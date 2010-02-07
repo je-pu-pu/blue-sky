@@ -7,11 +7,21 @@
 
 #include	"GameMain.h"
 #include	"App.h"
+
+#include	"Model.h"
+#include	"Canvas.h"
+
+#include	"matrix4x4.h"
+
 #include	"DirectDraw.h"
 #include	"DirectDrawSurface.h"
 #include	"Util.h"
 #include	<math.h>
+
 using namespace std;
+
+art::Model sample_model;
+art::Canvas canvas;
 
 //■コンストラクタ
 CGameMain::CGameMain()
@@ -23,6 +33,51 @@ CGameMain::CGameMain()
 	lpBack = NULL;
 	lpSrc = NULL;
 	lpDst = NULL;
+	
+	const float half = 0.5f;
+
+	//  
+	//   4----5
+	//  /|   /|
+	// 0----1 |
+	// | |  | |
+	// | |  | |
+	// | 6--|-7
+	// |/   |/
+	// 2----3
+
+	sample_model.vertex_list().push_back( art::Vertex( -half, +half, +half ) ); // 0
+	sample_model.vertex_list().push_back( art::Vertex( +half, +half, +half ) );
+	sample_model.vertex_list().push_back( art::Vertex( -half, -half, +half ) );
+	sample_model.vertex_list().push_back( art::Vertex( +half, -half, +half ) );
+	sample_model.vertex_list().push_back( art::Vertex( -half, +half, -half ) );
+	sample_model.vertex_list().push_back( art::Vertex( +half, +half, -half ) );
+	sample_model.vertex_list().push_back( art::Vertex( -half, -half, -half ) );
+	sample_model.vertex_list().push_back( art::Vertex( +half, -half, -half ) ); // 7
+	
+	sample_model.line_list().push_back( art::Line( 0, 1 ) );
+	sample_model.line_list().push_back( art::Line( 1, 3 ) );
+	sample_model.line_list().push_back( art::Line( 3, 2 ) );
+	sample_model.line_list().push_back( art::Line( 2, 0 ) );
+
+	sample_model.line_list().push_back( art::Line( 4, 5 ) );
+	sample_model.line_list().push_back( art::Line( 5, 7 ) );
+	sample_model.line_list().push_back( art::Line( 7, 6 ) );
+	sample_model.line_list().push_back( art::Line( 6, 4 ) );
+
+	sample_model.line_list().push_back( art::Line( 0, 4 ) );
+	sample_model.line_list().push_back( art::Line( 1, 5 ) );
+	sample_model.line_list().push_back( art::Line( 2, 6 ) );
+	sample_model.line_list().push_back( art::Line( 3, 7 ) );
+
+	CApp *app = CApp::GetInstance();
+	int w = app->GetWidth();
+	int h = app->GetHeight();
+
+	for ( int n = 0; n < 100; n++ )
+	{	
+		canvas.line_list().push_back( art::Canvas::Line( art::Vertex( rand() % w, rand() % h ), art::Vertex( rand() % w, rand() % h ), art::Color( rand() % 256, rand() % 256, rand() % 256, rand() % 256 ) ) );
+	}
 }
 
 //■デストラクタ
@@ -94,7 +149,7 @@ void CGameMain::UnInit()
 //■■■　メインループ　■■■
 void CGameMain::Loop()
 {
-	// MainLoop.WaitTime = 80;
+	MainLoop.WaitTime = 80;
 
 	//秒間50フレームを保持
 	if(! MainLoop.Loop())	return;
@@ -192,6 +247,9 @@ void CGameMain::Loop()
 	if ( GetAsyncKeyState( 'B' ) )	g_direction_random -= 0.001;
 	if ( GetAsyncKeyState( 'N' ) )	g_direction_random += 0.001;
 
+	POINT mp;
+	GetCursorPos( & mp );
+
 	double x = Width / 2;
 	double y = Height / 2;
 
@@ -203,6 +261,7 @@ void CGameMain::Loop()
 	double r = sr;
 	double dr = sdr;
 
+	/*
 	for ( int n = 0; n < mn; n++ )
 	{
 		x += dx * r * 0.1f;
@@ -235,9 +294,6 @@ void CGameMain::Loop()
 	}
 
 	// house
-	POINT mp;
-	GetCursorPos( & mp );
-
 	for ( int y = 0; y < 4; y++ )
 	{
 		for ( int x = 0; x < 6; x++ )
@@ -249,7 +305,7 @@ void CGameMain::Loop()
 
 			draw_house( p );
 		}
-	}	
+	}
 
 	// ビル
 	int building_left = 20;
@@ -288,6 +344,8 @@ void CGameMain::Loop()
 		cc += MaxAngle / line_count;
 	}
 	
+	*/
+
 	// 円描画
 	if ( GetAsyncKeyState( 'L' ) )
 	{
@@ -375,6 +433,52 @@ void CGameMain::Loop()
 
 	lpDst->Blur( Rect( 0, 0, Width / 2, Height / 2 ), pv );
 	*/
+	
+	// 3D BOX
+	matrix4x4 mt;
+	mt.rotate_y( 1.f );
+	mt.rotate_z( 0.1f );
+
+	for ( art::Model::VertexList::iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )
+	{
+		*i *= mt;
+	}
+
+	art::Color color( 255, 0, 0 );
+
+	canvas.line_list().clear();
+
+	for ( art::Model::LineList::const_iterator i = sample_model.line_list().begin(); i != sample_model.line_list().end(); ++i )
+	{
+		art::Vertex from = sample_model.vertex_list()[ i->from() ];
+		art::Vertex to = sample_model.vertex_list()[ i->to() ];
+
+		canvas.line_list().push_back( art::Canvas::Line( from, to, color ) );
+	}
+	
+	for ( art::Canvas::LineList::iterator i = canvas.line_list().begin(); i != canvas.line_list().end(); ++i )
+	{
+		const int cx = Width / 2;
+		const int cy = Height / 2;
+
+		const int w = 300;
+		const float eye_z = 2.f;
+		const float eye_far_len = 3.f;
+
+		i->from().x() *= ( ( eye_far_len - ( eye_z - i->from().z() ) ) / eye_far_len );
+		i->from().y() *= ( ( eye_far_len - ( eye_z - i->from().z() ) ) / eye_far_len );
+
+		i->to().x() *= ( ( eye_far_len - ( eye_z - i->to().z() ) ) / eye_far_len );
+		i->to().y() *= ( ( eye_far_len - ( eye_z - i->to().z() ) ) / eye_far_len );
+
+		i->from().x() = i->from().x() * w + cx;
+		i->from().y() = i->from().y() * w + cy;
+
+		i->to().x() = i->to().x() * w + cx;
+		i->to().y() = i->to().y() * w + cy;
+
+		lpDst->DrawLineHumanTouch( i->from().x(), i->from().y(), i->to().x(), i->to().y(), RGBQUAD( i->color() ) );
+	}
 
 	//アンロック
 	lpDst->UnLock();

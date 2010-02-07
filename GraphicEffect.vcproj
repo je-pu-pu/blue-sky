@@ -285,6 +285,18 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Canvas.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Color.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Face.h"
+			>
+		</File>
+		<File
 			RelativePath="GameMain.cpp"
 			>
 			<FileConfiguration
@@ -306,6 +318,14 @@
 		</File>
 		<File
 			RelativePath="GameMain.h"
+			>
+		</File>
+		<File
+			RelativePath=".\glut_main.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Line.h"
 			>
 		</File>
 		<File
@@ -353,6 +373,22 @@
 			>
 		</File>
 		<File
+			RelativePath=".\matrix4x4.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\matrix4x4.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Model.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Type.h"
+			>
+		</File>
+		<File
 			RelativePath="Util.cpp"
 			>
 			<FileConfiguration
@@ -374,6 +410,14 @@
 		</File>
 		<File
 			RelativePath="Util.h"
+			>
+		</File>
+		<File
+			RelativePath=".\vector3.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\vector3.h"
 			>
 		</File>
 	</Files>

@@ -23,11 +23,8 @@ void glut_display()
 
 	VGfloat white[] = {1,1,1,1};
 
-	/*
-	vgSetfv( VG_CLEAR_COLOR, 4, white );
-	vgClear( 0, 0, 640, 480 );
-
-	vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
+		glColor4f( 1.f, 0.f, 0.f, 1.f );
+	/*ATH_USER_TO_SURFACE);
 	*/
 
 	glEnable( GL_LINE_SMOOTH );

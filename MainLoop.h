@@ -28,8 +28,8 @@ public:
 	bool Loop();
 	
 	//Get
-	DWORD GetNowTime(){ return NowTime; }
-	int GetFPS(){ return FPS; }
+	DWORD GetNowTime() const { return NowTime; }
+	int GetFPS() const { return FPS; }
 };
 
 #endif

@@ -7,6 +7,8 @@
 #include	"DirectDrawSurface.h"
 #include	"DirectDraw.h"
 
+#include	"GameMain.h"
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -560,7 +562,7 @@ void CDirectDrawSurface::DrawLine(
 bool g_solid = false;
 bool g_line = false;
 
-double g_power = 4.0;
+double g_power = 1.0;
 double g_power_min = 1.0;
 double g_power_max = 5.0;
 double g_power_plus = 0.1;
@@ -573,6 +575,8 @@ double g_direction_random = 0.01;
 
 void CDirectDrawSurface::DrawLineHumanTouch( double x1, double y1, double x2, double y2, RGBQUAD c )
 {
+	srand( CGameMain::GetInstange()->getMainLoop().GetNowTime() / 100 );
+
 	int r = rand() % 255;
 
 	RGBQUAD black = { 0, r, r, 20 };
@@ -598,8 +602,8 @@ void CDirectDrawSurface::DrawLineHumanTouch( double x1, double y1, double x2, do
 	}
 	*/
 
-	int division = 10000; // ˆê–{‚Ìü‚ğ•`‰æ‚·‚é‚½‚ß‚ÉÅ‘å‰½ŒÂ‚Ì‰~‚ğ•`‰æ‚·‚é‚©
-	double interval = 2.0; // ‰~‚Æ‰~‚ÌŠÔŠu‚ÌÅ‘å’l ( pixel )
+	int division = 200; // ˆê–{‚Ìü‚ğ•`‰æ‚·‚é‚½‚ß‚ÉÅ‘å‰½ŒÂ‚Ì‰~‚ğ•`‰æ‚·‚é‚©
+	double interval = 10.0; // ‰~‚Æ‰~‚ÌŠÔŠu‚ÌÅ‘å’l ( pixel )
 
 	double power = 1.2; // •Mˆ³ ( pixel )
 	double power_min = 1.0; // Å’á•Mˆ³ ( pixel )

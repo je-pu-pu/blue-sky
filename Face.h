@@ -2,6 +2,7 @@
 #define ART_FACE_H
 
 #include "Type.h"
+#include <vector>
 
 namespace art
 {
@@ -11,6 +12,15 @@ namespace art
  */
 class Face
 {
+public:
+	typedef std::vector<Index> IndexList;
+
+private:
+	IndexList index_list_;
+
+public:
+	IndexList& index_list() { return index_list_; }
+	const IndexList& index_list() const { return index_list_; }
 
 };
 

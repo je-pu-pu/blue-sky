@@ -18,6 +18,8 @@ class CDirectDrawSurface;
 class CDirectInput;
 class CDirectInputDevice;
 
+class vector3;
+
 class CGameMain
 {
 protected:
@@ -39,6 +41,10 @@ protected:
 	CGameMain();				//コンストラクタ
 
 	void	CreateSinTable();	//サインテーブル作成
+
+
+	void convert_3d_to_2d( vector3& );
+
 public:
 	static CGameMain* GetInstange(){ static CGameMain gm; return &gm; }
 	~CGameMain();				//デストラクタ
@@ -57,6 +63,8 @@ public:
 	void	OnKeyPress(char);
 
 	void draw_house( const POINT& );
+
+	const CMainLoop& getMainLoop() const { return MainLoop; }
 };
 
 #endif

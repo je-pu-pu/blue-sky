@@ -70,6 +70,17 @@ CGameMain::CGameMain()
 	sample_model.line_list().push_back( art::Line( 2, 6 ) );
 	sample_model.line_list().push_back( art::Line( 3, 7 ) );
 
+	art::Face f;
+	f.index_list().push_back( 0 ); f.index_list().push_back( 1 ); f.index_list().push_back( 3 ); f.index_list().push_back( 2 );	sample_model.face_list().push_back( f ); f.index_list().clear();
+	f.index_list().push_back( 1 ); f.index_list().push_back( 5 ); f.index_list().push_back( 7 ); f.index_list().push_back( 3 );	sample_model.face_list().push_back( f ); f.index_list().clear();
+	
+	/*
+	f.index_list().push_back( 0 ); f.index_list().push_back( 1 ); f.index_list().push_back( 3 ); f.index_list().push_back( 2 );	sample_model.face_list().push_back( f ); f.index_list().clear();
+	f.index_list().push_back( 0 ); f.index_list().push_back( 1 ); f.index_list().push_back( 3 ); f.index_list().push_back( 2 );	sample_model.face_list().push_back( f ); f.index_list().clear();
+	f.index_list().push_back( 0 ); f.index_list().push_back( 1 ); f.index_list().push_back( 3 ); f.index_list().push_back( 2 );	sample_model.face_list().push_back( f ); f.index_list().clear();
+	f.index_list().push_back( 0 ); f.index_list().push_back( 1 ); f.index_list().push_back( 3 ); f.index_list().push_back( 2 );	sample_model.face_list().push_back( f ); f.index_list().clear();
+	*/
+
 	CApp *app = CApp::GetInstance();
 	int w = app->GetWidth();
 	int h = app->GetHeight();
@@ -146,10 +157,34 @@ void CGameMain::UnInit()
 	Free(SinTable);
 }
 
+static float eye_z = 2.f;
+
+void CGameMain::convert_3d_to_2d( vector3& v )
+{
+	const int cx = Width / 2;
+	const int cy = Height / 2;
+
+	const int w = 300;
+	
+	const float eye_far_len = 3.f;
+
+	v.x() *= ( ( eye_far_len - ( eye_z - v.z() ) ) / eye_far_len );
+	v.y() *= ( ( eye_far_len - ( eye_z - v.z() ) ) / eye_far_len );
+
+	v.x() = v.x() * w + cx;
+	v.y() = v.y() * w + cy;
+
+	// random
+	const int r = 1;
+
+	v.x() += rand() % r - r / 2;
+	v.y() += rand() % r - r / 2;
+}
+
 //■■■　メインループ　■■■
 void CGameMain::Loop()
 {
-	MainLoop.WaitTime = 80;
+	MainLoop.WaitTime = 0;
 
 	//秒間50フレームを保持
 	if(! MainLoop.Loop())	return;
@@ -456,29 +491,50 @@ void CGameMain::Loop()
 		canvas.line_list().push_back( art::Canvas::Line( from, to, color ) );
 	}
 	
+	canvas.vertex_list() = sample_model.vertex_list();
+	canvas.face_list() = sample_model.face_list();
+
+	for ( art::Canvas::VertexList::iterator i = canvas.vertex_list().begin(); i != canvas.vertex_list().end(); ++i )
+	{
+		convert_3d_to_2d( *i );
+	}
+
+	eye_z -= 0.001f;
+
+	for ( art::Canvas::FaceList::iterator i = canvas.face_list().begin(); i != canvas.face_list().end(); ++i )
+	{
+		POINT p[] = {
+			{ canvas.vertex_list()[ i->index_list()[ 0 ] ].x(), canvas.vertex_list()[ i->index_list()[ 0 ] ].y() },
+			{ canvas.vertex_list()[ i->index_list()[ 1 ] ].x(), canvas.vertex_list()[ i->index_list()[ 1 ] ].y() },
+			{ canvas.vertex_list()[ i->index_list()[ 2 ] ].x(), canvas.vertex_list()[ i->index_list()[ 2 ] ].y() },
+		};
+
+		lpDst->DrawPolygonHumanTouch( p, color );
+
+		POINT p2[] = {
+			{ canvas.vertex_list()[ i->index_list()[ 0 ] ].x(), canvas.vertex_list()[ i->index_list()[ 0 ] ].y() },
+			{ canvas.vertex_list()[ i->index_list()[ 2 ] ].x(), canvas.vertex_list()[ i->index_list()[ 2 ] ].y() },
+			{ canvas.vertex_list()[ i->index_list()[ 3 ] ].x(), canvas.vertex_list()[ i->index_list()[ 3 ] ].y() },
+		};
+
+		lpDst->DrawPolygonHumanTouch( p2, color );
+	}
+
+	int n = 0;
+
 	for ( art::Canvas::LineList::iterator i = canvas.line_list().begin(); i != canvas.line_list().end(); ++i )
 	{
-		const int cx = Width / 2;
-		const int cy = Height / 2;
+		n++;
+		
+		srand( n + getMainLoop().GetNowTime() / 200 );
 
-		const int w = 300;
-		const float eye_z = 2.f;
-		const float eye_far_len = 3.f;
-
-		i->from().x() *= ( ( eye_far_len - ( eye_z - i->from().z() ) ) / eye_far_len );
-		i->from().y() *= ( ( eye_far_len - ( eye_z - i->from().z() ) ) / eye_far_len );
-
-		i->to().x() *= ( ( eye_far_len - ( eye_z - i->to().z() ) ) / eye_far_len );
-		i->to().y() *= ( ( eye_far_len - ( eye_z - i->to().z() ) ) / eye_far_len );
-
-		i->from().x() = i->from().x() * w + cx;
-		i->from().y() = i->from().y() * w + cy;
-
-		i->to().x() = i->to().x() * w + cx;
-		i->to().y() = i->to().y() * w + cy;
+		convert_3d_to_2d( i->from() );
+		convert_3d_to_2d( i->to() );
 
 		lpDst->DrawLineHumanTouch( i->from().x(), i->from().y(), i->to().x(), i->to().y(), RGBQUAD( i->color() ) );
 	}
+
+	// lpDst->Draw
 
 	//アンロック
 	lpDst->UnLock();
@@ -511,8 +567,8 @@ void CGameMain::Loop()
 	if ( GetAsyncKeyState( 'N' ) )	g_direction_random += 0.001;
 	*/
 
-	sprintf(DebugStr, "%.3f,%.3f,%.3f,%.3f,%.3f,%.3f", g_power, g_power_min, g_power_max, g_power_plus, g_power_rest, g_power_plus_reset );
-	sprintf(DebugStr2, "%.5f,%.5f,%.4f", g_direction_fix_default, g_direction_fix_acceleration, g_direction_random );
+		sprintf(DebugStr, "power:%.3f,%.3f,%.3f plus:%.3f reset:%.3f plus_reset:%.3f", g_power, g_power_min, g_power_max, g_power_plus, g_power_rest, g_power_plus_reset );
+		sprintf(DebugStr2, "dir_fix_d:%.5f dir_fix_acc:%.5f dir_rnd:%.4f", g_direction_fix_default, g_direction_fix_acceleration, g_direction_random );
 	}
 
 	//デバッグ情報描画

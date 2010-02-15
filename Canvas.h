@@ -13,6 +13,23 @@ namespace art
 class Canvas
 {
 public:
+	class Vertex
+	{
+	private:
+		vector3 target_pos_;
+		vector3 pos_;
+		vector3 direction_;
+	public:
+
+		vector3& target_pos() { return target_pos_; }
+		vector3& pos() { return pos_; }
+		vector3& direction() { return direction_; }
+
+		const vector3& target_pos() const { return target_pos_; }
+		const vector3& pos() const { return pos_; }
+		const vector3& direction() const { return direction_; }
+	};
+
 	class Line
 	{
 	private:

@@ -81,6 +81,7 @@ CGameMain::CGameMain()
 	f.index_list().push_back( 0 ); f.index_list().push_back( 1 ); f.index_list().push_back( 3 ); f.index_list().push_back( 2 );	sample_model.face_list().push_back( f ); f.index_list().clear();
 	*/
 
+	/*
 	CApp *app = CApp::GetInstance();
 	int w = app->GetWidth();
 	int h = app->GetHeight();
@@ -89,6 +90,7 @@ CGameMain::CGameMain()
 	{	
 		canvas.line_list().push_back( art::Canvas::Line( art::Vertex( rand() % w, rand() % h ), art::Vertex( rand() % w, rand() % h ), art::Color( rand() % 256, rand() % 256, rand() % 256, rand() % 256 ) ) );
 	}
+	*/
 }
 
 //■デストラクタ
@@ -485,8 +487,8 @@ void CGameMain::Loop()
 
 	for ( art::Model::LineList::const_iterator i = sample_model.line_list().begin(); i != sample_model.line_list().end(); ++i )
 	{
-		art::Vertex from = sample_model.vertex_list()[ i->from() ];
-		art::Vertex to = sample_model.vertex_list()[ i->to() ];
+		art::Canvas::Vertex from( sample_model.vertex_list()[ i->from() ] );
+		art::Canvas::Vertex to( sample_model.vertex_list()[ i->to() ] );
 
 		canvas.line_list().push_back( art::Canvas::Line( from, to, color ) );
 	}
@@ -496,29 +498,31 @@ void CGameMain::Loop()
 
 	for ( art::Canvas::VertexList::iterator i = canvas.vertex_list().begin(); i != canvas.vertex_list().end(); ++i )
 	{
-		convert_3d_to_2d( *i );
+		convert_3d_to_2d( i->target_pos() );
 	}
 
 	eye_z -= 0.001f;
 
+	/*
 	for ( art::Canvas::FaceList::iterator i = canvas.face_list().begin(); i != canvas.face_list().end(); ++i )
 	{
 		POINT p[] = {
-			{ canvas.vertex_list()[ i->index_list()[ 0 ] ].x(), canvas.vertex_list()[ i->index_list()[ 0 ] ].y() },
-			{ canvas.vertex_list()[ i->index_list()[ 1 ] ].x(), canvas.vertex_list()[ i->index_list()[ 1 ] ].y() },
-			{ canvas.vertex_list()[ i->index_list()[ 2 ] ].x(), canvas.vertex_list()[ i->index_list()[ 2 ] ].y() },
+			{ canvas.vertex_list()[ i->index_list()[ 0 ] ].pos().x(), canvas.vertex_list()[ i->index_list()[ 0 ] ].pos().y() },
+			{ canvas.vertex_list()[ i->index_list()[ 1 ] ].pos().x(), canvas.vertex_list()[ i->index_list()[ 1 ] ].pos().y() },
+			{ canvas.vertex_list()[ i->index_list()[ 2 ] ].pos().x(), canvas.vertex_list()[ i->index_list()[ 2 ] ].pos().y() },
 		};
 
 		lpDst->DrawPolygonHumanTouch( p, color );
 
 		POINT p2[] = {
-			{ canvas.vertex_list()[ i->index_list()[ 0 ] ].x(), canvas.vertex_list()[ i->index_list()[ 0 ] ].y() },
-			{ canvas.vertex_list()[ i->index_list()[ 2 ] ].x(), canvas.vertex_list()[ i->index_list()[ 2 ] ].y() },
-			{ canvas.vertex_list()[ i->index_list()[ 3 ] ].x(), canvas.vertex_list()[ i->index_list()[ 3 ] ].y() },
+			{ canvas.vertex_list()[ i->index_list()[ 0 ] ].pos().x(), canvas.vertex_list()[ i->index_list()[ 0 ] ].pos().y() },
+			{ canvas.vertex_list()[ i->index_list()[ 2 ] ].pos().x(), canvas.vertex_list()[ i->index_list()[ 2 ] ].pos().y() },
+			{ canvas.vertex_list()[ i->index_list()[ 3 ] ].pos().x(), canvas.vertex_list()[ i->index_list()[ 3 ] ].pos().y() },
 		};
 
 		lpDst->DrawPolygonHumanTouch( p2, color );
 	}
+	*/
 
 	int n = 0;
 
@@ -528,10 +532,10 @@ void CGameMain::Loop()
 		
 		srand( n + getMainLoop().GetNowTime() / 200 );
 
-		convert_3d_to_2d( i->from() );
-		convert_3d_to_2d( i->to() );
+		convert_3d_to_2d( i->from().target_pos() );
+		convert_3d_to_2d( i->to().target_pos() );
 
-		lpDst->DrawLineHumanTouch( i->from().x(), i->from().y(), i->to().x(), i->to().y(), RGBQUAD( i->color() ) );
+		lpDst->DrawLineHumanTouch( i->from().pos().x(), i->from().pos().y(), i->to().pos().x(), i->to().pos().y(), RGBQUAD( i->color() ) );
 	}
 
 	// lpDst->Draw

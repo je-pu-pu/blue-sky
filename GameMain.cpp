@@ -482,18 +482,23 @@ void CGameMain::Loop()
 	*/
 	
 	// 3D BOX
-	matrix4x4 mt;
-	mt.rotate_y( 1.f );
-	mt.rotate_z( 0.1f );
-
-	for ( art::Model::VertexList::iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )
+	
+	// rotate
+	if ( space > 0 )
 	{
-		i->vertex() *= mt;
+		matrix4x4 mt;
+		mt.rotate_y( 1.f );
+		mt.rotate_z( 0.1f );
+
+		for ( art::Model::VertexList::iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )
+		{
+			i->vertex() *= mt;
+		}
 	}
 
 	art::Color color( 255, 0, 0, 255 );
 
-	// canvas.line_list().clear();
+	canvas.line_list().clear();
 
 	// 3D 座標を 2D キャンバスターゲット座標にコピー
 	for ( art::Model::VertexList::const_iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )

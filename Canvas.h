@@ -3,10 +3,12 @@
 
 #include "Type.h"
 #include "Color.h"
+#include "Face.h"
 
 #include "vector3.h"
 
 #include <map>
+#include <vector>
 
 namespace art
 {
@@ -33,7 +35,7 @@ public:
 		const art::Vertex& target_vertex() const { return target_vertex_; }
 		const art::Vertex& direction() const { return direction_; }
 
-		void update() { vertex_ = target_vertex_; }
+		void update();
 	};
 
 	class Line

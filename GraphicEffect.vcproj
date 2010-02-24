@@ -285,6 +285,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Canvas.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\Canvas.h"
 			>
 		</File>

@@ -573,6 +573,8 @@ double g_direction_fix_default = 0.0001;
 double g_direction_fix_acceleration = 0.01;
 double g_direction_random = 0.01;
 
+int g_circle_count = 0;
+
 void CDirectDrawSurface::DrawLineHumanTouch( double x1, double y1, double x2, double y2, RGBQUAD c )
 {
 	srand( CGameMain::GetInstange()->getMainLoop().GetNowTime() / 100 );
@@ -652,6 +654,7 @@ void CDirectDrawSurface::DrawLineHumanTouch( double x1, double y1, double x2, do
 			DrawCircle( x1, y1, power, c, true );
 		}
 		
+		g_circle_count++;
 
 		a += 0.01f; // ( ( rand() % 100 / 100.f ) ) * 0.1f;
 

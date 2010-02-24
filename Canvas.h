@@ -4,6 +4,10 @@
 #include "Type.h"
 #include "Color.h"
 
+#include "vector3.h"
+
+#include <map>
+
 namespace art
 {
 
@@ -16,29 +20,31 @@ public:
 	class Vertex
 	{
 	private:
-		vector3 target_pos_;
-		vector3 pos_;
-		vector3 direction_;
+		art::Vertex vertex_;
+		art::Vertex target_vertex_;
+		art::Vertex direction_;
+
 	public:
+		art::Vertex& vertex() { return vertex_; }
+		art::Vertex& target_vertex() { return target_vertex_; }
+		art::Vertex& direction() { return direction_; }
 
-		vector3& target_pos() { return target_pos_; }
-		vector3& pos() { return pos_; }
-		vector3& direction() { return direction_; }
+		const art::Vertex& vertex() const { return vertex_; }
+		const art::Vertex& target_vertex() const { return target_vertex_; }
+		const art::Vertex& direction() const { return direction_; }
 
-		const vector3& target_pos() const { return target_pos_; }
-		const vector3& pos() const { return pos_; }
-		const vector3& direction() const { return direction_; }
+		void update() { vertex_ = target_vertex_; }
 	};
 
 	class Line
 	{
 	private:
-		Vertex from_;
-		Vertex to_;
+		ID from_;
+		ID to_;
 		Color color_;
 
 	public:
-		Line( Vertex from = Vertex(), Vertex to = Vertex(), Color color = Color() )
+		Line( ID from, ID to, Color color = Color() )
 			: from_( from )
 			, to_( to )
 			, color_( color )
@@ -46,17 +52,17 @@ public:
 
 		~Line() { }
 
-		Vertex& from() { return from_; }
-		Vertex& to() { return to_; }
+		ID& from() { return from_; }
+		ID& to() { return to_; }
 		Color& color() { return color_; }
 
-		const Vertex& from() const { return from_; }
-		const Vertex& to() const { return to_; }
+		const ID& from() const { return from_; }
+		const ID& to() const { return to_; }
 		const Color& color() const { return color_; }
 
 	}; // class Line
 
-	typedef std::vector<Vertex> VertexList;
+	typedef std::map<ID, Vertex> VertexList;
 	typedef std::vector<Canvas::Line> LineList;
 	typedef std::vector<Face> FaceList;
 

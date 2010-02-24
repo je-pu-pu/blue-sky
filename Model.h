@@ -1,10 +1,9 @@
 #ifndef ART_MODEL_H
 #define ART_MODEL_H
 
-#include "Line.h"
+#include "LiveVertex.h"
 #include "Line.h"
 #include "Face.h"
-#include "vector3.h"
 #include <vector>
 
 namespace art
@@ -16,7 +15,7 @@ namespace art
 class Model
 {
 public:
-	typedef std::vector<Vertex> VertexList;
+	typedef std::vector<LiveVertex> VertexList;
 	typedef std::vector<Line> LineList;
 	typedef std::vector<Face> FaceList;
 

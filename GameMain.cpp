@@ -12,6 +12,7 @@
 #include	"Canvas.h"
 
 #include	"matrix4x4.h"
+#include	"vector3.h"
 
 #include	"DirectDraw.h"
 #include	"DirectDrawSurface.h"
@@ -46,14 +47,14 @@ CGameMain::CGameMain()
 	// |/   |/
 	// 2----3
 
-	sample_model.vertex_list().push_back( art::Vertex( -half, +half, +half ) ); // 0
-	sample_model.vertex_list().push_back( art::Vertex( +half, +half, +half ) );
-	sample_model.vertex_list().push_back( art::Vertex( -half, -half, +half ) );
-	sample_model.vertex_list().push_back( art::Vertex( +half, -half, +half ) );
-	sample_model.vertex_list().push_back( art::Vertex( -half, +half, -half ) );
-	sample_model.vertex_list().push_back( art::Vertex( +half, +half, -half ) );
-	sample_model.vertex_list().push_back( art::Vertex( -half, -half, -half ) );
-	sample_model.vertex_list().push_back( art::Vertex( +half, -half, -half ) ); // 7
+	sample_model.vertex_list().push_back( art::LiveVertex( -half, +half, +half ) ); // 0
+	sample_model.vertex_list().push_back( art::LiveVertex( +half, +half, +half ) );
+	sample_model.vertex_list().push_back( art::LiveVertex( -half, -half, +half ) );
+	sample_model.vertex_list().push_back( art::LiveVertex( +half, -half, +half ) );
+	sample_model.vertex_list().push_back( art::LiveVertex( -half, +half, -half ) );
+	sample_model.vertex_list().push_back( art::LiveVertex( +half, +half, -half ) );
+	sample_model.vertex_list().push_back( art::LiveVertex( -half, -half, -half ) );
+	sample_model.vertex_list().push_back( art::LiveVertex( +half, -half, -half ) ); // 7
 	
 	sample_model.line_list().push_back( art::Line( 0, 1 ) );
 	sample_model.line_list().push_back( art::Line( 1, 3 ) );
@@ -69,6 +70,13 @@ CGameMain::CGameMain()
 	sample_model.line_list().push_back( art::Line( 1, 5 ) );
 	sample_model.line_list().push_back( art::Line( 2, 6 ) );
 	sample_model.line_list().push_back( art::Line( 3, 7 ) );
+
+	// temp
+	for ( art::Model::LineList::iterator i = sample_model.line_list().begin(); i != sample_model.line_list().end(); ++i )
+	{
+		i->from()++;
+		i->to()++;
+	}
 
 	art::Face f;
 	f.index_list().push_back( 0 ); f.index_list().push_back( 1 ); f.index_list().push_back( 3 ); f.index_list().push_back( 2 );	sample_model.face_list().push_back( f ); f.index_list().clear();
@@ -284,6 +292,8 @@ void CGameMain::Loop()
 	if ( GetAsyncKeyState( 'B' ) )	g_direction_random -= 0.001;
 	if ( GetAsyncKeyState( 'N' ) )	g_direction_random += 0.001;
 
+	g_circle_count = 0;
+
 	POINT mp;
 	GetCursorPos( & mp );
 
@@ -478,27 +488,33 @@ void CGameMain::Loop()
 
 	for ( art::Model::VertexList::iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )
 	{
-		*i *= mt;
+		i->vertex() *= mt;
 	}
 
-	art::Color color( 255, 0, 0 );
+	art::Color color( 255, 0, 0, 255 );
 
-	canvas.line_list().clear();
+	// canvas.line_list().clear();
 
+	// 3D 座標を 2D キャンバスターゲット座標にコピー
+	for ( art::Model::VertexList::const_iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )
+	{
+		canvas.vertex_list()[ i->id() ].target_vertex() = i->vertex();
+	}
+
+	// 3D ラインを 2D キャンバスラインにコピー
 	for ( art::Model::LineList::const_iterator i = sample_model.line_list().begin(); i != sample_model.line_list().end(); ++i )
 	{
-		art::Canvas::Vertex from( sample_model.vertex_list()[ i->from() ] );
-		art::Canvas::Vertex to( sample_model.vertex_list()[ i->to() ] );
-
-		canvas.line_list().push_back( art::Canvas::Line( from, to, color ) );
+		canvas.line_list().push_back( art::Canvas::Line( i->from(), i->to(), color ) );
 	}
 	
-	canvas.vertex_list() = sample_model.vertex_list();
 	canvas.face_list() = sample_model.face_list();
 
+	// 2D キャンバスターゲット座標を透視投影変換
 	for ( art::Canvas::VertexList::iterator i = canvas.vertex_list().begin(); i != canvas.vertex_list().end(); ++i )
 	{
-		convert_3d_to_2d( i->target_pos() );
+		convert_3d_to_2d( i->second.target_vertex() );
+
+		i->second.update();
 	}
 
 	eye_z -= 0.001f;
@@ -532,10 +548,10 @@ void CGameMain::Loop()
 		
 		srand( n + getMainLoop().GetNowTime() / 200 );
 
-		convert_3d_to_2d( i->from().target_pos() );
-		convert_3d_to_2d( i->to().target_pos() );
+		art::Vertex& from = canvas.vertex_list()[ i->from() ].vertex();
+		art::Vertex& to = canvas.vertex_list()[ i->to() ].vertex();
 
-		lpDst->DrawLineHumanTouch( i->from().pos().x(), i->from().pos().y(), i->to().pos().x(), i->to().pos().y(), RGBQUAD( i->color() ) );
+		lpDst->DrawLineHumanTouch( from.x(), from.y(), to.x(), to.y(), RGBQUAD( i->color() ) );
 	}
 
 	// lpDst->Draw
@@ -576,8 +592,8 @@ void CGameMain::Loop()
 	}
 
 	//デバッグ情報描画
-	char fps[16];
-	wsprintf(fps, "FPS : %d", MainLoop.GetFPS());
+	char fps[255];
+	wsprintf(fps, "FPS : %d, circle : %d", MainLoop.GetFPS(), g_circle_count );
 	lpBack->TextOut(0, 0, fps);
 	lpBack->TextOut(0, 20, DebugStr);
 	lpBack->TextOut(0, 40, DebugStr2);

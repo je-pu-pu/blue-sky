@@ -12,22 +12,22 @@ namespace art
 class Line
 {
 private:
-	Index _from;
-	Index _to;
+	ID _from;
+	ID _to;
 
 public:
-	Line( Index from = 0, Index to = 0 )
+	Line( ID from = 0, ID to = 0 )
 		: _from( from )
 		, _to( to )
 	{ }
 
 	~Line() { }
 
-	Index& from() { return _from; }
-	Index& to() { return _to; }
+	ID& from() { return _from; }
+	ID& to() { return _to; }
 
-	const Index& from() const { return _from; }
-	const Index& to() const { return _to; }
+	const ID& from() const { return _from; }
+	const ID& to() const { return _to; }
 };
 
 }

@@ -329,6 +329,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\LiveVertex.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\LiveVertex.h"
+			>
+		</File>
+		<File
 			RelativePath="Main.cpp"
 			>
 			<FileConfiguration

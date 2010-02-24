@@ -115,4 +115,6 @@ extern double g_direction_fix_default;
 extern double g_direction_fix_acceleration;
 extern double g_direction_random;
 
+extern int g_circle_count;
+
 #endif

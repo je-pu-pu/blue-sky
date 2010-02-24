@@ -11,10 +11,10 @@ using namespace irr;
 int main()
 {
 	// create device
-	IrrlichtDevice* device = createDevice( video::EDT_OPENGL, core::dimension2d<u32>( 1024, 768 ) );
+	IrrlichtDevice* device = createDevice( video::EDT_OPENGL, core::dimension2d<u32>( 800, 600 ), 16, false );
 	if ( device == 0 ) return 1;
 
-	device->setWindowCaption( L"Irrlicht Engine - 2D Graphics Demo" );
+	device->setWindowCaption( L"blu-sky" );
 
 	video::IVideoDriver* driver = device->getVideoDriver();
 
@@ -34,7 +34,7 @@ int main()
 	driver->getMaterial2D().setTexture( 0, images );
 	// driver->getMaterial2D().ColorMaterial(
 	driver->getMaterial2D().MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
-	// driver->getMaterial2D().ZBuffer = video::ECFN_LESS;
+	driver->getMaterial2D().ZBuffer = video::ECFN_LESS;
 	// driver->getMaterial2D().ZWriteEnable = true;
 	// driver->setAllowZWriteOnTransparent( true );
 	// driver->getMaterial2D().MaterialType = video::EMT_ONETEXTURE_BLEND;
@@ -45,6 +45,7 @@ int main()
 	// driver->setRenderStates2DMode( true, true, true );
 
 	std::cout << "hasmap : " << driver->getMaterial2D().getTexture( 0 )->hasMipMaps() << std::endl;
+	std::cout << "zbuf : " << ( int ) driver->getMaterial2D().ZBuffer << std::endl;
 
 	const float z = 10.f;
 	static float h = 1.f;
@@ -54,14 +55,14 @@ int main()
 	std::vector<video::S3DVertex> vs;
 	std::vector<u32> is;
 
-	const int circle_count = 10000;
+	const int circle_count = 10000 / 2;
 
 	vs.reserve( circle_count * 4 );
 	is.reserve( circle_count * 4 );
 
 	for ( int n = 0; n < circle_count; n++ )
 	{
-		vs.push_back( video::S3DVertex( 0, 0, 0, 0, 0, 0, video::SColor( 0, 0, 0, 0 ), 0, 1 ) );
+		vs.push_back( video::S3DVertex( 0, 0, 0, 0, 0, 0, video::SColor( 0, 0xFF, 0xFF, 0xFF ), 0, 1 ) );
 		vs.push_back( video::S3DVertex( 0, 0, 0, 0, 0, 0, video::SColor( 0, 0, 0, 0 ), 1, 1 ) );
 		vs.push_back( video::S3DVertex( 0, 0, 0, 0, 0, 0, video::SColor( 0, 0xFF, 0xAA, 0x11 ), 1, 0 ) );
 		vs.push_back( video::S3DVertex( 0, 0, 0, 0, 0, 0, video::SColor( 0, 0xFF, 0xAA, 0x11 ), 0, 0 ) );
@@ -105,10 +106,6 @@ int main()
 
 			driver->beginScene( true, true, video::SColor( 255, 0xEE, 0xEE, 0xFF ) );
 
-			// core::matrix4 m;
-			// m.setTranslation( core::vector3df( 100.f, 100.f, 100.f ) );
-			// driver->setTransform( video::ETS_WORLD, m );
-
 			float nn = a;
 
 			core::matrix4 m;
@@ -116,6 +113,9 @@ int main()
 			m.setRotationRadians( core::vector3df( 0.f, 0.f, a ) );
 			m.setRotationCenter( core::vector3df( 100.f, 100.f, 0.f ), core::vector3df( -1-0.f, -100.f, a ) );
 			// driver->setTransform( video::ETS_WORLD, m );
+
+			m.setTranslation( core::vector3df( 100.f, 100.f, 100.f ) );
+			driver->setTransform( video::ETS_WORLD, m );
 
 			vs[ 0 ].Pos = core::vector3df( 100, 100, 0 );
 			vs[ 1 ].Pos = core::vector3df( 500, 100, 0 );
@@ -127,9 +127,11 @@ int main()
 			m.rotateVect( vs[ 2 ].Pos );
 			m.rotateVect( vs[ 3 ].Pos );
 
+			const float pen_interval = 3.1f;
 			const float max_pen_width = 100.f;
 			const float min_pen_width = 2.5f;
 			
+
 			float nnn = nn;
 			float nnnn = sin( a );
 
@@ -139,7 +141,7 @@ int main()
 				nnn += 0.082f;
 				nnnn += 0.099f;
 
-				float xx = x + n * 2.1f;
+				float xx = x + n * pen_interval;
 				float yy = y + n * 1.1f;
 				float zz = -n * 0.01f;
 				float hh = h + ( cos( nn ) * sin( nnn ) + 1.5f ) * ( max_pen_width * 0.2f );
@@ -152,15 +154,14 @@ int main()
 				vs[ n * 4 + 2 ].Pos = core::vector3df( xx + hh, yy + hh, zz );
 				vs[ n * 4 + 3 ].Pos = core::vector3df( xx - hh, yy + hh, zz );
 
-				/*
-				vs[ n * 4 + 0 ].Pos.rotateXYBy( n * 0.01f );
-				vs[ n * 4 + 1 ].Pos.rotateXYBy( n * 0.01f );
-				vs[ n * 4 + 2 ].Pos.rotateXYBy( n * 0.01f );
-				vs[ n * 4 + 3 ].Pos.rotateXYBy( n * 0.01f );
-				*/				
+				vs[ n * 4 + 0 ].Pos.rotateXYBy( a );
+				vs[ n * 4 + 1 ].Pos.rotateXYBy( a );
+				vs[ n * 4 + 2 ].Pos.rotateXYBy( a );
+				vs[ n * 4 + 3 ].Pos.rotateXYBy( a );
 			}
 
 			driver->draw2DVertexPrimitiveList( & vs[ 0 ], vs.size(), & is[ 0 ], vs.size() / 4, video::EVT_STANDARD, scene::EPT_QUADS, video::EIT_32BIT );
+			// driver->drawVertexPrimitiveList( & vs[ 0 ], vs.size(), & is[ 0 ], vs.size() / 4, video::EVT_STANDARD, scene::EPT_QUADS, video::EIT_32BIT );
 
 			driver->endScene();
 

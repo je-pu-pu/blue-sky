@@ -25,8 +25,11 @@ public:
 		art::Vertex vertex_;
 		art::Vertex target_vertex_;
 		art::Vertex direction_;
+		art::Angle angle_;
 
 	public:
+		Vertex();
+
 		art::Vertex& vertex() { return vertex_; }
 		art::Vertex& target_vertex() { return target_vertex_; }
 		art::Vertex& direction() { return direction_; }

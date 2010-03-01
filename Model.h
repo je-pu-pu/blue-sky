@@ -5,6 +5,7 @@
 #include "Line.h"
 #include "Face.h"
 #include <vector>
+#include <map>
 
 namespace art
 {
@@ -15,7 +16,7 @@ namespace art
 class Model
 {
 public:
-	typedef std::vector<LiveVertex> VertexList;
+	typedef std::map<ID, LiveVertex> VertexList;
 	typedef std::vector<Line> LineList;
 	typedef std::vector<Face> FaceList;
 
@@ -32,6 +33,8 @@ public:
 	const VertexList& vertex_list() const { return vertex_list_; }
 	const LineList& line_list() const { return line_list_; }
 	const FaceList& face_list() const { return face_list_; }
+
+	void load_file( const char* );
 };
 
 }

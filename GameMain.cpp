@@ -37,6 +37,11 @@ CGameMain::CGameMain()
 	
 	const float half = 0.5f;
 
+	art::Color color_building( 0, 255, 0, 255 );
+	art::Color color_building_dark( 0, 140, 0, 255 );
+	art::Color color_building_edge( 0, 80, 0, 255 );
+
+	// index ( id = index + 1 )
 	//  
 	//   4----5
 	//  /|   /|
@@ -47,6 +52,10 @@ CGameMain::CGameMain()
 	// |/   |/
 	// 2----3
 
+	sample_model.load_file( "./blue-sky-building-2.obj" );
+	// sample_model.load_file( "./blue-sky-box.obj" );
+
+	/*
 	sample_model.vertex_list().push_back( art::LiveVertex( -half, +half, +half ) ); // 0
 	sample_model.vertex_list().push_back( art::LiveVertex( +half, +half, +half ) );
 	sample_model.vertex_list().push_back( art::LiveVertex( -half, -half, +half ) );
@@ -56,48 +65,38 @@ CGameMain::CGameMain()
 	sample_model.vertex_list().push_back( art::LiveVertex( -half, -half, -half ) );
 	sample_model.vertex_list().push_back( art::LiveVertex( +half, -half, -half ) ); // 7
 	
-	sample_model.line_list().push_back( art::Line( 0, 1 ) );
-	sample_model.line_list().push_back( art::Line( 1, 3 ) );
-	sample_model.line_list().push_back( art::Line( 3, 2 ) );
-	sample_model.line_list().push_back( art::Line( 2, 0 ) );
+	sample_model.line_list().push_back( art::Line( 0, 1, color_building ) );
+	sample_model.line_list().push_back( art::Line( 1, 3, color_building ) );
+	sample_model.line_list().push_back( art::Line( 3, 2, color_building ) );
+	sample_model.line_list().push_back( art::Line( 2, 0, color_building ) );
 
-	sample_model.line_list().push_back( art::Line( 4, 5 ) );
-	sample_model.line_list().push_back( art::Line( 5, 7 ) );
-	sample_model.line_list().push_back( art::Line( 7, 6 ) );
-	sample_model.line_list().push_back( art::Line( 6, 4 ) );
+	sample_model.line_list().push_back( art::Line( 4, 5, color_building_dark ) );
+	sample_model.line_list().push_back( art::Line( 5, 7, color_building_dark ) );
+	sample_model.line_list().push_back( art::Line( 7, 6, color_building_dark ) );
+	sample_model.line_list().push_back( art::Line( 6, 4, color_building_dark ) );
 
-	sample_model.line_list().push_back( art::Line( 0, 4 ) );
-	sample_model.line_list().push_back( art::Line( 1, 5 ) );
-	sample_model.line_list().push_back( art::Line( 2, 6 ) );
-	sample_model.line_list().push_back( art::Line( 3, 7 ) );
+	sample_model.line_list().push_back( art::Line( 0, 4, color_building_edge ) );
+	sample_model.line_list().push_back( art::Line( 1, 5, color_building_edge ) );
+	sample_model.line_list().push_back( art::Line( 2, 6, color_building_edge ) );
+	sample_model.line_list().push_back( art::Line( 3, 7, color_building_edge ) );
 
 	// temp
 	for ( art::Model::LineList::iterator i = sample_model.line_list().begin(); i != sample_model.line_list().end(); ++i )
 	{
-		i->from()++;
-		i->to()++;
+		i->start_vertex_id()++;
+		i->end_vertex_id()++;
 	}
 
 	art::Face f;
-	f.index_list().push_back( 0 ); f.index_list().push_back( 1 ); f.index_list().push_back( 3 ); f.index_list().push_back( 2 );	sample_model.face_list().push_back( f ); f.index_list().clear();
-	f.index_list().push_back( 1 ); f.index_list().push_back( 5 ); f.index_list().push_back( 7 ); f.index_list().push_back( 3 );	sample_model.face_list().push_back( f ); f.index_list().clear();
+	f.index_list().push_back( 1 );
+	f.index_list().push_back( 2 );
+	f.index_list().push_back( 4 );
+	f.index_list().push_back( 3 );
+	f.color() = art::Color( 255, 127, 127, 255 );
+
+	sample_model.face_list().push_back( f );
 	
-	/*
-	f.index_list().push_back( 0 ); f.index_list().push_back( 1 ); f.index_list().push_back( 3 ); f.index_list().push_back( 2 );	sample_model.face_list().push_back( f ); f.index_list().clear();
-	f.index_list().push_back( 0 ); f.index_list().push_back( 1 ); f.index_list().push_back( 3 ); f.index_list().push_back( 2 );	sample_model.face_list().push_back( f ); f.index_list().clear();
-	f.index_list().push_back( 0 ); f.index_list().push_back( 1 ); f.index_list().push_back( 3 ); f.index_list().push_back( 2 );	sample_model.face_list().push_back( f ); f.index_list().clear();
-	f.index_list().push_back( 0 ); f.index_list().push_back( 1 ); f.index_list().push_back( 3 ); f.index_list().push_back( 2 );	sample_model.face_list().push_back( f ); f.index_list().clear();
-	*/
-
-	/*
-	CApp *app = CApp::GetInstance();
-	int w = app->GetWidth();
-	int h = app->GetHeight();
-
-	for ( int n = 0; n < 100; n++ )
-	{	
-		canvas.line_list().push_back( art::Canvas::Line( art::Vertex( rand() % w, rand() % h ), art::Vertex( rand() % w, rand() % h ), art::Color( rand() % 256, rand() % 256, rand() % 256, rand() % 256 ) ) );
-	}
+	f.index_list().clear();
 	*/
 }
 
@@ -174,9 +173,9 @@ void CGameMain::convert_3d_to_2d( vector3& v )
 	const int cx = Width / 2;
 	const int cy = Height / 2;
 
-	const int w = 300;
+	const int w = 100;
 	
-	const float eye_far_len = 3.f;
+	const float eye_far_len = 10.f;
 
 	v.x() *= ( ( eye_far_len - ( eye_z - v.z() ) ) / eye_far_len );
 	v.y() *= ( ( eye_far_len - ( eye_z - v.z() ) ) / eye_far_len );
@@ -233,6 +232,11 @@ void CGameMain::Loop()
 
 	if(GetAsyncKeyState(VK_SPACE))	space++;
 	else							space = 0;
+
+	if ( GetAsyncKeyState( VK_RETURN ) )
+	{
+		eye_z = 2.f;
+	}
 
 	if(space == 1){
 		line_count++;
@@ -467,6 +471,99 @@ void CGameMain::Loop()
 	}
 	
 	}
+	
+	// 3D BOX
+	matrix4x4 mt;
+
+	if ( GetAsyncKeyState( VK_NUMPAD4 ) ) { matrix4x4 m; m.rotate_y( +1.f ); mt *= m; }
+	if ( GetAsyncKeyState( VK_NUMPAD6 ) ) { matrix4x4 m; m.rotate_y( -1.f ); mt *= m; }
+	if ( GetAsyncKeyState( VK_NUMPAD8 ) ) { matrix4x4 m; m.rotate_x( -1.f ); mt *= m; }
+	if ( GetAsyncKeyState( VK_NUMPAD2 ) ) { matrix4x4 m; m.rotate_x( +1.f ); mt *= m; }
+
+	// rotate
+	if ( space > 0 )
+	{
+		mt.rotate_y( 1.f );
+		mt.rotate_z( 0.1f );
+	}
+
+	for ( art::Model::VertexList::iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )
+	{
+		i->second.vertex() *= mt;
+	}
+
+	canvas.line_list().clear();
+
+	// 3D 座標を 2D キャンバスターゲット座標にコピー
+	for ( art::Model::VertexList::const_iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )
+	{
+		canvas.vertex_list()[ i->first ].target_vertex() = i->second.vertex();
+	}
+
+	// 3D ラインを 2D キャンバスラインにコピー
+	for ( art::Model::LineList::const_iterator i = sample_model.line_list().begin(); i != sample_model.line_list().end(); ++i )
+	{
+		canvas.line_list().push_back( art::Canvas::Line( i->start_vertex_id(), i->end_vertex_id(), i->start_color() ) );
+	}
+	
+	// 3D フェイスを 2D キャンバスフェイスにコピー
+	canvas.face_list() = sample_model.face_list();
+
+	// 2D キャンバスターゲット座標を透視投影変換
+	for ( art::Canvas::VertexList::iterator i = canvas.vertex_list().begin(); i != canvas.vertex_list().end(); ++i )
+	{
+		convert_3d_to_2d( i->second.target_vertex() );
+
+		i->second.update();
+	}
+
+	eye_z -= 0.001f;
+
+	int n = 0;
+
+	// 面を描画する
+	for ( art::Canvas::FaceList::iterator i = canvas.face_list().begin(); i != canvas.face_list().end(); ++i )
+	{
+		srand( n + getMainLoop().GetNowTime() / 12000 );
+		
+		POINT p[] = {
+			{ canvas.vertex_list()[ i->index_list()[ 0 ] ].vertex().x(), canvas.vertex_list()[ i->index_list()[ 0 ] ].vertex().y() },
+			{ canvas.vertex_list()[ i->index_list()[ 1 ] ].vertex().x(), canvas.vertex_list()[ i->index_list()[ 1 ] ].vertex().y() },
+			{ canvas.vertex_list()[ i->index_list()[ 2 ] ].vertex().x(), canvas.vertex_list()[ i->index_list()[ 2 ] ].vertex().y() },
+			{ canvas.vertex_list()[ i->index_list()[ 3 ] ].vertex().x(), canvas.vertex_list()[ i->index_list()[ 3 ] ].vertex().y() },
+		};
+
+		lpDst->DrawSquareHumanTouch( p, i->color() );
+	}
+
+	// 線を描画する
+	for ( art::Canvas::LineList::iterator i = canvas.line_list().begin(); i != canvas.line_list().end(); ++i )
+	{
+		n++;
+		
+		// srand( n + getMainLoop().GetNowTime() / 1000 );
+
+		art::Vertex& from = canvas.vertex_list()[ i->from() ].vertex();
+		art::Vertex& to = canvas.vertex_list()[ i->to() ].vertex();
+
+		lpDst->DrawLineHumanTouch( from.x(), from.y(), to.x(), to.y(), RGBQUAD( i->color() ) );
+	}
+
+	/*
+	for ( art::Canvas::LineList::iterator i = canvas.line_list().begin(); i != canvas.line_list().end(); ++i )
+	{
+		n++;
+		
+		srand( n + getMainLoop().GetNowTime() / 100000 );
+
+		art::Vertex& from = canvas.vertex_list()[ i->from() ].target_vertex();
+		art::Vertex& to = canvas.vertex_list()[ i->to() ].target_vertex();
+
+		lpDst->DrawLineHumanTouch( from.x(), from.y(), to.x(), to.y(), art::Color( 0, 0, 0, 100 ) );
+	}
+	*/
+
+	// lpDst->Draw
 
 	// ぼかし
 	/*
@@ -480,86 +577,6 @@ void CGameMain::Loop()
 
 	lpDst->Blur( Rect( 0, 0, Width / 2, Height / 2 ), pv );
 	*/
-	
-	// 3D BOX
-	
-	// rotate
-	if ( space > 0 )
-	{
-		matrix4x4 mt;
-		mt.rotate_y( 1.f );
-		mt.rotate_z( 0.1f );
-
-		for ( art::Model::VertexList::iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )
-		{
-			i->vertex() *= mt;
-		}
-	}
-
-	art::Color color( 255, 0, 0, 255 );
-
-	canvas.line_list().clear();
-
-	// 3D 座標を 2D キャンバスターゲット座標にコピー
-	for ( art::Model::VertexList::const_iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )
-	{
-		canvas.vertex_list()[ i->id() ].target_vertex() = i->vertex();
-	}
-
-	// 3D ラインを 2D キャンバスラインにコピー
-	for ( art::Model::LineList::const_iterator i = sample_model.line_list().begin(); i != sample_model.line_list().end(); ++i )
-	{
-		canvas.line_list().push_back( art::Canvas::Line( i->from(), i->to(), color ) );
-	}
-	
-	canvas.face_list() = sample_model.face_list();
-
-	// 2D キャンバスターゲット座標を透視投影変換
-	for ( art::Canvas::VertexList::iterator i = canvas.vertex_list().begin(); i != canvas.vertex_list().end(); ++i )
-	{
-		convert_3d_to_2d( i->second.target_vertex() );
-
-		i->second.update();
-	}
-
-	eye_z -= 0.001f;
-
-	/*
-	for ( art::Canvas::FaceList::iterator i = canvas.face_list().begin(); i != canvas.face_list().end(); ++i )
-	{
-		POINT p[] = {
-			{ canvas.vertex_list()[ i->index_list()[ 0 ] ].pos().x(), canvas.vertex_list()[ i->index_list()[ 0 ] ].pos().y() },
-			{ canvas.vertex_list()[ i->index_list()[ 1 ] ].pos().x(), canvas.vertex_list()[ i->index_list()[ 1 ] ].pos().y() },
-			{ canvas.vertex_list()[ i->index_list()[ 2 ] ].pos().x(), canvas.vertex_list()[ i->index_list()[ 2 ] ].pos().y() },
-		};
-
-		lpDst->DrawPolygonHumanTouch( p, color );
-
-		POINT p2[] = {
-			{ canvas.vertex_list()[ i->index_list()[ 0 ] ].pos().x(), canvas.vertex_list()[ i->index_list()[ 0 ] ].pos().y() },
-			{ canvas.vertex_list()[ i->index_list()[ 2 ] ].pos().x(), canvas.vertex_list()[ i->index_list()[ 2 ] ].pos().y() },
-			{ canvas.vertex_list()[ i->index_list()[ 3 ] ].pos().x(), canvas.vertex_list()[ i->index_list()[ 3 ] ].pos().y() },
-		};
-
-		lpDst->DrawPolygonHumanTouch( p2, color );
-	}
-	*/
-
-	int n = 0;
-
-	for ( art::Canvas::LineList::iterator i = canvas.line_list().begin(); i != canvas.line_list().end(); ++i )
-	{
-		n++;
-		
-		srand( n + getMainLoop().GetNowTime() / 200 );
-
-		art::Vertex& from = canvas.vertex_list()[ i->from() ].vertex();
-		art::Vertex& to = canvas.vertex_list()[ i->to() ].vertex();
-
-		lpDst->DrawLineHumanTouch( from.x(), from.y(), to.x(), to.y(), RGBQUAD( i->color() ) );
-	}
-
-	// lpDst->Draw
 
 	//アンロック
 	lpDst->UnLock();

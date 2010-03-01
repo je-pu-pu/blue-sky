@@ -325,10 +325,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\glut_main.cpp"
-			>
-		</File>
-		<File
 			RelativePath=".\Line.h"
 			>
 		</File>
@@ -390,6 +386,10 @@
 		</File>
 		<File
 			RelativePath=".\matrix4x4.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Model.cpp"
 			>
 		</File>
 		<File

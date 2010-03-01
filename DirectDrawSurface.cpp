@@ -577,7 +577,7 @@ int g_circle_count = 0;
 
 void CDirectDrawSurface::DrawLineHumanTouch( double x1, double y1, double x2, double y2, RGBQUAD c )
 {
-	srand( CGameMain::GetInstange()->getMainLoop().GetNowTime() / 100 );
+	// srand( CGameMain::GetInstange()->getMainLoop().GetNowTime() / 1000 );
 
 	int r = rand() % 255;
 
@@ -1252,6 +1252,33 @@ void CDirectDrawSurface::DrawPolygonHumanTouch( POINT* p, RGBQUAD c )
 		}
 	}
 	*/
+}
+
+void CDirectDrawSurface::DrawSquareHumanTouch( POINT* p, RGBQUAD c )
+{
+	{
+		int div = 8; // line + 1
+
+		double x1 = p[ 0 ].x;
+		double y1 = p[ 0 ].y;
+		double x2 = p[ 3 ].x;
+		double y2 = p[ 3 ].y;
+
+		double dx1 = double( p[ 1 ].x - p[ 0 ].x ) / div;
+		double dy1 = double( p[ 1 ].y - p[ 0 ].y ) / div;
+		double dx2 = double( p[ 2 ].x - p[ 3 ].x ) / div;
+		double dy2 = double( p[ 2 ].y - p[ 3 ].y ) / div;
+
+		for ( int n = 0; n < div - 1; n++ )
+		{
+			x1 += dx1;
+			y1 += dy1;
+			x2 += dx2;
+			y2 += dy2;
+
+			DrawLineHumanTouch( x1, y1, x2, y2, c );
+		}
+	}
 }
 
 //¡‚Ú‚©‚µ

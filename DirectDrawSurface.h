@@ -68,6 +68,8 @@ public:
 	void	DrawPolygon(POINT*, RGBQUAD*);
 	void	DrawPolygonHumanTouch( POINT*, RGBQUAD );
 
+	void	DrawSquareHumanTouch( POINT*, RGBQUAD );
+
 	void	DrawCircle(int, int, int, RGBQUAD, bool);
 	void	DrawCircle( double, double, double, RGBQUAD, bool );
 

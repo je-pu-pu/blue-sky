@@ -209,60 +209,16 @@
 	</References>
 	<Files>
 		<Filter
-			Name="DirectDraw"
-			>
-			<File
-				RelativePath="DirectDraw.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="DirectDraw.h"
-				>
-			</File>
-			<File
-				RelativePath="DirectDrawSurface.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="DirectDrawSurface.h"
-				>
-			</File>
-		</Filter>
-		<Filter
 			Name="Direct3D"
 			>
+			<File
+				RelativePath=".\Direct3D9.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Direct3D9.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="App.cpp"
@@ -298,6 +254,14 @@
 		</File>
 		<File
 			RelativePath=".\Color.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Direct3D9Canvas.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Direct3D9Canvas.h"
 			>
 		</File>
 		<File

@@ -13,6 +13,9 @@
 namespace art
 {
 
+typedef POINT Point;
+typedef RECT Rect;
+
 /**
  * 
  */
@@ -77,6 +80,9 @@ private:
 	FaceList face_list_;
 
 public:
+	Canvas();
+	virtual ~Canvas();
+
 	VertexList& vertex_list() { return vertex_list_; }
 	LineList& line_list() { return line_list_; }
 	FaceList& face_list() { return face_list_; }
@@ -84,6 +90,12 @@ public:
 	const VertexList& vertex_list() const { return vertex_list_; }
 	const LineList& line_list() const { return line_list_; }
 	const FaceList& face_list() const { return face_list_; }
+
+	virtual void render() const = 0;
+
+	virtual void DrawLineHumanTouch( float, float, float, float, const Color& ) = 0;
+	virtual void DrawPolygonHumanTouch( const Point*, const Color& ) = 0;
+	virtual void FillRect( const Rect&, const Color& ) = 0;
 };
 
 }

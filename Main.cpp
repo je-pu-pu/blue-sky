@@ -4,18 +4,31 @@
 #include <windows.h>
 
 //■■■　メイン　■■■
-int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int nCmdShow)
+int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int nCmdShow )
 {
-	//初期化
-	CApp *app = CApp::GetInstance();
-	if( ! app->Init(hInst, nCmdShow) )	return 0;
+	CApp* app = 0;
 	
-	//メッセージループ
-	int i = app->MessageLoop();
-	
-	//終了処理
-	CGameMain *game = CGameMain::GetInstange();
-	game->UnInit();
+	try
+	{
+		// アプリケーションを初期化する
+		app = CApp::GetInstance();
+		if( ! app->Init( hInst, nCmdShow) )	return 0;
+		
+		// ゲームを初期化する
+		CGameMain* game = CGameMain::GetInstange();
 
-	return i;
+		// メッセージループ
+		return app->MessageLoop();
+	}
+	catch ( std::string message )
+	{
+		if ( app )
+		{
+			MessageBox( app->GetWindowHandle(), message.c_str(), "ERROR", MB_OK );
+		}
+
+		return -1;
+	}
+
+	return -1;
 }

@@ -1,22 +1,19 @@
-//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-//	App.cpp
-//	シングルトンアプリケーションクラス
-//	最終更新日	2001/11/25
-//■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-
-#include	"App.h"
-#include	"GameMain.h"
-#include	<winnls32.h>
-
+#include "App.h"
+#include "GameMain.h"
+#include <winnls32.h>
 
 //□コンストラクタ
 CApp::CApp()
+	: hWnd( 0 )
 {
 	ClassName = "GraphicEffect";
 	WinTitle = "GraphicEffect";
-	WinStyle = WS_POPUP;
-	Width = 640;
-	Height = 480;
+	//WinStyle = WS_POPUP;
+	// WinStyle = WS_CAPTION;
+	WinStyle = WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE;
+
+	Width = 800;
+	Height = 600;
 
 	hMutex = NULL;
 }
@@ -67,8 +64,8 @@ bool CApp::Init(HINSTANCE hi, int nCmdShow)
 		ClassName.c_str(),	//クラス名
 		WinTitle.c_str(),	//タイトル
 		WinStyle,			//スタイル
-		0,					//表示座標
-		0,					//
+		CW_USEDEFAULT ,		//表示座標
+		CW_USEDEFAULT ,		//
 		w,					//サイズ
 		h,					//
 		NULL,				//親ウィンドウのハンドル
@@ -76,14 +73,18 @@ bool CApp::Init(HINSTANCE hi, int nCmdShow)
 		hInst,				//インスタンスハンドル
 		NULL				//ウィンドウ作成データ アドレス
 	);
-	if(! hWnd)	return false;
-	if(! CGameMain::GetInstange()->Init()) return false;
+
+	if ( ! hWnd )
+	{
+		return false;
+	}
 
 	ShowWindow(hWnd, nCmdShow);		//表示
 	UpdateWindow(hWnd);				//描画
 
 	WINNLSEnableIME(hWnd, FALSE);	//IME非表示
-	ShowCursor(FALSE);				//カーソル非表示
+	
+	// ShowCursor( FALSE );			// カーソル非表示
 
 	return true;
 }
@@ -106,25 +107,25 @@ int CApp::MessageLoop()
 }
 
 //□ウィンドウプロシージャ
-LRESULT CALLBACK CApp::WinProc(HWND hw, UINT msg, WPARAM wp, LPARAM lp)
+LRESULT CALLBACK CApp::WinProc( HWND hw, UINT msg, WPARAM wp, LPARAM lp )
 {
-	CGameMain *gm = CGameMain::GetInstange();
-
-	switch(msg){
+	switch ( msg )
+	{
 	case	WM_CREATE:		break;
 	case	WM_KEYDOWN:
-		if(wp == VK_ESCAPE)	PostMessage(hw, WM_CLOSE, 0, 0);
-		gm->OnKeyDonw(wp);
+		if ( wp == VK_ESCAPE )
+		{
+			PostMessage( hw, WM_CLOSE, 0, 0 );
+		}
 		break;
-	case	WM_CHAR:
-		gm->OnKeyPress(wp);
-		break;
+	case	WM_CHAR:		break;
 	case	WM_ACTIVATEAPP:	break;
 	case	WM_DESTROY:
-		PostQuitMessage(0);
+		PostQuitMessage( 0 );
 		break;
 	default:
 		return DefWindowProc(hw, msg, wp, lp);
 	}
+
 	return	0;
 }

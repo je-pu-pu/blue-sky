@@ -7,6 +7,16 @@
 namespace art
 {
 
+Canvas::Canvas()
+{
+
+}
+
+Canvas::~Canvas()
+{
+
+}
+
 Canvas::Vertex::Vertex()
 	: angle_( 0.f )
 {

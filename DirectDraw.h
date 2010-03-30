@@ -31,15 +31,22 @@ protected:
 	LPDIRECTDRAW7			lpDirectDraw;
 	CDirectDrawPrimary		*lpPrimary;		//プライマリ
 	CDirectDrawBackBuffer	*lpBack;		//バックバッファ
-	LPDIRECTDRAWPALETTE		lpPalette;
+	
+	LPDIRECTDRAWPALETTE		lpPalette;		// パレット
+	LPDIRECTDRAWCLIPPER		lpClipper;		// クリッパー
 
 	bool CreatePrimary();					//プライマリ生成
 	bool CreatePalette();					//パレット生成
+
+	bool init_window_mode( int, int, int );
+
 public:
 	CDirectDraw();							//コンストラクタ
 	~CDirectDraw();							//デストラクタ
 	
 	bool Init(HWND, DWORD, DWORD, DWORD);	//初期化
+	bool InitWindowMode( HWND, DWORD, DWORD, DWORD );
+
 	int UnInit();							//終了処理
 
 	void Flip();							//フリップ

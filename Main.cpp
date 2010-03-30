@@ -1,7 +1,7 @@
+#include "App.h"
+#include "GameMain.h"
 
-#include	<Windows.h>
-#include	"App.h"
-#include	"GameMain.h"
+#include <windows.h>
 
 //Å°Å°Å°Å@ÉÅÉCÉìÅ@Å°Å°Å°
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int nCmdShow)

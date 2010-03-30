@@ -15,17 +15,21 @@ Canvas::Vertex::Vertex()
 
 void Canvas::Vertex::update()
 {
-	static float a = 0.f;
-	a += 0.01f;
+	// static float a = 0.f;
+	// a += 0.01f;
 
 	art::Vertex d = target_vertex() - vertex();
 	art::Vertex r( rand() % 100 / 100.f * 2.f - 1.f, rand() % 100 / 100.f * 2.f - 1.f, rand() % 100 / 100.f * 2.f - 1.f );
 
 	direction() = ( direction() * 14 + d * 1 + r * 1 ) / 16;
+	vertex_ += direction_;
 
 	// direction() *= ( sin( a ) + 1.f ) * 0.1f;
+	// vertex_ += direction_;
 
 	/*
+	const float speed = 1.f;
+
 	float rx = target_vertex().x() - vertex().x();
 	float ry = target_vertex().y() - vertex().y();
 	
@@ -77,11 +81,11 @@ void Canvas::Vertex::update()
 
 	float diff = abs( static_cast<float>( M_PI ) - aa );
 
-	direction_.x() = cos( angle_ ) * min( diff * 0.1f, len );
-	direction_.y() = sin( angle_ ) * min( diff * 0.1f, len );
-	*/
+	direction_.x() = cos( angle_ ) * speed; // min( diff * 0.1f, len );
+	direction_.y() = sin( angle_ ) * speed; // min( diff * 0.1f, len );
 
 	vertex_ += direction_;
+	*/
 }
 
 }; // namespace art

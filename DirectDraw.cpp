@@ -85,6 +85,72 @@ bool CDirectDraw::Init(	HWND hwnd,	//ウィンドウハンドル
 	return	true;
 }
 
+bool CDirectDraw::InitWindowMode( HWND hwnd, DWORD w, DWORD h, DWORD bpp )
+{
+	//プロパティーをコピー
+	hWnd = hwnd;
+	Width = w;
+	Height = h;
+	Bpp = bpp;
+
+	return init_window_mode( w, h, bpp );
+}
+
+/**
+ * ウィンドウモードで初期化を行う
+ * @param	int		w	画面の幅
+ * @param	int		h	画面の高さ
+ * @param	int		d	画面の色深度
+ * @retval	true		初期化に成功した
+ * @retval	false		初期化に失敗した
+ */
+bool CDirectDraw::init_window_mode( int w, int h, int d )
+{
+	// DirectDraw オブジェクト生成
+	HRESULT	result = DirectDrawCreateEx( 0, reinterpret_cast< void** >( & lpDirectDraw ), IID_IDirectDraw7, 0 );
+	if ( result != DD_OK ) return false;
+
+	// 動作環境設定
+	result = lpDirectDraw->SetCooperativeLevel( 0, DDSCL_NORMAL );
+	if ( result != DD_OK ) return false;
+
+
+	// 画面モードの設定
+//	result = direct_draw_->SetDisplayMode( w, h, d, 0, 0 );
+//	if ( ! check_result( result ) ) return false;
+
+	//プライマリサーフェス生成
+	if(! CreatePrimary()){
+		return false;
+	}
+
+	if(Bpp == 8){
+		//パレット生成
+		if(! CreatePalette()){
+			return false;
+		}
+	}
+	else if(Bpp == 16){
+		//ピクセルフォーマットを調べる
+		//GetPixelFormat();
+		//DDPIXELFORMAT	ddpf;
+		//ddpf.dwSize = sizeof(ddpf);
+		//lpPrimary->GetPixelFormat(&ddpf);
+	}
+
+	// クリッパーを作成する
+	result = lpDirectDraw->CreateClipper( 0, & lpClipper, 0 );
+	if ( result != DD_OK ) return false;
+
+	result = lpClipper->SetHWnd( 0, hWnd );
+	if ( result != DD_OK ) return false;
+
+	result = lpPrimary->GetSurface()->SetClipper( lpClipper);
+	if ( result != DD_OK ) return false;
+
+	return true;
+}
+
 //□プライマリサーフェイスを作成
 bool CDirectDraw::CreatePrimary()
 {

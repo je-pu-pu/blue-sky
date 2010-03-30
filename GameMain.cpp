@@ -119,6 +119,7 @@ bool CGameMain::Init()
 	//DirectDraw‰Šú‰»
 	lpDirectDraw = new CDirectDraw[1];
 	if(! lpDirectDraw->Init(hWnd, Width, Height, 32)){
+	// if(! lpDirectDraw->InitWindowMode(hWnd, Width, Height, 32)){
 		return false;
 	}
 	lpPrimary = lpDirectDraw->GetPrimary();

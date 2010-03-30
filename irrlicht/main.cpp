@@ -12,6 +12,7 @@ int main()
 {
 	// create device
 	IrrlichtDevice* device = createDevice( video::EDT_OPENGL, core::dimension2d<u32>( 800, 600 ), 16, false );
+	// IrrlichtDevice* device = createDevice( video::EDT_DIRECT3D9, core::dimension2d<u32>( 800, 600 ), 16, false );
 	if ( device == 0 ) return 1;
 
 	device->setWindowCaption( L"blu-sky" );

@@ -5,17 +5,17 @@
 //□コンストラクタ
 CApp::CApp()
 	: hWnd( 0 )
+	, hInst( 0 )
+	, hMutex( 0 )
+	, Width( 800 )
+	, Height( 600 )
 {
 	ClassName = "GraphicEffect";
 	WinTitle = "GraphicEffect";
-	//WinStyle = WS_POPUP;
+	// WinStyle = WS_POPUP;
 	// WinStyle = WS_CAPTION;
+	
 	WinStyle = WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE;
-
-	Width = 800;
-	Height = 600;
-
-	hMutex = NULL;
 }
 
 //□デストラクタ
@@ -78,11 +78,14 @@ bool CApp::Init(HINSTANCE hi, int nCmdShow)
 	{
 		return false;
 	}
+	
+	// ゲームを初期化する
+	CGameMain* game = CGameMain::GetInstange();
 
-	ShowWindow(hWnd, nCmdShow);		//表示
-	UpdateWindow(hWnd);				//描画
+	ShowWindow( hWnd, nCmdShow );		//表示
+	UpdateWindow( hWnd );				//描画
 
-	WINNLSEnableIME(hWnd, FALSE);	//IME非表示
+	// WINNLSEnableIME(hWnd, FALSE);	//IME非表示
 	
 	// ShowCursor( FALSE );			// カーソル非表示
 

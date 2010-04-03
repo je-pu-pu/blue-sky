@@ -55,50 +55,6 @@ CGameMain::CGameMain()
 
 	sample_model.load_file( "./blue-sky-building-2.obj" );
 	// sample_model.load_file( "./blue-sky-box.obj" );
-
-	/*
-	sample_model.vertex_list().push_back( art::LiveVertex( -half, +half, +half ) ); // 0
-	sample_model.vertex_list().push_back( art::LiveVertex( +half, +half, +half ) );
-	sample_model.vertex_list().push_back( art::LiveVertex( -half, -half, +half ) );
-	sample_model.vertex_list().push_back( art::LiveVertex( +half, -half, +half ) );
-	sample_model.vertex_list().push_back( art::LiveVertex( -half, +half, -half ) );
-	sample_model.vertex_list().push_back( art::LiveVertex( +half, +half, -half ) );
-	sample_model.vertex_list().push_back( art::LiveVertex( -half, -half, -half ) );
-	sample_model.vertex_list().push_back( art::LiveVertex( +half, -half, -half ) ); // 7
-	
-	sample_model.line_list().push_back( art::Line( 0, 1, color_building ) );
-	sample_model.line_list().push_back( art::Line( 1, 3, color_building ) );
-	sample_model.line_list().push_back( art::Line( 3, 2, color_building ) );
-	sample_model.line_list().push_back( art::Line( 2, 0, color_building ) );
-
-	sample_model.line_list().push_back( art::Line( 4, 5, color_building_dark ) );
-	sample_model.line_list().push_back( art::Line( 5, 7, color_building_dark ) );
-	sample_model.line_list().push_back( art::Line( 7, 6, color_building_dark ) );
-	sample_model.line_list().push_back( art::Line( 6, 4, color_building_dark ) );
-
-	sample_model.line_list().push_back( art::Line( 0, 4, color_building_edge ) );
-	sample_model.line_list().push_back( art::Line( 1, 5, color_building_edge ) );
-	sample_model.line_list().push_back( art::Line( 2, 6, color_building_edge ) );
-	sample_model.line_list().push_back( art::Line( 3, 7, color_building_edge ) );
-
-	// temp
-	for ( art::Model::LineList::iterator i = sample_model.line_list().begin(); i != sample_model.line_list().end(); ++i )
-	{
-		i->start_vertex_id()++;
-		i->end_vertex_id()++;
-	}
-
-	art::Face f;
-	f.index_list().push_back( 1 );
-	f.index_list().push_back( 2 );
-	f.index_list().push_back( 4 );
-	f.index_list().push_back( 3 );
-	f.color() = art::Color( 255, 127, 127, 255 );
-
-	sample_model.face_list().push_back( f );
-	
-	f.index_list().clear();
-	*/
 }
 
 //■デストラクタ

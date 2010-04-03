@@ -14,13 +14,12 @@ Direct3D9::Direct3D9( HWND hwnd )
 	}
 
 	DWORD behavior_flag = D3DCREATE_HARDWARE_VERTEXPROCESSING;
-	// DWORD behavior_flag = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 
-	D3DPRESENT_PARAMETERS present = { sizeof( D3DPRESENT_PARAMETERS ) };
+	D3DPRESENT_PARAMETERS present = { 0 };
     present.Windowed = TRUE;
     present.SwapEffect = D3DSWAPEFFECT_DISCARD;
     present.BackBufferFormat = D3DFMT_UNKNOWN;
-	
+
 	if ( FAILED( direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, behavior_flag, & present, & device_ ) ) )
 	{
 		direct_3d_->Release();

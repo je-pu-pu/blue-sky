@@ -31,14 +31,14 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
     // Initialize three vertices for rendering a triangle
     CUSTOMVERTEX vertices[] =
     {
-        { 25.f,  50.f, 0.5f, 1.f, 0xffff0000, }, // x, y, z, rhw, color
-        { 50.f, 250.f, 0.5f, 1.f, 0xff00ff00, },
-        {  0.f, 600.f, 0.5f, 1.f, 0xff00ffff, },
+        { 150.0f,  50.0f, 0.5f, 1.0f, 0xffff0000, }, // x, y, z, rhw, color
+        { 250.0f, 250.0f, 0.5f, 1.0f, 0xff00ff00, },
+        {  50.0f, 250.0f, 0.5f, 1.0f, 0xff00ffff, },
     };
-	
+
 	if ( FAILED( direct_3d_->getDevice()->CreateVertexBuffer( 3 * sizeof( CUSTOMVERTEX ), 0, D3DFVF_CUSTOMVERTEX, D3DPOOL_DEFAULT, & vertex_buffer_, NULL ) ) )
     {
-		delete direct_3d_; 
+		delete direct_3d_;
 
         THROW_EXCEPTION_MESSAGE;
     }
@@ -70,8 +70,8 @@ void Direct3D9Canvas::render() const
 	{
 		direct_3d_->getDevice()->SetStreamSource( 0, vertex_buffer_, 0, sizeof( CUSTOMVERTEX ) );
 		direct_3d_->getDevice()->SetFVF( D3DFVF_CUSTOMVERTEX );
-		// direct_3d_->getDevice()->DrawPrimitive( D3DPT_TRIANGLESTRIP, 0, 1 );
-		direct_3d_->getDevice()->DrawPrimitive( D3DPT_TRIANGLELIST, 0, 1 );
+		direct_3d_->getDevice()->DrawPrimitive( D3DPT_TRIANGLESTRIP, 0, 1 );
+		// direct_3d_->getDevice()->DrawPrimitive( D3DPT_TRIANGLELIST, 0, 1 );
 		
 		direct_3d_->getDevice()->EndScene();
 	}

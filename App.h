@@ -39,6 +39,9 @@ public:
 	HWND		GetWindowHandle(){ return hWnd; }
 	int			GetWidth(){ return Width; }
 	int			GetHeight(){ return Height; }
+
+	const char* getTitle() const;
+	void setTitle( const char* );
 };
 
 #endif

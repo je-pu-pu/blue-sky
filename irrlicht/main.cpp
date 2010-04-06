@@ -56,7 +56,8 @@ int main()
 	std::vector<video::S3DVertex> vs;
 	std::vector<u32> is;
 
-	const int circle_count = 10000 / 2;
+	// const int circle_count = 10000 / 2;
+	const int circle_count = 100000;
 
 	vs.reserve( circle_count * 4 );
 	is.reserve( circle_count * 4 );

@@ -132,3 +132,21 @@ LRESULT CALLBACK CApp::WinProc( HWND hw, UINT msg, WPARAM wp, LPARAM lp )
 
 	return	0;
 }
+
+void CApp::setTitle( const char* t )
+{
+	SetWindowText( hWnd, t );
+}
+
+const char* CApp::getTitle() const
+{
+	return "";
+
+	/*
+	int l = GetWindowTextLength( hWnd );
+
+	title_.resize( l );
+
+	GetWindowText( hWnd, )
+	*/
+}

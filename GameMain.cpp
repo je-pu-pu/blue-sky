@@ -90,6 +90,27 @@ void CGameMain::convert_3d_to_2d( vector3& v )
 //■■■　メインループ　■■■
 void CGameMain::Loop()
 {
+	static int fps = 0;
+	static int sec = 0;
+	
+	if ( timeGetTime() / 1000 != sec )
+	{
+		sec = timeGetTime() / 1000;
+
+		char sfps[ 255 ];
+		wsprintf( sfps, "FPS : %d", fps );
+
+		CApp::GetInstance()->setTitle( sfps );
+
+		fps = 0;
+	}
+
+	fps++;
+	
+	canvas_->render();
+
+	return;
+
 	static bool g_solid = false;
 	static bool g_line = false;
 
@@ -109,7 +130,7 @@ void CGameMain::Loop()
 	MainLoop.WaitTime = 0;
 
 	//秒間50フレームを保持
-	if(! MainLoop.Loop())	return;
+	// if(! MainLoop.Loop())	return;
 
 	// 色
 	RGBQUAD white =	{ 255, 255, 255, 20 };
@@ -292,7 +313,6 @@ void CGameMain::Loop()
 		lpDst->DrawLineHumanTouch( from.x(), from.y(), to.x(), to.y(), art::Color( 0, 0, 0, 100 ) );
 	}
 	*/
-
 	
 	canvas_->render();
 
@@ -302,6 +322,8 @@ void CGameMain::Loop()
 	}
 
 	//デバッグ情報描画
+	/*
 	char fps[255];
 	wsprintf(fps, "FPS : %d, circle : %d", MainLoop.GetFPS(), g_circle_count );
+	*/
 }

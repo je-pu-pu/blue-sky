@@ -7,8 +7,8 @@ CApp::CApp()
 	: hWnd( 0 )
 	, hInst( 0 )
 	, hMutex( 0 )
-	, Width( 800 )
-	, Height( 600 )
+	, Width( 640 )
+	, Height( 480 )
 {
 	ClassName = "GraphicEffect";
 	WinTitle = "GraphicEffect";
@@ -16,6 +16,7 @@ CApp::CApp()
 	// WinStyle = WS_CAPTION;
 	
 	WinStyle = WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE;
+	WinStyle = WS_POPUP;
 }
 
 //□デストラクタ

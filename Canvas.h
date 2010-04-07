@@ -93,11 +93,36 @@ public:
 
 	virtual void render() const = 0;
 
-	virtual void DrawLineHumanTouch( float, float, float, float, const Color& ) = 0;
-	virtual void DrawPolygonHumanTouch( const Point*, const Color& ) = 0;
-	virtual void FillRect( const Rect&, const Color& ) = 0;
+	virtual void begin() const = 0;
+	virtual void end() const = 0;
+
+	virtual void drawLineHumanTouch( const art::Vertex&, const art::Vertex&, const Color& );
+	virtual void drawPolygonHumanTouch( const Point*, const Color& ) = 0;
+	virtual void fillRect( const Rect&, const Color& ) = 0;
+
+	virtual void drawLine( Real, Real, Real, Real, const Color& ) = 0;
+	virtual void drawCircle( const art::Vertex&, Real, const Color&, bool ) = 0;
+	virtual void drawRing( const art::Vertex&, Real, Real, const Color&, bool ) = 0;
+
+	virtual void drawText( const art::Vertex&, const char*, const Color& ) = 0;
 };
 
 }
+
+extern bool g_solid;
+extern bool g_line;
+
+extern float g_power;
+extern float g_power_min;
+extern float g_power_max;
+extern float g_power_plus;
+extern float g_power_rest;
+extern float g_power_plus_reset;
+
+extern float g_direction_fix_default;
+extern float g_direction_fix_acceleration;
+extern float g_direction_random;
+
+extern int g_circle_count;
 
 #endif // ART_CANVAS_H

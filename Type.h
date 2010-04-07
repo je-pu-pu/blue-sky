@@ -7,6 +7,7 @@ namespace art
 {
 
 typedef int ID;
+typedef float Real;
 typedef float Angle;
 typedef vector3 Vertex;
 typedef unsigned int Index;

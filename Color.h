@@ -25,6 +25,14 @@ public:
 		color_.rgbBlue = b;
 		color_.rgbReserved = a;
 	}
+	
+	Color( COLORREF color )
+	{
+		color_.rgbRed   = GetRValue( color );
+		color_.rgbGreen = GetGValue( color );
+		color_.rgbBlue  = GetBValue( color );
+		color_.rgbReserved = 0xFF;
+	}
 
 	Color( RGBQUAD color )
 		: color_( color )
@@ -32,7 +40,12 @@ public:
 
 	~Color() { }
 
+	operator RGBQUAD& () { return color_; }
 	operator const RGBQUAD& () const { return color_; }
+
+	UnitType r() const { return color_.rgbRed; }
+	UnitType g() const { return color_.rgbGreen; }
+	UnitType b() const { return color_.rgbBlue; }
 };
 
 }

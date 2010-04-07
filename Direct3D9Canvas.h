@@ -2,6 +2,7 @@
 #define ART_DIRECT_3D_9_CANVAS_H
 
 #include "Canvas.h"
+#include "Direct3D9.h"
 
 class Direct3D9;
 
@@ -22,16 +23,25 @@ public:
 
 private:
 	Direct3D9*	direct_3d_;
-
+	LPD3DXFONT	font_;
 public:
 	Direct3D9Canvas( HWND );
-	~Direct3D9Canvas();
+	virtual ~Direct3D9Canvas();
 
 	void render() const;
 
-	void DrawLineHumanTouch( float, float, float, float, const Color& );
-	void DrawPolygonHumanTouch( const Point*, const Color& );
-	void FillRect( const Rect&, const Color& );
+	void drawLineHumanTouch( const art::Vertex&, const art::Vertex&, const Color& );
+	void drawPolygonHumanTouch( const Point*, const Color& );
+	void fillRect( const Rect&, const Color& );
+
+	virtual void drawLine( Real, Real, Real, Real, const Color& );
+	virtual void drawCircle( const art::Vertex&, Real, const Color&, bool );
+	virtual void drawRing( const art::Vertex&, Real, Real, const Color&, bool );
+
+	virtual void drawText( const art::Vertex&, const char*, const Color& );
+
+	virtual void begin() const;
+	virtual void end() const;
 };
 
 }

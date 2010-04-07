@@ -56,7 +56,7 @@ void Model::load_file( const char* file_name )
 		else if ( command == "f" )
 		{
 			int start_vertex_index, end_vertex_index;
-			unsigned int start_color, end_color;
+			COLORREF start_color = RGB( 255, 255, 255 ), end_color = RGB( 255, 255, 255 );
 
 			ss >> start_vertex_index >> end_vertex_index >> start_color >> end_color;
 

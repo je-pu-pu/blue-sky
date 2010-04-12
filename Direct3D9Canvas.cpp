@@ -61,7 +61,11 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	// D3DBLEND_INVSRCALPHAで画像の状態にあわせて描画先画像のアルファ値が変わるようになる   
 	direct_3d_->getDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);   
 
-	direct_3d_->getDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);   
+	direct_3d_->getDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);
+
+	// direct_3d_->getDevice()->SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
+
+	direct_3d_->getDevice()->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 
     // Initialize three vertices for rendering a triangleconst
 	if ( FAILED( direct_3d_->getDevice()->CreateVertexBuffer( v_count * sizeof( CUSTOMVERTEX ), 0, D3DFVF_CUSTOMVERTEX, D3DPOOL_DEFAULT, & vertex_buffer_, NULL ) ) )
@@ -79,8 +83,8 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	direct_3d_->getDevice()->SetTransform( D3DTS_VIEW, &matView );
 
 	D3DXMATRIXA16 matProj;
-	D3DXMatrixOrthoLH( &matProj, 800.f, 600.f, 1.0f, 100.0f );
-	D3DXMatrixOrthoOffCenterLH( & matProj, 0, 800.f, 600.f, 0.f, 1.0f, 100.0f );
+	D3DXMatrixOrthoLH( &matProj, 640.f, 480.f, 1.0f, 100.0f );
+	D3DXMatrixOrthoOffCenterLH( & matProj, 0, 640.f, 480.f, 0.f, 1.0f, 100.0f );
 	direct_3d_->getDevice()->SetTransform( D3DTS_PROJECTION, &matProj );
 	
 	direct_3d_->getDevice()->SetStreamSource( 0, vertex_buffer_, 0, sizeof( CUSTOMVERTEX ) );
@@ -129,17 +133,22 @@ void Direct3D9Canvas::begin() const
 	{
 		THROW_EXCEPTION_MESSAGE;
 	}
-
-	sprite_->Begin( D3DXSPRITE_ALPHABLEND );
 }
 
 void Direct3D9Canvas::end() const
 {
-	sprite_->End();
-		
 	direct_3d_->getDevice()->EndScene();
-
 	direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL );
+}
+
+void Direct3D9Canvas::BeginLine()
+{
+	sprite_->Begin( D3DXSPRITE_ALPHABLEND );
+}
+
+void Direct3D9Canvas::EndLine()
+{
+	sprite_->End();
 }
 
 void Direct3D9Canvas::render() const
@@ -175,6 +184,7 @@ void Direct3D9Canvas::render() const
 
 		direct_3d_->getDevice()->DrawPrimitive( D3DPT_TRIANGLESTRIP, 0, 100 - 2 );
 
+		/*
 		sprite_->Begin( D3DXSPRITE_ALPHABLEND | D3DXSPRITE_SORT_DEPTH_BACKTOFRONT );
 
 		float x = 10.f;
@@ -217,6 +227,7 @@ void Direct3D9Canvas::render() const
 
 
 		sprite_->End();
+		*/
 
 		direct_3d_->getDevice()->EndScene();
 	}
@@ -229,9 +240,33 @@ void Direct3D9Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Ve
 	Canvas::drawLineHumanTouch( from, to, c );
 }
 
-void Direct3D9Canvas::drawPolygonHumanTouch( const Point*, const Color& )
+void Direct3D9Canvas::drawPolygonHumanTouch( const Face& face, const Color& )
 {
-	
+	CUSTOMVERTEX* vs = 0;
+
+	if ( FAILED( vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & vs ), 0 ) ) )
+	{
+		THROW_EXCEPTION_MESSAGE;
+	}
+
+	unsigned int n = 0;
+
+	for ( Face::IDList::const_iterator i = face.id_list().begin(); i != face.id_list().end(); ++i )
+	{
+		vs[ n ].position.x = vertex_list()[ *i ].vertex().x();
+		vs[ n ].position.y = vertex_list()[ *i ].vertex().y();
+		vs[ n ].position.z = vertex_list()[ *i ].vertex().z();
+		vs[ n ].tu1 = ( n % 2 ) * 1.f;
+		vs[ n ].tv1 = 0.5f;
+		vs[ n ].color = 0xFFFF0000;
+
+		n++;
+	}
+
+	vertex_buffer_->Unlock();
+
+	direct_3d_->getDevice()->DrawPrimitive( D3DPT_TRIANGLESTRIP, 0, face.id_list().size() - 2 );
+	// direct_3d_->getDevice()->DrawPrimitive( D3DPT_TRIANGLEFAN, 0, face.id_list().size() - 2 );
 }
 
 void Direct3D9Canvas::fillRect( const Rect&, const Color& )

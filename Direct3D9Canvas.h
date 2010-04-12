@@ -31,7 +31,7 @@ public:
 	void render() const;
 
 	void drawLineHumanTouch( const art::Vertex&, const art::Vertex&, const Color& );
-	void drawPolygonHumanTouch( const Point*, const Color& );
+	void drawPolygonHumanTouch( const Face&, const Color& );
 	void fillRect( const Rect&, const Color& );
 
 	virtual void drawLine( Real, Real, Real, Real, const Color& );
@@ -42,6 +42,9 @@ public:
 
 	virtual void begin() const;
 	virtual void end() const;
+
+	static void BeginLine();
+	static void EndLine();
 };
 
 }

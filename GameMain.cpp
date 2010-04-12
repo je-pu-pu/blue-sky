@@ -39,8 +39,11 @@ CGameMain::CGameMain()
 	// Direct3D 
 	canvas_ = new art::Direct3D9Canvas( app->GetWindowHandle() );
 
-	sample_model.load_file( "./blue-sky-building-2.obj" );
+	// sample_model.load_file( "./blue-sky-building-3.obj" );
+	// sample_model.load_file( "./blue-sky-building-2.obj" );
 	// sample_model.load_file( "./blue-sky-box.obj" );
+	// sample_model.load_file( "./blue-sky-box2.obj" );
+	sample_model.load_file( "./blue-sky-box3.obj" );
 }
 
 //■デストラクタ
@@ -53,6 +56,8 @@ static float eye_z = 2.f;
 
 void CGameMain::convert_3d_to_2d( vector3& v )
 {
+	v *= 0.25f;
+
 	const int cx = Width / 2;
 	const int cy = Height / 2;
 
@@ -92,8 +97,6 @@ void CGameMain::Loop()
 	
 	// canvas_->render();
 	// return;
-
-	canvas_->begin();
 
 	MainLoop.WaitTime = 0;
 
@@ -194,6 +197,9 @@ void CGameMain::Loop()
 	// 3D BOX
 	matrix4x4 mt;
 
+	if ( GetAsyncKeyState( VK_NUMPAD9 ) ) { matrix4x4 m; m.translate( 0.f, 0.f, -1.f ); eye_z -= 0.1f; }
+	if ( GetAsyncKeyState( VK_NUMPAD3 ) ) { matrix4x4 m; m.translate( 0.f, 0.f, +1.f ); eye_z += 0.1f; }
+
 	if ( GetAsyncKeyState( VK_NUMPAD4 ) ) { matrix4x4 m; m.rotate_y( +1.f ); mt *= m; }
 	if ( GetAsyncKeyState( VK_NUMPAD6 ) ) { matrix4x4 m; m.rotate_y( -1.f ); mt *= m; }
 	if ( GetAsyncKeyState( VK_NUMPAD8 ) ) { matrix4x4 m; m.rotate_x( -1.f ); mt *= m; }
@@ -212,6 +218,7 @@ void CGameMain::Loop()
 	}
 
 	canvas_->line_list().clear();
+	canvas_->line_list().reserve( sample_model.vertex_list().size() );
 
 	// 3D 座標を 2D キャンバスターゲット座標にコピー
 	for ( art::Model::VertexList::const_iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )
@@ -236,53 +243,33 @@ void CGameMain::Loop()
 		i->second.update();
 	}
 
-	eye_z -= 0.001f;
-
 	int n = 0;
+
+	canvas_->begin();
 
 	// 面を描画する
 	for ( art::Canvas::FaceList::iterator i = canvas_->face_list().begin(); i != canvas_->face_list().end(); ++i )
 	{
 		srand( n + getMainLoop().GetNowTime() / 12000 );
-		
-		POINT p[] = {
-			{ canvas_->vertex_list()[ i->index_list()[ 0 ] ].vertex().x(), canvas_->vertex_list()[ i->index_list()[ 0 ] ].vertex().y() },
-			{ canvas_->vertex_list()[ i->index_list()[ 1 ] ].vertex().x(), canvas_->vertex_list()[ i->index_list()[ 1 ] ].vertex().y() },
-			{ canvas_->vertex_list()[ i->index_list()[ 2 ] ].vertex().x(), canvas_->vertex_list()[ i->index_list()[ 2 ] ].vertex().y() },
-			{ canvas_->vertex_list()[ i->index_list()[ 3 ] ].vertex().x(), canvas_->vertex_list()[ i->index_list()[ 3 ] ].vertex().y() },
-		};
-		
-		srand( getMainLoop().GetNowTime() / 1000 );
 
-		canvas_->drawPolygonHumanTouch( p, i->color() );
+		canvas_->drawPolygonHumanTouch( *i, i->color() );
 	}
+
+	art::Direct3D9Canvas::BeginLine();
 
 	// 線を描画する
 	for ( art::Canvas::LineList::iterator i = canvas_->line_list().begin(); i != canvas_->line_list().end(); ++i )
 	{
-		n++;
-		
+		// n++;
 		// srand( n + getMainLoop().GetNowTime() / 1000 );
 
 		art::Vertex& from = canvas_->vertex_list()[ i->from() ].vertex();
 		art::Vertex& to = canvas_->vertex_list()[ i->to() ].vertex();
 		
-		canvas_->drawLineHumanTouch( from, to, RGBQUAD( i->color() ) );
+		canvas_->drawLineHumanTouch( from, to, i->color() );
 	}
 
-	/*
-	for ( art::Canvas::LineList::iterator i = canvas_->line_list().begin(); i != canvas_->line_list().end(); ++i )
-	{
-		n++;
-		
-		srand( n + getMainLoop().GetNowTime() / 100000 );
-
-		art::Vertex& from = canvas_->vertex_list()[ i->from() ].target_vertex();
-		art::Vertex& to = canvas_->vertex_list()[ i->to() ].target_vertex();
-
-		lpDst->DrawLineHumanTouch( from.x(), from.y(), to.x(), to.y(), art::Color( 0, 0, 0, 100 ) );
-	}
-	*/
+	art::Direct3D9Canvas::EndLine();
 
 	//デバッグ情報描画
 	std::string debug_text;

@@ -28,7 +28,8 @@ public:
 		art::Vertex vertex_;
 		art::Vertex target_vertex_;
 		art::Vertex direction_;
-		art::Angle angle_;
+		art::Real angle_;
+		art::Real speed_;
 
 	public:
 		Vertex();
@@ -97,7 +98,7 @@ public:
 	virtual void end() const = 0;
 
 	virtual void drawLineHumanTouch( const art::Vertex&, const art::Vertex&, const Color& );
-	virtual void drawPolygonHumanTouch( const Point*, const Color& ) = 0;
+	virtual void drawPolygonHumanTouch( const Face&, const Color& ) = 0;
 	virtual void fillRect( const Rect&, const Color& ) = 0;
 
 	virtual void drawLine( Real, Real, Real, Real, const Color& ) = 0;

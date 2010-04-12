@@ -6,7 +6,7 @@ class vector3;
 namespace art
 {
 
-typedef int ID;
+typedef unsigned int ID;
 typedef float Real;
 typedef float Angle;
 typedef vector3 Vertex;

@@ -45,9 +45,6 @@ void Model::load_file( const char* file_name )
 			
 			LiveVertex v( x, y, z );
 
-			v.vertex() += Vertex( 0.f, 5.f, 5.f );
-			v.vertex() *= 0.4f;
-
 			vertex_list()[ v.id() ] = v;
 			id_map[ vertex_index ] = v.id();
 
@@ -55,15 +52,25 @@ void Model::load_file( const char* file_name )
 		}
 		else if ( command == "f" )
 		{
-			int start_vertex_index, end_vertex_index;
-			COLORREF start_color = RGB( 255, 255, 255 ), end_color = RGB( 255, 255, 255 );
+			Face face;
 
-			ss >> start_vertex_index >> end_vertex_index >> start_color >> end_color;
+			while ( ss.good() )
+			{
+				int index;
+				ss >> index;
 
-			int start_vertex_id = id_map[ start_vertex_index ];
-			int end_vertex_id = id_map[ end_vertex_index ];
+				face.id_list().push_back( id_map[ index ] );
+			}
 
-			line_list().push_back( Line( start_vertex_id, end_vertex_id, start_color, end_color ) );
+			if ( face.id_list().size() == 2 )
+			{
+				COLORREF start_color = RGB( 255, 255, 255 ), end_color = RGB( 255, 255, 255 );
+				line_list().push_back( Line( face.id_list()[ 0 ], face.id_list()[ 1 ], start_color, end_color ) );
+			}
+			else
+			{
+				face_list().push_back( face );
+			}
 		}
 	}
 }

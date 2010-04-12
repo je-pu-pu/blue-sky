@@ -9,20 +9,22 @@ namespace art
 {
 
 /**
+ * –Ê
+ *
  * 
  */
 class Face
 {
 public:
-	typedef std::vector<Index> IndexList;
+	typedef std::vector<ID> IDList;
 
 private:
-	IndexList index_list_;
-	Color color_;
+	IDList id_list_;		///< ID ‚Ìˆê——
+	Color color_;			///< F
 
 public:
-	IndexList& index_list() { return index_list_; }
-	const IndexList& index_list() const { return index_list_; }
+	IDList& id_list() { return id_list_; }
+	const IDList& id_list() const { return id_list_; }
 
 	Color& color() { return color_; }
 	const Color& color() const { return color_; }

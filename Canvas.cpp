@@ -68,8 +68,8 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 		std::swap( y1, y2 );
 	}
 
-	int division = 200; // ˆê–{‚Ìü‚ğ•`‰æ‚·‚é‚½‚ß‚ÉÅ‘å‰½ŒÂ‚Ì‰~‚ğ•`‰æ‚·‚é‚©
-	Real interval = 10.0; // ‰~‚Æ‰~‚ÌŠÔŠu‚ÌÅ‘å’l ( pixel )
+	int division = 100; // ˆê–{‚Ìü‚ğ•`‰æ‚·‚é‚½‚ß‚ÉÅ‘å‰½ŒÂ‚Ì‰~‚ğ•`‰æ‚·‚é‚©
+	Real interval = 10.f; // ‰~‚Æ‰~‚ÌŠÔŠu‚ÌÅ‘å’l ( pixel )
 
 	Real power = 1.2f; // •Mˆ³ ( pixel )
 	Real power_min = 1.f; // Å’á•Mˆ³ ( pixel )
@@ -101,7 +101,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 
 
 	Real a = 0.f; // •Mˆ³‚ÌƒAƒŒ
-	Real d = direction; // + ( ( rand() % 100 / 100.f ) - 0.5f ) * direction_random; // Œ»İ‚Ì•M‚Ì•ûŒü ( radian )
+	Real d = direction + ( ( rand() % 100 / 100.f ) - 0.5f ) * direction_random; // Œ»İ‚Ì•M‚Ì•ûŒü ( radian )
 
 	for ( int n = 0; n < division; n++ )
 	{
@@ -191,7 +191,8 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 
 		direction_fix += direction_fix_acceleration;
 
-		if ( rand() % 100 < 10 )
+		// if ( rand() % 100 < 10 )
+		if ( false )
 		{
 			direction_fix = direction_fix_default;
 			d += ( ( rand() % 100 / 100.f ) - 0.5f ) * direction_random;
@@ -234,6 +235,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 
 Canvas::Vertex::Vertex()
 	: angle_( 0.f )
+	, speed_( 0.f )
 {
 	//
 }
@@ -246,71 +248,112 @@ void Canvas::Vertex::update()
 	art::Vertex d = target_vertex() - vertex();
 	art::Vertex r( rand() % 100 / 100.f * 2.f - 1.f, rand() % 100 / 100.f * 2.f - 1.f, rand() % 100 / 100.f * 2.f - 1.f );
 
-	direction() = ( direction() * 14 + d * 1 + r * 1 ) / 16;
-	vertex_ += direction_;
+	// direction() = ( direction() * 14 + d * 1 + r * 1 ) / 16;
+	// vertex_ += direction_;
 
 	// direction() *= ( sin( a ) + 1.f ) * 0.1f;
 	// vertex_ += direction_;
 
-	/*
-	const float speed = 1.f;
+	/// ’¸“_‚ÌÅ‘åˆÚ“®‘¬“x
+	const float max_speed = 20.f;
 
-	float rx = target_vertex().x() - vertex().x();
-	float ry = target_vertex().y() - vertex().y();
+	/// ù‰ñ‚Ì‘¬“x
+	// const float turn_speed = 5.f;
+
+	const float rx = target_vertex().x() - vertex().x();
+	const float ry = target_vertex().y() - vertex().y();
 	
-	float len = sqrt( rx * rx + ry * ry );
+	const float len = sqrt( rx * rx + ry * ry );
 	float a = atan2( ry, rx );
 	
-	while ( a < 0 )
+	// 0 <= a < 2 * M_PI ‚ÉŠÛ‚ß‚é
+	while ( a < 0.f )
 	{
-		a += 2 * static_cast<float>( M_PI );
+		a += 2.f * static_cast<float>( M_PI );
 	}
-	while ( a >= 2 * static_cast<float>( M_PI ) )
+	while ( a >= 2.f * static_cast<float>( M_PI ) )
 	{
-		a -= 2 * static_cast<float>( M_PI ) ;
+		a -= 2.f * static_cast<float>( M_PI ) ;
 	}
-	
-	while ( angle_ < 0 )
+
+	// 0 <= angle_ < 2 * M_PI ‚ÉŠÛ‚ß‚é
+	while ( angle_ < 0.f )
 	{
-		angle_ += 2 * static_cast<float>( M_PI );
+		angle_ += 2.f * static_cast<float>( M_PI );
 	}
-	while ( angle_ >= 2 * static_cast<float>( M_PI ) )
+	while ( angle_ >= 2.f * static_cast<float>( M_PI ) )
 	{
-		angle_ -= 2 * static_cast<float>( M_PI );
+		angle_ -= 2.f * static_cast<float>( M_PI );
 	}
 
 	float aa = a - angle_;
-	float direction_fix = 0.1f;
+	const float direction_fix = 3.f;
 
+	// 0 <= angle_ < 2 * M_PI ‚ÉŠÛ‚ß‚é
 	while ( aa < 0 )
 	{
 		aa += ( 2 * static_cast<float>( M_PI ) );
 	}
 
-	if ( aa == 0 )
+	if ( aa == 0.f )
 	{
-		
+		// ^³–Ê
 	}
 	else if ( aa <= static_cast<float>( M_PI ) )
 	{
+		// ¶‰ñ‚è
 		angle_ += direction_fix;
+
+		if ( angle_ > a )
+		{
+			angle_ = a;
+		}
 	}
 	else if ( aa > static_cast<float>( M_PI ) )
 	{
+		// ‰E‰ñ‚è
 		angle_ -= direction_fix;
+
+		if ( angle_ < a )
+		{
+			angle_ = a;
+		}
 	}
 	else
 	{
 		
 	}
 
-	float diff = abs( static_cast<float>( M_PI ) - aa );
 
-	direction_.x() = cos( angle_ ) * speed; // min( diff * 0.1f, len );
-	direction_.y() = sin( angle_ ) * speed; // min( diff * 0.1f, len );
+
+	// float diff = abs( static_cast<float>( M_PI ) - aa );
+
+	const float speed = min( max_speed, len );
+	const float speed_fix = 0.01f;
+
+	if ( speed_ < speed )
+	{
+		speed_ += speed_fix;
+
+		if ( speed_ > speed )
+		{
+			speed_ = speed;
+		}
+	}
+	if ( speed_ > speed )
+	{
+		speed_ -= speed_fix;
+
+		if ( speed_ < 0.f )
+		{
+			speed_ = 0.f;
+		}
+	}
+
+	direction_.x() = cos( angle_ ) * speed_; // min( diff * 0.1f, len );
+	direction_.y() = sin( angle_ ) * speed_; // min( diff * 0.1f, len );
 
 	vertex_ += direction_;
-	*/
 }
 
 }; // namespace art

@@ -16,7 +16,7 @@ CApp::CApp()
 	// WinStyle = WS_CAPTION;
 	
 	WinStyle = WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE;
-	WinStyle = WS_POPUP;
+	// WinStyle = WS_POPUP;
 }
 
 //□デストラクタ

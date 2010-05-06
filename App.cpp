@@ -2,12 +2,14 @@
 #include "GameMain.h"
 #include <winnls32.h>
 
+#include <iostream>
+
 //□コンストラクタ
 CApp::CApp()
 	: hWnd( 0 )
 	, hInst( 0 )
 	, hMutex( 0 )
-	, Width( 640 )
+	, Width( 720 )
 	, Height( 480 )
 {
 	ClassName = "GraphicEffect";

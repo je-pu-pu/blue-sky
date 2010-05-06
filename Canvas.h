@@ -17,11 +17,30 @@ typedef POINT Point;
 typedef RECT Rect;
 
 /**
- * 
+ * キャンバス
+ *
+ *
  */
 class Canvas
 {
 public:
+	
+	/**
+	 * ブラシ
+	 *
+	 * 
+	 */
+	class Brush
+	{
+	private:
+		Real size_;		///< 
+		Real size_acceleration_;
+
+	public:
+		Real& size() { return size_; }
+		Real& size_acceleration() { return size_acceleration_; }
+	};
+
 	class Vertex
 	{
 	private:
@@ -76,6 +95,8 @@ public:
 	typedef std::vector<Face> FaceList;
 
 private:
+	Brush* brush_;
+
 	VertexList vertex_list_;
 	LineList line_list_;
 	FaceList face_list_;
@@ -106,6 +127,11 @@ public:
 	virtual void drawRing( const art::Vertex&, Real, Real, const Color&, bool ) = 0;
 
 	virtual void drawText( const art::Vertex&, const char*, const Color& ) = 0;
+
+	virtual int width() const = 0;
+	virtual int height() const = 0;
+
+	virtual void setBrush( Brush* b ) { brush_ = b; }
 };
 
 }

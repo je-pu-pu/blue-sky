@@ -3,6 +3,7 @@
 #define _USE_MATH_DEFINES
 
 #include <math.h>
+#include <assert.h>
 
 bool g_solid = false;
 bool g_line = false;
@@ -24,6 +25,7 @@ namespace art
 {
 
 Canvas::Canvas()
+	: brush_( 0 )
 {
 
 }
@@ -40,6 +42,14 @@ Canvas::~Canvas()
  */
 void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to, const Color& cl )
 {
+	const float w = static_cast< float >( width() );
+	const float h = static_cast< float >( height() );
+
+	if ( from.x() < 0.f && to.x() < 0.f ) return;
+	if ( from.x() > w   && to.x() > w   ) return;
+	if ( from.y() < 0.f && to.y() < 0.f ) return;
+	if ( from.y() > h   && to.y() > h   ) return;
+
 	RGBQUAD c = cl;
 	Real x1 = from.x();
 	Real y1 = from.y();
@@ -69,7 +79,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 	}
 
 	int division = 100; // ˆê–{‚Ìü‚ğ•`‰æ‚·‚é‚½‚ß‚ÉÅ‘å‰½ŒÂ‚Ì‰~‚ğ•`‰æ‚·‚é‚©
-	Real interval = 10.f; // ‰~‚Æ‰~‚ÌŠÔŠu‚ÌÅ‘å’l ( pixel )
+	Real max_interval = 10.f; // ‰~‚Æ‰~‚ÌŠÔŠu‚ÌÅ‘å’l ( pixel )
 
 	Real power = 1.2f; // •Mˆ³ ( pixel )
 	Real power_min = 1.f; // Å’á•Mˆ³ ( pixel )
@@ -100,13 +110,18 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 	direction_fix = direction_fix_default;
 
 
+	power = brush_->size();
+	power_plus = brush_->size_acceleration();
+
 	Real a = 0.f; // •Mˆ³‚ÌƒAƒŒ
 	Real d = direction + ( ( rand() % 100 / 100.f ) - 0.5f ) * direction_random; // Œ»İ‚Ì•M‚Ì•ûŒü ( radian )
 
 	for ( int n = 0; n < division; n++ )
 	{
-		x1 += cos( d ) * min( power / 2, interval );
-		y1 += sin( d ) * min( power / 2, interval );
+		const Real interval = 1.f;
+
+		x1 += cos( d ) * min( interval, max_interval );
+		y1 += sin( d ) * min( interval, max_interval );
 
 		drawCircle( art::Vertex( x1, y1, 0.f ), power, c, true );
 		g_circle_count++;
@@ -242,6 +257,9 @@ Canvas::Vertex::Vertex()
 
 void Canvas::Vertex::update()
 {
+	vertex() = target_vertex();
+	return;
+		
 	// static float a = 0.f;
 	// a += 0.01f;
 
@@ -256,6 +274,13 @@ void Canvas::Vertex::update()
 
 	/// ’¸“_‚ÌÅ‘åˆÚ“®‘¬“x
 	const float max_speed = 20.f;
+
+	/// ‰Á‘¬“x
+	const float speed_fix = 0.1f;
+
+	/// ù‰ñ‘¬“x
+	const float direction_fix = 0.1f;
+	
 
 	/// ù‰ñ‚Ì‘¬“x
 	// const float turn_speed = 5.f;
@@ -287,9 +312,8 @@ void Canvas::Vertex::update()
 	}
 
 	float aa = a - angle_;
-	const float direction_fix = 3.f;
 
-	// 0 <= angle_ < 2 * M_PI ‚ÉŠÛ‚ß‚é
+	// 0 <= aa < 2 * M_PI ‚ÉŠÛ‚ß‚é
 	while ( aa < 0 )
 	{
 		aa += ( 2 * static_cast<float>( M_PI ) );
@@ -324,12 +348,27 @@ void Canvas::Vertex::update()
 		
 	}
 
+	// Šp“x‚Ì³Šm‚³—¦ 0.f .. 1.f
+	float angle_diff = a - angle_;
 
+	// 0.f .. 2 * M_PI
+	while ( angle_diff < 0 )
+	{
+		angle_diff += ( 2 * static_cast<float>( M_PI ) );
+	}
+	if ( angle_diff > static_cast< float >( M_PI ) )
+	{
+		angle_diff = ( 2 * static_cast< float >( M_PI ) ) - angle_diff;
+	}
+
+	const float angle_correct_rate = 1.f - ( angle_diff / static_cast< float >( M_PI ) );
+
+	assert( angle_correct_rate >= 0.f );
+	assert( angle_correct_rate <= 1.f );
 
 	// float diff = abs( static_cast<float>( M_PI ) - aa );
 
-	const float speed = min( max_speed, len );
-	const float speed_fix = 0.01f;
+	const float speed = min( max_speed, len ) * ( pow( angle_correct_rate, 8 ) );
 
 	if ( speed_ < speed )
 	{
@@ -352,6 +391,8 @@ void Canvas::Vertex::update()
 
 	direction_.x() = cos( angle_ ) * speed_; // min( diff * 0.1f, len );
 	direction_.y() = sin( angle_ ) * speed_; // min( diff * 0.1f, len );
+
+	// direction() = ( direction() * 15 + d * 1 ) / 16;
 
 	vertex_ += direction_;
 }

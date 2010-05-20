@@ -91,9 +91,9 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	direct_3d_->getDevice()->SetFVF( D3DFVF_CUSTOMVERTEX );
 	
 	// 
-	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "brush5.png", & texture1_ ) ) )
+//	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "brush5.png", & texture1_ ) ) )
 //	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "test.png", & texture1_ ) ) )
-//	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle2.png", & texture1_ ) ) )
+	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle2.png", & texture1_ ) ) )
 	{
 		delete direct_3d_;
 		delete vertex_buffer_;
@@ -279,14 +279,14 @@ void Direct3D9Canvas::drawPolygonHumanTouch( const Face& face, const Color& )
 	direct_3d_->getDevice()->DrawPrimitive( D3DPT_TRIANGLEFAN, 0, face.id_list().size() - 2 );
 }
 
-void Direct3D9Canvas::fillRect( const Rect&, const Color& )
+void Direct3D9Canvas::fillRect( const Rect&, const Color& color )
 {
-	
+	direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( color.r(), color.g(), color.b() ), 1.f, 0 );
 }
 
 void Direct3D9Canvas::drawLine( Real, Real, Real, Real, const Color& )
 {
-
+	//
 }
 
 void Direct3D9Canvas::drawCircle( const art::Vertex& pos, Real w, const Color& color, bool )

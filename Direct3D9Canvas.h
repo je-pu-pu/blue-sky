@@ -28,6 +28,8 @@ public:
 	Direct3D9Canvas( HWND );
 	virtual ~Direct3D9Canvas();
 
+	void clear();
+
 	void render() const;
 
 	virtual void begin() const;

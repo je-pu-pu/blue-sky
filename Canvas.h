@@ -36,9 +36,12 @@ public:
 		Real size_;		///< 
 		Real size_acceleration_;
 
+		Color color_;
 	public:
 		Real& size() { return size_; }
 		Real& size_acceleration() { return size_acceleration_; }
+
+		Color& color() { return color_; }
 	};
 
 	class Vertex
@@ -113,12 +116,16 @@ public:
 	const LineList& line_list() const { return line_list_; }
 	const FaceList& face_list() const { return face_list_; }
 
+	// virtual void clear();
+
 	virtual void render() const = 0;
 
 	virtual void begin() const = 0;
 	virtual void end() const = 0;
 
 	virtual void drawLineHumanTouch( const art::Vertex&, const art::Vertex&, const Color& );
+	virtual void drawLineHumanTouch( Real, Real, Real, Real, const Color& );
+
 	virtual void drawPolygonHumanTouch( const Face&, const Color& ) = 0;
 	virtual void fillRect( const Rect&, const Color& ) = 0;
 
@@ -150,6 +157,7 @@ extern float g_direction_fix_default;
 extern float g_direction_fix_acceleration;
 extern float g_direction_random;
 
+extern int g_line_count;
 extern int g_circle_count;
 
 #endif // ART_CANVAS_H

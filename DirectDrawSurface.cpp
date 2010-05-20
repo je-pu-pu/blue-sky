@@ -4,12 +4,11 @@
 //最終更新部分	LostCheck(), RGB_Swap()
 //■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 
-#include	"DirectDrawSurface.h"
-#include	"DirectDraw.h"
+#include "DirectDrawSurface.h"
+#include "DirectDraw.h"
 
-#include	"GameMain.h"
+#include "GameMain.h"
 
-#define _USE_MATH_DEFINES
 #include <math.h>
 
 //Debug用
@@ -577,8 +576,12 @@ int g_circle_count = 0;
 
 void CDirectDrawSurface::DrawLineHumanTouch( double x1, double y1, double x2, double y2, RGBQUAD c )
 {
-	// srand( CGameMain::GetInstange()->getMainLoop().GetNowTime() / 1000 );
+	x1 += ( rand() % 100 / 100.f -0.5f ) * 10.f;
+	y1 += ( rand() % 100 / 100.f -0.5f ) * 10.f;
 
+	x2 += ( rand() % 100 / 100.f -0.5f ) * 10.f;
+	y2 += ( rand() % 100 / 100.f -0.5f ) * 10.f;
+	
 	int r = rand() % 255;
 
 	RGBQUAD black = { 0, r, r, 20 };

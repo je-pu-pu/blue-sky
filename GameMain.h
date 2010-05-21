@@ -46,9 +46,6 @@ protected:
 	CGameMain();				//コンストラクタ
 
 	void convert_3d_to_2d( vector3& );
-	
-	void draw_2d_buildings() const;
-	void draw_house( const art::Vertex& ) const;
 
 public:
 	static CGameMain* GetInstange(){ static CGameMain gm; return &gm; }

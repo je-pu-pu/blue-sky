@@ -69,6 +69,7 @@ void Model::load_file( const char* file_name )
 			}
 			else
 			{
+				face.color() = Color( 255, 0, 0 );
 				face_list().push_back( face );
 			}
 		}

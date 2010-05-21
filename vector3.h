@@ -28,16 +28,16 @@ public:
 	void			unit();
 	void			normal( const vector3&, const vector3&, const vector3& );
 
-	vector3&		operator =( const vector3& );
-	vector3			operator +( const vector3& );
-	vector3&		operator +=( const vector3& );
-	vector3			operator -( const vector3& );
-	vector3&		operator -=( const vector3& );
-	vector3			operator *( const matrix4x4& );
-	vector3&		operator *=( const matrix4x4& );
+	vector3&		operator =  ( const vector3& );
+	vector3			operator +  ( const vector3& ) const;
+	vector3&		operator += ( const vector3& );
+	vector3			operator -  ( const vector3& ) const;
+	vector3&		operator -= ( const vector3& );
+	vector3			operator *  ( const matrix4x4& ) const;
+	vector3&		operator *= ( const matrix4x4& );
 
-	vector3			operator * ( T v ) { return vector3( x() * v, y() * v, z() * v ); }
-	vector3			operator / ( T v ) { return vector3( x() / v, y() / v, z() / v ); }
+	vector3			operator * ( T v ) const { return vector3( x() * v, y() * v, z() * v ); }
+	vector3			operator / ( T v ) const { return vector3( x() / v, y() / v, z() / v ); }
 	vector3&		operator *= ( T v ) { set( x() * v, y() * v, z() * v ); return *this; }
 	vector3&		operator /= ( T v ) { set( x() / v, y() / v, z() / v ); return *this; }
 

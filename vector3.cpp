@@ -55,13 +55,13 @@ void vector3::normal( const vector3 &_v1, const vector3 &_v2, const vector3 &_v3
 	unit();
 }
 
-vector3& vector3::operator =( const vector3 &v )
+vector3& vector3::operator = ( const vector3 &v )
 {
 	memcpy( data, v.data, sizeof(float) * 3 );
 	return *this;
 }
 
-vector3 vector3::operator +( const vector3 &v )
+vector3 vector3::operator + ( const vector3 &v ) const
 {
 	vector3 dv;
 	for( int i = 0; i < 3; i++ ){
@@ -70,7 +70,7 @@ vector3 vector3::operator +( const vector3 &v )
 	return dv;
 }
 
-vector3& vector3::operator +=( const vector3 &v )
+vector3& vector3::operator += ( const vector3 &v )
 {
 	for( int i = 0; i < 3; i++ ){
 		data[i] += v.data[i];
@@ -78,7 +78,7 @@ vector3& vector3::operator +=( const vector3 &v )
 	return *this;
 }
 
-vector3 vector3::operator -( const vector3 &v )
+vector3 vector3::operator - ( const vector3 &v ) const
 {
 	vector3 dv;
 	for( int i = 0; i < 3; i++ ){
@@ -87,7 +87,7 @@ vector3 vector3::operator -( const vector3 &v )
 	return dv;
 }
 
-vector3& vector3::operator -=( const vector3 &v )
+vector3& vector3::operator -= ( const vector3 &v )
 {
 	for( int i = 0; i < 3; i++ ){
 		data[i] -= v.data[i];
@@ -95,7 +95,7 @@ vector3& vector3::operator -=( const vector3 &v )
 	return *this;
 }
 
-vector3 vector3::operator *( const matrix4x4 &_x )
+vector3 vector3::operator * ( const matrix4x4 &_x ) const
 {
 	// | x' |   | a b c d |   | x |
 	// | y' | = | e f g h | * | y |
@@ -104,12 +104,13 @@ vector3 vector3::operator *( const matrix4x4 &_x )
 
 	matrix4x4	x = _x;
 	vector3		dv;
-	float		&sx = data[0], &sy = data[1], &sz = data[2];
+	
+	const T &sx = data[0], &sy = data[1], &sz = data[2];
 
-	const float &a = x.get(0,0), &b = x.get(0,1), &c = x.get(0,2), &d = x.get(0,3);
-	const float &e = x.get(1,0), &f = x.get(1,1), &g = x.get(1,2), &h = x.get(1,3);
-	const float &i = x.get(2,0), &j = x.get(2,1), &k = x.get(2,2), &l = x.get(2,3);
-	const float &m = x.get(3,0), &n = x.get(3,1), &o = x.get(3,2), &p = x.get(3,3);
+	const T &a = x.get(0,0), &b = x.get(0,1), &c = x.get(0,2), &d = x.get(0,3);
+	const T &e = x.get(1,0), &f = x.get(1,1), &g = x.get(1,2), &h = x.get(1,3);
+	const T &i = x.get(2,0), &j = x.get(2,1), &k = x.get(2,2), &l = x.get(2,3);
+	const T &m = x.get(3,0), &n = x.get(3,1), &o = x.get(3,2), &p = x.get(3,3);
 
 	dv.set(
 		sx * a + sy * b + sz * c + d,
@@ -121,7 +122,7 @@ vector3 vector3::operator *( const matrix4x4 &_x )
 	return dv;
 }
 
-vector3& vector3::operator *=( const matrix4x4 &x )
+vector3& vector3::operator *= ( const matrix4x4 &x )
 {
 	*this = operator *( x );
 	return *this;

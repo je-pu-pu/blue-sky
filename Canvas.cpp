@@ -41,7 +41,7 @@ Canvas::~Canvas()
  *
  * 
  */
-void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to, const Color& cl )
+void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to, const Color& c )
 {
 	const float w = static_cast< float >( width() );
 	const float h = static_cast< float >( height() );
@@ -53,13 +53,19 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 
 	g_line_count++;
 	
-	const Real edge_pos_random = 0.f;
+	const Real edge_pos_random = 1.f;
 
-	RGBQUAD c = cl;
+	Color color = c;
+
+	/*
 	Real x1 = from.x() + common::random( -edge_pos_random, edge_pos_random );
 	Real y1 = from.y() + common::random( -edge_pos_random, edge_pos_random );
 	Real x2 = to.x() + common::random( -edge_pos_random, edge_pos_random );
 	Real y2 = to.y() + common::random( -edge_pos_random, edge_pos_random );
+	*/
+
+	art::Vertex v1 = from + art::Vertex( common::random( -edge_pos_random, edge_pos_random ), common::random( -edge_pos_random, edge_pos_random ) );
+	art::Vertex v2 = to + art::Vertex( common::random( -edge_pos_random, edge_pos_random ), common::random( -edge_pos_random, edge_pos_random ) );
 
 	// int r = rand() % 255;
 	// RGBQUAD black = { 0, r, r, 20 };
@@ -67,23 +73,14 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 	// ‚­‚Á‚«‚è
 	if ( g_solid )
 	{
-		c.rgbReserved = 255;
+		color.a() = 255;
 	}
 
 	// –Ê”’‚İ‚Ì–³‚¢ŠG‚É
 	if ( g_line )
 	{
-		return drawLine( x1, y1, x2, y2, c );
+		// return drawLine( x, y1, x2, y2, c );
 	}
-
-	// í‚Éã‚©‚ç‰º‚Ìü‚ğ•`‚­
-	/*
-	if ( y1 > y2 )
-	{
-		std::swap( x1, x2 );
-		std::swap( y1, y2 );
-	}
-	*/
 
 	int division = 1000; // ˆê–{‚Ìü‚ğ•`‰æ‚·‚é‚½‚ß‚ÉÅ‘å‰½ŒÂ‚Ì‰~‚ğ•`‰æ‚·‚é‚©
 	
@@ -97,7 +94,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 	Real power_reset = 0.8f; // •Mˆ³ƒŠƒZƒbƒg‚Ì”{—¦
 	Real power_plus_reset = -1.f;
 
-	Real direction = atan2( y2 - y1, x2 - x1 ); // Œ»İ‚Ì•M‚ÌˆÊ’u‚©‚çI—¹“_‚Ü‚Å‚Ì³Šm‚È•ûŒü ( radian )
+	Real direction = atan2( v2.y() - v1.y(), v2.x() - v1.x() ); // Œ»İ‚Ì•M‚ÌˆÊ’u‚©‚çI—¹“_‚Ü‚Å‚Ì³Šm‚È•ûŒü ( radian )
 	Real direction_fix_default = 0.0001f; // •M‚Ì•ûŒü‚Ì•â³’l‚ÌÅ¬’l ( radian )
 	Real direction_fix = direction_fix_default; // •M‚Ì•ûŒü‚Ì•â³’l ( radian )
 	Real direction_fix_acceleration = 0.01f; // •M‚Ì•ûŒü‚Ì•â³’l‚Ì‰Á‘¬“x ( radian )
@@ -133,21 +130,19 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 
 	// direction = d;
 
+	const Real dz = ( v2.z() - v1.z() ) / division;
+
 	for ( int n = 0; n < division; n++ )
 	{
 		// ‰~‚ğ•`‰æ‚·‚é
-		drawCircle( art::Vertex( x1, y1, 0.f ), power, c, true );
+		drawCircle( v1, power, color, true );
 		g_circle_count++;
 
-		// const Real interval = power / 2.f;
-		const Real interval = 2.f;
+		const Real interval = power / 4.f;
+		// const Real interval = 5.f;
 
-		x1 += cos( d ) * min( interval, max_interval );
-		y1 += sin( d ) * min( interval, max_interval );
+		v1 += art::Vertex( cos( d ) * min( interval, max_interval ), sin( d ) * min( interval, max_interval ), dz );
 
-		// a += 0.01f; // ( ( rand() % 100 / 100.f ) ) * 0.1f;
-
-		// power += ( 1.f + a ) * 0.5f * power_plus;
 		power += power_plus;
 
 		if ( power > power_max )
@@ -161,12 +156,12 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 			// power_plus = -power_plus;
 		}
 
-		Real lx = x2 - x1;
-		Real ly = y2 - y1;
+		Real lx = v2.x() - v1.x();
+		Real ly = v2.y() - v1.y();
 		Real len = sqrt( lx * lx + ly * ly );
 
 		// Œ»İ‚ÌÀ•W‚©‚ç to ‚Ö‚Ì³Šm‚ÈŠp“x
-		direction = atan2( y2 -y1, x2 - x1 );
+		direction = atan2( ly, lx );
 		
 		while ( direction < 0 )
 		{
@@ -192,31 +187,20 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 			dd += ( 2 * static_cast< float >( M_PI ) );
 		}
 
+		// Œ»İ‚ÌŠp“x‚ğ³Šm‚ÈŠp“x‚Ö‹ß•t‚¯‚é
 		if ( dd == 0 )
 		{
-			
+			// ³–Ê
 		}
 		else if ( dd <= static_cast< float >( M_PI ) )
 		{
+			// ¶‰ñ‚è
 			d += direction_fix;
-
-			/*
-			if ( d > direction )
-			{
-				d = direction; // + ( d - direction ) * 0.5f;
-			}
-			*/
 		}
 		else if ( dd > static_cast< float >( M_PI ) )
 		{
+			// ‰E‰ñ‚è
 			d -= direction_fix;
-
-			/*
-			if ( d < direction )
-			{
-				d = direction; // - ( direction - d ) * 0.5f;
-			}
-			*/
 		}
 		else
 		{
@@ -226,52 +210,14 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 		// to ‚Ü‚Å•`‰æ‚µ‚½‚çI—¹‚·‚é
 		if ( len < power )
 		{
+			// ‰~‚ğ•`‰æ‚·‚é
+			drawCircle( to, power, color, true );
+			g_circle_count++;
+
 			break;
 		}
 
 		direction_fix += direction_fix_acceleration;
-
-		// if ( rand() % 100 < 5 )
-		if ( false )
-		{
-			direction_fix = direction_fix_default;
-			d += ( ( rand() % 100 / 100.f ) - 0.5f ) * direction_random;
-			
-			power *= power_reset;
-			power_plus *= power_plus_reset;
-
-			c.rgbRed   = min( 255, max( 0, int( c.rgbRed )   + color_plus ) );
-			c.rgbGreen = min( 255, max( 0, int( c.rgbGreen ) + color_plus ) );
-			c.rgbBlue  = min( 255, max( 0, int( c.rgbBlue )  + color_plus ) );
-			
-			// c.rgbReserved = rand() % 256;
-		}
-
-		// c.rgbReserved = static_cast< int >( a * 100 ) % 256;
-		
-		/*
-		if ( d < direction )
-		{
-			d += direction_fix;
-
-			if ( d > direction ) d = direction;
-		}
-		if ( d > direction )
-		{
-			d -= direction_fix;
-
-			if ( d < direction ) d = direction;
-		}
-		*/
-
-		// direction_fix += 0.001f;
-
-		/*
-		if ( len < 5.f )
-		{
-			direction_fix = 100;
-		}
-		*/
 	}
 }
 

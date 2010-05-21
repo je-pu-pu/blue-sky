@@ -30,14 +30,6 @@ LPD3DXSPRITE sprite_ = 0;
 
 static const int v_count = 10000;
 
-CUSTOMVERTEX vertices[] =
-{
-    { D3DXVECTOR3(  10.0f,  10.0f, 0.5f ), 0xFFFFFFFF, 0.f, 1.f }, // x, y, z, color, u, v
-    { D3DXVECTOR3( 500.0f,  10.0f, 0.5f ), 0xFFFFFFFF, 1.f, 1.f },
-    { D3DXVECTOR3(  10.0f, 500.0f, 0.5f ), 0xFFFFFFFF, 0.f, 0.f },
-	{ D3DXVECTOR3( 500.0f, 500.0f, 0.5f ), 0xFFFFFFFF, 1.f, 0.f },
-};
-
 Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	: direct_3d_( 0 )
 	, font_( 0 )
@@ -50,18 +42,18 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
     // Turn off D3D lighting, since we are providing our own vertex colors
     direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
 
-	direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );   
+	// direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );   
 	
 	// 描画先にある画像に対するブレンド方法を指定   
 	
 	// D3DBLEND_SRCALPHAでアルファ値による描画をできるようなる   
-	direct_3d_->getDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);   
+	// direct_3d_->getDevice()->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);   
 	// 描画元の画像に対するブレンド方法を指定   
 	
 	// D3DBLEND_INVSRCALPHAで画像の状態にあわせて描画先画像のアルファ値が変わるようになる   
-	direct_3d_->getDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);   
+	// direct_3d_->getDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 
-	direct_3d_->getDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);
+	// direct_3d_->getDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);
 
 	// direct_3d_->getDevice()->SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
 
@@ -78,14 +70,19 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	D3DXVECTOR3 vEyePt( 0.0f, 0.0f,-5.0f );
 	D3DXVECTOR3 vLookatPt( 0.0f, 0.0f, 0.0f );
 	D3DXVECTOR3 vUpVec( 0.0f, 1.0f, 0.0f );
+
 	D3DXMATRIXA16 matView;
 	D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
 	direct_3d_->getDevice()->SetTransform( D3DTS_VIEW, &matView );
 
+	/*
 	D3DXMATRIXA16 matProj;
-	D3DXMatrixOrthoLH( &matProj, 640.f, 480.f, 1.0f, 100.0f );
-	D3DXMatrixOrthoOffCenterLH( & matProj, 0, 640.f, 480.f, 0.f, 1.0f, 100.0f );
+//	D3DXMatrixOrthoLH( &matProj, 640.f, 480.f, 1.0f, 100.0f );
+//	D3DXMatrixOrthoOffCenterLH( & matProj, 0, 640.f, 480.f, 0.f, 1.0f, 100.0f );
+//	D3DXMatrixPerspectiveOffCenterLH( & matProj, -100.f, 100.f, -100.f, 100.f, 0.f, 100.f );
+
 	direct_3d_->getDevice()->SetTransform( D3DTS_PROJECTION, &matProj );
+	*/
 	
 	direct_3d_->getDevice()->SetStreamSource( 0, vertex_buffer_, 0, sizeof( CUSTOMVERTEX ) );
 	direct_3d_->getDevice()->SetFVF( D3DFVF_CUSTOMVERTEX );
@@ -101,6 +98,7 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 		THROW_EXCEPTION_MESSAGE;
 	}
 
+//	texture1_->SetAutoGenFilterType( D3DTEXF_ANISOTROPIC );
 	texture1_->GenerateMipSubLevels();
 
 	direct_3d_->getDevice()->SetTexture( 0, texture1_ );
@@ -108,13 +106,22 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
     direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_CURRENT );
 	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
-
+	
+	direct_3d_->getDevice()->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_NONE );
+	direct_3d_->getDevice()->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_NONE );
 
 	// Sprite
-
 	D3DXCreateSprite( direct_3d_->getDevice(), & sprite_ );
 
 	if ( FAILED( D3DXCreateFont( direct_3d_->getDevice(), 16, 0, FW_NORMAL, 1, false, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "", & font_ ) ) )
+	{
+		delete direct_3d_;
+		delete vertex_buffer_;
+
+		THROW_EXCEPTION_MESSAGE;
+	}
+
+	if ( FAILED( sprite_->SetWorldViewRH( 0, & matView ) ) )
 	{
 		delete direct_3d_;
 		delete vertex_buffer_;
@@ -148,7 +155,7 @@ void Direct3D9Canvas::end() const
 
 void Direct3D9Canvas::BeginLine()
 {
-	sprite_->Begin( D3DXSPRITE_ALPHABLEND );
+	sprite_->Begin( 0 ); // | D3DXSPRITE_SORT_TEXTURE | D3DXSPRITE_SORT_DEPTH_BACKTOFRONT );
 }
 
 void Direct3D9Canvas::EndLine()
@@ -245,38 +252,46 @@ void Direct3D9Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Ve
 	Canvas::drawLineHumanTouch( from, to, c );
 }
 
-void Direct3D9Canvas::drawPolygonHumanTouch( const Face& face, const Color& )
+void Direct3D9Canvas::drawPolygonHumanTouch( const Face& face, const Color& c )
 {
-	CUSTOMVERTEX* vs = 0;
-
-	if ( FAILED( vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & vs ), 0 ) ) )
+	if ( face.id_list().size() < 4 )
 	{
-		THROW_EXCEPTION_MESSAGE;
+		return;
 	}
 
-	unsigned int n = 0;
-
-	const float tus[] = { 1.f, 0.f, 0.f, 1.f };
-	const float tvs[] = { 1.f, 1.f, 0.f, 0.f };
-
-	const D3DCOLOR colors[] = { 0x00FF0000, 0x0000FF00, 0x000000FF, 0x00FFFFFF };
-
-	for ( Face::IDList::const_iterator i = face.id_list().begin(); i != face.id_list().end(); ++i )
+	// quad
 	{
-		vs[ n ].position.x = vertex_list()[ *i ].vertex().x();
-		vs[ n ].position.y = vertex_list()[ *i ].vertex().y();
-		vs[ n ].position.z = vertex_list()[ *i ].vertex().z();
-		vs[ n ].tu1 = tus[ n ];
-		vs[ n ].tv1 = tvs[ n ];
-		vs[ n ].color = colors[ n ];
+		art::Vertex::T div = 20; // line + 1
 
-		n++;
+		art::Vertex from = vertex_list()[ face.id_list()[ 0 ] ].vertex();
+		art::Vertex to = vertex_list()[ face.id_list()[ 1 ] ].vertex();
+
+		from.z() += 0.00001f;
+		to.z() += 0.00001f;
+
+		art::Vertex from2 = vertex_list()[ face.id_list()[ 3 ] ].vertex();
+		art::Vertex to2 = vertex_list()[ face.id_list()[ 2 ] ].vertex();
+
+		from2.z() += 0.00001f;
+		to2.z() += 0.00001f;
+
+		art::Vertex from_inc = ( from2 - from ) / div;
+		art::Vertex to_inc   = ( to2 - to ) / div;
+
+		art::Color color = c;
+
+		for ( int n = 0; n < div - 1; n++ )
+		{
+			drawLineHumanTouch( from, to, color );
+			
+			color.r() = max( 0, color.r() - 10 );
+			color.g() = max( 0, color.g() - 10 );
+			color.b() = max( 0, color.b() - 10 );
+
+			from += from_inc;
+			to += to_inc;
+		}
 	}
-
-	vertex_buffer_->Unlock();
-
-	// direct_3d_->getDevice()->DrawPrimitive( D3DPT_TRIANGLESTRIP, 0, face.id_list().size() - 2 );
-	direct_3d_->getDevice()->DrawPrimitive( D3DPT_TRIANGLEFAN, 0, face.id_list().size() - 2 );
 }
 
 void Direct3D9Canvas::fillRect( const Rect&, const Color& color )
@@ -293,15 +308,12 @@ void Direct3D9Canvas::drawCircle( const art::Vertex& pos, Real w, const Color& c
 {
 	const float texture_width = 128.f;
 
-	Real x = pos.x();
-	Real y = pos.y();
-
 	D3DXVECTOR3 c( texture_width / 2.f, texture_width / 2.f, 0.f );
 	D3DXMATRIX r, s, t;
 
 	D3DXMatrixIdentity( & r );
-	D3DXMatrixRotationZ( & r, D3DXToRadian( w * 1.f ) );
-	D3DXMatrixTranslation( & t, x, y, 0.f );
+//	D3DXMatrixRotationZ( & r, D3DXToRadian( w * 1.f ) );
+	D3DXMatrixTranslation( & t, pos.x(), pos.y(), pos.z() );
 	D3DXMatrixScaling( & s, w / texture_width, w / texture_width, 0.f );
 
 	r = r * s * t;

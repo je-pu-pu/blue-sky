@@ -14,6 +14,7 @@ class Color
 {
 public:
 	typedef unsigned char UnitType;
+
 private:
 	RGBQUAD color_;
 
@@ -43,11 +44,17 @@ public:
 	operator RGBQUAD& () { return color_; }
 	operator const RGBQUAD& () const { return color_; }
 
+	UnitType & r() { return color_.rgbRed; }
+	UnitType & g() { return color_.rgbGreen; }
+	UnitType & b() { return color_.rgbBlue; }
+	UnitType & a() { return color_.rgbReserved; }
+
 	UnitType r() const { return color_.rgbRed; }
 	UnitType g() const { return color_.rgbGreen; }
 	UnitType b() const { return color_.rgbBlue; }
+	UnitType a() const { return color_.rgbReserved; }
 };
 
 }
 
-#endif // ART_MODEL_H
+#endif // ART_COLOR_H

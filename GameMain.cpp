@@ -198,8 +198,8 @@ void CGameMain::Loop()
 
 	if ( GetAsyncKeyState( 'Z' ) )	g_direction_fix_default -= 0.0001f;
 	if ( GetAsyncKeyState( 'X' ) )	g_direction_fix_default += 0.0001f;
-	if ( GetAsyncKeyState( 'C' ) )	g_direction_fix_acceleration -= 0.001f;
-	if ( GetAsyncKeyState( 'V' ) )	g_direction_fix_acceleration += 0.001f;
+	if ( GetAsyncKeyState( 'C' ) )	g_direction_fix_acceleration -= 0.00001f;
+	if ( GetAsyncKeyState( 'V' ) )	g_direction_fix_acceleration += 0.00001f;
 	if ( GetAsyncKeyState( 'B' ) )	g_direction_random -= 0.001f;
 	if ( GetAsyncKeyState( 'N' ) )	g_direction_random += 0.001f;
 
@@ -318,5 +318,6 @@ void CGameMain::Loop()
 	canvas_->drawText( art::Vertex( 0.f, 0.f ), debug_text.c_str(), art::Color( 255, 0, 0 ) );
 
 	canvas_->end();
-	
+
+	// canvas_->render();
 }

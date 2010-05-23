@@ -16,7 +16,7 @@ float g_power_rest = 0.8f;
 float g_power_plus_reset = -1.f;
 
 float g_direction_fix_default = 0.0001f;
-float g_direction_fix_acceleration = 0.01f;
+float g_direction_fix_acceleration = 0.00001f;
 float g_direction_random = 0.01f;
 
 int g_line_count = 0;
@@ -124,6 +124,8 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 	*/
 
 	Real a = 0.f; // •Mˆ³‚ÌƒAƒŒ
+	const Real random_direction = common::random( -direction_random, direction_random );
+
 	// Real d = direction + ( ( rand() % 100 / 100.f ) - 0.5f ) * direction_random; // Œ»İ‚Ì•M‚Ì•ûŒü ( radian )
 	
 	Real d = direction + direction_random; // Œ»İ‚Ì•M‚Ì•ûŒü ( radian )
@@ -138,7 +140,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 		drawCircle( v1, power, color, true );
 		g_circle_count++;
 
-		const Real interval = power / 4.f;
+		const Real interval = 1;
 		// const Real interval = 5.f;
 
 		v1 += art::Vertex( cos( d ) * min( interval, max_interval ), sin( d ) * min( interval, max_interval ), dz );
@@ -218,6 +220,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 		}
 
 		direction_fix += direction_fix_acceleration;
+		d += random_direction * 0.1f;
 	}
 }
 

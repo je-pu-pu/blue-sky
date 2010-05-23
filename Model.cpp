@@ -69,8 +69,13 @@ void Model::load_file( const char* file_name )
 			}
 			else
 			{
-				face.color() = Color( 255, 0, 0 );
+				static int n = 0;
+				Color colors[] = { Color( 164, 188, 151 ), Color( 50, 70, 40 ), Color( 0xCC, 0xFF, 0xCC ) };
+
+				face.color() = colors[ n ];
 				face_list().push_back( face );
+
+				n = ( n + 1 ) % 3;
 			}
 		}
 	}

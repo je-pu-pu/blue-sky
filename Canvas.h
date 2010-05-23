@@ -97,7 +97,7 @@ public:
 	typedef std::vector<Canvas::Line> LineList;
 	typedef std::vector<Face> FaceList;
 
-	static const int DEPTH_BUFFER_PIXEL_SIZE = 16;
+	static const int DEPTH_BUFFER_PIXEL_SIZE = 8;
 
 private:
 	Brush* brush_;
@@ -106,7 +106,13 @@ private:
 	LineList line_list_;
 	FaceList face_list_;
 
-	Real* depth_buffer_;
+	std::pair< Real, art::ID >* depth_buffer_;
+	int depth_buffer_last_index_;
+	bool depth_buffer_last_test_;
+	int depth_buffer_pixel_id_;
+	int depth_buffer_width_;
+	int depth_buffer_height_;
+
 public:
 	Canvas();
 	virtual ~Canvas();
@@ -142,6 +148,12 @@ public:
 	virtual int height() const = 0;
 
 	virtual void setBrush( Brush* b ) { brush_ = b; }
+
+	virtual void createDepthBuffer();
+	virtual void clearDepthBuffer();
+	virtual void setDepthBufferPixelId( int id ) { depth_buffer_pixel_id_ = id; }
+	virtual void clearDepthBufferLastIndex();
+	virtual bool depthTest( const art::Vertex& );
 };
 
 }

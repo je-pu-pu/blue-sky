@@ -10,14 +10,14 @@ bool g_line = false;
 
 float g_power = 1.f;
 float g_power_min = 1.f;
-float g_power_max = 5.f;
+float g_power_max = 32.f;
 float g_power_plus = 0.1f;
 float g_power_rest = 0.8f;
 float g_power_plus_reset = -1.f;
 
 float g_direction_fix_default = 0.0001f;
 float g_direction_fix_acceleration = 0.00001f;
-float g_direction_random = 0.01f;
+float g_direction_random = 0.f;
 
 int g_line_count = 0;
 int g_circle_count = 0;
@@ -27,13 +27,42 @@ namespace art
 
 Canvas::Canvas()
 	: brush_( 0 )
+	, depth_buffer_( 0 )
+	, depth_buffer_last_index_( -1 )
 {
-
+	
 }
 
 Canvas::~Canvas()
 {
+	delete depth_buffer_;
+}
 
+/**
+ * ÉfÉvÉXÉoÉbÉtÉ@ÇçÏê¨Ç∑ÇÈ
+ *
+ */
+void Canvas::createDepthBuffer()
+{
+	depth_buffer_width_ = width() / DEPTH_BUFFER_PIXEL_SIZE;
+	depth_buffer_height_ = height() / DEPTH_BUFFER_PIXEL_SIZE;
+
+	depth_buffer_ = new std::pair< Real, art::ID >[ depth_buffer_width_ * depth_buffer_height_ ];
+
+	clearDepthBuffer();
+}
+
+void Canvas::clearDepthBuffer()
+{
+	for ( int n = 0; n < depth_buffer_width_ * depth_buffer_height_; n++ )
+	{
+		depth_buffer_[ n ] = std::pair< Real, art::ID >( 9999.f, -1 );
+	}
+}
+
+void Canvas::clearDepthBufferLastIndex()
+{
+	depth_buffer_last_index_ = -1;
 }
 
 /**
@@ -53,7 +82,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 
 	g_line_count++;
 	
-	const Real edge_pos_random = 1.f;
+	const Real edge_pos_random = 0.f;
 
 	Color color = c;
 
@@ -66,6 +95,8 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 
 	art::Vertex v1 = from + art::Vertex( common::random( -edge_pos_random, edge_pos_random ), common::random( -edge_pos_random, edge_pos_random ) );
 	art::Vertex v2 = to + art::Vertex( common::random( -edge_pos_random, edge_pos_random ), common::random( -edge_pos_random, edge_pos_random ) );
+
+	v1.z() = ( from.z() + to.z() ) / 2.f;
 
 	// int r = rand() % 255;
 	// RGBQUAD black = { 0, r, r, 20 };
@@ -85,7 +116,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 	int division = 1000; // àÍñ{ÇÃê¸Çï`âÊÇ∑ÇÈÇΩÇﬂÇ…ç≈ëÂâΩå¬ÇÃâ~Çï`âÊÇ∑ÇÈÇ©
 	
 	const Real min_interval = 1.f;		// â~Ç∆â~ÇÃä‘äuÇÃç≈è¨íl ( pixel )
-	const Real max_interval = 10.f;		// â~Ç∆â~ÇÃä‘äuÇÃç≈ëÂíl ( pixel )
+	const Real max_interval = 8.f;		// â~Ç∆â~ÇÃä‘äuÇÃç≈ëÂíl ( pixel )
 
 	Real power = 1.2f; // ïMà≥ ( pixel )
 	Real power_min = 1.f; // ç≈í·ïMà≥ ( pixel )
@@ -115,13 +146,11 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 
 	direction_fix = direction_fix_default;
 
-	/*
 	if ( brush_ )
 	{
 		power = brush_->size();
 		power_plus = brush_->size_acceleration();
 	}
-	*/
 
 	Real a = 0.f; // ïMà≥ÇÃÉAÉå
 	const Real random_direction = common::random( -direction_random, direction_random );
@@ -137,8 +166,15 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 	for ( int n = 0; n < division; n++ )
 	{
 		// â~Çï`âÊÇ∑ÇÈ
-		drawCircle( v1, power, color, true );
-		g_circle_count++;
+		if ( depthTest( v1 ) )
+		{
+			drawCircle( v1, power, color, true );
+			g_circle_count++;
+		}
+		else
+		{
+			// power -= 0.1f;
+		}
 
 		Real interval = min( 1.f, max_interval );
 		// const Real interval = 5.f;
@@ -213,8 +249,11 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 		if ( len < interval )
 		{
 			// â~Çï`âÊÇ∑ÇÈ
-			drawCircle( to, power, color, true );
-			g_circle_count++;
+			if ( depthTest( v1 ) )
+			{
+				drawCircle( to, power, color, true );
+				g_circle_count++;
+			}
 
 			break;
 		}
@@ -228,6 +267,39 @@ void Canvas::drawLineHumanTouch( Real x1, Real y1, Real x2, Real y2, const Color
 {
 	drawLineHumanTouch( art::Vertex( x1, y1 ), art::Vertex( x2, y2 ), color );
 }
+
+bool Canvas::depthTest( const art::Vertex& v )
+{
+	const int x = static_cast< int >( v.x() ) / DEPTH_BUFFER_PIXEL_SIZE;
+	const int y = static_cast< int >( v.y() ) / DEPTH_BUFFER_PIXEL_SIZE;;
+
+	if ( x < 0 ) return false;
+	if ( x >= depth_buffer_width_ ) return false;
+	if ( y < 0 ) return false;
+	if ( y >= depth_buffer_height_ ) return false;
+
+	const int index = y * depth_buffer_width_ + x;
+
+	if ( depth_buffer_pixel_id_ == depth_buffer_[ index ].second )
+	{
+		depth_buffer_[ index ].first = min( depth_buffer_[ index ].first, v.z() );
+		return true; // depth_buffer_last_test_;
+	}
+
+	if ( v.z() <= depth_buffer_[ index ].first )
+	{
+		depth_buffer_[ index ] = std::pair< Real, art::ID >( v.z(), depth_buffer_pixel_id_ );
+		depth_buffer_last_index_ = index;
+		depth_buffer_last_test_ = true;
+
+		return true;
+	}
+
+	depth_buffer_last_test_ = false;
+
+	return false;
+}
+
 
 Canvas::Vertex::Vertex()
 	: angle_( 0.f )
@@ -244,11 +316,14 @@ void Canvas::Vertex::update()
 	// static float a = 0.f;
 	// a += 0.01f;
 
+	/*
 	art::Vertex d = target_vertex() - vertex();
 	art::Vertex r( rand() % 100 / 100.f * 2.f - 1.f, rand() % 100 / 100.f * 2.f - 1.f, rand() % 100 / 100.f * 2.f - 1.f );
 
-	// direction() = ( direction() * 14 + d * 1 + r * 1 ) / 16;
-	// vertex_ += direction_;
+	direction() = ( direction() * 14 + d * 1 + r * 1 ) / 16;
+	vertex_ += direction_;
+	return;
+	*/
 
 	// direction() *= ( sin( a ) + 1.f ) * 0.1f;
 	// vertex_ += direction_;

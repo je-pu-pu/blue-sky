@@ -163,7 +163,7 @@ void Direct3D9Canvas::begin() const
 
 	const int w = 720;
 	const int h = 480;
-	const float size = 10.f;
+	const float size = 4.f;
 
 	CUSTOMVERTEX* vs = 0;
 
@@ -177,9 +177,9 @@ void Direct3D9Canvas::begin() const
 	int n = 0;
 	const D3DCOLOR colors[] = { 0x00FF0000, 0x0000FF00, 0x000000FF };
 
-	for ( int y = 0; y < h; y += 16 )
+	for ( int y = 0; y < h; y += DEPTH_BUFFER_PIXEL_SIZE )
 	{
-		for ( int x = 0; x < w; x += 16 )
+		for ( int x = 0; x < w; x += DEPTH_BUFFER_PIXEL_SIZE )
 		{
 			// vs[ n ].position = D3DXVECTOR4( 30.f + x * 30.f, 30.f + y * 30.f, x * 0.01f, 1.f );
 			vs[ n ].position = D3DXVECTOR4( x, y, x * 0.001f, 1.f );
@@ -312,22 +312,30 @@ void Direct3D9Canvas::drawPolygonHumanTouch( const Face& face, const Color& c )
 
 	// quad
 	{
-		art::Vertex::T div = 20; // line + 1
+		const Real z_offset = 0.00001f;
+
+		art::Vertex::T div = 8; // line + 1
 
 		art::Vertex from = vertex_list()[ face.id_list()[ 0 ] ].vertex();
 		art::Vertex to = vertex_list()[ face.id_list()[ 1 ] ].vertex();
 
-		from.z() += 0.00001f;
-		to.z() += 0.00001f;
+		from.z() += z_offset;
+		to.z() += z_offset;
 
 		art::Vertex from2 = vertex_list()[ face.id_list()[ 3 ] ].vertex();
 		art::Vertex to2 = vertex_list()[ face.id_list()[ 2 ] ].vertex();
 
-		from2.z() += 0.00001f;
-		to2.z() += 0.00001f;
+		from2.z() += z_offset;
+		to2.z() += z_offset;
 
 		art::Vertex from_inc = ( from2 - from ) / div;
 		art::Vertex to_inc   = ( to2 - to ) / div;
+
+		from_inc.z() = 0.f;
+		to_inc.z() = 0.f;
+
+		from.z() = ( from.z() + to.z() + from2.z() + to2.z() ) / 4.f;
+		to.z() = from.z();
 
 		art::Color color = c;
 
@@ -335,9 +343,9 @@ void Direct3D9Canvas::drawPolygonHumanTouch( const Face& face, const Color& c )
 		{
 			drawLineHumanTouch( from, to, color );
 			
-			/* color.r() = max( 0, color.r() - 10 );
-			color.g() = max( 0, color.g() - 10 );
-			color.b() = max( 0, color.b() - 10 ); */
+			color.r() = max( 0, color.r() - 8 );
+			color.g() = max( 0, color.g() - 8 );
+			color.b() = max( 0, color.b() - 8 );
 
 			from += from_inc;
 			to += to_inc;

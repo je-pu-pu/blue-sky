@@ -23,6 +23,8 @@ using namespace std;
 
 art::Model sample_model;
 
+float g_eye_far_len = 3.f;
+
 //¡ƒRƒ“ƒXƒgƒ‰ƒNƒ^
 CGameMain::CGameMain()
 	: canvas_( 0 )
@@ -38,13 +40,18 @@ CGameMain::CGameMain()
 
 	// Direct3D 
 	canvas_ = new art::Direct3D9Canvas( app->GetWindowHandle() );
+	canvas_->createDepthBuffer();
 
 	// sample_model.load_file( "./blue-sky-building-3.obj" );
 	// sample_model.load_file( "./blue-sky-building-2.obj" );
 	// sample_model.load_file( "./blue-sky-building-4.obj" );
-	// sample_model.load_file( "./blue-sky-box.obj" );
+	
 	// sample_model.load_file( "./blue-sky-box2.obj" );
-	sample_model.load_file( "./blue-sky-box3.obj" );
+	
+	// sample_model.load_file( "./blue-sky-box.obj" );
+
+	// sample_model.load_file( "./blue-sky-box3.obj" );
+	sample_model.load_file( "./blue-sky-building-3.obj" );
 
 	// sample_model.load_file( "./grid-building.obj" );
 
@@ -67,7 +74,7 @@ void CGameMain::convert_3d_to_2d( vector3& v )
 	const float cx = static_cast< float >( Width / 2 );
 	const float cy = static_cast< float >( Height / 2 );
 
-	const float eye_far_len = 3.f;
+	const float eye_far_len = g_eye_far_len;
 
 	v = v - eye_pos;
 
@@ -165,6 +172,8 @@ void CGameMain::Loop()
 	static bool r_random = true;
 	static bool p_random = true;
 	static int mn = 100;
+
+	static bool draw_face = true;
 	
 	if(GetAsyncKeyState('A'))		sr -= 0.01f;
 	if(GetAsyncKeyState('S'))		sr += 0.01f;
@@ -202,6 +211,11 @@ void CGameMain::Loop()
 	if ( GetAsyncKeyState( 'V' ) )	g_direction_fix_acceleration += 0.00001f;
 	if ( GetAsyncKeyState( 'B' ) )	g_direction_random -= 0.001f;
 	if ( GetAsyncKeyState( 'N' ) )	g_direction_random += 0.001f;
+
+	if ( GetAsyncKeyState( 'F' ) )	draw_face = ! draw_face;
+
+	if ( GetAsyncKeyState( VK_PRIOR ) ) { g_eye_far_len -= 0.1f; }
+	if ( GetAsyncKeyState( VK_NEXT  ) ) { g_eye_far_len += 0.1f; }
 
 	g_line_count = 0;
 	g_circle_count = 0;
@@ -266,18 +280,34 @@ void CGameMain::Loop()
 
 	int n = 0;
 
+	canvas_->clearDepthBuffer();
 	canvas_->begin();
 
 	art::Direct3D9Canvas::BeginLine();
 
+	/*
 	canvas_->drawCircle( art::Vertex( 110.f, 110.f, 0.1f ), 300.f, art::Color( 255, 0, 0 ), true );
 	canvas_->drawCircle( art::Vertex( 120.f, 120.f, 0.5f ), 300.f, art::Color( 0, 255, 0 ), true );
 	canvas_->drawCircle( art::Vertex( 130.f, 130.f, 0.9f ), 300.f, art::Color( 0, 0, 255 ), true );
+	*/
 
-	// –Ê‚ð•`‰æ‚·‚é
-	for ( art::Canvas::FaceList::iterator i = canvas_->face_list().begin(); i != canvas_->face_list().end(); ++i )
+	if ( draw_face )
 	{
-		canvas_->drawPolygonHumanTouch( *i, i->color() );
+		art::Canvas::Brush brush;
+		brush.size() = 8.f;
+		brush.size_acceleration() = 0.f;
+		canvas_->setBrush( & brush );
+
+		int face_id = 0;
+
+		// –Ê‚ð•`‰æ‚·‚é
+		for ( art::Canvas::FaceList::iterator i = canvas_->face_list().begin(); i != canvas_->face_list().end(); ++i )
+		{
+			canvas_->setDepthBufferPixelId( face_id );
+			canvas_->drawPolygonHumanTouch( *i, i->color() );
+
+			face_id++;
+		}
 	}
 
 	// ü‚ð•`‰æ‚·‚é
@@ -290,7 +320,8 @@ void CGameMain::Loop()
 		art::Vertex& from = canvas_->vertex_list()[ i->from() ].vertex();
 		art::Vertex& to = canvas_->vertex_list()[ i->to() ].vertex();
 		
-		canvas_->setBrush( & brush );
+		canvas_->setBrush( 0 );
+		canvas_->setDepthBufferPixelId( i->from() );
 		canvas_->drawLineHumanTouch( from, to, i->color() );
 	}
 
@@ -306,12 +337,20 @@ void CGameMain::Loop()
 
 	debug_text += "\n";
 
-	/*
+	int x = 0;
+
 	for ( Canvas::VertexList::iterator i = canvas_->vertex_list().begin(); i != canvas_->vertex_list().end(); ++i )
 	{
 		debug_text += ( boost::format( "%-4.3f,%-4.3f,%-4.3f\n" ) % i->second.vertex().x() % i->second.vertex().y() % i->second.vertex().z() ).str();
+
+		if ( x >= 8 )
+		{
+			debug_text += "...\n";
+			break;
+		}
+
+		x++;
 	}
-	*/
 
 	canvas_->drawText( art::Vertex( 0.f, 0.f ), debug_text.c_str(), art::Color( 255, 0, 0 ) );
 

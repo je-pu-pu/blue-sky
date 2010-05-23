@@ -270,11 +270,9 @@ void CGameMain::Loop()
 
 	art::Direct3D9Canvas::BeginLine();
 
-	/*
-	canvas_->drawCircle( art::Vertex( 110.f, 110.f, 0.1f ), 500.f, art::Color( 255, 0, 0 ), true );
-	canvas_->drawCircle( art::Vertex( 120.f, 120.f, 0.5f ), 500.f, art::Color( 0, 255, 0 ), true );
-	canvas_->drawCircle( art::Vertex( 130.f, 130.f, 0.9f ), 500.f, art::Color( 0, 0, 255 ), true );
-	*/
+	canvas_->drawCircle( art::Vertex( 110.f, 110.f, 0.1f ), 300.f, art::Color( 255, 0, 0 ), true );
+	canvas_->drawCircle( art::Vertex( 120.f, 120.f, 0.5f ), 300.f, art::Color( 0, 255, 0 ), true );
+	canvas_->drawCircle( art::Vertex( 130.f, 130.f, 0.9f ), 300.f, art::Color( 0, 0, 255 ), true );
 
 	// –Ê‚ğ•`‰æ‚·‚é
 	for ( art::Canvas::FaceList::iterator i = canvas_->face_list().begin(); i != canvas_->face_list().end(); ++i )

@@ -50,8 +50,12 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 
 	direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
-	direct_3d_->getDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	direct_3d_->getDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);
+	
+	// direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_ONE );
+	// direct_3d_->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_ZERO );
+	
+	direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE );
+	direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE );
 
 	// direct_3d_->getDevice()->SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
 
@@ -81,9 +85,11 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	direct_3d_->getDevice()->SetFVF( D3DFVF_CUSTOMVERTEX );
 	
 	// 
-	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "brush5.png", & texture1_ ) ) )
+//	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "brush5.png", & texture1_ ) ) )
 //	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "test.png", & texture1_ ) ) )
 //	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle2.png", & texture1_ ) ) )
+//	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle3.png", & texture1_ ) ) )
+	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle4.png", & texture1_ ) ) )
 	{
 		delete direct_3d_;
 		delete vertex_buffer_;
@@ -95,9 +101,9 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	texture1_->GenerateMipSubLevels();
 
 	direct_3d_->getDevice()->SetTexture( 0, texture1_ );
-	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
-    direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
+	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_CURRENT );
+	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
 	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
 	
 	direct_3d_->getDevice()->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_NONE );
@@ -127,9 +133,14 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 
 	if ( caps.FVFCaps & D3DFVFCAPS_PSIZE )
 	{
-		// caps.FVFCaps = 10;
-		//
+		caps.FVFCaps = caps.FVFCaps;
 	}
+
+	float point_size_min = 0.f;
+	float point_size_max = 0.f;
+
+	direct_3d_->getDevice()->GetRenderState( D3DRS_POINTSIZE_MIN, reinterpret_cast< DWORD* >( & point_size_min ) );
+	direct_3d_->getDevice()->GetRenderState( D3DRS_POINTSIZE_MAX, reinterpret_cast< DWORD* >( & point_size_max ) );
 }
 
 Direct3D9Canvas::~Direct3D9Canvas()
@@ -147,28 +158,33 @@ void Direct3D9Canvas::begin() const
 	{
 		THROW_EXCEPTION_MESSAGE;
 	}
-}
+	
+	// return;
 
-void Direct3D9Canvas::end() const
-{
-	static CUSTOMVERTEX vs[ 720 * 480 ];
+	const int w = 720;
+	const int h = 480;
+	const float size = 10.f;
+
+	CUSTOMVERTEX* vs = 0;
 
 	if ( FAILED( vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & vs ), 0 ) ) )
 	{
 		THROW_EXCEPTION_MESSAGE;
 	}
 
-	int n = 0;
-	const D3DCOLOR colors[] = { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF };
+	// static CUSTOMVERTEX vs[ w * h ];
 
-	for ( int y = 0; y < 10; y++ )
+	int n = 0;
+	const D3DCOLOR colors[] = { 0x00FF0000, 0x0000FF00, 0x000000FF };
+
+	for ( int y = 0; y < h; y += 16 )
 	{
-		for ( int x = 0; x < 10; x++ )
+		for ( int x = 0; x < w; x += 16 )
 		{
-			vs[ n ].position = D3DXVECTOR4( 30.f + x * 30.f, 30.f + y * 30.f, x * 0.01f, 1.f );
-			// vs[ n ].position = D3DXVECTOR3( x, y, 0.f );
-			vs[ n ].size = 50.f;
-			vs[ n ].color = colors[ ( y * 10 + x ) % 3 ];
+			// vs[ n ].position = D3DXVECTOR4( 30.f + x * 30.f, 30.f + y * 30.f, x * 0.01f, 1.f );
+			vs[ n ].position = D3DXVECTOR4( x, y, x * 0.001f, 1.f );
+			vs[ n ].size = size;
+			vs[ n ].color = 0xFF000000; // colors[ ( y * 10 + x ) % 3 ];
 
 			n++;
 		}
@@ -177,16 +193,17 @@ void Direct3D9Canvas::end() const
 	FAIL_CHECK( vertex_buffer_->Unlock() );
 
 	direct_3d_->getDevice()->DrawPrimitive( D3DPT_POINTLIST, 0, n );
-	// direct_3d_->getDevice()->DrawPrimitive( D3DPT_TRIANGLESTRIP, 0, 100 - 2 );
-	// FAIL_CHECK( direct_3d_->getDevice()->DrawPrimitive( D3DPT_LINESTRIP, 0, 100 - 2 ) );
+}
 
+void Direct3D9Canvas::end() const
+{
 	direct_3d_->getDevice()->EndScene();
 	direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL );
 }
 
 void Direct3D9Canvas::BeginLine()
 {
-	sprite_->Begin( 0 ); // | D3DXSPRITE_SORT_TEXTURE | D3DXSPRITE_SORT_DEPTH_BACKTOFRONT );
+	sprite_->Begin( D3DXSPRITE_ALPHABLEND | D3DXSPRITE_SORT_TEXTURE ); // | D3DXSPRITE_SORT_DEPTH_BACKTOFRONT );
 }
 
 void Direct3D9Canvas::EndLine()
@@ -318,9 +335,9 @@ void Direct3D9Canvas::drawPolygonHumanTouch( const Face& face, const Color& c )
 		{
 			drawLineHumanTouch( from, to, color );
 			
-			color.r() = max( 0, color.r() - 10 );
+			/* color.r() = max( 0, color.r() - 10 );
 			color.g() = max( 0, color.g() - 10 );
-			color.b() = max( 0, color.b() - 10 );
+			color.b() = max( 0, color.b() - 10 ); */
 
 			from += from_inc;
 			to += to_inc;
@@ -340,7 +357,9 @@ void Direct3D9Canvas::drawLine( Real, Real, Real, Real, const Color& )
 
 void Direct3D9Canvas::drawCircle( const art::Vertex& pos, Real w, const Color& color, bool )
 {
-	const float texture_width = 128.f;
+	const float texture_width = 256.f;
+
+	w = min( texture_width, w );
 
 	D3DXVECTOR3 c( texture_width / 2.f, texture_width / 2.f, 0.f );
 	D3DXMATRIX r, s, t;

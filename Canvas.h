@@ -97,6 +97,8 @@ public:
 	typedef std::vector<Canvas::Line> LineList;
 	typedef std::vector<Face> FaceList;
 
+	static const int DEPTH_BUFFER_PIXEL_SIZE = 16;
+
 private:
 	Brush* brush_;
 
@@ -104,6 +106,7 @@ private:
 	LineList line_list_;
 	FaceList face_list_;
 
+	Real* depth_buffer_;
 public:
 	Canvas();
 	virtual ~Canvas();

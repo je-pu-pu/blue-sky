@@ -140,10 +140,10 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 		drawCircle( v1, power, color, true );
 		g_circle_count++;
 
-		const Real interval = 1;
+		Real interval = min( 1.f, max_interval );
 		// const Real interval = 5.f;
 
-		v1 += art::Vertex( cos( d ) * min( interval, max_interval ), sin( d ) * min( interval, max_interval ), dz );
+		v1 += art::Vertex( cos( d ) * interval, sin( d ) * interval, 0.f );
 
 		power += power_plus;
 
@@ -210,7 +210,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 		}
 
 		// to Ç‹Ç≈ï`âÊÇµÇΩÇÁèIóπÇ∑ÇÈ
-		if ( len < power )
+		if ( len < interval )
 		{
 			// â~Çï`âÊÇ∑ÇÈ
 			drawCircle( to, power, color, true );

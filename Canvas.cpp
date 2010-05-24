@@ -173,7 +173,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 		}
 		else
 		{
-			// power -= 0.1f;
+			power *= 0.9f;
 		}
 
 		Real interval = min( 1.f, max_interval );
@@ -310,8 +310,8 @@ Canvas::Vertex::Vertex()
 
 void Canvas::Vertex::update()
 {
-	vertex() = target_vertex();
-	return;
+	// vertex() = target_vertex();
+	// return;
 		
 	// static float a = 0.f;
 	// a += 0.01f;
@@ -328,15 +328,6 @@ void Canvas::Vertex::update()
 	// direction() *= ( sin( a ) + 1.f ) * 0.1f;
 	// vertex_ += direction_;
 
-	/// 頂点の最大移動速度
-	const float max_speed = 20.f;
-
-	/// 加速度
-	const float speed_fix = 0.1f;
-
-	/// 旋回速度
-	const float direction_fix = 0.1f;
-	
 
 	/// 旋回の速度
 	// const float turn_speed = 5.f;
@@ -347,6 +338,16 @@ void Canvas::Vertex::update()
 	const float len = sqrt( rx * rx + ry * ry );
 	float a = atan2( ry, rx );
 	
+	/// 頂点の最大移動速度
+	const float max_speed = len;
+	const float min_speed = len / 8.f;
+
+	/// 加速度
+	const float speed_fix = 8.f;
+
+	/// 旋回速度
+	const float direction_fix = 1.5f;
+
 	// 0 <= a < 2 * M_PI に丸める
 	while ( a < 0.f )
 	{
@@ -404,6 +405,8 @@ void Canvas::Vertex::update()
 		
 	}
 
+	// angle_ = a;
+
 	// 角度の正確さ率 0.f .. 1.f
 	float angle_diff = a - angle_;
 
@@ -425,25 +428,36 @@ void Canvas::Vertex::update()
 	// float diff = abs( static_cast<float>( M_PI ) - aa );
 
 	const float speed = min( max_speed, len ) * ( pow( angle_correct_rate, 8 ) );
+	// const float speed = len / 4.f; // * pow( angle_correct_rate, 8 );
+
+	// const float speed = min( max_speed, len );
 
 	if ( speed_ < speed )
 	{
-		speed_ += speed_fix;
+		speed_ *= 1.8f; // speed_fix;
+	}
+	else if ( speed_ > speed )
+	{
+		speed_ /= 1.8f; // speed_fix;
 
-		if ( speed_ > speed )
+		if ( speed_ < speed )
 		{
 			speed_ = speed;
 		}
 	}
+
+	if ( speed_ < min_speed )
+	{
+		speed_ = min_speed;
+	}
 	if ( speed_ > speed )
 	{
-		speed_ -= speed_fix;
-
-		if ( speed_ < 0.f )
-		{
-			speed_ = 0.f;
-		}
+		speed_ = speed;
 	}
+	
+	// speed_ = speed;
+
+	// speed_ = len / 2;
 
 	direction_.x() = cos( angle_ ) * speed_; // min( diff * 0.1f, len );
 	direction_.y() = sin( angle_ ) * speed_; // min( diff * 0.1f, len );

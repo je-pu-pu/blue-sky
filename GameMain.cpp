@@ -243,7 +243,7 @@ void CGameMain::Loop()
 		mt.rotate_z( 0.1f );
 	}
 
-	if ( GetAsyncKeyState( 'L' ) )
+	// if ( GetAsyncKeyState( 'L' ) )
 	{
 
 	for ( art::Model::VertexList::iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )

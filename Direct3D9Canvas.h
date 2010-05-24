@@ -17,26 +17,36 @@ class Direct3D9Canvas : public Canvas
 public:
 	struct Vertex
 	{
-		
+		static const UINT COUNT = 100000;
+		static const DWORD FVF = D3DFVF_XYZRHW | D3DFVF_PSIZE | D3DFVF_DIFFUSE;
 
+		D3DXVECTOR4		position;
+		FLOAT			size;
+		D3DCOLOR		color;
 	}; // class Vertex
 
 private:
 	Direct3D9*	direct_3d_;
+
+	LPDIRECT3DVERTEXBUFFER9 vertex_buffer_;
 	LPD3DXFONT	font_;
+
+	Vertex* point_sprite_;
+	UINT point_sprite_index_;
+
 public:
 	Direct3D9Canvas( HWND );
 	virtual ~Direct3D9Canvas();
 
 	void clear();
 
-	void render() const;
+	void render();
 
-	virtual void begin() const;
-	virtual void end() const;
+	virtual void begin();
+	virtual void end();
 
 	void drawLineHumanTouch( const art::Vertex&, const art::Vertex&, const Color& );
-	void drawPolygonHumanTouch( const Face&, const Color& );
+//	void drawPolygonHumanTouch( const Face&, const Color& );
 	void fillRect( const Rect&, const Color& );
 
 	virtual void drawLine( Real, Real, Real, Real, const Color& );
@@ -47,9 +57,6 @@ public:
 
 	virtual int width() const;
 	virtual int height() const;
-
-	static void BeginLine();
-	static void EndLine();
 };
 
 }

@@ -34,6 +34,7 @@ public:
 	const LineList& line_list() const { return line_list_; }
 	const FaceList& face_list() const { return face_list_; }
 
+	void clear();
 	void load_file( const char* );
 };
 

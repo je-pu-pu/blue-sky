@@ -14,39 +14,26 @@
 namespace art
 {
 
-struct CUSTOMVERTEX
-{
-    D3DXVECTOR4		position;
-	FLOAT			size;
-    D3DCOLOR		color;
-	// FLOAT			tu1, tv1;
-};
-
-struct PointVertex
-{
-
-};
-
-// #define D3DFVF_CUSTOMVERTEX ( D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1 )
-#define D3DFVF_CUSTOMVERTEX ( D3DFVF_XYZRHW | D3DFVF_PSIZE | D3DFVF_DIFFUSE )
-// #define D3DFVF_CUSTOMVERTEX ( D3DFVF_XYZ | D3DFVF_DIFFUSE )
-
-LPDIRECT3DVERTEXBUFFER9 vertex_buffer_ = 0;
 LPDIRECT3DTEXTURE9 texture1_ = 0;
 
-LPD3DXSPRITE sprite_ = 0;
-
-static const int v_count = 1000 * 1000;
-
+/**
+ * コンストラクタ
+ *
+ */
 Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	: direct_3d_( 0 )
+	, vertex_buffer_( 0 )
 	, font_( 0 )
+	, point_sprite_( 0 )
+	, point_sprite_index_( 0 )
 {
 	direct_3d_ = new Direct3D9( hwnd );
 	
     direct_3d_->getDevice()->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
     direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
+
 	direct_3d_->getDevice()->SetRenderState( D3DRS_POINTSPRITEENABLE, TRUE );
+//	direct_3d_->getDevice()->SetRenderState( D3DRS_POINTSCALEENABLE, TRUE );
 
 	direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
@@ -54,12 +41,12 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	// direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_ONE );
 	// direct_3d_->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_ZERO );
 	
-	direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE );
+	direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE );
 
 	// direct_3d_->getDevice()->SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
 
-	if ( FAILED( direct_3d_->getDevice()->CreateVertexBuffer( v_count * sizeof( CUSTOMVERTEX ), D3DUSAGE_POINTS, D3DFVF_CUSTOMVERTEX, D3DPOOL_DEFAULT, & vertex_buffer_, NULL ) ) )
+	if ( FAILED( direct_3d_->getDevice()->CreateVertexBuffer( Vertex::COUNT * sizeof( Vertex ), D3DUSAGE_POINTS, Vertex::FVF, D3DPOOL_DEFAULT, & vertex_buffer_, NULL ) ) )
     {
 		delete direct_3d_;
 
@@ -81,8 +68,8 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 
 	direct_3d_->getDevice()->SetTransform( D3DTS_PROJECTION, &matProj );
 	
-	direct_3d_->getDevice()->SetStreamSource( 0, vertex_buffer_, 0, sizeof( CUSTOMVERTEX ) );
-	direct_3d_->getDevice()->SetFVF( D3DFVF_CUSTOMVERTEX );
+	direct_3d_->getDevice()->SetStreamSource( 0, vertex_buffer_, 0, sizeof( Vertex ) );
+	direct_3d_->getDevice()->SetFVF( Vertex::FVF );
 	
 	// 
 //	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "brush5.png", & texture1_ ) ) )
@@ -98,7 +85,7 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	}
 
 //	texture1_->SetAutoGenFilterType( D3DTEXF_ANISOTROPIC );
-	texture1_->GenerateMipSubLevels();
+//	texture1_->GenerateMipSubLevels();
 
 	direct_3d_->getDevice()->SetTexture( 0, texture1_ );
 	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
@@ -106,12 +93,10 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
 	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
 	
-	direct_3d_->getDevice()->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_NONE );
-	direct_3d_->getDevice()->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_NONE );
+	direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+	direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
 
-	// Sprite
-	D3DXCreateSprite( direct_3d_->getDevice(), & sprite_ );
-
+	// Font
 	if ( FAILED( D3DXCreateFont( direct_3d_->getDevice(), 16, 0, FW_NORMAL, 1, false, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "", & font_ ) ) )
 	{
 		delete direct_3d_;
@@ -120,13 +105,6 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 		THROW_EXCEPTION_MESSAGE;
 	}
 
-	if ( FAILED( sprite_->SetWorldViewRH( 0, & matView ) ) )
-	{
-		delete direct_3d_;
-		delete vertex_buffer_;
-
-		THROW_EXCEPTION_MESSAGE;
-	}
 
 	D3DCAPS9 caps;
 	direct_3d_->getDevice()->GetDeviceCaps( & caps );
@@ -145,12 +123,13 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 
 Direct3D9Canvas::~Direct3D9Canvas()
 {
-	delete direct_3d_;
-	
 	font_->Release();
+	vertex_buffer_->Release();
+
+	delete direct_3d_;
 }
 
-void Direct3D9Canvas::begin() const
+void Direct3D9Canvas::begin()
 {
 	direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 63, 63, 127 ), 1.f, 0 );
 	
@@ -158,144 +137,25 @@ void Direct3D9Canvas::begin() const
 	{
 		THROW_EXCEPTION_MESSAGE;
 	}
-	
-	// return;
 
-	const int w = 720;
-	const int h = 480;
-	const float size = 4.f;
-
-	CUSTOMVERTEX* vs = 0;
-
-	if ( FAILED( vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & vs ), 0 ) ) )
+	if ( FAILED( vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & point_sprite_ ), 0 ) ) )
 	{
 		THROW_EXCEPTION_MESSAGE;
 	}
 
-	// static CUSTOMVERTEX vs[ w * h ];
-
-	int n = 0;
-	const D3DCOLOR colors[] = { 0x00FF0000, 0x0000FF00, 0x000000FF };
-
-	for ( int y = 0; y < h; y += DEPTH_BUFFER_PIXEL_SIZE )
-	{
-		for ( int x = 0; x < w; x += DEPTH_BUFFER_PIXEL_SIZE )
-		{
-			// vs[ n ].position = D3DXVECTOR4( 30.f + x * 30.f, 30.f + y * 30.f, x * 0.01f, 1.f );
-			vs[ n ].position = D3DXVECTOR4( x, y, x * 0.001f, 1.f );
-			vs[ n ].size = size;
-			vs[ n ].color = 0xFF000000; // colors[ ( y * 10 + x ) % 3 ];
-
-			n++;
-		}
-	}
-
-	FAIL_CHECK( vertex_buffer_->Unlock() );
-
-	direct_3d_->getDevice()->DrawPrimitive( D3DPT_POINTLIST, 0, n );
+	point_sprite_index_ = 0;
 }
 
-void Direct3D9Canvas::end() const
+void Direct3D9Canvas::end()
 {
 	direct_3d_->getDevice()->EndScene();
 	direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL );
 }
 
-void Direct3D9Canvas::BeginLine()
+void Direct3D9Canvas::render()
 {
-	sprite_->Begin( D3DXSPRITE_ALPHABLEND | D3DXSPRITE_SORT_TEXTURE ); // | D3DXSPRITE_SORT_DEPTH_BACKTOFRONT );
-}
-
-void Direct3D9Canvas::EndLine()
-{
-	sprite_->End();
-}
-
-void Direct3D9Canvas::render() const
-{
-#if 0
-	direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB( 0, 0, 31 ), 1.f, 0 );
-
-	if ( SUCCEEDED( direct_3d_->getDevice()->BeginScene() ) )
-	{
-		float ww = sin( timeGetTime() * 0.01f );
-
-		CUSTOMVERTEX* vs = 0;
-
-		if ( FAILED( vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & vs ), 0 ) ) )
-		{
-			THROW_EXCEPTION_MESSAGE;
-		}
-
-		for ( int n = 0; n < 100; n++ )
-		{
-			float w = ww * sin( n * 0.1f ) * 40.f + 40.f + 32.f;
-			float sp = 8.f;
-
-			vs[ n ].position = D3DXVECTOR3( 300.f + ( n % 2 ) * w - w / 2, ( n / 2 ) * sp, 0.f );
-			vs[ n ].color = 0xFFFF0000;
-
-//			vs[ n ].tu1 = ( n % 2 ) * 1.f;
-//			vs[ n ].tv1 = 0.5f;
-		}
-
-		// memcpy( vs, vertices, sizeof( vertices ) );
-
-		vertex_buffer_->Unlock();
-
-		direct_3d_->getDevice()->DrawPrimitive( D3DPT_TRIANGLESTRIP, 0, 100 - 2 );
-
-		/*
-		sprite_->Begin( D3DXSPRITE_ALPHABLEND | D3DXSPRITE_SORT_DEPTH_BACKTOFRONT );
-
-		float x = 10.f;
-		float y = 10.f;
-			
-		for ( int n = 0; n < 10000; n++ )
-		{
-			// float w = 0.2f; // ww * sin( n * 0.8f ) * 0.2f + 0.2f;
-			float w = ww * sin( n * 0.1f ) * 16.f + 16.f + 16.f * 2.f;
-			float sp = 2.f;
-			// float sp = max( 1.f, w );
-
-			x += sp;
-			y += sp;
-
-			D3DXVECTOR3 c( 128.f, 128.f, 0.f );
-			D3DXMATRIX r, s, t;
-
-			D3DXMatrixIdentity( & r );
-			D3DXMatrixRotationZ( & r, D3DXToRadian( -n * 1.f ) );
-			D3DXMatrixTranslation( & t, x, y, 0.f );
-			D3DXMatrixScaling( & s, w / 256.f, w / 256.f, 0.f );
-
-			// r = r * s * t * r;
-			r = r * s * t;
-
-			sprite_->SetTransform( & r );
-			sprite_->Draw( texture1_, 0, & c, 0, D3DCOLOR_ARGB( 255, 255, 255, 255 ) );
-		}
-
-		D3DXMATRIX m;
-		D3DXMatrixIdentity( & m );
-
-		sprite_->SetTransform( & m );
-		D3DXVECTOR3 c( 128.f, 128.f, 0.f );
-		D3DXVECTOR3 t1( 400.f, 200.f, 1.f );
-		D3DXVECTOR3 t2( 500.f, 200.f, 0.f );
-		sprite_->Draw( texture1_, 0, & c, & t1, D3DCOLOR_ARGB( 255, 255, 255, 255 ) );
-		sprite_->Draw( texture1_, 0, & c, & t2, D3DCOLOR_ARGB( 255, 255, 0, 0 ) );
-
-
-		sprite_->End();
-		*/
-
-		direct_3d_->getDevice()->EndScene();
-	}
-
-	direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL );
-
-#endif // 0
+	FAIL_CHECK( vertex_buffer_->Unlock() );
+	direct_3d_->getDevice()->DrawPrimitive( D3DPT_POINTLIST, 0, point_sprite_index_ );
 }
 
 void Direct3D9Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to, const Color& c )
@@ -303,55 +163,7 @@ void Direct3D9Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Ve
 	Canvas::drawLineHumanTouch( from, to, c );
 }
 
-void Direct3D9Canvas::drawPolygonHumanTouch( const Face& face, const Color& c )
-{
-	if ( face.id_list().size() < 4 )
-	{
-		return;
-	}
 
-	// quad
-	{
-		const Real z_offset = 0.00001f;
-
-		art::Vertex::T div = 8; // line + 1
-
-		art::Vertex from = vertex_list()[ face.id_list()[ 0 ] ].vertex();
-		art::Vertex to = vertex_list()[ face.id_list()[ 1 ] ].vertex();
-
-		from.z() += z_offset;
-		to.z() += z_offset;
-
-		art::Vertex from2 = vertex_list()[ face.id_list()[ 3 ] ].vertex();
-		art::Vertex to2 = vertex_list()[ face.id_list()[ 2 ] ].vertex();
-
-		from2.z() += z_offset;
-		to2.z() += z_offset;
-
-		art::Vertex from_inc = ( from2 - from ) / div;
-		art::Vertex to_inc   = ( to2 - to ) / div;
-
-		from_inc.z() = 0.f;
-		to_inc.z() = 0.f;
-
-		from.z() = ( from.z() + to.z() + from2.z() + to2.z() ) / 4.f;
-		to.z() = from.z();
-
-		art::Color color = c;
-
-		for ( int n = 0; n < div - 1; n++ )
-		{
-			drawLineHumanTouch( from, to, color );
-			
-			color.r() = max( 0, color.r() - 8 );
-			color.g() = max( 0, color.g() - 8 );
-			color.b() = max( 0, color.b() - 8 );
-
-			from += from_inc;
-			to += to_inc;
-		}
-	}
-}
 
 void Direct3D9Canvas::fillRect( const Rect&, const Color& color )
 {
@@ -365,22 +177,17 @@ void Direct3D9Canvas::drawLine( Real, Real, Real, Real, const Color& )
 
 void Direct3D9Canvas::drawCircle( const art::Vertex& pos, Real w, const Color& color, bool )
 {
+	if ( point_sprite_index_ >= Vertex::COUNT ) return;
+
 	const float texture_width = 256.f;
 
 	w = min( texture_width, w );
 
-	D3DXVECTOR3 c( texture_width / 2.f, texture_width / 2.f, 0.f );
-	D3DXMATRIX r, s, t;
+	point_sprite_[ point_sprite_index_ ].position = D3DXVECTOR4( pos.x(), pos.y(), pos.z(), 1.f );
+	point_sprite_[ point_sprite_index_ ].size = w;
+	point_sprite_[ point_sprite_index_ ].color = D3DCOLOR_RGBA( color.r(), color.g(), color.b(), color.a() );
 
-	D3DXMatrixIdentity( & r );
-//	D3DXMatrixRotationZ( & r, D3DXToRadian( w * 1.f ) );
-	D3DXMatrixTranslation( & t, pos.x(), pos.y(), pos.z() );
-	D3DXMatrixScaling( & s, w / texture_width, w / texture_width, 0.f );
-
-	r = r * s * t;
-
-	sprite_->SetTransform( & r );
-	sprite_->Draw( texture1_, 0, & c, 0, D3DCOLOR_ARGB( 255, color.r(), color.g(), color.b() ) );
+	point_sprite_index_++;
 }
 
 void Direct3D9Canvas::drawRing( const art::Vertex& pos, Real, Real, const Color&, bool )

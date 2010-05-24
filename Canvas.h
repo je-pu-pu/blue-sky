@@ -97,7 +97,7 @@ public:
 	typedef std::vector<Canvas::Line> LineList;
 	typedef std::vector<Face> FaceList;
 
-	static const int DEPTH_BUFFER_PIXEL_SIZE = 8;
+	static const int DEPTH_BUFFER_PIXEL_SIZE = 16;
 
 private:
 	Brush* brush_;
@@ -113,6 +113,28 @@ private:
 	int depth_buffer_width_;
 	int depth_buffer_height_;
 
+	class face_z_compare
+	{
+	private:
+		Canvas* canvas_;
+		
+	public:
+		face_z_compare( Canvas* c ) : canvas_( c ) { }
+
+		bool operator () ( const Face&, const Face& );
+	};
+
+	class line_z_compare
+	{
+	private:
+		Canvas* canvas_;
+		
+	public:
+		line_z_compare( Canvas* c ) : canvas_( c ) { }
+
+		bool operator () ( const Line&, const Line& );
+	};
+	
 public:
 	Canvas();
 	virtual ~Canvas();
@@ -125,17 +147,20 @@ public:
 	const LineList& line_list() const { return line_list_; }
 	const FaceList& face_list() const { return face_list_; }
 
+	void sort_face_list_by_z();
+	void sort_line_list_by_z();
+
 	// virtual void clear();
 
-	virtual void render() const = 0;
+	virtual void render() = 0;
 
-	virtual void begin() const = 0;
-	virtual void end() const = 0;
+	virtual void begin() = 0;
+	virtual void end() = 0;
 
 	virtual void drawLineHumanTouch( const art::Vertex&, const art::Vertex&, const Color& );
 	virtual void drawLineHumanTouch( Real, Real, Real, Real, const Color& );
 
-	virtual void drawPolygonHumanTouch( const Face&, const Color& ) = 0;
+	virtual void drawPolygonHumanTouch( const Face&, const Color& );
 	virtual void fillRect( const Rect&, const Color& ) = 0;
 
 	virtual void drawLine( Real, Real, Real, Real, const Color& ) = 0;

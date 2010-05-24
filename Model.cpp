@@ -9,6 +9,13 @@
 namespace art
 {
 
+void Model::clear()
+{
+	vertex_list().clear();
+	line_list().clear();
+	face_list().clear();
+}
+
 /**
  * ƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
  * 
@@ -19,6 +26,8 @@ void Model::load_file( const char* file_name )
 	
 	std::map<Index,ID> id_map;
 	int vertex_index = 1;
+
+	Color color( 164, 188, 151 ); // Color( 50, 70, 40 ), Color( 0xCC, 0xFF, 0xCC ) };
 
 	while ( in.good() )
 	{		
@@ -69,13 +78,18 @@ void Model::load_file( const char* file_name )
 			}
 			else
 			{
-				static int n = 0;
-				Color colors[] = { Color( 164, 188, 151 ), Color( 50, 70, 40 ), Color( 0xCC, 0xFF, 0xCC ) };
-
-				face.color() = colors[ n ];
+				face.color() = color;
 				face_list().push_back( face );
+			}
+		}
+		else if ( command == "c" )
+		{
+			if ( ss.good() )
+			{
+				int r, g, b;
+				ss >> r >> g >> b;
 
-				n = ( n + 1 ) % 3;
+				color = Color( r, g, b );
 			}
 		}
 	}

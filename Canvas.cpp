@@ -82,7 +82,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 
 	g_line_count++;
 	
-	const Real edge_pos_random = 0.f;
+	const Real edge_pos_random = 0.2f;
 
 	Color color = c;
 
@@ -268,15 +268,67 @@ void Canvas::drawLineHumanTouch( Real x1, Real y1, Real x2, Real y2, const Color
 	drawLineHumanTouch( art::Vertex( x1, y1 ), art::Vertex( x2, y2 ), color );
 }
 
+void Canvas::drawPolygonHumanTouch( const Face& face, const Color& c )
+{
+	if ( face.id_list().size() < 4 )
+	{
+		return;
+	}
+
+	// quad
+	{
+		const Real z_offset = 0.001f;
+
+		art::Vertex from = vertex_list()[ face.id_list()[ 0 ] ].vertex();
+		art::Vertex to = vertex_list()[ face.id_list()[ 1 ] ].vertex();
+
+		from.z() += z_offset;
+		to.z() += z_offset;
+
+		art::Vertex from2 = vertex_list()[ face.id_list()[ 3 ] ].vertex();
+		art::Vertex to2 = vertex_list()[ face.id_list()[ 2 ] ].vertex();
+
+		from2.z() += z_offset;
+		to2.z() += z_offset;
+
+		art::Vertex::T div = ( from2 - from ).length_xy() / ( ( brush_ ? brush_->size() : 4.f ) * 1.2f );
+
+		art::Vertex from_inc = ( from2 - from ) / div;
+		art::Vertex to_inc   = ( to2 - to ) / div;
+
+		from_inc.z() = 0.f;
+		to_inc.z() = 0.f;
+
+		from.z() = ( from.z() + to.z() + from2.z() + to2.z() ) / 4.f;
+		to.z() = from.z();
+
+		art::Color color = c;
+
+		for ( int n = 0; n < div - 1; n++ )
+		{
+			drawLineHumanTouch( from, to, color );
+			
+			color.r() = max( 0, color.r() - 8 );
+			color.g() = max( 0, color.g() - 8 );
+			color.b() = max( 0, color.b() - 8 );
+
+			from += from_inc;
+			to += to_inc;
+		}
+	}
+}
+
 bool Canvas::depthTest( const art::Vertex& v )
 {
+	// return true;
+
 	const int x = static_cast< int >( v.x() ) / DEPTH_BUFFER_PIXEL_SIZE;
 	const int y = static_cast< int >( v.y() ) / DEPTH_BUFFER_PIXEL_SIZE;;
 
-	if ( x < 0 ) return false;
-	if ( x >= depth_buffer_width_ ) return false;
-	if ( y < 0 ) return false;
-	if ( y >= depth_buffer_height_ ) return false;
+	if ( x < 0 ) return true;
+	if ( x >= depth_buffer_width_ ) return true;
+	if ( y < 0 ) return true;
+	if ( y >= depth_buffer_height_ ) return true;
 
 	const int index = y * depth_buffer_width_ + x;
 
@@ -286,7 +338,7 @@ bool Canvas::depthTest( const art::Vertex& v )
 		return true; // depth_buffer_last_test_;
 	}
 
-	if ( v.z() <= depth_buffer_[ index ].first )
+	if ( v.z() < depth_buffer_[ index ].first )
 	{
 		depth_buffer_[ index ] = std::pair< Real, art::ID >( v.z(), depth_buffer_pixel_id_ );
 		depth_buffer_last_index_ = index;
@@ -300,6 +352,38 @@ bool Canvas::depthTest( const art::Vertex& v )
 	return false;
 }
 
+void Canvas::sort_face_list_by_z()
+{
+	std::sort( face_list().begin(), face_list().end(), face_z_compare( this ) );
+}
+
+bool Canvas::face_z_compare::operator () ( const Face& a, const Face& b )
+{
+	Real az = 0.f;
+	Real bz = 0.f;
+
+	for ( Face::IDList::const_iterator i = a.id_list().begin(); i != a.id_list().end(); ++i )
+	{
+		az += canvas_->vertex_list_[ *i ].vertex().z();
+	}
+
+	for ( Face::IDList::const_iterator i = b.id_list().begin(); i != b.id_list().end(); ++i )
+	{
+		bz += canvas_->vertex_list_[ *i ].vertex().z();
+	}
+
+	return az > bz;
+}
+
+void Canvas::sort_line_list_by_z()
+{
+	std::sort( line_list().begin(), line_list().end(), line_z_compare( this ) );
+}
+
+bool Canvas::line_z_compare::operator () ( const Line& a, const Line& b )
+{
+	return ( canvas_->vertex_list_[ a.from() ].vertex().z() + canvas_->vertex_list_[ a.to() ].vertex().z() ) < ( canvas_->vertex_list_[ b.from() ].vertex().z() + canvas_->vertex_list_[ b.to() ].vertex().z() );
+}
 
 Canvas::Vertex::Vertex()
 	: angle_( 0.f )
@@ -311,19 +395,19 @@ Canvas::Vertex::Vertex()
 void Canvas::Vertex::update()
 {
 	// vertex() = target_vertex();
+	// vertex() = ( vertex() + target_vertex() ) / 2.f;
 	// return;
 		
 	// static float a = 0.f;
 	// a += 0.01f;
 
-	/*
+	const Real rs = 4.f;
 	art::Vertex d = target_vertex() - vertex();
-	art::Vertex r( rand() % 100 / 100.f * 2.f - 1.f, rand() % 100 / 100.f * 2.f - 1.f, rand() % 100 / 100.f * 2.f - 1.f );
+	art::Vertex r( common::random( -rs, rs ), common::random( -rs, rs ) );
 
-	direction() = ( direction() * 14 + d * 1 + r * 1 ) / 16;
+	direction() = ( d * 1 + r * 1 ) / 2;
 	vertex_ += direction_;
 	return;
-	*/
 
 	// direction() *= ( sin( a ) + 1.f ) * 0.1f;
 	// vertex_ += direction_;
@@ -346,7 +430,7 @@ void Canvas::Vertex::update()
 	const float speed_fix = 8.f;
 
 	/// ê˘âÒë¨ìx
-	const float direction_fix = 1.5f;
+	const float direction_fix = 0.2f;
 
 	// 0 <= a < 2 * M_PI Ç…ä€ÇﬂÇÈ
 	while ( a < 0.f )
@@ -465,6 +549,7 @@ void Canvas::Vertex::update()
 	// direction() = ( direction() * 15 + d * 1 ) / 16;
 
 	vertex_ += direction_;
+	vertex_.z() = target_vertex().z();
 }
 
 }; // namespace art

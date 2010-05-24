@@ -22,8 +22,31 @@
 using namespace std;
 
 art::Model sample_model;
+art::Model field_model;
 
 float g_eye_far_len = 3.f;
+
+const char* model_file_name_list[] =
+{
+	"./blue-sky-building-13.obj",
+	"./blue-sky-building-3.obj",
+	"./blue-sky-building-2.obj",
+	"./blue-sky-building-4.obj",
+
+	"./blue-sky-box2.obj",
+	"./blue-sky-box.obj",
+
+	"./boxes.obj",
+	"./blue-sky-box3.obj",
+	"./blue-sky-building-3.obj",
+	"./blue-sky-building-11.obj",
+	"./blue-sky-building-12.obj",
+
+	"./grid-building.obj",
+
+	"./grid.obj",
+	"./grid-cube.obj"
+};
 
 //■コンストラクタ
 CGameMain::CGameMain()
@@ -41,22 +64,6 @@ CGameMain::CGameMain()
 	// Direct3D 
 	canvas_ = new art::Direct3D9Canvas( app->GetWindowHandle() );
 	canvas_->createDepthBuffer();
-
-	// sample_model.load_file( "./blue-sky-building-3.obj" );
-	// sample_model.load_file( "./blue-sky-building-2.obj" );
-	// sample_model.load_file( "./blue-sky-building-4.obj" );
-	
-	// sample_model.load_file( "./blue-sky-box2.obj" );
-	
-	// sample_model.load_file( "./blue-sky-box.obj" );
-
-	// sample_model.load_file( "./blue-sky-box3.obj" );
-	sample_model.load_file( "./blue-sky-building-3.obj" );
-
-	// sample_model.load_file( "./grid-building.obj" );
-
-	// sample_model.load_file( "./grid.obj" );
-	// sample_model.load_file( "./grid-cube.obj" );
 }
 
 //■デストラクタ
@@ -78,12 +85,12 @@ void CGameMain::convert_3d_to_2d( vector3& v )
 
 	v = v - eye_pos;
 
-	const float sx = min( max( ( eye_far_len - v.z() ) / eye_far_len, 0.f ), 2.f );
-	const float sy = min( max( ( eye_far_len - v.z() ) / eye_far_len, 0.f ), 2.f );
+	const float sx = min( max( ( eye_far_len - v.z() ) / eye_far_len, 0.f ), 1.f );
+	const float sy = min( max( ( eye_far_len - v.z() ) / eye_far_len, 0.f ), 1.f );
 
-	v.x() *= pow( sx, 5.f );
-	v.y() *= pow( sy, 5.f );
-	v.z() = ( v.z() + eye_far_len ) * 0.01f;
+	v.x() *= pow( sx, 1.f );
+	v.y() *= pow( sy, 1.f );
+	v.z() = ( v.z() + eye_far_len ) * 0.0001f;
 
 	v.x() = v.x() * cy + cx;
 	v.y() = v.y() * cy + cy;
@@ -217,6 +224,18 @@ void CGameMain::Loop()
 	if ( GetAsyncKeyState( VK_PRIOR ) ) { g_eye_far_len -= 0.1f; }
 	if ( GetAsyncKeyState( VK_NEXT  ) ) { g_eye_far_len += 0.1f; }
 
+	if ( GetAsyncKeyState( VK_TAB ) )
+	{
+		static int n = 0;
+
+		sample_model.clear();
+		sample_model.load_file( model_file_name_list[ n ] );
+
+		n = ( n + 1 ) % ( sizeof( model_file_name_list ) / sizeof( char ) );
+
+		Sleep( 1000 );
+	}
+
 	g_line_count = 0;
 	g_circle_count = 0;
 	
@@ -283,8 +302,6 @@ void CGameMain::Loop()
 	canvas_->clearDepthBuffer();
 	canvas_->begin();
 
-	art::Direct3D9Canvas::BeginLine();
-
 	/*
 	canvas_->drawCircle( art::Vertex( 110.f, 110.f, 0.1f ), 300.f, art::Color( 255, 0, 0 ), true );
 	canvas_->drawCircle( art::Vertex( 120.f, 120.f, 0.5f ), 300.f, art::Color( 0, 255, 0 ), true );
@@ -293,9 +310,11 @@ void CGameMain::Loop()
 
 	if ( draw_face )
 	{
+		canvas_->sort_face_list_by_z();
+
 		art::Canvas::Brush brush;
 		brush.size() = 8.f;
-		brush.size_acceleration() = 0.f;
+		brush.size_acceleration() = 0.0001f;
 		canvas_->setBrush( & brush );
 
 		int face_id = 0;
@@ -309,6 +328,8 @@ void CGameMain::Loop()
 			face_id++;
 		}
 	}
+
+	canvas_->sort_line_list_by_z();
 
 	// 線を描画する
 	for ( art::Canvas::LineList::iterator i = canvas_->line_list().begin(); i != canvas_->line_list().end(); ++i )
@@ -325,13 +346,37 @@ void CGameMain::Loop()
 		canvas_->drawLineHumanTouch( from, to, i->color() );
 	}
 
-	art::Direct3D9Canvas::EndLine();
-	
+	/*
+	for ( int n = 0; n < 100; n++ )
+	{
+		// art::Canvas::Brush brush;
+		// brush.size() = 1.f;
+		// brush.size_acceleration() = 0.01f;
+		// canvas_->setBrush( & brush );
+		canvas_->setDepthBufferPixelId( n );
+
+		int x = n / 2 * 30;
+		int y = n / 2 * 30;
+
+		if ( n % 2 == 0 )
+		{
+			canvas_->drawLineHumanTouch( art::Vertex( 10.f, y, 0.f ), art::Vertex( Width - 10.f, y, 0.f ), art::Color( 0, 255, 0 ) );
+		}
+		else
+		{
+			// canvas_->drawLineHumanTouch( art::Vertex( x, 10.f, 0.f ), art::Vertex( x, Height - 10.f, 0.f ), art::Color( 0, 0, 255 ) );
+		}
+	}
+	*/
+
+	canvas_->render();
 
 	//デバッグ情報描画
 	std::string debug_text;
 
-	debug_text = std::string( "FPS : " ) + common::serialize( last_fps ) + ", circle : " + common::serialize( g_circle_count ) + ", line : " + common::serialize( g_line_count ) + " / " + common::serialize( canvas_->line_list().size() );
+	debug_text = std::string( "FPS : " ) + common::serialize( last_fps ) + ", circle : " + common::serialize( g_circle_count );
+	debug_text += ", line : " + common::serialize( g_line_count ) + " / " + common::serialize( canvas_->line_list().size() );
+	debug_text += ", face : " + common::serialize( canvas_->face_list().size() );
 	debug_text += "\n" + ( boost::format( "power:%.3f,%.3f,%.3f plus:%.3f reset:%.3f plus_reset:%.3f" ) % g_power % g_power_min % g_power_max % g_power_plus % g_power_rest % g_power_plus_reset ).str();
 	debug_text += "\n" + ( boost::format( "dir_fix_d:%.5f dir_fix_acc:%.5f dir_rnd:%.4f" ) % g_direction_fix_default % g_direction_fix_acceleration % g_direction_random ).str();
 
@@ -355,6 +400,4 @@ void CGameMain::Loop()
 	canvas_->drawText( art::Vertex( 0.f, 0.f ), debug_text.c_str(), art::Color( 255, 0, 0 ) );
 
 	canvas_->end();
-
-	// canvas_->render();
 }

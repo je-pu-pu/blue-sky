@@ -12,8 +12,8 @@ CApp::CApp()
 	, Width( 720 )
 	, Height( 480 )
 {
-	ClassName = "GraphicEffect";
-	WinTitle = "GraphicEffect";
+	ClassName = "blue-sky";
+	WinTitle = "blue-sky";
 	// WinStyle = WS_POPUP;
 	// WinStyle = WS_CAPTION;
 	

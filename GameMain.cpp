@@ -17,6 +17,9 @@
 #include	<math.h>
 
 #include <common/serialize.h>
+#include <common/random.h>
+#include <common/math.h>
+
 #include <boost/format.hpp>
 
 using namespace std;
@@ -85,11 +88,11 @@ void CGameMain::convert_3d_to_2d( vector3& v )
 
 	v = v - eye_pos;
 
-	const float sx = min( max( ( eye_far_len - v.z() ) / eye_far_len, 0.f ), 1.f );
-	const float sy = min( max( ( eye_far_len - v.z() ) / eye_far_len, 0.f ), 1.f );
+	const float sx = min( max( ( eye_far_len - v.z() ) / eye_far_len, 0.f ), 2.f );
+	const float sy = min( max( ( eye_far_len - v.z() ) / eye_far_len, 0.f ), 2.f );
 
-	v.x() *= pow( sx, 1.f );
-	v.y() *= pow( sy, 1.f );
+	v.x() *= pow( sx, 4.f );
+	v.y() *= pow( sy, 4.f );
 	v.z() = ( v.z() + eye_far_len ) * 0.0001f;
 
 	v.x() = v.x() * cy + cx;
@@ -313,8 +316,8 @@ void CGameMain::Loop()
 		canvas_->sort_face_list_by_z();
 
 		art::Canvas::Brush brush;
-		brush.size() = 8.f;
-		brush.size_acceleration() = 0.0001f;
+		brush.size() = 10.f;
+		brush.size_acceleration() = 0.08f;
 		canvas_->setBrush( & brush );
 
 		int face_id = 0;
@@ -377,6 +380,7 @@ void CGameMain::Loop()
 	debug_text = std::string( "FPS : " ) + common::serialize( last_fps ) + ", circle : " + common::serialize( g_circle_count );
 	debug_text += ", line : " + common::serialize( g_line_count ) + " / " + common::serialize( canvas_->line_list().size() );
 	debug_text += ", face : " + common::serialize( canvas_->face_list().size() );
+	debug_text += ", eye : " + common::serialize( g_eye_far_len );
 	debug_text += "\n" + ( boost::format( "power:%.3f,%.3f,%.3f plus:%.3f reset:%.3f plus_reset:%.3f" ) % g_power % g_power_min % g_power_max % g_power_plus % g_power_rest % g_power_plus_reset ).str();
 	debug_text += "\n" + ( boost::format( "dir_fix_d:%.5f dir_fix_acc:%.5f dir_rnd:%.4f" ) % g_direction_fix_default % g_direction_fix_acceleration % g_direction_random ).str();
 
@@ -396,6 +400,15 @@ void CGameMain::Loop()
 
 		x++;
 	}
+
+	debug_text += "\n";
+
+	/*
+	for ( int a = 0; a < 100; a++ )
+	{
+		debug_text += common::serialize( math::clamp( common::random( -4, 4 ), 0, 255 ) ) + ",";
+	}
+	*/
 
 	canvas_->drawText( art::Vertex( 0.f, 0.f ), debug_text.c_str(), art::Color( 255, 0, 0 ) );
 

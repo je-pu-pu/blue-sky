@@ -1,6 +1,7 @@
 #include "Canvas.h"
 
 #include <common/Random.h>
+#include <common/math.h>
 
 #include <math.h>
 #include <assert.h>
@@ -110,7 +111,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 	// ñ îíÇ›ÇÃñ≥Ç¢äGÇ…
 	if ( g_line )
 	{
-		// return drawLine( x, y1, x2, y2, c );
+		return drawLine( v1.x(), v1.y(), v2.x(), v2.y(), color );
 	}
 
 	int division = 1000; // àÍñ{ÇÃê¸Çï`âÊÇ∑ÇÈÇΩÇﬂÇ…ç≈ëÂâΩå¬ÇÃâ~Çï`âÊÇ∑ÇÈÇ©
@@ -260,6 +261,11 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 
 		direction_fix += direction_fix_acceleration;
 		d += random_direction * 0.1f;
+
+		color.r() = math::clamp( color.r() + common::random( -2, 1 ), 0, 255 );
+		color.g() = math::clamp( color.g() + common::random( -2, 1 ), 0, 255 );
+		color.b() = math::clamp( color.b() + common::random( -2, 1 ), 0, 255 );
+		color.a() = math::clamp( color.a() - 1, 0, 255 );
 	}
 }
 
@@ -308,9 +314,9 @@ void Canvas::drawPolygonHumanTouch( const Face& face, const Color& c )
 		{
 			drawLineHumanTouch( from, to, color );
 			
-			color.r() = max( 0, color.r() - 8 );
-			color.g() = max( 0, color.g() - 8 );
-			color.b() = max( 0, color.b() - 8 );
+			color.r() = math::clamp( color.r() + common::random( -1, 1 ), 0, 255 );
+			color.g() = math::clamp( color.g() + common::random( -1, 1 ), 0, 255 );
+			color.b() = math::clamp( color.b() + common::random( -1, 1 ), 0, 255 );
 
 			from += from_inc;
 			to += to_inc;

@@ -72,11 +72,11 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	direct_3d_->getDevice()->SetFVF( Vertex::FVF );
 	
 	// 
-//	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "brush5.png", & texture1_ ) ) )
+	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "brush5.png", & texture1_ ) ) )
 //	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "test.png", & texture1_ ) ) )
 //	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle2.png", & texture1_ ) ) )
 //	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle3.png", & texture1_ ) ) )
-	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle4.png", & texture1_ ) ) )
+//	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle4.png", & texture1_ ) ) )
 	{
 		delete direct_3d_;
 		delete vertex_buffer_;
@@ -91,7 +91,7 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_CURRENT );
 	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
-	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
+	direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );
 	
 	direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
 	direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
@@ -155,7 +155,15 @@ void Direct3D9Canvas::end()
 void Direct3D9Canvas::render()
 {
 	FAIL_CHECK( vertex_buffer_->Unlock() );
-	direct_3d_->getDevice()->DrawPrimitive( D3DPT_POINTLIST, 0, point_sprite_index_ );
+
+	if ( g_line )
+	{
+		direct_3d_->getDevice()->DrawPrimitive( D3DPT_LINELIST, 0, point_sprite_index_ / 2 );
+	}
+	else
+	{
+		direct_3d_->getDevice()->DrawPrimitive( D3DPT_POINTLIST, 0, point_sprite_index_ );
+	}
 }
 
 void Direct3D9Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to, const Color& c )
@@ -170,9 +178,21 @@ void Direct3D9Canvas::fillRect( const Rect&, const Color& color )
 	direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( color.r(), color.g(), color.b() ), 1.f, 0 );
 }
 
-void Direct3D9Canvas::drawLine( Real, Real, Real, Real, const Color& )
+void Direct3D9Canvas::drawLine( Real x1, Real y1, Real x2, Real y2, const Color& color )
 {
-	//
+	if ( point_sprite_index_ >= Vertex::COUNT ) return;
+
+	point_sprite_[ point_sprite_index_ ].position = D3DXVECTOR4( x1, y1, 0.f, 1.f );
+	point_sprite_[ point_sprite_index_ ].size = 10.f;
+	point_sprite_[ point_sprite_index_ ].color = D3DCOLOR_RGBA( color.r(), color.g(), color.b(), color.a() );
+
+	point_sprite_index_++;
+
+	point_sprite_[ point_sprite_index_ ].position = D3DXVECTOR4( x2, y2, 0.f, 1.f );
+	point_sprite_[ point_sprite_index_ ].size = 10.f;
+	point_sprite_[ point_sprite_index_ ].color = D3DCOLOR_RGBA( color.r(), color.g(), color.b(), color.a() );
+
+	point_sprite_index_++;
 }
 
 void Direct3D9Canvas::drawCircle( const art::Vertex& pos, Real w, const Color& color, bool )

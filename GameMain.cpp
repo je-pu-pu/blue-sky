@@ -9,6 +9,7 @@
 
 #include	"Model.h"
 #include	"Direct3D9Canvas.h"
+#include	"Direct3D9Mesh.h"
 
 #include	"matrix4x4.h"
 #include	"vector3.h"
@@ -51,9 +52,12 @@ const char* model_file_name_list[] =
 	"./grid-cube.obj"
 };
 
+Direct3D9Mesh* mesh_ = 0;
+
 //■コンストラクタ
 CGameMain::CGameMain()
-	: canvas_( 0 )
+	: direct_3d_( 0 )
+	, canvas_( 0 )
 	, Width( 0 )
 	, Height( 0 )
 {
@@ -65,14 +69,23 @@ CGameMain::CGameMain()
 	srand( timeGetTime() );
 
 	// Direct3D 
-	canvas_ = new art::Direct3D9Canvas( app->GetWindowHandle() );
+	direct_3d_ = new Direct3D9( app->GetWindowHandle() );
+
+	// Canvas
+	canvas_ = new art::Direct3D9Canvas( direct_3d_ );
 	canvas_->createDepthBuffer();
+
+	// Mesh
+	mesh_ = new Direct3D9Mesh( direct_3d_ );
+	mesh_->loadX( "blue-sky-building-13.x" );
 }
 
 //■デストラクタ
 CGameMain::~CGameMain()
 {
+	delete mesh_;
 	delete canvas_;
+	delete direct_3d_;
 }
 
 static art::Vertex eye_pos( 0.f, 2.f, 0.f );

@@ -1,5 +1,7 @@
 #include "Direct3D9.h"
 
+#include <common/exception.h>
+
 #pragma comment( lib, "d3d9.lib" )
 #pragma comment( lib, "d3dx9.lib" )
 
@@ -29,7 +31,7 @@ Direct3D9::Direct3D9( HWND hwnd )
 	{
 		direct_3d_->Release();
 
-		throw "";
+		COMMON_THROW_EXCEPTION;
 	}
 }
 

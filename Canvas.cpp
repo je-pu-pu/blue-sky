@@ -105,7 +105,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 	// ‚­‚Á‚«‚è
 	if ( g_solid )
 	{
-		color.a() = 255;
+		color.a() = 200;
 	}
 
 	// –Ê”’‚Ý‚Ì–³‚¢ŠG‚É

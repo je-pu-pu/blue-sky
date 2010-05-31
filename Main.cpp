@@ -1,6 +1,9 @@
 #include "App.h"
 #include "GameMain.h"
 
+#include <common/exception.h>
+#include <common/serialize.h>
+
 #include <windows.h>
 
 //■■■　メイン　■■■
@@ -20,10 +23,11 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 		// メッセージループ
 		return app->MessageLoop();
 	}
-	catch ( std::string message )
+	catch ( const common::exception& e )
 	{
 		if ( app )
 		{
+			std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() );
 			MessageBox( app->GetWindowHandle(), message.c_str(), "ERROR", MB_OK );
 		}
 

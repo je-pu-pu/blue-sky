@@ -35,7 +35,7 @@ private:
 	UINT point_sprite_index_;
 
 public:
-	Direct3D9Canvas( HWND );
+	Direct3D9Canvas( Direct3D9* );
 	virtual ~Direct3D9Canvas();
 
 	void clear();

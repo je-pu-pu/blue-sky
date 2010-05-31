@@ -8,8 +8,9 @@
 
 #include "App.h"
 
-#define THROW_EXCEPTION_MESSAGE throw __LINE__
-#define FAIL_CHECK( x ) if ( FAILED( x ) ) { THROW_EXCEPTION_MESSAGE; }
+#include <common/exception.h>
+
+#define FAIL_CHECK( x ) if ( FAILED( x ) ) { COMMON_THROW_EXCEPTION; }
 
 namespace art
 {
@@ -20,15 +21,13 @@ LPDIRECT3DTEXTURE9 texture1_ = 0;
  * コンストラクタ
  *
  */
-Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
-	: direct_3d_( 0 )
+Direct3D9Canvas::Direct3D9Canvas( Direct3D9* direct_3d )
+	: direct_3d_( direct_3d )
 	, vertex_buffer_( 0 )
 	, font_( 0 )
 	, point_sprite_( 0 )
 	, point_sprite_index_( 0 )
 {
-	direct_3d_ = new Direct3D9( hwnd );
-	
     direct_3d_->getDevice()->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
     direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
 
@@ -50,7 +49,7 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
     {
 		delete direct_3d_;
 
-        THROW_EXCEPTION_MESSAGE;
+        COMMON_THROW_EXCEPTION;
     }
 
 	D3DXVECTOR3 vEyePt( 0.0f, 0.0f,-5.0f );
@@ -72,8 +71,8 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 	direct_3d_->getDevice()->SetFVF( Vertex::FVF );
 	
 	// 
-	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "brush5.png", & texture1_ ) ) )
-//	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "test.png", & texture1_ ) ) )
+//	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "brush5.png", & texture1_ ) ) )
+	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "test.png", & texture1_ ) ) )
 //	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle2.png", & texture1_ ) ) )
 //	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle3.png", & texture1_ ) ) )
 //	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle4.png", & texture1_ ) ) )
@@ -81,7 +80,7 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 		delete direct_3d_;
 		delete vertex_buffer_;
 
-		THROW_EXCEPTION_MESSAGE;
+		COMMON_THROW_EXCEPTION;
 	}
 
 //	texture1_->SetAutoGenFilterType( D3DTEXF_ANISOTROPIC );
@@ -102,7 +101,7 @@ Direct3D9Canvas::Direct3D9Canvas( HWND hwnd )
 		delete direct_3d_;
 		delete vertex_buffer_;
 
-		THROW_EXCEPTION_MESSAGE;
+		COMMON_THROW_EXCEPTION;
 	}
 
 
@@ -125,8 +124,6 @@ Direct3D9Canvas::~Direct3D9Canvas()
 {
 	font_->Release();
 	vertex_buffer_->Release();
-
-	delete direct_3d_;
 }
 
 void Direct3D9Canvas::begin()
@@ -135,12 +132,12 @@ void Direct3D9Canvas::begin()
 	
 	if ( FAILED( direct_3d_->getDevice()->BeginScene() ) )
 	{
-		THROW_EXCEPTION_MESSAGE;
+		COMMON_THROW_EXCEPTION;
 	}
 
 	if ( FAILED( vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & point_sprite_ ), 0 ) ) )
 	{
-		THROW_EXCEPTION_MESSAGE;
+		COMMON_THROW_EXCEPTION;
 	}
 
 	point_sprite_index_ = 0;

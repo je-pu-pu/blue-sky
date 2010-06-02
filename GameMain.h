@@ -55,7 +55,8 @@ public:
 	static CGameMain* GetInstange(){ static CGameMain gm; return &gm; }
 	~CGameMain();				//デストラクタ
 
-	void	Loop();				//メインループ
+	void update();				///< メインループ
+	void render();				///< 描画
 
 	const CMainLoop& getMainLoop() const { return MainLoop; }
 };

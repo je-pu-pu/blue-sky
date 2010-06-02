@@ -39,6 +39,13 @@ Canvas::~Canvas()
 	delete depth_buffer_;
 }
 
+void Canvas::clear()
+{
+	vertex_list().clear();
+	line_list().clear();
+	face_list().clear();
+}
+
 /**
  * デプスバッファを作成する
  *

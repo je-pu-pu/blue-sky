@@ -28,8 +28,9 @@ Direct3D9Canvas::Direct3D9Canvas( Direct3D9* direct_3d )
 	, point_sprite_( 0 )
 	, point_sprite_index_( 0 )
 {
-    direct_3d_->getDevice()->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
-    direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
+
+	direct_3d_->getDevice()->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+	direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
 
 	direct_3d_->getDevice()->SetRenderState( D3DRS_POINTSPRITEENABLE, TRUE );
 //	direct_3d_->getDevice()->SetRenderState( D3DRS_POINTSCALEENABLE, TRUE );
@@ -37,13 +38,14 @@ Direct3D9Canvas::Direct3D9Canvas( Direct3D9* direct_3d )
 	direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 	
-	// direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_ONE );
-	// direct_3d_->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_ZERO );
+//	direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_ONE );
+//	direct_3d_->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_ZERO );
 	
 	direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE );
 
 	// direct_3d_->getDevice()->SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
+
 
 	if ( FAILED( direct_3d_->getDevice()->CreateVertexBuffer( Vertex::COUNT * sizeof( Vertex ), D3DUSAGE_POINTS, Vertex::FVF, D3DPOOL_DEFAULT, & vertex_buffer_, NULL ) ) )
     {
@@ -72,10 +74,10 @@ Direct3D9Canvas::Direct3D9Canvas( Direct3D9* direct_3d )
 	
 	// 
 //	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "brush5.png", & texture1_ ) ) )
-	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "test.png", & texture1_ ) ) )
+//	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "test.png", & texture1_ ) ) )
 //	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle2.png", & texture1_ ) ) )
 //	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle3.png", & texture1_ ) ) )
-//	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle4.png", & texture1_ ) ) )
+	if ( FAILED( D3DXCreateTextureFromFile( direct_3d_->getDevice(), "circle4.png", & texture1_ ) ) )
 	{
 		delete direct_3d_;
 		delete vertex_buffer_;

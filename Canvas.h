@@ -150,7 +150,7 @@ public:
 	void sort_face_list_by_z();
 	void sort_line_list_by_z();
 
-	// virtual void clear();
+	void clear();
 
 	virtual void render() = 0;
 

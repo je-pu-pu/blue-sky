@@ -7,6 +7,8 @@
 #include	"GameMain.h"
 #include	"App.h"
 
+#include "Camera.h"
+
 #include	"Model.h"
 #include	"Direct3D9Canvas.h"
 #include	"Direct3D9Mesh.h"
@@ -52,7 +54,10 @@ const char* model_file_name_list[] =
 	"./grid-cube.obj"
 };
 
+using blue_sky::Camera;
+
 Direct3D9Mesh* mesh_ = 0;
+Camera* camera_ = 0;
 
 //■コンストラクタ
 CGameMain::CGameMain()
@@ -77,12 +82,20 @@ CGameMain::CGameMain()
 
 	// Mesh
 	mesh_ = new Direct3D9Mesh( direct_3d_ );
-	mesh_->loadX( "blue-sky-building-13.x" );
+	// mesh_->loadX( "blue-sky-building-13.x" );
+	mesh_->loadX( "box2.x" );
+
+	// Camera
+	camera_ = new Camera();
+	camera_->position().set( 0.f, 5.f, -20.f );
+	camera_->up().set( 0.f, 1.f, 0.f );
 }
 
 //■デストラクタ
 CGameMain::~CGameMain()
 {
+	delete camera_;
+
 	delete mesh_;
 	delete canvas_;
 	delete direct_3d_;
@@ -120,10 +133,15 @@ void CGameMain::convert_3d_to_2d( vector3& v )
 	// v.y() += ( rand() % RAND_MAX / static_cast< float >( RAND_MAX ) ) * r - ( r / 2.f );
 }
 
-//■■■　メインループ　■■■
-void CGameMain::Loop()
+static int fps = 0, last_fps = 0;
+static bool draw_face = true;
+
+/**
+ * メインループ処理
+ *
+ */
+void CGameMain::update()
 {
-	static int fps = 0, last_fps = 0;
 	static int sec = 0;
 	
 	if ( timeGetTime() / 1000 != sec )
@@ -195,8 +213,6 @@ void CGameMain::Loop()
 	static bool r_random = true;
 	static bool p_random = true;
 	static int mn = 100;
-
-	static bool draw_face = true;
 	
 	if(GetAsyncKeyState('A'))		sr -= 0.01f;
 	if(GetAsyncKeyState('S'))		sr += 0.01f;
@@ -248,6 +264,8 @@ void CGameMain::Loop()
 		sample_model.load_file( model_file_name_list[ n ] );
 
 		n = ( n + 1 ) % ( sizeof( model_file_name_list ) / sizeof( char ) );
+
+		canvas_->clear();
 
 		Sleep( 1000 );
 	}
@@ -313,6 +331,19 @@ void CGameMain::Loop()
 
 	} // first
 
+	D3DXMATRIXA16 view;
+	D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< D3DXVECTOR3* >( & camera_->look_at() ), reinterpret_cast< D3DXVECTOR3* >( & camera_->up() ) );
+	direct_3d_->getDevice()->SetTransform( D3DTS_VIEW, & view );
+
+	mesh_->render();
+	// render();
+}
+
+/**
+ * 描画
+ */
+void CGameMain::render()
+{
 	int n = 0;
 
 	canvas_->clearDepthBuffer();
@@ -426,4 +457,6 @@ void CGameMain::Loop()
 	canvas_->drawText( art::Vertex( 0.f, 0.f ), debug_text.c_str(), art::Color( 255, 0, 0 ) );
 
 	canvas_->end();
+
+	mesh_->render();
 }

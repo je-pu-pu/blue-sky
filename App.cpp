@@ -100,16 +100,25 @@ bool CApp::Init(HINSTANCE hi, int nCmdShow)
 int CApp::MessageLoop()
 {
 	MSG msg;
-	while(true){
-		if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)){
-			if(msg.message == WM_QUIT) break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+
+	while ( true )
+	{
+		if ( PeekMessage( & msg, NULL, 0, 0, PM_REMOVE ) )
+		{
+			if ( msg.message == WM_QUIT)
+			{
+				break;
+			}
+
+			TranslateMessage( & msg );
+			DispatchMessage( & msg );
 		}
-		else{
-			CGameMain::GetInstange()->Loop();
+		else
+		{
+			CGameMain::GetInstange()->update();
 		}
 	}
+
 	return msg.wParam;
 }
 

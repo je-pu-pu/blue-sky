@@ -4,17 +4,8 @@
     <Filter Include="DirectX">
       <UniqueIdentifier>{c3b4646e-11d1-42af-ba74-3623212ce387}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DirectX\Direct3D">
-      <UniqueIdentifier>{a623ec99-1ff1-4997-933c-ea13fcb3dea9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DirectX\DirectInput">
-      <UniqueIdentifier>{20c1c1eb-49eb-4ecf-858a-59c692bfe02e}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Direct3D9.cpp">
-      <Filter>DirectX\Direct3D</Filter>
-    </ClCompile>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="Direct3D9Canvas.cpp" />
@@ -27,16 +18,17 @@
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="vector3.cpp" />
     <ClCompile Include="DirectInput.cpp">
-      <Filter>DirectX\DirectInput</Filter>
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D9.cpp">
+      <Filter>DirectX</Filter>
     </ClCompile>
     <ClCompile Include="Direct3D9Mesh.cpp">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Direct3D9.h">
-      <Filter>DirectX\Direct3D</Filter>
-    </ClInclude>
     <ClInclude Include="App.h" />
     <ClInclude Include="Canvas.h" />
     <ClInclude Include="Color.h" />
@@ -52,10 +44,14 @@
     <ClInclude Include="Util.h" />
     <ClInclude Include="vector3.h" />
     <ClInclude Include="DirectInput.h">
-      <Filter>DirectX\DirectInput</Filter>
+      <Filter>DirectX</Filter>
     </ClInclude>
     <ClInclude Include="Direct3D9Mesh.h">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX</Filter>
     </ClInclude>
+    <ClInclude Include="Direct3D9.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h" />
   </ItemGroup>
 </Project>

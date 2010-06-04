@@ -146,20 +146,25 @@ LRESULT CALLBACK CApp::WinProc( HWND hw, UINT msg, WPARAM wp, LPARAM lp )
 	return	0;
 }
 
+/**
+ * タイトルを取得する
+ *
+ * @return タイトル
+ */
+const char* CApp::getTitle()
+{
+	title_.resize( GetWindowTextLength( hWnd ) + 1 );
+	GetWindowText( hWnd, & title_[ 0 ], title_.size() );
+
+	return title_.c_str();
+}
+
+/**
+ * タイトルを設定する
+ *
+ * @param t タイトル
+ */
 void CApp::setTitle( const char* t )
 {
 	SetWindowText( hWnd, t );
-}
-
-const char* CApp::getTitle() const
-{
-	return "";
-
-	/*
-	int l = GetWindowTextLength( hWnd );
-
-	title_.resize( l );
-
-	GetWindowText( hWnd, )
-	*/
 }

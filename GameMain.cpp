@@ -60,6 +60,7 @@ using blue_sky::Camera;
 Direct3D9Mesh* mesh_ = 0;
 Camera* camera_ = 0;
 LPD3DXCONSTANTTABLE vs_constant_table;
+LPD3DXCONSTANTTABLE ps_constant_table;
 
 //■コンストラクタ
 CGameMain::CGameMain()
@@ -96,6 +97,8 @@ CGameMain::CGameMain()
 	const char* vs_profile = D3DXGetVertexShaderProfile( direct_3d_->getDevice() );
 	const char* ps_profile = D3DXGetPixelShaderProfile( direct_3d_->getDevice() );
 
+	app->setTitle( ( std::string( app->getTitle() ) + " : " + vs_profile + " : " + ps_profile ).c_str() );
+
 	LPD3DXBUFFER error_message_buffer;
 
 	// Vertex Shader
@@ -113,7 +116,6 @@ CGameMain::CGameMain()
 	// Pixel Shader
 	LPDIRECT3DPIXELSHADER9 pixel_shader_;
 	LPD3DXBUFFER ps_buffer;
-	LPD3DXCONSTANTTABLE ps_constant_table;
 
 	if ( FAILED( D3DXCompileShaderFromFile( "test.fx", 0, 0, "ps_main", ps_profile, 0, & ps_buffer, & error_message_buffer, & ps_constant_table ) ) )
 	{
@@ -122,9 +124,6 @@ CGameMain::CGameMain()
 	
 	direct_3d_->getDevice()->CreatePixelShader( static_cast< DWORD* >( ps_buffer->GetBufferPointer() ), & pixel_shader_ );
 	direct_3d_->getDevice()->SetPixelShader( pixel_shader_ );
-
-	float a = 2.12f;
-	ps_constant_table->SetFloat( direct_3d_->getDevice(), "a", a );
 }
 
 //■デストラクタ
@@ -385,6 +384,11 @@ void CGameMain::update()
 
 	D3DXMATRIX WorldViewProjection = world * view * projection;
 	vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
+
+	static float aaa = 2.12f;
+	aaa += 0.0001f;
+	vs_constant_table->SetFloat( direct_3d_->getDevice(), "a", sin( aaa ) );
+	ps_constant_table->SetFloat( direct_3d_->getDevice(), "a", sin( aaa ) );
 
 	mesh_->render();
 	// render();

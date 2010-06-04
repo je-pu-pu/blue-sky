@@ -16,7 +16,7 @@ Direct3D9::Direct3D9( HWND hwnd )
 		throw "";
 	}
 
-	DWORD behavior_flag = D3DCREATE_HARDWARE_VERTEXPROCESSING;
+//	DWORD behavior_flag = D3DCREATE_HARDWARE_VERTEXPROCESSING;
 
 	D3DPRESENT_PARAMETERS present = { 0 };
     present.Windowed = TRUE;
@@ -27,11 +27,17 @@ Direct3D9::Direct3D9( HWND hwnd )
 	present.EnableAutoDepthStencil = TRUE;
 	present.AutoDepthStencilFormat = D3DFMT_D16;
 
-	if ( FAILED( direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, behavior_flag, & present, & device_ ) ) )
+	if ( FAILED( direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, & present, & device_ ) ) )
 	{
-		direct_3d_->Release();
+		if ( FAILED( direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, & present, & device_ ) ) )
+		{
+			if ( FAILED( direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hwnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, & present, & device_ ) ) )
+			{
+				direct_3d_->Release();
 
-		COMMON_THROW_EXCEPTION;
+				COMMON_THROW_EXCEPTION;
+			}
+		}
 	}
 }
 

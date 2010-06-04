@@ -21,6 +21,8 @@ private:
 	int			Width;					//ウィンドウ横幅
 	int			Height;					//ウィンドウ高さ
 
+	std::string title_;					///< タイトル
+
 	CApp();								//コンストラクタ
 
 	static LRESULT CALLBACK WinProc(HWND, UINT, WPARAM, LPARAM);
@@ -40,7 +42,7 @@ public:
 	int			GetWidth(){ return Width; }
 	int			GetHeight(){ return Height; }
 
-	const char* getTitle() const;
+	const char* getTitle();
 	void setTitle( const char* );
 };
 

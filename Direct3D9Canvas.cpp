@@ -29,7 +29,7 @@ Direct3D9Canvas::Direct3D9Canvas( Direct3D9* direct_3d )
 	, point_sprite_index_( 0 )
 {
 
-	direct_3d_->getDevice()->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+//	direct_3d_->getDevice()->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE );
 
 	direct_3d_->getDevice()->SetRenderState( D3DRS_POINTSPRITEENABLE, TRUE );

@@ -28,6 +28,12 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 		if ( app )
 		{
 			std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() );
+			
+			if ( strlen( e.message() ) )
+			{
+				message += std::string( "\n\n" ) + e.message();
+			}
+
 			MessageBox( app->GetWindowHandle(), message.c_str(), "ERROR", MB_OK );
 		}
 

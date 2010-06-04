@@ -58,14 +58,6 @@ bool Direct3D9Mesh::loadX( const char* file_name )
 
 void Direct3D9Mesh::render()
 {
-    D3DXMATRIXA16 world;
-    D3DXMatrixRotationY( & world, timeGetTime() / 1000.f );
-    direct_3d_->getDevice()->SetTransform( D3DTS_WORLD, & world );
-
-	D3DXMATRIXA16 projection;
-	D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( 10.f ), 720.f / 480.f, 1.f, 1000.f );
-	direct_3d_->getDevice()->SetTransform( D3DTS_PROJECTION, & projection );
-	
 	direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_POINTSPRITEENABLE, FALSE );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE );

@@ -19,6 +19,7 @@
 #include	"Util.h"
 #include	<math.h>
 
+#include <common/exception.h>
 #include <common/serialize.h>
 #include <common/random.h>
 #include <common/math.h>
@@ -58,6 +59,7 @@ using blue_sky::Camera;
 
 Direct3D9Mesh* mesh_ = 0;
 Camera* camera_ = 0;
+LPD3DXCONSTANTTABLE vs_constant_table;
 
 //■コンストラクタ
 CGameMain::CGameMain()
@@ -82,13 +84,47 @@ CGameMain::CGameMain()
 
 	// Mesh
 	mesh_ = new Direct3D9Mesh( direct_3d_ );
-	// mesh_->loadX( "blue-sky-building-13.x" );
-	mesh_->loadX( "box2.x" );
+	mesh_->loadX( "blue-sky-building-13.x" );
+	// mesh_->loadX( "box3.x" );
+	// mesh_->loadX( "box2.x" );
 
 	// Camera
 	camera_ = new Camera();
-	camera_->position().set( 0.f, 5.f, -20.f );
+	camera_->position().set( 0.f, 50.f, -50.f );
 	camera_->up().set( 0.f, 1.f, 0.f );
+
+	const char* vs_profile = D3DXGetVertexShaderProfile( direct_3d_->getDevice() );
+	const char* ps_profile = D3DXGetPixelShaderProfile( direct_3d_->getDevice() );
+
+	LPD3DXBUFFER error_message_buffer;
+
+	// Vertex Shader
+	LPDIRECT3DVERTEXSHADER9 vertex_shader_;
+	LPD3DXBUFFER vs_buffer;
+
+	if ( FAILED( D3DXCompileShaderFromFile( "test.fx", 0, 0, "vs_main", vs_profile, 0, & vs_buffer, & error_message_buffer, & vs_constant_table ) ) )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( static_cast< char* >( error_message_buffer->GetBufferPointer() ) );
+	}
+
+	direct_3d_->getDevice()->CreateVertexShader( static_cast< DWORD* >( vs_buffer->GetBufferPointer() ), & vertex_shader_ );
+	direct_3d_->getDevice()->SetVertexShader( vertex_shader_ );
+
+	// Pixel Shader
+	LPDIRECT3DPIXELSHADER9 pixel_shader_;
+	LPD3DXBUFFER ps_buffer;
+	LPD3DXCONSTANTTABLE ps_constant_table;
+
+	if ( FAILED( D3DXCompileShaderFromFile( "test.fx", 0, 0, "ps_main", ps_profile, 0, & ps_buffer, & error_message_buffer, & ps_constant_table ) ) )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( static_cast< char* >( error_message_buffer->GetBufferPointer() ) );
+	}
+	
+	direct_3d_->getDevice()->CreatePixelShader( static_cast< DWORD* >( ps_buffer->GetBufferPointer() ), & pixel_shader_ );
+	direct_3d_->getDevice()->SetPixelShader( pixel_shader_ );
+
+	float a = 2.12f;
+	ps_constant_table->SetFloat( direct_3d_->getDevice(), "a", a );
 }
 
 //■デストラクタ
@@ -331,9 +367,24 @@ void CGameMain::update()
 
 	} // first
 
+	static float a = 0.f;
+	a += 0.0001f;
+	camera_->position().set( 0.f, 20.f, -100.f + sin( a ) * 100.f );
+
+	D3DXMATRIXA16 world;
+    D3DXMatrixRotationY( & world, timeGetTime() / 1000.f );
+    direct_3d_->getDevice()->SetTransform( D3DTS_WORLD, & world );
+
 	D3DXMATRIXA16 view;
 	D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< D3DXVECTOR3* >( & camera_->look_at() ), reinterpret_cast< D3DXVECTOR3* >( & camera_->up() ) );
 	direct_3d_->getDevice()->SetTransform( D3DTS_VIEW, & view );
+
+	D3DXMATRIXA16 projection;
+	D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( 90.f ), 720.f / 480.f, 1.f, 1000.f );
+	direct_3d_->getDevice()->SetTransform( D3DTS_PROJECTION, & projection );
+
+	D3DXMATRIX WorldViewProjection = world * view * projection;
+	vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
 
 	mesh_->render();
 	// render();

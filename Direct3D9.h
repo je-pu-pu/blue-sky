@@ -3,6 +3,10 @@
 
 #include <d3dx9.h>
 
+#ifndef FAIL_CHECK
+#define FAIL_CHECK( x ) if ( FAILED( x ) ) { COMMON_THROW_EXCEPTION; }
+#endif
+
 /**
  * Direct3D 9 のラッパークラス
  *

@@ -58,15 +58,6 @@ bool Direct3D9Mesh::loadX( const char* file_name )
 
 void Direct3D9Mesh::render()
 {
-	direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
-	direct_3d_->getDevice()->SetRenderState( D3DRS_POINTSPRITEENABLE, FALSE );
-	direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE );
-	direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE );
-	direct_3d_->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF );
-
-	FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xEE, 0xEE, 0xFF ), 1.f, 0 ) );
-	FAIL_CHECK( direct_3d_->getDevice()->BeginScene() );
-
 	for ( unsigned int n = 0; n < material_count_; n++ )
 	{
 		direct_3d_->getDevice()->SetMaterial( & materials_[ n ] );
@@ -74,7 +65,4 @@ void Direct3D9Mesh::render()
 
 		FAIL_CHECK( mesh_->DrawSubset( n ) );
 	}
-
-	FAIL_CHECK( direct_3d_->getDevice()->EndScene() );
-	FAIL_CHECK( direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL ) );
 }

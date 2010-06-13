@@ -15,7 +15,6 @@
     <ClCompile Include="MainLoop.cpp" />
     <ClCompile Include="matrix4x4.cpp" />
     <ClCompile Include="Model.cpp" />
-    <ClCompile Include="Util.cpp" />
     <ClCompile Include="vector3.cpp" />
     <ClCompile Include="DirectInput.cpp">
       <Filter>DirectX</Filter>
@@ -27,6 +26,12 @@
       <Filter>DirectX</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="Util.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Direct3D9Box.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -41,7 +46,6 @@
     <ClInclude Include="matrix4x4.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Type.h" />
-    <ClInclude Include="Util.h" />
     <ClInclude Include="vector3.h" />
     <ClInclude Include="DirectInput.h">
       <Filter>DirectX</Filter>
@@ -53,5 +57,11 @@
       <Filter>DirectX</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Stage.h" />
+    <ClInclude Include="Util.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="Direct3D9Box.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

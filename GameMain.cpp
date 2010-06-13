@@ -4,17 +4,21 @@
  */
 
 
-#include	"GameMain.h"
-#include	"App.h"
+#include "GameMain.h"
 
+#include "App.h"
+
+#include "Player.h"
 #include "Camera.h"
+#include "Stage.h"
 
-#include	"Model.h"
-#include	"Direct3D9Canvas.h"
-#include	"Direct3D9Mesh.h"
+#include "Model.h"
+#include "Direct3D9Canvas.h"
+#include "Direct3D9Mesh.h"
+#include "Direct3D9Box.h"
 
-#include	"matrix4x4.h"
-#include	"vector3.h"
+#include "matrix4x4.h"
+#include "vector3.h"
 
 #include	"Util.h"
 #include	<math.h>
@@ -55,10 +59,17 @@ const char* model_file_name_list[] =
 	"./grid-cube.obj"
 };
 
+using blue_sky::Player;
 using blue_sky::Camera;
+using blue_sky::Stage;
 
 Direct3D9Mesh* mesh_ = 0;
+Direct3D9Box* box_ = 0;
+
+Player* player_ = 0;
 Camera* camera_ = 0;
+Stage* stage_ = 0;
+
 LPD3DXCONSTANTTABLE vs_constant_table;
 LPD3DXCONSTANTTABLE ps_constant_table;
 
@@ -79,20 +90,29 @@ CGameMain::CGameMain()
 	// Direct3D 
 	direct_3d_ = new Direct3D9( app->GetWindowHandle() );
 
-	// Canvas
+	// Canvassssw
 	canvas_ = new art::Direct3D9Canvas( direct_3d_ );
 	canvas_->createDepthBuffer();
 
 	// Mesh
 	mesh_ = new Direct3D9Mesh( direct_3d_ );
-	mesh_->loadX( "blue-sky-building-13.x" );
+
+	// mesh_->loadX( "blue-sky-building-13.x" );
+	// mesh_->loadX( "blue-sky-buildings.x" );
 	// mesh_->loadX( "box3.x" );
 	// mesh_->loadX( "box2.x" );
+	mesh_->loadX( "hoge.x" );
+
+	// Box
+	box_ = new Direct3D9Box( direct_3d_, 0.8f, 0.8f, 0.8f );
+
+	// Player
+	player_ = new Player();
+	player_->position().set( 0.f, 10.f, 0.f );
 
 	// Camera
 	camera_ = new Camera();
-	camera_->position().set( 0.f, 50.f, -50.f );
-	camera_->up().set( 0.f, 1.f, 0.f );
+	camera_->fov() = 90.f;
 
 	const char* vs_profile = D3DXGetVertexShaderProfile( direct_3d_->getDevice() );
 	const char* ps_profile = D3DXGetPixelShaderProfile( direct_3d_->getDevice() );
@@ -124,11 +144,22 @@ CGameMain::CGameMain()
 	
 	direct_3d_->getDevice()->CreatePixelShader( static_cast< DWORD* >( ps_buffer->GetBufferPointer() ), & pixel_shader_ );
 	direct_3d_->getDevice()->SetPixelShader( pixel_shader_ );
+
+	// Stage
+	stage_ = new Stage( 1000, 1000 );
+
+	/*
+	if ( FAILED( direct_3d_->getVertexBuffer()->Lock( 0, 0, reinterpret_cast< void** >( & point_sprite_ ), 0 ) ) )
+	{
+		COMMON_THROW_EXCEPTION;
+	}
+	*/
 }
 
 //■デストラクタ
 CGameMain::~CGameMain()
 {
+	delete stage_;
 	delete camera_;
 
 	delete mesh_;
@@ -177,6 +208,17 @@ static bool draw_face = true;
  */
 void CGameMain::update()
 {
+	// canvas_->render();
+	// return;
+
+	MainLoop.WaitTime = 16;
+
+	//秒間50フレームを保持
+	if ( ! MainLoop.Loop() )
+	{
+		return;
+	}
+
 	static int sec = 0;
 	
 	if ( timeGetTime() / 1000 != sec )
@@ -188,14 +230,6 @@ void CGameMain::update()
 	}
 
 	fps++;
-	
-	// canvas_->render();
-	// return;
-
-	MainLoop.WaitTime = 0;
-
-	//秒間50フレームを保持
-	// if(! MainLoop.Loop())	return;
 
 	// 色
 	RGBQUAD white =	{ 255, 255, 255, 20 };
@@ -324,6 +358,28 @@ void CGameMain::update()
 	if ( GetAsyncKeyState( VK_NUMPAD8 ) ) { matrix4x4 m; m.rotate_x( -1.f ); mt *= m; }
 	if ( GetAsyncKeyState( VK_NUMPAD2 ) ) { matrix4x4 m; m.rotate_x( +1.f ); mt *= m; }
 
+	const float speed = 0.001f;
+
+	if ( GetAsyncKeyState( 'A' ) & 0x8000 ) { player_->velocity().x() -= speed; }
+	if ( GetAsyncKeyState( 'D' ) & 0x8000 ) { player_->velocity().x() += speed; }
+	if ( GetAsyncKeyState( 'W' ) & 0x8000 ) { player_->velocity().z() += speed; }
+	if ( GetAsyncKeyState( 'S' ) & 0x8000 ) { player_->velocity().z() -= speed; }
+	if ( GetAsyncKeyState( VK_LBUTTON ) & 0x8001 ) { player_->jump(); }
+
+	player_->set_floor_height( stage_->map_chip( static_cast< int >( player_->position().x() ), static_cast< int >( player_->position().z() ) ) ); 
+	player_->update();
+
+	camera_->position() = player_->position() + vector3( 0.f, 1.5f, 0.f );
+	
+	if ( player_->jumping() )
+	{
+		camera_->set_under_view_rate( camera_->get_under_view_rate() + 0.05f );
+	}
+	else
+	{
+		camera_->set_under_view_rate( camera_->get_under_view_rate() - 0.05f );
+	}
+
 	// rotate
 	if ( space > 0 )
 	{
@@ -366,31 +422,63 @@ void CGameMain::update()
 
 	} // first
 
-	static float a = 0.f;
-	a += 0.0001f;
-	camera_->position().set( 0.f, 20.f, -100.f + sin( a ) * 100.f );
-
 	D3DXMATRIXA16 world;
-    D3DXMatrixRotationY( & world, timeGetTime() / 1000.f );
+	D3DXMatrixIdentity( & world );
+	D3DXMatrixScaling( & world, 10.f, 10.f, 10.f );
+//	D3DXMatrixRotationY( & world, timeGetTime() / 100000.f );
     direct_3d_->getDevice()->SetTransform( D3DTS_WORLD, & world );
 
 	D3DXMATRIXA16 view;
-	D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< D3DXVECTOR3* >( & camera_->look_at() ), reinterpret_cast< D3DXVECTOR3* >( & camera_->up() ) );
+	D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->look_at() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->up() ) );
 	direct_3d_->getDevice()->SetTransform( D3DTS_VIEW, & view );
 
 	D3DXMATRIXA16 projection;
-	D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( 90.f ), 720.f / 480.f, 1.f, 1000.f );
+	D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() ), 720.f / 480.f, 1.f, 400.f );
 	direct_3d_->getDevice()->SetTransform( D3DTS_PROJECTION, & projection );
 
 	D3DXMATRIX WorldViewProjection = world * view * projection;
 	vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
 
-	static float aaa = 2.12f;
-	aaa += 0.0001f;
-	vs_constant_table->SetFloat( direct_3d_->getDevice(), "a", sin( aaa ) );
-	ps_constant_table->SetFloat( direct_3d_->getDevice(), "a", sin( aaa ) );
+	std::string debug_text;
+	debug_text = std::string( "FPS : " ) + common::serialize( last_fps ) + ", player : " + common::serialize( player_->position().y() );
+	CApp::GetInstance()->setTitle( debug_text.c_str() );
+
+	FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xEE, 0xEE, 0xFF ), 1.f, 0 ) );
+	FAIL_CHECK( direct_3d_->getDevice()->BeginScene() );
+
+	direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
+	direct_3d_->getDevice()->SetRenderState( D3DRS_POINTSPRITEENABLE, FALSE );
+	direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE );
+	direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE );
+	direct_3d_->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF );
+
+	// box_->ready();
+	// box_->render();
 
 	mesh_->render();
+
+	FAIL_CHECK( direct_3d_->getDevice()->EndScene() );
+	FAIL_CHECK( direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL ) );
+
+	/*
+	for ( int z = 0; z < stage_->depth(); z++ )
+	{
+		for ( int x = 0; x < stage_->width(); x++ )
+		{
+			int y = stage_->map_chip( x, z );
+			
+			if ( y > 0 )
+			{
+				D3DXMATRIXA16 world;
+				D3DXMatrixTranslation( & world, x, y - 1, z );
+				direct_3d_->getDevice()->SetTransform( D3DTS_WORLD, & world );
+
+				box_->render();
+			}
+		}
+	}
+	*/
+
 	// render();
 }
 

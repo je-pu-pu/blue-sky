@@ -25,7 +25,7 @@ Direct3D9::Direct3D9( HWND hwnd )
 	present.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
 	present.EnableAutoDepthStencil = TRUE;
-	present.AutoDepthStencilFormat = D3DFMT_D16;
+	present.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 
 	if ( FAILED( direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, & present, & device_ ) ) )
 	{

@@ -184,7 +184,7 @@ void Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to,
 			power *= 0.9f;
 		}
 
-		Real interval = min( 1.f, max_interval );
+		Real interval = std::min( 1.f, max_interval );
 		// const Real interval = 5.f;
 
 		v1 += art::Vertex( cos( d ) * interval, sin( d ) * interval, 0.f );
@@ -347,7 +347,7 @@ bool Canvas::depthTest( const art::Vertex& v )
 
 	if ( depth_buffer_pixel_id_ == depth_buffer_[ index ].second )
 	{
-		depth_buffer_[ index ].first = min( depth_buffer_[ index ].first, v.z() );
+		depth_buffer_[ index ].first = std::min( depth_buffer_[ index ].first, v.z() );
 		return true; // depth_buffer_last_test_;
 	}
 
@@ -524,7 +524,7 @@ void Canvas::Vertex::update()
 
 	// float diff = abs( static_cast<float>( M_PI ) - aa );
 
-	const float speed = min( max_speed, len ) * ( pow( angle_correct_rate, 8 ) );
+	const float speed = std::min( max_speed, len ) * ( pow( angle_correct_rate, 8 ) );
 	// const float speed = len / 4.f; // * pow( angle_correct_rate, 8 );
 
 	// const float speed = min( max_speed, len );

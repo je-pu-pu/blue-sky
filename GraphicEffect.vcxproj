@@ -60,7 +60,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>C:\Users\je\Desktop\Program\GraphicEffect\011129-アンチエイリアスライン\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;_DEBUG;_WINDOWS;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -108,7 +108,7 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_WINDOWS;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -147,6 +147,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="Canvas.cpp" />
+    <ClCompile Include="Direct3D9Box.cpp" />
     <ClCompile Include="Direct3D9Canvas.cpp" />
     <ClCompile Include="Direct3D9Mesh.cpp" />
     <ClCompile Include="DirectInput.cpp" />
@@ -165,10 +166,9 @@
     </ClCompile>
     <ClCompile Include="matrix4x4.cpp" />
     <ClCompile Include="Model.cpp" />
-    <ClCompile Include="Util.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="Util.cpp" />
     <ClCompile Include="vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +177,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="Canvas.h" />
     <ClInclude Include="Color.h" />
+    <ClInclude Include="Direct3D9Box.h" />
     <ClInclude Include="Direct3D9Canvas.h" />
     <ClInclude Include="Direct3D9Mesh.h" />
     <ClInclude Include="DirectInput.h" />
@@ -187,6 +188,8 @@
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="matrix4x4.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="Stage.h" />
     <ClInclude Include="Type.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="vector3.h" />

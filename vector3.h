@@ -55,6 +55,8 @@ public:
 		);
 	}
 
+	vector3&		normalize() { *this /= length(); return *this; }
+
 	void			set( T, T, T );
 	void			set( int, T );
 	

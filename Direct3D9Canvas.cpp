@@ -46,6 +46,7 @@ Direct3D9Canvas::Direct3D9Canvas( Direct3D9* direct_3d )
 
 	// direct_3d_->getDevice()->SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
 
+	// direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_FLAT );
 
 	if ( FAILED( direct_3d_->getDevice()->CreateVertexBuffer( Vertex::COUNT * sizeof( Vertex ), D3DUSAGE_POINTS, Vertex::FVF, D3DPOOL_DEFAULT, & vertex_buffer_, NULL ) ) )
     {

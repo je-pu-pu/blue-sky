@@ -59,6 +59,7 @@ public:
 	void render();				///< •`‰æ
 
 	const CMainLoop& getMainLoop() const { return MainLoop; }
+	// float getSPF() const { return }
 };
 
 #endif

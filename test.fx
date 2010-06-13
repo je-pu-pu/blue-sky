@@ -7,16 +7,14 @@ void vs_main( in float4 in_p : POSITION, in float4 in_normal : NORMAL0, in float
 
 	float4 diffuse ={ 0.6f, 1.f, 0.6f, 1.f };
 	float4 light = { -0.25f, -0.75f, 0.5f, 1.f };
-	out_d = diffuse * max( 0, dot( in_normal, normalize( light ) ) );
+	out_d = diffuse * max( 0, dot( in_normal, normalize( light ) ) ) + in_d;
 
-	/*
-	out_d[0] += abs( in_p[0] ) * 0.01 * 0.01;
-	out_d[1] += abs( in_p[1] ) * 0.3  * 0.01;
-	out_d[2] += abs( in_p[2] ) * 0.1  * 0.01;
-	*/
+	out_d[0] += abs( in_p[0] ) * 0.01;
+	out_d[1] += abs( in_p[1] ) * 0.3;
+	out_d[2] += abs( in_p[2] ) * 0.1;
 }
 
-void vs_main_vc( in float4 in_p : POSITION, in float4 in_normal : NORMAL0, in float4 in_d : COLOR0, out float4 out_p : POSITION, out float4 out_d : COLOR0 )
+void vs_main_vc( in float4 in_p : POSITION, in float4 in_d : COLOR0, out float4 out_p : POSITION, out float4 out_d : COLOR0 )
 {
 	out_p = mul( in_p, WorldViewProjection );
 	out_d = in_d;

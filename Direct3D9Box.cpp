@@ -4,9 +4,18 @@
 #include <common/exception.h>
 #include <common/math.h>
 
-Direct3D9Box::Direct3D9Box( Direct3D9* direct_3d, float w, float h, float d )
+Direct3D9Box::Direct3D9Box( Direct3D9* direct_3d, float w, float h, float d, D3DCOLOR c )
 	: direct_3d_( direct_3d )
 {
+	D3DVERTEXELEMENT9 vertex_element[] = {
+		{ 0, 0, D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+		{ 1, 0, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0 },
+		D3DDECL_END()
+	};
+
+	FAIL_CHECK( direct_3d_->getDevice()->CreateVertexDeclaration( vertex_element, & vertex_declaration_ ) );
+
+
 	D3DXVECTOR3* position;
 
 	FAIL_CHECK( direct_3d_->getDevice()->CreateVertexBuffer( sizeof( D3DXVECTOR3 ) * 8, 0, 0, D3DPOOL_DEFAULT, & position_vertex_buffer_, 0 ) );
@@ -30,13 +39,13 @@ Direct3D9Box::Direct3D9Box( Direct3D9* direct_3d, float w, float h, float d )
 	FAIL_CHECK( color_vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & color ), 0 ) );
 
 	color[ 0 ] = D3DCOLOR_XRGB( 0x00, 0x00, 0x00 );
-	color[ 1 ] = D3DCOLOR_XRGB( 0xFF, 0x00, 0x00 );
-	color[ 2 ] = D3DCOLOR_XRGB( 0x00, 0xFF, 0x00 );
-	color[ 3 ] = D3DCOLOR_XRGB( 0x00, 0x00, 0xFF );
-	color[ 4 ] = D3DCOLOR_XRGB( 0xFF, 0xFF, 0x00 );
-	color[ 5 ] = D3DCOLOR_XRGB( 0xFF, 0x00, 0xFF );
-	color[ 6 ] = D3DCOLOR_XRGB( 0x00, 0xFF, 0xFF );
-	color[ 7 ] = D3DCOLOR_XRGB( 0xFF, 0xFF, 0xFF );
+	color[ 1 ] = D3DCOLOR_XRGB( 0x00, 0x00, 0x00 );
+	color[ 2 ] = c;
+	color[ 3 ] = c;
+	color[ 4 ] = D3DCOLOR_XRGB( 0x00, 0x00, 0x00 );
+	color[ 5 ] = D3DCOLOR_XRGB( 0x00, 0x00, 0x00 );
+	color[ 6 ] = c;
+	color[ 7 ] = c;
 
 	FAIL_CHECK( color_vertex_buffer_->Unlock() );
 
@@ -48,17 +57,17 @@ Direct3D9Box::Direct3D9Box( Direct3D9* direct_3d, float w, float h, float d )
 	
 	/*
 	  6--7
-	 /  /|
+	 /| /|
 	2--3 |
 	| 4|-5
 	|/ |/
 	0--1
 	*/
 
-	DWORD index_src[] = {
+	WORD index_src[] = {
 		0, 3, 1,
 		0, 2, 3,
-		
+
 		1, 7, 5,
 		1, 3, 7,
 
@@ -72,7 +81,7 @@ Direct3D9Box::Direct3D9Box( Direct3D9* direct_3d, float w, float h, float d )
 		4, 0, 1,
 
 		5, 6, 4,
-		5, 7, 4
+		5, 7, 6
 	};
 
 	memcpy( index, index_src, sizeof( index_src ) );
@@ -88,12 +97,16 @@ Direct3D9Box::~Direct3D9Box()
 
 void Direct3D9Box::ready()
 {
-	direct_3d_->getDevice()->SetStreamSource( 0, position_vertex_buffer_, 0, sizeof( D3DXVECTOR3 ) );
-	direct_3d_->getDevice()->SetStreamSource( 1, color_vertex_buffer_, 0, sizeof( D3DCOLOR ) );
-	direct_3d_->getDevice()->SetIndices( index_buffer_ );
+	FAIL_CHECK( direct_3d_->getDevice()->SetVertexDeclaration( vertex_declaration_ ) );
+	FAIL_CHECK( direct_3d_->getDevice()->SetStreamSource( 0, position_vertex_buffer_, 0, sizeof( D3DXVECTOR3 ) ) );
+	FAIL_CHECK( direct_3d_->getDevice()->SetStreamSource( 1, color_vertex_buffer_, 0, sizeof( D3DCOLOR ) ) );
+	FAIL_CHECK( direct_3d_->getDevice()->SetIndices( index_buffer_ ) );
+
+	FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE ) );
 }
 
 void Direct3D9Box::render()
 {
 	FAIL_CHECK( direct_3d_->getDevice()->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, 8, 0, 12 ) );
+	// FAIL_CHECK( direct_3d_->getDevice()->DrawIndexedPrimitive( D3DPT_LINELIST, 0, 0, 8, 0, 3 ) );
 }

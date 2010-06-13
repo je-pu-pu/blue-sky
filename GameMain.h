@@ -38,18 +38,14 @@ public:
 
 protected:
 	Direct3D9*	direct_3d_;		///< Direct3D
-	Canvas*		canvas_;		///< Canvas
 		
 	HWND		hwnd_;			///< ウィンドウハンドル
 	int			Width;			///< 横幅
 	int			Height;			///< 高さ
 
-
 	CMainLoop	MainLoop;		//ループ管理
 
 	CGameMain();				//コンストラクタ
-
-	void convert_3d_to_2d( vector3& );
 
 public:
 	static CGameMain* GetInstange(){ static CGameMain gm; return &gm; }

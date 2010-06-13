@@ -27,7 +27,7 @@ void Player::update()
 		jumping_ = false;
 	}
 
-	velocity().y() -= 0.01f;
+	velocity().y() -= 0.001f;
 	velocity().x() *= 0.95f;
 	velocity().z() *= 0.95f;
 	

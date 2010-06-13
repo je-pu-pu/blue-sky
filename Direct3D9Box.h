@@ -14,13 +14,15 @@ class Direct3D9Box
 private:
 	Direct3D9* direct_3d_;
 
+	LPDIRECT3DVERTEXDECLARATION9  vertex_declaration_;
+
 	LPDIRECT3DVERTEXBUFFER9 position_vertex_buffer_;
 	LPDIRECT3DVERTEXBUFFER9 color_vertex_buffer_;
 
 	LPDIRECT3DINDEXBUFFER9 index_buffer_;
 
 public:
-	Direct3D9Box( Direct3D9*, float, float, float );
+	Direct3D9Box( Direct3D9*, float, float, float, D3DCOLOR );
 	~Direct3D9Box();
 
 	void ready();

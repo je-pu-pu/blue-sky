@@ -23,7 +23,7 @@ void Camera::set_under_view_rate( float rate )
 	under_view_rate_ = math::clamp( rate, 0.f, 1.f );
 	
 	matrix4x4 m;
-	m.rotate_x( rate * 90.f );
+	m.rotate_x( under_view_rate_ * 90.f );
 	// m.rotate_y( timeGetTime() * 0.01f );
 	
 	// look at

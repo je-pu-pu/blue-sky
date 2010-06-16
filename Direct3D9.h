@@ -18,6 +18,8 @@ private:
 	LPDIRECT3DDEVICE9		device_;		///< Direct3D 9 Device
 	LPDIRECT3DVERTEXBUFFER9	vertex_buffer_;	///< Direct3D 9 Vertex Buffer
 
+	D3DCAPS9				device_caps_;	///< Device Caps
+
 public:
 	Direct3D9( HWND );
 	~Direct3D9();

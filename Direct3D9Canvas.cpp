@@ -107,15 +107,6 @@ Direct3D9Canvas::Direct3D9Canvas( Direct3D9* direct_3d )
 		COMMON_THROW_EXCEPTION;
 	}
 
-
-	D3DCAPS9 caps;
-	direct_3d_->getDevice()->GetDeviceCaps( & caps );
-
-	if ( caps.FVFCaps & D3DFVFCAPS_PSIZE )
-	{
-		caps.FVFCaps = caps.FVFCaps;
-	}
-
 	float point_size_min = 0.f;
 	float point_size_max = 0.f;
 

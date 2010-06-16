@@ -66,7 +66,7 @@ CGameMain::CGameMain()
 	// Box
 	box_ = new Direct3D9Box( direct_3d_, 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
 
-	player_shadow_box_ = new Direct3D9Box( direct_3d_, 0.5f, 0.1f, 0.5f, D3DCOLOR_XRGB( 0, 0, 0 ) );
+	player_shadow_box_ = new Direct3D9Box( direct_3d_, 1.f, 0.1f, 1.f, D3DCOLOR_RGBA( 0, 0, 0, 127 ) );
 
 	// Player
 	player_ = new Player();
@@ -74,7 +74,6 @@ CGameMain::CGameMain()
 
 	// Camera
 	camera_ = new Camera();
-	camera_->fov() = 90.f;
 
 	const char* vs_profile = D3DXGetVertexShaderProfile( direct_3d_->getDevice() );
 	const char* ps_profile = D3DXGetPixelShaderProfile( direct_3d_->getDevice() );
@@ -223,10 +222,13 @@ void CGameMain::render()
 	FAIL_CHECK( direct_3d_->getDevice()->BeginScene() );
 
 	direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
-	direct_3d_->getDevice()->SetRenderState( D3DRS_POINTSPRITEENABLE, FALSE );
-	direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF );
+
+	direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE );
+	direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
+	direct_3d_->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
+
 //	direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_FLAT );
 
 	mesh_->render();
@@ -270,6 +272,6 @@ void CGameMain::render()
 
 	// Debug
 	std::string debug_text;
-	debug_text = std::string( "FPS : " ) + common::serialize( last_fps ) + ", player : " + common::serialize( player_->position().y() );
+	debug_text = std::string( "blue-sky | FPS : " ) + common::serialize( last_fps ) + ", player : " + common::serialize( player_->position().y() );
 	CApp::GetInstance()->setTitle( debug_text.c_str() );
 }

@@ -24,10 +24,12 @@ void Player::update()
 	if ( position().y() < get_floor_height() )
 	{
 		position().y() = get_floor_height();
+		velocity().y() *= -0.2f;
+
 		jumping_ = false;
 	}
 
-	velocity().y() -= 0.001f;
+	velocity().y() -= 0.008f;
 	velocity().x() *= 0.95f;
 	velocity().z() *= 0.95f;
 	

@@ -22,11 +22,11 @@ Stage::Stage( int w, int d )
 		{
 			if ( common::random( 0, 1 ) == 0 )
 			{
-				map_chip( x, z ) = map_chip( x, z - 1 ) + 5;
+				map_chip( x, z ) = map_chip( x, z - 1 ) + 1;
 			}
 			else
 			{
-				map_chip( x, z ) = 0; // math::clamp( map_chip( x, z - 1 ) + common::random( -1, 1 ), 0, 100 );
+				map_chip( x, z ) = map_chip( x, z - 1 ); // math::clamp( map_chip( x, z - 1 ) + common::random( -1, 1 ), 0, 100 );
 			}
 		}
 	}

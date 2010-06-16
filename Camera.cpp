@@ -31,6 +31,8 @@ void Camera::set_under_view_rate( float rate )
 
 	// up
 	up_ = vector3( 0.f, 1.f, 0.f ) * m;
+
+	// fov() = 60.f + under_view_rate_ * 30.f;
 }
 
 }; // namespace blue_sky

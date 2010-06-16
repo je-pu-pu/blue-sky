@@ -151,6 +151,8 @@
     <ClCompile Include="Direct3D9Canvas.cpp" />
     <ClCompile Include="Direct3D9Mesh.cpp" />
     <ClCompile Include="DirectInput.cpp" />
+    <ClCompile Include="DirectSound.cpp" />
+    <ClCompile Include="DirectSoundBuffer.cpp" />
     <ClCompile Include="GameMain.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -170,6 +172,7 @@
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="vector3.cpp" />
+    <ClCompile Include="WaveFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -181,6 +184,8 @@
     <ClInclude Include="Direct3D9Canvas.h" />
     <ClInclude Include="Direct3D9Mesh.h" />
     <ClInclude Include="DirectInput.h" />
+    <ClInclude Include="DirectSound.h" />
+    <ClInclude Include="DirectSoundBuffer.h" />
     <ClInclude Include="Face.h" />
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="Line.h" />
@@ -193,6 +198,7 @@
     <ClInclude Include="Type.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="vector3.h" />
+    <ClInclude Include="WaveFile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

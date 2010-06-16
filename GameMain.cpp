@@ -16,7 +16,8 @@
 #include "Direct3D9Box.h"
 #include "Direct3D9.h"
 
-#include "Direct3D9Canvas.h"
+#include "DirectSound.h"
+#include "DirectSoundBuffer.h"
 
 #include "matrix4x4.h"
 #include "vector3.h"
@@ -35,6 +36,8 @@ using blue_sky::Stage;
 Direct3D9Mesh* mesh_ = 0;
 Direct3D9Box* box_ = 0;
 Direct3D9Box* player_shadow_box_ = 0;
+
+DirectSoundBuffer* direct_sound_buffer_ = 0;
 
 Player* player_ = 0;
 Camera* camera_ = 0;
@@ -67,6 +70,10 @@ CGameMain::CGameMain()
 	box_ = new Direct3D9Box( direct_3d_, 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
 
 	player_shadow_box_ = new Direct3D9Box( direct_3d_, 1.f, 0.1f, 1.f, D3DCOLOR_RGBA( 0, 0, 0, 127 ) );
+
+	// DirectSound
+	direct_sound_ = new DirectSound( app->GetWindowHandle() );
+	direct_sound_buffer_ = direct_sound_->load_wave_file( "test.wav" );
 
 	// Player
 	player_ = new Player();
@@ -130,6 +137,10 @@ CGameMain::~CGameMain()
 	delete player_shadow_box_;
 
 	delete direct_3d_;
+
+	delete direct_sound_buffer_;
+
+	delete direct_sound_;
 }
 
 static int fps = 0, last_fps = 0;
@@ -168,7 +179,7 @@ void CGameMain::update()
 	if ( GetAsyncKeyState( 'D' ) & 0x8000 ) { player_->velocity().x() += speed; }
 	if ( GetAsyncKeyState( 'W' ) & 0x8000 ) { player_->velocity().z() += speed; }
 	if ( GetAsyncKeyState( 'S' ) & 0x8000 ) { player_->velocity().z() -= speed; }
-	if ( GetAsyncKeyState( VK_LBUTTON ) & 0x8000 ) { player_->jump(); }
+	if ( GetAsyncKeyState( VK_LBUTTON ) & 0x8000 ) { player_->jump(); direct_sound_buffer_->play(); }
 
 	player_->set_floor_height( stage_->map_chip( static_cast< int >( player_->position().x() ), static_cast< int >( player_->position().z() ) ) ); 
 	player_->update();

@@ -31,7 +31,7 @@ Direct3D9::Direct3D9( HWND hwnd )
 //	present.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 
 #ifdef PREF_HUD
-	for ( int n = 0; n < direct_3d_->GetAdapterCount(); n++ )
+	for ( UINT n = 0; n < direct_3d_->GetAdapterCount(); n++ )
 	{
 		D3DADAPTER_IDENTIFIER9 adapter_identifier;
 

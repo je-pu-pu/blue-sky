@@ -32,6 +32,13 @@
     <ClCompile Include="Direct3D9Box.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
+    <ClCompile Include="DirectSound.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectSoundBuffer.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="WaveFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -63,5 +70,12 @@
     <ClInclude Include="Direct3D9Box.h">
       <Filter>DirectX</Filter>
     </ClInclude>
+    <ClInclude Include="DirectSound.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectSoundBuffer.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="WaveFile.h" />
   </ItemGroup>
 </Project>

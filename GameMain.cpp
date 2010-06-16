@@ -64,7 +64,7 @@ CGameMain::CGameMain()
 
 	// Mesh
 	mesh_ = new Direct3D9Mesh( direct_3d_ );
-	mesh_->loadX( "hoge.x" );
+	mesh_->loadX( "media/model/hoge.x" );
 
 	// Box
 	box_ = new Direct3D9Box( direct_3d_, 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
@@ -73,7 +73,7 @@ CGameMain::CGameMain()
 
 	// DirectSound
 	direct_sound_ = new DirectSound( app->GetWindowHandle() );
-	direct_sound_buffer_ = direct_sound_->load_wave_file( "test.wav" );
+	direct_sound_buffer_ = direct_sound_->load_wave_file( "media/sound/test.wav" );
 
 	// Player
 	player_ = new Player();

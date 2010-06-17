@@ -12,13 +12,21 @@ class DirectSoundBuffer
 private:
 	LPDIRECTSOUNDBUFFER		buffer_;	///< DirectSoundBuffer
 
+	float speed_; ///< 
 public:
 	DirectSoundBuffer( LPDIRECTSOUNDBUFFER );
 	~DirectSoundBuffer();
 	
-	void play();
+	void play( bool = false );
 
 	LPDIRECTSOUNDBUFFER getBuffer() { return buffer_; }
+
+	float getSpeed() const { return speed_; }
+	void setSpeed( float s ) { speed_ = s; buffer_->SetFrequency( DSBFREQUENCY_ORIGINAL ); setFrequency( static_cast< DWORD >( getFrequency() * speed_ ) ); }
+
+	DWORD getFrequency() const { DWORD f; buffer_->GetFrequency( & f ); return f; }
+	void setFrequency( DWORD f ) { buffer_->SetFrequency( f ); }
+
 
 }; // class DirectSound
 

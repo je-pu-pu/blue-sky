@@ -44,8 +44,10 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IncludePath);D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;E:\je\program\lib\c++;D:\lib\boost</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IncludePath);D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;E:\je\program\lib\c++;D:\lib\boost</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IncludePath);D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;E:\je\program\lib\c++;D:\lib\boost;D:\lib\libogg\include;D:\lib\libvorbis\include</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IncludePath);D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;E:\je\program\lib\c++;D:\lib\boost;D:\lib\libogg\include;D:\lib\libvorbis\include</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">./lib/debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">./lib/release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -168,6 +170,7 @@
     </ClCompile>
     <ClCompile Include="matrix4x4.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="OggVorbisFile.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="Util.cpp" />
@@ -193,6 +196,7 @@
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="matrix4x4.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="OggVorbisFile.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="Type.h" />

@@ -39,6 +39,7 @@
       <Filter>DirectX</Filter>
     </ClCompile>
     <ClCompile Include="WaveFile.cpp" />
+    <ClCompile Include="OggVorbisFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -77,5 +78,6 @@
       <Filter>DirectX</Filter>
     </ClInclude>
     <ClInclude Include="WaveFile.h" />
+    <ClInclude Include="OggVorbisFile.h" />
   </ItemGroup>
 </Project>

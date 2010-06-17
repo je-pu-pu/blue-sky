@@ -19,6 +19,8 @@
 #include "DirectSound.h"
 #include "DirectSoundBuffer.h"
 
+#include "OggVorbisFile.h"
+
 #include "matrix4x4.h"
 #include "vector3.h"
 
@@ -73,7 +75,9 @@ CGameMain::CGameMain()
 
 	// DirectSound
 	direct_sound_ = new DirectSound( app->GetWindowHandle() );
-	direct_sound_buffer_ = direct_sound_->load_wave_file( "media/sound/test.wav" );
+	// direct_sound_buffer_ = direct_sound_->load_wave_file( "media/sound/test.wav" );
+	direct_sound_buffer_ = direct_sound_->load_wave_file( "media/music/tower.wav" );
+	direct_sound_buffer_->play( true );
 
 	// Player
 	player_ = new Player();
@@ -122,6 +126,8 @@ CGameMain::CGameMain()
 		COMMON_THROW_EXCEPTION;
 	}
 	*/
+
+	OggVorbisFile ogg_vorbis_file( "media/music/rain.ogg" );
 }
 
 //■デストラクタ
@@ -175,14 +181,25 @@ void CGameMain::update()
 	// Player
 	const float speed = 0.001f;
 
-	if ( GetAsyncKeyState( 'A' ) & 0x8000 ) { player_->velocity().x() -= speed; }
-	if ( GetAsyncKeyState( 'D' ) & 0x8000 ) { player_->velocity().x() += speed; }
+	if ( GetAsyncKeyState( 'A' ) & 0x8000 ) { player_->velocity().x() -= speed; direct_sound_buffer_->setFrequency( direct_sound_buffer_->getFrequency() - 10 ); }
+	if ( GetAsyncKeyState( 'D' ) & 0x8000 ) { player_->velocity().x() += speed; direct_sound_buffer_->setFrequency( direct_sound_buffer_->getFrequency() + 10 ); }
 	if ( GetAsyncKeyState( 'W' ) & 0x8000 ) { player_->velocity().z() += speed; }
 	if ( GetAsyncKeyState( 'S' ) & 0x8000 ) { player_->velocity().z() -= speed; }
-	if ( GetAsyncKeyState( VK_LBUTTON ) & 0x8000 ) { player_->jump(); direct_sound_buffer_->play(); }
+	if ( GetAsyncKeyState( VK_LBUTTON ) & 0x8000 ) { player_->jump(); }
 
 	player_->set_floor_height( stage_->map_chip( static_cast< int >( player_->position().x() ), static_cast< int >( player_->position().z() ) ) ); 
 	player_->update();
+
+	float target_speed = 1.f + player_->velocity().length();
+	float target_speed_accell = 0.01f;
+
+	if ( player_->jumping() )
+	{
+		target_speed = 1.f + player_->velocity().length();
+		target_speed_accell = 0.1f;
+	}
+
+	direct_sound_buffer_->setSpeed( math::chase( direct_sound_buffer_->getSpeed(), target_speed, target_speed_accell ) );
 
 	camera_->position() = player_->position() + vector3( 0.f, 1.5f, 0.f );
 	

@@ -1,4 +1,7 @@
 #include "Player.h"
+#include "GameMain.h"
+#include "SoundManager.h"
+#include "Sound.h"
 
 namespace blue_sky
 {
@@ -27,6 +30,8 @@ void Player::update()
 		velocity().y() *= -0.2f;
 
 		jumping_ = false;
+
+		GameMain::getInstance()->getSoundManager()->get_sound( "test" )->stop();
 	}
 
 	velocity().y() -= 0.008f;
@@ -50,6 +55,8 @@ void Player::jump()
 	velocity_.set( 0.f, 0.5f, 0.f );
 	
 	jumping_ = true;
+
+	GameMain::getInstance()->getSoundManager()->get_sound( "test" )->play( true );
 }
 
 /**

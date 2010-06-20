@@ -32,6 +32,8 @@ public:
 //	virtual game::Sound* load( const char*, const char* );
 	virtual game::Sound* createSound( const char* );
 
+	virtual void update();
+
 }; // class SoundManager
 
 } // namespace game

@@ -25,10 +25,19 @@ SoundManager::~SoundManager()
 
 game::Sound* SoundManager::createSound( const char* file_name )
 {
-	Sound* sound = new Sound( direct_sound_ );
+	// Sound* sound = new Sound( direct_sound_ );
+	Sound* sound = new StreamingSound( direct_sound_ );
 	sound->load( file_name );
 
 	return sound;
+}
+
+void SoundManager::update()
+{
+	for( SoundMap::iterator i = sound_map().begin(); i != sound_map().end(); ++i )
+	{
+		i->second->update();
+	}
 }
 
 }

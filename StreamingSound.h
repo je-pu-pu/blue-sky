@@ -2,6 +2,7 @@
 #define BLUE_SKY_STREAMING_SOUND_H
 
 #include "Sound.h"
+#include <windows.h>
 
 namespace blue_sky
 {
@@ -22,6 +23,13 @@ public:
 
 	/// ファイルを読み込む
 	bool load( const char* );
+
+	/// 更新処理
+	void update();
+
+	static DWORD get_buffer_size() { return 512 * 1024; /* 512 KB */ };
+
+
 
 }; // class StreamingSound
 

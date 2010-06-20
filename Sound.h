@@ -26,7 +26,7 @@ public:
 	Sound( const DirectSound* );
 
 	/// デストラクタ
-	~Sound();
+	virtual ~Sound();
 
 	/// ファイルを読み込む
 	bool load( const char* );
@@ -47,7 +47,7 @@ public:
 	bool play( bool );
 
 	/// サウンドを停止する
-	bool stop() { return true; };
+	bool stop();
 
 	DirectSoundBuffer* get_direct_sound_buffer() { return direct_sound_buffer_; };
 	void set_direct_sound_buffer( DirectSoundBuffer* b ) { direct_sound_buffer_ = b; }

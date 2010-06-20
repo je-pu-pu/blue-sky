@@ -79,6 +79,9 @@ GameMain::GameMain()
 	Sound* bgm = sound_manager_->load( "bgm", "media/music/tower.wav" );
 	bgm->play( true );
 
+	Sound* test = sound_manager_->load( "test", "media/sound/test.wav" );
+	test->set_speed( 0.5f );
+
 	// Player
 	player_ = new Player();
 	player_->position().set( 50.f, 10.f, 0.f );

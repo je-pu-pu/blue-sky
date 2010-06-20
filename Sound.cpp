@@ -77,4 +77,11 @@ bool Sound::play( bool loop )
 	return true;
 }
 
+bool Sound::stop()
+{
+	direct_sound_buffer_->get_direct_sound_buffer()->Stop();
+
+	return true;
+}
+
 } // namespace blue_sky

@@ -32,7 +32,7 @@ protected:
 	GameMain();					///< コンストラクタ
 
 public:
-	static GameMain* GetInstange(){ static GameMain gm; return &gm; }
+	static GameMain* getInstance(){ static GameMain gm; return & gm; }
 	~GameMain();				//デストラクタ
 
 	void update();				///< メインループ
@@ -40,6 +40,8 @@ public:
 
 	const CMainLoop& getMainLoop() const { return MainLoop; }
 	// float getSPF() const { return }
+
+	SoundManager* getSoundManager() { return sound_manager_; }
 
 }; // class GameMain
 

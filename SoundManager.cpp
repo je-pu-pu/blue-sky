@@ -1,5 +1,6 @@
 #include "SoundManager.h"
 #include "Sound.h"
+#include "StreamingSound.h"
 
 #include "DirectSound.h"
 
@@ -24,8 +25,8 @@ SoundManager::~SoundManager()
 
 game::Sound* SoundManager::createSound( const char* file_name )
 {
-	Sound* sound = new Sound();
-	sound->set_direct_sound_buffer( direct_sound_->load_wave_file( file_name ) );
+	Sound* sound = new Sound( direct_sound_ );
+	sound->load( file_name );
 
 	return sound;
 }

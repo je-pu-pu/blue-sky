@@ -3,7 +3,9 @@
 
 #include <game/Sound.h>
 
+class DirectSound;
 class DirectSoundBuffer;
+
 
 namespace blue_sky
 {
@@ -14,13 +16,14 @@ namespace blue_sky
  */
 class Sound : public game::Sound
 {
-private:
+protected:
+	const DirectSound* direct_sound_;
 	DirectSoundBuffer* direct_sound_buffer_;
 
 public:
 
 	/// コンストラクタ
-	Sound();
+	Sound( const DirectSound* );
 
 	/// デストラクタ
 	~Sound();
@@ -54,6 +57,6 @@ public:
 
 }; // class Sound
 
-} // namespace game
+} // namespace blue_sky
 
 #endif // BLUE_SKY_SOUND_H

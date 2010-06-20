@@ -42,6 +42,7 @@
     <ClCompile Include="OggVorbisFile.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="SoundManager.cpp" />
+    <ClCompile Include="StreamingSound.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -83,5 +84,6 @@
     <ClInclude Include="OggVorbisFile.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="StreamingSound.h" />
   </ItemGroup>
 </Project>

@@ -19,7 +19,7 @@ public:
 	
 	void play( bool = false );
 
-	LPDIRECTSOUNDBUFFER getBuffer() { return buffer_; }
+	LPDIRECTSOUNDBUFFER get_direct_sound_buffer() { return buffer_; }
 
 	float getSpeed() const { return speed_; }
 	void setSpeed( float s ) { speed_ = s; buffer_->SetFrequency( DSBFREQUENCY_ORIGINAL ); setFrequency( static_cast< DWORD >( getFrequency() * speed_ ) ); }

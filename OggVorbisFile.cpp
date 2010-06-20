@@ -11,7 +11,12 @@ OggVorbisFile::OggVorbisFile( const char* file_name )
 {
 	OggVorbis_File file;
 
-	ov_fopen( const_cast< char* >( file_name ), & file );
+	int error = ov_fopen( const_cast< char* >( file_name ), & file );
+
+	if ( error != 0 )
+	{
+		COMMON_THROW_EXCEPTION;
+	}
 
 	ov_clear( & file );
 }

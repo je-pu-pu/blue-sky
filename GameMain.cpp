@@ -16,13 +16,14 @@
 #include "Direct3D9Box.h"
 #include "Direct3D9.h"
 
-#include "DirectSound.h"
-#include "DirectSoundBuffer.h"
+#include "SoundManager.h"
 
 #include "OggVorbisFile.h"
 
 #include "matrix4x4.h"
 #include "vector3.h"
+
+#include <game/Sound.h>
 
 #include <common/exception.h>
 #include <common/serialize.h>
@@ -31,26 +32,26 @@
 
 #include <boost/format.hpp>
 
-using blue_sky::Player;
-using blue_sky::Camera;
-using blue_sky::Stage;
-
 Direct3D9Mesh* mesh_ = 0;
 Direct3D9Box* box_ = 0;
 Direct3D9Box* player_shadow_box_ = 0;
 
-DirectSoundBuffer* direct_sound_buffer_ = 0;
+LPD3DXCONSTANTTABLE vs_constant_table;
+LPD3DXCONSTANTTABLE ps_constant_table;
+
+namespace blue_sky
+{
 
 Player* player_ = 0;
 Camera* camera_ = 0;
 Stage* stage_ = 0;
 
-LPD3DXCONSTANTTABLE vs_constant_table;
-LPD3DXCONSTANTTABLE ps_constant_table;
+using game::Sound;
 
 //■コンストラクタ
-CGameMain::CGameMain()
+GameMain::GameMain()
 	: direct_3d_( 0 )
+	, sound_manager_( 0 )
 	, Width( 0 )
 	, Height( 0 )
 {
@@ -73,11 +74,10 @@ CGameMain::CGameMain()
 
 	player_shadow_box_ = new Direct3D9Box( direct_3d_, 1.f, 0.1f, 1.f, D3DCOLOR_RGBA( 0, 0, 0, 127 ) );
 
-	// DirectSound
-	direct_sound_ = new DirectSound( app->GetWindowHandle() );
-	// direct_sound_buffer_ = direct_sound_->load_wave_file( "media/sound/test.wav" );
-	direct_sound_buffer_ = direct_sound_->load_wave_file( "media/music/tower.wav" );
-	direct_sound_buffer_->play( true );
+	// Sound
+	sound_manager_ = new SoundManager( app->GetWindowHandle() );
+	Sound* bgm = sound_manager_->load( "bgm", "media/music/tower.wav" );
+	bgm->play( true );
 
 	// Player
 	player_ = new Player();
@@ -131,7 +131,7 @@ CGameMain::CGameMain()
 }
 
 //■デストラクタ
-CGameMain::~CGameMain()
+GameMain::~GameMain()
 {
 	delete stage_;
 	delete camera_;
@@ -144,9 +144,7 @@ CGameMain::~CGameMain()
 
 	delete direct_3d_;
 
-	delete direct_sound_buffer_;
-
-	delete direct_sound_;
+	delete sound_manager_;
 }
 
 static int fps = 0, last_fps = 0;
@@ -155,7 +153,7 @@ static int fps = 0, last_fps = 0;
  * メインループ処理
  *
  */
-void CGameMain::update()
+void GameMain::update()
 {
 	MainLoop.WaitTime = 16;
 
@@ -181,8 +179,8 @@ void CGameMain::update()
 	// Player
 	const float speed = 0.001f;
 
-	if ( GetAsyncKeyState( 'A' ) & 0x8000 ) { player_->velocity().x() -= speed; direct_sound_buffer_->setFrequency( direct_sound_buffer_->getFrequency() - 10 ); }
-	if ( GetAsyncKeyState( 'D' ) & 0x8000 ) { player_->velocity().x() += speed; direct_sound_buffer_->setFrequency( direct_sound_buffer_->getFrequency() + 10 ); }
+	if ( GetAsyncKeyState( 'A' ) & 0x8000 ) { player_->velocity().x() -= speed; }
+	if ( GetAsyncKeyState( 'D' ) & 0x8000 ) { player_->velocity().x() += speed; }
 	if ( GetAsyncKeyState( 'W' ) & 0x8000 ) { player_->velocity().z() += speed; }
 	if ( GetAsyncKeyState( 'S' ) & 0x8000 ) { player_->velocity().z() -= speed; }
 	if ( GetAsyncKeyState( VK_LBUTTON ) & 0x8000 ) { player_->jump(); }
@@ -199,7 +197,8 @@ void CGameMain::update()
 		target_speed_accell = 0.1f;
 	}
 
-	direct_sound_buffer_->setSpeed( math::chase( direct_sound_buffer_->getSpeed(), target_speed, target_speed_accell ) );
+	Sound* bgm = sound_manager_->get_sound( "bgm" );
+	bgm->set_speed( math::chase( bgm->get_speed(), target_speed, target_speed_accell ) );
 
 	camera_->position() = player_->position() + vector3( 0.f, 1.5f, 0.f );
 	
@@ -225,7 +224,7 @@ void CGameMain::update()
 /**
  * 描画
  */
-void CGameMain::render()
+void GameMain::render()
 {
 	D3DXMATRIXA16 world, t;
 	D3DXMatrixIdentity( & world );
@@ -303,3 +302,5 @@ void CGameMain::render()
 	debug_text = std::string( "blue-sky | FPS : " ) + common::serialize( last_fps ) + ", player : " + common::serialize( player_->position().y() );
 	CApp::GetInstance()->setTitle( debug_text.c_str() );
 }
+
+} // namespace blue_sky

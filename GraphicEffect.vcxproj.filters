@@ -40,6 +40,8 @@
     </ClCompile>
     <ClCompile Include="WaveFile.cpp" />
     <ClCompile Include="OggVorbisFile.cpp" />
+    <ClCompile Include="Sound.cpp" />
+    <ClCompile Include="SoundManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -79,5 +81,7 @@
     </ClInclude>
     <ClInclude Include="WaveFile.h" />
     <ClInclude Include="OggVorbisFile.h" />
+    <ClInclude Include="Sound.h" />
+    <ClInclude Include="SoundManager.h" />
   </ItemGroup>
 </Project>

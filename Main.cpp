@@ -18,7 +18,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 		if( ! app->Init( hInst, nCmdShow) )	return 0;
 		
 		// ゲームを初期化する
-		CGameMain* game = CGameMain::GetInstange();
+		blue_sky::GameMain* game = blue_sky::GameMain::GetInstange();
 
 		// メッセージループ
 		return app->MessageLoop();

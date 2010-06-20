@@ -4,37 +4,45 @@
 //最終更新部分	ウィンドウズ管理部分をApp.cppに分離
 //■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 
-#ifndef GAME_MAIN_H
-#define GAME_MAIN_H
+#ifndef BLUE_SKY_GAME_MAIN_H
+#define BLUE_SKY_GAME_MAIN_H
 
 #include "MainLoop.h"
 #include <windows.h>
 
 class Direct3D9;
-class DirectSound;
 
-class CGameMain
+namespace blue_sky
+{
+
+class SoundManager;
+
+class GameMain
 {
 protected:
 	Direct3D9*		direct_3d_;		///< Direct3D
-	DirectSound*	direct_sound_;	///< DirectSound
+
+	SoundManager*	sound_manager_;	///< SoundManager
 
 	int				Width;			///< 横幅
 	int				Height;			///< 高さ
 
 	CMainLoop		MainLoop;		///< ループ管理
 
-	CGameMain();					///< コンストラクタ
+	GameMain();					///< コンストラクタ
 
 public:
-	static CGameMain* GetInstange(){ static CGameMain gm; return &gm; }
-	~CGameMain();				//デストラクタ
+	static GameMain* GetInstange(){ static GameMain gm; return &gm; }
+	~GameMain();				//デストラクタ
 
 	void update();				///< メインループ
 	void render();				///< 描画
 
 	const CMainLoop& getMainLoop() const { return MainLoop; }
 	// float getSPF() const { return }
-};
 
-#endif
+}; // class GameMain
+
+} // namespace blue_sky
+
+#endif // BLUE_SKY_GAME_MAIN_H

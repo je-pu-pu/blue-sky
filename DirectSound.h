@@ -23,6 +23,7 @@ public:
 	~DirectSound();
 	
 	DirectSoundBuffer* load_wave_file( const char* );
+	// DirectSoundBuffer* load_wave_file( const char* );
 	
 }; // class DirectSound
 

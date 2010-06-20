@@ -84,7 +84,7 @@ bool CApp::Init(HINSTANCE hi, int nCmdShow)
 	}
 	
 	// ƒQ[ƒ€‚ğ‰Šú‰»‚·‚é
-	CGameMain* game = CGameMain::GetInstange();
+	blue_sky::GameMain* game = blue_sky::GameMain::GetInstange();
 
 	ShowWindow( hWnd, nCmdShow );		//•\¦
 	UpdateWindow( hWnd );				//•`‰æ
@@ -101,6 +101,8 @@ int CApp::MessageLoop()
 {
 	MSG msg;
 
+	blue_sky::GameMain* game = blue_sky::GameMain::GetInstange();
+
 	while ( true )
 	{
 		if ( PeekMessage( & msg, NULL, 0, 0, PM_REMOVE ) )
@@ -115,7 +117,7 @@ int CApp::MessageLoop()
 		}
 		else
 		{
-			CGameMain::GetInstange()->update();
+			game->update();
 		}
 	}
 

@@ -2,10 +2,17 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GraphicEffect", "GraphicEffect.vcxproj", "{22070086-2606-4AAE-BA50-98040E748B74}"
+	ProjectSection(ProjectDependencies) = postProject
+		{71BEB03E-40CE-43D7-9F8D-C8E8DD8952AA} = {71BEB03E-40CE-43D7-9F8D-C8E8DD8952AA}
+		{8FD31BE5-D334-4354-89C9-1DADC7DE6543} = {8FD31BE5-D334-4354-89C9-1DADC7DE6543}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "E:\je\program\lib\c++\common\common.vcxproj", "{71BEB03E-40CE-43D7-9F8D-C8E8DD8952AA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "game", "E:\je\program\lib\c++\game\game.vcxproj", "{8FD31BE5-D334-4354-89C9-1DADC7DE6543}"
+	ProjectSection(ProjectDependencies) = postProject
+		{71BEB03E-40CE-43D7-9F8D-C8E8DD8952AA} = {71BEB03E-40CE-43D7-9F8D-C8E8DD8952AA}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

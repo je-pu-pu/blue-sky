@@ -89,3 +89,33 @@ DirectSoundBuffer* DirectSound::load_wave_file( const char* file_name )
 
 	return new DirectSoundBuffer( buffer );
 }
+
+/*
+DirectSoundBuffer* DirectSound::load_wave_file_streaming( const char* file_name )
+{
+	WaveFile wave_file( file_name );
+
+	DSBUFFERDESC buffer_desc = { sizeof( DSBUFFERDESC ) };
+	buffer_desc.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPAN | DSBCAPS_CTRLFREQUENCY;
+	buffer_desc.dwBufferBytes = wave_file.size();
+	buffer_desc.lpwfxFormat = & wave_file.format();
+
+	LPDIRECTSOUNDBUFFER buffer = 0;
+
+	if ( FAILED( direct_sound_->CreateSoundBuffer( & buffer_desc, & buffer,  0 ) ) )
+	{
+		COMMON_THROW_EXCEPTION;
+	}
+
+	void* data = 0;
+	DWORD size = 0;
+
+	buffer->Lock( 0, 0, & data, & size, 0, 0, DSBLOCK_ENTIREBUFFER );
+	
+	memcpy( data, wave_file.data(), wave_file.size() );
+	
+	buffer->Unlock( data, size, 0, 0 );
+
+	return new DirectSoundBuffer( buffer );
+}
+*/

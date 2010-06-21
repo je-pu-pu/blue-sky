@@ -1,10 +1,14 @@
 #include "DirectSoundBuffer.h"
+#include "DirectX.h"
+
+#include <common/exception.h>
 
 DirectSoundBuffer::DirectSoundBuffer( LPDIRECTSOUNDBUFFER buffer )
 	: buffer_( buffer )
 	, speed_( 1.f )
 {
-
+	caps_.dwSize = sizeof ( DSBCAPS );
+	DIRECT_X_FAIL_CHECK( buffer_->GetCaps( & caps_ ) );
 }
 
 DirectSoundBuffer::~DirectSoundBuffer()

@@ -76,10 +76,15 @@ GameMain::GameMain()
 
 	// Sound
 	sound_manager_ = new SoundManager( app->GetWindowHandle() );
-	Sound* bgm = sound_manager_->load( "bgm", "media/music/tower.wav" );
+	Sound* bgm = sound_manager_->load( "bgm", "media/music/tower.ogg" );
+	bgm->set_volume( 0.8f );
 	bgm->play( true );
 
-	Sound* test = sound_manager_->load( "test", "media/sound/test.wav" );
+	Sound* s = sound_manager_->load( "rain", "media/music/rain.ogg" );
+	s->play( true );
+
+	Sound* test = sound_manager_->load( "test", "media/sound/test.ogg" );
+	test->set_volume( 0.5f );
 	test->set_speed( 0.5f );
 
 	// Player
@@ -201,7 +206,7 @@ void GameMain::update()
 	}
 
 	Sound* bgm = sound_manager_->get_sound( "bgm" );
-	bgm->set_speed( math::chase( bgm->get_speed(), target_speed, target_speed_accell ) );
+//	bgm->set_speed( math::chase( bgm->get_speed(), target_speed, target_speed_accell ) );
 
 	camera_->position() = player_->position() + vector3( 0.f, 1.5f, 0.f );
 	
@@ -220,6 +225,8 @@ void GameMain::update()
 	under_view_speed = math::clamp( under_view_speed, -under_view_max_speed, under_view_max_speed );
 	
 	camera_->set_under_view_rate( camera_->get_under_view_rate() + under_view_speed );
+
+	sound_manager_->update();
 
 	render();
 }

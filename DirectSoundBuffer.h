@@ -11,6 +11,7 @@ class DirectSoundBuffer
 {
 private:
 	LPDIRECTSOUNDBUFFER		buffer_;	///< DirectSoundBuffer
+	DSBCAPS					caps_;		///< Caps
 
 	float speed_; ///< 
 public:
@@ -20,6 +21,7 @@ public:
 	void play( bool = false );
 
 	LPDIRECTSOUNDBUFFER get_direct_sound_buffer() { return buffer_; }
+	DSBCAPS& get_caps() { return caps_; }
 
 	float getSpeed() const { return speed_; }
 	void setSpeed( float s ) { speed_ = s; buffer_->SetFrequency( DSBFREQUENCY_ORIGINAL ); setFrequency( static_cast< DWORD >( getFrequency() * speed_ ) ); }

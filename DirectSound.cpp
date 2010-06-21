@@ -1,7 +1,6 @@
 #include "DirectSound.h"
 #include "DirectSoundBuffer.h"
 
-#include "WaveFile.h"
 #include <common/exception.h>
 #include <dxerr9.h>
 #include <string>

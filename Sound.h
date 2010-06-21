@@ -6,6 +6,15 @@
 class DirectSound;
 class DirectSoundBuffer;
 
+class WaveFile;
+class OggVorbisFile;
+
+namespace game
+{
+
+class SoundFile;
+
+} // namespace game
 
 namespace blue_sky
 {
@@ -16,9 +25,15 @@ namespace blue_sky
  */
 class Sound : public game::Sound
 {
+public:
+	// typedef WaveFile SoundFile;
+	typedef OggVorbisFile SoundFile;
+
 protected:
 	const DirectSound* direct_sound_;
 	DirectSoundBuffer* direct_sound_buffer_;
+
+	SoundFile* sound_file_;
 
 public:
 
@@ -32,8 +47,8 @@ public:
 	bool load( const char* );
 
 	/// ƒ{ƒŠƒ…[ƒ€
-	T get_volume() { return 0; };
-	void set_volume( T ) { };
+	T get_volume();
+	void set_volume( T );
 
 	/// ƒpƒ“
 	T get_pan() { return 0; };

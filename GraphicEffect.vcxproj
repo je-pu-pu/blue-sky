@@ -194,6 +194,7 @@
     <ClInclude Include="DirectInput.h" />
     <ClInclude Include="DirectSound.h" />
     <ClInclude Include="DirectSoundBuffer.h" />
+    <ClInclude Include="DirectX.h" />
     <ClInclude Include="Face.h" />
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="Line.h" />

@@ -23,7 +23,6 @@ public:
 	~DirectSound();
 	
 	DirectSoundBuffer* create_sound_buffer( const DSBUFFERDESC& ) const;
-	DirectSoundBuffer* create_streaming_sound_buffer( const DSBUFFERDESC& ) const;
 
 	LPDIRECTSOUND8 get_direct_sound() const { return direct_sound_; }
 	// LPDIRECTSOUNDBUFFER get_primary_buffer() { return primary_buffer_; }

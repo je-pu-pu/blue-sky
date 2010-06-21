@@ -10,8 +10,9 @@
 class WaveFile
 {
 private:
+	HMMIO			hmmio_;
+
 	WAVEFORMATEX	format_;
-	char*			data_;
 	
 	MMCKINFO		riff_chunk_;
 	MMCKINFO		format_chunk_;
@@ -23,8 +24,9 @@ public:
 	
 	WAVEFORMATEX& format() { return format_; }
 
-	char* data() { return data_; }
+//	char* data() { return data_; }
 	DWORD size() const { return data_chunk_.cksize; }
+	DWORD read( void*, DWORD );
 
 }; // class DirectSound
 

@@ -56,6 +56,13 @@ bool StreamingSound::load( const char* file_name )
 	return true;
 }
 
+bool StreamingSound::play( bool loop )
+{
+	direct_sound_buffer_->play( true );
+
+	return true;
+}
+
 void StreamingSound::update()
 {
 	DWORD play_pos = 0;

@@ -28,7 +28,15 @@ Direct3D9::Direct3D9( HWND hwnd )
 
 	present.EnableAutoDepthStencil = TRUE;
 	present.AutoDepthStencilFormat = D3DFMT_D16;
-	present.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
+//	present.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
+//	present.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
+
+	DWORD multi_sample_quality = 0;
+	if ( SUCCEEDED( direct_3d_->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, D3DFMT_A32B32G32R32F, true, D3DMULTISAMPLE_4_SAMPLES, & multi_sample_quality ) ) )
+	{
+		present.MultiSampleType = D3DMULTISAMPLE_4_SAMPLES;
+		present.MultiSampleQuality = multi_sample_quality - 1;
+	}
 
 #ifdef PREF_HUD
 	for ( UINT n = 0; n < direct_3d_->GetAdapterCount(); n++ )
@@ -78,7 +86,7 @@ Direct3D9::Direct3D9( HWND hwnd )
 		int x = 0;
 	}
 
-
+	device_->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, TRUE );
 }
 
 Direct3D9::~Direct3D9()

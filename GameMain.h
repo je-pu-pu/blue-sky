@@ -15,6 +15,7 @@ class Direct3D9;
 namespace blue_sky
 {
 
+class Input;
 class SoundManager;
 
 class GameMain
@@ -22,6 +23,7 @@ class GameMain
 protected:
 	Direct3D9*		direct_3d_;		///< Direct3D
 
+	Input*			input_;			///< Input
 	SoundManager*	sound_manager_;	///< SoundManager
 
 	int				Width;			///< ‰¡•

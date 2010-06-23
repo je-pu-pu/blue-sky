@@ -17,6 +17,7 @@
 #include "Direct3D9.h"
 #include "DirectX.h"
 
+#include "Input.h"
 #include "SoundManager.h"
 
 #include "OggVorbisFile.h"
@@ -52,6 +53,7 @@ using game::Sound;
 //■コンストラクタ
 GameMain::GameMain()
 	: direct_3d_( 0 )
+	, input_( 0 )
 	, sound_manager_( 0 )
 	, Width( 0 )
 	, Height( 0 )
@@ -76,18 +78,28 @@ GameMain::GameMain()
 
 	player_shadow_box_ = new Direct3D9Box( direct_3d_, 1.f, 0.1f, 1.f, D3DCOLOR_RGBA( 0, 0, 0, 127 ) );
 
+	// Input
+	input_ = new Input();
+
 	// Sound
-	sound_manager_ = new SoundManager( app->GetWindowHandle() );
-	Sound* bgm = sound_manager_->load( "bgm", "media/music/tower.ogg" );
-	bgm->set_volume( 0.8f );
-	bgm->play( true );
+	{
+		sound_manager_ = new SoundManager( app->GetWindowHandle() );
+		Sound* bgm = sound_manager_->load( "bgm", "media/music/tower.ogg" );
+		bgm->play( true );
 
-	Sound* s = sound_manager_->load( "rain", "media/music/rain.ogg" );
-	s->play( true );
+		Sound* rain = sound_manager_->load( "rain", "media/music/rain.ogg" );
+		rain->play( true );
 
-	Sound* test = sound_manager_->load( "test", "media/sound/test.ogg" );
-//	test->set_volume( 0.5f );
-	test->set_speed( 0.5f );
+		Sound* izakaya = sound_manager_->load( "izakaya", "media/music/izakaya.ogg" );
+//		izakaya->set_volume( 0.8f );
+		izakaya->play( false );
+
+		Sound* jump = sound_manager_->load( "jump", "media/sound/jump.ogg" );
+		jump->set_speed( 0.5f );
+
+		Sound* land = sound_manager_->load( "land", "media/sound/land.ogg" );
+		land->set_speed( 0.5f );
+	}
 
 	// Player
 	player_ = new Player();
@@ -129,15 +141,6 @@ GameMain::GameMain()
 
 	// Stage
 	stage_ = new Stage( 100, 100 );
-
-	/*
-	if ( FAILED( direct_3d_->getVertexBuffer()->Lock( 0, 0, reinterpret_cast< void** >( & point_sprite_ ), 0 ) ) )
-	{
-		COMMON_THROW_EXCEPTION;
-	}
-	*/
-
-	OggVorbisFile ogg_vorbis_file( "media/music/rain.ogg" );
 }
 
 //■デストラクタ
@@ -153,6 +156,8 @@ GameMain::~GameMain()
 	delete player_shadow_box_;
 
 	delete direct_3d_;
+
+	delete input_;
 
 	delete sound_manager_;
 }
@@ -185,39 +190,46 @@ void GameMain::update()
 
 	fps++;
 	
-	if ( GetAsyncKeyState( 'A' ) & 0x8000 ) { player_->side_step( -1 ); }
-	if ( GetAsyncKeyState( 'D' ) & 0x8000 ) { player_->side_step( +1 ); }
-	if ( GetAsyncKeyState( 'W' ) & 0x8000 ) { player_->step( +1 ); }
-	if ( GetAsyncKeyState( 'S' ) & 0x8000 ) { player_->step( -1 ); }
-	if ( GetAsyncKeyState( 'Q' ) & 0x8000 ) { player_->turn( -1 ); }
-	if ( GetAsyncKeyState( 'E' ) & 0x8000 ) { player_->turn( +1 ); }
+	input_->update();
 
-	if ( GetAsyncKeyState( VK_LBUTTON ) & 0x8000 ) { player_->jump(); }
+	if ( input_->press( Input::LEFT  ) ) { player_->side_step( -1 ); }
+	if ( input_->press( Input::RIGHT ) ) { player_->side_step( +1 ); }
+	if ( input_->press( Input::UP    ) ) { player_->step( +1 ); }
+	if ( input_->press( Input::DOWN  ) ) { player_->step( -1 ); }
+	
+	if ( input_->push( Input::L ) ) { player_->turn( -1 ); }
+	if ( input_->push( Input::R ) ) { player_->turn( +1 ); }
+
+	if ( input_->push( Input::A ) ) { player_->jump(); }
 
 	player_->set_floor_height( 20 ); // stage_->map_chip( static_cast< int >( player_->position().x() ), static_cast< int >( player_->position().z() ) ) ); 
 	player_->update();
 
-	float target_speed = 1.f + player_->velocity().length();
-	float target_speed_accell = 0.01f;
+	Sound* bgm = sound_manager_->get_sound( "bgm" );
+	Sound* izakaya = sound_manager_->get_sound( "izakaya" );
 
-	if ( player_->jumping() )
+	if ( player_->is_jumping() )
 	{
-		target_speed = 1.f + player_->velocity().length();
-		target_speed_accell = 0.1f;
+		bgm->set_speed( 1.41421356f );
+		izakaya->set_speed( 1.41421356f );
+		izakaya->set_volume( 0.8f );
+	}
+	else
+	{
+		bgm->set_speed( 1.f );
+		izakaya->set_speed( 1.f );
+		izakaya->set_volume( 1.f );
 	}
 
-	Sound* bgm = sound_manager_->get_sound( "bgm" );
-//	bgm->set_speed( math::chase( bgm->get_speed(), target_speed, target_speed_accell ) );
-
 	camera_->position() = player_->position() + vector3( 0.f, 1.5f, 0.f );
-	camera_->look_at() = camera_->position() + player_->front();
+	camera_->set_front_target( player_->front() );
 	
-	const float under_view_max_speed = 0.05f;
+	const float under_view_max_speed = 0.1f;
 	static float under_view_speed = 0.f;
 
-	if ( GetAsyncKeyState( VK_RBUTTON ) & 0x8000 )
+	if ( player_->is_jumping() || input_->press( Input::B ) )
 	{
-		under_view_speed += 0.01f;
+		under_view_speed += 0.02f;
 	}
 	else
 	{
@@ -227,6 +239,7 @@ void GameMain::update()
 	under_view_speed = math::clamp( under_view_speed, -under_view_max_speed, under_view_max_speed );
 	
 	camera_->set_under_view_rate( camera_->get_under_view_rate() + under_view_speed );
+	camera_->update();
 
 	sound_manager_->update();
 
@@ -251,7 +264,7 @@ void GameMain::render()
 	direct_3d_->getDevice()->SetTransform( D3DTS_VIEW, & view );
 
 	D3DXMATRIXA16 projection;
-	D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() ), 720.f / 480.f, 0.01f, 400.f );
+	D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() ), 720.f / 480.f, 0.01f, 300.f );
 	direct_3d_->getDevice()->SetTransform( D3DTS_PROJECTION, & projection );
 
 	D3DXMATRIX WorldViewProjection = world * view * projection;
@@ -260,20 +273,33 @@ void GameMain::render()
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xEE, 0xEE, 0xFF ), 1.f, 0 ) );
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->BeginScene() );
 
-	direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
-	direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE );
-	direct_3d_->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF );
+//	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE ) );
+//	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
+//	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF ) );
 
-//	direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE );
-	direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
-	direct_3d_->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA ) );
 
-//	direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_FLAT );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGCOLOR, D3DCOLOR_XRGB( 255, 255, 255 ) ) );
+//	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGTABLEMODE, D3DFOG_LINEAR ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGVERTEXMODE, D3DFOG_LINEAR ) );
+//	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_RANGEFOGENABLE, TRUE ) );
 
-	mesh_->render();
+	float Start = 0.1f;
+	float End = 0.5f;
+
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGSTART, *(DWORD *)(&Start)) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGEND,   *(DWORD *)(&End)) );
 
 	direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
 
+	mesh_->render();
+
+	/*
+	direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
+	
 	box_->ready();
 
 	for ( int z = 0; z < stage_->depth(); z++ )
@@ -295,6 +321,7 @@ void GameMain::render()
 			}
 		}
 	}
+	*/
 
 	D3DXMatrixTranslation( & world, player_->position().x(), player_->get_floor_height(), player_->position().z() );
 	direct_3d_->getDevice()->SetTransform( D3DTS_WORLD, & world );

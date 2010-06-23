@@ -27,7 +27,7 @@ private:
 	vector3		front_;			///< 前
 	vector3		right_;			///< 右
 	
-	bool		jumping_;		///< ジャンプ中フラグ
+	bool		is_jumping_;	///< ジャンプ中フラグ
 	float		floor_height_;	///< 足場の高さ
 	
 	float max_speed();
@@ -46,8 +46,8 @@ public:
 	void side_step( float );
 	void turn( int );
 
-	float get_step_speed() const { return 0.001f; }
-	float get_side_step_speed() const { return 0.001f; }
+	float get_step_speed() const { return 0.002f; }
+	float get_side_step_speed() const { return 0.002f; }
 
 	/// 更新
 	void update();
@@ -55,7 +55,7 @@ public:
 	/// ジャンプ処理
 	void jump();
 
-	bool jumping() { return jumping_; }
+	bool is_jumping() { return is_jumping_; }
 
 	float get_floor_height() const { return floor_height_; }
 	void set_floor_height( float h ) { floor_height_ = h; }

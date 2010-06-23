@@ -25,10 +25,10 @@ SoundManager::~SoundManager()
 
 game::Sound* SoundManager::createSound( const char* file_name )
 {
-	Sound::SoundFile file( file_name );
+	Sound::SoundFile* file = new Sound::SoundFile( file_name );
 	Sound* sound = 0;
 
-	if ( file.size() <= StreamingSound::get_buffer_size() )
+	if ( file->size() <= StreamingSound::get_buffer_size() )
 	{
 		sound = new Sound( direct_sound_ );
 	}
@@ -36,6 +36,8 @@ game::Sound* SoundManager::createSound( const char* file_name )
 	{
 		sound = new StreamingSound( direct_sound_ );
 	}
+
+	delete file;
 
 	sound->load( file_name );
 

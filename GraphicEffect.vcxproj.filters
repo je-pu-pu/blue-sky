@@ -43,6 +43,7 @@
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="StreamingSound.cpp" />
+    <ClCompile Include="Input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -88,5 +89,6 @@
     <ClInclude Include="DirectX.h">
       <Filter>DirectX</Filter>
     </ClInclude>
+    <ClInclude Include="Input.h" />
   </ItemGroup>
 </Project>

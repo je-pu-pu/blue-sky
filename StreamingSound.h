@@ -27,6 +27,9 @@ public:
 	/// ファイルを読み込む
 	bool load( const char* );
 
+	/// サウンドを再生する
+	bool play( bool );
+
 	/// 更新処理
 	void update();
 

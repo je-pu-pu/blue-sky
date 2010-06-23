@@ -13,7 +13,7 @@ OggVorbisFile::OggVorbisFile( const char* file_name )
 
 	if ( error != 0 )
 	{
-		COMMON_THROW_EXCEPTION;
+		COMMON_THROW_EXCEPTION_SERIALIZE( error );
 	}
 
 	vorbis_info_ = ov_info( & file_, -1 );

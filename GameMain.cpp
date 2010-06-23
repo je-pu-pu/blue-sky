@@ -15,6 +15,7 @@
 #include "Direct3D9Mesh.h"
 #include "Direct3D9Box.h"
 #include "Direct3D9.h"
+#include "DirectX.h"
 
 #include "SoundManager.h"
 
@@ -67,7 +68,8 @@ GameMain::GameMain()
 
 	// Mesh
 	mesh_ = new Direct3D9Mesh( direct_3d_ );
-	mesh_->loadX( "media/model/hoge.x" );
+	// mesh_->loadX( "media/model/hoge.x" );
+	mesh_->loadX( "media/model/blue-sky-building-a-field.x" );
 
 	// Box
 	box_ = new Direct3D9Box( direct_3d_, 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
@@ -84,7 +86,7 @@ GameMain::GameMain()
 	s->play( true );
 
 	Sound* test = sound_manager_->load( "test", "media/sound/test.ogg" );
-	test->set_volume( 0.5f );
+//	test->set_volume( 0.5f );
 	test->set_speed( 0.5f );
 
 	// Player
@@ -183,17 +185,16 @@ void GameMain::update()
 
 	fps++;
 	
+	if ( GetAsyncKeyState( 'A' ) & 0x8000 ) { player_->side_step( -1 ); }
+	if ( GetAsyncKeyState( 'D' ) & 0x8000 ) { player_->side_step( +1 ); }
+	if ( GetAsyncKeyState( 'W' ) & 0x8000 ) { player_->step( +1 ); }
+	if ( GetAsyncKeyState( 'S' ) & 0x8000 ) { player_->step( -1 ); }
+	if ( GetAsyncKeyState( 'Q' ) & 0x8000 ) { player_->turn( -1 ); }
+	if ( GetAsyncKeyState( 'E' ) & 0x8000 ) { player_->turn( +1 ); }
 
-	// Player
-	const float speed = 0.001f;
-
-	if ( GetAsyncKeyState( 'A' ) & 0x8000 ) { player_->velocity().x() -= speed; }
-	if ( GetAsyncKeyState( 'D' ) & 0x8000 ) { player_->velocity().x() += speed; }
-	if ( GetAsyncKeyState( 'W' ) & 0x8000 ) { player_->velocity().z() += speed; }
-	if ( GetAsyncKeyState( 'S' ) & 0x8000 ) { player_->velocity().z() -= speed; }
 	if ( GetAsyncKeyState( VK_LBUTTON ) & 0x8000 ) { player_->jump(); }
 
-	player_->set_floor_height( stage_->map_chip( static_cast< int >( player_->position().x() ), static_cast< int >( player_->position().z() ) ) ); 
+	player_->set_floor_height( 20 ); // stage_->map_chip( static_cast< int >( player_->position().x() ), static_cast< int >( player_->position().z() ) ) ); 
 	player_->update();
 
 	float target_speed = 1.f + player_->velocity().length();
@@ -209,6 +210,7 @@ void GameMain::update()
 //	bgm->set_speed( math::chase( bgm->get_speed(), target_speed, target_speed_accell ) );
 
 	camera_->position() = player_->position() + vector3( 0.f, 1.5f, 0.f );
+	camera_->look_at() = camera_->position() + player_->front();
 	
 	const float under_view_max_speed = 0.05f;
 	static float under_view_speed = 0.f;
@@ -255,14 +257,14 @@ void GameMain::render()
 	D3DXMATRIX WorldViewProjection = world * view * projection;
 	vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
 
-	FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xEE, 0xEE, 0xFF ), 1.f, 0 ) );
-	FAIL_CHECK( direct_3d_->getDevice()->BeginScene() );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xEE, 0xEE, 0xFF ), 1.f, 0 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->BeginScene() );
 
 	direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF );
 
-	direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE );
+//	direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
 	direct_3d_->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 
@@ -304,8 +306,8 @@ void GameMain::render()
 	player_shadow_box_->render();
 
 
-	FAIL_CHECK( direct_3d_->getDevice()->EndScene() );
-	FAIL_CHECK( direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->EndScene() );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL ) );
 
 	// Debug
 	std::string debug_text;

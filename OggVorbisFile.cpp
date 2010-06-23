@@ -1,5 +1,7 @@
 #include "OggVorbisFile.h"
+
 #include <common/exception.h>
+#include <common/serialize.h>
 
 #pragma comment ( lib, "libogg_static.lib" )
 #pragma comment ( lib, "libvorbis_static.lib" )
@@ -45,7 +47,7 @@ OggVorbisFile::SizeType OggVorbisFile::size() const
 OggVorbisFile::SizeType OggVorbisFile::read( void* data, SizeType size )
 {
 	int bs = 0;
-	long read_bytes = 0;
+	SizeType read_bytes = 0;
 	char* ptr = static_cast< char* >( data );
 
 	while ( true )
@@ -54,11 +56,16 @@ OggVorbisFile::SizeType OggVorbisFile::read( void* data, SizeType size )
 
 		if ( result == 0 )
 		{
-			if ( int r = ov_raw_seek( & file_, 0 ) != 0 )
+			if ( int r = ov_raw_seek_lap( & file_, 0 ) != 0 )
 			{
 				COMMON_THROW_EXCEPTION;
 			}
-			break;
+
+			memset( ptr, 0, size - read_bytes );
+		}
+		else if ( result < 0 )
+		{
+			COMMON_THROW_EXCEPTION_MESSAGE( std::string( "ov_read returns : " ) + common::serialize( result ) );
 		}
 
 		ptr += result;

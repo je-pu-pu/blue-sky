@@ -3,13 +3,44 @@
 #include "SoundManager.h"
 #include "Sound.h"
 
+#include "Direct3D9.h"
+
+#include "matrix4x4.h"
+
+#include <common/exception.h>
+
 namespace blue_sky
 {
 
 Player::Player()
 	 : jumping_( false )
+	 , direction_( FRONT )
 {
 	//
+}
+
+void Player::step( float s )
+{
+	velocity() += front() * s * get_step_speed();
+}
+
+void Player::side_step( float s )
+{
+	velocity() += right() * s * get_side_step_speed();
+}
+
+void Player::turn( int d )
+{
+	direction_ = static_cast< Direction >( ( direction_ + d + DIRECTION_MAX ) % DIRECTION_MAX );
+
+	switch ( direction_ )
+	{
+	case FRONT : front_ = vector3(  0.f,  0.f,  1.f ); right_ = vector3(  1.f,  0.f,  0.f ); break;
+	case RIGHT : front_ = vector3(  1.f,  0.f,  0.f ); right_ = vector3(  0.f,  0.f, -1.f ); break;
+	case BACK  : front_ = vector3(  0.f,  0.f, -1.f ); right_ = vector3( -1.f,  0.f,  0.f ); break;
+	case LEFT  : front_ = vector3( -1.f,  0.f,  0.f ); right_ = vector3(  0.f,  0.f,  1.f ); break;
+	default : COMMON_THROW_EXCEPTION;
+	}
 }
 
 /**
@@ -56,7 +87,7 @@ void Player::jump()
 	
 	jumping_ = true;
 
-	GameMain::getInstance()->getSoundManager()->get_sound( "test" )->play( true );
+	GameMain::getInstance()->getSoundManager()->get_sound( "test" )->play( false );
 }
 
 /**

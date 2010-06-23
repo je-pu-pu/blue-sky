@@ -64,7 +64,7 @@ bool CApp::Init(HINSTANCE hi, int nCmdShow)
 	int h = rc.bottom - rc.top;
 	//ウインドウ作成
 	hWnd = CreateWindowEx(
-		WS_EX_TOPMOST,		//手前に表示
+		0 /* WS_EX_TOPMOST */,		//手前に表示
 		ClassName.c_str(),	//クラス名
 		WinTitle.c_str(),	//タイトル
 		WinStyle,			//スタイル

@@ -1,7 +1,7 @@
 #include "SoundManager.h"
 #include "Sound.h"
 #include "StreamingSound.h"
-
+#include "OggVorbisFile.h"
 #include "DirectSound.h"
 
 namespace blue_sky
@@ -25,8 +25,18 @@ SoundManager::~SoundManager()
 
 game::Sound* SoundManager::createSound( const char* file_name )
 {
-	// Sound* sound = new Sound( direct_sound_ );
-	Sound* sound = new StreamingSound( direct_sound_ );
+	Sound::SoundFile file( file_name );
+	Sound* sound = 0;
+
+	if ( file.size() <= StreamingSound::get_buffer_size() )
+	{
+		sound = new Sound( direct_sound_ );
+	}
+	else
+	{
+		sound = new StreamingSound( direct_sound_ );
+	}
+
 	sound->load( file_name );
 
 	return sound;

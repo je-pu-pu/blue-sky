@@ -29,6 +29,9 @@ public:
 	void			unit();
 	void			normal( const vector3&, const vector3&, const vector3& );
 
+	vector3			operator + () const { return *this; }
+	vector3			operator - () const { return vector3( -x(), -y(), -z() ); };
+
 	vector3&		operator =  ( const vector3& );
 	vector3			operator +  ( const vector3& ) const;
 	vector3&		operator += ( const vector3& );

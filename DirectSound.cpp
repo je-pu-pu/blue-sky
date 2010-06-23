@@ -1,8 +1,8 @@
 #include "DirectSound.h"
 #include "DirectSoundBuffer.h"
+#include "DirectX.h"
 
 #include <common/exception.h>
-#include <dxerr9.h>
 #include <string>
 
 #pragma comment( lib, "dsound.lib" )
@@ -12,33 +12,17 @@ DirectSound::DirectSound( HWND hwnd )
 	: direct_sound_( 0 )
 	, primary_buffer_( 0 )
 {
-	if ( FAILED( DirectSoundCreate8( NULL, & direct_sound_, 0 ) ) )
-	{
-		COMMON_THROW_EXCEPTION;
-	}
-
-	if ( FAILED( direct_sound_->SetCooperativeLevel( hwnd, DSSCL_PRIORITY ) ) )
-	{
-		COMMON_THROW_EXCEPTION;
-	}
-
-	HRESULT hr = 0;
+	DIRECT_X_FAIL_CHECK( DirectSoundCreate8( NULL, & direct_sound_, 0 ) );
+	DIRECT_X_FAIL_CHECK( direct_sound_->SetCooperativeLevel( hwnd, DSSCL_PRIORITY ) );
 
 	caps_.dwSize = sizeof( DSCAPS );
-	if ( FAILED( hr = direct_sound_->GetCaps( & caps_ ) ) )
-	{
-		std::string message = std::string( DXGetErrorString9( hr ) ) + " : " + DXGetErrorDescription9( hr );
-		COMMON_THROW_EXCEPTION_MESSAGE( message.c_str() );
-	}
+	DIRECT_X_FAIL_CHECK( direct_sound_->GetCaps( & caps_ ) );
 
 	// Create Primary Buffer
 	DSBUFFERDESC buffer_desc = { sizeof( DSBUFFERDESC ) };
 	buffer_desc.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_PRIMARYBUFFER;
 
-	if ( FAILED( direct_sound_->CreateSoundBuffer( & buffer_desc, & primary_buffer_, 0 ) ) )
-	{
-		COMMON_THROW_EXCEPTION;
-	}
+	DIRECT_X_FAIL_CHECK( direct_sound_->CreateSoundBuffer( & buffer_desc, & primary_buffer_, 0 ) );
 
 	/*
 	PCMWAVEFORMAT format = { 0 };

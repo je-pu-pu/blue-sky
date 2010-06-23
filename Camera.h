@@ -26,7 +26,7 @@ public:
 	~Camera();
 
 	vector3& position() { return position_; }
-	const vector3& look_at() const { return look_at_; }
+	vector3& look_at() { return look_at_; }
 	const vector3& up() const { return up_; }
 
 	float& fov() { return fov_; }

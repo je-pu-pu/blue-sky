@@ -27,7 +27,7 @@ void Camera::set_under_view_rate( float rate )
 	// m.rotate_y( timeGetTime() * 0.01f );
 	
 	// look at
-	look_at_ = position() + vector3( 0.f, 0.f, 1.f ) * m;
+	// look_at_ = position() + vector3( 0.f, 0.f, 1.f ) * m;
 
 	// up
 	up_ = vector3( 0.f, 1.f, 0.f ) * m;

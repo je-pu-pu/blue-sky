@@ -1,6 +1,6 @@
 float4x4 WorldViewProjection;
 
-void vs_main( in float4 in_p : POSITION, in float4 in_normal : NORMAL0, in float4 in_d : COLOR0, out float4 out_p : POSITION, out float4 out_d : COLOR0 )
+void vs_main( in float4 in_p : POSITION, in float4 in_normal : NORMAL0, in float4 in_d : COLOR0, in float4 in_t : TEXCOORD0, out float4 out_p : POSITION, out float4 out_d : COLOR0, out float4 out_t : TEXCOORD0 )
 {
 	out_p = mul( in_p, WorldViewProjection );
 //	out_p[0];
@@ -12,6 +12,8 @@ void vs_main( in float4 in_p : POSITION, in float4 in_normal : NORMAL0, in float
 	out_d[0] += abs( in_p[0] ) * 0.01 * 0.5;
 	out_d[1] += abs( in_p[1] ) * 0.3  * 0.5;
 	out_d[2] += abs( in_p[2] ) * 0.1  * 0.5;
+
+	out_t = in_t;
 }
 
 void vs_main_vc( in float4 in_p : POSITION, in float4 in_d : COLOR0, out float4 out_p : POSITION, out float4 out_d : COLOR0 )
@@ -20,8 +22,19 @@ void vs_main_vc( in float4 in_p : POSITION, in float4 in_d : COLOR0, out float4 
 	out_d = in_d;
 }
 
-void ps_main( in float4 in_d : COLOR0, in float2 vpos : VPOS, out float4 out_d : COLOR0 )
+texture Tex0;
+sampler TexSampler = sampler_state
 {
+	MipFilter = LINEAR;
+	MinFilter = LINEAR;
+	MagFilter = LINEAR;
+};
+
+void ps_main( in float4 in_d : COLOR0, in float2 in_t : TEXCOORD0, in float2 vpos : VPOS, out float4 out_d : COLOR0 )
+{
+	out_d = tex2D( TexSampler, in_t );
+	return;
+	
 	out_d = in_d;
 	
 	/*

@@ -47,7 +47,7 @@
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IncludePath);D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;E:\je\program\lib\c++;D:\lib\boost;D:\lib\libogg\include;D:\lib\libvorbis\include</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IncludePath);D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;E:\je\program\lib\c++;D:\lib\boost;D:\lib\libogg\include;D:\lib\libvorbis\include</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">./lib/debug;./Debug/;$(LibraryPath)</LibraryPath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">./lib/release;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">./lib/release;./release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>

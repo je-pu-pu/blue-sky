@@ -1,5 +1,6 @@
 #include "Direct3D9Box.h"
 #include "Direct3D9.h"
+#include "DirectX.h"
 
 #include <common/exception.h>
 #include <common/math.h>
@@ -13,13 +14,13 @@ Direct3D9Box::Direct3D9Box( Direct3D9* direct_3d, float w, float h, float d, D3D
 		D3DDECL_END()
 	};
 
-	FAIL_CHECK( direct_3d_->getDevice()->CreateVertexDeclaration( vertex_element, & vertex_declaration_ ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateVertexDeclaration( vertex_element, & vertex_declaration_ ) );
 
 
 	D3DXVECTOR3* position;
 
-	FAIL_CHECK( direct_3d_->getDevice()->CreateVertexBuffer( sizeof( D3DXVECTOR3 ) * 8, 0, 0, D3DPOOL_DEFAULT, & position_vertex_buffer_, 0 ) );
-	FAIL_CHECK( position_vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & position ), 0 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateVertexBuffer( sizeof( D3DXVECTOR3 ) * 8, 0, 0, D3DPOOL_DEFAULT, & position_vertex_buffer_, 0 ) );
+	DIRECT_X_FAIL_CHECK( position_vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & position ), 0 ) );
 
 	position[ 0 ] = D3DXVECTOR3( -w / 2, -h / 2, -d / 2 );
 	position[ 1 ] = D3DXVECTOR3( +w / 2, -h / 2, -d / 2 );
@@ -30,13 +31,13 @@ Direct3D9Box::Direct3D9Box( Direct3D9* direct_3d, float w, float h, float d, D3D
 	position[ 6 ] = D3DXVECTOR3( -w / 2, +h / 2, +d / 2 );
 	position[ 7 ] = D3DXVECTOR3( +w / 2, +h / 2, +d / 2 );
 
-	FAIL_CHECK( position_vertex_buffer_->Unlock() );
+	DIRECT_X_FAIL_CHECK( position_vertex_buffer_->Unlock() );
 
 
 	D3DCOLOR* color;
 
-	FAIL_CHECK( direct_3d_->getDevice()->CreateVertexBuffer( sizeof( D3DCOLOR ) * 8, 0, 0, D3DPOOL_DEFAULT, & color_vertex_buffer_, 0 ) );
-	FAIL_CHECK( color_vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & color ), 0 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateVertexBuffer( sizeof( D3DCOLOR ) * 8, 0, 0, D3DPOOL_DEFAULT, & color_vertex_buffer_, 0 ) );
+	DIRECT_X_FAIL_CHECK( color_vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & color ), 0 ) );
 
 	color[ 0 ] = D3DCOLOR_XRGB( 0x00, 0x00, 0x00 );
 	color[ 1 ] = D3DCOLOR_XRGB( 0x00, 0x00, 0x00 );
@@ -47,13 +48,13 @@ Direct3D9Box::Direct3D9Box( Direct3D9* direct_3d, float w, float h, float d, D3D
 	color[ 6 ] = c;
 	color[ 7 ] = c;
 
-	FAIL_CHECK( color_vertex_buffer_->Unlock() );
+	DIRECT_X_FAIL_CHECK( color_vertex_buffer_->Unlock() );
 
-	FAIL_CHECK( direct_3d_->getDevice()->CreateIndexBuffer( 36 * 2, 0, D3DFMT_INDEX16, D3DPOOL_DEFAULT, & index_buffer_, 0 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateIndexBuffer( 36 * 2, 0, D3DFMT_INDEX16, D3DPOOL_DEFAULT, & index_buffer_, 0 ) );
 
 	DWORD* index;
 
-	FAIL_CHECK( index_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & index ), 0 ) );
+	DIRECT_X_FAIL_CHECK( index_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & index ), 0 ) );
 	
 	/*
 	  6--7
@@ -86,7 +87,7 @@ Direct3D9Box::Direct3D9Box( Direct3D9* direct_3d, float w, float h, float d, D3D
 
 	memcpy( index, index_src, sizeof( index_src ) );
 
-	FAIL_CHECK( index_buffer_->Unlock() );
+	DIRECT_X_FAIL_CHECK( index_buffer_->Unlock() );
 }
 
 
@@ -97,16 +98,16 @@ Direct3D9Box::~Direct3D9Box()
 
 void Direct3D9Box::ready()
 {
-	FAIL_CHECK( direct_3d_->getDevice()->SetVertexDeclaration( vertex_declaration_ ) );
-	FAIL_CHECK( direct_3d_->getDevice()->SetStreamSource( 0, position_vertex_buffer_, 0, sizeof( D3DXVECTOR3 ) ) );
-	FAIL_CHECK( direct_3d_->getDevice()->SetStreamSource( 1, color_vertex_buffer_, 0, sizeof( D3DCOLOR ) ) );
-	FAIL_CHECK( direct_3d_->getDevice()->SetIndices( index_buffer_ ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetVertexDeclaration( vertex_declaration_ ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetStreamSource( 0, position_vertex_buffer_, 0, sizeof( D3DXVECTOR3 ) ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetStreamSource( 1, color_vertex_buffer_, 0, sizeof( D3DCOLOR ) ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetIndices( index_buffer_ ) );
 
-	FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE ) );
+	// DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE ) );
 }
 
 void Direct3D9Box::render()
 {
-	FAIL_CHECK( direct_3d_->getDevice()->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, 8, 0, 12 ) );
-	// FAIL_CHECK( direct_3d_->getDevice()->DrawIndexedPrimitive( D3DPT_LINELIST, 0, 0, 8, 0, 3 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, 8, 0, 12 ) );
+	// DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->DrawIndexedPrimitive( D3DPT_LINELIST, 0, 0, 8, 0, 3 ) );
 }

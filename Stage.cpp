@@ -22,7 +22,7 @@ Stage::Stage( int w, int d )
 		{
 			if ( common::random( 0, 1 ) == 0 )
 			{
-				map_chip( x, z ) = map_chip( x, z - 1 ) + 1;
+				map_chip( x, z ) = map_chip( x, z - 1 ) + 2;
 			}
 			else
 			{

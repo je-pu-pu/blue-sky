@@ -5,12 +5,11 @@
 
 #include "Direct3D9Canvas.h"
 #include "Direct3D9.h"
+#include "DirectX.h"
 
 #include "App.h"
 
 #include <common/exception.h>
-
-#define FAIL_CHECK( x ) if ( FAILED( x ) ) { COMMON_THROW_EXCEPTION; }
 
 namespace art
 {
@@ -145,7 +144,7 @@ void Direct3D9Canvas::end()
 
 void Direct3D9Canvas::render()
 {
-	FAIL_CHECK( vertex_buffer_->Unlock() );
+	DIRECT_X_FAIL_CHECK( vertex_buffer_->Unlock() );
 
 	if ( g_line )
 	{

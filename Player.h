@@ -32,7 +32,7 @@ private:
 	bool		is_jumping_;		///< ジャンプ中フラグ
 	float		floor_height_;		///< 足場の高さ
 	
-	float max_speed();
+	float get_max_speed();
 public:
 	Player();
 	~Player() { }

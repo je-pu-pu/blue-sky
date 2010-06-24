@@ -44,6 +44,10 @@
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="StreamingSound.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Building.cpp" />
+    <ClCompile Include="GridData.cpp" />
+    <ClCompile Include="GridObject.cpp" />
+    <ClCompile Include="GridObjectManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -90,5 +94,9 @@
       <Filter>DirectX</Filter>
     </ClInclude>
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Building.h" />
+    <ClInclude Include="GridData.h" />
+    <ClInclude Include="GridObject.h" />
+    <ClInclude Include="GridObjectManager.h" />
   </ItemGroup>
 </Project>

@@ -58,9 +58,9 @@ void Player::turn( int d )
  */
 void Player::update()
 {
-	if ( velocity().length() > max_speed() )
+	if ( velocity().length() > get_max_speed() )
 	{
-		velocity().normalize() *= max_speed();
+		velocity().normalize() *= get_max_speed();
 	}
 
 	position() += velocity();
@@ -88,8 +88,13 @@ void Player::update()
 	{
 		velocity().x() *= 0.95f;
 		velocity().z() *= 0.95f;
+
+		if ( velocity().y() < -get_max_speed() * 0.05f )
+		{
+			is_jumping_ = true;
+		}
 	}
-	
+
 	if ( velocity().y() < -10.f )
 	{
 		velocity().y() = -10.f;
@@ -114,7 +119,7 @@ void Player::jump()
 /**
  *
  */
-float Player::max_speed()
+float Player::get_max_speed()
 {
 	return 10.f;
 }

@@ -10,6 +10,8 @@ Direct3D9Mesh::Direct3D9Mesh( Direct3D9* direct_3d )
 	: direct_3d_( direct_3d )
 	, mesh_( 0 )
 	, material_count_( 0 )
+	, materials_( 0 )
+	, textures_( 0 )
 {
 
 }
@@ -20,13 +22,13 @@ Direct3D9Mesh::~Direct3D9Mesh()
 	{
 		mesh_->Release();
 	}
+
+	delete [] materials_;
+	delete [] textures_;
 }
 
-/// @todo ‚È‚ñ‚Æ‚©‚·‚é
-D3DMATERIAL9* materials_ = 0;
-LPDIRECT3DTEXTURE9* textures_ = 0;
 
-bool Direct3D9Mesh::loadX( const char* file_name )
+bool Direct3D9Mesh::load_x( const char* file_name )
 {
 	LPD3DXBUFFER adjacency_buffer;
 	LPD3DXBUFFER materials_buffer;
@@ -55,22 +57,7 @@ bool Direct3D9Mesh::loadX( const char* file_name )
 			{
 			}
 		}
-		
-		/*
-		materials_[ n ].Ambient.r = 1.f;
-		materials_[ n ].Ambient.g = 0.5f;
-		materials_[ n ].Ambient.b = 0.5f;
-		*/
 	}
-
-	/*
-	D3DLIGHT9* light_ = new D3DLIGHT9();
-	light_->Position = D3DXVECTOR3( 10.f, 10.f, -10.f );
-	light_->Diffuse = D3DXCOLOR( 1.f, 1.f, 1.f, 1.f );
-
-	direct_3d_->getDevice()->SetLight( 0, light_ );
-	direct_3d_->getDevice()->LightEnable( 0, TRUE );
-	*/
 
 	return true;
 }

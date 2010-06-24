@@ -17,14 +17,17 @@ namespace blue_sky
 
 class Input;
 class SoundManager;
+class GridObjectManager;
 
 class GameMain
 {
 protected:
-	Direct3D9*		direct_3d_;		///< Direct3D
+	Direct3D9*				direct_3d_;				///< Direct3D
 
-	Input*			input_;			///< Input
-	SoundManager*	sound_manager_;	///< SoundManager
+	Input*					input_;					///< Input
+	SoundManager*			sound_manager_;			///< SoundManager
+
+	GridObjectManager*		grid_object_manager_;	///< GridObjectManager
 
 	int				Width;			///< ‰¡•
 	int				Height;			///< ‚‚³

@@ -57,4 +57,12 @@ void SoundManager::update()
 	}
 }
 
+void SoundManager::stop_all()
+{
+	for ( SoundMap::iterator i = sound_map().begin(); i != sound_map().end(); ++i )
+	{
+		i->second->stop();
+	}
+}
+
 }

@@ -11,6 +11,7 @@
 #include "Player.h"
 #include "Camera.h"
 #include "Stage.h"
+#include "Building.h"
 
 #include "Direct3D9Mesh.h"
 #include "Direct3D9Box.h"
@@ -19,6 +20,8 @@
 
 #include "Input.h"
 #include "SoundManager.h"
+#include "GridObjectManager.h"
+#include "GridObject.h"
 
 #include "OggVorbisFile.h"
 
@@ -35,6 +38,8 @@
 #include <boost/format.hpp>
 
 Direct3D9Mesh* mesh_ = 0;
+Direct3D9Mesh* building_a_mesh_ = 0;
+
 Direct3D9Box* box_ = 0;
 Direct3D9Box* player_shadow_box_ = 0;
 
@@ -47,6 +52,7 @@ namespace blue_sky
 Player* player_ = 0;
 Camera* camera_ = 0;
 Stage* stage_ = 0;
+Building* building_a_grid_ = 0;
 
 using game::Sound;
 
@@ -55,6 +61,7 @@ GameMain::GameMain()
 	: direct_3d_( 0 )
 	, input_( 0 )
 	, sound_manager_( 0 )
+	, grid_object_manager_( 0 )
 	, Width( 0 )
 	, Height( 0 )
 {
@@ -70,8 +77,11 @@ GameMain::GameMain()
 
 	// Mesh
 	mesh_ = new Direct3D9Mesh( direct_3d_ );
-	// mesh_->loadX( "media/model/hoge.x" );
-	mesh_->loadX( "media/model/blue-sky-building-a-field.x" );
+	// mesh_->load_x( "media/model/hoge.x" );
+	mesh_->load_x( "media/model/blue-sky-building-a-field.x" );
+
+	building_a_mesh_ = new Direct3D9Mesh( direct_3d_ );
+	building_a_mesh_->load_x( "media/model/building-a.x" );
 
 	// Box
 	box_ = new Direct3D9Box( direct_3d_, 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
@@ -99,6 +109,8 @@ GameMain::GameMain()
 
 		Sound* land = sound_manager_->load( "land", "media/sound/land.ogg" );
 		land->set_speed( 0.5f );
+
+		Sound* fin = sound_manager_->load( "fin", "media/sound/fin.ogg" );
 	}
 
 	// Player
@@ -141,11 +153,42 @@ GameMain::GameMain()
 
 	// Stage
 	stage_ = new Stage( 100, 100 );
+
+	// Building
+	building_a_grid_ = new Building( 10, 10 );
+
+	
+	
+	// grid_object_manager_->grid_object_list()
+
+	grid_object_manager_ = new GridObjectManager();
+
+	grid_object_manager_->add_grid_object( new GridObject( 50, 0,  0, building_a_grid_, building_a_mesh_ ) );
+	grid_object_manager_->add_grid_object( new GridObject( 38, 0,  0, building_a_grid_, building_a_mesh_ ) );
+	grid_object_manager_->add_grid_object( new GridObject( 38, 0, 11, building_a_grid_, building_a_mesh_ ) );
+	grid_object_manager_->add_grid_object( new GridObject( 38, 0, 22, building_a_grid_, building_a_mesh_ ) );
+
+	grid_object_manager_->add_grid_object( new GridObject( 50, -10, 33, building_a_grid_, building_a_mesh_ ) );
+	grid_object_manager_->add_grid_object( new GridObject( 38, -10, 33, building_a_grid_, building_a_mesh_ ) );
+	grid_object_manager_->add_grid_object( new GridObject( 65,   0, 33, building_a_grid_, building_a_mesh_ ) );
+
+	grid_object_manager_->add_grid_object( new GridObject( 50, 10, 45, building_a_grid_, building_a_mesh_ ) );
+	grid_object_manager_->add_grid_object( new GridObject( 38, 10, 45, building_a_grid_, building_a_mesh_ ) );
+	grid_object_manager_->add_grid_object( new GridObject( 65, 10, 46, building_a_grid_, building_a_mesh_ ) );
+
+	for ( GridObjectManager::GridObjectList::iterator i = grid_object_manager_->grid_object_list().begin(); i != grid_object_manager_->grid_object_list().end(); ++i )
+	{
+		GridObject* grid_object = *i;
+		stage_->put( grid_object->x(), grid_object->y(), grid_object->z(), grid_object->grid_data() );
+	}
 }
 
 //■デストラクタ
 GameMain::~GameMain()
 {
+	delete building_a_grid_;
+	delete building_a_mesh_;
+
 	delete stage_;
 	delete camera_;
 	delete player_;
@@ -204,7 +247,9 @@ void GameMain::update()
 
 	if ( input_->push( Input::X ) ) { sound_manager_->set_enabled( ! sound_manager_->is_enabled() ); }
 
-	player_->set_floor_height( 20 ); // stage_->map_chip( static_cast< int >( player_->position().x() ), static_cast< int >( player_->position().z() ) ) ); 
+	if ( input_->push( Input::Y ) ) { sound_manager_->stop_all(); sound_manager_->get_sound( "fin" )->play( false ); }
+
+	player_->set_floor_height( stage_->chip( static_cast< int >( player_->position().x() ), static_cast< int >( player_->position().z() ) ) ); 
 	player_->update();
 
 	Sound* bgm = sound_manager_->get_sound( "bgm" );
@@ -284,7 +329,7 @@ void GameMain::render()
 	*/
 
 
-	const int panorama_y_division = 24;
+	const int panorama_y_division = 12;
 
 	camera_->set_panorama_y_division( panorama_y_division );
 
@@ -302,24 +347,28 @@ void GameMain::render()
 
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
 
+		D3DXMATRIXA16 world;
+		D3DXMATRIXA16 view;
+		D3DXMATRIXA16 projection;
+		D3DXMATRIXA16 WorldViewProjection;
+
 		vector3 look_at = camera_->get_look_at_part( panorama_y );
 		vector3 up = camera_->get_up_part( panorama_y );
-
-		D3DXMATRIXA16 world, t;
+		
+		D3DXMATRIXA16  t;
 		D3DXMatrixIdentity( & world );
 		D3DXMatrixScaling( & world, 10.f, 10.f, 10.f );
 		D3DXMatrixTranslation( & t, 50.f, 0.f, 0.f );
 		world *= t;
-
-		D3DXMATRIXA16 view;
+		
 		D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & look_at ), reinterpret_cast< const D3DXVECTOR3* >( & up ) );
 
-		D3DXMATRIXA16 projection;
 		D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() / panorama_y_division ), 720.f / ( 480.f / panorama_y_division ), 0.1f, 100.f );
 
-		D3DXMATRIXA16 WorldViewProjection = world * view * projection;
+		WorldViewProjection = world * view * projection;
 		vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
 
+		// Mesh
 		mesh_->render();
 
 
@@ -328,35 +377,34 @@ void GameMain::render()
 		WorldViewProjection = world * view * projection;
 		vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
 
+		// Player
 		player_shadow_box_->ready();
 		player_shadow_box_->render();
-	}
 
-	/*
-	direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
-	
-	box_->ready();
+		// Box
+		// direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
 
-	for ( int z = 0; z < stage_->depth(); z++ )
-	{
-		for ( int x = 0; x < stage_->width(); x++ )
+		box_->ready();
+
+		for ( int z = 0; z < stage_->depth(); z++ )
 		{
-			int y = stage_->map_chip( x, z );
-			
-			if ( y > 0 )
+			for ( int x = 0; x < stage_->width(); x++ )
 			{
-				D3DXMATRIXA16 world;
-				D3DXMatrixTranslation( & world, x + 0.5f, y - 0.5f, z + 0.5f );
-				direct_3d_->getDevice()->SetTransform( D3DTS_WORLD, & world );
+				int y = stage_->chip( x, z );
+			
+				if ( y > 0 )
+				{
+					D3DXMatrixTranslation( & world, x + 0.5f, y - 0.5f, z + 0.5f );
+					direct_3d_->getDevice()->SetTransform( D3DTS_WORLD, & world );
 
-				D3DXMATRIX WorldViewProjection = world * view * projection;
-				vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
+					D3DXMATRIX WorldViewProjection = world * view * projection;
+					vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
 
-				box_->render();
+					box_->render();
+				}
 			}
 		}
 	}
-	*/
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->EndScene() );
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL ) );

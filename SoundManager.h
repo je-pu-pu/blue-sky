@@ -34,6 +34,8 @@ public:
 
 	virtual void update();
 
+	virtual void stop_all();
+
 }; // class SoundManager
 
 } // namespace game

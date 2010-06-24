@@ -144,6 +144,7 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Building.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Direct3D9.cpp" />
     <ClCompile Include="App.cpp">
@@ -161,6 +162,9 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="GridData.cpp" />
+    <ClCompile Include="GridObject.cpp" />
+    <ClCompile Include="GridObjectManager.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="LiveVertex.cpp" />
     <ClCompile Include="Main.cpp">
@@ -184,6 +188,7 @@
     <ClCompile Include="WaveFile.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Building.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Direct3D9.h" />
     <ClInclude Include="App.h" />
@@ -198,6 +203,9 @@
     <ClInclude Include="DirectX.h" />
     <ClInclude Include="Face.h" />
     <ClInclude Include="GameMain.h" />
+    <ClInclude Include="GridData.h" />
+    <ClInclude Include="GridObject.h" />
+    <ClInclude Include="GridObjectManager.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="LiveVertex.h" />

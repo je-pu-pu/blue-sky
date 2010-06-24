@@ -1,6 +1,8 @@
 #ifndef BLUE_SKY_STAGE_H
 #define BLUE_SKY_STAGE_H
 
+#include "GridData.h"
+
 namespace blue_sky
 {
 
@@ -8,26 +10,11 @@ namespace blue_sky
  * ステージ
  *
  */
-class Stage
+class Stage : public GridData
 {
 public:
-	typedef unsigned char MapChipType;
-
-private:
-	int width_;
-	int depth_;
-
-	MapChipType* map_chip_;
-
-public:
 	Stage( int, int );
-	~Stage();
-
-	int width() const { return width_; }
-	int depth() const { return depth_; }
-
-	MapChipType& map_chip( int, int );
-	MapChipType map_chip( int, int ) const;
+	virtual ~Stage();
 };
 
 } // namespace blue_sky

@@ -71,7 +71,7 @@ void Camera::set_under_view_rate( float rate )
 
 vector3 Camera::get_look_at_part( int n ) const
 {
-	float x_rot_degree = under_view_rate_ * ( fov_ / 2.f ) + ( n - panorama_y_division_ / 2 ) * ( fov_ / panorama_y_division_ ) + ( fov_ / panorama_y_division_ / 2.f );
+	float x_rot_degree = under_view_rate_ * ( fov_ / 2.f ) + ( n - panorama_y_division_ / 2 ) * ( fov_ / panorama_y_division_ ); // + ( fov_ / panorama_y_division_ / 2.f );
 
 	matrix4x4 xr;
 	xr.rotate_x( x_rot_degree );
@@ -84,7 +84,7 @@ vector3 Camera::get_look_at_part( int n ) const
 
 vector3 Camera::get_up_part( int n ) const
 {
-	float x_rot_degree = under_view_rate_ * ( fov_ / 2.f ) + ( n - panorama_y_division_ / 2 ) * ( fov_ / panorama_y_division_ ) + ( fov_ / panorama_y_division_ / 2.f );
+	float x_rot_degree = under_view_rate_ * ( fov_ / 2.f ) + ( n - panorama_y_division_ / 2 ) * ( fov_ / panorama_y_division_ ); // + ( fov_ / panorama_y_division_ / 2.f );
 
 	matrix4x4 xr;
 	xr.rotate_x( x_rot_degree );

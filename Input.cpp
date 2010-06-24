@@ -47,18 +47,19 @@ void Input::update()
 	if ( GetAsyncKeyState( VK_LBUTTON ) & 0x8000 ) state_[ A ] |= 1;
 	if ( GetAsyncKeyState( VK_RBUTTON ) & 0x8000 ) state_[ B ] |= 1;
 
-	joyGetPosEx( JOYSTICKID1, & joy_info_ );
+	if ( joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR )
+	{
+		if ( joy_info_.dwXpos <  0xFFFF / 4 * 1 ) state_[ LEFT  ] |= 1;
+		if ( joy_info_.dwXpos >= 0xFFFF / 4 * 3 ) state_[ RIGHT ] |= 1;
+		if ( joy_info_.dwYpos <  0xFFFF / 4 * 1 ) state_[ UP    ] |= 1;
+		if ( joy_info_.dwYpos >= 0xFFFF / 4 * 3 ) state_[ DOWN  ] |= 1;
 	
-	if ( joy_info_.dwXpos <  0xFFFF / 4 * 1 ) state_[ LEFT  ] |= 1;
-	if ( joy_info_.dwXpos >= 0xFFFF / 4 * 3 ) state_[ RIGHT ] |= 1;
-	if ( joy_info_.dwYpos <  0xFFFF / 4 * 1 ) state_[ UP    ] |= 1;
-	if ( joy_info_.dwYpos >= 0xFFFF / 4 * 3 ) state_[ DOWN  ] |= 1;
+		if ( joy_info_.dwButtons & JOY_BUTTON1 ) state_[ A ] |= 1;
+		if ( joy_info_.dwButtons & JOY_BUTTON3 ) state_[ B ] |= 1;
 	
-	if ( joy_info_.dwButtons & JOY_BUTTON1 ) state_[ A ] |= 1;
-	if ( joy_info_.dwButtons & JOY_BUTTON3 ) state_[ B ] |= 1;
-	
-	if ( joy_info_.dwButtons & JOY_BUTTON5 ) state_[ L ] |= 1;
-	if ( joy_info_.dwButtons & JOY_BUTTON6 ) state_[ R ] |= 1;
+		if ( joy_info_.dwButtons & JOY_BUTTON5 ) state_[ L ] |= 1;
+		if ( joy_info_.dwButtons & JOY_BUTTON6 ) state_[ R ] |= 1;
+	}
 
 	update_common();
 }

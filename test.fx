@@ -17,11 +17,9 @@ void vs_main(
 	float4 light = { -0.25f, -0.75f, 0.5f, 1.f };
 	out_d = diffuse * max( 0, dot( in_n, normalize( light ) ) ) + in_d;
 
-	/*
 	out_d[0] += abs( in_p[0] ) * 0.01 * 0.5;
 	out_d[1] += abs( in_p[1] ) * 0.3  * 0.5;
 	out_d[2] += abs( in_p[2] ) * 0.1  * 0.5;
-	*/
 
 	out_t = in_t;
 

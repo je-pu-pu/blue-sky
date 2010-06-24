@@ -47,7 +47,13 @@ bool Direct3D9Mesh::loadX( const char* file_name )
 
 		if ( material->pTextureFilename )
 		{
-			DIRECT_X_FAIL_CHECK( D3DXCreateTextureFromFile( direct_3d_->getDevice(), ( std::string( "media/model/" ) + material->pTextureFilename ).c_str(), & textures_[ n ] ) );
+			try
+			{
+				DIRECT_X_FAIL_CHECK( D3DXCreateTextureFromFile( direct_3d_->getDevice(), ( std::string( "media/model/" ) + material->pTextureFilename ).c_str(), & textures_[ n ] ) );
+			}
+			catch ( ... )
+			{
+			}
 		}
 		
 		/*

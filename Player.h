@@ -20,15 +20,17 @@ public:
 	};
 
 private:
-	vector3		position_;		///< 座標
-	vector3		velocity_;		///< 移動
+	vector3		position_;			///< 座標
+	vector3		velocity_;			///< 移動
 
-	Direction	direction_;		///< 方向
-	vector3		front_;			///< 前
-	vector3		right_;			///< 右
+	Direction	direction_;			///< 方向
+	float		direction_degree_;	///< 方向 ( Degree )
+
+	vector3		front_;				///< 前
+	vector3		right_;				///< 右
 	
-	bool		is_jumping_;	///< ジャンプ中フラグ
-	float		floor_height_;	///< 足場の高さ
+	bool		is_jumping_;		///< ジャンプ中フラグ
+	float		floor_height_;		///< 足場の高さ
 	
 	float max_speed();
 public:
@@ -39,6 +41,8 @@ public:
 	vector3& velocity() { return velocity_; }
 
 	Direction direction() const { return direction_; }
+	float direction_degree() const { return direction_degree_; }
+
 	vector3& front() { return front_; }
 	vector3& right() { return right_; }
 

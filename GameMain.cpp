@@ -222,7 +222,6 @@ void GameMain::update()
 	}
 
 	camera_->position() = player_->position() + vector3( 0.f, 1.5f, 0.f );
-	camera_->set_front_target( player_->front() );
 	
 	const float under_view_max_speed = 0.1f;
 	static float under_view_speed = 0.f;
@@ -239,6 +238,8 @@ void GameMain::update()
 	under_view_speed = math::clamp( under_view_speed, -under_view_max_speed, under_view_max_speed );
 	
 	camera_->set_under_view_rate( camera_->get_under_view_rate() + under_view_speed );
+	camera_->set_direction_degree_target( player_->direction_degree() );
+
 	camera_->update();
 
 	sound_manager_->update();
@@ -251,24 +252,7 @@ void GameMain::update()
  */
 void GameMain::render()
 {
-	D3DXMATRIXA16 world, t;
-	D3DXMatrixIdentity( & world );
-	D3DXMatrixScaling( & world, 10.f, 10.f, 10.f );
-	D3DXMatrixTranslation( & t, 50.f, 0.f, 0.f );
-	world *= t;
-//	D3DXMatrixRotationY( & world, timeGetTime() / 1000.f );
-    direct_3d_->getDevice()->SetTransform( D3DTS_WORLD, & world );
-
-	D3DXMATRIXA16 view;
-	D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->look_at() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->up() ) );
-	direct_3d_->getDevice()->SetTransform( D3DTS_VIEW, & view );
-
-	D3DXMATRIXA16 projection;
-	D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() ), 720.f / 480.f, 0.01f, 300.f );
-	direct_3d_->getDevice()->SetTransform( D3DTS_PROJECTION, & projection );
-
-	D3DXMATRIX WorldViewProjection = world * view * projection;
-	vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
+//	direct_3d_->getDevice()->SetTransform( D3DTS_WORLD, & world );
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xEE, 0xEE, 0xFF ), 1.f, 0 ) );
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->BeginScene() );
@@ -295,7 +279,54 @@ void GameMain::render()
 
 	direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
 
-	mesh_->render();
+
+	const int panorama_y_division = 8;
+
+	camera_->set_panorama_y_division( panorama_y_division );
+
+	for ( int panorama_y = 0; panorama_y < panorama_y_division; panorama_y++ )
+	{
+		D3DVIEWPORT9 view_port;
+		view_port.X = 0;
+		view_port.Y = Height / panorama_y_division * panorama_y;
+		view_port.Width	= Width;
+		view_port.Height = Height / panorama_y_division;
+		view_port.MinZ = 0.f;
+		view_port.MaxZ = 1.f;
+	
+		direct_3d_->getDevice()->SetViewport( & view_port );
+
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xEE, 0xEE, 0xFF ), 1.f, 0 ) );
+
+		vector3 look_at = camera_->get_look_at_part( panorama_y );
+		vector3 up = camera_->get_up_part( panorama_y );
+
+		D3DXMATRIXA16 world, t;
+		D3DXMatrixIdentity( & world );
+		D3DXMatrixScaling( & world, 10.f, 10.f, 10.f );
+		D3DXMatrixTranslation( & t, 50.f, 0.f, 0.f );
+		world *= t;
+
+		D3DXMATRIXA16 view;
+		D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & look_at ), reinterpret_cast< const D3DXVECTOR3* >( & up ) );
+
+		D3DXMATRIXA16 projection;
+		D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() / panorama_y_division ), 720.f / ( 480.f / panorama_y_division ), 0.01f, 300.f );
+
+		D3DXMATRIXA16 WorldViewProjection = world * view * projection;
+		vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
+
+		mesh_->render();
+
+
+		D3DXMatrixTranslation( & world, player_->position().x(), player_->get_floor_height(), player_->position().z() );
+
+		WorldViewProjection = world * view * projection;
+		vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
+
+		player_shadow_box_->ready();
+		player_shadow_box_->render();
+	}
 
 	/*
 	direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
@@ -322,16 +353,6 @@ void GameMain::render()
 		}
 	}
 	*/
-
-	D3DXMatrixTranslation( & world, player_->position().x(), player_->get_floor_height(), player_->position().z() );
-	direct_3d_->getDevice()->SetTransform( D3DTS_WORLD, & world );
-
-	WorldViewProjection = world * view * projection;
-	vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
-
-	player_shadow_box_->ready();
-	player_shadow_box_->render();
-
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->EndScene() );
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL ) );

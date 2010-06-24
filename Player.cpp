@@ -15,6 +15,7 @@ namespace blue_sky
 Player::Player()
 	 : is_jumping_( false )
 	 , direction_( FRONT )
+	 , direction_degree_( 0.f )
 {
 	//
 	turn( 0 );
@@ -48,6 +49,8 @@ void Player::turn( int d )
 	case LEFT  : front_ = vector3( -1.f,  0.f,  0.f ); right_ = vector3(  0.f,  0.f,  1.f ); break;
 	default : COMMON_THROW_EXCEPTION;
 	}
+
+	direction_degree_ += d * 90.f;
 }
 
 /**

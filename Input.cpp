@@ -47,6 +47,9 @@ void Input::update()
 	if ( GetAsyncKeyState( VK_LBUTTON ) & 0x8000 ) state_[ A ] |= 1;
 	if ( GetAsyncKeyState( VK_RBUTTON ) & 0x8000 ) state_[ B ] |= 1;
 
+	if ( GetAsyncKeyState( '1' ) & 0x8000 ) state_[ X ] |= 1;
+	if ( GetAsyncKeyState( '2' ) & 0x8000 ) state_[ Y ] |= 1;
+
 	if ( joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR )
 	{
 		if ( joy_info_.dwXpos <  0xFFFF / 4 * 1 ) state_[ LEFT  ] |= 1;

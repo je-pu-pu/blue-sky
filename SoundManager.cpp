@@ -46,6 +46,11 @@ game::Sound* SoundManager::createSound( const char* file_name )
 
 void SoundManager::update()
 {
+	if ( ! is_enabled() )
+	{
+		return;
+	}
+
 	for( SoundMap::iterator i = sound_map().begin(); i != sound_map().end(); ++i )
 	{
 		i->second->update();

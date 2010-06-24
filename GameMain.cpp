@@ -39,9 +39,9 @@
 
 Direct3D9Mesh* mesh_ = 0;
 Direct3D9Mesh* building_a_mesh_ = 0;
+Direct3D9Mesh* shadow_mesh_ = 0;
 
 Direct3D9Box* box_ = 0;
-Direct3D9Box* player_shadow_box_ = 0;
 
 LPD3DXCONSTANTTABLE vs_constant_table;
 LPD3DXCONSTANTTABLE ps_constant_table;
@@ -78,15 +78,16 @@ GameMain::GameMain()
 	// Mesh
 	mesh_ = new Direct3D9Mesh( direct_3d_ );
 	// mesh_->load_x( "media/model/hoge.x" );
-	mesh_->load_x( "media/model/blue-sky-building-a-field.x" );
+	// mesh_->load_x( "media/model/blue-sky-building-a-field.x" );
 
 	building_a_mesh_ = new Direct3D9Mesh( direct_3d_ );
 	building_a_mesh_->load_x( "media/model/building-a.x" );
 
+	shadow_mesh_ = new Direct3D9Mesh( direct_3d_ );
+	shadow_mesh_->load_x( "media/model/shadow.x" );
+
 	// Box
 	box_ = new Direct3D9Box( direct_3d_, 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
-
-	player_shadow_box_ = new Direct3D9Box( direct_3d_, 1.f, 0.1f, 1.f, D3DCOLOR_RGBA( 0, 0, 0, 127 ) );
 
 	// Input
 	input_ = new Input();
@@ -102,7 +103,7 @@ GameMain::GameMain()
 
 		Sound* izakaya = sound_manager_->load( "izakaya", "media/music/izakaya.ogg" );
 //		izakaya->set_volume( 0.8f );
-		izakaya->play( false );
+//		izakaya->play( false );
 
 		Sound* jump = sound_manager_->load( "jump", "media/sound/jump.ogg" );
 		jump->set_speed( 0.5f );
@@ -153,17 +154,14 @@ GameMain::GameMain()
 
 	// Stage
 	stage_ = new Stage( 100, 100 );
+	player_->set_stage( stage_ );
 
 	// Building
 	building_a_grid_ = new Building( 10, 10 );
 
-	
-	
-	// grid_object_manager_->grid_object_list()
-
 	grid_object_manager_ = new GridObjectManager();
 
-	grid_object_manager_->add_grid_object( new GridObject( 50, 0,  0, building_a_grid_, building_a_mesh_ ) );
+	grid_object_manager_->add_grid_object( new GridObject( 50, -15,  0, building_a_grid_, building_a_mesh_ ) );
 	grid_object_manager_->add_grid_object( new GridObject( 38, 0,  0, building_a_grid_, building_a_mesh_ ) );
 	grid_object_manager_->add_grid_object( new GridObject( 38, 0, 11, building_a_grid_, building_a_mesh_ ) );
 	grid_object_manager_->add_grid_object( new GridObject( 38, 0, 22, building_a_grid_, building_a_mesh_ ) );
@@ -189,6 +187,8 @@ GameMain::~GameMain()
 	delete building_a_grid_;
 	delete building_a_mesh_;
 
+	delete shadow_mesh_;
+
 	delete stage_;
 	delete camera_;
 	delete player_;
@@ -196,7 +196,6 @@ GameMain::~GameMain()
 	delete mesh_;
 	
 	delete box_;
-	delete player_shadow_box_;
 
 	delete direct_3d_;
 
@@ -249,7 +248,6 @@ void GameMain::update()
 
 	if ( input_->push( Input::Y ) ) { sound_manager_->stop_all(); sound_manager_->get_sound( "fin" )->play( false ); }
 
-	player_->set_floor_height( stage_->chip( static_cast< int >( player_->position().x() ), static_cast< int >( player_->position().z() ) ) ); 
 	player_->update();
 
 	Sound* bgm = sound_manager_->get_sound( "bgm" );
@@ -328,8 +326,7 @@ void GameMain::render()
 	direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
 	*/
 
-
-	const int panorama_y_division = 12;
+	const int panorama_y_division = 24;
 
 	camera_->set_panorama_y_division( panorama_y_division );
 
@@ -355,35 +352,46 @@ void GameMain::render()
 		vector3 look_at = camera_->get_look_at_part( panorama_y );
 		vector3 up = camera_->get_up_part( panorama_y );
 		
-		D3DXMATRIXA16  t;
-		D3DXMatrixIdentity( & world );
-		D3DXMatrixScaling( & world, 10.f, 10.f, 10.f );
+		D3DXMATRIXA16 s;
+		D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );
+
+		D3DXMATRIXA16 t;
 		D3DXMatrixTranslation( & t, 50.f, 0.f, 0.f );
-		world *= t;
+		
+		world = s * t;
 		
 		D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & look_at ), reinterpret_cast< const D3DXVECTOR3* >( & up ) );
 
 		D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() / panorama_y_division ), 720.f / ( 480.f / panorama_y_division ), 0.1f, 100.f );
 
-		WorldViewProjection = world * view * projection;
-		vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
-
 		// Mesh
-		mesh_->render();
-
-
-		D3DXMatrixTranslation( & world, player_->position().x(), player_->get_floor_height(), player_->position().z() );
-
+		/*
 		WorldViewProjection = world * view * projection;
 		vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
 
-		// Player
-		player_shadow_box_->ready();
-		player_shadow_box_->render();
+		mesh_->render();
+		*/
+
+		// GridObject
+		for ( GridObjectManager::GridObjectList::iterator i = grid_object_manager_->grid_object_list().begin(); i != grid_object_manager_->grid_object_list().end(); ++i )
+		{
+			GridObject* grid_object = *i;
+
+			
+			D3DXMatrixTranslation( & t, grid_object->x() + grid_object->width() * 0.5f, static_cast< float >( grid_object->y() ), grid_object->z() + grid_object->depth() * 0.5f );
+			world = s * t;
+
+			WorldViewProjection = world * view * projection;
+			vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
+
+			grid_object->mesh()->render();
+		}
+
 
 		// Box
 		// direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
 
+		/*
 		box_->ready();
 
 		for ( int z = 0; z < stage_->depth(); z++ )
@@ -404,6 +412,26 @@ void GameMain::render()
 				}
 			}
 		}
+		*/
+
+		// Player ( Shadow )
+		std::set< float > height_set;
+
+		height_set.insert( player_->get_floor_height_center() );
+		height_set.insert( player_->get_floor_height_left_front() );
+		height_set.insert( player_->get_floor_height_right_front() );
+		height_set.insert( player_->get_floor_height_left_back() );
+		height_set.insert( player_->get_floor_height_right_back() );
+
+		for ( std::set< float >::iterator i = height_set.begin(); i != height_set.end(); ++i )
+		{
+			D3DXMatrixTranslation( & world, player_->position().x(), *i + 0.03f, player_->position().z() );
+
+			WorldViewProjection = world * view * projection;
+			vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
+
+			shadow_mesh_->render();
+		}
 	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->EndScene() );
@@ -411,7 +439,10 @@ void GameMain::render()
 
 	// Debug
 	std::string debug_text;
-	debug_text = std::string( "blue-sky | FPS : " ) + common::serialize( last_fps ) + ", player : " + common::serialize( player_->position().y() );
+	debug_text = std::string( "blue-sky | FPS : " ) + common::serialize( last_fps ) + ", player : (" + 
+		common::serialize( static_cast< int >( player_->position().x() ) ) + "," +
+		common::serialize( static_cast< int >( player_->position().y() ) ) + "," +
+		common::serialize( static_cast< int >( player_->position().z() ) ) + ")";
 	CApp::GetInstance()->setTitle( debug_text.c_str() );
 }
 

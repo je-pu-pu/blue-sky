@@ -6,6 +6,8 @@
 namespace blue_sky
 {
 
+class Stage;
+
 /**
  * プレイヤー
  *
@@ -30,15 +32,23 @@ private:
 	vector3		right_;				///< 右
 	
 	bool		is_jumping_;		///< ジャンプ中フラグ
-	float		floor_height_;		///< 足場の高さ
+	
+	const Stage* stage_;			///< ステージ
 	
 	float get_max_speed();
+	float get_collision_width() const;
+	float get_collision_depth() const;
+	float get_floor_height() const;
+
 public:
 	Player();
 	~Player() { }
 	
 	vector3& position() { return position_; }
+	const vector3& position() const { return position_; }
+
 	vector3& velocity() { return velocity_; }
+	const vector3& velocity() const { return velocity_; }
 
 	Direction direction() const { return direction_; }
 	float direction_degree() const { return direction_degree_; }
@@ -59,10 +69,15 @@ public:
 	/// ジャンプ処理
 	void jump();
 
-	bool is_jumping() { return is_jumping_; }
+	bool is_jumping() const { return is_jumping_; }
 
-	float get_floor_height() const { return floor_height_; }
-	void set_floor_height( float h ) { floor_height_ = h; }
+	float get_floor_height_center() const;
+	float get_floor_height_left_front() const;
+	float get_floor_height_right_front() const;
+	float get_floor_height_left_back() const;
+	float get_floor_height_right_back() const;
+
+	void set_stage( const Stage* );
 	
 }; // class Player
 

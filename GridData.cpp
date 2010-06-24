@@ -1,7 +1,7 @@
 #include "GridData.h"
 
-#include <common/math.h>
-#include <common/random.h>
+#include <common/exception.h>
+#include <cassert>
 
 namespace blue_sky
 {
@@ -27,24 +27,20 @@ GridData::~GridData()
 
 GridData::ChipType& GridData::chip( int x, int z )
 {
-	static ChipType none = 0;
-
-	if ( x < 0 ) return none;
-	if ( z < 0 ) return none;
-	if ( x >= width_ ) return none;
-	if ( z >= depth_ ) return none;
+	assert( x >= 0 );
+	assert( z >= 0 );
+	assert( x < width_ );
+	assert( z < depth_ );
 
 	return chip_[ z * width_ + x ];
 }
 
 GridData::ChipType GridData::chip( int x, int z ) const
 {
-	static ChipType none = 0;
-
-	if ( x < 0 ) return none;
-	if ( z < 0 ) return none;
-	if ( x >= width_ ) return none;
-	if ( z >= depth_ ) return none;
+	if ( x < 0 ) return 0;
+	if ( z < 0 ) return 0;
+	if ( x >= width_ ) return 0;
+	if ( z >= depth_ ) return 0;
 
 	return chip_[ z * width_ + x ];
 }

@@ -1,6 +1,11 @@
 #include "Direct3D9.h"
+#include "DirectX.h"
 
 #include <common/exception.h>
+#include <common/serialize.h>
+#include <common/log.h>
+
+#include <string>
 
 #pragma comment( lib, "d3d9.lib" )
 #pragma comment( lib, "d3dx9.lib" )
@@ -18,17 +23,25 @@ Direct3D9::Direct3D9( HWND hwnd )
 		COMMON_THROW_EXCEPTION;
 	}
 
+	text_out_adapter_info( "d3d_adapter_info.txt" );
+
 //	DWORD behavior_flag = D3DCREATE_HARDWARE_VERTEXPROCESSING;
 
 	D3DPRESENT_PARAMETERS present = { 0 };
-    present.Windowed = TRUE;
-    present.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    present.BackBufferFormat = D3DFMT_UNKNOWN;
-	present.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+
+	present.SwapEffect = D3DSWAPEFFECT_FLIP;
+	present.BackBufferFormat = D3DFMT_X8R8G8B8;
+	present.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
+	present.BackBufferWidth = 720;
+	present.BackBufferHeight = 480;
+	
+	present.Windowed = TRUE;
+//	present.SwapEffect = D3DSWAPEFFECT_DISCARD;
+//	present.BackBufferFormat = D3DFMT_UNKNOWN;
+//	present.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
 	present.EnableAutoDepthStencil = TRUE;
 	present.AutoDepthStencilFormat = D3DFMT_D16;
-//	present.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 //	present.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 
 	DWORD multi_sample_quality = 0;
@@ -61,15 +74,17 @@ Direct3D9::Direct3D9( HWND hwnd )
 	
 	if ( ! device_ )
 	{
+		HRESULT hr = 0;
+
 		if ( FAILED( direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, & present, & device_ ) ) )
 		{
 			if ( FAILED( direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, & present, & device_ ) ) )
 			{
-				if ( FAILED( direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hwnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, & present, & device_ ) ) )
+				if ( FAILED( hr = direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hwnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, & present, & device_ ) ) )
 				{
 					direct_3d_->Release();
 
-					COMMON_THROW_EXCEPTION;
+					DIRECT_X_FAIL_CHECK( hr );
 				}
 			}
 		}
@@ -93,4 +108,34 @@ Direct3D9::~Direct3D9()
 {
 	device_->Release();
 	direct_3d_->Release();
+}
+
+void Direct3D9::text_out_adapter_info( const char* file_name, bool append )
+{
+	std::string info_text;
+
+	for ( UINT n = 0; n < direct_3d_->GetAdapterCount(); n++ )
+	{
+		D3DADAPTER_IDENTIFIER9 adapter_identifier;
+
+		if ( SUCCEEDED( direct_3d_->GetAdapterIdentifier( n, 0, & adapter_identifier ) ) )
+		{
+			info_text += "adapter : " + common::serialize( n ) + "\n" +
+				"\tDriver : " + adapter_identifier.Driver + "\n" +
+				"\tDescription : " + adapter_identifier.Description + "\n" +
+				"\tDeviceName : " + adapter_identifier.DeviceName + "\n" +
+				"\tDriverVersion : " + common::serialize( adapter_identifier.DriverVersion.QuadPart ) + "\n" +
+				"\tDriverVersionLowPart : " + common::serialize( adapter_identifier.DriverVersion.LowPart ) + "\n" +
+				"\tDriverVersionHighPart : " + common::serialize( adapter_identifier.DriverVersion.HighPart ) + "\n" +
+				"\tVendorId : " + common::serialize( adapter_identifier.VendorId ) + "\n" +
+				"\tDeviceId : " + common::serialize( adapter_identifier.DeviceId ) + "\n" +
+				"\tSubSysId : " + common::serialize( adapter_identifier.SubSysId ) + "\n" +
+				"\tRevision : " + common::serialize( adapter_identifier.Revision ) + "\n" +
+//				"\tDeviceIdentifier : " + common::serialize( adapter_identifier.DeviceIdentifier ) + "\n" +
+				"\tWHQLLevel : " + common::serialize( adapter_identifier.WHQLLevel ) + "\n" +
+				"-----\n";
+		}
+	}
+
+	common::log( file_name, info_text, append );
 }

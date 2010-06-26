@@ -7,11 +7,9 @@ namespace blue_sky
 {
 
 Camera::Camera()
-	: default_front_( 0.f, -1.f, 0.f )
-	, default_up_( 0.f, 0.f, 1.f )
-	, direction_degree_( 0.f )
+	: direction_degree_( 0.f )
 	, direction_degree_target_( 0.f )
-	, fov_( 120.f )
+	, fov_( 110.f )
 	, under_view_rate_( 0.f )
 	, panorama_y_division_( 1 )
 {
@@ -35,16 +33,17 @@ void Camera::set_fov( float fov )
 	fov_ = fov;
 
 	matrix4x4 m;
-	m.rotate_x( -fov_ / 2 );
+	// m.rotate_x( -fov_ / 2 );
+	m.rotate_x( -90.f );
 
-	default_front_ *= m;
-	default_up_ *= m;
+	default_front_ = vector3( 0.f, -1.f, 0.f ) * m;
+	default_up_ = vector3( 0.f, 0.f, 1.f ) * m;
 }
 
 void Camera::set_under_view_rate( float rate )
 {
 	under_view_rate_ = math::clamp( rate, 0.f, 1.f );
-	under_view_rate_ = 0.f;
+	// under_view_rate_ = 0.f;
 	
 	/*
 	matrix4x4 xr;
@@ -64,9 +63,9 @@ void Camera::set_under_view_rate( float rate )
 	// up
 	up_ = vector3( 0.f, 1.f, 0.f ) * xr * yr;
 	up_under_ = vector3( 0.f, 1.f, 0.f ) * xru * yr;
-
-	// set_fov( 120.f; // + under_view_rate_ * 30.f;
 	*/
+
+	// set_fov( 60.f + under_view_rate_ * 60.f );
 }
 
 vector3 Camera::get_look_at_part( int n ) const

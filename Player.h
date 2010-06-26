@@ -7,6 +7,7 @@ namespace blue_sky
 {
 
 class Stage;
+class GridCell;
 
 /**
  * プレイヤー
@@ -22,8 +23,10 @@ public:
 	};
 
 private:
+	const Stage* stage_;			///< ステージへの参照
+
 	vector3		position_;			///< 座標
-	vector3		velocity_;			///< 移動
+	vector3		velocity_;			///< 移動量
 
 	Direction	direction_;			///< 方向
 	float		direction_degree_;	///< 方向 ( Degree )
@@ -32,13 +35,15 @@ private:
 	vector3		right_;				///< 右
 	
 	bool		is_jumping_;		///< ジャンプ中フラグ
-	
-	const Stage* stage_;			///< ステージ
+
+	bool		is_falling_;		///< 落下中フラグ
+	vector3		velocity_on_fall_;	///< 落下開始時の移動量
 	
 	float get_max_speed();
 	float get_collision_width() const;
 	float get_collision_depth() const;
-	float get_floor_height() const;
+	
+	const GridCell& get_floor_cell() const;
 
 public:
 	Player();
@@ -60,8 +65,8 @@ public:
 	void side_step( float );
 	void turn( int );
 
-	float get_step_speed() const { return 0.002f; }
-	float get_side_step_speed() const { return 0.002f; }
+	float get_step_speed() const { return 0.004f; }
+	float get_side_step_speed() const { return 0.004f; }
 
 	/// 更新
 	void update();
@@ -69,13 +74,15 @@ public:
 	/// ジャンプ処理
 	void jump();
 
+	void fall();
+
 	bool is_jumping() const { return is_jumping_; }
 
-	float get_floor_height_center() const;
-	float get_floor_height_left_front() const;
-	float get_floor_height_right_front() const;
-	float get_floor_height_left_back() const;
-	float get_floor_height_right_back() const;
+	const GridCell& get_floor_cell_center() const;
+	const GridCell& get_floor_cell_left_front() const;
+	const GridCell& get_floor_cell_right_front() const;
+	const GridCell& get_floor_cell_left_back() const;
+	const GridCell& get_floor_cell_right_back() const;
 
 	void set_stage( const Stage* );
 	

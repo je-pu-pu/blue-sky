@@ -18,13 +18,21 @@ Direct3D9Mesh::Direct3D9Mesh( Direct3D9* direct_3d )
 
 Direct3D9Mesh::~Direct3D9Mesh()
 {
-	if ( mesh_ )
+	for ( unsigned int n = 0; n < material_count_; n++ )
 	{
-		mesh_->Release();
+		if ( textures_[ n ] )
+		{
+			textures_[ n ]->Release();
+		}
 	}
 
 	delete [] materials_;
 	delete [] textures_;
+
+	if ( mesh_ )
+	{
+		mesh_->Release();
+	}
 }
 
 

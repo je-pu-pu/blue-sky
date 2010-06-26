@@ -40,7 +40,8 @@ private:
 	unsigned int state_[ MAX_BUTTONS ];						///< 全てのボタンの状態
 	ButtonStack allow_stack_;								///< 最優先の方向ボタン
 
-	JOYINFOEX joy_info_;
+	JOYINFOEX joy_info_;									///< ジョイスティック
+	bool joystick_enabled_;									///< ジョイスティック有効フラグ
 
 public:
 	Input();

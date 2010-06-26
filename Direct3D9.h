@@ -16,6 +16,7 @@ private:
 
 	D3DCAPS9				device_caps_;	///< Device Caps
 
+	void text_out_adapter_info( const char*, bool = false );
 public:
 	Direct3D9( HWND );
 	~Direct3D9();

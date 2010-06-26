@@ -25,6 +25,8 @@ Input::Input()
 
 	joy_info_.dwSize = sizeof( JOYINFOEX );
 	joy_info_.dwFlags = JOY_RETURNX | JOY_RETURNY | JOY_RETURNBUTTONS;
+
+	joystick_enabled_ = ( joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR );
 }
 
 /**
@@ -50,7 +52,7 @@ void Input::update()
 	if ( GetAsyncKeyState( '1' ) & 0x8000 ) state_[ X ] |= 1;
 	if ( GetAsyncKeyState( '2' ) & 0x8000 ) state_[ Y ] |= 1;
 
-	if ( joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR )
+	if ( joystick_enabled_ && joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR )
 	{
 		if ( joy_info_.dwXpos <  0xFFFF / 4 * 1 ) state_[ LEFT  ] |= 1;
 		if ( joy_info_.dwXpos >= 0xFFFF / 4 * 3 ) state_[ RIGHT ] |= 1;

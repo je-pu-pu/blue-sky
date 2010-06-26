@@ -47,6 +47,8 @@ public:
 
 	T				length() const { return sqrt( x() * x() + y() * y() + z() * z() ); }
 	T				length_xy() const { return sqrt( x() * x() + y() * y() ); }
+	T				length_xz() const { return sqrt( x() * x() + z() * z() ); }
+	T				length_yz() const { return sqrt( y() * y() + z() * z() ); }
 
 	T				dot_product( const vector3& v ) const { return x() * v.x() + y() * v.y() * z() * v.z(); }
 	vector3			cross_product( const vector3& v ) const

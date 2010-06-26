@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "Stage.h"
+#include "GridCell.h"
 
 #include "GameMain.h"
 
@@ -12,14 +13,17 @@
 
 #include <common/exception.h>
 
+#include <list>
+
 namespace blue_sky
 {
 
 Player::Player()
-	 : is_jumping_( false )
+	 : stage_( 0 )
 	 , direction_( FRONT )
 	 , direction_degree_( 0.f )
-	 , stage_( 0 )
+	 , is_jumping_( false )
+	 , is_falling_( false )
 {
 	//
 	turn( 0 );
@@ -27,18 +31,21 @@ Player::Player()
 
 void Player::step( float s )
 {
-	if ( ! is_jumping() )
+	if ( is_jumping() )
 	{
-		velocity() += front() * s * get_step_speed();
+		s *= 0.5f;
 	}
+	velocity() += front() * s * get_step_speed();
 }
 
 void Player::side_step( float s )
 {
-	if ( ! is_jumping() )
+	if ( is_jumping() )
 	{
-		velocity() += right() * s * get_side_step_speed();
+		s *= 0.5f;
 	}
+	
+	velocity() += right() * s * get_side_step_speed();
 }
 
 void Player::turn( int d )
@@ -55,6 +62,8 @@ void Player::turn( int d )
 	}
 
 	direction_degree_ += d * 90.f;
+
+	GameMain::getInstance()->getSoundManager()->get_sound( "turn" )->play( false );
 }
 
 /**
@@ -69,61 +78,112 @@ void Player::update()
 
 	const vector3 last_position = position();
 
-	float floor_height = 0.f;
-
 	position().x() += velocity().x();
-	floor_height = get_floor_height();
+	const GridCell& floor_cell_x = get_floor_cell();
 
-	if ( position().y() < floor_height )
+	if ( position().y() < floor_cell_x.height() )
 	{
-		position().x() = last_position.x();
-		velocity().x() *= 0.8f;
-
-		if ( floor_height - position().y() <= 2.f )
+		if ( velocity().y() <= 0.02f && floor_cell_x.height() - position().y() <= 2.f )
 		{
-			velocity().y() = 0.1f;
+			if ( ( velocity().x() < 0.f && direction() == LEFT || velocity().x() > 0.f && direction() == RIGHT ) ||
+				 ( floor_cell_x.height() - position().y() <= 1.f && ( velocity().x() < 0.f && direction() != RIGHT || velocity().x() > 0.f && direction() != LEFT ) ) )
+			{
+				velocity().y() = 0.02f;
+
+				is_jumping_ = false;
+			}
 		}
+
+		position().x() = last_position.x();
+		velocity().x() *= 0.5f;
+
+		GameMain::getInstance()->getSoundManager()->get_sound( "collision_wall" )->play( false );
 	}
 
 	position().z() += velocity().z();
-	floor_height = get_floor_height();
+	const GridCell& floor_cell_z = get_floor_cell();
 
-	if ( position().y() < floor_height )
+	if ( position().y() < floor_cell_z.height() )
 	{
-		position().z() = last_position.z();
-		velocity().z() *= 0.8f;
-		
-		if ( floor_height - position().y() <= 2.f )
+		if ( velocity().y() <= 0.02f && floor_cell_z.height() - position().y() <= 2.f )
 		{
-			velocity().y() = 0.1f;
+			if ( ( velocity().z() < 0.f && direction() == BACK || velocity().z() > 0.f && direction() == FRONT ) ||
+				 ( floor_cell_z.height() - position().y() <= 1.f && ( velocity().z() < 0.f && direction() != FRONT || velocity().z() > 0.f && direction() != BACK ) ) )
+			{
+				velocity().y() = 0.02f;
+
+				is_jumping_ = false;
+			}
 		}
+
+		position().z() = last_position.z();
+		velocity().z() *= 0.5f;
+
+		GameMain::getInstance()->getSoundManager()->get_sound( "collision_wall" )->play( false );
 	}
 
 	position().y() += velocity().y();
-	floor_height = get_floor_height(); 
+	const GridCell& floor_cell_y = get_floor_cell();
 	
-	if ( position().y() < floor_height )
+	// 着地処理
+	if ( position().y() < floor_cell_y.height() )
 	{
-		// position().y() = last_position.y();
+		position().y() = floor_cell_y.height();
 
-		position().y() = floor_height;
-		velocity().y() *= -0.01f;
-
-		if ( is_jumping_ )
+		if ( is_jumping() && floor_cell_y.bound() > 0 )
 		{
-			GameMain::getInstance()->getSoundManager()->get_sound( "jump" )->stop();
-			GameMain::getInstance()->getSoundManager()->get_sound( "land" )->play( false );
+			// スーパージャンプ
+			velocity_.y() = 0.5f;
+	
+			is_jumping_ = true;
 
-			is_jumping_ = false;
+			GameMain::getInstance()->getSoundManager()->get_sound( "jump" )->play( false );
+
+			float speed = 0.f;
+
+			if ( is_falling_ )
+			{
+				speed = velocity_on_fall_.length_xz();
+			}
+			else
+			{
+				speed = velocity().length_xz();
+			}
 
 			velocity().x() = 0.f;
 			velocity().z() = 0.f;
+			velocity() += front() * speed;
 		}
+		else
+		{
+			// 通常着地
+			velocity().y() *= -0.01f;
+
+			if ( is_jumping_ )
+			{
+				GameMain::getInstance()->getSoundManager()->get_sound( "jump" )->stop();
+				GameMain::getInstance()->getSoundManager()->get_sound( "land" )->play( false );
+
+				is_jumping_ = false;
+
+				velocity().x() = 0.f;
+				velocity().z() = 0.f;
+			}
+		}
+
+		is_falling_ = false;
 	}
 
 	position().y() = std::max( 0.f, position().y() );
 
-	velocity().y() -= 0.008f;
+	velocity().y() -= 0.01f;
+	// velocity().y() -= 0.001f;
+
+	if ( is_jumping() )
+	{
+		velocity().x() *= 0.999f;
+		velocity().z() *= 0.999f;
+	}
 
 	if ( ! is_jumping() )
 	{
@@ -143,43 +203,57 @@ void Player::update()
 }
 
 /**
- * ジャンプ処理
+ * ジャンプ開始
  * 
  */	
 void Player::jump()
 {
 	if ( is_jumping() ) return;
 	
-	velocity_.y() = 0.5f;
+	velocity_.y() = 0.3f;
 	
 	is_jumping_ = true;
 
 	GameMain::getInstance()->getSoundManager()->get_sound( "jump" )->play( false );
 }
 
-float Player::get_floor_height_center() const
+/**
+ * 落下開始
+ *
+ */
+void Player::fall()
 {
-	return static_cast< float >( stage_->chip( static_cast< int >( position_.x() ), static_cast< int >( position_.z() ) ) );
+	if ( is_falling_ ) return;
+
+	is_falling_ = true;
+
+	velocity_on_fall_ = velocity();
+	velocity() = vector3( 0.f, -get_max_speed(), 0.f );
 }
 
-float Player::get_floor_height_left_front() const
+const GridCell& Player::get_floor_cell_center() const
 {
-	return stage_->chip( static_cast< int >( position().x() - get_collision_width() * 0.5f ), static_cast< int >( position().z() + get_collision_depth() * 0.5f ) );
+	return stage_->cell( static_cast< int >( position_.x() ), static_cast< int >( position_.z() ) );
 }
 
-float Player::get_floor_height_right_front() const
+const GridCell& Player::get_floor_cell_left_front() const
 {
-	return stage_->chip( static_cast< int >( position().x() + get_collision_width() * 0.5f ), static_cast< int >( position().z() + get_collision_depth() * 0.5f ) );
+	return stage_->cell( static_cast< int >( position().x() - get_collision_width() * 0.5f ), static_cast< int >( position().z() + get_collision_depth() * 0.5f ) );
 }
 
-float Player::get_floor_height_left_back() const
+const GridCell& Player::get_floor_cell_right_front() const
 {
-	return stage_->chip( static_cast< int >( position().x() - get_collision_width() * 0.5f ), static_cast< int >( position().z() - get_collision_depth() * 0.5f ) );	
+	return stage_->cell( static_cast< int >( position().x() + get_collision_width() * 0.5f ), static_cast< int >( position().z() + get_collision_depth() * 0.5f ) );
 }
 
-float Player::get_floor_height_right_back() const
+const GridCell& Player::get_floor_cell_left_back() const
 {
-	return stage_->chip( static_cast< int >( position().x() + get_collision_width() * 0.5f ), static_cast< int >( position().z() - get_collision_depth() * 0.5f ) );
+	return stage_->cell( static_cast< int >( position().x() - get_collision_width() * 0.5f ), static_cast< int >( position().z() - get_collision_depth() * 0.5f ) );
+}
+
+const GridCell& Player::get_floor_cell_right_back() const
+{
+	return stage_->cell( static_cast< int >( position().x() + get_collision_width() * 0.5f ), static_cast< int >( position().z() - get_collision_depth() * 0.5f ) );
 }
 
 void Player::set_stage( const Stage* stage )
@@ -192,22 +266,34 @@ void Player::set_stage( const Stage* stage )
  */
 float Player::get_max_speed()
 {
-	return 10.f;
+	return 1.f;
 }
 
 float Player::get_collision_width() const
 {
-	return 0.8f;
+	return 0.5f;
 }
 
 float Player::get_collision_depth() const
 {
-	return 0.8f;
+	return 0.5f;
 }
 
-float Player::get_floor_height() const
+/**
+ * プレイヤーの接触している一番高いグリッドセルを返す
+ */
+const GridCell& Player::get_floor_cell() const
 {
-	return std::max( std::max( std::max( get_floor_height_left_front(), get_floor_height_right_front() ), get_floor_height_left_back() ), get_floor_height_right_back() );
+	std::list< const GridCell* > grid_cell_list;
+
+	grid_cell_list.push_back( & get_floor_cell_left_front() );
+	grid_cell_list.push_back( & get_floor_cell_right_front() );
+	grid_cell_list.push_back( & get_floor_cell_left_back() );
+	grid_cell_list.push_back( & get_floor_cell_right_back() );
+
+	grid_cell_list.sort( GridCell::height_less() );
+
+	return * grid_cell_list.back();
 }
 
 } // namespace blue_sky

@@ -162,6 +162,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="GridCell.cpp" />
     <ClCompile Include="GridData.cpp" />
     <ClCompile Include="GridObject.cpp" />
     <ClCompile Include="GridObjectManager.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="DirectX.h" />
     <ClInclude Include="Face.h" />
     <ClInclude Include="GameMain.h" />
+    <ClInclude Include="GridCell.h" />
     <ClInclude Include="GridData.h" />
     <ClInclude Include="GridObject.h" />
     <ClInclude Include="GridObjectManager.h" />

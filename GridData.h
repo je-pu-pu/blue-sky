@@ -1,6 +1,8 @@
 #ifndef BLUE_SKY_GRID_DATA_H
 #define BLUE_SKY_GRID_DATA_H
 
+#include "GridCell.h"
+
 namespace blue_sky
 {
 
@@ -10,36 +12,22 @@ namespace blue_sky
  */
 class GridData
 {
-public:
-	typedef unsigned char ChipType;
-
 private:
-	/*
-	int x_;
-	int y_;
-	int z_;
-	*/
-
 	int width_;
 	int depth_;
 
-	ChipType* chip_;
+	GridCell* cell_;
 
+	static GridCell null_cell_;
 public:
 	GridData( int, int );
 	virtual ~GridData();
 
-	/*
-	int x() { return x_; }
-	int y() { return y_; }
-	int z() { return z_; }
-	*/
-
 	int width() const { return width_; }
 	int depth() const { return depth_; }
 
-	ChipType& chip( int, int );
-	ChipType chip( int, int ) const;
+	GridCell& cell( int, int );
+	const GridCell& cell( int, int ) const;
 
 	void put( int, int, int, const GridData* );
 };

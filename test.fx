@@ -8,7 +8,7 @@ void vs_main(
 	out float4 out_p : POSITION,
 	out float4 out_d : COLOR0,
 	out float4 out_t : TEXCOORD0,
-	out float  out_f : FOG )
+	out float4 out_f : FOG )
 {
 	out_p = mul( in_p, WorldViewProjection );
 //	out_p[0];
@@ -23,7 +23,7 @@ void vs_main(
 
 	out_t = in_t;
 
-	out_f = 1.f;
+	out_f = 0.1f;
 }
 
 void vs_main_vc(

@@ -49,6 +49,7 @@
     <ClCompile Include="GridObject.cpp" />
     <ClCompile Include="GridObjectManager.cpp" />
     <ClCompile Include="GridCell.cpp" />
+    <ClCompile Include="House.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -100,5 +101,6 @@
     <ClInclude Include="GridObject.h" />
     <ClInclude Include="GridObjectManager.h" />
     <ClInclude Include="GridCell.h" />
+    <ClInclude Include="House.h" />
   </ItemGroup>
 </Project>

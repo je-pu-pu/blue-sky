@@ -27,28 +27,28 @@ Direct3D9::Direct3D9( HWND hwnd )
 
 //	DWORD behavior_flag = D3DCREATE_HARDWARE_VERTEXPROCESSING;
 
-	D3DPRESENT_PARAMETERS present = { 0 };
+	ZeroMemory( & present_, sizeof( present_ ) );
 
-	present.SwapEffect = D3DSWAPEFFECT_FLIP;
-	present.BackBufferFormat = D3DFMT_X8R8G8B8;
-	present.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
-	present.BackBufferWidth = 720;
-	present.BackBufferHeight = 480;
+	present_.SwapEffect = D3DSWAPEFFECT_FLIP;
+	present_.BackBufferFormat = D3DFMT_X8R8G8B8;
+	present_.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
+	present_.BackBufferWidth = 720;
+	present_.BackBufferHeight = 480;
 	
-	present.Windowed = TRUE;
-//	present.SwapEffect = D3DSWAPEFFECT_DISCARD;
-//	present.BackBufferFormat = D3DFMT_UNKNOWN;
-//	present.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+	present_.Windowed = TRUE;
+//	present_.SwapEffect = D3DSWAPEFFECT_DISCARD;
+//	present_.BackBufferFormat = D3DFMT_UNKNOWN;
+//	present_.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
-	present.EnableAutoDepthStencil = TRUE;
-	present.AutoDepthStencilFormat = D3DFMT_D16;
-//	present.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
+	present_.EnableAutoDepthStencil = TRUE;
+	present_.AutoDepthStencilFormat = D3DFMT_D16;
+//	present_.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 
 	DWORD multi_sample_quality = 0;
 	if ( SUCCEEDED( direct_3d_->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, D3DFMT_A32B32G32R32F, true, D3DMULTISAMPLE_2_SAMPLES, & multi_sample_quality ) ) )
 	{
-		// present.MultiSampleType = D3DMULTISAMPLE_2_SAMPLES;
-		// present.MultiSampleQuality = multi_sample_quality - 1;
+		// present_.MultiSampleType = D3DMULTISAMPLE_2_SAMPLES;
+		// present_.MultiSampleQuality = multi_sample_quality - 1;
 	}
 
 #ifdef PREF_HUD
@@ -60,7 +60,7 @@ Direct3D9::Direct3D9( HWND hwnd )
 		
 		if ( strstr( adapter_identifier.Description, "PerfHUD" ) != 0 )
 		{
-			if ( FAILED( direct_3d_->CreateDevice( n, D3DDEVTYPE_REF, hwnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, & present, & device_ ) ) )
+			if ( FAILED( direct_3d_->CreateDevice( n, D3DDEVTYPE_REF, hwnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, & present_, & device_ ) ) )
 			{
 				direct_3d_->Release();
 
@@ -76,11 +76,11 @@ Direct3D9::Direct3D9( HWND hwnd )
 	{
 		HRESULT hr = 0;
 
-		if ( FAILED( direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, & present, & device_ ) ) )
+		if ( FAILED( direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, & present_, & device_ ) ) )
 		{
-			if ( FAILED( direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, & present, & device_ ) ) )
+			if ( FAILED( direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, & present_, & device_ ) ) )
 			{
-				if ( FAILED( hr = direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hwnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, & present, & device_ ) ) )
+				if ( FAILED( hr = direct_3d_->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hwnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, & present_, & device_ ) ) )
 				{
 					direct_3d_->Release();
 
@@ -108,6 +108,13 @@ Direct3D9::~Direct3D9()
 {
 	device_->Release();
 	direct_3d_->Release();
+}
+
+void Direct3D9::toggle_full_screen()
+{
+	present_.Windowed = ! present_.Windowed;
+
+	device_->Reset( & present_ );
 }
 
 void Direct3D9::text_out_adapter_info( const char* file_name, bool append )

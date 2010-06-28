@@ -5,6 +5,8 @@
 #include <common/exception.h>
 #include <common/math.h>
 
+#include <dxfile.h>
+
 
 Direct3D9Mesh::Direct3D9Mesh( Direct3D9* direct_3d )
 	: direct_3d_( direct_3d )
@@ -43,6 +45,12 @@ bool Direct3D9Mesh::load_x( const char* file_name )
 
 	DIRECT_X_FAIL_CHECK( D3DXLoadMeshFromX( file_name, D3DXMESH_SYSTEMMEM, direct_3d_->getDevice(), & adjacency_buffer, & materials_buffer, 0, & material_count_, & mesh_ ) );
 
+	// DIRECT_X_FAIL_CHECK( D3DXSaveMeshToX( ( std::string( file_name ) + ".new.x" ).c_str(), mesh_, static_cast< DWORD* >( adjacency_buffer->GetBufferPointer() ), static_cast< D3DXMATERIAL* >( materials_buffer->GetBufferPointer() ), 0, material_count_, DXFILEFORMAT_TEXT ) );
+
+	// mesh_->GetOptions()
+
+	mesh_->OptimizeInplace( D3DXMESHOPT_COMPACT | D3DXMESHOPT_ATTRSORT | D3DXMESHOPT_VERTEXCACHE, static_cast< DWORD* >( adjacency_buffer->GetBufferPointer() ), 0, 0, 0 );
+
 	materials_ = new D3DMATERIAL9[ material_count_ ];
 	textures_ = new LPDIRECT3DTEXTURE9[ material_count_ ];
 
@@ -66,6 +74,11 @@ bool Direct3D9Mesh::load_x( const char* file_name )
 			}
 		}
 	}
+
+	// mesh_->LockVertexBuffer( 
+
+	adjacency_buffer->Release();
+	materials_buffer->Release();
 
 	return true;
 }

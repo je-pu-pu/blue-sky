@@ -181,8 +181,8 @@ void Player::update()
 
 	if ( is_jumping() )
 	{
-		velocity().x() *= 0.999f;
-		velocity().z() *= 0.999f;
+		velocity().x() *= 0.99f;
+		velocity().z() *= 0.99f;
 	}
 
 	if ( ! is_jumping() )
@@ -271,12 +271,12 @@ float Player::get_max_speed()
 
 float Player::get_collision_width() const
 {
-	return 0.5f;
+	return 0.4f;
 }
 
 float Player::get_collision_depth() const
 {
-	return 0.5f;
+	return 0.4f;
 }
 
 /**

@@ -12,6 +12,7 @@
 #include "Camera.h"
 #include "Stage.h"
 #include "Building.h"
+#include "House.h"
 
 #include "Direct3D9Mesh.h"
 #include "Direct3D9Box.h"
@@ -40,6 +41,7 @@
 
 Direct3D9Mesh* mesh_ = 0;
 Direct3D9Mesh* building_a_mesh_ = 0;
+Direct3D9Mesh* house_a_mesh_ = 0;
 Direct3D9Mesh* shadow_mesh_ = 0;
 Direct3D9Mesh* ground_mesh_ = 0;
 
@@ -55,6 +57,7 @@ Player* player_ = 0;
 Camera* camera_ = 0;
 Stage* stage_ = 0;
 Building* building_a_grid_ = 0;
+House* house_a_grid_ = 0;
 
 using game::Sound;
 
@@ -84,6 +87,9 @@ GameMain::GameMain()
 
 	building_a_mesh_ = new Direct3D9Mesh( direct_3d_ );
 	building_a_mesh_->load_x( "media/model/building-a.x" );
+
+	house_a_mesh_ = new Direct3D9Mesh( direct_3d_ );
+	house_a_mesh_->load_x( "media/model/house-a.x" );
 
 	shadow_mesh_ = new Direct3D9Mesh( direct_3d_ );
 	shadow_mesh_->load_x( "media/model/shadow.x" );
@@ -127,7 +133,7 @@ GameMain::GameMain()
 
 	// Player
 	player_ = new Player();
-	player_->position().set( 50.f, 10.f, 0.f );
+	player_->position().set( 2.f, 10.f, 2.f );
 
 	// Camera
 	camera_ = new Camera();
@@ -170,20 +176,36 @@ GameMain::GameMain()
 	// Building
 	building_a_grid_ = new Building( 10, 10 );
 
+	house_a_grid_ = new House( 8, 6 );
+
 	grid_object_manager_ = new GridObjectManager();
 
 	const int x_space = 1;
 	const int z_space = 1;
 
-	for ( int d = 0; d < 50; d++ )
+	for ( int d = 0; d < 10; d++ )
 	{
-		for ( int x = 0; x < 5; x++ )
+		for ( int x = 0; x < 10; x++ )
 		{
-			if ( d == 0 || common::random( 0, 0 ) == 0 )
+			// grid_object_manager_->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), building_a_grid_, building_a_mesh_ ) );
+			// grid_object_manager_->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), house_a_grid_, house_a_mesh_ ) );
+			// continue;
+
+			if ( common::random( 0, 1 ) == 0 )
+			{
+				grid_object_manager_->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), house_a_grid_, house_a_mesh_ ) );
+			}
+			else
 			{
 				const int y = d == 0 ? 0 : -15 + common::random( 0, 3 ) * 5;
+				grid_object_manager_->add_grid_object( new GridObject( x * ( 10 + x_space ), y, d * ( 10 + z_space ), building_a_grid_, building_a_mesh_ ) );
+			}
+			continue;
 
-				grid_object_manager_->add_grid_object( new GridObject( 40 + x * ( 10 + x_space ), y, d * ( 10 + z_space ), building_a_grid_, building_a_mesh_ ) );
+			if ( common::random( 0, 1 ) == 0 )
+			{
+				const int y = d == 0 ? 0 : -15 + common::random( 0, 3 ) * 5;
+				grid_object_manager_->add_grid_object( new GridObject( x * ( 10 + x_space ), y, d * ( 10 + z_space ), building_a_grid_, building_a_mesh_ ) );
 			}
 		}
 	}
@@ -193,6 +215,13 @@ GameMain::GameMain()
 		GridObject* grid_object = *i;
 		stage_->put( grid_object->x(), grid_object->y(), grid_object->z(), grid_object->grid_data() );
 	}
+
+	/*
+	IGraphBuilder
+
+	CoInitialize( 0 );
+	CoCreateInstance( CLSID_FilterGraph, 0, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, static_cast< void** >( m_cpGraph.ToCreator() ) );
+	*/
 }
 
 //■デストラクタ
@@ -228,7 +257,7 @@ static int fps = 0, last_fps = 0;
 void GameMain::update()
 {
 	MainLoop.WaitTime = 16;
-	// MainLoop.WaitTime = 0;
+	MainLoop.WaitTime = 0;
 
 	//秒間50フレームを保持
 	if ( ! MainLoop.Loop() )
@@ -272,9 +301,9 @@ void GameMain::update()
 
 	if ( player_->is_jumping() )
 	{
-		bgm->set_speed( 1.41421356f );
-		izakaya->set_speed( 1.41421356f );
-		 izakaya->set_volume( 0.7f );
+//		bgm->set_speed( 1.41421356f );
+//		izakaya->set_speed( 1.41421356f );
+		 izakaya->set_volume( 0.8f );
 	}
 	else
 	{
@@ -288,13 +317,13 @@ void GameMain::update()
 	const float under_view_max_speed = 0.1f;
 	static float under_view_speed = 0.f;
 
-	if ( player_->is_jumping() || input_->press( Input::B ) )
+	if ( input_->press( Input::B ) )
 	{
 		under_view_speed += 0.02f;
 	}
 	else
 	{
-		under_view_speed -= 0.004f;
+		under_view_speed -= 0.01f;
 	}
 
 	under_view_speed = math::clamp( under_view_speed, -under_view_max_speed, under_view_max_speed );
@@ -345,7 +374,7 @@ void GameMain::render()
 	direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
 	*/
 
-	const int panorama_y_division = 6;
+	const int panorama_y_division = 10;
 
 	camera_->set_panorama_y_division( panorama_y_division );
 
@@ -407,8 +436,12 @@ void GameMain::render()
 		{
 			GridObject* grid_object = *i;
 
+			const int max_length = 200;
+
+			if ( std::abs( static_cast< int >( player_->position().x() ) - grid_object->x() ) >= max_length ) continue;
+			if ( std::abs( static_cast< int >( player_->position().z() ) - grid_object->z() ) >= max_length ) continue;
 			
-			D3DXMatrixTranslation( & t, grid_object->x() + grid_object->width() * 0.5f, static_cast< float >( grid_object->y() ), grid_object->z() + grid_object->depth() * 0.5f );
+			D3DXMatrixTranslation( & t, static_cast< float >( grid_object->x() ), static_cast< float >( grid_object->y() ), static_cast< float >( grid_object->z() ) );
 			world = s * t;
 
 			WorldViewProjection = world * view * projection;
@@ -417,21 +450,22 @@ void GameMain::render()
 			grid_object->mesh()->render();
 		}
 
-
 		// Box
-		// direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
-
 		/*
+		direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
+
 		box_->ready();
 
 		for ( int z = 0; z < stage_->depth(); z++ )
 		{
 			for ( int x = 0; x < stage_->width(); x++ )
 			{
-				int y = stage_->chip( x, z );
+				int y = stage_->cell( x, z ).height();
 			
 				if ( y > 0 )
 				{
+					y = 1;
+
 					D3DXMatrixTranslation( & world, x + 0.5f, y - 0.5f, z + 0.5f );
 
 					D3DXMATRIX WorldViewProjection = world * view * projection;

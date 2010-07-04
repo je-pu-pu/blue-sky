@@ -22,6 +22,7 @@ Player::Player()
 	 : stage_( 0 )
 	 , direction_( FRONT )
 	 , direction_degree_( 0.f )
+	 , is_turn_avaiable_( true )
 	 , is_jumping_( false )
 	 , is_falling_( false )
 {
@@ -31,10 +32,15 @@ Player::Player()
 
 void Player::step( float s )
 {
-	if ( is_jumping() )
+	if ( is_falling() )
 	{
-		s *= 0.5f;
+		s = 0.f;
 	}
+	else if ( is_jumping() )
+	{
+		s *= 1.5f;
+	}
+
 	velocity() += front() * s * get_step_speed();
 }
 
@@ -42,10 +48,10 @@ void Player::side_step( float s )
 {
 	if ( is_jumping() )
 	{
-		s *= 0.5f;
+		s *= 1.5f;
 	}
 	
-	velocity() += right() * s * get_side_step_speed();
+	// velocity() += right() * s * get_side_step_speed();
 }
 
 void Player::turn( int d )
@@ -63,7 +69,12 @@ void Player::turn( int d )
 
 	direction_degree_ += d * 90.f;
 
-	GameMain::getInstance()->getSoundManager()->get_sound( "turn" )->play( false );
+	if ( d )
+	{
+		GameMain::getInstance()->getSoundManager()->get_sound( "turn" )->play( false );
+	}
+
+	is_turn_avaiable_ = false;
 }
 
 /**
@@ -83,21 +94,24 @@ void Player::update()
 
 	if ( position().y() < floor_cell_x.height() )
 	{
-		if ( velocity().y() <= 0.02f && floor_cell_x.height() - position().y() <= 2.f )
+		if (
+			( velocity().y() <= 0.02f && floor_cell_x.height() - position().y() <= 2.f ) &&
+			(
+				( velocity().x() < 0.f && direction() == LEFT || velocity().x() > 0.f && direction() == RIGHT ) ||
+				( floor_cell_x.height() - position().y() <= 1.f && ( velocity().x() < 0.f && direction() != RIGHT || velocity().x() > 0.f && direction() != LEFT ) )
+			) )
 		{
-			if ( ( velocity().x() < 0.f && direction() == LEFT || velocity().x() > 0.f && direction() == RIGHT ) ||
-				 ( floor_cell_x.height() - position().y() <= 1.f && ( velocity().x() < 0.f && direction() != RIGHT || velocity().x() > 0.f && direction() != LEFT ) ) )
-			{
-				velocity().y() = 0.02f;
+			velocity().y() = 0.02f;
 
-				is_jumping_ = false;
-			}
+			is_jumping_ = false;
+		}
+		else
+		{
+			GameMain::getInstance()->getSoundManager()->get_sound( "collision_wall" )->play( false );
 		}
 
 		position().x() = last_position.x();
 		velocity().x() *= 0.5f;
-
-		GameMain::getInstance()->getSoundManager()->get_sound( "collision_wall" )->play( false );
 	}
 
 	position().z() += velocity().z();
@@ -105,21 +119,24 @@ void Player::update()
 
 	if ( position().y() < floor_cell_z.height() )
 	{
-		if ( velocity().y() <= 0.02f && floor_cell_z.height() - position().y() <= 2.f )
+		if (
+			( velocity().y() <= 0.02f && floor_cell_z.height() - position().y() <= 2.f ) && 
+			(
+				( velocity().z() < 0.f && direction() == BACK || velocity().z() > 0.f && direction() == FRONT ) ||
+				( floor_cell_z.height() - position().y() <= 1.f && ( velocity().z() < 0.f && direction() != FRONT || velocity().z() > 0.f && direction() != BACK ) )
+			) )
 		{
-			if ( ( velocity().z() < 0.f && direction() == BACK || velocity().z() > 0.f && direction() == FRONT ) ||
-				 ( floor_cell_z.height() - position().y() <= 1.f && ( velocity().z() < 0.f && direction() != FRONT || velocity().z() > 0.f && direction() != BACK ) ) )
-			{
-				velocity().y() = 0.02f;
+			velocity().y() = 0.02f;
 
-				is_jumping_ = false;
-			}
+			is_jumping_ = false;
+		}
+		else
+		{
+			GameMain::getInstance()->getSoundManager()->get_sound( "collision_wall" )->play( false );
 		}
 
 		position().z() = last_position.z();
 		velocity().z() *= 0.5f;
-
-		GameMain::getInstance()->getSoundManager()->get_sound( "collision_wall" )->play( false );
 	}
 
 	position().y() += velocity().y();
@@ -156,6 +173,11 @@ void Player::update()
 		}
 		else
 		{
+			if ( floor_cell_y.height() == 0 && velocity().y() < -get_max_speed() * 0.5f )
+			{
+				position().set( 0.f, 0.f, 0.f );
+			}
+
 			// ’Êí’…’n
 			velocity().y() *= -0.01f;
 
@@ -171,6 +193,7 @@ void Player::update()
 			}
 		}
 
+		is_turn_avaiable_ = true;
 		is_falling_ = false;
 	}
 
@@ -178,6 +201,7 @@ void Player::update()
 
 	velocity().y() -= 0.01f;
 	// velocity().y() -= 0.001f;
+	// velocity().y() -= 0.0001f;
 
 	if ( is_jumping() )
 	{
@@ -211,6 +235,7 @@ void Player::jump()
 	if ( is_jumping() ) return;
 	
 	velocity_.y() = 0.3f;
+	// velocity_.z() = 0.1f;
 	
 	is_jumping_ = true;
 

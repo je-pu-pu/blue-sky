@@ -153,8 +153,8 @@
     </ClCompile>
     <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="Direct3D9Box.cpp" />
-    <ClCompile Include="Direct3D9Canvas.cpp" />
     <ClCompile Include="Direct3D9Mesh.cpp" />
+    <ClCompile Include="Direct3D9SkyBox.cpp" />
     <ClCompile Include="DirectInput.cpp" />
     <ClCompile Include="DirectSound.cpp" />
     <ClCompile Include="DirectSoundBuffer.cpp" />
@@ -197,8 +197,8 @@
     <ClInclude Include="Canvas.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="Direct3D9Box.h" />
-    <ClInclude Include="Direct3D9Canvas.h" />
     <ClInclude Include="Direct3D9Mesh.h" />
+    <ClInclude Include="Direct3D9SkyBox.h" />
     <ClInclude Include="DirectInput.h" />
     <ClInclude Include="DirectSound.h" />
     <ClInclude Include="DirectSoundBuffer.h" />

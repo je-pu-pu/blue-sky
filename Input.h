@@ -14,9 +14,18 @@
 #ifndef BLUE_SKY_INPUT_H
 #define BLUE_SKY_INPUT_H
 
+#include <boost/array.hpp>
 #include <deque>
+#include <vector>
 #include <algorithm>
 #include <windows.h>
+
+namespace game
+{
+
+class Config;
+
+} // namespace game
 
 namespace blue_sky
 {
@@ -34,7 +43,10 @@ public:
 	 */
 	enum Button { LEFT, RIGHT, UP, DOWN, A, B, X, Y, L, R, MAX_BUTTONS, NONE };
 
+	typedef game::Config Config;
+
 	typedef std::deque< Button > ButtonStack;
+	typedef boost::array< unsigned int, MAX_BUTTONS > ButtonCodeList;
 
 private:
 	unsigned int state_[ MAX_BUTTONS ];						///< 全てのボタンの状態
@@ -43,8 +55,13 @@ private:
 	JOYINFOEX joy_info_;									///< ジョイスティック
 	bool joystick_enabled_;									///< ジョイスティック有効フラグ
 
+	ButtonCodeList key_code_;
+	ButtonCodeList joystick_code_;
+
 public:
 	Input();
+
+	void load_config( Config& );
 
 	void update();
 	void update_common();
@@ -108,19 +125,19 @@ public:
 	 *
 	 * @return 現在最優先で押されている方向ボタン ( 方向ボタンが押されていない場合は NONE を返す )
 	 */
-	Button getPrimaryAllowButton() const
+	Button get_primary_allow_button() const
 	{
 		if ( allow_stack_.empty() ) return NONE;
 
 		return allow_stack_.back();
 	}
 
-	const ButtonStack& getAllowButtonStack() const
+	const ButtonStack& get_allow_button_stack() const
 	{
 		return allow_stack_;
 	}
 
-	static const Input& GetNullInput()
+	static const Input& get_null_input()
 	{
 		static Input null_input;
 

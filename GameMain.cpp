@@ -15,6 +15,7 @@
 #include "House.h"
 
 #include "Direct3D9Mesh.h"
+#include "Direct3D9SkyBox.h"
 #include "Direct3D9Box.h"
 #include "Direct3D9.h"
 #include "DirectX.h"
@@ -31,6 +32,7 @@
 #include "vector3.h"
 
 #include <game/Sound.h>
+#include <game/Config.h>
 
 #include <common/exception.h>
 #include <common/serialize.h>
@@ -39,11 +41,12 @@
 
 #include <boost/format.hpp>
 
-Direct3D9Mesh* mesh_ = 0;
 Direct3D9Mesh* building_a_mesh_ = 0;
 Direct3D9Mesh* house_a_mesh_ = 0;
 Direct3D9Mesh* shadow_mesh_ = 0;
 Direct3D9Mesh* ground_mesh_ = 0;
+
+Direct3D9SkyBox* sky_box_ = 0;
 
 Direct3D9Box* box_ = 0;
 
@@ -67,24 +70,27 @@ GameMain::GameMain()
 	, input_( 0 )
 	, sound_manager_( 0 )
 	, grid_object_manager_( 0 )
+	, config_( 0 )
 	, Width( 0 )
 	, Height( 0 )
 {
-	CApp *app = CApp::GetInstance();
+	App* app = App::GetInstance();
 	Width = app->GetWidth();
 	Height = app->GetHeight();
 
 	//ランダマイズ
 	srand( timeGetTime() );
 
+	// Config
+	config_ = new Config();
+	config_->load_file( "blue-sky.config" );
+
 	// Direct3D 
 	direct_3d_ = new Direct3D9( app->GetWindowHandle() );
 
-	// Mesh
-	mesh_ = new Direct3D9Mesh( direct_3d_ );
-	// mesh_->load_x( "media/model/hoge.x" );
-	// mesh_->load_x( "media/model/blue-sky-building-a-field.x" );
+	config_->get( "video.width", 720 );
 
+	// Mesh
 	building_a_mesh_ = new Direct3D9Mesh( direct_3d_ );
 	building_a_mesh_->load_x( "media/model/building-a.x" );
 
@@ -97,11 +103,15 @@ GameMain::GameMain()
 	ground_mesh_ = new Direct3D9Mesh( direct_3d_ );
 	ground_mesh_->load_x( "media/model/ground.x" );
 
+	// SkyBox
+	sky_box_ = new Direct3D9SkyBox( direct_3d_, "sky-box2", "jpg" );
+
 	// Box
-	box_ = new Direct3D9Box( direct_3d_, 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
+	// box_ = new Direct3D9Box( direct_3d_, 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
 
 	// Input
 	input_ = new Input();
+	input_->load_config( * config_ );
 
 	// Sound
 	{
@@ -119,7 +129,7 @@ GameMain::GameMain()
 		Sound* turn = sound_manager_->load( "turn", "media/sound/turn.ogg" );
 
 		Sound* collision_wall = sound_manager_->load( "collision_wall", "media/sound/collision_wall.ogg" );
-		collision_wall->set_volume( 0.7f );
+		collision_wall->set_volume( 0.9f );
 		collision_wall->set_speed( 0.3f );
 
 		Sound* jump = sound_manager_->load( "jump", "media/sound/jump.ogg" );
@@ -133,13 +143,13 @@ GameMain::GameMain()
 
 	// Player
 	player_ = new Player();
-	player_->position().set( 2.f, 10.f, 2.f );
+	player_->position().set( 2.f, 30.f, 2.f );
 
 	// Camera
 	camera_ = new Camera();
 
-	const char* vs_profile = D3DXGetVertexShaderProfile( direct_3d_->getDevice() );
-	const char* ps_profile = D3DXGetPixelShaderProfile( direct_3d_->getDevice() );
+	const char* vs_profile = "vs_2_0"; // D3DXGetVertexShaderProfile( direct_3d_->getDevice() );
+	const char* ps_profile = "ps_2_0"; // D3DXGetPixelShaderProfile( direct_3d_->getDevice() );
 
 	app->setTitle( ( std::string( app->getTitle() ) + " : " + vs_profile + " : " + ps_profile ).c_str() );
 
@@ -183,7 +193,7 @@ GameMain::GameMain()
 	const int x_space = 1;
 	const int z_space = 1;
 
-	for ( int d = 0; d < 10; d++ )
+	for ( int d = 0; d < 80; d++ )
 	{
 		for ( int x = 0; x < 10; x++ )
 		{
@@ -191,16 +201,18 @@ GameMain::GameMain()
 			// grid_object_manager_->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), house_a_grid_, house_a_mesh_ ) );
 			// continue;
 
+			/*
 			if ( common::random( 0, 1 ) == 0 )
 			{
 				grid_object_manager_->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), house_a_grid_, house_a_mesh_ ) );
 			}
-			else
+			else if ( common::random( 0, 1 ) == 0 )
 			{
 				const int y = d == 0 ? 0 : -15 + common::random( 0, 3 ) * 5;
 				grid_object_manager_->add_grid_object( new GridObject( x * ( 10 + x_space ), y, d * ( 10 + z_space ), building_a_grid_, building_a_mesh_ ) );
 			}
 			continue;
+			*/
 
 			if ( common::random( 0, 1 ) == 0 )
 			{
@@ -236,9 +248,9 @@ GameMain::~GameMain()
 	delete stage_;
 	delete camera_;
 	delete player_;
-
-	delete mesh_;
 	
+	delete sky_box_;
+
 	delete box_;
 
 	delete direct_3d_;
@@ -246,6 +258,10 @@ GameMain::~GameMain()
 	delete input_;
 
 	delete sound_manager_;
+
+	config_->save_file( "blue-sky.config" );
+
+	delete config_;
 }
 
 static int fps = 0, last_fps = 0;
@@ -278,20 +294,21 @@ void GameMain::update()
 	fps++;
 	
 	input_->update();
-
-	if ( input_->press( Input::LEFT  ) ) { player_->side_step( -1 ); }
-	if ( input_->press( Input::RIGHT ) ) { player_->side_step( +1 ); }
-	if ( input_->press( Input::UP    ) ) { player_->step( +1 ); }
-	if ( input_->press( Input::DOWN  ) ) { player_->step( -1 ); }
 	
-	if ( input_->push( Input::L ) ) { player_->turn( -1 ); }
-	if ( input_->push( Input::R ) ) { player_->turn( +1 ); }
+	if ( input_->press( Input::B ) ) { player_->step( +1 ); }
+
+	if ( input_->push( Input::LEFT  ) && player_->is_turn_available() ) { player_->turn( -1 ); }
+	if ( input_->push( Input::RIGHT ) && player_->is_turn_available() ) { player_->turn( +1 ); }
 
 	if ( input_->push( Input::A ) ) { player_->is_jumping() ? player_->fall() : player_->jump(); }
-//	if ( input_->push( Input::B ) ) { player_->fall(); }
 
-	if ( input_->push( Input::X ) ) { sound_manager_->set_enabled( ! sound_manager_->is_enabled() ); }
+	if ( input_->push( Input::X ) )
+	{
+		App::GetInstance()->set_full_screen( ! App::GetInstance()->is_full_screen() );
+		direct_3d_->set_full_screen( App::GetInstance()->is_full_screen() );
 
+		// sound_manager_->set_enabled( ! sound_manager_->is_enabled() );
+	}
 	if ( input_->push( Input::Y ) ) { sound_manager_->stop_all(); sound_manager_->get_sound( "fin" )->play( false ); }
 
 	player_->update();
@@ -317,7 +334,7 @@ void GameMain::update()
 	const float under_view_max_speed = 0.1f;
 	static float under_view_speed = 0.f;
 
-	if ( input_->press( Input::B ) )
+	if ( player_->is_jumping() || input_->press( Input::B ) )
 	{
 		under_view_speed += 0.02f;
 	}
@@ -348,9 +365,10 @@ void GameMain::render()
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xEE, 0xEE, 0xFF ), 1.f, 0 ) );
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->BeginScene() );
 
-//	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE ) );
-//	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
-//	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, TRUE ) );
+
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF ) );
 
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE ) );
@@ -358,25 +376,41 @@ void GameMain::render()
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA ) );
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGVERTEXMODE, D3DFOG_LINEAR ) );
-	/*
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGCOLOR, D3DCOLOR_XRGB( 255, 255, 255 ) ) );
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGTABLEMODE, D3DFOG_LINEAR ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGCOLOR, 0xFFEEEEFF ) );
 	
-//	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_RANGEFOGENABLE, TRUE ) );
-
-	float Start = 0.1f;
-	float End = 0.5f;
+	float Start   = 1.f;    // For linear mode
+	float End     = 200.f;
+	// static float fog_density_a = 0.f;
+	// fog_density_a += 0.001f;
+	// float fog_density = sin( fog_density_a );
+	// End = 2.f + std::abs( sin( fog_density_a ) * 500.f );
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGSTART, *(DWORD *)(&Start)) );
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGEND,   *(DWORD *)(&End)) );
 
-	direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
-	*/
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGVERTEXMODE, D3DFOG_LINEAR ) );
+//	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_RANGEFOGENABLE, TRUE ) );
 
-	const int panorama_y_division = 10;
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGTABLEMODE, D3DFOG_LINEAR ) ); 
+
+	// DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGTABLEMODE, D3DFOG_EXP2 ) ); 
+	// DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGDENSITY, * ( DWORD* )( & fog_density ) ) );
+
+
+	direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
+
+	D3DXMATRIXA16 world;
+	D3DXMATRIXA16 view;
+	D3DXMATRIXA16 projection;
+	D3DXMATRIXA16 WorldViewProjection;
+
+	const int panorama_y_division = config_->get( "panorama_y_division", 1 );
 
 	camera_->set_panorama_y_division( panorama_y_division );
+
+	static float fog = 0.f;
+	fog += 0.001f;
+	vs_constant_table->SetFloat( direct_3d_->getDevice(), "fog", sin( fog ) );
 
 	for ( int panorama_y = 0; panorama_y < panorama_y_division; panorama_y++ )
 	{
@@ -392,33 +426,23 @@ void GameMain::render()
 
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
 
-		D3DXMATRIXA16 world;
-		D3DXMATRIXA16 view;
-		D3DXMATRIXA16 projection;
-		D3DXMATRIXA16 WorldViewProjection;
-
 		vector3 look_at = camera_->get_look_at_part( panorama_y );
 		vector3 up = camera_->get_up_part( panorama_y );
 		
 		D3DXMATRIXA16 s;
-		D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );
-
 		D3DXMATRIXA16 t;
-		D3DXMatrixTranslation( & t, 50.f, 0.f, 0.f );
-		
-		world = s * t;
 		
 		D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & look_at ), reinterpret_cast< const D3DXVECTOR3* >( & up ) );
+		D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() / panorama_y_division ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() );
+		
+		// SkyBox
+		D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );
+		D3DXMatrixTranslation( & t, camera_->position().x(), camera_->position().y(), camera_->position().z() );
 
-		D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() / panorama_y_division ), 720.f / ( 480.f / panorama_y_division ), 0.05f, 600.f );
-
-		// Mesh
-		/*
+		world = s * t;
 		WorldViewProjection = world * view * projection;
 		vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
-
-		mesh_->render();
-		*/
+		sky_box_->render();
 
 		// Ground
 		const int gx = static_cast< int >( player_->position().x() );
@@ -432,6 +456,8 @@ void GameMain::render()
 		ground_mesh_->render();
 
 		// GridObject
+		D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );
+
 		for ( GridObjectManager::GridObjectList::iterator i = grid_object_manager_->grid_object_list().begin(); i != grid_object_manager_->grid_object_list().end(); ++i )
 		{
 			GridObject* grid_object = *i;
@@ -511,7 +537,7 @@ void GameMain::render()
 		common::serialize( static_cast< int >( player_->position().x() ) ) + "," +
 		common::serialize( static_cast< int >( player_->position().y() ) ) + "," +
 		common::serialize( static_cast< int >( player_->position().z() ) ) + ")";
-	CApp::GetInstance()->setTitle( debug_text.c_str() );
+	App::GetInstance()->setTitle( debug_text.c_str() );
 }
 
 } // namespace blue_sky

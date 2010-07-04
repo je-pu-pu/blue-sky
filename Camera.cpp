@@ -9,7 +9,7 @@ namespace blue_sky
 Camera::Camera()
 	: direction_degree_( 0.f )
 	, direction_degree_target_( 0.f )
-	, fov_( 110.f )
+	, fov_( 120.f )
 	, under_view_rate_( 0.f )
 	, panorama_y_division_( 1 )
 {

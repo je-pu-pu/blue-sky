@@ -58,6 +58,10 @@ public:
 
 	void set_under_view_rate( float );
 	float get_under_view_rate() const { return under_view_rate_; }
+
+	float aspect() const { return 720.f / ( 480.f / panorama_y_division_ ); }
+	float near_clip() const { return 0.05f; }
+	float far_clip() const { return 500.f; }
 };
 
 } // namespace blue_sky

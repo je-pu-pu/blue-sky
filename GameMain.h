@@ -10,6 +10,14 @@
 #include "MainLoop.h"
 #include <windows.h>
 
+namespace game
+{
+
+class Config;
+
+} // namespace game
+
+
 class Direct3D9;
 
 namespace blue_sky
@@ -21,6 +29,9 @@ class GridObjectManager;
 
 class GameMain
 {
+public:
+	typedef game::Config Config;
+
 protected:
 	Direct3D9*				direct_3d_;				///< Direct3D
 
@@ -28,6 +39,8 @@ protected:
 	SoundManager*			sound_manager_;			///< SoundManager
 
 	GridObjectManager*		grid_object_manager_;	///< GridObjectManager
+
+	Config*					config_;				///< Config
 
 	int				Width;			///< ‰¡•
 	int				Height;			///< ‚‚³

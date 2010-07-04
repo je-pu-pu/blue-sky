@@ -6,7 +6,7 @@
 #include <iostream>
 
 //□コンストラクタ
-CApp::CApp()
+App::App()
 	: hWnd( 0 )
 	, hInst( 0 )
 	, hMutex( 0 )
@@ -15,23 +15,19 @@ CApp::CApp()
 {
 	ClassName = "blue-sky";
 	WinTitle = "blue-sky";
-	// WinStyle = WS_POPUP;
-	// WinStyle = WS_CAPTION;
-	
-	WinStyle = WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE;
-	// WinStyle = WS_POPUP;
+	WinStyle = get_window_style();
 }
 
 //□デストラクタ
-CApp::~CApp()
+App::~App()
 {
 	ReleaseMutex(hMutex);			//ミューテックス開放
 	WINNLSEnableIME(hWnd, TRUE);	//IME表示
-	ShowCursor(TRUE);				//カーソル表示
+	ShowCursor( TRUE );				//カーソル表示
 }
 
 //■初期化
-bool CApp::Init(HINSTANCE hi, int nCmdShow)
+bool App::Init(HINSTANCE hi, int nCmdShow)
 {
 	//インスタンスハンドルをコピー
 	hInst = hi;
@@ -97,7 +93,7 @@ bool CApp::Init(HINSTANCE hi, int nCmdShow)
 }
 
 //□メッセージループ
-int CApp::MessageLoop()
+int App::MessageLoop()
 {
 	MSG msg;
 
@@ -125,7 +121,7 @@ int CApp::MessageLoop()
 }
 
 //□ウィンドウプロシージャ
-LRESULT CALLBACK CApp::WinProc( HWND hw, UINT msg, WPARAM wp, LPARAM lp )
+LRESULT CALLBACK App::WinProc( HWND hw, UINT msg, WPARAM wp, LPARAM lp )
 {
 	switch ( msg )
 	{
@@ -153,7 +149,7 @@ LRESULT CALLBACK CApp::WinProc( HWND hw, UINT msg, WPARAM wp, LPARAM lp )
  *
  * @return タイトル
  */
-const char* CApp::getTitle()
+const char* App::getTitle()
 {
 	title_.resize( GetWindowTextLength( hWnd ) + 1 );
 	GetWindowText( hWnd, & title_[ 0 ], title_.size() );
@@ -166,7 +162,44 @@ const char* CApp::getTitle()
  *
  * @param t タイトル
  */
-void CApp::setTitle( const char* t )
+void App::setTitle( const char* t )
 {
 	SetWindowText( hWnd, t );
+}
+
+void App::set_full_screen( bool full_screen )
+{
+	if ( full_screen )
+	{
+		SetWindowLong( hWnd, GWL_STYLE, get_window_style_full_scrren() );
+
+		if ( is_full_screen_ )
+		{
+			GetWindowRect( hWnd, & last_window_rect_ );
+		}
+
+		ShowCursor( FALSE );
+	}
+	else
+	{
+		SetWindowLong( hWnd, GWL_STYLE, get_window_style() );
+
+		if ( ! is_full_screen_ )
+		{
+			SetWindowPos(  hWnd, HWND_NOTOPMOST, last_window_rect_.left, last_window_rect_.top, last_window_rect_.right - last_window_rect_.left, last_window_rect_.bottom - last_window_rect_.top, SWP_SHOWWINDOW );
+		}
+	}
+
+	is_full_screen_ = full_screen;
+}
+
+LONG App::get_window_style() const
+{
+	return WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE;
+	// return WS_OVERLAPPEDWINDOW;
+}
+
+LONG App::get_window_style_full_scrren() const
+{
+	return WS_POPUP;
 }

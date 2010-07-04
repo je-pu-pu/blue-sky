@@ -25,18 +25,16 @@ Direct3D9::Direct3D9( HWND hwnd )
 
 	text_out_adapter_info( "d3d_adapter_info.txt" );
 
-//	DWORD behavior_flag = D3DCREATE_HARDWARE_VERTEXPROCESSING;
-
 	ZeroMemory( & present_, sizeof( present_ ) );
 
 	present_.SwapEffect = D3DSWAPEFFECT_FLIP;
 	present_.BackBufferFormat = D3DFMT_X8R8G8B8;
-	present_.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
+//	present_.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 	present_.BackBufferWidth = 720;
 	present_.BackBufferHeight = 480;
 	
 	present_.Windowed = TRUE;
-//	present_.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	present_.SwapEffect = D3DSWAPEFFECT_DISCARD;
 //	present_.BackBufferFormat = D3DFMT_UNKNOWN;
 //	present_.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
@@ -45,10 +43,10 @@ Direct3D9::Direct3D9( HWND hwnd )
 //	present_.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 
 	DWORD multi_sample_quality = 0;
-	if ( SUCCEEDED( direct_3d_->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, D3DFMT_A32B32G32R32F, true, D3DMULTISAMPLE_2_SAMPLES, & multi_sample_quality ) ) )
+	if ( SUCCEEDED( direct_3d_->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, false, D3DMULTISAMPLE_8_SAMPLES, & multi_sample_quality ) ) )
 	{
-		// present_.MultiSampleType = D3DMULTISAMPLE_2_SAMPLES;
-		// present_.MultiSampleQuality = multi_sample_quality - 1;
+		present_.MultiSampleType = D3DMULTISAMPLE_8_SAMPLES;
+		present_.MultiSampleQuality = multi_sample_quality - 1;
 	}
 
 #ifdef PREF_HUD
@@ -92,14 +90,7 @@ Direct3D9::Direct3D9( HWND hwnd )
 
 	device_->GetDeviceCaps( & device_caps_ );
 
-	int w = device_caps_.MaxTextureWidth;
-	int h = device_caps_.MaxTextureHeight;
-
-	if ( device_caps_.FVFCaps & D3DFVFCAPS_PSIZE )
-	{
-		//
-		int x = 0;
-	}
+	text_out_device_caps( "d3d_device_caps.txt" );
 
 	device_->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, TRUE );
 }
@@ -110,11 +101,11 @@ Direct3D9::~Direct3D9()
 	direct_3d_->Release();
 }
 
-void Direct3D9::toggle_full_screen()
+void Direct3D9::set_full_screen( bool full_scrren )
 {
-	present_.Windowed = ! present_.Windowed;
+	present_.Windowed = ! full_scrren;
 
-	device_->Reset( & present_ );
+	DIRECT_X_FAIL_CHECK( device_->Reset( & present_ ) );
 }
 
 void Direct3D9::text_out_adapter_info( const char* file_name, bool append )
@@ -143,6 +134,102 @@ void Direct3D9::text_out_adapter_info( const char* file_name, bool append )
 				"-----\n";
 		}
 	}
+
+	common::log( file_name, info_text, append );
+}
+
+void Direct3D9::text_out_device_caps( const char* file_name, bool append )
+{
+#define device_caps_string( name ) std::string( "\t" ) + # name + " : " + common::serialize( device_caps_.name ) + "\n"
+
+	std::string info_text = "device caps :\n" +
+		device_caps_string( DeviceType ) +
+		device_caps_string( AdapterOrdinal ) +
+
+		device_caps_string( Caps ) +
+		device_caps_string( Caps2 ) +
+		device_caps_string( Caps3 ) +
+		device_caps_string( PresentationIntervals ) +
+
+		device_caps_string( CursorCaps ) +
+
+	    device_caps_string( DevCaps ) +
+
+		device_caps_string( PrimitiveMiscCaps ) +
+		device_caps_string( RasterCaps ) +
+		device_caps_string( ZCmpCaps ) +
+		device_caps_string( SrcBlendCaps ) +
+		device_caps_string( DestBlendCaps ) +
+		device_caps_string( AlphaCmpCaps ) +
+		device_caps_string( ShadeCaps ) +
+		device_caps_string( TextureCaps ) +
+		device_caps_string( TextureFilterCaps ) +
+		device_caps_string( CubeTextureFilterCaps ) +
+		device_caps_string( VolumeTextureFilterCaps ) +
+		device_caps_string( TextureAddressCaps ) +
+		device_caps_string( VolumeTextureAddressCaps ) +
+
+		device_caps_string( LineCaps ) +
+
+		device_caps_string( MaxTextureWidth ) +
+		device_caps_string( MaxTextureHeight ) +
+		device_caps_string( MaxVolumeExtent ) +
+
+		device_caps_string( MaxTextureRepeat ) +
+		device_caps_string( MaxTextureAspectRatio ) +
+		device_caps_string( MaxAnisotropy ) +
+		device_caps_string( MaxVertexW ) +
+
+		device_caps_string( GuardBandLeft ) +
+		device_caps_string( GuardBandTop ) +
+		device_caps_string( GuardBandRight ) +
+		device_caps_string( GuardBandBottom ) +
+
+		device_caps_string( ExtentsAdjust ) +
+		device_caps_string( StencilCaps ) +
+
+		device_caps_string( FVFCaps ) +
+		device_caps_string( TextureOpCaps ) +
+		device_caps_string( MaxTextureBlendStages ) +
+		device_caps_string( MaxSimultaneousTextures ) +
+
+		device_caps_string( VertexProcessingCaps ) +
+		device_caps_string( MaxActiveLights ) +
+		device_caps_string( MaxUserClipPlanes ) +
+		device_caps_string( MaxVertexBlendMatrices ) +
+		device_caps_string( MaxVertexBlendMatrixIndex ) +
+
+		device_caps_string( MaxPointSize ) +
+
+		device_caps_string( MaxPrimitiveCount ) +
+		device_caps_string( MaxVertexIndex ) +
+		device_caps_string( MaxStreams ) +
+		device_caps_string( MaxStreamStride ) +
+
+		device_caps_string( VertexShaderVersion ) +
+		device_caps_string( MaxVertexShaderConst ) +
+
+		device_caps_string( PixelShaderVersion ) +
+		device_caps_string( PixelShader1xMaxValue ) +
+
+		device_caps_string( DevCaps2 ) +
+
+		device_caps_string( MaxNpatchTessellationLevel ) +
+		device_caps_string( Reserved5 ) +
+
+		device_caps_string( MasterAdapterOrdinal ) +
+		device_caps_string( AdapterOrdinalInGroup ) +
+		device_caps_string( NumberOfAdaptersInGroup ) +
+		device_caps_string( DeclTypes ) +
+		device_caps_string( NumSimultaneousRTs ) +
+		device_caps_string( StretchRectFilterCaps ) +
+//		device_caps_string( VS20Caps ) +
+//		device_caps_string( PS20Caps ) +
+		device_caps_string( VertexTextureFilterCaps ) +
+		device_caps_string( MaxVShaderInstructionsExecuted ) +
+		device_caps_string( MaxPShaderInstructionsExecuted ) +
+		device_caps_string( MaxVertexShader30InstructionSlots ) +
+		device_caps_string( MaxPixelShader30InstructionSlots );
 
 	common::log( file_name, info_text, append );
 }

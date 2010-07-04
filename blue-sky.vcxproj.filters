@@ -8,7 +8,6 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Canvas.cpp" />
-    <ClCompile Include="Direct3D9Canvas.cpp" />
     <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="LiveVertex.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -50,12 +49,14 @@
     <ClCompile Include="GridObjectManager.cpp" />
     <ClCompile Include="GridCell.cpp" />
     <ClCompile Include="House.cpp" />
+    <ClCompile Include="Direct3D9SkyBox.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="Canvas.h" />
     <ClInclude Include="Color.h" />
-    <ClInclude Include="Direct3D9Canvas.h" />
     <ClInclude Include="Face.h" />
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="Line.h" />
@@ -102,5 +103,8 @@
     <ClInclude Include="GridObjectManager.h" />
     <ClInclude Include="GridCell.h" />
     <ClInclude Include="House.h" />
+    <ClInclude Include="Direct3D9SkyBox.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

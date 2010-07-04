@@ -18,11 +18,13 @@ private:
 	D3DCAPS9				device_caps_;	///< Device Caps
 
 	void text_out_adapter_info( const char*, bool = false );
+	void text_out_device_caps( const char*, bool = false );
+
 public:
 	Direct3D9( HWND );
 	~Direct3D9();
 	
-	void toggle_full_screen();
+	void set_full_screen( bool );
 
 	LPDIRECT3DDEVICE9 getDevice() const { return device_; }
 	LPDIRECT3DVERTEXBUFFER9	getVertexBuffer() const { return vertex_buffer_; }

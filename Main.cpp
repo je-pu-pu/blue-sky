@@ -14,12 +14,12 @@
 //■■■　メイン　■■■
 int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int nCmdShow )
 {
-	CApp* app = 0;
+	App* app = 0;
 	
 	try
 	{
 		// アプリケーションを初期化する
-		app = CApp::GetInstance();
+		app = App::GetInstance();
 		if( ! app->Init( hInst, nCmdShow) )	return 0;
 		
 		// ゲームを初期化する
@@ -30,33 +30,40 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 	}
 	catch ( const common::exception& e )
 	{
+		std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() );
+			
+		if ( strlen( e.message() ) )
+		{
+			message += std::string( "\n\n" ) + e.message();
+		}
+
+		time_t t;
+		tm* t_st;
+
+		time( & t );
+		t_st = localtime( & t );
+
+		std::stringstream ss;
+
+		ss << "error_";
+		ss << std::setfill( '0' );
+		ss << ( 1900 + t_st->tm_year ) << std::setw( 2 ) << ( 1 + t_st->tm_mon ) << std::setw( 2 ) << t_st->tm_mday;
+		ss << "_" << std::setw( 2 ) << t_st->tm_hour << std::setw( 2 ) << t_st->tm_min << std::setw( 2 ) << t_st->tm_sec << ".log";
+		common::log( ss.str().c_str(), message );
+
 		if ( app )
 		{
-			std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() );
-			
-			if ( strlen( e.message() ) )
-			{
-				message += std::string( "\n\n" ) + e.message();
-			}
-
-			time_t t;
-			tm* t_st;
-
-			time( & t );
-			t_st = localtime( & t );
-
-			std::stringstream ss;
-
-			ss << "error_";
-			ss << std::setfill( '0' );
-			ss << ( 1900 + t_st->tm_year ) << std::setw( 2 ) << ( 1 + t_st->tm_mon ) << std::setw( 2 ) << t_st->tm_mday;
-			ss << "_" << std::setw( 2 ) << t_st->tm_hour << std::setw( 2 ) << t_st->tm_min << std::setw( 2 ) << t_st->tm_sec << ".log";
-			common::log( ss.str().c_str(), message );
-
 			MessageBox( app->GetWindowHandle(), message.c_str(), "ERROR", MB_OK );
 		}
 
 		return -1;
+	}
+	catch ( ... )
+	{
+		if ( app )
+		{
+			MessageBox( app->GetWindowHandle(), "Unknown Error", "ERROR", MB_OK );
+		}
 	}
 
 	return -1;

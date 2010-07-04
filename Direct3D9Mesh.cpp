@@ -43,7 +43,8 @@ bool Direct3D9Mesh::load_x( const char* file_name )
 	LPD3DXBUFFER adjacency_buffer;
 	LPD3DXBUFFER materials_buffer;
 
-	DIRECT_X_FAIL_CHECK( D3DXLoadMeshFromX( file_name, D3DXMESH_SYSTEMMEM, direct_3d_->getDevice(), & adjacency_buffer, & materials_buffer, 0, & material_count_, & mesh_ ) );
+	DIRECT_X_FAIL_CHECK( D3DXLoadMeshFromX( file_name, D3DXMESH_MANAGED, direct_3d_->getDevice(), & adjacency_buffer, & materials_buffer, 0, & material_count_, & mesh_ ) );
+	// DIRECT_X_FAIL_CHECK( D3DXLoadMeshFromX( file_name, D3DXMESH_SYSTEMMEM, direct_3d_->getDevice(), & adjacency_buffer, & materials_buffer, 0, & material_count_, & mesh_ ) );
 
 	// DIRECT_X_FAIL_CHECK( D3DXSaveMeshToX( ( std::string( file_name ) + ".new.x" ).c_str(), mesh_, static_cast< DWORD* >( adjacency_buffer->GetBufferPointer() ), static_cast< D3DXMATERIAL* >( materials_buffer->GetBufferPointer() ), 0, material_count_, DXFILEFORMAT_TEXT ) );
 
@@ -61,18 +62,7 @@ bool Direct3D9Mesh::load_x( const char* file_name )
 		materials_[ n ] = material->MatD3D;
 		materials_[ n ].Ambient = materials_[ n ].Diffuse;
 
-		textures_[ n ] = 0;
-
-		if ( material->pTextureFilename )
-		{
-			try
-			{
-				DIRECT_X_FAIL_CHECK( D3DXCreateTextureFromFile( direct_3d_->getDevice(), ( std::string( "media/model/" ) + material->pTextureFilename ).c_str(), & textures_[ n ] ) );
-			}
-			catch ( ... )
-			{
-			}
-		}
+		textures_[ n ] = load_texture( material->pTextureFilename );
 	}
 
 	// mesh_->LockVertexBuffer( 
@@ -83,12 +73,44 @@ bool Direct3D9Mesh::load_x( const char* file_name )
 	return true;
 }
 
+LPDIRECT3DTEXTURE9 Direct3D9Mesh::load_texture( const char* texture_name ) const
+{
+	LPDIRECT3DTEXTURE9 texture = 0;
+
+	if ( ! texture_name )
+	{
+		return 0;
+	}
+
+	try
+	{
+		DIRECT_X_FAIL_CHECK( D3DXCreateTextureFromFile( direct_3d_->getDevice(), get_texture_file_name_by_texture_name( texture_name ).c_str(), & texture ) );
+	}
+	catch ( ... )
+	{
+
+	}
+
+	return texture;
+}
+
+std::string Direct3D9Mesh::get_texture_file_name_by_texture_name( const char* texture_name ) const
+{
+	return std::string( "media/model/" ) + texture_name;
+}
+
 void Direct3D9Mesh::render()
 {
 	for ( unsigned int n = 0; n < material_count_; n++ )
 	{
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetMaterial( & materials_[ n ] ) );
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetTexture( 0, textures_[ n ] ) );
+
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP ) );
 
 		DIRECT_X_FAIL_CHECK( mesh_->DrawSubset( n ) );
 	}

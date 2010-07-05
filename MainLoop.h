@@ -4,13 +4,16 @@
 //最終更新部分	GetFPS()
 //■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 
-#ifndef		_MAIN_LOOP_H_
-#define		_MAIN_LOOP_H_
+#ifndef MAIN_LOOP_H
+#define MAIN_LOOP_H
 
-#include	<Windows.h>
+#include <windows.h>
 
-//メインループクラス
-class	CMainLoop
+/**
+ * メインループクラス
+ * 
+ */
+class CMainLoop
 {
 private:
 	DWORD	LastTime;	//前回の時間

@@ -162,6 +162,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="GamePlayScene.cpp" />
     <ClCompile Include="GridCell.cpp" />
     <ClCompile Include="GridData.cpp" />
     <ClCompile Include="GridObject.cpp" />
@@ -181,6 +182,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="OggVorbisFile.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="Stage.cpp" />
@@ -205,6 +207,7 @@
     <ClInclude Include="DirectX.h" />
     <ClInclude Include="Face.h" />
     <ClInclude Include="GameMain.h" />
+    <ClInclude Include="GamePlayScene.h" />
     <ClInclude Include="GridCell.h" />
     <ClInclude Include="GridData.h" />
     <ClInclude Include="GridObject.h" />
@@ -218,6 +221,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="OggVorbisFile.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="Stage.h" />

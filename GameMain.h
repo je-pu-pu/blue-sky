@@ -26,7 +26,13 @@ namespace blue_sky
 class Input;
 class SoundManager;
 class GridObjectManager;
+class Scene;
 
+/**
+ * ゲーム全体を管理する
+ *
+ * ゲーム全体で使用するリソースを保持する
+ */
 class GameMain
 {
 public:
@@ -46,11 +52,12 @@ protected:
 
 	CMainLoop				MainLoop;				///< ループ管理
 
+	Scene*					scene_;					///< 現在のシーン
 
 	GameMain();
 
 public:
-	static GameMain* getInstance(){ static GameMain gm; return & gm; }
+	static GameMain* getInstance() { static GameMain gm; return & gm; }
 	~GameMain();				//デストラクタ
 
 	void update();				///< メインループ
@@ -62,7 +69,11 @@ public:
 	const CMainLoop& getMainLoop() const { return MainLoop; }
 	// float getSPF() const { return }
 
-	SoundManager* getSoundManager() { return sound_manager_; }
+	Direct3D9* get_direct_3d() const { return direct_3d_; }
+	Input* get_input() const { return input_; }
+	SoundManager* get_sound_manager() const { return sound_manager_; }
+	GridObjectManager* get_grid_object_manager() const { return grid_object_manager_; }
+	Config* get_config() const { return config_; }
 
 }; // class GameMain
 

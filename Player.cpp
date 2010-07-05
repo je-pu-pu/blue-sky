@@ -71,7 +71,7 @@ void Player::turn( int d )
 
 	if ( d )
 	{
-		GameMain::getInstance()->getSoundManager()->get_sound( "turn" )->play( false );
+		GameMain::getInstance()->get_sound_manager()->get_sound( "turn" )->play( false );
 	}
 
 	is_turn_avaiable_ = false;
@@ -107,7 +107,7 @@ void Player::update()
 		}
 		else
 		{
-			GameMain::getInstance()->getSoundManager()->get_sound( "collision_wall" )->play( false );
+			GameMain::getInstance()->get_sound_manager()->get_sound( "collision_wall" )->play( false );
 		}
 
 		position().x() = last_position.x();
@@ -132,7 +132,7 @@ void Player::update()
 		}
 		else
 		{
-			GameMain::getInstance()->getSoundManager()->get_sound( "collision_wall" )->play( false );
+			GameMain::getInstance()->get_sound_manager()->get_sound( "collision_wall" )->play( false );
 		}
 
 		position().z() = last_position.z();
@@ -154,7 +154,7 @@ void Player::update()
 	
 			is_jumping_ = true;
 
-			GameMain::getInstance()->getSoundManager()->get_sound( "jump" )->play( false );
+			GameMain::getInstance()->get_sound_manager()->get_sound( "jump" )->play( false );
 
 			float speed = 0.f;
 
@@ -183,8 +183,8 @@ void Player::update()
 
 			if ( is_jumping_ )
 			{
-				GameMain::getInstance()->getSoundManager()->get_sound( "jump" )->stop();
-				GameMain::getInstance()->getSoundManager()->get_sound( "land" )->play( false );
+				GameMain::getInstance()->get_sound_manager()->get_sound( "jump" )->stop();
+				GameMain::getInstance()->get_sound_manager()->get_sound( "land" )->play( false );
 
 				is_jumping_ = false;
 
@@ -239,7 +239,7 @@ void Player::jump()
 	
 	is_jumping_ = true;
 
-	GameMain::getInstance()->getSoundManager()->get_sound( "jump" )->play( false );
+	GameMain::getInstance()->get_sound_manager()->get_sound( "jump" )->play( false );
 }
 
 /**

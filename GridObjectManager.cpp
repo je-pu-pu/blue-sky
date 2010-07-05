@@ -13,7 +13,17 @@ GridObjectManager::GridObjectManager()
 
 GridObjectManager::~GridObjectManager()
 {
-	
+	clear();
+}
+
+void GridObjectManager::clear()
+{
+	for ( GridObjectList::iterator i = grid_object_list_.begin(); i != grid_object_list_.end(); ++i )
+	{
+		delete *i;
+	}
+
+	grid_object_list_.clear();
 }
 
 void GridObjectManager::add_grid_object( GridObject* grid_object )

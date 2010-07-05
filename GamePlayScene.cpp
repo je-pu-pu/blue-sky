@@ -20,8 +20,6 @@
 #include "GridObject.h"
 #include "GridCell.h"
 
-#include "OggVorbisFile.h"
-
 #include "matrix4x4.h"
 #include "vector3.h"
 
@@ -40,6 +38,9 @@ namespace blue_sky
 {
 
 /// @todo ‚Ü‚Æ‚ß‚é
+LPDIRECT3DVERTEXSHADER9 vertex_shader_;
+LPDIRECT3DPIXELSHADER9 pixel_shader_;
+
 LPD3DXCONSTANTTABLE vs_constant_table;
 LPD3DXCONSTANTTABLE ps_constant_table;
 
@@ -69,6 +70,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Sound
 	{
+		sound_manager()->stop_all();
+
 		Sound* bgm = sound_manager()->load( "bgm", "media/music/tower.ogg" );
 		bgm->play( true );
 
@@ -107,7 +110,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	LPD3DXBUFFER error_message_buffer;
 
 	// Vertex Shader
-	LPDIRECT3DVERTEXSHADER9 vertex_shader_;
 	LPD3DXBUFFER vs_buffer;
 
 	if ( FAILED( D3DXCompileShaderFromFile( "test.fx", 0, 0, "vs_main", vs_profile, 0, & vs_buffer, & error_message_buffer, & vs_constant_table ) ) )
@@ -116,12 +118,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 
 	direct_3d()->getDevice()->CreateVertexShader( static_cast< DWORD* >( vs_buffer->GetBufferPointer() ), & vertex_shader_ );
-	direct_3d()->getDevice()->SetVertexShader( vertex_shader_ );
-
-
 
 	// Pixel Shader
-	LPDIRECT3DPIXELSHADER9 pixel_shader_;
 	LPD3DXBUFFER ps_buffer;
 
 	if ( FAILED( D3DXCompileShaderFromFile( "test.fx", 0, 0, "ps_main", ps_profile, 0, & ps_buffer, & error_message_buffer, & ps_constant_table ) ) )
@@ -130,7 +128,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 	
 	direct_3d()->getDevice()->CreatePixelShader( static_cast< DWORD* >( ps_buffer->GetBufferPointer() ), & pixel_shader_ );
-	direct_3d()->getDevice()->SetPixelShader( pixel_shader_ );
 
 //	app_->setTitle( ( std::string( app_->getTitle() ) + " : " + vs_profile + " : " + ps_profile ).c_str() );
 
@@ -148,7 +145,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	const int x_space = 1;
 	const int z_space = 1;
 
-	int y = -15;
+	int yy = -15;
 
 	for ( int d = 0; d < 80; d++ )
 	{
@@ -171,6 +168,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 			continue;
 			*/
 
+			int y = yy;
+
 			if ( common::random( 0, 1 ) == 0 )
 			{
 				if ( d > 0 )
@@ -183,7 +182,13 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), y, d * ( 10 + z_space ), building_a_grid_, building_a_mesh_ ) );
 			}
+			else if ( common::random( 0, 1 ) == 0 )
+			{
+				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), house_a_grid_, house_a_mesh_ ) );
+			}
 		}
+
+		yy += 5;
 	}
 
 	for ( GridObjectManager::GridObjectList::iterator i = grid_object_manager()->grid_object_list().begin(); i != grid_object_manager()->grid_object_list().end(); ++i )
@@ -230,7 +235,14 @@ void GamePlayScene::update()
 
 		// sound_manager()->set_enabled( ! sound_manager()->is_enabled() );
 	}
-	if ( input()->push( Input::Y ) ) { sound_manager()->stop_all(); sound_manager()->get_sound( "fin" )->play( false ); }
+	
+	if ( input()->push( Input::Y ) )
+	{
+		sound_manager()->stop_all();
+		sound_manager()->get_sound( "fin" )->play( false );
+
+		set_next_scene( "title" );
+	}
 
 	player_->update();
 
@@ -281,6 +293,9 @@ void GamePlayScene::render()
 {
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->BeginScene() );
 
+	direct_3d()->getDevice()->SetVertexShader( vertex_shader_ );
+	direct_3d()->getDevice()->SetPixelShader( pixel_shader_ );
+
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE ) );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
@@ -324,6 +339,9 @@ void GamePlayScene::render()
 	static float fog = 0.f;
 	fog += 0.001f;
 	vs_constant_table->SetFloat( direct_3d()->getDevice(), "fog", sin( fog ) );
+
+	static float a = 0.f;
+	a += 0.02f;
 
 	for ( int panorama_y = 0; panorama_y < get_panorama_y_division(); panorama_y++ )
 	{
@@ -379,14 +397,29 @@ void GamePlayScene::render()
 			if ( std::abs( static_cast< int >( player_->position().x() ) - grid_object->x() ) >= max_length ) continue;
 			if ( std::abs( static_cast< int >( player_->position().z() ) - grid_object->z() ) >= max_length ) continue;
 			
-			D3DXMatrixTranslation( & t, static_cast< float >( grid_object->x() ), static_cast< float >( grid_object->y() ), static_cast< float >( grid_object->z() ) );
+			
+			float flicker = sin( grid_object->x() + grid_object->z() * 0.001f + a ) * 0.1f;
+
+			D3DXMatrixTranslation( & t, static_cast< float >( grid_object->x() ), static_cast< float >( grid_object->y() + flicker ), static_cast< float >( grid_object->z() ) );
 			world = s * t;
 
 			WorldViewProjection = world * view * projection;
 			DIRECT_X_FAIL_CHECK( vs_constant_table->SetMatrix( direct_3d()->getDevice(), "WorldViewProjection", & WorldViewProjection ) );
 
 			grid_object->mesh()->render();
+
+
+			// Shadow
+			D3DXMatrixTranslation( & t, static_cast< float >( grid_object->x() ), 0.05f, static_cast< float >( grid_object->z() ) );
+			world = s * t;
+
+			WorldViewProjection = world * view * projection;
+			DIRECT_X_FAIL_CHECK( vs_constant_table->SetMatrix( direct_3d()->getDevice(), "WorldViewProjection", & WorldViewProjection ) );
+
+			shadow_mesh_->render();
 		}
+
+
 
 		/*
 		// Box
@@ -429,7 +462,7 @@ void GamePlayScene::render()
 
 		for ( std::set< float >::iterator i = grid_cell_height_set.begin(); i != grid_cell_height_set.end(); ++i )
 		{
-			D3DXMatrixTranslation( & t, player_->position().x(), *i + 0.03f, player_->position().z() );
+			D3DXMatrixTranslation( & t, player_->position().x(), *i + 0.11f, player_->position().z() );
 			world = t;
 			// world = r * t;
 

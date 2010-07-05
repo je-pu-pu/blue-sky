@@ -3,6 +3,13 @@
 
 #include "vector3.h"
 
+namespace game
+{
+
+class Sound;
+
+} // namespace game
+
 namespace blue_sky
 {
 
@@ -16,6 +23,8 @@ class GridCell;
 class Player
 {
 public:
+	typedef game::Sound Sound;
+
 	enum Direction
 	{
 		FRONT = 0, RIGHT, BACK, LEFT,
@@ -36,6 +45,7 @@ private:
 	
 	bool		is_turn_avaiable_;	///< 方向転換有効フラグ
 	bool		is_jumping_;		///< ジャンプ中フラグ
+	bool		is_clambering_;		///< よじ登り中フラグ
 
 	bool		is_falling_;		///< 落下中フラグ
 	vector3		velocity_on_fall_;	///< 落下開始時の移動量
@@ -45,6 +55,9 @@ private:
 	float get_collision_depth() const;
 	
 	const GridCell& get_floor_cell() const;
+
+	void play_sound( const char*, bool = false ) const;
+	void stop_sound( const char* ) const;
 
 public:
 	Player();
@@ -77,6 +90,8 @@ public:
 	/// ジャンプ処理
 	void jump();
 	bool is_jumping() const { return is_jumping_; }
+
+	bool is_clambering() const { return is_clambering_; }
 
 	/// 落下処理
 	void fall();

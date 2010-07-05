@@ -8,6 +8,7 @@
 
 #include "App.h"
 
+#include "TitleScene.h"
 #include "GamePlayScene.h"
 
 #include "Input.h"
@@ -62,7 +63,7 @@ GameMain::GameMain()
 	grid_object_manager_ = new GridObjectManager();
 
 	// Scene
-	scene_ = new GamePlayScene( this );
+	scene_ = new TitleScene( this );
 
 	/*
 	// DirectShow
@@ -106,6 +107,26 @@ void GameMain::update()
 	sound_manager_->update();
 
 	scene_->update();
+
+	std::string next_scene = scene_->get_next_scene();
+
+	if ( ! next_scene.empty() )
+	{
+		delete scene_;
+
+		if ( next_scene == "title" )
+		{
+			scene_ = new TitleScene( this );
+		}
+		else if ( next_scene == "game_play" )
+		{
+			scene_ = new GamePlayScene( this );
+		}
+		else
+		{
+			COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " + scene_->get_next_scene() ) );
+		}
+	}
 
 	render();
 }

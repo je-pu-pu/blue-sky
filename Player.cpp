@@ -24,6 +24,7 @@ Player::Player()
 	 , direction_degree_( 0.f )
 	 , is_turn_avaiable_( true )
 	 , is_jumping_( false )
+	 , is_clambering_( false )
 	 , is_falling_( false )
 {
 	//
@@ -79,6 +80,7 @@ void Player::turn( int d )
 
 /**
  * XV
+ *
  */
 void Player::update()
 {
@@ -104,10 +106,17 @@ void Player::update()
 			velocity().y() = 0.02f;
 
 			is_jumping_ = false;
+
+			if ( ! is_clambering() )
+			{
+				play_sound( "clamber" );
+			}
+
+			is_clambering_ = true;
 		}
 		else
 		{
-			GameMain::getInstance()->get_sound_manager()->get_sound( "collision_wall" )->play( false );
+			play_sound( "collision_wall" );
 		}
 
 		position().x() = last_position.x();
@@ -129,10 +138,17 @@ void Player::update()
 			velocity().y() = 0.02f;
 
 			is_jumping_ = false;
+
+			if ( ! is_clambering() )
+			{
+				play_sound( "clamber", false );
+			}
+
+			is_clambering_ = true;
 		}
 		else
 		{
-			GameMain::getInstance()->get_sound_manager()->get_sound( "collision_wall" )->play( false );
+			play_sound( "collision_wall" );
 		}
 
 		position().z() = last_position.z();
@@ -154,7 +170,7 @@ void Player::update()
 	
 			is_jumping_ = true;
 
-			GameMain::getInstance()->get_sound_manager()->get_sound( "jump" )->play( false );
+			play_sound( "jump" );
 
 			float speed = 0.f;
 
@@ -183,8 +199,8 @@ void Player::update()
 
 			if ( is_jumping_ )
 			{
-				GameMain::getInstance()->get_sound_manager()->get_sound( "jump" )->stop();
-				GameMain::getInstance()->get_sound_manager()->get_sound( "land" )->play( false );
+				stop_sound( "jump" );
+				play_sound( "land" );
 
 				is_jumping_ = false;
 
@@ -319,6 +335,26 @@ const GridCell& Player::get_floor_cell() const
 	grid_cell_list.sort( GridCell::height_less() );
 
 	return * grid_cell_list.back();
+}
+
+void Player::play_sound( const char* name, bool loop ) const
+{
+	Sound* sound = GameMain::getInstance()->get_sound_manager()->get_sound( name );
+	
+	if ( sound )
+	{
+		sound->play( loop );
+	}
+}
+
+void Player::stop_sound( const char* name ) const
+{
+	Sound* sound = GameMain::getInstance()->get_sound_manager()->get_sound( name );
+	
+	if ( sound )
+	{
+		sound->stop();
+	}
 }
 
 } // namespace blue_sky

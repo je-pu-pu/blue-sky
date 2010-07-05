@@ -2,6 +2,7 @@
 #define BLUE_SKY_SOUND_H
 
 #include <game/Sound.h>
+#include <string>
 
 class DirectSound;
 class DirectSoundBuffer;
@@ -35,6 +36,9 @@ protected:
 
 	SoundFile* sound_file_;
 
+	std::string name_;
+	std::string file_name_;
+
 public:
 
 	/// コンストラクタ
@@ -45,6 +49,14 @@ public:
 
 	/// ファイルを読み込む
 	bool load( const char* );
+
+	/// 名前を取得する
+	const char* get_name() { return name_.c_str(); };
+	void set_name( const char* name ) { name_ = name; };
+
+	/// ファイル名を取得する
+	const char* get_file_name() const { return file_name_.c_str(); }
+	void set_file_name( const char* file_name ) { file_name_ = file_name; };
 
 	/// ボリューム
 	T get_volume();

@@ -17,7 +17,7 @@ public:
 private:
 
 public:
-	House( int, int );
+	House( int, int, const Mesh* );
 	~House();
 };
 

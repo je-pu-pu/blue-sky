@@ -13,8 +13,6 @@ namespace blue_sky
 class Player;
 class Camera;
 class Stage;
-class Building;
-class House;
 
 /**
  * ƒQ[ƒ€ƒvƒŒƒC’†‚Ìˆ—‚ğŠÇ—‚·‚é
@@ -26,11 +24,7 @@ protected:
 	Player* player_;
 	Camera* camera_;
 	Stage* stage_;
-	Building* building_a_grid_;
-	House* house_a_grid_;
 
-	Direct3D9Mesh* building_a_mesh_;
-	Direct3D9Mesh* house_a_mesh_;
 	Direct3D9Mesh* shadow_mesh_;
 	Direct3D9Mesh* ground_mesh_;
 

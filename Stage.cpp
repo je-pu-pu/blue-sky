@@ -7,7 +7,7 @@ namespace blue_sky
 {
 
 Stage::Stage( int w, int d )
-	: GridData( w, d )
+	: GridData( w, d, 0 )
 {
 
 }

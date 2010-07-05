@@ -5,8 +5,6 @@
 #include "Player.h"
 #include "Camera.h"
 #include "Stage.h"
-#include "Building.h"
-#include "House.h"
 
 #include "Direct3D9Mesh.h"
 #include "Direct3D9SkyBox.h"
@@ -49,12 +47,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, panorama_y_division_( config()->get( "panorama_y_division", 1 ) )
 {
 	// Mesh
-	building_a_mesh_ = new Direct3D9Mesh( direct_3d() );
-	building_a_mesh_->load_x( "media/model/building-a.x" );
-
-	house_a_mesh_ = new Direct3D9Mesh( direct_3d() );
-	house_a_mesh_->load_x( "media/model/house-a.x" );
-
 	shadow_mesh_ = new Direct3D9Mesh( direct_3d() );
 	shadow_mesh_->load_x( "media/model/shadow.x" );
 
@@ -136,11 +128,10 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	player_->set_stage( stage_ );
 
 	// Building
-	building_a_grid_ = new Building( 10, 10 );
-
-	house_a_grid_ = new House( 8, 6 );
-
 	grid_object_manager()->clear();
+
+	GridData* building_a_grid_ = GridData::load_file( "media/object/building-a" );
+	GridData* house_a_grid_ = GridData::load_file( "media/object/house-a" );
 
 	const int x_space = 1;
 	const int z_space = 1;
@@ -180,11 +171,11 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 					if ( r >= 2 ) y += 5;
 				}
 
-				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), y, d * ( 10 + z_space ), building_a_grid_, building_a_mesh_ ) );
+				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), y, d * ( 10 + z_space ), building_a_grid_ ) );
 			}
 			else if ( common::random( 0, 1 ) == 0 )
 			{
-				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), house_a_grid_, house_a_mesh_ ) );
+				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), house_a_grid_ ) );
 			}
 		}
 
@@ -200,9 +191,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 GamePlayScene::~GamePlayScene()
 {
-	delete building_a_grid_;
-	delete building_a_mesh_;
-
 	delete shadow_mesh_;
 	delete ground_mesh_;
 

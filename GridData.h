@@ -3,6 +3,8 @@
 
 #include "GridCell.h"
 
+class Direct3D9Mesh;
+
 namespace blue_sky
 {
 
@@ -12,15 +14,25 @@ namespace blue_sky
  */
 class GridData
 {
+public:
+	typedef Direct3D9Mesh Mesh;
+
 private:
 	int width_;
 	int depth_;
 
 	GridCell* cell_;
+	const Mesh* mesh_;
 
 	static GridCell null_cell_;
+
+	GridData();
+	static const Mesh* load_mesh( const char* );
+
 public:
-	GridData( int, int );
+	static GridData* load_file( const char* );
+
+	GridData( int, int, const Mesh* );
 	virtual ~GridData();
 
 	int width() const { return width_; }
@@ -28,6 +40,8 @@ public:
 
 	GridCell& cell( int, int );
 	const GridCell& cell( int, int ) const;
+
+	const Mesh* mesh() const { return mesh_; }
 
 	void put( int, int, int, const GridData* );
 };

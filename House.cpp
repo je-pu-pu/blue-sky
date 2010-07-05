@@ -7,8 +7,8 @@
 namespace blue_sky
 {
 
-House::House( int w, int d )
-	: GridData( w, d )
+House::House( int w, int d, const Mesh* mesh )
+	: GridData( w, d, mesh )
 {
 	unsigned char data[]  = {
 		0,7,7,7,7,7,7,7,

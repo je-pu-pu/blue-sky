@@ -7,8 +7,8 @@
 namespace blue_sky
 {
 
-Building::Building( int w, int d )
-	: GridData( w, d )
+Building::Building( int w, int d, const Mesh* mesh )
+	: GridData( w, d, mesh )
 {
 	unsigned char data[]  = {
 		20,20,20,20,20,20,20,20,20,20,

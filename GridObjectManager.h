@@ -24,7 +24,8 @@ public:
 	GridObjectManager();
 	~GridObjectManager();
 
-	void clear();
+	void clear();	
+
 	void add_grid_object( GridObject* );
 
 	GridObjectList& grid_object_list() { return grid_object_list_; }

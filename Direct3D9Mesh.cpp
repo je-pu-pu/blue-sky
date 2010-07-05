@@ -99,7 +99,7 @@ std::string Direct3D9Mesh::get_texture_file_name_by_texture_name( const char* te
 	return std::string( "media/model/" ) + texture_name;
 }
 
-void Direct3D9Mesh::render()
+void Direct3D9Mesh::render() const
 {
 	for ( unsigned int n = 0; n < material_count_; n++ )
 	{

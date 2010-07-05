@@ -23,10 +23,10 @@ private:
 	int z_;
 
 	GridData* grid_data_;
-	Direct3D9Mesh* mesh_;
+
 
 public:
-	GridObject( int, int, int, GridData*, Direct3D9Mesh* );
+	GridObject( int, int, int, GridData* );
 	virtual ~GridObject();
 
 	int x() { return x_; }
@@ -39,8 +39,7 @@ public:
 	GridData* grid_data() { return grid_data_; }
 	const GridData* grid_data() const { return grid_data_; }
 
-	Mesh* mesh() { return mesh_; }
-	const Mesh* mesh() const { return mesh_; }
+	const Mesh* mesh() const;
 };
 
 } // namespace blue_sky

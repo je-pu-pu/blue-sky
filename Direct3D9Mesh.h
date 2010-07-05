@@ -30,7 +30,7 @@ public:
 
 	bool load_x( const char* );
 
-	void render();
+	void render() const;
 
 }; // class Direct3D9
 

@@ -7,6 +7,12 @@
     <Filter Include="Scene">
       <UniqueIdentifier>{c23be5ef-1a95-4aae-b8cb-f631e22315a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="object">
+      <UniqueIdentifier>{795a8f6f-5f7e-4f6e-9dc6-9379c0d665d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stage">
+      <UniqueIdentifier>{42d97a7e-ae7b-4e07-84f4-ff8e41387199}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
@@ -46,12 +52,10 @@
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="StreamingSound.cpp" />
     <ClCompile Include="Input.cpp" />
-    <ClCompile Include="Building.cpp" />
     <ClCompile Include="GridData.cpp" />
     <ClCompile Include="GridObject.cpp" />
     <ClCompile Include="GridObjectManager.cpp" />
     <ClCompile Include="GridCell.cpp" />
-    <ClCompile Include="House.cpp" />
     <ClCompile Include="Direct3D9SkyBox.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
@@ -109,12 +113,10 @@
       <Filter>DirectX</Filter>
     </ClInclude>
     <ClInclude Include="Input.h" />
-    <ClInclude Include="Building.h" />
     <ClInclude Include="GridData.h" />
     <ClInclude Include="GridObject.h" />
     <ClInclude Include="GridObjectManager.h" />
     <ClInclude Include="GridCell.h" />
-    <ClInclude Include="House.h" />
     <ClInclude Include="Direct3D9SkyBox.h">
       <Filter>DirectX</Filter>
     </ClInclude>
@@ -127,5 +129,13 @@
     <ClInclude Include="TitleScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="media\object\building-a">
+      <Filter>object</Filter>
+    </None>
+    <None Include="media\object\house-a">
+      <Filter>object</Filter>
+    </None>
   </ItemGroup>
 </Project>

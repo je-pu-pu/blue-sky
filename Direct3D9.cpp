@@ -27,14 +27,14 @@ Direct3D9::Direct3D9( HWND hwnd )
 
 	ZeroMemory( & present_, sizeof( present_ ) );
 
-	present_.SwapEffect = D3DSWAPEFFECT_FLIP;
+//	present_.hDeviceWindow = hwnd;
+	present_.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	present_.BackBufferFormat = D3DFMT_X8R8G8B8;
-//	present_.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
+	present_.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 	present_.BackBufferWidth = 720;
 	present_.BackBufferHeight = 480;
 	
-	present_.Windowed = TRUE;
-	present_.SwapEffect = D3DSWAPEFFECT_DISCARD;
+//	present_.Windowed = TRUE;
 //	present_.BackBufferFormat = D3DFMT_UNKNOWN;
 //	present_.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
@@ -101,9 +101,23 @@ Direct3D9::~Direct3D9()
 	direct_3d_->Release();
 }
 
+void Direct3D9::reset()
+{
+	HRESULT hr = device_->TestCooperativeLevel();
+
+	if ( hr == D3DERR_DEVICENOTRESET )
+	{
+		if ( SUCCEEDED( device_->Reset( & present_ ) ) )
+		{
+			// COMMON_THROW_EXCEPTION_MESSAGE( "reset OK !!!" );
+		}
+	}
+}
+
 void Direct3D9::set_full_screen( bool full_scrren )
 {
 	present_.Windowed = ! full_scrren;
+	present_.BackBufferFormat = D3DFMT_X8R8G8B8;
 
 	DIRECT_X_FAIL_CHECK( device_->Reset( & present_ ) );
 }

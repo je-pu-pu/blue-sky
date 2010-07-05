@@ -50,7 +50,7 @@ bool Direct3D9Mesh::load_x( const char* file_name )
 
 	// mesh_->GetOptions()
 
-	mesh_->OptimizeInplace( D3DXMESHOPT_COMPACT | D3DXMESHOPT_ATTRSORT | D3DXMESHOPT_VERTEXCACHE, static_cast< DWORD* >( adjacency_buffer->GetBufferPointer() ), 0, 0, 0 );
+	DIRECT_X_FAIL_CHECK( mesh_->OptimizeInplace( D3DXMESHOPT_COMPACT | D3DXMESHOPT_ATTRSORT | D3DXMESHOPT_VERTEXCACHE, static_cast< DWORD* >( adjacency_buffer->GetBufferPointer() ), 0, 0, 0 ) );
 
 	materials_ = new D3DMATERIAL9[ material_count_ ];
 	textures_ = new LPDIRECT3DTEXTURE9[ material_count_ ];

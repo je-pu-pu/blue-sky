@@ -193,9 +193,11 @@ GameMain::GameMain()
 	const int x_space = 1;
 	const int z_space = 1;
 
+	int y = -15;
+
 	for ( int d = 0; d < 80; d++ )
 	{
-		for ( int x = 0; x < 10; x++ )
+		for ( int x = 0; x < 20; x++ )
 		{
 			// grid_object_manager_->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), building_a_grid_, building_a_mesh_ ) );
 			// grid_object_manager_->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), house_a_grid_, house_a_mesh_ ) );
@@ -216,7 +218,14 @@ GameMain::GameMain()
 
 			if ( common::random( 0, 1 ) == 0 )
 			{
-				const int y = d == 0 ? 0 : -15 + common::random( 0, 3 ) * 5;
+				if ( d > 0 )
+				{
+					int r = common::random( 0, 3 );
+
+					if ( r == 0 ) y -= 5;
+					if ( r >= 2 ) y += 5;
+				}
+
 				grid_object_manager_->add_grid_object( new GridObject( x * ( 10 + x_space ), y, d * ( 10 + z_space ), building_a_grid_, building_a_mesh_ ) );
 			}
 		}
@@ -272,8 +281,8 @@ static int fps = 0, last_fps = 0;
  */
 void GameMain::update()
 {
-	MainLoop.WaitTime = 16;
-	MainLoop.WaitTime = 0;
+	MainLoop.WaitTime = 18;
+	// MainLoop.WaitTime = 0;
 
 	//•bŠÔ50ƒtƒŒ[ƒ€‚ð•ÛŽ
 	if ( ! MainLoop.Loop() )
@@ -362,7 +371,7 @@ void GameMain::update()
  */
 void GameMain::render()
 {
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xEE, 0xEE, 0xFF ), 1.f, 0 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->BeginScene() );
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, TRUE ) );
@@ -422,8 +431,7 @@ void GameMain::render()
 		view_port.MinZ = 0.f;
 		view_port.MaxZ = 1.f;
 	
-		direct_3d_->getDevice()->SetViewport( & view_port );
-
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetViewport( & view_port ) );
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
 
 		vector3 look_at = camera_->get_look_at_part( panorama_y );
@@ -523,13 +531,26 @@ void GameMain::render()
 
 			WorldViewProjection = world * view * projection;
 			vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
-
 			shadow_mesh_->render();
 		}
 	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->EndScene() );
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL ) );
+	
+	HRESULT hr = direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL );
+
+	if ( hr == D3DERR_DEVICELOST )
+	{
+		direct_3d_->reset();
+	}
+	else
+	{
+		DIRECT_X_FAIL_CHECK( hr );
+	}
+
+	std::string hoge = DXGetErrorString9( direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL ) ) ;
+
+
 
 	// Debug
 	std::string debug_text;

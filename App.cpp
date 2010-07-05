@@ -12,10 +12,11 @@ App::App()
 	, hMutex( 0 )
 	, Width( 720 )
 	, Height( 480 )
+	, is_full_screen_( true )
 {
 	ClassName = "blue-sky";
 	WinTitle = "blue-sky";
-	WinStyle = get_window_style();
+	WinStyle = is_full_screen() ? get_window_style_full_scrren() : get_window_style();
 }
 
 //□デストラクタ
@@ -171,22 +172,22 @@ void App::set_full_screen( bool full_screen )
 {
 	if ( full_screen )
 	{
-		SetWindowLong( hWnd, GWL_STYLE, get_window_style_full_scrren() );
-
-		if ( is_full_screen_ )
+		if ( ! is_full_screen_ )
 		{
 			GetWindowRect( hWnd, & last_window_rect_ );
+			ShowCursor( FALSE );
 		}
 
-		ShowCursor( FALSE );
+		SetWindowLong( hWnd, GWL_STYLE, get_window_style_full_scrren() );
 	}
 	else
 	{
 		SetWindowLong( hWnd, GWL_STYLE, get_window_style() );
 
-		if ( ! is_full_screen_ )
+		if ( is_full_screen_ )
 		{
 			SetWindowPos(  hWnd, HWND_NOTOPMOST, last_window_rect_.left, last_window_rect_.top, last_window_rect_.right - last_window_rect_.left, last_window_rect_.bottom - last_window_rect_.top, SWP_SHOWWINDOW );
+			ShowCursor( TRUE );
 		}
 	}
 

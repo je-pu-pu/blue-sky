@@ -24,6 +24,8 @@ public:
 	Direct3D9( HWND );
 	~Direct3D9();
 	
+	void reset();
+
 	void set_full_screen( bool );
 
 	LPDIRECT3DDEVICE9 getDevice() const { return device_; }

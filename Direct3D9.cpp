@@ -8,11 +8,16 @@
 #include <string>
 
 #pragma comment( lib, "d3d9.lib" )
+
+#ifdef _DEBUG
+#pragma comment( lib, "d3dx9d.lib" )
+#else
 #pragma comment( lib, "d3dx9.lib" )
+#endif
 
 #define PREF_HUD
 
-Direct3D9::Direct3D9( HWND hwnd )
+Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sample_type, int multi_sample_quality )
 	: direct_3d_( 0 )
 	, device_( 0 )
 {
@@ -31,10 +36,10 @@ Direct3D9::Direct3D9( HWND hwnd )
 	present_.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	present_.BackBufferFormat = D3DFMT_X8R8G8B8;
 	present_.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
-	present_.BackBufferWidth = 720;
-	present_.BackBufferHeight = 480;
+	present_.BackBufferWidth = w;
+	present_.BackBufferHeight = h;
 	
-//	present_.Windowed = TRUE;
+	present_.Windowed = ! full_screen;
 //	present_.BackBufferFormat = D3DFMT_UNKNOWN;
 //	present_.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
@@ -42,11 +47,16 @@ Direct3D9::Direct3D9( HWND hwnd )
 	present_.AutoDepthStencilFormat = D3DFMT_D16;
 //	present_.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 
-	DWORD multi_sample_quality = 0;
-	if ( SUCCEEDED( direct_3d_->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, false, D3DMULTISAMPLE_8_SAMPLES, & multi_sample_quality ) ) )
+	DWORD max_multi_sample_quality = 0;
+	if ( SUCCEEDED( direct_3d_->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, present_.Windowed, static_cast< D3DMULTISAMPLE_TYPE >( multi_sample_type ), & max_multi_sample_quality ) ) )
 	{
-		present_.MultiSampleType = D3DMULTISAMPLE_8_SAMPLES;
-		present_.MultiSampleQuality = multi_sample_quality - 1;
+		if ( multi_sample_quality >= max_multi_sample_quality )
+		{
+			multi_sample_quality = max_multi_sample_quality - 1;
+		}
+
+		present_.MultiSampleType = static_cast< D3DMULTISAMPLE_TYPE >( multi_sample_type );
+		present_.MultiSampleQuality = multi_sample_quality;
 	}
 
 #ifdef PREF_HUD
@@ -117,7 +127,6 @@ void Direct3D9::reset()
 void Direct3D9::set_full_screen( bool full_scrren )
 {
 	present_.Windowed = ! full_scrren;
-	present_.BackBufferFormat = D3DFMT_X8R8G8B8;
 
 	DIRECT_X_FAIL_CHECK( device_->Reset( & present_ ) );
 }

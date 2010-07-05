@@ -66,18 +66,13 @@ using game::Sound;
 
 //■コンストラクタ
 GameMain::GameMain()
-	: direct_3d_( 0 )
+	: app_( App::GetInstance() )
+	, direct_3d_( 0 )
 	, input_( 0 )
 	, sound_manager_( 0 )
 	, grid_object_manager_( 0 )
 	, config_( 0 )
-	, Width( 0 )
-	, Height( 0 )
 {
-	App* app = App::GetInstance();
-	Width = app->GetWidth();
-	Height = app->GetHeight();
-
 	//ランダマイズ
 	srand( timeGetTime() );
 
@@ -85,10 +80,12 @@ GameMain::GameMain()
 	config_ = new Config();
 	config_->load_file( "blue-sky.config" );
 
-	// Direct3D 
-	direct_3d_ = new Direct3D9( app->GetWindowHandle() );
+	// App
+	app_->set_size( config_->get( "video.width", App::DEFAULT_WIDTH ), config_->get( "video.height", App::DEFAULT_HEIGHT ) );
+	app_->set_full_screen( static_cast< bool >( config_->get( "video.full_screen", 0 ) ) );
 
-	config_->get( "video.width", 720 );
+	// Direct3D
+	direct_3d_ = new Direct3D9( app_->GetWindowHandle(), app_->get_width(), app_->get_height(), app_->is_full_screen(), config_->get( "video.multi_sample_type", 0 ), config_->get( "video.multi_sample_quality", 0 ) );
 
 	// Mesh
 	building_a_mesh_ = new Direct3D9Mesh( direct_3d_ );
@@ -104,10 +101,10 @@ GameMain::GameMain()
 	ground_mesh_->load_x( "media/model/ground.x" );
 
 	// SkyBox
-	sky_box_ = new Direct3D9SkyBox( direct_3d_, "sky-box2", "jpg" );
+	sky_box_ = new Direct3D9SkyBox( direct_3d_, "sky-box", "jpg" );
 
 	// Box
-	// box_ = new Direct3D9Box( direct_3d_, 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
+	box_ = new Direct3D9Box( direct_3d_, 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
 
 	// Input
 	input_ = new Input();
@@ -115,7 +112,7 @@ GameMain::GameMain()
 
 	// Sound
 	{
-		sound_manager_ = new SoundManager( app->GetWindowHandle() );
+		sound_manager_ = new SoundManager( app_->GetWindowHandle() );
 		Sound* bgm = sound_manager_->load( "bgm", "media/music/tower.ogg" );
 		bgm->play( true );
 
@@ -143,7 +140,7 @@ GameMain::GameMain()
 
 	// Player
 	player_ = new Player();
-	player_->position().set( 2.f, 30.f, 2.f );
+	player_->position().set( 2.f, 300.f, 2.f );
 
 	// Camera
 	camera_ = new Camera();
@@ -151,7 +148,7 @@ GameMain::GameMain()
 	const char* vs_profile = "vs_2_0"; // D3DXGetVertexShaderProfile( direct_3d_->getDevice() );
 	const char* ps_profile = "ps_2_0"; // D3DXGetPixelShaderProfile( direct_3d_->getDevice() );
 
-	app->setTitle( ( std::string( app->getTitle() ) + " : " + vs_profile + " : " + ps_profile ).c_str() );
+	app_->setTitle( ( std::string( app_->getTitle() ) + " : " + vs_profile + " : " + ps_profile ).c_str() );
 
 	LPD3DXBUFFER error_message_buffer;
 
@@ -371,10 +368,9 @@ void GameMain::update()
  */
 void GameMain::render()
 {
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->BeginScene() );
 
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, TRUE ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE ) );
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF ) );
@@ -384,7 +380,7 @@ void GameMain::render()
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA ) );
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA ) );
 
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGENABLE, FALSE ) );
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGCOLOR, 0xFFEEEEFF ) );
 	
 	float Start   = 1.f;    // For linear mode
@@ -405,7 +401,6 @@ void GameMain::render()
 	// DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGTABLEMODE, D3DFOG_EXP2 ) ); 
 	// DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_FOGDENSITY, * ( DWORD* )( & fog_density ) ) );
 
-
 	direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
 
 	D3DXMATRIXA16 world;
@@ -425,9 +420,9 @@ void GameMain::render()
 	{
 		D3DVIEWPORT9 view_port;
 		view_port.X = 0;
-		view_port.Y = Height / panorama_y_division * panorama_y;
-		view_port.Width	= Width;
-		view_port.Height = Height / panorama_y_division;
+		view_port.Y = get_height() / panorama_y_division * panorama_y;
+		view_port.Width	= get_width();
+		view_port.Height = get_height() / panorama_y_division;
 		view_port.MinZ = 0.f;
 		view_port.MaxZ = 1.f;
 	
@@ -449,7 +444,7 @@ void GameMain::render()
 
 		world = s * t;
 		WorldViewProjection = world * view * projection;
-		vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
+		DIRECT_X_FAIL_CHECK( vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection ) );
 		sky_box_->render();
 
 		// Ground
@@ -460,7 +455,7 @@ void GameMain::render()
 		world = t;
 
 		WorldViewProjection = world * view * projection;
-		vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
+		DIRECT_X_FAIL_CHECK( vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection ) );
 		ground_mesh_->render();
 
 		// GridObject
@@ -479,13 +474,13 @@ void GameMain::render()
 			world = s * t;
 
 			WorldViewProjection = world * view * projection;
-			vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
+			DIRECT_X_FAIL_CHECK( vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection ) );
 
 			grid_object->mesh()->render();
 		}
 
-		// Box
 		/*
+		// Box
 		direct_3d_->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
 
 		box_->ready();
@@ -503,7 +498,7 @@ void GameMain::render()
 					D3DXMatrixTranslation( & world, x + 0.5f, y - 0.5f, z + 0.5f );
 
 					D3DXMATRIX WorldViewProjection = world * view * projection;
-					vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
+					DIRECT_X_FAIL_CHECK( vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection ) );
 
 					box_->render();
 				}
@@ -530,7 +525,7 @@ void GameMain::render()
 			// world = r * t;
 
 			WorldViewProjection = world * view * projection;
-			vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection );
+			DIRECT_X_FAIL_CHECK( vs_constant_table->SetMatrix( direct_3d_->getDevice(), "WorldViewProjection", & WorldViewProjection ) );
 			shadow_mesh_->render();
 		}
 	}
@@ -555,6 +550,16 @@ void GameMain::render()
 		common::serialize( static_cast< int >( player_->position().y() ) ) + "," +
 		common::serialize( static_cast< int >( player_->position().z() ) ) + ")";
 	App::GetInstance()->setTitle( debug_text.c_str() );
+}
+
+int GameMain::get_width() const
+{
+	return app_->get_width();
+}
+
+int GameMain::get_height() const
+{
+	return app_->get_height();
 }
 
 } // namespace blue_sky

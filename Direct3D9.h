@@ -21,12 +21,14 @@ private:
 	void text_out_device_caps( const char*, bool = false );
 
 public:
-	Direct3D9( HWND );
+	Direct3D9( HWND, int, int, bool, int = 0, int = 0 );
 	~Direct3D9();
 	
 	void reset();
 
+	void set_size( int, int );
 	void set_full_screen( bool );
+	void set_multi_sample( int, int );
 
 	LPDIRECT3DDEVICE9 getDevice() const { return device_; }
 	LPDIRECT3DVERTEXBUFFER9	getVertexBuffer() const { return vertex_buffer_; }

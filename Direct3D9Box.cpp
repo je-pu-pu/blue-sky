@@ -19,7 +19,7 @@ Direct3D9Box::Direct3D9Box( Direct3D9* direct_3d, float w, float h, float d, D3D
 
 	D3DXVECTOR3* position;
 
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateVertexBuffer( sizeof( D3DXVECTOR3 ) * 8, 0, 0, D3DPOOL_DEFAULT, & position_vertex_buffer_, 0 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateVertexBuffer( sizeof( D3DXVECTOR3 ) * 8, 0, 0, D3DPOOL_MANAGED, & position_vertex_buffer_, 0 ) );
 	DIRECT_X_FAIL_CHECK( position_vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & position ), 0 ) );
 
 	position[ 0 ] = D3DXVECTOR3( -w / 2, -h / 2, -d / 2 );
@@ -36,7 +36,7 @@ Direct3D9Box::Direct3D9Box( Direct3D9* direct_3d, float w, float h, float d, D3D
 
 	D3DCOLOR* color;
 
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateVertexBuffer( sizeof( D3DCOLOR ) * 8, 0, 0, D3DPOOL_DEFAULT, & color_vertex_buffer_, 0 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateVertexBuffer( sizeof( D3DCOLOR ) * 8, 0, 0, D3DPOOL_MANAGED, & color_vertex_buffer_, 0 ) );
 	DIRECT_X_FAIL_CHECK( color_vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & color ), 0 ) );
 
 	color[ 0 ] = D3DCOLOR_XRGB( 0x00, 0x00, 0x00 );
@@ -50,7 +50,7 @@ Direct3D9Box::Direct3D9Box( Direct3D9* direct_3d, float w, float h, float d, D3D
 
 	DIRECT_X_FAIL_CHECK( color_vertex_buffer_->Unlock() );
 
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateIndexBuffer( 36 * 2, 0, D3DFMT_INDEX16, D3DPOOL_DEFAULT, & index_buffer_, 0 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateIndexBuffer( 36 * 2, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, & index_buffer_, 0 ) );
 
 	DWORD* index;
 

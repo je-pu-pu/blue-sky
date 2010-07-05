@@ -10,15 +10,23 @@
 #include <windows.h>
 #include <string>
 
+/**
+ * アプリケーションとそれに対応するひとつのウィンドウを管理する
+ *
+ */
 class App
-{	
+{
+public:
+	static const int DEFAULT_WIDTH = 640;
+	static const int DEFAULT_HEIGHT = 480;
+
 private:
 	HINSTANCE	hInst;					//インスタンスハンドル
 	HWND		hWnd;					//ウィンドウハンドル
 	HANDLE		hMutex;					//ミューテックスハンドル
 
-	int			Width;					//ウィンドウ横幅
-	int			Height;					//ウィンドウ高さ
+	int			width_;					///< ウィンドウ横幅
+	int			height_;				///< ウィンドウ高さ
 
 	bool		is_full_screen_;		///< フルスクリーン
 	RECT		last_window_rect_;		///< 前回のウィンドウ位置とサイズ
@@ -33,7 +41,7 @@ private:
 	LONG get_window_style_full_scrren() const;
 
 public:
-	virtual ~App();					///< デストラクタ
+	virtual ~App();						///< デストラクタ
 
 	std::string	ClassName;				//クラス名
 	std::string	WinTitle;				//タイトル
@@ -48,8 +56,10 @@ public:
 	HINSTANCE	GetInstanceHandle(){ return hInst; }
 	HWND		GetWindowHandle(){ return hWnd; }
 	
-	int			GetWidth(){ return Width; }
-	int			GetHeight(){ return Height; }
+	int get_width() const { return width_; }
+	int	get_height() const { return height_; }
+
+	void set_size( int, int );
 
 	const char* getTitle();
 	void setTitle( const char* );

@@ -17,7 +17,7 @@ class Config;
 
 } // namespace game
 
-
+class App;
 class Direct3D9;
 
 namespace blue_sky
@@ -33,6 +33,8 @@ public:
 	typedef game::Config Config;
 
 protected:
+	App*					app_;					///< Application
+
 	Direct3D9*				direct_3d_;				///< Direct3D
 
 	Input*					input_;					///< Input
@@ -42,12 +44,10 @@ protected:
 
 	Config*					config_;				///< Config
 
-	int				Width;			///< 横幅
-	int				Height;			///< 高さ
+	CMainLoop				MainLoop;				///< ループ管理
 
-	CMainLoop		MainLoop;		///< ループ管理
 
-	GameMain();					///< コンストラクタ
+	GameMain();
 
 public:
 	static GameMain* getInstance(){ static GameMain gm; return & gm; }
@@ -55,6 +55,9 @@ public:
 
 	void update();				///< メインループ
 	void render();				///< 描画
+
+	int get_width() const;
+	int get_height() const;
 
 	const CMainLoop& getMainLoop() const { return MainLoop; }
 	// float getSPF() const { return }

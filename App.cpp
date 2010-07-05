@@ -10,13 +10,13 @@ App::App()
 	: hWnd( 0 )
 	, hInst( 0 )
 	, hMutex( 0 )
-	, Width( 720 )
-	, Height( 480 )
-	, is_full_screen_( true )
+	, width_( DEFAULT_WIDTH )
+	, height_( DEFAULT_HEIGHT )
+	, is_full_screen_( false )
 {
 	ClassName = "blue-sky";
 	WinTitle = "blue-sky";
-	WinStyle = is_full_screen() ? get_window_style_full_scrren() : get_window_style();
+	WinStyle = get_window_style();
 }
 
 //□デストラクタ
@@ -54,11 +54,13 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	};
 	//ウィンドウクラスの登録
 	if(! RegisterClass(&wc))	return false;
-	//ウィンドウサイズの取得
-	RECT rc = {0, 0, Width, Height};
-	AdjustWindowRect(&rc, WinStyle, FALSE);
+	
+	// ウィンドウサイズの取得
+	RECT rc = { 0, 0, width_, height_ };
+	AdjustWindowRect( & rc, WinStyle, FALSE );
 	int w = rc.right - rc.left;
 	int h = rc.bottom - rc.top;
+
 	//ウインドウ作成
 	hWnd = CreateWindowEx(
 		0 /* WS_EX_TOPMOST */,		//手前に表示
@@ -143,6 +145,17 @@ LRESULT CALLBACK App::WinProc( HWND hw, UINT msg, WPARAM wp, LPARAM lp )
 	}
 
 	return	0;
+}
+
+void App::set_size( int w, int h )
+{
+	width_ = w;
+	height_ = h;
+
+	RECT rect;
+
+	GetWindowRect( hWnd, & rect );
+	SetWindowPos( hWnd, HWND_NOTOPMOST, rect.left, rect.top, width_, height_, SWP_SHOWWINDOW );
 }
 
 /**

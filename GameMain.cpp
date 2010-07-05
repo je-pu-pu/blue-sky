@@ -548,10 +548,6 @@ void GameMain::render()
 		DIRECT_X_FAIL_CHECK( hr );
 	}
 
-	std::string hoge = DXGetErrorString9( direct_3d_->getDevice()->Present( NULL, NULL, NULL, NULL ) ) ;
-
-
-
 	// Debug
 	std::string debug_text;
 	debug_text = std::string( "blue-sky | FPS : " ) + common::serialize( last_fps ) + ", player : (" + 

@@ -19,6 +19,11 @@ Direct3D9* Scene::direct_3d() const
 	return game_main_->get_direct_3d();
 }
 
+GridDataManager* Scene::grid_data_manager() const
+{
+	return game_main_->get_grid_data_manager();
+}
+
 GridObjectManager* Scene::grid_object_manager() const
 {
 	return game_main_->get_grid_object_manager();

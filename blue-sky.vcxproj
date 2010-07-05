@@ -164,6 +164,7 @@
     <ClCompile Include="GamePlayScene.cpp" />
     <ClCompile Include="GridCell.cpp" />
     <ClCompile Include="GridData.cpp" />
+    <ClCompile Include="GridDataManager.cpp" />
     <ClCompile Include="GridObject.cpp" />
     <ClCompile Include="GridObjectManager.cpp" />
     <ClCompile Include="Input.cpp" />
@@ -208,6 +209,7 @@
     <ClInclude Include="GamePlayScene.h" />
     <ClInclude Include="GridCell.h" />
     <ClInclude Include="GridData.h" />
+    <ClInclude Include="GridDataManager.h" />
     <ClInclude Include="GridObject.h" />
     <ClInclude Include="GridObjectManager.h" />
     <ClInclude Include="Input.h" />
@@ -232,6 +234,7 @@
   <ItemGroup>
     <None Include="media\object\building-a" />
     <None Include="media\object\house-a" />
+    <None Include="media\stage\stage-1-1" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

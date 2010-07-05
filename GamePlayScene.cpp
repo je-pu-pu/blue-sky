@@ -14,6 +14,7 @@
 
 #include "Input.h"
 #include "SoundManager.h"
+#include "GridDataManager.h"
 #include "GridObjectManager.h"
 #include "GridObject.h"
 #include "GridCell.h"
@@ -31,6 +32,8 @@
 
 #include <boost/format.hpp>
 
+#include <fstream>
+#include <sstream>
 
 namespace blue_sky
 {
@@ -91,7 +94,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Player
 	player_ = new Player();
-	player_->position().set( 2.f, 300.f, 2.f );
 
 	// Camera
 	camera_ = new Camera();
@@ -124,14 +126,53 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 //	app_->setTitle( ( std::string( app_->getTitle() ) + " : " + vs_profile + " : " + ps_profile ).c_str() );
 
 	// Stage
-	stage_ = new Stage( 1000, 1000 );
+	stage_ = new Stage( 3000, 3000 );
 	player_->set_stage( stage_ );
 
-	// Building
+	generate_random_stage();
+
+	try
+	{
+		// load_stage_file( "media/stage/quit" );
+		// load_stage_file( "media/stage/stage-1-1" );
+	}
+	catch ( ... )
+	{
+		generate_random_stage();
+	}
+
+	for ( GridObjectManager::GridObjectList::iterator i = grid_object_manager()->grid_object_list().begin(); i != grid_object_manager()->grid_object_list().end(); ++i )
+	{
+		GridObject* grid_object = *i;
+		stage_->put( grid_object->x(), grid_object->y(), grid_object->z(), grid_object->grid_data() );
+	}
+}
+
+GamePlayScene::~GamePlayScene()
+{
+	save_stage_file( "media/stage/quit" );
+
+	delete shadow_mesh_;
+	delete ground_mesh_;
+
+	delete stage_;
+	delete camera_;
+	delete player_;
+	
+	delete sky_box_;
+
+	delete box_;
+}
+
+void GamePlayScene::generate_random_stage()
+{
 	grid_object_manager()->clear();
 
 	GridData* building_a_grid_ = GridData::load_file( "media/object/building-a" );
 	GridData* house_a_grid_ = GridData::load_file( "media/object/house-a" );
+
+	building_a_grid_->set_name( "building-a" );
+	house_a_grid_->set_name( "house-a" );
 
 	const int x_space = 1;
 	const int z_space = 1;
@@ -142,23 +183,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	{
 		for ( int x = 0; x < 20; x++ )
 		{
-			// grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), building_a_grid_, building_a_mesh_ ) );
-			// grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), house_a_grid_, house_a_mesh_ ) );
-			// continue;
-
-			/*
-			if ( common::random( 0, 1 ) == 0 )
-			{
-				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), house_a_grid_, house_a_mesh_ ) );
-			}
-			else if ( common::random( 0, 1 ) == 0 )
-			{
-				const int y = d == 0 ? 0 : -15 + common::random( 0, 3 ) * 5;
-				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), y, d * ( 10 + z_space ), building_a_grid_, building_a_mesh_ ) );
-			}
-			continue;
-			*/
-
 			int y = yy;
 
 			if ( common::random( 0, 1 ) == 0 )
@@ -181,27 +205,69 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 		yy += 5;
 	}
+}
 
-	for ( GridObjectManager::GridObjectList::iterator i = grid_object_manager()->grid_object_list().begin(); i != grid_object_manager()->grid_object_list().end(); ++i )
+void GamePlayScene::load_stage_file( const char* file_name )
+{
+	std::ifstream in( file_name );
+	
+	if ( ! in.good() )
 	{
-		GridObject* grid_object = *i;
-		stage_->put( grid_object->x(), grid_object->y(), grid_object->z(), grid_object->grid_data() );
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "load stage file \"" ) + file_name + "\" failed." );
+	}
+
+	while ( in.good() )
+	{
+		std::string line;
+		std::getline( in, line );
+
+		std::stringstream ss;
+		
+		std::string name;
+		std::string value;
+		
+		ss << line;
+
+		ss >> name;
+
+		if ( name == "player" )
+		{
+			ss >> player_->position().x() >> player_->position().y() >> player_->position().z();
+		}
+		else if ( name == "object" )
+		{
+			std::string grid_data_name;
+			int x = 0, y = 0, z = 0;
+
+			ss >> grid_data_name >> x >> y >> z;
+
+			GridData* grid_data = grid_data_manager()->load( grid_data_name.c_str() );
+			grid_object_manager()->add_grid_object( new GridObject( x, y, z, grid_data ) );
+		}
 	}
 }
 
-GamePlayScene::~GamePlayScene()
+void GamePlayScene::save_stage_file( const char* file_name ) const
 {
-	delete shadow_mesh_;
-	delete ground_mesh_;
-
-	delete stage_;
-	delete camera_;
-	delete player_;
+	std::ofstream out( file_name );
 	
-	delete sky_box_;
+	if ( ! out.good() )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "save stage file \"" ) + file_name + "\" failed." );
+	}
 
-	delete box_;
+	out << "player " << player_->position().x() << " " << player_->position().z() << " " << player_->position().z() << std::endl;
+	
+	for ( GridObjectManager::GridObjectList::iterator i = grid_object_manager()->grid_object_list().begin(); i != grid_object_manager()->grid_object_list().end(); ++i )
+	{
+		GridObject* grid_object = *i;
+
+		out << "object " << grid_object->grid_data()->get_name() << " " << grid_object->x() << " " << grid_object->y() << " " << grid_object->z() << std::endl;
+	}
 }
+
+static int b_frame = 0;
+static int b_r_frame = 0;
 
 /**
  * ƒƒCƒ“ƒ‹[ƒvˆ—
@@ -209,7 +275,34 @@ GamePlayScene::~GamePlayScene()
  */
 void GamePlayScene::update()
 {
-	if ( input()->press( Input::B ) ) { player_->step( +1 ); }
+	if ( input()->press( Input::B ) && b_frame < 1000 )
+	{
+		b_frame++;
+	}
+	else
+	{
+		b_frame = 0;
+	}
+
+	if ( input()->push( Input::B ) )
+	{
+		b_r_frame = 1;
+	}
+
+	if ( b_r_frame > 0 )
+	{
+		b_r_frame++;
+
+		if ( b_r_frame > 60 )
+		{
+			b_r_frame = 0;
+		}
+	}
+	
+	if ( b_frame >= 60 )
+	{
+		player_->step( +1 );
+	}
 
 	if ( input()->push( Input::LEFT  ) && player_->is_turn_available() ) { player_->turn( -1 ); }
 	if ( input()->push( Input::RIGHT ) && player_->is_turn_available() ) { player_->turn( +1 ); }
@@ -255,7 +348,7 @@ void GamePlayScene::update()
 	const float under_view_max_speed = 0.1f;
 	static float under_view_speed = 0.f;
 
-	if ( player_->is_jumping() || input()->press( Input::B ) )
+	if ( player_->is_jumping() || input()->press( Input::B ) || b_r_frame )
 	{
 		under_view_speed += 0.02f;
 	}

@@ -25,6 +25,7 @@ namespace blue_sky
 
 class Input;
 class SoundManager;
+class GridDataManager;
 class GridObjectManager;
 class Scene;
 
@@ -46,6 +47,7 @@ protected:
 	Input*					input_;					///< Input
 	SoundManager*			sound_manager_;			///< SoundManager
 
+	GridDataManager*		grid_data_manager_;		///< GridDataManager
 	GridObjectManager*		grid_object_manager_;	///< GridObjectManager
 
 	Config*					config_;				///< Config
@@ -72,7 +74,10 @@ public:
 	Direct3D9* get_direct_3d() const { return direct_3d_; }
 	Input* get_input() const { return input_; }
 	SoundManager* get_sound_manager() const { return sound_manager_; }
+	
+	GridDataManager* get_grid_data_manager() const { return grid_data_manager_; }
 	GridObjectManager* get_grid_object_manager() const { return grid_object_manager_; }
+	
 	Config* get_config() const { return config_; }
 
 }; // class GameMain

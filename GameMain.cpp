@@ -13,6 +13,7 @@
 
 #include "Input.h"
 #include "SoundManager.h"
+#include "GridDataManager.h"
 #include "GridObjectManager.h"
 
 #include "Direct3D9.h"
@@ -35,8 +36,10 @@ GameMain::GameMain()
 	, direct_3d_( 0 )
 	, input_( 0 )
 	, sound_manager_( 0 )
+	, grid_data_manager_( 0 )
 	, grid_object_manager_( 0 )
 	, config_( 0 )
+	, scene_( 0 )
 {
 	// ランダマイズ
 	srand( timeGetTime() );
@@ -59,6 +62,9 @@ GameMain::GameMain()
 	// Sound
 	sound_manager_ = new SoundManager( app_->GetWindowHandle() );
 
+	// GridDataManager
+	grid_data_manager_ = new GridDataManager();
+
 	// GridOBjectManager
 	grid_object_manager_ = new GridObjectManager();
 
@@ -77,6 +83,8 @@ GameMain::GameMain()
 //■デストラクタ
 GameMain::~GameMain()
 {
+	delete scene_;
+
 	delete direct_3d_;
 
 	delete input_;
@@ -113,6 +121,7 @@ void GameMain::update()
 	if ( ! next_scene.empty() )
 	{
 		delete scene_;
+		scene_ = 0;
 
 		if ( next_scene == "title" )
 		{

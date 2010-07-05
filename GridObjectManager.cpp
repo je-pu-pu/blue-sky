@@ -1,7 +1,6 @@
 #include "GridObjectManager.h"
 #include "GridObject.h"
 #include "GridData.h"
-#include "Direct3D9Mesh.h"
 
 namespace blue_sky
 {

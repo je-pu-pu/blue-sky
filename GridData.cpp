@@ -49,7 +49,7 @@ GridData* GridData::load_file( const char* file_name )
 	}
 
 	while ( in.good() )
-	{		
+	{
 		std::string line;
 		std::getline( in, line );
 

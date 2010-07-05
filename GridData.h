@@ -2,6 +2,7 @@
 #define BLUE_SKY_GRID_DATA_H
 
 #include "GridCell.h"
+#include <string>
 
 class Direct3D9Mesh;
 
@@ -18,6 +19,8 @@ public:
 	typedef Direct3D9Mesh Mesh;
 
 private:
+	std::string name_;
+
 	int width_;
 	int depth_;
 
@@ -34,6 +37,9 @@ public:
 
 	GridData( int, int, const Mesh* );
 	virtual ~GridData();
+
+	const char* get_name() const { return name_.c_str(); }
+	void set_name( const char* name ) { name_ = name; }
 
 	int width() const { return width_; }
 	int depth() const { return depth_; }

@@ -234,6 +234,7 @@
   <ItemGroup>
     <None Include="media\object\building-a" />
     <None Include="media\object\house-a" />
+    <None Include="media\shader\blue-sky.fx" />
     <None Include="media\stage\stage-1-1" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

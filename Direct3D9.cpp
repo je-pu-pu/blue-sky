@@ -136,8 +136,12 @@ void Direct3D9::reset()
 
 	if ( hr == D3DERR_DEVICENOTRESET )
 	{
+		DIRECT_X_FAIL_CHECK( effect_->OnLostDevice() );
+
 		if ( SUCCEEDED( device_->Reset( & present_ ) ) )
 		{
+			DIRECT_X_FAIL_CHECK( effect_->OnResetDevice() );
+
 			// COMMON_THROW_EXCEPTION_MESSAGE( "reset OK !!!" );
 		}
 	}
@@ -147,7 +151,9 @@ void Direct3D9::set_full_screen( bool full_scrren )
 {
 	present_.Windowed = ! full_scrren;
 
+	DIRECT_X_FAIL_CHECK( effect_->OnLostDevice() );
 	DIRECT_X_FAIL_CHECK( device_->Reset( & present_ ) );
+	DIRECT_X_FAIL_CHECK( effect_->OnResetDevice() );
 }
 
 void Direct3D9::text_out_adapter_info( const char* file_name, bool append )

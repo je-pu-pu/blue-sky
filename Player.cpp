@@ -218,8 +218,9 @@ void Player::update()
 
 	position().y() = std::max( 0.f, position().y() );
 
+	velocity().y() -= 0.02f;
 	// velocity().y() -= 0.01f;
-	velocity().y() -= 0.001f;
+	// velocity().y() -= 0.001f;
 	// velocity().y() -= 0.0001f;
 
 	if ( is_jumping() )

@@ -40,6 +40,13 @@ namespace blue_sky
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
+	, player_( 0 )
+	, camera_( 0 )
+	, stage_( 0 )
+	, shadow_mesh_( 0 )
+	, ground_mesh_( 0 )
+	, sky_box_( 0 )
+	, box_( 0 )
 	, panorama_y_division_( config()->get( "panorama_y_division", 1 ) )
 {
 	// Mesh
@@ -51,6 +58,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// SkyBox
 	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box", "jpg" );
+	// sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-star-2", "png" );
 
 
 	// Box
@@ -70,6 +78,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		sound_manager()->load( "jump" );
 		sound_manager()->load( "super-jump" );
 		sound_manager()->load( "land" );
+		sound_manager()->load( "short-breath" );
 
 		sound_manager()->load( "fin" );
 	}
@@ -257,6 +266,16 @@ void GamePlayScene::update()
 	if ( b_frame >= 60 )
 	{
 		player_->step( +1 );
+		
+		if ( b_frame == 60 )
+		{
+			sound_manager()->get_sound( "short-breath" )->play( true );
+		}
+	}
+
+	if ( input()->release( Input::B ) || player_->is_clambering() || player_->is_jumping() || player_->is_falling() )
+	{
+		sound_manager()->get_sound( "short-breath" )->stop();
 	}
 
 	if ( input()->push( Input::LEFT  ) && player_->is_turn_available() ) { player_->turn( -1 ); }
@@ -342,31 +361,9 @@ void GamePlayScene::render()
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF ) );
 
-
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA ) );
-
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGCOLOR, 0xFFEEEEFF ) );
-	
-	float Start   = 1.f;    // For linear mode
-	float End     = 200.f;
-	// static float fog_density_a = 0.f;
-	// fog_density_a += 0.001f;
-	// float fog_density = sin( fog_density_a );
-	// End = 2.f + std::abs( sin( fog_density_a ) * 500.f );
-
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGSTART, *(DWORD *)(&Start)) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGEND,   *(DWORD *)(&End)) );
-
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGVERTEXMODE, D3DFOG_LINEAR ) );
-//	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_RANGEFOGENABLE, TRUE ) );
-
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGTABLEMODE, D3DFOG_LINEAR ) ); 
-
-	// DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGTABLEMODE, D3DFOG_EXP2 ) ); 
-	// DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGDENSITY, * ( DWORD* )( & fog_density ) ) );
 
 	direct_3d()->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
 

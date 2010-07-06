@@ -148,7 +148,7 @@ void Player::update()
 		}
 		else
 		{
-			play_sound( "collision_wall" );
+			play_sound( "collision-wall" );
 		}
 
 		position().z() = last_position.z();
@@ -170,7 +170,7 @@ void Player::update()
 	
 			is_jumping_ = true;
 
-			play_sound( "jump" );
+			play_sound( "super-jump" );
 
 			float speed = 0.f;
 
@@ -211,12 +211,13 @@ void Player::update()
 
 		is_turn_avaiable_ = true;
 		is_falling_ = false;
+		is_clambering_ = false;
 	}
 
 	position().y() = std::max( 0.f, position().y() );
 
-	velocity().y() -= 0.01f;
-	// velocity().y() -= 0.001f;
+	// velocity().y() -= 0.01f;
+	velocity().y() -= 0.001f;
 	// velocity().y() -= 0.0001f;
 
 	if ( is_jumping() )

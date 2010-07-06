@@ -4,6 +4,8 @@
 #include "OggVorbisFile.h"
 #include "DirectSound.h"
 
+#include <string>
+
 namespace blue_sky
 {
 
@@ -21,6 +23,26 @@ SoundManager::~SoundManager()
 	}
 
 	delete direct_sound_;
+}
+
+game::Sound* SoundManager::load( const char* name, const char* file_name )
+{
+	if ( file_name )
+	{
+		return game::SoundManager::load( name, ( std::string( "media/sound/" ) + file_name + ".ogg" ).c_str() );
+	}
+
+	return game::SoundManager::load( name, ( std::string( "media/sound/" ) + name + ".ogg" ).c_str() );
+}
+
+game::Sound* SoundManager::load_music( const char* name, const char* file_name )
+{
+	if ( file_name )
+	{
+		return game::SoundManager::load( name, ( std::string( "media/music/" ) + file_name + ".ogg" ).c_str() );
+	}
+
+	return game::SoundManager::load( name, ( std::string( "media/music/" ) + name + ".ogg" ).c_str() );
 }
 
 game::Sound* SoundManager::createSound( const char* file_name )

@@ -13,7 +13,7 @@ OggVorbisFile::OggVorbisFile( const char* file_name )
 
 	if ( error != 0 )
 	{
-		COMMON_THROW_EXCEPTION_SERIALIZE( error );
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "load ogg file \""  ) + file_name + "\", error code : " + common::serialize( error ) );
 	}
 
 	vorbis_info_ = ov_info( & file_, -1 );

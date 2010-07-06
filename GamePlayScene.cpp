@@ -67,29 +67,18 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	{
 		sound_manager()->stop_all();
 
-		Sound* bgm = sound_manager()->load( "bgm", "media/music/tower.ogg" );
-		bgm->play( true );
+		sound_manager()->load_music( "bgm", "tower" )->play( true );
+		sound_manager()->load_music( "rain" )->play( true );
+//		sound_manager()->load_music( "izakaya" )->play( false );
 
-		Sound* rain = sound_manager()->load( "rain", "media/music/rain.ogg" );
-		rain->play( true );
+		sound_manager()->load( "turn" );
+		sound_manager()->load( "clamber" );
+		sound_manager()->load( "collision-wall" );
+		sound_manager()->load( "jump" );
+		sound_manager()->load( "super-jump" );
+		sound_manager()->load( "land" );
 
-		Sound* izakaya = sound_manager()->load( "izakaya", "media/music/izakaya.ogg" );
-//		izakaya->set_volume( 0.8f );
-		izakaya->play( false );
-
-		Sound* turn = sound_manager()->load( "turn", "media/sound/turn.ogg" );
-
-		Sound* collision_wall = sound_manager()->load( "collision_wall", "media/sound/collision_wall.ogg" );
-		collision_wall->set_volume( 0.9f );
-		collision_wall->set_speed( 0.3f );
-
-		Sound* jump = sound_manager()->load( "jump", "media/sound/jump.ogg" );
-		jump->set_speed( 0.5f );
-
-		Sound* land = sound_manager()->load( "land", "media/sound/land.ogg" );
-		land->set_speed( 0.5f );
-
-		Sound* fin = sound_manager()->load( "fin", "media/sound/fin.ogg" );
+		sound_manager()->load( "fin" );
 	}
 
 	// Player
@@ -328,19 +317,19 @@ void GamePlayScene::update()
 	player_->update();
 
 	Sound* bgm = sound_manager()->get_sound( "bgm" );
-	Sound* izakaya = sound_manager()->get_sound( "izakaya" );
+//	Sound* izakaya = sound_manager()->get_sound( "izakaya" );
 
 	if ( player_->is_jumping() )
 	{
 //		bgm->set_speed( 1.41421356f );
 //		izakaya->set_speed( 1.41421356f );
-		 izakaya->set_volume( 0.8f );
+//		 izakaya->set_volume( 0.8f );
 	}
 	else
 	{
 		bgm->set_speed( 1.f );
-		izakaya->set_speed( 1.f );
-		izakaya->set_volume( 1.f );
+//		izakaya->set_speed( 1.f );
+//		izakaya->set_volume( 1.f );
 	}
 
 	camera_->position() = player_->position() + vector3( 0.f, 1.5f, 0.f );
@@ -473,7 +462,7 @@ void GamePlayScene::render()
 		{
 			GridObject* grid_object = *i;
 
-			const int max_length = 200;
+			const int max_length = 150;
 
 			if ( std::abs( static_cast< int >( player_->position().x() ) - grid_object->x() ) >= max_length ) continue;
 			if ( std::abs( static_cast< int >( player_->position().z() ) - grid_object->z() ) >= max_length ) continue;

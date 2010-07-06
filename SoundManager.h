@@ -29,7 +29,8 @@ public:
 	SoundManager( HWND );
 	virtual ~SoundManager();
 
-//	virtual game::Sound* load( const char*, const char* );
+	virtual game::Sound* load( const char*, const char* = 0 );
+	virtual game::Sound* load_music( const char*, const char* = 0 );
 	virtual game::Sound* createSound( const char* );
 
 	virtual void update();

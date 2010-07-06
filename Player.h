@@ -81,7 +81,7 @@ public:
 
 	bool is_turn_available() const { return is_turn_avaiable_; }
 
-	float get_step_speed() const { return 0.01f; }
+	float get_step_speed() const { return 0.002f; }
 	float get_side_step_speed() const { return 0.004f; }
 
 	/// XV

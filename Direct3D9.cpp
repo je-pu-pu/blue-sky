@@ -111,6 +111,25 @@ Direct3D9::~Direct3D9()
 	direct_3d_->Release();
 }
 
+void Direct3D9::load_effect_file( const char* file_name )
+{
+	LPD3DXBUFFER error_message_buffer = 0;
+
+	HRESULT hr = D3DXCreateEffectFromFile( getDevice(), file_name, 0, 0, 0, 0, & effect_, & error_message_buffer );
+
+	if ( FAILED( hr ) )
+	{
+		if ( error_message_buffer )
+		{
+			COMMON_THROW_EXCEPTION_MESSAGE( static_cast< char* >( error_message_buffer->GetBufferPointer() ) );
+		}
+		else
+		{
+			DIRECT_X_FAIL_CHECK( hr );
+		}
+	}
+}
+
 void Direct3D9::reset()
 {
 	HRESULT hr = device_->TestCooperativeLevel();
@@ -253,6 +272,10 @@ void Direct3D9::text_out_device_caps( const char* file_name, bool append )
 		device_caps_string( MaxPShaderInstructionsExecuted ) +
 		device_caps_string( MaxVertexShader30InstructionSlots ) +
 		device_caps_string( MaxPixelShader30InstructionSlots );
+
+	info_text += std::string( "\n" ) + "shader :\n" +
+		"\t" + D3DXGetVertexShaderProfile( getDevice() ) + "\n" +
+		"\t" + D3DXGetPixelShaderProfile( getDevice() ) + "\n";
 
 	common::log( file_name, info_text, append );
 }

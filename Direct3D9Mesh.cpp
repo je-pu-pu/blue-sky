@@ -106,12 +106,6 @@ void Direct3D9Mesh::render() const
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetMaterial( & materials_[ n ] ) );
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetTexture( 0, textures_[ n ] ) );
 
-		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR ) );
-		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR ) );
-		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR ) );
-		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP ) );
-		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP ) );
-
 		DIRECT_X_FAIL_CHECK( mesh_->DrawSubset( n ) );
 	}
 }

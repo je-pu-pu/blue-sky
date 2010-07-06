@@ -12,7 +12,7 @@ class Direct3D9
 private:
 	LPDIRECT3D9				direct_3d_;		///< Direct3D 9 
 	LPDIRECT3DDEVICE9		device_;		///< Direct3D 9 Device
-	LPDIRECT3DVERTEXBUFFER9	vertex_buffer_;	///< Direct3D 9 Vertex Buffer
+	LPD3DXEFFECT			effect_;		///< Effect
 
 	D3DPRESENT_PARAMETERS	present_;		///< Present Parameters
 	D3DCAPS9				device_caps_;	///< Device Caps
@@ -24,6 +24,8 @@ public:
 	Direct3D9( HWND, int, int, bool, int = 0, int = 0 );
 	~Direct3D9();
 	
+	void load_effect_file( const char* );
+
 	void reset();
 
 	void set_size( int, int );
@@ -31,7 +33,7 @@ public:
 	void set_multi_sample( int, int );
 
 	LPDIRECT3DDEVICE9 getDevice() const { return device_; }
-	LPDIRECT3DVERTEXBUFFER9	getVertexBuffer() const { return vertex_buffer_; }
+	LPD3DXEFFECT getEffect() const { return effect_; }
 
 }; // class Direct3D9
 

@@ -170,6 +170,7 @@ void Player::update()
 	
 			is_jumping_ = true;
 
+			stop_sound( "super-jump" );
 			play_sound( "super-jump" );
 
 			float speed = 0.f;
@@ -200,6 +201,7 @@ void Player::update()
 			if ( is_jumping_ )
 			{
 				stop_sound( "jump" );
+				stop_sound( "land" );
 				play_sound( "land" );
 
 				is_jumping_ = false;

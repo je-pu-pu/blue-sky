@@ -18,5 +18,6 @@ DirectSoundBuffer::~DirectSoundBuffer()
 
 void DirectSoundBuffer::play( bool loop )
 {
+	buffer_->SetCurrentPosition( 0 );
 	buffer_->Play( 0, 0, loop ? DSBPLAY_LOOPING : 0 );
 }

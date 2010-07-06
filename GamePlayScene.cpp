@@ -38,13 +38,6 @@
 namespace blue_sky
 {
 
-/// @todo ‚Ü‚Æ‚ß‚é
-LPDIRECT3DVERTEXSHADER9 vertex_shader_;
-LPDIRECT3DPIXELSHADER9 pixel_shader_;
-
-LPD3DXCONSTANTTABLE vs_constant_table;
-LPD3DXCONSTANTTABLE ps_constant_table;
-
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
 	, panorama_y_division_( config()->get( "panorama_y_division", 1 ) )
@@ -86,33 +79,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Camera
 	camera_ = new Camera();
-
-	const char* vs_profile = "vs_2_0"; // D3DXGetVertexShaderProfile( direct_3d()->getDevice() );
-	const char* ps_profile = "ps_2_0"; // D3DXGetPixelShaderProfile( direct_3d()->getDevice() );
-
-	LPD3DXBUFFER error_message_buffer;
-
-	// Vertex Shader
-	LPD3DXBUFFER vs_buffer;
-
-	if ( FAILED( D3DXCompileShaderFromFile( "test.fx", 0, 0, "vs_main", vs_profile, 0, & vs_buffer, & error_message_buffer, & vs_constant_table ) ) )
-	{
-		COMMON_THROW_EXCEPTION_MESSAGE( static_cast< char* >( error_message_buffer->GetBufferPointer() ) );
-	}
-
-	direct_3d()->getDevice()->CreateVertexShader( static_cast< DWORD* >( vs_buffer->GetBufferPointer() ), & vertex_shader_ );
-
-	// Pixel Shader
-	LPD3DXBUFFER ps_buffer;
-
-	if ( FAILED( D3DXCompileShaderFromFile( "test.fx", 0, 0, "ps_main", ps_profile, 0, & ps_buffer, & error_message_buffer, & ps_constant_table ) ) )
-	{
-		COMMON_THROW_EXCEPTION_MESSAGE( static_cast< char* >( error_message_buffer->GetBufferPointer() ) );
-	}
-	
-	direct_3d()->getDevice()->CreatePixelShader( static_cast< DWORD* >( ps_buffer->GetBufferPointer() ), & pixel_shader_ );
-
-//	app_->setTitle( ( std::string( app_->getTitle() ) + " : " + vs_profile + " : " + ps_profile ).c_str() );
 
 	// Stage
 	stage_ = new Stage( 3000, 3000 );
@@ -363,8 +329,13 @@ void GamePlayScene::render()
 {
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->BeginScene() );
 
-	direct_3d()->getDevice()->SetVertexShader( vertex_shader_ );
-	direct_3d()->getDevice()->SetPixelShader( pixel_shader_ );
+	D3DXHANDLE technique = direct_3d()->getEffect()->GetTechniqueByName( "technique_0" );
+	direct_3d()->getEffect()->SetTechnique( technique );
+
+	UINT pass_count = 0;
+
+	direct_3d()->getEffect()->Begin( & pass_count, 0 );
+	direct_3d()->getEffect()->BeginPass( 0 );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE ) );
 
@@ -376,7 +347,7 @@ void GamePlayScene::render()
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA ) );
 
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, FALSE ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGCOLOR, 0xFFEEEEFF ) );
 	
 	float Start   = 1.f;    // For linear mode
@@ -408,7 +379,6 @@ void GamePlayScene::render()
 
 	static float fog = 0.f;
 	fog += 0.001f;
-	vs_constant_table->SetFloat( direct_3d()->getDevice(), "fog", sin( fog ) );
 
 	static float a = 0.f;
 	a += 0.02f;
@@ -441,7 +411,8 @@ void GamePlayScene::render()
 
 		world = s * t;
 		WorldViewProjection = world * view * projection;
-		DIRECT_X_FAIL_CHECK( vs_constant_table->SetMatrix( direct_3d()->getDevice(), "WorldViewProjection", & WorldViewProjection ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 		sky_box_->render();
 
 		// Ground
@@ -452,7 +423,8 @@ void GamePlayScene::render()
 		world = t;
 
 		WorldViewProjection = world * view * projection;
-		DIRECT_X_FAIL_CHECK( vs_constant_table->SetMatrix( direct_3d()->getDevice(), "WorldViewProjection", & WorldViewProjection ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 		ground_mesh_->render();
 
 		// GridObject
@@ -474,7 +446,8 @@ void GamePlayScene::render()
 			world = s * t;
 
 			WorldViewProjection = world * view * projection;
-			DIRECT_X_FAIL_CHECK( vs_constant_table->SetMatrix( direct_3d()->getDevice(), "WorldViewProjection", & WorldViewProjection ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 			grid_object->mesh()->render();
 
@@ -484,12 +457,11 @@ void GamePlayScene::render()
 			world = s * t;
 
 			WorldViewProjection = world * view * projection;
-			DIRECT_X_FAIL_CHECK( vs_constant_table->SetMatrix( direct_3d()->getDevice(), "WorldViewProjection", & WorldViewProjection ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 			shadow_mesh_->render();
 		}
-
-
 
 		/*
 		// Box
@@ -537,10 +509,15 @@ void GamePlayScene::render()
 			// world = r * t;
 
 			WorldViewProjection = world * view * projection;
-			DIRECT_X_FAIL_CHECK( vs_constant_table->SetMatrix( direct_3d()->getDevice(), "WorldViewProjection", & WorldViewProjection ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+
 			shadow_mesh_->render();
 		}
 	}
+
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
 	

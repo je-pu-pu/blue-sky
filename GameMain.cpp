@@ -54,6 +54,8 @@ GameMain::GameMain()
 
 	// Direct3D
 	direct_3d_ = new Direct3D9( app_->GetWindowHandle(), app_->get_width(), app_->get_height(), app_->is_full_screen(), config_->get( "video.multi_sample_type", 0 ), config_->get( "video.multi_sample_quality", 0 ) );
+	direct_3d_->load_effect_file( "media/shader/blue-sky.fx" );
+
 
 	// Input
 	input_ = new Input();

@@ -76,6 +76,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		sound_manager()->load( "clamber" );
 		sound_manager()->load( "collision-wall" );
 		sound_manager()->load( "jump" );
+		sound_manager()->load( "fall" );
 		sound_manager()->load( "super-jump" );
 		sound_manager()->load( "land" );
 		sound_manager()->load( "short-breath" );
@@ -90,26 +91,29 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	camera_ = new Camera();
 
 	// Stage
-	stage_ = new Stage( 3000, 3000 );
+	stage_ = new Stage( 1000, 1000 );
 	player_->set_stage( stage_ );
 
 	generate_random_stage();
 
-	try
-	{
-		// load_stage_file( "media/stage/quit" );
-		// load_stage_file( "media/stage/stage-1-1" );
-	}
-	catch ( ... )
-	{
-		generate_random_stage();
-	}
+	// load_stage_file( "media/stage/quit" );
+	// load_stage_file( "media/stage/stage-1-1" );
 
 	for ( GridObjectManager::GridObjectList::iterator i = grid_object_manager()->grid_object_list().begin(); i != grid_object_manager()->grid_object_list().end(); ++i )
 	{
 		GridObject* grid_object = *i;
 		stage_->put( grid_object->x(), grid_object->y(), grid_object->z(), grid_object->grid_data() );
 	}
+
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF ) );
+
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA ) );
+
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_FLAT ) );
 }
 
 GamePlayScene::~GamePlayScene()
@@ -134,12 +138,14 @@ void GamePlayScene::generate_random_stage()
 
 	GridData* building_a_grid_ = GridData::load_file( "media/object/building-a" );
 	GridData* house_a_grid_ = GridData::load_file( "media/object/house-a" );
+	GridData* road_a_grid_ = GridData::load_file( "media/object/road-a" );
 
 	building_a_grid_->set_name( "building-a" );
 	house_a_grid_->set_name( "house-a" );
+	road_a_grid_->set_name( "road-a" );
 
-	const int x_space = 1;
-	const int z_space = 1;
+	const int x_space = 0;
+	const int z_space = 0;
 
 	int yy = -15;
 
@@ -159,11 +165,17 @@ void GamePlayScene::generate_random_stage()
 					if ( r >= 2 ) y += 5;
 				}
 
+				y = 0;
+
 				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), y, d * ( 10 + z_space ), building_a_grid_ ) );
 			}
 			else if ( common::random( 0, 1 ) == 0 )
 			{
 				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), house_a_grid_ ) );
+			}
+			else
+			{
+				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), road_a_grid_ ) );
 			}
 		}
 
@@ -230,56 +242,37 @@ void GamePlayScene::save_stage_file( const char* file_name ) const
 	}
 }
 
-static int b_frame = 0;
-static int b_r_frame = 0;
-
 /**
  * ƒƒCƒ“ƒ‹[ƒvˆ—
  *
  */
 void GamePlayScene::update()
 {
-	if ( input()->press( Input::B ) && b_frame < 1000 )
+	if ( input()->press( Input::A ) )
 	{
-		b_frame++;
+		if ( input()->push( Input::UP    ) ) { camera_->step_rotate_x( -1 ); }
+		if ( input()->push( Input::DOWN  ) ) { camera_->step_rotate_x( +1 ); }
+
+		if ( player_->is_turn_available() )
+		{
+			if ( input()->push( Input::LEFT  ) ) { player_->turn( -1 ); }
+			if ( input()->push( Input::RIGHT ) ) { player_->turn( +1 ); }
+		}
+
+//		if ( input()->push( Input::LEFT  ) ) { camera_->step_rotate_y( -1 ); }
+//		if ( input()->push( Input::RIGHT ) ) { camera_->step_rotate_y( +1 ); }
 	}
 	else
 	{
-		b_frame = 0;
+		if ( input()->press( Input::UP    ) ) { player_->step( +1 ); }
+		if ( input()->press( Input::DOWN  ) ) { player_->step( -1 ); }
+		if ( input()->press( Input::LEFT  ) ) { player_->side_step( -1 ); }
+		if ( input()->press( Input::RIGHT ) ) { player_->side_step( +1 ); }
 	}
 
-	if ( input()->push( Input::B ) )
-	{
-		b_r_frame = 1;
-	}
-
-	if ( b_r_frame > 0 )
-	{
-		b_r_frame++;
-
-		if ( b_r_frame > 60 )
-		{
-			b_r_frame = 0;
-		}
-	}
+//		if ( input()->push( Input::L ) && player_->is_turn_available() ) { player_->turn( -1 ); }
+//		if ( input()->push( Input::R ) && player_->is_turn_available() ) { player_->turn( +1 ); }
 	
-	if ( b_frame >= 60 )
-	{
-		player_->step( +1 );
-		
-		if ( b_frame == 60 )
-		{
-			sound_manager()->get_sound( "short-breath" )->play( true );
-		}
-	}
-
-	if ( input()->release( Input::B ) || player_->is_clambering() || player_->is_jumping() || player_->is_falling() )
-	{
-		sound_manager()->get_sound( "short-breath" )->stop();
-	}
-
-	if ( input()->push( Input::LEFT  ) && player_->is_turn_available() ) { player_->turn( -1 ); }
-	if ( input()->push( Input::RIGHT ) && player_->is_turn_available() ) { player_->turn( +1 ); }
 
 	if ( input()->push( Input::A ) ) { player_->is_jumping() ? player_->fall() : player_->jump(); }
 
@@ -293,10 +286,15 @@ void GamePlayScene::update()
 	
 	if ( input()->push( Input::Y ) )
 	{
-		sound_manager()->stop_all();
-		sound_manager()->get_sound( "fin" )->play( false );
+		sound_manager()->set_enabled( ! sound_manager()->is_enabled() );
 
-		set_next_scene( "title" );
+		if ( sound_manager()->is_enabled() )
+		{
+			sound_manager()->stop_all();
+			sound_manager()->get_sound( "fin" )->play( false );
+		}
+
+		// set_next_scene( "title" );
 	}
 
 	player_->update();
@@ -317,27 +315,8 @@ void GamePlayScene::update()
 //		izakaya->set_volume( 1.f );
 	}
 
-	camera_->position() = player_->position() + vector3( 0.f, 1.5f, 0.f );
-	
-	const float under_view_max_speed = 0.1f;
-	static float under_view_speed = 0.f;
-
-	if ( player_->is_jumping() || input()->press( Input::B ) || b_r_frame )
-	{
-		under_view_speed += 0.02f;
-	}
-	else
-	{
-		under_view_speed -= 0.01f;
-	}
-
-	under_view_speed = math::clamp( under_view_speed, -under_view_max_speed, under_view_max_speed );
-	
-	camera_->set_under_view_rate( camera_->get_under_view_rate() + under_view_speed );
-	// camera_->set_under_view_rate( player_->position().y() / 50.f );
-
-	camera_->set_direction_degree_target( player_->direction_degree() );
-
+	camera_->position() = player_->position() + vector3( 0.f, 1.5f /* + camera_->get_under_view_rate() * 20.f */, 0.f );
+	camera_->rotate_degree_target().y() = player_->direction_degree();
 	camera_->update();
 }
 
@@ -356,26 +335,12 @@ void GamePlayScene::render()
 	direct_3d()->getEffect()->Begin( & pass_count, 0 );
 	direct_3d()->getEffect()->BeginPass( 0 );
 
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE ) );
-
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF ) );
-
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA ) );
-
-	direct_3d()->getDevice()->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
-
 	D3DXMATRIXA16 world;
 	D3DXMATRIXA16 view;
 	D3DXMATRIXA16 projection;
 	D3DXMATRIXA16 WorldViewProjection;
 
 	camera_->set_panorama_y_division( get_panorama_y_division() );
-
-	static float fog = 0.f;
-	fog += 0.001f;
 
 	static float a = 0.f;
 	a += 0.02f;
@@ -436,10 +401,10 @@ void GamePlayScene::render()
 			if ( std::abs( static_cast< int >( player_->position().x() ) - grid_object->x() ) >= max_length ) continue;
 			if ( std::abs( static_cast< int >( player_->position().z() ) - grid_object->z() ) >= max_length ) continue;
 			
-			
-			float flicker = sin( grid_object->x() + grid_object->z() * 0.001f + a ) * 0.1f;
+			const float offset = 0.03f;
+			float flicker = 0.f; // sin( grid_object->x() + grid_object->z() * 0.001f + a ) * 0.1f;
 
-			D3DXMatrixTranslation( & t, static_cast< float >( grid_object->x() ), static_cast< float >( grid_object->y() + flicker ), static_cast< float >( grid_object->z() ) );
+			D3DXMatrixTranslation( & t, static_cast< float >( grid_object->x() ), static_cast< float >( grid_object->y() + flicker + offset ), static_cast< float >( grid_object->z() ) );
 			world = s * t;
 
 			WorldViewProjection = world * view * projection;
@@ -450,6 +415,7 @@ void GamePlayScene::render()
 
 
 			// Shadow
+			/*
 			D3DXMatrixTranslation( & t, static_cast< float >( grid_object->x() ), 0.05f, static_cast< float >( grid_object->z() ) );
 			world = s * t;
 
@@ -458,6 +424,8 @@ void GamePlayScene::render()
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 			shadow_mesh_->render();
+
+			*/
 		}
 
 		/*
@@ -517,7 +485,7 @@ void GamePlayScene::render()
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
-	
+
 	HRESULT hr = direct_3d()->getDevice()->Present( NULL, NULL, NULL, NULL );
 
 	if ( hr == D3DERR_DEVICELOST )

@@ -7,10 +7,10 @@ namespace blue_sky
 {
 
 Camera::Camera()
-	: direction_degree_( 0.f )
-	, direction_degree_target_( 0.f )
-	, fov_( 120.f )
+	: fov_( 120.f )
 	, under_view_rate_( 0.f )
+	, rotate_step_x_( 0 )
+	, rotate_step_y_( 0 )
 	, panorama_y_division_( 1 )
 {
 	set_fov( fov_ );
@@ -23,9 +23,9 @@ Camera::~Camera()
 
 void Camera::update()
 {
-	float speed = 4.f;
-
-	direction_degree_ = math::chase( direction_degree_, direction_degree_target_, speed );
+	rotate_degree().x() = math::chase( rotate_degree().x(), rotate_degree_target().x(), 2.f );
+	rotate_degree().y() = math::chase( rotate_degree().y(), rotate_degree_target().y(), 4.f );
+	rotate_degree().z() = math::chase( rotate_degree().z(), rotate_degree_target().z(), 2.f );
 }
 
 void Camera::set_fov( float fov )
@@ -43,41 +43,18 @@ void Camera::set_fov( float fov )
 void Camera::set_under_view_rate( float rate )
 {
 	under_view_rate_ = math::clamp( rate, 0.f, 1.f );
-	// under_view_rate_ = 0.f;
-	
-	/*
-	matrix4x4 xr;
-	xr.rotate_x( under_view_rate_ * ( fov_ / 2.f ) );
-	// m.rotate_y( timeGetTime() * 0.01f );
-
-	matrix4x4 xru;
-	xru.rotate_x( under_view_rate_ * ( 90.f ) + 60.f );
-	
-	matrix4x4 yr;
-	yr.rotate_y( get_direction_degree() );
-
-	// look at
-	look_at_ = position() + ( vector3( 0.f, 0.f, 1.f ) * xr ) * yr;
-	look_at_under_ = position() + ( vector3( 0.f, 0.f, 1.f ) * xru ) * yr;
-
-	// up
-	up_ = vector3( 0.f, 1.f, 0.f ) * xr * yr;
-	up_under_ = vector3( 0.f, 1.f, 0.f ) * xru * yr;
-	*/
-
-	// set_fov( 60.f + under_view_rate_ * 60.f );
 }
 
 vector3 Camera::get_look_at_part( int n ) const
 {
 	float x_rot_degree = -( ( fov_ * 0.5f ) - ( fov_ / panorama_y_division_ * 0.5f ) ) + ( fov_ / panorama_y_division_ ) * n;
-	x_rot_degree += under_view_rate_ * ( 35.f );
+	x_rot_degree += rotate_degree().x();
 
 	matrix4x4 xr;
 	xr.rotate_x( x_rot_degree );
 
 	matrix4x4 yr;
-	yr.rotate_y( get_direction_degree() );
+	yr.rotate_y( rotate_degree().y() );
 
 	return position_ + ( default_front_ * xr ) * yr;
 }
@@ -85,15 +62,37 @@ vector3 Camera::get_look_at_part( int n ) const
 vector3 Camera::get_up_part( int n ) const
 {
 	float x_rot_degree = -( ( fov_ * 0.5f ) - ( fov_ / panorama_y_division_ * 0.5f ) ) + ( fov_ / panorama_y_division_ ) * n;
-	x_rot_degree += under_view_rate_ * ( 35.f );
+	x_rot_degree += rotate_degree().x();
 
 	matrix4x4 xr;
 	xr.rotate_x( x_rot_degree );
 
 	matrix4x4 yr;
-	yr.rotate_y( get_direction_degree() );
+	yr.rotate_y( rotate_degree().y() );
 
 	return default_up_ * xr * yr;
+}
+
+void Camera::step_rotate_x( int step )
+{
+	const int step_degree_ = 45;
+	const int max_step = 1;
+
+	rotate_step_x_ += step;
+	rotate_step_x_ = math::clamp( rotate_step_x_, -max_step, max_step );
+
+	rotate_degree_target().x() = static_cast< float >( rotate_step_x_ * step_degree_ );
+}
+
+void Camera::step_rotate_y( int step )
+{
+	const int step_degree_ = 30;
+	const int max_step = 3;
+
+	rotate_step_y_ += step;
+	rotate_step_y_ = math::clamp( rotate_step_y_, -max_step, max_step );
+
+	rotate_degree_target().y() = static_cast< float >( rotate_step_y_ * step_degree_ );
 }
 
 }; // namespace blue_sky

@@ -178,8 +178,12 @@ void GridData::put( int px, int py, int pz, const GridData* grid_data )
 {
 	for ( int z = 0; z < grid_data->depth(); z++ )
 	{
+		if ( pz + z >= depth() ) continue;
+
 		for ( int x = 0; x < grid_data->width(); x++ )
 		{
+			if ( px + x >= width() ) continue;
+
 			cell( px + x, pz + z ).bound() = grid_data->cell( x, z ).bound();
 			cell( px + x, pz + z ).height() = std::max( 0, py + grid_data->cell( x, z ).height() );
 		}

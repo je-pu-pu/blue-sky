@@ -12,6 +12,7 @@
 #include "matrix4x4.h"
 
 #include <common/exception.h>
+#include <common/math.h>
 
 #include <list>
 
@@ -20,6 +21,7 @@ namespace blue_sky
 
 Player::Player()
 	 : stage_( 0 )
+	 , position_( 0.f, 50.f, 0.f )
 	 , direction_( FRONT )
 	 , direction_degree_( 0.f )
 	 , is_turn_avaiable_( true )
@@ -39,20 +41,24 @@ void Player::step( float s )
 	}
 	else if ( is_jumping() )
 	{
-		s *= 1.5f;
+		s = 1.f; // 1.5f;
 	}
 
-	velocity() += front() * s * get_step_speed();
+	velocity() += front() * s * 0.002f;
+
+	// get_step_speed();
 }
 
 void Player::side_step( float s )
 {
 	if ( is_jumping() )
 	{
-		s *= 1.5f;
+		s = 0.f; // s *= 1.5f;
 	}
-	
-	// velocity() += right() * s * get_side_step_speed();
+
+	velocity() += right() * s * 0.002f;
+
+	// get_side_step_speed();
 }
 
 void Player::turn( int d )
@@ -92,6 +98,8 @@ void Player::update()
 	const vector3 last_position = position();
 
 	position().x() += velocity().x();
+	position().x() = math::clamp( position().x(), 0.f, static_cast< float >( stage_->width() ) );
+
 	const GridCell& floor_cell_x = get_floor_cell();
 
 	if ( position().y() < floor_cell_x.height() )
@@ -124,6 +132,8 @@ void Player::update()
 	}
 
 	position().z() += velocity().z();
+	position().z() = math::clamp( position().z(), 0.f, static_cast< float >( stage_->depth() ) );
+
 	const GridCell& floor_cell_z = get_floor_cell();
 
 	if ( position().y() < floor_cell_z.height() )
@@ -218,8 +228,10 @@ void Player::update()
 
 	position().y() = std::max( 0.f, position().y() );
 
-	velocity().y() -= 0.02f;
-	// velocity().y() -= 0.01f;
+	// gravity
+	// velocity().y() -= 0.004f;
+	// velocity().y() -= 0.015f;
+	velocity().y() -= 0.01f;
 	// velocity().y() -= 0.001f;
 	// velocity().y() -= 0.0001f;
 
@@ -259,7 +271,7 @@ void Player::jump()
 	
 	is_jumping_ = true;
 
-	GameMain::getInstance()->get_sound_manager()->get_sound( "jump" )->play( false );
+	play_sound( "jump" );
 }
 
 /**
@@ -274,6 +286,8 @@ void Player::fall()
 
 	velocity_on_fall_ = velocity();
 	velocity() = vector3( 0.f, -get_max_speed(), 0.f );
+
+	play_sound( "fall" );
 }
 
 const GridCell& Player::get_floor_cell_center() const

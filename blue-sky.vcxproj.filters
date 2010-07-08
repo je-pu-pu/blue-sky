@@ -69,6 +69,9 @@
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="GridDataManager.cpp" />
+    <ClCompile Include="StageSelectScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -131,6 +134,9 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="GridDataManager.h" />
+    <ClInclude Include="StageSelectScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="media\object\building-a">

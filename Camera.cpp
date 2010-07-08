@@ -7,7 +7,7 @@ namespace blue_sky
 {
 
 Camera::Camera()
-	: fov_( 120.f )
+	: fov_( 90.f )
 	, under_view_rate_( 0.f )
 	, rotate_step_x_( 0 )
 	, rotate_step_y_( 0 )
@@ -25,7 +25,30 @@ void Camera::update()
 {
 	rotate_degree().x() = math::chase( rotate_degree().x(), rotate_degree_target().x(), 2.f );
 	rotate_degree().y() = math::chase( rotate_degree().y(), rotate_degree_target().y(), 4.f );
-	rotate_degree().z() = math::chase( rotate_degree().z(), rotate_degree_target().z(), 2.f );
+	rotate_degree().z() = math::chase( rotate_degree().z(), rotate_degree_target().z(), 4.f );
+
+	/*
+	for ( int n = 0; n < 3; n++ )
+	{
+		if ( rotate_degree().get( n ) == rotate_degree_target().get( n ) )
+		{
+			while ( rotate_degree().get( n ) <   0.f ) rotate_degree().get( n ) += 360.f;
+//			while ( rotate_degree().get( n ) > 360.f ) rotate_degree().get( n ) -= 360.f;
+
+			rotate_degree_target().get( n ) = rotate_degree().get( n );
+		}
+		else
+		{
+			// while ( rotate_degree().get( n ) - rotate_degree_target().get( n ) < -360.f ) rotate_degree_target().get( n ) += 360.f;
+			// while ( rotate_degree().get( n ) - rotate_degree_target().get( n ) >  360.f ) rotate_degree_target().get( n ) -= 360.f;
+		}
+	}
+	*/
+
+	matrix4x4 m;
+	m.rotate_y( rotate_degree().y() );
+
+	front_ = default_front_ * m;
 }
 
 void Camera::set_fov( float fov )
@@ -56,7 +79,10 @@ vector3 Camera::get_look_at_part( int n ) const
 	matrix4x4 yr;
 	yr.rotate_y( rotate_degree().y() );
 
-	return position_ + ( default_front_ * xr ) * yr;
+	matrix4x4 zr;
+	zr.rotate_z( rotate_degree().z() );
+
+	return position_ + ( default_front_ * xr ) * zr * yr;
 }
 
 vector3 Camera::get_up_part( int n ) const
@@ -70,13 +96,16 @@ vector3 Camera::get_up_part( int n ) const
 	matrix4x4 yr;
 	yr.rotate_y( rotate_degree().y() );
 
-	return default_up_ * xr * yr;
+	matrix4x4 zr;
+	zr.rotate_z( rotate_degree().z() );
+
+	return default_up_ * xr * zr * yr;
 }
 
 void Camera::step_rotate_x( int step )
 {
 	const int step_degree_ = 45;
-	const int max_step = 1;
+	const int max_step = 2;
 
 	rotate_step_x_ += step;
 	rotate_step_x_ = math::clamp( rotate_step_x_, -max_step, max_step );

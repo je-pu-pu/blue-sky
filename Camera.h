@@ -22,8 +22,7 @@ private:
 	vector3 default_front_;			///< デフォルト視点
 	vector3 default_up_;			///< デフォルト上
 
-	vector3 look_at_under_;			///< 注視点 ( 足元 )
-	vector3 up_under_;				///< 上 ( 足元 )
+	vector3 front_;					///< 前
 
 	int rotate_step_x_;				///< 回転角度ステップ数 ( X Axis )
 	int rotate_step_y_;				///< 回転角度ステップ数 ( Y Axis )
@@ -45,6 +44,8 @@ public:
 	const vector3& look_at() { return look_at_; }
 	const vector3& up() const { return up_; }
 
+	const vector3& front() const { return front_; }
+
 	vector3 get_look_at_part( int ) const;
 	vector3 get_up_part( int ) const;
 
@@ -65,6 +66,8 @@ public:
 	float aspect() const { return 720.f / ( 480.f / panorama_y_division_ ); }
 	float near_clip() const { return 0.05f; }
 	float far_clip() const { return 500.f; }
+
+	bool step_rotate_x_available() const { return rotate_degree().x() == rotate_degree_target().x(); }
 
 	void step_rotate_x( int );
 	void step_rotate_y( int );

@@ -27,12 +27,12 @@ bool StreamingSound::load( const char* file_name )
 {
 	if ( direct_sound_buffer_ )
 	{
-		COMMON_THROW_EXCEPTION;
+		COMMON_THROW_EXCEPTION_MESSAGE( "direct_sound_buffer_ is not null." );
 	}
 
 	if ( sound_file_ )
 	{
-		COMMON_THROW_EXCEPTION;
+		COMMON_THROW_EXCEPTION_MESSAGE( "sound_file_ is not null." );
 	}
 
 	sound_file_ = new SoundFile( file_name );

@@ -9,6 +9,7 @@
 #include "App.h"
 
 #include "TitleScene.h"
+#include "StageSelectScene.h"
 #include "GamePlayScene.h"
 
 #include "Input.h"
@@ -17,6 +18,7 @@
 #include "GridObjectManager.h"
 
 #include "Direct3D9.h"
+#include "DirectX.h"
 
 #include <game/Config.h>
 
@@ -129,6 +131,10 @@ void GameMain::update()
 		{
 			scene_ = new TitleScene( this );
 		}
+		else if ( next_scene == "stage_select" )
+		{
+			scene_ = new StageSelectScene( this );
+		}
 		else if ( next_scene == "game_play" )
 		{
 			scene_ = new GamePlayScene( this );
@@ -148,6 +154,17 @@ void GameMain::update()
 void GameMain::render()
 {
 	scene_->render();
+
+	HRESULT hr = get_direct_3d()->getDevice()->Present( NULL, NULL, NULL, NULL );
+
+	if ( hr == D3DERR_DEVICELOST )
+	{
+		get_direct_3d()->reset();
+	}
+	else
+	{
+		DIRECT_X_FAIL_CHECK( hr );
+	}
 
 	// Debug
 	

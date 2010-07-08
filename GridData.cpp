@@ -5,6 +5,11 @@
 #include "Direct3D9Mesh.h"
 
 #include <common/exception.h>
+
+#include <boost/algorithm/string.hpp>
+
+#include <vector>
+#include <string>
 #include <fstream>
 #include <sstream>
 #include <cassert>
@@ -139,6 +144,11 @@ GridData* GridData::load_file( const char* file_name )
 			grid_data->cell_  = new GridCell[ grid_data->width_ * grid_data->depth_ ];
 		}
 	}
+
+	std::vector< std::string > name_list;
+	boost::algorithm::split( name_list, file_name, boost::algorithm::is_any_of( std::string( "\\/" ) ) );
+
+	grid_data->set_name( name_list[ name_list.size() - 1 ].c_str() );
 
 	return grid_data;
 }

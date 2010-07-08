@@ -45,6 +45,9 @@ public:
 	vector3&		operator *= ( T v ) { set( x() * v, y() * v, z() * v ); return *this; }
 	vector3&		operator /= ( T v ) { set( x() / v, y() / v, z() / v ); return *this; }
 
+	bool			operator == ( const vector3& v ) const { return x() == v.x() && y() == v.y() && z() == v.z(); }
+	bool			operator != ( const vector3& v ) const { return ! operator == ( v ); }
+
 	T				length() const { return sqrt( x() * x() + y() * y() + z() * z() ); }
 	T				length_xy() const { return sqrt( x() * x() + y() * y() ); }
 	T				length_xz() const { return sqrt( x() * x() + z() * z() ); }
@@ -65,6 +68,7 @@ public:
 	void			set( T, T, T );
 	void			set( int, T );
 	
+	T&				get( int );
 	const T&		get( int ) const;
 	const T*		get() const;
 	

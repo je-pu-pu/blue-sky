@@ -9,21 +9,21 @@ WaveFile::WaveFile( const char* file_name )
 
 	if( ! hmmio_ )
 	{
-		COMMON_THROW_EXCEPTION;
+		COMMON_THROW_EXCEPTION_MESSAGE( "mmioOpen failed." );
 	}
 	
 	riff_chunk_.fccType = mmioFOURCC( 'W', 'A', 'V', 'E' );
 
 	if ( mmioDescend( hmmio_, & riff_chunk_, 0, MMIO_FINDRIFF ) == MMIOERR_CHUNKNOTFOUND )
 	{
-		COMMON_THROW_EXCEPTION;
+		COMMON_THROW_EXCEPTION_MESSAGE( "mmioFOURCC( 'W', 'A', 'V', 'E' ) failed." );
 	}
 	
 	format_chunk_.ckid = mmioFOURCC( 'f', 'm', 't', ' ' );
 
 	if ( mmioDescend( hmmio_, & format_chunk_, & riff_chunk_, MMIO_FINDCHUNK ) == MMIOERR_CHUNKNOTFOUND )
 	{
-		COMMON_THROW_EXCEPTION;
+		COMMON_THROW_EXCEPTION_MESSAGE( "mmioFOURCC( 'f', 'm', 't', ' ' ) failed." );
 	}	
 
 	mmioRead( hmmio_, reinterpret_cast< HPSTR >( & format_ ), format_chunk_.cksize );
@@ -32,7 +32,7 @@ WaveFile::WaveFile( const char* file_name )
 	data_chunk_.ckid = mmioFOURCC( 'd', 'a', 't', 'a' );
 	if ( mmioDescend( hmmio_, & data_chunk_, & riff_chunk_, MMIO_FINDCHUNK ) == MMIOERR_CHUNKNOTFOUND )
 	{
-		COMMON_THROW_EXCEPTION;
+		COMMON_THROW_EXCEPTION_MESSAGE( "mmioFOURCC( 'd', 'a', 't', 'a' ) failed." );
 	}
 }
 

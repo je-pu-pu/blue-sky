@@ -1,6 +1,8 @@
 #include "App.h"
 #include "GameMain.h"
 
+#include "DirectX.h"
+
 #include <common/log.h>
 #include <common/exception.h>
 #include <common/serialize.h>
@@ -16,6 +18,10 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 {
 	App* app = 0;
 	
+	std::string error_file;
+	int error_line;
+	std::string error_message;
+
 	try
 	{
 		// アプリケーションを初期化する
@@ -28,13 +34,33 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 		// メッセージループ
 		return app->MessageLoop();
 	}
-	catch ( const common::exception& e )
+	catch ( const common::exception< HRESULT >& e )
 	{
-		std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() );
-			
-		if ( strlen( e.message() ) )
+		error_file = e.file();
+		error_line = e.line();
+		error_message = std::string( DXGetErrorString9( e.data() ) ) + " : " + DXGetErrorDescription9( e.data() );
+	}
+	catch ( const common::exception< std::string >& e )
+	{
+		error_file = e.file();
+		error_line = e.line();
+		error_message= e.data();
+	}
+	catch ( ... )
+	{
+		if ( app )
 		{
-			message += std::string( "\n\n" ) + e.message();
+			MessageBox( app->GetWindowHandle(), "Unknown Error", "ERROR", MB_OK );
+		}
+	}
+
+	if ( ! error_file.empty() )
+	{
+		std::string message = std::string( "exception on " ) + error_file + ":" + common::serialize( error_line );
+			
+		if ( error_message.length() )
+		{
+			message += std::string( "\n\n" ) + error_message;
 		}
 
 		time_t t;
@@ -57,13 +83,6 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 		}
 
 		return -1;
-	}
-	catch ( ... )
-	{
-		if ( app )
-		{
-			MessageBox( app->GetWindowHandle(), "Unknown Error", "ERROR", MB_OK );
-		}
 	}
 
 	return -1;

@@ -2,6 +2,7 @@
 #define BLUE_SKY_GAME_PLAY_SCENE_H
 
 #include "Scene.h"
+#include "vector3.h"
 
 class Direct3D9Mesh;
 class Direct3D9SkyBox;
@@ -25,12 +26,15 @@ protected:
 	Camera* camera_;
 	Stage* stage_;
 
+	Direct3D9Mesh* player_mesh_;
 	Direct3D9Mesh* shadow_mesh_;
 	Direct3D9Mesh* ground_mesh_;
 
 	Direct3D9SkyBox* sky_box_;
 
 	Direct3D9Box* box_;
+
+	vector3 player_start_position_;
 
 	int panorama_y_division_;
 	int get_panorama_y_division() const { return panorama_y_division_; }

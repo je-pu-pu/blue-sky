@@ -43,7 +43,10 @@ bool Direct3D9Mesh::load_x( const char* file_name )
 	LPD3DXBUFFER adjacency_buffer;
 	LPD3DXBUFFER materials_buffer;
 
-	DIRECT_X_FAIL_CHECK( D3DXLoadMeshFromX( file_name, D3DXMESH_MANAGED, direct_3d_->getDevice(), & adjacency_buffer, & materials_buffer, 0, & material_count_, & mesh_ ) );
+	if ( FAILED( D3DXLoadMeshFromX( file_name, D3DXMESH_MANAGED, direct_3d_->getDevice(), & adjacency_buffer, & materials_buffer, 0, & material_count_, & mesh_ ) ) )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "load x file " ) + file_name + " failed." );
+	}
 	// DIRECT_X_FAIL_CHECK( D3DXLoadMeshFromX( file_name, D3DXMESH_SYSTEMMEM, direct_3d_->getDevice(), & adjacency_buffer, & materials_buffer, 0, & material_count_, & mesh_ ) );
 
 	// DIRECT_X_FAIL_CHECK( D3DXSaveMeshToX( ( std::string( file_name ) + ".new.x" ).c_str(), mesh_, static_cast< DWORD* >( adjacency_buffer->GetBufferPointer() ), static_cast< D3DXMATERIAL* >( materials_buffer->GetBufferPointer() ), 0, material_count_, DXFILEFORMAT_TEXT ) );

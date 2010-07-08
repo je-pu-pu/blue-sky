@@ -24,6 +24,7 @@ Player::Player()
 	 , position_( 0.f, 50.f, 0.f )
 	 , direction_( FRONT )
 	 , direction_degree_( 0.f )
+	 , is_dead_( false )
 	 , is_turn_avaiable_( true )
 	 , is_jumping_( false )
 	 , is_clambering_( false )
@@ -78,7 +79,7 @@ void Player::turn( int d )
 
 	if ( d )
 	{
-		GameMain::getInstance()->get_sound_manager()->get_sound( "turn" )->play( false );
+		play_sound( "turn" );
 	}
 
 	is_turn_avaiable_ = false;
@@ -124,7 +125,7 @@ void Player::update()
 		}
 		else
 		{
-			play_sound( "collision_wall" );
+			play_sound( "collision-wall" );
 		}
 
 		position().x() = last_position.x();
@@ -151,7 +152,7 @@ void Player::update()
 
 			if ( ! is_clambering() )
 			{
-				play_sound( "clamber", false );
+				play_sound( "clamber" );
 			}
 
 			is_clambering_ = true;
@@ -200,9 +201,12 @@ void Player::update()
 		}
 		else
 		{
+			// ’…’nŽ¸”s
 			if ( floor_cell_y.height() == 0 && velocity().y() < -get_max_speed() * 0.5f )
 			{
-				position().set( 0.f, 0.f, 0.f );
+				is_dead_ = true;
+				play_sound( "dead" );
+				play_sound( "land" );
 			}
 
 			// ’Êí’…’n
@@ -211,7 +215,6 @@ void Player::update()
 			if ( is_jumping_ )
 			{
 				stop_sound( "jump" );
-				stop_sound( "land" );
 				play_sound( "land" );
 
 				is_jumping_ = false;
@@ -230,8 +233,8 @@ void Player::update()
 
 	// gravity
 	// velocity().y() -= 0.004f;
-	// velocity().y() -= 0.015f;
-	velocity().y() -= 0.01f;
+	velocity().y() -= 0.015f;
+	// velocity().y() -= 0.01f;
 	// velocity().y() -= 0.001f;
 	// velocity().y() -= 0.0001f;
 
@@ -330,12 +333,12 @@ float Player::get_max_speed()
 
 float Player::get_collision_width() const
 {
-	return 0.4f;
+	return 0.8f;
 }
 
 float Player::get_collision_depth() const
 {
-	return 0.4f;
+	return 0.8f;
 }
 
 /**

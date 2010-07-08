@@ -43,6 +43,7 @@ private:
 	vector3		front_;				///< 前
 	vector3		right_;				///< 右
 	
+	bool		is_dead_;			///< 死亡フラグ
 	bool		is_turn_avaiable_;	///< 方向転換有効フラグ
 	bool		is_jumping_;		///< ジャンプ中フラグ
 	bool		is_clambering_;		///< よじ登り中フラグ
@@ -79,6 +80,9 @@ public:
 	void side_step( float );
 	void turn( int );
 
+	bool is_dead() const { return is_dead_; }
+	void rebirth() { is_dead_ = false; }
+
 	bool is_turn_available() const { return is_turn_avaiable_; }
 
 	float get_step_speed() const { return 0.002f; }
@@ -103,7 +107,7 @@ public:
 	const GridCell& get_floor_cell_left_back() const;
 	const GridCell& get_floor_cell_right_back() const;
 
-	void set_stage( const Stage* );
+	void set_stage( const Stage* );	
 	
 }; // class Player
 

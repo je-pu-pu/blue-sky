@@ -81,7 +81,7 @@ public:
 	void turn( int );
 
 	bool is_dead() const { return is_dead_; }
-	void rebirth() { is_dead_ = false; }
+	void rebirth();
 
 	bool is_turn_available() const { return is_turn_avaiable_; }
 

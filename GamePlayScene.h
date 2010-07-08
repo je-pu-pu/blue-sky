@@ -4,6 +4,8 @@
 #include "Scene.h"
 #include "vector3.h"
 
+#include <common/safe_ptr.h>
+
 class Direct3D9Mesh;
 class Direct3D9SkyBox;
 class Direct3D9Box;
@@ -22,17 +24,17 @@ class Stage;
 class GamePlayScene : public Scene
 {
 protected:
-	Player* player_;
-	Camera* camera_;
-	Stage* stage_;
+	common::safe_ptr< Player > player_;
+	common::safe_ptr< Camera > camera_;
+	common::safe_ptr< Stage > stage_;
 
-	Direct3D9Mesh* player_mesh_;
-	Direct3D9Mesh* shadow_mesh_;
-	Direct3D9Mesh* ground_mesh_;
+	common::safe_ptr< Direct3D9Mesh > player_mesh_;
+	common::safe_ptr< Direct3D9Mesh > shadow_mesh_;
+	common::safe_ptr< Direct3D9Mesh > ground_mesh_;
 
-	Direct3D9SkyBox* sky_box_;
+	common::safe_ptr< Direct3D9SkyBox > sky_box_;
 
-	Direct3D9Box* box_;
+	common::safe_ptr< Direct3D9Box > box_;
 
 	vector3 player_start_position_;
 

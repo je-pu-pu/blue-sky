@@ -61,9 +61,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	ground_mesh_->load_x( "media/model/ground.x" );
 
 	// SkyBox
-	// sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box", "jpg" );
-	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-star-2", "png" );
-
+	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box", "jpg" );
 
 	// Box
 	box_ = new Direct3D9Box( direct_3d(), 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
@@ -97,7 +95,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Stage
 	stage_ = new Stage( 1000, 1000 );
-	player_->set_stage( stage_ );
+	player_->set_stage( stage_.get() );
 
 	// generate_random_stage();
 
@@ -121,17 +119,17 @@ GamePlayScene::~GamePlayScene()
 {
 	save_stage_file( "media/stage/quit" );
 
-	delete player_mesh_;
-	delete shadow_mesh_;
-	delete ground_mesh_;
+	player_mesh_.release();
+	shadow_mesh_.release();
+	ground_mesh_.release();
 
-	delete stage_;
-	delete camera_;
-	delete player_;
+	stage_.release();
+	camera_.release();
+	player_.release();
 	
-	delete sky_box_;
+	sky_box_.release();
 
-	delete box_;
+	box_.release();
 }
 
 void GamePlayScene::generate_random_stage()
@@ -143,6 +141,8 @@ void GamePlayScene::generate_random_stage()
 	
 	GridData* road_grid_ = GridData::load_file( "media/object/road" );
 	GridData* road_curve_grid_ = GridData::load_file( "media/object/road-curve" );
+
+	GridData* tex_box_grid_ = GridData::load_file( "media/object/tel-box" );
 
 	const int x_space = 0;
 	const int z_space = 0;
@@ -179,6 +179,11 @@ void GamePlayScene::generate_random_stage()
 			else
 			{
 				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), road_grid_ ) );
+
+				if ( common::random( 0, 5 ) == 0 )
+				{
+					grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), tex_box_grid_ ) );
+				}
 			}
 		}
 
@@ -216,6 +221,20 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		if ( name == "player" )
 		{
 			ss >> player_start_position_.x() >> player_start_position_.y() >> player_start_position_.z();
+		}
+		else if ( name == "sky-box" )
+		{
+			std::string sky_box_name;
+			std::string sky_box_ext;
+
+			ss >> sky_box_name >> sky_box_ext;
+
+			sky_box_.release();
+
+			if ( sky_box_name != "none" )
+			{
+				sky_box_ = new Direct3D9SkyBox( direct_3d(), sky_box_name.c_str(), sky_box_ext.c_str() );
+			}
 		}
 		else if ( name == "object" )
 		{
@@ -311,7 +330,8 @@ void GamePlayScene::update()
 	if ( player_->is_dead() )
 	{
 		// camera_->position() 
-		camera_->rotate_degree_target().z() = 120.f;
+		// camera_->rotate_degree_target().x() = 90.f;
+		camera_->rotate_degree_target().z() = 90.f;
 
 		if ( camera_->rotate_degree() == camera_->rotate_degree_target() )
 		{
@@ -377,14 +397,18 @@ void GamePlayScene::render()
 		D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() / get_panorama_y_division() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() );
 		
 		// SkyBox
-		D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );
-		D3DXMatrixTranslation( & t, camera_->position().x(), camera_->position().y(), camera_->position().z() );
+		if ( sky_box_ )
+		{
+		
+			D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );
+			D3DXMatrixTranslation( & t, camera_->position().x(), camera_->position().y(), camera_->position().z() );
 
-		world = s * t;
-		WorldViewProjection = world * view * projection;
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
-		sky_box_->render();
+			world = s * t;
+			WorldViewProjection = world * view * projection;
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+			sky_box_->render();
+		}
 
 		// Ground
 		const int gx = static_cast< int >( player_->position().x() );

@@ -42,7 +42,7 @@ void Player::step( float s )
 	}
 	else if ( is_jumping() )
 	{
-		s = 1.f; // 1.5f;
+		// s *= 1.f; // 1.5f;
 	}
 
 	velocity() += front() * s * 0.002f;
@@ -54,7 +54,7 @@ void Player::side_step( float s )
 {
 	if ( is_jumping() )
 	{
-		s = 0.f; // s *= 1.5f;
+		// s = 0.f; // s *= 1.5f;
 	}
 
 	velocity() += right() * s * 0.002f;
@@ -106,7 +106,7 @@ void Player::update()
 	if ( position().y() < floor_cell_x.height() )
 	{
 		if (
-			( velocity().y() <= 0.02f && floor_cell_x.height() - position().y() <= 2.f ) &&
+			// ( velocity().y() <= 0.02f && floor_cell_x.height() - position().y() <= 2.f ) &&
 			(
 				( velocity().x() < 0.f && direction() == LEFT || velocity().x() > 0.f && direction() == RIGHT ) ||
 				( floor_cell_x.height() - position().y() <= 1.f && ( velocity().x() < 0.f && direction() != RIGHT || velocity().x() > 0.f && direction() != LEFT ) )
@@ -116,7 +116,7 @@ void Player::update()
 
 			is_jumping_ = false;
 
-			if ( ! is_clambering() )
+			if ( ! is_clambering() && floor_cell_x.height() - position().y() > 1.f )
 			{
 				play_sound( "clamber" );
 			}
@@ -140,7 +140,7 @@ void Player::update()
 	if ( position().y() < floor_cell_z.height() )
 	{
 		if (
-			( velocity().y() <= 0.02f && floor_cell_z.height() - position().y() <= 2.f ) && 
+			// ( velocity().y() <= 0.02f && floor_cell_z.height() - position().y() <= 2.f ) && 
 			(
 				( velocity().z() < 0.f && direction() == BACK || velocity().z() > 0.f && direction() == FRONT ) ||
 				( floor_cell_z.height() - position().y() <= 1.f && ( velocity().z() < 0.f && direction() != FRONT || velocity().z() > 0.f && direction() != BACK ) )
@@ -150,7 +150,7 @@ void Player::update()
 
 			is_jumping_ = false;
 
-			if ( ! is_clambering() )
+			if ( ! is_clambering() && floor_cell_z.height() - position().y() > 1.f )
 			{
 				play_sound( "clamber" );
 			}
@@ -177,7 +177,7 @@ void Player::update()
 		if ( is_jumping() && floor_cell_y.bound() > 0 )
 		{
 			// スーパージャンプ
-			velocity_.y() = 0.5f;
+			velocity_.y() = 1.f;
 	
 			is_jumping_ = true;
 
@@ -293,6 +293,13 @@ void Player::fall()
 	play_sound( "fall" );
 }
 
+void Player::rebirth()
+{
+	is_dead_ = false;
+
+	// direction_degree_ = 0.f;
+}
+
 const GridCell& Player::get_floor_cell_center() const
 {
 	return stage_->cell( static_cast< int >( position_.x() ), static_cast< int >( position_.z() ) );
@@ -333,12 +340,12 @@ float Player::get_max_speed()
 
 float Player::get_collision_width() const
 {
-	return 0.8f;
+	return 0.6f;
 }
 
 float Player::get_collision_depth() const
 {
-	return 0.8f;
+	return 0.6f;
 }
 
 /**

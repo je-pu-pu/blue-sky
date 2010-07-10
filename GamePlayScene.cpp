@@ -89,6 +89,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Player
 	player_ = new Player();
+	player_->set_input( input() );
 
 	// Camera
 	camera_ = new Camera();
@@ -136,13 +137,13 @@ void GamePlayScene::generate_random_stage()
 {
 	grid_object_manager()->clear();
 
-	GridData* building_a_grid_ = GridData::load_file( "media/object/building-a" );
-	GridData* house_a_grid_ = GridData::load_file( "media/object/house-a" );
+	GridData* building_a_grid_ = grid_data_manager()->load( "building-a" );
+	GridData* house_a_grid_ = grid_data_manager()->load( "house-a" );
 	
-	GridData* road_grid_ = GridData::load_file( "media/object/road" );
-	GridData* road_curve_grid_ = GridData::load_file( "media/object/road-curve" );
+	GridData* road_grid_ = grid_data_manager()->load( "road" );
+	GridData* road_curve_grid_ = grid_data_manager()->load( "road-curve" );
 
-	GridData* tex_box_grid_ = GridData::load_file( "media/object/tel-box" );
+	GridData* tex_box_grid_ = grid_data_manager()->load( "tel-box" );
 
 	const int x_space = 0;
 	const int z_space = 0;
@@ -303,25 +304,6 @@ void GamePlayScene::update()
 
 	if ( input()->push( Input::A ) ) { player_->is_jumping() ? player_->fall() : player_->jump(); }
 
-	if ( input()->push( Input::X ) )
-	{
-		App::GetInstance()->set_full_screen( ! App::GetInstance()->is_full_screen() );
-		direct_3d()->set_full_screen( App::GetInstance()->is_full_screen() );
-	}
-	
-	if ( input()->push( Input::Y ) )
-	{
-		sound_manager()->set_enabled( ! sound_manager()->is_enabled() );
-
-		if ( sound_manager()->is_enabled() )
-		{
-			sound_manager()->stop_all();
-			sound_manager()->get_sound( "fin" )->play( false );
-
-			set_next_scene( "title" );
-		}
-	}
-
 	player_->update();
 
 	camera_->position() = player_->position() + vector3( 0.f, 1.5f, 0.f );
@@ -420,7 +402,7 @@ void GamePlayScene::render()
 		WorldViewProjection = world * view * projection;
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
-		// ground_mesh_->render();
+		ground_mesh_->render();
 
 		// GridObject
 		D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );

@@ -48,8 +48,6 @@ protected:
 	int get_width() const;
 	int get_height() const;
 
-	void set_next_scene( const std::string& next_scene ) { next_scene_ = next_scene; }
-
 public:
 	Scene( const GameMain* );
 	virtual ~Scene();
@@ -59,6 +57,7 @@ public:
 
 
 	const std::string& get_next_scene() const { return next_scene_; }
+	void set_next_scene( const std::string& next_scene ) { next_scene_ = next_scene; }
 
 }; // class Scene
 

@@ -26,7 +26,7 @@ TitleScene::TitleScene( const GameMain* game_main )
 
 TitleScene::~TitleScene()
 {
-	
+	delete mesh_;
 }
 
 /**
@@ -67,17 +67,36 @@ void TitleScene::render()
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetViewport( & view_port ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x11 ), 1.f, 0 ) );
 
-	D3DXMATRIXA16 world;
+
+	D3DXMATRIXA16 s;
 	D3DXMATRIXA16 ortho;
 	D3DXMATRIXA16 WorldViewProjection;
 
-	D3DXMatrixOrthoLH( & ortho, 10, 10, 0.f, 1.f );
+	D3DXMatrixScaling( & s, 100.f, 100.f, 1.f );
 
-	WorldViewProjection = ortho;
-	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+	D3DXMatrixOrthoOffCenterLH( & ortho, 0, static_cast< float >( get_width() ), 0.f, static_cast< float >( get_height() ), 0.f, 1.f );
 
-	mesh_->render();
+	for (  int n = 0; n < 3; n++ )
+	{
+		D3DXMATRIXA16 t;
+		D3DXMatrixTranslation( & t, n * 110.f, 0.f, 0.f );
+
+		WorldViewProjection = s * t * ortho;
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+
+		mesh_->render();
+	}
+
+	/*
+	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->Begin( 0 ) );
+
+	direct_3d()->getSprite()->Draw(
+
+	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->End() );
+	*/
+
+		
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );

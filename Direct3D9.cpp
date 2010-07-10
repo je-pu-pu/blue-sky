@@ -1,4 +1,5 @@
 #include "Direct3D9.h"
+#include "Direct3D9TextureManager.h"
 #include "DirectX.h"
 
 #include <common/exception.h>
@@ -20,6 +21,9 @@
 Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sample_type, int multi_sample_quality )
 	: direct_3d_( 0 )
 	, device_( 0 )
+	, effect_( 0 )
+	, sprite_( 0 )
+	, texture_manager_( 0 )
 {
 	direct_3d_ = Direct3DCreate9( D3D_SDK_VERSION );
 
@@ -102,13 +106,21 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 
 	text_out_device_caps( "d3d_device_caps.txt" );
 
-	device_->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, TRUE );
+	// device_->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, TRUE );
+
+	DIRECT_X_FAIL_CHECK( D3DXCreateSprite( device_, & sprite_ ) );
+
+	texture_manager_ = new Direct3D9TextureManager( this );
 }
 
 Direct3D9::~Direct3D9()
 {
-	device_->Release();
-	direct_3d_->Release();
+	if ( texture_manager_ ) delete texture_manager_;
+
+	if ( sprite_ ) sprite_->Release();
+	if ( effect_ ) effect_->Release();
+	if ( device_ ) device_->Release();
+	if ( direct_3d_ ) direct_3d_->Release();
 }
 
 void Direct3D9::load_effect_file( const char* file_name )

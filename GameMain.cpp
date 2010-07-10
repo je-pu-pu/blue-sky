@@ -65,6 +65,7 @@ GameMain::GameMain()
 
 	// Sound
 	sound_manager_ = new SoundManager( app_->GetWindowHandle() );
+	sound_manager_->set_enabled( config_->get( "audio.enable", 1 ) != 0 );
 
 	// GridDataManager
 	grid_data_manager_ = new GridDataManager();
@@ -95,6 +96,10 @@ GameMain::~GameMain()
 
 	delete sound_manager_;
 
+	delete grid_data_manager_;
+
+	delete grid_object_manager_;
+
 	config_->save_file( "blue-sky.config" );
 
 	delete config_;
@@ -115,6 +120,17 @@ void GameMain::update()
 		return;
 	}
 	
+	if ( GetAsyncKeyState( VK_F1 ) ) 
+	{
+		get_sound_manager()->stop_all();
+		scene_->set_next_scene( "title" );
+	}
+	if ( GetAsyncKeyState( VK_F5 ) )
+	{
+		app_->set_full_screen( ! app_->is_full_screen() );
+		get_direct_3d()->set_full_screen( App::GetInstance()->is_full_screen() );
+	}
+
 	input_->update();
 	sound_manager_->update();
 

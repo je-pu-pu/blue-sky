@@ -11,6 +11,8 @@
 
 #include "matrix4x4.h"
 
+#include <game/AABB.h>
+
 #include <common/exception.h>
 #include <common/math.h>
 
@@ -20,10 +22,12 @@ namespace blue_sky
 {
 
 Player::Player()
-	 : stage_( 0 )
+	 : input_( 0 )
+	 , stage_( 0 )
 	 , position_( 0.f, 50.f, 0.f )
 	 , direction_( FRONT )
 	 , direction_degree_( 0.f )
+	 , aabb_( vector3( -get_collision_width() * 0.5f, 0.f, -get_collision_depth() * 0.5f ), vector3( get_collision_width() * 0.5f, get_collision_height(), get_collision_depth() * 0.5f ) )
 	 , is_dead_( false )
 	 , is_turn_avaiable_( true )
 	 , is_jumping_( false )
@@ -101,6 +105,15 @@ void Player::update()
 	position().x() += velocity().x();
 	position().x() = math::clamp( position().x(), 0.f, static_cast< float >( stage_->width() ) );
 
+	AABB player_world_aabb_x( position() + aabb().min(), position() + aabb().max() );
+	const AABB* collision_aabb_x = stage_->get_collision_aabb( player_world_aabb_x );
+
+	if ( collision_aabb_x  )
+	{
+		throw "hoge !!!";
+	}
+
+
 	const GridCell& floor_cell_x = get_floor_cell();
 
 	if ( position().y() < floor_cell_x.height() )
@@ -174,7 +187,7 @@ void Player::update()
 	{
 		position().y() = floor_cell_y.height();
 
-		if ( is_jumping() && floor_cell_y.bound() > 0 )
+		if ( is_jumping() && is_falling() && floor_cell_y.bound() > 0 )
 		{
 			// スーパージャンプ
 			velocity_.y() = 1.f;
@@ -233,21 +246,21 @@ void Player::update()
 
 	// gravity
 	// velocity().y() -= 0.004f;
-	velocity().y() -= 0.015f;
+	// velocity().y() -= 0.015f;
 	// velocity().y() -= 0.01f;
+	velocity().y() -= 0.004f;
 	// velocity().y() -= 0.001f;
 	// velocity().y() -= 0.0001f;
 
 	if ( is_jumping() )
 	{
-		velocity().x() *= 0.99f;
-		velocity().z() *= 0.99f;
+		velocity().x() = math::chase( velocity().x(), 0.f, 0.0002f );
+		velocity().z() = math::chase( velocity().z(), 0.f, 0.0002f );
 	}
-
-	if ( ! is_jumping() )
+	else
 	{
-		velocity().x() *= 0.95f;
-		velocity().z() *= 0.95f;
+		velocity().x() = math::chase( velocity().x(), 0.f, 0.0005f );
+		velocity().z() = math::chase( velocity().z(), 0.f, 0.0005f );
 
 		if ( velocity().y() < -get_max_speed() * 0.05f )
 		{
@@ -330,6 +343,11 @@ void Player::set_stage( const Stage* stage )
 	stage_ = stage;
 }
 
+void Player::set_input( const Input* input )
+{
+	input_ = input;
+}
+
 /**
  *
  */
@@ -340,12 +358,17 @@ float Player::get_max_speed()
 
 float Player::get_collision_width() const
 {
-	return 0.6f;
+	return 0.4f;
+}
+
+float Player::get_collision_height() const
+{
+	return 1.5f;
 }
 
 float Player::get_collision_depth() const
 {
-	return 0.6f;
+	return 0.4f;
 }
 
 /**

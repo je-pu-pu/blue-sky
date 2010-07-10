@@ -2,17 +2,20 @@
 #define BLUE_SKY_PLAYER_H
 
 #include "vector3.h"
+#include <game/AABB.h>
 
 namespace game
 {
 
 class Sound;
+template< typename > class AABB;
 
 } // namespace game
 
 namespace blue_sky
 {
 
+class Input;
 class Stage;
 class GridCell;
 
@@ -24,6 +27,7 @@ class Player
 {
 public:
 	typedef game::Sound Sound;
+	typedef game::AABB< vector3 > AABB;
 
 	enum Direction
 	{
@@ -32,6 +36,7 @@ public:
 	};
 
 private:
+	const Input* input_;			///< 入力への参照
 	const Stage* stage_;			///< ステージへの参照
 
 	vector3		position_;			///< 座標
@@ -43,6 +48,8 @@ private:
 	vector3		front_;				///< 前
 	vector3		right_;				///< 右
 	
+	AABB		aabb_;				///< AABB
+
 	bool		is_dead_;			///< 死亡フラグ
 	bool		is_turn_avaiable_;	///< 方向転換有効フラグ
 	bool		is_jumping_;		///< ジャンプ中フラグ
@@ -53,6 +60,7 @@ private:
 	
 	float get_max_speed();
 	float get_collision_width() const;
+	float get_collision_height() const;
 	float get_collision_depth() const;
 	
 	const GridCell& get_floor_cell() const;
@@ -75,6 +83,8 @@ public:
 
 	vector3& front() { return front_; }
 	vector3& right() { return right_; }
+
+	AABB& aabb() { return aabb_; }
 
 	void step( float );
 	void side_step( float );
@@ -107,6 +117,7 @@ public:
 	const GridCell& get_floor_cell_left_back() const;
 	const GridCell& get_floor_cell_right_back() const;
 
+	void set_input( const Input* );
 	void set_stage( const Stage* );	
 	
 }; // class Player

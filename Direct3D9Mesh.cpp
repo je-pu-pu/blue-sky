@@ -1,11 +1,16 @@
 #include "Direct3D9Mesh.h"
 #include "Direct3D9.h"
+#include "Direct3D9TextureManager.h"
 #include "DirectX.h"
 
 #include <common/exception.h>
 #include <common/math.h>
 
 #include <dxfile.h>
+
+#include <boost/algorithm/string.hpp>
+
+#include <vector>
 
 
 Direct3D9Mesh::Direct3D9Mesh( Direct3D9* direct_3d )
@@ -20,14 +25,6 @@ Direct3D9Mesh::Direct3D9Mesh( Direct3D9* direct_3d )
 
 Direct3D9Mesh::~Direct3D9Mesh()
 {
-	for ( unsigned int n = 0; n < material_count_; n++ )
-	{
-		if ( textures_[ n ] )
-		{
-			textures_[ n ]->Release();
-		}
-	}
-
 	delete [] materials_;
 	delete [] textures_;
 
@@ -78,8 +75,6 @@ bool Direct3D9Mesh::load_x( const char* file_name )
 
 LPDIRECT3DTEXTURE9 Direct3D9Mesh::load_texture( const char* texture_name ) const
 {
-	LPDIRECT3DTEXTURE9 texture = 0;
-
 	if ( ! texture_name )
 	{
 		return 0;
@@ -87,14 +82,19 @@ LPDIRECT3DTEXTURE9 Direct3D9Mesh::load_texture( const char* texture_name ) const
 
 	try
 	{
-		DIRECT_X_FAIL_CHECK( D3DXCreateTextureFromFile( direct_3d_->getDevice(), get_texture_file_name_by_texture_name( texture_name ).c_str(), & texture ) );
+		std::string texture_file_name = get_texture_file_name_by_texture_name( texture_name );
+
+		std::vector< std::string > name_list;
+		boost::algorithm::split( name_list, texture_file_name, boost::algorithm::is_any_of( std::string( "\\/" ) ) );
+
+		return direct_3d_->getTextureManager()->load( name_list[ name_list.size() - 1 ].c_str(), get_texture_file_name_by_texture_name( texture_name ).c_str() );
 	}
 	catch ( ... )
 	{
 
 	}
 
-	return texture;
+	return 0;
 }
 
 std::string Direct3D9Mesh::get_texture_file_name_by_texture_name( const char* texture_name ) const

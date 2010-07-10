@@ -3,6 +3,8 @@
 
 #include <d3dx9.h>
 
+class Direct3D9TextureManager;
+
 /**
  * Direct3D 9 のラッパークラス
  *
@@ -13,6 +15,9 @@ private:
 	LPDIRECT3D9				direct_3d_;		///< Direct3D 9 
 	LPDIRECT3DDEVICE9		device_;		///< Direct3D 9 Device
 	LPD3DXEFFECT			effect_;		///< Effect
+	LPD3DXSPRITE			sprite_;		///< Sprite
+
+	Direct3D9TextureManager*texture_manager_;
 
 	D3DPRESENT_PARAMETERS	present_;		///< Present Parameters
 	D3DCAPS9				device_caps_;	///< Device Caps
@@ -34,6 +39,9 @@ public:
 
 	LPDIRECT3DDEVICE9 getDevice() const { return device_; }
 	LPD3DXEFFECT getEffect() const { return effect_; }
+	LPD3DXSPRITE getSprite() const { return sprite_; }
+
+	Direct3D9TextureManager* getTextureManager() const { return texture_manager_; }
 
 }; // class Direct3D9
 

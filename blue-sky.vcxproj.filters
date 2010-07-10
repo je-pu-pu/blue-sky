@@ -72,6 +72,9 @@
     <ClCompile Include="StageSelectScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Direct3D9TextureManager.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -136,6 +139,9 @@
     <ClInclude Include="GridDataManager.h" />
     <ClInclude Include="StageSelectScene.h">
       <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D9TextureManager.h">
+      <Filter>DirectX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

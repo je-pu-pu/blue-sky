@@ -40,6 +40,7 @@ GridData::GridData( int w, int d, const Mesh* mesh )
 GridData::~GridData()
 {
 	delete [] cell_;
+	delete mesh_;
 }
 
 GridData* GridData::load_file( const char* file_name )

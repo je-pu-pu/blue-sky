@@ -93,7 +93,10 @@ Direct3D9Box::Direct3D9Box( Direct3D9* direct_3d, float w, float h, float d, D3D
 
 Direct3D9Box::~Direct3D9Box()
 {
-
+	vertex_declaration_->Release();
+	position_vertex_buffer_->Release();
+	color_vertex_buffer_->Release();
+	index_buffer_->Release();
 }
 
 void Direct3D9Box::ready()

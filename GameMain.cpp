@@ -90,7 +90,7 @@ GameMain::GameMain()
 GameMain::~GameMain()
 {
 	config_->set< int >( "audio.enable", sound_manager_->is_enabled() );
-	config_->set< int >( "video.video.full_screen", app_->is_full_screen() );
+	config_->set< int >( "video.full_screen", app_->is_full_screen() );
 	config_->save_file( "blue-sky.config" );
 
 	delete scene_;
@@ -114,8 +114,8 @@ GameMain::~GameMain()
  */
 void GameMain::update()
 {
-	MainLoop.WaitTime = 18;
-	MainLoop.WaitTime = 0;
+	MainLoop.WaitTime = 15;
+	// MainLoop.WaitTime = 0;
 
 	//•bŠÔ50ƒtƒŒ[ƒ€‚ğ•Û
 	if ( ! MainLoop.Loop() )

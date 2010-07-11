@@ -188,7 +188,8 @@ void Player::update()
 	{
 		position().y() = floor_cell_y.height();
 
-		if ( is_jumping() && is_falling() && floor_cell_y.bound() > 0 )
+		// if ( is_jumping() && is_falling() && floor_cell_y.bound() > 0 )
+		if ( is_jumping() && floor_cell_y.bound() > 0 )
 		{
 			// スーパージャンプ
 			velocity_.y() = 1.f;
@@ -216,7 +217,7 @@ void Player::update()
 		else
 		{
 			// 着地失敗
-			if ( floor_cell_y.height() == 0 && velocity().y() < -get_max_speed() * 0.5f )
+			if ( floor_cell_y.height() == 0 && velocity().y() < -get_max_speed() * 0.8f )
 			{
 				is_dead_ = true;
 				play_sound( "dead" );
@@ -233,8 +234,8 @@ void Player::update()
 
 				is_jumping_ = false;
 
-				velocity().x() = 0.f;
-				velocity().z() = 0.f;
+				// velocity().x() = 0.f;
+				// velocity().z() = 0.f;
 			}
 		}
 
@@ -265,8 +266,8 @@ void Player::update()
 	}
 	else
 	{
-		velocity().x() = math::chase( velocity().x(), 0.f, 0.0005f );
-		velocity().z() = math::chase( velocity().z(), 0.f, 0.0005f );
+		velocity().x() = math::chase( velocity().x(), 0.f, 0.0015f );
+		velocity().z() = math::chase( velocity().z(), 0.f, 0.0015f );
 
 		if ( velocity().y() < -get_max_speed() * 0.05f )
 		{
@@ -288,7 +289,7 @@ void Player::jump()
 {
 	if ( is_jumping() ) return;
 	
-	velocity_.y() = 0.3f;
+	velocity_.y() = 0.2f;
 	// velocity_.z() = 0.1f;
 	
 	is_jumping_ = true;

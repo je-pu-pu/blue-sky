@@ -11,7 +11,12 @@
 //**********************************************************
 
 #include "Input.h"
+#include "App.h"
+
 #include <game/Config.h>
+
+#include <common/math.h>
+
 #include <windows.h>
 
 namespace blue_sky
@@ -78,6 +83,12 @@ void Input::update()
 	if ( GetAsyncKeyState( key_code_[ X ] ) & 0x8000 ) state_[ X ] |= 1;
 	if ( GetAsyncKeyState( key_code_[ Y ] ) & 0x8000 ) state_[ Y ] |= 1;
 
+	POINT point;
+	GetCursorPos( & point );
+	ScreenToClient( App::GetInstance()->GetWindowHandle(), & point );
+	mouse_x_ = math::clamp( point.x / static_cast< float >( App::GetInstance()->get_width() - 1 ) * 2.f - 1.f, -1.f, +1.f );
+	mouse_y_ = math::clamp( point.y / static_cast< float >( App::GetInstance()->get_height() - 1 ) * 2.f - 1.f, -1.f, +1.f );
+
 	if ( joystick_enabled_ && joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR )
 	{
 		if ( joy_info_.dwXpos <  0xFFFF / 4 * 1 ) state_[ LEFT  ] |= 1;
@@ -112,6 +123,32 @@ void Input::update_common()
 	if ( push( UP    ) ) allow_push( UP    );
 	if ( push( RIGHT ) ) allow_push( RIGHT );
 	if ( push( LEFT  ) ) allow_push( LEFT  );
+}
+
+void Input::set_mouse_x( float x )
+{
+	mouse_x_ = x;
+
+	POINT point;
+
+	point.x = static_cast< int >( ( mouse_x_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_width() - 1 ) );
+	point.y = static_cast< int >( ( mouse_y_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_height() - 1 ) );
+
+	ClientToScreen( App::GetInstance()->GetWindowHandle(), & point );
+	SetCursorPos( point.x, point.y );
+}
+
+void Input::set_mouse_y( float y )
+{
+	mouse_y_ = y;
+
+	POINT point;
+
+	point.x = static_cast< int >( ( mouse_x_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_width() - 1 ) );
+	point.y = static_cast< int >( ( mouse_y_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_height() - 1 ) );
+
+	ClientToScreen( App::GetInstance()->GetWindowHandle(), & point );
+	SetCursorPos( point.x, point.y );
 }
 
 } // namespace blue_sky

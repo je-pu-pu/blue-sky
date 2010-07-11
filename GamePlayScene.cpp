@@ -293,11 +293,6 @@ void GamePlayScene::save_stage_file( const char* file_name ) const
  */
 void GamePlayScene::update()
 {
-	if ( input()->press( Input::UP    ) ) { player_->step( +1 ); }
-	if ( input()->press( Input::DOWN  ) ) { player_->step( -1 ); }
-	if ( input()->press( Input::LEFT  ) ) { player_->side_step( -1 ); }
-	if ( input()->press( Input::RIGHT ) ) { player_->side_step( +1 ); }
-
 	if ( input()->press( Input::B ) )
 	{
 		if ( camera_->step_rotate_x_available() )
@@ -311,21 +306,35 @@ void GamePlayScene::update()
 			if ( input()->push( Input::LEFT  ) ) { player_->turn( -1 ); }
 			if ( input()->push( Input::RIGHT ) ) { player_->turn( +1 ); }
 		}
+	}
+	else
+	{
+		if ( input()->press( Input::UP    ) ) { player_->step( +1 ); }
+		if ( input()->press( Input::DOWN  ) ) { player_->step( -1 ); }
+		if ( input()->press( Input::LEFT  ) ) { player_->side_step( -1 ); }
+		if ( input()->press( Input::RIGHT ) ) { player_->side_step( +1 ); }
+	}
 
-//		if ( input()->push( Input::LEFT  ) ) { camera_->step_rotate_y( -1 ); }
-//		if ( input()->push( Input::RIGHT ) ) { camera_->step_rotate_y( +1 ); }
+	if ( player_->is_turn_available() )
+	{
+		if ( input()->get_mouse_x() == -1.f ) { player_->turn( -1 ); input()->set_mouse_x( +0.8f ); }
+		if ( input()->get_mouse_x() == +1.f ) { player_->turn( +1 ); input()->set_mouse_x( -0.8f ); }
 	}
 
 	if ( input()->push( Input::L ) && player_->is_turn_available() ) { player_->turn( -1 ); }
 	if ( input()->push( Input::R ) && player_->is_turn_available() ) { player_->turn( +1 ); }
 	
+	if ( input()->push( Input::A ) ) { player_->jump(); }
 
-	if ( input()->push( Input::A ) ) { player_->is_jumping() ? player_->fall() : player_->jump(); }
+	// if ( input()->push( Input::A ) ) { player_->is_jumping() ? player_->fall() : player_->jump(); }
 
 	player_->update();
 
 	camera_->position() = player_->position() + vector3( 0.f, 1.5f, 0.f );
-	camera_->rotate_degree_target().y() = player_->direction_degree();
+//	camera_->rotate_degree_target().y() = player_->direction_degree();
+
+	camera_->rotate_degree_target().y() = player_->direction_degree() + input()->get_mouse_x() * 45.f;
+	camera_->rotate_degree_target().x() = input()->get_mouse_y() * 90.f;
 	
 	if ( player_->is_dead() )
 	{
@@ -333,7 +342,7 @@ void GamePlayScene::update()
 		// camera_->rotate_degree_target().x() = 90.f;
 		camera_->rotate_degree_target().z() = 90.f;
 
-		if ( camera_->rotate_degree() == camera_->rotate_degree_target() )
+		if ( camera_->rotate_degree().z() == camera_->rotate_degree_target().z() )
 		{
 			camera_->rotate_degree().set( 0.f, 0.f, 0.f );
 			camera_->rotate_degree_target().set( 0.f, 0.f, 0.f );
@@ -344,8 +353,6 @@ void GamePlayScene::update()
 	}
 
 	camera_->update();
-
-
 }
 
 /**
@@ -557,7 +564,10 @@ void GamePlayScene::render()
 	std::string debug_text = "player : (" + 
 		common::serialize( static_cast< int >( player_->position().x() ) ) + "," +
 		common::serialize( static_cast< int >( player_->position().y() ) ) + "," +
-		common::serialize( static_cast< int >( player_->position().z() ) ) + ")";
+		common::serialize( static_cast< int >( player_->position().z() ) ) + ")\n" +
+		"mouse : ( " +
+		common::serialize( input()->get_mouse_x() ) + ", " +
+		common::serialize( input()->get_mouse_y() );
 
 	font_->draw_text( -1, 0, debug_text.c_str(), D3DCOLOR_XRGB( 0x99, 0x99, 0x99 ) );
 	font_->draw_text( +1, 0, debug_text.c_str(), D3DCOLOR_XRGB( 0x99, 0x99, 0x99 ) );

@@ -23,9 +23,12 @@ Camera::~Camera()
 
 void Camera::update()
 {
-	rotate_degree().x() = math::chase( rotate_degree().x(), rotate_degree_target().x(), 2.f );
-	rotate_degree().y() = math::chase( rotate_degree().y(), rotate_degree_target().y(), 4.f );
-	rotate_degree().z() = math::chase( rotate_degree().z(), rotate_degree_target().z(), 4.f );
+//	rotate_degree().x() = math::chase( rotate_degree().x(), rotate_degree_target().x(), 2.f );
+//	rotate_degree().y() = math::chase( rotate_degree().y(), rotate_degree_target().y(), 4.f );
+	rotate_degree().z() = math::chase( rotate_degree().z(), rotate_degree_target().z(), 2.f );
+
+	rotate_degree().x() += ( rotate_degree_target().x() - rotate_degree().x() ) * 0.2f;
+	rotate_degree().y() += ( rotate_degree_target().y() - rotate_degree().y() ) * 0.2f;
 
 	/*
 	for ( int n = 0; n < 3; n++ )

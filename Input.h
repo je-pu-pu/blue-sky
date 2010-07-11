@@ -55,6 +55,9 @@ private:
 	JOYINFOEX joy_info_;									///< ジョイスティック
 	bool joystick_enabled_;									///< ジョイスティック有効フラグ
 
+	float mouse_x_;											///< マウス X 座標 ( -1.f .. 1.f )
+	float mouse_y_;											///< マウス Y 座標 ( -1.f .. 1.f )
+
 	ButtonCodeList key_code_;
 	ButtonCodeList joystick_code_;
 
@@ -143,6 +146,13 @@ public:
 
 		return null_input;
 	}
+
+	float get_mouse_x() const { return mouse_x_; }
+	float get_mouse_y() const { return mouse_y_; }
+
+	void set_mouse_x( float );
+	void set_mouse_y( float );
+
 }; // class Input
 
 } // namespace blue_sky

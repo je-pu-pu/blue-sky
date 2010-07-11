@@ -26,7 +26,7 @@ public:
 	~Direct3D9TextureManager();
 
 	Texture* load( const char*, const char* );
-	Texture* get( const char* );
+	Texture* get( const char* ) const;
 
 }; // class Direct3D9TextureManager
 

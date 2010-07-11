@@ -6,6 +6,7 @@
 
 #include <common/safe_ptr.h>
 
+class Direct3D9Font;
 class Direct3D9Mesh;
 class Direct3D9SkyBox;
 class Direct3D9Box;
@@ -28,6 +29,7 @@ protected:
 	common::safe_ptr< Camera > camera_;
 	common::safe_ptr< Stage > stage_;
 
+	common::safe_ptr< Direct3D9Font > font_;
 	common::safe_ptr< Direct3D9Mesh > player_mesh_;
 	common::safe_ptr< Direct3D9Mesh > shadow_mesh_;
 	common::safe_ptr< Direct3D9Mesh > ground_mesh_;

@@ -40,3 +40,14 @@ Direct3D9TextureManager::Texture* Direct3D9TextureManager::load( const char* nam
 	return texture;
 }
 
+Direct3D9TextureManager::Texture* Direct3D9TextureManager::get( const char* name ) const
+{
+	TextureList::const_iterator i = texture_list_.find( name );
+
+	if ( i != texture_list_.end() )
+	{
+		return i->second;
+	}
+
+	return 0;
+}

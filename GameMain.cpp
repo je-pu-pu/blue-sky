@@ -20,6 +20,7 @@
 #include "Direct3D9.h"
 #include "DirectX.h"
 
+#include <game/Sound.h>
 #include <game/Config.h>
 
 #include <common/exception.h>
@@ -88,6 +89,10 @@ GameMain::GameMain()
 //■デストラクタ
 GameMain::~GameMain()
 {
+	config_->set< int >( "audio.enable", sound_manager_->is_enabled() );
+	config_->set< int >( "video.video.full_screen", app_->is_full_screen() );
+	config_->save_file( "blue-sky.config" );
+
 	delete scene_;
 
 	delete direct_3d_;
@@ -99,8 +104,6 @@ GameMain::~GameMain()
 	delete grid_data_manager_;
 
 	delete grid_object_manager_;
-
-	config_->save_file( "blue-sky.config" );
 
 	delete config_;
 }
@@ -124,6 +127,16 @@ void GameMain::update()
 	{
 		get_sound_manager()->stop_all();
 		scene_->set_next_scene( "title" );
+	}
+	if ( GetAsyncKeyState( VK_F2 ) )
+	{
+		get_sound_manager()->set_enabled( ! get_sound_manager()->is_enabled() );
+		Sound* bgm = get_sound_manager()->get_sound( "bgm" );
+
+		if ( bgm )
+		{
+			bgm->play( true );
+		}
 	}
 	if ( GetAsyncKeyState( VK_F5 ) )
 	{
@@ -183,17 +196,9 @@ void GameMain::render()
 	}
 
 	// Debug
-	
 	std::string debug_text;
 	debug_text = std::string( "blue-sky | FPS : " ) + common::serialize( MainLoop.GetFPS() );
-	/*
-	debug_text += ", player : (" + 
-		common::serialize( static_cast< int >( player_->position().x() ) ) + "," +
-		common::serialize( static_cast< int >( player_->position().y() ) ) + "," +
-		common::serialize( static_cast< int >( player_->position().z() ) ) + ")";
-	*/
-
-	App::GetInstance()->setTitle( debug_text.c_str() );
+	app_->setTitle( debug_text.c_str() );
 }
 
 int GameMain::get_width() const

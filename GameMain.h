@@ -13,6 +13,7 @@
 namespace game
 {
 
+class Sound;
 class Config;
 
 } // namespace game
@@ -37,6 +38,7 @@ class Scene;
 class GameMain
 {
 public:
+	typedef game::Sound Sound;
 	typedef game::Config Config;
 
 protected:

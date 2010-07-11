@@ -2,7 +2,9 @@
 #define DIRECT_3D_9_H
 
 #include <d3dx9.h>
+#include <list>
 
+class Direct3D9Resource;
 class Direct3D9TextureManager;
 
 /**
@@ -11,12 +13,16 @@ class Direct3D9TextureManager;
  */
 class Direct3D9
 {
+public:
+	typedef std::list< Direct3D9Resource* > ResourceList;
+
 private:
 	LPDIRECT3D9				direct_3d_;		///< Direct3D 9 
 	LPDIRECT3DDEVICE9		device_;		///< Direct3D 9 Device
 	LPD3DXEFFECT			effect_;		///< Effect
 	LPD3DXSPRITE			sprite_;		///< Sprite
 
+	ResourceList			resource_list_;	///< Resource List
 	Direct3D9TextureManager*texture_manager_;
 
 	D3DPRESENT_PARAMETERS	present_;		///< Present Parameters
@@ -38,10 +44,16 @@ public:
 	void set_multi_sample( int, int );
 
 	LPDIRECT3DDEVICE9 getDevice() const { return device_; }
+
+	const D3DPRESENT_PARAMETERS& getPresentParameters() const { return present_; }
+	const D3DCAPS9& getCaps() const { return device_caps_; }
+
 	LPD3DXEFFECT getEffect() const { return effect_; }
 	LPD3DXSPRITE getSprite() const { return sprite_; }
 
 	Direct3D9TextureManager* getTextureManager() const { return texture_manager_; }
+
+	void add_resource( Direct3D9Resource* r ) { resource_list_.push_back( r ); }
 
 }; // class Direct3D9
 

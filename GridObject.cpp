@@ -6,10 +6,11 @@
 namespace blue_sky
 {
 
-GridObject::GridObject( int x, int y, int z, GridData* grid_data )
+GridObject::GridObject( int x, int y, int z, int r, GridData* grid_data )
 	: x_( x )
 	, y_( y )
 	, z_( z )
+	, rotate_degree_( r )
 	, grid_data_( grid_data )
 {
 	

@@ -75,6 +75,12 @@
     <ClCompile Include="Direct3D9TextureManager.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
+    <ClCompile Include="Direct3D9Font.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D9Resource.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -143,6 +149,12 @@
     <ClInclude Include="Direct3D9TextureManager.h">
       <Filter>DirectX</Filter>
     </ClInclude>
+    <ClInclude Include="Direct3D9Font.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D9Resource.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="media\object\building-a">
@@ -155,5 +167,8 @@
       <Filter>stage</Filter>
     </None>
     <None Include="media\shader\blue-sky.fx" />
+    <None Include="media\stage\stage-1-2">
+      <Filter>stage</Filter>
+    </None>
   </ItemGroup>
 </Project>

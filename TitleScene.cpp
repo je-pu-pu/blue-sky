@@ -6,6 +6,7 @@
 
 #include "Direct3D9.h"
 #include "Direct3D9Mesh.h"
+#include "Direct3D9TextureManager.h"
 #include "DirectX.h"
 
 #include <common/exception.h>
@@ -22,6 +23,8 @@ TitleScene::TitleScene( const GameMain* game_main )
 	mesh_->load_x( "media/model/building-a.x" );
 
 	sound_manager()->load_music( "bgm", "env" )->play( true );
+	
+	direct_3d()->getTextureManager()->load( "title-bg", "media/image/title-bg.png" );
 }
 
 TitleScene::~TitleScene()
@@ -67,8 +70,30 @@ void TitleScene::render()
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetViewport( & view_port ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x11 ), 1.f, 0 ) );
 
+	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->Begin( 0 ) );
 
-	D3DXMATRIXA16 s;
+	RECT src_rect = { 0, 0, 1024, 1707 };
+	D3DXVECTOR3 center( src_rect.right * 0.5f, src_rect.bottom / 2.f, 0 );
+	D3DXVECTOR3 position( get_width() * 0.5f, get_height() * 0.5f, 0.f );
+	
+	static float scale = 1.f;
+	static float oy = 0.f;
+	scale -= 0.0001f;
+	oy -= 0.1f;
+
+	D3DXMATRIXA16 s, t;
+
+	D3DXMatrixScaling( & s, scale, scale, scale );
+	D3DXMatrixTranslation( & t, 0.f, oy, 0.f );
+
+	D3DXMATRIXA16 transform = s * t;
+
+	direct_3d()->getSprite()->SetTransform( & transform );
+	direct_3d()->getSprite()->Draw( direct_3d()->getTextureManager()->get( "title-bg" ), & src_rect, & center, & position, D3DCOLOR_XRGB( 255, 255, 255 ) );
+
+	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->End() );
+
+	
 	D3DXMATRIXA16 ortho;
 	D3DXMATRIXA16 WorldViewProjection;
 
@@ -87,16 +112,6 @@ void TitleScene::render()
 
 		mesh_->render();
 	}
-
-	/*
-	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->Begin( 0 ) );
-
-	direct_3d()->getSprite()->Draw(
-
-	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->End() );
-	*/
-
-		
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );

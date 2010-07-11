@@ -25,9 +25,6 @@ std::string Direct3D9SkyBox::get_texture_file_name_by_texture_name( const char* 
 
 void Direct3D9SkyBox::render()
 {
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
-
 	for ( unsigned int n = 0; n < material_count_; n++ )
 	{
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetMaterial( & materials_[ n ] ) );
@@ -35,7 +32,4 @@ void Direct3D9SkyBox::render()
 
 		DIRECT_X_FAIL_CHECK( mesh_->DrawSubset( n ) );
 	}
-
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 }

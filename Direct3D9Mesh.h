@@ -7,7 +7,7 @@
 class Direct3D9;
 
 /**
- * Direct3D 9 のラッパークラス
+ * X ファイルから読み込むメッシュ
  *
  */
 class Direct3D9Mesh
@@ -32,6 +32,6 @@ public:
 
 	void render() const;
 
-}; // class Direct3D9
+}; // class Direct3D9Mesh
 
 #endif // DIRECT_3D_9_MESH_H

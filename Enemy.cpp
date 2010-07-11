@@ -6,7 +6,6 @@
 
 #include "Sound.h"
 #include "SoundManager.h"
-#include "Input.h"
 
 #include "Direct3D9.h"
 
@@ -120,7 +119,7 @@ void Player::update()
 	if ( position().y() < floor_cell_x.height() )
 	{
 		if (
-			( velocity().y() <= 0.02f && floor_cell_x.height() - position().y() <= 2.f ) &&
+			// ( velocity().y() <= 0.02f && floor_cell_x.height() - position().y() <= 2.f ) &&
 			(
 				( velocity().x() < 0.f && direction() == LEFT || velocity().x() > 0.f && direction() == RIGHT ) ||
 				( floor_cell_x.height() - position().y() <= 1.f && ( velocity().x() < 0.f && direction() != RIGHT || velocity().x() > 0.f && direction() != LEFT ) )
@@ -154,7 +153,7 @@ void Player::update()
 	if ( position().y() < floor_cell_z.height() )
 	{
 		if (
-			( velocity().y() <= 0.02f && floor_cell_z.height() - position().y() <= 2.f ) && 
+			// ( velocity().y() <= 0.02f && floor_cell_z.height() - position().y() <= 2.f ) && 
 			(
 				( velocity().z() < 0.f && direction() == BACK || velocity().z() > 0.f && direction() == FRONT ) ||
 				( floor_cell_z.height() - position().y() <= 1.f && ( velocity().z() < 0.f && direction() != FRONT || velocity().z() > 0.f && direction() != BACK ) )
@@ -253,12 +252,7 @@ void Player::update()
 	// velocity().y() -= 0.001f;
 	// velocity().y() -= 0.0001f;
 
-	if ( input_->press( Input::B ) )
-	{
-		velocity().x() = 0.f;
-		velocity().z() = 0.f;
-	}
-	else if ( is_jumping() )
+	if ( is_jumping() )
 	{
 		velocity().x() = math::chase( velocity().x(), 0.f, 0.0002f );
 		velocity().z() = math::chase( velocity().z(), 0.f, 0.0002f );
@@ -315,10 +309,8 @@ void Player::fall()
 void Player::rebirth()
 {
 	is_dead_ = false;
-	direction_ = FRONT;
-	direction_degree_ = 0.f;
 
-	turn( 0 );
+	// direction_degree_ = 0.f;
 }
 
 const GridCell& Player::get_floor_cell_center() const

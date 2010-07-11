@@ -21,17 +21,19 @@ private:
 	int x_;
 	int y_;
 	int z_;
+	int rotate_degree_;
 
 	GridData* grid_data_;
 
 
 public:
-	GridObject( int, int, int, GridData* );
+	GridObject( int, int, int, int, GridData* );
 	virtual ~GridObject();
 
-	int x() { return x_; }
-	int y() { return y_; }
-	int z() { return z_; }
+	int x() const { return x_; }
+	int y() const { return y_; }
+	int z() const { return z_; }
+	int rotate_degree() const { return rotate_degree_; }
 
 	int width() const;
 	int depth() const;

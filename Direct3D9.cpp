@@ -1,4 +1,5 @@
 #include "Direct3D9.h"
+#include "Direct3D9Resource.h"
 #include "Direct3D9TextureManager.h"
 #include "DirectX.h"
 
@@ -54,7 +55,7 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 	DWORD max_multi_sample_quality = 0;
 	if ( SUCCEEDED( direct_3d_->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, present_.Windowed, static_cast< D3DMULTISAMPLE_TYPE >( multi_sample_type ), & max_multi_sample_quality ) ) )
 	{
-		if ( multi_sample_quality >= max_multi_sample_quality )
+		if ( multi_sample_quality >= static_cast< int >( max_multi_sample_quality ) )
 		{
 			multi_sample_quality = max_multi_sample_quality - 1;
 		}
@@ -149,10 +150,22 @@ void Direct3D9::reset()
 	if ( hr == D3DERR_DEVICENOTRESET )
 	{
 		DIRECT_X_FAIL_CHECK( effect_->OnLostDevice() );
+		DIRECT_X_FAIL_CHECK( sprite_->OnLostDevice() );
+
+		for ( ResourceList::iterator i = resource_list_.begin(); i != resource_list_.end(); ++i )
+		{
+			(*i)->on_lost_device();
+		}
 
 		if ( SUCCEEDED( device_->Reset( & present_ ) ) )
 		{
 			DIRECT_X_FAIL_CHECK( effect_->OnResetDevice() );
+			DIRECT_X_FAIL_CHECK( sprite_->OnResetDevice() );
+
+			for ( ResourceList::iterator i = resource_list_.begin(); i != resource_list_.end(); ++i )
+			{
+				(*i)->on_reset_device();
+			}
 
 			// COMMON_THROW_EXCEPTION_MESSAGE( "reset OK !!!" );
 		}
@@ -164,8 +177,22 @@ void Direct3D9::set_full_screen( bool full_scrren )
 	present_.Windowed = ! full_scrren;
 
 	DIRECT_X_FAIL_CHECK( effect_->OnLostDevice() );
+	DIRECT_X_FAIL_CHECK( sprite_->OnLostDevice() );
+
+	for ( ResourceList::iterator i = resource_list_.begin(); i != resource_list_.end(); ++i )
+	{
+		(*i)->on_lost_device();
+	}
+
 	DIRECT_X_FAIL_CHECK( device_->Reset( & present_ ) );
+
 	DIRECT_X_FAIL_CHECK( effect_->OnResetDevice() );
+	DIRECT_X_FAIL_CHECK( sprite_->OnResetDevice() );
+
+	for ( ResourceList::iterator i = resource_list_.begin(); i != resource_list_.end(); ++i )
+	{
+		(*i)->on_reset_device();
+	}
 }
 
 void Direct3D9::text_out_adapter_info( const char* file_name, bool append )

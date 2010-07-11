@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "Stage.h"
 
+#include "Direct3D9Font.h"
 #include "Direct3D9Mesh.h"
 #include "Direct3D9SkyBox.h"
 #include "Direct3D9Box.h"
@@ -32,17 +33,22 @@
 
 #include <boost/format.hpp>
 
+#include <list>
+
 #include <fstream>
 #include <sstream>
 
 namespace blue_sky
 {
 
+Direct3D9Mesh* landscape_ = 0;
+
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
 	, player_( 0 )
 	, camera_( 0 )
 	, stage_( 0 )
+	, font_( 0 )
 	, player_mesh_( 0 )
 	, shadow_mesh_( 0 )
 	, ground_mesh_( 0 )
@@ -50,6 +56,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, box_( 0 )
 	, panorama_y_division_( config()->get( "panorama_y_division", 1 ) )
 {
+	// Font
+	font_ = new Direct3D9Font( direct_3d() );
+
 	// Mesh
 	player_mesh_ = new Direct3D9Mesh( direct_3d() );
 	player_mesh_->load_x( "media/model/player.x" );
@@ -59,6 +68,10 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	ground_mesh_ = new Direct3D9Mesh( direct_3d() );
 	ground_mesh_->load_x( "media/model/ground.x" );
+
+	
+	landscape_ = new Direct3D9Mesh( direct_3d() );
+	landscape_->load_x( "media/model/landscape.x" );
 
 	// SkyBox
 	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box", "jpg" );
@@ -101,7 +114,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// generate_random_stage();
 
 	// load_stage_file( "media/stage/quit" );
-	load_stage_file( "media/stage/stage-1-1" );
+	// load_stage_file( "media/stage/stage-1-1" );
+	load_stage_file( "media/stage/stage-1-2" );
 
 	player_->position() = player_start_position_;
 
@@ -120,6 +134,8 @@ GamePlayScene::~GamePlayScene()
 {
 	save_stage_file( "media/stage/quit" );
 
+	font_.release();
+
 	player_mesh_.release();
 	shadow_mesh_.release();
 	ground_mesh_.release();
@@ -131,6 +147,8 @@ GamePlayScene::~GamePlayScene()
 	sky_box_.release();
 
 	box_.release();
+
+	delete landscape_;
 }
 
 void GamePlayScene::generate_random_stage()
@@ -171,19 +189,19 @@ void GamePlayScene::generate_random_stage()
 
 				y = 0;
 
-				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), y, d * ( 10 + z_space ), building_a_grid_ ) );
+				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), y, d * ( 10 + z_space ), 0, building_a_grid_ ) );
 			}
 			else if ( common::random( 0, 2 ) == 0 )
 			{
-				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), house_a_grid_ ) );
+				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), 0, house_a_grid_ ) );
 			}
 			else
 			{
-				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), road_grid_ ) );
+				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), 0, road_grid_ ) );
 
 				if ( common::random( 0, 5 ) == 0 )
 				{
-					grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), tex_box_grid_ ) );
+					grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), 0, tex_box_grid_ ) );
 				}
 			}
 		}
@@ -240,12 +258,12 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		else if ( name == "object" )
 		{
 			std::string grid_data_name;
-			int x = 0, y = 0, z = 0;
+			int x = 0, y = 0, z = 0, r = 0;
 
-			ss >> grid_data_name >> x >> y >> z;
+			ss >> grid_data_name >> x >> y >> z >> r;
 
 			GridData* grid_data = grid_data_manager()->load( grid_data_name.c_str() );
-			grid_object_manager()->add_grid_object( new GridObject( x, y, z, grid_data ) );
+			grid_object_manager()->add_grid_object( new GridObject( x, y, z, r, grid_data ) );
 		}
 	}
 }
@@ -381,7 +399,9 @@ void GamePlayScene::render()
 		// SkyBox
 		if ( sky_box_ )
 		{
-		
+			DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
+
 			D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );
 			D3DXMatrixTranslation( & t, camera_->position().x(), camera_->position().y(), camera_->position().z() );
 
@@ -390,6 +410,9 @@ void GamePlayScene::render()
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 			sky_box_->render();
+
+			DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 		}
 
 		// Ground
@@ -403,6 +426,26 @@ void GamePlayScene::render()
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 		ground_mesh_->render();
+
+		// Landscape
+		if ( landscape_ )
+		{
+			D3DXMatrixTranslation( & t, player_->position().x(), 0.f, player_->position().z() );
+
+			for ( int n = 0; n < 10; n++ )
+			{
+				float scale = 1.4f - ( n * 0.08f );
+				D3DXMatrixRotationY( & r, n * 0.1f );
+				D3DXMatrixScaling( & s,  scale, scale, scale );
+
+				world = s * r * t;
+
+				WorldViewProjection = world * view * projection;
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+				landscape_->render();
+			}
+		}
 
 		// GridObject
 		D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );
@@ -419,8 +462,10 @@ void GamePlayScene::render()
 			const float offset = 0.05f;
 			float flicker = 0.f; // sin( grid_object->x() + grid_object->z() * 0.001f + a ) * 0.1f;
 
+			D3DXMatrixRotationY( & r, math::degree_to_radian( static_cast< float >( -grid_object->rotate_degree() ) ) );
 			D3DXMatrixTranslation( & t, static_cast< float >( grid_object->x() ), static_cast< float >( grid_object->y() + flicker + offset ), static_cast< float >( grid_object->z() ) );
-			world = s * t;
+
+			world = s * r * t;
 
 			WorldViewProjection = world * view * projection;
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
@@ -485,17 +530,17 @@ void GamePlayScene::render()
 		player_mesh_->render();
 
 		// Player ( Shadow )
-		std::set< float > grid_cell_height_set;
+		std::list< float > grid_cell_height_set;
 
-		grid_cell_height_set.insert( player_->get_floor_cell_center().height() );
-		grid_cell_height_set.insert( player_->get_floor_cell_left_front().height() );
-		grid_cell_height_set.insert( player_->get_floor_cell_right_front().height() );
-		grid_cell_height_set.insert( player_->get_floor_cell_left_back().height() );
-		grid_cell_height_set.insert( player_->get_floor_cell_right_back().height() );
+		grid_cell_height_set.push_back( player_->get_floor_cell_center().height() );
+		grid_cell_height_set.push_back( player_->get_floor_cell_left_front().height() );
+		grid_cell_height_set.push_back( player_->get_floor_cell_right_front().height() );
+		grid_cell_height_set.push_back( player_->get_floor_cell_left_back().height() );
+		grid_cell_height_set.push_back( player_->get_floor_cell_right_back().height() );
 
-		for ( std::set< float >::iterator i = grid_cell_height_set.begin(); i != grid_cell_height_set.end(); ++i )
+		for ( std::list< float >::iterator i = grid_cell_height_set.begin(); i != grid_cell_height_set.end(); ++i )
 		{
-			D3DXMatrixTranslation( & t, player_->position().x(), *i + 0.11f, player_->position().z() );
+			D3DXMatrixTranslation( & t, player_->position().x() , *i + 0.11f, player_->position().z() );
 			world = r * t;
 
 			WorldViewProjection = world * view * projection;
@@ -508,6 +553,17 @@ void GamePlayScene::render()
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );
+
+	std::string debug_text = "player : (" + 
+		common::serialize( static_cast< int >( player_->position().x() ) ) + "," +
+		common::serialize( static_cast< int >( player_->position().y() ) ) + "," +
+		common::serialize( static_cast< int >( player_->position().z() ) ) + ")";
+
+	font_->draw_text( -1, 0, debug_text.c_str(), D3DCOLOR_XRGB( 0x99, 0x99, 0x99 ) );
+	font_->draw_text( +1, 0, debug_text.c_str(), D3DCOLOR_XRGB( 0x99, 0x99, 0x99 ) );
+	font_->draw_text( 0, -1, debug_text.c_str(), D3DCOLOR_XRGB( 0x99, 0x99, 0x99 ) );
+	font_->draw_text( 0, +1, debug_text.c_str(), D3DCOLOR_XRGB( 0x99, 0x99, 0x99 ) );
+	font_->draw_text( 0, 0, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
 }

@@ -152,7 +152,9 @@
     </ClCompile>
     <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="Direct3D9Box.cpp" />
+    <ClCompile Include="Direct3D9Font.cpp" />
     <ClCompile Include="Direct3D9Mesh.cpp" />
+    <ClCompile Include="Direct3D9Resource.cpp" />
     <ClCompile Include="Direct3D9SkyBox.cpp" />
     <ClCompile Include="Direct3D9TextureManager.cpp" />
     <ClCompile Include="DirectInput.cpp" />
@@ -200,7 +202,9 @@
     <ClInclude Include="Canvas.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="Direct3D9Box.h" />
+    <ClInclude Include="Direct3D9Font.h" />
     <ClInclude Include="Direct3D9Mesh.h" />
+    <ClInclude Include="Direct3D9Resource.h" />
     <ClInclude Include="Direct3D9SkyBox.h" />
     <ClInclude Include="Direct3D9TextureManager.h" />
     <ClInclude Include="DirectInput.h" />
@@ -240,6 +244,7 @@
     <None Include="media\object\house-a" />
     <None Include="media\shader\blue-sky.fx" />
     <None Include="media\stage\stage-1-1" />
+    <None Include="media\stage\stage-1-2" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

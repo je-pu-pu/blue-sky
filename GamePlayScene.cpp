@@ -42,6 +42,7 @@ namespace blue_sky
 {
 
 Direct3D9Mesh* landscape_ = 0;
+float brightness = 0.f;
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
@@ -293,44 +294,47 @@ void GamePlayScene::save_stage_file( const char* file_name ) const
  */
 void GamePlayScene::update()
 {
-	if ( input()->press( Input::B ) )
+	if ( ! player_->is_dead() )
 	{
-		if ( camera_->step_rotate_x_available() )
+		if ( input()->press( Input::B ) )
 		{
-			if ( input()->press( Input::UP    ) ) { camera_->step_rotate_x( -1 ); sound_manager()->get_sound( "turn" )->play( false ); }
-			if ( input()->press( Input::DOWN  ) ) { camera_->step_rotate_x( +1 ); sound_manager()->get_sound( "turn" )->play( false ); }
+			if ( camera_->step_rotate_x_available() )
+			{
+				if ( input()->press( Input::UP    ) ) { camera_->step_rotate_x( -1 ); sound_manager()->get_sound( "turn" )->play( false ); }
+				if ( input()->press( Input::DOWN  ) ) { camera_->step_rotate_x( +1 ); sound_manager()->get_sound( "turn" )->play( false ); }
+			}
+
+			if ( player_->is_turn_available() )
+			{
+				if ( input()->push( Input::LEFT  ) ) { player_->turn( -1 ); }
+				if ( input()->push( Input::RIGHT ) ) { player_->turn( +1 ); }
+			}
+		}
+		else
+		{
+			if ( input()->press( Input::UP    ) ) { player_->step( +1 ); }
+			if ( input()->press( Input::DOWN  ) ) { player_->step( -1 ); }
+			if ( input()->press( Input::LEFT  ) ) { player_->side_step( -1 ); }
+			if ( input()->press( Input::RIGHT ) ) { player_->side_step( +1 ); }
 		}
 
 		if ( player_->is_turn_available() )
 		{
-			if ( input()->push( Input::LEFT  ) ) { player_->turn( -1 ); }
-			if ( input()->push( Input::RIGHT ) ) { player_->turn( +1 ); }
+			if ( input()->get_mouse_x() == -1.f ) { player_->turn( -1 ); input()->set_mouse_x( +0.8f ); }
+			if ( input()->get_mouse_x() == +1.f ) { player_->turn( +1 ); input()->set_mouse_x( -0.8f ); }
 		}
-	}
-	else
-	{
-		if ( input()->press( Input::UP    ) ) { player_->step( +1 ); }
-		if ( input()->press( Input::DOWN  ) ) { player_->step( -1 ); }
-		if ( input()->press( Input::LEFT  ) ) { player_->side_step( -1 ); }
-		if ( input()->press( Input::RIGHT ) ) { player_->side_step( +1 ); }
-	}
 
-	if ( player_->is_turn_available() )
-	{
-		if ( input()->get_mouse_x() == -1.f ) { player_->turn( -1 ); input()->set_mouse_x( +0.8f ); }
-		if ( input()->get_mouse_x() == +1.f ) { player_->turn( +1 ); input()->set_mouse_x( -0.8f ); }
-	}
-
-	if ( input()->push( Input::L ) && player_->is_turn_available() ) { player_->turn( -1 ); }
-	if ( input()->push( Input::R ) && player_->is_turn_available() ) { player_->turn( +1 ); }
+		if ( input()->push( Input::L ) && player_->is_turn_available() ) { player_->turn( -1 ); }
+		if ( input()->push( Input::R ) && player_->is_turn_available() ) { player_->turn( +1 ); }
 	
-	if ( input()->push( Input::A ) ) { player_->jump(); }
+		if ( input()->push( Input::A ) ) { player_->jump(); }
+	}
 
 	// if ( input()->push( Input::A ) ) { player_->is_jumping() ? player_->fall() : player_->jump(); }
 
 	player_->update();
 
-	camera_->position() = player_->position() + vector3( 0.f, 1.5f, 0.f );
+	camera_->position() = player_->position() + vector3( 0.f, player_->get_eye_height(), 0.f );
 //	camera_->rotate_degree_target().y() = player_->direction_degree();
 
 	camera_->rotate_degree_target().y() = player_->direction_degree() + input()->get_mouse_x() * 45.f;
@@ -341,15 +345,22 @@ void GamePlayScene::update()
 		// camera_->position() 
 		// camera_->rotate_degree_target().x() = 90.f;
 		camera_->rotate_degree_target().z() = 90.f;
+		brightness = math::chase( brightness, -0.5f, 0.01f );
 
-		if ( camera_->rotate_degree().z() == camera_->rotate_degree_target().z() )
+		if ( camera_->rotate_degree().z() == camera_->rotate_degree_target().z() && input()->push( Input::A ) )
 		{
 			camera_->rotate_degree().set( 0.f, 0.f, 0.f );
 			camera_->rotate_degree_target().set( 0.f, 0.f, 0.f );
 
 			player_->rebirth();
 			player_->position() = player_start_position_;
+
+			brightness = 1.f;
 		}
+	}
+	else
+	{
+		brightness = math::chase( brightness, 0.f, 0.02f );
 	}
 
 	camera_->update();
@@ -367,8 +378,11 @@ void GamePlayScene::render()
 
 	UINT pass_count = 0;
 
-	direct_3d()->getEffect()->Begin( & pass_count, 0 );
-	direct_3d()->getEffect()->BeginPass( 0 );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloat( "brightness", brightness ) );
+
+
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->Begin( & pass_count, 0 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->BeginPass( 0 ) );
 
 	D3DXMATRIXA16 world;
 	D3DXMATRIXA16 view;
@@ -403,12 +417,13 @@ void GamePlayScene::render()
 		D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & look_at ), reinterpret_cast< const D3DXVECTOR3* >( & up ) );
 		D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() / get_panorama_y_division() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() );
 		
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, FALSE ) );
+
 		// SkyBox
 		if ( sky_box_ )
 		{
-			DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
-			DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
-
 			D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );
 			D3DXMatrixTranslation( & t, camera_->position().x(), camera_->position().y(), camera_->position().z() );
 
@@ -417,10 +432,9 @@ void GamePlayScene::render()
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 			sky_box_->render();
-
-			DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
-			DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 		}
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
 
 		// Ground
 		const int gx = static_cast< int >( player_->position().x() );
@@ -433,6 +447,8 @@ void GamePlayScene::render()
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 		ground_mesh_->render();
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, FALSE ) );
 
 		// Landscape
 		if ( landscape_ )
@@ -453,6 +469,11 @@ void GamePlayScene::render()
 				landscape_->render();
 			}
 		}
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
+		
 
 		// GridObject
 		D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );

@@ -47,7 +47,8 @@ private:
 
 	vector3		front_;				///< 前
 	vector3		right_;				///< 右
-	
+	float		eye_height_;		///< 目の高さ
+
 	AABB		aabb_;				///< AABB
 
 	bool		is_dead_;			///< 死亡フラグ
@@ -83,6 +84,8 @@ public:
 
 	vector3& front() { return front_; }
 	vector3& right() { return right_; }
+
+	float get_eye_height() const { return eye_height_; }
 
 	AABB& aabb() { return aabb_; }
 

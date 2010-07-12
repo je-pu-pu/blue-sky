@@ -28,6 +28,7 @@ Player::Player()
 	 , position_( 0.f, 50.f, 0.f )
 	 , direction_( FRONT )
 	 , direction_degree_( 0.f )
+	 , eye_height_( 1.5f )
 	 , aabb_( vector3( -get_collision_width() * 0.5f, 0.f, -get_collision_depth() * 0.5f ), vector3( get_collision_width() * 0.5f, get_collision_height(), get_collision_depth() * 0.5f ) )
 	 , is_dead_( false )
 	 , is_turn_avaiable_( true )
@@ -217,7 +218,7 @@ void Player::update()
 		else
 		{
 			// ’…’nŽ¸”s
-			if ( floor_cell_y.height() == 0 && velocity().y() < -get_max_speed() * 0.8f )
+			if ( floor_cell_y.height() == 0 && velocity().y() < -get_max_speed() * 0.6f )
 			{
 				is_dead_ = true;
 				play_sound( "dead" );
@@ -279,6 +280,12 @@ void Player::update()
 	{
 		velocity().y() = -10.f;
 	}
+
+	if ( is_dead() )
+	{
+		eye_height_ -= 0.02f;
+		eye_height_ = std::max( 0.2f, eye_height_ );
+	}
 }
 
 /**
@@ -318,6 +325,7 @@ void Player::rebirth()
 	is_dead_ = false;
 	direction_ = FRONT;
 	direction_degree_ = 0.f;
+	eye_height_ = 1.5f;
 
 	turn( 0 );
 }

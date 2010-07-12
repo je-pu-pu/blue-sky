@@ -161,7 +161,7 @@ void Direct3D9::reset()
 		{
 			DIRECT_X_FAIL_CHECK( effect_->OnResetDevice() );
 			DIRECT_X_FAIL_CHECK( sprite_->OnResetDevice() );
-
+			
 			for ( ResourceList::iterator i = resource_list_.begin(); i != resource_list_.end(); ++i )
 			{
 				(*i)->on_reset_device();
@@ -175,6 +175,13 @@ void Direct3D9::reset()
 void Direct3D9::set_full_screen( bool full_scrren )
 {
 	present_.Windowed = ! full_scrren;
+
+	HRESULT hr = device_->TestCooperativeLevel();
+
+	if ( hr == D3DERR_DEVICELOST )
+	{
+		return;
+	}
 
 	DIRECT_X_FAIL_CHECK( effect_->OnLostDevice() );
 	DIRECT_X_FAIL_CHECK( sprite_->OnLostDevice() );

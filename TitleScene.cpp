@@ -22,8 +22,9 @@ TitleScene::TitleScene( const GameMain* game_main )
 	mesh_ = new Direct3D9Mesh( direct_3d() );
 	mesh_->load_x( "media/model/building-a.x" );
 
-	sound_manager()->load_music( "bgm", "env" )->play( true );
+	sound_manager()->load_music( "bgm", "title" )->play( true );
 	
+	direct_3d()->getTextureManager()->load( "title", "media/image/title.png" );
 	direct_3d()->getTextureManager()->load( "title-bg", "media/image/title-bg.png" );
 }
 
@@ -54,6 +55,8 @@ void TitleScene::render()
 	D3DXHANDLE technique = direct_3d()->getEffect()->GetTechniqueByName( "technique_0" );
 	direct_3d()->getEffect()->SetTechnique( technique );
 
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloat( "brightness", 1.f ) );
+
 	UINT pass_count = 0;
 
 	direct_3d()->getEffect()->Begin( & pass_count, 0 );
@@ -81,37 +84,40 @@ void TitleScene::render()
 	scale -= 0.0001f;
 	oy -= 0.1f;
 
-	D3DXMATRIXA16 s, t;
+	D3DXMATRIXA16 transform;
 
-	D3DXMatrixScaling( & s, scale, scale, scale );
-	D3DXMatrixTranslation( & t, 0.f, oy, 0.f );
+	{
+		D3DXMATRIXA16 s, t;
 
-	D3DXMATRIXA16 transform = s * t;
+		D3DXMatrixScaling( & s, scale, scale, scale );
+		D3DXMatrixTranslation( & t, 0.f, oy, 0.f );
 
-	direct_3d()->getSprite()->SetTransform( & transform );
-	direct_3d()->getSprite()->Draw( direct_3d()->getTextureManager()->get( "title-bg" ), & src_rect, & center, & position, D3DCOLOR_XRGB( 255, 255, 255 ) );
+		transform = s * t;
+
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw( direct_3d()->getTextureManager()->get( "title-bg" ), & src_rect, & center, & position, D3DCOLOR_XRGB( 255, 255, 255 ) );
+	}
+	if ( ! input()->press( Input::B ) )
+	{
+		RECT src_rect = { 0, 0, 389, 117 };
+		D3DXVECTOR3 center( 389 / 2, 117 / 2, 0.f );
+		D3DXVECTOR3 position( get_width() * 0.5f, get_height() * 0.5f, 0.f );
+
+		D3DXMatrixIdentity( & transform );
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw( direct_3d()->getTextureManager()->get( "title" ), & src_rect, & center, & position, D3DCOLOR_XRGB( 255, 255, 255 ) );
+	}
+	if ( input()->press( Input::B ) ) {
+		RECT src_rect = { 0, 128, 528, 128 + 309 };
+		D3DXVECTOR3 center( 528 / 2, 309 / 2, 0.f );
+		D3DXVECTOR3 position( get_width() * 0.5f, get_height() * 0.5f, 0.f );
+
+		D3DXMatrixIdentity( & transform );
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw( direct_3d()->getTextureManager()->get( "title" ), & src_rect, & center, & position, D3DCOLOR_XRGB( 255, 255, 255 ) );
+	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->End() );
-
-	
-	D3DXMATRIXA16 ortho;
-	D3DXMATRIXA16 WorldViewProjection;
-
-	D3DXMatrixScaling( & s, 100.f, 100.f, 1.f );
-
-	D3DXMatrixOrthoOffCenterLH( & ortho, 0, static_cast< float >( get_width() ), 0.f, static_cast< float >( get_height() ), 0.f, 1.f );
-
-	for (  int n = 0; n < 3; n++ )
-	{
-		D3DXMATRIXA16 t;
-		D3DXMatrixTranslation( & t, n * 110.f, 0.f, 0.f );
-
-		WorldViewProjection = s * t * ortho;
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
-
-		mesh_->render();
-	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );

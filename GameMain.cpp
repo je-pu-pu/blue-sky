@@ -112,15 +112,14 @@ GameMain::~GameMain()
  * メインループ処理
  *
  */
-void GameMain::update()
+bool GameMain::update()
 {
 	MainLoop.WaitTime = 15;
-	// MainLoop.WaitTime = 0;
 
-	//秒間50フレームを保持
+	// FPS 固定
 	if ( ! MainLoop.Loop() )
 	{
-		return;
+		return false ;
 	}
 	
 	if ( GetAsyncKeyState( VK_F1 ) ) 
@@ -175,6 +174,8 @@ void GameMain::update()
 	}
 
 	render();
+
+	return true;
 }
 
 /**
@@ -182,6 +183,18 @@ void GameMain::update()
  */
 void GameMain::render()
 {
+	const int render_div = 1;
+	static int n = 0;
+
+	if ( n < render_div - 1 )
+	{
+		n++;
+		return;
+	}
+
+	n = 0;
+
+
 	scene_->render();
 
 	HRESULT hr = get_direct_3d()->getDevice()->Present( NULL, NULL, NULL, NULL );

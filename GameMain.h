@@ -64,7 +64,7 @@ public:
 	static GameMain* getInstance() { static GameMain gm; return & gm; }
 	~GameMain();				//デストラクタ
 
-	void update();				///< メインループ
+	bool update();				///< メインループ
 	void render();				///< 描画
 
 	int get_width() const;

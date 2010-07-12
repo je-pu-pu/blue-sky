@@ -116,7 +116,10 @@ int App::MessageLoop()
 		}
 		else
 		{
-			game->update();
+			if ( ! game->update() )
+			{
+				Sleep( 1 );
+			}
 		}
 	}
 

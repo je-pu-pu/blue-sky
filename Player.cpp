@@ -144,7 +144,7 @@ void Player::update()
 		}
 
 		position().x() = last_position.x();
-		velocity().x() *= 0.5f;
+		velocity().x() *= -1.1f;
 	}
 
 	position().z() += velocity().z();
@@ -178,7 +178,7 @@ void Player::update()
 		}
 
 		position().z() = last_position.z();
-		velocity().z() *= 0.5f;
+		velocity().z() *= -1.1f;
 	}
 
 	position().y() += velocity().y();
@@ -218,7 +218,7 @@ void Player::update()
 		else
 		{
 			// ’…’nŽ¸”s
-			if ( floor_cell_y.height() == 0 && velocity().y() < -get_max_speed() * 0.6f )
+			if ( /* floor_cell_y.height() == 0 && */ velocity().y() == -get_max_speed() )
 			{
 				is_dead_ = true;
 				play_sound( "dead" );
@@ -262,8 +262,8 @@ void Player::update()
 	}
 	else if ( is_jumping() )
 	{
-		velocity().x() = math::chase( velocity().x(), 0.f, 0.0002f );
-		velocity().z() = math::chase( velocity().z(), 0.f, 0.0002f );
+		velocity().x() = math::chase( velocity().x(), 0.f, 0.0018f );
+		velocity().z() = math::chase( velocity().z(), 0.f, 0.0018f );
 	}
 	else
 	{
@@ -296,7 +296,7 @@ void Player::jump()
 {
 	if ( is_jumping() ) return;
 	
-	velocity_.y() = 0.2f;
+	velocity_.y() = 1.f;
 	// velocity_.z() = 0.1f;
 	
 	is_jumping_ = true;

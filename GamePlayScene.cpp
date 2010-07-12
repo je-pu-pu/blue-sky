@@ -294,6 +294,8 @@ void GamePlayScene::save_stage_file( const char* file_name ) const
  */
 void GamePlayScene::update()
 {
+	static int run_count = 0;
+
 	if ( ! player_->is_dead() )
 	{
 		if ( input()->press( Input::B ) )
@@ -312,7 +314,27 @@ void GamePlayScene::update()
 		}
 		else
 		{
-			if ( input()->press( Input::UP    ) ) { player_->step( +1 ); }
+			if ( input()->press( Input::UP    ) )
+			{
+				player_->step( +1 );
+				
+				if ( ! player_->is_jumping() )
+				{
+					run_count++;
+					if ( run_count == 120 )
+					{
+						sound_manager()->get_sound( "short-breath" )->play( false );
+					}
+				}
+				else
+				{
+					run_count = 0;
+				}
+			}
+			else
+			{
+				run_count = 0;
+			}
 			if ( input()->press( Input::DOWN  ) ) { player_->step( -1 ); }
 			if ( input()->press( Input::LEFT  ) ) { player_->side_step( -1 ); }
 			if ( input()->press( Input::RIGHT ) ) { player_->side_step( +1 ); }

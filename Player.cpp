@@ -250,8 +250,8 @@ void Player::update()
 	// gravity
 	// velocity().y() -= 0.004f;
 	// velocity().y() -= 0.015f;
-	velocity().y() -= 0.01f;
-	// velocity().y() -= 0.004f;
+	// velocity().y() -= 0.01f;
+	velocity().y() -= 0.004f;
 	// velocity().y() -= 0.001f;
 	// velocity().y() -= 0.0001f;
 
@@ -262,8 +262,8 @@ void Player::update()
 	}
 	else if ( is_jumping() )
 	{
-		velocity().x() = math::chase( velocity().x(), 0.f, 0.0018f );
-		velocity().z() = math::chase( velocity().z(), 0.f, 0.0018f );
+		velocity().x() = math::chase( velocity().x(), 0.f, 0.001f );
+		velocity().z() = math::chase( velocity().z(), 0.f, 0.001f );
 	}
 	else
 	{

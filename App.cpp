@@ -24,6 +24,8 @@ App::~App()
 {
 	ReleaseMutex(hMutex);			//ミューテックス開放
 	WINNLSEnableIME(hWnd, TRUE);	//IME表示
+
+	ClipCursor( 0 );
 	ShowCursor( TRUE );				//カーソル表示
 }
 
@@ -90,6 +92,14 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 
 	// WINNLSEnableIME(hWnd, FALSE);	//IME非表示
 	
+	/*
+	RECT rect;
+	GetWindowRect( hWnd, & rect );
+	AdjustWindowRect( & rect, WinStyle, FALSE );
+
+	ClipCursor( & rect );
+	*/
+
 	// ShowCursor( FALSE );			// カーソル非表示
 
 	return true;

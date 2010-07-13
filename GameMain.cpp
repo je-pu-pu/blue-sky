@@ -59,6 +59,10 @@ GameMain::GameMain()
 	direct_3d_ = new Direct3D9( app_->GetWindowHandle(), app_->get_width(), app_->get_height(), app_->is_full_screen(), config_->get( "video.multi_sample_type", 0 ), config_->get( "video.multi_sample_quality", 0 ) );
 	direct_3d_->load_effect_file( "media/shader/blue-sky.fx" );
 
+	if ( app_->is_full_screen() )
+	{
+		Sleep( 1000 );
+	}
 
 	// Input
 	input_ = new Input();
@@ -213,6 +217,13 @@ void GameMain::render()
 	debug_text = std::string( "blue-sky | FPS : " ) + common::serialize( MainLoop.GetFPS() );
 	app_->setTitle( debug_text.c_str() );
 }
+
+bool GameMain::is_first_game_play() const
+{
+	return false;
+}
+
+
 
 int GameMain::get_width() const
 {

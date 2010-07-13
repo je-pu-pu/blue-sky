@@ -1,5 +1,5 @@
 #include "Direct3D9.h"
-#include "Direct3D9Resource.h"
+#include "Direct3D9Font.h"
 #include "Direct3D9TextureManager.h"
 #include "DirectX.h"
 
@@ -24,6 +24,7 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 	, device_( 0 )
 	, effect_( 0 )
 	, sprite_( 0 )
+	, font_( 0 )
 	, texture_manager_( 0 )
 {
 	direct_3d_ = Direct3DCreate9( D3D_SDK_VERSION );
@@ -109,14 +110,21 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 
 	// device_->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, TRUE );
 
+	// Sprite
 	DIRECT_X_FAIL_CHECK( D3DXCreateSprite( device_, & sprite_ ) );
 
+	// Font
+	font_ = new Direct3D9Font( this );
+	add_resource( font_ );
+
+	// Texture Manager
 	texture_manager_ = new Direct3D9TextureManager( this );
 }
 
 Direct3D9::~Direct3D9()
 {
 	if ( texture_manager_ ) delete texture_manager_;
+	if ( font_ ) delete font_;
 
 	if ( sprite_ ) sprite_->Release();
 	if ( effect_ ) effect_->Release();

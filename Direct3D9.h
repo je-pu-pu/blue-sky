@@ -5,6 +5,7 @@
 #include <list>
 
 class Direct3D9Resource;
+class Direct3D9Font;
 class Direct3D9TextureManager;
 
 /**
@@ -21,6 +22,7 @@ private:
 	LPDIRECT3DDEVICE9		device_;		///< Direct3D 9 Device
 	LPD3DXEFFECT			effect_;		///< Effect
 	LPD3DXSPRITE			sprite_;		///< Sprite
+	Direct3D9Font*			font_;			///< Font
 
 	ResourceList			resource_list_;	///< Resource List
 	Direct3D9TextureManager*texture_manager_;
@@ -50,6 +52,7 @@ public:
 
 	LPD3DXEFFECT getEffect() const { return effect_; }
 	LPD3DXSPRITE getSprite() const { return sprite_; }
+	Direct3D9Font* getFont() const { return font_; }
 
 	Direct3D9TextureManager* getTextureManager() const { return texture_manager_; }
 

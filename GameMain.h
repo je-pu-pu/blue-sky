@@ -67,6 +67,11 @@ public:
 	bool update();				///< ƒƒCƒ“ƒ‹[ƒv
 	void render();				///< •`‰æ
 
+	bool is_first_game_play() const;
+
+	/// Œ»İ‚ÌŠÔ‚ğƒ~ƒŠ•b‚Å•Ô‚·
+	unsigned int get_current_time() const { return MainLoop.get_current_time(); }
+
 	int get_width() const;
 	int get_height() const;
 

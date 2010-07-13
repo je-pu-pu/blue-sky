@@ -14,7 +14,9 @@ namespace blue_sky
 class StreamingSound : public Sound
 {
 private:
+	bool is_loop_;
 	bool is_first_half_playing_;
+	float current_position_offset_;
 
 public:
 
@@ -29,9 +31,13 @@ public:
 
 	/// サウンドを再生する
 	bool play( bool );
+	bool is_loop() const { return is_loop_; }
 
 	/// 更新処理
 	void update();
+
+	/// 現在の位置 ( 秒 ) を取得する
+	float get_current_position() const;
 
 	static DWORD get_buffer_size() { return 512 * 1024; /* 512 KB */ };
 

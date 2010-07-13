@@ -14,6 +14,16 @@ Scene::~Scene()
 
 }
 
+bool Scene::is_first_game_play() const
+{
+	return game_main_->is_first_game_play();
+}
+
+unsigned int Scene::get_current_time() const
+{
+	return game_main_->get_current_time();
+}
+
 Direct3D9* Scene::direct_3d() const
 {
 	return game_main_->get_direct_3d();

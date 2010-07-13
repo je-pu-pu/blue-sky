@@ -28,6 +28,8 @@ public:
 	Texture* load( const char*, const char* );
 	Texture* get( const char* ) const;
 
+	void unload( const char* );
+
 }; // class Direct3D9TextureManager
 
 #endif // DIRECT_3D_9_TEXTURE_MANAGER_H

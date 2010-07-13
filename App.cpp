@@ -147,6 +147,7 @@ LRESULT CALLBACK App::WinProc( HWND hw, UINT msg, WPARAM wp, LPARAM lp )
 		{
 			PostMessage( hw, WM_CLOSE, 0, 0 );
 		}
+
 		break;
 	case	WM_CHAR:		break;
 	case	WM_ACTIVATEAPP:	break;

@@ -76,6 +76,9 @@ public:
 	/// サウンドを停止する
 	bool stop();
 
+	/// 現在の位置 ( 秒 ) を取得する
+	float get_current_position() const;
+
 	DirectSoundBuffer* get_direct_sound_buffer() { return direct_sound_buffer_; };
 	void set_direct_sound_buffer( DirectSoundBuffer* b ) { direct_sound_buffer_ = b; }
 

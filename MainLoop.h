@@ -17,7 +17,7 @@ class CMainLoop
 {
 private:
 	DWORD	LastTime;	//前回の時間
-	DWORD	NowTime;	//現在の時間
+	DWORD	current_time_;	//現在の時間
 
 	int		FPSCount;	//FPS
 	int		FPS;		//FPS	デバッグ用
@@ -31,7 +31,7 @@ public:
 	bool Loop();
 	
 	//Get
-	DWORD GetNowTime() const { return NowTime; }
+	DWORD get_current_time() const { return current_time_; }
 	int GetFPS() const { return FPS; }
 };
 

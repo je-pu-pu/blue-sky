@@ -44,7 +44,12 @@ OggVorbisFile::SizeType OggVorbisFile::size() const
 	return static_cast< SizeType >( 2 * size * vorbis_info_->channels );
 }
 
-OggVorbisFile::SizeType OggVorbisFile::read( void* data, SizeType size )
+OggVorbisFile::SizeType OggVorbisFile::size_per_sec() const
+{
+	return format_.nAvgBytesPerSec;
+}
+
+OggVorbisFile::SizeType OggVorbisFile::read( void* data, SizeType size, bool loop )
 {
 	int bs = 0;
 	SizeType read_bytes = 0;
@@ -61,7 +66,12 @@ OggVorbisFile::SizeType OggVorbisFile::read( void* data, SizeType size )
 				COMMON_THROW_EXCEPTION;
 			}
 
-			memset( ptr, 0, size - read_bytes );
+			if ( ! loop )
+			{
+				memset( ptr, 0, size - read_bytes );
+
+				return size;
+			}
 		}
 		else if ( result < 0 )
 		{

@@ -10,6 +10,7 @@
 
 //■コンストラクタ
 CMainLoop::CMainLoop()
+	: current_time_( timeGetTime() )
 {
 	Active = true;
 	WaitTime = 20;	//待機時間初期値 20 ( 50 FPS )
@@ -24,18 +25,18 @@ bool CMainLoop::Loop()
 		return false;
 	}
 	//現在の時間を取得
-	NowTime = timeGetTime();
+	current_time_ = timeGetTime();
 	//指定された時間が経過したかチェック
-	if(NowTime - LastTime >= WaitTime){
+	if(current_time_ - LastTime >= WaitTime){
 		//
-		if(NowTime - LastSec >= 1000){
+		if(current_time_ - LastSec >= 1000){
 			FPS = FPSCount;
 			FPSCount = 0;
-			LastSec = NowTime;
+			LastSec = current_time_;
 		}
 		FPSCount++;
 		//
-		LastTime = NowTime;
+		LastTime = current_time_;
 		return true;
 	}
 	return false;

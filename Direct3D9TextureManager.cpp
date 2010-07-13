@@ -51,3 +51,15 @@ Direct3D9TextureManager::Texture* Direct3D9TextureManager::get( const char* name
 
 	return 0;
 }
+
+void Direct3D9TextureManager::unload( const char* name )
+{
+	TextureList::iterator i = texture_list_.find( name );
+
+	if ( i != texture_list_.end() )
+	{
+		i->second->Release();
+		texture_list_.erase( i );
+	}
+}
+

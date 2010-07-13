@@ -13,7 +13,9 @@ namespace blue_sky
 
 StreamingSound::StreamingSound( const DirectSound* direct_sound )
 	: Sound( direct_sound )
+	, is_loop_( false )
 	, is_first_half_playing_( true )
+	, current_position_offset_( 0.f )
 {
 
 }
@@ -58,6 +60,9 @@ bool StreamingSound::load( const char* file_name )
 
 bool StreamingSound::play( bool loop )
 {
+	is_loop_ = loop;
+	current_position_offset_ = 0.f;
+
 	direct_sound_buffer_->play( true );
 
 	return true;
@@ -68,6 +73,16 @@ void StreamingSound::update()
 	DWORD play_pos = 0;
 	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->GetCurrentPosition( & play_pos, 0 ) );
 
+	// 再生終了チェック
+	if ( ! is_loop_ )
+	{
+		if ( get_current_position() >= static_cast< float >( sound_file_->size() ) / static_cast< float >( sound_file_->size_per_sec() ) )
+		{
+			stop();
+		}
+	}
+
+	// バッファ書き込みチェック
 	bool swap = false;
 	DWORD lock_offset = 0;
 	DWORD lock_size = 0;
@@ -82,6 +97,8 @@ void StreamingSound::update()
 		swap = true;
 		lock_offset = direct_sound_buffer_->get_caps().dwBufferBytes / 2;
 		lock_size = direct_sound_buffer_->get_caps().dwBufferBytes - lock_offset;
+
+		current_position_offset_ += static_cast< float >( direct_sound_buffer_->get_caps().dwBufferBytes ) / static_cast< float >( sound_file_->size_per_sec() );
 	}
 
 	if ( swap )
@@ -93,10 +110,18 @@ void StreamingSound::update()
 
 		DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->Lock( lock_offset, lock_size, & data, & size, 0, 0, 0 ) );
 
-		int x = sound_file_->read( data, size );
+		int x = sound_file_->read( data, size, is_loop_ );
 
 		DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->Unlock( data, size, 0, 0 ) );
 	}
+}
+
+float StreamingSound::get_current_position() const
+{
+	DWORD play_pos = 0;
+	direct_sound_buffer_->get_direct_sound_buffer()->GetCurrentPosition( & play_pos, 0 );
+
+	return current_position_offset_ + static_cast< float >( play_pos ) / static_cast< float >( sound_file_->size_per_sec() );
 }
 
 } // namespace blue_sky

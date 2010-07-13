@@ -107,4 +107,12 @@ bool Sound::stop()
 	return true;
 }
 
+float Sound::get_current_position() const
+{
+	DWORD play_pos = 0;
+	direct_sound_buffer_->get_direct_sound_buffer()->GetCurrentPosition( & play_pos, 0 );
+
+	return static_cast< float >( play_pos ) / static_cast< float >( sound_file_->size_per_sec() );
+}
+
 } // namespace blue_sky

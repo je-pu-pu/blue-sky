@@ -24,7 +24,9 @@ public:
 	WAVEFORMATEX& format() { return format_; }
 
 	SizeType size() const;
-	SizeType read( void*, SizeType  );
+	SizeType size_per_sec() const;
+
+	SizeType read( void*, SizeType, bool = false );
 
 }; // class OggVorbisFile
 

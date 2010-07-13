@@ -60,6 +60,7 @@ bool StreamingSound::play( bool loop )
 	}
 
 	is_loop_ = loop;
+	is_first_half_playing_ = true;
 	current_position_offset_ = 0.f;
 
 	direct_sound_buffer_->play( true );

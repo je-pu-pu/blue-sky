@@ -27,6 +27,7 @@ public:
 	SizeType size_per_sec() const;
 
 	SizeType read( void*, SizeType, bool = false );
+	void seek( SizeType );
 
 }; // class OggVorbisFile
 

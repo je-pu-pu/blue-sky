@@ -18,6 +18,9 @@ private:
 	bool is_first_half_playing_;
 	float current_position_offset_;
 
+	void stream_all();
+	void stream_half( bool );
+
 public:
 
 	/// コンストラクタ

@@ -89,3 +89,11 @@ OggVorbisFile::SizeType OggVorbisFile::read( void* data, SizeType size, bool loo
 
 	return read_bytes;
 }
+
+void OggVorbisFile::seek( SizeType position )
+{
+	if ( int r = ov_raw_seek_lap( & file_, position ) != 0 )
+	{
+		COMMON_THROW_EXCEPTION;
+	}
+}

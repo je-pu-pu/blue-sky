@@ -183,8 +183,10 @@ void TitleScene::render()
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->End() );
 
+	/*
 	std::string debug_text = "bgm pos : " +  common::serialize( bgm_->get_current_position() );
 	direct_3d()->getFont()->draw_text( -1, 0, debug_text.c_str(), D3DCOLOR_XRGB( 255, 0, 0 ) );
+	*/
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
 }

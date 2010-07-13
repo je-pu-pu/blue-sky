@@ -46,20 +46,19 @@ bool StreamingSound::load( const char* file_name )
 
 	direct_sound_buffer_ = direct_sound_->create_sound_buffer( buffer_desc );
 
-	void* data = 0;
-	DWORD size = 0;
-
-	direct_sound_buffer_->get_direct_sound_buffer()->Lock( 0, 0, & data, & size, 0, 0, DSBLOCK_ENTIREBUFFER );
-	
-	sound_file_->read( data, buffer_desc.dwBufferBytes );
-	
-	direct_sound_buffer_->get_direct_sound_buffer()->Unlock( data, size, 0, 0 );
+	stream_all();
 
 	return true;
 }
 
 bool StreamingSound::play( bool loop )
 {
+	if ( get_current_position() > 0.f )
+	{
+		sound_file_->seek( 0 );
+		stream_all();
+	}
+
 	is_loop_ = loop;
 	current_position_offset_ = 0.f;
 
@@ -83,37 +82,54 @@ void StreamingSound::update()
 	}
 
 	// バッファ書き込みチェック
-	bool swap = false;
-	DWORD lock_offset = 0;
-	DWORD lock_size = 0;
-	
 	if ( is_first_half_playing_ && play_pos >= direct_sound_buffer_->get_caps().dwBufferBytes / 2 )
 	{
-		swap = true;
-		lock_size = direct_sound_buffer_->get_caps().dwBufferBytes / 2;
+		stream_half( false );
+		is_first_half_playing_ = ! is_first_half_playing_;
 	}
 	else if ( ! is_first_half_playing_ && play_pos < direct_sound_buffer_->get_caps().dwBufferBytes / 2 ) 
 	{
-		swap = true;
-		lock_offset = direct_sound_buffer_->get_caps().dwBufferBytes / 2;
-		lock_size = direct_sound_buffer_->get_caps().dwBufferBytes - lock_offset;
-
+		stream_half( true );
+		is_first_half_playing_ = ! is_first_half_playing_;
 		current_position_offset_ += static_cast< float >( direct_sound_buffer_->get_caps().dwBufferBytes ) / static_cast< float >( sound_file_->size_per_sec() );
 	}
+}
 
-	if ( swap )
+void StreamingSound::stream_all()
+{
+	void* data = 0;
+	DWORD size = 0;
+
+	direct_sound_buffer_->get_direct_sound_buffer()->Lock( 0, 0, & data, & size, 0, 0, DSBLOCK_ENTIREBUFFER );
+	
+	sound_file_->read( data, direct_sound_buffer_->get_caps().dwBufferBytes );
+	
+	direct_sound_buffer_->get_direct_sound_buffer()->Unlock( data, size, 0, 0 );
+}
+
+void StreamingSound::stream_half( bool first_half )
+{
+	DWORD lock_offset = 0;
+	DWORD lock_size = 0;
+
+	if ( first_half )
 	{
-		is_first_half_playing_ = ! is_first_half_playing_;
-
-		void* data = 0;
-		DWORD size = 0;
-
-		DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->Lock( lock_offset, lock_size, & data, & size, 0, 0, 0 ) );
-
-		int x = sound_file_->read( data, size, is_loop_ );
-
-		DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->Unlock( data, size, 0, 0 ) );
+		lock_offset = direct_sound_buffer_->get_caps().dwBufferBytes / 2;
+		lock_size = direct_sound_buffer_->get_caps().dwBufferBytes - lock_offset;
 	}
+	else
+	{
+		lock_size = direct_sound_buffer_->get_caps().dwBufferBytes / 2;
+	}
+
+	void* data = 0;
+	DWORD size = 0;
+
+	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->Lock( lock_offset, lock_size, & data, & size, 0, 0, 0 ) );
+
+	int x = sound_file_->read( data, size, is_loop_ );
+
+	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->Unlock( data, size, 0, 0 ) );
 }
 
 float StreamingSound::get_current_position() const

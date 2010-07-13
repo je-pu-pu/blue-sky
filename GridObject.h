@@ -41,7 +41,7 @@ public:
 	GridData* grid_data() { return grid_data_; }
 	const GridData* grid_data() const { return grid_data_; }
 
-	const Mesh* mesh() const;
+	const Mesh* mesh( int ) const;
 };
 
 } // namespace blue_sky

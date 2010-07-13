@@ -10,7 +10,7 @@ Direct3D9SkyBox::Direct3D9SkyBox( Direct3D9* direct_3d, const char* name, const 
 	, name_( name )
 	, ext_( ext )
 {
-	load_x( "media/model/sky-box.x" );
+	load_x( "media/model/sky-box" );
 }
 
 Direct3D9SkyBox::~Direct3D9SkyBox()

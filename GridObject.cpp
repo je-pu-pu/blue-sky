@@ -24,6 +24,6 @@ GridObject::~GridObject()
 int GridObject::width() const { return grid_data_->width(); }
 int GridObject::depth() const { return grid_data_->depth(); }
 
-const GridObject::Mesh* GridObject::mesh() const { return grid_data_->mesh(); }
+const GridObject::Mesh* GridObject::mesh( int level = 0 ) const { return grid_data_->mesh( level ); }
 
 }; // namespace blue_sky

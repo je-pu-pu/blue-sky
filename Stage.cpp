@@ -7,7 +7,7 @@ namespace blue_sky
 {
 
 Stage::Stage( int w, int d )
-	: GridData( w, d, 0 )
+	: GridData( w, d )
 {
 	aabb_list_.push_back( new AABB( vector3( 20.f, 4.f, 20.f ), vector3( 22.f, 5.f, 21.f ) ) );
 }

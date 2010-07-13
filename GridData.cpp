@@ -4,6 +4,7 @@
 #include "GameMain.h"
 #include "Direct3D9Mesh.h"
 
+#include <common/serialize.h>
 #include <common/exception.h>
 
 #include <boost/algorithm/string.hpp>
@@ -23,24 +24,32 @@ GridData::GridData( )
 	: width_( 0 )
 	, depth_( 0 )
 	, cell_( 0 )
-	, mesh_( 0 )
 {
-
+	for ( int n = 0; n < LOD_MAX; n++ )
+	{
+		mesh_[ n ] = 0;
+	}
 }
 
-GridData::GridData( int w, int d, const Mesh* mesh )
+GridData::GridData( int w, int d )
 	: width_( w )
 	, depth_( d )
 	, cell_( new GridCell[ width_ * depth_ ] )
-	, mesh_( mesh )
 {
-	
+	for ( int n = 0; n < LOD_MAX; n++ )
+	{
+		mesh_[ n ] = 0;
+	}
 }
 
 GridData::~GridData()
 {
 	delete [] cell_;
-	delete mesh_;
+
+	for ( int n = 0; n < LOD_MAX; n++ )
+	{
+		delete mesh_[ n ];
+	}
 }
 
 GridData* GridData::load_file( const char* file_name )
@@ -76,15 +85,26 @@ GridData* GridData::load_file( const char* file_name )
 		}
 		else if ( name == "mesh" )
 		{
-			if ( grid_data->mesh_ )
-			{
-				COMMON_THROW_EXCEPTION_MESSAGE( std::string( "\"mesh\" is already defined, in " ) + file_name );
-			}
-
+			int lod = 0;
 			std::string mesh_file_name;
+
+			ss >> lod;
 			ss >> mesh_file_name;
 
-			grid_data->mesh_ = load_mesh( mesh_file_name.c_str() );
+			if ( lod < 0 )
+			{
+				COMMON_THROW_EXCEPTION_MESSAGE( std::string( "\"mesh lod" ) + "\" is not valid, in " + file_name );
+			}
+			if ( lod >= LOD_MAX )
+			{
+				COMMON_THROW_EXCEPTION_MESSAGE( std::string( "\"mesh lod" ) + "\" is not valid, in " + file_name );
+			}
+			if ( grid_data->mesh_[ lod ] )
+			{
+				COMMON_THROW_EXCEPTION_MESSAGE( std::string( "\"mesh " ) + common::serialize( lod ) + "\" is already defined, in " + file_name );
+			}
+
+			grid_data->mesh_[ lod ] = load_mesh( mesh_file_name.c_str() );
 
 			if ( ! grid_data->mesh_ )
 			{

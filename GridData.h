@@ -17,6 +17,7 @@ class GridData
 {
 public:
 	typedef Direct3D9Mesh Mesh;
+	static const int LOD_MAX = 2;
 
 private:
 	std::string name_;
@@ -25,7 +26,7 @@ private:
 	int depth_;
 
 	GridCell* cell_;
-	const Mesh* mesh_;
+	const Mesh* mesh_[ LOD_MAX ];
 
 	static GridCell null_cell_;
 
@@ -35,7 +36,7 @@ private:
 public:
 	static GridData* load_file( const char* );
 
-	GridData( int, int, const Mesh* );
+	GridData( int, int );
 	virtual ~GridData();
 
 	const char* get_name() const { return name_.c_str(); }
@@ -47,7 +48,7 @@ public:
 	GridCell& cell( int, int );
 	const GridCell& cell( int, int ) const;
 
-	const Mesh* mesh() const { return mesh_; }
+	const Mesh* mesh( int level ) const { return mesh_[ level ] ? mesh_[ level ] : mesh_[ 0 ]; }
 
 	void put( int, int, int, const GridData* );
 };

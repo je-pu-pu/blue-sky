@@ -18,6 +18,7 @@
 #include "GridObjectManager.h"
 
 #include "Direct3D9.h"
+#include "Direct3D9Font.h"
 #include "DirectX.h"
 
 #include <game/Sound.h>
@@ -198,8 +199,12 @@ void GameMain::render()
 
 	n = 0;
 
-
 	scene_->render();
+
+	// Debug
+	std::string debug_text;
+	debug_text = std::string( "FPS : " ) + common::serialize( MainLoop.GetFPS() );
+	get_direct_3d()->getFont()->draw_text( 0, 0, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
 
 	HRESULT hr = get_direct_3d()->getDevice()->Present( NULL, NULL, NULL, NULL );
 
@@ -211,11 +216,6 @@ void GameMain::render()
 	{
 		DIRECT_X_FAIL_CHECK( hr );
 	}
-
-	// Debug
-	std::string debug_text;
-	debug_text = std::string( "blue-sky | FPS : " ) + common::serialize( MainLoop.GetFPS() );
-	app_->setTitle( debug_text.c_str() );
 }
 
 bool GameMain::is_first_game_play() const

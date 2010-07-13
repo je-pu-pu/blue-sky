@@ -182,6 +182,8 @@ void Player::update()
 	}
 
 	position().y() += velocity().y();
+	position().y() = std::min( position().y(), 300.f );
+
 	const GridCell& floor_cell_y = get_floor_cell();
 	
 	// ’…’nˆ—
@@ -248,11 +250,11 @@ void Player::update()
 	position().y() = std::max( 0.f, position().y() );
 
 	// gravity
-	// velocity().y() -= 0.004f;
-	// velocity().y() -= 0.015f;
 	// velocity().y() -= 0.01f;
-	velocity().y() -= 0.004f;
-	// velocity().y() -= 0.001f;
+	// velocity().y() -= 0.015f;
+	// velocity().y() -= 0.004f;
+	// velocity().y() -= 0.002f;
+	velocity().y() -= 0.001f;
 	// velocity().y() -= 0.0001f;
 
 	if ( input_->press( Input::B ) )

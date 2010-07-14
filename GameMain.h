@@ -87,6 +87,10 @@ public:
 	
 	Config* get_config() const { return config_; }
 
+	void on_reset_key_down();
+	void on_function_key_down( int );
+	void on_mouse_wheel( int );
+
 }; // class GameMain
 
 } // namespace blue_sky

@@ -66,6 +66,8 @@ public:
 
 	bool is_full_screen() const { return is_full_screen_; }
 	void set_full_screen( bool );
+
+	void close();
 };
 
 #endif // APP_H

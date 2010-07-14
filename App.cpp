@@ -143,12 +143,20 @@ LRESULT CALLBACK App::WinProc( HWND hw, UINT msg, WPARAM wp, LPARAM lp )
 	{
 	case	WM_CREATE:		break;
 	case	WM_KEYDOWN:
-		if ( wp == VK_ESCAPE )
-		{
-			PostMessage( hw, WM_CLOSE, 0, 0 );
-		}
+	{
+		blue_sky::GameMain* game = blue_sky::GameMain::getInstance();
 
+		if ( wp == VK_ESCAPE ) game->on_reset_key_down();
+		if ( wp >= VK_F1 && wp <= VK_F24 ) game->on_function_key_down( wp - VK_F1 + 1 );
 		break;
+	}
+	case	WM_MOUSEWHEEL:
+	{
+		blue_sky::GameMain* game = blue_sky::GameMain::getInstance();
+
+		game->on_mouse_wheel( GET_WHEEL_DELTA_WPARAM( wp ) );
+		break;
+	}
 	case	WM_CHAR:		break;
 	case	WM_ACTIVATEAPP:	break;
 	case	WM_DESTROY:
@@ -230,4 +238,9 @@ LONG App::get_window_style() const
 LONG App::get_window_style_full_scrren() const
 {
 	return WS_POPUP;
+}
+
+void App::close()
+{
+	PostMessage( hWnd, WM_CLOSE, 0, 0 );
 }

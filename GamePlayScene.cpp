@@ -333,7 +333,7 @@ void GamePlayScene::update()
 	}
 	else if ( player_->is_falling_to_dead() )
 	{
-		brightness = math::chase( brightness, 0.5f, 0.02f );
+		brightness = math::chase( brightness, 0.2f, 0.02f );
 	}
 	else
 	{
@@ -416,7 +416,6 @@ void GamePlayScene::render()
 
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
 
-		/*
 		// Ground
 		const int gx = static_cast< int >( player_->position().x() );
 		const int gy = static_cast< int >( player_->position().z() );
@@ -428,7 +427,6 @@ void GamePlayScene::render()
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 		ground_mesh_->render();
-		*/
 
 //		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, FALSE ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );		
@@ -464,8 +462,8 @@ void GamePlayScene::render()
 		{
 			GridObject* grid_object = *i;
 
-			const int max_length = 300;
-			const int lod_length = 100;
+			const int max_length = 1000;
+			const int lod_length = 200;
 
 			const int x_length = std::abs( static_cast< int >( player_->position().x() ) - grid_object->x() );
 			const int y_length = std::abs( static_cast< int >( player_->position().y() ) - grid_object->y() );
@@ -576,6 +574,7 @@ void GamePlayScene::render()
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );
 
+	/*
 	std::string debug_text = "player : (" + 
 		common::serialize( static_cast< int >( player_->position().x() ) ) + "," +
 		common::serialize( static_cast< int >( player_->position().y() ) ) + "," +
@@ -587,6 +586,7 @@ void GamePlayScene::render()
 		common::serialize( input()->get_mouse_dy() ) + ")";
 
 	font_->draw_text( 0, 24, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
+	*/
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
 }

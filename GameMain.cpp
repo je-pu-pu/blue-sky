@@ -127,27 +127,6 @@ bool GameMain::update()
 		return false ;
 	}
 	
-	if ( GetAsyncKeyState( VK_F1 ) ) 
-	{
-		get_sound_manager()->stop_all();
-		scene_->set_next_scene( "title" );
-	}
-	if ( GetAsyncKeyState( VK_F2 ) )
-	{
-		get_sound_manager()->set_enabled( ! get_sound_manager()->is_enabled() );
-		Sound* bgm = get_sound_manager()->get_sound( "bgm" );
-
-		if ( bgm )
-		{
-			bgm->play( true );
-		}
-	}
-	if ( GetAsyncKeyState( VK_F5 ) )
-	{
-		app_->set_full_screen( ! app_->is_full_screen() );
-		get_direct_3d()->set_full_screen( App::GetInstance()->is_full_screen() );
-	}
-
 	input_->update();
 	sound_manager_->update();
 
@@ -233,6 +212,49 @@ int GameMain::get_width() const
 int GameMain::get_height() const
 {
 	return app_->get_height();
+}
+
+void GameMain::on_reset_key_down()
+{
+	app_->close();
+
+	/*
+	if ( scene_->get_name() == "title" )
+	{
+		
+	}
+	*/
+}
+
+void GameMain::on_function_key_down( int function_key )
+{
+	if ( function_key == 1 ) 
+	{
+		get_sound_manager()->stop_all();
+		scene_->set_next_scene( "title" );
+	}
+
+	if ( function_key == 2 )
+	{
+		get_sound_manager()->set_enabled( ! get_sound_manager()->is_enabled() );
+		Sound* bgm = get_sound_manager()->get_sound( "bgm" );
+
+		if ( bgm )
+		{
+			bgm->play( true );
+		}
+	}
+
+	if ( function_key == 5 )
+	{
+		app_->set_full_screen( ! app_->is_full_screen() );
+		get_direct_3d()->set_full_screen( App::GetInstance()->is_full_screen() );
+	}
+}
+
+void GameMain::on_mouse_wheel( int wheel )
+{
+	input_->push_mouse_wheel_queue( wheel ? 1 : -1 );
 }
 
 } // namespace blue_sky

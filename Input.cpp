@@ -27,6 +27,7 @@ Input::Input()
 	, mouse_y_( 0.f )
 	, mouse_dx_( 0.f )
 	, mouse_dy_( 0.f )
+	, mouse_wheel_( 0 )
 {
 	for ( int n = 0; n < MAX_BUTTONS; n++ )
 	{

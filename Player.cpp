@@ -27,6 +27,7 @@ Player::Player()
 	 , stage_( 0 )
 	 , position_( 0.f, 50.f, 0.f )
 	 , direction_degree_( 0.f )
+	 , step_speed_( 0.06f )
 	 , eye_height_( 1.5f )
 	 , aabb_( vector3( -get_collision_width() * 0.5f, 0.f, -get_collision_depth() * 0.5f ), vector3( get_collision_width() * 0.5f, get_collision_height(), get_collision_depth() * 0.5f ) )
 	 , is_dead_( false )
@@ -40,40 +41,14 @@ Player::Player()
 
 void Player::step( float s )
 {
-	if ( is_falling() )
-	{
-		s = 0.f;
-	}
-	else if ( is_jumping() )
-	{
-		// s *= 1.f; // 1.5f;
-	}
-
-	vector3 v = front() * s * 0.04f;
+	vector3 v = front() * s * get_step_speed();
 	velocity().x() = v.x();
 	velocity().z() = v.z();
-
-	// velocity() += front() * s * 0.002f;
-
-	// get_step_speed();
 }
 
 void Player::side_step( float s )
 {
-	if ( is_jumping() )
-	{
-		// s = 0.f; // s *= 1.5f;
-	}
-
-	/*
-	vector3 v = right() * s * 0.02f;
-	velocity().x() = v.x();
-	velocity().z() = v.z();
-	*/
-
-	// velocity() += right() * s * 0.002f;
-
-	// get_side_step_speed();
+	//
 }
 
 /**
@@ -113,15 +88,6 @@ void Player::update()
 
 	position().x() += velocity().x();
 	position().x() = math::clamp( position().x(), 0.f, static_cast< float >( stage_->width() ) );
-
-	AABB player_world_aabb_x( position() + aabb().min(), position() + aabb().max() );
-	const AABB* collision_aabb_x = stage_->get_collision_aabb( player_world_aabb_x );
-
-	if ( collision_aabb_x  )
-	{
-		throw "hoge !!!";
-	}
-
 
 	const GridCell& floor_cell_x = get_floor_cell();
 
@@ -210,6 +176,7 @@ void Player::update()
 			velocity_.y() = 1.f;
 	
 			is_jumping_ = true;
+			step_speed_ += 0.01f;
 
 			stop_sound( "super-jump" );
 			play_sound( "super-jump" );
@@ -248,6 +215,7 @@ void Player::update()
 				play_sound( "land" );
 
 				is_jumping_ = false;
+				step_speed_ = 0.06f;
 
 				// velocity().x() = 0.f;
 				// velocity().z() = 0.f;
@@ -284,7 +252,7 @@ void Player::update()
 		velocity().x() = math::chase( velocity().x(), 0.f, 0.0015f );
 		velocity().z() = math::chase( velocity().z(), 0.f, 0.0015f );
 
-		if ( velocity().y() < -get_max_speed() * 0.05f )
+		if ( velocity().y() < -get_max_speed() * 0.02f )
 		{
 			is_jumping_ = true;
 		}

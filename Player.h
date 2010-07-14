@@ -45,6 +45,8 @@ private:
 	Direction	direction_;			///< 方向
 	float		direction_degree_;	///< 方向 ( Y Axis Degree )
 
+	float		step_speed_;		///< 移動速度
+
 	vector3		front_;				///< 前
 	vector3		right_;				///< 右
 	float		eye_height_;		///< 目の高さ
@@ -99,7 +101,7 @@ public:
 
 	bool is_turn_available() const { return is_turn_avaiable_; }
 
-	float get_step_speed() const { return 0.002f; }
+	float get_step_speed() const { return step_speed_; }
 	float get_side_step_speed() const { return 0.004f; }
 
 	/// 更新

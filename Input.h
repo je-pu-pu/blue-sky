@@ -61,6 +61,8 @@ private:
 	float mouse_dx_;										///< マウス X 移動量 ( )
 	float mouse_dy_;
 
+	int mouse_wheel_;										///< マウスホイール ( + : front / - : back )
+
 	POINT last_mouse_point_;								///< 前のフレームのマウス 座標
 
 	ButtonCodeList key_code_;
@@ -160,6 +162,9 @@ public:
 
 	void set_mouse_x( float );
 	void set_mouse_y( float );
+
+	void push_mouse_wheel_queue( int wheel ) { mouse_wheel_ += wheel; }
+	int pop_mouse_wheel_queue() { int w = mouse_wheel_; mouse_wheel_ = 0; return w; }
 
 }; // class Input
 

@@ -115,7 +115,6 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 
 	// Font
 	font_ = new Direct3D9Font( this );
-	add_resource( font_ );
 
 	// Texture Manager
 	texture_manager_ = new Direct3D9TextureManager( this );

@@ -50,7 +50,7 @@ public:
 
 	const Mesh* mesh( int level ) const { return mesh_[ level ] ? mesh_[ level ] : mesh_[ 0 ]; }
 
-	void put( int, int, int, const GridData* );
+	void put( int, int, int, int, const GridData* );
 };
 
 } // namespace blue_sky

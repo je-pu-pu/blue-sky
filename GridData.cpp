@@ -205,26 +205,72 @@ const GridCell& GridData::cell( int x, int z ) const
 	return cell_[ z * width_ + x ];
 }
 
-void GridData::put( int px, int py, int pz, const GridData* grid_data )
+void GridData::put( int px, int py, int pz, int r, const GridData* grid_data )
 {
-	for ( int z = 0; z < grid_data->depth(); z++ )
+	int xddx = 1;
+	int xddz = 0;
+	int zddx = 0;
+	int zddz = 1;
+	bool dx_reset_at_x_loop_end = true;
+	bool dz_reset_at_x_loop_end = false;
+
+	r %= 360;
+
+	if ( r == 90 )
 	{
-		if ( pz + z < 0 ) continue;
-		if ( pz + z >= depth() ) continue;
+		pz -= 1;
+		xddx = 0;
+		xddz = -1;
+		zddx = 1;
+		zddz = 0;
+		dx_reset_at_x_loop_end = false;
+		dz_reset_at_x_loop_end = true;
+	}
+	else if ( r == 180 )
+	{
+		px -= 1;
+		pz -= 1;
+		xddx = -1;
+		xddz = 0;
+		zddx = 0;
+		zddz = -1;
+	}
+	else if ( r == 270 )
+	{
+		px -= 1;
+		xddx = 0;
+		xddz = 1;
+		zddx = -1;
+		zddz = 0;
+		dx_reset_at_x_loop_end = false;
+		dz_reset_at_x_loop_end = true;
+	}
 
-		for ( int x = 0; x < grid_data->width(); x++ )
+	int dx = px;
+	int dz = pz;
+
+	for ( int z = 0; z < grid_data->depth(); z++, dx += zddx, dz += zddz )
+	{
+		for ( int x = 0; x < grid_data->width(); x++, dx += xddx, dz += xddz )
 		{
-			if ( px + x < 0 ) continue;
-			if ( px + x >= width() ) continue;
+			if ( dx < 0 ) continue;
+			if ( dx >= width() ) continue;
+			if ( dz < 0 ) continue;
+			if ( dz >= depth() ) continue;
 
-			if ( cell( px + x, pz + z ).height() > static_cast< int >( py + grid_data->cell( x, z ).height() ) )
+			GridCell& target_cell = cell( dx, dz );
+
+			if ( target_cell.height() > static_cast< int >( py + grid_data->cell( x, z ).height() ) )
 			{
 				continue;
 			}
 
-			cell( px + x, pz + z ).bound() = grid_data->cell( x, z ).bound();
-			cell( px + x, pz + z ).height() = py + grid_data->cell( x, z ).height();
+			target_cell.bound() = grid_data->cell( x, z ).bound();
+			target_cell.height() = py + grid_data->cell( x, z ).height();
 		}
+
+		if ( dx_reset_at_x_loop_end ) dx = px;
+		if ( dz_reset_at_x_loop_end ) dz = pz;
 	}
 }
 

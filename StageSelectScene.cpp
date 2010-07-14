@@ -1,9 +1,12 @@
 #include "StageSelectScene.h"
 #include "Input.h"
+#include "SoundManager.h"
 
 #include "Direct3D9.h"
 #include "Direct3D9Mesh.h"
 #include "DirectX.h"
+
+#include <game/Sound.h>
 
 #include <common/exception.h>
 
@@ -12,8 +15,9 @@ namespace blue_sky
 
 StageSelectScene::StageSelectScene( const GameMain* game_main )
 	: Scene( game_main )
+	, ok_( 0 )
 {
-
+	ok_ = sound_manager()->load( "ok" );
 }
 
 StageSelectScene::~StageSelectScene()
@@ -29,6 +33,7 @@ void StageSelectScene::update()
 {
 	if ( input()->push( Input::A ) )
 	{
+		ok_->play( false );
 		set_next_scene( "game_play" );
 	}
 }

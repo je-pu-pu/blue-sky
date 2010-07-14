@@ -26,7 +26,6 @@ Player::Player()
 	 : input_( 0 )
 	 , stage_( 0 )
 	 , position_( 0.f, 50.f, 0.f )
-	 , direction_( FRONT )
 	 , direction_degree_( 0.f )
 	 , eye_height_( 1.5f )
 	 , aabb_( vector3( -get_collision_width() * 0.5f, 0.f, -get_collision_depth() * 0.5f ), vector3( get_collision_width() * 0.5f, get_collision_height(), get_collision_depth() * 0.5f ) )
@@ -36,8 +35,7 @@ Player::Player()
 	 , is_clambering_( false )
 	 , is_falling_( false )
 {
-	//
-	turn( 0 );
+
 }
 
 void Player::step( float s )
@@ -51,7 +49,11 @@ void Player::step( float s )
 		// s *= 1.f; // 1.5f;
 	}
 
-	velocity() += front() * s * 0.002f;
+	vector3 v = front() * s * 0.04f;
+	velocity().x() = v.x();
+	velocity().z() = v.z();
+
+	// velocity() += front() * s * 0.002f;
 
 	// get_step_speed();
 }
@@ -63,32 +65,37 @@ void Player::side_step( float s )
 		// s = 0.f; // s *= 1.5f;
 	}
 
-	velocity() += right() * s * 0.002f;
+	/*
+	vector3 v = right() * s * 0.02f;
+	velocity().x() = v.x();
+	velocity().z() = v.z();
+	*/
+
+	// velocity() += right() * s * 0.002f;
 
 	// get_side_step_speed();
 }
 
-void Player::turn( int d )
+/**
+ *
+ */
+void Player::add_direction_degree( float d )
 {
-	direction_ = static_cast< Direction >( ( direction_ + d + DIRECTION_MAX ) % DIRECTION_MAX );
+	direction_degree_ += d;
+	
+	while ( direction_degree_ < 0.f ) direction_degree_ += 360.f;
+	while ( direction_degree_ > 360.f ) direction_degree_ -= 360.f;
 
-	switch ( direction_ )
-	{
-	case FRONT : front_ = vector3(  0.f,  0.f,  1.f ); right_ = vector3(  1.f,  0.f,  0.f ); break;
-	case RIGHT : front_ = vector3(  1.f,  0.f,  0.f ); right_ = vector3(  0.f,  0.f, -1.f ); break;
-	case BACK  : front_ = vector3(  0.f,  0.f, -1.f ); right_ = vector3( -1.f,  0.f,  0.f ); break;
-	case LEFT  : front_ = vector3( -1.f,  0.f,  0.f ); right_ = vector3(  0.f,  0.f,  1.f ); break;
-	default : COMMON_THROW_EXCEPTION;
-	}
+	matrix4x4 m;
+	m.rotate_y( direction_degree_ );
 
-	direction_degree_ += d * 90.f;
+	front_ = vector3( 0.f, 0.f, 1.f ) * m;
 
-	if ( d )
-	{
-		play_sound( "turn" );
-	}
-
-	is_turn_avaiable_ = false;
+	if ( direction_degree_ < 45.f ) direction_ = FRONT;
+	else if ( direction_degree_ < 45.f + 90.f * 1.f ) direction_ = RIGHT;
+	else if ( direction_degree_ < 45.f + 90.f * 2.f ) direction_ = BACK;
+	else if ( direction_degree_ < 45.f + 90.f * 3.f ) direction_ = LEFT;
+	else direction_ = FRONT;
 }
 
 /**
@@ -144,7 +151,7 @@ void Player::update()
 		}
 
 		position().x() = last_position.x();
-		velocity().x() *= -1.1f;
+		velocity().x() *= 0.1f;
 	}
 
 	position().z() += velocity().z();
@@ -178,11 +185,16 @@ void Player::update()
 		}
 
 		position().z() = last_position.z();
-		velocity().z() *= -1.1f;
+		velocity().z() *= 0.1f;
 	}
 
 	position().y() += velocity().y();
-	position().y() = std::min( position().y(), 300.f );
+
+	if ( position().y() >= 300.f )
+	{
+		position().y() = 300.f;
+		velocity().y() = 0.f;
+	}
 
 	const GridCell& floor_cell_y = get_floor_cell();
 	
@@ -220,7 +232,7 @@ void Player::update()
 		else
 		{
 			// ’…’nŽ¸”s
-			if ( /* floor_cell_y.height() == 0 && */ velocity().y() == -get_max_speed() )
+			if ( is_falling_to_dead() )
 			{
 				is_dead_ = true;
 				play_sound( "dead" );
@@ -250,11 +262,11 @@ void Player::update()
 	position().y() = std::max( 0.f, position().y() );
 
 	// gravity
-	// velocity().y() -= 0.01f;
+	velocity().y() -= 0.01f;
 	// velocity().y() -= 0.015f;
 	// velocity().y() -= 0.004f;
 	// velocity().y() -= 0.002f;
-	velocity().y() -= 0.001f;
+	// velocity().y() -= 0.001f;
 	// velocity().y() -= 0.0001f;
 
 	if ( input_->press( Input::B ) )
@@ -298,8 +310,10 @@ void Player::jump()
 {
 	if ( is_jumping() ) return;
 	
-	velocity_.y() = 1.f;
-	// velocity_.z() = 0.1f;
+	velocity_.y() = 0.5f;
+	
+	// velocity_.x() += front_.x() * 0.4f;
+	// velocity_.z() += front_.z() * 0.4f;
 	
 	is_jumping_ = true;
 
@@ -322,14 +336,20 @@ void Player::fall()
 	play_sound( "fall" );
 }
 
+/**
+ * 
+ */
+bool Player::is_falling_to_dead() const
+{
+	return velocity().y() < -get_max_speed() * 0.6f;
+}
+
 void Player::rebirth()
 {
 	is_dead_ = false;
 	direction_ = FRONT;
 	direction_degree_ = 0.f;
 	eye_height_ = 1.5f;
-
-	turn( 0 );
 }
 
 const GridCell& Player::get_floor_cell_center() const
@@ -370,7 +390,7 @@ void Player::set_input( const Input* input )
 /**
  *
  */
-float Player::get_max_speed()
+float Player::get_max_speed() const
 {
 	return 1.f;
 }

@@ -112,18 +112,18 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	stage_ = new Stage( 1000, 1000 );
 	player_->set_stage( stage_.get() );
 
-	generate_random_stage();
+	// generate_random_stage();
 
 	// load_stage_file( "media/stage/quit" );
 	// load_stage_file( "media/stage/stage-1-1" );
-	// load_stage_file( "media/stage/stage-1-2" );
+	load_stage_file( "media/stage/stage-1-2" );
 
 	player_->position() = player_start_position_;
 
 	for ( GridObjectManager::GridObjectList::iterator i = grid_object_manager()->grid_object_list().begin(); i != grid_object_manager()->grid_object_list().end(); ++i )
 	{
 		GridObject* grid_object = *i;
-		stage_->put( grid_object->x(), grid_object->y(), grid_object->z(), grid_object->grid_data() );
+		stage_->put( grid_object->x(), grid_object->y(), grid_object->z(), grid_object->rotate_degree(), grid_object->grid_data() );
 	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE ) );
@@ -294,78 +294,29 @@ void GamePlayScene::save_stage_file( const char* file_name ) const
  */
 void GamePlayScene::update()
 {
-	static int run_count = 0;
-
 	if ( ! player_->is_dead() )
 	{
 		if ( input()->press( Input::B ) )
 		{
-			if ( camera_->step_rotate_x_available() )
-			{
-				if ( input()->press( Input::UP    ) ) { camera_->step_rotate_x( -1 ); sound_manager()->get_sound( "turn" )->play( false ); }
-				if ( input()->press( Input::DOWN  ) ) { camera_->step_rotate_x( +1 ); sound_manager()->get_sound( "turn" )->play( false ); }
-			}
-
-			if ( player_->is_turn_available() )
-			{
-				if ( input()->push( Input::LEFT  ) ) { player_->turn( -1 ); }
-				if ( input()->push( Input::RIGHT ) ) { player_->turn( +1 ); }
-			}
+			player_->step( +1 );
 		}
-		else
+		if ( input()->push( Input::A ) )
 		{
-			if ( input()->press( Input::UP    ) )
-			{
-				player_->step( +1 );
-				
-				if ( ! player_->is_jumping() )
-				{
-					run_count++;
-					if ( run_count == 120 )
-					{
-						sound_manager()->get_sound( "short-breath" )->play( false );
-					}
-				}
-				else
-				{
-					run_count = 0;
-				}
-			}
-			else
-			{
-				run_count = 0;
-			}
-			if ( input()->press( Input::DOWN  ) ) { player_->step( -1 ); }
-			if ( input()->press( Input::LEFT  ) ) { player_->side_step( -1 ); }
-			if ( input()->press( Input::RIGHT ) ) { player_->side_step( +1 ); }
+			player_->jump();
 		}
-
-		if ( player_->is_turn_available() )
-		{
-			if ( input()->get_mouse_x() == -1.f ) { player_->turn( -1 ); input()->set_mouse_x( +0.8f ); }
-			if ( input()->get_mouse_x() == +1.f ) { player_->turn( +1 ); input()->set_mouse_x( -0.8f ); }
-		}
-
-		if ( input()->push( Input::L ) && player_->is_turn_available() ) { player_->turn( -1 ); }
-		if ( input()->push( Input::R ) && player_->is_turn_available() ) { player_->turn( +1 ); }
-	
-		if ( input()->push( Input::A ) ) { player_->jump(); }
 	}
 
-	// if ( input()->push( Input::A ) ) { player_->is_jumping() ? player_->fall() : player_->jump(); }
+	player_->add_direction_degree( input()->get_mouse_dx() * 90.f );
+
+	camera_->rotate_degree_target().y() = player_->direction_degree();
+	camera_->rotate_degree_target().x() = input()->get_mouse_y() * 90.f;
 
 	player_->update();
 
 	camera_->position() = player_->position() + vector3( 0.f, player_->get_eye_height(), 0.f );
-//	camera_->rotate_degree_target().y() = player_->direction_degree();
-
-	camera_->rotate_degree_target().y() = player_->direction_degree() + input()->get_mouse_x() * 45.f;
-	camera_->rotate_degree_target().x() = input()->get_mouse_y() * 90.f;
 	
 	if ( player_->is_dead() )
 	{
-		// camera_->position() 
-		// camera_->rotate_degree_target().x() = 90.f;
 		camera_->rotate_degree_target().z() = 90.f;
 		brightness = math::chase( brightness, -0.5f, 0.01f );
 
@@ -380,12 +331,19 @@ void GamePlayScene::update()
 			brightness = 1.f;
 		}
 	}
+	else if ( player_->is_falling_to_dead() )
+	{
+		brightness = math::chase( brightness, 0.5f, 0.02f );
+	}
 	else
 	{
 		brightness = math::chase( brightness, 0.f, 0.02f );
 	}
 
 	camera_->update();
+
+	if ( input()->get_mouse_x() <= -1.f ) { input()->set_mouse_x( 0.f ); }
+	if ( input()->get_mouse_x() >= +1.f ) { input()->set_mouse_x( 0.f ); }
 }
 
 /**
@@ -519,7 +477,7 @@ void GamePlayScene::render()
 			const float offset = 0.05f;
 			const float flicker = 0.f; // sin( grid_object->x() + grid_object->z() * 0.001f + a ) * 0.1f;
 
-			D3DXMatrixRotationY( & r, math::degree_to_radian( static_cast< float >( -grid_object->rotate_degree() ) ) );
+			D3DXMatrixRotationY( & r, math::degree_to_radian( static_cast< float >( grid_object->rotate_degree() ) ) );
 			D3DXMatrixTranslation( & t, static_cast< float >( grid_object->x() ), static_cast< float >( grid_object->y() + flicker + offset ), static_cast< float >( grid_object->z() ) );
 
 			world = s * r * t;
@@ -624,9 +582,11 @@ void GamePlayScene::render()
 		common::serialize( static_cast< int >( player_->position().z() ) ) + ")\n" +
 		"mouse : ( " +
 		common::serialize( input()->get_mouse_x() ) + ", " +
-		common::serialize( input()->get_mouse_y() );
+		common::serialize( input()->get_mouse_y() ) + ")\n( " +
+		common::serialize( input()->get_mouse_dx() ) + ", " +
+		common::serialize( input()->get_mouse_dy() ) + ")";
 
-	font_->draw_text( 0, 0, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
+	font_->draw_text( 0, 24, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
 }

@@ -57,6 +57,11 @@ private:
 
 	float mouse_x_;											///< マウス X 座標 ( -1.f .. 1.f )
 	float mouse_y_;											///< マウス Y 座標 ( -1.f .. 1.f )
+	
+	float mouse_dx_;										///< マウス X 移動量 ( )
+	float mouse_dy_;
+
+	POINT last_mouse_point_;								///< 前のフレームのマウス 座標
 
 	ButtonCodeList key_code_;
 	ButtonCodeList joystick_code_;
@@ -149,6 +154,9 @@ public:
 
 	float get_mouse_x() const { return mouse_x_; }
 	float get_mouse_y() const { return mouse_y_; }
+
+	float get_mouse_dx() const { return mouse_dx_; }
+	float get_mouse_dy() const { return mouse_dy_; }
 
 	void set_mouse_x( float );
 	void set_mouse_y( float );

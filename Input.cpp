@@ -23,6 +23,10 @@ namespace blue_sky
 {
 
 Input::Input()
+	: mouse_x_( 0.f )
+	, mouse_y_( 0.f )
+	, mouse_dx_( 0.f )
+	, mouse_dy_( 0.f )
 {
 	for ( int n = 0; n < MAX_BUTTONS; n++ )
 	{
@@ -86,8 +90,14 @@ void Input::update()
 	POINT point;
 	GetCursorPos( & point );
 	ScreenToClient( App::GetInstance()->GetWindowHandle(), & point );
+
 	mouse_x_ = math::clamp( point.x / static_cast< float >( App::GetInstance()->get_width() - 1 ) * 2.f - 1.f, -1.f, +1.f );
 	mouse_y_ = math::clamp( point.y / static_cast< float >( App::GetInstance()->get_height() - 1 ) * 2.f - 1.f, -1.f, +1.f );
+
+	mouse_dx_ = static_cast< float >( point.x - last_mouse_point_.x ) / static_cast< float >( App::GetInstance()->get_width() - 1 ) * 2.f;
+	mouse_dy_ = static_cast< float >( point.y - last_mouse_point_.y ) / static_cast< float >( App::GetInstance()->get_height() - 1 ) * 2.f;
+
+	last_mouse_point_ = point;
 
 	if ( joystick_enabled_ && joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR )
 	{
@@ -128,11 +138,14 @@ void Input::update_common()
 void Input::set_mouse_x( float x )
 {
 	mouse_x_ = x;
+	mouse_dx_ = 0.f;
 
 	POINT point;
 
 	point.x = static_cast< int >( ( mouse_x_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_width() - 1 ) );
 	point.y = static_cast< int >( ( mouse_y_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_height() - 1 ) );
+
+	last_mouse_point_.x = point.x;
 
 	ClientToScreen( App::GetInstance()->GetWindowHandle(), & point );
 	SetCursorPos( point.x, point.y );
@@ -141,11 +154,14 @@ void Input::set_mouse_x( float x )
 void Input::set_mouse_y( float y )
 {
 	mouse_y_ = y;
+	mouse_dy_ = 0.f;
 
 	POINT point;
 
 	point.x = static_cast< int >( ( mouse_x_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_width() - 1 ) );
 	point.y = static_cast< int >( ( mouse_y_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_height() - 1 ) );
+
+	last_mouse_point_.y = point.y;
 
 	ClientToScreen( App::GetInstance()->GetWindowHandle(), & point );
 	SetCursorPos( point.x, point.y );

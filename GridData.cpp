@@ -205,7 +205,7 @@ const GridCell& GridData::cell( int x, int z ) const
 	return cell_[ z * width_ + x ];
 }
 
-void GridData::put( int px, int py, int pz, int r, const GridData* grid_data )
+bool GridData::put( int px, int py, int pz, int r, const GridData* grid_data )
 {
 	int xddx = 1;
 	int xddz = 0;
@@ -249,6 +249,33 @@ void GridData::put( int px, int py, int pz, int r, const GridData* grid_data )
 	int dx = px;
 	int dz = pz;
 
+	// Collision Check
+	for ( int z = 0; z < grid_data->depth(); z++, dx += zddx, dz += zddz )
+	{
+		for ( int x = 0; x < grid_data->width(); x++, dx += xddx, dz += xddz )
+		{
+			if ( dx < 0 ) continue;
+			if ( dx >= width() ) continue;
+			if ( dz < 0 ) continue;
+			if ( dz >= depth() ) continue;
+
+			GridCell& target_cell = cell( dx, dz );
+
+			if ( target_cell.height() > 0 )
+			{
+				return false;
+			}
+		}
+
+		if ( dx_reset_at_x_loop_end ) dx = px;
+		if ( dz_reset_at_x_loop_end ) dz = pz;
+	}
+
+	dx = px;
+	dz = pz;
+
+
+	// Put
 	for ( int z = 0; z < grid_data->depth(); z++, dx += zddx, dz += zddz )
 	{
 		for ( int x = 0; x < grid_data->width(); x++, dx += xddx, dz += xddz )
@@ -272,6 +299,8 @@ void GridData::put( int px, int py, int pz, int r, const GridData* grid_data )
 		if ( dx_reset_at_x_loop_end ) dx = px;
 		if ( dz_reset_at_x_loop_end ) dz = pz;
 	}
+
+	return true;
 }
 
 }; // namespace blue_sky

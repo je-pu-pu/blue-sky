@@ -13,10 +13,11 @@ class DirectSoundBuffer;
 class DirectSound
 {
 private:
-	LPDIRECTSOUND8			direct_sound_;		///< DirectSound 8
-	LPDIRECTSOUNDBUFFER		primary_buffer_;	///< Primary Buffer
+	LPDIRECTSOUND8				direct_sound_;		///< DirectSound 8
+	LPDIRECTSOUNDBUFFER			primary_buffer_;	///< Primary Buffer
+	LPDIRECTSOUND3DLISTENER8	listener_;			///< 3D Listener
 
-	DSCAPS					caps_;				///< Caps
+	DSCAPS						caps_;				///< Caps
 
 public:
 	DirectSound( HWND );

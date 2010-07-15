@@ -49,6 +49,7 @@ public:
 	void step( float );
 	void side_step( float );
 
+	void kill();
 	bool is_dead() const { return is_dead_; }
 	void rebirth();
 

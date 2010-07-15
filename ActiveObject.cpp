@@ -23,7 +23,8 @@ namespace blue_sky
 ActiveObject::ActiveObject()
 	 : stage_( 0 )
 	 , direction_degree_( 0.f )
-	 , aabb_( vector3( -get_collision_width() * 0.5f, 0.f, -get_collision_depth() * 0.5f ), vector3( get_collision_width() * 0.5f, get_collision_height(), get_collision_depth() * 0.5f ) )
+	 , local_aabb_( vector3( -get_collision_width() * 0.5f, 0.f, -get_collision_depth() * 0.5f ), vector3( get_collision_width() * 0.5f, get_collision_height(), get_collision_depth() * 0.5f ) )
+	 , global_aabb_( local_aabb_ )
 {
 	set_direction_degree( 0.f );
 }
@@ -143,6 +144,9 @@ void ActiveObject::update_position()
 	}
 
 	position().y() = std::max( 0.f, position().y() );
+
+
+	global_aabb_ = local_aabb_ + position();
 }
 
 /**

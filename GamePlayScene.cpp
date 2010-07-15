@@ -92,7 +92,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	{
 		sound_manager()->stop_all();
 
-		sound_manager()->load_music( "bgm", "tower" )->play( true );
+//		sound_manager()->load_music( "bgm", "tower" )->play( true );
 		sound_manager()->load_music( "rain" )->play( true );
 //		sound_manager()->load_music( "izakaya" )->play( false );
 
@@ -128,12 +128,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	player_->position() = player_start_position_;
 
-	for ( GridObjectManager::GridObjectList::iterator i = grid_object_manager()->grid_object_list().begin(); i != grid_object_manager()->grid_object_list().end(); ++i )
-	{
-		GridObject* grid_object = *i;
-		stage_->put( grid_object->x(), grid_object->y(), grid_object->z(), grid_object->rotate_degree(), grid_object->grid_data() );
-	}
-
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF ) );
@@ -141,7 +135,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 GamePlayScene::~GamePlayScene()
 {
-	save_stage_file( "media/stage/quit" );
+	// save_stage_file( "media/stage/quit" );
 
 	font_.release();
 
@@ -160,64 +154,81 @@ GamePlayScene::~GamePlayScene()
 	delete landscape_;
 
 	delete enemy_mesh_;
+
+	grid_object_manager()->clear();
+	active_object_manager()->clear();
 }
 
 void GamePlayScene::generate_random_stage()
 {
 	grid_object_manager()->clear();
 
-	GridData* building_a_grid_ = grid_data_manager()->load( "building-a" );
-	GridData* house_a_grid_ = grid_data_manager()->load( "house-a" );
+	GridData* building_a_grid = grid_data_manager()->load( "building-a" );
+	GridData* building_b_grid = grid_data_manager()->load( "building-b" );
+	GridData* house_a_grid = grid_data_manager()->load( "house-a" );
 	
-	GridData* road_grid_ = grid_data_manager()->load( "road" );
-	GridData* road_curve_grid_ = grid_data_manager()->load( "road-curve" );
+	GridData* road_grid = grid_data_manager()->load( "road" );
+	GridData* road_curve_grid = grid_data_manager()->load( "road-curve" );
 
-	GridData* tex_box_grid_ = grid_data_manager()->load( "tel-box" );
+	GridData* tel_box_grid = grid_data_manager()->load( "tel-box" );
 
 	const int x_space = 0;
 	const int z_space = 0;
-
-	int yy = -15;
 
 	for ( int d = 0; d < 300; d++ )
 	{
 		for ( int x = 0; x < 300; x++ )
 		{
-			// grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), road_grid_ ) );
-			// continue;
+			GridData* grid_data = 0;
+			bool tel_box = false;
 
-			int y = yy;
+			int y = 0;
 
-			if ( common::random( 0, 2 ) == 0 )
+			int random_value = common::random( 0, 10 );
+
+			if ( random_value < 4 )
 			{
-				if ( d > 0 )
-				{
-					int r = common::random( 0, 3 );
-
-					if ( r == 0 ) y -= 5;
-					if ( r >= 2 ) y += 5;
-				}
-
-				y = 0;
-
-				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), y, d * ( 10 + z_space ), 0, building_a_grid_ ) );
+				grid_data = building_a_grid;
 			}
-			else if ( common::random( 0, 2 ) == 0 )
+			else if ( random_value < 5 )
 			{
-				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), 0, house_a_grid_ ) );
+				grid_data = building_b_grid;
+			}
+			else if ( random_value < 6 )
+			{
+				grid_data = house_a_grid;
 			}
 			else
 			{
-				grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), 0, road_grid_ ) );
+				if ( common::random( 0, 3 ) == 0 )
+				{
+					grid_data = road_grid;
+				}
 
 				if ( common::random( 0, 5 ) == 0 )
 				{
-					grid_object_manager()->add_grid_object( new GridObject( x * ( 10 + x_space ), 0, d * ( 10 + z_space ), 0, tex_box_grid_ ) );
+					tel_box = true;
+				}
+			}
+
+			if ( grid_data )
+			{
+				int r = common::random( 0, 3 ) * 90;
+				int dx = x * ( 10 + x_space );
+				int dy = y;
+				int dz = d * ( 10 + z_space );
+
+				if ( stage_->put( dx, dy, dz, r, grid_data ) )
+				{
+					grid_object_manager()->add_grid_object( new GridObject( dx, dy, dz, r, grid_data ) );
+
+					if ( tel_box )
+					{
+						grid_object_manager()->add_grid_object( new GridObject( dx, dy, dz, r, tel_box_grid ) );
+					}
 				}
 			}
 		}
-
-		yy += 5;
 	}
 
 	player_start_position_.x() = common::random( 0.f, 100.f );
@@ -274,7 +285,11 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> grid_data_name >> x >> y >> z >> r;
 
 			GridData* grid_data = grid_data_manager()->load( grid_data_name.c_str() );
-			grid_object_manager()->add_grid_object( new GridObject( x, y, z, r, grid_data ) );
+
+			if ( stage_->put( x, y, z, r, grid_data ) )
+			{
+				grid_object_manager()->add_grid_object( new GridObject( x, y, z, r, grid_data ) );
+			}
 		}
 		else if ( name == "enemy" )
 		{
@@ -283,6 +298,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			Enemy* enemy = new Enemy();
 			enemy->set_stage( stage_.get() );
+			enemy->set_player( player_.get() );
 			enemy->position().set( x, y, z );
 			enemy->set_direction_degree( r );
 
@@ -337,12 +353,25 @@ void GamePlayScene::update()
 
 	active_object_manager()->update();
 
+	for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
+	{
+		ActiveObject* active_object = *i;
+
+		if ( active_object->global_aabb().collision_detection( player_->global_aabb() ) )
+		{
+			// active_object->on_collision( player_ );
+			// player_->on_collision( active_object );
+
+			player_->kill();
+		}
+	}
+
 	camera_->position() = player_->position() + vector3( 0.f, player_->get_eye_height(), 0.f );
 	
 	if ( player_->is_dead() )
 	{
 		camera_->rotate_degree_target().z() = 90.f;
-		brightness = math::chase( brightness, -0.5f, 0.01f );
+		brightness = math::chase( brightness, -0.4f, 0.01f );
 
 		if ( camera_->rotate_degree().z() == camera_->rotate_degree_target().z() && input()->push( Input::A ) )
 		{
@@ -486,8 +515,8 @@ void GamePlayScene::render()
 		{
 			GridObject* grid_object = *i;
 
-			const int max_length = 1000;
-			const int lod_length = 200;
+			const int max_length = 500;
+			const int lod_length = 100;
 
 			const int x_length = std::abs( static_cast< int >( player_->position().x() ) - grid_object->x() );
 			const int y_length = std::abs( static_cast< int >( player_->position().y() ) - grid_object->y() );
@@ -497,12 +526,13 @@ void GamePlayScene::render()
 			if ( z_length >= max_length ) continue;
 			
 			const float offset = 0.05f;
-			const float flicker = 0.f; // sin( grid_object->x() + grid_object->z() * 0.001f + a ) * 0.1f;
+			const float flicker = 0.f; // sin( grid_object->x() + grid_object->z() * 0.001f + a ) * 0.5f;
 
 			D3DXMatrixRotationY( & r, math::degree_to_radian( static_cast< float >( grid_object->rotate_degree() ) ) );
 			D3DXMatrixTranslation( & t, static_cast< float >( grid_object->x() ), static_cast< float >( grid_object->y() + flicker + offset ), static_cast< float >( grid_object->z() ) );
 
 			world = s * r * t;
+
 
 			WorldViewProjection = world * view * projection;
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );

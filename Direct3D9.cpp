@@ -51,6 +51,7 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 
 	present_.EnableAutoDepthStencil = TRUE;
 	present_.AutoDepthStencilFormat = D3DFMT_D16;
+	present_.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 //	present_.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 
 	DWORD max_multi_sample_quality = 0;

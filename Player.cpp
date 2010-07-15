@@ -148,7 +148,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 		velocity().y() = 1.f;
 	
 		is_jumping_ = true;
-		step_speed_ = 0.5f;
+		step_speed_ = 0.2f;
 
 		stop_sound( "super-jump" );
 		play_sound( "super-jump" );
@@ -173,8 +173,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 		// ’…’nŽ¸”s
 		if ( is_falling_to_dead() )
 		{
-			is_dead_ = true;
-			play_sound( "dead" );
+			kill();
 			play_sound( "land" );
 		}
 
@@ -269,11 +268,22 @@ bool Player::is_falling_to_dead() const
 	return velocity().y() < -get_max_speed() * 0.6f;
 }
 
+void Player::kill()
+{
+	if ( ! is_dead_ )
+	{
+		is_dead_ = true;
+		play_sound( "dead" );
+	}
+}
+
 void Player::rebirth()
 {
 	is_dead_ = false;
 	set_direction_degree( 0.f );
 	eye_height_ = 1.5f;
+
+	velocity().init();
 }
 
 void Player::set_input( const Input* input )

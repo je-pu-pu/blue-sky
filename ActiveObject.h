@@ -46,7 +46,8 @@ private:
 
 	vector3		front_;				///< ‘O
 
-	AABB		aabb_;				///< AABB
+	AABB		local_aabb_;		///< AABB ( local )
+	AABB		global_aabb_;		///< AABB ( global )
 	
 protected:
 	const Stage* stage() const { return stage_; }
@@ -88,7 +89,8 @@ public:
 	vector3& front() { return front_; }
 	const vector3& front() const { return front_; }
 
-	AABB& aabb() { return aabb_; }
+	const AABB& local_aabb() const { return local_aabb_; }
+	const AABB& global_aabb() const { return global_aabb_; }
 
 	/// XV
 	virtual void update() = 0;

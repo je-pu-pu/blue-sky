@@ -11,6 +11,7 @@
 DirectSound::DirectSound( HWND hwnd )
 	: direct_sound_( 0 )
 	, primary_buffer_( 0 )
+	, listener_( 0 )
 {
 	DIRECT_X_FAIL_CHECK( DirectSoundCreate8( NULL, & direct_sound_, 0 ) );
 	DIRECT_X_FAIL_CHECK( direct_sound_->SetCooperativeLevel( hwnd, DSSCL_PRIORITY ) );
@@ -20,9 +21,14 @@ DirectSound::DirectSound( HWND hwnd )
 
 	// Create Primary Buffer
 	DSBUFFERDESC buffer_desc = { sizeof( DSBUFFERDESC ) };
-	buffer_desc.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_PRIMARYBUFFER;
+	buffer_desc.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRL3D | DSBCAPS_PRIMARYBUFFER;
 
 	DIRECT_X_FAIL_CHECK( direct_sound_->CreateSoundBuffer( & buffer_desc, & primary_buffer_, 0 ) );
+
+
+	// 3D 
+	DIRECT_X_FAIL_CHECK( primary_buffer_->QueryInterface( IID_IDirectSound3DListener8, reinterpret_cast< void** >( & listener_ ) ) );
+	DIRECT_X_FAIL_CHECK( listener_->SetDopplerFactor( 2.f, DS3D_IMMEDIATE ) );
 
 	/*
 	PCMWAVEFORMAT format = { 0 };

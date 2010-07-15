@@ -15,6 +15,7 @@ namespace blue_sky
 {
 
 class Player;
+class ActiveObject;
 class Camera;
 class Stage;
 
@@ -55,6 +56,8 @@ public:
 
 	void update();				///< ƒƒCƒ“ƒ‹[ƒv
 	void render();				///< •`‰æ
+
+	void render_shadow( const ActiveObject*, const D3DXMATRIXA16& );
 
 }; // class Scene
 

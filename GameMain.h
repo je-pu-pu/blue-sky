@@ -28,6 +28,7 @@ class Input;
 class SoundManager;
 class GridDataManager;
 class GridObjectManager;
+class ActiveObjectManager;
 class Scene;
 
 /**
@@ -51,6 +52,8 @@ protected:
 
 	GridDataManager*		grid_data_manager_;		///< GridDataManager
 	GridObjectManager*		grid_object_manager_;	///< GridObjectManager
+
+	ActiveObjectManager*	active_object_manager_;	///< ActiveObjectManager
 
 	Config*					config_;				///< Config
 
@@ -84,6 +87,7 @@ public:
 	
 	GridDataManager* get_grid_data_manager() const { return grid_data_manager_; }
 	GridObjectManager* get_grid_object_manager() const { return grid_object_manager_; }
+	ActiveObjectManager* get_active_object_manager() const { return active_object_manager_; }
 	
 	Config* get_config() const { return config_; }
 

@@ -16,6 +16,7 @@
 #include "SoundManager.h"
 #include "GridDataManager.h"
 #include "GridObjectManager.h"
+#include "ActiveObjectManager.h"
 
 #include "Direct3D9.h"
 #include "Direct3D9Font.h"
@@ -42,6 +43,7 @@ GameMain::GameMain()
 	, sound_manager_( 0 )
 	, grid_data_manager_( 0 )
 	, grid_object_manager_( 0 )
+	, active_object_manager_( 0 )
 	, config_( 0 )
 	, scene_( 0 )
 {
@@ -79,6 +81,9 @@ GameMain::GameMain()
 	// GridOBjectManager
 	grid_object_manager_ = new GridObjectManager();
 
+	// ActiveObjectManager 
+	active_object_manager_ = new ActiveObjectManager();
+
 	// Scene
 	scene_ = new TitleScene( this );
 
@@ -109,6 +114,8 @@ GameMain::~GameMain()
 	delete grid_data_manager_;
 
 	delete grid_object_manager_;
+
+	delete active_object_manager_;
 
 	delete config_;
 }
@@ -254,7 +261,7 @@ void GameMain::on_function_key_down( int function_key )
 
 void GameMain::on_mouse_wheel( int wheel )
 {
-	input_->push_mouse_wheel_queue( wheel ? 1 : -1 );
+	input_->push_mouse_wheel_queue( wheel > 0 ? 1 : -1 );
 }
 
 } // namespace blue_sky

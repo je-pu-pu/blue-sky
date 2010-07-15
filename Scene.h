@@ -20,6 +20,7 @@ namespace blue_sky
 class GameMain;
 class GridDataManager;
 class GridObjectManager;
+class ActiveObjectManager;
 class SoundManager;
 class Input;
 class Config;
@@ -43,6 +44,7 @@ protected:
 	Direct3D9* direct_3d() const;
 	GridDataManager* grid_data_manager() const;
 	GridObjectManager* grid_object_manager() const;
+	ActiveObjectManager* active_object_manager() const;
 	SoundManager* sound_manager() const;
 	Input* input() const;
 	Config* config() const;

@@ -7,7 +7,7 @@ namespace blue_sky
 {
 
 Camera::Camera()
-	: fov_( 90.f )
+	: fov_( 60.f )
 	, under_view_rate_( 0.f )
 	, rotate_step_x_( 0 )
 	, rotate_step_y_( 0 )

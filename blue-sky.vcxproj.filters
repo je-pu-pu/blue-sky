@@ -81,6 +81,9 @@
     <ClCompile Include="Direct3D9Resource.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
+    <ClCompile Include="ActiveObject.cpp" />
+    <ClCompile Include="ActiveObjectManager.cpp" />
+    <ClCompile Include="Enemy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -155,6 +158,9 @@
     <ClInclude Include="Direct3D9Resource.h">
       <Filter>DirectX</Filter>
     </ClInclude>
+    <ClInclude Include="ActiveObject.h" />
+    <ClInclude Include="ActiveObjectManager.h" />
+    <ClInclude Include="Enemy.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="media\object\building-a">

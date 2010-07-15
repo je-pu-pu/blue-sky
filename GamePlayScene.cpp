@@ -20,6 +20,9 @@
 #include "GridObject.h"
 #include "GridCell.h"
 
+#include "ActiveObjectManager.h"
+#include "Enemy.h"
+
 #include "matrix4x4.h"
 #include "vector3.h"
 
@@ -42,6 +45,8 @@ namespace blue_sky
 {
 
 Direct3D9Mesh* landscape_ = 0;
+Direct3D9Mesh* enemy_mesh_ = 0;
+
 float brightness = 0.f;
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
@@ -63,6 +68,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// Mesh
 	player_mesh_ = new Direct3D9Mesh( direct_3d() );
 	player_mesh_->load_x( "media/model/player" );
+
+	enemy_mesh_ = new Direct3D9Mesh( direct_3d() );
+	enemy_mesh_->load_x( "media/model/enemy-a" );
 
 	shadow_mesh_ = new Direct3D9Mesh( direct_3d() );
 	shadow_mesh_->load_x( "media/model/shadow" );
@@ -150,6 +158,8 @@ GamePlayScene::~GamePlayScene()
 	box_.release();
 
 	delete landscape_;
+
+	delete enemy_mesh_;
 }
 
 void GamePlayScene::generate_random_stage()
@@ -266,6 +276,18 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			GridData* grid_data = grid_data_manager()->load( grid_data_name.c_str() );
 			grid_object_manager()->add_grid_object( new GridObject( x, y, z, r, grid_data ) );
 		}
+		else if ( name == "enemy" )
+		{
+			float x = 0, y = 0, z = 0, r = 0;
+			ss >> x >> y >> z >> r;
+
+			Enemy* enemy = new Enemy();
+			enemy->set_stage( stage_.get() );
+			enemy->position().set( x, y, z );
+			enemy->set_direction_degree( r );
+
+			active_object_manager()->add_active_object( enemy );
+		}
 	}
 }
 
@@ -308,10 +330,12 @@ void GamePlayScene::update()
 
 	player_->add_direction_degree( input()->get_mouse_dx() * 90.f );
 
-	camera_->rotate_degree_target().y() = player_->direction_degree();
+	camera_->rotate_degree_target().y() = player_->get_direction_degree();
 	camera_->rotate_degree_target().x() = input()->get_mouse_y() * 90.f;
 
 	player_->update();
+
+	active_object_manager()->update();
 
 	camera_->position() = player_->position() + vector3( 0.f, player_->get_eye_height(), 0.f );
 	
@@ -535,6 +559,15 @@ void GamePlayScene::render()
 		}
 		*/
 
+		// Player ( Shadow )
+		render_shadow( player_.get(), view * projection );
+
+		// ActiveObject ( Shadow )
+		for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
+		{
+			render_shadow( *i, view * projection );
+		}
+
 		// Player
 		vector3 pos = player_->position();
 		pos += -camera_->front() * 0.1f;
@@ -549,25 +582,20 @@ void GamePlayScene::render()
 
 		player_mesh_->render();
 
-		// Player ( Shadow )
-		std::list< float > grid_cell_height_set;
-
-		grid_cell_height_set.push_back( player_->get_floor_cell_center().height() );
-		grid_cell_height_set.push_back( player_->get_floor_cell_left_front().height() );
-		grid_cell_height_set.push_back( player_->get_floor_cell_right_front().height() );
-		grid_cell_height_set.push_back( player_->get_floor_cell_left_back().height() );
-		grid_cell_height_set.push_back( player_->get_floor_cell_right_back().height() );
-
-		for ( std::list< float >::iterator i = grid_cell_height_set.begin(); i != grid_cell_height_set.end(); ++i )
+		// ActiveObject
+		for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
 		{
-			D3DXMatrixTranslation( & t, player_->position().x() , *i + 0.11f, player_->position().z() );
-			world = r * t;
+			ActiveObject* active_object = *i;
 
+			D3DXMatrixRotationY( & r, math::degree_to_radian( active_object->get_direction_degree() ) );
+			D3DXMatrixTranslation( & t, active_object->position().x(), active_object->position().y() + 0.05f, active_object->position().z() );
+
+			world = r * t;
 			WorldViewProjection = world * view * projection;
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
-			shadow_mesh_->render();
+			enemy_mesh_->render();
 		}
 	}
 
@@ -589,6 +617,34 @@ void GamePlayScene::render()
 	*/
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
+}
+
+void GamePlayScene::render_shadow( const ActiveObject* active_object, const D3DXMATRIXA16& after )
+{
+	D3DXMATRIXA16 r;
+	D3DXMATRIXA16 t;
+	D3DXMATRIXA16 WorldViewProjection;
+
+	D3DXMatrixRotationY( & r, math::degree_to_radian( active_object->get_direction_degree() ) );
+
+	std::list< float > grid_cell_height_list;
+
+	grid_cell_height_list.push_back( active_object->get_floor_cell_center().height() );
+	grid_cell_height_list.push_back( active_object->get_floor_cell_left_front().height() );
+	grid_cell_height_list.push_back( active_object->get_floor_cell_right_front().height() );
+	grid_cell_height_list.push_back( active_object->get_floor_cell_left_back().height() );
+	grid_cell_height_list.push_back( active_object->get_floor_cell_right_back().height() );
+
+	for ( std::list< float >::iterator i = grid_cell_height_list.begin(); i != grid_cell_height_list.end(); ++i )
+	{
+		D3DXMatrixTranslation( & t, active_object->position().x() , *i + 0.11f, active_object->position().z() );
+
+		WorldViewProjection = r * t * after;
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+
+		shadow_mesh_->render();
+	}
 }
 
 } // namespace blue_sky

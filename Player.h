@@ -1,57 +1,26 @@
 #ifndef BLUE_SKY_PLAYER_H
 #define BLUE_SKY_PLAYER_H
 
-#include "vector3.h"
-#include <game/AABB.h>
-
-namespace game
-{
-
-class Sound;
-template< typename > class AABB;
-
-} // namespace game
+#include "ActiveObject.h"
 
 namespace blue_sky
 {
-
-class Input;
-class Stage;
-class GridCell;
 
 /**
  * プレイヤー
  *
  */
-class Player
+class Player : public ActiveObject
 {
 public:
-	typedef game::Sound Sound;
-	typedef game::AABB< vector3 > AABB;
 
-	enum Direction
-	{
-		FRONT = 0, RIGHT, BACK, LEFT,
-		DIRECTION_MAX
-	};
 
 private:
 	const Input* input_;			///< 入力への参照
-	const Stage* stage_;			///< ステージへの参照
-
-	vector3		position_;			///< 座標
-	vector3		velocity_;			///< 移動量
-
-	Direction	direction_;			///< 方向
-	float		direction_degree_;	///< 方向 ( Y Axis Degree )
 
 	float		step_speed_;		///< 移動速度
 
-	vector3		front_;				///< 前
-	vector3		right_;				///< 右
 	float		eye_height_;		///< 目の高さ
-
-	AABB		aabb_;				///< AABB
 
 	bool		is_dead_;			///< 死亡フラグ
 	bool		is_turn_avaiable_;	///< 方向転換有効フラグ
@@ -61,37 +30,21 @@ private:
 	bool		is_falling_;		///< 落下中フラグ
 	vector3		velocity_on_fall_;	///< 落下開始時の移動量
 	
-	float get_max_speed() const;
+	void on_collision_x( const GridCell& );
+	void on_collision_y( const GridCell& );
+	void on_collision_z( const GridCell& );
+
 	float get_collision_width() const;
 	float get_collision_height() const;
 	float get_collision_depth() const;
-	
-	const GridCell& get_floor_cell() const;
-
-	void play_sound( const char*, bool = false ) const;
-	void stop_sound( const char* ) const;
 
 public:
 	Player();
 	~Player() { }
 	
-	vector3& position() { return position_; }
-	const vector3& position() const { return position_; }
-
-	vector3& velocity() { return velocity_; }
-	const vector3& velocity() const { return velocity_; }
-
-	Direction direction() const { return direction_; }
-
-	float direction_degree() const { return direction_degree_; }
 	void add_direction_degree( float );
 
-	vector3& front() { return front_; }
-	vector3& right() { return right_; }
-
 	float get_eye_height() const { return eye_height_; }
-
-	AABB& aabb() { return aabb_; }
 
 	void step( float );
 	void side_step( float );
@@ -118,14 +71,7 @@ public:
 	bool is_falling() const { return is_falling_; }
 	bool is_falling_to_dead() const;
 
-	const GridCell& get_floor_cell_center() const;
-	const GridCell& get_floor_cell_left_front() const;
-	const GridCell& get_floor_cell_right_front() const;
-	const GridCell& get_floor_cell_left_back() const;
-	const GridCell& get_floor_cell_right_back() const;
-
 	void set_input( const Input* );
-	void set_stage( const Stage* );	
 	
 }; // class Player
 

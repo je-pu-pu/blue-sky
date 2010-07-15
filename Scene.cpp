@@ -39,6 +39,11 @@ GridObjectManager* Scene::grid_object_manager() const
 	return game_main_->get_grid_object_manager();
 }
 
+ActiveObjectManager* Scene::active_object_manager() const
+{
+	return game_main_->get_active_object_manager();
+}
+
 SoundManager* Scene::sound_manager() const
 {
 	return game_main_->get_sound_manager();

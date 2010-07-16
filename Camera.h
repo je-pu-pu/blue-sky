@@ -24,30 +24,20 @@ private:
 
 	vector3 front_;					///< 前
 
-	int rotate_step_x_;				///< 回転角度ステップ数 ( X Axis )
-	int rotate_step_y_;				///< 回転角度ステップ数 ( Y Axis )
-
 	vector3 rotate_degree_;			///< XYZ 各軸に対する回転角度
 	vector3 rotate_degree_target_;	///< XYZ 各軸に対する回転角度 ( 目標 )
 
 	float fov_;						///< FOV
-	float under_view_rate_;			///< 真下視点の度合い ( 0.f .. 1.f )
 
-	int panorama_y_division_;		///< パノラマ分割数
 public:
 	Camera();
 	~Camera();
-
-	void set_panorama_y_division( int d ) { panorama_y_division_ = d; }
 
 	vector3& position() { return position_; }
 	const vector3& look_at() { return look_at_; }
 	const vector3& up() const { return up_; }
 
 	const vector3& front() const { return front_; }
-
-	vector3 get_look_at_part( int ) const;
-	vector3 get_up_part( int ) const;
 
 	vector3& rotate_degree() { return rotate_degree_; }
 	vector3& rotate_degree_target() { return rotate_degree_target_; }
@@ -60,17 +50,9 @@ public:
 
 	void update();
 
-	void set_under_view_rate( float );
-	float get_under_view_rate() const { return under_view_rate_; }
-
-	float aspect() const { return 720.f / ( 480.f / panorama_y_division_ ); }
+	float aspect() const { return 720.f / 480.f; /* todo */ }
 	float near_clip() const { return 0.05f; }
 	float far_clip() const { return 500.f; }
-
-	bool step_rotate_x_available() const { return rotate_degree().x() == rotate_degree_target().x(); }
-
-	void step_rotate_x( int );
-	void step_rotate_y( int );
 };
 
 } // namespace blue_sky

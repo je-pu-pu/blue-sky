@@ -172,6 +172,8 @@ void ActiveObject::play_sound( const char* name, bool loop ) const
 	
 	if ( sound )
 	{
+		sound->set_3d_position( position().x(), position().y(), position().z() );
+		sound->set_3d_velocity( velocity().x(), velocity().z(), velocity().z() );
 		sound->play( loop );
 	}
 }

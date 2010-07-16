@@ -83,7 +83,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	landscape_->load_x( "media/model/landscape" );
 
 	// SkyBox
-	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box", "jpg" );
+	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-star-2", "png" );
 
 	// Box
 	box_ = new Direct3D9Box( direct_3d(), 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
@@ -93,18 +93,17 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		sound_manager()->stop_all();
 
 //		sound_manager()->load_music( "bgm", "tower" )->play( true );
-		sound_manager()->load_music( "rain" )->play( true );
+//		sound_manager()->load_music( "rain" )->play( true );
 //		sound_manager()->load_music( "izakaya" )->play( false );
 
-		sound_manager()->load( "turn" );
-		sound_manager()->load( "clamber" );
-		sound_manager()->load( "collision-wall" );
-		sound_manager()->load( "jump" );
-		sound_manager()->load( "fall", "turn" );
-		sound_manager()->load( "super-jump" );
-		sound_manager()->load( "land" );
-		sound_manager()->load( "short-breath" );
-		sound_manager()->load( "dead" );
+		sound_manager()->load_3d_sound( "ok" );
+		sound_manager()->load_3d_sound( "clamber" );
+		sound_manager()->load_3d_sound( "collision-wall" );
+		sound_manager()->load_3d_sound( "jump" );
+		sound_manager()->load_3d_sound( "super-jump" );
+		sound_manager()->load_3d_sound( "land" );
+		sound_manager()->load_3d_sound( "short-breath" );
+		sound_manager()->load_3d_sound( "dead" );
 
 		sound_manager()->load( "fin" );
 	}
@@ -347,7 +346,15 @@ void GamePlayScene::update()
 	player_->add_direction_degree( input()->get_mouse_dx() * 90.f );
 
 	camera_->rotate_degree_target().y() = player_->get_direction_degree();
-	camera_->rotate_degree_target().x() = input()->get_mouse_y() * 90.f;
+
+	if ( player_->is_jumping() )
+	{
+		camera_->rotate_degree_target().x() = math::chase( camera_->rotate_degree_target().x(), 90.f, 1.f );
+	}
+	else
+	{
+		camera_->rotate_degree_target().x() = input()->get_mouse_y() * 90.f;
+	}
 
 	player_->update();
 
@@ -397,6 +404,11 @@ void GamePlayScene::update()
 
 	if ( input()->get_mouse_x() <= -1.f ) { input()->set_mouse_x( 0.f ); }
 	if ( input()->get_mouse_x() >= +1.f ) { input()->set_mouse_x( 0.f ); }
+
+	sound_manager()->set_listener_position( camera_->position() );
+	sound_manager()->set_listener_velocity( player_->velocity() );
+	sound_manager()->set_listener_orientation( camera_->front(), camera_->up() );
+	sound_manager()->commit();
 }
 
 /**
@@ -422,32 +434,17 @@ void GamePlayScene::render()
 	D3DXMATRIXA16 projection;
 	D3DXMATRIXA16 WorldViewProjection;
 
-	camera_->set_panorama_y_division( get_panorama_y_division() );
-
 	static float a = 0.f;
 	a += 0.02f;
 
-	for ( int panorama_y = 0; panorama_y < get_panorama_y_division(); panorama_y++ )
 	{
-		D3DVIEWPORT9 view_port;
-		view_port.X = 0;
-		view_port.Y = get_height() / get_panorama_y_division() * panorama_y;
-		view_port.Width	= get_width();
-		view_port.Height = get_height() / get_panorama_y_division();
-		view_port.MinZ = 0.f;
-		view_port.MaxZ = 1.f;
-	
-		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetViewport( & view_port ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
-
-		vector3 look_at = camera_->get_look_at_part( panorama_y );
-		vector3 up = camera_->get_up_part( panorama_y );
 		
 		D3DXMATRIXA16 r;
 		D3DXMATRIXA16 s;
 		D3DXMATRIXA16 t;
 		
-		D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & look_at ), reinterpret_cast< const D3DXVECTOR3* >( & up ) );
+		D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->look_at() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->up() ) );
 		D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() / get_panorama_y_division() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() );
 		
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
@@ -473,7 +470,8 @@ void GamePlayScene::render()
 		const int gx = static_cast< int >( player_->position().x() );
 		const int gy = static_cast< int >( player_->position().z() );
 
-		D3DXMatrixTranslation( & t, static_cast< float >( gx / 10 * 10 ), 0.f, static_cast< float >( gy / 10 * 10 ) );
+		// D3DXMatrixTranslation( & t, static_cast< float >( gx / 10 * 10 ), 0.f, static_cast< float >( gy / 10 * 10 ) );
+		D3DXMatrixTranslation( & t, 0.f, 0.f, 0.f );
 		world = t;
 
 		WorldViewProjection = world * view * projection;

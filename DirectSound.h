@@ -1,7 +1,7 @@
 #ifndef DIRECT_SOUND_H
 #define DIRECT_SOUND_H
 
-// #define DIRECTSOUND_VERSION 0x1000
+#define DIRECTSOUND_VERSION 0x1000
 #include <dsound.h>
 
 class DirectSoundBuffer;
@@ -27,6 +27,7 @@ public:
 
 	LPDIRECTSOUND8 get_direct_sound() const { return direct_sound_; }
 	// LPDIRECTSOUNDBUFFER get_primary_buffer() { return primary_buffer_; }
+	LPDIRECTSOUND3DLISTENER8 get_listener() const { return listener_; }
 
 }; // class DirectSound
 

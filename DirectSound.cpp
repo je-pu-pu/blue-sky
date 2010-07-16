@@ -6,7 +6,6 @@
 #include <string>
 
 #pragma comment( lib, "dsound.lib" )
-#pragma comment( lib, "dxerr9.lib" )
 
 DirectSound::DirectSound( HWND hwnd )
 	: direct_sound_( 0 )
@@ -21,7 +20,7 @@ DirectSound::DirectSound( HWND hwnd )
 
 	// Create Primary Buffer
 	DSBUFFERDESC buffer_desc = { sizeof( DSBUFFERDESC ) };
-	buffer_desc.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRL3D | DSBCAPS_PRIMARYBUFFER;
+	buffer_desc.dwFlags = /* DSBCAPS_CTRLVOLUME | */ DSBCAPS_CTRL3D | DSBCAPS_PRIMARYBUFFER;
 
 	DIRECT_X_FAIL_CHECK( direct_sound_->CreateSoundBuffer( & buffer_desc, & primary_buffer_, 0 ) );
 
@@ -55,11 +54,13 @@ DirectSoundBuffer* DirectSound::create_sound_buffer( const DSBUFFERDESC& buffer_
 {
 	LPDIRECTSOUNDBUFFER buffer = 0;
 
-	if ( FAILED( direct_sound_->CreateSoundBuffer( & buffer_desc, & buffer,  0 ) ) )
-	{
-		COMMON_THROW_EXCEPTION;
-	}
+	DIRECT_X_FAIL_CHECK( direct_sound_->CreateSoundBuffer( & buffer_desc, & buffer,  0 ) );
 
-	return new DirectSoundBuffer( buffer );
+	LPDIRECTSOUNDBUFFER8 buffer_8 = 0;
+	HRESULT hr = buffer->QueryInterface( IID_IDirectSoundBuffer8, reinterpret_cast< void** >( & buffer_8 ) );
+	buffer->Release();
+	
+	DIRECT_X_FAIL_CHECK( hr );
+
+	return new DirectSoundBuffer( buffer_8 );
 }
-

@@ -26,6 +26,7 @@ Sound::Sound( const DirectSound* direct_sound )
 	: direct_sound_( direct_sound )
 	, direct_sound_buffer_( 0 )
 	, sound_file_( 0 )
+	, is_3d_sound_( false )
 {
 
 }
@@ -51,11 +52,22 @@ bool Sound::load( const char* file_name )
 	sound_file_ = new SoundFile( file_name );
 
 	DSBUFFERDESC buffer_desc = { sizeof( DSBUFFERDESC ) };
-	buffer_desc.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPAN | DSBCAPS_CTRLFREQUENCY;
+
+	if ( is_3d_sound() )
+	{
+		buffer_desc.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY | DSBCAPS_CTRL3D;
+		buffer_desc.guid3DAlgorithm = DS3DALG_DEFAULT;
+	}
+	else
+	{
+		buffer_desc.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPAN | DSBCAPS_CTRLFREQUENCY;
+	}
+
 	buffer_desc.dwBufferBytes = sound_file_->size();
 	buffer_desc.lpwfxFormat = & sound_file_->format();
 
 	direct_sound_buffer_ = direct_sound_->create_sound_buffer( buffer_desc );
+	direct_sound_buffer_->set_3d_sound( is_3d_sound() );
 
 	void* data = 0;
 	DWORD size = 0;
@@ -67,6 +79,16 @@ bool Sound::load( const char* file_name )
 	direct_sound_buffer_->get_direct_sound_buffer()->Unlock( data, size, 0, 0 );
 
 	return true;
+}
+
+void Sound::set_3d_position( T x, T y, T z )
+{
+	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_3d_buffer()->SetPosition( x, y, z, DS3D_DEFERRED ) );
+}
+
+void Sound::set_3d_velocity( T x, T y, T z )
+{
+	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_3d_buffer()->SetVelocity( x, y, z, DS3D_DEFERRED ) );
 }
 
 Sound::T Sound::get_volume()

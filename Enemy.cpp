@@ -16,6 +16,8 @@ Enemy::Enemy()
 
 void Enemy::update()
 {
+	counter_++;
+
 	if ( player_->is_dead() )
 	{
 		mode_ = MODE_FIND;
@@ -34,8 +36,6 @@ void Enemy::update()
 	}
 	else if ( mode_ == MODE_CHASE )
 	{
-		counter_++;
-
 		if ( counter_ >= 10 )
 		{
 			vector3 relative_position = player_->position() - position();
@@ -58,13 +58,16 @@ void Enemy::update()
 	{
 		velocity() = vector3( 0.f, 0.1f, 0.f );
 
-		counter_++;
-
 		if ( counter_ >= 60 )
 		{
 			mode_ = MODE_CHASE;
 			counter_ = 0;
 		}
+	}
+
+	if ( counter_ % 20 == 0 )
+	{
+		play_sound( "ok" );
 	}
 
 	update_position();

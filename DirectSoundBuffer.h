@@ -1,6 +1,7 @@
 #ifndef DIRECT_SOUND_BUFFER_H
 #define DIRECT_SOUND_BUFFER_H
 
+#define DIRECTSOUND_VERSION 0x1000
 #include <dsound.h>
 
 /**
@@ -10,17 +11,23 @@
 class DirectSoundBuffer
 {
 private:
-	LPDIRECTSOUNDBUFFER		buffer_;	///< DirectSoundBuffer
+	LPDIRECTSOUNDBUFFER8	buffer_;	///< DirectSoundBuffer
+	LPDIRECTSOUND3DBUFFER8	buffer_3d_;	///< DirectSound3DBuffer
+
 	DSBCAPS					caps_;		///< Caps
 
 	float speed_; ///< 
 public:
-	DirectSoundBuffer( LPDIRECTSOUNDBUFFER );
+	DirectSoundBuffer( LPDIRECTSOUNDBUFFER8 );
 	~DirectSoundBuffer();
 	
+	void set_3d_sound( bool );
+
 	void play( bool = false );
 
-	LPDIRECTSOUNDBUFFER get_direct_sound_buffer() { return buffer_; }
+	LPDIRECTSOUNDBUFFER8 get_direct_sound_buffer() { return buffer_; }
+	LPDIRECTSOUND3DBUFFER8 get_direct_sound_3d_buffer() { return buffer_3d_; }
+
 	DSBCAPS& get_caps() { return caps_; }
 
 	float getSpeed() const { return speed_; }

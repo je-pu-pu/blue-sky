@@ -24,7 +24,7 @@ namespace blue_sky
 
 Player::Player()
 	 : input_( 0 )
-	 , step_speed_( 0.06f )
+	 , step_speed_( 0.05f )
 	 , eye_height_( 1.5f )
 	 , is_dead_( false )
 	 , is_turn_avaiable_( true )
@@ -65,12 +65,12 @@ void Player::update()
 
 	if ( w > 0 )
 	{
-		step_speed_ += 0.01f;
+		step_speed_ += 0.05f;
 		step_speed_ = math::clamp( step_speed_, -0.02f, 0.2f );
 	}
 	if ( w < 0 )
 	{
-		step_speed_ -= 0.01f;
+		step_speed_ -= 0.05f;
 		step_speed_ = math::clamp( step_speed_, -0.02f, 0.2f );
 	}
 
@@ -95,8 +95,8 @@ void Player::update()
 	}
 	else
 	{
-		velocity().x() = math::chase( velocity().x(), 0.f, 0.0015f );
-		velocity().z() = math::chase( velocity().z(), 0.f, 0.0015f );
+		velocity().x() *= 0.8f;
+		velocity().z() *= 0.8f;
 
 		if ( velocity().y() < -get_max_speed() * 0.02f )
 		{
@@ -186,7 +186,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 			play_sound( "land" );
 
 			is_jumping_ = false;
-			step_speed_ = 0.06f;
+			step_speed_ = 0.05f;
 
 			// velocity().x() = 0.f;
 			// velocity().z() = 0.f;

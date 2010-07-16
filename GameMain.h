@@ -20,6 +20,7 @@ class Config;
 
 class App;
 class Direct3D9;
+class DirectInput;
 
 namespace blue_sky
 {
@@ -46,6 +47,7 @@ protected:
 	App*					app_;					///< Application
 
 	Direct3D9*				direct_3d_;				///< Direct3D
+	DirectInput*			direct_input_;			///< DirectInput
 
 	Input*					input_;					///< Input
 	SoundManager*			sound_manager_;			///< SoundManager
@@ -94,6 +96,8 @@ public:
 	void on_reset_key_down();
 	void on_function_key_down( int );
 	void on_mouse_wheel( int );
+
+	bool is_clip_cursor_required() const;
 
 }; // class GameMain
 

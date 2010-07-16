@@ -65,6 +65,8 @@ public:
 	const std::string& get_next_scene() const { return next_scene_; }
 	void set_next_scene( const std::string& next_scene ) { next_scene_ = next_scene; }
 
+	virtual bool is_clip_cursor_required() { return false; }
+
 }; // class Scene
 
 } // namespace blue_sky

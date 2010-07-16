@@ -1,6 +1,8 @@
 #ifndef DIRECT_X_H
 #define DIRECT_X_H
 
+#include <common/exception.h>
+
 #include <dxerr9.h>
 #pragma comment( lib, "dxerr9.lib" )
 

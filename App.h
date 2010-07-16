@@ -33,9 +33,12 @@ private:
 
 	std::string title_;					///< タイトル
 
+	bool		is_clip_cursor_enabled_;
+
 	App();								//コンストラクタ
 
 	static LRESULT CALLBACK WinProc(HWND, UINT, WPARAM, LPARAM);
+	static void on_resize( HWND );
 
 	LONG get_window_style() const;
 	LONG get_window_style_full_scrren() const;
@@ -66,6 +69,8 @@ public:
 
 	bool is_full_screen() const { return is_full_screen_; }
 	void set_full_screen( bool );
+
+	void clip_cursor( bool );
 
 	void close();
 };

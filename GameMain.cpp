@@ -20,6 +20,7 @@
 
 #include "Direct3D9.h"
 #include "Direct3D9Font.h"
+#include "DirectInput.h"
 #include "DirectX.h"
 
 #include <game/Sound.h>
@@ -39,6 +40,7 @@ namespace blue_sky
 GameMain::GameMain()
 	: app_( App::GetInstance() )
 	, direct_3d_( 0 )
+	, direct_input_( 0 )
 	, input_( 0 )
 	, sound_manager_( 0 )
 	, grid_data_manager_( 0 )
@@ -67,8 +69,12 @@ GameMain::GameMain()
 		Sleep( 1000 );
 	}
 
+	// DirectInput
+	direct_input_ = new DirectInput( app_->GetInstanceHandle(), app_->GetWindowHandle() );
+
 	// Input
 	input_ = new Input();
+	input_->set_direct_input( direct_input_ );
 	input_->load_config( * config_ );
 
 	// Sound
@@ -109,6 +115,8 @@ GameMain::~GameMain()
 
 	delete input_;
 
+	delete direct_input_;
+
 	delete sound_manager_;
 
 	delete grid_data_manager_;
@@ -134,6 +142,7 @@ bool GameMain::update()
 		return false ;
 	}
 	
+	direct_input_->update();
 	input_->update();
 	sound_manager_->update();
 
@@ -162,6 +171,8 @@ bool GameMain::update()
 		{
 			COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " + scene_->get_next_scene() ) );
 		}
+
+		app_->clip_cursor( scene_->is_clip_cursor_required() );
 	}
 
 	render();
@@ -262,6 +273,11 @@ void GameMain::on_function_key_down( int function_key )
 void GameMain::on_mouse_wheel( int wheel )
 {
 	input_->push_mouse_wheel_queue( wheel > 0 ? 1 : -1 );
+}
+
+bool GameMain::is_clip_cursor_required() const
+{
+	return scene_->is_clip_cursor_required();
 }
 
 } // namespace blue_sky

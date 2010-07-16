@@ -60,7 +60,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, ground_mesh_( 0 )
 	, sky_box_( 0 )
 	, box_( 0 )
-	, panorama_y_division_( config()->get( "panorama_y_division", 1 ) )
 {
 	// Font
 	font_ = new Direct3D9Font( direct_3d() );
@@ -345,6 +344,7 @@ void GamePlayScene::update()
 
 	player_->add_direction_degree( input()->get_mouse_dx() * 90.f );
 
+	// camera_->rotate_degree().y() = player_->get_direction_degree();
 	camera_->rotate_degree_target().y() = player_->get_direction_degree();
 
 	if ( player_->is_jumping() )
@@ -353,7 +353,7 @@ void GamePlayScene::update()
 	}
 	else
 	{
-		camera_->rotate_degree_target().x() = input()->get_mouse_y() * 90.f;
+		camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x() + input()->get_mouse_dy(), -90.f, +90.f );
 	}
 
 	player_->update();
@@ -402,9 +402,6 @@ void GamePlayScene::update()
 
 	camera_->update();
 
-	if ( input()->get_mouse_x() <= -1.f ) { input()->set_mouse_x( 0.f ); }
-	if ( input()->get_mouse_x() >= +1.f ) { input()->set_mouse_x( 0.f ); }
-
 	sound_manager()->set_listener_position( camera_->position() );
 	sound_manager()->set_listener_velocity( player_->velocity() );
 	sound_manager()->set_listener_orientation( camera_->front(), camera_->up() );
@@ -445,7 +442,7 @@ void GamePlayScene::render()
 		D3DXMATRIXA16 t;
 		
 		D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->look_at() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->up() ) );
-		D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() / get_panorama_y_division() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() );
+		D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() );
 		
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
@@ -630,7 +627,6 @@ void GamePlayScene::render()
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );
 
-	/*
 	std::string debug_text = "player : (" + 
 		common::serialize( static_cast< int >( player_->position().x() ) ) + "," +
 		common::serialize( static_cast< int >( player_->position().y() ) ) + "," +
@@ -642,7 +638,6 @@ void GamePlayScene::render()
 		common::serialize( input()->get_mouse_dy() ) + ")";
 
 	font_->draw_text( 0, 24, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
-	*/
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
 }

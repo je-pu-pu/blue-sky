@@ -1,23 +1,44 @@
 #include "DirectInput.h"
+#include "DirectX.h"
 
-#pragma comment (lib, "dinput.lib")
+#pragma comment (lib, "dinput8.lib")
 #pragma comment (lib, "dxguid.lib")
 
 /**
  * コンストラクタ
  */
-DirectInput::DirectInput( HINSTANCE instance )
+DirectInput::DirectInput( HINSTANCE hinstance, HWND hwnd )
 	: direct_input_( 0 )
+	, mouse_device_( 0 )
 {
-	if ( FAILED( DirectInputCreateEx( instance, DIRECTINPUT_VERSION, IID_IDirectInput7, ( void** )( & direct_input_ ), 0 ) ) )
-	{
-		throw "";
-	}
+	DIRECT_X_FAIL_CHECK( DirectInput8Create( hinstance, DIRECTINPUT_VERSION, IID_IDirectInput8, reinterpret_cast< void** >( & direct_input_ ), 0 ) );
+
+
+	DIRECT_X_FAIL_CHECK( direct_input_->CreateDevice( GUID_SysMouse, & mouse_device_, 0 ) );
+	DIRECT_X_FAIL_CHECK( mouse_device_->SetDataFormat( & c_dfDIMouse ) );
+	DIRECT_X_FAIL_CHECK( mouse_device_->SetCooperativeLevel( hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE ) );
+	
+	DIPROPDWORD prop = { sizeof( DIPROPDWORD ), { sizeof( DIPROPHEADER ) } };
+	prop.diph.dwObj = 0;
+	prop.diph.dwHow = DIPH_DEVICE;
+	prop.dwData = DIPROPAXISMODE_REL;
+
+	DIRECT_X_FAIL_CHECK( mouse_device_->SetProperty( DIPROP_AXISMODE, & prop.diph ) );
+
+	mouse_device_->Acquire();
 }
 
 DirectInput::~DirectInput()
 {
+	mouse_device_->Unacquire();
+	mouse_device_->Release();
 	direct_input_->Release();
+}
+
+void DirectInput::update()
+{
+	mouse_device_->Acquire();
+	mouse_device_->GetDeviceState( sizeof( DIMOUSESTATE ), & mouse_state_ );
 }
 
 /*

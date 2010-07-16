@@ -20,6 +20,8 @@
 #include <algorithm>
 #include <windows.h>
 
+class DirectInput;
+
 namespace game
 {
 
@@ -49,16 +51,21 @@ public:
 	typedef boost::array< unsigned int, MAX_BUTTONS > ButtonCodeList;
 
 private:
+	const DirectInput* direct_input_;						///< DirectInput
+
 	unsigned int state_[ MAX_BUTTONS ];						///< 全てのボタンの状態
 	ButtonStack allow_stack_;								///< 最優先の方向ボタン
 
 	JOYINFOEX joy_info_;									///< ジョイスティック
 	bool joystick_enabled_;									///< ジョイスティック有効フラグ
 
+	float mouse_x_sensitivity_;								///< マウス X 座標 感度 ( default : 1.f )
+	float mouse_y_sensitivity_;								///< マウス X 座標 感度 ( default : 1.f )
+
 	float mouse_x_;											///< マウス X 座標 ( -1.f .. 1.f )
 	float mouse_y_;											///< マウス Y 座標 ( -1.f .. 1.f )
 	
-	float mouse_dx_;										///< マウス X 移動量 ( )
+	float mouse_dx_;										///< マウス X 移動量
 	float mouse_dy_;
 
 	int mouse_wheel_;										///< マウスホイール ( + : front / - : back )
@@ -70,6 +77,11 @@ private:
 
 public:
 	Input();
+	~Input();
+
+	void set_direct_input( const DirectInput* i ) { direct_input_ = i; }
+	void set_mouse_x_sensitivity( float s ) { mouse_x_sensitivity_ = s; }
+	void set_mouse_y_sensitivity( float s ) { mouse_y_sensitivity_ = s; }
 
 	void load_config( Config& );
 

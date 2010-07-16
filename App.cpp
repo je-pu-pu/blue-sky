@@ -13,6 +13,7 @@ App::App()
 	, width_( DEFAULT_WIDTH )
 	, height_( DEFAULT_HEIGHT )
 	, is_full_screen_( false )
+	, is_clip_cursor_enabled_( false )
 {
 	ClassName = "blue-sky";
 	WinTitle = "blue-sky";
@@ -69,8 +70,8 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		ClassName.c_str(),	//クラス名
 		WinTitle.c_str(),	//タイトル
 		WinStyle,			//スタイル
-		CW_USEDEFAULT ,		//表示座標
-		CW_USEDEFAULT ,		//
+		CW_USEDEFAULT,		//表示座標
+		CW_USEDEFAULT,		//
 		w,					//サイズ
 		h,					//
 		NULL,				//親ウィンドウのハンドル
@@ -91,14 +92,6 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	UpdateWindow( hWnd );				//描画
 
 	// WINNLSEnableIME(hWnd, FALSE);	//IME非表示
-	
-	/*
-	RECT rect;
-	GetWindowRect( hWnd, & rect );
-	AdjustWindowRect( & rect, WinStyle, FALSE );
-
-	ClipCursor( & rect );
-	*/
 
 	// ShowCursor( FALSE );			// カーソル非表示
 
@@ -137,12 +130,13 @@ int App::MessageLoop()
 }
 
 //□ウィンドウプロシージャ
-LRESULT CALLBACK App::WinProc( HWND hw, UINT msg, WPARAM wp, LPARAM lp )
+LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 {
 	switch ( msg )
 	{
-	case	WM_CREATE:		break;
-	case	WM_KEYDOWN:
+	case WM_CREATE: break;
+	case WM_EXITSIZEMOVE: on_resize( hwnd ); break;
+	case WM_KEYDOWN:
 	{
 		blue_sky::GameMain* game = blue_sky::GameMain::getInstance();
 
@@ -150,23 +144,58 @@ LRESULT CALLBACK App::WinProc( HWND hw, UINT msg, WPARAM wp, LPARAM lp )
 		if ( wp >= VK_F1 && wp <= VK_F24 ) game->on_function_key_down( wp - VK_F1 + 1 );
 		break;
 	}
-	case	WM_MOUSEWHEEL:
+	case WM_MOUSEWHEEL:
 	{
 		blue_sky::GameMain* game = blue_sky::GameMain::getInstance();
 
 		game->on_mouse_wheel( GET_WHEEL_DELTA_WPARAM( wp ) );
 		break;
 	}
-	case	WM_CHAR:		break;
-	case	WM_ACTIVATEAPP:	break;
-	case	WM_DESTROY:
+	case WM_CHAR:		break;
+	case WM_ACTIVATEAPP:
+		if ( LOWORD( wp ) )
+		{
+			App::GetInstance()->clip_cursor( App::GetInstance()->is_clip_cursor_enabled_ );
+		}
+		break;
+	case WM_DESTROY:
 		PostQuitMessage( 0 );
 		break;
 	default:
-		return DefWindowProc(hw, msg, wp, lp);
+		return DefWindowProc( hwnd, msg, wp, lp );
 	}
 
 	return	0;
+}
+
+void App::on_resize( HWND hwnd )
+{
+	App::GetInstance()->clip_cursor( App::GetInstance()->is_clip_cursor_enabled_ );
+}
+
+void App::clip_cursor( bool clip )
+{
+	is_clip_cursor_enabled_ = clip;
+
+	if ( is_clip_cursor_enabled_ )
+	{
+		RECT rect;
+		GetClientRect( hWnd, & rect );
+
+		POINT point = { rect.left, rect.top };
+		ClientToScreen( hWnd, & point );
+	
+		rect.left = point.x;
+		rect.top = point.y;
+		rect.right += point.x;
+		rect.bottom += point.y;
+
+		ClipCursor( & rect );
+	}
+	else
+	{
+		ClipCursor( 0 );
+	}
 }
 
 void App::set_size( int w, int h )
@@ -174,10 +203,19 @@ void App::set_size( int w, int h )
 	width_ = w;
 	height_ = h;
 
-	RECT rect;
+	int sw = GetSystemMetrics( SM_CXSCREEN );
+	int sh = GetSystemMetrics( SM_CYSCREEN );
 
-	GetWindowRect( hWnd, & rect );
-	SetWindowPos( hWnd, HWND_NOTOPMOST, rect.left, rect.top, width_, height_, SWP_SHOWWINDOW );
+	
+	RECT rect = { 0, 0, width_, height_ };
+	AdjustWindowRect( & rect, WinStyle, false );
+
+	int ww = rect.right - rect.left;
+	int wh = rect.bottom - rect.top;
+
+	SetWindowPos( hWnd, HWND_NOTOPMOST, ( sw - ww ) / 2, ( sh - wh ) / 2, ww, wh, SWP_SHOWWINDOW );
+
+	PostMessage( hWnd, WM_EXITSIZEMOVE, 0, 0 );
 }
 
 /**

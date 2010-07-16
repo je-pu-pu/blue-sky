@@ -1,7 +1,7 @@
 #ifndef DIRECT_INPUT_H
 #define DIRECT_INPUT_H
 
-#define DIRECTINPUT_VERSION 0x0700
+#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
 /**
@@ -11,29 +11,17 @@
 class DirectInput
 {
 private:
-	LPDIRECTINPUT7 direct_input_;
+	LPDIRECTINPUT8 direct_input_;
+	LPDIRECTINPUTDEVICE8 mouse_device_;
+	DIMOUSESTATE mouse_state_;
 
 public:
-	DirectInput( HINSTANCE );
+	DirectInput( HINSTANCE, HWND );
 	~DirectInput();
+
+	void update();
+	const DIMOUSESTATE& get_mouse_state() const { return mouse_state_; }
 
 }; // class DirectInput
 
-/*
-//プロトタイプ宣言
-BOOL	DI_Init( HINSTANCE );
-
-//キーボードデバイス作成
-LPDIRECTINPUTDEVICE7 DI_CreateKeyDevice(HWND);
-//ジョイスティックデバイス作成
-LPDIRECTINPUTDEVICE7 DI_CreateJoyDevice(HWND);
-BOOL CALLBACK GetJoyDevice(LPDIDEVICEINSTANCE, LPVOID);
-
-void	DI_Release(LPDIRECTINPUTDEVICE7&);
-void	DI_UnInit();
-
-extern	LPDIRECTINPUT7	lpDI;
-*/
-
 #endif // DIRECT_3D_H
-

@@ -42,9 +42,6 @@ protected:
 
 	vector3 player_start_position_;
 
-	int panorama_y_division_;
-	int get_panorama_y_division() const { return panorama_y_division_; }
-
 	void generate_random_stage();
 
 	void load_stage_file( const char* );
@@ -58,6 +55,8 @@ public:
 	void render();				///< •`‰æ
 
 	void render_shadow( const ActiveObject*, const D3DXMATRIXA16& );
+
+	bool is_clip_cursor_required() { return true; }
 
 }; // class Scene
 

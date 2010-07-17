@@ -62,15 +62,15 @@ private:
 	float mouse_x_sensitivity_;								///< マウス X 座標 感度 ( default : 1.f )
 	float mouse_y_sensitivity_;								///< マウス X 座標 感度 ( default : 1.f )
 
-	float mouse_x_;											///< マウス X 座標 ( -1.f .. 1.f )
-	float mouse_y_;											///< マウス Y 座標 ( -1.f .. 1.f )
+	float mouse_x_rate_;									///< マウス X 座標 ( -1.f .. 1.f )
+	float mouse_y_rate_;									///< マウス Y 座標 ( -1.f .. 1.f )
 	
 	float mouse_dx_;										///< マウス X 移動量
 	float mouse_dy_;
 
 	int mouse_wheel_;										///< マウスホイール ( + : front / - : back )
 
-	POINT last_mouse_point_;								///< 前のフレームのマウス 座標
+	POINT mouse_point_;										///< マウス 座標
 
 	ButtonCodeList key_code_;
 	ButtonCodeList joystick_code_;
@@ -166,14 +166,17 @@ public:
 		return null_input;
 	}
 
-	float get_mouse_x() const { return mouse_x_; }
-	float get_mouse_y() const { return mouse_y_; }
+	int get_mouse_x() const { return mouse_point_.x; }
+	int get_mouse_y() const { return mouse_point_.y; }
+
+	float get_mouse_x_rate() const { return mouse_x_rate_; }
+	float get_mouse_y_rate() const { return mouse_y_rate_; }
 
 	float get_mouse_dx() const { return mouse_dx_; }
 	float get_mouse_dy() const { return mouse_dy_; }
 
-	void set_mouse_x( float );
-	void set_mouse_y( float );
+//	void set_mouse_x_rate( float );
+//	void set_mouse_y_rate( float );
 
 	void push_mouse_wheel_queue( int wheel ) { mouse_wheel_ += wheel; }
 	int pop_mouse_wheel_queue() { int w = mouse_wheel_; mouse_wheel_ = 0; return w; }

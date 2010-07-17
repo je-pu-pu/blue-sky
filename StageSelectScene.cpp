@@ -4,9 +4,12 @@
 
 #include "Direct3D9.h"
 #include "Direct3D9Mesh.h"
+#include "Direct3D9TextureManager.h"
 #include "DirectX.h"
 
 #include <game/Sound.h>
+
+#include <windows/Rect.h>
 
 #include <common/exception.h>
 
@@ -15,9 +18,12 @@ namespace blue_sky
 
 StageSelectScene::StageSelectScene( const GameMain* game_main )
 	: Scene( game_main )
+	, sprite_texture_( 0 )
 	, ok_( 0 )
 {
-	ok_ = sound_manager()->load( "ok" );
+	sprite_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
+
+	ok_ = sound_manager()->get_sound( "ok" );
 }
 
 StageSelectScene::~StageSelectScene()
@@ -44,39 +50,46 @@ void StageSelectScene::update()
 void StageSelectScene::render()
 {
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->BeginScene() );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0x11, 0xAA, 0xFF ), 1.f, 0 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->Begin( D3DXSPRITE_ALPHABLEND ) );
 
-	D3DXHANDLE technique = direct_3d()->getEffect()->GetTechniqueByName( "technique_0" );
-	direct_3d()->getEffect()->SetTechnique( technique );
+	D3DXMATRIXA16 transform;
 
-	UINT pass_count = 0;
+	// Allow
+	const float allow_margin = 5.f;
 
-	direct_3d()->getEffect()->Begin( & pass_count, 0 );
-	direct_3d()->getEffect()->BeginPass( 0 );
+	{
+		win::Rect src_rect = win::Rect::Size( 128, 704, 82, 126 );
+		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
 
-	D3DVIEWPORT9 view_port;
-	view_port.X = 0;
-	view_port.Y = 0;
-	view_port.Width	= get_width();
-	view_port.Height = get_height();
-	view_port.MinZ = 0.f;
-	view_port.MaxZ = 1.f;
+		D3DXMatrixTranslation( & transform, 0.f + src_rect.width() * 0.5f + allow_margin, get_height() * 0.5f, 0.f );
 
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetViewport( & view_port ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0x00, 0x00, 0x66 ), 1.f, 0 ) );
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw( sprite_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+	}
+	{
+		win::Rect src_rect = win::Rect::Size( 256, 704, 86, 126 );
+		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
 
-	D3DXMATRIXA16 world;
-	D3DXMATRIXA16 ortho;
-	D3DXMATRIXA16 WorldViewProjection;
+		D3DXMatrixTranslation( & transform, get_width() - src_rect.width() * 0.5f - allow_margin, get_height() * 0.5f, 0.f );
 
-	D3DXMatrixOrthoLH( & ortho, 10, 10, 0.f, 1.f );
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw( sprite_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+	}
 
-	WorldViewProjection = ortho;
-	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+	// Cursor
+	{
+		win::Rect src_rect( 0, 702, 91, 841 );
 
-	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );
+		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
+		
+		D3DXMatrixTranslation( & transform, static_cast< float >( input()->get_mouse_x() ) + src_rect.width() * 0.5f - 5.f, static_cast< float >( input()->get_mouse_y() ) + src_rect.height() * 0.5f - 5.f, 0.f );
 
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw( sprite_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+	}
+
+	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->End() );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
 }
 

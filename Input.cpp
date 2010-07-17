@@ -27,8 +27,8 @@ Input::Input()
 	: direct_input_( 0 )
 	, mouse_x_sensitivity_( 1.f )
 	, mouse_y_sensitivity_( 1.f )
-	, mouse_x_( 0.f )
-	, mouse_y_( 0.f )
+	, mouse_x_rate_( 0.f )
+	, mouse_y_rate_( 0.f )
 	, mouse_dx_( 0.f )
 	, mouse_dy_( 0.f )
 	, mouse_wheel_( 0 )
@@ -104,13 +104,13 @@ void Input::update()
 	GetCursorPos( & point );
 	ScreenToClient( App::GetInstance()->GetWindowHandle(), & point );
 
-	mouse_x_ = math::clamp( point.x / static_cast< float >( App::GetInstance()->get_width() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_x_sensitivity_;
-	mouse_y_ = math::clamp( point.y / static_cast< float >( App::GetInstance()->get_height() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_y_sensitivity_;
+	mouse_x_rate_ = math::clamp( point.x / static_cast< float >( App::GetInstance()->get_width() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_x_sensitivity_;
+	mouse_y_rate_ = math::clamp( point.y / static_cast< float >( App::GetInstance()->get_height() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_y_sensitivity_;
 
 	mouse_dx_ = static_cast< float >( direct_input_->get_mouse_state().lX ) / static_cast< float >( App::GetInstance()->get_width() - 1 ) * 2.f * mouse_x_sensitivity_;
 	mouse_dy_ = static_cast< float >( direct_input_->get_mouse_state().lY ) / static_cast< float >( App::GetInstance()->get_height() - 1 ) * 2.f * mouse_y_sensitivity_;
 
-	last_mouse_point_ = point;
+	mouse_point_ = point;
 
 	if ( joystick_enabled_ && joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR )
 	{
@@ -148,17 +148,19 @@ void Input::update_common()
 	if ( push( LEFT  ) ) allow_push( LEFT  );
 }
 
-void Input::set_mouse_x( float x )
+#if 0
+
+void Input::set_mouse_x_rate( float x )
 {
-	mouse_x_ = x;
+	mouse_x_rate_ = x;
 	mouse_dx_ = 0.f;
 
 	POINT point;
 
-	point.x = static_cast< int >( ( mouse_x_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_width() - 1 ) );
-	point.y = static_cast< int >( ( mouse_y_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_height() - 1 ) );
+	point.x = static_cast< int >( ( mouse_x_rate_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_width() - 1 ) );
+	point.y = static_cast< int >( ( mouse_y_rate_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_height() - 1 ) );
 
-	last_mouse_point_.x = point.x;
+	mouse_point_.x = point.x;
 
 	ClientToScreen( App::GetInstance()->GetWindowHandle(), & point );
 	SetCursorPos( point.x, point.y );
@@ -167,22 +169,24 @@ void Input::set_mouse_x( float x )
 	GetCursorPos( & new_point );
 }
 
-void Input::set_mouse_y( float y )
+void Input::set_mouse_y_rate( float y )
 {
 	return;
 
-	mouse_y_ = y;
+	mouse_y_rate_ = y;
 	mouse_dy_ = 0.f;
 
 	POINT point;
 
-	point.x = static_cast< int >( ( mouse_x_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_width() - 1 ) );
-	point.y = static_cast< int >( ( mouse_y_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_height() - 1 ) );
+	point.x = static_cast< int >( ( mouse_x_rate_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_width() - 1 ) );
+	point.y = static_cast< int >( ( mouse_x_rate_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_height() - 1 ) );
 
-	last_mouse_point_.y = point.y;
+	mouse_point_.y = point.y;
 
 	ClientToScreen( App::GetInstance()->GetWindowHandle(), & point );
 	SetCursorPos( point.x, point.y );
 }
+
+#endif // 0
 
 } // namespace blue_sky

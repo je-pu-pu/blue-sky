@@ -25,6 +25,7 @@ namespace blue_sky
 Player::Player()
 	 : input_( 0 )
 	 , step_speed_( 0.05f )
+	 , gravity_( 0.01f )
 	 , eye_height_( 1.5f )
 	 , is_dead_( false )
 	 , is_turn_avaiable_( true )
@@ -80,7 +81,7 @@ void Player::update()
 	update_position();
 
 	// gravity
-	velocity().y() -= 0.01f;
+	velocity().y() -= get_gravity();
 	// velocity().y() -= 0.015f;
 	// velocity().y() -= 0.004f;
 	// velocity().y() -= 0.002f;

@@ -32,13 +32,12 @@ TitleScene::TitleScene( const GameMain* game_main )
 	bgm_ = sound_manager()->load_music( "bgm", "title" );
 	bgm_->play( false );
 	
-	title_texture_ = direct_3d()->getTextureManager()->load( "title", "media/image/title.png" );
+	title_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
 	title_bg_texture_ = direct_3d()->getTextureManager()->load( "title-bg", "media/image/title-bg.png" );
 }
 
 TitleScene::~TitleScene()
 {
-	direct_3d()->getTextureManager()->unload( "title" );
 	direct_3d()->getTextureManager()->unload( "title-bg" );
 }
 

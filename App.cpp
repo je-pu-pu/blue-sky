@@ -93,7 +93,7 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 
 	// WINNLSEnableIME(hWnd, FALSE);	//IME非表示
 
-	// ShowCursor( FALSE );			// カーソル非表示
+	ShowCursor( FALSE );			// カーソル非表示
 
 	return true;
 }

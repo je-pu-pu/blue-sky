@@ -7,9 +7,11 @@ namespace blue_sky
 {
 
 Camera::Camera()
-	: fov_( 60.f )
+	: default_front_( 0.f, 0.f, 1.f )
+	, default_up_( 0.f, 1.f, 0.f )
+	, fov_( 60.f )
 {
-	set_fov( fov_ );
+
 }
 
 Camera::~Camera()
@@ -25,8 +27,8 @@ void Camera::update()
 	while ( rotate_degree_target().y() - rotate_degree().y() > +180.f ) rotate_degree().y() += 360.f;
 	while ( rotate_degree_target().y() - rotate_degree().y() < -180.f ) rotate_degree().y() -= 360.f;
 	
-	rotate_degree().x() += ( rotate_degree_target().x() - rotate_degree().x() ) * 0.2f;
-	rotate_degree().y() += ( rotate_degree_target().y() - rotate_degree().y() ) * 0.2f;
+	rotate_degree().x() += ( rotate_degree_target().x() - rotate_degree().x() ) * 0.1f;
+	rotate_degree().y() += ( rotate_degree_target().y() - rotate_degree().y() ) * 0.1f;
 	rotate_degree().z() = math::chase( rotate_degree().z(), rotate_degree_target().z(), 0.8f );
 
 	matrix4x4 m;
@@ -51,13 +53,6 @@ void Camera::update()
 void Camera::set_fov( float fov )
 {
 	fov_ = fov;
-
-	matrix4x4 m;
-	// m.rotate_x( -fov_ / 2 );
-	m.rotate_x( -90.f );
-
-	default_front_ = vector3( 0.f, -1.f, 0.f ) * m;
-	default_up_ = vector3( 0.f, 0.f, 1.f ) * m;
 }
 
 }; // namespace blue_sky

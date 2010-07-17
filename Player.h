@@ -19,6 +19,7 @@ private:
 	const Input* input_;			///< 入力への参照
 
 	float		step_speed_;		///< 移動速度
+	float		gravity_;			///< 重力
 
 	float		eye_height_;		///< 目の高さ
 
@@ -30,6 +31,8 @@ private:
 	bool		is_falling_;		///< 落下中フラグ
 	vector3		velocity_on_fall_;	///< 落下開始時の移動量
 	
+	
+
 	void on_collision_x( const GridCell& );
 	void on_collision_y( const GridCell& );
 	void on_collision_z( const GridCell& );
@@ -73,6 +76,9 @@ public:
 	bool is_falling_to_dead() const;
 
 	void set_input( const Input* );
+
+	float get_gravity() const { return gravity_; }
+	void set_gravity( float g ) { gravity_ = g; }
 	
 }; // class Player
 

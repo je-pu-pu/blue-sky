@@ -32,7 +32,7 @@ void Enemy::update()
 			mode_ = MODE_CHASE;
 		}
 
-		velocity() = front() * 0.1f;
+		velocity() += front() * 0.01f;
 	}
 	else if ( mode_ == MODE_CHASE )
 	{
@@ -52,7 +52,7 @@ void Enemy::update()
 			counter_ = 0;
 		}
 
-		velocity() = front() * 0.1f;
+		velocity() += front() * 0.01f;
 	}
 	else if ( mode_ == MODE_DETOUR )
 	{
@@ -65,12 +65,17 @@ void Enemy::update()
 		}
 	}
 
-	if ( counter_ % 20 == 0 )
+	if ( counter_ % 120 == 0 )
 	{
 		play_sound( "ok" );
 	}
 
+	velocity().y() -= 0.005f;
+
 	update_position();
+
+	velocity().x() *= 0.8f;
+	velocity().z() *= 0.8f;
 }
 
 void Enemy::on_collision_x( const GridCell& )

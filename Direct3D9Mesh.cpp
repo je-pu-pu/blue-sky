@@ -70,6 +70,18 @@ bool Direct3D9Mesh::load_x( const char* file_name )
 	adjacency_buffer->Release();
 	materials_buffer->Release();
 
+	D3DVERTEXELEMENT9 vertex_element[] =
+	{
+		{ 0,  0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+		{ 0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+		D3DDECL_END()
+	};
+
+	LPD3DXMESH new_mesh = 0;
+	DIRECT_X_FAIL_CHECK( mesh_->CloneMesh( D3DXMESH_MANAGED, vertex_element, direct_3d_->getDevice(), & new_mesh ) );
+	mesh_->Release();
+	mesh_ = new_mesh;
+
 	return true;
 }
 

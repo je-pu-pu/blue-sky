@@ -44,7 +44,6 @@
 namespace blue_sky
 {
 
-Direct3D9Mesh* landscape_ = 0;
 Direct3D9Mesh* enemy_mesh_ = 0;
 
 float brightness = 0.f;
@@ -58,6 +57,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, player_mesh_( 0 )
 	, shadow_mesh_( 0 )
 	, ground_mesh_( 0 )
+	, goal_mesh_( 0 )
 	, sky_box_( 0 )
 	, box_( 0 )
 {
@@ -77,12 +77,12 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	ground_mesh_ = new Direct3D9Mesh( direct_3d() );
 	ground_mesh_->load_x( "media/model/ground" );
 
-	
-	landscape_ = new Direct3D9Mesh( direct_3d() );
-	landscape_->load_x( "media/model/landscape" );
+	goal_mesh_ = new Direct3D9Mesh( direct_3d() );
+	goal_mesh_->load_x( "media/model/door" );
 
 	// SkyBox
-	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-star-2", "png" );
+	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
+	// sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-star-2", "png" );
 
 	// Box
 	box_ = new Direct3D9Box( direct_3d(), 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
@@ -110,19 +110,21 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// Player
 	player_ = new Player();
 	player_->set_input( input() );
+	player_->set_gravity( config()->get( "player.gravity", 0.01f ) );
 
 	// Camera
 	camera_ = new Camera();
+	camera_->set_fov( config()->get( "camera.fov", 60.f ) );
 
 	// Stage
 	stage_ = new Stage( 1000, 1000 );
 	player_->set_stage( stage_.get() );
 
-	// generate_random_stage();
+	generate_random_stage();
 
 	// load_stage_file( "media/stage/quit" );
 	// load_stage_file( "media/stage/stage-1-1" );
-	load_stage_file( "media/stage/stage-1-2" );
+	// load_stage_file( "media/stage/stage-1-2" );
 
 	player_->position() = player_start_position_;
 
@@ -140,6 +142,7 @@ GamePlayScene::~GamePlayScene()
 	player_mesh_.release();
 	shadow_mesh_.release();
 	ground_mesh_.release();
+	goal_mesh_.release();
 
 	stage_.release();
 	camera_.release();
@@ -148,8 +151,6 @@ GamePlayScene::~GamePlayScene()
 	sky_box_.release();
 
 	box_.release();
-
-	delete landscape_;
 
 	delete enemy_mesh_;
 
@@ -172,36 +173,40 @@ void GamePlayScene::generate_random_stage()
 
 	const int x_space = 0;
 	const int z_space = 0;
+	bool player_position_fixed = false;
 
-	for ( int d = 0; d < 300; d++ )
+	for ( int z = 0; z < stage_->depth(); z += 10 + z_space )
 	{
-		for ( int x = 0; x < 300; x++ )
+		for ( int x = 0; x < stage_->width(); x += 10 + x_space )
 		{
 			GridData* grid_data = 0;
 			bool tel_box = false;
 
 			int y = 0;
 
-			int random_value = common::random( 0, 10 );
+			int random_value = common::random( 0, 100 );
 
-			if ( random_value < 4 )
+			if ( random_value < 40 )
 			{
 				grid_data = building_a_grid;
 			}
-			else if ( random_value < 5 )
+			else if ( random_value < 41 )
 			{
 				grid_data = building_b_grid;
+				
+				if ( ! player_position_fixed )
+				{
+					player_start_position_.set( static_cast< float >( x ), static_cast< float >( building_b_grid->cell( 0, 0 ).height() ), static_cast< float >( z ) );
+					player_position_fixed = true;
+				}
 			}
-			else if ( random_value < 6 )
+			else if ( random_value < 60 )
 			{
 				grid_data = house_a_grid;
 			}
 			else
 			{
-				if ( common::random( 0, 3 ) == 0 )
-				{
-					grid_data = road_grid;
-				}
+				grid_data = road_grid;
 
 				if ( common::random( 0, 5 ) == 0 )
 				{
@@ -211,10 +216,10 @@ void GamePlayScene::generate_random_stage()
 
 			if ( grid_data )
 			{
-				int r = common::random( 0, 3 ) * 90;
-				int dx = x * ( 10 + x_space );
+				int r = 0; // common::random( 0, 3 ) * 90;
+				int dx = x;
 				int dy = y;
-				int dz = d * ( 10 + z_space );
+				int dz = z;
 
 				if ( stage_->put( dx, dy, dz, r, grid_data ) )
 				{
@@ -229,9 +234,21 @@ void GamePlayScene::generate_random_stage()
 		}
 	}
 
-	player_start_position_.x() = common::random( 0.f, 100.f );
-	player_start_position_.y() = 3.f;
-	player_start_position_.z() = common::random( 0.f, 100.f );
+	if ( ! player_position_fixed )
+	{
+		player_start_position_.set( common::random( 0.f, 100.f ), 3.f, common::random( 0.f, 100.f ) );
+	}
+
+	goal_position_ = player_start_position_;
+	goal_position_.z() += 10.f;
+
+	Enemy* enemy = new Enemy();
+	enemy->set_stage( stage_.get() );
+	enemy->set_player( player_.get() );
+	enemy->position().set( player_start_position_.x(), 300.f, player_start_position_.z() + common::random( 0, 100 ) );
+	enemy->set_direction_degree( 180 );
+
+	active_object_manager()->add_active_object( enemy );	
 }
 
 void GamePlayScene::load_stage_file( const char* file_name )
@@ -344,17 +361,8 @@ void GamePlayScene::update()
 
 	player_->add_direction_degree( input()->get_mouse_dx() * 90.f );
 
-	// camera_->rotate_degree().y() = player_->get_direction_degree();
 	camera_->rotate_degree_target().y() = player_->get_direction_degree();
-
-	if ( player_->is_jumping() )
-	{
-		camera_->rotate_degree_target().x() = math::chase( camera_->rotate_degree_target().x(), 90.f, 1.f );
-	}
-	else
-	{
-		camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x() + input()->get_mouse_dy(), -90.f, +90.f );
-	}
+	camera_->rotate_degree_target().x() = math::clamp( input()->get_mouse_y_rate() * 90.f, -90.f, +90.f );
 
 	player_->update();
 
@@ -450,6 +458,7 @@ void GamePlayScene::render()
 
 		// SkyBox
 		if ( sky_box_ )
+		// if ( false )
 		{
 			D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );
 			D3DXMatrixTranslation( & t, camera_->position().x(), camera_->position().y(), camera_->position().z() );
@@ -468,7 +477,7 @@ void GamePlayScene::render()
 		const int gy = static_cast< int >( player_->position().z() );
 
 		// D3DXMatrixTranslation( & t, static_cast< float >( gx / 10 * 10 ), 0.f, static_cast< float >( gy / 10 * 10 ) );
-		D3DXMatrixTranslation( & t, 0.f, 0.f, 0.f );
+		D3DXMatrixTranslation( & t, stage_->width() * 0.5f, 0.f, stage_->depth() * 0.5f );
 		world = t;
 
 		WorldViewProjection = world * view * projection;
@@ -479,27 +488,6 @@ void GamePlayScene::render()
 //		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, FALSE ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );		
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
-
-		// Landscape
-		if ( landscape_ )
-		{
-			D3DXMatrixTranslation( & t, player_->position().x(), 0.f, player_->position().z() );
-
-			for ( int n = 0; n < 10; n++ )
-			{
-				float scale = 1.4f - ( n * 0.08f );
-				D3DXMatrixRotationY( & r, n * 0.1f );
-				D3DXMatrixScaling( & s,  scale, scale, scale );
-
-				world = s * r * t;
-
-				WorldViewProjection = world * view * projection;
-				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
-				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
-				landscape_->render();
-			}
-		}
-
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 		
 #if 1
@@ -510,12 +498,12 @@ void GamePlayScene::render()
 		{
 			GridObject* grid_object = *i;
 
-			const int max_length = 500;
-			const int lod_length = 100;
+			const float max_length = 500;
+			const float lod_length = 100;
 
-			const int x_length = std::abs( static_cast< int >( player_->position().x() ) - grid_object->x() );
-			const int y_length = std::abs( static_cast< int >( player_->position().y() ) - grid_object->y() );
-			const int z_length = std::abs( static_cast< int >( player_->position().z() ) - grid_object->z() );
+			const float x_length = std::abs( player_->position().x() - static_cast< float >( grid_object->x() ) ) + grid_object->z() * 0.02f;
+			const float y_length = std::abs( player_->position().y() - static_cast< float >( grid_object->y() ) );
+			const float z_length = std::abs( player_->position().z() - static_cast< float >( grid_object->z() ) ) + grid_object->x() * 0.02f;
 
 			if ( x_length >= max_length ) continue;
 			if ( z_length >= max_length ) continue;
@@ -527,7 +515,6 @@ void GamePlayScene::render()
 			D3DXMatrixTranslation( & t, static_cast< float >( grid_object->x() ), static_cast< float >( grid_object->y() + flicker + offset ), static_cast< float >( grid_object->z() ) );
 
 			world = s * r * t;
-
 
 			WorldViewProjection = world * view * projection;
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
@@ -541,19 +528,6 @@ void GamePlayScene::render()
 			{
 				grid_object->mesh( 1 )->render();
 			}
-
-			// Shadow
-			/*
-			D3DXMatrixTranslation( & t, static_cast< float >( grid_object->x() ), 0.05f, static_cast< float >( grid_object->z() ) );
-			world = s * t;
-
-			WorldViewProjection = world * view * projection;
-			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
-			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
-
-			shadow_mesh_->render();
-
-			*/
 		}
 #endif // 0
 
@@ -584,14 +558,15 @@ void GamePlayScene::render()
 		}
 		*/
 
-		// Player ( Shadow )
-		render_shadow( player_.get(), view * projection );
+		// Goal
+		D3DXMatrixTranslation( & t, goal_position_.x(), goal_position_.y() + 0.05f, goal_position_.z() );
 
-		// ActiveObject ( Shadow )
-		for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
-		{
-			render_shadow( *i, view * projection );
-		}
+		world = t;
+		WorldViewProjection = world * view * projection;
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+
+		goal_mesh_->render();
 
 		// Player
 		vector3 pos = player_->position();
@@ -622,20 +597,29 @@ void GamePlayScene::render()
 
 			enemy_mesh_->render();
 		}
+
+		// Player ( Shadow )
+		render_shadow( player_.get(), view * projection );
+
+		// ActiveObject ( Shadow )
+		for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
+		{
+			render_shadow( *i, view * projection );
+		}
 	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );
 
 	std::string debug_text = "player : (" + 
-		common::serialize( static_cast< int >( player_->position().x() ) ) + "," +
-		common::serialize( static_cast< int >( player_->position().y() ) ) + "," +
-		common::serialize( static_cast< int >( player_->position().z() ) ) + ")\n" +
-		"mouse : ( " +
-		common::serialize( input()->get_mouse_x() ) + ", " +
-		common::serialize( input()->get_mouse_y() ) + ")\n( " +
-		common::serialize( input()->get_mouse_dx() ) + ", " +
-		common::serialize( input()->get_mouse_dy() ) + ")";
+			common::serialize( static_cast< int >( player_->position().x() ) ) + "," +
+			common::serialize( static_cast< int >( player_->position().y() ) ) + "," +
+			common::serialize( static_cast< int >( player_->position().z() ) ) + ")\n" +
+			"mouse : ( " +
+			common::serialize( input()->get_mouse_x_rate() ) + ", " +
+			common::serialize( input()->get_mouse_y_rate() ) + ")\n( " +
+			common::serialize( input()->get_mouse_dx() ) + ", " +
+			common::serialize( input()->get_mouse_dy() ) + ")";
 
 	font_->draw_text( 0, 24, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
 

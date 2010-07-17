@@ -41,6 +41,7 @@ protected:
 	common::safe_ptr< Direct3D9Box > box_;
 
 	vector3 player_start_position_;
+	vector3 goal_position_;
 
 	void generate_random_stage();
 

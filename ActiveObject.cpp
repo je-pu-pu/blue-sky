@@ -145,7 +145,6 @@ void ActiveObject::update_position()
 
 	position().y() = std::max( 0.f, position().y() );
 
-
 	global_aabb_ = local_aabb_ + position();
 }
 

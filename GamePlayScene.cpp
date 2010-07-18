@@ -48,7 +48,7 @@ Direct3D9Mesh* enemy_mesh_ = 0;
 
 float brightness = 0.f;
 
-GamePlayScene::GamePlayScene( const GameMain* game_main )
+GamePlayScene::GamePlayScene( const GameMain* game_main, const std::string& stage_name )
 	: Scene( game_main )
 	, player_( 0 )
 	, camera_( 0 )
@@ -61,6 +61,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, sky_box_( 0 )
 	, box_( 0 )
 {
+	set_stage_name( stage_name );
+
 	// Font
 	font_ = new Direct3D9Font( direct_3d() );
 
@@ -120,11 +122,14 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	stage_ = new Stage( 1000, 1000 );
 	player_->set_stage( stage_.get() );
 
-	// generate_random_stage();
-
-	// load_stage_file( "media/stage/quit" );
-	// load_stage_file( "media/stage/stage-1-1" );
-	load_stage_file( "media/stage/stage-1-2" );
+	if ( get_stage_name().empty() )
+	{
+		generate_random_stage();
+	}
+	else
+	{
+		load_stage_file( ( std::string( "media/stage/" ) + get_stage_name() ).c_str() );
+	}
 
 	player_->position() = player_start_position_;
 

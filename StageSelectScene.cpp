@@ -36,10 +36,25 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	// for ( boost::filesystem::directory_iterator i( boost::filesystem::path( "stage/" ) ); i != end; ++i )
 
 	std::list< std::string > stage_name_list;
-	stage_name_list.push_back( "stage-0-1" );
-	stage_name_list.push_back( "stage-0-2" );
-	stage_name_list.push_back( "stage-0-3" );
-	stage_name_list.push_back( "stage-0-4" );
+
+	WIN32_FIND_DATA find_data;
+
+	HANDLE find_handle = FindFirstFile( "media/stage/stage-0-*", & find_data );
+
+	if ( find_handle  != INVALID_HANDLE_VALUE )
+	{
+		while ( true )
+		{
+			stage_name_list.push_back( find_data.cFileName );
+
+			if ( ! FindNextFile( find_handle, & find_data ) )
+			{
+				break;
+			}
+		}
+
+		FindClose( find_handle );
+	}
 
 	int n = 0;
 
@@ -51,13 +66,12 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 
 		try
 		{
-			stage->texture = direct_3d()->getTextureManager()->load( i->c_str(), ( std::string( "media/stage/" ) + *i + ".png" ).c_str() );
+			stage->texture = direct_3d()->getTextureManager()->load( i->c_str(), ( std::string( "media/stage/image/" ) + *i + ".png" ).c_str() );
 		}
 		catch ( ... )
 		{
-			stage->texture = direct_3d()->getTextureManager()->load( i->c_str(), "media/stage/default.png" );
+			stage->texture = direct_3d()->getTextureManager()->load( i->c_str(), "media/stage/image/stage-default.png" );
 		}
-
 
 		stage_list_.push_back( stage );
 
@@ -68,6 +82,15 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 StageSelectScene::~StageSelectScene()
 {
 	direct_3d()->getTextureManager()->unload( "sprite" );
+
+	for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i )
+	{
+		Stage* stage = *i;
+
+		delete stage;
+	}
+
+	stage_list_.clear();
 }
 
 /**
@@ -91,7 +114,15 @@ void StageSelectScene::update()
 		{
 			ok_->play( false );
 
-			set_stage_name( stage->name );
+			if ( stage->name == "stage-0-4" )
+			{
+				set_stage_name( "" );
+			}
+			else
+			{
+				set_stage_name( stage->name );
+			}
+
 			set_next_scene( "game_play" );
 		}
 	}

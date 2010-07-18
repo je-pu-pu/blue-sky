@@ -155,6 +155,8 @@ bool GameMain::update()
 
 	if ( ! next_scene.empty() )
 	{
+		std::string stage_name = scene_->get_stage_name();
+
 		delete scene_;
 		scene_ = 0;
 
@@ -168,7 +170,7 @@ bool GameMain::update()
 		}
 		else if ( next_scene == "game_play" )
 		{
-			scene_ = new GamePlayScene( this );
+			scene_ = new GamePlayScene( this, stage_name );
 		}
 		else
 		{

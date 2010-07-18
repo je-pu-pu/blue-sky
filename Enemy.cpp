@@ -43,6 +43,7 @@ void Enemy::update()
 			set_direction_degree( math::radian_to_degree( std::atan2( relative_position.x(), relative_position.z() ) ) );
 
 			front() = relative_position;
+			front().y() = 0.f;
 			
 			if ( front().length() > 1.f )
 			{

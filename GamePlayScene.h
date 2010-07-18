@@ -49,7 +49,7 @@ protected:
 	void save_stage_file( const char* ) const;
 
 public:
-	GamePlayScene( const GameMain* );
+	GamePlayScene( const GameMain*, const std::string& );
 	~GamePlayScene();
 
 	void update();				///< ƒƒCƒ“ƒ‹[ƒv

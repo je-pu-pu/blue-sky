@@ -80,6 +80,8 @@ void Enemy::update()
 
 void Enemy::on_collision_x( const GridCell& )
 {
+	velocity().x() = 0.f;
+
 	if ( mode_ == MODE_FIND )
 	{
 		set_direction_degree( get_direction_degree() + 90.f );
@@ -106,6 +108,8 @@ void Enemy::on_collision_y( const GridCell& )
 
 void Enemy::on_collision_z( const GridCell& )
 {
+	velocity().z() = 0.f;
+
 	if ( mode_ == MODE_FIND )
 	{
 		set_direction_degree( get_direction_degree() + 90.f );

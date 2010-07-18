@@ -57,6 +57,7 @@ public:
 	Direct3D9TextureManager* getTextureManager() const { return texture_manager_; }
 
 	void add_resource( Direct3D9Resource* r ) { resource_list_.push_back( r ); }
+	void remove_resource( Direct3D9Resource* r ) { resource_list_.remove( r ); }
 
 }; // class Direct3D9
 

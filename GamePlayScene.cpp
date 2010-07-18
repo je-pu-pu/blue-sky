@@ -120,11 +120,11 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	stage_ = new Stage( 1000, 1000 );
 	player_->set_stage( stage_.get() );
 
-	generate_random_stage();
+	// generate_random_stage();
 
 	// load_stage_file( "media/stage/quit" );
 	// load_stage_file( "media/stage/stage-1-1" );
-	// load_stage_file( "media/stage/stage-1-2" );
+	load_stage_file( "media/stage/stage-1-2" );
 
 	player_->position() = player_start_position_;
 

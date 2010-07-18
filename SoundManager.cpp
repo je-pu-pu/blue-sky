@@ -81,7 +81,7 @@ game::Sound* SoundManager::create_sound( const char* file_name, bool is_3d )
 
 	if ( is_3d )
 	{
-		DIRECT_X_FAIL_CHECK( sound->get_direct_sound_buffer()->get_direct_sound_3d_buffer()->SetMinDistance( 5.f, DS3D_DEFERRED ) );
+		DIRECT_X_FAIL_CHECK( sound->get_direct_sound_buffer()->get_direct_sound_3d_buffer()->SetMinDistance( 2.f, DS3D_DEFERRED ) );
 		DIRECT_X_FAIL_CHECK( sound->get_direct_sound_buffer()->get_direct_sound_3d_buffer()->SetMaxDistance( 50.f, DS3D_DEFERRED ) );
 		DIRECT_X_FAIL_CHECK( sound->get_direct_sound_buffer()->get_direct_sound_3d_buffer()->SetMode( DS3DMODE_NORMAL, DS3D_DEFERRED ) );
 	}

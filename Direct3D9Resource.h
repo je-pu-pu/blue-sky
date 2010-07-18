@@ -14,6 +14,7 @@ private:
 
 protected:
 	Direct3D9Resource( Direct3D9* );
+	virtual ~Direct3D9Resource();
 
 	const Direct3D9* direct_3d() const { return direct_3d_; }
 

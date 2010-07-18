@@ -90,7 +90,14 @@ void TitleScene::update()
 	}
 	else if ( sequence_ >= SEQUENCE_TITLE_BG )
 	{
-		title_bg_scale_ = math::chase( title_bg_scale_, -1.f, 0.002f );
+		if ( title_bg_scale_ > 0.f )
+		{
+			title_bg_scale_ = math::chase( title_bg_scale_, -1.f, 0.002f );
+		}
+		else
+		{
+			title_bg_scale_ = math::chase( title_bg_scale_, -1.f, 0.004f );
+		}
 	}
 
 	fade_alpha_ = math::chase( fade_alpha_, 0.f, 0.01f );

@@ -148,6 +148,9 @@ bool GameMain::update()
 
 	scene_->update();
 
+	render();
+
+
 	std::string next_scene = scene_->get_next_scene();
 
 	if ( ! next_scene.empty() )
@@ -174,8 +177,6 @@ bool GameMain::update()
 
 		app_->clip_cursor( scene_->is_clip_cursor_required() );
 	}
-
-	render();
 
 	return true;
 }

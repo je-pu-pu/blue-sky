@@ -52,7 +52,7 @@ public:
 
 	float aspect() const { return 720.f / 480.f; /* todo */ }
 	float near_clip() const { return 0.05f; }
-	float far_clip() const { return 2000.f; }
+	float far_clip() const { return 4000.f; }
 };
 
 } // namespace blue_sky

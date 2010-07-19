@@ -23,9 +23,13 @@ namespace blue_sky
 ActiveObject::ActiveObject()
 	 : stage_( 0 )
 	 , direction_degree_( 0.f )
-	 , local_aabb_( vector3( -get_collision_width() * 0.5f, 0.f, -get_collision_depth() * 0.5f ), vector3( get_collision_width() * 0.5f, get_collision_height(), get_collision_depth() * 0.5f ) )
-	 , global_aabb_( local_aabb_ )
+	 , start_direction_degree_( 0.f )
 {
+	vector3 min( -get_collision_width() * 0.5f, 0.f, -get_collision_depth() * 0.5f );
+	vector3 max( get_collision_width() * 0.5f, get_collision_height(), get_collision_depth() * 0.5f );
+
+	local_aabb_list_.push_back( AABB( min, max ) );
+
 	set_direction_degree( 0.f );
 }
 
@@ -144,8 +148,43 @@ void ActiveObject::update_position()
 	}
 
 	position().y() = std::max( 0.f, position().y() );
+	
+	/// @todo rotate
+	update_global_aabb_list();
+}
 
-	global_aabb_ = local_aabb_ + position();
+void ActiveObject::update_global_aabb_list()
+{
+	global_aabb_list_.clear();
+
+	for ( AABBList::iterator i = local_aabb_list_.begin(); i != local_aabb_list_.end(); ++i )
+	{
+		global_aabb_list_.push_back( *i + position() );
+	}
+}
+
+bool ActiveObject::collision_detection( const ActiveObject* active_object ) const
+{
+	for ( AABBList::const_iterator i = global_aabb_list().begin(); i != global_aabb_list().end(); ++i )
+	{
+		for ( AABBList::const_iterator j = active_object->global_aabb_list().begin(); j != active_object->global_aabb_list().end(); ++j )
+		{
+			if ( i->collision_detection( *j ) )
+			{
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
+void ActiveObject::restart()
+{
+	position() = start_position();
+	set_direction_degree( start_direction_degree_ );
+
+	update_global_aabb_list();
 }
 
 /**

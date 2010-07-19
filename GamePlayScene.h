@@ -15,6 +15,7 @@ namespace blue_sky
 {
 
 class Player;
+class Goal;
 class ActiveObject;
 class Camera;
 class Stage;
@@ -27,21 +28,21 @@ class GamePlayScene : public Scene
 {
 protected:
 	common::safe_ptr< Player > player_;
+	common::safe_ptr< Goal > goal_;
+
 	common::safe_ptr< Camera > camera_;
 	common::safe_ptr< Stage > stage_;
 
 	common::safe_ptr< Direct3D9Font > font_;
 	common::safe_ptr< Direct3D9Mesh > player_mesh_;
+	common::safe_ptr< Direct3D9Mesh > goal_mesh_;
+	common::safe_ptr< Direct3D9Mesh > enemy_mesh_;
 	common::safe_ptr< Direct3D9Mesh > shadow_mesh_;
 	common::safe_ptr< Direct3D9Mesh > ground_mesh_;
-	common::safe_ptr< Direct3D9Mesh > goal_mesh_;
 
 	common::safe_ptr< Direct3D9SkyBox > sky_box_;
 
 	common::safe_ptr< Direct3D9Box > box_;
-
-	vector3 player_start_position_;
-	vector3 goal_position_;
 
 	void generate_random_stage();
 

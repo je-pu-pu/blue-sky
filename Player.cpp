@@ -67,12 +67,12 @@ void Player::update()
 	if ( w > 0 )
 	{
 		step_speed_ += 0.05f;
-		step_speed_ = math::clamp( step_speed_, -0.02f, 0.2f );
+		step_speed_ = math::clamp( step_speed_, -0.05f, 0.1f );
 	}
 	if ( w < 0 )
 	{
 		step_speed_ -= 0.05f;
-		step_speed_ = math::clamp( step_speed_, -0.02f, 0.2f );
+		step_speed_ = math::clamp( step_speed_, -0.05f, 0.1f );
 	}
 
 	step_speed_ = math::clamp( step_speed_, -0.02f, 0.5f );
@@ -281,10 +281,11 @@ void Player::kill()
 void Player::rebirth()
 {
 	is_dead_ = false;
-	set_direction_degree( 0.f );
 	eye_height_ = 1.5f;
 
 	velocity().init();
+
+	restart();
 }
 
 void Player::set_input( const Input* input )

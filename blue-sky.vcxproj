@@ -168,6 +168,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="GamePlayScene.cpp" />
+    <ClCompile Include="Goal.cpp" />
     <ClCompile Include="GridCell.cpp" />
     <ClCompile Include="GridData.cpp" />
     <ClCompile Include="GridDataManager.cpp" />
@@ -220,6 +221,7 @@
     <ClInclude Include="Face.h" />
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="GamePlayScene.h" />
+    <ClInclude Include="Goal.h" />
     <ClInclude Include="GridCell.h" />
     <ClInclude Include="GridData.h" />
     <ClInclude Include="GridDataManager.h" />

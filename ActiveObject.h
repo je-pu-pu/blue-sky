@@ -3,6 +3,7 @@
 
 #include "vector3.h"
 #include <game/AABB.h>
+#include <list>
 
 namespace game
 {
@@ -28,6 +29,7 @@ class ActiveObject
 public:
 	typedef game::Sound Sound;
 	typedef game::AABB< vector3 > AABB;
+	typedef std::list< AABB > AABBList;
 
 	enum Direction
 	{
@@ -36,21 +38,27 @@ public:
 	};
 
 private:
-	const Stage* stage_;			///< ステージへの参照
+	const Stage* stage_;					///< ステージへの参照
 
-	vector3		position_;			///< 座標
-	vector3		velocity_;			///< 移動量
+	vector3		position_;					///< 座標
+	vector3		velocity_;					///< 移動量
 
-	Direction	direction_;			///< 方向
-	float		direction_degree_;	///< 方向 ( Y Axis Degree )
+	Direction	direction_;					///< 方向
+	float		direction_degree_;			///< 方向 ( Y Axis Degree )
 
-	vector3		front_;				///< 前
+	vector3		front_;						///< 前
 
-	AABB		local_aabb_;		///< AABB ( local )
-	AABB		global_aabb_;		///< AABB ( global )
+	AABBList	local_aabb_list_;			///< AABB List ( local )
+	AABBList	global_aabb_list_;			///< AABB List ( global )
 	
+
+	vector3		start_position_;			///< ゲーム開始時の座標
+	float		start_direction_degree_;	///< ゲーム開始時の方向
+
 protected:
 	const Stage* stage() const { return stage_; }
+
+	AABBList& local_aabb_list() { return local_aabb_list_; }
 
 	float get_max_speed() const { return 1.f; }
 	virtual float get_collision_width() const;
@@ -61,6 +69,7 @@ protected:
 
 	void limit_velocity();
 	void update_position();
+	void update_global_aabb_list();
 
 	virtual void on_collision_x( const GridCell& ) { }
 	virtual void on_collision_y( const GridCell& ) { }
@@ -89,11 +98,18 @@ public:
 	vector3& front() { return front_; }
 	const vector3& front() const { return front_; }
 
-	const AABB& local_aabb() const { return local_aabb_; }
-	const AABB& global_aabb() const { return global_aabb_; }
+	const AABBList& local_aabb_list() const { return local_aabb_list_; }
+	const AABBList& global_aabb_list() const { return global_aabb_list_; }
+
+	vector3& start_position() { return start_position_; }
+	void set_start_direction_degree( float d ) { start_direction_degree_ = d; }
+
+	void restart();
 
 	/// 更新
 	virtual void update() = 0;
+
+	bool collision_detection( const ActiveObject* ) const;
 
 	void render_shadow();
 

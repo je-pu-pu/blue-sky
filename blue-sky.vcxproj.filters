@@ -84,6 +84,7 @@
     <ClCompile Include="ActiveObject.cpp" />
     <ClCompile Include="ActiveObjectManager.cpp" />
     <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="Goal.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -161,6 +162,7 @@
     <ClInclude Include="ActiveObject.h" />
     <ClInclude Include="ActiveObjectManager.h" />
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="Goal.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="media\object\building-a">

@@ -3,6 +3,8 @@
 #include "App.h"
 
 #include "Player.h"
+#include "Goal.h"
+#include "Enemy.h"
 #include "Camera.h"
 #include "Stage.h"
 
@@ -19,9 +21,7 @@
 #include "GridObjectManager.h"
 #include "GridObject.h"
 #include "GridCell.h"
-
 #include "ActiveObjectManager.h"
-#include "Enemy.h"
 
 #include "matrix4x4.h"
 #include "vector3.h"
@@ -44,23 +44,14 @@
 namespace blue_sky
 {
 
-Direct3D9Mesh* enemy_mesh_ = 0;
-
 float brightness = 0.f;
+bool clear_flag = false;
 
 GamePlayScene::GamePlayScene( const GameMain* game_main, const std::string& stage_name )
 	: Scene( game_main )
-	, player_( 0 )
-	, camera_( 0 )
-	, stage_( 0 )
-	, font_( 0 )
-	, player_mesh_( 0 )
-	, shadow_mesh_( 0 )
-	, ground_mesh_( 0 )
-	, goal_mesh_( 0 )
-	, sky_box_( 0 )
-	, box_( 0 )
 {
+	clear_flag = false;
+
 	set_stage_name( stage_name );
 
 	// Font
@@ -114,6 +105,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main, const std::string& stag
 	player_->set_input( input() );
 	player_->set_gravity( config()->get( "player.gravity", 0.01f ) );
 
+	// Goal
+	goal_ = new Goal();
+
 	// Camera
 	camera_ = new Camera();
 	camera_->set_fov( config()->get( "camera.fov", 60.f ) );
@@ -131,7 +125,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main, const std::string& stag
 		load_stage_file( ( std::string( "media/stage/" ) + get_stage_name() ).c_str() );
 	}
 
-	player_->position() = player_start_position_;
+	player_->restart();
+	goal_->restart();
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
@@ -145,19 +140,19 @@ GamePlayScene::~GamePlayScene()
 	font_.release();
 
 	player_mesh_.release();
+	goal_mesh_.release();
+	enemy_mesh_.release();
 	shadow_mesh_.release();
 	ground_mesh_.release();
-	goal_mesh_.release();
 
 	stage_.release();
 	camera_.release();
+	goal_.release();
 	player_.release();
 	
 	sky_box_.release();
 
 	box_.release();
-
-	delete enemy_mesh_;
 
 	grid_object_manager()->clear();
 	active_object_manager()->clear();
@@ -201,7 +196,7 @@ void GamePlayScene::generate_random_stage()
 				
 				if ( ! player_position_fixed )
 				{
-					player_start_position_.set( static_cast< float >( x ), static_cast< float >( building_b_grid->cell( 0, 0 ).height() ), static_cast< float >( z ) );
+					player_->start_position().set( static_cast< float >( x ), static_cast< float >( building_b_grid->cell( 0, 0 ).height() ), static_cast< float >( z ) );
 					player_position_fixed = true;
 				}
 			}
@@ -241,19 +236,19 @@ void GamePlayScene::generate_random_stage()
 
 	if ( ! player_position_fixed )
 	{
-		player_start_position_.set( common::random( 0.f, 100.f ), 3.f, common::random( 0.f, 100.f ) );
+		player_->start_position().set( common::random( 0.f, 100.f ), 3.f, common::random( 0.f, 100.f ) );
 	}
 
-	goal_position_ = player_start_position_;
-	goal_position_.z() += 10.f;
+	goal_->start_position() = player_->start_position();
+	goal_->start_position().z() += 10.f;
 
 	Enemy* enemy = new Enemy();
 	enemy->set_stage( stage_.get() );
 	enemy->set_player( player_.get() );
-	enemy->position().set( player_start_position_.x(), 300.f, player_start_position_.z() + common::random( 0, 100 ) );
+	enemy->position().set( player_->start_position().x(), 300.f, player_->start_position().z() + common::random( 0, 100 ) );
 	enemy->set_direction_degree( 180 );
 
-	active_object_manager()->add_active_object( enemy );	
+	active_object_manager()->add_active_object( enemy );
 }
 
 void GamePlayScene::load_stage_file( const char* file_name )
@@ -281,7 +276,11 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 		if ( name == "player" )
 		{
-			ss >> player_start_position_.x() >> player_start_position_.y() >> player_start_position_.z();
+			ss >> player_->start_position().x() >> player_->start_position().y() >> player_->start_position().z();
+		}
+		if ( name == "goal" )
+		{
+			ss >> goal_->start_position().x() >> goal_->start_position().y() >> goal_->start_position().z();
 		}
 		else if ( name == "sky-box" )
 		{
@@ -377,7 +376,7 @@ void GamePlayScene::update()
 	{
 		ActiveObject* active_object = *i;
 
-		if ( active_object->global_aabb().collision_detection( player_->global_aabb() ) )
+		if ( active_object->collision_detection( player_.get() ) )
 		{
 			// active_object->on_collision( player_ );
 			// player_->on_collision( active_object );
@@ -386,9 +385,28 @@ void GamePlayScene::update()
 		}
 	}
 
+	if ( player_->collision_detection( goal_.get() ) )
+	{
+		player_->set_gravity( player_->get_gravity() * 0.1f );
+		player_->velocity().set( 0.f, 0.5f, 0.f );
+
+		clear_flag = true;
+
+		sound_manager()->get_sound( "fin" )->play( false );
+	}
+
 	camera_->position() = player_->position() + vector3( 0.f, player_->get_eye_height(), 0.f );
 	
-	if ( player_->is_dead() )
+	if ( clear_flag )
+	{
+		brightness = math::chase( brightness, 1.f, 0.002f );
+
+		if ( sound_manager()->get_sound( "fin" )->get_current_position() >= 9.f )
+		{
+			set_next_scene( "stage_select" );
+		}
+	}
+	else if ( player_->is_dead() )
 	{
 		camera_->rotate_degree_target().z() = 90.f;
 		brightness = math::chase( brightness, -0.4f, 0.01f );
@@ -399,7 +417,6 @@ void GamePlayScene::update()
 			camera_->rotate_degree_target().set( 0.f, 0.f, 0.f );
 
 			player_->rebirth();
-			player_->position() = player_start_position_;
 
 			brightness = 1.f;
 		}
@@ -412,6 +429,8 @@ void GamePlayScene::update()
 	{
 		brightness = math::chase( brightness, 0.f, 0.02f );
 	}
+
+	
 
 	camera_->update();
 
@@ -564,7 +583,7 @@ void GamePlayScene::render()
 		*/
 
 		// Goal
-		D3DXMatrixTranslation( & t, goal_position_.x(), goal_position_.y() + 0.05f, goal_position_.z() );
+		D3DXMatrixTranslation( & t, goal_->position().x(), goal_->position().y() + 0.05f, goal_->position().z() );
 
 		world = t;
 		WorldViewProjection = world * view * projection;

@@ -37,6 +37,7 @@ private:
 	win::Rect left_allow_src_rect_;
 	win::Rect right_allow_src_rect_;
 	win::Rect stage_src_rect_;
+	std::list< win::Rect > circle_src_rect_list_;
 
 	int get_margin() const { return 5; }
 

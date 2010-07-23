@@ -593,6 +593,7 @@ bool GamePlayScene::render()
 		goal_mesh_->render();
 
 		// Player
+		/*
 		vector3 pos = player_->position();
 		pos += -camera_->front() * 0.1f;
 
@@ -605,6 +606,7 @@ bool GamePlayScene::render()
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 		player_mesh_->render();
+		*/
 
 		// ActiveObject
 		for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
@@ -622,14 +624,14 @@ bool GamePlayScene::render()
 			enemy_mesh_->render();
 		}
 
-		// Player ( Shadow )
-		render_shadow( player_.get(), view * projection );
-
 		// ActiveObject ( Shadow )
 		for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
 		{
 			render_shadow( *i, view * projection );
 		}
+
+		// Player ( Shadow )
+		render_shadow( player_.get(), view * projection );
 	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );

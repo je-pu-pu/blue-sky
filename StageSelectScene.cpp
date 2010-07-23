@@ -28,6 +28,11 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	, right_allow_src_rect_( win::Rect::Size( 384, 704, 86, 126 ) )
 	, stage_src_rect_( 0, 0, 512, 512 )
 {
+	circle_src_rect_list_.push_back( win::Rect::Size( 256, 512, 128, 140 ) );
+	circle_src_rect_list_.push_back( win::Rect::Size( 384, 512, 160, 130 ) );
+	circle_src_rect_list_.push_back( win::Rect::Size( 576, 512, 144, 114 ) );
+	circle_src_rect_list_.push_back( win::Rect::Size( 768, 512, 146, 120 ) );
+
 	sprite_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
 
 	ok_ = sound_manager()->get_sound( "ok" );
@@ -147,7 +152,9 @@ bool StageSelectScene::render()
 	// Stage
 	int n = 0;
 
-	for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i )
+	std::list< win::Rect >::const_iterator j = circle_src_rect_list_.begin();
+
+	for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i, ++j )
 	{
 		Stage* stage = *i;
 
@@ -199,6 +206,15 @@ bool StageSelectScene::render()
 
 		direct_3d()->getSprite()->SetTransform( & transform );
 		direct_3d()->getSprite()->Draw( stage->texture, & stage_src_rect_.get_rect(), & center, 0, 0xFFFFFFFF );
+
+		// Circle
+		D3DXVECTOR3 circle_center( j->width() * 0.5f, j->height() * 0.5f, 0.f );
+
+		D3DXMatrixTranslation( & t, dx + ( dst_rect.width() - j->width() ) * 0.5f - - offset, dy + ( dst_rect.height() - j->height() ) * 0.5f + offset, 0.f );
+		transform = t;
+
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw( sprite_texture_, & j->get_rect(), & circle_center, 0, 0x99FFFFFF );
 
 		n++;
 	}

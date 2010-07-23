@@ -85,6 +85,9 @@
     <ClCompile Include="ActiveObjectManager.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Goal.cpp" />
+    <ClCompile Include="DirectShow.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -163,6 +166,9 @@
     <ClInclude Include="ActiveObjectManager.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Goal.h" />
+    <ClInclude Include="DirectShow.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="media\object\building-a">

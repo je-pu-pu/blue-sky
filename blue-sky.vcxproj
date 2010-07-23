@@ -160,6 +160,7 @@
     <ClCompile Include="Direct3D9SkyBox.cpp" />
     <ClCompile Include="Direct3D9TextureManager.cpp" />
     <ClCompile Include="DirectInput.cpp" />
+    <ClCompile Include="DirectShow.cpp" />
     <ClCompile Include="DirectSound.cpp" />
     <ClCompile Include="DirectSoundBuffer.cpp" />
     <ClCompile Include="Enemy.cpp" />
@@ -214,6 +215,7 @@
     <ClInclude Include="Direct3D9SkyBox.h" />
     <ClInclude Include="Direct3D9TextureManager.h" />
     <ClInclude Include="DirectInput.h" />
+    <ClInclude Include="DirectShow.h" />
     <ClInclude Include="DirectSound.h" />
     <ClInclude Include="DirectSoundBuffer.h" />
     <ClInclude Include="DirectX.h" />

@@ -187,7 +187,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 			play_sound( "land" );
 
 			is_jumping_ = false;
-			step_speed_ = 0.05f;
+			step_speed_ = math::clamp( step_speed_, -0.05f, 0.1f );
 
 			// velocity().x() = 0.f;
 			// velocity().z() = 0.f;
@@ -235,7 +235,7 @@ void Player::jump()
 {
 	if ( is_jumping() ) return;
 	
-	velocity().y() = 0.5f;
+	velocity().y() = 0.3f;
 	
 	// velocity().x() += front_.x() * 0.4f;
 	// velocity().z() += front_.z() * 0.4f;

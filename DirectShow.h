@@ -15,12 +15,12 @@ public:
 private:
 	IGraphBuilder*			graph_builder_;
 	ICaptureGraphBuilder2*	capture_graph_builder_;
-	IBaseFilter*			base_fildter_;
+	IBaseFilter*			video_mixing_renderer_;
 	IMediaControl*			media_control_;
 	
 
 public:
-	DirectShow();
+	DirectShow( HWND );
 	~DirectShow();
 
 }; // class DirectShow

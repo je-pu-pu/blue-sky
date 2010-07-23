@@ -57,8 +57,8 @@ public:
 	void update();				///< ƒƒCƒ“ƒ‹[ƒv
 	void render();				///< •`‰æ
 
-}; // class Scene
+}; // class StageSelectScene
 
-} // namespace StageSelectScene
+} // namespace blue_sky
 
 #endif // BLUE_SKY_STAGE_SELECT_SCENE_H

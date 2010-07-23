@@ -60,8 +60,8 @@ public:
 
 	bool is_clip_cursor_required() { return true; }
 
-}; // class Scene
+}; // class GamePlayScene
 
-} // namespace GamePlayScene
+} // namespace blue_sky
 
-#endif // BLUE_SKY_SCENE_H
+#endif // BLUE_SKY_GAME_PLAY_SCENE_H

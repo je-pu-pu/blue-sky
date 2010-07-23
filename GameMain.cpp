@@ -11,6 +11,7 @@
 #include "TitleScene.h"
 #include "StageSelectScene.h"
 #include "GamePlayScene.h"
+#include "EndingScene.h"
 
 #include "Input.h"
 #include "SoundManager.h"
@@ -91,15 +92,8 @@ GameMain::GameMain()
 	active_object_manager_ = new ActiveObjectManager();
 
 	// Scene
-	scene_ = new TitleScene( this );
-
-	/*
-	// DirectShow
-	IGraphBuilder
-
-	CoInitialize( 0 );
-	CoCreateInstance( CLSID_FilterGraph, 0, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, static_cast< void** >( m_cpGraph.ToCreator() ) );
-	*/
+	// scene_ = new TitleScene( this );
+	scene_ = new EndingScene( this );
 }
 
 //■デストラクタ
@@ -172,6 +166,10 @@ bool GameMain::update()
 		{
 			scene_ = new GamePlayScene( this, stage_name );
 		}
+		else if ( next_scene == "ending" )
+		{
+			scene_ = new EndingScene( this );
+		}
 		else
 		{
 			COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " + scene_->get_next_scene() ) );
@@ -205,6 +203,8 @@ void GameMain::render()
 	std::string debug_text;
 	debug_text = std::string( "FPS : " ) + common::serialize( MainLoop.GetFPS() );
 	get_direct_3d()->getFont()->draw_text( 0, 0, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
+
+	return;
 
 	HRESULT hr = get_direct_3d()->getDevice()->Present( NULL, NULL, NULL, NULL );
 

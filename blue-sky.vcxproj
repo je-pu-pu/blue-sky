@@ -163,6 +163,7 @@
     <ClCompile Include="DirectShow.cpp" />
     <ClCompile Include="DirectSound.cpp" />
     <ClCompile Include="DirectSoundBuffer.cpp" />
+    <ClCompile Include="EndingScene.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameMain.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -219,6 +220,7 @@
     <ClInclude Include="DirectSound.h" />
     <ClInclude Include="DirectSoundBuffer.h" />
     <ClInclude Include="DirectX.h" />
+    <ClInclude Include="EndingScene.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Face.h" />
     <ClInclude Include="GameMain.h" />

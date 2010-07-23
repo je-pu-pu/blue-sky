@@ -88,6 +88,9 @@
     <ClCompile Include="DirectShow.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
+    <ClCompile Include="EndingScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -168,6 +171,9 @@
     <ClInclude Include="Goal.h" />
     <ClInclude Include="DirectShow.h">
       <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="EndingScene.h">
+      <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

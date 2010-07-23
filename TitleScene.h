@@ -40,8 +40,8 @@ public:
 	void update();				///< ƒƒCƒ“ƒ‹[ƒv
 	void render();				///< •`‰æ
 
-}; // class Scene
+}; // class TitleScene
 
-} // namespace GamePlayScene
+} // namespace blue_sky
 
-#endif // BLUE_SKY_SCENE_H
+#endif // BLUE_SKY_TITLE_SCENE_H

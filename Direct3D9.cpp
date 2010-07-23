@@ -47,6 +47,7 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 	present_.Windowed = ! full_screen;
 	present_.EnableAutoDepthStencil = TRUE;
 	present_.AutoDepthStencilFormat = D3DFMT_D16;
+	present_.AutoDepthStencilFormat = D3DFMT_D24S8;
 
 //	present_.EnableAutoDepthStencil = FALSE;
 //	present_.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
@@ -54,10 +55,6 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 	present_.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
 	present_.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;	
 //	present_.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
-	
-//	present_.AutoDepthStencilFormat = D3DFMT_D16;
-//	present_.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
-//	present_.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 
 	DWORD max_multi_sample_quality = 0;
 	if ( SUCCEEDED( direct_3d_->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, present_.BackBufferFormat, present_.Windowed, static_cast< D3DMULTISAMPLE_TYPE >( multi_sample_type ), & max_multi_sample_quality ) ) )

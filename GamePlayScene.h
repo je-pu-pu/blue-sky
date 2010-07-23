@@ -44,6 +44,10 @@ protected:
 
 	common::safe_ptr< Direct3D9Box > box_;
 
+	float ambient_color_[ 4 ];
+	float grid_object_visible_length_;
+	float grid_object_lod_0_length_;
+
 	void generate_random_stage();
 
 	void load_stage_file( const char* );

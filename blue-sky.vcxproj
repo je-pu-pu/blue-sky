@@ -253,10 +253,22 @@
     <ClInclude Include="WaveFile.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="blue-sky.config" />
     <None Include="blye-sky.ico" />
     <None Include="media\object\building-a" />
+    <None Include="media\object\building-b" />
     <None Include="media\object\house-a" />
+    <None Include="media\object\pole" />
+    <None Include="media\object\road" />
+    <None Include="media\object\road-curve" />
+    <None Include="media\object\step" />
+    <None Include="media\object\tel-box" />
+    <None Include="media\object\vending-machine" />
     <None Include="media\shader\blue-sky.fx" />
+    <None Include="media\stage\stage-0-1" />
+    <None Include="media\stage\stage-0-2" />
+    <None Include="media\stage\stage-0-3" />
+    <None Include="media\stage\stage-0-4" />
     <None Include="media\stage\stage-1-1" />
     <None Include="media\stage\stage-1-2" />
   </ItemGroup>

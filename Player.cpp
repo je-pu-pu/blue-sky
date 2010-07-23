@@ -89,15 +89,9 @@ void Player::update()
 	// velocity().y() -= 0.0001f;
 
 	// Œ¸‘¬
-	if ( is_jumping() )
 	{
-		velocity().x() = math::chase( velocity().x(), 0.f, 0.001f );
-		velocity().z() = math::chase( velocity().z(), 0.f, 0.001f );
-	}
-	else
-	{
-		velocity().x() *= 0.8f;
-		velocity().z() *= 0.8f;
+		velocity().x() *= 0.9f;
+		velocity().z() *= 0.9f;
 
 		if ( velocity().y() < -get_max_speed() * 0.02f )
 		{
@@ -149,7 +143,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 		velocity().y() = 1.f;
 	
 		is_jumping_ = true;
-		step_speed_ = 0.2f;
+		// step_speed_ = 0.2f;
 
 		stop_sound( "super-jump" );
 		play_sound( "super-jump" );
@@ -187,7 +181,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 			play_sound( "land" );
 
 			is_jumping_ = false;
-			step_speed_ = math::clamp( step_speed_, -0.05f, 0.1f );
+			// step_speed_ = math::clamp( step_speed_, -0.05f, 0.1f );
 
 			// velocity().x() = 0.f;
 			// velocity().z() = 0.f;

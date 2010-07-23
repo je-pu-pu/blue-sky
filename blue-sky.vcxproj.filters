@@ -192,6 +192,40 @@
       <Filter>stage</Filter>
     </None>
     <None Include="blye-sky.ico" />
+    <None Include="media\stage\stage-0-2">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\stage-0-3">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\stage-0-4">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\stage-0-1">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\object\road-curve">
+      <Filter>object</Filter>
+    </None>
+    <None Include="media\object\step">
+      <Filter>object</Filter>
+    </None>
+    <None Include="media\object\tel-box">
+      <Filter>object</Filter>
+    </None>
+    <None Include="media\object\vending-machine">
+      <Filter>object</Filter>
+    </None>
+    <None Include="media\object\building-b">
+      <Filter>object</Filter>
+    </None>
+    <None Include="media\object\pole">
+      <Filter>object</Filter>
+    </None>
+    <None Include="media\object\road">
+      <Filter>object</Filter>
+    </None>
+    <None Include="blue-sky.config" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

@@ -49,7 +49,17 @@ bool clear_flag = false;
 
 GamePlayScene::GamePlayScene( const GameMain* game_main, const std::string& stage_name )
 	: Scene( game_main )
+	, grid_object_visible_length_( 500 )
+	, grid_object_lod_0_length_( 100 )
 {
+	ambient_color_[ 0 ] = 1.f;
+	ambient_color_[ 1 ] = 1.f;
+	ambient_color_[ 2 ] = 1.f;
+	ambient_color_[ 3 ] = 1.f;
+
+	grid_object_visible_length_ = config()->get( "video.grid-object-visible-length", 500.f );
+	grid_object_lod_0_length_ = config()->get( "video.grid-object-lod-0-length", 100.f );
+
 	clear_flag = false;
 
 	set_stage_name( stage_name );
@@ -67,15 +77,17 @@ GamePlayScene::GamePlayScene( const GameMain* game_main, const std::string& stag
 	shadow_mesh_ = new Direct3D9Mesh( direct_3d() );
 	shadow_mesh_->load_x( "media/model/shadow" );
 
+	/*
 	ground_mesh_ = new Direct3D9Mesh( direct_3d() );
 	ground_mesh_->load_x( "media/model/ground" );
+	*/
 
 	goal_mesh_ = new Direct3D9Mesh( direct_3d() );
 	goal_mesh_->load_x( "media/model/door" );
 
 	// SkyBox
-	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
-	// sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-star-2", "png" );
+	// sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
+	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-star-2", "png" );
 
 	// Box
 	box_ = new Direct3D9Box( direct_3d(), 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
@@ -84,7 +96,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main, const std::string& stag
 	{
 		sound_manager()->stop_all();
 
-//		sound_manager()->load_music( "bgm", "tower" )->play( true );
 //		sound_manager()->load_music( "rain" )->play( true );
 //		sound_manager()->load_music( "izakaya" )->play( false );
 
@@ -127,6 +138,14 @@ GamePlayScene::GamePlayScene( const GameMain* game_main, const std::string& stag
 
 	player_->restart();
 	goal_->restart();
+
+	Sound* bgm = sound_manager()->get_sound( "bgm" );
+	if ( bgm )
+	{
+		bgm->play( true );
+	}
+
+	direct_3d()->getEffect()->SetFloatArray( "ambient", ambient_color_, 4 );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
@@ -274,11 +293,22 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 		ss >> name;
 
-		if ( name == "player" )
+		if ( name == "bgm" )
+		{
+			std::string name;
+			ss >> name;
+
+			sound_manager()->load_music( "bgm", name.c_str() );
+		}
+		else if ( name == "ambient" )
+		{
+			ss >> ambient_color_[ 0 ] >> ambient_color_[ 1 ] >> ambient_color_[ 2 ];
+		}
+		else if ( name == "player" )
 		{
 			ss >> player_->start_position().x() >> player_->start_position().y() >> player_->start_position().z();
 		}
-		if ( name == "goal" )
+		else if ( name == "goal" )
 		{
 			ss >> goal_->start_position().x() >> goal_->start_position().y() >> goal_->start_position().z();
 		}
@@ -392,6 +422,12 @@ void GamePlayScene::update()
 
 		clear_flag = true;
 
+		Sound* bgm = sound_manager()->get_sound( "bgm" );
+		if ( bgm )
+		{
+			bgm->stop();
+		}
+
 		sound_manager()->get_sound( "fin" )->play( false );
 	}
 
@@ -497,20 +533,23 @@ bool GamePlayScene::render()
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
 
 		// Ground
-		const int gx = static_cast< int >( player_->position().x() );
-		const int gy = static_cast< int >( player_->position().z() );
+		if ( ground_mesh_ )
+		{
+			const int gx = static_cast< int >( player_->position().x() );
+			const int gy = static_cast< int >( player_->position().z() );
 
-		// D3DXMatrixTranslation( & t, static_cast< float >( gx / 10 * 10 ), 0.f, static_cast< float >( gy / 10 * 10 ) );
-		D3DXMatrixTranslation( & t, stage_->width() * 0.5f, 0.f, stage_->depth() * 0.5f );
-		world = t;
+			// D3DXMatrixTranslation( & t, static_cast< float >( gx / 10 * 10 ), 0.f, static_cast< float >( gy / 10 * 10 ) );
+			D3DXMatrixTranslation( & t, stage_->width() * 0.5f, 0.f, stage_->depth() * 0.5f );
+			world = t;
 
-		WorldViewProjection = world * view * projection;
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
-		ground_mesh_->render();
+			WorldViewProjection = world * view * projection;
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+			ground_mesh_->render();
+		}
 
 //		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, FALSE ) );
-		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );		
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 		
@@ -522,16 +561,24 @@ bool GamePlayScene::render()
 		{
 			GridObject* grid_object = *i;
 
-			const float max_length = 500;
-			const float lod_length = 100;
-
 			const float x_length = std::abs( player_->position().x() - static_cast< float >( grid_object->x() ) ) + grid_object->z() * 0.02f;
 			const float y_length = std::abs( player_->position().y() - static_cast< float >( grid_object->y() ) );
 			const float z_length = std::abs( player_->position().z() - static_cast< float >( grid_object->z() ) ) + grid_object->x() * 0.02f;
 
-			if ( x_length >= max_length ) continue;
-			if ( z_length >= max_length ) continue;
-			
+			if ( x_length >= grid_object_visible_length_ || z_length >= grid_object_visible_length_ )
+			{
+				grid_object->set_visible( false );
+			}
+			else
+			{
+				grid_object->set_visible( true );
+			}
+
+			if ( grid_object->visible_alpha() == 0.f )
+			{
+				continue;
+			}
+
 			const float offset = 0.05f;
 			const float flicker = 0.f; // sin( grid_object->x() + grid_object->z() * 0.001f + a ) * 0.5f;
 
@@ -542,18 +589,47 @@ bool GamePlayScene::render()
 
 			WorldViewProjection = world * view * projection;
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
-			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
-			if ( x_length < lod_length && z_length < lod_length )
+			if ( x_length < grid_object_lod_0_length_ && z_length < grid_object_lod_0_length_ )
 			{
-				grid_object->mesh( 0 )->render();
+				grid_object->set_lod( 0 );
 			}
 			else
 			{
-				grid_object->mesh( 1 )->render();
+				grid_object->set_lod( 1 );
+			}
+
+			if ( grid_object->has_last_lod() )
+			{
+				DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
+
+				ambient_color_[ 3 ] = 1.f;
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient", ambient_color_, 4 ) );
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+
+				grid_object->render_last_lod();
+
+				DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
+
+				ambient_color_[ 3 ] = grid_object->lod_alpha();
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient", ambient_color_, 4 ) );
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+
+				grid_object->render();
+			}
+			else
+			{
+				ambient_color_[ 3 ] = grid_object->visible_alpha();
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient", ambient_color_, 4 ) );
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+
+				grid_object->render();
 			}
 		}
 #endif // 0
+
+		ambient_color_[ 3 ] = 1.f;
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient", ambient_color_, 4 ) );
 
 		/*
 		// Box

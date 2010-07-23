@@ -210,7 +210,7 @@ bool StageSelectScene::render()
 		// Circle
 		D3DXVECTOR3 circle_center( j->width() * 0.5f, j->height() * 0.5f, 0.f );
 
-		D3DXMatrixTranslation( & t, dx + ( dst_rect.width() - j->width() ) * 0.5f - - offset, dy + ( dst_rect.height() - j->height() ) * 0.5f + offset, 0.f );
+		D3DXMatrixTranslation( & t, dx + ( dst_rect.width() - j->width() ) * 0.5f - offset, dy + ( dst_rect.height() - j->height() ) * 0.5f + offset, 0.f );
 		transform = t;
 
 		direct_3d()->getSprite()->SetTransform( & transform );

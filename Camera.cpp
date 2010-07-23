@@ -36,6 +36,9 @@ void Camera::update()
 
 	front_ = default_front_ * m;
 
+	static float xxx = 0.f;
+	xxx += 1.f;
+
 	// 
 	matrix4x4 xr;
 	xr.rotate_x( rotate_degree().x() );

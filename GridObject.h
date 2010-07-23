@@ -25,6 +25,11 @@ private:
 
 	GridData* grid_data_;
 
+	int lod_;
+	int last_lod_;
+
+	float visible_alpha_;
+	float lod_alpha_;
 
 public:
 	GridObject( int, int, int, int, GridData* );
@@ -35,13 +40,26 @@ public:
 	int z() const { return z_; }
 	int rotate_degree() const { return rotate_degree_; }
 
+	void set_visible( bool );
+	void set_lod( int );
+
+	float visible_alpha() const { return visible_alpha_; }
+	float lod_alpha() const { return lod_alpha_; }
+
+	float alpha() const { return visible_alpha_ * lod_alpha_; }
+
 	int width() const;
 	int depth() const;
 	
 	GridData* grid_data() { return grid_data_; }
 	const GridData* grid_data() const { return grid_data_; }
 
-	const Mesh* mesh( int ) const;
+	// const Mesh* mesh() const;
+
+	bool has_last_lod() const { return lod_ != last_lod_; }
+
+	void render() const;
+	void render_last_lod() const;
 };
 
 } // namespace blue_sky

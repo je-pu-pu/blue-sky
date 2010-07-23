@@ -12,15 +12,20 @@ EndingScene::EndingScene( const GameMain* game_main )
 	, direct_show_( 0 )
 {
 	direct_3d()->set_depth_stencil( false );
-	direct_3d()->reset();
+	direct_3d()->set_multi_sample( 0, 0 );
+	direct_3d()->reset( true );
 
 	sound_manager()->stop_all();
+	sound_manager()->unload_all();
 
 	direct_show_ = new DirectShow( App::GetInstance()->GetWindowHandle() );
 }
 
 EndingScene::~EndingScene()
 {
+	direct_3d()->set_depth_stencil( true );
+	direct_3d()->reset( true );
+
 	delete direct_show_;
 }
 

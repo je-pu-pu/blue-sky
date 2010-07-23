@@ -48,6 +48,9 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 	present_.EnableAutoDepthStencil = TRUE;
 	present_.AutoDepthStencilFormat = D3DFMT_D16;
 
+//	present_.EnableAutoDepthStencil = FALSE;
+//	present_.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
+
 	present_.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
 	present_.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;	
 //	present_.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
@@ -57,7 +60,7 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 //	present_.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 
 	DWORD max_multi_sample_quality = 0;
-	if ( SUCCEEDED( direct_3d_->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, present_.Windowed, static_cast< D3DMULTISAMPLE_TYPE >( multi_sample_type ), & max_multi_sample_quality ) ) )
+	if ( SUCCEEDED( direct_3d_->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, present_.BackBufferFormat, present_.Windowed, static_cast< D3DMULTISAMPLE_TYPE >( multi_sample_type ), & max_multi_sample_quality ) ) )
 	{
 		if ( multi_sample_quality >= static_cast< int >( max_multi_sample_quality ) )
 		{
@@ -153,11 +156,11 @@ void Direct3D9::load_effect_file( const char* file_name )
 	}
 }
 
-void Direct3D9::reset()
+void Direct3D9::reset( bool force )
 {
 	HRESULT hr = device_->TestCooperativeLevel();
 
-	if ( hr == D3DERR_DEVICENOTRESET )
+	if ( force && hr != D3DERR_DEVICELOST || hr == D3DERR_DEVICENOTRESET )
 	{
 		DIRECT_X_FAIL_CHECK( effect_->OnLostDevice() );
 		DIRECT_X_FAIL_CHECK( sprite_->OnLostDevice() );
@@ -186,29 +189,27 @@ void Direct3D9::set_full_screen( bool full_scrren )
 {
 	present_.Windowed = ! full_scrren;
 
-	HRESULT hr = device_->TestCooperativeLevel();
+	reset( true );
+}
 
-	if ( hr == D3DERR_DEVICELOST )
+void Direct3D9::set_multi_sample( int multi_sample_type, int multi_sample_quality )
+{
+	DWORD max_multi_sample_quality = 0;
+
+	if ( SUCCEEDED( direct_3d_->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, present_.BackBufferFormat, present_.Windowed, static_cast< D3DMULTISAMPLE_TYPE >( multi_sample_type ), & max_multi_sample_quality ) ) )
 	{
-		return;
+		if ( multi_sample_quality >= static_cast< int >( max_multi_sample_quality ) )
+		{
+			multi_sample_quality = max_multi_sample_quality - 1;
+		}
+
+		present_.MultiSampleType = static_cast< D3DMULTISAMPLE_TYPE >( multi_sample_type );
+		present_.MultiSampleQuality = multi_sample_quality;
 	}
-
-	DIRECT_X_FAIL_CHECK( effect_->OnLostDevice() );
-	DIRECT_X_FAIL_CHECK( sprite_->OnLostDevice() );
-
-	for ( ResourceList::iterator i = resource_list_.begin(); i != resource_list_.end(); ++i )
+	else
 	{
-		(*i)->on_lost_device();
-	}
-
-	DIRECT_X_FAIL_CHECK( device_->Reset( & present_ ) );
-
-	DIRECT_X_FAIL_CHECK( effect_->OnResetDevice() );
-	DIRECT_X_FAIL_CHECK( sprite_->OnResetDevice() );
-
-	for ( ResourceList::iterator i = resource_list_.begin(); i != resource_list_.end(); ++i )
-	{
-		(*i)->on_reset_device();
+		present_.MultiSampleType = D3DMULTISAMPLE_NONE;
+		present_.MultiSampleQuality = 0;
 	}
 }
 

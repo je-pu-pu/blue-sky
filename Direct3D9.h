@@ -39,7 +39,7 @@ public:
 	
 	void load_effect_file( const char* );
 
-	void reset();
+	void reset( bool = false );
 
 	void set_size( int, int );
 	void set_full_screen( bool );

@@ -35,6 +35,9 @@ public:
 
 	virtual game::Sound* load_music( const char*, const char* = 0 );
 	
+	virtual void unload( const char* );
+	virtual void unload_all();
+
 	virtual game::Sound* create_sound( const char*, bool );
 
 	virtual void update();

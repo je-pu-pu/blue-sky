@@ -22,10 +22,7 @@ SoundManager::SoundManager( HWND hwnd )
 
 SoundManager::~SoundManager()
 {
-	for ( SoundMap::iterator i = sound_map().begin(); i != sound_map().end(); ++i )
-	{
-		delete i->second;
-	}
+	unload_all();
 
 	delete direct_sound_;
 }
@@ -58,6 +55,28 @@ game::Sound* SoundManager::load_music( const char* name, const char* file_name )
 	}
 
 	return game::SoundManager::load( name, ( std::string( "media/music/" ) + name + ".ogg" ).c_str() );
+}
+
+void SoundManager::unload( const char* name )
+{
+	SoundMap::const_iterator i = sound_map().find( name );
+
+	if ( i != sound_map().end() )
+	{
+		delete i->second;
+
+		sound_map().erase( i );
+	}
+}
+
+void SoundManager::unload_all()
+{
+	for ( SoundMap::iterator i = sound_map().begin(); i != sound_map().end(); ++i )
+	{
+		delete i->second;
+	}
+
+	sound_map().clear();
 }
 
 game::Sound* SoundManager::create_sound( const char* file_name, bool is_3d )

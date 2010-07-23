@@ -2,6 +2,9 @@
 #include "GameMain.h"
 #include "resource.h"
 
+#include <win/Rect.h>
+#include <win/Point.h>
+
 #include <winnls32.h>
 
 #include <iostream>
@@ -28,7 +31,6 @@ App::~App()
 	WINNLSEnableIME(hWnd, TRUE);	//IME表示
 
 	ClipCursor( 0 );
-	ShowCursor( TRUE );				//カーソル表示
 }
 
 //■初期化
@@ -43,6 +45,7 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		return false;
 	}
 	hMutex = CreateMutex(NULL, FALSE, WinTitle.c_str());
+
 	//WNDCLASS構造体
 	WNDCLASS wc = {
 		CS_HREDRAW | CS_VREDRAW,				//スタイル
@@ -51,7 +54,7 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		NULL,									//拡張用パラメータ
 		hInst,									//インスタンスハンドル
 		LoadIcon( hi, MAKEINTRESOURCE( IDI_ICON1 ) ),			//アイコン
-		LoadCursor( NULL, IDC_ARROW ),			//マウスカーソル
+		LoadCursor( NULL, IDC_ARROW ),							//マウスカーソル
 		(HBRUSH)GetStockObject(BLACK_BRUSH),	//背景色
 		NULL,									//メニュー
 		ClassName.c_str(),						//クラス名
@@ -94,8 +97,6 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 
 	// WINNLSEnableIME(hWnd, FALSE);	//IME非表示
 
-	ShowCursor( FALSE );			// カーソル非表示
-
 	return true;
 }
 
@@ -135,7 +136,11 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 {
 	switch ( msg )
 	{
-	case WM_CREATE: break;
+	case WM_CREATE:
+	{
+		SetCursor( 0 );
+		break;
+	}
 	case WM_EXITSIZEMOVE: on_resize( hwnd ); break;
 	case WM_KEYDOWN:
 	{
@@ -143,6 +148,24 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 
 		if ( wp == VK_ESCAPE ) game->on_reset_key_down();
 		if ( wp >= VK_F1 && wp <= VK_F24 ) game->on_function_key_down( wp - VK_F1 + 1 );
+		break;
+	}
+	case WM_MOUSEMOVE:
+	{
+		win::Point point( LOWORD( lp ), HIWORD( lp ) );
+		win::Rect client_rect;
+
+		GetClientRect( hwnd, & client_rect.get_rect() );
+
+		if ( client_rect.in( point ) )
+		{
+			SetCursor( 0 );
+		}
+		else
+		{
+			SetCursor( LoadCursor( NULL, IDC_ARROW ) );
+		}
+
 		break;
 	}
 	case WM_MOUSEWHEEL:

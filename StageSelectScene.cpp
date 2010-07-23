@@ -118,6 +118,11 @@ void StageSelectScene::update()
 			{
 				set_stage_name( "" );
 			}
+			else if ( stage->name == "stage-0-3" )
+			{
+				set_next_scene( "ending" );
+				return;
+			}
 			else
 			{
 				set_stage_name( stage->name );
@@ -131,7 +136,7 @@ void StageSelectScene::update()
 /**
  * •`‰æ
  */
-void StageSelectScene::render()
+bool StageSelectScene::render()
 {
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->BeginScene() );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0x11, 0xAA, 0xFF ), 1.f, 0 ) );
@@ -254,6 +259,8 @@ void StageSelectScene::render()
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->End() );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
+
+	return true;
 }
 
 bool StageSelectScene::has_prev_page() const

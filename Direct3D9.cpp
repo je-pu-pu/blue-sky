@@ -34,23 +34,25 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 		COMMON_THROW_EXCEPTION;
 	}
 
-	text_out_adapter_info( "d3d_adapter_info.txt" );
+	text_out_adapter_info( "log/d3d_adapter_info.txt" );
 
 	ZeroMemory( & present_, sizeof( present_ ) );
 
-//	present_.hDeviceWindow = hwnd;
-	present_.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	present_.BackBufferFormat = D3DFMT_X8R8G8B8;
-	present_.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 	present_.BackBufferWidth = w;
 	present_.BackBufferHeight = h;
-	
-	present_.Windowed = ! full_screen;
-//	present_.BackBufferFormat = D3DFMT_UNKNOWN;
-//	present_.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+	present_.BackBufferFormat = D3DFMT_A8R8G8B8;
 
+	present_.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	present_.hDeviceWindow = hwnd;
+	present_.Windowed = ! full_screen;
 	present_.EnableAutoDepthStencil = TRUE;
 	present_.AutoDepthStencilFormat = D3DFMT_D16;
+
+	present_.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+	present_.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;	
+//	present_.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+	
+//	present_.AutoDepthStencilFormat = D3DFMT_D16;
 //	present_.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 //	present_.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 
@@ -107,7 +109,7 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 
 	device_->GetDeviceCaps( & device_caps_ );
 
-	text_out_device_caps( "d3d_device_caps.txt" );
+	text_out_device_caps( "log/d3d_device_caps.txt" );
 
 	// device_->SetRenderState( D3DRS_MULTISAMPLEANTIALIAS, TRUE );
 
@@ -207,6 +209,20 @@ void Direct3D9::set_full_screen( bool full_scrren )
 	for ( ResourceList::iterator i = resource_list_.begin(); i != resource_list_.end(); ++i )
 	{
 		(*i)->on_reset_device();
+	}
+}
+
+void Direct3D9::set_depth_stencil( bool enable )
+{
+	present_.EnableAutoDepthStencil = enable;
+
+	if ( enable )
+	{
+		present_.AutoDepthStencilFormat = D3DFMT_D16;
+	}
+	else
+	{
+		present_.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
 	}
 }
 

@@ -239,6 +239,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="OggVorbisFile.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundManager.h" />
@@ -252,11 +253,15 @@
     <ClInclude Include="WaveFile.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="blye-sky.ico" />
     <None Include="media\object\building-a" />
     <None Include="media\object\house-a" />
     <None Include="media\shader\blue-sky.fx" />
     <None Include="media\stage\stage-1-1" />
     <None Include="media\stage\stage-1-2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="blue-sky.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -66,7 +66,6 @@ DirectShow::DirectShow( HWND hwnd )
 	DIRECT_X_FAIL_CHECK( windowless_conterol->SetVideoPosition( & src_rect, & dst_rect ) );
 	windowless_conterol->Release();
 
-
 	DIRECT_X_FAIL_CHECK( graph_builder_->QueryInterface( IID_IMediaControl, reinterpret_cast< void** >( & media_control_ ) ) );
 
 	media_control_->Run();

@@ -107,7 +107,7 @@ void TitleScene::update()
 /**
  * •`‰æ
  */
-void TitleScene::render()
+bool TitleScene::render()
 {
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->BeginScene() );
 
@@ -195,6 +195,8 @@ void TitleScene::render()
 	*/
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
+
+	return true;
 }
 
 } // namespace blue_sky

@@ -38,7 +38,7 @@ public:
 	~TitleScene();
 
 	void update();				///< ƒƒCƒ“ƒ‹[ƒv
-	void render();				///< •`‰æ
+	bool render();				///< •`‰æ
 
 }; // class TitleScene
 

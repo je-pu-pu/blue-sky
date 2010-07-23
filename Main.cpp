@@ -71,7 +71,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 
 		std::stringstream ss;
 
-		ss << "error_";
+		ss << "log/error_";
 		ss << std::setfill( '0' );
 		ss << ( 1900 + t_st->tm_year ) << std::setw( 2 ) << ( 1 + t_st->tm_mon ) << std::setw( 2 ) << t_st->tm_mday;
 		ss << "_" << std::setw( 2 ) << t_st->tm_hour << std::setw( 2 ) << t_st->tm_min << std::setw( 2 ) << t_st->tm_sec << ".log";

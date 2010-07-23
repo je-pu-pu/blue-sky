@@ -443,7 +443,7 @@ void GamePlayScene::update()
 /**
  * •`‰æ
  */
-void GamePlayScene::render()
+bool GamePlayScene::render()
 {
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->BeginScene() );
 
@@ -648,6 +648,8 @@ void GamePlayScene::render()
 	font_->draw_text( 0, 24, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
+
+	return true;
 }
 
 void GamePlayScene::render_shadow( const ActiveObject* active_object, const D3DXMATRIXA16& after )

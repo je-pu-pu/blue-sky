@@ -45,6 +45,8 @@ public:
 	void set_full_screen( bool );
 	void set_multi_sample( int, int );
 
+	void set_depth_stencil( bool );
+
 	LPDIRECT3DDEVICE9 getDevice() const { return device_; }
 
 	const D3DPRESENT_PARAMETERS& getPresentParameters() const { return present_; }

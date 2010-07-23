@@ -1,5 +1,6 @@
 #include "App.h"
 #include "GameMain.h"
+#include "resource.h"
 
 #include <winnls32.h>
 
@@ -49,8 +50,8 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		NULL,									//拡張用パラメータ
 		NULL,									//拡張用パラメータ
 		hInst,									//インスタンスハンドル
-		LoadIcon(NULL, IDI_WINLOGO),			//アイコン
-		LoadCursor(NULL, IDC_ARROW),			//マウスカーソル
+		LoadIcon( hi, MAKEINTRESOURCE( IDI_ICON1 ) ),			//アイコン
+		LoadCursor( NULL, IDC_ARROW ),			//マウスカーソル
 		(HBRUSH)GetStockObject(BLACK_BRUSH),	//背景色
 		NULL,									//メニュー
 		ClassName.c_str(),						//クラス名

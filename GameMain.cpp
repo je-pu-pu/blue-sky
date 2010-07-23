@@ -92,8 +92,7 @@ GameMain::GameMain()
 	active_object_manager_ = new ActiveObjectManager();
 
 	// Scene
-	// scene_ = new TitleScene( this );
-	scene_ = new EndingScene( this );
+	scene_ = new TitleScene( this );
 }
 
 //■デストラクタ
@@ -197,14 +196,17 @@ void GameMain::render()
 
 	n = 0;
 
-	scene_->render();
+	if ( ! scene_->render() )
+	{
+		return;
+	}
 
 	// Debug
 	std::string debug_text;
 	debug_text = std::string( "FPS : " ) + common::serialize( MainLoop.GetFPS() );
 	get_direct_3d()->getFont()->draw_text( 0, 0, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
 
-	return;
+	
 
 	HRESULT hr = get_direct_3d()->getDevice()->Present( NULL, NULL, NULL, NULL );
 

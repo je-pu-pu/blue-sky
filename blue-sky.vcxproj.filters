@@ -175,6 +175,7 @@
     <ClInclude Include="EndingScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="media\object\building-a">
@@ -190,5 +191,9 @@
     <None Include="media\stage\stage-1-2">
       <Filter>stage</Filter>
     </None>
+    <None Include="blye-sky.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="blue-sky.rc" />
   </ItemGroup>
 </Project>

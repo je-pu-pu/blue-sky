@@ -54,7 +54,7 @@ public:
 	~GamePlayScene();
 
 	void update();				///< ƒƒCƒ“ƒ‹[ƒv
-	void render();				///< •`‰æ
+	bool render();				///< •`‰æ
 
 	void render_shadow( const ActiveObject*, const D3DXMATRIXA16& );
 

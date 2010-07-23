@@ -58,7 +58,7 @@ public:
 	virtual ~Scene();
 
 	virtual void update() = 0;				///< ƒƒCƒ“ƒ‹[ƒv
-	virtual void render() = 0;				///< •`‰æ
+	virtual bool render() = 0;				///< •`‰æ
 
 	bool is_first_game_play() const;
 	unsigned int get_current_time() const;

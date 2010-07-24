@@ -40,6 +40,8 @@ protected:
 	common::safe_ptr< Direct3D9Mesh > shadow_mesh_;
 	common::safe_ptr< Direct3D9Mesh > ground_mesh_;
 
+	common::safe_ptr< Direct3D9Mesh > balloon_mesh_;
+
 	common::safe_ptr< Direct3D9SkyBox > sky_box_;
 
 	common::safe_ptr< Direct3D9Box > box_;

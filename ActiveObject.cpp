@@ -24,6 +24,7 @@ ActiveObject::ActiveObject()
 	 : stage_( 0 )
 	 , direction_degree_( 0.f )
 	 , start_direction_degree_( 0.f )
+	 , is_dead_( false )
 {
 	vector3 min( -get_collision_width() * 0.5f, 0.f, -get_collision_depth() * 0.5f );
 	vector3 max( get_collision_width() * 0.5f, get_collision_height(), get_collision_depth() * 0.5f );
@@ -153,6 +154,13 @@ void ActiveObject::update_position()
 	update_global_aabb_list();
 }
 
+void ActiveObject::limit_position()
+{
+	position().x() = math::clamp( position().x(), 0.f, static_cast< float >( stage()->width() ) );
+	position().y() = math::clamp( position().y(), 0.f, 300.f );
+	position().z() = math::clamp( position().z(), 0.f, static_cast< float >( stage()->depth() ) );
+}
+
 void ActiveObject::update_global_aabb_list()
 {
 	global_aabb_list_.clear();
@@ -179,8 +187,15 @@ bool ActiveObject::collision_detection( const ActiveObject* active_object ) cons
 	return false;
 }
 
+void ActiveObject::kill()
+{
+	is_dead_ = true;
+}
+
 void ActiveObject::restart()
 {
+	is_dead_ = false;
+
 	position() = start_position();
 	set_direction_degree( start_direction_degree_ );
 

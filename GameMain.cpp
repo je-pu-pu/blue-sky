@@ -62,7 +62,10 @@ GameMain::GameMain()
 	app_->set_full_screen( config_->get( "video.full_screen", 0 ) != 0 );
 
 	// Direct3D
-	direct_3d_ = new Direct3D9( app_->GetWindowHandle(), app_->get_width(), app_->get_height(), app_->is_full_screen(), config_->get( "video.multi_sample_type", 0 ), config_->get( "video.multi_sample_quality", 0 ) );
+	std::string adapter_format = config_->get( "video.adapter_format", std::string( "x8r8g8b8" ) );
+	std::string depth_stencil_format = config_->get( "video.depth_stencil_format", std::string( "d24x8" ) );
+
+	direct_3d_ = new Direct3D9( app_->GetWindowHandle(), app_->get_width(), app_->get_height(), app_->is_full_screen(), adapter_format.c_str(), depth_stencil_format.c_str(), config_->get( "video.multi_sample_type", 0 ), config_->get( "video.multi_sample_quality", 0 ) );
 	direct_3d_->load_effect_file( "media/shader/blue-sky.fx" );
 
 	if ( app_->is_full_screen() )

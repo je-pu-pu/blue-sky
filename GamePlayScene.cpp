@@ -5,6 +5,7 @@
 #include "Player.h"
 #include "Goal.h"
 #include "Enemy.h"
+#include "Balloon.h"
 #include "Camera.h"
 #include "Stage.h"
 
@@ -77,13 +78,14 @@ GamePlayScene::GamePlayScene( const GameMain* game_main, const std::string& stag
 	shadow_mesh_ = new Direct3D9Mesh( direct_3d() );
 	shadow_mesh_->load_x( "media/model/shadow" );
 
-	/*
 	ground_mesh_ = new Direct3D9Mesh( direct_3d() );
 	ground_mesh_->load_x( "media/model/ground" );
-	*/
 
 	goal_mesh_ = new Direct3D9Mesh( direct_3d() );
 	goal_mesh_->load_x( "media/model/door" );
+
+	balloon_mesh_ = new Direct3D9Mesh( direct_3d() );
+	balloon_mesh_->load_x( "media/model/balloon" );
 
 	// SkyBox
 	// sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
@@ -163,6 +165,7 @@ GamePlayScene::~GamePlayScene()
 	enemy_mesh_.release();
 	shadow_mesh_.release();
 	ground_mesh_.release();
+	balloon_mesh_.release();
 
 	stage_.release();
 	camera_.release();
@@ -183,6 +186,7 @@ void GamePlayScene::generate_random_stage()
 
 	GridData* building_a_grid = grid_data_manager()->load( "building-a" );
 	GridData* building_b_grid = grid_data_manager()->load( "building-b" );
+	GridData* building_c_grid = grid_data_manager()->load( "building-c" );
 	GridData* house_a_grid = grid_data_manager()->load( "house-a" );
 	
 	GridData* road_grid = grid_data_manager()->load( "road" );
@@ -219,6 +223,10 @@ void GamePlayScene::generate_random_stage()
 					player_position_fixed = true;
 				}
 			}
+			else if ( random_value < 42 )
+			{
+				grid_data = building_c_grid;
+			}
 			else if ( random_value < 60 )
 			{
 				grid_data = house_a_grid;
@@ -246,7 +254,10 @@ void GamePlayScene::generate_random_stage()
 
 					if ( tel_box )
 					{
-						grid_object_manager()->add_grid_object( new GridObject( dx, dy, dz, r, tel_box_grid ) );
+						if ( stage_->put( dx, dy, dz, r, tel_box_grid ) )
+						{
+							grid_object_manager()->add_grid_object( new GridObject( dx, dy, dz, r, tel_box_grid ) );
+						}
 					}
 				}
 			}
@@ -268,6 +279,18 @@ void GamePlayScene::generate_random_stage()
 	enemy->set_direction_degree( 180 );
 
 	active_object_manager()->add_active_object( enemy );
+
+	for ( int n = 0; n < 30; n++ )
+	{
+		Balloon* balloon = new Balloon();
+		balloon->set_stage( stage_.get() );
+		balloon->position() = player_->start_position();
+		balloon->position().x() += common::random( -50.f, +50.f );
+		balloon->position().y() = common::random( 30.f, 150.f );
+		balloon->position().z() += common::random( -50.f, +50.f );
+		balloon->limit_position();
+		active_object_manager()->add_active_object( balloon );
+	}
 }
 
 void GamePlayScene::load_stage_file( const char* file_name )
@@ -406,12 +429,25 @@ void GamePlayScene::update()
 	{
 		ActiveObject* active_object = *i;
 
+		if ( active_object->is_dead() )
+		{
+			continue;
+		}
+
 		if ( active_object->collision_detection( player_.get() ) )
 		{
 			// active_object->on_collision( player_ );
 			// player_->on_collision( active_object );
 
-			player_->kill();
+			if ( dynamic_cast< Balloon* >( active_object ) )
+			{
+				player_->on_get_balloon();
+				active_object->kill();
+			}
+			else
+			{
+				player_->kill();
+			}
 		}
 	}
 
@@ -689,6 +725,11 @@ bool GamePlayScene::render()
 		{
 			ActiveObject* active_object = *i;
 
+			if ( active_object->is_dead() )
+			{
+				continue;
+			}
+
 			D3DXMatrixRotationY( & r, math::degree_to_radian( active_object->get_direction_degree() ) );
 			D3DXMatrixTranslation( & t, active_object->position().x(), active_object->position().y() + 0.05f, active_object->position().z() );
 
@@ -697,17 +738,35 @@ bool GamePlayScene::render()
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
-			enemy_mesh_->render();
+			if ( dynamic_cast< Enemy* >( active_object ) )
+			{
+				enemy_mesh_->render();
+			}
+			else
+			{
+				balloon_mesh_->render();
+			}
 		}
 
 		// ActiveObject ( Shadow )
 		for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
 		{
-			render_shadow( *i, view * projection );
+			ActiveObject* active_object = *i;
+
+			if ( active_object->is_dead() )
+			{
+				continue;
+			}
+
+			render_shadow( active_object, view * projection );
 		}
 
 		// Player ( Shadow )
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
+
 		render_shadow( player_.get(), view * projection );
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
 	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
@@ -746,9 +805,11 @@ void GamePlayScene::render_shadow( const ActiveObject* active_object, const D3DX
 	grid_cell_height_list.push_back( active_object->get_floor_cell_left_back().height() );
 	grid_cell_height_list.push_back( active_object->get_floor_cell_right_back().height() );
 
+	const float offset = 0.01f * static_cast< float >( reinterpret_cast< int >( active_object ) / 32 % 8 );
+
 	for ( std::list< float >::iterator i = grid_cell_height_list.begin(); i != grid_cell_height_list.end(); ++i )
 	{
-		D3DXMatrixTranslation( & t, active_object->position().x() , *i + 0.11f, active_object->position().z() );
+		D3DXMatrixTranslation( & t, active_object->position().x() , *i + 0.05f + offset, active_object->position().z() );
 
 		WorldViewProjection = r * t * after;
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );

@@ -35,7 +35,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 
 	sprite_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
 
-	ok_ = sound_manager()->get_sound( "ok" );
+	ok_ = sound_manager()->load( "ok" );
 
 	// boost::filesystem::directory_iterator end;
 	// for ( boost::filesystem::directory_iterator i( boost::filesystem::path( "stage/" ) ); i != end; ++i )

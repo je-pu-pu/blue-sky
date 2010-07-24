@@ -33,7 +33,10 @@ void ActiveObjectManager::update()
 {
 	for ( ActiveObjectList::iterator i = active_object_list_.begin(); i != active_object_list_.end(); ++i )
 	{
-		(*i)->update();
+		if ( ! (*i)->is_dead() )
+		{
+			(*i)->update();
+		}
 	}
 }
 

@@ -27,11 +27,11 @@ Player::Player()
 	 , step_speed_( 0.05f )
 	 , gravity_( 0.01f )
 	 , eye_height_( 1.5f )
-	 , is_dead_( false )
 	 , is_turn_avaiable_( true )
 	 , is_jumping_( false )
 	 , is_clambering_( false )
 	 , is_falling_( false )
+	 , up_count_( 0 )
 {
 
 }
@@ -79,6 +79,13 @@ void Player::update()
 
 	limit_velocity();
 	update_position();
+
+	up_count_ = math::chase( up_count_, 0, 1 );
+
+	if ( up_count_ > 0 )
+	{
+		velocity().y() += get_gravity() * 3.f;
+	}
 
 	// gravity
 	velocity().y() -= get_gravity();
@@ -265,17 +272,18 @@ bool Player::is_falling_to_dead() const
 
 void Player::kill()
 {
-	if ( ! is_dead_ )
+	if ( ! is_dead() )
 	{
-		is_dead_ = true;
 		play_sound( "dead" );
 	}
+
+	ActiveObject::kill();
 }
 
 void Player::rebirth()
 {
-	is_dead_ = false;
 	eye_height_ = 1.5f;
+	up_count_ = 0;
 
 	velocity().init();
 
@@ -285,6 +293,13 @@ void Player::rebirth()
 void Player::set_input( const Input* input )
 {
 	input_ = input;
+}
+
+void Player::on_get_balloon()
+{
+	up_count_ += 120;
+
+	play_sound( "ok" );
 }
 
 float Player::get_collision_width() const

@@ -9,7 +9,7 @@ Direct3D9Font::Direct3D9Font( Direct3D9* d3d )
 	, font_( 0 )
 {
 	// Font
-	DIRECT_X_FAIL_CHECK( D3DXCreateFont( direct_3d()->getDevice(), 32, 0, FW_NORMAL, 1, false, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "", & font_ ) );
+	DIRECT_X_FAIL_CHECK( D3DXCreateFont( direct_3d()->getDevice(), 32, 0, FW_NORMAL, 1, false, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "HuiFontP", & font_ ) );
 }
 
 Direct3D9Font::~Direct3D9Font()

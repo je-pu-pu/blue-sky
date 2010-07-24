@@ -34,7 +34,7 @@ private:
 	void text_out_device_caps( const char*, bool = false );
 
 public:
-	Direct3D9( HWND, int, int, bool, int = 0, int = 0 );
+	Direct3D9( HWND, int, int, bool, const char* = 0, const char* = 0, int = 0, int = 0 );
 	~Direct3D9();
 	
 	void load_effect_file( const char* );

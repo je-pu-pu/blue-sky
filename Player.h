@@ -23,7 +23,6 @@ private:
 
 	float		eye_height_;		///< 目の高さ
 
-	bool		is_dead_;			///< 死亡フラグ
 	bool		is_turn_avaiable_;	///< 方向転換有効フラグ
 	bool		is_jumping_;		///< ジャンプ中フラグ
 	bool		is_clambering_;		///< よじ登り中フラグ
@@ -31,7 +30,7 @@ private:
 	bool		is_falling_;		///< 落下中フラグ
 	vector3		velocity_on_fall_;	///< 落下開始時の移動量
 	
-	
+	int			up_count_;			///< 上昇カウンタ
 
 	void on_collision_x( const GridCell& );
 	void on_collision_y( const GridCell& );
@@ -53,7 +52,7 @@ public:
 	void side_step( float );
 
 	void kill();
-	bool is_dead() const { return is_dead_; }
+
 	void rebirth();
 
 	bool is_turn_available() const { return is_turn_avaiable_; }
@@ -80,6 +79,8 @@ public:
 	float get_gravity() const { return gravity_; }
 	void set_gravity( float g ) { gravity_ = g; }
 	
+	void on_get_balloon();
+
 }; // class Player
 
 } // namespace blue_sky

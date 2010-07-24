@@ -55,6 +55,8 @@ private:
 	vector3		start_position_;			///< ゲーム開始時の座標
 	float		start_direction_degree_;	///< ゲーム開始時の方向
 
+	bool		is_dead_;					///< 死亡フラグ
+
 protected:
 	const Stage* stage() const { return stage_; }
 
@@ -68,7 +70,7 @@ protected:
 	const GridCell& get_floor_cell() const;
 
 	void limit_velocity();
-	void update_position();
+	void update_position();	
 	void update_global_aabb_list();
 
 	virtual void on_collision_x( const GridCell& ) { }
@@ -104,7 +106,10 @@ public:
 	vector3& start_position() { return start_position_; }
 	void set_start_direction_degree( float d ) { start_direction_degree_ = d; }
 
-	void restart();
+	void limit_position();
+
+	virtual void kill();
+	virtual void restart();
 
 	/// 更新
 	virtual void update() = 0;
@@ -119,6 +124,8 @@ public:
 	const GridCell& get_floor_cell_left_back() const;
 	const GridCell& get_floor_cell_right_back() const;
 	
+	bool is_dead() const { return is_dead_; }
+
 }; // class ActiveObject
 
 } // namespace blue_sky

@@ -91,6 +91,7 @@
     <ClCompile Include="EndingScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Balloon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -176,6 +177,7 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Balloon.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="media\object\building-a">
@@ -226,6 +228,10 @@
       <Filter>object</Filter>
     </None>
     <None Include="blue-sky.config" />
+    <None Include="blue-sky.default.config" />
+    <None Include="media\object\building-c">
+      <Filter>object</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

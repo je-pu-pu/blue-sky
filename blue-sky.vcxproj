@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClCompile Include="ActiveObject.cpp" />
     <ClCompile Include="ActiveObjectManager.cpp" />
+    <ClCompile Include="Balloon.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Direct3D9.cpp" />
     <ClCompile Include="App.cpp">
@@ -204,6 +205,7 @@
   <ItemGroup>
     <ClInclude Include="ActiveObject.h" />
     <ClInclude Include="ActiveObjectManager.h" />
+    <ClInclude Include="Balloon.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Direct3D9.h" />
     <ClInclude Include="App.h" />
@@ -254,9 +256,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="blue-sky.config" />
+    <None Include="blue-sky.default.config" />
     <None Include="blye-sky.ico" />
     <None Include="media\object\building-a" />
     <None Include="media\object\building-b" />
+    <None Include="media\object\building-c" />
     <None Include="media\object\house-a" />
     <None Include="media\object\pole" />
     <None Include="media\object\road" />

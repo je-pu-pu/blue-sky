@@ -19,7 +19,7 @@
 
 #define PREF_HUD
 
-Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sample_type, int multi_sample_quality )
+Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, const char* adapter_format, const char* depth_stencil_format, int multi_sample_type, int multi_sample_quality )
 	: direct_3d_( 0 )
 	, device_( 0 )
 	, effect_( 0 )
@@ -27,27 +27,84 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 	, font_( 0 )
 	, texture_manager_( 0 )
 {
+	common::log( "log/d3d.log", "", false );
+
 	direct_3d_ = Direct3DCreate9( D3D_SDK_VERSION );
 
-	if ( direct_3d_ == NULL )
+	if ( ! direct_3d_ )
 	{
-		COMMON_THROW_EXCEPTION;
+		COMMON_THROW_EXCEPTION_MESSAGE( "Direct3DCreate9 failed." );
 	}
 
 	text_out_adapter_info( "log/d3d_adapter_info.txt" );
 
 	ZeroMemory( & present_, sizeof( present_ ) );
 
+	typedef std::map< std::string, D3DFORMAT > FormatMap;
+	
+	FormatMap adapter_format_map;
+	adapter_format_map[ "r8g8b8"   ] = D3DFMT_R8G8B8;
+	adapter_format_map[ "x8r8g8b8" ] = D3DFMT_X8R8G8B8;
+	adapter_format_map[ "a8r8g8b8" ] = D3DFMT_A8R8G8B8;
+	adapter_format_map[ "r5g6b5"   ] = D3DFMT_R5G6B5;
+	
 	present_.BackBufferWidth = w;
 	present_.BackBufferHeight = h;
-	present_.BackBufferFormat = D3DFMT_A8R8G8B8;
+	present_.BackBufferFormat = D3DFMT_X8R8G8B8;
+
+	if ( adapter_format )
+	{
+		FormatMap::const_iterator i = adapter_format_map.find( adapter_format );
+
+		if ( i == adapter_format_map.end() )
+		{
+			COMMON_THROW_EXCEPTION_MESSAGE( "wrong adapter format" );
+		}
+		
+		present_.BackBufferFormat = i->second;
+
+		if ( FAILED( direct_3d_->CheckDeviceType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, present_.BackBufferFormat, present_.BackBufferFormat, full_screen ) ) )
+		{
+			common::log( "log/d3d.log", std::string( "adapter format " ) + adapter_format + " not supported.\n" );
+		}
+	}
 
 	present_.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	present_.hDeviceWindow = hwnd;
 	present_.Windowed = ! full_screen;
 	present_.EnableAutoDepthStencil = TRUE;
 	present_.AutoDepthStencilFormat = D3DFMT_D16;
-	present_.AutoDepthStencilFormat = D3DFMT_D24S8;
+
+	FormatMap depth_stencil_format_map;
+	depth_stencil_format_map[ "d32"     ] = D3DFMT_D32;
+	depth_stencil_format_map[ "d32l"    ] = D3DFMT_D32_LOCKABLE;
+	depth_stencil_format_map[ "d32fl"   ] = D3DFMT_D32F_LOCKABLE;
+	depth_stencil_format_map[ "d24x8"   ] = D3DFMT_D24X8;
+	depth_stencil_format_map[ "d24s8"   ] = D3DFMT_D24S8;
+	depth_stencil_format_map[ "d24x4s4" ] = D3DFMT_D24X4S4;
+	depth_stencil_format_map[ "d24fs8"  ] = D3DFMT_D24FS8;
+	depth_stencil_format_map[ "d16l"    ] = D3DFMT_D16_LOCKABLE;
+	depth_stencil_format_map[ "d16"     ] = D3DFMT_D16;
+	depth_stencil_format_map[ "d15s1"   ] = D3DFMT_D15S1;
+
+	if ( depth_stencil_format )
+	{
+		FormatMap::const_iterator i = depth_stencil_format_map.find( depth_stencil_format );
+
+		if ( i == depth_stencil_format_map.end() )
+		{
+			COMMON_THROW_EXCEPTION_MESSAGE( "wrong depth stencil format" );
+		}
+		
+		present_.AutoDepthStencilFormat = i->second;
+
+		if ( FAILED( direct_3d_->CheckDeviceFormat( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, present_.BackBufferFormat, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_SURFACE, present_.AutoDepthStencilFormat ) ) )
+		{
+			present_.AutoDepthStencilFormat = D3DFMT_D16;
+
+			common::log( "log/d3d.log", std::string( "depth stencil format " ) + depth_stencil_format + " not supported.\n" );
+		}
+	}
 
 //	present_.EnableAutoDepthStencil = FALSE;
 //	present_.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
@@ -67,6 +124,10 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, int multi_sampl
 		present_.MultiSampleType = static_cast< D3DMULTISAMPLE_TYPE >( multi_sample_type );
 		present_.MultiSampleQuality = multi_sample_quality;
 	}
+	
+	common::log( "log/d3d.log", std::string( "mulit sample type : " ) + common::serialize( present_.MultiSampleType ) + "\n" );
+	common::log( "log/d3d.log", std::string( "mulit sample quality : " ) + common::serialize( present_.MultiSampleQuality ) + "\n" );
+
 
 #ifdef PREF_HUD
 	for ( UINT n = 0; n < direct_3d_->GetAdapterCount(); n++ )
@@ -213,15 +274,6 @@ void Direct3D9::set_multi_sample( int multi_sample_type, int multi_sample_qualit
 void Direct3D9::set_depth_stencil( bool enable )
 {
 	present_.EnableAutoDepthStencil = enable;
-
-	if ( enable )
-	{
-		present_.AutoDepthStencilFormat = D3DFMT_D16;
-	}
-	else
-	{
-		present_.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
-	}
 }
 
 void Direct3D9::text_out_adapter_info( const char* file_name, bool append )

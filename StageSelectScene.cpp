@@ -271,7 +271,18 @@ void StageSelectScene::update_stage_list()
 
 	WIN32_FIND_DATA find_data;
 
-	HANDLE find_handle = FindFirstFile( ( std::string( get_stage_dir_name_by_page( page_ ) ) + common::serialize( page_ ) + "-*.stage" ).c_str(), & find_data );
+	std::string file_pattern;
+	
+	if ( page_ < get_max_story_page() )
+	{
+		file_pattern = get_stage_dir_name_by_page( page_ ) + common::serialize( page_ ) + "-*.stage";
+	}
+	else
+	{
+		file_pattern = get_stage_dir_name_by_page( page_ ) + "*.stage";
+	}
+	
+	HANDLE find_handle = FindFirstFile( file_pattern.c_str(), & find_data );
 
 	if ( find_handle  != INVALID_HANDLE_VALUE )
 	{
@@ -302,7 +313,7 @@ void StageSelectScene::update_stage_list()
 
 		try
 		{
-			stage->texture = direct_3d()->getTextureManager()->load( stage->name.c_str(), ( std::string( get_stage_dir_name_by_page( page_ ) ) + stage->name + ".png" ).c_str() );
+			stage->texture = direct_3d()->getTextureManager()->load( stage->name.c_str(), ( get_stage_dir_name_by_page( page_ ) + stage->name + ".png" ).c_str() );
 		}
 		catch ( ... )
 		{

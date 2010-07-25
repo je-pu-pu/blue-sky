@@ -23,6 +23,7 @@ namespace blue_sky
 StageSelectScene::StageSelectScene( const GameMain* game_main )
 	: Scene( game_main )
 	, page_( 0 )
+	, stage_count_( 0 )
 	, sprite_texture_( 0 )
 	, ok_( 0 )
 	, cursor_src_rect_( win::Rect::Size( 0, 702, 92, 136 ) )
@@ -30,7 +31,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	, right_allow_src_rect_( win::Rect::Size( 384, 704, 86, 126 ) )
 	, stage_src_rect_( 0, 0, 512, 512 )
 {
-	page_ = save_data()->get( "page", 0 );
+	page_ = save_data()->get( "stage-select.page", 0 );
 
 	circle_src_rect_list_.push_back( win::Rect::Size( 256, 512, 128, 140 ) );
 	circle_src_rect_list_.push_back( win::Rect::Size( 384, 512, 160, 130 ) );
@@ -245,7 +246,7 @@ void StageSelectScene::update_page( int page )
 
 	update_stage_list();
 
-	save_data()->set( "page", page );
+	save_data()->set( "stage-select.page", page );
 }
 
 void StageSelectScene::clear_stage_list()
@@ -266,14 +267,11 @@ void StageSelectScene::update_stage_list()
 {
 	clear_stage_list();
 
-	// boost::filesystem::directory_iterator end;
-	// for ( boost::filesystem::directory_iterator i( boost::filesystem::path( "stage/" ) ); i != end; ++i )
-
 	std::list< std::string > stage_name_list;
 
 	WIN32_FIND_DATA find_data;
 
-	HANDLE find_handle = FindFirstFile( ( std::string( "media/stage/" ) + common::serialize( page_ ) + "-*.stage" ).c_str(), & find_data );
+	HANDLE find_handle = FindFirstFile( ( std::string( get_stage_dir_name_by_page( page_ ) ) + common::serialize( page_ ) + "-*.stage" ).c_str(), & find_data );
 
 	if ( find_handle  != INVALID_HANDLE_VALUE )
 	{
@@ -290,6 +288,8 @@ void StageSelectScene::update_stage_list()
 		FindClose( find_handle );
 	}
 
+	stage_count_ = stage_name_list.size();
+
 	int n = 0;
 
 	for ( std::list< std::string >::iterator i = stage_name_list.begin(); i != stage_name_list.end(); ++i )
@@ -298,11 +298,11 @@ void StageSelectScene::update_stage_list()
 		stage->name = *i;
 		stage->name.resize( stage->name.find_first_of( "." ) );
 		stage->rect = get_stage_dst_rect( stage, n );
-		stage->cleared = save_data()->get( stage->name.c_str(), 0 ) != 0;
+		stage->cleared = save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + stage->name ).c_str(), 0 ) != 0;
 
 		try
 		{
-			stage->texture = direct_3d()->getTextureManager()->load( stage->name.c_str(), ( std::string( "media/stage/" ) + stage->name + ".png" ).c_str() );
+			stage->texture = direct_3d()->getTextureManager()->load( stage->name.c_str(), ( std::string( get_stage_dir_name_by_page( page_ ) ) + stage->name + ".png" ).c_str() );
 		}
 		catch ( ... )
 		{
@@ -312,6 +312,35 @@ void StageSelectScene::update_stage_list()
 		stage_list_.push_back( stage );
 
 		n++;
+
+		if ( n >= get_max_stage_per_page() )
+		{
+			break;
+		}
+	}
+}
+
+std::string StageSelectScene::get_stage_dir_name_by_page( int page )
+{
+	if ( page < get_max_story_page() )
+	{
+		return "media/stage/";
+	}
+	else
+	{
+		return "media/stage_ext/";
+	}
+}
+
+std::string StageSelectScene::get_stage_prefix_by_page( int page )
+{
+	if ( page < get_max_story_page() )
+	{
+		return "stage";
+	}
+	else
+	{
+		return "stage_ext";
 	}
 }
 
@@ -322,7 +351,7 @@ bool StageSelectScene::has_prev_page() const
 
 bool StageSelectScene::has_next_page() const
 {
-	if ( page_ < 3 )
+	if ( page_ < get_max_story_page() )
 	{
 		for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i )
 		{
@@ -336,8 +365,10 @@ bool StageSelectScene::has_next_page() const
 
 		return true;
 	}
-
-	return true;
+	else
+	{
+		return ( page_ - get_max_story_page() + 1 ) * get_max_stage_per_page() < stage_count_;
+	}
 }
 
 bool StageSelectScene::is_mouse_on_left_allow() const

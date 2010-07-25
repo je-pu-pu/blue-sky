@@ -26,8 +26,14 @@ public:
 
 	typedef std::list< Stage* > StageList;
 
+	static std::string get_stage_dir_name_by_page( int );
+	static std::string get_stage_prefix_by_page( int );
+	static int get_max_story_page() { return 3; }
+
 private:
 	int page_;
+	int stage_count_;
+
 	StageList stage_list_;
 
 	Texture* sprite_texture_;
@@ -40,6 +46,7 @@ private:
 	win::Rect stage_src_rect_;
 	std::list< win::Rect > circle_src_rect_list_;
 
+	int get_max_stage_per_page() const { return 4; }
 	int get_margin() const { return 5; }
 
 	void update_page( int );

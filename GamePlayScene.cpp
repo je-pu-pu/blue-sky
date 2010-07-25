@@ -1,4 +1,5 @@
 #include "GamePlayScene.h"
+#include "StageSelectScene.h"
 
 #include "App.h"
 
@@ -133,7 +134,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 	else
 	{
-		load_stage_file( ( std::string( "media/stage/" ) + get_stage_name() + ".stage" ).c_str() );
+		std::string stage_dir_name = StageSelectScene::get_stage_dir_name_by_page( save_data()->get( "stage-select.page", 0 ) );
+
+		load_stage_file( ( stage_dir_name + get_stage_name() + ".stage" ).c_str() );
 	}
 
 	player_->restart();
@@ -288,11 +291,13 @@ void GamePlayScene::generate_random_stage()
 	{
 		Balloon* balloon = new Balloon();
 		balloon->set_stage( stage_.get() );
-		balloon->start_position() = player_->start_position();
-		balloon->start_position().x() += common::random( -50.f, +50.f );
-		balloon->start_position().y() = common::random( 30.f, 150.f );
-		balloon->start_position().z() += common::random( -50.f, +50.f );
+		balloon->position() = player_->start_position();
+		balloon->position().x() += common::random( -50.f, +50.f );
+		balloon->position().y() = common::random( 30.f, 150.f );
+		balloon->position().z() += common::random( -50.f, +50.f );
 		balloon->limit_position();
+		balloon->start_position() = balloon->position();
+
 		active_object_manager()->add_active_object( balloon );
 	}
 }
@@ -506,7 +511,7 @@ void GamePlayScene::update()
 
 		if ( sound_manager()->get_sound( "fin" )->get_current_position() >= 9.f )
 		{
-			save_data()->set( get_stage_name().c_str(), 1 );
+			save_data()->set( ( StageSelectScene::get_stage_prefix_by_page( save_data()->get( "stage-select.page", 0 ) ) + "." + get_stage_name() ).c_str(), 1 );
 			set_next_scene( "stage_outro" );
 		}
 	}

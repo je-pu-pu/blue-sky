@@ -284,6 +284,7 @@ void Player::jump()
 	// velocity().z() += front_.z() * 0.4f;
 	
 	is_jumping_ = true;
+	rocket_count_ = 0;
 
 	play_sound( "jump" );
 }

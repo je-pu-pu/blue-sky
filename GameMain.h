@@ -59,6 +59,7 @@ protected:
 	ActiveObjectManager*	active_object_manager_;	///< ActiveObjectManager
 
 	Config*					config_;				///< Config
+	Config*					save_data_;				///< Save Data
 
 	CMainLoop				MainLoop;				///< ƒ‹[ƒvŠÇ—
 
@@ -96,8 +97,8 @@ public:
 	ActiveObjectManager* get_active_object_manager() const { return active_object_manager_; }
 	
 	Config* get_config() const { return config_; }
+	Config* get_save_data() const { return save_data_; }
 
-	void on_reset_key_down();
 	void on_function_key_down( int );
 	void on_mouse_wheel( int );
 

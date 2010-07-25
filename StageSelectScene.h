@@ -21,6 +21,7 @@ public:
 		std::string name;
 		Texture* texture;
 		win::Rect rect;
+		bool cleared;
 	};
 
 	typedef std::list< Stage* > StageList;
@@ -40,6 +41,11 @@ private:
 	std::list< win::Rect > circle_src_rect_list_;
 
 	int get_margin() const { return 5; }
+
+	void update_page( int );
+
+	void clear_stage_list();
+	void update_stage_list();
 
 	bool has_prev_page() const;
 	bool has_next_page() const;

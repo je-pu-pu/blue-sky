@@ -49,6 +49,7 @@ GameMain::GameMain()
 	, grid_object_manager_( 0 )
 	, active_object_manager_( 0 )
 	, config_( 0 )
+	, save_data_( 0 )
 	, scene_( 0 )
 	, display_fps_flag_( 0 )
 {
@@ -58,6 +59,9 @@ GameMain::GameMain()
 	// Config
 	config_ = new Config();
 	config_->load_file( "blue-sky.config" );
+
+	save_data_ = new Config();
+	save_data_->load_file( "save/blue-sky.save" );
 
 	// App
 	app_->set_size( config_->get( "video.width", App::DEFAULT_WIDTH ), config_->get( "video.height", App::DEFAULT_HEIGHT ) );
@@ -98,6 +102,7 @@ GameMain::GameMain()
 
 	// Scene
 	scene_ = new TitleScene( this );
+	scene_->set_name( "title" );
 
 	display_fps_flag_ = config_->get( "video.display_fps", 0 ) != 0;
 }
@@ -126,6 +131,8 @@ GameMain::~GameMain()
 	delete active_object_manager_;
 
 	delete config_;
+
+	delete save_data_;
 }
 
 /**
@@ -145,6 +152,18 @@ bool GameMain::update()
 	direct_input_->update();
 	input_->update();
 	sound_manager_->update();
+
+	if ( input_->push( Input::ESCAPE ) )
+	{
+		if ( scene_->get_name() == "title" )
+		{
+			app_->close();
+		}
+		else
+		{
+			scene_->set_next_scene( "title" );
+		}
+	}
 
 	scene_->update();
 
@@ -189,9 +208,12 @@ bool GameMain::update()
 			COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " + scene_->get_next_scene() ) );
 		}
 
+		scene_->set_name( next_scene );
 		scene_->set_next_stage_name( get_stage_name() );
 
 		app_->clip_cursor( scene_->is_clip_cursor_required() );
+
+		save_data_->save_file( "save/blue-sky.save" );
 	}
 
 	return true;
@@ -252,18 +274,6 @@ int GameMain::get_width() const
 int GameMain::get_height() const
 {
 	return app_->get_height();
-}
-
-void GameMain::on_reset_key_down()
-{
-	app_->close();
-
-	/*
-	if ( scene_->get_name() == "title" )
-	{
-		
-	}
-	*/
 }
 
 void GameMain::on_function_key_down( int function_key )

@@ -8,6 +8,7 @@
 #include "DirectX.h"
 
 #include <game/Sound.h>
+#include <game/Config.h>
 
 #include <win/Rect.h>
 
@@ -29,6 +30,8 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	, right_allow_src_rect_( win::Rect::Size( 384, 704, 86, 126 ) )
 	, stage_src_rect_( 0, 0, 512, 512 )
 {
+	page_ = save_data()->get( "page", 0 );
+
 	circle_src_rect_list_.push_back( win::Rect::Size( 256, 512, 128, 140 ) );
 	circle_src_rect_list_.push_back( win::Rect::Size( 384, 512, 160, 130 ) );
 	circle_src_rect_list_.push_back( win::Rect::Size( 576, 512, 144, 114 ) );
@@ -38,69 +41,14 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 
 	ok_ = sound_manager()->load( "ok" );
 
-	// boost::filesystem::directory_iterator end;
-	// for ( boost::filesystem::directory_iterator i( boost::filesystem::path( "stage/" ) ); i != end; ++i )
-
-	std::list< std::string > stage_name_list;
-
-	WIN32_FIND_DATA find_data;
-
-	HANDLE find_handle = FindFirstFile( ( std::string( "media/stage/" ) + common::serialize( page_ ) + "-*.stage" ).c_str(), & find_data );
-
-	if ( find_handle  != INVALID_HANDLE_VALUE )
-	{
-		while ( true )
-		{
-			stage_name_list.push_back( find_data.cFileName );
-
-			if ( ! FindNextFile( find_handle, & find_data ) )
-			{
-				break;
-			}
-		}
-
-		FindClose( find_handle );
-	}
-
-	int n = 0;
-
-	for ( std::list< std::string >::iterator i = stage_name_list.begin(); i != stage_name_list.end(); ++i )
-	{
-		Stage* stage = new Stage();
-		stage->name = *i;
-		stage->rect = get_stage_dst_rect( stage, n );
-
-		stage->name.resize( stage->name.find_first_of( "." ) );
-
-		try
-		{
-			stage->texture = direct_3d()->getTextureManager()->load( stage->name.c_str(), ( std::string( "media/stage/" ) + stage->name + ".png" ).c_str() );
-		}
-		catch ( ... )
-		{
-			stage->texture = direct_3d()->getTextureManager()->load( stage->name.c_str(), "media/stage/default.png" );
-		}
-
-		stage_list_.push_back( stage );
-
-		n++;
-	}
+	update_stage_list();
 }
 
 StageSelectScene::~StageSelectScene()
 {
 	direct_3d()->getTextureManager()->unload( "sprite" );
 
-	for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i )
-	{
-		Stage* stage = *i;
-
-		direct_3d()->getTextureManager()->unload( stage->name.c_str() );
-
-		delete stage;
-	}
-
-	stage_list_.clear();
+	clear_stage_list();
 }
 
 /**
@@ -113,10 +61,14 @@ void StageSelectScene::update()
 	{
 		if ( is_mouse_on_left_allow() )
 		{
+			update_page( page_ - 1 );
+
 			ok_->play( false );
 		}
 		if ( is_mouse_on_right_allow() )
 		{
+			update_page( page_ + 1 );
+
 			ok_->play( false );
 		}
 
@@ -124,11 +76,11 @@ void StageSelectScene::update()
 		{
 			ok_->play( false );
 
-			if ( stage->name == "stage-0-4" )
+			if ( stage->name == "1-1" )
 			{
 				set_next_stage_name( "" );
 			}
-			else if ( stage->name == "stage-0-3" )
+			else if ( stage->name == "1-2" )
 			{
 				set_next_scene( "ending" );
 				return;
@@ -213,13 +165,16 @@ bool StageSelectScene::render()
 		direct_3d()->getSprite()->Draw( stage->texture, & stage_src_rect_.get_rect(), & center, 0, 0xFFFFFFFF );
 
 		// Circle
-		D3DXVECTOR3 circle_center( j->width() * 0.5f, j->height() * 0.5f, 0.f );
+		if ( stage->cleared )
+		{
+			D3DXVECTOR3 circle_center( j->width() * 0.5f, j->height() * 0.5f, 0.f );
 
-		D3DXMatrixTranslation( & t, dx + ( dst_rect.width() - j->width() ) * 0.5f - offset, dy + ( dst_rect.height() - j->height() ) * 0.5f + offset, 0.f );
-		transform = t;
+			D3DXMatrixTranslation( & t, dx + ( dst_rect.width() - j->width() ) * 0.5f - offset, dy + ( dst_rect.height() - j->height() ) * 0.5f + offset, 0.f );
+			transform = t;
 
-		direct_3d()->getSprite()->SetTransform( & transform );
-		direct_3d()->getSprite()->Draw( sprite_texture_, & j->get_rect(), & circle_center, 0, 0x99FFFFFF );
+			direct_3d()->getSprite()->SetTransform( & transform );
+			direct_3d()->getSprite()->Draw( sprite_texture_, & j->get_rect(), & circle_center, 0, 0x99FFFFFF );
+		}
 
 		n++;
 	}
@@ -284,13 +239,104 @@ bool StageSelectScene::render()
 	return true;
 }
 
+void StageSelectScene::update_page( int page )
+{
+	page_ = page;
+
+	update_stage_list();
+
+	save_data()->set( "page", page );
+}
+
+void StageSelectScene::clear_stage_list()
+{
+	for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i )
+	{
+		Stage* stage = *i;
+
+		direct_3d()->getTextureManager()->unload( stage->name.c_str() );
+
+		delete stage;
+	}
+
+	stage_list_.clear();
+}
+
+void StageSelectScene::update_stage_list()
+{
+	clear_stage_list();
+
+	// boost::filesystem::directory_iterator end;
+	// for ( boost::filesystem::directory_iterator i( boost::filesystem::path( "stage/" ) ); i != end; ++i )
+
+	std::list< std::string > stage_name_list;
+
+	WIN32_FIND_DATA find_data;
+
+	HANDLE find_handle = FindFirstFile( ( std::string( "media/stage/" ) + common::serialize( page_ ) + "-*.stage" ).c_str(), & find_data );
+
+	if ( find_handle  != INVALID_HANDLE_VALUE )
+	{
+		while ( true )
+		{
+			stage_name_list.push_back( find_data.cFileName );
+
+			if ( ! FindNextFile( find_handle, & find_data ) )
+			{
+				break;
+			}
+		}
+
+		FindClose( find_handle );
+	}
+
+	int n = 0;
+
+	for ( std::list< std::string >::iterator i = stage_name_list.begin(); i != stage_name_list.end(); ++i )
+	{
+		Stage* stage = new Stage();
+		stage->name = *i;
+		stage->name.resize( stage->name.find_first_of( "." ) );
+		stage->rect = get_stage_dst_rect( stage, n );
+		stage->cleared = save_data()->get( stage->name.c_str(), 0 ) != 0;
+
+		try
+		{
+			stage->texture = direct_3d()->getTextureManager()->load( stage->name.c_str(), ( std::string( "media/stage/" ) + stage->name + ".png" ).c_str() );
+		}
+		catch ( ... )
+		{
+			stage->texture = direct_3d()->getTextureManager()->load( stage->name.c_str(), "media/stage/default.png" );
+		}
+
+		stage_list_.push_back( stage );
+
+		n++;
+	}
+}
+
 bool StageSelectScene::has_prev_page() const
 {
-	return false;
+	return page_ > 0;
 }
 
 bool StageSelectScene::has_next_page() const
 {
+	if ( page_ < 3 )
+	{
+		for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i )
+		{
+			Stage* stage = *i;
+
+			if ( ! stage->cleared )
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	return true;
 }
 

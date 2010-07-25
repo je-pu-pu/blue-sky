@@ -38,6 +38,7 @@ public:
 
 private:
 	const GameMain* game_main_;
+	std::string name_;
 	std::string next_scene_;
 	std::string next_stage_name_;
 
@@ -49,6 +50,7 @@ protected:
 	SoundManager* sound_manager() const;
 	Input* input() const;
 	Config* config() const;
+	Config* save_data() const;
 
 	int get_width() const;
 	int get_height() const;
@@ -56,6 +58,9 @@ protected:
 public:
 	Scene( const GameMain* );
 	virtual ~Scene();
+
+	void set_name( const std::string name ) { name_ = name; }
+	const std::string& get_name() const { return name_; }
 
 	virtual void update() = 0;				///< ƒƒCƒ“ƒ‹[ƒv
 	virtual bool render() = 0;				///< •`‰æ

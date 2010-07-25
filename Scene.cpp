@@ -59,6 +59,11 @@ Scene::Config* Scene::config() const
 	return game_main_->get_config();
 }
 
+Scene::Config* Scene::save_data() const
+{
+	return game_main_->get_save_data();
+}
+
 int Scene::get_width() const
 {
 	return game_main_->get_width();

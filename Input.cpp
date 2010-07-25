@@ -87,6 +87,8 @@ void Input::update()
 		state_[ n ] <<= 1;
 	}
 
+	if ( GetAsyncKeyState( VK_ESCAPE ) & 0x8000 )  state_[ ESCAPE ] |= 1;
+
 	if ( GetAsyncKeyState( key_code_[ LEFT  ] ) & 0x8000 ) state_[ LEFT  ] |= 1;
 	if ( GetAsyncKeyState( key_code_[ RIGHT ] ) & 0x8000 ) state_[ RIGHT ] |= 1;
 	if ( GetAsyncKeyState( key_code_[ UP    ] ) & 0x8000 ) state_[ UP    ] |= 1;

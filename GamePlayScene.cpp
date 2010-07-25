@@ -375,7 +375,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			Enemy* enemy = new Enemy();
 			enemy->set_stage( stage_.get() );
 			enemy->set_player( player_.get() );
-			enemy->position().set( x, y, z );
+			enemy->start_position().set( x, y, z );
 			enemy->set_direction_degree( r );
 
 			active_object_manager()->add_active_object( enemy );
@@ -506,6 +506,7 @@ void GamePlayScene::update()
 
 		if ( sound_manager()->get_sound( "fin" )->get_current_position() >= 9.f )
 		{
+			save_data()->set( get_stage_name().c_str(), 1 );
 			set_next_scene( "stage_outro" );
 		}
 	}

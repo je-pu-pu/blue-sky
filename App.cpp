@@ -146,7 +146,6 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	{
 		blue_sky::GameMain* game = blue_sky::GameMain::getInstance();
 
-		if ( wp == VK_ESCAPE ) game->on_reset_key_down();
 		if ( wp >= VK_F1 && wp <= VK_F24 ) game->on_function_key_down( wp - VK_F1 + 1 );
 		break;
 	}

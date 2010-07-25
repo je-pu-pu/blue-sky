@@ -47,6 +47,7 @@ private:
 	float		direction_degree_;			///< •ûŒü ( Y Axis Degree )
 
 	vector3		front_;						///< ‘O
+	vector3		right_;						///< ‰E
 
 	AABBList	local_aabb_list_;			///< AABB List ( local )
 	AABBList	global_aabb_list_;			///< AABB List ( global )
@@ -99,6 +100,9 @@ public:
 
 	vector3& front() { return front_; }
 	const vector3& front() const { return front_; }
+
+	vector3& right() { return right_; }
+	const vector3& right() const { return right_; }
 
 	const AABBList& local_aabb_list() const { return local_aabb_list_; }
 	const AABBList& global_aabb_list() const { return global_aabb_list_; }

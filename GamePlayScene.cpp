@@ -410,14 +410,34 @@ void GamePlayScene::update()
 {
 	if ( ! player_->is_dead() )
 	{
-		if ( input()->press( Input::B ) )
+		bool step = false;
+
+		if ( input()->press( Input::B ) || input()->press( Input::UP ) )
 		{
 			player_->step( +1 );
+			step = true;
 		}
+		if ( input()->press( Input::LEFT ) )
+		{
+			player_->side_step( -1 );
+			step = true;
+		}
+		if ( input()->press( Input::RIGHT ) )
+		{
+			player_->side_step( +1 );
+			step = true;
+		}
+
+		if ( ! step )
+		{
+			player_->stop();
+		}
+
 		if ( input()->push( Input::A ) )
 		{
 			player_->jump();
 		}
+
 		if ( input()->push( Input::X ) )
 		{
 			player_->rocket( camera_->front() );
@@ -477,7 +497,8 @@ void GamePlayScene::update()
 		sound_manager()->get_sound( "fin" )->play( false );
 	}
 
-	camera_->position() = player_->position() + player_->front() + vector3( 0.f, player_->get_eye_height(), 0.f );
+	camera_->position() = player_->position() + vector3( 0.f, player_->get_eye_height(), 0.f );
+	// camera_->position() = player_->position() + player_->front() + vector3( 0.f, player_->get_eye_height(), 0.f );
 	
 	if ( clear_flag )
 	{

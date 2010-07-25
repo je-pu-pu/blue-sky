@@ -66,6 +66,7 @@ void ActiveObject::set_direction_degree( float d )
 	m.rotate_y( direction_degree_ );
 
 	front_ = vector3( 0.f, 0.f, 1.f ) * m;
+	right_ = vector3( 1.f, 0.f, 0.f ) * m;
 }
 
 const GridCell& ActiveObject::get_floor_cell_center() const

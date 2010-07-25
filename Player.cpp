@@ -24,6 +24,7 @@ namespace blue_sky
 
 Player::Player()
 	 : input_( 0 )
+	 , step_count_( 0 )
 	 , step_speed_( 0.05f )
 	 , gravity_( 0.01f )
 	 , eye_height_( 1.5f )
@@ -44,6 +45,10 @@ void Player::step( float s )
 		return;
 	}
 
+	step_count_++;
+
+	update_step_speed();
+
 	vector3 v = front() * s * get_step_speed();
 	velocity().x() = v.x();
 	velocity().z() = v.z();
@@ -51,7 +56,48 @@ void Player::step( float s )
 
 void Player::side_step( float s )
 {
-	//
+	velocity() += right() * s * get_side_step_speed();
+}
+
+void Player::stop()
+{
+	if ( is_jumping() )
+	{
+		return;
+	}
+
+	step_count_ = 0;
+
+	update_step_speed();
+}
+
+void Player::update_step_speed()
+{
+	if ( is_jumping() )
+	{
+		step_speed_ = math::chase( step_speed_, 0.1f, 0.001f );
+	}
+
+	if ( step_count_ <= 0 )
+	{
+		// stop
+		step_speed_ = 0.f;
+	}
+	else if ( step_count_ <= 20 )
+	{
+		// slow walk
+		step_speed_ = math::chase( step_speed_, 0.01f, 0.001f );
+	}
+	else if ( step_count_ <= 240 )
+	{
+		// slow walk
+		step_speed_ = math::chase( step_speed_, 0.05f, 0.001f );
+	}
+	else
+	{
+		// run
+		step_speed_ = math::chase( step_speed_, 0.1f, 0.001f );
+	}
 }
 
 /**
@@ -73,21 +119,6 @@ void Player::add_direction_degree( float d )
  */
 void Player::update()
 {
-	int w = const_cast< Input* >( input_ )->pop_mouse_wheel_queue();
-
-	if ( w > 0 )
-	{
-		step_speed_ += 0.05f;
-		step_speed_ = math::clamp( step_speed_, -0.05f, 0.1f );
-	}
-	if ( w < 0 )
-	{
-		step_speed_ -= 0.05f;
-		step_speed_ = math::clamp( step_speed_, -0.05f, 0.1f );
-	}
-
-	step_speed_ = math::clamp( step_speed_, -0.02f, 0.5f );
-
 	limit_velocity();
 	update_position();
 
@@ -126,6 +157,7 @@ void Player::update()
 void Player::on_collision_x( const GridCell& floor_cell_x )
 {
 	if (
+		( ! is_jumping()  ) &&
 		( velocity().y() <= 0.02f && floor_cell_x.height() - position().y() <= 2.f ) &&
 		(
 			( velocity().x() < 0.f && direction() == LEFT || velocity().x() > 0.f && direction() == RIGHT ) ||
@@ -135,6 +167,8 @@ void Player::on_collision_x( const GridCell& floor_cell_x )
 		velocity().y() = 0.02f;
 
 		is_jumping_ = false;
+		step_count_ = 0;
+		step_speed_ = 0.f;
 
 		if ( ! is_clambering() && floor_cell_x.height() - position().y() > 1.f )
 		{
@@ -160,7 +194,6 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 		velocity().y() = 1.f;
 	
 		is_jumping_ = true;
-		// step_speed_ = 0.2f;
 
 		stop_sound( "super-jump" );
 		play_sound( "super-jump" );
@@ -198,10 +231,6 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 			play_sound( "land" );
 
 			is_jumping_ = false;
-			// step_speed_ = math::clamp( step_speed_, -0.05f, 0.1f );
-
-			// velocity().x() = 0.f;
-			// velocity().z() = 0.f;
 		}
 	}
 
@@ -213,6 +242,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 void Player::on_collision_z( const GridCell& floor_cell_z )
 {
 	if (
+		( ! is_jumping()  ) &&
 		( velocity().y() <= 0.02f && floor_cell_z.height() - position().y() <= 2.f ) && 
 		(
 			( velocity().z() < 0.f && direction() == BACK || velocity().z() > 0.f && direction() == FRONT ) ||
@@ -222,6 +252,8 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
 		velocity().y() = 0.02f;
 
 		is_jumping_ = false;
+		step_count_ = 0;
+		step_speed_ = 0.f;
 
 		if ( ! is_clambering() && floor_cell_z.height() - position().y() > 1.f )
 		{

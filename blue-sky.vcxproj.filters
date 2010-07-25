@@ -13,16 +13,22 @@
     <Filter Include="stage">
       <UniqueIdentifier>{42d97a7e-ae7b-4e07-84f4-ff8e41387199}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ActiveObject">
+      <UniqueIdentifier>{0fc579b7-c447-43db-9065-4d89b9282319}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GridObject">
+      <UniqueIdentifier>{02eac5f9-75ac-4940-9e46-416ff6bb7fd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sound">
+      <UniqueIdentifier>{72ad5316-4fb4-49d2-86fd-4c4cd247ac62}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
-    <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="GameMain.cpp" />
-    <ClCompile Include="LiveVertex.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainLoop.cpp" />
     <ClCompile Include="matrix4x4.cpp" />
-    <ClCompile Include="Model.cpp" />
     <ClCompile Include="vector3.cpp" />
     <ClCompile Include="DirectInput.cpp">
       <Filter>DirectX</Filter>
@@ -34,9 +40,7 @@
       <Filter>DirectX</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Stage.cpp" />
     <ClCompile Include="Util.cpp" />
-    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Direct3D9Box.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
@@ -46,16 +50,7 @@
     <ClCompile Include="DirectSoundBuffer.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
-    <ClCompile Include="WaveFile.cpp" />
-    <ClCompile Include="OggVorbisFile.cpp" />
-    <ClCompile Include="Sound.cpp" />
-    <ClCompile Include="SoundManager.cpp" />
-    <ClCompile Include="StreamingSound.cpp" />
     <ClCompile Include="Input.cpp" />
-    <ClCompile Include="GridData.cpp" />
-    <ClCompile Include="GridObject.cpp" />
-    <ClCompile Include="GridObjectManager.cpp" />
-    <ClCompile Include="GridCell.cpp" />
     <ClCompile Include="Direct3D9SkyBox.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
@@ -68,7 +63,6 @@
     <ClCompile Include="TitleScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="GridDataManager.cpp" />
     <ClCompile Include="StageSelectScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -81,33 +75,72 @@
     <ClCompile Include="Direct3D9Resource.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
-    <ClCompile Include="ActiveObject.cpp" />
-    <ClCompile Include="ActiveObjectManager.cpp" />
-    <ClCompile Include="Enemy.cpp" />
-    <ClCompile Include="Goal.cpp" />
     <ClCompile Include="DirectShow.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
     <ClCompile Include="EndingScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Balloon.cpp" />
     <ClCompile Include="StoryTextScene.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Balloon.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
+    <ClCompile Include="ActiveObject.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
+    <ClCompile Include="ActiveObjectManager.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GridCell.cpp">
+      <Filter>GridObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GridData.cpp">
+      <Filter>GridObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GridDataManager.cpp">
+      <Filter>GridObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GridObject.cpp">
+      <Filter>GridObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GridObjectManager.cpp">
+      <Filter>GridObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Goal.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamingSound.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="WaveFile.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="OggVorbisFile.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage.cpp">
+      <Filter>GridObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
-    <ClInclude Include="Canvas.h" />
-    <ClInclude Include="Color.h" />
-    <ClInclude Include="Face.h" />
     <ClInclude Include="GameMain.h" />
-    <ClInclude Include="Line.h" />
-    <ClInclude Include="LiveVertex.h" />
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="matrix4x4.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="Type.h" />
     <ClInclude Include="vector3.h" />
     <ClInclude Include="DirectInput.h">
       <Filter>DirectX</Filter>
@@ -119,9 +152,7 @@
       <Filter>DirectX</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Stage.h" />
     <ClInclude Include="Util.h" />
-    <ClInclude Include="Player.h" />
     <ClInclude Include="Direct3D9Box.h">
       <Filter>DirectX</Filter>
     </ClInclude>
@@ -131,19 +162,10 @@
     <ClInclude Include="DirectSoundBuffer.h">
       <Filter>DirectX</Filter>
     </ClInclude>
-    <ClInclude Include="WaveFile.h" />
-    <ClInclude Include="OggVorbisFile.h" />
-    <ClInclude Include="Sound.h" />
-    <ClInclude Include="SoundManager.h" />
-    <ClInclude Include="StreamingSound.h" />
     <ClInclude Include="DirectX.h">
       <Filter>DirectX</Filter>
     </ClInclude>
     <ClInclude Include="Input.h" />
-    <ClInclude Include="GridData.h" />
-    <ClInclude Include="GridObject.h" />
-    <ClInclude Include="GridObjectManager.h" />
-    <ClInclude Include="GridCell.h" />
     <ClInclude Include="Direct3D9SkyBox.h">
       <Filter>DirectX</Filter>
     </ClInclude>
@@ -156,7 +178,6 @@
     <ClInclude Include="TitleScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="GridDataManager.h" />
     <ClInclude Include="StageSelectScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -169,10 +190,6 @@
     <ClInclude Include="Direct3D9Resource.h">
       <Filter>DirectX</Filter>
     </ClInclude>
-    <ClInclude Include="ActiveObject.h" />
-    <ClInclude Include="ActiveObjectManager.h" />
-    <ClInclude Include="Enemy.h" />
-    <ClInclude Include="Goal.h" />
     <ClInclude Include="DirectShow.h">
       <Filter>DirectX</Filter>
     </ClInclude>
@@ -180,9 +197,59 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="Balloon.h" />
     <ClInclude Include="StoryTextScene.h">
       <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Balloon.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="ActiveObject.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="ActiveObjectManager.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GridObjectManager.h">
+      <Filter>GridObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCell.h">
+      <Filter>GridObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GridData.h">
+      <Filter>GridObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GridDataManager.h">
+      <Filter>GridObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GridObject.h">
+      <Filter>GridObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Goal.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamingSound.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="WaveFile.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="OggVorbisFile.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage.h">
+      <Filter>GridObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -192,26 +259,8 @@
     <None Include="media\object\house-a">
       <Filter>object</Filter>
     </None>
-    <None Include="media\stage\stage-1-1">
-      <Filter>stage</Filter>
-    </None>
     <None Include="media\shader\blue-sky.fx" />
-    <None Include="media\stage\stage-1-2">
-      <Filter>stage</Filter>
-    </None>
     <None Include="blye-sky.ico" />
-    <None Include="media\stage\stage-0-2">
-      <Filter>stage</Filter>
-    </None>
-    <None Include="media\stage\stage-0-3">
-      <Filter>stage</Filter>
-    </None>
-    <None Include="media\stage\stage-0-4">
-      <Filter>stage</Filter>
-    </None>
-    <None Include="media\stage\stage-0-1">
-      <Filter>stage</Filter>
-    </None>
     <None Include="media\object\road-curve">
       <Filter>object</Filter>
     </None>
@@ -237,6 +286,18 @@
     <None Include="blue-sky.default.config" />
     <None Include="media\object\building-c">
       <Filter>object</Filter>
+    </None>
+    <None Include="media\stage\0-4.stage">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\0-1.stage">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\0-2.stage">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\0-3.stage">
+      <Filter>stage</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

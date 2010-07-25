@@ -18,6 +18,7 @@ public:
 private:
 	const Input* input_;			///< 入力への参照
 
+	int			step_count_;
 	float		step_speed_;		///< 移動速度
 	float		gravity_;			///< 重力
 
@@ -52,6 +53,10 @@ public:
 	void step( float );
 	void side_step( float );
 
+	void stop();
+
+	void update_step_speed();
+
 	void kill();
 
 	void rebirth();
@@ -59,7 +64,7 @@ public:
 	bool is_turn_available() const { return is_turn_avaiable_; }
 
 	float get_step_speed() const { return step_speed_; }
-	float get_side_step_speed() const { return 0.004f; }
+	float get_side_step_speed() const { return 0.001f; }
 
 	/// 更新
 	void update();

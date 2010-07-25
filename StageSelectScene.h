@@ -3,6 +3,7 @@
 
 #include "Scene.h"
 #include <win/Rect.h>
+#include <vector>
 #include <list>
 
 namespace blue_sky
@@ -44,7 +45,7 @@ private:
 	win::Rect left_allow_src_rect_;
 	win::Rect right_allow_src_rect_;
 	win::Rect stage_src_rect_;
-	std::list< win::Rect > circle_src_rect_list_;
+	std::vector< win::Rect > circle_src_rect_list_;
 
 	int get_max_stage_per_page() const { return 4; }
 	int get_margin() const { return 5; }

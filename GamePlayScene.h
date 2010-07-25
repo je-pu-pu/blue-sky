@@ -46,6 +46,8 @@ protected:
 
 	common::safe_ptr< Direct3D9Box > box_;
 
+	Texture* ui_texture_;
+
 	float ambient_color_[ 4 ];
 	float grid_object_visible_length_;
 	float grid_object_lod_0_length_;

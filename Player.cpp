@@ -32,6 +32,7 @@ Player::Player()
 	 , is_jumping_( false )
 	 , is_clambering_( false )
 	 , is_falling_( false )
+	 , is_umbrella_mode_( false )
 	 , up_count_( 0 )
 	 , rocket_count_( 0 )
 {
@@ -128,7 +129,11 @@ void Player::update()
 	// gravity
 	if ( up_count_ > 0 )
 	{
-		velocity().y() = math::chase( velocity().y(), 0.1f, 0.01f );
+		velocity().y() = math::chase( velocity().y(), 0.4f, 0.01f );
+	}
+	else if ( is_umbrella_mode_ )
+	{
+		velocity().y() = math::chase( velocity().y(), -0.1f, 0.02f );
 	}
 	else if ( ! is_rocketing() )
 	{
@@ -164,7 +169,7 @@ void Player::on_collision_x( const GridCell& floor_cell_x )
 			( floor_cell_x.height() - position().y() <= 1.f && ( velocity().x() < 0.f && direction() != RIGHT || velocity().x() > 0.f && direction() != LEFT ) )
 		) )
 	{
-		velocity().y() = 0.02f;
+		velocity().y() = get_clambering_speed();
 
 		is_jumping_ = false;
 		step_count_ = 0;
@@ -179,7 +184,7 @@ void Player::on_collision_x( const GridCell& floor_cell_x )
 	}
 	else
 	{
-		play_sound( "collision-wall" );
+		play_sound( "collision-wall", false, false );
 	}
 
 	velocity().x() *= 0.1f;
@@ -232,6 +237,8 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 
 			is_jumping_ = false;
 		}
+
+		is_umbrella_mode_ = false;
 	}
 
 	is_turn_avaiable_ = true;
@@ -249,7 +256,7 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
 			( floor_cell_z.height() - position().y() <= 1.f && ( velocity().z() < 0.f && direction() != FRONT || velocity().z() > 0.f && direction() != BACK ) )
 		) )
 	{
-		velocity().y() = 0.02f;
+		velocity().y() = get_clambering_speed();
 
 		is_jumping_ = false;
 		step_count_ = 0;
@@ -264,7 +271,7 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
 	}
 	else
 	{
-		play_sound( "collision-wall" );
+		play_sound( "collision-wall", false, false );
 	}
 
 	velocity().z() *= 0.1f;
@@ -306,6 +313,15 @@ void Player::fall()
 }
 
 /**
+ * 落下傘モード開始
+ *
+ */
+void Player::start_umbrella_mode()
+{
+	is_umbrella_mode_ = true;
+}
+
+/**
  * 
  */
 bool Player::is_falling_to_dead() const
@@ -340,7 +356,7 @@ void Player::set_input( const Input* input )
 
 void Player::rocket( const vector3& direction )
 {
-	rocket_count_ = 180;
+	rocket_count_ = 120;
 	velocity() = direction * get_max_speed();
 }
 

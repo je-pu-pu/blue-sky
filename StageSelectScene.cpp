@@ -110,7 +110,7 @@ bool StageSelectScene::render()
 	// Stage
 	int n = 0;
 
-	std::list< win::Rect >::const_iterator j = circle_src_rect_list_.begin();
+	std::vector< win::Rect >::const_iterator j = circle_src_rect_list_.begin();
 
 	for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i, ++j )
 	{
@@ -329,6 +329,10 @@ void StageSelectScene::update_stage_list()
 			break;
 		}
 	}
+
+	std::random_shuffle( circle_src_rect_list_.begin(), circle_src_rect_list_.end() );
+
+	// std::swap( circle_src_rect_list_[ common::random( 0, 3 ) ]. circle_src_rect_list_[ common::random( 0, 3 ) ] );
 }
 
 std::string StageSelectScene::get_stage_dir_name_by_page( int page )

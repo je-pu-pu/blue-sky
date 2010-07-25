@@ -78,7 +78,7 @@ protected:
 	virtual void on_collision_y( const GridCell& ) { }
 	virtual void on_collision_z( const GridCell& ) { }
 
-	void play_sound( const char*, bool = false ) const;
+	void play_sound( const char*, bool = false, bool = true ) const;
 	void stop_sound( const char* ) const;
 
 public:

@@ -220,15 +220,18 @@ const GridCell& ActiveObject::get_floor_cell() const
 	return * grid_cell_list.back();
 }
 
-void ActiveObject::play_sound( const char* name, bool loop ) const
+void ActiveObject::play_sound( const char* name, bool loop, bool force ) const
 {
 	Sound* sound = GameMain::getInstance()->get_sound_manager()->get_sound( name );
 	
 	if ( sound )
 	{
-		sound->set_3d_position( position().x(), position().y(), position().z() );
-		sound->set_3d_velocity( velocity().x() * 60.f, velocity().z() * 60.f, velocity().z() * 60.f );
-		sound->play( loop );
+		if ( force || ! sound->is_playing() )
+		{
+			sound->set_3d_position( position().x(), position().y(), position().z() );
+			sound->set_3d_velocity( velocity().x() * 60.f, velocity().z() * 60.f, velocity().z() * 60.f );
+			sound->play( loop );
+		}
 	}
 }
 

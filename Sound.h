@@ -84,6 +84,9 @@ public:
 	/// サウンドを再生する
 	bool play( bool );
 
+	/// サウンドが再生中かどうかを取得する
+	bool is_playing() const;
+
 	/// サウンドを停止する
 	bool stop();
 

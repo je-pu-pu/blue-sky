@@ -15,6 +15,7 @@
 #include "Direct3D9SkyBox.h"
 #include "Direct3D9Box.h"
 #include "Direct3D9.h"
+#include "Direct3D9TextureManager.h"
 #include "DirectX.h"
 
 #include "Input.h"
@@ -51,6 +52,7 @@ bool clear_flag = false;
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
+	, ui_texture_( 0 )
 	, grid_object_visible_length_( 500 )
 	, grid_object_lod_0_length_( 100 )
 {
@@ -63,6 +65,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	grid_object_lod_0_length_ = config()->get( "video.grid-object-lod-0-length", 100.f );
 
 	clear_flag = false;
+
+	// Texture
+	ui_texture_ = direct_3d()->getTextureManager()->load( "ui", "media/image/item.png" );
 
 	// Font
 	font_ = new Direct3D9Font( direct_3d() );
@@ -96,18 +101,18 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// Sound
 	{
 		sound_manager()->stop_all();
-
-//		sound_manager()->load_music( "rain" )->play( true );
-//		sound_manager()->load_music( "izakaya" )->play( false );
+		sound_manager()->unload_all();
 
 		sound_manager()->load_3d_sound( "ok" );
-		sound_manager()->load_3d_sound( "clamber" );
-		sound_manager()->load_3d_sound( "collision-wall" );
-		sound_manager()->load_3d_sound( "jump" );
-		sound_manager()->load_3d_sound( "super-jump" );
-		sound_manager()->load_3d_sound( "land" );
-		sound_manager()->load_3d_sound( "short-breath" );
-		sound_manager()->load_3d_sound( "dead" );
+		sound_manager()->load_3d_sound( "vending-machine" );
+
+		sound_manager()->load( "clamber" );
+		sound_manager()->load( "collision-wall" );
+		sound_manager()->load( "jump" );
+		sound_manager()->load( "super-jump" );
+		sound_manager()->load( "land" );
+		sound_manager()->load( "short-breath" );
+		sound_manager()->load( "dead" );
 
 		sound_manager()->load( "fin" );
 	}
@@ -446,6 +451,11 @@ void GamePlayScene::update()
 		if ( input()->push( Input::X ) )
 		{
 			player_->rocket( camera_->front() );
+		}
+
+		if ( input()->push( Input::Y ) )
+		{
+			player_->start_umbrella_mode();
 		}
 	}
 
@@ -808,6 +818,51 @@ bool GamePlayScene::render()
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );
+
+	// UI
+	direct_3d()->getSprite()->Begin( D3DXSPRITE_ALPHABLEND );
+
+	D3DXMATRIXA16 t, transform;
+
+	for ( int n = 0; n < 3; n++ )
+	{
+		const float offset = n * 50.f;
+
+		win::Rect src_rect = win::Rect::Size( 0, 0, 202, 200 );
+		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
+
+		D3DXMatrixTranslation( & t, get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f - offset, 0.f );
+		transform = t;
+
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+	}
+
+	for ( int n = 3; n < 6; n++ )
+	{
+		const float offset = n * 50.f;
+
+		win::Rect src_rect = win::Rect::Size( 0, 256, 186, 220 );
+		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
+
+		D3DXMatrixTranslation( & t, get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f - offset, 0.f );
+		transform = t;
+
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+	}
+
+	{
+		win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );
+		D3DXVECTOR3 center( 34.f, 38.f, 0.f );
+
+		D3DXMatrixTranslation( & transform, get_width() * 0.5f, get_height() * 0.5f, 0.f );
+
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0x99FFFFFF );
+	}
+
+	direct_3d()->getSprite()->End();
 
 	std::string debug_text = "player : (" + 
 			common::serialize( static_cast< int >( player_->position().x() ) ) + "," +

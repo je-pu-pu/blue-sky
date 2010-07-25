@@ -31,6 +31,8 @@ private:
 	bool		is_falling_;		///< 落下中フラグ
 	vector3		velocity_on_fall_;	///< 落下開始時の移動量
 	
+	bool		is_umbrella_mode_;	///< 落下傘モード
+
 	int			up_count_;			///< 上昇カウンタ
 	int			rocket_count_;		///< ロケットカウンタ
 
@@ -41,6 +43,8 @@ private:
 	float get_collision_width() const;
 	float get_collision_height() const;
 	float get_collision_depth() const;
+
+	float get_clambering_speed() const { return 0.01f; }
 
 public:
 	Player();
@@ -80,6 +84,9 @@ public:
 	void fall();
 	bool is_falling() const { return is_falling_; }
 	bool is_falling_to_dead() const;
+
+	///
+	void start_umbrella_mode();
 
 	void set_input( const Input* );
 

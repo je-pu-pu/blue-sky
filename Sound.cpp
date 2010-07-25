@@ -83,11 +83,21 @@ bool Sound::load( const char* file_name )
 
 void Sound::set_3d_position( T x, T y, T z )
 {
+	if ( ! direct_sound_buffer_->get_direct_sound_3d_buffer() )
+	{
+		return;
+	}
+
 	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_3d_buffer()->SetPosition( x, y, z, DS3D_DEFERRED ) );
 }
 
 void Sound::set_3d_velocity( T x, T y, T z )
 {
+	if ( ! direct_sound_buffer_->get_direct_sound_3d_buffer() )
+	{
+		return;
+	}
+
 	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_3d_buffer()->SetVelocity( x, y, z, DS3D_DEFERRED ) );
 }
 
@@ -120,6 +130,14 @@ bool Sound::play( bool loop )
 	direct_sound_buffer_->play( loop );
 
 	return true;
+}
+
+bool Sound::is_playing() const
+{
+	DWORD status = 0;
+	direct_sound_buffer_->get_direct_sound_buffer()->GetStatus( & status );
+
+	return status & DSBSTATUS_PLAYING;
 }
 
 bool Sound::stop()

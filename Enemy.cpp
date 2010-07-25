@@ -69,6 +69,7 @@ void Enemy::update()
 	if ( counter_ % 120 == 0 )
 	{
 		play_sound( "ok" );
+		// play_sound( "vending-machine", true, false );
 	}
 
 	velocity().y() -= 0.005f;

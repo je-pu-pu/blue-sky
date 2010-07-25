@@ -209,8 +209,6 @@ void GameMain::render()
 	debug_text = std::string( "FPS : " ) + common::serialize( MainLoop.GetFPS() );
 	get_direct_3d()->getFont()->draw_text( 0, 0, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
 
-	
-
 	HRESULT hr = get_direct_3d()->getDevice()->Present( NULL, NULL, NULL, NULL );
 
 	if ( hr == D3DERR_DEVICELOST )

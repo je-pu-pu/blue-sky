@@ -31,6 +31,7 @@ private:
 	vector3		velocity_on_fall_;	///< 落下開始時の移動量
 	
 	int			up_count_;			///< 上昇カウンタ
+	int			rocket_count_;		///< ロケットカウンタ
 
 	void on_collision_x( const GridCell& );
 	void on_collision_y( const GridCell& );
@@ -68,6 +69,7 @@ public:
 	bool is_jumping() const { return is_jumping_; }
 
 	bool is_clambering() const { return is_clambering_; }
+	bool is_rocketing() const { return rocket_count_ > 0; }
 
 	/// 落下処理
 	void fall();
@@ -79,6 +81,7 @@ public:
 	float get_gravity() const { return gravity_; }
 	void set_gravity( float g ) { gravity_ = g; }
 	
+	void rocket( const vector3& );
 	void on_get_balloon();
 
 }; // class Player

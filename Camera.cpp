@@ -31,11 +31,6 @@ void Camera::update()
 	rotate_degree().y() += ( rotate_degree_target().y() - rotate_degree().y() ) * 0.1f;
 	rotate_degree().z() = math::chase( rotate_degree().z(), rotate_degree_target().z(), 0.8f );
 
-	matrix4x4 m;
-	m.rotate_y( rotate_degree().y() );
-
-	front_ = default_front_ * m;
-
 	static float xxx = 0.f;
 	xxx += 1.f;
 
@@ -48,7 +43,8 @@ void Camera::update()
 
 	matrix4x4 zr;
 	zr.rotate_z( rotate_degree().z() );
-
+	
+	front_ = default_front_ * xr * yr;
 	look_at_ = position() + default_front_ * xr * zr * yr;
 	up_ = default_up_ * xr * zr * yr;
 }

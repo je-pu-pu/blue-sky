@@ -141,6 +141,12 @@ GamePlayScene::GamePlayScene( const GameMain* game_main, const std::string& stag
 	player_->restart();
 	goal_->restart();
 
+	for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
+	{
+		ActiveObject* active_object = *i;
+		active_object->restart();
+	}
+
 	Sound* bgm = sound_manager()->get_sound( "bgm" );
 	if ( bgm )
 	{
@@ -284,10 +290,10 @@ void GamePlayScene::generate_random_stage()
 	{
 		Balloon* balloon = new Balloon();
 		balloon->set_stage( stage_.get() );
-		balloon->position() = player_->start_position();
-		balloon->position().x() += common::random( -50.f, +50.f );
-		balloon->position().y() = common::random( 30.f, 150.f );
-		balloon->position().z() += common::random( -50.f, +50.f );
+		balloon->start_position() = player_->start_position();
+		balloon->start_position().x() += common::random( -50.f, +50.f );
+		balloon->start_position().y() = common::random( 30.f, 150.f );
+		balloon->start_position().z() += common::random( -50.f, +50.f );
 		balloon->limit_position();
 		active_object_manager()->add_active_object( balloon );
 	}
@@ -413,6 +419,10 @@ void GamePlayScene::update()
 		if ( input()->push( Input::A ) )
 		{
 			player_->jump();
+		}
+		if ( input()->push( Input::X ) )
+		{
+			player_->rocket( camera_->front() );
 		}
 	}
 

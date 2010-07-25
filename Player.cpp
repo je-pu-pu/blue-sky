@@ -32,12 +32,18 @@ Player::Player()
 	 , is_clambering_( false )
 	 , is_falling_( false )
 	 , up_count_( 0 )
+	 , rocket_count_( 0 )
 {
 
 }
 
 void Player::step( float s )
 {
+	if ( is_rocketing() )
+	{
+		return;
+	}
+
 	vector3 v = front() * s * get_step_speed();
 	velocity().x() = v.x();
 	velocity().z() = v.z();
@@ -53,6 +59,11 @@ void Player::side_step( float s )
  */
 void Player::add_direction_degree( float d )
 {
+	if ( is_rocketing() )
+	{
+		return;
+	}
+
 	set_direction_degree( get_direction_degree() + d );
 }
 
@@ -81,21 +92,20 @@ void Player::update()
 	update_position();
 
 	up_count_ = math::chase( up_count_, 0, 1 );
-
-	if ( up_count_ > 0 )
-	{
-		velocity().y() += get_gravity() * 3.f;
-	}
+	rocket_count_ = math::chase( rocket_count_, 0, 1 );
 
 	// gravity
-	velocity().y() -= get_gravity();
-	// velocity().y() -= 0.015f;
-	// velocity().y() -= 0.004f;
-	// velocity().y() -= 0.002f;
-	// velocity().y() -= 0.001f;
-	// velocity().y() -= 0.0001f;
+	if ( up_count_ > 0 )
+	{
+		velocity().y() = math::chase( velocity().y(), 0.1f, 0.01f );
+	}
+	else if ( ! is_rocketing() )
+	{
+		velocity().y() -= get_gravity();
+	}
 
 	// Œ¸‘¬
+	if ( ! is_rocketing() )
 	{
 		velocity().x() *= 0.9f;
 		velocity().z() *= 0.9f;
@@ -293,6 +303,12 @@ void Player::rebirth()
 void Player::set_input( const Input* input )
 {
 	input_ = input;
+}
+
+void Player::rocket( const vector3& direction )
+{
+	rocket_count_ = 180;
+	velocity() = direction * get_max_speed();
 }
 
 void Player::on_get_balloon()

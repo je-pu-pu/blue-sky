@@ -9,6 +9,7 @@
 
 #include "MainLoop.h"
 #include <windows.h>
+#include <string>
 
 namespace game
 {
@@ -62,6 +63,9 @@ protected:
 	CMainLoop				MainLoop;				///< ループ管理
 
 	Scene*					scene_;					///< 現在のシーン
+	std::string				stage_name_;			///< 現在のステージ名
+
+	bool					display_fps_flag_;		///< FPS 表示フラグ
 
 	GameMain();
 
@@ -98,6 +102,9 @@ public:
 	void on_mouse_wheel( int );
 
 	bool is_clip_cursor_required() const;
+
+	const std::string& get_stage_name() const { return stage_name_; }
+	void set_stage_name( const std::string& stage_name ) { stage_name_ = stage_name; }
 
 }; // class GameMain
 

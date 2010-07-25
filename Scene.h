@@ -39,7 +39,7 @@ public:
 private:
 	const GameMain* game_main_;
 	std::string next_scene_;
-	std::string stage_name_;
+	std::string next_stage_name_;
 
 protected:
 	Direct3D9* direct_3d() const;
@@ -66,8 +66,10 @@ public:
 	const std::string& get_next_scene() const { return next_scene_; }
 	void set_next_scene( const std::string& next_scene ) { next_scene_ = next_scene; }
 
-	const std::string& get_stage_name() const { return stage_name_; }
-	void set_stage_name( const std::string& stage_name ) { stage_name_ = stage_name; }
+	const std::string& get_stage_name() const;
+	
+	const std::string& get_next_stage_name() const { return next_stage_name_; }
+	void set_next_stage_name( const std::string& next_stage_name ) { next_stage_name_ = next_stage_name; }
 
 	virtual bool is_clip_cursor_required() { return false; }
 

@@ -20,6 +20,10 @@ public:
 	~Direct3D9Font();
 	
 	void draw_text( int, int, const char*, D3DCOLOR );
+	void draw_text_center( int, int, const char*, D3DCOLOR );
+
+
+	int get_text_height( const char* );
 
 	void on_lost_device();
 	void on_reset_device();

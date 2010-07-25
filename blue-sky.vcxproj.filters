@@ -92,6 +92,9 @@
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="Balloon.cpp" />
+    <ClCompile Include="StoryTextScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -178,6 +181,9 @@
     </ClInclude>
     <ClInclude Include="resource.h" />
     <ClInclude Include="Balloon.h" />
+    <ClInclude Include="StoryTextScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="media\object\building-a">

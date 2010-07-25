@@ -10,6 +10,7 @@
 
 #include "TitleScene.h"
 #include "StageSelectScene.h"
+#include "StoryTextScene.h"
 #include "GamePlayScene.h"
 #include "EndingScene.h"
 
@@ -49,6 +50,7 @@ GameMain::GameMain()
 	, active_object_manager_( 0 )
 	, config_( 0 )
 	, scene_( 0 )
+	, display_fps_flag_( 0 )
 {
 	// ランダマイズ
 	srand( timeGetTime() );
@@ -96,6 +98,8 @@ GameMain::GameMain()
 
 	// Scene
 	scene_ = new TitleScene( this );
+
+	display_fps_flag_ = config_->get( "video.display_fps", 0 ) != 0;
 }
 
 //■デストラクタ
@@ -151,7 +155,7 @@ bool GameMain::update()
 
 	if ( ! next_scene.empty() )
 	{
-		std::string stage_name = scene_->get_stage_name();
+		set_stage_name( scene_->get_next_stage_name() );
 
 		delete scene_;
 		scene_ = 0;
@@ -164,9 +168,17 @@ bool GameMain::update()
 		{
 			scene_ = new StageSelectScene( this );
 		}
+		else if ( next_scene == "stage_intro" )
+		{
+			scene_ = new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".intro" ).c_str(), "game_play" );
+		}
 		else if ( next_scene == "game_play" )
 		{
-			scene_ = new GamePlayScene( this, stage_name );
+			scene_ = new GamePlayScene( this );
+		}
+		else if ( next_scene == "stage_outro" )
+		{
+			scene_ = new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".outro" ).c_str(), "stage_select" );
 		}
 		else if ( next_scene == "ending" )
 		{
@@ -176,6 +188,8 @@ bool GameMain::update()
 		{
 			COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " + scene_->get_next_scene() ) );
 		}
+
+		scene_->set_next_stage_name( get_stage_name() );
 
 		app_->clip_cursor( scene_->is_clip_cursor_required() );
 	}
@@ -205,9 +219,11 @@ void GameMain::render()
 	}
 
 	// Debug
-	std::string debug_text;
-	debug_text = std::string( "FPS : " ) + common::serialize( MainLoop.GetFPS() );
-	get_direct_3d()->getFont()->draw_text( 0, 0, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
+	if ( display_fps_flag_ )
+	{
+		std::string debug_text = std::string( "FPS : " ) + common::serialize( MainLoop.GetFPS() );
+		get_direct_3d()->getFont()->draw_text( 0, 0, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
+	}
 
 	HRESULT hr = get_direct_3d()->getDevice()->Present( NULL, NULL, NULL, NULL );
 

@@ -16,10 +16,7 @@ Direct3D9TextureManager::Direct3D9TextureManager( const Direct3D9* direct_3d )
 
 Direct3D9TextureManager::~Direct3D9TextureManager()
 {
-	for ( TextureList::iterator i = texture_list_.begin(); i != texture_list_.end(); ++i )
-	{
-		i->second->Release();
-	}
+	unload_all();
 }
 
 Direct3D9TextureManager::Texture* Direct3D9TextureManager::load( const char* name, const char* file_name )
@@ -63,3 +60,12 @@ void Direct3D9TextureManager::unload( const char* name )
 	}
 }
 
+void Direct3D9TextureManager::unload_all()
+{
+	for ( TextureList::iterator i = texture_list_.begin(); i != texture_list_.end(); ++i )
+	{
+		i->second->Release();
+	}
+
+	texture_list_.clear();
+}

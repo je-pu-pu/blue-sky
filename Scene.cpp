@@ -69,4 +69,9 @@ int Scene::get_height() const
 	return game_main_->get_height();
 }
 
+const std::string& Scene::get_stage_name() const
+{
+	return game_main_->get_stage_name();
+}
+
 } // namespace blue_sky

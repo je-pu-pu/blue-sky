@@ -196,6 +196,7 @@
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StageSelectScene.cpp" />
+    <ClCompile Include="StoryTextScene.cpp" />
     <ClCompile Include="StreamingSound.cpp" />
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="Util.cpp" />
@@ -247,6 +248,7 @@
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="StageSelectScene.h" />
+    <ClInclude Include="StoryTextScene.h" />
     <ClInclude Include="StreamingSound.h" />
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="Type.h" />

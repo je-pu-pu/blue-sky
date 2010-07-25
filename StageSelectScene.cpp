@@ -12,8 +12,9 @@
 #include <win/Rect.h>
 
 #include <common/exception.h>
+#include <common/serialize.h>
 
-// #include <boost/filesystem/operations.hpp>
+// #include <boost/filesystem/convenience.hpp>
 
 namespace blue_sky
 {
@@ -44,7 +45,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 
 	WIN32_FIND_DATA find_data;
 
-	HANDLE find_handle = FindFirstFile( "media/stage/stage-0-*", & find_data );
+	HANDLE find_handle = FindFirstFile( ( std::string( "media/stage/" ) + common::serialize( page_ ) + "-*.stage" ).c_str(), & find_data );
 
 	if ( find_handle  != INVALID_HANDLE_VALUE )
 	{
@@ -69,13 +70,15 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 		stage->name = *i;
 		stage->rect = get_stage_dst_rect( stage, n );
 
+		stage->name.resize( stage->name.find_first_of( "." ) );
+
 		try
 		{
-			stage->texture = direct_3d()->getTextureManager()->load( i->c_str(), ( std::string( "media/stage/image/" ) + *i + ".png" ).c_str() );
+			stage->texture = direct_3d()->getTextureManager()->load( stage->name.c_str(), ( std::string( "media/stage/" ) + stage->name + ".png" ).c_str() );
 		}
 		catch ( ... )
 		{
-			stage->texture = direct_3d()->getTextureManager()->load( i->c_str(), "media/stage/image/stage-default.png" );
+			stage->texture = direct_3d()->getTextureManager()->load( stage->name.c_str(), "media/stage/default.png" );
 		}
 
 		stage_list_.push_back( stage );
@@ -91,6 +94,8 @@ StageSelectScene::~StageSelectScene()
 	for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i )
 	{
 		Stage* stage = *i;
+
+		direct_3d()->getTextureManager()->unload( stage->name.c_str() );
 
 		delete stage;
 	}
@@ -121,7 +126,7 @@ void StageSelectScene::update()
 
 			if ( stage->name == "stage-0-4" )
 			{
-				set_stage_name( "" );
+				set_next_stage_name( "" );
 			}
 			else if ( stage->name == "stage-0-3" )
 			{
@@ -130,10 +135,10 @@ void StageSelectScene::update()
 			}
 			else
 			{
-				set_stage_name( stage->name );
+				set_next_stage_name( stage->name );
 			}
 
-			set_next_scene( "game_play" );
+			set_next_scene( "stage_intro" );
 		}
 	}
 }

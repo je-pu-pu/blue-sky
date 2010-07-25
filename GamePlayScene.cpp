@@ -48,7 +48,7 @@ namespace blue_sky
 float brightness = 0.f;
 bool clear_flag = false;
 
-GamePlayScene::GamePlayScene( const GameMain* game_main, const std::string& stage_name )
+GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
 	, grid_object_visible_length_( 500 )
 	, grid_object_lod_0_length_( 100 )
@@ -62,8 +62,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main, const std::string& stag
 	grid_object_lod_0_length_ = config()->get( "video.grid-object-lod-0-length", 100.f );
 
 	clear_flag = false;
-
-	set_stage_name( stage_name );
 
 	// Font
 	font_ = new Direct3D9Font( direct_3d() );
@@ -135,7 +133,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main, const std::string& stag
 	}
 	else
 	{
-		load_stage_file( ( std::string( "media/stage/" ) + get_stage_name() ).c_str() );
+		load_stage_file( ( std::string( "media/stage/" ) + get_stage_name() + ".stage" ).c_str() );
 	}
 
 	player_->restart();
@@ -429,7 +427,9 @@ void GamePlayScene::update()
 	player_->add_direction_degree( input()->get_mouse_dx() * 90.f );
 
 	camera_->rotate_degree_target().y() = player_->get_direction_degree();
-	camera_->rotate_degree_target().x() = math::clamp( input()->get_mouse_y_rate() * 90.f, -90.f, +90.f );
+
+	camera_->rotate_degree_target().x() += input()->get_mouse_dy() * 90.f;
+	camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
 
 	player_->update();
 
@@ -477,7 +477,7 @@ void GamePlayScene::update()
 		sound_manager()->get_sound( "fin" )->play( false );
 	}
 
-	camera_->position() = player_->position() + vector3( 0.f, player_->get_eye_height(), 0.f );
+	camera_->position() = player_->position() + player_->front() + vector3( 0.f, player_->get_eye_height(), 0.f );
 	
 	if ( clear_flag )
 	{
@@ -485,7 +485,7 @@ void GamePlayScene::update()
 
 		if ( sound_manager()->get_sound( "fin" )->get_current_position() >= 9.f )
 		{
-			set_next_scene( "stage_select" );
+			set_next_scene( "stage_outro" );
 		}
 	}
 	else if ( player_->is_dead() )

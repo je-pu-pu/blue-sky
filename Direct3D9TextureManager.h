@@ -29,6 +29,7 @@ public:
 	Texture* get( const char* ) const;
 
 	void unload( const char* );
+	void unload_all();
 
 }; // class Direct3D9TextureManager
 

@@ -99,6 +99,26 @@ void Player::update_step_speed()
 		// run
 		step_speed_ = math::chase( step_speed_, 0.1f, 0.001f );
 	}
+
+	if ( is_jumping() || is_rocketing() || is_clambering() )
+	{
+		stop_sound( "walk" );
+		stop_sound( "run" );
+	}
+	else if ( step_count_ >= 20 && step_count_ < 240 )
+	{
+		play_sound( "walk", true, false );
+	}
+	else if ( step_count_ >= 240 )
+	{
+		stop_sound( "walk" );
+		play_sound( "run", true, false );
+	}
+	else if ( step_count_ == 0 )
+	{
+		stop_sound( "walk" );
+		stop_sound( "run" );
+	}
 }
 
 /**
@@ -322,11 +342,18 @@ void Player::start_umbrella_mode()
 }
 
 /**
- * 
+ * ‚±‚Ì‚Ü‚Ü—Ž‰º‚·‚é‚ÆŽ€–S‚·‚é‚©‚Ç‚¤‚©‚ðŽæ“¾‚·‚é
+ *
  */
 bool Player::is_falling_to_dead() const
 {
-	return velocity().y() < -get_max_speed() * 0.6f;
+	if ( is_umbrella_mode_ ) return false;
+
+	if ( ! last_floor_cell() ) return false;
+	if ( ! floor_cell() ) return false;
+	
+
+	return velocity().y() < -0.2f && last_floor_cell()->height() - floor_cell()->height() >= 20;
 }
 
 void Player::kill()

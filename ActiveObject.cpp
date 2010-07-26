@@ -24,6 +24,8 @@ ActiveObject::ActiveObject()
 	 : stage_( 0 )
 	 , direction_degree_( 0.f )
 	 , start_direction_degree_( 0.f )
+	 , floor_cell_( 0 )
+	 , last_floor_cell_( 0 )
 	 , is_dead_( false )
 {
 	vector3 min( -get_collision_width() * 0.5f, 0.f, -get_collision_depth() * 0.5f );
@@ -113,7 +115,7 @@ void ActiveObject::update_position()
 	position().x() += velocity().x();
 	position().x() = math::clamp( position().x(), 0.f, static_cast< float >( stage()->width() ) );
 
-	const GridCell& floor_cell_x = get_floor_cell();
+	const GridCell& floor_cell_x = update_floor_cell();
 
 	if ( position().y() < floor_cell_x.height() )
 	{
@@ -124,7 +126,7 @@ void ActiveObject::update_position()
 	position().z() += velocity().z();
 	position().z() = math::clamp( position().z(), 0.f, static_cast< float >( stage()->depth() ) );
 
-	const GridCell& floor_cell_z = get_floor_cell();
+	const GridCell& floor_cell_z = update_floor_cell();
 
 	if ( position().y() < floor_cell_z.height() )
 	{
@@ -140,17 +142,19 @@ void ActiveObject::update_position()
 		velocity().y() = 0.f;
 	}
 
-	const GridCell& floor_cell_y = get_floor_cell();
+	const GridCell& floor_cell_y = update_floor_cell();
 	
 	if ( position().y() < floor_cell_y.height() )
 	{
 		position().y() = floor_cell_y.height();
 
 		on_collision_y( floor_cell_y );
+
+		last_floor_cell_ = floor_cell_;
 	}
 
 	position().y() = std::max( 0.f, position().y() );
-	
+
 	/// @todo rotate
 	update_global_aabb_list();
 }
@@ -206,7 +210,7 @@ void ActiveObject::restart()
 /**
  * オブジェクトの接触している一番高いグリッドセルを返す
  */
-const GridCell& ActiveObject::get_floor_cell() const
+const GridCell& ActiveObject::update_floor_cell()
 {
 	std::list< const GridCell* > grid_cell_list;
 
@@ -217,7 +221,9 @@ const GridCell& ActiveObject::get_floor_cell() const
 
 	grid_cell_list.sort( GridCell::height_less() );
 
-	return * grid_cell_list.back();
+	floor_cell_ = grid_cell_list.back();
+
+	return * floor_cell_;
 }
 
 void ActiveObject::play_sound( const char* name, bool loop, bool force ) const

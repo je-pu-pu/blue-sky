@@ -159,6 +159,10 @@ bool GameMain::update()
 		{
 			app_->close();
 		}
+		else if ( scene_->get_name() == "game_play" )
+		{
+			scene_->set_next_scene( "stage_select" );
+		}
 		else
 		{
 			scene_->set_next_scene( "title" );
@@ -278,12 +282,7 @@ int GameMain::get_height() const
 
 void GameMain::on_function_key_down( int function_key )
 {
-	if ( function_key == 1 ) 
-	{
-		get_sound_manager()->stop_all();
-		scene_->set_next_scene( "title" );
-	}
-
+	/*
 	if ( function_key == 2 )
 	{
 		get_sound_manager()->set_enabled( ! get_sound_manager()->is_enabled() );
@@ -294,6 +293,7 @@ void GameMain::on_function_key_down( int function_key )
 			bgm->play( true );
 		}
 	}
+	*/
 
 	if ( function_key == 5 )
 	{

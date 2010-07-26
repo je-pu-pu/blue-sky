@@ -106,6 +106,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		sound_manager()->load_3d_sound( "ok" );
 		sound_manager()->load_3d_sound( "vending-machine" );
 
+		sound_manager()->load( "walk" );
+		sound_manager()->load( "run" );
 		sound_manager()->load( "clamber" );
 		sound_manager()->load( "collision-wall" );
 		sound_manager()->load( "jump" );
@@ -496,7 +498,7 @@ void GamePlayScene::update()
 		}
 	}
 
-	if ( player_->collision_detection( goal_.get() ) )
+	if ( ! clear_flag && player_->collision_detection( goal_.get() ) )
 	{
 		player_->set_gravity( player_->get_gravity() * 0.1f );
 		player_->velocity().set( 0.f, 0.5f, 0.f );
@@ -552,6 +554,18 @@ void GamePlayScene::update()
 	
 
 	camera_->update();
+
+	if ( player_->is_rocketing() )
+	{
+		// camera_->set_fov( math::chase( camera_->fov(), 30.f, 0.2f ) );
+		camera_->position().x() += common::random( -0.01f, 0.01f );
+		camera_->position().y() += common::random( -0.01f, 0.01f );
+		camera_->position().z() += common::random( -0.01f, 0.01f );
+	}
+	else
+	{
+		// camera_->set_fov( math::chase( camera_->fov(), 60.f, 0.4f ) );
+	}
 
 	sound_manager()->set_listener_position( camera_->position() );
 	sound_manager()->set_listener_velocity( player_->velocity() );

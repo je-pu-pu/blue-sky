@@ -52,14 +52,18 @@ void StoryTextScene::load_story_text_file( const char* file_name )
  */
 void StoryTextScene::update()
 {
+	float speed = text_scroll_speed_;
+
 	if ( input()->press( Input::A ) )
 	{
-		text_y_ -= text_scroll_speed_ * 8.f;
+		speed *= 8.f;
 	}
-	else
+	if ( input()->press( Input::B ) )
 	{
-		text_y_ -= text_scroll_speed_;
+		speed *= 8.f;
 	}
+	
+	text_y_ -= speed;
 
 	if ( text_y_ < text_y_target_ )
 	{

@@ -247,7 +247,9 @@
     <ClInclude Include="WaveFile.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="blue-sky.config" />
+    <None Include="blue-sky.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="blue-sky.default.config" />
     <None Include="blye-sky.ico" />
     <None Include="media\object\building-a" />

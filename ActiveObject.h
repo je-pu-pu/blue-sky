@@ -56,6 +56,9 @@ private:
 	vector3		start_position_;			///< ゲーム開始時の座標
 	float		start_direction_degree_;	///< ゲーム開始時の方向
 
+	const GridCell*		floor_cell_;		///< 現在の足場
+	const GridCell*		last_floor_cell_;	///< 前回の足場に立っていた時の足場
+
 	bool		is_dead_;					///< 死亡フラグ
 
 protected:
@@ -68,7 +71,10 @@ protected:
 	virtual float get_collision_height() const;
 	virtual float get_collision_depth() const;
 	
-	const GridCell& get_floor_cell() const;
+	const GridCell& update_floor_cell();
+
+	const GridCell* floor_cell() const { return floor_cell_; }
+	const GridCell* last_floor_cell() const { return last_floor_cell_;  }
 
 	void limit_velocity();
 	void update_position();	

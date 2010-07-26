@@ -207,7 +207,15 @@ void Player::on_collision_x( const GridCell& floor_cell_x )
 		play_sound( "collision-wall", false, false );
 	}
 
-	velocity().x() *= 0.1f;
+	if ( is_rocketing() )
+	{
+		stop_rocket();
+		velocity().x() *= -0.8f;
+	}
+	else
+	{
+		velocity().x() *= 0.1f;
+	}
 }
 
 void Player::on_collision_y( const GridCell& floor_cell_y )
@@ -294,7 +302,15 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
 		play_sound( "collision-wall", false, false );
 	}
 
-	velocity().z() *= 0.1f;
+	if ( is_rocketing() )
+	{
+		stop_rocket();
+		velocity().z() *= -0.8f;
+	}
+	else
+	{
+		velocity().z() *= 0.1f;
+	}
 }
 
 /**
@@ -385,6 +401,11 @@ void Player::rocket( const vector3& direction )
 {
 	rocket_count_ = 120;
 	velocity() = direction * get_max_speed();
+}
+
+void Player::stop_rocket()
+{
+	rocket_count_ = 0;
 }
 
 void Player::on_get_balloon()

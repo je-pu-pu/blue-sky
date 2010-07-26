@@ -94,6 +94,8 @@ public:
 	void set_gravity( float g ) { gravity_ = g; }
 	
 	void rocket( const vector3& );
+	void stop_rocket();
+
 	void on_get_balloon();
 
 }; // class Player

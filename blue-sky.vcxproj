@@ -258,7 +258,9 @@
     <None Include="media\object\house-a" />
     <None Include="media\object\pole" />
     <None Include="media\object\road" />
+    <None Include="media\object\road-cross" />
     <None Include="media\object\road-curve" />
+    <None Include="media\object\road-t" />
     <None Include="media\object\step" />
     <None Include="media\object\tel-box" />
     <None Include="media\object\vending-machine" />

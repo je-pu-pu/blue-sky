@@ -47,7 +47,7 @@
 namespace blue_sky
 {
 
-float brightness = 0.f;
+float brightness = 1.f;
 bool clear_flag = false;
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
@@ -89,7 +89,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	goal_mesh_->load_x( "media/model/door" );
 
 	balloon_mesh_ = new Direct3D9Mesh( direct_3d() );
-	balloon_mesh_->load_x( "media/model/balloon" );
+	balloon_mesh_->load_x( "media/model/rocket" );
 
 	// SkyBox
 	// sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
@@ -192,6 +192,9 @@ GamePlayScene::~GamePlayScene()
 
 	grid_object_manager()->clear();
 	active_object_manager()->clear();
+
+	sound_manager()->stop_all();
+	sound_manager()->unload_all();
 }
 
 void GamePlayScene::generate_random_stage()
@@ -420,7 +423,7 @@ void GamePlayScene::save_stage_file( const char* file_name ) const
  */
 void GamePlayScene::update()
 {
-	if ( ! player_->is_dead() )
+	if ( ! player_->is_dead() && ! clear_flag )
 	{
 		bool step = false;
 
@@ -461,16 +464,19 @@ void GamePlayScene::update()
 		}
 	}
 
-	player_->add_direction_degree( input()->get_mouse_dx() * 90.f );
+	if ( ! clear_flag )
+	{
+		player_->add_direction_degree( input()->get_mouse_dx() * 90.f );
 
-	camera_->rotate_degree_target().y() = player_->get_direction_degree();
+		camera_->rotate_degree_target().y() = player_->get_direction_degree();
 
-	camera_->rotate_degree_target().x() += input()->get_mouse_dy() * 90.f;
-	camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
+		camera_->rotate_degree_target().x() += input()->get_mouse_dy() * 90.f;
+		camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
 
-	player_->update();
+		player_->update();
 
-	active_object_manager()->update();
+		active_object_manager()->update();
+	}
 
 	for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
 	{
@@ -514,11 +520,19 @@ void GamePlayScene::update()
 		sound_manager()->get_sound( "fin" )->play( false );
 	}
 
-	camera_->position() = player_->position() + vector3( 0.f, player_->get_eye_height(), 0.f );
-	// camera_->position() = player_->position() + player_->front() + vector3( 0.f, player_->get_eye_height(), 0.f );
-	
 	if ( clear_flag )
 	{
+		vector3 target_position = goal_->position();
+		target_position.z() -= 4.f - sound_manager()->get_sound( "fin" )->get_current_position() * 0.5f;
+
+		player_->position() = ( player_->position() * 0.95f + target_position * 0.05f );
+		player_->set_direction_degree( 0.f );
+
+		camera_->rotate_degree_target().x() = 0.f;
+		camera_->rotate_degree_target().y() = player_->get_direction_degree();
+		camera_->rotate_degree_target().z() = 0.f;
+		camera_->set_rotate_chase_speed( 0.02f );
+
 		brightness = math::chase( brightness, 1.f, 0.002f );
 
 		if ( sound_manager()->get_sound( "fin" )->get_current_position() >= 9.f )
@@ -536,8 +550,15 @@ void GamePlayScene::update()
 		{
 			camera_->rotate_degree().set( 0.f, 0.f, 0.f );
 			camera_->rotate_degree_target().set( 0.f, 0.f, 0.f );
+			camera_->reset_rotate_chase_speed();
 
 			player_->rebirth();
+
+			for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
+			{
+				ActiveObject* active_object = *i;
+				active_object->restart();
+			}
 
 			brightness = 1.f;
 		}
@@ -551,11 +572,11 @@ void GamePlayScene::update()
 		brightness = math::chase( brightness, 0.f, 0.02f );
 	}
 
-	
-
+	camera_->position() = player_->position() + vector3( 0.f, player_->get_eye_height(), 0.f );
 	camera_->update();
+	// camera_->position() = player_->position() + player_->front() + vector3( 0.f, player_->get_eye_height(), 0.f );
 
-	if ( player_->is_rocketing() )
+	if ( ! clear_flag && player_->is_rocketing() )
 	{
 		// camera_->set_fov( math::chase( camera_->fov(), 30.f, 0.2f ) );
 		camera_->position().x() += common::random( -0.01f, 0.01f );
@@ -840,7 +861,7 @@ bool GamePlayScene::render()
 
 	for ( int n = 0; n < 3; n++ )
 	{
-		const float offset = n * 50.f;
+		const float offset = n * 20.f;
 
 		win::Rect src_rect = win::Rect::Size( 0, 0, 202, 200 );
 		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
@@ -849,7 +870,7 @@ bool GamePlayScene::render()
 		transform = t;
 
 		direct_3d()->getSprite()->SetTransform( & transform );
-		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0x99FFFFFF );
 	}
 
 	for ( int n = 3; n < 6; n++ )
@@ -887,6 +908,8 @@ bool GamePlayScene::render()
 			common::serialize( input()->get_mouse_y_rate() ) + ")\n( " +
 			common::serialize( input()->get_mouse_dx() ) + ", " +
 			common::serialize( input()->get_mouse_dy() ) + ")";
+
+	debug_text += std::string( "\ncamera : " ) + common::serialize( camera_->rotate_degree_target().y() );
 
 	font_->draw_text( 0, 24, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
 

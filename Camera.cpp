@@ -10,6 +10,7 @@ Camera::Camera()
 	: default_front_( 0.f, 0.f, 1.f )
 	, default_up_( 0.f, 1.f, 0.f )
 	, fov_( 60.f )
+	, rotate_chase_speed_( 0.5f )
 {
 
 }
@@ -27,8 +28,8 @@ void Camera::update()
 	while ( rotate_degree_target().y() - rotate_degree().y() > +180.f ) rotate_degree().y() += 360.f;
 	while ( rotate_degree_target().y() - rotate_degree().y() < -180.f ) rotate_degree().y() -= 360.f;
 	
-	rotate_degree().x() += ( rotate_degree_target().x() - rotate_degree().x() ) * 0.5f;
-	rotate_degree().y() += ( rotate_degree_target().y() - rotate_degree().y() ) * 0.5f;
+	rotate_degree().x() += ( rotate_degree_target().x() - rotate_degree().x() ) * get_rotate_chase_speed();
+	rotate_degree().y() += ( rotate_degree_target().y() - rotate_degree().y() ) * get_rotate_chase_speed();
 	rotate_degree().z() = math::chase( rotate_degree().z(), rotate_degree_target().z(), 0.8f );
 
 	static float xxx = 0.f;

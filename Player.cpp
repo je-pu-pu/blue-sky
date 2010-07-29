@@ -27,6 +27,7 @@ Player::Player()
 	 , step_count_( 0 )
 	 , step_speed_( 0.05f )
 	 , gravity_( 0.01f )
+	 , super_jump_velocity_( 0.f )
 	 , eye_height_( 1.5f )
 	 , is_turn_avaiable_( true )
 	 , is_jumping_( false )
@@ -41,7 +42,7 @@ Player::Player()
 
 void Player::step( float s )
 {
-	if ( is_rocketing() )
+	if ( is_rocketing() || is_falling() )
 	{
 		return;
 	}
@@ -157,14 +158,28 @@ void Player::update()
 	}
 	else if ( ! is_rocketing() )
 	{
-		velocity().y() -= get_gravity();
+		if ( is_jumping() && ! input_->press( Input::A ) && velocity().y() > 0.f )
+		{
+			velocity().y() -= get_gravity() * 4.f;
+		}
+		else
+		{
+			velocity().y() -= get_gravity();
+		}
 	}
 
 	// 減速
 	if ( ! is_rocketing() )
 	{
-		velocity().x() *= 0.9f;
-		velocity().z() *= 0.9f;
+		if ( is_jumping() )
+		{
+
+		}
+		else
+		{
+			velocity().x() *= 0.9f;
+			velocity().z() *= 0.9f;
+		}
 
 		if ( velocity().y() < -get_max_speed() * 0.02f )
 		{
@@ -182,7 +197,6 @@ void Player::update()
 void Player::on_collision_x( const GridCell& floor_cell_x )
 {
 	if (
-		( ! is_jumping()  ) &&
 		( velocity().y() <= 0.02f && floor_cell_x.height() - position().y() <= 2.f ) &&
 		(
 			( velocity().x() < 0.f && direction() == LEFT || velocity().x() > 0.f && direction() == RIGHT ) ||
@@ -224,7 +238,9 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 	if ( is_jumping() && floor_cell_y.bound() > 0 )
 	{
 		// スーパージャンプ
-		velocity().y() = 1.f;
+		super_jump_velocity_ += 0.5f;
+
+		velocity().y() = super_jump_velocity_;
 	
 		is_jumping_ = true;
 
@@ -235,7 +251,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 
 		if ( is_falling_ )
 		{
-			speed = velocity_on_fall_.length_xz();
+			speed = 0.1f; // velocity_on_fall_.length_xz();
 		}
 		else
 		{
@@ -256,7 +272,8 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 		}
 
 		// 通常着地
-		velocity().y() *= -0.01f;
+		velocity().y() = -0.f;
+		super_jump_velocity_ = 0.f;
 
 		if ( is_jumping_ )
 		{
@@ -277,7 +294,6 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 void Player::on_collision_z( const GridCell& floor_cell_z )
 {
 	if (
-		( ! is_jumping()  ) &&
 		( velocity().y() <= 0.02f && floor_cell_z.height() - position().y() <= 2.f ) && 
 		(
 			( velocity().z() < 0.f && direction() == BACK || velocity().z() > 0.f && direction() == FRONT ) ||
@@ -319,9 +335,14 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
  */	
 void Player::jump()
 {
-	if ( is_jumping() ) return;
+	if ( is_jumping() )
+	{
+		fall();
+
+		return;
+	}
 	
-	velocity().y() = 0.3f;
+	velocity().y() = 0.8f;
 	
 	// velocity().x() += front_.x() * 0.4f;
 	// velocity().z() += front_.z() * 0.4f;
@@ -400,7 +421,7 @@ void Player::set_input( const Input* input )
 void Player::rocket( const vector3& direction )
 {
 	rocket_count_ = 120;
-	velocity() = direction * get_max_speed();
+	velocity() = direction * get_max_speed() * 0.5f;
 }
 
 void Player::stop_rocket()

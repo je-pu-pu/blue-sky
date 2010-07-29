@@ -32,6 +32,7 @@ void Enemy::update()
 			mode_ = MODE_CHASE;
 		}
 
+		set_direction_degree( static_cast< float >( static_cast< int >( get_direction_degree() ) / 90 * 90 ) );
 		velocity() += front() * 0.01f;
 	}
 	else if ( mode_ == MODE_CHASE )
@@ -40,17 +41,24 @@ void Enemy::update()
 		{
 			vector3 relative_position = player_->position() - position();
 
-			set_direction_degree( math::radian_to_degree( std::atan2( relative_position.x(), relative_position.z() ) ) );
-
-			front() = relative_position;
-			front().y() = 0.f;
-			
-			if ( front().length() > 1.f )
+			if ( relative_position.length() > 40.f )
 			{
-				front().normalize();
+				mode_ = MODE_FIND;
 			}
+			else
+			{
+				set_direction_degree( math::radian_to_degree( std::atan2( relative_position.x(), relative_position.z() ) ) );
 
-			counter_ = 0;
+				front() = relative_position;
+				front().y() = 0.f;
+			
+				if ( front().length() > 1.f )
+				{
+					front().normalize();
+				}
+
+				counter_ = 0;
+			}
 		}
 
 		velocity() += front() * 0.01f;

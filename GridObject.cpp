@@ -43,7 +43,7 @@ void GridObject::set_visible( bool visible )
 
 void GridObject::set_lod( int lod )
 {
-	if ( lod != lod_ )
+	if ( lod != lod_ && grid_data_->mesh( lod ) != grid_data_->mesh( lod_ ) )
 	{
 		last_lod_ = lod_;
 		lod_alpha_ = 0.f;

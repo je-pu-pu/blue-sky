@@ -19,6 +19,7 @@ void Balloon::update()
 	flicker_ += 0.02f;
 
 	position().y() = start_position().y() + std::sin( flicker_ );
+	set_direction_degree( get_direction_degree() + 1. );
 
 	update_global_aabb_list();
 }

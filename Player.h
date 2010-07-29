@@ -16,25 +16,26 @@ public:
 
 
 private:
-	const Input* input_;			///< 入力への参照
+	const Input* input_;				///< 入力への参照
 
 	int			step_count_;
-	float		step_speed_;		///< 移動速度
-	float		gravity_;			///< 重力
+	float		step_speed_;			///< 移動速度
+	float		gravity_;				///< 重力
+	float		super_jump_velocity_;	///< スーパージャンプ推進力
 
-	float		eye_height_;		///< 目の高さ
+	float		eye_height_;			///< 目の高さ
 
-	bool		is_turn_avaiable_;	///< 方向転換有効フラグ
-	bool		is_jumping_;		///< ジャンプ中フラグ
-	bool		is_clambering_;		///< よじ登り中フラグ
+	bool		is_turn_avaiable_;		///< 方向転換有効フラグ
+	bool		is_jumping_;			///< ジャンプ中フラグ
+	bool		is_clambering_;			///< よじ登り中フラグ
 
-	bool		is_falling_;		///< 落下中フラグ
-	vector3		velocity_on_fall_;	///< 落下開始時の移動量
+	bool		is_falling_;			///< 落下中フラグ
+	vector3		velocity_on_fall_;		///< 落下開始時の移動量
 	
-	bool		is_umbrella_mode_;	///< 落下傘モード
+	bool		is_umbrella_mode_;		///< 落下傘モード
 
-	int			up_count_;			///< 上昇カウンタ
-	int			rocket_count_;		///< ロケットカウンタ
+	int			up_count_;				///< 上昇カウンタ
+	int			rocket_count_;			///< ロケットカウンタ
 
 	void on_collision_x( const GridCell& );
 	void on_collision_y( const GridCell& );
@@ -44,7 +45,7 @@ private:
 	float get_collision_height() const;
 	float get_collision_depth() const;
 
-	float get_clambering_speed() const { return 0.01f; }
+	float get_clambering_speed() const { return 0.1f; }
 
 public:
 	Player();

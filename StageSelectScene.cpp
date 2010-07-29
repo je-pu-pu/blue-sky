@@ -101,8 +101,10 @@ void StageSelectScene::update()
  */
 bool StageSelectScene::render()
 {
+	D3DCOLOR bg_color = page_ < get_max_story_page() ? D3DCOLOR_XRGB( 0x11, 0xAA, 0xFF ) : D3DCOLOR_XRGB( 0x99, 0xEE, 0xFF );
+
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->BeginScene() );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0x11, 0xAA, 0xFF ), 1.f, 0 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, bg_color, 1.f, 0 ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->Begin( D3DXSPRITE_ALPHABLEND ) );
 
 	D3DXMATRIXA16 t, s, transform;

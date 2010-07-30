@@ -150,7 +150,7 @@ void Player::update()
 	// gravity
 	if ( up_count_ > 0 )
 	{
-		velocity().y() = math::chase( velocity().y(), 0.4f, 0.01f );
+		velocity().y() = math::chase( velocity().y(), 0.2f, 0.01f );
 	}
 	else if ( is_umbrella_mode_ )
 	{
@@ -272,7 +272,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 		}
 
 		// í èÌíÖín
-		velocity().y() = -0.f;
+		velocity().y() = 0.f;
 		super_jump_velocity_ = 0.f;
 
 		if ( is_jumping_ )
@@ -342,7 +342,7 @@ void Player::jump()
 		return;
 	}
 	
-	velocity().y() = 0.8f;
+	velocity().y() = 0.5f;
 	
 	// velocity().x() += front_.x() * 0.4f;
 	// velocity().z() += front_.z() * 0.4f;
@@ -432,6 +432,9 @@ void Player::stop_rocket()
 void Player::on_get_balloon()
 {
 	up_count_ += 120;
+	
+	is_jumping_ = false;
+	is_falling_ = false;
 
 	play_sound( "ok" );
 }

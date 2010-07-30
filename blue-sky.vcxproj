@@ -252,6 +252,8 @@
     </None>
     <None Include="blue-sky.default.config" />
     <None Include="blye-sky.ico" />
+    <None Include="media\object\building-100" />
+    <None Include="media\object\building-150" />
     <None Include="media\object\building-a" />
     <None Include="media\object\building-b" />
     <None Include="media\object\building-c" />
@@ -269,6 +271,7 @@
     <None Include="media\stage\0-2.stage" />
     <None Include="media\stage\0-3.stage" />
     <None Include="media\stage\0-4.stage" />
+    <None Include="media\stage\2-4.stage" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

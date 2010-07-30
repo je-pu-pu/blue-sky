@@ -80,7 +80,7 @@ void Enemy::update()
 		// play_sound( "vending-machine", true, false );
 	}
 
-	velocity().y() -= 0.005f;
+	velocity().y() -= 0.01f;
 
 	update_position();
 
@@ -114,6 +114,8 @@ void Enemy::on_collision_y( const GridCell& )
 			front().normalize();
 		}
 	}
+
+	velocity().y() = 0.f;
 }
 
 void Enemy::on_collision_z( const GridCell& )

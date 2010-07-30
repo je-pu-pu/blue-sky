@@ -89,7 +89,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	goal_mesh_->load_x( "media/model/door" );
 
 	balloon_mesh_ = new Direct3D9Mesh( direct_3d() );
-	balloon_mesh_->load_x( "media/model/rocket" );
+	balloon_mesh_->load_x( "media/model/balloon" );
 
 	// SkyBox
 	// sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
@@ -117,6 +117,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		sound_manager()->load( "dead" );
 
 		sound_manager()->load( "fin" );
+		sound_manager()->load( "door" );
 	}
 
 	// Player
@@ -395,6 +396,17 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			active_object_manager()->add_active_object( enemy );
 		}
+		else if ( name == "balloon" )
+		{
+			float x = 0, y = 0, z = 0, r = 0;
+			ss >> x >> y >> z >> r;
+
+			ActiveObject* active_object = new Balloon();
+			active_object->set_stage( stage_.get() );
+			active_object->start_position().set( x, y, z );
+			active_object->set_direction_degree( r );
+			active_object_manager()->add_active_object( active_object );
+		}
 	}
 }
 
@@ -531,9 +543,14 @@ void GamePlayScene::update()
 		camera_->rotate_degree_target().x() = 0.f;
 		camera_->rotate_degree_target().y() = player_->get_direction_degree();
 		camera_->rotate_degree_target().z() = 0.f;
-		camera_->set_rotate_chase_speed( 0.02f );
+		camera_->set_rotate_chase_speed( 0.1f );
 
 		brightness = math::chase( brightness, 1.f, 0.002f );
+
+		if ( sound_manager()->get_sound( "fin" )->get_current_position() >= 6.f && ! sound_manager()->get_sound( "door" )->is_playing() )
+		{
+			sound_manager()->get_sound( "door" )->play( false );
+		}
 
 		if ( sound_manager()->get_sound( "fin" )->get_current_position() >= 9.f )
 		{
@@ -855,11 +872,14 @@ bool GamePlayScene::render()
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );
 
 	// UI
+	if ( input()->press( Input::Y ) )
+	{
+
 	direct_3d()->getSprite()->Begin( D3DXSPRITE_ALPHABLEND );
 
 	D3DXMATRIXA16 t, transform;
 
-	for ( int n = 0; n < 3; n++ )
+	for ( int n = 0; n < 1; n++ )
 	{
 		const float offset = n * 20.f;
 
@@ -870,9 +890,10 @@ bool GamePlayScene::render()
 		transform = t;
 
 		direct_3d()->getSprite()->SetTransform( & transform );
-		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0x99FFFFFF );
+		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
 	}
 
+	/*
 	for ( int n = 3; n < 6; n++ )
 	{
 		const float offset = n * 50.f;
@@ -886,6 +907,7 @@ bool GamePlayScene::render()
 		direct_3d()->getSprite()->SetTransform( & transform );
 		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
 	}
+	*/
 
 	{
 		win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );
@@ -899,6 +921,9 @@ bool GamePlayScene::render()
 
 	direct_3d()->getSprite()->End();
 
+	}
+
+	/*
 	std::string debug_text = "player : (" + 
 			common::serialize( static_cast< int >( player_->position().x() ) ) + "," +
 			common::serialize( static_cast< int >( player_->position().y() ) ) + "," +
@@ -912,6 +937,7 @@ bool GamePlayScene::render()
 	debug_text += std::string( "\ncamera : " ) + common::serialize( camera_->rotate_degree_target().y() );
 
 	font_->draw_text( 0, 24, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
+	*/
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
 
@@ -934,11 +960,9 @@ void GamePlayScene::render_shadow( const ActiveObject* active_object, const D3DX
 	grid_cell_height_list.push_back( active_object->get_floor_cell_left_back().height() );
 	grid_cell_height_list.push_back( active_object->get_floor_cell_right_back().height() );
 
-	const float offset = 0.01f * static_cast< float >( reinterpret_cast< int >( active_object ) / 32 % 8 );
-
 	for ( std::list< float >::iterator i = grid_cell_height_list.begin(); i != grid_cell_height_list.end(); ++i )
 	{
-		D3DXMatrixTranslation( & t, active_object->position().x() , *i + 0.05f + offset, active_object->position().z() );
+		D3DXMatrixTranslation( & t, active_object->position().x() , *i + 0.1f, active_object->position().z() );
 
 		WorldViewProjection = r * t * after;
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );

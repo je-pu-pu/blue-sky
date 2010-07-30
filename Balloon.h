@@ -30,6 +30,8 @@ public:
 
 	/// XV
 	void update();
+
+	void restart();
 	
 }; // class Balloon
 

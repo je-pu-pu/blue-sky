@@ -10,9 +10,9 @@ Camera::Camera()
 	: default_front_( 0.f, 0.f, 1.f )
 	, default_up_( 0.f, 1.f, 0.f )
 	, fov_( 60.f )
-	, rotate_chase_speed_( 0.5f )
+	, rotate_chase_speed_( 0.f )
 {
-
+	reset_rotate_chase_speed();
 }
 
 Camera::~Camera()

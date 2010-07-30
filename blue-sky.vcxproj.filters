@@ -305,6 +305,15 @@
     <None Include="media\object\road-cross">
       <Filter>object</Filter>
     </None>
+    <None Include="media\object\building-100">
+      <Filter>object</Filter>
+    </None>
+    <None Include="media\object\building-150">
+      <Filter>object</Filter>
+    </None>
+    <None Include="media\stage\2-4.stage">
+      <Filter>stage</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

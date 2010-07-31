@@ -7,7 +7,7 @@ Balloon::Balloon()
 	: flicker_( 0 )
 {
 	local_aabb_list().clear();
-	local_aabb_list().push_back( AABB( vector3( -1, -1, -1 ), vector3( 1, 1, 1 ) ) );
+	local_aabb_list().push_back( AABB( vector3( -2, -2, -2 ), vector3( 2, 2, 2 ) ) );
 }
 
 /**

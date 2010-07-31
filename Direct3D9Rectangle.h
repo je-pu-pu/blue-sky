@@ -17,6 +17,7 @@ private:
 	LPDIRECT3DVERTEXDECLARATION9  vertex_declaration_;
 
 	LPDIRECT3DVERTEXBUFFER9 position_vertex_buffer_;
+	LPDIRECT3DVERTEXBUFFER9 color_vertex_buffer_;
 	LPDIRECT3DVERTEXBUFFER9 uv_vertex_buffer_;
 
 	LPDIRECT3DINDEXBUFFER9 index_buffer_;

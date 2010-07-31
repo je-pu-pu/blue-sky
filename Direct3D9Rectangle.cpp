@@ -10,7 +10,8 @@ Direct3D9Rectangle::Direct3D9Rectangle( Direct3D9* direct_3d )
 {
 	D3DVERTEXELEMENT9 vertex_element[] = {
 		{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
-		{ 1, 0, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+		{ 1, 0, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0 },
+		{ 2, 0, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
 		D3DDECL_END()
 	};
 
@@ -29,15 +30,31 @@ Direct3D9Rectangle::Direct3D9Rectangle( Direct3D9* direct_3d )
 
 	DIRECT_X_FAIL_CHECK( position_vertex_buffer_->Unlock() );
 
+
+	D3DCOLOR* color;
+
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateVertexBuffer( sizeof( D3DCOLOR ) * 4, 0, 0, D3DPOOL_MANAGED, & color_vertex_buffer_, 0 ) );
+	DIRECT_X_FAIL_CHECK( color_vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & color ), 0 ) );
+
+	color[ 0 ] = D3DCOLOR_XRGB( 0xFF, 0x00, 0x00 );
+	color[ 1 ] = D3DCOLOR_XRGB( 0x00, 0xFF, 0x00 );
+	color[ 2 ] = D3DCOLOR_XRGB( 0x00, 0x00, 0xFF );
+	color[ 3 ] = D3DCOLOR_XRGB( 0x00, 0x00, 0x00 );
+
+	FillMemory( color, sizeof( D3DCOLOR ) * 4, 0xFF );
+
+	DIRECT_X_FAIL_CHECK( color_vertex_buffer_->Unlock() );
+
+
 	D3DXVECTOR2* uv;
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateVertexBuffer( sizeof( D3DXVECTOR2 ) * 4, 0, 0, D3DPOOL_MANAGED, & uv_vertex_buffer_, 0 ) );
 	DIRECT_X_FAIL_CHECK( uv_vertex_buffer_->Lock( 0, 0, reinterpret_cast< void** >( & uv ), 0 ) );
 
-	uv[ 0 ] = D3DXVECTOR2( 0.f, 1.f );
-	uv[ 1 ] = D3DXVECTOR2( 1.f, 1.f );
-	uv[ 2 ] = D3DXVECTOR2( 0.f, 0.f );
-	uv[ 3 ] = D3DXVECTOR2( 1.f, 0.f );
+	uv[ 0 ] = D3DXVECTOR2( 0.f, 0.f );
+	uv[ 1 ] = D3DXVECTOR2( 1.f, 0.f );
+	uv[ 2 ] = D3DXVECTOR2( 0.f, 1.f );
+	uv[ 3 ] = D3DXVECTOR2( 1.f, 1.f );
 
 	DIRECT_X_FAIL_CHECK( uv_vertex_buffer_->Unlock() );
 
@@ -73,7 +90,8 @@ void Direct3D9Rectangle::ready()
 {
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetVertexDeclaration( vertex_declaration_ ) );
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetStreamSource( 0, position_vertex_buffer_, 0, sizeof( D3DXVECTOR3 ) ) );
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetStreamSource( 1, uv_vertex_buffer_, 0, sizeof( D3DXVECTOR2 ) ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetStreamSource( 1, color_vertex_buffer_, 0, sizeof( D3DCOLOR ) ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetStreamSource( 2, uv_vertex_buffer_, 0, sizeof( D3DXVECTOR2 ) ) );
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetIndices( index_buffer_ ) );
 
 	// DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE ) );

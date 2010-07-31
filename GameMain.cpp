@@ -251,7 +251,7 @@ void GameMain::render()
 		get_direct_3d()->getFont()->draw_text( 0, 0, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
 	}
 
-	HRESULT hr = get_direct_3d()->getDevice()->Present( NULL, NULL, NULL, NULL );
+	HRESULT hr = get_direct_3d()->getDevice()->Present( 0, 0, 0, 0 );
 
 	if ( hr == D3DERR_DEVICELOST )
 	{

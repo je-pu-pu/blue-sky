@@ -53,6 +53,8 @@ bool clear_flag = false;
 
 LPDIRECT3DTEXTURE9 back_buffer_texture_ = 0;
 LPDIRECT3DSURFACE9 back_buffer_surface_ = 0;
+LPDIRECT3DSURFACE9 depth_surface_ = 0;
+
 Direct3D9Rectangle* rectangle_ = 0;
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
@@ -61,8 +63,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, grid_object_visible_length_( 500 )
 	, grid_object_lod_0_length_( 100 )
 {
-	DIRECT_X_FAIL_CHECK( D3DXCreateTexture( direct_3d()->getDevice(), get_width(), get_height(), 1, D3DUSAGE_RENDERTARGET, direct_3d()->getPresentParameters().BackBufferFormat, D3DPOOL_DEFAULT, & back_buffer_texture_ ) );
-	back_buffer_texture_->GetSurfaceLevel( 0, & back_buffer_surface_ );
+	DIRECT_X_FAIL_CHECK( D3DXCreateTexture( direct_3d()->getDevice(), 512, 512, 1, D3DUSAGE_RENDERTARGET, direct_3d()->getPresentParameters().BackBufferFormat, D3DPOOL_DEFAULT, & back_buffer_texture_ ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->CreateDepthStencilSurface( 512, 512, direct_3d()->getPresentParameters().AutoDepthStencilFormat, D3DMULTISAMPLE_NONE, 0, TRUE, & depth_surface_, 0 ) );
 
 	rectangle_ = new Direct3D9Rectangle( direct_3d() );
 
@@ -624,14 +626,24 @@ void GamePlayScene::update()
  */
 bool GamePlayScene::render()
 {
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->BeginScene() );
 
 	LPDIRECT3DSURFACE9 default_back_buffer_surface = 0;
+	LPDIRECT3DSURFACE9 default_depth_surface = 0;
+	
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->GetRenderTarget( 0, & default_back_buffer_surface ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderTarget( 0, back_buffer_surface_ ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->GetDepthStencilSurface( & default_depth_surface ) );
 
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->BeginScene() );
+	DIRECT_X_FAIL_CHECK( back_buffer_texture_->GetSurfaceLevel( 0, & back_buffer_surface_ ) );
+
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderTarget( 0, back_buffer_surface_ ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetDepthStencilSurface( depth_surface_ ) );
+
+	// ビューポートの保存と変更
+	D3DVIEWPORT9 OldViewport;
+	direct_3d()->getDevice()->GetViewport( & OldViewport );
+	D3DVIEWPORT9 Viewport = {0,0, 512, 512, 0.0f, 1.0f};
+	direct_3d()->getDevice()->SetViewport( & Viewport );
 
 	D3DXHANDLE technique = direct_3d()->getEffect()->GetTechniqueByName( "technique_0" );
 	direct_3d()->getEffect()->SetTechnique( technique );
@@ -642,6 +654,9 @@ bool GamePlayScene::render()
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->Begin( & pass_count, 0 ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->BeginPass( 0 ) );
+	
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 
 	D3DXMATRIXA16 world;
 	D3DXMATRIXA16 view;
@@ -652,7 +667,7 @@ bool GamePlayScene::render()
 	a += 0.02f;
 
 	{
-		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xFF, 0xCC, 0xFF ), 1.f, 0 ) );
 		
 		D3DXMATRIXA16 r;
 		D3DXMATRIXA16 s;
@@ -697,10 +712,9 @@ bool GamePlayScene::render()
 			ground_mesh_->render();
 		}
 
-//		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, FALSE ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
-		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
+//		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
 		
 #if 1
 		// GridObject
@@ -875,36 +889,41 @@ bool GamePlayScene::render()
 		}
 
 		// Player ( Shadow )
-		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
+//		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
 
 		render_shadow( player_.get(), view * projection );
 
-		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
+//		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, FALSE ) );
 	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
 
 
 	// Eye Fish
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetViewport( & OldViewport ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderTarget( 0, default_back_buffer_surface ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetDepthStencilSurface( default_depth_surface ) );
+
 	DIRECT_X_FAIL_CHECK( default_back_buffer_surface->Release() );
+	DIRECT_X_FAIL_CHECK( default_depth_surface->Release() );
+	DIRECT_X_FAIL_CHECK( back_buffer_surface_->Release() );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->BeginPass( 1 ) );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
 	
-	D3DXVECTOR3 p( 0.f, 1.f, -1.f );
+	D3DXVECTOR3 p( 0.f, 2.f, -1.f );
 	D3DXVECTOR3 at( 0.f, 0.f, 0.f );
 	D3DXVECTOR3 up( 0.f, 1.f, 0.f );
 
-	D3DXMatrixLookAtLH( & view, & p, & at, & up );
-	D3DXMatrixPerspectiveFovLH( & projection, 30.f, 1.f, 0.1f, 100.f );
+	// D3DXMatrixLookAtLH( & view, & p, & at, & up );
+	// D3DXMatrixPerspectiveFovLH( & projection, 30.f, 1.f, 0.1f, 100.f );
 
-	D3DXMatrixTranslation( & world, 0.f, 0.f, 0.f );
+	D3DXMatrixTranslation( & world, player_->position().x(), player_->position().y(), player_->position().z() + 2.f );
 
 	WorldViewProjection = world * view * projection;
-
-	// D3DXMatrixIdentity( & WorldViewProjection );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
@@ -914,7 +933,6 @@ bool GamePlayScene::render()
 	rectangle_->render();
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
-
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );
 
@@ -970,7 +988,6 @@ bool GamePlayScene::render()
 
 	}
 
-	/*
 	std::string debug_text = "player : (" + 
 			common::serialize( static_cast< int >( player_->position().x() ) ) + "," +
 			common::serialize( static_cast< int >( player_->position().y() ) ) + "," +
@@ -984,7 +1001,6 @@ bool GamePlayScene::render()
 	debug_text += std::string( "\ncamera : " ) + common::serialize( camera_->rotate_degree_target().y() );
 
 	font_->draw_text( 0, 24, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
-	*/
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
 

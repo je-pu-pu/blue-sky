@@ -135,6 +135,9 @@
     <ClCompile Include="Stage.cpp">
       <Filter>GridObject</Filter>
     </ClCompile>
+    <ClCompile Include="Direct3D9Rectangle.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -250,6 +253,9 @@
     </ClInclude>
     <ClInclude Include="Stage.h">
       <Filter>GridObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D9Rectangle.h">
+      <Filter>DirectX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

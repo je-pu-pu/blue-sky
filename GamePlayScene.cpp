@@ -14,6 +14,7 @@
 #include "Direct3D9Mesh.h"
 #include "Direct3D9SkyBox.h"
 #include "Direct3D9Box.h"
+#include "Direct3D9Rectangle.h"
 #include "Direct3D9.h"
 #include "Direct3D9TextureManager.h"
 #include "DirectX.h"
@@ -50,12 +51,21 @@ namespace blue_sky
 float brightness = 1.f;
 bool clear_flag = false;
 
+LPDIRECT3DTEXTURE9 back_buffer_texture_ = 0;
+LPDIRECT3DSURFACE9 back_buffer_surface_ = 0;
+Direct3D9Rectangle* rectangle_ = 0;
+
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
 	, ui_texture_( 0 )
 	, grid_object_visible_length_( 500 )
 	, grid_object_lod_0_length_( 100 )
 {
+	DIRECT_X_FAIL_CHECK( D3DXCreateTexture( direct_3d()->getDevice(), get_width(), get_height(), 1, D3DUSAGE_RENDERTARGET, direct_3d()->getPresentParameters().BackBufferFormat, D3DPOOL_DEFAULT, & back_buffer_texture_ ) );
+	back_buffer_texture_->GetSurfaceLevel( 0, & back_buffer_surface_ );
+
+	rectangle_ = new Direct3D9Rectangle( direct_3d() );
+
 	ambient_color_[ 0 ] = 1.f;
 	ambient_color_[ 1 ] = 1.f;
 	ambient_color_[ 2 ] = 1.f;
@@ -163,10 +173,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 
 	direct_3d()->getEffect()->SetFloatArray( "ambient", ambient_color_, 4 );
-
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_LIGHTING, FALSE ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF ) );
 }
 
 GamePlayScene::~GamePlayScene()
@@ -196,6 +202,8 @@ GamePlayScene::~GamePlayScene()
 
 	sound_manager()->stop_all();
 	sound_manager()->unload_all();
+
+	delete rectangle_;
 }
 
 void GamePlayScene::generate_random_stage()
@@ -616,6 +624,13 @@ void GamePlayScene::update()
  */
 bool GamePlayScene::render()
 {
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
+
+	LPDIRECT3DSURFACE9 default_back_buffer_surface = 0;
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->GetRenderTarget( 0, & default_back_buffer_surface ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderTarget( 0, back_buffer_surface_ ) );
+
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->BeginScene() );
 
 	D3DXHANDLE technique = direct_3d()->getEffect()->GetTechniqueByName( "technique_0" );
@@ -624,7 +639,6 @@ bool GamePlayScene::render()
 	UINT pass_count = 0;
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloat( "brightness", brightness ) );
-
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->Begin( & pass_count, 0 ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->BeginPass( 0 ) );
@@ -869,6 +883,39 @@ bool GamePlayScene::render()
 	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
+
+
+	// Eye Fish
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderTarget( 0, default_back_buffer_surface ) );
+	DIRECT_X_FAIL_CHECK( default_back_buffer_surface->Release() );
+
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->BeginPass( 1 ) );
+
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
+	
+	D3DXVECTOR3 p( 0.f, 1.f, -1.f );
+	D3DXVECTOR3 at( 0.f, 0.f, 0.f );
+	D3DXVECTOR3 up( 0.f, 1.f, 0.f );
+
+	D3DXMatrixLookAtLH( & view, & p, & at, & up );
+	D3DXMatrixPerspectiveFovLH( & projection, 30.f, 1.f, 0.1f, 100.f );
+
+	D3DXMatrixTranslation( & world, 0.f, 0.f, 0.f );
+
+	WorldViewProjection = world * view * projection;
+
+	// D3DXMatrixIdentity( & WorldViewProjection );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetTexture( 0, back_buffer_texture_ ) );
+
+	rectangle_->ready();
+	rectangle_->render();
+
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
+
+
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );
 
 	// UI

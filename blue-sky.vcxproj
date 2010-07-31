@@ -156,6 +156,7 @@
     <ClCompile Include="Direct3D9Box.cpp" />
     <ClCompile Include="Direct3D9Font.cpp" />
     <ClCompile Include="Direct3D9Mesh.cpp" />
+    <ClCompile Include="Direct3D9Rectangle.cpp" />
     <ClCompile Include="Direct3D9Resource.cpp" />
     <ClCompile Include="Direct3D9SkyBox.cpp" />
     <ClCompile Include="Direct3D9TextureManager.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="Direct3D9Box.h" />
     <ClInclude Include="Direct3D9Font.h" />
     <ClInclude Include="Direct3D9Mesh.h" />
+    <ClInclude Include="Direct3D9Rectangle.h" />
     <ClInclude Include="Direct3D9Resource.h" />
     <ClInclude Include="Direct3D9SkyBox.h" />
     <ClInclude Include="Direct3D9TextureManager.h" />

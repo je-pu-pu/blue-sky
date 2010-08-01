@@ -144,7 +144,11 @@ void Player::update()
 	limit_velocity();
 	update_position();
 
-	up_count_ = math::chase( up_count_, 0, 1 );
+	if (  velocity().y() > 0.f )
+	{
+		up_count_ = math::chase( up_count_, 0, 1 );
+	}
+
 	rocket_count_ = math::chase( rocket_count_, 0, 1 );
 
 	// gravity

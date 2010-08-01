@@ -63,8 +63,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, grid_object_visible_length_( 500 )
 	, grid_object_lod_0_length_( 100 )
 {
-	DIRECT_X_FAIL_CHECK( D3DXCreateTexture( direct_3d()->getDevice(), 512, 512, 1, D3DUSAGE_RENDERTARGET, direct_3d()->getPresentParameters().BackBufferFormat, D3DPOOL_DEFAULT, & back_buffer_texture_ ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->CreateDepthStencilSurface( 512, 512, direct_3d()->getPresentParameters().AutoDepthStencilFormat, D3DMULTISAMPLE_NONE, 0, TRUE, & depth_surface_, 0 ) );
+	DIRECT_X_FAIL_CHECK( D3DXCreateTexture( direct_3d()->getDevice(), get_width(), get_height(), 1, D3DUSAGE_RENDERTARGET, direct_3d()->getPresentParameters().BackBufferFormat, D3DPOOL_DEFAULT, & back_buffer_texture_ ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->CreateDepthStencilSurface( get_width(), get_height(), direct_3d()->getPresentParameters().AutoDepthStencilFormat, D3DMULTISAMPLE_NONE, 0, TRUE, & depth_surface_, 0 ) );
 
 	rectangle_ = new Direct3D9Rectangle( direct_3d() );
 
@@ -639,12 +639,6 @@ bool GamePlayScene::render()
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderTarget( 0, back_buffer_surface_ ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetDepthStencilSurface( depth_surface_ ) );
 
-	// ビューポートの保存と変更
-	D3DVIEWPORT9 OldViewport;
-	direct_3d()->getDevice()->GetViewport( & OldViewport );
-	D3DVIEWPORT9 Viewport = {0,0, 512, 512, 0.0f, 1.0f};
-	direct_3d()->getDevice()->SetViewport( & Viewport );
-
 	D3DXHANDLE technique = direct_3d()->getEffect()->GetTechniqueByName( "technique_0" );
 	direct_3d()->getEffect()->SetTechnique( technique );
 
@@ -902,7 +896,6 @@ bool GamePlayScene::render()
 
 
 	// Eye Fish
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetViewport( & OldViewport ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderTarget( 0, default_back_buffer_surface ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetDepthStencilSurface( default_depth_surface ) );
 
@@ -911,19 +904,7 @@ bool GamePlayScene::render()
 	DIRECT_X_FAIL_CHECK( back_buffer_surface_->Release() );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->BeginPass( 1 ) );
-
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
-	
-	D3DXVECTOR3 p( 0.f, 2.f, -1.f );
-	D3DXVECTOR3 at( 0.f, 0.f, 0.f );
-	D3DXVECTOR3 up( 0.f, 1.f, 0.f );
-
-	// D3DXMatrixLookAtLH( & view, & p, & at, & up );
-	// D3DXMatrixPerspectiveFovLH( & projection, 30.f, 1.f, 0.1f, 100.f );
-
-	D3DXMatrixTranslation( & world, player_->position().x(), player_->position().y(), player_->position().z() + 2.f );
-
-	WorldViewProjection = world * view * projection;
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 

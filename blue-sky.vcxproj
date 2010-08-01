@@ -189,6 +189,7 @@
     <ClCompile Include="matrix4x4.cpp" />
     <ClCompile Include="OggVorbisFile.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Rocket.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="SoundManager.cpp" />
@@ -236,6 +237,7 @@
     <ClInclude Include="OggVorbisFile.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Rocket.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundManager.h" />

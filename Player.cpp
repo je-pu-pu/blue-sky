@@ -440,7 +440,12 @@ void Player::on_get_balloon()
 	is_jumping_ = false;
 	is_falling_ = false;
 
-	play_sound( "ok" );
+	play_sound( "balloon-get" );
+}
+
+void Player::on_get_rocket()
+{
+	play_sound( "rocket-get" );
 }
 
 float Player::get_collision_width() const

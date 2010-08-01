@@ -98,6 +98,7 @@ public:
 	void stop_rocket();
 
 	void on_get_balloon();
+	void on_get_rocket();
 
 }; // class Player
 

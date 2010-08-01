@@ -10,6 +10,7 @@ class Direct3D9Font;
 class Direct3D9Mesh;
 class Direct3D9SkyBox;
 class Direct3D9Box;
+class Direct3D9Rectangle;
 
 namespace blue_sky
 {
@@ -41,16 +42,32 @@ protected:
 	common::safe_ptr< Direct3D9Mesh > ground_mesh_;
 
 	common::safe_ptr< Direct3D9Mesh > balloon_mesh_;
+	common::safe_ptr< Direct3D9Mesh > rocket_mesh_;
 
 	common::safe_ptr< Direct3D9SkyBox > sky_box_;
 
 	common::safe_ptr< Direct3D9Box > box_;
+
+	common::safe_ptr< Direct3D9Rectangle > rectangle_;
+
+	LPDIRECT3DTEXTURE9 back_buffer_texture_;
+	LPDIRECT3DSURFACE9 back_buffer_surface_;
+	LPDIRECT3DSURFACE9 depth_surface_;
 
 	Texture* ui_texture_;
 
 	float ambient_color_[ 4 ];
 	float grid_object_visible_length_;
 	float grid_object_lod_0_length_;
+
+	enum LensType
+	{
+		LENS_TYPE_NORMAL = 0,
+		LENS_TYPE_FISH_EYE = 1,
+		LENS_TYPE_CRAZY
+	};
+
+	LensType lens_type_;
 
 	void generate_random_stage();
 

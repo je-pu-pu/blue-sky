@@ -7,6 +7,7 @@
 #include "Goal.h"
 #include "Enemy.h"
 #include "Balloon.h"
+#include "Rocket.h"
 #include "Camera.h"
 #include "Stage.h"
 
@@ -51,22 +52,20 @@ namespace blue_sky
 float brightness = 1.f;
 bool clear_flag = false;
 
-LPDIRECT3DTEXTURE9 back_buffer_texture_ = 0;
-LPDIRECT3DSURFACE9 back_buffer_surface_ = 0;
-LPDIRECT3DSURFACE9 depth_surface_ = 0;
-
-Direct3D9Rectangle* rectangle_ = 0;
+int rocket_count_ = 0;
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
+	, back_buffer_texture_( 0 )
+	, back_buffer_surface_( 0 )
+	, depth_surface_( 0 )
 	, ui_texture_( 0 )
 	, grid_object_visible_length_( 500 )
 	, grid_object_lod_0_length_( 100 )
+	, lens_type_( LENS_TYPE_NORMAL )
 {
-	DIRECT_X_FAIL_CHECK( D3DXCreateTexture( direct_3d()->getDevice(), get_width(), get_height(), 1, D3DUSAGE_RENDERTARGET, direct_3d()->getPresentParameters().BackBufferFormat, D3DPOOL_DEFAULT, & back_buffer_texture_ ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->CreateDepthStencilSurface( get_width(), get_height(), direct_3d()->getPresentParameters().AutoDepthStencilFormat, D3DMULTISAMPLE_NONE, 0, TRUE, & depth_surface_, 0 ) );
-
-	rectangle_ = new Direct3D9Rectangle( direct_3d() );
+	/// @todo xxx
+	rocket_count_ = 0;
 
 	ambient_color_[ 0 ] = 1.f;
 	ambient_color_[ 1 ] = 1.f;
@@ -103,6 +102,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	balloon_mesh_ = new Direct3D9Mesh( direct_3d() );
 	balloon_mesh_->load_x( "media/model/balloon" );
 
+	rocket_mesh_ = new Direct3D9Mesh( direct_3d() );
+	rocket_mesh_->load_x( "media/model/rocket" );
+
 	// SkyBox
 	// sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
 	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-star-2", "png" );
@@ -127,6 +129,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		sound_manager()->load( "land" );
 		sound_manager()->load( "short-breath" );
 		sound_manager()->load( "dead" );
+
+		sound_manager()->load( "balloon-get" );
+		sound_manager()->load( "rocket-get" );
 
 		sound_manager()->load( "fin" );
 		sound_manager()->load( "door" );
@@ -159,6 +164,14 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		load_stage_file( ( stage_dir_name + get_stage_name() + ".stage" ).c_str() );
 	}
 
+	if ( lens_type_ != LENS_TYPE_NORMAL )
+	{
+		DIRECT_X_FAIL_CHECK( D3DXCreateTexture( direct_3d()->getDevice(), get_width(), get_height(), 1, D3DUSAGE_RENDERTARGET, direct_3d()->getPresentParameters().BackBufferFormat, D3DPOOL_DEFAULT, & back_buffer_texture_ ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->CreateDepthStencilSurface( get_width(), get_height(), direct_3d()->getPresentParameters().AutoDepthStencilFormat, D3DMULTISAMPLE_NONE, 0, TRUE, & depth_surface_, 0 ) );
+
+		rectangle_ = new Direct3D9Rectangle( direct_3d() );
+	}
+
 	player_->restart();
 	goal_->restart();
 
@@ -188,7 +201,9 @@ GamePlayScene::~GamePlayScene()
 	enemy_mesh_.release();
 	shadow_mesh_.release();
 	ground_mesh_.release();
+	
 	balloon_mesh_.release();
+	rocket_mesh_.release();
 
 	stage_.release();
 	camera_.release();
@@ -198,14 +213,17 @@ GamePlayScene::~GamePlayScene()
 	sky_box_.release();
 
 	box_.release();
+	rectangle_.release();
+
+	DIRECT_X_RELEASE( depth_surface_ );
+	DIRECT_X_RELEASE( back_buffer_surface_ );
+	DIRECT_X_RELEASE( back_buffer_texture_ );
 
 	grid_object_manager()->clear();
 	active_object_manager()->clear();
 
 	sound_manager()->stop_all();
 	sound_manager()->unload_all();
-
-	delete rectangle_;
 }
 
 void GamePlayScene::generate_random_stage()
@@ -346,7 +364,21 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 		ss >> name;
 
-		if ( name == "bgm" )
+		if ( name == "lens" )
+		{
+			std::string name;
+			ss >> name;
+
+			if ( name == "fish-eye" )
+			{
+				lens_type_ = LENS_TYPE_FISH_EYE;
+			}
+			else if ( name == "crazy" )
+			{
+				lens_type_ = LENS_TYPE_CRAZY;
+			}
+		}
+		else if ( name == "bgm" )
 		{
 			std::string name;
 			ss >> name;
@@ -417,6 +449,17 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			active_object->set_direction_degree( r );
 			active_object_manager()->add_active_object( active_object );
 		}
+		else if ( name == "rocket" )
+		{
+			float x = 0, y = 0, z = 0, r = 0;
+			ss >> x >> y >> z >> r;
+
+			ActiveObject* active_object = new Rocket();
+			active_object->set_stage( stage_.get() );
+			active_object->start_position().set( x, y, z );
+			active_object->set_direction_degree( r );
+			active_object_manager()->add_active_object( active_object );
+		}
 	}
 }
 
@@ -472,12 +515,15 @@ void GamePlayScene::update()
 
 		if ( input()->push( Input::A ) )
 		{
-			player_->jump();
-		}
-
-		if ( input()->push( Input::X ) )
-		{
-			player_->rocket( camera_->front() );
+			if ( rocket_count_ > 0 )
+			{
+				player_->rocket( camera_->front() );
+				rocket_count_--;
+			}
+			else
+			{
+				player_->jump();
+			}
 		}
 
 		if ( input()->push( Input::Y ) )
@@ -519,6 +565,13 @@ void GamePlayScene::update()
 				player_->on_get_balloon();
 				active_object->kill();
 			}
+			else if ( dynamic_cast< Rocket* >( active_object ) )
+			{
+				player_->on_get_rocket();
+				active_object->kill();
+
+				rocket_count_++;
+			}
 			else
 			{
 				player_->kill();
@@ -533,12 +586,7 @@ void GamePlayScene::update()
 
 		clear_flag = true;
 
-		Sound* bgm = sound_manager()->get_sound( "bgm" );
-		if ( bgm )
-		{
-			bgm->stop();
-		}
-
+		sound_manager()->stop_all();
 		sound_manager()->get_sound( "fin" )->play( false );
 	}
 
@@ -631,13 +679,16 @@ bool GamePlayScene::render()
 	LPDIRECT3DSURFACE9 default_back_buffer_surface = 0;
 	LPDIRECT3DSURFACE9 default_depth_surface = 0;
 	
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->GetRenderTarget( 0, & default_back_buffer_surface ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->GetDepthStencilSurface( & default_depth_surface ) );
+	if ( lens_type_ != LENS_TYPE_NORMAL )
+	{
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->GetRenderTarget( 0, & default_back_buffer_surface ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->GetDepthStencilSurface( & default_depth_surface ) );
+		
+		DIRECT_X_FAIL_CHECK( back_buffer_texture_->GetSurfaceLevel( 0, & back_buffer_surface_ ) );
 
-	DIRECT_X_FAIL_CHECK( back_buffer_texture_->GetSurfaceLevel( 0, & back_buffer_surface_ ) );
-
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderTarget( 0, back_buffer_surface_ ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetDepthStencilSurface( depth_surface_ ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderTarget( 0, back_buffer_surface_ ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetDepthStencilSurface( depth_surface_ ) );
+	}
 
 	D3DXHANDLE technique = direct_3d()->getEffect()->GetTechniqueByName( "technique_0" );
 	direct_3d()->getEffect()->SetTechnique( technique );
@@ -863,6 +914,10 @@ bool GamePlayScene::render()
 			{
 				enemy_mesh_->render();
 			}
+			else if ( dynamic_cast< Rocket* >( active_object ) )
+			{
+				rocket_mesh_->render();
+			}
 			else
 			{
 				balloon_mesh_->render();
@@ -883,60 +938,75 @@ bool GamePlayScene::render()
 		}
 
 		// Player ( Shadow )
-//		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
-
 		render_shadow( player_.get(), view * projection );
 
-//		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
 
+		// cleanup
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, FALSE ) );
 	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
 
 
-	// Eye Fish
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderTarget( 0, default_back_buffer_surface ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetDepthStencilSurface( default_depth_surface ) );
+	// Lens Effect
+	if ( lens_type_ != LENS_TYPE_NORMAL )
+	{
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderTarget( 0, default_back_buffer_surface ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetDepthStencilSurface( default_depth_surface ) );
+		
+		DIRECT_X_RELEASE( default_back_buffer_surface );
+		DIRECT_X_RELEASE( default_depth_surface );
+		DIRECT_X_RELEASE( back_buffer_surface_ );
 
-	DIRECT_X_FAIL_CHECK( default_back_buffer_surface->Release() );
-	DIRECT_X_FAIL_CHECK( default_depth_surface->Release() );
-	DIRECT_X_FAIL_CHECK( back_buffer_surface_->Release() );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->BeginPass( static_cast< int >( lens_type_ ) ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
 
-	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->BeginPass( 1 ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+		static float ratio_a = 0.f;
+		ratio_a += math::degree_to_radian( 1.f );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloat( "ratio", ( std::sin( ratio_a ) + 1.f ) * 0.5f ) );
 
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetTexture( 0, back_buffer_texture_ ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
-	rectangle_->ready();
-	rectangle_->render();
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetTexture( 0, back_buffer_texture_ ) );
 
-	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
+		rectangle_->ready();
+		rectangle_->render();
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
+	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );
 
 	// UI
-	if ( input()->press( Input::Y ) )
-	{
-
 	direct_3d()->getSprite()->Begin( D3DXSPRITE_ALPHABLEND );
 
-	D3DXMATRIXA16 t, transform;
-
-	for ( int n = 0; n < 1; n++ )
+	if ( rocket_count_ > 0 )
 	{
-		const float offset = n * 20.f;
+		D3DXMATRIXA16 t, transform;
 
-		win::Rect src_rect = win::Rect::Size( 0, 0, 202, 200 );
-		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
+		for ( int n = 0; n < rocket_count_; n++ )
+		{
+			const float offset = n * 20.f;
 
-		D3DXMatrixTranslation( & t, get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f - offset, 0.f );
-		transform = t;
+			win::Rect src_rect = win::Rect::Size( 0, 0, 202, 200 );
+			D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
+
+			D3DXMatrixTranslation( & t, get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f - offset, 0.f );
+			transform = t;
+
+			direct_3d()->getSprite()->SetTransform( & transform );
+			direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+		}
+
+		// aim
+		win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );
+		D3DXVECTOR3 center( 34.f, 38.f, 0.f );
+
+		D3DXMatrixTranslation( & transform, get_width() * 0.5f, get_height() * 0.5f, 0.f );
 
 		direct_3d()->getSprite()->SetTransform( & transform );
-		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0x99FFFFFF );
 	}
 
 	/*
@@ -955,19 +1025,7 @@ bool GamePlayScene::render()
 	}
 	*/
 
-	{
-		win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );
-		D3DXVECTOR3 center( 34.f, 38.f, 0.f );
-
-		D3DXMatrixTranslation( & transform, get_width() * 0.5f, get_height() * 0.5f, 0.f );
-
-		direct_3d()->getSprite()->SetTransform( & transform );
-		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0x99FFFFFF );
-	}
-
 	direct_3d()->getSprite()->End();
-
-	}
 
 	std::string debug_text = "player : (" + 
 			common::serialize( static_cast< int >( player_->position().x() ) ) + "," +

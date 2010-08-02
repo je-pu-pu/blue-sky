@@ -187,7 +187,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		bgm->play( true );
 	}
 
-	direct_3d()->getEffect()->SetFloatArray( "ambient", ambient_color_, 4 );
+	direct_3d()->getEffect()->SetFloatArray( "ambient_color", ambient_color_, 4 );
 }
 
 GamePlayScene::~GamePlayScene()
@@ -526,6 +526,10 @@ void GamePlayScene::update()
 			}
 		}
 
+		if ( input()->push( Input::X ) )
+		{
+			player_->rocket( camera_->front() );
+		}
 		if ( input()->push( Input::Y ) )
 		{
 			player_->start_umbrella_mode();
@@ -718,7 +722,15 @@ bool GamePlayScene::render()
 		D3DXMATRIXA16 s;
 		D3DXMATRIXA16 t;
 		
+		/*
+		camera_->set_fov( 60.f );
+		vector3 at = camera_->position();
+		at.z() += 1.f;
+		*/
+
 		D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->look_at() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->up() ) );
+		// D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & goal_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->up() ) );
+		// D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & at) ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->up() ) );
 		D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() );
 		
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
@@ -764,6 +776,14 @@ bool GamePlayScene::render()
 #if 1
 		// GridObject
 		D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );
+
+		float colors[][ 4 ] = {
+			{ 1.f, 0.95f, 0.95f, 1.f },
+			{ 0.95f, 1.f, 0.95f, 1.f },
+			{ 0.95f, 0.95f, 1.f, 1.f },
+		};
+
+		int color_index = 0;
 
 		for ( GridObjectManager::GridObjectList::iterator i = grid_object_manager()->grid_object_list().begin(); i != grid_object_manager()->grid_object_list().end(); ++i )
 		{
@@ -812,7 +832,7 @@ bool GamePlayScene::render()
 				DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
 
 				ambient_color_[ 3 ] = 1.f;
-				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient", ambient_color_, 4 ) );
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient_color", ambient_color_, 4 ) );
 				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 				grid_object->render_last_lod();
@@ -820,24 +840,27 @@ bool GamePlayScene::render()
 				DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 
 				ambient_color_[ 3 ] = grid_object->lod_alpha();
-				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient", ambient_color_, 4 ) );
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient_color", ambient_color_, 4 ) );
 				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 				grid_object->render();
 			}
 			else
 			{
-				ambient_color_[ 3 ] = grid_object->visible_alpha();
-				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient", ambient_color_, 4 ) );
+				// ambient_color_[ 3 ] = grid_object->visible_alpha();
+				// DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient_color", ambient_color_, 4 ) );
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient_color", colors[ color_index ], 4 ) );
 				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 				grid_object->render();
 			}
+
+			color_index = ( color_index + 1 ) % 3;
 		}
 #endif // 0
 
 		ambient_color_[ 3 ] = 1.f;
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient", ambient_color_, 4 ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient_color", ambient_color_, 4 ) );
 
 		/*
 		// Box
@@ -902,26 +925,47 @@ bool GamePlayScene::render()
 				continue;
 			}
 
+			Direct3D9Mesh* mesh = 0;
+
+			if ( dynamic_cast< Enemy* >( active_object ) )
+			{
+				mesh = enemy_mesh_.get();
+			}
+			else if ( dynamic_cast< Rocket* >( active_object ) )
+			{
+				mesh = rocket_mesh_.get();
+			}
+			else
+			{
+				mesh = balloon_mesh_.get();
+			}
+
+			D3DXMatrixScaling( & s, 1.1f, 1.1f, 1.1f );
 			D3DXMatrixRotationY( & r, math::degree_to_radian( active_object->get_direction_degree() ) );
 			D3DXMatrixTranslation( & t, active_object->position().x(), active_object->position().y() + 0.05f, active_object->position().z() );
+
+			float white[] = { 0.f, 0.f, 0.f, 1.f };
+			float none[] = { 1.f, 1.f, 1.f, 1.f };
+
+			world = s * r * t;
+			WorldViewProjection = world * view * projection;
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "object_color", white, 4 ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+
+			DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
+
+			mesh->render();
+
+			DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 
 			world = r * t;
 			WorldViewProjection = world * view * projection;
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "object_color", none, 4 ) );
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
-			if ( dynamic_cast< Enemy* >( active_object ) )
-			{
-				enemy_mesh_->render();
-			}
-			else if ( dynamic_cast< Rocket* >( active_object ) )
-			{
-				rocket_mesh_->render();
-			}
-			else
-			{
-				balloon_mesh_->render();
-			}
+			mesh->render();
 		}
 
 		// ActiveObject ( Shadow )
@@ -962,9 +1006,14 @@ bool GamePlayScene::render()
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
 
-		static float ratio_a = 0.f;
-		ratio_a += math::degree_to_radian( 1.f );
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloat( "ratio", ( std::sin( ratio_a ) + 1.f ) * 0.5f ) );
+		static float x_ratio_a = 0.f;
+		// static float y_ratio_a = 0.f;
+
+		x_ratio_a += math::degree_to_radian( 1.f );
+		// y_ratio_a += math::degree_to_radian( 0.9f );
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloat( "ratio", ( std::sin( x_ratio_a ) + 1.f ) * 0.5f ) );
+		// DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloat( "y_ratio", ( std::sin( y_ratio_a ) + 1.f ) * 0.5f ) );
 
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 

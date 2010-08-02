@@ -22,6 +22,8 @@ private:
 	
 	std::string		next_scene_name_;
 
+	Texture*		bg_texture_;
+
 	void load_story_text_file( const char* );
 
 public:

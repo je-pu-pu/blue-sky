@@ -92,21 +92,12 @@ LPDIRECT3DTEXTURE9 Direct3D9Mesh::load_texture( const char* texture_name ) const
 		return 0;
 	}
 
-	try
-	{
-		std::string texture_file_name = get_texture_file_name_by_texture_name( texture_name );
+	std::string texture_file_name = get_texture_file_name_by_texture_name( texture_name );
 
-		std::vector< std::string > name_list;
-		boost::algorithm::split( name_list, texture_file_name, boost::algorithm::is_any_of( std::string( "\\/" ) ) );
+	std::vector< std::string > name_list;
+	boost::algorithm::split( name_list, texture_file_name, boost::algorithm::is_any_of( std::string( "\\/" ) ) );
 
-		return direct_3d_->getTextureManager()->load( name_list[ name_list.size() - 1 ].c_str(), get_texture_file_name_by_texture_name( texture_name ).c_str() );
-	}
-	catch ( ... )
-	{
-
-	}
-
-	return 0;
+	return direct_3d_->getTextureManager()->load( name_list[ name_list.size() - 1 ].c_str(), get_texture_file_name_by_texture_name( texture_name ).c_str() );
 }
 
 std::string Direct3D9Mesh::get_texture_file_name_by_texture_name( const char* texture_name ) const

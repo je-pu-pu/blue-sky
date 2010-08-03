@@ -80,9 +80,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// Texture
 	ui_texture_ = direct_3d()->getTextureManager()->load( "ui", "media/image/item.png" );
 
-	// Font
-	font_ = new Direct3D9Font( direct_3d() );
-
 	// Mesh
 	player_mesh_ = new Direct3D9Mesh( direct_3d() );
 	player_mesh_->load_x( "media/model/player" );
@@ -193,8 +190,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 GamePlayScene::~GamePlayScene()
 {
 	// save_stage_file( "media/stage/quit" );
-
-	font_.release();
 
 	player_mesh_.release();
 	goal_mesh_.release();
@@ -1074,7 +1069,7 @@ bool GamePlayScene::render()
 
 	debug_text += std::string( "\ncamera : " ) + common::serialize( camera_->rotate_degree_target().y() );
 
-	font_->draw_text( 0, 24, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
+	direct_3d()->getFont()->draw_text( 0, 24, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
 

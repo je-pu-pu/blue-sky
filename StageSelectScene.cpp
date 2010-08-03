@@ -38,6 +38,11 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	circle_src_rect_list_.push_back( win::Rect::Size( 576, 512, 144, 114 ) );
 	circle_src_rect_list_.push_back( win::Rect::Size( 768, 512, 146, 120 ) );
 
+	face_src_rect_list_.push_back( win::Rect::Size( 576, 384, 64, 64 ) );
+	face_src_rect_list_.push_back( win::Rect::Size( 640, 384, 64, 64 ) );
+	face_src_rect_list_.push_back( win::Rect::Size( 704, 384, 64, 64 ) );
+	face_src_rect_list_.push_back( win::Rect::Size( 768, 384, 64, 64 ) );
+
 	sprite_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
 
 	ok_ = sound_manager()->load( "ok" );
@@ -112,9 +117,10 @@ bool StageSelectScene::render()
 	// Stage
 	int n = 0;
 
-	std::vector< win::Rect >::const_iterator j = circle_src_rect_list_.begin();
+	RectList::const_iterator j = circle_src_rect_list_.begin();
+	RectList::const_iterator k = face_src_rect_list_.begin();
 
-	for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i, ++j )
+	for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i, ++j, ++k )
 	{
 		Stage* stage = *i;
 
@@ -177,6 +183,18 @@ bool StageSelectScene::render()
 
 			direct_3d()->getSprite()->SetTransform( & transform );
 			direct_3d()->getSprite()->Draw( sprite_texture_, & j->get_rect(), & circle_center, 0, 0x99FFFFFF );
+		}
+
+		// Face
+		if ( stage->completed )
+		{
+			D3DXVECTOR3 face_center( k->width() * 0.5f, k->height() * 0.5f, 0.f );
+
+			D3DXMatrixTranslation( & t, dx + ( dst_rect.width() - j->width() ) * 0.5f - offset, dy + ( dst_rect.height() - j->height() ) * 0.5f + offset, 0.f );
+			transform = t;
+
+			direct_3d()->getSprite()->SetTransform( & transform );
+			direct_3d()->getSprite()->Draw( sprite_texture_, & k->get_rect(), & face_center, 0, 0x99FFFFFF );
 		}
 
 		n++;
@@ -312,6 +330,7 @@ void StageSelectScene::update_stage_list()
 		stage->name.resize( stage->name.find_first_of( "." ) );
 		stage->rect = get_stage_dst_rect( stage, n );
 		stage->cleared = save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + stage->name ).c_str(), 0 ) != 0;
+		stage->completed = save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + stage->name ).c_str(), 0 ) == 2;
 
 		try
 		{
@@ -333,8 +352,7 @@ void StageSelectScene::update_stage_list()
 	}
 
 	std::random_shuffle( circle_src_rect_list_.begin(), circle_src_rect_list_.end() );
-
-	// std::swap( circle_src_rect_list_[ common::random( 0, 3 ) ]. circle_src_rect_list_[ common::random( 0, 3 ) ] );
+	std::random_shuffle( face_src_rect_list_.begin(), face_src_rect_list_.end() );
 }
 
 std::string StageSelectScene::get_stage_dir_name_by_page( int page )

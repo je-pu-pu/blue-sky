@@ -23,9 +23,11 @@ public:
 		Texture* texture;
 		win::Rect rect;
 		bool cleared;
+		bool completed;
 	};
 
 	typedef std::list< Stage* > StageList;
+	typedef std::vector< win::Rect > RectList;
 
 	static std::string get_stage_dir_name_by_page( int );
 	static std::string get_stage_prefix_by_page( int );
@@ -45,7 +47,9 @@ private:
 	win::Rect left_allow_src_rect_;
 	win::Rect right_allow_src_rect_;
 	win::Rect stage_src_rect_;
-	std::vector< win::Rect > circle_src_rect_list_;
+
+	RectList circle_src_rect_list_;
+	RectList face_src_rect_list_;
 
 	int get_max_stage_per_page() const { return 4; }
 	int get_margin() const { return 5; }

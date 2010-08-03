@@ -34,7 +34,6 @@ protected:
 	common::safe_ptr< Camera > camera_;
 	common::safe_ptr< Stage > stage_;
 
-	common::safe_ptr< Direct3D9Font > font_;
 	common::safe_ptr< Direct3D9Mesh > player_mesh_;
 	common::safe_ptr< Direct3D9Mesh > goal_mesh_;
 	common::safe_ptr< Direct3D9Mesh > enemy_mesh_;

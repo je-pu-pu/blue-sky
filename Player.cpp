@@ -51,9 +51,7 @@ void Player::step( float s )
 
 	update_step_speed();
 
-	vector3 v = front() * s * get_step_speed();
-	velocity().x() = v.x();
-	velocity().z() = v.z();
+	velocity() += front() * s * get_step_speed();
 }
 
 void Player::side_step( float s )
@@ -75,33 +73,31 @@ void Player::stop()
 
 void Player::update_step_speed()
 {
-	step_speed_ = 0.1f;
-	return;
-
-	if ( is_jumping() )
+	if ( is_jumping() || action_mode_ == ACTION_MODE_BALLOON )
 	{
-		step_speed_ = math::chase( step_speed_, 0.1f, 0.001f );
+		step_speed_ = 0.01f; // math::chase( step_speed_, 0.1f, 0.001f );
+		return;
 	}
-
+	
 	if ( step_count_ <= 0 )
 	{
 		// stop
 		step_speed_ = 0.f;
 	}
-	else if ( step_count_ <= 20 )
+	else if ( step_count_ <= 60 )
 	{
 		// slow walk
-		step_speed_ = math::chase( step_speed_, 0.01f, 0.001f );
+		step_speed_ = math::chase( step_speed_, 0.001f, 0.001f );
 	}
-	else if ( step_count_ <= 240 )
+	else if ( step_count_ <= 180 )
 	{
 		// slow walk
-		step_speed_ = math::chase( step_speed_, 0.05f, 0.001f );
+		step_speed_ = math::chase( step_speed_, 0.005f, 0.001f );
 	}
 	else
 	{
 		// run
-		step_speed_ = math::chase( step_speed_, 0.1f, 0.001f );
+		step_speed_ = math::chase( step_speed_, 0.01f, 0.001f );
 	}
 
 	if ( is_jumping() || is_rocketing() || is_clambering() )
@@ -176,12 +172,10 @@ void Player::update()
 		// ’Êí
 		if ( is_jumping() && ! input_->press( Input::A ) && velocity().y() > 0.f )
 		{
-			velocity().y() -= get_gravity() * 5.f;
+			velocity().y() *= 0.9f;
 		}
-		else
-		{
-			velocity().y() -= get_gravity();
-		}
+
+		velocity().y() -= get_gravity();
 	}
 
 	// Œ¸‘¬
@@ -189,7 +183,8 @@ void Player::update()
 	{
 		if ( is_jumping() )
 		{
-
+			velocity().x() *= 0.91f;
+			velocity().z() *= 0.91f;
 		}
 		else
 		{
@@ -299,7 +294,10 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 			is_jumping_ = false;
 		}
 
-		action_mode_ = ACTION_MODE_NONE;
+		if ( action_mode_ == ACTION_MODE_UMBRELLA )
+		{
+			action_mode_ = ACTION_MODE_NONE;
+		}
 	}
 
 	is_turn_avaiable_ = true;

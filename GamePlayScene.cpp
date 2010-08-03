@@ -55,8 +55,6 @@ namespace blue_sky
 float brightness = 1.f;
 bool clear_flag = false;
 
-int rocket_count_ = 0;
-
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
 	, back_buffer_texture_( 0 )
@@ -67,9 +65,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, grid_object_lod_0_length_( 100 )
 	, lens_type_( LENS_TYPE_NORMAL )
 {
-	/// @todo xxx
-	rocket_count_ = 0;
-
 	ambient_color_[ 0 ] = 1.f;
 	ambient_color_[ 1 ] = 1.f;
 	ambient_color_[ 2 ] = 1.f;
@@ -205,7 +200,12 @@ GamePlayScene::~GamePlayScene()
 	DIRECT_X_RELEASE( back_buffer_texture_ );
 
 	grid_object_manager()->clear();
+	grid_data_manager()->clear();
+
 	active_object_manager()->clear();
+
+	direct_3d()->getMeshManager()->unload_all();
+	direct_3d()->getTextureManager()->unload_all();
 
 	sound_manager()->stop_all();
 	sound_manager()->unload_all();
@@ -508,10 +508,9 @@ void GamePlayScene::update()
 
 		if ( input()->push( Input::A ) )
 		{
-			if ( rocket_count_ > 0 )
+			if ( player_->get_rocket_count() > 0 )
 			{
 				player_->rocket( camera_->front() );
-				rocket_count_--;
 			}
 			else
 			{
@@ -566,8 +565,6 @@ void GamePlayScene::update()
 			{
 				player_->on_get_rocket();
 				active_object->kill();
-
-				rocket_count_++;
 			}
 			else
 			{
@@ -1000,11 +997,11 @@ bool GamePlayScene::render()
 	// UI
 	direct_3d()->getSprite()->Begin( D3DXSPRITE_ALPHABLEND );
 
-	if ( rocket_count_ > 0 )
+	if ( player_->get_rocket_count() > 0 )
 	{
 		D3DXMATRIXA16 t, transform;
 
-		for ( int n = 0; n < rocket_count_; n++ )
+		for ( int n = 0; n < player_->get_rocket_count(); n++ )
 		{
 			const float offset = n * 20.f;
 

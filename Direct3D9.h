@@ -1,11 +1,13 @@
 #ifndef DIRECT_3D_9_H
 #define DIRECT_3D_9_H
 
+#include <common/safe_ptr.h>
 #include <d3dx9.h>
 #include <list>
 
 class Direct3D9Resource;
 class Direct3D9Font;
+class Direct3D9MeshManager;
 class Direct3D9TextureManager;
 
 /**
@@ -22,10 +24,13 @@ private:
 	LPDIRECT3DDEVICE9		device_;		///< Direct3D 9 Device
 	LPD3DXEFFECT			effect_;		///< Effect
 	LPD3DXSPRITE			sprite_;		///< Sprite
-	Direct3D9Font*			font_;			///< Font
 
-	ResourceList			resource_list_;	///< Resource List
-	Direct3D9TextureManager*texture_manager_;
+	common::safe_ptr< Direct3D9Font>			font_;			///< Font
+
+	ResourceList								resource_list_;	///< Resource List
+
+	common::safe_ptr< Direct3D9MeshManager >	mesh_manager_;
+	common::safe_ptr< Direct3D9TextureManager >	texture_manager_;
 
 	D3DPRESENT_PARAMETERS	present_;		///< Present Parameters
 	D3DCAPS9				device_caps_;	///< Device Caps
@@ -54,9 +59,13 @@ public:
 
 	LPD3DXEFFECT getEffect() const { return effect_; }
 	LPD3DXSPRITE getSprite() const { return sprite_; }
-	Direct3D9Font* getFont() const { return font_; }
+	const Direct3D9Font* getFont() const { return font_.get(); }
 
-	Direct3D9TextureManager* getTextureManager() const { return texture_manager_; }
+	Direct3D9MeshManager* getMeshManager() { return mesh_manager_.get(); }
+	Direct3D9TextureManager* getTextureManager() { return texture_manager_.get(); }
+
+	const Direct3D9MeshManager* getMeshManager() const { return mesh_manager_.get(); }
+	const Direct3D9TextureManager* getTextureManager() const { return texture_manager_.get(); }
 
 	void add_resource( Direct3D9Resource* r ) { resource_list_.push_back( r ); }
 	void remove_resource( Direct3D9Resource* r ) { resource_list_.remove( r ); }

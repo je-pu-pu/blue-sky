@@ -141,6 +141,9 @@
     <ClCompile Include="Rocket.cpp">
       <Filter>ActiveObject</Filter>
     </ClCompile>
+    <ClCompile Include="Direct3D9MeshManager.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -262,6 +265,9 @@
     </ClInclude>
     <ClInclude Include="Rocket.h">
       <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D9MeshManager.h">
+      <Filter>DirectX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,6 @@
 #include "Direct3D9.h"
 #include "Direct3D9Font.h"
+#include "Direct3D9MeshManager.h"
 #include "Direct3D9TextureManager.h"
 #include "DirectX.h"
 
@@ -12,20 +13,17 @@
 #pragma comment( lib, "d3d9.lib" )
 
 #ifdef _DEBUG
+#define PREF_HUD
 #pragma comment( lib, "d3dx9d.lib" )
 #else
 #pragma comment( lib, "d3dx9.lib" )
 #endif
-
-#define PREF_HUD
 
 Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, const char* adapter_format, const char* depth_stencil_format, int multi_sample_type, int multi_sample_quality )
 	: direct_3d_( 0 )
 	, device_( 0 )
 	, effect_( 0 )
 	, sprite_( 0 )
-	, font_( 0 )
-	, texture_manager_( 0 )
 {
 	common::log( "log/d3d.log", "", false );
 
@@ -180,14 +178,19 @@ Direct3D9::Direct3D9( HWND hwnd, int w, int h, bool full_screen, const char* ada
 	// Font
 	font_ = new Direct3D9Font( this );
 
+	// Mesh Manager
+	mesh_manager_ = new Direct3D9MeshManager( this );
+
 	// Texture Manager
 	texture_manager_ = new Direct3D9TextureManager( this );
 }
 
 Direct3D9::~Direct3D9()
 {
-	if ( texture_manager_ ) delete texture_manager_;
-	if ( font_ ) delete font_;
+	mesh_manager_.release();
+	texture_manager_.release();
+	
+	font_.release();
 
 	if ( sprite_ ) sprite_->Release();
 	if ( effect_ ) effect_->Release();

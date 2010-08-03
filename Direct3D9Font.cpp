@@ -25,19 +25,19 @@ Direct3D9Font::~Direct3D9Font()
 	}
 }
 
-void Direct3D9Font::draw_text( int x, int y, const char* text, D3DCOLOR color )
+void Direct3D9Font::draw_text( int x, int y, const char* text, D3DCOLOR color ) const
 {
 	RECT rect = { x, y, direct_3d()->getPresentParameters().BackBufferWidth, direct_3d()->getPresentParameters().BackBufferHeight };
 	font_->DrawText( 0, text, -1, & rect, DT_LEFT | DT_NOCLIP, color );
 }
 
-void Direct3D9Font::draw_text_center( int x, int y, const char* text, D3DCOLOR color )
+void Direct3D9Font::draw_text_center( int x, int y, const char* text, D3DCOLOR color ) const
 {
 	RECT rect = { x, y, direct_3d()->getPresentParameters().BackBufferWidth, direct_3d()->getPresentParameters().BackBufferHeight };
 	font_->DrawText( 0, text, -1, & rect, DT_CENTER | DT_NOCLIP, color );
 }
 
-int Direct3D9Font::get_text_height( const char* text )
+int Direct3D9Font::get_text_height( const char* text ) const
 {
 	RECT rect = { 0, 0, direct_3d()->getPresentParameters().BackBufferWidth, direct_3d()->getPresentParameters().BackBufferHeight };
 	return font_->DrawText( 0, text, -1, & rect, DT_CALCRECT, 0 );

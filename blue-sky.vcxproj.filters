@@ -144,6 +144,12 @@
     <ClCompile Include="Direct3D9MeshManager.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
+    <ClCompile Include="Umbrella.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Medal.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -268,6 +274,12 @@
     </ClInclude>
     <ClInclude Include="Direct3D9MeshManager.h">
       <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Medal.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Umbrella.h">
+      <Filter>ActiveObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

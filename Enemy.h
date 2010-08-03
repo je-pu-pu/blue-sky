@@ -30,6 +30,7 @@ private:
 
 protected:
 	float get_collision_width() const { return 0.4f; }
+	float get_collision_height() const { return 1.5f; }
 	float get_collision_depth() const  { return 0.4f; }
 
 	void on_collision_x( const GridCell& );

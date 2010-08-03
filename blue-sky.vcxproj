@@ -188,6 +188,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="matrix4x4.cpp" />
+    <ClCompile Include="Medal.cpp" />
     <ClCompile Include="OggVorbisFile.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Rocket.cpp" />
@@ -199,6 +200,7 @@
     <ClCompile Include="StoryTextScene.cpp" />
     <ClCompile Include="StreamingSound.cpp" />
     <ClCompile Include="TitleScene.cpp" />
+    <ClCompile Include="Umbrella.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="vector3.cpp" />
     <ClCompile Include="WaveFile.cpp" />
@@ -236,6 +238,7 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="matrix4x4.h" />
+    <ClInclude Include="Medal.h" />
     <ClInclude Include="OggVorbisFile.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="resource.h" />
@@ -248,6 +251,7 @@
     <ClInclude Include="StoryTextScene.h" />
     <ClInclude Include="StreamingSound.h" />
     <ClInclude Include="TitleScene.h" />
+    <ClInclude Include="Umbrella.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="vector3.h" />
     <ClInclude Include="WaveFile.h" />

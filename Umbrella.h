@@ -1,5 +1,5 @@
-#ifndef BLUE_SKY_GOAL_H
-#define BLUE_SKY_GOAL_H
+#ifndef BLUE_SKY_UMBRELLA_H
+#define BLUE_SKY_UMBRELLA_H
 
 #include "ActiveObject.h"
 
@@ -7,32 +7,34 @@ namespace blue_sky
 {
 
 /**
- * ÉSÅ[ÉãÇÃî‡
+ * éP
  *
  */
-class Goal : public ActiveObject
+class Umbrella : public ActiveObject
 {
 public:
-
+	float flicker_;
 
 private:
 	void on_collision_x( const GridCell& ) { }
 	void on_collision_y( const GridCell& ) { }
 	void on_collision_z( const GridCell& ) { }
 
-	float get_collision_width() const { return 4.f; }
+	float get_collision_width() const { return 2.f; }
 	float get_collision_height() const { return 2.f; }
-	float get_collision_depth() const { return 4.f; }
+	float get_collision_depth() const { return 2.f; }
 
 public:
-	Goal();
-	~Goal() { }
+	Umbrella();
+	~Umbrella() { }
 
 	/// çXêV
 	void update();
+
+	void restart();
 	
-}; // class Goal
+}; // class Umbrella
 
 } // namespace blue_sky
 
-#endif // BLUE_SKY_GOAL_H
+#endif // BLUE_SKY_UMBRELLA_H

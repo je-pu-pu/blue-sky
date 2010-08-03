@@ -71,10 +71,13 @@ protected:
 	AABBList& local_aabb_list() { return local_aabb_list_; }
 
 	float get_max_speed() const { return 1.f; }
+	
 	virtual float get_collision_width() const;
 	virtual float get_collision_height() const;
 	virtual float get_collision_depth() const;
-	
+
+	virtual void setup_local_aabb_list();
+
 	const GridCell& update_floor_cell();
 
 	const GridCell* floor_cell() const { return floor_cell_; }

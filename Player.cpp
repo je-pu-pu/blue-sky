@@ -38,7 +38,7 @@ Player::Player()
 
 	 , action_mode_( ACTION_MODE_NONE )
 {
-
+	setup_local_aabb_list();
 }
 
 void Player::step( float s )
@@ -376,6 +376,7 @@ void Player::jump()
 	velocity().y() = 0.5f;
 	
 	is_jumping_ = true;
+	action_mode_ = ACTION_MODE_NONE;
 
 	play_sound( "jump" );
 }

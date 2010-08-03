@@ -11,7 +11,7 @@ Enemy::Enemy()
 	, mode_( MODE_FIND )
 	, counter_( 0 )
 {
-
+	setup_local_aabb_list();
 }
 
 void Enemy::update()

@@ -8,8 +8,8 @@
 #include "Enemy.h"
 #include "Balloon.h"
 #include "Rocket.h"
-// #include "Umbrella.h"
-// #include "Medal.h"
+#include "Umbrella.h"
+#include "Medal.h"
 #include "Camera.h"
 #include "Stage.h"
 

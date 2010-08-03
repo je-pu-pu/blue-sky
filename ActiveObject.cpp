@@ -28,11 +28,6 @@ ActiveObject::ActiveObject()
 	 , last_floor_cell_( 0 )
 	 , is_dead_( false )
 {
-	vector3 min( -get_collision_width() * 0.5f, 0.f, -get_collision_depth() * 0.5f );
-	vector3 max( get_collision_width() * 0.5f, get_collision_height(), get_collision_depth() * 0.5f );
-
-	local_aabb_list_.push_back( AABB( min, max ) );
-
 	set_direction_degree( 0.f );
 }
 
@@ -49,6 +44,15 @@ float ActiveObject::get_collision_height() const
 float ActiveObject::get_collision_depth() const
 {
 	return 0.4f;
+}
+
+void ActiveObject::setup_local_aabb_list()
+{
+	vector3 min( -get_collision_width() * 0.5f, 0.f, -get_collision_depth() * 0.5f );
+	vector3 max( get_collision_width() * 0.5f, get_collision_height(), get_collision_depth() * 0.5f );
+
+	local_aabb_list_.clear();
+	local_aabb_list_.push_back( AABB( min, max ) );
 }
 
 void ActiveObject::set_direction_degree( float d )
@@ -204,6 +208,7 @@ void ActiveObject::restart()
 	position() = start_position();
 	set_direction_degree( start_direction_degree_ );
 
+	setup_local_aabb_list();
 	update_global_aabb_list();
 }
 

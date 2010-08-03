@@ -80,16 +80,16 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Mesh
 	player_mesh_ = new Direct3D9Mesh( direct_3d() );
-	player_mesh_->load_x( "media/model/player" );
+	player_mesh_->load_x( "media/model/player.x" );
 
 	shadow_mesh_ = new Direct3D9Mesh( direct_3d() );
-	shadow_mesh_->load_x( "media/model/shadow" );
+	shadow_mesh_->load_x( "media/model/shadow.x" );
 
 	ground_mesh_ = new Direct3D9Mesh( direct_3d() );
-	ground_mesh_->load_x( "media/model/ground" );
+	ground_mesh_->load_x( "media/model/ground.x" );
 
 	goal_mesh_ = new Direct3D9Mesh( direct_3d() );
-	goal_mesh_->load_x( "media/model/door" );
+	goal_mesh_->load_x( "media/model/goal.x" );
 
 	// SkyBox
 	// sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
@@ -304,6 +304,7 @@ void GamePlayScene::generate_random_stage()
 	goal_->start_position().z() += 10.f;
 
 	Enemy* enemy = new Enemy();
+	enemy->set_mesh( direct_3d()->getMeshManager()->load( "enemy", "media/model/enemy-a.x" ) );
 	enemy->set_stage( stage_.get() );
 	enemy->set_player( player_.get() );
 	enemy->position().set( player_->start_position().x(), 300.f, player_->start_position().z() + common::random( 0, 100 ) );
@@ -314,6 +315,7 @@ void GamePlayScene::generate_random_stage()
 	for ( int n = 0; n < 30; n++ )
 	{
 		Balloon* balloon = new Balloon();
+		balloon->set_mesh( direct_3d()->getMeshManager()->load( "balloon", "media/model/balloon.x" ) );
 		balloon->set_stage( stage_.get() );
 		balloon->position() = player_->start_position();
 		balloon->position().x() += common::random( -50.f, +50.f );
@@ -348,6 +350,8 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		ss << line;
 
 		ss >> name;
+
+		ActiveObject* active_object = 0;
 
 		if ( name == "lens" )
 		{
@@ -412,37 +416,33 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( name == "enemy" )
 		{
-			float x = 0, y = 0, z = 0, r = 0;
-			ss >> x >> y >> z >> r;
-
-			Enemy* active_object = new Enemy();
-			active_object->set_mesh( direct_3d()->getMeshManager()->load( "enemy", "media/model/enemy-a" ) );
-			active_object->set_stage( stage_.get() );
-			active_object->set_player( player_.get() );
-			active_object->start_position().set( x, y, z );
-			active_object->set_direction_degree( r );
-
-			active_object_manager()->add_active_object( active_object );
+			Enemy* enemy = new Enemy();
+			enemy->set_player( player_.get() );
+			active_object = enemy;
 		}
 		else if ( name == "balloon" )
 		{
-			float x = 0, y = 0, z = 0, r = 0;
-			ss >> x >> y >> z >> r;
-
-			ActiveObject* active_object = new Balloon();
-			active_object->set_mesh( direct_3d()->getMeshManager()->load( "balloon", "media/model/balloon" ) );
-			active_object->set_stage( stage_.get() );
-			active_object->start_position().set( x, y, z );
-			active_object->set_direction_degree( r );
-			active_object_manager()->add_active_object( active_object );
+			active_object = new Balloon();
 		}
 		else if ( name == "rocket" )
+		{
+			active_object = new Rocket();
+		}
+		else if ( name == "umbrella" )
+		{
+			active_object = new Umbrella();
+		}
+		else if ( name == "medal" )
+		{
+			active_object = new Medal();
+		}
+
+		if ( active_object )
 		{
 			float x = 0, y = 0, z = 0, r = 0;
 			ss >> x >> y >> z >> r;
 
-			ActiveObject* active_object = new Rocket();
-			active_object->set_mesh( direct_3d()->getMeshManager()->load( "rocket", "media/model/rocket" ) );
+			active_object->set_mesh( direct_3d()->getMeshManager()->load( name.c_str(), ( std::string( "media/model/" ) + name + ".x" ).c_str() ) );
 			active_object->set_stage( stage_.get() );
 			active_object->start_position().set( x, y, z );
 			active_object->set_direction_degree( r );
@@ -564,6 +564,16 @@ void GamePlayScene::update()
 			else if ( dynamic_cast< Rocket* >( active_object ) )
 			{
 				player_->on_get_rocket();
+				active_object->kill();
+			}
+			else if ( dynamic_cast< Umbrella* >( active_object ) )
+			{
+				player_->on_get_umbrella();
+				active_object->kill();
+			}
+			else if ( dynamic_cast< Medal* >( active_object ) )
+			{
+				player_->on_get_medal();
 				active_object->kill();
 			}
 			else
@@ -973,15 +983,29 @@ bool GamePlayScene::render()
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xCC, 0xCC, 0xFF ), 1.f, 0 ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
 
-		static float x_ratio_a = 0.f;
-		// static float y_ratio_a = 0.f;
+		static float lens_ratio = 0.f;
 
-		x_ratio_a += math::degree_to_radian( 1.f );
-		// y_ratio_a += math::degree_to_radian( 0.9f );
+		{
+			if ( player_->is_falling_to_dead() )
+			{
+				lens_ratio = math::chase( lens_ratio, 1.f, 0.02f );
+			}
+			else
+			{
+				lens_ratio = math::chase( lens_ratio, 0.f, 0.02f );
+			}
+		}
+		
+		if ( 0 )
+		{
+			static float lens_ratio_a = 0.f;
 
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloat( "ratio", ( std::sin( x_ratio_a ) + 1.f ) * 0.5f ) );
-		// DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloat( "y_ratio", ( std::sin( y_ratio_a ) + 1.f ) * 0.5f ) );
+			lens_ratio_a += math::degree_to_radian( 1.f );
 
+			lens_ratio = ( std::sin( lens_ratio_a ) + 1.f ) * 0.5f;
+		}
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloat( "lens_ratio", lens_ratio ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetTexture( 0, back_buffer_texture_ ) );

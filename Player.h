@@ -112,6 +112,7 @@ public:
 
 	void on_get_balloon();
 	void on_get_rocket();
+	void on_get_umbrella();
 	void on_get_medal();
 
 	bool has_medal() const { return has_medal_; }

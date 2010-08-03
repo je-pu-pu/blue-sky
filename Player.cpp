@@ -488,6 +488,11 @@ void Player::on_get_rocket()
 	play_sound( "rocket-get" );
 }
 
+void Player::on_get_umbrella()
+{
+	play_sound( "umbrella-get" );
+}
+
 void Player::on_get_medal()
 {
 	has_medal_ = true;

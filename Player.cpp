@@ -33,9 +33,9 @@ Player::Player()
 	 , is_jumping_( false )
 	 , is_clambering_( false )
 	 , is_falling_( false )
-	 , is_umbrella_mode_( false )
-	 , up_count_( 0 )
 	 , rocket_count_( 0 )
+
+	 , action_mode_( ACTION_MODE_NONE )
 {
 
 }
@@ -75,6 +75,9 @@ void Player::stop()
 
 void Player::update_step_speed()
 {
+	step_speed_ = 0.1f;
+	return;
+
 	if ( is_jumping() )
 	{
 		step_speed_ = math::chase( step_speed_, 0.1f, 0.001f );
@@ -144,27 +147,36 @@ void Player::update()
 	limit_velocity();
 	update_position();
 
-	if (  velocity().y() > 0.f )
+	// 重力
+	if ( action_mode_ == ACTION_MODE_BALLOON )
 	{
-		up_count_ = math::chase( up_count_, 0, 1 );
-	}
+		// 風船
+		velocity().y() = math::chase( velocity().y(), 0.1f, 0.02f );
 
-	rocket_count_ = math::chase( rocket_count_, 0, 1 );
-
-	// gravity
-	if ( up_count_ > 0 )
-	{
-		velocity().y() = math::chase( velocity().y(), 0.2f, 0.01f );
+		if ( position().y() - action_base_position_.y() >= get_balloon_action_length() )
+		{
+			action_mode_ = ACTION_MODE_NONE;
+		}
 	}
-	else if ( is_umbrella_mode_ )
+	else if ( action_mode_ == ACTION_MODE_ROCKET )
 	{
+		// ロケット
+		if ( ( position() - action_base_position_ ).length() >= get_rocket_action_length() )
+		{
+			action_mode_ = ACTION_MODE_NONE;
+		}
+	}
+	else if ( action_mode_ == ACTION_MODE_UMBRELLA )
+	{
+		// ふんわり落下
 		velocity().y() = math::chase( velocity().y(), -0.1f, 0.02f );
 	}
-	else if ( ! is_rocketing() )
+	else
 	{
+		// 通常
 		if ( is_jumping() && ! input_->press( Input::A ) && velocity().y() > 0.f )
 		{
-			velocity().y() -= get_gravity() * 4.f;
+			velocity().y() -= get_gravity() * 5.f;
 		}
 		else
 		{
@@ -287,7 +299,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 			is_jumping_ = false;
 		}
 
-		is_umbrella_mode_ = false;
+		action_mode_ = ACTION_MODE_NONE;
 	}
 
 	is_turn_avaiable_ = true;
@@ -348,11 +360,7 @@ void Player::jump()
 	
 	velocity().y() = 0.5f;
 	
-	// velocity().x() += front_.x() * 0.4f;
-	// velocity().z() += front_.z() * 0.4f;
-	
 	is_jumping_ = true;
-	rocket_count_ = 0;
 
 	play_sound( "jump" );
 }
@@ -379,7 +387,7 @@ void Player::fall()
  */
 void Player::start_umbrella_mode()
 {
-	is_umbrella_mode_ = true;
+	action_mode_ = ACTION_MODE_UMBRELLA;
 }
 
 /**
@@ -388,7 +396,7 @@ void Player::start_umbrella_mode()
  */
 bool Player::is_falling_to_dead() const
 {
-	if ( is_umbrella_mode_ ) return false;
+	if ( action_mode_ == ACTION_MODE_UMBRELLA ) return false;
 
 	if ( ! last_floor_cell() ) return false;
 	if ( ! floor_cell() ) return false;
@@ -410,7 +418,9 @@ void Player::kill()
 void Player::rebirth()
 {
 	eye_height_ = 1.5f;
-	up_count_ = 0;
+	
+	action_mode_ = ACTION_MODE_NONE;
+	rocket_count_ = 0;
 
 	velocity().init();
 
@@ -424,27 +434,40 @@ void Player::set_input( const Input* input )
 
 void Player::rocket( const vector3& direction )
 {
-	rocket_count_ = 120;
+	if ( rocket_count_ <= 0 )
+	{
+		return;
+	}
+
+	is_jumping_ = false;
+	is_falling_ = false;
+
+	action_mode_ = ACTION_MODE_ROCKET;
 	velocity() = direction * get_max_speed() * 0.5f;
+	action_base_position_ = position();
+
+	rocket_count_--;
 }
 
 void Player::stop_rocket()
 {
-	rocket_count_ = 0;
+	action_mode_ = ACTION_MODE_NONE;
 }
 
 void Player::on_get_balloon()
 {
-	up_count_ += 120;
-	
 	is_jumping_ = false;
 	is_falling_ = false;
+
+	action_mode_ = ACTION_MODE_BALLOON;
+	action_base_position_ = position();
 
 	play_sound( "balloon-get" );
 }
 
 void Player::on_get_rocket()
 {
+	rocket_count_++;
 	play_sound( "rocket-get" );
 }
 

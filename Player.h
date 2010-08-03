@@ -13,7 +13,13 @@ namespace blue_sky
 class Player : public ActiveObject
 {
 public:
-
+	enum ActionMode
+	{
+		ACTION_MODE_NONE = 0,
+		ACTION_MODE_BALLOON,
+		ACTION_MODE_ROCKET,
+		ACTION_MODE_UMBRELLA
+	};
 
 private:
 	const Input* input_;				///< 入力への参照
@@ -31,11 +37,11 @@ private:
 
 	bool		is_falling_;			///< 落下中フラグ
 	vector3		velocity_on_fall_;		///< 落下開始時の移動量
-	
-	bool		is_umbrella_mode_;		///< 落下傘モード
 
-	int			up_count_;				///< 上昇カウンタ
-	int			rocket_count_;			///< ロケットカウンタ
+	int			rocket_count_;			///< 持っているロケット花火の数
+
+	ActionMode	action_mode_;			///< 現在のアクションのモード
+	vector3		action_base_position_;	///< 現在のアクションの基底位置
 
 	void on_collision_x( const GridCell& );
 	void on_collision_y( const GridCell& );
@@ -46,6 +52,9 @@ private:
 	float get_collision_depth() const;
 
 	float get_clambering_speed() const { return 0.1f; }
+
+	float get_balloon_action_length() const { return 10.f; }
+	float get_rocket_action_length() const { return 60.f; }
 
 public:
 	Player();
@@ -79,7 +88,7 @@ public:
 	bool is_jumping() const { return is_jumping_; }
 
 	bool is_clambering() const { return is_clambering_; }
-	bool is_rocketing() const { return rocket_count_ > 0; }
+	bool is_rocketing() const { return action_mode_ == ACTION_MODE_ROCKET; }
 
 	/// 落下処理
 	void fall();
@@ -96,6 +105,8 @@ public:
 	
 	void rocket( const vector3& );
 	void stop_rocket();
+
+	int get_rocket_count() const { return rocket_count_; }
 
 	void on_get_balloon();
 	void on_get_rocket();

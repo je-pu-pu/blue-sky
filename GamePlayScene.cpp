@@ -497,6 +497,11 @@ void GamePlayScene::update()
 			player_->step( +1 );
 			step = true;
 		}
+		if ( input()->press( Input::DOWN ) )
+		{
+			player_->step( -1 );
+			step = true;
+		}
 		if ( input()->press( Input::LEFT ) )
 		{
 			player_->side_step( -1 );
@@ -900,7 +905,6 @@ bool GamePlayScene::render()
 		goal_mesh_->render();
 
 		// Player
-		/*
 		vector3 pos = player_->position();
 		pos += -camera_->front() * 0.1f;
 
@@ -913,7 +917,6 @@ bool GamePlayScene::render()
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 		player_mesh_->render();
-		*/
 
 		// ActiveObject
 		for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
@@ -940,29 +943,12 @@ bool GamePlayScene::render()
 				mesh = balloon_mesh_.get();
 			}
 
-			D3DXMatrixScaling( & s, 1.1f, 1.1f, 1.1f );
 			D3DXMatrixRotationY( & r, math::degree_to_radian( active_object->get_direction_degree() ) );
 			D3DXMatrixTranslation( & t, active_object->position().x(), active_object->position().y() + 0.05f, active_object->position().z() );
-
-			float white[] = { 0.f, 0.f, 0.f, 1.f };
-			float none[] = { 1.f, 1.f, 1.f, 1.f };
-
-			world = s * r * t;
-			WorldViewProjection = world * view * projection;
-			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
-			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "object_color", white, 4 ) );
-			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
-
-			DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
-
-			mesh->render();
-
-			DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 
 			world = r * t;
 			WorldViewProjection = world * view * projection;
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
-			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "object_color", none, 4 ) );
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 			mesh->render();

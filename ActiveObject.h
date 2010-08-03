@@ -5,6 +5,8 @@
 #include <game/AABB.h>
 #include <list>
 
+class Direct3D9Mesh;
+
 namespace game
 {
 
@@ -60,6 +62,8 @@ private:
 	const GridCell*		last_floor_cell_;	///< ‘O‰ñ‚Ì‘«ê‚É—§‚Á‚Ä‚¢‚½Žž‚Ì‘«ê
 
 	bool		is_dead_;					///< Ž€–Sƒtƒ‰ƒO
+
+	const Direct3D9Mesh* mesh_;				///< Mesh
 
 protected:
 	const Stage* stage() const { return stage_; }
@@ -135,6 +139,9 @@ public:
 	const GridCell& get_floor_cell_right_back() const;
 	
 	bool is_dead() const { return is_dead_; }
+
+	void set_mesh( const Direct3D9Mesh* m ) { mesh_ = m; }
+	const Direct3D9Mesh* get_mesh() const { return mesh_; }
 
 }; // class ActiveObject
 

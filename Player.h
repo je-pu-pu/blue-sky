@@ -43,6 +43,8 @@ private:
 	ActionMode	action_mode_;			///< 現在のアクションのモード
 	vector3		action_base_position_;	///< 現在のアクションの基底位置
 
+	bool		has_medal_;				///< メダル保持フラグ
+
 	void on_collision_x( const GridCell& );
 	void on_collision_y( const GridCell& );
 	void on_collision_z( const GridCell& );
@@ -110,6 +112,9 @@ public:
 
 	void on_get_balloon();
 	void on_get_rocket();
+	void on_get_medal();
+
+	bool has_medal() const { return has_medal_; }
 
 }; // class Player
 

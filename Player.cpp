@@ -34,6 +34,7 @@ Player::Player()
 	 , is_clambering_( false )
 	 , is_falling_( false )
 	 , rocket_count_( 0 )
+	 , has_medal_( false )
 
 	 , action_mode_( ACTION_MODE_NONE )
 {
@@ -76,6 +77,10 @@ void Player::update_step_speed()
 	if ( is_jumping() || action_mode_ == ACTION_MODE_BALLOON )
 	{
 		step_speed_ = 0.01f; // math::chase( step_speed_, 0.1f, 0.001f );
+
+		stop_sound( "walk" );
+		stop_sound( "run" );
+
 		return;
 	}
 	
@@ -152,6 +157,7 @@ void Player::update()
 		if ( position().y() - action_base_position_.y() >= get_balloon_action_length() )
 		{
 			action_mode_ = ACTION_MODE_NONE;
+			is_jumping_ = true;
 		}
 	}
 	else if ( action_mode_ == ACTION_MODE_ROCKET )
@@ -160,6 +166,7 @@ void Player::update()
 		if ( ( position() - action_base_position_ ).length() >= get_rocket_action_length() )
 		{
 			action_mode_ = ACTION_MODE_NONE;
+			is_jumping_ = true;
 		}
 	}
 	else if ( action_mode_ == ACTION_MODE_UMBRELLA )
@@ -283,9 +290,18 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 		}
 
 		// í èÌíÖín
+		if ( velocity().y() < -0.01f )
+		{
+			stop_sound( "jump" );
+			play_sound( "land" );
+
+			is_jumping_ = false;
+		}
+
 		velocity().y() = 0.f;
 		super_jump_velocity_ = 0.f;
 
+		/*
 		if ( is_jumping_ )
 		{
 			stop_sound( "jump" );
@@ -293,6 +309,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 
 			is_jumping_ = false;
 		}
+		*/
 
 		if ( action_mode_ == ACTION_MODE_UMBRELLA )
 		{
@@ -419,6 +436,7 @@ void Player::rebirth()
 	
 	action_mode_ = ACTION_MODE_NONE;
 	rocket_count_ = 0;
+	has_medal_ = false;
 
 	velocity().init();
 
@@ -467,6 +485,13 @@ void Player::on_get_rocket()
 {
 	rocket_count_++;
 	play_sound( "rocket-get" );
+}
+
+void Player::on_get_medal()
+{
+	has_medal_ = true;
+
+	play_sound( "medal-get" );
 }
 
 float Player::get_collision_width() const

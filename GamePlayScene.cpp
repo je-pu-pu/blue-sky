@@ -8,6 +8,8 @@
 #include "Enemy.h"
 #include "Balloon.h"
 #include "Rocket.h"
+// #include "Umbrella.h"
+// #include "Medal.h"
 #include "Camera.h"
 #include "Stage.h"
 
@@ -17,6 +19,7 @@
 #include "Direct3D9Box.h"
 #include "Direct3D9Rectangle.h"
 #include "Direct3D9.h"
+#include "Direct3D9MeshManager.h"
 #include "Direct3D9TextureManager.h"
 #include "DirectX.h"
 
@@ -84,9 +87,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	player_mesh_ = new Direct3D9Mesh( direct_3d() );
 	player_mesh_->load_x( "media/model/player" );
 
-	enemy_mesh_ = new Direct3D9Mesh( direct_3d() );
-	enemy_mesh_->load_x( "media/model/enemy-a" );
-
 	shadow_mesh_ = new Direct3D9Mesh( direct_3d() );
 	shadow_mesh_->load_x( "media/model/shadow" );
 
@@ -95,12 +95,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	goal_mesh_ = new Direct3D9Mesh( direct_3d() );
 	goal_mesh_->load_x( "media/model/door" );
-
-	balloon_mesh_ = new Direct3D9Mesh( direct_3d() );
-	balloon_mesh_->load_x( "media/model/balloon" );
-
-	rocket_mesh_ = new Direct3D9Mesh( direct_3d() );
-	rocket_mesh_->load_x( "media/model/rocket" );
 
 	// SkyBox
 	// sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
@@ -193,12 +187,8 @@ GamePlayScene::~GamePlayScene()
 
 	player_mesh_.release();
 	goal_mesh_.release();
-	enemy_mesh_.release();
 	shadow_mesh_.release();
 	ground_mesh_.release();
-	
-	balloon_mesh_.release();
-	rocket_mesh_.release();
 
 	stage_.release();
 	camera_.release();
@@ -425,13 +415,14 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			float x = 0, y = 0, z = 0, r = 0;
 			ss >> x >> y >> z >> r;
 
-			Enemy* enemy = new Enemy();
-			enemy->set_stage( stage_.get() );
-			enemy->set_player( player_.get() );
-			enemy->start_position().set( x, y, z );
-			enemy->set_direction_degree( r );
+			Enemy* active_object = new Enemy();
+			active_object->set_mesh( direct_3d()->getMeshManager()->load( "enemy", "media/model/enemy-a" ) );
+			active_object->set_stage( stage_.get() );
+			active_object->set_player( player_.get() );
+			active_object->start_position().set( x, y, z );
+			active_object->set_direction_degree( r );
 
-			active_object_manager()->add_active_object( enemy );
+			active_object_manager()->add_active_object( active_object );
 		}
 		else if ( name == "balloon" )
 		{
@@ -439,6 +430,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> x >> y >> z >> r;
 
 			ActiveObject* active_object = new Balloon();
+			active_object->set_mesh( direct_3d()->getMeshManager()->load( "balloon", "media/model/balloon" ) );
 			active_object->set_stage( stage_.get() );
 			active_object->start_position().set( x, y, z );
 			active_object->set_direction_degree( r );
@@ -450,6 +442,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> x >> y >> z >> r;
 
 			ActiveObject* active_object = new Rocket();
+			active_object->set_mesh( direct_3d()->getMeshManager()->load( "rocket", "media/model/rocket" ) );
 			active_object->set_stage( stage_.get() );
 			active_object->start_position().set( x, y, z );
 			active_object->set_direction_degree( r );
@@ -616,7 +609,9 @@ void GamePlayScene::update()
 
 		if ( sound_manager()->get_sound( "fin" )->get_current_position() >= 9.f )
 		{
-			save_data()->set( ( StageSelectScene::get_stage_prefix_by_page( save_data()->get( "stage-select.page", 0 ) ) + "." + get_stage_name() ).c_str(), 1 );
+			std::string save_param_name = StageSelectScene::get_stage_prefix_by_page( save_data()->get( "stage-select.page", 0 ) ) + "." + get_stage_name();
+
+			save_data()->set( save_param_name.c_str(), std::max( player_->has_medal() ? 2 : 1, save_data()->get( save_param_name.c_str(), 0 ) ) );
 			set_next_scene( "stage_outro" );
 		}
 	}
@@ -923,31 +918,25 @@ bool GamePlayScene::render()
 				continue;
 			}
 
-			Direct3D9Mesh* mesh = 0;
-
-			if ( dynamic_cast< Enemy* >( active_object ) )
-			{
-				mesh = enemy_mesh_.get();
-			}
-			else if ( dynamic_cast< Rocket* >( active_object ) )
-			{
-				mesh = rocket_mesh_.get();
-			}
-			else
-			{
-				mesh = balloon_mesh_.get();
-			}
-
 			D3DXMatrixRotationY( & r, math::degree_to_radian( active_object->get_direction_degree() ) );
 			D3DXMatrixTranslation( & t, active_object->position().x(), active_object->position().y() + 0.05f, active_object->position().z() );
+
+//			float color[] = { 1.f, 1.f, 0.5f, 0.5f };
 
 			world = r * t;
 			WorldViewProjection = world * view * projection;
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+//			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "object_color", color, 3 ) );
+//			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", color, 4 ) );
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
-			mesh->render();
+			active_object->get_mesh()->render();
 		}
+
+		float object_color_none[] = { 1.f, 1.f, 1.f, 1.f };
+		float add_color_none[] = { 0.f, 0.f, 0.f, 0.f };
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "object_color", object_color_none, 4 ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", add_color_none, 4 ) );
 
 		// ActiveObject ( Shadow )
 		for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )

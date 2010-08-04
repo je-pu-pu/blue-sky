@@ -30,6 +30,9 @@ public:
 	SoundManager( HWND );
 	virtual ~SoundManager();
 
+	virtual void set_mute( bool );
+	virtual void set_volume( float );
+
 	virtual game::Sound* load( const char*, const char* = 0 );
 	virtual game::Sound* load_3d_sound( const char*, const char* = 0 );
 

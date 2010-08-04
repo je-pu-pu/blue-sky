@@ -17,6 +17,7 @@ App::App()
 	, width_( DEFAULT_WIDTH )
 	, height_( DEFAULT_HEIGHT )
 	, is_full_screen_( false )
+	, is_mouse_in_window_( false )
 	, is_clip_cursor_enabled_( false )
 {
 	ClassName = "blue-sky";
@@ -151,19 +152,22 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_MOUSEMOVE:
 	{
-		win::Point point( LOWORD( lp ), HIWORD( lp ) );
-		win::Rect client_rect;
-
-		GetClientRect( hwnd, & client_rect.get_rect() );
-
-		if ( client_rect.in( point ) )
+		if ( ! App::GetInstance()->is_mouse_in_window_ )
 		{
-			SetCursor( 0 );
+			App::GetInstance()->is_mouse_in_window_ = true;
+
+			ShowCursor( FALSE );
+
+			TRACKMOUSEEVENT track_mouse_event = { sizeof( TRACKMOUSEEVENT ), TME_LEAVE, hwnd };
+			TrackMouseEvent( & track_mouse_event );
 		}
-		else
-		{
-			SetCursor( LoadCursor( NULL, IDC_ARROW ) );
-		}
+		break;
+	}
+	case WM_MOUSELEAVE:
+	{
+		App::GetInstance()->is_mouse_in_window_ = false;
+
+		ShowCursor( TRUE );
 
 		break;
 	}

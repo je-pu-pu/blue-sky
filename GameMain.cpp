@@ -89,7 +89,8 @@ GameMain::GameMain()
 
 	// Sound
 	sound_manager_ = new SoundManager( app_->GetWindowHandle() );
-	sound_manager_->set_enabled( config_->get( "audio.enable", 1 ) != 0 );
+	sound_manager_->set_mute( config_->get( "audio.mute", 0 ) != 0 );
+	sound_manager_->set_volume( config_->get( "audio.volume", 1.f ) );
 
 	// GridDataManager
 	grid_data_manager_ = new GridDataManager();
@@ -110,7 +111,7 @@ GameMain::GameMain()
 //■デストラクタ
 GameMain::~GameMain()
 {
-	config_->set< int >( "audio.enable", sound_manager_->is_enabled() );
+	config_->set< int >( "audio.mute", sound_manager_->is_mute() );
 	config_->set< int >( "video.full_screen", app_->is_full_screen() );
 	config_->save_file( "blue-sky.config" );
 

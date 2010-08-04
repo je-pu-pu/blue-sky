@@ -92,8 +92,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	goal_mesh_->load_x( "media/model/goal.x" );
 
 	// SkyBox
-	// sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
-	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-star-2", "png" );
+	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
 
 	// Box
 	box_ = new Direct3D9Box( direct_3d(), 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
@@ -721,26 +720,16 @@ bool GamePlayScene::render()
 	D3DXMATRIXA16 view;
 	D3DXMATRIXA16 projection;
 	D3DXMATRIXA16 WorldViewProjection;
+	D3DXMATRIXA16 transform;
 
-	static float a = 0.f;
-	a += 0.02f;
+	D3DXMATRIXA16 r;
+	D3DXMATRIXA16 s;
+	D3DXMATRIXA16 t;
 
 	{
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xFF, 0xCC, 0xFF ), 1.f, 0 ) );
-		
-		D3DXMATRIXA16 r;
-		D3DXMATRIXA16 s;
-		D3DXMATRIXA16 t;
-		
-		/*
-		camera_->set_fov( 60.f );
-		vector3 at = camera_->position();
-		at.z() += 1.f;
-		*/
-
+	
 		D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->look_at() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->up() ) );
-		// D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & goal_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->up() ) );
-		// D3DXMatrixLookAtLH( & view, reinterpret_cast< D3DXVECTOR3* >( & camera_->position() ), reinterpret_cast< const D3DXVECTOR3* >( & at) ), reinterpret_cast< const D3DXVECTOR3* >( & camera_->up() ) );
 		D3DXMatrixPerspectiveFovLH( & projection, math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() );
 		
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
@@ -749,7 +738,6 @@ bool GamePlayScene::render()
 
 		// SkyBox
 		if ( sky_box_ )
-		// if ( false )
 		{
 			D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );
 			D3DXMatrixTranslation( & t, camera_->position().x(), camera_->position().y(), camera_->position().z() );
@@ -1031,8 +1019,6 @@ bool GamePlayScene::render()
 
 	if ( player_->get_rocket_count() > 0 )
 	{
-		D3DXMATRIXA16 t, transform;
-
 		for ( int n = 0; n < player_->get_rocket_count(); n++ )
 		{
 			const float offset = n * 20.f;
@@ -1057,21 +1043,22 @@ bool GamePlayScene::render()
 		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0x99FFFFFF );
 	}
 
-	/*
-	for ( int n = 3; n < 6; n++ )
+	if ( player_->get_umbrella_count() )
 	{
-		const float offset = n * 50.f;
+		for ( int n = 3; n < 6; n++ )
+		{
+			const float offset = n * 50.f;
 
-		win::Rect src_rect = win::Rect::Size( 0, 256, 186, 220 );
-		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
+			win::Rect src_rect = win::Rect::Size( 0, 256, 186, 220 );
+			D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
 
-		D3DXMatrixTranslation( & t, get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f - offset, 0.f );
-		transform = t;
+			D3DXMatrixTranslation( & t, get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f - offset, 0.f );
+			transform = t;
 
-		direct_3d()->getSprite()->SetTransform( & transform );
-		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+			direct_3d()->getSprite()->SetTransform( & transform );
+			direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+		}
 	}
-	*/
 
 	direct_3d()->getSprite()->End();
 

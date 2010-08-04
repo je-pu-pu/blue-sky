@@ -27,6 +27,31 @@ SoundManager::~SoundManager()
 	delete direct_sound_;
 }
 
+void SoundManager::set_mute( bool mute )
+{
+	game::SoundManager::set_mute( mute );
+
+	if ( is_mute() )
+	{
+		DIRECT_X_FAIL_CHECK( direct_sound_->get_primary_buffer()->SetVolume( DSBVOLUME_MIN ) );
+	}
+	else
+	{
+		set_volume( get_volume() );
+	}
+}
+
+void SoundManager::set_volume( float v )
+{
+	game::SoundManager::set_volume( v );
+
+	if ( ! is_mute() )
+	{
+		LONG volume = static_cast< long >( ( get_volume() - Sound::VOLUME_MIN ) / ( Sound::VOLUME_MAX - Sound::VOLUME_MIN ) * ( DSBVOLUME_MAX - DSBVOLUME_MIN ) + DSBVOLUME_MIN );
+		DIRECT_X_FAIL_CHECK( direct_sound_->get_primary_buffer()->SetVolume( volume ) );
+	}
+}
+
 game::Sound* SoundManager::load( const char* name, const char* file_name )
 {
 	if ( file_name )
@@ -110,11 +135,6 @@ game::Sound* SoundManager::create_sound( const char* file_name, bool is_3d )
 
 void SoundManager::update()
 {
-	if ( ! is_enabled() )
-	{
-		return;
-	}
-
 	for( SoundMap::iterator i = sound_map().begin(); i != sound_map().end(); ++i )
 	{
 		i->second->update();

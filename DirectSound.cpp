@@ -20,7 +20,7 @@ DirectSound::DirectSound( HWND hwnd )
 
 	// Create Primary Buffer
 	DSBUFFERDESC buffer_desc = { sizeof( DSBUFFERDESC ) };
-	buffer_desc.dwFlags = /* DSBCAPS_CTRLVOLUME | */ DSBCAPS_CTRL3D | DSBCAPS_PRIMARYBUFFER;
+	buffer_desc.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRL3D | DSBCAPS_PRIMARYBUFFER;
 
 	DIRECT_X_FAIL_CHECK( direct_sound_->CreateSoundBuffer( & buffer_desc, & primary_buffer_, 0 ) );
 

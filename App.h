@@ -33,6 +33,7 @@ private:
 
 	std::string title_;					///< タイトル
 
+	bool		is_mouse_in_window_;
 	bool		is_clip_cursor_enabled_;
 
 	App();								//コンストラクタ

@@ -209,6 +209,14 @@ GamePlayScene::~GamePlayScene()
 
 	sound_manager()->stop_all();
 	sound_manager()->unload_all();
+
+	float ambient_color_none[] = { 1.f, 1.f, 1.f, 1.f };
+	float object_color_none[] = { 1.f, 1.f, 1.f, 1.f };
+	float add_color_none[] = { 0.f, 0.f, 0.f, 0.f };
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient_color", ambient_color_none, 4 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "object_color", object_color_none, 4 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", add_color_none, 4 ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 }
 
 void GamePlayScene::generate_random_stage()

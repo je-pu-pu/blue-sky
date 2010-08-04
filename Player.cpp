@@ -34,6 +34,7 @@ Player::Player()
 	 , is_clambering_( false )
 	 , is_falling_( false )
 	 , rocket_count_( 0 )
+	 , umbrella_count_( 0 )
 	 , has_medal_( false )
 
 	 , action_mode_( ACTION_MODE_NONE )
@@ -437,6 +438,7 @@ void Player::rebirth()
 	
 	action_mode_ = ACTION_MODE_NONE;
 	rocket_count_ = 0;
+	umbrella_count_ = 0;
 	has_medal_ = false;
 
 	velocity().init();
@@ -490,6 +492,7 @@ void Player::on_get_rocket()
 
 void Player::on_get_umbrella()
 {
+	umbrella_count_++;
 	play_sound( "umbrella-get" );
 }
 

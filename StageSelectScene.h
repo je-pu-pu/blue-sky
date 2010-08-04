@@ -40,6 +40,7 @@ private:
 	StageList stage_list_;
 
 	Texture* sprite_texture_;
+	Texture* bg_texture_;
 
 	Sound* ok_;
 

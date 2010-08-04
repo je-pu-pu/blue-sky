@@ -39,6 +39,7 @@ private:
 	vector3		velocity_on_fall_;		///< 落下開始時の移動量
 
 	int			rocket_count_;			///< 持っているロケット花火の数
+	int			umbrella_count_;		///< 持っている傘の数
 
 	ActionMode	action_mode_;			///< 現在のアクションのモード
 	vector3		action_base_position_;	///< 現在のアクションの基底位置
@@ -109,6 +110,7 @@ public:
 	void stop_rocket();
 
 	int get_rocket_count() const { return rocket_count_; }
+	int get_umbrella_count() const { return umbrella_count_; }
 
 	void on_get_balloon();
 	void on_get_rocket();

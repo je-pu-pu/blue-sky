@@ -29,7 +29,7 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 
 StoryTextScene::~StoryTextScene()
 {
-
+	direct_3d()->getTextureManager()->unload( "bg" );
 }
 
 void StoryTextScene::load_story_text_file( const char* file_name )

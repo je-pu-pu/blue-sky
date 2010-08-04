@@ -25,6 +25,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	, page_( 0 )
 	, stage_count_( 0 )
 	, sprite_texture_( 0 )
+	, bg_texture_( 0 )
 	, ok_( 0 )
 	, cursor_src_rect_( win::Rect::Size( 0, 702, 92, 136 ) )
 	, left_allow_src_rect_( win::Rect::Size( 256, 704, 82, 126 ) )
@@ -44,6 +45,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	face_src_rect_list_.push_back( win::Rect::Size( 768, 384, 64, 64 ) );
 
 	sprite_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
+	bg_texture_ = direct_3d()->getTextureManager()->load( "bg", "media/image/title-bg.png" );
 
 	ok_ = sound_manager()->load( "ok" );
 
@@ -53,6 +55,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 StageSelectScene::~StageSelectScene()
 {
 	direct_3d()->getTextureManager()->unload( "sprite" );
+	direct_3d()->getTextureManager()->unload( "bg" );
 
 	clear_stage_list();
 }
@@ -113,6 +116,21 @@ bool StageSelectScene::render()
 	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->Begin( D3DXSPRITE_ALPHABLEND ) );
 
 	D3DXMATRIXA16 t, s, transform;
+
+	// BG
+	{
+		win::Rect bg_src_rect( 0, 1024, 2048, 2048 );
+		D3DXVECTOR3 bg_center( bg_src_rect.width() * 0.5f, bg_src_rect.height() * 0.5f, 0.f );
+
+		float ratio = static_cast< float >( get_height() ) / static_cast< float >( bg_src_rect.height() );
+
+		D3DXMatrixScaling( & s, ratio, ratio, 1.f );
+		D3DXMatrixTranslation( & t, get_width() * 0.5f, get_height() * 0.5f, 0.f );
+
+		transform = s * t;
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw( bg_texture_, & bg_src_rect.get_rect(), & bg_center, 0, D3DCOLOR_ARGB( 0x66, 0x33, 0x33, 0x99 ) );
+	}
 
 	// Stage
 	int n = 0;

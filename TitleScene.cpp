@@ -9,6 +9,8 @@
 #include "Direct3D9TextureManager.h"
 #include "DirectX.h"
 
+#include <win/Rect.h>
+
 #include <common/math.h>
 #include <common/serialize.h>
 #include <common/exception.h>
@@ -38,7 +40,7 @@ TitleScene::TitleScene( const GameMain* game_main )
 
 TitleScene::~TitleScene()
 {
-	direct_3d()->getTextureManager()->unload( "title-bg" );
+	// direct_3d()->getTextureManager()->unload( "title-bg" );
 }
 
 /**
@@ -126,6 +128,21 @@ bool TitleScene::render()
 
 	D3DXMATRIXA16 transform;
 	D3DXMATRIXA16 s, t;
+
+	// BG
+	{
+		win::Rect bg_src_rect( 0, 1024, 2048, 2048 );
+		D3DXVECTOR3 bg_center( bg_src_rect.width() * 0.5f, bg_src_rect.height() * 0.5f, 0.f );
+
+		float ratio = static_cast< float >( get_height() ) / static_cast< float >( bg_src_rect.height() );
+
+		D3DXMatrixScaling( & s, ratio, ratio, 1.f );
+		D3DXMatrixTranslation( & t, get_width() * 0.5f, get_height() * 0.5f, 0.f );
+
+		transform = s * t;
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw(  title_bg_texture_, & bg_src_rect.get_rect(), & bg_center, 0, D3DCOLOR_ARGB( 0xFF, 0xFF, 0x66, 0x11 ) );
+	}
 
 	// Logo
 	if ( sequence_ == SEQUENCE_LOGO )

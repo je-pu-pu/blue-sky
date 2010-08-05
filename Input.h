@@ -86,6 +86,7 @@ public:
 	void load_config( Config& );
 
 	void update();
+	void update_null();
 	void update_common();
 
 	void allow_push( Button button )

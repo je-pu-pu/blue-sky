@@ -29,6 +29,8 @@ private:
 
 	float fov_;						///< FOV
 	float fov_target_;				///< FOV ( –Ú•W )
+	float fov_default_;				///< FOV ( •W€ )
+
 	float rotate_chase_speed_;		///< ‰ñ“]‘¬“x
 
 public:
@@ -53,6 +55,10 @@ public:
 	float get_fov_target() const { return fov_target_; }
 	void set_fov_target( float );
 
+	float get_fov_default() const { return fov_default_; }
+	void set_fov_default( float f ) { fov_default_ = f; }
+
+	void reset_fov() { fov_ = fov_target_ = fov_default_; }
 
 	float get_rotate_chase_speed() { return rotate_chase_speed_; }
 	void set_rotate_chase_speed( float s ) { rotate_chase_speed_; }

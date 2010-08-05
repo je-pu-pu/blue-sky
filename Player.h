@@ -19,7 +19,7 @@ public:
 		ACTION_MODE_BALLOON,
 		ACTION_MODE_ROCKET,
 		ACTION_MODE_UMBRELLA,
-		ACTION_MODE_
+		ACTION_MODE_SCOPE,
 	};
 
 	enum ItemType
@@ -27,6 +27,7 @@ public:
 		ITEM_TYPE_NONE = -1,
 		ITEM_TYPE_ROCKET = 0,
 		ITEM_TYPE_UMBRELLA,
+		ITEM_TYPE_SCOPE,
 		ITEM_TYPE_MAX
 	};
 
@@ -109,6 +110,7 @@ public:
 
 	///
 	void start_umbrella_mode();
+	void switch_scope_mode();
 
 	void set_input( const Input* );
 
@@ -124,6 +126,8 @@ public:
 	void on_get_medal();
 
 	bool has_medal() const { return has_medal_; }
+
+	ActionMode get_action_mode() const { return action_mode_; }
 
 	ItemType get_selected_item_type() const { return selected_item_type_; }
 	int get_item_count( ItemType ) const;

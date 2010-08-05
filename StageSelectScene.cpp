@@ -54,7 +54,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 
 StageSelectScene::~StageSelectScene()
 {
-	direct_3d()->getTextureManager()->unload( "sprite" );
+	// direct_3d()->getTextureManager()->unload( "sprite" );
 	direct_3d()->getTextureManager()->unload( "bg" );
 
 	clear_stage_list();

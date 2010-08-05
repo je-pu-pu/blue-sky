@@ -108,6 +108,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		sound_manager()->load_3d_sound( "ok" );
 		sound_manager()->load_3d_sound( "vending-machine" );
 
+		sound_manager()->load( "click" );
+
 		sound_manager()->load( "walk" );
 		sound_manager()->load( "run" );
 		sound_manager()->load( "clamber" );
@@ -120,6 +122,10 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 		sound_manager()->load( "balloon-get" );
 		sound_manager()->load( "rocket-get" );
+		sound_manager()->load( "umbrella-get" );
+		sound_manager()->load( "medal-get" );
+
+		sound_manager()->load( "rocket" );
 
 		sound_manager()->load( "fin" );
 		sound_manager()->load( "door" );
@@ -135,7 +141,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Camera
 	camera_ = new Camera();
-	camera_->set_fov( config()->get( "camera.fov", 60.f ) );
+	camera_->set_fov_default( config()->get( "camera.fov", 60.f ) );
 
 	// Stage
 	stage_ = new Stage( 1000, 1000 );
@@ -519,33 +525,51 @@ void GamePlayScene::update()
 		
 		int wheel = input()->pop_mouse_wheel_queue();
 
-
-
-		if ( wheel > 0 )
+		if ( wheel )
 		{
-			player_->select_next_item();
-		}
-		else if ( wheel < 0 )
-		{
-			player_->select_prev_item();
+			sound_manager()->get_sound( "click" )->play( false );
 		}
 
-		if ( wheel > 0 )
+		if ( player_->get_action_mode() == Player::ACTION_MODE_SCOPE )
 		{
-			camera_->set_fov_target( camera_->fov() / 1.5f );
+			if ( wheel > 0 )
+			{
+				camera_->set_fov_target( camera_->fov() * 0.5f );
+			}
+			else if ( wheel < 0 )
+			{
+				camera_->set_fov_target( camera_->fov() * 2.f );
+			}
 		}
-		else if ( wheel < 0 )
+		else
 		{
-			camera_->set_fov_target( camera_->fov() * 1.5f );
+			if ( wheel > 0 )
+			{
+				player_->select_prev_item();
+			}
+			else if ( wheel < 0 )
+			{
+				player_->select_next_item();
+			}
 		}
 
 		if ( input()->push( Input::A ) )
 		{
 			switch ( player_->get_selected_item_type() )
 			{
-			case Player::ITEM_TYPE_NONE: player_->jump(); break;
-			case Player::ITEM_TYPE_ROCKET: player_->rocket( camera_->front() ); break;
-			case Player::ITEM_TYPE_UMBRELLA: player_->start_umbrella_mode(); break;
+				case Player::ITEM_TYPE_NONE: player_->jump(); break;
+				case Player::ITEM_TYPE_ROCKET: player_->rocket( camera_->front() ); break;
+				case Player::ITEM_TYPE_UMBRELLA: player_->start_umbrella_mode(); break;
+				case Player::ITEM_TYPE_SCOPE:
+				{
+					player_->switch_scope_mode();
+
+					if ( player_->get_action_mode() != Player::ACTION_MODE_SCOPE )
+					{
+						camera_->reset_fov();
+					}
+					break;
+				}
 			}
 		}
 	}
@@ -677,7 +701,14 @@ void GamePlayScene::update()
 
 	camera_->position() = player_->position() + vector3( 0.f, player_->get_eye_height(), 0.f );
 	camera_->update();
+
+	if ( player_->get_action_mode() == Player::ACTION_MODE_SCOPE )
+	{
+		camera_->set_fov( math::clamp( camera_->fov(), 1.f, 30.f ) );
+	}
+
 	// camera_->position() = player_->position() + player_->front() + vector3( 0.f, player_->get_eye_height(), 0.f );
+
 
 	if ( ! clear_flag && player_->is_rocketing() )
 	{
@@ -958,6 +989,8 @@ bool GamePlayScene::render()
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", add_color_none, 4 ) );
 
 		// ActiveObject ( Shadow )
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
+
 		for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
 		{
 			ActiveObject* active_object = *i;
@@ -978,26 +1011,10 @@ bool GamePlayScene::render()
 
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", add_color_none, 4 ) );
 
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 
 		// cleanup
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, FALSE ) );
-	}
-
-	if ( true )
-	{
-		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
-		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
-
-		D3DXMatrixScaling( & s, 0.9f / camera_->aspect(), 0.9f, 1.f );
-		D3DXMatrixTranslation( & t, 0.f, 0.f, 1.f );
-
-		WorldViewProjection = s * t; // * projection;
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
-		scope_mesh_->render();
-
-		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
-		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
@@ -1050,6 +1067,28 @@ bool GamePlayScene::render()
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
 	}
 
+	// Scope
+	if ( player_->get_action_mode() == Player::ACTION_MODE_SCOPE )
+	{
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->BeginPass( 0 ) );
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
+
+		D3DXMatrixScaling( & s, 0.9f / camera_->aspect(), 0.9f, 1.f );
+		D3DXMatrixTranslation( & t, 0.f, 0.f, 1.f );
+
+		WorldViewProjection = s * t; // * projection;
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+		scope_mesh_->render();
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
+	}
+
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->End() );
 
 	// UI
@@ -1080,8 +1119,7 @@ bool GamePlayScene::render()
 		direct_3d()->getSprite()->SetTransform( & transform );
 		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0x99FFFFFF );
 	}
-
-	if ( player_->get_selected_item_type() == Player::ITEM_TYPE_UMBRELLA )
+	else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_UMBRELLA )
 	{
 		for ( int n = 0; n < player_->get_item_count( Player::ITEM_TYPE_UMBRELLA ); n++ )
 		{
@@ -1096,6 +1134,17 @@ bool GamePlayScene::render()
 			direct_3d()->getSprite()->SetTransform( & transform );
 			direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
 		}
+	}
+	else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_SCOPE )
+	{
+		win::Rect src_rect = win::Rect::Size( 0, 512, 192, 192 );
+		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
+
+		D3DXMatrixTranslation( & t, get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f, 0.f );
+		transform = t;
+
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
 	}
 
 	direct_3d()->getSprite()->End();

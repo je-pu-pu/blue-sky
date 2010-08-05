@@ -150,8 +150,16 @@ bool GameMain::update()
 		return false ;
 	}
 	
-	direct_input_->update();
-	input_->update();
+	if ( app_->is_active() )
+	{
+		direct_input_->update();
+		input_->update();
+	}
+	else
+	{
+		input_->update_null();
+	}
+
 	sound_manager_->update();
 
 	if ( input_->push( Input::ESCAPE ) )

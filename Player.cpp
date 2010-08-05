@@ -39,10 +39,7 @@ Player::Player()
 {
 	setup_local_aabb_list();
 
-	for ( int n = 0; n < ITEM_TYPE_MAX; n++ )
-	{
-		item_count_[ n ] = 0;
-	}
+	rebirth();
 }
 
 void Player::step( float s )
@@ -418,6 +415,21 @@ void Player::start_umbrella_mode()
 }
 
 /**
+ *
+ */
+void Player::switch_scope_mode()
+{
+	if ( action_mode_ == ACTION_MODE_SCOPE )
+	{
+		action_mode_ = ACTION_MODE_NONE;
+	}
+	else
+	{
+		action_mode_ = ACTION_MODE_SCOPE;
+	}
+}
+
+/**
  * ‚±‚Ì‚Ü‚Ü—Ž‰º‚·‚é‚ÆŽ€–S‚·‚é‚©‚Ç‚¤‚©‚ðŽæ“¾‚·‚é
  *
  */
@@ -453,6 +465,7 @@ void Player::rebirth()
 	{
 		item_count_[ n ] = 0;
 	}
+	item_count_[ ITEM_TYPE_SCOPE ] = 1;
 
 	selected_item_type_ = ITEM_TYPE_NONE;
 
@@ -486,6 +499,8 @@ void Player::rocket( const vector3& direction )
 	{
 		selected_item_type_ = ITEM_TYPE_NONE;
 	}
+
+	play_sound( "rocket" );
 }
 
 void Player::stop_rocket()

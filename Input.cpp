@@ -134,6 +134,14 @@ void Input::update()
 	update_common();
 }
 
+void Input::update_null()
+{
+	for ( int n = 0; n < MAX_BUTTONS; n++ )
+	{
+		state_[ n ] <<= 1;
+	}
+}
+
 /**
  * キーボード・ジョイスティック共通の更新処理を行う
  */

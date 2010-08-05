@@ -6,6 +6,8 @@
 #include "SoundManager.h"
 #include "Input.h"
 
+#include <win/Rect.h>
+
 #include <fstream>
 
 namespace blue_sky
@@ -17,6 +19,7 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 	, text_y_target_( 0.f )
 	, text_scroll_speed_( 0.5f )
 	, next_scene_name_( next_scene_name )
+	, sprite_texture_( 0 )
 	, bg_texture_( 0 )
 {
 	load_story_text_file( file_name );
@@ -24,11 +27,13 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 	text_y_target_ = static_cast< float >( -direct_3d()->getFont()->get_text_height( text_.c_str() ) );
 
 	// bg_texture_ = direct_3d()->getTextureManager()->load( "bg", "media/image/test.jpg" );
+	sprite_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
 	bg_texture_ = direct_3d()->getTextureManager()->load( "bg", "media/image/town.jpg" );
 }
 
 StoryTextScene::~StoryTextScene()
 {
+	direct_3d()->getTextureManager()->unload( "sprite" );
 	direct_3d()->getTextureManager()->unload( "bg" );
 }
 
@@ -81,9 +86,10 @@ void StoryTextScene::update()
  */
 bool StoryTextScene::render()
 { 
-	static float bg_scale_ = 1.f;
+	static float bg_scale_ = 2.f;
 
-	bg_scale_ += 0.0001f;
+	bg_scale_ -= 0.0002f;
+	bg_scale_ = std::min( bg_scale_, 1.f );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->BeginScene() );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB( 0x00, 0x00, 0x00 ), 1.f, 0 ) );
@@ -104,6 +110,18 @@ bool StoryTextScene::render()
 	transform = s * t;
 	direct_3d()->getSprite()->SetTransform( & transform );
 	direct_3d()->getSprite()->Draw( bg_texture_, & src_rect, & center, 0, 0xFFFFFFFF );
+
+	// loading ...
+	if ( ! get_next_scene().empty() )
+	{
+		win::Rect src_rect = win::Rect::Size( 512, 0, 272, 128 );
+		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
+
+		D3DXMatrixTranslation( & transform, get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f, 0.f );
+
+		direct_3d()->getSprite()->SetTransform( & transform );
+		direct_3d()->getSprite()->Draw( sprite_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->End() );
 

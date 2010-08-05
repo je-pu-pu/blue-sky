@@ -10,7 +10,8 @@ Camera::Camera()
 	: default_front_( 0.f, 0.f, 1.f )
 	, default_up_( 0.f, 1.f, 0.f )
 	, fov_( 60.f )
-	, fov_target_( 60.f )
+	, fov_target_( fov_ )
+	, fov_default_( fov_ )
 	, rotate_chase_speed_( 0.f )
 {
 	reset_rotate_chase_speed();
@@ -58,7 +59,6 @@ void Camera::update()
 void Camera::set_fov( float fov )
 {
 	fov_ = fov;
-	fov_target_ = fov;
 }
 
 void Camera::set_fov_target( float fov_target )

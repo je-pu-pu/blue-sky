@@ -28,6 +28,7 @@ private:
 	int			width_;					///< ウィンドウ横幅
 	int			height_;				///< ウィンドウ高さ
 
+	bool		is_active_;				///< アクティブフラグ
 	bool		is_full_screen_;		///< フルスクリーン
 	RECT		last_window_rect_;		///< 前回のウィンドウ位置とサイズ
 
@@ -64,6 +65,9 @@ public:
 	int	get_height() const { return height_; }
 
 	void set_size( int, int );
+
+	void set_active( bool );
+	bool is_active() const { return is_active_; }
 
 	const char* getTitle();
 	void setTitle( const char* );

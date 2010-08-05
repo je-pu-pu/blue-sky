@@ -16,6 +16,7 @@ App::App()
 	, hMutex( 0 )
 	, width_( DEFAULT_WIDTH )
 	, height_( DEFAULT_HEIGHT )
+	, is_active_( false )
 	, is_full_screen_( false )
 	, is_mouse_in_window_( false )
 	, is_clip_cursor_enabled_( false )
@@ -180,10 +181,7 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_CHAR:		break;
 	case WM_ACTIVATEAPP:
-		if ( LOWORD( wp ) )
-		{
-			App::GetInstance()->clip_cursor( App::GetInstance()->is_clip_cursor_enabled_ );
-		}
+		App::GetInstance()->set_active( LOWORD( wp ) != 0 );
 		break;
 	case WM_DESTROY:
 		PostQuitMessage( 0 );
@@ -193,6 +191,16 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 
 	return	0;
+}
+
+void App::set_active( bool active )
+{
+	is_active_ = active;
+
+	if ( active )
+	{
+		App::GetInstance()->clip_cursor( is_clip_cursor_enabled_ );
+	}
 }
 
 void App::on_resize( HWND hwnd )

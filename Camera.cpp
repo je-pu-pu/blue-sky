@@ -10,6 +10,7 @@ Camera::Camera()
 	: default_front_( 0.f, 0.f, 1.f )
 	, default_up_( 0.f, 1.f, 0.f )
 	, fov_( 60.f )
+	, fov_target_( 60.f )
 	, rotate_chase_speed_( 0.f )
 {
 	reset_rotate_chase_speed();
@@ -48,11 +49,21 @@ void Camera::update()
 	front_ = default_front_ * xr * yr;
 	look_at_ = position() + default_front_ * xr * zr * yr;
 	up_ = default_up_ * xr * zr * yr;
+
+
+	fov_ = fov_ * 0.9f + fov_target_ * 0.1f;
+	fov_ = math::clamp( fov_, 2.f, 100.f );
 }
 
 void Camera::set_fov( float fov )
 {
 	fov_ = fov;
+	fov_target_ = fov;
+}
+
+void Camera::set_fov_target( float fov_target )
+{
+	fov_target_ = math::clamp( fov_target, 0.f, 100.f );
 }
 
 }; // namespace blue_sky

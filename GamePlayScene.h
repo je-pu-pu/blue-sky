@@ -38,6 +38,7 @@ protected:
 	common::safe_ptr< Direct3D9Mesh > goal_mesh_;
 	common::safe_ptr< Direct3D9Mesh > shadow_mesh_;
 	common::safe_ptr< Direct3D9Mesh > ground_mesh_;
+	common::safe_ptr< Direct3D9Mesh > scope_mesh_;
 
 	common::safe_ptr< Direct3D9SkyBox > sky_box_;
 

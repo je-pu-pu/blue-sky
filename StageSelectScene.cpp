@@ -85,11 +85,11 @@ void StageSelectScene::update()
 		{
 			ok_->play( false );
 
-			if ( stage->name == "1-1" )
+			if ( stage->name == "3-1" )
 			{
 				set_next_stage_name( "" );
 			}
-			else if ( stage->name == "1-2" )
+			else if ( stage->name == "3-2" )
 			{
 				set_next_scene( "ending" );
 				return;

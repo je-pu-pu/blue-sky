@@ -28,6 +28,7 @@ private:
 	vector3 rotate_degree_target_;	///< XYZ ŠeŽ²‚É‘Î‚·‚é‰ñ“]Šp“x ( –Ú•W )
 
 	float fov_;						///< FOV
+	float fov_target_;				///< FOV ( –Ú•W )
 	float rotate_chase_speed_;		///< ‰ñ“]‘¬“x
 
 public:
@@ -46,8 +47,12 @@ public:
 	const vector3& rotate_degree() const { return rotate_degree_; }
 	const vector3& rotate_degree_target() const { return rotate_degree_target_; }
 
-	const float& fov() const { return fov_; }
+	float fov() const { return fov_; }
 	void set_fov( float );
+
+	float get_fov_target() const { return fov_target_; }
+	void set_fov_target( float );
+
 
 	float get_rotate_chase_speed() { return rotate_chase_speed_; }
 	void set_rotate_chase_speed( float s ) { rotate_chase_speed_; }

@@ -33,13 +33,16 @@ Player::Player()
 	 , is_jumping_( false )
 	 , is_clambering_( false )
 	 , is_falling_( false )
-	 , rocket_count_( 0 )
-	 , umbrella_count_( 0 )
-	 , has_medal_( false )
-
 	 , action_mode_( ACTION_MODE_NONE )
+	 , has_medal_( false )
+	 , selected_item_type_( ITEM_TYPE_NONE )
 {
 	setup_local_aabb_list();
+
+	for ( int n = 0; n < ITEM_TYPE_MAX; n++ )
+	{
+		item_count_[ n ] = 0;
+	}
 }
 
 void Player::step( float s )
@@ -314,7 +317,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 
 		if ( action_mode_ == ACTION_MODE_UMBRELLA )
 		{
-			action_mode_ = ACTION_MODE_NONE;
+			// action_mode_ = ACTION_MODE_NONE;
 		}
 	}
 
@@ -405,6 +408,13 @@ void Player::fall()
 void Player::start_umbrella_mode()
 {
 	action_mode_ = ACTION_MODE_UMBRELLA;
+	item_count_[ ITEM_TYPE_UMBRELLA ]--;
+
+	if ( item_count_[ ITEM_TYPE_UMBRELLA ] <= 0 )
+	{
+		item_count_[ ITEM_TYPE_UMBRELLA ] = 0;
+		selected_item_type_ = ITEM_TYPE_NONE;
+	}
 }
 
 /**
@@ -437,9 +447,14 @@ void Player::rebirth()
 	eye_height_ = 1.5f;
 	
 	action_mode_ = ACTION_MODE_NONE;
-	rocket_count_ = 0;
-	umbrella_count_ = 0;
 	has_medal_ = false;
+
+	for ( int n = 0; n < ITEM_TYPE_MAX; n++ )
+	{
+		item_count_[ n ] = 0;
+	}
+
+	selected_item_type_ = ITEM_TYPE_NONE;
 
 	velocity().init();
 
@@ -453,7 +468,7 @@ void Player::set_input( const Input* input )
 
 void Player::rocket( const vector3& direction )
 {
-	if ( rocket_count_ <= 0 )
+	if ( get_item_count( ITEM_TYPE_ROCKET ) <= 0 )
 	{
 		return;
 	}
@@ -465,7 +480,12 @@ void Player::rocket( const vector3& direction )
 	velocity() = direction * get_max_speed() * 0.5f;
 	action_base_position_ = position();
 
-	rocket_count_--;
+	item_count_[ ITEM_TYPE_ROCKET ]--;
+
+	if ( item_count_[ ITEM_TYPE_ROCKET ] <= 0 )
+	{
+		selected_item_type_ = ITEM_TYPE_NONE;
+	}
 }
 
 void Player::stop_rocket()
@@ -486,13 +506,17 @@ void Player::on_get_balloon()
 
 void Player::on_get_rocket()
 {
-	rocket_count_++;
+	item_count_[ ITEM_TYPE_ROCKET ]++;
+	selected_item_type_ = ITEM_TYPE_ROCKET;
+
 	play_sound( "rocket-get" );
 }
 
 void Player::on_get_umbrella()
 {
-	umbrella_count_++;
+	item_count_[ ITEM_TYPE_UMBRELLA ]++;
+	selected_item_type_ = ITEM_TYPE_UMBRELLA;
+
 	play_sound( "umbrella-get" );
 }
 
@@ -501,6 +525,42 @@ void Player::on_get_medal()
 	has_medal_ = true;
 
 	play_sound( "medal-get" );
+}
+
+int Player::get_item_count( ItemType item_type ) const
+{
+	if ( item_type <= ITEM_TYPE_NONE ) return 0;
+	if ( item_type >= ITEM_TYPE_MAX ) return 0;
+
+	return item_count_[ item_type ];
+}
+
+void Player::select_prev_item()
+{
+	do
+	{
+		selected_item_type_ = static_cast< ItemType >( static_cast< int >( selected_item_type_ ) - 1 );
+
+		if ( selected_item_type_ < ITEM_TYPE_NONE )
+		{
+			selected_item_type_ = static_cast< ItemType >( ITEM_TYPE_MAX - 1 );
+		}
+	}
+	while ( selected_item_type_ != ITEM_TYPE_NONE && item_count_[ selected_item_type_ ] == 0 );
+}
+
+void Player::select_next_item()
+{
+	do
+	{
+		selected_item_type_ = static_cast< ItemType >( static_cast< int >( selected_item_type_ ) + 1 );
+
+		if ( selected_item_type_ >= ITEM_TYPE_MAX )
+		{
+			selected_item_type_ = ITEM_TYPE_NONE;
+		}
+	}
+	while ( selected_item_type_ != ITEM_TYPE_NONE && item_count_[ selected_item_type_ ] == 0 );
 }
 
 float Player::get_collision_width() const

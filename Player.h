@@ -18,7 +18,16 @@ public:
 		ACTION_MODE_NONE = 0,
 		ACTION_MODE_BALLOON,
 		ACTION_MODE_ROCKET,
-		ACTION_MODE_UMBRELLA
+		ACTION_MODE_UMBRELLA,
+		ACTION_MODE_
+	};
+
+	enum ItemType
+	{
+		ITEM_TYPE_NONE = -1,
+		ITEM_TYPE_ROCKET = 0,
+		ITEM_TYPE_UMBRELLA,
+		ITEM_TYPE_MAX
 	};
 
 private:
@@ -38,13 +47,13 @@ private:
 	bool		is_falling_;			///< 落下中フラグ
 	vector3		velocity_on_fall_;		///< 落下開始時の移動量
 
-	int			rocket_count_;			///< 持っているロケット花火の数
-	int			umbrella_count_;		///< 持っている傘の数
-
 	ActionMode	action_mode_;			///< 現在のアクションのモード
 	vector3		action_base_position_;	///< 現在のアクションの基底位置
 
 	bool		has_medal_;				///< メダル保持フラグ
+
+	int			item_count_[ ITEM_TYPE_MAX ];
+	ItemType	selected_item_type_;	///< 現在選択中のアイテム
 
 	void on_collision_x( const GridCell& );
 	void on_collision_y( const GridCell& );
@@ -109,15 +118,18 @@ public:
 	void rocket( const vector3& );
 	void stop_rocket();
 
-	int get_rocket_count() const { return rocket_count_; }
-	int get_umbrella_count() const { return umbrella_count_; }
-
 	void on_get_balloon();
 	void on_get_rocket();
 	void on_get_umbrella();
 	void on_get_medal();
 
 	bool has_medal() const { return has_medal_; }
+
+	ItemType get_selected_item_type() const { return selected_item_type_; }
+	int get_item_count( ItemType ) const;
+
+	void select_prev_item();
+	void select_next_item();
 
 }; // class Player
 

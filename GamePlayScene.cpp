@@ -82,14 +82,17 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	player_mesh_ = new Direct3D9Mesh( direct_3d() );
 	player_mesh_->load_x( "media/model/player.x" );
 
+	goal_mesh_ = new Direct3D9Mesh( direct_3d() );
+	goal_mesh_->load_x( "media/model/goal.x" );
+
 	shadow_mesh_ = new Direct3D9Mesh( direct_3d() );
 	shadow_mesh_->load_x( "media/model/shadow.x" );
 
 	ground_mesh_ = new Direct3D9Mesh( direct_3d() );
 	ground_mesh_->load_x( "media/model/ground.x" );
 
-	goal_mesh_ = new Direct3D9Mesh( direct_3d() );
-	goal_mesh_->load_x( "media/model/goal.x" );
+	scope_mesh_ = new Direct3D9Mesh( direct_3d() );
+	scope_mesh_->load_x( "media/model/scope.x" );
 
 	// SkyBox
 	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
@@ -183,6 +186,7 @@ GamePlayScene::~GamePlayScene()
 	goal_mesh_.release();
 	shadow_mesh_.release();
 	ground_mesh_.release();
+	scope_mesh_.release();
 
 	stage_.release();
 	camera_.release();
@@ -512,26 +516,37 @@ void GamePlayScene::update()
 		{
 			player_->stop();
 		}
+		
+		int wheel = input()->pop_mouse_wheel_queue();
+
+
+
+		if ( wheel > 0 )
+		{
+			player_->select_next_item();
+		}
+		else if ( wheel < 0 )
+		{
+			player_->select_prev_item();
+		}
+
+		if ( wheel > 0 )
+		{
+			camera_->set_fov_target( camera_->fov() / 1.5f );
+		}
+		else if ( wheel < 0 )
+		{
+			camera_->set_fov_target( camera_->fov() * 1.5f );
+		}
 
 		if ( input()->push( Input::A ) )
 		{
-			if ( player_->get_rocket_count() > 0 )
+			switch ( player_->get_selected_item_type() )
 			{
-				player_->rocket( camera_->front() );
+			case Player::ITEM_TYPE_NONE: player_->jump(); break;
+			case Player::ITEM_TYPE_ROCKET: player_->rocket( camera_->front() ); break;
+			case Player::ITEM_TYPE_UMBRELLA: player_->start_umbrella_mode(); break;
 			}
-			else
-			{
-				player_->jump();
-			}
-		}
-
-		if ( input()->push( Input::X ) )
-		{
-			player_->rocket( camera_->front() );
-		}
-		if ( input()->push( Input::Y ) )
-		{
-			player_->start_umbrella_mode();
 		}
 	}
 
@@ -825,29 +840,30 @@ bool GamePlayScene::render()
 				grid_object->set_lod( 1 );
 			}
 
+			float* object_color = colors[ color_index ];
+
 			if ( grid_object->has_last_lod() )
 			{
 				DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
 
-				ambient_color_[ 3 ] = 1.f;
-				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient_color", ambient_color_, 4 ) );
+				object_color[ 3 ] = 1.f;
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "object_color", object_color, 4 ) );
 				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 				grid_object->render_last_lod();
 
 				DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 
-				ambient_color_[ 3 ] = grid_object->lod_alpha();
-				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient_color", ambient_color_, 4 ) );
+				object_color[ 3 ] = grid_object->lod_alpha();
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "object_color", object_color, 4 ) );
 				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 				grid_object->render();
 			}
 			else
 			{
-				// ambient_color_[ 3 ] = grid_object->visible_alpha();
-				// DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient_color", ambient_color_, 4 ) );
-				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient_color", colors[ color_index ], 4 ) );
+				object_color[ 3 ] = 1.f;
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "object_color", object_color, 4 ) );
 				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 				grid_object->render();
@@ -857,8 +873,10 @@ bool GamePlayScene::render()
 		}
 #endif // 0
 
-		ambient_color_[ 3 ] = 1.f;
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "ambient_color", ambient_color_, 4 ) );
+		float object_color_none[] = { 1.f, 1.f, 1.f, 1.f };
+		float add_color_none[] = { 0.f, 0.f, 0.f, 0.f };
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "object_color", object_color_none, 4 ) );
 
 		/*
 		// Box
@@ -936,8 +954,6 @@ bool GamePlayScene::render()
 			active_object->get_mesh()->render();
 		}
 
-		float object_color_none[] = { 1.f, 1.f, 1.f, 1.f };
-		float add_color_none[] = { 0.f, 0.f, 0.f, 0.f };
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "object_color", object_color_none, 4 ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", add_color_none, 4 ) );
 
@@ -955,11 +971,33 @@ bool GamePlayScene::render()
 		}
 
 		// Player ( Shadow )
+		float add_color[] = { 0.f, 0.f, 0.8f, 1.f };
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", add_color, 4 ) );
+
 		render_shadow( player_.get(), view * projection );
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", add_color_none, 4 ) );
 
 
 		// cleanup
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, FALSE ) );
+	}
+
+	if ( true )
+	{
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE ) );
+
+		D3DXMatrixScaling( & s, 0.9f / camera_->aspect(), 0.9f, 1.f );
+		D3DXMatrixTranslation( & t, 0.f, 0.f, 1.f );
+
+		WorldViewProjection = s * t; // * projection;
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+		scope_mesh_->render();
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
+		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 	}
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
@@ -1017,9 +1055,9 @@ bool GamePlayScene::render()
 	// UI
 	direct_3d()->getSprite()->Begin( D3DXSPRITE_ALPHABLEND );
 
-	if ( player_->get_rocket_count() > 0 )
+	if ( player_->get_selected_item_type() == Player::ITEM_TYPE_ROCKET )
 	{
-		for ( int n = 0; n < player_->get_rocket_count(); n++ )
+		for ( int n = 0; n < player_->get_item_count( Player::ITEM_TYPE_ROCKET ); n++ )
 		{
 			const float offset = n * 20.f;
 
@@ -1043,9 +1081,9 @@ bool GamePlayScene::render()
 		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0x99FFFFFF );
 	}
 
-	if ( player_->get_umbrella_count() )
+	if ( player_->get_selected_item_type() == Player::ITEM_TYPE_UMBRELLA )
 	{
-		for ( int n = 3; n < 6; n++ )
+		for ( int n = 0; n < player_->get_item_count( Player::ITEM_TYPE_UMBRELLA ); n++ )
 		{
 			const float offset = n * 50.f;
 

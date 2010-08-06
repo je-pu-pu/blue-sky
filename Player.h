@@ -107,6 +107,8 @@ public:
 	void fall();
 	bool is_falling() const { return is_falling_; }
 	bool is_falling_to_dead() const;
+	
+	bool is_if_fall_to_dead( float ) const;
 
 	///
 	void start_umbrella_mode();

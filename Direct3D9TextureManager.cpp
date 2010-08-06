@@ -30,7 +30,8 @@ Direct3D9TextureManager::Texture* Direct3D9TextureManager::load( const char* nam
 
 	Texture* texture = 0;
 	
-	DIRECT_X_FAIL_CHECK( D3DXCreateTextureFromFile( direct_3d_->getDevice(), file_name, & texture ) );
+	// DIRECT_X_FAIL_CHECK( D3DXCreateTextureFromFile( direct_3d_->getDevice(), file_name, & texture ) );
+	DIRECT_X_FAIL_CHECK( D3DXCreateTextureFromFileEx( direct_3d_->getDevice(), file_name, D3DX_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, 0, D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0, NULL, NULL, & texture ) );
 	
 	texture_list_[ name ] = texture;
 

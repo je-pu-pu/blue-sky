@@ -79,8 +79,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	ui_texture_ = direct_3d()->getTextureManager()->load( "ui", "media/image/item.png" );
 
 	// Mesh
-	player_mesh_ = new Direct3D9Mesh( direct_3d() );
-	player_mesh_->load_x( "media/model/player.x" );
+//	player_mesh_ = new Direct3D9Mesh( direct_3d() );
+//	player_mesh_->load_x( "media/model/player.x" );
 
 	goal_mesh_ = new Direct3D9Mesh( direct_3d() );
 	goal_mesh_->load_x( "media/model/goal.x" );
@@ -947,18 +947,21 @@ bool GamePlayScene::render()
 		goal_mesh_->render();
 
 		// Player
-		vector3 pos = player_->position();
-		pos += -camera_->front() * 0.1f;
+		if ( player_mesh_ )
+		{
+			vector3 pos = player_->position();
+			pos += -camera_->front() * 0.1f;
 
-		D3DXMatrixRotationY( & r, math::degree_to_radian( camera_->rotate_degree().y() ) );
-		D3DXMatrixTranslation( & t, pos.x(), pos.y() + 0.05f, pos.z() );
+			D3DXMatrixRotationY( & r, math::degree_to_radian( camera_->rotate_degree().y() ) );
+			D3DXMatrixTranslation( & t, pos.x(), pos.y() + 0.05f, pos.z() );
 
-		world = r * t;
-		WorldViewProjection = world * view * projection;
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+			world = r * t;
+			WorldViewProjection = world * view * projection;
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
-		player_mesh_->render();
+			player_mesh_->render();
+		}
 
 		// ActiveObject
 		for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager()->active_object_list().begin(); i != active_object_manager()->active_object_list().end(); ++i )
@@ -1004,12 +1007,7 @@ bool GamePlayScene::render()
 		}
 
 		// Player ( Shadow )
-		float add_color[] = { 0.f, 0.f, 0.8f, 1.f };
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", add_color, 4 ) );
-
 		render_shadow( player_.get(), view * projection );
-
-		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", add_color_none, 4 ) );
 
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
 
@@ -1186,13 +1184,36 @@ void GamePlayScene::render_shadow( const ActiveObject* active_object, const D3DX
 
 	for ( std::list< float >::iterator i = grid_cell_height_list.begin(); i != grid_cell_height_list.end(); ++i )
 	{
-		D3DXMatrixTranslation( & t, active_object->position().x() , *i + 0.1f, active_object->position().z() );
+		if ( *i > active_object->position().y() ) continue;
+
+		D3DXMatrixTranslation( & t, active_object->position().x() , *i + 0.2f, active_object->position().z() );
 
 		WorldViewProjection = r * t * after;
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+
+		if ( active_object == player_.get() )
+		{
+			if ( player_->is_if_fall_to_dead( *i ) || player_->is_dead() )
+			{
+				float add_color[] = { 0.5f, 0.f, 0.f, 1.f };
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", add_color, 4 ) );
+			}
+			else
+			{
+				float add_color[] = { 0.f, 0.f, 0.5f, 1.f };
+				DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", add_color, 4 ) );
+			}
+		}
+
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 
 		shadow_mesh_->render();
+	}
+
+	if ( active_object == player_.get() )
+	{
+		float add_color[] = { 0.f, 0.f, 0.f, 1.f };
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", add_color, 4 ) );
 	}
 }
 

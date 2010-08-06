@@ -369,7 +369,7 @@ void Player::jump()
 {
 	if ( is_jumping() )
 	{
-		fall();
+		// fall();
 
 		return;
 	}
@@ -442,6 +442,17 @@ bool Player::is_falling_to_dead() const
 	
 
 	return velocity().y() < -0.2f && last_floor_cell()->height() - floor_cell()->height() >= 20;
+}
+
+/**
+ * Žw’è‚³‚ê‚½‚‚³‚É‚±‚Ì‚Ü‚Ü—Ž‰º‚·‚é‚ÆŽ€–S‚·‚é‚©‚Ç‚¤‚©‚ðŽæ“¾‚·‚é
+ */
+bool Player::is_if_fall_to_dead( float height ) const
+{
+	if ( action_mode_ == ACTION_MODE_UMBRELLA ) return false;
+	if ( ! last_floor_cell() ) return false;
+
+	return last_floor_cell()->height() - height >= 20;
 }
 
 void Player::kill()

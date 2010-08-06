@@ -5,6 +5,7 @@
 #include "DirectX.h"
 #include "App.h"
 #include "SoundManager.h"
+#include "Sound.h"
 
 namespace blue_sky
 {
@@ -19,6 +20,8 @@ EndingScene::EndingScene( const GameMain* game_main )
 
 	sound_manager()->stop_all();
 	sound_manager()->unload_all();
+
+	sound_manager()->load_music( "tokyo-shojo" )->play( false );
 
 	// direct_show_ = new DirectShow( App::GetInstance()->GetWindowHandle() );
 }

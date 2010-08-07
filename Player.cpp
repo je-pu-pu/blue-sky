@@ -157,6 +157,7 @@ void Player::update()
 
 		if ( position().y() - action_base_position_.y() >= get_balloon_action_length() )
 		{
+			play_sound( "balloon-burst" );
 			action_mode_ = ACTION_MODE_NONE;
 			is_jumping_ = true;
 		}
@@ -170,7 +171,7 @@ void Player::update()
 			is_jumping_ = true;
 		}
 	}
-	else if ( action_mode_ == ACTION_MODE_UMBRELLA )
+	else if ( action_mode_ == ACTION_MODE_UMBRELLA && velocity().y() < -0.1f )
 	{
 		// ‚Ó‚ñ‚í‚è—Ž‰º
 		velocity().y() = math::chase( velocity().y(), -0.1f, 0.02f );
@@ -312,9 +313,21 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 		}
 		*/
 
-		if ( action_mode_ == ACTION_MODE_UMBRELLA )
+		if ( is_if_fall_to_umbrella_lost( floor_cell_y.height() ) )
 		{
-			// action_mode_ = ACTION_MODE_NONE;
+			action_mode_ = ACTION_MODE_NONE;
+
+			item_count_[ ITEM_TYPE_UMBRELLA ]--;
+
+			if ( item_count_[ ITEM_TYPE_UMBRELLA ] <= 0 )
+			{
+				item_count_[ ITEM_TYPE_UMBRELLA ] = 0;
+
+				if ( selected_item_type_ == ITEM_TYPE_UMBRELLA )
+				{
+					selected_item_type_ = ITEM_TYPE_NONE;
+				}
+			}
 		}
 	}
 
@@ -377,7 +390,15 @@ void Player::jump()
 	velocity().y() = 0.5f;
 	
 	is_jumping_ = true;
-	action_mode_ = ACTION_MODE_NONE;
+
+	if ( action_mode_ == ACTION_MODE_UMBRELLA )
+	{
+		// if ( player_->get
+	}
+	else
+	{
+		action_mode_ = ACTION_MODE_NONE;
+	}
 
 	play_sound( "jump" );
 }
@@ -404,12 +425,14 @@ void Player::fall()
  */
 void Player::start_umbrella_mode()
 {
-	action_mode_ = ACTION_MODE_UMBRELLA;
-	item_count_[ ITEM_TYPE_UMBRELLA ]--;
-
-	if ( item_count_[ ITEM_TYPE_UMBRELLA ] <= 0 )
+	if ( action_mode_ == ACTION_MODE_UMBRELLA )
 	{
-		item_count_[ ITEM_TYPE_UMBRELLA ] = 0;
+		action_mode_ = ACTION_MODE_NONE;
+		selected_item_type_ = ITEM_TYPE_NONE;
+	}
+	else
+	{
+		action_mode_ = ACTION_MODE_UMBRELLA;
 		selected_item_type_ = ITEM_TYPE_NONE;
 	}
 }
@@ -422,6 +445,7 @@ void Player::switch_scope_mode()
 	if ( action_mode_ == ACTION_MODE_SCOPE )
 	{
 		action_mode_ = ACTION_MODE_NONE;
+		selected_item_type_ = ITEM_TYPE_NONE;
 	}
 	else
 	{
@@ -450,6 +474,17 @@ bool Player::is_falling_to_dead() const
 bool Player::is_if_fall_to_dead( float height ) const
 {
 	if ( action_mode_ == ACTION_MODE_UMBRELLA ) return false;
+	if ( ! last_floor_cell() ) return false;
+
+	return last_floor_cell()->height() - height >= 20;
+}
+
+/**
+ * Žw’è‚³‚ê‚½‚‚³‚É‚±‚Ì‚Ü‚Ü—Ž‰º‚·‚é‚ÆŽP‚ðÁ”ï‚·‚é‚©‚Ç‚¤‚©‚ðŽæ“¾‚·‚é
+ */
+bool Player::is_if_fall_to_umbrella_lost( float height ) const
+{
+	if ( action_mode_ != ACTION_MODE_UMBRELLA ) return false;
 	if ( ! last_floor_cell() ) return false;
 
 	return last_floor_cell()->height() - height >= 20;
@@ -563,30 +598,28 @@ int Player::get_item_count( ItemType item_type ) const
 
 void Player::select_prev_item()
 {
-	do
+	for ( int type = static_cast< int >( selected_item_type_ ) - 1; type >= ITEM_TYPE_NONE; type-- )
 	{
-		selected_item_type_ = static_cast< ItemType >( static_cast< int >( selected_item_type_ ) - 1 );
-
-		if ( selected_item_type_ < ITEM_TYPE_NONE )
+		if ( type == ITEM_TYPE_NONE || item_count_[ type ] )
 		{
-			selected_item_type_ = static_cast< ItemType >( ITEM_TYPE_MAX - 1 );
+			selected_item_type_ = static_cast< ItemType >( type );
+			play_sound( "click" );
+			break;
 		}
 	}
-	while ( selected_item_type_ != ITEM_TYPE_NONE && item_count_[ selected_item_type_ ] == 0 );
 }
 
 void Player::select_next_item()
 {
-	do
+	for ( int type = static_cast< int >( selected_item_type_ ) + 1; type < ITEM_TYPE_MAX; type++ )
 	{
-		selected_item_type_ = static_cast< ItemType >( static_cast< int >( selected_item_type_ ) + 1 );
-
-		if ( selected_item_type_ >= ITEM_TYPE_MAX )
+		if ( item_count_[ type ] )
 		{
-			selected_item_type_ = ITEM_TYPE_NONE;
+			selected_item_type_ = static_cast< ItemType >( type );
+			play_sound( "click" );
+			break;
 		}
 	}
-	while ( selected_item_type_ != ITEM_TYPE_NONE && item_count_[ selected_item_type_ ] == 0 );
 }
 
 float Player::get_collision_width() const

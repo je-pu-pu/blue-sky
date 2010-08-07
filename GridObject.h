@@ -31,6 +31,8 @@ private:
 	float visible_alpha_;
 	float lod_alpha_;
 
+	float color_[ 4 ];
+
 public:
 	GridObject( int, int, int, int, GridData* );
 	virtual ~GridObject();
@@ -60,6 +62,8 @@ public:
 
 	void render() const;
 	void render_last_lod() const;
+
+	float* color() { return color_; }
 };
 
 } // namespace blue_sky

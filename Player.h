@@ -109,6 +109,7 @@ public:
 	bool is_falling_to_dead() const;
 	
 	bool is_if_fall_to_dead( float ) const;
+	bool is_if_fall_to_umbrella_lost( float ) const;
 
 	///
 	void start_umbrella_mode();

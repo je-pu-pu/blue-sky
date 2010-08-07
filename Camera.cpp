@@ -8,6 +8,7 @@ namespace blue_sky
 
 Camera::Camera()
 	: default_front_( 0.f, 0.f, 1.f )
+	, default_right_( 1.f, 0.f, 0.f )
 	, default_up_( 0.f, 1.f, 0.f )
 	, fov_( 60.f )
 	, fov_target_( fov_ )
@@ -48,6 +49,8 @@ void Camera::update()
 	zr.rotate_z( rotate_degree().z() );
 	
 	front_ = default_front_ * xr * yr;
+	right_ = default_right_ * xr * yr;
+
 	look_at_ = position() + default_front_ * xr * zr * yr;
 	up_ = default_up_ * xr * zr * yr;
 

@@ -19,7 +19,7 @@ GridObject::GridObject( int x, int y, int z, int r, GridData* grid_data )
 	, visible_alpha_( 0.f )
 	, lod_alpha_( 0.f )
 {
-	
+	color_[ 0 ] = color_[ 1 ] = color_[ 2 ] = color_[ 3 ] = 1.f;
 }
 
 GridObject::~GridObject()

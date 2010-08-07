@@ -20,9 +20,11 @@ private:
 	vector3 up_;					///< 上
 
 	vector3 default_front_;			///< デフォルト視点
+	vector3 default_right_;			///< デフォルト左
 	vector3 default_up_;			///< デフォルト上
 
 	vector3 front_;					///< 前
+	vector3 right_;					///< 右
 
 	vector3 rotate_degree_;			///< XYZ 各軸に対する回転角度
 	vector3 rotate_degree_target_;	///< XYZ 各軸に対する回転角度 ( 目標 )
@@ -42,6 +44,7 @@ public:
 	const vector3& up() const { return up_; }
 
 	const vector3& front() const { return front_; }
+	const vector3& right() const { return right_; }
 
 	vector3& rotate_degree() { return rotate_degree_; }
 	vector3& rotate_degree_target() { return rotate_degree_target_; }

@@ -82,22 +82,22 @@ const GridCell& ActiveObject::get_floor_cell_center() const
 
 const GridCell& ActiveObject::get_floor_cell_left_front() const
 {
-	return stage_->cell( static_cast< int >( position().x() - get_collision_width() * 0.5f ), static_cast< int >( position().z() + get_collision_depth() * 0.5f ) );
+	return stage_->cell( static_cast< int >( position().x() - std::min( get_collision_width() * 0.5f, 1.f ) ), static_cast< int >( position().z() + std::min( get_collision_depth() * 0.5f, 1.f ) ) );
 }
 
 const GridCell& ActiveObject::get_floor_cell_right_front() const
 {
-	return stage_->cell( static_cast< int >( position().x() + get_collision_width() * 0.5f ), static_cast< int >( position().z() + get_collision_depth() * 0.5f ) );
+	return stage_->cell( static_cast< int >( position().x() + std::min( get_collision_width() * 0.5f, 1.f ) ), static_cast< int >( position().z() + std::min( get_collision_depth() * 0.5f, 1.f ) ) );
 }
 
 const GridCell& ActiveObject::get_floor_cell_left_back() const
 {
-	return stage_->cell( static_cast< int >( position().x() - get_collision_width() * 0.5f ), static_cast< int >( position().z() - get_collision_depth() * 0.5f ) );
+	return stage_->cell( static_cast< int >( position().x() - std::min( get_collision_width() * 0.5f, 1.f ) ), static_cast< int >( position().z() - std::min( get_collision_depth() * 0.5f, 1.f ) ) );
 }
 
 const GridCell& ActiveObject::get_floor_cell_right_back() const
 {
-	return stage_->cell( static_cast< int >( position().x() + get_collision_width() * 0.5f ), static_cast< int >( position().z() - get_collision_depth() * 0.5f ) );
+	return stage_->cell( static_cast< int >( position().x() + std::min( get_collision_width() * 0.5f, 1.f ) ), static_cast< int >( position().z() - std::min( get_collision_depth() * 0.5f, 1.f ) ) );
 }
 
 void ActiveObject::set_stage( const Stage* stage )

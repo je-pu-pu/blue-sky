@@ -55,6 +55,9 @@ protected:
 
 	Texture* ui_texture_;
 
+	float brightness_;
+	bool is_cleared_;
+
 	float ambient_color_[ 4 ];
 	float grid_object_visible_length_;
 	float grid_object_lod_0_length_;

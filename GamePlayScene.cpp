@@ -52,15 +52,14 @@
 namespace blue_sky
 {
 
-float brightness = 1.f;
-bool clear_flag = false;
-
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
 	, back_buffer_texture_( 0 )
 	, back_buffer_surface_( 0 )
 	, depth_surface_( 0 )
 	, ui_texture_( 0 )
+	, brightness_( 1.f )
+	, is_cleared_( false )
 	, grid_object_visible_length_( 500 )
 	, grid_object_lod_0_length_( 100 )
 	, lens_type_( LENS_TYPE_NORMAL )
@@ -72,8 +71,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	grid_object_visible_length_ = config()->get( "video.grid-object-visible-length", 500.f );
 	grid_object_lod_0_length_ = config()->get( "video.grid-object-lod-0-length", 100.f );
-
-	clear_flag = false;
 
 	// Texture
 	ui_texture_ = direct_3d()->getTextureManager()->load( "ui", "media/image/item.png" );
@@ -531,7 +528,7 @@ void GamePlayScene::save_stage_file( const char* file_name ) const
  */
 void GamePlayScene::update()
 {
-	if ( ! player_->is_dead() && ! clear_flag )
+	if ( ! player_->is_dead() && ! is_cleared_ )
 	{
 		bool step = false;
 
@@ -614,7 +611,7 @@ void GamePlayScene::update()
 		}
 	}
 
-	if ( ! clear_flag )
+	if ( ! is_cleared_ )
 	{
 		player_->add_direction_degree( input()->get_mouse_dx() * 90.f );
 
@@ -669,18 +666,18 @@ void GamePlayScene::update()
 		}
 	}
 
-	if ( ! clear_flag && player_->collision_detection( goal_.get() ) )
+	if ( ! is_cleared_ && player_->collision_detection( goal_.get() ) )
 	{
 		player_->set_gravity( player_->get_gravity() * 0.1f );
 		player_->velocity().set( 0.f, 0.5f, 0.f );
 
-		clear_flag = true;
+		is_cleared_ = true;
 
 		sound_manager()->stop_all();
 		sound_manager()->get_sound( "fin" )->play( false );
 	}
 
-	if ( clear_flag )
+	if ( is_cleared_ )
 	{
 		vector3 target_position = goal_->position();
 		target_position.z() -= 4.f - sound_manager()->get_sound( "fin" )->get_current_position() * 0.5f;
@@ -693,7 +690,7 @@ void GamePlayScene::update()
 		camera_->rotate_degree_target().z() = 0.f;
 		camera_->set_rotate_chase_speed( 0.1f );
 
-		brightness = math::chase( brightness, 1.f, 0.002f );
+		brightness_ = math::chase( brightness_, 1.f, 0.002f );
 
 		if ( sound_manager()->get_sound( "fin" )->get_current_position() >= 6.f && ! sound_manager()->get_sound( "door" )->is_playing() )
 		{
@@ -711,7 +708,7 @@ void GamePlayScene::update()
 	else if ( player_->is_dead() )
 	{
 		camera_->rotate_degree_target().z() = 90.f;
-		brightness = math::chase( brightness, -0.4f, 0.01f );
+		brightness_ = math::chase( brightness_, -0.4f, 0.01f );
 
 		if ( camera_->rotate_degree().z() == camera_->rotate_degree_target().z() && input()->push( Input::A ) )
 		{
@@ -727,16 +724,16 @@ void GamePlayScene::update()
 				active_object->restart();
 			}
 
-			brightness = 1.f;
+			brightness_ = 1.f;
 		}
 	}
 	else if ( player_->is_falling_to_dead() )
 	{
-		brightness = math::chase( brightness, 0.2f, 0.02f );
+		brightness_ = math::chase( brightness_, 0.2f, 0.02f );
 	}
 	else
 	{
-		brightness = math::chase( brightness, 0.f, 0.02f );
+		brightness_ = math::chase( brightness_, 0.f, 0.02f );
 	}
 
 	camera_->position() = player_->position() + vector3( 0.f, player_->get_eye_height(), 0.f ); // + player_->front();
@@ -750,7 +747,7 @@ void GamePlayScene::update()
 	// camera_->position() = player_->position() + player_->front() + vector3( 0.f, player_->get_eye_height(), 0.f );
 
 
-	if ( ! clear_flag && player_->is_rocketing() )
+	if ( ! is_cleared_ && player_->is_rocketing() )
 	{
 		// camera_->set_fov( math::chase( camera_->fov(), 30.f, 0.2f ) );
 		camera_->position().x() += common::random( -0.01f, 0.01f );
@@ -794,7 +791,7 @@ bool GamePlayScene::render()
 
 	UINT pass_count = 0;
 
-	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloat( "brightness", brightness ) );
+	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloat( "brightness", brightness_ ) );
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->Begin( & pass_count, 0 ) );
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->BeginPass( 0 ) );

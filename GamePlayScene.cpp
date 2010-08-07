@@ -1209,7 +1209,7 @@ bool GamePlayScene::render()
 		win::Rect src_rect = win::Rect::Size( 384, 0, 64, 64 );
 		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
 
-		D3DXMatrixTranslation( & t, get_width() - src_rect.width() * 0.55f, src_rect.height() * 0.55f, 0.f );
+		D3DXMatrixTranslation( & t, src_rect.width() * 0.6f, get_height() - src_rect.height() * 0.6f, 0.f );
 		direct_3d()->getSprite()->SetTransform( & t );
 		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0x99FFFFFF );
 	}

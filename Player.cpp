@@ -226,8 +226,8 @@ void Player::on_collision_x( const GridCell& floor_cell_x )
 		velocity().y() = get_clambering_speed();
 
 		is_jumping_ = false;
-		step_count_ = 0;
-		step_speed_ = 0.f;
+		// step_count_ = 0;
+		// step_speed_ = 0.f;
 
 		if ( ! is_clambering() && floor_cell_x.height() - position().y() > 1.f )
 		{
@@ -348,8 +348,8 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
 		velocity().y() = get_clambering_speed();
 
 		is_jumping_ = false;
-		step_count_ = 0;
-		step_speed_ = 0.f;
+		// step_count_ = 0;
+		// step_speed_ = 0.f;
 
 		if ( ! is_clambering() && floor_cell_z.height() - position().y() > 1.f )
 		{

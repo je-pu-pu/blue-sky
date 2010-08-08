@@ -167,6 +167,7 @@ void Player::update()
 		// ƒƒPƒbƒg
 		if ( ( position() - action_base_position_ ).length() >= get_rocket_action_length() )
 		{
+			play_sound( "rocket-burst" );
 			action_mode_ = ACTION_MODE_NONE;
 			is_jumping_ = true;
 		}
@@ -201,7 +202,7 @@ void Player::update()
 			velocity().z() *= 0.9f;
 		}
 
-		if ( velocity().y() < -get_max_speed() * 0.02f )
+		if ( velocity().y() < -get_max_speed() * 0.02f && action_mode_ != ACTION_MODE_BALLOON )
 		{
 			is_jumping_ = true;
 		}
@@ -220,7 +221,8 @@ void Player::on_collision_x( const GridCell& floor_cell_x )
 		( velocity().y() <= 0.02f && floor_cell_x.height() - position().y() <= 2.f ) &&
 		(
 			( velocity().x() < 0.f && direction() == LEFT || velocity().x() > 0.f && direction() == RIGHT ) ||
-			( floor_cell_x.height() - position().y() <= 1.f && ( velocity().x() < 0.f && direction() != RIGHT || velocity().x() > 0.f && direction() != LEFT ) )
+			( floor_cell_x.height() - position().y() <= 1.f && ( velocity().x() < 0.f && direction() != RIGHT || velocity().x() > 0.f && direction() != LEFT ) ) ||
+			( is_rocketing() )
 		) )
 	{
 		velocity().y() = get_clambering_speed();
@@ -239,14 +241,15 @@ void Player::on_collision_x( const GridCell& floor_cell_x )
 	else
 	{
 		play_sound( "collision-wall", false, false );
+
+		if ( is_rocketing() )
+		{
+			stop_rocket();
+			velocity().z() *= -0.8f;
+		}
 	}
 
-	if ( is_rocketing() )
-	{
-		stop_rocket();
-		velocity().x() *= -0.8f;
-	}
-	else
+	if ( ! is_rocketing() )
 	{
 		velocity().x() *= 0.1f;
 	}
@@ -342,7 +345,8 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
 		( velocity().y() <= 0.02f && floor_cell_z.height() - position().y() <= 2.f ) && 
 		(
 			( velocity().z() < 0.f && direction() == BACK || velocity().z() > 0.f && direction() == FRONT ) ||
-			( floor_cell_z.height() - position().y() <= 1.f && ( velocity().z() < 0.f && direction() != FRONT || velocity().z() > 0.f && direction() != BACK ) )
+			( floor_cell_z.height() - position().y() <= 1.f && ( velocity().z() < 0.f && direction() != FRONT || velocity().z() > 0.f && direction() != BACK ) ) ||
+			( is_rocketing() )
 		) )
 	{
 		velocity().y() = get_clambering_speed();
@@ -361,14 +365,15 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
 	else
 	{
 		play_sound( "collision-wall", false, false );
+
+		if ( is_rocketing() )
+		{
+			stop_rocket();
+			velocity().z() *= -0.8f;
+		}
 	}
 
-	if ( is_rocketing() )
-	{
-		stop_rocket();
-		velocity().z() *= -0.8f;
-	}
-	else
+	if ( ! is_rocketing() )
 	{
 		velocity().z() *= 0.1f;
 	}

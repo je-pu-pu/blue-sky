@@ -48,6 +48,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	bg_texture_ = direct_3d()->getTextureManager()->load( "bg", "media/image/title-bg.png" );
 
 	ok_ = sound_manager()->load( "ok" );
+	click_ = sound_manager()->load( "click" );
 
 	update_stage_list();
 }
@@ -74,14 +75,13 @@ void StageSelectScene::update()
 
 			ok_->play( false );
 		}
-		if ( is_mouse_on_right_allow() )
+		else if ( is_mouse_on_right_allow() )
 		{
 			update_page( page_ + 1 );
 
 			ok_->play( false );
 		}
-
-		if ( Stage* stage = get_pointed_stage() )
+		else if ( Stage* stage = get_pointed_stage() )
 		{
 			ok_->play( false );
 
@@ -100,6 +100,10 @@ void StageSelectScene::update()
 			}
 
 			set_next_scene( "stage_intro" );
+		}
+		else
+		{
+			click_->play( false );
 		}
 	}
 }

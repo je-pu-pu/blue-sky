@@ -123,10 +123,10 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		sound_manager()->load( "balloon-get" );
 		sound_manager()->load( "balloon-burst" );
 		sound_manager()->load( "rocket-get" );
+		sound_manager()->load( "rocket" );
+		sound_manager()->load( "rocket-burst" );
 		sound_manager()->load( "umbrella-get" );
 		sound_manager()->load( "medal-get" );
-
-		sound_manager()->load( "rocket" );
 
 		sound_manager()->load( "fin" );
 		sound_manager()->load( "door" );
@@ -1213,6 +1213,7 @@ bool GamePlayScene::render()
 
 	direct_3d()->getSprite()->End();
 
+	/*
 	std::string debug_text = "player : (" + 
 			common::serialize( static_cast< int >( player_->position().x() ) ) + "," +
 			common::serialize( static_cast< int >( player_->position().y() ) ) + "," +
@@ -1226,6 +1227,7 @@ bool GamePlayScene::render()
 	debug_text += std::string( "\ncamera : " ) + common::serialize( camera_->rotate_degree_target().y() );
 
 	direct_3d()->getFont()->draw_text( 0, 24, debug_text.c_str(), D3DCOLOR_XRGB( 0, 0, 0 ) );
+	*/
 
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
 

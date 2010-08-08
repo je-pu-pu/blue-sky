@@ -43,6 +43,7 @@ private:
 	Texture* bg_texture_;
 
 	Sound* ok_;
+	Sound* click_;
 
 	win::Rect cursor_src_rect_;
 	win::Rect left_allow_src_rect_;

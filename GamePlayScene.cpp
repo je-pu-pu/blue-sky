@@ -596,7 +596,7 @@ void GamePlayScene::update()
 			{
 				case Player::ITEM_TYPE_NONE: player_->jump(); break;
 				case Player::ITEM_TYPE_ROCKET: player_->rocket( camera_->front() ); break;
-				case Player::ITEM_TYPE_UMBRELLA: player_->start_umbrella_mode(); break;
+				case Player::ITEM_TYPE_UMBRELLA: player_->start_umbrella_mode(); player_->jump(); break;
 				case Player::ITEM_TYPE_SCOPE:
 				{
 					player_->switch_scope_mode();

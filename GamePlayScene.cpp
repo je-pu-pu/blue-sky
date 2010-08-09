@@ -10,6 +10,7 @@
 #include "Rocket.h"
 #include "Umbrella.h"
 #include "Medal.h"
+#include "Poison.h"
 #include "Camera.h"
 #include "Stage.h"
 
@@ -488,6 +489,10 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		{
 			active_object = new Medal();
 		}
+		else if ( name == "poison" )
+		{
+			active_object = new Poison();
+		}
 
 		if ( active_object )
 		{
@@ -657,6 +662,11 @@ void GamePlayScene::update()
 			else if ( dynamic_cast< Medal* >( active_object ) )
 			{
 				player_->on_get_medal();
+				active_object->kill();
+			}
+			else if ( dynamic_cast< Poison* >( active_object ) )
+			{
+				player_->kill();
 				active_object->kill();
 			}
 			else
@@ -849,11 +859,10 @@ bool GamePlayScene::render()
 			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
 			ground_mesh_->render();
 		}
-
+		
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE ) );
 		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE ) );
-//		DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->SetRenderState( D3DRS_FOGENABLE, TRUE ) );
-		
+
 #if 1
 		// GridObject
 		D3DXMatrixScaling( & s, 10.f, 10.f, 10.f );
@@ -1123,6 +1132,47 @@ bool GamePlayScene::render()
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
 	}
 
+	// aim
+	if ( player_->get_selected_item_type() == Player::ITEM_TYPE_ROCKET )
+	{
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->BeginPass( 0 ) );
+
+		box_->ready();
+
+		// vector3 pos = player_->position();
+		// pos += camera_->front() * 60.f;
+
+		// D3DXMatrixRotationY( & r, math::degree_to_radian( camera_->rotate_degree().y() ) );
+		// D3DXMatrixTranslation( & t, pos.x(), pos.y(), pos.z() );
+
+		D3DXMatrixTranslation( & t, 0.f, 0.f, 60.f );
+
+		{
+			// D3DXMatrixScaling( & s, 1.f, 500.f, 5.f );
+
+			// WorldViewProjection = s * t * view * projection;
+			WorldViewProjection = t * projection;
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+
+			box_->render();
+		}
+
+		/*
+		{
+			D3DXMatrixScaling( & s, 500.f, 1.f, 5.f );
+
+			WorldViewProjection = s * r * t * view * projection;
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );
+			DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->CommitChanges() );
+
+			box_->render();
+		}
+		*/
+
+		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->EndPass() );
+	}
+
 	// Scope
 	if ( player_->get_action_mode() == Player::ACTION_MODE_SCOPE )
 	{
@@ -1167,6 +1217,7 @@ bool GamePlayScene::render()
 		}
 
 		// aim
+		/*
 		win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );
 		D3DXVECTOR3 center( 34.f, 38.f, 0.f );
 
@@ -1174,6 +1225,7 @@ bool GamePlayScene::render()
 
 		direct_3d()->getSprite()->SetTransform( & transform );
 		direct_3d()->getSprite()->Draw( ui_texture_, & src_rect.get_rect(), & center, 0, 0x99FFFFFF );
+		*/
 	}
 	else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_UMBRELLA )
 	{

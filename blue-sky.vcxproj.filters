@@ -150,6 +150,9 @@
     <ClCompile Include="Medal.cpp">
       <Filter>ActiveObject</Filter>
     </ClCompile>
+    <ClCompile Include="Poison.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -279,6 +282,9 @@
       <Filter>ActiveObject</Filter>
     </ClInclude>
     <ClInclude Include="Umbrella.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Poison.h">
       <Filter>ActiveObject</Filter>
     </ClInclude>
   </ItemGroup>

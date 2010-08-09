@@ -191,6 +191,7 @@
     <ClCompile Include="Medal.cpp" />
     <ClCompile Include="OggVorbisFile.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Poison.cpp" />
     <ClCompile Include="Rocket.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Sound.cpp" />
@@ -241,6 +242,7 @@
     <ClInclude Include="Medal.h" />
     <ClInclude Include="OggVorbisFile.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Poison.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Rocket.h" />
     <ClInclude Include="Scene.h" />

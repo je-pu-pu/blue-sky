@@ -481,7 +481,7 @@ bool Player::is_if_fall_to_dead( float height ) const
 	if ( action_mode_ == ACTION_MODE_UMBRELLA ) return false;
 	if ( ! last_floor_cell() ) return false;
 
-	return last_floor_cell()->height() - height >= 20;
+	return last_floor_cell()->height() - height >= 45;
 }
 
 /**

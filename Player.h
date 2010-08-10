@@ -50,11 +50,14 @@ private:
 
 	ActionMode	action_mode_;			///< 現在のアクションのモード
 	vector3		action_base_position_;	///< 現在のアクションの基底位置
+	bool		is_action_pre_finish_;	///< 現在のアクションがもうすぐ終わるフラグ
 
 	bool		has_medal_;				///< メダル保持フラグ
 
 	int			item_count_[ ITEM_TYPE_MAX ];
 	ItemType	selected_item_type_;	///< 現在選択中のアイテム
+
+	bool		look_floor_request_;	///< 下を見て欲しい要求
 
 	void on_collision_x( const GridCell& );
 	void on_collision_y( const GridCell& );
@@ -132,11 +135,17 @@ public:
 
 	ActionMode get_action_mode() const { return action_mode_; }
 
+	bool is_action_pre_finish() const { return is_action_pre_finish_; }
+
+
 	ItemType get_selected_item_type() const { return selected_item_type_; }
 	int get_item_count( ItemType ) const;
 
 	void select_prev_item();
 	void select_next_item();
+
+	void push_look_floor_request() { look_floor_request_ = true; }
+	bool pop_look_floor_request() { bool r = look_floor_request_; look_floor_request_ = false; return r; }
 
 }; // class Player
 

@@ -41,7 +41,9 @@ protected:
 	common::safe_ptr< Direct3D9Mesh > scope_mesh_;
 
 	common::safe_ptr< Direct3D9Mesh > balloon_mesh_;
+	common::safe_ptr< Direct3D9Mesh > rocket_mesh_;
 	common::safe_ptr< Direct3D9Mesh > umbrella_mesh_;
+	common::safe_ptr< Direct3D9Mesh > aim_mesh_;
 
 	common::safe_ptr< Direct3D9SkyBox > sky_box_;
 

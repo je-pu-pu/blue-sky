@@ -289,9 +289,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="media\object\building-a">
-      <Filter>object</Filter>
-    </None>
     <None Include="media\object\house-a">
       <Filter>object</Filter>
     </None>
@@ -300,29 +297,11 @@
     <None Include="media\object\road-curve">
       <Filter>object</Filter>
     </None>
-    <None Include="media\object\step">
-      <Filter>object</Filter>
-    </None>
-    <None Include="media\object\tel-box">
-      <Filter>object</Filter>
-    </None>
-    <None Include="media\object\vending-machine">
-      <Filter>object</Filter>
-    </None>
-    <None Include="media\object\building-b">
-      <Filter>object</Filter>
-    </None>
-    <None Include="media\object\pole">
-      <Filter>object</Filter>
-    </None>
     <None Include="media\object\road">
       <Filter>object</Filter>
     </None>
     <None Include="blue-sky.config" />
     <None Include="blue-sky.default.config" />
-    <None Include="media\object\building-c">
-      <Filter>object</Filter>
-    </None>
     <None Include="media\stage\0-4.stage">
       <Filter>stage</Filter>
     </None>

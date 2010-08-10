@@ -23,19 +23,21 @@ namespace blue_sky
 {
 
 Player::Player()
-	 : input_( 0 )
-	 , step_count_( 0 )
-	 , step_speed_( 0.05f )
-	 , gravity_( 0.01f )
-	 , super_jump_velocity_( 0.f )
-	 , eye_height_( 1.5f )
-	 , is_turn_avaiable_( true )
-	 , is_jumping_( false )
-	 , is_clambering_( false )
-	 , is_falling_( false )
-	 , action_mode_( ACTION_MODE_NONE )
-	 , has_medal_( false )
-	 , selected_item_type_( ITEM_TYPE_NONE )
+	: input_( 0 )
+	, step_count_( 0 )
+	, step_speed_( 0.05f )
+	, gravity_( 0.01f )
+	, super_jump_velocity_( 0.f )
+	, eye_height_( 1.5f )
+	, is_turn_avaiable_( true )
+	, is_jumping_( false )
+	, is_clambering_( false )
+	, is_falling_( false )
+	, action_mode_( ACTION_MODE_NONE )
+	, is_action_pre_finish_( false )
+	, has_medal_( false )
+	, selected_item_type_( ITEM_TYPE_NONE )
+	, look_floor_request_( false )
 {
 	setup_local_aabb_list();
 
@@ -44,7 +46,7 @@ Player::Player()
 
 void Player::step( float s )
 {
-	if ( is_rocketing() || is_falling() )
+	if ( is_rocketing() || is_falling() || ! last_floor_cell() )
 	{
 		return;
 	}
@@ -58,6 +60,11 @@ void Player::step( float s )
 
 void Player::side_step( float s )
 {
+	if ( is_rocketing() || is_falling() || ! last_floor_cell() )
+	{
+		return;
+	}
+
 	velocity() += right() * s * get_side_step_speed();
 }
 
@@ -77,7 +84,7 @@ void Player::update_step_speed()
 {
 	if ( is_jumping() || action_mode_ == ACTION_MODE_BALLOON )
 	{
-		step_speed_ = 0.01f; // math::chase( step_speed_, 0.1f, 0.001f );
+		step_speed_ = 0.012f; // math::chase( step_speed_, 0.1f, 0.001f );
 
 		stop_sound( "walk" );
 		stop_sound( "run" );
@@ -153,13 +160,18 @@ void Player::update()
 	if ( action_mode_ == ACTION_MODE_BALLOON )
 	{
 		// •—‘D
-		velocity().y() = math::chase( velocity().y(), 0.1f, 0.02f );
+		velocity().y() = math::chase( velocity().y(), 0.08f, 0.02f );
 
 		if ( position().y() - action_base_position_.y() >= get_balloon_action_length() )
 		{
 			play_sound( "balloon-burst" );
 			action_mode_ = ACTION_MODE_NONE;
 			is_jumping_ = true;
+			is_action_pre_finish_ = false;
+		}
+		else if ( position().y() - action_base_position_.y() >= get_balloon_action_length() * 0.5f )
+		{
+			is_action_pre_finish_ = true;
 		}
 	}
 	else if ( action_mode_ == ACTION_MODE_ROCKET )
@@ -170,6 +182,11 @@ void Player::update()
 			play_sound( "rocket-burst" );
 			action_mode_ = ACTION_MODE_NONE;
 			is_jumping_ = true;
+			is_action_pre_finish_ = false;
+		}
+		else if ( ( position() - action_base_position_ ).length() >= get_rocket_action_length() * 0.8f )
+		{
+			is_action_pre_finish_ = true;
 		}
 	}
 	else if ( action_mode_ == ACTION_MODE_UMBRELLA && velocity().y() < -0.1f )
@@ -252,6 +269,8 @@ void Player::on_collision_x( const GridCell& floor_cell_x )
 	{
 		velocity().x() *= 0.1f;
 	}
+
+	push_look_floor_request();
 }
 
 void Player::on_collision_y( const GridCell& floor_cell_y )
@@ -375,6 +394,8 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
 	{
 		velocity().z() *= 0.1f;
 	}
+
+	push_look_floor_request();
 }
 
 /**
@@ -536,6 +557,7 @@ void Player::rocket( const vector3& direction )
 
 	is_jumping_ = false;
 	is_falling_ = false;
+	is_action_pre_finish_ = false;
 
 	action_mode_ = ACTION_MODE_ROCKET;
 	velocity() = direction * get_max_speed() * 0.5f;
@@ -554,12 +576,14 @@ void Player::rocket( const vector3& direction )
 void Player::stop_rocket()
 {
 	action_mode_ = ACTION_MODE_NONE;
+	is_action_pre_finish_ = false;
 }
 
 void Player::on_get_balloon()
 {
 	is_jumping_ = false;
 	is_falling_ = false;
+	is_action_pre_finish_ = false;
 
 	action_mode_ = ACTION_MODE_BALLOON;
 	action_base_position_ = position();

@@ -221,8 +221,7 @@ void Player::on_collision_x( const GridCell& floor_cell_x )
 		( velocity().y() <= 0.02f && floor_cell_x.height() - position().y() <= 2.f ) &&
 		(
 			( velocity().x() < 0.f && direction() == LEFT || velocity().x() > 0.f && direction() == RIGHT ) ||
-			( floor_cell_x.height() - position().y() <= 1.f && ( velocity().x() < 0.f && direction() != RIGHT || velocity().x() > 0.f && direction() != LEFT ) ) ||
-			( is_rocketing() )
+			( floor_cell_x.height() - position().y() <= 1.f && ( velocity().x() < 0.f && direction() != RIGHT || velocity().x() > 0.f && direction() != LEFT ) )
 		) )
 	{
 		velocity().y() = get_clambering_speed();
@@ -245,7 +244,7 @@ void Player::on_collision_x( const GridCell& floor_cell_x )
 		if ( is_rocketing() )
 		{
 			stop_rocket();
-			velocity().z() *= -0.8f;
+			velocity().x() *= -0.8f;
 		}
 	}
 
@@ -345,8 +344,7 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
 		( velocity().y() <= 0.02f && floor_cell_z.height() - position().y() <= 2.f ) && 
 		(
 			( velocity().z() < 0.f && direction() == BACK || velocity().z() > 0.f && direction() == FRONT ) ||
-			( floor_cell_z.height() - position().y() <= 1.f && ( velocity().z() < 0.f && direction() != FRONT || velocity().z() > 0.f && direction() != BACK ) ) ||
-			( is_rocketing() )
+			( floor_cell_z.height() - position().y() <= 1.f && ( velocity().z() < 0.f && direction() != FRONT || velocity().z() > 0.f && direction() != BACK ) )
 		) )
 	{
 		velocity().y() = get_clambering_speed();
@@ -469,8 +467,7 @@ bool Player::is_falling_to_dead() const
 	if ( ! last_floor_cell() ) return false;
 	if ( ! floor_cell() ) return false;
 	
-
-	return velocity().y() < -0.2f && last_floor_cell()->height() - floor_cell()->height() >= 20;
+	return velocity().y() < -0.2f && last_floor_cell()->height() - floor_cell()->height() >= 45;
 }
 
 /**

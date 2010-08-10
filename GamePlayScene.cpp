@@ -364,10 +364,21 @@ void GamePlayScene::load_stage_file( const char* file_name )
 	};
 	*/
 
+	/*
 	float object_colors[ 3 ][ 4 ] = {
 		{ 1.f, 0.5f, 0.5f, 1.f },
 		{ 1.f, 1.f, 1.f, 1.f },
 		{ 0.5f, 0.5f, 1.f, 1.f },
+	};
+	*/
+
+	const int OBJECT_COLOR_MAX = 5;
+	float object_colors[ OBJECT_COLOR_MAX ][ 4 ] = {
+		{ 1.0f, 1.0f, 1.0f, 1.f },
+		{ 0.9f, 0.9f, 0.9f, 1.f },
+		{ 0.8f, 0.8f, 0.8f, 1.f },
+		{ 0.7f, 0.7f, 0.7f, 1.f },
+		{ 0.6f, 0.6f, 0.6f, 1.f },
 	};
 
 	int object_color_index = 0;
@@ -456,7 +467,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 						grid_object->color()[ 1 ] = object_colors[ object_color_index ][ 1 ];
 						grid_object->color()[ 2 ] = object_colors[ object_color_index ][ 2 ];
 						grid_object->color()[ 3 ] = object_colors[ object_color_index ][ 3 ];
-						object_color_index = ( object_color_index + 1 ) % 3;
+						object_color_index = ( object_color_index + 1 ) % OBJECT_COLOR_MAX;
 					}
 				}
 				else

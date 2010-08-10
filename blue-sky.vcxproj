@@ -292,6 +292,8 @@
     <None Include="media\stage\2-2.stage" />
     <None Include="media\stage\2-3.stage" />
     <None Include="media\stage\2-4.stage" />
+    <None Include="media\stage_ext\3-1.stage" />
+    <None Include="media\stage_ext\3-2.stage" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

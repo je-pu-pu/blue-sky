@@ -604,11 +604,11 @@ void GamePlayScene::update()
 		{
 			if ( wheel > 0 )
 			{
-				player_->select_prev_item();
+				player_->select_next_item();
 			}
 			else if ( wheel < 0 )
 			{
-				player_->select_next_item();
+				player_->select_prev_item();
 			}
 		}
 
@@ -750,6 +750,8 @@ void GamePlayScene::update()
 				ActiveObject* active_object = *i;
 				active_object->restart();
 			}
+
+			camera_->reset_fov();
 
 			brightness_ = 1.f;
 		}
@@ -1184,7 +1186,7 @@ bool GamePlayScene::render()
 		D3DXMatrixScaling( & s, 5.f, 5.f, 5.f );
 		D3DXMatrixTranslation( & t, 0.f, 0.f, 65.f );
 
-		float object_color[] = { 0.f, 0.f, 1.f, 0.5f };
+		float object_color[] = { 0.f, 1.f, 1.f, 0.5f };
 
 		WorldViewProjection = s * t * projection;
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );

@@ -165,7 +165,7 @@ void Player::update()
 		if ( position().y() - action_base_position_.y() >= get_balloon_action_length() )
 		{
 			play_sound( "balloon-burst" );
-			action_mode_ = ACTION_MODE_NONE;
+			set_action_mode( ACTION_MODE_NONE );
 			is_jumping_ = true;
 			is_action_pre_finish_ = false;
 		}
@@ -180,7 +180,7 @@ void Player::update()
 		if ( ( position() - action_base_position_ ).length() >= get_rocket_action_length() )
 		{
 			play_sound( "rocket-burst" );
-			action_mode_ = ACTION_MODE_NONE;
+			set_action_mode( ACTION_MODE_NONE );
 			is_jumping_ = true;
 			is_action_pre_finish_ = false;
 		}
@@ -196,7 +196,7 @@ void Player::update()
 
 		if ( position().y() < 40.f )
 		{
-			action_mode_ = ACTION_MODE_NONE;
+			set_action_mode( ACTION_MODE_NONE );
 			is_jumping_ = true;
 			is_action_pre_finish_ = false;
 		}
@@ -275,7 +275,10 @@ void Player::on_collision_x( const GridCell& floor_cell_x )
 			velocity().x() *= -0.8f;
 		}
 		
-		lose_umbrella();
+		if ( is_if_fall_to_umbrella_lost( floor_cell_x.height() ) )
+		{
+			lose_umbrella();
+		}
 	}
 
 	if ( ! is_rocketing() )
@@ -390,7 +393,10 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
 			velocity().z() *= -0.8f;
 		}
 
-		lose_umbrella();
+		if ( is_if_fall_to_umbrella_lost( floor_cell_z.height() ) )
+		{
+			lose_umbrella();
+		}
 	}
 
 	if ( ! is_rocketing() )
@@ -403,12 +409,10 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
 
 void Player::lose_umbrella()
 {
-	if ( action_mode_ != ACTION_MODE_UMBRELLA )
+	if ( action_mode_ == ACTION_MODE_UMBRELLA )
 	{
-		return;
+		set_action_mode( ACTION_MODE_NONE );
 	}
-
-	action_mode_ = ACTION_MODE_NONE;
 
 	item_count_[ ITEM_TYPE_UMBRELLA ]--;
 
@@ -450,7 +454,7 @@ void Player::jump()
 	}
 	else
 	{
-		action_mode_ = ACTION_MODE_NONE;
+		set_action_mode( ACTION_MODE_NONE );
 	}
 
 	play_sound( "jump" );
@@ -480,12 +484,11 @@ void Player::start_umbrella_mode()
 {
 	if ( action_mode_ == ACTION_MODE_UMBRELLA )
 	{
-		action_mode_ = ACTION_MODE_NONE;
-		// selected_item_type_ = ITEM_TYPE_NONE;
+		set_action_mode( ACTION_MODE_NONE );
 	}
 	else
 	{
-		action_mode_ = ACTION_MODE_UMBRELLA;
+		set_action_mode( ACTION_MODE_UMBRELLA );
 		selected_item_type_ = ITEM_TYPE_NONE;
 		is_action_pre_finish_ = false;
 	}
@@ -498,7 +501,7 @@ void Player::switch_scope_mode()
 {
 	if ( action_mode_ == ACTION_MODE_SCOPE )
 	{
-		action_mode_ = ACTION_MODE_NONE;
+		set_action_mode( ACTION_MODE_NONE );
 		selected_item_type_ = ITEM_TYPE_NONE;
 	}
 	else
@@ -537,7 +540,7 @@ bool Player::is_if_fall_to_dead( float height ) const
  */
 bool Player::is_if_fall_to_umbrella_lost( float height ) const
 {
-	if ( action_mode_ != ACTION_MODE_UMBRELLA ) return false;
+	// if ( action_mode_ != ACTION_MODE_UMBRELLA ) return false;
 	if ( ! last_floor_cell() ) return false;
 
 	return last_floor_cell()->height() - height >= 45;
@@ -589,7 +592,7 @@ void Player::rocket( const vector3& direction )
 	is_falling_ = false;
 	is_action_pre_finish_ = false;
 
-	action_mode_ = ACTION_MODE_ROCKET;
+	set_action_mode( ACTION_MODE_ROCKET );
 	velocity() = direction * get_max_speed() * 0.5f;
 	action_base_position_ = position();
 
@@ -605,7 +608,7 @@ void Player::rocket( const vector3& direction )
 
 void Player::stop_rocket()
 {
-	action_mode_ = ACTION_MODE_NONE;
+	set_action_mode( ACTION_MODE_NONE );
 	is_action_pre_finish_ = false;
 }
 
@@ -615,7 +618,7 @@ void Player::on_get_balloon()
 	is_falling_ = false;
 	is_action_pre_finish_ = false;
 
-	action_mode_ = ACTION_MODE_BALLOON;
+	set_action_mode( ACTION_MODE_BALLOON );
 	action_base_position_ = position();
 
 	play_sound( "balloon-get" );
@@ -705,6 +708,25 @@ float Player::get_clambering_speed() const
 	}
 
 	return 0.05f;
+}
+
+void Player::set_action_mode( ActionMode action_mode )
+{
+	if ( action_mode == action_mode_ )
+	{
+		return;
+	}
+
+	// Ž©“®ŽP‘I‘ð
+	if ( action_mode_ != ACTION_MODE_UMBRELLA && action_mode_ != ACTION_MODE_NONE )
+	{
+		if ( action_mode == ACTION_MODE_NONE && item_count_[ ITEM_TYPE_UMBRELLA ] && floor_cell() && is_if_fall_to_dead( floor_cell()->height() ) )
+		{
+			action_mode = ACTION_MODE_UMBRELLA;
+		}
+	}
+
+	action_mode_ = action_mode;
 }
 
 } // namespace blue_sky

@@ -136,6 +136,7 @@ public:
 	bool has_medal() const { return has_medal_; }
 
 	ActionMode get_action_mode() const { return action_mode_; }
+	void set_action_mode( ActionMode );
 
 	bool is_action_pre_finish() const { return is_action_pre_finish_; }
 

@@ -59,6 +59,11 @@ private:
 
 	bool		look_floor_request_;	///< 下を見て欲しい要求
 
+	float		last_floor_height_;		///< 前回の足場の高さ ( バルーン含む )
+
+	bool is_last_floor_height_null() const { return last_floor_height_ >= 300.f; }
+	float last_floor_height() const { return last_floor_height_; }
+
 	void on_collision_x( const GridCell& );
 	void on_collision_y( const GridCell& );
 	void on_collision_z( const GridCell& );

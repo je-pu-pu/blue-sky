@@ -38,6 +38,7 @@ Player::Player()
 	, has_medal_( false )
 	, selected_item_type_( ITEM_TYPE_NONE )
 	, look_floor_request_( false )
+	, last_floor_height_( 300.f )
 {
 	setup_local_aabb_list();
 
@@ -46,7 +47,7 @@ Player::Player()
 
 void Player::step( float s )
 {
-	if ( is_rocketing() || is_falling() || ! last_floor_cell() )
+	if ( is_rocketing() || is_falling() || is_last_floor_height_null() )
 	{
 		return;
 	}
@@ -60,7 +61,7 @@ void Player::step( float s )
 
 void Player::side_step( float s )
 {
-	if ( is_rocketing() || is_falling() || ! last_floor_cell() )
+	if ( is_rocketing() || is_falling() || ! is_last_floor_height_null() )
 	{
 		return;
 	}
@@ -200,7 +201,7 @@ void Player::update()
 			is_jumping_ = true;
 			is_action_pre_finish_ = false;
 		}
-		else if ( position().y() < 50.f )
+		else if ( position().y() < 48.f )
 		{
 			is_action_pre_finish_ = true;
 		}
@@ -359,6 +360,8 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 	is_turn_avaiable_ = true;
 	is_falling_ = false;
 	is_clambering_ = false;
+
+	last_floor_height_ = floor_cell_y.height();
 }
 
 void Player::on_collision_z( const GridCell& floor_cell_z )
@@ -518,10 +521,10 @@ bool Player::is_falling_to_dead() const
 {
 	if ( action_mode_ == ACTION_MODE_UMBRELLA ) return false;
 
-	if ( ! last_floor_cell() ) return false;
+	if ( is_last_floor_height_null() ) return false;
 	if ( ! floor_cell() ) return false;
 	
-	return velocity().y() < -0.2f && last_floor_cell()->height() - floor_cell()->height() >= 45;
+	return velocity().y() < -0.2f && last_floor_height() - floor_cell()->height() >= 45;
 }
 
 /**
@@ -530,9 +533,9 @@ bool Player::is_falling_to_dead() const
 bool Player::is_if_fall_to_dead( float height ) const
 {
 	if ( action_mode_ == ACTION_MODE_UMBRELLA ) return false;
-	if ( ! last_floor_cell() ) return false;
+	if ( is_last_floor_height_null() ) return false;
 
-	return last_floor_cell()->height() - height >= 45;
+	return last_floor_height() - height >= 45;
 }
 
 /**
@@ -541,9 +544,9 @@ bool Player::is_if_fall_to_dead( float height ) const
 bool Player::is_if_fall_to_umbrella_lost( float height ) const
 {
 	// if ( action_mode_ != ACTION_MODE_UMBRELLA ) return false;
-	if ( ! last_floor_cell() ) return false;
+	if ( is_last_floor_height_null() ) return false;
 
-	return last_floor_cell()->height() - height >= 45;
+	return last_floor_height() - height >= 45;
 }
 
 void Player::kill()
@@ -572,6 +575,8 @@ void Player::rebirth()
 	selected_item_type_ = ITEM_TYPE_NONE;
 
 	velocity().init();
+
+	last_floor_height_ = 300.f;
 
 	restart();
 }
@@ -620,6 +625,8 @@ void Player::on_get_balloon()
 
 	set_action_mode( ACTION_MODE_BALLOON );
 	action_base_position_ = position();
+
+	last_floor_height_ = position().y();
 
 	play_sound( "balloon-get" );
 }
@@ -717,6 +724,7 @@ void Player::set_action_mode( ActionMode action_mode )
 		return;
 	}
 
+	/*
 	// Ž©“®ŽP‘I‘ð
 	if ( action_mode_ != ACTION_MODE_UMBRELLA && action_mode_ != ACTION_MODE_NONE )
 	{
@@ -725,6 +733,7 @@ void Player::set_action_mode( ActionMode action_mode )
 			action_mode = ACTION_MODE_UMBRELLA;
 		}
 	}
+	*/
 
 	action_mode_ = action_mode;
 }

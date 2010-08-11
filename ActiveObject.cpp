@@ -25,7 +25,6 @@ ActiveObject::ActiveObject()
 	 , direction_degree_( 0.f )
 	 , start_direction_degree_( 0.f )
 	 , floor_cell_( 0 )
-	 , last_floor_cell_( 0 )
 	 , is_dead_( false )
 {
 	set_direction_degree( 0.f );
@@ -153,8 +152,6 @@ void ActiveObject::update_position()
 		position().y() = floor_cell_y.height();
 
 		on_collision_y( floor_cell_y );
-
-		last_floor_cell_ = floor_cell_;
 	}
 
 	position().y() = std::max( 0.f, position().y() );
@@ -204,7 +201,6 @@ void ActiveObject::kill()
 void ActiveObject::restart()
 {
 	is_dead_ = false;
-	last_floor_cell_ = 0;
 
 	position() = start_position();
 	set_direction_degree( start_direction_degree_ );

@@ -22,6 +22,9 @@
     <Filter Include="Sound">
       <UniqueIdentifier>{72ad5316-4fb4-49d2-86fd-4c4cd247ac62}</UniqueIdentifier>
     </Filter>
+    <Filter Include="story">
+      <UniqueIdentifier>{321131c7-e7d2-4aa2-96f7-628b31138495}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
@@ -361,6 +364,36 @@
     </None>
     <None Include="media\object\tile">
       <Filter>object</Filter>
+    </None>
+    <None Include="media\stage\0-1.intro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\0-2.intro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\2-4.intro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\0-1.outro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\0-2.outro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\2-4.outro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\0-3.intro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\0-4.intro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\0-3.outro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\0-4.outro">
+      <Filter>story</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -1269,7 +1269,7 @@ bool GamePlayScene::render()
 	}
 	else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_SCOPE )
 	{
-		win::Rect src_rect = win::Rect::Size( 0, 512, 192, 192 );
+		win::Rect src_rect = win::Rect::Size( 256, 256, 192, 140 );
 		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
 
 		D3DXMatrixTranslation( & t, get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f, 0.f );

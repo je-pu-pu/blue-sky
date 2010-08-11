@@ -61,7 +61,7 @@ void Player::step( float s )
 
 void Player::side_step( float s )
 {
-	if ( is_rocketing() || is_falling() || ! is_last_floor_height_null() )
+	if ( is_rocketing() || is_falling() || is_last_floor_height_null() )
 	{
 		return;
 	}

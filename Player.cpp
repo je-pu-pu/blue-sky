@@ -193,6 +193,17 @@ void Player::update()
 	{
 		// ‚Ó‚ñ‚í‚è—Ž‰º
 		velocity().y() = math::chase( velocity().y(), -0.1f, 0.02f );
+
+		if ( position().y() < 40.f )
+		{
+			action_mode_ = ACTION_MODE_NONE;
+			is_jumping_ = true;
+			is_action_pre_finish_ = false;
+		}
+		else if ( position().y() < 50.f )
+		{
+			is_action_pre_finish_ = true;
+		}
 	}
 	else
 	{
@@ -410,6 +421,10 @@ void Player::lose_umbrella()
 			selected_item_type_ = ITEM_TYPE_NONE;
 		}
 	}
+	else
+	{
+		selected_item_type_ = ITEM_TYPE_UMBRELLA;
+	}
 }
 
 /**
@@ -466,12 +481,13 @@ void Player::start_umbrella_mode()
 	if ( action_mode_ == ACTION_MODE_UMBRELLA )
 	{
 		action_mode_ = ACTION_MODE_NONE;
-		selected_item_type_ = ITEM_TYPE_NONE;
+		// selected_item_type_ = ITEM_TYPE_NONE;
 	}
 	else
 	{
 		action_mode_ = ACTION_MODE_UMBRELLA;
 		selected_item_type_ = ITEM_TYPE_NONE;
+		is_action_pre_finish_ = false;
 	}
 }
 

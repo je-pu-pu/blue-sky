@@ -24,6 +24,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	: Scene( game_main )
 	, page_( 0 )
 	, stage_count_( 0 )
+	, is_story_completed_( false )
 	, sprite_texture_( 0 )
 	, bg_texture_( 0 )
 	, ok_( 0 )
@@ -33,6 +34,8 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	, stage_src_rect_( 0, 0, 512, 512 )
 {
 	page_ = save_data()->get( "stage-select.page", 0 );
+
+	check_story_completed();
 
 	circle_src_rect_list_.push_back( win::Rect::Size( 256, 512, 128, 140 ) );
 	circle_src_rect_list_.push_back( win::Rect::Size( 384, 512, 160, 130 ) );
@@ -346,6 +349,14 @@ void StageSelectScene::update_stage_list()
 				break;
 			}
 		}
+		if ( stage_name == common::serialize( get_max_story_page() - 1 ) + "-" + common::serialize( get_max_stage_per_page() ) )
+		{
+			// final stage
+			if ( ! is_final_stage_open() )
+			{
+				continue;
+			}
+		}
 
 		last_stage_name = stage_name;
 
@@ -402,6 +413,41 @@ std::string StageSelectScene::get_stage_prefix_by_page( int page )
 	}
 }
 
+void StageSelectScene::check_story_completed()
+{
+	is_story_completed_ = false;
+
+	for ( int p = 0; p < get_max_story_page(); p++ )
+	{
+		for ( int s = 1; s <= get_max_stage_per_page(); s++ )
+		{
+			std::string stage_name = common::serialize( p ) + "-" + common::serialize( s );
+
+			if ( save_data()->get( ( get_stage_prefix_by_page( p ) + "." + stage_name ).c_str(), 0 ) < 2 )
+			{
+				return;
+			}
+		}
+	}
+
+	is_story_completed_ = true;
+}
+
+bool StageSelectScene::is_final_stage_open() const
+{
+	for ( int s = 1; s < get_max_stage_per_page(); s++ )
+	{
+		std::string stage_name = common::serialize( get_max_story_page() - 1 ) + "-" + common::serialize( s );
+
+		if ( save_data()->get( ( get_stage_prefix_by_page( get_max_story_page() - 1 ) + "." + stage_name ).c_str(), 0 ) == 0 )
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 bool StageSelectScene::has_prev_page() const
 {
 	return page_ > 0;
@@ -409,8 +455,14 @@ bool StageSelectScene::has_prev_page() const
 
 bool StageSelectScene::has_next_page() const
 {
-	if ( page_ < get_max_story_page() )
+	if ( page_ == get_max_story_page() - 1 )
 	{
+		// stroy last page
+		return is_story_completed_;
+	}
+	else if ( page_ < get_max_story_page() )
+	{
+		// story normal page
 		for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i )
 		{
 			Stage* stage = *i;
@@ -423,6 +475,7 @@ bool StageSelectScene::has_next_page() const
 
 		return true;
 	}
+	
 	else
 	{
 		return ( page_ - get_max_story_page() + 1 ) * get_max_stage_per_page() < stage_count_;

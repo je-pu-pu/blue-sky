@@ -272,6 +272,7 @@
     <None Include="media\object\road-cross" />
     <None Include="media\object\road-curve" />
     <None Include="media\object\road-t" />
+    <None Include="media\object\tile" />
     <None Include="media\shader\blue-sky.fx" />
     <None Include="media\stage\0-1.stage" />
     <None Include="media\stage\0-2.stage" />

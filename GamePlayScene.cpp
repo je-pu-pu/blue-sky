@@ -98,7 +98,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	aim_mesh_ = direct_3d()->getMeshManager()->load( "aim", "media/model/aim.x" );
 
 	// SkyBox
-	sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
+	// sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
 
 	// Box
 	box_ = new Direct3D9Box( direct_3d(), 0.8f, 0.8f, 0.8f, D3DCOLOR_XRGB( 0xFF, 0xAA, 0x00 ) );
@@ -108,8 +108,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		sound_manager()->stop_all();
 		sound_manager()->unload_all();
 
-		sound_manager()->load_3d_sound( "ok" );
-		sound_manager()->load_3d_sound( "vending-machine" );
+		sound_manager()->load_3d_sound( "enemy" );
+		// sound_manager()->load_3d_sound( "vending-machine" );
 
 		sound_manager()->load( "click" );
 
@@ -160,6 +160,11 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		std::string stage_dir_name = StageSelectScene::get_stage_dir_name_by_page( save_data()->get( "stage-select.page", 0 ) );
 
 		load_stage_file( ( stage_dir_name + get_stage_name() + ".stage" ).c_str() );
+	}
+
+	if ( ! sky_box_ )
+	{
+		sky_box_ = new Direct3D9SkyBox( direct_3d(), "sky-box-3", "png" );
 	}
 
 	if ( lens_type_ != LENS_TYPE_NORMAL )
@@ -351,7 +356,8 @@ void GamePlayScene::load_stage_file( const char* file_name )
 	}
 
 	/*
-	float object_colors[ 3 ][ 4 ] = {
+	const int OBJECT_COLOR_MAX = 3;
+	float object_colors[ OBJECT_COLOR_MAX ][ 4 ] = {
 		{ 1.f, 0.95f, 0.95f, 1.f },
 		{ 0.95f, 1.f, 0.95f, 1.f },
 		{ 0.95f, 0.95f, 1.f, 1.f },
@@ -1101,7 +1107,7 @@ bool GamePlayScene::render()
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloatArray( "add_color", add_color_none, 4 ) );
 
 		// Player's Umbrella
-		if ( player_->get_action_mode() == Player::ACTION_MODE_UMBRELLA )
+		if ( player_->get_action_mode() == Player::ACTION_MODE_UMBRELLA && ( get_current_time() % 20 < 10 || ! player_->is_action_pre_finish() ) )
 		{
 			vector3 pos = player_->position() + player_->front() * 0.2f - player_->right() * 0.1f;
 			pos.y() += 1.f;
@@ -1178,7 +1184,7 @@ bool GamePlayScene::render()
 		D3DXMatrixScaling( & s, 5.f, 5.f, 5.f );
 		D3DXMatrixTranslation( & t, 0.f, 0.f, 65.f );
 
-		float object_color[] = { 0.f, 0.f, 1.f, 0.9f };
+		float object_color[] = { 0.f, 0.f, 1.f, 0.5f };
 
 		WorldViewProjection = s * t * projection;
 		DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetMatrix( "WorldViewProjection", & WorldViewProjection ) );

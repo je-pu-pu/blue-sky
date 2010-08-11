@@ -20,14 +20,14 @@ void Enemy::update()
 
 	if ( player_->is_dead() )
 	{
-		mode_ = MODE_FIND;
+		// mode_ = MODE_FIND;
 	}
 
 	if ( mode_ == MODE_FIND )
 	{
 		vector3 relative_position = player_->position() - position();
 
-		if ( relative_position.length() < 20.f )
+		if ( relative_position.length() < 15.f )
 		{
 			mode_ = MODE_CHASE;
 		}
@@ -41,7 +41,7 @@ void Enemy::update()
 		{
 			vector3 relative_position = player_->position() - position();
 
-			if ( relative_position.length() > 40.f )
+			if ( relative_position.length_xz() > 40.f )
 			{
 				mode_ = MODE_FIND;
 			}
@@ -61,7 +61,7 @@ void Enemy::update()
 			}
 		}
 
-		velocity() += front() * 0.01f;
+		velocity() += front() * 0.015f;
 	}
 	else if ( mode_ == MODE_DETOUR )
 	{
@@ -76,7 +76,7 @@ void Enemy::update()
 
 	if ( counter_ % 120 == 0 )
 	{
-		play_sound( "ok" );
+		play_sound( "enemy" );
 		// play_sound( "vending-machine", true, false );
 	}
 

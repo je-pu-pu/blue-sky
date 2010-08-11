@@ -33,9 +33,13 @@ public:
 	static std::string get_stage_prefix_by_page( int );
 	static int get_max_story_page() { return 3; }
 
+	void check_story_completed();
+	bool is_final_stage_open() const;
+
 private:
 	int page_;
 	int stage_count_;
+	bool is_story_completed_;
 
 	StageList stage_list_;
 

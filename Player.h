@@ -67,7 +67,7 @@ private:
 	float get_collision_height() const;
 	float get_collision_depth() const;
 
-	float get_clambering_speed() const { return 0.1f; }
+	float get_clambering_speed() const;
 
 	float get_balloon_action_length() const { return 10.f; }
 	float get_rocket_action_length() const { return 60.f; }
@@ -116,6 +116,8 @@ public:
 
 	///
 	void start_umbrella_mode();
+	void lose_umbrella();
+
 	void switch_scope_mode();
 
 	void set_input( const Input* );

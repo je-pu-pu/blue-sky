@@ -235,7 +235,7 @@ void Player::update()
 void Player::on_collision_x( const GridCell& floor_cell_x )
 {
 	if (
-		( velocity().y() <= 0.02f && floor_cell_x.height() - position().y() <= 2.f ) &&
+		( floor_cell_x.height() - position().y() <= 2.f ) &&
 		(
 			( velocity().x() < 0.f && direction() == LEFT || velocity().x() > 0.f && direction() == RIGHT ) ||
 			( floor_cell_x.height() - position().y() <= 1.f && ( velocity().x() < 0.f && direction() != RIGHT || velocity().x() > 0.f && direction() != LEFT ) )
@@ -263,6 +263,8 @@ void Player::on_collision_x( const GridCell& floor_cell_x )
 			stop_rocket();
 			velocity().x() *= -0.8f;
 		}
+		
+		lose_umbrella();
 	}
 
 	if ( ! is_rocketing() )
@@ -336,19 +338,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 
 		if ( is_if_fall_to_umbrella_lost( floor_cell_y.height() ) )
 		{
-			action_mode_ = ACTION_MODE_NONE;
-
-			item_count_[ ITEM_TYPE_UMBRELLA ]--;
-
-			if ( item_count_[ ITEM_TYPE_UMBRELLA ] <= 0 )
-			{
-				item_count_[ ITEM_TYPE_UMBRELLA ] = 0;
-
-				if ( selected_item_type_ == ITEM_TYPE_UMBRELLA )
-				{
-					selected_item_type_ = ITEM_TYPE_NONE;
-				}
-			}
+			lose_umbrella();
 		}
 	}
 
@@ -360,7 +350,7 @@ void Player::on_collision_y( const GridCell& floor_cell_y )
 void Player::on_collision_z( const GridCell& floor_cell_z )
 {
 	if (
-		( velocity().y() <= 0.02f && floor_cell_z.height() - position().y() <= 2.f ) && 
+		( floor_cell_z.height() - position().y() <= 2.f ) && 
 		(
 			( velocity().z() < 0.f && direction() == BACK || velocity().z() > 0.f && direction() == FRONT ) ||
 			( floor_cell_z.height() - position().y() <= 1.f && ( velocity().z() < 0.f && direction() != FRONT || velocity().z() > 0.f && direction() != BACK ) )
@@ -388,6 +378,8 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
 			stop_rocket();
 			velocity().z() *= -0.8f;
 		}
+
+		lose_umbrella();
 	}
 
 	if ( ! is_rocketing() )
@@ -396,6 +388,28 @@ void Player::on_collision_z( const GridCell& floor_cell_z )
 	}
 
 	push_look_floor_request();
+}
+
+void Player::lose_umbrella()
+{
+	if ( action_mode_ != ACTION_MODE_UMBRELLA )
+	{
+		return;
+	}
+
+	action_mode_ = ACTION_MODE_NONE;
+
+	item_count_[ ITEM_TYPE_UMBRELLA ]--;
+
+	if ( item_count_[ ITEM_TYPE_UMBRELLA ] <= 0 )
+	{
+		item_count_[ ITEM_TYPE_UMBRELLA ] = 0;
+
+		if ( selected_item_type_ == ITEM_TYPE_UMBRELLA )
+		{
+			selected_item_type_ = ITEM_TYPE_NONE;
+		}
+	}
 }
 
 /**
@@ -510,7 +524,7 @@ bool Player::is_if_fall_to_umbrella_lost( float height ) const
 	if ( action_mode_ != ACTION_MODE_UMBRELLA ) return false;
 	if ( ! last_floor_cell() ) return false;
 
-	return last_floor_cell()->height() - height >= 20;
+	return last_floor_cell()->height() - height >= 45;
 }
 
 void Player::kill()
@@ -602,7 +616,11 @@ void Player::on_get_rocket()
 void Player::on_get_umbrella()
 {
 	item_count_[ ITEM_TYPE_UMBRELLA ]++;
-	selected_item_type_ = ITEM_TYPE_UMBRELLA;
+
+	if ( get_action_mode() != ACTION_MODE_UMBRELLA )
+	{
+		selected_item_type_ = ITEM_TYPE_UMBRELLA;
+	}
 
 	play_sound( "umbrella-get" );
 }
@@ -661,6 +679,16 @@ float Player::get_collision_height() const
 float Player::get_collision_depth() const
 {
 	return 0.4f;
+}
+
+float Player::get_clambering_speed() const
+{
+	if ( get_action_mode() == ACTION_MODE_UMBRELLA )
+	{
+		return 0.02f;
+	}
+
+	return 0.05f;
 }
 
 } // namespace blue_sky

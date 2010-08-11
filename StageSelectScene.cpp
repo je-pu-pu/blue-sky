@@ -331,12 +331,26 @@ void StageSelectScene::update_stage_list()
 	stage_count_ = stage_name_list.size();
 
 	int n = 0;
+	std::string last_stage_name;
 
 	for ( std::list< std::string >::iterator i = stage_name_list.begin(); i != stage_name_list.end(); ++i )
 	{
+		std::string stage_name = *i;
+		stage_name.resize( stage_name.find_first_of( "." ) );
+
+		// bad
+		if ( page_ == 0 && ! last_stage_name.empty() )
+		{
+			if ( save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + last_stage_name ).c_str(), 0 ) == 0 )
+			{
+				break;
+			}
+		}
+
+		last_stage_name = stage_name;
+
 		Stage* stage = new Stage();
-		stage->name = *i;
-		stage->name.resize( stage->name.find_first_of( "." ) );
+		stage->name = stage_name;
 		stage->rect = get_stage_dst_rect( stage, n );
 		stage->cleared = save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + stage->name ).c_str(), 0 ) != 0;
 		stage->completed = save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + stage->name ).c_str(), 0 ) == 2;

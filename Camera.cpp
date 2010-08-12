@@ -13,6 +13,7 @@ Camera::Camera()
 	, fov_( 60.f )
 	, fov_target_( fov_ )
 	, fov_default_( fov_ )
+	, aspect_( 720.f / 480.f )
 	, rotate_chase_speed_( 0.f )
 {
 	reset_rotate_chase_speed();

@@ -146,6 +146,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// Camera
 	camera_ = new Camera();
 	camera_->set_fov_default( config()->get( "camera.fov", 60.f ) );
+	camera_->set_aspect( static_cast< float >( get_width() ) / static_cast< float >( get_height() ) );
 
 	// Stage
 	stage_ = new Stage( 1000, 1000 );

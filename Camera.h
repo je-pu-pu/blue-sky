@@ -33,6 +33,8 @@ private:
 	float fov_target_;				///< FOV ( 目標 )
 	float fov_default_;				///< FOV ( 標準 )
 
+	float aspect_;					///< アスペクト比
+
 	float rotate_chase_speed_;		///< 回転速度
 
 public:
@@ -69,7 +71,8 @@ public:
 
 	void update();
 
-	float aspect() const { return 720.f / 480.f; /* todo */ }
+	void set_aspect( float a ) { aspect_ = a; }
+	float aspect() const { return aspect_; /* todo */ }
 	float near_clip() const { return 0.05f; }
 	float far_clip() const { return 4000.f; }
 };

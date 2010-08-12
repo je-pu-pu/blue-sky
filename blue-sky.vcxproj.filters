@@ -422,6 +422,24 @@
     <None Include="media\stage\1-4.outro">
       <Filter>story</Filter>
     </None>
+    <None Include="media\stage\2-1.intro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\2-2.intro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\2-3.intro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\2-2.outro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\2-1.outro">
+      <Filter>story</Filter>
+    </None>
+    <None Include="media\stage\2-3.outro">
+      <Filter>story</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

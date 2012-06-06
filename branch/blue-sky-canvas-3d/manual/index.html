@@ -1,0 +1,282 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<link rel="start" href="/" />
+<link rel="stylesheet" type="text/css" href="style.css" />
+<title>blue-sky</title>
+</head>
+<body>
+
+<div id="outline">
+	<h1>blue-sky</h1>
+	
+	<img src="images/title.png" />
+	
+	<hr />
+	
+	<div class="box">
+		<h2>はじめに</h2>
+		
+		<p>
+			このたびは je-pu-pu のゲーム blue-sky を手にとって頂きましてありがとうございます。
+		</p>
+		
+		<p>
+			blue-sky は je-pu-pu 初のゲーム作品です。<br />
+			少しでも楽しんで頂けると幸いです。
+		</p>
+	</div>
+	
+	<div class="box">
+		<h2>操作方法</h2>
+		
+		<p>
+			blue-sky はマウスを使って操作します。
+		</p>
+		
+		<h3>マウスの機能</h3>
+		
+		<table>
+			<tr><th>操作</th><th>ゲーム画面での用途</th><th>その他の用途</th></tr>
+			<tr><td>マウスの移動</td><td>視線の移動</td><td>カーソルの移動</td></tr>
+			<tr><td>左ボタン</td><td>ジャンプ・アイテムを使う</td><td>次の画面に進む・ステージの選択</td></tr>
+			<tr><td>右ボタン</td><td>歩く・走る</td><td></td></tr>
+			<tr><td>ホイール</td><td>アイテムの選択</td><td></td></tr>
+		</table>
+		
+		<p>
+			ゲーム終了などの特別な操作はキーボードを使います。
+		</p>
+		
+		<h3>キーボードの機能</h3>
+		
+		<table>
+			<tr><th>操作</th><th>機能</th></tr>
+			<tr><td>ESC</td><td>ステージ選択に戻る・タイトルに戻る・ゲーム終了</td></tr>
+			<tr><td>F5</td><td>画面モードの切り替え</td></tr>
+		</table>
+		
+		
+	</div>
+	
+	<hr />
+	
+	<div class="box">
+		<h2>画面</h2>
+		
+		<h3>タイトル画面</h3>
+		
+		<img src="images/title.png" />
+		
+		<p>
+			左ボタンをクリックするとステージ選択に進みます。
+		</p>
+		
+		<h3>ステージ選択画面</h3>
+		
+		<img src="images/stage-select.png" />
+		
+		<p>
+			ステージをクリアすると、選択できるステージが増えていきます。
+			左右のボタンを押すとページを移動できます。
+		</p>
+		
+		<h3>ストーリー画面</h3>
+		
+		<img src="images/story.png" />
+		
+		<p>
+			短いストーリーが流れます。左ボタンか右ボタンを押すと、スキップできます。
+		</p>
+		
+		<h3>ゲーム画面</h3>
+		
+		<img src="images/game-play.png" />
+		
+		<p>
+			ステージの奥にあるゴールを目指します。
+		</p>
+		
+	</div>
+	
+	<hr />
+	
+	<div class="box">
+		<h2>ゲームの目的</h2>
+		
+		<h3>ゲームの目的</h3>
+			
+			<p>
+				全 12 ステージ、全てのステージをクリアする事が目的です。
+			</p>
+		
+		<h3>ステージの目的</h3>
+		
+		<img src="images/goal.png" />
+		
+		<p>
+			ステージのどこかにあるオレンジのドアにたどり着く事が目的です。
+		</p>
+		
+		<h3>メダル</h3>
+		
+		<img src="images/medal.png" />
+		
+		<p>
+			ステージのどこかにメダルが隠れています。<br />
+			メダルは少し取りにくい所にあります。<br />
+			全てのステージのメダルを取ると、追加ステージ ( 3 ステージ ) が遊べるようになります。
+		</p>
+		
+	</div>
+	
+	<hr />
+	
+	<div class="box">
+		<h2>アクション</h2>
+		
+		<h3>見る</h3>
+		
+		<img src="images/look-1.png" />
+		<img src="images/look-2.png" />
+		
+		<p>
+			マウスを移動すると見る方向が変わります。<br />
+			見る方向が変わってもプレイヤー自身は移動しません。
+		</p>
+		
+		<p>
+			落ちそうな場所では足元を良く見て進んでください。
+		</p>
+		
+		<h3>歩く</h3>
+		
+		<p>
+			右ボタンを押すとプレイヤーが向いている方向に歩き始めます。
+		</p>
+		
+		<p>
+			右ボタンを短く何度も押すと少しずつ進めます。
+		</p>
+		
+		<h3>走る</h3>
+		
+		<p>
+			右ボタンを押し続けるとプレイヤーが走ります。
+		</p>
+		
+		<p>
+			ビルとビルの谷間を乗り越える時や、敵から逃げる時は走ると有利です。
+		</p>
+		
+		<h3>登る</h3>
+		
+		<p>
+			低い段差にぶつかった時に、そのまま右ボタンを押し続けると、段差を登れます。
+		</p>
+		
+		<h3>ジャンプ</h3>
+		
+		<img src="images/look-2.png" />
+		<img src="images/jump.png" />
+		
+		<p>
+			左ボタンを押すとジャンプします。
+			左ボタンを短く押すと低いジャンプになります。<br />
+			左ボタンを押し続けると高いジャンプになります。<br />
+		</p>
+		
+		<p>
+			ジャンプ中に右ボタンを押すと、ジャンプしながら前に進めます。
+		</p>
+		
+		<h3>アイテムを選ぶ・アイテムをしまう</h3>
+		
+		<p>
+			ホイールを回すと使うアイテムを選べます。
+		</p>
+		
+		<p>
+			アイテムを取った時は、自動的にそのアイテムが選択されますが、
+			ホイールを回して、アイテムをしまう事ができます。
+		</p>
+		
+	</div>
+	
+	<hr />
+	
+	<div class="box">
+		<h2>アイテム</h2>
+		
+		<h3>風船</h3>
+		
+		<img src="images/balloon.png" />
+		
+		<p>
+			取ると少しだけ高く浮かびます。その後すぐに割れてしまいます。
+		</p>
+		
+		<p>
+			風船で浮かんでいる途中にもジャンプできます。<br />
+			風船が割れる前にジャンプするとさらに高いところに登れます。
+		</p>
+		
+		<h3>ロケット花火</h3>
+		
+		<img src="images/rocket.png" />
+		
+		<p>
+			使うとまっすぐ飛んでいきます。ジャンプでは登れない高いところにも登れます。
+		</p>
+		
+		<p>
+			ロケット花火を使っている途中にもジャンプできます。<br />
+			ロケット花火が消える前にジャンプするとさらに高いところに登れます。
+		</p>
+		
+		<p>
+			ロケット花火は一度使うとなくなります。
+		</p>
+		
+		<h3>傘</h3>
+		
+		<img src="images/umbrella.png" />
+		
+		<p>
+			使うと傘をさします。傘をさすと、高いところからゆっくり降ります。
+			普段なら落下して死んでしまう所にも着地できます。高いところから着地すると、さしている傘は無くなります。
+		</p>
+		
+		<p>
+			ゆっくり降りている途中に、ある程度低い場所に来ると、さしている傘は消えて無くなります。<br />
+			さしている傘が消える前に、どこかのビルに着地してください。
+		</p>
+		
+		<img src="images/scope.png" />
+		
+		<h3>双眼鏡</h3>
+		
+		<p>
+			使うと遠くを大きく見れます。ホイールで大きさを調整できます。
+		</p>
+		
+		<p>
+			双眼鏡は何度でも使えます。
+		</p>
+	</div>
+	
+</div>
+
+<hr />
+
+<div id="footer">
+	<p id="copyright">
+		copyright &copy; 2010 je-pu-pu all rights reserved.
+	</p>
+</div>
+
+</body>
+</html>

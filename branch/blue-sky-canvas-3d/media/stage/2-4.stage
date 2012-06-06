@@ -1,0 +1,91 @@
+bgm semi
+ambient 1.0 0.6 0.6
+medal 505.000000 30.0 940.0 0
+object house-a 520 0 960 0
+object house-a 520 0 970 0
+object house-a 510 0 970 0
+object house-a 510 0 960 0
+object house-a 480 0 930 0
+object house-a 480 0 940 0
+object house-a 490 0 940 0
+object house-a 490 0 930 0
+object building-50 510 0 910 0
+object building-50 490 0 860 0
+object road 500 0 980 90
+object road 500 0 970 90
+object road 500 0 960 90
+object road 500 0 920 90
+object road 500 0 930 90
+object road 500 0 940 90
+object road 500 0 950 90
+object road 500 0 910 90
+object road 500 0 900 90
+object road 500 0 890 90
+object road 500 0 880 90
+object road 500 0 840 90
+object road 500 0 850 90
+object road 500 0 860 90
+object road 500 0 870 90
+object road 500 0 830 90
+object road 500 0 820 90
+object road 500 0 810 90
+object road 500 0 800 90
+object road 500 0 760 90
+object road 500 0 770 90
+object road 500 0 780 90
+object road 500 0 790 90
+object road 500 0 750 90
+object road 500 0 740 90
+object road 500 0 730 90
+object road 500 0 720 90
+object road 500 0 680 90
+object road 500 0 690 90
+object road 500 0 700 90
+object road 500 0 710 90
+object road 500 0 670 90
+object road 500 0 660 90
+object road 500 0 650 90
+object road 500 0 640 90
+object road 500 0 600 90
+object road 500 0 610 90
+object road 500 0 620 90
+object road 500 0 630 90
+object road 500 0 590 90
+object road 500 0 580 90
+object road 500 0 570 90
+object road 500 0 560 90
+object house-a 490 0 890 0
+object house-a 510 0 890 0
+object building-50 510 0 840 0
+object building-100 450 0 680 0
+object building-100 540 0 680 0
+object building-50 530 0 660 0
+object building-50 530 0 590 0
+object building-50 470 0 590 0
+object building-50 470 0 660 0
+object building-50 470 0 810 0
+object building-50 490 0 810 0
+object building-100 480 0 830 0
+object building-100 510 0 810 0
+object building-150 510 0 770 0
+object building-200 460 0 760 0
+object building-100 510 0 680 0
+object building-100 480 0 680 0
+object building-100 480 0 560 0
+object building-100 510 0 560 0
+object building-50 510 0 590 0
+object building-50 490 0 590 0
+object building-50 490 0 660 0
+object building-50 510 0 660 0
+object building-200 510 0 710 0
+object building-150 470 0 710 0
+object building-200 460 0 610 0
+object building-200 510 0 610 0
+balloon 505.000000 10.0 950.0 0
+rocket 505.000000 200.0 525.0 0
+rocket 505.000000 200.0 530.0 0
+umbrella 505.000000 200.0 540.0 0
+object building-200 500 0 510 0 1.0 0.666 0.066
+rocket 505.000000 200.0 520.0 0
+goal 505 0 995
+player 505 200 515

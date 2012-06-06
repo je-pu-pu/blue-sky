@@ -1,0 +1,103 @@
+bgm tower
+sky-box sky-box-night-moon png
+ambient 0.8 0.8 0.8
+balloon 505.000000 78.0000019073 595.0 0
+balloon 515.000000 76.0000038147 595.0 0
+balloon 525.000000 74.000005722 595.0 0
+balloon 525.000000 72.0000076294 585.0 0
+balloon 525.000000 72.0000076294 585.0 0
+balloon 525.000000 70.0000095367 575.0 0
+balloon 525.000000 68.0000114441 565.0 0
+object building-50 530 0 510 0
+object building-50 530 0 520 0
+object building-50 530 0 540 0
+object building-50 530 0 530 0
+object building-50 530 0 550 0
+object building-50 530 0 560 0
+object building-50 530 0 580 0
+object building-50 530 0 570 0
+object building-50 530 0 590 0
+object building-50 530 0 600 0
+object building-50 530 0 620 0
+object building-50 530 0 610 0
+object building-50 530 0 630 0
+object building-50 530 0 640 0
+object building-50 490 0 640 0
+object building-50 500 0 640 0
+object building-50 520 0 640 0
+object building-50 510 0 640 0
+object building-50 480 0 640 0
+balloon 525.000000 66.0000085831 555.0 0
+balloon 525.000000 64.0000009537 547.000007629 0
+balloon 525.000000 63.0000066757 542.000007629 0
+balloon 525.000000 61.0000085831 532.000007629 0
+balloon 525.000000 62.000002861 537.000007629 0
+balloon 525.000000 60.0000047684 527.000007629 0
+object building-50 480 0 630 0
+object building-50 480 0 610 0
+object building-50 480 0 510 0
+object building-50 480 0 550 0
+object building-50 480 0 570 0
+object building-50 480 0 560 0
+object building-50 480 0 590 0
+object building-50 480 0 520 0
+object building-50 480 0 540 0
+object building-50 480 0 530 0
+object building-50 480 0 600 0
+object building-50 480 0 620 0
+object building-50 480 0 580 0
+object building-50 490 20 600 0
+object building-50 490 30 630 0
+object building-50 510 0 630 0
+object building-50 520 0 630 0
+object building-50 500 0 630 0
+object building-50 490 30 610 0
+object building-50 500 0 580 0
+object building-50 500 -10 620 0
+object building-50 500 -10 600 0
+object building-50 500 0 530 0
+object building-50 500 0 540 0
+object building-50 500 0 520 0
+object building-50 500 0 590 0
+object building-50 500 0 560 0
+object building-50 500 0 570 0
+object building-50 500 0 550 0
+object building-50 500 0 510 0
+object building-50 500 -10 610 0
+object building-50 520 -10 610 0
+object building-50 520 0 510 0
+object building-50 520 0 550 0
+object building-50 520 0 570 0
+object building-50 520 0 560 0
+object building-50 520 0 590 0
+object building-50 520 0 520 0
+object building-50 520 0 540 0
+object building-50 520 0 530 0
+object building-50 520 -10 600 0
+object building-50 520 -10 620 0
+object building-50 520 0 580 0
+object building-50 490 20 580 0
+object building-50 510 -10 580 0
+object building-50 510 -10 620 0
+object building-50 490 0 620 0
+object building-50 490 30 590 0
+object building-50 510 -10 600 0
+object building-50 510 0 530 0
+object building-50 490 0 530 0
+object building-50 490 10 540 0
+object building-50 510 -10 540 0
+object building-50 510 -10 520 0
+object building-50 490 0 510 0
+object building-50 510 0 590 0
+object building-50 510 -10 560 0
+object building-50 510 0 570 0
+object building-50 510 0 550 0
+object building-50 490 20 550 0
+object building-50 490 0 560 0
+object building-50 490 10 570 0
+object building-50 490 10 520 0
+medal 495.000000 80.999994278 635.0 0
+object building-50 510 10 610 0 0.666 1.0 0.666
+object building-50 510 0 510 0 1.0 0.666 0.066
+goal 515 59 615
+player 515 300 512 60

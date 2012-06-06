@@ -1,0 +1,323 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{22070086-2606-4AAE-BA50-98040E748B74}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IncludePath);D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;E:\je\program\lib\c++;D:\lib\boost;D:\lib\libogg\include;D:\lib\libvorbis\include</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IncludePath);D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;E:\je\program\lib\c++;D:\lib\boost;D:\lib\libogg\include;D:\lib\libvorbis\include</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">./lib/debug;./Debug/;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">./lib/release;./release;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Debug/GraphicEffect.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>C:\Users\je\Desktop\Program\GraphicEffect\011129-アンチエイリアスライン\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;_DEBUG;_WINDOWS;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderOutputFile>.\Debug/GraphicEffect.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
+      <ObjectFileName>.\Debug/</ObjectFileName>
+      <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0411</Culture>
+    </ResourceCompile>
+    <Link>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>D:\Program Files\Microsoft DirectX SDK (August 2007)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\Debug/GraphicEffect.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>game.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug/GraphicEffect.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Release/GraphicEffect.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_WINDOWS;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>.\Release/GraphicEffect.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
+      <ObjectFileName>.\Release/</ObjectFileName>
+      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0411</Culture>
+    </ResourceCompile>
+    <Link>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>D:\Program Files\Microsoft DirectX SDK (August 2007)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>.\Release/GraphicEffect.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>game.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release/GraphicEffect.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="ActiveObject.cpp" />
+    <ClCompile Include="ActiveObjectManager.cpp" />
+    <ClCompile Include="Balloon.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Direct3D9.cpp" />
+    <ClCompile Include="App.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="Direct3D9Box.cpp" />
+    <ClCompile Include="Direct3D9Font.cpp" />
+    <ClCompile Include="Direct3D9Mesh.cpp" />
+    <ClCompile Include="Direct3D9MeshManager.cpp" />
+    <ClCompile Include="Direct3D9Rectangle.cpp" />
+    <ClCompile Include="Direct3D9Resource.cpp" />
+    <ClCompile Include="Direct3D9SkyBox.cpp" />
+    <ClCompile Include="Direct3D9TextureManager.cpp" />
+    <ClCompile Include="DirectInput.cpp" />
+    <ClCompile Include="DirectShow.cpp" />
+    <ClCompile Include="DirectSound.cpp" />
+    <ClCompile Include="DirectSoundBuffer.cpp" />
+    <ClCompile Include="EndingScene.cpp" />
+    <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="GameMain.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="GamePlayScene.cpp" />
+    <ClCompile Include="Goal.cpp" />
+    <ClCompile Include="GridCell.cpp" />
+    <ClCompile Include="GridData.cpp" />
+    <ClCompile Include="GridDataManager.cpp" />
+    <ClCompile Include="GridObject.cpp" />
+    <ClCompile Include="GridObjectManager.cpp" />
+    <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Main.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="MainLoop.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="matrix4x4.cpp" />
+    <ClCompile Include="Medal.cpp" />
+    <ClCompile Include="OggVorbisFile.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Poison.cpp" />
+    <ClCompile Include="Rocket.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Sound.cpp" />
+    <ClCompile Include="SoundManager.cpp" />
+    <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="StageSelectScene.cpp" />
+    <ClCompile Include="StoryTextScene.cpp" />
+    <ClCompile Include="StreamingSound.cpp" />
+    <ClCompile Include="TitleScene.cpp" />
+    <ClCompile Include="Umbrella.cpp" />
+    <ClCompile Include="Util.cpp" />
+    <ClCompile Include="vector3.cpp" />
+    <ClCompile Include="WaveFile.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ActiveObject.h" />
+    <ClInclude Include="ActiveObjectManager.h" />
+    <ClInclude Include="Balloon.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Direct3D9.h" />
+    <ClInclude Include="App.h" />
+    <ClInclude Include="Direct3D9Box.h" />
+    <ClInclude Include="Direct3D9Font.h" />
+    <ClInclude Include="Direct3D9Mesh.h" />
+    <ClInclude Include="Direct3D9MeshManager.h" />
+    <ClInclude Include="Direct3D9Rectangle.h" />
+    <ClInclude Include="Direct3D9Resource.h" />
+    <ClInclude Include="Direct3D9SkyBox.h" />
+    <ClInclude Include="Direct3D9TextureManager.h" />
+    <ClInclude Include="DirectInput.h" />
+    <ClInclude Include="DirectShow.h" />
+    <ClInclude Include="DirectSound.h" />
+    <ClInclude Include="DirectSoundBuffer.h" />
+    <ClInclude Include="DirectX.h" />
+    <ClInclude Include="EndingScene.h" />
+    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="GameMain.h" />
+    <ClInclude Include="GamePlayScene.h" />
+    <ClInclude Include="Goal.h" />
+    <ClInclude Include="GridCell.h" />
+    <ClInclude Include="GridData.h" />
+    <ClInclude Include="GridDataManager.h" />
+    <ClInclude Include="GridObject.h" />
+    <ClInclude Include="GridObjectManager.h" />
+    <ClInclude Include="Input.h" />
+    <ClInclude Include="MainLoop.h" />
+    <ClInclude Include="matrix4x4.h" />
+    <ClInclude Include="Medal.h" />
+    <ClInclude Include="OggVorbisFile.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="Poison.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Rocket.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="Sound.h" />
+    <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="Stage.h" />
+    <ClInclude Include="StageSelectScene.h" />
+    <ClInclude Include="StoryTextScene.h" />
+    <ClInclude Include="StreamingSound.h" />
+    <ClInclude Include="TitleScene.h" />
+    <ClInclude Include="Umbrella.h" />
+    <ClInclude Include="Util.h" />
+    <ClInclude Include="vector3.h" />
+    <ClInclude Include="WaveFile.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="blue-sky.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="blue-sky.default.config" />
+    <None Include="blye-sky.ico" />
+    <None Include="media\object\building-100" />
+    <None Include="media\object\building-150" />
+    <None Include="media\object\building-50" />
+    <None Include="media\object\house-a" />
+    <None Include="media\object\road" />
+    <None Include="media\object\road-cross" />
+    <None Include="media\object\road-curve" />
+    <None Include="media\object\road-t" />
+    <None Include="media\object\tile" />
+    <None Include="media\shader\blue-sky.fx" />
+    <None Include="media\stage\0-1.intro" />
+    <None Include="media\stage\0-1.outro" />
+    <None Include="media\stage\0-1.stage" />
+    <None Include="media\stage\0-2.intro" />
+    <None Include="media\stage\0-2.outro" />
+    <None Include="media\stage\0-2.stage" />
+    <None Include="media\stage\0-3.intro" />
+    <None Include="media\stage\0-3.outro" />
+    <None Include="media\stage\0-3.stage" />
+    <None Include="media\stage\0-4.intro" />
+    <None Include="media\stage\0-4.outro" />
+    <None Include="media\stage\0-4.stage" />
+    <None Include="media\stage\1-1.intro" />
+    <None Include="media\stage\1-1.outro" />
+    <None Include="media\stage\1-1.stage" />
+    <None Include="media\stage\1-2.intro" />
+    <None Include="media\stage\1-2.outro" />
+    <None Include="media\stage\1-2.stage" />
+    <None Include="media\stage\1-3.intro" />
+    <None Include="media\stage\1-3.outro" />
+    <None Include="media\stage\1-3.stage" />
+    <None Include="media\stage\1-4.intro" />
+    <None Include="media\stage\1-4.outro" />
+    <None Include="media\stage\1-4.stage" />
+    <None Include="media\stage\2-1.intro" />
+    <None Include="media\stage\2-1.outro" />
+    <None Include="media\stage\2-1.stage" />
+    <None Include="media\stage\2-2.intro" />
+    <None Include="media\stage\2-2.outro" />
+    <None Include="media\stage\2-2.stage" />
+    <None Include="media\stage\2-3.intro" />
+    <None Include="media\stage\2-3.outro" />
+    <None Include="media\stage\2-3.stage" />
+    <None Include="media\stage\2-4.intro" />
+    <None Include="media\stage\2-4.outro" />
+    <None Include="media\stage\2-4.stage" />
+    <None Include="media\stage_ext\3-1.stage" />
+    <None Include="media\stage_ext\3-2.stage" />
+    <None Include="media\stage_ext\3-3.stage" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="blue-sky.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

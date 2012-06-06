@@ -1,0 +1,45 @@
+bgm road
+medal 515.000000 120.0 715.0 0
+umbrella 515.000000 250.0 515.0 0
+object building-100 510 0 650 0
+object building-100 560 0 710 0
+object building-200 540 0 650 0
+object building-150 470 0 650 0
+object building-150 480 0 700 0
+object building-150 520 0 700 0
+object building-100 490 0 730 0
+object building-100 520 0 730 0
+umbrella 515.000000 100.0 685.0 0
+umbrella 525.000000 150.0 635.0 0
+object building-50 560 0 570 0
+object building-50 560 0 590 0
+object building-50 490 0 590 0
+object building-50 490 0 570 0
+object building-200 510 0 560 0
+object building-50 540 0 690 0
+object building-50 530 0 690 0
+object building-50 550 0 630 0
+object building-50 550 0 610 0
+object building-50 560 0 610 0
+object building-50 560 0 550 0
+object building-50 560 0 530 0
+object building-50 560 0 510 0
+object building-50 560 0 490 0
+object building-50 550 0 490 0
+object building-50 530 0 490 0
+object building-50 510 0 490 0
+object building-50 490 0 490 0
+object building-50 490 0 510 0
+object building-50 490 0 530 0
+object building-50 490 0 550 0
+object building-50 490 0 610 0
+object building-50 490 0 630 0
+object building-50 490 0 690 0
+object building-50 510 0 690 0
+object building-50 510 0 710 0
+object building-100 510 0 670 0
+object building-150 510 0 610 0
+object building-200 510 0 510 0 1.0 0.666 0.066
+object building-50 510 0 750 0 0.666 1.0 0.666
+goal 515 49 755
+player 515 300 515 60

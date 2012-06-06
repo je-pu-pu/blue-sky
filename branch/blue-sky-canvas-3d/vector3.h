@@ -29,9 +29,6 @@ public:
 	void			unit();
 	void			normal( const vector3&, const vector3&, const vector3& );
 
-	vector3			operator + () const { return *this; }
-	vector3			operator - () const { return vector3( -x(), -y(), -z() ); };
-
 	vector3&		operator =  ( const vector3& );
 	vector3			operator +  ( const vector3& ) const;
 	vector3&		operator += ( const vector3& );
@@ -45,13 +42,8 @@ public:
 	vector3&		operator *= ( T v ) { set( x() * v, y() * v, z() * v ); return *this; }
 	vector3&		operator /= ( T v ) { set( x() / v, y() / v, z() / v ); return *this; }
 
-	bool			operator == ( const vector3& v ) const { return x() == v.x() && y() == v.y() && z() == v.z(); }
-	bool			operator != ( const vector3& v ) const { return ! operator == ( v ); }
-
 	T				length() const { return sqrt( x() * x() + y() * y() + z() * z() ); }
 	T				length_xy() const { return sqrt( x() * x() + y() * y() ); }
-	T				length_xz() const { return sqrt( x() * x() + z() * z() ); }
-	T				length_yz() const { return sqrt( y() * y() + z() * z() ); }
 
 	T				dot_product( const vector3& v ) const { return x() * v.x() + y() * v.y() * z() * v.z(); }
 	vector3			cross_product( const vector3& v ) const
@@ -63,12 +55,9 @@ public:
 		);
 	}
 
-	vector3&		normalize() { *this /= length(); return *this; }
-
 	void			set( T, T, T );
 	void			set( int, T );
 	
-	T&				get( int );
 	const T&		get( int ) const;
 	const T*		get() const;
 	

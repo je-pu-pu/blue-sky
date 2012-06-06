@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="DirectX">
+      <UniqueIdentifier>{c3b4646e-11d1-42af-ba74-3623212ce387}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX\Direct3D">
+      <UniqueIdentifier>{a623ec99-1ff1-4997-933c-ea13fcb3dea9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX\DirectInput">
+      <UniqueIdentifier>{20c1c1eb-49eb-4ecf-858a-59c692bfe02e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Direct3D9.cpp">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="Canvas.cpp" />
+    <ClCompile Include="Direct3D9Canvas.cpp" />
+    <ClCompile Include="GameMain.cpp" />
+    <ClCompile Include="LiveVertex.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MainLoop.cpp" />
+    <ClCompile Include="matrix4x4.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Util.cpp" />
+    <ClCompile Include="vector3.cpp" />
+    <ClCompile Include="DirectInput.cpp">
+      <Filter>DirectX\DirectInput</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D9Mesh.cpp">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Direct3D9.h">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="App.h" />
+    <ClInclude Include="Canvas.h" />
+    <ClInclude Include="Color.h" />
+    <ClInclude Include="Direct3D9Canvas.h" />
+    <ClInclude Include="Face.h" />
+    <ClInclude Include="GameMain.h" />
+    <ClInclude Include="Line.h" />
+    <ClInclude Include="LiveVertex.h" />
+    <ClInclude Include="MainLoop.h" />
+    <ClInclude Include="matrix4x4.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="Type.h" />
+    <ClInclude Include="Util.h" />
+    <ClInclude Include="vector3.h" />
+    <ClInclude Include="DirectInput.h">
+      <Filter>DirectX\DirectInput</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D9Mesh.h">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

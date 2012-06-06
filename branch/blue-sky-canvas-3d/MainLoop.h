@@ -4,20 +4,17 @@
 //最終更新部分	GetFPS()
 //■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 
-#ifndef MAIN_LOOP_H
-#define MAIN_LOOP_H
+#ifndef		_MAIN_LOOP_H_
+#define		_MAIN_LOOP_H_
 
-#include <windows.h>
+#include	<Windows.h>
 
-/**
- * メインループクラス
- * 
- */
-class CMainLoop
+//メインループクラス
+class	CMainLoop
 {
 private:
 	DWORD	LastTime;	//前回の時間
-	DWORD	current_time_;	//現在の時間
+	DWORD	NowTime;	//現在の時間
 
 	int		FPSCount;	//FPS
 	int		FPS;		//FPS	デバッグ用
@@ -31,7 +28,7 @@ public:
 	bool Loop();
 	
 	//Get
-	DWORD get_current_time() const { return current_time_; }
+	DWORD GetNowTime() const { return NowTime; }
 	int GetFPS() const { return FPS; }
 };
 

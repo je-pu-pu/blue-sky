@@ -141,12 +141,6 @@ void vector3::set( int i, float a )
 	data[i] = a;
 }
 
-float& vector3::get( int i )
-{
-	check_index( i );
-	return data[i];
-}
-
 const float& vector3::get( int i ) const
 {
 	check_index( i );

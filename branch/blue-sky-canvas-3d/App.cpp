@@ -1,42 +1,37 @@
 #include "App.h"
 #include "GameMain.h"
-#include "resource.h"
-
-#include <win/Rect.h>
-#include <win/Point.h>
 
 #include <winnls32.h>
 
 #include <iostream>
 
 //□コンストラクタ
-App::App()
+CApp::CApp()
 	: hWnd( 0 )
 	, hInst( 0 )
 	, hMutex( 0 )
-	, width_( DEFAULT_WIDTH )
-	, height_( DEFAULT_HEIGHT )
-	, is_active_( false )
-	, is_full_screen_( false )
-	, is_mouse_in_window_( false )
-	, is_clip_cursor_enabled_( false )
+	, Width( 720 )
+	, Height( 480 )
 {
 	ClassName = "blue-sky";
 	WinTitle = "blue-sky";
-	WinStyle = get_window_style();
+	// WinStyle = WS_POPUP;
+	// WinStyle = WS_CAPTION;
+	
+	WinStyle = WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE;
+	// WinStyle = WS_POPUP;
 }
 
 //□デストラクタ
-App::~App()
+CApp::~CApp()
 {
 	ReleaseMutex(hMutex);			//ミューテックス開放
 	WINNLSEnableIME(hWnd, TRUE);	//IME表示
-
-	ClipCursor( 0 );
+	ShowCursor(TRUE);				//カーソル表示
 }
 
 //■初期化
-bool App::Init(HINSTANCE hi, int nCmdShow)
+bool CApp::Init(HINSTANCE hi, int nCmdShow)
 {
 	//インスタンスハンドルをコピー
 	hInst = hi;
@@ -47,7 +42,6 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		return false;
 	}
 	hMutex = CreateMutex(NULL, FALSE, WinTitle.c_str());
-
 	//WNDCLASS構造体
 	WNDCLASS wc = {
 		CS_HREDRAW | CS_VREDRAW,				//スタイル
@@ -55,29 +49,27 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		NULL,									//拡張用パラメータ
 		NULL,									//拡張用パラメータ
 		hInst,									//インスタンスハンドル
-		LoadIcon( hi, MAKEINTRESOURCE( IDI_ICON1 ) ),			//アイコン
-		LoadCursor( NULL, IDC_ARROW ),							//マウスカーソル
+		LoadIcon(NULL, IDI_WINLOGO),			//アイコン
+		LoadCursor(NULL, IDC_ARROW),			//マウスカーソル
 		(HBRUSH)GetStockObject(BLACK_BRUSH),	//背景色
 		NULL,									//メニュー
 		ClassName.c_str(),						//クラス名
 	};
 	//ウィンドウクラスの登録
 	if(! RegisterClass(&wc))	return false;
-	
-	// ウィンドウサイズの取得
-	RECT rc = { 0, 0, width_, height_ };
-	AdjustWindowRect( & rc, WinStyle, FALSE );
+	//ウィンドウサイズの取得
+	RECT rc = {0, 0, Width, Height};
+	AdjustWindowRect(&rc, WinStyle, FALSE);
 	int w = rc.right - rc.left;
 	int h = rc.bottom - rc.top;
-
 	//ウインドウ作成
 	hWnd = CreateWindowEx(
-		0 /* WS_EX_TOPMOST */,		//手前に表示
+		WS_EX_TOPMOST,		//手前に表示
 		ClassName.c_str(),	//クラス名
 		WinTitle.c_str(),	//タイトル
 		WinStyle,			//スタイル
-		CW_USEDEFAULT,		//表示座標
-		CW_USEDEFAULT,		//
+		CW_USEDEFAULT ,		//表示座標
+		CW_USEDEFAULT ,		//
 		w,					//サイズ
 		h,					//
 		NULL,				//親ウィンドウのハンドル
@@ -92,228 +84,73 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	}
 	
 	// ゲームを初期化する
-	blue_sky::GameMain* game = blue_sky::GameMain::getInstance();
+	CGameMain* game = CGameMain::GetInstange();
 
 	ShowWindow( hWnd, nCmdShow );		//表示
 	UpdateWindow( hWnd );				//描画
 
 	// WINNLSEnableIME(hWnd, FALSE);	//IME非表示
+	
+	// ShowCursor( FALSE );			// カーソル非表示
 
 	return true;
 }
 
 //□メッセージループ
-int App::MessageLoop()
+int CApp::MessageLoop()
 {
 	MSG msg;
-
-	blue_sky::GameMain* game = blue_sky::GameMain::getInstance();
-
-	while ( true )
-	{
-		if ( PeekMessage( & msg, NULL, 0, 0, PM_REMOVE ) )
-		{
-			if ( msg.message == WM_QUIT)
-			{
-				break;
-			}
-
-			TranslateMessage( & msg );
-			DispatchMessage( & msg );
+	while(true){
+		if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)){
+			if(msg.message == WM_QUIT) break;
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 		}
-		else
-		{
-			if ( ! game->update() )
-			{
-				Sleep( 1 );
-			}
+		else{
+			CGameMain::GetInstange()->Loop();
 		}
 	}
-
 	return msg.wParam;
 }
 
 //□ウィンドウプロシージャ
-LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
+LRESULT CALLBACK CApp::WinProc( HWND hw, UINT msg, WPARAM wp, LPARAM lp )
 {
 	switch ( msg )
 	{
-	case WM_CREATE:
-	{
-		SetCursor( 0 );
-		break;
-	}
-	case WM_EXITSIZEMOVE: on_resize( hwnd ); break;
-	case WM_KEYDOWN:
-	{
-		blue_sky::GameMain* game = blue_sky::GameMain::getInstance();
-
-		if ( wp >= VK_F1 && wp <= VK_F24 ) game->on_function_key_down( wp - VK_F1 + 1 );
-		break;
-	}
-	case WM_MOUSEMOVE:
-	{
-		if ( ! App::GetInstance()->is_mouse_in_window_ )
+	case	WM_CREATE:		break;
+	case	WM_KEYDOWN:
+		if ( wp == VK_ESCAPE )
 		{
-			App::GetInstance()->is_mouse_in_window_ = true;
-
-			ShowCursor( FALSE );
-
-			TRACKMOUSEEVENT track_mouse_event = { sizeof( TRACKMOUSEEVENT ), TME_LEAVE, hwnd };
-			TrackMouseEvent( & track_mouse_event );
+			PostMessage( hw, WM_CLOSE, 0, 0 );
 		}
 		break;
-	}
-	case WM_MOUSELEAVE:
-	{
-		App::GetInstance()->is_mouse_in_window_ = false;
-
-		ShowCursor( TRUE );
-
-		break;
-	}
-	case WM_MOUSEWHEEL:
-	{
-		blue_sky::GameMain* game = blue_sky::GameMain::getInstance();
-
-		game->on_mouse_wheel( GET_WHEEL_DELTA_WPARAM( wp ) );
-		break;
-	}
-	case WM_CHAR:		break;
-	case WM_ACTIVATEAPP:
-		App::GetInstance()->set_active( LOWORD( wp ) != 0 );
-		break;
-	case WM_DESTROY:
+	case	WM_CHAR:		break;
+	case	WM_ACTIVATEAPP:	break;
+	case	WM_DESTROY:
 		PostQuitMessage( 0 );
 		break;
 	default:
-		return DefWindowProc( hwnd, msg, wp, lp );
+		return DefWindowProc(hw, msg, wp, lp);
 	}
 
 	return	0;
 }
 
-void App::set_active( bool active )
-{
-	is_active_ = active;
-
-	if ( active )
-	{
-		App::GetInstance()->clip_cursor( is_clip_cursor_enabled_ );
-	}
-}
-
-void App::on_resize( HWND hwnd )
-{
-	App::GetInstance()->clip_cursor( App::GetInstance()->is_clip_cursor_enabled_ );
-}
-
-void App::clip_cursor( bool clip )
-{
-	is_clip_cursor_enabled_ = clip;
-
-	if ( is_clip_cursor_enabled_ )
-	{
-		RECT rect;
-		GetClientRect( hWnd, & rect );
-
-		POINT point = { rect.left, rect.top };
-		ClientToScreen( hWnd, & point );
-	
-		rect.left = point.x;
-		rect.top = point.y;
-		rect.right += point.x;
-		rect.bottom += point.y;
-
-		ClipCursor( & rect );
-	}
-	else
-	{
-		ClipCursor( 0 );
-	}
-}
-
-void App::set_size( int w, int h )
-{
-	width_ = w;
-	height_ = h;
-
-	int sw = GetSystemMetrics( SM_CXSCREEN );
-	int sh = GetSystemMetrics( SM_CYSCREEN );
-
-	
-	RECT rect = { 0, 0, width_, height_ };
-	AdjustWindowRect( & rect, WinStyle, false );
-
-	int ww = rect.right - rect.left;
-	int wh = rect.bottom - rect.top;
-
-	SetWindowPos( hWnd, HWND_NOTOPMOST, ( sw - ww ) / 2, ( sh - wh ) / 2, ww, wh, SWP_SHOWWINDOW );
-
-	PostMessage( hWnd, WM_EXITSIZEMOVE, 0, 0 );
-}
-
-/**
- * タイトルを取得する
- *
- * @return タイトル
- */
-const char* App::getTitle()
-{
-	title_.resize( GetWindowTextLength( hWnd ) + 1 );
-	GetWindowText( hWnd, & title_[ 0 ], title_.size() );
-
-	return title_.c_str();
-}
-
-/**
- * タイトルを設定する
- *
- * @param t タイトル
- */
-void App::setTitle( const char* t )
+void CApp::setTitle( const char* t )
 {
 	SetWindowText( hWnd, t );
 }
 
-void App::set_full_screen( bool full_screen )
+const char* CApp::getTitle() const
 {
-	if ( full_screen )
-	{
-		if ( ! is_full_screen_ )
-		{
-			GetWindowRect( hWnd, & last_window_rect_ );
-			ShowCursor( FALSE );
-		}
+	return "";
 
-		SetWindowLong( hWnd, GWL_STYLE, get_window_style_full_scrren() );
-	}
-	else
-	{
-		SetWindowLong( hWnd, GWL_STYLE, get_window_style() );
+	/*
+	int l = GetWindowTextLength( hWnd );
 
-		if ( is_full_screen_ )
-		{
-			SetWindowPos(  hWnd, HWND_NOTOPMOST, last_window_rect_.left, last_window_rect_.top, last_window_rect_.right - last_window_rect_.left, last_window_rect_.bottom - last_window_rect_.top, SWP_SHOWWINDOW );
-			ShowCursor( TRUE );
-		}
-	}
+	title_.resize( l );
 
-	is_full_screen_ = full_screen;
-}
-
-LONG App::get_window_style() const
-{
-	return WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE;
-	// return WS_OVERLAPPEDWINDOW;
-}
-
-LONG App::get_window_style_full_scrren() const
-{
-	return WS_POPUP;
-}
-
-void App::close()
-{
-	PostMessage( hWnd, WM_CLOSE, 0, 0 );
+	GetWindowText( hWnd, )
+	*/
 }

@@ -6,7 +6,7 @@
 #ifndef		_UTIL_H_
 #define		_UTIL_H_
 
-#include	<windows.h>
+#include	<Windows.h>
 
 #define		Free(x)		if(x){ delete[] x; x = NULL; } 
 

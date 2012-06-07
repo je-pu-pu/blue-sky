@@ -87,6 +87,7 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
+      <Profile>true</Profile>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -147,7 +148,11 @@
     </ClCompile>
     <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="Direct3D9Canvas.cpp" />
+    <ClCompile Include="Direct3D9Font.cpp" />
     <ClCompile Include="Direct3D9Mesh.cpp" />
+    <ClCompile Include="Direct3D9MeshManager.cpp" />
+    <ClCompile Include="Direct3D9Resource.cpp" />
+    <ClCompile Include="Direct3D9TextureManager.cpp" />
     <ClCompile Include="DirectInput.cpp" />
     <ClCompile Include="GameMain.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -176,8 +181,13 @@
     <ClInclude Include="Canvas.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="Direct3D9Canvas.h" />
+    <ClInclude Include="Direct3D9Font.h" />
     <ClInclude Include="Direct3D9Mesh.h" />
+    <ClInclude Include="Direct3D9MeshManager.h" />
+    <ClInclude Include="Direct3D9Resource.h" />
+    <ClInclude Include="Direct3D9TextureManager.h" />
     <ClInclude Include="DirectInput.h" />
+    <ClInclude Include="DirectX.h" />
     <ClInclude Include="Face.h" />
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="Line.h" />

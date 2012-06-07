@@ -4,6 +4,8 @@
 #include "Canvas.h"
 #include "Direct3D9.h"
 
+#include <boost/array.hpp>
+
 class Direct3D9;
 
 namespace art
@@ -15,6 +17,10 @@ namespace art
 class Direct3D9Canvas : public Canvas
 {
 public:
+
+	/**
+	 * ポイントスプライト用 Vertex
+	 */
 	struct Vertex
 	{
 		static const UINT COUNT = 100000;
@@ -25,6 +31,20 @@ public:
 		D3DCOLOR		color;
 	}; // class Vertex
 
+	/**
+	 * 線用 Vertex
+	 */
+	struct VertexForLine
+	{
+		static const DWORD FVF = D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1;
+
+		D3DXVECTOR4		position;
+		D3DCOLOR		color;
+		D3DXVECTOR2		uv;
+	};
+
+	typedef IDirect3DTexture9 Texture;
+
 private:
 	Direct3D9*	direct_3d_;
 
@@ -33,6 +53,8 @@ private:
 
 	Vertex* point_sprite_;
 	UINT point_sprite_index_;
+
+	boost::array< Texture*, 3 >line_texture_list_;
 
 public:
 	Direct3D9Canvas( Direct3D9* );
@@ -46,7 +68,7 @@ public:
 	virtual void end();
 
 	void drawLineHumanTouch( const art::Vertex&, const art::Vertex&, const Color& );
-//	void drawPolygonHumanTouch( const Face&, const Color& );
+	void drawPolygonHumanTouch( const Face&, const Color& );
 	void fillRect( const Rect&, const Color& );
 
 	virtual void drawLine( Real, Real, Real, Real, const Color& );

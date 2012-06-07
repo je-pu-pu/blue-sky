@@ -8,8 +8,8 @@
 #include	"App.h"
 
 #include	"Model.h"
-#include	"Direct3D9Canvas.h"
-#include	"Direct3D9Mesh.h"
+#include "Direct3D9Canvas.h"
+#include "Direct3D9Font.h"
 
 #include	"matrix4x4.h"
 #include	"vector3.h"
@@ -44,8 +44,6 @@ const char* model_file_name_list[] =
 	"./grid-cube.obj"
 };
 
-Direct3D9Mesh* mesh_ = 0;
-
 //■コンストラクタ
 CGameMain::CGameMain()
 	: direct_3d_( 0 )
@@ -61,21 +59,17 @@ CGameMain::CGameMain()
 	srand( timeGetTime() );
 
 	// Direct3D 
-	direct_3d_ = new Direct3D9( app->GetWindowHandle() );
+	direct_3d_ = new Direct3D9( app->GetWindowHandle(), Width, Height, true );
+	// direct_3d_->getFont()->load( "uzura_font", "media/font/uzura.ttf" );
 
 	// Canvas
 	canvas_ = new art::Direct3D9Canvas( direct_3d_ );
 	canvas_->createDepthBuffer();
-
-	// Mesh
-	mesh_ = new Direct3D9Mesh( direct_3d_ );
-	mesh_->loadX( "blue-sky-building-13.x" );
 }
 
 //■デストラクタ
 CGameMain::~CGameMain()
 {
-	delete mesh_;
 	delete canvas_;
 	delete direct_3d_;
 }
@@ -235,6 +229,8 @@ void CGameMain::Loop()
 	if ( GetAsyncKeyState( VK_TAB ) )
 	{
 		static int n = 0;
+
+		canvas_->vertex_list().clear();
 
 		sample_model.clear();
 		sample_model.load_file( model_file_name_list[ n ] );
@@ -415,7 +411,7 @@ void CGameMain::Loop()
 	}
 	*/
 
-	canvas_->drawText( art::Vertex( 0.f, 0.f ), debug_text.c_str(), art::Color( 255, 0, 0 ) );
+	canvas_->drawText( art::Vertex( 0.f, 0.f ), debug_text.c_str(), art::Color( 255, 0, 0, 127 ) );
 
 	canvas_->end();
 }

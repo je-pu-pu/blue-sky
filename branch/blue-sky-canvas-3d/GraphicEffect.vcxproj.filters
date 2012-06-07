@@ -10,26 +10,49 @@
     <Filter Include="DirectX\DirectInput">
       <UniqueIdentifier>{20c1c1eb-49eb-4ecf-858a-59c692bfe02e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="art">
+      <UniqueIdentifier>{5323b45d-558e-49a1-bd89-70529db0827b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Direct3D9.cpp">
       <Filter>DirectX\Direct3D</Filter>
     </ClCompile>
     <ClCompile Include="App.cpp" />
-    <ClCompile Include="Canvas.cpp" />
-    <ClCompile Include="Direct3D9Canvas.cpp" />
     <ClCompile Include="GameMain.cpp" />
-    <ClCompile Include="LiveVertex.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainLoop.cpp" />
     <ClCompile Include="matrix4x4.cpp" />
-    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="vector3.cpp" />
     <ClCompile Include="DirectInput.cpp">
       <Filter>DirectX\DirectInput</Filter>
     </ClCompile>
+    <ClCompile Include="Canvas.cpp">
+      <Filter>art</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D9Canvas.cpp">
+      <Filter>art</Filter>
+    </ClCompile>
+    <ClCompile Include="LiveVertex.cpp">
+      <Filter>art</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>art</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D9TextureManager.cpp">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D9MeshManager.cpp">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D9Font.cpp">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClCompile>
     <ClCompile Include="Direct3D9Mesh.cpp">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D9Resource.cpp">
       <Filter>DirectX\Direct3D</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,23 +61,54 @@
       <Filter>DirectX\Direct3D</Filter>
     </ClInclude>
     <ClInclude Include="App.h" />
-    <ClInclude Include="Canvas.h" />
-    <ClInclude Include="Color.h" />
-    <ClInclude Include="Direct3D9Canvas.h" />
-    <ClInclude Include="Face.h" />
     <ClInclude Include="GameMain.h" />
-    <ClInclude Include="Line.h" />
-    <ClInclude Include="LiveVertex.h" />
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="matrix4x4.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="Type.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="vector3.h" />
     <ClInclude Include="DirectInput.h">
       <Filter>DirectX\DirectInput</Filter>
     </ClInclude>
+    <ClInclude Include="Color.h">
+      <Filter>art</Filter>
+    </ClInclude>
+    <ClInclude Include="Canvas.h">
+      <Filter>art</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D9Canvas.h">
+      <Filter>art</Filter>
+    </ClInclude>
+    <ClInclude Include="Face.h">
+      <Filter>art</Filter>
+    </ClInclude>
+    <ClInclude Include="Line.h">
+      <Filter>art</Filter>
+    </ClInclude>
+    <ClInclude Include="LiveVertex.h">
+      <Filter>art</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>art</Filter>
+    </ClInclude>
+    <ClInclude Include="Type.h">
+      <Filter>art</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D9TextureManager.h">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D9Font.h">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClInclude>
     <ClInclude Include="Direct3D9Mesh.h">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D9MeshManager.h">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D9Resource.h">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectX.h">
       <Filter>DirectX\Direct3D</Filter>
     </ClInclude>
   </ItemGroup>

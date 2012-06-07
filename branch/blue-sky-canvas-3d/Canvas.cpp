@@ -400,9 +400,11 @@ Canvas::Vertex::Vertex()
 
 void Canvas::Vertex::update()
 {
-	// vertex() = target_vertex();
+	vertex() = target_vertex();
+	return;
+
 	// vertex() = ( vertex() + target_vertex() ) / 2.f;
-	// return;
+	
 		
 	// static float a = 0.f;
 	// a += 0.01f;

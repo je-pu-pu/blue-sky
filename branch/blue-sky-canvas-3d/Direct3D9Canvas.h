@@ -54,7 +54,8 @@ private:
 	Vertex* point_sprite_;
 	UINT point_sprite_index_;
 
-	boost::array< Texture*, 3 >line_texture_list_;
+	boost::array< Texture*, 3 > line_texture_list_;
+	boost::array< Texture*, 3 > face_texture_list_;
 
 public:
 	Direct3D9Canvas( Direct3D9* );

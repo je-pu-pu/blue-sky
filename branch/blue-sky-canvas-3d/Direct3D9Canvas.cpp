@@ -122,18 +122,26 @@ Direct3D9Canvas::Direct3D9Canvas( Direct3D9* direct_3d )
 
 	if ( LINE )
 	{
+		// Z テストを有効にする
+		direct_3d_->getDevice()->SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE );
+			
 		// テクスチャを読み込む
 		line_texture_list_[ 0 ] = direct_3d_->getTextureManager()->load( "line-1", "media/texture/pencil-line-1.png" );
 		line_texture_list_[ 1 ] = direct_3d_->getTextureManager()->load( "line-2", "media/texture/pencil-line-2.png" );
 		line_texture_list_[ 2 ] = direct_3d_->getTextureManager()->load( "line-3", "media/texture/pencil-line-3.png" );
 
+		face_texture_list_[ 0 ] = direct_3d_->getTextureManager()->load( "face-1", "media/texture/pencil-face-1.png" );
+		face_texture_list_[ 1 ] = direct_3d_->getTextureManager()->load( "face-2", "media/texture/pencil-face-2.png" );
+		face_texture_list_[ 2 ] = direct_3d_->getTextureManager()->load( "face-3", "media/texture/pencil-face-3.png" );
+
 		direct_3d_->getDevice()->SetTexture( 0, direct_3d_->getTextureManager()->get( "line-1" ) );
 		direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
 		direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_CURRENT );
-		direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_ADD );
+		// direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_ADD );
+		direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_MODULATE );
 		direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );
 		// direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
-		direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_TEXTURE );
+		// direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_TEXTURE );
 
 		direct_3d_->getDevice()->SetFVF( VertexForLine::FVF );
 	}
@@ -203,14 +211,14 @@ void Direct3D9Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Ve
 		return;
 	}
 
-	const float line_width = 64.f;
+	const float line_width = ( to - from ).length() * 0.1f;
 
 	VertexForLine data[ 4 ];
 
-	data[ 0 ].position = D3DXVECTOR4( from.x(), from.y() - line_width / 2.f, 0.f, 1.f );
-	data[ 1 ].position = D3DXVECTOR4( from.x(), from.y() + line_width / 2.f, 0.f, 1.f );
-	data[ 2 ].position = D3DXVECTOR4( to.x(), to.y() - line_width / 2.f, 0.f, 1.f );
-	data[ 3 ].position = D3DXVECTOR4( to.x(), to.y() + line_width / 2.f, 0.f, 1.f );
+	data[ 0 ].position = D3DXVECTOR4( from.x(), from.y() - line_width / 2.f, from.z(), 1.f );
+	data[ 1 ].position = D3DXVECTOR4( from.x(), from.y() + line_width / 2.f, from.z(), 1.f );
+	data[ 2 ].position = D3DXVECTOR4( to.x(), to.y() - line_width / 2.f, to.z(), 1.f );
+	data[ 3 ].position = D3DXVECTOR4( to.x(), to.y() + line_width / 2.f, to.z(), 1.f );
 
 	data[ 0 ].uv = D3DXVECTOR2( 0.f, 0.f );
 	data[ 1 ].uv = D3DXVECTOR2( 0.f, 1.f );
@@ -223,15 +231,33 @@ void Direct3D9Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Ve
 	data[ 3 ].color = D3DCOLOR_RGBA( c.r(), c.g(), c.b(), c.a() );
 
 	/*
-	data[ 0 ].position = D3DXVECTOR4( 10.f, 64.f, 0.f, 1.f );
-	data[ 1 ].position = D3DXVECTOR4( 10.f, 10.f, 0.f, 1.f );
-	data[ 2 ].position = D3DXVECTOR4( 600.f, 64.f, 0.f, 1.f );	
-	data[ 3 ].position = D3DXVECTOR4( 600.f, 10.f, 0.f, 1.f );
+	data[ 0 ].position = D3DXVECTOR4( 10.f, 64.f, 1.f, 1.f );
+	data[ 1 ].position = D3DXVECTOR4( 10.f, 10.f, 1.f, 1.f );
+	data[ 2 ].position = D3DXVECTOR4( 600.f, 64.f, 1.f, 1.f );	
+	data[ 3 ].position = D3DXVECTOR4( 600.f, 10.f, 1.f, 1.f );
+
+	static bool x = true;
+
+	if ( x )
+	{
+		data[ 0 ].position += D3DXVECTOR4( 100.f, 10.f, -0.5f, 1.f );
+		data[ 1 ].position += D3DXVECTOR4( 100.f, 10.f, -0.5f, 1.f );
+		data[ 2 ].position += D3DXVECTOR4( 100.f, 10.f, -0.5f, 1.f );
+		data[ 3 ].position += D3DXVECTOR4( 100.f, 10.f, -0.5f, 1.f );
+			
+		data[ 0 ].color = D3DCOLOR_RGBA( 255, 0, 0, 255 );
+		data[ 1 ].color = D3DCOLOR_RGBA( 255, 0, 0, 255 );
+		data[ 2 ].color = D3DCOLOR_RGBA( 255, 0, 0, 255 );
+		data[ 3 ].color = D3DCOLOR_RGBA( 255, 0, 0, 255 );
+	}
+
+	x = ! x;
 	*/
 
-	if ( common::random< int >( 0, 1000 ) == 0 )
+	// if ( common::random< int >( 0, 1000 ) == 0 )
 	{
 		direct_3d_->getDevice()->SetTexture( 0, line_texture_list_[ common::random< int >( 0, line_texture_list_.size() - 1 ) ] );
+		// direct_3d_->getDevice()->SetTexture( 0, 0 );
 	}
 
 	FAIL_CHECK( direct_3d_->getDevice()->DrawPrimitiveUP( D3DPT_TRIANGLESTRIP, 2, data, sizeof( VertexForLine ) ) );
@@ -239,7 +265,35 @@ void Direct3D9Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Ve
 
 void Direct3D9Canvas::drawPolygonHumanTouch( const Face& face, const Color& c )
 {
-	//
+	VertexForLine data[ 4 ];
+
+	art::Vertex vs[ 4 ] = {
+		vertex_list()[ face.id_list()[ 0 ] ].vertex(),
+		vertex_list()[ face.id_list()[ 1 ] ].vertex(),
+		vertex_list()[ face.id_list()[ 2 ] ].vertex(),
+		vertex_list()[ face.id_list()[ 3 ] ].vertex(),
+	};
+
+	data[ 0 ].position = D3DXVECTOR4( vs[ 0 ].x(), vs[ 0 ].y(), vs[ 0 ].z(), 1.f );
+	data[ 1 ].position = D3DXVECTOR4( vs[ 1 ].x(), vs[ 1 ].y(), vs[ 1 ].z(), 1.f );
+	data[ 2 ].position = D3DXVECTOR4( vs[ 2 ].x(), vs[ 2 ].y(), vs[ 2 ].z(), 1.f );
+	data[ 3 ].position = D3DXVECTOR4( vs[ 3 ].x(), vs[ 3 ].y(), vs[ 3 ].z(), 1.f );
+
+	float w = 0.5f;
+
+	data[ 0 ].uv = D3DXVECTOR2( 0.f, 0.f );
+	data[ 1 ].uv = D3DXVECTOR2( 0.f, w );
+	data[ 2 ].uv = D3DXVECTOR2( w, w );
+	data[ 3 ].uv = D3DXVECTOR2( w, 0.f );
+
+	data[ 0 ].color = D3DCOLOR_RGBA( c.r(), c.g(), c.b(), c.a() );
+	data[ 1 ].color = D3DCOLOR_RGBA( c.r(), c.g(), c.b(), c.a() );
+	data[ 2 ].color = D3DCOLOR_RGBA( c.r(), c.g(), c.b(), c.a() );
+	data[ 3 ].color = D3DCOLOR_RGBA( c.r(), c.g(), c.b(), c.a() );
+
+	direct_3d_->getDevice()->SetTexture( 0, face_texture_list_[ common::random< int >( 0, face_texture_list_.size() - 1 ) ] );
+
+	FAIL_CHECK( direct_3d_->getDevice()->DrawPrimitiveUP( D3DPT_TRIANGLEFAN, 2, data, sizeof( VertexForLine ) ) );
 }
 
 void Direct3D9Canvas::fillRect( const Rect&, const Color& color )

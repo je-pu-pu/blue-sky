@@ -59,7 +59,7 @@ CGameMain::CGameMain()
 	srand( timeGetTime() );
 
 	// Direct3D 
-	direct_3d_ = new Direct3D9( app->GetWindowHandle(), Width, Height, true );
+	direct_3d_ = new Direct3D9( app->GetWindowHandle(), Width, Height, false );
 	// direct_3d_->getFont()->load( "uzura_font", "media/font/uzura.ttf" );
 
 	// Canvas

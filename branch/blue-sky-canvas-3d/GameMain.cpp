@@ -92,7 +92,7 @@ void CGameMain::convert_3d_to_2d( vector3& v )
 
 	v.x() *= pow( sx, 4.f );
 	v.y() *= pow( sy, 4.f );
-	v.z() = ( v.z() + eye_far_len ) * 0.0001f;
+	v.z() = ( v.z() + eye_far_len ) * 0.01f;
 
 	v.x() = v.x() * cy + cx;
 	v.y() = v.y() * cy + cy;
@@ -314,7 +314,7 @@ void CGameMain::Loop()
 
 	if ( draw_face )
 	{
-		canvas_->sort_face_list_by_z();
+		// canvas_->sort_face_list_by_z();
 
 		art::Canvas::Brush brush;
 		brush.size() = 10.f;

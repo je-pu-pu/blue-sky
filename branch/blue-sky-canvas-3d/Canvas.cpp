@@ -384,6 +384,7 @@ bool Canvas::face_z_compare::operator () ( const Face& a, const Face& b )
 void Canvas::sort_line_list_by_z()
 {
 	std::sort( line_list().begin(), line_list().end(), line_z_compare( this ) );
+	// std::random_shuffle( line_list().begin(), line_list().end() );
 }
 
 bool Canvas::line_z_compare::operator () ( const Line& a, const Line& b )

@@ -44,8 +44,8 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IncludePath);D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;E:\je\program\lib\c++;D:\lib\boost</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IncludePath);D:\Program Files\Microsoft DirectX SDK %28August 2007%29\Include;E:\je\program\lib\c++;D:\lib\boost</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IncludePath);$(DXSDK_DIR)\Include;E:\je\program\lib\c++;D:\lib\boost</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IncludePath);$(DXSDK_DIR)\Include;E:\je\program\lib\c++;D:\lib\boost</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -79,7 +79,7 @@
     <Link>
       <OutputFile>.\Debug/GraphicEffect.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>D:\Program Files\Microsoft DirectX SDK (August 2007)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Debug/GraphicEffect.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -127,7 +127,7 @@
     <Link>
       <OutputFile>.\Release/GraphicEffect.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>D:\Program Files\Microsoft DirectX SDK (August 2007)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>.\Release/GraphicEffect.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -153,7 +153,6 @@
     <ClCompile Include="Direct3D9MeshManager.cpp" />
     <ClCompile Include="Direct3D9Resource.cpp" />
     <ClCompile Include="Direct3D9TextureManager.cpp" />
-    <ClCompile Include="DirectInput.cpp" />
     <ClCompile Include="GameMain.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -186,7 +185,6 @@
     <ClInclude Include="Direct3D9MeshManager.h" />
     <ClInclude Include="Direct3D9Resource.h" />
     <ClInclude Include="Direct3D9TextureManager.h" />
-    <ClInclude Include="DirectInput.h" />
     <ClInclude Include="DirectX.h" />
     <ClInclude Include="Face.h" />
     <ClInclude Include="GameMain.h" />

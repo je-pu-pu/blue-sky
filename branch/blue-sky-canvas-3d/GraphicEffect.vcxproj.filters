@@ -7,9 +7,6 @@
     <Filter Include="DirectX\Direct3D">
       <UniqueIdentifier>{a623ec99-1ff1-4997-933c-ea13fcb3dea9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DirectX\DirectInput">
-      <UniqueIdentifier>{20c1c1eb-49eb-4ecf-858a-59c692bfe02e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="art">
       <UniqueIdentifier>{5323b45d-558e-49a1-bd89-70529db0827b}</UniqueIdentifier>
     </Filter>
@@ -25,9 +22,6 @@
     <ClCompile Include="matrix4x4.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="vector3.cpp" />
-    <ClCompile Include="DirectInput.cpp">
-      <Filter>DirectX\DirectInput</Filter>
-    </ClCompile>
     <ClCompile Include="Canvas.cpp">
       <Filter>art</Filter>
     </ClCompile>
@@ -66,9 +60,6 @@
     <ClInclude Include="matrix4x4.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="vector3.h" />
-    <ClInclude Include="DirectInput.h">
-      <Filter>DirectX\DirectInput</Filter>
-    </ClInclude>
     <ClInclude Include="Color.h">
       <Filter>art</Filter>
     </ClInclude>

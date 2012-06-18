@@ -27,7 +27,14 @@ void Model::load_file( const char* file_name )
 	std::map<Index,ID> id_map;
 	int vertex_index = 1;
 
-	Color color( 164, 188, 151 ); // Color( 50, 70, 40 ), Color( 0xCC, 0xFF, 0xCC ) };
+	// Color color( 164, 188, 151 ); // Color( 50, 70, 40 ), Color( 0xCC, 0xFF, 0xCC ) };
+	
+	// ñ ÇÃêF
+	Color color( 0x66, 0xCC, 0xFF );
+
+	// ê¸ÇÃêF
+	const Color line_start_color( 255, 255, 255 );
+	const Color line_end_color( 255, 255, 255 );
 
 	while ( in.good() )
 	{		
@@ -73,8 +80,7 @@ void Model::load_file( const char* file_name )
 
 			if ( face.id_list().size() == 2 )
 			{
-				COLORREF start_color = RGB( 255, 255, 255 ), end_color = RGB( 255, 255, 255 );
-				line_list().push_back( Line( face.id_list()[ 0 ], face.id_list()[ 1 ], start_color, end_color ) );
+				line_list().push_back( Line( face.id_list()[ 0 ], face.id_list()[ 1 ], line_start_color, line_end_color ) );
 			}
 			else
 			{

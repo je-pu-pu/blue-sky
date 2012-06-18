@@ -142,8 +142,8 @@ void CGameMain::Loop()
 
 	const int horizon_y = Height / 2;
 	
-	canvas_->fillRect( Rect( 0, 0, Width, horizon_y ), RGB( 190, 200, 255 ) );
-	canvas_->fillRect( Rect( 0, horizon_y, Width, Height ), RGB( 80, 100, 80 ) );
+	// canvas_->fillRect( Rect( 0, 0, Width, horizon_y ), RGB( 190, 200, 255 ) );
+	// canvas_->fillRect( Rect( 0, horizon_y, Width, Height ), RGB( 80, 100, 80 ) );
 
 	static int space;
 	static int c;
@@ -323,6 +323,8 @@ void CGameMain::Loop()
 
 		int face_id = 0;
 
+		canvas_->beginDrawPolygon();
+
 		// –Ê‚ğ•`‰æ‚·‚é
 		for ( art::Canvas::FaceList::iterator i = canvas_->face_list().begin(); i != canvas_->face_list().end(); ++i )
 		{
@@ -334,6 +336,8 @@ void CGameMain::Loop()
 	}
 
 	canvas_->sort_line_list_by_z();
+
+	canvas_->beginDrawLine();
 
 	// ü‚ğ•`‰æ‚·‚é
 	for ( art::Canvas::LineList::iterator i = canvas_->line_list().begin(); i != canvas_->line_list().end(); ++i )

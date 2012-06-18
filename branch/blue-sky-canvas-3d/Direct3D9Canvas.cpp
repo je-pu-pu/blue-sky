@@ -130,7 +130,8 @@ Direct3D9Canvas::Direct3D9Canvas( Direct3D9* direct_3d )
 		direct_3d_->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE );
 			
 		// テクスチャを読み込む
-		/*
+
+		// 鉛筆
 		line_texture_list_[ 0 ] = direct_3d_->getTextureManager()->load( "line-1", "media/texture/pencil-line-1.png" );
 		line_texture_list_[ 1 ] = direct_3d_->getTextureManager()->load( "line-2", "media/texture/pencil-line-2.png" );
 		line_texture_list_[ 2 ] = direct_3d_->getTextureManager()->load( "line-3", "media/texture/pencil-line-3.png" );
@@ -138,8 +139,9 @@ Direct3D9Canvas::Direct3D9Canvas( Direct3D9* direct_3d )
 		face_texture_list_[ 0 ] = direct_3d_->getTextureManager()->load( "face-1", "media/texture/pencil-face-1.png" );
 		face_texture_list_[ 1 ] = direct_3d_->getTextureManager()->load( "face-2", "media/texture/pencil-face-2.png" );
 		face_texture_list_[ 2 ] = direct_3d_->getTextureManager()->load( "face-3", "media/texture/pencil-face-3.png" );
-		*/
 
+		// ペン
+		/*
 		line_texture_list_[ 0 ] = direct_3d_->getTextureManager()->load( "line-1", "media/texture/pen-line-1.png" );
 		line_texture_list_[ 1 ] = direct_3d_->getTextureManager()->load( "line-2", "media/texture/pen-line-2.png" );
 		line_texture_list_[ 2 ] = direct_3d_->getTextureManager()->load( "line-3", "media/texture/pen-line-3.png" );
@@ -147,6 +149,7 @@ Direct3D9Canvas::Direct3D9Canvas( Direct3D9* direct_3d )
 		face_texture_list_[ 0 ] = direct_3d_->getTextureManager()->load( "face-1", "media/texture/pen-face-1.png" );
 		face_texture_list_[ 1 ] = direct_3d_->getTextureManager()->load( "face-2", "media/texture/pen-face-2.png" );
 		face_texture_list_[ 2 ] = direct_3d_->getTextureManager()->load( "face-3", "media/texture/pen-face-3.png" );
+		*/
 
 		direct_3d_->getDevice()->SetTexture( 0, direct_3d_->getTextureManager()->get( "line-1" ) );
 		
@@ -161,6 +164,9 @@ Direct3D9Canvas::Direct3D9Canvas( Direct3D9* direct_3d )
 		// direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE );
 		direct_3d_->getDevice()->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
 
+		direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC );
+		direct_3d_->getDevice()->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC );
+
 		direct_3d_->getDevice()->SetFVF( VertexForLine::FVF );
 	}
 }
@@ -173,7 +179,9 @@ Direct3D9Canvas::~Direct3D9Canvas()
 
 void Direct3D9Canvas::begin()
 {
-	direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 63, 63, 127 ), 1.f, 0 );
+	// direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 63, 63, 127 ), 1.f, 0 );
+
+	direct_3d_->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0xFF, 0xFF, 0xFF ), 1.f, 0 );
 	
 	if ( FAILED( direct_3d_->getDevice()->BeginScene() ) )
 	{
@@ -213,6 +221,16 @@ void Direct3D9Canvas::render()
 			direct_3d_->getDevice()->DrawPrimitive( D3DPT_POINTLIST, 0, point_sprite_index_ );
 		}
 	}
+}
+
+void Direct3D9Canvas::beginDrawLine()
+{
+	direct_3d_->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, FALSE );
+}
+
+void Direct3D9Canvas::beginDrawPolygon()
+{
+	direct_3d_->getDevice()->SetRenderState( D3DRS_ZWRITEENABLE, TRUE );
 }
 
 void Direct3D9Canvas::drawLineHumanTouch( const art::Vertex& from, const art::Vertex& to, const Color& c )
@@ -321,9 +339,13 @@ void Direct3D9Canvas::drawPolygonHumanTouch( const Face& face, const Color& c )
 	data[ 2 ].position = D3DXVECTOR4( vs[ 2 ].x(), vs[ 2 ].y(), vs[ 2 ].z(), 1.f );
 	data[ 3 ].position = D3DXVECTOR4( vs[ 3 ].x(), vs[ 3 ].y(), vs[ 3 ].z(), 1.f );
 
-	float w = 1.f;
-	float su = common::random( 0.f, 1.f - w );
-	float sv = common::random( 0.f, 1.f - w );
+	static float a = 0.f;
+	const float w = 0.5f;
+
+	a += 0.0001f;
+	
+	float su = a; // common::random( 0.f, 1.f - w );
+	float sv = 0.f; // common::random( 0.f, 1.f - w );
 
 	data[ 0 ].uv = D3DXVECTOR2( su, sv );
 	data[ 1 ].uv = D3DXVECTOR2( su, sv + w );

@@ -68,6 +68,9 @@ public:
 	virtual void begin();
 	virtual void end();
 
+	void beginDrawLine();
+	void beginDrawPolygon();
+
 	void drawLineHumanTouch( const art::Vertex&, const art::Vertex&, const Color& );
 	void drawPolygonHumanTouch( const Face&, const Color& );
 	void fillRect( const Rect&, const Color& );

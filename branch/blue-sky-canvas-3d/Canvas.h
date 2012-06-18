@@ -157,6 +157,9 @@ public:
 	virtual void begin() = 0;
 	virtual void end() = 0;
 
+	virtual void beginDrawLine() = 0;
+	virtual void beginDrawPolygon() = 0;
+
 	virtual void drawLineHumanTouch( const art::Vertex&, const art::Vertex&, const Color& );
 	virtual void drawLineHumanTouch( Real, Real, Real, Real, const Color& );
 

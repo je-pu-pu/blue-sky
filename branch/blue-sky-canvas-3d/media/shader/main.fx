@@ -1,57 +1,54 @@
 struct GSPSInput
 {
 	float4 Position : SV_POSITION;
-	// float4 Color : SV_COLOR;
+	float4 Color : COLOR;
 };
 
-GSPSInput vs( float4 Pos : POSITION ) : SV_POSITION
+GSPSInput vs( float4 Pos : POSITION, uint vertex_id : SV_VertexID )
 {
-	GSPSInput output;
-	output.Position = Pos;
-
-	/*
-	float4 colors[ 3 ] = {
-		{ 1.f, 0.f, 0.f, 1.f },
-		{ 0.f, 1.f, 0.f, 1.f },
-		{ 0.f, 0.f, 1.f, 1.f },
+	static float4 colors[ 3 ] = {
+		{ 1.f, 0.f, 0.f, 0.5f },
+		{ 0.f, 1.f, 0.f, 0.5f },
+		{ 0.f, 0.f, 1.f, 0.5f },
 	};
 
-    output.Color = colors[ id % 3 ];
-	*/
-
+	GSPSInput output = { Pos, colors[ vertex_id % 3 ] };
     return output;
 }
 
-[maxvertexcount(6)]
-void gs( triangle GSPSInput input[3], inout TriangleStream<GSPSInput> TriStream )
+[maxvertexcount(12)]
+void gs( triangle GSPSInput input[3], inout TriangleStream<GSPSInput> TriStream, uint patchID : SV_PrimitiveID )
 {
-	for ( int n = 0; n < 3; n++ )
+	static const float PI = 3.14159265f;
+	
+	for ( uint n = 0; n < 3; n++ )
 	{
-		GSPSInput output = input[ n ];
-		TriStream.Append( output );
-	}
+		uint m = ( n + 1 ) % 3;
+		float angle = atan2( input[ m ].Position.y - input[ n ].Position.y, input[ m ].Position.x - input[ n ].Position.x );
+		angle += PI / 2.f;
 
-	TriStream.RestartStrip();
+		float dx = cos( angle ) * 0.05f;
+		float dy = sin( angle ) * 0.05f;
 
-	for ( int n = 0; n < 3; n++ )
-	{
-		GSPSInput output = input[ n ];
+		GSPSInput output[ 4 ] = { input[ n ], input[ n ], input[ n ], input[ n ] };
 
-		float4 x = { 0.5, 0.5, 0.5, 0.5 };
+		output[ 0 ].Position = input[ n ].Position + float4( -dx, -dy, 0.f, 0.f );
+		output[ 1 ].Position = input[ n ].Position + float4( +dx, +dy, 0.f, 0.f );
+		output[ 2 ].Position = input[ m ].Position + float4( -dx, -dy, 0.f, 0.f );
+		output[ 3 ].Position = input[ m ].Position + float4( +dx, +dy, 0.f, 0.f );
 
-		output.Position = input[ n ].Position + x;
+		TriStream.Append( output[ 0 ] );
+		TriStream.Append( output[ 1 ] );
+		TriStream.Append( output[ 2 ] );
+		TriStream.Append( output[ 3 ] );
 		
-		TriStream.Append( output );
+		TriStream.RestartStrip();
 	}
-
-	TriStream.RestartStrip();
 }
 
 float4 ps( GSPSInput input ) : SV_Target
 {
-	return float4( 1.f, 0.f, 0.f, 1.f );
-	
-	// return input.Color;
+	return input.Color;
 }
 
 technique11 main

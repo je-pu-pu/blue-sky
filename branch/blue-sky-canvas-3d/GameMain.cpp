@@ -38,6 +38,8 @@ const char* model_file_name_list[] =
 	"./blue-sky-building-11.obj",
 	"./blue-sky-building-12.obj",
 
+	"./blue-sky-building-13.obj",
+
 	"./grid-building.obj",
 
 	"./grid.obj",

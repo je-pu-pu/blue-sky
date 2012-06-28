@@ -6,6 +6,8 @@
 
 #include <windows.h>
 
+#include <dxerr.h>
+
 //■■■　メイン　■■■
 int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int nCmdShow )
 {
@@ -23,11 +25,21 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 		// メッセージループ
 		return app->MessageLoop();
 	}
+	catch ( const common::exception< HRESULT >& e )
+	{
+		if ( app )
+		{
+			std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() ) + "\n";
+			message += std::string( DXGetErrorString( e.data() ) ) + " : " + DXGetErrorDescription( e.data() );
+
+			MessageBox( app->GetWindowHandle(), message.c_str(), "ERROR", MB_OK );
+		}
+	}
 	catch ( const common::exception< std::string >& e )
 	{
 		if ( app )
 		{
-			std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() );
+			std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() ) + "\n" + e.data();
 			MessageBox( app->GetWindowHandle(), message.c_str(), "ERROR", MB_OK );
 		}
 

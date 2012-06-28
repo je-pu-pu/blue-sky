@@ -4,16 +4,19 @@
     <Filter Include="DirectX">
       <UniqueIdentifier>{c3b4646e-11d1-42af-ba74-3623212ce387}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DirectX\Direct3D">
-      <UniqueIdentifier>{a623ec99-1ff1-4997-933c-ea13fcb3dea9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="art">
       <UniqueIdentifier>{5323b45d-558e-49a1-bd89-70529db0827b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX\Direct3D9">
+      <UniqueIdentifier>{a623ec99-1ff1-4997-933c-ea13fcb3dea9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX\Direct3D11">
+      <UniqueIdentifier>{526faaaa-03a2-4db1-b30c-03fe07599e73}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Direct3D9.cpp">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX\Direct3D9</Filter>
     </ClCompile>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="GameMain.cpp" />
@@ -35,24 +38,27 @@
       <Filter>art</Filter>
     </ClCompile>
     <ClCompile Include="Direct3D9TextureManager.cpp">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX\Direct3D9</Filter>
     </ClCompile>
     <ClCompile Include="Direct3D9MeshManager.cpp">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX\Direct3D9</Filter>
     </ClCompile>
     <ClCompile Include="Direct3D9Font.cpp">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX\Direct3D9</Filter>
     </ClCompile>
     <ClCompile Include="Direct3D9Mesh.cpp">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX\Direct3D9</Filter>
     </ClCompile>
     <ClCompile Include="Direct3D9Resource.cpp">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX\Direct3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Direct3D9.h">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX\Direct3D9</Filter>
     </ClInclude>
     <ClInclude Include="App.h" />
     <ClInclude Include="GameMain.h" />
@@ -85,22 +91,25 @@
       <Filter>art</Filter>
     </ClInclude>
     <ClInclude Include="Direct3D9TextureManager.h">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX\Direct3D9</Filter>
     </ClInclude>
     <ClInclude Include="Direct3D9Font.h">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX\Direct3D9</Filter>
     </ClInclude>
     <ClInclude Include="Direct3D9Mesh.h">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX\Direct3D9</Filter>
     </ClInclude>
     <ClInclude Include="Direct3D9MeshManager.h">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX\Direct3D9</Filter>
     </ClInclude>
     <ClInclude Include="Direct3D9Resource.h">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX\Direct3D9</Filter>
     </ClInclude>
     <ClInclude Include="DirectX.h">
-      <Filter>DirectX\Direct3D</Filter>
+      <Filter>DirectX\Direct3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11.h">
+      <Filter>DirectX\Direct3D11</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

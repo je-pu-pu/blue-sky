@@ -7,7 +7,7 @@
 #ifndef		_APP_H_
 #define		_APP_H_
 
-#include	<Windows.h>
+#include	<windows.h>
 #include	<string>
 using namespace std;
 

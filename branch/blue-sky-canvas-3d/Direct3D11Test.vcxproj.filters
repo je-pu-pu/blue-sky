@@ -6,12 +6,14 @@
     <ClCompile Include="..\sources\Direct3D11Test.cpp" />
     <ClCompile Include="..\sources\MainLoop.cpp" />
     <ClCompile Include="..\sources\Main.cpp" />
+    <ClCompile Include="Direct3D11Mesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sources\Direct3D11.h" />
     <ClInclude Include="..\sources\App.h" />
     <ClInclude Include="..\sources\Direct3D11Test.h" />
     <ClInclude Include="..\sources\MainLoop.h" />
+    <ClInclude Include="Direct3D11Mesh.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\main.fx" />

@@ -35,7 +35,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 
 	, effect_( 0 )
 	, vertex_layout_( 0 )
-	, vertex_buffer_( 0 )
 {
 	common::log( "log/d3d11.log", "", false );
 
@@ -82,40 +81,15 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
     viewport.MaxDepth = 1.f;
 
     immediate_context_->RSSetViewports( 1, & viewport );
-	
-    // Create vertex buffer
-    SimpleVertex vertices[] =
-    {
-        XMFLOAT3( 0.0f, 0.5f, 0.5f ),
-        XMFLOAT3( 0.5f, -0.5f, 0.5f ),
-        XMFLOAT3( -0.5f, -0.5f, 0.5f ),
-    };
-    D3D11_BUFFER_DESC bd;
-	ZeroMemory( &bd, sizeof(bd) );
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof( SimpleVertex ) * 3;
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-    D3D11_SUBRESOURCE_DATA InitData;
-	ZeroMemory( &InitData, sizeof(InitData) );
-    InitData.pSysMem = vertices;
-	
-	DIRECT_X_FAIL_CHECK( device_->CreateBuffer( &bd, &InitData, & vertex_buffer_ ) );
-    
-    // Set vertex buffer
-    UINT stride = sizeof( SimpleVertex );
-    UINT offset = 0;
-	immediate_context_->IASetVertexBuffers( 0, 1, & vertex_buffer_, &stride, &offset );
 
-    // Set primitive topology
+	// ?
     immediate_context_->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 }
 
 Direct3D11::~Direct3D11()
 {
 	DIRECT_X_RELEASE( vertex_layout_ );
-	DIRECT_X_RELEASE( vertex_buffer_ );
-
+	
 	DIRECT_X_RELEASE( effect_ );
 
 	DIRECT_X_RELEASE( render_target_view_ );

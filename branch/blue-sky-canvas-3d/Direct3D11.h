@@ -25,7 +25,6 @@ private:
 
 	// ?
 	ID3D11InputLayout*      vertex_layout_;
-	ID3D11Buffer*           vertex_buffer_;
 
 	void text_out_adapter_info( const char*, bool = false );
 	void text_out_device_caps( const char*, bool = false );
@@ -46,6 +45,7 @@ public:
 	void set_depth_stencil( bool );
 
 	/** BAD functions */
+	inline ID3D11Device* getDevice() { return device_; }
 	inline ID3D11DeviceContext* getImmediateContext() { return immediate_context_; }
 	inline IDXGISwapChain* getSwapChain() { return swap_chain_; }
 	inline ID3D11RenderTargetView* getRenderTargetView() { return render_target_view_; }

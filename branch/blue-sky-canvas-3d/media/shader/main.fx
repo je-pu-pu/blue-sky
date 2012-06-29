@@ -1,3 +1,10 @@
+cbuffer ConstantBuffer : register( b0 )
+{
+	matrix World;
+	matrix View;
+	matrix Projection;
+};
+
 struct GSPSInput
 {
 	float4 Position : SV_POSITION;
@@ -13,11 +20,24 @@ GSPSInput vs( float4 Pos : POSITION, uint vertex_id : SV_VertexID )
 	};
 
 	GSPSInput output = { Pos, colors[ vertex_id % 3 ] };
+
+	output.Position = mul( output.Position, World );
+    output.Position = mul( output.Position, View );
+    output.Position = mul( output.Position, Projection );
+
     return output;
 }
 
 [maxvertexcount(12)]
 void gs( triangle GSPSInput input[3], inout TriangleStream<GSPSInput> TriStream, uint patchID : SV_PrimitiveID )
+{
+	TriStream.Append( input[ 0 ] );
+	TriStream.Append( input[ 1 ] );
+	TriStream.Append( input[ 2 ] );
+}
+
+[maxvertexcount(12)]
+void gs_line( triangle GSPSInput input[3], inout TriangleStream<GSPSInput> TriStream, uint patchID : SV_PrimitiveID )
 {
 	static const float PI = 3.14159265f;
 	

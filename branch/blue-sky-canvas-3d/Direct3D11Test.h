@@ -28,6 +28,7 @@ public:
 	~CGameMain();				//デストラクタ
 
 	void	Loop();				//メインループ
+	void	render();
 
 	const CMainLoop& getMainLoop() const { return MainLoop; }
 };

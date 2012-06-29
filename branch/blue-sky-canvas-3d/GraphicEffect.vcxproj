@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Direct3D11.cpp" />
+    <ClCompile Include="Direct3D11ConstantBuffer.cpp" />
     <ClCompile Include="Direct3D11Mesh.cpp" />
     <ClCompile Include="Direct3D9.cpp" />
     <ClCompile Include="App.cpp">
@@ -178,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Direct3D11.h" />
+    <ClInclude Include="Direct3D11ConstantBuffer.h" />
     <ClInclude Include="Direct3D11Mesh.h" />
     <ClInclude Include="Direct3D9.h" />
     <ClInclude Include="App.h" />

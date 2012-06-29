@@ -58,6 +58,9 @@
     <ClCompile Include="Direct3D11Mesh.cpp">
       <Filter>DirectX\Direct3D11</Filter>
     </ClCompile>
+    <ClCompile Include="Direct3D11ConstantBuffer.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Direct3D9.h">
@@ -115,6 +118,9 @@
       <Filter>DirectX\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="Direct3D11Mesh.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11ConstantBuffer.h">
       <Filter>DirectX\Direct3D11</Filter>
     </ClInclude>
   </ItemGroup>

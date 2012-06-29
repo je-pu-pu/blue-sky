@@ -7,6 +7,7 @@
     <ClCompile Include="..\sources\MainLoop.cpp" />
     <ClCompile Include="..\sources\Main.cpp" />
     <ClCompile Include="Direct3D11Mesh.cpp" />
+    <ClCompile Include="Direct3D11ConstantBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sources\Direct3D11.h" />
@@ -14,6 +15,7 @@
     <ClInclude Include="..\sources\Direct3D11Test.h" />
     <ClInclude Include="..\sources\MainLoop.h" />
     <ClInclude Include="Direct3D11Mesh.h" />
+    <ClInclude Include="Direct3D11ConstantBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\main.fx" />

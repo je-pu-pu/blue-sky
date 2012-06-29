@@ -19,12 +19,17 @@ private:
 	ID3D11Device*			device_;				///< Direct3D 11 Device
 	ID3D11DeviceContext*	immediate_context_;		///< Direct3D 11 Device Context
 	IDXGISwapChain*			swap_chain_;			///< Direct3D 11 Swap Chain
+
 	ID3D11RenderTargetView*	render_target_view_;	///< Direct3D 11 Render Target View
+	
+	ID3D11Texture2D*		depth_stencil_texture_;
+	ID3D11DepthStencilView*	depth_stencil_view_;
 
 	ID3DX11Effect*			effect_;
 
-	// ?
 	ID3D11InputLayout*      vertex_layout_;
+
+	ID3D11Buffer*			constant_buffer_;
 
 	void text_out_adapter_info( const char*, bool = false );
 	void text_out_device_caps( const char*, bool = false );
@@ -43,6 +48,8 @@ public:
 	void set_multi_sample( int, int );
 
 	void set_depth_stencil( bool );
+
+	void clear();
 
 	/** BAD functions */
 	inline ID3D11Device* getDevice() { return device_; }

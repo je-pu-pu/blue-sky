@@ -31,10 +31,16 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	: device_( 0 )
 	, immediate_context_( 0 )
 	, swap_chain_( 0 )
+	
 	, render_target_view_( 0 )
+
+	, depth_stencil_texture_( 0 )
+	, depth_stencil_view_( 0 )
 
 	, effect_( 0 )
 	, vertex_layout_( 0 )
+	
+	, constant_buffer_( 0 )
 {
 	common::log( "log/d3d11.log", "", false );
 
@@ -70,6 +76,34 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 
 	immediate_context_->OMSetRenderTargets( 1, & render_target_view_, 0 );
 
+
+	D3D11_TEXTURE2D_DESC texture_desc = { 0 };
+    
+	texture_desc.Width = w;
+    texture_desc.Height = h;
+    texture_desc.MipLevels = 1;
+    texture_desc.ArraySize = 1;
+	texture_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    texture_desc.SampleDesc.Count = 1;
+    texture_desc.SampleDesc.Quality = 0;
+    texture_desc.Usage = D3D11_USAGE_DEFAULT;
+    texture_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    texture_desc.CPUAccessFlags = 0;
+    texture_desc.MiscFlags = 0;
+
+	DIRECT_X_FAIL_CHECK( device_->CreateTexture2D( & texture_desc, 0, & depth_stencil_texture_ ) );
+
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc = { texture_desc.Format };
+	
+    depth_stencil_view_desc.Format = texture_desc.Format;
+    depth_stencil_view_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    depth_stencil_view_desc.Texture2D.MipSlice = 0;
+
+	DIRECT_X_FAIL_CHECK( device_->CreateDepthStencilView( depth_stencil_texture_, & depth_stencil_view_desc, & depth_stencil_view_ ) );
+
+    immediate_context_->OMSetRenderTargets( 1, & render_target_view_, depth_stencil_view_ );
+
  
     D3D11_VIEWPORT viewport;
     
@@ -88,9 +122,14 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 
 Direct3D11::~Direct3D11()
 {
+	DIRECT_X_RELEASE( constant_buffer_ );
+
 	DIRECT_X_RELEASE( vertex_layout_ );
 	
 	DIRECT_X_RELEASE( effect_ );
+
+	DIRECT_X_RELEASE( depth_stencil_view_ );
+	DIRECT_X_RELEASE( depth_stencil_texture_ );
 
 	DIRECT_X_RELEASE( render_target_view_ );
 	DIRECT_X_RELEASE( swap_chain_ );
@@ -143,4 +182,12 @@ void Direct3D11::apply_effect()
     immediate_context_->IASetInputLayout( vertex_layout_ );
 	
 	DIRECT_X_FAIL_CHECK( pass->Apply( 0, immediate_context_ ) );
+}
+
+void Direct3D11::clear()
+{
+	float clear_color[ 4 ] = { 0.f, 0.125f, 0.3f, 1.0f };
+
+	immediate_context_->ClearRenderTargetView( render_target_view_, clear_color );
+	immediate_context_->ClearDepthStencilView( depth_stencil_view_, D3D11_CLEAR_DEPTH, 1.0f, 0 );
 }

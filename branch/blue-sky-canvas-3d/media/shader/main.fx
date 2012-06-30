@@ -64,8 +64,8 @@ void gs_line( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> Tri
 	static const float w_fix = 1.f;
 	
 	static const float line_index = 0;
-	static const float line_v_width = 4.f; // 32.f / 1024.f;
-	static const float line_v_origin = 1.f - ( line_index * line_v_width ) - line_v_width;
+	static const float line_v_width = 0.05f; // 32.f / 1024.f;
+	static const float line_v_origin = 0.f;// 1.f - 0.05f; // ( line_index * line_v_width ) - line_v_width;
 
 	static const float screen_ratio = ( 320.f / 1280.f );
 	

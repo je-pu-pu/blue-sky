@@ -58,21 +58,23 @@ void gs_pass( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> Tri
 void gs_line( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> TriStream )
 {
 	static const float PI = 3.14159265f;
-	static const float line_width = 0.05f;
+	static const float line_width = 0.025f;
 	static const float z_offset = 0.f; // -0.0001f;
 	static const float z_fix = 0.f;
 	static const float w_fix = 1.f;
 	
 	static const float line_index = 0;
-	static const float line_v_width = 0.05f; // 32.f / 1024.f;
-	static const float line_v_origin = 0.f;// 1.f - 0.05f; // ( line_index * line_v_width ) - line_v_width;
+	static const float line_v_width = 32.f / 1024.f;
+	static const float line_v_origin = 0.f; // ( line_index * line_v_width );
 
-	static const float screen_ratio = ( 320.f / 1280.f );
+	static const float screen_ratio = ( 600.f / 800.f );
 	
 	for ( uint n = 0; n < 3; n++ )
 	{
 		input[ n ].Position /= input[ n ].Position.w;
 		input[ n ].Position.w = w_fix;
+
+		// input[ n ].Position.x += noise( input[ n ].Position.x );
 	}
 
 	for ( uint n = 0; n < 3; n++ )

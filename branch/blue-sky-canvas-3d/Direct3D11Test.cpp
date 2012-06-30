@@ -57,6 +57,7 @@ CGameMain::CGameMain()
 //■デストラクタ
 CGameMain::~CGameMain()
 {
+	delete constant_buffer_;
 	delete mesh_;
 	delete direct_3d_;
 }
@@ -88,6 +89,7 @@ void CGameMain::Loop()
 	t += 0.01f;
 
 	constant_buffer.world = XMMatrixRotationY( t );
+	// constant_buffer.world = XMMatrixRotationZ( t );
 
 	ConstantBuffer buffer;
 

@@ -10,8 +10,8 @@ CApp::CApp()
 	: hWnd( 0 )
 	, hInst( 0 )
 	, hMutex( 0 )
-	, Width( 720 )
-	, Height( 480 )
+	, Width( 1280 )
+	, Height( 320 )
 {
 	ClassName = "blue-sky";
 	WinTitle = "blue-sky";

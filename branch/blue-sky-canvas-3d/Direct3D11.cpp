@@ -192,7 +192,7 @@ void Direct3D11::apply_effect()
 
 void Direct3D11::clear()
 {
-	float clear_color[ 4 ] = { 0.f, 0.125f, 0.3f, 1.0f };
+	float clear_color[ 4 ] = { 0.6f, 0.8f, 1.f, 1.f };
 
 	immediate_context_->ClearRenderTargetView( render_target_view_, clear_color );
 	immediate_context_->ClearDepthStencilView( depth_stencil_view_, D3D11_CLEAR_DEPTH, 1.0f, 0 );

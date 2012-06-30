@@ -155,7 +155,9 @@ void Direct3D11Mesh::create_index_buffer()
 
 void Direct3D11Mesh::create_texture_resource_view( const char* file_name )
 {
-	std::string texture_file_name = "media/model/robot.png"; // boost::filesystem::basename( boost::filesystem::path( file_name ) ) + ".png";
+	// std::string texture_file_name = "media/model/robot.png"; // boost::filesystem::basename( boost::filesystem::path( file_name ) ) + ".png";
+	std::string texture_file_name = "media/texture/lines.png";
+	// std::string texture_file_name = "media/texture/pencil-face-3.png";
 	
 	DIRECT_X_FAIL_CHECK( D3DX11CreateShaderResourceViewFromFile( direct_3d_->getDevice(), texture_file_name.c_str(), 0, 0, & texture_resource_view_, 0 ) );
 }

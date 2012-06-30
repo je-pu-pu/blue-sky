@@ -56,7 +56,7 @@ public:
 	inline ID3D11DeviceContext* getImmediateContext() { return immediate_context_; }
 	inline IDXGISwapChain* getSwapChain() { return swap_chain_; }
 	inline ID3D11RenderTargetView* getRenderTargetView() { return render_target_view_; }
-
+	inline ID3DX11Effect* getEffect() { return effect_; }
 
 }; // class Direct3D11
 

@@ -159,28 +159,34 @@ void Direct3D11::load_effect_file( const char* file_path )
 	int n = shader->GetBufferSize();
 
 	DIRECT_X_FAIL_CHECK( D3DX11CreateEffectFromMemory( shader->GetBufferPointer(), shader->GetBufferSize(), 0, device_, & effect_ ) );
+
+	
+	// ?
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+
+	UINT numElements = ARRAYSIZE( layout );
+
+
+	ID3DX11EffectPass* pass = effect_->GetTechniqueByName( "|main" )->GetPassByIndex( 0 ); 
+
+	D3DX11_PASS_DESC pass_desc;
+	pass->GetDesc( & pass_desc );
+
+	DIRECT_X_FAIL_CHECK( device_->CreateInputLayout( layout, numElements, pass_desc.pIAInputSignature, pass_desc.IAInputSignatureSize, & vertex_layout_ ) );
+
+	// ?
+	immediate_context_->IASetInputLayout( vertex_layout_ );
 }
 
 void Direct3D11::apply_effect()
 {
-	D3DX11_EFFECT_DESC desc;
-	D3DX11_PASS_DESC pass_desc;
+	ID3DX11EffectTechnique* technique = effect_->GetTechniqueByName( "|main" );
 
-	effect_->GetDesc( & desc );
-
-	ID3DX11EffectPass* pass = effect_->GetTechniqueByName( "|main" )->GetPassByIndex( 0 ); 
-
-	pass->GetDesc( & pass_desc );
-
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-    {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    };
-	UINT numElements = ARRAYSIZE( layout );
-
-	DIRECT_X_FAIL_CHECK( device_->CreateInputLayout( layout, numElements, pass_desc.pIAInputSignature, pass_desc.IAInputSignatureSize, & vertex_layout_ ) );
-    immediate_context_->IASetInputLayout( vertex_layout_ );
-	
+	ID3DX11EffectPass* pass = technique->GetPassByIndex( 0 ); 
 	DIRECT_X_FAIL_CHECK( pass->Apply( 0, immediate_context_ ) );
 }
 

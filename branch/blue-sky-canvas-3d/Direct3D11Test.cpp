@@ -5,6 +5,10 @@
 #include "Direct3D11Mesh.h"
 #include "Direct3D11ConstantBuffer.h"
 
+#include "include/d3dx11effect.h"
+
+#include "DirectX.h"
+
 struct ConstantBuffer
 {
 	XMMATRIX world;
@@ -34,14 +38,15 @@ CGameMain::CGameMain()
 
 	mesh_ = new Direct3D11Mesh( direct_3d_ );
 	// mesh_->load_obj( "media/model/tri.obj" );
-	mesh_->load_obj( "media/model/robot.obj" );
+	// mesh_->load_obj( "media/model/robot.obj" );
+	mesh_->load_obj( "media/model/robot-blender-exported.obj" );
 
 	constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_, sizeof( ConstantBuffer ) );
 
 	constant_buffer.projection = XMMatrixIdentity();
 
-	XMVECTOR eye = XMVectorSet( 0.0f, 1.0f, -5.0f, 0.0f );
-	XMVECTOR at = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
+	XMVECTOR eye = XMVectorSet( 0.0f, 4.0f, -5.0f, 0.0f );
+	XMVECTOR at = XMVectorSet( 0.0f, 4.0f, 0.0f, 0.0f );
 	XMVECTOR up = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
 
 	constant_buffer.view = XMMatrixLookAtLH( eye, at, up );
@@ -105,8 +110,19 @@ void CGameMain::render()
 {
 	direct_3d_->clear();
 
-	constant_buffer_->render();
-	mesh_->render();
+	ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|main" );
+
+	D3DX11_TECHNIQUE_DESC technique_desc;
+	technique->GetDesc( & technique_desc );
+
+	for ( UINT n = 0; n < technique_desc.Passes; n++ )
+	{
+		ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
+		DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+
+		constant_buffer_->render();
+		mesh_->render();
+	}
 
 	direct_3d_->getSwapChain()->Present( 0, 0 );
 }

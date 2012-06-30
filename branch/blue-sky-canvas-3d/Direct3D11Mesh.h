@@ -14,8 +14,36 @@ class Direct3D11;
 class Direct3D11Mesh
 {
 public:
-	typedef XMFLOAT3 Vertex;
+	struct Vertex
+	{
+		XMFLOAT3 Position;
+		XMFLOAT2 TexCoord;
+
+		bool operator < ( const Vertex& v ) const
+		{
+			if ( Position.x < v.Position.x ) return true;
+			if ( Position.x > v.Position.x ) return false;
+			if ( Position.y < v.Position.y ) return true;
+			if ( Position.y > v.Position.y ) return false;
+			if ( Position.z < v.Position.z ) return true;
+			if ( Position.z > v.Position.z ) return false;
+
+			if ( TexCoord.x < v.TexCoord.x ) return true;
+			if ( TexCoord.x > v.TexCoord.x ) return false;
+			if ( TexCoord.y < v.TexCoord.y ) return true;
+			if ( TexCoord.y > v.TexCoord.y ) return false;
+
+			return false;
+		}
+	};
+
+	typedef XMFLOAT3 Position;
+	typedef XMFLOAT2 TexCoord;
+
 	typedef WORD Index;
+
+	typedef std::vector< Position > PositionList; // ?
+	typedef std::vector< TexCoord > TexCoordList; // ?
 
 	typedef std::vector< Vertex > VertexList;
 	typedef std::vector< Index > IndexList;
@@ -27,12 +55,18 @@ protected:
 	
 	ID3D11Buffer*	vertex_buffer_;
 	ID3D11Buffer*	index_buffer_;
+	
+	ID3D11ShaderResourceView*	texture_resource_view_;
+	ID3D11SamplerState*			texture_sampler_;			// ?
 
 	VertexList		vertex_list_;
 	IndexList		index_list_;
 	
 	void create_vertex_buffer();
 	void create_index_buffer();
+
+	void create_texture_resource_view( const char* );
+	void create_texture_sampler();
 
 	/*
 	LPDIRECT3DTEXTURE9* textures_;
@@ -46,7 +80,6 @@ public:
 	virtual ~Direct3D11Mesh();
 
 	bool load_obj( const char* );
-	
 
 	void render() const;
 

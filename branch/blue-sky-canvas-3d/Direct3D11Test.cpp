@@ -38,8 +38,10 @@ CGameMain::CGameMain()
 
 	mesh_ = new Direct3D11Mesh( direct_3d_ );
 	// mesh_->load_obj( "media/model/tri.obj" );
+	mesh_->load_obj( "media/model/tris.obj" );
+	// mesh_->load_obj( "media/model/cube.obj" );
 	// mesh_->load_obj( "media/model/robot.obj" );
-	mesh_->load_obj( "media/model/robot-blender-exported.obj" );
+	// mesh_->load_obj( "media/model/robot-blender-exported.obj" );
 
 	constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_, sizeof( ConstantBuffer ) );
 

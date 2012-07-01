@@ -1,5 +1,13 @@
 Texture2D model_texture : register( t0 );
-SamplerState texture_sampler : register( s0 );
+// SamplerState texture_sampler : register( s0 );
+
+SamplerState texture_sampler
+{
+	Filter = MIN_POINT_MAG_LINEAR_MIP_POINT;
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    AddressW = CLAMP;
+};
 
 cbuffer ConstantBuffer : register( b0 )
 {
@@ -59,22 +67,21 @@ void gs_line( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> Tri
 {
 	static const float PI = 3.14159265f;
 	static const float line_width = 0.025f;
-	static const float z_offset = 0.f; // -0.0001f;
+	static const float z_offset = -0.0001f;
 	static const float z_fix = 0.f;
 	static const float w_fix = 1.f;
 	
 	static const float line_index = 0;
 	static const float line_v_width = 32.f / 1024.f;
-	static const float line_v_origin = 0.f; // ( line_index * line_v_width );
+	static const float line_v_origin = ( line_index * line_v_width );
 
 	static const float screen_ratio = ( 600.f / 800.f );
 	
 	for ( uint n = 0; n < 3; n++ )
 	{
 		input[ n ].Position /= input[ n ].Position.w;
+		input[ n ].Position.z -= 0.0001f;
 		input[ n ].Position.w = w_fix;
-
-		// input[ n ].Position.x += noise( input[ n ].Position.x );
 	}
 
 	for ( uint n = 0; n < 3; n++ )
@@ -155,9 +162,13 @@ DepthStencilState WriteDepth
 	DepthWriteMask = ALL;
 };
 
+RasterizerState WireFrame
+{
+	FILLMODE = WIREFRAME;
+};
+
 technique11 main
 {
-	/*
 	pass pass1
     {
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
@@ -167,7 +178,6 @@ technique11 main
         SetGeometryShader( CompileShader( gs_4_0, gs_pass() ) );
         SetPixelShader( CompileShader( ps_4_0, ps_debug() ) );
     }
-	*/
 
 	pass pass_line
 	{
@@ -177,5 +187,7 @@ technique11 main
 		SetVertexShader( CompileShader( vs_4_0, vs() ) );
 		SetGeometryShader( CompileShader( gs_4_0, gs_line() ) );
 		SetPixelShader( CompileShader( ps_4_0, ps() ) );
+
+		// RASTERIZERSTATE = WireFrame;
 	}
 }

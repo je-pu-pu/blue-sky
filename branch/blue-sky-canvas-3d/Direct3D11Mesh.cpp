@@ -18,14 +18,12 @@ Direct3D11Mesh::Direct3D11Mesh( Direct3D11* direct_3d )
 	, index_buffer_( 0 )
 
 	, texture_resource_view_( 0 )
-	, texture_sampler_( 0 )
 {
 
 }
 
 Direct3D11Mesh::~Direct3D11Mesh()
 {
-	DIRECT_X_RELEASE( texture_sampler_ );
 	DIRECT_X_RELEASE( texture_resource_view_ );
 
 	DIRECT_X_RELEASE( index_buffer_ );
@@ -87,7 +85,7 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 
 				fss >> position_index >> tex_coord_index;
 
-				// ???
+				// 1 origin -> 0 origin
 				position_index--;
 				tex_coord_index--;
 
@@ -120,7 +118,6 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 	create_index_buffer();
 
 	create_texture_resource_view( file_name );
-	create_texture_sampler();
 
 	return true;
 }
@@ -162,22 +159,6 @@ void Direct3D11Mesh::create_texture_resource_view( const char* file_name )
 	DIRECT_X_FAIL_CHECK( D3DX11CreateShaderResourceViewFromFile( direct_3d_->getDevice(), texture_file_name.c_str(), 0, 0, & texture_resource_view_, 0 ) );
 }
 
-void Direct3D11Mesh::create_texture_sampler()
-{
-	D3D11_SAMPLER_DESC sampler_desc = { D3D11_FILTER_MIN_MAG_MIP_LINEAR };
-
-	sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-    sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-
-    sampler_desc.MinLOD = 0;
-    sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateSamplerState( & sampler_desc, & texture_sampler_ ) );
-}
-
 void Direct3D11Mesh::render() const
 {
 	UINT stride = sizeof( Vertex );
@@ -187,7 +168,6 @@ void Direct3D11Mesh::render() const
 	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_, IndexBufferFormat, 0 );
 
 	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & texture_resource_view_ );
-	direct_3d_->getImmediateContext()->PSSetSamplers( 0, 1, & texture_sampler_ ); // ?
 
 	direct_3d_->getImmediateContext()->DrawIndexed( index_list_.size(), 0, 0 );
 }

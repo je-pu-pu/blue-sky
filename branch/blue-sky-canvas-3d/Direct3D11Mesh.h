@@ -57,7 +57,6 @@ protected:
 	ID3D11Buffer*	index_buffer_;
 	
 	ID3D11ShaderResourceView*	texture_resource_view_;
-	ID3D11SamplerState*			texture_sampler_;			// ?
 
 	VertexList		vertex_list_;
 	IndexList		index_list_;
@@ -66,14 +65,6 @@ protected:
 	void create_index_buffer();
 
 	void create_texture_resource_view( const char* );
-	void create_texture_sampler();
-
-	/*
-	LPDIRECT3DTEXTURE9* textures_;
-
-	virtual LPDIRECT3DTEXTURE9 load_texture( const char* ) const ;
-	virtual std::string get_texture_file_name_by_texture_name( const char* ) const;
-	*/
 
 public:
 	Direct3D11Mesh( Direct3D11* );

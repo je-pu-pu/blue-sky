@@ -1,9 +1,9 @@
 Texture2D model_texture : register( t0 );
-// SamplerState texture_sampler : register( s0 );
+Texture2D line_texture : register( t0 );
 
 SamplerState texture_sampler
 {
-	Filter = MIN_POINT_MAG_LINEAR_MIP_POINT;
+	Filter = ANISOTROPIC; // MIN_POINT_MAG_LINEAR_MIP_POINT;
     AddressU = CLAMP;
     AddressV = CLAMP;
     AddressW = CLAMP;
@@ -14,6 +14,7 @@ cbuffer ConstantBuffer : register( b0 )
 	matrix World;
 	matrix View;
 	matrix Projection;
+	float t;
 };
 
 struct VS_INPUT
@@ -28,7 +29,7 @@ struct GSPS_INPUT
 	float2 TexCoord : TEXCOORD0;
 };
 
-GSPS_INPUT vs( VS_INPUT input )
+GSPS_INPUT vs( VS_INPUT input, uint vertex_id : SV_VertexID )
 {
 	GSPS_INPUT output;
 
@@ -36,6 +37,11 @@ GSPS_INPUT vs( VS_INPUT input )
     output.Position = mul( output.Position, View );
     output.Position = mul( output.Position, Projection );
 	output.TexCoord = input.TexCoord;
+
+	// �Ԃ炷
+	float a = ( vertex_id ) / 10.f + t * 10.f;
+	output.Position.x += cos( a ) * 0.01f;
+	output.Position.y += sin( t ) * 0.01f;
 
 	// output.Position = input.Position;
 
@@ -65,23 +71,27 @@ void gs_pass( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> Tri
 [maxvertexcount(12)]
 void gs_line( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> TriStream )
 {
+	static const float screen_width = 800.f;
+	static const float screen_height = 600.f;
+	static const float screen_ratio = ( screen_height / screen_width );
+
 	static const float PI = 3.14159265f;
-	static const float line_width = 0.025f;
-	static const float z_offset = -0.0001f;
+	static const float line_width_scale = 0.5f;
+	static const float line_width = 32.f / screen_height * line_width_scale;
+	static const float z_offset = -0.00001f;
 	static const float z_fix = 0.f;
 	static const float w_fix = 1.f;
 	
-	static const float line_index = 0;
 	static const float line_v_width = 32.f / 1024.f;
-	static const float line_v_origin = ( line_index * line_v_width );
 
-	static const float screen_ratio = ( 600.f / 800.f );
-	
 	for ( uint n = 0; n < 3; n++ )
 	{
 		input[ n ].Position /= input[ n ].Position.w;
-		input[ n ].Position.z -= 0.0001f;
+		input[ n ].Position.z += z_offset;
 		input[ n ].Position.w = w_fix;
+
+		// debug
+		// input[ n ].Position.z = z_fix;
 	}
 
 	for ( uint n = 0; n < 3; n++ )
@@ -90,6 +100,9 @@ void gs_line( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> Tri
 
 		float ly = ( input[ m ].Position.y * screen_ratio ) - ( input[ n ].Position.y * screen_ratio );
 		float lx = input[ m ].Position.x - input[ n ].Position.x;
+		
+		float line_index = uint( ( input[ n ].Position.x + input[ m ].Position.y + input[ n ].Position.z ) * 30.f ) % 3;
+		float line_v_origin = ( line_index * line_v_width );
 
 		float angle = atan2( ly, lx );
 		angle += PI / 2.f;
@@ -99,16 +112,16 @@ void gs_line( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> Tri
 
 		GSPS_INPUT output[ 4 ];
 
-		output[ 0 ].Position = input[ n ].Position + float4( -dx, -dy, z_offset, 0.f );
+		output[ 0 ].Position = input[ n ].Position + float4( -dx, -dy, 0.f, 0.f );
 		output[ 0 ].TexCoord = float2( 0.f, line_v_origin );
 
-		output[ 1 ].Position = input[ n ].Position + float4( +dx, +dy, z_offset, 0.f );
+		output[ 1 ].Position = input[ n ].Position + float4( +dx, +dy, 0.f, 0.f );
 		output[ 1 ].TexCoord = float2( 0.f, line_v_origin + line_v_width );
 
-		output[ 2 ].Position = input[ m ].Position + float4( -dx, -dy, z_offset, 0.f );
+		output[ 2 ].Position = input[ m ].Position + float4( -dx, -dy, 0.f, 0.f );
 		output[ 2 ].TexCoord = float2( 1.f, line_v_origin );
 
-		output[ 3 ].Position = input[ m ].Position + float4( +dx, +dy, z_offset, 0.f );
+		output[ 3 ].Position = input[ m ].Position + float4( +dx, +dy, 0.f, 0.f );
 		output[ 3 ].TexCoord = float2( 1.f, line_v_origin + line_v_width );
 
 		/*
@@ -130,6 +143,11 @@ void gs_line( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> Tri
 float4 ps( GSPS_INPUT input ) : SV_Target
 {
 	return model_texture.Sample( texture_sampler, input.TexCoord );
+}
+
+float4 ps_line( GSPS_INPUT input ) : SV_Target
+{
+	return line_texture.Sample( texture_sampler, input.TexCoord );
 }
 
 float4 ps_debug( GSPS_INPUT input ) : SV_Target
@@ -176,7 +194,7 @@ technique11 main
 
         SetVertexShader( CompileShader( vs_4_0, vs() ) );
         SetGeometryShader( CompileShader( gs_4_0, gs_pass() ) );
-        SetPixelShader( CompileShader( ps_4_0, ps_debug() ) );
+        SetPixelShader( CompileShader( ps_4_0, ps() ) );
     }
 
 	pass pass_line
@@ -186,7 +204,7 @@ technique11 main
 
 		SetVertexShader( CompileShader( vs_4_0, vs() ) );
 		SetGeometryShader( CompileShader( gs_4_0, gs_line() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_line() ) );
 
 		// RASTERIZERSTATE = WireFrame;
 	}

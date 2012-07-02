@@ -14,6 +14,7 @@ struct ConstantBuffer
 	XMMATRIX world;
 	XMMATRIX view;
 	XMMATRIX projection;
+	float t;
 };
 
 Direct3D11Mesh* mesh_ = 0;
@@ -38,10 +39,10 @@ CGameMain::CGameMain()
 
 	mesh_ = new Direct3D11Mesh( direct_3d_ );
 	// mesh_->load_obj( "media/model/tri.obj" );
-	mesh_->load_obj( "media/model/tris.obj" );
+	// mesh_->load_obj( "media/model/tris.obj" );
 	// mesh_->load_obj( "media/model/cube.obj" );
 	// mesh_->load_obj( "media/model/robot.obj" );
-	// mesh_->load_obj( "media/model/robot-blender-exported.obj" );
+	mesh_->load_obj( "media/model/robot-blender-exported.obj" );
 
 	constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_, sizeof( ConstantBuffer ) );
 
@@ -93,11 +94,12 @@ void CGameMain::Loop()
 	constant_buffer.world = XMMatrixRotationY( t );
 	// constant_buffer.world = XMMatrixRotationZ( t );
 
-	ConstantBuffer buffer;
+	static ConstantBuffer buffer;
 
 	buffer.world = XMMatrixTranspose( constant_buffer.world );
 	buffer.view = XMMatrixTranspose( constant_buffer.view );
 	buffer.projection = XMMatrixTranspose( constant_buffer.projection );
+	buffer.t += 0.1f;
 
 	/*
 	buffer.world = XMMatrixIdentity();
@@ -123,9 +125,13 @@ void CGameMain::render()
 	{
 		ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
 		DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
-
+		
 		constant_buffer_->render();
-		mesh_->render();
+
+		for ( int n = 0; n < 1; n++ )
+		{
+			mesh_->render();
+		}
 	}
 
 	direct_3d_->getSwapChain()->Present( 0, 0 );

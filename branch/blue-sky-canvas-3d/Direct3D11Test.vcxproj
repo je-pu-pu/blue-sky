@@ -10,6 +10,28 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="Direct3D11.cpp" />
+    <ClCompile Include="Direct3D11ConstantBuffer.cpp" />
+    <ClCompile Include="Direct3D11Mesh.cpp" />
+    <ClCompile Include="Direct3D11Test.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MainLoop.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App.h" />
+    <ClInclude Include="Direct3D11.h" />
+    <ClInclude Include="Direct3D11ConstantBuffer.h" />
+    <ClInclude Include="Direct3D11Mesh.h" />
+    <ClInclude Include="Direct3D11Test.h" />
+    <ClInclude Include="MainLoop.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="media\shader\main.fx">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BB7232F9-527F-4ED0-B15D-5FABCFDAFB7E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -45,7 +67,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>E:\je\program\lib\c++;$(DXSDK_DIR)\Include;D:\lib\boost</IncludePath>
+    <IncludePath>E:\je\program\lib\c++;$(DXSDK_DIR)\Include;D:\lib\boost;$(IncludePath)</IncludePath>
     <LibraryPath>$(DXSDK_DIR)lib\x86;$(ProjectDir)lib\release;$(LibraryPath)</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
@@ -79,26 +101,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\sources\App.cpp" />
-    <ClCompile Include="..\sources\Direct3D11.cpp" />
-    <ClCompile Include="..\sources\Direct3D11Test.cpp" />
-    <ClCompile Include="..\sources\Main.cpp" />
-    <ClCompile Include="..\sources\MainLoop.cpp" />
-    <ClCompile Include="Direct3D11ConstantBuffer.cpp" />
-    <ClCompile Include="Direct3D11Mesh.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\sources\App.h" />
-    <ClInclude Include="..\sources\Direct3D11.h" />
-    <ClInclude Include="..\sources\Direct3D11Test.h" />
-    <ClInclude Include="..\sources\MainLoop.h" />
-    <ClInclude Include="Direct3D11ConstantBuffer.h" />
-    <ClInclude Include="Direct3D11Mesh.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="media\shader\main.fx" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

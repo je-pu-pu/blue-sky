@@ -1,21 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\sources\Direct3D11.cpp" />
-    <ClCompile Include="..\sources\App.cpp" />
-    <ClCompile Include="..\sources\Direct3D11Test.cpp" />
-    <ClCompile Include="..\sources\MainLoop.cpp" />
-    <ClCompile Include="..\sources\Main.cpp" />
-    <ClCompile Include="Direct3D11Mesh.cpp" />
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="Direct3D11.cpp" />
     <ClCompile Include="Direct3D11ConstantBuffer.cpp" />
+    <ClCompile Include="Direct3D11Mesh.cpp" />
+    <ClCompile Include="Direct3D11Test.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MainLoop.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\sources\Direct3D11.h" />
-    <ClInclude Include="..\sources\App.h" />
-    <ClInclude Include="..\sources\Direct3D11Test.h" />
-    <ClInclude Include="..\sources\MainLoop.h" />
-    <ClInclude Include="Direct3D11Mesh.h" />
+    <ClInclude Include="MainLoop.h" />
+    <ClInclude Include="App.h" />
+    <ClInclude Include="Direct3D11.h" />
     <ClInclude Include="Direct3D11ConstantBuffer.h" />
+    <ClInclude Include="Direct3D11Mesh.h" />
+    <ClInclude Include="Direct3D11Test.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\main.fx" />

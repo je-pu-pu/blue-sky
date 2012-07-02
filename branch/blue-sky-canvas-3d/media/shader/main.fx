@@ -27,15 +27,22 @@ struct VS_INPUT
 	float2 TexCoord : TEXCOORD0;
 };
 
-struct GSPS_INPUT
+struct GS_INPUT
 {
 	float4 Position : SV_POSITION;
 	float2 TexCoord : TEXCOORD0;
 };
 
-GSPS_INPUT vs( VS_INPUT input, uint vertex_id : SV_VertexID )
+struct PS_INPUT
 {
-	GSPS_INPUT output;
+	float4 Position : SV_POSITION;
+	float2 TexCoord : TEXCOORD0;
+	float4 Color    : COLOR0;
+};
+
+GS_INPUT vs( VS_INPUT input, uint vertex_id : SV_VertexID )
+{
+	GS_INPUT output;
 
 	output.Position = mul( input.Position, World );
     output.Position = mul( output.Position, View );
@@ -52,14 +59,33 @@ GSPS_INPUT vs( VS_INPUT input, uint vertex_id : SV_VertexID )
     return output;
 }
 
+PS_INPUT vs_to_ps( VS_INPUT input, uint vertex_id : SV_VertexID )
+{
+	PS_INPUT output;
+
+	output.Position = mul( input.Position, World );
+    output.Position = mul( output.Position, View );
+    output.Position = mul( output.Position, Projection );
+	output.TexCoord = input.TexCoord;
+	output.Color = float4(
+		( vertex_id + 8  ) % 32 / 32.f,
+		( vertex_id + 16 ) % 32 / 32.f,
+		( vertex_id + 24 ) % 32 / 32.f,
+		1.f
+	);
+
+	return output;
+}
+
 [maxvertexcount(12)]
-void gs_pass( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> TriStream )
+void gs_pass( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStream )
 {
 	for ( uint n = 0; n < 3; n++ )
 	{
-		GSPS_INPUT output;
+		PS_INPUT output;
 		output.Position = input[ n ].Position;
 		output.TexCoord = input[ n ].TexCoord;
+		output.Color = float4( 1.f, 1.f, 1.f, 1.f );
 
 		TriStream.Append( output );
 	}
@@ -68,7 +94,7 @@ void gs_pass( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> Tri
 }
 
 [maxvertexcount(12)]
-void gs_line( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> TriStream )
+void gs_line( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
 {
 	static const float screen_width = 800.f;
 	static const float screen_height = 600.f;
@@ -82,6 +108,11 @@ void gs_line( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> Tri
 	static const float w_fix = 1.f;
 	
 	static const float line_v_width = 32.f / 1024.f;
+
+	const float4 line_start_color_1 = float4( 0.f, 0.f, 0.f, 0.f );
+	const float4 line_start_color_2 = float4( 0.f, 0.f, 0.f, 0.f );
+	const float4 line_end_color_1 = float4( 0.f, 0.f, primitive_id % 32 / 32.f, 0.f );
+	const float4 line_end_color_2 = float4( 0.f, primitive_id % 8 / 8.f, 0.f, 0.f );
 
 	for ( uint n = 0; n < 3; n++ )
 	{
@@ -110,19 +141,23 @@ void gs_line( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> Tri
 		float dx = cos( angle ) * line_width * screen_ratio;
 		float dy = sin( angle ) * line_width;
 
-		GSPS_INPUT output[ 4 ];
+		PS_INPUT output[ 4 ];
 
 		output[ 0 ].Position = input[ n ].Position + float4( -dx, -dy, 0.f, 0.f );
 		output[ 0 ].TexCoord = float2( 0.f, line_v_origin );
+		output[ 0 ].Color = line_start_color_1;
 
 		output[ 1 ].Position = input[ n ].Position + float4( +dx, +dy, 0.f, 0.f );
 		output[ 1 ].TexCoord = float2( 0.f, line_v_origin + line_v_width );
+		output[ 1 ].Color = line_start_color_2;
 
 		output[ 2 ].Position = input[ m ].Position + float4( -dx, -dy, 0.f, 0.f );
 		output[ 2 ].TexCoord = float2( 1.f, line_v_origin );
+		output[ 2 ].Color = line_end_color_1;
 
 		output[ 3 ].Position = input[ m ].Position + float4( +dx, +dy, 0.f, 0.f );
 		output[ 3 ].TexCoord = float2( 1.f, line_v_origin + line_v_width );
+		output[ 3 ].Color = line_end_color_2;
 
 		/*
 		output[ 0 ].Position.z = z_fix;
@@ -140,17 +175,17 @@ void gs_line( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> Tri
 	}
 }
 
-float4 ps( GSPS_INPUT input ) : SV_Target
+float4 ps( PS_INPUT input ) : SV_Target
 {
-	return model_texture.Sample( texture_sampler, input.TexCoord );
+	return model_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
 }
 
-float4 ps_line( GSPS_INPUT input ) : SV_Target
+float4 ps_line( PS_INPUT input ) : SV_Target
 {
-	return line_texture.Sample( texture_sampler, input.TexCoord );
+	return line_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
 }
 
-float4 ps_debug( GSPS_INPUT input ) : SV_Target
+float4 ps_debug( PS_INPUT input ) : SV_Target
 {
 	return float4( 1.f, 0.f, 0.f, 0.25f );
 }
@@ -192,7 +227,7 @@ technique11 main
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
-        SetVertexShader( CompileShader( vs_4_0, vs() ) );
+        SetVertexShader( CompileShader( vs_4_0, vs_to_ps() ) );
 		SetGeometryShader( NULL );
         // SetGeometryShader( CompileShader( gs_4_0, gs_pass() ) );
         SetPixelShader( CompileShader( ps_4_0, ps() ) );

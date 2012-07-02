@@ -36,9 +36,6 @@ void Camera::update()
 	rotate_degree().y() += ( rotate_degree_target().y() - rotate_degree().y() ) * get_rotate_chase_speed();
 	rotate_degree().z() = math::chase( rotate_degree().z(), rotate_degree_target().z(), 0.8f );
 
-	static float xxx = 0.f;
-	xxx += 1.f;
-
 	// 
 	matrix4x4 xr;
 	xr.rotate_x( rotate_degree().x() );

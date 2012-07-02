@@ -67,7 +67,7 @@ public:
 
 	float get_rotate_chase_speed() { return rotate_chase_speed_; }
 	void set_rotate_chase_speed( float s ) { rotate_chase_speed_; }
-	void reset_rotate_chase_speed() { rotate_chase_speed_ = 0.1f; }
+	void reset_rotate_chase_speed() { rotate_chase_speed_ = 0.2f; }
 
 	void update();
 

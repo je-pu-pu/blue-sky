@@ -4,9 +4,13 @@ Texture2D line_texture : register( t0 );
 SamplerState texture_sampler
 {
 	Filter = ANISOTROPIC; // MIN_POINT_MAG_LINEAR_MIP_POINT;
+//	Filter = MIN_MAG_MIP_LINEAR;
     AddressU = CLAMP;
     AddressV = CLAMP;
     AddressW = CLAMP;
+//	MinLOD = 5.f;
+//	MaxLOD = FLOAT32_MAX;
+//	ComparisonFunc = NEVER;
 };
 
 cbuffer ConstantBuffer : register( b0 )
@@ -57,11 +61,6 @@ void gs_pass( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> Tri
 		output.Position = input[ n ].Position;
 		output.TexCoord = input[ n ].TexCoord;
 
-		{
-			output.Position /= output.Position.w;
-			output.Position.w = 1.f;
-		}
-
 		TriStream.Append( output );
 	}
 
@@ -87,6 +86,7 @@ void gs_line( triangle GSPS_INPUT input[3], inout TriangleStream<GSPS_INPUT> Tri
 	for ( uint n = 0; n < 3; n++ )
 	{
 		input[ n ].Position /= input[ n ].Position.w;
+//		input[ n ].Position.y /= input[ n ].Position.w;
 		input[ n ].Position.z += z_offset;
 		input[ n ].Position.w = w_fix;
 
@@ -193,7 +193,8 @@ technique11 main
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
         SetVertexShader( CompileShader( vs_4_0, vs() ) );
-        SetGeometryShader( CompileShader( gs_4_0, gs_pass() ) );
+		SetGeometryShader( NULL );
+        // SetGeometryShader( CompileShader( gs_4_0, gs_pass() ) );
         SetPixelShader( CompileShader( ps_4_0, ps() ) );
     }
 

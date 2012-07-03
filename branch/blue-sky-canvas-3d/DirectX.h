@@ -3,6 +3,7 @@
 
 #include <common/exception.h>
 
+#include <windows.h>
 #include <dxerr.h>
 #pragma comment( lib, "dxerr.lib" )
 

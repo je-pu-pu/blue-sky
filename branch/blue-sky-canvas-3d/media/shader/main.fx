@@ -67,12 +67,25 @@ PS_INPUT vs_to_ps( VS_INPUT input, uint vertex_id : SV_VertexID )
     output.Position = mul( output.Position, View );
     output.Position = mul( output.Position, Projection );
 	output.TexCoord = input.TexCoord;
-	output.Color = float4(
+	output.Color = float4( 0.f, 0.f, 0.f, 0.f );
+
+	/*
+	output.Color = 
 		( vertex_id + 8  ) % 32 / 32.f,
 		( vertex_id + 16 ) % 32 / 32.f,
 		( vertex_id + 24 ) % 32 / 32.f,
 		1.f
 	);
+	*/
+
+	return output;
+}
+
+GS_INPUT vs_text( VS_INPUT input )
+{
+	GS_INPUT output;
+	output.Position = input.Position;
+	output.TexCoord = input.TexCoord;
 
 	return output;
 }
@@ -109,10 +122,10 @@ void gs_line( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 	
 	static const float line_v_width = 32.f / 1024.f;
 
-	const float4 line_start_color_1 = float4( 0.f, 0.f, 0.f, 0.f );
-	const float4 line_start_color_2 = float4( 0.f, 0.f, 0.f, 0.f );
-	const float4 line_end_color_1 = float4( 0.f, 0.f, primitive_id % 32 / 32.f, 0.f );
-	const float4 line_end_color_2 = float4( 0.f, primitive_id % 8 / 8.f, 0.f, 0.f );
+	const float4 line_start_color_1 = float4( 1.f, 0.f, 0.f, 0.f );
+	const float4 line_start_color_2 = float4( 0.f, 1.f, 0.f, 0.f );
+	const float4 line_end_color_1 = float4( 1.f, 1.f, 0.f, 0.f );
+	const float4 line_end_color_2 = float4( 1.f, 0.f, 0.f, 0.f );
 
 	for ( uint n = 0; n < 3; n++ )
 	{
@@ -173,6 +186,38 @@ void gs_line( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 		
 		TriStream.RestartStrip();
 	}
+}
+
+[maxvertexcount(4)]
+void gs_text( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStream )
+{
+	PS_INPUT output[ 4 ];
+
+	float w = 1.f;
+	float h = 1.f;
+
+	output[ 0 ].Position = float4( -w, +h, 0.f, 1.f );
+	output[ 0 ].TexCoord = float2( 0.f,  0.f );
+	output[ 0 ].Color = float4( 1.f, 0.f, 0.f, 0.f );
+	
+	output[ 1 ].Position = float4( +w, +h, 0.f, 1.f );
+	output[ 1 ].TexCoord = float2( 1.f,  0.f );
+	output[ 1 ].Color = float4( 0.f, 1.f, 0.f, 0.f );
+
+	output[ 2 ].Position = float4( -w, -h, 0.f, 1.f );
+	output[ 2 ].TexCoord = float2( 0.f,  1.f );
+	output[ 2 ].Color = float4( 0.f, 0.f, 1.f, 0.f );
+
+	output[ 3 ].Position = float4( +w, -h, 0.f, 1.f );
+	output[ 3 ].TexCoord = float2( 1.f,  1.f );
+	output[ 3 ].Color = float4( 0.f, 0.f, 0.f, 0.f );
+
+	TriStream.Append( output[ 0 ] );
+	TriStream.Append( output[ 1 ] );
+	TriStream.Append( output[ 2 ] );
+	TriStream.Append( output[ 3 ] );
+
+	TriStream.RestartStrip();
 }
 
 float4 ps( PS_INPUT input ) : SV_Target
@@ -243,5 +288,15 @@ technique11 main
 		SetPixelShader( CompileShader( ps_4_0, ps_line() ) );
 
 		// RASTERIZERSTATE = WireFrame;
+	}
+}
+
+technique11 text
+{
+	pass main
+	{
+		SetVertexShader( CompileShader( vs_4_0, vs_text() ) );
+		SetGeometryShader( CompileShader( gs_4_0, gs_text() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps() ) );
 	}
 }

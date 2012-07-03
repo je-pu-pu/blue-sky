@@ -8,6 +8,7 @@
     <ClCompile Include="Direct3D11Test.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainLoop.cpp" />
+    <ClCompile Include="DirectWrite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainLoop.h" />
@@ -16,6 +17,8 @@
     <ClInclude Include="Direct3D11ConstantBuffer.h" />
     <ClInclude Include="Direct3D11Mesh.h" />
     <ClInclude Include="Direct3D11Test.h" />
+    <ClInclude Include="DirectWrite.h" />
+    <ClInclude Include="DirectX.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\main.fx" />

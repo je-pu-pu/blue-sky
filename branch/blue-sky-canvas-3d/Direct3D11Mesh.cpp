@@ -167,7 +167,11 @@ void Direct3D11Mesh::render() const
 	direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, 1, & vertex_buffer_, & stride, & offset );
 	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_, IndexBufferFormat, 0 );
 
-	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & texture_resource_view_ );
+	// direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & texture_resource_view_ );
+
+	// debug !!!
+	ID3D11ShaderResourceView* text_view = direct_3d_->getTextView();
+	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & text_view );
 
 	direct_3d_->getImmediateContext()->DrawIndexed( index_list_.size(), 0, 0 );
 }

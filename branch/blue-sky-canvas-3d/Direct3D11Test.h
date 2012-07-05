@@ -3,8 +3,6 @@
 
 #include "MainLoop.h"
 
-#include "Type.h"
-
 #include <windows.h>
 #include <string>
 

@@ -9,21 +9,8 @@
 
 #include "MainLoop.h"
 
-#include "Type.h"
-
 #include <windows.h>
 #include <string>
-
-class Direct3D9;
-
-namespace art
-{
-
-class Canvas;
-
-}
-
-using namespace std;
 
 // uses
 class CDirectInput;
@@ -34,12 +21,8 @@ class vector3;
 class CGameMain
 {
 public:
-	typedef art::Canvas Canvas;
 
 protected:
-	Direct3D9*	direct_3d_;		///< Direct3D
-	Canvas*		canvas_;		///< Canvas
-		
 	HWND		hwnd_;			///< ウィンドウハンドル
 	int			Width;			///< 横幅
 	int			Height;			///< 高さ

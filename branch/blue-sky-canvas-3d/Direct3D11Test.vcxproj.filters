@@ -19,6 +19,10 @@
     <ClInclude Include="Direct3D11Test.h" />
     <ClInclude Include="DirectWrite.h" />
     <ClInclude Include="DirectX.h" />
+    <ClInclude Include="DirectWriteFontCollectionLoader.h" />
+    <ClInclude Include="DirectWriteFontFileEnumerator.h" />
+    <ClInclude Include="DirectWriteFontFileLoader.h" />
+    <ClInclude Include="DirectWriteFontFileStream.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\main.fx" />

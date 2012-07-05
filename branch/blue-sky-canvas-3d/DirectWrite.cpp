@@ -1,4 +1,5 @@
 #include "DirectWrite.h"
+#include "DirectWriteFontCollectionLoader.h"
 #include "DirectX.h"
 
 #pragma comment( lib, "d2d1.lib" )
@@ -15,20 +16,30 @@ DirectWrite::DirectWrite( IDXGISurface1* surface )
 	DIRECT_X_FAIL_CHECK( D2D1CreateFactory( D2D1_FACTORY_TYPE_SINGLE_THREADED, & direct_2d_factory_ ) );
 	
 	DIRECT_X_FAIL_CHECK( DWriteCreateFactory( DWRITE_FACTORY_TYPE_SHARED, __uuidof( IDWriteFactory ), reinterpret_cast< IUnknown** >( & dwrite_factory_ ) ) );
-	DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateTextFormat( L"Gabriola", 0, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 32.f, L"en-us", & text_format_ ) );
+	
+	DIRECT_X_FAIL_CHECK( dwrite_factory_->RegisterFontCollectionLoader( DirectWriteFontCollectionLoader::GetLoader() ) );
+	DIRECT_X_FAIL_CHECK( dwrite_factory_->RegisterFontFileLoader( DirectWriteFontFileLoader::GetLoader() ) );
 
+	const char* font_file_path = "media/font/uzura.ttf";
+
+	IDWriteFontCollection* font_collection = 0;
+	DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateCustomFontCollection( DirectWriteFontCollectionLoader::GetLoader(), font_file_path, strlen( font_file_path ) + 1, & font_collection ) );
+
+	DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateTextFormat( L"uzura_font", font_collection, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 26.f, L"ja-jp", & text_format_ ) );
 
 	/*
-	if ( false )
 	{
-		RECT rc;
-		GetClientRect( hwnd, &rc );
+		IDWriteFontFile* font_file_ = 0;
+		IDWriteFontFace* font_face_ = 0;
 
-		D2D1_SIZE_U size = D2D1::SizeU( rc.right - rc.left, rc.bottom - rc.top );
-
-		DIRECT_X_FAIL_CHECK( direct_2d_factory_->CreateHwndRenderTarget( D2D1::RenderTargetProperties(), D2D1::HwndRenderTargetProperties( hwnd, size ), & render_target_ ) );
+		DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateFontFileReference( file_path, 0, & font_file_ ) );
+		DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateFontFace( DWRITE_FONT_FACE_TYPE_TRUETYPE, 1, & font_file_, 0, DWRITE_FONT_SIMULATIONS_NONE, & font_face_ ) );
+		
+		DIRECT_X_RELEASE( font_file_ );
 	}
 	*/
+
+	// create_
 	{
 		FLOAT dpi_x, dpi_y;
 		direct_2d_factory_->GetDesktopDpi( & dpi_x, & dpi_y );
@@ -43,10 +54,14 @@ DirectWrite::DirectWrite( IDXGISurface1* surface )
 DirectWrite::~DirectWrite()
 {
 	DIRECT_X_RELEASE( text_format_ );
-	DIRECT_X_RELEASE( dwrite_factory_ );
 
 	DIRECT_X_RELEASE( solid_color_brush_ );
 	DIRECT_X_RELEASE( render_target_ );
+
+	DIRECT_X_FAIL_CHECK( dwrite_factory_->UnregisterFontFileLoader( DirectWriteFontFileLoader::GetLoader() ) );
+	DIRECT_X_FAIL_CHECK( dwrite_factory_->UnregisterFontCollectionLoader( DirectWriteFontCollectionLoader::GetLoader() ) );
+
+	DIRECT_X_RELEASE( dwrite_factory_ );
 	DIRECT_X_RELEASE( direct_2d_factory_ );
 }
 

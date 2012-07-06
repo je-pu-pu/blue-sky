@@ -136,7 +136,9 @@ void CGameMain::render()
 		ss << "FPS : " << getMainLoop().GetFPS();
 
 		direct_write_->drawText( 10.f, 10.f, ss.str().c_str() );
-		direct_write_->drawText( 30.f, 50.f, Width - 30.f, Height - 50.f, L"ロボットです！こんにちは！よろしくね！\nちなみにいま DirectWrite で文字を描いているよ。\n描いた文字はテクスチャとしても使えるよ。\nDirectWrite は Direct3D11 と直接組み合わせて使えないからわざわざ Direct3D10 のデバイスを作らないといけなかったよ。\nすごくめんどうだったよ！\nでも文字は綺麗だね！\nVista で動くか心配だな！\n外部フォントファイルの読み込みもしないとね！時間が無いわ！" );
+		direct_write_->drawText( 30.f, 50.f, Width - 30.f, Height - 50.f, L"" );
+		direct_write_->drawText( 31.f, 51.f, Width - 30.f, Height - 50.f, L"Hello World !!!" );
+		direct_write_->drawText( 30.f, 50.f, Width - 30.f, Height - 50.f, L"Hello World !!!" );
 
 		direct_write_->end();
 		direct_3d_->end2D();

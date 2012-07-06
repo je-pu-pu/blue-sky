@@ -189,11 +189,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 
 		immediate_context_->RSSetViewports( 1, & viewport );
 	}
-
-	// ?
-	{
-		immediate_context_->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-	}
 }
 
 Direct3D11::~Direct3D11()

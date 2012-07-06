@@ -300,3 +300,40 @@ technique11 text
 		SetPixelShader( CompileShader( ps_4_0, ps() ) );
 	}
 }
+
+
+
+// ----------------------------------------
+// for Bullet debug
+// ----------------------------------------
+struct BULLET_DEBUG_INPUT
+{
+	float4 Position : SV_POSITION;
+	float3 Color    : COLOR0;
+};
+
+BULLET_DEBUG_INPUT vs_bullet_debug( BULLET_DEBUG_INPUT input )
+{
+	BULLET_DEBUG_INPUT output;
+
+	output.Position = mul( input.Position, View );
+    output.Position = mul( output.Position, Projection );
+	output.Color = input.Color;
+
+	return output;
+}
+
+float4 ps_bullet_debug( BULLET_DEBUG_INPUT input ) : SV_Target
+{
+	return float4( input.Color.x, input.Color.y, input.Color.z, 0.5f );
+}
+
+technique11 bullet
+{
+	pass main
+	{
+		SetVertexShader( CompileShader( vs_4_0, vs_bullet_debug() ) );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps_bullet_debug() ) );
+	}
+}

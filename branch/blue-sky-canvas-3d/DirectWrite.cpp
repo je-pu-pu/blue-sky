@@ -21,19 +21,17 @@ DirectWrite::DirectWrite( IDXGISurface1* surface )
 	DIRECT_X_FAIL_CHECK( dwrite_factory_->RegisterFontFileLoader( DirectWriteFontFileLoader::GetLoader() ) );
 
 	const char* font_file_path = "media/font/uzura.ttf";
+	const wchar_t* font_family_name = L"uzura_font";
 
 	IDWriteFontCollection* font_collection = 0;
 	DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateCustomFontCollection( DirectWriteFontCollectionLoader::GetLoader(), font_file_path, strlen( font_file_path ) + 1, & font_collection ) );
 	
 	// ?
-	DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateTextFormat( L"uzura_font", font_collection, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 26.f, L"ja-jp", & text_format_ ) );
+	DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateTextFormat( font_family_name, font_collection, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 26.f, L"ja-jp", & text_format_ ) );
 
-	// create_
+	// create_render_target()
 	{
-		FLOAT dpi_x, dpi_y;
-		direct_2d_factory_->GetDesktopDpi( & dpi_x, & dpi_y );
-
-		D2D1_RENDER_TARGET_PROPERTIES propaties = D2D1::RenderTargetProperties( D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat( DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED ), dpi_x, dpi_y );
+		D2D1_RENDER_TARGET_PROPERTIES propaties = D2D1::RenderTargetProperties( D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat( DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED ) );
 		DIRECT_X_FAIL_CHECK( direct_2d_factory_->CreateDxgiSurfaceRenderTarget( surface, & propaties, & render_target_ ) );
 	}
 

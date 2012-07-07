@@ -78,8 +78,8 @@ GameMain::GameMain()
 
 	constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.1f, 100.0f );
 
-	//
 	direct_write_ = new DirectWrite( direct_3d_->getTextSurface() );
+	// direct_write_ = new DirectWrite( direct_3d_->getBackbufferSurface() );
 
 	physics_ = new BulletPhysics();
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_ );
@@ -206,6 +206,8 @@ void GameMain::render()
 		ss << L"Bullet ‚É‚æ‚é•¨—‰‰ŽZ" << std::endl;
 		ss << L"FPS : " << getMainLoop().GetFPS() << std::endl;
 
+		ss << L"blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky ";
+
 		/*
 		ss << "FPS : " << getMainLoop().GetFPS() << std::endl;
 		ss << "Click Left Mouse Button !!!" << std::endl;
@@ -217,7 +219,7 @@ void GameMain::render()
 		}
 		*/
 
-		direct_write_->drawText( 10.f, 10.f, ss.str().c_str() );
+		direct_write_->drawText( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str() );
 
 		direct_write_->end();
 		direct_3d_->end2D();
@@ -264,7 +266,7 @@ void GameMain::render()
 				bullet_debug_draw_->render();
 			}
 		}
-		
+
 		// render_text();
 		direct_3d_->renderText();
 
@@ -288,7 +290,7 @@ void GameMain::render( const ActiveObject* active_object )
 	buffer.world = XMMatrixTranspose( constant_buffer.world );
 	buffer.view = XMMatrixTranspose( constant_buffer.view );
 	buffer.projection = XMMatrixTranspose( constant_buffer.projection );
-	buffer.t += 0.1f;
+	buffer.t = t;
 
 	constant_buffer_->update( & buffer );
 	constant_buffer_->render();

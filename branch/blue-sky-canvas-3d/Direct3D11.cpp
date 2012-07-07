@@ -44,6 +44,8 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	
 	, constant_buffer_( 0 )
 
+	, device_10_( 0 )
+	, back_buffer_surface_( 0 )
 	, text_texture_( 0 )
 	, text_view_( 0 )
 	, text_surface_( 0 )
@@ -52,21 +54,28 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 {
 	common::log( "log/d3d11.log", "", false );
 
-	IDXGIFactory1* dxgi_factory = 0;
 	IDXGIAdapter1* dxgi_adapter = 0;
-	DXGI_ADAPTER_DESC1 adapter_desc;
 
+	// get_adapter()
 	{
+		IDXGIFactory1* dxgi_factory = 0;
+
 		DIRECT_X_FAIL_CHECK( CreateDXGIFactory1( __uuidof( IDXGIFactory1 ), reinterpret_cast< void** >( & dxgi_factory ) ) );
 		DIRECT_X_FAIL_CHECK( dxgi_factory->EnumAdapters1( 0, & dxgi_adapter ) );
 
+		DXGI_ADAPTER_DESC1 adapter_desc;
+
 		DIRECT_X_FAIL_CHECK( dxgi_adapter->GetDesc1( & adapter_desc ) );
+
+		DIRECT_X_RELEASE( dxgi_factory );
+
+		// MessageBoxW( 0, adapter_desc.Description, L"HOGE", MB_OK );
 	}
 	
 
 	D3D_FEATURE_LEVEL feature_levels[] = {
-		D3D_FEATURE_LEVEL_11_0,
-		D3D_FEATURE_LEVEL_10_1,
+//		D3D_FEATURE_LEVEL_11_0,
+//		D3D_FEATURE_LEVEL_10_1,
 		D3D_FEATURE_LEVEL_10_0
 	};
 
@@ -76,9 +85,9 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	swap_chain_desc.BufferCount = 1;
     swap_chain_desc.BufferDesc.Width = w;
     swap_chain_desc.BufferDesc.Height = h;
-    swap_chain_desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    swap_chain_desc.BufferDesc.RefreshRate.Numerator = 60;
-    swap_chain_desc.BufferDesc.RefreshRate.Denominator = 1;
+    swap_chain_desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	swap_chain_desc.BufferDesc.RefreshRate.Numerator = 60;
+	swap_chain_desc.BufferDesc.RefreshRate.Denominator = 1;
     swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     swap_chain_desc.OutputWindow = hwnd;
     swap_chain_desc.SampleDesc.Count = 1;
@@ -88,16 +97,22 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	// !!!
 	DIRECT_X_FAIL_CHECK( D3D11CreateDeviceAndSwapChain( dxgi_adapter, D3D_DRIVER_TYPE_UNKNOWN, 0, D3D11_CREATE_DEVICE_BGRA_SUPPORT, feature_levels, sizeof( feature_levels ) / sizeof( D3D_FEATURE_LEVEL ), D3D11_SDK_VERSION, & swap_chain_desc, & swap_chain_, & device_, & feature_level, & immediate_context_ ) );
 
-	// Direct3D 10
-	ID3D10Device1* device_10_ = 0;
+	// Direct3D 10.1
 	{
 		DIRECT_X_FAIL_CHECK( D3D10CreateDevice1( dxgi_adapter, D3D10_DRIVER_TYPE_HARDWARE, 0, D3D10_CREATE_DEVICE_BGRA_SUPPORT, D3D10_FEATURE_LEVEL_10_0, D3D10_1_SDK_VERSION, & device_10_ ) );
 	}
+
+	DIRECT_X_RELEASE( dxgi_adapter );
 
 	// create_back_buffer_view()
 	{
 		DIRECT_X_FAIL_CHECK( swap_chain_->GetBuffer( 0, __uuidof( ID3D11Texture2D ), reinterpret_cast< void** >( & back_buffer_texture_ ) ) );
 		DIRECT_X_FAIL_CHECK( device_->CreateRenderTargetView( back_buffer_texture_, 0, & back_buffer_view_ ) );
+	}
+
+	// create_back_buffer_surface()
+	{
+		DIRECT_X_FAIL_CHECK( back_buffer_texture_->QueryInterface( __uuidof( IDXGISurface1 ), reinterpret_cast< void** >( & back_buffer_surface_ ) ) );
 	}
 
 	// create_text_texture()
@@ -129,6 +144,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		}
 	}
 
+	// create_text_texture_mutex()
 	{
 		HANDLE shared_handle = 0;
 		IDXGIResource* text_texture_resource_ = 0;
@@ -142,9 +158,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 
 		DIRECT_X_RELEASE( text_texture_resource_ );
 	}
-
-	immediate_context_->OMSetRenderTargets( 1, & back_buffer_view_, 0 );
-
 
 	// create_depth_stencil_view()
 	{
@@ -172,9 +185,9 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		depth_stencil_view_desc.Texture2D.MipSlice = 0;
 
 		DIRECT_X_FAIL_CHECK( device_->CreateDepthStencilView( depth_stencil_texture_, & depth_stencil_view_desc, & depth_stencil_view_ ) );
-
-		immediate_context_->OMSetRenderTargets( 1, & back_buffer_view_, depth_stencil_view_ );
 	}
+
+	immediate_context_->OMSetRenderTargets( 1, & back_buffer_view_, depth_stencil_view_ );
 
 	// setup_viewport()
 	{
@@ -199,6 +212,10 @@ Direct3D11::~Direct3D11()
 
 	DIRECT_X_RELEASE( text_view_ );
 	DIRECT_X_RELEASE( text_texture_ );
+
+	DIRECT_X_RELEASE( back_buffer_surface_ );
+
+	DIRECT_X_RELEASE( device_10_ );
 
 	DIRECT_X_RELEASE( constant_buffer_ );
 
@@ -297,9 +314,7 @@ void Direct3D11::end3D()
 {
 	DIRECT_X_FAIL_CHECK( text_texture_mutex_11_->ReleaseSync( 0 ) );
 
-	immediate_context_->CopyResource( back_buffer_texture_, text_texture_ );
-
-	swap_chain_->Present( 0, 0 );
+	DIRECT_X_FAIL_CHECK( swap_chain_->Present( 0, 0 ) );
 }
 
 void Direct3D11::renderText()

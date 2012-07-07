@@ -20,7 +20,7 @@ private:
 	ID3D11DeviceContext*	immediate_context_;		///< Direct3D 11 Device Context
 	IDXGISwapChain*			swap_chain_;			///< Direct3D 11 Swap Chain
 
-	ID3D11Texture2D*		back_buffer_texture_;	
+	ID3D11Texture2D*		back_buffer_texture_;
 	ID3D11RenderTargetView*	back_buffer_view_;		///< Direct3D 11 Render Target View
 
 	ID3D11Texture2D*		depth_stencil_texture_;
@@ -33,6 +33,10 @@ private:
 	ID3D11Buffer*			constant_buffer_;
 
 	// for Direct2D & DirectWrite
+	ID3D10Device1*				device_10_;
+
+	IDXGISurface1*				back_buffer_surface_;
+
 	ID3D11Texture2D*			text_texture_;
 	ID3D11ShaderResourceView*	text_view_;
 
@@ -71,6 +75,8 @@ public:
 	inline ID3D11Device* getDevice() { return device_; }
 	inline ID3D11DeviceContext* getImmediateContext() { return immediate_context_; }
 	inline ID3DX11Effect* getEffect() { return effect_; }
+
+	inline IDXGISurface1* getBackbufferSurface() { return back_buffer_surface_; }
 
 	inline IDXGISurface1* getTextSurface() { return text_surface_; }
 	inline ID3D11ShaderResourceView* getTextView() { return text_view_; }

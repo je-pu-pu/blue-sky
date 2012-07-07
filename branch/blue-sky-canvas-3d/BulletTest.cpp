@@ -10,11 +10,21 @@
 #include "BulletPhysics.h"
 #include "Direct3D11BulletDebugDraw.h"
 
+#include "DirectInput.h"
+#include "Input.h"
+
+#include "Robot.h"
+#include "ActiveObjectManager.h"
+
 #include "include/d3dx11effect.h"
 
 #include "DirectX.h"
 
+#include <game/Config.h>
+
 #include <sstream>
+
+#pragma comment( lib, "game.lib" )
 
 struct ConstantBuffer
 {
@@ -34,18 +44,24 @@ DirectWrite* direct_write_ = 0;
 Direct3D11BulletDebugDraw* bullet_debug_draw_ = 0;
 
 //■コンストラクタ
-CGameMain::CGameMain()
+GameMain::GameMain()
 	: direct_3d_( 0 )
 	, physics_( 0 )
-	, Width( 0 )
-	, Height( 0 )
+	, direct_input_( 0 )
+	, input_( 0 )
+	, config_( 0 )
+	, save_data_( 0 )
+	, active_object_manager_( 0 )
 {
-	CApp *app = CApp::GetInstance();
-	Width = app->GetWidth();
-	Height = app->GetHeight();
+	// Config
+	config_ = new Config();
+	config_->load_file( "blue-sky.config" );
+
+	save_data_ = new Config();
+	save_data_->load_file( "save/blue-sky.save" );
 
 	// Direct3D 
-	direct_3d_ = new Direct3D11( app->GetWindowHandle(), Width, Height, false );
+	direct_3d_ = new Direct3D11( get_app()->GetWindowHandle(), get_app()->get_width(), get_app()->get_height(), false );
 	direct_3d_->load_effect_file( "media/shader/main.fx" );
 	direct_3d_->apply_effect();
 
@@ -60,13 +76,7 @@ CGameMain::CGameMain()
 
 	constant_buffer.projection = XMMatrixIdentity();
 
-	XMVECTOR eye = XMVectorSet( 0.0f, 4.0f, -5.0f, 0.0f );
-	XMVECTOR at = XMVectorSet( 0.0f, 4.0f, 0.0f, 0.0f );
-	XMVECTOR up = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
-
-	constant_buffer.view = XMMatrixLookAtLH( eye, at, up );
-
-	constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, Width / ( FLOAT ) Height, 0.01f, 100.0f );
+	constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.1f, 100.0f );
 
 	//
 	direct_write_ = new DirectWrite( direct_3d_->getTextSurface() );
@@ -76,16 +86,28 @@ CGameMain::CGameMain()
 	bullet_debug_draw_->setDebugMode( btIDebugDraw::DBG_DrawWireframe );
 
 	physics_->setDebugDrawer( bullet_debug_draw_ );
-	
+
+	direct_input_ = new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() );
+	input_ = new Input();
+	input_->set_direct_input( direct_input_ );
+	input_->load_config( *config_ );
+
+	// ActiveObjectManager
+	active_object_manager_ = new ActiveObjectManager();
 }
 
 //■デストラクタ
-CGameMain::~CGameMain()
+GameMain::~GameMain()
 {
 	delete direct_write_;
 	
 	delete constant_buffer_;
 	delete mesh_;
+
+	delete active_object_manager_;
+
+	delete input_;
+	delete direct_input_;
 
 	delete bullet_debug_draw_;
 	delete physics_;
@@ -95,8 +117,7 @@ CGameMain::~CGameMain()
 
 static int fps = 0, last_fps = 0;
 
-//■■■　メインループ　■■■
-void CGameMain::Loop()
+bool GameMain::update()
 {
 	static int sec = 0;
 	
@@ -113,46 +134,68 @@ void CGameMain::Loop()
 
 	if ( ! MainLoop.Loop() )
 	{
-		return;
+		return false;
 	}
 
-	static float t = 0.f;
+	if ( get_app()->is_active() )
+	{
+		direct_input_->update();
+		input_->update();
+	}
+	else
+	{
+		input_->update_null();
+	}
 
-	t += 0.01f;
+	static XMVECTOR eye = XMVectorSet( 0.0f, 4.0f, -5.0f, 0.0f );
 
-	const btTransform& trans = physics_->getTransform();
+	{
+		if ( input_->press( Input::LEFT ) )
+		{
+			eye += XMVectorSet( -0.01f, 0.0f, 0.0f, 0.0f );
+		}
+		if ( input_->press( Input::RIGHT ) )
+		{
+			eye += XMVectorSet( 0.01f, 0.0f, 0.0f, 0.0f );
+		}
+		if ( input_->press( Input::UP ) )
+		{
+			eye += XMVectorSet( 0.f, 0.0f, 0.01f, 0.f );
+		}
+		if ( input_->press( Input::DOWN ) )
+		{
+			eye += XMVectorSet( 0.f, 0.0f, -0.01f, 0.f );
+		}
 
-	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
-	constant_buffer.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
-	// constant_buffer.world *= XMMatrixRotationY( trans.getRotation().y() );
-	// constant_buffer.world *= XMMatrixRotationZ( trans.getRotation().z() );
-	constant_buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-	// constant_buffer.world = XMMatrixRotationZ( t );
+		XMVECTOR at = eye + XMVectorSet( 0.0f, 0.0f, 1.f, 0.0f );
+		XMVECTOR up = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
 
-	static ConstantBuffer buffer;
+		constant_buffer.view = XMMatrixLookAtLH( eye, at, up );
 
-	buffer.world = XMMatrixTranspose( constant_buffer.world );
-	buffer.view = XMMatrixTranspose( constant_buffer.view );
-	buffer.projection = XMMatrixTranspose( constant_buffer.projection );
-	buffer.t += 0.1f;
+		if ( input_->push( Input::A ) )
+		{
+			Robot* robot = new Robot();
+			robot->set_mesh( mesh_ );
 
-	/*
-	buffer.world = XMMatrixIdentity();
-	buffer.view = XMMatrixIdentity();
-	buffer.projection = XMMatrixIdentity();
-	*/
+			active_object_manager_->add_active_object( robot );
+			robot->set_rigid_body( physics_->add_active_object( & robot->get_transform() ) );
+		}
+	}
 
-	constant_buffer_->update( & buffer );
+	physics_->update( 1.f / 60.f );
 
-	physics_->update( 1.f / 400.f );
+	for ( ActiveObjectManager::ActiveObjectList::iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
+	{
+		( *i )->update_transform();
+	}
 
 	render();
+
+	return true;
 }
 
-void CGameMain::render()
+void GameMain::render()
 {
-	const btTransform& t = physics_->getTransform();
-
 	// render_2d()
 	{
 		direct_3d_->begin2D();
@@ -160,13 +203,21 @@ void CGameMain::render()
 
 		std::wstringstream ss;
 
+		ss << L"Bullet による物理演算" << std::endl;
+		ss << L"FPS : " << getMainLoop().GetFPS() << std::endl;
+
+		/*
 		ss << "FPS : " << getMainLoop().GetFPS() << std::endl;
-		ss << "POS : " << t.getOrigin().x() << ", " << t.getOrigin().y() << ", " << t.getOrigin().z();
+		ss << "Click Left Mouse Button !!!" << std::endl;
+
+		if ( ! active_object_manager_->active_object_list().empty() )
+		{
+			const ActiveObject::Transform& t = ( *active_object_manager_->active_object_list().begin() )->get_transform();
+			ss << "POS : " << t.getOrigin().x() << ", " << t.getOrigin().y() << ", " << t.getOrigin().z();
+		}
+		*/
 
 		direct_write_->drawText( 10.f, 10.f, ss.str().c_str() );
-		direct_write_->drawText( 30.f, 50.f, Width - 30.f, Height - 50.f, L"" );
-		direct_write_->drawText( 31.f, 51.f, Width - 30.f, Height - 50.f, L"Hello World !!!" );
-		direct_write_->drawText( 30.f, 50.f, Width - 30.f, Height - 50.f, L"Hello World !!!" );
 
 		direct_write_->end();
 		direct_3d_->end2D();
@@ -190,11 +241,9 @@ void CGameMain::render()
 				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
 				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
 		
-				constant_buffer_->render();
-
-				for ( int n = 0; n < 1; n++ )
+				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
 				{
-					mesh_->render();
+					render( *i );
 				}
 			}
 		}
@@ -221,4 +270,28 @@ void CGameMain::render()
 
 		direct_3d_->end3D();
 	}
+}
+
+void GameMain::render( const ActiveObject* active_object )
+{
+	/// @todo 効率化
+	static float t = 0.f;
+	t += 0.01f;
+
+	const btTransform& trans = active_object->get_transform();
+	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
+	constant_buffer.world = XMMatrixTranslation( 0, - active_object->get_collision_height() * 0.5f, 0.f );
+	constant_buffer.world *= XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
+	constant_buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+
+	ConstantBuffer buffer;
+	buffer.world = XMMatrixTranspose( constant_buffer.world );
+	buffer.view = XMMatrixTranspose( constant_buffer.view );
+	buffer.projection = XMMatrixTranspose( constant_buffer.projection );
+	buffer.t += 0.1f;
+
+	constant_buffer_->update( & buffer );
+	constant_buffer_->render();
+
+	active_object->get_mesh()->render();
 }

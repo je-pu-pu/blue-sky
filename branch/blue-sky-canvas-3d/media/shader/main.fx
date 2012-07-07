@@ -114,7 +114,7 @@ void gs_line( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 	static const float screen_ratio = ( screen_height / screen_width );
 
 	static const float PI = 3.14159265f;
-	static const float line_width_scale = 0.5f;
+	static const float line_width_scale = 0.25f;
 	static const float line_width = 32.f / screen_height * line_width_scale;
 	static const float z_offset = -0.00001f;
 	static const float z_fix = 0.f;
@@ -122,17 +122,25 @@ void gs_line( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 	
 	static const float line_v_width = 32.f / 1024.f;
 
-	const float4 line_start_color_1 = float4( 1.f, 0.f, 0.f, 0.f );
-	const float4 line_start_color_2 = float4( 0.f, 1.f, 0.f, 0.f );
-	const float4 line_end_color_1 = float4( 1.f, 1.f, 0.f, 0.f );
-	const float4 line_end_color_2 = float4( 1.f, 0.f, 0.f, 0.f );
+	const float4 line_start_color_1 = float4( 0.f, 0.f, 0.f, 0.f );
+	const float4 line_start_color_2 = float4( 0.f, 0.f, 0.f, 0.f );
+	const float4 line_end_color_1 = float4( 0.f, 0.f, 0.f, 0.f );
+	const float4 line_end_color_2 = float4( 0.f, 0.f, 0.f, 0.f );
 
 	for ( uint n = 0; n < 3; n++ )
 	{
-		input[ n ].Position /= input[ n ].Position.w;
-//		input[ n ].Position.y /= input[ n ].Position.w;
-		input[ n ].Position.z += z_offset;
-		input[ n ].Position.w = w_fix;
+		if ( input[ n ].Position.z < 0.f )
+		{
+			input[ n ].Position.w = 0.f;
+
+			continue;
+		}
+		else
+		{
+			input[ n ].Position /= input[ n ].Position.w;
+			input[ n ].Position.z += z_offset;
+			input[ n ].Position.w = w_fix;
+		}
 
 		// debug
 		// input[ n ].Position.z = z_fix;

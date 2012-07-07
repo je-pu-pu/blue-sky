@@ -25,63 +25,25 @@ BulletPhysics::BulletPhysics()
 
 	dynamics_world_->setGravity( btVector3( 0, -9.8f, 0 ) );
 
-
 	// create_ground_shape()
-	btCollisionShape* ground = new btBoxShape( btVector3( btScalar( 50 ), btScalar( 50 ), btScalar( 50 ) ) );
+	btCollisionShape* ground = new btBoxShape( btVector3( btScalar( 50 ), btScalar( 2 ), btScalar( 50 ) ) );
 	btAlignedObjectArray<btCollisionShape*> collision_shape_list_;
 
 	collision_shape_list_.push_back( ground );
-
 
 	// create_ground_rigid_body()
 	{
 		btTransform ground_transform;
 		ground_transform.setIdentity();
-		ground_transform.setOrigin( btVector3( 0, -50, 0 ) );
+		ground_transform.setOrigin( btVector3( 0, -1, 0 ) );
 
 		btScalar mass( 0 );
 		btVector3 local_inertia( 0, 0, 0 );
+
+		ground->calculateLocalInertia( mass, local_inertia );
+
 		btDefaultMotionState* motion_state = new btDefaultMotionState( ground_transform );
 		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, ground, local_inertia );
-	
-		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
-		dynamics_world_->addRigidBody( rigid_body );
-	}
-
-	// create_box_shape()
-	btCompoundShape* shape = new btCompoundShape();
-	btBoxShape* box = new btBoxShape( btVector3( 2, 4, 1 ) );
-
-	{
-		collision_shape_list_.push_back( shape );
-		collision_shape_list_.push_back( box );
-	}
-
-	{
-		btTransform transform;
-		transform.setIdentity();
-		transform.setOrigin( btVector3( 0, 4, 0 ) );
-
-		shape->addChildShape( transform, box );
-	}
-
-	// create_box_rigid_body()
-	{
-		btTransform transform;
-		transform.setIdentity();
-		transform.setOrigin( btVector3( 0, 20, 2.5 ) );
-
-		// btQuaternion quaternion( 3.141592f / 4.f, 0, 3.141592f / 4.f );
-		btQuaternion quaternion( 3.141592f / 4.f, 0, 3.141592f / 4.f );
-		transform.setRotation( quaternion );
-
-		btScalar mass( 1.f );
-		btVector3 local_inertia( 0, 0, 0 );
-
-		shape->calculateLocalInertia( mass,local_inertia );
-
-		btDefaultMotionState* motion_state = new btDefaultMotionState( transform );
-		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );
 	
 		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
 		dynamics_world_->addRigidBody( rigid_body );
@@ -120,6 +82,56 @@ BulletPhysics::~BulletPhysics()
 	delete collision_configuration_;
 }
 
+btRigidBody* BulletPhysics::add_active_object( btTransform* transform )
+{
+	// create_box_shape()
+	// btCompoundShape* shape = new btCompoundShape();
+	// btSphereShape* box = new btSphereShape( 1 );
+	// btBoxShape* box = new btBoxShape( btVector3( 1.5, 4, 0.75 ) );
+
+	btBoxShape* shape = new btBoxShape( btVector3( 1.5, 4, 0.75 ) );
+
+	{
+		collision_shape_list_.push_back( shape );
+		// collision_shape_list_.push_back( box );
+	}
+
+	/*
+	{
+		btTransform transform;
+		transform.setIdentity();
+		transform.setOrigin( btVector3( 0, 4, 0 ) );
+
+		// shape->addChildShape( transform, box );
+		// shape->createAabbTreeFromChildren();
+	}
+	*/
+
+	// create_box_rigid_body()
+	{
+		btTransform transform;
+		transform.setIdentity();
+		transform.setOrigin( btVector3( 0, 30, 3 ) );
+
+		// btQuaternion quaternion( 3.141592f / 4.f, 0, 3.141592f / 4.f );
+		btQuaternion quaternion( 3.141592f, 0, 3.141592f / 16.f );
+		transform.setRotation( quaternion );
+
+		btScalar mass( 1.f );
+		btVector3 local_inertia( 0, 0, 0 );
+
+		shape->calculateLocalInertia( mass, local_inertia );
+
+		btDefaultMotionState* motion_state = new btDefaultMotionState( transform );
+		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );
+	
+		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
+		dynamics_world_->addRigidBody( rigid_body );
+
+		return rigid_body;
+	}
+}
+
 void BulletPhysics::update( float time_step )
 {
 	dynamics_world_->stepSimulation( time_step );
@@ -127,6 +139,7 @@ void BulletPhysics::update( float time_step )
 	dynamics_world_->debugDrawWorld();
 }
 
+/*
 const btTransform& BulletPhysics::getTransform() const
 {
 	static btTransform trans;
@@ -142,6 +155,7 @@ const btTransform& BulletPhysics::getTransform() const
 	
 	return trans;
 }
+*/
 
 void BulletPhysics::setDebugDrawer( btIDebugDraw* debug_drawer )
 {

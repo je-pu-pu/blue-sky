@@ -1,5 +1,5 @@
 #include "App.h"
-#include "GameMain.h"
+#include "BulletTest.h"
 
 #include <common/exception.h>
 #include <common/serialize.h>
@@ -11,16 +11,21 @@
 //■■■　メイン　■■■
 int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int nCmdShow )
 {
-	CApp* app = 0;
+	App* app = 0;
 	
 	try
 	{
 		// アプリケーションを初期化する
-		app = CApp::GetInstance();
-		if( ! app->Init( hInst, nCmdShow) )	return 0;
-		
+		app = App::GetInstance();
+		app->set_size( 800, 600 );
+
+		if ( ! app->Init( hInst, nCmdShow ) )
+		{
+			return 0;
+		}
+
 		// ゲームを初期化する
-		CGameMain* game = CGameMain::GetInstange();
+		Game* game = Game::getInstance();
 
 		// メッセージループ
 		return app->MessageLoop();

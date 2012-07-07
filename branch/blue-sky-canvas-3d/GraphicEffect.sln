@@ -15,6 +15,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Direct3D11Test", "Direct3D1
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BulletTest", "BulletTest.vcxproj", "{5DB1FAFC-E068-43A8-84D3-0DA42D464BE5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{71BEB03E-40CE-43D7-9F8D-C8E8DD8952AA} = {71BEB03E-40CE-43D7-9F8D-C8E8DD8952AA}
+		{8FD31BE5-D334-4354-89C9-1DADC7DE6543} = {8FD31BE5-D334-4354-89C9-1DADC7DE6543}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

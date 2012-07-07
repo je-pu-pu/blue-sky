@@ -25,11 +25,9 @@ public:
 	BulletPhysics();
 	~BulletPhysics();
 
+	btRigidBody* add_active_object( btTransform* );
 
 	void update( float = 1.f / 60.f );
-
-	// ???
-	const btTransform& BulletPhysics::getTransform() const;
 	
 	// for debug
 	void setDebugDrawer( btIDebugDraw* );

@@ -1,36 +1,53 @@
 #ifndef GAME_MAIN_H
 #define GAME_MAIN_H
 
-#include "MainLoop.h"
-
-#include <windows.h>
-#include <string>
+#include "Game.h"
 
 class Direct3D11;
 class BulletPhysics;
 
-class CGameMain
+class DirectInput;
+
+namespace game
 {
-protected:
-	Direct3D11*		direct_3d_;	///< Direct3D
-	BulletPhysics*	physics_;	///< Bullet
-		
-	HWND		hwnd_;			///< ウィンドウハンドル
-	int			Width;			///< 横幅
-	int			Height;			///< 高さ
-
-	CMainLoop	MainLoop;		//ループ管理
-
-	CGameMain();				//コンストラクタ
-
-public:
-	static CGameMain* GetInstange(){ static CGameMain gm; return & gm; }
-	~CGameMain();				//デストラクタ
-
-	void	Loop();				//メインループ
-	void	render();
-
-	const CMainLoop& getMainLoop() const { return MainLoop; }
+	class Config;
 };
 
-#endif
+namespace blue_sky
+{
+	class Input;
+
+	class ActiveObject;
+	class ActiveObjectManager;
+};
+
+using namespace game;
+using namespace blue_sky;
+
+class GameMain : public Game
+{
+protected:
+	Direct3D11*				direct_3d_;				///< Direct3D
+	BulletPhysics*			physics_;				///< Bullet
+
+	DirectInput*			direct_input_;			///< DirectInput
+	Input*					input_;					///< Game Input
+
+	Config*					config_;				///< Config
+	Config*					save_data_;				///< Save Data
+
+	ActiveObjectManager*	active_object_manager_;	///< ActiveObjectManager
+
+	void render( const ActiveObject* );
+
+public:
+	GameMain();
+	virtual ~GameMain();
+
+	bool update();
+	void render();
+};
+
+inline Game* Game::getInstance() { static GameMain game_main; return & game_main; }
+
+#endif // GAME_MAIN_H

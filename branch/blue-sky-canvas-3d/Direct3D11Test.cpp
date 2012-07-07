@@ -38,7 +38,7 @@ CGameMain::CGameMain()
 	Width = app->GetWidth();
 	Height = app->GetHeight();
 
-	// Direct3D 
+	// Direct3D
 	direct_3d_ = new Direct3D11( app->GetWindowHandle(), Width, Height, false );
 	direct_3d_->load_effect_file( "media/shader/main.fx" );
 	direct_3d_->apply_effect();

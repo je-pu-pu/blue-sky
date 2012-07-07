@@ -24,20 +24,9 @@ DirectWrite::DirectWrite( IDXGISurface1* surface )
 
 	IDWriteFontCollection* font_collection = 0;
 	DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateCustomFontCollection( DirectWriteFontCollectionLoader::GetLoader(), font_file_path, strlen( font_file_path ) + 1, & font_collection ) );
-
+	
+	// ?
 	DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateTextFormat( L"uzura_font", font_collection, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 26.f, L"ja-jp", & text_format_ ) );
-
-	/*
-	{
-		IDWriteFontFile* font_file_ = 0;
-		IDWriteFontFace* font_face_ = 0;
-
-		DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateFontFileReference( file_path, 0, & font_file_ ) );
-		DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateFontFace( DWRITE_FONT_FACE_TYPE_TRUETYPE, 1, & font_file_, 0, DWRITE_FONT_SIMULATIONS_NONE, & font_face_ ) );
-		
-		DIRECT_X_RELEASE( font_file_ );
-	}
-	*/
 
 	// create_
 	{

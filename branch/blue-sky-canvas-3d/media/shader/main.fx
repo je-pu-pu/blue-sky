@@ -50,9 +50,9 @@ GS_INPUT vs( VS_INPUT input, uint vertex_id : SV_VertexID )
 	output.TexCoord = input.TexCoord;
 
 	// �Ԃ炷
-	float a = ( vertex_id ) / 10.f + t * 10.f;
-	output.Position.x += cos( a ) * 0.01f;
-	output.Position.y += sin( t ) * 0.01f;
+	// float a = ( vertex_id ) / 10.f + t * 10.f;
+	// output.Position.x += cos( a ) * 0.01f;
+	// output.Position.y += sin( t ) * 0.01f;
 
 	// output.Position = input.Position;
 
@@ -114,9 +114,7 @@ void gs_line( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 	static const float screen_ratio = ( screen_height / screen_width );
 
 	static const float PI = 3.14159265f;
-	static const float line_width_scale = 0.25f;
-	static const float line_width = 32.f / screen_height * line_width_scale;
-	static const float z_offset = -0.00001f;
+	static const float z_offset = -0.002f;
 	static const float z_fix = 0.f;
 	static const float w_fix = 1.f;
 	
@@ -137,14 +135,17 @@ void gs_line( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 		}
 		else
 		{
-			input[ n ].Position /= input[ n ].Position.w;
 			input[ n ].Position.z += z_offset;
+			input[ n ].Position /= input[ n ].Position.w;
 			input[ n ].Position.w = w_fix;
 		}
 
 		// debug
 		// input[ n ].Position.z = z_fix;
 	}
+
+	const float line_width_scale = 1.f; // ( -input[ 0 ].Position.z + 1.f ) * 0.5f;
+	const float line_width = 32.f / screen_height * line_width_scale;
 
 	for ( uint n = 0; n < 3; n++ )
 	{
@@ -153,8 +154,11 @@ void gs_line( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 		float ly = ( input[ m ].Position.y * screen_ratio ) - ( input[ n ].Position.y * screen_ratio );
 		float lx = input[ m ].Position.x - input[ n ].Position.x;
 		
+		// float line_index = uint( t * 100.f ) % 3;
 		float line_index = uint( ( input[ n ].Position.x + input[ m ].Position.y + input[ n ].Position.z ) * 30.f ) % 3;
 		float line_v_origin = ( line_index * line_v_width );
+
+		float line_length_ratio = length( float2( lx, ly ) ) / length( float2( 2.f, 2.f ) );
 
 		float angle = atan2( ly, lx );
 		angle += PI / 2.f;
@@ -173,11 +177,11 @@ void gs_line( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 		output[ 1 ].Color = line_start_color_2;
 
 		output[ 2 ].Position = input[ m ].Position + float4( -dx, -dy, 0.f, 0.f );
-		output[ 2 ].TexCoord = float2( 1.f, line_v_origin );
+		output[ 2 ].TexCoord = float2( line_length_ratio, line_v_origin );
 		output[ 2 ].Color = line_end_color_1;
 
 		output[ 3 ].Position = input[ m ].Position + float4( +dx, +dy, 0.f, 0.f );
-		output[ 3 ].TexCoord = float2( 1.f, line_v_origin + line_v_width );
+		output[ 3 ].TexCoord = float2( line_length_ratio, line_v_origin + line_v_width );
 		output[ 3 ].Color = line_end_color_2;
 
 		/*

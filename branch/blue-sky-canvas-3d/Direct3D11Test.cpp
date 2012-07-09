@@ -29,17 +29,11 @@ ConstantBuffer constant_buffer;
 DirectWrite* direct_write_ = 0;
 
 //■コンストラクタ
-CGameMain::CGameMain()
+GameMain::GameMain()
 	: direct_3d_( 0 )
-	, Width( 0 )
-	, Height( 0 )
 {
-	CApp *app = CApp::GetInstance();
-	Width = app->GetWidth();
-	Height = app->GetHeight();
-
 	// Direct3D
-	direct_3d_ = new Direct3D11( app->GetWindowHandle(), Width, Height, false );
+	direct_3d_ = new Direct3D11( get_app()->GetWindowHandle(), get_app()->get_width(), get_app()->get_height(), false );
 	direct_3d_->load_effect_file( "media/shader/main.fx" );
 	direct_3d_->apply_effect();
 
@@ -60,14 +54,14 @@ CGameMain::CGameMain()
 
 	constant_buffer.view = XMMatrixLookAtLH( eye, at, up );
 
-	constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, Width / ( FLOAT ) Height, 0.01f, 100.0f );
+	constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.01f, 100.0f );
 
 	//
 	direct_write_ = new DirectWrite( direct_3d_->getTextSurface() );
 }
 
 //■デストラクタ
-CGameMain::~CGameMain()
+GameMain::~GameMain()
 {
 	delete direct_write_;
 	
@@ -79,7 +73,7 @@ CGameMain::~CGameMain()
 static int fps = 0, last_fps = 0;
 
 //■■■　メインループ　■■■
-void CGameMain::Loop()
+bool GameMain::update()
 {
 	static int sec = 0;
 	
@@ -96,7 +90,7 @@ void CGameMain::Loop()
 
 	if ( ! MainLoop.Loop() )
 	{
-		return;
+		return false;
 	}
 
 	static float t = 0.f;
@@ -122,9 +116,11 @@ void CGameMain::Loop()
 	constant_buffer_->update( & buffer );
 
 	render();
+
+	return true;
 }
 
-void CGameMain::render()
+void GameMain::render()
 {
 	// render_2d()
 	{
@@ -136,9 +132,9 @@ void CGameMain::render()
 		ss << "FPS : " << getMainLoop().GetFPS();
 
 		direct_write_->drawText( 10.f, 10.f, ss.str().c_str() );
-		direct_write_->drawText( 30.f, 50.f, Width - 30.f, Height - 50.f, L"" );
-		direct_write_->drawText( 31.f, 51.f, Width - 30.f, Height - 50.f, L"Hello World !!!" );
-		direct_write_->drawText( 30.f, 50.f, Width - 30.f, Height - 50.f, L"Hello World !!!" );
+		direct_write_->drawText( 30.f, 50.f, get_width() - 30.f, get_height() - 50.f, L"" );
+		direct_write_->drawText( 31.f, 51.f, get_width() - 30.f, get_height() - 50.f, L"Hello World !!!" );
+		direct_write_->drawText( 30.f, 50.f, get_width() - 30.f, get_height() - 50.f, L"Hello World !!!" );
 
 		direct_write_->end();
 		direct_3d_->end2D();

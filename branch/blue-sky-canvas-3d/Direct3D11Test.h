@@ -1,34 +1,23 @@
 #ifndef GAME_MAIN_H
 #define GAME_MAIN_H
 
-#include "MainLoop.h"
-
-#include <windows.h>
-#include <string>
+#include "Game.h"
 
 class Direct3D11;
 
-class CGameMain
+class GameMain : public Game
 {
 protected:
 	Direct3D11*	direct_3d_;		///< Direct3D
-		
-	HWND		hwnd_;			///< ウィンドウハンドル
-	int			Width;			///< 横幅
-	int			Height;			///< 高さ
-
-	CMainLoop	MainLoop;		//ループ管理
-
-	CGameMain();				//コンストラクタ
 
 public:
-	static CGameMain* GetInstange(){ static CGameMain gm; return & gm; }
-	~CGameMain();				//デストラクタ
+	GameMain();
+	~GameMain();
 
-	void	Loop();				//メインループ
-	void	render();
-
-	const CMainLoop& getMainLoop() const { return MainLoop; }
+	bool update();
+	void render();
 };
 
-#endif
+inline Game* Game::getInstance() { static GameMain game_main; return & game_main; }
+
+#endif // GAME_MAIN_H

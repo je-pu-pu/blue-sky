@@ -44,7 +44,7 @@ private:
 	IDXGIKeyedMutex*			text_texture_mutex_11_;
 	IDXGIKeyedMutex*			text_texture_mutex_10_;
 
-	void text_out_adapter_info( const char*, bool = false );
+	void log_adapter_desc( int, const DXGI_ADAPTER_DESC1& );
 	void text_out_device_caps( const char*, bool = false );
 
 public:

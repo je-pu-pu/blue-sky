@@ -57,6 +57,7 @@ void DirectWrite::begin()
 	render_target_->BeginDraw();
 	render_target_->SetTransform( D2D1::IdentityMatrix() );
 
+	// D2D1::ColorF clear_color( 1.f, 1.f, 1.f, 1.f );
 	D2D1::ColorF clear_color( 0.f, 0.f, 0.f, 0.f );
 	render_target_->Clear( clear_color );
 }

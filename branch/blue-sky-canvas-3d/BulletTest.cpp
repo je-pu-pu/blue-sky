@@ -60,7 +60,7 @@ GameMain::GameMain()
 	save_data_ = new Config();
 	save_data_->load_file( "save/blue-sky.save" );
 
-	// Direct3D 
+	// Direct3D
 	direct_3d_ = new Direct3D11( get_app()->GetWindowHandle(), get_app()->get_width(), get_app()->get_height(), false );
 	direct_3d_->load_effect_file( "media/shader/main.fx" );
 	direct_3d_->apply_effect();
@@ -79,7 +79,6 @@ GameMain::GameMain()
 	constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.1f, 100.0f );
 
 	direct_write_ = new DirectWrite( direct_3d_->getTextSurface() );
-	// direct_write_ = new DirectWrite( direct_3d_->getBackbufferSurface() );
 
 	physics_ = new BulletPhysics();
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_ );

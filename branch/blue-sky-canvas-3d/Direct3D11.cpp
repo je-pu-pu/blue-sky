@@ -9,6 +9,7 @@
 
 #include <xnamath.h>
 
+#include <dxgi.h>
 #include <d3d10_1.h>
 
 #include <string>
@@ -25,7 +26,7 @@
 #pragma comment( lib, "d3dx10d.lib" )
 #else
 #pragma comment( lib, "d3dx11.lib" )
-#pragma comment( lib, "d3dx10.lib" )
+// #pragma comment( lib, "d3dx10.lib" )
 #endif
 
 Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* adapter_format, const char* depth_stencil_format, int multi_sample_type, int multi_sample_quality )
@@ -61,12 +62,18 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		IDXGIFactory1* dxgi_factory = 0;
 
 		DIRECT_X_FAIL_CHECK( CreateDXGIFactory1( __uuidof( IDXGIFactory1 ), reinterpret_cast< void** >( & dxgi_factory ) ) );
+
+		for ( int n = 0; dxgi_factory->EnumAdapters1( n, & dxgi_adapter ) != DXGI_ERROR_NOT_FOUND; n++ )
+		{
+			DXGI_ADAPTER_DESC1 adapter_desc;
+			DIRECT_X_FAIL_CHECK( dxgi_adapter->GetDesc1( & adapter_desc ) );
+
+			log_adapter_desc( n, adapter_desc );
+
+			DIRECT_X_RELEASE( dxgi_adapter );
+		}
+
 		DIRECT_X_FAIL_CHECK( dxgi_factory->EnumAdapters1( 0, & dxgi_adapter ) );
-
-		DXGI_ADAPTER_DESC1 adapter_desc;
-
-		DIRECT_X_FAIL_CHECK( dxgi_adapter->GetDesc1( & adapter_desc ) );
-
 		DIRECT_X_RELEASE( dxgi_factory );
 
 		// MessageBoxW( 0, adapter_desc.Description, L"HOGE", MB_OK );
@@ -312,9 +319,11 @@ void Direct3D11::begin3D()
 
 void Direct3D11::end3D()
 {
-	DIRECT_X_FAIL_CHECK( text_texture_mutex_11_->ReleaseSync( 0 ) );
+	// immediate_context_->CopyResource( back_buffer_texture_, text_texture_ );
 
 	DIRECT_X_FAIL_CHECK( swap_chain_->Present( 0, 0 ) );
+
+	DIRECT_X_FAIL_CHECK( text_texture_mutex_11_->ReleaseSync( 0 ) );
 }
 
 void Direct3D11::renderText()
@@ -332,4 +341,23 @@ void Direct3D11::renderText()
 		immediate_context_->PSSetShaderResources( 0, 1, & text_view_ );
 		immediate_context_->Draw( 3, 0 ); // !!!
 	}
+}
+
+void Direct3D11::log_adapter_desc( int index, const DXGI_ADAPTER_DESC1& adapter_desc )
+{
+	#define adapter_desc_string( name ) std::wstring( L"\t" ) + L# name + L" : " + common::w_serialize( adapter_desc.name ) + L"\n"
+
+	std::wstring text = common::w_serialize( index ) + L" : " + adapter_desc.Description + L"\n" +
+		adapter_desc_string( VendorId ) +
+		adapter_desc_string( DeviceId ) +
+		adapter_desc_string( SubSysId ) +
+		adapter_desc_string( Revision ) +
+		adapter_desc_string( DedicatedVideoMemory ) +
+		adapter_desc_string( DedicatedSystemMemory ) +
+		adapter_desc_string( SharedSystemMemory ) +
+		adapter_desc_string( AdapterLuid.LowPart ) + 
+		adapter_desc_string( AdapterLuid.HighPart ) + 
+		adapter_desc_string( Flags );
+
+	common::log( "log/adapter_info.log", text );
 }

@@ -22,6 +22,7 @@
     <ClCompile Include="Direct3D11Mesh.cpp" />
     <ClCompile Include="DirectInput.cpp" />
     <ClCompile Include="DirectWrite.cpp" />
+    <ClCompile Include="DrawingModel.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainLoop.cpp" />
@@ -43,6 +44,7 @@
     <ClInclude Include="DirectWriteFontFileEnumerator.h" />
     <ClInclude Include="DirectWriteFontFileLoader.h" />
     <ClInclude Include="DirectWriteFontFileStream.h" />
+    <ClInclude Include="DrawingModel.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="MainLoop.h" />

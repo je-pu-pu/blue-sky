@@ -5,6 +5,8 @@
 #include "Direct3D11Mesh.h"
 #include "Direct3D11ConstantBuffer.h"
 
+#include "DrawingModel.h"
+
 #include "DirectWrite.h"
 
 #include "BulletPhysics.h"
@@ -35,6 +37,8 @@ struct ConstantBuffer
 };
 
 Direct3D11Mesh* mesh_ = 0;
+DrawingModel* model_ = 0;
+
 Direct3D11ConstantBuffer* constant_buffer_ = 0;
 
 ConstantBuffer constant_buffer;
@@ -71,6 +75,10 @@ GameMain::GameMain()
 	// mesh_->load_obj( "media/model/cube.obj" );
 	// mesh_->load_obj( "media/model/robot.obj" );
 	mesh_->load_obj( "media/model/robot-blender-exported.obj" );
+	// mesh_->load_obj( "media/model/tree-2.obj" );
+
+	model_ = new DrawingModel( direct_3d_ );
+	model_->load_obj( "media/model/tree-2.obj" );
 
 	constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_, sizeof( ConstantBuffer ) );
 
@@ -102,6 +110,7 @@ GameMain::~GameMain()
 	
 	delete constant_buffer_;
 	delete mesh_;
+	delete model_;
 
 	delete active_object_manager_;
 
@@ -146,7 +155,7 @@ bool GameMain::update()
 		input_->update_null();
 	}
 
-	static XMVECTOR eye = XMVectorSet( 0.0f, 4.0f, -5.0f, 0.0f );
+	static XMVECTOR eye = XMVectorSet( 0.0f, 1.5f, -5.0f, 0.0f );
 
 	{
 		if ( input_->press( Input::LEFT ) )
@@ -175,6 +184,7 @@ bool GameMain::update()
 		{
 			Robot* robot = new Robot();
 			robot->set_mesh( mesh_ );
+			robot->set_drawing_model( model_ );
 
 			active_object_manager_->add_active_object( robot );
 			robot->set_rigid_body( physics_->add_active_object( & robot->get_transform() ) );
@@ -205,7 +215,7 @@ void GameMain::render()
 		ss << L"Bullet ‚É‚æ‚é•¨—‰‰Z" << std::endl;
 		ss << L"FPS : " << getMainLoop().GetFPS() << std::endl;
 
-		ss << L"blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky ";
+		// ss << L"blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky ";
 
 		/*
 		ss << "FPS : " << getMainLoop().GetFPS() << std::endl;
@@ -232,7 +242,7 @@ void GameMain::render()
 		
 		// render_robot();
 		{
-			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|main" );
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|drawing_line" );
 
 			D3DX11_TECHNIQUE_DESC technique_desc;
 			technique->GetDesc( & technique_desc );
@@ -277,7 +287,7 @@ void GameMain::render( const ActiveObject* active_object )
 {
 	/// @todo Œø—¦‰»
 	static float t = 0.f;
-	t += 0.01f;
+	t += 1.f;
 
 	const btTransform& trans = active_object->get_transform();
 	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
@@ -294,5 +304,7 @@ void GameMain::render( const ActiveObject* active_object )
 	constant_buffer_->update( & buffer );
 	constant_buffer_->render();
 
-	active_object->get_mesh()->render();
+	// active_object->get_mesh()->render();
+
+	active_object->get_drawing_model()->render();
 }

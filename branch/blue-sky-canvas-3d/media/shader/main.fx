@@ -33,6 +33,12 @@ struct GS_INPUT
 	float2 TexCoord : TEXCOORD0;
 };
 
+struct VSGS_LINE_INPUT
+{
+	float4 Position : POSITION;
+	float4 Color : COLOR0;
+};
+
 struct PS_INPUT
 {
 	float4 Position : SV_POSITION;
@@ -81,6 +87,17 @@ PS_INPUT vs_to_ps( VS_INPUT input, uint vertex_id : SV_VertexID )
 	return output;
 }
 
+VSGS_LINE_INPUT vs_line( VSGS_LINE_INPUT input )
+{
+	VSGS_LINE_INPUT output = input;
+
+	output.Position = mul( output.Position, World );
+    output.Position = mul( output.Position, View );
+    output.Position = mul( output.Position, Projection );
+
+	return output;
+}
+
 GS_INPUT vs_text( VS_INPUT input )
 {
 	GS_INPUT output;
@@ -106,9 +123,41 @@ void gs_pass( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 	TriStream.RestartStrip();
 }
 
-[maxvertexcount(12)]
-void gs_line( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
+[maxvertexcount(4)]
+void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
 {
+	/*
+	{
+		PS_INPUT output[ 4 ];
+
+		output[ 0 ].Position = float4( -0.5f, -0.5f, 0.f, 1.f );
+		output[ 0 ].TexCoord = float2( 0.f, 1.f );
+
+		output[ 1 ].Position = float4( -0.5f, +0.5f, 0.f, 1.f );
+		output[ 1 ].TexCoord = float2( 0.f, 0.f );
+
+		output[ 2 ].Position = float4( 0.5f, -0.5f, 0.f, 1.f );
+		output[ 2 ].TexCoord = float2( 1.f, 1.f );
+
+		output[ 3 ].Position = float4( 0.5f, 0.5f, 0.f, 1.f );
+		output[ 3 ].TexCoord = float2( 1.f, 0.f );
+
+		output[ 0 ].Color = float4( 0.f, 0.f, 0.f, 0.f );
+		output[ 1 ].Color = float4( 0.f, 0.f, 0.f, 0.f );
+		output[ 2 ].Color = float4( 0.f, 0.f, 0.f, 0.f );
+		output[ 3 ].Color = float4( 0.f, 0.f, 0.f, 0.f );
+
+		TriStream.Append( output[ 0 ] );
+		TriStream.Append( output[ 1 ] );
+		TriStream.Append( output[ 2 ] );
+		TriStream.Append( output[ 3 ] );
+
+		return;
+	}
+	*/
+
+	static const uint input_vertex_count = 2;
+
 	static const float screen_width = 800.f;
 	static const float screen_height = 600.f;
 	static const float screen_ratio = ( screen_height / screen_width );
@@ -120,12 +169,7 @@ void gs_line( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 	
 	static const float line_v_width = 32.f / 1024.f;
 
-	const float4 line_start_color_1 = float4( 0.f, 0.f, 0.f, 0.f );
-	const float4 line_start_color_2 = float4( 0.f, 0.f, 0.f, 0.f );
-	const float4 line_end_color_1 = float4( 0.f, 0.f, 0.f, 0.f );
-	const float4 line_end_color_2 = float4( 0.f, 0.f, 0.f, 0.f );
-
-	for ( uint n = 0; n < 3; n++ )
+	for ( uint n = 0; n < 2; n++ )
 	{
 		if ( input[ n ].Position.z < 0.f )
 		{
@@ -138,24 +182,24 @@ void gs_line( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 			input[ n ].Position.z += z_offset;
 			input[ n ].Position /= input[ n ].Position.w;
 			input[ n ].Position.w = w_fix;
-		}
 
-		// debug
-		// input[ n ].Position.z = z_fix;
+			// debug
+			input[ n ].Position.z = 0.f;
+		}
 	}
 
-	const float line_width_scale = 1.f; // ( -input[ 0 ].Position.z + 1.f ) * 0.5f;
+	const float line_width_scale = 1.f;
 	const float line_width = 32.f / screen_height * line_width_scale;
 
-	for ( uint n = 0; n < 3; n++ )
 	{
-		uint m = ( n + 1 ) % 3;
+		uint n = 0;
+		uint m = 1;
 
 		float ly = ( input[ m ].Position.y * screen_ratio ) - ( input[ n ].Position.y * screen_ratio );
 		float lx = input[ m ].Position.x - input[ n ].Position.x;
 		
 		// float line_index = uint( t * 100.f ) % 3;
-		float line_index = uint( ( input[ n ].Position.x + input[ m ].Position.y + input[ n ].Position.z ) * 30.f ) % 3;
+		float line_index = uint( t ) * primitive_id % 3;
 		float line_v_origin = ( line_index * line_v_width );
 
 		float line_length_ratio = length( float2( lx, ly ) ) / length( float2( 2.f, 2.f ) );
@@ -170,26 +214,19 @@ void gs_line( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 
 		output[ 0 ].Position = input[ n ].Position + float4( -dx, -dy, 0.f, 0.f );
 		output[ 0 ].TexCoord = float2( 0.f, line_v_origin );
-		output[ 0 ].Color = line_start_color_1;
+		output[ 0 ].Color = input[ 0 ].Color;
 
 		output[ 1 ].Position = input[ n ].Position + float4( +dx, +dy, 0.f, 0.f );
 		output[ 1 ].TexCoord = float2( 0.f, line_v_origin + line_v_width );
-		output[ 1 ].Color = line_start_color_2;
+		output[ 1 ].Color = input[ 0 ].Color;
 
 		output[ 2 ].Position = input[ m ].Position + float4( -dx, -dy, 0.f, 0.f );
 		output[ 2 ].TexCoord = float2( line_length_ratio, line_v_origin );
-		output[ 2 ].Color = line_end_color_1;
+		output[ 2 ].Color = input[ 1 ].Color;
 
 		output[ 3 ].Position = input[ m ].Position + float4( +dx, +dy, 0.f, 0.f );
 		output[ 3 ].TexCoord = float2( line_length_ratio, line_v_origin + line_v_width );
-		output[ 3 ].Color = line_end_color_2;
-
-		/*
-		output[ 0 ].Position.z = z_fix;
-		output[ 1 ].Position.z = z_fix;
-		output[ 2 ].Position.z = z_fix;
-		output[ 3 ].Position.z = z_fix;
-		*/
+		output[ 3 ].Color = input[ 1 ].Color;
 
 		TriStream.Append( output[ 0 ] );
 		TriStream.Append( output[ 1 ] );
@@ -239,6 +276,7 @@ float4 ps( PS_INPUT input ) : SV_Target
 
 float4 ps_line( PS_INPUT input ) : SV_Target
 {
+	input.Color.a = 0.f;
 	return line_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
 }
 
@@ -289,13 +327,16 @@ technique11 main
         // SetGeometryShader( CompileShader( gs_4_0, gs_pass() ) );
         SetPixelShader( CompileShader( ps_4_0, ps() ) );
     }
+}
 
+technique11 drawing_line
+{
 	pass pass_line
 	{
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
 
-		SetVertexShader( CompileShader( vs_4_0, vs() ) );
+		SetVertexShader( CompileShader( vs_4_0, vs_line() ) );
 		SetGeometryShader( CompileShader( gs_4_0, gs_line() ) );
 		SetPixelShader( CompileShader( ps_4_0, ps_line() ) );
 

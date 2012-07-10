@@ -2,6 +2,7 @@
 #define BLUE_SKY_ACTIVE_OBJECT_H
 
 class Direct3D11Mesh;
+class DrawingModel;
 
 class btRigidBody;
 class btTransform;
@@ -25,9 +26,11 @@ public:
 	typedef btRigidBody RigidBody;
 
 private:
-	const Mesh*		mesh_;				///< Mesh
-	RigidBody*		rigid_body_;		///< RigidBody
-	Transform*		transform_;			///< Transform
+	const Mesh*			mesh_;				///< Mesh
+	const DrawingModel*	drawing_model_;		///< DrawingModel
+
+	RigidBody*			rigid_body_;		///< RigidBody
+	Transform*			transform_;			///< Transform
 
 protected:
 
@@ -45,6 +48,9 @@ public:
 
 	void set_mesh( const Mesh* m ) { mesh_ = m; }
 	const Mesh* get_mesh() const { return mesh_; }
+
+	void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; }
+	const DrawingModel* get_drawing_model() const { return drawing_model_; }
 
 	void set_rigid_body( RigidBody* rigid_body ) { rigid_body_ = rigid_body; }
 

@@ -18,7 +18,7 @@ cbuffer ConstantBuffer : register( b0 )
 	matrix World;
 	matrix View;
 	matrix Projection;
-	float t;
+	float Time;
 };
 
 struct VS_INPUT
@@ -56,9 +56,9 @@ GS_INPUT vs( VS_INPUT input, uint vertex_id : SV_VertexID )
 	output.TexCoord = input.TexCoord;
 
 	// ぶらす
-	// float a = ( vertex_id ) / 10.f + t * 10.f;
+	// float a = ( vertex_id ) / 10.f + Time * 10.f;
 	// output.Position.x += cos( a ) * 0.01f;
-	// output.Position.y += sin( t ) * 0.01f;
+	// output.Position.y += sin( Time ) * 0.01f;
 
 	// output.Position = input.Position;
 
@@ -87,13 +87,20 @@ PS_INPUT vs_to_ps( VS_INPUT input, uint vertex_id : SV_VertexID )
 	return output;
 }
 
-VSGS_LINE_INPUT vs_line( VSGS_LINE_INPUT input )
+VSGS_LINE_INPUT vs_line( VSGS_LINE_INPUT input, uint vertex_id : SV_VertexID )
 {
 	VSGS_LINE_INPUT output = input;
 
 	output.Position = mul( output.Position, World );
     output.Position = mul( output.Position, View );
     output.Position = mul( output.Position, Projection );
+
+	// ぶらす
+	// float a = Time; // ( vertex_id ) / 10.f + Time * 10.f;
+	// output.Position.x += cos( vertex_id + a ) * 0.001f;
+	// output.Position.y += ( vertex_id + Time % 10 / 10 ) * 0.04f;
+
+	// output.Position = input.Position;
 
 	return output;
 }
@@ -171,7 +178,7 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 
 	for ( uint n = 0; n < 2; n++ )
 	{
-		if ( input[ n ].Position.z < 0.f )
+		if ( input[ n ].Position.z < -0.1f )
 		{
 			input[ n ].Position.w = 0.f;
 
@@ -198,8 +205,8 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 		float ly = ( input[ m ].Position.y * screen_ratio ) - ( input[ n ].Position.y * screen_ratio );
 		float lx = input[ m ].Position.x - input[ n ].Position.x;
 		
-		// float line_index = uint( t * 100.f ) % 3;
-		float line_index = uint( t ) * primitive_id % 3;
+		// float line_index = ( uint( Time + primitive_id % 10 / 10.f ) + primitive_id ) % 3; // 全ての線がばらばらのタイミングで更新される
+		float line_index = ( uint( Time ) + primitive_id ) % 3; // 全ての線が統一されたタイミングで更新される
 		float line_v_origin = ( line_index * line_v_width );
 
 		float line_length_ratio = length( float2( lx, ly ) ) / length( float2( 2.f, 2.f ) );

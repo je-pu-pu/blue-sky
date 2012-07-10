@@ -203,6 +203,8 @@ bool GameMain::update()
 	return true;
 }
 
+static float t = 0.f;
+
 void GameMain::render()
 {
 	// render_2d()
@@ -281,14 +283,13 @@ void GameMain::render()
 
 		direct_3d_->end3D();
 	}
+
+	t += 0.01f;
 }
 
 void GameMain::render( const ActiveObject* active_object )
 {
 	/// @todo Œø—¦‰»
-	static float t = 0.f;
-	t += 1.f;
-
 	const btTransform& trans = active_object->get_transform();
 	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
 	constant_buffer.world = XMMatrixTranslation( 0, - active_object->get_collision_height() * 0.5f, 0.f );

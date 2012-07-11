@@ -326,6 +326,19 @@ void GameMain::render( const ActiveObject* active_object )
 
 void GameMain::render_line( const ActiveObject* active_object )
 {
+	// @todo Œø—¦‰»
+	const btTransform& trans = active_object->get_transform();
+
+	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
+
+	ObjectConstantBuffer buffer;
+	buffer.world = XMMatrixTranslation( 0, - active_object->get_collision_height() * 0.5f, 0.f );
+	buffer.world *= XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
+	buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+	buffer.world = XMMatrixTranspose( buffer.world );
+
+	object_constant_buffer_->update( & buffer );
+
 	game_constant_buffer_->render( 0 );
 	frame_constant_buffer_->render( 1 );
 	object_constant_buffer_->render( 2 );

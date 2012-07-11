@@ -25,7 +25,7 @@ public:
 	virtual ~Direct3D11ConstantBuffer();
 
 	void update( const void* );
-	void render();
+	void render( UINT );
 
 }; // class Direct3D11ConstantBuffer
 

@@ -121,8 +121,13 @@ void DrawingModel::create_texture_resource_view( const char* file_name )
 	DIRECT_X_FAIL_CHECK( D3DX11CreateShaderResourceViewFromFile( direct_3d_->getDevice(), texture_file_name.c_str(), 0, 0, & texture_resource_view_, 0 ) );
 }
 
-void DrawingModel::render() const
+void DrawingModel::render( int level ) const
 {
+	if ( level < 1 )
+	{
+		return;
+	}
+
 	UINT stride = sizeof( Vertex );
     UINT offset = 0;
 
@@ -137,5 +142,5 @@ void DrawingModel::render() const
 	// ID3D11ShaderResourceView* text_view = direct_3d_->getTextView();
 	// direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & text_view );
 
-	direct_3d_->getImmediateContext()->DrawIndexed( index_list_.size(), 0, 0 );
+	direct_3d_->getImmediateContext()->DrawIndexed( std::min< int >( level, index_list_.size() ), 0, 0 );
 }

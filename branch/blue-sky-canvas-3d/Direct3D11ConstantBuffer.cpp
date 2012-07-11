@@ -32,8 +32,8 @@ void Direct3D11ConstantBuffer::update( const void* data )
 	direct_3d_->getImmediateContext()->UpdateSubresource( constant_buffer_, 0, 0, data, 0, 0 );
 }
 
-void Direct3D11ConstantBuffer::render()
+void Direct3D11ConstantBuffer::render( UINT slot )
 {
-	direct_3d_->getImmediateContext()->VSSetConstantBuffers( 0, 1, & constant_buffer_ );
-	direct_3d_->getImmediateContext()->GSSetConstantBuffers( 0, 1, & constant_buffer_ );
+	direct_3d_->getImmediateContext()->VSSetConstantBuffers( slot, 1, & constant_buffer_ );
+	direct_3d_->getImmediateContext()->GSSetConstantBuffers( slot, 1, & constant_buffer_ );
 }

@@ -13,12 +13,20 @@ SamplerState texture_sampler
 //	ComparisonFunc = NEVER;
 };
 
-cbuffer ConstantBuffer : register( b0 )
+cbuffer GameConstantBuffer : register( b0 )
+{
+	matrix Projection;
+};
+
+cbuffer FrameConstantBuffer : register( b1 )
+{
+	matrix View;
+	float Time;
+};
+
+cbuffer ObjectConstantBuffer : register( b2 )
 {
 	matrix World;
-	matrix View;
-	matrix Projection;
-	float Time;
 };
 
 struct VS_INPUT
@@ -178,7 +186,7 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 
 	for ( uint n = 0; n < 2; n++ )
 	{
-		if ( input[ n ].Position.z < -0.1f )
+		if ( input[ n ].Position.z < 0.f )
 		{
 			input[ n ].Position.w = 0.f;
 
@@ -191,11 +199,11 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 			input[ n ].Position.w = w_fix;
 
 			// debug
-			input[ n ].Position.z = 0.f;
+			// input[ n ].Position.z = 0.f;
 		}
 	}
 
-	const float line_width_scale = 1.f;
+	const float line_width_scale = 0.5f;
 	const float line_width = 32.f / screen_height * line_width_scale;
 
 	{
@@ -281,7 +289,7 @@ float4 ps( PS_INPUT input ) : SV_Target
 	return model_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
 }
 
-float4 ps_line( PS_INPUT input ) : SV_Target
+float4 ps_line( noperspective PS_INPUT input ) : SV_Target
 {
 	input.Color.a = 0.f;
 	return line_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;

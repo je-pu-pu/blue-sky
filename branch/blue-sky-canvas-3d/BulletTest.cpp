@@ -28,34 +28,27 @@
 
 #pragma comment( lib, "game.lib" )
 
-struct ConstantBuffer
+struct GameConstantBuffer
+{
+	XMMATRIX projection;
+};
+
+struct FrameConstantBuffer
+{
+	XMMATRIX view;
+	float time;
+};
+
+struct ObjectConstantBuffer
 {
 	XMMATRIX world;
-	XMMATRIX view;
-	XMMATRIX projection;
-	float t;
 };
 
 Direct3D11Mesh* mesh_ = 0;
 DrawingModel* model_ = 0;
 
-Direct3D11ConstantBuffer* constant_buffer_ = 0;
-
-ConstantBuffer constant_buffer;
-
-DirectWrite* direct_write_ = 0;
-
-Direct3D11BulletDebugDraw* bullet_debug_draw_ = 0;
-
 //■コンストラクタ
 GameMain::GameMain()
-	: direct_3d_( 0 )
-	, physics_( 0 )
-	, direct_input_( 0 )
-	, input_( 0 )
-	, config_( 0 )
-	, save_data_( 0 )
-	, active_object_manager_( 0 )
 {
 	// Config
 	config_ = new Config();
@@ -69,35 +62,42 @@ GameMain::GameMain()
 	direct_3d_->load_effect_file( "media/shader/main.fx" );
 	direct_3d_->apply_effect();
 
-	mesh_ = new Direct3D11Mesh( direct_3d_ );
+	mesh_ = new Direct3D11Mesh( direct_3d_.get() );
 	// mesh_->load_obj( "media/model/tri.obj" );
 	// mesh_->load_obj( "media/model/tris.obj" );
 	// mesh_->load_obj( "media/model/cube.obj" );
 	// mesh_->load_obj( "media/model/robot.obj" );
-	mesh_->load_obj( "media/model/robot-blender-exported.obj" );
+	// mesh_->load_obj( "media/model/robot-blender-exported.obj" );
+	mesh_->load_obj( "media/model/building.obj" );
 	// mesh_->load_obj( "media/model/tree-2.obj" );
 
-	model_ = new DrawingModel( direct_3d_ );
-	model_->load_obj( "media/model/tree-2.obj" );
+	model_ = new DrawingModel( direct_3d_.get() );
+	// model_->load_obj( "media/model/tree-2.obj" );
+	model_->load_obj( "media/model/building-line.obj" );
 
-	constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_, sizeof( ConstantBuffer ) );
+	game_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( GameConstantBuffer ) );
+	frame_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( FrameConstantBuffer ) );
+	object_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( ObjectConstantBuffer ) );
 
-	constant_buffer.projection = XMMatrixIdentity();
-
-	constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.1f, 100.0f );
+	{
+		GameConstantBuffer constant_buffer;
+		constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.1f, 100.0f );
+		constant_buffer.projection = XMMatrixTranspose( constant_buffer.projection );
+		game_constant_buffer_->update( & constant_buffer );
+	}
 
 	direct_write_ = new DirectWrite( direct_3d_->getTextSurface() );
 
 	physics_ = new BulletPhysics();
-	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_ );
+	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
 	bullet_debug_draw_->setDebugMode( btIDebugDraw::DBG_DrawWireframe );
 
-	physics_->setDebugDrawer( bullet_debug_draw_ );
+	physics_->setDebugDrawer( bullet_debug_draw_.get() );
 
 	direct_input_ = new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() );
 	input_ = new Input();
-	input_->set_direct_input( direct_input_ );
-	input_->load_config( *config_ );
+	input_->set_direct_input( direct_input_.get() );
+	input_->load_config( * config_.get() );
 
 	// ActiveObjectManager
 	active_object_manager_ = new ActiveObjectManager();
@@ -106,24 +106,12 @@ GameMain::GameMain()
 //■デストラクタ
 GameMain::~GameMain()
 {
-	delete direct_write_;
-	
-	delete constant_buffer_;
 	delete mesh_;
 	delete model_;
-
-	delete active_object_manager_;
-
-	delete input_;
-	delete direct_input_;
-
-	delete bullet_debug_draw_;
-	delete physics_;
-
-	delete direct_3d_;
 }
 
 static int fps = 0, last_fps = 0;
+static XMVECTOR eye = XMVectorSet( 0.0f, 1.5f, -5.0f, 0.0f );
 
 bool GameMain::update()
 {
@@ -155,8 +143,6 @@ bool GameMain::update()
 		input_->update_null();
 	}
 
-	static XMVECTOR eye = XMVectorSet( 0.0f, 1.5f, -5.0f, 0.0f );
-
 	{
 		if ( input_->press( Input::LEFT ) )
 		{
@@ -175,11 +161,6 @@ bool GameMain::update()
 			eye += XMVectorSet( 0.f, 0.0f, -0.01f, 0.f );
 		}
 
-		XMVECTOR at = eye + XMVectorSet( 0.0f, 0.0f, 1.f, 0.0f );
-		XMVECTOR up = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
-
-		constant_buffer.view = XMMatrixLookAtLH( eye, at, up );
-
 		if ( input_->push( Input::A ) )
 		{
 			Robot* robot = new Robot();
@@ -188,6 +169,22 @@ bool GameMain::update()
 
 			active_object_manager_->add_active_object( robot );
 			robot->set_rigid_body( physics_->add_active_object( & robot->get_transform() ) );
+		}
+
+		XMVECTOR at = eye + XMVectorSet( 0.0f, 0.0f, 1.f, 0.0f );
+		XMVECTOR up = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
+
+		{
+			static float t = 0.f;
+
+			FrameConstantBuffer constant_buffer;
+			constant_buffer.view = XMMatrixLookAtLH( eye, at, up );
+			constant_buffer.view = XMMatrixTranspose( constant_buffer.view );
+			constant_buffer.time = t;
+
+			frame_constant_buffer_->update( & constant_buffer );
+
+			t += 0.01f;
 		}
 	}
 
@@ -202,8 +199,6 @@ bool GameMain::update()
 
 	return true;
 }
-
-static float t = 0.f;
 
 void GameMain::render()
 {
@@ -242,9 +237,14 @@ void GameMain::render()
 		
 		direct_3d_->clear();
 		
-		// render_robot();
 		{
-			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|drawing_line" );
+			game_constant_buffer_->render( 0 );
+			frame_constant_buffer_->render( 1 );
+		}
+
+		// render_object();
+		{
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|main" );
 
 			D3DX11_TECHNIQUE_DESC technique_desc;
 			technique->GetDesc( & technique_desc );
@@ -261,6 +261,25 @@ void GameMain::render()
 			}
 		}
 
+		// render_object_line();
+		{
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|drawing_line" );
+
+			D3DX11_TECHNIQUE_DESC technique_desc;
+			technique->GetDesc( & technique_desc );
+
+			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			{
+				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
+				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+		
+				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
+				{
+					render_line( *i );
+				}
+			}
+		}
+
 		// render_bullet_debug();
 		{
 			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|bullet" );
@@ -273,7 +292,6 @@ void GameMain::render()
 				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
 				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
 		
-				constant_buffer_->render();
 				bullet_debug_draw_->render();
 			}
 		}
@@ -283,29 +301,34 @@ void GameMain::render()
 
 		direct_3d_->end3D();
 	}
-
-	t += 0.01f;
 }
 
 void GameMain::render( const ActiveObject* active_object )
 {
-	/// @todo 効率化
 	const btTransform& trans = active_object->get_transform();
+
 	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
-	constant_buffer.world = XMMatrixTranslation( 0, - active_object->get_collision_height() * 0.5f, 0.f );
-	constant_buffer.world *= XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
-	constant_buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
 
-	ConstantBuffer buffer;
-	buffer.world = XMMatrixTranspose( constant_buffer.world );
-	buffer.view = XMMatrixTranspose( constant_buffer.view );
-	buffer.projection = XMMatrixTranspose( constant_buffer.projection );
-	buffer.t = t;
+	ObjectConstantBuffer buffer;
+	buffer.world = XMMatrixTranslation( 0, - active_object->get_collision_height() * 0.5f, 0.f );
+	buffer.world *= XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
+	buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+	buffer.world = XMMatrixTranspose( buffer.world );
 
-	constant_buffer_->update( & buffer );
-	constant_buffer_->render();
+	object_constant_buffer_->update( & buffer );
+	
+	game_constant_buffer_->render( 0 );
+	frame_constant_buffer_->render( 1 );
+	object_constant_buffer_->render( 2 );
 
-	// active_object->get_mesh()->render();
+	active_object->get_mesh()->render();
+}
 
-	active_object->get_drawing_model()->render();
+void GameMain::render_line( const ActiveObject* active_object )
+{
+	game_constant_buffer_->render( 0 );
+	frame_constant_buffer_->render( 1 );
+	object_constant_buffer_->render( 2 );
+
+	active_object->get_drawing_model()->render( 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
 }

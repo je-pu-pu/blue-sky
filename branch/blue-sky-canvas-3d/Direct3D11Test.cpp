@@ -156,7 +156,7 @@ void GameMain::render()
 			ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
 			DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
 		
-			constant_buffer_->render();
+			constant_buffer_->render( 0 );
 
 			for ( int n = 0; n < 1; n++ )
 			{

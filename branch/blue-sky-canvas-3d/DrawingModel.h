@@ -72,7 +72,7 @@ public:
 
 	bool load_obj( const char* );
 
-	void render() const;
+	void render( int level ) const;
 
 }; // class DrawingModel
 

@@ -106,6 +106,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 
 	// Direct3D 10.1
 	{
+		// D3D10_CREATE_DEVICE_DEBUG
 		DIRECT_X_FAIL_CHECK( D3D10CreateDevice1( dxgi_adapter, D3D10_DRIVER_TYPE_HARDWARE, 0, D3D10_CREATE_DEVICE_BGRA_SUPPORT, D3D10_FEATURE_LEVEL_10_0, D3D10_1_SDK_VERSION, & device_10_ ) );
 	}
 

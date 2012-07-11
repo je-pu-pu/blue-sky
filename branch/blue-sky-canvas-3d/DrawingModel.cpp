@@ -55,7 +55,7 @@ bool DrawingModel::load_obj( const char* file_name )
 		{
 			Vertex v;
 
-			v.Color = Color( 1.f, 1.f, 1.f, 0.f );
+			v.Color = Color( 0.f, 0.f, 0.f, 0.f );
 
 			ss >> v.Position.x >> v.Position.y >> v.Position.z;
 			ss >> v.Color.x >> v.Color.y >> v.Color.z >> v.Color.w;
@@ -116,6 +116,7 @@ void DrawingModel::create_index_buffer()
 
 void DrawingModel::create_texture_resource_view( const char* file_name )
 {
+	// @todo Manager
 	std::string texture_file_name = "media/texture/lines.png";
 	
 	DIRECT_X_FAIL_CHECK( D3DX11CreateShaderResourceViewFromFile( direct_3d_->getDevice(), texture_file_name.c_str(), 0, 0, & texture_resource_view_, 0 ) );

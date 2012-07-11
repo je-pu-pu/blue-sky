@@ -203,7 +203,7 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 		}
 	}
 
-	const float line_width_scale = 0.5f;
+	const float line_width_scale = 0.25f;
 	const float line_width = 32.f / screen_height * line_width_scale;
 
 	{

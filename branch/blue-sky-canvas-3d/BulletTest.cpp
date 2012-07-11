@@ -67,13 +67,14 @@ GameMain::GameMain()
 	// mesh_->load_obj( "media/model/tris.obj" );
 	// mesh_->load_obj( "media/model/cube.obj" );
 	// mesh_->load_obj( "media/model/robot.obj" );
-	// mesh_->load_obj( "media/model/robot-blender-exported.obj" );
-	mesh_->load_obj( "media/model/building.obj" );
+	mesh_->load_obj( "media/model/robot-blender-exported.obj" );
+	// mesh_->load_obj( "media/model/building.obj" );
 	// mesh_->load_obj( "media/model/tree-2.obj" );
 
 	model_ = new DrawingModel( direct_3d_.get() );
 	// model_->load_obj( "media/model/tree-2.obj" );
-	model_->load_obj( "media/model/building-line.obj" );
+	// model_->load_obj( "media/model/building-line.obj" );
+	model_->load_obj( "media/model/robot-line.obj" );
 
 	game_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( GameConstantBuffer ) );
 	frame_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( FrameConstantBuffer ) );
@@ -291,7 +292,10 @@ void GameMain::render()
 			{
 				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
 				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
-		
+				
+				game_constant_buffer_->render( 0 );
+				frame_constant_buffer_->render( 1 );
+
 				bullet_debug_draw_->render();
 			}
 		}

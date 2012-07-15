@@ -453,7 +453,19 @@ technique11 bullet
 // for Shadow Map
 // ----------------------------------------
 
-float4 ps_shadow_map( PS_INPUT input ) : SV_Target
+PS_INPUT vs_shadow_map( VS_INPUT input )
+{
+	PS_INPUT output;
+	
+	output.Position = mul( input.Position, World );
+    output.Position = mul( output.Position, ShadowViewProjection );
+	output.TexCoord = input.TexCoord;
+	output.Color = float4( 0.f, 0.f, 0.f, 0.f );
+
+	return output;
+}
+
+float4 ps_shadow_map_debug( PS_INPUT input ) : SV_Target
 {
 	// float sz = shadow_texture.Sample( texture_sampler, input.TexCoord );
 	float sz = model_texture.Sample( texture_sampler, input.TexCoord );
@@ -468,9 +480,12 @@ technique11 shadow_map
 {
 	pass main
 	{
-		SetVertexShader( CompileShader( vs_4_0, vs_text() ) );
-		SetGeometryShader( CompileShader( gs_4_0, gs_text() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_shadow_map() ) );
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_shadow_map() ) );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps() ) );
 	}
 }
 
@@ -494,6 +509,6 @@ technique11 main2d
 	{
 		SetVertexShader( CompileShader( vs_4_0, vs_pass() ) );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_shadow_map() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_shadow_map_debug() ) );
 	}
 }

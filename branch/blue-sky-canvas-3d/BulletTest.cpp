@@ -260,7 +260,7 @@ void GameMain::render()
 			frame_constant_buffer.view = XMMatrixTranspose( shadow_map_->getViewMatrix() );
 			frame_constant_buffer_->update( & frame_constant_buffer );
 
-			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|main" );
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|shadow_map" );
 
 			D3DX11_TECHNIQUE_DESC technique_desc;
 			technique->GetDesc( & technique_desc );

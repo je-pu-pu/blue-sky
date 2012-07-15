@@ -62,13 +62,13 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, size_t size )
 	}
 
 	{
-		XMVECTOR eye = XMVectorSet( 20.f, 20.f, -0.f, 0.f );
+		XMVECTOR eye = XMVectorSet( 10.f, 20.f, -20.0f, 0.0f );
 		XMVECTOR at = XMVectorSet( 0.0f, 0.0f, 0.f, 0.0f );
 		XMVECTOR up = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
 		
 		view_matrix_ = XMMatrixLookAtLH( eye, at, up );
-		// projection_matrix_ = XMMatrixOrthographicLH( 100.f, 100.f, 1.f, 1000.f ); // !!!
-		projection_matrix_ = XMMatrixPerspectiveFovLH( XM_PIDIV2, 1.f, 0.1f, 10.0f );
+		projection_matrix_ = XMMatrixOrthographicLH( 100.f, 100.f, 1.f, 600.f );
+		// projection_matrix_ = XMMatrixPerspectiveFovLH( XM_PIDIV2, 1.f, 0.1f, 600.f );
 	}
 }
 

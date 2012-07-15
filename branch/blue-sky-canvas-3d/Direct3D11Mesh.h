@@ -71,6 +71,9 @@ public:
 	virtual ~Direct3D11Mesh();
 
 	bool load_obj( const char* );
+	
+	ID3D11ShaderResourceView* get_shader_resource_view() { return texture_resource_view_; }
+	void set_shader_resource_view( ID3D11ShaderResourceView* view ) { texture_resource_view_ = view; }
 
 	void render() const;
 

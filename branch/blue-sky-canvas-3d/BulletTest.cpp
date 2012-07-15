@@ -4,6 +4,8 @@
 #include "Direct3D11.h"
 #include "Direct3D11Mesh.h"
 #include "Direct3D11ConstantBuffer.h"
+#include "Direct3D11ShadowMap.h"
+#include "Direct3D11Rectangle.h"
 
 #include "DrawingModel.h"
 
@@ -22,15 +24,19 @@
 
 #include "DirectX.h"
 
+#include <win/Version.h>
+
 #include <game/Config.h>
 
 #include <sstream>
 
 #pragma comment( lib, "game.lib" )
+#pragma comment( lib, "win.lib" )
 
 struct GameConstantBuffer
 {
 	XMMATRIX projection;
+	XMMATRIX shadow_view_projection;
 };
 
 struct FrameConstantBuffer
@@ -45,11 +51,18 @@ struct ObjectConstantBuffer
 };
 
 Direct3D11Mesh* mesh_ = 0;
+Direct3D11Rectangle* rectangle_ = 0;
+
 DrawingModel* model_ = 0;
+
+
 
 //■コンストラクタ
 GameMain::GameMain()
 {
+	win::Version version;
+	version.log( "log/windows_version.log" );
+
 	// Config
 	config_ = new Config();
 	config_->load_file( "blue-sky.config" );
@@ -75,19 +88,28 @@ GameMain::GameMain()
 	// model_->load_obj( "media/model/tree-2.obj" );
 	// model_->load_obj( "media/model/building-line.obj" );
 	model_->load_obj( "media/model/robot-line.obj" );
-
+	
 	game_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( GameConstantBuffer ) );
 	frame_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( FrameConstantBuffer ) );
 	object_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( ObjectConstantBuffer ) );
 
+	shadow_map_ = new Direct3D11ShadowMap( direct_3d_.get(), 256 );
+
 	{
 		GameConstantBuffer constant_buffer;
-		constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.1f, 100.0f );
+		constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.1f, 100.f );
 		constant_buffer.projection = XMMatrixTranspose( constant_buffer.projection );
+		constant_buffer.shadow_view_projection = shadow_map_->getViewMatrix() * shadow_map_->getProjectionMatrix();
+		constant_buffer.shadow_view_projection = XMMatrixTranspose( constant_buffer.shadow_view_projection );
+
 		game_constant_buffer_->update( & constant_buffer );
 	}
+	
+	rectangle_ = new Direct3D11Rectangle( direct_3d_.get() );
 
+	/*
 	direct_write_ = new DirectWrite( direct_3d_->getTextSurface() );
+	*/
 
 	physics_ = new BulletPhysics();
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
@@ -109,10 +131,13 @@ GameMain::~GameMain()
 {
 	delete mesh_;
 	delete model_;
+	delete rectangle_;
 }
 
 static int fps = 0, last_fps = 0;
 static XMVECTOR eye = XMVectorSet( 0.0f, 1.5f, -5.0f, 0.0f );
+
+FrameConstantBuffer frame_constant_buffer;
 
 bool GameMain::update()
 {
@@ -171,22 +196,6 @@ bool GameMain::update()
 			active_object_manager_->add_active_object( robot );
 			robot->set_rigid_body( physics_->add_active_object( & robot->get_transform() ) );
 		}
-
-		XMVECTOR at = eye + XMVectorSet( 0.0f, 0.0f, 1.f, 0.0f );
-		XMVECTOR up = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
-
-		{
-			static float t = 0.f;
-
-			FrameConstantBuffer constant_buffer;
-			constant_buffer.view = XMMatrixLookAtLH( eye, at, up );
-			constant_buffer.view = XMMatrixTranspose( constant_buffer.view );
-			constant_buffer.time = t;
-
-			frame_constant_buffer_->update( & constant_buffer );
-
-			t += 0.01f;
-		}
 	}
 
 	physics_->update( 1.f / 60.f );
@@ -203,15 +212,20 @@ bool GameMain::update()
 
 void GameMain::render()
 {
+	static const bool is_render_2d_enabled = false;
+
 	// render_2d()
+	if ( is_render_2d_enabled )
 	{
 		direct_3d_->begin2D();
+
 		direct_write_->begin();
 
 		std::wstringstream ss;
 
 		ss << L"Bullet による物理演算" << std::endl;
 		ss << L"FPS : " << getMainLoop().GetFPS() << std::endl;
+		ss << L"Objects : " << active_object_manager_->active_object_list().size() << std::endl;
 
 		// ss << L"blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky ";
 
@@ -229,18 +243,59 @@ void GameMain::render()
 		direct_write_->drawText( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str() );
 
 		direct_write_->end();
+
 		direct_3d_->end2D();
 	}
 
 	// render_3d()
 	{
-		direct_3d_->begin3D();
-		
-		direct_3d_->clear();
-		
+		if ( is_render_2d_enabled )
 		{
-			game_constant_buffer_->render( 0 );
-			frame_constant_buffer_->render( 1 );
+			direct_3d_->begin3D();
+		}
+
+#if 1
+		// render_object_for_shadow()
+		{
+			frame_constant_buffer.view = XMMatrixTranspose( shadow_map_->getViewMatrix() );
+			frame_constant_buffer_->update( & frame_constant_buffer );
+
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|main" );
+
+			D3DX11_TECHNIQUE_DESC technique_desc;
+			technique->GetDesc( & technique_desc );
+
+			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			{
+				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
+				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+
+				shadow_map_->render();
+
+				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
+				{
+					render( *i );
+				}
+			}
+		}
+#endif
+
+#if 1
+		direct_3d_->clear();
+
+		{
+			XMVECTOR at = eye + XMVectorSet( 0.0f, 0.0f, 1.f, 0.0f );
+			XMVECTOR up = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
+
+			static float t = 0.f;
+
+			frame_constant_buffer.view = XMMatrixLookAtLH( eye, at, up );
+			frame_constant_buffer.view = XMMatrixTranspose( frame_constant_buffer.view );
+			frame_constant_buffer.time = t;
+
+			frame_constant_buffer_->update( & frame_constant_buffer );
+
+			t += 0.01f;
 		}
 
 		// render_object();
@@ -281,6 +336,7 @@ void GameMain::render()
 			}
 		}
 
+#if 1
 		// render_bullet_debug();
 		{
 			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|bullet" );
@@ -299,12 +355,64 @@ void GameMain::render()
 				bullet_debug_draw_->render();
 			}
 		}
+#endif
 
 		// render_text();
-		direct_3d_->renderText();
+		if ( is_render_2d_enabled )
+		{
+			direct_3d_->renderText();
+		}
 
-		direct_3d_->end3D();
+#endif
+
+#if 0
+		// render_debug_shadow_map()
+		{
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|shadow_map" );
+
+			D3DX11_TECHNIQUE_DESC technique_desc;
+			technique->GetDesc( & technique_desc );
+
+			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			{
+				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
+				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+				
+				rectangle_->set_shader_resource_view( shadow_map_->getShaderResourceView() );
+				rectangle_->render();
+			}
+		}
+#endif
+
+#if 1
+		// render_debug_shadow_map()
+		{
+			direct_3d_->setDebugViewport();
+
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|main2d" );
+
+			D3DX11_TECHNIQUE_DESC technique_desc;
+			technique->GetDesc( & technique_desc );
+
+			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			{
+				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
+				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+				
+				rectangle_->set_shader_resource_view( shadow_map_->getShaderResourceView() );
+				// rectangle_->set_shader_resource_view( mesh_->get_shader_resource_view() );
+				rectangle_->render();
+			}
+		}
+#endif
+
+		if ( is_render_2d_enabled )
+		{
+			direct_3d_->end3D();
+		}
 	}
+
+	direct_3d_->end();
 }
 
 void GameMain::render( const ActiveObject* active_object )
@@ -317,6 +425,7 @@ void GameMain::render( const ActiveObject* active_object )
 	buffer.world = XMMatrixTranslation( 0, - active_object->get_collision_height() * 0.5f, 0.f );
 	buffer.world *= XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
 	buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+
 	buffer.world = XMMatrixTranspose( buffer.world );
 
 	object_constant_buffer_->update( & buffer );

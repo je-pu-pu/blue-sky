@@ -1,5 +1,6 @@
 Texture2D model_texture : register( t0 );
 Texture2D line_texture : register( t0 );
+Texture2D shadow_texture : register( t1 );
 
 SamplerState texture_sampler
 {
@@ -16,6 +17,7 @@ SamplerState texture_sampler
 cbuffer GameConstantBuffer : register( b0 )
 {
 	matrix Projection;
+	matrix ShadowViewProjection;
 };
 
 cbuffer FrameConstantBuffer : register( b1 )
@@ -52,6 +54,13 @@ struct PS_INPUT
 	float4 Position : SV_POSITION;
 	float2 TexCoord : TEXCOORD0;
 	float4 Color    : COLOR0;
+};
+
+struct PS_SHADOW_INPUT
+{
+	float4 Position : SV_POSITION;
+	float2 TexCoord : TEXCOORD0;
+	float4 ShadowTexCoord : TEXCOORD1;
 };
 
 GS_INPUT vs( VS_INPUT input, uint vertex_id : SV_VertexID )
@@ -91,6 +100,28 @@ PS_INPUT vs_to_ps( VS_INPUT input, uint vertex_id : SV_VertexID )
 		1.f
 	);
 	*/
+
+	return output;
+}
+
+PS_SHADOW_INPUT vs_shadow( VS_INPUT input )
+{
+	PS_SHADOW_INPUT output;
+
+	output.Position = mul( input.Position, World );
+    output.Position = mul( output.Position, View );
+    output.Position = mul( output.Position, Projection );
+	output.TexCoord = input.TexCoord;
+	
+	output.ShadowTexCoord = mul( input.Position, World );
+	output.ShadowTexCoord = mul( output.ShadowTexCoord, ShadowViewProjection );
+	output.ShadowTexCoord /= output.ShadowTexCoord.w;
+
+    output.ShadowTexCoord.x = ( output.ShadowTexCoord.x + 1.f ) / 2.f;
+    output.ShadowTexCoord.y = ( -output.ShadowTexCoord.y + 1.f ) / 2.f;
+
+	// debug
+	// output.ShadowTexCoord = float4( 0.f, 0.f, 0.f, 1.f );
 
 	return output;
 }
@@ -203,7 +234,7 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 		}
 	}
 
-	const float line_width_scale = 0.25f;
+	const float line_width_scale = 0.5f;
 	const float line_width = 32.f / screen_height * line_width_scale;
 
 	{
@@ -289,6 +320,19 @@ float4 ps( PS_INPUT input ) : SV_Target
 	return model_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
 }
 
+float4 ps_shadow( PS_SHADOW_INPUT input ) : SV_Target
+{
+	float shadow = 1.f;
+	float sz = shadow_texture.Sample( texture_sampler, input.ShadowTexCoord.xy );
+
+	if ( input.ShadowTexCoord.z < sz )
+	{
+		shadow = 0.25f;
+	}
+
+	return model_texture.Sample( texture_sampler, input.TexCoord ) * float4( shadow, shadow, shadow, 1.f );
+}
+
 float4 ps_line( noperspective PS_INPUT input ) : SV_Target
 {
 	input.Color.a = 0.f;
@@ -339,7 +383,6 @@ technique11 main
 
         SetVertexShader( CompileShader( vs_4_0, vs_to_ps() ) );
 		SetGeometryShader( NULL );
-        // SetGeometryShader( CompileShader( gs_4_0, gs_pass() ) );
         SetPixelShader( CompileShader( ps_4_0, ps() ) );
     }
 }
@@ -403,5 +446,54 @@ technique11 bullet
 		SetVertexShader( CompileShader( vs_4_0, vs_bullet_debug() ) );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_bullet_debug() ) );
+	}
+}
+
+// ----------------------------------------
+// for Shadow Map
+// ----------------------------------------
+
+float4 ps_shadow_map( PS_INPUT input ) : SV_Target
+{
+	// float sz = shadow_texture.Sample( texture_sampler, input.TexCoord );
+	float sz = model_texture.Sample( texture_sampler, input.TexCoord );
+
+	sz *= 1000.f;
+	sz -= 999.5f;
+
+	return float4( sz, sz, sz, 1.f );
+}
+
+technique11 shadow_map
+{
+	pass main
+	{
+		SetVertexShader( CompileShader( vs_4_0, vs_text() ) );
+		SetGeometryShader( CompileShader( gs_4_0, gs_text() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_shadow_map() ) );
+	}
+}
+
+// ----------------------------------------
+// for 2D
+// ----------------------------------------
+PS_INPUT vs_pass( VS_INPUT input )
+{
+	PS_INPUT output = ( PS_INPUT ) 0;
+
+	output.Position = input.Position;
+	output.TexCoord = input.TexCoord;
+	output.Color = float4( 0.f, 0.f, 0.f, -0.5f );
+
+	return output;
+}
+
+technique11 main2d
+{
+	pass main
+	{
+		SetVertexShader( CompileShader( vs_4_0, vs_pass() ) );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps_shadow_map() ) );
 	}
 }

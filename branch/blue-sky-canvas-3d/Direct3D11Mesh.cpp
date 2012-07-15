@@ -1,4 +1,5 @@
 #include "Direct3D11Mesh.h"
+#include "Direct3D11TextureManager.h"
 #include "Direct3D11.h"
 #include "DirectX.h"
 
@@ -24,8 +25,6 @@ Direct3D11Mesh::Direct3D11Mesh( Direct3D11* direct_3d )
 
 Direct3D11Mesh::~Direct3D11Mesh()
 {
-	DIRECT_X_RELEASE( texture_resource_view_ );
-
 	DIRECT_X_RELEASE( index_buffer_ );
 	DIRECT_X_RELEASE( vertex_buffer_ );
 }
@@ -156,7 +155,7 @@ void Direct3D11Mesh::create_texture_resource_view( const char* file_name )
 	// std::string texture_file_name = "media/texture/lines.png";
 	// std::string texture_file_name = "media/texture/pencil-face-3.png";
 	
-	DIRECT_X_FAIL_CHECK( D3DX11CreateShaderResourceViewFromFile( direct_3d_->getDevice(), texture_file_name.c_str(), 0, 0, & texture_resource_view_, 0 ) );
+	texture_resource_view_ = direct_3d_->getTextureManager()->load( texture_file_name.c_str(), texture_file_name.c_str() );
 }
 
 void Direct3D11Mesh::render() const

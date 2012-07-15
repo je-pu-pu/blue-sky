@@ -20,6 +20,10 @@
     <ClCompile Include="Direct3D11BulletDebugDraw.cpp" />
     <ClCompile Include="Direct3D11ConstantBuffer.cpp" />
     <ClCompile Include="Direct3D11Mesh.cpp" />
+    <ClCompile Include="Direct3D11MeshManager.cpp" />
+    <ClCompile Include="Direct3D11Rectangle.cpp" />
+    <ClCompile Include="Direct3D11ShadowMap.cpp" />
+    <ClCompile Include="Direct3D11TextureManager.cpp" />
     <ClCompile Include="DirectInput.cpp" />
     <ClCompile Include="DirectWrite.cpp" />
     <ClCompile Include="DrawingModel.cpp" />
@@ -38,6 +42,10 @@
     <ClInclude Include="Direct3D11BulletDebugDraw.h" />
     <ClInclude Include="Direct3D11ConstantBuffer.h" />
     <ClInclude Include="Direct3D11Mesh.h" />
+    <ClInclude Include="Direct3D11MeshManager.h" />
+    <ClInclude Include="Direct3D11Rectangle.h" />
+    <ClInclude Include="Direct3D11ShadowMap.h" />
+    <ClInclude Include="Direct3D11TextureManager.h" />
     <ClInclude Include="DirectInput.h" />
     <ClInclude Include="DirectWrite.h" />
     <ClInclude Include="DirectWriteFontCollectionLoader.h" />
@@ -89,14 +97,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>E:\je\program\lib\c++;$(DXSDK_DIR)\Include;D:\lib\boost;D:\lib\bullet-2.80-rev2531\src;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)lib\x86;$(ProjectDir)lib\debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\lib\bullet-2.80-rev2531\src;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)lib\x86;$(ProjectDir)lib\debug;$(ProjectDir)debug;$(LibraryPath)</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>E:\je\program\lib\c++;$(DXSDK_DIR)\Include;D:\lib\boost;D:\lib\bullet-2.80-rev2531\src;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)lib\x86;$(ProjectDir)lib\release;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\lib\bullet-2.80-rev2531\src;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)lib\x86;$(ProjectDir)lib\release;$(ProjectDir)release;$(LibraryPath)</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

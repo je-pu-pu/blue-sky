@@ -1,4 +1,6 @@
 #include "Direct3D11.h"
+#include "Direct3D11MeshManager.h"
+#include "Direct3D11TextureManager.h"
 #include "DirectX.h"
 
 #include "include/d3dx11effect.h"
@@ -43,8 +45,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	, effect_( 0 )
 	, vertex_layout_( 0 )
 	
-	, constant_buffer_( 0 )
-
 	, device_10_( 0 )
 	, back_buffer_surface_( 0 )
 	, text_texture_( 0 )
@@ -195,20 +195,14 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		DIRECT_X_FAIL_CHECK( device_->CreateDepthStencilView( depth_stencil_texture_, & depth_stencil_view_desc, & depth_stencil_view_ ) );
 	}
 
-	immediate_context_->OMSetRenderTargets( 1, & back_buffer_view_, depth_stencil_view_ );
-
 	// setup_viewport()
 	{
-		D3D11_VIEWPORT viewport;
-    
-		viewport.TopLeftX = 0;
-		viewport.TopLeftY = 0;
-		viewport.Width = static_cast< float >( w );
-		viewport.Height = static_cast< float >( h );
-		viewport.MinDepth = 0.f;
-		viewport.MaxDepth = 1.f;
-
-		immediate_context_->RSSetViewports( 1, & viewport );
+		viewport_.TopLeftX = 0;
+		viewport_.TopLeftY = 0;
+		viewport_.Width = static_cast< float >( w );
+		viewport_.Height = static_cast< float >( h );
+		viewport_.MinDepth = 0.f;
+		viewport_.MaxDepth = 1.f;
 	}
 }
 
@@ -224,8 +218,6 @@ Direct3D11::~Direct3D11()
 	DIRECT_X_RELEASE( back_buffer_surface_ );
 
 	DIRECT_X_RELEASE( device_10_ );
-
-	DIRECT_X_RELEASE( constant_buffer_ );
 
 	DIRECT_X_RELEASE( vertex_layout_ );
 	
@@ -286,6 +278,13 @@ void Direct3D11::load_effect_file( const char* file_path )
 
 	// ?
 	immediate_context_->IASetInputLayout( vertex_layout_ );
+
+
+	// Mesh Manager
+	mesh_manager_ = new Direct3D11MeshManager( this );
+
+	// Texture Manager
+	texture_manager_ = new Direct3D11TextureManager( this );
 }
 
 void Direct3D11::apply_effect()
@@ -301,7 +300,9 @@ void Direct3D11::clear()
 	float clear_color[ 4 ] = { 0.6f, 0.8f, 1.f, 1.f };
 
 	immediate_context_->ClearRenderTargetView( back_buffer_view_, clear_color );
-	immediate_context_->ClearDepthStencilView( depth_stencil_view_, D3D11_CLEAR_DEPTH, 1.0f, 0 );
+	immediate_context_->ClearDepthStencilView( depth_stencil_view_, D3D11_CLEAR_DEPTH, 1.f, 0 );
+	immediate_context_->OMSetRenderTargets( 1, & back_buffer_view_, depth_stencil_view_ );
+	immediate_context_->RSSetViewports( 1, & viewport_ );
 }
 
 void Direct3D11::begin2D()
@@ -323,9 +324,12 @@ void Direct3D11::end3D()
 {
 	// immediate_context_->CopyResource( back_buffer_texture_, text_texture_ );
 
-	DIRECT_X_FAIL_CHECK( swap_chain_->Present( 0, 0 ) );
-
 	DIRECT_X_FAIL_CHECK( text_texture_mutex_11_->ReleaseSync( 0 ) );
+}
+
+void Direct3D11::end()
+{
+	DIRECT_X_FAIL_CHECK( swap_chain_->Present( 0, 0 ) );
 }
 
 void Direct3D11::renderText()
@@ -343,6 +347,26 @@ void Direct3D11::renderText()
 		immediate_context_->PSSetShaderResources( 0, 1, & text_view_ );
 		immediate_context_->Draw( 3, 0 ); // !!!
 	}
+}
+
+void Direct3D11::setDebugViewport()
+{
+	D3D11_TEXTURE2D_DESC texture_desc;
+
+	back_buffer_texture_->GetDesc( & texture_desc );
+	
+	static_cast< float >( texture_desc.Width );
+
+	D3D11_VIEWPORT viewport;
+
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = static_cast< float >( texture_desc.Height ) / 4.f * 3.f;
+	viewport.Width = static_cast< float >( texture_desc.Width ) / 4.f;
+	viewport.Height = static_cast< float >( texture_desc.Height ) / 4.f;
+	viewport.MinDepth = 0.f;
+	viewport.MaxDepth = 1.f;
+
+	immediate_context_->RSSetViewports( 1, & viewport );
 }
 
 void Direct3D11::log_adapter_desc( int index, const DXGI_ADAPTER_DESC1& adapter_desc )

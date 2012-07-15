@@ -35,6 +35,18 @@
       <Filter>DirectX</Filter>
     </ClCompile>
     <ClCompile Include="DrawingModel.cpp" />
+    <ClCompile Include="Direct3D11ShadowMap.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11Rectangle.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11MeshManager.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11TextureManager.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainLoop.h" />
@@ -86,6 +98,18 @@
       <Filter>resource</Filter>
     </ClInclude>
     <ClInclude Include="DrawingModel.h" />
+    <ClInclude Include="Direct3D11ShadowMap.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11Rectangle.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11MeshManager.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11TextureManager.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\main.fx" />

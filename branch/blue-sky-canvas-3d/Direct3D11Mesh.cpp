@@ -44,6 +44,8 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 	PositionList position_list;
 	TexCoordList tex_coord_list;
 
+	std::string texture_file_name;
+
 	while ( in.good() )
 	{		
 		std::string line;		
@@ -116,12 +118,16 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 				}
 			}
 		}
+		else if ( command == "texture" )
+		{
+			ss >> texture_file_name;
+		}
 	}
 
 	create_vertex_buffer();
 	create_index_buffer();
 
-	create_texture_resource_view( file_name );
+	create_texture_resource_view( texture_file_name.c_str() );
 
 	return true;
 }
@@ -156,7 +162,7 @@ void Direct3D11Mesh::create_index_buffer()
 
 void Direct3D11Mesh::create_texture_resource_view( const char* file_name )
 {
-	std::string texture_file_name = "media/model/robot.png"; // boost::filesystem::basename( boost::filesystem::path( file_name ) ) + ".png";
+	std::string texture_file_name = file_name; // boost::filesystem::basename( boost::filesystem::path( file_name ) ) + ".png";
 	// std::string texture_file_name = "media/texture/lines.png";
 	// std::string texture_file_name = "media/texture/pencil-face-3.png";
 	

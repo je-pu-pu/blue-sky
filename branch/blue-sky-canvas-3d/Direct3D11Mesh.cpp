@@ -99,6 +99,7 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 				
 				v.Position = position_list[ position_index ];
 				v.TexCoord = tex_coord_list[ tex_coord_index ];
+				v.TexCoord.y = 1.f - v.TexCoord.y;
 
 				VertexIndexMap::iterator i = vertex_index_map.find( v );
 

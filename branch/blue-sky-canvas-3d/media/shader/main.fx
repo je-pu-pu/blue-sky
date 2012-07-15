@@ -469,12 +469,14 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 
 	if ( input.ShadowTexCoord.z >= sz )
 	{
+		const float4 shadow_color = float4( 0.5f, 0.5f, 0.75f, 1.f );
 		float a = abs( input.ShadowTexCoord.x - 0.5f ) + abs( input.ShadowTexCoord.y - 0.5f ) / 0.5f;
 
 		a = min( a, 1.f );
 		a = 1.f - pow( a, 3 );
 		
-		shadow = float4( 1.f, 1.f, 1.f, 1.f ) * ( 1.f - a ) + float4( 0.5f, 0.5f, 0.75f, 1.f ) * a;
+		
+		shadow = float4( 1.f, 1.f, 1.f, 1.f ) * ( 1.f - a ) + shadow_color * a;
 		shadow.a = 1.f;
 	}
 
@@ -501,7 +503,7 @@ float4 ps_shadow_map_debug( PS_INPUT input ) : SV_Target
 	sz *= 1000.f;
 	sz -= 999.5f;
 
-	return float4( sz, sz, sz, 1.f );
+	return float4( sz, sz, sz, 0.5f );
 }
 
 technique11 shadow_map

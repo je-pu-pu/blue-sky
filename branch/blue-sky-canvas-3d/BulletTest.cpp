@@ -80,14 +80,14 @@ GameMain::GameMain()
 	// mesh_->load_obj( "media/model/tris.obj" );
 	// mesh_->load_obj( "media/model/cube.obj" );
 	// mesh_->load_obj( "media/model/robot.obj" );
-	mesh_->load_obj( "media/model/robot-blender-exported.obj" );
-	// mesh_->load_obj( "media/model/building.obj" );
+	// mesh_->load_obj( "media/model/robot-blender-exported.obj" );
+	mesh_->load_obj( "media/model/building.obj" );
 	// mesh_->load_obj( "media/model/tree-2.obj" );
 
 	model_ = new DrawingModel( direct_3d_.get() );
 	// model_->load_obj( "media/model/tree-2.obj" );
-	// model_->load_obj( "media/model/building-line.obj" );
-	model_->load_obj( "media/model/robot-line.obj" );
+	model_->load_obj( "media/model/building-line.obj" );
+	// model_->load_obj( "media/model/robot-line.obj" );
 	
 	direct_3d_->getMeshManager()->load( "floor", "media/model/floor.obj" );
 
@@ -152,7 +152,7 @@ bool GameMain::update()
 	}
 	
 	// •bŠÔ50ƒtƒŒ[ƒ€‚ð•ÛŽ
-	MainLoop.WaitTime = 0;
+	MainLoop.WaitTime = 20;
 
 	if ( ! MainLoop.Loop() )
 	{
@@ -458,5 +458,5 @@ void GameMain::render_line( const ActiveObject* active_object )
 	frame_constant_buffer_->render( 1 );
 	object_constant_buffer_->render( 2 );
 
-	active_object->get_drawing_model()->render( 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
+	active_object->get_drawing_model()->render( 500 ); // 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
 }

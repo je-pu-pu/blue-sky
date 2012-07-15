@@ -7,8 +7,11 @@
 
 #include <xnamath.h>
 
+XMVECTOR Direct3D11ShadowMap::light_position_;
 XMMATRIX Direct3D11ShadowMap::view_matrix_;
 XMMATRIX Direct3D11ShadowMap::projection_matrix_;
+
+static const float light_y = 500.f;
 
 Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, size_t size )
 	: direct_3d_( direct_3d )
@@ -61,15 +64,7 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, size_t size )
 		viewport_.MaxDepth = 1.f;
 	}
 
-	{
-		XMVECTOR eye = XMVectorSet( 10.f, 20.f, -20.0f, 0.0f );
-		XMVECTOR at = XMVectorSet( 0.0f, 0.0f, 0.f, 0.0f );
-		XMVECTOR up = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
-		
-		view_matrix_ = XMMatrixLookAtLH( eye, at, up );
-		projection_matrix_ = XMMatrixOrthographicLH( 100.f, 100.f, 1.f, 600.f );
-		// projection_matrix_ = XMMatrixPerspectiveFovLH( XM_PIDIV2, 1.f, 0.1f, 600.f );
-	}
+	light_position_ = XMVectorSet( 0.f, 500.f, 0.f, 0.f );
 }
 
 Direct3D11ShadowMap::~Direct3D11ShadowMap()
@@ -77,6 +72,16 @@ Direct3D11ShadowMap::~Direct3D11ShadowMap()
 	DIRECT_X_RELEASE( shader_resource_view_ );
 	DIRECT_X_RELEASE( depth_stencil_view_ );
 	DIRECT_X_RELEASE( depth_stencil_texture_ );
+}
+
+void Direct3D11ShadowMap::setEyePosition( const XMVECTOR& eye )
+{
+	XMVECTOR eye_fix = XMVectorSet( XMVectorGetX( eye ) + XMVectorGetX( light_position_ ), XMVectorGetY( light_position_ ), XMVectorGetZ( eye ) + XMVectorGetZ( light_position_ ), 0.f );
+	XMVECTOR at = XMVectorSet( XMVectorGetX( eye ), 0, XMVectorGetZ( eye ) + 5.f, 0.f );
+	XMVECTOR up = XMVectorSet( 0.f, 0.f, 1.f, 0.f );
+
+	view_matrix_ = XMMatrixLookAtLH( eye_fix, at, up );
+	projection_matrix_ = XMMatrixOrthographicLH( 10.f, 10.f, 50.f, 600.f );
 }
 
 void Direct3D11ShadowMap::render()

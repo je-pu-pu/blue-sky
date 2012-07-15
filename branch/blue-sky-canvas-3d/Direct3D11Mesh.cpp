@@ -33,6 +33,11 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 {
 	std::ifstream in( file_name );
 
+	if ( ! in.good() )
+	{
+		return false;
+	}
+
 	typedef std::map< Vertex, Index > VertexIndexMap;
 	VertexIndexMap vertex_index_map;
 

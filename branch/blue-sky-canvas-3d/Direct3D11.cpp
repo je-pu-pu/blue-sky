@@ -360,9 +360,9 @@ void Direct3D11::setDebugViewport()
 	D3D11_VIEWPORT viewport;
 
 	viewport.TopLeftX = 0;
-	viewport.TopLeftY = static_cast< float >( texture_desc.Height ) / 4.f * 3.f;
-	viewport.Width = static_cast< float >( texture_desc.Width ) / 4.f;
-	viewport.Height = static_cast< float >( texture_desc.Height ) / 4.f;
+	viewport.TopLeftY = static_cast< float >( texture_desc.Height ) / 2.f;
+	viewport.Width = static_cast< float >( texture_desc.Width ) / 2.f;
+	viewport.Height = static_cast< float >( texture_desc.Height ) / 2.f;
 	viewport.MinDepth = 0.f;
 	viewport.MaxDepth = 1.f;
 

@@ -26,7 +26,7 @@ BulletPhysics::BulletPhysics()
 	dynamics_world_->setGravity( btVector3( 0, -9.8f, 0 ) );
 
 	// create_ground_shape()
-	btCollisionShape* ground = new btBoxShape( btVector3( btScalar( 50 ), btScalar( 2 ), btScalar( 50 ) ) );
+	btCollisionShape* ground = new btBoxShape( btVector3( btScalar( 50 ), btScalar( 1 ), btScalar( 50 ) ) );
 	btAlignedObjectArray<btCollisionShape*> collision_shape_list_;
 
 	collision_shape_list_.push_back( ground );

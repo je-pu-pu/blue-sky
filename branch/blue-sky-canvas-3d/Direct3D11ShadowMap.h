@@ -25,8 +25,10 @@ private:
 
 	D3D11_VIEWPORT				viewport_;
 
-	static XMMATRIX					view_matrix_;
-	static XMMATRIX					projection_matrix_;
+	static XMVECTOR				light_position_;			//!< ( 0, 0, 0 ) ‚ðŒü‚­ sun
+
+	static XMMATRIX				view_matrix_;
+	static XMMATRIX				projection_matrix_;
 
 public:
 	Direct3D11ShadowMap( Direct3D11*, size_t );
@@ -35,6 +37,8 @@ public:
 	void render();
 
 	ID3D11ShaderResourceView* getShaderResourceView() { return shader_resource_view_; }
+
+	void setEyePosition( const XMVECTOR& );
 
 	const XMMATRIX& getViewMatrix() const { return view_matrix_; }
 	const XMMATRIX& getProjectionMatrix() const { return projection_matrix_; }

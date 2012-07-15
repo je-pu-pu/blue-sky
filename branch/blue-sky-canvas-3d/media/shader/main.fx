@@ -14,15 +14,26 @@ SamplerState texture_sampler
 //	ComparisonFunc = NEVER;
 };
 
+SamplerState shadow_texture_sampler
+{
+	Filter = ANISOTROPIC;
+    AddressU = BORDER;
+    AddressV = BORDER;
+    AddressW = BORDER;
+	BorderColor = float4( 1.f, 1.f, 1.f, 1.f );
+	ComparisonFunc = NEVER;
+	MaxAnisotropy = 2.f;
+};
+
 cbuffer GameConstantBuffer : register( b0 )
 {
 	matrix Projection;
-	matrix ShadowViewProjection;
 };
 
 cbuffer FrameConstantBuffer : register( b1 )
 {
 	matrix View;
+	matrix ShadowViewProjection;
 	float Time;
 };
 
@@ -100,28 +111,6 @@ PS_INPUT vs_to_ps( VS_INPUT input, uint vertex_id : SV_VertexID )
 		1.f
 	);
 	*/
-
-	return output;
-}
-
-PS_SHADOW_INPUT vs_shadow( VS_INPUT input )
-{
-	PS_SHADOW_INPUT output;
-
-	output.Position = mul( input.Position, World );
-    output.Position = mul( output.Position, View );
-    output.Position = mul( output.Position, Projection );
-	output.TexCoord = input.TexCoord;
-	
-	output.ShadowTexCoord = mul( input.Position, World );
-	output.ShadowTexCoord = mul( output.ShadowTexCoord, ShadowViewProjection );
-	output.ShadowTexCoord /= output.ShadowTexCoord.w;
-
-    output.ShadowTexCoord.x = ( output.ShadowTexCoord.x + 1.f ) / 2.f;
-    output.ShadowTexCoord.y = ( -output.ShadowTexCoord.y + 1.f ) / 2.f;
-
-	// debug
-	// output.ShadowTexCoord = float4( 0.f, 0.f, 0.f, 1.f );
 
 	return output;
 }
@@ -320,19 +309,6 @@ float4 ps( PS_INPUT input ) : SV_Target
 	return model_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
 }
 
-float4 ps_shadow( PS_SHADOW_INPUT input ) : SV_Target
-{
-	float shadow = 1.f;
-	float sz = shadow_texture.Sample( texture_sampler, input.ShadowTexCoord.xy );
-
-	if ( input.ShadowTexCoord.z < sz )
-	{
-		shadow = 0.25f;
-	}
-
-	return model_texture.Sample( texture_sampler, input.TexCoord ) * float4( shadow, shadow, shadow, 1.f );
-}
-
 float4 ps_line( noperspective PS_INPUT input ) : SV_Target
 {
 	input.Color.a = 0.f;
@@ -369,9 +345,19 @@ DepthStencilState WriteDepth
 	DepthWriteMask = ALL;
 };
 
+RasterizerState Default
+{
+	CullMode = BACK;
+};
+
 RasterizerState WireFrame
 {
 	FILLMODE = WIREFRAME;
+};
+
+RasterizerState Shadow
+{
+	CullMode = NONE;
 };
 
 technique11 main
@@ -384,6 +370,8 @@ technique11 main
         SetVertexShader( CompileShader( vs_4_0, vs_to_ps() ) );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, ps() ) );
+
+		RASTERIZERSTATE = Default;
     }
 }
 
@@ -453,6 +441,46 @@ technique11 bullet
 // for Shadow Map
 // ----------------------------------------
 
+PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
+{
+	PS_SHADOW_INPUT output;
+
+	output.Position = mul( input.Position, World );
+    output.Position = mul( output.Position, View );
+    output.Position = mul( output.Position, Projection );
+	output.TexCoord = input.TexCoord;
+	
+	output.ShadowTexCoord = mul( input.Position, World );
+	output.ShadowTexCoord = mul( output.ShadowTexCoord, ShadowViewProjection );
+	
+	output.ShadowTexCoord /= output.ShadowTexCoord.w;
+	
+    output.ShadowTexCoord.x = ( output.ShadowTexCoord.x + 1.f ) / 2.f;
+    output.ShadowTexCoord.y = ( -output.ShadowTexCoord.y + 1.f ) / 2.f;
+	output.ShadowTexCoord.z -= 0.001f;
+
+	return output;
+}
+
+float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
+{
+	float4 shadow = float4( 1.f, 1.f, 1.f, 1.f );
+	float sz = shadow_texture.Sample( shadow_texture_sampler, input.ShadowTexCoord.xy );
+
+	if ( input.ShadowTexCoord.z >= sz )
+	{
+		float a = abs( input.ShadowTexCoord.x - 0.5f ) + abs( input.ShadowTexCoord.y - 0.5f ) / 0.5f;
+
+		a = min( a, 1.f );
+		a = 1.f - pow( a, 3 );
+		
+		shadow = float4( 1.f, 1.f, 1.f, 1.f ) * ( 1.f - a ) + float4( 0.5f, 0.5f, 0.75f, 1.f ) * a;
+		shadow.a = 1.f;
+	}
+
+	return model_texture.Sample( texture_sampler, input.TexCoord ) * shadow;
+}
+
 PS_INPUT vs_shadow_map( VS_INPUT input )
 {
 	PS_INPUT output;
@@ -486,6 +514,23 @@ technique11 shadow_map
 		SetVertexShader( CompileShader( vs_4_0, vs_shadow_map() ) );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps() ) );
+
+		RASTERIZERSTATE = Shadow;
+	}
+}
+
+technique11 main_with_shadow
+{
+	pass main
+	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_with_shadow() ) );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
+
+		RASTERIZERSTATE = Default;
 	}
 }
 

@@ -2,6 +2,7 @@
 #include "App.h"
 
 #include "Direct3D11.h"
+#include "Direct3D11MeshManager.h"
 #include "Direct3D11Mesh.h"
 #include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11ShadowMap.h"
@@ -36,12 +37,12 @@
 struct GameConstantBuffer
 {
 	XMMATRIX projection;
-	XMMATRIX shadow_view_projection;
 };
 
 struct FrameConstantBuffer
 {
 	XMMATRIX view;
+	XMMATRIX shadow_view_projection;
 	float time;
 };
 
@@ -51,11 +52,10 @@ struct ObjectConstantBuffer
 };
 
 Direct3D11Mesh* mesh_ = 0;
+Direct3D11Mesh* floor_mesh_ = 0;
 Direct3D11Rectangle* rectangle_ = 0;
 
 DrawingModel* model_ = 0;
-
-
 
 //■コンストラクタ
 GameMain::GameMain()
@@ -89,19 +89,19 @@ GameMain::GameMain()
 	// model_->load_obj( "media/model/building-line.obj" );
 	model_->load_obj( "media/model/robot-line.obj" );
 	
+	direct_3d_->getMeshManager()->load( "floor", "media/model/floor.obj" );
+
 	game_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( GameConstantBuffer ) );
 	frame_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( FrameConstantBuffer ) );
 	object_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( ObjectConstantBuffer ) );
 
-	shadow_map_ = new Direct3D11ShadowMap( direct_3d_.get(), 256 );
+	shadow_map_ = new Direct3D11ShadowMap( direct_3d_.get(), 1024 );
 
 	{
 		GameConstantBuffer constant_buffer;
 		constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.1f, 100.f );
 		constant_buffer.projection = XMMatrixTranspose( constant_buffer.projection );
-		constant_buffer.shadow_view_projection = shadow_map_->getViewMatrix() * shadow_map_->getProjectionMatrix();
-		constant_buffer.shadow_view_projection = XMMatrixTranspose( constant_buffer.shadow_view_projection );
-
+		
 		game_constant_buffer_->update( & constant_buffer );
 	}
 	
@@ -257,7 +257,12 @@ void GameMain::render()
 #if 1
 		// render_object_for_shadow()
 		{
+			shadow_map_->setEyePosition( eye );
+
 			frame_constant_buffer.view = XMMatrixTranspose( shadow_map_->getViewMatrix() );
+			frame_constant_buffer.shadow_view_projection = shadow_map_->getViewMatrix() * shadow_map_->getProjectionMatrix();
+			frame_constant_buffer.shadow_view_projection = XMMatrixTranspose( frame_constant_buffer.shadow_view_projection );
+
 			frame_constant_buffer_->update( & frame_constant_buffer );
 
 			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|shadow_map" );
@@ -300,7 +305,7 @@ void GameMain::render()
 
 		// render_object();
 		{
-			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|main" );
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|main_with_shadow" );
 
 			D3DX11_TECHNIQUE_DESC technique_desc;
 			technique->GetDesc( & technique_desc );
@@ -309,7 +314,22 @@ void GameMain::render()
 			{
 				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
 				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
-		
+				
+				ID3D11ShaderResourceView* shader_resource_view = shadow_map_->getShaderResourceView();
+				direct_3d_->getImmediateContext()->PSSetShaderResources( 1, 1, & shader_resource_view );
+
+				{
+					ObjectConstantBuffer buffer;
+					buffer.world = XMMatrixIdentity();
+					object_constant_buffer_->update( & buffer );
+
+					game_constant_buffer_->render( 0 );
+					frame_constant_buffer_->render( 1 );
+					object_constant_buffer_->render( 2 );
+
+					direct_3d_->getMeshManager()->get( "floor" )->render();
+				}
+
 				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
 				{
 					render( *i );
@@ -317,6 +337,7 @@ void GameMain::render()
 			}
 		}
 
+#if 1
 		// render_object_line();
 		{
 			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|drawing_line" );
@@ -335,6 +356,7 @@ void GameMain::render()
 				}
 			}
 		}
+#endif
 
 #if 1
 		// render_bullet_debug();
@@ -365,25 +387,6 @@ void GameMain::render()
 
 #endif
 
-#if 0
-		// render_debug_shadow_map()
-		{
-			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|shadow_map" );
-
-			D3DX11_TECHNIQUE_DESC technique_desc;
-			technique->GetDesc( & technique_desc );
-
-			for ( UINT n = 0; n < technique_desc.Passes; n++ )
-			{
-				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
-				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
-				
-				rectangle_->set_shader_resource_view( shadow_map_->getShaderResourceView() );
-				rectangle_->render();
-			}
-		}
-#endif
-
 #if 1
 		// render_debug_shadow_map()
 		{
@@ -400,7 +403,6 @@ void GameMain::render()
 				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
 				
 				rectangle_->set_shader_resource_view( shadow_map_->getShaderResourceView() );
-				// rectangle_->set_shader_resource_view( mesh_->get_shader_resource_view() );
 				rectangle_->render();
 			}
 		}

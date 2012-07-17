@@ -114,21 +114,42 @@ GameMain::GameMain()
 	drawing_model_manager_ = new DrawingModelManager();
 
 	{
-		DrawingModel* drawing_model = get_drawing_model_manager()->load( "building" );
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "floor" );
 
-		StaticObject* static_object = new StaticObject();
-		static_object->set_drawing_model( drawing_model );
+		for ( int n = 0; n < 10; n++ )
+		{
+			StaticObject* static_object = new StaticObject();
+			static_object->set_drawing_model( drawing_model );
+			static_object->set_location( 0, 0, n * 20 );
 
-		active_object_manager_->add_active_object( static_object );
+			active_object_manager_->add_active_object( static_object );
+		}
 	}
 
 	{
-		DrawingModel* drawing_model = get_drawing_model_manager()->load( "floor" );
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "building" );
 
-		StaticObject* static_object = new StaticObject();
-		static_object->set_drawing_model( drawing_model );
+		for ( int n = 0; n < 10; n++ )
+		{
+			StaticObject* static_object = new StaticObject();
+			static_object->set_drawing_model( drawing_model );
+			static_object->set_location( -10.f, 0, n * 12.f );
 
-		active_object_manager_->add_active_object( static_object );
+			active_object_manager_->add_active_object( static_object );
+		}
+	}
+
+	{
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "tree-1" );
+
+		for ( int n = 0; n < 20; n++ )
+		{
+			StaticObject* static_object = new StaticObject();
+			static_object->set_drawing_model( drawing_model );
+			static_object->set_location( 5.f + rand() % 3, 0, n * 5.f + rand() % 2 );
+
+			active_object_manager_->add_active_object( static_object );
+		}
 	}
 }
 
@@ -203,6 +224,7 @@ bool GameMain::update()
 		{
 			Robot* robot = new Robot();
 			robot->set_drawing_model( get_drawing_model_manager()->load( "robot" ) );
+			robot->set_location( XMVectorGetX( eye ), 20, XMVectorGetZ( eye ) + 15 );
 
 			active_object_manager_->add_active_object( robot );
 			robot->set_rigid_body( physics_->add_active_object( & robot->get_transform() ) );

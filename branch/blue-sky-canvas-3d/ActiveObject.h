@@ -1,6 +1,8 @@
 #ifndef BLUE_SKY_ACTIVE_OBJECT_H
 #define BLUE_SKY_ACTIVE_OBJECT_H
 
+#include "type.h"
+
 class btRigidBody;
 class btTransform;
 
@@ -47,6 +49,8 @@ public:
 	const DrawingModel* get_drawing_model() const { return drawing_model_; }
 
 	void set_rigid_body( RigidBody* rigid_body ) { rigid_body_ = rigid_body; }
+
+	void set_location( float_t, float_t, float_t );
 
 	Transform& get_transform();
 	const Transform& get_transform() const;

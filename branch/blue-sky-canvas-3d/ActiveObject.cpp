@@ -27,6 +27,11 @@ void ActiveObject::update_transform()
 	// transform_->getOrigin().
 }
 
+void ActiveObject::set_location( float_t x, float_t y, float_t z )
+{
+	get_transform().getOrigin().setValue( x, y, z );
+}
+
 ActiveObject::Transform& ActiveObject::get_transform()
 {
 	return * transform_;

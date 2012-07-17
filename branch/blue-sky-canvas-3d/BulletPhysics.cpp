@@ -26,7 +26,7 @@ BulletPhysics::BulletPhysics()
 	dynamics_world_->setGravity( btVector3( 0, -9.8f, 0 ) );
 
 	// create_ground_shape()
-	btCollisionShape* ground = new btBoxShape( btVector3( btScalar( 50 ), btScalar( 1 ), btScalar( 50 ) ) );
+	btCollisionShape* ground = new btBoxShape( btVector3( btScalar( 200 ), btScalar( 1 ), btScalar( 200 ) ) );
 	btAlignedObjectArray<btCollisionShape*> collision_shape_list_;
 
 	collision_shape_list_.push_back( ground );
@@ -109,20 +109,12 @@ btRigidBody* BulletPhysics::add_active_object( btTransform* transform )
 
 	// create_box_rigid_body()
 	{
-		btTransform transform;
-		transform.setIdentity();
-		transform.setOrigin( btVector3( 0, 30, 3 ) );
-
-		// btQuaternion quaternion( 3.141592f / 4.f, 0, 3.141592f / 4.f );
-		btQuaternion quaternion( 3.141592f, 0, 3.141592f / 16.f );
-		transform.setRotation( quaternion );
-
 		btScalar mass( 1.f );
 		btVector3 local_inertia( 0, 0, 0 );
 
 		shape->calculateLocalInertia( mass, local_inertia );
 
-		btDefaultMotionState* motion_state = new btDefaultMotionState( transform );
+		btDefaultMotionState* motion_state = new btDefaultMotionState( * transform );
 		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );
 	
 		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );

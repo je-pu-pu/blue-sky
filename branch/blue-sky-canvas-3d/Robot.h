@@ -27,9 +27,9 @@ public:
 	/// XV
 	void update();
 	
-	float get_collision_width() const { return 4.f; }
-	float get_collision_height() const { return 8.f; }
-	float get_collision_depth() const  { return 2.f; }
+	float get_collision_width() const { return 1.f; }
+	float get_collision_height() const { return 2.f; }
+	float get_collision_depth() const  { return 0.5f; }
 
 }; // class Robot
 

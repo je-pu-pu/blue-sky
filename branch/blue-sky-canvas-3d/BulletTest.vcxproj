@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="ActiveObject.cpp" />
     <ClCompile Include="ActiveObjectManager.cpp" />
+    <ClCompile Include="ActiveObjectPhysics.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />
     <ClCompile Include="BulletTest.cpp" />
@@ -38,6 +39,7 @@
   <ItemGroup>
     <ClInclude Include="ActiveObject.h" />
     <ClInclude Include="ActiveObjectManager.h" />
+    <ClInclude Include="ActiveObjectPhysics.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="BulletTest.h" />

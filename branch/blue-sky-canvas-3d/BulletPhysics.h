@@ -25,7 +25,7 @@ public:
 	BulletPhysics();
 	~BulletPhysics();
 
-	btRigidBody* add_active_object( btTransform* );
+	btRigidBody* add_box_rigid_body( const btVector3&, const btTransform& );
 
 	void update( float = 1.f / 60.f );
 	

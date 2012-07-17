@@ -6,9 +6,9 @@ SamplerState texture_sampler
 {
 	Filter = ANISOTROPIC; // MIN_POINT_MAG_LINEAR_MIP_POINT;
 //	Filter = MIN_MAG_MIP_LINEAR;
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-    AddressW = CLAMP;
+    AddressU = Wrap;
+    AddressV = Wrap;
+    AddressW = Wrap;
 //	MinLOD = 5.f;
 //	MaxLOD = FLOAT32_MAX;
 //	ComparisonFunc = NEVER;

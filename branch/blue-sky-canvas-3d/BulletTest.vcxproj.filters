@@ -54,6 +54,9 @@
     <ClCompile Include="ActiveObjectManager.cpp">
       <Filter>ActiveObject</Filter>
     </ClCompile>
+    <ClCompile Include="ActiveObjectPhysics.cpp">
+      <Filter>Bullet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainLoop.h" />
@@ -125,6 +128,9 @@
       <Filter>ActiveObject</Filter>
     </ClInclude>
     <ClInclude Include="type.h" />
+    <ClInclude Include="ActiveObjectPhysics.h">
+      <Filter>Bullet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\main.fx" />

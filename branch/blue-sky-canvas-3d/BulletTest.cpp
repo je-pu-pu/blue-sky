@@ -12,7 +12,6 @@
 
 #include "DirectWrite.h"
 
-#include "BulletPhysics.h"
 #include "Direct3D11BulletDebugDraw.h"
 
 #include "DirectInput.h"
@@ -21,6 +20,8 @@
 #include "Robot.h"
 #include "StaticObject.h"
 #include "ActiveObjectManager.h"
+
+#include "ActiveObjectPhysics.h"
 
 #include "DrawingModelManager.h"
 #include "DrawingModel.h"
@@ -97,7 +98,7 @@ GameMain::GameMain()
 	direct_write_ = new DirectWrite( direct_3d_->getTextSurface() );
 	*/
 
-	physics_ = new BulletPhysics();
+	physics_ = new ActiveObjectPhysics();
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
 	bullet_debug_draw_->setDebugMode( btIDebugDraw::DBG_DrawWireframe );
 
@@ -224,10 +225,10 @@ bool GameMain::update()
 		{
 			Robot* robot = new Robot();
 			robot->set_drawing_model( get_drawing_model_manager()->load( "robot" ) );
-			robot->set_location( XMVectorGetX( eye ), 20, XMVectorGetZ( eye ) + 15 );
+			robot->set_location( XMVectorGetX( eye ), 30, XMVectorGetZ( eye ) + 3 );
 
 			active_object_manager_->add_active_object( robot );
-			robot->set_rigid_body( physics_->add_active_object( & robot->get_transform() ) );
+			robot->set_rigid_body( physics_->add_active_object( robot ) );
 		}
 	}
 
@@ -289,7 +290,7 @@ void GameMain::render()
 
 #if 1
 		// render_object_for_shadow()
-		if ( rand() % 20 == 0 )
+		// if ( rand() % 4 == 0 )
 		{
 			shadow_map_->setEyePosition( eye );
 

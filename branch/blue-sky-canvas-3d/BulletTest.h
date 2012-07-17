@@ -13,9 +13,6 @@ class DirectWrite;
 
 class DirectInput;
 
-class BulletPhysics;
-
-
 namespace game
 {
 	class Config;
@@ -24,6 +21,8 @@ namespace game
 namespace blue_sky
 {
 	class Input;
+
+	class ActiveObjectPhysics;
 
 	class ActiveObject;
 	class ActiveObjectManager;
@@ -40,7 +39,7 @@ class GameMain : public Game
 {
 public:
 	typedef Direct3D11			Direct3D;
-	typedef BulletPhysics		Physics;
+	typedef ActiveObjectPhysics	Physics;
 
 protected:
 	auto_ptr< Direct3D >		direct_3d_;				///< Direct3D

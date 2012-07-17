@@ -82,30 +82,11 @@ BulletPhysics::~BulletPhysics()
 	delete collision_configuration_;
 }
 
-btRigidBody* BulletPhysics::add_active_object( btTransform* transform )
+btRigidBody* BulletPhysics::add_box_rigid_body( const btVector3& box, const btTransform& transform )
 {
 	// create_box_shape()
-	// btCompoundShape* shape = new btCompoundShape();
-	// btSphereShape* box = new btSphereShape( 1 );
-	// btBoxShape* box = new btBoxShape( btVector3( 1.5, 4, 0.75 ) );
-
-	btBoxShape* shape = new btBoxShape( btVector3( 1.5, 4, 0.75 ) );
-
-	{
-		collision_shape_list_.push_back( shape );
-		// collision_shape_list_.push_back( box );
-	}
-
-	/*
-	{
-		btTransform transform;
-		transform.setIdentity();
-		transform.setOrigin( btVector3( 0, 4, 0 ) );
-
-		// shape->addChildShape( transform, box );
-		// shape->createAabbTreeFromChildren();
-	}
-	*/
+	btBoxShape* shape = new btBoxShape( box ); // btVector3( 1.5, 4, 0.75 ) );
+	collision_shape_list_.push_back( shape );
 
 	// create_box_rigid_body()
 	{
@@ -114,7 +95,7 @@ btRigidBody* BulletPhysics::add_active_object( btTransform* transform )
 
 		shape->calculateLocalInertia( mass, local_inertia );
 
-		btDefaultMotionState* motion_state = new btDefaultMotionState( * transform );
+		btDefaultMotionState* motion_state = new btDefaultMotionState( transform );
 		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );
 	
 		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );

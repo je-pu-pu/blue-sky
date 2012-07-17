@@ -85,7 +85,7 @@ public:
 
 	void renderText();
 
-	void setDebugViewport();
+	void setDebugViewport( float, float, float, float );
 
 	/** BAD functions */
 	inline ID3D11Device* getDevice() const { return device_; }

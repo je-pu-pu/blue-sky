@@ -64,7 +64,7 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, size_t size )
 		viewport_.MaxDepth = 1.f;
 	}
 
-	light_position_ = XMVectorSet( 25.f, 500.f, -5.f, 0.f );
+	light_position_ = XMVectorSet( 50.f, 500.f, -25.f, 0.f );
 }
 
 Direct3D11ShadowMap::~Direct3D11ShadowMap()

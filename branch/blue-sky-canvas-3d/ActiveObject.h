@@ -1,9 +1,6 @@
 #ifndef BLUE_SKY_ACTIVE_OBJECT_H
 #define BLUE_SKY_ACTIVE_OBJECT_H
 
-class Direct3D11Mesh;
-class DrawingModel;
-
 class btRigidBody;
 class btTransform;
 
@@ -14,6 +11,8 @@ class Input;
 class Stage;
 class GridCell;
 
+class DrawingModel;
+
 /**
  * 行動するオブジェクト
  *
@@ -21,12 +20,10 @@ class GridCell;
 class ActiveObject
 {
 public:
-	typedef Direct3D11Mesh Mesh;
 	typedef btTransform Transform;
 	typedef btRigidBody RigidBody;
 
 private:
-	const Mesh*			mesh_;				///< Mesh
 	const DrawingModel*	drawing_model_;		///< DrawingModel
 
 	RigidBody*			rigid_body_;		///< RigidBody
@@ -45,9 +42,6 @@ public:
 	virtual float get_collision_width() const = 0;
 	virtual float get_collision_height() const = 0;
 	virtual float get_collision_depth() const = 0;
-
-	void set_mesh( const Mesh* m ) { mesh_ = m; }
-	const Mesh* get_mesh() const { return mesh_; }
 
 	void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; }
 	const DrawingModel* get_drawing_model() const { return drawing_model_; }

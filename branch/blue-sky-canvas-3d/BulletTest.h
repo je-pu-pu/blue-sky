@@ -27,6 +27,9 @@ namespace blue_sky
 
 	class ActiveObject;
 	class ActiveObjectManager;
+
+	class DrawingModel;
+	class DrawingModelManager;
 };
 
 using namespace game;
@@ -35,9 +38,13 @@ using common::auto_ptr;
 
 class GameMain : public Game
 {
+public:
+	typedef Direct3D11			Direct3D;
+	typedef BulletPhysics		Physics;
+
 protected:
-	auto_ptr< Direct3D11 >		direct_3d_;				///< Direct3D
-	auto_ptr< BulletPhysics >	physics_;				///< Bullet
+	auto_ptr< Direct3D >		direct_3d_;				///< Direct3D
+	auto_ptr< Physics >			physics_;				///< Physics
 
 	auto_ptr< DirectInput >		direct_input_;			///< DirectInput
 	auto_ptr< Input >			input_;					///< Game Input
@@ -46,6 +53,8 @@ protected:
 	auto_ptr< Config >			save_data_;				///< Save Data
 
 	auto_ptr< ActiveObjectManager >			active_object_manager_;	///< ActiveObjectManager
+
+	auto_ptr< DrawingModelManager >			drawing_model_manager_;	///< DrawingModelManager
 
 	auto_ptr< Direct3D11ConstantBuffer >	game_constant_buffer_;
 	auto_ptr< Direct3D11ConstantBuffer >	frame_constant_buffer_;
@@ -65,8 +74,25 @@ public:
 
 	bool update();
 	void render();
+
+	Direct3D* get_direct_3d() const { return direct_3d_.get(); }
+	Input* get_input() const { return input_.get(); }
+	// SoundManager* get_sound_manager() const { return sound_manager_.get(); }
+	
+	// GridDataManager* get_grid_data_manager() const { return grid_data_manager_.get(); }
+	// GridObjectManager* get_grid_object_manager() const { return grid_object_manager_.get(); }
+
+	ActiveObjectManager* get_active_object_manager() const { return active_object_manager_.get(); }
+
+	DrawingModelManager* get_drawing_model_manager() const { return drawing_model_manager_.get(); }
+	
+	Config* get_config() const { return config_.get(); }
+	Config* get_save_data() const { return save_data_.get(); }
+
+	inline static GameMain* get_instance() { static GameMain game_main; return & game_main; }
 };
 
-inline Game* Game::getInstance() { static GameMain game_main; return & game_main; }
+inline Game* Game::getInstance() { return GameMain::get_instance(); }
+
 
 #endif // GAME_MAIN_H

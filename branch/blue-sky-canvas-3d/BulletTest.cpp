@@ -19,7 +19,13 @@
 #include "Input.h"
 
 #include "Robot.h"
+#include "StaticObject.h"
 #include "ActiveObjectManager.h"
+
+#include "DrawingModelManager.h"
+#include "DrawingModel.h"
+// #include "DrawingMesh.h"
+#include "DrawingLine.h"
 
 #include "include/d3dx11effect.h"
 
@@ -51,11 +57,7 @@ struct ObjectConstantBuffer
 	XMMATRIX world;
 };
 
-Direct3D11Mesh* mesh_ = 0;
-Direct3D11Mesh* floor_mesh_ = 0;
 Direct3D11Rectangle* rectangle_ = 0;
-
-DrawingModel* model_ = 0;
 
 //■コンストラクタ
 GameMain::GameMain()
@@ -74,22 +76,6 @@ GameMain::GameMain()
 	direct_3d_ = new Direct3D11( get_app()->GetWindowHandle(), get_app()->get_width(), get_app()->get_height(), false );
 	direct_3d_->load_effect_file( "media/shader/main.fx" );
 	direct_3d_->apply_effect();
-
-	mesh_ = new Direct3D11Mesh( direct_3d_.get() );
-	// mesh_->load_obj( "media/model/tri.obj" );
-	// mesh_->load_obj( "media/model/tris.obj" );
-	// mesh_->load_obj( "media/model/cube.obj" );
-	// mesh_->load_obj( "media/model/robot.obj" );
-	// mesh_->load_obj( "media/model/robot-blender-exported.obj" );
-	mesh_->load_obj( "media/model/building.obj" );
-	// mesh_->load_obj( "media/model/tree-2.obj" );
-
-	model_ = new DrawingModel( direct_3d_.get() );
-	// model_->load_obj( "media/model/tree-2.obj" );
-	model_->load_obj( "media/model/building-line.obj" );
-	// model_->load_obj( "media/model/robot-line.obj" );
-	
-	direct_3d_->getMeshManager()->load( "floor", "media/model/floor.obj" );
 
 	game_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( GameConstantBuffer ) );
 	frame_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( FrameConstantBuffer ) );
@@ -124,13 +110,31 @@ GameMain::GameMain()
 
 	// ActiveObjectManager
 	active_object_manager_ = new ActiveObjectManager();
+
+	drawing_model_manager_ = new DrawingModelManager();
+
+	{
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "building" );
+
+		StaticObject* static_object = new StaticObject();
+		static_object->set_drawing_model( drawing_model );
+
+		active_object_manager_->add_active_object( static_object );
+	}
+
+	{
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "floor" );
+
+		StaticObject* static_object = new StaticObject();
+		static_object->set_drawing_model( drawing_model );
+
+		active_object_manager_->add_active_object( static_object );
+	}
 }
 
 //■デストラクタ
 GameMain::~GameMain()
 {
-	delete mesh_;
-	delete model_;
 	delete rectangle_;
 }
 
@@ -152,7 +156,7 @@ bool GameMain::update()
 	}
 	
 	// 秒間50フレームを保持
-	MainLoop.WaitTime = 20;
+	MainLoop.WaitTime = 0;
 
 	if ( ! MainLoop.Loop() )
 	{
@@ -186,12 +190,19 @@ bool GameMain::update()
 		{
 			eye += XMVectorSet( 0.f, 0.0f, -0.01f, 0.f );
 		}
+		if ( input_->press( Input::X ) )
+		{
+			eye += XMVectorSet( 0.f, +0.01f, 0.f, 0.f );
+		}
+		if ( input_->press( Input::Y ) )
+		{
+			eye += XMVectorSet( 0.f, -0.01f, 0.f, 0.f );
+		}
 
 		if ( input_->push( Input::A ) )
 		{
 			Robot* robot = new Robot();
-			robot->set_mesh( mesh_ );
-			robot->set_drawing_model( model_ );
+			robot->set_drawing_model( get_drawing_model_manager()->load( "robot" ) );
 
 			active_object_manager_->add_active_object( robot );
 			robot->set_rigid_body( physics_->add_active_object( & robot->get_transform() ) );
@@ -256,6 +267,7 @@ void GameMain::render()
 
 #if 1
 		// render_object_for_shadow()
+		if ( rand() % 20 == 0 )
 		{
 			shadow_map_->setEyePosition( eye );
 
@@ -326,8 +338,6 @@ void GameMain::render()
 					game_constant_buffer_->render( 0 );
 					frame_constant_buffer_->render( 1 );
 					object_constant_buffer_->render( 2 );
-
-					direct_3d_->getMeshManager()->get( "floor" )->render();
 				}
 
 				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
@@ -390,7 +400,7 @@ void GameMain::render()
 #if 1
 		// render_debug_shadow_map()
 		{
-			direct_3d_->setDebugViewport();
+			direct_3d_->setDebugViewport( 0.f, 0, get_width() / 4.f, get_height() / 4.f );
 
 			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|main2d" );
 
@@ -436,7 +446,7 @@ void GameMain::render( const ActiveObject* active_object )
 	frame_constant_buffer_->render( 1 );
 	object_constant_buffer_->render( 2 );
 
-	active_object->get_mesh()->render();
+	active_object->get_drawing_model()->get_mesh()->render();
 }
 
 void GameMain::render_line( const ActiveObject* active_object )
@@ -458,5 +468,5 @@ void GameMain::render_line( const ActiveObject* active_object )
 	frame_constant_buffer_->render( 1 );
 	object_constant_buffer_->render( 2 );
 
-	active_object->get_drawing_model()->render( 500 ); // 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
+	active_object->get_drawing_model()->get_line()->render( 500 ); // 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
 }

@@ -349,20 +349,14 @@ void Direct3D11::renderText()
 	}
 }
 
-void Direct3D11::setDebugViewport()
+void Direct3D11::setDebugViewport( float x, float y, float w, float h )
 {
-	D3D11_TEXTURE2D_DESC texture_desc;
-
-	back_buffer_texture_->GetDesc( & texture_desc );
-	
-	static_cast< float >( texture_desc.Width );
-
 	D3D11_VIEWPORT viewport;
 
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = static_cast< float >( texture_desc.Height ) / 2.f;
-	viewport.Width = static_cast< float >( texture_desc.Width ) / 2.f;
-	viewport.Height = static_cast< float >( texture_desc.Height ) / 2.f;
+	viewport.TopLeftX = x;
+	viewport.TopLeftY = y;
+	viewport.Width = w;
+	viewport.Height = h;
 	viewport.MinDepth = 0.f;
 	viewport.MaxDepth = 1.f;
 

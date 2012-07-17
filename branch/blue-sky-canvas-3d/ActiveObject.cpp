@@ -9,6 +9,7 @@ ActiveObject::ActiveObject()
 	, transform_( 0 )
 {
 	transform_ = new Transform();
+	transform_->setIdentity();
 }
 
 ActiveObject::~ActiveObject()
@@ -18,7 +19,10 @@ ActiveObject::~ActiveObject()
 
 void ActiveObject::update_transform()
 {
-	rigid_body_->getMotionState()->getWorldTransform( * transform_ );
+	if ( rigid_body_ )
+	{
+		rigid_body_->getMotionState()->getWorldTransform( * transform_ );
+	}
 
 	// transform_->getOrigin().
 }

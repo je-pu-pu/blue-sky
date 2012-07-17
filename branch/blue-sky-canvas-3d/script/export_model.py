@@ -30,7 +30,7 @@ def export_model():
 	try:
 		to = bpy.data.texts[ "exported_model" ]
 	except:
-		to = bpy.data.texts.new( "exported_model" )			
+		to = bpy.data.texts.new( "exported_model" )
 		
 	to.clear()
 	to.write( output )

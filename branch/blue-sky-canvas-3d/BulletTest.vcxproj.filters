@@ -5,7 +5,6 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainLoop.cpp" />
     <ClCompile Include="BulletTest.cpp" />
-    <ClCompile Include="ActiveObjectManager.cpp" />
     <ClCompile Include="ActiveObject.cpp">
       <Filter>ActiveObject</Filter>
     </ClCompile>
@@ -47,12 +46,19 @@
     <ClCompile Include="Direct3D11TextureManager.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
+    <ClCompile Include="StaticeObject.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawingLine.cpp" />
+    <ClCompile Include="DrawingModelManager.cpp" />
+    <ClCompile Include="ActiveObjectManager.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="BulletTest.h" />
-    <ClInclude Include="ActiveObjectManager.h" />
     <ClInclude Include="ActiveObject.h">
       <Filter>ActiveObject</Filter>
     </ClInclude>
@@ -110,6 +116,15 @@
     <ClInclude Include="Direct3D11TextureManager.h">
       <Filter>DirectX</Filter>
     </ClInclude>
+    <ClInclude Include="StaticObject.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawingLine.h" />
+    <ClInclude Include="DrawingModelManager.h" />
+    <ClInclude Include="ActiveObjectManager.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="type.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\main.fx" />

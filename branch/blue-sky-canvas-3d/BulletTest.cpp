@@ -28,6 +28,9 @@
 // #include "DrawingMesh.h"
 #include "DrawingLine.h"
 
+#include "SoundManager.h"
+#include "Sound.h"
+
 #include "include/d3dx11effect.h"
 
 #include "DirectX.h"
@@ -101,6 +104,7 @@ GameMain::GameMain()
 	physics_ = new ActiveObjectPhysics();
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
 	bullet_debug_draw_->setDebugMode( btIDebugDraw::DBG_DrawWireframe );
+	bullet_debug_draw_->setDebugMode( 0 );
 
 	physics_->setDebugDrawer( bullet_debug_draw_.get() );
 
@@ -108,6 +112,11 @@ GameMain::GameMain()
 	input_ = new Input();
 	input_->set_direct_input( direct_input_.get() );
 	input_->load_config( * config_.get() );
+
+	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
+	
+	get_sound_manager()->load_music( "bgm", "tower" );
+	get_sound_manager()->get_sound( "bgm" )->play( true );
 
 	// ActiveObjectManager
 	active_object_manager_ = new ActiveObjectManager();
@@ -134,7 +143,7 @@ GameMain::GameMain()
 		{
 			StaticObject* static_object = new StaticObject();
 			static_object->set_drawing_model( drawing_model );
-			static_object->set_location( -10.f, 0, n * 12.f );
+			static_object->set_location( 10.f, 0, n * 12.f );
 
 			active_object_manager_->add_active_object( static_object );
 		}
@@ -147,7 +156,30 @@ GameMain::GameMain()
 		{
 			StaticObject* static_object = new StaticObject();
 			static_object->set_drawing_model( drawing_model );
-			static_object->set_location( 5.f + rand() % 3, 0, n * 5.f + rand() % 2 );
+			static_object->set_location( -5.f + rand() % 3, 0, n * 5.f + rand() % 2 );
+
+			active_object_manager_->add_active_object( static_object );
+		}
+	}
+
+	{
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "rocket" );
+
+		StaticObject* static_object = new StaticObject();
+		static_object->set_drawing_model( drawing_model );
+		static_object->set_location( 0, 0, 0 );
+
+		active_object_manager_->add_active_object( static_object );
+	}
+
+	{
+		for ( int n = 0; n < 10; n++ )
+		{
+			DrawingModel* drawing_model = get_drawing_model_manager()->load( "balloon" );
+
+			StaticObject* static_object = new StaticObject();
+			static_object->set_drawing_model( drawing_model );
+			static_object->set_location( rand() % 3, 3 + n * 3, n * 3 );
 
 			active_object_manager_->add_active_object( static_object );
 		}
@@ -184,6 +216,10 @@ bool GameMain::update()
 	{
 		return false;
 	}
+
+	/// @todo •ÊƒXƒŒƒbƒh‰»
+	get_sound_manager()->update();
+	
 
 	if ( get_app()->is_active() )
 	{
@@ -225,7 +261,7 @@ bool GameMain::update()
 		{
 			Robot* robot = new Robot();
 			robot->set_drawing_model( get_drawing_model_manager()->load( "robot" ) );
-			robot->set_location( XMVectorGetX( eye ), 30, XMVectorGetZ( eye ) + 3 );
+			robot->set_location( XMVectorGetX( eye ), 30, XMVectorGetZ( eye ) + 5 );
 
 			active_object_manager_->add_active_object( robot );
 			robot->set_rigid_body( physics_->add_active_object( robot ) );

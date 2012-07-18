@@ -2,9 +2,11 @@
 #define BLUE_SKY_ACTIVE_OBJECT_H
 
 #include "type.h"
+#include <btBulletCollisionCommon.h>
 
-class btRigidBody;
+class btVector3;
 class btTransform;
+class btRigidBody;
 
 namespace blue_sky
 {
@@ -22,6 +24,7 @@ class DrawingModel;
 class ActiveObject
 {
 public:
+	typedef btVector3	Vector3;
 	typedef btTransform Transform;
 	typedef btRigidBody RigidBody;
 

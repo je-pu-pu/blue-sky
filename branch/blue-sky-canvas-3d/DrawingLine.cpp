@@ -95,8 +95,6 @@ bool DrawingLine::load_obj( const char* file_name )
 
 void DrawingLine::create_vertex_buffer()
 {
-
-
 	D3D11_BUFFER_DESC buffer_desc = { 0 };
 
 	buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;

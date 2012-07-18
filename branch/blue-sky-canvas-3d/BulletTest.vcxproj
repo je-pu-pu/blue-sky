@@ -17,6 +17,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />
     <ClCompile Include="BulletTest.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Direct3D11.cpp" />
     <ClCompile Include="Direct3D11BulletDebugDraw.cpp" />
     <ClCompile Include="Direct3D11ConstantBuffer.cpp" />
@@ -26,6 +27,8 @@
     <ClCompile Include="Direct3D11ShadowMap.cpp" />
     <ClCompile Include="Direct3D11TextureManager.cpp" />
     <ClCompile Include="DirectInput.cpp" />
+    <ClCompile Include="DirectSound.cpp" />
+    <ClCompile Include="DirectSoundBuffer.cpp" />
     <ClCompile Include="DirectWrite.cpp" />
     <ClCompile Include="DrawingLine.cpp" />
     <ClCompile Include="DrawingModel.cpp" />
@@ -33,8 +36,15 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainLoop.cpp" />
+    <ClCompile Include="matrix4x4.cpp" />
+    <ClCompile Include="OggVorbisFile.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Robot.cpp" />
+    <ClCompile Include="Sound.cpp" />
+    <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="StaticeObject.cpp" />
+    <ClCompile Include="StreamingSound.cpp" />
+    <ClCompile Include="vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ActiveObject.h" />
@@ -43,6 +53,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="BulletTest.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Direct3D11.h" />
     <ClInclude Include="Direct3D11BulletDebugDraw.h" />
     <ClInclude Include="Direct3D11ConstantBuffer.h" />
@@ -52,6 +63,8 @@
     <ClInclude Include="Direct3D11ShadowMap.h" />
     <ClInclude Include="Direct3D11TextureManager.h" />
     <ClInclude Include="DirectInput.h" />
+    <ClInclude Include="DirectSound.h" />
+    <ClInclude Include="DirectSoundBuffer.h" />
     <ClInclude Include="DirectWrite.h" />
     <ClInclude Include="DirectWriteFontCollectionLoader.h" />
     <ClInclude Include="DirectWriteFontFileEnumerator.h" />
@@ -63,10 +76,17 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="MainLoop.h" />
+    <ClInclude Include="matrix4x4.h" />
+    <ClInclude Include="OggVorbisFile.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Robot.h" />
+    <ClInclude Include="Sound.h" />
+    <ClInclude Include="SoundManager.h" />
     <ClInclude Include="StaticObject.h" />
+    <ClInclude Include="StreamingSound.h" />
     <ClInclude Include="type.h" />
+    <ClInclude Include="vector3.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="blye-sky.ico" />
@@ -123,7 +143,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;NOMINMAX;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -139,11 +159,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NOMINMAX;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>

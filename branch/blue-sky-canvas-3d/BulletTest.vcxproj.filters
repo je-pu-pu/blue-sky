@@ -8,21 +8,6 @@
     <ClCompile Include="ActiveObject.cpp">
       <Filter>ActiveObject</Filter>
     </ClCompile>
-    <ClCompile Include="Direct3D11.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11BulletDebugDraw.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11ConstantBuffer.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11Mesh.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectWrite.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
     <ClCompile Include="Robot.cpp">
       <Filter>ActiveObject</Filter>
     </ClCompile>
@@ -30,22 +15,7 @@
       <Filter>Bullet</Filter>
     </ClCompile>
     <ClCompile Include="Input.cpp" />
-    <ClCompile Include="DirectInput.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
     <ClCompile Include="DrawingModel.cpp" />
-    <ClCompile Include="Direct3D11ShadowMap.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11Rectangle.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11MeshManager.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11TextureManager.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
     <ClCompile Include="StaticeObject.cpp">
       <Filter>ActiveObject</Filter>
     </ClCompile>
@@ -57,6 +27,64 @@
     <ClCompile Include="ActiveObjectPhysics.cpp">
       <Filter>Bullet</Filter>
     </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="vector3.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="matrix4x4.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="OggVorbisFile.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamingSound.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11BulletDebugDraw.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11ConstantBuffer.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11Mesh.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11MeshManager.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11Rectangle.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11ShadowMap.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11TextureManager.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectWrite.cpp">
+      <Filter>DirectX\DirectWrite</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectSound.cpp">
+      <Filter>DirectX\DirectSound</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectSoundBuffer.cpp">
+      <Filter>DirectX\DirectSound</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectInput.cpp">
+      <Filter>DirectX\DirectInput</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainLoop.h" />
@@ -65,33 +93,6 @@
     <ClInclude Include="ActiveObject.h">
       <Filter>ActiveObject</Filter>
     </ClInclude>
-    <ClInclude Include="Direct3D11Mesh.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11BulletDebugDraw.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11ConstantBuffer.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectWriteFontFileStream.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectWrite.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectWriteFontCollectionLoader.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectWriteFontFileEnumerator.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectWriteFontFileLoader.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
     <ClInclude Include="Robot.h">
       <Filter>ActiveObject</Filter>
     </ClInclude>
@@ -99,26 +100,11 @@
       <Filter>Bullet</Filter>
     </ClInclude>
     <ClInclude Include="Input.h" />
-    <ClInclude Include="DirectInput.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
     <ClInclude Include="Game.h" />
     <ClInclude Include="resource.h">
       <Filter>resource</Filter>
     </ClInclude>
     <ClInclude Include="DrawingModel.h" />
-    <ClInclude Include="Direct3D11ShadowMap.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11Rectangle.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11MeshManager.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11TextureManager.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
     <ClInclude Include="StaticObject.h">
       <Filter>ActiveObject</Filter>
     </ClInclude>
@@ -130,6 +116,76 @@
     <ClInclude Include="type.h" />
     <ClInclude Include="ActiveObjectPhysics.h">
       <Filter>Bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="vector3.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix4x4.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="OggVorbisFile.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamingSound.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11TextureManager.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11BulletDebugDraw.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11ConstantBuffer.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11Mesh.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11MeshManager.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11Rectangle.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11ShadowMap.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectWriteFontFileStream.h">
+      <Filter>DirectX\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectWrite.h">
+      <Filter>DirectX\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectWriteFontCollectionLoader.h">
+      <Filter>DirectX\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectWriteFontFileEnumerator.h">
+      <Filter>DirectX\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectWriteFontFileLoader.h">
+      <Filter>DirectX\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectSoundBuffer.h">
+      <Filter>DirectX\DirectSound</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectSound.h">
+      <Filter>DirectX\DirectSound</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectInput.h">
+      <Filter>DirectX\DirectInput</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -150,6 +206,24 @@
     </Filter>
     <Filter Include="resource">
       <UniqueIdentifier>{aeaa379d-a072-47cd-a182-948d6aced8e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{1f0b6511-c3a8-4771-92cc-1394abacb156}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sound">
+      <UniqueIdentifier>{bc18a28a-72a2-4370-bc67-497cd4fa3dc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX\Direct3D11">
+      <UniqueIdentifier>{1ef62cc7-a6aa-4e47-84ea-a52f8a155508}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX\DirectWrite">
+      <UniqueIdentifier>{47755e36-11f4-453d-b15d-fbf2a62cb314}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX\DirectSound">
+      <UniqueIdentifier>{5f378807-e24b-4703-9275-a918503077b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX\DirectInput">
+      <UniqueIdentifier>{0373c118-1ba9-48ac-ae50-70e4353fe825}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

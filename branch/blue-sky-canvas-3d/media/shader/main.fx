@@ -4,14 +4,20 @@ Texture2D shadow_texture : register( t1 );
 
 SamplerState texture_sampler
 {
-	Filter = ANISOTROPIC; // MIN_POINT_MAG_LINEAR_MIP_POINT;
-//	Filter = MIN_MAG_MIP_LINEAR;
+	Filter = ANISOTROPIC;
     AddressU = Wrap;
     AddressV = Wrap;
     AddressW = Wrap;
-//	MinLOD = 5.f;
-//	MaxLOD = FLOAT32_MAX;
-//	ComparisonFunc = NEVER;
+	ComparisonFunc = NEVER;
+};
+
+SamplerState wrap_texture_sampler
+{
+	Filter = ANISOTROPIC;
+    AddressU = Wrap;
+    AddressV = Wrap;
+    AddressW = Wrap;
+	ComparisonFunc = NEVER;
 };
 
 SamplerState shadow_texture_sampler
@@ -161,36 +167,6 @@ void gs_pass( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 [maxvertexcount(4)]
 void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
 {
-	/*
-	{
-		PS_INPUT output[ 4 ];
-
-		output[ 0 ].Position = float4( -0.5f, -0.5f, 0.f, 1.f );
-		output[ 0 ].TexCoord = float2( 0.f, 1.f );
-
-		output[ 1 ].Position = float4( -0.5f, +0.5f, 0.f, 1.f );
-		output[ 1 ].TexCoord = float2( 0.f, 0.f );
-
-		output[ 2 ].Position = float4( 0.5f, -0.5f, 0.f, 1.f );
-		output[ 2 ].TexCoord = float2( 1.f, 1.f );
-
-		output[ 3 ].Position = float4( 0.5f, 0.5f, 0.f, 1.f );
-		output[ 3 ].TexCoord = float2( 1.f, 0.f );
-
-		output[ 0 ].Color = float4( 0.f, 0.f, 0.f, 0.f );
-		output[ 1 ].Color = float4( 0.f, 0.f, 0.f, 0.f );
-		output[ 2 ].Color = float4( 0.f, 0.f, 0.f, 0.f );
-		output[ 3 ].Color = float4( 0.f, 0.f, 0.f, 0.f );
-
-		TriStream.Append( output[ 0 ] );
-		TriStream.Append( output[ 1 ] );
-		TriStream.Append( output[ 2 ] );
-		TriStream.Append( output[ 3 ] );
-
-		return;
-	}
-	*/
-
 	static const uint input_vertex_count = 2;
 
 	static const float screen_width = 800.f;
@@ -204,7 +180,7 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 	
 	static const float line_v_width = 32.f / 1024.f;
 
-	for ( uint n = 0; n < 2; n++ )
+	for ( uint n = 0; n < input_vertex_count; n++ )
 	{
 		if ( input[ n ].Position.z < 0.f )
 		{
@@ -217,9 +193,6 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 			input[ n ].Position.z += z_offset;
 			input[ n ].Position /= input[ n ].Position.w;
 			input[ n ].Position.w = w_fix;
-
-			// debug
-			// input[ n ].Position.z = 0.f;
 		}
 	}
 
@@ -311,7 +284,7 @@ float4 ps( PS_INPUT input ) : SV_Target
 
 float4 ps_line( noperspective PS_INPUT input ) : SV_Target
 {
-	input.Color.a = 0.f;
+	// input.Color.a = 0.f;
 	return line_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
 }
 
@@ -457,7 +430,7 @@ PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
 	
     output.ShadowTexCoord.x = ( output.ShadowTexCoord.x + 1.f ) / 2.f;
     output.ShadowTexCoord.y = ( -output.ShadowTexCoord.y + 1.f ) / 2.f;
-	output.ShadowTexCoord.z -= 0.001f;
+	output.ShadowTexCoord.z -= 0.000005f;
 
 	return output;
 }

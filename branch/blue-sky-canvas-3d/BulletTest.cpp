@@ -31,6 +31,8 @@
 #include "SoundManager.h"
 #include "Sound.h"
 
+#include "Player.h"
+
 #include "include/d3dx11effect.h"
 
 #include "DirectX.h"
@@ -85,7 +87,7 @@ GameMain::GameMain()
 	frame_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( FrameConstantBuffer ) );
 	object_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( ObjectConstantBuffer ) );
 
-	shadow_map_ = new Direct3D11ShadowMap( direct_3d_.get(), 1024 );
+	shadow_map_ = new Direct3D11ShadowMap( direct_3d_.get(), 512 );
 
 	{
 		GameConstantBuffer constant_buffer;
@@ -104,7 +106,7 @@ GameMain::GameMain()
 	physics_ = new ActiveObjectPhysics();
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
 	bullet_debug_draw_->setDebugMode( btIDebugDraw::DBG_DrawWireframe );
-	bullet_debug_draw_->setDebugMode( 0 );
+	// bullet_debug_draw_->setDebugMode( 0 );
 
 	physics_->setDebugDrawer( bullet_debug_draw_.get() );
 
@@ -141,11 +143,13 @@ GameMain::GameMain()
 
 		for ( int n = 0; n < 10; n++ )
 		{
-			StaticObject* static_object = new StaticObject();
+			StaticObject* static_object = new StaticObject( 10, 20, 10 );
 			static_object->set_drawing_model( drawing_model );
 			static_object->set_location( 10.f, 0, n * 12.f );
 
 			active_object_manager_->add_active_object( static_object );
+
+			static_object->set_rigid_body( physics_->add_active_object( static_object ) );
 		}
 	}
 
@@ -184,6 +188,10 @@ GameMain::GameMain()
 			active_object_manager_->add_active_object( static_object );
 		}
 	}
+
+	player_ = new Player();
+	player_->set_rigid_body( physics_->add_active_object( player_.get() ) );
+	player_->get_rigid_body()->setAngularFactor( 0 );
 }
 
 //■デストラクタ
@@ -193,7 +201,6 @@ GameMain::~GameMain()
 }
 
 static int fps = 0, last_fps = 0;
-static XMVECTOR eye = XMVectorSet( 0.0f, 1.5f, -5.0f, 0.0f );
 
 FrameConstantBuffer frame_constant_buffer;
 
@@ -234,48 +241,71 @@ bool GameMain::update()
 	{
 		if ( input_->press( Input::LEFT ) )
 		{
-			eye += XMVectorSet( -0.01f, 0.0f, 0.0f, 0.0f );
+			player_->side_step( -1.f );
+			// eye += XMVectorSet( -0.01f, 0.0f, 0.0f, 0.0f );
 		}
 		if ( input_->press( Input::RIGHT ) )
 		{
-			eye += XMVectorSet( 0.01f, 0.0f, 0.0f, 0.0f );
+			player_->side_step( +1.f );
+			// eye += XMVectorSet( 0.01f, 0.0f, 0.0f, 0.0f );
 		}
 		if ( input_->press( Input::UP ) )
 		{
-			eye += XMVectorSet( 0.f, 0.0f, 0.01f, 0.f );
+			player_->step( +1.f );
+			// eye += XMVectorSet( 0.f, 0.0f, 0.01f, 0.f );
 		}
 		if ( input_->press( Input::DOWN ) )
 		{
-			eye += XMVectorSet( 0.f, 0.0f, -0.01f, 0.f );
+			player_->step( -1.f );
+			// eye += XMVectorSet( 0.f, 0.0f, -0.01f, 0.f );
 		}
 		if ( input_->press( Input::X ) )
 		{
-			eye += XMVectorSet( 0.f, +0.01f, 0.f, 0.f );
+			// eye += XMVectorSet( 0.f, +0.01f, 0.f, 0.f );
 		}
 		if ( input_->press( Input::Y ) )
 		{
-			eye += XMVectorSet( 0.f, -0.01f, 0.f, 0.f );
+			// eye += XMVectorSet( 0.f, -0.01f, 0.f, 0.f );
 		}
 
 		if ( input_->push( Input::A ) )
 		{
+			player_->jump();
+		}
+
+		if ( input_->push( Input::B ) )
+		{
 			Robot* robot = new Robot();
 			robot->set_drawing_model( get_drawing_model_manager()->load( "robot" ) );
-			robot->set_location( XMVectorGetX( eye ), 30, XMVectorGetZ( eye ) + 5 );
+			robot->set_location( player_->get_transform().getOrigin().getX(), 20, player_->get_transform().getOrigin().getZ() + 5 );
 
 			active_object_manager_->add_active_object( robot );
 			robot->set_rigid_body( physics_->add_active_object( robot ) );
 		}
 	}
 
-	physics_->update( 1.f / 60.f );
+	static DWORD old_time = timeGetTime();
+	DWORD time = timeGetTime();
+
+	player_->update();
 
 	for ( ActiveObjectManager::ActiveObjectList::iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
 	{
 		( *i )->update_transform();
 	}
 
+	physics_->update( ( time - old_time ) / 1000.f );
+
+	for ( ActiveObjectManager::ActiveObjectList::iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
+	{
+		( *i )->update_transform();
+	}
+
+	player_->update_transform();
+
 	render();
+
+	old_time = time;
 
 	return true;
 }
@@ -283,6 +313,16 @@ bool GameMain::update()
 void GameMain::render()
 {
 	static const bool is_render_2d_enabled = false;
+
+	if ( ! active_object_manager_->active_object_list().empty() )
+	{
+		const ActiveObject::Transform& t = ( * active_object_manager_->active_object_list().begin() )->get_transform();
+
+		std::stringstream ss;
+		ss << "POS : " << t.getOrigin().x() << ", " << t.getOrigin().y() << ", " << t.getOrigin().z();
+
+		get_app()->setTitle( ss.str().c_str() );
+	}
 
 	// render_2d()
 	if ( is_render_2d_enabled )
@@ -292,23 +332,14 @@ void GameMain::render()
 		direct_write_->begin();
 
 		std::wstringstream ss;
-
 		ss << L"Bullet による物理演算" << std::endl;
 		ss << L"FPS : " << getMainLoop().GetFPS() << std::endl;
 		ss << L"Objects : " << active_object_manager_->active_object_list().size() << std::endl;
 
 		// ss << L"blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky ";
 
-		/*
 		ss << "FPS : " << getMainLoop().GetFPS() << std::endl;
 		ss << "Click Left Mouse Button !!!" << std::endl;
-
-		if ( ! active_object_manager_->active_object_list().empty() )
-		{
-			const ActiveObject::Transform& t = ( *active_object_manager_->active_object_list().begin() )->get_transform();
-			ss << "POS : " << t.getOrigin().x() << ", " << t.getOrigin().y() << ", " << t.getOrigin().z();
-		}
-		*/
 
 		direct_write_->drawText( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str() );
 
@@ -324,6 +355,7 @@ void GameMain::render()
 			direct_3d_->begin3D();
 		}
 
+		XMVECTOR eye = XMVectorSet( player_->get_transform().getOrigin().getX(), player_->get_transform().getOrigin().getY() + 1.5f, player_->get_transform().getOrigin().getZ(), 1 );
 #if 1
 		// render_object_for_shadow()
 		// if ( rand() % 4 == 0 )
@@ -493,10 +525,9 @@ void GameMain::render( const ActiveObject* active_object )
 	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
 
 	ObjectConstantBuffer buffer;
-	buffer.world = XMMatrixTranslation( 0, - active_object->get_collision_height() * 0.5f, 0.f );
-	buffer.world *= XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
-	buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
 
+	buffer.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
+	buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
 	buffer.world = XMMatrixTranspose( buffer.world );
 
 	object_constant_buffer_->update( & buffer );
@@ -516,8 +547,8 @@ void GameMain::render_line( const ActiveObject* active_object )
 	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
 
 	ObjectConstantBuffer buffer;
-	buffer.world = XMMatrixTranslation( 0, - active_object->get_collision_height() * 0.5f, 0.f );
-	buffer.world *= XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
+
+	buffer.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
 	buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
 	buffer.world = XMMatrixTranspose( buffer.world );
 

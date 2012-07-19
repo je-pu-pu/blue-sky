@@ -26,7 +26,7 @@ BulletPhysics::BulletPhysics()
 	dynamics_world_->setGravity( btVector3( 0, -9.8f, 0 ) );
 
 	// create_ground_shape()
-	btCollisionShape* ground = new btBoxShape( btVector3( btScalar( 200 ), btScalar( 1 ), btScalar( 200 ) ) );
+	btCollisionShape* ground = new btBoxShape( btVector3( btScalar( 1000 ), btScalar( 1 ), btScalar( 1000 ) ) );
 	btAlignedObjectArray<btCollisionShape*> collision_shape_list_;
 
 	collision_shape_list_.push_back( ground );
@@ -74,7 +74,6 @@ BulletPhysics::~BulletPhysics()
 		delete shape;
 	}
 
-
 	delete dynamics_world_;
 	delete constraint_solver_;
 	delete broadphase_interface_;
@@ -82,20 +81,27 @@ BulletPhysics::~BulletPhysics()
 	delete collision_configuration_;
 }
 
-btRigidBody* BulletPhysics::add_box_rigid_body( const btVector3& box, const btTransform& transform )
+btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, bool is_static )
 {
+	// 
+	// btCompoundShape* compound_shape = new btCompoundShape();
+	// collision_shape_list_.push_back( compound_shape );
+
 	// create_box_shape()
-	btBoxShape* shape = new btBoxShape( box ); // btVector3( 1.5, 4, 0.75 ) );
+	btBoxShape* shape = new btBoxShape( box );
 	collision_shape_list_.push_back( shape );
+
+	// compound_shape->addChildShape( offset, shape );
 
 	// create_box_rigid_body()
 	{
-		btScalar mass( 1.f );
+		btScalar mass( is_static ? 0.f : 0.001f );
 		btVector3 local_inertia( 0, 0, 0 );
 
 		shape->calculateLocalInertia( mass, local_inertia );
+		// compound_shape->calculateLocalInertia( mass, local_inertia );
 
-		btDefaultMotionState* motion_state = new btDefaultMotionState( transform );
+		btDefaultMotionState* motion_state = new btDefaultMotionState( transform * offset );
 		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );
 	
 		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );

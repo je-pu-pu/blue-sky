@@ -26,7 +26,8 @@ void Player::update()
  */	
 void Player::jump()
 {
-	
+	get_rigid_body()->setActivationState( true );
+	get_rigid_body()->setLinearVelocity( Vector3( 0, 7.5, 0 ) );
 }
 
 } // namespace blue_sky

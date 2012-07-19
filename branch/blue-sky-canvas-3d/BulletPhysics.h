@@ -11,6 +11,8 @@ class BulletPhysics
 {
 public:
 	typedef btAlignedObjectArray< btCollisionShape* > CollisionShapeArray;
+	typedef btVector3						Vector3;
+	typedef btTransform						Transform;
 
 private:
 	btDefaultCollisionConfiguration*		collision_configuration_;
@@ -25,7 +27,7 @@ public:
 	BulletPhysics();
 	~BulletPhysics();
 
-	btRigidBody* add_box_rigid_body( const btVector3&, const btTransform& );
+	btRigidBody* add_box_rigid_body( const Transform&, const Transform&, const Vector3&, bool = false );
 
 	void update( float = 1.f / 60.f );
 	

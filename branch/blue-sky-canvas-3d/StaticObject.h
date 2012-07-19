@@ -2,6 +2,7 @@
 #define BLUE_SKY_STATIC_OBJECT_H
 
 #include "ActiveObject.h"
+#include "type.h"
 
 namespace blue_sky
 {
@@ -13,19 +14,22 @@ namespace blue_sky
 class StaticObject : public ActiveObject
 {
 private:
+	float_t		collision_width_;
+	float_t		collision_height_;
+	float_t		collision_depth_;
 
 protected:
 
 public:
-	StaticObject();
+	StaticObject( float_t = 0, float_t = 0, float_t = 0 );
 	virtual ~StaticObject();
 
 	/// çXêV
 	virtual void update() { };
 	
-	virtual float get_collision_width() const { return 0.f; }
-	virtual float get_collision_height() const { return 0.f; }
-	virtual float get_collision_depth() const { return 0.f; }
+	virtual float get_collision_width() const { return collision_width_; }
+	virtual float get_collision_height() const { return collision_height_; }
+	virtual float get_collision_depth() const { return collision_depth_; }
 
 }; // class StaticObject
 

@@ -3,6 +3,7 @@
 
 #include "type.h"
 #include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 class btVector3;
 class btTransform;
@@ -51,7 +52,13 @@ public:
 	void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; }
 	const DrawingModel* get_drawing_model() const { return drawing_model_; }
 
-	void set_rigid_body( RigidBody* rigid_body ) { rigid_body_ = rigid_body; }
+	inline RigidBody* get_rigid_body() { return rigid_body_; }
+	inline const RigidBody* get_rigid_body() const { return rigid_body_; }
+
+	inline void set_rigid_body( RigidBody* rigid_body ) { rigid_body_ = rigid_body; }
+
+	void step( float_t );
+	void side_step( float_t );
 
 	void set_location( float_t, float_t, float_t );
 

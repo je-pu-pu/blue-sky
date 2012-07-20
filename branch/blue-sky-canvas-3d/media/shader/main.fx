@@ -184,9 +184,10 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 	{
 		if ( input[ n ].Position.z < 0.f )
 		{
-			input[ n ].Position.w = 0.f;
+			input[ 0 ].Position.w = 0.f;
+			input[ 1 ].Position.w = 0.f;
 
-			continue;
+			break;
 		}
 		else
 		{

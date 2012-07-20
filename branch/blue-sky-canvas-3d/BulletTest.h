@@ -3,7 +3,6 @@
 
 #include "Game.h"
 #include <common/auto_ptr.h>
-#include <common/safe_ptr.h>
 
 class Direct3D11;
 class Direct3D11ConstantBuffer;
@@ -34,13 +33,13 @@ namespace blue_sky
 	class DrawingModelManager;
 
 	class Player;
+	class Camera;
 };
 
 using namespace game;
 using namespace blue_sky;
 
 using common::auto_ptr;
-using common::safe_ptr;
 
 class GameMain : public Game
 {
@@ -75,7 +74,8 @@ protected:
 	auto_ptr< DirectWrite >					direct_write_;
 	auto_ptr< Direct3D11BulletDebugDraw >	bullet_debug_draw_;
 
-	safe_ptr< Player >						player_;
+	auto_ptr< Player >						player_;
+	auto_ptr< Camera >						camera_;
 
 	void render( const ActiveObject* );
 	void render_line( const ActiveObject* );

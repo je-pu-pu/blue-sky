@@ -32,6 +32,7 @@
 #include "Sound.h"
 
 #include "Player.h"
+#include "Camera.h"
 
 #include "include/d3dx11effect.h"
 
@@ -40,6 +41,8 @@
 #include <win/Version.h>
 
 #include <game/Config.h>
+
+#include <common/math.h>
 
 #include <sstream>
 
@@ -71,6 +74,8 @@ GameMain::GameMain()
 	win::Version version;
 	version.log( "log/windows_version.log" );
 
+	get_app()->clip_cursor( true );
+
 	// Config
 	config_ = new Config();
 	config_->load_file( "blue-sky.config" );
@@ -87,11 +92,11 @@ GameMain::GameMain()
 	frame_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( FrameConstantBuffer ) );
 	object_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( ObjectConstantBuffer ) );
 
-	shadow_map_ = new Direct3D11ShadowMap( direct_3d_.get(), 512 );
+	shadow_map_ = new Direct3D11ShadowMap( direct_3d_.get(), 1024 );
 
 	{
 		GameConstantBuffer constant_buffer;
-		constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.1f, 100.f );
+		constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.1f, 1000.f );
 		constant_buffer.projection = XMMatrixTranspose( constant_buffer.projection );
 		
 		game_constant_buffer_->update( & constant_buffer );
@@ -106,7 +111,7 @@ GameMain::GameMain()
 	physics_ = new ActiveObjectPhysics();
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
 	bullet_debug_draw_->setDebugMode( btIDebugDraw::DBG_DrawWireframe );
-	// bullet_debug_draw_->setDebugMode( 0 );
+	bullet_debug_draw_->setDebugMode( 0 );
 
 	physics_->setDebugDrawer( bullet_debug_draw_.get() );
 
@@ -132,14 +137,14 @@ GameMain::GameMain()
 		{
 			StaticObject* static_object = new StaticObject();
 			static_object->set_drawing_model( drawing_model );
-			static_object->set_location( 0, 0, n * 20 );
+			static_object->set_location( 0.f, 0.f, n * 20.f );
 
 			active_object_manager_->add_active_object( static_object );
 		}
 	}
 
 	{
-		DrawingModel* drawing_model = get_drawing_model_manager()->load( "building" );
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "building-20" );
 
 		for ( int n = 0; n < 10; n++ )
 		{
@@ -183,7 +188,7 @@ GameMain::GameMain()
 
 			StaticObject* static_object = new StaticObject();
 			static_object->set_drawing_model( drawing_model );
-			static_object->set_location( rand() % 3, 3 + n * 3, n * 3 );
+			static_object->set_location( float_t( rand() % 3 ), float_t( 3 + n * 3 ), float_t( n * 3 ) );
 
 			active_object_manager_->add_active_object( static_object );
 		}
@@ -192,6 +197,11 @@ GameMain::GameMain()
 	player_ = new Player();
 	player_->set_rigid_body( physics_->add_active_object( player_.get() ) );
 	player_->get_rigid_body()->setAngularFactor( 0 );
+	player_->get_rigid_body()->setFriction( 0 );
+
+	player_->set_drawing_model( drawing_model_manager_->load( "player" ) );
+
+	camera_ = new Camera();
 }
 
 //■デストラクタ
@@ -261,7 +271,7 @@ bool GameMain::update()
 		}
 		if ( input_->press( Input::X ) )
 		{
-			// eye += XMVectorSet( 0.f, +0.01f, 0.f, 0.f );
+			physics_->setConstraint();
 		}
 		if ( input_->press( Input::Y ) )
 		{
@@ -287,6 +297,16 @@ bool GameMain::update()
 	static DWORD old_time = timeGetTime();
 	DWORD time = timeGetTime();
 
+	player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );
+	camera_->rotate_degree_target().y() = player_->get_direction_degree();
+
+	camera_->rotate_degree_target().y() += get_input()->get_mouse_dx() * 90.f;
+	camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f;
+	camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
+	
+	camera_->update();
+
+	player_->update_rigid_body_velocity();
 	player_->update();
 
 	for ( ActiveObjectManager::ActiveObjectList::iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
@@ -314,11 +334,11 @@ void GameMain::render()
 {
 	static const bool is_render_2d_enabled = false;
 
-	if ( ! active_object_manager_->active_object_list().empty() )
 	{
-		const ActiveObject::Transform& t = ( * active_object_manager_->active_object_list().begin() )->get_transform();
+		const ActiveObject::Transform& t = player_->get_transform();
 
 		std::stringstream ss;
+		ss << "FPS : " << getMainLoop().GetFPS() << ", ";
 		ss << "POS : " << t.getOrigin().x() << ", " << t.getOrigin().y() << ", " << t.getOrigin().z();
 
 		get_app()->setTitle( ss.str().c_str() );
@@ -355,7 +375,7 @@ void GameMain::render()
 			direct_3d_->begin3D();
 		}
 
-		XMVECTOR eye = XMVectorSet( player_->get_transform().getOrigin().getX(), player_->get_transform().getOrigin().getY() + 1.5f, player_->get_transform().getOrigin().getZ(), 1 );
+		XMVECTOR eye = XMVectorSet( player_->get_transform().getOrigin().getX(), player_->get_transform().getOrigin().getY() + 1.5f, player_->get_transform().getOrigin().getZ() + 0.f, 1 );
 #if 1
 		// render_object_for_shadow()
 		// if ( rand() % 4 == 0 )
@@ -384,6 +404,8 @@ void GameMain::render()
 				{
 					render( *i );
 				}
+
+				render( player_.get() );
 			}
 		}
 #endif
@@ -392,7 +414,7 @@ void GameMain::render()
 		direct_3d_->clear();
 
 		{
-			XMVECTOR at = eye + XMVectorSet( 0.0f, 0.0f, 1.f, 0.0f );
+			XMVECTOR at = eye + XMVectorSet( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z(), 0.0f );
 			XMVECTOR up = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
 
 			static float t = 0.f;
@@ -455,6 +477,8 @@ void GameMain::render()
 				{
 					render_line( *i );
 				}
+
+				render_line( player_.get() );
 			}
 		}
 #endif

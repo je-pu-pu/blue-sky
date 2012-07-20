@@ -52,6 +52,11 @@ BulletPhysics::BulletPhysics()
 
 BulletPhysics::~BulletPhysics()
 {
+	for ( int n = dynamics_world_->getNumConstraints() - 1; n >= 0; n-- )
+	{
+		delete dynamics_world_->getConstraint( n );
+	}
+
 	for ( int n = dynamics_world_->getNumCollisionObjects() - 1; n >= 0; n-- )
 	{
 		btCollisionObject* object = dynamics_world_->getCollisionObjectArray()[ n ];
@@ -95,7 +100,7 @@ btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, cons
 
 	// create_box_rigid_body()
 	{
-		btScalar mass( is_static ? 0.f : 0.001f );
+		btScalar mass( is_static ? 0.f : 1.f );
 		btVector3 local_inertia( 0, 0, 0 );
 
 		shape->calculateLocalInertia( mass, local_inertia );
@@ -108,8 +113,20 @@ btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, cons
 		dynamics_world_->addRigidBody( rigid_body );
 
 		return rigid_body;
-	}
+	}	
 }
+
+void BulletPhysics::setConstraint()
+{
+	btRigidBody* a = btRigidBody::upcast( dynamics_world_->getCollisionObjectArray()[ dynamics_world_->getNumCollisionObjects() - 2 ] );
+	btRigidBody* b = btRigidBody::upcast( dynamics_world_->getCollisionObjectArray()[ dynamics_world_->getNumCollisionObjects() - 1 ] );
+
+	// btPoint2PointConstraint* constraint = new btPoint2PointConstraint( * a, * b, Vector3( 2, 0, 0 ), Vector3( -2, 0, 0 ) );
+	btPoint2PointConstraint* constraint = new btPoint2PointConstraint( * b, Vector3( 0, 5, 0 ) );
+
+	dynamics_world_->addConstraint( constraint );
+}
+
 
 void BulletPhysics::update( float time_step )
 {
@@ -117,24 +134,6 @@ void BulletPhysics::update( float time_step )
 
 	dynamics_world_->debugDrawWorld();
 }
-
-/*
-const btTransform& BulletPhysics::getTransform() const
-{
-	static btTransform trans;
-	trans.setIdentity();
-
-	btCollisionObject* object = dynamics_world_->getCollisionObjectArray()[ 1 ];
-	btRigidBody* body = btRigidBody::upcast( object );
-
-	if ( body && body->getMotionState() )
-	{
-		body->getMotionState()->getWorldTransform( trans );
-	}
-	
-	return trans;
-}
-*/
 
 void BulletPhysics::setDebugDrawer( btIDebugDraw* debug_drawer )
 {

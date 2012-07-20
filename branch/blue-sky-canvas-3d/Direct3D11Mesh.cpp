@@ -128,7 +128,10 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 	create_vertex_buffer();
 	create_index_buffer();
 
-	create_texture_resource_view( texture_file_name.c_str() );
+	if ( ! texture_file_name.empty() )
+	{
+		create_texture_resource_view( texture_file_name.c_str() );
+	}
 
 	return true;
 }

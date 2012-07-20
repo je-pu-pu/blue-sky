@@ -34,6 +34,8 @@ public:
 	// for debug
 	void setDebugDrawer( btIDebugDraw* );
 
+	void setConstraint();
+
 }; // class BulletPhysics
 
 #endif // BULLET_PHYSICS_H

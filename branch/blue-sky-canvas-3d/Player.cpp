@@ -17,7 +17,7 @@ Player::Player()
  */
 void Player::update()
 {
-	
+	get_velocity() = Vector3( 0, 0, 0 );
 }
 
 /**
@@ -26,8 +26,23 @@ void Player::update()
  */	
 void Player::jump()
 {
-	get_rigid_body()->setActivationState( true );
-	get_rigid_body()->setLinearVelocity( Vector3( 0, 7.5, 0 ) );
+	get_velocity() += Vector3( 0, 5, 0 );
+
+}
+
+/**
+ *
+ */
+void Player::add_direction_degree( float d )
+{
+	/*
+	if ( is_rocketing() )
+	{
+		return;
+	}
+	*/
+
+	set_direction_degree( get_direction_degree() + d );
 }
 
 } // namespace blue_sky

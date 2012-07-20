@@ -15,9 +15,9 @@ class Player : public ActiveObject
 public:
 
 private:
-	float get_collision_width() const { return 1.f; }
+	float get_collision_width() const { return 0.5f; }
 	float get_collision_height() const { return 1.75f; }
-	float get_collision_depth() const { return 1.f; }
+	float get_collision_depth() const { return 0.25f; }
 
 protected:
 	const Input* get_input() const;
@@ -31,6 +31,9 @@ public:
 	
 	/// ƒWƒƒƒ“ƒvˆ—
 	void jump();
+
+	/// •ûŒü‰ÁZ
+	void add_direction_degree( float );
 
 }; // class Player
 

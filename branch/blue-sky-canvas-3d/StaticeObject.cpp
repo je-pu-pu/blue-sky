@@ -17,4 +17,14 @@ StaticObject::~StaticObject()
 	
 }
 
+void StaticObject::update_transform()
+{
+	ActiveObject::update_transform();
+
+	get_transform().getRotation().setEulerZYX(
+		get_transform().getRotation().x(),
+		get_transform().getRotation().y() + 0.01f,
+		get_transform().getRotation().z() );
+}
+
 } // namespace blue_sky

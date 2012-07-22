@@ -53,7 +53,7 @@ public:
 	virtual void update() = 0;
 
 	void update_rigid_body_velocity();
-	void update_transform();
+	virtual void update_transform();
 	
 	virtual float get_collision_width() const = 0;
 	virtual float get_collision_height() const = 0;

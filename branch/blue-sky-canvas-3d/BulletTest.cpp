@@ -111,7 +111,7 @@ GameMain::GameMain()
 	physics_ = new ActiveObjectPhysics();
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
 	bullet_debug_draw_->setDebugMode( btIDebugDraw::DBG_DrawWireframe );
-	bullet_debug_draw_->setDebugMode( 0 );
+	// bullet_debug_draw_->setDebugMode( 0 );
 
 	physics_->setDebugDrawer( bullet_debug_draw_.get() );
 
@@ -159,6 +159,21 @@ GameMain::GameMain()
 	}
 
 	{
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "building-200" );
+
+		for ( int n = 0; n < 5; n++ )
+		{
+			StaticObject* static_object = new StaticObject( 80, 200, 60 );
+			static_object->set_drawing_model( drawing_model );
+			static_object->set_location( -40, 0, n * 70.f );
+
+			active_object_manager_->add_active_object( static_object );
+
+			static_object->set_rigid_body( physics_->add_active_object( static_object ) );
+		}
+	}
+
+	{
 		DrawingModel* drawing_model = get_drawing_model_manager()->load( "tree-1" );
 
 		for ( int n = 0; n < 20; n++ )
@@ -195,9 +210,10 @@ GameMain::GameMain()
 	}
 
 	player_ = new Player();
+	player_->set_location( 0, 300.f, 0 );
 	player_->set_rigid_body( physics_->add_active_object( player_.get() ) );
 	player_->get_rigid_body()->setAngularFactor( 0 );
-	player_->get_rigid_body()->setFriction( 0 );
+	// player_->get_rigid_body()->setFriction( 0 );
 
 	player_->set_drawing_model( drawing_model_manager_->load( "player" ) );
 
@@ -304,8 +320,6 @@ bool GameMain::update()
 	camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f;
 	camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
 	
-	camera_->update();
-
 	player_->update_rigid_body_velocity();
 	player_->update();
 
@@ -322,6 +336,11 @@ bool GameMain::update()
 	}
 
 	player_->update_transform();
+
+	camera_->position().x() = player_->get_transform().getOrigin().x();
+	camera_->position().y() = player_->get_transform().getOrigin().y() + 1.5f;
+	camera_->position().z() = player_->get_transform().getOrigin().z();
+	camera_->update();
 
 	render();
 
@@ -375,7 +394,7 @@ void GameMain::render()
 			direct_3d_->begin3D();
 		}
 
-		XMVECTOR eye = XMVectorSet( player_->get_transform().getOrigin().getX(), player_->get_transform().getOrigin().getY() + 1.5f, player_->get_transform().getOrigin().getZ() + 0.f, 1 );
+		XMVECTOR eye = XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 );
 #if 1
 		// render_object_for_shadow()
 		// if ( rand() % 4 == 0 )
@@ -414,8 +433,8 @@ void GameMain::render()
 		direct_3d_->clear();
 
 		{
-			XMVECTOR at = eye + XMVectorSet( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z(), 0.0f );
-			XMVECTOR up = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
+			XMVECTOR at = XMVectorSet( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z(), 0.0f );
+			XMVECTOR up = XMVectorSet( camera_->up().x(), camera_->up().y(), camera_->up().z(), 0.0f );
 
 			static float t = 0.f;
 

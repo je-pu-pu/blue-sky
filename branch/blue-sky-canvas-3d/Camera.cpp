@@ -26,9 +26,6 @@ Camera::~Camera()
 
 void Camera::update()
 {
-//	rotate_degree().x() = math::chase( rotate_degree().x(), rotate_degree_target().x(), 2.f );
-//	rotate_degree().y() = math::chase( rotate_degree().y(), rotate_degree_target().y(), 4.f );
-
 	while ( rotate_degree_target().y() - rotate_degree().y() > +180.f ) rotate_degree().y() += 360.f;
 	while ( rotate_degree_target().y() - rotate_degree().y() < -180.f ) rotate_degree().y() -= 360.f;
 	
@@ -51,7 +48,6 @@ void Camera::update()
 
 	look_at_ = position() + default_front_ * xr * zr * yr;
 	up_ = default_up_ * xr * zr * yr;
-
 
 	fov_ = fov_ * 0.9f + fov_target_ * 0.1f;
 	fov_ = math::clamp( fov_, 2.f, 100.f );

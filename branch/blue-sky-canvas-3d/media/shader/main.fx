@@ -5,9 +5,9 @@ Texture2D shadow_texture : register( t1 );
 SamplerState texture_sampler
 {
 	Filter = ANISOTROPIC;
-    AddressU = Wrap;
-    AddressV = Wrap;
-    AddressW = Wrap;
+    AddressU = Clamp;
+    AddressV = Clamp;
+    AddressW = Clamp;
 	ComparisonFunc = NEVER;
 };
 
@@ -283,6 +283,11 @@ float4 ps( PS_INPUT input ) : SV_Target
 	return model_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
 }
 
+float4 ps_wrap( PS_INPUT input ) : SV_Target
+{
+	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ) + input.Color;
+}
+
 float4 ps_line( noperspective PS_INPUT input ) : SV_Target
 {
 	// input.Color.a = 0.f;
@@ -334,6 +339,9 @@ RasterizerState Shadow
 	CullMode = NONE;
 };
 
+// ----------------------------------------
+// main
+// ----------------------------------------
 technique11 main
 {
 	pass pass1
@@ -343,7 +351,7 @@ technique11 main
 
         SetVertexShader( CompileShader( vs_4_0, vs_to_ps() ) );
 		SetGeometryShader( NULL );
-        SetPixelShader( CompileShader( ps_4_0, ps() ) );
+        SetPixelShader( CompileShader( ps_4_0, ps_wrap() ) );
 
 		RASTERIZERSTATE = Default;
     }
@@ -364,6 +372,9 @@ technique11 drawing_line
 	}
 }
 
+// ----------------------------------------
+// for Text
+// ----------------------------------------
 technique11 text
 {
 	pass main
@@ -374,7 +385,20 @@ technique11 text
 	}
 }
 
+// ----------------------------------------
+// for SkyBox
+// ----------------------------------------
+technique11 sky_box
+{
+	pass main
+	{
+		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
 
+		SetVertexShader( CompileShader( vs_4_0, vs_to_ps() ) );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps() ) );
+	}
+}
 
 // ----------------------------------------
 // for Bullet debug
@@ -462,7 +486,7 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 		shadow.a = 1.f;
 	}
 
-	return model_texture.Sample( texture_sampler, input.TexCoord ) * shadow;
+	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ) * shadow;
 }
 
 PS_INPUT vs_shadow_map( VS_INPUT input )

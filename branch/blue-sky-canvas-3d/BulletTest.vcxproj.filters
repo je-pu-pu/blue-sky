@@ -85,6 +85,12 @@
     <ClCompile Include="DirectInput.cpp">
       <Filter>DirectX\DirectInput</Filter>
     </ClCompile>
+    <ClCompile Include="Direct3D11SkyBox.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11Material.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainLoop.h" />
@@ -186,6 +192,12 @@
     </ClInclude>
     <ClInclude Include="DirectInput.h">
       <Filter>DirectX\DirectInput</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11SkyBox.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11Material.h">
+      <Filter>DirectX\Direct3D11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

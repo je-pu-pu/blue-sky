@@ -18,14 +18,16 @@ protected:
 	
 	ID3D11Buffer*	constant_buffer_;
 
+	UINT			slot_;
+
 	void create_constant_buffer( size_t );
 
 public:
-	Direct3D11ConstantBuffer( Direct3D11*, size_t );
+	Direct3D11ConstantBuffer( Direct3D11*, size_t, UINT );
 	virtual ~Direct3D11ConstantBuffer();
 
 	void update( const void* );
-	void render( UINT );
+	void render();
 
 }; // class Direct3D11ConstantBuffer
 

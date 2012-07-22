@@ -7,6 +7,7 @@
 class Direct3D11;
 class Direct3D11ConstantBuffer;
 class Direct3D11ShadowMap;
+class Direct3D11SkyBox;
 class Direct3D11BulletDebugDraw;
 
 class DirectWrite;
@@ -70,6 +71,7 @@ protected:
 	auto_ptr< Direct3D11ConstantBuffer >	object_constant_buffer_;
 
 	auto_ptr< Direct3D11ShadowMap >			shadow_map_;
+	auto_ptr< Direct3D11SkyBox >			sky_box_;
 
 	auto_ptr< DirectWrite >					direct_write_;
 	auto_ptr< Direct3D11BulletDebugDraw >	bullet_debug_draw_;

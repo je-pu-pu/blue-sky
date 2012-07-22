@@ -4,9 +4,10 @@
 
 #include <common/exception.h>
 
-Direct3D11ConstantBuffer::Direct3D11ConstantBuffer( Direct3D11* direct_3d, size_t size )
+Direct3D11ConstantBuffer::Direct3D11ConstantBuffer( Direct3D11* direct_3d, size_t size, UINT slot )
 	: direct_3d_( direct_3d )
 	, constant_buffer_( 0 )
+	, slot_( slot )
 {
 	create_constant_buffer( size );
 }
@@ -32,8 +33,8 @@ void Direct3D11ConstantBuffer::update( const void* data )
 	direct_3d_->getImmediateContext()->UpdateSubresource( constant_buffer_, 0, 0, data, 0, 0 );
 }
 
-void Direct3D11ConstantBuffer::render( UINT slot )
+void Direct3D11ConstantBuffer::render()
 {
-	direct_3d_->getImmediateContext()->VSSetConstantBuffers( slot, 1, & constant_buffer_ );
-	direct_3d_->getImmediateContext()->GSSetConstantBuffers( slot, 1, & constant_buffer_ );
+	direct_3d_->getImmediateContext()->VSSetConstantBuffers( slot_, 1, & constant_buffer_ );
+	direct_3d_->getImmediateContext()->GSSetConstantBuffers( slot_, 1, & constant_buffer_ );
 }

@@ -1,11 +1,14 @@
 #ifndef DIRECT_3D_11_MESH_H
 #define DIRECT_3D_11_MESH_H
 
+#include "type.h"
+
 #include <d3d11.h>
 #include <xnamath.h>
 #include <vector>
 
 class Direct3D11;
+class Direct3D11Material;
 
 /**
  * obj ファイルから読み込むメッシュ
@@ -37,34 +40,26 @@ public:
 		}
 	};
 
-	typedef XMFLOAT3 Position;
-	typedef XMFLOAT2 TexCoord;
+	typedef XMFLOAT3					Position;
+	typedef XMFLOAT2					TexCoord;
 
-	typedef WORD Index;
+	typedef std::vector< Position >		PositionList; // ?
+	typedef std::vector< TexCoord >		TexCoordList; // ?
 
-	typedef std::vector< Position > PositionList; // ?
-	typedef std::vector< TexCoord > TexCoordList; // ?
+	typedef Direct3D11Material			Material;
 
-	typedef std::vector< Vertex > VertexList;
-	typedef std::vector< Index > IndexList;
-
-	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
+	typedef std::vector< Vertex >		VertexList;
+	typedef std::vector< Material* >	MaterialList;
 
 protected:
 	Direct3D11*		direct_3d_;
-	
 	ID3D11Buffer*	vertex_buffer_;
-	ID3D11Buffer*	index_buffer_;
-	
-	ID3D11ShaderResourceView*	texture_resource_view_;
-
 	VertexList		vertex_list_;
-	IndexList		index_list_;
+	MaterialList	material_list_;
 	
 	void create_vertex_buffer();
-	void create_index_buffer();
 
-	void create_texture_resource_view( const char* );
+	virtual string_t get_texture_file_name_by_texture_name( const char* ) const;
 
 public:
 	Direct3D11Mesh( Direct3D11* );
@@ -72,10 +67,10 @@ public:
 
 	bool load_obj( const char* );
 	
-	ID3D11ShaderResourceView* get_shader_resource_view() { return texture_resource_view_; }
-	void set_shader_resource_view( ID3D11ShaderResourceView* view ) { texture_resource_view_ = view; }
-
 	void render() const;
+
+	inline MaterialList& get_material_list() { return material_list_; }
+	inline const MaterialList& get_material_list() const { return material_list_; }
 
 }; // class Direct3D11Mesh
 

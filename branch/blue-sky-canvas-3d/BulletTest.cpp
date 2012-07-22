@@ -4,8 +4,10 @@
 #include "Direct3D11.h"
 #include "Direct3D11MeshManager.h"
 #include "Direct3D11Mesh.h"
+#include "Direct3D11Material.h"
 #include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11ShadowMap.h"
+#include "Direct3D11SkyBox.h"
 #include "Direct3D11Rectangle.h"
 
 #include "DrawingModel.h"
@@ -88,9 +90,9 @@ GameMain::GameMain()
 	direct_3d_->load_effect_file( "media/shader/main.fx" );
 	direct_3d_->apply_effect();
 
-	game_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( GameConstantBuffer ) );
-	frame_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( FrameConstantBuffer ) );
-	object_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( ObjectConstantBuffer ) );
+	game_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( GameConstantBuffer ), 0 );
+	frame_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( FrameConstantBuffer ), 1 );
+	object_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( ObjectConstantBuffer ), 2 );
 
 	shadow_map_ = new Direct3D11ShadowMap( direct_3d_.get(), 1024 );
 
@@ -101,6 +103,8 @@ GameMain::GameMain()
 		
 		game_constant_buffer_->update( & constant_buffer );
 	}
+
+	sky_box_ = new Direct3D11SkyBox( direct_3d_.get(), "sky-box-3" );
 	
 	rectangle_ = new Direct3D11Rectangle( direct_3d_.get() );
 
@@ -419,6 +423,11 @@ void GameMain::render()
 
 				shadow_map_->render();
 
+				{
+					game_constant_buffer_->render();
+					frame_constant_buffer_->render();
+				}
+
 				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
 				{
 					render( *i );
@@ -432,6 +441,7 @@ void GameMain::render()
 #if 1
 		direct_3d_->clear();
 
+		// update_view()
 		{
 			XMVECTOR at = XMVectorSet( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z(), 0.0f );
 			XMVECTOR up = XMVectorSet( camera_->up().x(), camera_->up().y(), camera_->up().z(), 0.0f );
@@ -445,6 +455,33 @@ void GameMain::render()
 			frame_constant_buffer_->update( & frame_constant_buffer );
 
 			t += 0.01f;
+		}
+
+		// render_sky_box()
+		{
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|sky_box" );
+
+			D3DX11_TECHNIQUE_DESC technique_desc;
+			technique->GetDesc( & technique_desc );
+
+			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			{
+				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
+				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+
+				{
+					game_constant_buffer_->render();
+					frame_constant_buffer_->render();
+
+					ObjectConstantBuffer buffer;
+					buffer.world = XMMatrixTranslationFromVector( eye );
+					buffer.world = XMMatrixTranspose( buffer.world );
+					object_constant_buffer_->update( & buffer );
+					object_constant_buffer_->render();
+				}
+
+				sky_box_->render();
+			}
 		}
 
 		// render_object();
@@ -463,13 +500,8 @@ void GameMain::render()
 				direct_3d_->getImmediateContext()->PSSetShaderResources( 1, 1, & shader_resource_view );
 
 				{
-					ObjectConstantBuffer buffer;
-					buffer.world = XMMatrixIdentity();
-					object_constant_buffer_->update( & buffer );
-
-					game_constant_buffer_->render( 0 );
-					frame_constant_buffer_->render( 1 );
-					object_constant_buffer_->render( 2 );
+					game_constant_buffer_->render();
+					frame_constant_buffer_->render();
 				}
 
 				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
@@ -491,7 +523,12 @@ void GameMain::render()
 			{
 				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
 				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
-		
+				
+				{
+					game_constant_buffer_->render();
+					frame_constant_buffer_->render();
+				}
+
 				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
 				{
 					render_line( *i );
@@ -515,8 +552,8 @@ void GameMain::render()
 				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
 				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
 				
-				game_constant_buffer_->render( 0 );
-				frame_constant_buffer_->render( 1 );
+				game_constant_buffer_->render();
+				frame_constant_buffer_->render();
 
 				bullet_debug_draw_->render();
 			}
@@ -546,7 +583,7 @@ void GameMain::render()
 				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
 				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
 				
-				rectangle_->set_shader_resource_view( shadow_map_->getShaderResourceView() );
+				( * rectangle_->get_material_list().begin() )->set_shader_resource_view( shadow_map_->getShaderResourceView() );
 				rectangle_->render();
 			}
 		}
@@ -574,10 +611,7 @@ void GameMain::render( const ActiveObject* active_object )
 	buffer.world = XMMatrixTranspose( buffer.world );
 
 	object_constant_buffer_->update( & buffer );
-	
-	game_constant_buffer_->render( 0 );
-	frame_constant_buffer_->render( 1 );
-	object_constant_buffer_->render( 2 );
+	object_constant_buffer_->render();
 
 	active_object->get_drawing_model()->get_mesh()->render();
 }
@@ -596,10 +630,7 @@ void GameMain::render_line( const ActiveObject* active_object )
 	buffer.world = XMMatrixTranspose( buffer.world );
 
 	object_constant_buffer_->update( & buffer );
-
-	game_constant_buffer_->render( 0 );
-	frame_constant_buffer_->render( 1 );
-	object_constant_buffer_->render( 2 );
+	object_constant_buffer_->render();
 
 	active_object->get_drawing_model()->get_line()->render( 500 ); // 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
 }

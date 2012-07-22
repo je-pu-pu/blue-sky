@@ -1,4 +1,5 @@
 #include "Direct3D11Mesh.h"
+#include "Direct3D11Material.h"
 #include "Direct3D11TextureManager.h"
 #include "Direct3D11.h"
 #include "DirectX.h"
@@ -16,17 +17,19 @@
 Direct3D11Mesh::Direct3D11Mesh( Direct3D11* direct_3d )
 	: direct_3d_( direct_3d )
 	, vertex_buffer_( 0 )
-	, index_buffer_( 0 )
-
-	, texture_resource_view_( 0 )
 {
 
 }
 
 Direct3D11Mesh::~Direct3D11Mesh()
 {
-	DIRECT_X_RELEASE( index_buffer_ );
+	for ( MaterialList::iterator i = material_list_.begin(); i != material_list_.end(); ++i )
+	{
+		delete *i;
+	}
+
 	DIRECT_X_RELEASE( vertex_buffer_ );
+
 }
 
 bool Direct3D11Mesh::load_obj( const char* file_name )
@@ -38,13 +41,14 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 		return false;
 	}
 
-	typedef std::map< Vertex, Index > VertexIndexMap;
+	typedef std::map< Vertex, Material::Index > VertexIndexMap;
 	VertexIndexMap vertex_index_map;
 
 	PositionList position_list;
 	TexCoordList tex_coord_list;
 
-	std::string texture_file_name;
+	material_list_.push_back( new Material( direct_3d_ ) );
+	Material* material = material_list_[ material_list_.size() - 1 ];
 
 	while ( in.good() )
 	{		
@@ -105,15 +109,14 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 
 				if ( i != vertex_index_map.end() )
 				{
-					index_list_.push_back( i->second );
+					material->get_index_list().push_back( i->second );
 				}
 				else
 				{
-					Index vertex_index = vertex_index_map.size();
+					Material::Index vertex_index = vertex_list_.size();
 
 					vertex_list_.push_back( v );
-					index_list_.push_back( vertex_index );
-
+					material->get_index_list().push_back( vertex_index );
 
 					vertex_index_map[ v ] = vertex_index;
 				}
@@ -121,16 +124,31 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 		}
 		else if ( command == "texture" )
 		{
+			std::string texture_file_name;
+
 			ss >> texture_file_name;
+
+			material->load_texture( get_texture_file_name_by_texture_name( texture_file_name.c_str() ).c_str() );
+		}
+		else if ( command == "usemtl" )
+		{
+			if ( ! material->get_index_list().empty() )
+			{
+				material->create_index_buffer();
+
+				material_list_.push_back( new Material( direct_3d_ ) );
+				material = material_list_[ material_list_.size() - 1 ];
+
+				vertex_index_map.clear();
+			}
 		}
 	}
 
 	create_vertex_buffer();
-	create_index_buffer();
 
-	if ( ! texture_file_name.empty() )
+	if ( ! material->get_index_list().empty() )
 	{
-		create_texture_resource_view( texture_file_name.c_str() );
+		material->create_index_buffer();
 	}
 
 	return true;
@@ -150,27 +168,9 @@ void Direct3D11Mesh::create_vertex_buffer()
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & vertex_buffer_ ) );
 }
 
-void Direct3D11Mesh::create_index_buffer()
+string_t Direct3D11Mesh::get_texture_file_name_by_texture_name( const char* texture_name ) const
 {
-	D3D11_BUFFER_DESC buffer_desc = { 0 };
-
-	buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
-    buffer_desc.ByteWidth = sizeof( Index ) * index_list_.size();
-
-	D3D11_SUBRESOURCE_DATA data = { 0 };
-	data.pSysMem = & index_list_[ 0 ];
-
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & index_buffer_ ) );
-}
-
-void Direct3D11Mesh::create_texture_resource_view( const char* file_name )
-{
-	std::string texture_file_name = file_name; // boost::filesystem::basename( boost::filesystem::path( file_name ) ) + ".png";
-	// std::string texture_file_name = "media/texture/lines.png";
-	// std::string texture_file_name = "media/texture/pencil-face-3.png";
-	
-	texture_resource_view_ = direct_3d_->getTextureManager()->load( texture_file_name.c_str(), texture_file_name.c_str() );
+	return texture_name;
 }
 
 void Direct3D11Mesh::render() const
@@ -179,15 +179,10 @@ void Direct3D11Mesh::render() const
     UINT offset = 0;
 
 	direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, 1, & vertex_buffer_, & stride, & offset );
-	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_, IndexBufferFormat, 0 );
-
 	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
-	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & texture_resource_view_ );
-
-	// debug !!!
-	// ID3D11ShaderResourceView* text_view = direct_3d_->getTextView();
-	// direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & text_view );
-
-	direct_3d_->getImmediateContext()->DrawIndexed( index_list_.size(), 0, 0 );
+	for ( MaterialList::const_iterator i = material_list_.begin(); i != material_list_.end(); ++i )
+	{
+		( *i )->render();
+	}
 }

@@ -49,12 +49,14 @@ void ActiveObject::update_transform()
 
 void ActiveObject::step( float_t s )
 {
-	get_velocity() += get_front() * s;
+	get_velocity() = get_front() * s;
+	get_velocity().setY( get_rigid_body()->getLinearVelocity().y() );
 }
 
 void ActiveObject::side_step( float_t s )
 {
-	get_velocity() += get_right() * s;
+	get_velocity() = get_right() * s;
+	get_velocity().setY( get_rigid_body()->getLinearVelocity().y() );
 }
 
 void ActiveObject::set_location( float_t x, float_t y, float_t z )

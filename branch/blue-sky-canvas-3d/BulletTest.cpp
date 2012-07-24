@@ -104,7 +104,7 @@ GameMain::GameMain()
 		game_constant_buffer_->update( & constant_buffer );
 	}
 
-	sky_box_ = new Direct3D11SkyBox( direct_3d_.get(), "sky-box-3" );
+	sky_box_ = new Direct3D11SkyBox( direct_3d_.get(), "sky-box-a" );
 	
 	rectangle_ = new Direct3D11Rectangle( direct_3d_.get() );
 

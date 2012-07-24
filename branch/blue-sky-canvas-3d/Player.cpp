@@ -26,8 +26,7 @@ void Player::update()
  */	
 void Player::jump()
 {
-	get_velocity() += Vector3( 0, 5, 0 );
-
+	get_velocity() = get_rigid_body()->getLinearVelocity() + Vector3( 0, 5, 0 );
 }
 
 /**

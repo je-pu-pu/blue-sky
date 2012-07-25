@@ -1,5 +1,5 @@
 #include "App.h"
-#include "BulletTest.h"
+#include "GameMain.h"
 
 #include <common/exception.h>
 #include <common/serialize.h>

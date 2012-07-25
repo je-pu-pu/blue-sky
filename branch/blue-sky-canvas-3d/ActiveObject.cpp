@@ -1,7 +1,9 @@
 #include "ActiveObject.h"
-#include "BulletTest.h"
 #include "ActiveObjectPhysics.h"
+#include "GameMain.h"
+
 #include <common/math.h>
+
 #include <btBulletDynamicsCommon.h>
 
 namespace blue_sky

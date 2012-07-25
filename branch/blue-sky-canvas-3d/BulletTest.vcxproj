@@ -16,7 +16,6 @@
     <ClCompile Include="ActiveObjectPhysics.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />
-    <ClCompile Include="BulletTest.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Direct3D11.cpp" />
     <ClCompile Include="Direct3D11BulletDebugDraw.cpp" />
@@ -35,6 +34,7 @@
     <ClCompile Include="DrawingLine.cpp" />
     <ClCompile Include="DrawingModel.cpp" />
     <ClCompile Include="DrawingModelManager.cpp" />
+    <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainLoop.cpp" />
@@ -54,7 +54,6 @@
     <ClInclude Include="ActiveObjectPhysics.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="BulletPhysics.h" />
-    <ClInclude Include="BulletTest.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Direct3D11.h" />
     <ClInclude Include="Direct3D11BulletDebugDraw.h" />
@@ -78,6 +77,7 @@
     <ClInclude Include="DrawingModel.h" />
     <ClInclude Include="DrawingModelManager.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameMain.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="matrix4x4.h" />

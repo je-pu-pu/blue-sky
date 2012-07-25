@@ -2,7 +2,7 @@
 #include "DrawingLine.h"
 #include "Direct3D11Mesh.h"
 
-#include "BulletTest.h"
+#include "GameMain.h"
 
 namespace blue_sky
 {

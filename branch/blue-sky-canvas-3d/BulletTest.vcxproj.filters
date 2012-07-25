@@ -4,7 +4,6 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainLoop.cpp" />
-    <ClCompile Include="BulletTest.cpp" />
     <ClCompile Include="ActiveObject.cpp">
       <Filter>ActiveObject</Filter>
     </ClCompile>
@@ -91,11 +90,11 @@
     <ClCompile Include="Direct3D11Material.cpp">
       <Filter>DirectX\Direct3D11</Filter>
     </ClCompile>
+    <ClCompile Include="GameMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="App.h" />
-    <ClInclude Include="BulletTest.h" />
     <ClInclude Include="ActiveObject.h">
       <Filter>ActiveObject</Filter>
     </ClInclude>
@@ -199,6 +198,7 @@
     <ClInclude Include="Direct3D11Material.h">
       <Filter>DirectX\Direct3D11</Filter>
     </ClInclude>
+    <ClInclude Include="GameMain.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\main.fx" />

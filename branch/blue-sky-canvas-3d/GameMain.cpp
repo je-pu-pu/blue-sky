@@ -1,423 +1,623 @@
-/**
- *
- *
- */
+#include "GameMain.h"
+#include "App.h"
 
+#include "Direct3D11.h"
+#include "Direct3D11MeshManager.h"
+#include "Direct3D11Mesh.h"
+#include "Direct3D11Material.h"
+#include "Direct3D11ConstantBuffer.h"
+#include "Direct3D11ShadowMap.h"
+#include "Direct3D11SkyBox.h"
+#include "Direct3D11Rectangle.h"
 
-#include	"GameMain.h"
-#include	"App.h"
+#include "DrawingModel.h"
 
-#include	"Model.h"
-#include "Direct3D9Canvas.h"
-#include "Direct3D9Font.h"
+#include "DirectWrite.h"
 
-#include	"matrix4x4.h"
-#include	"vector3.h"
+#include "Direct3D11BulletDebugDraw.h"
 
-#include	"Util.h"
-#include	<math.h>
+#include "DirectInput.h"
+#include "Input.h"
 
-#include <common/serialize.h>
-#include <common/random.h>
+#include "Robot.h"
+#include "StaticObject.h"
+#include "ActiveObjectManager.h"
+
+#include "ActiveObjectPhysics.h"
+
+#include "DrawingModelManager.h"
+#include "DrawingModel.h"
+// #include "DrawingMesh.h"
+#include "DrawingLine.h"
+
+#include "SoundManager.h"
+#include "Sound.h"
+
+#include "Player.h"
+#include "Camera.h"
+
+#include "include/d3dx11effect.h"
+
+#include "DirectX.h"
+
+#include <win/Version.h>
+
+#include <game/Config.h>
+#include <game/MainLoop.h>
+
 #include <common/math.h>
+#include <common/log.h>
 
-#include <boost/format.hpp>
+#include <sstream>
 
-using namespace std;
+#pragma comment( lib, "game.lib" )
+#pragma comment( lib, "win.lib" )
 
-art::Model sample_model;
-art::Model field_model;
-
-float g_eye_far_len = 10.f;
-
-const char* model_file_name_list[] =
+struct GameConstantBuffer
 {
-	"./boxes.obj",
-	"./blue-sky-box3.obj",
-	"./blue-sky-building-3.obj",
-	"./blue-sky-building-11.obj",
-	"./blue-sky-building-12.obj",
-
-	"./blue-sky-building-13.obj",
-
-	"./grid-building.obj",
-
-	"./grid.obj",
-	"./grid-cube.obj"
+	XMMATRIX projection;
 };
 
-//■コンストラクタ
-CGameMain::CGameMain()
-	: direct_3d_( 0 )
-	, canvas_( 0 )
-	, Width( 0 )
-	, Height( 0 )
+struct FrameConstantBuffer
 {
-	CApp *app = CApp::GetInstance();
-	Width = app->GetWidth();
-	Height = app->GetHeight();
+	XMMATRIX view;
+	XMMATRIX shadow_view_projection;
+	float time;
+};
 
-	//ランダマイズ
-	srand( timeGetTime() );
+struct ObjectConstantBuffer
+{
+	XMMATRIX world;
+};
 
-	// Direct3D 
-	direct_3d_ = new Direct3D9( app->GetWindowHandle(), Width, Height, false );
-	// direct_3d_->getFont()->load( "uzura_font", "media/font/uzura.ttf" );
+Direct3D11Rectangle* rectangle_ = 0;
 
-	// Canvas
-	canvas_ = new art::Direct3D9Canvas( direct_3d_ );
-	canvas_->createDepthBuffer();
+//■コンストラクタ
+GameMain::GameMain()
+{
+	win::Version version;
+	version.log( "log/windows_version.log" );
+
+	get_app()->clip_cursor( true );
+
+	// Config
+	config_ = new Config();
+	config_->load_file( "blue-sky.config" );
+
+	save_data_ = new Config();
+	save_data_->load_file( "save/blue-sky.save" );
+
+	// MainLoop
+	main_loop_ = new MainLoop( 60 );
+
+	// Direct3D
+	direct_3d_ = new Direct3D11( get_app()->GetWindowHandle(), get_app()->get_width(), get_app()->get_height(), false );
+	direct_3d_->load_effect_file( "media/shader/main.fx" );
+	direct_3d_->apply_effect();
+
+	game_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( GameConstantBuffer ), 0 );
+	frame_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( FrameConstantBuffer ), 1 );
+	object_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( ObjectConstantBuffer ), 2 );
+
+	shadow_map_ = new Direct3D11ShadowMap( direct_3d_.get(), 1024 );
+
+	{
+		GameConstantBuffer constant_buffer;
+		constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.05f, 1000.f );
+		constant_buffer.projection = XMMatrixTranspose( constant_buffer.projection );
+		
+		game_constant_buffer_->update( & constant_buffer );
+	}
+
+	sky_box_ = new Direct3D11SkyBox( direct_3d_.get(), "sky-box-a" );
+	
+	rectangle_ = new Direct3D11Rectangle( direct_3d_.get() );
+
+	/*
+	direct_write_ = new DirectWrite( direct_3d_->getTextSurface() );
+	*/
+
+	physics_ = new ActiveObjectPhysics();
+	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
+	bullet_debug_draw_->setDebugMode( btIDebugDraw::DBG_DrawWireframe );
+	bullet_debug_draw_->setDebugMode( 0 );
+
+	physics_->setDebugDrawer( bullet_debug_draw_.get() );
+
+	direct_input_ = new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() );
+	input_ = new Input();
+	input_->set_direct_input( direct_input_.get() );
+	input_->load_config( * config_.get() );
+
+	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
+	
+	get_sound_manager()->load_music( "bgm", "tower" );
+	get_sound_manager()->get_sound( "bgm" )->play( true );
+
+	// ActiveObjectManager
+	active_object_manager_ = new ActiveObjectManager();
+
+	drawing_model_manager_ = new DrawingModelManager();
+
+	{
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "floor" );
+
+		for ( int n = 0; n < 10; n++ )
+		{
+			StaticObject* static_object = new StaticObject();
+			static_object->set_drawing_model( drawing_model );
+			static_object->set_location( 0.f, 0.f, n * 20.f );
+
+			active_object_manager_->add_active_object( static_object );
+		}
+	}
+
+	{
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "building-20" );
+
+		for ( int n = 0; n < 10; n++ )
+		{
+			StaticObject* static_object = new StaticObject( 10, 20, 10 );
+			static_object->set_drawing_model( drawing_model );
+			static_object->set_location( 10.f, 0, n * 12.f );
+
+			active_object_manager_->add_active_object( static_object );
+
+			static_object->set_rigid_body( physics_->add_active_object( static_object ) );
+		}
+	}
+
+	{
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "building-200" );
+
+		for ( int n = 0; n < 5; n++ )
+		{
+			StaticObject* static_object = new StaticObject( 80, 200, 60 );
+			static_object->set_drawing_model( drawing_model );
+			static_object->set_location( -40, 0, n * 70.f );
+
+			active_object_manager_->add_active_object( static_object );
+
+			static_object->set_rigid_body( physics_->add_active_object( static_object ) );
+		}
+	}
+
+	{
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "tree-1" );
+
+		for ( int n = 0; n < 20; n++ )
+		{
+			StaticObject* static_object = new StaticObject();
+			static_object->set_drawing_model( drawing_model );
+			static_object->set_location( -5.f + rand() % 3, 0, n * 5.f + rand() % 2 );
+
+			active_object_manager_->add_active_object( static_object );
+		}
+	}
+
+	{
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "rocket" );
+
+		StaticObject* static_object = new StaticObject();
+		static_object->set_drawing_model( drawing_model );
+		static_object->set_location( 0, 0, 0 );
+
+		active_object_manager_->add_active_object( static_object );
+	}
+
+	{
+		for ( int n = 0; n < 10; n++ )
+		{
+			DrawingModel* drawing_model = get_drawing_model_manager()->load( "balloon" );
+
+			StaticObject* static_object = new StaticObject();
+			static_object->set_drawing_model( drawing_model );
+			static_object->set_location( float_t( rand() % 3 ), float_t( 3 + n * 3 ), float_t( n * 3 ) );
+
+			active_object_manager_->add_active_object( static_object );
+		}
+	}
+
+	player_ = new Player();
+	player_->set_location( 0, 300.f, 0 );
+	player_->set_rigid_body( physics_->add_active_object( player_.get() ) );
+	player_->get_rigid_body()->setAngularFactor( 0 );
+	player_->get_rigid_body()->setFriction( 0 );
+
+	player_->set_drawing_model( drawing_model_manager_->load( "player" ) );
+
+	camera_ = new Camera();
 }
 
 //■デストラクタ
-CGameMain::~CGameMain()
+GameMain::~GameMain()
 {
-	delete canvas_;
-	delete direct_3d_;
+	delete rectangle_;
 }
 
-static art::Vertex eye_pos( 0.f, 0.f, 0.f );
+FrameConstantBuffer frame_constant_buffer;
 
-void CGameMain::convert_3d_to_2d( vector3& v )
+bool GameMain::update()
 {
-	v *= 0.25f;
+	if ( ! main_loop_->loop() )
+	{
+		return false;
+	}
 
-	const float cx = static_cast< float >( Width / 2 );
-	const float cy = static_cast< float >( Height / 2 );
+	/// @todo 別スレッド化
+	get_sound_manager()->update();
+	
 
-	const float eye_far_len = g_eye_far_len;
+	if ( get_app()->is_active() )
+	{
+		direct_input_->update();
+		input_->update();
+	}
+	else
+	{
+		input_->update_null();
+	}
 
-	v = v - eye_pos;
+	{
+		bool is_moving = false;
 
-	const float sx = min( max( ( eye_far_len - v.z() ) / eye_far_len, 0.f ), 2.f );
-	const float sy = min( max( ( eye_far_len - v.z() ) / eye_far_len, 0.f ), 2.f );
+		if ( input_->press( Input::LEFT ) )
+		{
+			player_->side_step( -1.f );
+			is_moving = true;
+		}
+		if ( input_->press( Input::RIGHT ) )
+		{
+			player_->side_step( +1.f );
+			is_moving = true;
+		}
+		if ( input_->press( Input::UP ) )
+		{
+			player_->step( +1.f );
+			is_moving = true;
+		}
+		if ( input_->press( Input::DOWN ) )
+		{
+			player_->step( -1.f );
+			is_moving = true;
+		}
 
-	v.x() *= pow( sx, 4.f );
-	v.y() *= pow( sy, 4.f );
-	v.z() = ( v.z() + eye_far_len ) * 0.01f;
+		if ( ! is_moving )
+		{
+			player_->stop();
+		}
 
-	v.x() = v.x() * cy + cx;
-	v.y() = v.y() * cy + cy;
+		if ( input_->press( Input::X ) )
+		{
+			physics_->setConstraint();
+		}
+		if ( input_->press( Input::Y ) )
+		{
+			// eye += XMVectorSet( 0.f, -0.01f, 0.f, 0.f );
+		}
 
-	// srand( time( 0 ) );
+		if ( input_->push( Input::A ) )
+		{
+			player_->jump();
+		}
 
-	// random
-	const float r = 10.f;
+		if ( input_->push( Input::B ) )
+		{
+			Robot* robot = new Robot();
+			robot->set_drawing_model( get_drawing_model_manager()->load( "robot" ) );
+			robot->set_location( player_->get_transform().getOrigin().getX(), 20, player_->get_transform().getOrigin().getZ() + 5 );
 
-	// v.x() += ( rand() % RAND_MAX / static_cast< float >( RAND_MAX ) ) * r - ( r / 2.f );
-	// v.y() += ( rand() % RAND_MAX / static_cast< float >( RAND_MAX ) ) * r - ( r / 2.f );
+			active_object_manager_->add_active_object( robot );
+			robot->set_rigid_body( physics_->add_active_object( robot ) );
+		}
+	}
+
+	player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );
+	camera_->rotate_degree_target().y() = player_->get_direction_degree();
+
+	camera_->rotate_degree_target().y() += get_input()->get_mouse_dx() * 90.f;
+	camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f;
+	camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
+	
+	player_->update_rigid_body_velocity();
+	player_->update();
+
+	physics_->update( main_loop_->get_elapsed() );
+
+	for ( ActiveObjectManager::ActiveObjectList::iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
+	{
+		( *i )->update_transform();
+	}
+
+	player_->update_transform();
+
+	camera_->position().x() = player_->get_transform().getOrigin().x();
+	camera_->position().y() = player_->get_transform().getOrigin().y() + 1.5f;
+	camera_->position().z() = player_->get_transform().getOrigin().z();
+	camera_->update();
+
+	render();
+
+	// common::log( "log/elapsed.log", common::serialize( main_loop_->get_elapsed() ) + "\n" );
+
+	return true;
 }
 
-//■■■　メインループ　■■■
-void CGameMain::Loop()
+void GameMain::render()
 {
-	static int fps = 0, last_fps = 0;
-	static int sec = 0;
-	
-	if ( timeGetTime() / 1000 != sec )
-	{
-		sec = timeGetTime() / 1000;
+	static const bool is_render_2d_enabled = false;
 
-		last_fps = fps;
-		fps = 0;
+	{
+		const ActiveObject::Transform& t = player_->get_transform();
+
+		std::stringstream ss;
+		ss << "FPS : " << main_loop_->get_last_fps() << ", ";
+		ss << "POS : " << t.getOrigin().x() << ", " << t.getOrigin().y() << ", " << t.getOrigin().z();
+
+		get_app()->setTitle( ss.str().c_str() );
 	}
 
-	fps++;
-	
-	// canvas_->render();
-	// return;
-
-	MainLoop.WaitTime = 0;
-
-	//秒間50フレームを保持
-	// if(! MainLoop.Loop())	return;
-
-	// 色
-	RGBQUAD white =	{ 255, 255, 255, 20 };
-	RGBQUAD red =	{ 0, 0, 255, 127 };
-	RGBQUAD blue =	{ 255, 0, 0 };
-
-	RGBQUAD color_building = { 0, 255, 0, 255 };
-	RGBQUAD color_building_dark = { 0, 80, 0, 255 };
-	RGBQUAD color_building_edge = { 0, 20, 0, 255 };
-	RGBQUAD color_river = { 0xFF, 0x60, 0x10, 0x20 };
-
-	const int horizon_y = Height / 2;
-	
-	// canvas_->fillRect( Rect( 0, 0, Width, horizon_y ), RGB( 190, 200, 255 ) );
-	// canvas_->fillRect( Rect( 0, horizon_y, Width, Height ), RGB( 80, 100, 80 ) );
-
-	static int space;
-	static int c;
-	static int line_count = 32;
-	static int line_len = 200;
-
-	static POINT p[ 3 ];
-	static POINT m[ 3 ];
-
-	if(GetAsyncKeyState(VK_SPACE))	space++;
-	else							space = 0;
-
-	if ( GetAsyncKeyState( VK_RETURN ) )
+	// render_2d()
+	if ( is_render_2d_enabled )
 	{
-		eye_pos = art::Vertex( 0.f, 2.f, 0.f );
+		direct_3d_->begin2D();
+
+		direct_write_->begin();
+
+		std::wstringstream ss;
+		ss << L"Bullet による物理演算" << std::endl;
+		ss << L"FPS : " << main_loop_->get_last_fps() << std::endl;
+		ss << L"Objects : " << active_object_manager_->active_object_list().size() << std::endl;
+
+		// ss << L"blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky ";
+
+		direct_write_->drawText( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str() );
+
+		direct_write_->end();
+
+		direct_3d_->end2D();
 	}
 
-	if(space == 1){
-		line_count++;
-		line_len += 32;
-	}
-
-	//キー入力
-	if(GetAsyncKeyState(VK_LEFT))	c--;
-	if(GetAsyncKeyState(VK_RIGHT))	c++;
-	if(GetAsyncKeyState(VK_UP))		line_len++;
-	if(GetAsyncKeyState(VK_DOWN))	line_len--;
-	if(GetAsyncKeyState('Z'))		line_count++;
-	if(GetAsyncKeyState('X'))		line_count--;
-	if(line_count < 0)	line_count = 0;
-	
-	static double sr = 1.f;
-	static double sdr = 0.1f;
-	static double g = 1.0001f;
-	static bool r_random = true;
-	static bool p_random = true;
-	static int mn = 100;
-
-	static bool draw_face = true;
-	
-	if(GetAsyncKeyState('A'))		sr -= 0.01f;
-	if(GetAsyncKeyState('S'))		sr += 0.01f;
-	if(GetAsyncKeyState('D'))		sdr -= 0.01f;
-	if(GetAsyncKeyState('F'))		sdr += 0.01f;
-
-	if(GetAsyncKeyState('G'))		g -= 0.01f;
-	if(GetAsyncKeyState('H'))		g += 0.01f;
-	if(GetAsyncKeyState('R'))		r_random = ! p_random;
-	if(GetAsyncKeyState('T'))		p_random = ! p_random;
-
-	if(GetAsyncKeyState('Q'))		mn -= 10;
-	if(GetAsyncKeyState('W'))		mn += 10;
-
-	if ( GetAsyncKeyState( '1' ) )	g_solid = ! g_solid;
-	if ( GetAsyncKeyState( '2' ) )	g_line = ! g_line;
-
-	if ( GetAsyncKeyState( '3' ) )	g_power -= 0.1f;
-	if ( GetAsyncKeyState( '4' ) )	g_power += 0.1f;
-	if ( GetAsyncKeyState( '5' ) )	g_power_min -= 0.1f;
-	if ( GetAsyncKeyState( '6' ) )	g_power_min += 0.1f;
-	if ( GetAsyncKeyState( '7' ) )	g_power_max -= 0.1f;
-	if ( GetAsyncKeyState( '8' ) )	g_power_max += 0.1f;
-	if ( GetAsyncKeyState( '9' ) )	g_power_plus -= 0.01f;
-	if ( GetAsyncKeyState( '0' ) )	g_power_plus += 0.01f;
-
-	if ( GetAsyncKeyState( 'Y' ) )	g_power_rest -= 0.01f;
-	if ( GetAsyncKeyState( 'U' ) )	g_power_rest += 0.01f;
-	if ( GetAsyncKeyState( 'I' ) )	g_power_plus_reset -= 0.01f;
-	if ( GetAsyncKeyState( 'O' ) )	g_power_plus_reset += 0.01f;
-
-	if ( GetAsyncKeyState( 'Z' ) )	g_direction_fix_default -= 0.0001f;
-	if ( GetAsyncKeyState( 'X' ) )	g_direction_fix_default += 0.0001f;
-	if ( GetAsyncKeyState( 'C' ) )	g_direction_fix_acceleration -= 0.00001f;
-	if ( GetAsyncKeyState( 'V' ) )	g_direction_fix_acceleration += 0.00001f;
-	if ( GetAsyncKeyState( 'B' ) )	g_direction_random -= 0.001f;
-	if ( GetAsyncKeyState( 'N' ) )	g_direction_random += 0.001f;
-
-	if ( GetAsyncKeyState( 'F' ) )	draw_face = ! draw_face;
-
-	if ( GetAsyncKeyState( VK_PRIOR ) ) { g_eye_far_len -= 0.1f; }
-	if ( GetAsyncKeyState( VK_NEXT  ) ) { g_eye_far_len += 0.1f; }
-
-	if ( GetAsyncKeyState( VK_TAB ) )
+	// render_3d()
 	{
-		static int n = 0;
-
-		canvas_->vertex_list().clear();
-
-		sample_model.clear();
-		sample_model.load_file( model_file_name_list[ n ] );
-
-		n = ( n + 1 ) % ( sizeof( model_file_name_list ) / sizeof( char ) );
-
-		Sleep( 1000 );
-	}
-
-	g_line_count = 0;
-	g_circle_count = 0;
-	
-	// 3D BOX
-	matrix4x4 mt;
-
-	if ( GetAsyncKeyState( VK_LEFT  ) ) { eye_pos.x() -= 0.1f; }
-	if ( GetAsyncKeyState( VK_RIGHT ) ) { eye_pos.x() += 0.1f; }
-	if ( GetAsyncKeyState( VK_UP    ) ) { eye_pos.y() -= 0.1f; }
-	if ( GetAsyncKeyState( VK_DOWN  ) ) { eye_pos.y() += 0.1f; }
-
-	if ( GetAsyncKeyState( VK_NUMPAD9 ) ) { eye_pos.z() -= 0.1f; }
-	if ( GetAsyncKeyState( VK_NUMPAD3 ) ) { eye_pos.z() += 0.1f; }
-
-	if ( GetAsyncKeyState( VK_NUMPAD4 ) ) { matrix4x4 m; m.rotate_y( +1.f ); mt *= m; }
-	if ( GetAsyncKeyState( VK_NUMPAD6 ) ) { matrix4x4 m; m.rotate_y( -1.f ); mt *= m; }
-	if ( GetAsyncKeyState( VK_NUMPAD8 ) ) { matrix4x4 m; m.rotate_x( -1.f ); mt *= m; }
-	if ( GetAsyncKeyState( VK_NUMPAD2 ) ) { matrix4x4 m; m.rotate_x( +1.f ); mt *= m; }
-
-	// rotate
-	if ( space > 0 )
-	{
-		mt.rotate_y( 1.f );
-		mt.rotate_z( 0.1f );
-	}
-
-	// if ( GetAsyncKeyState( 'L' ) )
-	{
-
-	for ( art::Model::VertexList::iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )
-	{
-		i->second.vertex() *= mt;
-	}
-
-	// 3D 座標を 2D キャンバスターゲット座標にコピー
-	for ( art::Model::VertexList::const_iterator i = sample_model.vertex_list().begin(); i != sample_model.vertex_list().end(); ++i )
-	{
-		canvas_->vertex_list()[ i->first ].target_vertex() = i->second.vertex();
-	}
-
-	canvas_->line_list().clear();
-
-	// 3D ラインを 2D キャンバスラインにコピー
-	for ( art::Model::LineList::const_iterator i = sample_model.line_list().begin(); i != sample_model.line_list().end(); ++i )
-	{
-		canvas_->line_list().push_back( art::Canvas::Line( i->start_vertex_id(), i->end_vertex_id(), i->start_color() ) );
-	}
-	
-	// 3D フェイスを 2D キャンバスフェイスにコピー
-	canvas_->face_list() = sample_model.face_list();
-
-	// 2D キャンバスターゲット座標を透視投影変換
-	for ( art::Canvas::VertexList::iterator i = canvas_->vertex_list().begin(); i != canvas_->vertex_list().end(); ++i )
-	{
-		convert_3d_to_2d( i->second.target_vertex() );
-
-		i->second.update();
-	}
-
-	} // first
-
-	int n = 0;
-
-	canvas_->clearDepthBuffer();
-	canvas_->begin();
-
-	/*
-	canvas_->drawCircle( art::Vertex( 110.f, 110.f, 0.1f ), 300.f, art::Color( 255, 0, 0 ), true );
-	canvas_->drawCircle( art::Vertex( 120.f, 120.f, 0.5f ), 300.f, art::Color( 0, 255, 0 ), true );
-	canvas_->drawCircle( art::Vertex( 130.f, 130.f, 0.9f ), 300.f, art::Color( 0, 0, 255 ), true );
-	*/
-
-	if ( draw_face )
-	{
-		// canvas_->sort_face_list_by_z();
-
-		art::Canvas::Brush brush;
-		brush.size() = 10.f;
-		brush.size_acceleration() = 0.08f;
-		canvas_->setBrush( & brush );
-
-		int face_id = 0;
-
-		canvas_->beginDrawPolygon();
-
-		// 面を描画する
-		for ( art::Canvas::FaceList::iterator i = canvas_->face_list().begin(); i != canvas_->face_list().end(); ++i )
+		if ( is_render_2d_enabled )
 		{
-			canvas_->setDepthBufferPixelId( face_id );
-			canvas_->drawPolygonHumanTouch( *i, i->color() );
+			direct_3d_->begin3D();
+		}
 
-			face_id++;
+		XMVECTOR eye = XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 );
+#if 1
+		// render_object_for_shadow()
+		// if ( rand() % 4 == 0 )
+		{
+			shadow_map_->setEyePosition( eye );
+
+			frame_constant_buffer.view = XMMatrixTranspose( shadow_map_->getViewMatrix() );
+			frame_constant_buffer.shadow_view_projection = shadow_map_->getViewMatrix() * shadow_map_->getProjectionMatrix();
+			frame_constant_buffer.shadow_view_projection = XMMatrixTranspose( frame_constant_buffer.shadow_view_projection );
+
+			frame_constant_buffer_->update( & frame_constant_buffer );
+
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|shadow_map" );
+
+			D3DX11_TECHNIQUE_DESC technique_desc;
+			technique->GetDesc( & technique_desc );
+
+			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			{
+				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
+				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+
+				shadow_map_->render();
+
+				{
+					game_constant_buffer_->render();
+					frame_constant_buffer_->render();
+				}
+
+				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
+				{
+					render( *i );
+				}
+
+				render( player_.get() );
+			}
+		}
+#endif
+
+#if 1
+		direct_3d_->clear();
+
+		// update_view()
+		{
+			XMVECTOR at = XMVectorSet( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z(), 0.0f );
+			XMVECTOR up = XMVectorSet( camera_->up().x(), camera_->up().y(), camera_->up().z(), 0.0f );
+
+			static float t = 0.f;
+
+			frame_constant_buffer.view = XMMatrixLookAtLH( eye, at, up );
+			frame_constant_buffer.view = XMMatrixTranspose( frame_constant_buffer.view );
+			frame_constant_buffer.time = t;
+
+			frame_constant_buffer_->update( & frame_constant_buffer );
+
+			t += main_loop_->get_elapsed();
+		}
+
+		// render_sky_box()
+		{
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|sky_box" );
+
+			D3DX11_TECHNIQUE_DESC technique_desc;
+			technique->GetDesc( & technique_desc );
+
+			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			{
+				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
+				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+
+				{
+					game_constant_buffer_->render();
+					frame_constant_buffer_->render();
+
+					ObjectConstantBuffer buffer;
+					buffer.world = XMMatrixTranslationFromVector( eye );
+					buffer.world = XMMatrixTranspose( buffer.world );
+					object_constant_buffer_->update( & buffer );
+					object_constant_buffer_->render();
+				}
+
+				sky_box_->render();
+			}
+		}
+
+		// render_object();
+		{
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|main_with_shadow" );
+
+			D3DX11_TECHNIQUE_DESC technique_desc;
+			technique->GetDesc( & technique_desc );
+
+			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			{
+				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
+				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+				
+				ID3D11ShaderResourceView* shader_resource_view = shadow_map_->getShaderResourceView();
+				direct_3d_->getImmediateContext()->PSSetShaderResources( 1, 1, & shader_resource_view );
+
+				{
+					game_constant_buffer_->render();
+					frame_constant_buffer_->render();
+				}
+
+				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
+				{
+					render( *i );
+				}
+			}
+		}
+
+#if 1
+		// render_object_line();
+		{
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|drawing_line" );
+
+			D3DX11_TECHNIQUE_DESC technique_desc;
+			technique->GetDesc( & technique_desc );
+
+			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			{
+				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
+				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+				
+				{
+					game_constant_buffer_->render();
+					frame_constant_buffer_->render();
+				}
+
+				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
+				{
+					render_line( *i );
+				}
+
+				render_line( player_.get() );
+			}
+		}
+#endif
+
+#if 1
+		// render_bullet_debug();
+		{
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|bullet" );
+			
+			D3DX11_TECHNIQUE_DESC technique_desc;
+			technique->GetDesc( & technique_desc );
+
+			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			{
+				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
+				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+				
+				game_constant_buffer_->render();
+				frame_constant_buffer_->render();
+
+				bullet_debug_draw_->render();
+			}
+		}
+#endif
+
+		// render_text();
+		if ( is_render_2d_enabled )
+		{
+			direct_3d_->renderText();
+		}
+
+#endif
+
+#if 1
+		// render_debug_shadow_map()
+		{
+			direct_3d_->setDebugViewport( 0.f, 0, get_width() / 4.f, get_height() / 4.f );
+
+			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|main2d" );
+
+			D3DX11_TECHNIQUE_DESC technique_desc;
+			technique->GetDesc( & technique_desc );
+
+			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			{
+				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
+				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+				
+				( * rectangle_->get_material_list().begin() )->set_shader_resource_view( shadow_map_->getShaderResourceView() );
+				rectangle_->render();
+			}
+		}
+#endif
+
+		if ( is_render_2d_enabled )
+		{
+			direct_3d_->end3D();
 		}
 	}
 
-	canvas_->sort_line_list_by_z();
+	direct_3d_->end();
+}
 
-	canvas_->beginDrawLine();
+void GameMain::render( const ActiveObject* active_object )
+{
+	const btTransform& trans = active_object->get_transform();
 
-	// 線を描画する
-	for ( art::Canvas::LineList::iterator i = canvas_->line_list().begin(); i != canvas_->line_list().end(); ++i )
-	{
-		art::Canvas::Brush brush;
-		brush.size() = 1.f;
-		brush.size_acceleration() = 0.05f;
+	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
 
-		art::Vertex& from = canvas_->vertex_list()[ i->from() ].vertex();
-		art::Vertex& to = canvas_->vertex_list()[ i->to() ].vertex();
-		
-		canvas_->setBrush( 0 );
-		canvas_->setDepthBufferPixelId( i->from() );
-		canvas_->drawLineHumanTouch( from, to, i->color() );
-	}
+	ObjectConstantBuffer buffer;
 
-	/*
-	for ( int n = 0; n < 100; n++ )
-	{
-		// art::Canvas::Brush brush;
-		// brush.size() = 1.f;
-		// brush.size_acceleration() = 0.01f;
-		// canvas_->setBrush( & brush );
-		canvas_->setDepthBufferPixelId( n );
+	buffer.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
+	buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+	buffer.world = XMMatrixTranspose( buffer.world );
 
-		int x = n / 2 * 30;
-		int y = n / 2 * 30;
+	object_constant_buffer_->update( & buffer );
+	object_constant_buffer_->render();
 
-		if ( n % 2 == 0 )
-		{
-			canvas_->drawLineHumanTouch( art::Vertex( 10.f, y, 0.f ), art::Vertex( Width - 10.f, y, 0.f ), art::Color( 0, 255, 0 ) );
-		}
-		else
-		{
-			// canvas_->drawLineHumanTouch( art::Vertex( x, 10.f, 0.f ), art::Vertex( x, Height - 10.f, 0.f ), art::Color( 0, 0, 255 ) );
-		}
-	}
-	*/
+	active_object->get_drawing_model()->get_mesh()->render();
+}
 
-	canvas_->render();
+void GameMain::render_line( const ActiveObject* active_object )
+{
+	// @todo 効率化
+	const btTransform& trans = active_object->get_transform();
 
-	//デバッグ情報描画
-	std::string debug_text;
+	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
 
-	debug_text = std::string( "FPS : " ) + common::serialize( last_fps ) + ", circle : " + common::serialize( g_circle_count );
-	debug_text += ", line : " + common::serialize( g_line_count ) + " / " + common::serialize( canvas_->line_list().size() );
-	debug_text += ", face : " + common::serialize( canvas_->face_list().size() );
-	debug_text += ", eye : " + common::serialize( g_eye_far_len );
-	debug_text += "\n" + ( boost::format( "power:%.3f,%.3f,%.3f plus:%.3f reset:%.3f plus_reset:%.3f" ) % g_power % g_power_min % g_power_max % g_power_plus % g_power_rest % g_power_plus_reset ).str();
-	debug_text += "\n" + ( boost::format( "dir_fix_d:%.5f dir_fix_acc:%.5f dir_rnd:%.4f" ) % g_direction_fix_default % g_direction_fix_acceleration % g_direction_random ).str();
+	ObjectConstantBuffer buffer;
 
-	debug_text += "\n";
+	buffer.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
+	buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+	buffer.world = XMMatrixTranspose( buffer.world );
 
-	int x = 0;
+	object_constant_buffer_->update( & buffer );
+	object_constant_buffer_->render();
 
-	for ( Canvas::VertexList::iterator i = canvas_->vertex_list().begin(); i != canvas_->vertex_list().end(); ++i )
-	{
-		debug_text += ( boost::format( "%-4.3f,%-4.3f,%-4.3f\n" ) % i->second.vertex().x() % i->second.vertex().y() % i->second.vertex().z() ).str();
-
-		if ( x >= 8 )
-		{
-			debug_text += "...\n";
-			break;
-		}
-
-		x++;
-	}
-
-	debug_text += "\n";
-
-	/*
-	for ( int a = 0; a < 100; a++ )
-	{
-		debug_text += common::serialize( math::clamp( common::random( -4, 4 ), 0, 255 ) ) + ",";
-	}
-	*/
-
-	canvas_->drawText( art::Vertex( 0.f, 0.f ), debug_text.c_str(), art::Color( 255, 0, 0, 127 ) );
-
-	canvas_->end();
+	active_object->get_drawing_model()->get_line()->render( 500 ); // 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
 }

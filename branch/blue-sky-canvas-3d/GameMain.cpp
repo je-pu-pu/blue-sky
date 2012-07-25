@@ -9,6 +9,7 @@
 #include "Direct3D11ShadowMap.h"
 #include "Direct3D11SkyBox.h"
 #include "Direct3D11Rectangle.h"
+#include "Direct3D11Effect.h"
 
 #include "DrawingModel.h"
 
@@ -53,6 +54,9 @@
 #pragma comment( lib, "game.lib" )
 #pragma comment( lib, "win.lib" )
 
+namespace blue_sky
+{
+
 struct GameConstantBuffer
 {
 	XMMATRIX projection;
@@ -92,8 +96,8 @@ GameMain::GameMain()
 
 	// Direct3D
 	direct_3d_ = new Direct3D11( get_app()->GetWindowHandle(), get_app()->get_width(), get_app()->get_height(), false );
-	direct_3d_->load_effect_file( "media/shader/main.fx" );
-	direct_3d_->apply_effect();
+	direct_3d_->getEffect()->load( "media/shader/main.fx" );
+	direct_3d_->create_default_input_layout();
 
 	game_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( GameConstantBuffer ), 0 );
 	frame_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( FrameConstantBuffer ), 1 );
@@ -357,6 +361,8 @@ void GameMain::render()
 		get_app()->setTitle( ss.str().c_str() );
 	}
 
+	direct_3d_->setInputLayout( "main" );
+
 	// render_2d()
 	if ( is_render_2d_enabled )
 	{
@@ -398,15 +404,11 @@ void GameMain::render()
 
 			frame_constant_buffer_->update( & frame_constant_buffer );
 
-			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|shadow_map" );
+			Direct3D::EffectTechnique* technique = direct_3d_->getEffect()->getTechnique( "|shadow_map" );
 
-			D3DX11_TECHNIQUE_DESC technique_desc;
-			technique->GetDesc( & technique_desc );
-
-			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 			{
-				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
-				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+				( *i )->apply();
 
 				shadow_map_->render();
 
@@ -446,15 +448,11 @@ void GameMain::render()
 
 		// render_sky_box()
 		{
-			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|sky_box" );
+			Direct3D::EffectTechnique* technique = direct_3d_->getEffect()->getTechnique( "|sky_box" );
 
-			D3DX11_TECHNIQUE_DESC technique_desc;
-			technique->GetDesc( & technique_desc );
-
-			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 			{
-				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
-				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+				( *i )->apply();
 
 				{
 					game_constant_buffer_->render();
@@ -473,15 +471,11 @@ void GameMain::render()
 
 		// render_object();
 		{
-			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|main_with_shadow" );
+			Direct3D::EffectTechnique* technique = direct_3d_->getEffect()->getTechnique( "|main_with_shadow" );
 
-			D3DX11_TECHNIQUE_DESC technique_desc;
-			technique->GetDesc( & technique_desc );
-
-			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 			{
-				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
-				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+				( *i )->apply();
 				
 				ID3D11ShaderResourceView* shader_resource_view = shadow_map_->getShaderResourceView();
 				direct_3d_->getImmediateContext()->PSSetShaderResources( 1, 1, & shader_resource_view );
@@ -501,16 +495,14 @@ void GameMain::render()
 #if 1
 		// render_object_line();
 		{
-			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|drawing_line" );
+			direct_3d_->setInputLayout( "line" );
 
-			D3DX11_TECHNIQUE_DESC technique_desc;
-			technique->GetDesc( & technique_desc );
+			Direct3D::EffectTechnique* technique = direct_3d_->getEffect()->getTechnique( "|drawing_line" );
 
-			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 			{
-				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
-				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
-				
+				( *i )->apply();
+
 				{
 					game_constant_buffer_->render();
 					frame_constant_buffer_->render();
@@ -523,21 +515,19 @@ void GameMain::render()
 
 				render_line( player_.get() );
 			}
+
+			direct_3d_->setInputLayout( "main" );
 		}
 #endif
 
 #if 1
 		// render_bullet_debug();
 		{
-			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|bullet" );
-			
-			D3DX11_TECHNIQUE_DESC technique_desc;
-			technique->GetDesc( & technique_desc );
+			Direct3D::EffectTechnique* technique = direct_3d_->getEffect()->getTechnique( "|bullet" );
 
-			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 			{
-				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
-				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+				( *i )->apply();
 				
 				game_constant_buffer_->render();
 				frame_constant_buffer_->render();
@@ -560,15 +550,11 @@ void GameMain::render()
 		{
 			direct_3d_->setDebugViewport( 0.f, 0, get_width() / 4.f, get_height() / 4.f );
 
-			ID3DX11EffectTechnique* technique = direct_3d_->getEffect()->GetTechniqueByName( "|main2d" );
+			Direct3D::EffectTechnique* technique = direct_3d_->getEffect()->getTechnique( "|main2d" );
 
-			D3DX11_TECHNIQUE_DESC technique_desc;
-			technique->GetDesc( & technique_desc );
-
-			for ( UINT n = 0; n < technique_desc.Passes; n++ )
+			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 			{
-				ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
-				DIRECT_X_FAIL_CHECK( pass->Apply( 0, direct_3d_->getImmediateContext() ) );
+				( *i )->apply();
 				
 				( * rectangle_->get_material_list().begin() )->set_shader_resource_view( shadow_map_->getShaderResourceView() );
 				rectangle_->render();
@@ -621,3 +607,5 @@ void GameMain::render_line( const ActiveObject* active_object )
 
 	active_object->get_drawing_model()->get_line()->render( 500 ); // 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
 }
+
+} // namespace blue_sky

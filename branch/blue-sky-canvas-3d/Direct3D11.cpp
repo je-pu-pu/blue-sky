@@ -1,4 +1,5 @@
 #include "Direct3D11.h"
+#include "Direct3D11Effect.h"
 #include "Direct3D11MeshManager.h"
 #include "Direct3D11TextureManager.h"
 #include "DirectX.h"
@@ -21,9 +22,6 @@
 #pragma comment (lib, "d3d10_1.lib" )
 #pragma comment( lib, "d3dcompiler.lib" )
 
-#pragma comment( lib, "effects11.lib" )
-
-
 #ifdef _DEBUG
 #pragma comment( lib, "d3dx11d.lib" )
 // #pragma comment( lib, "d3dx10d.lib" )
@@ -43,9 +41,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	, depth_stencil_texture_( 0 )
 	, depth_stencil_view_( 0 )
 
-	, effect_( 0 )
-	, vertex_layout_( 0 )
-	
 	, device_10_( 0 )
 	, back_buffer_surface_( 0 )
 	, text_texture_( 0 )
@@ -205,6 +200,15 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		viewport_.MinDepth = 0.f;
 		viewport_.MaxDepth = 1.f;
 	}
+
+	// 
+	effect_ = new Effect( this );
+
+	// Mesh Manager
+	mesh_manager_ = new Direct3D11MeshManager( this );
+
+	// Texture Manager
+	texture_manager_ = new Direct3D11TextureManager( this );
 }
 
 Direct3D11::~Direct3D11()
@@ -220,9 +224,10 @@ Direct3D11::~Direct3D11()
 
 	DIRECT_X_RELEASE( device_10_ );
 
-	DIRECT_X_RELEASE( vertex_layout_ );
-	
-	DIRECT_X_RELEASE( effect_ );
+	for ( InputLayoutList::iterator i = vertex_layout_list_.begin(); i != vertex_layout_list_.end(); ++i )
+	{
+		DIRECT_X_RELEASE( i->second );
+	}
 
 	DIRECT_X_RELEASE( depth_stencil_view_ );
 	DIRECT_X_RELEASE( depth_stencil_texture_ );
@@ -235,65 +240,24 @@ Direct3D11::~Direct3D11()
 	DIRECT_X_RELEASE( device_ );
 }
 
-void Direct3D11::load_effect_file( const char* file_path )
+// ???
+void Direct3D11::create_default_input_layout()
 {
-	ID3D10Blob* shader = 0;
-	ID3D10Blob* error_messages = 0;
+	D3D11_INPUT_ELEMENT_DESC layout_main[] =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
 
-	HRESULT hr = D3DX11CompileFromFile( file_path, 0, 0, 0, "fx_5_0", 0, 0, 0, & shader, & error_messages, 0  );
+	vertex_layout_list_[ "main" ] = ( * effect_->getTechnique( "|main" )->getPassList().begin() )->createVertexLayout( layout_main, ARRAYSIZE( layout_main ) );
 
-	if ( FAILED( hr ) )
-	{
-		if ( error_messages )
-		{
-			COMMON_THROW_EXCEPTION_MESSAGE( static_cast< char* >( error_messages->GetBufferPointer() ) );
-		}
-		else
-		{
-			DIRECT_X_FAIL_CHECK( hr );
-		}
-	}
-
-	int n = shader->GetBufferSize();
-
-	DIRECT_X_FAIL_CHECK( D3DX11CreateEffectFromMemory( shader->GetBufferPointer(), shader->GetBufferSize(), 0, device_, & effect_ ) );
-
-	
-	// ?
-	D3D11_INPUT_ELEMENT_DESC layout[] =
+	D3D11_INPUT_ELEMENT_DESC layout_line[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		// { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-	UINT numElements = ARRAYSIZE( layout );
-
-
-	ID3DX11EffectPass* pass = effect_->GetTechniqueByName( "|drawing_line" )->GetPassByIndex( 0 ); 
-
-	D3DX11_PASS_DESC pass_desc;
-	pass->GetDesc( & pass_desc );
-
-	DIRECT_X_FAIL_CHECK( device_->CreateInputLayout( layout, numElements, pass_desc.pIAInputSignature, pass_desc.IAInputSignatureSize, & vertex_layout_ ) );
-
-	// ?
-	immediate_context_->IASetInputLayout( vertex_layout_ );
-
-
-	// Mesh Manager
-	mesh_manager_ = new Direct3D11MeshManager( this );
-
-	// Texture Manager
-	texture_manager_ = new Direct3D11TextureManager( this );
-}
-
-void Direct3D11::apply_effect()
-{
-	ID3DX11EffectTechnique* technique = effect_->GetTechniqueByName( "|main" );
-
-	ID3DX11EffectPass* pass = technique->GetPassByIndex( 0 ); 
-	DIRECT_X_FAIL_CHECK( pass->Apply( 0, immediate_context_ ) );
+	vertex_layout_list_[ "line" ] = ( * effect_->getTechnique( "|drawing_line" )->getPassList().begin() )->createVertexLayout( layout_line, ARRAYSIZE( layout_line ) );
 }
 
 void Direct3D11::clear()
@@ -304,6 +268,11 @@ void Direct3D11::clear()
 	immediate_context_->ClearDepthStencilView( depth_stencil_view_, D3D11_CLEAR_DEPTH, 1.f, 0 );
 	immediate_context_->OMSetRenderTargets( 1, & back_buffer_view_, depth_stencil_view_ );
 	immediate_context_->RSSetViewports( 1, & viewport_ );
+}
+
+void Direct3D11::setInputLayout( const char* name )
+{
+	immediate_context_->IASetInputLayout( vertex_layout_list_[ name ] );
 }
 
 void Direct3D11::begin2D()
@@ -335,15 +304,11 @@ void Direct3D11::end()
 
 void Direct3D11::renderText()
 {
-	ID3DX11EffectTechnique* technique = effect_->GetTechniqueByName( "|text" );
+	EffectTechnique* technique = effect_->getTechnique( "|text" );
 
-	D3DX11_TECHNIQUE_DESC technique_desc;
-	technique->GetDesc( & technique_desc );
-
-	for ( UINT n = 0; n < technique_desc.Passes; n++ )
+	for ( EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 	{
-		ID3DX11EffectPass* pass = technique->GetPassByIndex( n ); 
-		DIRECT_X_FAIL_CHECK( pass->Apply( 0, immediate_context_ ) );
+		( *i )->apply();
 
 		immediate_context_->PSSetShaderResources( 0, 1, & text_view_ );
 		immediate_context_->Draw( 3, 0 ); // !!!

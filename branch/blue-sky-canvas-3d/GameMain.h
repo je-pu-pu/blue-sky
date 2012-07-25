@@ -43,6 +43,9 @@ using namespace blue_sky;
 
 using common::auto_ptr;
 
+namespace blue_sky
+{
+
 class GameMain : public Game
 {
 public:
@@ -109,6 +112,8 @@ public:
 
 	inline static GameMain* get_instance() { static GameMain game_main; return & game_main; }
 };
+
+} // namespace blue_sky
 
 inline Game* Game::getInstance() { return GameMain::get_instance(); }
 

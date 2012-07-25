@@ -20,6 +20,9 @@
     <ClCompile Include="Direct3D11.cpp" />
     <ClCompile Include="Direct3D11BulletDebugDraw.cpp" />
     <ClCompile Include="Direct3D11ConstantBuffer.cpp" />
+    <ClCompile Include="Direct3D11Effect.cpp" />
+    <ClCompile Include="Direct3D11EffectPass.cpp" />
+    <ClCompile Include="Direct3D11EffectTechnique.cpp" />
     <ClCompile Include="Direct3D11Material.cpp" />
     <ClCompile Include="Direct3D11Mesh.cpp" />
     <ClCompile Include="Direct3D11MeshManager.cpp" />
@@ -42,6 +45,7 @@
     <ClCompile Include="OggVorbisFile.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Robot.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="StaticeObject.cpp" />
@@ -58,6 +62,9 @@
     <ClInclude Include="Direct3D11.h" />
     <ClInclude Include="Direct3D11BulletDebugDraw.h" />
     <ClInclude Include="Direct3D11ConstantBuffer.h" />
+    <ClInclude Include="Direct3D11Effect.h" />
+    <ClInclude Include="Direct3D11EffectPass.h" />
+    <ClInclude Include="Direct3D11EffectTechnique.h" />
     <ClInclude Include="Direct3D11Material.h" />
     <ClInclude Include="Direct3D11Mesh.h" />
     <ClInclude Include="Direct3D11MeshManager.h" />
@@ -76,8 +83,10 @@
     <ClInclude Include="DrawingLine.h" />
     <ClInclude Include="DrawingModel.h" />
     <ClInclude Include="DrawingModelManager.h" />
+    <ClInclude Include="EndingScene.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameMain.h" />
+    <ClInclude Include="GamePlayScene.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="matrix4x4.h" />
@@ -85,10 +94,14 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Robot.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="StageSelectScene.h" />
     <ClInclude Include="StaticObject.h" />
+    <ClInclude Include="StoryTextScene.h" />
     <ClInclude Include="StreamingSound.h" />
+    <ClInclude Include="TitleScene.h" />
     <ClInclude Include="type.h" />
     <ClInclude Include="vector3.h" />
   </ItemGroup>

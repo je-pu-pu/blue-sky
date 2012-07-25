@@ -91,6 +91,18 @@
       <Filter>DirectX\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="GameMain.cpp" />
+    <ClCompile Include="Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11Effect.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11EffectTechnique.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11EffectPass.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainLoop.h" />
@@ -199,6 +211,33 @@
       <Filter>DirectX\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="GameMain.h" />
+    <ClInclude Include="StoryTextScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="TitleScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="EndingScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePlayScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="StageSelectScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11Effect.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11EffectTechnique.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11EffectPass.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\main.fx" />
@@ -236,6 +275,9 @@
     </Filter>
     <Filter Include="DirectX\DirectInput">
       <UniqueIdentifier>{0373c118-1ba9-48ac-ae50-70e4353fe825}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{10ce03e4-864e-4dea-b599-103ee588e478}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -43,8 +43,10 @@
 #include <win/Version.h>
 
 #include <game/Config.h>
+#include <game/MainLoop.h>
 
 #include <common/math.h>
+#include <common/log.h>
 
 #include <sstream>
 
@@ -85,6 +87,9 @@ GameMain::GameMain()
 	save_data_ = new Config();
 	save_data_->load_file( "save/blue-sky.save" );
 
+	// MainLoop
+	main_loop_ = new MainLoop( 60 );
+
 	// Direct3D
 	direct_3d_ = new Direct3D11( get_app()->GetWindowHandle(), get_app()->get_width(), get_app()->get_height(), false );
 	direct_3d_->load_effect_file( "media/shader/main.fx" );
@@ -98,7 +103,7 @@ GameMain::GameMain()
 
 	{
 		GameConstantBuffer constant_buffer;
-		constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.1f, 1000.f );
+		constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.05f, 1000.f );
 		constant_buffer.projection = XMMatrixTranspose( constant_buffer.projection );
 		
 		game_constant_buffer_->update( & constant_buffer );
@@ -115,7 +120,7 @@ GameMain::GameMain()
 	physics_ = new ActiveObjectPhysics();
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
 	bullet_debug_draw_->setDebugMode( btIDebugDraw::DBG_DrawWireframe );
-	// bullet_debug_draw_->setDebugMode( 0 );
+	bullet_debug_draw_->setDebugMode( 0 );
 
 	physics_->setDebugDrawer( bullet_debug_draw_.get() );
 
@@ -217,7 +222,7 @@ GameMain::GameMain()
 	player_->set_location( 0, 300.f, 0 );
 	player_->set_rigid_body( physics_->add_active_object( player_.get() ) );
 	player_->get_rigid_body()->setAngularFactor( 0 );
-	// player_->get_rigid_body()->setFriction( 0 );
+	player_->get_rigid_body()->setFriction( 0 );
 
 	player_->set_drawing_model( drawing_model_manager_->load( "player" ) );
 
@@ -230,26 +235,11 @@ GameMain::~GameMain()
 	delete rectangle_;
 }
 
-static int fps = 0, last_fps = 0;
-
 FrameConstantBuffer frame_constant_buffer;
 
 bool GameMain::update()
 {
-	static int sec = 0;
-	
-	if ( timeGetTime() / 1000 != sec )
-	{
-		sec = timeGetTime() / 1000;
-
-		last_fps = fps;
-		fps = 0;
-	}
-	
-	// •bŠÔ50ƒtƒŒ[ƒ€‚ð•ÛŽ
-	MainLoop.WaitTime = 0;
-
-	if ( ! MainLoop.Loop() )
+	if ( ! main_loop_->loop() )
 	{
 		return false;
 	}
@@ -269,26 +259,34 @@ bool GameMain::update()
 	}
 
 	{
+		bool is_moving = false;
+
 		if ( input_->press( Input::LEFT ) )
 		{
 			player_->side_step( -1.f );
-			// eye += XMVectorSet( -0.01f, 0.0f, 0.0f, 0.0f );
+			is_moving = true;
 		}
 		if ( input_->press( Input::RIGHT ) )
 		{
 			player_->side_step( +1.f );
-			// eye += XMVectorSet( 0.01f, 0.0f, 0.0f, 0.0f );
+			is_moving = true;
 		}
 		if ( input_->press( Input::UP ) )
 		{
 			player_->step( +1.f );
-			// eye += XMVectorSet( 0.f, 0.0f, 0.01f, 0.f );
+			is_moving = true;
 		}
 		if ( input_->press( Input::DOWN ) )
 		{
 			player_->step( -1.f );
-			// eye += XMVectorSet( 0.f, 0.0f, -0.01f, 0.f );
+			is_moving = true;
 		}
+
+		if ( ! is_moving )
+		{
+			player_->stop();
+		}
+
 		if ( input_->press( Input::X ) )
 		{
 			physics_->setConstraint();
@@ -314,9 +312,6 @@ bool GameMain::update()
 		}
 	}
 
-	static DWORD old_time = timeGetTime();
-	DWORD time = timeGetTime();
-
 	player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );
 	camera_->rotate_degree_target().y() = player_->get_direction_degree();
 
@@ -327,12 +322,7 @@ bool GameMain::update()
 	player_->update_rigid_body_velocity();
 	player_->update();
 
-	for ( ActiveObjectManager::ActiveObjectList::iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
-	{
-		( *i )->update_transform();
-	}
-
-	physics_->update( ( time - old_time ) / 1000.f );
+	physics_->update( main_loop_->get_elapsed() );
 
 	for ( ActiveObjectManager::ActiveObjectList::iterator i = active_object_manager_->active_object_list().begin(); i != active_object_manager_->active_object_list().end(); ++i )
 	{
@@ -348,7 +338,7 @@ bool GameMain::update()
 
 	render();
 
-	old_time = time;
+	// common::log( "log/elapsed.log", common::serialize( main_loop_->get_elapsed() ) + "\n" );
 
 	return true;
 }
@@ -361,7 +351,7 @@ void GameMain::render()
 		const ActiveObject::Transform& t = player_->get_transform();
 
 		std::stringstream ss;
-		ss << "FPS : " << getMainLoop().GetFPS() << ", ";
+		ss << "FPS : " << main_loop_->get_last_fps() << ", ";
 		ss << "POS : " << t.getOrigin().x() << ", " << t.getOrigin().y() << ", " << t.getOrigin().z();
 
 		get_app()->setTitle( ss.str().c_str() );
@@ -376,13 +366,10 @@ void GameMain::render()
 
 		std::wstringstream ss;
 		ss << L"Bullet ‚É‚æ‚é•¨—‰‰ŽZ" << std::endl;
-		ss << L"FPS : " << getMainLoop().GetFPS() << std::endl;
+		ss << L"FPS : " << main_loop_->get_last_fps() << std::endl;
 		ss << L"Objects : " << active_object_manager_->active_object_list().size() << std::endl;
 
 		// ss << L"blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky blue-sky ";
-
-		ss << "FPS : " << getMainLoop().GetFPS() << std::endl;
-		ss << "Click Left Mouse Button !!!" << std::endl;
 
 		direct_write_->drawText( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str() );
 
@@ -454,7 +441,7 @@ void GameMain::render()
 
 			frame_constant_buffer_->update( & frame_constant_buffer );
 
-			t += 0.01f;
+			t += main_loop_->get_elapsed();
 		}
 
 		// render_sky_box()

@@ -31,6 +31,8 @@ public:
 
 	void update( float = 1.f / 60.f );
 	
+	btDynamicsWorld* get_dynamics_world() { return dynamics_world_; }
+
 	// for debug
 	void setDebugDrawer( btIDebugDraw* );
 

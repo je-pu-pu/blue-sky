@@ -100,7 +100,7 @@ btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, cons
 
 	// create_box_rigid_body()
 	{
-		btScalar mass( is_static ? 0.f : 1.f );
+		btScalar mass( is_static ? 0.f : 100.f );
 		btVector3 local_inertia( 0, 0, 0 );
 
 		shape->calculateLocalInertia( mass, local_inertia );

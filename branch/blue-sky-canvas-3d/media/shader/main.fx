@@ -184,9 +184,10 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 	{
 		if ( input[ n ].Position.z < 0.f )
 		{
+			// @todo 調整
 			input[ 0 ].Position.w = 0.f;
 			input[ 1 ].Position.w = 0.f;
-
+			
 			break;
 		}
 		else
@@ -208,7 +209,7 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 		float lx = input[ m ].Position.x - input[ n ].Position.x;
 		
 		// float line_index = ( uint( Time + primitive_id % 10 / 10.f ) + primitive_id ) % 3; // 全ての線がばらばらのタイミングで更新される
-		float line_index = ( uint( Time ) + primitive_id ) % 3; // 全ての線が統一されたタイミングで更新される
+		float line_index = ( uint( Time * 5.f ) + primitive_id ) % 3; // 全ての線が統一されたタイミングで更新される
 		float line_v_origin = ( line_index * line_v_width );
 
 		float line_length_ratio = length( float2( lx, ly ) ) / length( float2( 2.f, 2.f ) );
@@ -315,6 +316,7 @@ BlendState Blend
 
 DepthStencilState NoWriteDepth
 {
+	// DepthEnable = False;
 	DepthWriteMask = ZERO;
 };
 

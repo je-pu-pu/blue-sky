@@ -17,6 +17,7 @@ class DirectInput;
 namespace game
 {
 	class Config;
+	class MainLoop;
 };
 
 namespace blue_sky
@@ -62,6 +63,8 @@ protected:
 	auto_ptr< Config >						config_;				///< Config
 	auto_ptr< Config >						save_data_;				///< Save Data
 
+	auto_ptr< MainLoop >					main_loop_;				///< ƒ‹[ƒvŠÇ—
+
 	auto_ptr< ActiveObjectManager >			active_object_manager_;	///< ActiveObjectManager
 
 	auto_ptr< DrawingModelManager >			drawing_model_manager_;	///< DrawingModelManager
@@ -90,6 +93,8 @@ public:
 	void render();
 
 	Direct3D* get_direct_3d() const { return direct_3d_.get(); }
+	Physics* get_physics() const { return physics_.get(); }
+
 	Input* get_input() const { return input_.get(); }
 	SoundManager* get_sound_manager() const { return sound_manager_.get(); }
 
@@ -99,6 +104,8 @@ public:
 	
 	Config* get_config() const { return config_.get(); }
 	Config* get_save_data() const { return save_data_.get(); }
+
+	// MainLoop* get_main_loop() const { return main_loop_.get(); }
 
 	inline static GameMain* get_instance() { static GameMain game_main; return & game_main; }
 };

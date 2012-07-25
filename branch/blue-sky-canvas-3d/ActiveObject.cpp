@@ -1,4 +1,6 @@
 #include "ActiveObject.h"
+#include "BulletTest.h"
+#include "ActiveObjectPhysics.h"
 #include <common/math.h>
 #include <btBulletDynamicsCommon.h>
 
@@ -23,15 +25,22 @@ ActiveObject::~ActiveObject()
 	delete transform_;
 }
 
+void ActiveObject::limit_velocity()
+{
+	Vector3 v = get_rigid_body()->getLinearVelocity();
+
+	v.setX( math::clamp( v.x(), -get_max_speed(), get_max_speed() ) );
+	v.setZ( math::clamp( v.z(), -get_max_speed(), get_max_speed() ) );
+
+	get_rigid_body()->setLinearVelocity( v );
+}
+
 void ActiveObject::update_rigid_body_velocity()
 {
-	if ( get_velocity() == Vector3( 0, 0, 0 ) )
-	{
-		return;
-	}
+	limit_velocity();
 
 	get_rigid_body()->setActivationState( true );
-	get_rigid_body()->setLinearVelocity( get_velocity() );
+	// get_rigid_body()->setLinearVelocity( get_velocity() );
 }
 
 void ActiveObject::update_transform()
@@ -45,18 +54,6 @@ void ActiveObject::update_transform()
 
 		*transform_ = *transform_ * offset;
 	}
-}
-
-void ActiveObject::step( float_t s )
-{
-	get_velocity() = get_front() * s;
-	get_velocity().setY( get_rigid_body()->getLinearVelocity().y() );
-}
-
-void ActiveObject::side_step( float_t s )
-{
-	get_velocity() = get_right() * s;
-	get_velocity().setY( get_rigid_body()->getLinearVelocity().y() );
 }
 
 void ActiveObject::set_location( float_t x, float_t y, float_t z )
@@ -88,5 +85,9 @@ void ActiveObject::set_direction_degree( float d )
 	right_ = Vector3( 1.f, 0.f, 0.f ) * m;
 }
 
+ActiveObject::DynamicsWorld* ActiveObject::get_dynamics_world() const
+{
+	return GameMain::get_instance()->get_physics()->get_dynamics_world();
+}
 
 } // namespace blue_sky

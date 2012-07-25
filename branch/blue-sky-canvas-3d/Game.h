@@ -2,16 +2,14 @@
 #define GAME_H
 
 #include "App.h"
-#include "MainLoop.h"
 
 class Game
 {
 public:
 
 protected:
-	CMainLoop	MainLoop;		// ƒ‹[ƒvŠÇ—
-
 	Game() { }
+
 public:
 	static Game* getInstance();
 
@@ -23,8 +21,6 @@ public:
 
 	inline int get_width() const { return get_app()->get_width(); }
 	inline int get_height() const { return get_app()->get_height(); }
-
-	const CMainLoop& getMainLoop() const { return MainLoop; }
 };
 
 #endif // GAME_H

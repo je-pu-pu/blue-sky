@@ -25,10 +25,11 @@ class DrawingModel;
 class ActiveObject
 {
 public:
-	typedef btVector3	Vector3;
-	typedef btMatrix3x3	Matrix;
-	typedef btTransform Transform;
-	typedef btRigidBody RigidBody;
+	typedef btVector3			Vector3;
+	typedef btMatrix3x3			Matrix;
+	typedef btTransform			Transform;
+	typedef btRigidBody			RigidBody;
+	typedef btDynamicsWorld		DynamicsWorld;
 
 private:
 	const DrawingModel*	drawing_model_;		///< DrawingModel
@@ -44,6 +45,11 @@ private:
 	Vector3				right_;				///< ‰E
 
 protected:
+	void limit_velocity();
+
+	float get_max_speed() const { return 4.f; }
+	
+	DynamicsWorld* get_dynamics_world() const;
 
 public:
 	ActiveObject();
@@ -66,9 +72,6 @@ public:
 	inline const RigidBody* get_rigid_body() const { return rigid_body_; }
 
 	inline void set_rigid_body( RigidBody* rigid_body ) { rigid_body_ = rigid_body; }
-
-	void step( float_t );
-	void side_step( float_t );
 
 	void set_location( float_t, float_t, float_t );
 

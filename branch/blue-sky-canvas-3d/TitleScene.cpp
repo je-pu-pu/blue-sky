@@ -182,7 +182,7 @@ bool TitleScene::render()
 			get_game_main()->get_frame_constant_buffer()->render();
 			get_game_main()->get_object_constant_buffer()->render();
 
-			drawing_model_manager()->get( "je-pu-pu" )->get_line()->render();
+			drawing_model_manager()->get( "je-pu-pu" )->get_line()->render( static_cast< int >( get_game_main()->get_elapsed() * 30 ) );
 		}
 	}
 

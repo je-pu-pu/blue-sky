@@ -57,6 +57,8 @@
 namespace blue_sky
 {
 
+static const bool is_render_2d_enabled = true;
+
 struct GameConstantBuffer
 {
 	XMMATRIX projection;
@@ -117,9 +119,10 @@ GameMain::GameMain()
 	
 	rectangle_ = new Direct3D11Rectangle( direct_3d_.get() );
 
-	/*
-	direct_write_ = new DirectWrite( direct_3d_->getTextSurface() );
-	*/
+	if ( is_render_2d_enabled )
+	{
+		direct_write_ = new DirectWrite( direct_3d_->getTextSurface() );
+	}
 
 	physics_ = new ActiveObjectPhysics();
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
@@ -349,8 +352,6 @@ bool GameMain::update()
 
 void GameMain::render()
 {
-	static const bool is_render_2d_enabled = false;
-
 	{
 		const ActiveObject::Transform& t = player_->get_transform();
 

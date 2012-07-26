@@ -19,6 +19,8 @@ class Direct3D11EffectPass;
 class Direct3D11MeshManager;
 class Direct3D11TextureManager;
 
+class DirectWrite;
+
 struct ID3DX11Effect;
 
 /**
@@ -36,6 +38,8 @@ public:
 
 	typedef Direct3D11MeshManager		MeshManager;
 	typedef Direct3D11TextureManager	TextureManager;
+
+	typedef DirectWrite					Font;
 
 	typedef ID3D11InputLayout			InputLayout;
 	
@@ -69,6 +73,8 @@ private:
 	IDXGISurface1*				text_surface_;
 	IDXGIKeyedMutex*			text_texture_mutex_11_;
 	IDXGIKeyedMutex*			text_texture_mutex_10_;
+
+	common::auto_ptr< Font	>				font_;
 
 	common::auto_ptr< Sprite >				sprite_;
 	common::auto_ptr< Effect >				effect_;
@@ -110,11 +116,13 @@ public:
 
 	void setDebugViewport( float, float, float, float );
 
+	inline Font* getFont() { return font_.get(); }
 	inline Sprite* getSprite() { return sprite_.get(); }
 	inline Effect* getEffect() { return effect_.get(); }
 	inline MeshManager* getMeshManager() { return mesh_manager_.get(); }
 	inline TextureManager* getTextureManager() { return texture_manager_.get(); }
 
+	inline const Font* getFont() const { return font_.get(); }
 	inline const Sprite* getSprite() const { return sprite_.get(); }
 	inline const Effect* getEffect() const { return effect_.get(); }
 	inline const MeshManager* getMeshManager() const { return mesh_manager_.get(); }

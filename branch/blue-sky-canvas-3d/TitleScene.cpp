@@ -40,16 +40,16 @@ TitleScene::TitleScene( const GameMain* game_main )
 	, title_bg_scale_cycle_( 0.f )
 	, fade_alpha_( 1.f )
 {
-	ok_ = sound_manager()->load( "ok" );
+	ok_ = get_sound_manager()->load( "ok" );
 
-	bgm_ = sound_manager()->load_music( "bgm", "title" );
+	bgm_ = get_sound_manager()->load_music( "bgm", "title" );
 	bgm_->play( false );
 	
 	// title_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/texture/title.png" );
 	// title_bg_texture_ = direct_3d()->getTextureManager()->load( "title-bg", "media/texture/title-bg.png" );
-	cloth_texture_ = direct_3d()->getTextureManager()->load( "cloth", "media/texture/cloth.png" );
+	cloth_texture_ = get_direct_3d()->getTextureManager()->load( "cloth", "media/texture/cloth.png" );
 
-	drawing_model_manager()->load( "je-pu-pu" );
+	get_drawing_model_manager()->load( "je-pu-pu" );
 
 	{
 		GameConstantBuffer game_constant_buffer;
@@ -77,12 +77,15 @@ TitleScene::~TitleScene()
  */
 void TitleScene::update()
 {
-	if ( input()->push( Input::A ) )
+	Scene::update();
+
+	if ( get_input()->push( Input::A ) )
 	{
 		if ( sequence_ == SEQUENCE_TITLE_FIX )
 		{
 			ok_->play( false );
-			set_next_scene( "stage_select" );
+			set_next_scene( "game_play" );
+			// set_next_scene( "stage_select" );
 		}
 		else if ( ! is_first_game_play() )
 		{
@@ -136,23 +139,23 @@ void TitleScene::update()
 /**
  * •`‰æ
  */
-bool TitleScene::render()
+void TitleScene::render()
 {
 	{
 		FrameConstantBuffer frame_constant_buffer;
 
 		frame_constant_buffer.view = XMMatrixTranspose( XMMatrixIdentity() );
 		frame_constant_buffer.shadow_view_projection = XMMatrixTranspose( XMMatrixIdentity() );
-		frame_constant_buffer.time = get_game_main()->get_elapsed();
+		frame_constant_buffer.time = get_game_main()->get_total_elapsed_time();
 	
 		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer );
 	}
 
 
-	direct_3d()->clear( Direct3D::Color::from_256( 0xFF, 0xAA, 0x11 ) );
-	direct_3d()->getSprite()->begin();
+	get_direct_3d()->clear( Direct3D::Color::from_256( 0xFF, 0xAA, 0x11 ) );
+	get_direct_3d()->getSprite()->begin();
 
-	Direct3D::EffectTechnique* technique = direct_3d()->getEffect()->getTechnique( "|sprite" );
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
 
 	for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
 	{
@@ -162,17 +165,17 @@ bool TitleScene::render()
 		{
 			win::Rect dst_rect( 0, 0, get_width(), get_height() );
 
-			direct_3d()->getSprite()->draw( dst_rect, cloth_texture_, Direct3D::Color( 1.f, 1.f, 1.f, 0.5f ) );
+			get_direct_3d()->getSprite()->draw( dst_rect, cloth_texture_, Direct3D::Color( 1.f, 1.f, 1.f, 0.5f ) );
 		}
 	}
 
-	direct_3d()->getSprite()->end();
+	get_direct_3d()->getSprite()->end();
 
 	// render_logo()
 	{
-		direct_3d()->setInputLayout( "line" );
+		get_direct_3d()->setInputLayout( "line" );
 
-		Direct3D::EffectTechnique* technique = direct_3d()->getEffect()->getTechnique( "|drawing_line" );
+		Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|drawing_line" );
 
 		for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
 		{
@@ -182,7 +185,7 @@ bool TitleScene::render()
 			get_game_main()->get_frame_constant_buffer()->render();
 			get_game_main()->get_object_constant_buffer()->render();
 
-			drawing_model_manager()->get( "je-pu-pu" )->get_line()->render( static_cast< int >( get_game_main()->get_elapsed() * 30 ) );
+			get_drawing_model_manager()->get( "je-pu-pu" )->get_line()->render( static_cast< int >( get_game_main()->get_total_elapsed_time() * 30 ) );
 		}
 	}
 
@@ -286,7 +289,6 @@ bool TitleScene::render()
 	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
 #endif
 
-	return true;
 }
 
 } // namespace blue_sky

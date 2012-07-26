@@ -63,7 +63,7 @@ public:
 	typedef blue_sky::Player				Player;
 
 protected:
-	float									elapsed_;				///< ゲームが開始してからの経過時間 ( 秒 )
+	float									total_elapsed_time_;	///< ゲームが開始してからの経過時間 ( 秒 )
 
 	auto_ptr< Direct3D >					direct_3d_;				///< Direct3D
 	auto_ptr< Physics >						physics_;				///< Physics
@@ -85,20 +85,14 @@ protected:
 	auto_ptr< Direct3D11ConstantBuffer >	frame_constant_buffer_;
 	auto_ptr< Direct3D11ConstantBuffer >	object_constant_buffer_;
 
-	auto_ptr< Direct3D11ShadowMap >			shadow_map_;
-	auto_ptr< Direct3D11SkyBox >			sky_box_;
-
-	auto_ptr< DirectWrite >					direct_write_;
 	auto_ptr< Direct3D11BulletDebugDraw >	bullet_debug_draw_;
 
-	auto_ptr< Player >						player_;
-	auto_ptr< Camera >						camera_;
-
 	safe_ptr< Scene >						scene_;					///< 現在のシーン
-	std::string								stage_name_;			///< 現在のステージ名
+	string_t								stage_name_;			///< 現在のステージ名
 
-	void render( const ActiveObject* );
-	void render_line( const ActiveObject* );
+	bool									display_fps_flag_;		///< FPS 表示フラグ
+
+	void check_scene_transition();
 
 public:
 	GameMain();
@@ -107,8 +101,8 @@ public:
 	bool update();
 	void render();
 
-	float_t get_elapsed() const { return elapsed_; }
-	// void clear_elapsed() { elapsed_ = 0.f; }
+	float_t get_total_elapsed_time() const { return total_elapsed_time_; }
+	float_t get_elapsed_time() const;
 
 	Direct3D* get_direct_3d() const { return direct_3d_.get(); }
 	Physics* get_physics() const { return physics_.get(); }
@@ -123,11 +117,16 @@ public:
 	Config* get_config() const { return config_.get(); }
 	Config* get_save_data() const { return save_data_.get(); }
 
-	// MainLoop* get_main_loop() const { return main_loop_.get(); }
+	const MainLoop* get_main_loop() const { return main_loop_.get(); }
 
 	Direct3D11ConstantBuffer* get_game_constant_buffer() const { return game_constant_buffer_.get(); }
 	Direct3D11ConstantBuffer* get_frame_constant_buffer() const { return frame_constant_buffer_.get(); }
 	Direct3D11ConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_.get(); }
+	
+	Direct3D11BulletDebugDraw* get_bullet_debug_draw() const { return bullet_debug_draw_.get(); }
+
+	const std::string& get_stage_name() const { return stage_name_; }
+	void set_stage_name( const std::string& stage_name ) { stage_name_ = stage_name; }
 
 	inline static GameMain* get_instance() { static GameMain game_main; return & game_main; }
 };

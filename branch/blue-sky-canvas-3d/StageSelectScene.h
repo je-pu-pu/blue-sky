@@ -80,7 +80,7 @@ public:
 	~StageSelectScene();
 
 	void update();				///< ƒƒCƒ“ƒ‹[ƒv
-	bool render();				///< •`‰æ
+	void render();				///< •`‰æ
 
 }; // class StageSelectScene
 

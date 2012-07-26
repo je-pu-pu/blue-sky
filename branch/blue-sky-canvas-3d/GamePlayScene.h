@@ -2,18 +2,17 @@
 #define BLUE_SKY_GAME_PLAY_SCENE_H
 
 #include "Scene.h"
-#include "vector3.h"
 
-#include <common/safe_ptr.h>
+#include <common/auto_ptr.h>
 
-class Direct3D9Font;
-class Direct3D9Mesh;
-class Direct3D9SkyBox;
-class Direct3D9Box;
-class Direct3D9Rectangle;
+class Direct3D11SkyBox;
+class Direct3D11ShadowMap;
+class Direct3D11Rectangle;
 
 namespace blue_sky
 {
+
+using common::auto_ptr;
 
 class Player;
 class Goal;
@@ -27,65 +26,43 @@ class Stage;
  */
 class GamePlayScene : public Scene
 {
+public:
+	typedef Direct3D11SkyBox			SkyBox;
+	typedef Direct3D11ShadowMap			ShadowMap;
+	typedef Direct3D11Rectangle			Rectangle;
+
 protected:
-	common::safe_ptr< Player > player_;
-	common::safe_ptr< Goal > goal_;
+	float_t				object_detail_level_0_length_;			///< 低品質のオブジェクトを表示する距離
+	float_t				object_detail_level_1_length_;			///< 中品質のオブジェクトを表示する距離
+	float_t				object_detail_level_2_length_;			///< 高品質のオブジェクトを表示する距離
 
-	common::safe_ptr< Camera > camera_;
-	common::safe_ptr< Stage > stage_;
+	Texture*			ui_texture_;							///< UI 表示用テクスチャ
 
-	common::safe_ptr< Direct3D9Mesh > player_mesh_;
-	common::safe_ptr< Direct3D9Mesh > goal_mesh_;
-	common::safe_ptr< Direct3D9Mesh > shadow_mesh_;
-	common::safe_ptr< Direct3D9Mesh > ground_mesh_;
-	common::safe_ptr< Direct3D9Mesh > scope_mesh_;
+	auto_ptr< ShadowMap >				shadow_map_;
+	auto_ptr< SkyBox >					sky_box_;
+	auto_ptr< Rectangle >				rectangle_;
 
-	common::safe_ptr< Direct3D9Mesh > balloon_mesh_;
-	common::safe_ptr< Direct3D9Mesh > rocket_mesh_;
-	common::safe_ptr< Direct3D9Mesh > umbrella_mesh_;
-	common::safe_ptr< Direct3D9Mesh > aim_mesh_;
+	auto_ptr< Stage >					stage_;
+	auto_ptr< Goal >					goal_;
 
-	common::safe_ptr< Direct3D9SkyBox > sky_box_;
+	auto_ptr< Player >					player_;
+	auto_ptr< Camera >					camera_;
 
-	common::safe_ptr< Direct3D9Box > box_;
-
-	common::safe_ptr< Direct3D9Rectangle > rectangle_;
-
-	LPDIRECT3DTEXTURE9 back_buffer_texture_;
-	LPDIRECT3DSURFACE9 back_buffer_surface_;
-	LPDIRECT3DSURFACE9 depth_surface_;
-
-	Texture* ui_texture_;
-
-	float brightness_;
-	bool is_cleared_;
-
-	float ambient_color_[ 4 ];
-	float grid_object_visible_length_;
-	float grid_object_lod_0_length_;
-
-	enum LensType
-	{
-		LENS_TYPE_NORMAL = 0,
-		LENS_TYPE_FISH_EYE = 1,
-		LENS_TYPE_CRAZY
-	};
-
-	LensType lens_type_;
 
 	void generate_random_stage();
 
 	void load_stage_file( const char* );
 	void save_stage_file( const char* ) const;
 
+	void render( const ActiveObject* );
+	void render_line( const ActiveObject* );
+
 public:
 	GamePlayScene( const GameMain* );
 	~GamePlayScene();
 
 	void update();				///< メインループ
-	bool render();				///< 描画
-
-	void render_shadow( const ActiveObject*, const D3DXMATRIXA16& );
+	void render();				///< 描画
 
 	bool is_clip_cursor_required() { return true; }
 

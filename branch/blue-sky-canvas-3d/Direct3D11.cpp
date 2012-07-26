@@ -4,6 +4,7 @@
 #include "Direct3D11MeshManager.h"
 #include "Direct3D11TextureManager.h"
 #include "Direct3D11Color.h"
+#include "DirectWrite.h"
 #include "DirectX.h"
 
 #include "include/d3dx11effect.h"
@@ -202,6 +203,9 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		viewport_.MinDepth = 0.f;
 		viewport_.MaxDepth = 1.f;
 	}
+
+	// Font
+	font_ = new Font( text_surface_ );
 
 	// Sprite
 	sprite_ = new Sprite( this );

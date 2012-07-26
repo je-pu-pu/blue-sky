@@ -29,6 +29,7 @@
     <ClCompile Include="Direct3D11Rectangle.cpp" />
     <ClCompile Include="Direct3D11ShadowMap.cpp" />
     <ClCompile Include="Direct3D11SkyBox.cpp" />
+    <ClCompile Include="Direct3D11Sprite.cpp" />
     <ClCompile Include="Direct3D11TextureManager.cpp" />
     <ClCompile Include="DirectInput.cpp" />
     <ClCompile Include="DirectSound.cpp" />
@@ -50,6 +51,7 @@
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="StaticeObject.cpp" />
     <ClCompile Include="StreamingSound.cpp" />
+    <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -59,8 +61,10 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="Direct3D11.h" />
     <ClInclude Include="Direct3D11BulletDebugDraw.h" />
+    <ClInclude Include="Direct3D11Color.h" />
     <ClInclude Include="Direct3D11ConstantBuffer.h" />
     <ClInclude Include="Direct3D11Effect.h" />
     <ClInclude Include="Direct3D11EffectPass.h" />
@@ -71,6 +75,7 @@
     <ClInclude Include="Direct3D11Rectangle.h" />
     <ClInclude Include="Direct3D11ShadowMap.h" />
     <ClInclude Include="Direct3D11SkyBox.h" />
+    <ClInclude Include="Direct3D11Sprite.h" />
     <ClInclude Include="Direct3D11TextureManager.h" />
     <ClInclude Include="DirectInput.h" />
     <ClInclude Include="DirectSound.h" />
@@ -80,6 +85,7 @@
     <ClInclude Include="DirectWriteFontFileEnumerator.h" />
     <ClInclude Include="DirectWriteFontFileLoader.h" />
     <ClInclude Include="DirectWriteFontFileStream.h" />
+    <ClInclude Include="DirectX.h" />
     <ClInclude Include="DrawingLine.h" />
     <ClInclude Include="DrawingModel.h" />
     <ClInclude Include="DrawingModelManager.h" />

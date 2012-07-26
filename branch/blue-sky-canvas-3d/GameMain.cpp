@@ -1,6 +1,8 @@
 #include "GameMain.h"
 #include "App.h"
 
+#include "ConstantBuffer.h"
+
 #include "Direct3D11.h"
 #include "Direct3D11MeshManager.h"
 #include "Direct3D11Mesh.h"
@@ -41,6 +43,8 @@
 
 #include "DirectX.h"
 
+#include "TitleScene.h"
+
 #include <win/Version.h>
 
 #include <game/Config.h>
@@ -57,24 +61,7 @@
 namespace blue_sky
 {
 
-static const bool is_render_2d_enabled = true;
-
-struct GameConstantBuffer
-{
-	XMMATRIX projection;
-};
-
-struct FrameConstantBuffer
-{
-	XMMATRIX view;
-	XMMATRIX shadow_view_projection;
-	float time;
-};
-
-struct ObjectConstantBuffer
-{
-	XMMATRIX world;
-};
+static const bool is_render_2d_enabled = false;
 
 Direct3D11Rectangle* rectangle_ = 0;
 
@@ -234,6 +221,11 @@ GameMain::GameMain()
 	player_->set_drawing_model( drawing_model_manager_->load( "player" ) );
 
 	camera_ = new Camera();
+
+
+	// Scene
+	scene_ = new TitleScene( this );
+	scene_->set_name( "title" );
 }
 
 //■デストラクタ
@@ -251,6 +243,8 @@ bool GameMain::update()
 		return false;
 	}
 
+	elapsed_ += main_loop_->get_elapsed();
+
 	/// @todo 別スレッド化
 	get_sound_manager()->update();
 	
@@ -263,6 +257,15 @@ bool GameMain::update()
 	else
 	{
 		input_->update_null();
+	}
+
+	if ( scene_ )
+	{
+		scene_->update();
+
+		render();
+
+		return true;
 	}
 
 	{
@@ -362,6 +365,15 @@ void GameMain::render()
 		get_app()->setTitle( ss.str().c_str() );
 	}
 
+	if ( scene_ )
+	{
+		scene_->render();
+
+		direct_3d_->end();
+
+		return;
+	}
+
 	direct_3d_->setInputLayout( "main" );
 
 	// render_2d()
@@ -436,15 +448,11 @@ void GameMain::render()
 			XMVECTOR at = XMVectorSet( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z(), 0.0f );
 			XMVECTOR up = XMVectorSet( camera_->up().x(), camera_->up().y(), camera_->up().z(), 0.0f );
 
-			static float t = 0.f;
-
 			frame_constant_buffer.view = XMMatrixLookAtLH( eye, at, up );
 			frame_constant_buffer.view = XMMatrixTranspose( frame_constant_buffer.view );
-			frame_constant_buffer.time = t;
+			frame_constant_buffer.time = get_elapsed();
 
 			frame_constant_buffer_->update( & frame_constant_buffer );
-
-			t += main_loop_->get_elapsed();
 		}
 
 		// render_sky_box()

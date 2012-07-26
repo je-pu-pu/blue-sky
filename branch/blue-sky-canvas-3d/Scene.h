@@ -18,9 +18,8 @@ namespace blue_sky
 {
 
 class GameMain;
-class GridDataManager;
-class GridObjectManager;
 class ActiveObjectManager;
+class DrawingModelManager;
 class SoundManager;
 class Input;
 
@@ -46,10 +45,14 @@ private:
 protected:
 	Direct3D* direct_3d() const;
 	ActiveObjectManager* active_object_manager() const;
+	DrawingModelManager* drawing_model_manager() const;
+
 	SoundManager* sound_manager() const;
 	Input* input() const;
 	Config* config() const;
 	Config* save_data() const;
+
+	const GameMain* get_game_main() const { return game_main_; }
 
 	int get_width() const;
 	int get_height() const;

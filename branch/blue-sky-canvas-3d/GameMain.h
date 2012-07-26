@@ -2,7 +2,11 @@
 #define GAME_MAIN_H
 
 #include "Game.h"
+
+#include "type.h"
+
 #include <common/auto_ptr.h>
+#include <common/safe_ptr.h>
 
 class Direct3D11;
 class Direct3D11ConstantBuffer;
@@ -36,12 +40,15 @@ namespace blue_sky
 
 	class Player;
 	class Camera;
+
+	class Scene;
 };
 
 using namespace game;
 using namespace blue_sky;
 
 using common::auto_ptr;
+using common::safe_ptr;
 
 namespace blue_sky
 {
@@ -56,6 +63,8 @@ public:
 	typedef blue_sky::Player				Player;
 
 protected:
+	float									elapsed_;				///< ゲームが開始してからの経過時間 ( 秒 )
+
 	auto_ptr< Direct3D >					direct_3d_;				///< Direct3D
 	auto_ptr< Physics >						physics_;				///< Physics
 
@@ -85,6 +94,9 @@ protected:
 	auto_ptr< Player >						player_;
 	auto_ptr< Camera >						camera_;
 
+	safe_ptr< Scene >						scene_;					///< 現在のシーン
+	std::string								stage_name_;			///< 現在のステージ名
+
 	void render( const ActiveObject* );
 	void render_line( const ActiveObject* );
 
@@ -94,6 +106,9 @@ public:
 
 	bool update();
 	void render();
+
+	float_t get_elapsed() const { return elapsed_; }
+	// void clear_elapsed() { elapsed_ = 0.f; }
 
 	Direct3D* get_direct_3d() const { return direct_3d_.get(); }
 	Physics* get_physics() const { return physics_.get(); }
@@ -109,6 +124,10 @@ public:
 	Config* get_save_data() const { return save_data_.get(); }
 
 	// MainLoop* get_main_loop() const { return main_loop_.get(); }
+
+	Direct3D11ConstantBuffer* get_game_constant_buffer() const { return game_constant_buffer_.get(); }
+	Direct3D11ConstantBuffer* get_frame_constant_buffer() const { return frame_constant_buffer_.get(); }
+	Direct3D11ConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_.get(); }
 
 	inline static GameMain* get_instance() { static GameMain game_main; return & game_main; }
 };

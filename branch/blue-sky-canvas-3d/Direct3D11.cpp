@@ -1,7 +1,9 @@
 #include "Direct3D11.h"
+#include "Direct3D11Sprite.h"
 #include "Direct3D11Effect.h"
 #include "Direct3D11MeshManager.h"
 #include "Direct3D11TextureManager.h"
+#include "Direct3D11Color.h"
 #include "DirectX.h"
 
 #include "include/d3dx11effect.h"
@@ -201,7 +203,10 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		viewport_.MaxDepth = 1.f;
 	}
 
-	// 
+	// Sprite
+	sprite_ = new Sprite( this );
+
+	// Effect
 	effect_ = new Effect( this );
 
 	// Mesh Manager
@@ -243,6 +248,7 @@ Direct3D11::~Direct3D11()
 // ???
 void Direct3D11::create_default_input_layout()
 {
+	// main
 	D3D11_INPUT_ELEMENT_DESC layout_main[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -251,6 +257,7 @@ void Direct3D11::create_default_input_layout()
 
 	vertex_layout_list_[ "main" ] = ( * effect_->getTechnique( "|main" )->getPassList().begin() )->createVertexLayout( layout_main, ARRAYSIZE( layout_main ) );
 
+	// line
 	D3D11_INPUT_ELEMENT_DESC layout_line[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -258,13 +265,26 @@ void Direct3D11::create_default_input_layout()
     };
 
 	vertex_layout_list_[ "line" ] = ( * effect_->getTechnique( "|drawing_line" )->getPassList().begin() )->createVertexLayout( layout_line, ARRAYSIZE( layout_line ) );
+
+	// sprite 
+	D3D11_INPUT_ELEMENT_DESC layout_sprite[] =
+    {
+        { "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",    0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR",       0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+
+	vertex_layout_list_[ "sprite" ] = ( * effect_->getTechnique( "|sprite" )->getPassList().begin() )->createVertexLayout( layout_sprite, ARRAYSIZE( layout_sprite ) );
 }
 
 void Direct3D11::clear()
 {
-	float clear_color[ 4 ] = { 0.6f, 0.8f, 1.f, 1.f };
+	clear( Color( 1, 1, 1, 1 ) );
+}
 
-	immediate_context_->ClearRenderTargetView( back_buffer_view_, clear_color );
+void Direct3D11::clear( const Color& color )
+{
+	immediate_context_->ClearRenderTargetView( back_buffer_view_, static_cast< const float* >( & color.r() ) );
 	immediate_context_->ClearDepthStencilView( depth_stencil_view_, D3D11_CLEAR_DEPTH, 1.f, 0 );
 	immediate_context_->OMSetRenderTargets( 1, & back_buffer_view_, depth_stencil_view_ );
 	immediate_context_->RSSetViewports( 1, & viewport_ );

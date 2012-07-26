@@ -4,8 +4,13 @@
 #include <common/auto_ptr.h>
 
 #include <d3dx11.h>
+#include <xnamath.h>
 
 #include <map>
+
+class Direct3D11Color;
+
+class Direct3D11Sprite;
 
 class Direct3D11Effect;
 class Direct3D11EffectTechnique;
@@ -23,6 +28,8 @@ struct ID3DX11Effect;
 class Direct3D11
 {
 public:
+	typedef Direct3D11Sprite			Sprite;
+
 	typedef Direct3D11Effect			Effect;
 	typedef Direct3D11EffectTechnique	EffectTechnique;
 	typedef Direct3D11EffectPass		EffectPass;
@@ -31,6 +38,8 @@ public:
 	typedef Direct3D11TextureManager	TextureManager;
 
 	typedef ID3D11InputLayout			InputLayout;
+	
+	typedef Direct3D11Color				Color;
 
 	typedef std::map< const char*, InputLayout* >		InputLayoutList;
 
@@ -61,6 +70,7 @@ private:
 	IDXGIKeyedMutex*			text_texture_mutex_11_;
 	IDXGIKeyedMutex*			text_texture_mutex_10_;
 
+	common::auto_ptr< Sprite >				sprite_;
 	common::auto_ptr< Effect >				effect_;
 
 	common::auto_ptr< MeshManager >			mesh_manager_;
@@ -85,6 +95,7 @@ public:
 	void set_depth_stencil( bool );
 
 	void clear();
+	void clear( const Color& );
 
 	void setInputLayout( const char* );
 
@@ -99,10 +110,12 @@ public:
 
 	void setDebugViewport( float, float, float, float );
 
+	inline Sprite* getSprite() { return sprite_.get(); }
 	inline Effect* getEffect() { return effect_.get(); }
 	inline MeshManager* getMeshManager() { return mesh_manager_.get(); }
 	inline TextureManager* getTextureManager() { return texture_manager_.get(); }
 
+	inline const Sprite* getSprite() const { return sprite_.get(); }
 	inline const Effect* getEffect() const { return effect_.get(); }
 	inline const MeshManager* getMeshManager() const { return mesh_manager_.get(); }
 	inline const TextureManager* getTextureManager() const { return texture_manager_.get(); }

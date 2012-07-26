@@ -136,6 +136,7 @@ void DrawingLine::render( int level ) const
 	UINT stride = sizeof( Vertex );
     UINT offset = 0;
 
+	direct_3d_->setInputLayout( "line" );
 	direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, 1, & vertex_buffer_, & stride, & offset );
 	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_, IndexBufferFormat, 0 );
 

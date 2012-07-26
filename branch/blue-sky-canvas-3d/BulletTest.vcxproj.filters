@@ -103,6 +103,12 @@
     <ClCompile Include="Direct3D11EffectPass.cpp">
       <Filter>DirectX\Direct3D11</Filter>
     </ClCompile>
+    <ClCompile Include="Direct3D11Sprite.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="TitleScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainLoop.h" />
@@ -238,6 +244,16 @@
     <ClInclude Include="Direct3D11EffectPass.h">
       <Filter>DirectX\Direct3D11</Filter>
     </ClInclude>
+    <ClInclude Include="Direct3D11Sprite.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectX.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11Color.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\main.fx" />

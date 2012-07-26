@@ -75,7 +75,7 @@ public:
 
 	bool load_obj( const char* );
 
-	void render( int level ) const;
+	void render( int level = 99999 ) const;
 
 }; // class DrawingLine
 

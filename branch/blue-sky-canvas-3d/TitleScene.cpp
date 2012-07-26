@@ -1,14 +1,22 @@
 #include "TitleScene.h"
 
+#include "GameMain.h"
+#include "ConstantBuffer.h"
+
+#include "DrawingModelManager.h"
+#include "DrawingModel.h"
+#include "DrawingLine.h"
+
 #include "Input.h"
 #include "SoundManager.h"
 #include "Sound.h"
 
 #include "Direct3D11.h"
+#include "Direct3D11Sprite.h"
 #include "Direct3D11Effect.h"
-#include "Direct3D11EffectTechnique.h"
-#include "Direct3D11EffectPass.h"
+#include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11TextureManager.h"
+#include "Direct3D11Color.h"
 #include "DirectX.h"
 
 #include <win/Rect.h>
@@ -37,9 +45,25 @@ TitleScene::TitleScene( const GameMain* game_main )
 	bgm_ = sound_manager()->load_music( "bgm", "title" );
 	bgm_->play( false );
 	
-	title_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/texture/title.png" );
-	title_bg_texture_ = direct_3d()->getTextureManager()->load( "title-bg", "media/texture/title-bg.png" );
+	// title_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/texture/title.png" );
+	// title_bg_texture_ = direct_3d()->getTextureManager()->load( "title-bg", "media/texture/title-bg.png" );
 	cloth_texture_ = direct_3d()->getTextureManager()->load( "cloth", "media/texture/cloth.png" );
+
+	drawing_model_manager()->load( "je-pu-pu" );
+
+	{
+		GameConstantBuffer game_constant_buffer;
+		game_constant_buffer.projection = XMMatrixTranspose( XMMatrixOrthographicLH( 2.f * get_width() / get_height(), 2.f, 0.f, 1.f ) );
+
+		get_game_main()->get_game_constant_buffer()->update( & game_constant_buffer );
+	}
+	
+	{
+		ObjectConstantBuffer object_constant_buffer;
+		object_constant_buffer.world = XMMatrixTranspose( XMMatrixIdentity() );
+
+		get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer );
+	}
 }
 
 TitleScene::~TitleScene()
@@ -107,7 +131,6 @@ void TitleScene::update()
 	}
 
 	fade_alpha_ = math::chase( fade_alpha_, 0.f, 0.01f );
-	
 }
 
 /**
@@ -115,9 +138,21 @@ void TitleScene::update()
  */
 bool TitleScene::render()
 {
+	{
+		FrameConstantBuffer frame_constant_buffer;
+
+		frame_constant_buffer.view = XMMatrixTranspose( XMMatrixIdentity() );
+		frame_constant_buffer.shadow_view_projection = XMMatrixTranspose( XMMatrixIdentity() );
+		frame_constant_buffer.time = get_game_main()->get_elapsed();
+	
+		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer );
+	}
+
+
+	direct_3d()->clear( Direct3D::Color::from_256( 0xFF, 0xAA, 0x11 ) );
 	direct_3d()->getSprite()->begin();
 
-	Direct3D::EffectTechnique* technique = direct_3d()->getEffect()->getTechnique( "technique_0" );
+	Direct3D::EffectTechnique* technique = direct_3d()->getEffect()->getTechnique( "|sprite" );
 
 	for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
 	{
@@ -125,11 +160,31 @@ bool TitleScene::render()
 
 		// render_bg()
 		{
-			direct_3d()->getSprite()->draw( cloth_texture_, src_rect, dst_rect );
+			win::Rect dst_rect( 0, 0, get_width(), get_height() );
+
+			direct_3d()->getSprite()->draw( dst_rect, cloth_texture_, Direct3D::Color( 1.f, 1.f, 1.f, 0.5f ) );
 		}
 	}
 
 	direct_3d()->getSprite()->end();
+
+	// render_logo()
+	{
+		direct_3d()->setInputLayout( "line" );
+
+		Direct3D::EffectTechnique* technique = direct_3d()->getEffect()->getTechnique( "|drawing_line" );
+
+		for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
+		{
+			( *i )->apply();
+
+			get_game_main()->get_game_constant_buffer()->render();
+			get_game_main()->get_frame_constant_buffer()->render();
+			get_game_main()->get_object_constant_buffer()->render();
+
+			drawing_model_manager()->get( "je-pu-pu" )->get_line()->render();
+		}
+	}
 
 
 #if 0

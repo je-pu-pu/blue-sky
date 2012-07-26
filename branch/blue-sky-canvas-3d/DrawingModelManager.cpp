@@ -41,4 +41,9 @@ DrawingModel* DrawingModelManager::load( const char_t* name )
 	return drawing_model;
 }
 
+DrawingModel* DrawingModelManager::get( const char_t* name )
+{
+	return drawing_model_list_[ name ];
+}
+
 }; // namespace blue_sky

@@ -14,12 +14,14 @@ Scene::~Scene()
 
 }
 
-/*
 bool Scene::is_first_game_play() const
 {
-	return game_main_->is_first_game_play();
+	return false;
+
+	// return game_main_->is_first_game_play();
 }
 
+/*
 unsigned int Scene::get_current_time() const
 {
 	return game_main_->get_current_time();
@@ -34,6 +36,11 @@ Scene::Direct3D* Scene::direct_3d() const
 ActiveObjectManager* Scene::active_object_manager() const
 {
 	return game_main_->get_active_object_manager();
+}
+
+DrawingModelManager* Scene::drawing_model_manager() const
+{
+	return game_main_->get_drawing_model_manager();
 }
 
 SoundManager* Scene::sound_manager() const

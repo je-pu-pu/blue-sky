@@ -212,6 +212,7 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 		float line_index = ( uint( Time * 5.f ) + primitive_id ) % 3; // 全ての線が統一されたタイミングで更新される
 		float line_v_origin = ( line_index * line_v_width );
 
+		float line_u_origin = 0.1f;
 		float line_length_ratio = length( float2( lx, ly ) ) / length( float2( 2.f, 2.f ) );
 
 		float angle = atan2( ly, lx );
@@ -223,19 +224,19 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 		PS_INPUT output[ 4 ];
 
 		output[ 0 ].Position = input[ n ].Position + float4( -dx, -dy, 0.f, 0.f );
-		output[ 0 ].TexCoord = float2( 0.f, line_v_origin );
+		output[ 0 ].TexCoord = float2( line_u_origin, line_v_origin );
 		output[ 0 ].Color = input[ 0 ].Color;
 
 		output[ 1 ].Position = input[ n ].Position + float4( +dx, +dy, 0.f, 0.f );
-		output[ 1 ].TexCoord = float2( 0.f, line_v_origin + line_v_width );
+		output[ 1 ].TexCoord = float2( line_u_origin, line_v_origin + line_v_width );
 		output[ 1 ].Color = input[ 0 ].Color;
 
 		output[ 2 ].Position = input[ m ].Position + float4( -dx, -dy, 0.f, 0.f );
-		output[ 2 ].TexCoord = float2( line_length_ratio, line_v_origin );
+		output[ 2 ].TexCoord = float2( line_u_origin + line_length_ratio, line_v_origin );
 		output[ 2 ].Color = input[ 1 ].Color;
 
 		output[ 3 ].Position = input[ m ].Position + float4( +dx, +dy, 0.f, 0.f );
-		output[ 3 ].TexCoord = float2( line_length_ratio, line_v_origin + line_v_width );
+		output[ 3 ].TexCoord = float2( line_u_origin + line_length_ratio, line_v_origin + line_v_width );
 		output[ 3 ].Color = input[ 1 ].Color;
 
 		TriStream.Append( output[ 0 ] );
@@ -565,5 +566,40 @@ technique11 main2d
 		SetVertexShader( CompileShader( vs_4_0, vs_pass() ) );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_shadow_map_debug() ) );
+	}
+}
+
+// ----------------------------------------
+// for Sprite
+// ----------------------------------------
+cbuffer GameConstantBuffer : register( b3 )
+{
+	matrix Transform;
+};
+
+PS_INPUT vs_sprite( PS_INPUT input )
+{
+	PS_INPUT output = input;
+
+	output.Position = mul( input.Position, Transform );
+
+	return output;
+}
+
+float4 ps_sprite( PS_INPUT input ) : SV_Target
+{
+	return model_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
+}
+
+technique11 sprite
+{
+	pass main
+	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_sprite() ) );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps_sprite() ) );
 	}
 }

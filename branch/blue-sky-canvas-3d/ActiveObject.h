@@ -27,12 +27,15 @@ class ActiveObject
 public:
 	typedef btVector3			Vector3;
 	typedef btMatrix3x3			Matrix;
-	typedef btTransform			Transform;
+	typedef btQuaternion		Quaternion;
+	typedef btTransform			Transform;	
 	typedef btRigidBody			RigidBody;
 	typedef btDynamicsWorld		DynamicsWorld;
 
 private:
 	const DrawingModel*	drawing_model_;		///< DrawingModel
+
+	bool				is_dead_;			///< 死亡フラグ
 
 	RigidBody*			rigid_body_;		///< RigidBody
 	Transform*			transform_;			///< Transform
@@ -44,6 +47,7 @@ private:
 	Vector3				front_;				///< 前
 	Vector3				right_;				///< 右
 
+
 protected:
 	void limit_velocity();
 
@@ -52,6 +56,7 @@ protected:
 	DynamicsWorld* get_dynamics_world() const;
 
 public:
+
 	ActiveObject();
 	virtual ~ActiveObject();
 
@@ -77,6 +82,7 @@ public:
 	inline void set_rigid_body( RigidBody* rigid_body ) { rigid_body_ = rigid_body; }
 
 	void set_location( float_t, float_t, float_t );
+	void set_rotation( float_t, float_t, float_t );
 
 	Transform& get_transform();
 	const Transform& get_transform() const;
@@ -93,6 +99,21 @@ public:
 
 	Vector3& get_right() { return right_; }
 	const Vector3& get_right() const { return right_; }
+
+
+	virtual void kill();
+
+	/*
+	void render_shadow();
+
+	const GridCell& get_floor_cell_center() const;
+	const GridCell& get_floor_cell_left_front() const;
+	const GridCell& get_floor_cell_right_front() const;
+	const GridCell& get_floor_cell_left_back() const;
+	const GridCell& get_floor_cell_right_back() const;
+	*/
+	
+	bool is_dead() const { return is_dead_; }
 
 }; // class ActiveObject
 

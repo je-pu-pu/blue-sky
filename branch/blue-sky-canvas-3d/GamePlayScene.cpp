@@ -129,7 +129,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	generate_random_stage();
 
-	/*
 	if ( get_stage_name().empty() )
 	{
 		generate_random_stage();
@@ -140,7 +139,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 		load_stage_file( ( stage_dir_name + get_stage_name() + ".stage" ).c_str() );
 	}
-	*/
 
 	shadow_map_ = new ShadowMap( get_direct_3d(), get_config()->get( "video.shadow-map-size", 1024 ) );
 
@@ -203,6 +201,36 @@ void GamePlayScene::generate_random_stage()
 	}
 
 	{
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "wall" );
+
+		for ( int n = 0; n < 4; n++ )
+		{
+			StaticObject* static_object = new StaticObject( 4.f, 1.75f, 0.1f );
+			static_object->set_drawing_model( drawing_model );
+			static_object->set_location( n * 5.f, 0, 0.f );
+
+			get_active_object_manager()->add_active_object( static_object );
+
+			static_object->set_rigid_body( get_physics()->add_active_object( static_object ) );
+		}
+	}
+
+	{
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "outdoor-unit" );
+
+		for ( int n = 0; n < 10; n++ )
+		{
+			StaticObject* static_object = new StaticObject( 0.7f, 0.6f, 0.24f );
+			static_object->set_drawing_model( drawing_model );
+			static_object->set_location( 4.f, 0, -n * 2.f );
+
+			get_active_object_manager()->add_active_object( static_object );
+
+			static_object->set_rigid_body( get_physics()->add_active_object( static_object ) );
+		}
+	}
+
+	{
 		DrawingModel* drawing_model = get_drawing_model_manager()->load( "building-20" );
 
 		for ( int n = 0; n < 10; n++ )
@@ -210,6 +238,7 @@ void GamePlayScene::generate_random_stage()
 			StaticObject* static_object = new StaticObject( 10, 20, 10 );
 			static_object->set_drawing_model( drawing_model );
 			static_object->set_location( 10.f, 0, n * 12.f );
+			static_object->set_rotation( 15.f, 0, 0 );
 
 			get_active_object_manager()->add_active_object( static_object );
 
@@ -271,41 +300,12 @@ void GamePlayScene::generate_random_stage()
 
 void GamePlayScene::load_stage_file( const char* file_name )
 {
-#if 0
 	std::ifstream in( file_name );
 	
 	if ( ! in.good() )
 	{
 		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "load stage file \"" ) + file_name + "\" failed." );
 	}
-
-	/*
-	const int OBJECT_COLOR_MAX = 3;
-	float object_colors[ OBJECT_COLOR_MAX ][ 4 ] = {
-		{ 1.f, 0.95f, 0.95f, 1.f },
-		{ 0.95f, 1.f, 0.95f, 1.f },
-		{ 0.95f, 0.95f, 1.f, 1.f },
-	};
-	*/
-
-	/*
-	float object_colors[ 3 ][ 4 ] = {
-		{ 1.f, 0.5f, 0.5f, 1.f },
-		{ 1.f, 1.f, 1.f, 1.f },
-		{ 0.5f, 0.5f, 1.f, 1.f },
-	};
-	*/
-
-	const int OBJECT_COLOR_MAX = 5;
-	float object_colors[ OBJECT_COLOR_MAX ][ 4 ] = {
-		{ 1.0f, 1.0f, 1.0f, 1.f },
-		{ 0.9f, 0.9f, 0.9f, 1.f },
-		{ 0.8f, 0.8f, 0.8f, 1.f },
-		{ 0.7f, 0.7f, 0.7f, 1.f },
-		{ 0.6f, 0.6f, 0.6f, 1.f },
-	};
-
-	int object_color_index = 0;
 
 	while ( in.good() )
 	{
@@ -323,34 +323,27 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 		ActiveObject* active_object = 0;
 
-		if ( name == "lens" )
+	
+		if ( name == "bgm" )
 		{
 			std::string name;
 			ss >> name;
 
-			if ( name == "fish-eye" )
-			{
-				lens_type_ = LENS_TYPE_FISH_EYE;
-			}
-			else if ( name == "crazy" )
-			{
-				lens_type_ = LENS_TYPE_CRAZY;
-			}
+			get_sound_manager()->load_music( "bgm", name.c_str() );
 		}
-		else if ( name == "bgm" )
-		{
-			std::string name;
-			ss >> name;
-
-			sound_manager()->load_music( "bgm", name.c_str() );
-		}
+		/*
 		else if ( name == "ambient" )
 		{
 			ss >> ambient_color_[ 0 ] >> ambient_color_[ 1 ] >> ambient_color_[ 2 ];
 		}
+		*/
 		else if ( name == "player" )
 		{
-			ss >> player_->start_position().x() >> player_->start_position().y() >> player_->start_position().z();
+			float_t x = 0, y = 0, z = 0;
+
+			ss >> x >> y >> z;
+
+			player_->set_location( x, y, z );
 
 			if ( ! ss.eof() )
 			{
@@ -360,7 +353,11 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( name == "goal" )
 		{
-			ss >> goal_->start_position().x() >> goal_->start_position().y() >> goal_->start_position().z();
+			float_t x = 0, y = 0, z = 0;
+
+			ss >> x >> y >> z;
+
+			player_->set_location( x, y, z );
 		}
 		else if ( name == "sky-box" )
 		{
@@ -373,41 +370,25 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			if ( sky_box_name != "none" )
 			{
-				sky_box_ = new Direct3D9SkyBox( direct_3d(), sky_box_name.c_str(), sky_box_ext.c_str() );
+				sky_box_ = new SkyBox( get_direct_3d(), sky_box_name.c_str(), sky_box_ext.c_str() );
 			}
 		}
-		else if ( name == "object" )
+		else if ( name == "static_object" )
 		{
-			std::string grid_data_name;
-			int x = 0, y = 0, z = 0, r = 0;
+			std::string static_object_name;
+			float x = 0, y = 0, z = 0, r = 0;
 
-			ss >> grid_data_name >> x >> y >> z >> r;
+			ss >> static_object_name >> x >> y >> z >> r;
 
-			GridData* grid_data = grid_data_manager()->load( grid_data_name.c_str() );
+			DrawingModel* drawing_model = get_drawing_model_manager()->load( static_object_name.c_str() );
 
-			if ( stage_->put( x, y, z, r, grid_data ) )
-			{
-				GridObject* grid_object = new GridObject( x, y, z, r, grid_data );
-				
-				if ( ss.eof() )
-				{
-					if ( grid_data->cell( 0, 0 ).height() > 0 )
-					{
-						grid_object->color()[ 0 ] = object_colors[ object_color_index ][ 0 ];
-						grid_object->color()[ 1 ] = object_colors[ object_color_index ][ 1 ];
-						grid_object->color()[ 2 ] = object_colors[ object_color_index ][ 2 ];
-						grid_object->color()[ 3 ] = object_colors[ object_color_index ][ 3 ];
-						object_color_index = ( object_color_index + 1 ) % OBJECT_COLOR_MAX;
-					}
-				}
-				else
-				{
-					ss >> grid_object->color()[ 0 ] >> grid_object->color()[ 1 ] >> grid_object->color()[ 2 ];
-				}
+			StaticObject* static_object = new StaticObject();
+			static_object->set_drawing_model( drawing_model );
+			static_object->set_location( x, y, z );
 
-				grid_object_manager()->add_grid_object( grid_object );
-			}
+			get_active_object_manager()->add_active_object( static_object );
 		}
+		/*
 		else if ( name == "enemy" )
 		{
 			Enemy* enemy = new Enemy();
@@ -434,20 +415,23 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		{
 			active_object = new Poison();
 		}
+		*/
 
 		if ( active_object )
 		{
 			float x = 0, y = 0, z = 0, r = 0;
 			ss >> x >> y >> z >> r;
 
-			active_object->set_mesh( direct_3d()->getMeshManager()->load( name.c_str(), ( std::string( "media/model/" ) + name + ".x" ).c_str() ) );
-			active_object->set_stage( stage_.get() );
-			active_object->start_position().set( x, y, z );
+			DrawingModel* drawing_model = get_drawing_model_manager()->load( name.c_str() );
+
+			active_object->set_drawing_model( drawing_model );
+
+			active_object->set_location( x, y, z );
 			active_object->set_direction_degree( r );
-			active_object_manager()->add_active_object( active_object );
+			
+			get_active_object_manager()->add_active_object( active_object );
 		}
 	}
-#endif // 0
 }
 
 void GamePlayScene::save_stage_file( const char* file_name ) const
@@ -510,7 +494,7 @@ void GamePlayScene::update()
 		{
 			Robot* robot = new Robot();
 			robot->set_drawing_model( get_drawing_model_manager()->load( "robot" ) );
-			robot->set_location( player_->get_transform().getOrigin().getX(), 20, player_->get_transform().getOrigin().getZ() + 5 );
+			robot->set_location( player_->get_transform().getOrigin().getX(), player_->get_transform().getOrigin().getY() + 20, player_->get_transform().getOrigin().getZ() + 5 );
 
 			get_active_object_manager()->add_active_object( robot );
 			robot->set_rigid_body( get_physics()->add_active_object( robot ) );
@@ -518,6 +502,7 @@ void GamePlayScene::update()
 	}
 
 	player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );
+
 	camera_->rotate_degree_target().y() = player_->get_direction_degree();
 
 	camera_->rotate_degree_target().y() += get_input()->get_mouse_dx() * 90.f;
@@ -566,6 +551,10 @@ void GamePlayScene::render()
 		std::wstringstream ss;
 		ss << L"Bullet ‚É‚æ‚é•¨—‰‰ŽZ" << std::endl;
 		ss << L"FPS : " << get_main_loop()->get_last_fps() << std::endl;
+		ss << L"POS : " << player_->get_transform().getOrigin().x() << ", " << player_->get_transform().getOrigin().y() << ", " << player_->get_transform().getOrigin().z() << std::endl;
+		ss << L"DX : " <<player_->get_rigid_body()->getLinearVelocity().x() << std::endl;
+		ss << L"DY : " <<player_->get_rigid_body()->getLinearVelocity().y() << std::endl;
+		ss << L"DZ : " <<player_->get_rigid_body()->getLinearVelocity().z() << std::endl;
 		ss << L"Objects : " << get_active_object_manager()->active_object_list().size() << std::endl;
 
 		get_direct_3d()->getFont()->drawText( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str() );
@@ -786,6 +775,7 @@ void GamePlayScene::render_line( const ActiveObject* active_object )
 	buffer.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
 	buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
 	buffer.world = XMMatrixTranspose( buffer.world );
+	buffer.color = active_object->get_drawing_model()->get_line()->get_color();
 
 	get_game_main()->get_object_constant_buffer()->update( & buffer );
 	get_game_main()->get_object_constant_buffer()->render();

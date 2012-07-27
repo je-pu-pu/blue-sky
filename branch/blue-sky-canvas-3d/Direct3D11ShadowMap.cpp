@@ -64,7 +64,7 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, size_t size )
 		viewport_.MaxDepth = 1.f;
 	}
 
-	light_position_ = XMVectorSet( 50.f, 350.f, -25.f, 0.f );
+	light_position_ = XMVectorSet( 50.f, 100.f, -25.f, 0.f );
 }
 
 Direct3D11ShadowMap::~Direct3D11ShadowMap()
@@ -76,12 +76,13 @@ Direct3D11ShadowMap::~Direct3D11ShadowMap()
 
 void Direct3D11ShadowMap::setEyePosition( const XMVECTOR& eye )
 {
-	XMVECTOR eye_fix = XMVectorSet( XMVectorGetX( eye ) + XMVectorGetX( light_position_ ), XMVectorGetY( light_position_ ), XMVectorGetZ( eye ) + XMVectorGetZ( light_position_ ), 0.f );
+	XMVECTOR eye_fix = XMVectorSet( XMVectorGetX( eye ) + XMVectorGetX( light_position_ ), XMVectorGetY( eye ) + XMVectorGetY( light_position_ ), XMVectorGetZ( eye ) + XMVectorGetZ( light_position_ ), 0.f );
 	XMVECTOR at = XMVectorSet( XMVectorGetX( eye ), XMVectorGetY( eye ), XMVectorGetZ( eye ), 0.f );
 	XMVECTOR up = XMVectorSet( 0.f, 0.f, 1.f, 0.f );
 
 	view_matrix_ = XMMatrixLookAtLH( eye_fix, at, up );
-	projection_matrix_ = XMMatrixOrthographicLH( 10.f, 10.f, 50.f, 400.f );
+	projection_matrix_ = XMMatrixOrthographicLH( 5.f, 5.f, 50.f, 400.f );
+	// projection_matrix_ = XMMatrixOrthographicLH( 1000.f, 1000.f, 50.f, 400.f );
 }
 
 void Direct3D11ShadowMap::render()

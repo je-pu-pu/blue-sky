@@ -57,11 +57,15 @@ GameMain::GameMain()
 	save_data_ = new Config();
 	save_data_->load_file( "save/blue-sky.save" );
 
+	// App
+	get_app()->set_size( get_config()->get( "video.width", App::DEFAULT_WIDTH ), get_config()->get( "video.height", App::DEFAULT_HEIGHT ) );
+	get_app()->set_full_screen( get_config()->get( "video.full_screen", 0 ) != 0 );
+
 	// MainLoop
 	main_loop_ = new MainLoop( 60 );
 
 	// Direct3D
-	direct_3d_ = new Direct3D11( get_app()->GetWindowHandle(), get_app()->get_width(), get_app()->get_height(), false );
+	direct_3d_ = new Direct3D11( get_app()->GetWindowHandle(), get_app()->get_width(), get_app()->get_height(), get_app()->is_full_screen() );
 	direct_3d_->getEffect()->load( "media/shader/main.fx" );
 	direct_3d_->create_default_input_layout();
 
@@ -71,10 +75,16 @@ GameMain::GameMain()
 
 	physics_ = new ActiveObjectPhysics();
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
-	bullet_debug_draw_->setDebugMode( btIDebugDraw::DBG_DrawWireframe );
-	bullet_debug_draw_->setDebugMode( 0 );
 
-	physics_->setDebugDrawer( bullet_debug_draw_.get() );
+	if ( get_config()->get< int >( "video.bullet_debug_draw", 0 ) )
+	{
+		bullet_debug_draw_->setDebugMode( btIDebugDraw::DBG_DrawWireframe );
+		physics_->setDebugDrawer( bullet_debug_draw_.get() );
+	}
+	else
+	{
+		bullet_debug_draw_->setDebugMode( 0 );
+	}
 
 	direct_input_ = new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() );
 	input_ = new Input();
@@ -97,7 +107,10 @@ GameMain::GameMain()
 //■デストラクタ
 GameMain::~GameMain()
 {
+	config_->set< int >( "audio.mute", sound_manager_->is_mute() );
+	config_->set< int >( "video.full_screen", get_app()->is_full_screen() );
 
+	config_->save_file( "blue-sky.config" );
 }
 
 bool GameMain::update()

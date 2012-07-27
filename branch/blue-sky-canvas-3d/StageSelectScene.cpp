@@ -2,9 +2,10 @@
 #include "Input.h"
 #include "SoundManager.h"
 
-#include "Direct3D9.h"
-#include "Direct3D9Mesh.h"
-#include "Direct3D9TextureManager.h"
+#include "Direct3D11.h"
+#include "Direct3D11Color.h"
+#include "Direct3D11TextureManager.h"
+#include "Direct3D11Sprite.h"
 #include "DirectX.h"
 
 #include <game/Sound.h>
@@ -33,7 +34,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	, right_allow_src_rect_( win::Rect::Size( 384, 704, 86, 126 ) )
 	, stage_src_rect_( 0, 0, 512, 512 )
 {
-	page_ = save_data()->get( "stage-select.page", 0 );
+	page_ = get_save_data()->get( "stage-select.page", 0 );
 
 	check_story_completed();
 
@@ -47,11 +48,11 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	face_src_rect_list_.push_back( win::Rect::Size( 704, 384, 64, 64 ) );
 	face_src_rect_list_.push_back( win::Rect::Size( 768, 384, 64, 64 ) );
 
-	sprite_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
-	bg_texture_ = direct_3d()->getTextureManager()->load( "bg", "media/image/title-bg.png" );
+	sprite_texture_ = get_direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
+	bg_texture_ = get_direct_3d()->getTextureManager()->load( "bg", "media/image/title-bg.png" );
 
-	ok_ = sound_manager()->load( "ok" );
-	click_ = sound_manager()->load( "click" );
+	ok_ = get_sound_manager()->load( "ok" );
+	click_ = get_sound_manager()->load( "click" );
 
 	update_stage_list();
 }
@@ -59,7 +60,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 StageSelectScene::~StageSelectScene()
 {
 	// direct_3d()->getTextureManager()->unload( "sprite" );
-	direct_3d()->getTextureManager()->unload( "bg" );
+	get_direct_3d()->getTextureManager()->unload( "bg" );
 
 	clear_stage_list();
 }
@@ -70,7 +71,7 @@ StageSelectScene::~StageSelectScene()
  */
 void StageSelectScene::update()
 {
-	if ( input()->push( Input::A ) )
+	if ( get_input()->push( Input::A ) )
 	{
 		if ( is_mouse_on_left_allow() )
 		{
@@ -101,14 +102,14 @@ void StageSelectScene::update()
 /**
  * •`‰æ
  */
-bool StageSelectScene::render()
+void StageSelectScene::render()
 {
-	D3DCOLOR bg_color = page_ < get_max_story_page() ? D3DCOLOR_XRGB( 0x11, 0xAA, 0xFF ) : D3DCOLOR_XRGB( 0x99, 0xEE, 0xFF );
+	Color bg_color = page_ < get_max_story_page() ? Color::from_256( 0x11, 0xAA, 0xFF ) : Color::from_256( 0x99, 0xEE, 0xFF );
 
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->BeginScene() );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, bg_color, 1.f, 0 ) );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->Begin( D3DXSPRITE_ALPHABLEND ) );
+	get_direct_3d()->clear();
+	get_direct_3d()->getSprite()->begin();
 
+#if 0
 	D3DXMATRIXA16 t, s, transform;
 
 	// BG
@@ -266,10 +267,8 @@ bool StageSelectScene::render()
 		direct_3d()->getSprite()->Draw( sprite_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
 	}
 
-	DIRECT_X_FAIL_CHECK( direct_3d()->getSprite()->End() );
-	DIRECT_X_FAIL_CHECK( direct_3d()->getDevice()->EndScene() );
-
-	return true;
+	direct_3d()->getSprite()->end();
+#endif // 0
 }
 
 void StageSelectScene::update_page( int page )
@@ -278,7 +277,7 @@ void StageSelectScene::update_page( int page )
 
 	update_stage_list();
 
-	save_data()->set( "stage-select.page", page );
+	get_save_data()->set( "stage-select.page", page );
 }
 
 void StageSelectScene::clear_stage_list()
@@ -287,7 +286,7 @@ void StageSelectScene::clear_stage_list()
 	{
 		Stage* stage = *i;
 
-		direct_3d()->getTextureManager()->unload( stage->name.c_str() );
+		get_direct_3d()->getTextureManager()->unload( stage->name.c_str() );
 
 		delete stage;
 	}
@@ -344,7 +343,7 @@ void StageSelectScene::update_stage_list()
 		// bad
 		if ( page_ == 0 && ! last_stage_name.empty() )
 		{
-			if ( save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + last_stage_name ).c_str(), 0 ) == 0 )
+			if ( get_save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + last_stage_name ).c_str(), 0 ) == 0 )
 			{
 				break;
 			}
@@ -363,16 +362,16 @@ void StageSelectScene::update_stage_list()
 		Stage* stage = new Stage();
 		stage->name = stage_name;
 		stage->rect = get_stage_dst_rect( stage, n );
-		stage->cleared = save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + stage->name ).c_str(), 0 ) != 0;
-		stage->completed = save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + stage->name ).c_str(), 0 ) == 2;
+		stage->cleared = get_save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + stage->name ).c_str(), 0 ) != 0;
+		stage->completed = get_save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + stage->name ).c_str(), 0 ) == 2;
 
 		try
 		{
-			stage->texture = direct_3d()->getTextureManager()->load( stage->name.c_str(), ( get_stage_dir_name_by_page( page_ ) + stage->name + ".png" ).c_str() );
+			stage->texture = get_direct_3d()->getTextureManager()->load( stage->name.c_str(), ( get_stage_dir_name_by_page( page_ ) + stage->name + ".png" ).c_str() );
 		}
 		catch ( ... )
 		{
-			stage->texture = direct_3d()->getTextureManager()->load( stage->name.c_str(), "media/stage/default.png" );
+			stage->texture = get_direct_3d()->getTextureManager()->load( stage->name.c_str(), "media/stage/default.png" );
 		}
 
 		stage_list_.push_back( stage );
@@ -423,7 +422,7 @@ void StageSelectScene::check_story_completed()
 		{
 			std::string stage_name = common::serialize( p ) + "-" + common::serialize( s );
 
-			if ( save_data()->get( ( get_stage_prefix_by_page( p ) + "." + stage_name ).c_str(), 0 ) < 2 )
+			if ( get_save_data()->get( ( get_stage_prefix_by_page( p ) + "." + stage_name ).c_str(), 0 ) < 2 )
 			{
 				return;
 			}
@@ -439,7 +438,7 @@ bool StageSelectScene::is_final_stage_open() const
 	{
 		std::string stage_name = common::serialize( get_max_story_page() - 1 ) + "-" + common::serialize( s );
 
-		if ( save_data()->get( ( get_stage_prefix_by_page( get_max_story_page() - 1 ) + "." + stage_name ).c_str(), 0 ) == 0 )
+		if ( get_save_data()->get( ( get_stage_prefix_by_page( get_max_story_page() - 1 ) + "." + stage_name ).c_str(), 0 ) == 0 )
 		{
 			return false;
 		}
@@ -488,10 +487,10 @@ bool StageSelectScene::is_mouse_on_left_allow() const
 
 	win::Rect rect = win::Rect::Size( get_margin(), ( get_height() - left_allow_src_rect_.height() ) / 2, left_allow_src_rect_.width(), left_allow_src_rect_.height() );
 
-	if ( input()->get_mouse_x() <  rect.left()   ) return false;
-	if ( input()->get_mouse_x() >= rect.right()  ) return false;
-	if ( input()->get_mouse_y() <  rect.top()    ) return false;
-	if ( input()->get_mouse_y() >= rect.bottom() ) return false;
+	if ( get_input()->get_mouse_x() <  rect.left()   ) return false;
+	if ( get_input()->get_mouse_x() >= rect.right()  ) return false;
+	if ( get_input()->get_mouse_y() <  rect.top()    ) return false;
+	if ( get_input()->get_mouse_y() >= rect.bottom() ) return false;
 
 	return true;
 }
@@ -502,10 +501,10 @@ bool StageSelectScene::is_mouse_on_right_allow() const
 
 	win::Rect rect = win::Rect::Size( get_width() - get_margin() - right_allow_src_rect_.width(), ( get_height() - right_allow_src_rect_.height() ) / 2, right_allow_src_rect_.width(), right_allow_src_rect_.height() );
 
-	if ( input()->get_mouse_x() <  rect.left()   ) return false;
-	if ( input()->get_mouse_x() >= rect.right()  ) return false;
-	if ( input()->get_mouse_y() <  rect.top()    ) return false;
-	if ( input()->get_mouse_y() >= rect.bottom() ) return false;
+	if ( get_input()->get_mouse_x() <  rect.left()   ) return false;
+	if ( get_input()->get_mouse_x() >= rect.right()  ) return false;
+	if ( get_input()->get_mouse_y() <  rect.top()    ) return false;
+	if ( get_input()->get_mouse_y() >= rect.bottom() ) return false;
 
 	return true;
 }
@@ -516,10 +515,10 @@ StageSelectScene::Stage* StageSelectScene::get_pointed_stage() const
 	{
 		Stage* stage = *i;
 
-		if ( input()->get_mouse_x() <  stage->rect.left()   ) continue;
-		if ( input()->get_mouse_x() >= stage->rect.right()  ) continue;
-		if ( input()->get_mouse_y() <  stage->rect.top()    ) continue;
-		if ( input()->get_mouse_y() >= stage->rect.bottom() ) continue;
+		if ( get_input()->get_mouse_x() <  stage->rect.left()   ) continue;
+		if ( get_input()->get_mouse_x() >= stage->rect.right()  ) continue;
+		if ( get_input()->get_mouse_y() <  stage->rect.top()    ) continue;
+		if ( get_input()->get_mouse_y() >= stage->rect.bottom() ) continue;
 
 		return stage;
 	}

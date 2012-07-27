@@ -11,6 +11,7 @@ namespace blue_sky
 
 ActiveObject::ActiveObject()
 	: rigid_body_( 0 )
+	, is_dead_( false )
 	, transform_( 0 )
 
 	, velocity_( 0, 0, 0 )
@@ -63,6 +64,11 @@ void ActiveObject::set_location( float_t x, float_t y, float_t z )
 	get_transform().getOrigin().setValue( x, y, z );
 }
 
+void ActiveObject::set_rotation( float_t x, float_t y, float_t z )
+{
+	get_transform().getRotation().setEuler( x, y, z );
+}
+
 ActiveObject::Transform& ActiveObject::get_transform()
 {
 	return * transform_;
@@ -90,6 +96,11 @@ void ActiveObject::set_direction_degree( float d )
 ActiveObject::DynamicsWorld* ActiveObject::get_dynamics_world() const
 {
 	return GameMain::get_instance()->get_physics()->get_dynamics_world();
+}
+
+void ActiveObject::kill()
+{
+	is_dead_ = true;
 }
 
 } // namespace blue_sky

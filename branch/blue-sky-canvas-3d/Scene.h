@@ -7,6 +7,7 @@
 
 class App;
 class Direct3D11;
+class Direct3D11Color;
 
 namespace game
 {
@@ -40,6 +41,8 @@ public:
 	
 	typedef Direct3D11					Direct3D;
 	typedef ActiveObjectPhysics			Physics;
+
+	typedef Direct3D11Color				Color;
 
 	typedef ID3D11ShaderResourceView	Texture;
 

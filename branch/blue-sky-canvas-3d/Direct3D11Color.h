@@ -1,6 +1,7 @@
 #ifndef DIRECT_3D_11_COLOR_H
 #define DIRECT_3D_11_COLOR_H
 
+#include <d3d11.h>
 #include <xnamath.h>
 
 /**

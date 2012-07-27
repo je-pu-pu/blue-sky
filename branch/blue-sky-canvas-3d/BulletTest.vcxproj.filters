@@ -114,6 +114,9 @@
     <ClCompile Include="Goal.cpp">
       <Filter>ActiveObject</Filter>
     </ClCompile>
+    <ClCompile Include="StageSelectScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -267,6 +270,7 @@
     <None Include="blye-sky.ico">
       <Filter>resource</Filter>
     </None>
+    <None Include="blue-sky.config" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ActiveObject">

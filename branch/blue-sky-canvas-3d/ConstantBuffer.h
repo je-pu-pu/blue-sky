@@ -1,7 +1,7 @@
 #ifndef BLUE_SKY_CONSTANT_BUFFER_H
 #define BLUE_SKY_CONSTANT_BUFFER_H
 
-#include <xnamath.h>
+#include "Direct3D11Color.h"
 
 namespace blue_sky
 {
@@ -21,6 +21,11 @@ struct FrameConstantBuffer
 struct ObjectConstantBuffer
 {
 	XMMATRIX world;
+	Direct3D11Color color;
+
+	ObjectConstantBuffer()
+		: color( 0.f, 0.f, 0.f, 0.f )
+	{ }
 };
 
 } // namespace blue_sky

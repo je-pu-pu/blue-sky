@@ -55,6 +55,9 @@ public:
 	/// •ûŒü‰ÁŽZ
 	void add_direction_degree( float );
 
+	//
+	bool is_falling_to_dead() const;
+
 }; // class Player
 
 } // namespace blue_sky

@@ -18,6 +18,9 @@ namespace blue_sky
 
 DrawingLine::DrawingLine( Direct3D11* direct_3d )
 	: direct_3d_( direct_3d )
+
+	, color_( 0.f, 0.f, 0.f, 0.f )
+
 	, vertex_buffer_( 0 )
 	, index_buffer_( 0 )
 

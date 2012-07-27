@@ -46,6 +46,7 @@ cbuffer FrameConstantBuffer : register( b1 )
 cbuffer ObjectConstantBuffer : register( b2 )
 {
 	matrix World;
+	float4 ObjectColor;
 };
 
 struct VS_INPUT
@@ -128,6 +129,8 @@ VSGS_LINE_INPUT vs_line( VSGS_LINE_INPUT input, uint vertex_id : SV_VertexID )
 	output.Position = mul( output.Position, World );
     output.Position = mul( output.Position, View );
     output.Position = mul( output.Position, Projection );
+
+	output.Color = input.Color + ObjectColor;
 
 	// �Ԃ炷
 	// float a = Time; // ( vertex_id ) / 10.f + Time * 10.f;
@@ -458,6 +461,7 @@ PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
 	
     output.ShadowTexCoord.x = ( output.ShadowTexCoord.x + 1.f ) / 2.f;
     output.ShadowTexCoord.y = ( -output.ShadowTexCoord.y + 1.f ) / 2.f;
+	// output.ShadowTexCoord.z -= 0.0005f;
 	output.ShadowTexCoord.z -= 0.000005f;
 
 	return output;

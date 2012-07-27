@@ -1,7 +1,12 @@
 #include "Player.h"
 
+#include "DrawingModel.h"
+#include "DrawingLine.h"
+
 #include "GameMain.h"
 #include "Input.h"
+
+#include <common/math.h>
 
 #include <btBulletCollisionCommon.h>
 
@@ -25,6 +30,20 @@ void Player::update()
 
 	update_jumpable();
 	update_jumping();
+
+	if ( is_falling_to_dead() )
+	{
+		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 1.f, 0.f, 0.f, 0.f ) );
+	}
+	else
+	{
+		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.f, 0.f, 0.f, 0.f ) );
+	}
+
+	if ( is_jumpable() && is_falling_to_dead() )
+	{
+		kill();
+	}
 }
 
 /**
@@ -135,7 +154,7 @@ void Player::jump()
 	get_rigid_body()->setLinearVelocity(
 		Vector3(
 			get_rigid_body()->getLinearVelocity().x(),
-			get_rigid_body()->getLinearVelocity().y() + 5.f,
+			get_rigid_body()->getLinearVelocity().y() + 4.f,
 			get_rigid_body()->getLinearVelocity().z()
 		)
 	);
@@ -156,6 +175,20 @@ void Player::add_direction_degree( float d )
 	*/
 
 	set_direction_degree( get_direction_degree() + d );
+
+	/*
+	Transform t = get_rigid_body()->getCenterOfMassTransform();
+	t.getRotation().setEulerZYX( 0, get_direction_degree(), 0 );
+
+	get_rigid_body()->setCenterOfMassTransform( t );
+	*/
+
+	Transform t = get_rigid_body()->getCenterOfMassTransform();
+
+	Matrix m;
+	m.setEulerZYX( 0.f, math::degree_to_radian( get_direction_degree() ), 0.f );
+	t.setBasis( m );
+	get_rigid_body()->setCenterOfMassTransform( t );
 }
 
 void Player::stop()
@@ -174,6 +207,11 @@ void Player::stop()
 	}
 
 	get_rigid_body()->setLinearVelocity( v );
+}
+
+bool Player::is_falling_to_dead() const
+{
+	return get_rigid_body()->getLinearVelocity().y() < -10.f;
 }
 
 } // namespace blue_sky

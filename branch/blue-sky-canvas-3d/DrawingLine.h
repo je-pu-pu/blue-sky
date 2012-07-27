@@ -1,8 +1,8 @@
 #ifndef BLUE_SKY_DRAWING_LINE_H
 #define BLUE_SKY_DRAWING_LINE_H
 
-#include <d3d11.h>
-#include <xnamath.h>
+#include "Direct3D11Color.h"
+
 #include <vector>
 
 class Direct3D11;
@@ -41,7 +41,7 @@ public:
 	};
 
 	typedef XMFLOAT3 Position;
-	typedef XMFLOAT4 Color;
+	typedef Direct3D11Color Color;
 
 	typedef WORD Index;
 
@@ -55,7 +55,9 @@ public:
 
 protected:
 	Direct3D11*		direct_3d_;
-	
+
+	Color			color_;
+
 	ID3D11Buffer*	vertex_buffer_;
 	ID3D11Buffer*	index_buffer_;
 	
@@ -76,6 +78,9 @@ public:
 	bool load_obj( const char* );
 
 	void render( int level = 99999 ) const;
+
+	const Color& get_color() const { return color_; }
+	void set_color( const Color& color ) { color_ = color; }
 
 }; // class DrawingLine
 

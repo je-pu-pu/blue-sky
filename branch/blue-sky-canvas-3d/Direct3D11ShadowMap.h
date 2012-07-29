@@ -74,6 +74,7 @@ public:
 
 	ID3D11ShaderResourceView* getShaderResourceView() { return shader_resource_view_; }
 
+	void setLightPosition( const Vector& );
 	void setEyePosition( const XMVECTOR& );
 
 	const ConstantBuffer* getConstantBuffer() const { return constant_buffer_.get(); }

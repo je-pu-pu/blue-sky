@@ -43,6 +43,8 @@ void Player::update()
 	if ( is_jumpable() && is_falling_to_dead() )
 	{
 		kill();
+
+		play_sound( "dead" );
 	}
 
 	uncontrollable_timer_ = math::chase< float_t >( uncontrollable_timer_, 0.f, get_elapsed_time() );
@@ -54,6 +56,14 @@ void Player::update()
  */
 void Player::update_jumpable()
 {
+	is_jumpable_ = false;
+
+	// ジャンプ直後と着地直後はジャンプできない
+	if ( abs( get_velocity().y() ) > 5.f )
+	{
+		return;
+	}
+
 	// 中心 + 四隅の設置を調べる
 	if (
 		is_on_ground( 0, 0 ) ||
@@ -63,10 +73,6 @@ void Player::update_jumpable()
 		is_on_ground( +get_collision_width() / 2.f, +get_collision_depth() / 2.f ) )
 	{
 		is_jumpable_ = true;
-	}
-	else
-	{
-		is_jumpable_ = false;
 	}
 }
 
@@ -236,7 +242,7 @@ void Player::damage( const Vector3& to )
 
 bool Player::is_falling_to_dead() const
 {
-	return get_rigid_body()->getLinearVelocity().y() < -10.f;
+	return get_rigid_body()->getLinearVelocity().y() < -15.f;
 }
 
 } // namespace blue_sky

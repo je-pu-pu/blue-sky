@@ -9,6 +9,13 @@ class btVector3;
 class btTransform;
 class btRigidBody;
 
+namespace game
+{
+
+class Sound;
+
+} // namespace game
+
 namespace blue_sky
 {
 
@@ -25,6 +32,8 @@ class DrawingModel;
 class ActiveObject
 {
 public:
+	typedef game::Sound			Sound;
+
 	typedef btVector3			Vector3;
 	typedef btMatrix3x3			Matrix;
 	typedef btQuaternion		Quaternion;
@@ -58,6 +67,10 @@ protected:
 	float get_elapsed_time() const;
 
 	DynamicsWorld* get_dynamics_world() const;
+
+
+	void play_sound( const char*, bool = false, bool = true ) const;
+	void stop_sound( const char* ) const;
 
 public:
 

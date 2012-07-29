@@ -94,6 +94,11 @@ Direct3D11ShadowMap::~Direct3D11ShadowMap()
 	DIRECT_X_RELEASE( depth_stencil_texture_ );
 }
 
+void Direct3D11ShadowMap::setLightPosition( const XMVECTOR& pos )
+{
+	light_position_ = pos;
+}
+
 void Direct3D11ShadowMap::setEyePosition( const XMVECTOR& eye )
 {
 	XMVECTOR eye_fix = XMVectorSet( XMVectorGetX( eye ) + XMVectorGetX( light_position_ ), XMVectorGetY( eye ) + XMVectorGetY( light_position_ ), XMVectorGetZ( eye ) + XMVectorGetZ( light_position_ ), 0.f );

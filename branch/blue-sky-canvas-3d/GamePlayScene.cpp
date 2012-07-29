@@ -621,6 +621,14 @@ void GamePlayScene::render()
 		// render_object_for_shadow()
 		// if ( rand() % 4 == 0 )
 		{
+			static float a = 0.f;
+
+			a += 0.01f;
+
+			const XMVECTOR light_origin = XMVectorSet( 50.f, 100.f, -25.f, 0.f );
+			XMVECTOR light = light_origin + XMVectorSet( cos( a ) * 10.f, 0.f, sin( a ) * 10.f, 0.f );	
+
+			shadow_map_->setLightPosition( light );
 			shadow_map_->setEyePosition( eye );
 			shadow_map_->ready_to_render_shadow_map();
 

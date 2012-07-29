@@ -1,5 +1,7 @@
 #include "ActiveObject.h"
 #include "ActiveObjectPhysics.h"
+#include "SoundManager.h"
+#include "Sound.h"
 #include "GameMain.h"
 
 #include <common/math.h>
@@ -118,6 +120,31 @@ void ActiveObject::kill()
 float ActiveObject::get_elapsed_time() const
 {
 	return GameMain::get_instance()->get_elapsed_time();
+}
+
+void ActiveObject::play_sound( const char* name, bool loop, bool force ) const
+{
+	Sound* sound = GameMain::get_instance()->get_sound_manager()->get_sound( name );
+	
+	if ( sound )
+	{
+		if ( force || ! sound->is_playing() )
+		{
+			sound->set_3d_position( get_location().x(), get_location().y(), get_location().z() );
+			sound->set_3d_velocity( get_velocity().x() * 60.f, get_velocity().z() * 60.f, get_velocity().z() * 60.f );
+			sound->play( loop );
+		}
+	}
+}
+
+void ActiveObject::stop_sound( const char* name ) const
+{
+	Sound* sound = GameMain::get_instance()->get_sound_manager()->get_sound( name );
+	
+	if ( sound )
+	{
+		sound->stop();
+	}
 }
 
 } // namespace blue_sky

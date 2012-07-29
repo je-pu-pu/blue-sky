@@ -66,7 +66,10 @@ void ActiveObject::set_location( float_t x, float_t y, float_t z )
 
 void ActiveObject::set_rotation( float_t x, float_t y, float_t z )
 {
-	get_transform().getRotation().setEuler( x, y, z );
+	Quaternion q;
+	q.setEuler( math::degree_to_radian( x ), math::degree_to_radian( y ), math::degree_to_radian( z ) );
+
+	get_transform().setRotation( q );
 }
 
 ActiveObject::Transform& ActiveObject::get_transform()

@@ -38,6 +38,7 @@
     <ClCompile Include="DrawingLine.cpp" />
     <ClCompile Include="DrawingModel.cpp" />
     <ClCompile Include="DrawingModelManager.cpp" />
+    <ClCompile Include="DynamicObject.cpp" />
     <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="GamePlayScene.cpp" />
     <ClCompile Include="Goal.cpp" />
@@ -91,6 +92,7 @@
     <ClInclude Include="DrawingLine.h" />
     <ClInclude Include="DrawingModel.h" />
     <ClInclude Include="DrawingModelManager.h" />
+    <ClInclude Include="DynamicObject.h" />
     <ClInclude Include="EndingScene.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameMain.h" />
@@ -119,6 +121,7 @@
     <None Include="media\shader\main.fx">
       <FileType>Document</FileType>
     </None>
+    <None Include="media\stage\0.stage" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

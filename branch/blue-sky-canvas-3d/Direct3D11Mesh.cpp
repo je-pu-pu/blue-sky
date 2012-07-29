@@ -7,7 +7,8 @@
 #include <common/exception.h>
 #include <common/math.h>
 
-// #include <boost/filesystem.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string_regex.hpp>
 
 #include <map>
 
@@ -50,6 +51,8 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 	material_list_.push_back( new Material( direct_3d_ ) );
 	Material* material = material_list_[ material_list_.size() - 1 ];
 
+	std::string texture_file_name;
+
 	while ( in.good() )
 	{		
 		std::string line;		
@@ -67,6 +70,8 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 
 			ss >> v.x >> v.y >> v.z;
 
+			v.z = -v.z;
+
 			position_list.push_back( v );
 		}
 		else if ( command == "vt" )
@@ -79,11 +84,26 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 		}
 		else if ( command == "f" )
 		{
+			std::list< std::string > f_list;
+
 			while ( ss.good() )
 			{
 				std::string f;
 
 				ss >> f;
+
+				f_list.push_back( f );
+			}
+
+			if ( f_list.size() >= 3 )
+			{
+				f_list.reverse();
+			}
+			
+
+			for ( auto fi = f_list.begin(); fi != f_list.end(); ++fi )
+			{
+				std::string& f = *fi;
 
 				std::replace( f.begin(), f.end(), '/', ' ' );
 				
@@ -124,8 +144,6 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 		}
 		else if ( command == "texture" )
 		{
-			std::string texture_file_name;
-
 			ss >> texture_file_name;
 
 			material->load_texture( get_texture_file_name_by_texture_name( texture_file_name.c_str() ).c_str() );
@@ -141,6 +159,16 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 
 				vertex_index_map.clear();
 			}
+
+			
+			ss >> texture_file_name;
+
+			boost::algorithm::replace_all_regex( texture_file_name, boost::regex( "(.*)_(.*)" ), std::string( "$2" ) );
+
+			if ( ! texture_file_name.empty() )
+			{
+				material->load_texture( get_texture_file_name_by_texture_name( texture_file_name.c_str() ).c_str() );
+			}
 		}
 	}
 
@@ -149,6 +177,22 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 	if ( ! material->get_index_list().empty() )
 	{
 		material->create_index_buffer();
+	}
+
+	// !!!
+	if ( texture_file_name.empty() )
+	{
+		boost::filesystem::path path( file_name );
+		texture_file_name = std::string( "media/model/" ) + path.stem().string() + ".png";
+
+		try
+		{
+			material->load_texture( get_texture_file_name_by_texture_name( texture_file_name.c_str() ).c_str() );
+		}
+		catch ( ... )
+		{
+
+		}
 	}
 
 	return true;
@@ -170,6 +214,12 @@ void Direct3D11Mesh::create_vertex_buffer()
 
 string_t Direct3D11Mesh::get_texture_file_name_by_texture_name( const char* texture_name ) const
 {
+	/// !!!
+	if ( ! boost::filesystem::path( texture_name ).has_parent_path() )
+	{
+		return string_t( "media/model/" ) + texture_name;
+	}
+
 	return texture_name;
 }
 

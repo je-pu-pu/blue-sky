@@ -84,6 +84,7 @@ void TitleScene::update()
 		if ( sequence_ == SEQUENCE_TITLE_FIX )
 		{
 			ok_->play( false );
+			set_next_stage_name( "0" );
 			set_next_scene( "game_play" );
 			// set_next_scene( "stage_select" );
 		}

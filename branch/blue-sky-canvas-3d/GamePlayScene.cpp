@@ -42,6 +42,7 @@
 #include "ActiveObjectManager.h"
 
 #include "StaticObject.h"
+#include "DynamicObject.h"
 
 #include "Direct3D11.h"
 
@@ -127,8 +128,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// Camera
 	camera_ = new Camera();
 
-	generate_random_stage();
-
 	if ( get_stage_name().empty() )
 	{
 		generate_random_stage();
@@ -201,7 +200,23 @@ void GamePlayScene::generate_random_stage()
 	}
 
 	{
-		DrawingModel* drawing_model = get_drawing_model_manager()->load( "wall" );
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "soda-can" );
+
+		for ( int n = 0; n < 5; n++ )
+		{
+			DynamicObject* object = new DynamicObject( 0.07f, 0.12f, 0.07f );
+			object->set_drawing_model( drawing_model );
+			object->set_location( 5.f + n * 0.5f, 20.f, 0.f );
+
+			get_active_object_manager()->add_active_object( object );
+
+			// object->set_rigid_body( get_physics()->add_active_object( object ) );
+			object->set_rigid_body( get_physics()->add_active_object_as_cylinder( object ) );
+		}
+	}
+
+	{
+		DrawingModel* drawing_model = get_drawing_model_manager()->load( "wall-1" );
 
 		for ( int n = 0; n < 4; n++ )
 		{
@@ -373,7 +388,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 				sky_box_ = new SkyBox( get_direct_3d(), sky_box_name.c_str(), sky_box_ext.c_str() );
 			}
 		}
-		else if ( name == "static_object" )
+		else if ( name == "object" )
 		{
 			std::string static_object_name;
 			float x = 0, y = 0, z = 0, r = 0;
@@ -382,9 +397,33 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			DrawingModel* drawing_model = get_drawing_model_manager()->load( static_object_name.c_str() );
 
-			StaticObject* static_object = new StaticObject();
+			std::map< string_t, ActiveObject::Vector3 > size_map;
+
+			size_map[ "soda-can-1"   ] = ActiveObject::Vector3(  0.07f, 0.12f, 0.07f );
+			size_map[ "wall-1"       ] = ActiveObject::Vector3(  4.f,   1.75f, 0.1f  );
+			size_map[ "wall-2"       ] = ActiveObject::Vector3(  8.f,   2.5f,  0.1f  );
+			size_map[ "outdoor-unit" ] = ActiveObject::Vector3(  0.7f,  0.6f,  0.24f );
+			size_map[ "building-20"  ] = ActiveObject::Vector3( 10.f,  20.f,  10.f   );
+			size_map[ "building-200" ] = ActiveObject::Vector3( 80.f, 200.f,  60.f   );
+			size_map[ "balloon"      ] = ActiveObject::Vector3(  1.f,   2.f,   1.f   );
+
+			auto i = size_map.find( static_object_name );
+
+			float w = 0.f, h = 0.f, d = 0.f;
+
+			if ( i != size_map.end() )
+			{
+				w = i->second.x();
+				h = i->second.y();
+				d = i->second.z();
+			}
+
+			StaticObject* static_object = new StaticObject( w, h, d );
 			static_object->set_drawing_model( drawing_model );
 			static_object->set_location( x, y, z );
+			static_object->set_rotation( r, 0, 0 );
+
+			static_object->set_rigid_body( get_physics()->add_active_object( static_object ) );
 
 			get_active_object_manager()->add_active_object( static_object );
 		}
@@ -549,12 +588,14 @@ void GamePlayScene::render()
 		get_direct_3d()->getFont()->begin();
 
 		std::wstringstream ss;
+		ss.setf( std::ios_base::fixed, std::ios_base::floatfield );
+
 		ss << L"Bullet ‚É‚æ‚é•¨—‰‰ŽZ" << std::endl;
 		ss << L"FPS : " << get_main_loop()->get_last_fps() << std::endl;
 		ss << L"POS : " << player_->get_transform().getOrigin().x() << ", " << player_->get_transform().getOrigin().y() << ", " << player_->get_transform().getOrigin().z() << std::endl;
-		ss << L"DX : " <<player_->get_rigid_body()->getLinearVelocity().x() << std::endl;
-		ss << L"DY : " <<player_->get_rigid_body()->getLinearVelocity().y() << std::endl;
-		ss << L"DZ : " <<player_->get_rigid_body()->getLinearVelocity().z() << std::endl;
+		ss << L"DX : " << player_->get_rigid_body()->getLinearVelocity().x() << std::endl;
+		ss << L"DY : " << player_->get_rigid_body()->getLinearVelocity().y() << std::endl;
+		ss << L"DZ : " << player_->get_rigid_body()->getLinearVelocity().z() << std::endl;
 		ss << L"Objects : " << get_active_object_manager()->active_object_list().size() << std::endl;
 
 		get_direct_3d()->getFont()->drawText( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str() );

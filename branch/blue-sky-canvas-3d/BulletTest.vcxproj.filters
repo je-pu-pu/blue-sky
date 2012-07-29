@@ -117,6 +117,9 @@
     <ClCompile Include="StageSelectScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="DynamicObject.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -264,6 +267,9 @@
     <ClInclude Include="Goal.h">
       <Filter>ActiveObject</Filter>
     </ClInclude>
+    <ClInclude Include="DynamicObject.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\main.fx" />
@@ -271,6 +277,9 @@
       <Filter>resource</Filter>
     </None>
     <None Include="blue-sky.config" />
+    <None Include="media\stage\0.stage">
+      <Filter>stage</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ActiveObject">
@@ -305,6 +314,9 @@
     </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{10ce03e4-864e-4dea-b599-103ee588e478}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stage">
+      <UniqueIdentifier>{3cbc121b-0d60-4a83-9e5c-4740d20afed4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

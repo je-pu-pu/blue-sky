@@ -26,7 +26,7 @@ BulletPhysics::BulletPhysics()
 	dynamics_world_->setGravity( btVector3( 0, -9.8f, 0 ) );
 
 	// create_ground_shape()
-	btCollisionShape* ground = new btBoxShape( btVector3( btScalar( 1000 ), btScalar( 1 ), btScalar( 1000 ) ) );
+	btCollisionShape* ground = new btBoxShape( btVector3( btScalar( 10 ), btScalar( 1 ), btScalar( 10 ) ) );
 	btAlignedObjectArray<btCollisionShape*> collision_shape_list_;
 
 	collision_shape_list_.push_back( ground );
@@ -100,11 +100,34 @@ btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, cons
 
 	// create_box_rigid_body()
 	{
-		btScalar mass( is_static ? 0.f : 100.f );
+		btScalar mass( is_static ? 0.f : 10.f );
 		btVector3 local_inertia( 0, 0, 0 );
 
 		shape->calculateLocalInertia( mass, local_inertia );
 		// compound_shape->calculateLocalInertia( mass, local_inertia );
+
+		btDefaultMotionState* motion_state = new btDefaultMotionState( transform * offset );
+		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );
+	
+		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
+		dynamics_world_->addRigidBody( rigid_body );
+
+		return rigid_body;
+	}	
+}
+
+btRigidBody* BulletPhysics::add_cylinder_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, bool is_static )
+{
+	// create_cylinder_shape()
+	btCylinderShape* shape = new btCylinderShape( box );
+	collision_shape_list_.push_back( shape );
+
+	// create_cylinder_rigid_body()
+	{
+		btScalar mass( is_static ? 0.f : 0.01f );
+		btVector3 local_inertia( 0, 0, 0 );
+
+		shape->calculateLocalInertia( mass, local_inertia );
 
 		btDefaultMotionState* motion_state = new btDefaultMotionState( transform * offset );
 		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );

@@ -17,8 +17,8 @@
 class App
 {
 public:
-	static const int DEFAULT_WIDTH = 640;
-	static const int DEFAULT_HEIGHT = 480;
+	static const int DEFAULT_WIDTH = 800;
+	static const int DEFAULT_HEIGHT = 600;
 
 private:
 	HINSTANCE	hInst;					//インスタンスハンドル

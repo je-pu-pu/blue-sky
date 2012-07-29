@@ -22,6 +22,7 @@ public:
 	~ActiveObjectPhysics();
 
 	RigidBody* add_active_object( const ActiveObject* );
+	RigidBody* add_active_object_as_cylinder( const ActiveObject* );
 
 }; // class ActiveObjectPhysics
 

@@ -53,6 +53,8 @@ protected:
 
 	float get_max_speed() const { return 4.f; }
 	
+	float get_elapsed_time() const;
+
 	DynamicsWorld* get_dynamics_world() const;
 
 public:

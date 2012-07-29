@@ -44,6 +44,8 @@ void Player::update()
 	{
 		kill();
 	}
+
+	uncontrollable_timer_ = math::chase< float_t >( uncontrollable_timer_, 0.f, get_elapsed_time() );
 }
 
 /**
@@ -117,6 +119,11 @@ bool Player::is_on_ground( float_t offset_x, float_t offset_z ) const
 
 void Player::step( float_t s )
 {
+	if ( is_uncontrollable() )
+	{
+		return;
+	}
+
 	get_rigid_body()->setActivationState( true );
 	get_rigid_body()->setLinearVelocity(
 		Vector3(
@@ -129,6 +136,11 @@ void Player::step( float_t s )
 
 void Player::side_step( float_t s )
 {
+	if ( is_uncontrollable() )
+	{
+		return;
+	}
+
 	get_rigid_body()->setActivationState( true );
 	get_rigid_body()->setLinearVelocity(
 		Vector3(
@@ -193,6 +205,11 @@ void Player::add_direction_degree( float d )
 
 void Player::stop()
 {
+	if ( is_uncontrollable() )
+	{
+		return;
+	}
+
 	Vector3 v = get_rigid_body()->getLinearVelocity();
 
 	if ( is_jumping() )
@@ -207,6 +224,14 @@ void Player::stop()
 	}
 
 	get_rigid_body()->setLinearVelocity( v );
+}
+
+void Player::damage( const Vector3& to )
+{
+	uncontrollable_timer_ = 1.f;
+
+	get_rigid_body()->setActivationState( true );
+	get_rigid_body()->setLinearVelocity( to );
 }
 
 bool Player::is_falling_to_dead() const

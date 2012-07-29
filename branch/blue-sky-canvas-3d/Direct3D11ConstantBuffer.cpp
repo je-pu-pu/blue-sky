@@ -37,4 +37,5 @@ void Direct3D11ConstantBuffer::render()
 {
 	direct_3d_->getImmediateContext()->VSSetConstantBuffers( slot_, 1, & constant_buffer_ );
 	direct_3d_->getImmediateContext()->GSSetConstantBuffers( slot_, 1, & constant_buffer_ );
+	direct_3d_->getImmediateContext()->PSSetConstantBuffers( slot_, 1, & constant_buffer_ );
 }

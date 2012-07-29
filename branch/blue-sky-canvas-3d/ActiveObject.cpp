@@ -106,4 +106,9 @@ void ActiveObject::kill()
 	is_dead_ = true;
 }
 
+float ActiveObject::get_elapsed_time() const
+{
+	return GameMain::get_instance()->get_elapsed_time();
+}
+
 } // namespace blue_sky

@@ -20,6 +20,15 @@ SamplerState wrap_texture_sampler
 	ComparisonFunc = NEVER;
 };
 
+SamplerState u_wrap_texture_sampler
+{
+	Filter = ANISOTROPIC;
+    AddressU = Wrap;
+    AddressV = Clamp;
+    AddressW = Clamp;
+	ComparisonFunc = NEVER;
+};
+
 SamplerState shadow_texture_sampler
 {
 	Filter = ANISOTROPIC;
@@ -131,6 +140,9 @@ VSGS_LINE_INPUT vs_line( VSGS_LINE_INPUT input, uint vertex_id : SV_VertexID )
     output.Position = mul( output.Position, Projection );
 
 	output.Color = input.Color + ObjectColor;
+	
+	// アルファ値を変動させる
+	// output.Color.a -= ( ( uint( Time * 5 ) + vertex_id ) % 8 ) / 8.f * 0.5f;
 
 	// ぶらす
 	// float a = Time; // ( vertex_id ) / 10.f + Time * 10.f;
@@ -211,11 +223,13 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 		float ly = ( input[ m ].Position.y * screen_ratio ) - ( input[ n ].Position.y * screen_ratio );
 		float lx = input[ m ].Position.x - input[ n ].Position.x;
 		
+		int redraw_seed = uint( Time * 5.f ) + primitive_id;
+
 		// float line_index = ( uint( Time + primitive_id % 10 / 10.f ) + primitive_id ) % 3; // 全ての線がばらばらのタイミングで更新される
-		float line_index = ( uint( Time * 5.f ) + primitive_id ) % 3; // 全ての線が統一されたタイミングで更新される
+		float line_index = redraw_seed % 3; // 全ての線が統一されたタイミングで更新される
 		float line_v_origin = ( line_index * line_v_width );
 
-		float line_u_origin = 0.1f;
+		float line_u_origin = ( redraw_seed ) * 0.01f;
 		float line_length_ratio = length( float2( lx, ly ) ) / length( float2( 2.f, 2.f ) );
 
 		float angle = atan2( ly, lx );
@@ -295,8 +309,7 @@ float4 ps_wrap( PS_INPUT input ) : SV_Target
 
 float4 ps_line( noperspective PS_INPUT input ) : SV_Target
 {
-	// input.Color.a = 0.f;
-	return line_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
+	return line_texture.Sample( u_wrap_texture_sampler, input.TexCoord ) + input.Color;
 }
 
 float4 ps_debug( PS_INPUT input ) : SV_Target

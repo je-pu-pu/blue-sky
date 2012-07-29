@@ -18,6 +18,8 @@ private:
 	bool is_jumping_;			///< 現在ジャンプ可能フラグ
 	bool is_jumpable_;			///< 現在ジャンプ中フラグ
 
+	float_t uncontrollable_timer_;	///< 制御不能タイマー
+
 	float_t get_collision_width() const { return 0.5f; }
 	float_t get_collision_height() const { return 1.75f; }
 	float_t get_collision_depth() const { return 0.25f; }
@@ -34,6 +36,8 @@ protected:
 	bool is_jumpable() const { return is_jumpable_; }
 	bool is_on_ground( float_t, float_t ) const;
 	bool is_jumping() const { return is_jumping_; }
+
+	bool is_uncontrollable() const { return uncontrollable_timer_ > 0.f; }
 
 public:
 	Player();
@@ -54,6 +58,8 @@ public:
 
 	/// 方向加算
 	void add_direction_degree( float );
+
+	void damage( const Vector3& );
 
 	//
 	bool is_falling_to_dead() const;

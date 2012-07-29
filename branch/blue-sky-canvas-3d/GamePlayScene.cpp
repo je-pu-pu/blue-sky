@@ -521,9 +521,8 @@ void GamePlayScene::update()
 		}
 		if ( get_input()->press( Input::Y ) )
 		{
-			// eye += XMVectorSet( 0.f, -0.01f, 0.f, 0.f );
+			player_->damage( Player::Vector3( 0, 10, -30.f ) );
 		}
-
 		if ( get_input()->push( Input::A ) )
 		{
 			player_->jump();

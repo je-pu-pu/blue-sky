@@ -9,6 +9,7 @@
 
 Direct3D11Effect::Direct3D11Effect( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
+	, effect_( 0 )
 {
 
 }

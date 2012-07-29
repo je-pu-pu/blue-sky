@@ -78,22 +78,13 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_lev
 
 	light_position_ = XMVectorSet( 50.f, 100.f, -25.f, 0.f );
 
-	projection_matrix_list_[ 0 ] = XMMatrixOrthographicLH(    5.f,    5.f, 50.f, 400.f );
-	projection_matrix_list_[ 1 ] = XMMatrixOrthographicLH(   25.f,   25.f, 50.f, 400.f );
-	projection_matrix_list_[ 2 ] = XMMatrixOrthographicLH(  150.f,  150.f, 50.f, 400.f );
-	projection_matrix_list_[ 3 ] = XMMatrixOrthographicLH( 9999.f, 9999.f, 50.f, 400.f );
+	float length[ 4 ] = { 10.f, 20.f, 40.f, 9999.f };
 
-	constant_buffer_data_.view_depth_per_cascade_level[ 0 ] = 5.f;
-	constant_buffer_data_.view_depth_per_cascade_level[ 1 ] = 25.f;
-	constant_buffer_data_.view_depth_per_cascade_level[ 2 ] = 150.f;
-	constant_buffer_data_.view_depth_per_cascade_level[ 3 ] = 9999.f;
-
-	/*
-	for ( int n = 0; n < cascade_levels_; n++ )
+	for ( int n = 0; n < 4; n++ )
 	{
-		projection_matrix_list_[ n ] = XMMatrixOrthographicLH( 5.f, 5.f, 50.f, 400.f );
+		projection_matrix_list_[ n ] = XMMatrixOrthographicLH( length[ n ], length[ n ], 50.f, 400.f );
+		constant_buffer_data_.view_depth_per_cascade_level[ n ] = length[ n ] * 0.25f;
 	}
-	*/
 }
 
 Direct3D11ShadowMap::~Direct3D11ShadowMap()
@@ -119,8 +110,9 @@ void Direct3D11ShadowMap::ready_to_render_shadow_map()
 
 void Direct3D11ShadowMap::ready_to_render_shadow_map_with_cascade_level( int level )
 {
-	constant_buffer_data_.shadow_view_projection = getViewProjectionMatrix( level );
-	constant_buffer_data_.shadow_view_projection = XMMatrixTranspose( constant_buffer_data_.shadow_view_projection );
+	constant_buffer_data_.shadow_view_projection[ level ] = getViewProjectionMatrix( level );
+	constant_buffer_data_.shadow_view_projection[ level ] = XMMatrixTranspose( constant_buffer_data_.shadow_view_projection[ level ] );
+	constant_buffer_data_.shadow_view_projection[ 0 ] = constant_buffer_data_.shadow_view_projection[ level ];
 
 	constant_buffer_->update( & constant_buffer_data_ );
 	constant_buffer_->render();
@@ -136,9 +128,17 @@ void Direct3D11ShadowMap::ready_to_render_scene()
 
 	direct_3d_->getImmediateContext()->PSSetShaderResources( slot, 1, & shader_resource_view_ );
 
-	constant_buffer_data_.shadow_view_projection = getViewProjectionMatrix( 0 );
-	constant_buffer_data_.shadow_view_projection = XMMatrixTranspose( constant_buffer_data_.shadow_view_projection );
+	for ( int n = 0; n < cascade_levels_; n++ )
+	{
+		constant_buffer_data_.shadow_view_projection[ n ] = getViewProjectionMatrix( n );
+		constant_buffer_data_.shadow_view_projection[ n ] = XMMatrixTranspose( constant_buffer_data_.shadow_view_projection[ n ] );
+	}
 
 	constant_buffer_->update( & constant_buffer_data_ );
 	constant_buffer_->render();
+
+	// constant_buffer_data_.shadow_view_projection = getViewProjectionMatrix( 0 );
+	// constant_buffer_data_.shadow_view_projection = XMMatrixTranspose( constant_buffer_data_.shadow_view_projection );
+	// constant_buffer_->update( & constant_buffer_data_ );
+	// constant_buffer_->render();
 }

@@ -15,7 +15,7 @@ class Direct3D11ConstantBuffer;
 
 struct ShadowMapFrameConstantBufferData
 {
-	XMMATRIX shadow_view_projection;
+	XMMATRIX shadow_view_projection[ 3 ];
 	float_t view_depth_per_cascade_level[ 4 ];
 };
 

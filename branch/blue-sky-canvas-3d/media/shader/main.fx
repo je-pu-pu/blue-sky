@@ -1,3 +1,5 @@
+static const int ShadowMapCascadeLevels = 3;
+
 Texture2D model_texture : register( t0 );
 Texture2D line_texture : register( t0 );
 Texture2D shadow_texture : register( t1 );
@@ -59,7 +61,7 @@ cbuffer ObjectConstantBuffer : register( b2 )
 
 cbuffer ShadowMapBuffer : register( b3 )
 {
-	matrix ShadowViewProjection;
+	matrix ShadowViewProjection[ ShadowMapCascadeLevels ];
 	float4 ShadowMapViewDepthPerCascadeLevel;
 };
 
@@ -98,9 +100,9 @@ struct PS_INPUT
 struct PS_SHADOW_INPUT
 {
 	float4 Position : SV_POSITION;
-	float2 TexCoord : TEXCOORD0;
-	float4 ShadowTexCoord : TEXCOORD1;
-	float Depth : TEXCOORD2;
+	float4 ShadowTexCoord[ ShadowMapCascadeLevels ] : TEXCOORD;
+	float2 TexCoord : TEXCOORD4;
+	float Depth : TEXCOORD5;
 };
 
 GS_INPUT vs( VS_INPUT input, uint vertex_id : SV_VertexID )
@@ -489,15 +491,18 @@ PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
     output.Position = mul( output.Position, Projection );
 	output.TexCoord = input.TexCoord;
 	
-	output.ShadowTexCoord = mul( input.Position, World );
-	output.ShadowTexCoord = mul( output.ShadowTexCoord, ShadowViewProjection );
+	for ( int n = 0; n < ShadowMapCascadeLevels; n++ )
+	{
+		output.ShadowTexCoord[ n ] = mul( input.Position, World );
+		output.ShadowTexCoord[ n ] = mul( output.ShadowTexCoord[ n ], ShadowViewProjection[ n ] );
+		
+		output.ShadowTexCoord[ n ] /= output.ShadowTexCoord[ n ].w;
 	
-	output.ShadowTexCoord /= output.ShadowTexCoord.w;
-	
-    output.ShadowTexCoord.x = ( output.ShadowTexCoord.x + 1.f ) / 2.f;
-    output.ShadowTexCoord.y = ( -output.ShadowTexCoord.y + 1.f ) / 2.f;
-	// output.ShadowTexCoord.z -= 0.0005f;
-	output.ShadowTexCoord.z -= 0.000005f;
+		output.ShadowTexCoord[ n ].x = ( output.ShadowTexCoord[ n ].x + 1.f ) / 2.f;
+		output.ShadowTexCoord[ n ].y = ( -output.ShadowTexCoord[ n ].y + 1.f ) / 2.f;
+		// output.ShadowTexCoord[ n ].z -= 0.0005f;
+		output.ShadowTexCoord[ n ].z -= 0.000005f;
+	}
 
 	output.Depth = mul( mul( input.Position, World ), View ).z;
 
@@ -506,8 +511,6 @@ PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
 
 float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 {
-	static const int ShadowMapCascadeLevels = 3;
-
 	const float4 comp = input.Depth > ShadowMapViewDepthPerCascadeLevel;
 
 	float index =
@@ -525,17 +528,19 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 
 	const int cascade_index = ( int ) index;
 
-	input.ShadowTexCoord.x /= ( float ) ShadowMapCascadeLevels;
-	input.ShadowTexCoord.x += ( float ) cascade_index / ( float ) ShadowMapCascadeLevels;
+	float4 shadow_tex_coord = input.ShadowTexCoord[ cascade_index ];
+
+	shadow_tex_coord.x /= ( float ) ShadowMapCascadeLevels;
+	shadow_tex_coord.x += ( float ) cascade_index / ( float ) ShadowMapCascadeLevels;
 
 
 	// ---
 
 
 	float4 shadow = float4( 1.f, 1.f, 1.f, 1.f );
-	float sz = ( float ) shadow_texture.Sample( shadow_texture_sampler, input.ShadowTexCoord.xy );
+	float sz = ( float ) shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy );
 
-	if ( input.ShadowTexCoord.z >= sz )
+	if ( shadow_tex_coord.z >= sz )
 	{
 		const float4 shadow_color = float4( 0.5f, 0.5f, 0.75f, 1.f );
 		float a = 1.f;
@@ -564,7 +569,7 @@ PS_INPUT vs_shadow_map( VS_INPUT input )
 	PS_INPUT output;
 	
 	output.Position = mul( input.Position, World );
-    output.Position = mul( output.Position, ShadowViewProjection );
+    output.Position = mul( output.Position, ShadowViewProjection[ 0 ] );
 	output.TexCoord = input.TexCoord;
 	output.Color = float4( 0.f, 0.f, 0.f, 0.f );
 

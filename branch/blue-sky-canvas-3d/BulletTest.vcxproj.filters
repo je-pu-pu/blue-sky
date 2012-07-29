@@ -120,6 +120,9 @@
     <ClCompile Include="DynamicObject.cpp">
       <Filter>ActiveObject</Filter>
     </ClCompile>
+    <ClCompile Include="Balloon.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -268,6 +271,9 @@
       <Filter>ActiveObject</Filter>
     </ClInclude>
     <ClInclude Include="DynamicObject.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Balloon.h">
       <Filter>ActiveObject</Filter>
     </ClInclude>
   </ItemGroup>

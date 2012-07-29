@@ -20,9 +20,9 @@ private:
 	void on_collision_y( const GridCell& ) { }
 	void on_collision_z( const GridCell& ) { }
 
-	float get_collision_width() const { return 4.f; }
-	float get_collision_height() const { return 4.f; }
-	float get_collision_depth() const { return 4.f; }
+	float get_collision_width() const { return 1.5f; }
+	float get_collision_height() const { return 1.5f; }
+	float get_collision_depth() const { return 1.5f; }
 
 public:
 	Balloon();

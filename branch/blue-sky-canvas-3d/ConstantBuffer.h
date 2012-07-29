@@ -14,8 +14,7 @@ struct GameConstantBuffer
 struct FrameConstantBuffer
 {
 	XMMATRIX view;
-	XMMATRIX shadow_view_projection;
-	float time;
+	float_t time;
 };
 
 struct ObjectConstantBuffer

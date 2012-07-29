@@ -44,6 +44,8 @@ private:
 	Vector3				velocity_;			///< 移動量
 	float_t				direction_degree_;	///< 方向 ( Y Axis Degree )
 
+	Vector3				start_location_;	///< スタート時の位置
+
 	Vector3				front_;				///< 前
 	Vector3				right_;				///< 右
 
@@ -83,6 +85,8 @@ public:
 
 	inline void set_rigid_body( RigidBody* rigid_body ) { rigid_body_ = rigid_body; }
 
+	void set_start_location( float_t, float_t, float_t );
+
 	void set_location( float_t, float_t, float_t );
 	void set_rotation( float_t, float_t, float_t );
 
@@ -102,6 +106,10 @@ public:
 	Vector3& get_right() { return right_; }
 	const Vector3& get_right() const { return right_; }
 
+	Vector3& get_start_location() { return start_location_; }
+	const Vector3& get_start_location() const { return start_location_; }
+
+	const Vector3& get_location() const { return transform_->getOrigin(); }
 
 	virtual void kill();
 

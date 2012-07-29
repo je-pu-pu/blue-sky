@@ -15,6 +15,7 @@
     <ClCompile Include="ActiveObjectManager.cpp" />
     <ClCompile Include="ActiveObjectPhysics.cpp" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="Balloon.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Direct3D11.cpp" />
@@ -62,6 +63,7 @@
     <ClInclude Include="ActiveObjectManager.h" />
     <ClInclude Include="ActiveObjectPhysics.h" />
     <ClInclude Include="App.h" />
+    <ClInclude Include="Balloon.h" />
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantBuffer.h" />

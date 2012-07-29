@@ -7,22 +7,27 @@
 
 #include <xnamath.h>
 
-XMVECTOR Direct3D11ShadowMap::light_position_;
-XMMATRIX Direct3D11ShadowMap::view_matrix_;
-XMMATRIX Direct3D11ShadowMap::projection_matrix_;
+Direct3D11ShadowMap::Vector Direct3D11ShadowMap::light_position_;
+Direct3D11ShadowMap::Matrix Direct3D11ShadowMap::view_matrix_;
+Direct3D11ShadowMap::MatrixList Direct3D11ShadowMap::projection_matrix_list_;
+Direct3D11ShadowMap::ConstantBufferData Direct3D11ShadowMap::constant_buffer_data_;
 
 static const float light_y = 500.f;
 
-Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, size_t size )
+Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_levels, size_t size )
 	: direct_3d_( direct_3d )
+	, constant_buffer_( new ConstantBuffer( direct_3d, sizeof( ConstantBufferData ), 3 ) ) /// !!!
+	, cascade_levels_( cascade_levels )
 	, depth_stencil_texture_( 0 )
 	, depth_stencil_view_( 0 )
 	, shader_resource_view_( 0 )
 {
+	assert( cascade_levels_ <= MaxCascadeLevels );
+
 	{
 		D3D11_TEXTURE2D_DESC texture_desc = { 0 };
 
-		texture_desc.Width = size;
+		texture_desc.Width = size * cascade_levels_;
 		texture_desc.Height = size;
 		texture_desc.MipLevels = 1;
 		texture_desc.ArraySize = 1;
@@ -55,16 +60,40 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, size_t size )
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateShaderResourceView( depth_stencil_texture_, & view_desc, & shader_resource_view_ ) );
 	}
 
+	viewport_list_.resize( cascade_levels_ );
+
+	int n = 0;
+
+	for ( auto i = viewport_list_.begin(); i != viewport_list_.end(); ++i )
 	{
-		viewport_.TopLeftX = 0.f;
-		viewport_.TopLeftY = 0.f;
-		viewport_.Width = static_cast< float >( size );
-		viewport_.Height = static_cast< float >( size );
-		viewport_.MinDepth = 0.f;
-		viewport_.MaxDepth = 1.f;
+		i->TopLeftX = static_cast< float >( size * n );
+		i->TopLeftY = 0.f;
+		i->Width = static_cast< float >( size );
+		i->Height = static_cast< float >( size );
+		i->MinDepth = 0.f;
+		i->MaxDepth = 1.f;
+
+		n++;
 	}
 
 	light_position_ = XMVectorSet( 50.f, 100.f, -25.f, 0.f );
+
+	projection_matrix_list_[ 0 ] = XMMatrixOrthographicLH(    5.f,    5.f, 50.f, 400.f );
+	projection_matrix_list_[ 1 ] = XMMatrixOrthographicLH(   25.f,   25.f, 50.f, 400.f );
+	projection_matrix_list_[ 2 ] = XMMatrixOrthographicLH(  150.f,  150.f, 50.f, 400.f );
+	projection_matrix_list_[ 3 ] = XMMatrixOrthographicLH( 9999.f, 9999.f, 50.f, 400.f );
+
+	constant_buffer_data_.view_depth_per_cascade_level[ 0 ] = 5.f;
+	constant_buffer_data_.view_depth_per_cascade_level[ 1 ] = 25.f;
+	constant_buffer_data_.view_depth_per_cascade_level[ 2 ] = 150.f;
+	constant_buffer_data_.view_depth_per_cascade_level[ 3 ] = 9999.f;
+
+	/*
+	for ( int n = 0; n < cascade_levels_; n++ )
+	{
+		projection_matrix_list_[ n ] = XMMatrixOrthographicLH( 5.f, 5.f, 50.f, 400.f );
+	}
+	*/
 }
 
 Direct3D11ShadowMap::~Direct3D11ShadowMap()
@@ -81,15 +110,35 @@ void Direct3D11ShadowMap::setEyePosition( const XMVECTOR& eye )
 	XMVECTOR up = XMVectorSet( 0.f, 0.f, 1.f, 0.f );
 
 	view_matrix_ = XMMatrixLookAtLH( eye_fix, at, up );
-	projection_matrix_ = XMMatrixOrthographicLH( 5.f, 5.f, 50.f, 400.f );
-	// projection_matrix_ = XMMatrixOrthographicLH( 1000.f, 1000.f, 50.f, 400.f );
 }
 
-void Direct3D11ShadowMap::render()
+void Direct3D11ShadowMap::ready_to_render_shadow_map()
 {
 	direct_3d_->getImmediateContext()->ClearDepthStencilView( depth_stencil_view_, D3D11_CLEAR_DEPTH, 1.f, 0 );
-	
+}
+
+void Direct3D11ShadowMap::ready_to_render_shadow_map_with_cascade_level( int level )
+{
+	constant_buffer_data_.shadow_view_projection = getViewProjectionMatrix( level );
+	constant_buffer_data_.shadow_view_projection = XMMatrixTranspose( constant_buffer_data_.shadow_view_projection );
+
+	constant_buffer_->update( & constant_buffer_data_ );
+	constant_buffer_->render();
+
 	ID3D11RenderTargetView* render_target_view[] = { 0 };
+	direct_3d_->getImmediateContext()->RSSetViewports( 1, & viewport_list_[ level ] );
 	direct_3d_->getImmediateContext()->OMSetRenderTargets( 1, render_target_view, depth_stencil_view_ );
-	direct_3d_->getImmediateContext()->RSSetViewports( 1, & viewport_ );
+}
+
+void Direct3D11ShadowMap::ready_to_render_scene()
+{
+	const int slot = 1; /// !!!!!!!!!!!
+
+	direct_3d_->getImmediateContext()->PSSetShaderResources( slot, 1, & shader_resource_view_ );
+
+	constant_buffer_data_.shadow_view_projection = getViewProjectionMatrix( 0 );
+	constant_buffer_data_.shadow_view_projection = XMMatrixTranspose( constant_buffer_data_.shadow_view_projection );
+
+	constant_buffer_->update( & constant_buffer_data_ );
+	constant_buffer_->render();
 }

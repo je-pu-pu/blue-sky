@@ -16,6 +16,9 @@ ActiveObject::ActiveObject()
 
 	, velocity_( 0, 0, 0 )
 	, direction_degree_( 0 )
+
+	, start_location_( 0, 0, 0 )
+
 	, front_( 0, 0, 1 )
 	, right_( 1, 0, 0 )
 {
@@ -57,6 +60,12 @@ void ActiveObject::update_transform()
 
 		*transform_ = *transform_ * offset;
 	}
+}
+
+void ActiveObject::set_start_location( float_t x, float_t y, float_t z )
+{
+	start_location_.setValue( x, y, z );
+	get_transform().getOrigin() = start_location_;
 }
 
 void ActiveObject::set_location( float_t x, float_t y, float_t z )

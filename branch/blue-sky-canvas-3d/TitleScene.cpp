@@ -146,7 +146,6 @@ void TitleScene::render()
 		FrameConstantBuffer frame_constant_buffer;
 
 		frame_constant_buffer.view = XMMatrixTranspose( XMMatrixIdentity() );
-		frame_constant_buffer.shadow_view_projection = XMMatrixTranspose( XMMatrixIdentity() );
 		frame_constant_buffer.time = get_game_main()->get_total_elapsed_time();
 	
 		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer );

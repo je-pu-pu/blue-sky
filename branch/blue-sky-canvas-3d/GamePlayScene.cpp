@@ -115,7 +115,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Player
 	player_ = new Player();
-	player_->set_location( 0, 300.f, 0 );
+	player_->set_start_location( 0, 300.f, 0 );
 	player_->set_rigid_body( get_physics()->add_active_object( player_.get() ) );
 	player_->get_rigid_body()->setAngularFactor( 0 );
 	player_->get_rigid_body()->setFriction( 0 );
@@ -139,7 +139,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		load_stage_file( ( stage_dir_name + get_stage_name() + ".stage" ).c_str() );
 	}
 
-	shadow_map_ = new ShadowMap( get_direct_3d(), get_config()->get( "video.shadow-map-size", 1024 ) );
+	shadow_map_ = new ShadowMap( get_direct_3d(), get_config()->get( "video.shadow-map-cascade-levels", 3 ), get_config()->get( "video.shadow-map-size", 1024 ) );
 
 	{
 		GameConstantBuffer constant_buffer;
@@ -358,7 +358,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			ss >> x >> y >> z;
 
-			player_->set_location( x, y, z );
+			player_->set_start_location( x, y, z );
 
 			if ( ! ss.eof() )
 			{
@@ -372,7 +372,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			ss >> x >> y >> z;
 
-			player_->set_location( x, y, z );
+			player_->set_start_location( x, y, z );
 		}
 		else if ( name == "sky-box" )
 		{
@@ -420,7 +420,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			StaticObject* static_object = new StaticObject( w, h, d );
 			static_object->set_drawing_model( drawing_model );
-			static_object->set_location( x, y, z );
+			static_object->set_start_location( x, y, z );
 			static_object->set_rotation( r, 0, 0 );
 
 			static_object->set_rigid_body( get_physics()->add_active_object( static_object ) );
@@ -434,10 +434,12 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			enemy->set_player( player_.get() );
 			active_object = enemy;
 		}
+		*/
 		else if ( name == "balloon" )
 		{
 			active_object = new Balloon();
 		}
+		/*
 		else if ( name == "rocket" )
 		{
 			active_object = new Rocket();
@@ -465,7 +467,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			active_object->set_drawing_model( drawing_model );
 
-			active_object->set_location( x, y, z );
+			active_object->set_start_location( x, y, z );
 			active_object->set_direction_degree( r );
 			
 			get_active_object_manager()->add_active_object( active_object );
@@ -532,7 +534,7 @@ void GamePlayScene::update()
 		{
 			Robot* robot = new Robot();
 			robot->set_drawing_model( get_drawing_model_manager()->load( "robot" ) );
-			robot->set_location( player_->get_transform().getOrigin().getX(), player_->get_transform().getOrigin().getY() + 20, player_->get_transform().getOrigin().getZ() + 5 );
+			robot->set_start_location( player_->get_transform().getOrigin().getX(), player_->get_transform().getOrigin().getY() + 20, player_->get_transform().getOrigin().getZ() + 5 );
 
 			get_active_object_manager()->add_active_object( robot );
 			robot->set_rigid_body( get_physics()->add_active_object( robot ) );
@@ -550,7 +552,10 @@ void GamePlayScene::update()
 	player_->update_rigid_body_velocity();
 	player_->update();
 
+	get_active_object_manager()->update();
+
 	get_physics()->update( get_elapsed_time() );
+
 
 	for ( ActiveObjectManager::ActiveObjectList::iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 	{
@@ -617,12 +622,7 @@ void GamePlayScene::render()
 		// if ( rand() % 4 == 0 )
 		{
 			shadow_map_->setEyePosition( eye );
-
-			frame_constant_buffer.view = XMMatrixTranspose( shadow_map_->getViewMatrix() );
-			frame_constant_buffer.shadow_view_projection = shadow_map_->getViewMatrix() * shadow_map_->getProjectionMatrix();
-			frame_constant_buffer.shadow_view_projection = XMMatrixTranspose( frame_constant_buffer.shadow_view_projection );
-
-			get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer );
+			shadow_map_->ready_to_render_shadow_map();
 
 			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|shadow_map" );
 
@@ -630,19 +630,22 @@ void GamePlayScene::render()
 			{
 				( *i )->apply();
 
-				shadow_map_->render();
-
+				for ( int n = 0; n < shadow_map_->get_cascade_levels(); n++ )
 				{
-					get_game_main()->get_game_constant_buffer()->render();
-					get_game_main()->get_frame_constant_buffer()->render();
-				}
+					shadow_map_->ready_to_render_shadow_map_with_cascade_level( n );
 
-				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
-				{
-					render( *i );
-				}
+					{
+						get_game_main()->get_game_constant_buffer()->render();
+						get_game_main()->get_frame_constant_buffer()->render();
+					}
 
-				render( player_.get() );
+					for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+					{
+						render( *i );
+					}
+
+					render( player_.get() );
+				}
 			}
 		}
 #endif
@@ -693,8 +696,7 @@ void GamePlayScene::render()
 			{
 				( *i )->apply();
 				
-				ID3D11ShaderResourceView* shader_resource_view = shadow_map_->getShaderResourceView();
-				get_direct_3d()->getImmediateContext()->PSSetShaderResources( 1, 1, & shader_resource_view );
+				shadow_map_->ready_to_render_scene();
 
 				{
 					get_game_main()->get_game_constant_buffer()->render();
@@ -764,7 +766,7 @@ void GamePlayScene::render()
 #if 1
 		// render_debug_shadow_map()
 		{
-			get_direct_3d()->setDebugViewport( 0.f, 0, get_width() / 4.f, get_height() / 4.f );
+			get_direct_3d()->setDebugViewport( 0.f, 0, get_width() / 4.f * shadow_map_->get_cascade_levels(), get_height() / 4.f );
 
 			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
 

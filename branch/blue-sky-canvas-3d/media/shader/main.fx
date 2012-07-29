@@ -48,7 +48,6 @@ cbuffer GameConstantBuffer : register( b0 )
 cbuffer FrameConstantBuffer : register( b1 )
 {
 	matrix View;
-	matrix ShadowViewProjection;
 	float Time;
 };
 
@@ -56,6 +55,12 @@ cbuffer ObjectConstantBuffer : register( b2 )
 {
 	matrix World;
 	float4 ObjectColor;
+};
+
+cbuffer ShadowMapBuffer : register( b3 )
+{
+	matrix ShadowViewProjection;
+	float4 ShadowMapViewDepthPerCascadeLevel;
 };
 
 struct VS_INPUT
@@ -70,10 +75,17 @@ struct GS_INPUT
 	float2 TexCoord : TEXCOORD0;
 };
 
-struct VSGS_LINE_INPUT
+struct VS_LINE_INPUT
 {
 	float4 Position : POSITION;
 	float4 Color : COLOR0;
+};
+
+struct VS_LINE_OUTPUT
+{
+	float4 Position : POSITION;
+	float4 Color : COLOR0;
+	float Depth : TEXCOORD0; /// ???
 };
 
 struct PS_INPUT
@@ -88,6 +100,7 @@ struct PS_SHADOW_INPUT
 	float4 Position : SV_POSITION;
 	float2 TexCoord : TEXCOORD0;
 	float4 ShadowTexCoord : TEXCOORD1;
+	float Depth : TEXCOORD2;
 };
 
 GS_INPUT vs( VS_INPUT input, uint vertex_id : SV_VertexID )
@@ -131,16 +144,18 @@ PS_INPUT vs_to_ps( VS_INPUT input, uint vertex_id : SV_VertexID )
 	return output;
 }
 
-VSGS_LINE_INPUT vs_line( VSGS_LINE_INPUT input, uint vertex_id : SV_VertexID )
+VS_LINE_OUTPUT vs_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID )
 {
-	VSGS_LINE_INPUT output = input;
+	VS_LINE_OUTPUT output;
 
-	output.Position = mul( output.Position, World );
+	output.Position = mul( input.Position, World );
     output.Position = mul( output.Position, View );
     output.Position = mul( output.Position, Projection );
 
 	output.Color = input.Color + ObjectColor;
 	
+	output.Depth = mul( mul( input.Position, World ), View ).z;
+
 	// アルファ値を変動させる
 	// output.Color.a -= ( ( uint( Time * 5 ) + vertex_id ) % 8 ) / 8.f * 0.5f;
 
@@ -180,7 +195,7 @@ void gs_pass( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 }
 
 [maxvertexcount(4)]
-void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
+void gs_line( line VS_LINE_OUTPUT input[2], inout TriangleStream<PS_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
 {
 	static const uint input_vertex_count = 2;
 
@@ -197,7 +212,7 @@ void gs_line( line VSGS_LINE_INPUT input[2], inout TriangleStream<PS_INPUT> TriS
 
 	for ( uint n = 0; n < input_vertex_count; n++ )
 	{
-		if ( input[ n ].Position.z < 0.f )
+		if ( input[ n ].Depth < -0.f )
 		{
 			// @todo 調整
 			input[ 0 ].Position.w = 0.f;
@@ -457,6 +472,13 @@ technique11 bullet
 // ----------------------------------------
 // for Shadow Map
 // ----------------------------------------
+static const float4 cascade_colors[ 4 ] = 
+{
+    float4 ( 1.2f, 1.0f, 1.0f, 1.0f ),
+    float4 ( 1.0f, 1.2f, 1.0f, 1.0f ),
+    float4 ( 1.0f, 1.0f, 1.2f, 1.0f ),
+    float4 ( 1.2f, 1.2f, 0.0f, 1.0f ),
+};
 
 PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
 {
@@ -477,11 +499,39 @@ PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
 	// output.ShadowTexCoord.z -= 0.0005f;
 	output.ShadowTexCoord.z -= 0.000005f;
 
+	output.Depth = mul( mul( input.Position, World ), View ).z;
+
 	return output;
 }
 
 float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 {
+	static const int ShadowMapCascadeLevels = 3;
+
+	const float4 comp = input.Depth > ShadowMapViewDepthPerCascadeLevel;
+
+	float index =
+		dot(
+			float4(
+				ShadowMapCascadeLevels > 0,
+				ShadowMapCascadeLevels > 1,
+				ShadowMapCascadeLevels > 2,
+				ShadowMapCascadeLevels > 3
+			),
+			comp
+		);
+
+	index = min( index, ShadowMapCascadeLevels - 1 );
+
+	const int cascade_index = ( int ) index;
+
+	input.ShadowTexCoord.x /= ( float ) ShadowMapCascadeLevels;
+	input.ShadowTexCoord.x += ( float ) cascade_index / ( float ) ShadowMapCascadeLevels;
+
+
+	// ---
+
+
 	float4 shadow = float4( 1.f, 1.f, 1.f, 1.f );
 	float sz = ( float ) shadow_texture.Sample( shadow_texture_sampler, input.ShadowTexCoord.xy );
 
@@ -506,7 +556,7 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 		shadow.a = 1.f;
 	}
 
-	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ) * shadow;
+	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ) * shadow; // * cascade_colors[ cascade_index ];
 }
 
 PS_INPUT vs_shadow_map( VS_INPUT input )
@@ -524,7 +574,7 @@ PS_INPUT vs_shadow_map( VS_INPUT input )
 float4 ps_shadow_map_debug( PS_INPUT input ) : SV_Target
 {
 	// float sz = shadow_texture.Sample( texture_sampler, input.TexCoord );
-	float sz = model_texture.Sample( texture_sampler, input.TexCoord );
+	float sz = model_texture.Sample( texture_sampler, input.TexCoord ).x;
 
 	sz *= 1000.f;
 	sz -= 999.5f;

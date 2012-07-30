@@ -41,6 +41,8 @@ public:
 	typedef D3D11_VIEWPORT						Viewport;
 	typedef std::vector< Viewport >				ViewportList;
 
+	static const int shader_resource_view_slot_ = 1;		/// !!!!!!!!!!!
+
 private:
 	Direct3D11*					direct_3d_;
 	auto_ptr< ConstantBuffer >	constant_buffer_;

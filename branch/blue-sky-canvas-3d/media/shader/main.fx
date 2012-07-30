@@ -67,7 +67,7 @@ cbuffer ShadowMapBuffer : register( b3 )
 
 struct VS_INPUT
 {
-	float4 Position : POSITION;
+	float4 Position : SV_POSITION;
 	float2 TexCoord : TEXCOORD0;
 };
 
@@ -79,13 +79,13 @@ struct GS_INPUT
 
 struct VS_LINE_INPUT
 {
-	float4 Position : POSITION;
+	float4 Position : SV_POSITION;
 	float4 Color : COLOR0;
 };
 
 struct VS_LINE_OUTPUT
 {
-	float4 Position : POSITION;
+	float4 Position : SV_POSITION;
 	float4 Color : COLOR0;
 	float Depth : TEXCOORD0; /// ???
 };

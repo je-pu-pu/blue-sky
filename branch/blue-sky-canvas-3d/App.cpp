@@ -216,6 +216,7 @@ void App::set_active( bool active )
 void App::on_resize( HWND hwnd )
 {
 	App::GetInstance()->clip_cursor( App::GetInstance()->is_clip_cursor_enabled_ );
+	// Game::get_instance()->on_resize();
 }
 
 void App::clip_cursor( bool clip )

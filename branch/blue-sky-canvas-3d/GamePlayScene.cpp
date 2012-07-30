@@ -670,6 +670,8 @@ void GamePlayScene::render()
 					render( player_.get() );
 				}
 			}
+
+			// shadow_map_->finish_to_render_shadow_map();
 		}
 #endif
 

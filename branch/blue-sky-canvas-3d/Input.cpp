@@ -129,6 +129,9 @@ void Input::update()
 	
 		if ( joy_info_.dwButtons & joystick_code_[ L ] ) state_[ L ] |= 1;
 		if ( joy_info_.dwButtons & joystick_code_[ R ] ) state_[ R ] |= 1;
+
+		mouse_dx_ += get_rate_by_joystick_pos( joy_info_.dwZpos ) * 0.01f;
+		mouse_dy_ += get_rate_by_joystick_pos( joy_info_.dwRpos ) * 0.01f;
 	}
 
 	update_common();
@@ -156,6 +159,20 @@ void Input::update_common()
 	if ( push( UP    ) ) allow_push( UP    );
 	if ( push( RIGHT ) ) allow_push( RIGHT );
 	if ( push( LEFT  ) ) allow_push( LEFT  );
+}
+
+float Input::get_rate_by_joystick_pos( DWORD pos )
+{
+	const float threshold = 0.25f; // 0.f .. 1.f
+
+	float rate = ( pos / static_cast< float >( 0xFFFF ) * 2.f ) - 1.f;
+
+	if ( abs( rate ) < threshold )
+	{
+		return 0.f;
+	}
+	
+	return ( rate - threshold ) / threshold;
 }
 
 #if 0

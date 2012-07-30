@@ -75,6 +75,8 @@ private:
 	ButtonCodeList key_code_;
 	ButtonCodeList joystick_code_;
 
+	static float get_rate_by_joystick_pos( DWORD );
+
 public:
 	Input();
 	~Input();

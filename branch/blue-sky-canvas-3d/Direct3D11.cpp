@@ -54,7 +54,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	, text_texture_mutex_11_( 0 )
 	, text_texture_mutex_10_( 0 )
 {
-	common::log( "log/d3d11.log", "", false );
+	common::log( "log/d3d11.log", "init", false );
 
 	IDXGIAdapter1* dxgi_adapter = 0;
 
@@ -104,19 +104,70 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	swap_chain_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 #ifdef _DEBUG
-    UINT flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG;
+    UINT d3d11_create_device_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG;
 #else
-    UINT flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+    UINT d3d11_create_device_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #endif
 
 	// !!!
-	DIRECT_X_FAIL_CHECK( D3D11CreateDeviceAndSwapChain( dxgi_adapter, D3D_DRIVER_TYPE_UNKNOWN, 0, flags, feature_levels, ARRAYSIZE( feature_levels ), D3D11_SDK_VERSION, & swap_chain_desc_, & swap_chain_, & device_, & feature_level, & immediate_context_ ) );
+	DIRECT_X_FAIL_CHECK( D3D11CreateDeviceAndSwapChain( dxgi_adapter, D3D_DRIVER_TYPE_UNKNOWN, 0, d3d11_create_device_flags, feature_levels, ARRAYSIZE( feature_levels ), D3D11_SDK_VERSION, & swap_chain_desc_, & swap_chain_, & device_, & feature_level, & immediate_context_ ) );
+
+	// log_feature_level_11()
+	{
+		std::map< D3D_FEATURE_LEVEL, std::string > feature_level_map;
+
+		feature_level_map[ D3D_FEATURE_LEVEL_9_1 ] = "9.1";
+		feature_level_map[ D3D_FEATURE_LEVEL_9_2 ] = "9.2";
+		feature_level_map[ D3D_FEATURE_LEVEL_9_3 ] = "9.3";
+		feature_level_map[ D3D_FEATURE_LEVEL_10_0 ] = "10.0";
+		feature_level_map[ D3D_FEATURE_LEVEL_10_1 ] = "10.1";
+		feature_level_map[ D3D_FEATURE_LEVEL_11_0 ] = "11.1";
+
+		common::log( "log/d3d11.log", std::string( "created d3d11 device ( feature_level : " ) + feature_level_map[ device_->GetFeatureLevel() ] + " )" );
+	}
 
 #ifdef ENABLE_DIRECT_WRITE
 	// Direct3D 10.1
 	{
-		// D3D10_CREATE_DEVICE_DEBUG
-		DIRECT_X_FAIL_CHECK( D3D10CreateDevice1( dxgi_adapter, D3D10_DRIVER_TYPE_HARDWARE, 0, D3D10_CREATE_DEVICE_BGRA_SUPPORT, D3D10_FEATURE_LEVEL_10_0, D3D10_1_SDK_VERSION, & device_10_ ) );
+#ifdef _DEBUG
+		UINT d3d10_create_device_flags = D3D10_CREATE_DEVICE_BGRA_SUPPORT | D3D10_CREATE_DEVICE_DEBUG | D3D10_CREATE_DEVICE_STRICT_VALIDATION;
+#else
+		UINT d3d10_create_device_flags = D3D10_CREATE_DEVICE_BGRA_SUPPORT;
+#endif
+
+		D3D10_FEATURE_LEVEL1 d3d10_feature_levels[] =
+		{
+			D3D10_FEATURE_LEVEL_9_3,
+			D3D10_FEATURE_LEVEL_9_2,
+			D3D10_FEATURE_LEVEL_9_1,
+
+			// D3D10_FEATURE_LEVEL_10_1,
+			// D3D10_FEATURE_LEVEL_10_0,
+		};
+
+		const char* d3d10_feature_level_names[] =
+		{
+			"9.3",
+			"9.2",
+			"9.1",
+
+			// "10.1",
+			// "10.0",
+		};
+
+		for ( int n = 0; n < ARRAYSIZE( d3d10_feature_levels ); n++ )
+		{
+			if ( SUCCEEDED( D3D10CreateDevice1( dxgi_adapter, D3D10_DRIVER_TYPE_HARDWARE, 0, d3d10_create_device_flags, d3d10_feature_levels[ n ], D3D10_1_SDK_VERSION, & device_10_ ) ) )
+			{
+				common::log( "log/d3d11.log", std::string( "created d3d10 device ( feature_level : " ) + d3d10_feature_level_names[ n ] + " )" );
+				break;
+			}
+		}
+
+		if ( ! device_10_ )
+		{
+			COMMON_THROW_EXCEPTION_MESSAGE( "D3D10CreateDevice1() failed." );
+		}
 	}
 #endif
 

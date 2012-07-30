@@ -81,7 +81,6 @@ object building-20 -2.0 0.0 -22.0 0
 object building-20 -22.0 0.0 -33.0 0
 object building-20 -33.0 0.0 -22.0 0
 object building-20 -22.0 0.0 -22.0 0
-object ground 0.0 0.0 -10.0 0
 object wall-2 18.0 0.0 13.059999465942383 90
 object wall-2 -7.0 0.0 13.059999465942383 90
 object building-20 0.0 0.0 11.0 0

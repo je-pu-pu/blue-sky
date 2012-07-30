@@ -105,7 +105,7 @@ GameMain::GameMain()
 GameMain::~GameMain()
 {
 	config_->set< int >( "audio.mute", sound_manager_->is_mute() );
-	config_->set< int >( "video.full_screen", get_app()->is_full_screen() );
+	config_->set< int >( "video.full_screen", get_direct_3d()->is_full_screen() );
 
 	config_->save_file( "blue-sky.config" );
 
@@ -168,8 +168,8 @@ void GameMain::on_function_key_down( int function_key )
 
 	if ( function_key == 5 )
 	{
-		get_app()->set_full_screen( ! get_app()->is_full_screen() );
-		get_direct_3d()->set_full_screen( App::GetInstance()->is_full_screen() );
+		get_direct_3d()->switch_full_screen();
+		get_app()->set_full_screen( get_direct_3d()->is_full_screen() );
 	}
 }
 

@@ -47,9 +47,6 @@
     <ClCompile Include="StreamingSound.cpp">
       <Filter>Sound</Filter>
     </ClCompile>
-    <ClCompile Include="Direct3D11.cpp">
-      <Filter>DirectX\Direct3D11</Filter>
-    </ClCompile>
     <ClCompile Include="Direct3D11BulletDebugDraw.cpp">
       <Filter>DirectX\Direct3D11</Filter>
     </ClCompile>
@@ -122,6 +119,9 @@
     </ClCompile>
     <ClCompile Include="Balloon.cpp">
       <Filter>ActiveObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

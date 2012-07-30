@@ -438,6 +438,25 @@ technique11 sky_box
 		SetVertexShader( CompileShader( vs_4_0, vs_to_ps() ) );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps() ) );
+
+		RASTERIZERSTATE = Default;
+	}
+}
+
+// ----------------------------------------
+// for Billboard
+// ----------------------------------------
+technique11 billboard
+{
+	pass main
+	{
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_to_ps() ) );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps() ) );
+
+		RASTERIZERSTATE = Default;
 	}
 }
 

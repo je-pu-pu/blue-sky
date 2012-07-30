@@ -139,7 +139,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	{
 		GameConstantBuffer constant_buffer;
-		constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.05f, 1000.f );
+		constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.05f, 3000.f );
 		constant_buffer.projection = XMMatrixTranspose( constant_buffer.projection );
 		
 		get_game_main()->get_game_constant_buffer()->update( & constant_buffer );
@@ -148,6 +148,12 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	if ( ! sky_box_ )
 	{
 		sky_box_ = new SkyBox( get_direct_3d(), "sky-box-3" );
+	}
+
+	if ( ! ground_ )
+	{
+		ground_ = new Mesh( get_direct_3d() );
+		ground_->load_obj( "media/model/ground.obj" );
 	}
 
 	rectangle_ = new Rectangle( get_direct_3d() );
@@ -710,6 +716,42 @@ void GamePlayScene::render()
 				}
 
 				sky_box_->render();
+
+
+				{
+					ObjectConstantBuffer buffer;
+					buffer.world = XMMatrixIdentity();
+
+					get_game_main()->get_object_constant_buffer()->update( & buffer );
+					get_game_main()->get_object_constant_buffer()->render();
+
+					ground_->render();
+				}
+			}
+		}
+
+		// render_far_billboards()
+		{
+			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|billboard" );
+
+			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+			{
+				( *i )->apply();
+
+				get_game_main()->get_game_constant_buffer()->render();
+				get_game_main()->get_frame_constant_buffer()->render();
+
+				{
+					ObjectConstantBuffer buffer;
+					buffer.world = XMMatrixIdentity();
+					
+					get_game_main()->get_object_constant_buffer()->update( & buffer );
+					get_game_main()->get_object_constant_buffer()->render();
+
+					// 
+					DrawingModel* drawing_model = get_drawing_model_manager()->load( "far-billboards-1" );
+					drawing_model->get_mesh()->render();
+				}
 			}
 		}
 
@@ -788,7 +830,7 @@ void GamePlayScene::render()
 
 #endif
 
-#if 1
+#if 0
 		// render_debug_shadow_map()
 		{
 			get_direct_3d()->setDebugViewport( 0.f, 0, get_width() / 4.f * shadow_map_->get_cascade_levels(), get_height() / 4.f );

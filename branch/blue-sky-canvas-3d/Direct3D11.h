@@ -102,6 +102,9 @@ public:
 
 	void set_depth_stencil( bool );
 
+	bool is_full_screen() const;
+	void switch_full_screen();
+
 	void clear();
 	void clear( const Color& );
 

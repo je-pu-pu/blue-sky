@@ -5,6 +5,7 @@
 
 #include <common/auto_ptr.h>
 
+class Direct3D11Mesh;
 class Direct3D11SkyBox;
 class Direct3D11ShadowMap;
 class Direct3D11Rectangle;
@@ -27,6 +28,7 @@ class Stage;
 class GamePlayScene : public Scene
 {
 public:
+	typedef Direct3D11Mesh				Mesh;
 	typedef Direct3D11SkyBox			SkyBox;
 	typedef Direct3D11ShadowMap			ShadowMap;
 	typedef Direct3D11Rectangle			Rectangle;
@@ -40,6 +42,7 @@ protected:
 
 	auto_ptr< ShadowMap >				shadow_map_;
 	auto_ptr< SkyBox >					sky_box_;
+	auto_ptr< Mesh >					ground_;
 	auto_ptr< Rectangle >				rectangle_;
 
 	auto_ptr< Stage >					stage_;

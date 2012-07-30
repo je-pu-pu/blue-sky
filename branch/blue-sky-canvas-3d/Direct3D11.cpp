@@ -374,6 +374,20 @@ void Direct3D11::set_size( int w, int h )
 	) );
 }
 
+bool Direct3D11::is_full_screen() const
+{
+	BOOL full_screen;
+
+	DIRECT_X_FAIL_CHECK( swap_chain_->GetFullscreenState( & full_screen, 0 ) );
+
+	return full_screen == TRUE;
+}
+
+void Direct3D11::switch_full_screen()
+{
+	swap_chain_->SetFullscreenState( ! is_full_screen(), 0 );
+}
+
 void Direct3D11::clear()
 {
 	clear( Color( 1, 1, 1, 1 ) );

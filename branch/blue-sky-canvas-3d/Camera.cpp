@@ -1,7 +1,8 @@
 #include "Camera.h"
+#include "Player.h"
 #include "matrix4x4.h"
+
 #include <common/math.h>
-#include <windows.h>
 
 namespace blue_sky
 {
@@ -55,6 +56,13 @@ void Camera::update()
 
 	fov_ = fov_ * 0.9f + fov_target_ * 0.1f;
 	fov_ = math::clamp( fov_, 2.f, 100.f );
+}
+
+void Camera::update_with_player( const Player* player )
+{
+	position().x() = player->get_transform().getOrigin().x();
+	position().y() = player->get_transform().getOrigin().y() + player->get_eye_height();
+	position().z() = player->get_transform().getOrigin().z();
 }
 
 void Camera::set_fov( float fov )

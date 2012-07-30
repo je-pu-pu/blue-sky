@@ -57,6 +57,8 @@ protected:
 	void render( const ActiveObject* );
 	void render_line( const ActiveObject* );
 
+	void restart();
+
 public:
 	GamePlayScene( const GameMain* );
 	~GamePlayScene();

@@ -158,7 +158,12 @@ VS_LINE_OUTPUT vs_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID )
 	
 	output.Depth = mul( mul( input.Position, World ), View ).z;
 
-	// アルファ値を変動させる
+	// 色を変動させる
+	static const float color_random_range = 0.1f;
+
+	output.Color.r += ( ( ( uint( Time * 5 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
+	output.Color.g += ( ( ( uint( Time * 15 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
+	output.Color.b += ( ( ( uint( Time * 25 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
 	// output.Color.a -= ( ( uint( Time * 5 ) + vertex_id ) % 8 ) / 8.f * 0.5f;
 
 	// ぶらす
@@ -167,15 +172,6 @@ VS_LINE_OUTPUT vs_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID )
 	// output.Position.y += ( vertex_id + Time % 10 / 10 ) * 0.04f;
 
 	// output.Position = input.Position;
-
-	return output;
-}
-
-GS_INPUT vs_text( VS_INPUT input )
-{
-	GS_INPUT output;
-	output.Position = input.Position;
-	output.TexCoord = input.TexCoord;
 
 	return output;
 }
@@ -282,38 +278,6 @@ void gs_line( line VS_LINE_OUTPUT input[2], inout TriangleStream<PS_INPUT> TriSt
 	}
 }
 
-[maxvertexcount(4)]
-void gs_text( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStream )
-{
-	PS_INPUT output[ 4 ];
-
-	float w = 1.f;
-	float h = 1.f;
-
-	output[ 0 ].Position = float4( -w, +h, 0.f, 1.f );
-	output[ 0 ].TexCoord = float2( 0.f,  0.f );
-	output[ 0 ].Color = float4( 1.f, 0.f, 0.f, 0.f );
-	
-	output[ 1 ].Position = float4( +w, +h, 0.f, 1.f );
-	output[ 1 ].TexCoord = float2( 1.f,  0.f );
-	output[ 1 ].Color = float4( 0.f, 1.f, 0.f, 0.f );
-
-	output[ 2 ].Position = float4( -w, -h, 0.f, 1.f );
-	output[ 2 ].TexCoord = float2( 0.f,  1.f );
-	output[ 2 ].Color = float4( 0.f, 0.f, 1.f, 0.f );
-
-	output[ 3 ].Position = float4( +w, -h, 0.f, 1.f );
-	output[ 3 ].TexCoord = float2( 1.f,  1.f );
-	output[ 3 ].Color = float4( 0.f, 0.f, 0.f, 0.f );
-
-	TriStream.Append( output[ 0 ] );
-	TriStream.Append( output[ 1 ] );
-	TriStream.Append( output[ 2 ] );
-	TriStream.Append( output[ 3 ] );
-
-	TriStream.RestartStrip();
-}
-
 float4 ps( PS_INPUT input ) : SV_Target
 {
 	return model_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
@@ -411,6 +375,47 @@ technique11 drawing_line
 // ----------------------------------------
 // for Text
 // ----------------------------------------
+GS_INPUT vs_text( VS_INPUT input )
+{
+	GS_INPUT output;
+	output.Position = input.Position;
+	output.TexCoord = input.TexCoord;
+
+	return output;
+}
+
+[maxvertexcount(4)]
+void gs_text( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStream )
+{
+	PS_INPUT output[ 4 ];
+
+	float w = 1.f;
+	float h = 1.f;
+
+	output[ 0 ].Position = float4( -w, +h, 0.f, 1.f );
+	output[ 0 ].TexCoord = float2( 0.f,  0.f );
+	output[ 0 ].Color = float4( 1.f, 0.f, 0.f, 0.f );
+	
+	output[ 1 ].Position = float4( +w, +h, 0.f, 1.f );
+	output[ 1 ].TexCoord = float2( 1.f,  0.f );
+	output[ 1 ].Color = float4( 0.f, 1.f, 0.f, 0.f );
+
+	output[ 2 ].Position = float4( -w, -h, 0.f, 1.f );
+	output[ 2 ].TexCoord = float2( 0.f,  1.f );
+	output[ 2 ].Color = float4( 0.f, 0.f, 1.f, 0.f );
+
+	output[ 3 ].Position = float4( +w, -h, 0.f, 1.f );
+	output[ 3 ].TexCoord = float2( 1.f,  1.f );
+	output[ 3 ].Color = float4( 0.f, 0.f, 0.f, 0.f );
+
+	TriStream.Append( output[ 0 ] );
+	TriStream.Append( output[ 1 ] );
+	TriStream.Append( output[ 2 ] );
+	TriStream.Append( output[ 3 ] );
+
+	TriStream.RestartStrip();
+}
+
 technique11 text
 {
 	pass main

@@ -99,7 +99,12 @@ public:
 	virtual ~GameMain();
 
 	bool update();
+
 	void render();
+
+
+	void on_function_key_down( int );
+	void on_mouse_wheel( int );
 
 	float_t get_total_elapsed_time() const { return total_elapsed_time_; }
 	float_t get_elapsed_time() const;
@@ -133,7 +138,7 @@ public:
 
 } // namespace blue_sky
 
-inline Game* Game::getInstance() { return GameMain::get_instance(); }
+inline Game* Game::get_instance() { return GameMain::get_instance(); }
 
 
 #endif // GAME_MAIN_H

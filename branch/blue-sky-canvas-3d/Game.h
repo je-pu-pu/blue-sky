@@ -11,11 +11,14 @@ protected:
 	Game() { }
 
 public:
-	static Game* getInstance();
+	static Game* get_instance();
 
 	virtual ~Game() { }
 
 	virtual bool update() = 0;
+
+	virtual void on_function_key_down( int ) = 0;
+	virtual void on_mouse_wheel( int ) = 0;
 
 	inline App* get_app() const { return App::GetInstance(); }
 

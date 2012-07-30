@@ -7,6 +7,8 @@
 namespace blue_sky
 {
 
+class Player;
+
 /**
  * ƒJƒƒ‰
  *
@@ -71,6 +73,7 @@ public:
 	void set_rotate_chase_speed( float s ) { rotate_chase_speed_; }
 	void reset_rotate_chase_speed() { rotate_chase_speed_ = 0.2f; }
 
+	void update_with_player( const Player* );
 	void update();
 
 	void set_aspect( float a ) { aspect_ = a; }

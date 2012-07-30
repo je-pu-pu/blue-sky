@@ -33,6 +33,21 @@ ActiveObject::~ActiveObject()
 	delete transform_;
 }
 
+void ActiveObject::restart()
+{
+	is_dead_ = false;
+	
+	if ( get_rigid_body() && transform_ )
+	{
+		get_transform().setOrigin( start_location_ + Vector3( 0, get_collision_height() / 2.f, 0 ) );
+		get_rigid_body()->getMotionState()->setWorldTransform( get_transform() );
+		
+		get_rigid_body()->clearForces();
+		get_rigid_body()->setWorldTransform( get_transform() );
+		get_rigid_body()->setInterpolationWorldTransform( get_transform() );
+	}
+}
+
 void ActiveObject::limit_velocity()
 {
 	Vector3 v = get_rigid_body()->getLinearVelocity();

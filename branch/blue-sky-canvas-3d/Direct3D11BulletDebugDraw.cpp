@@ -63,6 +63,11 @@ void Direct3D11BulletDebugDraw::drawLine( const btVector3& from, const btVector3
 
 void Direct3D11BulletDebugDraw::render() const
 {
+	if ( vertex_list_.empty() )
+	{
+		return;
+	}
+
 	const_cast< Direct3D11BulletDebugDraw* >( this )->create_vertex_buffer();
 
 	UINT stride = sizeof( Vertex );

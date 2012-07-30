@@ -115,15 +115,11 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Player
 	player_ = new Player();
-	player_->set_start_location( 0, 300.f, 0 );
-	player_->set_rigid_body( get_physics()->add_active_object( player_.get() ) );
-	player_->get_rigid_body()->setAngularFactor( 0 );
-	player_->get_rigid_body()->setFriction( 0 );
-
 	player_->set_drawing_model( get_drawing_model_manager()->load( "player" ) );
 
 	// Goal
 	goal_ = new Goal();
+	goal_->set_drawing_model( get_drawing_model_manager()->load( "goal" ) );
 
 	// Camera
 	camera_ = new Camera();
@@ -156,20 +152,13 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	rectangle_ = new Rectangle( get_direct_3d() );
 
-	player_->restart();
-	goal_->restart();
-
-	for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
-	{
-		ActiveObject* active_object = *i;
-		active_object->restart();
-	}
-
 	Sound* bgm = get_sound_manager()->get_sound( "bgm" );
 	if ( bgm )
 	{
 		bgm->play( true );
 	}
+
+	restart();
 }
 
 GamePlayScene::~GamePlayScene()
@@ -182,6 +171,22 @@ GamePlayScene::~GamePlayScene()
 
 	get_sound_manager()->stop_all();
 	get_sound_manager()->unload_all();
+}
+
+void GamePlayScene::restart()
+{
+	player_->restart();
+	goal_->restart();
+
+	for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+	{
+		ActiveObject* active_object = *i;
+		active_object->restart();
+	}
+
+	// get_physics()->on_reset();
+
+	play_sound( "restart" );
 }
 
 void GamePlayScene::generate_random_stage()
@@ -359,6 +364,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> x >> y >> z;
 
 			player_->set_start_location( x, y, z );
+			player_->set_rigid_body( get_physics()->add_active_object( player_.get() ) );
 
 			if ( ! ss.eof() )
 			{
@@ -488,6 +494,7 @@ void GamePlayScene::update()
 {
 	Scene::update();
 
+	if ( ! player_->is_dead() )
 	{
 		bool is_moving = false;
 
@@ -539,16 +546,23 @@ void GamePlayScene::update()
 			get_active_object_manager()->add_active_object( robot );
 			robot->set_rigid_body( get_physics()->add_active_object( robot ) );
 		}
+
+		player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );
+
+		camera_->rotate_degree_target().y() = player_->get_direction_degree();
 	}
-
-	player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );
-
-	camera_->rotate_degree_target().y() = player_->get_direction_degree();
-
+	else
+	{
+		if ( get_input()->press( Input::A ) )
+		{
+			restart();
+		}
+	}
+	
 	camera_->rotate_degree_target().y() += get_input()->get_mouse_dx() * 90.f;
 	camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f;
 	camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
-	
+
 	player_->update_rigid_body_velocity();
 	player_->update();
 
@@ -564,9 +578,7 @@ void GamePlayScene::update()
 
 	player_->update_transform();
 
-	camera_->position().x() = player_->get_transform().getOrigin().x();
-	camera_->position().y() = player_->get_transform().getOrigin().y() + 1.5f;
-	camera_->position().z() = player_->get_transform().getOrigin().z();
+	camera_->update_with_player( player_.get() );
 	camera_->update();
 	
 	/*
@@ -621,6 +633,7 @@ void GamePlayScene::render()
 		// render_object_for_shadow()
 		// if ( rand() % 4 == 0 )
 		{
+			/*
 			static float a = 0.f;
 
 			a += 0.01f;
@@ -629,6 +642,8 @@ void GamePlayScene::render()
 			XMVECTOR light = light_origin + XMVectorSet( cos( a ) * 10.f, 0.f, sin( a ) * 10.f, 0.f );	
 
 			shadow_map_->setLightPosition( light );
+			*/
+
 			shadow_map_->setEyePosition( eye );
 			shadow_map_->ready_to_render_shadow_map();
 

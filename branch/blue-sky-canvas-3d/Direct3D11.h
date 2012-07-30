@@ -52,6 +52,8 @@ private:
 	ID3D11DeviceContext*		immediate_context_;		///< Direct3D 11 Device Context
 	IDXGISwapChain*				swap_chain_;			///< Direct3D 11 Swap Chain
 
+	DXGI_SWAP_CHAIN_DESC		swap_chain_desc_;
+
 	ID3D11Texture2D*			back_buffer_texture_;
 	ID3D11RenderTargetView*		back_buffer_view_;		///< Direct3D 11 Render Target View
 

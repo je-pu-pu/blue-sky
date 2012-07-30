@@ -48,7 +48,7 @@ GameMain::GameMain()
 	win::Version version;
 	version.log( "log/windows_version.log" );
 
-	get_app()->clip_cursor( true );
+	// get_app()->clip_cursor( true );
 
 	// Config
 	config_ = new Config();
@@ -92,9 +92,6 @@ GameMain::GameMain()
 	input_->load_config( * config_.get() );
 
 	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
-	
-	get_sound_manager()->load_music( "bgm", "tower" );
-	get_sound_manager()->get_sound( "bgm" )->play( true );
 
 	active_object_manager_ = new ActiveObjectManager();
 	drawing_model_manager_ = new DrawingModelManager();
@@ -111,6 +108,8 @@ GameMain::~GameMain()
 	config_->set< int >( "video.full_screen", get_app()->is_full_screen() );
 
 	config_->save_file( "blue-sky.config" );
+
+	scene_.release();
 }
 
 bool GameMain::update()
@@ -150,6 +149,33 @@ void GameMain::render()
 	scene_->render();
 
 	direct_3d_->end();
+}
+
+void GameMain::on_function_key_down( int function_key )
+{
+	/*
+	if ( function_key == 2 )
+	{
+		get_sound_manager()->set_enabled( ! get_sound_manager()->is_enabled() );
+		Sound* bgm = get_sound_manager()->get_sound( "bgm" );
+
+		if ( bgm )
+		{
+			bgm->play( true );
+		}
+	}
+	*/
+
+	if ( function_key == 5 )
+	{
+		get_app()->set_full_screen( ! get_app()->is_full_screen() );
+		get_direct_3d()->set_full_screen( App::GetInstance()->is_full_screen() );
+	}
+}
+
+void GameMain::on_mouse_wheel( int wheel )
+{
+	input_->push_mouse_wheel_queue( wheel > 0 ? 1 : -1 );
 }
 
 /**

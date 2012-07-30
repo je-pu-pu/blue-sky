@@ -78,7 +78,7 @@ public:
 	virtual ~ActiveObject();
 
 	/// 
-	virtual void restart() { }
+	virtual void restart();
 
 	/// XV
 	virtual void update() = 0;

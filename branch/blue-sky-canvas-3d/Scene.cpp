@@ -1,6 +1,9 @@
 #include "Scene.h"
 #include "GameMain.h"
 
+#include "SoundManager.h"
+#include "Sound.h"
+
 #include <game/MainLoop.h>
 
 namespace blue_sky
@@ -97,6 +100,29 @@ int Scene::get_height() const
 const std::string& Scene::get_stage_name() const
 {
 	return game_main_->get_stage_name();
+}
+
+void Scene::play_sound( const char* name, bool loop, bool force ) const
+{
+	Sound* sound = GameMain::get_instance()->get_sound_manager()->get_sound( name );
+	
+	if ( sound )
+	{
+		if ( force || ! sound->is_playing() )
+		{
+			sound->play( loop );
+		}
+	}
+}
+
+void Scene::stop_sound( const char* name ) const
+{
+	Sound* sound = GameMain::get_instance()->get_sound_manager()->get_sound( name );
+	
+	if ( sound )
+	{
+		sound->stop();
+	}
 }
 
 } // namespace blue_sky

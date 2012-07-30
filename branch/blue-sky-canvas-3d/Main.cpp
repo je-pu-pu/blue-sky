@@ -25,7 +25,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 		}
 
 		// ゲームを初期化する
-		Game* game = Game::getInstance();
+		Game* game = Game::get_instance();
 
 		// メッセージループ
 		return app->MessageLoop();

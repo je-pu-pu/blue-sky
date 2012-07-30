@@ -16,8 +16,24 @@ namespace blue_sky
 Player::Player()
 	: is_jumping_( false )
 	, is_jumpable_( true )
+	, uncontrollable_timer_( 0.f )
+	, eye_height_( 1.5f )
 {
 	
+}
+
+/**
+ * 再スタート
+ *
+ */
+void Player::restart()
+{
+	ActiveObject::restart();
+
+	eye_height_ = 1.5f;
+
+	get_rigid_body()->setAngularFactor( 0 );
+	get_rigid_body()->setFriction( 0 );
 }
 
 /**
@@ -43,8 +59,12 @@ void Player::update()
 	if ( is_jumpable() && is_falling_to_dead() )
 	{
 		kill();
+	}
 
-		play_sound( "dead" );
+	if ( is_dead() )
+	{
+		eye_height_ *= 0.95f;
+		eye_height_ = std::max( eye_height_, 0.15f );
 	}
 
 	uncontrollable_timer_ = math::chase< float_t >( uncontrollable_timer_, 0.f, get_elapsed_time() );
@@ -238,6 +258,23 @@ void Player::damage( const Vector3& to )
 
 	get_rigid_body()->setActivationState( true );
 	get_rigid_body()->setLinearVelocity( to );
+}
+
+void Player::kill()
+{
+	if ( is_dead() )
+	{
+		return;
+	}
+
+	ActiveObject::kill();
+
+	play_sound( "dead" );
+
+	get_rigid_body()->setActivationState( true );
+	get_rigid_body()->setAngularFactor( 2.f );
+	get_rigid_body()->setFriction( 0.1f );
+	get_rigid_body()->applyForce( get_front() * 1000.f, Vector3( 0.1f, 1.5f, 0.f ) );
 }
 
 bool Player::is_falling_to_dead() const

@@ -7,7 +7,7 @@
 #include "DirectWrite.h"
 #include "DirectX.h"
 
-#include "include/d3dx11effect.h"
+#include <win/Rect.h>
 
 #include <common/exception.h>
 #include <common/serialize.h>
@@ -32,6 +32,8 @@
 #pragma comment( lib, "d3dx11.lib" )
 // #pragma comment( lib, "d3dx10.lib" )
 #endif
+
+#define ENABLE_DIRECT_WRITE
 
 Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* adapter_format, const char* depth_stencil_format, int multi_sample_type, int multi_sample_quality )
 	: device_( 0 )
@@ -87,27 +89,36 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 
 	D3D_FEATURE_LEVEL feature_level = feature_levels[ 0 ];
 
-	DXGI_SWAP_CHAIN_DESC swap_chain_desc = { 0 };
-	swap_chain_desc.BufferCount = 1;
-    swap_chain_desc.BufferDesc.Width = w;
-    swap_chain_desc.BufferDesc.Height = h;
-    swap_chain_desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	swap_chain_desc.BufferDesc.RefreshRate.Numerator = 60;
-	swap_chain_desc.BufferDesc.RefreshRate.Denominator = 1;
-    swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    swap_chain_desc.OutputWindow = hwnd;
-    swap_chain_desc.SampleDesc.Count = 1;
-    swap_chain_desc.SampleDesc.Quality = 0;
-    swap_chain_desc.Windowed = ! full_screen;
+	ZeroMemory( & swap_chain_desc_, sizeof( swap_chain_desc_ ) );
+	swap_chain_desc_.BufferCount = 1;
+    swap_chain_desc_.BufferDesc.Width = w;
+    swap_chain_desc_.BufferDesc.Height = h;
+    swap_chain_desc_.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+//	swap_chain_desc_.BufferDesc.RefreshRate.Numerator = 60;
+//	swap_chain_desc_.BufferDesc.RefreshRate.Denominator = 1;
+    swap_chain_desc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    swap_chain_desc_.OutputWindow = hwnd;
+    swap_chain_desc_.SampleDesc.Count = 1;
+    swap_chain_desc_.SampleDesc.Quality = 0;
+    swap_chain_desc_.Windowed = ! full_screen;
+	swap_chain_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+#ifdef _DEBUG
+    UINT flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG;
+#else
+    UINT flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+#endif
 
 	// !!!
-	DIRECT_X_FAIL_CHECK( D3D11CreateDeviceAndSwapChain( dxgi_adapter, D3D_DRIVER_TYPE_UNKNOWN, 0, D3D11_CREATE_DEVICE_BGRA_SUPPORT, feature_levels, ARRAYSIZE( feature_levels ), D3D11_SDK_VERSION, & swap_chain_desc, & swap_chain_, & device_, & feature_level, & immediate_context_ ) );
+	DIRECT_X_FAIL_CHECK( D3D11CreateDeviceAndSwapChain( dxgi_adapter, D3D_DRIVER_TYPE_UNKNOWN, 0, flags, feature_levels, ARRAYSIZE( feature_levels ), D3D11_SDK_VERSION, & swap_chain_desc_, & swap_chain_, & device_, & feature_level, & immediate_context_ ) );
 
+#ifdef ENABLE_DIRECT_WRITE
 	// Direct3D 10.1
 	{
 		// D3D10_CREATE_DEVICE_DEBUG
 		DIRECT_X_FAIL_CHECK( D3D10CreateDevice1( dxgi_adapter, D3D10_DRIVER_TYPE_HARDWARE, 0, D3D10_CREATE_DEVICE_BGRA_SUPPORT, D3D10_FEATURE_LEVEL_10_0, D3D10_1_SDK_VERSION, & device_10_ ) );
 	}
+#endif
 
 	DIRECT_X_RELEASE( dxgi_adapter );
 
@@ -122,6 +133,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		DIRECT_X_FAIL_CHECK( back_buffer_texture_->QueryInterface( __uuidof( IDXGISurface1 ), reinterpret_cast< void** >( & back_buffer_surface_ ) ) );
 	}
 
+#ifdef ENABLE_DIRECT_WRITE
 	// create_text_texture()
 	{
 		D3D11_TEXTURE2D_DESC texture_desc = { 0 };
@@ -165,6 +177,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 
 		DIRECT_X_RELEASE( text_texture_resource_ );
 	}
+#endif
 
 	// create_depth_stencil_view()
 	{
@@ -204,8 +217,10 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		viewport_.MaxDepth = 1.f;
 	}
 
+#ifdef ENABLE_DIRECT_WRITE
 	// Font
 	font_ = new Font( text_surface_ );
+#endif
 
 	// Sprite
 	sprite_ = new Sprite( this );
@@ -222,6 +237,14 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 
 Direct3D11::~Direct3D11()
 {
+	set_full_screen( false );
+
+	texture_manager_.release();
+	mesh_manager_.release();
+	effect_.release();
+	sprite_.release();
+	font_.release();
+
 	DIRECT_X_RELEASE( text_texture_mutex_10_ );
 	DIRECT_X_RELEASE( text_texture_mutex_11_ );
 	DIRECT_X_RELEASE( text_surface_ );
@@ -281,6 +304,25 @@ void Direct3D11::create_default_input_layout()
 	vertex_layout_list_[ "sprite" ] = ( * effect_->getTechnique( "|sprite" )->getPassList().begin() )->createVertexLayout( layout_sprite, ARRAYSIZE( layout_sprite ) );
 }
 
+void Direct3D11::set_full_screen( bool full_screen )
+{
+	DIRECT_X_FAIL_CHECK( swap_chain_->SetFullscreenState( full_screen, 0 ) );
+}
+
+void Direct3D11::set_size( int w, int h )
+{
+	swap_chain_desc_.BufferDesc.Width = w;
+	swap_chain_desc_.BufferDesc.Height = h;
+
+	DIRECT_X_FAIL_CHECK( swap_chain_->ResizeBuffers(
+		swap_chain_desc_.BufferCount,
+		swap_chain_desc_.BufferDesc.Width,
+		swap_chain_desc_.BufferDesc.Height,
+		swap_chain_desc_.BufferDesc.Format,
+		0
+	) );
+}
+
 void Direct3D11::clear()
 {
 	clear( Color( 1, 1, 1, 1 ) );
@@ -301,21 +343,41 @@ void Direct3D11::setInputLayout( const char* name )
 
 void Direct3D11::begin2D()
 {
+	if ( ! text_texture_mutex_10_ )
+	{
+		return;
+	}
+
 	DIRECT_X_FAIL_CHECK( text_texture_mutex_10_->AcquireSync( 0, INFINITE ) );
 }
 
 void Direct3D11::end2D()
 {
+	if ( ! text_texture_mutex_10_ )
+	{
+		return;
+	}
+
 	DIRECT_X_FAIL_CHECK( text_texture_mutex_10_->ReleaseSync( 1 ) );
 }
 
 void Direct3D11::begin3D()
 {
+	if ( ! text_texture_mutex_11_ )
+	{
+		return;
+	}
+
 	DIRECT_X_FAIL_CHECK( text_texture_mutex_11_->AcquireSync( 1, INFINITE ) );
 }
 
 void Direct3D11::end3D()
 {
+	if ( ! text_texture_mutex_11_ )
+	{
+		return;
+	}
+
 	// immediate_context_->CopyResource( back_buffer_texture_, text_texture_ );
 
 	DIRECT_X_FAIL_CHECK( text_texture_mutex_11_->ReleaseSync( 0 ) );
@@ -328,15 +390,21 @@ void Direct3D11::end()
 
 void Direct3D11::renderText()
 {
-	EffectTechnique* technique = effect_->getTechnique( "|text" );
+	setInputLayout( "sprite" );
+
+	getSprite()->begin();
+
+	EffectTechnique* technique = effect_->getTechnique( "|sprite" );
 
 	for ( EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 	{
 		( *i )->apply();
 
-		immediate_context_->PSSetShaderResources( 0, 1, & text_view_ );
-		immediate_context_->Draw( 3, 0 ); // !!!
+		Sprite::Rect dst_rect( 0, 0, swap_chain_desc_.BufferDesc.Width, swap_chain_desc_.BufferDesc.Height );
+		getSprite()->draw( dst_rect, text_view_ );
 	}
+
+	getSprite()->end();
 }
 
 void Direct3D11::setDebugViewport( float x, float y, float w, float h )

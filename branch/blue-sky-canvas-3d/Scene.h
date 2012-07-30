@@ -78,6 +78,10 @@ protected:
 	int get_width() const;
 	int get_height() const;
 
+
+	void play_sound( const char*, bool = false, bool = true ) const;
+	void stop_sound( const char* ) const;
+
 public:
 	Scene( const GameMain* );
 	virtual ~Scene();

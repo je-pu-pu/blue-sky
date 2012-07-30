@@ -20,6 +20,8 @@ private:
 
 	float_t uncontrollable_timer_;	///< 制御不能タイマー
 
+	float_t eye_height_;		///< 目の高さ
+
 	float_t get_collision_width() const { return 0.5f; }
 	float_t get_collision_height() const { return 1.75f; }
 	float_t get_collision_depth() const { return 0.25f; }
@@ -43,6 +45,8 @@ public:
 	Player();
 	~Player() { }
 
+	void restart();
+
 	/// 更新
 	void update();
 	
@@ -60,6 +64,9 @@ public:
 	void add_direction_degree( float );
 
 	void damage( const Vector3& );
+	void kill();
+
+	float_t get_eye_height() const { return eye_height_; }
 
 	//
 	bool is_falling_to_dead() const;

@@ -29,10 +29,10 @@ App::App()
 //□デストラクタ
 App::~App()
 {
-	ReleaseMutex(hMutex);			//ミューテックス開放
-	WINNLSEnableIME(hWnd, TRUE);	//IME表示
+	ReleaseMutex( hMutex );			// ミューテックス開放
+	WINNLSEnableIME( hWnd, TRUE );	// IME表示
 
-	ClipCursor( 0 );
+	clip_cursor( false );
 }
 
 //■初期化
@@ -92,7 +92,7 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	}
 	
 	// ゲームを初期化する
-	Game* game = Game::getInstance();
+	Game* game = Game::get_instance();
 
 	ShowWindow( hWnd, nCmdShow );		//表示
 	UpdateWindow( hWnd );				//描画
@@ -107,7 +107,7 @@ int App::MessageLoop()
 {
 	MSG msg;
 
-	Game* game = Game::getInstance();
+	Game* game = Game::get_instance();
 
 	while ( true )
 	{
@@ -143,7 +143,11 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		SetCursor( 0 );
 		break;
 	}
-	case WM_EXITSIZEMOVE: on_resize( hwnd ); break;
+	case WM_EXITSIZEMOVE:
+	{
+		on_resize( hwnd );
+		break;
+	}
 	case WM_KEYDOWN:
 	{
 		if ( wp == VK_ESCAPE )
@@ -151,8 +155,7 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 			PostMessage( hwnd, WM_CLOSE, 0, 0 );
 		}
 
-		// blue_sky::GameMain* game = blue_sky::GameMain::getInstance();
-		// if ( wp >= VK_F1 && wp <= VK_F24 ) game->on_function_key_down( wp - VK_F1 + 1 );
+		Game::get_instance()->on_function_key_down( wp - VK_F1 + 1 );
 
 		break;
 	}
@@ -179,21 +182,20 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_MOUSEWHEEL:
 	{
-		/*
-		blue_sky::GameMain* game = blue_sky::GameMain::getInstance();
-
-		game->on_mouse_wheel( GET_WHEEL_DELTA_WPARAM( wp ) );
-		*/
+		Game::get_instance()->on_mouse_wheel( GET_WHEEL_DELTA_WPARAM( wp ) );
 
 		break;
 	}
-	case WM_CHAR:		break;
 	case WM_ACTIVATEAPP:
+	{
 		App::GetInstance()->set_active( LOWORD( wp ) != 0 );
 		break;
+	}
 	case WM_DESTROY:
+	{
 		PostQuitMessage( 0 );
 		break;
+	}
 	default:
 		return DefWindowProc( hwnd, msg, wp, lp );
 	}

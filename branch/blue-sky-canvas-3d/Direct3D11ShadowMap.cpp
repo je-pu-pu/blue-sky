@@ -111,6 +111,9 @@ void Direct3D11ShadowMap::setEyePosition( const XMVECTOR& eye )
 void Direct3D11ShadowMap::ready_to_render_shadow_map()
 {
 	direct_3d_->getImmediateContext()->ClearDepthStencilView( depth_stencil_view_, D3D11_CLEAR_DEPTH, 1.f, 0 );
+
+	ID3D11RenderTargetView* render_target_view[] = { 0 };
+	direct_3d_->getImmediateContext()->OMSetRenderTargets( 1, render_target_view, depth_stencil_view_ );
 }
 
 void Direct3D11ShadowMap::ready_to_render_shadow_map_with_cascade_level( int level )
@@ -122,9 +125,7 @@ void Direct3D11ShadowMap::ready_to_render_shadow_map_with_cascade_level( int lev
 	constant_buffer_->update( & constant_buffer_data_ );
 	constant_buffer_->render();
 
-	ID3D11RenderTargetView* render_target_view[] = { 0 };
 	direct_3d_->getImmediateContext()->RSSetViewports( 1, & viewport_list_[ level ] );
-	direct_3d_->getImmediateContext()->OMSetRenderTargets( 1, render_target_view, depth_stencil_view_ );
 }
 
 void Direct3D11ShadowMap::ready_to_render_scene()

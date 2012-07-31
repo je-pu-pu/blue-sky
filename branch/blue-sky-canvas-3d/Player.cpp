@@ -14,10 +14,12 @@ namespace blue_sky
 {
 
 Player::Player()
-	: is_jumping_( false )
-	, is_jumpable_( true )
+	: is_on_footing_( false )
+	, is_jumping_( false )
+	, is_jumpable_( false )
 	, uncontrollable_timer_( 0.f )
 	, eye_height_( 1.5f )
+	, eye_depth_( 0.f )
 {
 	
 }
@@ -31,6 +33,7 @@ void Player::restart()
 	ActiveObject::restart();
 
 	eye_height_ = 1.5f;
+	eye_depth_ = 0.f;
 
 	get_rigid_body()->setAngularFactor( 0 );
 	get_rigid_body()->setFriction( 0 );
@@ -44,8 +47,15 @@ void Player::update()
 {
 	stop();
 
+	update_on_footing();
 	update_jumpable();
 	update_jumping();
+
+	if ( is_falling() || is_jumping() )
+	{
+		eye_depth_ *= 0.95f;
+		eye_depth_ = math::clamp( eye_depth_, 0.f, 1.f );
+	}
 
 	if ( is_falling_to_dead() )
 	{
@@ -56,7 +66,7 @@ void Player::update()
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.f, 0.f, 0.f, 0.f ) );
 	}
 
-	if ( is_jumpable() && is_falling_to_dead() )
+	if ( is_on_footing() && is_falling_to_dead() )
 	{
 		kill();
 	}
@@ -79,20 +89,29 @@ void Player::update_jumpable()
 	is_jumpable_ = false;
 
 	// ジャンプ直後と着地直後はジャンプできない
-	if ( abs( get_velocity().y() ) > 5.f )
+	if ( abs( get_velocity().y() ) > 3.f )
 	{
 		return;
 	}
 
+	is_jumpable_ = is_on_footing();
+}
+
+void Player::update_on_footing()
+{
 	// 中心 + 四隅の設置を調べる
 	if (
-		is_on_ground( 0, 0 ) ||
-		is_on_ground( -get_collision_width() / 2.f, -get_collision_depth() / 2.f ) ||
-		is_on_ground( +get_collision_width() / 2.f, -get_collision_depth() / 2.f ) ||
-		is_on_ground( -get_collision_width() / 2.f, +get_collision_depth() / 2.f ) ||
-		is_on_ground( +get_collision_width() / 2.f, +get_collision_depth() / 2.f ) )
+		check_on_footing( 0, 0 ) ||
+		check_on_footing( -get_collision_width() / 2.f, -get_collision_depth() / 2.f ) ||
+		check_on_footing( +get_collision_width() / 2.f, -get_collision_depth() / 2.f ) ||
+		check_on_footing( -get_collision_width() / 2.f, +get_collision_depth() / 2.f ) ||
+		check_on_footing( +get_collision_width() / 2.f, +get_collision_depth() / 2.f ) )
 	{
-		is_jumpable_ = true;
+		is_on_footing_ = true;
+	}
+	else
+	{
+		is_on_footing_ = false;
 	}
 }
 
@@ -130,7 +149,7 @@ public:
 	}
 };
 
-bool Player::is_on_ground( float_t offset_x, float_t offset_z ) const
+bool Player::check_on_footing( float_t offset_x, float_t offset_z ) const
 {
 	Vector3 from = get_rigid_body()->getCenterOfMassPosition()  + Vector3( offset_x, -0.1f, offset_z );
 	Vector3 to = from + Vector3( 0, -( get_collision_height() / 2.f + 0.01f ), 0 );
@@ -158,6 +177,8 @@ void Player::step( float_t s )
 			get_rigid_body()->getLinearVelocity().z() + ( get_front() * s ).z() * get_step_speed()
 		)
 	);
+
+	// eye_depth_ *= 0.95f;
 }
 
 void Player::side_step( float_t s )
@@ -175,6 +196,8 @@ void Player::side_step( float_t s )
 			get_rigid_body()->getLinearVelocity().z() + ( get_right() * s ).z() * get_side_step_speed()
 		)
 	);
+
+	// eye_depth_ *= 0.95f;
 }
 
 /**
@@ -258,6 +281,8 @@ void Player::damage( const Vector3& to )
 
 	get_rigid_body()->setActivationState( true );
 	get_rigid_body()->setLinearVelocity( to );
+
+	is_jumping_ = true;
 }
 
 void Player::kill()
@@ -275,6 +300,26 @@ void Player::kill()
 	get_rigid_body()->setAngularFactor( 2.f );
 	get_rigid_body()->setFriction( 0.1f );
 	get_rigid_body()->applyForce( get_front() * 1000.f, Vector3( 0.1f, 1.5f, 0.f ) );
+}
+
+void Player::set_eye_depth( float d )
+{
+	if ( is_falling() || is_jumping() )
+	{
+		return;
+	}
+
+	eye_depth_ = math::clamp( d, 0.f, 1.f );
+}
+
+void Player::add_eye_depth( float d )
+{
+	set_eye_depth( eye_depth_ + d );
+}
+
+bool Player::is_falling() const
+{
+	return get_rigid_body()->getLinearVelocity().y() < -1.f;
 }
 
 bool Player::is_falling_to_dead() const

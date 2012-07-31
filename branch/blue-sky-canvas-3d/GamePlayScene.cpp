@@ -190,8 +190,6 @@ void GamePlayScene::restart()
 		active_object->restart();
 	}
 
-	// get_physics()->on_reset();
-
 	play_sound( "restart" );
 }
 
@@ -400,14 +398,14 @@ void GamePlayScene::load_stage_file( const char* file_name )
 				sky_box_ = new SkyBox( get_direct_3d(), sky_box_name.c_str(), sky_box_ext.c_str() );
 			}
 		}
-		else if ( name == "object" )
+		else if ( name == "object" || name == "static-object" || name == "dynamic-object" )
 		{
-			std::string static_object_name;
+			std::string object_name;
 			float x = 0, y = 0, z = 0, r = 0;
 
-			ss >> static_object_name >> x >> y >> z >> r;
+			ss >> object_name >> x >> y >> z >> r;
 
-			DrawingModel* drawing_model = get_drawing_model_manager()->load( static_object_name.c_str() );
+			DrawingModel* drawing_model = get_drawing_model_manager()->load( object_name.c_str() );
 
 			std::map< string_t, ActiveObject::Vector3 > size_map;
 
@@ -419,7 +417,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			size_map[ "building-200" ] = ActiveObject::Vector3( 80.f, 200.f,  60.f   );
 			size_map[ "balloon"      ] = ActiveObject::Vector3(  1.f,   2.f,   1.f   );
 
-			auto i = size_map.find( static_object_name );
+			auto i = size_map.find( object_name );
 
 			float w = 0.f, h = 0.f, d = 0.f;
 
@@ -430,14 +428,31 @@ void GamePlayScene::load_stage_file( const char* file_name )
 				d = i->second.z();
 			}
 
-			StaticObject* static_object = new StaticObject( w, h, d );
-			static_object->set_drawing_model( drawing_model );
-			static_object->set_start_location( x, y, z );
-			static_object->set_rotation( r, 0, 0 );
+			ActiveObject* object = 0;
 
-			static_object->set_rigid_body( get_physics()->add_active_object( static_object ) );
+			if ( name == "dynamic-object" )
+			{
+				object = new DynamicObject( w, h, d );
+			}
+			else
+			{
+				object = new StaticObject( w, h, d );
+			}
+			
+			object->set_drawing_model( drawing_model );
+			object->set_start_location( x, y, z );
+			object->set_rotation( r, 0, 0 );
 
-			get_active_object_manager()->add_active_object( static_object );
+			if ( object_name == "soda-can" )
+			{
+				object->set_rigid_body( get_physics()->add_active_object_as_cylinder( object ) );
+			}
+			else
+			{
+				object->set_rigid_body( get_physics()->add_active_object( object ) );
+			}
+
+			get_active_object_manager()->add_active_object( object );
 		}
 		/*
 		else if ( name == "enemy" )
@@ -530,11 +545,11 @@ void GamePlayScene::update()
 			player_->stop();
 		}
 
-		if ( get_input()->press( Input::X ) )
+		if ( get_input()->push( Input::X ) )
 		{
 			get_physics()->setConstraint();
 		}
-		if ( get_input()->press( Input::Y ) )
+		if ( get_input()->push( Input::Y ) )
 		{
 			player_->damage( Player::Vector3( 0, 10, -30.f ) );
 		}
@@ -559,7 +574,7 @@ void GamePlayScene::update()
 	}
 	else
 	{
-		if ( get_input()->press( Input::A ) )
+		if ( get_input()->push( Input::A ) )
 		{
 			restart();
 		}
@@ -569,6 +584,14 @@ void GamePlayScene::update()
 	camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f;
 	camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
 
+	float eye_depth_add = 0.f;
+
+	if ( camera_->rotate_degree_target().x() > 0.f )
+	{
+		eye_depth_add = get_input()->get_mouse_dy();
+	}
+
+	player_->add_eye_depth( eye_depth_add );
 	player_->update_rigid_body_velocity();
 	player_->update();
 

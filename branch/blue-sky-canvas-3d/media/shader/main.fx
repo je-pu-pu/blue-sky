@@ -567,15 +567,16 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 	if ( shadow_tex_coord.z >= sz )
 	{
 		const float4 shadow_color = float4( 0.5f, 0.5f, 0.75f, 1.f );
-		float a = 1.f;
 
-		// float a = abs( input.ShadowTexCoord.x - 0.5f ) + abs( input.ShadowTexCoord.y - 0.5f ) / 0.5f;
-
-		// a = min( a, 1.f );
-		// a = 1.f - pow( a, 3 );
+		const float a = 1.f;
 
 		/*
-		if ( input.ShadowTexCoord.z < ( float ) shadow_texture.Sample( shadow_texture_sampler, input.ShadowTexCoord.xy + float2( 1.f / 1024.f, 1.f ) ) )
+		float a = abs( shadow_tex_coord.x - 0.5f ) + abs( shadow_tex_coord.y - 0.5f ) / 0.5f;
+
+		a = min( a, 1.f );
+		a = 1.f - pow( a, 3 );
+
+		if ( shadow_tex_coord.z < ( float ) shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy + float2( 1.f / 1024.f, 1.f ) ) )
 		{
 			a /= 2.f;
 		}

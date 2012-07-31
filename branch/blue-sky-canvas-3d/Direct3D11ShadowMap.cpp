@@ -78,7 +78,7 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_lev
 
 	light_position_ = XMVectorSet( 50.f, 100.f, -25.f, 0.f );
 
-	float length[ 4 ] = { 10.f, 20.f, 40.f, 9999.f };
+	float length[ 4 ] = { 10.f, 20.f, 100.f, 9999.f };
 
 	for ( int n = 0; n < 4; n++ )
 	{

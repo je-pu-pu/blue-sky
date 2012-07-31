@@ -16,7 +16,6 @@ ActiveObject::ActiveObject()
 	, is_dead_( false )
 	, transform_( 0 )
 
-	, velocity_( 0, 0, 0 )
 	, direction_degree_( 0 )
 
 	, start_location_( 0, 0, 0 )
@@ -45,6 +44,7 @@ void ActiveObject::restart()
 		get_rigid_body()->clearForces();
 		get_rigid_body()->setWorldTransform( get_transform() );
 		get_rigid_body()->setInterpolationWorldTransform( get_transform() );
+		get_rigid_body()->setLinearVelocity( Vector3( 0.f, 0.f, 0.f ) );
 	}
 }
 
@@ -107,6 +107,13 @@ const ActiveObject::Transform& ActiveObject::get_transform() const
 {
 	return * transform_;
 }
+
+const ActiveObject::Vector3& ActiveObject::get_velocity() const
+{
+	return get_rigid_body()->getLinearVelocity();
+}
+
+
 
 void ActiveObject::set_direction_degree( float d )
 {

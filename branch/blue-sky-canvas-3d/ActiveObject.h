@@ -50,7 +50,6 @@ private:
 	Transform*			transform_;			///< Transform
 
 	/** @todo ActiveObject から分離 */
-	Vector3				velocity_;			///< 移動量
 	float_t				direction_degree_;	///< 方向 ( Y Axis Degree )
 
 	Vector3				start_location_;	///< スタート時の位置
@@ -106,9 +105,7 @@ public:
 	Transform& get_transform();
 	const Transform& get_transform() const;
 
-
-	Vector3& get_velocity() { return velocity_; }
-	const Vector3& get_velocity() const { return velocity_; }
+	const Vector3& get_velocity() const;
 
 	float get_direction_degree() const { return direction_degree_; }
 	void set_direction_degree( float d );

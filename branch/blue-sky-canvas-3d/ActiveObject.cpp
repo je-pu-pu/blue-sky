@@ -94,6 +94,14 @@ void ActiveObject::set_start_location( float_t x, float_t y, float_t z )
 void ActiveObject::set_location( const Vector3& v )
 {
 	get_transform().getOrigin() = v;
+
+	if ( rigid_body_ )
+	{
+		get_rigid_body()->getMotionState()->setWorldTransform( get_transform() );
+		
+		get_rigid_body()->setWorldTransform( get_transform() );
+		get_rigid_body()->setInterpolationWorldTransform( get_transform() );
+	}
 }
 
 void ActiveObject::set_location( float_t x, float_t y, float_t z )

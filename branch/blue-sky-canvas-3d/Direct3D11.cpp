@@ -1,5 +1,6 @@
 #include "Direct3D11.h"
 #include "Direct3D11Sprite.h"
+#include "Direct3D11Fader.h"
 #include "Direct3D11Effect.h"
 #include "Direct3D11MeshManager.h"
 #include "Direct3D11TextureManager.h"
@@ -265,16 +266,11 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	font_ = new Font( text_surface_ );
 #endif
 
-	// Sprite
 	sprite_ = new Sprite( this );
-
-	// Effect
+	fader_ = new Fader( this );
 	effect_ = new Effect( this );
-
-	// Mesh Manager
+	
 	mesh_manager_ = new Direct3D11MeshManager( this );
-
-	// Texture Manager
 	texture_manager_ = new Direct3D11TextureManager( this );
 }
 
@@ -285,6 +281,7 @@ Direct3D11::~Direct3D11()
 	texture_manager_.release();
 	mesh_manager_.release();
 	effect_.release();
+	fader_.release();
 	sprite_.release();
 	font_.release();
 

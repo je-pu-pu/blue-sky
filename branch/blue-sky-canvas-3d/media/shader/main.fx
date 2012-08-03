@@ -651,7 +651,7 @@ PS_INPUT vs_pass( VS_INPUT input )
 
 	output.Position = input.Position;
 	output.TexCoord = input.TexCoord;
-	output.Color = float4( 0.f, 0.f, 0.f, -0.5f );
+	output.Color = ObjectColor;
 
 	return output;
 }
@@ -662,7 +662,7 @@ technique11 main2d
 	{
 		SetVertexShader( CompileShader( vs_4_0, vs_pass() ) );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_shadow_map_debug() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps() ) );
 	}
 }
 

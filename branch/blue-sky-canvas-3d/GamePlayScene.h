@@ -53,6 +53,7 @@ protected:
 	auto_ptr< Player >					player_;
 	auto_ptr< Camera >					camera_;
 
+	auto_ptr< Rectangle >				fader_rectangle_;
 
 	void generate_random_stage();
 

@@ -8,6 +8,7 @@
 #include <vector>
 
 class Direct3D11;
+class Direct3D11Color;
 class Direct3D11Material;
 
 /**
@@ -16,6 +17,11 @@ class Direct3D11Material;
  */
 class Direct3D11Mesh
 {
+public:
+	typedef Direct3D11					Direct3D;
+	typedef Direct3D11Color				Color;
+	typedef Direct3D11Material			Material;
+
 public:
 	struct Vertex
 	{
@@ -46,13 +52,11 @@ public:
 	typedef std::vector< Position >		PositionList; // ?
 	typedef std::vector< TexCoord >		TexCoordList; // ?
 
-	typedef Direct3D11Material			Material;
-
 	typedef std::vector< Vertex >		VertexList;
 	typedef std::vector< Material* >	MaterialList;
 
 protected:
-	Direct3D11*		direct_3d_;
+	Direct3D*		direct_3d_;
 	ID3D11Buffer*	vertex_buffer_;
 	VertexList		vertex_list_;
 	MaterialList	material_list_;

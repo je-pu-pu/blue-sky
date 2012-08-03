@@ -25,6 +25,8 @@ public:
 	Goal();
 	~Goal() { }
 
+	void restart();
+
 	/// XV
 	void update();
 	

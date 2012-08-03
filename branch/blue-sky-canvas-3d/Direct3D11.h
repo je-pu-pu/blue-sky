@@ -13,6 +13,7 @@ class Direct3D11Matrix;
 class Direct3D11Color;
 
 class Direct3D11Sprite;
+class Direct3D11Fader;
 
 class Direct3D11Effect;
 class Direct3D11EffectTechnique;
@@ -33,6 +34,7 @@ class Direct3D11
 {
 public:
 	typedef Direct3D11Sprite			Sprite;
+	typedef Direct3D11Fader				Fader;
 
 	typedef Direct3D11Effect			Effect;
 	typedef Direct3D11EffectTechnique	EffectTechnique;
@@ -85,6 +87,7 @@ private:
 	common::auto_ptr< Font	>				font_;
 
 	common::auto_ptr< Sprite >				sprite_;
+	common::auto_ptr< Fader >				fader_;
 	common::auto_ptr< Effect >				effect_;
 
 	common::auto_ptr< MeshManager >			mesh_manager_;
@@ -136,12 +139,14 @@ public:
 
 	inline Font* getFont() { return font_.get(); }
 	inline Sprite* getSprite() { return sprite_.get(); }
+	inline Fader* getFader() { return fader_.get(); }
 	inline Effect* getEffect() { return effect_.get(); }
 	inline MeshManager* getMeshManager() { return mesh_manager_.get(); }
 	inline TextureManager* getTextureManager() { return texture_manager_.get(); }
 
 	inline const Font* getFont() const { return font_.get(); }
 	inline const Sprite* getSprite() const { return sprite_.get(); }
+	inline const Fader* getFader() const { return fader_.get(); }
 	inline const Effect* getEffect() const { return effect_.get(); }
 	inline const MeshManager* getMeshManager() const { return mesh_manager_.get(); }
 	inline const TextureManager* getTextureManager() const { return texture_manager_.get(); }

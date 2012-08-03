@@ -27,6 +27,7 @@
 #include "Direct3D11TextureManager.h"
 #include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11Material.h"
+#include "Direct3D11Fader.h"
 #include "Direct3D11Effect.h"
 #include "DirectWrite.h"
 #include "DirectX.h"
@@ -156,6 +157,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 
 	rectangle_ = new Rectangle( get_direct_3d() );
+	fader_rectangle_ = new Rectangle( get_direct_3d() );
 
 	Sound* bgm = get_sound_manager()->get_sound( "bgm" );
 	if ( bgm )
@@ -180,6 +182,9 @@ GamePlayScene::~GamePlayScene()
 
 void GamePlayScene::restart()
 {
+	get_direct_3d()->getFader()->set_color( Direct3D::Color::White );
+	get_direct_3d()->getFader()->full_out();
+
 	is_cleared_ = false;
 
 	player_->restart();
@@ -530,15 +535,17 @@ void GamePlayScene::update()
 
 	get_active_object_manager()->update();
 
-	get_physics()->update( get_elapsed_time() );
-
-
-	for ( ActiveObjectManager::ActiveObjectList::iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+	if ( ! is_cleared_ )
 	{
-		( *i )->update_transform();
-	}
+		get_physics()->update( get_elapsed_time() );
 
-	player_->update_transform();
+		player_->update_transform();
+
+		for ( ActiveObjectManager::ActiveObjectList::iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+		{
+			( *i )->update_transform();
+		}
+	}
 
 	camera_->update_with_player( player_.get() );
 	camera_->update();
@@ -618,12 +625,19 @@ void GamePlayScene::update_main()
 		player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );
 
 		camera_->rotate_degree_target().y() = player_->get_direction_degree();
+
+		get_direct_3d()->getFader()->fade_in( 0.05f );
 	}
 	else
 	{
 		if ( get_input()->push( Input::A ) )
 		{
 			restart();
+		}
+		else
+		{
+			get_direct_3d()->getFader()->set_color( Direct3D::Color( 0.25f, 0.f, 0.f, 0.75f ) );
+			get_direct_3d()->getFader()->fade_out( 0.05f );
 		}
 	}
 
@@ -657,7 +671,7 @@ void GamePlayScene::on_goal()
 void GamePlayScene::update_clear()
 {
 	ActiveObject::Vector3 target_position = goal_->get_location();
-	target_position.setZ( target_position.z() - 4.f - get_sound_manager()->get_sound( "fin" )->get_current_position() * 0.5f );
+	target_position.setZ( target_position.z() - 4.f + get_sound_manager()->get_sound( "fin" )->get_current_position() * 0.5f );
 
 	player_->set_location( player_->get_location() * 0.95f + target_position * 0.05f );
 	player_->set_direction_degree( 0.f );
@@ -667,14 +681,17 @@ void GamePlayScene::update_clear()
 	camera_->rotate_degree_target().z() = 0.f;
 	camera_->set_rotate_chase_speed( 0.1f );
 
-	// brightness_ = math::chase( brightness_, 1.f, 0.002f );
+	get_direct_3d()->getFader()->fade_out( 0.0025f );
 
-	if ( get_sound_manager()->get_sound( "fin" )->get_current_position() >= 6.f && ! get_sound_manager()->get_sound( "door" )->is_playing() )
+	if (
+		get_sound_manager()->get_sound( "fin" )->get_current_position() >= 6.f &&
+		get_sound_manager()->get_sound( "fin" )->get_current_position() <= 8.f &&
+		! get_sound_manager()->get_sound( "door" )->is_playing() )
 	{
 		get_sound_manager()->get_sound( "door" )->play( false );
 	}
 	
-	if ( get_sound_manager()->get_sound( "fin" )->get_current_position() >= 9.f )
+	if ( get_sound_manager()->get_sound( "fin" )->get_current_position() >= 10.f )
 	{
 		std::string save_param_name = StageSelectScene::get_stage_prefix_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + "." + get_stage_name();
 
@@ -937,6 +954,25 @@ void GamePlayScene::render()
 			}
 		}
 #endif
+
+		// render_fader_rectangle()
+		{
+			ObjectConstantBuffer buffer;
+			buffer.color = get_direct_3d()->getFader()->get_color();
+			get_game_main()->get_object_constant_buffer()->update( & buffer );
+
+			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
+
+			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+			{
+				( *i )->apply();
+				
+				get_game_main()->get_object_constant_buffer()->render();
+
+				( * rectangle_->get_material_list().begin() )->set_shader_resource_view( 0 );
+				fader_rectangle_->render();
+			}
+		}
 
 		if ( is_render_2d_enabled )
 		{

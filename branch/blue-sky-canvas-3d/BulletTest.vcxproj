@@ -25,6 +25,7 @@
     <ClCompile Include="Direct3D11Effect.cpp" />
     <ClCompile Include="Direct3D11EffectPass.cpp" />
     <ClCompile Include="Direct3D11EffectTechnique.cpp" />
+    <ClCompile Include="Direct3D11Fader.cpp" />
     <ClCompile Include="Direct3D11Material.cpp" />
     <ClCompile Include="Direct3D11Mesh.cpp" />
     <ClCompile Include="Direct3D11MeshManager.cpp" />
@@ -76,6 +77,7 @@
     <ClInclude Include="Direct3D11Effect.h" />
     <ClInclude Include="Direct3D11EffectPass.h" />
     <ClInclude Include="Direct3D11EffectTechnique.h" />
+    <ClInclude Include="Direct3D11Fader.h" />
     <ClInclude Include="Direct3D11Material.h" />
     <ClInclude Include="Direct3D11Matrix.h" />
     <ClInclude Include="Direct3D11Mesh.h" />

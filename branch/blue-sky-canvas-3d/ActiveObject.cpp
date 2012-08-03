@@ -41,10 +41,16 @@ void ActiveObject::restart()
 		get_transform().setOrigin( start_location_ + Vector3( 0, get_collision_height() / 2.f, 0 ) );
 		get_rigid_body()->getMotionState()->setWorldTransform( get_transform() );
 		
-		get_rigid_body()->clearForces();
 		get_rigid_body()->setWorldTransform( get_transform() );
 		get_rigid_body()->setInterpolationWorldTransform( get_transform() );
+		
 		get_rigid_body()->setLinearVelocity( Vector3( 0.f, 0.f, 0.f ) );
+		get_rigid_body()->setInterpolationLinearVelocity( Vector3( 0.f, 0.f, 0.f ) );
+		
+		get_rigid_body()->setAngularVelocity( Vector3( 0.f, 0.f, 0.f ) );
+		get_rigid_body()->setInterpolationAngularVelocity( Vector3( 0.f, 0.f, 0.f ) );
+		
+		get_rigid_body()->clearForces();
 	}
 }
 

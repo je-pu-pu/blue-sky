@@ -39,6 +39,11 @@ public:
 		ifs.close();
     }
 
+	~DirectWriteFontFileStream()
+	{
+
+	}
+
     virtual HRESULT STDMETHODCALLTYPE QueryInterface( REFIID id, void** object )
 	{
 		if ( id == IID_IUnknown || id == __uuidof( IDWriteFontFileStream ) )

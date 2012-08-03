@@ -382,7 +382,8 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			ss >> x >> y >> z;
 
-			player_->set_start_location( x, y, z );
+			goal_->set_start_location( x, y, z );
+			goal_->set_rigid_body( get_physics()->add_active_object( goal_.get() ) );
 		}
 		else if ( name == "sky-box" )
 		{
@@ -610,6 +611,15 @@ void GamePlayScene::update()
 	camera_->update_with_player( player_.get() );
 	camera_->update();
 	
+
+	// collision_check
+
+	if ( get_physics()->is_collision( player_.get(), goal_.get() ) )
+	{
+
+	}
+	// player_->get_rigid_body()->
+
 	/*
 	sound_manager()->set_listener_position( camera_->position() );
 	sound_manager()->set_listener_velocity( player_->velocity() );
@@ -635,7 +645,7 @@ void GamePlayScene::render()
 		std::wstringstream ss;
 		ss.setf( std::ios_base::fixed, std::ios_base::floatfield );
 
-		ss << L"Bullet ‚É‚æ‚é•¨—‰‰ŽZ" << std::endl;
+		ss << L"‚Ü‚Ÿ‚ª‚­‚ê‚½ŒŽ" << std::endl;
 		ss << L"FPS : " << get_main_loop()->get_last_fps() << std::endl;
 		ss << L"POS : " << player_->get_transform().getOrigin().x() << ", " << player_->get_transform().getOrigin().y() << ", " << player_->get_transform().getOrigin().z() << std::endl;
 		ss << L"DX : " << player_->get_rigid_body()->getLinearVelocity().x() << std::endl;
@@ -643,7 +653,7 @@ void GamePlayScene::render()
 		ss << L"DZ : " << player_->get_rigid_body()->getLinearVelocity().z() << std::endl;
 		ss << L"Objects : " << get_active_object_manager()->active_object_list().size() << std::endl;
 
-		get_direct_3d()->getFont()->drawText( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str() );
+		get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );
 
 		get_direct_3d()->getFont()->end();
 
@@ -697,6 +707,7 @@ void GamePlayScene::render()
 					}
 
 					render( player_.get() );
+					render( goal_.get() );
 				}
 			}
 
@@ -797,6 +808,8 @@ void GamePlayScene::render()
 				{
 					render( *i );
 				}
+
+				render( goal_.get() );
 			}
 		}
 

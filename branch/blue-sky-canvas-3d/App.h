@@ -21,9 +21,13 @@ public:
 	static const int DEFAULT_HEIGHT = 600;
 
 private:
-	HINSTANCE	hInst;					//インスタンスハンドル
-	HWND		hWnd;					//ウィンドウハンドル
-	HANDLE		hMutex;					//ミューテックスハンドル
+	HINSTANCE	hInst;					///< インスタンスハンドル
+	HWND		hWnd;					///< ウィンドウハンドル
+	HANDLE		hMutex;					///< ミューテックスハンドル
+
+	std::string	class_name_;			///< クラス名
+	std::string	title_;					///< タイトル
+	DWORD		style_;					///< スタイル
 
 	int			width_;					///< ウィンドウ横幅
 	int			height_;				///< ウィンドウ高さ
@@ -31,8 +35,6 @@ private:
 	bool		is_active_;				///< アクティブフラグ
 	bool		is_full_screen_;		///< フルスクリーン
 	RECT		last_window_rect_;		///< 前回のウィンドウ位置とサイズ
-
-	std::string title_;					///< タイトル
 
 	bool		is_mouse_in_window_;
 	bool		is_clip_cursor_enabled_;
@@ -47,10 +49,6 @@ private:
 
 public:
 	virtual ~App();						///< デストラクタ
-
-	std::string	ClassName;				//クラス名
-	std::string	WinTitle;				//タイトル
-	DWORD		WinStyle;				//スタイル
 
 	bool		Init(HINSTANCE, int);	//初期化
 	int			MessageLoop();			//メッセージループ
@@ -69,8 +67,11 @@ public:
 	void set_active( bool );
 	bool is_active() const { return is_active_; }
 
-	const char* getTitle();
-	void setTitle( const char* );
+	const char* get_title();
+	void set_title( const char* );
+
+	const char* get_class_name() const { return class_name_.c_str(); }
+	void set_class_name( const char* name ) { class_name_ = name; }
 
 	bool is_full_screen() const { return is_full_screen_; }
 	void set_full_screen( bool );

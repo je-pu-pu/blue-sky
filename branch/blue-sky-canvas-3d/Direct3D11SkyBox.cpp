@@ -13,6 +13,11 @@ Direct3D11SkyBox::Direct3D11SkyBox( Direct3D* direct_3d, const char* name, const
 	, name_( name )
 	, ext_( ext )
 {
+	if ( std::string( ext_ ).empty() )
+	{
+		ext_ = "png";
+	}
+
 	load_obj( "media/model/sky-box.obj" );
 }
 

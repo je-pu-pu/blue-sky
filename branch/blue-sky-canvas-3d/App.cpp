@@ -14,6 +14,9 @@ App::App()
 	: hWnd( 0 )
 	, hInst( 0 )
 	, hMutex( 0 )
+	, class_name_( "blue-sky" )
+	, title_( "blue-sky" )
+	, style_( get_window_style() )
 	, width_( DEFAULT_WIDTH )
 	, height_( DEFAULT_HEIGHT )
 	, is_active_( false )
@@ -21,9 +24,7 @@ App::App()
 	, is_mouse_in_window_( false )
 	, is_clip_cursor_enabled_( false )
 {
-	ClassName = "blue-sky";
-	WinTitle = "blue-sky";
-	WinStyle = get_window_style();
+	setlocale( LC_CTYPE, "" );
 }
 
 //□デストラクタ
@@ -41,12 +42,12 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	//インスタンスハンドルをコピー
 	hInst = hi;
 	//２重起動防止
-	hMutex = OpenMutex(MUTEX_ALL_ACCESS, FALSE, WinTitle.c_str());
+	hMutex = OpenMutex(MUTEX_ALL_ACCESS, FALSE, title_.c_str() );
 	if(hMutex != NULL){
 		CloseHandle(hMutex);
 		return false;
 	}
-	hMutex = CreateMutex(NULL, FALSE, WinTitle.c_str());
+	hMutex = CreateMutex(NULL, FALSE, title_.c_str());
 
 	//WNDCLASS構造体
 	WNDCLASS wc = {
@@ -59,23 +60,23 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		LoadCursor( NULL, IDC_ARROW ),							//マウスカーソル
 		(HBRUSH)GetStockObject(BLACK_BRUSH),	//背景色
 		NULL,									//メニュー
-		ClassName.c_str(),						//クラス名
+		class_name_.c_str(),						//クラス名
 	};
 	//ウィンドウクラスの登録
 	if(! RegisterClass(&wc))	return false;
 	
 	// ウィンドウサイズの取得
 	RECT rc = { 0, 0, width_, height_ };
-	AdjustWindowRect( & rc, WinStyle, FALSE );
+	AdjustWindowRect( & rc, style_, FALSE );
 	int w = rc.right - rc.left;
 	int h = rc.bottom - rc.top;
 
 	//ウインドウ作成
 	hWnd = CreateWindowEx(
 		0 /* WS_EX_TOPMOST */,		//手前に表示
-		ClassName.c_str(),	//クラス名
-		WinTitle.c_str(),	//タイトル
-		WinStyle,			//スタイル
+		class_name_.c_str(),	//クラス名
+		title_.c_str(),		//タイトル
+		style_,				//スタイル
 		CW_USEDEFAULT,		//表示座標
 		CW_USEDEFAULT,		//
 		w,					//サイズ
@@ -254,7 +255,7 @@ void App::set_size( int w, int h )
 
 	
 	RECT rect = { 0, 0, width_, height_ };
-	AdjustWindowRect( & rect, WinStyle, false );
+	AdjustWindowRect( & rect, style_, false );
 
 	int ww = rect.right - rect.left;
 	int wh = rect.bottom - rect.top;
@@ -269,10 +270,13 @@ void App::set_size( int w, int h )
  *
  * @return タイトル
  */
-const char* App::getTitle()
+const char* App::get_title()
 {
-	title_.resize( GetWindowTextLength( hWnd ) + 1 );
-	GetWindowText( hWnd, & title_[ 0 ], title_.size() );
+	if ( hWnd )
+	{
+		title_.resize( GetWindowTextLength( hWnd ) + 1 );
+		GetWindowText( hWnd, & title_[ 0 ], title_.size() );
+	}
 
 	return title_.c_str();
 }
@@ -282,9 +286,14 @@ const char* App::getTitle()
  *
  * @param t タイトル
  */
-void App::setTitle( const char* t )
+void App::set_title( const char* t )
 {
-	SetWindowText( hWnd, t );
+	title_ = t;
+
+	if ( hWnd )
+	{
+		SetWindowText( hWnd, title_.c_str() );
+	}
 }
 
 void App::set_full_screen( bool full_screen )

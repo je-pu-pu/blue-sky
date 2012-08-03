@@ -1,6 +1,8 @@
 #ifndef DIRECT_3D_11_SPRITE_H
 #define DIRECT_3D_11_SPRITE_H
 
+#include "Direct3D11Matrix.h"
+
 #include <d3d11.h>
 #include <xnamath.h>
 
@@ -11,6 +13,8 @@ namespace win
 
 class Direct3D11;
 class Direct3D11ConstantBuffer;
+class Direct3D11Vector;
+class Direct3D11Matrix;
 class Direct3D11Color;
 
 /**
@@ -35,6 +39,9 @@ public:
 	typedef XMFLOAT3					Vector3;
 	typedef XMFLOAT4					Vector4;
 	
+	typedef Direct3D11Vector			Vector;
+	typedef Direct3D11Matrix			Matrix;
+
 	typedef WORD						Index;
 
 	typedef win::Rect					Rect;
@@ -55,6 +62,8 @@ protected:
 	Buffer*			vertex_buffer_;
 	Buffer*			index_buffer_;
 
+	Matrix			transform_;
+
 	static Color	white_;
 
 	void create_vertex_buffer();
@@ -68,8 +77,12 @@ public:
 
 	void begin();
 
+	void set_transform( const Matrix& );
+
 	void draw( const Rect&, Texture*, const Rect&, const Color& = white_ );
 	void draw( const Rect&, Texture*, const Color& = white_ );
+
+	void draw( Texture*, const Rect&, const Color& = white_ );
 
 	void end();
 

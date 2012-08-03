@@ -123,6 +123,12 @@
     <ClCompile Include="Direct3D11.cpp">
       <Filter>DirectX\Direct3D11</Filter>
     </ClCompile>
+    <ClCompile Include="StoryTextScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11Color.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -236,9 +242,6 @@
     <ClInclude Include="TitleScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="EndingScene.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
     <ClInclude Include="GamePlayScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -275,6 +278,12 @@
     </ClInclude>
     <ClInclude Include="Balloon.h">
       <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11Vector.h">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11Matrix.h">
+      <Filter>DirectX\Direct3D11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

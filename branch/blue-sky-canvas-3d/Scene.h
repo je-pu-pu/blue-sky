@@ -28,6 +28,8 @@ class DrawingModelManager;
 class SoundManager;
 class Input;
 
+class DrawingModel;
+
 /**
  * ê–Ê‚²‚Æ‚Ìˆ—A•`‰æ‚ğŠÇ—‚·‚é
  *
@@ -106,6 +108,7 @@ public:
 	virtual bool is_clip_cursor_required() { return false; }
 
 	float_t get_total_elapsed_time() const { return total_elapsed_time_; }
+	void reset_total_elapsed_time() { total_elapsed_time_ = 0.f; }
 
 }; // class Scene
 

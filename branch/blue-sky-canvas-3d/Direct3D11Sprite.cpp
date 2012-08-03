@@ -83,6 +83,11 @@ void Direct3D11Sprite::end()
 
 }
 
+void Direct3D11Sprite::set_transform( const Matrix& m )
+{
+	transform_ = m;
+}
+
 void Direct3D11Sprite::draw( const Rect* dst, Texture* texture, const Rect* src, const Color* color )
 {
 	D3D11_MAPPED_SUBRESOURCE mapped_subresource;
@@ -96,15 +101,12 @@ void Direct3D11Sprite::draw( const Rect* dst, Texture* texture, const Rect* src,
 	vertex_list[ 2 ].Color = * color;
 	vertex_list[ 3 ].Color = * color;
 
+	UINT src_width;
+	UINT src_height;
+
 	{
-		com_ptr< ID3D11Resource > texture_2d_resource;
-		texture->GetResource( & texture_2d_resource );
-
-		ID3D11Texture2D* texture_2d = static_cast< ID3D11Texture2D* >( texture_2d_resource.get() );
-
 		D3D11_TEXTURE2D_DESC texture_2d_desc;
-
-		texture_2d->GetDesc( & texture_2d_desc );
+		direct_3d_->getTexture2dDescByTexture( texture, & texture_2d_desc );
 
 		if ( src )
 		{
@@ -117,6 +119,9 @@ void Direct3D11Sprite::draw( const Rect* dst, Texture* texture, const Rect* src,
 			vertex_list[ 1 ].TexCoord = Vector2( r, t );
 			vertex_list[ 2 ].TexCoord = Vector2( l, b );
 			vertex_list[ 3 ].TexCoord = Vector2( r, b );
+
+			src_width = src->width();
+			src_height = src->height();
 		}
 		else
 		{
@@ -124,18 +129,32 @@ void Direct3D11Sprite::draw( const Rect* dst, Texture* texture, const Rect* src,
 			vertex_list[ 1 ].TexCoord = Vector2( 1, 0 );
 			vertex_list[ 2 ].TexCoord = Vector2( 0, 1 );
 			vertex_list[ 3 ].TexCoord = Vector2( 1, 1 );
+
+			src_width = texture_2d_desc.Width;
+			src_height = texture_2d_desc.Height;
 		}
 	}
 
 	{
 		DXGI_SURFACE_DESC surface_desc;
-
 		direct_3d_->getBackbufferSurface()->GetDesc( & surface_desc );
 
-		FLOAT l = dst->left()   * 2.f / static_cast< FLOAT >( surface_desc.Width ) - 1.f;
-		FLOAT r = dst->right()  * 2.f / static_cast< FLOAT >( surface_desc.Width ) - 1.f;
-		FLOAT t = -( dst->top()    * 2.f / static_cast< FLOAT >( surface_desc.Height ) - 1.f );
-		FLOAT b = -( dst->bottom() * 2.f / static_cast< FLOAT >( surface_desc.Height ) - 1.f );
+		FLOAT l, r, t, b;
+
+		if ( dst )
+		{
+			l = +( dst->left()   * 2.f / static_cast< FLOAT >( surface_desc.Width  ) - 1.f );
+			r = +( dst->right()  * 2.f / static_cast< FLOAT >( surface_desc.Width  ) - 1.f );
+			t = -( dst->top()    * 2.f / static_cast< FLOAT >( surface_desc.Height ) - 1.f );
+			b = -( dst->bottom() * 2.f / static_cast< FLOAT >( surface_desc.Height ) - 1.f );
+		}
+		else
+		{
+			l = +( ( ( static_cast< FLOAT >( surface_desc.Width  ) - src_width  ) / 2               ) / surface_desc.Width  * 2.f - 1.f );
+			r = +( ( ( static_cast< FLOAT >( surface_desc.Width  ) - src_width  ) / 2 + src_width   ) / surface_desc.Width  * 2.f - 1.f );
+			t = -( ( ( static_cast< FLOAT >( surface_desc.Height ) - src_height ) / 2               ) / surface_desc.Height * 2.f - 1.f );
+			b = -( ( ( static_cast< FLOAT >( surface_desc.Height ) - src_height ) / 2 + src_height  ) / surface_desc.Height * 2.f - 1.f );
+		}
 
 		vertex_list[ 0 ].Position = Vector3( l, t, 0 );
 		vertex_list[ 1 ].Position = Vector3( r, t, 0 );
@@ -149,6 +168,9 @@ void Direct3D11Sprite::draw( const Rect* dst, Texture* texture, const Rect* src,
 
 	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & texture );
 	direct_3d_->getImmediateContext()->DrawIndexed( 6, 0, 0 );
+	
+	ID3D11ShaderResourceView* shader_resource_view[] = { 0 };
+	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, shader_resource_view );
 }
 
 void Direct3D11Sprite::draw( const Rect& dst, Texture* texture, const Rect& src, const Color& color )
@@ -159,4 +181,9 @@ void Direct3D11Sprite::draw( const Rect& dst, Texture* texture, const Rect& src,
 void Direct3D11Sprite::draw( const Rect& dst, Texture* texture, const Color& color )
 {
 	draw( & dst, texture, 0, & color );
+}
+
+void Direct3D11Sprite::draw( Texture* texture, const Rect& src, const Color& color )
+{
+	draw( 0, texture, 0, & color );
 }

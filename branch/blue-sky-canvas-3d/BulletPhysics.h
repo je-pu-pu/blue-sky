@@ -14,7 +14,7 @@ public:
 	typedef btVector3						Vector3;
 	typedef btTransform						Transform;
 
-private:
+protected:
 	btDefaultCollisionConfiguration*		collision_configuration_;
 	btCollisionDispatcher*					collision_dispatcher_;
 	btBroadphaseInterface*					broadphase_interface_;

@@ -1,6 +1,8 @@
 bgm balloon
 
-goal 0.0 20.0 300.0
+sky-box sky-box-moon
+
+goal 0.0 20.0 5.0
 player 0.0 20.0 -3.0
 object stage-0 0 0 0 0
 object building-20 -57.0 0.0 -23.0 0

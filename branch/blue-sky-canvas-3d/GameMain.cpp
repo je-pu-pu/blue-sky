@@ -2,7 +2,9 @@
 #include "App.h"
 
 #include "TitleScene.h"
+#include "StoryTextScene.h"
 #include "GamePlayScene.h"
+
 
 #include "DrawingModelManager.h"
 #include "ActiveObjectManager.h"
@@ -61,9 +63,6 @@ GameMain::GameMain()
 	get_app()->set_size( get_config()->get( "video.width", App::DEFAULT_WIDTH ), get_config()->get( "video.height", App::DEFAULT_HEIGHT ) );
 	get_app()->set_full_screen( get_config()->get( "video.full_screen", 0 ) != 0 );
 
-	// MainLoop
-	main_loop_ = new MainLoop( 60 );
-
 	// Direct3D
 	direct_3d_ = new Direct3D11( get_app()->GetWindowHandle(), get_app()->get_width(), get_app()->get_height(), get_app()->is_full_screen() );
 	direct_3d_->getEffect()->load( "media/shader/main.fx" );
@@ -92,13 +91,21 @@ GameMain::GameMain()
 	input_->load_config( * config_.get() );
 
 	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
+	sound_manager_->set_mute( config_->get( "audio.mute", 0 ) != 0 );
+	sound_manager_->set_volume( config_->get( "audio.volume", 1.f ) );
 
 	active_object_manager_ = new ActiveObjectManager();
 	drawing_model_manager_ = new DrawingModelManager();
 
 	// Scene
-	scene_ = new TitleScene( this );
-	scene_->set_name( "title" );
+	// scene_ = new TitleScene( this );
+	// scene_->set_name( "title" );
+
+	scene_ = new StoryTextScene( this, "media/stage/8.outro", "title" );
+	scene_->set_name( "stage_outro" );
+
+	// MainLoop
+	main_loop_ = new MainLoop( 60 );
 }
 
 //■デストラクタ
@@ -201,25 +208,19 @@ void GameMain::check_scene_transition()
 		{
 			scene_ = new StageSelectScene( this );
 		}
+		*/
 		else if ( next_scene == "stage_intro" )
 		{
 			scene_ = new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".intro" ).c_str(), "game_play" );
 		}
-		*/
 		else if ( next_scene == "game_play" )
 		{
 			scene_ = new GamePlayScene( this );
 		}
-		/*
 		else if ( next_scene == "stage_outro" )
 		{
 			scene_ = new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".outro" ).c_str(), "stage_select" );
 		}
-		else if ( next_scene == "ending" )
-		{
-			scene_ = new EndingScene( this );
-		}
-		*/
 		else
 		{
 			COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " + scene_->get_next_scene() ) );

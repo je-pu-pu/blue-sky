@@ -11,8 +11,12 @@
 class Direct3D11Color : public XMFLOAT4
 {
 public:
-	typedef float	UnitType;
-	typedef int		IntType;
+	typedef float			UnitType;
+	typedef int				IntType;
+	typedef unsigned int	UintType;
+
+	static Direct3D11Color White;
+	static Direct3D11Color Black;
 
 public:
 	Direct3D11Color( UnitType r, UnitType g, UnitType b, UnitType a )
@@ -28,6 +32,16 @@ public:
 			static_cast< UnitType >( g ) / 255.f,
 			static_cast< UnitType >( b ) / 255.f,
 			static_cast< UnitType >( a ) / 255.f
+		);
+	}
+
+	static Direct3D11Color from_hex( UintType hex )
+	{
+		return from_256(
+			( hex >> 24 ) & 0xFF,
+			( hex >> 16 ) & 0xFF,
+			( hex >>  8 ) & 0xFF,
+			( hex >>  0 ) & 0xFF
 		);
 	}
 

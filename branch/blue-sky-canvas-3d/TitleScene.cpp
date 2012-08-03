@@ -33,23 +33,26 @@ TitleScene::TitleScene( const GameMain* game_main )
 	, title_texture_( 0 )
 	, title_bg_texture_( 0 )
 	, cloth_texture_( 0 )
+	, brand_logo_model_( 0 )
+	, title_logo_model_( 0 )
 	, ok_( 0 )
 	, bgm_( 0 )
 	, sequence_( 0 )
 	, title_bg_scale_( 2.f )
 	, title_bg_scale_cycle_( 0.f )
 	, fade_alpha_( 1.f )
+	, sequence_elapsed_time_( 0.f )
 {
 	ok_ = get_sound_manager()->load( "ok" );
 
 	bgm_ = get_sound_manager()->load_music( "bgm", "title" );
-	bgm_->play( false );
 	
 	// title_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/texture/title.png" );
 	// title_bg_texture_ = direct_3d()->getTextureManager()->load( "title-bg", "media/texture/title-bg.png" );
 	cloth_texture_ = get_direct_3d()->getTextureManager()->load( "cloth", "media/texture/cloth.png" );
 
-	get_drawing_model_manager()->load( "je-pu-pu" );
+	brand_logo_model_ = get_drawing_model_manager()->load( "je-pu-pu" );
+	title_logo_model_ = get_drawing_model_manager()->load( "blue-sky" );
 
 	{
 		GameConstantBuffer game_constant_buffer;
@@ -64,6 +67,9 @@ TitleScene::TitleScene( const GameMain* game_main )
 
 		get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer );
 	}
+
+	reset_total_elapsed_time();
+	bgm_->play( false );
 }
 
 TitleScene::~TitleScene()
@@ -79,6 +85,8 @@ void TitleScene::update()
 {
 	Scene::update();
 
+	sequence_elapsed_time_ += get_elapsed_time();
+
 	if ( get_input()->push( Input::A ) )
 	{
 		if ( sequence_ == SEQUENCE_TITLE_FIX )
@@ -92,6 +100,7 @@ void TitleScene::update()
 		{
 			ok_->play( false );
 			sequence_ = SEQUENCE_TITLE_FIX;
+			sequence_elapsed_time_ = 0.f;
 			fade_alpha_ = 1.f;
 		}
 	}
@@ -99,12 +108,14 @@ void TitleScene::update()
 	if ( title_bg_scale_ == -1.f )
 	{
 		sequence_ = SEQUENCE_TITLE_FIX;
+		sequence_elapsed_time_ = 0.f;
 	}
 	else if ( bgm_->get_current_position() >= 19.f )
 	{
 		if ( sequence_ < SEQUENCE_TITLE_BG )
 		{
 			sequence_ = SEQUENCE_TITLE_BG;
+			sequence_elapsed_time_ = 0.f;
 			fade_alpha_ = 1.f;
 		}
 	}
@@ -113,6 +124,7 @@ void TitleScene::update()
 		if ( sequence_ < SEQUENCE_TITLE_LOGO )
 		{
 			sequence_ = SEQUENCE_TITLE_LOGO;
+			sequence_elapsed_time_ = 0.f;
 			fade_alpha_ = 1.f;
 		}
 	}
@@ -146,7 +158,7 @@ void TitleScene::render()
 		FrameConstantBuffer frame_constant_buffer;
 
 		frame_constant_buffer.view = XMMatrixTranspose( XMMatrixIdentity() );
-		frame_constant_buffer.time = get_game_main()->get_total_elapsed_time();
+		frame_constant_buffer.time = get_total_elapsed_time();
 	
 		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer );
 	}
@@ -185,7 +197,14 @@ void TitleScene::render()
 			get_game_main()->get_frame_constant_buffer()->render();
 			get_game_main()->get_object_constant_buffer()->render();
 
-			get_drawing_model_manager()->get( "je-pu-pu" )->get_line()->render( static_cast< int >( get_game_main()->get_total_elapsed_time() * 30 ) );
+			if ( sequence_ == SEQUENCE_LOGO )
+			{
+				brand_logo_model_->get_line()->render( static_cast< int >( sequence_elapsed_time_ * 30 ) );
+			}
+			else if ( sequence_ >= SEQUENCE_TITLE_BG )
+			{
+				title_logo_model_->get_line()->render( static_cast< int >( sequence_elapsed_time_ * 30 ) );
+			}
 		}
 	}
 

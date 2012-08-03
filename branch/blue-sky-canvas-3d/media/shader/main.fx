@@ -242,7 +242,7 @@ void gs_line( line VS_LINE_OUTPUT input[2], inout TriangleStream<PS_INPUT> TriSt
 		float line_index = redraw_seed % 3; // 全ての線が統一されたタイミングで更新される
 		float line_v_origin = ( line_index * line_v_width );
 
-		float line_u_origin = ( redraw_seed ) * 0.01f;
+		float line_u_origin = ( redraw_seed ) * 0.1f;
 		float line_length_ratio = length( float2( lx, ly ) ) / length( float2( 2.f, 2.f ) );
 
 		float angle = atan2( ly, lx );

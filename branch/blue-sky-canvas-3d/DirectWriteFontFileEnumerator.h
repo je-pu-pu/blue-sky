@@ -18,8 +18,14 @@ public:
 		, current_font_file_( 0 )
 		, file_path_( file_path )
     {
-
+		DIRECT_X_ADD_REF( factory_ );
     }
+
+	~DirectWriteFontFileEnumerator()
+	{
+		DIRECT_X_RELEASE( current_font_file_ );
+		DIRECT_X_RELEASE( factory_ );
+	}
 
     virtual HRESULT STDMETHODCALLTYPE QueryInterface( REFIID id, void** object )
 	{

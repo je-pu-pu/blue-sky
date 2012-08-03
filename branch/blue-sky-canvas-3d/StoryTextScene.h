@@ -2,6 +2,7 @@
 #define BLUE_SKY_STORY_TEXT_SCENE_H
 
 #include "Scene.h"
+#include "Direct3D11Color.h"
 #include <common/chase_value.h>
 
 namespace blue_sky
@@ -14,17 +15,18 @@ namespace blue_sky
 class StoryTextScene : public Scene
 {
 public:
+	typedef Direct3D11Color Color;
 
 private:
-	std::string		text_;
+	std::wstring	text_;
 	float			text_y_;
 	float			text_y_target_;
 	float			text_scroll_speed_;
-	D3DCOLOR		text_color_;
+	Color			text_color_;
+	Color			text_border_color_;
 	
 	std::string		next_scene_name_;
 
-	Texture*		sprite_texture_;
 	Texture*		bg_texture_;
 	int				bg_width_;
 	int				bg_height_;
@@ -38,7 +40,7 @@ public:
 	~StoryTextScene();
 
 	void update();				///< ƒƒCƒ“ƒ‹[ƒv
-	bool render();				///< •`‰æ
+	void render();				///< •`‰æ
 
 }; // class StoryTextScene
 

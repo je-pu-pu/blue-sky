@@ -15,6 +15,11 @@ private:
 
     }
 
+	~DirectWriteFontCollectionLoader()
+    {
+
+    }
+
 public:
     virtual HRESULT STDMETHODCALLTYPE QueryInterface( REFIID id, void** object )
 	{

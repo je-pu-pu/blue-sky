@@ -24,6 +24,8 @@ public:
 	RigidBody* add_active_object( const ActiveObject* );
 	RigidBody* add_active_object_as_cylinder( const ActiveObject* );
 
+	bool is_collision( ActiveObject*, ActiveObject* );
+
 }; // class ActiveObjectPhysics
 
 } // namespace blue_sky

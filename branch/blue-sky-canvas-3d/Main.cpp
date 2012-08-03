@@ -17,6 +17,8 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 	{
 		// アプリケーションを初期化する
 		app = App::GetInstance();
+		app->set_title( "blue-sky 2" );
+		app->set_class_name( "blue-sky-2" );
 		app->set_size( 800, 600 );
 
 		if ( ! app->Init( hInst, nCmdShow ) )

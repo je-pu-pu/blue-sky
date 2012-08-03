@@ -1,6 +1,6 @@
 #include "EndingScene.h"
-#include "Direct3D9.h"
-#include "Direct3D9Font.h"
+#include "Direct3D11.h"
+#include "DirectWrite.h"
 #include "DirectX.h"
 #include "App.h"
 #include "SoundManager.h"
@@ -13,22 +13,20 @@ EndingScene::EndingScene( const GameMain* game_main )
 	: Scene( game_main )
 	, direct_show_( 0 )
 {
-	direct_3d()->set_depth_stencil( false );
-	direct_3d()->set_multi_sample( 0, 0 );
-	direct_3d()->reset( true );
+	get_direct_3d()->set_depth_stencil( false );
+	get_direct_3d()->set_multi_sample( 0, 0 );
+	get_direct_3d()->reset( true );
 
-	sound_manager()->stop_all();
-	sound_manager()->unload_all();
+	get_sound_manager()->stop_all();
+	get_sound_manager()->unload_all();
 
-	sound_manager()->load_music( "tokyo-shojo" )->play( false );
-
-	// direct_show_ = new DirectShow( App::GetInstance()->GetWindowHandle() );
+	get_sound_manager()->load_music( "ending" )->play( false );
 }
 
 EndingScene::~EndingScene()
 {
-	direct_3d()->set_depth_stencil( true );
-	direct_3d()->reset( true );
+	get_direct_3d()->set_depth_stencil( true );
+	get_direct_3d()->reset( true );
 
 	delete direct_show_;
 }

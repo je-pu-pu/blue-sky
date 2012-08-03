@@ -443,8 +443,6 @@ void Direct3D11::end3D()
 		return;
 	}
 
-	// immediate_context_->CopyResource( back_buffer_texture_, text_texture_ );
-
 	DIRECT_X_FAIL_CHECK( text_texture_mutex_11_->ReleaseSync( 0 ) );
 }
 
@@ -455,8 +453,6 @@ void Direct3D11::end()
 
 void Direct3D11::renderText()
 {
-	setInputLayout( "sprite" );
-
 	getSprite()->begin();
 
 	EffectTechnique* technique = effect_->getTechnique( "|sprite" );
@@ -485,6 +481,17 @@ void Direct3D11::setDebugViewport( float x, float y, float w, float h )
 
 	immediate_context_->RSSetViewports( 1, & viewport );
 }
+
+void Direct3D11::getTexture2dDescByTexture( Texture* texture, D3D11_TEXTURE2D_DESC* texture_2d_desc )
+{
+	com_ptr< ID3D11Resource > texture_2d_resource;
+
+	texture->GetResource( & texture_2d_resource );
+
+	ID3D11Texture2D* texture_2d = static_cast< ID3D11Texture2D* >( texture_2d_resource.get() );
+	texture_2d->GetDesc( texture_2d_desc );
+}
+
 
 void Direct3D11::log_adapter_desc( int index, const DXGI_ADAPTER_DESC1& adapter_desc )
 {

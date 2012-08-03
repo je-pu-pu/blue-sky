@@ -26,6 +26,9 @@ private:
 	Texture* title_bg_texture_;
 	Texture* cloth_texture_;
 
+	DrawingModel* brand_logo_model_;
+	DrawingModel* title_logo_model_;
+
 	Sound* ok_;
 	Sound* bgm_;
 
@@ -33,6 +36,8 @@ private:
 	float title_bg_scale_;
 	float title_bg_scale_cycle_;
 	float fade_alpha_;
+
+	float sequence_elapsed_time_;
 
 public:
 	TitleScene( const GameMain* );

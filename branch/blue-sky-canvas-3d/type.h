@@ -6,6 +6,8 @@
 typedef int				int_t;
 typedef float			float_t;
 
+typedef unsigned int	uint_t;
+
 typedef char			char_t;
 typedef std::string		string_t;
 

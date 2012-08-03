@@ -8,6 +8,8 @@
 
 #include <map>
 
+class Direct3D11Vector;
+class Direct3D11Matrix;
 class Direct3D11Color;
 
 class Direct3D11Sprite;
@@ -43,9 +45,13 @@ public:
 
 	typedef ID3D11InputLayout			InputLayout;
 	
+	typedef Direct3D11Vector			Vector;
+	typedef Direct3D11Matrix			Matrix;
 	typedef Direct3D11Color				Color;
 
 	typedef std::map< const char*, InputLayout* >		InputLayoutList;
+
+	typedef ID3D11ShaderResourceView	Texture;
 
 private:
 	ID3D11Device*				device_;				///< Direct3D 11 Device
@@ -120,6 +126,8 @@ public:
 	void renderText();
 
 	void setDebugViewport( float, float, float, float );
+
+	void getTexture2dDescByTexture( Texture*, D3D11_TEXTURE2D_DESC* );
 
 	inline Font* getFont() { return font_.get(); }
 	inline Sprite* getSprite() { return sprite_.get(); }

@@ -40,6 +40,8 @@ protected:
 
 	Texture*			ui_texture_;							///< UI 表示用テクスチャ
 
+	bool				is_cleared_;							///< ステージクリアフラグ
+
 	auto_ptr< ShadowMap >				shadow_map_;
 	auto_ptr< SkyBox >					sky_box_;
 	auto_ptr< Mesh >					ground_;

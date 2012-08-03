@@ -32,11 +32,15 @@ void Player::restart()
 {
 	ActiveObject::restart();
 
-	eye_height_ = 1.5f;
-	eye_depth_ = 0.f;
-
 	get_rigid_body()->setAngularFactor( 0 );
 	get_rigid_body()->setFriction( 0 );
+
+	is_on_footing_ = false;
+	is_jumping_ = false;
+	is_jumpable_ = false;
+
+	eye_height_ = 1.5f;
+	eye_depth_ = 0.f;
 }
 
 /**
@@ -297,9 +301,9 @@ void Player::kill()
 	play_sound( "dead" );
 
 	get_rigid_body()->setActivationState( true );
-	get_rigid_body()->setAngularFactor( 2.f );
-	get_rigid_body()->setFriction( 0.1f );
-	get_rigid_body()->applyForce( get_front() * 1000.f, Vector3( 0.1f, 1.5f, 0.f ) );
+	get_rigid_body()->setAngularFactor( 1.f );
+	get_rigid_body()->setFriction( 1.f );
+	get_rigid_body()->applyForce( get_front() * 2000.f, Vector3( 0.1f, 1.5f, 0.f ) );
 }
 
 void Player::set_eye_depth( float d )

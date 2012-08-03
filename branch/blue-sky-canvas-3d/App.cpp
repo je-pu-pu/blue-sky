@@ -144,8 +144,11 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		SetCursor( 0 );
 		break;
 	}
-	case WM_EXITSIZEMOVE:
+	case WM_SIZE:
 	{
+		int w = ( lp >>  0 ) & 0xFFFF;
+		int h = ( lp >> 16 ) & 0xFFFF;
+
 		on_resize( hwnd );
 		break;
 	}
@@ -216,8 +219,13 @@ void App::set_active( bool active )
 
 void App::on_resize( HWND hwnd )
 {
-	App::GetInstance()->clip_cursor( App::GetInstance()->is_clip_cursor_enabled_ );
-	// Game::get_instance()->on_resize();
+	if ( ! App::GetInstance()->hWnd )
+	{
+		return;
+	}
+
+	// App::GetInstance()->clip_cursor( App::GetInstance()->is_clip_cursor_enabled_ );
+	Game::get_instance()->on_resize();
 }
 
 void App::clip_cursor( bool clip )
@@ -298,6 +306,7 @@ void App::set_title( const char* t )
 
 void App::set_full_screen( bool full_screen )
 {
+	/*
 	if ( full_screen )
 	{
 		if ( ! is_full_screen_ )
@@ -318,6 +327,7 @@ void App::set_full_screen( bool full_screen )
 			ShowCursor( TRUE );
 		}
 	}
+	*/
 
 	is_full_screen_ = full_screen;
 }
@@ -325,7 +335,6 @@ void App::set_full_screen( bool full_screen )
 LONG App::get_window_style() const
 {
 	return WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE;
-	// return WS_OVERLAPPEDWINDOW;
 }
 
 LONG App::get_window_style_full_scrren() const

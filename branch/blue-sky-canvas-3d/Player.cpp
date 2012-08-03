@@ -50,6 +50,7 @@ void Player::restart()
 void Player::update()
 {
 	stop();
+	limit_velocity();
 
 	update_on_footing();
 	update_jumpable();

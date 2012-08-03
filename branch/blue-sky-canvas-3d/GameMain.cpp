@@ -2,9 +2,9 @@
 #include "App.h"
 
 #include "TitleScene.h"
+#include "StageSelectScene.h"
 #include "StoryTextScene.h"
 #include "GamePlayScene.h"
-
 
 #include "DrawingModelManager.h"
 #include "ActiveObjectManager.h"
@@ -185,6 +185,11 @@ void GameMain::on_mouse_wheel( int wheel )
 	input_->push_mouse_wheel_queue( wheel > 0 ? 1 : -1 );
 }
 
+void GameMain::on_resize()
+{
+	direct_3d_->on_resize( get_app()->get_width(), get_app()->get_height() );
+}
+
 /**
  * 次のシーンへの遷移をチェックする
  *
@@ -203,12 +208,10 @@ void GameMain::check_scene_transition()
 		{
 			scene_ = new TitleScene( this );
 		}
-		/*
 		else if ( next_scene == "stage_select" )
 		{
 			scene_ = new StageSelectScene( this );
 		}
-		*/
 		else if ( next_scene == "stage_intro" )
 		{
 			scene_ = new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".intro" ).c_str(), "game_play" );
@@ -223,7 +226,7 @@ void GameMain::check_scene_transition()
 		}
 		else
 		{
-			COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " + scene_->get_next_scene() ) );
+			COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " ) + next_scene );
 		}
 
 		scene_->set_name( next_scene );

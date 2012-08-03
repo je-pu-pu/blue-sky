@@ -40,16 +40,17 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 	
 	if ( ! bg_texture_ )
 	{
-		bg_texture_ = get_direct_3d()->getTextureManager()->load( "bg", "media/image/noise.jpg" );
-		bg_width_ = 800;
-		bg_height_ = 600;
+		bg_texture_ = get_direct_3d()->getTextureManager()->load( "bg", "media/image/story-bg-default.jpg" );
 	}
 
-	D3D11_TEXTURE2D_DESC texture_2d_desc;
-	get_direct_3d()->getTexture2dDescByTexture( bg_texture_, & texture_2d_desc );
+	if ( bg_width_ == 0 && bg_height_ == 0 )
+	{
+		D3D11_TEXTURE2D_DESC texture_2d_desc;
+		get_direct_3d()->getTexture2dDescByTexture( bg_texture_, & texture_2d_desc );
 
-	bg_width_ = texture_2d_desc.Width;
-	bg_height_ = texture_2d_desc.Height;
+		bg_width_ = texture_2d_desc.Width;
+		bg_height_ = texture_2d_desc.Height;
+	}
 }
 
 StoryTextScene::~StoryTextScene()

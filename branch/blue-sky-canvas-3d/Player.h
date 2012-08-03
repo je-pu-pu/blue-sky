@@ -83,6 +83,8 @@ public:
 	bool is_falling() const;
 	bool is_falling_to_dead() const;
 
+	bool has_medal() const { return false; }
+
 }; // class Player
 
 } // namespace blue_sky

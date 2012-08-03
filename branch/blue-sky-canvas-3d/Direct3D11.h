@@ -91,6 +91,9 @@ private:
 	common::auto_ptr< TextureManager >		texture_manager_;
 
 
+	void create_back_buffer_view();
+	void create_back_buffer_surface();
+
 	void log_adapter_desc( int, const DXGI_ADAPTER_DESC1& );
 	void text_out_device_caps( const char*, bool = false );
 
@@ -110,6 +113,8 @@ public:
 
 	bool is_full_screen() const;
 	void switch_full_screen();
+
+	void on_resize( int, int );
 
 	void clear();
 	void clear( const Color& );

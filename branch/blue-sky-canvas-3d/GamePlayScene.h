@@ -64,6 +64,11 @@ protected:
 
 	void restart();
 
+	void on_goal();
+
+	void update_main();
+	void update_clear();
+
 public:
 	GamePlayScene( const GameMain* );
 	~GamePlayScene();

@@ -127,6 +127,7 @@
       <FileType>Document</FileType>
     </None>
     <None Include="media\stage\0.stage" />
+    <None Include="media\stage\8.outro" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

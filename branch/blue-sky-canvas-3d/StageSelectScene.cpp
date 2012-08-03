@@ -49,7 +49,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	face_src_rect_list_.push_back( win::Rect::Size( 768, 384, 64, 64 ) );
 
 	sprite_texture_ = get_direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
-	bg_texture_ = get_direct_3d()->getTextureManager()->load( "bg", "media/image/title-bg.png" );
+	bg_texture_ = get_direct_3d()->getTextureManager()->load( "bg", "media/texture/cloth.png" );
 
 	ok_ = get_sound_manager()->load( "ok" );
 	click_ = get_sound_manager()->load( "click" );

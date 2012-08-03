@@ -173,16 +173,8 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 
 	DIRECT_X_RELEASE( dxgi_adapter );
 
-	// create_back_buffer_view()
-	{
-		DIRECT_X_FAIL_CHECK( swap_chain_->GetBuffer( 0, __uuidof( ID3D11Texture2D ), reinterpret_cast< void** >( & back_buffer_texture_ ) ) );
-		DIRECT_X_FAIL_CHECK( device_->CreateRenderTargetView( back_buffer_texture_, 0, & back_buffer_view_ ) );
-	}
-
-	// create_back_buffer_surface()
-	{
-		DIRECT_X_FAIL_CHECK( back_buffer_texture_->QueryInterface( __uuidof( IDXGISurface1 ), reinterpret_cast< void** >( & back_buffer_surface_ ) ) );
-	}
+	create_back_buffer_view();
+	create_back_buffer_surface();
 
 #ifdef ENABLE_DIRECT_WRITE
 	// create_text_texture()
@@ -323,6 +315,17 @@ Direct3D11::~Direct3D11()
 	DIRECT_X_RELEASE( device_ );
 }
 
+void Direct3D11::create_back_buffer_view()
+{
+	DIRECT_X_FAIL_CHECK( swap_chain_->GetBuffer( 0, __uuidof( ID3D11Texture2D ), reinterpret_cast< void** >( & back_buffer_texture_ ) ) );
+	DIRECT_X_FAIL_CHECK( device_->CreateRenderTargetView( back_buffer_texture_, 0, & back_buffer_view_ ) );
+}
+
+void Direct3D11::create_back_buffer_surface()
+{
+	DIRECT_X_FAIL_CHECK( back_buffer_texture_->QueryInterface( __uuidof( IDXGISurface1 ), reinterpret_cast< void** >( & back_buffer_surface_ ) ) );
+}
+
 // ???
 void Direct3D11::create_default_input_layout()
 {
@@ -370,7 +373,7 @@ void Direct3D11::set_size( int w, int h )
 		swap_chain_desc_.BufferDesc.Width,
 		swap_chain_desc_.BufferDesc.Height,
 		swap_chain_desc_.BufferDesc.Format,
-		0
+		swap_chain_desc_.Flags
 	) );
 }
 
@@ -385,7 +388,31 @@ bool Direct3D11::is_full_screen() const
 
 void Direct3D11::switch_full_screen()
 {
-	swap_chain_->SetFullscreenState( ! is_full_screen(), 0 );
+	DIRECT_X_FAIL_CHECK( swap_chain_->ResizeTarget( & swap_chain_desc_.BufferDesc ) );
+	DIRECT_X_FAIL_CHECK( swap_chain_->SetFullscreenState( ! is_full_screen(), 0 ) );
+}
+
+void Direct3D11::on_resize( int w, int h )
+{
+	immediate_context_->OMSetRenderTargets( 0, 0, 0 );
+
+	DIRECT_X_RELEASE( back_buffer_surface_ );
+	DIRECT_X_RELEASE( back_buffer_view_ );
+	DIRECT_X_RELEASE( back_buffer_texture_ );
+
+	swap_chain_desc_.BufferDesc.Width = w;
+	swap_chain_desc_.BufferDesc.Height = h;
+
+	DIRECT_X_FAIL_CHECK( swap_chain_->ResizeBuffers(
+		swap_chain_desc_.BufferCount,
+		swap_chain_desc_.BufferDesc.Width,
+		swap_chain_desc_.BufferDesc.Height,
+		swap_chain_desc_.BufferDesc.Format,
+		swap_chain_desc_.Flags
+	) );
+
+	create_back_buffer_view();
+	create_back_buffer_surface();
 }
 
 void Direct3D11::clear()

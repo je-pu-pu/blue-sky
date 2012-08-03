@@ -105,6 +105,7 @@ public:
 
 	void on_function_key_down( int );
 	void on_mouse_wheel( int );
+	void on_resize();
 
 	float_t get_total_elapsed_time() const { return total_elapsed_time_; }
 	float_t get_elapsed_time() const;

@@ -99,6 +99,7 @@ public:
 
 	void set_start_location( float_t, float_t, float_t );
 
+	void set_location( const Vector3& );
 	void set_location( float_t, float_t, float_t );
 	void set_rotation( float_t, float_t, float_t );
 

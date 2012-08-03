@@ -295,6 +295,9 @@
     <None Include="media\stage\0.stage">
       <Filter>stage</Filter>
     </None>
+    <None Include="media\stage\8.outro">
+      <Filter>stage</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ActiveObject">

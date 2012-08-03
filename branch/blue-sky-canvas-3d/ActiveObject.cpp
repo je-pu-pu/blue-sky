@@ -91,6 +91,11 @@ void ActiveObject::set_start_location( float_t x, float_t y, float_t z )
 	get_transform().getOrigin() = start_location_;
 }
 
+void ActiveObject::set_location( const Vector3& v )
+{
+	get_transform().getOrigin() = v;
+}
+
 void ActiveObject::set_location( float_t x, float_t y, float_t z )
 {
 	get_transform().getOrigin().setValue( x, y, z );

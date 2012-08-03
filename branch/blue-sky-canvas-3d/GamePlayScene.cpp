@@ -71,6 +71,7 @@ static FrameConstantBuffer frame_constant_buffer; /// @todo ƒƒ“ƒo‚É‚·‚é
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
 	, ui_texture_( 0 )
+	, is_cleared_( false )
 {
 	object_detail_level_0_length_ = get_config()->get( "video.object-detail-level-0-length", 500.f );
 	object_detail_level_1_length_ = get_config()->get( "video.object-detail-level-1-length", 250.f );
@@ -109,8 +110,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 		get_sound_manager()->load( "fin" );
 		get_sound_manager()->load( "door" );
-
-		get_sound_manager()->load_music( "bgm", "road" )->play( true );
 	}
 
 	// Player
@@ -181,6 +180,8 @@ GamePlayScene::~GamePlayScene()
 
 void GamePlayScene::restart()
 {
+	is_cleared_ = false;
+
 	player_->restart();
 	goal_->restart();
 
@@ -516,6 +517,51 @@ void GamePlayScene::update()
 {
 	Scene::update();
 
+	if ( is_cleared_ )
+	{
+		update_clear();
+	}
+	else
+	{
+		update_main();
+	}
+
+	player_->update();
+
+	get_active_object_manager()->update();
+
+	get_physics()->update( get_elapsed_time() );
+
+
+	for ( ActiveObjectManager::ActiveObjectList::iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+	{
+		( *i )->update_transform();
+	}
+
+	player_->update_transform();
+
+	camera_->update_with_player( player_.get() );
+	camera_->update();
+	
+
+	// collision_check
+
+	if ( get_physics()->is_collision( player_.get(), goal_.get() ) )
+	{
+		on_goal();
+	}
+	// player_->get_rigid_body()->
+
+	/*
+	sound_manager()->set_listener_position( camera_->position() );
+	sound_manager()->set_listener_velocity( player_->velocity() );
+	sound_manager()->set_listener_orientation( camera_->front(), camera_->up() );
+	sound_manager()->commit();
+	*/
+}
+
+void GamePlayScene::update_main()
+{
 	if ( ! player_->is_dead() )
 	{
 		bool is_moving = false;
@@ -580,7 +626,7 @@ void GamePlayScene::update()
 			restart();
 		}
 	}
-	
+
 	camera_->rotate_degree_target().y() += get_input()->get_mouse_dx() * 90.f;
 	camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f;
 	camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
@@ -593,39 +639,48 @@ void GamePlayScene::update()
 	}
 
 	player_->add_eye_depth( eye_depth_add );
-	player_->update_rigid_body_velocity();
-	player_->update();
+}
 
-	get_active_object_manager()->update();
-
-	get_physics()->update( get_elapsed_time() );
-
-
-	for ( ActiveObjectManager::ActiveObjectList::iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+void GamePlayScene::on_goal()
+{
+	if ( is_cleared_ )
 	{
-		( *i )->update_transform();
+		return;
 	}
 
-	player_->update_transform();
+	is_cleared_ = true;
 
-	camera_->update_with_player( player_.get() );
-	camera_->update();
+	get_sound_manager()->stop_all();
+	get_sound_manager()->get_sound( "fin" )->play( false );
+}
+
+void GamePlayScene::update_clear()
+{
+	ActiveObject::Vector3 target_position = goal_->get_location();
+	target_position.setZ( target_position.z() - 4.f - get_sound_manager()->get_sound( "fin" )->get_current_position() * 0.5f );
+
+	player_->set_location( player_->get_location() * 0.95f + target_position * 0.05f );
+	player_->set_direction_degree( 0.f );
+
+	camera_->rotate_degree_target().x() = 0.f;
+	camera_->rotate_degree_target().y() = player_->get_direction_degree();
+	camera_->rotate_degree_target().z() = 0.f;
+	camera_->set_rotate_chase_speed( 0.1f );
+
+	// brightness_ = math::chase( brightness_, 1.f, 0.002f );
+
+	if ( get_sound_manager()->get_sound( "fin" )->get_current_position() >= 6.f && ! get_sound_manager()->get_sound( "door" )->is_playing() )
+	{
+		get_sound_manager()->get_sound( "door" )->play( false );
+	}
 	
-
-	// collision_check
-
-	if ( get_physics()->is_collision( player_.get(), goal_.get() ) )
+	if ( get_sound_manager()->get_sound( "fin" )->get_current_position() >= 9.f )
 	{
+		std::string save_param_name = StageSelectScene::get_stage_prefix_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + "." + get_stage_name();
 
+		get_save_data()->set( save_param_name.c_str(), std::max( player_->has_medal() ? 2 : 1, get_save_data()->get( save_param_name.c_str(), 0 ) ) );
+		set_next_scene( "stage_outro" );
 	}
-	// player_->get_rigid_body()->
-
-	/*
-	sound_manager()->set_listener_position( camera_->position() );
-	sound_manager()->set_listener_velocity( player_->velocity() );
-	sound_manager()->set_listener_orientation( camera_->front(), camera_->up() );
-	sound_manager()->commit();
-	*/
 }
 
 /**

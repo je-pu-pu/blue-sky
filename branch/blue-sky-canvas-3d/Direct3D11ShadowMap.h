@@ -47,6 +47,7 @@ private:
 	Direct3D11*					direct_3d_;
 	auto_ptr< ConstantBuffer >	constant_buffer_;
 
+	bool						enabled_;					///< 有効フラグ
 	int							cascade_levels_;			///< CSM のレベル数
 
 	ID3D11Texture2D*			depth_stencil_texture_;
@@ -71,6 +72,9 @@ public:
 	void ready_to_render_shadow_map_with_cascade_level( int );
 
 	void ready_to_render_scene();
+
+	void set_enabled( bool e ) { enabled_ = e; }
+	bool is_enabled() const { return enabled_; }
 
 	int get_cascade_levels() const { return cascade_levels_; }
 

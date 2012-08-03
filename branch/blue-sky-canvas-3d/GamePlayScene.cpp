@@ -135,7 +135,10 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		load_stage_file( ( stage_dir_name + get_stage_name() + ".stage" ).c_str() );
 	}
 
-	shadow_map_ = new ShadowMap( get_direct_3d(), get_config()->get( "video.shadow-map-cascade-levels", 3 ), get_config()->get( "video.shadow-map-size", 1024 ) );
+	if ( get_config()->get( "video.shadow-map-enabled", 1 ) != 0 )
+	{
+		shadow_map_ = new ShadowMap( get_direct_3d(), get_config()->get( "video.shadow-map-cascade-levels", 3 ), get_config()->get( "video.shadow-map-size", 1024 ) );
+	}
 
 	{
 		GameConstantBuffer constant_buffer;
@@ -267,8 +270,8 @@ void GamePlayScene::generate_random_stage()
 		{
 			StaticObject* static_object = new StaticObject( 10, 20, 10 );
 			static_object->set_drawing_model( drawing_model );
-			static_object->set_location( 10.f, 0, n * 12.f );
-			static_object->set_rotation( 15.f, 0, 0 );
+			static_object->set_start_location( 10.f, 0, n * 12.f );
+			static_object->set_start_rotation( 15.f, 0, 0 );
 
 			get_active_object_manager()->add_active_object( static_object );
 
@@ -422,7 +425,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			size_map[ "outdoor-unit" ] = ActiveObject::Vector3(  0.7f,  0.6f,  0.24f );
 			size_map[ "building-20"  ] = ActiveObject::Vector3( 10.f,  20.f,  10.f   );
 			size_map[ "building-200" ] = ActiveObject::Vector3( 80.f, 200.f,  60.f   );
-			size_map[ "balloon"      ] = ActiveObject::Vector3(  1.f,   2.f,   1.f   );
+			size_map[ "balloon"      ] = ActiveObject::Vector3(  1.5f,  2.f,   1.5f  );
 
 			auto i = size_map.find( object_name );
 
@@ -448,7 +451,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			
 			object->set_drawing_model( drawing_model );
 			object->set_start_location( x, y, z );
-			object->set_rotation( r, 0, 0 );
+			object->set_start_rotation( r, 0, 0 );
 
 			if ( object_name == "soda-can" )
 			{
@@ -472,6 +475,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		else if ( name == "balloon" )
 		{
 			active_object = new Balloon();
+			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
 		}
 		/*
 		else if ( name == "rocket" )
@@ -552,6 +556,7 @@ void GamePlayScene::update()
 	
 
 	// collision_check
+	get_physics()->check_collision_with( player_.get() );
 
 	if ( get_physics()->is_collision( player_.get(), goal_.get() ) )
 	{
@@ -559,12 +564,10 @@ void GamePlayScene::update()
 	}
 	// player_->get_rigid_body()->
 
-	/*
-	sound_manager()->set_listener_position( camera_->position() );
-	sound_manager()->set_listener_velocity( player_->velocity() );
-	sound_manager()->set_listener_orientation( camera_->front(), camera_->up() );
-	sound_manager()->commit();
-	*/
+	get_sound_manager()->set_listener_position( camera_->position() );
+	// sound_manager()->set_listener_velocity( player_->velocity() );
+	get_sound_manager()->set_listener_orientation( camera_->front(), camera_->up() );
+	get_sound_manager()->commit();
 }
 
 void GamePlayScene::update_main()
@@ -743,6 +746,7 @@ void GamePlayScene::render()
 #if 1
 		// render_object_for_shadow()
 		// if ( rand() % 4 == 0 )
+		if ( shadow_map_ )
 		{
 			/*
 			static float a = 0.f;
@@ -775,6 +779,11 @@ void GamePlayScene::render()
 
 					for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 					{
+						if ( ( *i )->is_dead() )
+						{
+							continue;
+						}
+						
 						render( *i );
 					}
 
@@ -862,6 +871,7 @@ void GamePlayScene::render()
 		}
 
 		// render_object();
+		if ( shadow_map_ )
 		{
 			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|main_with_shadow" );
 
@@ -878,6 +888,37 @@ void GamePlayScene::render()
 
 				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 				{
+					if ( ( *i )->is_dead() )
+					{
+						continue;
+					}
+
+					render( *i );
+				}
+
+				render( goal_.get() );
+			}
+		}
+		else
+		{
+			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|main" );
+
+			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+			{
+				( *i )->apply();
+				
+				{
+					get_game_main()->get_game_constant_buffer()->render();
+					get_game_main()->get_frame_constant_buffer()->render();
+				}
+
+				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+				{
+					if ( ( *i )->is_dead() )
+					{
+						continue;
+					}
+
 					render( *i );
 				}
 
@@ -903,6 +944,11 @@ void GamePlayScene::render()
 
 				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 				{
+					if ( ( *i )->is_dead() )
+					{
+						continue;
+					}
+
 					render_line( *i );
 				}
 

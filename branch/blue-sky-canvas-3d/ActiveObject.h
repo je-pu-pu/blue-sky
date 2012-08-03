@@ -25,6 +25,9 @@ class GridCell;
 
 class DrawingModel;
 
+class Player;
+class Balloon;
+
 /**
  * 行動するオブジェクト
  *
@@ -53,6 +56,7 @@ private:
 	float_t				direction_degree_;	///< 方向 ( Y Axis Degree )
 
 	Vector3				start_location_;	///< スタート時の位置
+	Vector3				start_rotation_;	///< スタート時の回転
 
 	Vector3				front_;				///< 前
 	Vector3				right_;				///< 右
@@ -85,9 +89,18 @@ public:
 	void update_rigid_body_velocity();
 	virtual void update_transform();
 	
-	virtual float get_collision_width() const = 0;
-	virtual float get_collision_height() const = 0;
-	virtual float get_collision_depth() const = 0;
+	virtual bool is_hard() const { return true; }
+
+	virtual float_t get_collision_width() const = 0;
+	virtual float_t get_collision_height() const = 0;
+	virtual float_t get_collision_depth() const = 0;
+	
+	virtual float_t get_height_offset() const { return get_collision_height() * 0.5f; }
+
+	virtual void on_collide_with( ActiveObject* ) = 0;
+
+	virtual void on_collide_with( Player* ) { }
+	virtual void on_collide_with( Balloon* ) { }
 
 	void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; }
 	const DrawingModel* get_drawing_model() const { return drawing_model_; }
@@ -98,10 +111,10 @@ public:
 	inline void set_rigid_body( RigidBody* rigid_body ) { rigid_body_ = rigid_body; }
 
 	void set_start_location( float_t, float_t, float_t );
+	void set_start_rotation( float_t, float_t, float_t );
 
 	void set_location( const Vector3& );
 	void set_location( float_t, float_t, float_t );
-	void set_rotation( float_t, float_t, float_t );
 
 	Transform& get_transform();
 	const Transform& get_transform() const;

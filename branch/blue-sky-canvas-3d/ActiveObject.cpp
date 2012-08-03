@@ -19,6 +19,7 @@ ActiveObject::ActiveObject()
 	, direction_degree_( 0 )
 
 	, start_location_( 0, 0, 0 )
+	, start_rotation_( 0, 0, 0 )
 
 	, front_( 0, 0, 1 )
 	, right_( 1, 0, 0 )
@@ -38,7 +39,9 @@ void ActiveObject::restart()
 	
 	if ( get_rigid_body() && transform_ )
 	{
-		get_transform().setOrigin( start_location_ + Vector3( 0, get_collision_height() / 2.f, 0 ) );
+		get_transform().setOrigin( start_location_ + Vector3( 0, get_height_offset(), 0 ) );
+		get_transform().setRotation( Quaternion( start_rotation_.x(), start_rotation_.y(), start_rotation_.z() ) );
+
 		get_rigid_body()->getMotionState()->setWorldTransform( get_transform() );
 		
 		get_rigid_body()->setWorldTransform( get_transform() );
@@ -79,16 +82,27 @@ void ActiveObject::update_transform()
 		rigid_body_->getMotionState()->getWorldTransform( * transform_ );
 		Transform offset;
 		offset.setIdentity();
-		offset.setOrigin( Vector3( 0, -get_collision_height() / 2.f, 0 ) );
+		offset.setOrigin( Vector3( 0, -get_height_offset(), 0 ) );
 
 		*transform_ = *transform_ * offset;
 	}
+}
+
+void ActiveObject::on_collide_with( ActiveObject* o )
+{
+	o->on_collide_with( this );
 }
 
 void ActiveObject::set_start_location( float_t x, float_t y, float_t z )
 {
 	start_location_.setValue( x, y, z );
 	get_transform().getOrigin() = start_location_;
+}
+
+void ActiveObject::set_start_rotation( float_t x, float_t y, float_t z )
+{
+	start_rotation_.setValue( math::degree_to_radian( x ), math::degree_to_radian( y ), math::degree_to_radian( z ) );
+	get_transform().setRotation( Quaternion( start_rotation_.x(), start_rotation_.y(), start_rotation_.z() ) );
 }
 
 void ActiveObject::set_location( const Vector3& v )
@@ -106,15 +120,7 @@ void ActiveObject::set_location( const Vector3& v )
 
 void ActiveObject::set_location( float_t x, float_t y, float_t z )
 {
-	get_transform().getOrigin().setValue( x, y, z );
-}
-
-void ActiveObject::set_rotation( float_t x, float_t y, float_t z )
-{
-	Quaternion q;
-	q.setEuler( math::degree_to_radian( x ), math::degree_to_radian( y ), math::degree_to_radian( z ) );
-
-	get_transform().setRotation( q );
+	set_location( Vector3( x, y, z ) );
 }
 
 ActiveObject::Transform& ActiveObject::get_transform()
@@ -156,6 +162,13 @@ ActiveObject::DynamicsWorld* ActiveObject::get_dynamics_world() const
 void ActiveObject::kill()
 {
 	is_dead_ = true;
+
+	/*
+	if ( get_rigid_body() )
+	{
+		set_location( 0.f, -100.f, 0.f );
+	}
+	*/
 }
 
 float ActiveObject::get_elapsed_time() const

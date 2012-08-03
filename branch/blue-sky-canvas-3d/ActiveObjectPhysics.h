@@ -21,10 +21,11 @@ public:
 	ActiveObjectPhysics();
 	~ActiveObjectPhysics();
 
-	RigidBody* add_active_object( const ActiveObject* );
-	RigidBody* add_active_object_as_cylinder( const ActiveObject* );
+	RigidBody* add_active_object( ActiveObject* );
+	RigidBody* add_active_object_as_cylinder( ActiveObject* );
 
 	bool is_collision( ActiveObject*, ActiveObject* );
+	void check_collision_with( ActiveObject* );
 
 }; // class ActiveObjectPhysics
 

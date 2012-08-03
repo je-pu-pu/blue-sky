@@ -17,6 +17,7 @@ class Robot : public ActiveObject
 public:
 
 private:
+	void on_collide_with( ActiveObject* o ) { o->on_collide_with( this ); }
 
 protected:
 

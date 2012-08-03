@@ -98,11 +98,11 @@ GameMain::GameMain()
 	drawing_model_manager_ = new DrawingModelManager();
 
 	// Scene
-	// scene_ = new TitleScene( this );
-	// scene_->set_name( "title" );
+	scene_ = new TitleScene( this );
+	scene_->set_name( "title" );
 
-	scene_ = new StoryTextScene( this, "media/stage/8.outro", "title" );
-	scene_->set_name( "stage_outro" );
+	// scene_ = new StoryTextScene( this, "media/stage/8.outro", "title" );
+	// scene_->set_name( "stage_outro" );
 
 	// MainLoop
 	main_loop_ = new MainLoop( 60 );

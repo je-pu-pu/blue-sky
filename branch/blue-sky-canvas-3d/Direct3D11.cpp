@@ -34,6 +34,7 @@
 // #pragma comment( lib, "d3dx10.lib" )
 #endif
 
+// #define 
 #define ENABLE_DIRECT_WRITE
 
 Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* adapter_format, const char* depth_stencil_format, int multi_sample_type, int multi_sample_quality )
@@ -105,7 +106,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	swap_chain_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 #ifdef _DEBUG
-    UINT d3d11_create_device_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG;
+    UINT d3d11_create_device_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT; // | D3D11_CREATE_DEVICE_DEBUG;
 #else
     UINT d3d11_create_device_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #endif
@@ -131,7 +132,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	// Direct3D 10.1
 	{
 #ifdef _DEBUG
-		UINT d3d10_create_device_flags = D3D10_CREATE_DEVICE_BGRA_SUPPORT | D3D10_CREATE_DEVICE_DEBUG | D3D10_CREATE_DEVICE_STRICT_VALIDATION;
+		UINT d3d10_create_device_flags = D3D10_CREATE_DEVICE_BGRA_SUPPORT; // | D3D10_CREATE_DEVICE_DEBUG | D3D10_CREATE_DEVICE_STRICT_VALIDATION;
 #else
 		UINT d3d10_create_device_flags = D3D10_CREATE_DEVICE_BGRA_SUPPORT;
 #endif

@@ -18,6 +18,8 @@ private:
 	float_t		collision_height_;
 	float_t		collision_depth_;
 
+	void on_collide_with( ActiveObject* o ) { }
+
 protected:
 
 public:

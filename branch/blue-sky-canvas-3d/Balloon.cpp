@@ -26,6 +26,9 @@ void Balloon::restart()
 	ActiveObject::restart();
 
 	flicker_ = 0.f;
+
+	get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
+	get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
 }
 
 } // namespace blue_sky

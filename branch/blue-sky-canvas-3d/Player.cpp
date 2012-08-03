@@ -1,5 +1,7 @@
 #include "Player.h"
 
+#include "Balloon.h"
+
 #include "DrawingModel.h"
 #include "DrawingLine.h"
 
@@ -17,9 +19,11 @@ Player::Player()
 	: is_on_footing_( false )
 	, is_jumping_( false )
 	, is_jumpable_( false )
+	, action_mode_( ACTION_MODE_NONE )
 	, uncontrollable_timer_( 0.f )
 	, eye_height_( 1.5f )
 	, eye_depth_( 0.f )
+	, has_medal_( false )
 {
 	
 }
@@ -41,6 +45,11 @@ void Player::restart()
 
 	eye_height_ = 1.5f;
 	eye_depth_ = 0.f;
+
+	action_mode_ = ACTION_MODE_NONE;
+	has_medal_ = false;
+
+	set_last_footing_height_to_null();
 }
 
 /**
@@ -56,7 +65,30 @@ void Player::update()
 	update_jumpable();
 	update_jumping();
 
-	if ( is_falling() || is_jumping() )
+	if ( action_mode_ == ACTION_MODE_BALLOON )
+	{
+		get_rigid_body()->setLinearVelocity(
+			Vector3(
+				get_rigid_body()->getLinearVelocity().x(),
+				math::chase( get_rigid_body()->getLinearVelocity().y(), 2.f, 0.5f ),
+				get_rigid_body()->getLinearVelocity().z()
+			)
+		);
+
+		if ( get_location().y() - action_base_position_.y() >= get_balloon_action_length() )
+		{
+			play_sound( "balloon-burst" );
+			set_action_mode( ACTION_MODE_NONE );
+			is_jumping_ = true;
+			is_action_pre_finish_ = false;
+		}
+		else if ( get_location().y() - action_base_position_.y() >= get_balloon_action_length() * 0.5f )
+		{
+			is_action_pre_finish_ = true;
+		}
+	}
+
+	if ( ! is_on_footing() )
 	{
 		eye_depth_ *= 0.95f;
 		eye_depth_ = math::clamp( eye_depth_, 0.f, 1.f );
@@ -71,9 +103,16 @@ void Player::update()
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.f, 0.f, 0.f, 0.f ) );
 	}
 
-	if ( is_on_footing() && is_falling_to_dead() )
+	if ( is_on_footing() )
 	{
-		kill();
+		if ( is_falling_to_dead() )
+		{
+			kill();
+		}
+		else
+		{
+			set_last_footing_height_to_current_height();
+		}
 	}
 
 	if ( is_dead() )
@@ -145,9 +184,19 @@ public:
 
 	virtual	btScalar addSingleResult( btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
 	{
-		if (rayResult.m_collisionObject == rigid_body_ )
+		if ( rayResult.m_collisionObject == rigid_body_ )
 		{
 			return 1.0;
+		}
+
+		if ( rayResult.m_collisionObject->getUserPointer() )
+		{
+			ActiveObject* a = reinterpret_cast< ActiveObject* >( rayResult.m_collisionObject->getUserPointer() );
+			
+			if ( ! a->is_hard() )
+			{
+				return 1.0;
+			}
 		}
 
 		return ClosestRayResultCallback::addSingleResult( rayResult, normalInWorldSpace );
@@ -309,7 +358,7 @@ void Player::kill()
 
 void Player::set_eye_depth( float d )
 {
-	if ( is_falling() || is_jumping() )
+	if ( ! is_on_footing() )
 	{
 		return;
 	}
@@ -330,6 +379,55 @@ bool Player::is_falling() const
 bool Player::is_falling_to_dead() const
 {
 	return get_rigid_body()->getLinearVelocity().y() < -15.f;
+}
+
+void Player::on_collide_with( Balloon* balloon )
+{
+	balloon->kill();
+
+	is_jumping_ = false;
+
+	/*
+	is_falling_ = false;
+	is_action_pre_finish_ = false;
+	*/
+
+	set_action_mode( ACTION_MODE_BALLOON );
+	set_action_base_position_to_current_position();
+
+	set_last_footing_height_to_current_height();
+
+	play_sound( "balloon-get" );
+}
+
+void Player::set_action_mode( ActionMode action_mode )
+{
+	if ( action_mode == action_mode_ )
+	{
+		return;
+	}
+
+	/*
+	// Ž©“®ŽP‘I‘ð
+	if ( action_mode_ != ACTION_MODE_UMBRELLA && action_mode_ != ACTION_MODE_NONE )
+	{
+		if ( action_mode == ACTION_MODE_NONE && item_count_[ ITEM_TYPE_UMBRELLA ] && floor_cell() && is_if_fall_to_dead( floor_cell()->height() ) )
+		{
+			action_mode = ACTION_MODE_UMBRELLA;
+		}
+	}
+	*/
+
+	action_mode_ = action_mode;
+
+	if ( action_mode_ == ACTION_MODE_NONE )
+	{
+		get_rigid_body()->setGravity( Vector3( 0, -9.8, 0 ) );
+	}
+	else
+	{
+		get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
+	}
 }
 
 } // namespace blue_sky

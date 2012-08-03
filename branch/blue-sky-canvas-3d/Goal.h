@@ -16,10 +16,11 @@ public:
 
 
 private:
-
 	float get_collision_width() const { return 4.f; }
 	float get_collision_height() const { return 2.f; }
 	float get_collision_depth() const { return 4.f; }
+
+	void on_collide_with( ActiveObject* o ) { }
 
 public:
 	Goal();

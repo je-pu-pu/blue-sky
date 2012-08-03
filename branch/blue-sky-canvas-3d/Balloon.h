@@ -16,13 +16,15 @@ public:
 	float flicker_;
 
 private:
-	void on_collision_x( const GridCell& ) { }
-	void on_collision_y( const GridCell& ) { }
-	void on_collision_z( const GridCell& ) { }
+	float_t get_collision_width() const { return 1.5f; }
+	float_t get_collision_height() const { return 2.f; }
+	float_t get_collision_depth() const { return 1.5f; }
+	
+	float_t get_height_offset() const { return 0.f; }
 
-	float get_collision_width() const { return 1.5f; }
-	float get_collision_height() const { return 1.5f; }
-	float get_collision_depth() const { return 1.5f; }
+	void on_collide_with( ActiveObject* o ) { o->on_collide_with( this ); }
+
+	bool is_hard() const { return false; }
 
 public:
 	Balloon();

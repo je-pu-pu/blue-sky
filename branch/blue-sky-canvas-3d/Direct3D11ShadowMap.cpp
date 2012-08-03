@@ -17,6 +17,7 @@ static const float light_y = 500.f;
 Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_levels, size_t size )
 	: direct_3d_( direct_3d )
 	, constant_buffer_( new ConstantBuffer( direct_3d, sizeof( ConstantBufferData ), 3 ) ) /// !!!
+	, enabled_( true )
 	, cascade_levels_( cascade_levels )
 	, depth_stencil_texture_( 0 )
 	, depth_stencil_view_( 0 )

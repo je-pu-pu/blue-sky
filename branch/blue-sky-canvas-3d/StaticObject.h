@@ -18,19 +18,21 @@ private:
 	float_t		collision_height_;
 	float_t		collision_depth_;
 
+	float get_collision_width() const { return collision_width_; }
+	float get_collision_height() const { return collision_height_; }
+	float get_collision_depth() const { return collision_depth_; }
+
+	void on_collide_with( ActiveObject* o ) { }
+
 protected:
 
 public:
 	StaticObject( float_t = 0, float_t = 0, float_t = 0 );
-	virtual ~StaticObject();
+	~StaticObject();
 
 	/// çXêV
-	virtual void update() { }
-	virtual void update_transform();
-	
-	virtual float get_collision_width() const { return collision_width_; }
-	virtual float get_collision_height() const { return collision_height_; }
-	virtual float get_collision_depth() const { return collision_depth_; }
+	void update() { }
+	void update_transform();
 
 }; // class StaticObject
 

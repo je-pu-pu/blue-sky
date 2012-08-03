@@ -568,7 +568,7 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 	{
 		const float4 shadow_color = float4( 0.5f, 0.5f, 0.75f, 1.f );
 
-		const float a = 1.f;
+		const float a = 0.75f;
 
 		/*
 		float a = abs( shadow_tex_coord.x - 0.5f ) + abs( shadow_tex_coord.y - 0.5f ) / 0.5f;

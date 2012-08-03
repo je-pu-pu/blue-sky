@@ -15,16 +15,43 @@ namespace blue_sky
 class Player : public ActiveObject
 {
 public:
+	enum ActionMode
+	{
+		ACTION_MODE_NONE = 0,
+		ACTION_MODE_BALLOON,
+		ACTION_MODE_ROCKET,
+		ACTION_MODE_UMBRELLA,
+		ACTION_MODE_SCOPE,
+	};
 
 private:
-	bool is_on_footing_;		///< 現在足場上フラグ
-	bool is_jumping_;			///< 現在ジャンプ中フラグ
-	bool is_jumpable_;			///< 現在ジャンプ可能フラグ
+	bool		is_on_footing_;			///< 現在足場上フラグ
+	bool		is_jumping_;			///< 現在ジャンプ中フラグ
+	bool		is_jumpable_;			///< 現在ジャンプ可能フラグ
+	
+	ActionMode	action_mode_;			///< 現在のアクションのモード
+	Vector3		action_base_position_;	///< 現在のアクションの基底位置
+	bool		is_action_pre_finish_;	///< 現在のアクションがもうすぐ終わるフラグ
 
-	float_t uncontrollable_timer_;	///< 制御不能タイマー
+	float_t		uncontrollable_timer_;	///< 制御不能タイマー
 
-	float_t eye_height_;		///< 目の高さ
-	float_t eye_depth_;			///< 目の奥行きオフセット ( 身を乗り出した時に増える ) ( 0.f .. 1.f )
+	float_t		eye_height_;			///< 目の高さ
+	float_t		eye_depth_;				///< 目の奥行きオフセット ( 身を乗り出した時に増える ) ( 0.f .. 1.f )
+
+	bool		has_medal_;				///< メダル保持フラグ
+
+	float		last_footing_height_;	///< 前回の足場の高さ ( バルーン含む )
+
+	bool is_last_footing_height_null() const { return last_footing_height_ >= 300.f; }
+	
+	void set_last_footing_height_to_null() { last_footing_height_ = 300.f; }
+	void set_last_footing_height_to_current_height() { last_footing_height_ = get_location().y(); }
+	
+	float get_last_footing_height() const { return last_footing_height_; }
+
+	void set_action_base_position_to_current_position() { action_base_position_ = get_location(); }
+
+	float get_balloon_action_length() const { return 10.f; }
 
 protected:
 	const Input* get_input() const;
@@ -43,6 +70,9 @@ protected:
 	bool is_jumping() const { return is_jumping_; }
 
 	bool is_uncontrollable() const { return uncontrollable_timer_ > 0.f; }
+
+	void on_collide_with( ActiveObject* o ) { o->on_collide_with( this ); }
+	void on_collide_with( Balloon* );
 
 public:
 	Player();
@@ -83,7 +113,12 @@ public:
 	bool is_falling() const;
 	bool is_falling_to_dead() const;
 
-	bool has_medal() const { return false; }
+	bool has_medal() const { return has_medal_; }
+
+	ActionMode get_action_mode() const { return action_mode_; }
+	void set_action_mode( ActionMode );
+
+
 
 }; // class Player
 

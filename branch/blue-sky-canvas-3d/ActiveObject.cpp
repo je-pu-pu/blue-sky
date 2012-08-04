@@ -33,15 +33,30 @@ ActiveObject::~ActiveObject()
 	delete transform_;
 }
 
+void ActiveObject::set_mass( float_t mass )
+{
+	if ( ! get_rigid_body() )
+	{
+		return;
+	}
+
+	btVector3 local_inertia( 0, 0, 0 );
+	get_rigid_body()->getCollisionShape()->calculateLocalInertia( mass, local_inertia );
+	get_rigid_body()->setMassProps( mass, local_inertia );
+}
+
 void ActiveObject::restart()
 {
 	is_dead_ = false;
 	
 	if ( get_rigid_body() && transform_ )
 	{
+		set_direction_degree( 0 );
+
 		get_transform().setOrigin( start_location_ + Vector3( 0, get_height_offset(), 0 ) );
 		get_transform().setRotation( Quaternion( start_rotation_.x(), start_rotation_.y(), start_rotation_.z() ) );
 
+		get_rigid_body()->activate( true );
 		get_rigid_body()->getMotionState()->setWorldTransform( get_transform() );
 		
 		get_rigid_body()->setWorldTransform( get_transform() );

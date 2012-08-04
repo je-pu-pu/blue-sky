@@ -27,6 +27,7 @@ class DrawingModel;
 
 class Player;
 class Balloon;
+class Robot;
 
 /**
  * 行動するオブジェクト
@@ -101,6 +102,9 @@ public:
 
 	virtual void on_collide_with( Player* ) { }
 	virtual void on_collide_with( Balloon* ) { }
+	virtual void on_collide_with( Robot* ) { }
+
+	void set_mass( float_t );
 
 	void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; }
 	const DrawingModel* get_drawing_model() const { return drawing_model_; }

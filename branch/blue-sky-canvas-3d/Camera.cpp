@@ -25,6 +25,12 @@ Camera::~Camera()
 	
 }
 
+void Camera::restart()
+{
+	rotate_degree_target_ = Vector3( 0, 0, 0 );
+	rotate_degree_ = Vector3( 0, 0, 0 );
+}
+
 void Camera::update()
 {
 	while ( rotate_degree_target().y() - rotate_degree().y() > +180.f ) rotate_degree().y() += 360.f;

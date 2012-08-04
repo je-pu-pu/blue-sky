@@ -193,6 +193,8 @@ void GamePlayScene::restart()
 	player_->restart();
 	goal_->restart();
 
+	camera_->restart();
+
 	for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 	{
 		ActiveObject* active_object = *i;
@@ -418,24 +420,38 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			DrawingModel* drawing_model = get_drawing_model_manager()->load( object_name.c_str() );
 
 			std::map< string_t, ActiveObject::Vector3 > size_map;
-
 			size_map[ "soda-can-1"   ] = ActiveObject::Vector3(  0.07f, 0.12f, 0.07f );
-			size_map[ "wall-1"       ] = ActiveObject::Vector3(  4.f,   1.75f, 0.1f  );
-			size_map[ "wall-2"       ] = ActiveObject::Vector3(  8.f,   2.5f,  0.1f  );
+			size_map[ "wall-1"       ] = ActiveObject::Vector3(  4.f,   1.75f, 0.2f  );
+			size_map[ "wall-2"       ] = ActiveObject::Vector3(  8.f,   2.5f,  0.2f  );
 			size_map[ "outdoor-unit" ] = ActiveObject::Vector3(  0.7f,  0.6f,  0.24f );
 			size_map[ "building-20"  ] = ActiveObject::Vector3( 10.f,  20.f,  10.f   );
 			size_map[ "building-200" ] = ActiveObject::Vector3( 80.f, 200.f,  60.f   );
-			size_map[ "balloon"      ] = ActiveObject::Vector3(  1.5f,  2.f,   1.5f  );
+			size_map[ "board-1"      ] = ActiveObject::Vector3(  4.f,   0.2f,  0.8f  );
 
-			auto i = size_map.find( object_name );
+			std::map< string_t, float_t > mass_map;
+			mass_map[ "soda-can-1"   ] = 0.1f;
+			mass_map[ "board-1"      ] = 20.f;
 
-			float w = 0.f, h = 0.f, d = 0.f;
-
-			if ( i != size_map.end() )
+			float w = 0.f, h = 0.f, d = 0.f, mass = 0.f;
+			
 			{
-				w = i->second.x();
-				h = i->second.y();
-				d = i->second.z();
+				auto i = size_map.find( object_name );
+
+				if ( i != size_map.end() )
+				{
+					w = i->second.x();
+					h = i->second.y();
+					d = i->second.z();
+				}
+			}
+
+			{
+				auto i = mass_map.find( object_name );
+
+				if ( i != mass_map.end() )
+				{
+					mass = i->second;
+				}
 			}
 
 			ActiveObject* object = 0;
@@ -462,6 +478,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 				object->set_rigid_body( get_physics()->add_active_object( object ) );
 			}
 
+			object->set_mass( mass );
 			get_active_object_manager()->add_active_object( object );
 		}
 		/*
@@ -608,7 +625,7 @@ void GamePlayScene::update_main()
 		}
 		if ( get_input()->push( Input::Y ) )
 		{
-			player_->damage( Player::Vector3( 0, 10, -30.f ) );
+			player_->damage( Player::Vector3( 0, 10, 0.f ) );
 		}
 		if ( get_input()->push( Input::A ) )
 		{

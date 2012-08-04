@@ -51,6 +51,7 @@ private:
 
 	void set_action_base_position_to_current_position() { action_base_position_ = get_location(); }
 
+	float get_height_to_die() const { return 15.f; }
 	float get_balloon_action_length() const { return 10.f; }
 
 protected:
@@ -63,7 +64,7 @@ protected:
 	void update_jumpable();
 	void update_jumping();
 
-	bool check_on_footing( float_t, float_t ) const;
+	bool check_on_footing( const Vector3&, float_t ) const;
 
 	bool is_on_footing() const { return is_on_footing_; }
 	bool is_jumpable() const { return is_jumpable_; }
@@ -73,6 +74,7 @@ protected:
 
 	void on_collide_with( ActiveObject* o ) { o->on_collide_with( this ); }
 	void on_collide_with( Balloon* );
+	void on_collide_with( Robot* );
 
 public:
 	Player();
@@ -111,7 +113,7 @@ public:
 
 	//
 	bool is_falling() const;
-	bool is_falling_to_dead() const;
+	bool is_falling_to_die() const;
 
 	bool has_medal() const { return has_medal_; }
 

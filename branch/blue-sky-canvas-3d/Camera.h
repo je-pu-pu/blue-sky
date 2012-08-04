@@ -45,6 +45,8 @@ public:
 	Camera();
 	~Camera();
 
+	void restart();
+
 	Vector3& position() { return position_; }
 	const Vector3& look_at() { return look_at_; }
 	const Vector3& up() const { return up_; }

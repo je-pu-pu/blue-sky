@@ -96,9 +96,12 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		get_sound_manager()->load( "clamber" );
 		get_sound_manager()->load( "collision-wall" );
 		get_sound_manager()->load( "jump" );
-		get_sound_manager()->load( "super-jump" );
+		get_sound_manager()->load( "short-breath-jump" );
 		get_sound_manager()->load( "land" );
 		get_sound_manager()->load( "short-breath" );
+
+		get_sound_manager()->load( "fall" );
+		get_sound_manager()->load( "damage-1" );
 		get_sound_manager()->load( "dead" );
 
 		get_sound_manager()->load( "balloon-get" );
@@ -740,6 +743,8 @@ void GamePlayScene::render()
 		ss << L"‚Ü‚Ÿ‚ª‚­‚ê‚½ŒŽ" << std::endl;
 		ss << L"FPS : " << get_main_loop()->get_last_fps() << std::endl;
 		ss << L"POS : " << player_->get_transform().getOrigin().x() << ", " << player_->get_transform().getOrigin().y() << ", " << player_->get_transform().getOrigin().z() << std::endl;
+		ss << L"step speed : " << player_->get_step_speed() << std::endl;
+		ss << L"last footing height : " << player_->get_last_footing_height() << std::endl;
 		ss << L"DX : " << player_->get_rigid_body()->getLinearVelocity().x() << std::endl;
 		ss << L"DY : " << player_->get_rigid_body()->getLinearVelocity().y() << std::endl;
 		ss << L"DZ : " << player_->get_rigid_body()->getLinearVelocity().z() << std::endl;

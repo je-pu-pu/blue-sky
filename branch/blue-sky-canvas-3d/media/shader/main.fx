@@ -524,8 +524,8 @@ PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
 	
 		output.ShadowTexCoord[ n ].x = ( output.ShadowTexCoord[ n ].x + 1.f ) / 2.f;
 		output.ShadowTexCoord[ n ].y = ( -output.ShadowTexCoord[ n ].y + 1.f ) / 2.f;
-		// output.ShadowTexCoord[ n ].z -= 0.0005f;
-		output.ShadowTexCoord[ n ].z -= 0.000005f;
+		output.ShadowTexCoord[ n ].z -= 0.00001f;
+		// output.ShadowTexCoord[ n ].z -= 0.000005f;
 	}
 
 	output.Depth = mul( mul( input.Position, World ), View ).z;

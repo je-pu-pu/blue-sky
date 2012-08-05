@@ -64,7 +64,7 @@ private:
 
 
 protected:
-	void limit_velocity();
+	virtual void limit_velocity();
 
 	float get_max_speed() const { return 4.f; }
 	
@@ -86,8 +86,6 @@ public:
 
 	/// XV
 	virtual void update() = 0;
-
-	void update_rigid_body_velocity();
 	virtual void update_transform();
 	
 	virtual bool is_hard() const { return true; }

@@ -82,14 +82,6 @@ void ActiveObject::limit_velocity()
 	get_rigid_body()->setLinearVelocity( v );
 }
 
-void ActiveObject::update_rigid_body_velocity()
-{
-	limit_velocity();
-
-	get_rigid_body()->setActivationState( true );
-	// get_rigid_body()->setLinearVelocity( get_velocity() );
-}
-
 void ActiveObject::update_transform()
 {
 	if ( rigid_body_ )

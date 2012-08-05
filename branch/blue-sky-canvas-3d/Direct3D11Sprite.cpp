@@ -152,6 +152,7 @@ void Direct3D11Sprite::draw( const Rect* dst, Texture* texture, const Rect* src,
 		{
 			l = +( ( ( static_cast< FLOAT >( surface_desc.Width  ) - src_width  ) / 2               ) / surface_desc.Width  * 2.f - 1.f );
 			r = +( ( ( static_cast< FLOAT >( surface_desc.Width  ) - src_width  ) / 2 + src_width   ) / surface_desc.Width  * 2.f - 1.f );
+
 			t = -( ( ( static_cast< FLOAT >( surface_desc.Height ) - src_height ) / 2               ) / surface_desc.Height * 2.f - 1.f );
 			b = -( ( ( static_cast< FLOAT >( surface_desc.Height ) - src_height ) / 2 + src_height  ) / surface_desc.Height * 2.f - 1.f );
 		}

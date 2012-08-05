@@ -19,6 +19,9 @@ Player::Player()
 	: is_on_footing_( false )
 	, is_jumping_( false )
 	, is_jumpable_( false )
+	, is_falling_to_die_( false )
+	, step_count_( 0 )
+	, step_speed_( 0.25f )
 	, action_mode_( ACTION_MODE_NONE )
 	, uncontrollable_timer_( 0.f )
 	, eye_height_( 1.5f )
@@ -42,6 +45,10 @@ void Player::restart()
 	is_on_footing_ = false;
 	is_jumping_ = false;
 	is_jumpable_ = false;
+	is_falling_to_die_ = false;
+
+	step_count_ = 0;
+	step_speed_ = 0.25f;
 
 	eye_height_ = 1.5f;
 	eye_depth_ = 0.f;
@@ -58,12 +65,12 @@ void Player::restart()
  */
 void Player::update()
 {
-	stop();
 	limit_velocity();
 
 	update_on_footing();
 	update_jumpable();
 	update_jumping();
+	update_falling_to_die();
 
 	if ( action_mode_ == ACTION_MODE_BALLOON )
 	{
@@ -97,6 +104,11 @@ void Player::update()
 	if ( is_falling_to_die() )
 	{
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 1.f, 0.f, 0.f, 0.f ) );
+
+		if ( ! is_dead() && ! is_on_footing() && get_rigid_body()->getLinearVelocity().y() < -7.5f && get_action_mode() == ACTION_MODE_NONE )
+		{
+			play_sound( "fall", false, false );
+		}
 	}
 	else
 	{
@@ -111,8 +123,20 @@ void Player::update()
 		}
 		else
 		{
+			// 通常着地
+			if ( get_velocity().y() < -0.1f )
+			{
+				stop_sound( "fall" );
+				play_sound( "land", false, false );
+			}
+
 			set_last_footing_height_to_current_height();
 		}
+	}
+
+	if ( ! is_falling_to_die() )
+	{
+		stop_sound( "fall" );
 	}
 
 	if ( is_dead() )
@@ -122,6 +146,31 @@ void Player::update()
 	}
 
 	uncontrollable_timer_ = math::chase< float_t >( uncontrollable_timer_, 0.f, get_elapsed_time() );
+}
+
+void Player::limit_velocity()
+{
+	ActiveObject::limit_velocity();
+
+	if ( is_uncontrollable() )
+	{
+		return;
+	}
+
+	Vector3 v = get_rigid_body()->getLinearVelocity();
+
+	if ( is_jumping() )
+	{
+		v.setX( v.x() * 0.95f );
+		v.setZ( v.z() * 0.95f );
+	}
+	else
+	{
+		v.setX( v.x() * 0.9f );
+		v.setZ( v.z() * 0.9f );
+	}
+
+	get_rigid_body()->setLinearVelocity( v );
 }
 
 /**
@@ -148,13 +197,24 @@ void Player::update_on_footing()
 	const float_t z = get_rigid_body()->getCenterOfMassPosition().z();
 	const float_t ray_length = get_collision_height() * 0.5f + 0.01f;
 
-	// 中心 + 四隅の設置を調べる
+	const float_t margin = 0.05f;
+	const Vector3 front = get_front() * ( get_collision_depth() * 0.5f - margin );
+	const Vector3 right = get_right() * ( get_collision_width() * 0.5f - margin );
+	const Vector3 center = Vector3( x, y, z );
+
+	// 中心 + 四隅 + 四点 の設置を調べる
 	if (
-		check_on_footing( Vector3( x, y, z ), ray_length ) ||
-		check_on_footing( Vector3( x - get_collision_width() / 2.f, y, z - get_collision_depth() / 2.f ), ray_length ) ||
-		check_on_footing( Vector3( x + get_collision_width() / 2.f, y, z - get_collision_depth() / 2.f ), ray_length ) ||
-		check_on_footing( Vector3( x - get_collision_width() / 2.f, y, z + get_collision_depth() / 2.f ), ray_length ) ||
-		check_on_footing( Vector3( x + get_collision_width() / 2.f, y, z + get_collision_depth() / 2.f ), ray_length ) )
+		check_on_footing( center, ray_length ) ||
+
+		check_on_footing( center - right - front, ray_length ) ||
+		check_on_footing( center + right - front, ray_length ) ||
+		check_on_footing( center - right + front, ray_length ) ||
+		check_on_footing( center + right + front, ray_length ) ||
+		
+		check_on_footing( center - right, ray_length ) ||
+		check_on_footing( center + right, ray_length ) ||
+		check_on_footing( center - front, ray_length ) ||
+		check_on_footing( center + front, ray_length ) )
 	{
 		is_on_footing_ = true;
 	}
@@ -173,6 +233,92 @@ void Player::update_jumping()
 	if ( is_jumping_ && is_jumpable() )
 	{
 		is_jumping_ = false;
+	}
+}
+
+/**
+ * このまま落下すると死亡するかどうかの状態を更新する
+ *
+ */
+void Player::update_falling_to_die()
+{
+	const float_t x = get_rigid_body()->getCenterOfMassPosition().x();
+	const float_t y = get_last_footing_height() + get_collision_height() * 0.5f;
+	const float_t z = get_rigid_body()->getCenterOfMassPosition().z();
+	const float_t ray_length = get_collision_height() * 0.5f + get_height_to_die();
+
+	const float_t margin = 0.05f;
+	const Vector3 front = get_front() * ( get_collision_depth() * 0.5f - margin );
+	const Vector3 right = get_right() * ( get_collision_width() * 0.5f - margin );
+	const Vector3 center = Vector3( x, y, z );
+
+	// 中心 + 四隅 + 四点 の設置を調べる
+	if (
+		check_on_footing( center, ray_length ) ||
+
+		check_on_footing( center - right - front, ray_length ) ||
+		check_on_footing( center + right - front, ray_length ) ||
+		check_on_footing( center - right + front, ray_length ) ||
+		check_on_footing( center + right + front, ray_length ) ||
+		
+		check_on_footing( center - right, ray_length ) ||
+		check_on_footing( center + right, ray_length ) ||
+		check_on_footing( center - front, ray_length ) ||
+		check_on_footing( center + front, ray_length ) )
+	{
+		is_falling_to_die_ = false;
+
+		return;
+	}
+
+	is_falling_to_die_ = true;
+}
+
+/**
+ * 移動速度を更新する
+ *
+ */
+void Player::update_step_speed()
+{
+	if ( action_mode_ == ACTION_MODE_BALLOON )
+	{
+		step_speed_ = math::chase( step_speed_, get_max_walk_step_speed(), 0.01f );
+	}
+	else if ( step_count_ <= 0 )
+	{
+		// stop
+		step_speed_ *= 0.5f;
+	}
+	else if ( step_count_ <= 150 )
+	{
+		// slow walk
+		step_speed_ = math::chase( step_speed_, get_max_walk_step_speed(), 0.01f );
+	}
+	else
+	{
+		// run
+		step_speed_ = math::chase( step_speed_, get_max_run_step_speed(), 0.001f );
+	}
+
+	if ( ! is_on_footing() )
+	{
+		stop_sound( "walk" );
+		stop_sound( "run" );
+	}
+	else if ( is_running() )
+	{
+		stop_sound( "walk" );
+		play_sound( "run", true, false );
+	}
+	else if ( is_walking() )
+	{
+		stop_sound( "run" );
+		play_sound( "walk", true, false );
+	}
+	else
+	{
+		stop_sound( "walk" );
+		stop_sound( "run" );
 	}
 }
 
@@ -227,6 +373,9 @@ void Player::step( float_t s )
 		return;
 	}
 
+	step_count_++;
+	update_step_speed();
+
 	get_rigid_body()->setActivationState( true );
 	get_rigid_body()->setLinearVelocity(
 		Vector3(
@@ -236,7 +385,12 @@ void Player::step( float_t s )
 		)
 	);
 
-	// eye_depth_ *= 0.95f;
+	/*
+	if ( is_jumpable() )
+	{
+		play_sound( "short-breath", true, false );
+	}
+	*/
 }
 
 void Player::side_step( float_t s )
@@ -279,6 +433,17 @@ void Player::jump()
 	);
 
 	is_jumping_ = true;
+
+	stop_sound( "short-breath" );
+
+	if ( is_running() )
+	{
+		play_sound( "short-breath-jump" );
+	}
+	else
+	{
+		play_sound( "jump" );
+	}
 }
 
 /**
@@ -312,25 +477,8 @@ void Player::add_direction_degree( float d )
 
 void Player::stop()
 {
-	if ( is_uncontrollable() )
-	{
-		return;
-	}
-
-	Vector3 v = get_rigid_body()->getLinearVelocity();
-
-	if ( is_jumping() )
-	{
-		v.setX( v.x() * 0.95f );
-		v.setZ( v.z() * 0.95f );
-	}
-	else
-	{
-		v.setX( v.x() * 0.9f );
-		v.setZ( v.z() * 0.9f );
-	}
-
-	get_rigid_body()->setLinearVelocity( v );
+	step_count_ = 0;
+	update_step_speed();
 }
 
 void Player::damage( const Vector3& to )
@@ -341,6 +489,8 @@ void Player::damage( const Vector3& to )
 	get_rigid_body()->setLinearVelocity( to );
 
 	is_jumping_ = true;
+
+	play_sound( "damage-1" );
 }
 
 void Player::kill()
@@ -352,6 +502,7 @@ void Player::kill()
 
 	ActiveObject::kill();
 
+	stop_sound( "fall" );
 	play_sound( "dead" );
 
 	get_rigid_body()->setActivationState( true );
@@ -378,38 +529,6 @@ void Player::add_eye_depth( float d )
 bool Player::is_falling() const
 {
 	return get_rigid_body()->getLinearVelocity().y() < -1.f;
-}
-
-/**
- * このまま落下すると死亡するかどうかを取得する
- *
- */
-bool Player::is_falling_to_die() const
-{
-	/*
-	if ( get_rigid_body()->getLinearVelocity().y() < -15.f )
-	{
-		return true;
-	}
-	*/
-
-	const float_t x = get_rigid_body()->getCenterOfMassPosition().x();
-	const float_t y = get_last_footing_height() + get_collision_height() * 0.5f;
-	const float_t z = get_rigid_body()->getCenterOfMassPosition().z();
-	const float_t ray_length = get_collision_height() * 0.5f + get_height_to_die();
-
-	// 中心 + 四隅の設置を調べる
-	if (
-		check_on_footing( Vector3( x, y, z ), ray_length ) ||
-		check_on_footing( Vector3( x - get_collision_width() / 2.f, y, z - get_collision_depth() / 2.f ), ray_length ) ||
-		check_on_footing( Vector3( x + get_collision_width() / 2.f, y, z - get_collision_depth() / 2.f ), ray_length ) ||
-		check_on_footing( Vector3( x - get_collision_width() / 2.f, y, z + get_collision_depth() / 2.f ), ray_length ) ||
-		check_on_footing( Vector3( x + get_collision_width() / 2.f, y, z + get_collision_depth() / 2.f ), ray_length ) )
-	{
-		return false;
-	}
-
-	return true;
 }
 
 void Player::on_collide_with( Balloon* balloon )
@@ -467,6 +586,8 @@ void Player::set_action_mode( ActionMode action_mode )
 	{
 		get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
 	}
+
+	stop_sound( "fall" );
 }
 
 } // namespace blue_sky

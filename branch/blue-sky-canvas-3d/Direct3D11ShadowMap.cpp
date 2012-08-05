@@ -79,12 +79,12 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_lev
 
 	light_position_ = XMVectorSet( 50.f, 100.f, -25.f, 0.f );
 
-	float length[ 4 ] = { 10.f, 20.f, 100.f, 9999.f };
+	float length[ 4 ] = { 15.f, 50.f, 300.f, 9999.f };
 
 	for ( int n = 0; n < 4; n++ )
 	{
 		projection_matrix_list_[ n ] = XMMatrixOrthographicLH( length[ n ], length[ n ], 50.f, 400.f );
-		constant_buffer_data_.view_depth_per_cascade_level[ n ] = length[ n ] * 0.25f;
+		constant_buffer_data_.view_depth_per_cascade_level[ n ] = length[ n ] * 0.3f;
 	}
 }
 

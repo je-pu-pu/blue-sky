@@ -28,7 +28,11 @@ private:
 	bool		is_on_footing_;			///< 現在足場上フラグ
 	bool		is_jumping_;			///< 現在ジャンプ中フラグ
 	bool		is_jumpable_;			///< 現在ジャンプ可能フラグ
+	bool		is_falling_to_die_;		///< 現在死亡へ向けて落下中フラグ
 	
+	int			step_count_;			///< 移動カウンタ
+	float		step_speed_;			///< 移動速度
+
 	ActionMode	action_mode_;			///< 現在のアクションのモード
 	Vector3		action_base_position_;	///< 現在のアクションの基底位置
 	bool		is_action_pre_finish_;	///< 現在のアクションがもうすぐ終わるフラグ
@@ -46,8 +50,6 @@ private:
 	
 	void set_last_footing_height_to_null() { last_footing_height_ = 300.f; }
 	void set_last_footing_height_to_current_height() { last_footing_height_ = get_location().y(); }
-	
-	float get_last_footing_height() const { return last_footing_height_; }
 
 	void set_action_base_position_to_current_position() { action_base_position_ = get_location(); }
 
@@ -57,12 +59,24 @@ private:
 protected:
 	const Input* get_input() const;
 
-	float_t get_step_speed() const { return 0.25f; }
+	float_t get_min_walk_step_speed() const { return 0.1f; }
+	float_t get_max_walk_step_speed() const { return 0.25f; }
+	float_t get_max_run_step_speed() const { return 0.5f; }
+
 	float_t get_side_step_speed() const { return 0.25f; }
+
+	bool is_walking() const { return get_step_speed() > get_min_walk_step_speed(); }
+	bool is_running() const { return get_step_speed() > get_max_walk_step_speed(); }
 
 	void update_on_footing();
 	void update_jumpable();
 	void update_jumping();
+	
+	void update_falling_to_die();
+
+	void update_step_speed();
+
+	void limit_velocity();
 
 	bool check_on_footing( const Vector3&, float_t ) const;
 
@@ -83,6 +97,10 @@ public:
 	float_t get_collision_width() const { return 0.5f; }
 	float_t get_collision_height() const { return 1.75f; }
 	float_t get_collision_depth() const { return 0.25f; }
+
+	float_t get_step_speed() const { return step_speed_; }
+
+	float_t get_last_footing_height() const { return last_footing_height_; }
 
 	void restart();
 
@@ -113,7 +131,7 @@ public:
 
 	//
 	bool is_falling() const;
-	bool is_falling_to_die() const;
+	bool is_falling_to_die() const { return is_falling_to_die_; }
 
 	bool has_medal() const { return has_medal_; }
 

@@ -27,6 +27,7 @@ Player::Player()
 	, eye_height_( 1.5f )
 	, eye_depth_( 0.f )
 	, has_medal_( false )
+	, balloon_( 0 )
 {
 	
 }
@@ -56,7 +57,10 @@ void Player::restart()
 	set_action_mode( ACTION_MODE_NONE );
 	has_medal_ = false;
 
+	balloon_ = 0;
+
 	set_last_footing_height_to_current_height();
+	set_mass( 50.f );
 }
 
 /**
@@ -533,7 +537,13 @@ bool Player::is_falling() const
 
 void Player::on_collide_with( Balloon* balloon )
 {
-	balloon->kill();
+	if ( balloon->get_player() )
+	{
+		return;
+	}
+
+	balloon->set_player( this );
+	this->balloon_ = balloon;
 
 	is_jumping_ = false;
 

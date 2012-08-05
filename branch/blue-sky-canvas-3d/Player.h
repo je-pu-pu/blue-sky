@@ -46,6 +46,11 @@ private:
 
 	float		last_footing_height_;	///< 前回の足場の高さ ( バルーン含む )
 
+	Balloon*	balloon_;				///< 現在持っている風船
+
+protected:
+	const Input* get_input() const;
+	
 	bool is_last_footing_height_null() const { return last_footing_height_ >= 300.f; }
 	
 	void set_last_footing_height_to_null() { last_footing_height_ = 300.f; }
@@ -55,9 +60,6 @@ private:
 
 	float get_height_to_die() const { return 15.f; }
 	float get_balloon_action_length() const { return 10.f; }
-
-protected:
-	const Input* get_input() const;
 
 	float_t get_min_walk_step_speed() const { return 0.1f; }
 	float_t get_max_walk_step_speed() const { return 0.25f; }
@@ -138,6 +140,7 @@ public:
 	ActionMode get_action_mode() const { return action_mode_; }
 	void set_action_mode( ActionMode );
 
+	const Balloon* get_balloon() const { return balloon_; }
 
 
 }; // class Player

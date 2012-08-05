@@ -127,6 +127,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// Camera
 	camera_ = new Camera();
 
+	// balloon_model_ = get_drawing_model_manager()->load( "balloon" );
+
 	if ( get_stage_name().empty() )
 	{
 		generate_random_stage();
@@ -853,7 +855,6 @@ void GamePlayScene::render()
 				}
 
 				sky_box_->render();
-
 
 				{
 					ObjectConstantBuffer buffer;

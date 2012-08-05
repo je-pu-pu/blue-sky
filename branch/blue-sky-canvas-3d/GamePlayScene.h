@@ -20,6 +20,7 @@ class Goal;
 class ActiveObject;
 class Camera;
 class Stage;
+class DrawingModel;
 
 /**
  * ƒQ[ƒ€ƒvƒŒƒC’†‚Ìˆ—‚ğŠÇ—‚·‚é
@@ -52,6 +53,8 @@ protected:
 
 	auto_ptr< Player >					player_;
 	auto_ptr< Camera >					camera_;
+
+	// auto_ptr< DrawingModel >			balloon_model_;
 
 	auto_ptr< Rectangle >				fader_rectangle_;
 

@@ -13,6 +13,7 @@ namespace blue_sky
 class Balloon : public ActiveObject
 {
 public:
+	const Player* player_;
 	float flicker_;
 
 private:
@@ -35,6 +36,9 @@ public:
 
 	void restart();
 	
+	void set_player( const Player* p ) { player_ = p; flicker_ = 0.f; }
+	const Player* get_player() const { return player_; }
+
 }; // class Balloon
 
 } // namespace blue_sky

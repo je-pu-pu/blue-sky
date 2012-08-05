@@ -29,6 +29,7 @@ private:
 	bool		is_jumping_;			///< 現在ジャンプ中フラグ
 	bool		is_jumpable_;			///< 現在ジャンプ可能フラグ
 	bool		is_falling_to_die_;		///< 現在死亡へ向けて落下中フラグ
+	bool		is_falling_to_balloon_;	///< そのまま落下すると風船を取得するフラグ
 	
 	int			step_count_;			///< 移動カウンタ
 	float		step_speed_;			///< 移動速度
@@ -80,7 +81,8 @@ protected:
 
 	void limit_velocity();
 
-	bool check_on_footing( const Vector3&, float_t ) const;
+	bool check_on_footing( const Vector3&, float_t, bool = false ) const;
+	float_t get_footing_height( const Vector3&, bool = false ) const;
 
 	bool is_on_footing() const { return is_on_footing_; }
 	bool is_jumpable() const { return is_jumpable_; }
@@ -134,6 +136,7 @@ public:
 	//
 	bool is_falling() const;
 	bool is_falling_to_die() const { return is_falling_to_die_; }
+	bool is_falling_to_balloon() const { return is_falling_to_balloon_; }
 
 	bool has_medal() const { return has_medal_; }
 

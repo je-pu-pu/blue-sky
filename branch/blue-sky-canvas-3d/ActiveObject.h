@@ -89,6 +89,7 @@ public:
 	virtual void update_transform();
 	
 	virtual bool is_hard() const { return true; }
+	virtual bool is_balloon() const { return false; }
 
 	virtual float_t get_collision_width() const = 0;
 	virtual float_t get_collision_height() const = 0;

@@ -20,6 +20,7 @@ Player::Player()
 	, is_jumping_( false )
 	, is_jumpable_( false )
 	, is_falling_to_die_( false )
+	, is_falling_to_balloon_( false )
 	, step_count_( 0 )
 	, step_speed_( 0.25f )
 	, action_mode_( ACTION_MODE_NONE )
@@ -47,6 +48,7 @@ void Player::restart()
 	is_jumping_ = false;
 	is_jumpable_ = false;
 	is_falling_to_die_ = false;
+	is_falling_to_balloon_ = false;
 
 	step_count_ = 0;
 	step_speed_ = 0.25f;
@@ -105,7 +107,11 @@ void Player::update()
 		eye_depth_ = math::clamp( eye_depth_, 0.f, 1.f );
 	}
 
-	if ( is_falling_to_die() )
+	if ( is_falling_to_balloon() )
+	{
+		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.25f, 0.25f, 1.f, 0.f ) );
+	}
+	else if ( is_falling_to_die() )
 	{
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 1.f, 0.f, 0.f, 0.f ) );
 
@@ -247,7 +253,7 @@ void Player::update_jumping()
 void Player::update_falling_to_die()
 {
 	const float_t x = get_rigid_body()->getCenterOfMassPosition().x();
-	const float_t y = get_last_footing_height() + get_collision_height() * 0.5f;
+	const float_t y = get_rigid_body()->getCenterOfMassPosition().y();
 	const float_t z = get_rigid_body()->getCenterOfMassPosition().z();
 	const float_t ray_length = get_collision_height() * 0.5f + get_height_to_die();
 
@@ -256,19 +262,21 @@ void Player::update_falling_to_die()
 	const Vector3 right = get_right() * ( get_collision_width() * 0.5f - margin );
 	const Vector3 center = Vector3( x, y, z );
 
+	is_falling_to_balloon_ = false;
+
 	// 中心 + 四隅 + 四点 の設置を調べる
 	if (
-		check_on_footing( center, ray_length ) ||
+		get_footing_height( center, true ) > ray_length ||
 
-		check_on_footing( center - right - front, ray_length ) ||
-		check_on_footing( center + right - front, ray_length ) ||
-		check_on_footing( center - right + front, ray_length ) ||
-		check_on_footing( center + right + front, ray_length ) ||
+		get_footing_height( center - right - front, true ) > ray_length ||
+		get_footing_height( center + right - front, true ) > ray_length ||
+		get_footing_height( center - right + front, true ) > ray_length ||
+		get_footing_height( center + right + front, true ) > ray_length ||
 		
-		check_on_footing( center - right, ray_length ) ||
-		check_on_footing( center + right, ray_length ) ||
-		check_on_footing( center - front, ray_length ) ||
-		check_on_footing( center + front, ray_length ) )
+		get_footing_height( center - right, true ) > ray_length ||
+		get_footing_height( center + right, true ) > ray_length ||
+		get_footing_height( center - front, true ) > ray_length ||
+		get_footing_height( center + front, true ) > ray_length )
 	{
 		is_falling_to_die_ = false;
 
@@ -330,11 +338,13 @@ class ClosestNotMe : public btCollisionWorld::ClosestRayResultCallback
 {
 private:
 	const Player::RigidBody* rigid_body_;
+	bool include_soft_footing_;
 
 public:
-	ClosestNotMe( const btVector3& s, const btVector3& d, const Player::RigidBody* rb )
+	ClosestNotMe( const btVector3& s, const btVector3& d, const Player::RigidBody* rb, bool include_soft_footing )
 		: ClosestRayResultCallback( s, d )
 		, rigid_body_( rb )
+		, include_soft_footing_( include_soft_footing )
 	{ }
 
 	virtual	btScalar addSingleResult( btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
@@ -348,7 +358,7 @@ public:
 		{
 			ActiveObject* a = reinterpret_cast< ActiveObject* >( rayResult.m_collisionObject->getUserPointer() );
 			
-			if ( ! a->is_hard() )
+			if ( ! include_soft_footing_ && ! a->is_hard() )
 			{
 				return 1.0;
 			}
@@ -358,16 +368,51 @@ public:
 	}
 };
 
-bool Player::check_on_footing( const Vector3& from, float_t ray_length ) const
+/**
+ *
+ *
+ *
+ */
+bool Player::check_on_footing( const Vector3& from, float_t ray_length, bool include_soft_footing ) const
 {
 	Vector3 to = from + Vector3( 0, -ray_length, 0 );
 	
-	ClosestNotMe ray_callback( from, to, get_rigid_body() );
+	ClosestNotMe ray_callback( from, to, get_rigid_body(), include_soft_footing );
 	ray_callback.m_closestHitFraction = 1.0;
 
 	get_dynamics_world()->rayTest( from, to, ray_callback );
 
 	return ray_callback.hasHit();
+}
+
+/**
+ * 指定した座標から地面までの間で、一番高い足場の高さを取得する
+ *
+ * @param Vector3 from 
+ * @param bool include_soft_footing 風船などのやわらかいものを足場に含むフラグ
+ */
+float_t Player::get_footing_height( const Vector3& from, bool include_soft_footing ) const
+{
+	Vector3 to = from;
+	to.setY( 0.f );
+
+	ClosestNotMe ray_callback( from, to, get_rigid_body(), include_soft_footing );
+	ray_callback.m_closestHitFraction = 1.0;
+
+	get_dynamics_world()->rayTest( from, to, ray_callback );
+
+	if ( ray_callback.m_collisionObject && ray_callback.m_collisionObject->getUserPointer() )
+	{
+		const ActiveObject* a = reinterpret_cast< const ActiveObject* >( ray_callback.m_collisionObject->getUserPointer() );
+		
+		if ( a->is_balloon() )
+		{
+			// !!!
+			const_cast< Player* >( this )->is_falling_to_balloon_ = true;
+		}
+	}
+
+	return ( 1.f - ray_callback.m_closestHitFraction ) * from.y();
 }
 
 void Player::step( float_t s )

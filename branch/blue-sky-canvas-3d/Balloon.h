@@ -26,6 +26,7 @@ private:
 	void on_collide_with( ActiveObject* o ) { o->on_collide_with( this ); }
 
 	bool is_hard() const { return false; }
+	bool is_balloon() const { return true; }
 
 public:
 	Balloon();

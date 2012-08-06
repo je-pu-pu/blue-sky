@@ -165,7 +165,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 
 	rectangle_ = new Rectangle( get_direct_3d() );
-	fader_rectangle_ = new Rectangle( get_direct_3d() );
 
 	Sound* bgm = get_sound_manager()->get_sound( "bgm" );
 	if ( bgm )
@@ -1024,24 +1023,7 @@ void GamePlayScene::render()
 		}
 #endif
 
-		// render_fader_rectangle()
-		{
-			ObjectConstantBuffer buffer;
-			buffer.color = get_direct_3d()->getFader()->get_color();
-			get_game_main()->get_object_constant_buffer()->update( & buffer );
-
-			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
-
-			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
-			{
-				( *i )->apply();
-				
-				get_game_main()->get_object_constant_buffer()->render();
-
-				( * rectangle_->get_material_list().begin() )->set_shader_resource_view( 0 );
-				fader_rectangle_->render();
-			}
-		}
+		render_fader();
 
 		if ( is_render_2d_enabled )
 		{

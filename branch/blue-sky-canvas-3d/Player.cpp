@@ -80,6 +80,7 @@ void Player::update()
 
 	if ( action_mode_ == ACTION_MODE_BALLOON )
 	{
+		get_rigid_body()->clearForces();
 		get_rigid_body()->setLinearVelocity(
 			Vector3(
 				get_rigid_body()->getLinearVelocity().x(),
@@ -332,6 +333,15 @@ void Player::update_step_speed()
 		stop_sound( "walk" );
 		stop_sound( "run" );
 	}
+
+	if ( get_step_speed() >= get_max_run_step_speed() && ! is_jumping() && ! is_falling() )
+	{
+		play_sound( "short-breath", true, false );
+	}
+	else
+	{
+		stop_sound( "short-breath" );
+	}
 }
 
 class ClosestNotMe : public btCollisionWorld::ClosestRayResultCallback
@@ -433,13 +443,6 @@ void Player::step( float_t s )
 			get_rigid_body()->getLinearVelocity().z() + ( get_front() * s ).z() * get_step_speed()
 		)
 	);
-
-	/*
-	if ( is_jumpable() )
-	{
-		play_sound( "short-breath", true, false );
-	}
-	*/
 }
 
 void Player::side_step( float_t s )

@@ -22,7 +22,7 @@ private:
 public:
 	Direct3D11Matrix()
 	{
-		// value_ = 
+		set_identity();
 	}
 
 	Direct3D11Matrix( XMFLOAT4X4 m )
@@ -74,6 +74,9 @@ public:
 		
 		return d11m;
 	}
+
+	XMFLOAT4X4& get() { return value_; }
+	const XMFLOAT4X4& get() const { return value_; }
 
 }; // class Direct3D11Matrix
 

@@ -54,10 +54,6 @@ protected:
 	auto_ptr< Player >					player_;
 	auto_ptr< Camera >					camera_;
 
-	// auto_ptr< DrawingModel >			balloon_model_;
-
-	auto_ptr< Rectangle >				fader_rectangle_;
-
 	void generate_random_stage();
 
 	void load_stage_file( const char* );

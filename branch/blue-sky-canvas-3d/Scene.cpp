@@ -1,6 +1,12 @@
 #include "Scene.h"
 #include "GameMain.h"
 
+#include "ConstantBuffer.h"
+#include "Direct3D11ConstantBuffer.h"
+#include "Direct3D11Effect.h"
+#include "Direct3D11Fader.h"
+#include "Direct3D11.h"
+
 #include "SoundManager.h"
 #include "Sound.h"
 
@@ -122,6 +128,24 @@ void Scene::stop_sound( const char* name ) const
 	if ( sound )
 	{
 		sound->stop();
+	}
+}
+
+void Scene::render_fader() const
+{
+	ObjectConstantBuffer buffer;
+	buffer.color = get_direct_3d()->getFader()->get_color();
+	get_game_main()->get_object_constant_buffer()->update( & buffer );
+
+	get_direct_3d()->setInputLayout( "main" );
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
+
+	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	{
+		( *i )->apply();
+				
+		get_game_main()->get_object_constant_buffer()->render();
+		get_direct_3d()->getFader()->render();
 	}
 }
 

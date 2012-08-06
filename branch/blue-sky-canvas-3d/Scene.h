@@ -84,6 +84,8 @@ protected:
 	void play_sound( const char*, bool = false, bool = true ) const;
 	void stop_sound( const char* ) const;
 
+	void render_fader() const;
+
 public:
 	Scene( const GameMain* );
 	virtual ~Scene();

@@ -17,7 +17,6 @@ public:
 	{
 		SEQUENCE_LOGO = 0,
 		SEQUENCE_TITLE_LOGO,
-		SEQUENCE_TITLE_BG,
 		SEQUENCE_TITLE_FIX
 	};
 
@@ -32,12 +31,8 @@ private:
 	Sound* ok_;
 	Sound* bgm_;
 
-	int sequence_;
-	float title_bg_scale_;
-	float title_bg_scale_cycle_;
-	float fade_alpha_;
-
-	float sequence_elapsed_time_;
+	int_t sequence_;
+	float_t sequence_elapsed_time_;
 
 public:
 	TitleScene( const GameMain* );

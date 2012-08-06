@@ -4,8 +4,11 @@
 
 #include "Direct3D11.h"
 #include "Direct3D11Color.h"
+#include "Direct3D11Vector.h"
 #include "Direct3D11TextureManager.h"
 #include "Direct3D11Sprite.h"
+#include "Direct3D11Effect.h"
+#include "Direct3D11Fader.h"
 #include "DirectX.h"
 
 #include <game/Sound.h>
@@ -55,6 +58,8 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	click_ = get_sound_manager()->load( "click" );
 
 	update_stage_list();
+
+	get_direct_3d()->getFader()->full_out();
 }
 
 StageSelectScene::~StageSelectScene()
@@ -71,6 +76,8 @@ StageSelectScene::~StageSelectScene()
  */
 void StageSelectScene::update()
 {
+	get_direct_3d()->getFader()->fade_in();
+
 	if ( get_input()->push( Input::A ) )
 	{
 		if ( is_mouse_on_left_allow() )
@@ -104,28 +111,24 @@ void StageSelectScene::update()
  */
 void StageSelectScene::render()
 {
-	Color bg_color = page_ < get_max_story_page() ? Color::from_256( 0x11, 0xAA, 0xFF ) : Color::from_256( 0x99, 0xEE, 0xFF );
+	Color bg_color = page_ < get_max_story_page() ? Color::from_256( 0xFF, 0xAA, 0x11 ) : Color::from_256( 0xFF, 0xEE, 0x99 );
 
-	get_direct_3d()->clear();
+	get_direct_3d()->clear( bg_color );
 	get_direct_3d()->getSprite()->begin();
 
-#if 0
-	D3DXMATRIXA16 t, s, transform;
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
 
-	// BG
+	for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
 	{
-		win::Rect bg_src_rect( 0, 1024, 2048, 2048 );
-		D3DXVECTOR3 bg_center( bg_src_rect.width() * 0.5f, bg_src_rect.height() * 0.5f, 0.f );
+		( *i )->apply();
 
-		float ratio = static_cast< float >( get_height() ) / static_cast< float >( bg_src_rect.height() );
-
-		D3DXMatrixScaling( & s, ratio, ratio, 1.f );
-		D3DXMatrixTranslation( & t, get_width() * 0.5f, get_height() * 0.5f, 0.f );
-
-		transform = s * t;
-		direct_3d()->getSprite()->SetTransform( & transform );
-		direct_3d()->getSprite()->Draw( bg_texture_, & bg_src_rect.get_rect(), & bg_center, 0, D3DCOLOR_ARGB( 0x66, 0x33, 0x33, 0x99 ) );
+		// render_bg()
+		{
+			get_direct_3d()->getSprite()->draw( bg_texture_, Color( 1.f, 1.f, 1.f, 0.5f ) );
+		}
 	}
+
+	Direct3D::Matrix t, s, transform;
 
 	// Stage
 	int n = 0;
@@ -137,77 +140,53 @@ void StageSelectScene::render()
 	{
 		Stage* stage = *i;
 
-		D3DXVECTOR3 center( stage_src_rect_.width() * 0.5f, stage_src_rect_.height() * 0.5f, 0.f );
+		Direct3D::Vector center( stage_src_rect_.width() * 0.5f, stage_src_rect_.height() * 0.5f, 0.f );
 
 		win::Rect dst_rect = stage->rect;
 
-		float dx = dst_rect.left() + dst_rect.width() * 0.5f;
-		float dy = dst_rect.top() + dst_rect.height() * 0.5f;
+		float dx = dst_rect.left() + dst_rect.width() * 0.5f - ( get_width() / 2 );
+		float dy = dst_rect.top() + dst_rect.height() * 0.5f - ( get_height() / 2 );
 
-		float offset = 0.f;
-		D3DCOLOR frame_color = 0xFFFFFFFF;
+		int offset = 0;
+		Direct3D::Color frame_color = Direct3D::Color::White;
 
 		if ( stage == get_pointed_stage() )
 		{
-			if ( input()->press( Input::A ) )
+			if ( get_input()->press( Input::A ) )
 			{
-				offset = 3.f;
+				offset = 3;
 			}
-			frame_color = 0xFFFFAA11;
+			frame_color = Direct3D::Color::from_hex( 0xFFAA11FF );
 		}
 
 		win::Rect white_src_rect = win::Rect::Size( 0, 512, 128, 128 );
-		D3DXVECTOR3 white_center( white_src_rect.width() * 0.5f, white_src_rect.height() * 0.5f, 0.f );
+		Direct3D::Vector white_center( white_src_rect.width() * 0.5f, white_src_rect.height() * 0.5f, 0.f );
 
 		float scale = static_cast< float >( dst_rect.width() ) / static_cast< float >( stage_src_rect_.width() );
 		float frame_scale = ( dst_rect.width() + 10.f ) / white_src_rect.width();
+		const win::Rect frame_scale_rect( -5, -5, +5, +5 );
 
 		// shadow
-		D3DXMatrixTranslation( & t, dx - 5, dy + 5, 0.f );
-		D3DXMatrixScaling( & s, frame_scale, frame_scale, frame_scale );
-		transform = s * t;
-
-		direct_3d()->getSprite()->SetTransform( & transform );
-		direct_3d()->getSprite()->Draw( sprite_texture_, & white_src_rect.get_rect(), & white_center, 0, 0x99000000 );
+		get_direct_3d()->getSprite()->draw( dst_rect + frame_scale_rect + win::Point( -5, 5 ), sprite_texture_, white_src_rect, Direct3D::Color::from_hex( 0x00000099 ) );
 
 		// white
-		D3DXMatrixTranslation( & t, dx - offset, dy + offset, 0.f );
-		D3DXMatrixScaling( & s, frame_scale, frame_scale, frame_scale );
-		transform = s * t;
+		get_direct_3d()->getSprite()->draw( dst_rect + frame_scale_rect + win::Point( -offset, offset ), sprite_texture_, white_src_rect, frame_color );
 
-		direct_3d()->getSprite()->SetTransform( & transform );
-		direct_3d()->getSprite()->Draw( sprite_texture_, & white_src_rect.get_rect(), & white_center, 0, frame_color );
+		// stage
+		get_direct_3d()->getSprite()->draw( dst_rect + win::Point( -offset, offset ), stage->texture, stage_src_rect_, Direct3D::Color::White );
 
-		// Stage
-		D3DXMatrixTranslation( & t, dx - offset, dy + offset, 0.f );
-		D3DXMatrixScaling( & s, scale, scale, scale );
-		transform = s * t;
-
-		direct_3d()->getSprite()->SetTransform( & transform );
-		direct_3d()->getSprite()->Draw( stage->texture, & stage_src_rect_.get_rect(), & center, 0, 0xFFFFFFFF );
-
-		// Circle
+		// circle
 		if ( stage->cleared )
 		{
-			D3DXVECTOR3 circle_center( j->width() * 0.5f, j->height() * 0.5f, 0.f );
-
-			D3DXMatrixTranslation( & t, dx + ( dst_rect.width() - j->width() ) * 0.5f - offset, dy + ( dst_rect.height() - j->height() ) * 0.5f + offset, 0.f );
-			transform = t;
-
-			direct_3d()->getSprite()->SetTransform( & transform );
-			direct_3d()->getSprite()->Draw( sprite_texture_, & j->get_rect(), & circle_center, 0, 0x99FFFFFF );
+			win::Point circle_dst_point = win::Point( dst_rect.right() - j->width(), dst_rect.bottom() - j->height() ) + win::Point( -offset, offset );
+			get_direct_3d()->getSprite()->draw( circle_dst_point, sprite_texture_, *j, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
 		}
 
-		// Face
+		// face
 		if ( stage->completed )
 		{
-			D3DXVECTOR3 face_center( k->width() * 0.5f, k->height() * 0.5f, 0.f );
-
-			D3DXMatrixTranslation( & t, dx + ( dst_rect.width() - j->width() ) * 0.5f - offset, dy + ( dst_rect.height() - j->height() ) * 0.5f + offset, 0.f );
-			transform = t;
-
-			direct_3d()->getSprite()->SetTransform( & transform );
-			direct_3d()->getSprite()->Draw( sprite_texture_, & k->get_rect(), & face_center, 0, 0x99FFFFFF );
+			win::Point circle_dst_point = win::Point( dst_rect.right() - j->width() + ( j->width() - k->width() ) / 2, dst_rect.bottom() - j->height() + ( j->height() - k->height() ) / 2 ) + win::Point( -offset, offset );
+			get_direct_3d()->getSprite()->draw( circle_dst_point, sprite_texture_, *k, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
 		}
 
 		n++;
@@ -218,24 +197,18 @@ void StageSelectScene::render()
 	{
 		win::Rect src_rect = left_allow_src_rect_;
 
-		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
-
 		if ( is_mouse_on_left_allow() )
 		{
 			src_rect.left() += 256;
 			src_rect.right() += 256;
 		}
 
-		D3DXMatrixTranslation( & transform, 0.f + src_rect.width() * 0.5f + get_margin(), get_height() * 0.5f, 0.f );
-
-		direct_3d()->getSprite()->SetTransform( & transform );
-		direct_3d()->getSprite()->Draw( sprite_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+		win::Point allow_dst_point = win::Point( get_margin(), ( get_height() - src_rect.height() ) / 2 );
+		get_direct_3d()->getSprite()->draw( allow_dst_point, sprite_texture_, src_rect.get_rect() );
 	}
 	if ( has_next_page() )
 	{
 		win::Rect src_rect = right_allow_src_rect_;
-
-		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
 
 		if ( is_mouse_on_right_allow() )
 		{
@@ -243,32 +216,27 @@ void StageSelectScene::render()
 			src_rect.right() += 256;
 		}
 
-		D3DXMatrixTranslation( & transform, get_width() - src_rect.width() * 0.5f - get_margin(), get_height() * 0.5f, 0.f );
-
-		direct_3d()->getSprite()->SetTransform( & transform );
-		direct_3d()->getSprite()->Draw( sprite_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+		win::Point allow_dst_point( get_width() - get_margin() - src_rect.width(), ( get_height() - src_rect.height() ) / 2 );
+		get_direct_3d()->getSprite()->draw( allow_dst_point, sprite_texture_, src_rect.get_rect() );
 	}
 
 	// Cursor
 	{
 		win::Rect src_rect = cursor_src_rect_;
 
-		if ( input()->press( Input::A ) )
+		if ( get_input()->press( Input::A ) )
 		{
 			src_rect.left() += 128;
 			src_rect.right() += 128;
 		}
 
-		D3DXVECTOR3 center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
-		
-		D3DXMatrixTranslation( & transform, static_cast< float >( input()->get_mouse_x() ) + src_rect.width() * 0.5f - 5.f, static_cast< float >( input()->get_mouse_y() ) + src_rect.height() * 0.5f - 5.f, 0.f );
-
-		direct_3d()->getSprite()->SetTransform( & transform );
-		direct_3d()->getSprite()->Draw( sprite_texture_, & src_rect.get_rect(), & center, 0, 0xFFFFFFFF );
+		win::Point cursor_dst_point( get_input()->get_mouse_x(), get_input()->get_mouse_y() );
+		get_direct_3d()->getSprite()->draw( cursor_dst_point, sprite_texture_, src_rect.get_rect() );
 	}
 
-	direct_3d()->getSprite()->end();
-#endif // 0
+	get_direct_3d()->getSprite()->end();
+
+	render_fader();
 }
 
 void StageSelectScene::update_page( int page )

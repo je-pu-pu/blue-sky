@@ -14,6 +14,7 @@
 #include "Direct3D11.h"
 #include "Direct3D11Sprite.h"
 #include "Direct3D11Effect.h"
+#include "Direct3D11Fader.h"
 #include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11TextureManager.h"
 #include "Direct3D11Color.h"
@@ -38,13 +39,9 @@ TitleScene::TitleScene( const GameMain* game_main )
 	, ok_( 0 )
 	, bgm_( 0 )
 	, sequence_( 0 )
-	, title_bg_scale_( 2.f )
-	, title_bg_scale_cycle_( 0.f )
-	, fade_alpha_( 1.f )
 	, sequence_elapsed_time_( 0.f )
 {
 	ok_ = get_sound_manager()->load( "ok" );
-
 	bgm_ = get_sound_manager()->load_music( "bgm", "title" );
 	
 	// title_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/texture/title.png" );
@@ -61,15 +58,10 @@ TitleScene::TitleScene( const GameMain* game_main )
 		get_game_main()->get_game_constant_buffer()->update( & game_constant_buffer );
 	}
 	
-	{
-		ObjectConstantBuffer object_constant_buffer;
-		object_constant_buffer.world = XMMatrixTranspose( XMMatrixIdentity() );
-
-		get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer );
-	}
-
 	reset_total_elapsed_time();
 	bgm_->play( false );
+
+	get_direct_3d()->getFader()->full_out();
 }
 
 TitleScene::~TitleScene()
@@ -86,67 +78,42 @@ void TitleScene::update()
 	Scene::update();
 
 	sequence_elapsed_time_ += get_elapsed_time();
+	get_direct_3d()->getFader()->fade_in();
 
 	if ( get_input()->push( Input::A ) )
 	{
 		if ( sequence_ == SEQUENCE_TITLE_FIX )
 		{
 			ok_->play( false );
-			set_next_stage_name( "0" );
-			set_next_scene( "game_play" );
-			// set_next_scene( "stage_select" );
+			set_next_scene( "stage_select" );
 		}
 		else if ( ! is_first_game_play() )
 		{
 			ok_->play( false );
 			sequence_ = SEQUENCE_TITLE_FIX;
 			sequence_elapsed_time_ = 0.f;
-			fade_alpha_ = 1.f;
+			get_direct_3d()->getFader()->full_out();
 		}
 	}
 
-	if ( title_bg_scale_ == -1.f )
+	if ( bgm_->get_current_position() >= 8.25f )
 	{
-		sequence_ = SEQUENCE_TITLE_FIX;
-		sequence_elapsed_time_ = 0.f;
-	}
-	else if ( bgm_->get_current_position() >= 19.f )
-	{
-		if ( sequence_ < SEQUENCE_TITLE_BG )
+		if ( sequence_ < SEQUENCE_TITLE_FIX )
 		{
-			sequence_ = SEQUENCE_TITLE_BG;
+			sequence_ = SEQUENCE_TITLE_FIX;
 			sequence_elapsed_time_ = 0.f;
-			fade_alpha_ = 1.f;
+			get_direct_3d()->getFader()->full_out();
 		}
 	}
-	else if ( bgm_->get_current_position() >= 9.5f )
+	else if ( bgm_->get_current_position() >= 4.25f )
 	{
 		if ( sequence_ < SEQUENCE_TITLE_LOGO )
 		{
 			sequence_ = SEQUENCE_TITLE_LOGO;
 			sequence_elapsed_time_ = 0.f;
-			fade_alpha_ = 1.f;
+			get_direct_3d()->getFader()->full_out();
 		}
 	}
-
-	if ( sequence_ >= SEQUENCE_TITLE_FIX )
-	{
-		title_bg_scale_ = -1.f + cos( title_bg_scale_cycle_ ) * 0.05f - 0.05f;
-		title_bg_scale_cycle_ += 0.01f;
-	}
-	else if ( sequence_ >= SEQUENCE_TITLE_BG )
-	{
-		if ( title_bg_scale_ > 0.f )
-		{
-			title_bg_scale_ = math::chase( title_bg_scale_, -1.f, 0.002f );
-		}
-		else
-		{
-			title_bg_scale_ = math::chase( title_bg_scale_, -1.f, 0.004f );
-		}
-	}
-
-	fade_alpha_ = math::chase( fade_alpha_, 0.f, 0.01f );
 }
 
 /**
@@ -163,6 +130,11 @@ void TitleScene::render()
 		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer );
 	}
 
+	{
+		ObjectConstantBuffer object_constant_buffer;
+		object_constant_buffer.world = XMMatrixTranspose( XMMatrixIdentity() );
+		get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer );
+	}
 
 	get_direct_3d()->clear( Direct3D::Color::from_256( 0xFF, 0xAA, 0x11 ) );
 	get_direct_3d()->getSprite()->begin();
@@ -183,6 +155,11 @@ void TitleScene::render()
 
 	get_direct_3d()->getSprite()->end();
 
+	// render_scene()
+	{
+
+	}
+
 	// render_logo()
 	{
 		get_direct_3d()->setInputLayout( "line" );
@@ -199,15 +176,39 @@ void TitleScene::render()
 
 			if ( sequence_ == SEQUENCE_LOGO )
 			{
-				brand_logo_model_->get_line()->render( static_cast< int >( sequence_elapsed_time_ * 30 ) );
+				brand_logo_model_->get_line()->render( static_cast< int >( sequence_elapsed_time_ * 50 ) );
 			}
-			else if ( sequence_ >= SEQUENCE_TITLE_BG )
+			else if ( sequence_ >= SEQUENCE_TITLE_LOGO )
 			{
-				title_logo_model_->get_line()->render( static_cast< int >( sequence_elapsed_time_ * 30 ) );
+				if ( sequence_ >= SEQUENCE_TITLE_FIX )
+				{
+					{
+						ObjectConstantBuffer object_constant_buffer;
+						object_constant_buffer.world = XMMatrixTranspose( XMMatrixTranslation( -0.01f, +0.01f, 0.f ) );
+						object_constant_buffer.color = Color( 1.f, 1.f, 1.f, 0.f );
+						get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer );
+					}
+
+					title_logo_model_->get_line()->render();
+
+					{
+						ObjectConstantBuffer object_constant_buffer;
+						object_constant_buffer.world = XMMatrixTranspose( XMMatrixIdentity() );
+						object_constant_buffer.color = Color( 0.f, 0.f, 0.f, 0.f );
+						get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer );
+					}
+
+					title_logo_model_->get_line()->render();
+				}
+				else
+				{
+					title_logo_model_->get_line()->render( static_cast< int >( sequence_elapsed_time_ * 50 ) );
+				}
 			}
 		}
 	}
 
+	render_fader();
 
 #if 0
 	DIRECT_X_FAIL_CHECK( direct_3d()->getEffect()->SetFloat( "brightness", 1.f ) );

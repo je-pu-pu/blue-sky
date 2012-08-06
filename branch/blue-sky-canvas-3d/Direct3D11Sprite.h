@@ -9,6 +9,7 @@
 namespace win
 {
 	class Rect;
+	class Point;
 }
 
 class Direct3D11;
@@ -45,6 +46,7 @@ public:
 	typedef WORD						Index;
 
 	typedef win::Rect					Rect;
+	typedef win::Point					Point;
 
 	struct Vertex
 	{
@@ -79,10 +81,12 @@ public:
 
 	void set_transform( const Matrix& );
 
+	void draw( const Point&, Texture*, const Rect&, const Color& = white_ );
 	void draw( const Rect&, Texture*, const Rect&, const Color& = white_ );
 	void draw( const Rect&, Texture*, const Color& = white_ );
 
 	void draw( Texture*, const Rect&, const Color& = white_ );
+	void draw( Texture*, const Color& = white_ );
 
 	void end();
 

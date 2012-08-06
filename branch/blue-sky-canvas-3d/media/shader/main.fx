@@ -669,7 +669,7 @@ technique11 main2d
 // ----------------------------------------
 // for Sprite
 // ----------------------------------------
-cbuffer GameConstantBuffer : register( b3 )
+cbuffer GameConstantBuffer : register( b4 )
 {
 	matrix Transform;
 };

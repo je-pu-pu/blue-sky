@@ -59,6 +59,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 
 	update_stage_list();
 
+	get_direct_3d()->getFader()->set_color( Color::White );
 	get_direct_3d()->getFader()->full_out();
 }
 

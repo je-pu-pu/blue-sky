@@ -136,7 +136,7 @@ void Player::update()
 		else
 		{
 			// ’Êí’…’n
-			if ( get_velocity().y() < -0.1f )
+			if ( get_velocity().y() < -0.5f )
 			{
 				stop_sound( "fall" );
 				play_sound( "land", false, false );
@@ -365,7 +365,7 @@ public:
 			return 1.0;
 		}
 
-		if ( rayResult.m_collisionObject->getUserPointer() )
+		if ( rayResult.m_collisionObject && rayResult.m_collisionObject->getUserPointer() )
 		{
 			ActiveObject* a = reinterpret_cast< ActiveObject* >( rayResult.m_collisionObject->getUserPointer() );
 			

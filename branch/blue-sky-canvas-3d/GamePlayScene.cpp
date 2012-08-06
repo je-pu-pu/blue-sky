@@ -79,6 +79,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	object_detail_level_1_length_ = get_config()->get( "video.object-detail-level-1-length", 250.f );
 	object_detail_level_2_length_ = get_config()->get( "video.object-detail-level-2-length", 100.f );
 
+	get_physics()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
+
 	// Texture
 	// ui_texture_ = get_direct_3d()->getTextureManager()->load( "ui", "media/image/item.png" );
 
@@ -188,6 +190,8 @@ GamePlayScene::~GamePlayScene()
 
 	get_sound_manager()->stop_all();
 	get_sound_manager()->unload_all();
+
+	get_physics()->clear();
 }
 
 void GamePlayScene::restart()

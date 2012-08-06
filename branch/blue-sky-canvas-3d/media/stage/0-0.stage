@@ -6,7 +6,15 @@ goal 0.0 20.0 200.0
 player 0.0 30.0 -3.0
 object stage-0 0 0 0 0
 object rocket 0 21 0
-dynamic-object board-1 0 25 20
+dynamic-object board-1 0 21 20 0
+dynamic-object board-1 0 22 20 45
+dynamic-object board-1 0 23 20 90
+dynamic-object board-1 0 24 20 45
+dynamic-object board-1 0 25 20 0
+dynamic-object board-1 0 26 20 45
+dynamic-object board-1 0 27 20 90
+dynamic-object board-1 0 28 20 45
+dynamic-object board-1 0 29 20 0
 object building-20 -57.0 0.0 -23.0 0
 object building-20 -57.0 0.0 -12.0 0
 object building-20 -57.0 0.0 -1.0 0
@@ -72,7 +80,11 @@ object building-20 33.0 0.0 -16.0 0
 object building-20 33.0 0.0 -5.0 0
 object building-20 0.0 0.0 22.0 90
 object building-20 0.0 0.0 300.0 0
-dynamic-object soda-can-1 -4.800000190734863 20.0 -4.800000190734863 0
+dynamic-object soda-can-1 -4.8 20.0 -4.8 0
+dynamic-object soda-can-1 -4.6 20.0 -4.8 0
+dynamic-object soda-can-1 -4.4 20.0 -4.8 0
+dynamic-object soda-can-1 -4.2 20.0 -4.8 0
+dynamic-object soda-can-1 -4.3 20.0 -4.8 0
 object building-20 -35.0 0.0 0.0 0
 object building-20 -24.0 0.0 11.0 0
 object building-20 -24.0 0.0 0.0 0

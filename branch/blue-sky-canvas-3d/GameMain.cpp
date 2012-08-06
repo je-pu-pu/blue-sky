@@ -46,6 +46,7 @@ namespace blue_sky
 //■コンストラクタ
 GameMain::GameMain()
 	: total_elapsed_time_( 0.f )
+	, is_display_fps_( false )
 {
 	win::Version version;
 	version.log( "log/windows_version.log" );
@@ -106,6 +107,8 @@ GameMain::GameMain()
 
 	// MainLoop
 	main_loop_ = new MainLoop( 60 );
+
+	is_display_fps_ = config_->get( "video.display_fps", 0 ) != 0;
 }
 
 //■デストラクタ

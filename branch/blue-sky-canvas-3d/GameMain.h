@@ -90,7 +90,7 @@ protected:
 	safe_ptr< Scene >						scene_;					///< 現在のシーン
 	string_t								stage_name_;			///< 現在のステージ名
 
-	bool									display_fps_flag_;		///< FPS 表示フラグ
+	bool									is_display_fps_;		///< FPS 表示フラグ
 
 	void check_scene_transition();
 

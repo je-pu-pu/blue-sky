@@ -301,6 +301,30 @@
     <None Include="media\stage\8.outro">
       <Filter>stage</Filter>
     </None>
+    <None Include="media\stage\0-0.stage">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\0-1.stage">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\0-2.stage">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\0-3.stage">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\0-0.intro">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\0-1.intro">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\0-2.intro">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\0-3.intro">
+      <Filter>stage</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ActiveObject">

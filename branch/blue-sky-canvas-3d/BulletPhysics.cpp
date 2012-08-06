@@ -24,37 +24,28 @@ BulletPhysics::BulletPhysics()
 	dynamics_world_ = new btDiscreteDynamicsWorld( collision_dispatcher_, broadphase_interface_, constraint_solver_, collision_configuration_ );
 
 	dynamics_world_->setGravity( btVector3( 0, -9.8f, 0 ) );
-
-	// create_ground_shape()
-	btCollisionShape* ground = new btBoxShape( btVector3( btScalar( 1000 ), btScalar( 1 ), btScalar( 1000 ) ) );
-	btAlignedObjectArray<btCollisionShape*> collision_shape_list_;
-
-	collision_shape_list_.push_back( ground );
-
-	// create_ground_rigid_body()
-	{
-		btTransform ground_transform;
-		ground_transform.setIdentity();
-		ground_transform.setOrigin( btVector3( 0, -1, 0 ) );
-
-		btScalar mass( 0 );
-		btVector3 local_inertia( 0, 0, 0 );
-
-		ground->calculateLocalInertia( mass, local_inertia );
-
-		btDefaultMotionState* motion_state = new btDefaultMotionState( ground_transform );
-		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, ground, local_inertia );
-	
-		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
-		dynamics_world_->addRigidBody( rigid_body );
-	}
 }
 
 BulletPhysics::~BulletPhysics()
 {
+	clear();
+
+	delete dynamics_world_;
+	delete constraint_solver_;
+	delete broadphase_interface_;
+	delete collision_dispatcher_;
+	delete collision_configuration_;
+}
+
+void BulletPhysics::clear()
+{
 	for ( int n = dynamics_world_->getNumConstraints() - 1; n >= 0; n-- )
 	{
-		delete dynamics_world_->getConstraint( n );
+		btTypedConstraint* constraint = dynamics_world_->getConstraint( n );
+
+		dynamics_world_->removeConstraint( constraint );
+
+		delete constraint;
 	}
 
 	for ( int n = dynamics_world_->getNumCollisionObjects() - 1; n >= 0; n-- )
@@ -79,11 +70,36 @@ BulletPhysics::~BulletPhysics()
 		delete shape;
 	}
 
-	delete dynamics_world_;
-	delete constraint_solver_;
-	delete broadphase_interface_;
-	delete collision_dispatcher_;
-	delete collision_configuration_;
+	collision_shape_list_.clear();
+}
+
+btRigidBody* BulletPhysics::add_ground_rigid_body( const btVector3& box )
+{
+	// create_ground_shape()
+	btCollisionShape* ground = new btBoxShape( box );
+	btAlignedObjectArray<btCollisionShape*> collision_shape_list_;
+
+	collision_shape_list_.push_back( ground );
+
+	// create_ground_rigid_body()
+	{
+		btTransform ground_transform;
+		ground_transform.setIdentity();
+		ground_transform.setOrigin( btVector3( 0, -box.y(), 0 ) );
+
+		btScalar mass( 0 );
+		btVector3 local_inertia( 0, 0, 0 );
+
+		ground->calculateLocalInertia( mass, local_inertia );
+
+		btDefaultMotionState* motion_state = new btDefaultMotionState( ground_transform );
+		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, ground, local_inertia );
+	
+		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
+		dynamics_world_->addRigidBody( rigid_body );
+
+		return rigid_body;
+	}
 }
 
 btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, bool is_static )

@@ -159,6 +159,9 @@ void ActiveObject::set_direction_degree( float d )
 
 	front_ = Vector3( 0.f, 0.f, 1.f ) * m;
 	right_ = Vector3( 1.f, 0.f, 0.f ) * m;
+
+	front_.normalize();
+	right_.normalize();
 }
 
 ActiveObject::DynamicsWorld* ActiveObject::get_dynamics_world() const

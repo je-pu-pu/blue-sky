@@ -31,7 +31,7 @@ public:
 
 	static std::string get_stage_dir_name_by_page( int );
 	static std::string get_stage_prefix_by_page( int );
-	static int get_max_story_page() { return 3; }
+	static int get_max_story_page() { return 1; }
 
 	void check_story_completed();
 	bool is_final_stage_open() const;

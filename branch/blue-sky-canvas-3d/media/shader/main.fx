@@ -669,7 +669,7 @@ technique11 main2d
 // ----------------------------------------
 // for Sprite
 // ----------------------------------------
-cbuffer GameConstantBuffer : register( b4 )
+cbuffer SpriteConstantBuffer : register( b4 )
 {
 	matrix Transform;
 };
@@ -688,6 +688,11 @@ float4 ps_sprite( PS_INPUT input ) : SV_Target
 	return model_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
 }
 
+float4 ps_sprite_add( PS_INPUT input ) : SV_Target
+{
+	return model_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
+}
+
 technique11 sprite
 {
 	pass main
@@ -698,5 +703,18 @@ technique11 sprite
 		SetVertexShader( CompileShader( vs_4_0, vs_sprite() ) );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_sprite() ) );
+	}
+}
+
+technique11 sprite_add
+{
+	pass main
+	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_sprite() ) );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps_sprite_add() ) );
 	}
 }

@@ -154,11 +154,6 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_KEYDOWN:
 	{
-		if ( wp == VK_ESCAPE )
-		{
-			PostMessage( hwnd, WM_CLOSE, 0, 0 );
-		}
-
 		Game::get_instance()->on_function_key_down( wp - VK_F1 + 1 );
 
 		break;

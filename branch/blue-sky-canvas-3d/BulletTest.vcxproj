@@ -128,7 +128,6 @@
     <None Include="media\shader\main.fx">
       <FileType>Document</FileType>
     </None>
-    <None Include="media\stage\0.stage" />
     <None Include="media\stage\8.outro" />
   </ItemGroup>
   <ItemGroup>

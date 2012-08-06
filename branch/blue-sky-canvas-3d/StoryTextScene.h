@@ -27,11 +27,17 @@ private:
 	
 	std::string		next_scene_name_;
 
+	Texture*		sprite_texture_;
 	Texture*		bg_texture_;
 	int				bg_width_;
 	int				bg_height_;
 
 	common::chase_value< float > bg_scale_;
+
+	Sound*			bgm_;
+	Sound*			sound_;
+
+	bool			is_skipped_;
 
 	void load_story_text_file( const char* );
 

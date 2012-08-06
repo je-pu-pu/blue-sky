@@ -142,6 +142,22 @@ bool GameMain::update()
 		input_->update_null();
 	}
 
+	if ( input_->push( Input::ESCAPE ) )
+	{
+		if ( scene_->get_name() == "title" )
+		{
+			get_app()->close();
+		}
+		else if ( scene_->get_name() == "game_play" )
+		{
+			scene_->set_next_scene( "stage_select" );
+		}
+		else
+		{
+			scene_->set_next_scene( "title" );
+		}
+	}
+
 	scene_->update();
 
 	render();
@@ -160,18 +176,16 @@ void GameMain::render()
 
 void GameMain::on_function_key_down( int function_key )
 {
-	/*
 	if ( function_key == 2 )
 	{
-		get_sound_manager()->set_enabled( ! get_sound_manager()->is_enabled() );
-		Sound* bgm = get_sound_manager()->get_sound( "bgm" );
+		get_sound_manager()->set_mute( ! get_sound_manager()->is_mute() );
+		game::Sound* bgm = get_sound_manager()->get_sound( "bgm" );
 
 		if ( bgm )
 		{
 			bgm->play( true );
 		}
 	}
-	*/
 
 	if ( function_key == 5 )
 	{

@@ -4,6 +4,7 @@
 #include "Direct3D11Matrix.h"
 #include "Direct3D11Sprite.h"
 #include "Direct3D11Effect.h"
+#include "Direct3D11Fader.h"
 #include "DirectWrite.h"
 #include "Direct3D11TextureManager.h"
 #include "DirectX.h"
@@ -29,15 +30,23 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 	, text_color_( Direct3D::Color::from_256( 255, 255, 255, 127 ) )
 	, text_border_color_( Direct3D::Color::from_256( 0, 0, 0, 127 ) )
 	, next_scene_name_( next_scene_name )
+	, sprite_texture_( 0 )
 	, bg_texture_( 0 )
 	, bg_width_( 0 )
 	, bg_height_( 0 )
 	, bg_scale_( 1.f, 1.f, 0.001f )
+	, bgm_( 0 )
+	, sound_( 0 )
+	, is_skipped_( false )
 {
+	get_sound_manager()->stop_all();
+
 	load_story_text_file( file_name );
 
 	text_y_target_ = static_cast< float >( -get_direct_3d()->getFont()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) ) );
 	
+	sprite_texture_ = get_direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
+
 	if ( ! bg_texture_ )
 	{
 		bg_texture_ = get_direct_3d()->getTextureManager()->load( "bg", "media/image/story-bg-default.jpg" );
@@ -51,12 +60,16 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 		bg_width_ = texture_2d_desc.Width;
 		bg_height_ = texture_2d_desc.Height;
 	}
+
+	get_direct_3d()->getFader()->full_out();
 }
 
 StoryTextScene::~StoryTextScene()
 {
 	get_direct_3d()->getTextureManager()->unload( "sprite" );
 	get_direct_3d()->getTextureManager()->unload( "bg" );
+
+	get_sound_manager()->stop_all();
 }
 
 void StoryTextScene::load_story_text_file( const char* file_name )
@@ -108,7 +121,8 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 			std::string bgm_name;
 			ss >> bgm_name;
 
-			get_sound_manager()->load_music( "bgm", bgm_name.c_str() )->play( false );
+			bgm_ = get_sound_manager()->load_music( "bgm", bgm_name.c_str() );
+			bgm_->play( false );
 		}
 		else if ( name == "text-color" )
 		{
@@ -130,6 +144,13 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 		{
 			in_text = true;
 		}
+		else if ( name == "sound" )
+		{
+			std::string sound_name;
+			ss >> sound_name;
+			sound_ = get_sound_manager()->load( "sound", sound_name.c_str() );
+			sound_->play( false );
+		}
 	}
 }
 
@@ -141,21 +162,55 @@ void StoryTextScene::update()
 {
 	float speed = text_scroll_speed_;
 
-	if ( get_input()->press( Input::A ) )
+	if ( ! text_.empty() )
 	{
-		speed *= 8.f;
-	}
-	if ( get_input()->press( Input::B ) )
-	{
-		speed *= 8.f;
-	}
+		if ( get_input()->press( Input::A ) )
+		{
+			speed *= 8.f;
+		}
+		if ( get_input()->press( Input::B ) )
+		{
+			speed *= 8.f;
+		}
 	
-	text_y_ -= speed;
+		text_y_ -= speed;
 
-	if ( text_y_ < text_y_target_ )
+		if ( text_y_ < text_y_target_ )
+		{
+			set_next_scene( next_scene_name_ );
+		}
+	}
+	else if ( sound_ )
 	{
-		set_next_scene( next_scene_name_ );
-	}	
+		if ( ! is_skipped_ )
+		{
+			if ( get_input()->push( Input::A ) || ! sound_->is_playing() )
+			{
+				is_skipped_ = true;
+			}
+		}
+		else
+		{
+			sound_->fade_out();
+
+			if ( bgm_ )
+			{
+				bgm_->fade_out();
+			}
+
+			get_direct_3d()->getFader()->fade_out();
+		}
+
+		if ( ! sound_->is_playing() && ( ! bgm_ || ! bgm_->is_playing() ) && get_direct_3d()->getFader()->is_full_out() )
+		{
+			set_next_scene( next_scene_name_ );
+		}
+	}
+
+	if ( ! is_skipped_ )
+	{
+		get_direct_3d()->getFader()->fade_in();
+	}
 
 	bg_scale_.chase();
 }
@@ -165,8 +220,6 @@ void StoryTextScene::update()
  */
 void StoryTextScene::render()
 {
-	get_direct_3d()->setInputLayout( "main" );
-
 	get_direct_3d()->clear();
 	get_direct_3d()->getSprite()->begin();
 
@@ -181,27 +234,10 @@ void StoryTextScene::render()
 
 		// bg
 		{
-			win::Rect src_rect( 0, 0, bg_width_, bg_height_ );
-			Direct3D::Vector center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
-			Direct3D::Vector position( get_width() * 0.5f, get_height() * 0.5f, 0.f );
-
-			float x_ratio = static_cast< float >( get_width() ) / static_cast< float >( src_rect.width() );
-			float y_ratio = static_cast< float >( get_height() ) / static_cast< float >( src_rect.height() );
-			float ratio = std::min( x_ratio, y_ratio );
-		
-			s.set_scaling( bg_scale_.value() * ratio, bg_scale_.value() * ratio, 1.f );
-			t.set_translation( get_width() * 0.5f, get_height() * 0.5f, 0.f );
-
-			transform = s * t;
+			win::Rect dst_rect( 0, 0, get_width(), get_height() );
 
 			get_direct_3d()->getSprite()->set_transform( transform );
-			get_direct_3d()->getSprite()->draw( bg_texture_, src_rect );
-		}
-
-		// loading ...
-		if ( ! get_next_scene().empty() )
-		{
-
+			get_direct_3d()->getSprite()->draw( dst_rect, bg_texture_ );
 		}
 	}
 
@@ -220,6 +256,29 @@ void StoryTextScene::render()
 
 	get_direct_3d()->begin3D();
 	get_direct_3d()->renderText();
+
+	render_fader();
+
+	// loading ...
+	if ( is_skipped_ )
+	{
+		get_direct_3d()->getSprite()->begin();
+
+		Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
+
+		for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
+		{
+			( *i )->apply();
+
+			win::Rect src_rect = win::Rect::Size( 512, 0, 272, 128 );
+			win::Point dst_point( get_width() - src_rect.width(), get_height() - src_rect.height() );
+
+			get_direct_3d()->getSprite()->draw( dst_point, sprite_texture_, src_rect );
+		}
+
+		get_direct_3d()->getSprite()->end();
+	}
+
 	get_direct_3d()->end3D();
 }
 

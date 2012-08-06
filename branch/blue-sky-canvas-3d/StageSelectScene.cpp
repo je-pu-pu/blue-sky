@@ -19,7 +19,7 @@
 #include <common/exception.h>
 #include <common/serialize.h>
 
-// #include <boost/filesystem/convenience.hpp>
+#include <boost/filesystem.hpp>
 
 namespace blue_sky
 {
@@ -97,7 +97,15 @@ void StageSelectScene::update()
 			ok_->play( false );
 
 			set_next_stage_name( stage->name );
-			set_next_scene( "stage_intro" );
+
+			if ( boost::filesystem::exists( std::string( "media/stage/" ) + stage->name + ".intro" ) )
+			{
+				set_next_scene( "stage_intro" );
+			}
+			else
+			{
+				set_next_scene( "game_play" );
+			}
 		}
 		else
 		{
@@ -111,7 +119,7 @@ void StageSelectScene::update()
  */
 void StageSelectScene::render()
 {
-	Color bg_color = page_ < get_max_story_page() ? Color::from_256( 0xFF, 0xAA, 0x11 ) : Color::from_256( 0xFF, 0xEE, 0x99 );
+	Color bg_color = page_ < get_max_story_page() ? Color::from_256( 0xFF, 0xAA, 0x11 ) : Color::from_256( 0x99, 0xEE, 0xFF );
 
 	get_direct_3d()->clear( bg_color );
 	get_direct_3d()->getSprite()->begin();
@@ -124,7 +132,7 @@ void StageSelectScene::render()
 
 		// render_bg()
 		{
-			get_direct_3d()->getSprite()->draw( bg_texture_, Color( 1.f, 1.f, 1.f, 0.5f ) );
+			get_direct_3d()->getSprite()->draw( bg_texture_ );
 		}
 	}
 
@@ -386,7 +394,7 @@ void StageSelectScene::check_story_completed()
 
 	for ( int p = 0; p < get_max_story_page(); p++ )
 	{
-		for ( int s = 1; s <= get_max_stage_per_page(); s++ )
+		for ( int s = 0; s < get_max_stage_per_page(); s++ )
 		{
 			std::string stage_name = common::serialize( p ) + "-" + common::serialize( s );
 
@@ -402,7 +410,7 @@ void StageSelectScene::check_story_completed()
 
 bool StageSelectScene::is_final_stage_open() const
 {
-	for ( int s = 1; s < get_max_stage_per_page(); s++ )
+	for ( int s = 0; s < get_max_stage_per_page(); s++ )
 	{
 		std::string stage_name = common::serialize( get_max_story_page() - 1 ) + "-" + common::serialize( s );
 

@@ -20,11 +20,14 @@ private:
 public:
 	Direct3D11Fader( Direct3D* );
 
-	bool fade_in( float_t speed = 0.01f );
-	bool fade_out( float_t speed = 0.01f );
+	bool fade_in( float_t = 0.05f );
+	bool fade_out( float_t = 0.05f );
 
 	void full_in();
 	void full_out();
+
+	bool is_full_in() const { return fade_ == 0.f; }
+	bool is_full_out() const { return fade_ == 1.f; }
 
 	void set_color( const Color& c ) { fade_color_ = c; current_color_ = Color( c.r(), c.g(), c.b(), current_color_.a() ); }
 	const Color& get_color() const { return current_color_; }

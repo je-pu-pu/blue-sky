@@ -416,6 +416,9 @@ float_t Player::get_footing_height( const Vector3& from, bool include_soft_footi
 	{
 		const ActiveObject* a = reinterpret_cast< const ActiveObject* >( ray_callback.m_collisionObject->getUserPointer() );
 		
+		/// debug !!!
+		const char* xxx = typeid( a ).name();
+
 		if ( a->is_balloon() )
 		{
 			// !!!

@@ -40,6 +40,8 @@ protected:
 	std::string file_name_;
 	bool is_3d_sound_;
 
+	T volume_fade_;
+
 public:
 
 	/// コンストラクタ
@@ -82,7 +84,7 @@ public:
 	void set_speed( T );
 
 	/// サウンドを再生する
-	bool play( bool );
+	bool play( bool, bool );
 
 	/// サウンドが再生中かどうかを取得する
 	bool is_playing() const;
@@ -90,8 +92,16 @@ public:
 	/// サウンドを停止する
 	bool stop();
 
+	/// サウンドのフェードインを開始する
+	void fade_in( T = 0.01f );
+
+	/// サウンドのフェードアウトを開始する
+	void fade_out( T = 0.01f );
+
 	/// 現在の位置 ( 秒 ) を取得する
 	float get_current_position() const;
+
+	void update();
 
 	DirectSoundBuffer* get_direct_sound_buffer() { return direct_sound_buffer_; };
 	void set_direct_sound_buffer( DirectSoundBuffer* b ) { direct_sound_buffer_ = b; }

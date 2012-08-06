@@ -62,8 +62,15 @@ bool StreamingSound::load( const char* file_name )
 	return true;
 }
 
-bool StreamingSound::play( bool loop )
+bool StreamingSound::play( bool loop, bool force )
 {
+	volume_fade_ = 0.f;
+
+	if ( ! force && is_playing() )
+	{
+		return true;
+	}
+
 	if ( get_current_position() > 0.f )
 	{
 		sound_file_->seek( 0 );
@@ -81,6 +88,8 @@ bool StreamingSound::play( bool loop )
 
 void StreamingSound::update()
 {
+	Sound::update();
+
 	DWORD play_pos = 0;
 	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->GetCurrentPosition( & play_pos, 0 ) );
 

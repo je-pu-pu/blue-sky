@@ -60,7 +60,7 @@ protected:
 	void set_action_base_position_to_current_position() { action_base_position_ = get_location(); }
 
 	float get_height_to_die() const { return 15.f; }
-	float get_balloon_action_length() const { return 10.f; }
+	float get_balloon_action_length() const { return 5.f; }
 
 	float_t get_min_walk_step_speed() const { return 0.1f; }
 	float_t get_max_walk_step_speed() const { return 0.25f; }

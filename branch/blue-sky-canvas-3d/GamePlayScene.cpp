@@ -73,6 +73,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
 	, ui_texture_( 0 )
 	, is_cleared_( false )
+	, action_bgm_after_timer_( 0.f )
 {
 	object_detail_level_0_length_ = get_config()->get( "video.object-detail-level-0-length", 500.f );
 	object_detail_level_1_length_ = get_config()->get( "video.object-detail-level-1-length", 250.f );
@@ -85,6 +86,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	{
 		get_sound_manager()->stop_all();
 		get_sound_manager()->unload_all();
+
+		balloon_bgm_ = get_sound_manager()->load_music( "balloon" );
 
 		get_sound_manager()->load_3d_sound( "enemy" );
 		// sound_manager()->load_3d_sound( "vending-machine" );
@@ -166,10 +169,10 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	rectangle_ = new Rectangle( get_direct_3d() );
 
-	Sound* bgm = get_sound_manager()->get_sound( "bgm" );
-	if ( bgm )
+	bgm_ = get_sound_manager()->get_sound( "bgm" );
+	if ( bgm_ )
 	{
-		bgm->play( true );
+		bgm_->play( true );
 	}
 
 	restart();
@@ -193,6 +196,7 @@ void GamePlayScene::restart()
 	get_direct_3d()->getFader()->full_out();
 
 	is_cleared_ = false;
+	action_bgm_after_timer_ = 0.f;
 
 	player_->restart();
 	goal_->restart();
@@ -589,6 +593,37 @@ void GamePlayScene::update()
 	// sound_manager()->set_listener_velocity( player_->velocity() );
 	get_sound_manager()->set_listener_orientation( camera_->front(), camera_->up() );
 	get_sound_manager()->commit();
+
+	if ( player_->get_action_mode() == Player::ACTION_MODE_BALLOON )
+	{
+		action_bgm_after_timer_ = 2.f;
+	}
+	else
+	{
+		action_bgm_after_timer_ -= get_elapsed_time();
+	}
+
+	if ( action_bgm_after_timer_ > 0.f )
+	{
+		bgm_->fade_out();
+
+		if ( balloon_bgm_->is_playing() )
+		{
+			balloon_bgm_->fade_in( Sound::VOLUME_FADE_SPEED_FAST );
+		}
+		else
+		{
+			balloon_bgm_->play( true );
+			balloon_bgm_->set_volume( Sound::VOLUME_MAX );
+		}
+	}
+	else
+	{
+		balloon_bgm_->fade_out();
+
+		bgm_->play( true, false );
+		bgm_->fade_in();
+	}
 }
 
 void GamePlayScene::update_main()

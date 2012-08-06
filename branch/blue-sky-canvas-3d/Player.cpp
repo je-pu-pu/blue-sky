@@ -71,6 +71,8 @@ void Player::restart()
  */
 void Player::update()
 {
+	get_rigid_body()->setActivationState( true );
+
 	limit_velocity();
 
 	update_on_footing();
@@ -80,7 +82,6 @@ void Player::update()
 
 	if ( action_mode_ == ACTION_MODE_BALLOON )
 	{
-		get_rigid_body()->clearForces();
 		get_rigid_body()->setLinearVelocity(
 			Vector3(
 				get_rigid_body()->getLinearVelocity().x(),
@@ -340,7 +341,7 @@ void Player::update_step_speed()
 	}
 	else
 	{
-		stop_sound( "short-breath" );
+		fade_out_sound( "short-breath" );
 	}
 }
 
@@ -535,7 +536,7 @@ void Player::stop()
 
 void Player::damage( const Vector3& to )
 {
-	uncontrollable_timer_ = 1.f;
+	uncontrollable_timer_ = 1.5f;
 
 	get_rigid_body()->setActivationState( true );
 	get_rigid_body()->setLinearVelocity( to );

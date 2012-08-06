@@ -208,4 +208,14 @@ void ActiveObject::stop_sound( const char* name ) const
 	}
 }
 
+void ActiveObject::fade_out_sound( const char* name ) const
+{
+	Sound* sound = GameMain::get_instance()->get_sound_manager()->get_sound( name );
+	
+	if ( sound )
+	{
+		sound->fade_out();
+	}
+}
+
 } // namespace blue_sky

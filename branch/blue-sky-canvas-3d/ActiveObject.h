@@ -76,6 +76,9 @@ protected:
 	void play_sound( const char*, bool = false, bool = true ) const;
 	void stop_sound( const char* ) const;
 
+	void fade_in_sound( const char* ) const;
+	void fade_out_sound( const char* ) const;
+
 public:
 
 	ActiveObject();

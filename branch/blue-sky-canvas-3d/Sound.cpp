@@ -5,6 +5,7 @@
 // #include "WaveFile.h"
 #include "OggVorbisFile.h"
 
+#include <common/math.h>
 #include <common/exception.h>
 
 namespace game
@@ -12,6 +13,8 @@ namespace game
 
 const Sound::T Sound::VOLUME_MIN = 0.f;
 const Sound::T Sound::VOLUME_MAX = 1.f;
+const Sound::T Sound::VOLUME_FADE_SPEED_DEFAULT = 0.0025f;
+const Sound::T Sound::VOLUME_FADE_SPEED_FAST = 0.025f;
 
 const Sound::T Sound::PAN_LEFT = -1.f;
 const Sound::T Sound::PAN_RIGHT = 1.f;
@@ -27,6 +30,7 @@ Sound::Sound( const DirectSound* direct_sound )
 	, direct_sound_buffer_( 0 )
 	, sound_file_( 0 )
 	, is_3d_sound_( false )
+	, volume_fade_( 0.f )
 {
 
 }
@@ -111,6 +115,8 @@ Sound::T Sound::get_volume()
 
 void Sound::set_volume( T v )
 {
+	v = math::clamp( v, VOLUME_MIN, VOLUME_MAX );
+
 	LONG volume = static_cast< long >( ( v  - VOLUME_MIN ) / ( VOLUME_MAX - VOLUME_MIN ) * ( DSBVOLUME_MAX - DSBVOLUME_MIN ) + DSBVOLUME_MIN );
 	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->SetVolume( volume ) );
 }
@@ -125,8 +131,15 @@ void Sound::set_speed( Sound::T s )
 	return direct_sound_buffer_->setSpeed( s );
 }
 
-bool Sound::play( bool loop )
+bool Sound::play( bool loop, bool force )
 {
+	volume_fade_ = 0.f;
+
+	if ( ! force && is_playing() )
+	{
+		return true;
+	}
+
 	direct_sound_buffer_->play( loop );
 
 	return true;
@@ -147,12 +160,39 @@ bool Sound::stop()
 	return true;
 }
 
+void Sound::fade_in( T speed )
+{
+	volume_fade_ = speed;
+}
+
+void Sound::fade_out( T speed )
+{
+	if ( is_playing() )
+	{
+		volume_fade_ = -speed;
+	}
+}
+
 float Sound::get_current_position() const
 {
 	DWORD play_pos = 0;
 	direct_sound_buffer_->get_direct_sound_buffer()->GetCurrentPosition( & play_pos, 0 );
 
 	return static_cast< float >( play_pos ) / static_cast< float >( sound_file_->size_per_sec() );
+}
+
+void Sound::update()
+{
+	if ( volume_fade_ )
+	{
+		set_volume( get_volume() + volume_fade_ );
+	
+		if ( get_volume() < VOLUME_MAX * 0.5f )
+		{
+			stop();
+			volume_fade_ = 0.f;
+		}
+	}
 }
 
 } // namespace blue_sky

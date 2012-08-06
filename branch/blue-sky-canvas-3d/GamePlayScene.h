@@ -54,6 +54,10 @@ protected:
 	auto_ptr< Player >					player_;
 	auto_ptr< Camera >					camera_;
 
+	Sound*								bgm_;
+	Sound*								balloon_bgm_;
+	float_t								action_bgm_after_timer_;
+
 	void generate_random_stage();
 
 	void load_stage_file( const char* );

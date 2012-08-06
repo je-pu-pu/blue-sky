@@ -33,7 +33,7 @@ public:
 	bool load( const char* );
 
 	/// サウンドを再生する
-	bool play( bool );
+	bool play( bool, bool );
 	bool is_loop() const { return is_loop_; }
 
 	/// 更新処理

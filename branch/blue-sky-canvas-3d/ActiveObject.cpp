@@ -205,7 +205,7 @@ void ActiveObject::play_sound( const char* name, bool loop, bool force ) const
 		if ( force || ! sound->is_playing() )
 		{
 			sound->set_3d_position( get_location().x(), get_location().y(), get_location().z() );
-			sound->set_3d_velocity( get_velocity().x() * 60.f, get_velocity().z() * 60.f, get_velocity().z() * 60.f );
+			sound->set_3d_velocity( get_velocity().x(), get_velocity().z(), get_velocity().z() );
 			sound->play( loop );
 		}
 	}

@@ -28,6 +28,8 @@ class DrawingModel;
 class Player;
 class Balloon;
 class Robot;
+class StaticObject;
+class DynamicObject;
 
 /**
  * 行動するオブジェクト
@@ -93,6 +95,7 @@ public:
 	
 	virtual bool is_hard() const { return true; }
 	virtual bool is_balloon() const { return false; }
+	virtual bool is_dynamic_object() const { return false; }
 
 	virtual float_t get_collision_width() const = 0;
 	virtual float_t get_collision_height() const = 0;
@@ -105,6 +108,10 @@ public:
 	virtual void on_collide_with( Player* ) { }
 	virtual void on_collide_with( Balloon* ) { }
 	virtual void on_collide_with( Robot* ) { }
+	virtual void on_collide_with( StaticObject* ) { }
+	virtual void on_collide_with( DynamicObject* ) { }
+
+	virtual void on_collide_with_ground() { }
 
 	void set_mass( float_t );
 

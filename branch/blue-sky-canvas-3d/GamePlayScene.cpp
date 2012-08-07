@@ -109,13 +109,19 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		get_sound_manager()->load( "damage-1" );
 		get_sound_manager()->load( "dead" );
 
-		get_sound_manager()->load( "balloon-get" );
-		get_sound_manager()->load( "balloon-burst" );
-		get_sound_manager()->load( "rocket-get" );
-		get_sound_manager()->load( "rocket" );
-		get_sound_manager()->load( "rocket-burst" );
-		get_sound_manager()->load( "umbrella-get" );
-		get_sound_manager()->load( "medal-get" );
+		get_sound_manager()->load_3d_sound( "balloon-get" );
+		get_sound_manager()->load_3d_sound( "balloon-burst" );
+		get_sound_manager()->load_3d_sound( "rocket-get" );
+		get_sound_manager()->load_3d_sound( "rocket" );
+		get_sound_manager()->load_3d_sound( "rocket-burst" );
+		get_sound_manager()->load_3d_sound( "umbrella-get" );
+		get_sound_manager()->load_3d_sound( "medal-get" );
+
+		get_sound_manager()->load_3d_sound( "soda-can-long-1" );
+		get_sound_manager()->load_3d_sound( "soda-can-long-2" );
+		get_sound_manager()->load_3d_sound( "soda-can-short-1" );
+		get_sound_manager()->load_3d_sound( "soda-can-short-2" );
+		get_sound_manager()->load_3d_sound( "soda-can-short-3" );
 
 		get_sound_manager()->load( "fin" );
 		get_sound_manager()->load( "door" );
@@ -591,10 +597,11 @@ void GamePlayScene::update()
 	{
 		on_goal();
 	}
-	// player_->get_rigid_body()->
+	
+	get_physics()->check_collision_dynamic_object();
 
 	get_sound_manager()->set_listener_position( camera_->position() );
-	// sound_manager()->set_listener_velocity( player_->velocity() );
+	// get_sound_manager()->set_listener_velocity( player_->get_velocity() );
 	get_sound_manager()->set_listener_orientation( camera_->front(), camera_->up() );
 	get_sound_manager()->commit();
 

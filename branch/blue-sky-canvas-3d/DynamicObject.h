@@ -18,7 +18,15 @@ private:
 	float_t		collision_height_;
 	float_t		collision_depth_;
 
-	void on_collide_with( ActiveObject* o ) { }
+	bool is_dynamic_object() const { return true; }
+
+	void on_collide_with( ActiveObject* o ) { o->on_collide_with( this ); }
+
+	void on_collide_with( Player* );
+	void on_collide_with( StaticObject* );
+	void on_collide_with_ground();
+
+	void play_collision_sound( const ActiveObject* );
 
 protected:
 

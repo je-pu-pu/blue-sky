@@ -71,7 +71,27 @@ public:
 		ActiveObject* a0 = reinterpret_cast< ActiveObject* >( o0->getUserPointer() );
 		ActiveObject* a1 = reinterpret_cast< ActiveObject* >( o1->getUserPointer() );
 
-		if ( ! a0 || ! a1 || a0->is_dead() || a1->is_dead() )
+		if ( ! a0 )
+		{
+			if ( a1 && ! a1->is_dead() )
+			{
+				a1->on_collide_with_ground();
+			}
+
+			return 0;
+		}
+
+		if ( ! a1 )
+		{
+			if ( a0 && ! a0->is_dead() )
+			{
+				a0->on_collide_with_ground();
+			}
+
+			return 0;
+		}
+
+		if ( a0->is_dead() || a1->is_dead() )
 		{
 			return 0;
 		}
@@ -94,6 +114,34 @@ void ActiveObjectPhysics::check_collision_with( ActiveObject* a )
 {
 	ActiveObjectContactResultCallback callback;
 	dynamics_world_->contactTest( a->get_rigid_body(), callback );
+}
+
+void ActiveObjectPhysics::check_collision_dynamic_object()
+{
+	for ( int n = 0; n < dynamics_world_->getCollisionObjectArray().size(); n++ )
+	{
+		btRigidBody* rigid_body = btRigidBody::upcast( dynamics_world_->getCollisionObjectArray()[ n ] );
+
+		if ( ! rigid_body )
+		{
+			continue;
+		}
+
+		if ( ! rigid_body->getUserPointer() )
+		{
+			continue;
+		}
+
+		ActiveObject* a = reinterpret_cast< ActiveObject* >( rigid_body->getUserPointer() );
+
+		if ( ! a->is_dynamic_object() )
+		{
+			continue;
+		}
+		
+		ActiveObjectContactResultCallback callback;
+		dynamics_world_->contactTest( a->get_rigid_body(), callback );
+	}
 }
 
 }

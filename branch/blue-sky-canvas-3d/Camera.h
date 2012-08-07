@@ -67,7 +67,7 @@ public:
 	void set_fov_target( float );
 
 	float get_fov_default() const { return fov_default_; }
-	void set_fov_default( float f ) { fov_default_ = f; }
+	void set_fov_default( float f ) { fov_ = fov_default_ = f; }
 
 	void reset_fov() { fov_ = fov_target_ = fov_default_; }
 

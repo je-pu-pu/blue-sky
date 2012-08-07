@@ -27,6 +27,8 @@ Camera::~Camera()
 
 void Camera::restart()
 {
+	reset_fov();
+
 	rotate_degree_target_ = Vector3( 0, 0, 0 );
 	rotate_degree_ = Vector3( 0, 0, 0 );
 }

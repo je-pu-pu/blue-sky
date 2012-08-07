@@ -54,6 +54,8 @@ TitleScene::TitleScene( const GameMain* game_main )
 	{
 		GameConstantBuffer game_constant_buffer;
 		game_constant_buffer.projection = XMMatrixTranspose( XMMatrixOrthographicLH( 2.f * get_width() / get_height(), 2.f, 0.f, 1.f ) );
+		game_constant_buffer.screen_width = static_cast< float_t >( get_width() );
+		game_constant_buffer.screen_height = static_cast< float_t >( get_height() );
 
 		get_game_main()->get_game_constant_buffer()->update( & game_constant_buffer );
 	}

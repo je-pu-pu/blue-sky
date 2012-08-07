@@ -137,6 +137,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Camera
 	camera_ = new Camera();
+	camera_->set_fov_default( get_config()->get( "camera.fov", 90.f ) );
+	camera_->set_aspect( static_cast< float >( get_width() ) / static_cast< float >( get_height() ) );
+	camera_->reset_fov();
 
 	// balloon_model_ = get_drawing_model_manager()->load( "balloon" );
 
@@ -158,8 +161,10 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	{
 		GameConstantBuffer constant_buffer;
-		constant_buffer.projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, get_app()->get_width() / ( FLOAT ) get_app()->get_height(), 0.05f, 3000.f );
+		constant_buffer.projection = XMMatrixPerspectiveFovLH( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f );
 		constant_buffer.projection = XMMatrixTranspose( constant_buffer.projection );
+		constant_buffer.screen_width = static_cast< float_t >( get_width() );
+		constant_buffer.screen_height = static_cast< float_t >( get_height() );
 		
 		get_game_main()->get_game_constant_buffer()->update( & constant_buffer );
 	}
@@ -447,7 +452,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			size_map[ "board-1"      ] = ActiveObject::Vector3(  4.f,   0.2f,  0.8f  );
 
 			std::map< string_t, float_t > mass_map;
-			mass_map[ "soda-can-1"   ] = 0.1f;
+			mass_map[ "soda-can-1"   ] = 0.001f;
 			mass_map[ "board-1"      ] = 20.f;
 
 			float w = 0.f, h = 0.f, d = 0.f, mass = 0.f;
@@ -487,7 +492,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			object->set_start_location( x, y, z );
 			object->set_start_rotation( r, 0, 0 );
 
-			if ( object_name == "soda-can" )
+			if ( object_name == "soda-can-1" )
 			{
 				object->set_rigid_body( get_physics()->add_active_object_as_cylinder( object ) );
 			}

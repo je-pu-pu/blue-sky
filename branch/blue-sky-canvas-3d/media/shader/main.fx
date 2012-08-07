@@ -45,6 +45,8 @@ SamplerState shadow_texture_sampler
 cbuffer GameConstantBuffer : register( b0 )
 {
 	matrix Projection;
+	float ScreenWidth;
+	float ScreenHeight;
 };
 
 cbuffer FrameConstantBuffer : register( b1 )
@@ -197,12 +199,12 @@ void gs_line( line VS_LINE_OUTPUT input[2], inout TriangleStream<PS_INPUT> TriSt
 {
 	static const uint input_vertex_count = 2;
 
-	static const float screen_width = 800.f;
-	static const float screen_height = 600.f;
-	static const float screen_ratio = ( screen_height / screen_width );
+	const float screen_width = ScreenWidth;
+	const float screen_height = ScreenHeight;
+	const float screen_ratio = ( screen_height / screen_width );
 
 	static const float PI = 3.14159265f;
-	static const float z_offset = -0.0005f;
+	static const float z_offset = -0.00001f;
 	static const float z_fix = 0.f;
 	static const float w_fix = 1.f;
 	

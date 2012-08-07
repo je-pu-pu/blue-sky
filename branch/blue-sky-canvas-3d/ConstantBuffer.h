@@ -9,6 +9,8 @@ namespace blue_sky
 struct GameConstantBuffer
 {
 	XMMATRIX projection;
+	float_t screen_width;
+	float_t screen_height;
 };
 
 struct FrameConstantBuffer

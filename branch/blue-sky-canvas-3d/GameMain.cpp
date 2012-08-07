@@ -204,7 +204,10 @@ void GameMain::on_mouse_wheel( int wheel )
 
 void GameMain::on_resize()
 {
-	direct_3d_->on_resize( get_app()->get_width(), get_app()->get_height() );
+	if ( direct_3d_ )
+	{
+		direct_3d_->on_resize( get_app()->get_width(), get_app()->get_height() );
+	}
 }
 
 /**

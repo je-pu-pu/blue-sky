@@ -202,7 +202,7 @@ void gs_line( line VS_LINE_OUTPUT input[2], inout TriangleStream<PS_INPUT> TriSt
 	static const float screen_ratio = ( screen_height / screen_width );
 
 	static const float PI = 3.14159265f;
-	static const float z_offset = -0.002f;
+	static const float z_offset = -0.0005f;
 	static const float z_fix = 0.f;
 	static const float w_fix = 1.f;
 	

@@ -207,7 +207,7 @@ void Player::update_on_footing()
 	const float_t x = get_rigid_body()->getCenterOfMassPosition().x();
 	const float_t y = get_rigid_body()->getCenterOfMassPosition().y();
 	const float_t z = get_rigid_body()->getCenterOfMassPosition().z();
-	const float_t ray_length = get_collision_height() * 0.5f + 0.01f;
+	const float_t ray_length = get_collision_height() * 0.5f + 0.05f;
 
 	const float_t margin = 0.05f;
 	const Vector3 front = get_front() * ( get_collision_depth() * 0.5f - margin );
@@ -522,13 +522,6 @@ void Player::add_direction_degree( float d )
 
 	get_rigid_body()->setCenterOfMassTransform( t );
 	*/
-
-	Transform t = get_rigid_body()->getCenterOfMassTransform();
-
-	Matrix m;
-	m.setEulerZYX( 0.f, math::degree_to_radian( get_direction_degree() ), 0.f );
-	t.setBasis( m );
-	get_rigid_body()->setCenterOfMassTransform( t );
 }
 
 void Player::stop()

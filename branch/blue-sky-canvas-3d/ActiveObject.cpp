@@ -145,6 +145,10 @@ const ActiveObject::Vector3& ActiveObject::get_velocity() const
 	return get_rigid_body()->getLinearVelocity();
 }
 
+void ActiveObject::set_velocity( const Vector3& v )
+{
+	get_rigid_body()->setLinearVelocity( v );
+}
 
 
 void ActiveObject::set_direction_degree( float d )
@@ -162,6 +166,12 @@ void ActiveObject::set_direction_degree( float d )
 
 	front_.normalize();
 	right_.normalize();
+
+	Transform t = get_rigid_body()->getCenterOfMassTransform();
+
+	m.setEulerZYX( 0.f, math::degree_to_radian( get_direction_degree() ), 0.f );
+	t.setBasis( m );
+	get_rigid_body()->setCenterOfMassTransform( t );
 }
 
 ActiveObject::DynamicsWorld* ActiveObject::get_dynamics_world() const

@@ -119,9 +119,12 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 		else if ( name == "bgm" )
 		{
 			std::string bgm_name;
-			ss >> bgm_name;
+			float_t volume = 1.f;
+
+			ss >> bgm_name >> volume;
 
 			bgm_ = get_sound_manager()->load_music( "bgm", bgm_name.c_str() );
+			bgm_->set_volume( volume );
 			bgm_->play( false );
 		}
 		else if ( name == "text-color" )

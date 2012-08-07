@@ -108,8 +108,8 @@ public:
 
 	void set_mass( float_t );
 
-	void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; }
-	const DrawingModel* get_drawing_model() const { return drawing_model_; }
+	virtual void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; }
+	virtual const DrawingModel* get_drawing_model() const { return drawing_model_; }
 
 	inline RigidBody* get_rigid_body() { return rigid_body_; }
 	inline const RigidBody* get_rigid_body() const { return rigid_body_; }
@@ -126,6 +126,7 @@ public:
 	const Transform& get_transform() const;
 
 	const Vector3& get_velocity() const;
+	void set_velocity( const Vector3& );
 
 	float get_direction_degree() const { return direction_degree_; }
 	void set_direction_degree( float d );

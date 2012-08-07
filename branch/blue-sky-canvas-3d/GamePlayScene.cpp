@@ -678,7 +678,13 @@ void GamePlayScene::update_main()
 		if ( get_input()->push( Input::B ) )
 		{
 			Robot* robot = new Robot();
-			robot->set_drawing_model( get_drawing_model_manager()->load( "robot" ) );
+			robot->set_player( player_.get() );
+
+			robot->add_drawing_model( get_drawing_model_manager()->load( "robot" ) );
+			robot->add_drawing_model( get_drawing_model_manager()->load( "robot-l" ) );
+			robot->add_drawing_model( get_drawing_model_manager()->load( "robot" ) );
+			robot->add_drawing_model( get_drawing_model_manager()->load( "robot-r" ) );
+
 			robot->set_start_location( player_->get_transform().getOrigin().getX(), player_->get_transform().getOrigin().getY() + 20, player_->get_transform().getOrigin().getZ() + 5 );
 
 			get_active_object_manager()->add_active_object( robot );

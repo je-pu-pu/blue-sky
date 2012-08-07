@@ -2,6 +2,7 @@ bgm road
 sky-box sky-box-3
 
 object outdoor-unit 0 20 2 0
+medal 11.000000 25.0 47.0 0
 dynamic-object soda-can-1 11.199999809265137 20.799999237060547 50.499996185302734 0
 balloon 11.000000 23.0 32.5 0
 dynamic-object board-1 11.0 20.60000228881836 49.0 270

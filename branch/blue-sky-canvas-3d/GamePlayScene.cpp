@@ -29,6 +29,7 @@
 #include "Direct3D11Material.h"
 #include "Direct3D11Fader.h"
 #include "Direct3D11Effect.h"
+#include "Direct3D11Sprite.h"
 #include "DirectWrite.h"
 #include "DirectX.h"
 
@@ -82,7 +83,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	get_physics()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
 
 	// Texture
-	// ui_texture_ = get_direct_3d()->getTextureManager()->load( "ui", "media/image/item.png" );
+	ui_texture_ = get_direct_3d()->getTextureManager()->load( "ui", "media/image/item.png" );
 
 	// Sound
 	{
@@ -517,6 +518,11 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			active_object = new Balloon();
 			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
 		}
+		else if ( name == "medal" )
+		{
+			active_object = new Medal();
+			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
+		}
 		/*
 		else if ( name == "rocket" )
 		{
@@ -526,10 +532,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		{
 			active_object = new Umbrella();
 		}
-		else if ( name == "medal" )
-		{
-			active_object = new Medal();
-		}
+		
 		else if ( name == "poison" )
 		{
 			active_object = new Poison();
@@ -581,7 +584,8 @@ void GamePlayScene::update()
 
 	if ( ! is_cleared_ )
 	{
-		get_physics()->update( get_elapsed_time() );
+		get_physics()->update( 1.f / get_main_loop()->get_fps() );
+		// get_physics()->update( get_elapsed_time() );
 
 		player_->update_transform();
 
@@ -1080,6 +1084,8 @@ void GamePlayScene::render()
 		}
 #endif
 
+		render_sprite();
+
 		render_fader();
 
 		if ( is_render_2d_enabled )
@@ -1125,6 +1131,28 @@ void GamePlayScene::render_line( const ActiveObject* active_object )
 	get_game_main()->get_object_constant_buffer()->render();
 
 	active_object->get_drawing_model()->get_line()->render(); // 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
+}
+
+void GamePlayScene::render_sprite()
+{
+	get_direct_3d()->getSprite()->begin();
+
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
+
+	for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
+	{
+		( *i )->apply();
+
+		if ( player_->has_medal() )
+		{
+			win::Rect src_rect = win::Rect::Size( 384, 0, 64, 64 );
+			win::Point dst_point( 5, get_height() - src_rect.height() - 5 );
+
+			get_direct_3d()->getSprite()->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+		}
+	}
+
+	get_direct_3d()->getSprite()->end();
 }
 
 } // namespace blue_sky

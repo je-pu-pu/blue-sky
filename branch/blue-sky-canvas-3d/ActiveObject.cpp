@@ -79,7 +79,7 @@ void ActiveObject::limit_velocity()
 	v.setX( math::clamp( v.x(), -get_max_speed(), get_max_speed() ) );
 	v.setZ( math::clamp( v.z(), -get_max_speed(), get_max_speed() ) );
 
-	get_rigid_body()->setLinearVelocity( v );
+	set_velocity( v );
 }
 
 void ActiveObject::update_transform()
@@ -147,7 +147,10 @@ const ActiveObject::Vector3& ActiveObject::get_velocity() const
 
 void ActiveObject::set_velocity( const Vector3& v )
 {
+	get_rigid_body()->setActivationState( true );
+
 	get_rigid_body()->setLinearVelocity( v );
+	// get_rigid_body()->setInterpolationLinearVelocity( v );
 }
 
 

@@ -63,6 +63,8 @@ protected:
 	void load_stage_file( const char* );
 	void save_stage_file( const char* ) const;
 
+	void render_sprite();
+
 	void render( const ActiveObject* );
 	void render_line( const ActiveObject* );
 

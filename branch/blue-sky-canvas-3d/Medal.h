@@ -15,13 +15,11 @@ class Medal : public ActiveObject
 public:
 
 private:
-	void on_collision_x( const GridCell& ) { }
-	void on_collision_y( const GridCell& ) { }
-	void on_collision_z( const GridCell& ) { }
-
 	float get_collision_width() const { return 2.f; }
 	float get_collision_height() const { return 2.f; }
 	float get_collision_depth() const { return 2.f; }
+
+	void on_collide_with( ActiveObject* o ) { o->on_collide_with( this ); }
 
 public:
 	Medal();

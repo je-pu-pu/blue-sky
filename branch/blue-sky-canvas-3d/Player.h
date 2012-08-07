@@ -92,6 +92,7 @@ protected:
 
 	void on_collide_with( ActiveObject* o ) { o->on_collide_with( this ); }
 	void on_collide_with( Balloon* );
+	void on_collide_with( Medal* );
 	void on_collide_with( Robot* );
 
 public:

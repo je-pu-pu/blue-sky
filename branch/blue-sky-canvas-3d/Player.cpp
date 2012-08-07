@@ -1,6 +1,7 @@
 #include "Player.h"
 
 #include "Balloon.h"
+#include "Medal.h"
 
 #include "DrawingModel.h"
 #include "DrawingLine.h"
@@ -82,13 +83,7 @@ void Player::update()
 
 	if ( action_mode_ == ACTION_MODE_BALLOON )
 	{
-		get_rigid_body()->setLinearVelocity(
-			Vector3(
-				get_rigid_body()->getLinearVelocity().x(),
-				math::chase( get_rigid_body()->getLinearVelocity().y(), 3.f, 0.5f ),
-				get_rigid_body()->getLinearVelocity().z()
-			)
-		);
+		set_velocity( Vector3( get_velocity().x(), math::chase( get_velocity().y(), 3.f, 0.5f ), get_velocity().z() ) );
 
 		if ( get_location().y() - action_base_position_.y() >= get_balloon_action_length() )
 		{
@@ -182,7 +177,7 @@ void Player::limit_velocity()
 		v.setZ( v.z() * 0.9f );
 	}
 
-	get_rigid_body()->setLinearVelocity( v );
+	set_velocity( v );
 }
 
 /**
@@ -439,14 +434,7 @@ void Player::step( float_t s )
 	step_count_++;
 	update_step_speed();
 
-	get_rigid_body()->setActivationState( true );
-	get_rigid_body()->setLinearVelocity(
-		Vector3(
-			get_rigid_body()->getLinearVelocity().x() + ( get_front() * s ).x() * get_step_speed(),
-			get_rigid_body()->getLinearVelocity().y(),
-			get_rigid_body()->getLinearVelocity().z() + ( get_front() * s ).z() * get_step_speed()
-		)
-	);
+	set_velocity( get_velocity() + Vector3( ( get_front() * s ).x() * get_step_speed(), 0, ( get_front() * s ).z() * get_step_speed() ) );
 }
 
 void Player::side_step( float_t s )
@@ -456,12 +444,12 @@ void Player::side_step( float_t s )
 		return;
 	}
 
-	get_rigid_body()->setActivationState( true );
-	get_rigid_body()->setLinearVelocity(
+	set_velocity(
+		get_velocity() +
 		Vector3(
-			get_rigid_body()->getLinearVelocity().x() + ( get_right() * s ).x() * get_side_step_speed(),
-			get_rigid_body()->getLinearVelocity().y(),
-			get_rigid_body()->getLinearVelocity().z() + ( get_right() * s ).z() * get_side_step_speed()
+			( get_right() * s ).x() * get_side_step_speed(),
+			0,
+			( get_right() * s ).z() * get_side_step_speed()
 		)
 	);
 
@@ -479,14 +467,7 @@ void Player::jump()
 		return;
 	}
 
-	get_rigid_body()->setActivationState( true );
-	get_rigid_body()->setLinearVelocity(
-		Vector3(
-			get_rigid_body()->getLinearVelocity().x(),
-			get_rigid_body()->getLinearVelocity().y() + 4.f,
-			get_rigid_body()->getLinearVelocity().z()
-		)
-	);
+	set_velocity( Vector3( get_velocity().x(), get_velocity().y() + 4.f, get_velocity().z() ) );
 
 	is_jumping_ = true;
 
@@ -534,8 +515,7 @@ void Player::damage( const Vector3& to )
 {
 	uncontrollable_timer_ = 1.5f;
 
-	get_rigid_body()->setActivationState( true );
-	get_rigid_body()->setLinearVelocity( to );
+	set_velocity( to );
 
 	is_jumping_ = true;
 
@@ -603,6 +583,13 @@ void Player::on_collide_with( Balloon* balloon )
 	// set_last_footing_height_to_current_height();
 
 	play_sound( "balloon-get" );
+}
+
+void Player::on_collide_with( Medal* medal )
+{
+	has_medal_ = true;
+	
+	medal->kill();
 }
 
 void Player::on_collide_with( Robot* robot )

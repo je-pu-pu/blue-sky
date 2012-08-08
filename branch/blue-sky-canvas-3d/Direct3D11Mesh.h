@@ -61,7 +61,8 @@ protected:
 	VertexList		vertex_list_;
 	MaterialList	material_list_;
 	
-	void create_vertex_buffer();
+	virtual void create_vertex_buffer();
+	virtual void create_index_buffer( Material* );
 
 	virtual string_t get_texture_file_name_by_texture_name( const char* ) const;
 
@@ -72,6 +73,8 @@ public:
 	bool load_obj( const char* );
 	
 	void render() const;
+
+	inline const VertexList& get_vertex_list() const { return vertex_list_; }
 
 	inline MaterialList& get_material_list() { return material_list_; }
 	inline const MaterialList& get_material_list() const { return material_list_; }

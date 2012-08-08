@@ -135,6 +135,9 @@
     <ClCompile Include="Medal.cpp">
       <Filter>ActiveObject</Filter>
     </ClCompile>
+    <ClCompile Include="Direct3D11FarBillboardsMesh.cpp">
+      <Filter>DirectX\Direct3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -296,6 +299,9 @@
     </ClInclude>
     <ClInclude Include="Medal.h">
       <Filter>ActiveObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11FarBillboardsMesh.h">
+      <Filter>DirectX\Direct3D11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

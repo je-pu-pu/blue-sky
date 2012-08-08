@@ -26,6 +26,7 @@
 #include "Direct3D11MeshManager.h"
 #include "Direct3D11TextureManager.h"
 #include "Direct3D11ConstantBuffer.h"
+#include "Direct3D11FarBillboardsMesh.h"
 #include "Direct3D11Material.h"
 #include "Direct3D11Fader.h"
 #include "Direct3D11Effect.h"
@@ -179,6 +180,12 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	{
 		ground_ = new Mesh( get_direct_3d() );
 		ground_->load_obj( "media/model/ground.obj" );
+	}
+
+	if ( ! far_billboards_ )
+	{
+		far_billboards_ = new FarBillboardsMesh( get_direct_3d() );
+		far_billboards_->load_obj( ( std::string( "media/model/stage-" ) + get_stage_name() + "-far-billboards.obj" ).c_str() );
 	}
 
 	rectangle_ = new Rectangle( get_direct_3d() );
@@ -433,6 +440,15 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			{
 				sky_box_ = new SkyBox( get_direct_3d(), sky_box_name.c_str(), sky_box_ext.c_str() );
 			}
+		}
+		else if ( name == "far-billboards" )
+		{
+			std::string far_billboards_name;
+
+			ss >> far_billboards_name;
+
+			far_billboards_ = new Mesh( get_direct_3d() );
+			far_billboards_->load_obj( ( std::string( "media/model/" ) + far_billboards_name + ".obj" ).c_str() );
 		}
 		else if ( name == "object" || name == "static-object" || name == "dynamic-object" )
 		{
@@ -929,6 +945,7 @@ void GamePlayScene::render()
 		}
 
 		// render_far_billboards()
+		if ( far_billboards_ )
 		{
 			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|billboard" );
 
@@ -946,9 +963,7 @@ void GamePlayScene::render()
 					get_game_main()->get_object_constant_buffer()->update( & buffer );
 					get_game_main()->get_object_constant_buffer()->render();
 
-					// 
-					DrawingModel* drawing_model = get_drawing_model_manager()->load( "far-billboards-1" );
-					drawing_model->get_mesh()->render();
+					far_billboards_->render();
 				}
 			}
 		}

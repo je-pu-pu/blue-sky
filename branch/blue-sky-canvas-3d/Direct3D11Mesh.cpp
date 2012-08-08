@@ -173,11 +173,7 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 	}
 
 	create_vertex_buffer();
-
-	if ( ! material->get_index_list().empty() )
-	{
-		material->create_index_buffer();
-	}
+	create_index_buffer( material );
 
 	// !!!
 	if ( texture_file_name.empty() )
@@ -210,6 +206,14 @@ void Direct3D11Mesh::create_vertex_buffer()
 	data.pSysMem = & vertex_list_[ 0 ];
 	
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & vertex_buffer_ ) );
+}
+
+void Direct3D11Mesh::create_index_buffer( Material* material )
+{
+	if ( ! material->get_index_list().empty() )
+	{
+		material->create_index_buffer();
+	}
 }
 
 string_t Direct3D11Mesh::get_texture_file_name_by_texture_name( const char* texture_name ) const

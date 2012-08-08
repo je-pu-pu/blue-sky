@@ -194,9 +194,17 @@ void StageSelectScene::render()
 		// face
 		if ( stage->completed )
 		{
+			// face
 			win::Point circle_dst_point = win::Point( dst_rect.right() - j->width() + ( j->width() - k->width() ) / 2, dst_rect.bottom() - j->height() + ( j->height() - k->height() ) / 2 ) + win::Point( -offset, offset );
 			get_direct_3d()->getSprite()->draw( circle_dst_point, sprite_texture_, *k, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
+
+			// medal
+			win::Rect medal_src_rect = win::Rect::Size( 832, 384, 64, 64 );
+			win::Point medal_dst_point( dst_rect.left(), dst_rect.bottom() - medal_src_rect.height() );
+			get_direct_3d()->getSprite()->draw( medal_dst_point, sprite_texture_, medal_src_rect, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
 		}
+
+
 
 		n++;
 	}

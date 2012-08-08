@@ -590,6 +590,8 @@ void Player::on_collide_with( Medal* medal )
 	has_medal_ = true;
 	
 	medal->kill();
+
+	play_sound( "medal-get" );
 }
 
 void Player::on_collide_with( Robot* robot )

@@ -592,9 +592,8 @@ void GamePlayScene::update()
 	else
 	{
 		update_main();
+		player_->update();
 	}
-
-	player_->update();
 
 	get_active_object_manager()->update();
 

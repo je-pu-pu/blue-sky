@@ -127,7 +127,9 @@
     <ClInclude Include="vector3.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="blue-sky.config" />
+    <None Include="blue-sky.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="blye-sky.ico" />
     <None Include="media\shader\main.fx">
       <FileType>Document</FileType>

@@ -49,6 +49,8 @@ private:
 
 	Balloon*	balloon_;				///< Œ»ÝŽ‚Á‚Ä‚¢‚é•—‘D
 
+	int			hp_;					///< HP
+
 protected:
 	const Input* get_input() const;
 	

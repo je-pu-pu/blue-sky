@@ -53,7 +53,7 @@ void Robot::update()
 		set_velocity( Vector3( get_front().x() * 2.f, get_velocity().y(), get_front().z() * 2.f ) );
 		set_drawing_model( drawing_model_list_[ static_cast< int >( timer_ * 3 ) % drawing_model_list_.size() ] );
 
-		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.8, 0, 0, -0.25 ) );
+		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.8f, 0, 0, -0.25f ) );
 	}
 	else
 	{

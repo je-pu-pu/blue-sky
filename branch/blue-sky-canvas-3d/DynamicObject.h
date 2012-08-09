@@ -36,6 +36,8 @@ public:
 	DynamicObject( float_t = 0, float_t = 0, float_t = 0 );
 	virtual ~DynamicObject();
 
+	void restart();
+
 	/// XV
 	virtual void update() { }
 	virtual void update_transform();

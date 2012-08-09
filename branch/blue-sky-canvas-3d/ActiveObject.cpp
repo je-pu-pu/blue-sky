@@ -109,7 +109,10 @@ void ActiveObject::set_start_location( float_t x, float_t y, float_t z )
 void ActiveObject::set_start_rotation( float_t x, float_t y, float_t z )
 {
 	start_rotation_.setValue( math::degree_to_radian( x ), math::degree_to_radian( y ), math::degree_to_radian( z ) );
-	get_transform().setRotation( Quaternion( start_rotation_.x(), start_rotation_.y(), start_rotation_.z() ) );
+
+	Quaternion q;
+	q.setEulerZYX( start_rotation_.x(), start_rotation_.y(), start_rotation_.z() );
+	get_transform().setRotation( q );
 }
 
 void ActiveObject::set_location( const Vector3& v )

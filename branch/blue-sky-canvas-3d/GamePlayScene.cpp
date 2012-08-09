@@ -451,9 +451,9 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		else if ( name == "object" || name == "static-object" || name == "dynamic-object" )
 		{
 			std::string object_name;
-			float x = 0, y = 0, z = 0, r = 0;
+			float x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0;
 
-			ss >> object_name >> x >> y >> z >> r;
+			ss >> object_name >> x >> y >> z >> rx >> ry >> rz;
 
 			DrawingModel* drawing_model = get_drawing_model_manager()->load( object_name.c_str() );
 
@@ -514,7 +514,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			
 			object->set_drawing_model( drawing_model );
 			object->set_start_location( x, y, z );
-			object->set_start_rotation( r, 0, 0 );
+			object->set_start_rotation( rx, ry, rz );
 
 			if ( object_name == "soda-can-1" )
 			{

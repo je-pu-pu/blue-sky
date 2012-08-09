@@ -22,6 +22,13 @@ DynamicObject::~DynamicObject()
 	
 }
 
+void DynamicObject::restart()
+{
+	ActiveObject::restart();
+
+	get_rigid_body()->setActivationState( false );
+}
+
 void DynamicObject::update_transform()
 {
 	ActiveObject::update_transform();

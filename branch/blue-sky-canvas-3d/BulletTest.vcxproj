@@ -142,7 +142,6 @@
     <None Include="media\stage\0-1.stage" />
     <None Include="media\stage\0-2.stage" />
     <None Include="media\stage\0-3.stage" />
-    <None Include="media\stage\8.outro" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

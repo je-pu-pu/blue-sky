@@ -29,6 +29,8 @@ def export_stage():
 			continue
 		
 		r = int( floor( degrees( o.rotation_euler[2] ) + 0.5 ) )
+		r2 = int( floor( degrees( o.rotation_euler[1] ) + 0.5 ) )
+		r3 = int( floor( degrees( o.rotation_euler[0] ) + 0.5 ) )
 		
 		while r < 0:
 			r += 360
@@ -43,7 +45,7 @@ def export_stage():
 			text += "%f " % ( o.location[ 0 ] )
 			text += str( o.location[ 2 ] ) + " "
 			text += str( o.location[ 1 ] ) + " "
-			text += str( r );
+			text += str( r ) + " " + str( r2 ) + " " + str( r3 )
 			text += "\n"
 			continue
 		
@@ -57,6 +59,9 @@ def export_stage():
 		text += str( o.location[ 2 ] ) + " "
 		text += str( o.location[ 1 ] ) + " "
 		text += str( r )
+		
+		if o.name.startswith( "dynamic" ):
+			text += " " + str( r2 ) + " " + str( r3 )
 		
 		if o.name == "s":
 			text += " 1.0 0.666 0.066"

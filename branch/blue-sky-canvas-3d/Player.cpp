@@ -30,6 +30,7 @@ Player::Player()
 	, eye_depth_( 0.f )
 	, has_medal_( false )
 	, balloon_( 0 )
+	, hp_( 3 )
 {
 	
 }
@@ -61,6 +62,8 @@ void Player::restart()
 	has_medal_ = false;
 
 	balloon_ = 0;
+
+	hp_ = 3;
 
 	set_last_footing_height_to_current_height();
 	set_mass( 50.f );
@@ -600,8 +603,32 @@ void Player::on_collide_with( Medal* medal )
 
 void Player::on_collide_with( Robot* robot )
 {
-	Vector3 v = -get_front() * 20.f;
-	v.setY( 10.f );
+	/*
+	if ( is_uncontrollable() )
+	{
+		if ( uncontrollable_timer_ < 1.f )
+		{
+			kill();
+
+			return;
+		}
+	}
+	*/
+
+	if ( ! is_uncontrollable() )
+	{
+		hp_--;
+	}
+
+	if ( hp_ <= 0 )
+	{
+		kill();
+
+		return;
+	}
+
+	Vector3 v = -get_front() * 10.f;
+	v.setY( 2.5f );
 
 	damage( v );
 }

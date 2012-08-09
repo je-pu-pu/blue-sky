@@ -42,6 +42,13 @@ Input::Input()
 	joy_info_.dwFlags = JOY_RETURNX | JOY_RETURNY | JOY_RETURNBUTTONS;
 
 	joystick_enabled_ = ( joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR );
+
+	if ( joystick_enabled_ )
+	{
+		JOYCAPS jc;
+		joyGetDevCaps( JOYSTICKID1, & jc, sizeof( JOYCAPS ) );
+		joystick_enabled_ &= jc.wNumAxes >= 4;
+	}
 }
 
 Input::~Input()

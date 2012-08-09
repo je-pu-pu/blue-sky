@@ -138,6 +138,9 @@
     <ClCompile Include="Direct3D11FarBillboardsMesh.cpp">
       <Filter>DirectX\Direct3D11</Filter>
     </ClCompile>
+    <ClCompile Include="TranslationObject.cpp">
+      <Filter>ActiveObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -303,6 +306,9 @@
     <ClInclude Include="Direct3D11FarBillboardsMesh.h">
       <Filter>DirectX\Direct3D11</Filter>
     </ClInclude>
+    <ClInclude Include="TranslationObject.h">
+      <Filter>ActiveObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\main.fx" />
@@ -319,9 +325,6 @@
     <None Include="media\stage\0-2.stage">
       <Filter>stage</Filter>
     </None>
-    <None Include="media\stage\0-3.stage">
-      <Filter>stage</Filter>
-    </None>
     <None Include="media\stage\0-0.intro">
       <Filter>stage</Filter>
     </None>
@@ -332,6 +335,15 @@
       <Filter>stage</Filter>
     </None>
     <None Include="media\stage\0-1.outro">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\ending.outro">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\0-2.intro">
+      <Filter>stage</Filter>
+    </None>
+    <None Include="media\stage\0-2.outro">
       <Filter>stage</Filter>
     </None>
   </ItemGroup>

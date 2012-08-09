@@ -61,6 +61,7 @@
     <ClCompile Include="StoryTextScene.cpp" />
     <ClCompile Include="StreamingSound.cpp" />
     <ClCompile Include="TitleScene.cpp" />
+    <ClCompile Include="TranslationObject.cpp" />
     <ClCompile Include="vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -123,6 +124,7 @@
     <ClInclude Include="StoryTextScene.h" />
     <ClInclude Include="StreamingSound.h" />
     <ClInclude Include="TitleScene.h" />
+    <ClInclude Include="TranslationObject.h" />
     <ClInclude Include="type.h" />
     <ClInclude Include="vector3.h" />
   </ItemGroup>
@@ -140,8 +142,10 @@
     <None Include="media\stage\0-1.intro" />
     <None Include="media\stage\0-1.outro" />
     <None Include="media\stage\0-1.stage" />
+    <None Include="media\stage\0-2.intro" />
+    <None Include="media\stage\0-2.outro" />
     <None Include="media\stage\0-2.stage" />
-    <None Include="media\stage\0-3.stage" />
+    <None Include="media\stage\ending.outro" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

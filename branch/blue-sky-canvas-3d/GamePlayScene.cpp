@@ -46,6 +46,7 @@
 
 #include "StaticObject.h"
 #include "DynamicObject.h"
+#include "TranslationObject.h"
 
 #include "Direct3D11.h"
 
@@ -526,6 +527,21 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			}
 
 			object->set_mass( mass );
+			get_active_object_manager()->add_active_object( object );
+		}
+		else if ( name == "translation-object" )
+		{
+			float_t x = 0, y = 0, z = 0, tw = 0, th = 0, td = 0, s = 0.01f;
+			ss >> x >> y >> z >> tw >> th >> td >> s;
+
+			TranslationObject* object = new TranslationObject( 5, 5, 5, tw, th, td, s );
+
+			DrawingModel* drawing_model = get_drawing_model_manager()->load( "box-5x5x5" );
+			
+			object->set_drawing_model( drawing_model );
+			object->set_start_location( x, y, z );
+
+			object->set_rigid_body( get_physics()->add_active_object( object ) );
 			get_active_object_manager()->add_active_object( object );
 		}
 		else if ( name == "robot" )

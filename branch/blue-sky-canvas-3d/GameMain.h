@@ -134,6 +134,8 @@ public:
 	const std::string& get_stage_name() const { return stage_name_; }
 	void set_stage_name( const std::string& stage_name ) { stage_name_ = stage_name; }
 
+	bool is_display_fps() const { return is_display_fps_; }
+
 	inline static GameMain* get_instance() { static GameMain game_main; return & game_main; }
 };
 

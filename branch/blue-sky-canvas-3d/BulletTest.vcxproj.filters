@@ -331,10 +331,10 @@
     <None Include="media\stage\0-1.intro">
       <Filter>stage</Filter>
     </None>
-    <None Include="media\stage\0-2.intro">
+    <None Include="media\stage\0-0.outro">
       <Filter>stage</Filter>
     </None>
-    <None Include="media\stage\0-3.intro">
+    <None Include="media\stage\0-1.outro">
       <Filter>stage</Filter>
     </None>
   </ItemGroup>

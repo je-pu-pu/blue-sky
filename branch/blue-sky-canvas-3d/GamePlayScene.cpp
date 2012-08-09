@@ -68,7 +68,6 @@
 namespace blue_sky
 {
 
-static const bool is_render_2d_enabled = true;
 static FrameConstantBuffer frame_constant_buffer; /// @todo ƒƒ“ƒo‚É‚·‚é
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
@@ -94,7 +93,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		balloon_bgm_ = get_sound_manager()->load_music( "balloon" );
 
 		get_sound_manager()->load_3d_sound( "enemy" );
-		// sound_manager()->load_3d_sound( "vending-machine" );
 
 		get_sound_manager()->load( "click" );
 
@@ -111,13 +109,13 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		get_sound_manager()->load( "damage-1" );
 		get_sound_manager()->load( "dead" );
 
-		get_sound_manager()->load_3d_sound( "balloon-get" );
-		get_sound_manager()->load_3d_sound( "balloon-burst" );
-		get_sound_manager()->load_3d_sound( "rocket-get" );
-		get_sound_manager()->load_3d_sound( "rocket" );
-		get_sound_manager()->load_3d_sound( "rocket-burst" );
-		get_sound_manager()->load_3d_sound( "umbrella-get" );
-		get_sound_manager()->load_3d_sound( "medal-get" );
+		get_sound_manager()->load( "balloon-get" );
+		get_sound_manager()->load( "balloon-burst" );
+		get_sound_manager()->load( "rocket-get" );
+		get_sound_manager()->load( "rocket" );
+		get_sound_manager()->load( "rocket-burst" );
+		get_sound_manager()->load( "umbrella-get" );
+		get_sound_manager()->load( "medal-get" );
 
 		get_sound_manager()->load_3d_sound( "soda-can-long-1" );
 		get_sound_manager()->load_3d_sound( "soda-can-long-2" );
@@ -447,7 +445,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			ss >> far_billboards_name;
 
-			far_billboards_ = new Mesh( get_direct_3d() );
+			far_billboards_ = new FarBillboardsMesh( get_direct_3d() );
 			far_billboards_->load_obj( ( std::string( "media/model/" ) + far_billboards_name + ".obj" ).c_str() );
 		}
 		else if ( name == "object" || name == "static-object" || name == "dynamic-object" )
@@ -467,6 +465,8 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			size_map[ "building-20"  ] = ActiveObject::Vector3( 10.f,  20.f,  10.f   );
 			size_map[ "building-200" ] = ActiveObject::Vector3( 80.f, 200.f,  60.f   );
 			size_map[ "board-1"      ] = ActiveObject::Vector3(  4.f,   0.2f,  0.8f  );
+
+			size_map[ "box-5x5x5"    ] = ActiveObject::Vector3(  5.f,  5.f,  5.f );
 
 			std::map< string_t, float_t > mass_map;
 			mass_map[ "soda-can-1"   ] = 0.001f;
@@ -498,7 +498,14 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			if ( name == "dynamic-object" )
 			{
-				object = new DynamicObject( w, h, d );
+				DynamicObject* dynamic_object = new DynamicObject( w, h, d );
+
+				if ( object_name == "soda-can-1" )
+				{
+					dynamic_object->set_collision_sound_name( "soda-can-long-1" );
+				}
+
+				object = dynamic_object;
 			}
 			else
 			{
@@ -521,14 +528,24 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			object->set_mass( mass );
 			get_active_object_manager()->add_active_object( object );
 		}
-		/*
-		else if ( name == "enemy" )
+		else if ( name == "robot" )
 		{
-			Enemy* enemy = new Enemy();
-			enemy->set_player( player_.get() );
-			active_object = enemy;
+			float x = 0, y = 0, z = 0, r = 0;
+			ss >> x >> y >> z >> r;
+
+			Robot* robot = new Robot();
+			robot->set_player( player_.get() );
+
+			robot->add_drawing_model( get_drawing_model_manager()->load( "robot" ) );
+			robot->add_drawing_model( get_drawing_model_manager()->load( "robot-l" ) );
+			robot->add_drawing_model( get_drawing_model_manager()->load( "robot" ) );
+			robot->add_drawing_model( get_drawing_model_manager()->load( "robot-r" ) );
+
+			robot->set_start_location( x, y, z );
+
+			get_active_object_manager()->add_active_object( robot );
+			robot->set_rigid_body( get_physics()->add_active_object( robot ) );
 		}
-		*/
 		else if ( name == "balloon" )
 		{
 			active_object = new Balloon();
@@ -693,14 +710,6 @@ void GamePlayScene::update_main()
 			player_->stop();
 		}
 
-		if ( get_input()->push( Input::X ) )
-		{
-			get_physics()->setConstraint();
-		}
-		if ( get_input()->push( Input::Y ) )
-		{
-			player_->damage( Player::Vector3( 0, 10, 0.f ) );
-		}
 		if ( get_input()->push( Input::A ) )
 		{
 			player_->jump();
@@ -708,18 +717,7 @@ void GamePlayScene::update_main()
 
 		if ( get_input()->push( Input::B ) )
 		{
-			Robot* robot = new Robot();
-			robot->set_player( player_.get() );
-
-			robot->add_drawing_model( get_drawing_model_manager()->load( "robot" ) );
-			robot->add_drawing_model( get_drawing_model_manager()->load( "robot-l" ) );
-			robot->add_drawing_model( get_drawing_model_manager()->load( "robot" ) );
-			robot->add_drawing_model( get_drawing_model_manager()->load( "robot-r" ) );
-
-			robot->set_start_location( player_->get_transform().getOrigin().getX(), player_->get_transform().getOrigin().getY() + 20, player_->get_transform().getOrigin().getZ() + 5 );
-
-			get_active_object_manager()->add_active_object( robot );
-			robot->set_rigid_body( get_physics()->add_active_object( robot ) );
+			player_->set_location( goal_->get_location() + Player::Vector3( 0, 5, 0 ) );
 		}
 
 		player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );
@@ -805,6 +803,8 @@ void GamePlayScene::update_clear()
  */
 void GamePlayScene::render()
 {
+	const bool is_render_2d_enabled = get_game_main()->is_display_fps();
+
 	get_direct_3d()->setInputLayout( "main" );
 
 	// render_2d()
@@ -817,15 +817,18 @@ void GamePlayScene::render()
 		std::wstringstream ss;
 		ss.setf( std::ios_base::fixed, std::ios_base::floatfield );
 
-		ss << L"‚Ü‚Ÿ‚ª‚­‚ê‚½ŒŽ" << std::endl;
-		ss << L"FPS : " << get_main_loop()->get_last_fps() << std::endl;
-		ss << L"POS : " << player_->get_transform().getOrigin().x() << ", " << player_->get_transform().getOrigin().y() << ", " << player_->get_transform().getOrigin().z() << std::endl;
-		ss << L"step speed : " << player_->get_step_speed() << std::endl;
-		ss << L"last footing height : " << player_->get_last_footing_height() << std::endl;
-		ss << L"DX : " << player_->get_rigid_body()->getLinearVelocity().x() << std::endl;
-		ss << L"DY : " << player_->get_rigid_body()->getLinearVelocity().y() << std::endl;
-		ss << L"DZ : " << player_->get_rigid_body()->getLinearVelocity().z() << std::endl;
-		ss << L"Objects : " << get_active_object_manager()->active_object_list().size() << std::endl;
+		// ss << L"‚Ü‚Ÿ‚ª‚­‚ê‚½ŒŽ" << std::endl;
+		if ( get_game_main()->is_display_fps() )
+		{
+			ss << L"FPS : " << get_main_loop()->get_last_fps() << std::endl;
+			ss << L"POS : " << player_->get_transform().getOrigin().x() << ", " << player_->get_transform().getOrigin().y() << ", " << player_->get_transform().getOrigin().z() << std::endl;
+			ss << L"step speed : " << player_->get_step_speed() << std::endl;
+			ss << L"last footing height : " << player_->get_last_footing_height() << std::endl;
+			ss << L"DX : " << player_->get_rigid_body()->getLinearVelocity().x() << std::endl;
+			ss << L"DY : " << player_->get_rigid_body()->getLinearVelocity().y() << std::endl;
+			ss << L"DZ : " << player_->get_rigid_body()->getLinearVelocity().z() << std::endl;
+			ss << L"Objects : " << get_active_object_manager()->active_object_list().size() << std::endl;
+		}
 
 		get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );
 

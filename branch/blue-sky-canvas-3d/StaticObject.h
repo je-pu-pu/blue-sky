@@ -31,8 +31,7 @@ public:
 	~StaticObject();
 
 	/// XV
-	void update() { }
-	void update_transform();
+	void update();
 
 }; // class StaticObject
 

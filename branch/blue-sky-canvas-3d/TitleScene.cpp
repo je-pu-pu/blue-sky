@@ -45,7 +45,7 @@ TitleScene::TitleScene( const GameMain* game_main )
 	bgm_ = get_sound_manager()->load_music( "bgm", "title" );
 	
 	// title_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/texture/title.png" );
-	// title_bg_texture_ = direct_3d()->getTextureManager()->load( "title-bg", "media/texture/title-bg.png" );
+	title_bg_texture_ = get_direct_3d()->getTextureManager()->load( "title-bg", "media/image/cloud-3.jpg" );
 	cloth_texture_ = get_direct_3d()->getTextureManager()->load( "cloth", "media/texture/cloth.png" );
 
 	brand_logo_model_ = get_drawing_model_manager()->load( "je-pu-pu" );
@@ -147,20 +147,23 @@ void TitleScene::render()
 	{
 		( *i )->apply();
 
-		// render_bg()
-		{
-			win::Rect dst_rect( 0, 0, get_width(), get_height() );
+		win::Rect dst_rect( 0, 0, get_width(), get_height() );
 
+		if ( sequence_ >= SEQUENCE_TITLE_FIX )
+		{
+			// render_bg()
+			get_direct_3d()->getSprite()->draw( dst_rect, title_bg_texture_ );
+		}
+		else
+		{
+			// render_bg()
 			get_direct_3d()->getSprite()->draw( dst_rect, cloth_texture_, Direct3D::Color( 1.f, 1.f, 1.f, 0.5f ) );
 		}
 	}
 
 	get_direct_3d()->getSprite()->end();
 
-	// render_scene()
-	{
-
-	}
+	
 
 	// render_logo()
 	{
@@ -186,8 +189,8 @@ void TitleScene::render()
 				{
 					{
 						ObjectConstantBuffer object_constant_buffer;
-						object_constant_buffer.world = XMMatrixTranspose( XMMatrixTranslation( -0.01f, +0.01f, 0.f ) );
-						object_constant_buffer.color = Color( 1.f, 1.f, 1.f, 0.f );
+						object_constant_buffer.world = XMMatrixTranspose( XMMatrixTranslation( +0.01f, +0.01f, 0.f ) );
+						object_constant_buffer.color = Color( 0.f, 0.f, 0.f, -0.5f );
 						get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer );
 					}
 
@@ -196,7 +199,7 @@ void TitleScene::render()
 					{
 						ObjectConstantBuffer object_constant_buffer;
 						object_constant_buffer.world = XMMatrixTranspose( XMMatrixIdentity() );
-						object_constant_buffer.color = Color( 0.f, 0.f, 0.f, 0.f );
+						object_constant_buffer.color = Color( 1.f, 1.f, 1.f, 0.f );
 						get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer );
 					}
 

@@ -154,6 +154,14 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 			sound_ = get_sound_manager()->load( "sound", sound_name.c_str() );
 			sound_->play( false );
 		}
+		else if ( name == "next-scene" )
+		{
+			ss >> next_scene_name_;
+		}
+		else if ( name == "next-stage-name" )
+		{
+			ss >> next_stage_name_;
+		}
 	}
 }
 
@@ -207,6 +215,11 @@ void StoryTextScene::update()
 		if ( ! sound_->is_playing() && ( ! bgm_ || ! bgm_->is_playing() ) && get_direct_3d()->getFader()->is_full_out() )
 		{
 			set_next_scene( next_scene_name_ );
+
+			if ( ! next_stage_name_.empty() )
+			{
+				set_next_stage_name( next_stage_name_ );
+			}
 		}
 	}
 

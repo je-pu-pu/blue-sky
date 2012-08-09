@@ -252,7 +252,6 @@ void Player::update_falling_to_die()
 	const float_t x = get_rigid_body()->getCenterOfMassPosition().x();
 	const float_t y = get_rigid_body()->getCenterOfMassPosition().y();
 	const float_t z = get_rigid_body()->getCenterOfMassPosition().z();
-	const float_t ray_length = get_collision_height() * 0.5f + get_height_to_die();
 
 	const float_t margin = 0.05f;
 	const Vector3 front = get_front() * ( get_collision_depth() * 0.5f - margin );
@@ -263,24 +262,24 @@ void Player::update_falling_to_die()
 
 	// 中心 + 四隅 + 四点 の設置を調べる
 	if (
-		get_footing_height( center, true ) > ray_length ||
+		get_last_footing_height() - get_footing_height( center, true ) < get_height_to_die() ||
 
-		get_footing_height( center - right - front, true ) > ray_length ||
-		get_footing_height( center + right - front, true ) > ray_length ||
-		get_footing_height( center - right + front, true ) > ray_length ||
-		get_footing_height( center + right + front, true ) > ray_length ||
+		get_last_footing_height() - get_footing_height( center - right - front, true ) < get_height_to_die() ||
+		get_last_footing_height() - get_footing_height( center + right - front, true ) < get_height_to_die() ||
+		get_last_footing_height() - get_footing_height( center - right + front, true ) < get_height_to_die() ||
+		get_last_footing_height() - get_footing_height( center + right + front, true ) < get_height_to_die() ||
 		
-		get_footing_height( center - right, true ) > ray_length ||
-		get_footing_height( center + right, true ) > ray_length ||
-		get_footing_height( center - front, true ) > ray_length ||
-		get_footing_height( center + front, true ) > ray_length )
+		get_last_footing_height() - get_footing_height( center - right, true ) < get_height_to_die() ||
+		get_last_footing_height() - get_footing_height( center + right, true ) < get_height_to_die() ||
+		get_last_footing_height() - get_footing_height( center - front, true ) < get_height_to_die() ||
+		get_last_footing_height() - get_footing_height( center + front, true ) < get_height_to_die() )
 	{
 		is_falling_to_die_ = false;
-
-		return;
 	}
-
-	is_falling_to_die_ = true;
+	else
+	{
+		is_falling_to_die_ = true;
+	}
 }
 
 /**
@@ -547,6 +546,11 @@ void Player::set_eye_depth( float d )
 		return;
 	}
 
+	if ( get_location().y() < 5.f )
+	{
+		return;
+	}
+
 	eye_depth_ = math::clamp( d, 0.f, 1.f );
 }
 
@@ -580,7 +584,7 @@ void Player::on_collide_with( Balloon* balloon )
 	set_action_mode( ACTION_MODE_BALLOON );
 	set_action_base_position_to_current_position();
 
-	// set_last_footing_height_to_current_height();
+	set_last_footing_height_to_current_height();
 
 	play_sound( "balloon-get" );
 }

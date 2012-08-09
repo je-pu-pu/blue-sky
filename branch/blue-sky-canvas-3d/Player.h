@@ -52,9 +52,6 @@ private:
 protected:
 	const Input* get_input() const;
 	
-	bool is_last_footing_height_null() const { return last_footing_height_ >= 300.f; }
-	
-	void set_last_footing_height_to_null() { last_footing_height_ = 300.f; }
 	void set_last_footing_height_to_current_height() { last_footing_height_ = get_location().y(); }
 
 	void set_action_base_position_to_current_position() { action_base_position_ = get_location(); }

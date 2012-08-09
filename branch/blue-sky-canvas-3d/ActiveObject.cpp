@@ -86,7 +86,7 @@ void ActiveObject::update_transform()
 {
 	if ( rigid_body_ )
 	{
-		rigid_body_->getMotionState()->getWorldTransform( * transform_ );
+		* transform_ = rigid_body_->getWorldTransform();
 		Transform offset;
 		offset.setIdentity();
 		offset.setOrigin( Vector3( 0, -get_height_offset(), 0 ) );

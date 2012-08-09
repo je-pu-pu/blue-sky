@@ -11,15 +11,16 @@ def export_stage():
 	
 	for o in os:
 		name = o.data.name
-		
-		if name[-2:] == "-0":
-			name = name[:-2]
+		name = name.replace( "-line", "" )
+
+		# if name[-2:] == "-0":
+		#	name = name[:-2]
 		
 		if name == "player" or name == "goal":
 			text += name + " "
-			text += str( int( floor( o.location[ 0 ] * 10 + 0.5 ) ) ) + " "
-			text += str( int( floor( o.location[ 2 ] * 10 + 0.5 ) ) ) + " "
-			text += str( int( floor( o.location[ 1 ] * 10 + 0.5 ) ) )
+			text += str( o.location[ 0 ] ) + " "
+			text += str( o.location[ 2 ] ) + " "
+			text += str( o.location[ 1 ] )
 			
 			if name == "player" and o.location[ 2 ] >= 30:
 				text += " 60"
@@ -37,20 +38,24 @@ def export_stage():
 		if r > 0:
 			r = 360 - r;
 		
-		if name == "enemy" or name == "balloon" or name == "rocket" or name == "umbrella" or name == "medal":
+		if name == "robot" or name == "balloon" or name == "rocket" or name == "umbrella" or name == "medal":
 			text += name + " "
-			text += "%f " % ( o.location[ 0 ] * 10 )
-			text += str( o.location[ 2 ] * 10 ) + " "
-			text += str( o.location[ 1 ] * 10 ) + " "
+			text += "%f " % ( o.location[ 0 ] )
+			text += str( o.location[ 2 ] ) + " "
+			text += str( o.location[ 1 ] ) + " "
 			text += str( r );
 			text += "\n"
 			continue
+		
+		if o.name.startswith( "dynamic" ):
+			text += "dynamic-object "
+		else:
+			text += "object "
 			
-		text += "object "
 		text += name + " "
-		text += str( int( floor( o.location[ 0 ] * 10 + 0.5 ) ) ) + " "
-		text += str( int( floor( o.location[ 2 ] * 10 + 0.5 ) ) ) + " "
-		text += str( int( floor( o.location[ 1 ] * 10 + 0.5 ) ) ) + " "
+		text += str( o.location[ 0 ] ) + " "
+		text += str( o.location[ 2 ] ) + " "
+		text += str( o.location[ 1 ] ) + " "
 		text += str( r )
 		
 		if o.name == "s":

@@ -41,6 +41,7 @@ class ActiveObject
 public:
 	typedef game::Sound			Sound;
 
+	typedef btScalar			Scalar;
 	typedef btVector3			Vector3;
 	typedef btMatrix3x3			Matrix;
 	typedef btQuaternion		Quaternion;

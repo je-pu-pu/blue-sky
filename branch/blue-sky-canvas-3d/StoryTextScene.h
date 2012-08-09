@@ -26,6 +26,7 @@ private:
 	Color			text_border_color_;
 	
 	std::string		next_scene_name_;
+	std::string		next_stage_name_;
 
 	Texture*		sprite_texture_;
 	Texture*		bg_texture_;

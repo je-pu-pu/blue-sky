@@ -12,6 +12,7 @@ DynamicObject::DynamicObject( float_t w, float_t h, float_t d )
 	: collision_width_( w )
 	, collision_height_( h )
 	, collision_depth_( d )
+	, collision_sound_name_( 0  )
 {
 	
 }
@@ -43,6 +44,11 @@ void DynamicObject::on_collide_with_ground()
 
 void DynamicObject::play_collision_sound( const ActiveObject* o )
 {
+	if ( ! collision_sound_name_ )
+	{
+		return;
+	}
+
 	if ( get_velocity().length() < 1.f )
 	{
 		return;
@@ -50,7 +56,7 @@ void DynamicObject::play_collision_sound( const ActiveObject* o )
 
 	if ( ! o || o->is_hard() )
 	{
-		play_sound( "soda-can-long-1", false, false );
+		play_sound( collision_sound_name_, false, false );
 	}
 }
 

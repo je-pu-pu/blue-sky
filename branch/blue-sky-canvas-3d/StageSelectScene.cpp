@@ -200,7 +200,7 @@ void StageSelectScene::render()
 
 			// medal
 			win::Rect medal_src_rect = win::Rect::Size( 832, 384, 64, 64 );
-			win::Point medal_dst_point( dst_rect.left(), dst_rect.bottom() - medal_src_rect.height() );
+			win::Point medal_dst_point = win::Point( dst_rect.left(), dst_rect.bottom() - medal_src_rect.height() ) + win::Point( -offset, offset );
 			get_direct_3d()->getSprite()->draw( medal_dst_point, sprite_texture_, medal_src_rect, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
 		}
 
@@ -439,6 +439,9 @@ bool StageSelectScene::has_prev_page() const
 
 bool StageSelectScene::has_next_page() const
 {
+	/// !!!
+	return false;
+
 	if ( page_ == get_max_story_page() - 1 )
 	{
 		// stroy last page

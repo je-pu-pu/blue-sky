@@ -25,6 +25,12 @@ namespace blue_sky
 
 Input::Input()
 	: direct_input_( 0 )
+	, joystick_enabled_( false )
+	, joystick_axis_threshold_( 0.f )
+	, joystick_x_axis_pos_( 0 )
+	, joystick_y_axis_pos_( 0 )
+	, joystick_x_sensitivity_( 1.f )
+	, joystick_y_sensitivity_( 1.f )
 	, mouse_x_sensitivity_( 1.f )
 	, mouse_y_sensitivity_( 1.f )
 	, mouse_x_rate_( 0.f )
@@ -80,8 +86,16 @@ void Input::load_config( Config& config )
 	joystick_code_[ L ] = 1 << ( config.get( "input.joystick.l", 5 ) - 1 );
 	joystick_code_[ R ] = 1 << ( config.get( "input.joystick.r", 6 ) - 1 );
 
+	joystick_axis_threshold_ = config.get( "input.joystick.axis.threshold", 0.25f );
+
+	joystick_x_axis_pos_ = get_joystick_axis_pos_pointer_by_index( config.get( "input.joystick.axis.x", 3 ) );
+	joystick_y_axis_pos_ = get_joystick_axis_pos_pointer_by_index( config.get( "input.joystick.axis.y", 2 ) );
+
 	mouse_x_sensitivity_ = config.get( "input.mouse.x_sensitivity", 1.f );
 	mouse_y_sensitivity_ = config.get( "input.mouse.y_sensitivity", 1.f );
+
+	joystick_x_sensitivity_ = config.get( "input.joystick.axis.x_sensitivity", 1.f );
+	joystick_y_sensitivity_ = config.get( "input.joystick.axis.y_sensitivity", 1.f );
 }
 
 /**
@@ -137,8 +151,8 @@ void Input::update()
 		if ( joy_info_.dwButtons & joystick_code_[ L ] ) state_[ L ] |= 1;
 		if ( joy_info_.dwButtons & joystick_code_[ R ] ) state_[ R ] |= 1;
 
-		mouse_dx_ += get_rate_by_joystick_pos( joy_info_.dwZpos ) * 0.01f;
-		mouse_dy_ += get_rate_by_joystick_pos( joy_info_.dwRpos ) * 0.01f;
+		mouse_dx_ += get_rate_by_joystick_axis_pos( * joystick_x_axis_pos_ ) * 0.01f * joystick_x_sensitivity_;
+		mouse_dy_ += get_rate_by_joystick_axis_pos( * joystick_y_axis_pos_ ) * 0.01f * joystick_y_sensitivity_;
 	}
 
 	update_common();
@@ -168,18 +182,25 @@ void Input::update_common()
 	if ( push( LEFT  ) ) allow_push( LEFT  );
 }
 
-float Input::get_rate_by_joystick_pos( DWORD pos )
+DWORD* Input::get_joystick_axis_pos_pointer_by_index( int index )
 {
-	const float threshold = 0.25f; // 0.f .. 1.f
+	std::map< int, DWORD* > axis_map;
 
+	axis_map[ 0 ] = & joy_info_.dwXpos;
+	axis_map[ 1 ] = & joy_info_.dwYpos;
+	axis_map[ 2 ] = & joy_info_.dwZpos;
+	axis_map[ 3 ] = & joy_info_.dwRpos;
+	axis_map[ 4 ] = & joy_info_.dwUpos;
+	axis_map[ 5 ] = & joy_info_.dwVpos;
+
+	return axis_map.at( index );
+}
+
+float Input::get_rate_by_joystick_axis_pos( DWORD pos )
+{
 	float rate = ( pos / static_cast< float >( 0xFFFF ) * 2.f ) - 1.f;
 
-	if ( abs( rate ) < threshold )
-	{
-		return 0.f;
-	}
-	
-	return ( rate - threshold ) / threshold;
+	return math::chase( rate, 0.f, joystick_axis_threshold_ ) / ( 1.f - joystick_axis_threshold_ );
 }
 
 #if 0

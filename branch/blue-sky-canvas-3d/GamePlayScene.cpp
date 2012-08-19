@@ -846,6 +846,9 @@ void GamePlayScene::render()
 			ss << L"DY : " << player_->get_rigid_body()->getLinearVelocity().y() << std::endl;
 			ss << L"DZ : " << player_->get_rigid_body()->getLinearVelocity().z() << std::endl;
 			ss << L"Objects : " << get_active_object_manager()->active_object_list().size() << std::endl;
+
+			ss << L"mouse.dx : " << get_input()->get_mouse_dx() << std::endl;
+			ss << L"mouse.dy : " << get_input()->get_mouse_dy() << std::endl;
 		}
 
 		get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );

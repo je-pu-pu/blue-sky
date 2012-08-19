@@ -56,8 +56,16 @@ private:
 	unsigned int state_[ MAX_BUTTONS ];						///< 全てのボタンの状態
 	ButtonStack allow_stack_;								///< 最優先の方向ボタン
 
-	JOYINFOEX joy_info_;									///< ジョイスティック
 	bool joystick_enabled_;									///< ジョイスティック有効フラグ
+
+	JOYINFOEX joy_info_;									///< ジョイスティック
+	float joystick_axis_threshold_;							///< ジョイスティックの入力の閾値 ( 0.f .. 1.f )
+
+	DWORD* joystick_x_axis_pos_;							///< ジョイスティック X 座標 
+	DWORD* joystick_y_axis_pos_;							///< ジョイスティック Y 座標 
+
+	float joystick_x_sensitivity_;							///< ジョイスティック X 座標 感度 ( default : 1.f )
+	float joystick_y_sensitivity_;							///< ジョイスティック Y 座標 感度 ( default : 1.f )
 
 	float mouse_x_sensitivity_;								///< マウス X 座標 感度 ( default : 1.f )
 	float mouse_y_sensitivity_;								///< マウス X 座標 感度 ( default : 1.f )
@@ -75,7 +83,8 @@ private:
 	ButtonCodeList key_code_;
 	ButtonCodeList joystick_code_;
 
-	static float get_rate_by_joystick_pos( DWORD );
+	DWORD* get_joystick_axis_pos_pointer_by_index( int );
+	float get_rate_by_joystick_axis_pos( DWORD );
 
 public:
 	Input();

@@ -164,6 +164,9 @@ object outdoor-unit 11.699999809265137 0.0 21.5 90
 object outdoor-unit 11.699999809265137 0.0 18.5 90
 object outdoor-unit 11.699999809265137 0.0 16.5 90
 object outdoor-unit 11.699999809265137 0.0 13.5 90
+
+dynamic-object god-animation-1 11.7 0.6 21.5 90
+
 object wall-2 10.0 0.0 15.059999465942383 90
 object wall-2 14.0 0.0 11.0 0
 object building-20 17.0 0.0 16.0 0

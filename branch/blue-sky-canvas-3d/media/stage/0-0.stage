@@ -5,6 +5,10 @@ balloon 17.000000 25.0 89.0 0
 balloon 17.000000 26.0 83.0 0
 balloon 17.000000 25.0 77.0 0
 robot 17.000000 20.0 293.0 0
+
+dynamic-object god-animation-2 17 20 20 0
+balloon 17.000000 21 17 0
+
 dynamic-object board-1 17.0 20.800004959106445 262.0 270
 dynamic-object board-1 17.0 20.600004196166992 262.0 270
 dynamic-object board-1 17.0 20.40000343322754 262.0 270
@@ -53,7 +57,7 @@ object building-20 -7.0 0.0 42.0 0
 object tree-1 -1.0 0.0 60.0 0
 object building-20 -7.0 0.0 54.0 0
 object power-pole-1 5.0 0.0 15.0 0
-player 17.0 20.0 15.0
+player 17.0 20.0 20.0
 object building-20 -40.0 0.0 -5.0 0
 object building-20 -40.0 0.0 6.0 0
 object building-20 -45.0 0.0 16.0 0

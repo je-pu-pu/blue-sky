@@ -5,11 +5,12 @@
 
 #include "type.h"
 
+#include "ConstantBuffer.h"
+
 #include <common/auto_ptr.h>
 #include <common/safe_ptr.h>
 
 class Direct3D11;
-class Direct3D11ConstantBuffer;
 class Direct3D11ShadowMap;
 class Direct3D11SkyBox;
 class Direct3D11BulletDebugDraw;
@@ -81,9 +82,10 @@ protected:
 
 	auto_ptr< DrawingModelManager >			drawing_model_manager_;	///< DrawingModelManager
 
-	auto_ptr< Direct3D11ConstantBuffer >	game_constant_buffer_;
-	auto_ptr< Direct3D11ConstantBuffer >	frame_constant_buffer_;
-	auto_ptr< Direct3D11ConstantBuffer >	object_constant_buffer_;
+	/// @todo ‚Ü‚Æ‚ß‚é
+	auto_ptr< GameConstantBuffer >			game_constant_buffer_;
+	auto_ptr< FrameConstantBuffer >			frame_constant_buffer_;
+	auto_ptr< ObjectConstantBuffer >		object_constant_buffer_;
 
 	auto_ptr< Direct3D11BulletDebugDraw >	bullet_debug_draw_;
 
@@ -125,9 +127,9 @@ public:
 
 	const MainLoop* get_main_loop() const { return main_loop_.get(); }
 
-	Direct3D11ConstantBuffer* get_game_constant_buffer() const { return game_constant_buffer_.get(); }
-	Direct3D11ConstantBuffer* get_frame_constant_buffer() const { return frame_constant_buffer_.get(); }
-	Direct3D11ConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_.get(); }
+	GameConstantBuffer* get_game_constant_buffer() const { return game_constant_buffer_.get(); }
+	FrameConstantBuffer* get_frame_constant_buffer() const { return frame_constant_buffer_.get(); }
+	ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_.get(); }
 	
 	Direct3D11BulletDebugDraw* get_bullet_debug_draw() const { return bullet_debug_draw_.get(); }
 

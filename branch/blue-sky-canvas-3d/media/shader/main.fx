@@ -1,4 +1,5 @@
 static const int ShadowMapCascadeLevels = 3;
+static const float Pi = 3.14159265f;
 
 Texture2D model_texture : register( t0 );
 Texture2D line_texture : register( t0 );
@@ -61,15 +62,15 @@ cbuffer ObjectConstantBuffer : register( b2 )
 	float4 ObjectColor;
 };
 
-cbuffer ShadowMapBuffer : register( b3 )
+cbuffer ObjectExtensionConstantBuffer : register( b3 )
 {
-	matrix ShadowViewProjection[ ShadowMapCascadeLevels ];
-	float4 ShadowMapViewDepthPerCascadeLevel;
-};
+	float4 ObjectAdditionalColor;
+}
 
 struct VS_INPUT
 {
 	float4 Position : SV_POSITION;
+	float3 Normal   : NORMAL0;
 	float2 TexCoord : TEXCOORD0;
 };
 
@@ -198,34 +199,24 @@ void gs_pass( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStre
 void gs_line( line VS_LINE_OUTPUT input[2], inout TriangleStream<PS_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
 {
 	static const uint input_vertex_count = 2;
+	static const uint output_vertex_count = 4;
 
 	const float screen_width = ScreenWidth;
 	const float screen_height = ScreenHeight;
 	const float screen_ratio = ( screen_height / screen_width );
 
-	static const float PI = 3.14159265f;
-	static const float z_offset = -0.00001f;
-	static const float z_fix = 0.f;
 	static const float w_fix = 1.f;
+	static const float z_fix = 0.f;
+
+	// static const float z_offset = 0.f;
+	static const float z_offset = -0.00001f;
 	
 	static const float line_v_width = 32.f / 1024.f;
 
 	for ( uint n = 0; n < input_vertex_count; n++ )
 	{
-		if ( input[ n ].Depth < -0.f )
-		{
-			// @todo 調整
-			input[ 0 ].Position.w = 0.f;
-			input[ 1 ].Position.w = 0.f;
-			
-			break;
-		}
-		else
-		{
-			input[ n ].Position.z += z_offset;
-			input[ n ].Position /= input[ n ].Position.w;
-			input[ n ].Position.w = w_fix;
-		}
+		input[ n ].Position.z += z_offset;
+		input[ n ].Position.xyz /= input[ n ].Position.w;
 	}
 
 	const float line_width_scale = 0.5f;
@@ -248,7 +239,7 @@ void gs_line( line VS_LINE_OUTPUT input[2], inout TriangleStream<PS_INPUT> TriSt
 		float line_length_ratio = length( float2( lx, ly ) ) / length( float2( 2.f, 2.f ) );
 
 		float angle = atan2( ly, lx );
-		angle += PI / 2.f;
+		angle += Pi / 2.f;
 
 		float dx = cos( angle ) * line_width * screen_ratio;
 		float dy = sin( angle ) * line_width;
@@ -271,10 +262,12 @@ void gs_line( line VS_LINE_OUTPUT input[2], inout TriangleStream<PS_INPUT> TriSt
 		output[ 3 ].TexCoord = float2( line_u_origin + line_length_ratio, line_v_origin + line_v_width );
 		output[ 3 ].Color = input[ 1 ].Color;
 
-		TriStream.Append( output[ 0 ] );
-		TriStream.Append( output[ 1 ] );
-		TriStream.Append( output[ 2 ] );
-		TriStream.Append( output[ 3 ] );
+		for ( uint x = 0; x < output_vertex_count; ++x )
+		{
+			output[ x ].Position.xyz *= output[ x ].Position.w;
+
+			TriStream.Append( output[ x ] );
+		}
 		
 		TriStream.RestartStrip();
 	}
@@ -339,6 +332,7 @@ RasterizerState WireFrame
 RasterizerState Shadow
 {
 	CullMode = NONE;
+	// SlopeScaledDepthBias = 1.f;
 };
 
 // ----------------------------------------
@@ -500,6 +494,12 @@ technique11 bullet
 // ----------------------------------------
 // for Shadow Map
 // ----------------------------------------
+cbuffer ShadowMapBuffer : register( b10 )
+{
+	matrix ShadowViewProjection[ ShadowMapCascadeLevels ];
+	float4 ShadowMapViewDepthPerCascadeLevel;
+};
+
 static const float4 cascade_colors[ 4 ] = 
 {
     float4 ( 1.2f, 1.0f, 1.0f, 1.0f ),
@@ -645,33 +645,38 @@ technique11 main_with_shadow
 }
 
 // ----------------------------------------
-// for 2D
+// for 2D ( Fader, debug ウィンドウで使用 )
 // ----------------------------------------
-PS_INPUT vs_pass( VS_INPUT input )
+PS_INPUT vs_2d( VS_INPUT input )
 {
 	PS_INPUT output = ( PS_INPUT ) 0;
 
 	output.Position = input.Position;
 	output.TexCoord = input.TexCoord;
-	output.Color = ObjectColor;
+	// output.Color = ObjectColor;
 
 	return output;
+}
+
+float4 ps_2d( PS_INPUT input ) : SV_Target
+{
+	return model_texture.Sample( texture_sampler, input.TexCoord ) + ObjectColor; // + ObjectAdditionalColor;
 }
 
 technique11 main2d
 {
 	pass main
 	{
-		SetVertexShader( CompileShader( vs_4_0, vs_pass() ) );
+		SetVertexShader( CompileShader( vs_4_0, vs_2d() ) );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_2d() ) );
 	}
 }
 
 // ----------------------------------------
 // for Sprite
 // ----------------------------------------
-cbuffer SpriteConstantBuffer : register( b4 )
+cbuffer SpriteConstantBuffer : register( b13 )
 {
 	matrix Transform;
 };

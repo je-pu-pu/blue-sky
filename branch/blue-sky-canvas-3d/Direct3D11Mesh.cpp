@@ -51,7 +51,7 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 	material_list_.push_back( new Material( direct_3d_ ) );
 	Material* material = material_list_[ material_list_.size() - 1 ];
 
-	std::string texture_file_name;
+	std::string texture_name;
 
 	while ( in.good() )
 	{		
@@ -144,9 +144,9 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 		}
 		else if ( command == "texture" )
 		{
-			ss >> texture_file_name;
+			ss >> texture_name;
 
-			material->load_texture( get_texture_file_name_by_texture_name( texture_file_name.c_str() ).c_str() );
+			material->load_texture( get_texture_file_name_by_texture_name( texture_name.c_str() ).c_str() );
 		}
 		else if ( command == "usemtl" )
 		{
@@ -161,13 +161,22 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 			}
 
 			
-			ss >> texture_file_name;
+			ss >> texture_name;
 
-			boost::algorithm::replace_all_regex( texture_file_name, boost::regex( "(.*)_(.*)" ), std::string( "$2" ) );
+			boost::algorithm::replace_all_regex( texture_name, boost::regex( "(.*)_(.*)" ), std::string( "$2" ) );
 
-			if ( ! texture_file_name.empty() )
+			if ( ! texture_name.empty() )
 			{
-				material->load_texture( get_texture_file_name_by_texture_name( texture_file_name.c_str() ).c_str() );
+				const string_t texture_file_name = get_texture_file_name_by_texture_name( texture_name.c_str() );
+
+				try
+				{
+					material->load_texture( texture_file_name.c_str() );
+				}
+				catch ( ... )
+				{
+					COMMON_THROW_EXCEPTION_MESSAGE( texture_file_name );
+				}
 			}
 		}
 	}
@@ -176,10 +185,10 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 	create_index_buffer( material );
 
 	// !!!
-	if ( texture_file_name.empty() )
+	if ( texture_name.empty() )
 	{
 		boost::filesystem::path path( file_name );
-		texture_file_name = std::string( "media/model/" ) + path.stem().string() + ".png";
+		const string_t texture_file_name = std::string( "media/model/" ) + path.stem().string() + ".png";
 
 		try
 		{
@@ -190,6 +199,9 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 
 		}
 	}
+
+	// test
+	std::reverse( material_list_.begin(), material_list_.end() );
 
 	return true;
 }

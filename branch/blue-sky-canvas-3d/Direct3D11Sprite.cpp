@@ -8,18 +8,13 @@
 
 Direct3D11Sprite::Color Direct3D11Sprite::white_( 1, 1, 1, 1 );
 
-struct SpriteConstantBuffer
-{
-	XMMATRIX transform;
-};
-
 Direct3D11Sprite::Direct3D11Sprite( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
 	, constant_buffer_( 0 )
 	, vertex_buffer_( 0 )
 	, index_buffer_( 0 )
 {
-	constant_buffer_ = new ConstantBuffer( direct_3d, sizeof( SpriteConstantBuffer ), 4 );
+	constant_buffer_ = new ConstantBuffer( direct_3d );
 	
 	create_vertex_buffer();
 	create_index_buffer();
@@ -89,11 +84,11 @@ void Direct3D11Sprite::set_transform( const Matrix& m )
 
 	XMMATRIX view = XMMatrixOrthographicOffCenterLH( 0.f, static_cast< float >( surface_desc.Width ), static_cast< float >( surface_desc.Height ), 0.f, 0.f, 1.f );
 
-	SpriteConstantBuffer sprite_constant_buffer;
-	// sprite_constant_buffer.transform = XMLoadFloat4x4( & transform_.get() );
-	sprite_constant_buffer.transform = XMMatrixIdentity();
-	sprite_constant_buffer.transform = XMMatrixTranspose( sprite_constant_buffer.transform );
-	constant_buffer_->update( & sprite_constant_buffer );
+	ConstantBufferData constant_buffer_data;
+	// constant_buffer_data.transform = XMLoadFloat4x4( & transform_.get() );
+	constant_buffer_data.transform = XMMatrixIdentity();
+	constant_buffer_data.transform = XMMatrixTranspose( constant_buffer_data.transform );
+	constant_buffer_->update( & constant_buffer_data );
 }
 
 void Direct3D11Sprite::draw( const Rect* dst, Texture* texture, const Rect* src, const Color* color )
@@ -179,7 +174,7 @@ void Direct3D11Sprite::draw( const Rect* dst, Texture* texture, const Rect* src,
 
 	direct_3d_->getImmediateContext()->Unmap( vertex_buffer_, 0 );
 
-	constant_buffer_->render();
+	constant_buffer_->bind_to_vs();
 
 	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & texture );
 	direct_3d_->getImmediateContext()->DrawIndexed( 6, 0, 0 );

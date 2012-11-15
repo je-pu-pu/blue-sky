@@ -52,12 +52,13 @@ TitleScene::TitleScene( const GameMain* game_main )
 	title_logo_model_ = get_drawing_model_manager()->load( "blue-sky" );
 
 	{
-		GameConstantBuffer game_constant_buffer;
-		game_constant_buffer.projection = XMMatrixTranspose( XMMatrixOrthographicLH( 2.f * get_width() / get_height(), 2.f, 0.f, 1.f ) );
-		game_constant_buffer.screen_width = static_cast< float_t >( get_width() );
-		game_constant_buffer.screen_height = static_cast< float_t >( get_height() );
+		GameConstantBufferData game_constant_buffer_data;
 
-		get_game_main()->get_game_constant_buffer()->update( & game_constant_buffer );
+		game_constant_buffer_data.projection = XMMatrixTranspose( XMMatrixOrthographicLH( 2.f * get_width() / get_height(), 2.f, 0.f, 1.f ) );
+		game_constant_buffer_data.screen_width = static_cast< float_t >( get_width() );
+		game_constant_buffer_data.screen_height = static_cast< float_t >( get_height() );
+		
+		get_game_main()->get_game_constant_buffer()->update( & game_constant_buffer_data );
 	}
 	
 	reset_total_elapsed_time();
@@ -124,18 +125,20 @@ void TitleScene::update()
 void TitleScene::render()
 {
 	{
-		FrameConstantBuffer frame_constant_buffer;
+		FrameConstantBufferData frame_constant_buffer_data;
 
-		frame_constant_buffer.view = XMMatrixTranspose( XMMatrixIdentity() );
-		frame_constant_buffer.time = get_total_elapsed_time();
+		frame_constant_buffer_data.view = XMMatrixTranspose( XMMatrixIdentity() );
+		frame_constant_buffer_data.time = get_total_elapsed_time();
 	
-		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer );
+		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
 	}
 
 	{
-		ObjectConstantBuffer object_constant_buffer;
-		object_constant_buffer.world = XMMatrixTranspose( XMMatrixIdentity() );
-		get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer );
+		ObjectConstantBufferData object_constant_buffer_data;
+
+		object_constant_buffer_data.world = XMMatrixTranspose( XMMatrixIdentity() );
+
+		get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
 	}
 
 	get_direct_3d()->clear( Direct3D::Color::from_256( 0xFF, 0xAA, 0x11 ) );
@@ -175,9 +178,9 @@ void TitleScene::render()
 		{
 			( *i )->apply();
 
-			get_game_main()->get_game_constant_buffer()->render();
-			get_game_main()->get_frame_constant_buffer()->render();
-			get_game_main()->get_object_constant_buffer()->render();
+			get_game_main()->get_game_constant_buffer()->bind_to_all(); /// !!!
+			get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// !!!
+			get_game_main()->get_object_constant_buffer()->bind_to_all(); /// !!!
 
 			if ( sequence_ == SEQUENCE_LOGO )
 			{
@@ -188,19 +191,23 @@ void TitleScene::render()
 				if ( sequence_ >= SEQUENCE_TITLE_FIX )
 				{
 					{
-						ObjectConstantBuffer object_constant_buffer;
-						object_constant_buffer.world = XMMatrixTranspose( XMMatrixTranslation( +0.01f, +0.01f, 0.f ) );
-						object_constant_buffer.color = Color( 0.f, 0.f, 0.f, -0.5f );
-						get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer );
+						ObjectConstantBufferData object_constant_buffer_data;
+
+						object_constant_buffer_data.world = XMMatrixTranspose( XMMatrixTranslation( +0.01f, +0.01f, 0.f ) );
+						object_constant_buffer_data.color = Color( 0.f, 0.f, 0.f, -0.5f );
+
+						get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
 					}
 
 					title_logo_model_->get_line()->render();
 
 					{
-						ObjectConstantBuffer object_constant_buffer;
-						object_constant_buffer.world = XMMatrixTranspose( XMMatrixIdentity() );
-						object_constant_buffer.color = Color( 1.f, 1.f, 1.f, 0.f );
-						get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer );
+						ObjectConstantBufferData object_constant_buffer_data;
+
+						object_constant_buffer_data.world = XMMatrixTranspose( XMMatrixIdentity() );
+						object_constant_buffer_data.color = Color( 1.f, 1.f, 1.f, 0.f );
+
+						get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
 					}
 
 					title_logo_model_->get_line()->render();

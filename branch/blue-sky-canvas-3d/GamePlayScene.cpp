@@ -69,8 +69,6 @@
 namespace blue_sky
 {
 
-static FrameConstantBuffer frame_constant_buffer; /// @todo ƒƒ“ƒo‚É‚·‚é
-
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
 	, ui_texture_( 0 )
@@ -161,13 +159,14 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 
 	{
-		GameConstantBuffer constant_buffer;
-		constant_buffer.projection = XMMatrixPerspectiveFovLH( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f );
-		constant_buffer.projection = XMMatrixTranspose( constant_buffer.projection );
-		constant_buffer.screen_width = static_cast< float_t >( get_width() );
-		constant_buffer.screen_height = static_cast< float_t >( get_height() );
+		GameConstantBufferData constant_buffer_data;
+
+		constant_buffer_data.projection = XMMatrixPerspectiveFovLH( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f );
+		constant_buffer_data.projection = XMMatrixTranspose( constant_buffer_data.projection );
+		constant_buffer_data.screen_width = static_cast< float_t >( get_width() );
+		constant_buffer_data.screen_height = static_cast< float_t >( get_height() );
 		
-		get_game_main()->get_game_constant_buffer()->update( & constant_buffer );
+		get_game_main()->get_game_constant_buffer()->update( & constant_buffer_data );
 	}
 
 	if ( ! sky_box_ )
@@ -896,8 +895,8 @@ void GamePlayScene::render()
 					shadow_map_->ready_to_render_shadow_map_with_cascade_level( n );
 
 					{
-						get_game_main()->get_game_constant_buffer()->render();
-						get_game_main()->get_frame_constant_buffer()->render();
+						get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
+						get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 					}
 
 					for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
@@ -927,11 +926,13 @@ void GamePlayScene::render()
 			XMVECTOR at = XMVectorSet( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z(), 0.0f );
 			XMVECTOR up = XMVectorSet( camera_->up().x(), camera_->up().y(), camera_->up().z(), 0.0f );
 
-			frame_constant_buffer.view = XMMatrixLookAtLH( eye, at, up );
-			frame_constant_buffer.view = XMMatrixTranspose( frame_constant_buffer.view );
-			frame_constant_buffer.time = get_total_elapsed_time();
+			FrameConstantBufferData frame_constant_buffer_data;
 
-			get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer );
+			frame_constant_buffer_data.view = XMMatrixLookAtLH( eye, at, up );
+			frame_constant_buffer_data.view = XMMatrixTranspose( frame_constant_buffer_data.view );
+			frame_constant_buffer_data.time = get_total_elapsed_time();
+
+			get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
 		}
 
 		// render_sky_box()
@@ -942,25 +943,28 @@ void GamePlayScene::render()
 			{
 				( *i )->apply();
 
-				{
-					get_game_main()->get_game_constant_buffer()->render();
-					get_game_main()->get_frame_constant_buffer()->render();
+				ObjectConstantBufferData object_constant_buffer_data;
 
-					ObjectConstantBuffer buffer;
-					buffer.world = XMMatrixTranslationFromVector( eye );
-					buffer.world = XMMatrixTranspose( buffer.world );
-					get_game_main()->get_object_constant_buffer()->update( & buffer );
-					get_game_main()->get_object_constant_buffer()->render();
+				// sky box
+				{
+					object_constant_buffer_data.world = XMMatrixTranslationFromVector( eye );
+					object_constant_buffer_data.world = XMMatrixTranspose( object_constant_buffer_data.world );
+
+					get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
+
+					get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
+					get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
+					get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 				}
 
 				sky_box_->render();
 
+				// ground
 				{
-					ObjectConstantBuffer buffer;
-					buffer.world = XMMatrixIdentity();
+					object_constant_buffer_data.world = XMMatrixIdentity();
 
-					get_game_main()->get_object_constant_buffer()->update( & buffer );
-					get_game_main()->get_object_constant_buffer()->render();
+					get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
+					get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 
 					ground_->render();
 				}
@@ -976,15 +980,15 @@ void GamePlayScene::render()
 			{
 				( *i )->apply();
 
-				get_game_main()->get_game_constant_buffer()->render();
-				get_game_main()->get_frame_constant_buffer()->render();
+				get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
+				get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 
 				{
-					ObjectConstantBuffer buffer;
+					ObjectConstantBufferData buffer;
 					buffer.world = XMMatrixIdentity();
 					
 					get_game_main()->get_object_constant_buffer()->update( & buffer );
-					get_game_main()->get_object_constant_buffer()->render();
+					get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 
 					far_billboards_->render();
 				}
@@ -1003,8 +1007,8 @@ void GamePlayScene::render()
 				shadow_map_->ready_to_render_scene();
 
 				{
-					get_game_main()->get_game_constant_buffer()->render();
-					get_game_main()->get_frame_constant_buffer()->render();
+					get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
+					get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 				}
 
 				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
@@ -1029,8 +1033,8 @@ void GamePlayScene::render()
 				( *i )->apply();
 				
 				{
-					get_game_main()->get_game_constant_buffer()->render();
-					get_game_main()->get_frame_constant_buffer()->render();
+					get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
+					get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 				}
 
 				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
@@ -1059,8 +1063,8 @@ void GamePlayScene::render()
 				( *i )->apply();
 
 				{
-					get_game_main()->get_game_constant_buffer()->render();
-					get_game_main()->get_frame_constant_buffer()->render();
+					get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
+					get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 				}
 
 				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
@@ -1089,8 +1093,8 @@ void GamePlayScene::render()
 			{
 				( *i )->apply();
 				
-				get_game_main()->get_game_constant_buffer()->render();
-				get_game_main()->get_frame_constant_buffer()->render();
+				get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
+				get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 
 				get_game_main()->get_bullet_debug_draw()->render();
 			}
@@ -1116,6 +1120,14 @@ void GamePlayScene::render()
 			{
 				( *i )->apply();
 				
+				ObjectConstantBufferData buffer_data;
+				
+				buffer_data.world = XMMatrixIdentity();
+				buffer_data.color = Color( 0.5f, 0.f, 0.f, 0.f );
+
+				get_game_main()->get_object_constant_buffer()->update( & buffer_data );
+				get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
+
 				( * rectangle_->get_material_list().begin() )->set_shader_resource_view( shadow_map_->getShaderResourceView() );
 				rectangle_->render();
 			}
@@ -1139,14 +1151,14 @@ void GamePlayScene::render( const ActiveObject* active_object )
 
 	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
 
-	ObjectConstantBuffer buffer;
+	ObjectConstantBufferData buffer_data;
 
-	buffer.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
-	buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-	buffer.world = XMMatrixTranspose( buffer.world );
+	buffer_data.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
+	buffer_data.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+	buffer_data.world = XMMatrixTranspose( buffer_data.world );
 
-	get_game_main()->get_object_constant_buffer()->update( & buffer );
-	get_game_main()->get_object_constant_buffer()->render();
+	get_game_main()->get_object_constant_buffer()->update( & buffer_data );
+	get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 
 	active_object->get_drawing_model()->get_mesh()->render();
 }
@@ -1158,15 +1170,15 @@ void GamePlayScene::render_line( const ActiveObject* active_object )
 
 	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
 
-	ObjectConstantBuffer buffer;
+	ObjectConstantBufferData buffer_data;
 
-	buffer.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
-	buffer.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-	buffer.world = XMMatrixTranspose( buffer.world );
-	buffer.color = active_object->get_drawing_model()->get_line()->get_color();
+	buffer_data.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
+	buffer_data.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+	buffer_data.world = XMMatrixTranspose( buffer_data.world );
+	buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
 
-	get_game_main()->get_object_constant_buffer()->update( & buffer );
-	get_game_main()->get_object_constant_buffer()->render();
+	get_game_main()->get_object_constant_buffer()->update( & buffer_data );
+	get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 
 	active_object->get_drawing_model()->get_line()->render(); // 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
 }

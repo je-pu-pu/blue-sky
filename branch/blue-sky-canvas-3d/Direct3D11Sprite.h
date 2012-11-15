@@ -2,6 +2,7 @@
 #define DIRECT_3D_11_SPRITE_H
 
 #include "Direct3D11Matrix.h"
+#include "Direct3D11ConstantBuffer.h"
 
 #include <d3d11.h>
 #include <xnamath.h>
@@ -13,10 +14,11 @@ namespace win
 }
 
 class Direct3D11;
-class Direct3D11ConstantBuffer;
 class Direct3D11Vector;
 class Direct3D11Matrix;
 class Direct3D11Color;
+
+template< typename T > class Direct3D11ConstantBuffer;
 
 /**
  * Direct3D 11 Sprite
@@ -26,7 +28,6 @@ class Direct3D11Sprite
 {
 public:
 	typedef Direct3D11					Direct3D;
-	typedef Direct3D11ConstantBuffer	ConstantBuffer;
 	typedef Direct3D11Color				Color;
 
 
@@ -55,6 +56,15 @@ public:
 		Vector4 Color;
 	};
 
+	struct ConstantBufferData
+	{
+		static const int DEFAULT_SLOT = 13;
+
+		XMMATRIX transform;
+	};
+
+	typedef Direct3D11ConstantBuffer< ConstantBufferData > ConstantBuffer;
+
 	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
 
 protected:
@@ -66,7 +76,7 @@ protected:
 
 	Matrix			transform_;
 
-	static Color	white_;
+	static Color	white_;				/// !!!!!
 
 	void create_vertex_buffer();
 	void create_index_buffer();

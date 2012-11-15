@@ -16,7 +16,7 @@ static const float light_y = 500.f;
 
 Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_levels, size_t size )
 	: direct_3d_( direct_3d )
-	, constant_buffer_( new ConstantBuffer( direct_3d, sizeof( ConstantBufferData ), 3 ) ) /// !!!
+	, constant_buffer_( new ConstantBuffer( direct_3d ) )
 	, enabled_( true )
 	, cascade_levels_( cascade_levels )
 	, depth_stencil_texture_( 0 )
@@ -79,7 +79,8 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_lev
 
 	light_position_ = XMVectorSet( 50.f, 100.f, -25.f, 0.f );
 
-	float length[ 4 ] = { 15.f, 50.f, 250.f, 9999.f };
+	/// @todo ìÆìIÇ…ïœçXÇ≈Ç´ÇÈÇÊÇ§Ç…Ç∑ÇÈ
+	float length[ 4 ] = { 5.f, 50.f, 200.f, 9999.f };
 
 	for ( int n = 0; n < 4; n++ )
 	{
@@ -128,7 +129,7 @@ void Direct3D11ShadowMap::ready_to_render_shadow_map_with_cascade_level( int lev
 	constant_buffer_data_.shadow_view_projection[ 0 ] = constant_buffer_data_.shadow_view_projection[ level ];
 
 	constant_buffer_->update( & constant_buffer_data_ );
-	constant_buffer_->render();
+	constant_buffer_->bind_to_vs();
 
 	direct_3d_->getImmediateContext()->RSSetViewports( 1, & viewport_list_[ level ] );
 }
@@ -144,7 +145,8 @@ void Direct3D11ShadowMap::ready_to_render_scene()
 	}
 
 	constant_buffer_->update( & constant_buffer_data_ );
-	constant_buffer_->render();
+	constant_buffer_->bind_to_vs();
+	constant_buffer_->bind_to_ps();
 
 	// constant_buffer_data_.shadow_view_projection = getViewProjectionMatrix( 0 );
 	// constant_buffer_data_.shadow_view_projection = XMMatrixTranspose( constant_buffer_data_.shadow_view_projection );

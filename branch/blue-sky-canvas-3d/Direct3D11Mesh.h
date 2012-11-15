@@ -22,11 +22,16 @@ public:
 	typedef Direct3D11Color				Color;
 	typedef Direct3D11Material			Material;
 
+	typedef XMFLOAT2					Vector2;
+	typedef XMFLOAT3					Vector3;
+	typedef XMFLOAT4					Vector4;
+
 public:
 	struct Vertex
 	{
-		XMFLOAT3 Position;
-		XMFLOAT2 TexCoord;
+		Vector3 Position;
+		Vector3 Normal;
+		Vector2 TexCoord;
 
 		bool operator < ( const Vertex& v ) const
 		{
@@ -36,6 +41,13 @@ public:
 			if ( Position.y > v.Position.y ) return false;
 			if ( Position.z < v.Position.z ) return true;
 			if ( Position.z > v.Position.z ) return false;
+
+			if ( Normal.x < v.Normal.x ) return true;
+			if ( Normal.x > v.Normal.x ) return false;
+			if ( Normal.y < v.Normal.y ) return true;
+			if ( Normal.y > v.Normal.y ) return false;
+			if ( Normal.z < v.Normal.z ) return true;
+			if ( Normal.z > v.Normal.z ) return false;
 
 			if ( TexCoord.x < v.TexCoord.x ) return true;
 			if ( TexCoord.x > v.TexCoord.x ) return false;

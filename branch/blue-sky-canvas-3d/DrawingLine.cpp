@@ -71,7 +71,7 @@ bool DrawingLine::load_obj( const char* file_name )
 			ss >> v.Color.x >> v.Color.y >> v.Color.z >> v.Color.w;
 
 			v.Position.z = -v.Position.z;
-
+			
 			vertex_list_.push_back( v );
 		}
 		else if ( command == "f" )

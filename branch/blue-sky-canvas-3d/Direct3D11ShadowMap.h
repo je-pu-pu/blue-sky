@@ -1,6 +1,8 @@
 #ifndef DIRECT_3D_11_SHADOW_MAP_H
 #define DIRECT_3D_11_SHADOW_MAP_H
 
+#include "Direct3D11ConstantBuffer.h"
+
 #include "type.h"
 
 #include <common/auto_ptr.h>
@@ -11,13 +13,6 @@
 #include <vector>
 
 class Direct3D11;
-class Direct3D11ConstantBuffer;
-
-struct ShadowMapFrameConstantBufferData
-{
-	XMMATRIX shadow_view_projection[ 3 ];
-	float_t view_depth_per_cascade_level[ 4 ];
-};
 
 using common::auto_ptr;
 
@@ -30,9 +25,6 @@ class Direct3D11ShadowMap
 public:
 	static const int MaxCascadeLevels = 4;
 
-	typedef Direct3D11ConstantBuffer			ConstantBuffer;
-	typedef ShadowMapFrameConstantBufferData	ConstantBufferData;
-
 	typedef XMVECTOR							Vector;
 
 	typedef XMMATRIX							Matrix;
@@ -40,6 +32,16 @@ public:
 
 	typedef D3D11_VIEWPORT						Viewport;
 	typedef std::vector< Viewport >				ViewportList;
+
+	struct ConstantBufferData
+	{
+		static const int DEFAULT_SLOT = 10;
+
+		XMMATRIX shadow_view_projection[ 3 ];
+		float_t view_depth_per_cascade_level[ 4 ];
+	};
+
+	typedef Direct3D11ConstantBuffer< ConstantBufferData > ConstantBuffer;
 
 	static const int shader_resource_view_slot_ = 1;		/// !!!!!!!!!!!
 

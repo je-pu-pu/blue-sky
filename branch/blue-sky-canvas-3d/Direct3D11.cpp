@@ -123,7 +123,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		feature_level_map[ D3D_FEATURE_LEVEL_9_3 ] = "9.3";
 		feature_level_map[ D3D_FEATURE_LEVEL_10_0 ] = "10.0";
 		feature_level_map[ D3D_FEATURE_LEVEL_10_1 ] = "10.1";
-		feature_level_map[ D3D_FEATURE_LEVEL_11_0 ] = "11.1";
+		feature_level_map[ D3D_FEATURE_LEVEL_11_0 ] = "11.0";
 
 		common::log( "log/d3d11.log", std::string( "created d3d11 device ( feature_level : " ) + feature_level_map[ device_->GetFeatureLevel() ] + " )" );
 	}
@@ -331,6 +331,7 @@ void Direct3D11::create_default_input_layout()
 	D3D11_INPUT_ELEMENT_DESC layout_main[] =
     {
         { "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",      0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD",    0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 

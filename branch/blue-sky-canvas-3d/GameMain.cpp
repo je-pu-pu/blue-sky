@@ -69,9 +69,9 @@ GameMain::GameMain()
 	direct_3d_->getEffect()->load( "media/shader/main.fx" );
 	direct_3d_->create_default_input_layout();
 
-	game_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( GameConstantBuffer ), 0 );
-	frame_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( FrameConstantBuffer ), 1 );
-	object_constant_buffer_ = new Direct3D11ConstantBuffer( direct_3d_.get(), sizeof( ObjectConstantBuffer ), 2 );
+	game_constant_buffer_ = new GameConstantBuffer( direct_3d_.get() );
+	frame_constant_buffer_ = new FrameConstantBuffer( direct_3d_.get() );
+	object_constant_buffer_ = new ObjectConstantBuffer( direct_3d_.get() );
 
 	physics_ = new ActiveObjectPhysics();
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );

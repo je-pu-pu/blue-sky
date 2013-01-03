@@ -59,10 +59,12 @@ public:
 	};
 
 	typedef XMFLOAT3					Position;
+	typedef XMFLOAT3					Normal;
 	typedef XMFLOAT2					TexCoord;
 
-	typedef std::vector< Position >		PositionList; // ?
-	typedef std::vector< TexCoord >		TexCoordList; // ?
+	typedef std::vector< Position >		PositionList;
+	typedef std::vector< Normal >		NormalList;
+	typedef std::vector< TexCoord >		TexCoordList;
 
 	typedef std::vector< Vertex >		VertexList;
 	typedef std::vector< Material* >	MaterialList;

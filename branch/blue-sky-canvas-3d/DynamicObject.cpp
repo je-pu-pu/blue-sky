@@ -29,6 +29,11 @@ void DynamicObject::restart()
 	get_rigid_body()->setActivationState( false );
 }
 
+void DynamicObject::update()
+{
+	set_direction_degree( get_direction_degree() + 0.1f );
+}
+
 void DynamicObject::update_transform()
 {
 	ActiveObject::update_transform();

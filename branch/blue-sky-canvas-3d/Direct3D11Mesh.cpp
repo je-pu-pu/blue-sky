@@ -46,6 +46,7 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 	VertexIndexMap vertex_index_map;
 
 	PositionList position_list;
+	NormalList normal_list;
 	TexCoordList tex_coord_list;
 
 	material_list_.push_back( new Material( direct_3d_ ) );
@@ -73,6 +74,14 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 			v.z = -v.z;
 
 			position_list.push_back( v );
+		}
+		else if ( command == "vn" )
+		{
+			Vector3 n;
+
+			ss >> n.x >> n.y >> n.z;
+
+			normal_list.push_back( n );
 		}
 		else if ( command == "vt" )
 		{
@@ -112,6 +121,7 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 
 				PositionList::size_type position_index;
 				TexCoordList::size_type tex_coord_index;
+				NormalList::size_type normal_index;
 
 				fss >> position_index >> tex_coord_index;
 
@@ -124,6 +134,15 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 				v.Position = position_list[ position_index ];
 				v.TexCoord = tex_coord_list[ tex_coord_index ];
 				v.TexCoord.y = 1.f - v.TexCoord.y;
+
+				if ( ! fss.eof() )
+				{
+					fss >> normal_index;
+
+					normal_index--;
+
+					v.Normal = normal_list[ normal_index ];
+				}
 
 				VertexIndexMap::iterator i = vertex_index_map.find( v );
 
@@ -167,7 +186,12 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 
 			if ( ! texture_name.empty() )
 			{
-				const string_t texture_file_name = get_texture_file_name_by_texture_name( texture_name.c_str() );
+				string_t texture_file_name = get_texture_file_name_by_texture_name( texture_name.c_str() );
+				
+				if ( ! boost::regex_search( texture_file_name, boost::regex( "\\." ) ) )
+				{
+					texture_file_name += ".png";
+				}
 
 				try
 				{

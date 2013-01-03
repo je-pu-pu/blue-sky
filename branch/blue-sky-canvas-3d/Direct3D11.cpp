@@ -106,7 +106,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	swap_chain_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 #ifdef _DEBUG
-    UINT d3d11_create_device_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT; // | D3D11_CREATE_DEVICE_DEBUG;
+    UINT d3d11_create_device_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG;
 #else
     UINT d3d11_create_device_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #endif
@@ -128,11 +128,23 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		common::log( "log/d3d11.log", std::string( "created d3d11 device ( feature_level : " ) + feature_level_map[ device_->GetFeatureLevel() ] + " )" );
 	}
 
+	// multi_sample()
+	/// @todo 実装する
+	{
+		UINT multi_sample_count = 4;
+		UINT multi_sample_quality = 0;
+
+		if ( device_->CheckMultisampleQualityLevels( swap_chain_desc_.BufferDesc.Format, multi_sample_count, & multi_sample_quality ) )
+		{
+			int x = 0;
+		}
+	}
+
 #ifdef ENABLE_DIRECT_WRITE
 	// Direct3D 10.1
 	{
 #ifdef _DEBUG
-		UINT d3d10_create_device_flags = D3D10_CREATE_DEVICE_BGRA_SUPPORT; // | D3D10_CREATE_DEVICE_DEBUG | D3D10_CREATE_DEVICE_STRICT_VALIDATION;
+		UINT d3d10_create_device_flags = D3D10_CREATE_DEVICE_BGRA_SUPPORT | D3D10_CREATE_DEVICE_DEBUG;
 #else
 		UINT d3d10_create_device_flags = D3D10_CREATE_DEVICE_BGRA_SUPPORT;
 #endif
@@ -275,6 +287,8 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	texture_manager_ = new Direct3D11TextureManager( this );
 }
 
+
+/// @todo D3D11_CREATE_DEVICE_DEBUG を有効にし、メモリリークを調べる
 Direct3D11::~Direct3D11()
 {
 	set_full_screen( false );

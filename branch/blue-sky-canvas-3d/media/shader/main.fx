@@ -74,7 +74,7 @@ struct VS_INPUT
 	float2 TexCoord : TEXCOORD0;
 };
 
-struct GS_INPUT
+struct GS_2D_INPUT
 {
 	float4 Position : SV_POSITION;
 	float2 TexCoord : TEXCOORD0;
@@ -86,14 +86,22 @@ struct VS_LINE_INPUT
 	float4 Color : COLOR0;
 };
 
-struct VS_LINE_OUTPUT
+struct GS_LINE_INPUT
 {
 	float4 Position : SV_POSITION;
 	float4 Color : COLOR0;
-	float Depth : TEXCOORD0; /// ???
+	float Depth : TEXCOORD1; /// ???
 };
 
 struct PS_INPUT
+{
+	float4 Position : SV_POSITION;
+	float3 Normal   : NORMAL0;
+	float2 TexCoord : TEXCOORD0;
+	float4 Color    : COLOR0;
+};
+
+struct PS_FLAT_INPUT
 {
 	float4 Position : SV_POSITION;
 	float2 TexCoord : TEXCOORD0;
@@ -103,37 +111,22 @@ struct PS_INPUT
 struct PS_SHADOW_INPUT
 {
 	float4 Position : SV_POSITION;
-	float4 ShadowTexCoord[ ShadowMapCascadeLevels ] : TEXCOORD;
+	float3 Normal   : NORMAL0;
+	float4 ShadowTexCoord[ ShadowMapCascadeLevels ] : TEXCOORD0;
 	float2 TexCoord : TEXCOORD4;
 	float Depth : TEXCOORD5;
 };
 
-GS_INPUT vs( VS_INPUT input, uint vertex_id : SV_VertexID )
-{
-	GS_INPUT output;
-
-	output.Position = mul( input.Position, World );
-    output.Position = mul( output.Position, View );
-    output.Position = mul( output.Position, Projection );
-	output.TexCoord = input.TexCoord;
-
-	// ぶらす
-	// float a = ( vertex_id ) / 10.f + Time * 10.f;
-	// output.Position.x += cos( a ) * 0.01f;
-	// output.Position.y += sin( Time ) * 0.01f;
-
-	// output.Position = input.Position;
-
-    return output;
-}
-
-PS_INPUT vs_to_ps( VS_INPUT input, uint vertex_id : SV_VertexID )
+PS_INPUT vs_main( VS_INPUT input, uint vertex_id : SV_VertexID )
 {
 	PS_INPUT output;
 
 	output.Position = mul( input.Position, World );
     output.Position = mul( output.Position, View );
     output.Position = mul( output.Position, Projection );
+	
+	output.Normal = float3( 1.f, 0.f, 0.f );
+	
 	output.TexCoord = input.TexCoord;
 	output.Color = float4( 0.f, 0.f, 0.f, 0.f );
 
@@ -149,9 +142,22 @@ PS_INPUT vs_to_ps( VS_INPUT input, uint vertex_id : SV_VertexID )
 	return output;
 }
 
-VS_LINE_OUTPUT vs_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID )
+PS_FLAT_INPUT vs_flat( VS_INPUT input, uint vertex_id : SV_VertexID )
 {
-	VS_LINE_OUTPUT output;
+	PS_FLAT_INPUT output;
+
+	output.Position = mul( input.Position, World );
+    output.Position = mul( output.Position, View );
+    output.Position = mul( output.Position, Projection );
+	output.TexCoord = input.TexCoord;
+	output.Color = float4( 0.f, 0.f, 0.f, 0.f );
+
+	return output;
+}
+
+GS_LINE_INPUT vs_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID )
+{
+	GS_LINE_INPUT output;
 
 	output.Position = mul( input.Position, World );
     output.Position = mul( output.Position, View );
@@ -179,24 +185,8 @@ VS_LINE_OUTPUT vs_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID )
 	return output;
 }
 
-[maxvertexcount(12)]
-void gs_pass( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStream )
-{
-	for ( uint n = 0; n < 3; n++ )
-	{
-		PS_INPUT output;
-		output.Position = input[ n ].Position;
-		output.TexCoord = input[ n ].TexCoord;
-		output.Color = float4( 1.f, 1.f, 1.f, 1.f );
-
-		TriStream.Append( output );
-	}
-
-	TriStream.RestartStrip();
-}
-
 [maxvertexcount(4)]
-void gs_line( line VS_LINE_OUTPUT input[2], inout TriangleStream<PS_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
+void gs_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
 {
 	static const uint input_vertex_count = 2;
 	static const uint output_vertex_count = 4;
@@ -213,6 +203,7 @@ void gs_line( line VS_LINE_OUTPUT input[2], inout TriangleStream<PS_INPUT> TriSt
 	
 	static const float line_v_width = 32.f / 1024.f;
 
+	[unroll]
 	for ( uint n = 0; n < input_vertex_count; n++ )
 	{
 		input[ n ].Position.z += z_offset;
@@ -229,7 +220,7 @@ void gs_line( line VS_LINE_OUTPUT input[2], inout TriangleStream<PS_INPUT> TriSt
 		float ly = ( input[ m ].Position.y * screen_ratio ) - ( input[ n ].Position.y * screen_ratio );
 		float lx = input[ m ].Position.x - input[ n ].Position.x;
 		
-		int redraw_seed = uint( Time * 5.f ) + primitive_id;
+		uint redraw_seed = uint( Time * 5.f ) + primitive_id;
 
 		// float line_index = ( uint( Time + primitive_id % 10 / 10.f ) + primitive_id ) % 3; // 全ての線がばらばらのタイミングで更新される
 		float line_index = redraw_seed % 3; // 全ての線が統一されたタイミングで更新される
@@ -244,7 +235,7 @@ void gs_line( line VS_LINE_OUTPUT input[2], inout TriangleStream<PS_INPUT> TriSt
 		float dx = cos( angle ) * line_width * screen_ratio;
 		float dy = sin( angle ) * line_width;
 
-		PS_INPUT output[ 4 ];
+		PS_FLAT_INPUT output[ 4 ];
 
 		output[ 0 ].Position = input[ n ].Position + float4( -dx, -dy, 0.f, 0.f );
 		output[ 0 ].TexCoord = float2( line_u_origin, line_v_origin );
@@ -273,19 +264,19 @@ void gs_line( line VS_LINE_OUTPUT input[2], inout TriangleStream<PS_INPUT> TriSt
 	}
 }
 
-float4 ps( PS_INPUT input ) : SV_Target
+float4 ps_line( noperspective PS_FLAT_INPUT input ) : SV_Target
+{
+	return line_texture.Sample( u_wrap_texture_sampler, input.TexCoord ) + input.Color;
+}
+
+float4 ps_flat( PS_FLAT_INPUT input ) : SV_Target
 {
 	return model_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
 }
 
-float4 ps_wrap( PS_INPUT input ) : SV_Target
+float4 ps_main_wrap( PS_INPUT input ) : SV_Target
 {
-	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ) + input.Color;
-}
-
-float4 ps_line( noperspective PS_INPUT input ) : SV_Target
-{
-	return line_texture.Sample( u_wrap_texture_sampler, input.TexCoord ) + input.Color;
+	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ); // /* + input.Color */ * float4( input.Normal, 1.f );
 }
 
 float4 ps_debug( PS_INPUT input ) : SV_Target
@@ -332,7 +323,7 @@ RasterizerState WireFrame
 RasterizerState Shadow
 {
 	CullMode = NONE;
-	// SlopeScaledDepthBias = 1.f;
+	SlopeScaledDepthBias = 8.f;
 };
 
 // ----------------------------------------
@@ -345,14 +336,17 @@ technique11 main
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
-        SetVertexShader( CompileShader( vs_4_0, vs_to_ps() ) );
+        SetVertexShader( CompileShader( vs_4_0, vs_main() ) );
 		SetGeometryShader( NULL );
-        SetPixelShader( CompileShader( ps_4_0, ps_wrap() ) );
+        SetPixelShader( CompileShader( ps_4_0, ps_main_wrap() ) );
 
 		RASTERIZERSTATE = Default;
     }
 }
 
+// ----------------------------------------
+// for line
+// ----------------------------------------
 technique11 drawing_line
 {
 	pass pass_line
@@ -371,9 +365,9 @@ technique11 drawing_line
 // ----------------------------------------
 // for Text
 // ----------------------------------------
-GS_INPUT vs_text( VS_INPUT input )
+GS_2D_INPUT vs_text( VS_INPUT input )
 {
-	GS_INPUT output;
+	GS_2D_INPUT output;
 	output.Position = input.Position;
 	output.TexCoord = input.TexCoord;
 
@@ -381,9 +375,9 @@ GS_INPUT vs_text( VS_INPUT input )
 }
 
 [maxvertexcount(4)]
-void gs_text( triangle GS_INPUT input[3], inout TriangleStream<PS_INPUT> TriStream )
+void gs_text( triangle GS_2D_INPUT input[3], inout TriangleStream<PS_FLAT_INPUT> TriStream )
 {
-	PS_INPUT output[ 4 ];
+	PS_FLAT_INPUT output[ 4 ];
 
 	float w = 1.f;
 	float h = 1.f;
@@ -418,7 +412,7 @@ technique11 text
 	{
 		SetVertexShader( CompileShader( vs_4_0, vs_text() ) );
 		SetGeometryShader( CompileShader( gs_4_0, gs_text() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_flat() ) );
 	}
 }
 
@@ -431,9 +425,9 @@ technique11 sky_box
 	{
 		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
 
-		SetVertexShader( CompileShader( vs_4_0, vs_to_ps() ) );
+		SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_flat() ) );
 
 		RASTERIZERSTATE = Default;
 	}
@@ -448,9 +442,9 @@ technique11 billboard
 	{
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
-		SetVertexShader( CompileShader( vs_4_0, vs_to_ps() ) );
+		SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_flat() ) );
 
 		RASTERIZERSTATE = Default;
 	}
@@ -515,8 +509,13 @@ PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
 	output.Position = mul( input.Position, World );
     output.Position = mul( output.Position, View );
     output.Position = mul( output.Position, Projection );
+	
+	// output.Normal = input.Normal;
+	output.Normal = normalize( mul( input.Normal, ( float3x3 ) transpose( World ) ) );
+	
 	output.TexCoord = input.TexCoord;
 	
+	[unroll]
 	for ( int n = 0; n < ShadowMapCascadeLevels; n++ )
 	{
 		output.ShadowTexCoord[ n ] = mul( input.Position, World );
@@ -526,7 +525,7 @@ PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
 	
 		output.ShadowTexCoord[ n ].x = ( output.ShadowTexCoord[ n ].x + 1.f ) / 2.f;
 		output.ShadowTexCoord[ n ].y = ( -output.ShadowTexCoord[ n ].y + 1.f ) / 2.f;
-		output.ShadowTexCoord[ n ].z -= 0.00001f;
+		// output.ShadowTexCoord[ n ].z -= 0.00001f;
 		// output.ShadowTexCoord[ n ].z -= 0.000005f;
 	}
 
@@ -566,7 +565,7 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 	float4 shadow = float4( 1.f, 1.f, 1.f, 1.f );
 	float sz = ( float ) shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy );
 
-	if ( shadow_tex_coord.z >= sz )
+	if ( /* input.Normal.x < 0.f || */ shadow_tex_coord.z >= sz )
 	{
 		const float4 shadow_color = float4( 0.5f, 0.5f, 0.75f, 1.f );
 
@@ -588,12 +587,14 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 		shadow.a = 1.f;
 	}
 
+	// return float4( input.Normal, 1.f );
+
 	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ) * shadow; // * cascade_colors[ cascade_index ];
 }
 
-PS_INPUT vs_shadow_map( VS_INPUT input )
+PS_FLAT_INPUT vs_shadow_map( VS_INPUT input )
 {
-	PS_INPUT output;
+	PS_FLAT_INPUT output;
 	
 	output.Position = mul( input.Position, World );
     output.Position = mul( output.Position, ShadowViewProjection[ 0 ] );
@@ -623,7 +624,7 @@ technique11 shadow_map
 
 		SetVertexShader( CompileShader( vs_4_0, vs_shadow_map() ) );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_flat() ) );
 
 		RASTERIZERSTATE = Shadow;
 	}
@@ -681,21 +682,21 @@ cbuffer SpriteConstantBuffer : register( b13 )
 	matrix Transform;
 };
 
-PS_INPUT vs_sprite( PS_INPUT input )
+PS_FLAT_INPUT vs_sprite( PS_FLAT_INPUT input )
 {
-	PS_INPUT output = input;
+	PS_FLAT_INPUT output = input;
 
 	output.Position = mul( input.Position, Transform );
 
 	return output;
 }
 
-float4 ps_sprite( PS_INPUT input ) : SV_Target
+float4 ps_sprite( PS_FLAT_INPUT input ) : SV_Target
 {
 	return model_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
 }
 
-float4 ps_sprite_add( PS_INPUT input ) : SV_Target
+float4 ps_sprite_add( PS_FLAT_INPUT input ) : SV_Target
 {
 	return model_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
 }

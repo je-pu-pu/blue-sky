@@ -39,7 +39,7 @@ public:
 	void restart();
 
 	/// XV
-	virtual void update() { }
+	virtual void update();
 	virtual void update_transform();
 	
 	virtual float get_collision_width() const { return collision_width_; }

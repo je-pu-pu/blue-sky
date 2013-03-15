@@ -57,6 +57,8 @@ bool StreamingSound::load( const char* file_name )
 	direct_sound_buffer_ = direct_sound_->create_sound_buffer( buffer_desc );
 	direct_sound_buffer_->set_3d_sound( is_3d_sound() );
 
+	sound_sample_buffer_.resize( get_buffer_size() / sizeof( SoundSample ) );
+
 	stream_all();
 
 	return true;
@@ -126,6 +128,8 @@ void StreamingSound::stream_all()
 	sound_file_->read( data, direct_sound_buffer_->get_caps().dwBufferBytes );
 	
 	direct_sound_buffer_->get_direct_sound_buffer()->Unlock( data, size, 0, 0 );
+
+	memcpy( & sound_sample_buffer_[ 0 ], data, size );
 }
 
 void StreamingSound::stream_half( bool first_half )
@@ -151,6 +155,8 @@ void StreamingSound::stream_half( bool first_half )
 	int x = sound_file_->read( data, size, is_loop_ );
 
 	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->Unlock( data, size, 0, 0 ) );
+
+	memcpy( & sound_sample_buffer_[ lock_offset / sizeof( SoundSample ) ], data, size );
 }
 
 float StreamingSound::get_current_position() const
@@ -159,6 +165,24 @@ float StreamingSound::get_current_position() const
 	direct_sound_buffer_->get_direct_sound_buffer()->GetCurrentPosition( & play_pos, 0 );
 
 	return current_position_offset_ + static_cast< float >( play_pos ) / static_cast< float >( sound_file_->size_per_sec() );
+}
+
+float StreamingSound::get_current_peak_level() const
+{
+	DWORD play_pos = 0;
+	direct_sound_buffer_->get_direct_sound_buffer()->GetCurrentPosition( & play_pos, 0 );
+
+	const float sample_sec = 1.f / 20.f;
+	const int sample_count = static_cast< int >( sound_file_->size_per_sec() * sample_sec ) / sizeof( SoundSample );
+	float result = 0.f;
+
+	for ( int n = 0; n < sample_count; n++ )
+	{
+		DWORD sample_index = ( play_pos / sizeof( SoundSample ) + n ) % sound_sample_buffer_.size();
+		result = std::max( result, sound_sample_buffer_[ sample_index ] / static_cast< float >( USHRT_MAX ) );
+	}
+
+	return result;
 }
 
 } // namespace blue_sky

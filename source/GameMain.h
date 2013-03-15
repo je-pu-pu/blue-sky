@@ -85,6 +85,7 @@ protected:
 	/// @todo ‚Ü‚Æ‚ß‚é
 	auto_ptr< GameConstantBuffer >			game_constant_buffer_;
 	auto_ptr< FrameConstantBuffer >			frame_constant_buffer_;
+	auto_ptr< FrameDrawingConstantBuffer >	frame_drawing_constant_buffer_;
 	auto_ptr< ObjectConstantBuffer >		object_constant_buffer_;
 
 	auto_ptr< Direct3D11BulletDebugDraw >	bullet_debug_draw_;
@@ -129,6 +130,7 @@ public:
 
 	GameConstantBuffer* get_game_constant_buffer() const { return game_constant_buffer_.get(); }
 	FrameConstantBuffer* get_frame_constant_buffer() const { return frame_constant_buffer_.get(); }
+	FrameDrawingConstantBuffer* get_frame_drawing_constant_buffer() const { return frame_drawing_constant_buffer_.get(); }
 	ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_.get(); }
 	
 	Direct3D11BulletDebugDraw* get_bullet_debug_draw() const { return bullet_debug_draw_.get(); }

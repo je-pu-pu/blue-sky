@@ -67,6 +67,11 @@ cbuffer ObjectExtensionConstantBuffer : register( b3 )
 	float4 ObjectAdditionalColor;
 }
 
+cbuffer FrameDrawingConstantBuffer : register( b4 )
+{
+	float DrawingAccent;
+}
+
 struct VS_INPUT
 {
 	float4 Position : SV_POSITION;
@@ -201,8 +206,6 @@ void gs_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> T
 	// static const float z_offset = 0.f;
 	static const float z_offset = -0.00001f;
 	
-	static const float line_v_width = 32.f / 1024.f;
-
 	[unroll]
 	for ( uint n = 0; n < input_vertex_count; n++ )
 	{
@@ -210,8 +213,14 @@ void gs_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> T
 		input[ n ].Position.xyz /= input[ n ].Position.w;
 	}
 
-	const float line_width_scale = 0.5f;
-	const float line_width = 32.f / screen_height * line_width_scale;
+	static const float LineTextureSize = 1024.f;
+	static const float DrawingAccentPower = 3.f;
+	static const float DrawingAccentScale = 300.f;
+
+	const float line_width_scale = 0.2f + pow( abs( DrawingAccent ), DrawingAccentPower ) * DrawingAccentScale;
+	const float line_width = 32.f * line_width_scale / screen_height;
+
+	const float line_v_width = 32.f / LineTextureSize;
 
 	{
 		uint n = 0;
@@ -227,7 +236,7 @@ void gs_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> T
 		float line_v_origin = ( line_index * line_v_width );
 
 		float line_u_origin = ( redraw_seed ) * 0.1f;
-		float line_length_ratio = length( float2( lx, ly ) ) / length( float2( 2.f, 2.f ) );
+		float line_length_ratio = 1.f; // length( float2( lx, ly ) ) / length( float2( 2.f, 2.f ) );
 
 		float angle = atan2( ly, lx );
 		angle += Pi / 2.f;

@@ -42,6 +42,9 @@ public:
 	/// 現在の位置 ( 秒 ) を取得する
 	float get_current_position() const;
 
+	/// 現在の位置のピークレベルを取得する
+	float get_current_peak_level() const;
+
 	static DWORD get_buffer_size() { return 512 * 1024; /* 512 KB */ };
 
 }; // class StreamingSound

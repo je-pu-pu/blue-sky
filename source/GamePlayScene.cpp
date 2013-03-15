@@ -188,7 +188,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	rectangle_ = new Rectangle( get_direct_3d() );
 
-	bgm_ = get_sound_manager()->get_sound( "bgm" );
+	bgm_ = get_sound_manager()->get_sound( "balloon" );
 	if ( bgm_ )
 	{
 		bgm_->play( true );
@@ -935,6 +935,14 @@ void GamePlayScene::render()
 			get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
 		}
 
+		{
+			FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
+
+			frame_drawing_constant_buffer_data.accent = bgm_->get_current_peak_level();
+
+			get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
+		}
+
 		// render_sky_box()
 		{
 			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sky_box" );
@@ -1009,6 +1017,7 @@ void GamePlayScene::render()
 				{
 					get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 					get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
+					get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 				}
 
 				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
@@ -1035,6 +1044,7 @@ void GamePlayScene::render()
 				{
 					get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 					get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
+					get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 				}
 
 				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
@@ -1065,6 +1075,7 @@ void GamePlayScene::render()
 				{
 					get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 					get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
+					get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// @todo –³‘Ê‚ðÈ‚­
 				}
 
 				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )

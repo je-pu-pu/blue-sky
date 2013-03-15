@@ -42,7 +42,7 @@ TitleScene::TitleScene( const GameMain* game_main )
 	, sequence_elapsed_time_( 0.f )
 {
 	ok_ = get_sound_manager()->load( "ok" );
-	bgm_ = get_sound_manager()->load_music( "bgm", "title" );
+	bgm_ = get_sound_manager()->load_music( "bgm", "ending" );
 	
 	// title_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/texture/title.png" );
 	title_bg_texture_ = get_direct_3d()->getTextureManager()->load( "title-bg", "media/image/cloud-3.jpg" );
@@ -134,6 +134,14 @@ void TitleScene::render()
 	}
 
 	{
+		FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
+
+		frame_drawing_constant_buffer_data.accent = bgm_->get_current_peak_level();
+
+		get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
+	}
+
+	{
 		ObjectConstantBufferData object_constant_buffer_data;
 
 		object_constant_buffer_data.world = XMMatrixTranspose( XMMatrixIdentity() );
@@ -180,6 +188,7 @@ void TitleScene::render()
 
 			get_game_main()->get_game_constant_buffer()->bind_to_all(); /// !!!
 			get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// !!!
+			get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// !!!
 			get_game_main()->get_object_constant_buffer()->bind_to_all(); /// !!!
 
 			if ( sequence_ == SEQUENCE_LOGO )

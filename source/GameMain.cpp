@@ -71,6 +71,7 @@ GameMain::GameMain()
 
 	game_constant_buffer_ = new GameConstantBuffer( direct_3d_.get() );
 	frame_constant_buffer_ = new FrameConstantBuffer( direct_3d_.get() );
+	frame_drawing_constant_buffer_ = new FrameDrawingConstantBuffer( direct_3d_.get() );
 	object_constant_buffer_ = new ObjectConstantBuffer( direct_3d_.get() );
 
 	physics_ = new ActiveObjectPhysics();

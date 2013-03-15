@@ -1,7 +1,11 @@
 #ifndef BLUE_SKY_SOUND_H
 #define BLUE_SKY_SOUND_H
 
+#include "type.h"
+
 #include <game/Sound.h>
+
+#include <vector>
 #include <string>
 
 class DirectSound;
@@ -30,11 +34,15 @@ public:
 	// typedef WaveFile SoundFile;
 	typedef OggVorbisFile SoundFile;
 
+	typedef s16_t SoundSample;
+	typedef std::vector< SoundSample > SoundSampleList;
+
 protected:
 	const DirectSound* direct_sound_;
 	DirectSoundBuffer* direct_sound_buffer_;
 
 	SoundFile* sound_file_;
+	SoundSampleList sound_sample_buffer_;
 
 	std::string name_;
 	std::string file_name_;

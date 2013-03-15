@@ -79,8 +79,11 @@ bool Sound::load( const char* file_name )
 	direct_sound_buffer_->get_direct_sound_buffer()->Lock( 0, 0, & data, & size, 0, 0, DSBLOCK_ENTIREBUFFER );
 	
 	sound_file_->read( data, sound_file_->size() );
-	
+
 	direct_sound_buffer_->get_direct_sound_buffer()->Unlock( data, size, 0, 0 );
+
+	sound_sample_buffer_.resize( size / sizeof( SoundSample ) );
+	memcpy( & sound_sample_buffer_[ 0 ], data, size );
 
 	return true;
 }

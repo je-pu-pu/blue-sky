@@ -4,6 +4,8 @@
 #include "Direct3D11.h"
 #include "DirectX.h"
 
+#include "FbxFileLoader.h"
+
 #include <common/exception.h>
 #include <common/math.h>
 
@@ -15,6 +17,11 @@
 #include <fstream>
 #include <sstream>
 
+/**
+ * コンストラクタ
+ *
+ * @param direct_3d Direct3D
+ */
 Direct3D11Mesh::Direct3D11Mesh( Direct3D11* direct_3d )
 	: direct_3d_( direct_3d )
 	, vertex_buffer_( 0 )
@@ -22,6 +29,10 @@ Direct3D11Mesh::Direct3D11Mesh( Direct3D11* direct_3d )
 
 }
 
+/**
+ * デストラクタ
+ *
+ */
 Direct3D11Mesh::~Direct3D11Mesh()
 {
 	for ( MaterialList::iterator i = material_list_.begin(); i != material_list_.end(); ++i )
@@ -33,6 +44,22 @@ Direct3D11Mesh::~Direct3D11Mesh()
 
 }
 
+/**
+ * 新しいマテリアルを作成する
+ *
+ * @return 作成されたマテリアル
+ */
+Direct3D11Mesh::Material* Direct3D11Mesh::create_material()
+{
+	return new Material( direct_3d_ );
+}
+
+/**
+ * OBJ ファイルを読み込む
+ *
+ * @param file_name OBJ ファイル名
+ * @return ファイルの読み込みに成功した場合は true を、失敗した場合は false を返す
+ */
 bool Direct3D11Mesh::load_obj( const char* file_name )
 {
 	std::ifstream in( file_name );
@@ -230,8 +257,38 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 	return true;
 }
 
+/**
+ * FBX ファイルを読み込む
+ *
+ * @param file_name FBX ファイル名
+ * @return ファイルの読み込みに成功した場合は true を、失敗した場合は false を返す
+ */
+bool Direct3D11Mesh::load_fbx( const char* file_name )
+{
+	FbxFileLoader loader( this );
+
+	if ( ! loader.load( file_name ) )
+	{
+		return false;
+	}
+
+	create_vertex_buffer();
+	create_index_buffer();
+
+	return true;
+}
+
+/**
+ * 頂点バッファを作成する
+ *
+ */
 void Direct3D11Mesh::create_vertex_buffer()
 {
+	if ( vertex_list_.empty() )
+	{
+		return;
+	}
+
 	D3D11_BUFFER_DESC buffer_desc = { 0 };
 
 	buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -244,14 +301,34 @@ void Direct3D11Mesh::create_vertex_buffer()
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & vertex_buffer_ ) );
 }
 
-void Direct3D11Mesh::create_index_buffer( Material* material )
+/**
+ * インデックスバッファを作成する
+ *
+ */
+void Direct3D11Mesh::create_index_buffer()
 {
-	if ( ! material->get_index_list().empty() )
+	for ( auto i = get_material_list().begin(); i != get_material_list().end(); ++i )
 	{
-		material->create_index_buffer();
+		create_index_buffer( *i );
 	}
 }
 
+/**
+ * 指定したマテリアルに対するインデックスバッファを作成する
+ *
+ * @param material マテリアル
+ */
+void Direct3D11Mesh::create_index_buffer( Material* material )
+{
+	material->create_index_buffer();
+}
+
+/**
+ * 指定したテクスチャ名に対応するテクスチャファイル名を取得する
+ *
+ * @param texture_name テクスチャ名
+ * @return テクスチャファイル名
+ */
 string_t Direct3D11Mesh::get_texture_file_name_by_texture_name( const char* texture_name ) const
 {
 	/// !!!
@@ -263,6 +340,10 @@ string_t Direct3D11Mesh::get_texture_file_name_by_texture_name( const char* text
 	return texture_name;
 }
 
+/**
+ * 描画する
+ *
+ */
 void Direct3D11Mesh::render() const
 {
 	UINT stride = sizeof( Vertex );

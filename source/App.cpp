@@ -25,6 +25,9 @@ App::App()
 	, is_clip_cursor_enabled_( false )
 {
 	setlocale( LC_CTYPE, "" );
+
+	AllocConsole();
+	freopen( "CONOUT$", "w", stdout );
 }
 
 //□デストラクタ
@@ -34,6 +37,8 @@ App::~App()
 	WINNLSEnableIME( hWnd, TRUE );	// IME表示
 
 	clip_cursor( false );
+
+	FreeConsole();
 }
 
 //■初期化

@@ -43,6 +43,7 @@
     <ClCompile Include="DrawingModel.cpp" />
     <ClCompile Include="DrawingModelManager.cpp" />
     <ClCompile Include="DynamicObject.cpp" />
+    <ClCompile Include="FbxFileLoader.cpp" />
     <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="GamePlayScene.cpp" />
     <ClCompile Include="Goal.cpp" />
@@ -105,6 +106,7 @@
     <ClInclude Include="DrawingModel.h" />
     <ClInclude Include="DrawingModelManager.h" />
     <ClInclude Include="DynamicObject.h" />
+    <ClInclude Include="FbxFileLoader.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="GamePlayScene.h" />
@@ -179,14 +181,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\lib\bullet-2.80-rev2531\src;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)lib\x86;$(ProjectDir)lib\debug;$(ProjectDir)debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\lib\bullet-2.80-rev2531\src;D:\lib\collada-dom\include\collada-dom2.4\;D:\Program Files\Autodesk\FBX\FBX SDK\2013.3\include;D:\lib\collada-dom-2.4.0\dom\external-libs\boost\lib\vc10;D:\lib\collada-dom-2.4.0\dom\external-libs\libxml2-new\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\minizip\win32\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\pcre\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\tinyxml\lib\vc10;D:\lib\collada-dom-2.4.0\dom\external-libs\zlib-1.2.5\Release;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)lib\x86;D:\Program Files\Autodesk\FBX\FBX SDK\2013.3\lib\vs2010\x86;$(ProjectDir)lib\debug;$(ProjectDir)debug;$(LibraryPath);D:\lib\collada-dom\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\boost\lib\vc10;D:\lib\collada-dom-2.4.0\dom\external-libs\libxml2-new\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\minizip\win32\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\pcre\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\tinyxml\lib\vc10;D:\lib\collada-dom-2.4.0\dom\external-libs\zlib-1.2.5\Release</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\lib\bullet-2.80-rev2531\src;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)lib\x86;$(ProjectDir)lib\release;$(ProjectDir)release;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\lib\bullet-2.80-rev2531\src;D:\lib\collada-dom\include\collada-dom2.4\;D:\Program Files\Autodesk\FBX\FBX SDK\2013.3\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)lib\x86;D:\Program Files\Autodesk\FBX\FBX SDK\2013.3\lib\vs2010\x86;$(ProjectDir)lib\release;$(ProjectDir)release;$(LibraryPath);D:\lib\collada-dom-2.4.0\dom\external-libs\boost\lib\vc10;D:\lib\collada-dom-2.4.0\dom\external-libs\libxml2-new\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\minizip\win32\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\pcre\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\tinyxml\lib\vc10;D:\lib\collada-dom-2.4.0\dom\external-libs\zlib-1.2.5\Release</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -195,7 +197,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;NOMINMAX;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NOMINMAX;FBXSDK_NEW_API;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <StructMemberAlignment>16Bytes</StructMemberAlignment>
     </ClCompile>
@@ -212,7 +214,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NOMINMAX;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NOMINMAX;FBXSDK_NEW_API;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>

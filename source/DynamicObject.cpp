@@ -31,7 +31,7 @@ void DynamicObject::restart()
 
 void DynamicObject::update()
 {
-	set_direction_degree( get_direction_degree() + 0.1f );
+	// set_direction_degree( get_direction_degree() + 0.1f );
 }
 
 void DynamicObject::update_transform()

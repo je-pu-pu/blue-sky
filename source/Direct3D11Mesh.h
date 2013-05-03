@@ -33,6 +33,14 @@ public:
 		Vector3 Normal;
 		Vector2 TexCoord;
 
+		Vertex()
+			: Position( 0.f, 0.f, 0.f )
+			, Normal( 0.f, 0.f, 0.f )
+			, TexCoord( 0.f, 0.f )
+		{
+
+		}
+
 		bool operator < ( const Vertex& v ) const
 		{
 			if ( Position.x < v.Position.x ) return true;
@@ -75,7 +83,9 @@ protected:
 	VertexList		vertex_list_;
 	MaterialList	material_list_;
 	
-	virtual void create_vertex_buffer();
+	void create_vertex_buffer();
+	void create_index_buffer();
+
 	virtual void create_index_buffer( Material* );
 
 	virtual string_t get_texture_file_name_by_texture_name( const char* ) const;
@@ -83,11 +93,15 @@ protected:
 public:
 	Direct3D11Mesh( Direct3D11* );
 	virtual ~Direct3D11Mesh();
+	
+	Material* create_material();
 
 	bool load_obj( const char* );
+	bool load_fbx( const char* );
 	
 	void render() const;
 
+	inline VertexList& get_vertex_list() { return vertex_list_; }
 	inline const VertexList& get_vertex_list() const { return vertex_list_; }
 
 	inline MaterialList& get_material_list() { return material_list_; }

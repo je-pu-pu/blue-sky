@@ -26,6 +26,15 @@
 #include <common/serialize.h>
 #include <common/exception.h>
 
+
+// #include <dae.h>
+// #include <1.5/dom/domCOLLADA.h>
+
+// #pragma comment( lib, "collada-dom2.4-dp-vc100-mt.lib" )
+// #pragma comment( lib, "libboost_filesystem.lib" )
+// #pragma comment( lib, "libboost_system.lib" )
+// #pragma comment( lib, "libxml2-vc100-mt.lib" )
+
 namespace blue_sky
 {
 
@@ -65,6 +74,14 @@ TitleScene::TitleScene( const GameMain* game_main )
 	bgm_->play( false );
 
 	get_direct_3d()->getFader()->full_out();
+
+	
+	/*
+	{
+		std::string s = cdom::getCurrentDirAsUri();
+		std::cout << s << std::endl;
+	}
+	*/
 }
 
 TitleScene::~TitleScene()

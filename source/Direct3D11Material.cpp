@@ -21,6 +21,11 @@ Direct3D11Material::~Direct3D11Material()
 
 void Direct3D11Material::create_index_buffer()
 {
+	if ( index_list_.empty() )
+	{
+		return;
+	}
+
 	D3D11_BUFFER_DESC buffer_desc = { 0 };
 
 	buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;

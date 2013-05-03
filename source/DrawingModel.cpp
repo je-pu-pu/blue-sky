@@ -25,7 +25,11 @@ void DrawingModel::load( const char_t* name )
 	mesh_ = new DrawingMesh( direct_3d );
 	line_ = new DrawingLine( direct_3d );
 
-	mesh_->load_obj( ( string_t( "media/model/" ) + name + ".obj" ).c_str() );
+	if ( ! mesh_->load_fbx( ( string_t( "media/model/" ) + name + ".fbx" ).c_str() ) )
+	{
+		mesh_->load_obj( ( string_t( "media/model/" ) + name + ".obj" ).c_str() );
+	}
+
 	line_->load_obj( ( string_t( "media/model/" ) + name + "-line.obj" ).c_str() );
 }
 

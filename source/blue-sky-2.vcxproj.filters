@@ -153,6 +153,9 @@
     <ClCompile Include="Camera.cpp">
       <Filter>ActiveObject</Filter>
     </ClCompile>
+    <ClCompile Include="FbxFileLoader.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -335,6 +338,9 @@
     <ClInclude Include="ConstantBuffer.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="FbxFileLoader.h">
+      <Filter>Model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -404,6 +410,9 @@
     </Filter>
     <Filter Include="DirectX">
       <UniqueIdentifier>{6084c2f3-79fc-436e-98ca-9ce7f92612e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{f044bb29-1e9a-4c67-9582-b1a161bc11a6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

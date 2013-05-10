@@ -44,8 +44,8 @@ DirectWrite::~DirectWrite()
 	DIRECT_X_RELEASE( solid_color_brush_ );
 	DIRECT_X_RELEASE( render_target_ );
 
-	DIRECT_X_FAIL_CHECK( dwrite_factory_->UnregisterFontFileLoader( DirectWriteFontFileLoader::GetLoader() ) );
-	DIRECT_X_FAIL_CHECK( dwrite_factory_->UnregisterFontCollectionLoader( DirectWriteFontCollectionLoader::GetLoader() ) );
+	dwrite_factory_->UnregisterFontFileLoader( DirectWriteFontFileLoader::GetLoader() );
+	dwrite_factory_->UnregisterFontCollectionLoader( DirectWriteFontCollectionLoader::GetLoader() );
 
 	DIRECT_X_RELEASE( dwrite_factory_ );
 	DIRECT_X_RELEASE( direct_2d_factory_ );

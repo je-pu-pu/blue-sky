@@ -10,7 +10,9 @@ namespace blue_sky
 {
 
 Robot::Robot()
-	: timer_( 0 )
+	: player_( 0 )
+	, mode_( MODE_STAND )
+	, timer_( 0 )
 {
 	
 }

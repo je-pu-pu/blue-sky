@@ -12,8 +12,9 @@ namespace blue_sky
 {
 
 ActiveObject::ActiveObject()
-	: rigid_body_( 0 )
+	: drawing_model_( 0 )
 	, is_dead_( false )
+	, rigid_body_( 0 )
 	, transform_( 0 )
 
 	, direction_degree_( 0 )

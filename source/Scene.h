@@ -93,7 +93,7 @@ public:
 	Scene( const GameMain* );
 	virtual ~Scene();
 
-	void set_name( const std::string name ) { name_ = name; }
+	void set_name( const std::string& name ) { name_ = name; }
 	const std::string& get_name() const { return name_; }
 
 	virtual void update();					///< ƒƒCƒ“ƒ‹[ƒv

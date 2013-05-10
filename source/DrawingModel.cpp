@@ -1,6 +1,10 @@
 #include "DrawingModel.h"
+#include "DrawingMesh.h"
 #include "DrawingLine.h"
-#include "Direct3D11Mesh.h"
+
+#include "FbxFileLoader.h"
+
+#include "GraphicsManager.h"
 
 #include "GameMain.h"
 
@@ -19,18 +23,8 @@ DrawingModel::~DrawingModel()
 
 void DrawingModel::load( const char_t* name )
 {
-	GameMain::Direct3D* direct_3d = GameMain::get_instance()->get_direct_3d();
-
-	/// @todo Direct3D ‚ð“n‚³‚È‚¢
-	mesh_ = new DrawingMesh( direct_3d );
-	line_ = new DrawingLine( direct_3d );
-
-	if ( ! mesh_->load_fbx( ( string_t( "media/model/" ) + name + ".fbx" ).c_str() ) )
-	{
-		mesh_->load_obj( ( string_t( "media/model/" ) + name + ".obj" ).c_str() );
-	}
-
-	line_->load_obj( ( string_t( "media/model/" ) + name + "-line.obj" ).c_str() );
+	mesh_ = GameMain::get_instance()->get_graphics_manager()->load_drawing_mesh( name );
+	line_ = GameMain::get_instance()->get_graphics_manager()->load_drawing_line( name );
 }
 
 } // namespace blue_sky

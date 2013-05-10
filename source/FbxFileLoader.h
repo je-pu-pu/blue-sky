@@ -2,11 +2,15 @@
 #define FBX_FILE_LOADER_H
 
 #include "type.h"
-
+#include "Direct3D11Mesh.h"
 #include <fbxsdk.h>
 
-class Direct3D11Mesh;
-class Direct3D11Material;
+namespace game
+{
+
+class Mesh;
+
+}
 
 /**
  * FBX File Loader
@@ -15,10 +19,9 @@ class Direct3D11Material;
 class FbxFileLoader
 {
 public:
-	typedef Direct3D11Mesh			Mesh;
-	typedef Direct3D11Material		Material;
+	typedef Direct3D11Mesh Mesh;
+	typedef Direct3D11Material Material;
 
-	friend Mesh;
 private:
 	Mesh*	mesh_;
 
@@ -29,7 +32,7 @@ public:
 	FbxFileLoader( Mesh* );
 
 	bool load( const char_t* );
-
+	
 }; // class FbxFileLoader
 
 #endif // FBX_FILE_LOADER_H

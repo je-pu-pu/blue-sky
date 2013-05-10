@@ -210,7 +210,7 @@ void TitleScene::render()
 
 			if ( sequence_ == SEQUENCE_LOGO )
 			{
-				brand_logo_model_->get_line()->render( static_cast< int >( sequence_elapsed_time_ * 50 ) );
+				brand_logo_model_->get_line()->render_part( static_cast< int >( sequence_elapsed_time_ * 50 ) );
 			}
 			else if ( sequence_ >= SEQUENCE_TITLE_LOGO )
 			{
@@ -240,7 +240,7 @@ void TitleScene::render()
 				}
 				else
 				{
-					title_logo_model_->get_line()->render( static_cast< int >( sequence_elapsed_time_ * 50 ) );
+					title_logo_model_->get_line()->render_part( static_cast< int >( sequence_elapsed_time_ * 50 ) );
 				}
 			}
 		}

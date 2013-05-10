@@ -17,6 +17,7 @@
 
 #include "DrawingModelManager.h"
 #include "DrawingModel.h"
+#include "DrawingMesh.h"
 #include "DrawingLine.h"
 
 #include "Direct3D11.h"
@@ -65,6 +66,9 @@
 
 #include <fstream>
 #include <sstream>
+
+/// XXXXX
+#include "include/d3dx11effect.h"
 
 namespace blue_sky
 {
@@ -1006,7 +1010,7 @@ void GamePlayScene::render()
 		// render_object();
 		if ( shadow_map_ )
 		{
-			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|main_with_shadow" );
+			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|skin" );
 
 			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 			{
@@ -1035,7 +1039,23 @@ void GamePlayScene::render()
 		}
 		else
 		{
-			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|main" );
+			// get_graphics_manager()->render( "skin" );
+
+			get_direct_3d()->setInputLayout( "skin" );
+			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|skin" );
+
+			XMMATRIX ms[ 2 ] = {
+				XMMatrixIdentity(),
+				XMMatrixIdentity(),
+			};
+
+			ms[ 0 ] = XMMatrixRotationY( get_total_elapsed_time() );
+			ms[ 1 ] = XMMatrixRotationZ( get_total_elapsed_time() );
+
+			ID3DX11EffectMatrixVariable* bone_matrix = get_direct_3d()->getEffect()->getEffect()->GetVariableByName( "BoneMatrix" )->AsMatrix();
+			bone_matrix->SetMatrixArray( reinterpret_cast< const float* >( ms ), 0, 2 );
+			
+			// get_graphics_manager()->update_data( "BoneMatrix", & bone_matrix );
 
 			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 			{

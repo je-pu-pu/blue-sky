@@ -132,7 +132,7 @@ void DrawingLine::create_texture_resource_view( const char* file_name )
 	// texture_resource_view_ = direct_3d_->getTextureManager()->load( "lines", "media/texture/pen-face-1-loop.png" );
 }
 
-void DrawingLine::render( int level ) const
+void DrawingLine::render_part( int level ) const
 {
 	if ( level < 1 )
 	{

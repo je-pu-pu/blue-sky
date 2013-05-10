@@ -40,6 +40,9 @@ public:
 
 	Technique* getTechnique( const char* name );
 
+	///! @todo ‚â‚ß‚é
+	ID3DX11Effect* getEffect() const { return effect_; }
+
 }; // class Direct3D11Effect
 
 #endif // DIRECT_3D_11_EFFECT_H

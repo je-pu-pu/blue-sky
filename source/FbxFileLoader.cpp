@@ -3,6 +3,8 @@
 #include "Direct3D11Mesh.h"
 #include "Direct3D11Material.h"
 
+// #include <game/GraphicsManager.h>
+
 #include <map>
 
 #include <iostream>
@@ -11,7 +13,11 @@
 // #include <common/exception.h>
 // #include <common/serialize.h>
 
+#ifdef _DEBUG
 #pragma comment ( lib, "fbxsdk-2013.3-mtd.lib" )
+#else
+#pragma comment ( lib, "fbxsdk-2013.3-mt.lib" )
+#endif
 
 void print_fbx_node_recursive( FbxNode* node )
 {
@@ -252,9 +258,13 @@ void FbxFileLoader::load_node_recursive( FbxNode* node )
 	if ( mesh )
 	{
 		typedef std::map< Mesh::Vertex, Material::Index > VertexIndexMap;
+		typedef std::vector< Mesh::Vertex > VertexList;
+
 		VertexIndexMap vertex_index_map;
+		VertexList vertex_list;
 
 		Mesh::PositionList position_list;
+		Mesh::SkinningInfoList skinning_info_list;
 		Mesh::Material* material = mesh_->create_material();
 
 		mesh_->get_material_list().push_back( material );
@@ -270,13 +280,48 @@ void FbxFileLoader::load_node_recursive( FbxNode* node )
 					static_cast< float >( v[ 2 ] ) ) );
 		}
 
+		// load_skinning_info()
+		int skin_count = mesh->GetDeformerCount( FbxDeformer::eSkin );
+
+		if ( skin_count > 0 )
+		{
+			assert( skin_count == 1 );
+
+			skinning_info_list.resize( position_list.size() );
+
+			for ( int n = 0; n < skin_count; ++n )
+			{
+				FbxSkin* skin = FbxCast< FbxSkin >( mesh->GetDeformer( n, FbxDeformer::eSkin ) );
+
+				std::cout << skin->GetClusterCount() << " bones" << std::endl;
+
+				for ( int bone_index = 0; bone_index < skin->GetClusterCount(); ++bone_index )
+				{
+					std::cout << "bone " << bone_index << " : " << std::endl;
+
+					FbxCluster* cluster = skin->GetCluster( bone_index );
+
+					for ( int i = 0; i < cluster->GetControlPointIndicesCount(); ++i )
+					{
+						int index = cluster->GetControlPointIndices()[ i ];
+						float weight = static_cast< float >( cluster->GetControlPointWeights()[ i ] );
+
+						skinning_info_list[ index ].add( bone_index, weight );
+
+						std::cout << index << ":" << weight << std::endl;
+					}
+				}
+			}
+		}
+
 		for ( int n = 0; n < mesh->GetPolygonCount(); n++ )
 		{
 			for ( int m = 0; m < mesh->GetPolygonSize( n ); m++ )
 			{
-				Mesh::Vertex v;
+				int position_index = mesh->GetPolygonVertex( n, m );
 
-				v.Position = Mesh::Position( position_list.at( mesh->GetPolygonVertex( n, m ) ) );
+				Mesh::Vertex v;
+				v.Position = Mesh::Position( position_list.at( position_index ) );
 
 				FbxVector2 uv_vector;
 				
@@ -308,6 +353,12 @@ void FbxFileLoader::load_node_recursive( FbxNode* node )
 					Material::Index vertex_index = mesh_->get_vertex_list().size();
 
 					mesh_->get_vertex_list().push_back( v );
+
+					if ( ! skinning_info_list.empty() )
+					{
+						mesh_->get_skinning_info_list().push_back( skinning_info_list.at( position_index ) );
+					}
+
 					material->get_index_list().push_back( vertex_index );
 
 					vertex_index_map[ v ] = vertex_index;

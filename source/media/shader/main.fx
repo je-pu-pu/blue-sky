@@ -1,5 +1,6 @@
 static const int ShadowMapCascadeLevels = 3;
 static const float Pi = 3.14159265f;
+static const uint MaxBoneMatrices = 255;
 
 Texture2D model_texture : register( t0 );
 Texture2D line_texture : register( t0 );
@@ -72,6 +73,11 @@ cbuffer FrameDrawingConstantBuffer : register( b4 )
 	float DrawingAccent;
 }
 
+cbuffer BoneMatrixConstantBuffer
+{
+    matrix BoneMatrix[ MaxBoneMatrices ];
+};
+
 struct VS_INPUT
 {
 	float4 Position : SV_POSITION;
@@ -85,17 +91,26 @@ struct GS_2D_INPUT
 	float2 TexCoord : TEXCOORD0;
 };
 
+struct VS_SKIN_INPUT
+{
+	float4 Position : POSITION;
+	float3 Normal   : NORMAL0;
+	float2 TexCoord : TEXCOORD0;
+	uint4  Bone     : BONE;
+	float4 Weight   : WEIGHT;
+};
+
 struct VS_LINE_INPUT
 {
 	float4 Position : SV_POSITION;
-	float4 Color : COLOR0;
+	float4 Color    : COLOR0;
 };
 
 struct GS_LINE_INPUT
 {
 	float4 Position : SV_POSITION;
-	float4 Color : COLOR0;
-	float Depth : TEXCOORD1; /// ???
+	float4 Color    : COLOR0;
+	float Depth     : TEXCOORD1; /// ???
 };
 
 struct PS_INPUT
@@ -130,7 +145,7 @@ PS_INPUT vs_main( VS_INPUT input, uint vertex_id : SV_VertexID )
     output.Position = mul( output.Position, View );
     output.Position = mul( output.Position, Projection );
 	
-	output.Normal = float3( 1.f, 0.f, 0.f );
+	output.Normal = mul( input.Normal, ( float3x3 ) World );
 	
 	output.TexCoord = input.TexCoord;
 	output.Color = float4( 0.f, 0.f, 0.f, 0.f );
@@ -143,6 +158,34 @@ PS_INPUT vs_main( VS_INPUT input, uint vertex_id : SV_VertexID )
 		1.f
 	);
 	*/
+
+	return output;
+}
+
+PS_INPUT vs_skin( VS_SKIN_INPUT input )
+{
+	PS_INPUT output = ( PS_INPUT ) 0;
+
+	output.Position +=
+		mul( input.Position, BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
+		mul( input.Position, BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
+		mul( input.Position, BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
+		mul( input.Position, BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
+	
+	output.Normal +=
+		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
+		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
+		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
+		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
+
+	output.Position = mul( output.Position, World );
+    output.Position = mul( output.Position, View );
+    output.Position = mul( output.Position, Projection );
+
+	output.Normal = mul( output.Normal, ( float3x3 ) World );
+	
+	output.TexCoord = input.TexCoord;
+	output.Color = float4( 0.f, 0.f, 0.f, 0.f );
 
 	return output;
 }
@@ -346,6 +389,24 @@ technique11 main
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
         SetVertexShader( CompileShader( vs_4_0, vs_main() ) );
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_4_0, ps_main_wrap() ) );
+
+		RASTERIZERSTATE = Default;
+    }
+}
+
+// ----------------------------------------
+// skin
+// ----------------------------------------
+technique11 skin
+{
+	pass pass1
+    {
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+        SetVertexShader( CompileShader( vs_4_0, vs_skin() ) );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, ps_main_wrap() ) );
 

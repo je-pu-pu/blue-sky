@@ -12,6 +12,8 @@
 #include "ConstantBuffer.h"
 
 #include "Direct3D11.h"
+#include "Direct3D11GraphicsManager.h"
+
 #include "Direct3D11MeshManager.h"
 #include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11BulletDebugDraw.h"
@@ -91,6 +93,8 @@ GameMain::GameMain()
 	input_ = new Input();
 	input_->set_direct_input( direct_input_.get() );
 	input_->load_config( * config_.get() );
+
+	graphics_manager_ = new Direct3D11GraphicsManager( direct_3d_.get() );
 
 	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
 	sound_manager_->set_mute( config_->get( "audio.mute", 0 ) != 0 );

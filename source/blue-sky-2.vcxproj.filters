@@ -111,9 +111,6 @@
     <ClCompile Include="TitleScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="DrawingLine.cpp">
-      <Filter>Drawing</Filter>
-    </ClCompile>
     <ClCompile Include="DrawingModel.cpp">
       <Filter>Drawing</Filter>
     </ClCompile>
@@ -154,7 +151,19 @@
       <Filter>ActiveObject</Filter>
     </ClCompile>
     <ClCompile Include="FbxFileLoader.cpp">
-      <Filter>Model</Filter>
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D11GraphicsManager.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsManager.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawingLine.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawingMesh.cpp">
+      <Filter>Drawing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -339,7 +348,16 @@
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="FbxFileLoader.h">
-      <Filter>Model</Filter>
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsManager.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11GraphicsManager.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawingMesh.h">
+      <Filter>Drawing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -405,14 +423,14 @@
     <Filter Include="Input">
       <UniqueIdentifier>{3306306a-f212-4428-80eb-8d1355e62c22}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Game">
-      <UniqueIdentifier>{1d357c30-a5d6-4fcb-a582-73566ac2eb55}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DirectX">
       <UniqueIdentifier>{6084c2f3-79fc-436e-98ca-9ce7f92612e1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Model">
+    <Filter Include="Graphics">
       <UniqueIdentifier>{f044bb29-1e9a-4c67-9582-b1a161bc11a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{1d357c30-a5d6-4fcb-a582-73566ac2eb55}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -11,21 +11,19 @@ namespace blue_sky
 
 using common::auto_ptr;
 
-// class DrawingMesh;
+class DrawingMesh;
 class DrawingLine;
 
 /**
- * è•`‚«ƒ‚ƒfƒ‹
+ * è•`‚«•—ƒ‚ƒfƒ‹
  *
  */
 class DrawingModel
 {
-public:
-	typedef Direct3D11Mesh		DrawingMesh;
 
 protected:
-	auto_ptr< DrawingMesh >		mesh_;		// –Ê
-	auto_ptr< DrawingLine >		line_;		// ü
+	auto_ptr< DrawingMesh >		mesh_;		///< è•`‚«•—ƒƒbƒVƒ…
+	auto_ptr< DrawingLine >		line_;		///< è•`‚«•—ƒ‰ƒCƒ“
 
 public:
 	DrawingModel();

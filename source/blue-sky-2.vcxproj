@@ -27,6 +27,7 @@
     <ClCompile Include="Direct3D11EffectTechnique.cpp" />
     <ClCompile Include="Direct3D11Fader.cpp" />
     <ClCompile Include="Direct3D11FarBillboardsMesh.cpp" />
+    <ClCompile Include="Direct3D11GraphicsManager.cpp" />
     <ClCompile Include="Direct3D11Material.cpp" />
     <ClCompile Include="Direct3D11Mesh.cpp" />
     <ClCompile Include="Direct3D11MeshManager.cpp" />
@@ -40,6 +41,7 @@
     <ClCompile Include="DirectSoundBuffer.cpp" />
     <ClCompile Include="DirectWrite.cpp" />
     <ClCompile Include="DrawingLine.cpp" />
+    <ClCompile Include="DrawingMesh.cpp" />
     <ClCompile Include="DrawingModel.cpp" />
     <ClCompile Include="DrawingModelManager.cpp" />
     <ClCompile Include="DynamicObject.cpp" />
@@ -47,6 +49,7 @@
     <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="GamePlayScene.cpp" />
     <ClCompile Include="Goal.cpp" />
+    <ClCompile Include="GraphicsManager.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="matrix4x4.cpp" />
@@ -83,6 +86,7 @@
     <ClInclude Include="Direct3D11EffectTechnique.h" />
     <ClInclude Include="Direct3D11Fader.h" />
     <ClInclude Include="Direct3D11FarBillboardsMesh.h" />
+    <ClInclude Include="Direct3D11GraphicsManager.h" />
     <ClInclude Include="Direct3D11Material.h" />
     <ClInclude Include="Direct3D11Matrix.h" />
     <ClInclude Include="Direct3D11Mesh.h" />
@@ -103,6 +107,7 @@
     <ClInclude Include="DirectWriteFontFileStream.h" />
     <ClInclude Include="DirectX.h" />
     <ClInclude Include="DrawingLine.h" />
+    <ClInclude Include="DrawingMesh.h" />
     <ClInclude Include="DrawingModel.h" />
     <ClInclude Include="DrawingModelManager.h" />
     <ClInclude Include="DynamicObject.h" />
@@ -111,6 +116,7 @@
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="GamePlayScene.h" />
     <ClInclude Include="Goal.h" />
+    <ClInclude Include="GraphicsManager.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="matrix4x4.h" />
     <ClInclude Include="Medal.h" />

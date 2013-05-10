@@ -2,7 +2,9 @@
 #define DIRECT_3D_11_MESH_H
 
 #include "type.h"
-
+#include <game/GraphicsManager.h>
+#include <common/math.h>
+#include <boost/array.hpp>
 #include <d3d11.h>
 #include <xnamath.h>
 #include <vector>
@@ -12,10 +14,10 @@ class Direct3D11Color;
 class Direct3D11Material;
 
 /**
- * obj ファイルから読み込むメッシュ
+ * メッシュ
  *
  */
-class Direct3D11Mesh
+class Direct3D11Mesh : public game::Mesh
 {
 public:
 	typedef Direct3D11					Direct3D;
@@ -27,6 +29,11 @@ public:
 	typedef XMFLOAT4					Vector4;
 
 public:
+
+	/**
+	 * 頂点情報
+	 *
+	 */
 	struct Vertex
 	{
 		Vector3 Position;
@@ -66,43 +73,102 @@ public:
 		}
 	};
 
-	typedef XMFLOAT3					Position;
-	typedef XMFLOAT3					Normal;
-	typedef XMFLOAT2					TexCoord;
+	/**
+	 * 頂点毎のスキニング情報
+	 *
+	 */
+	struct SkinningInfo
+	{
+	public:
+		typedef u8_t BoneIndexList[ 4 ];
+		typedef u8_t WeightList[ 4 ];
+		
+	private:
+		BoneIndexList	bone_index_list_;	///< ボーンインデックス ( 0 .. 3 )
+		WeightList		weight_list_;		///< ウエイト ( 0 .. 3 )
+	
+	public:
+		SkinningInfo()
+		{
+			for ( int n = 0; n < 4; ++n )
+			{
+				bone_index_list_[ n ] = 0;
+				weight_list_[ n ] = 0;
+			}
+		}
 
-	typedef std::vector< Position >		PositionList;
-	typedef std::vector< Normal >		NormalList;
-	typedef std::vector< TexCoord >		TexCoordList;
+		void add( int bone_index, float weight )
+		{
+			assert( bone_index >= 0 );
+			assert( bone_index <= 255 );
+			assert( weight >= 0.f );
+			assert( weight <= 1.f );
 
-	typedef std::vector< Vertex >		VertexList;
-	typedef std::vector< Material* >	MaterialList;
+			for ( int n = 0; n < 4; ++n )
+			{
+				if ( bone_index_list_[ n ] == 0 && weight_list_[ n ] == 0 )
+				{
+					bone_index_list_[ n ] = bone_index;
+					weight_list_[ n ] = static_cast< u8_t >( weight * 255 );
+
+					return;
+				}
+			}
+
+			assert( false );
+		}
+	};
+
+	typedef WORD							Index;
+
+	typedef XMFLOAT3						Position;
+	typedef XMFLOAT3						Normal;
+	typedef XMFLOAT2						TexCoord;
+
+	typedef std::vector< Position >			PositionList;
+	typedef std::vector< Normal >			NormalList;
+	typedef std::vector< TexCoord >			TexCoordList;
+
+	typedef std::vector< Vertex >			VertexList;
+	typedef std::vector< SkinningInfo >		SkinningInfoList;
+	typedef std::vector< Material* >		MaterialList;
+	
+	typedef std::vector< ID3D11Buffer* >	VertexBufferList;
 
 protected:
-	Direct3D*		direct_3d_;
-	ID3D11Buffer*	vertex_buffer_;
-	VertexList		vertex_list_;
-	MaterialList	material_list_;
+	Direct3D*			direct_3d_;
+	VertexBufferList	vertex_buffer_list_;
+
+	VertexList			vertex_list_;
+	SkinningInfoList	skinning_info_list_;
+
+	MaterialList		material_list_;
 	
+	void optimize();
+
 	void create_vertex_buffer();
 	void create_index_buffer();
 
 	virtual void create_index_buffer( Material* );
 
-	virtual string_t get_texture_file_name_by_texture_name( const char* ) const;
+	virtual string_t get_texture_file_name_by_texture_name( const char_t* ) const;
 
 public:
-	Direct3D11Mesh( Direct3D11* );
+	Direct3D11Mesh( Direct3D* );
 	virtual ~Direct3D11Mesh();
 	
 	Material* create_material();
 
-	bool load_obj( const char* );
-	bool load_fbx( const char* );
+	bool load_obj( const char_t* );
+	bool load_fbx( const char_t* );
 	
 	void render() const;
 
 	inline VertexList& get_vertex_list() { return vertex_list_; }
 	inline const VertexList& get_vertex_list() const { return vertex_list_; }
+
+	inline SkinningInfoList& get_skinning_info_list() { return skinning_info_list_; }
+	inline const SkinningInfoList& get_skinning_info_list() const { return skinning_info_list_; }
 
 	inline MaterialList& get_material_list() { return material_list_; }
 	inline const MaterialList& get_material_list() const { return material_list_; }

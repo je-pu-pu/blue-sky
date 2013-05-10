@@ -25,6 +25,7 @@ class GameMain;
 class ActiveObjectPhysics;
 class ActiveObjectManager;
 class DrawingModelManager;
+class GraphicsManager;
 class SoundManager;
 class Input;
 
@@ -60,13 +61,15 @@ private:
 protected:
 	float_t get_elapsed_time() const;
 
-	Direct3D* get_direct_3d() const;
+	Direct3D* get_direct_3d() const;	///< @todo íœ‚·‚é
 	Physics* get_physics() const;
 
 	ActiveObjectManager* get_active_object_manager() const;
 	DrawingModelManager* get_drawing_model_manager() const;
 
+	GraphicsManager* get_graphics_manager() const;
 	SoundManager* get_sound_manager() const;
+
 	Input* get_input() const;
 	Config* get_config() const;
 	Config* get_save_data() const;

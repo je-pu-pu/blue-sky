@@ -2,7 +2,7 @@
 #define BLUE_SKY_DRAWING_LINE_H
 
 #include "Direct3D11Color.h"
-
+#include <game/GraphicsManager.h>
 #include <vector>
 
 class Direct3D11;
@@ -11,10 +11,11 @@ namespace blue_sky
 {
 
 /**
- * obj ファイルから読み込む手描きモデル
+ * 手描き風ライン
  *
+ * @todo 抽象化する
  */
-class DrawingLine
+class DrawingLine : public game::Line
 {
 public:
 	struct Vertex
@@ -77,7 +78,8 @@ public:
 
 	bool load_obj( const char* );
 
-	void render( int level = 99999 ) const;
+	void render() const { render_part(); }
+	void render_part( int level = 99999 ) const;
 
 	const Color& get_color() const { return color_; }
 	void set_color( const Color& color ) { color_ = color; }

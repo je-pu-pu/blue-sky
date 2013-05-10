@@ -34,6 +34,7 @@ namespace blue_sky
 	class ActiveObject;
 	class ActiveObjectManager;
 
+	class GraphicsManager;
 	class SoundManager;
 
 	class DrawingModel;
@@ -60,6 +61,7 @@ public:
 	typedef Direct3D11						Direct3D;
 	typedef ActiveObjectPhysics				Physics;
 
+	typedef blue_sky::GraphicsManager		GraphicsManager;
 	typedef blue_sky::SoundManager			SoundManager;
 	typedef blue_sky::Player				Player;
 
@@ -71,6 +73,8 @@ protected:
 
 	auto_ptr< DirectInput >					direct_input_;			///< DirectInput
 	auto_ptr< Input >						input_;					///< Game Input
+
+	auto_ptr< GraphicsManager >				graphics_manager_;		///< GraphicsManager
 	auto_ptr< SoundManager >				sound_manager_;			///< SoundManager
 
 	auto_ptr< Config >						config_;				///< Config
@@ -117,6 +121,8 @@ public:
 	Physics* get_physics() const { return physics_.get(); }
 
 	Input* get_input() const { return input_.get(); }
+
+	GraphicsManager* get_graphics_manager() const { return graphics_manager_.get(); }
 	SoundManager* get_sound_manager() const { return sound_manager_.get(); }
 
 	ActiveObjectManager* get_active_object_manager() const { return active_object_manager_.get(); }
@@ -128,6 +134,7 @@ public:
 
 	const MainLoop* get_main_loop() const { return main_loop_.get(); }
 
+	/// @todo ®—‚·‚é
 	GameConstantBuffer* get_game_constant_buffer() const { return game_constant_buffer_.get(); }
 	FrameConstantBuffer* get_frame_constant_buffer() const { return frame_constant_buffer_.get(); }
 	FrameDrawingConstantBuffer* get_frame_drawing_constant_buffer() const { return frame_drawing_constant_buffer_.get(); }

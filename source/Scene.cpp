@@ -63,6 +63,11 @@ DrawingModelManager* Scene::get_drawing_model_manager() const
 	return game_main_->get_drawing_model_manager();
 }
 
+GraphicsManager* Scene::get_graphics_manager() const
+{
+	return game_main_->get_graphics_manager();
+}
+
 SoundManager* Scene::get_sound_manager() const
 {
 	return game_main_->get_sound_manager();

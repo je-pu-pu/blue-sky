@@ -351,6 +351,18 @@ void Direct3D11::create_default_input_layout()
 
 	vertex_layout_list_[ "main" ] = ( * effect_->getTechnique( "|main" )->getPassList().begin() )->createVertexLayout( layout_main, ARRAYSIZE( layout_main ) );
 
+	// skin
+	D3D11_INPUT_ELEMENT_DESC layout_skin[] =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BONE",     0, DXGI_FORMAT_R8G8B8A8_UINT,      1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "WEIGHT",   0, DXGI_FORMAT_R8G8B8A8_UNORM,     1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+
+	vertex_layout_list_[ "skin" ] = ( * effect_->getTechnique( "|skin" )->getPassList().begin() )->createVertexLayout( layout_skin, ARRAYSIZE( layout_skin ) );
+
 	// line
 	D3D11_INPUT_ELEMENT_DESC layout_line[] =
     {

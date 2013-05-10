@@ -24,7 +24,6 @@
  */
 Direct3D11Mesh::Direct3D11Mesh( Direct3D11* direct_3d )
 	: direct_3d_( direct_3d )
-	, vertex_buffer_( 0 )
 {
 
 }
@@ -40,8 +39,10 @@ Direct3D11Mesh::~Direct3D11Mesh()
 		delete *i;
 	}
 
-	DIRECT_X_RELEASE( vertex_buffer_ );
-
+	for ( VertexBufferList::iterator i = vertex_buffer_list_.begin(); i != vertex_buffer_list_.end(); ++i )
+	{
+		DIRECT_X_RELEASE( *i );
+	}
 }
 
 /**
@@ -60,7 +61,7 @@ Direct3D11Mesh::Material* Direct3D11Mesh::create_material()
  * @param file_name OBJ ファイル名
  * @return ファイルの読み込みに成功した場合は true を、失敗した場合は false を返す
  */
-bool Direct3D11Mesh::load_obj( const char* file_name )
+bool Direct3D11Mesh::load_obj( const char_t* file_name )
 {
 	std::ifstream in( file_name );
 
@@ -232,6 +233,8 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
 		}
 	}
 
+	optimize();
+
 	create_vertex_buffer();
 	create_index_buffer( material );
 
@@ -263,7 +266,7 @@ bool Direct3D11Mesh::load_obj( const char* file_name )
  * @param file_name FBX ファイル名
  * @return ファイルの読み込みに成功した場合は true を、失敗した場合は false を返す
  */
-bool Direct3D11Mesh::load_fbx( const char* file_name )
+bool Direct3D11Mesh::load_fbx( const char_t* file_name )
 {
 	FbxFileLoader loader( this );
 
@@ -272,10 +275,62 @@ bool Direct3D11Mesh::load_fbx( const char* file_name )
 		return false;
 	}
 
+	optimize();
+
 	create_vertex_buffer();
 	create_index_buffer();
 
 	return true;
+}
+
+/**
+ * 最適化する
+ *
+ *
+ */
+void Direct3D11Mesh::optimize()
+{
+	struct VertexInfo
+	{
+		Vertex			vertex;
+		SkinningInfo*	skinning_info;
+		
+		VertexInfo()
+			: skinning_info( 0 )
+		{
+
+		}
+
+		/*
+		bool operator < ( const VertexInfo& v )
+		{
+			if ( vertex < v.vertex ) return true;
+			if ( vertex > v.vertex ) return false;
+
+			if ( ! skinning_info ) return true;
+			if ( ! v.skinning_info ) return false;
+
+			if ( *skinning_info < *v.skinning_info ) return true;
+			
+			return false;
+		}
+		*/
+	};
+
+	/*
+	std::map< VertexInfo, Index > index_map;
+	
+	for ( VertexList::size_type n = 0; n < vertex_list_.size(); ++n )
+	{
+		VertexInfo v;
+		v.vertex = vertex_list_[ n ];
+		v.skinning_info = & skinning_info_list_[ n ];
+
+		index_map.insert( std::make_pair( v, n ) );
+	}
+	*/
+
+	// Index index;
 }
 
 /**
@@ -289,16 +344,36 @@ void Direct3D11Mesh::create_vertex_buffer()
 		return;
 	}
 
-	D3D11_BUFFER_DESC buffer_desc = { 0 };
+	{
+		vertex_buffer_list_.push_back( 0 );
 
-	buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
-	buffer_desc.ByteWidth = sizeof( Vertex ) * vertex_list_.size();
+		D3D11_BUFFER_DESC buffer_desc = { 0 };
+
+		buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+		buffer_desc.ByteWidth = sizeof( Vertex ) * vertex_list_.size();
     
-	D3D11_SUBRESOURCE_DATA data = { 0 };
-	data.pSysMem = & vertex_list_[ 0 ];
+		D3D11_SUBRESOURCE_DATA data = { 0 };
+		data.pSysMem = & vertex_list_[ 0 ];
 	
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & vertex_buffer_ ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & vertex_buffer_list_[ 0 ] ) );
+	}
+
+	if ( ! skinning_info_list_.empty() )
+	{
+		vertex_buffer_list_.push_back( 0 );
+
+		D3D11_BUFFER_DESC buffer_desc = { 0 };
+
+		buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+		buffer_desc.ByteWidth = sizeof( SkinningInfo ) * skinning_info_list_.size();
+    
+		D3D11_SUBRESOURCE_DATA data = { 0 };
+		data.pSysMem = & skinning_info_list_[ 0 ];
+	
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & vertex_buffer_list_[ 1 ] ) );
+	}
 }
 
 /**
@@ -329,7 +404,7 @@ void Direct3D11Mesh::create_index_buffer( Material* material )
  * @param texture_name テクスチャ名
  * @return テクスチャファイル名
  */
-string_t Direct3D11Mesh::get_texture_file_name_by_texture_name( const char* texture_name ) const
+string_t Direct3D11Mesh::get_texture_file_name_by_texture_name( const char_t* texture_name ) const
 {
 	/// !!!
 	if ( ! boost::filesystem::path( texture_name ).has_parent_path() )
@@ -346,10 +421,16 @@ string_t Direct3D11Mesh::get_texture_file_name_by_texture_name( const char* text
  */
 void Direct3D11Mesh::render() const
 {
-	UINT stride = sizeof( Vertex );
-    UINT offset = 0;
+	UINT buffer_count = vertex_buffer_list_.size();
+	UINT stride[] = { sizeof( Vertex ), sizeof( SkinningInfo ) };
+	UINT offset[] = { 0, 0 };
 
-	direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, 1, & vertex_buffer_, & stride, & offset );
+	if ( buffer_count < 2 )
+	{
+		return;
+	}
+
+	direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, buffer_count, & vertex_buffer_list_[ 0 ], stride, offset );
 	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
 	for ( MaterialList::const_iterator i = material_list_.begin(); i != material_list_.end(); ++i )

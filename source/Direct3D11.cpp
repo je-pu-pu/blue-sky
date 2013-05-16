@@ -182,6 +182,9 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		{
 			COMMON_THROW_EXCEPTION_MESSAGE( "D3D10CreateDevice1() failed." );
 		}
+
+		// D2D のデバッグレイヤーメッセージを抑制
+		device_10_->IASetPrimitiveTopology( D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 	}
 #endif
 
@@ -229,10 +232,10 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		DIRECT_X_FAIL_CHECK( text_texture_->QueryInterface( __uuidof( IDXGIResource ), reinterpret_cast< void** >( & text_texture_resource_ ) ) );
 		DIRECT_X_FAIL_CHECK( text_texture_resource_->GetSharedHandle( & shared_handle ) );
 
+		DIRECT_X_RELEASE( text_texture_resource_ );
+
 		DIRECT_X_FAIL_CHECK( device_10_->OpenSharedResource( shared_handle, __uuidof( IDXGISurface1 ), reinterpret_cast< void** >( & text_surface_ ) ) );
 		DIRECT_X_FAIL_CHECK( text_surface_->QueryInterface( __uuidof( IDXGIKeyedMutex ), reinterpret_cast< void** >( & text_texture_mutex_10_ ) ) );
-
-		DIRECT_X_RELEASE( text_texture_resource_ );
 	}
 #endif
 
@@ -279,6 +282,8 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	font_ = new Font( text_surface_ );
 #endif
 
+	DIRECT_X_RELEASE( text_surface_ );
+
 	sprite_ = new Sprite( this );
 	fader_ = new Fader( this );
 	effect_ = new Effect( this );
@@ -286,7 +291,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	mesh_manager_ = new Direct3D11MeshManager( this );
 	texture_manager_ = new Direct3D11TextureManager( this );
 }
-
 
 /// @todo D3D11_CREATE_DEVICE_DEBUG を有効にし、メモリリークを調べる
 Direct3D11::~Direct3D11()
@@ -309,6 +313,22 @@ Direct3D11::~Direct3D11()
 
 	DIRECT_X_RELEASE( back_buffer_surface_ );
 
+	if ( device_10_ )
+	{
+		device_10_->ClearState();
+		device_10_->Flush();
+	}
+
+	if ( false && device_10_ )
+	{
+		ID3D10Debug* debug_ = 0;
+
+		DIRECT_X_FAIL_CHECK( device_10_->QueryInterface( __uuidof( ID3D10Debug ), reinterpret_cast< void** >( & debug_ ) ) );
+		DIRECT_X_FAIL_CHECK( debug_->Validate() );
+
+		DIRECT_X_RELEASE( debug_ );
+	}
+
 	DIRECT_X_RELEASE( device_10_ );
 
 	for ( InputLayoutList::iterator i = vertex_layout_list_.begin(); i != vertex_layout_list_.end(); ++i )
@@ -323,6 +343,23 @@ Direct3D11::~Direct3D11()
 	DIRECT_X_RELEASE( back_buffer_texture_ );
 
 	DIRECT_X_RELEASE( swap_chain_ );
+
+	if ( immediate_context_ )
+	{
+		immediate_context_->ClearState();
+		immediate_context_->Flush();
+	}
+
+	if ( false )
+	{
+		ID3D11Debug* debug_ = 0;
+
+		DIRECT_X_FAIL_CHECK( device_->QueryInterface( __uuidof( ID3D11Debug ), reinterpret_cast< void** >( & debug_ ) ) );
+		DIRECT_X_FAIL_CHECK( debug_->ReportLiveDeviceObjects( D3D11_RLDO_DETAIL ) );
+
+		DIRECT_X_RELEASE( debug_ );
+	}
+
 	DIRECT_X_RELEASE( immediate_context_ );
 	DIRECT_X_RELEASE( device_ );
 }

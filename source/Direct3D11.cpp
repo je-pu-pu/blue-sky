@@ -307,7 +307,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 /**
  * デストラクタ
  *
- * @todo D3D11_CREATE_DEVICE_DEBUG を有効にし、メモリリークを調べる
  */
 Direct3D11::~Direct3D11()
 {

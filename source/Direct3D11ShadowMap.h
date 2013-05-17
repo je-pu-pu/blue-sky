@@ -14,8 +14,6 @@
 
 class Direct3D11;
 
-using common::auto_ptr;
-
 /**
  * Direct3D 11 によるシャドウマップ
  *
@@ -46,8 +44,8 @@ public:
 	static const int shader_resource_view_slot_ = 1;		/// !!!!!!!!!!!
 
 private:
-	Direct3D11*					direct_3d_;
-	auto_ptr< ConstantBuffer >	constant_buffer_;
+	Direct3D11*							direct_3d_;
+	common::auto_ptr< ConstantBuffer >	constant_buffer_;
 
 	bool						enabled_;					///< 有効フラグ
 	int							cascade_levels_;			///< CSM のレベル数

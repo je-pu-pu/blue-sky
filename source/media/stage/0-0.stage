@@ -1,5 +1,7 @@
 bgm road
+
 sky-box sky-box-3
+far-billboards stage-0-0-far-billboards
 
 player 0 0 0
 goal 0 0 30

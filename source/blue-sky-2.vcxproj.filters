@@ -359,6 +359,21 @@
     <ClInclude Include="DrawingMesh.h">
       <Filter>Drawing</Filter>
     </ClInclude>
+    <ClInclude Include="AnimationKeyFrame.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationChannel.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationPlayer.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinningAnimation.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

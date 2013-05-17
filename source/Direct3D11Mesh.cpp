@@ -4,6 +4,7 @@
 #include "Direct3D11.h"
 #include "DirectX.h"
 
+#include "SkinningAnimation.h"
 #include "FbxFileLoader.h"
 
 #include <common/exception.h>
@@ -52,7 +53,30 @@ Direct3D11Mesh::~Direct3D11Mesh()
  */
 Direct3D11Mesh::Material* Direct3D11Mesh::create_material()
 {
-	return new Material( direct_3d_ );
+	get_material_list().push_back( new Material( direct_3d_ ) );
+
+	return get_material_list().back();
+}
+
+/**
+ * マテリアルの一覧の中から最後のマテリアルを取得する
+ *
+ * @param force マテリアルの一覧が空の場合、新しいマテリアルを作成するフラグ
+ * @return マテリアル or 0
+ */
+Direct3D11Mesh::Material* Direct3D11Mesh::get_last_material( bool force )
+{
+	if ( material_list_.empty() )
+	{
+		if ( force )
+		{
+			return create_material();
+		}
+
+		return 0;
+	}
+
+	return get_material_list().back();
 }
 
 /**
@@ -77,8 +101,7 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 	NormalList normal_list;
 	TexCoordList tex_coord_list;
 
-	material_list_.push_back( new Material( direct_3d_ ) );
-	Material* material = material_list_[ material_list_.size() - 1 ];
+	Material* material = get_last_material();
 
 	std::string texture_name;
 
@@ -415,20 +438,73 @@ string_t Direct3D11Mesh::get_texture_file_name_by_texture_name( const char_t* te
 	return texture_name;
 }
 
+#include "Direct3D11.h"
+#include "Direct3D11Effect.h"
+#include "include/d3dx11effect.h"
+
 /**
  * 描画する
  *
  */
 void Direct3D11Mesh::render() const
 {
+	if ( get_skinning_animation() )
+	{
+		static float frame = 0.f;
+
+		frame += 1.f;
+
+		if ( frame > 100.f )
+		{
+			frame = 0.f;
+		}
+
+		ID3DX11EffectMatrixVariable* bone_matrix = direct_3d_->getEffect()->getEffect()->GetVariableByName( "BoneMatrix" )->AsMatrix();
+
+		const SkinningAnimation::AnimationList* animation_list = get_skinning_animation()->get_animation_list( "Swing" );
+
+		if ( animation_list )
+		{
+			Direct3D11Matrix lm;
+
+			for ( uint_t n = 0; n < animation_list->size(); n++ )
+			{
+				Direct3D11Matrix bone_offset = get_skinning_animation()->get_bone_offset_matrix_list()[ n ];
+				Direct3D11Matrix inversed_bone_offset = bone_offset.inverse();
+
+				Direct3D11Matrix s, r, t, m;
+
+				s.set_scaling(
+					( *animation_list )[ n ].get_value( "sx", frame ),
+					( *animation_list )[ n ].get_value( "sy", frame ),
+					( *animation_list )[ n ].get_value( "sz", frame ) );
+
+				r.set_rotation(
+					( *animation_list )[ n ].get_value( "rx", frame ),
+					( *animation_list )[ n ].get_value( "ry", frame ),
+					( *animation_list )[ n ].get_value( "rz", frame ) );
+
+				t.set_translation(
+					( *animation_list )[ n ].get_value( "tx", frame ),
+					( *animation_list )[ n ].get_value( "ty", frame ),
+					( *animation_list )[ n ].get_value( "tz", frame ) );
+
+				// m = s * r * t;
+				// m.set_translation( frame, frame * 2.f, frame * n );
+				// m = inversed_bone_offset * t * bone_offset;
+				m =  t * r;
+
+				bone_matrix->SetMatrixArray( reinterpret_cast< const float* >( & m ), n, 1 );
+
+				lm = m;
+			}
+		}
+	}
+
+
 	UINT buffer_count = vertex_buffer_list_.size();
 	UINT stride[] = { sizeof( Vertex ), sizeof( SkinningInfo ) };
 	UINT offset[] = { 0, 0 };
-
-	if ( buffer_count < 2 )
-	{
-		return;
-	}
 
 	direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, buffer_count, & vertex_buffer_list_[ 0 ], stride, offset );
 	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );

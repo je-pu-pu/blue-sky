@@ -9,6 +9,8 @@ class btVector3;
 class btTransform;
 class btRigidBody;
 
+class AnimationPlayer;
+
 namespace game
 {
 
@@ -51,6 +53,7 @@ public:
 
 private:
 	const DrawingModel*	drawing_model_;		///< DrawingModel
+	const AnimationPlayer* animation_;		///< AnimationPlayer
 
 	bool				is_dead_;			///< Ž€–Sƒtƒ‰ƒO
 
@@ -76,6 +79,7 @@ protected:
 
 	DynamicsWorld* get_dynamics_world() const;
 
+	void play_animation( const char_t* ) const;
 
 	void play_sound( const char*, bool = false, bool = true ) const;
 	void stop_sound( const char* ) const;

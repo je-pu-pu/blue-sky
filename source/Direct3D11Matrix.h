@@ -43,12 +43,38 @@ public:
 
 		return *this;
 	}
+	
+	UnitType get( int y, int x )
+	{
+		return value_.m[ y ][ x ];
+	}
+
+	void set(
+		UnitType m00, UnitType m01, UnitType m02, UnitType m03,
+		UnitType m10, UnitType m11, UnitType m12, UnitType m13,
+		UnitType m20, UnitType m21, UnitType m22, UnitType m23,
+		UnitType m30, UnitType m31, UnitType m32, UnitType m33 )
+	{
+		XMStoreFloat4x4( & value_, XMMatrixSet( m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33 ) );
+	}
 
 	void set_identity()
 	{
 		// value_ = XMMatrixIdentity();
 
 		XMStoreFloat4x4( & value_, XMMatrixIdentity() );
+	}
+
+	void set_translation( UnitType tx, UnitType ty, UnitType tz )
+	{
+		// value_ = XMMatrixTranslation( tx, ty, tz );
+
+		XMStoreFloat4x4( & value_, XMMatrixTranslation( tx, ty, tz ) );
+	}
+
+	void set_rotation( UnitType rx, UnitType ry, UnitType rz )
+	{
+		XMStoreFloat4x4( & value_, XMMatrixRotationRollPitchYaw( rx, ry, rz ) );
 	}
 
 	void set_scaling( UnitType sx, UnitType sy, UnitType sz )
@@ -58,11 +84,14 @@ public:
 		XMStoreFloat4x4( & value_, XMMatrixScaling( sx, sy, sz ) );
 	}
 
-	void set_translation( UnitType tx, UnitType ty, UnitType tz )
+	Direct3D11Matrix inverse() const
 	{
-		// value_ = XMMatrixTranslation( tx, ty, tz );
+		Direct3D11Matrix m;
 
-		XMStoreFloat4x4( & value_, XMMatrixTranslation( tx, ty, tz ) );
+		XMVECTOR v;
+		XMStoreFloat4x4( & m.value_, XMMatrixInverse( & v, XMLoadFloat4x4( & value_ ) ) );
+
+		return m;
 	}
 
 	Direct3D11Matrix operator * ( const Direct3D11Matrix& m )

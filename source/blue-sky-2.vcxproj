@@ -72,6 +72,10 @@
     <ClInclude Include="ActiveObject.h" />
     <ClInclude Include="ActiveObjectManager.h" />
     <ClInclude Include="ActiveObjectPhysics.h" />
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="AnimationChannel.h" />
+    <ClInclude Include="AnimationKeyFrame.h" />
+    <ClInclude Include="AnimationPlayer.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="Balloon.h" />
     <ClInclude Include="BulletPhysics.h" />
@@ -125,6 +129,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="Robot.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SkinningAnimation.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="StageSelectScene.h" />

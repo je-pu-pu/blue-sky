@@ -46,18 +46,15 @@ namespace blue_sky
 	class Scene;
 };
 
-using namespace game;
-using namespace blue_sky;
-
-using common::auto_ptr;
-using common::safe_ptr;
-
 namespace blue_sky
 {
 
 class GameMain : public Game
 {
 public:
+	typedef game::Config					Config;
+	typedef game::MainLoop					MainLoop;
+
 	typedef Direct3D11						Direct3D;
 	typedef ActiveObjectPhysics				Physics;
 
@@ -68,33 +65,33 @@ public:
 protected:
 	float									total_elapsed_time_;	///< ゲームが開始してからの経過時間 ( 秒 )
 
-	auto_ptr< Direct3D >					direct_3d_;				///< Direct3D
-	auto_ptr< Physics >						physics_;				///< Physics
+	common::auto_ptr< Direct3D >			direct_3d_;				///< Direct3D
+	common::auto_ptr< Physics >				physics_;				///< Physics
 
-	auto_ptr< DirectInput >					direct_input_;			///< DirectInput
-	auto_ptr< Input >						input_;					///< Game Input
+	common::auto_ptr< DirectInput >			direct_input_;			///< DirectInput
+	common::auto_ptr< Input >				input_;					///< Game Input
 
-	auto_ptr< GraphicsManager >				graphics_manager_;		///< GraphicsManager
-	auto_ptr< SoundManager >				sound_manager_;			///< SoundManager
+	common::auto_ptr< GraphicsManager >		graphics_manager_;		///< GraphicsManager
+	common::auto_ptr< SoundManager >		sound_manager_;			///< SoundManager
 
-	auto_ptr< Config >						config_;				///< Config
-	auto_ptr< Config >						save_data_;				///< Save Data
+	common::auto_ptr< Config >				config_;				///< Config
+	common::auto_ptr< Config >				save_data_;				///< Save Data
 
-	auto_ptr< MainLoop >					main_loop_;				///< ループ管理
+	common::auto_ptr< MainLoop >			main_loop_;				///< ループ管理
 
-	auto_ptr< ActiveObjectManager >			active_object_manager_;	///< ActiveObjectManager
+	common::auto_ptr< ActiveObjectManager >	active_object_manager_;	///< ActiveObjectManager
 
-	auto_ptr< DrawingModelManager >			drawing_model_manager_;	///< DrawingModelManager
+	common::auto_ptr< DrawingModelManager >	drawing_model_manager_;	///< DrawingModelManager
 
 	/// @todo まとめる
-	auto_ptr< GameConstantBuffer >			game_constant_buffer_;
-	auto_ptr< FrameConstantBuffer >			frame_constant_buffer_;
-	auto_ptr< FrameDrawingConstantBuffer >	frame_drawing_constant_buffer_;
-	auto_ptr< ObjectConstantBuffer >		object_constant_buffer_;
+	common::auto_ptr< GameConstantBuffer >			game_constant_buffer_;
+	common::auto_ptr< FrameConstantBuffer >			frame_constant_buffer_;
+	common::auto_ptr< FrameDrawingConstantBuffer >	frame_drawing_constant_buffer_;
+	common::auto_ptr< ObjectConstantBuffer >		object_constant_buffer_;
 
-	auto_ptr< Direct3D11BulletDebugDraw >	bullet_debug_draw_;
+	common::auto_ptr< Direct3D11BulletDebugDraw >	bullet_debug_draw_;
 
-	safe_ptr< Scene >						scene_;					///< 現在のシーン
+	common::safe_ptr< Scene >				scene_;					///< 現在のシーン
 	string_t								stage_name_;			///< 現在のステージ名
 
 	bool									is_display_fps_;		///< FPS 表示フラグ
@@ -152,7 +149,7 @@ public:
 
 } // namespace blue_sky
 
-inline Game* Game::get_instance() { return GameMain::get_instance(); }
+inline Game* Game::get_instance() { return blue_sky::GameMain::get_instance(); }
 
 
 #endif // GAME_MAIN_H

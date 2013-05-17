@@ -3,6 +3,11 @@
 
 #include "App.h"
 
+/**
+ * ’ŠÛƒQ[ƒ€ƒNƒ‰ƒX
+ *
+ * @todo game ‚ÉˆÚ“®‚·‚é
+ */
 class Game
 {
 public:

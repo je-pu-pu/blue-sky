@@ -9,8 +9,6 @@ class Direct3D11Mesh;
 namespace blue_sky
 {
 
-using common::auto_ptr;
-
 class DrawingMesh;
 class DrawingLine;
 
@@ -20,10 +18,11 @@ class DrawingLine;
  */
 class DrawingModel
 {
+public:
 
-protected:
-	auto_ptr< DrawingMesh >		mesh_;		///< Žè•`‚«•—ƒƒbƒVƒ…
-	auto_ptr< DrawingLine >		line_;		///< Žè•`‚«•—ƒ‰ƒCƒ“
+private:
+	common::auto_ptr< DrawingMesh >		mesh_;		///< Žè•`‚«•—ƒƒbƒVƒ…
+	common::auto_ptr< DrawingLine >		line_;		///< Žè•`‚«•—ƒ‰ƒCƒ“
 
 public:
 	DrawingModel();

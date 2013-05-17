@@ -2,16 +2,21 @@
 #define DIRECT_3D_11_MESH_H
 
 #include "type.h"
+#include "Direct3D11Matrix.h"
 #include <game/GraphicsManager.h>
+#include <common/auto_ptr.h>
 #include <common/math.h>
-#include <boost/array.hpp>
 #include <d3d11.h>
 #include <xnamath.h>
 #include <vector>
+#include <cassert>
 
 class Direct3D11;
 class Direct3D11Color;
 class Direct3D11Material;
+class Direct3D11Matrix;
+
+template< typename > class SkinningAnimation;
 
 /**
  * ÉÅÉbÉVÉÖ
@@ -23,6 +28,9 @@ public:
 	typedef Direct3D11					Direct3D;
 	typedef Direct3D11Color				Color;
 	typedef Direct3D11Material			Material;
+	typedef Direct3D11Matrix			Matrix;
+
+	typedef SkinningAnimation< Matrix >	SkinningAnimation;
 
 	typedef XMFLOAT2					Vector2;
 	typedef XMFLOAT3					Vector3;
@@ -144,6 +152,10 @@ protected:
 
 	MaterialList		material_list_;
 	
+	common::auto_ptr< SkinningAnimation >	skinning_animation_;
+
+	Material* create_material();
+
 	void optimize();
 
 	void create_vertex_buffer();
@@ -155,17 +167,22 @@ protected:
 
 public:
 	Direct3D11Mesh( Direct3D* );
-	virtual ~Direct3D11Mesh();
-	
-	Material* create_material();
+	~Direct3D11Mesh();
 
 	bool load_obj( const char_t* );
 	bool load_fbx( const char_t* );
 	
+	Material* get_last_material( bool force = true );
+
 	void render() const;
 
 	inline VertexList& get_vertex_list() { return vertex_list_; }
 	inline const VertexList& get_vertex_list() const { return vertex_list_; }
+
+	inline SkinningAnimation* get_skinning_animation() { return skinning_animation_.get(); }
+	inline const SkinningAnimation* get_skinning_animation() const { return skinning_animation_.get(); }
+
+	inline void set_skinning_animation( SkinningAnimation* sa ) { skinning_animation_ = sa; }
 
 	inline SkinningInfoList& get_skinning_info_list() { return skinning_info_list_; }
 	inline const SkinningInfoList& get_skinning_info_list() const { return skinning_info_list_; }

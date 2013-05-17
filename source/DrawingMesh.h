@@ -2,6 +2,7 @@
 #define BLUE_SKY_DRAWING_MESH_H
 
 #include "type.h"
+#include <common/auto_ptr.h>
 #include <game/GraphicsManager.h>
 
 namespace blue_sky
@@ -15,9 +16,10 @@ class DrawingMesh
 {
 public:
 	typedef game::Mesh Mesh;
+	// template < typename T > using auto_ptr = typedef common::auto_ptr< T >;
 
 private:
-	Mesh* mesh_;
+	common::auto_ptr< Mesh > mesh_;
 
 public:
 	DrawingMesh( Mesh* );

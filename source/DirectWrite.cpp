@@ -13,21 +13,22 @@ DirectWrite::DirectWrite( IDXGISurface1* surface )
 	, text_format_( 0 )
 	, render_target_( 0 )
 {
-	// ?
-	DIRECT_X_FAIL_CHECK( D2D1CreateFactory( D2D1_FACTORY_TYPE_SINGLE_THREADED, & direct_2d_factory_ ) );
+	D2D1_FACTORY_OPTIONS factroy_options = { D2D1_DEBUG_LEVEL_INFORMATION };
+	DIRECT_X_FAIL_CHECK( D2D1CreateFactory( D2D1_FACTORY_TYPE_SINGLE_THREADED, factroy_options, & direct_2d_factory_ ) );
 	
 	DIRECT_X_FAIL_CHECK( DWriteCreateFactory( DWRITE_FACTORY_TYPE_SHARED, __uuidof( IDWriteFactory ), reinterpret_cast< IUnknown** >( & dwrite_factory_ ) ) );
 	
 	DIRECT_X_FAIL_CHECK( dwrite_factory_->RegisterFontCollectionLoader( DirectWriteFontCollectionLoader::GetLoader() ) );
 	DIRECT_X_FAIL_CHECK( dwrite_factory_->RegisterFontFileLoader( DirectWriteFontFileLoader::GetLoader() ) );
 
-	const char* font_file_path = "media/font/uzura.ttf";
-	const wchar_t* font_family_name = L"uzura_font";
+	// create_custom_font()
+	{
+		const char* font_file_path = "media/font/uzura.ttf";
+		const wchar_t* font_family_name = L"uzura_font";
 
-	DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateCustomFontCollection( DirectWriteFontCollectionLoader::GetLoader(), font_file_path, strlen( font_file_path ) + 1, & font_collection_ ) );
-	
-	// ?
-	DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateTextFormat( font_family_name, font_collection_, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 26.f, L"ja-jp", & text_format_ ) );
+		DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateCustomFontCollection( DirectWriteFontCollectionLoader::GetLoader(), font_file_path, strlen( font_file_path ) + 1, & font_collection_ ) );
+		DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateTextFormat( font_family_name, font_collection_, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 26.f, L"ja-jp", & text_format_ ) );
+	}
 
 	// create_render_target()
 	{
@@ -44,8 +45,8 @@ DirectWrite::~DirectWrite()
 	DIRECT_X_RELEASE( solid_color_brush_ );
 	DIRECT_X_RELEASE( render_target_ );
 
-	dwrite_factory_->UnregisterFontFileLoader( DirectWriteFontFileLoader::GetLoader() );
 	dwrite_factory_->UnregisterFontCollectionLoader( DirectWriteFontCollectionLoader::GetLoader() );
+	dwrite_factory_->UnregisterFontFileLoader( DirectWriteFontFileLoader::GetLoader() );
 
 	DIRECT_X_RELEASE( dwrite_factory_ );
 	DIRECT_X_RELEASE( direct_2d_factory_ );

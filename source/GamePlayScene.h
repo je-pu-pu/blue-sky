@@ -14,8 +14,6 @@ class Direct3D11Rectangle;
 namespace blue_sky
 {
 
-using common::auto_ptr;
-
 class Player;
 class Goal;
 class ActiveObject;
@@ -45,17 +43,17 @@ protected:
 
 	bool				is_cleared_;							///< ステージクリアフラグ
 
-	auto_ptr< ShadowMap >				shadow_map_;
-	auto_ptr< SkyBox >					sky_box_;
-	auto_ptr< Mesh >					ground_;
-	auto_ptr< Mesh >					far_billboards_;
-	auto_ptr< Rectangle >				rectangle_;
+	common::auto_ptr< ShadowMap >		shadow_map_;
+	common::auto_ptr< SkyBox >			sky_box_;
+	common::auto_ptr< Mesh >			ground_;
+	common::auto_ptr< Mesh >			far_billboards_;
+	common::auto_ptr< Rectangle >		rectangle_;
 
-	auto_ptr< Stage >					stage_;
-	auto_ptr< Goal >					goal_;
+	common::auto_ptr< Stage >			stage_;
+	common::auto_ptr< Goal >			goal_;
 
-	auto_ptr< Player >					player_;
-	auto_ptr< Camera >					camera_;
+	common::auto_ptr< Player >			player_;
+	common::auto_ptr< Camera >			camera_;
 
 	Sound*								bgm_;
 	Sound*								balloon_bgm_;

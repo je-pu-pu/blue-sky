@@ -67,9 +67,6 @@
 #include <fstream>
 #include <sstream>
 
-/// XXXXX
-#include "include/d3dx11effect.h"
-
 namespace blue_sky
 {
 
@@ -824,7 +821,7 @@ void GamePlayScene::update_clear()
  */
 void GamePlayScene::render()
 {
-	const bool is_render_2d_enabled = get_game_main()->is_display_fps();
+	const bool is_render_2d_enabled = true; // get_game_main()->is_display_fps();
 
 	get_direct_3d()->setInputLayout( "main" );
 
@@ -1043,19 +1040,6 @@ void GamePlayScene::render()
 
 			get_direct_3d()->setInputLayout( "skin" );
 			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|skin" );
-
-			XMMATRIX ms[ 2 ] = {
-				XMMatrixIdentity(),
-				XMMatrixIdentity(),
-			};
-
-			ms[ 0 ] = XMMatrixRotationY( get_total_elapsed_time() );
-			ms[ 1 ] = XMMatrixRotationZ( get_total_elapsed_time() );
-
-			ID3DX11EffectMatrixVariable* bone_matrix = get_direct_3d()->getEffect()->getEffect()->GetVariableByName( "BoneMatrix" )->AsMatrix();
-			bone_matrix->SetMatrixArray( reinterpret_cast< const float* >( ms ), 0, 2 );
-			
-			// get_graphics_manager()->update_data( "BoneMatrix", & bone_matrix );
 
 			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 			{

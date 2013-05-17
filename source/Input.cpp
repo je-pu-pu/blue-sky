@@ -45,7 +45,7 @@ Input::Input()
 	}
 
 	joy_info_.dwSize = sizeof( JOYINFOEX );
-	joy_info_.dwFlags = JOY_RETURNX | JOY_RETURNY | JOY_RETURNBUTTONS;
+	joy_info_.dwFlags = JOY_RETURNALL;
 
 	joystick_enabled_ = ( joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR );
 

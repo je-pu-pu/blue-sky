@@ -37,6 +37,18 @@
 // #define 
 #define ENABLE_DIRECT_WRITE
 
+/**
+ * コンストラクタ
+ *
+ * @param hwnd ウィンドウハンドル
+ * @param w バックバッファの幅
+ * @param h バックバッファの高さ
+ * @param full_screen フルスクリーンフラグ
+ * @param adapter_format 
+ * @param depth_stencil_format
+ * @param multi_sample_type
+ * @param multi_sample_quality
+ */
 Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* adapter_format, const char* depth_stencil_format, int multi_sample_type, int multi_sample_quality )
 	: device_( 0 )
 	, immediate_context_( 0 )
@@ -292,7 +304,11 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 	texture_manager_ = new Direct3D11TextureManager( this );
 }
 
-/// @todo D3D11_CREATE_DEVICE_DEBUG を有効にし、メモリリークを調べる
+/**
+ * デストラクタ
+ *
+ * @todo D3D11_CREATE_DEVICE_DEBUG を有効にし、メモリリークを調べる
+ */
 Direct3D11::~Direct3D11()
 {
 	set_full_screen( false );
@@ -312,6 +328,12 @@ Direct3D11::~Direct3D11()
 	DIRECT_X_RELEASE( text_texture_ );
 
 	DIRECT_X_RELEASE( back_buffer_surface_ );
+
+	if ( immediate_context_ )
+	{
+		immediate_context_->ClearState();
+		immediate_context_->Flush();
+	}
 
 	if ( device_10_ )
 	{
@@ -344,11 +366,6 @@ Direct3D11::~Direct3D11()
 
 	DIRECT_X_RELEASE( swap_chain_ );
 
-	if ( immediate_context_ )
-	{
-		immediate_context_->ClearState();
-		immediate_context_->Flush();
-	}
 
 	if ( false )
 	{

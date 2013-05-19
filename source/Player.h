@@ -117,6 +117,7 @@ public:
 
 	/// ƒWƒƒƒ“ƒvˆ—
 	void jump();
+	void super_jump();
 
 	// ’â~
 	void stop();

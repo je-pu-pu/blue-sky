@@ -185,7 +185,7 @@ PS_INPUT vs_skin( VS_SKIN_INPUT input )
 	output.Normal = mul( output.Normal, ( float3x3 ) World );
 	
 	output.TexCoord = input.TexCoord;
-	output.Color = float4( 0.f, 0.f, 0.f, 0.f );
+	output.Color = float4( 0.f, 0.f, 0.f, 1.f );
 
 	return output;
 }
@@ -257,13 +257,17 @@ void gs_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> T
 	}
 
 	static const float LineTextureSize = 1024.f;
-	static const float DrawingAccentPower = 3.f;
-	static const float DrawingAccentScale = 300.f;
+	
+	static const float DrawingAccentPower = 2.f;
+	static const float DrawingAccentScale = 10.f;
 
-	const float line_width_scale = 0.2f + pow( abs( DrawingAccent ), DrawingAccentPower ) * DrawingAccentScale;
+	const float line_width_scale = 0.5f + pow( abs( DrawingAccent ), DrawingAccentPower ) * DrawingAccentScale;
 	const float line_width = 32.f * line_width_scale / screen_height;
 
 	const float line_v_width = 32.f / LineTextureSize;
+	const float line_v_offset = ( 128.f ) / LineTextureSize;
+
+	const int pattern_count = 4;	// 更新パターン
 
 	{
 		uint n = 0;
@@ -274,12 +278,13 @@ void gs_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> T
 		
 		uint redraw_seed = uint( Time * 5.f ) + primitive_id;
 
-		// float line_index = ( uint( Time + primitive_id % 10 / 10.f ) + primitive_id ) % 3; // 全ての線がばらばらのタイミングで更新される
-		float line_index = redraw_seed % 3; // 全ての線が統一されたタイミングで更新される
-		float line_v_origin = ( line_index * line_v_width );
+		float line_index = ( uint( Time + primitive_id % 10 / 10.f ) + primitive_id ) % pattern_count; // 全ての線がばらばらのタイミングで更新される
+		// float line_index = redraw_seed % pattern_count; // 全ての線が統一されたタイミングで更新される
+		float line_v_origin = line_v_offset + ( line_index * line_v_width );
 
 		float line_u_origin = ( redraw_seed ) * 0.1f;
-		float line_length_ratio = 1.f; // length( float2( lx, ly ) ) / length( float2( 2.f, 2.f ) );
+		/// float line_length_ratio = 1.f; // 
+		float line_length_ratio = length( float2( lx, ly ) ) / length( float2( 1.f, 1.f ) );
 
 		float angle = atan2( ly, lx );
 		angle += Pi / 2.f;
@@ -318,7 +323,7 @@ void gs_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> T
 
 float4 ps_line( noperspective PS_FLAT_INPUT input ) : SV_Target
 {
-	return line_texture.Sample( u_wrap_texture_sampler, input.TexCoord ) + input.Color;
+	return ( line_texture.Sample( u_wrap_texture_sampler, input.TexCoord ) + input.Color ); // * float4( 1.f, 1.f, 1.f, 0.5f );
 }
 
 float4 ps_flat( PS_FLAT_INPUT input ) : SV_Target
@@ -348,6 +353,7 @@ BlendState Blend
 	// SrcBlendAlpha = SRC_ALPHA;
 	SrcBlend = SRC_ALPHA;
 	DestBlend = INV_SRC_ALPHA;
+	AlphaToCoverageEnable = True;
 };
 
 DepthStencilState NoWriteDepth
@@ -365,6 +371,7 @@ DepthStencilState WriteDepth
 RasterizerState Default
 {
 	CullMode = BACK;
+	MultisampleEnable = True;
 };
 
 RasterizerState WireFrame
@@ -428,7 +435,7 @@ technique11 drawing_line
 		SetGeometryShader( CompileShader( gs_4_0, gs_line() ) );
 		SetPixelShader( CompileShader( ps_4_0, ps_line() ) );
 
-		// RASTERIZERSTATE = WireFrame;
+		RASTERIZERSTATE = Default;
 	}
 }
 

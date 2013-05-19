@@ -67,7 +67,16 @@ GameMain::GameMain()
 	get_app()->set_full_screen( get_config()->get( "video.full_screen", 0 ) != 0 );
 
 	// Direct3D
-	direct_3d_ = new Direct3D11( get_app()->GetWindowHandle(), get_app()->get_width(), get_app()->get_height(), get_app()->is_full_screen() );
+	direct_3d_ = new Direct3D11(
+		get_app()->GetWindowHandle(),
+		get_app()->get_width(),
+		get_app()->get_height(),
+		get_app()->is_full_screen(),
+		0,
+		0,
+		get_config()->get( "video.multisample.count", 4 ), 
+		get_config()->get( "video.multisample.quality", 2 )
+	);
 	direct_3d_->getEffect()->load( "media/shader/main.fx" );
 	direct_3d_->create_default_input_layout();
 

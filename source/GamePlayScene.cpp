@@ -731,12 +731,10 @@ void GamePlayScene::update_main()
 			player_->jump();
 		}
 
-		/*
 		if ( get_input()->push( Input::B ) )
 		{
-			player_->set_location( goal_->get_location() + Player::Vector3( 0, 5, 0 ) );
+			player_->super_jump();
 		}
-		*/
 
 		player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );
 

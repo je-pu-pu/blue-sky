@@ -34,22 +34,21 @@
 // #pragma comment( lib, "d3dx10.lib" )
 #endif
 
-// #define 
 #define ENABLE_DIRECT_WRITE
 
 /**
  * コンストラクタ
  *
- * @param hwnd ウィンドウハンドル
- * @param w バックバッファの幅
- * @param h バックバッファの高さ
- * @param full_screen フルスクリーンフラグ
- * @param adapter_format 
- * @param depth_stencil_format
- * @param multi_sample_type
- * @param multi_sample_quality
+ * @param hwnd					ウィンドウハンドル
+ * @param w						バックバッファの幅
+ * @param h						バックバッファの高さ
+ * @param full_screen			フルスクリーンフラグ
+ * @param adapter_format		未使用
+ * @param depth_stencil_format	未使用
+ * @param multi_sample_count	マルチサンプリングのサンプル数
+ * @param multi_sample_quality	マルチサンプリングのクオリティ
  */
-Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* adapter_format, const char* depth_stencil_format, int multi_sample_type, int multi_sample_quality )
+Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* adapter_format, const char* depth_stencil_format, int multi_sample_count, int multi_sample_quality )
 	: device_( 0 )
 	, immediate_context_( 0 )
 	, swap_chain_( 0 )
@@ -70,12 +69,11 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 {
 	common::log( "log/d3d11.log", "init", false );
 
+	IDXGIFactory1* dxgi_factory = 0;
 	IDXGIAdapter1* dxgi_adapter = 0;
 
 	// get_adapter()
 	{
-		IDXGIFactory1* dxgi_factory = 0;
-
 		DIRECT_X_FAIL_CHECK( CreateDXGIFactory1( __uuidof( IDXGIFactory1 ), reinterpret_cast< void** >( & dxgi_factory ) ) );
 
 		for ( int n = 0; dxgi_factory->EnumAdapters1( n, & dxgi_adapter ) != DXGI_ERROR_NOT_FOUND; n++ )
@@ -89,11 +87,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		}
 
 		DIRECT_X_FAIL_CHECK( dxgi_factory->EnumAdapters1( 0, & dxgi_adapter ) );
-		DIRECT_X_RELEASE( dxgi_factory );
-
-		// MessageBoxW( 0, adapter_desc.Description, L"HOGE", MB_OK );
 	}
-	
 
 	D3D_FEATURE_LEVEL feature_levels[] = {
 		D3D_FEATURE_LEVEL_11_0,
@@ -103,28 +97,13 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 
 	D3D_FEATURE_LEVEL feature_level = feature_levels[ 0 ];
 
-	ZeroMemory( & swap_chain_desc_, sizeof( swap_chain_desc_ ) );
-	swap_chain_desc_.BufferCount = 1;
-    swap_chain_desc_.BufferDesc.Width = w;
-    swap_chain_desc_.BufferDesc.Height = h;
-    swap_chain_desc_.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-//	swap_chain_desc_.BufferDesc.RefreshRate.Numerator = 60;
-//	swap_chain_desc_.BufferDesc.RefreshRate.Denominator = 1;
-    swap_chain_desc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    swap_chain_desc_.OutputWindow = hwnd;
-    swap_chain_desc_.SampleDesc.Count = 1;
-    swap_chain_desc_.SampleDesc.Quality = 0;
-    swap_chain_desc_.Windowed = ! full_screen;
-	swap_chain_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-
 #ifdef _DEBUG
     UINT d3d11_create_device_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG;
 #else
     UINT d3d11_create_device_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #endif
 
-	// !!!
-	DIRECT_X_FAIL_CHECK( D3D11CreateDeviceAndSwapChain( dxgi_adapter, D3D_DRIVER_TYPE_UNKNOWN, 0, d3d11_create_device_flags, feature_levels, ARRAYSIZE( feature_levels ), D3D11_SDK_VERSION, & swap_chain_desc_, & swap_chain_, & device_, & feature_level, & immediate_context_ ) );
+	DIRECT_X_FAIL_CHECK( D3D11CreateDevice( dxgi_adapter, D3D_DRIVER_TYPE_UNKNOWN, 0, d3d11_create_device_flags, feature_levels, ARRAYSIZE( feature_levels ), D3D11_SDK_VERSION, & device_, & feature_level, & immediate_context_ ) );
 
 	// log_feature_level_11()
 	{
@@ -140,16 +119,51 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		common::log( "log/d3d11.log", std::string( "created d3d11 device ( feature_level : " ) + feature_level_map[ device_->GetFeatureLevel() ] + " )" );
 	}
 
-	// multi_sample()
-	/// @todo 実装する
+	// create_swap_chain
 	{
-		UINT multi_sample_count = 4;
-		UINT multi_sample_quality = 0;
+		ZeroMemory( & swap_chain_desc_, sizeof( swap_chain_desc_ ) );
+		swap_chain_desc_.BufferCount = 1;
+		swap_chain_desc_.BufferDesc.Width = w;
+		swap_chain_desc_.BufferDesc.Height = h;
+		swap_chain_desc_.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+//		swap_chain_desc_.BufferDesc.RefreshRate.Numerator = 60;
+//		swap_chain_desc_.BufferDesc.RefreshRate.Denominator = 1;
+		swap_chain_desc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swap_chain_desc_.OutputWindow = hwnd;
+		swap_chain_desc_.SampleDesc.Count = 1;
+		swap_chain_desc_.SampleDesc.Quality = 0;
+		swap_chain_desc_.Windowed = ! full_screen;
+		swap_chain_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-		if ( device_->CheckMultisampleQualityLevels( swap_chain_desc_.BufferDesc.Format, multi_sample_count, & multi_sample_quality ) )
+		// check_multi_sample()
 		{
-			int x = 0;
+			if ( multi_sample_count < 1 )
+			{
+				multi_sample_count = 1;
+			}
+			if ( multi_sample_quality < 0 )
+			{
+				multi_sample_quality = 0;
+			}
+
+			UINT uint_multi_sample_quality = 0;
+
+			if ( SUCCEEDED( device_->CheckMultisampleQualityLevels( swap_chain_desc_.BufferDesc.Format, multi_sample_count, & uint_multi_sample_quality ) ) )
+			{
+				if ( uint_multi_sample_quality > 0 )
+				{
+					if ( static_cast< UINT >( multi_sample_quality ) >= uint_multi_sample_quality )
+					{
+						multi_sample_quality = uint_multi_sample_quality - 1;
+					}
+
+					swap_chain_desc_.SampleDesc.Count = multi_sample_count;
+					swap_chain_desc_.SampleDesc.Quality = multi_sample_quality;
+				}
+			}
 		}
+		
+		DIRECT_X_FAIL_CHECK( dxgi_factory->CreateSwapChain( device_, & swap_chain_desc_, & swap_chain_ ) );
 	}
 
 #ifdef ENABLE_DIRECT_WRITE
@@ -201,6 +215,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 #endif
 
 	DIRECT_X_RELEASE( dxgi_adapter );
+	DIRECT_X_RELEASE( dxgi_factory );
 
 	create_back_buffer_view();
 	create_back_buffer_surface();
@@ -260,8 +275,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		texture_desc.MipLevels = 1;
 		texture_desc.ArraySize = 1;
 		texture_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		texture_desc.SampleDesc.Count = 1;
-		texture_desc.SampleDesc.Quality = 0;
+		texture_desc.SampleDesc = swap_chain_desc_.SampleDesc;
 		texture_desc.Usage = D3D11_USAGE_DEFAULT;
 		texture_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 		texture_desc.CPUAccessFlags = 0;
@@ -273,7 +287,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 		D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc = { texture_desc.Format };
 	
 		depth_stencil_view_desc.Format = texture_desc.Format;
-		depth_stencil_view_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		depth_stencil_view_desc.ViewDimension = swap_chain_desc_.SampleDesc.Count > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
 		depth_stencil_view_desc.Texture2D.MipSlice = 0;
 
 		DIRECT_X_FAIL_CHECK( device_->CreateDepthStencilView( depth_stencil_texture_, & depth_stencil_view_desc, & depth_stencil_view_ ) );

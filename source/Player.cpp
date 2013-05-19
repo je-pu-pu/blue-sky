@@ -487,6 +487,11 @@ void Player::jump()
 	}
 }
 
+void Player::super_jump()
+{
+	set_velocity( Vector3( get_velocity().x(), get_velocity().y() + 20.f, get_velocity().z() ) );
+}
+
 /**
  *
  */

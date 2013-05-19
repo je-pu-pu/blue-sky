@@ -8,3 +8,4 @@ goal 0 0 30
 
 dynamic-object box 0 0 0
 dynamic-object stick 0 0 10
+object buildings 0 0 0

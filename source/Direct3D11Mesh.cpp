@@ -448,6 +448,11 @@ string_t Direct3D11Mesh::get_texture_file_name_by_texture_name( const char_t* te
  */
 void Direct3D11Mesh::render() const
 {
+	if ( vertex_buffer_list_.empty() )
+	{
+		return;
+	}
+
 	if ( get_skinning_animation() )
 	{
 		static float frame = 0.f;

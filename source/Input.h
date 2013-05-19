@@ -14,11 +14,15 @@
 #ifndef BLUE_SKY_INPUT_H
 #define BLUE_SKY_INPUT_H
 
-#include <boost/array.hpp>
+#include "type.h"
+
+#include <Windows.h>
+
+#include <map>
 #include <deque>
+#include <array>
 #include <vector>
 #include <algorithm>
-#include <windows.h>
 
 class DirectInput;
 
@@ -34,6 +38,8 @@ namespace blue_sky
 
 /**
  * 入力
+ *
+ * @todo Windows と切り離す
  */
 class Input
 {
@@ -48,7 +54,9 @@ public:
 	typedef game::Config Config;
 
 	typedef std::deque< Button > ButtonStack;
-	typedef boost::array< unsigned int, MAX_BUTTONS > ButtonCodeList;
+	typedef std::array< unsigned int, MAX_BUTTONS > ButtonCodeList;
+	typedef std::array< std::vector< int >, MAX_BUTTONS > ButtonCodeMultiList;
+	typedef std::map< std::string, int > ConfigKeyCodeMap;
 
 private:
 	const DirectInput* direct_input_;						///< DirectInput
@@ -80,8 +88,14 @@ private:
 
 	POINT mouse_point_;										///< マウス 座標
 
-	ButtonCodeList key_code_;
+	ButtonCodeMultiList key_code_;
 	ButtonCodeList joystick_code_;
+
+	ConfigKeyCodeMap config_key_code_map_;					///< コンフィグファイルのキー名 から GetAsyncKeyState() の引数に渡すキーへのマップ
+
+	void load_key_code_config( Config&, const uint_t, const char_t*, const char_t* );
+	
+	void update_state_by_key_for( uint_t );
 
 	DWORD* get_joystick_axis_pos_pointer_by_index( int );
 	float get_rate_by_joystick_axis_pos( DWORD );

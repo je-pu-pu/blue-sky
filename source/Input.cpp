@@ -55,6 +55,10 @@ Input::Input()
 		joyGetDevCaps( JOYSTICKID1, & jc, sizeof( JOYCAPS ) );
 		joystick_enabled_ &= jc.wNumAxes >= 4;
 	}
+
+	config_key_code_map_.insert( std::make_pair( "MOUSE_L", VK_LBUTTON  ) );
+	config_key_code_map_.insert( std::make_pair( "MOUSE_R", VK_RBUTTON ) );
+	config_key_code_map_.insert( std::make_pair( "SPACE", VK_SPACE ) );
 }
 
 Input::~Input()
@@ -64,18 +68,20 @@ Input::~Input()
 
 void Input::load_config( Config& config )
 {
-	key_code_[ LEFT  ] = config.get( "input.key.left",  'A' );
-	key_code_[ RIGHT ] = config.get( "input.key.right", 'D' );
-	key_code_[ UP    ] = config.get( "input.key.up",    'W' );
-	key_code_[ DOWN  ] = config.get( "input.key.down",  'S' );
-	
-	key_code_[ A ] = config.get( "input.key.a", VK_LBUTTON );
-	key_code_[ B ] = config.get( "input.key.b", VK_RBUTTON );
-	key_code_[ X ] = config.get( "input.key.x", '1' );
-	key_code_[ Y ] = config.get( "input.key.y", '2' );
+	key_code_[ ESCAPE ].push_back( VK_ESCAPE );
 
-	key_code_[ L ] = config.get( "input.key.l", 'Q' );
-	key_code_[ R ] = config.get( "input.key.r", 'E' );
+	load_key_code_config( config, LEFT,  "input.key.left",  "A" );
+	load_key_code_config( config, RIGHT, "input.key.right", "D" );
+	load_key_code_config( config, UP,    "input.key.up",    "W" );
+	load_key_code_config( config, DOWN,  "input.key.down",  "S" );
+	
+	load_key_code_config( config, A,     "input.key.a", "MOUSE_L SPACE" );
+	load_key_code_config( config, B,     "input.key.b", "MOUSE_R" );
+	load_key_code_config( config, X,     "input.key.x", "1" );
+	load_key_code_config( config, Y,     "input.key.y", "2" );
+
+	load_key_code_config( config, L,     "input.key.l", "Q" );
+	load_key_code_config( config, R,     "input.key.r", "E" );
 
 	joystick_code_[ A ] = 1 << ( config.get( "input.joystick.a", 1 ) - 1 );
 	joystick_code_[ B ] = 1 << ( config.get( "input.joystick.b", 3 ) - 1 );
@@ -98,6 +104,36 @@ void Input::load_config( Config& config )
 	joystick_y_sensitivity_ = config.get( "input.joystick.axis.y_sensitivity", 1.f );
 }
 
+void Input::load_key_code_config( Config& config, uint_t button, const char_t* name, const char_t* default_value )
+{
+	std::string values = config.get( name, std::string( default_value ) );
+	std::stringstream ss;
+
+	ss << values;
+
+	while ( ss.good() )
+	{
+		std::string key_code;
+
+		ss >> key_code;
+
+		auto i = config_key_code_map_.find( key_code );
+
+		if ( i != config_key_code_map_.end() )
+		{
+			key_code_[ button ].push_back( i->second );
+		}
+		else if ( key_code.size() == 1 )
+		{
+			key_code_[ button ].push_back( key_code.at( 0 ) );
+		}
+		else
+		{
+
+		}
+	}
+}
+
 /**
  * キーボードからの入力による状態の更新を行う
  */
@@ -106,22 +142,9 @@ void Input::update()
 	for ( int n = 0; n < MAX_BUTTONS; n++ )
 	{
 		state_[ n ] <<= 1;
+
+		update_state_by_key_for( n );
 	}
-
-	if ( GetAsyncKeyState( VK_ESCAPE ) & 0x8000 )  state_[ ESCAPE ] |= 1;
-
-	if ( GetAsyncKeyState( key_code_[ LEFT  ] ) & 0x8000 ) state_[ LEFT  ] |= 1;
-	if ( GetAsyncKeyState( key_code_[ RIGHT ] ) & 0x8000 ) state_[ RIGHT ] |= 1;
-	if ( GetAsyncKeyState( key_code_[ UP    ] ) & 0x8000 ) state_[ UP    ] |= 1;
-	if ( GetAsyncKeyState( key_code_[ DOWN  ] ) & 0x8000 ) state_[ DOWN  ] |= 1;
-	if ( GetAsyncKeyState( key_code_[ L     ] ) & 0x8000 ) state_[ L     ] |= 1;
-	if ( GetAsyncKeyState( key_code_[ R     ] ) & 0x8000 ) state_[ R     ] |= 1;
-
-	if ( GetAsyncKeyState( key_code_[ A ] ) & 0x8000 ) state_[ A ] |= 1;
-	if ( GetAsyncKeyState( key_code_[ B ] ) & 0x8000 ) state_[ B ] |= 1;
-
-	if ( GetAsyncKeyState( key_code_[ X ] ) & 0x8000 ) state_[ X ] |= 1;
-	if ( GetAsyncKeyState( key_code_[ Y ] ) & 0x8000 ) state_[ Y ] |= 1;
 
 	POINT point;
 	GetCursorPos( & point );
@@ -180,6 +203,22 @@ void Input::update_common()
 	if ( push( UP    ) ) allow_push( UP    );
 	if ( push( RIGHT ) ) allow_push( RIGHT );
 	if ( push( LEFT  ) ) allow_push( LEFT  );
+}
+
+/**
+ * キー入力をチェックし指定したボタンの状態を更新する
+ *
+ * @param button ボタン
+ */
+void Input::update_state_by_key_for( uint_t button )
+{
+	for ( auto i = key_code_[ button ].begin(); i != key_code_[ button ].end(); ++i )
+	{
+		if ( GetAsyncKeyState( *i ) & 0x8000 )
+		{
+			state_[ button ] |= 1;
+		}
+	}
 }
 
 DWORD* Input::get_joystick_axis_pos_pointer_by_index( int index )

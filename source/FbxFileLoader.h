@@ -27,6 +27,7 @@ public:
 private:
 	Mesh*		mesh_;
 	FbxScene*	fbx_scene_;
+	int			fbx_material_index_;
 
 protected:
 	void load_node_recursive( FbxNode* );

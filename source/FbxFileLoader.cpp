@@ -191,8 +191,15 @@ void print_fbx_node_recursive( FbxNode* node )
 FbxFileLoader::FbxFileLoader( Mesh* mesh )
 	: mesh_( mesh )
 	, fbx_scene_( 0 )
+	, fbx_material_index_( 0 )
 {
-
+	/*
+	int n;
+	FBXSDK_FOR_EACH_TEXTURE( n )
+    {
+		std::cout << n << " : " << FbxLayerElement::sTextureChannelNames[ n ] << std::endl;
+	}
+	*/
 }
 
 /**
@@ -229,12 +236,6 @@ bool FbxFileLoader::load( const char_t* file_name )
 		}
 	}
 
-	int n;
-	FBXSDK_FOR_EACH_TEXTURE( n )
-    {
-		std::cout << n << " : " << FbxLayerElement::sTextureChannelNames[ n ] << std::endl;
-	}
-
 	sdk_manager->Destroy();
 
 	convert_coordinate_system();
@@ -262,10 +263,11 @@ void FbxFileLoader::load_node_recursive( FbxNode* node )
 	}
 }
 
+#include "Direct3D11Vector.h"
+#include "Direct3D11Matrix.h"
+
 /**
  * メッシュ情報を読み込む
- *
- * @todo 複数マテリアルに対応する
  *
  * @param mesh メッシュ情報
  */
@@ -284,7 +286,6 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 
 	Mesh::PositionList position_list;
 	Mesh::SkinningInfoList skinning_info_list;
-	Mesh::Material* material = mesh_->get_last_material();
 
 	for ( int n = 0; n < mesh->GetControlPointsCount(); n++ )
 	{
@@ -296,6 +297,9 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 				static_cast< float >( v[ 1 ] ),
 				static_cast< float >( v[ 2 ] ) ) );
 	}
+
+	FbxLayerElementArrayTemplate< int >* material_indices;
+	mesh->GetMaterialIndices( & material_indices );
 
 	// load_skinning_info()
 	int skin_count = mesh->GetDeformerCount( FbxDeformer::eSkin );
@@ -367,6 +371,20 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 					m[ 3 ][ 0 ], m[ 3 ][ 1 ], m[ 3 ][ 2 ], m[ 3 ][ 3 ] );
 
 
+				Direct3D11Vector v( 10.f, 10.f, 10.f );
+				Direct3D11Matrix mm, t;
+
+				t.set_translation( 10.f, 10.f, 10.f );
+
+				mm =
+					skinning_animation->get_bone_offset_matrix_list().at( bone_index ).inverse() *
+					t *
+					skinning_animation->get_bone_offset_matrix_list().at( bone_index );
+
+				v = v * mm;
+
+				std::cout << v.x() << ", " << v.y() << ", " << v.z() << ", " << v.w() << std::endl;
+
 				for ( int y = 0; y < 4; y++ )
 				{
 					for ( int x = 0; x < 4; x++ )
@@ -382,6 +400,8 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 
 	for ( int n = 0; n < mesh->GetPolygonCount(); n++ )
 	{
+		Mesh::Material* material = mesh_->get_material_at( material_indices->GetAt( n ) );
+
 		for ( int m = 0; m < mesh->GetPolygonSize( n ); m++ )
 		{
 			int position_index = mesh->GetPolygonVertex( n, m );
@@ -436,20 +456,22 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 /**
  * マテリアル情報を読み込む
  *
- * @todo 複数マテリアルに対応する
- *
- * @param material マテリアル情報
+ * @param fbx_material マテリアル情報
  */
-void FbxFileLoader::load_material( FbxSurfaceMaterial* material )
+void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 {
-	if ( ! material )
+	if ( ! fbx_material )
 	{
 		return;
 	}
 
+	Mesh::Material* material = mesh_->get_material_at( fbx_material_index_ );
+
+	fbx_material_index_++;
+
 	string_t texture_file_path;
 
-	for ( auto p = material->GetFirstProperty(); p.IsValid(); p = material->GetNextProperty( p ) )
+	for ( auto p = fbx_material->GetFirstProperty(); p.IsValid(); p = fbx_material->GetNextProperty( p ) )
 	{
 		for ( int m = 0; m < p.GetSrcObjectCount< FbxTexture >(); m++ )
 		{
@@ -493,7 +515,7 @@ void FbxFileLoader::load_material( FbxSurfaceMaterial* material )
 
 	if ( ! texture_file_path.empty() )
 	{
-		mesh_->get_last_material()->load_texture( texture_file_path.c_str() );
+		material->load_texture( texture_file_path.c_str() );
 	}
 }
 

@@ -374,6 +374,9 @@
     <ClInclude Include="SkinningAnimation.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="BoneNode.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

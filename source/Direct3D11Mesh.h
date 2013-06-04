@@ -172,7 +172,10 @@ public:
 	bool load_obj( const char_t* );
 	bool load_fbx( const char_t* );
 	
-	Material* get_last_material( bool force = true );
+	Material* get_material_at( int, bool force = true );
+	Material* get_material_at_last( bool force = true );
+
+	bool has_animation() const { return skinning_animation_; }
 
 	void render() const;
 

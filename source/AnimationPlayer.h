@@ -10,19 +10,21 @@
 class AnimationPlayer
 {
 public:
-	typedef AnimationChannel Channel;
 	typedef AnimationKeyFrame KeyFrame;
 	typedef Channel::KeyFrameList KeyFrameList;
 
 private:
-
+	const Animation* animation_;	///< 現在のアニメーション
+	float current_frame_;			///< 現在の再生フレーム
 
 public:
-	Animation()
+	AnimationPlayer()
+		: animation_( 0 )
+		, current_frame( 0.f )
 	{ }
 
-	
+	const Animation* get_animation() const { return animation_; }
 
-}; // class Animation
+}; // class AnimationPlayer
 
-#endif // ANIMATION_H
+#endif // ANIMATION_PLAYER_H

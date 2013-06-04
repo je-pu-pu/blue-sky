@@ -75,6 +75,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, ui_texture_( 0 )
 	, is_cleared_( false )
 	, action_bgm_after_timer_( 0.f )
+	, bpm_( 120.f )
 {
 	object_detail_level_0_length_ = get_config()->get( "video.object-detail-level-0-length", 500.f );
 	object_detail_level_1_length_ = get_config()->get( "video.object-detail-level-1-length", 250.f );
@@ -159,17 +160,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		shadow_map_ = new ShadowMap( get_direct_3d(), get_config()->get( "video.shadow-map-cascade-levels", 3 ), get_config()->get( "video.shadow-map-size", 1024 ) );
 	}
 
-	{
-		GameConstantBufferData constant_buffer_data;
-
-		constant_buffer_data.projection = XMMatrixPerspectiveFovLH( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f );
-		constant_buffer_data.projection = XMMatrixTranspose( constant_buffer_data.projection );
-		constant_buffer_data.screen_width = static_cast< float_t >( get_width() );
-		constant_buffer_data.screen_height = static_cast< float_t >( get_height() );
-		
-		get_game_main()->get_game_constant_buffer()->update( & constant_buffer_data );
-	}
-
 	if ( ! sky_box_ )
 	{
 		sky_box_ = new SkyBox( get_direct_3d(), "sky-box-3" );
@@ -190,10 +180,13 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	rectangle_ = new Rectangle( get_direct_3d() );
 
 	bgm_ = get_sound_manager()->get_sound( "balloon" );
+
 	if ( bgm_ )
 	{
 		bgm_->play( true );
 	}
+	
+	update_render_data_for_game();
 
 	restart();
 }
@@ -395,6 +388,15 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> name;
 
 			get_sound_manager()->load_music( "bgm", name.c_str() );
+
+			if ( ss.good() )
+			{
+				float_t bpm = get_bpm();
+
+				ss >> bpm;
+
+				set_bpm( bpm );
+			}
 		}
 		/*
 		else if ( name == "ambient" )
@@ -816,350 +818,371 @@ void GamePlayScene::update_clear()
 
 /**
  * 描画
+ *
  */
 void GamePlayScene::render()
 {
-	const bool is_render_2d_enabled = true; // get_game_main()->is_display_fps();
-
 	get_direct_3d()->setInputLayout( "main" );
-
-	// render_2d()
-	if ( is_render_2d_enabled )
+	
+	// render_text()
 	{
 		get_direct_3d()->begin2D();
-
 		get_direct_3d()->getFont()->begin();
 
-		std::wstringstream ss;
-		ss.setf( std::ios_base::fixed, std::ios_base::floatfield );
-
-		// ss << L"まぁがくれた月" << std::endl;
-		if ( get_game_main()->is_display_fps() )
-		{
-			ss << L"FPS : " << get_main_loop()->get_last_fps() << std::endl;
-			ss << L"POS : " << player_->get_transform().getOrigin().x() << ", " << player_->get_transform().getOrigin().y() << ", " << player_->get_transform().getOrigin().z() << std::endl;
-			ss << L"step speed : " << player_->get_step_speed() << std::endl;
-			ss << L"last footing height : " << player_->get_last_footing_height() << std::endl;
-			ss << L"DX : " << player_->get_rigid_body()->getLinearVelocity().x() << std::endl;
-			ss << L"DY : " << player_->get_rigid_body()->getLinearVelocity().y() << std::endl;
-			ss << L"DZ : " << player_->get_rigid_body()->getLinearVelocity().z() << std::endl;
-			ss << L"Objects : " << get_active_object_manager()->active_object_list().size() << std::endl;
-
-			ss << L"mouse.dx : " << get_input()->get_mouse_dx() << std::endl;
-			ss << L"mouse.dy : " << get_input()->get_mouse_dy() << std::endl;
-		}
-
-		get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );
+		render_text();
 
 		get_direct_3d()->getFont()->end();
-
 		get_direct_3d()->end2D();
 	}
 
 	// render_3d()
 	{
-		if ( is_render_2d_enabled )
-		{
-			get_direct_3d()->begin3D();
-		}
+		get_direct_3d()->begin3D();
 
-		XMVECTOR eye = XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 );
-#if 1
-		// render_object_for_shadow()
-		// if ( rand() % 4 == 0 )
-		if ( shadow_map_ )
-		{
-			/*
-			static float a = 0.f;
-
-			a += 0.01f;
-
-			const XMVECTOR light_origin = XMVectorSet( 50.f, 100.f, -25.f, 0.f );
-			XMVECTOR light = light_origin + XMVectorSet( cos( a ) * 10.f, 0.f, sin( a ) * 10.f, 0.f );	
-
-			shadow_map_->setLightPosition( light );
-			*/
-
-			shadow_map_->setEyePosition( eye );
-			shadow_map_->ready_to_render_shadow_map();
-
-			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|shadow_map" );
-
-			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
-			{
-				( *i )->apply();
-
-				for ( int n = 0; n < shadow_map_->get_cascade_levels(); n++ )
-				{
-					shadow_map_->ready_to_render_shadow_map_with_cascade_level( n );
-
-					{
-						get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-						get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-					}
-
-					for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
-					{
-						if ( ( *i )->is_dead() )
-						{
-							continue;
-						}
-						
-						render( *i );
-					}
-
-					render( player_.get() );
-					render( goal_.get() );
-				}
-			}
-
-			// shadow_map_->finish_to_render_shadow_map();
-		}
-#endif
-
-#if 1
 		get_direct_3d()->clear();
 
-		// update_view()
-		{
-			XMVECTOR at = XMVectorSet( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z(), 0.0f );
-			XMVECTOR up = XMVectorSet( camera_->up().x(), camera_->up().y(), camera_->up().z(), 0.0f );
+		update_render_data_for_frame();
+		// update_render_data_for_object();
 
-			FrameConstantBufferData frame_constant_buffer_data;
+		render_shadow_map();
 
-			frame_constant_buffer_data.view = XMMatrixLookAtLH( eye, at, up );
-			frame_constant_buffer_data.view = XMMatrixTranspose( frame_constant_buffer_data.view );
-			frame_constant_buffer_data.time = get_total_elapsed_time();
+		get_direct_3d()->set_default_render_target();
+		get_direct_3d()->set_default_viewport();
 
-			get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
-		}
+		render_sky_box();
+		render_far_billboards();
 
-		{
-			FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
+		get_direct_3d()->setInputLayout( "skin" );
 
-			frame_drawing_constant_buffer_data.accent = bgm_->get_current_peak_level();
+		render_object_skin_mesh();
 
-			get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
-		}
+		get_direct_3d()->setInputLayout( "main" );
 
-		// render_sky_box()
-		{
-			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sky_box" );
+		render_object_mesh();
 
-			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
-			{
-				( *i )->apply();
+		get_direct_3d()->setInputLayout( "line" );
 
-				ObjectConstantBufferData object_constant_buffer_data;
+		render_object_line();
 
-				// sky box
-				{
-					object_constant_buffer_data.world = XMMatrixTranslationFromVector( eye );
-					object_constant_buffer_data.world = XMMatrixTranspose( object_constant_buffer_data.world );
+		render_bullet_debug();
 
-					get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
+		get_direct_3d()->setInputLayout( "main" );
 
-					get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-					get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-					get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-				}
-
-				sky_box_->render();
-
-				// ground
-				{
-					object_constant_buffer_data.world = XMMatrixIdentity();
-
-					get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
-					get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-
-					ground_->render();
-				}
-			}
-		}
-
-		// render_far_billboards()
-		if ( far_billboards_ )
-		{
-			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|billboard" );
-
-			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
-			{
-				( *i )->apply();
-
-				get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-				get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-
-				{
-					ObjectConstantBufferData buffer;
-					buffer.world = XMMatrixIdentity();
-					
-					get_game_main()->get_object_constant_buffer()->update( & buffer );
-					get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-
-					far_billboards_->render();
-				}
-			}
-		}
-
-		// render_object();
-		if ( shadow_map_ )
-		{
-			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|skin" );
-
-			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
-			{
-				( *i )->apply();
-				
-				shadow_map_->ready_to_render_scene();
-
-				{
-					get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-					get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-					get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-				}
-
-				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
-				{
-					if ( ( *i )->is_dead() )
-					{
-						continue;
-					}
-
-					render( *i );
-				}
-
-				render( goal_.get() );
-			}
-		}
-		else
-		{
-			// get_graphics_manager()->render( "skin" );
-
-			get_direct_3d()->setInputLayout( "skin" );
-			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|skin" );
-
-			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
-			{
-				( *i )->apply();
-				
-				{
-					get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-					get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-					get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-				}
-
-				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
-				{
-					if ( ( *i )->is_dead() )
-					{
-						continue;
-					}
-
-					render( *i );
-				}
-
-				render( goal_.get() );
-			}
-		}
-
-#if 1
-		// render_object_line();
-		{
-			get_direct_3d()->setInputLayout( "line" );
-
-			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|drawing_line" );
-
-			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
-			{
-				( *i )->apply();
-
-				{
-					get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-					get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-					get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-				}
-
-				for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
-				{
-					if ( ( *i )->is_dead() )
-					{
-						continue;
-					}
-
-					render_line( *i );
-				}
-
-				render_line( player_.get() );
-			}
-
-			get_direct_3d()->setInputLayout( "main" );
-		}
-#endif
-
-#if 1
-		// render_bullet_debug();
-		{
-			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|bullet" );
-
-			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
-			{
-				( *i )->apply();
-				
-				get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-				get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-
-				get_game_main()->get_bullet_debug_draw()->render();
-			}
-		}
-#endif
-
-		// render_text();
-		if ( is_render_2d_enabled )
-		{
-			get_direct_3d()->renderText();
-		}
-
-#endif
-
-#if 0
-		// render_debug_shadow_map()
-		{
-			get_direct_3d()->setDebugViewport( 0.f, 0, get_width() / 4.f * shadow_map_->get_cascade_levels(), get_height() / 4.f );
-
-			Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
-
-			for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
-			{
-				( *i )->apply();
-				
-				ObjectConstantBufferData buffer_data;
-				
-				buffer_data.world = XMMatrixIdentity();
-				buffer_data.color = Color( 0.5f, 0.f, 0.f, 0.f );
-
-				get_game_main()->get_object_constant_buffer()->update( & buffer_data );
-				get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-
-				( * rectangle_->get_material_list().begin() )->set_shader_resource_view( shadow_map_->getShaderResourceView() );
-				rectangle_->render();
-			}
-		}
-#endif
+		get_direct_3d()->renderText();
+		
+		// render_shadow_map_debug_window();
 
 		render_sprite();
 
 		render_fader();
 
-		if ( is_render_2d_enabled )
+		get_direct_3d()->end3D();
+	}
+}
+
+void GamePlayScene::render_text() const
+{
+	std::wstringstream ss;
+	ss.setf( std::ios_base::fixed, std::ios_base::floatfield );
+
+	if ( get_game_main()->is_display_fps() )
+	{
+		ss << L"FPS : " << get_main_loop()->get_last_fps() << std::endl;
+		ss << L"BPM : " << get_bpm() << std::endl;
+		ss << L"POS : " << player_->get_transform().getOrigin().x() << ", " << player_->get_transform().getOrigin().y() << ", " << player_->get_transform().getOrigin().z() << std::endl;
+		ss << L"step speed : " << player_->get_step_speed() << std::endl;
+		ss << L"last footing height : " << player_->get_last_footing_height() << std::endl;
+		ss << L"DX : " << player_->get_rigid_body()->getLinearVelocity().x() << std::endl;
+		ss << L"DY : " << player_->get_rigid_body()->getLinearVelocity().y() << std::endl;
+		ss << L"DZ : " << player_->get_rigid_body()->getLinearVelocity().z() << std::endl;
+		ss << L"Objects : " << get_active_object_manager()->active_object_list().size() << std::endl;
+
+		ss << L"mouse.dx : " << get_input()->get_mouse_dx() << std::endl;
+		ss << L"mouse.dy : " << get_input()->get_mouse_dy() << std::endl;
+	}
+
+	get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );
+}
+
+/**
+ * ゲーム毎に更新する必要のある描画用の定数バッファを更新する
+ *
+ */
+void GamePlayScene::update_render_data_for_game() const
+{
+	GameConstantBufferData constant_buffer_data;
+
+	constant_buffer_data.projection = XMMatrixPerspectiveFovLH( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f );
+	constant_buffer_data.projection = XMMatrixTranspose( constant_buffer_data.projection );
+	constant_buffer_data.screen_width = static_cast< float_t >( get_width() );
+	constant_buffer_data.screen_height = static_cast< float_t >( get_height() );
+		
+	get_game_main()->get_game_constant_buffer()->update( & constant_buffer_data );
+}
+
+/**
+ * フレーム毎に更新する必要のある描画用の定数バッファを更新する
+ *
+ */
+void GamePlayScene::update_render_data_for_frame() const
+{
+	{
+		XMVECTOR eye = XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 );
+		XMVECTOR at = XMVectorSet( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z(), 0.f );
+		XMVECTOR up = XMVectorSet( camera_->up().x(), camera_->up().y(), camera_->up().z(), 0.f );
+
+		FrameConstantBufferData frame_constant_buffer_data;
+
+		frame_constant_buffer_data.view = XMMatrixLookAtLH( eye, at, up );
+		frame_constant_buffer_data.view = XMMatrixTranspose( frame_constant_buffer_data.view );
+		frame_constant_buffer_data.time = get_total_elapsed_time();
+		frame_constant_buffer_data.time_beat = static_cast< uint_t >( get_total_elapsed_time() * ( get_bpm() / 60.f ) );
+
+		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
+	}
+
+	{
+		FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
+
+		frame_drawing_constant_buffer_data.accent = bgm_->get_current_peak_level();
+
+		get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
+	}
+}
+
+/**
+ * シャドウマップを描画する
+ *
+ */
+void GamePlayScene::render_shadow_map() const
+{
+	if ( ! shadow_map_ )
+	{
+		return;
+	}
+
+	/*
+	static float a = 0.f;
+
+	a += 0.01f;
+
+	const XMVECTOR light_origin = XMVectorSet( 50.f, 100.f, -25.f, 0.f );
+	XMVECTOR light = light_origin + XMVectorSet( cos( a ) * 10.f, 0.f, sin( a ) * 10.f, 0.f );	
+
+	shadow_map_->setLightPosition( light );
+	*/
+
+	shadow_map_->setEyePosition( XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 ) );
+	shadow_map_->ready_to_render_shadow_map();
+
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|shadow_map" );
+
+	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	{
+		( *i )->apply();
+
+		for ( int n = 0; n < shadow_map_->get_cascade_levels(); n++ )
 		{
-			get_direct_3d()->end3D();
+			shadow_map_->ready_to_render_shadow_map_with_cascade_level( n );
+
+			{
+				get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+				get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+			}
+
+			for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+			{
+				render_active_object_mesh( *i );
+			}
+
+			render_active_object_mesh( player_.get() );
+			render_active_object_mesh( goal_.get() );
+		}
+	}
+
+	// shadow_map_->finish_to_render_shadow_map();
+}
+
+/**
+ * スカイボックスを描画する
+ *
+ */
+void GamePlayScene::render_sky_box() const
+{
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sky_box" );
+
+	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	{
+		( *i )->apply();
+
+		ObjectConstantBufferData object_constant_buffer_data;
+
+		// sky box
+		{
+			object_constant_buffer_data.world = XMMatrixTranslationFromVector( XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 ) );
+			object_constant_buffer_data.world = XMMatrixTranspose( object_constant_buffer_data.world );
+
+			get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
+
+			get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+			get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+			get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+		}
+
+		sky_box_->render();
+
+		// ground
+		{
+			object_constant_buffer_data.world = XMMatrixIdentity();
+
+			get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
+			get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+
+			ground_->render();
 		}
 	}
 }
 
-void GamePlayScene::render( const ActiveObject* active_object )
+/**
+ * 遠景ビルボードメッシュを描画する
+ *
+ */
+void GamePlayScene::render_far_billboards() const
 {
+	if ( ! far_billboards_ )
+	{
+		return;
+	}
+
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|billboard" );
+
+	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	{
+		( *i )->apply();
+
+		get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+		get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+
+		{
+			ObjectConstantBufferData buffer;
+			buffer.world = XMMatrixIdentity();
+					
+			get_game_main()->get_object_constant_buffer()->update( & buffer );
+			get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+
+			far_billboards_->render();
+		}
+	}
+}
+
+/**
+ * オブジェクトのスキンメッシュを描画する
+ *
+ */
+void GamePlayScene::render_object_skin_mesh() const
+{
+	/// @todo skin_with_shadow
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( shadow_map_ ? "|skin" : "|skin" );
+
+	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	{
+		( *i )->apply();
+				
+		{
+			get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+			get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+			get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+		}
+
+		if ( shadow_map_ )
+		{
+			shadow_map_->ready_to_render_scene();
+		}		
+
+		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+		{
+			if ( ( *i )->get_drawing_model()->get_mesh()->is_skin_mesh() )
+			{
+				render_active_object_mesh( *i );
+			}
+		}
+	}
+}
+
+/**
+ * オブジェクトのメッシュを描画する
+ *
+ */
+void GamePlayScene::render_object_mesh() const
+{
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( shadow_map_ ? "|main_with_shadow" : "|main" );
+
+	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	{
+		( *i )->apply();
+				
+		{
+			get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+			get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+			get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+		}
+
+		if ( shadow_map_ )
+		{
+			shadow_map_->ready_to_render_scene();
+		}		
+
+		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+		{
+			if ( ! ( *i )->get_drawing_model()->get_mesh()->is_skin_mesh() )
+			{
+				render_active_object_mesh( *i );
+			}
+		}
+
+		render_active_object_mesh( goal_.get() );
+	}
+}
+
+/**
+ * オブジェクトの線を描画する
+ *
+ */
+void GamePlayScene::render_object_line() const
+{
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|drawing_line" );
+
+	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	{
+		( *i )->apply();
+
+		{
+			get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+			get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+			get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+		}
+
+		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+		{
+			render_active_object_line( *i );
+		}
+
+		render_active_object_line( player_.get() );
+	}
+}
+
+/**
+ * ActiveObject のメッシュを描画する
+ *
+ * @param active_object ActiveObject
+ */
+void GamePlayScene::render_active_object_mesh( const ActiveObject* active_object ) const
+{
+	if ( active_object->is_dead() )
+	{
+		return;
+	}
+
 	const btTransform& trans = active_object->get_transform();
 
 	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
@@ -1173,11 +1196,22 @@ void GamePlayScene::render( const ActiveObject* active_object )
 	get_game_main()->get_object_constant_buffer()->update( & buffer_data );
 	get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
 
+	// active_object->get_animation_player()->render();
 	active_object->get_drawing_model()->get_mesh()->render();
 }
 
-void GamePlayScene::render_line( const ActiveObject* active_object )
+/**
+ * ActiveObject の線を描画する
+ *
+ * @param active_object ActiveObject
+ */
+void GamePlayScene::render_active_object_line( const ActiveObject* active_object ) const
 {
+	if ( active_object->is_dead() )
+	{
+		return;
+	}
+
 	// @todo 効率化
 	const btTransform& trans = active_object->get_transform();
 
@@ -1196,6 +1230,10 @@ void GamePlayScene::render_line( const ActiveObject* active_object )
 	active_object->get_drawing_model()->get_line()->render(); // 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
 }
 
+/**
+ * 2D スプライトを描画する
+ *
+ */
 void GamePlayScene::render_sprite()
 {
 	get_direct_3d()->getSprite()->begin();
@@ -1216,6 +1254,57 @@ void GamePlayScene::render_sprite()
 	}
 
 	get_direct_3d()->getSprite()->end();
+}
+
+/**
+ * Bullet のデバッグ表示を描画する
+ *
+ */
+void GamePlayScene::render_bullet_debug() const
+{
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|bullet" );
+
+	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	{
+		( *i )->apply();
+				
+		get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+		get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+
+		get_game_main()->get_bullet_debug_draw()->render();
+	}
+}
+
+/**
+ * シャドウマップのデバッグウィンドウを描画する
+ *
+ */
+void GamePlayScene::render_shadow_map_debug_window() const
+{
+	if ( ! shadow_map_ )
+	{
+		return;
+	}
+
+	get_direct_3d()->setDebugViewport( 0.f, 0, get_width() / 4.f * shadow_map_->get_cascade_levels(), get_height() / 4.f );
+
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
+
+	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	{
+		( *i )->apply();
+				
+		ObjectConstantBufferData buffer_data;
+				
+		buffer_data.world = XMMatrixIdentity();
+		buffer_data.color = Color( 0.5f, 0.f, 0.f, 0.f );
+
+		get_game_main()->get_object_constant_buffer()->update( & buffer_data );
+		get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+
+		( * rectangle_->get_material_list().begin() )->set_shader_resource_view( shadow_map_->getShaderResourceView() );
+		rectangle_->render();
+	}
 }
 
 } // namespace blue_sky

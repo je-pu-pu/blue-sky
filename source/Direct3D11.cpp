@@ -507,16 +507,44 @@ void Direct3D11::on_resize( int w, int h )
 	create_back_buffer_surface();
 }
 
+/**
+ * 画面をクリアする
+ *
+ */
 void Direct3D11::clear()
 {
 	clear( Color( 1, 1, 1, 1 ) );
 }
 
+/**
+ * 指定した色で画面をクリアする
+ *
+ * @param color クリアに使用する色
+ */
 void Direct3D11::clear( const Color& color )
 {
 	immediate_context_->ClearRenderTargetView( back_buffer_view_, static_cast< const float* >( & color.r() ) );
 	immediate_context_->ClearDepthStencilView( depth_stencil_view_, D3D11_CLEAR_DEPTH, 1.f, 0 );
+
+	set_default_render_target();
+	set_default_viewport();
+}
+
+/**
+ * 通常のレンダーターゲットを設定する
+ *
+ */
+void Direct3D11::set_default_render_target()
+{
 	immediate_context_->OMSetRenderTargets( 1, & back_buffer_view_, depth_stencil_view_ );
+}
+
+/**
+ * 通常のビューポートを設定する
+ *
+ */
+void Direct3D11::set_default_viewport()
+{
 	immediate_context_->RSSetViewports( 1, & viewport_ );
 }
 

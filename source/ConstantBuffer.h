@@ -24,6 +24,7 @@ struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
 {
 	XMMATRIX view;
 	float_t time;
+	uint_t time_beat;
 };
 
 struct ObjectConstantBufferData : public BaseConstantBufferData< 2 >

@@ -122,6 +122,9 @@ public:
 	void clear();
 	void clear( const Color& );
 
+	void set_default_render_target();
+	void set_default_viewport();
+
 	void setInputLayout( const char* );
 
 	void begin2D();

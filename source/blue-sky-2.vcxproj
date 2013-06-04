@@ -78,6 +78,7 @@
     <ClInclude Include="AnimationPlayer.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="Balloon.h" />
+    <ClInclude Include="BoneNode.h" />
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantBuffer.h" />

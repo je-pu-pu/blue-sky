@@ -78,6 +78,9 @@ public:
 
 	bool load_obj( const char* );
 
+	/// @todo ³‚µ‚­À‘•‚·‚é
+	bool has_animation() const { return false; }
+
 	void render() const { render_part(); }
 	void render_part( int level = 99999 ) const;
 

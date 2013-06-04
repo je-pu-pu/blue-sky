@@ -113,7 +113,7 @@ void Direct3D11ShadowMap::setEyePosition( const XMVECTOR& eye )
 void Direct3D11ShadowMap::ready_to_render_shadow_map()
 {
 	ID3D11ShaderResourceView* shader_resource_view[] = { 0 };
-	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, shader_resource_view ); /// ?????
+	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, shader_resource_view );
 	direct_3d_->getImmediateContext()->PSSetShaderResources( shader_resource_view_slot_, 1, shader_resource_view );
 
 	direct_3d_->getImmediateContext()->ClearDepthStencilView( depth_stencil_view_, D3D11_CLEAR_DEPTH, 1.f, 0 );

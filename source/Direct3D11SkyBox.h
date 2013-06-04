@@ -26,6 +26,8 @@ public:
 	Direct3D11SkyBox( Direct3D*, const char*, const char* = "png" );
 	virtual ~Direct3D11SkyBox();
 
+	bool has_animation() const { return false; }
+
 }; // class Direct3D11SkyBox
 
 #endif // DIRECT_3D_11_SKY_BOX_H

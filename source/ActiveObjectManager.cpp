@@ -40,4 +40,13 @@ void ActiveObjectManager::update()
 	}
 }
 
+/**
+ * ‘S‚Ä‚Ì ActiveObject ‚ð•`‰æ‚·‚é
+ *
+ */
+void ActiveObjectManager::render()
+{
+
+}
+
 }; // namespace blue_sky

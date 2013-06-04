@@ -47,8 +47,8 @@ public:
 
 	void restart();
 
-	Vector3& position() { return position_; }
-	const Vector3& look_at() { return look_at_; }
+	const Vector3& position() const { return position_; }
+	const Vector3& look_at() const { return look_at_; }
 	const Vector3& up() const { return up_; }
 
 	const Vector3& front() const { return front_; }

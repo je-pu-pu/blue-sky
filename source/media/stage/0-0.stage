@@ -1,11 +1,22 @@
-bgm road
+bgm road 123
 
 sky-box sky-box-3
-far-billboards stage-0-0-far-billboards
+far-billboards stage-0-0-drawing-far-billboards
 
 player 0 0 0
 goal 0 0 30
 
-dynamic-object box 0 0 0
-dynamic-object stick 0 0 10
-object buildings 0 0 0
+object building-20 0 0 -5
+dynamic-object box 0 0 2.5
+dynamic-object multi-material-test 0 0 5
+dynamic-object stick 0 0 15
+dynamic-object god 0 0 12.5
+object wall-2 0 0 20
+
+
+# object buildings 0 0 0 0
+# object buildings 0 0 0 2
+# object buildings 0 0 0 4
+# object buildings 1 0 0 0
+# object buildings 0 1 0 2
+# object buildings 1 1 0 4

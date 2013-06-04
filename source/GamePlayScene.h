@@ -43,7 +43,7 @@ protected:
 
 	bool				is_cleared_;							///< ステージクリアフラグ
 
-	common::auto_ptr< ShadowMap >		shadow_map_;
+	mutable common::auto_ptr< ShadowMap >		shadow_map_;
 	common::auto_ptr< SkyBox >			sky_box_;
 	common::auto_ptr< Mesh >			ground_;
 	common::auto_ptr< Mesh >			far_billboards_;
@@ -59,6 +59,8 @@ protected:
 	Sound*								balloon_bgm_;
 	float_t								action_bgm_after_timer_;
 
+	float_t								bpm_;
+
 	void generate_random_stage();
 
 	void load_stage_file( const char* );
@@ -66,15 +68,36 @@ protected:
 
 	void render_sprite();
 
-	void render( const ActiveObject* );
-	void render_line( const ActiveObject* );
-
 	void restart();
 
 	void on_goal();
 
 	void update_main();
 	void update_clear();
+
+	void set_bpm( const float_t bpm ) { bpm_ = bpm; }
+	float_t get_bpm() const { return bpm_; }
+
+	/** @todo 移動する */
+	void update_render_data_for_game() const;
+	void update_render_data_for_frame() const;
+
+	void render_text() const;
+
+	void render_shadow_map() const;
+	
+	void render_sky_box() const;
+	void render_far_billboards() const;
+
+	void render_object_skin_mesh() const;
+	void render_object_mesh() const;
+	void render_object_line() const;
+	
+	void render_active_object_mesh( const ActiveObject* ) const;
+	void render_active_object_line( const ActiveObject* ) const;
+
+	void render_bullet_debug() const;
+	void render_shadow_map_debug_window() const;
 
 public:
 	GamePlayScene( const GameMain* );

@@ -4,8 +4,10 @@
 #include <d3d11.h>
 #include <xnamath.h>
 
+class Direct3D11Vector;
+
 /**
- * Direct3D 11 Vector
+ * Direct3D 11 Matrix
  *
  */
 class Direct3D11Matrix
@@ -103,6 +105,8 @@ public:
 		
 		return d11m;
 	}
+
+	friend Direct3D11Vector operator * ( const Direct3D11Vector&, const Direct3D11Matrix& );
 
 	XMFLOAT4X4& get() { return value_; }
 	const XMFLOAT4X4& get() const { return value_; }

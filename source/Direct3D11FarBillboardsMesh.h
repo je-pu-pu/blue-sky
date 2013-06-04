@@ -18,6 +18,8 @@ public:
 	Direct3D11FarBillboardsMesh( Direct3D11* );
 	~Direct3D11FarBillboardsMesh() { }
 
+	bool has_animation() const { return false; }
+
 }; // class Direct3D11FarBillboardsMesh
 
 #endif // DIRECT_3D_11_FAR_BILLBOARDS_MESH_H

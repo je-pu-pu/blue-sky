@@ -29,7 +29,11 @@ Direct3D11TextureManager::Texture* Direct3D11TextureManager::load( const char* n
 	}
 
 	Texture* texture = 0;
-	DIRECT_X_FAIL_CHECK( D3DX11CreateShaderResourceViewFromFile( direct_3d_->getDevice(), file_name, 0, 0, & texture, 0 ) );
+
+	if ( FAILED( D3DX11CreateShaderResourceViewFromFile( direct_3d_->getDevice(), file_name, 0, 0, & texture, 0 ) ) )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "file open failed. " ) + file_name );
+	}
 	
 	texture_list_[ name ] = texture;
 

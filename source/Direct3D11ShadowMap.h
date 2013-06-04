@@ -70,6 +70,7 @@ public:
 
 	void ready_to_render_shadow_map();
 	void ready_to_render_shadow_map_with_cascade_level( int );
+	// void finish_render_shadow_map();
 
 	void ready_to_render_scene();
 

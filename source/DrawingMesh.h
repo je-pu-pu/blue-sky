@@ -27,6 +27,8 @@ public:
 	bool load_obj( const char_t* );
 	bool load_fbx( const char_t* );
 
+	bool is_skin_mesh() const { return mesh_->is_skin_mesh(); }
+
 	void render() const;
 
 }; // class DrawingMesh

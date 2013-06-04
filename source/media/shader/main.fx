@@ -1,6 +1,6 @@
 static const int ShadowMapCascadeLevels = 3;
 static const float Pi = 3.14159265f;
-static const uint MaxBoneMatrices = 255;
+static const uint MaxBoneMatrices = 256;
 
 Texture2D model_texture : register( t0 );
 Texture2D line_texture : register( t0 );
@@ -55,6 +55,7 @@ cbuffer FrameConstantBuffer : register( b1 )
 {
 	matrix View;
 	float Time;
+	uint TimeBeat;
 };
 
 cbuffer ObjectConstantBuffer : register( b2 )
@@ -261,13 +262,14 @@ void gs_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> T
 	static const float DrawingAccentPower = 2.f;
 	static const float DrawingAccentScale = 10.f;
 
-	const float line_width_scale = 0.5f + pow( abs( DrawingAccent ), DrawingAccentPower ) * DrawingAccentScale;
-	const float line_width = 32.f * line_width_scale / screen_height;
+	const float line_width_pixels = 32.f;
+	const float line_width_scale = 1.f; // 0.5f + pow( abs( DrawingAccent ), DrawingAccentPower ) * DrawingAccentScale;
+	const float line_width = line_width_pixels * line_width_scale / screen_height;
 
-	const float line_v_width = 32.f / LineTextureSize;
-	const float line_v_offset = ( 128.f ) / LineTextureSize;
+	const float line_v_width = line_width_pixels / LineTextureSize;
+	const float line_v_offset = ( 0.f ) / LineTextureSize;
 
-	const int pattern_count = 4;	// 更新パターン
+	const int pattern_count = 3;	// 更新パターン
 
 	{
 		uint n = 0;
@@ -329,6 +331,11 @@ float4 ps_line( noperspective PS_FLAT_INPUT input ) : SV_Target
 float4 ps_flat( PS_FLAT_INPUT input ) : SV_Target
 {
 	return model_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
+}
+
+float4 ps_flat_with_flicker( PS_FLAT_INPUT input ) : SV_Target
+{
+	return model_texture.Sample( texture_sampler, input.TexCoord + float2( sin( input.TexCoord.y * 50.f + TimeBeat ) * 0.01f, 0.f ) ) + input.Color;
 }
 
 float4 ps_main_wrap( PS_INPUT input ) : SV_Target
@@ -521,7 +528,7 @@ technique11 billboard
 
 		SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_flat() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_flat_with_flicker() ) );
 
 		RASTERIZERSTATE = Default;
 	}

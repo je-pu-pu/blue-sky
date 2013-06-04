@@ -59,12 +59,37 @@ Direct3D11Mesh::Material* Direct3D11Mesh::create_material()
 }
 
 /**
+ * マテリアルの一覧の中から指定したインデックスのマテリアルを取得する
+ *
+ * @param index マテリアルのインデックス
+ * @param force マテリアルが存在しない場合、新しいマテリアルを作成するフラグ
+ * @return マテリアル or 0
+ */
+Direct3D11Mesh::Material* Direct3D11Mesh::get_material_at( int index, bool force )
+{
+	if ( static_cast< uint_t >( index ) >= material_list_.size() )
+	{
+		if ( ! force )
+		{
+			return 0;
+		}
+		
+		while ( static_cast< uint_t >( index ) >= material_list_.size() )
+		{
+			create_material();
+		}
+	}
+
+	return material_list_[ index ];
+}
+
+/**
  * マテリアルの一覧の中から最後のマテリアルを取得する
  *
  * @param force マテリアルの一覧が空の場合、新しいマテリアルを作成するフラグ
  * @return マテリアル or 0
  */
-Direct3D11Mesh::Material* Direct3D11Mesh::get_last_material( bool force )
+Direct3D11Mesh::Material* Direct3D11Mesh::get_material_at_last( bool force )
 {
 	if ( material_list_.empty() )
 	{
@@ -101,7 +126,7 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 	NormalList normal_list;
 	TexCoordList tex_coord_list;
 
-	Material* material = get_last_material();
+	Material* material = get_material_at_last();
 
 	std::string texture_name;
 
@@ -466,7 +491,7 @@ void Direct3D11Mesh::render() const
 
 		ID3DX11EffectMatrixVariable* bone_matrix = direct_3d_->getEffect()->getEffect()->GetVariableByName( "BoneMatrix" )->AsMatrix();
 
-		const SkinningAnimation::AnimationList* animation_list = get_skinning_animation()->get_animation_list( "Swing" );
+		const SkinningAnimation::AnimationList* animation_list = get_skinning_animation()->get_animation_list( "Walk" );
 
 		if ( animation_list )
 		{
@@ -497,11 +522,19 @@ void Direct3D11Mesh::render() const
 				// m = s * r * t;
 				// m.set_translation( frame, frame * 2.f, frame * n );
 				// m = inversed_bone_offset * t * bone_offset;
-				m =  t * r;
+				m = inversed_bone_offset * bone_offset;
 
 				bone_matrix->SetMatrixArray( reinterpret_cast< const float* >( & m ), n, 1 );
 
 				lm = m;
+			}
+		}
+		else
+		{
+			for ( int n = 0; n < 256; n++ )
+			{
+				Direct3D11Matrix m;
+				bone_matrix->SetMatrixArray( reinterpret_cast< const float* >( & m ), n, 1 );
 			}
 		}
 	}

@@ -82,6 +82,11 @@ protected:
 	void update_render_data_for_game() const;
 	void update_render_data_for_frame() const;
 	void update_render_data_for_object() const;
+	void update_render_data_for_active_object( const ActiveObject* ) const;
+
+	void bind_game_constant_buffer() const;
+	void bind_frame_constant_buffer() const;
+	void bind_object_constant_buffer() const;
 
 	void render_text() const;
 
@@ -99,6 +104,8 @@ protected:
 
 	void render_bullet_debug() const;
 	void render_shadow_map_debug_window() const;
+
+
 
 public:
 	GamePlayScene( const GameMain* );

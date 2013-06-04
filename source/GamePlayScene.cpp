@@ -957,21 +957,66 @@ void GamePlayScene::update_render_data_for_object() const
 {
 	for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 	{
-		ActiveObject* active_object = *i;
-
-		const btTransform& trans = active_object->get_transform();
-
-		XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
-
-		ObjectConstantBufferData buffer_data;
-
-		buffer_data.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
-		buffer_data.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-		buffer_data.world = XMMatrixTranspose( buffer_data.world );
-		buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
-
-		active_object->get_object_constant_buffer()->update( & buffer_data );
+		update_render_data_for_active_object( *i );
 	}
+
+	update_render_data_for_active_object( player_.get() );
+	update_render_data_for_active_object( goal_.get() );
+}
+
+/**
+ * 指定した ActiveObject の描画用の定数バッファを更新する
+ *
+ * @param active_object ActiveObject
+ */
+void GamePlayScene::update_render_data_for_active_object( const ActiveObject* active_object ) const
+{
+	if ( active_object->is_dead() )
+	{
+		return;
+	}
+
+	const btTransform& trans = active_object->get_transform();
+
+	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
+
+	ObjectConstantBufferData buffer_data;
+
+	buffer_data.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
+	buffer_data.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+	buffer_data.world = XMMatrixTranspose( buffer_data.world );
+	buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
+
+	active_object->get_object_constant_buffer()->update( & buffer_data );
+}
+
+/**
+ * ゲーム毎の定数バッファをバインドする
+ *
+ */
+void GamePlayScene::bind_game_constant_buffer() const
+{
+	get_game_main()->get_game_constant_buffer()->bind_to_vs();
+	get_game_main()->get_game_constant_buffer()->bind_to_gs();
+}
+
+/**
+ * フレーム毎の定数バッファをバインドする
+ *
+ */
+void GamePlayScene::bind_frame_constant_buffer() const
+{
+	get_game_main()->get_frame_constant_buffer()->bind_to_all();
+}
+
+/**
+ * オブジェクト毎の定数バッファをバインドする
+ *
+ */
+void GamePlayScene::bind_object_constant_buffer() const
+{
+	get_game_main()->get_object_constant_buffer()->bind_to_vs();
+	get_game_main()->get_object_constant_buffer()->bind_to_ps();
 }
 
 /**
@@ -1009,10 +1054,8 @@ void GamePlayScene::render_shadow_map() const
 		{
 			shadow_map_->ready_to_render_shadow_map_with_cascade_level( n );
 
-			{
-				get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-				get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-			}
+			bind_game_constant_buffer();
+			bind_frame_constant_buffer();
 
 			for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 			{
@@ -1039,6 +1082,10 @@ void GamePlayScene::render_sky_box() const
 	{
 		( *i )->apply();
 
+		bind_game_constant_buffer();
+		bind_frame_constant_buffer();
+		bind_object_constant_buffer();
+
 		ObjectConstantBufferData object_constant_buffer_data;
 
 		// sky box
@@ -1048,20 +1095,15 @@ void GamePlayScene::render_sky_box() const
 
 			get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
 
-			get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-			get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-			get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+			sky_box_->render();
 		}
-
-		sky_box_->render();
 
 		// ground
 		{
 			object_constant_buffer_data.world = XMMatrixIdentity();
 
 			get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
-			get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-
+	
 			ground_->render();
 		}
 	}
@@ -1084,18 +1126,18 @@ void GamePlayScene::render_far_billboards() const
 	{
 		( *i )->apply();
 
-		get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-		get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-
 		{
 			ObjectConstantBufferData buffer;
 			buffer.world = XMMatrixIdentity();
 					
 			get_game_main()->get_object_constant_buffer()->update( & buffer );
-			get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-
-			far_billboards_->render();
 		}
+
+		bind_game_constant_buffer();
+		bind_frame_constant_buffer();
+		bind_object_constant_buffer();
+
+		far_billboards_->render();
 	}
 }
 
@@ -1111,12 +1153,10 @@ void GamePlayScene::render_object_skin_mesh() const
 	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 	{
 		( *i )->apply();
-				
-		{
-			get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-			get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-			get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-		}
+		
+		bind_game_constant_buffer();
+		bind_frame_constant_buffer();
+		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs();
 
 		if ( shadow_map_ )
 		{
@@ -1145,11 +1185,9 @@ void GamePlayScene::render_object_mesh() const
 	{
 		( *i )->apply();
 				
-		{
-			get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-			get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-			get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-		}
+		bind_game_constant_buffer();
+		bind_frame_constant_buffer();
+		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs();
 
 		if ( shadow_map_ )
 		{
@@ -1180,11 +1218,9 @@ void GamePlayScene::render_object_line() const
 	{
 		( *i )->apply();
 
-		{
-			get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-			get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-			get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-		}
+		bind_game_constant_buffer();
+		bind_frame_constant_buffer();
+		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs();
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 		{
@@ -1270,8 +1306,8 @@ void GamePlayScene::render_bullet_debug() const
 	{
 		( *i )->apply();
 				
-		get_game_main()->get_game_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
-		get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+		bind_game_constant_buffer();
+		bind_frame_constant_buffer();
 
 		get_game_main()->get_bullet_debug_draw()->render();
 	}
@@ -1302,7 +1338,8 @@ void GamePlayScene::render_shadow_map_debug_window() const
 		buffer_data.color = Color( 0.5f, 0.f, 0.f, 0.f );
 
 		get_game_main()->get_object_constant_buffer()->update( & buffer_data );
-		get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+		
+		bind_object_constant_buffer();
 
 		( * rectangle_->get_material_list().begin() )->set_shader_resource_view( shadow_map_->getShaderResourceView() );
 		rectangle_->render();

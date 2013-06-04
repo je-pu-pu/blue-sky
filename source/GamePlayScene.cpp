@@ -757,7 +757,6 @@ void GamePlayScene::update_main()
 		}
 	}
 
-	camera_->rotate_degree_target().y() += get_input()->get_mouse_dx() * 90.f;
 	camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f;
 	camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
 

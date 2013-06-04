@@ -47,6 +47,7 @@
     <ClCompile Include="DynamicObject.cpp" />
     <ClCompile Include="FbxFileLoader.cpp" />
     <ClCompile Include="GameMain.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GamePlayScene.cpp" />
     <ClCompile Include="Goal.cpp" />
     <ClCompile Include="GraphicsManager.cpp" />
@@ -119,6 +120,7 @@
     <ClInclude Include="FbxFileLoader.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameMain.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="GamePlayScene.h" />
     <ClInclude Include="Goal.h" />
     <ClInclude Include="GraphicsManager.h" />

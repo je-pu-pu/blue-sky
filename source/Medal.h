@@ -21,7 +21,7 @@ private:
 
 	float_t get_height_offset() const { return 0.f; }
 
-	void on_collide_with( ActiveObject* o ) { o->on_collide_with( this ); }
+	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 
 public:
 	Medal();

@@ -10,6 +10,7 @@ Direct3D11Material::Direct3D11Material( Direct3D11* direct_3d )
 	: direct_3d_( direct_3d )
 	, index_buffer_( 0 )
 	, texture_resource_view_( 0 )
+	, index_count_( 0 )
 {
 
 }
@@ -36,6 +37,17 @@ void Direct3D11Material::create_index_buffer()
 	data.pSysMem = & index_list_[ 0 ];
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & index_buffer_ ) );
+
+	index_count_ = index_list_.size();
+}
+
+/**
+ * システムメモリ上のインデックス情報をクリアする
+ *
+ */
+void Direct3D11Material::clear_index_list()
+{
+	index_list_.clear();
 }
 
 void Direct3D11Material::load_texture( const char* file_name )
@@ -52,5 +64,5 @@ void Direct3D11Material::render() const
 	// ID3D11ShaderResourceView* text_view = direct_3d_->getTextView();
 	// direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & text_view );
 
-	direct_3d_->getImmediateContext()->DrawIndexed( index_list_.size(), 0, 0 );
+	direct_3d_->getImmediateContext()->DrawIndexed( index_count_, 0, 0 );
 }

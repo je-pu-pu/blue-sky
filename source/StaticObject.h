@@ -22,7 +22,7 @@ private:
 	float get_collision_height() const { return collision_height_; }
 	float get_collision_depth() const { return collision_depth_; }
 
-	void on_collide_with( ActiveObject* o ) { o->on_collide_with( this ); }
+	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 
 protected:
 

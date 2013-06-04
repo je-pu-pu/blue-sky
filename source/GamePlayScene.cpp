@@ -841,7 +841,7 @@ void GamePlayScene::render()
 		get_direct_3d()->clear();
 
 		update_render_data_for_frame();
-		// update_render_data_for_object();
+		update_render_data_for_object();
 
 		render_shadow_map();
 
@@ -946,6 +946,31 @@ void GamePlayScene::update_render_data_for_frame() const
 		frame_drawing_constant_buffer_data.accent = bgm_->get_current_peak_level();
 
 		get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
+	}
+}
+
+/**
+ * 全てのオブジェクトの描画用の定数バッファを更新する
+ *
+ */
+void GamePlayScene::update_render_data_for_object() const
+{
+	for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+	{
+		ActiveObject* active_object = *i;
+
+		const btTransform& trans = active_object->get_transform();
+
+		XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
+
+		ObjectConstantBufferData buffer_data;
+
+		buffer_data.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
+		buffer_data.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+		buffer_data.world = XMMatrixTranspose( buffer_data.world );
+		buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
+
+		active_object->get_object_constant_buffer()->update( & buffer_data );
 	}
 }
 
@@ -1181,19 +1206,9 @@ void GamePlayScene::render_active_object_mesh( const ActiveObject* active_object
 	{
 		return;
 	}
-
-	const btTransform& trans = active_object->get_transform();
-
-	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
-
-	ObjectConstantBufferData buffer_data;
-
-	buffer_data.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
-	buffer_data.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-	buffer_data.world = XMMatrixTranspose( buffer_data.world );
-
-	get_game_main()->get_object_constant_buffer()->update( & buffer_data );
-	get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+	
+	active_object->get_object_constant_buffer()->bind_to_vs();
+	active_object->get_object_constant_buffer()->bind_to_ps();
 
 	// active_object->get_animation_player()->render();
 	active_object->get_drawing_model()->get_mesh()->render();
@@ -1211,20 +1226,8 @@ void GamePlayScene::render_active_object_line( const ActiveObject* active_object
 		return;
 	}
 
-	// @todo 効率化
-	const btTransform& trans = active_object->get_transform();
-
-	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
-
-	ObjectConstantBufferData buffer_data;
-
-	buffer_data.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
-	buffer_data.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-	buffer_data.world = XMMatrixTranspose( buffer_data.world );
-	buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
-
-	get_game_main()->get_object_constant_buffer()->update( & buffer_data );
-	get_game_main()->get_object_constant_buffer()->bind_to_all(); /// @todo 無駄を省く
+	active_object->get_object_constant_buffer()->bind_to_vs();
+	active_object->get_object_constant_buffer()->bind_to_ps();
 
 	active_object->get_drawing_model()->get_line()->render(); // 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
 }

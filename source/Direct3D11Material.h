@@ -1,6 +1,7 @@
 #ifndef DIRECT_3D_11_MATERIAL_H
 #define DIRECT_3D_11_MATERIAL_H
 
+#include "type.h"
 #include <d3d11.h>
 #include <xnamath.h>
 #include <vector>
@@ -26,6 +27,7 @@ protected:
 	ID3D11ShaderResourceView*	texture_resource_view_;
 
 	IndexList					index_list_;
+	uint_t						index_count_;
 	
 	void create_texture_resource_view( const char* );
 
@@ -34,6 +36,8 @@ public:
 	virtual ~Direct3D11Material();
 
 	void create_index_buffer();
+	void clear_index_list();
+
 	void load_texture( const char* );
 
 	ID3D11ShaderResourceView* get_shader_resource_view() { return texture_resource_view_; }

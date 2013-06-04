@@ -67,37 +67,37 @@
       <Filter>DirectX</Filter>
     </ClCompile>
     <ClCompile Include="ActiveObject.cpp">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="ActiveObjectManager.cpp">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="ActiveObjectPhysics.cpp">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="Balloon.cpp">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="DynamicObject.cpp">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="Goal.cpp">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="Medal.cpp">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="Robot.cpp">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="StaticeObject.cpp">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="TranslationObject.cpp">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="GamePlayScene.cpp">
       <Filter>Scene</Filter>
@@ -148,7 +148,7 @@
       <Filter>Input</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="FbxFileLoader.cpp">
       <Filter>Graphics</Filter>
@@ -164,6 +164,9 @@
     </ClCompile>
     <ClCompile Include="DrawingMesh.cpp">
       <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>GameObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -255,37 +258,37 @@
       <Filter>DirectX</Filter>
     </ClInclude>
     <ClInclude Include="ActiveObjectPhysics.h">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="ActiveObject.h">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="ActiveObjectManager.h">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Balloon.h">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="DynamicObject.h">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Goal.h">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Medal.h">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Robot.h">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="StaticObject.h">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="TranslationObject.h">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GamePlayScene.h">
       <Filter>Scene</Filter>
@@ -342,7 +345,7 @@
       <Filter>Input</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>ActiveObject</Filter>
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="ConstantBuffer.h">
       <Filter>Game</Filter>
@@ -376,6 +379,9 @@
     </ClInclude>
     <ClInclude Include="BoneNode.h">
       <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -417,9 +423,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="ActiveObject">
-      <UniqueIdentifier>{6a5beb6c-7027-43c9-8b56-4c6b57c6b71b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{c1b2cae5-d8ba-4f95-ad74-68bb60ecd2db}</UniqueIdentifier>
     </Filter>
@@ -449,6 +452,9 @@
     </Filter>
     <Filter Include="Game">
       <UniqueIdentifier>{1d357c30-a5d6-4fcb-a582-73566ac2eb55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject">
+      <UniqueIdentifier>{6a5beb6c-7027-43c9-8b56-4c6b57c6b71b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

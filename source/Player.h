@@ -89,7 +89,7 @@ protected:
 
 	bool is_uncontrollable() const { return uncontrollable_timer_ > 0.f; }
 
-	void on_collide_with( ActiveObject* o ) { o->on_collide_with( this ); }
+	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 	void on_collide_with( Balloon* );
 	void on_collide_with( Medal* );
 	void on_collide_with( Robot* );

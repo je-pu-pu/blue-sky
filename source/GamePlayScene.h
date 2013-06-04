@@ -81,6 +81,7 @@ protected:
 	/** @todo ˆÚ“®‚·‚é */
 	void update_render_data_for_game() const;
 	void update_render_data_for_frame() const;
+	void update_render_data_for_object() const;
 
 	void render_text() const;
 

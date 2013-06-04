@@ -13,9 +13,8 @@ namespace blue_sky
 
 ActiveObject::ActiveObject()
 	: drawing_model_( 0 )
+	, object_constant_buffer_( new ObjectConstantBuffer( GameMain::get_instance()->get_direct_3d() ) )
 	, is_dead_( false )
-	, rigid_body_( 0 )
-	, transform_( 0 )
 
 	, direction_degree_( 0 )
 
@@ -25,32 +24,19 @@ ActiveObject::ActiveObject()
 	, front_( 0, 0, 1 )
 	, right_( 1, 0, 0 )
 {
-	transform_ = new Transform();
-	transform_->setIdentity();
+	
 }
 
 ActiveObject::~ActiveObject()
 {
-	delete transform_;
-}
-
-void ActiveObject::set_mass( float_t mass )
-{
-	if ( ! get_rigid_body() )
-	{
-		return;
-	}
-
-	btVector3 local_inertia( 0, 0, 0 );
-	get_rigid_body()->getCollisionShape()->calculateLocalInertia( mass, local_inertia );
-	get_rigid_body()->setMassProps( mass, local_inertia );
+	delete object_constant_buffer_;
 }
 
 void ActiveObject::restart()
 {
 	is_dead_ = false;
 	
-	if ( get_rigid_body() && transform_ )
+	if ( get_rigid_body() )
 	{
 		set_direction_degree( 0 );
 
@@ -83,24 +69,6 @@ void ActiveObject::limit_velocity()
 	set_velocity( v );
 }
 
-void ActiveObject::update_transform()
-{
-	if ( rigid_body_ )
-	{
-		* transform_ = rigid_body_->getWorldTransform();
-		Transform offset;
-		offset.setIdentity();
-		offset.setOrigin( Vector3( 0, -get_height_offset(), 0 ) );
-
-		*transform_ = *transform_ * offset;
-	}
-}
-
-void ActiveObject::on_collide_with( ActiveObject* o )
-{
-	o->on_collide_with( this );
-}
-
 void ActiveObject::set_start_location( float_t x, float_t y, float_t z )
 {
 	start_location_.setValue( x, y, z );
@@ -115,48 +83,6 @@ void ActiveObject::set_start_rotation( float_t x, float_t y, float_t z )
 	q.setEulerZYX( start_rotation_.x(), start_rotation_.y(), start_rotation_.z() );
 	get_transform().setRotation( q );
 }
-
-void ActiveObject::set_location( const Vector3& v )
-{
-	get_transform().getOrigin() = v;
-
-	if ( rigid_body_ )
-	{
-		get_rigid_body()->getMotionState()->setWorldTransform( get_transform() );
-		
-		get_rigid_body()->setWorldTransform( get_transform() );
-		get_rigid_body()->setInterpolationWorldTransform( get_transform() );
-	}
-}
-
-void ActiveObject::set_location( float_t x, float_t y, float_t z )
-{
-	set_location( Vector3( x, y, z ) );
-}
-
-ActiveObject::Transform& ActiveObject::get_transform()
-{
-	return * transform_;
-}
-
-const ActiveObject::Transform& ActiveObject::get_transform() const
-{
-	return * transform_;
-}
-
-const ActiveObject::Vector3& ActiveObject::get_velocity() const
-{
-	return get_rigid_body()->getLinearVelocity();
-}
-
-void ActiveObject::set_velocity( const Vector3& v )
-{
-	get_rigid_body()->setActivationState( true );
-
-	get_rigid_body()->setLinearVelocity( v );
-	// get_rigid_body()->setInterpolationLinearVelocity( v );
-}
-
 
 void ActiveObject::set_direction_degree( float d )
 {
@@ -181,11 +107,6 @@ void ActiveObject::set_direction_degree( float d )
 	get_rigid_body()->setCenterOfMassTransform( t );
 }
 
-ActiveObject::DynamicsWorld* ActiveObject::get_dynamics_world() const
-{
-	return GameMain::get_instance()->get_physics()->get_dynamics_world();
-}
-
 void ActiveObject::kill()
 {
 	is_dead_ = true;
@@ -196,46 +117,6 @@ void ActiveObject::kill()
 		set_location( 0.f, -100.f, 0.f );
 	}
 	*/
-}
-
-float ActiveObject::get_elapsed_time() const
-{
-	return GameMain::get_instance()->get_elapsed_time();
-}
-
-void ActiveObject::play_sound( const char* name, bool loop, bool force ) const
-{
-	Sound* sound = GameMain::get_instance()->get_sound_manager()->get_sound( name );
-	
-	if ( sound )
-	{
-		if ( force || ! sound->is_playing() )
-		{
-			sound->set_3d_position( get_location().x(), get_location().y(), get_location().z() );
-			sound->set_3d_velocity( get_velocity().x(), get_velocity().z(), get_velocity().z() );
-			sound->play( loop );
-		}
-	}
-}
-
-void ActiveObject::stop_sound( const char* name ) const
-{
-	Sound* sound = GameMain::get_instance()->get_sound_manager()->get_sound( name );
-	
-	if ( sound )
-	{
-		sound->stop();
-	}
-}
-
-void ActiveObject::fade_out_sound( const char* name ) const
-{
-	Sound* sound = GameMain::get_instance()->get_sound_manager()->get_sound( name );
-	
-	if ( sound )
-	{
-		sound->fade_out();
-	}
 }
 
 } // namespace blue_sky

@@ -286,6 +286,10 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 	create_vertex_buffer();
 	create_index_buffer( material );
 
+	clear_vertex_list();
+	clear_skinning_info_list();
+	clear_index_list();
+
 	// !!!
 	if ( texture_name.empty() )
 	{
@@ -301,9 +305,6 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 
 		}
 	}
-
-	// test
-	std::reverse( material_list_.begin(), material_list_.end() );
 
 	return true;
 }
@@ -327,6 +328,10 @@ bool Direct3D11Mesh::load_fbx( const char_t* file_name )
 
 	create_vertex_buffer();
 	create_index_buffer();
+
+	clear_vertex_list();
+	clear_skinning_info_list();
+	clear_index_list();
 
 	return true;
 }
@@ -444,6 +449,36 @@ void Direct3D11Mesh::create_index_buffer()
 void Direct3D11Mesh::create_index_buffer( Material* material )
 {
 	material->create_index_buffer();
+}
+
+/**
+ * システムメモリ上の頂点情報をクリアする
+ *
+ */
+void Direct3D11Mesh::clear_vertex_list()
+{
+	vertex_list_.clear();
+}
+
+/**
+ * システムメモリ上のスキニング情報をクリアする
+ *
+ */
+void Direct3D11Mesh::clear_skinning_info_list()
+{
+	skinning_info_list_.clear();
+}
+
+/**
+ * システムメモリ上のインデックス情報をクリアする
+ *
+ */
+void Direct3D11Mesh::clear_index_list()
+{
+	for ( auto i = get_material_list().begin(); i != get_material_list().end(); ++i )
+	{
+		( *i )->clear_index_list();
+	}
 }
 
 /**

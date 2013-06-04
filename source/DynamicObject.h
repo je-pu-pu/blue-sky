@@ -22,7 +22,7 @@ private:
 
 	bool is_dynamic_object() const { return true; }
 
-	void on_collide_with( ActiveObject* o ) { o->on_collide_with( this ); }
+	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 
 	void on_collide_with( Player* );
 	void on_collide_with( StaticObject* );

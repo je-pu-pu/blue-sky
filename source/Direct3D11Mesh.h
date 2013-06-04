@@ -161,6 +161,10 @@ protected:
 	void create_vertex_buffer();
 	void create_index_buffer();
 
+	void clear_vertex_list();
+	void clear_skinning_info_list();
+	void clear_index_list();
+
 	virtual void create_index_buffer( Material* );
 
 	virtual string_t get_texture_file_name_by_texture_name( const char_t* ) const;

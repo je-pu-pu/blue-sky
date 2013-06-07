@@ -14,6 +14,7 @@
     <ClCompile Include="ActiveObject.cpp" />
     <ClCompile Include="ActiveObjectManager.cpp" />
     <ClCompile Include="ActiveObjectPhysics.cpp" />
+    <ClCompile Include="AnimationPlayer.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Balloon.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />
@@ -133,6 +134,7 @@
     <ClInclude Include="Robot.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SkinningAnimation.h" />
+    <ClInclude Include="SkinningAnimationSet.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="StageSelectScene.h" />

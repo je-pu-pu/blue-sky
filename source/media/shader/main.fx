@@ -1,6 +1,6 @@
 static const int ShadowMapCascadeLevels = 3;
 static const float Pi = 3.14159265f;
-static const uint MaxBoneMatrices = 256;
+static const uint MaxBones = 200;
 
 Texture2D model_texture : register( t0 );
 Texture2D line_texture : register( t0 );
@@ -74,9 +74,9 @@ cbuffer FrameDrawingConstantBuffer : register( b4 )
 	float DrawingAccent;
 }
 
-cbuffer BoneMatrixConstantBuffer
+cbuffer BoneConstantBuffer : register( b5 )
 {
-    matrix BoneMatrix[ MaxBoneMatrices ];
+    matrix BoneMatrix[ MaxBones ];
 };
 
 struct VS_INPUT

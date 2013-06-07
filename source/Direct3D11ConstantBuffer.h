@@ -17,12 +17,11 @@ template< typename T >
 class Direct3D11ConstantBuffer
 {
 public:
+	static const UINT Slot = T::DEFAULT_SLOT;
 
 protected:
 	Direct3D11*		direct_3d_;
 	ID3D11Buffer*	constant_buffer_;
-
-	UINT			slot_;
 
 	void create_constant_buffer( size_t size )
 	{
@@ -39,7 +38,6 @@ public:
 	Direct3D11ConstantBuffer( Direct3D11* direct_3d )
 		: direct_3d_( direct_3d )
 		, constant_buffer_( 0 )
-		, slot_( T::DEFAULT_SLOT )
 	{
 		create_constant_buffer( sizeof( T ) );
 	}
@@ -49,42 +47,33 @@ public:
 		DIRECT_X_RELEASE( constant_buffer_ );
 	}
 
-//	UINT get_slot() const { return slot_; }
-//	void set_slot( UINT s ) { slot_ = s; }
-
 	void update( const T* data ) const
 	{
 		/// @todo Map() ‚ÆŽg‚¢•ª‚¯‚é
 		direct_3d_->getImmediateContext()->UpdateSubresource( constant_buffer_, 0, 0, data, 0, 0 );
 	}
 
-	void bind_to_vs( UINT slot ) const
+	void bind_to_vs( UINT slot = Slot ) const
 	{
 		direct_3d_->getImmediateContext()->VSSetConstantBuffers( slot, 1, & constant_buffer_ );
 	}
 
-	void bind_to_gs( UINT slot ) const
+	void bind_to_gs( UINT slot = Slot ) const
 	{
 		direct_3d_->getImmediateContext()->GSSetConstantBuffers( slot, 1, & constant_buffer_ );
 	}
 
-	void bind_to_ps( UINT slot ) const
+	void bind_to_ps( UINT slot = Slot ) const
 	{
 		direct_3d_->getImmediateContext()->PSSetConstantBuffers( slot, 1, & constant_buffer_ );
 	}
 
-	void bind_to_all( UINT slot ) const
+	void bind_to_all( UINT slot = Slot ) const
 	{
 		bind_to_vs( slot );
 		bind_to_gs( slot );
 		bind_to_ps( slot );
 	}
-
-	void bind_to_vs() const { bind_to_vs( slot_ ); }
-	void bind_to_gs() const { bind_to_gs( slot_ ); }
-	void bind_to_ps() const { bind_to_ps( slot_ ); }
-
-	void bind_to_all() const { bind_to_all( slot_ ); }
 
 }; // class Direct3D11ConstantBuffer
 

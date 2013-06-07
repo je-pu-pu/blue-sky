@@ -18,11 +18,15 @@ public:
 	typedef Channel::KeyFrameList KeyFrameList;
 
 private:
+	string_t name_;
 	ChannelMap channel_map_;
 
 public:
 	Animation()
 	{ }
+
+	void set_name( string_t name ) { name_ = name; }
+	const string_t& get_name() const { return name_; }
 
 	Channel& get_channel( const char_t* name )
 	{
@@ -39,6 +43,23 @@ public:
 		}
 
 		return i->second.get_value( frame );
+	}
+
+	/**
+	 * アニメーションの長さを計算する
+	 *
+	 * @return アニメーションの長さ
+	 */
+	float_t calculate_length()
+	{
+		float_t last_frame = 0.f;
+
+		for ( auto i = channel_map_.begin(); i != channel_map_.end(); ++i )
+		{
+			last_frame = std::max( last_frame, i->second.get_last_key_frame().get_frame() );
+		}
+
+		return last_frame;
 	}
 
 }; // class Animation

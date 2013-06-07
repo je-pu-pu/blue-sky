@@ -4,8 +4,8 @@
 #include "Direct3D11.h"
 #include "DirectX.h"
 
-#include "SkinningAnimation.h"
 #include "FbxFileLoader.h"
+#include "SkinningAnimationSet.h"
 
 #include <common/exception.h>
 #include <common/math.h>
@@ -44,6 +44,8 @@ Direct3D11Mesh::~Direct3D11Mesh()
 	{
 		DIRECT_X_RELEASE( *i );
 	}
+
+	skinning_animation_set_.release();
 }
 
 /**
@@ -313,9 +315,10 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
  * FBX ファイルを読み込む
  *
  * @param file_name FBX ファイル名
+ * @param skinning_animation_set 同時に読み込むスキニングアニメーション情報を格納するポインタ
  * @return ファイルの読み込みに成功した場合は true を、失敗した場合は false を返す
  */
-bool Direct3D11Mesh::load_fbx( const char_t* file_name )
+bool Direct3D11Mesh::load_fbx( const char_t* file_name, common::safe_ptr< SkinningAnimationSet >& skinning_animation_set )
 {
 	FbxFileLoader loader( this );
 
@@ -323,6 +326,8 @@ bool Direct3D11Mesh::load_fbx( const char_t* file_name )
 	{
 		return false;
 	}
+
+	skinning_animation_set = skinning_animation_set_.get();
 
 	optimize();
 
@@ -334,6 +339,16 @@ bool Direct3D11Mesh::load_fbx( const char_t* file_name )
 	clear_index_list();
 
 	return true;
+}
+
+SkinningAnimationSet* Direct3D11Mesh::setup_skinning_animation_set()
+{
+	if ( ! skinning_animation_set_ )
+	{
+		skinning_animation_set_ = new SkinningAnimationSet();
+	}
+
+	return skinning_animation_set_.get();
 }
 
 /**
@@ -498,10 +513,6 @@ string_t Direct3D11Mesh::get_texture_file_name_by_texture_name( const char_t* te
 	return texture_name;
 }
 
-#include "Direct3D11.h"
-#include "Direct3D11Effect.h"
-#include "include/d3dx11effect.h"
-
 /**
  * 描画する
  *
@@ -512,68 +523,6 @@ void Direct3D11Mesh::render() const
 	{
 		return;
 	}
-
-	if ( get_skinning_animation() )
-	{
-		static float frame = 0.f;
-
-		frame += 1.f;
-
-		if ( frame > 100.f )
-		{
-			frame = 0.f;
-		}
-
-		ID3DX11EffectMatrixVariable* bone_matrix = direct_3d_->getEffect()->getEffect()->GetVariableByName( "BoneMatrix" )->AsMatrix();
-
-		const SkinningAnimation::AnimationList* animation_list = get_skinning_animation()->get_animation_list( "Walk" );
-
-		if ( animation_list )
-		{
-			Direct3D11Matrix lm;
-
-			for ( uint_t n = 0; n < animation_list->size(); n++ )
-			{
-				Direct3D11Matrix bone_offset = get_skinning_animation()->get_bone_offset_matrix_list()[ n ];
-				Direct3D11Matrix inversed_bone_offset = bone_offset.inverse();
-
-				Direct3D11Matrix s, r, t, m;
-
-				s.set_scaling(
-					( *animation_list )[ n ].get_value( "sx", frame ),
-					( *animation_list )[ n ].get_value( "sy", frame ),
-					( *animation_list )[ n ].get_value( "sz", frame ) );
-
-				r.set_rotation(
-					( *animation_list )[ n ].get_value( "rx", frame ),
-					( *animation_list )[ n ].get_value( "ry", frame ),
-					( *animation_list )[ n ].get_value( "rz", frame ) );
-
-				t.set_translation(
-					( *animation_list )[ n ].get_value( "tx", frame ),
-					( *animation_list )[ n ].get_value( "ty", frame ),
-					( *animation_list )[ n ].get_value( "tz", frame ) );
-
-				// m = s * r * t;
-				// m.set_translation( frame, frame * 2.f, frame * n );
-				// m = inversed_bone_offset * t * bone_offset;
-				m = inversed_bone_offset * bone_offset;
-
-				bone_matrix->SetMatrixArray( reinterpret_cast< const float* >( & m ), n, 1 );
-
-				lm = m;
-			}
-		}
-		else
-		{
-			for ( int n = 0; n < 256; n++ )
-			{
-				Direct3D11Matrix m;
-				bone_matrix->SetMatrixArray( reinterpret_cast< const float* >( & m ), n, 1 );
-			}
-		}
-	}
-
 
 	UINT buffer_count = vertex_buffer_list_.size();
 	UINT stride[] = { sizeof( Vertex ), sizeof( SkinningInfo ) };

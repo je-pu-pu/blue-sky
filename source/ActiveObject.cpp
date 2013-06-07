@@ -2,6 +2,8 @@
 #include "ActiveObjectPhysics.h"
 #include "SoundManager.h"
 #include "Sound.h"
+#include "DrawingModel.h"
+#include "AnimationPlayer.h"
 #include "GameMain.h"
 
 #include <common/math.h>
@@ -14,6 +16,7 @@ namespace blue_sky
 ActiveObject::ActiveObject()
 	: drawing_model_( 0 )
 	, object_constant_buffer_( new ObjectConstantBuffer( GameMain::get_instance()->get_direct_3d() ) )
+	, animation_player_( 0 )
 	, is_dead_( false )
 
 	, direction_degree_( 0 )
@@ -30,6 +33,24 @@ ActiveObject::ActiveObject()
 ActiveObject::~ActiveObject()
 {
 	delete object_constant_buffer_;
+	delete animation_player_;
+}
+
+/**
+ * アニメーション再生をセットアップする
+ *
+ */
+void ActiveObject::setup_animation_player()
+{
+	if ( animation_player_ )
+	{
+		return;
+	}
+
+	if ( get_drawing_model()->has_animation() )
+	{
+		animation_player_ = get_drawing_model()->create_animation_player();
+	}
 }
 
 void ActiveObject::restart()
@@ -57,6 +78,11 @@ void ActiveObject::restart()
 		
 		get_rigid_body()->clearForces();
 	}
+}
+
+void ActiveObject::update()
+{
+
 }
 
 void ActiveObject::limit_velocity()

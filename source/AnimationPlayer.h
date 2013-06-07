@@ -1,29 +1,45 @@
 #ifndef ANIMATION_PLAYER_H
 #define ANIMATION_PLAYER_H
 
-#include "Animation.h"
+#include "SkinningAnimationSet.h"
+#include "ConstantBuffer.h"
+
+class Direct3D11Matrix;
 
 /**
- * アニメーション再生
+ * スキニングアニメーションの再生
  *
  */
 class AnimationPlayer
 {
 public:
-	typedef AnimationKeyFrame KeyFrame;
-	typedef Channel::KeyFrameList KeyFrameList;
+	/// @todo 整理する
+	typedef blue_sky::BoneConstantBuffer			BoneConstantBuffer;
+
+	static const int MaxBones = blue_sky::BoneConstantBufferData::MaxBones;
 
 private:
-	const Animation* animation_;	///< 現在のアニメーション
-	float current_frame_;			///< 現在の再生フレーム
+	const SkinningAnimationSet* skinning_animation_set_;	///< スキニングアニメーションのセット
+	const SkinningAnimation* current_skinning_animation_;	///< 現在のスキニングアニメーション
+	float_t current_frame_;									///< 現在の再生フレーム
+	bool is_looping_;										///< ループ再生中フラグ
+
+	/// @todo 移動する
+	const BoneConstantBuffer constant_buffer_;				///< 定数バッファ
 
 public:
-	AnimationPlayer()
-		: animation_( 0 )
-		, current_frame( 0.f )
-	{ }
+	AnimationPlayer( const SkinningAnimationSet* );
+	~AnimationPlayer() { }
 
-	const Animation* get_animation() const { return animation_; }
+	void play( const char_t*, bool, bool );
+	void update();
+
+	const SkinningAnimationSet* get_skinning_animation_set() const { return skinning_animation_set_; }
+	const SkinningAnimation* get_current_skinning_animation() const { return current_skinning_animation_; }
+	float_t get_current_frame() const { return current_frame_; }
+
+	void update_render_data() const;
+	void bind_render_data() const;
 
 }; // class AnimationPlayer
 

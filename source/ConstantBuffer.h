@@ -3,6 +3,7 @@
 
 #include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11Color.h"
+#include "Direct3D11Matrix.h"
 
 namespace blue_sky
 {
@@ -10,6 +11,9 @@ namespace blue_sky
 template< int N >
 struct BaseConstantBufferData
 {
+	typedef Direct3D11Color		Color;
+	typedef Direct3D11Matrix	Matrix;
+
 	static const int DEFAULT_SLOT = N;
 };
 
@@ -30,7 +34,7 @@ struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
 struct ObjectConstantBufferData : public BaseConstantBufferData< 2 >
 {
 	XMMATRIX world;
-	Direct3D11Color color;
+	Color color;
 
 	ObjectConstantBufferData()
 		: color( 0.f, 0.f, 0.f, 0.f )
@@ -39,13 +43,28 @@ struct ObjectConstantBufferData : public BaseConstantBufferData< 2 >
 
 struct ObjectExtentionConstantBufferData : public BaseConstantBufferData< 3 >
 {
-	Direct3D11Color color;
+	Color color;
 };
 
 struct FrameDrawingConstantBufferData : public BaseConstantBufferData< 4 >
 {
 	float_t accent;
-	float_t a, b, c;
+	float_t dummy[ 3 ];
+};
+
+struct BoneConstantBufferData : public BaseConstantBufferData< 5 >
+{
+	static const int MaxBones = 200;
+
+	Matrix bone_matrix[ MaxBones ];
+
+	void set_identity()
+	{
+		for ( int n = 0; n < MaxBones; ++n )
+		{
+			bone_matrix[ n ].set_identity();
+		}
+	}
 };
 
 typedef Direct3D11ConstantBuffer< GameConstantBufferData > GameConstantBuffer;
@@ -53,6 +72,7 @@ typedef Direct3D11ConstantBuffer< FrameConstantBufferData > FrameConstantBuffer;
 typedef Direct3D11ConstantBuffer< FrameDrawingConstantBufferData > FrameDrawingConstantBuffer;
 typedef Direct3D11ConstantBuffer< ObjectConstantBufferData > ObjectConstantBuffer;
 typedef Direct3D11ConstantBuffer< ObjectExtentionConstantBufferData > ObjectExtentionConstantBuffer;
+typedef Direct3D11ConstantBuffer< BoneConstantBufferData > BoneConstantBuffer;
 
 } // namespace blue_sky
 

@@ -18,10 +18,9 @@ class ActiveObject : public GameObject
 public:
 
 private:
-	const DrawingModel*	drawing_model_;		///< DrawingModel
-	const ObjectConstantBuffer* object_constant_buffer_;
-
-	const AnimationPlayer* animation_;		///< AnimationPlayer
+	const DrawingModel*						drawing_model_;				///< DrawingModel
+	const ObjectConstantBuffer*				object_constant_buffer_;	///< 定数バッファ
+	AnimationPlayer*						animation_player_;			///< アニメーション再生
 
 	bool				is_dead_;			///< 死亡フラグ
 
@@ -48,10 +47,17 @@ public:
 
 	virtual void restart();
 
+	virtual void update();
+
 	virtual void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; }
 	virtual const DrawingModel* get_drawing_model() const { return drawing_model_; }
 
 	const ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_; }
+
+	void setup_animation_player();
+	
+	AnimationPlayer* get_animation_player() { return animation_player_; }
+	const AnimationPlayer* get_animation_player() const { return animation_player_; }
 
 	void set_start_location( float_t, float_t, float_t );
 	void set_start_rotation( float_t, float_t, float_t );

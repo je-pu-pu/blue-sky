@@ -7,53 +7,89 @@
  * スキニングアニメーション
  *
  */
-template< typename Matrix >
 class SkinningAnimation
 {
 public:
-	typedef std::vector< Matrix > MatrixList;
-
 	typedef std::vector< Animation > AnimationList;
-	typedef std::map< const string_t, AnimationList > AnimationSet;
 
-	typedef AnimationKeyFrame KeyFrame;
-	
 	typedef AnimationChannel Channel;
+	typedef AnimationKeyFrame KeyFrame;
 	typedef Channel::KeyFrameList KeyFrameList;
 
 private:
-	MatrixList bone_offset_matrix_list_;
-	AnimationSet animation_set_;
+	AnimationList	bone_animation_list_;					///< ボーン毎のアニメーションの一覧
+	float_t			length_;								///< アニメーションの長さ ( フレーム )
 
 public:
-	SkinningAnimation()
-	{ }
-
-	Animation& get_animation( const char_t* name, uint_t n, bool force = true )
+	SkinningAnimation( uint_t size )
+		: bone_animation_list_( size )
+		, length_( 0.f )
 	{
-		if ( force && animation_set_[ name ].size() <= n )
+	
+	}
+	
+	/**
+	 * 指定したボーンインデックスに対応するアニメーションを取得する
+	 *
+	 * @param bone_index ボーンインデックス
+	 * @return アニメーション
+	 */
+	Animation& get_bone_animation_by_bone_index( uint_t bone_index )
+	{
+		if ( bone_index >= bone_animation_list_.size() )
 		{
-			animation_set_[ name ].resize( n + 1 );
+			bone_animation_list_.resize( bone_index + 1 );
 		}
 
-		return animation_set_[ name ][ n ];
+		return bone_animation_list_[ bone_index ];
 	}
 
-	MatrixList& get_bone_offset_matrix_list() { return bone_offset_matrix_list_; }
-	const MatrixList& get_bone_offset_matrix_list() const { return bone_offset_matrix_list_; }
-
-	AnimationList* get_animation_list( const char_t* name ) { return & animation_set_[ name ]; }
-	
-	const AnimationList* get_animation_list( const char_t* name ) const
+	const Animation& get_bone_animation_by_bone_index( uint_t bone_index ) const
 	{
-		AnimationSet::const_iterator i = animation_set_.find( name );
-		
-		if ( i == animation_set_.end() )
+		return bone_animation_list_[ bone_index ];
+	}
+
+	/**
+	 * ボーン毎のアニメーションのサイズを取得する
+	 *
+	 * @return ボーン毎のアニメーションの一覧のサイズ
+	 */
+	uint_t get_bone_animation_list_size() const
+	{
+		return bone_animation_list_.size();
+	}
+
+	/**
+	 * ボーン毎のアニメーションの一覧をリサイズする
+	 *
+	 * @param size ボーン毎のアニメーションの一覧のサイズ
+	 */
+	void resize_bone_animation_list( uint_t size )
+	{
+		bone_animation_list_.resize( size );
+	}
+
+	/**
+	 * アニメーションの長さを計算する
+	 *
+	 */
+	float_t calculate_length()
+	{
+		for ( auto i = bone_animation_list_.begin(); i != bone_animation_list_.end(); ++i )
 		{
-			return 0;
+			length_ = std::max( length_, i->calculate_length() );
 		}
 
-		return & i->second;
+		return length_;
+	}
+
+	/**
+	 * アニメーションの長さを取得する
+	 *
+	 */
+	float_t get_length() const
+	{
+		return length_;
 	}
 
 }; // class SkinningAnimation

@@ -1,5 +1,6 @@
 #include "ActiveObjectManager.h"
 #include "ActiveObject.h"
+#include "AnimationPlayer.h"
 
 namespace blue_sky
 {
@@ -36,6 +37,11 @@ void ActiveObjectManager::update()
 		// if ( ! (*i)->is_dead() )
 		{
 			(*i)->update();
+		}
+
+		if ( ( *i )->get_animation_player() )
+		{
+			( *i )->get_animation_player()->update();
 		}
 	}
 }

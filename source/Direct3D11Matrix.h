@@ -96,7 +96,7 @@ public:
 		return m;
 	}
 
-	Direct3D11Matrix operator * ( const Direct3D11Matrix& m )
+	Direct3D11Matrix operator * ( const Direct3D11Matrix& m ) const
 	{
 		// return Direct3D11Matrix( value_ * m.value_ );
 

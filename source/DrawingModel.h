@@ -3,8 +3,10 @@
 
 #include "type.h"
 #include <common/auto_ptr.h>
+#include <common/safe_ptr.h>
 
-class Direct3D11Mesh;
+class SkinningAnimationSet;
+class AnimationPlayer;
 
 namespace blue_sky
 {
@@ -21,8 +23,10 @@ class DrawingModel
 public:
 
 private:
-	common::auto_ptr< DrawingMesh >		mesh_;		///< 手描き風メッシュ
-	common::auto_ptr< DrawingLine >		line_;		///< 手描き風ライン
+	common::auto_ptr< DrawingMesh >				mesh_;							///< 手描き風メッシュ
+	common::auto_ptr< DrawingLine >				line_;							///< 手描き風ライン
+	
+	common::safe_ptr< SkinningAnimationSet >	skinning_animation_set_;		///< アニメーション
 
 public:
 	DrawingModel();
@@ -32,6 +36,11 @@ public:
 
 	DrawingMesh* get_mesh() const { return mesh_.get(); }
 	DrawingLine* get_line() const { return line_.get(); }
+
+	bool has_animation() const;
+	bool is_skin_mesh() const;
+
+	AnimationPlayer* create_animation_player() const;
 
 }; // class DrawingModel
 

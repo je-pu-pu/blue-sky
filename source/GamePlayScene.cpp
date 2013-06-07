@@ -20,6 +20,8 @@
 #include "DrawingMesh.h"
 #include "DrawingLine.h"
 
+#include "AnimationPlayer.h"
+
 #include "Direct3D11.h"
 #include "Direct3D11SkyBox.h"
 #include "Direct3D11ShadowMap.h"
@@ -356,6 +358,11 @@ void GamePlayScene::generate_random_stage()
 	}
 }
 
+/**
+ * ステージファイルを読み込む
+ *
+ * @param file_name ステージファイル名
+ */
 void GamePlayScene::load_stage_file( const char* file_name )
 {
 	std::ifstream in( file_name );
@@ -516,6 +523,14 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			}
 			
 			object->set_drawing_model( drawing_model );
+			object->setup_animation_player();
+
+			/*** @todo ちゃんとする */
+			if ( object->get_animation_player() )
+			{
+				object->get_animation_player()->play( "Walk", true, false );
+			}
+
 			object->set_start_location( x, y, z );
 			object->set_start_rotation( rx, ry, rz );
 
@@ -598,6 +613,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			DrawingModel* drawing_model = get_drawing_model_manager()->load( name.c_str() );
 
 			active_object->set_drawing_model( drawing_model );
+			active_object->setup_animation_player();
 
 			active_object->set_start_location( x, y, z );
 			active_object->set_direction_degree( r );
@@ -988,6 +1004,11 @@ void GamePlayScene::update_render_data_for_active_object( const ActiveObject* ac
 	buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
 
 	active_object->get_object_constant_buffer()->update( & buffer_data );
+
+	if ( active_object->get_animation_player() )
+	{
+		active_object->get_animation_player()->update_render_data();
+	}
 }
 
 /**
@@ -1165,7 +1186,7 @@ void GamePlayScene::render_object_skin_mesh() const
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 		{
-			if ( ( *i )->get_drawing_model()->get_mesh()->is_skin_mesh() )
+			if ( ( *i )->get_drawing_model()->is_skin_mesh() )
 			{
 				render_active_object_mesh( *i );
 			}
@@ -1196,7 +1217,7 @@ void GamePlayScene::render_object_mesh() const
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 		{
-			if ( ! ( *i )->get_drawing_model()->get_mesh()->is_skin_mesh() )
+			if ( ! ( *i )->get_drawing_model()->is_skin_mesh() )
 			{
 				render_active_object_mesh( *i );
 			}
@@ -1245,8 +1266,12 @@ void GamePlayScene::render_active_object_mesh( const ActiveObject* active_object
 	
 	active_object->get_object_constant_buffer()->bind_to_vs();
 	active_object->get_object_constant_buffer()->bind_to_ps();
+	
+	if ( active_object->get_animation_player() )
+	{
+		active_object->get_animation_player()->bind_render_data();
+	}
 
-	// active_object->get_animation_player()->render();
 	active_object->get_drawing_model()->get_mesh()->render();
 }
 

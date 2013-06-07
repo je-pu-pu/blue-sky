@@ -3,6 +3,9 @@
 
 #include "type.h"
 #include <game/GraphicsManager.h>
+#include <common/safe_ptr.h>
+
+class SkinningAnimationSet;
 
 namespace blue_sky
 {
@@ -25,7 +28,7 @@ public:
 	virtual DrawingMesh* create_drawing_mesh() = 0;
 	virtual DrawingLine* create_drawing_line() = 0;
 
-	DrawingMesh* load_drawing_mesh( const char_t* );
+	DrawingMesh* load_drawing_mesh( const char_t*, common::safe_ptr< SkinningAnimationSet >& );
 	DrawingLine* load_drawing_line( const char_t* );
 
 }; // class GraphicsManager

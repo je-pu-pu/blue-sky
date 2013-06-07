@@ -3,7 +3,7 @@
 #include "Direct3D11Mesh.h"
 #include "Direct3D11Material.h"
 #include "Direct3D11Matrix.h"
-#include "SkinningAnimation.h"
+#include "SkinningAnimationSet.h"
 
 // #include <game/GraphicsManager.h>
 
@@ -310,8 +310,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 
 		skinning_info_list.resize( position_list.size() );
 			
-		Mesh::SkinningAnimation* skinning_animation = new Mesh::SkinningAnimation();
-		mesh_->set_skinning_animation( skinning_animation );
+		SkinningAnimationSet* skinning_animation_set = mesh_->setup_skinning_animation_set();
 
 		for ( int n = 0; n < skin_count; ++n )
 		{
@@ -319,7 +318,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 
 			std::cout << skin->GetClusterCount() << " bones" << std::endl;
 
-			skinning_animation->get_bone_offset_matrix_list().resize( skin->GetClusterCount() );
+			skinning_animation_set->set_bone_count( skin->GetClusterCount() );
 
 			for ( int bone_index = 0; bone_index < skin->GetClusterCount(); ++bone_index )
 			{
@@ -364,38 +363,15 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 					}
 				}
 
-				skinning_animation->get_bone_offset_matrix_list().at( bone_index ).set(
+				skinning_animation_set->get_bone_offset_matrix_by_bone_index( bone_index ).set(
 					m[ 0 ][ 0 ], m[ 0 ][ 1 ], m[ 0 ][ 2 ], m[ 0 ][ 3 ],
 					m[ 1 ][ 0 ], m[ 1 ][ 1 ], m[ 1 ][ 2 ], m[ 1 ][ 3 ],
 					m[ 2 ][ 0 ], m[ 2 ][ 1 ], m[ 2 ][ 2 ], m[ 2 ][ 3 ],
 					m[ 3 ][ 0 ], m[ 3 ][ 1 ], m[ 3 ][ 2 ], m[ 3 ][ 3 ] );
-
-
-				Direct3D11Vector v( 10.f, 10.f, 10.f );
-				Direct3D11Matrix mm, t;
-
-				t.set_translation( 10.f, 10.f, 10.f );
-
-				mm =
-					skinning_animation->get_bone_offset_matrix_list().at( bone_index ).inverse() *
-					t *
-					skinning_animation->get_bone_offset_matrix_list().at( bone_index );
-
-				v = v * mm;
-
-				std::cout << v.x() << ", " << v.y() << ", " << v.z() << ", " << v.w() << std::endl;
-
-				for ( int y = 0; y < 4; y++ )
-				{
-					for ( int x = 0; x < 4; x++ )
-					{
-						std::cout << skinning_animation->get_bone_offset_matrix_list().at( bone_index ).get( y, x ) << ", ";
-					}
-
-					std::cout << std::endl;
-				}
 			}
 		}
+
+		skinning_animation_set->calculate_length();
 	}
 
 	for ( int n = 0; n < mesh->GetPolygonCount(); n++ )
@@ -541,7 +517,8 @@ void FbxFileLoader::load_animations_for_bone( int bone_index, FbxCluster* cluste
 			continue;
 		}
 
-		Animation& animation = mesh_->get_skinning_animation()->get_animation( anim_stack->GetName(), bone_index );
+		Animation& animation = mesh_->get_skinning_animation_set()->get_skinning_animation( anim_stack->GetName() ).get_bone_animation_by_bone_index( bone_index );
+		animation.set_name( cluster->GetName() );
 
 		for ( int m = 0; m < anim_stack->GetMemberCount< FbxAnimLayer >(); m++ )
 		{
@@ -567,17 +544,17 @@ void FbxFileLoader::load_animations_for_bone( int bone_index, FbxCluster* cluste
 			std::for_each(
 				animation.get_channel( "rx" ).get_key_frame_list().begin(),
 				animation.get_channel( "rx" ).get_key_frame_list().end(),
-				[] ( Mesh::SkinningAnimation::KeyFrame& key_frame ) { key_frame.get_value() = math::degree_to_radian( key_frame.get_value() ); } );
+				[] ( AnimationKeyFrame& key_frame ) { key_frame.get_value() = math::degree_to_radian( key_frame.get_value() ); } );
 
 			std::for_each(
 				animation.get_channel( "ry" ).get_key_frame_list().begin(),
 				animation.get_channel( "ry" ).get_key_frame_list().end(),
-				[] ( Mesh::SkinningAnimation::KeyFrame& key_frame ) { key_frame.get_value() = math::degree_to_radian( key_frame.get_value() ); } );
+				[] ( AnimationKeyFrame& key_frame ) { key_frame.get_value() = math::degree_to_radian( key_frame.get_value() ); } );
 
 			std::for_each(
 				animation.get_channel( "rz" ).get_key_frame_list().begin(),
 				animation.get_channel( "rz" ).get_key_frame_list().end(),
-				[] ( Mesh::SkinningAnimation::KeyFrame& key_frame ) { key_frame.get_value() = math::degree_to_radian( key_frame.get_value() ); } );
+				[] ( AnimationKeyFrame& key_frame ) { key_frame.get_value() = math::degree_to_radian( key_frame.get_value() ); } );
 		}
 	}
 }
@@ -598,15 +575,8 @@ void FbxFileLoader::load_curve_for_animation( Animation& animation, const char_t
 
 	for ( int l = 0; l < anim_curve->KeyGetCount(); l++ )
 	{
-		int h, m, s, f, i, p = 0;
-
-		if ( ! anim_curve->KeyGetTime( l ).GetTime( h, m, s, f, i, p ) )
-		{
-			continue;
-		}
-
-		Mesh::SkinningAnimation::KeyFrame key_frame( 
-			static_cast< float >( f ),
+		AnimationKeyFrame key_frame( 
+			static_cast< float >( anim_curve->KeyGetTime( l ).GetFrameCount() ),
 			static_cast< float >( anim_curve->KeyGetValue( l ) ) );
 
 		animation.get_channel( channel_name ).add_key_frame( key_frame );

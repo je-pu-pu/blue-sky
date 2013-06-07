@@ -5,6 +5,8 @@
 #include <common/auto_ptr.h>
 #include <game/GraphicsManager.h>
 
+class SkinningAnimationSet;
+
 namespace blue_sky
 {
 
@@ -25,9 +27,7 @@ public:
 	DrawingMesh( Mesh* );
 
 	bool load_obj( const char_t* );
-	bool load_fbx( const char_t* );
-
-	bool is_skin_mesh() const { return mesh_->is_skin_mesh(); }
+	bool load_fbx( const char_t*, common::safe_ptr< SkinningAnimationSet >& );
 
 	void render() const;
 

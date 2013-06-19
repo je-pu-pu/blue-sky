@@ -10,6 +10,7 @@ class Direct3D11FarBillboardsMesh;
 class Direct3D11SkyBox;
 class Direct3D11ShadowMap;
 class Direct3D11Rectangle;
+class Direct3D11Axis;
 
 namespace blue_sky
 {
@@ -33,6 +34,7 @@ public:
 	typedef Direct3D11SkyBox			SkyBox;
 	typedef Direct3D11ShadowMap			ShadowMap;
 	typedef Direct3D11Rectangle			Rectangle;
+	typedef Direct3D11Axis				Axis;
 
 protected:
 	float_t				object_detail_level_0_length_;			///< 低品質のオブジェクトを表示する距離
@@ -48,6 +50,8 @@ protected:
 	common::auto_ptr< Mesh >			ground_;
 	common::auto_ptr< Mesh >			far_billboards_;
 	common::auto_ptr< Rectangle >		rectangle_;
+
+	common::auto_ptr< Axis >			debug_axis_;
 
 	common::auto_ptr< Stage >			stage_;
 	common::auto_ptr< Goal >			goal_;
@@ -102,8 +106,9 @@ protected:
 	void render_active_object_mesh( const ActiveObject* ) const;
 	void render_active_object_line( const ActiveObject* ) const;
 
-	void render_bullet_debug() const;
-	void render_shadow_map_debug_window() const;
+	void render_debug_axis() const;
+	void render_debug_bullet() const;
+	void render_debug_shadow_map_window() const;
 
 
 

@@ -43,7 +43,11 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 
 	load_story_text_file( file_name );
 
-	text_y_target_ = static_cast< float >( -get_direct_3d()->getFont()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) ) );
+	/// @todo ®—
+	if ( get_direct_3d()->getFont() )
+	{
+		text_y_target_ = static_cast< float >( -get_direct_3d()->getFont()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) ) );
+	}
 	
 	sprite_texture_ = get_direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
 
@@ -260,15 +264,19 @@ void StoryTextScene::render()
 	get_direct_3d()->getSprite()->end();
 
 	// text
-	get_direct_3d()->begin2D();
-	get_direct_3d()->getFont()->begin();
-	get_direct_3d()->getFont()->draw_text_center( -1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-	get_direct_3d()->getFont()->draw_text_center( +1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-	get_direct_3d()->getFont()->draw_text_center( -1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-	get_direct_3d()->getFont()->draw_text_center( +1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-	get_direct_3d()->getFont()->draw_text_center( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_color_ );
-	get_direct_3d()->getFont()->end();
-	get_direct_3d()->end2D();
+	/// @todo ®—
+	if ( get_direct_3d()->getFont() )
+	{
+		get_direct_3d()->begin2D();
+		get_direct_3d()->getFont()->begin();
+		get_direct_3d()->getFont()->draw_text_center( -1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
+		get_direct_3d()->getFont()->draw_text_center( +1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
+		get_direct_3d()->getFont()->draw_text_center( -1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
+		get_direct_3d()->getFont()->draw_text_center( +1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
+		get_direct_3d()->getFont()->draw_text_center( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_color_ );
+		get_direct_3d()->getFont()->end();
+		get_direct_3d()->end2D();
+	}
 
 	get_direct_3d()->begin3D();
 	get_direct_3d()->renderText();

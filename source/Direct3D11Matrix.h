@@ -74,7 +74,22 @@ public:
 		XMStoreFloat4x4( & value_, XMMatrixTranslation( tx, ty, tz ) );
 	}
 
-	void set_rotation( UnitType rx, UnitType ry, UnitType rz )
+	void set_rotation_x( UnitType r )
+	{
+		XMStoreFloat4x4( & value_, XMMatrixRotationX( r ) );
+	}
+
+	void set_rotation_y( UnitType r )
+	{
+		XMStoreFloat4x4( & value_, XMMatrixRotationY( r ) );
+	}
+
+	void set_rotation_z( UnitType r )
+	{
+		XMStoreFloat4x4( & value_, XMMatrixRotationZ( r ) );
+	}
+
+	void set_rotation_roll_pitch_yaw( UnitType rx, UnitType ry, UnitType rz )
 	{
 		XMStoreFloat4x4( & value_, XMMatrixRotationRollPitchYaw( rx, ry, rz ) );
 	}
@@ -96,6 +111,15 @@ public:
 		return m;
 	}
 
+	Direct3D11Matrix transpose() const
+	{
+		Direct3D11Matrix m;
+		XMStoreFloat4x4( & m.value_, XMMatrixTranspose( XMLoadFloat4x4( & value_ ) ) );
+
+		return m;
+	}
+
+
 	Direct3D11Matrix operator * ( const Direct3D11Matrix& m ) const
 	{
 		// return Direct3D11Matrix( value_ * m.value_ );
@@ -107,6 +131,8 @@ public:
 	}
 
 	friend Direct3D11Vector operator * ( const Direct3D11Vector&, const Direct3D11Matrix& );
+
+	operator XMMATRIX () const { return XMLoadFloat4x4( & value_ ); }
 
 	XMFLOAT4X4& get() { return value_; }
 	const XMFLOAT4X4& get() const { return value_; }

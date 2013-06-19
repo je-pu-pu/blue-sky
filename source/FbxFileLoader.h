@@ -4,6 +4,7 @@
 #include "type.h"
 #include "Direct3D11Mesh.h"
 #include <fbxsdk.h>
+#include <map>
 
 namespace game
 {
@@ -25,23 +26,32 @@ public:
 	typedef Direct3D11Material Material;
 
 private:
+	FbxManager* fbx_manager_;
 	Mesh*		mesh_;
 	FbxScene*	fbx_scene_;
 	int			fbx_material_index_;
+	std::map< FbxNode*, uint_t > bone_index_map_;
 
 protected:
-	void load_node_recursive( FbxNode* );
-	
+	void load_mesh_recursive( FbxNode* );
 	void load_mesh( FbxMesh* );
 	void load_material( FbxSurfaceMaterial* );
 	
+	void load_limb_recursive( FbxNode* );
+	void load_limb( FbxNode* );
+
 	void load_animations_for_bone( int, FbxCluster* );
 	void load_curve_for_animation( Animation&, const char_t*, const FbxAnimCurve* );
 
 	void convert_coordinate_system();
 
+	void print_local_transform( const FbxNode* ) const;
+	void print_matrix( const FbxAMatrix& ) const;
+	void print_axis_system( const FbxAxisSystem& ) const;
+
 public:
 	FbxFileLoader( Mesh* );
+	~FbxFileLoader();
 
 	bool load( const char_t* );
 	

@@ -70,6 +70,18 @@ public:
 	}
 
 	/**
+	 * 最適化する
+	 *
+	 */
+	void optimize()
+	{
+		for ( auto i = bone_animation_list_.begin(); i != bone_animation_list_.end(); ++i )
+		{
+			i->optimize();
+		}
+	}
+
+	/**
 	 * アニメーションの長さを計算する
 	 *
 	 */

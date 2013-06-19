@@ -26,6 +26,7 @@
 #include "Direct3D11SkyBox.h"
 #include "Direct3D11ShadowMap.h"
 #include "Direct3D11Rectangle.h"
+#include "Direct3D11Axis.h"
 #include "Direct3D11MeshManager.h"
 #include "Direct3D11TextureManager.h"
 #include "Direct3D11ConstantBuffer.h"
@@ -180,6 +181,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 
 	rectangle_ = new Rectangle( get_direct_3d() );
+
+	debug_axis_ = new Axis( get_direct_3d() );
 
 	bgm_ = get_sound_manager()->get_sound( "balloon" );
 
@@ -528,7 +531,10 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			/*** @todo ちゃんとする */
 			if ( object->get_animation_player() )
 			{
-				object->get_animation_player()->play( "Walk", true, false );
+				object->get_animation_player()->play( "L", true, true );
+				object->get_animation_player()->play( "Swing", true, true );
+				object->get_animation_player()->play( "Walk", true, true );
+				object->get_animation_player()->play( "ArmatureAction", true, true );
 			}
 
 			object->set_start_location( x, y, z );
@@ -840,6 +846,7 @@ void GamePlayScene::render()
 	get_direct_3d()->setInputLayout( "main" );
 	
 	// render_text()
+	if ( get_direct_3d()->getFont() )
 	{
 		get_direct_3d()->begin2D();
 		get_direct_3d()->getFont()->begin();
@@ -879,13 +886,15 @@ void GamePlayScene::render()
 
 		render_object_line();
 
-		render_bullet_debug();
+		render_debug_axis();
+
+		render_debug_bullet();
 
 		get_direct_3d()->setInputLayout( "main" );
 
 		get_direct_3d()->renderText();
 		
-		// render_shadow_map_debug_window();
+		// render_debug_shadow_map_window();
 
 		render_sprite();
 
@@ -1320,10 +1329,91 @@ void GamePlayScene::render_sprite()
 }
 
 /**
+ * デバッグ用の軸を表示する
+ *
+ */
+void GamePlayScene::render_debug_axis() const
+{
+	/*
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|simple_line" );
+
+	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	{
+		( *i )->apply();
+				
+		bind_game_constant_buffer();
+		bind_frame_constant_buffer();
+
+		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+		{
+			( *i )->get_object_constant_buffer()->bind_to_vs();
+			( *i )->get_object_constant_buffer()->bind_to_ps();
+
+			debug_axis_->render();
+		}
+	}
+	*/
+
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|simple_line" );
+
+	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	{
+		( *i )->apply();
+				
+		bind_game_constant_buffer();
+		bind_frame_constant_buffer();
+
+		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+		{
+			const ActiveObject* active_object = *i;
+
+			if ( active_object->is_dead() )
+			{
+				continue;
+			}
+
+			if ( ! ( *i )->get_animation_player() )
+			{
+				continue;
+			}
+
+			( *i )->get_object_constant_buffer()->bind_to_vs();
+			( *i )->get_animation_player()->bind_render_data();
+
+			AnimationPlayer::BoneConstantBuffer::Data bone_constant_buffer_data;
+			active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix() );
+
+			for ( uint_t n = 0; n < ( *i )->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )
+			{
+				const Matrix& bone_offset_matrix = ( *i )->get_animation_player()->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( n );
+				const Matrix& bone_matrix = bone_constant_buffer_data.bone_matrix[ n ];
+
+				const btTransform& trans = active_object->get_transform();
+
+				XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
+
+				ObjectConstantBufferData buffer_data;
+
+				buffer_data.world = XMMatrixScaling( 0.1f, 0.1f, 0.1f );
+				buffer_data.world *= bone_offset_matrix * bone_matrix;
+				buffer_data.world *= XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
+				buffer_data.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+				buffer_data.world = XMMatrixTranspose( buffer_data.world );
+				buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
+
+				active_object->get_object_constant_buffer()->update( & buffer_data );
+
+				debug_axis_->render();
+			}
+		}
+	}
+}
+
+/**
  * Bullet のデバッグ表示を描画する
  *
  */
-void GamePlayScene::render_bullet_debug() const
+void GamePlayScene::render_debug_bullet() const
 {
 	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|bullet" );
 
@@ -1342,7 +1432,7 @@ void GamePlayScene::render_bullet_debug() const
  * シャドウマップのデバッグウィンドウを描画する
  *
  */
-void GamePlayScene::render_shadow_map_debug_window() const
+void GamePlayScene::render_debug_shadow_map_window() const
 {
 	if ( ! shadow_map_ )
 	{

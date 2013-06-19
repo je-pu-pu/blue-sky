@@ -44,6 +44,10 @@ void AnimationPlayer::play( const char_t* name, bool force, bool loop )
 	current_frame_ = 0.f;
 }
 
+/**
+ * アニメーションを更新する
+ *
+ */
 void AnimationPlayer::update()
 {
 	if ( ! current_skinning_animation_ )
@@ -65,6 +69,7 @@ void AnimationPlayer::update()
 /**
  * 描画用のデータを更新する
  *
+ * @todo 必要最低限のボーン行列だけ更新するようにする
  */
 void AnimationPlayer::update_render_data() const
 {
@@ -79,35 +84,60 @@ void AnimationPlayer::update_render_data() const
 
 	blue_sky::BoneConstantBufferData data;
 
-	for ( uint_t n = 0; n < get_current_skinning_animation()->get_bone_animation_list_size(); ++n )
+	calculate_bone_matrix_recursive( data, 0, Matrix() );
+
+	for ( uint_t n = 0; n < get_skinning_animation_set()->get_bone_count(); ++n )
 	{
-		const Matrix& bone_offset = get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index(  n );
-		const Matrix inversed_bone_offset = bone_offset.inverse();
-		const Animation& bone_animation = get_current_skinning_animation()->get_bone_animation_by_bone_index( n );
-
-		Matrix s, r, t;
-		Matrix& m = data.bone_matrix[ n ];
-
-		s.set_scaling(
-			bone_animation.get_value( "sx", current_frame_ ),
-			bone_animation.get_value( "sy", current_frame_ ),
-			bone_animation.get_value( "sz", current_frame_ ) );
-
-		r.set_rotation(
-			bone_animation.get_value( "rx", current_frame_ ),
-			bone_animation.get_value( "ry", current_frame_ ),
-			bone_animation.get_value( "rz", current_frame_ ) );
-
-		t.set_translation(
-			bone_animation.get_value( "tx", current_frame_ ),
-			bone_animation.get_value( "ty", current_frame_ ),
-			bone_animation.get_value( "tz", current_frame_ ) );
-
-		m = inversed_bone_offset * s * r * t * bone_offset;
+		data.bone_matrix[ n ] = data.bone_matrix[ n ].transpose();
 	}
 
 	constant_buffer_.update( & data );
-	constant_buffer_.bind_to_vs();
+}
+
+/**
+ * ボーンマトリックスを再帰的に計算する
+ *
+ * @param data ボーンマトリックス
+ * @param bone_index ボーンのインデックス
+ * @param parent_bone_matrix 親ボーン行列
+ */
+void AnimationPlayer::calculate_bone_matrix_recursive( BoneConstantBuffer::Data& data, uint_t bone_index, const Matrix& parent_bone_matrix ) const
+{
+	const Animation& bone_animation = get_current_skinning_animation()->get_bone_animation_by_bone_index( bone_index );
+	const Matrix& bone_offset_matrix = get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( bone_index );
+
+	uint_t parent_bone_index = get_skinning_animation_set()->get_parent_bone_index( bone_index );
+	const Matrix& parent_bone_offset_matrix = get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( parent_bone_index );
+
+	Matrix s, r, t;
+
+	s.set_scaling(
+		bone_animation.get_value( "sx", current_frame_, 1.f ),
+		bone_animation.get_value( "sy", current_frame_, 1.f ),
+		bone_animation.get_value( "sz", current_frame_, 1.f ) );
+
+	r.set_rotation_roll_pitch_yaw(
+		bone_animation.get_value( "rx", current_frame_, 0.f ),
+		bone_animation.get_value( "ry", current_frame_, 0.f ),
+		bone_animation.get_value( "rz", current_frame_, 0.f ) );
+
+	t.set_translation(
+		bone_animation.get_value( "tx", current_frame_, 0.f ),
+		bone_animation.get_value( "ty", current_frame_, 0.f ),
+		bone_animation.get_value( "tz", current_frame_, 0.f ) );
+
+	Matrix rx, ry, rz;
+
+	rx.set_rotation_x( bone_animation.get_value( "rx", current_frame_, 0.f ) );
+	ry.set_rotation_y( bone_animation.get_value( "ry", current_frame_, 0.f ) );
+	rz.set_rotation_z( bone_animation.get_value( "rz", current_frame_, 0.f ) );
+
+	data.bone_matrix[ bone_index ] = bone_offset_matrix.inverse() * s * rx * ry * rz * t * parent_bone_offset_matrix * parent_bone_matrix;
+
+	for ( uint_t n = 0; n < get_skinning_animation_set()->get_child_bone_count( bone_index ); ++n )
+	{
+		calculate_bone_matrix_recursive( data, get_skinning_animation_set()->get_child_bone_index( bone_index, n ), data.bone_matrix[ bone_index ] );
+	}
 }
 
 /**

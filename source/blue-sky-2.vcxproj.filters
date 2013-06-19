@@ -171,6 +171,9 @@
     <ClCompile Include="AnimationPlayer.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Direct3D11Axis.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -389,6 +392,9 @@
     <ClInclude Include="SkinningAnimationSet.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Direct3D11Axis.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -425,6 +431,15 @@
       <Filter>Scenario</Filter>
     </None>
     <None Include="media\stage\ending.outro">
+      <Filter>Scenario</Filter>
+    </None>
+    <None Include="media\stage\0-3.intro">
+      <Filter>Scenario</Filter>
+    </None>
+    <None Include="media\stage\0-3.outro">
+      <Filter>Scenario</Filter>
+    </None>
+    <None Include="media\stage\0-3.stage">
       <Filter>Scenario</Filter>
     </None>
   </ItemGroup>

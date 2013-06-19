@@ -17,6 +17,7 @@ template< typename T >
 class Direct3D11ConstantBuffer
 {
 public:
+	typedef T Data;
 	static const UINT Slot = T::DEFAULT_SLOT;
 
 protected:

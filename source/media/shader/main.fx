@@ -72,12 +72,15 @@ cbuffer ObjectExtensionConstantBuffer : register( b3 )
 cbuffer FrameDrawingConstantBuffer : register( b4 )
 {
 	float DrawingAccent;
+	float3 dummy;
 }
 
 cbuffer BoneConstantBuffer : register( b5 )
 {
     matrix BoneMatrix[ MaxBones ];
 };
+
+int debug_bone_index;
 
 struct VS_INPUT
 {
@@ -204,7 +207,7 @@ PS_FLAT_INPUT vs_flat( VS_INPUT input, uint vertex_id : SV_VertexID )
 	return output;
 }
 
-GS_LINE_INPUT vs_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID )
+GS_LINE_INPUT vs_drawing_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID )
 {
 	GS_LINE_INPUT output;
 
@@ -235,7 +238,7 @@ GS_LINE_INPUT vs_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID )
 }
 
 [maxvertexcount(4)]
-void gs_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
+void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
 {
 	static const uint input_vertex_count = 2;
 	static const uint output_vertex_count = 4;
@@ -323,7 +326,7 @@ void gs_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> T
 	}
 }
 
-float4 ps_line( noperspective PS_FLAT_INPUT input ) : SV_Target
+float4 ps_drawing_line( noperspective PS_FLAT_INPUT input ) : SV_Target
 {
 	return ( line_texture.Sample( u_wrap_texture_sampler, input.TexCoord ) + input.Color ); // * float4( 1.f, 1.f, 1.f, 0.5f );
 }
@@ -377,9 +380,15 @@ DepthStencilState WriteDepth
 	DepthWriteMask = ALL;
 };
 
+DepthStencilState NoDepthTest
+{
+	DepthEnable = False;
+};
+
 RasterizerState Default
 {
 	CullMode = BACK;
+	// CullMode = NONE;
 	MultisampleEnable = True;
 };
 
@@ -399,7 +408,7 @@ RasterizerState Shadow
 // ----------------------------------------
 technique11 main
 {
-	pass pass1
+	pass main
     {
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
@@ -417,7 +426,7 @@ technique11 main
 // ----------------------------------------
 technique11 skin
 {
-	pass pass1
+	pass main
     {
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
@@ -431,18 +440,18 @@ technique11 skin
 }
 
 // ----------------------------------------
-// for line
+// for drawing line
 // ----------------------------------------
 technique11 drawing_line
 {
-	pass pass_line
+	pass main
 	{
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
 
-		SetVertexShader( CompileShader( vs_4_0, vs_line() ) );
-		SetGeometryShader( CompileShader( gs_4_0, gs_line() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_line() ) );
+		SetVertexShader( CompileShader( vs_4_0, vs_drawing_line() ) );
+		SetGeometryShader( CompileShader( gs_4_0, gs_drawing_line() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_drawing_line() ) );
 
 		RASTERIZERSTATE = Default;
 	}
@@ -537,17 +546,40 @@ technique11 billboard
 }
 
 // ----------------------------------------
+// for debug axis
+// ----------------------------------------
+VS_LINE_INPUT vs_line( VS_LINE_INPUT input )
+{
+	input.Position = mul( input.Position, World );
+    input.Position = mul( input.Position, View );
+    input.Position = mul( input.Position, Projection );
+
+	return input;
+}
+
+float4 ps_line( VS_LINE_INPUT input ) : SV_Target
+{
+	return float4( input.Color.x, input.Color.y, input.Color.z, 0.5f );
+}
+
+technique11 simple_line
+{
+	pass main
+	{
+		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
+		
+		SetVertexShader( CompileShader( vs_4_0, vs_line() ) );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps_line() ) );
+	}
+}
+
+// ----------------------------------------
 // for Bullet debug
 // ----------------------------------------
-struct BULLET_DEBUG_INPUT
+VS_LINE_INPUT vs_bullet_debug( VS_LINE_INPUT input )
 {
-	float4 Position : SV_POSITION;
-	float3 Color    : COLOR0;
-};
-
-BULLET_DEBUG_INPUT vs_bullet_debug( BULLET_DEBUG_INPUT input )
-{
-	BULLET_DEBUG_INPUT output;
+	VS_LINE_INPUT output;
 
 	output.Position = mul( input.Position, View );
     output.Position = mul( output.Position, Projection );
@@ -556,18 +588,13 @@ BULLET_DEBUG_INPUT vs_bullet_debug( BULLET_DEBUG_INPUT input )
 	return output;
 }
 
-float4 ps_bullet_debug( BULLET_DEBUG_INPUT input ) : SV_Target
-{
-	return float4( input.Color.x, input.Color.y, input.Color.z, 0.5f );
-}
-
 technique11 bullet
 {
 	pass main
 	{
 		SetVertexShader( CompileShader( vs_4_0, vs_bullet_debug() ) );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_bullet_debug() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_line() ) );
 	}
 }
 

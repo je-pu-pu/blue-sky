@@ -32,6 +32,12 @@ public:
 		std::sort( key_frame_list_.begin(), key_frame_list_.end(), KeyFrame::FrameLess() );
 	}
 
+	bool empty() const
+	{
+		return key_frame_list_.empty();
+	}
+
+
 	float_t get_value( float_t frame ) const
 	{
 		KeyFrameList::const_iterator next = std::lower_bound( key_frame_list_.begin(), key_frame_list_.end(), frame, KeyFrame::FrameLess() );

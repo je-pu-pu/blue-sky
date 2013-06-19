@@ -1,0 +1,12 @@
+bgm road
+
+sky-box sky-box-star-2
+
+player 0 0 0
+goal 0 0 30
+
+object fbx_test_rd -1 0 2
+object fbx_test2  1 0 2
+object fbx_test   3 0 2
+
+object stick2   0 0 5

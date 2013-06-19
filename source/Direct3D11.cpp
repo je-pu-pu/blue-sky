@@ -34,7 +34,7 @@
 // #pragma comment( lib, "d3dx10.lib" )
 #endif
 
-#define ENABLE_DIRECT_WRITE
+// #define ENABLE_DIRECT_WRITE
 
 /**
  * コンストラクタ
@@ -600,6 +600,7 @@ void Direct3D11::end()
 
 void Direct3D11::renderText()
 {
+#ifdef ENABLE_DIRECT_WRITE
 	getSprite()->begin();
 
 	EffectTechnique* technique = effect_->getTechnique( "|sprite" );
@@ -613,6 +614,7 @@ void Direct3D11::renderText()
 	}
 
 	getSprite()->end();
+#endif
 }
 
 void Direct3D11::setDebugViewport( float x, float y, float w, float h )

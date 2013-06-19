@@ -20,6 +20,7 @@
     <ClCompile Include="BulletPhysics.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Direct3D11.cpp" />
+    <ClCompile Include="Direct3D11Axis.cpp" />
     <ClCompile Include="Direct3D11BulletDebugDraw.cpp" />
     <ClCompile Include="Direct3D11Color.cpp" />
     <ClCompile Include="Direct3D11ConstantBuffer.cpp" />
@@ -85,6 +86,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="Direct3D11.h" />
+    <ClInclude Include="Direct3D11Axis.h" />
     <ClInclude Include="Direct3D11BulletDebugDraw.h" />
     <ClInclude Include="Direct3D11Color.h" />
     <ClInclude Include="Direct3D11ConstantBuffer.h" />
@@ -163,6 +165,9 @@
     <None Include="media\stage\0-2.intro" />
     <None Include="media\stage\0-2.outro" />
     <None Include="media\stage\0-2.stage" />
+    <None Include="media\stage\0-3.intro" />
+    <None Include="media\stage\0-3.outro" />
+    <None Include="media\stage\0-3.stage" />
     <None Include="media\stage\ending.outro" />
   </ItemGroup>
   <ItemGroup>

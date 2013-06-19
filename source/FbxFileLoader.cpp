@@ -26,8 +26,25 @@ void print_fbx_node_recursive( FbxNode* node )
 	std::string s = node->GetName();
 
 	std::cout << "Object : " << s << std::endl;
+	std::cout << "type : " << node->GetTypeName() << std::endl;
 
 	FbxMesh* mesh = node->GetMesh();
+	
+	std::map< int_t, string_t > ro_map;
+	ro_map[ FbxEuler::eOrderXYZ ] = "XYZ";
+	ro_map[ FbxEuler::eOrderXYX ] = "XYX";
+	ro_map[ FbxEuler::eOrderXZY ] = "XZY";
+	ro_map[ FbxEuler::eOrderXZX ] = "XZX";
+	ro_map[ FbxEuler::eOrderYZX ] = "YZX";
+	ro_map[ FbxEuler::eOrderYZY ] = "YZY";
+	ro_map[ FbxEuler::eOrderYXZ ] = "YXZ";
+	ro_map[ FbxEuler::eOrderYXY ] = "YXY";
+	ro_map[ FbxEuler::eOrderZXY ] = "ZXY";
+	ro_map[ FbxEuler::eOrderZXZ ] = "ZXZ";
+	ro_map[ FbxEuler::eOrderZYX ] = "ZYX";
+	ro_map[ FbxEuler::eOrderZYZ ] = "ZYZ";
+
+	std::cout << "rotation_order : " << ro_map[ node->RotationOrder.Get() ] << std::endl;
 
 	if ( mesh )
 	{
@@ -189,7 +206,8 @@ void print_fbx_node_recursive( FbxNode* node )
 }
 
 FbxFileLoader::FbxFileLoader( Mesh* mesh )
-	: mesh_( mesh )
+	: fbx_manager_( FbxManager::Create() )
+	, mesh_( mesh )
 	, fbx_scene_( 0 )
 	, fbx_material_index_( 0 )
 {
@@ -202,6 +220,11 @@ FbxFileLoader::FbxFileLoader( Mesh* mesh )
 	*/
 }
 
+FbxFileLoader::~FbxFileLoader()
+{
+	fbx_manager_->Destroy();
+}
+
 /**
  * FBX ファイルを読み込む
  *
@@ -210,45 +233,64 @@ FbxFileLoader::FbxFileLoader( Mesh* mesh )
  */
 bool FbxFileLoader::load( const char_t* file_name )
 {
-	FbxManager* sdk_manager = FbxManager::Create();
-	FbxIOSettings* io_settings = FbxIOSettings::Create( sdk_manager, IOSROOT );
-	sdk_manager->SetIOSettings( io_settings );
+	FbxIOSettings* io_settings = FbxIOSettings::Create( fbx_manager_, IOSROOT );
+	fbx_manager_->SetIOSettings( io_settings );
 
-	FbxImporter* importer = FbxImporter::Create( sdk_manager, "" );
+	FbxImporter* importer = FbxImporter::Create( fbx_manager_, "" );
     
-	if ( ! importer->Initialize( file_name, -1, sdk_manager->GetIOSettings() ) )
+	if ( ! importer->Initialize( file_name, -1, fbx_manager_->GetIOSettings() ) )
 	{
 		return false;
 	}
     
-	fbx_scene_ = FbxScene::Create( sdk_manager, "scene" );
+	fbx_scene_ = FbxScene::Create( fbx_manager_, "scene" );
 	importer->Import( fbx_scene_ );
 	importer->Destroy();
     
+	std::cout << "*** DirectX ***" << std::endl;
+	print_axis_system( FbxAxisSystem::DirectX );
+
+	std::cout << "*** FBX ***" << std::endl;
+	print_axis_system( fbx_scene_->GetGlobalSettings().GetAxisSystem() );
+
+	// FbxAxisSystem::DirectX.ConvertScene( fbx_scene_ );
+
+	std::cout << "*** Converted FBX ***" << std::endl;
+	print_axis_system( fbx_scene_->GetGlobalSettings().GetAxisSystem() );
+
 	FbxNode* root_node = fbx_scene_->GetRootNode();
 
 	if ( root_node )
 	{
+		/*
 		for ( int n = 0; n < root_node->GetChildCount(); n++ )
 		{
-			// print_fbx_node_recursive( root_node->GetChild( n ) );
-			load_node_recursive( root_node->GetChild( n ) );
+			print_fbx_node_recursive( root_node->GetChild( n ) );
+		}
+		*/
+
+		for ( int n = 0; n < root_node->GetChildCount(); n++ )
+		{
+			load_limb_recursive( root_node->GetChild( n ) );
+		}
+
+		for ( int n = 0; n < root_node->GetChildCount(); n++ )
+		{
+			load_mesh_recursive( root_node->GetChild( n ) );
 		}
 	}
 
-	sdk_manager->Destroy();
-
-	convert_coordinate_system();
+//	convert_coordinate_system();
 
 	return true;
 }
 
 /**
- * FbxNode を再帰的に読み込む
+ * FbxNode からメッシュ情報を再帰的に読み込む
  *
  * @param node FbxNode
  */
-void FbxFileLoader::load_node_recursive( FbxNode* node )
+void FbxFileLoader::load_mesh_recursive( FbxNode* node )
 {
 	load_mesh( node->GetMesh() );
 
@@ -259,12 +301,9 @@ void FbxFileLoader::load_node_recursive( FbxNode* node )
 
 	for ( int n = 0; n < node->GetChildCount(); n++ )
 	{
-		load_node_recursive( node->GetChild( n ) );
+		load_mesh_recursive( node->GetChild( n ) );
 	}
 }
-
-#include "Direct3D11Vector.h"
-#include "Direct3D11Matrix.h"
 
 /**
  * メッシュ情報を読み込む
@@ -311,6 +350,20 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 		skinning_info_list.resize( position_list.size() );
 			
 		SkinningAnimationSet* skinning_animation_set = mesh_->setup_skinning_animation_set();
+		skinning_animation_set->set_bone_count( bone_index_map_.size() );
+
+		for ( auto i = bone_index_map_.begin(); i != bone_index_map_.end(); ++i )
+		{
+			for ( int n = 0; n < i->first->GetChildCount(); ++n )
+			{
+				auto j = bone_index_map_.find( i->first->GetChild( n ) );
+
+				if ( j != bone_index_map_.end() )
+				{
+					skinning_animation_set->add_child_bone_index( i->second, j->second );
+				}
+			}
+		}
 
 		for ( int n = 0; n < skin_count; ++n )
 		{
@@ -318,16 +371,28 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 
 			std::cout << skin->GetClusterCount() << " bones" << std::endl;
 
-			skinning_animation_set->set_bone_count( skin->GetClusterCount() );
-
-			for ( int bone_index = 0; bone_index < skin->GetClusterCount(); ++bone_index )
+			for ( int cluster_index = 0; cluster_index < skin->GetClusterCount(); ++cluster_index )
 			{
-				std::cout << "bone " << bone_index << " : " << std::endl;
-
-				FbxCluster* cluster = skin->GetCluster( bone_index );
-				std::cout << "cluster : " << cluster->GetNameOnly() << std::endl;
+				FbxCluster* cluster = skin->GetCluster( cluster_index );
+				std::cout << "cluster : " << cluster_index << " : " << cluster->GetNameOnly() << std::endl;
 				std::cout << "link : " << cluster->GetLink()->GetName() << std::endl;
-				std::cout << "curve node : " << cluster->GetLink()->LclTranslation.GetCurveNode()->GetName() << std::endl;
+				std::cout << "type : " << cluster->GetLink()->GetTypeName() << std::endl;
+				std::cout << "link mode : " << cluster->GetLinkMode() << std::endl;
+
+				assert( cluster->GetLinkMode() == FbxCluster::eNormalize );
+
+				int bone_index = 0;
+
+				{
+					auto i = bone_index_map_.find( cluster->GetLink() );
+
+					if ( i == bone_index_map_.end() )
+					{
+						continue;
+					}
+
+					bone_index = i->second;
+				}
 
 				load_animations_for_bone( bone_index, cluster );
 
@@ -338,39 +403,68 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 
 					skinning_info_list[ index ].add( bone_index, weight );
 
-					std::cout << index << ":" << weight << std::endl;
+					// std::cout << index << ":" << weight << std::endl;
 				}
 
-				FbxAMatrix initial_matrix;
+				FbxAMatrix transform_matrix, transform_link_matrix;
 
-				cluster->GetTransformLinkMatrix( initial_matrix );
+				cluster->GetTransformMatrix( transform_matrix );
+				cluster->GetTransformLinkMatrix( transform_link_matrix );
 
-				std::cout.setf( std::ios_base::fixed, std::ios_base::floatfield );
-				std::cout.precision( 4 );
+				const FbxAMatrix& node_global_transform = fbx_scene_->GetEvaluator()->GetNodeLocalTransform( cluster->GetLink() );
 
-				std::cout << "initial matrix :" << std::endl;
-				std::cout << "\tt : " << initial_matrix.GetT()[ 0 ] << ", " << initial_matrix.GetT()[ 1 ] << ", " << initial_matrix.GetT()[ 2 ] << std::endl;
-				std::cout << "\tr : " << initial_matrix.GetR()[ 0 ] << ", " << initial_matrix.GetR()[ 1 ] << ", " << initial_matrix.GetR()[ 2 ] << std::endl;
-				std::cout << "\ts : " << initial_matrix.GetS()[ 0 ] << ", " << initial_matrix.GetS()[ 1 ] << ", " << initial_matrix.GetS()[ 2 ] << std::endl;
-					
-				float m[ 4 ][ 4 ] = { 0.f };
+				std::cout << "LocalTransform : " << std::endl;
+				print_local_transform( cluster->GetLink() );
 
-				for ( int y = 0; y < 4; y++ )
-				{
-					for ( int x = 0; x < 4; x++ )
-					{
-						m[ y ][ x ] = static_cast< float >( initial_matrix.Get( y, x ) );
-					}
-				}
+				// std::cout << "NodeGlobalTransform : " << std::endl;
+				// print_matrix( node_global_transform );
+
+				std::cout << "TransformMatrix : " << std::endl;
+				print_matrix( transform_matrix );
+
+				std::cout << "TransformLinkMatrix : " << std::endl;
+				print_matrix( transform_link_matrix );
+
+				FbxAMatrix initial_matrix = transform_link_matrix; // .Inverse() * transform_matrix;
+
+				std::cout << "BoneInitialMatrix : " << std::endl;
+				print_matrix( initial_matrix );
+
+				// initial_matrix.SetIdentity();
 
 				skinning_animation_set->get_bone_offset_matrix_by_bone_index( bone_index ).set(
-					m[ 0 ][ 0 ], m[ 0 ][ 1 ], m[ 0 ][ 2 ], m[ 0 ][ 3 ],
-					m[ 1 ][ 0 ], m[ 1 ][ 1 ], m[ 1 ][ 2 ], m[ 1 ][ 3 ],
-					m[ 2 ][ 0 ], m[ 2 ][ 1 ], m[ 2 ][ 2 ], m[ 2 ][ 3 ],
-					m[ 3 ][ 0 ], m[ 3 ][ 1 ], m[ 3 ][ 2 ], m[ 3 ][ 3 ] );
+					static_cast< float_t >( initial_matrix.Get( 0, 0 ) ), static_cast< float_t >( initial_matrix.Get( 0, 1 ) ), static_cast< float_t >( initial_matrix.Get( 0, 2 ) ), static_cast< float_t >( initial_matrix.Get( 0, 3 ) ),
+					static_cast< float_t >( initial_matrix.Get( 1, 0 ) ), static_cast< float_t >( initial_matrix.Get( 1, 1 ) ), static_cast< float_t >( initial_matrix.Get( 1, 2 ) ), static_cast< float_t >( initial_matrix.Get( 1, 3 ) ),
+					static_cast< float_t >( initial_matrix.Get( 2, 0 ) ), static_cast< float_t >( initial_matrix.Get( 2, 1 ) ), static_cast< float_t >( initial_matrix.Get( 2, 2 ) ), static_cast< float_t >( initial_matrix.Get( 2, 3 ) ),
+					static_cast< float_t >( initial_matrix.Get( 3, 0 ) ), static_cast< float_t >( initial_matrix.Get( 3, 1 ) ), static_cast< float_t >( initial_matrix.Get( 3, 2 ) ), static_cast< float_t >( initial_matrix.Get( 3, 3 ) ) );
+
+				/*
+				Matrix r, s, t;
+
+				r.set_rotation(
+					math::degree_to_radian( static_cast< float_t >( initial_matrix.GetR()[ 0 ] ) ),
+					math::degree_to_radian( static_cast< float_t >( initial_matrix.GetR()[ 1 ] ) ),
+					math::degree_to_radian( static_cast< float_t >( initial_matrix.GetR()[ 2 ] ) ) );
+
+				s.set_scaling(
+					static_cast< float_t >( initial_matrix.GetS()[ 0 ] ),
+					static_cast< float_t >( initial_matrix.GetS()[ 1 ] ),
+					static_cast< float_t >( initial_matrix.GetS()[ 2 ] ) );
+
+				t.set_translation(
+					static_cast< float_t >( initial_matrix.GetT()[ 0 ] ),
+					static_cast< float_t >( initial_matrix.GetT()[ 1 ] ),
+					static_cast< float_t >( initial_matrix.GetT()[ 2 ] ) );
+
+				skinning_animation_set->get_bone_offset_matrix_by_bone_index( bone_index ) = s * r * t;
+				*/
 			}
 		}
 
+		// skinning_animation_set->get_bone_offset_matrix_by_bone_index( 0 ).set_identity();
+		// skinning_animation_set->get_bone_offset_matrix_by_bone_index( 0 ).set_identity();
+
+		skinning_animation_set->optimize();
 		skinning_animation_set->calculate_length();
 	}
 
@@ -496,6 +590,42 @@ void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 }
 
 /**
+ * FbxNode からボーン情報を再帰的に読み込む
+ *
+ * @param node FbxNode
+ */
+void FbxFileLoader::load_limb_recursive( FbxNode* node )
+{
+	load_limb( node );
+
+	for ( int n = 0; n < node->GetChildCount(); n++ )
+	{
+		load_limb_recursive( node->GetChild( n ) );
+	}
+}
+
+/**
+ * スケルトン情報を読み込む
+ *
+ */
+void FbxFileLoader::load_limb( FbxNode* node )
+{
+	if ( std::string( node->GetTypeName() ) != "Limb" )
+	{
+		return;
+	}
+
+	if ( std::string( node->GetParent()->GetTypeName() ) != "Limb" )
+	{
+		return;
+	}
+
+	std::cout << "limb : " << node->GetName() << std::endl;
+
+	bone_index_map_[ node ] = bone_index_map_.size();
+}
+
+/**
  * 指定したインデックスのボーンに対応するアニメーションの一覧を読み込む
  *
  * @param bone_index ボーンのインデックス
@@ -541,20 +671,35 @@ void FbxFileLoader::load_animations_for_bone( int bone_index, FbxCluster* cluste
 			load_curve_for_animation( animation, "sy", cluster->GetLink()->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Y ) );
 			load_curve_for_animation( animation, "sz", cluster->GetLink()->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Z ) );
 
+			/*
 			std::for_each(
 				animation.get_channel( "rx" ).get_key_frame_list().begin(),
 				animation.get_channel( "rx" ).get_key_frame_list().end(),
-				[] ( AnimationKeyFrame& key_frame ) { key_frame.get_value() = math::degree_to_radian( key_frame.get_value() ); } );
+				[] ( AnimationKeyFrame& key_frame ) { std::cout << "\trx : " << key_frame.get_frame() << " : " << key_frame.get_value() << std::endl; } );
 
 			std::for_each(
 				animation.get_channel( "ry" ).get_key_frame_list().begin(),
 				animation.get_channel( "ry" ).get_key_frame_list().end(),
-				[] ( AnimationKeyFrame& key_frame ) { key_frame.get_value() = math::degree_to_radian( key_frame.get_value() ); } );
+				[] ( AnimationKeyFrame& key_frame ) { std::cout << "\try : " << key_frame.get_frame() << " : " << key_frame.get_value() << std::endl; } );
 
 			std::for_each(
 				animation.get_channel( "rz" ).get_key_frame_list().begin(),
 				animation.get_channel( "rz" ).get_key_frame_list().end(),
-				[] ( AnimationKeyFrame& key_frame ) { key_frame.get_value() = math::degree_to_radian( key_frame.get_value() ); } );
+				[] ( AnimationKeyFrame& key_frame ) { std::cout << "\trz : " << key_frame.get_frame() << " : " << key_frame.get_value() << std::endl; } );
+			*/
+
+			const char* rotate_channel_names[] = { "rx", "ry", "rz" };
+
+			for ( int o = 0; o < 3; ++o )
+			{
+				if ( animation.has_channel( rotate_channel_names[ o ]  ) )
+				{
+					std::for_each(
+						animation.get_channel( rotate_channel_names[ o ] ).get_key_frame_list().begin(),
+						animation.get_channel( rotate_channel_names[ o ] ).get_key_frame_list().end(),
+						[] ( AnimationKeyFrame& key_frame ) { key_frame.get_value() = math::degree_to_radian( key_frame.get_value() ); } );
+				}
+			}
 		}
 	}
 }
@@ -592,7 +737,7 @@ void FbxFileLoader::convert_coordinate_system()
 	for ( auto i = mesh_->get_vertex_list().begin(); i != mesh_->get_vertex_list().end(); ++i )
 	{
 		std::swap( i->Position.y, i->Position.z );
-		std::swap( i->Normal.x, i->Normal.y );
+		std::swap( i->Normal.y, i->Normal.z );
 	}
 
 	for ( auto i = mesh_->get_material_list().begin(); i != mesh_->get_material_list().end(); ++i )
@@ -605,4 +750,98 @@ void FbxFileLoader::convert_coordinate_system()
 			}
 		}
 	}
+}
+
+void FbxFileLoader::print_local_transform( const FbxNode* node ) const
+{
+	std::cout.setf( std::ios_base::fixed, std::ios_base::floatfield );
+	std::cout.precision( 4 );
+
+	std::cout << "\tT : " << node->LclTranslation.Get()[ 0 ] << ", " << node->LclTranslation.Get()[ 1 ] << ", " << node->LclTranslation.Get()[ 2 ] << std::endl;
+	std::cout << "\tR : " << node->LclRotation.Get()[ 0 ] << ", " << node->LclRotation.Get()[ 1 ] << ", " << node->LclRotation.Get()[ 2 ] << std::endl;
+	std::cout << "\tS : " << node->LclScaling.Get()[ 0 ] << ", " << node->LclScaling.Get()[ 1 ] << ", " << node->LclScaling.Get()[ 2 ] << std::endl;
+}
+
+/**
+ *
+ *
+ */
+void FbxFileLoader::print_matrix( const FbxAMatrix& m ) const
+{
+	std::cout.setf( std::ios_base::fixed, std::ios_base::floatfield );
+	std::cout.precision( 4 );
+
+	std::cout << "\tT : " << m.GetT()[ 0 ] << ", " << m.GetT()[ 1 ] << ", " << m.GetT()[ 2 ] << std::endl;
+	std::cout << "\tR : " << m.GetR()[ 0 ] << ", " << m.GetR()[ 1 ] << ", " << m.GetR()[ 2 ] << std::endl;
+	std::cout << "\tS : " << m.GetS()[ 0 ] << ", " << m.GetS()[ 1 ] << ", " << m.GetS()[ 2 ] << std::endl;
+}
+
+/**
+ * 座標系を表示する
+ *
+ */
+void FbxFileLoader::print_axis_system( const FbxAxisSystem& axis_system ) const
+{
+	int front_sign, up_sign;
+
+	FbxAxisSystem::EFrontVector front = axis_system.GetFrontVector( front_sign );
+	FbxAxisSystem::EUpVector up = axis_system.GetUpVector( up_sign );
+	FbxAxisSystem::ECoordSystem coord_system = axis_system.GetCoorSystem();
+
+	std::cout << "up : ";
+		
+	if ( up_sign < 0 )
+	{
+		std::cout << "-";
+	}
+
+	if ( up == FbxAxisSystem::eXAxis )
+	{
+		std::cout << "X";
+	}
+	else if ( up == FbxAxisSystem::eYAxis )
+	{
+		std::cout << "Y";
+	}
+	else if ( up == FbxAxisSystem::eZAxis )
+	{
+		std::cout << "Z";
+	}
+
+	std::cout << std::endl;
+
+	std::cout << "front : ";
+
+	if ( front_sign < 0 )
+	{
+		std::cout << "-";
+	}
+
+	if ( up == FbxAxisSystem::eXAxis )
+	{
+		std::cout << ( front == FbxAxisSystem::eParityEven ? "Y" : "Z" );
+	}
+	else if ( up == FbxAxisSystem::eYAxis )
+	{
+		std::cout << ( front == FbxAxisSystem::eParityEven ? "X" : "Z" );
+	}
+	else if ( up == FbxAxisSystem::eZAxis )
+	{
+		std::cout << ( front == FbxAxisSystem::eParityEven ? "X" : "Y" );
+	}
+
+	std::cout << std::endl;
+
+	std::cout << "coord system : ";
+	
+	if ( coord_system == FbxAxisSystem::eLeftHanded )
+	{
+		std::cout << "LeftHanded";
+	}
+	else if ( coord_system == FbxAxisSystem::eRightHanded )
+	{
+		std::cout << "RightHanded";
+	}
+	
+	std::cout << std::endl;
 }

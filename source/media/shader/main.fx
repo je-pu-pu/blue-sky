@@ -343,7 +343,7 @@ float4 ps_flat_with_flicker( PS_FLAT_INPUT input ) : SV_Target
 
 float4 ps_main_wrap( PS_INPUT input ) : SV_Target
 {
-	// return float4( input.Normal, 1.f );
+	// return float4( input.Normal * 0.5f + float3( 0.5f, 0.5f, 0.5f ), 1.f );
 
 	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ); // /* + input.Color */ * float4( input.Normal, 1.f );
 }

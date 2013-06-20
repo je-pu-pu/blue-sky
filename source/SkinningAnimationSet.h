@@ -25,7 +25,10 @@ private:
 
 public:
 	SkinningAnimationSet()
-	{ }
+	{
+		parent_bone_index_list_.resize( 1 );
+		parent_bone_index_list_[ 0 ] = 0;
+	}
 
 	/**
 	 * 指定した名前に対応したスキニングアニメーションを取得する
@@ -97,6 +100,9 @@ public:
 		{
 			i->second.resize_bone_animation_list( count );
 		}
+
+		parent_bone_index_list_.resize( count );
+		child_bone_index_list_.resize( count );
 	}
 
 	/**

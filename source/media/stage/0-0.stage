@@ -6,12 +6,9 @@ far-billboards stage-0-0-drawing-far-billboards
 player 0 0 0
 goal 0 0 30
 
-object building-20 0 0 -5
-dynamic-object box 0 0 2.5
-dynamic-object multi-material-test 0 0 5
-dynamic-object stick 0 0 15
-dynamic-object god 0 0 12.5
-object wall-2 0 0 20
+dynamic-object stick 0 0 4
+dynamic-object god 0 1.5 2
+object wall-2 0 0 6
 
 
 # object buildings 0 0 0 0

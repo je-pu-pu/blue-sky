@@ -280,7 +280,7 @@ bool FbxFileLoader::load( const char_t* file_name )
 		}
 	}
 
-//	convert_coordinate_system();
+	convert_coordinate_system();
 
 	return true;
 }
@@ -432,19 +432,19 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 
 				// initial_matrix.SetIdentity();
 
+				/*
 				skinning_animation_set->get_bone_offset_matrix_by_bone_index( bone_index ).set(
 					static_cast< float_t >( initial_matrix.Get( 0, 0 ) ), static_cast< float_t >( initial_matrix.Get( 0, 1 ) ), static_cast< float_t >( initial_matrix.Get( 0, 2 ) ), static_cast< float_t >( initial_matrix.Get( 0, 3 ) ),
 					static_cast< float_t >( initial_matrix.Get( 1, 0 ) ), static_cast< float_t >( initial_matrix.Get( 1, 1 ) ), static_cast< float_t >( initial_matrix.Get( 1, 2 ) ), static_cast< float_t >( initial_matrix.Get( 1, 3 ) ),
 					static_cast< float_t >( initial_matrix.Get( 2, 0 ) ), static_cast< float_t >( initial_matrix.Get( 2, 1 ) ), static_cast< float_t >( initial_matrix.Get( 2, 2 ) ), static_cast< float_t >( initial_matrix.Get( 2, 3 ) ),
 					static_cast< float_t >( initial_matrix.Get( 3, 0 ) ), static_cast< float_t >( initial_matrix.Get( 3, 1 ) ), static_cast< float_t >( initial_matrix.Get( 3, 2 ) ), static_cast< float_t >( initial_matrix.Get( 3, 3 ) ) );
+				*/
 
-				/*
-				Matrix r, s, t;
+				Matrix rx, ry, rz, s, t;
 
-				r.set_rotation(
-					math::degree_to_radian( static_cast< float_t >( initial_matrix.GetR()[ 0 ] ) ),
-					math::degree_to_radian( static_cast< float_t >( initial_matrix.GetR()[ 1 ] ) ),
-					math::degree_to_radian( static_cast< float_t >( initial_matrix.GetR()[ 2 ] ) ) );
+				rx.set_rotation_x( math::degree_to_radian( static_cast< float_t >( -initial_matrix.GetR()[ 0 ] ) ) );
+				ry.set_rotation_y( math::degree_to_radian( static_cast< float_t >( -initial_matrix.GetR()[ 1 ] ) ) );
+				rz.set_rotation_z( math::degree_to_radian( static_cast< float_t >(  initial_matrix.GetR()[ 2 ] ) ) );
 
 				s.set_scaling(
 					static_cast< float_t >( initial_matrix.GetS()[ 0 ] ),
@@ -452,17 +452,16 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 					static_cast< float_t >( initial_matrix.GetS()[ 2 ] ) );
 
 				t.set_translation(
-					static_cast< float_t >( initial_matrix.GetT()[ 0 ] ),
-					static_cast< float_t >( initial_matrix.GetT()[ 1 ] ),
-					static_cast< float_t >( initial_matrix.GetT()[ 2 ] ) );
+					static_cast< float_t >(  initial_matrix.GetT()[ 0 ] ),
+					static_cast< float_t >(  initial_matrix.GetT()[ 1 ] ),
+					static_cast< float_t >( -initial_matrix.GetT()[ 2 ] ) );
 
-				skinning_animation_set->get_bone_offset_matrix_by_bone_index( bone_index ) = s * r * t;
-				*/
+				skinning_animation_set->get_bone_offset_matrix_by_bone_index( bone_index ) = s * rx * ry * rz * t;
+				// skinning_animation_set->get_bone_offset_matrix_by_bone_index( bone_index ).set_identity();
 			}
-		}
 
-		// skinning_animation_set->get_bone_offset_matrix_by_bone_index( 0 ).set_identity();
-		// skinning_animation_set->get_bone_offset_matrix_by_bone_index( 0 ).set_identity();
+			// skinning_animation_set->get_bone_offset_matrix_by_bone_index( 0 ).set_identity();
+		}
 
 		skinning_animation_set->optimize();
 		skinning_animation_set->calculate_length();
@@ -700,6 +699,19 @@ void FbxFileLoader::load_animations_for_bone( int bone_index, FbxCluster* cluste
 						[] ( AnimationKeyFrame& key_frame ) { key_frame.get_value() = math::degree_to_radian( key_frame.get_value() ); } );
 				}
 			}
+
+			const char* inverse_channel_names[] = { "tz", "rx", "ry" };
+
+			for ( int o = 0; o < 3; ++o )
+			{
+				if ( animation.has_channel( inverse_channel_names[ o ]  ) )
+				{
+					std::for_each(
+						animation.get_channel( inverse_channel_names[ o ] ).get_key_frame_list().begin(),
+						animation.get_channel( inverse_channel_names[ o ] ).get_key_frame_list().end(),
+						[] ( AnimationKeyFrame& key_frame ) { key_frame.get_value() = -key_frame.get_value(); } );
+				}
+			}
 		}
 	}
 }
@@ -736,8 +748,11 @@ void FbxFileLoader::convert_coordinate_system()
 {
 	for ( auto i = mesh_->get_vertex_list().begin(); i != mesh_->get_vertex_list().end(); ++i )
 	{
-		std::swap( i->Position.y, i->Position.z );
-		std::swap( i->Normal.y, i->Normal.z );
+		i->Position.z = -i->Position.z;
+		i->Normal.z = -i->Normal.z;
+
+		// std::swap( i->Position.y, i->Position.z );
+		// std::swap( i->Normal.y, i->Normal.z );
 	}
 
 	for ( auto i = mesh_->get_material_list().begin(); i != mesh_->get_material_list().end(); ++i )

@@ -1386,7 +1386,8 @@ void GamePlayScene::render_debug_axis() const
 			for ( uint_t n = 0; n < ( *i )->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )
 			{
 				const Matrix& bone_offset_matrix = ( *i )->get_animation_player()->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( n );
-				const Matrix& bone_matrix = bone_constant_buffer_data.bone_matrix[ n ];
+				const Matrix& bone_matrix = bone_offset_matrix * bone_constant_buffer_data.bone_matrix[ n ];
+				// const Matrix& bone_matrix = bone_offset_matrix;
 
 				const btTransform& trans = active_object->get_transform();
 
@@ -1395,7 +1396,7 @@ void GamePlayScene::render_debug_axis() const
 				ObjectConstantBufferData buffer_data;
 
 				buffer_data.world = XMMatrixScaling( 0.1f, 0.1f, 0.1f );
-				buffer_data.world *= bone_offset_matrix * bone_matrix;
+				buffer_data.world *= bone_matrix;
 				buffer_data.world *= XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
 				buffer_data.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
 				buffer_data.world = XMMatrixTranspose( buffer_data.world );

@@ -34,13 +34,16 @@ private:
 
 protected:
 	void load_mesh_recursive( FbxNode* );
+	
 	void load_mesh( FbxMesh* );
+	void load_mesh_skinning_info( FbxSkin*, Mesh::SkinningInfoList& );
 	void load_material( FbxSurfaceMaterial* );
 	
 	void load_limb_recursive( FbxNode* );
 	void load_limb( FbxNode* );
 
-	void load_animations_for_bone( int, FbxCluster* );
+	void load_animations();
+	void load_animations_for_bone( int, FbxNode* );
 	void load_curve_for_animation( Animation&, const char_t*, const FbxAnimCurve* );
 
 	void convert_coordinate_system();

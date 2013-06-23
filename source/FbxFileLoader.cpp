@@ -274,6 +274,8 @@ bool FbxFileLoader::load( const char_t* file_name )
 			load_limb_recursive( root_node->GetChild( n ) );
 		}
 
+		load_animations();
+
 		for ( int n = 0; n < root_node->GetChildCount(); n++ )
 		{
 			load_mesh_recursive( root_node->GetChild( n ) );
@@ -326,6 +328,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 	Mesh::PositionList position_list;
 	Mesh::SkinningInfoList skinning_info_list;
 
+	// load_mesh_vertex()
 	for ( int n = 0; n < mesh->GetControlPointsCount(); n++ )
 	{
 		FbxVector4 v = mesh->GetControlPointAt( n );
@@ -337,135 +340,25 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 				static_cast< float >( v[ 2 ] ) ) );
 	}
 
+	// load_mesh_skinning_info()
+	{
+		int skin_count = mesh->GetDeformerCount( FbxDeformer::eSkin );
+
+		if ( skin_count > 0 )
+		{
+			assert( skin_count == 1 );
+
+			skinning_info_list.resize( position_list.size() );
+
+			FbxSkin* skin = FbxCast< FbxSkin >( mesh->GetDeformer( 0, FbxDeformer::eSkin ) );
+
+			load_mesh_skinning_info( skin, skinning_info_list );
+		}
+	}
+
+	// load_mesh_plygon()
 	FbxLayerElementArrayTemplate< int >* material_indices;
 	mesh->GetMaterialIndices( & material_indices );
-
-	// load_skinning_info()
-	int skin_count = mesh->GetDeformerCount( FbxDeformer::eSkin );
-
-	if ( skin_count > 0 )
-	{
-		assert( skin_count == 1 );
-
-		skinning_info_list.resize( position_list.size() );
-			
-		SkinningAnimationSet* skinning_animation_set = mesh_->setup_skinning_animation_set();
-		skinning_animation_set->set_bone_count( bone_index_map_.size() );
-
-		for ( auto i = bone_index_map_.begin(); i != bone_index_map_.end(); ++i )
-		{
-			for ( int n = 0; n < i->first->GetChildCount(); ++n )
-			{
-				auto j = bone_index_map_.find( i->first->GetChild( n ) );
-
-				if ( j != bone_index_map_.end() )
-				{
-					skinning_animation_set->add_child_bone_index( i->second, j->second );
-				}
-			}
-		}
-
-		for ( int n = 0; n < skin_count; ++n )
-		{
-			FbxSkin* skin = FbxCast< FbxSkin >( mesh->GetDeformer( n, FbxDeformer::eSkin ) );
-
-			std::cout << skin->GetClusterCount() << " bones" << std::endl;
-
-			for ( int cluster_index = 0; cluster_index < skin->GetClusterCount(); ++cluster_index )
-			{
-				FbxCluster* cluster = skin->GetCluster( cluster_index );
-				std::cout << "cluster : " << cluster_index << " : " << cluster->GetNameOnly() << std::endl;
-				std::cout << "link : " << cluster->GetLink()->GetName() << std::endl;
-				std::cout << "type : " << cluster->GetLink()->GetTypeName() << std::endl;
-				std::cout << "link mode : " << cluster->GetLinkMode() << std::endl;
-
-				assert( cluster->GetLinkMode() == FbxCluster::eNormalize );
-
-				int bone_index = 0;
-
-				{
-					auto i = bone_index_map_.find( cluster->GetLink() );
-
-					if ( i == bone_index_map_.end() )
-					{
-						continue;
-					}
-
-					bone_index = i->second;
-				}
-
-				load_animations_for_bone( bone_index, cluster );
-
-				for ( int i = 0; i < cluster->GetControlPointIndicesCount(); ++i )
-				{
-					int index = cluster->GetControlPointIndices()[ i ];
-					float weight = static_cast< float >( cluster->GetControlPointWeights()[ i ] );
-
-					skinning_info_list[ index ].add( bone_index, weight );
-
-					// std::cout << index << ":" << weight << std::endl;
-				}
-
-				FbxAMatrix transform_matrix, transform_link_matrix;
-
-				cluster->GetTransformMatrix( transform_matrix );
-				cluster->GetTransformLinkMatrix( transform_link_matrix );
-
-				const FbxAMatrix& node_global_transform = fbx_scene_->GetEvaluator()->GetNodeLocalTransform( cluster->GetLink() );
-
-				std::cout << "LocalTransform : " << std::endl;
-				print_local_transform( cluster->GetLink() );
-
-				// std::cout << "NodeGlobalTransform : " << std::endl;
-				// print_matrix( node_global_transform );
-
-				std::cout << "TransformMatrix : " << std::endl;
-				print_matrix( transform_matrix );
-
-				std::cout << "TransformLinkMatrix : " << std::endl;
-				print_matrix( transform_link_matrix );
-
-				FbxAMatrix initial_matrix = transform_link_matrix; // .Inverse() * transform_matrix;
-
-				std::cout << "BoneInitialMatrix : " << std::endl;
-				print_matrix( initial_matrix );
-
-				// initial_matrix.SetIdentity();
-
-				/*
-				skinning_animation_set->get_bone_offset_matrix_by_bone_index( bone_index ).set(
-					static_cast< float_t >( initial_matrix.Get( 0, 0 ) ), static_cast< float_t >( initial_matrix.Get( 0, 1 ) ), static_cast< float_t >( initial_matrix.Get( 0, 2 ) ), static_cast< float_t >( initial_matrix.Get( 0, 3 ) ),
-					static_cast< float_t >( initial_matrix.Get( 1, 0 ) ), static_cast< float_t >( initial_matrix.Get( 1, 1 ) ), static_cast< float_t >( initial_matrix.Get( 1, 2 ) ), static_cast< float_t >( initial_matrix.Get( 1, 3 ) ),
-					static_cast< float_t >( initial_matrix.Get( 2, 0 ) ), static_cast< float_t >( initial_matrix.Get( 2, 1 ) ), static_cast< float_t >( initial_matrix.Get( 2, 2 ) ), static_cast< float_t >( initial_matrix.Get( 2, 3 ) ),
-					static_cast< float_t >( initial_matrix.Get( 3, 0 ) ), static_cast< float_t >( initial_matrix.Get( 3, 1 ) ), static_cast< float_t >( initial_matrix.Get( 3, 2 ) ), static_cast< float_t >( initial_matrix.Get( 3, 3 ) ) );
-				*/
-
-				Matrix rx, ry, rz, s, t;
-
-				rx.set_rotation_x( math::degree_to_radian( static_cast< float_t >( -initial_matrix.GetR()[ 0 ] ) ) );
-				ry.set_rotation_y( math::degree_to_radian( static_cast< float_t >( -initial_matrix.GetR()[ 1 ] ) ) );
-				rz.set_rotation_z( math::degree_to_radian( static_cast< float_t >(  initial_matrix.GetR()[ 2 ] ) ) );
-
-				s.set_scaling(
-					static_cast< float_t >( initial_matrix.GetS()[ 0 ] ),
-					static_cast< float_t >( initial_matrix.GetS()[ 1 ] ),
-					static_cast< float_t >( initial_matrix.GetS()[ 2 ] ) );
-
-				t.set_translation(
-					static_cast< float_t >(  initial_matrix.GetT()[ 0 ] ),
-					static_cast< float_t >(  initial_matrix.GetT()[ 1 ] ),
-					static_cast< float_t >( -initial_matrix.GetT()[ 2 ] ) );
-
-				skinning_animation_set->get_bone_offset_matrix_by_bone_index( bone_index ) = s * rx * ry * rz * t;
-				// skinning_animation_set->get_bone_offset_matrix_by_bone_index( bone_index ).set_identity();
-			}
-
-			// skinning_animation_set->get_bone_offset_matrix_by_bone_index( 0 ).set_identity();
-		}
-
-		skinning_animation_set->optimize();
-		skinning_animation_set->calculate_length();
-	}
 
 	for ( int n = 0; n < mesh->GetPolygonCount(); n++ )
 	{
@@ -519,6 +412,78 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 				vertex_index_map[ v ] = vertex_index;
 			}
 		}
+	}
+}
+
+/**
+ * メッシュのスキニング情報を読み込む
+ *
+ * @param mesh メッシュ情報
+ * @param skinning_info_list スキニング情報への参照
+ */
+void FbxFileLoader::load_mesh_skinning_info( FbxSkin* skin, Mesh::SkinningInfoList& skinning_info_list )
+{
+	std::cout << skin->GetClusterCount() << " bones" << std::endl;
+
+	for ( int cluster_index = 0; cluster_index < skin->GetClusterCount(); ++cluster_index )
+	{
+		FbxCluster* cluster = skin->GetCluster( cluster_index );
+		std::cout << "cluster : " << cluster_index << " : " << cluster->GetNameOnly() << std::endl;
+		std::cout << "link : " << cluster->GetLink()->GetName() << std::endl;
+		std::cout << "type : " << cluster->GetLink()->GetTypeName() << std::endl;
+		std::cout << "link mode : " << cluster->GetLinkMode() << std::endl;
+
+		assert( cluster->GetLinkMode() == FbxCluster::eNormalize );
+
+		int bone_index = 0;
+
+		{
+			auto i = bone_index_map_.find( cluster->GetLink() );
+
+			if ( i == bone_index_map_.end() )
+			{
+				continue;
+			}
+
+			bone_index = i->second;
+		}
+
+		for ( int i = 0; i < cluster->GetControlPointIndicesCount(); ++i )
+		{
+			int index = cluster->GetControlPointIndices()[ i ];
+			float weight = static_cast< float >( cluster->GetControlPointWeights()[ i ] );
+
+			skinning_info_list[ index ].add( bone_index, weight );
+
+			// std::cout << index << ":" << weight << std::endl;
+		}
+
+		FbxAMatrix initial_matrix;
+		cluster->GetTransformLinkMatrix( initial_matrix );
+
+		Matrix rx, ry, rz, s, t;
+
+		rx.set_rotation_x( math::degree_to_radian( static_cast< float_t >( -initial_matrix.GetR()[ 0 ] ) ) );
+		ry.set_rotation_y( math::degree_to_radian( static_cast< float_t >( -initial_matrix.GetR()[ 1 ] ) ) );
+		rz.set_rotation_z( math::degree_to_radian( static_cast< float_t >(  initial_matrix.GetR()[ 2 ] ) ) );
+
+		s.set_scaling(
+			static_cast< float_t >( initial_matrix.GetS()[ 0 ] ),
+			static_cast< float_t >( initial_matrix.GetS()[ 1 ] ),
+			static_cast< float_t >( initial_matrix.GetS()[ 2 ] ) );
+
+		t.set_translation(
+			static_cast< float_t >(  initial_matrix.GetT()[ 0 ] ),
+			static_cast< float_t >(  initial_matrix.GetT()[ 1 ] ),
+			static_cast< float_t >( -initial_matrix.GetT()[ 2 ] ) );
+
+		mesh_->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( bone_index ) = s * rx * ry * rz * t;
+	}
+
+	if ( mesh_->get_skinning_animation_set() )
+	{
+		mesh_->get_skinning_animation_set()->optimize();
+		mesh_->get_skinning_animation_set()->calculate_length();
 	}
 }
 
@@ -625,14 +590,47 @@ void FbxFileLoader::load_limb( FbxNode* node )
 }
 
 /**
+ * アニメーション情報を読み込む
+ *
+ */
+void FbxFileLoader::load_animations()
+{
+	if ( bone_index_map_.empty() )
+	{
+		return;
+	}
+
+	SkinningAnimationSet* skinning_animation_set = mesh_->setup_skinning_animation_set();
+	skinning_animation_set->set_bone_count( bone_index_map_.size() );
+
+	for ( auto i = bone_index_map_.begin(); i != bone_index_map_.end(); ++i )
+	{
+		for ( int n = 0; n < i->first->GetChildCount(); ++n )
+		{
+			auto j = bone_index_map_.find( i->first->GetChild( n ) );
+
+			if ( j != bone_index_map_.end() )
+			{
+				skinning_animation_set->add_child_bone_index( i->second, j->second );
+			}
+		}
+	}
+
+	for ( auto i = bone_index_map_.begin(); i != bone_index_map_.end(); ++i )
+	{
+		load_animations_for_bone( i->second, i->first );
+	}
+}
+
+/**
  * 指定したインデックスのボーンに対応するアニメーションの一覧を読み込む
  *
  * @param bone_index ボーンのインデックス
  * @param cluster FbxCluster
  */
-void FbxFileLoader::load_animations_for_bone( int bone_index, FbxCluster* cluster )
+void FbxFileLoader::load_animations_for_bone( int bone_index, FbxNode* node )
 {
-	if ( ! cluster )
+	if ( ! node )
 	{
 		return;
 	}
@@ -647,7 +645,7 @@ void FbxFileLoader::load_animations_for_bone( int bone_index, FbxCluster* cluste
 		}
 
 		Animation& animation = mesh_->get_skinning_animation_set()->get_skinning_animation( anim_stack->GetName() ).get_bone_animation_by_bone_index( bone_index );
-		animation.set_name( cluster->GetName() );
+		animation.set_name( node->GetName() );
 
 		for ( int m = 0; m < anim_stack->GetMemberCount< FbxAnimLayer >(); m++ )
 		{
@@ -658,17 +656,17 @@ void FbxFileLoader::load_animations_for_bone( int bone_index, FbxCluster* cluste
 				continue;
 			}
 
-			load_curve_for_animation( animation, "tx", cluster->GetLink()->LclTranslation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_X ) );
-			load_curve_for_animation( animation, "ty", cluster->GetLink()->LclTranslation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Y ) );
-			load_curve_for_animation( animation, "tz", cluster->GetLink()->LclTranslation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Z ) );
+			load_curve_for_animation( animation, "tx", node->LclTranslation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_X ) );
+			load_curve_for_animation( animation, "ty", node->LclTranslation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Y ) );
+			load_curve_for_animation( animation, "tz", node->LclTranslation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Z ) );
 
-			load_curve_for_animation( animation, "rx", cluster->GetLink()->LclRotation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_X ) );
-			load_curve_for_animation( animation, "ry", cluster->GetLink()->LclRotation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Y ) );
-			load_curve_for_animation( animation, "rz", cluster->GetLink()->LclRotation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Z ) );
+			load_curve_for_animation( animation, "rx", node->LclRotation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_X ) );
+			load_curve_for_animation( animation, "ry", node->LclRotation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Y ) );
+			load_curve_for_animation( animation, "rz", node->LclRotation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Z ) );
 
-			load_curve_for_animation( animation, "sx", cluster->GetLink()->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_X ) );
-			load_curve_for_animation( animation, "sy", cluster->GetLink()->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Y ) );
-			load_curve_for_animation( animation, "sz", cluster->GetLink()->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Z ) );
+			load_curve_for_animation( animation, "sx", node->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_X ) );
+			load_curve_for_animation( animation, "sy", node->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Y ) );
+			load_curve_for_animation( animation, "sz", node->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Z ) );
 
 			/*
 			std::for_each(

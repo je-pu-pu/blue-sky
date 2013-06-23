@@ -107,7 +107,7 @@ void AnimationPlayer::calculate_bone_matrix_recursive( BoneConstantBuffer::Data&
 	const Matrix& bone_offset_matrix = get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( bone_index );
 
 	uint_t parent_bone_index = get_skinning_animation_set()->get_parent_bone_index( bone_index );
-	const Matrix& parent_bone_offset_matrix = get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( parent_bone_index );
+	const Matrix& parent_bone_offset_matrix = bone_index == 0 ? Matrix() : get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( parent_bone_index );
 
 	Matrix s, r, t;
 

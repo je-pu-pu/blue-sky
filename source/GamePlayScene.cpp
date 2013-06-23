@@ -886,7 +886,7 @@ void GamePlayScene::render()
 
 		render_object_line();
 
-		render_debug_axis();
+		// render_debug_axis();
 
 		render_debug_bullet();
 

@@ -894,7 +894,7 @@ void GamePlayScene::render()
 
 		get_direct_3d()->renderText();
 		
-		// render_debug_shadow_map_window();
+		render_debug_shadow_map_window();
 
 		render_sprite();
 
@@ -1076,7 +1076,7 @@ void GamePlayScene::render_shadow_map() const
 
 	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|shadow_map" );
 
-	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 	{
 		( *i )->apply();
 
@@ -1087,9 +1087,12 @@ void GamePlayScene::render_shadow_map() const
 			bind_game_constant_buffer();
 			bind_frame_constant_buffer();
 
-			for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+			get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs(); // for line
+
+			for ( auto j = get_active_object_manager()->active_object_list().begin(); j != get_active_object_manager()->active_object_list().end(); ++j )
 			{
-				render_active_object_mesh( *i );
+				render_active_object_mesh( *j );
+				render_active_object_line( *j );
 			}
 
 			render_active_object_mesh( player_.get() );

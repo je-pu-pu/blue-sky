@@ -80,8 +80,6 @@ cbuffer BoneConstantBuffer : register( b5 )
     matrix BoneMatrix[ MaxBones ];
 };
 
-int debug_bone_index;
-
 struct VS_INPUT
 {
 	float4 Position : SV_POSITION;

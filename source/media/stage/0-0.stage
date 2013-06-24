@@ -6,6 +6,8 @@ far-billboards stage-0-0-drawing-far-billboards
 player 0 0 0
 goal 0 0 30
 
+object stage-0 0 0 0
+
 object god 0 0 2
 
 dynamic-object soda-can-1 0.5 0 1.8

@@ -87,6 +87,11 @@ Direct3D11ShadowMap::~Direct3D11ShadowMap()
 	DIRECT_X_RELEASE( depth_stencil_texture_ );
 }
 
+/**
+ * 光源の座標を設定する
+ *
+ * @param pos 光源の座標
+ */
 void Direct3D11ShadowMap::setLightPosition( const XMVECTOR& pos )
 {
 	light_position_ = pos;
@@ -101,6 +106,11 @@ void Direct3D11ShadowMap::setLightPosition( const XMVECTOR& pos )
 	}
 }
 
+/**
+ * カメラの座標を設定する
+ *
+ * @param pos カメラの座標
+ */
 void Direct3D11ShadowMap::setEyePosition( const XMVECTOR& eye )
 {
 	XMVECTOR eye_fix = XMVectorSet( XMVectorGetX( eye ) + XMVectorGetX( light_position_ ), XMVectorGetY( eye ) + XMVectorGetY( light_position_ ), XMVectorGetZ( eye ) + XMVectorGetZ( light_position_ ), 0.f );
@@ -110,6 +120,10 @@ void Direct3D11ShadowMap::setEyePosition( const XMVECTOR& eye )
 	view_matrix_ = XMMatrixLookAtLH( eye_fix, at, up );
 }
 
+/**
+ * シャドウマップを描画するための準備をする
+ *
+ */
 void Direct3D11ShadowMap::ready_to_render_shadow_map()
 {
 	ID3D11ShaderResourceView* shader_resource_view[] = { 0 };
@@ -122,6 +136,11 @@ void Direct3D11ShadowMap::ready_to_render_shadow_map()
 	direct_3d_->getImmediateContext()->OMSetRenderTargets( 1, render_target_view, depth_stencil_view_ );
 }
 
+/**
+ * 指定したカスケードレベルのシャドウマップを描画するための準備をする
+ *
+ * @param level カスケードレベル
+ */
 void Direct3D11ShadowMap::ready_to_render_shadow_map_with_cascade_level( int level )
 {
 	constant_buffer_data_.shadow_view_projection[ level ] = getViewProjectionMatrix( level );
@@ -134,6 +153,10 @@ void Direct3D11ShadowMap::ready_to_render_shadow_map_with_cascade_level( int lev
 	direct_3d_->getImmediateContext()->RSSetViewports( 1, & viewport_list_[ level ] );
 }
 
+/**
+ * シーンを描画するための準備をする
+ *
+ */
 void Direct3D11ShadowMap::ready_to_render_scene()
 {
 	direct_3d_->getImmediateContext()->PSSetShaderResources( shader_resource_view_slot_, 1, & shader_resource_view_ );
@@ -147,9 +170,4 @@ void Direct3D11ShadowMap::ready_to_render_scene()
 	constant_buffer_->update( & constant_buffer_data_ );
 	constant_buffer_->bind_to_vs();
 	constant_buffer_->bind_to_ps();
-
-	// constant_buffer_data_.shadow_view_projection = getViewProjectionMatrix( 0 );
-	// constant_buffer_data_.shadow_view_projection = XMMatrixTranspose( constant_buffer_data_.shadow_view_projection );
-	// constant_buffer_->update( & constant_buffer_data_ );
-	// constant_buffer_->render();
 }

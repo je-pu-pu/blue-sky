@@ -51,6 +51,25 @@ void Direct3D11Effect::load( const char* file_path )
 	int n = shader->GetBufferSize();
 
 	DIRECT_X_FAIL_CHECK( D3DX11CreateEffectFromMemory( shader->GetBufferPointer(), shader->GetBufferSize(), 0, direct_3d_->getDevice(), & effect_ ) );
+	
+	/*
+	for ( int n = 0; ; ++n )
+	{
+		D3DX11_EFFECT_VARIABLE_DESC evd;
+		DIRECT_X_FAIL_CHECK( effect_->GetVariableByIndex( n )->GetDesc( & evd ) );
+
+		const char* name = evd.Name;
+	}
+
+	bool a = effect_->IsValid();
+	bool b = effect_->GetVariableByName( "|vs_skin" )->IsValid();
+	bool c = effect_->GetVariableByName( "|vs_skin" )->AsShader()->IsValid();
+
+	ID3D11VertexShader* vs = 0;
+	effect_->GetVariableByName( "|vs_skin" )->AsShader()->GetVertexShader( 0, & vs );
+
+	vs = vs;
+	*/
 }
 
 Direct3D11Effect::Technique* Direct3D11Effect::getTechnique( const char* name )

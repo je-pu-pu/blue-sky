@@ -77,7 +77,7 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_lev
 		n++;
 	}
 
-	setLightPosition( XMVectorSet( 0.5f, 1.f, -0.25f, 0.f ) );
+	setLightPosition( XMVectorSet( 50.f, 100.f, -25.f, 0.f ) );
 }
 
 Direct3D11ShadowMap::~Direct3D11ShadowMap()
@@ -97,11 +97,12 @@ void Direct3D11ShadowMap::setLightPosition( const XMVECTOR& pos )
 	light_position_ = pos;
 
 	/// @todo 動的に変更できるようにする
-	float length[ 4 ] = { 5.f, 50.f, 200.f, 9999.f };
+	float length[ 4 ] = { 10.f, 50.f, 150.f, 9999.f };
 
 	for ( int n = 0; n < 4; n++ )
 	{
-		projection_matrix_list_[ n ] = XMMatrixOrthographicLH( length[ n ], length[ n ], 1.f, 5.f );
+		/// @todo 地面より手前に far clip がこないようにする
+		projection_matrix_list_[ n ] = XMMatrixOrthographicLH( length[ n ], length[ n ], 1.f, 200.f );
 		constant_buffer_data_.view_depth_per_cascade_level[ n ] = length[ n ] * 0.3f;
 	}
 }

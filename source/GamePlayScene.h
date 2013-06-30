@@ -95,6 +95,7 @@ protected:
 	void render_text() const;
 
 	void render_shadow_map() const;
+	void render_shadow_map( const char*, bool ) const;
 	
 	void render_sky_box() const;
 	void render_far_billboards() const;

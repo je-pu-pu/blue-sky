@@ -190,7 +190,11 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	{
 		bgm_->play( true );
 	}
-	
+
+	// きれいにする
+	get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-1-loop.png" );
+	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pencil-face-1.png" );
+
 	update_render_data_for_game();
 
 	restart();
@@ -576,14 +580,20 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			robot->set_player( player_.get() );
 
 			robot->add_drawing_model( get_drawing_model_manager()->load( "robot" ) );
+			/*
 			robot->add_drawing_model( get_drawing_model_manager()->load( "robot-l" ) );
 			robot->add_drawing_model( get_drawing_model_manager()->load( "robot" ) );
 			robot->add_drawing_model( get_drawing_model_manager()->load( "robot-r" ) );
+			*/
 
 			robot->set_start_location( x, y, z );
 
 			get_active_object_manager()->add_active_object( robot );
 			robot->set_rigid_body( get_physics()->add_active_object( robot ) );
+
+			/// @todo ちゃんとする
+			robot->setup_animation_player();
+			robot->get_animation_player()->play( "Walk", true, true );
 		}
 		else if ( name == "balloon" )
 		{
@@ -894,7 +904,7 @@ void GamePlayScene::render()
 
 		get_direct_3d()->renderText();
 		
-		render_debug_shadow_map_window();
+		// render_debug_shadow_map_window();
 
 		render_sprite();
 
@@ -1028,6 +1038,7 @@ void GamePlayScene::bind_game_constant_buffer() const
 {
 	get_game_main()->get_game_constant_buffer()->bind_to_vs();
 	get_game_main()->get_game_constant_buffer()->bind_to_gs();
+	get_game_main()->get_game_constant_buffer()->bind_to_ps();
 }
 
 /**
@@ -1074,7 +1085,25 @@ void GamePlayScene::render_shadow_map() const
 	shadow_map_->setEyePosition( XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 ) );
 	shadow_map_->ready_to_render_shadow_map();
 
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|shadow_map" );
+	get_direct_3d()->setInputLayout( "main" );
+	render_shadow_map( "|shadow_map", false );
+
+	// @todo 最適化・高速化
+	// get_direct_3d()->setInputLayout( "skin" );
+	// render_shadow_map( "|shadow_map_skin", true );
+
+	// shadow_map_->finish_to_render_shadow_map();
+}
+
+/**
+ * シャドウマップを描画する
+ *
+ * @param technique_name テクニック名
+ * @param is_skin_mesh スキンメッシュフラグ
+ */
+void GamePlayScene::render_shadow_map( const char* technique_name, bool is_skin_mesh ) const
+{
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( technique_name );
 
 	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 	{
@@ -1091,17 +1120,24 @@ void GamePlayScene::render_shadow_map() const
 
 			for ( auto j = get_active_object_manager()->active_object_list().begin(); j != get_active_object_manager()->active_object_list().end(); ++j )
 			{
-				render_active_object_mesh( *j );
-				render_active_object_line( *j );
+				if ( ( *j )->get_drawing_model()->is_skin_mesh() == is_skin_mesh )
+				{
+					render_active_object_mesh( *j );
+				}
+
+				/// @todo ちゃんとする
+				// render_active_object_line( *j );
 			}
 
-			render_active_object_mesh( player_.get() );
-			render_active_object_mesh( goal_.get() );
+			if ( ! is_skin_mesh )
+			{
+				render_active_object_mesh( player_.get() );
+				render_active_object_mesh( goal_.get() );
+			}
 		}
 	}
-
-	// shadow_map_->finish_to_render_shadow_map();
 }
+
 
 /**
  * スカイボックスを描画する
@@ -1220,12 +1256,17 @@ void GamePlayScene::render_object_mesh() const
 				
 		bind_game_constant_buffer();
 		bind_frame_constant_buffer();
+		
 		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs();
+		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_ps();
 
 		if ( shadow_map_ )
 		{
 			shadow_map_->ready_to_render_scene();
 		}		
+
+		Texture* paper_texture = get_direct_3d()->getTextureManager()->get( "paper" );
+		get_direct_3d()->getImmediateContext()->PSSetShaderResources( 2, 1, & paper_texture );
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 		{

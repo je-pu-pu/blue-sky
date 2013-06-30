@@ -2,9 +2,10 @@ static const int ShadowMapCascadeLevels = 3;
 static const float Pi = 3.14159265f;
 static const uint MaxBones = 200;
 
-Texture2D model_texture : register( t0 );
-Texture2D line_texture : register( t0 );
-Texture2D shadow_texture : register( t1 );
+Texture2D model_texture : register( t0 );		/// モデルのテクスチャ
+Texture2D line_texture : register( t0 );		/// 線のテクスチャ
+Texture2D shadow_texture : register( t1 );		/// シャドウマップ
+Texture2D paper_texture : register( t2 );		/// 紙の質感テクスチャ
 
 SamplerState texture_sampler
 {
@@ -264,7 +265,7 @@ void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_
 	static const float DrawingAccentScale = 10.f;
 
 	const float line_width_pixels = 32.f;
-	const float line_width_scale = 1.f; // 0.5f + pow( abs( DrawingAccent ), DrawingAccentPower ) * DrawingAccentScale;
+	const float line_width_scale = 0.5f + pow( abs( DrawingAccent ), DrawingAccentPower ) * DrawingAccentScale;
 	const float line_width = line_width_pixels * line_width_scale / screen_height;
 
 	const float line_v_width = line_width_pixels / LineTextureSize;
@@ -363,7 +364,7 @@ BlendState Blend
 	// SrcBlendAlpha = SRC_ALPHA;
 	SrcBlend = SRC_ALPHA;
 	DestBlend = INV_SRC_ALPHA;
-	AlphaToCoverageEnable = True;
+	// AlphaToCoverageEnable = True;
 };
 
 DepthStencilState NoWriteDepth
@@ -398,7 +399,7 @@ RasterizerState WireFrame
 RasterizerState Shadow
 {
 	CullMode = NONE;
-	SlopeScaledDepthBias = 8.f;
+	SlopeScaledDepthBias = 1.f;
 };
 
 // ----------------------------------------
@@ -533,6 +534,7 @@ technique11 billboard
 {
 	pass main
 	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
 		SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
@@ -676,13 +678,17 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 	float4 shadow = float4( 1.f, 1.f, 1.f, 1.f );
 	float sz = ( float ) shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy );
 
-	if ( /* input.Normal.x < 0.f || */ shadow_tex_coord.z >= sz )
+	// if ( input.Position.z >= sz )
+	if ( shadow_tex_coord.z >= sz )
 	{
+		// 影
+
 		const float4 shadow_color = float4( 0.5f, 0.5f, 0.75f, 1.f );
 
 		const float a = 0.75f;
 
 		/*
+		// 端に行くほど影を透明にする？
 		float a = abs( shadow_tex_coord.x - 0.5f ) + abs( shadow_tex_coord.y - 0.5f ) / 0.5f;
 
 		a = min( a, 1.f );
@@ -696,21 +702,68 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 		
 		shadow = float4( 1.f, 1.f, 1.f, 1.f ) * ( 1.f - a ) + shadow_color * a;
 		shadow.a = 1.f;
+
+		// 紙の質感を追加する
+		{
+			const float Scale = 1.f; // 0.75f + DrawingAccent * 0.25f;
+			
+			const float PaperTextureWidth  = 512.f * Scale;
+			const float PaperTextureHeight = 512.f * Scale;
+
+			float2 uv = float2(
+				input.Position.x / ScreenWidth  * ( ScreenWidth  / PaperTextureWidth  ),
+				input.Position.y / ScreenHeight * ( ScreenHeight / PaperTextureHeight )
+			);
+
+			// アクセントを加える
+			uv += float2( TimeBeat * 0.2f, 0.f );
+			
+			float4 paper = paper_texture.Sample( wrap_texture_sampler, uv );
+			shadow.rgb = float3( 1.f, 1.f, 1.f ) * ( 1.f - paper.a ) + shadow.rgb * paper.a;
+						
+			/*
+			shadow.r = input.Position.x / ScreenWidth;
+			shadow.g = input.Position.y / ScreenHeight;
+			shadow.b = 0.f;
+			
+			*/
+
+			// return shadow;
+		}
 	}
 
 	// return float4( input.Normal, 1.f );
 
+	// return float4( sz, sz, sz, 1.f );
+	// return float4( input.Position.z, input.Position.z, input.Position.z, 1.f );
+
+	// return paper_texture.Sample( wrap_texture_sampler, input.TexCoord );
+
 	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ) * shadow; // * cascade_colors[ cascade_index ];
 }
 
-PS_FLAT_INPUT vs_shadow_map( VS_INPUT input )
+float4 vs_shadow_map( VS_INPUT input ) : SV_POSITION
 {
-	PS_FLAT_INPUT output;
-	
-	output.Position = mul( input.Position, World );
-    output.Position = mul( output.Position, ShadowViewProjection[ 0 ] );
-	output.TexCoord = input.TexCoord;
-	output.Color = float4( 0.f, 0.f, 0.f, 0.f );
+	float4 output;
+
+	output = mul( input.Position, World );
+    output = mul( output, ShadowViewProjection[ 0 ] );
+
+	return output;
+}
+
+float4 vs_shadow_map_skin( VS_SKIN_INPUT input ) : SV_POSITION
+{
+	float4 output;
+
+	output =
+		mul( input.Position, BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
+		mul( input.Position, BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
+		mul( input.Position, BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
+		mul( input.Position, BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
+
+	output = mul( output, World );
+    output = mul( output, ShadowViewProjection[ 0 ] );
 
 	return output;
 }
@@ -720,8 +773,8 @@ float4 ps_shadow_map_debug( PS_INPUT input ) : SV_Target
 	// float sz = shadow_texture.Sample( texture_sampler, input.TexCoord );
 	float sz = model_texture.Sample( texture_sampler, input.TexCoord ).x;
 
-	sz *= 1000.f;
-	sz -= 999.5f;
+	// sz *= 1000.f;
+	// sz -= 999.5f;
 
 	return float4( sz, sz, sz, 0.5f );
 }
@@ -730,12 +783,27 @@ technique11 shadow_map
 {
 	pass main
 	{
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
 		SetVertexShader( CompileShader( vs_4_0, vs_shadow_map() ) );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_flat() ) );
+		SetPixelShader( NULL );
+
+		RASTERIZERSTATE = Shadow;
+	}
+}
+
+technique11 shadow_map_skin
+{
+	pass main
+	{
+		SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_shadow_map_skin() ) );
+		SetGeometryShader( NULL );
+		SetPixelShader( NULL );
 
 		RASTERIZERSTATE = Shadow;
 	}

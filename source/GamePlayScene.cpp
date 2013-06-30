@@ -1071,16 +1071,17 @@ void GamePlayScene::render_shadow_map() const
 		return;
 	}
 
-	/*
-	static float a = 0.f;
+	if ( true )
+	{
+		static float a = 0.f;
 
-	a += 0.01f;
+		a += 0.01f;
 
-	const XMVECTOR light_origin = XMVectorSet( 50.f, 100.f, -25.f, 0.f );
-	XMVECTOR light = light_origin + XMVectorSet( cos( a ) * 10.f, 0.f, sin( a ) * 10.f, 0.f );	
+		const XMVECTOR light_origin = XMVectorSet( 0.f, 100.f, 0.f, 0.f );
+		XMVECTOR light = light_origin + XMVectorSet( cos( a ) * 50.f, 0.f, sin( a ) * 50.f, 0.f );	
 
-	shadow_map_->setLightPosition( light );
-	*/
+		shadow_map_->setLightPosition( light );
+	}
 
 	shadow_map_->setEyePosition( XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 ) );
 	shadow_map_->ready_to_render_shadow_map();
@@ -1089,8 +1090,8 @@ void GamePlayScene::render_shadow_map() const
 	render_shadow_map( "|shadow_map", false );
 
 	// @todo Å“K‰»E‚‘¬‰»
-	// get_direct_3d()->setInputLayout( "skin" );
-	// render_shadow_map( "|shadow_map_skin", true );
+	get_direct_3d()->setInputLayout( "skin" );
+	render_shadow_map( "|shadow_map_skin", true );
 
 	// shadow_map_->finish_to_render_shadow_map();
 }
@@ -1123,10 +1124,10 @@ void GamePlayScene::render_shadow_map( const char* technique_name, bool is_skin_
 				if ( ( *j )->get_drawing_model()->is_skin_mesh() == is_skin_mesh )
 				{
 					render_active_object_mesh( *j );
-				}
 
-				/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
-				// render_active_object_line( *j );
+					/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
+					render_active_object_line( *j );
+				}
 			}
 
 			if ( ! is_skin_mesh )
@@ -1216,8 +1217,7 @@ void GamePlayScene::render_far_billboards() const
  */
 void GamePlayScene::render_object_skin_mesh() const
 {
-	/// @todo skin_with_shadow
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( shadow_map_ ? "|skin" : "|skin" );
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( shadow_map_ ? "|skin_with_shadow" : "|skin" );
 
 	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 	{
@@ -1225,12 +1225,18 @@ void GamePlayScene::render_object_skin_mesh() const
 		
 		bind_game_constant_buffer();
 		bind_frame_constant_buffer();
+
 		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs();
+		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_ps();
 
 		if ( shadow_map_ )
 		{
 			shadow_map_->ready_to_render_scene();
-		}		
+
+			/// @todo ‚Ü‚Æ‚ß‚é
+			Texture* paper_texture = get_direct_3d()->getTextureManager()->get( "paper" );
+			get_direct_3d()->getImmediateContext()->PSSetShaderResources( 2, 1, & paper_texture );
+		}
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 		{
@@ -1263,10 +1269,11 @@ void GamePlayScene::render_object_mesh() const
 		if ( shadow_map_ )
 		{
 			shadow_map_->ready_to_render_scene();
-		}		
 
-		Texture* paper_texture = get_direct_3d()->getTextureManager()->get( "paper" );
-		get_direct_3d()->getImmediateContext()->PSSetShaderResources( 2, 1, & paper_texture );
+			/// @todo ‚Ü‚Æ‚ß‚é
+			Texture* paper_texture = get_direct_3d()->getTextureManager()->get( "paper" );
+			get_direct_3d()->getImmediateContext()->PSSetShaderResources( 2, 1, & paper_texture );
+		}
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 		{

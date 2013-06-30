@@ -81,6 +81,12 @@ cbuffer BoneConstantBuffer : register( b5 )
     matrix BoneMatrix[ MaxBones ];
 };
 
+cbuffer ShadowMapBuffer : register( b10 )
+{
+	matrix ShadowViewProjection[ ShadowMapCascadeLevels ];
+	float4 ShadowMapViewDepthPerCascadeLevel;
+};
+
 struct VS_INPUT
 {
 	float4 Position : SV_POSITION;
@@ -403,6 +409,236 @@ RasterizerState Shadow
 };
 
 // ----------------------------------------
+// shaders
+// ----------------------------------------
+
+/**
+ * シャドウマップへのレンダリング
+ *
+ */
+float4 vs_shadow_map( VS_INPUT input ) : SV_POSITION
+{
+	float4 output;
+
+	output = mul( input.Position, World );
+    output = mul( output, ShadowViewProjection[ 0 ] );
+
+	return output;
+}
+
+/**
+ * シャドウマップへのスキンメッシュのレンダリング
+ *
+ */
+float4 vs_shadow_map_skin( VS_SKIN_INPUT input ) : SV_POSITION
+{
+	float4 output;
+
+	output =
+		mul( input.Position, BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
+		mul( input.Position, BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
+		mul( input.Position, BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
+		mul( input.Position, BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
+
+	output = mul( output, World );
+    output = mul( output, ShadowViewProjection[ 0 ] );
+
+	return output;
+}
+
+/**
+ * 
+ *
+ *
+ */
+PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
+{
+	PS_SHADOW_INPUT output;
+
+	output.Position = mul( input.Position, World );
+    output.Position = mul( output.Position, View );
+    output.Position = mul( output.Position, Projection );
+	
+	// output.Normal = input.Normal;
+	output.Normal = normalize( mul( input.Normal, ( float3x3 ) transpose( World ) ) );
+	
+	output.TexCoord = input.TexCoord;
+	
+	[unroll]
+	for ( int n = 0; n < ShadowMapCascadeLevels; n++ )
+	{
+		output.ShadowTexCoord[ n ] = mul( input.Position, World );
+		output.ShadowTexCoord[ n ] = mul( output.ShadowTexCoord[ n ], ShadowViewProjection[ n ] );
+		
+		output.ShadowTexCoord[ n ] /= output.ShadowTexCoord[ n ].w;
+	
+		output.ShadowTexCoord[ n ].x = ( output.ShadowTexCoord[ n ].x + 1.f ) / 2.f;
+		output.ShadowTexCoord[ n ].y = ( -output.ShadowTexCoord[ n ].y + 1.f ) / 2.f;
+		// output.ShadowTexCoord[ n ].z -= 0.00001f;
+		// output.ShadowTexCoord[ n ].z -= 0.000005f;
+	}
+
+	output.Depth = mul( mul( input.Position, World ), View ).z;
+
+	return output;
+}
+
+/**
+ * 
+ *
+ *
+ */
+PS_SHADOW_INPUT vs_skin_with_shadow( VS_SKIN_INPUT input )
+{
+	PS_SHADOW_INPUT output;
+
+	output.Position =
+		mul( input.Position, BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
+		mul( input.Position, BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
+		mul( input.Position, BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
+		mul( input.Position, BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
+
+	output.Position = mul( output.Position, World );
+    output.Position = mul( output.Position, View );
+    output.Position = mul( output.Position, Projection );
+	
+	// output.Normal = input.Normal;
+	output.Normal = normalize( mul( input.Normal, ( float3x3 ) transpose( World ) ) );
+	
+	output.TexCoord = input.TexCoord;
+	
+	[unroll]
+	for ( int n = 0; n < ShadowMapCascadeLevels; n++ )
+	{
+		/// @todo 高速化する
+		output.ShadowTexCoord[ n ] = 
+			mul( input.Position, BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
+			mul( input.Position, BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
+			mul( input.Position, BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
+			mul( input.Position, BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
+		output.ShadowTexCoord[ n ] = mul( output.ShadowTexCoord[ n ], World );
+		output.ShadowTexCoord[ n ] = mul( output.ShadowTexCoord[ n ], ShadowViewProjection[ n ] );
+		
+		output.ShadowTexCoord[ n ] /= output.ShadowTexCoord[ n ].w;
+	
+		output.ShadowTexCoord[ n ].x = ( output.ShadowTexCoord[ n ].x + 1.f ) / 2.f;
+		output.ShadowTexCoord[ n ].y = ( -output.ShadowTexCoord[ n ].y + 1.f ) / 2.f;
+	}
+
+	output.Depth = mul( mul( input.Position, World ), View ).z;
+
+	return output;
+}
+
+/**
+ * 
+ *
+ */
+float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
+{
+	const float4 comp = input.Depth > ShadowMapViewDepthPerCascadeLevel;
+
+	float index =
+		dot(
+			float4(
+				ShadowMapCascadeLevels > 0,
+				ShadowMapCascadeLevels > 1,
+				ShadowMapCascadeLevels > 2,
+				ShadowMapCascadeLevels > 3
+			),
+			comp
+		);
+
+	index = min( index, ShadowMapCascadeLevels - 1 );
+
+	const int cascade_index = ( int ) index;
+
+	float4 shadow_tex_coord = input.ShadowTexCoord[ cascade_index ];
+
+	shadow_tex_coord.x /= ( float ) ShadowMapCascadeLevels;
+	shadow_tex_coord.x += ( float ) cascade_index / ( float ) ShadowMapCascadeLevels;
+
+
+	// ---
+
+
+	float4 shadow = float4( 1.f, 1.f, 1.f, 1.f );
+	float sz = ( float ) shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy );
+
+	// if ( input.Position.z >= sz )
+	if ( shadow_tex_coord.z >= sz )
+	{
+		// 影
+
+		const float4 shadow_color = float4( 0.5f, 0.5f, 0.75f, 1.f );
+
+		const float a = 0.75f;
+
+		/*
+		// 端に行くほど影を透明にする？
+		float a = abs( shadow_tex_coord.x - 0.5f ) + abs( shadow_tex_coord.y - 0.5f ) / 0.5f;
+
+		a = min( a, 1.f );
+		a = 1.f - pow( a, 3 );
+
+		if ( shadow_tex_coord.z < ( float ) shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy + float2( 1.f / 1024.f, 1.f ) ) )
+		{
+			a /= 2.f;
+		}
+		*/
+		
+		shadow = float4( 1.f, 1.f, 1.f, 1.f ) * ( 1.f - a ) + shadow_color * a;
+		shadow.a = 1.f;
+
+		// 紙の質感を追加する
+		if ( true )
+		{
+			const float Scale = 0.5f; // 0.75f + DrawingAccent * 0.25f;
+			
+			const float PaperTextureWidth  = 512.f * Scale;
+			const float PaperTextureHeight = 512.f * Scale;
+
+			float2 uv = float2(
+				input.Position.x / ScreenWidth  * ( ScreenWidth  / PaperTextureWidth  ),
+				input.Position.y / ScreenHeight * ( ScreenHeight / PaperTextureHeight )
+			);
+
+			// アクセントを加える
+			uv += float2( TimeBeat * 0.2f, 0.f );
+			
+			float4 paper = paper_texture.Sample( wrap_texture_sampler, uv );
+			shadow.rgb = float3( 1.f, 1.f, 1.f ) * ( 1.f - paper.a ) + shadow.rgb * paper.a;
+						
+			/*
+			shadow.r = input.Position.x / ScreenWidth;
+			shadow.g = input.Position.y / ScreenHeight;
+			shadow.b = 0.f;
+			
+			*/
+
+			// return shadow;
+		}
+	}
+
+	// return float4( input.Normal, 1.f );
+
+	// return float4( sz, sz, sz, 1.f );
+	// return float4( input.Position.z, input.Position.z, input.Position.z, 1.f );
+
+	// return paper_texture.Sample( wrap_texture_sampler, input.TexCoord );
+
+	static const float4 cascade_colors[ 4 ] = 
+	{
+		float4 ( 1.2f, 1.0f, 1.0f, 1.0f ),
+		float4 ( 1.0f, 1.2f, 1.0f, 1.0f ),
+		float4 ( 1.0f, 1.0f, 1.2f, 1.0f ),
+		float4 ( 1.2f, 1.2f, 0.0f, 1.0f ),
+	};
+
+	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ) * shadow; // * cascade_colors[ cascade_index ];
+}
+
+// ----------------------------------------
 // main
 // ----------------------------------------
 technique11 main
@@ -433,6 +669,21 @@ technique11 skin
         SetVertexShader( CompileShader( vs_4_0, vs_skin() ) );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, ps_main_wrap() ) );
+
+		RASTERIZERSTATE = Default;
+    }
+}
+
+technique11 skin_with_shadow
+{
+	pass main
+    {
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+        SetVertexShader( CompileShader( vs_4_0, vs_skin_with_shadow() ) );
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
 
 		RASTERIZERSTATE = Default;
     }
@@ -601,173 +852,6 @@ technique11 bullet
 // ----------------------------------------
 // for Shadow Map
 // ----------------------------------------
-cbuffer ShadowMapBuffer : register( b10 )
-{
-	matrix ShadowViewProjection[ ShadowMapCascadeLevels ];
-	float4 ShadowMapViewDepthPerCascadeLevel;
-};
-
-static const float4 cascade_colors[ 4 ] = 
-{
-    float4 ( 1.2f, 1.0f, 1.0f, 1.0f ),
-    float4 ( 1.0f, 1.2f, 1.0f, 1.0f ),
-    float4 ( 1.0f, 1.0f, 1.2f, 1.0f ),
-    float4 ( 1.2f, 1.2f, 0.0f, 1.0f ),
-};
-
-PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
-{
-	PS_SHADOW_INPUT output;
-
-	output.Position = mul( input.Position, World );
-    output.Position = mul( output.Position, View );
-    output.Position = mul( output.Position, Projection );
-	
-	// output.Normal = input.Normal;
-	output.Normal = normalize( mul( input.Normal, ( float3x3 ) transpose( World ) ) );
-	
-	output.TexCoord = input.TexCoord;
-	
-	[unroll]
-	for ( int n = 0; n < ShadowMapCascadeLevels; n++ )
-	{
-		output.ShadowTexCoord[ n ] = mul( input.Position, World );
-		output.ShadowTexCoord[ n ] = mul( output.ShadowTexCoord[ n ], ShadowViewProjection[ n ] );
-		
-		output.ShadowTexCoord[ n ] /= output.ShadowTexCoord[ n ].w;
-	
-		output.ShadowTexCoord[ n ].x = ( output.ShadowTexCoord[ n ].x + 1.f ) / 2.f;
-		output.ShadowTexCoord[ n ].y = ( -output.ShadowTexCoord[ n ].y + 1.f ) / 2.f;
-		// output.ShadowTexCoord[ n ].z -= 0.00001f;
-		// output.ShadowTexCoord[ n ].z -= 0.000005f;
-	}
-
-	output.Depth = mul( mul( input.Position, World ), View ).z;
-
-	return output;
-}
-
-float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
-{
-	const float4 comp = input.Depth > ShadowMapViewDepthPerCascadeLevel;
-
-	float index =
-		dot(
-			float4(
-				ShadowMapCascadeLevels > 0,
-				ShadowMapCascadeLevels > 1,
-				ShadowMapCascadeLevels > 2,
-				ShadowMapCascadeLevels > 3
-			),
-			comp
-		);
-
-	index = min( index, ShadowMapCascadeLevels - 1 );
-
-	const int cascade_index = ( int ) index;
-
-	float4 shadow_tex_coord = input.ShadowTexCoord[ cascade_index ];
-
-	shadow_tex_coord.x /= ( float ) ShadowMapCascadeLevels;
-	shadow_tex_coord.x += ( float ) cascade_index / ( float ) ShadowMapCascadeLevels;
-
-
-	// ---
-
-
-	float4 shadow = float4( 1.f, 1.f, 1.f, 1.f );
-	float sz = ( float ) shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy );
-
-	// if ( input.Position.z >= sz )
-	if ( shadow_tex_coord.z >= sz )
-	{
-		// 影
-
-		const float4 shadow_color = float4( 0.5f, 0.5f, 0.75f, 1.f );
-
-		const float a = 0.75f;
-
-		/*
-		// 端に行くほど影を透明にする？
-		float a = abs( shadow_tex_coord.x - 0.5f ) + abs( shadow_tex_coord.y - 0.5f ) / 0.5f;
-
-		a = min( a, 1.f );
-		a = 1.f - pow( a, 3 );
-
-		if ( shadow_tex_coord.z < ( float ) shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy + float2( 1.f / 1024.f, 1.f ) ) )
-		{
-			a /= 2.f;
-		}
-		*/
-		
-		shadow = float4( 1.f, 1.f, 1.f, 1.f ) * ( 1.f - a ) + shadow_color * a;
-		shadow.a = 1.f;
-
-		// 紙の質感を追加する
-		{
-			const float Scale = 1.f; // 0.75f + DrawingAccent * 0.25f;
-			
-			const float PaperTextureWidth  = 512.f * Scale;
-			const float PaperTextureHeight = 512.f * Scale;
-
-			float2 uv = float2(
-				input.Position.x / ScreenWidth  * ( ScreenWidth  / PaperTextureWidth  ),
-				input.Position.y / ScreenHeight * ( ScreenHeight / PaperTextureHeight )
-			);
-
-			// アクセントを加える
-			uv += float2( TimeBeat * 0.2f, 0.f );
-			
-			float4 paper = paper_texture.Sample( wrap_texture_sampler, uv );
-			shadow.rgb = float3( 1.f, 1.f, 1.f ) * ( 1.f - paper.a ) + shadow.rgb * paper.a;
-						
-			/*
-			shadow.r = input.Position.x / ScreenWidth;
-			shadow.g = input.Position.y / ScreenHeight;
-			shadow.b = 0.f;
-			
-			*/
-
-			// return shadow;
-		}
-	}
-
-	// return float4( input.Normal, 1.f );
-
-	// return float4( sz, sz, sz, 1.f );
-	// return float4( input.Position.z, input.Position.z, input.Position.z, 1.f );
-
-	// return paper_texture.Sample( wrap_texture_sampler, input.TexCoord );
-
-	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ) * shadow; // * cascade_colors[ cascade_index ];
-}
-
-float4 vs_shadow_map( VS_INPUT input ) : SV_POSITION
-{
-	float4 output;
-
-	output = mul( input.Position, World );
-    output = mul( output, ShadowViewProjection[ 0 ] );
-
-	return output;
-}
-
-float4 vs_shadow_map_skin( VS_SKIN_INPUT input ) : SV_POSITION
-{
-	float4 output;
-
-	output =
-		mul( input.Position, BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
-		mul( input.Position, BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
-		mul( input.Position, BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
-		mul( input.Position, BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
-
-	output = mul( output, World );
-    output = mul( output, ShadowViewProjection[ 0 ] );
-
-	return output;
-}
-
 float4 ps_shadow_map_debug( PS_INPUT input ) : SV_Target
 {
 	// float sz = shadow_texture.Sample( texture_sampler, input.TexCoord );

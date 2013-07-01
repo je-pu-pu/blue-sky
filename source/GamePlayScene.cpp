@@ -418,6 +418,14 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> ambient_color_[ 0 ] >> ambient_color_[ 1 ] >> ambient_color_[ 2 ];
 		}
 		*/
+		else if ( name == "collision" )
+		{
+			std::string file_name;
+
+			ss >> file_name;
+
+			get_physics()->load_obj( ( std::string( "media/stage/" ) + file_name ).c_str() );
+		}
 		else if ( name == "player" )
 		{
 			float_t x = 0, y = 0, z = 0;
@@ -486,7 +494,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			size_map[ "box-5x5x5"    ] = ActiveObject::Vector3(  5.f,  5.f,  5.f );
 
 			std::map< string_t, float_t > mass_map;
-			mass_map[ "soda-can-1"   ] = 0.001f;
+			mass_map[ "soda-can-1"   ] = 0.000000001f;
 			mass_map[ "board-1"      ] = 20.f;
 
 			float w = 0.f, h = 0.f, d = 0.f, mass = 0.f;

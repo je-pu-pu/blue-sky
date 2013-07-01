@@ -790,7 +790,8 @@ technique11 billboard
 
 		SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_flat_with_flicker() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_flat() ) );
+		// SetPixelShader( CompileShader( ps_4_0, ps_flat_with_flicker() ) );
 
 		RASTERIZERSTATE = Default;
 	}

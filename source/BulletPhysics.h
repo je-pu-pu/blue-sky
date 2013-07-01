@@ -1,6 +1,7 @@
 #ifndef BULLET_PHYSICS_H
 #define BULLET_PHYSICS_H
 
+#include "type.h"
 #include <btBulletDynamicsCommon.h>
 
 /**
@@ -28,6 +29,8 @@ public:
 	~BulletPhysics();
 
 	void clear();
+
+	bool load_obj( const char_t* );
 
 	btRigidBody* add_ground_rigid_body( const Vector3& );
 	btRigidBody* add_box_rigid_body( const Transform&, const Transform&, const Vector3&, bool = false );

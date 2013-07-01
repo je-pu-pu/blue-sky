@@ -319,6 +319,9 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 		return;
 	}
 
+	FbxGeometryConverter converter( fbx_manager_ );
+	mesh = converter.TriangulateMesh( mesh );
+
 	typedef std::map< Mesh::Vertex, Material::Index > VertexIndexMap;
 	typedef std::vector< Mesh::Vertex > VertexList;
 

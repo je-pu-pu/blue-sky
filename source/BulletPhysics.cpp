@@ -1,5 +1,10 @@
 #include "BulletPhysics.h"
 
+#include <vector>
+#include <fstream>
+#include <sstream>
+
+
 #ifdef _DEBUG
 #pragma comment( lib, "BulletCollision_debug.lib" )
 #pragma comment( lib, "BulletDynamics_debug.lib" )
@@ -24,7 +29,7 @@ BulletPhysics::BulletPhysics()
 	dynamics_world_ = new btDiscreteDynamicsWorld( collision_dispatcher_, broadphase_interface_, constraint_solver_, collision_configuration_ );
 
 	dynamics_world_->setGravity( btVector3( 0, -9.8f, 0 ) );
-}
+ }
 
 BulletPhysics::~BulletPhysics()
 {
@@ -153,6 +158,104 @@ btRigidBody* BulletPhysics::add_cylinder_rigid_body( const Transform& transform,
 
 		return rigid_body;
 	}	
+}
+
+/**
+ * Wavefront OBJ ファイルからポリゴン形状を剛体として読み込む
+ *
+ */
+bool BulletPhysics::load_obj( const char_t* file_name )
+{
+	std::ifstream in( file_name );
+
+	if ( ! in.good() )
+	{
+		return false;
+	}
+
+	btTriangleMesh* triangle = new btTriangleMesh;
+	std::vector< btVector3* > vs;
+
+	while ( in.good() )
+	{		
+		std::string line;		
+		std::getline( in, line );
+
+		std::stringstream ss;
+		std::string command;
+		
+		ss << line;
+		ss >> command;
+
+		if ( command == "v" )
+		{
+			btScalar x, y, z;
+
+			ss >> x >> y >> z;
+
+			vs.push_back( new btVector3( x, y, -z ) );
+		}
+		else if ( command == "f" )
+		{
+			std::vector< uint_t > ns;
+
+			while ( ss.good() )
+			{
+				uint_t n;
+
+				ss >> n;
+
+				// 1 origin -> 0 origin
+				n--;
+
+				ns.push_back( n );
+			}
+
+			if ( ns.size() == 3 )
+			{
+				triangle->addTriangle( *vs[ ns[ 0 ] ], *vs[ ns[ 1 ] ], *vs[ ns[ 2 ] ], true );
+			}
+		}
+	}
+
+	for ( auto i = vs.begin(); i != vs.end(); ++i )
+	{
+		delete *i;
+	}
+	
+	{
+		/*
+		btConvexShape* convex_shape = new btConvexTriangleMeshShape( triangle );
+		btShapeHull* hull = new btShapeHull( convex_shape );
+		hull->buildHull( convex_shape->getMargin() );
+		
+		btConvexHullShape* shape = new btConvexHullShape;
+
+		for ( int n = 0; n < hull->numVertices(); ++n )
+		{
+ 			shape->addPoint( hull->getVertexPointer()[ n ] );
+		}
+		*/
+
+		btBvhTriangleMeshShape* shape = new btBvhTriangleMeshShape( triangle, true );
+		collision_shape_list_.push_back( shape );
+
+		Transform transform;
+		transform.setIdentity();
+
+		btScalar mass( 0 );
+		btVector3 local_inertia( 0, 0, 0 );
+
+		// shape->calculateLocalInertia( mass, local_inertia ); /// 静的な剛体なので慣性は不要
+
+		btDefaultMotionState* motion_state = new btDefaultMotionState( transform );
+		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( 0.f, motion_state, shape, local_inertia );
+	
+		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
+		dynamics_world_->addRigidBody( rigid_body );
+	}
+
+	return true;
 }
 
 void BulletPhysics::setConstraint()

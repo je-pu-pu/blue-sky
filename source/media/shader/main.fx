@@ -570,7 +570,7 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 	{
 		// ‰e
 
-		const float4 shadow_color = float4( 0.5f, 0.5f, 0.75f, 1.f );
+		const float4 shadow_color = float4( 0.75f, 0.75f, 1.f, 1.f );
 
 		const float a = 0.75f;
 

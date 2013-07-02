@@ -137,6 +137,29 @@ btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, cons
 	}	
 }
 
+btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, bool is_static )
+{
+	// create_cylinder_shape()
+	btCapsuleShape* shape = new btCapsuleShape( box.getX(), box.getY() );
+	collision_shape_list_.push_back( shape );
+
+	// create_cylinder_rigid_body()
+	{
+		btScalar mass( is_static ? 0.f : 0.01f );
+		btVector3 local_inertia( 0, 0, 0 );
+
+		shape->calculateLocalInertia( mass, local_inertia );
+
+		btDefaultMotionState* motion_state = new btDefaultMotionState( transform * offset );
+		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );
+	
+		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
+		dynamics_world_->addRigidBody( rigid_body );
+
+		return rigid_body;
+	}	
+}
+
 btRigidBody* BulletPhysics::add_cylinder_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, bool is_static )
 {
 	// create_cylinder_shape()

@@ -433,7 +433,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> x >> y >> z;
 
 			player_->set_start_location( x, y, z );
-			player_->set_rigid_body( get_physics()->add_active_object( player_.get() ) );
+			player_->set_rigid_body( get_physics()->add_active_object_as_capsule( player_.get() ) );
 
 			if ( ! ss.eof() )
 			{
@@ -494,7 +494,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			size_map[ "box-5x5x5"    ] = ActiveObject::Vector3(  5.f,  5.f,  5.f );
 
 			std::map< string_t, float_t > mass_map;
-			mass_map[ "soda-can-1"   ] = 0.000000001f;
+			mass_map[ "soda-can-1"   ] = 0.00000000001f;
 			mass_map[ "board-1"      ] = 20.f;
 
 			float w = 0.f, h = 0.f, d = 0.f, mass = 0.f;

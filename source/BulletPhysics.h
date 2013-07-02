@@ -34,6 +34,7 @@ public:
 
 	btRigidBody* add_ground_rigid_body( const Vector3& );
 	btRigidBody* add_box_rigid_body( const Transform&, const Transform&, const Vector3&, bool = false );
+	btRigidBody* add_capsule_rigid_body( const Transform&, const Transform&, const Vector3&, bool = false );
 	btRigidBody* add_cylinder_rigid_body( const Transform&, const Transform&, const Vector3&, bool = false );
 
 	void update( float = 1.f / 60.f );

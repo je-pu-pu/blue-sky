@@ -570,7 +570,7 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 	{
 		// ‰e
 
-		const float4 shadow_color = float4( 0.75f, 0.75f, 1.f, 1.f );
+		const float4 shadow_color = float4( 0.25f, 0.25f, 0.5f, 1.f );
 
 		const float a = 0.75f;
 
@@ -607,7 +607,7 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 			uv += float2( TimeBeat * 0.2f, 0.f );
 			
 			float4 paper = paper_texture.Sample( wrap_texture_sampler, uv );
-			shadow.rgb = float3( 1.f, 1.f, 1.f ) * ( 1.f - paper.a ) + shadow.rgb * paper.a;
+			shadow.rgb = float3( 0.5f, 0.5f, 0.5f ) * ( 1.f - paper.a ) + shadow.rgb * paper.a;
 						
 			/*
 			shadow.r = input.Position.x / ScreenWidth;

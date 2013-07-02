@@ -45,6 +45,16 @@ void AnimationPlayer::play( const char_t* name, bool force, bool loop )
 }
 
 /**
+ * 現在再生中のアニメーションを停止する
+ *
+ */
+void AnimationPlayer::stop()
+{
+	current_skinning_animation_ = nullptr;
+	current_frame_ = 0.f;
+}
+
+/**
  * アニメーションを更新する
  *
  */

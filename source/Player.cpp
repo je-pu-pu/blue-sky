@@ -9,9 +9,9 @@
 #include "GameMain.h"
 #include "Input.h"
 
-#include <common/math.h>
+#include "ActiveObjectPhysics.h"
 
-#include <btBulletCollisionCommon.h>
+#include <common/math.h>
 
 namespace blue_sky
 {
@@ -136,7 +136,7 @@ void Player::update()
 		else
 		{
 			// í èÌíÖín
-			if ( get_velocity().y() < -0.5f )
+			if ( get_velocity().y() < -1.f )
 			{
 				stop_sound( "fall" );
 				play_sound( "land", false, false );
@@ -343,40 +343,6 @@ void Player::update_step_speed()
 		fade_out_sound( "short-breath" );
 	}
 }
-
-class ClosestNotMe : public btCollisionWorld::ClosestRayResultCallback
-{
-private:
-	const Player::RigidBody* rigid_body_;
-	bool include_soft_footing_;
-
-public:
-	ClosestNotMe( const btVector3& s, const btVector3& d, const Player::RigidBody* rb, bool include_soft_footing )
-		: ClosestRayResultCallback( s, d )
-		, rigid_body_( rb )
-		, include_soft_footing_( include_soft_footing )
-	{ }
-
-	virtual	btScalar addSingleResult( btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
-	{
-		if ( rayResult.m_collisionObject == rigid_body_ )
-		{
-			return 1.0;
-		}
-
-		if ( rayResult.m_collisionObject && rayResult.m_collisionObject->getUserPointer() )
-		{
-			ActiveObject* a = reinterpret_cast< ActiveObject* >( rayResult.m_collisionObject->getUserPointer() );
-			
-			if ( ! include_soft_footing_ && ! a->is_hard() )
-			{
-				return 1.0;
-			}
-		}
-
-		return ClosestRayResultCallback::addSingleResult( rayResult, normalInWorldSpace );
-	}
-};
 
 /**
  *

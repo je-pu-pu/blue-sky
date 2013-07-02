@@ -32,6 +32,8 @@ public:
 	~AnimationPlayer() { }
 
 	void play( const char_t*, bool, bool );
+	void stop();
+
 	void update();
 
 	const SkinningAnimationSet* get_skinning_animation_set() const { return skinning_animation_set_; }

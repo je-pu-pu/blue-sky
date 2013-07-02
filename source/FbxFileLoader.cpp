@@ -108,6 +108,21 @@ void print_fbx_node_recursive( FbxNode* node )
 		{
 			FbxLayer* layer = mesh->GetLayer( n );
 
+			FbxLayerElementSmoothing* smooth = layer->GetSmoothing();
+
+			if ( smooth )
+			{
+				assert( smooth->GetMappingMode() == FbxLayerElement::eByPolygon );
+				assert( smooth->GetReferenceMode() == FbxLayerElement::eDirect );
+
+				std::cout << "smooth : " << smooth->GetName() << " : " << std::endl;
+
+				for ( int m= 0; m < smooth->GetDirectArray().GetCount(); m++ )
+				{
+					std::cout << m << " : " << smooth->GetDirectArray().GetAt( m ) << std::endl;
+				}
+			}
+
 			FbxLayerElementNormal* normal = layer->GetNormals();
 			
 			if ( normal )
@@ -247,6 +262,7 @@ bool FbxFileLoader::load( const char_t* file_name )
 	importer->Import( fbx_scene_ );
 	importer->Destroy();
     
+	/*
 	std::cout << "*** DirectX ***" << std::endl;
 	print_axis_system( FbxAxisSystem::DirectX );
 
@@ -257,6 +273,7 @@ bool FbxFileLoader::load( const char_t* file_name )
 
 	std::cout << "*** Converted FBX ***" << std::endl;
 	print_axis_system( fbx_scene_->GetGlobalSettings().GetAxisSystem() );
+	*/
 
 	FbxNode* root_node = fbx_scene_->GetRootNode();
 
@@ -359,6 +376,21 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 		}
 	}
 
+	FbxLayerElementSmoothing* smoothing = 0;
+
+	// load_mesh_smoothing_info()
+	{
+		for ( int n = 0; n < mesh->GetLayerCount(); n++ )
+		{
+			FbxLayer* layer = mesh->GetLayer( n );
+			smoothing = layer->GetSmoothing();
+
+			break;
+		}
+	}
+
+	assert( smoothing );
+
 	// load_mesh_plygon()
 	FbxLayerElementArrayTemplate< int >* material_indices;
 	mesh->GetMaterialIndices( & material_indices );
@@ -366,6 +398,28 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 	for ( int n = 0; n < mesh->GetPolygonCount(); n++ )
 	{
 		Mesh::Material* material = mesh_->get_material_at( material_indices->GetAt( n ) );
+		std::vector< Mesh::Vertex > v_tmp_list;
+
+		bool is_smooth = smoothing->GetDirectArray().GetAt( n ) != 0;
+		FbxVector4 polygon_normal( 0.f, 0.f, 0.f );
+
+		if ( ! is_smooth )
+		{
+			// ポリゴンの法線を計算する
+			Mesh::Position p1 = Mesh::Position( position_list.at( mesh->GetPolygonVertex( n, 0 ) ) );
+			Mesh::Position p2 = Mesh::Position( position_list.at( mesh->GetPolygonVertex( n, 1 ) ) );
+			Mesh::Position p3 = Mesh::Position( position_list.at( mesh->GetPolygonVertex( n, 2 ) ) );
+
+			FbxVector4 a = FbxVector4( p1.x, p1.y, p1.z );
+			FbxVector4 b = FbxVector4( p2.x, p2.y, p2.z );
+			FbxVector4 c = FbxVector4( p3.x, p3.y, p3.z );
+
+			FbxVector4 ab( b - a );
+			FbxVector4 bc( c - b );
+
+			polygon_normal = ab.CrossProduct( bc );
+			polygon_normal.Normalize();
+		}
 
 		for ( int m = 0; m < mesh->GetPolygonSize( n ); m++ )
 		{
@@ -383,36 +437,51 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 					1.f - static_cast< float >( uv_vector[ 1 ] ) );
 			}
 
-			FbxVector4 normal_vector;
-
-			if ( mesh->GetPolygonVertexNormal( n, m, normal_vector ) )
+			if ( is_smooth )
 			{
-				v.Normal = Mesh::Normal(
-					static_cast< float >( normal_vector[ 0 ] ),
-					static_cast< float >( normal_vector[ 1 ] ),
-					static_cast< float >( normal_vector[ 2 ] ) );
-			}
+				FbxVector4 normal_vector;
 
-			VertexIndexMap::iterator i = vertex_index_map.find( v );
-
-			if ( i != vertex_index_map.end() )
-			{
-				material->get_index_list().push_back( i->second );
+				// 頂点の法線
+				if ( mesh->GetPolygonVertexNormal( n, m, normal_vector ) )
+				{
+					v.Normal = Mesh::Normal(
+						static_cast< float >( normal_vector[ 0 ] ),
+						static_cast< float >( normal_vector[ 1 ] ),
+						static_cast< float >( normal_vector[ 2 ] ) );
+				}
 			}
 			else
 			{
-				Material::Index vertex_index = mesh_->get_vertex_list().size();
+				// ポリゴンの法線
+				v.Normal = Mesh::Normal(
+					static_cast< float >( polygon_normal[ 0 ] ),
+					static_cast< float >( polygon_normal[ 1 ] ),
+					static_cast< float >( polygon_normal[ 2 ] ) );
+			}
+			
+			// 頂点の一覧に追加
+			{
+				VertexIndexMap::iterator i = vertex_index_map.find( v );
 
-				mesh_->get_vertex_list().push_back( v );
-
-				if ( ! skinning_info_list.empty() )
+				if ( i != vertex_index_map.end() )
 				{
-					mesh_->get_skinning_info_list().push_back( skinning_info_list.at( position_index ) );
+					material->get_index_list().push_back( i->second );
 				}
+				else
+				{
+					Material::Index vertex_index = mesh_->get_vertex_list().size();
 
-				material->get_index_list().push_back( vertex_index );
+					mesh_->get_vertex_list().push_back( v );
 
-				vertex_index_map[ v ] = vertex_index;
+					if ( ! skinning_info_list.empty() )
+					{
+						mesh_->get_skinning_info_list().push_back( skinning_info_list.at( position_index ) );
+					}
+
+					material->get_index_list().push_back( vertex_index );
+
+					vertex_index_map[ v ] = vertex_index;
+				}
 			}
 		}
 	}

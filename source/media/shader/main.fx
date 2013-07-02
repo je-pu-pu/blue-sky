@@ -54,7 +54,8 @@ cbuffer GameConstantBuffer : register( b0 )
 
 cbuffer FrameConstantBuffer : register( b1 )
 {
-	matrix View;
+	matrix View;	// ƒrƒ…[•ÏŠ·s—ñ
+	float4 Light;	// ŒõŒ¹‚ÌŒü‚« ( ³‹K‰»Ï‚Ý ) 
 	float Time;
 	uint TimeBeat;
 };
@@ -404,8 +405,8 @@ RasterizerState WireFrame
 
 RasterizerState Shadow
 {
-	CullMode = NONE;
-	SlopeScaledDepthBias = 1.f;
+	CullMode = FRONT;
+	SlopeScaledDepthBias = 0.1f;
 };
 
 // ----------------------------------------
@@ -459,8 +460,7 @@ PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
     output.Position = mul( output.Position, View );
     output.Position = mul( output.Position, Projection );
 	
-	// output.Normal = input.Normal;
-	output.Normal = normalize( mul( input.Normal, ( float3x3 ) transpose( World ) ) );
+	output.Normal = normalize( mul( input.Normal, ( float3x3 ) World ) );
 	
 	output.TexCoord = input.TexCoord;
 	
@@ -502,8 +502,13 @@ PS_SHADOW_INPUT vs_skin_with_shadow( VS_SKIN_INPUT input )
     output.Position = mul( output.Position, View );
     output.Position = mul( output.Position, Projection );
 	
-	// output.Normal = input.Normal;
-	output.Normal = normalize( mul( input.Normal, ( float3x3 ) transpose( World ) ) );
+	output.Normal =
+		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
+		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
+		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
+		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
+
+	output.Normal = normalize( mul( output.Normal, ( float3x3 ) World ) );
 	
 	output.TexCoord = input.TexCoord;
 	
@@ -558,15 +563,15 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 	shadow_tex_coord.x /= ( float ) ShadowMapCascadeLevels;
 	shadow_tex_coord.x += ( float ) cascade_index / ( float ) ShadowMapCascadeLevels;
 
+	// return float4( input.Normal, 1.f );
 
 	// ---
-
 
 	float4 shadow = float4( 1.f, 1.f, 1.f, 1.f );
 	float sz = ( float ) shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy );
 
 	// if ( input.Position.z >= sz )
-	if ( shadow_tex_coord.z >= sz )
+	if ( dot( input.Normal, ( float3 ) Light ) > 0.f || shadow_tex_coord.z >= sz )
 	{
 		// ‰e
 
@@ -619,8 +624,6 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 			// return shadow;
 		}
 	}
-
-	// return float4( input.Normal, 1.f );
 
 	// return float4( sz, sz, sz, 1.f );
 	// return float4( input.Position.z, input.Position.z, input.Position.z, 1.f );

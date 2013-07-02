@@ -38,6 +38,9 @@ private:
 	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 
 protected:
+	bool caluclate_target_visible() const;
+	bool caluclate_target_lost() const;
+
 
 public:
 	Robot();

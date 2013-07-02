@@ -2,6 +2,7 @@
 #define BLUE_SKY_GAME_PLAY_SCENE_H
 
 #include "Scene.h"
+#include "Direct3D11Vector.h"
 
 #include <common/auto_ptr.h>
 
@@ -65,6 +66,8 @@ protected:
 
 	float_t								bpm_;
 
+	static Direct3D11Vector				light_;
+
 	void generate_random_stage();
 
 	void load_stage_file( const char* );
@@ -78,6 +81,8 @@ protected:
 
 	void update_main();
 	void update_clear();
+
+	void update_shadow();
 
 	void set_bpm( const float_t bpm ) { bpm_ = bpm; }
 	float_t get_bpm() const { return bpm_; }

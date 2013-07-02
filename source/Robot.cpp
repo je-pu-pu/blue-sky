@@ -10,6 +10,8 @@
 
 #include <common/math.h>
 
+#include <iostream>
+
 namespace blue_sky
 {
 
@@ -37,30 +39,27 @@ void Robot::update()
 
 	get_rigid_body()->setActivationState( true );
 
-	Vector3 relative_position = player_->get_location() - get_location();
-	relative_position.setY( 0 );
-
-	if ( relative_position.length() < 7.5f )
-	{
-		// mode_ = MODE_CHASE;
-	}
-	else 
-	{
-		mode_ = MODE_STAND;
-	}
-
-	set_direction_degree( math::radian_to_degree( std::atan2( relative_position.x(), relative_position.z() ) ) );
-
-	get_front() = relative_position;
-	get_front().normalize();
-
 	if ( mode_ == MODE_CHASE )
 	{
+		// ターゲットの方を向く
+		Vector3 relative_position = player_->get_location() - get_location();
+		relative_position.setY( 0 );
+
+		set_direction_degree( math::radian_to_degree( std::atan2( relative_position.x(), relative_position.z() ) ) );
+
+		get_front() = relative_position;
+		get_front().normalize();
+
 		set_velocity( Vector3( get_front().x() * 2.f, get_velocity().y(), get_front().z() * 2.f ) );
 		set_drawing_model( drawing_model_list_[ static_cast< int >( timer_ * 3 ) % drawing_model_list_.size() ] );
 
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.8f, 0, 0, -0.25f ) );
 		get_animation_player()->play( "Walk", false, true );
+
+		if ( caluclate_target_lost() )
+		{
+			mode_ = MODE_STAND;
+		}
 	}
 	else
 	{
@@ -70,30 +69,104 @@ void Robot::update()
 		// get_animation_player()->play( "Test", false, true );
 		get_animation_player()->play( "Stand", false, true );
 		
-		if ( relative_position.length() < 7.5f )
+		if ( caluclate_target_visible() )
 		{
-			Vector3 from(
-				get_rigid_body()->getCenterOfMassPosition().x(),
-				get_rigid_body()->getCenterOfMassPosition().y() + 1.5f, // 目線
-				get_rigid_body()->getCenterOfMassPosition().z() );
-
-			Vector3 to(
-				player_->get_rigid_body()->getCenterOfMassPosition().x(),
-				player_->get_rigid_body()->getCenterOfMassPosition().y() + 1.5f, // プレイヤーの目線
-				player_->get_rigid_body()->getCenterOfMassPosition().z() );
-
-			ClosestNotMeAndHim ray_callback( from, to, get_rigid_body(), player_->get_rigid_body(), false );
-			ray_callback.m_closestHitFraction = 1.0;
-
-			get_dynamics_world()->rayTest( from, to, ray_callback );
-		
-			// プレイヤーとの間に障害物がなければ
-			if ( ! ray_callback.hasHit() )
-			{
-				mode_ = MODE_CHASE;
-			}
+			mode_ = MODE_CHASE;
 		}
 	}
+}
+
+/**
+ * ターゲット ( プレイヤー ) を見失ったかを計算する
+ *
+ * @param ターゲットを見失った場合は、true を、ターゲットを補足中の場合は false を返す
+ */
+bool Robot::caluclate_target_lost() const
+{
+	Vector3 relative_position = player_->get_location() - get_location();
+	relative_position.setY( 0 );
+
+	Scalar relative_length = relative_position.length(); // ターゲットとの距離
+
+	/// @todo ちゃんと実装
+	if ( relative_length > 20.f )
+	{
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * ターゲット ( プレイヤー ) を目視できるかを計算する
+ *
+ * @param ターゲット ( プレイヤー ) を目視できる場合は、true を、目視できない場合は false を返す
+ */
+bool Robot::caluclate_target_visible() const
+{
+	Vector3 relative_position = player_->get_location() - get_location();
+
+	Scalar relative_length = relative_position.length(); // ターゲットとの距離
+	
+	/// 視野の距離
+	const float_t eyeshot_length_short = 3.f;
+	const float_t eyeshot_length_middle = 10.f;
+	const float_t eyeshot_length_long = 20.f;
+
+	/// 視野の距離に応じた視野角 ( -1.f .. 1.f ) ( 1.f : 正面 / 0.f : 真横 / -1.f : 真後ろ  ) 
+	const float_t eyeshot_angle_short = -0.25f;
+	const float_t eyeshot_angle_middle = 0.5f;
+	const float_t eyeshot_angle_long = 0.75f;
+
+	if ( relative_length > eyeshot_length_long )
+	{
+		return false;
+	}
+
+	// ロボットの目の位置
+	Vector3 from = get_rigid_body()->getCenterOfMassPosition();
+	from.setY( from.y() + 1.5f ); // 目線の高さを追加
+
+	// ターゲットの目の位置
+	Vector3 to = player_->get_rigid_body()->getCenterOfMassPosition();
+	to.setY( to.y() + 1.5f ); // 目線の高さを追加
+	
+	float_t eyeshot_angle = 0.f;
+
+	if ( relative_length > eyeshot_length_middle )
+	{
+		eyeshot_angle = eyeshot_angle_long;
+	}
+	else if ( relative_length > eyeshot_length_short )
+	{
+		eyeshot_angle = eyeshot_angle_middle;
+	}
+	else
+	{
+		eyeshot_angle = eyeshot_angle_short;
+	}
+	
+	std::cout << relative_length << " : " << eyeshot_angle << " : " << get_front().dot( ( to - from ).normalize() ) << std::endl;
+
+	// ターゲットとの距離に応じた視野角に入っていなければ、目視できない
+	if ( get_front().dot( ( to - from ).normalize() ) < eyeshot_angle )
+	{
+		return false;
+	}
+
+	// 障害物判定
+	ClosestNotMeAndHim ray_callback( from, to, get_rigid_body(), player_->get_rigid_body(), false );
+	ray_callback.m_closestHitFraction = 1.0;
+	
+	get_dynamics_world()->rayTest( from, to, ray_callback );
+	
+	// ターゲットとの間に障害物がなければ目視できている
+	if ( ! ray_callback.hasHit() )
+	{
+		return true;
+	}
+
+	return false;
 }
 
 /// @todo 削除

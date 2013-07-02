@@ -27,9 +27,19 @@ private:
 	}
 
 public:
+	Direct3D11Vector()
+	{
+
+	}
+
 	Direct3D11Vector( UnitType x, UnitType y, UnitType z, UnitType w = 1 )
 	{
 		value_ = XMVectorSet( x, y, z, w );
+	}
+
+	static Direct3D11Vector FromXMVECTOR( XMVECTOR v )
+	{
+		return Direct3D11Vector( v );
 	}
 
 	inline UnitType x() const { UnitType x; XMVectorGetXPtr( & x, value_ ); return x; }
@@ -37,10 +47,24 @@ public:
 	inline UnitType z() const { UnitType x; XMVectorGetZPtr( & x, value_ ); return x; }
 	inline UnitType w() const { UnitType x; XMVectorGetWPtr( & x, value_ ); return x; }
 
+	Direct3D11Vector& normalize()
+	{
+		value_ = XMVector3Normalize( value_ );
+
+		return *this;
+	}
+
+	Direct3D11Vector operator - () const
+	{
+		return Direct3D11Vector( -value_ );
+	}
+
 	friend Direct3D11Vector operator * ( const Direct3D11Vector& v, const Direct3D11Matrix& m )
 	{
 		return XMVector4Transform( v.value_, XMLoadFloat4x4( & m.value_ ) );
 	}
+
+
 
 }; // class Direct3D11Vector
 

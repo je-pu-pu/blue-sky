@@ -73,6 +73,8 @@
 namespace blue_sky
 {
 
+Direct3D11Vector GamePlayScene::light_( -0.25f, -1.f, 0.5f );
+
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
 	, ui_texture_( 0 )
@@ -734,6 +736,8 @@ void GamePlayScene::update()
 		bgm_->play( true, false );
 		bgm_->fade_in();
 	}
+
+	update_shadow();
 }
 
 void GamePlayScene::update_main()
@@ -808,6 +812,32 @@ void GamePlayScene::update_main()
 	}
 
 	player_->add_eye_depth( eye_depth_add );
+}
+
+/**
+ * ‰eŠÖ˜A‚Ìî•ñ‚ðXV‚·‚é
+ *
+ */
+void GamePlayScene::update_shadow()
+{
+	if ( shadow_map_ )
+	{
+		if ( true )
+		{
+			static float a = 0.1f;
+
+			a += 0.01f;
+
+			const XMVECTOR light_origin = XMVectorSet( 0.f, 10.f, 0.f, 0.f );
+			XMVECTOR light = light_origin + XMVectorSet( cos( a ) * 50.f, 0.f, sin( a ) * 50.f, 0.f );	
+
+			shadow_map_->setLightPosition( light );
+
+			light_ = -Direct3D11Vector::FromXMVECTOR( light );
+		}
+
+		shadow_map_->setEyePosition( XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 ) );
+	}
 }
 
 void GamePlayScene::on_goal()
@@ -977,6 +1007,8 @@ void GamePlayScene::update_render_data_for_frame() const
 
 		frame_constant_buffer_data.view = XMMatrixLookAtLH( eye, at, up );
 		frame_constant_buffer_data.view = XMMatrixTranspose( frame_constant_buffer_data.view );
+		frame_constant_buffer_data.light = light_;
+		frame_constant_buffer_data.light.normalize();
 		frame_constant_buffer_data.time = get_total_elapsed_time();
 		frame_constant_buffer_data.time_beat = static_cast< uint_t >( get_total_elapsed_time() * ( get_bpm() / 60.f ) );
 
@@ -1079,19 +1111,6 @@ void GamePlayScene::render_shadow_map() const
 		return;
 	}
 
-	if ( true )
-	{
-		static float a = 0.f;
-
-		a += 0.01f;
-
-		const XMVECTOR light_origin = XMVectorSet( 0.f, 100.f, 0.f, 0.f );
-		XMVECTOR light = light_origin + XMVectorSet( cos( a ) * 50.f, 0.f, sin( a ) * 50.f, 0.f );	
-
-		shadow_map_->setLightPosition( light );
-	}
-
-	shadow_map_->setEyePosition( XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 ) );
 	shadow_map_->ready_to_render_shadow_map();
 
 	get_direct_3d()->setInputLayout( "main" );

@@ -4,6 +4,7 @@
 #include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11Color.h"
 #include "Direct3D11Matrix.h"
+#include "Direct3D11Vector.h"
 
 namespace blue_sky
 {
@@ -13,6 +14,7 @@ struct BaseConstantBufferData
 {
 	typedef Direct3D11Color		Color;
 	typedef Direct3D11Matrix	Matrix;
+	typedef Direct3D11Vector	Vector;
 
 	static const int DEFAULT_SLOT = N;
 };
@@ -27,6 +29,7 @@ struct GameConstantBufferData : public BaseConstantBufferData< 0 >
 struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
 {
 	XMMATRIX view;
+	Vector light;
 	float_t time;
 	uint_t time_beat;
 };

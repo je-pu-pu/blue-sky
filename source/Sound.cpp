@@ -30,6 +30,7 @@ Sound::Sound( const DirectSound* direct_sound )
 	, direct_sound_buffer_( 0 )
 	, sound_file_( 0 )
 	, is_3d_sound_( false )
+	, max_volume_( VOLUME_MAX )
 	, volume_fade_( 0.f )
 {
 
@@ -108,7 +109,7 @@ void Sound::set_3d_velocity( T x, T y, T z )
 	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_3d_buffer()->SetVelocity( x, y, z, DS3D_DEFERRED ) );
 }
 
-Sound::T Sound::get_volume()
+Sound::T Sound::get_volume() const
 {
 	LONG volume = 0;
 	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->GetVolume( & volume ) );
@@ -118,7 +119,7 @@ Sound::T Sound::get_volume()
 
 void Sound::set_volume( T v )
 {
-	v = math::clamp( v, VOLUME_MIN, VOLUME_MAX );
+	v = math::clamp( v, VOLUME_MIN, get_max_volume() );
 
 	LONG volume = static_cast< long >( ( v  - VOLUME_MIN ) / ( VOLUME_MAX - VOLUME_MIN ) * ( DSBVOLUME_MAX - DSBVOLUME_MIN ) + DSBVOLUME_MIN );
 	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->SetVolume( volume ) );

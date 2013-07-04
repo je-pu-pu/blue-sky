@@ -130,6 +130,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		get_sound_manager()->load_3d_sound( "soda-can-short-2" );
 		get_sound_manager()->load_3d_sound( "soda-can-short-3" );
 
+		get_sound_manager()->load_3d_sound( "robot-chase" );
+		get_sound_manager()->load_3d_sound( "robot-found" );
+
 		get_sound_manager()->load( "fin" );
 		get_sound_manager()->load( "door" );
 	}
@@ -187,10 +190,11 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	debug_axis_ = new Axis( get_direct_3d() );
 
-	bgm_ = get_sound_manager()->get_sound( "balloon" );
+	bgm_ = get_sound_manager()->get_sound( "bgm" );
 
 	if ( bgm_ )
 	{
+		bgm_->set_max_volume( bgm_->get_max_volume() * 0.9f );
 		bgm_->play( true );
 	}
 

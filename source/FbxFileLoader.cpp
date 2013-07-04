@@ -429,7 +429,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 			v.Position = Mesh::Position( position_list.at( position_index ) );
 
 			FbxVector2 uv_vector;
-				
+			
 			if ( mesh->GetPolygonVertexUV( n, m, "UVMap", uv_vector ) )
 			{
 				v.TexCoord = Mesh::TexCoord(

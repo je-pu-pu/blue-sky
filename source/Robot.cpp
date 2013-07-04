@@ -50,7 +50,7 @@ void Robot::update()
 		get_front() = relative_position;
 		get_front().normalize();
 
-		set_velocity( Vector3( get_front().x() * 2.f, get_velocity().y(), get_front().z() * 2.f ) );
+		set_velocity( Vector3( get_front().x() * 3.f, get_velocity().y(), get_front().z() * 3.f ) );
 
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.8f, 0, 0, -0.25f ) );
 		get_animation_player()->play( "Walk", false, true );
@@ -59,6 +59,8 @@ void Robot::update()
 		{
 			mode_ = MODE_STAND;
 		}
+
+		play_sound( "robot-chase", false, false );
 	}
 	else
 	{
@@ -70,6 +72,8 @@ void Robot::update()
 		if ( caluclate_target_visible() )
 		{
 			mode_ = MODE_CHASE;
+
+			play_sound( "robot-found", false, false );
 		}
 	}
 }

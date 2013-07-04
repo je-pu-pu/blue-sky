@@ -48,7 +48,8 @@ protected:
 	std::string file_name_;
 	bool is_3d_sound_;
 
-	T volume_fade_;
+	T max_volume_;						///< 最大ボリューム
+	T volume_fade_;						///< フェード ( 毎フレームの加算値 )
 
 public:
 
@@ -80,11 +81,15 @@ public:
 	void set_3d_velocity( T, T, T );
 
 	/// ボリューム
-	T get_volume();
+	T get_volume() const;
 	void set_volume( T );
 
+	/// 最大ボリューム
+	T get_max_volume() const { return max_volume_; }
+	void set_max_volume( T v ) { max_volume_ = v; set_volume( get_volume() ); }
+
 	/// パン
-	T get_pan() { return 0; };
+	T get_pan() const { return 0; };
 	void set_pan( T ) { };
 
 	/// 再生スピード

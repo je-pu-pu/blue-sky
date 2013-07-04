@@ -140,6 +140,9 @@ void Player::update()
 			{
 				stop_sound( "fall" );
 				play_sound( "land", false, false );
+
+				// ƒoƒEƒ“ƒh‚µ‚È‚¢‚æ‚¤‚É‚·‚é
+				set_velocity( Vector3( get_velocity().x(), 0.f, get_velocity().z() ) );
 			}
 
 			set_last_footing_height_to_current_height();
@@ -507,6 +510,9 @@ void Player::kill()
 	ActiveObject::kill();
 
 	stop_sound( "fall" );
+	stop_sound( "walk" );
+	stop_sound( "run" );
+
 	play_sound( "dead" );
 
 	get_rigid_body()->setActivationState( true );

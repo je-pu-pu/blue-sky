@@ -139,6 +139,28 @@ void ActiveObject::set_direction_degree( float d )
 	get_rigid_body()->setCenterOfMassTransform( t );
 }
 
+/**
+ * 方向を指定した目的の方向に近づける
+ *
+ * @param d 目的の方向
+ * @param speed 速度
+ */
+void ActiveObject::chase_direction_degree( float_t d, float_t speed )
+{
+	while ( direction_degree_ < 0.f ) direction_degree_ += 360.f;
+	while ( direction_degree_ > 360.f ) direction_degree_ -= 360.f;
+
+	while ( d < 0.f ) d += 360.f;
+	while ( d > 360.f ) d -= 360.f;
+
+	float_t diff = d - direction_degree_;
+
+	while ( diff < -180.f ) diff += 360.f;
+	while ( diff >  180.f ) diff -= 360.f;
+
+	set_direction_degree( math::chase( direction_degree_, direction_degree_ + diff, speed ) );
+}
+
 void ActiveObject::kill()
 {
 	is_dead_ = true;

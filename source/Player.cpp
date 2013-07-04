@@ -2,6 +2,7 @@
 
 #include "Balloon.h"
 #include "Medal.h"
+#include "Robot.h"
 
 #include "DrawingModel.h"
 #include "DrawingLine.h"
@@ -32,7 +33,7 @@ Player::Player()
 	, has_medal_( false )
 	, last_footing_height_( 0.f )
 	, balloon_( 0 )
-	, hp_( 3 )
+	, hp_( 1 )
 {
 	
 }
@@ -65,7 +66,7 @@ void Player::restart()
 
 	balloon_ = 0;
 
-	hp_ = 3;
+	hp_ = 1;
 
 	set_last_footing_height_to_current_height();
 	set_mass( 50.f );
@@ -340,6 +341,8 @@ void Player::update_step_speed()
 	if ( get_step_speed() >= get_max_run_step_speed() && ! is_jumping() && ! is_falling() )
 	{
 		play_sound( "short-breath", true, false );
+
+		stop();
 	}
 	else
 	{
@@ -594,7 +597,10 @@ void Player::on_collide_with( Robot* robot )
 	}
 	*/
 
-	return;
+	if ( robot->get_mode() != Robot::MODE_CHASE )
+	{
+		return;
+	}
 
 	if ( ! is_uncontrollable() )
 	{

@@ -29,7 +29,8 @@ void Robot::restart()
 
 	get_rigid_body()->setAngularFactor( 0 );
 	get_rigid_body()->setFriction( 0 );
-
+	
+	mode_ = MODE_STAND;
 	timer_ = 0;
 }
 
@@ -45,8 +46,21 @@ void Robot::update()
 		Vector3 relative_position = player_->get_location() - get_location();
 		relative_position.setY( 0 );
 
-		set_direction_degree( math::radian_to_degree( std::atan2( relative_position.x(), relative_position.z() ) ) );
+		// 表示上の向きを設定
+		float_t target_direction_degree = math::radian_to_degree( std::atan2( relative_position.x(), relative_position.z() ) );
+		chase_direction_degree( target_direction_degree, 2.f );
+		
+		// ターゲットとの距離が遠い場合は、ターゲットの進行方向を予測して進む
+		Vector3 player_xz_velocity = player_->get_velocity();
+		player_xz_velocity.setY( 0 );
 
+		if ( relative_position.length() > 3.f && player_xz_velocity.length() > 1.f )
+		{
+			relative_position = ( player_->get_location() + player_->get_front() * 3.f ) - get_location();
+			relative_position.setY( 0 );
+		}
+
+		// 進行方向を設定
 		get_front() = relative_position;
 		get_front().normalize();
 
@@ -75,6 +89,10 @@ void Robot::update()
 
 			play_sound( "robot-found", false, false );
 		}
+	}
+	else if ( mode_ == MODE_SHUTDOWN )
+	{
+		set_velocity( get_velocity() * 0.5f );
 	}
 }
 
@@ -177,6 +195,11 @@ bool Robot::caluclate_target_visible() const
 
 void Robot::on_collide_with( Player* )
 {
+	if ( mode_ != MODE_STAND )
+	{
+		return;
+	}
+
 	mode_ = MODE_SHUTDOWN;
 
 	stop_sound( "robot-found" );

@@ -52,6 +52,8 @@ public:
 
 	/// XV
 	void update();
+
+	Mode get_mode() const { return mode_; };
 	
 	float get_collision_width() const { return 1.f; }
 	float get_collision_height() const { return 2.f; }

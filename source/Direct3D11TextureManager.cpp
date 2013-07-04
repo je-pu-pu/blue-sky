@@ -30,7 +30,22 @@ Direct3D11TextureManager::Texture* Direct3D11TextureManager::load( const char* n
 
 	Texture* texture = 0;
 
-	if ( FAILED( D3DX11CreateShaderResourceViewFromFile( direct_3d_->getDevice(), file_name, 0, 0, & texture, 0 ) ) )
+	D3DX11_IMAGE_LOAD_INFO image_load_info;
+	image_load_info.Width = D3DX11_DEFAULT; // 256;
+	image_load_info.Height = D3DX11_DEFAULT; // 256;
+	image_load_info.Depth = D3DX11_DEFAULT;
+	image_load_info.FirstMipLevel = D3DX11_DEFAULT;
+	image_load_info.MipLevels = D3DX11_DEFAULT;
+	image_load_info.Usage = static_cast< D3D11_USAGE >( D3DX11_DEFAULT );
+	image_load_info.BindFlags = D3DX11_DEFAULT;
+	image_load_info.CpuAccessFlags = D3DX11_DEFAULT;
+	image_load_info.MiscFlags = D3DX11_DEFAULT;
+	image_load_info.Format = DXGI_FORMAT_FROM_FILE;
+	image_load_info.Filter = D3DX11_DEFAULT;
+	image_load_info.MipFilter = D3DX11_DEFAULT;
+	image_load_info.pSrcInfo = nullptr;
+
+	if ( FAILED( D3DX11CreateShaderResourceViewFromFile( direct_3d_->getDevice(), file_name, & image_load_info, 0, & texture, 0 ) ) )
 	{
 		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "file open failed. " ) + file_name );
 	}

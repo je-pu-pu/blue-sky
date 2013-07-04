@@ -64,8 +64,9 @@ public:
 	void set_start_rotation( float_t, float_t, float_t );
 	void set_start_direction_degree( float_t );
 
-	float get_direction_degree() const { return direction_degree_; }
-	void set_direction_degree( float d );
+	float_t get_direction_degree() const { return direction_degree_; }
+	void set_direction_degree( float_t );
+	void chase_direction_degree( float_t, float_t );
 
 	Vector3& get_front() { return front_; }
 	const Vector3& get_front() const { return front_; }

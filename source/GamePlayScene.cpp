@@ -89,7 +89,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	get_physics()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
 
 	// Texture
-	ui_texture_ = get_direct_3d()->getTextureManager()->load( "ui", "media/image/item.png" );
+	// ui_texture_ = get_direct_3d()->getTextureManager()->load( "ui", "media/image/item.png" );
+	ui_texture_ = get_direct_3d()->getTextureManager()->load( "ui", "media/image/ui.png" );
 
 	// Sound
 	{
@@ -589,17 +590,13 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			Robot* robot = new Robot();
 			robot->set_player( player_.get() );
 
-			robot->add_drawing_model( get_drawing_model_manager()->load( "robot" ) );
-			/*
-			robot->add_drawing_model( get_drawing_model_manager()->load( "robot-l" ) );
-			robot->add_drawing_model( get_drawing_model_manager()->load( "robot" ) );
-			robot->add_drawing_model( get_drawing_model_manager()->load( "robot-r" ) );
-			*/
-
-			robot->set_start_location( x, y, z );
+			robot->set_drawing_model( get_drawing_model_manager()->load( "robot" ) );
 
 			get_active_object_manager()->add_active_object( robot );
 			robot->set_rigid_body( get_physics()->add_active_object( robot ) );
+
+			robot->set_start_location( x, y, z );
+			robot->set_start_direction_degree( r );
 
 			/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
 			robot->setup_animation_player();
@@ -826,9 +823,9 @@ void GamePlayScene::update_shadow()
 		{
 			static float a = 0.1f;
 
-			a += 0.01f;
+			// a += 0.0025f;
 
-			const XMVECTOR light_origin = XMVectorSet( 0.f, 10.f, 0.f, 0.f );
+			const XMVECTOR light_origin = XMVectorSet( 0.f, 100.f, 0.f, 0.f );
 			XMVECTOR light = light_origin + XMVectorSet( cos( a ) * 50.f, 0.f, sin( a ) * 50.f, 0.f );	
 
 			shadow_map_->setLightPosition( light );
@@ -918,6 +915,8 @@ void GamePlayScene::render()
 
 		get_direct_3d()->set_default_render_target();
 		get_direct_3d()->set_default_viewport();
+
+		get_direct_3d()->setInputLayout( "main" );
 
 		render_sky_box();
 		render_far_billboards();
@@ -1400,6 +1399,14 @@ void GamePlayScene::render_sprite()
 			win::Point dst_point( 5, get_height() - src_rect.height() - 5 );
 
 			get_direct_3d()->getSprite()->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+		}
+
+		for ( int n = 0; n < player_->get_hp(); ++n )
+		{
+			win::Rect src_rect = win::Rect::Size( n * 120, 0, 120, 120 );
+			win::Rect dst_rect = win::Rect::Size( 10 + n * 96, get_height() - 10 - 96, 90, 90 );
+
+			get_direct_3d()->getSprite()->draw( dst_rect, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 		}
 	}
 

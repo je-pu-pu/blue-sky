@@ -146,6 +146,7 @@ public:
 
 	const Balloon* get_balloon() const { return balloon_; }
 
+	int get_hp() const { return hp_; }
 
 }; // class Player
 

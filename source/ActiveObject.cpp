@@ -23,6 +23,7 @@ ActiveObject::ActiveObject()
 
 	, start_location_( 0, 0, 0 )
 	, start_rotation_( 0, 0, 0 )
+	, start_direction_degree_( 0 )
 
 	, front_( 0, 0, 1 )
 	, right_( 1, 0, 0 )
@@ -59,10 +60,8 @@ void ActiveObject::restart()
 	
 	if ( get_rigid_body() )
 	{
-		set_direction_degree( 0 );
-
 		get_transform().setOrigin( start_location_ + Vector3( 0, get_height_offset(), 0 ) );
-		get_transform().setRotation( Quaternion( start_rotation_.x(), start_rotation_.y(), start_rotation_.z() ) );
+		get_transform().setRotation( Quaternion( math::degree_to_radian( start_rotation_.x() ), math::degree_to_radian( start_rotation_.y() ), math::degree_to_radian( start_rotation_.z() ) ) );
 
 		get_rigid_body()->activate( true );
 		get_rigid_body()->getMotionState()->setWorldTransform( get_transform() );
@@ -77,6 +76,8 @@ void ActiveObject::restart()
 		get_rigid_body()->setInterpolationAngularVelocity( Vector3( 0.f, 0.f, 0.f ) );
 		
 		get_rigid_body()->clearForces();
+
+		set_direction_degree( start_direction_degree_ );
 	}
 }
 
@@ -103,11 +104,16 @@ void ActiveObject::set_start_location( float_t x, float_t y, float_t z )
 
 void ActiveObject::set_start_rotation( float_t x, float_t y, float_t z )
 {
-	start_rotation_.setValue( math::degree_to_radian( x ), math::degree_to_radian( y ), math::degree_to_radian( z ) );
+	start_rotation_.setValue( x, y, z );
 
 	Quaternion q;
-	q.setEulerZYX( start_rotation_.x(), start_rotation_.y(), start_rotation_.z() );
+	q.setEulerZYX( math::degree_to_radian( start_rotation_.z() ), math::degree_to_radian( start_rotation_.y() ), math::degree_to_radian( start_rotation_.x() ) );
 	get_transform().setRotation( q );
+}
+
+void ActiveObject::set_start_direction_degree( float d )
+{
+	start_direction_degree_ = d;
 }
 
 void ActiveObject::set_direction_degree( float d )

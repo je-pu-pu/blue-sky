@@ -51,7 +51,6 @@ void Robot::update()
 		get_front().normalize();
 
 		set_velocity( Vector3( get_front().x() * 2.f, get_velocity().y(), get_front().z() * 2.f ) );
-		set_drawing_model( drawing_model_list_[ static_cast< int >( timer_ * 3 ) % drawing_model_list_.size() ] );
 
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.8f, 0, 0, -0.25f ) );
 		get_animation_player()->play( "Walk", false, true );
@@ -64,7 +63,6 @@ void Robot::update()
 	else
 	{
 		set_velocity( Vector3( 0.f, 0.f, 0.f ) );
-		set_drawing_model( drawing_model_list_.front() );
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0, 0, 0, 0 ) );
 		// get_animation_player()->play( "Test", false, true );
 		get_animation_player()->play( "Stand", false, true );
@@ -115,7 +113,7 @@ bool Robot::caluclate_target_visible() const
 
 	/// éãñÏÇÃãóó£Ç…âûÇ∂ÇΩéãñÏäp ( -1.f .. 1.f ) ( 1.f : ê≥ñ  / 0.f : ê^â° / -1.f : ê^å„ÇÎ  ) 
 	const float_t eyeshot_angle_short = -0.25f;
-	const float_t eyeshot_angle_middle = 0.5f;
+	const float_t eyeshot_angle_middle = 0.25f;
 	const float_t eyeshot_angle_long = 0.75f;
 
 	if ( relative_length > eyeshot_length_long )
@@ -167,13 +165,6 @@ bool Robot::caluclate_target_visible() const
 	}
 
 	return false;
-}
-
-/// @todo çÌèú
-void Robot::add_drawing_model( const DrawingModel* m )
-{
-	drawing_model_list_.push_back( m );
-	set_drawing_model( drawing_model_list_.front() );
 }
 
 } // namespace blue_sky

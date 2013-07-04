@@ -28,7 +28,8 @@ private:
 	float_t				direction_degree_;	///< 方向 ( Y Axis Degree )
 
 	Vector3				start_location_;	///< スタート時の位置
-	Vector3				start_rotation_;	///< スタート時の回転
+	Vector3				start_rotation_;	///< スタート時の回転 ( Degree )
+	float_t				start_direction_degree_;	///< スタート時の向き ( Y Axis )
 
 	Vector3				front_;				///< 前
 	Vector3				right_;				///< 右
@@ -61,6 +62,7 @@ public:
 
 	void set_start_location( float_t, float_t, float_t );
 	void set_start_rotation( float_t, float_t, float_t );
+	void set_start_direction_degree( float_t );
 
 	float get_direction_degree() const { return direction_degree_; }
 	void set_direction_degree( float d );

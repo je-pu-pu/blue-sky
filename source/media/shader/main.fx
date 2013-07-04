@@ -405,8 +405,8 @@ RasterizerState WireFrame
 
 RasterizerState Shadow
 {
-	CullMode = FRONT;
-	SlopeScaledDepthBias = 0.1f;
+	CullMode = NONE;
+	SlopeScaledDepthBias = 1.f;
 };
 
 // ----------------------------------------

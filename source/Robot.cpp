@@ -62,7 +62,7 @@ void Robot::update()
 
 		play_sound( "robot-chase", false, false );
 	}
-	else
+	else if ( mode_ == MODE_STAND )
 	{
 		set_velocity( Vector3( 0.f, 0.f, 0.f ) );
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0, 0, 0, 0 ) );
@@ -126,11 +126,11 @@ bool Robot::caluclate_target_visible() const
 	}
 
 	// ロボットの目の位置
-	Vector3 from = get_rigid_body()->getCenterOfMassPosition();
+	Vector3 from = get_location();
 	from.setY( from.y() + 1.5f ); // 目線の高さを追加
 
 	// ターゲットの目の位置
-	Vector3 to = player_->get_rigid_body()->getCenterOfMassPosition();
+	Vector3 to = player_->get_location();
 	to.setY( to.y() + 1.5f ); // 目線の高さを追加
 	
 	float_t eyeshot_angle = 0.f;
@@ -148,7 +148,7 @@ bool Robot::caluclate_target_visible() const
 		eyeshot_angle = eyeshot_angle_short;
 	}
 	
-	std::cout << relative_length << " : " << eyeshot_angle << " : " << get_front().dot( ( to - from ).normalize() ) << std::endl;
+	// std::cout << relative_length << " : " << eyeshot_angle << " : " << get_front().dot( ( to - from ).normalize() ) << std::endl;
 
 	// ターゲットとの距離に応じた視野角に入っていなければ、目視できない
 	if ( get_front().dot( ( to - from ).normalize() ) < eyeshot_angle )
@@ -165,10 +165,28 @@ bool Robot::caluclate_target_visible() const
 	// ターゲットとの間に障害物がなければ目視できている
 	if ( ! ray_callback.hasHit() )
 	{
+		std::cout << "*** target_visible ***" << std::endl;
+		std::cout << "from : " << from.x() << ", " << from.y() << ", " << from.z() << std::endl;
+		std::cout << "to : " << to.x() << ", " << to.y() << ", " << to.z() << std::endl;
+
 		return true;
 	}
 
 	return false;
+}
+
+void Robot::on_collide_with( Player* )
+{
+	mode_ = MODE_SHUTDOWN;
+
+	stop_sound( "robot-found" );
+	stop_sound( "robot-chase" );
+
+	play_sound( "robot-shutdown", false, false );
+
+	get_animation_player()->play( "Shutdown", false, false );
+
+	set_velocity( Vector3( 0.f, 0.f, 0.f ) );
 }
 
 } // namespace blue_sky

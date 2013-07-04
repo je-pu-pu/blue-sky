@@ -132,6 +132,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 		get_sound_manager()->load_3d_sound( "robot-chase" );
 		get_sound_manager()->load_3d_sound( "robot-found" );
+		get_sound_manager()->load_3d_sound( "robot-shutdown" );
 
 		get_sound_manager()->load( "fin" );
 		get_sound_manager()->load( "door" );

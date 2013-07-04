@@ -22,6 +22,7 @@ public:
 		MODE_STAND = 0,
 		MODE_FIND,
 		MODE_CHASE,
+		MODE_SHUTDOWN,
 		// MODE_DETOUR
 	};
 
@@ -34,6 +35,7 @@ private:
 	float_t			timer_;
 
 	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
+	void on_collide_with( Player* );
 
 protected:
 	bool caluclate_target_visible() const;

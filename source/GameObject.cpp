@@ -85,7 +85,7 @@ void GameObject::set_velocity( const Vector3& v )
 	get_rigid_body()->setActivationState( true );
 
 	get_rigid_body()->setLinearVelocity( v );
-	// get_rigid_body()->setInterpolationLinearVelocity( v );
+	get_rigid_body()->setInterpolationLinearVelocity( v );
 }
 
 void GameObject::on_collide_with( GameObject* o )

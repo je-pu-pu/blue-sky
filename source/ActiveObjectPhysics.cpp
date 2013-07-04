@@ -124,6 +124,7 @@ public:
 			return 0;
 		}
 
+		a0->on_collide_with( a1 );
 		a1->on_collide_with( a0 );
 
 		return 0;

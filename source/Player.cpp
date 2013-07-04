@@ -594,6 +594,8 @@ void Player::on_collide_with( Robot* robot )
 	}
 	*/
 
+	return;
+
 	if ( ! is_uncontrollable() )
 	{
 		hp_--;

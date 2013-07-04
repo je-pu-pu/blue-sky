@@ -117,7 +117,7 @@ void Player::update()
 	{
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 1.f, 0.f, 0.f, 0.f ) );
 
-		if ( ! is_dead() && ! is_on_footing() && get_rigid_body()->getLinearVelocity().y() < -7.5f && get_action_mode() == ACTION_MODE_NONE )
+		if ( ! is_dead() && ! is_on_footing() && get_rigid_body()->getLinearVelocity().y() < -7.5f && get_location().y() > 10.f && get_location().y() < 30.f &&  get_action_mode() == ACTION_MODE_NONE )
 		{
 			play_sound( "fall", false, false );
 		}

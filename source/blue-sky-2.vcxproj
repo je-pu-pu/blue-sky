@@ -202,13 +202,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\lib\bullet-2.80-rev2531\src;D:\lib\collada-dom\include\collada-dom2.4\;D:\Program Files\Autodesk\FBX\FBX SDK\2013.3\include;D:\lib\collada-dom-2.4.0\dom\external-libs\boost\lib\vc10;D:\lib\collada-dom-2.4.0\dom\external-libs\libxml2-new\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\minizip\win32\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\pcre\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\tinyxml\lib\vc10;D:\lib\collada-dom-2.4.0\dom\external-libs\zlib-1.2.5\Release;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)extern;D:\lib\bullet-2.80-rev2531\src;D:\lib\collada-dom\include\collada-dom2.4\;D:\Program Files\Autodesk\FBX\FBX SDK\2013.3\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(DXSDK_DIR)lib\x86;D:\Program Files\Autodesk\FBX\FBX SDK\2013.3\lib\vs2010\x86;$(ProjectDir)lib\debug;$(ProjectDir)debug;$(LibraryPath);D:\lib\collada-dom\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\boost\lib\vc10;D:\lib\collada-dom-2.4.0\dom\external-libs\libxml2-new\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\minizip\win32\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\pcre\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\tinyxml\lib\vc10;D:\lib\collada-dom-2.4.0\dom\external-libs\zlib-1.2.5\Release</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\lib\bullet-2.80-rev2531\src;D:\lib\collada-dom\include\collada-dom2.4\;D:\Program Files\Autodesk\FBX\FBX SDK\2013.3\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)extern\;D:\lib\bullet-2.80-rev2531\src;D:\lib\collada-dom\include\collada-dom2.4\;D:\Program Files\Autodesk\FBX\FBX SDK\2013.3\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(DXSDK_DIR)lib\x86;D:\Program Files\Autodesk\FBX\FBX SDK\2013.3\lib\vs2010\x86;$(ProjectDir)lib\release;$(ProjectDir)release;$(LibraryPath);D:\lib\collada-dom-2.4.0\dom\external-libs\boost\lib\vc10;D:\lib\collada-dom-2.4.0\dom\external-libs\libxml2-new\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\minizip\win32\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\pcre\lib;D:\lib\collada-dom-2.4.0\dom\external-libs\tinyxml\lib\vc10;D:\lib\collada-dom-2.4.0\dom\external-libs\zlib-1.2.5\Release</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>

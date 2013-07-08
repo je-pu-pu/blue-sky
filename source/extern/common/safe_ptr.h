@@ -1,0 +1,47 @@
+#ifndef COMMON_SAFE_PTR_H
+#define COMMON_SAFE_PTR_H
+
+#include <cassert>
+
+namespace common
+{
+
+template< typename T >
+class safe_ptr
+{
+private:
+	T* ptr_;
+
+	safe_ptr( const safe_ptr& ) { }
+	safe_ptr& operator = ( const safe_ptr& ) { return *this; }
+
+public:
+	safe_ptr() : ptr_( 0 ) { }
+	safe_ptr( T* ptr ) : ptr_( ptr ) { }
+
+	safe_ptr& operator = ( T* ptr ) { assert( ! ptr_ ); ptr_ = ptr; return *this; }
+
+	T* operator -> () { return ptr_; }
+	const T* operator -> () const { return ptr_; }
+	
+	// operator T* () { return ptr_; }
+	// operator const T* () const { return ptr_; }
+
+	T* get() { return ptr_; }
+	const T* get() const { return ptr_; }
+
+	operator bool () const { return ptr_ != 0; }
+
+	void release()
+	{
+		if ( ptr_ )
+		{
+			delete ptr_;
+			ptr_ = 0;
+		}
+	}
+};
+
+} // namespace common
+
+#endif // COMMON_SAFE_PTR_H

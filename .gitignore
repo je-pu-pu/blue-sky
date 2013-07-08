@@ -1,9 +1,12 @@
 *.lnk
 *.url
 
-/source/Debug
-/source/Release
+/source/Debug/
+/source/Release/
 /source/ipch/
+
+/source/extern/*/Debug/
+/source/extern/*/Release/
 
 /source/docs/
 
@@ -11,10 +14,10 @@
 /source/save/*.save
 /source/log/*.log
 
-/source/blue-sky-2.vcxproj.user
-/source/blue-sky.opensdf
-/source/blue-sky.sdf
-/source/blue-sky.suo
+*.vcxproj.user
+*.opensdf
+*.sdf
+*.suo
 
 /docs/
 

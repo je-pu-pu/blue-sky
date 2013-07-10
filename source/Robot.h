@@ -20,6 +20,7 @@ public:
 	enum Mode
 	{
 		MODE_STAND = 0,
+		MODE_ATTENTION,
 		MODE_FIND,
 		MODE_CHASE,
 		MODE_SHUTDOWN,
@@ -31,8 +32,8 @@ public:
 private:
 	const Player*	player_;
 
-	Mode			mode_;
-	float_t			timer_;
+	Mode			mode_;			///< 現在の動作モード
+	float_t			timer_;			///< 汎用タイマー
 
 	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 	void on_collide_with( Player* );

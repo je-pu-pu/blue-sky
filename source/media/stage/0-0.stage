@@ -40,6 +40,9 @@ robot 66 0 2
 
 dynamic-object soda-can-1 63.5 0 1.8
 
+object rocket 66 0 4
+object missile 67 1 4
+
 balloon 43 22 8
 
 object tree-1 57 0 8

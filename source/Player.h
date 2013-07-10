@@ -110,6 +110,7 @@ public:
 
 	/// XV
 	void update();
+	void update_transform();
 	
 	// ˆÚ“®
 	void step( float_t );

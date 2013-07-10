@@ -200,8 +200,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 
 	// ‚«‚ê‚¢‚É‚·‚é
-	get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-1-loop.png" );
-	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pencil-face-1.png" );
+	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-1-loop.png" );
+	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-2-loop.png" );
+	get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pencil-face-1.png" );
 
 	update_render_data_for_game();
 
@@ -502,7 +503,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			size_map[ "box-5x5x5"    ] = ActiveObject::Vector3(  5.f,  5.f,  5.f );
 
 			std::map< string_t, float_t > mass_map;
-			mass_map[ "soda-can-1"   ] = 0.00000000001f;
+			mass_map[ "soda-can-1"   ] = 50.f;
 			mass_map[ "board-1"      ] = 20.f;
 
 			float w = 0.f, h = 0.f, d = 0.f, mass = 0.f;

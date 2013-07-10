@@ -137,10 +137,19 @@ btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, cons
 	}	
 }
 
-btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, bool is_static )
+/**
+ * カプセル形状の剛体を追加する
+ *
+ * @param transform 座標変換
+ * @param offset 剛体の中心点のオフセット
+ * @param radius シリンダー部の上下に付加される半球の半径
+ * @param height シリンダー部の高さ
+ * @param is_static 静的剛体フラグ
+ */
+btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, const Transform& offset, float_t radius, float_t height, bool is_static )
 {
 	// create_cylinder_shape()
-	btCapsuleShape* shape = new btCapsuleShape( box.getX(), box.getY() );
+	btCapsuleShape* shape = new btCapsuleShape( radius, height );
 	collision_shape_list_.push_back( shape );
 
 	// create_cylinder_rigid_body()

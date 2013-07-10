@@ -164,6 +164,19 @@ void Player::update()
 	uncontrollable_timer_ = math::chase< float_t >( uncontrollable_timer_, 0.f, get_elapsed_time() );
 }
 
+void Player::update_transform()
+{
+	ActiveObject::update_transform();
+
+	/*
+	if ( get_location().y() < 0.f )
+	{
+		set_location( Vector3( get_location().x(), 0.f, get_location().z() ) );
+		is_on_footing_ = true;
+	}
+	*/
+}
+
 void Player::limit_velocity()
 {
 	ActiveObject::limit_velocity();

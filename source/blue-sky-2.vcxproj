@@ -57,6 +57,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="matrix4x4.cpp" />
     <ClCompile Include="Medal.cpp" />
+    <ClCompile Include="Missile.cpp" />
     <ClCompile Include="OggVorbisFile.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Robot.cpp" />
@@ -130,6 +131,7 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="matrix4x4.h" />
     <ClInclude Include="Medal.h" />
+    <ClInclude Include="Missile.h" />
     <ClInclude Include="OggVorbisFile.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="resource.h" />

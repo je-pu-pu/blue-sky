@@ -1,3 +1,4 @@
+#if 0
 #include "Robot.h"
 #include "Player.h"
 
@@ -235,3 +236,5 @@ void Robot::on_collide_with( Player* )
 }
 
 } // namespace blue_sky
+
+#endif //

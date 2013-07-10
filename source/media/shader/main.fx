@@ -406,7 +406,7 @@ RasterizerState WireFrame
 RasterizerState Shadow
 {
 	CullMode = NONE;
-	SlopeScaledDepthBias = 1.f;
+	SlopeScaledDepthBias = 2.f;
 };
 
 // ----------------------------------------
@@ -536,6 +536,28 @@ PS_SHADOW_INPUT vs_skin_with_shadow( VS_SKIN_INPUT input )
 }
 
 /**
+ * 紙の質感テクスチャをサンプリングする
+ *
+ */
+float4 sample_paper_texture( float2 xy )
+{
+	const float Scale = 0.5f; // 0.75f + DrawingAccent * 0.25f;
+			
+	const float PaperTextureWidth  = 512.f * Scale;
+	const float PaperTextureHeight = 512.f * Scale;
+
+	float2 uv = float2(
+		xy.x / ScreenWidth  * ( ScreenWidth  / PaperTextureWidth  ),
+		xy.y / ScreenHeight * ( ScreenHeight / PaperTextureHeight )
+	);
+
+	// アクセントを加える
+	uv += float2( TimeBeat * 0.2f, 0.f );
+			
+	return paper_texture.Sample( wrap_texture_sampler, uv );
+}
+
+/**
  * 
  *
  */
@@ -598,32 +620,25 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 		// 紙の質感を追加する
 		if ( true )
 		{
-			const float Scale = 0.5f; // 0.75f + DrawingAccent * 0.25f;
-			
-			const float PaperTextureWidth  = 512.f * Scale;
-			const float PaperTextureHeight = 512.f * Scale;
-
-			float2 uv = float2(
-				input.Position.x / ScreenWidth  * ( ScreenWidth  / PaperTextureWidth  ),
-				input.Position.y / ScreenHeight * ( ScreenHeight / PaperTextureHeight )
-			);
-
-			// アクセントを加える
-			uv += float2( TimeBeat * 0.2f, 0.f );
-			
-			float4 paper = paper_texture.Sample( wrap_texture_sampler, uv );
+			float4 paper = sample_paper_texture( ( float2 ) input.Position );
 			shadow.rgb = float3( 0.5f, 0.5f, 0.5f ) * ( 1.f - paper.a ) + shadow.rgb * paper.a;
 						
 			/*
 			shadow.r = input.Position.x / ScreenWidth;
 			shadow.g = input.Position.y / ScreenHeight;
 			shadow.b = 0.f;
-			
 			*/
 
 			// return shadow;
 		}
 	}
+	/*
+	else
+	{
+		float4 paper = sample_paper_texture( ( float2 ) input.Position );
+		return model_texture.Sample( wrap_texture_sampler, input.TexCoord ) * ( 1.f - paper.a ) + float4( paper.rgb, 1.f );
+	}
+	*/
 
 	// return float4( sz, sz, sz, 1.f );
 	// return float4( input.Position.z, input.Position.z, input.Position.z, 1.f );

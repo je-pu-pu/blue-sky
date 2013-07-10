@@ -40,12 +40,14 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object( ActiveOb
  */
 ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_capsule( ActiveObject* active_object )
 {
-	Vector3 box( active_object->get_collision_width() / 2.f, active_object->get_collision_height() / 2.f, active_object->get_collision_depth() / 2.f );
+	float_t radius = std::max( active_object->get_collision_width(), active_object->get_collision_depth() ) / 2.f;
+	float_t height = active_object->get_collision_height() - ( radius * 2.f );
+
 	Transform offset;
 	offset.setIdentity();
 	offset.setOrigin( Vector3( 0, active_object->get_collision_height() / 2, 0 ) );
 
-	RigidBody* rigid_body = add_capsule_rigid_body( active_object->get_transform(), offset, box, dynamic_cast< const StaticObject* >( active_object ) != 0 );
+	RigidBody* rigid_body = add_capsule_rigid_body( active_object->get_transform(), offset, radius, height, dynamic_cast< const StaticObject* >( active_object ) != 0 );
 	rigid_body->setUserPointer(	active_object );
 
 	return rigid_body;

@@ -780,11 +780,6 @@ void GamePlayScene::update_main()
 			player_->jump();
 		}
 
-		if ( get_input()->push( Input::B ) )
-		{
-			player_->super_jump();
-		}
-
 		player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );
 
 		camera_->rotate_degree_target().y() = player_->get_direction_degree();

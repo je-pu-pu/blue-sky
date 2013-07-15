@@ -2,6 +2,7 @@
 #include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11.h"
 #include "DirectX.h"
+#include "type.h"
 
 #include <common/exception.h>
 
@@ -97,12 +98,14 @@ void Direct3D11ShadowMap::setLightPosition( const XMVECTOR& pos )
 	light_position_ = pos;
 
 	/// @todo 動的に変更できるようにする
-	float length[ 4 ] = { 10.f, 50.f, 150.f, 9999.f };
+	float_t length[ 4 ] = { 10.f, 50.f, 150.f, 9999.f };
+	// float_t near_length[ 4 ] = { 1.f, 10.f, 50.f, 150.f, };
+	// float_t far_length[ 4 ] = { 10.f, 50.f, 150.f, 300.f };
 
 	for ( int n = 0; n < 4; n++ )
 	{
 		/// @todo 地面より手前に far clip がこないようにする
-		projection_matrix_list_[ n ] = XMMatrixOrthographicLH( length[ n ], length[ n ], 1.f, 200.f );
+		projection_matrix_list_[ n ] = XMMatrixOrthographicLH( length[ n ], length[ n ], 1.f, 500.f );
 		constant_buffer_data_.view_depth_per_cascade_level[ n ] = length[ n ] * 0.3f;
 	}
 }

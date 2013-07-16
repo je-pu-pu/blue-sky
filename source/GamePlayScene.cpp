@@ -116,6 +116,14 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		get_sound_manager()->load( "damage-1" );
 		get_sound_manager()->load( "dead" );
 
+		get_sound_manager()->load( "balloon-1" );
+		get_sound_manager()->load( "balloon-2" );
+		get_sound_manager()->load( "balloon-3" );
+		get_sound_manager()->load( "balloon-4" );
+		get_sound_manager()->load( "balloon-5" );
+		get_sound_manager()->load( "balloon-6" );
+		get_sound_manager()->load( "balloon-7" );
+
 		get_sound_manager()->load( "balloon-get" );
 		get_sound_manager()->load( "balloon-burst" );
 		get_sound_manager()->load( "rocket-get" );
@@ -722,6 +730,7 @@ void GamePlayScene::update()
 	{
 		bgm_->fade_out();
 
+		/*
 		if ( balloon_bgm_->is_playing() )
 		{
 			balloon_bgm_->fade_in( Sound::VOLUME_FADE_SPEED_FAST );
@@ -731,6 +740,7 @@ void GamePlayScene::update()
 			balloon_bgm_->play( true );
 			balloon_bgm_->set_volume( Sound::VOLUME_MAX );
 		}
+		*/
 	}
 	else
 	{

@@ -13,6 +13,7 @@
 #include "ActiveObjectPhysics.h"
 
 #include <common/math.h>
+#include <common/serialize.h>
 
 namespace blue_sky
 {
@@ -27,6 +28,7 @@ Player::Player()
 	, step_speed_( 0.25f )
 	, action_mode_( ACTION_MODE_NONE )
 	, is_action_pre_finish_( false )
+	, balloon_sequence_count_( 0 )
 	, uncontrollable_timer_( 0.f )
 	, eye_height_( 1.5f )
 	, eye_depth_( 0.f )
@@ -148,6 +150,11 @@ void Player::update()
 
 			set_last_footing_height_to_current_height();
 		}
+
+		if ( action_mode_ != ACTION_MODE_BALLOON )
+		{
+			balloon_sequence_count_ = 0;
+		}
 	}
 
 	if ( ! is_falling_to_die() )
@@ -216,7 +223,7 @@ void Player::update_jumpable()
 		return;
 	}
 
-	is_jumpable_ = is_on_footing();
+	is_jumpable_ = is_on_footing() || action_mode_ == ACTION_MODE_BALLOON;
 }
 
 void Player::update_on_footing()
@@ -460,6 +467,8 @@ void Player::jump()
 
 	is_jumping_ = true;
 
+	set_action_mode( ACTION_MODE_NONE );
+
 	stop_sound( "short-breath" );
 
 	if ( is_running() )
@@ -584,7 +593,20 @@ void Player::on_collide_with( Balloon* balloon )
 
 	set_last_footing_height_to_current_height();
 
-	play_sound( "balloon-get" );
+	// play_sound( "balloon-get" );
+
+	balloon_sequence_count_ += 1;
+	balloon_sequence_count_ = math::clamp( balloon_sequence_count_, 1, 7 );
+
+	for ( int n = 1; n <= 7; n++ )
+	{
+		if ( n != balloon_sequence_count_ )
+		{
+			stop_sound( ( std::string( "balloon-" ) + common::serialize( n ) ).c_str() );
+		}
+	}
+
+	play_sound( ( std::string( "balloon-" ) + common::serialize( balloon_sequence_count_ ) ).c_str() );
 }
 
 void Player::on_collide_with( Medal* medal )

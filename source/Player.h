@@ -37,6 +37,7 @@ private:
 	ActionMode	action_mode_;			///< 現在のアクションのモード
 	Vector3		action_base_position_;	///< 現在のアクションの基底位置
 	bool		is_action_pre_finish_;	///< 現在のアクションがもうすぐ終わるフラグ
+	int_t		balloon_sequence_count_;///< 現在の連続取得バルーンの数 ( 0 .. 7 )
 
 	float_t		uncontrollable_timer_;	///< 制御不能タイマー
 

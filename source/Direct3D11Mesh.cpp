@@ -159,6 +159,8 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 
 			ss >> n.x >> n.y >> n.z;
 
+			n.z = -n.z;
+
 			normal_list.push_back( n );
 		}
 		else if ( command == "vt" )

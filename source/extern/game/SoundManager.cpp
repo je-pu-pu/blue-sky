@@ -10,7 +10,7 @@
 #include "SoundManager.h"
 #include "Sound.h"
 
-#include <common/exception.h>
+#include <cassert>
 
 namespace game
 {
@@ -35,6 +35,33 @@ void SoundManager::set_mute( bool mute )
 void SoundManager::set_volume( float volume )
 {
 	volume_ = volume;
+}
+
+void SoundManager::push_group( const char_t* group_name )
+{
+	assert( group_name_.empty() );
+
+	group_name_ = group_name;
+}
+
+void SoundManager::pop_group()
+{
+	auto i = grouped_sound_map_.find( group_name_ );
+
+	group_name_.clear();
+
+	if ( i == grouped_sound_map_.end() )
+	{
+		return;
+	}
+
+	for ( auto j = i->second.begin(); j != i->second.end(); ++j )
+	{
+		/// j->second ‚Í–³Œø‚Èê‡‚ª‚ ‚éŽ–‚É’ˆÓ
+		unload( j->first.c_str() );
+	}
+
+	grouped_sound_map_.erase( i );
 }
 
 Sound* SoundManager::load( const char* name, const char* file_name )
@@ -68,6 +95,7 @@ Sound* SoundManager::load_common( const char* name, const char* file_name, bool 
 	sound->set_file_name( file_name );
 	
 	sound_map_[ name ] = sound;
+	grouped_sound_map_[ group_name_ ][ name ] = sound;
 
 	return sound;
 }
@@ -91,7 +119,8 @@ void SoundManager::unload_all()
 		delete i->second;
 	}
 
-	sound_map().clear();
+	sound_map_.clear();
+	grouped_sound_map_.clear();
 }
 
 Sound* SoundManager::get_sound( const char* name ) const

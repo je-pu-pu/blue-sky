@@ -38,6 +38,6 @@ std::string convert_to_string( const std::wstring ws )
 	return result;
 }
 
-} // namespace math
+} // namespace common
 
-#endif // COMMON_MATH_H
+#endif // COMMON_STRING_H

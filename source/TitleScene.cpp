@@ -8,6 +8,7 @@
 #include "DrawingLine.h"
 
 #include "Input.h"
+#include "GraphicsManager.h"
 #include "SoundManager.h"
 #include "Sound.h"
 
@@ -48,8 +49,12 @@ TitleScene::TitleScene( const GameMain* game_main )
 	title_bg_texture_ = get_direct_3d()->getTextureManager()->load( "title-bg", "media/image/cloud-3.jpg" );
 	cloth_texture_ = get_direct_3d()->getTextureManager()->load( "cloth", "media/texture/cloth.png" );
 
+	get_graphics_manager()->setup_loader();
+
 	brand_logo_model_ = get_drawing_model_manager()->load( "je-pu-pu" );
 	title_logo_model_ = get_drawing_model_manager()->load( "blue-sky" );
+
+	get_graphics_manager()->cleanup_loader();
 
 	{
 		GameConstantBufferData game_constant_buffer_data;

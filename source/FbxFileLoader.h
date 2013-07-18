@@ -23,7 +23,6 @@ class FbxFileLoader
 {
 public:
 	typedef Direct3D11Mesh Mesh;
-	typedef Direct3D11Material Material;
 
 private:
 	FbxManager* fbx_manager_;
@@ -53,10 +52,11 @@ protected:
 	void print_axis_system( const FbxAxisSystem& ) const;
 
 public:
-	FbxFileLoader( Mesh* );
+	FbxFileLoader();
 	~FbxFileLoader();
 
-	bool load( const char_t* );
+	bool load( Mesh*, const char_t* );
+	bool save( const char_t* );
 	
 }; // class FbxFileLoader
 

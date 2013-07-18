@@ -6,6 +6,7 @@
 #include <game/GraphicsManager.h>
 
 class SkinningAnimationSet;
+class FbxFileLoader;
 
 namespace blue_sky
 {
@@ -27,7 +28,7 @@ public:
 	DrawingMesh( Mesh* );
 
 	bool load_obj( const char_t* );
-	bool load_fbx( const char_t*, common::safe_ptr< SkinningAnimationSet >& );
+	bool load_fbx( const char_t*, FbxFileLoader*, common::safe_ptr< SkinningAnimationSet >& );
 
 	void render() const;
 

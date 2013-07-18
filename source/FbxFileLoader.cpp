@@ -5,15 +5,13 @@
 #include "Direct3D11Matrix.h"
 #include "SkinningAnimationSet.h"
 
-// #include <game/GraphicsManager.h>
+#include <common/timer.h>
+#include <common/exception.h>
 
 #include <map>
 
 #include <iostream>
 #include <cassert>
-
-// #include <common/exception.h>
-// #include <common/serialize.h>
 
 #ifdef _DEBUG
 #pragma comment ( lib, "fbxsdk-2013.3-mtd.lib" )
@@ -220,12 +218,15 @@ void print_fbx_node_recursive( FbxNode* node )
 	}
 }
 
-FbxFileLoader::FbxFileLoader( Mesh* mesh )
+FbxFileLoader::FbxFileLoader()
 	: fbx_manager_( FbxManager::Create() )
-	, mesh_( mesh )
+	, mesh_( 0 )
 	, fbx_scene_( 0 )
 	, fbx_material_index_( 0 )
 {
+	FbxIOSettings* io_settings = FbxIOSettings::Create( fbx_manager_, IOSROOT );
+	fbx_manager_->SetIOSettings( io_settings );
+
 	/*
 	int n;
 	FBXSDK_FOR_EACH_TEXTURE( n )
@@ -243,13 +244,15 @@ FbxFileLoader::~FbxFileLoader()
 /**
  * FBX ファイルを読み込む
  *
+ * @param mesh 読込先のメッシュ
  * @param file_name FBX ファイル名
  * @return ファイルの読み込みに成功した場合は true を、失敗した場合は false を返す
  */
-bool FbxFileLoader::load( const char_t* file_name )
+bool FbxFileLoader::load( Mesh* mesh, const char_t* file_name )
 {
-	FbxIOSettings* io_settings = FbxIOSettings::Create( fbx_manager_, IOSROOT );
-	fbx_manager_->SetIOSettings( io_settings );
+	mesh_ = mesh;
+	fbx_material_index_ = 0;
+	bone_index_map_.clear();
 
 	FbxImporter* importer = FbxImporter::Create( fbx_manager_, "" );
     
@@ -258,10 +261,14 @@ bool FbxFileLoader::load( const char_t* file_name )
 		return false;
 	}
     
+	common::timer t;
+
 	fbx_scene_ = FbxScene::Create( fbx_manager_, "scene" );
 	importer->Import( fbx_scene_ );
 	importer->Destroy();
     
+	std::cout << "imp " << t.elapsed() << std::endl;
+
 	/*
 	std::cout << "*** DirectX ***" << std::endl;
 	print_axis_system( FbxAxisSystem::DirectX );
@@ -286,20 +293,34 @@ bool FbxFileLoader::load( const char_t* file_name )
 		}
 		*/
 
+		t.restart();
+
 		for ( int n = 0; n < root_node->GetChildCount(); n++ )
 		{
 			load_limb_recursive( root_node->GetChild( n ) );
 		}
 
+		std::cout << "limb " << t.elapsed() << std::endl;
+		t.restart();
+
 		load_animations();
+
+		std::cout << "anim " << t.elapsed() << std::endl;
+		t.restart();
 
 		for ( int n = 0; n < root_node->GetChildCount(); n++ )
 		{
 			load_mesh_recursive( root_node->GetChild( n ) );
 		}
+
+		std::cout << "mesh " << t.elapsed() << std::endl;
+		t.restart();
 	}
 
 	convert_coordinate_system();
+
+	std::cout << "convert_coordinate_system " << t.elapsed() << std::endl;
+	t.restart();
 
 	return true;
 }
@@ -339,7 +360,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 	FbxGeometryConverter converter( fbx_manager_ );
 	mesh = converter.TriangulateMesh( mesh );
 
-	typedef std::map< Mesh::Vertex, Material::Index > VertexIndexMap;
+	typedef std::map< Mesh::Vertex, Mesh::Material::Index > VertexIndexMap;
 	typedef std::vector< Mesh::Vertex > VertexList;
 
 	VertexIndexMap vertex_index_map;
@@ -389,7 +410,10 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 		}
 	}
 
-	assert( smoothing );
+	if ( ! smoothing )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( "this FBX format is not supported. ( no smoothing info )" );
+	}
 
 	// load_mesh_plygon()
 	FbxLayerElementArrayTemplate< int >* material_indices;
@@ -469,7 +493,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 				}
 				else
 				{
-					Material::Index vertex_index = mesh_->get_vertex_list().size();
+					Mesh::Material::Index vertex_index = mesh_->get_vertex_list().size();
 
 					mesh_->get_vertex_list().push_back( v );
 
@@ -929,4 +953,25 @@ void FbxFileLoader::print_axis_system( const FbxAxisSystem& axis_system ) const
 	}
 	
 	std::cout << std::endl;
+}
+
+/**
+ * FBX ファイルを保存する
+ *
+ * @param file_name FBX ファイル名
+ */
+bool FbxFileLoader::save( const char_t* file_name )
+{
+	bool result = false;
+
+	FbxExporter* exporter = FbxExporter::Create( fbx_manager_, "" );
+	
+	if ( exporter->Initialize( file_name, -1, fbx_manager_->GetIOSettings() ) )
+	{
+		result = exporter->Export( fbx_scene_ );
+	}
+
+	exporter->Destroy();
+
+	return result;
 }

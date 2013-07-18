@@ -44,7 +44,9 @@
 #include "ConstantBuffer.h"
 
 #include "Input.h"
+#include "GraphicsManager.h"
 #include "SoundManager.h"
+
 #include "DrawingModelManager.h"
 #include "ActiveObjectManager.h"
 
@@ -62,10 +64,6 @@
 #include <common/serialize.h>
 #include <common/random.h>
 #include <common/math.h>
-
-#include <boost/format.hpp>
-
-#include <list>
 
 #include <fstream>
 #include <sstream>
@@ -138,6 +136,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		get_sound_manager()->load( "door" );
 	}
 
+	get_graphics_manager()->setup_loader();
+
 	// Player
 	player_ = new Player();
 	player_->set_drawing_model( get_drawing_model_manager()->load( "player" ) );
@@ -190,6 +190,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	rectangle_ = new Rectangle( get_direct_3d() );
 
 	debug_axis_ = new Axis( get_direct_3d() );
+
+	get_graphics_manager()->cleanup_loader();
 
 	bgm_ = get_sound_manager()->get_sound( "bgm" );
 

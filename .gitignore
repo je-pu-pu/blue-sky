@@ -1,5 +1,6 @@
 *.lnk
 *.url
+*.bin.fbx
 
 /source/Debug/
 /source/Release/

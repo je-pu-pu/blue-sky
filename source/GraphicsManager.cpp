@@ -1,11 +1,37 @@
 #include "GraphicsManager.h"
-#include "FbxFileLoader.h"
-
 #include "DrawingMesh.h"
 #include "DrawingLine.h"
+#include "FbxFileLoader.h"
+
+#include <common/timer.h>
+#include <common/exception.h>
+
+#include <boost/filesystem.hpp>
+
+#include <iostream>
 
 namespace blue_sky
 {
+
+GraphicsManager::GraphicsManager()
+{
+
+}
+
+GraphicsManager::~GraphicsManager()
+{
+	cleanup_loader();
+}
+
+void GraphicsManager::setup_loader()
+{
+	fbx_file_loader_ = new FbxFileLoader();
+}
+
+void GraphicsManager::cleanup_loader()
+{
+	fbx_file_loader_.release();	
+}
 
 /**
  * è•`‚«•—ƒƒbƒVƒ…‚ğ“Ç‚İ‚Ş
@@ -16,13 +42,35 @@ namespace blue_sky
  */
 DrawingMesh* GraphicsManager::load_drawing_mesh( const char_t* name, common::safe_ptr< SkinningAnimationSet >& skinning_animation_set )
 {
+	std::string file_path = string_t( "media/model/" ) + name;
+
+	std::cout << "--- loading " << name << " ---" << std::endl;
+	common::timer t;
+
 	DrawingMesh* mesh = create_drawing_mesh();
 	
-	if ( ! mesh->load_fbx( ( string_t( "media/model/" ) + name + ".fbx" ).c_str(), skinning_animation_set ) )
+	bool loaded = false;
+
+	if ( ! loaded && boost::filesystem::exists( file_path + ".bin.fbx" ) )
 	{
-		mesh->load_obj( ( string_t( "media/model/" ) + name + ".obj" ).c_str() );
+		loaded = mesh->load_fbx( ( file_path + ".bin.fbx" ).c_str(), fbx_file_loader_.get(), skinning_animation_set );
 	}
-	
+	if ( ! loaded && boost::filesystem::exists( file_path  + ".fbx" ) )
+	{
+		loaded = mesh->load_fbx( ( file_path  + ".fbx" ).c_str(), fbx_file_loader_.get(), skinning_animation_set );
+
+		if ( loaded )
+		{
+			fbx_file_loader_->save( ( file_path + ".bin.fbx" ).c_str() );
+		}
+	}
+	if ( ! loaded && boost::filesystem::exists( file_path + ".obj" ) )
+	{
+		loaded = mesh->load_obj( ( file_path + ".obj" ).c_str() );
+	}
+
+	std::cout << "--- loaded " << name << " : " << t.elapsed() << "---" << std::endl;
+
 	return mesh;
 }
 

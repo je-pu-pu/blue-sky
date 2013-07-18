@@ -5,6 +5,7 @@
 #include <type/type.h>
 
 class SkinningAnimationSet;
+class FbxFileLoader; /// @todo ˆË‘¶ŠÖŒW‚ð‚È‚ñ‚Æ‚©‚·‚é
 
 namespace game
 {
@@ -30,7 +31,7 @@ class Mesh : public RenderingObject
 {
 public:
 	virtual bool load_obj( const char_t* ) { return false; }
-	virtual bool load_fbx( const char_t*, common::safe_ptr< SkinningAnimationSet >& ) { return false; }
+	virtual bool load_fbx( const char_t*, FbxFileLoader*, common::safe_ptr< SkinningAnimationSet >& ) { return false; }
 };
 
 /**

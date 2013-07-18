@@ -82,10 +82,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, action_bgm_after_timer_( 0.f )
 	, bpm_( 120.f )
 {
-	object_detail_level_0_length_ = get_config()->get( "video.object-detail-level-0-length", 500.f );
-	object_detail_level_1_length_ = get_config()->get( "video.object-detail-level-1-length", 250.f );
-	object_detail_level_2_length_ = get_config()->get( "video.object-detail-level-2-length", 100.f );
-
 	get_physics()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
 
 	// Texture
@@ -94,14 +90,10 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Sound
 	{
-		get_sound_manager()->stop_all();
-		get_sound_manager()->unload_all();
 
 		balloon_bgm_ = get_sound_manager()->load_music( "balloon" );
 
 		get_sound_manager()->load_3d_sound( "enemy" );
-
-		get_sound_manager()->load( "click" );
 
 		get_sound_manager()->load( "walk" );
 		get_sound_manager()->load( "run" );
@@ -224,9 +216,6 @@ GamePlayScene::~GamePlayScene()
 
 	get_direct_3d()->getMeshManager()->unload_all();
 	get_direct_3d()->getTextureManager()->unload_all();
-
-	get_sound_manager()->stop_all();
-	get_sound_manager()->unload_all();
 
 	get_physics()->clear();
 }
@@ -788,6 +777,10 @@ void GamePlayScene::update_main()
 		if ( get_input()->push( Input::A ) )
 		{
 			player_->jump();
+		}
+		else if ( get_input()->push( Input::B ) )
+		{
+			player_->super_jump();
 		}
 
 		player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );

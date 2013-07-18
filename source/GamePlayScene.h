@@ -38,10 +38,6 @@ public:
 	typedef Direct3D11Axis				Axis;
 
 protected:
-	float_t				object_detail_level_0_length_;			///< 低品質のオブジェクトを表示する距離
-	float_t				object_detail_level_1_length_;			///< 中品質のオブジェクトを表示する距離
-	float_t				object_detail_level_2_length_;			///< 高品質のオブジェクトを表示する距離
-
 	Texture*			ui_texture_;							///< UI 表示用テクスチャ
 
 	bool				is_cleared_;							///< ステージクリアフラグ

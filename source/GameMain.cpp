@@ -108,6 +108,12 @@ GameMain::GameMain()
 	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
 	sound_manager_->set_mute( config_->get( "audio.mute", 0 ) != 0 );
 	sound_manager_->set_volume( config_->get( "audio.volume", 1.f ) );
+	
+	sound_manager_->load( "ok" );
+	sound_manager_->load( "cancel" );
+	sound_manager_->load( "click" );
+
+	get_sound_manager()->push_group( "title" );
 
 	active_object_manager_ = new ActiveObjectManager();
 	drawing_model_manager_ = new DrawingModelManager();
@@ -172,6 +178,13 @@ bool GameMain::update()
 		else
 		{
 			scene_->set_next_scene( "title" );
+		}
+
+		game::Sound* cancel = sound_manager_->get_sound( "cancel" );
+
+		if ( cancel )
+		{
+			cancel->play( false );
 		}
 	}
 
@@ -238,6 +251,8 @@ void GameMain::check_scene_transition()
 
 		scene_.release();
 
+		sound_manager_->pop_group();
+
 		if ( next_scene == "title" )
 		{
 			scene_ = new TitleScene( this );
@@ -262,6 +277,8 @@ void GameMain::check_scene_transition()
 		{
 			COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " ) + next_scene );
 		}
+
+		sound_manager_->push_group( next_scene.c_str() );
 
 		scene_->set_name( next_scene );
 		scene_->set_next_stage_name( get_stage_name() );

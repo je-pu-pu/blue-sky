@@ -1,0 +1,6 @@
+next-scene stage_outro
+next-stage-name ending
+
+bg cloud-2.jpg
+bgm balloon 0.9
+sound voice-epilogue

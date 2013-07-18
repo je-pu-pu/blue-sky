@@ -72,8 +72,6 @@ StoryTextScene::~StoryTextScene()
 {
 	get_direct_3d()->getTextureManager()->unload( "sprite" );
 	get_direct_3d()->getTextureManager()->unload( "bg" );
-
-	get_sound_manager()->stop_all();
 }
 
 void StoryTextScene::load_story_text_file( const char* file_name )

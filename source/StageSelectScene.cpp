@@ -32,6 +32,7 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	, sprite_texture_( 0 )
 	, bg_texture_( 0 )
 	, ok_( 0 )
+	, click_( 0 )
 	, cursor_src_rect_( win::Rect::Size( 0, 702, 92, 136 ) )
 	, left_allow_src_rect_( win::Rect::Size( 256, 704, 82, 126 ) )
 	, right_allow_src_rect_( win::Rect::Size( 384, 704, 86, 126 ) )
@@ -54,8 +55,8 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	sprite_texture_ = get_direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
 	bg_texture_ = get_direct_3d()->getTextureManager()->load( "bg", "media/texture/cloth.png" );
 
-	ok_ = get_sound_manager()->load( "ok" );
-	click_ = get_sound_manager()->load( "click" );
+	ok_ = get_sound_manager()->get_sound( "ok" );
+	click_ = get_sound_manager()->get_sound( "click" );
 
 	update_stage_list();
 
@@ -133,7 +134,7 @@ void StageSelectScene::render()
 
 		// render_bg()
 		{
-			get_direct_3d()->getSprite()->draw( bg_texture_ );
+			get_direct_3d()->getSprite()->draw( win::Rect::Size( 0, 0, get_width(), get_height() ), bg_texture_ );
 		}
 	}
 
@@ -439,9 +440,6 @@ bool StageSelectScene::has_prev_page() const
 
 bool StageSelectScene::has_next_page() const
 {
-	/// !!!
-	return false;
-
 	if ( page_ == get_max_story_page() - 1 )
 	{
 		// stroy last page

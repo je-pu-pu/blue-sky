@@ -1,6 +1,7 @@
 #ifndef DIRECT_3D_11_H
 #define DIRECT_3D_11_H
 
+#include "type.h"
 #include <common/auto_ptr.h>
 
 #include <d3dx11.h>
@@ -11,6 +12,7 @@
 class Direct3D11Vector;
 class Direct3D11Matrix;
 class Direct3D11Color;
+class Direct3D11Texture;
 
 class Direct3D11Sprite;
 class Direct3D11Fader;
@@ -50,10 +52,9 @@ public:
 	typedef Direct3D11Vector			Vector;
 	typedef Direct3D11Matrix			Matrix;
 	typedef Direct3D11Color				Color;
+	typedef Direct3D11Texture			Texture;
 
 	typedef std::map< const char*, InputLayout* >		InputLayoutList;
-
-	typedef ID3D11ShaderResourceView	Texture;
 
 private:
 	ID3D11Device*				device_;				///< Direct3D 11 Device
@@ -78,7 +79,7 @@ private:
 	IDXGISurface1*				back_buffer_surface_;
 
 	ID3D11Texture2D*			text_texture_;
-	ID3D11ShaderResourceView*	text_view_;
+	common::auto_ptr< Texture >	text_view_;
 
 	IDXGISurface1*				text_surface_;
 	IDXGIKeyedMutex*			text_texture_mutex_11_;
@@ -127,6 +128,9 @@ public:
 
 	void setInputLayout( const char* );
 
+	void bind_texture_to_ps( uint_t, const Texture* );
+
+
 	void begin2D();
 	void end2D();
 	void begin3D();
@@ -138,7 +142,7 @@ public:
 
 	void setDebugViewport( float, float, float, float );
 
-	void getTexture2dDescByTexture( Texture*, D3D11_TEXTURE2D_DESC* );
+	void getTexture2dDescByTexture( const Texture*, D3D11_TEXTURE2D_DESC* );
 
 	inline Font* getFont() { return font_.get(); }
 	inline Sprite* getSprite() { return sprite_.get(); }
@@ -154,7 +158,6 @@ public:
 	inline const MeshManager* getMeshManager() const { return mesh_manager_.get(); }
 	inline const TextureManager* getTextureManager() const { return texture_manager_.get(); }
 
-
 	/** BAD functions */
 	inline ID3D11Device* getDevice() const { return device_; }
 	inline ID3D11DeviceContext* getImmediateContext() const { return immediate_context_; }
@@ -162,7 +165,6 @@ public:
 	inline IDXGISurface1* getBackbufferSurface() const { return back_buffer_surface_; }
 
 	inline IDXGISurface1* getTextSurface() const { return text_surface_; }
-	inline ID3D11ShaderResourceView* getTextView() const { return text_view_; }
 
 }; // class Direct3D11
 

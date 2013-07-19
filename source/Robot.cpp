@@ -63,8 +63,7 @@ void Robot::update()
 		get_front().normalize();
 
 		set_velocity( Vector3( get_front().x() * 3.f, get_velocity().y(), get_front().z() * 3.f ) );
-
-		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.8f, 0, 0, -0.25f ) );
+		// get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.8f, 0, 0, -0.25f ) );
 		get_animation_player()->play( "Walk", false, true );
 
 		if ( caluclate_target_lost() )
@@ -77,7 +76,7 @@ void Robot::update()
 	else if ( mode_ == MODE_STAND )
 	{
 		set_velocity( Vector3( 0.f, 0.f, 0.f ) );
-		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0, 0, 0, 0 ) );
+		// get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0, 0, 0, 0 ) );
 		// get_animation_player()->play( "Test", false, true );
 		get_animation_player()->play( "Stand", false, true );
 		

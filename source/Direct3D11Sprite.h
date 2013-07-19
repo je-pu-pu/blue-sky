@@ -17,6 +17,7 @@ class Direct3D11;
 class Direct3D11Vector;
 class Direct3D11Matrix;
 class Direct3D11Color;
+class Direct3D11Texture;
 
 template< typename T > class Direct3D11ConstantBuffer;
 
@@ -29,13 +30,12 @@ class Direct3D11Sprite
 public:
 	typedef Direct3D11					Direct3D;
 	typedef Direct3D11Color				Color;
-
+	typedef Direct3D11Texture			Texture;
 
 	typedef Direct3D11Sprite			Sprite;
 	
 	typedef ID3D11InputLayout			InputLayout;
 	typedef ID3D11Buffer				Buffer;
-	typedef ID3D11ShaderResourceView	Texture;
 
 	typedef XMFLOAT2					Vector2;
 	typedef XMFLOAT3					Vector3;
@@ -81,7 +81,7 @@ protected:
 	void create_vertex_buffer();
 	void create_index_buffer();
 
-	void draw( const Rect*, Texture*, const Rect*, const Color* );
+	void draw( const Rect*, const Texture*, const Rect*, const Color* );
 
 public:
 	Direct3D11Sprite( Direct3D* );
@@ -91,12 +91,12 @@ public:
 
 	void set_transform( const Matrix& );
 
-	void draw( const Point&, Texture*, const Rect&, const Color& = white_ );
-	void draw( const Rect&, Texture*, const Rect&, const Color& = white_ );
-	void draw( const Rect&, Texture*, const Color& = white_ );
+	void draw( const Point&, const Texture*, const Rect&, const Color& = white_ );
+	void draw( const Rect&, const Texture*, const Rect&, const Color& = white_ );
+	void draw( const Rect&, const Texture*, const Color& = white_ );
 
-	void draw( Texture*, const Rect&, const Color& = white_ );
-	void draw( Texture*, const Color& = white_ );
+	void draw( const Texture*, const Rect&, const Color& = white_ );
+	void draw( const Texture*, const Color& = white_ );
 
 	void end();
 

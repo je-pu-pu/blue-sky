@@ -24,7 +24,7 @@ DrawingLine::DrawingLine( Direct3D11* direct_3d )
 	, vertex_buffer_( 0 )
 	, index_buffer_( 0 )
 
-	, texture_resource_view_( 0 )
+	, texture_( 0 )
 {
 
 }
@@ -93,7 +93,12 @@ bool DrawingLine::load_obj( const char* file_name )
 	create_vertex_buffer();
 	create_index_buffer();
 
-	create_texture_resource_view( file_name );
+	create_texture( file_name );
+
+	index_size_ = index_list_.size();
+
+	vertex_list_.clear();
+	index_list_.clear();
 
 	return true;
 }
@@ -126,9 +131,9 @@ void DrawingLine::create_index_buffer()
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & index_buffer_ ) );
 }
 
-void DrawingLine::create_texture_resource_view( const char* file_name )
+void DrawingLine::create_texture( const char* file_name )
 {
-	texture_resource_view_ = direct_3d_->getTextureManager()->load( "lines", "media/texture/lines.png" );
+	texture_ = direct_3d_->getTextureManager()->load( "lines", "media/texture/lines.png" );
 	// texture_resource_view_ = direct_3d_->getTextureManager()->load( "lines", "media/texture/pen-face-1-loop.png" );
 }
 
@@ -147,13 +152,13 @@ void DrawingLine::render_part( int level ) const
 
 	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
 
-	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & texture_resource_view_ );
+	direct_3d_->bind_texture_to_ps( 0, texture_ );
 
 	// debug !!!
 	// ID3D11ShaderResourceView* text_view = direct_3d_->getTextView();
 	// direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & text_view );
 
-	direct_3d_->getImmediateContext()->DrawIndexed( std::min< int >( level, index_list_.size() ), 0, 0 );
+	direct_3d_->getImmediateContext()->DrawIndexed( std::min< int >( level, index_size_ ), 0, 0 );
 }
 
 } // namespace blue_sky

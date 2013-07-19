@@ -39,6 +39,8 @@ public:
 	DrawingMesh* load_drawing_mesh( const char_t*, common::safe_ptr< SkinningAnimationSet >& );
 	DrawingLine* load_drawing_line( const char_t* );
 
+	// Texture* load_texture(();
+
 }; // class GraphicsManager
 
 } // namespace blue_sky

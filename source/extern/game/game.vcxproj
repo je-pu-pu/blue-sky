@@ -125,6 +125,7 @@
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundFile.h" />
     <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Config.cpp" />

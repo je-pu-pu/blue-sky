@@ -8,6 +8,7 @@
     <ClInclude Include="AABB.h" />
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="GraphicsManager.h" />
+    <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SoundManager.cpp" />

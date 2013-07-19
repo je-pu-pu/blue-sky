@@ -1065,7 +1065,11 @@ void GamePlayScene::update_render_data_for_active_object( const ActiveObject* ac
 	buffer_data.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
 	buffer_data.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
 	buffer_data.world = XMMatrixTranspose( buffer_data.world );
-	buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
+
+	if ( active_object->get_drawing_model()->get_line() )
+	{
+		buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
+	}
 
 	active_object->get_object_constant_buffer()->update( & buffer_data );
 
@@ -1266,8 +1270,7 @@ void GamePlayScene::render_object_skin_mesh() const
 			shadow_map_->ready_to_render_scene();
 
 			/// @todo ‚Ü‚Æ‚ß‚é
-			Texture* paper_texture = get_direct_3d()->getTextureManager()->get( "paper" );
-			get_direct_3d()->getImmediateContext()->PSSetShaderResources( 2, 1, & paper_texture );
+			get_direct_3d()->bind_texture_to_ps( 2, get_direct_3d()->getTextureManager()->get( "paper" ) );
 		}
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
@@ -1303,8 +1306,7 @@ void GamePlayScene::render_object_mesh() const
 			shadow_map_->ready_to_render_scene();
 
 			/// @todo ‚Ü‚Æ‚ß‚é
-			Texture* paper_texture = get_direct_3d()->getTextureManager()->get( "paper" );
-			get_direct_3d()->getImmediateContext()->PSSetShaderResources( 2, 1, & paper_texture );
+			get_direct_3d()->bind_texture_to_ps( 2, get_direct_3d()->getTextureManager()->get( "paper" ) );
 		}
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
@@ -1375,6 +1377,11 @@ void GamePlayScene::render_active_object_mesh( const ActiveObject* active_object
 void GamePlayScene::render_active_object_line( const ActiveObject* active_object ) const
 {
 	if ( active_object->is_dead() )
+	{
+		return;
+	}
+
+	if ( ! active_object->get_drawing_model()->get_line() )
 	{
 		return;
 	}
@@ -1491,7 +1498,11 @@ void GamePlayScene::render_debug_axis() const
 				buffer_data.world *= XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
 				buffer_data.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
 				buffer_data.world = XMMatrixTranspose( buffer_data.world );
-				buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
+
+				if ( active_object->get_drawing_model()->get_line() )
+				{
+					buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
+				}
 
 				active_object->get_object_constant_buffer()->update( & buffer_data );
 

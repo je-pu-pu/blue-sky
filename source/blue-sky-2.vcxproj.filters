@@ -177,6 +177,9 @@
     <ClCompile Include="Missile.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
+    <ClCompile Include="BgSpriteLayer.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -400,6 +403,12 @@
     </ClInclude>
     <ClInclude Include="Missile.h">
       <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="BgSpriteLayer.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D11Texture.h">
+      <Filter>DirectX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -8,6 +8,7 @@
 #include "DirectWrite.h"
 #include "Direct3D11TextureManager.h"
 #include "DirectX.h"
+#include "BgSpriteLayer.h"
 #include "SoundManager.h"
 #include "Sound.h"
 #include "Input.h"
@@ -31,10 +32,6 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 	, text_border_color_( Direct3D::Color::from_256( 0, 0, 0, 127 ) )
 	, next_scene_name_( next_scene_name )
 	, sprite_texture_( 0 )
-	, bg_texture_( 0 )
-	, bg_width_( 0 )
-	, bg_height_( 0 )
-	, bg_scale_( 1.f, 1.f, 0.001f )
 	, bgm_( 0 )
 	, sound_( 0 )
 	, is_skipped_( false )
@@ -51,18 +48,10 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 	
 	sprite_texture_ = get_direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
 
-	if ( ! bg_texture_ )
+	if ( bg_sprite_layer_list_.empty() )
 	{
-		bg_texture_ = get_direct_3d()->getTextureManager()->load( "bg", "media/image/story-bg-default.jpg" );
-	}
-
-	if ( bg_width_ == 0 && bg_height_ == 0 )
-	{
-		D3D11_TEXTURE2D_DESC texture_2d_desc;
-		get_direct_3d()->getTexture2dDescByTexture( bg_texture_, & texture_2d_desc );
-
-		bg_width_ = texture_2d_desc.Width;
-		bg_height_ = texture_2d_desc.Height;
+		bg_sprite_layer_list_.push_back( new BgSpriteLayer( "bg", get_direct_3d()->getTextureManager()->load( "bg", "media/image/story-bg-default.jpg" ) ) );
+		// bg_sprite_layer_list_.back()->set_size_from_texture();
 	}
 
 	get_direct_3d()->getFader()->full_out();
@@ -71,7 +60,12 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 StoryTextScene::~StoryTextScene()
 {
 	get_direct_3d()->getTextureManager()->unload( "sprite" );
-	get_direct_3d()->getTextureManager()->unload( "bg" );
+
+	for ( auto i = bg_sprite_layer_list_.begin(); i != bg_sprite_layer_list_.end(); ++i )
+	{
+		get_direct_3d()->getTextureManager()->unload( ( *i )->get_name().c_str() );
+		delete *i;
+	}
 }
 
 void StoryTextScene::load_story_text_file( const char* file_name )
@@ -85,6 +79,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 	}
 
 	bool in_text = false;
+	BgSpriteLayer* current_layer = 0;
 
 	while ( in.good() )
 	{
@@ -106,17 +101,33 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 
 		ss >> name;
 
-		if ( name == "bg" )
+		if ( name == "layer" )
 		{
-			std::string bg_file_name;
-			ss >> bg_file_name >> bg_width_ >> bg_height_;
+			string_t layer_name;
+			ss >> layer_name;
 
-			get_direct_3d()->getTextureManager()->unload( "bg" );
-			bg_texture_ = get_direct_3d()->getTextureManager()->load( "bg", ( std::string( "media/image/" + bg_file_name ) ).c_str() );
+			current_layer = new BgSpriteLayer( layer_name.c_str(), get_direct_3d()->getTextureManager()->load( layer_name.c_str(), ( std::string( "media/image/" + layer_name ) ).c_str() ) );
+			bg_sprite_layer_list_.push_back( current_layer );
 		}
-		else if ( name == "bg-scale" )
+		else if ( name == "layer-translation" )
 		{
-			ss >> bg_scale_.value() >> bg_scale_.target_value() >> bg_scale_.speed();
+			ss >> current_layer->get_translation().value().x() >> current_layer->get_translation().value().y();
+			ss >> current_layer->get_translation().target_value().x() >> current_layer->get_translation().target_value().y();
+			ss >> current_layer->get_translation().speed().x() >> current_layer->get_translation().speed().y();
+		}
+		else if ( name == "layer-rotation" )
+		{
+			ss >> current_layer->get_rotation().value() >> current_layer->get_rotation().target_value() >> current_layer->get_rotation().speed();
+		}
+		else if ( name == "layer-scale" )
+		{
+			ss >> current_layer->get_scale().value() >> current_layer->get_scale().target_value() >> current_layer->get_scale().speed();
+		}
+		else if ( name == "layer-color" )
+		{
+			ss >> current_layer->get_color().value().r() >> current_layer->get_color().value().g() >> current_layer->get_color().value().b() >> current_layer->get_color().value().a();
+			ss >> current_layer->get_color().target_value().r() >> current_layer->get_color().target_value().g() >> current_layer->get_color().target_value().b() >> current_layer->get_color().value().a();
+			ss >> current_layer->get_color().speed().r() >> current_layer->get_color().speed().g() >> current_layer->get_color().speed().b() >> current_layer->get_color().speed().a();
 		}
 		else if ( name == "bgm" )
 		{
@@ -230,7 +241,10 @@ void StoryTextScene::update()
 		get_direct_3d()->getFader()->fade_in();
 	}
 
-	bg_scale_.chase();
+	for ( auto i = bg_sprite_layer_list_.begin(); i != bg_sprite_layer_list_.end(); ++i )
+	{
+		( *i )->update();
+	}
 }
 
 /**
@@ -241,21 +255,22 @@ void StoryTextScene::render()
 	get_direct_3d()->clear();
 	get_direct_3d()->getSprite()->begin();
 
-	Direct3D::Matrix transform;
-	Direct3D::Matrix s, t;
-
 	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
 
 	for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
 	{
 		( *i )->apply();
 
-		// bg
+		for ( auto j = bg_sprite_layer_list_.begin(); j != bg_sprite_layer_list_.end(); ++j )
 		{
-			win::Rect dst_rect( 0, 0, get_width(), get_height() );
+			Matrix r, s, t;
+			
+			r.set_rotation_z( math::degree_to_radian( ( *j )->get_rotation().value() ) );
+			s.set_scaling( ( *j )->get_scale().value(), ( *j )->get_scale().value(), 1.f );
+			t.set_translation( ( *j )->get_translation().value().x(), ( *j )->get_translation().value().y(), 0.f );
 
-			get_direct_3d()->getSprite()->set_transform( transform );
-			get_direct_3d()->getSprite()->draw( dst_rect, bg_texture_ );
+			get_direct_3d()->getSprite()->set_transform( r * s * t );
+			get_direct_3d()->getSprite()->draw( win::Rect( 0, 0, get_width(), get_height() ), ( *j )->get_texture(), ( *j )->get_src_rect(), ( *j )->get_color().value() );
 		}
 	}
 

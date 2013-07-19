@@ -82,8 +82,15 @@ DrawingMesh* GraphicsManager::load_drawing_mesh( const char_t* name, common::saf
  */
 DrawingLine* GraphicsManager::load_drawing_line( const char_t* name )
 {
+	string_t file_path = string_t( "media/model/" ) + name + "-line.obj";
+
+	if ( ! boost::filesystem::exists( file_path ) )
+	{
+		return 0;
+	}
+
 	DrawingLine* line = create_drawing_line();
-	line->load_obj( ( string_t( "media/model/" ) + name + "-line.obj" ).c_str() );
+	line->load_obj( file_path.c_str() );
 
 	return line;
 }

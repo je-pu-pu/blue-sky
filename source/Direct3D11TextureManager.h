@@ -1,21 +1,23 @@
 #ifndef DIRECT_3D_11_TEXTURE_MANAGER_H
 #define DIRECT_3D_11_TEXTURE_MANAGER_H
 
+#include "Direct3D11Texture.h"
 #include <d3d11.h>
-
 #include <string>
 #include <map>
 
 class Direct3D11;
+class Direct3D11Texture;
 
 /**
  * テクスチャ管理
  *
+ * テクスチャに名前を付けて管理し、同じテクスチャを重複して読み込まないようにする。
  */
 class Direct3D11TextureManager
 {
 public:
-	typedef ID3D11ShaderResourceView Texture;
+	typedef Direct3D11Texture Texture;
 	typedef std::map< std::string, Texture* > TextureList;
 
 private:

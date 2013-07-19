@@ -2,6 +2,7 @@
 #include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11.h"
 #include "Direct3D11Color.h"
+#include "Direct3D11Texture.h"
 #include "DirectX.h"
 
 #include <win/Rect.h>
@@ -77,21 +78,13 @@ void Direct3D11Sprite::end()
 
 void Direct3D11Sprite::set_transform( const Matrix& m )
 {
-	transform_ = m;
-
-	DXGI_SURFACE_DESC surface_desc;
-	direct_3d_->getBackbufferSurface()->GetDesc( & surface_desc );
-
-	XMMATRIX view = XMMatrixOrthographicOffCenterLH( 0.f, static_cast< float >( surface_desc.Width ), static_cast< float >( surface_desc.Height ), 0.f, 0.f, 1.f );
-
 	ConstantBufferData constant_buffer_data;
-	// constant_buffer_data.transform = XMLoadFloat4x4( & transform_.get() );
-	constant_buffer_data.transform = XMMatrixIdentity();
+	constant_buffer_data.transform = m;
 	constant_buffer_data.transform = XMMatrixTranspose( constant_buffer_data.transform );
 	constant_buffer_->update( & constant_buffer_data );
 }
 
-void Direct3D11Sprite::draw( const Rect* dst, Texture* texture, const Rect* src, const Color* color )
+void Direct3D11Sprite::draw( const Rect* dst, const Texture* texture, const Rect* src, const Color* color )
 {
 	D3D11_MAPPED_SUBRESOURCE mapped_subresource;
 
@@ -176,35 +169,35 @@ void Direct3D11Sprite::draw( const Rect* dst, Texture* texture, const Rect* src,
 
 	constant_buffer_->bind_to_vs();
 
-	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & texture );
+	direct_3d_->bind_texture_to_ps( 0, texture );
 	direct_3d_->getImmediateContext()->DrawIndexed( 6, 0, 0 );
 	
 	ID3D11ShaderResourceView* shader_resource_view[] = { 0 };
 	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, shader_resource_view );
 }
 
-void Direct3D11Sprite::draw( const Point& dst_point, Texture* texture, const Rect& src, const Color& color )
+void Direct3D11Sprite::draw( const Point& dst_point, const Texture* texture, const Rect& src, const Color& color )
 {
 	win::Rect dst = win::Rect::Size( dst_point.x(), dst_point.y(), src.width(), src.height() );
 	draw( & dst, texture, & src, & color );
 }
 
-void Direct3D11Sprite::draw( const Rect& dst, Texture* texture, const Rect& src, const Color& color )
+void Direct3D11Sprite::draw( const Rect& dst, const Texture* texture, const Rect& src, const Color& color )
 {
 	draw( & dst, texture, & src, & color );
 }
 
-void Direct3D11Sprite::draw( const Rect& dst, Texture* texture, const Color& color )
+void Direct3D11Sprite::draw( const Rect& dst, const Texture* texture, const Color& color )
 {
 	draw( & dst, texture, 0, & color );
 }
 
-void Direct3D11Sprite::draw( Texture* texture, const Rect& src, const Color& color )
+void Direct3D11Sprite::draw( const Texture* texture, const Rect& src, const Color& color )
 {
 	draw( 0, texture, & src, & color );
 }
 
-void Direct3D11Sprite::draw( Texture* texture, const Color& color )
+void Direct3D11Sprite::draw( const Texture* texture, const Color& color )
 {
 	draw( 0, texture, 0, & color );
 }

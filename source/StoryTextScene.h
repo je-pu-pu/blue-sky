@@ -4,6 +4,9 @@
 #include "Scene.h"
 #include "Direct3D11Color.h"
 #include <common/chase_value.h>
+#include <list>
+
+class BgSpriteLayer;
 
 namespace blue_sky
 {
@@ -16,6 +19,7 @@ class StoryTextScene : public Scene
 {
 public:
 	typedef Direct3D11Color Color;
+	typedef std::list< BgSpriteLayer* > BgSpriteLayerList;
 
 private:
 	std::wstring	text_;
@@ -29,11 +33,8 @@ private:
 	std::string		next_stage_name_;
 
 	Texture*		sprite_texture_;
-	Texture*		bg_texture_;
-	int				bg_width_;
-	int				bg_height_;
-
-	common::chase_value< float > bg_scale_;
+	
+	BgSpriteLayerList	bg_sprite_layer_list_;
 
 	Sound*			bgm_;
 	Sound*			sound_;

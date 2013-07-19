@@ -53,7 +53,7 @@ void Direct3D11Material::clear_index_list()
 void Direct3D11Material::load_texture( const char* file_name )
 {
 	std::string texture_file_name = file_name; // boost::filesystem::basename( boost::filesystem::path( file_name ) ) + ".png";
-	texture_resource_view_ = direct_3d_->getTextureManager()->load( texture_file_name.c_str(), texture_file_name.c_str() );
+	texture_resource_view_ = direct_3d_->getTextureManager()->load( texture_file_name.c_str(), texture_file_name.c_str() )->get_shader_resource_view();
 }
 
 void Direct3D11Material::render() const

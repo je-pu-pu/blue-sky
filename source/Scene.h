@@ -8,6 +8,7 @@
 class App;
 class Direct3D11;
 class Direct3D11Color;
+class Direct3D11Texture;
 
 namespace game
 {
@@ -15,6 +16,7 @@ namespace game
 class Sound;
 class Config;
 class MainLoop;
+// class Texture;
 
 } // namespace game
 
@@ -42,12 +44,14 @@ public:
 	typedef game::Config				Config;
 	typedef game::MainLoop				MainLoop;
 	
+	// typedef game::Texture				Texture;
+
 	typedef Direct3D11					Direct3D;
+	typedef Direct3D11Texture			Texture;
+
 	typedef ActiveObjectPhysics			Physics;
 
 	typedef Direct3D11Color				Color;
-
-	typedef ID3D11ShaderResourceView	Texture;
 
 private:
 	const GameMain* game_main_;

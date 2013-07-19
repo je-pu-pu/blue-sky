@@ -4,6 +4,7 @@
     <ClInclude Include="Rect.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Version.h" />
+    <ClInclude Include="Size.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Version.cpp" />

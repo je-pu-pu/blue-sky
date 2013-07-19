@@ -6,6 +6,7 @@
 #include <vector>
 
 class Direct3D11;
+class Direct3D11Texture;
 
 namespace blue_sky
 {
@@ -18,6 +19,10 @@ namespace blue_sky
 class DrawingLine : public game::Line
 {
 public:
+	typedef Direct3D11 Direct3D;
+	typedef Direct3D11Color Color;
+	typedef Direct3D11Texture Texture;
+
 	struct Vertex
 	{
 		XMFLOAT3 Position;
@@ -42,7 +47,6 @@ public:
 	};
 
 	typedef XMFLOAT3 Position;
-	typedef Direct3D11Color Color;
 
 	typedef WORD Index;
 
@@ -55,22 +59,23 @@ public:
 	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
 
 protected:
-	Direct3D11*		direct_3d_;
+	Direct3D*		direct_3d_;
 
 	Color			color_;
 
 	ID3D11Buffer*	vertex_buffer_;
 	ID3D11Buffer*	index_buffer_;
 	
-	ID3D11ShaderResourceView*	texture_resource_view_;
+	Texture*		texture_;
 
 	VertexList		vertex_list_;
 	IndexList		index_list_;
-	
+	uint_t			index_size_;
+
 	void create_vertex_buffer();
 	void create_index_buffer();
 
-	void create_texture_resource_view( const char* );
+	void create_texture( const char* );
 
 public:
 	DrawingLine( Direct3D11* );

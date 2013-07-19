@@ -102,6 +102,7 @@
   <ItemGroup>
     <ClInclude Include="Point.h" />
     <ClInclude Include="Rect.h" />
+    <ClInclude Include="Size.h" />
     <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>

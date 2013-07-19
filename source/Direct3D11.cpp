@@ -3,6 +3,7 @@
 #include "Direct3D11Fader.h"
 #include "Direct3D11Effect.h"
 #include "Direct3D11MeshManager.h"
+#include "Direct3D11Texture.h"
 #include "Direct3D11TextureManager.h"
 #include "Direct3D11Color.h"
 #include "DirectWrite.h"
@@ -246,7 +247,10 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 			view_desc.Texture2D.MipLevels = texture_desc.MipLevels;
 			view_desc.Texture2D.MostDetailedMip = 0;
 
-			DIRECT_X_FAIL_CHECK( device_->CreateShaderResourceView( text_texture_, & view_desc, & text_view_ ) );
+			ID3D11ShaderResourceView* text_view = 0;
+			DIRECT_X_FAIL_CHECK( device_->CreateShaderResourceView( text_texture_, & view_desc, & text_view ) );
+
+			text_view_ = new Texture( text_view );
 		}
 	}
 
@@ -337,7 +341,7 @@ Direct3D11::~Direct3D11()
 	DIRECT_X_RELEASE( text_texture_mutex_11_ );
 	DIRECT_X_RELEASE( text_surface_ );
 
-	DIRECT_X_RELEASE( text_view_ );
+	text_view_.release();
 	DIRECT_X_RELEASE( text_texture_ );
 
 	DIRECT_X_RELEASE( back_buffer_surface_ );
@@ -553,6 +557,19 @@ void Direct3D11::setInputLayout( const char* name )
 	immediate_context_->IASetInputLayout( vertex_layout_list_[ name ] );
 }
 
+/**
+ * テクスチャをピクセルシェーダーに関連付ける
+ *
+ * @param slot スロット
+ * @param texture テクスチャ
+ */
+void Direct3D11::bind_texture_to_ps( uint_t slot, const Texture* texture )
+{
+	ID3D11ShaderResourceView* view[] = { texture->get_shader_resource_view() };
+	immediate_context_->PSSetShaderResources( slot, 1, view );
+}
+
+
 void Direct3D11::begin2D()
 {
 	if ( ! text_texture_mutex_10_ )
@@ -610,7 +627,7 @@ void Direct3D11::renderText()
 		( *i )->apply();
 
 		Sprite::Rect dst_rect( 0, 0, swap_chain_desc_.BufferDesc.Width, swap_chain_desc_.BufferDesc.Height );
-		getSprite()->draw( dst_rect, text_view_ );
+		getSprite()->draw( dst_rect, text_view_.get() );
 	}
 
 	getSprite()->end();
@@ -631,11 +648,11 @@ void Direct3D11::setDebugViewport( float x, float y, float w, float h )
 	immediate_context_->RSSetViewports( 1, & viewport );
 }
 
-void Direct3D11::getTexture2dDescByTexture( Texture* texture, D3D11_TEXTURE2D_DESC* texture_2d_desc )
+void Direct3D11::getTexture2dDescByTexture( const Texture* texture, D3D11_TEXTURE2D_DESC* texture_2d_desc )
 {
 	com_ptr< ID3D11Resource > texture_2d_resource;
 
-	texture->GetResource( & texture_2d_resource );
+	texture->get_shader_resource_view()->GetResource( & texture_2d_resource );
 
 	ID3D11Texture2D* texture_2d = static_cast< ID3D11Texture2D* >( texture_2d_resource.get() );
 	texture_2d->GetDesc( texture_2d_desc );

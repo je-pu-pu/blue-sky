@@ -28,8 +28,6 @@ Direct3D11TextureManager::Texture* Direct3D11TextureManager::load( const char* n
 		return i->second;
 	}
 
-	Texture* texture = 0;
-
 	D3DX11_IMAGE_LOAD_INFO image_load_info;
 	image_load_info.Width = D3DX11_DEFAULT; // 256;
 	image_load_info.Height = D3DX11_DEFAULT; // 256;
@@ -45,11 +43,14 @@ Direct3D11TextureManager::Texture* Direct3D11TextureManager::load( const char* n
 	image_load_info.MipFilter = D3DX11_DEFAULT;
 	image_load_info.pSrcInfo = nullptr;
 
-	if ( FAILED( D3DX11CreateShaderResourceViewFromFile( direct_3d_->getDevice(), file_name, & image_load_info, 0, & texture, 0 ) ) )
+	ID3D11ShaderResourceView* view = 0;
+
+	if ( FAILED( D3DX11CreateShaderResourceViewFromFile( direct_3d_->getDevice(), file_name, & image_load_info, 0, & view, 0 ) ) )
 	{
 		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "file open failed. " ) + file_name );
 	}
 	
+	Texture* texture = new Texture( view );
 	texture_list_[ name ] = texture;
 
 	return texture;
@@ -73,7 +74,7 @@ void Direct3D11TextureManager::unload( const char* name )
 
 	if ( i != texture_list_.end() )
 	{
-		i->second->Release();
+		delete i->second;
 		texture_list_.erase( i );
 	}
 }
@@ -82,7 +83,7 @@ void Direct3D11TextureManager::unload_all()
 {
 	for ( TextureList::iterator i = texture_list_.begin(); i != texture_list_.end(); ++i )
 	{
-		i->second->Release();
+		delete i->second;
 	}
 
 	texture_list_.clear();

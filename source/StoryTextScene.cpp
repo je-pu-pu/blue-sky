@@ -107,6 +107,10 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 			ss >> layer_name;
 
 			current_layer = new BgSpriteLayer( layer_name.c_str(), get_direct_3d()->getTextureManager()->load( layer_name.c_str(), ( std::string( "media/image/" + layer_name ) ).c_str() ) );
+
+			ss >> current_layer->get_src_rect().left() >> current_layer->get_src_rect().top();
+			ss >> current_layer->get_src_rect().right() >> current_layer->get_src_rect().bottom();
+
 			bg_sprite_layer_list_.push_back( current_layer );
 		}
 		else if ( name == "layer-translation" )
@@ -270,7 +274,7 @@ void StoryTextScene::render()
 			t.set_translation( ( *j )->get_translation().value().x(), ( *j )->get_translation().value().y(), 0.f );
 
 			get_direct_3d()->getSprite()->set_transform( r * s * t );
-			get_direct_3d()->getSprite()->draw( win::Rect( 0, 0, get_width(), get_height() ), ( *j )->get_texture(), ( *j )->get_src_rect(), ( *j )->get_color().value() );
+			get_direct_3d()->getSprite()->draw( ( *j )->get_texture(), ( *j )->get_src_rect(), ( *j )->get_color().value() );
 		}
 	}
 

@@ -2,51 +2,50 @@ bgm road 123
 collision 0-0.obj
 
 sky-box sky-box-3
-// far-billboards stage-0-0-drawing-far-billboards
+object stage-0-0 0 0 0
 
-player 50 0 0
-goal 0 0 30
-
-// object stage-0 0 0 0
-object stage-1-1 0 0 0
-
-object god 65 0 2
-
-robot 66 0 2
-// robot 67 0 2
-// robot 68 0 2
-// robot 69 0 2
-
-// robot 66 0 3
-// robot 67 0 3
-// robot 68 0 3
-// robot 69 0 3
-// robot 70 0 3
-
-// robot 66 0 4
-// robot 67 0 4
-// robot 68 0 4
-// robot 69 0 4
-// robot 70 0 4
-// robot 71 0 4
-
-// robot 66 0 5
-// robot 67 0 5
-// robot 68 0 5
-// robot 69 0 5
-// robot 70 0 5
-// robot 71 0 5
-// robot 72 0 5
-
-dynamic-object soda-can-1 63.5 0 1.8
-
-object rocket 66 0 4
-object missile 67 1 4
-
-balloon 43 22 8
-
-object tree-1 57 0 8
-object tree-1 57 0 4
-
-object tree-1 67 0 8
-object tree-1 68 0 6
+balloon 15.000000 21.0 79.0 0
+balloon 15.000000 21.0 77.0 0
+balloon 15.000000 21.0 75.0 0
+balloon 15.000000 21.0 73.0 0
+balloon 25.000000 28.0 60.0 0
+balloon 23.000000 27.0 59.0 0
+balloon 21.000000 26.0 58.0 0
+balloon 19.000000 25.0 57.0 0
+balloon 17.000000 24.0 56.0 0
+balloon 15.000000 21.0 63.0 0
+balloon 15.000000 22.0 61.0 0
+balloon 15.000000 23.0 59.0 0
+balloon 15.000000 23.0 57.0 0
+balloon 15.000000 23.0 55.0 0
+balloon 15.000000 23.0 53.0 0
+balloon 15.000000 22.0 51.0 0
+balloon 15.000000 21.0 49.0 0
+balloon 18.000000 21.0 43.0 0
+balloon 18.000000 22.0 41.0 0
+balloon 18.000000 23.0 39.0 0
+balloon 18.000000 23.0 37.0 0
+balloon 18.000000 23.0 35.0 0
+balloon 18.000000 23.0 33.0 0
+balloon 18.000000 22.0 31.0 0
+balloon 18.000000 21.0 29.0 0
+balloon 15.000000 21.0 29.0 0
+balloon 15.000000 22.0 31.0 0
+balloon 15.000000 23.0 33.0 0
+balloon 15.000000 23.0 35.0 0
+balloon 15.000000 23.0 37.0 0
+balloon 15.000000 23.0 39.0 0
+balloon 15.000000 22.0 41.0 0
+balloon 15.000000 21.0 43.0 0
+balloon 12.000000 21.0 43.0 0
+balloon 12.000000 22.0 41.0 0
+balloon 12.000000 23.0 39.0 0
+balloon 12.000000 23.0 37.0 0
+balloon 12.000000 23.0 35.0 0
+balloon 12.000000 23.0 33.0 0
+balloon 12.000000 22.0 31.0 0
+balloon 15.000000 21.0 18.0 0
+balloon 12.000000 21.0 29.0 0
+medal 26.000000 28.0 62.0 0
+goal 15.0 20.0 85.0
+player 15.0 20.0 15.0

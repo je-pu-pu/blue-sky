@@ -32,6 +32,8 @@ public:
 	Balloon();
 	~Balloon() { }
 
+	virtual void set_drawing_model( const DrawingModel* m );
+
 	/// çXêV
 	void update();
 

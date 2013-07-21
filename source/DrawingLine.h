@@ -62,6 +62,7 @@ protected:
 	Direct3D*		direct_3d_;
 
 	Color			color_;
+	bool			is_cast_shadow_;	///< ‰e‚ð—Ž‚Æ‚·ƒtƒ‰ƒO
 
 	ID3D11Buffer*	vertex_buffer_;
 	ID3D11Buffer*	index_buffer_;
@@ -88,6 +89,10 @@ public:
 
 	const Color& get_color() const { return color_; }
 	void set_color( const Color& color ) { color_ = color; }
+
+	bool is_cast_shadow() const { return is_cast_shadow_; }
+	void set_cast_shadow( bool b ) { is_cast_shadow_ = b; }
+
 
 }; // class DrawingLine
 

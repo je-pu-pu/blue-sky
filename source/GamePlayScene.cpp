@@ -204,7 +204,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// ‚«‚ê‚¢‚É‚·‚é
 	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-1-loop.png" );
 	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-2-loop.png" );
-	get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pencil-face-1.png" );
+	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/dot-face-1.png" );
+	get_direct_3d()->getTextureManager()->load( "paper", "media/texture/brush-face-1.png" );
+	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pencil-face-1.png" );
 
 	update_render_data_for_game();
 
@@ -1161,8 +1163,10 @@ void GamePlayScene::render_shadow_map( const char* technique_name, bool is_skin_
 				{
 					render_active_object_mesh( *j );
 
-					/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
-					render_active_object_line( *j );
+					if ( ( *j )->get_drawing_model()->get_line() && ( *j )->get_drawing_model()->get_line()->is_cast_shadow() )
+					{
+						render_active_object_line( *j );
+					}
 				}
 			}
 

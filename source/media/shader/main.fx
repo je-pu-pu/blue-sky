@@ -234,11 +234,12 @@ GS_LINE_INPUT vs_drawing_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID
 	// output.Color.a -= ( ( uint( Time * 5 ) + vertex_id ) % 8 ) / 8.f * 0.5f;
 
 	// ぶらす
-	// float a = Time; // ( vertex_id ) / 10.f + Time * 10.f;
-	// output.Position.x += cos( vertex_id + a ) * 0.001f;
-	// output.Position.y += ( vertex_id + Time % 10 / 10 ) * 0.04f;
-
-	// output.Position = input.Position;
+	if ( false )
+	{
+		float a = Time; // ( vertex_id ) / 10.f + Time * 10.f;
+		output.Position.x += cos( vertex_id + a ) * 0.1f;
+		output.Position.y += sin( vertex_id + Time % 10 / 10 ) * 0.1f;
+	}
 
 	return output;
 }
@@ -270,15 +271,35 @@ void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_
 	
 	static const float DrawingAccentPower = 2.f;
 	static const float DrawingAccentScale = 10.f;
+	
+	struct line_config
+	{
+		float v_offset;
+		float line_width;
+		uint  pattern_count;
+	};
 
-	const float line_width_pixels = 32.f;
+	static const line_config line_configs[ 5 ]= 
+	{
+		{   0.f, 32.f, 3 },
+		{ 128.f, 32.f, 3 },
+		{ 256.f, 64.f, 4 },
+		{ 512.f, 64.f, 4 },
+		{ 768.f, 64.f, 4 },
+	};
+
+	static const uint line_config_index = 4;
+
+	const float line_width_pixels = line_configs[ line_config_index ].line_width;
 	const float line_width_scale = 0.5f + pow( abs( DrawingAccent ), DrawingAccentPower ) * DrawingAccentScale;
-	const float line_width = line_width_pixels * line_width_scale / screen_height;
+	
+	float line_width = line_width_pixels * line_width_scale / screen_height;
 
 	const float line_v_width = line_width_pixels / LineTextureSize;
-	const float line_v_offset = ( 0.f ) / LineTextureSize;
+	const float line_v_offset = line_configs[ line_config_index ].v_offset / LineTextureSize;
 
-	const int pattern_count = 3;	// 更新パターン
+	// 更新パターン数
+	const int pattern_count = line_configs[ line_config_index ].pattern_count;
 
 	{
 		uint n = 0;
@@ -295,7 +316,11 @@ void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_
 
 		float line_u_origin = ( redraw_seed ) * 0.1f;
 		/// float line_length_ratio = 1.f; // 
-		float line_length_ratio = length( float2( lx, ly ) ) / length( float2( 1.f, 1.f ) );
+
+		float line_length = length( float2( lx, ly ) );
+		float line_length_ratio = line_length / length( float2( 1.f, 1.f ) );
+
+		line_width = min( line_width, line_length ); // 線の長さが短い場合に線の幅が太くならないようにする
 
 		float angle = atan2( ly, lx );
 		angle += Pi / 2.f;
@@ -587,63 +612,30 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 
 	// return float4( input.Normal, 1.f );
 
-	// ---
-
 	float4 shadow = float4( 1.f, 1.f, 1.f, 1.f );
-	float sz = ( float ) shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy );
+	float4 depth = shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy );
 
-	// if ( input.Position.z >= sz )
-	if ( dot( input.Normal, ( float3 ) Light ) > 0.f || shadow_tex_coord.z >= sz )
+	// const float vsm_variance = depth.y - pow( depth.x, 2 );
+	// const float vsm_p = vsm_variance / ( vsm_variance + pow( shadow_tex_coord.z - depth.x, 2 ) );
+	// const float vsm_shadow_rate = 1.f - saturate( max( vsm_p, depth.x <= shadow_tex_coord.z ) );
+
+	if ( dot( input.Normal, ( float3 ) Light ) > 0.f || shadow_tex_coord.z >= depth.x )
 	{
 		// 影
-
 		const float4 shadow_color = float4( 0.25f, 0.25f, 0.5f, 1.f );
-
-		const float a = 0.75f;
-
-		/*
-		// 端に行くほど影を透明にする？
-		float a = abs( shadow_tex_coord.x - 0.5f ) + abs( shadow_tex_coord.y - 0.5f ) / 0.5f;
-
-		a = min( a, 1.f );
-		a = 1.f - pow( a, 3 );
-
-		if ( shadow_tex_coord.z < ( float ) shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy + float2( 1.f / 1024.f, 1.f ) ) )
-		{
-			a /= 2.f;
-		}
-		*/
-		
-		shadow = float4( 1.f, 1.f, 1.f, 1.f ) * ( 1.f - a ) + shadow_color * a;
+		shadow = float4( 1.f, 1.f, 1.f, 1.f ) * ( 1.f - shadow_color.a ) + shadow_color * shadow_color.a;
 		shadow.a = 1.f;
-
+		
 		// 紙の質感を追加する
 		if ( true )
 		{
 			float4 paper = sample_paper_texture( ( float2 ) input.Position );
 			shadow.rgb = float3( 0.5f, 0.5f, 0.5f ) * ( 1.f - paper.a ) + shadow.rgb * paper.a;
-						
-			/*
-			shadow.r = input.Position.x / ScreenWidth;
-			shadow.g = input.Position.y / ScreenHeight;
-			shadow.b = 0.f;
-			*/
-
-			// return shadow;
 		}
-	}
-	/*
-	else
-	{
-		float4 paper = sample_paper_texture( ( float2 ) input.Position );
-		return model_texture.Sample( wrap_texture_sampler, input.TexCoord ) * ( 1.f - paper.a ) + float4( paper.rgb, 1.f );
-	}
-	*/
 
-	// return float4( sz, sz, sz, 1.f );
-	// return float4( input.Position.z, input.Position.z, input.Position.z, 1.f );
-
-	// return paper_texture.Sample( wrap_texture_sampler, input.TexCoord );
+		const float shadow_rate = 0.75f;
+		shadow.rgb = float3( 1.f, 1.f, 1.f ) * ( 1.f - shadow_rate ) + shadow.rgb * shadow_rate;
+	}
 
 	static const float4 cascade_colors[ 4 ] = 
 	{

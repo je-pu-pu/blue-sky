@@ -53,7 +53,10 @@ DrawingMesh* GraphicsManager::load_drawing_mesh( const char_t* name, common::saf
 
 	if ( ! loaded && boost::filesystem::exists( file_path + ".bin.fbx" ) )
 	{
-		loaded = mesh->load_fbx( ( file_path + ".bin.fbx" ).c_str(), fbx_file_loader_.get(), skinning_animation_set );
+		if ( ! boost::filesystem::exists( file_path + ".fbx" ) || boost::filesystem::last_write_time( file_path + ".fbx" ) < boost::filesystem::last_write_time( file_path + ".bin.fbx" ) )
+		{
+			loaded = mesh->load_fbx( ( file_path + ".bin.fbx" ).c_str(), fbx_file_loader_.get(), skinning_animation_set );
+		}
 	}
 	if ( ! loaded && boost::filesystem::exists( file_path  + ".fbx" ) )
 	{

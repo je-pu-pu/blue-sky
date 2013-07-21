@@ -1,5 +1,7 @@
 #include "Balloon.h"
 #include "Player.h"
+#include "DrawingModel.h"
+#include "DrawingLine.h"
 
 namespace blue_sky
 {
@@ -9,6 +11,16 @@ Balloon::Balloon()
 	, flicker_( 0 )
 {
 
+}
+
+void Balloon::set_drawing_model( const DrawingModel* m )
+{
+	ActiveObject::set_drawing_model( m );
+
+	if ( m->get_line() )
+	{
+		m->get_line()->set_cast_shadow( true );
+	}
 }
 
 /**

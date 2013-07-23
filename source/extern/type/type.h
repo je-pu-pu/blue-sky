@@ -17,6 +17,8 @@ typedef unsigned char	u8_t;
 
 typedef float			float_t;
 
+typedef bool			bool_t;
+
 typedef char			char_t;
 typedef std::string		string_t;
 

@@ -1053,7 +1053,7 @@ void GamePlayScene::update_render_data_for_object() const
  */
 void GamePlayScene::update_render_data_for_active_object( const ActiveObject* active_object ) const
 {
-	if ( active_object->is_dead() )
+	if ( ! active_object->is_visible() )
 	{
 		return;
 	}
@@ -1357,7 +1357,7 @@ void GamePlayScene::render_object_line() const
  */
 void GamePlayScene::render_active_object_mesh( const ActiveObject* active_object ) const
 {
-	if ( active_object->is_dead() )
+	if ( ! active_object->is_visible() )
 	{
 		return;
 	}
@@ -1380,7 +1380,7 @@ void GamePlayScene::render_active_object_mesh( const ActiveObject* active_object
  */
 void GamePlayScene::render_active_object_line( const ActiveObject* active_object ) const
 {
-	if ( active_object->is_dead() )
+	if ( ! active_object->is_visible() )
 	{
 		return;
 	}

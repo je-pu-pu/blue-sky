@@ -27,7 +27,7 @@ void TranslationObject::update()
 {
 	get_rigid_body()->setActivationState( true );
 
-	a_ += get_elapsed_time() * speed_;
+	a_ += get_frame_elapsed_time() * speed_;
 
 	set_location( get_start_location() + Vector3( std::cos( a_ ) * tw_, std::sin( a_ ) * th_, std::cos( a_ ) * td_ ) );
 }

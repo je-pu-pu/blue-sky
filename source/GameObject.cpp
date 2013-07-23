@@ -3,6 +3,7 @@
 #include "SoundManager.h"
 #include "Sound.h"
 #include "GameMain.h"
+#include "Scene.h"
 
 #include <common/math.h>
 
@@ -93,9 +94,35 @@ void GameObject::on_collide_with( GameObject* o )
 	o->on_collide_with( this );
 }
 
-float GameObject::get_elapsed_time() const
+/**
+ * 前のフレームからの経過秒を返す
+ *
+ * @return 前のフレームからの経過秒
+ */
+float_t GameObject::get_frame_elapsed_time() const
 {
 	return GameMain::get_instance()->get_elapsed_time();
+}
+
+/**
+ * 現在のシーンが開始してからの経過秒を返す
+ *
+ * @return 現在のシーンが開始してからの経過秒
+ */
+float_t GameObject::get_scene_elapsed_time() const
+{
+	return GameMain::get_instance()->get_current_scene()->get_total_elapsed_time();
+}
+
+/**
+ * 点滅時においてオブジェクトが表示されるかどうかを返す
+ *
+ * @param blink_count 1 秒の間に点滅する回数
+ * @return bool 点滅時において、現在オブジェクトが表示される場合は true を、表示されない場合は false を返す
+ */
+bool_t GameObject::is_visible_in_blink( float_t blink_count ) const
+{
+	return std::fmodf( get_scene_elapsed_time(), 1.f / blink_count ) < ( 0.5f / blink_count );
 }
 
 GameObject::DynamicsWorld* GameObject::get_dynamics_world() const

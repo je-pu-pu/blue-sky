@@ -45,13 +45,7 @@ void Balloon::update()
 		}
 		else
 		{
-			get_rigid_body()->setActivationState( true );
-			get_rigid_body()->setGravity( Vector3( 0, 9.8f, 0 ) );
-
-			if ( get_location().y() >= get_start_location().y() + 100.f )
-			{
-				kill();
-			}
+			kill();
 		}
 	}
 	else
@@ -70,6 +64,16 @@ void Balloon::restart()
 
 	get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
 	get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
+}
+
+/**
+ * オブジェクトが表示されるかを返す
+ *
+ * @return bool オブジェクトが表示される場合は true を、表示されない場合は false を返す
+ */
+bool Balloon::is_visible() const
+{
+	return ActiveObject::is_visible() && ( ! player_ || ! player_->is_action_pre_finish() || is_visible_in_blink( 6.f / 1.f ) );
 }
 
 } // namespace blue_sky

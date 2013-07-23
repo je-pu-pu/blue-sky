@@ -288,7 +288,7 @@ void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_
 		{ 768.f, 64.f, 4 },
 	};
 
-	static const uint line_config_index = 4;
+	static const uint line_config_index = 1;
 
 	const float line_width_pixels = line_configs[ line_config_index ].line_width;
 	const float line_width_scale = 0.5f + pow( abs( DrawingAccent ), DrawingAccentPower ) * DrawingAccentScale;

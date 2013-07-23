@@ -146,6 +146,8 @@ public:
 	ActionMode get_action_mode() const { return action_mode_; }
 	void set_action_mode( ActionMode );
 
+	bool is_action_pre_finish() const { return is_action_pre_finish_; }
+
 	const Balloon* get_balloon() const { return balloon_; }
 
 	int get_hp() const { return hp_; }

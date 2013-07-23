@@ -168,7 +168,7 @@ void Player::update()
 		eye_height_ = std::max( eye_height_, 0.15f );
 	}
 
-	uncontrollable_timer_ = math::chase< float_t >( uncontrollable_timer_, 0.f, get_elapsed_time() );
+	uncontrollable_timer_ = math::chase< float_t >( uncontrollable_timer_, 0.f, get_frame_elapsed_time() );
 }
 
 void Player::update_transform()

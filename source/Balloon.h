@@ -42,6 +42,8 @@ public:
 	void set_player( const Player* p ) { player_ = p; flicker_ = 0.f; }
 	const Player* get_player() const { return player_; }
 
+	bool is_visible() const;
+
 }; // class Balloon
 
 } // namespace blue_sky

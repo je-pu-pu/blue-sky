@@ -54,7 +54,10 @@ private:
 	Transform*			transform_;			///< Transform
 
 protected:
-	float get_elapsed_time() const;
+	float_t get_frame_elapsed_time() const;
+	float_t get_scene_elapsed_time() const;
+
+	bool_t is_visible_in_blink( float_t ) const;
 
 	DynamicsWorld* get_dynamics_world() const;
 

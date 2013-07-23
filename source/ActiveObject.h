@@ -81,6 +81,9 @@ public:
 	
 	bool is_dead() const { return is_dead_; }
 
+	/// •`‰æ‚³‚ê‚é‚©‚Ç‚¤‚©‚ð•Ô‚·
+	virtual bool is_visible() const { return ! is_dead(); }
+
 }; // class ActiveObject
 
 } // namespace blue_sky

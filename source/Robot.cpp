@@ -102,7 +102,7 @@ void Robot::update()
 
 		get_animation_player()->play( "Attention", false, true );
 
-		timer_ += get_elapsed_time();
+		timer_ += get_frame_elapsed_time();
 
 		if ( timer_ >= 3.f )
 		{

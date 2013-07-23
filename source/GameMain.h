@@ -145,6 +145,8 @@ public:
 	bool is_display_fps() const { return is_display_fps_; }
 
 	inline static GameMain* get_instance() { static GameMain game_main; return & game_main; }
+	const Scene* get_current_scene() const { return scene_.get(); }
+
 };
 
 } // namespace blue_sky

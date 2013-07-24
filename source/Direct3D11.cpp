@@ -420,7 +420,7 @@ void Direct3D11::create_default_input_layout()
 		{ "TEXCOORD",    0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-	vertex_layout_list_[ "main" ] = ( * effect_->getTechnique( "|main" )->getPassList().begin() )->createVertexLayout( layout_main, ARRAYSIZE( layout_main ) );
+	vertex_layout_list_[ "main" ] = effect_->getTechnique( "|main" )->getPassList().front()->createVertexLayout( layout_main, ARRAYSIZE( layout_main ) );
 
 	// skin
 	D3D11_INPUT_ELEMENT_DESC layout_skin[] =
@@ -432,7 +432,7 @@ void Direct3D11::create_default_input_layout()
 		{ "WEIGHT",   0, DXGI_FORMAT_R8G8B8A8_UNORM,     1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-	vertex_layout_list_[ "skin" ] = ( * effect_->getTechnique( "|skin" )->getPassList().begin() )->createVertexLayout( layout_skin, ARRAYSIZE( layout_skin ) );
+	vertex_layout_list_[ "skin" ] = effect_->getTechnique( "|skin" )->getPassList().front()->createVertexLayout( layout_skin, ARRAYSIZE( layout_skin ) );
 
 	// line
 	D3D11_INPUT_ELEMENT_DESC layout_line[] =
@@ -441,7 +441,7 @@ void Direct3D11::create_default_input_layout()
 		{ "COLOR",       0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-	vertex_layout_list_[ "line" ] = ( * effect_->getTechnique( "|drawing_line" )->getPassList().begin() )->createVertexLayout( layout_line, ARRAYSIZE( layout_line ) );
+	vertex_layout_list_[ "line" ] = effect_->getTechnique( "|drawing_line" )->getPassList().front()->createVertexLayout( layout_line, ARRAYSIZE( layout_line ) );
 
 	// sprite 
 	D3D11_INPUT_ELEMENT_DESC layout_sprite[] =
@@ -451,7 +451,7 @@ void Direct3D11::create_default_input_layout()
 		{ "COLOR",       0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-	vertex_layout_list_[ "sprite" ] = ( * effect_->getTechnique( "|sprite" )->getPassList().begin() )->createVertexLayout( layout_sprite, ARRAYSIZE( layout_sprite ) );
+	vertex_layout_list_[ "sprite" ] = effect_->getTechnique( "|sprite" )->getPassList().front()->createVertexLayout( layout_sprite, ARRAYSIZE( layout_sprite ) );
 }
 
 void Direct3D11::set_full_screen( bool full_screen )

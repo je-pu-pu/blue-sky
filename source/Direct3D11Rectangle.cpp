@@ -30,7 +30,7 @@ Direct3D11Rectangle::Direct3D11Rectangle( Direct3D11* direct_3d )
 
 	// 
 	get_material_list().push_back( new Material( direct_3d_ ) );
-	Material* material = * get_material_list().begin();
+	Material* material = get_material_list().front();
 
 	material->get_index_list().resize( 3 * 2 );
 

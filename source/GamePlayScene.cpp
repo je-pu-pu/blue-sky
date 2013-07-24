@@ -1588,7 +1588,7 @@ void GamePlayScene::render_debug_shadow_map_window() const
 		
 		bind_object_constant_buffer();
 
-		( * rectangle_->get_material_list().begin() )->set_shader_resource_view( shadow_map_->getShaderResourceView() );
+		rectangle_->get_material_list().front()->set_shader_resource_view( shadow_map_->getShaderResourceView() );
 		rectangle_->render();
 	}
 }

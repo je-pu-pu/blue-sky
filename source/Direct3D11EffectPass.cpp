@@ -7,7 +7,6 @@
 Direct3D11EffectPass::Direct3D11EffectPass( Direct3D* direct_3d, ID3DX11EffectPass* pass )
 	: direct_3d_( direct_3d )
 	, pass_( pass )
-	, vertex_layout_( 0 )
 {
 
 }
@@ -31,10 +30,5 @@ Direct3D11EffectPass::InputLayout* Direct3D11EffectPass::createVertexLayout( D3D
 
 void Direct3D11EffectPass::apply()
 {
-	if ( vertex_layout_ )
-	{
-		direct_3d_->getImmediateContext()->IASetInputLayout( vertex_layout_ );
-	}
-
 	pass_->Apply( 0, direct_3d_->getImmediateContext() );
 }

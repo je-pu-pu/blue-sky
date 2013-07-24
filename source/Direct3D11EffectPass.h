@@ -21,14 +21,12 @@ public:
 private:
 	Direct3D*						direct_3d_;			
 	ID3DX11EffectPass*				pass_;
-	InputLayout*					vertex_layout_;
 
 public:
 	Direct3D11EffectPass( Direct3D*, ID3DX11EffectPass* );
 	~Direct3D11EffectPass();
 	
 	InputLayout* createVertexLayout( D3D11_INPUT_ELEMENT_DESC[], UINT );
-	// void setVertexLayout( InputLayout* vertex_layout ) { vertex_layout_ = vertex_layout; }
 
 	void apply();
 

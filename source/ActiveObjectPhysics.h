@@ -26,6 +26,8 @@ public:
 	RigidBody* add_active_object_as_capsule( ActiveObject* );
 	RigidBody* add_active_object_as_cylinder( ActiveObject* );
 
+	void set_active_object_info_to_rigid_body( RigidBody*, ActiveObject* );
+
 	bool is_collision( ActiveObject*, ActiveObject* );
 	void check_collision_with( ActiveObject* );
 	void check_collision_dynamic_object();

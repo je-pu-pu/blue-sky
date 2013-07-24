@@ -28,7 +28,7 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object( ActiveOb
 	offset.setOrigin( Vector3( 0, active_object->get_collision_height() / 2, 0 ) );
 
 	RigidBody* rigid_body = add_box_rigid_body( active_object->get_transform(), offset, box, dynamic_cast< const StaticObject* >( active_object ) != 0 );
-	rigid_body->setUserPointer(	active_object );
+	set_active_object_info_to_rigid_body( rigid_body, active_object );
 
 	return rigid_body;
 }
@@ -48,7 +48,7 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_capsul
 	offset.setOrigin( Vector3( 0, active_object->get_collision_height() / 2, 0 ) );
 
 	RigidBody* rigid_body = add_capsule_rigid_body( active_object->get_transform(), offset, radius, height, dynamic_cast< const StaticObject* >( active_object ) != 0 );
-	rigid_body->setUserPointer(	active_object );
+	set_active_object_info_to_rigid_body( rigid_body, active_object );
 
 	return rigid_body;
 }
@@ -66,9 +66,25 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_cylind
 	offset.setOrigin( Vector3( 0, active_object->get_collision_height() / 2, 0 ) );
 
 	RigidBody* rigid_body = add_cylinder_rigid_body( active_object->get_transform(), offset, box, dynamic_cast< const StaticObject* >( active_object ) != 0 );
-	rigid_body->setUserPointer(	active_object );
+	set_active_object_info_to_rigid_body( rigid_body, active_object );
 
 	return rigid_body;
+}
+
+/**
+ * ActiveObject ‚Ìî•ñ‚ð RigidBody ‚ÉÝ’è‚·‚é
+ *
+ * @param rigid_body RigidBody
+ * @param active_object ActiveObject
+ */
+void ActiveObjectPhysics::set_active_object_info_to_rigid_body( RigidBody* rigid_body, ActiveObject* active_object )
+{
+	rigid_body->setUserPointer(	active_object );
+
+	if ( ! active_object->is_hard() )
+	{
+		rigid_body->setCollisionFlags( rigid_body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
+	}
 }
 
 class ContactResultCallback : public btCollisionWorld::ContactResultCallback

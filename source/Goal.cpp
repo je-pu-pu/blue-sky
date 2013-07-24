@@ -10,7 +10,8 @@ Goal::Goal()
 
 void Goal::restart()
 {
-	get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
+	ActiveObject::restart();
+
 	get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
 }
 

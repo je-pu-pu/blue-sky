@@ -203,9 +203,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// ‚«‚ê‚¢‚É‚·‚é
 	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-1-loop.png" );
-	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-2-loop.png" );
+	get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-2-loop.png" );
 	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/dot-face-1.png" );
-	get_direct_3d()->getTextureManager()->load( "paper", "media/texture/brush-face-1.png" );
+	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/brush-face-1.png" );
 	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pencil-face-1.png" );
 
 	update_render_data_for_game();

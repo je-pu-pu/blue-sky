@@ -361,8 +361,6 @@ void Player::update_step_speed()
 	if ( get_step_speed() >= get_max_run_step_speed() && ! is_jumping() && ! is_falling() )
 	{
 		play_sound( "short-breath", true, false );
-
-		stop();
 	}
 	else
 	{
@@ -543,7 +541,7 @@ void Player::kill()
 	get_rigid_body()->setActivationState( true );
 	get_rigid_body()->setAngularFactor( 1.f );
 	get_rigid_body()->setFriction( 1.f );
-	get_rigid_body()->applyForce( get_front() * 2000.f, Vector3( 0.1f, 1.5f, 0.f ) );
+	// get_rigid_body()->applyForce( get_front() * 2000.f, Vector3( 0.1f, 1.5f, 0.f ) );
 }
 
 void Player::set_eye_depth( float d )

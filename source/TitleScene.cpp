@@ -58,8 +58,6 @@ TitleScene::TitleScene( const GameMain* game_main )
 
 	{
 		GameConstantBufferData game_constant_buffer_data;
-
-		game_constant_buffer_data.projection = XMMatrixTranspose( XMMatrixOrthographicLH( 2.f * get_width() / get_height(), 2.f, 0.f, 1.f ) );
 		game_constant_buffer_data.screen_width = static_cast< float_t >( get_width() );
 		game_constant_buffer_data.screen_height = static_cast< float_t >( get_height() );
 		
@@ -133,6 +131,7 @@ void TitleScene::render()
 		FrameConstantBufferData frame_constant_buffer_data;
 
 		frame_constant_buffer_data.view = XMMatrixTranspose( XMMatrixIdentity() );
+		frame_constant_buffer_data.projection = XMMatrixTranspose( XMMatrixOrthographicLH( 2.f * get_width() / get_height(), 2.f, 0.f, 1.f ) );
 		frame_constant_buffer_data.time = get_total_elapsed_time();
 	
 		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );

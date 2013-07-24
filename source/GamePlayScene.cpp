@@ -177,7 +177,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	if ( ! ground_ )
 	{
-		ground_ = new Mesh( get_direct_3d() );
+		ground_ = get_graphics_manager()->create_mesh();
 		ground_->load_obj( "media/model/ground.obj" );
 	}
 
@@ -190,6 +190,10 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	rectangle_ = new Rectangle( get_direct_3d() );
 
 	debug_axis_ = new Axis( get_direct_3d() );
+
+	scope_mesh_ = get_graphics_manager()->create_mesh();
+	scope_mesh_->load_obj( "media/model/scope.obj" );
+
 
 	get_graphics_manager()->cleanup_loader();
 
@@ -781,10 +785,12 @@ void GamePlayScene::update_main()
 		if ( get_input()->push( Input::A ) )
 		{
 			player_->jump();
+			camera_->set_fov_target( camera_->get_fov_default() );
 		}
 		else if ( get_input()->push( Input::B ) )
 		{
 			player_->super_jump();
+			camera_->set_fov_target( 15.f );
 		}
 
 		player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );
@@ -947,13 +953,13 @@ void GamePlayScene::render()
 
 		get_direct_3d()->setInputLayout( "main" );
 
-		get_direct_3d()->renderText();
-		
-		// render_debug_shadow_map_window();
-
 		render_sprite();
 
+		get_direct_3d()->renderText();
+
 		render_fader();
+		
+		// render_debug_shadow_map_window();
 
 		get_direct_3d()->end3D();
 	}
@@ -990,9 +996,6 @@ void GamePlayScene::render_text() const
 void GamePlayScene::update_render_data_for_game() const
 {
 	GameConstantBufferData constant_buffer_data;
-
-	constant_buffer_data.projection = XMMatrixPerspectiveFovLH( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f );
-	constant_buffer_data.projection = XMMatrixTranspose( constant_buffer_data.projection );
 	constant_buffer_data.screen_width = static_cast< float_t >( get_width() );
 	constant_buffer_data.screen_height = static_cast< float_t >( get_height() );
 		
@@ -1014,6 +1017,8 @@ void GamePlayScene::update_render_data_for_frame() const
 
 		frame_constant_buffer_data.view = XMMatrixLookAtLH( eye, at, up );
 		frame_constant_buffer_data.view = XMMatrixTranspose( frame_constant_buffer_data.view );
+		frame_constant_buffer_data.projection = XMMatrixPerspectiveFovLH( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f );
+		frame_constant_buffer_data.projection = XMMatrixTranspose( frame_constant_buffer_data.projection );
 		frame_constant_buffer_data.light = light_;
 		frame_constant_buffer_data.light.normalize();
 		frame_constant_buffer_data.time = get_total_elapsed_time();
@@ -1402,6 +1407,28 @@ void GamePlayScene::render_active_object_line( const ActiveObject* active_object
  */
 void GamePlayScene::render_sprite()
 {
+	{
+		get_direct_3d()->setInputLayout( "main" );
+
+		ObjectConstantBufferData buffer_data;
+		buffer_data.world = XMMatrixOrthographicLH( camera_->aspect() * 2.f, 2.f, 0.f, 1.f );
+		buffer_data.world = XMMatrixTranspose( buffer_data.world );
+
+		get_game_main()->get_object_constant_buffer()->update( & buffer_data );
+
+		auto technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
+
+		for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+		{
+			( *i )->apply();
+			
+			get_game_main()->get_object_constant_buffer()->bind_to_vs();
+			get_game_main()->get_object_constant_buffer()->bind_to_ps();
+
+			scope_mesh_->render();
+		}
+	}
+
 	get_direct_3d()->getSprite()->begin();
 
 	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
@@ -1548,18 +1575,16 @@ void GamePlayScene::render_debug_shadow_map_window() const
 
 	get_direct_3d()->setDebugViewport( 0.f, 0, get_width() / 4.f * shadow_map_->get_cascade_levels(), get_height() / 4.f );
 
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
+	ObjectConstantBufferData buffer_data;
+	buffer_data.world = XMMatrixIdentity();
+	buffer_data.color = Color( 0.5f, 0.f, 0.f, 0.f );
+	get_game_main()->get_object_constant_buffer()->update( & buffer_data );
 
-	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	auto technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
+
+	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 	{
 		( *i )->apply();
-				
-		ObjectConstantBufferData buffer_data;
-				
-		buffer_data.world = XMMatrixIdentity();
-		buffer_data.color = Color( 0.5f, 0.f, 0.f, 0.f );
-
-		get_game_main()->get_object_constant_buffer()->update( & buffer_data );
 		
 		bind_object_constant_buffer();
 

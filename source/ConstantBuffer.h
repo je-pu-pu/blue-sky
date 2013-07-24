@@ -21,14 +21,16 @@ struct BaseConstantBufferData
 
 struct GameConstantBufferData : public BaseConstantBufferData< 0 >
 {
-	XMMATRIX projection;
 	float_t screen_width;
 	float_t screen_height;
+
+	float_t dummy[ 2 ];
 };
 
 struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
 {
 	XMMATRIX view;
+	XMMATRIX projection;
 	Vector light;
 	float_t time;
 	uint_t time_beat;

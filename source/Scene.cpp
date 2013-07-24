@@ -139,18 +139,18 @@ void Scene::stop_sound( const char* name ) const
 void Scene::render_fader() const
 {
 	ObjectConstantBufferData buffer_data;
-
+	buffer_data.world = XMMatrixIdentity();
 	buffer_data.color = get_direct_3d()->getFader()->get_color();
-
 	get_game_main()->get_object_constant_buffer()->update( & buffer_data );
 
 	get_direct_3d()->setInputLayout( "main" );
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
+	auto technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
 
-	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 	{
 		( *i )->apply();
-				
+
+		get_game_main()->get_object_constant_buffer()->bind_to_vs();
 		get_game_main()->get_object_constant_buffer()->bind_to_ps();
 
 		get_direct_3d()->getFader()->render();

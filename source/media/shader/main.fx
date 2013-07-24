@@ -47,17 +47,17 @@ SamplerState shadow_texture_sampler
 
 cbuffer GameConstantBuffer : register( b0 )
 {
-	matrix Projection;
 	float ScreenWidth;
 	float ScreenHeight;
 };
 
 cbuffer FrameConstantBuffer : register( b1 )
 {
-	matrix View;	// ビュー変換行列
-	float4 Light;	// 光源の向き ( 正規化済み ) 
-	float Time;
-	uint TimeBeat;
+	matrix View;			// ビュー変換行列
+	matrix Projection;		// プロジェクション変換行列
+	float4 Light;			// 光源の向き ( 正規化済み ) 
+	float Time;				// シーン開始からの経過秒数
+	uint TimeBeat;			// 現在の音楽の BPM ?
 };
 
 cbuffer ObjectConstantBuffer : register( b2 )
@@ -922,18 +922,17 @@ technique11 main_with_shadow
 // ----------------------------------------
 // for 2D ( Fader, debug ウィンドウで使用 )
 // ----------------------------------------
-PS_INPUT vs_2d( VS_INPUT input )
+PS_FLAT_INPUT vs_2d( VS_INPUT input )
 {
-	PS_INPUT output = ( PS_INPUT ) 0;
+	PS_FLAT_INPUT output = ( PS_FLAT_INPUT ) 0;
 
-	output.Position = input.Position;
+	output.Position = mul( input.Position, World );
 	output.TexCoord = input.TexCoord;
-	// output.Color = ObjectColor;
 
 	return output;
 }
 
-float4 ps_2d( PS_INPUT input ) : SV_Target
+float4 ps_2d( PS_FLAT_INPUT input ) : SV_Target
 {
 	return model_texture.Sample( texture_sampler, input.TexCoord ) + ObjectColor; // + ObjectAdditionalColor;
 }

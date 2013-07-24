@@ -6,12 +6,18 @@
 
 #include <common/auto_ptr.h>
 
-class Direct3D11Mesh;
 class Direct3D11FarBillboardsMesh;
 class Direct3D11SkyBox;
 class Direct3D11ShadowMap;
 class Direct3D11Rectangle;
 class Direct3D11Axis;
+
+namespace game
+{
+
+class Mesh;
+
+}; // namespace game
 
 namespace blue_sky
 {
@@ -30,7 +36,7 @@ class DrawingModel;
 class GamePlayScene : public Scene
 {
 public:
-	typedef Direct3D11Mesh				Mesh;
+	typedef game::Mesh					Mesh;
 	typedef Direct3D11FarBillboardsMesh	FarBillboardsMesh;
 	typedef Direct3D11SkyBox			SkyBox;
 	typedef Direct3D11ShadowMap			ShadowMap;
@@ -55,6 +61,8 @@ protected:
 
 	common::auto_ptr< Player >			player_;
 	common::auto_ptr< Camera >			camera_;
+
+	common::auto_ptr< Mesh >			scope_mesh_;			///< ‘oŠá‹¾
 
 	Sound*								bgm_;
 	Sound*								balloon_bgm_;

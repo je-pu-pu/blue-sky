@@ -27,6 +27,8 @@ private:
 	/// @todo 移動する
 	const BoneConstantBuffer constant_buffer_;				///< 定数バッファ
 
+	Matrix get_bone_local_matrix( uint_t ) const;
+
 public:
 	AnimationPlayer( const SkinningAnimationSet* );
 	~AnimationPlayer() { }

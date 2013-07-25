@@ -24,7 +24,7 @@ private:
 public:
 	Direct3D11Matrix()
 	{
-		set_identity();
+		
 	}
 
 	Direct3D11Matrix( XMFLOAT4X4 m )
@@ -62,15 +62,11 @@ public:
 
 	void set_identity()
 	{
-		// value_ = XMMatrixIdentity();
-
 		XMStoreFloat4x4( & value_, XMMatrixIdentity() );
 	}
 
 	void set_translation( UnitType tx, UnitType ty, UnitType tz )
 	{
-		// value_ = XMMatrixTranslation( tx, ty, tz );
-
 		XMStoreFloat4x4( & value_, XMMatrixTranslation( tx, ty, tz ) );
 	}
 
@@ -89,6 +85,11 @@ public:
 		XMStoreFloat4x4( & value_, XMMatrixRotationZ( r ) );
 	}
 
+	void set_rotation_xyz( UnitType rx, UnitType ry, UnitType rz )
+	{
+		XMStoreFloat4x4( & value_, XMMatrixRotationX( rx ) * XMMatrixRotationY( ry ) * XMMatrixRotationZ( rz ) );
+	}
+
 	void set_rotation_roll_pitch_yaw( UnitType rx, UnitType ry, UnitType rz )
 	{
 		XMStoreFloat4x4( & value_, XMMatrixRotationRollPitchYaw( rx, ry, rz ) );
@@ -96,8 +97,6 @@ public:
 
 	void set_scaling( UnitType sx, UnitType sy, UnitType sz )
 	{
-		// value_ = XMMatrixScaling( sx, sy, sz );
-
 		XMStoreFloat4x4( & value_, XMMatrixScaling( sx, sy, sz ) );
 	}
 
@@ -136,6 +135,15 @@ public:
 
 	XMFLOAT4X4& get() { return value_; }
 	const XMFLOAT4X4& get() const { return value_; }
+
+
+	static Direct3D11Matrix identity()
+	{
+		Direct3D11Matrix m;
+		m.set_identity();
+
+		return m;
+	}
 
 }; // class Direct3D11Matrix
 

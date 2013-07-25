@@ -94,7 +94,7 @@ public:
 	 */
 	void set_bone_count( uint_t count )
 	{
-		bone_offset_matrix_list_.resize( count );
+		bone_offset_matrix_list_.resize( count, Matrix::identity() );
 
 		for ( auto i = skinning_animation_map_.begin(); i != skinning_animation_map_.end(); ++i )
 		{

@@ -68,7 +68,7 @@ void Direct3D11Sprite::begin()
 
 	direct_3d_->setInputLayout( "sprite" );
 
-	set_transform( Matrix() );
+	set_transform( Matrix::identity() );
 }
 
 void Direct3D11Sprite::end()

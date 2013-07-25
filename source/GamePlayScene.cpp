@@ -6,6 +6,7 @@
 #include "App.h"
 
 #include "Player.h"
+#include "Girl.h"
 #include "Goal.h"
 #include "Robot.h"
 #include "Balloon.h"
@@ -554,15 +555,6 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			object->set_drawing_model( drawing_model );
 			object->setup_animation_player();
 
-			/*** @todo ‚¿‚á‚ñ‚Æ‚·‚é */
-			if ( object->get_animation_player() )
-			{
-				object->get_animation_player()->play( "L", true, true );
-				object->get_animation_player()->play( "Swing", true, true );
-				object->get_animation_player()->play( "Walk", true, true );
-				object->get_animation_player()->play( "ArmatureAction", true, true );
-			}
-
 			object->set_start_location( x, y, z );
 			object->set_start_rotation( rx, ry, rz );
 
@@ -593,6 +585,19 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			object->set_rigid_body( get_physics()->add_active_object( object ) );
 			get_active_object_manager()->add_active_object( object );
 		}
+		else if ( name == "girl" )
+		{
+			float x = 0, y = 0, z = 0;
+			ss >> x >> y >> z;
+
+			Girl* girl = new Girl();
+			girl->set_drawing_model( get_drawing_model_manager()->load( "girl" ) );
+			get_active_object_manager()->add_active_object( girl );
+			girl->set_rigid_body( get_physics()->add_active_object( girl ) );
+
+			girl->set_start_location( x, y, z );
+			girl->setup_animation_player();
+		}
 		else if ( name == "robot" )
 		{
 			float x = 0, y = 0, z = 0, r = 0;
@@ -608,10 +613,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			robot->set_start_location( x, y, z );
 			robot->set_start_direction_degree( r );
-
-			/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
 			robot->setup_animation_player();
-			robot->get_animation_player()->play( "Walk", true, true );
 		}
 		else if ( name == "balloon" )
 		{
@@ -789,8 +791,8 @@ void GamePlayScene::update_main()
 		}
 		else if ( get_input()->push( Input::B ) )
 		{
-			player_->super_jump();
-			camera_->set_fov_target( 15.f );
+			// player_->super_jump();
+			// camera_->set_fov_target( 15.f );
 		}
 
 		player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );
@@ -1407,6 +1409,7 @@ void GamePlayScene::render_active_object_line( const ActiveObject* active_object
  */
 void GamePlayScene::render_sprite()
 {
+	if ( false )
 	{
 		get_direct_3d()->setInputLayout( "main" );
 
@@ -1510,7 +1513,7 @@ void GamePlayScene::render_debug_axis() const
 			( *i )->get_animation_player()->bind_render_data();
 
 			AnimationPlayer::BoneConstantBuffer::Data bone_constant_buffer_data;
-			active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix() );
+			active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix::identity() );
 
 			for ( uint_t n = 0; n < ( *i )->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )
 			{

@@ -557,11 +557,12 @@ void FbxFileLoader::load_mesh_skinning_info( FbxSkin* skin, Mesh::SkinningInfoLi
 		FbxAMatrix initial_matrix;
 		cluster->GetTransformLinkMatrix( initial_matrix );
 
-		Matrix rx, ry, rz, s, t;
+		Matrix r, s, t;
 
-		rx.set_rotation_x( math::degree_to_radian( static_cast< float_t >( -initial_matrix.GetR()[ 0 ] ) ) );
-		ry.set_rotation_y( math::degree_to_radian( static_cast< float_t >( -initial_matrix.GetR()[ 1 ] ) ) );
-		rz.set_rotation_z( math::degree_to_radian( static_cast< float_t >(  initial_matrix.GetR()[ 2 ] ) ) );
+		r.set_rotation_xyz(
+			math::degree_to_radian( static_cast< float_t >( -initial_matrix.GetR()[ 0 ] ) ),
+			math::degree_to_radian( static_cast< float_t >( -initial_matrix.GetR()[ 1 ] ) ),
+			math::degree_to_radian( static_cast< float_t >(  initial_matrix.GetR()[ 2 ] ) ) );
 
 		s.set_scaling(
 			static_cast< float_t >( initial_matrix.GetS()[ 0 ] ),
@@ -573,7 +574,7 @@ void FbxFileLoader::load_mesh_skinning_info( FbxSkin* skin, Mesh::SkinningInfoLi
 			static_cast< float_t >(  initial_matrix.GetT()[ 1 ] ),
 			static_cast< float_t >( -initial_matrix.GetT()[ 2 ] ) );
 
-		mesh_->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( bone_index ) = s * rx * ry * rz * t;
+		mesh_->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( bone_index ) = s * r * t;
 	}
 
 	if ( mesh_->get_skinning_animation_set() )

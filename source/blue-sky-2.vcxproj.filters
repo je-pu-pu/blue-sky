@@ -180,6 +180,9 @@
     <ClCompile Include="BgSpriteLayer.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Girl.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -410,6 +413,9 @@
     <ClInclude Include="Direct3D11Texture.h">
       <Filter>DirectX</Filter>
     </ClInclude>
+    <ClInclude Include="Girl.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -455,6 +461,12 @@
       <Filter>Scenario</Filter>
     </None>
     <None Include="media\stage\0-3.stage">
+      <Filter>Scenario</Filter>
+    </None>
+    <None Include="media\stage\2-1.stage">
+      <Filter>Scenario</Filter>
+    </None>
+    <None Include="media\stage\1-0.stage">
       <Filter>Scenario</Filter>
     </None>
   </ItemGroup>

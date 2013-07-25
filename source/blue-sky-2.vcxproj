@@ -52,6 +52,7 @@
     <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GamePlayScene.cpp" />
+    <ClCompile Include="Girl.cpp" />
     <ClCompile Include="Goal.cpp" />
     <ClCompile Include="GraphicsManager.cpp" />
     <ClCompile Include="Input.cpp" />
@@ -129,6 +130,7 @@
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GamePlayScene.h" />
+    <ClInclude Include="Girl.h" />
     <ClInclude Include="Goal.h" />
     <ClInclude Include="GraphicsManager.h" />
     <ClInclude Include="Input.h" />
@@ -173,6 +175,8 @@
     <None Include="media\stage\0-3.intro" />
     <None Include="media\stage\0-3.outro" />
     <None Include="media\stage\0-3.stage" />
+    <None Include="media\stage\1-0.stage" />
+    <None Include="media\stage\2-1.stage" />
     <None Include="media\stage\ending.outro" />
   </ItemGroup>
   <ItemGroup>

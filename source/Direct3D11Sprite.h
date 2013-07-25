@@ -74,8 +74,6 @@ protected:
 	Buffer*			vertex_buffer_;
 	Buffer*			index_buffer_;
 
-	Matrix			transform_;
-
 	static Color	white_;				/// !!!!!
 
 	void create_vertex_buffer();

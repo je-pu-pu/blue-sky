@@ -629,8 +629,10 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 		// Ž†‚ÌŽ¿Š´‚ð’Ç‰Á‚·‚é
 		if ( true )
 		{
+			const float3 shadow_paper_color = float3( 0.5f, 0.5f, 0.5f );
+
 			float4 paper = sample_paper_texture( ( float2 ) input.Position );
-			shadow.rgb = float3( 0.5f, 0.5f, 0.5f ) * ( 1.f - paper.a ) + shadow.rgb * paper.a;
+			shadow.rgb = shadow_paper_color * ( 1.f - paper.a ) + shadow.rgb * paper.a;
 		}
 
 		const float shadow_rate = 0.75f;

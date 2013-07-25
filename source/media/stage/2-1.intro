@@ -1,0 +1,12 @@
+layer town-1920x1920.png
+layer-translation 0 1.5  0 -0.75  0 0.002
+layer-rotation 5 -180 0.01
+layer-scale 1  0.8  0.0002
+
+layer c84-god.png
+layer-translation 0 0.75  0 0  0 0.0001
+layer-rotation 0 10 0.02
+layer-scale 0.8 0.25 0.0004
+
+bgm tower
+sound voice-prologue

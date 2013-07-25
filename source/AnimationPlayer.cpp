@@ -86,6 +86,11 @@ void AnimationPlayer::update_render_data() const
 	if ( ! get_current_skinning_animation() )
 	{
 		blue_sky::BoneConstantBufferData data;
+		
+		for ( uint_t n = 0; n < get_skinning_animation_set()->get_bone_count(); ++n )
+		{
+			data.bone_matrix[ n ].identity();
+		}
 
 		constant_buffer_.update( & data );
 
@@ -94,7 +99,7 @@ void AnimationPlayer::update_render_data() const
 
 	blue_sky::BoneConstantBufferData data;
 
-	calculate_bone_matrix_recursive( data, 0, Matrix() );
+	calculate_bone_matrix_recursive( data, 0, Matrix::identity() );
 
 	for ( uint_t n = 0; n < get_skinning_animation_set()->get_bone_count(); ++n )
 	{
@@ -113,11 +118,28 @@ void AnimationPlayer::update_render_data() const
  */
 void AnimationPlayer::calculate_bone_matrix_recursive( BoneConstantBuffer::Data& data, uint_t bone_index, const Matrix& parent_bone_matrix ) const
 {
-	const Animation& bone_animation = get_current_skinning_animation()->get_bone_animation_by_bone_index( bone_index );
 	const Matrix& bone_offset_matrix = get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( bone_index );
 
 	uint_t parent_bone_index = get_skinning_animation_set()->get_parent_bone_index( bone_index );
-	const Matrix& parent_bone_offset_matrix = bone_index == 0 ? Matrix() : get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( parent_bone_index );
+	const Matrix& parent_bone_offset_matrix = bone_index == 0 ? Matrix::identity() : get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( parent_bone_index );
+
+	data.bone_matrix[ bone_index ] = bone_offset_matrix.inverse() * get_bone_local_matrix( bone_index ) * parent_bone_offset_matrix * parent_bone_matrix;
+
+	for ( uint_t n = 0; n < get_skinning_animation_set()->get_child_bone_count( bone_index ); ++n )
+	{
+		calculate_bone_matrix_recursive( data, get_skinning_animation_set()->get_child_bone_index( bone_index, n ), data.bone_matrix[ bone_index ] );
+	}
+}
+
+/**
+ * 指定したインデックスのボーンのローカルマトリックスを取得する
+ *
+ * @param bone_index ボーンのインデックス
+ * @return ボーンのローカルマトリックス
+ */
+Matrix AnimationPlayer::get_bone_local_matrix( uint_t bone_index ) const
+{
+	const Animation& bone_animation = get_current_skinning_animation()->get_bone_animation_by_bone_index( bone_index );
 
 	Matrix s, r, t;
 
@@ -126,7 +148,7 @@ void AnimationPlayer::calculate_bone_matrix_recursive( BoneConstantBuffer::Data&
 		bone_animation.get_value( "sy", current_frame_, 1.f ),
 		bone_animation.get_value( "sz", current_frame_, 1.f ) );
 
-	r.set_rotation_roll_pitch_yaw(
+	r.set_rotation_xyz(
 		bone_animation.get_value( "rx", current_frame_, 0.f ),
 		bone_animation.get_value( "ry", current_frame_, 0.f ),
 		bone_animation.get_value( "rz", current_frame_, 0.f ) );
@@ -136,18 +158,7 @@ void AnimationPlayer::calculate_bone_matrix_recursive( BoneConstantBuffer::Data&
 		bone_animation.get_value( "ty", current_frame_, 0.f ),
 		bone_animation.get_value( "tz", current_frame_, 0.f ) );
 
-	Matrix rx, ry, rz;
-
-	rx.set_rotation_x( bone_animation.get_value( "rx", current_frame_, 0.f ) );
-	ry.set_rotation_y( bone_animation.get_value( "ry", current_frame_, 0.f ) );
-	rz.set_rotation_z( bone_animation.get_value( "rz", current_frame_, 0.f ) );
-
-	data.bone_matrix[ bone_index ] = bone_offset_matrix.inverse() * s * rx * ry * rz * t * parent_bone_offset_matrix * parent_bone_matrix;
-
-	for ( uint_t n = 0; n < get_skinning_animation_set()->get_child_bone_count( bone_index ); ++n )
-	{
-		calculate_bone_matrix_recursive( data, get_skinning_animation_set()->get_child_bone_index( bone_index, n ), data.bone_matrix[ bone_index ] );
-	}
+	return s * r * t;
 }
 
 /**

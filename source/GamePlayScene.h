@@ -70,7 +70,7 @@ protected:
 
 	float_t								bpm_;
 
-	static Direct3D11Vector				light_;
+	static Vector						light_position_;
 
 	void generate_random_stage();
 
@@ -83,13 +83,15 @@ protected:
 
 	void on_goal();
 
+	void set_bpm( const float_t bpm ) { bpm_ = bpm; }
+	float_t get_bpm() const { return bpm_; }
+
+	void set_light_position( const Vector& );
+
 	void update_main();
 	void update_clear();
 
 	void update_shadow();
-
-	void set_bpm( const float_t bpm ) { bpm_ = bpm; }
-	float_t get_bpm() const { return bpm_; }
 
 	/** @todo ˆÚ“®‚·‚é */
 	void update_render_data_for_game() const;

@@ -20,7 +20,7 @@ void Girl::restart()
 	// ActiveObject::restart();
 
 	/// @todo ‚Ü‚Æ‚ß‚é
-	get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
+	// get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
 
 	flicker_ = common::random( 0.f, 10.f );
 

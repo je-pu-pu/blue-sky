@@ -72,7 +72,8 @@
 namespace blue_sky
 {
 
-Direct3D11Vector GamePlayScene::light_( -0.25f, -1.f, 0.5f );
+// Direct3D11Vector GamePlayScene::light_position_( 0.f, -1.f, -0.1f );
+Direct3D11Vector GamePlayScene::light_position_( 0.25f, 1.f, -0.5f );
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
@@ -665,6 +666,16 @@ void GamePlayScene::save_stage_file( const char* file_name ) const
 }
 
 /**
+ * 光源の位置を設定する
+ *
+ * @param pos 光源の位置
+ */
+void GamePlayScene::set_light_position( const Direct3D11Vector& pos )
+{
+	light_position_ = pos;
+}
+
+/**
  * メインループ処理
  *
  */
@@ -835,20 +846,17 @@ void GamePlayScene::update_shadow()
 {
 	if ( shadow_map_ )
 	{
-		if ( true )
+		if ( false )
 		{
 			static float a = 0.1f;
 
-			// a += 0.0025f;
+			a += 0.0025f;
 
-			const XMVECTOR light_origin = XMVectorSet( 0.f, 100.f, 0.f, 0.f );
-			XMVECTOR light = light_origin + XMVectorSet( cos( a ) * 50.f, 0.f, sin( a ) * 50.f, 0.f );	
-
-			shadow_map_->setLightPosition( light );
-
-			light_ = -Direct3D11Vector::FromXMVECTOR( light );
+			const Vector light_origin( 0.f, 100.f, 0.f );
+			light_position_ = light_origin + Vector( cos( a ) * 50.f, 0.f, sin( a ) * 50.f, 0.f );	
 		}
 
+		shadow_map_->setLightPosition( XMVectorSet( light_position_.x(), light_position_.y(), light_position_.z(), 1 ) );
 		shadow_map_->setEyePosition( XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 ) );
 	}
 }
@@ -1021,8 +1029,7 @@ void GamePlayScene::update_render_data_for_frame() const
 		frame_constant_buffer_data.view = XMMatrixTranspose( frame_constant_buffer_data.view );
 		frame_constant_buffer_data.projection = XMMatrixPerspectiveFovLH( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f );
 		frame_constant_buffer_data.projection = XMMatrixTranspose( frame_constant_buffer_data.projection );
-		frame_constant_buffer_data.light = light_;
-		frame_constant_buffer_data.light.normalize();
+		frame_constant_buffer_data.light = -light_position_.normalize();
 		frame_constant_buffer_data.time = get_total_elapsed_time();
 		frame_constant_buffer_data.time_beat = static_cast< uint_t >( get_total_elapsed_time() * ( get_bpm() / 60.f ) );
 

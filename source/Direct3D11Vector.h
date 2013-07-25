@@ -59,6 +59,11 @@ public:
 		return Direct3D11Vector( -value_ );
 	}
 
+	friend Direct3D11Vector operator + ( const Direct3D11Vector& v1, const Direct3D11Vector& v2 )
+	{
+		return XMVectorAdd( v1.value_, v2.value_ );
+	}
+
 	friend Direct3D11Vector operator * ( const Direct3D11Vector& v, const Direct3D11Matrix& m )
 	{
 		return XMVector4Transform( v.value_, XMLoadFloat4x4( & m.value_ ) );

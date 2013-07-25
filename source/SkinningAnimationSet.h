@@ -3,6 +3,7 @@
 
 #include "type.h"
 #include "SkinningAnimation.h"
+#include "Direct3D11Matrix.h"
 
 /**
  * スキニングアニメーションの複数セット

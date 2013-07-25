@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "DrawingModel.h"
 #include "DrawingLine.h"
+#include <common/random.h>
 
 namespace blue_sky
 {
@@ -59,7 +60,7 @@ void Balloon::restart()
 {
 	ActiveObject::restart();
 
-	flicker_ = 0.f;
+	flicker_ = common::random( 0.f, 10.f );
 	player_ = 0;
 
 	get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );

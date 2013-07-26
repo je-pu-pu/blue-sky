@@ -59,7 +59,7 @@ struct FrameDrawingConstantBufferData : public BaseConstantBufferData< 4 >
 
 struct BoneConstantBufferData : public BaseConstantBufferData< 5 >
 {
-	static const int MaxBones = 200;
+	static const int MaxBones = 100;
 
 	Matrix bone_matrix[ MaxBones ];
 

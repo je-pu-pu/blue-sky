@@ -58,6 +58,10 @@ const GameObject::Transform& GameObject::get_transform() const
 	return * transform_;
 }
 
+/**
+ * @todo 調べる : set_rotation_degree() で設定した角度がクリアされる？
+ *
+ */
 void GameObject::set_location( const Vector3& v )
 {
 	get_transform().getOrigin() = v;

@@ -27,8 +27,6 @@ public:
 		// MODE_DETOUR
 	};
 
-	typedef std::vector< const DrawingModel* > DrawingModelList;
-
 private:
 	const Player*	player_;
 

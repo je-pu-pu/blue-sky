@@ -25,6 +25,8 @@ private:
 
 	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 
+	bool is_hard() const { return true; }
+
 protected:
 
 

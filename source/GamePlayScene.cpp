@@ -588,15 +588,16 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( name == "girl" )
 		{
-			float x = 0, y = 0, z = 0;
-			ss >> x >> y >> z;
+			float x = 0, y = 0, z = 0, r = 0;
+			ss >> x >> y >> z >> r;
 
 			Girl* girl = new Girl();
 			girl->set_drawing_model( get_drawing_model_manager()->load( "girl" ) );
 			get_active_object_manager()->add_active_object( girl );
-			girl->set_rigid_body( get_physics()->add_active_object( girl ) );
+			girl->set_rigid_body( get_physics()->add_active_object( girl ) );			
 
 			girl->set_start_location( x, y, z );
+			girl->set_start_direction_degree( r );
 			girl->setup_animation_player();
 		}
 		else if ( name == "robot" )
@@ -945,13 +946,10 @@ void GamePlayScene::render()
 		render_sky_box();
 		render_far_billboards();
 
-		get_direct_3d()->setInputLayout( "skin" );
-
-		render_object_skin_mesh();
-
-		get_direct_3d()->setInputLayout( "main" );
-
 		render_object_mesh();
+
+		get_direct_3d()->setInputLayout( "skin" );
+		render_object_skin_mesh();
 
 		get_direct_3d()->setInputLayout( "line" );
 

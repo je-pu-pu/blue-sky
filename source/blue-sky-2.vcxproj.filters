@@ -469,6 +469,15 @@
     <None Include="media\stage\1-0.stage">
       <Filter>Scenario</Filter>
     </None>
+    <None Include="media\stage\2-1.intro">
+      <Filter>Scenario</Filter>
+    </None>
+    <None Include="media\stage\1-3.stage">
+      <Filter>Scenario</Filter>
+    </None>
+    <None Include="media\stage\2-0.stage">
+      <Filter>Scenario</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Scene">

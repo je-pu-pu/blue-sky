@@ -17,14 +17,17 @@ Girl::Girl()
  */
 void Girl::restart()
 {
-	// ActiveObject::restart();
+	ActiveObject::restart();
+
+	get_rigid_body()->setAngularFactor( 0 );
+	get_rigid_body()->setFriction( 0 );
 
 	/// @todo ‚Ü‚Æ‚ß‚é
-	// get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
+	get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
 
 	flicker_ = common::random( 0.f, 10.f );
 
-	get_animation_player()->play( "Walk", true, true );
+	get_animation_player()->play( "Float", true, true );
 }
 
 /**
@@ -33,7 +36,10 @@ void Girl::restart()
  */
 void Girl::update()
 {
-	set_location( get_location().x(), get_start_location().y() + 1.f + std::sin( flicker_ ), get_location().z() );
+	// get_rigid_body()->setActivationState( true );
+
+	// flicker_ += 0.02f;
+	// set_location( get_location().x(), get_start_location().y() + 1.f + std::sin( flicker_ ), get_location().z() );
 }
 
 } // namespace blue_sky

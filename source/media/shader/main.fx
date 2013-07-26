@@ -1,6 +1,6 @@
 static const int ShadowMapCascadeLevels = 3;
 static const float Pi = 3.14159265f;
-static const uint MaxBones = 200;
+static const uint MaxBones = 100;
 
 Texture2D model_texture : register( t0 );		/// モデルのテクスチャ
 Texture2D line_texture : register( t0 );		/// 線のテクスチャ

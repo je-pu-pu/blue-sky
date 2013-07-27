@@ -1,5 +1,6 @@
 #include "Player.h"
 
+#include "Ladder.h"
 #include "Balloon.h"
 #include "Medal.h"
 #include "Robot.h"
@@ -8,7 +9,6 @@
 #include "DrawingLine.h"
 
 #include "GameMain.h"
-#include "Input.h"
 
 #include "ActiveObjectPhysics.h"
 
@@ -24,17 +24,20 @@ Player::Player()
 	, is_jumpable_( false )
 	, is_falling_to_die_( false )
 	, is_falling_to_balloon_( false )
+	, is_on_ladder_( false )
 	, step_count_( 0 )
 	, step_speed_( 0.25f )
 	, action_mode_( ACTION_MODE_NONE )
 	, is_action_pre_finish_( false )
 	, balloon_sequence_count_( 0 )
 	, uncontrollable_timer_( 0.f )
+	, pitch_( 0.f )
 	, eye_height_( 1.5f )
 	, eye_depth_( 0.f )
 	, has_medal_( false )
 	, last_footing_height_( 0.f )
-	, balloon_( 0 )
+	, ladder_( nullptr )
+	, balloon_( nullptr )
 	, hp_( 1 )
 {
 	
@@ -50,12 +53,14 @@ void Player::restart()
 
 	get_rigid_body()->setAngularFactor( 0 );
 	get_rigid_body()->setFriction( 0 );
+	// get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
 
 	is_on_footing_ = false;
 	is_jumping_ = false;
 	is_jumpable_ = false;
 	is_falling_to_die_ = false;
 	is_falling_to_balloon_ = false;
+	is_on_ladder_ = false;
 
 	step_count_ = 0;
 	step_speed_ = 0.25f;
@@ -66,7 +71,8 @@ void Player::restart()
 	set_action_mode( ACTION_MODE_NONE );
 	has_medal_ = false;
 
-	balloon_ = 0;
+	ladder_ = nullptr;
+	balloon_ = nullptr;
 
 	hp_ = 1;
 
@@ -106,6 +112,25 @@ void Player::update()
 		}
 	}
 
+	if ( ladder_ && ! is_jumping() )
+	{
+		// 梯子の軸に移動
+		float_t d = ( get_collision_depth() + ladder_->get_collision_depth() ) * 0.5f;
+		Vector3 target_location(
+			ladder_->get_location().x() + ladder_->get_front().x() * -d,
+			get_velocity().y(),
+			ladder_->get_location().z() + ladder_->get_front().z() * -d
+		);
+
+		set_velocity(
+			Vector3(
+				math::chase( 0.f, target_location.x() - get_location().x(), get_side_step_speed() ),
+				target_location.y(),
+				math::chase( 0.f, target_location.z() - get_location().z(), get_side_step_speed() )
+			)
+		);
+	}
+
 	if ( ! is_on_footing() )
 	{
 		eye_depth_ *= 0.95f;
@@ -120,7 +145,7 @@ void Player::update()
 	{
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 1.f, 0.f, 0.f, 0.f ) );
 
-		if ( ! is_dead() && ! is_on_footing() && get_rigid_body()->getLinearVelocity().y() < -7.5f && get_location().y() > 10.f && get_location().y() < 30.f &&  get_action_mode() == ACTION_MODE_NONE )
+		if ( ! is_dead() && ! is_on_footing() && ! is_on_ladder() && get_rigid_body()->getLinearVelocity().y() < -7.5f && get_location().y() > 10.f && get_location().y() < 30.f &&  get_action_mode() == ACTION_MODE_NONE )
 		{
 			play_sound( "fall", false, false );
 		}
@@ -169,6 +194,9 @@ void Player::update()
 	}
 
 	uncontrollable_timer_ = math::chase< float_t >( uncontrollable_timer_, 0.f, get_frame_elapsed_time() );
+
+	// 当たり判定のためにリセット
+	is_on_ladder_ = false;
 }
 
 void Player::update_transform()
@@ -206,6 +234,11 @@ void Player::limit_velocity()
 		v.setZ( v.z() * 0.9f );
 	}
 
+	if ( is_on_ladder() )
+	{
+		v.setY( v.y() * 0.9f );
+	}
+
 	set_velocity( v );
 }
 
@@ -223,7 +256,7 @@ void Player::update_jumpable()
 		return;
 	}
 
-	is_jumpable_ = is_on_footing() || action_mode_ == ACTION_MODE_BALLOON;
+	is_jumpable_ = is_on_footing() || is_on_ladder() || action_mode_ == ACTION_MODE_BALLOON;
 }
 
 void Player::update_on_footing()
@@ -266,7 +299,7 @@ void Player::update_on_footing()
  */
 void Player::update_jumping()
 {
-	if ( is_jumping_ && is_jumpable() )
+	if ( is_jumping_ && is_on_footing() )
 	{
 		is_jumping_ = false;
 	}
@@ -418,6 +451,15 @@ float_t Player::get_footing_height( const Vector3& from, bool include_soft_footi
 	return ( 1.f - ray_callback.m_closestHitFraction ) * from.y();
 }
 
+/**
+ * 現在梯子の上り下り以外の移動を禁止するか
+ *
+ */
+bool Player::is_ladder_step_only() const
+{
+	return is_on_ladder();
+}
+
 void Player::step( float_t s )
 {
 	if ( is_uncontrollable() )
@@ -442,13 +484,37 @@ void Player::side_step( float_t s )
 		get_velocity() +
 		Vector3(
 			( get_right() * s ).x() * get_side_step_speed(),
-			0,
+			0.f,
 			( get_right() * s ).z() * get_side_step_speed()
 		)
 	);
 
 	// eye_depth_ *= 0.95f;
 }
+
+/**
+ * 
+ *
+ */
+void Player::ladder_step( float_t s )
+{
+	if ( is_uncontrollable() )
+	{
+		return;
+	}
+
+	Vector3 v = get_velocity() + Vector3( 0.f, pitch_ * s, 0.f );
+	v.setY( math::clamp( v.y(), -get_ladder_step_speed(), get_ladder_step_speed() ) );
+
+	set_velocity( v );
+}
+
+void Player::release_ladder()
+{
+	ladder_ = nullptr;
+	get_rigid_body()->setGravity( Vector3( 0, -9.8f, 0 ) );
+}
+
 
 /**
  * ジャンプ開始
@@ -462,6 +528,11 @@ void Player::jump()
 	}
 
 	set_velocity( Vector3( get_velocity().x(), get_velocity().y() + 4.f, get_velocity().z() ) );
+
+	if ( is_on_ladder() )
+	{
+		set_velocity( get_velocity() + get_front() * 4.f );
+	}
 
 	is_jumping_ = true;
 
@@ -651,6 +722,14 @@ void Player::on_collide_with( Robot* robot )
 	v.setY( 2.5f );
 
 	damage( v );
+}
+
+void Player::on_collide_with( Ladder* l )
+{
+	is_on_ladder_ = true;
+	ladder_ = l;
+
+	get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
 }
 
 void Player::set_action_mode( ActionMode action_mode )

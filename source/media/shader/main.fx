@@ -619,9 +619,9 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 	// const float vsm_p = vsm_variance / ( vsm_variance + pow( shadow_tex_coord.z - depth.x, 2 ) );
 	// const float vsm_shadow_rate = 1.f - saturate( max( vsm_p, depth.x <= shadow_tex_coord.z ) );
 
-	float diffuse = ( 1.f - ( dot( input.Normal, ( float3 ) Light ) * 0.5f + 0.5f ) ) * 2.f - 1.f;
+	float diffuse = ( 1.f - ( dot( input.Normal, ( float3 ) Light ) * 0.5f + 0.5f ) );
 	
-	if ( shadow_tex_coord.z >= depth.x )
+	if ( shadow_tex_coord.z >= depth.x || diffuse <= 0.5f )
 	{
 		diffuse -= 0.75f;
 	}

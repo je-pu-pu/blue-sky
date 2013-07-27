@@ -19,10 +19,6 @@ class Sound;
 namespace blue_sky
 {
 
-class Input;
-class Stage;
-class GridCell;
-
 class DrawingModel;
 
 class Player;
@@ -31,6 +27,7 @@ class Medal;
 class Robot;
 class StaticObject;
 class DynamicObject;
+class Ladder;
 
 /**
  * ゲーム上に存在する全てのオブジェクトの基底クラス
@@ -98,6 +95,7 @@ public:
 	virtual void on_collide_with( Medal* ) { }
 	virtual void on_collide_with( StaticObject* ) { }
 	virtual void on_collide_with( DynamicObject* ) { }
+	virtual void on_collide_with( Ladder* ) { }
 
 	virtual void on_collide_with_ground() { }
 

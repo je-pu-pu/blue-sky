@@ -134,6 +134,7 @@
     <ClInclude Include="Goal.h" />
     <ClInclude Include="GraphicsManager.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Ladder.h" />
     <ClInclude Include="matrix4x4.h" />
     <ClInclude Include="Medal.h" />
     <ClInclude Include="Missile.h" />

@@ -26,7 +26,6 @@ class Player;
 class Goal;
 class ActiveObject;
 class Camera;
-class Stage;
 class DrawingModel;
 
 /**
@@ -56,7 +55,6 @@ protected:
 
 	common::auto_ptr< Axis >			debug_axis_;
 
-	common::auto_ptr< Stage >			stage_;
 	common::auto_ptr< Goal >			goal_;
 
 	common::auto_ptr< Player >			player_;

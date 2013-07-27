@@ -16,10 +16,6 @@ public:
 	float flicker_;
 
 private:
-	void on_collision_x( const GridCell& ) { }
-	void on_collision_y( const GridCell& ) { }
-	void on_collision_z( const GridCell& ) { }
-
 	float get_collision_width() const { return 2.f; }
 	float get_collision_height() const { return 2.f; }
 	float get_collision_depth() const { return 2.f; }

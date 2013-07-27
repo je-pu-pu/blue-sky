@@ -416,6 +416,9 @@
     <ClInclude Include="Girl.h">
       <Filter>GameObject</Filter>
     </ClInclude>
+    <ClInclude Include="Ladder.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

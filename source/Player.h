@@ -31,6 +31,8 @@ private:
 	bool		is_falling_to_die_;		///< 現在死亡へ向けて落下中フラグ
 	bool		is_falling_to_balloon_;	///< そのまま落下すると風船を取得するフラグ
 	
+	bool		is_on_ladder_;			///< 梯子と接触中フラグ
+
 	int			step_count_;			///< 移動カウンタ
 	float		step_speed_;			///< 移動速度
 
@@ -41,6 +43,8 @@ private:
 
 	float_t		uncontrollable_timer_;	///< 制御不能タイマー
 
+	float_t		pitch_;					///< 上下の向き ( 真下 : -1.f / 真上 : 1.f )
+
 	float_t		eye_height_;			///< 目の高さ
 	float_t		eye_depth_;				///< 目の奥行きオフセット ( 身を乗り出した時に増える ) ( 0.f .. 1.f )
 
@@ -48,13 +52,12 @@ private:
 
 	float		last_footing_height_;	///< 前回の足場の高さ ( バルーン含む )
 
+	Ladder*		ladder_;				///< 現在接触している梯子
 	Balloon*	balloon_;				///< 現在持っている風船
 
 	int			hp_;					///< HP
 
 protected:
-	const Input* get_input() const;
-	
 	void set_last_footing_height_to_current_height() { last_footing_height_ = get_location().y(); }
 
 	void set_action_base_position_to_current_position() { action_base_position_ = get_location(); }
@@ -67,6 +70,7 @@ protected:
 	float_t get_max_run_step_speed() const { return 0.5f; }
 
 	float_t get_side_step_speed() const { return 0.25f; }
+	float_t get_ladder_step_speed() const { return 2.f; }
 
 	bool is_walking() const { return get_step_speed() > get_min_walk_step_speed(); }
 	bool is_running() const { return get_step_speed() > get_max_walk_step_speed(); }
@@ -94,6 +98,7 @@ protected:
 	void on_collide_with( Balloon* );
 	void on_collide_with( Medal* );
 	void on_collide_with( Robot* );
+	void on_collide_with( Ladder* );
 
 public:
 	Player();
@@ -116,6 +121,9 @@ public:
 	// 移動
 	void step( float_t );
 	void side_step( float_t );
+	void ladder_step( float_t );
+
+	void release_ladder();
 
 	/// ジャンプ処理
 	void jump();
@@ -126,6 +134,9 @@ public:
 
 	/// 方向加算
 	void add_direction_degree( float );
+
+	void set_pitch( float_t p ) { pitch_ = p; }
+	bool is_ladder_step_only() const;
 
 	void damage( const Vector3& );
 	void kill();
@@ -140,6 +151,8 @@ public:
 	bool is_falling() const;
 	bool is_falling_to_die() const { return is_falling_to_die_; }
 	bool is_falling_to_balloon() const { return is_falling_to_balloon_; }
+	
+	bool is_on_ladder() const { return is_on_ladder_; }
 
 	bool has_medal() const { return has_medal_; }
 

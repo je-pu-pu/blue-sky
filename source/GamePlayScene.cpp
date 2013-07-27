@@ -13,8 +13,8 @@
 #include "Rocket.h"
 #include "Umbrella.h"
 #include "Medal.h"
+#include "Ladder.h"
 #include "Camera.h"
-#include "Stage.h"
 
 #include "DrawingModelManager.h"
 #include "DrawingModel.h"
@@ -558,6 +558,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			object->set_start_location( x, y, z );
 			object->set_start_rotation( rx, ry, rz );
+			object->set_start_direction_degree( rx );
 
 			if ( object_name == "soda-can-1" )
 			{
@@ -627,6 +628,13 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			active_object = new Medal();
 			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
 		}
+		else if ( name == "ladder" )
+		{
+			active_object = new Ladder();
+			active_object->set_drawing_model( get_drawing_model_manager()->load( "ladder-5" ) );
+			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
+			active_object->set_mass( 0 );
+		}
 		/*
 		else if ( name == "rocket" )
 		{
@@ -648,13 +656,16 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			float x = 0, y = 0, z = 0, r = 0;
 			ss >> x >> y >> z >> r;
 
-			DrawingModel* drawing_model = get_drawing_model_manager()->load( name.c_str() );
+			if ( ! active_object->get_drawing_model() )
+			{
+				DrawingModel* drawing_model = get_drawing_model_manager()->load( name.c_str() );
+				active_object->set_drawing_model( drawing_model );
+			}
 
-			active_object->set_drawing_model( drawing_model );
 			active_object->setup_animation_player();
 
 			active_object->set_start_location( x, y, z );
-			active_object->set_direction_degree( r );
+			active_object->set_start_direction_degree( r );
 			
 			get_active_object_manager()->add_active_object( active_object );
 		}
@@ -766,29 +777,65 @@ void GamePlayScene::update()
 
 void GamePlayScene::update_main()
 {
+	camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f;
+	camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
+	player_->set_pitch( -camera_->rotate_degree_target().x() / 90.f );
+
+	float eye_depth_add = 0.f;
+
+	if ( player_->is_on_ladder() )
+	{
+		eye_depth_add = -0.05f;
+	}
+	else if ( camera_->rotate_degree_target().x() > 0.f )
+	{
+		eye_depth_add = get_input()->get_mouse_dy();
+	}
+
+	player_->add_eye_depth( eye_depth_add );
+
 	if ( ! player_->is_dead() )
 	{
 		bool is_moving = false;
 
-		if ( get_input()->press( Input::LEFT ) )
+		if ( ! player_->is_ladder_step_only() )
 		{
-			player_->side_step( -1.f );
-			is_moving = true;
+			if ( get_input()->press( Input::LEFT ) )
+			{
+				player_->side_step( -1.f );
+				is_moving = true;
+			}
+			if ( get_input()->press( Input::RIGHT ) )
+			{
+				player_->side_step( +1.f );
+				is_moving = true;
+			}
+			if ( get_input()->press( Input::UP ) )
+			{
+				player_->step( +1.f );
+				is_moving = true;
+			}
+			if ( get_input()->press( Input::DOWN ) )
+			{
+				player_->step( -1.f );
+				is_moving = true;
+			}
 		}
-		if ( get_input()->press( Input::RIGHT ) )
+
+		if ( player_->is_on_ladder() )
 		{
-			player_->side_step( +1.f );
-			is_moving = true;
+			if ( get_input()->press( Input::UP ) )
+			{
+				player_->ladder_step( +1.f );
+			}
+			if ( get_input()->press( Input::DOWN ) )
+			{
+				player_->ladder_step( -1.f );
+			}
 		}
-		if ( get_input()->press( Input::UP ) )
+		else
 		{
-			player_->step( +1.f );
-			is_moving = true;
-		}
-		if ( get_input()->press( Input::DOWN ) )
-		{
-			player_->step( -1.f );
-			is_moving = true;
+			player_->release_ladder();
 		}
 
 		if ( ! is_moving )
@@ -825,18 +872,6 @@ void GamePlayScene::update_main()
 			get_direct_3d()->getFader()->fade_out( 0.05f );
 		}
 	}
-
-	camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f;
-	camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
-
-	float eye_depth_add = 0.f;
-
-	if ( camera_->rotate_degree_target().x() > 0.f )
-	{
-		eye_depth_add = get_input()->get_mouse_dy();
-	}
-
-	player_->add_eye_depth( eye_depth_add );
 }
 
 /**

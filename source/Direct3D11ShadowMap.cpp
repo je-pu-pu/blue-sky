@@ -1,5 +1,6 @@
 #include "Direct3D11ShadowMap.h"
 #include "Direct3D11ConstantBuffer.h"
+#include "Direct3D11Vector.h"
 #include "Direct3D11.h"
 #include "DirectX.h"
 #include "type.h"
@@ -78,7 +79,7 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_lev
 		n++;
 	}
 
-	setLightPosition( XMVectorSet( 50.f, 100.f, -25.f, 0.f ) );
+	set_light_position( Vector( 50.f, 100.f, -25.f, 0.f ) );
 }
 
 Direct3D11ShadowMap::~Direct3D11ShadowMap()
@@ -91,11 +92,12 @@ Direct3D11ShadowMap::~Direct3D11ShadowMap()
 /**
  * 光源の座標を設定する
  *
- * @param pos 光源の座標
+ * @param pos 光源の座標 ( カメラの座標からの相対座標 )
  */
-void Direct3D11ShadowMap::setLightPosition( const XMVECTOR& pos )
+void Direct3D11ShadowMap::set_light_position( const Vector& pos )
 {
 	light_position_ = pos;
+	light_position_ *= 100.f / light_position_.y(); /// 高さが 100.f になるように調整
 
 	/// @todo 動的に変更できるようにする
 	float_t length[ 4 ] = { 10.f, 50.f, 150.f, 9999.f };
@@ -115,10 +117,10 @@ void Direct3D11ShadowMap::setLightPosition( const XMVECTOR& pos )
  *
  * @param pos カメラの座標
  */
-void Direct3D11ShadowMap::setEyePosition( const XMVECTOR& eye )
+void Direct3D11ShadowMap::set_eye_position( const Vector& eye )
 {
-	XMVECTOR eye_fix = XMVectorSet( XMVectorGetX( eye ) + XMVectorGetX( light_position_ ), XMVectorGetY( eye ) + XMVectorGetY( light_position_ ), XMVectorGetZ( eye ) + XMVectorGetZ( light_position_ ), 0.f );
-	XMVECTOR at = XMVectorSet( XMVectorGetX( eye ), XMVectorGetY( eye ), XMVectorGetZ( eye ), 0.f );
+	XMVECTOR eye_fix = XMVectorSet( eye.x() + light_position_.x(), eye.y() + light_position_.y(), eye.z() + light_position_.z(), 0.f );
+	XMVECTOR at = XMVectorSet( eye.x(), eye.y(), eye.z(), 0.f );
 	XMVECTOR up = XMVectorSet( 0.f, 0.f, 1.f, 0.f );
 
 	view_matrix_ = XMMatrixLookAtLH( eye_fix, at, up );
@@ -131,7 +133,6 @@ void Direct3D11ShadowMap::setEyePosition( const XMVECTOR& eye )
 void Direct3D11ShadowMap::ready_to_render_shadow_map()
 {
 	ID3D11ShaderResourceView* shader_resource_view[] = { 0 };
-	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, shader_resource_view );
 	direct_3d_->getImmediateContext()->PSSetShaderResources( shader_resource_view_slot_, 1, shader_resource_view );
 
 	direct_3d_->getImmediateContext()->ClearDepthStencilView( depth_stencil_view_, D3D11_CLEAR_DEPTH, 1.f, 0 );

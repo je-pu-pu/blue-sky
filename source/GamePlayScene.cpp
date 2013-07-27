@@ -208,11 +208,11 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 
 	// ‚«‚ê‚¢‚É‚·‚é
+	get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pencil-face-1.png" );
 	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-1-loop.png" );
-	get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-2-loop.png" );
+	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-2-loop.png" );
 	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/dot-face-1.png" );
 	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/brush-face-1.png" );
-	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pencil-face-1.png" );
 
 	update_render_data_for_game();
 
@@ -857,8 +857,8 @@ void GamePlayScene::update_shadow()
 			light_position_ = light_origin + Vector( cos( a ) * 50.f, 0.f, sin( a ) * 50.f, 0.f );	
 		}
 
-		shadow_map_->setLightPosition( XMVectorSet( light_position_.x(), light_position_.y(), light_position_.z(), 1 ) );
-		shadow_map_->setEyePosition( XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 ) );
+		shadow_map_->set_light_position( light_position_ );
+		shadow_map_->set_eye_position( Vector( camera_->position().x(), camera_->position().y(), camera_->position().z() ) );
 	}
 }
 
@@ -1027,7 +1027,8 @@ void GamePlayScene::update_render_data_for_frame() const
 		frame_constant_buffer_data.view = XMMatrixTranspose( frame_constant_buffer_data.view );
 		frame_constant_buffer_data.projection = XMMatrixPerspectiveFovLH( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f );
 		frame_constant_buffer_data.projection = XMMatrixTranspose( frame_constant_buffer_data.projection );
-		frame_constant_buffer_data.light = -light_position_.normalize();
+		frame_constant_buffer_data.light = -light_position_;
+		frame_constant_buffer_data.light.normalize();
 		frame_constant_buffer_data.time = get_total_elapsed_time();
 		frame_constant_buffer_data.time_beat = static_cast< uint_t >( get_total_elapsed_time() * ( get_bpm() / 60.f ) );
 

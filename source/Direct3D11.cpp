@@ -565,7 +565,7 @@ void Direct3D11::setInputLayout( const char* name )
  */
 void Direct3D11::bind_texture_to_ps( uint_t slot, const Texture* texture )
 {
-	ID3D11ShaderResourceView* view[] = { texture->get_shader_resource_view() };
+	ID3D11ShaderResourceView* view[] = { texture ? texture->get_shader_resource_view() : nullptr };
 	immediate_context_->PSSetShaderResources( slot, 1, view );
 }
 

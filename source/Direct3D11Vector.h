@@ -59,9 +59,29 @@ public:
 		return Direct3D11Vector( -value_ );
 	}
 
+	Direct3D11Vector& operator *= ( UnitType x )
+	{
+		value_ = ( *this * x ).value_;
+
+		return *this;
+	}
+
+	Direct3D11Vector& operator /= ( UnitType x )
+	{
+		value_ = ( *this / x ).value_;
+
+		return *this;
+	}
+
+
 	friend Direct3D11Vector operator + ( const Direct3D11Vector& v1, const Direct3D11Vector& v2 )
 	{
 		return XMVectorAdd( v1.value_, v2.value_ );
+	}
+
+	friend Direct3D11Vector operator - ( const Direct3D11Vector& v1, const Direct3D11Vector& v2 )
+	{
+		return XMVectorSubtract( v1.value_, v2.value_ );
 	}
 
 	friend Direct3D11Vector operator * ( const Direct3D11Vector& v, const Direct3D11Matrix& m )
@@ -69,6 +89,15 @@ public:
 		return XMVector4Transform( v.value_, XMLoadFloat4x4( & m.value_ ) );
 	}
 
+	friend Direct3D11Vector operator * ( const Direct3D11Vector& v, UnitType x )
+	{
+		return v.value_ * x;
+	}
+
+	friend Direct3D11Vector operator / ( const Direct3D11Vector& v, UnitType x )
+	{
+		return v.value_ / x;
+	}
 
 
 }; // class Direct3D11Vector

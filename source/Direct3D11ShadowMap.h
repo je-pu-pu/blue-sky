@@ -23,8 +23,7 @@ class Direct3D11ShadowMap
 public:
 	static const int MaxCascadeLevels = 4;
 
-	typedef XMVECTOR							Vector;
-
+	typedef Vector								Vector;
 	typedef XMMATRIX							Matrix;
 	typedef Matrix								MatrixList[ MaxCascadeLevels ];
 
@@ -81,8 +80,8 @@ public:
 
 	ID3D11ShaderResourceView* getShaderResourceView() { return shader_resource_view_; }
 
-	void setLightPosition( const Vector& );
-	void setEyePosition( const XMVECTOR& );
+	void set_light_position( const Vector& );
+	void set_eye_position( const Vector& );
 
 	const ConstantBuffer* getConstantBuffer() const { return constant_buffer_.get(); }
 

@@ -73,7 +73,7 @@ void Direct3D11Sprite::begin()
 
 void Direct3D11Sprite::end()
 {
-
+	direct_3d_->bind_texture_to_ps( 0, nullptr );
 }
 
 void Direct3D11Sprite::set_transform( const Matrix& m )
@@ -177,9 +177,6 @@ void Direct3D11Sprite::draw( const Rect* dst, const Texture* texture, const Rect
 
 	direct_3d_->bind_texture_to_ps( 0, texture );
 	direct_3d_->getImmediateContext()->DrawIndexed( 6, 0, 0 );
-	
-	ID3D11ShaderResourceView* shader_resource_view[] = { 0 };
-	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, shader_resource_view );
 }
 
 void Direct3D11Sprite::draw( const Point& dst_point, const Texture* texture, const Rect& src, const Color& color )

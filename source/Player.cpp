@@ -35,6 +35,7 @@ Player::Player()
 	, eye_height_( 1.5f )
 	, eye_depth_( 0.f )
 	, has_medal_( false )
+	, selected_item_type_( ITEM_TYPE_NONE )
 	, last_footing_height_( 0.f )
 	, ladder_( nullptr )
 	, balloon_( nullptr )
@@ -53,7 +54,6 @@ void Player::restart()
 
 	get_rigid_body()->setAngularFactor( 0 );
 	get_rigid_body()->setFriction( 0 );
-	// get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
 
 	is_on_footing_ = false;
 	is_jumping_ = false;
@@ -70,6 +70,14 @@ void Player::restart()
 
 	set_action_mode( ACTION_MODE_NONE );
 	has_medal_ = false;
+
+	for ( int n = 0; n < ITEM_TYPE_MAX; n++ )
+	{
+		item_count_[ n ] = 0;
+	}
+	item_count_[ ITEM_TYPE_SCOPE ] = 1;
+
+	selected_item_type_ = ITEM_TYPE_NONE;
 
 	ladder_ = nullptr;
 	balloon_ = nullptr;
@@ -411,7 +419,7 @@ void Player::update_step_speed()
  */
 void Player::update_gravity()
 {
-	if ( action_mode_ != ACTION_MODE_NONE || ( is_on_ladder() && ! is_jumping() ) )
+	if ( action_mode_ == ACTION_MODE_BALLOON || action_mode_ == ACTION_MODE_ROCKET || ( is_on_ladder() && ! is_jumping() ) )
 	{
 		get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
 	}
@@ -771,6 +779,57 @@ void Player::set_action_mode( ActionMode action_mode )
 	action_mode_ = action_mode;
 
 	stop_sound( "fall" );
+}
+
+int Player::get_item_count( ItemType item_type ) const
+{
+	if ( item_type <= ITEM_TYPE_NONE ) return 0;
+	if ( item_type >= ITEM_TYPE_MAX ) return 0;
+
+	return item_count_[ item_type ];
+}
+
+void Player::select_prev_item()
+{
+	for ( int type = static_cast< int >( selected_item_type_ ) - 1; type >= ITEM_TYPE_NONE; type-- )
+	{
+		if ( type == ITEM_TYPE_NONE || item_count_[ type ] )
+		{
+			selected_item_type_ = static_cast< ItemType >( type );
+			play_sound( "click" );
+			break;
+		}
+	}
+}
+
+void Player::select_next_item()
+{
+	for ( int type = static_cast< int >( selected_item_type_ ) + 1; type < ITEM_TYPE_MAX; type++ )
+	{
+		if ( item_count_[ type ] )
+		{
+			selected_item_type_ = static_cast< ItemType >( type );
+			play_sound( "click" );
+			break;
+		}
+	}
+}
+
+/**
+ * ñ]âìãæÉÇÅ[ÉhÇêÿÇËë÷Ç¶ÇÈ
+ *
+ */
+void Player::switch_scope_mode()
+{
+	if ( action_mode_ == ACTION_MODE_SCOPE )
+	{
+		set_action_mode( ACTION_MODE_NONE );
+		selected_item_type_ = ITEM_TYPE_NONE;
+	}
+	else
+	{
+		action_mode_ = ACTION_MODE_SCOPE;
+	}
 }
 
 } // namespace blue_sky

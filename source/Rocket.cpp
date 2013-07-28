@@ -5,7 +5,12 @@ namespace blue_sky
 
 Rocket::Rocket()
 {
-	setup_local_aabb_list();
+	
+}
+
+void Rocket::restart()
+{
+	ActiveObject::restart();
 }
 
 /**
@@ -14,14 +19,7 @@ Rocket::Rocket()
  */
 void Rocket::update()
 {
-	set_direction_degree( get_direction_degree() + 1.f );
-
-	update_global_aabb_list();
-}
-
-void Rocket::restart()
-{
-	ActiveObject::restart();
+	// set_direction_degree( get_direction_degree() + 1.f );
 }
 
 } // namespace blue_sky

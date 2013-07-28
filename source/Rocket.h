@@ -13,9 +13,11 @@ namespace blue_sky
 class Rocket : public ActiveObject
 {
 private:
-	float get_collision_width() const { return 3.f; }
-	float get_collision_height() const { return 3.f; }
-	float get_collision_depth() const { return 3.f; }
+	bool is_hard() const { return true; }
+
+	float get_collision_width() const { return 0.2f; }
+	float get_collision_height() const { return 1.f; }
+	float get_collision_depth() const { return 0.2f; }
 
 public:
 	Rocket();

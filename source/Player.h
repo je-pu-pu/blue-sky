@@ -24,6 +24,15 @@ public:
 		ACTION_MODE_SCOPE,
 	};
 
+	enum ItemType
+	{
+		ITEM_TYPE_NONE = -1,
+		ITEM_TYPE_ROCKET = 0,
+		ITEM_TYPE_UMBRELLA,
+		ITEM_TYPE_SCOPE,
+		ITEM_TYPE_MAX
+	};
+
 private:
 	bool		is_on_footing_;			///< 現在足場上フラグ
 	bool		is_jumping_;			///< 現在ジャンプ中フラグ
@@ -49,6 +58,9 @@ private:
 	float_t		eye_depth_;				///< 目の奥行きオフセット ( 身を乗り出した時に増える ) ( 0.f .. 1.f )
 
 	bool		has_medal_;				///< メダル保持フラグ
+
+	int			item_count_[ ITEM_TYPE_MAX ];	///< 各アイテムの個数
+	ItemType	selected_item_type_;	///< 現在選択中のアイテム
 
 	float		last_footing_height_;	///< 前回の足場の高さ ( バルーン含む )
 
@@ -161,6 +173,15 @@ public:
 	void set_action_mode( ActionMode );
 
 	bool is_action_pre_finish() const { return is_action_pre_finish_; }
+
+	ItemType get_selected_item_type() const { return selected_item_type_; }
+	int get_item_count( ItemType ) const;
+
+	void select_prev_item();
+	void select_next_item();
+
+	void switch_scope_mode();
+
 
 	const Balloon* get_balloon() const { return balloon_; }
 

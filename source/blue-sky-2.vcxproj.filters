@@ -183,6 +183,9 @@
     <ClCompile Include="Girl.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
+    <ClCompile Include="Rocket.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -417,6 +420,9 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Ladder.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Rocket.h">
       <Filter>GameObject</Filter>
     </ClInclude>
   </ItemGroup>

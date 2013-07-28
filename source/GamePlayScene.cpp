@@ -85,8 +85,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	get_physics()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
 
 	// Texture
-	// ui_texture_ = get_direct_3d()->getTextureManager()->load( "ui", "media/image/item.png" );
-	ui_texture_ = get_direct_3d()->getTextureManager()->load( "ui", "media/image/ui.png" );
+	ui_texture_ = get_direct_3d()->getTextureManager()->load( "ui", "media/image/item.png" );
+	// ui_texture_ = get_direct_3d()->getTextureManager()->load( "ui", "media/image/ui.png" );
 
 	// Sound
 	{
@@ -634,11 +634,12 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
 			active_object->set_mass( 0 );
 		}
-		/*
 		else if ( name == "rocket" )
 		{
 			active_object = new Rocket();
+			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
 		}
+		/*
 		else if ( name == "umbrella" )
 		{
 			active_object = new Umbrella();
@@ -776,7 +777,9 @@ void GamePlayScene::update()
 
 void GamePlayScene::update_main()
 {
-	camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f;
+	const float_t rotation_speed_rate = camera_->fov() / camera_->get_fov_default();
+
+	camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f * rotation_speed_rate;
 	camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
 	player_->set_pitch( -camera_->rotate_degree_target().x() / 90.f );
 
@@ -844,8 +847,27 @@ void GamePlayScene::update_main()
 
 		if ( get_input()->push( Input::A ) )
 		{
-			player_->jump();
-			camera_->set_fov_target( camera_->get_fov_default() );
+			switch ( player_->get_selected_item_type() )
+			{
+				case Player::ITEM_TYPE_NONE: player_->jump(); break;
+				// case Player::ITEM_TYPE_ROCKET: player_->rocket( camera_->front() ); break;
+				// case Player::ITEM_TYPE_UMBRELLA: player_->start_umbrella_mode(); player_->jump(); break;
+				case Player::ITEM_TYPE_SCOPE:
+				{
+					player_->switch_scope_mode();
+
+					if ( player_->get_action_mode() != Player::ACTION_MODE_SCOPE )
+					{
+						camera_->reset_fov();
+					}
+					else
+					{
+						camera_->set_fov_target( camera_->get_fov_default() * 0.5f );
+						camera_->set_fov( camera_->get_fov_default() * 0.5f );
+					}
+					break;
+				}
+			}
 		}
 		else if ( get_input()->push( Input::B ) )
 		{
@@ -853,8 +875,32 @@ void GamePlayScene::update_main()
 			// camera_->set_fov_target( 15.f );
 		}
 
-		player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f );
+		int wheel = get_input()->pop_mouse_wheel_queue();
 
+		if ( player_->get_action_mode() == Player::ACTION_MODE_SCOPE )
+		{
+			if ( wheel > 0 )
+			{
+				camera_->set_fov_target( std::max( camera_->get_fov_target() * 0.5f, 5.f ) );
+			}
+			else if ( wheel < 0 )
+			{
+				camera_->set_fov_target( std::min( camera_->get_fov_target() * 2.f, camera_->get_fov_default() * 0.5f ) );
+			}
+		}
+		else
+		{
+			if ( wheel > 0 )
+			{
+				player_->select_next_item();
+			}
+			else if ( wheel < 0 )
+			{
+				player_->select_prev_item();
+			}
+		}
+
+		player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f * rotation_speed_rate);
 		camera_->rotate_degree_target().y() = player_->get_direction_degree();
 
 		get_direct_3d()->getFader()->fade_in( 0.05f );
@@ -1453,7 +1499,7 @@ void GamePlayScene::render_active_object_line( const ActiveObject* active_object
  */
 void GamePlayScene::render_sprite()
 {
-	if ( false )
+	if ( player_->get_action_mode() == Player::ACTION_MODE_SCOPE )
 	{
 		get_direct_3d()->setInputLayout( "main" );
 
@@ -1483,6 +1529,54 @@ void GamePlayScene::render_sprite()
 	for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
 	{
 		( *i )->apply();
+
+		if ( player_->get_selected_item_type() == Player::ITEM_TYPE_ROCKET )
+		{
+			for ( int n = 0; n < player_->get_item_count( Player::ITEM_TYPE_ROCKET ); n++ )
+			{
+				const float offset = n * 20.f;
+
+				win::Rect src_rect = win::Rect::Size( 0, 0, 202, 200 );
+
+				Matrix t;
+				t.set_translation( get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f - offset, 0.f );
+
+				get_direct_3d()->getSprite()->set_transform( t );
+				get_direct_3d()->getSprite()->draw( ui_texture_, src_rect.get_rect() );
+			}
+
+			// aim
+			win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );
+
+			Matrix t;
+			t.set_translation( get_width() * 0.5f, get_height() * 0.5f, 0.f );
+
+			get_direct_3d()->getSprite()->set_transform( t );
+			get_direct_3d()->getSprite()->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+		}
+		else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_UMBRELLA )
+		{
+			for ( int n = 0; n < player_->get_item_count( Player::ITEM_TYPE_UMBRELLA ); n++ )
+			{
+				const float offset = n * 50.f;
+
+				win::Rect src_rect = win::Rect::Size( 0, 256, 186, 220 );
+				Vector center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
+
+				Matrix t;
+				t.set_translation( get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f - offset, 0.f );
+
+				get_direct_3d()->getSprite()->set_transform( t );
+				get_direct_3d()->getSprite()->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+			}
+		}
+		else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_SCOPE )
+		{
+			win::Rect src_rect = win::Rect::Size( 256, 256, 192, 140 );
+			win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - 5 );
+
+			get_direct_3d()->getSprite()->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+		}
 
 		if ( player_->has_medal() )
 		{

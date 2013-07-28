@@ -203,7 +203,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	if ( bgm_ )
 	{
-		bgm_->set_max_volume( bgm_->get_max_volume() * 0.9f );
 		bgm_->play( true );
 	}
 
@@ -1027,6 +1026,10 @@ void GamePlayScene::render_text() const
 
 		ss << L"mouse.dx : " << get_input()->get_mouse_dx() << std::endl;
 		ss << L"mouse.dy : " << get_input()->get_mouse_dy() << std::endl;
+
+		ss << L"IS JUMPING : " << player_->is_jumping() << std::endl;
+		ss << L"ON FOOTING : " << player_->is_on_footing() << std::endl;
+		ss << L"ON LADDER : " << player_->is_on_ladder() << std::endl;
 	}
 
 	get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );

@@ -8,6 +8,7 @@ goal 0 0 30
 
 object stage-1-3 0 0 0
 
+balloon 1  1 0
 balloon 0  5 0
 balloon 1 10 0
 balloon 2 15 0

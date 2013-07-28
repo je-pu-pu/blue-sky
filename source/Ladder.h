@@ -15,6 +15,8 @@ class Ladder : public ActiveObject
 public:
 
 private:
+	bool is_hard() const { return false; }
+
 	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 
 public:

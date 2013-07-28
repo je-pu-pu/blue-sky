@@ -83,14 +83,12 @@ protected:
 
 	void update_step_speed();
 
+	void update_gravity();
+
 	void limit_velocity();
 
 	bool check_on_footing( const Vector3&, float_t, bool = false ) const;
 	float_t get_footing_height( const Vector3&, bool = false ) const;
-
-	bool is_on_footing() const { return is_on_footing_; }
-	bool is_jumpable() const { return is_jumpable_; }
-	bool is_jumping() const { return is_jumping_; }
 
 	bool is_uncontrollable() const { return uncontrollable_timer_ > 0.f; }
 
@@ -152,7 +150,10 @@ public:
 	bool is_falling_to_die() const { return is_falling_to_die_; }
 	bool is_falling_to_balloon() const { return is_falling_to_balloon_; }
 	
+	bool is_on_footing() const { return is_on_footing_; }
 	bool is_on_ladder() const { return is_on_ladder_; }
+	bool is_jumpable() const { return is_jumpable_; }
+	bool is_jumping() const { return is_jumping_; }
 
 	bool has_medal() const { return has_medal_; }
 

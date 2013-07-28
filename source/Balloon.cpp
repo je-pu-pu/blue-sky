@@ -51,7 +51,7 @@ void Balloon::update()
 	}
 	else
 	{
-		set_location( get_location().x(), get_start_location().y() + 1.f + std::sin( flicker_ ), get_location().z() );
+		set_location( get_location().x(), get_start_location().y() + std::sin( flicker_ ) * 0.5f, get_location().z() );
 		set_direction_degree( get_direction_degree() + 1.f );
 	}
 }

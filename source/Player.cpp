@@ -112,7 +112,8 @@ void Player::update()
 		}
 	}
 
-	if ( ladder_ && ! is_jumping() )
+	/*
+	if ( is_on_ladder() && ! is_jumping() )
 	{
 		// 梯子の軸に移動
 		float_t d = ( get_collision_depth() + ladder_->get_collision_depth() ) * 0.5f;
@@ -130,6 +131,7 @@ void Player::update()
 			)
 		);
 	}
+	*/
 
 	if ( ! is_on_footing() )
 	{
@@ -195,6 +197,8 @@ void Player::update()
 
 	uncontrollable_timer_ = math::chase< float_t >( uncontrollable_timer_, 0.f, get_frame_elapsed_time() );
 
+	update_gravity();
+
 	// 当たり判定のためにリセット
 	is_on_ladder_ = false;
 }
@@ -232,11 +236,11 @@ void Player::limit_velocity()
 	{
 		v.setX( v.x() * 0.9f );
 		v.setZ( v.z() * 0.9f );
-	}
 
-	if ( is_on_ladder() )
-	{
-		v.setY( v.y() * 0.9f );
+		if ( is_on_ladder() )
+		{
+			v.setY( v.y() * 0.5f );
+		}
 	}
 
 	set_velocity( v );
@@ -299,7 +303,7 @@ void Player::update_on_footing()
  */
 void Player::update_jumping()
 {
-	if ( is_jumping_ && is_on_footing() )
+	if ( is_jumping_ && get_velocity().y() < 0.f && ( is_on_footing() || is_on_ladder() ) )
 	{
 		is_jumping_ = false;
 	}
@@ -402,6 +406,22 @@ void Player::update_step_speed()
 }
 
 /**
+ * 重力を更新する
+ *
+ */
+void Player::update_gravity()
+{
+	if ( action_mode_ != ACTION_MODE_NONE || ( is_on_ladder() && ! is_jumping() ) )
+	{
+		get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
+	}
+	else
+	{
+		get_rigid_body()->setGravity( Vector3( 0, -9.8f, 0 ) );
+	}
+}
+
+/**
  *
  *
  *
@@ -457,7 +477,7 @@ float_t Player::get_footing_height( const Vector3& from, bool include_soft_footi
  */
 bool Player::is_ladder_step_only() const
 {
-	return is_on_ladder();
+	return is_on_ladder() && ! is_on_footing();
 }
 
 void Player::step( float_t s )
@@ -498,7 +518,7 @@ void Player::side_step( float_t s )
  */
 void Player::ladder_step( float_t s )
 {
-	if ( is_uncontrollable() )
+	if ( is_uncontrollable() || is_jumping() )
 	{
 		return;
 	}
@@ -728,8 +748,6 @@ void Player::on_collide_with( Ladder* l )
 {
 	is_on_ladder_ = true;
 	ladder_ = l;
-
-	get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
 }
 
 void Player::set_action_mode( ActionMode action_mode )
@@ -751,15 +769,6 @@ void Player::set_action_mode( ActionMode action_mode )
 	*/
 
 	action_mode_ = action_mode;
-
-	if ( action_mode_ == ACTION_MODE_NONE )
-	{
-		get_rigid_body()->setGravity( Vector3( 0, -9.8f, 0 ) );
-	}
-	else
-	{
-		get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
-	}
 
 	stop_sound( "fall" );
 }

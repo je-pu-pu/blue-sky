@@ -2,6 +2,7 @@
 
 #include "Ladder.h"
 #include "Balloon.h"
+#include "Rocket.h"
 #include "Medal.h"
 #include "Robot.h"
 
@@ -96,8 +97,6 @@ void Player::update()
 {
 	get_rigid_body()->setActivationState( true );
 
-	limit_velocity();
-
 	update_on_footing();
 	update_jumpable();
 	update_jumping();
@@ -119,27 +118,21 @@ void Player::update()
 			is_action_pre_finish_ = true;
 		}
 	}
-
-	/*
-	if ( is_on_ladder() && ! is_jumping() )
+	else if ( action_mode_ == ACTION_MODE_ROCKET )
 	{
-		// 梯子の軸に移動
-		float_t d = ( get_collision_depth() + ladder_->get_collision_depth() ) * 0.5f;
-		Vector3 target_location(
-			ladder_->get_location().x() + ladder_->get_front().x() * -d,
-			get_velocity().y(),
-			ladder_->get_location().z() + ladder_->get_front().z() * -d
-		);
-
-		set_velocity(
-			Vector3(
-				math::chase( 0.f, target_location.x() - get_location().x(), get_side_step_speed() ),
-				target_location.y(),
-				math::chase( 0.f, target_location.z() - get_location().z(), get_side_step_speed() )
-			)
-		);
+		// ロケット
+		if ( ( get_location() - action_base_position_ ).length() >= get_rocket_action_length() )
+		{
+			play_sound( "rocket-burst" );
+			set_action_mode( ACTION_MODE_NONE );
+			is_jumping_ = true;
+			is_action_pre_finish_ = false;
+		}
+		else if ( ( get_location() - action_base_position_ ).length() >= get_rocket_action_length() * 0.8f )
+		{
+			is_action_pre_finish_ = true;
+		}
 	}
-	*/
 
 	if ( ! is_on_footing() )
 	{
@@ -205,6 +198,8 @@ void Player::update()
 
 	uncontrollable_timer_ = math::chase< float_t >( uncontrollable_timer_, 0.f, get_frame_elapsed_time() );
 
+	limit_velocity();
+
 	update_gravity();
 
 	// 当たり判定のためにリセット
@@ -226,16 +221,20 @@ void Player::update_transform()
 
 void Player::limit_velocity()
 {
-	ActiveObject::limit_velocity();
-
 	if ( is_uncontrollable() )
 	{
+		ActiveObject::limit_velocity();
+
 		return;
 	}
 
-	Vector3 v = get_rigid_body()->getLinearVelocity();
+	Vector3 v = get_velocity();
 
-	if ( is_jumping() )
+	if ( is_rocketing() )
+	{
+		// v *= 1.01f;
+	}
+	else if ( is_jumping() )
 	{
 		v.setX( v.x() * 0.95f );
 		v.setZ( v.z() * 0.95f );
@@ -251,7 +250,21 @@ void Player::limit_velocity()
 		}
 	}
 
+	if ( ! is_rocketing() )
+	{
+		Vector3 xz_v( v.x(), 0.f, v.z() );
+
+		if ( xz_v.length() > get_max_run_velocity() )
+		{
+			xz_v /= xz_v.length() / get_max_run_velocity();
+			v.setX( xz_v.x() );
+			v.setZ( xz_v.z() );
+		}
+	}
+
 	set_velocity( v );
+
+	ActiveObject::limit_velocity();
 }
 
 /**
@@ -611,6 +624,30 @@ void Player::stop()
 	update_step_speed();
 }
 
+void Player::rocket( const Vector3& direction )
+{
+	if ( get_item_count( ITEM_TYPE_ROCKET ) <= 0 )
+	{
+		return;
+	}
+
+	is_jumping_ = true;
+
+	set_action_mode( ACTION_MODE_ROCKET );
+	set_action_base_position_to_current_position();
+
+	set_velocity( direction * get_rocket_initial_velocity() );
+
+	item_count_[ ITEM_TYPE_ROCKET ]--;
+
+	if ( item_count_[ ITEM_TYPE_ROCKET ] <= 0 )
+	{
+		selected_item_type_ = ITEM_TYPE_NONE;
+	}
+
+	play_sound( "rocket" );
+}
+
 void Player::damage( const Vector3& to )
 {
 	uncontrollable_timer_ = 1.5f;
@@ -704,6 +741,14 @@ void Player::on_collide_with( Balloon* balloon )
 	}
 
 	play_sound( ( std::string( "balloon-" ) + common::serialize( balloon_sequence_count_ ) ).c_str() );
+}
+
+void Player::on_collide_with( Rocket* rocket )
+{
+	item_count_[ ITEM_TYPE_ROCKET ]++;
+	selected_item_type_ = ITEM_TYPE_ROCKET;
+
+	play_sound( "rocket-get" );
 }
 
 void Player::on_collide_with( Medal* medal )

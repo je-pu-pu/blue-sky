@@ -23,6 +23,7 @@ class DrawingModel;
 
 class Player;
 class Balloon;
+class Rocket;
 class Medal;
 class Robot;
 class StaticObject;
@@ -91,6 +92,7 @@ public:
 
 	virtual void on_collide_with( Player* ) { }
 	virtual void on_collide_with( Balloon* ) { }
+	virtual void on_collide_with( Rocket* ) { }
 	virtual void on_collide_with( Robot* ) { }
 	virtual void on_collide_with( Medal* ) { }
 	virtual void on_collide_with( StaticObject* ) { }

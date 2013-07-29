@@ -19,6 +19,9 @@ private:
 	float get_collision_height() const { return 1.f; }
 	float get_collision_depth() const { return 0.2f; }
 
+	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
+	void on_collide_with( Player* );
+
 public:
 	Rocket();
 	~Rocket() { }

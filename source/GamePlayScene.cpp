@@ -850,7 +850,7 @@ void GamePlayScene::update_main()
 			switch ( player_->get_selected_item_type() )
 			{
 				case Player::ITEM_TYPE_NONE: player_->jump(); break;
-				// case Player::ITEM_TYPE_ROCKET: player_->rocket( camera_->front() ); break;
+				case Player::ITEM_TYPE_ROCKET: player_->rocket( Player::Vector3( camera_->front().x(), camera_->front().y(), camera_->front().z() ) ); break;
 				// case Player::ITEM_TYPE_UMBRELLA: player_->start_umbrella_mode(); player_->jump(); break;
 				case Player::ITEM_TYPE_SCOPE:
 				{
@@ -1065,9 +1065,10 @@ void GamePlayScene::render_text() const
 		ss << L"POS : " << player_->get_transform().getOrigin().x() << ", " << player_->get_transform().getOrigin().y() << ", " << player_->get_transform().getOrigin().z() << std::endl;
 		ss << L"step speed : " << player_->get_step_speed() << std::endl;
 		ss << L"last footing height : " << player_->get_last_footing_height() << std::endl;
-		ss << L"DX : " << player_->get_rigid_body()->getLinearVelocity().x() << std::endl;
-		ss << L"DY : " << player_->get_rigid_body()->getLinearVelocity().y() << std::endl;
-		ss << L"DZ : " << player_->get_rigid_body()->getLinearVelocity().z() << std::endl;
+		ss << L"DX : " << player_->get_velocity().x() << std::endl;
+		ss << L"DY : " << player_->get_velocity().y() << std::endl;
+		ss << L"DZ : " << player_->get_velocity().z() << std::endl;
+		ss << L"VELOCITY : " << player_->get_velocity().length() << std::endl;
 		ss << L"Objects : " << get_active_object_manager()->active_object_list().size() << std::endl;
 
 		ss << L"mouse.dx : " << get_input()->get_mouse_dx() << std::endl;
@@ -1534,24 +1535,18 @@ void GamePlayScene::render_sprite()
 		{
 			for ( int n = 0; n < player_->get_item_count( Player::ITEM_TYPE_ROCKET ); n++ )
 			{
-				const float offset = n * 20.f;
+				const int offset = n * 20;
 
 				win::Rect src_rect = win::Rect::Size( 0, 0, 202, 200 );
+				win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - offset - 5 );
 
-				Matrix t;
-				t.set_translation( get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f - offset, 0.f );
-
-				get_direct_3d()->getSprite()->set_transform( t );
-				get_direct_3d()->getSprite()->draw( ui_texture_, src_rect.get_rect() );
+				get_direct_3d()->getSprite()->draw( dst_point, ui_texture_, src_rect.get_rect() );
 			}
 
 			// aim
 			win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );
-
-			Matrix t;
-			t.set_translation( get_width() * 0.5f, get_height() * 0.5f, 0.f );
-
-			get_direct_3d()->getSprite()->set_transform( t );
+			win::Point dst_point( ( get_width() - src_rect.width() ) / 2, ( get_height() - src_rect.height() ) / 2 );
+			
 			get_direct_3d()->getSprite()->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 		}
 		else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_UMBRELLA )

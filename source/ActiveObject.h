@@ -38,7 +38,7 @@ private:
 protected:
 	virtual void limit_velocity();
 
-	float get_max_speed() const { return 4.f; }
+	float get_max_speed() const { return 20.f; }
 	
 	void play_animation( const char_t* ) const;
 

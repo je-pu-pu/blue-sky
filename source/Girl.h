@@ -19,9 +19,9 @@ public:
 private:
 	float_t flicker_;
 
-	float get_collision_width() const { return 1.f; }
-	float get_collision_height() const { return 1.f; }
-	float get_collision_depth() const  { return 1.f; }
+	float get_collision_width() const { return 0.5f; }
+	float get_collision_height() const { return 1.5f; }
+	float get_collision_depth() const  { return 0.5f; }
 
 	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 

@@ -84,6 +84,11 @@ protected:
 	float_t get_side_step_speed() const { return 0.25f; }
 	float_t get_ladder_step_speed() const { return 2.f; }
 
+	float_t get_max_run_velocity() const { return 4.f; }
+
+	float_t get_rocket_initial_velocity() const { return 10.f; }
+	float_t get_rocket_action_length() const { return 10.f; }
+
 	bool is_walking() const { return get_step_speed() > get_min_walk_step_speed(); }
 	bool is_running() const { return get_step_speed() > get_max_walk_step_speed(); }
 
@@ -106,6 +111,7 @@ protected:
 
 	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 	void on_collide_with( Balloon* );
+	void on_collide_with( Rocket* );
 	void on_collide_with( Medal* );
 	void on_collide_with( Robot* );
 	void on_collide_with( Ladder* );
@@ -148,6 +154,8 @@ public:
 	void set_pitch( float_t p ) { pitch_ = p; }
 	bool is_ladder_step_only() const;
 
+	void rocket( const Vector3& );
+
 	void damage( const Vector3& );
 	void kill();
 
@@ -166,6 +174,7 @@ public:
 	bool is_on_ladder() const { return is_on_ladder_; }
 	bool is_jumpable() const { return is_jumpable_; }
 	bool is_jumping() const { return is_jumping_; }
+	bool is_rocketing() const { return action_mode_ == ACTION_MODE_ROCKET; }
 
 	bool has_medal() const { return has_medal_; }
 

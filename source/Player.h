@@ -41,6 +41,7 @@ private:
 	bool		is_falling_to_balloon_;	///< そのまま落下すると風船を取得するフラグ
 	
 	bool		is_on_ladder_;			///< 梯子と接触中フラグ
+	bool		is_facing_to_block_;	///< 障害物の方を向いて接触中フラグ
 
 	int			step_count_;			///< 移動カウンタ
 	float		step_speed_;			///< 移動速度
@@ -95,6 +96,7 @@ protected:
 	void update_on_footing();
 	void update_jumpable();
 	void update_jumping();
+	void update_facing_to_block();
 	
 	void update_falling_to_die();
 
@@ -122,7 +124,7 @@ public:
 
 	float_t get_collision_width() const { return 0.5f; }
 	float_t get_collision_height() const { return 1.75f; }
-	float_t get_collision_depth() const { return 0.25f; }
+	float_t get_collision_depth() const { return 0.5f; }
 
 	float_t get_step_speed() const { return step_speed_; }
 
@@ -174,6 +176,7 @@ public:
 	bool is_on_ladder() const { return is_on_ladder_; }
 	bool is_jumpable() const { return is_jumpable_; }
 	bool is_jumping() const { return is_jumping_; }
+	bool is_facing_to_block() const { return is_facing_to_block_; }
 	bool is_rocketing() const { return action_mode_ == ACTION_MODE_ROCKET; }
 
 	bool has_medal() const { return has_medal_; }

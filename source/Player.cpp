@@ -26,6 +26,7 @@ Player::Player()
 	, is_falling_to_die_( false )
 	, is_falling_to_balloon_( false )
 	, is_on_ladder_( false )
+	, is_facing_to_block_( false )
 	, step_count_( 0 )
 	, step_speed_( 0.25f )
 	, action_mode_( ACTION_MODE_NONE )
@@ -62,6 +63,7 @@ void Player::restart()
 	is_falling_to_die_ = false;
 	is_falling_to_balloon_ = false;
 	is_on_ladder_ = false;
+	is_facing_to_block_ = false;
 
 	step_count_ = 0;
 	step_speed_ = 0.25f;
@@ -101,6 +103,8 @@ void Player::update()
 	update_jumpable();
 	update_jumping();
 	update_falling_to_die();
+	update_facing_to_block();
+
 
 	if ( action_mode_ == ACTION_MODE_BALLOON )
 	{
@@ -367,6 +371,66 @@ void Player::update_falling_to_die()
 	{
 		is_falling_to_die_ = true;
 	}
+}
+
+/**
+ * 障害物に直面しているかのフラグを更新する
+ *
+ */
+void Player::update_facing_to_block()
+{
+	is_facing_to_block_ = false;
+
+	Vector3 half( 0.05f, 0.05f, 0.05f );
+	static btBoxShape shape( half );
+
+	Transform offset;
+	offset.setIdentity();
+	offset.setOrigin( Vector3( 0.f, shape.getHalfExtentsWithMargin().y() + 0.01f, get_collision_depth() * 0.5f + shape.getHalfExtentsWithMargin().z() ) );
+	
+	btCollisionObject collision_object;
+	collision_object.setCollisionShape( & shape );
+	collision_object.setWorldTransform( get_transform() * offset );
+
+	struct ContactResultCallback : public btCollisionWorld::ContactResultCallback
+	{
+	private:
+		GameObject* me_;
+		bool is_hit_;
+
+	public:
+		ContactResultCallback( GameObject* me )
+			: me_( me )
+			, is_hit_( false )
+		{
+
+		}
+
+		virtual	btScalar addSingleResult( btManifoldPoint& cp, const btCollisionObject* o1,int partId0, int index0, const btCollisionObject* o2, int partId1, int index1 )
+		{
+			GameObject* go1 = static_cast< GameObject* >( o1->getUserPointer() );
+			GameObject* go2 = static_cast< GameObject* >( o2->getUserPointer() );
+
+			if ( o1->getUserPointer() == me_ || o2->getUserPointer() == me_ )
+			{
+				return 1.f;
+			}
+
+			is_hit_ = true;
+
+			btQuaternion q1 = o1->getWorldTransform().getRotation();
+
+			return 1.f;
+		}
+
+		bool is_hit() const { return is_hit_; }
+	};
+
+	ContactResultCallback callback( this );
+	GameMain::get_instance()->get_physics()->get_dynamics_world()->contactTest( & collision_object, callback );
+
+	is_facing_to_block_ = callback.is_hit();
+
 }
 
 /**

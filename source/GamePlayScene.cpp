@@ -1077,6 +1077,7 @@ void GamePlayScene::render_text() const
 		ss << L"IS JUMPING : " << player_->is_jumping() << std::endl;
 		ss << L"ON FOOTING : " << player_->is_on_footing() << std::endl;
 		ss << L"ON LADDER : " << player_->is_on_ladder() << std::endl;
+		ss << L"IS FACING TO BLOCK : " << player_->is_facing_to_block() << std::endl;
 	}
 
 	get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );

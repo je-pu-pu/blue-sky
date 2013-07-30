@@ -2,7 +2,7 @@
 #define ANIMATION_H
 
 #include "AnimationChannel.h"
-#include <map>
+#include <array>
 
 /**
  * アニメーション
@@ -11,15 +11,29 @@
 class Animation
 {
 public:
+	enum ChannelIndex
+	{
+		CHANNEL_INDEX_TX = 0,
+		CHANNEL_INDEX_TY,
+		CHANNEL_INDEX_TZ,
+		CHANNEL_INDEX_RX,
+		CHANNEL_INDEX_RY,
+		CHANNEL_INDEX_RZ,
+		CHANNEL_INDEX_SX,
+		CHANNEL_INDEX_SY,
+		CHANNEL_INDEX_SZ,
+		CHANNEL_INDEX_MAX
+	};
+
 	typedef AnimationChannel Channel;
-	typedef std::map< string_t, Channel > ChannelMap;
+	typedef std::array< Channel, CHANNEL_INDEX_MAX > ChannelList;
 
 	typedef AnimationKeyFrame KeyFrame;
 	typedef Channel::KeyFrameList KeyFrameList;
 
 private:
 	string_t name_;
-	ChannelMap channel_map_;
+	ChannelList channel_list_;
 
 public:
 	Animation()
@@ -28,34 +42,32 @@ public:
 	void set_name( string_t name ) { name_ = name; }
 	const string_t& get_name() const { return name_; }
 
-	bool has_channel( const char_t* name ) const
+	bool has_channel( ChannelIndex index ) const
 	{
-		return channel_map_.find( name ) != channel_map_.end();
+		return index >= 0 && static_cast< uint_t >( index ) < channel_list_.size();
 	}
 
-	Channel& get_channel( const char_t* name )
+	Channel& get_channel( uint_t index )
 	{
-		return channel_map_[ name ];
+		return channel_list_[ index ];
 	}
 
 	/**
 	 * 指定したチャンネルの指定したフレームの値を取得する
 	 *
-	 * @param name チャンネル名
+	 * @param channel_index チャンネルのインデックス
 	 * @param frame フレーム
 	 * @param default_value チャンネルが存在しない場合に返すデフォルト値
 	 * @return 値
 	 */
-	float_t get_value( const char_t* name, float_t frame, float_t default_value ) const
+	float_t get_value( ChannelIndex channel_index, float_t frame, float_t default_value ) const
 	{
-		ChannelMap::const_iterator i = channel_map_.find( name );
-
-		if ( i == channel_map_.end() )
+		if ( ! has_channel( channel_index ) )
 		{
 			return default_value;
 		}
-
-		return i->second.get_value( frame );
+		
+		return channel_list_[ channel_index ].get_value( frame );
 	}
 
 	/**
@@ -64,17 +76,7 @@ public:
 	 */
 	void optimize()
 	{
-		for ( auto i = channel_map_.begin(); i != channel_map_.end(); )
-		{
-			if ( i->second.empty() )
-			{
-				i = channel_map_.erase( i );
-			}
-			else
-			{
-				++i;
-			}
-		}
+		//
 	}
 
 	/**
@@ -86,9 +88,9 @@ public:
 	{
 		float_t last_frame = 0.f;
 
-		for ( auto i = channel_map_.begin(); i != channel_map_.end(); ++i )
+		for ( auto i = channel_list_.begin(); i != channel_list_.end(); ++i )
 		{
-			last_frame = std::max( last_frame, i->second.get_last_key_frame().get_frame() );
+			last_frame = std::max( last_frame, i->get_last_key_frame().get_frame() );
 		}
 
 		return last_frame;

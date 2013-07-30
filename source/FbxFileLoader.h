@@ -2,6 +2,7 @@
 #define FBX_FILE_LOADER_H
 
 #include "type.h"
+#include "Animation.h"
 #include "Direct3D11Mesh.h"
 #include <fbxsdk.h>
 #include <map>
@@ -12,8 +13,6 @@ namespace game
 class Mesh;
 
 }
-
-class Animation;
 
 /**
  * FBX File Loader
@@ -43,7 +42,7 @@ protected:
 
 	void load_animations();
 	void load_animations_for_bone( int, FbxNode* );
-	void load_curve_for_animation( Animation&, const char_t*, const FbxAnimCurve* );
+	void load_curve_for_animation( Animation&, Animation::ChannelIndex, const FbxAnimCurve* );
 
 	void convert_coordinate_system();
 

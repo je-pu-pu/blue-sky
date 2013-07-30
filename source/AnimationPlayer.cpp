@@ -141,24 +141,26 @@ Matrix AnimationPlayer::get_bone_local_matrix( uint_t bone_index ) const
 {
 	const Animation& bone_animation = get_current_skinning_animation()->get_bone_animation_by_bone_index( bone_index );
 
-	Matrix s, r, t;
+	Matrix /* s, */ rt;
 
+	/*
 	s.set_scaling(
-		bone_animation.get_value( "sx", current_frame_, 1.f ),
-		bone_animation.get_value( "sy", current_frame_, 1.f ),
-		bone_animation.get_value( "sz", current_frame_, 1.f ) );
+		bone_animation.get_value( Animation::CHANNEL_INDEX_SX, current_frame_, 1.f ),
+		bone_animation.get_value( Animation::CHANNEL_INDEX_SY, current_frame_, 1.f ),
+		bone_animation.get_value( Animation::CHANNEL_INDEX_SZ, current_frame_, 1.f ) );
+	*/
 
-	r.set_rotation_xyz(
-		bone_animation.get_value( "rx", current_frame_, 0.f ),
-		bone_animation.get_value( "ry", current_frame_, 0.f ),
-		bone_animation.get_value( "rz", current_frame_, 0.f ) );
+	rt.set_rotation_xyz(
+		bone_animation.get_value( Animation::CHANNEL_INDEX_RX, current_frame_, 0.f ),
+		bone_animation.get_value( Animation::CHANNEL_INDEX_RY, current_frame_, 0.f ),
+		bone_animation.get_value( Animation::CHANNEL_INDEX_RZ, current_frame_, 0.f ) );
 
-	t.set_translation(
-		bone_animation.get_value( "tx", current_frame_, 0.f ),
-		bone_animation.get_value( "ty", current_frame_, 0.f ),
-		bone_animation.get_value( "tz", current_frame_, 0.f ) );
+	rt.add_translation(
+		bone_animation.get_value( Animation::CHANNEL_INDEX_TX, current_frame_, 0.f ),
+		bone_animation.get_value( Animation::CHANNEL_INDEX_TY, current_frame_, 0.f ),
+		bone_animation.get_value( Animation::CHANNEL_INDEX_TZ, current_frame_, 0.f ) );
 
-	return s * r * t;
+	return /* s * */ rt;
 }
 
 /**

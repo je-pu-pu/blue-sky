@@ -70,6 +70,13 @@ public:
 		XMStoreFloat4x4( & value_, XMMatrixTranslation( tx, ty, tz ) );
 	}
 
+	void add_translation( UnitType tx, UnitType ty, UnitType tz )
+	{
+		value_._41 += tx;
+		value_._42 += ty;
+		value_._43 += tz;
+	}
+
 	void set_rotation_x( UnitType r )
 	{
 		XMStoreFloat4x4( & value_, XMMatrixRotationX( r ) );

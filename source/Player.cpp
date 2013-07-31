@@ -430,7 +430,7 @@ void Player::update_facing_to_block()
 
 	Transform offset;
 	offset.setIdentity();
-	offset.setOrigin( Vector3( 0.f, is_clambering() ? -0.1f : shape.getHalfExtentsWithMargin().y() + 0.25f, get_collision_depth() * 1.f + shape.getHalfExtentsWithMargin().z() ) );
+	offset.setOrigin( Vector3( 0.f, is_clambering() ? -0.1f : shape.getHalfExtentsWithMargin().y() + 0.25f, get_collision_depth() * 0.5f ) );
 	
 	btCollisionObject collision_object;
 	collision_object.setCollisionShape( & shape );

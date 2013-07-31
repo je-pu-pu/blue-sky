@@ -37,11 +37,14 @@ private:
 	bool		is_on_footing_;			///< 現在足場上フラグ
 	bool		is_jumping_;			///< 現在ジャンプ中フラグ
 	bool		is_jumpable_;			///< 現在ジャンプ可能フラグ
+	bool		is_clambering_;			///< 現在よじ登り中フラグ
 	bool		is_falling_to_die_;		///< 現在死亡へ向けて落下中フラグ
 	bool		is_falling_to_balloon_;	///< そのまま落下すると風船を取得するフラグ
 	
 	bool		is_on_ladder_;			///< 梯子と接触中フラグ
 	bool		is_facing_to_block_;	///< 障害物の方を向いて接触中フラグ
+	bool		can_clamber_;			///< よじ登り可能フラグ
+	bool		can_peer_down_;			///< のぞき込み可能フラグ
 
 	int			step_count_;			///< 移動カウンタ
 	float		step_speed_;			///< 移動速度
@@ -56,7 +59,7 @@ private:
 	float_t		pitch_;					///< 上下の向き ( 真下 : -1.f / 真上 : 1.f )
 
 	float_t		eye_height_;			///< 目の高さ
-	float_t		eye_depth_;				///< 目の奥行きオフセット ( 身を乗り出した時に増える ) ( 0.f .. 1.f )
+	float_t		eye_depth_;				///< 目の奥行きオフセット ( m ) ( 身を乗り出した時に増える ) ( 0.f .. 1.f )
 
 	bool		has_medal_;				///< メダル保持フラグ
 
@@ -97,7 +100,9 @@ protected:
 	void update_jumpable();
 	void update_jumping();
 	void update_facing_to_block();
-	
+	void update_can_clamber();
+	void update_can_peer_down();
+
 	void update_falling_to_die();
 
 	void update_step_speed();
@@ -147,6 +152,10 @@ public:
 	void jump();
 	void super_jump();
 
+	/// よじ登り
+	void clamber();
+	void stop_clamber();
+
 	// 停止
 	void stop();
 
@@ -176,7 +185,10 @@ public:
 	bool is_on_ladder() const { return is_on_ladder_; }
 	bool is_jumpable() const { return is_jumpable_; }
 	bool is_jumping() const { return is_jumping_; }
+	bool is_clambering() const { return is_clambering_; }
 	bool is_facing_to_block() const { return is_facing_to_block_; }
+	bool can_clamber() const { return can_clamber_; }
+	bool can_peer_down() const { return can_peer_down_; }
 	bool is_rocketing() const { return action_mode_ == ACTION_MODE_ROCKET; }
 
 	bool has_medal() const { return has_medal_; }

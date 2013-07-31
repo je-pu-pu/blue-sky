@@ -869,7 +869,16 @@ void GamePlayScene::update_main()
 				}
 			}
 		}
-		else if ( get_input()->push( Input::B ) )
+		else if ( get_input()->press( Input::A ) )
+		{
+			player_->clamber();
+		}
+		else
+		{
+			player_->stop_clamber();
+		}
+
+		if ( get_input()->push( Input::B ) )
 		{
 			// player_->super_jump();
 			// camera_->set_fov_target( 15.f );
@@ -1078,6 +1087,8 @@ void GamePlayScene::render_text() const
 		ss << L"ON FOOTING : " << player_->is_on_footing() << std::endl;
 		ss << L"ON LADDER : " << player_->is_on_ladder() << std::endl;
 		ss << L"IS FACING TO BLOCK : " << player_->is_facing_to_block() << std::endl;
+		ss << L"CAN CLAMBER : " << player_->can_clamber() << std::endl;
+		ss << L"CAN PEER DOWN : " << player_->can_peer_down() << std::endl;
 	}
 
 	get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );

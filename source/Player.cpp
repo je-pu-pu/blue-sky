@@ -23,10 +23,13 @@ Player::Player()
 	: is_on_footing_( false )
 	, is_jumping_( false )
 	, is_jumpable_( false )
+	, is_clambering_( false )
 	, is_falling_to_die_( false )
 	, is_falling_to_balloon_( false )
 	, is_on_ladder_( false )
 	, is_facing_to_block_( false )
+	, can_clamber_( false )
+	, can_peer_down_( false )
 	, step_count_( 0 )
 	, step_speed_( 0.25f )
 	, action_mode_( ACTION_MODE_NONE )
@@ -60,10 +63,13 @@ void Player::restart()
 	is_on_footing_ = false;
 	is_jumping_ = false;
 	is_jumpable_ = false;
+	is_clambering_ = false;
 	is_falling_to_die_ = false;
 	is_falling_to_balloon_ = false;
 	is_on_ladder_ = false;
 	is_facing_to_block_ = false;
+	can_clamber_ = false;
+	can_peer_down_ = false;
 
 	step_count_ = 0;
 	step_speed_ = 0.25f;
@@ -104,7 +110,8 @@ void Player::update()
 	update_jumping();
 	update_falling_to_die();
 	update_facing_to_block();
-
+	update_can_clamber();
+	update_can_peer_down();
 
 	if ( action_mode_ == ACTION_MODE_BALLOON )
 	{
@@ -138,7 +145,7 @@ void Player::update()
 		}
 	}
 
-	if ( ! is_on_footing() )
+	if ( ! can_peer_down() )
 	{
 		eye_depth_ *= 0.95f;
 		eye_depth_ = math::clamp( eye_depth_, 0.f, 1.f );
@@ -373,64 +380,138 @@ void Player::update_falling_to_die()
 	}
 }
 
+class WithoutMeContactResultCallback : public btCollisionWorld::ContactResultCallback
+{
+private:
+	GameObject* me_;
+	bool is_hit_;
+
+public:
+	WithoutMeContactResultCallback( GameObject* me )
+		: me_( me )
+		, is_hit_( false )
+	{
+
+	}
+
+	virtual	btScalar addSingleResult( btManifoldPoint& cp, const btCollisionObject* o1,int partId0, int index0, const btCollisionObject* o2, int partId1, int index1 )
+	{
+		GameObject* go1 = static_cast< GameObject* >( o1->getUserPointer() );
+		GameObject* go2 = static_cast< GameObject* >( o2->getUserPointer() );
+
+		if ( o1->getUserPointer() == me_ || o2->getUserPointer() == me_ )
+		{
+			return 1.f;
+		}
+
+		is_hit_ = true;
+
+		btQuaternion q1 = o1->getWorldTransform().getRotation();
+
+		return 1.f;
+	}
+
+	bool is_hit() const { return is_hit_; }
+	void clear() { is_hit_ = false; }
+};
+
 /**
  * 障害物に直面しているかのフラグを更新する
  *
+ * facing_to_block_ は 
+ * 
  */
 void Player::update_facing_to_block()
 {
 	is_facing_to_block_ = false;
 
 	Vector3 half( 0.05f, 0.05f, 0.05f );
-	static btBoxShape shape( half );
+	btBoxShape shape( half );
 
 	Transform offset;
 	offset.setIdentity();
-	offset.setOrigin( Vector3( 0.f, shape.getHalfExtentsWithMargin().y() + 0.01f, get_collision_depth() * 0.5f + shape.getHalfExtentsWithMargin().z() ) );
+	offset.setOrigin( Vector3( 0.f, is_clambering() ? -0.1f : shape.getHalfExtentsWithMargin().y() + 0.25f, get_collision_depth() * 1.f + shape.getHalfExtentsWithMargin().z() ) );
 	
 	btCollisionObject collision_object;
 	collision_object.setCollisionShape( & shape );
 	collision_object.setWorldTransform( get_transform() * offset );
 
-	struct ContactResultCallback : public btCollisionWorld::ContactResultCallback
-	{
-	private:
-		GameObject* me_;
-		bool is_hit_;
-
-	public:
-		ContactResultCallback( GameObject* me )
-			: me_( me )
-			, is_hit_( false )
-		{
-
-		}
-
-		virtual	btScalar addSingleResult( btManifoldPoint& cp, const btCollisionObject* o1,int partId0, int index0, const btCollisionObject* o2, int partId1, int index1 )
-		{
-			GameObject* go1 = static_cast< GameObject* >( o1->getUserPointer() );
-			GameObject* go2 = static_cast< GameObject* >( o2->getUserPointer() );
-
-			if ( o1->getUserPointer() == me_ || o2->getUserPointer() == me_ )
-			{
-				return 1.f;
-			}
-
-			is_hit_ = true;
-
-			btQuaternion q1 = o1->getWorldTransform().getRotation();
-
-			return 1.f;
-		}
-
-		bool is_hit() const { return is_hit_; }
-	};
-
-	ContactResultCallback callback( this );
+	WithoutMeContactResultCallback callback( this );
 	GameMain::get_instance()->get_physics()->get_dynamics_world()->contactTest( & collision_object, callback );
 
 	is_facing_to_block_ = callback.is_hit();
 
+}
+
+/**
+ * よじ登りが可能かのフラグを更新する
+ *
+ */
+void Player::update_can_clamber()
+{
+	can_clamber_ = false;
+
+	if ( ! is_facing_to_block() )
+	{
+		return;
+	}
+
+	Vector3 half( get_collision_width() * 0.5f, get_collision_height() * 0.5f, get_collision_depth() * 0.5f );
+	btBoxShape shape( half );
+
+	Transform offset;
+	offset.setIdentity();
+	offset.setOrigin( Vector3( 0.f, get_collision_height() * 0.5f + 0.1f, get_collision_depth() * 0.5f ) );
+	
+	btCollisionObject collision_object;
+	collision_object.setCollisionShape( & shape );
+	collision_object.setWorldTransform( get_transform() * offset );
+
+	WithoutMeContactResultCallback callback_low( this );
+	GameMain::get_instance()->get_physics()->get_dynamics_world()->contactTest( & collision_object, callback_low );
+
+	if ( ! callback_low.is_hit() )
+	{
+		can_clamber_ = true;
+		return;
+	}
+
+	offset.setOrigin( Vector3( 0.f, get_collision_height() * 0.5f + 1.5f, get_collision_depth() ) );
+	collision_object.setWorldTransform( get_transform() * offset );
+
+	WithoutMeContactResultCallback callback_high( this );
+	GameMain::get_instance()->get_physics()->get_dynamics_world()->contactTest( & collision_object, callback_high );
+
+	can_clamber_ = ! callback_high.is_hit();
+}
+
+/**
+ * のぞき込みが可能かのフラグを更新する
+ *
+ */
+void Player::update_can_peer_down()
+{
+	if ( ! is_on_footing() )
+	{
+		can_peer_down_ = false;
+		return;
+	}
+
+	Vector3 half( 0.02f, 0.02f, 0.02f );
+	btBoxShape shape( half );
+
+	Transform offset;
+	offset.setIdentity();
+	offset.setOrigin( Vector3( 0.f, get_eye_height(), get_collision_depth() * 0.5f + get_eye_depth() ) );
+	
+	btCollisionObject collision_object;
+	collision_object.setCollisionShape( & shape );
+	collision_object.setWorldTransform( get_transform() * offset );
+
+	WithoutMeContactResultCallback callback( this );
+	GameMain::get_instance()->get_physics()->get_dynamics_world()->contactTest( & collision_object, callback );
+
+	can_peer_down_ = ! callback.is_hit();
 }
 
 /**
@@ -593,8 +674,6 @@ void Player::side_step( float_t s )
 			( get_right() * s ).z() * get_side_step_speed()
 		)
 	);
-
-	// eye_depth_ *= 0.95f;
 }
 
 /**
@@ -658,6 +737,38 @@ void Player::jump()
 void Player::super_jump()
 {
 	set_velocity( Vector3( get_velocity().x(), get_velocity().y() + 20.f, get_velocity().z() ) );
+}
+
+/**
+ * よじ登る
+ *
+ */
+void Player::clamber()
+{
+	if ( can_clamber() )
+	{
+		set_velocity( Vector3( 0.f, 2.f, 0.f ) + get_front() * 4.f );
+
+		if ( ! is_clambering() )
+		{
+			is_clambering_ = true;
+
+			play_sound( "clamber", false, false );
+		}
+	}
+	else
+	{
+		is_clambering_ = false;
+	}
+}
+
+/**
+ * よじ登りの中止
+ *
+ */
+void Player::stop_clamber()
+{
+	is_clambering_ = false;
 }
 
 /**
@@ -761,6 +872,11 @@ void Player::set_eye_depth( float d )
 
 void Player::add_eye_depth( float d )
 {
+	if ( d > 0.f && ! can_peer_down() )
+	{
+		return;
+	}
+
 	set_eye_depth( eye_depth_ + d );
 }
 

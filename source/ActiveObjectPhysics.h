@@ -58,6 +58,11 @@ public:
 		{
 			ActiveObject* a = reinterpret_cast< ActiveObject* >( rayResult.m_collisionObject->getUserPointer() );
 			
+			if ( a->is_dead() )
+			{
+				return 1.0;
+			}
+
 			if ( ! include_soft_footing_ && ! a->is_hard() )
 			{
 				return 1.0;

@@ -29,6 +29,7 @@ private:
 
 public:
 	DrawingMesh( Mesh* );
+	~DrawingMesh();
 
 	bool load_obj( const char_t* );
 	bool load_fbx( const char_t*, FbxFileLoader*, common::safe_ptr< SkinningAnimationSet >& );

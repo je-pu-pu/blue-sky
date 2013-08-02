@@ -20,6 +20,9 @@ class Material;
 class Mesh
 {
 public:
+	Mesh() { }
+	virtual ~Mesh() { }
+
 	virtual bool load_obj( const char_t* ) { return false; }
 	virtual bool load_fbx( const char_t*, FbxFileLoader*, common::safe_ptr< SkinningAnimationSet >& ) { return false; }
 

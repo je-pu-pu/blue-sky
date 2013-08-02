@@ -5,6 +5,7 @@
     <ClInclude Include="Point.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="Size.h" />
+    <ClInclude Include="..\game\SoundManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Version.cpp" />

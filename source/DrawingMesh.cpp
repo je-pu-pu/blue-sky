@@ -9,6 +9,12 @@ DrawingMesh::DrawingMesh( Mesh* mesh )
 
 }
 
+DrawingMesh::~DrawingMesh()
+{
+	
+}
+
+
 bool DrawingMesh::load_obj( const char_t* file_name )
 {
 	return mesh_->load_obj( file_name );

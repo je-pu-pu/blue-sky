@@ -2,7 +2,7 @@
 #define BLUE_SKY_DRAWING_LINE_H
 
 #include "Direct3D11Color.h"
-#include <game/GraphicsManager.h>
+#include <game/Line.h>
 #include <vector>
 
 class Direct3D11;

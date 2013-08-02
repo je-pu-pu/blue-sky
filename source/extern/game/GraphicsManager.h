@@ -7,26 +7,8 @@
 namespace game
 {
 
-/**
- * 描画されるオブジェクトの基底クラス
- *
- */
-class RenderingObject
-{
-public:
-	RenderingObject() { }
-	virtual ~RenderingObject() { }
-
-	virtual void render() const = 0;
-};
-
 class Mesh;
-
-/**
- * 線
- *
- */
-class Line : public RenderingObject { };
+class Line;
 
 /**
  * グラフィック管理クラス

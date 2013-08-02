@@ -9,4 +9,8 @@ class Direct3D11Matrix;
 typedef Direct3D11Vector Vector;
 typedef Direct3D11Matrix Matrix;
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
 #endif // BLUE_SKY_TYPE_H

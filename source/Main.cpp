@@ -11,8 +11,10 @@
 //■■■　メイン　■■■
 int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int nCmdShow )
 {
+    _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+
 	App* app = 0;
-	
+
 	try
 	{
 		// アプリケーションを初期化する

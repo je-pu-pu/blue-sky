@@ -120,7 +120,7 @@ GameMain::GameMain()
 	main_loop_ = new MainLoop( 60 );
 
 	is_display_fps_ = config_->get( "video.display_fps", 0 ) != 0;
-
+	
 	// Scene
 	if ( get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
 	{

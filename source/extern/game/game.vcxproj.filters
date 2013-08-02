@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="Sound.h" />
-    <ClInclude Include="SoundManager.h" />
     <ClInclude Include="SoundFile.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="AABB.h" />
@@ -11,6 +10,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Line.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SoundManager.cpp" />

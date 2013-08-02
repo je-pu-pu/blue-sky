@@ -1477,20 +1477,7 @@ void GamePlayScene::render_object_line() const
  */
 void GamePlayScene::render_active_object_mesh( const ActiveObject* active_object ) const
 {
-	if ( ! active_object->is_visible() )
-	{
-		return;
-	}
-	
-	active_object->get_object_constant_buffer()->bind_to_vs();
-	active_object->get_object_constant_buffer()->bind_to_ps();
-	
-	if ( active_object->get_animation_player() )
-	{
-		active_object->get_animation_player()->bind_render_data();
-	}
-
-	active_object->get_drawing_model()->get_mesh()->render();
+	active_object->render_mesh();
 }
 
 /**

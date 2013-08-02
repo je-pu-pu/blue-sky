@@ -55,7 +55,8 @@ public:
 	IndexList& get_index_list() { return index_list_; }
 	const IndexList& get_index_list() const { return index_list_; }
 
-	void render() const;
+	void bind_to_ia() const;
+	void render() const override;
 
 }; // class Direct3D11Material
 

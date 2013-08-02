@@ -181,14 +181,16 @@ public:
 	Material* get_material_at( int, bool force = true );
 	Material* get_material_at_last( bool force = true );
 
-	game::Material* get_material_at( uint_t );
+	game::Material* get_material_at( uint_t ) override;
+	uint_t get_material_count() const override { return material_list_.size(); }
 
 	SkinningAnimationSet* setup_skinning_animation_set();
 	
 	SkinningAnimationSet* get_skinning_animation_set() { return skinning_animation_set_.get(); }
 	const SkinningAnimationSet* get_skinning_animation_set() const { return skinning_animation_set_.get(); }
 
-	void render() const;
+	void bind_to_ia() const override;
+	void render() const override;
 
 	inline VertexList& get_vertex_list() { return vertex_list_; }
 	inline const VertexList& get_vertex_list() const { return vertex_list_; }

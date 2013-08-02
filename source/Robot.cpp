@@ -13,6 +13,8 @@
 #include "GameMain.h"
 #include "GraphicsManager.h"
 
+#include <game/Texture.h>
+
 #include <common/math.h>
 
 #include <iostream>
@@ -24,9 +26,12 @@ namespace blue_sky
 
 Robot::Robot()
 	: player_( 0 )
+	, texture_( 0 )
 	, mode_( MODE_STAND )
 	, timer_( 0 )
 {
+	texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
+
 	GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
 	GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-error" );
 }
@@ -41,7 +46,7 @@ void Robot::restart()
 	mode_ = MODE_STAND;
 	timer_ = 0;
 
-	get_drawing_model()->get_mesh()->get_material_at( 0 )->set_texture( GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" ) );
+	texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
 }
 
 void Robot::update()
@@ -76,10 +81,19 @@ void Robot::update()
 		// get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.8f, 0, 0, -0.25f ) );
 		get_animation_player()->play( "Walk", false, true );
 
+		if ( is_visible_in_blink( 4.f ) )
+		{
+			texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-error" );
+		}
+		else
+		{
+			texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
+		}
+
 		if ( caluclate_target_lost() )
 		{
 			mode_ = MODE_STAND;
-			get_drawing_model()->get_mesh()->get_material_at( 0 )->set_texture( GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" ) );
+			texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
 		}
 
 		play_sound( "robot-chase", false, false );
@@ -97,7 +111,7 @@ void Robot::update()
 			timer_ = 0.f;
 
 			play_sound( "robot-found", false, false );
-			get_drawing_model()->get_mesh()->get_material_at( 0 )->set_texture( GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" ) );
+			texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
 		}
 	}
 	else if ( mode_ == MODE_ATTENTION )
@@ -121,13 +135,12 @@ void Robot::update()
 			mode_ = MODE_CHASE;
 
 			play_sound( "robot-found", false, false );
-			get_drawing_model()->get_mesh()->get_material_at( 0 )->set_texture( GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-error" ) );
 		}
 	}
 	else if ( mode_ == MODE_SHUTDOWN )
 	{
 		set_velocity( get_velocity() * 0.5f );
-		get_drawing_model()->get_mesh()->get_material_at( 0 )->set_texture( GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" ) );
+		texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
 	}
 }
 
@@ -245,6 +258,15 @@ void Robot::on_collide_with( Player* )
 	get_animation_player()->play( "Shutdown", false, false );
 
 	set_velocity( Vector3( 0.f, 0.f, 0.f ) );
+}
+
+void Robot::render_material_at( uint_t material_index ) const
+{
+	texture_->bind_to_ps( 0 );
+
+	game::Material* material = get_drawing_model()->get_mesh()->get_material_at( material_index );
+	material->bind_to_ia();
+	material->render();
 }
 
 } // namespace blue_sky

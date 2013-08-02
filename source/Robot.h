@@ -2,6 +2,7 @@
 #define BLUE_SKY_ROBOT_H
 
 #include "ActiveObject.h"
+#include <game/Texture.h>
 
 #include <vector>
 
@@ -17,6 +18,8 @@ class Player;
 class Robot : public ActiveObject
 {
 public:
+	typedef game::Texture Texture;
+
 	enum Mode
 	{
 		MODE_STAND = 0,
@@ -29,6 +32,7 @@ public:
 
 private:
 	const Player*	player_;
+	const Texture*	texture_;		///< テクスチャ
 
 	Mode			mode_;			///< 現在の動作モード
 	float_t			timer_;			///< 汎用タイマー
@@ -57,6 +61,8 @@ public:
 	float get_collision_width() const { return 1.f; }
 	float get_collision_height() const { return 2.f; }
 	float get_collision_depth() const  { return 0.5f; }
+
+	void render_material_at( uint_t ) const override;
 
 }; // class Robot
 

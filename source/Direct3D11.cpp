@@ -35,7 +35,7 @@
 #pragma comment( lib, "d3dx11.lib" )
 #endif
 
-#define ENABLE_DIRECT_WRITE
+// #define ENABLE_DIRECT_WRITE
 
 /**
  * コンストラクタ

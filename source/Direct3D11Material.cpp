@@ -72,14 +72,12 @@ void Direct3D11Material::set_texture( game::Texture* texture )
 	texture_ = texture;
 }
 
-void Direct3D11Material::render() const
+void Direct3D11Material::bind_to_ia() const
 {
 	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_, IndexBufferFormat, 0 );
+}
 
-	if ( texture_ )
-	{
-		texture_->bind_to_ps( 0 );
-	}
-
+void Direct3D11Material::render() const
+{
 	direct_3d_->getImmediateContext()->DrawIndexed( index_count_, 0, 0 );
 }

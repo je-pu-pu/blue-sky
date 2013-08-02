@@ -32,9 +32,14 @@ DrawingMesh::Material* DrawingMesh::get_material_at( uint_t index )
 	return mesh_->get_material_at( index );
 }
 
-void DrawingMesh::render() const
+uint_t DrawingMesh::get_material_count() const
 {
-	mesh_->render();
+	return mesh_->get_material_count();
+}
+
+void DrawingMesh::bind_to_ia() const
+{
+	mesh_->bind_to_ia();
 }
 
 } // namespace blue_sky

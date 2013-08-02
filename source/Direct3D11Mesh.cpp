@@ -528,10 +528,10 @@ string_t Direct3D11Mesh::get_texture_file_name_by_texture_name( const char_t* te
 }
 
 /**
- * •`‰æ‚·‚é
+ * “ü—ÍƒAƒZƒ“ƒuƒ‰‚Éİ’è‚·‚é
  *
  */
-void Direct3D11Mesh::render() const
+void Direct3D11Mesh::bind_to_ia() const
 {
 	if ( vertex_buffer_list_.empty() )
 	{
@@ -544,9 +544,25 @@ void Direct3D11Mesh::render() const
 
 	direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, buffer_count, & vertex_buffer_list_[ 0 ], stride, offset );
 	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+}
 
-	for ( MaterialList::const_iterator i = material_list_.begin(); i != material_list_.end(); ++i )
+/**
+ * •`‰æ‚·‚é
+ *
+ */
+void Direct3D11Mesh::render() const
+{
+	bind_to_ia();
+
+	for ( auto i = material_list_.begin(); i != material_list_.end(); ++i )
 	{
+		( *i )->bind_to_ia();
+
+		if ( ( *i )->get_texture() )
+		{
+			( *i )->get_texture()->bind_to_ps( 0 );
+		}
+
 		( *i )->render();
 	}
 }

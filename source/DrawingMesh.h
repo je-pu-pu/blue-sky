@@ -35,8 +35,9 @@ public:
 	bool load_fbx( const char_t*, FbxFileLoader*, common::safe_ptr< SkinningAnimationSet >& );
 
 	Material* get_material_at( uint_t );
+	uint_t get_material_count() const;
 
-	void render() const;
+	void bind_to_ia() const;
 
 }; // class DrawingMesh
 

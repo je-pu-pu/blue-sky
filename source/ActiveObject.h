@@ -84,6 +84,11 @@ public:
 	/// •`‰æ‚³‚ê‚é‚©‚Ç‚¤‚©‚ð•Ô‚·
 	virtual bool is_visible() const { return ! is_dead(); }
 
+	virtual void render_mesh() const;
+	virtual void render_material_at( uint_t ) const;
+
+	// virtual void render_line() = 0;
+
 }; // class ActiveObject
 
 } // namespace blue_sky

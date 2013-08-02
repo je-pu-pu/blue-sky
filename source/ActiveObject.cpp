@@ -6,9 +6,13 @@
 #include "AnimationPlayer.h"
 #include "GameMain.h"
 
-#include <common/math.h>
+#include "DrawingModel.h"
+#include "DrawingMesh.h"
 
-#include <btBulletDynamicsCommon.h>
+#include <game/Material.h>
+#include <game/Texture.h>
+
+#include <common/math.h>
 
 #include "memory.h"
 
@@ -173,6 +177,42 @@ void ActiveObject::kill()
 		set_location( 0.f, -100.f, 0.f );
 	}
 	*/
+}
+
+void ActiveObject::render_mesh() const
+{
+	if ( ! is_visible() )
+	{
+		return;
+	}
+	
+	get_object_constant_buffer()->bind_to_vs();
+	get_object_constant_buffer()->bind_to_ps();
+	
+	if ( get_animation_player() )
+	{
+		get_animation_player()->bind_render_data();
+	}
+
+	get_drawing_model()->get_mesh()->bind_to_ia();
+
+	for ( uint_t n = 0; n < get_drawing_model()->get_mesh()->get_material_count(); ++n )
+	{
+		render_material_at( n );
+	}
+}
+
+void ActiveObject::render_material_at( uint_t material_index ) const
+{
+	game::Material* material = get_drawing_model()->get_mesh()->get_material_at( material_index );
+
+	if ( material->get_texture() )
+	{
+		material->get_texture()->bind_to_ps( 0 );
+	}
+
+	material->bind_to_ia();
+	material->render();
 }
 
 } // namespace blue_sky

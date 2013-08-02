@@ -1590,14 +1590,6 @@ void GamePlayScene::render_sprite()
 
 			get_direct_3d()->getSprite()->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 		}
-
-		for ( int n = 0; n < player_->get_hp(); ++n )
-		{
-			win::Rect src_rect = win::Rect::Size( n * 120, 0, 120, 120 );
-			win::Rect dst_rect = win::Rect::Size( 10 + n * 96, get_height() - 10 - 96, 90, 90 );
-
-			get_direct_3d()->getSprite()->draw( dst_rect, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
-		}
 	}
 
 	get_direct_3d()->getSprite()->end();

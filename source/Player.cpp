@@ -406,6 +406,16 @@ public:
 			return 1.f;
 		}
 
+		if ( go1 && ! go1->is_hard() )
+		{
+			return 1.f;
+		}
+
+		if ( go2 && ! go2->is_hard() )
+		{
+			return 1.f;
+		}
+
 		is_hit_ = true;
 
 		btQuaternion q1 = o1->getWorldTransform().getRotation();

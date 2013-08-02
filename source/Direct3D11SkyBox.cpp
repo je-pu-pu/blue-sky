@@ -8,6 +8,8 @@
 
 #include <string>
 
+#include "memory.h"
+
 Direct3D11SkyBox::Direct3D11SkyBox( Direct3D* direct_3d, const char* name, const char* ext )
 	: Direct3D11Mesh( direct_3d )
 	, name_( name )

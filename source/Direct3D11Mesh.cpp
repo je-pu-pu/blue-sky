@@ -18,6 +18,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "memory.h"
+
 /**
  * コンストラクタ
  *

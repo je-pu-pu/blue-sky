@@ -32,10 +32,7 @@ public:
 		texture_2d->GetDesc( & texture_2d_desc_ );
 	}
 
-	~Direct3D11Texture()
-	{
-
-	}
+	virtual ~Direct3D11Texture() { }
 
 	uint_t get_width() const { return texture_2d_desc_.Width; }
 	uint_t get_height() const { return texture_2d_desc_.Height; }

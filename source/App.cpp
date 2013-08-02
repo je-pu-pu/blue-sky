@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+#include "memory.h"
+
 //□コンストラクタ
 App::App()
 	: hWnd( 0 )

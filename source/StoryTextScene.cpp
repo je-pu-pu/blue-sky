@@ -20,6 +20,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "memory.h"
+
 namespace blue_sky
 {
 
@@ -267,6 +269,7 @@ void StoryTextScene::render()
 
 		for ( auto j = bg_sprite_layer_list_.begin(); j != bg_sprite_layer_list_.end(); ++j )
 		{
+
 			Matrix r, s, t;
 			
 			r.set_rotation_z( math::degree_to_radian( ( *j )->get_rotation().value() ) );

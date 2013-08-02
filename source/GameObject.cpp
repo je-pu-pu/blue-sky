@@ -7,6 +7,8 @@
 
 #include <common/math.h>
 
+#include "memory.h"
+
 namespace blue_sky
 {
 

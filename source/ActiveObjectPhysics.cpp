@@ -2,6 +2,8 @@
 #include "StaticObject.h"
 #include "ActiveObject.h"
 
+#include "memory.h"
+
 namespace blue_sky
 {
 

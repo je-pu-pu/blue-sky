@@ -13,6 +13,8 @@
 #include <iostream>
 #include <cassert>
 
+#include "memory.h"
+
 #ifdef _DEBUG
 #pragma comment ( lib, "fbxsdk-2013.3-mtd.lib" )
 #else

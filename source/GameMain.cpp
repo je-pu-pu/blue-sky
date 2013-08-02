@@ -39,6 +39,8 @@
 
 #include <sstream>
 
+#include "memory.h"
+
 #pragma comment( lib, "game.lib" )
 #pragma comment( lib, "win.lib" )
 
@@ -181,6 +183,9 @@ bool GameMain::update()
 
 	if ( input_->push( Input::ESCAPE ) )
 	{
+		get_app()->close();
+
+		/*
 		if ( scene_->get_name() == "title" )
 		{
 			get_app()->close();
@@ -193,6 +198,7 @@ bool GameMain::update()
 		{
 			scene_->set_next_scene( "title" );
 		}
+		*/
 
 		game::Sound* cancel = sound_manager_->get_sound( "cancel" );
 

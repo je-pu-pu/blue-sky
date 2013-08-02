@@ -18,7 +18,7 @@ private:
 	std::vector< char >		fragment_buffer_;
 
 public:
-	DirectWriteFontFileStream( const char* file_path )
+	explicit DirectWriteFontFileStream( const char* file_path )
 		: ref_count_( 0 )
 		, file_size_( 0 )
     {

@@ -6,6 +6,8 @@
 #include "DrawingMesh.h"
 #include "DrawingLine.h"
 
+#include "memory.h"
+
 namespace blue_sky
 {
 

@@ -5,6 +5,8 @@
 
 #include "include/d3dx11effect.h"
 
+#include "memory.h"
+
 #pragma comment( lib, "effects11.lib" )
 
 Direct3D11Effect::Direct3D11Effect( Direct3D* direct_3d )

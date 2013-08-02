@@ -9,6 +9,8 @@
 
 #include <xnamath.h>
 
+#include "memory.h"
+
 Direct3D11ShadowMap::Vector Direct3D11ShadowMap::light_position_;
 Direct3D11ShadowMap::Matrix Direct3D11ShadowMap::view_matrix_;
 Direct3D11ShadowMap::MatrixList Direct3D11ShadowMap::projection_matrix_list_;

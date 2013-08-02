@@ -5,6 +5,8 @@
 #include <common/exception.h>
 #include <string>
 
+#include "memory.h"
+
 #pragma comment( lib, "dsound.lib" )
 
 DirectSound::DirectSound( HWND hwnd )

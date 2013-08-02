@@ -2,6 +2,8 @@
 #include "ActiveObject.h"
 #include "AnimationPlayer.h"
 
+#include "memory.h"
+
 namespace blue_sky
 {
 

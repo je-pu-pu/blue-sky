@@ -18,25 +18,46 @@ class com_ptr
 private:
 	T*		ptr_;
 
+	inline com_ptr& operator = ( T* ptr )
+	{
+		DIREXT_X_RELEASE( ptr_ );
+		ptr_ = ptr;
+		DIREXT_X_ADD_REF( ptr_ );
+
+		return *this;
+	}
+	inline com_ptr& operator = ( const com_ptr& ptr )
+	{
+		DIRECT_X_RELEASE( ptr_ );
+		ptr_ = ptr.ptr_;
+		DIREXT_X_ADD_REF( ptr_ );
+
+		return *this;
+	}
+
 public:
-	com_ptr()
+	explicit com_ptr()
 		: ptr_( 0 )
 	{
 		//
 	}
 
-	com_ptr( T* ptr )
+	explicit com_ptr( T* ptr )
 		: ptr_( ptr )
 	{
 		//
+	}
+
+	explicit com_ptr( const com_ptr& ptr )
+		: ptr_( ptr.ptr_ )
+	{
+		DIRECT_X_ADD_REF( ptr_ );
 	}
 
 	~com_ptr()
 	{
 		DIRECT_X_RELEASE( ptr_ );
 	}
-
-	inline com_ptr& operator = ( T* ptr ) { assert( ! ptr_ ); ptr_ = ptr; return *this; }
 	
 	inline T** operator & () { return & ptr_; }
 

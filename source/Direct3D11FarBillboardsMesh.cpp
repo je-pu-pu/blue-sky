@@ -4,6 +4,8 @@
 
 #include <list>
 
+#include "memory.h"
+
 Direct3D11FarBillboardsMesh::Direct3D11FarBillboardsMesh( Direct3D* direct_3d )
 	: Direct3D11Mesh( direct_3d )
 {

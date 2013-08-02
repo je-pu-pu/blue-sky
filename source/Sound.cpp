@@ -8,6 +8,8 @@
 #include <common/math.h>
 #include <common/exception.h>
 
+#include "memory.h"
+
 namespace game
 {
 

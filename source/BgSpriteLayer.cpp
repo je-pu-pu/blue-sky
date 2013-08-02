@@ -1,5 +1,7 @@
 #include "BgSpriteLayer.h"
 
+#include "memory.h"
+
 BgSpriteLayer::BgSpriteLayer( const char_t* name, const Texture* texture )
 	: name_( name )
 	, texture_( texture )

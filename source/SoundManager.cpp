@@ -11,6 +11,8 @@
 
 #include <string>
 
+#include "memory.h"
+
 namespace blue_sky
 {
 

@@ -8,12 +8,14 @@
 
 #include "GameMain.h"
 
+#include "memory.h"
+
 namespace blue_sky
 {
 
 DrawingModel::DrawingModel()
 {
-
+	
 }
 
 DrawingModel::~DrawingModel()

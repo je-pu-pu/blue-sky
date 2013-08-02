@@ -10,6 +10,8 @@
 
 #include <iostream>
 
+#include "memory.h"
+
 namespace blue_sky
 {
 

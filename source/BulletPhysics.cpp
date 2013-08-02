@@ -4,7 +4,6 @@
 #include <fstream>
 #include <sstream>
 
-
 #ifdef _DEBUG
 #pragma comment( lib, "BulletCollision_debug.lib" )
 #pragma comment( lib, "BulletDynamics_debug.lib" )

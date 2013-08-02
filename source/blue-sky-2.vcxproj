@@ -43,6 +43,8 @@
     <ClCompile Include="DirectSound.cpp" />
     <ClCompile Include="DirectSoundBuffer.cpp" />
     <ClCompile Include="DirectWrite.cpp" />
+    <ClCompile Include="DirectWriteFontCollectionLoader.cpp" />
+    <ClCompile Include="DirectWriteFontFileLoader.cpp" />
     <ClCompile Include="DrawingLine.cpp" />
     <ClCompile Include="DrawingMesh.cpp" />
     <ClCompile Include="DrawingModel.cpp" />
@@ -138,6 +140,7 @@
     <ClInclude Include="Ladder.h" />
     <ClInclude Include="matrix4x4.h" />
     <ClInclude Include="Medal.h" />
+    <ClInclude Include="memory.h" />
     <ClInclude Include="Missile.h" />
     <ClInclude Include="OggVorbisFile.h" />
     <ClInclude Include="Player.h" />

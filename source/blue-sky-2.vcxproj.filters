@@ -186,6 +186,12 @@
     <ClCompile Include="Rocket.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
+    <ClCompile Include="DirectWriteFontFileLoader.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectWriteFontCollectionLoader.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -425,6 +431,7 @@
     <ClInclude Include="Rocket.h">
       <Filter>GameObject</Filter>
     </ClInclude>
+    <ClInclude Include="memory.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

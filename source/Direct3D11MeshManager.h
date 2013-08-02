@@ -23,7 +23,7 @@ private:
 
 public:
 	Direct3D11MeshManager( Direct3D11* );
-	~Direct3D11MeshManager();
+	virtual ~Direct3D11MeshManager();
 
 	Mesh* load( const char*, const char* );
 	Mesh* get( const char* ) const;

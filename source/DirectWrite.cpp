@@ -2,6 +2,8 @@
 #include "DirectWriteFontCollectionLoader.h"
 #include "DirectX.h"
 
+#include "memory.h"
+
 #pragma comment( lib, "d2d1.lib" )
 #pragma comment( lib, "dwrite.lib" )
 
@@ -102,6 +104,8 @@ void DirectWrite::draw_text_common( FLOAT left, FLOAT top, FLOAT right, FLOAT bo
 
 FLOAT DirectWrite::get_text_height( const WCHAR* text, FLOAT w, FLOAT h ) const
 {
+	return 10.f;
+
 	std::wstring ws = text;
 
 	IDWriteTextLayout* text_layout;

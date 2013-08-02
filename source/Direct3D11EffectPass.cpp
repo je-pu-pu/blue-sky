@@ -4,6 +4,8 @@
 
 #include "include/d3dx11effect.h"
 
+#include "memory.h"
+
 Direct3D11EffectPass::Direct3D11EffectPass( Direct3D* direct_3d, ID3DX11EffectPass* pass )
 	: direct_3d_( direct_3d )
 	, pass_( pass )

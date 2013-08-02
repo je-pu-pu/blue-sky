@@ -6,6 +6,8 @@
 #include <common/exception.h>
 #include <common/math.h>
 
+#include "memory.h"
+
 Direct3D11Material::Direct3D11Material( Direct3D11* direct_3d )
 	: direct_3d_( direct_3d )
 	, index_buffer_( 0 )

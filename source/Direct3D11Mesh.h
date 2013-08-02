@@ -173,7 +173,7 @@ protected:
 
 public:
 	Direct3D11Mesh( Direct3D* );
-	~Direct3D11Mesh();
+	virtual ~Direct3D11Mesh();
 
 	bool load_obj( const char_t* );
 	bool load_fbx( const char_t*, FbxFileLoader*, common::safe_ptr< SkinningAnimationSet >& );

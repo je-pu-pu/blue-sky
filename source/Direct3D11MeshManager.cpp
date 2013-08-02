@@ -9,6 +9,8 @@
 
 #include <string>
 
+#include "memory.h"
+
 Direct3D11MeshManager::Direct3D11MeshManager( Direct3D11* direct_3d )
 	: direct_3d_( direct_3d )
 {

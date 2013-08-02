@@ -7,6 +7,8 @@
 
 #include <win/Rect.h>
 
+#include "memory.h"
+
 Direct3D11Sprite::Color Direct3D11Sprite::white_( 1, 1, 1, 1 );
 
 Direct3D11Sprite::Direct3D11Sprite( Direct3D* direct_3d )

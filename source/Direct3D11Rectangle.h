@@ -11,7 +11,7 @@ class Direct3D11Rectangle : public Direct3D11Mesh
 {
 public:
 	Direct3D11Rectangle( Direct3D11* );
-	~Direct3D11Rectangle() { }
+	virtual ~Direct3D11Rectangle() { }
 
 }; // class Direct3D11Rectangle
 

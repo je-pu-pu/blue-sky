@@ -68,6 +68,14 @@ void Balloon::restart()
 	get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
 }
 
+void Balloon::kill()
+{
+	ActiveObject::kill();
+
+	// 影響のの無い場所に退避させる
+	set_location( 0.f, -100.f, 0.f );
+}
+
 /**
  * オブジェクトが表示されるかを返す
  *

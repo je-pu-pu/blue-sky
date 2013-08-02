@@ -81,7 +81,7 @@ void Robot::update()
 		// get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.8f, 0, 0, -0.25f ) );
 		get_animation_player()->play( "Walk", false, true );
 
-		if ( is_visible_in_blink( 4.f ) )
+		if ( is_visible_in_blink( 2.f ) )
 		{
 			texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-error" );
 		}

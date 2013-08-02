@@ -28,6 +28,8 @@ private:
 	bool is_hard() const { return false; }
 	bool is_balloon() const { return true; }
 
+	void kill() override;
+
 public:
 	Balloon();
 	~Balloon() { }

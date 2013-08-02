@@ -6,8 +6,7 @@
 class DirectWriteFontFileLoader : public IDWriteFontFileLoader
 {
 private:
-    ULONG				ref_count_;
-	static IDWriteFontFileLoader* instance_;
+    ULONG ref_count_;
 
 public:
 	DirectWriteFontFileLoader()
@@ -55,10 +54,7 @@ public:
 
 	virtual HRESULT STDMETHODCALLTYPE CreateStreamFromKey( const void* file_path, UINT32 file_path_length, OUT IDWriteFontFileStream** font_file_stream );
 
-	static IDWriteFontFileLoader* GetLoader()
-	{
-		return instance_;
-	}
+	static IDWriteFontFileLoader* GetLoader();
 
 }; // class DirectWriteFontFileLoader
 

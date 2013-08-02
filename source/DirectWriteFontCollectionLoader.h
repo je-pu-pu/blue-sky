@@ -7,7 +7,6 @@ class DirectWriteFontCollectionLoader : public IDWriteFontCollectionLoader
 {
 private:
     ULONG ref_count_;
-	static IDWriteFontCollectionLoader* instance_;
 
 public:
 	DirectWriteFontCollectionLoader()
@@ -55,10 +54,7 @@ public:
 
     virtual HRESULT STDMETHODCALLTYPE CreateEnumeratorFromKey( IDWriteFactory* factory, const void* file_path, UINT32 file_path_length, OUT IDWriteFontFileEnumerator** font_file_enumrator );
 
-    static IDWriteFontCollectionLoader* GetLoader()
-	{
-		return instance_;
-	}
+    static IDWriteFontCollectionLoader* GetLoader();
 
 }; // class DirectWriteFontCollectionLoader
 

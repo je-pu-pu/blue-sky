@@ -3,9 +3,12 @@
 
 #include "memory.h"
 
-IDWriteFontCollectionLoader* DirectWriteFontCollectionLoader::instance_(
-	new DirectWriteFontCollectionLoader()
-);
+IDWriteFontCollectionLoader* DirectWriteFontCollectionLoader::GetLoader()
+{
+	static IDWriteFontCollectionLoader* instance = new DirectWriteFontCollectionLoader();
+
+	return instance;
+}
 
 HRESULT STDMETHODCALLTYPE DirectWriteFontCollectionLoader::CreateEnumeratorFromKey( IDWriteFactory* factory, const void* file_path, UINT32 file_path_length, OUT IDWriteFontFileEnumerator** font_file_enumrator )
 {

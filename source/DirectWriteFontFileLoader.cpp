@@ -3,9 +3,12 @@
 
 #include "memory.h"
 
-IDWriteFontFileLoader* DirectWriteFontFileLoader::instance_(
-	new DirectWriteFontFileLoader()
-);
+IDWriteFontFileLoader* DirectWriteFontFileLoader::GetLoader()
+{
+	static IDWriteFontFileLoader* instance = new DirectWriteFontFileLoader();
+
+	return instance;
+}
 
 HRESULT STDMETHODCALLTYPE DirectWriteFontFileLoader::CreateStreamFromKey( const void* file_path, UINT32 file_path_length, OUT IDWriteFontFileStream** font_file_stream )
 {

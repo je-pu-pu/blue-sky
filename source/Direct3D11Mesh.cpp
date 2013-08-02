@@ -107,6 +107,17 @@ Direct3D11Mesh::Material* Direct3D11Mesh::get_material_at_last( bool force )
 }
 
 /**
+ * マテリアルの一覧の中から指定したインデックスのマテリアルを取得する
+ *
+ * @param index マテリアルのインデックス
+ * @return マテリアル or 0
+ */
+game::Material* Direct3D11Mesh::get_material_at( uint_t index )
+{
+	return get_material_at( index, false );
+}
+
+/**
  * OBJ ファイルを読み込む
  *
  * @param file_name OBJ ファイル名

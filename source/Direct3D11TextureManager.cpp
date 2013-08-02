@@ -50,7 +50,7 @@ Direct3D11TextureManager::Texture* Direct3D11TextureManager::load( const char* n
 		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "file open failed. " ) + file_name );
 	}
 	
-	Texture* texture = new Texture( view );
+	Texture* texture = new Texture( direct_3d_, view );
 	texture_list_[ name ] = texture;
 
 	return texture;

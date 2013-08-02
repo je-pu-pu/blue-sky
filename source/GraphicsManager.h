@@ -9,6 +9,13 @@
 class SkinningAnimationSet;
 class FbxFileLoader;
 
+namespace game
+{
+
+class Texture;
+
+}
+
 namespace blue_sky
 {
 
@@ -22,6 +29,7 @@ class DrawingLine;
 class GraphicsManager : public game::GraphicsManager
 {
 public:
+	typedef game::Texture Texture;
 
 private:
 	common::auto_ptr< FbxFileLoader> fbx_file_loader_;
@@ -38,8 +46,8 @@ public:
 
 	DrawingMesh* load_drawing_mesh( const char_t*, common::safe_ptr< SkinningAnimationSet >& );
 	DrawingLine* load_drawing_line( const char_t* );
-
-	// Texture* load_texture(();
+	
+	virtual Texture* get_texture( const char_t* ) = 0;
 
 }; // class GraphicsManager
 

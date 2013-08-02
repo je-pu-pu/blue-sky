@@ -30,6 +30,8 @@ public:
 	DrawingMesh* create_drawing_mesh();
 	DrawingLine* create_drawing_line();
 
+	Texture* get_texture( const char_t* );
+
 }; // class GraphicsManager
 
 } // namespace game

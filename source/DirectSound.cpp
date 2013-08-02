@@ -27,8 +27,8 @@ DirectSound::DirectSound( HWND hwnd )
 
 	// 3D 
 	DIRECT_X_FAIL_CHECK( primary_buffer_->QueryInterface( IID_IDirectSound3DListener8, reinterpret_cast< void** >( & listener_ ) ) );
-	DIRECT_X_FAIL_CHECK( listener_->SetDopplerFactor( 1.f, DS3D_DEFERRED ) );
-	DIRECT_X_FAIL_CHECK( listener_->SetRolloffFactor( 0.5f, DS3D_DEFERRED ) );
+	DIRECT_X_FAIL_CHECK( listener_->SetDopplerFactor( DS3D_DEFAULTDOPPLERFACTOR , DS3D_DEFERRED ) );
+	DIRECT_X_FAIL_CHECK( listener_->SetRolloffFactor( 0.25f, DS3D_DEFERRED ) );
 
 	/*
 	PCMWAVEFORMAT format = { 0 };

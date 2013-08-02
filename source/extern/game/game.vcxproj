@@ -122,6 +122,8 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="GraphicsManager.h" />
     <ClInclude Include="MainLoop.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundFile.h" />
     <ClInclude Include="SoundManager.h" />

@@ -250,7 +250,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* a
 			ID3D11ShaderResourceView* text_view = 0;
 			DIRECT_X_FAIL_CHECK( device_->CreateShaderResourceView( text_texture_, & view_desc, & text_view ) );
 
-			text_view_ = new Texture( text_view );
+			text_view_ = new Texture( this, text_view );
 		}
 	}
 

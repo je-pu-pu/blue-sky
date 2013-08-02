@@ -9,7 +9,7 @@
 Direct3D11Material::Direct3D11Material( Direct3D11* direct_3d )
 	: direct_3d_( direct_3d )
 	, index_buffer_( 0 )
-	, texture_resource_view_( 0 )
+	, texture_( 0 )
 	, index_count_( 0 )
 {
 
@@ -50,19 +50,34 @@ void Direct3D11Material::clear_index_list()
 	index_list_.clear();
 }
 
+/**
+ * テクスチャを読み込む
+ *
+ * @param file_name テクスチャファイル名
+ */
 void Direct3D11Material::load_texture( const char* file_name )
 {
-	std::string texture_file_name = file_name; // boost::filesystem::basename( boost::filesystem::path( file_name ) ) + ".png";
-	texture_resource_view_ = direct_3d_->getTextureManager()->load( texture_file_name.c_str(), texture_file_name.c_str() )->get_shader_resource_view();
+	texture_ = direct_3d_->getTextureManager()->load( file_name, file_name );
+}
+
+game::Texture* Direct3D11Material::get_texture()
+{
+	return texture_;
+}
+
+void Direct3D11Material::set_texture( game::Texture* texture )
+{
+	texture_ = texture;
 }
 
 void Direct3D11Material::render() const
 {
 	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_, IndexBufferFormat, 0 );
-	direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & texture_resource_view_ );
 
-	// ID3D11ShaderResourceView* text_view = direct_3d_->getTextView();
-	// direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & text_view );
+	if ( texture_ )
+	{
+		texture_->bind_to_ps( 0 );
+	}
 
 	direct_3d_->getImmediateContext()->DrawIndexed( index_count_, 0, 0 );
 }

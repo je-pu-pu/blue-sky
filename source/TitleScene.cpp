@@ -178,8 +178,6 @@ void TitleScene::render()
 
 	get_direct_3d()->getSprite()->end();
 
-	
-
 	// render_logo()
 	{
 		get_direct_3d()->setInputLayout( "line" );

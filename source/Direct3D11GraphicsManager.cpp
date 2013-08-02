@@ -1,5 +1,7 @@
 #include "Direct3D11GraphicsManager.h"
 #include "Direct3D11Mesh.h"
+#include "Direct3D11TextureManager.h"
+#include "Direct3D11.h"
 
 #include "DrawingMesh.h"
 #include "DrawingLine.h"
@@ -65,6 +67,16 @@ DrawingMesh* Direct3D11GraphicsManager::create_drawing_mesh()
 DrawingLine* Direct3D11GraphicsManager::create_drawing_line()
 {
 	return new DrawingLine( direct_3d_ );
+}
+
+/**
+ * 指定した名前のテクスチャを取得する
+ *
+ * @param name テクスチャ名
+ */
+Direct3D11GraphicsManager::Texture* Direct3D11GraphicsManager::get_texture( const char_t* name )
+{
+	return direct_3d_->getTextureManager()->load( name, ( string_t( "media/model/" ) + name + ".png" ).c_str() );
 }
 
 } // namespace blue_sky

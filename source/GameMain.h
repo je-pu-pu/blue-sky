@@ -97,6 +97,7 @@ protected:
 	bool									is_display_fps_;		///< FPS •\Ž¦ƒtƒ‰ƒO
 
 	void check_scene_transition();
+	void setup_scene( const string_t& );
 
 public:
 	GameMain();

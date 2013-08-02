@@ -73,7 +73,7 @@ namespace blue_sky
 {
 
 // Direct3D11Vector GamePlayScene::light_position_( 0.f, -1.f, -0.1f );
-Direct3D11Vector GamePlayScene::light_position_( 0.25f, 1.f, -0.5f );
+Direct3D11Vector GamePlayScene::light_position_( 0.25f, 1.f, -1.f );
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
@@ -507,10 +507,13 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			size_map[ "board-1"      ] = ActiveObject::Vector3(  4.f,   0.2f,  0.8f  );
 
 			size_map[ "box-5x5x5"    ] = ActiveObject::Vector3(  5.f,  5.f,  5.f );
+			size_map[ "box-2x2x2"    ] = ActiveObject::Vector3(  2.f,  2.f,  2.f );
 
 			std::map< string_t, float_t > mass_map;
 			mass_map[ "soda-can-1"   ] = 50.f;
 			mass_map[ "board-1"      ] = 20.f;
+			mass_map[ "box-5x5x5"    ] = 1.f;
+			mass_map[ "box-2x2x2"    ] = 100.f;
 
 			float w = 0.f, h = 0.f, d = 0.f, mass = 0.f;
 			
@@ -570,6 +573,11 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			object->set_mass( mass );
 			get_active_object_manager()->add_active_object( object );
+
+			if ( object_name == "box-2x2x2" )
+			{
+				object->get_rigid_body()->setFriction( 10 );
+			}
 		}
 		else if ( name == "translation-object" )
 		{
@@ -1736,7 +1744,8 @@ void GamePlayScene::render_debug_shadow_map_window() const
 		
 		bind_object_constant_buffer();
 
-		rectangle_->get_material_list().front()->set_shader_resource_view( shadow_map_->getShaderResourceView() );
+		Texture t( get_direct_3d(), shadow_map_->getShaderResourceView() );
+		rectangle_->get_material_list().front()->set_texture( & t );
 		rectangle_->render();
 	}
 }

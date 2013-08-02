@@ -4,9 +4,14 @@
 #include "AnimationPlayer.h"
 
 #include "DrawingModel.h"
+#include "DrawingMesh.h"
 #include "DrawingLine.h"
 
+
 #include "ActiveObjectPhysics.h"
+
+#include "GameMain.h"
+#include "GraphicsManager.h"
 
 #include <common/math.h>
 
@@ -20,7 +25,8 @@ Robot::Robot()
 	, mode_( MODE_STAND )
 	, timer_( 0 )
 {
-	
+	GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
+	GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-error" );
 }
 
 void Robot::restart()
@@ -32,6 +38,8 @@ void Robot::restart()
 	
 	mode_ = MODE_STAND;
 	timer_ = 0;
+
+	get_drawing_model()->get_mesh()->get_material_at( 0 )->set_texture( GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" ) );
 }
 
 void Robot::update()
@@ -69,6 +77,7 @@ void Robot::update()
 		if ( caluclate_target_lost() )
 		{
 			mode_ = MODE_STAND;
+			get_drawing_model()->get_mesh()->get_material_at( 0 )->set_texture( GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" ) );
 		}
 
 		play_sound( "robot-chase", false, false );
@@ -86,6 +95,7 @@ void Robot::update()
 			timer_ = 0.f;
 
 			play_sound( "robot-found", false, false );
+			get_drawing_model()->get_mesh()->get_material_at( 0 )->set_texture( GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" ) );
 		}
 	}
 	else if ( mode_ == MODE_ATTENTION )
@@ -109,11 +119,13 @@ void Robot::update()
 			mode_ = MODE_CHASE;
 
 			play_sound( "robot-found", false, false );
+			get_drawing_model()->get_mesh()->get_material_at( 0 )->set_texture( GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-error" ) );
 		}
 	}
 	else if ( mode_ == MODE_SHUTDOWN )
 	{
 		set_velocity( get_velocity() * 0.5f );
+		get_drawing_model()->get_mesh()->get_material_at( 0 )->set_texture( GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" ) );
 	}
 }
 

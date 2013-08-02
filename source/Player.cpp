@@ -534,7 +534,7 @@ void Player::update_step_speed()
 		// slow walk
 		step_speed_ = math::chase( step_speed_, get_max_walk_step_speed(), 0.01f );
 	}
-	else
+	else if ( get_velocity().length() > 1.f )
 	{
 		// run
 		step_speed_ = math::chase( step_speed_, get_max_run_step_speed(), 0.001f );
@@ -747,7 +747,7 @@ void Player::clamber()
 {
 	if ( can_clamber() )
 	{
-		set_velocity( Vector3( 0.f, 2.f, 0.f ) + get_front() * 4.f );
+		set_velocity( Vector3( 0.f, 2.f, 0.f ) + get_front() * 2.f );
 
 		if ( ! is_clambering() )
 		{

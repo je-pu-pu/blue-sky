@@ -113,22 +113,36 @@ GameMain::GameMain()
 	sound_manager_->load( "cancel" );
 	sound_manager_->load( "click" );
 
-	get_sound_manager()->push_group( "title" );
-
 	active_object_manager_ = new ActiveObjectManager();
 	drawing_model_manager_ = new DrawingModelManager();
-
-	// Scene
-	scene_ = new TitleScene( this );
-	scene_->set_name( "title" );
-
-	// scene_ = new StoryTextScene( this, "media/stage/8.outro", "title" );
-	// scene_->set_name( "stage_outro" );
 
 	// MainLoop
 	main_loop_ = new MainLoop( 60 );
 
 	is_display_fps_ = config_->get( "video.display_fps", 0 ) != 0;
+
+	// Scene
+	if ( get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
+	{
+		setup_scene( "title" );
+	}
+	else
+	{
+		if ( get_save_data()->get< int >( "stage.0-1", 0 ) > 0 )
+		{
+			set_stage_name( "0-2" );
+		}
+		else if ( get_save_data()->get< int >( "stage.0-0", 0 ) > 0 )
+		{
+			set_stage_name( "0-1" );
+		}
+		else
+		{
+			set_stage_name( "0-0" );
+		}
+
+		setup_scene( "stage_intro" );
+	}
 }
 
 //■デストラクタ
@@ -253,40 +267,50 @@ void GameMain::check_scene_transition()
 
 		sound_manager_->pop_group();
 
-		if ( next_scene == "title" )
-		{
-			scene_ = new TitleScene( this );
-		}
-		else if ( next_scene == "stage_select" )
-		{
-			scene_ = new StageSelectScene( this );
-		}
-		else if ( next_scene == "stage_intro" )
-		{
-			scene_ = new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".intro" ).c_str(), "game_play" );
-		}
-		else if ( next_scene == "game_play" )
-		{
-			scene_ = new GamePlayScene( this );
-		}
-		else if ( next_scene == "stage_outro" )
-		{
-			scene_ = new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".outro" ).c_str(), "stage_select" );
-		}
-		else
-		{
-			COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " ) + next_scene );
-		}
-
-		sound_manager_->push_group( next_scene.c_str() );
-
-		scene_->set_name( next_scene );
-		scene_->set_next_stage_name( get_stage_name() );
-
-		get_app()->clip_cursor( scene_->is_clip_cursor_required() );
+		setup_scene( next_scene );
 
 		save_data_->save_file( "save/blue-sky.save" );
 	}
+}
+
+/**
+ * シーンを準備する
+ *
+ * @param scene_name シーン名
+ */
+void GameMain::setup_scene( const string_t& scene_name )
+{
+	sound_manager_->push_group( scene_name.c_str() );
+
+	if ( scene_name == "title" )
+	{
+		scene_ = new TitleScene( this );
+	}
+	else if ( scene_name == "stage_select" )
+	{
+		scene_ = new StageSelectScene( this );
+	}
+	else if ( scene_name == "stage_intro" )
+	{
+		scene_ = new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".intro" ).c_str(), "game_play" );
+	}
+	else if ( scene_name == "game_play" )
+	{
+		scene_ = new GamePlayScene( this );
+	}
+	else if ( scene_name == "stage_outro" )
+	{
+		scene_ = new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".outro" ).c_str(), "stage_select" );
+	}
+	else
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " ) + scene_name );
+	}
+
+	scene_->set_name( scene_name );
+	scene_->set_next_stage_name( get_stage_name() );
+
+	get_app()->clip_cursor( scene_->is_clip_cursor_required() );
 }
 
 float_t GameMain::get_elapsed_time() const

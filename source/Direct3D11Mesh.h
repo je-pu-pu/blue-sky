@@ -2,9 +2,8 @@
 #define DIRECT_3D_11_MESH_H
 
 #include "type.h"
-#include "Direct3D11Matrix.h"
 
-#include <game/GraphicsManager.h>
+#include <game/Mesh.h>
 
 #include <common/safe_ptr.h>
 #include <common/math.h>
@@ -181,6 +180,8 @@ public:
 	
 	Material* get_material_at( int, bool force = true );
 	Material* get_material_at_last( bool force = true );
+
+	game::Material* get_material_at( uint_t );
 
 	SkinningAnimationSet* setup_skinning_animation_set();
 	

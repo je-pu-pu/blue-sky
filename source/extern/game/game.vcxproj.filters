@@ -9,6 +9,8 @@
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="GraphicsManager.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="Mesh.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SoundManager.cpp" />

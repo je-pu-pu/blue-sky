@@ -1,4 +1,4 @@
-bgm empty
+bgm twinkle
 collision 2-1.obj
 
 sky-box sky-box-3
@@ -28,7 +28,9 @@ balloon 35.500000 20.0 -50.0 0 0 90
 goal -5.0 39.0 15.0
 girl 15.0 20.0 -64.0 180
 player 15.0 20.0 -65.0
-object box-5x5x5 10.0 17.0 -65.0 
+dynamic-object box-2x2x2 12.0 20.0 -67.0 
+dynamic-object box-2x2x2 13.0 25.0 -67.0 
+dynamic-object box-2x2x2 25.0 32.0 -67.0 
 
 rocket 17.0 20.0 -65.0
 

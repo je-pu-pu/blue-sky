@@ -2,9 +2,18 @@
 #define DIRECT_3D_11_MATERIAL_H
 
 #include "type.h"
+#include <game/Material.h>
 #include <d3d11.h>
 #include <xnamath.h>
 #include <vector>
+
+namespace game
+{
+
+class Material;
+class Texture;
+
+}
 
 class Direct3D11;
 
@@ -12,7 +21,7 @@ class Direct3D11;
  * Direct3D11Mesh ‚Ìƒ}ƒeƒŠƒAƒ‹
  *
  */
-class Direct3D11Material
+class Direct3D11Material : public game::Material
 {
 public:
 	typedef WORD Index;
@@ -22,9 +31,9 @@ public:
 
 protected:
 	Direct3D11*					direct_3d_;
-
+	
 	ID3D11Buffer*				index_buffer_;
-	ID3D11ShaderResourceView*	texture_resource_view_;
+	game::Texture*				texture_;
 
 	IndexList					index_list_;
 	uint_t						index_count_;
@@ -38,10 +47,10 @@ public:
 	void create_index_buffer();
 	void clear_index_list();
 
-	void load_texture( const char* );
+	void load_texture( const char_t* );
 
-	ID3D11ShaderResourceView* get_shader_resource_view() { return texture_resource_view_; }
-	void set_shader_resource_view( ID3D11ShaderResourceView* view ) { texture_resource_view_ = view; }
+	game::Texture* get_texture();
+	void set_texture( game::Texture* );
 
 	IndexList& get_index_list() { return index_list_; }
 	const IndexList& get_index_list() const { return index_list_; }

@@ -19,6 +19,11 @@ bool DrawingMesh::load_fbx( const char_t* file_name, FbxFileLoader* loader, comm
 	return mesh_->load_fbx( file_name, loader, skinning_animation_set );
 }
 
+DrawingMesh::Material* DrawingMesh::get_material_at( uint_t index )
+{
+	return mesh_->get_material_at( index );
+}
+
 void DrawingMesh::render() const
 {
 	mesh_->render();

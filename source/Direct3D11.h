@@ -1,6 +1,7 @@
 #ifndef DIRECT_3D_11_H
 #define DIRECT_3D_11_H
 
+#include "DirectX.h"
 #include "type.h"
 #include <common/auto_ptr.h>
 
@@ -57,6 +58,8 @@ public:
 	typedef std::map< const char*, InputLayout* >		InputLayoutList;
 
 private:
+	com_ptr< IDXGIAdapter1 >	dxgi_adapter_;
+
 	ID3D11Device*				device_;				///< Direct3D 11 Device
 	ID3D11DeviceContext*		immediate_context_;		///< Direct3D 11 Device Context
 	IDXGISwapChain*				swap_chain_;			///< Direct3D 11 Swap Chain
@@ -94,17 +97,25 @@ private:
 	common::auto_ptr< MeshManager >			mesh_manager_;
 	common::auto_ptr< TextureManager >		texture_manager_;
 
-
+	void create_device();
+	void create_swap_chain( IDXGIFactory1*, HWND, uint_t, uint_t, bool, int, int );
 	void create_back_buffer_view();
 	void create_back_buffer_surface();
+	void create_depth_stencil_view();
+	void setup_viewport();
 
+	void log_all_adapter_desc( IDXGIFactory1* );
 	void log_adapter_desc( int, const DXGI_ADAPTER_DESC1& );
+	void log_feature_level();
+
 	void text_out_device_caps( const char*, bool = false );
 
 public:
 	Direct3D11( HWND, int, int, bool, const char* = 0, const char* = 0, int = 0, int = 0 );
 	~Direct3D11();
 	
+	void setup_font();
+
 	void create_default_input_layout();
 
 	void reset( bool = false );

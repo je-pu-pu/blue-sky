@@ -82,6 +82,11 @@ GameMain::GameMain()
 	direct_3d_->getEffect()->load( "media/shader/main.fx" );
 	direct_3d_->create_default_input_layout();
 
+	if ( get_config()->get( "video.font_enabled", 1 ) )
+	{
+		direct_3d_->setup_font();
+	}
+
 	game_constant_buffer_ = new GameConstantBuffer( direct_3d_.get() );
 	frame_constant_buffer_ = new FrameConstantBuffer( direct_3d_.get() );
 	frame_drawing_constant_buffer_ = new FrameDrawingConstantBuffer( direct_3d_.get() );

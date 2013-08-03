@@ -623,7 +623,7 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 	
 	if ( shadow_tex_coord.z >= depth.x || diffuse <= 0.5f )
 	{
-		diffuse -= 0.75f;
+		diffuse *= 0.5f;
 	}
 
 	diffuse = max( 0.f, diffuse );

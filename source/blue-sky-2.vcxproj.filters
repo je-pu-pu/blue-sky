@@ -99,26 +99,11 @@
     <ClCompile Include="TranslationObject.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="GamePlayScene.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="StageSelectScene.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="StoryTextScene.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="TitleScene.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
     <ClCompile Include="DrawingModel.cpp">
       <Filter>Drawing</Filter>
     </ClCompile>
     <ClCompile Include="DrawingModelManager.cpp">
       <Filter>Drawing</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="Sound.cpp">
       <Filter>Sound</Filter>
@@ -191,6 +176,21 @@
     </ClCompile>
     <ClCompile Include="DirectWriteFontCollectionLoader.cpp">
       <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePlayScene.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="StageSelectScene.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="StoryTextScene.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="TitleScene.cpp">
+      <Filter>Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -314,18 +314,6 @@
     <ClInclude Include="TranslationObject.h">
       <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="GamePlayScene.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="StoryTextScene.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="StageSelectScene.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="TitleScene.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
     <ClInclude Include="DrawingModelManager.h">
       <Filter>Drawing</Filter>
     </ClInclude>
@@ -334,9 +322,6 @@
     </ClInclude>
     <ClInclude Include="DrawingModel.h">
       <Filter>Drawing</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="StreamingSound.h">
       <Filter>Sound</Filter>
@@ -432,6 +417,21 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="memory.h" />
+    <ClInclude Include="TitleScene.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePlayScene.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="StageSelectScene.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="StoryTextScene.h">
+      <Filter>Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -494,11 +494,11 @@
     <None Include="media\stage\2-0.stage">
       <Filter>Scenario</Filter>
     </None>
+    <None Include="media\stage\2-2.stage">
+      <Filter>Scenario</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Scene">
-      <UniqueIdentifier>{c1b2cae5-d8ba-4f95-ad74-68bb60ecd2db}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Drawing">
       <UniqueIdentifier>{d58a8a69-eed5-4380-a305-29b0e553d17d}</UniqueIdentifier>
     </Filter>

@@ -92,7 +92,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Sound
 	{
-
 		balloon_bgm_ = get_sound_manager()->load_music( "balloon" );
 
 		get_sound_manager()->load_3d_sound( "enemy" );
@@ -177,12 +176,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	if ( ! sky_box_ )
 	{
 		sky_box_ = new SkyBox( get_direct_3d(), "sky-box-3" );
-	}
-
-	if ( ! ground_ )
-	{
-		ground_ = get_graphics_manager()->create_mesh();
-		ground_->load_obj( "media/model/ground.obj" );
 	}
 
 	if ( ! far_billboards_ )
@@ -480,6 +473,18 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			{
 				sky_box_ = new SkyBox( get_direct_3d(), sky_box_name.c_str(), sky_box_ext.c_str() );
 			}
+		}
+		else if ( name == "ground" )
+		{
+			string_t ground_name;
+			ss >> ground_name;
+
+			if ( ! ground_ )
+			{
+				ground_ = get_graphics_manager()->create_mesh();				
+			}
+			
+			ground_->load_obj( ( string_t( "media/model/" ) + ground_name + ".obj" ).c_str() );
 		}
 		else if ( name == "far-billboards" )
 		{
@@ -879,19 +884,17 @@ void GamePlayScene::update_main()
 				}
 			}
 		}
-		else if ( get_input()->press( Input::A ) )
+		else if ( get_input()->push( Input::JUMP ) )
+		{
+			player_->jump();
+		}
+		else if ( get_input()->press( Input::A ) || get_input()->press( Input::JUMP ) )
 		{
 			player_->clamber();
 		}
 		else
 		{
 			player_->stop_clamber();
-		}
-
-		if ( get_input()->push( Input::B ) )
-		{
-			// player_->super_jump();
-			// camera_->set_fov_target( 15.f );
 		}
 
 		int wheel = get_input()->pop_mouse_wheel_queue();
@@ -933,7 +936,7 @@ void GamePlayScene::update_main()
 		else
 		{
 			get_direct_3d()->getFader()->set_color( Direct3D::Color( 0.25f, 0.f, 0.f, 0.75f ) );
-			get_direct_3d()->getFader()->fade_out( 0.05f );
+			get_direct_3d()->getFader()->fade_out( 0.25f );
 		}
 	}
 }
@@ -1330,6 +1333,7 @@ void GamePlayScene::render_sky_box() const
 		}
 
 		// ground
+		if ( ground_ )
 		{
 			object_constant_buffer_data.world = XMMatrixIdentity();
 

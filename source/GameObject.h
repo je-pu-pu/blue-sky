@@ -79,6 +79,7 @@ public:
 	virtual void update_transform();
 	
 	virtual bool is_hard() const { return true; }
+	virtual bool is_block() const { return is_hard(); }
 	virtual bool is_balloon() const { return false; }
 	virtual bool is_dynamic_object() const { return false; }
 

@@ -77,19 +77,15 @@ void Input::load_config( Config& config )
 	load_key_code_config( config, UP,    "input.key.up",    "W" );
 	load_key_code_config( config, DOWN,  "input.key.down",  "S" );
 	
-	load_key_code_config( config, A,     "input.key.a", "MOUSE_L SPACE" );
-	load_key_code_config( config, B,     "input.key.b", "MOUSE_R" );
-	load_key_code_config( config, X,     "input.key.x", "1" );
-	load_key_code_config( config, Y,     "input.key.y", "2" );
+	load_key_code_config( config, A,     "input.key.a",     "MOUSE_L" );
+	load_key_code_config( config, B,     "input.key.b",     "MOUSE_R" );
+	load_key_code_config( config, JUMP,   "input.key.jump", "SPACE"   );
 
 	load_key_code_config( config, L,     "input.key.l", "Q" );
 	load_key_code_config( config, R,     "input.key.r", "E" );
 
 	joystick_code_[ A ] = 1 << ( config.get( "input.joystick.a", 1 ) - 1 );
 	joystick_code_[ B ] = 1 << ( config.get( "input.joystick.b", 3 ) - 1 );
-	
-	joystick_code_[ X ] = 1 << ( config.get( "input.joystick.x", 2 ) - 1 );
-	joystick_code_[ Y ] = 1 << ( config.get( "input.joystick.y", 4 ) - 1 );
 	
 	joystick_code_[ L ] = 1 << ( config.get( "input.joystick.l", 5 ) - 1 );
 	joystick_code_[ R ] = 1 << ( config.get( "input.joystick.r", 6 ) - 1 );
@@ -169,9 +165,6 @@ void Input::update()
 	
 		if ( joy_info_.dwButtons & joystick_code_[ A ] ) state_[ A ] |= 1;
 		if ( joy_info_.dwButtons & joystick_code_[ B ] ) state_[ B ] |= 1;
-
-		if ( joy_info_.dwButtons & joystick_code_[ X ] ) state_[ X ] |= 1;
-		if ( joy_info_.dwButtons & joystick_code_[ Y ] ) state_[ Y ] |= 1;
 	
 		if ( joy_info_.dwButtons & joystick_code_[ L ] ) state_[ L ] |= 1;
 		if ( joy_info_.dwButtons & joystick_code_[ R ] ) state_[ R ] |= 1;

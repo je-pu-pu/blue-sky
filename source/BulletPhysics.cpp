@@ -1,4 +1,5 @@
 #include "BulletPhysics.h"
+#include <common/exception.h>
 
 #include <vector>
 #include <fstream>
@@ -258,19 +259,14 @@ bool BulletPhysics::load_obj( const char_t* file_name )
 		delete *i;
 	}
 	
+	if ( triangle->getNumTriangles() <= 0 )
 	{
-		/*
-		btConvexShape* convex_shape = new btConvexTriangleMeshShape( triangle );
-		btShapeHull* hull = new btShapeHull( convex_shape );
-		hull->buildHull( convex_shape->getMargin() );
-		
-		btConvexHullShape* shape = new btConvexHullShape;
+		delete triangle;
 
-		for ( int n = 0; n < hull->numVertices(); ++n )
-		{
- 			shape->addPoint( hull->getVertexPointer()[ n ] );
-		}
-		*/
+		COMMON_THROW_EXCEPTION_MESSAGE( string_t( "empty triangles : " ) + file_name );
+	}
+
+	{
 
 		btBvhTriangleMeshShape* shape = new btBvhTriangleMeshShape( triangle, true );
 		collision_shape_list_.push_back( shape );

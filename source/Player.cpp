@@ -136,6 +136,7 @@ void Player::update()
 		// ロケット
 		if ( ( get_location() - action_base_position_ ).length() >= get_rocket_action_length() )
 		{
+			stop_sound( "rocket" );
 			play_sound( "rocket-burst" );
 			set_action_mode( ACTION_MODE_NONE );
 			is_jumping_ = true;
@@ -288,13 +289,19 @@ void Player::update_jumpable()
 {
 	is_jumpable_ = false;
 
+	if ( action_mode_ == ACTION_MODE_BALLOON || action_mode_ == ACTION_MODE_ROCKET )
+	{
+		is_jumpable_ = true;
+		return;
+	}
+
 	// ジャンプ直後と着地直後はジャンプできない
 	if ( abs( get_velocity().y() ) > 3.f )
 	{
 		return;
 	}
 
-	is_jumpable_ = is_on_footing() || is_on_ladder() || action_mode_ == ACTION_MODE_BALLOON;
+	is_jumpable_ = is_on_footing() || is_on_ladder();
 }
 
 void Player::update_on_footing()
@@ -406,12 +413,12 @@ public:
 			return 1.f;
 		}
 
-		if ( go1 && ! go1->is_hard() )
+		if ( go1 && ! go1->is_block() )
 		{
 			return 1.f;
 		}
 
-		if ( go2 && ! go2->is_hard() )
+		if ( go2 && ! go2->is_block() )
 		{
 			return 1.f;
 		}
@@ -464,6 +471,11 @@ void Player::update_can_clamber()
 	can_clamber_ = false;
 
 	if ( ! is_facing_to_block() )
+	{
+		return;
+	}
+
+	if ( get_last_footing_height() - get_location().y() > 5.f )
 	{
 		return;
 	}
@@ -660,7 +672,7 @@ bool Player::is_ladder_step_only() const
 
 void Player::step( float_t s )
 {
-	if ( is_uncontrollable() )
+	if ( is_uncontrollable() || is_rocketing() )
 	{
 		return;
 	}
@@ -673,7 +685,7 @@ void Player::step( float_t s )
 
 void Player::side_step( float_t s )
 {
-	if ( is_uncontrollable() )
+	if ( is_uncontrollable() || is_rocketing() )
 	{
 		return;
 	}
@@ -788,12 +800,10 @@ void Player::stop_clamber()
  */
 void Player::add_direction_degree( float d )
 {
-	/*
 	if ( is_rocketing() )
 	{
 		return;
 	}
-	*/
 
 	set_direction_degree( get_direction_degree() + d );
 

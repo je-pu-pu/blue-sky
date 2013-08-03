@@ -73,6 +73,11 @@ void Camera::update_with_player( const Player* player )
 	position_.x() = player->get_transform().getOrigin().x() + player->get_front().x() * player->get_eye_depth(); // * player->get_collision_depth() * 0.5f;
 	position_.y() = player->get_transform().getOrigin().y() + player->get_eye_height();
 	position_.z() = player->get_transform().getOrigin().z() + player->get_front().z() * player->get_eye_depth(); // * player->get_collision_depth() * 0.5f;
+
+	if ( player->is_dead() )
+	{
+		rotate_degree_target().z() = ( 1.5f - player->get_eye_height() ) / 1.5f * -90.f;
+	}
 }
 
 void Camera::set_fov( float fov )

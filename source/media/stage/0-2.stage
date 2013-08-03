@@ -1,54 +1,25 @@
 bgm ending
+collision 0-2.obj
 
 sky-box sky-box-3
-far-billboards stage-0-0-far-billboards
+ground ground
+object stage-0-2 0 0 0
 
-player 0 200 0
-goal 0 200 100
-
-# object ground 0 0 0
-
-object building-200 0 0 -25
-object building-200 0 0 125
-
-object box-5x5x5 0 190 10
-object box-5x5x5 0 180 20
-object box-5x5x5 0 170 30
-object box-5x5x5 0 160 40
-object box-5x5x5 0 150 50
-
-translation-object  0 175 60 0 30 0 0.2
-
-object box-5x5x5 0 180 66
-
-translation-object -6 185 70 0 20 0 0.3
-translation-object +6 195 70 0 20 0 0.5
-
-object box-5x5x5 0 200 75
-
-object box-5x5x5 0 190 80
-object box-5x5x5 0 180 90
-
-translation-object -6 150 50 0 0 10 0.3
-translation-object -12 150 50 0 10 0 0.3
-translation-object -18 150 50 0 0 10 0.3
-translation-object -24 150 50 0 10 0 0.3
-translation-object -30 150 50 0 0 20 0.3
-
-medal -30 155 50
-
-translation-object -24 150 60 0  0 20 0.3
-translation-object -18 150 75 0 10  0 0.3
-translation-object -12 150 90 0  0 20 0.3
-
-
-balloon 0 185   90
-balloon 0 187.5 90
-balloon 0 190   90
-balloon 0 192.5 90
-balloon 0 195   90
-balloon 0 197.5 90
-balloon 0 200   90
-balloon 0 202.5 90
-balloon 0 205   90
-balloon 0 205   95
+rocket -15.000000 60.0 -57.0 0 0 90
+rocket 0.000000 70.0 -35.0 0 0 90
+balloon -15.000000 70.0 -46.0 0 0 90
+rocket 35.000000 70.0 15.0 0 0 90
+rocket 35.000000 80.0 0.0 0 0 90
+rocket 35.000000 80.0 -10.0 0 0 90
+balloon -25.000000 80.0 25.0 0 0 90
+balloon -15.000000 80.0 25.0 0 0 90
+balloon -5.000000 80.0 25.0 0 0 90
+balloon 5.000000 80.0 25.0 0 0 90
+balloon 15.000000 80.0 25.0 0 0 90
+balloon 25.000000 80.0 25.0 0 0 90
+balloon 35.000000 80.0 -25.0 0 0 90
+player 0.0 70.0 -68.0 60
+balloon 25.000000 80.0 -35.0 0 0 90
+rocket 35.000000 70.0 -35.0 0 0 90
+goal 0.0 99.0 0.0
+medal -35.000000 85.0 37.0 0 0 90

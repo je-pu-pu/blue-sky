@@ -1,0 +1,15 @@
+bgm twinkle
+
+sky-box sky-box-sky
+ground ground
+
+ladder 21.899999618530273 25.0 -68.0 90
+ladder 21.899999618530273 20.0 -69.0 90
+
+medal 42.500000 25.0 -60.0 0 0 0
+goal -5.0 39.0 15.0
+girl 15.0 20.0 -64.0 180
+player 0 500.0 0
+balloon 0 300 0
+balloon 10 200 10
+balloon -10 100 -10

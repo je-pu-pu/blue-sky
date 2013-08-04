@@ -43,7 +43,8 @@ void Robot::restart()
 
 	get_rigid_body()->setAngularFactor( 0 );
 	get_rigid_body()->setFriction( 0 );
-	
+	set_mass( 50.f );
+
 	mode_ = MODE_STAND;
 	timer_ = 0;
 
@@ -264,6 +265,7 @@ void Robot::on_collide_with( Player* )
 	}
 
 	shutdown();
+	play_sound( "switch-off", false, false );
 }
 
 void Robot::on_collide_with( Stone* stone )
@@ -276,6 +278,7 @@ void Robot::on_collide_with( Stone* stone )
 	if ( stone->is_moving_to( this ) )
 	{
 		shutdown();
+		play_sound( "switch-off", false, false );
 	}
 }
 

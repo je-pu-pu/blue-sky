@@ -70,20 +70,22 @@ void BulletPhysics::clear()
 
 	for ( int n = 0; n < collision_shape_list_.size(); n++ )
 	{
-		btCollisionShape* shape = collision_shape_list_[ n ];
-		collision_shape_list_[ n ] = 0;
-		delete shape;
+		delete collision_shape_list_[ n ];
+	}
+
+	for ( auto i = mesh_list_.begin(); i != mesh_list_.end(); ++i )
+	{
+		delete *i;
 	}
 
 	collision_shape_list_.clear();
+	mesh_list_.clear();
 }
 
 btRigidBody* BulletPhysics::add_ground_rigid_body( const btVector3& box )
 {
 	// create_ground_shape()
 	btCollisionShape* ground = new btBoxShape( box );
-	btAlignedObjectArray<btCollisionShape*> collision_shape_list_;
-
 	collision_shape_list_.push_back( ground );
 
 	// create_ground_rigid_body()
@@ -113,10 +115,6 @@ btRigidBody* BulletPhysics::add_ground_rigid_body( const btVector3& box )
  */
 btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, bool is_static )
 {
-	// 
-	// btCompoundShape* compound_shape = new btCompoundShape();
-	// collision_shape_list_.push_back( compound_shape );
-
 	// create_box_shape()
 	btBoxShape* shape = new btBoxShape( box );
 	collision_shape_list_.push_back( shape );
@@ -266,8 +264,9 @@ bool BulletPhysics::load_obj( const char_t* file_name )
 		COMMON_THROW_EXCEPTION_MESSAGE( string_t( "empty triangles : " ) + file_name );
 	}
 
-	{
+	mesh_list_.push_back( triangle );
 
+	{
 		btBvhTriangleMeshShape* shape = new btBvhTriangleMeshShape( triangle, true );
 		collision_shape_list_.push_back( shape );
 

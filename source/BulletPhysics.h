@@ -3,6 +3,7 @@
 
 #include "type.h"
 #include <btBulletDynamicsCommon.h>
+#include <list>
 
 /**
  * Bullet のラッパークラス
@@ -12,6 +13,8 @@ class BulletPhysics
 {
 public:
 	typedef btAlignedObjectArray< btCollisionShape* > CollisionShapeArray;
+	typedef std::list< btStridingMeshInterface* > MeshList;
+
 	typedef btVector3						Vector3;
 	typedef btTransform						Transform;
 
@@ -23,6 +26,7 @@ protected:
 	btDiscreteDynamicsWorld*				dynamics_world_;
 
 	CollisionShapeArray						collision_shape_list_;
+	MeshList								mesh_list_;
 
 public:
 	BulletPhysics();

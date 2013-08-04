@@ -95,6 +95,18 @@ void GameObject::set_velocity( const Vector3& v )
 	get_rigid_body()->setInterpolationLinearVelocity( v );
 }
 
+bool GameObject::is_moving_to( const GameObject* o ) const
+{
+	Vector3 v = get_velocity();
+	v.normalize();
+	v *= 0.01f;
+
+	float_t current_length = ( o->get_location() - get_location() ).length();
+	float_t next_length = ( o->get_location() - ( get_location() + v ) ).length();
+
+	return next_length < current_length;
+}
+
 void GameObject::on_collide_with( GameObject* o )
 {
 	o->on_collide_with( this );

@@ -2,8 +2,8 @@
 #define BLUE_SKY_PLAYER_H
 
 #include "ActiveObject.h"
-
 #include <common/math.h>
+#include <list>
 
 namespace blue_sky
 {
@@ -29,9 +29,12 @@ public:
 		ITEM_TYPE_NONE = -1,
 		ITEM_TYPE_ROCKET = 0,
 		ITEM_TYPE_UMBRELLA,
+		ITEM_TYPE_STONE,
 		ITEM_TYPE_SCOPE,
 		ITEM_TYPE_MAX
 	};
+
+	typedef std::list< Stone* > StoneList;
 
 private:
 	bool		is_on_footing_;			///< 現在足場上フラグ
@@ -70,6 +73,7 @@ private:
 
 	Ladder*		ladder_;				///< 現在接触している梯子
 	Balloon*	balloon_;				///< 現在持っている風船
+	StoneList	stone_list_;			///< 現在持っている石のリスト
 
 	int			hp_;					///< HP
 
@@ -116,30 +120,31 @@ protected:
 
 	bool is_uncontrollable() const { return uncontrollable_timer_ > 0.f; }
 
-	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
-	void on_collide_with( Balloon* );
-	void on_collide_with( Rocket* );
-	void on_collide_with( Medal* );
-	void on_collide_with( Robot* );
-	void on_collide_with( Ladder* );
+	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
+	void on_collide_with( Balloon* ) override;
+	void on_collide_with( Rocket* ) override;
+	void on_collide_with( Medal* ) override;
+	void on_collide_with( Robot* ) override;
+	void on_collide_with( Ladder* ) override;
+	void on_collide_with( Stone* ) override;
 
 public:
 	Player();
 	~Player() { }
 
-	float_t get_collision_width() const { return 0.5f; }
-	float_t get_collision_height() const { return 1.75f; }
-	float_t get_collision_depth() const { return 0.5f; }
+	float_t get_collision_width() const override { return 0.5f; }
+	float_t get_collision_height() const override { return 1.75f; }
+	float_t get_collision_depth() const override { return 0.5f; }
 
 	float_t get_step_speed() const { return step_speed_; }
 
 	float_t get_last_footing_height() const { return last_footing_height_; }
 
-	void restart();
+	void restart() override;
 
 	/// 更新
-	void update();
-	void update_transform();
+	void update() override;
+	void update_transform() override;
 	
 	// 移動
 	void step( float_t );
@@ -166,6 +171,7 @@ public:
 	bool is_ladder_step_only() const;
 
 	void rocket( const Vector3& );
+	void throw_stone( const Vector3& );
 
 	void damage( const Vector3& );
 	void kill();

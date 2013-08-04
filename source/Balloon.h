@@ -17,16 +17,17 @@ public:
 	float flicker_;
 
 private:
-	float_t get_collision_width() const { return 1.5f; }
-	float_t get_collision_height() const { return 1.5f; }
-	float_t get_collision_depth() const { return 1.5f; }
+	float_t get_collision_width() const override { return 1.5f; }
+	float_t get_collision_height() const override { return 1.5f; }
+	float_t get_collision_depth() const override { return 1.5f; }
 	
-	float_t get_height_offset() const { return 0.f; }
+	float_t get_height_offset() const override { return 0.f; }
 
-	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
+	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
+	void on_collide_with( Stone* ) override;
 
-	bool is_hard() const { return false; }
-	bool is_balloon() const { return true; }
+	bool is_hard() const override { return false; }
+	bool is_balloon() const override { return true; }
 
 	void kill() override;
 
@@ -34,17 +35,17 @@ public:
 	Balloon();
 	~Balloon() { }
 
-	virtual void set_drawing_model( const DrawingModel* m );
+	virtual void set_drawing_model( const DrawingModel* m ) override;
 
 	/// çXêV
-	void update();
+	void update() override;
 
-	void restart();
+	void restart() override;
 	
 	void set_player( const Player* p ) { player_ = p; flicker_ = 0.f; }
 	const Player* get_player() const { return player_; }
 
-	bool is_visible() const;
+	bool is_visible() const override;
 
 }; // class Balloon
 

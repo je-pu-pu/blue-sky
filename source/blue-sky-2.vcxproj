@@ -71,10 +71,13 @@
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="StageSelectScene.cpp" />
     <ClCompile Include="StaticeObject.cpp" />
+    <ClCompile Include="Stone.cpp" />
     <ClCompile Include="StoryTextScene.cpp" />
     <ClCompile Include="StreamingSound.cpp" />
+    <ClCompile Include="Switch.cpp" />
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="TranslationObject.cpp" />
+    <ClCompile Include="Umbrella.cpp" />
     <ClCompile Include="vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -154,11 +157,14 @@
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="StageSelectScene.h" />
     <ClInclude Include="StaticObject.h" />
+    <ClInclude Include="Stone.h" />
     <ClInclude Include="StoryTextScene.h" />
     <ClInclude Include="StreamingSound.h" />
+    <ClInclude Include="Switch.h" />
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="TranslationObject.h" />
     <ClInclude Include="type.h" />
+    <ClInclude Include="Umbrella.h" />
     <ClInclude Include="vector3.h" />
   </ItemGroup>
   <ItemGroup>

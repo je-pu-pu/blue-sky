@@ -86,4 +86,10 @@ bool Balloon::is_visible() const
 	return ActiveObject::is_visible() && ( ! player_ || ! player_->is_action_pre_finish() || is_visible_in_blink( 6.f / 1.f ) );
 }
 
+void Balloon::on_collide_with( Stone* )
+{
+	kill();
+	play_sound( "balloon-burst" );
+}
+
 } // namespace blue_sky

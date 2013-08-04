@@ -5,6 +5,7 @@
 #include "Rocket.h"
 #include "Medal.h"
 #include "Robot.h"
+#include "Stone.h"
 
 #include "DrawingModel.h"
 #include "DrawingLine.h"
@@ -92,6 +93,7 @@ void Player::restart()
 
 	ladder_ = nullptr;
 	balloon_ = nullptr;
+	stone_list_.clear();
 
 	hp_ = 1;
 
@@ -845,6 +847,29 @@ void Player::rocket( const Vector3& direction )
 	play_sound( "rocket" );
 }
 
+void Player::throw_stone( const Vector3& direction )
+{
+	if ( get_item_count( ITEM_TYPE_STONE ) <= 0 )
+	{
+		return;
+	}
+	
+	Stone* stone = stone_list_.back();
+	stone_list_.pop_back();
+	item_count_[ ITEM_TYPE_STONE ]--;
+
+	if ( item_count_[ ITEM_TYPE_STONE ] <= 0 )
+	{
+		selected_item_type_ = ITEM_TYPE_NONE;
+	}
+
+	stone->restart();
+	stone->set_location( get_location() + ( get_front() * get_collision_depth() ) + Vector3( 0.f, get_eye_height(), 0.f ) );
+	stone->set_velocity( direction * 8.f );
+
+	play_sound( "stone-throw" );
+}
+
 void Player::damage( const Vector3& to )
 {
 	uncontrollable_timer_ = 1.5f;
@@ -951,6 +976,16 @@ void Player::on_collide_with( Rocket* rocket )
 	selected_item_type_ = ITEM_TYPE_ROCKET;
 
 	play_sound( "rocket-get" );
+}
+
+void Player::on_collide_with( Stone* stone )
+{
+	item_count_[ ITEM_TYPE_STONE ]++;
+	selected_item_type_ = ITEM_TYPE_STONE;
+
+	stone_list_.push_back( stone );
+
+	play_sound( "stone-get" );
 }
 
 void Player::on_collide_with( Medal* medal )

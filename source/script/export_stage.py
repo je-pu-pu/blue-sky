@@ -40,7 +40,7 @@ def export_stage():
 		if r > 0:
 			r = 360 - r;
 		
-		if name == "robot" or name == "balloon" or name == "rocket" or name == "umbrella" or name == "medal":
+		if name == "robot" or name == "balloon" or name == "rocket" or name == "umbrella" or name == "medal" or name == "stone":
 			text += name + " "
 			text += "%f " % ( o.location[ 0 ] )
 			text += str( o.location[ 2 ] ) + " "

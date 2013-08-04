@@ -16,18 +16,23 @@ public:
 	float flicker_;
 
 private:
-	float get_collision_width() const { return 2.f; }
-	float get_collision_height() const { return 2.f; }
-	float get_collision_depth() const { return 2.f; }
+	bool is_hard() const override { return false; }
+
+	float get_collision_width() const override { return 2.f; }
+	float get_collision_height() const override { return 2.f; }
+	float get_collision_depth() const override { return 2.f; }
+
+	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
+	void on_collide_with( Player* ) override;
 
 public:
 	Umbrella();
 	~Umbrella() { }
 
 	/// XV
-	void update();
+	void update() override;
 
-	void restart();
+	void restart() override;
 	
 }; // class Umbrella
 

@@ -192,6 +192,15 @@
     <ClCompile Include="TitleScene.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="Stone.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Switch.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Umbrella.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -431,6 +440,15 @@
     </ClInclude>
     <ClInclude Include="StoryTextScene.h">
       <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Stone.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Switch.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Umbrella.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

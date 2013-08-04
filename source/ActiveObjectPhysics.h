@@ -30,6 +30,7 @@ public:
 
 	bool is_collision( ActiveObject*, ActiveObject* );
 	void check_collision_with( ActiveObject* );
+	void check_collision_all();
 	void check_collision_dynamic_object();
 
 }; // class ActiveObjectPhysics

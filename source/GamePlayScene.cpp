@@ -13,8 +13,11 @@
 #include "Rocket.h"
 #include "Umbrella.h"
 #include "Medal.h"
+#include "Stone.h"
+#include "Switch.h"
 #include "Ladder.h"
 #include "Camera.h"
+
 
 #include "DrawingModelManager.h"
 #include "DrawingModel.h"
@@ -119,10 +122,20 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 		get_sound_manager()->load( "balloon-get" );
 		get_sound_manager()->load( "balloon-burst" );
+
 		get_sound_manager()->load( "rocket-get" );
 		get_sound_manager()->load( "rocket" );
 		get_sound_manager()->load( "rocket-burst" );
+
 		get_sound_manager()->load( "umbrella-get" );
+		get_sound_manager()->load( "umbrella-open" );
+
+		get_sound_manager()->load( "stone-get" );
+		get_sound_manager()->load( "stone-throw" );
+
+		get_sound_manager()->load( "switch-on" );
+		get_sound_manager()->load( "switch-off" );
+
 		get_sound_manager()->load( "medal-get" );
 
 		get_sound_manager()->load_3d_sound( "soda-can-long-1" );
@@ -654,17 +667,21 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			active_object = new Rocket();
 			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
 		}
-		/*
 		else if ( name == "umbrella" )
 		{
 			active_object = new Umbrella();
+			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
 		}
-		
-		else if ( name == "poison" )
+		else if ( name == "stone" )
 		{
-			active_object = new Poison();
+			active_object = new Stone();
+			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
 		}
-		*/
+		else if ( name == "switch" )
+		{
+			active_object = new Switch();
+			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
+		}
 
 		if ( active_object )
 		{
@@ -747,7 +764,8 @@ void GamePlayScene::update()
 		on_goal();
 	}
 	
-	get_physics()->check_collision_dynamic_object();
+	get_physics()->check_collision_all();
+	// get_physics()->check_collision_dynamic_object();
 
 	get_sound_manager()->set_listener_position( camera_->position() );
 	// get_sound_manager()->set_listener_velocity( player_->get_velocity() );
@@ -866,6 +884,7 @@ void GamePlayScene::update_main()
 			{
 				case Player::ITEM_TYPE_NONE: player_->jump(); break;
 				case Player::ITEM_TYPE_ROCKET: player_->rocket( Player::Vector3( camera_->front().x(), camera_->front().y(), camera_->front().z() ) ); break;
+				case Player::ITEM_TYPE_STONE: player_->throw_stone( Player::Vector3( camera_->front().x(), camera_->front().y(), camera_->front().z() ) ); break;
 				// case Player::ITEM_TYPE_UMBRELLA: player_->start_umbrella_mode(); player_->jump(); break;
 				case Player::ITEM_TYPE_SCOPE:
 				{
@@ -1556,12 +1575,6 @@ void GamePlayScene::render_sprite()
 
 				get_direct_3d()->getSprite()->draw( dst_point, ui_texture_, src_rect.get_rect() );
 			}
-
-			// aim
-			win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );
-			win::Point dst_point( ( get_width() - src_rect.width() ) / 2, ( get_height() - src_rect.height() ) / 2 );
-			
-			get_direct_3d()->getSprite()->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 		}
 		else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_UMBRELLA )
 		{
@@ -1579,12 +1592,33 @@ void GamePlayScene::render_sprite()
 				get_direct_3d()->getSprite()->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 			}
 		}
+		else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_STONE )
+		{
+			for ( int n = 0; n < player_->get_item_count( Player::ITEM_TYPE_STONE ); n++ )
+			{
+				const int offset = n * 20;
+
+				win::Rect src_rect = win::Rect::Size( 256, 96, 128, 96 );
+				win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - 5 - offset );
+				
+				get_direct_3d()->getSprite()->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+			}
+		}
 		else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_SCOPE )
 		{
 			win::Rect src_rect = win::Rect::Size( 256, 256, 192, 140 );
 			win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - 5 );
 
 			get_direct_3d()->getSprite()->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+		}
+
+		if ( player_->get_selected_item_type() == Player::ITEM_TYPE_ROCKET || player_->get_selected_item_type() == Player::ITEM_TYPE_STONE )
+		{
+			// aim
+			win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );
+			win::Point dst_point( ( get_width() - src_rect.width() ) / 2, ( get_height() - src_rect.height() ) / 2 );
+			
+			get_direct_3d()->getSprite()->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.5f ) );
 		}
 
 		if ( player_->has_medal() )

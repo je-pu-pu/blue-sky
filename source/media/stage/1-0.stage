@@ -1,52 +1,25 @@
 bgm road 123
-collision 0-0.obj
+collision 1-0.obj
 
 sky-box sky-box-3
-// far-billboards stage-0-0-drawing-far-billboards
+ground ground
+object stage-1-0
 
-player 50 0 0
-goal 0 0 30
-
-// object stage-0 0 0 0
-object stage-1-1 0 0 0
-
-god 65 0 2
-
-robot 66 0 2
-// robot 67 0 2
-// robot 68 0 2
-// robot 69 0 2
-
-// robot 66 0 3
-// robot 67 0 3
-// robot 68 0 3
-// robot 69 0 3
-// robot 70 0 3
-
-// robot 66 0 4
-// robot 67 0 4
-// robot 68 0 4
-// robot 69 0 4
-// robot 70 0 4
-// robot 71 0 4
-
-// robot 66 0 5
-// robot 67 0 5
-// robot 68 0 5
-// robot 69 0 5
-// robot 70 0 5
-// robot 71 0 5
-// robot 72 0 5
-
-dynamic-object soda-can-1 63.5 0 1.8
-
-object rocket 66 0 4
-object missile 67 1 4
-
-balloon 43 22 8
-
-object tree-1 57 0 8
-object tree-1 57 0 4
-
-object tree-1 67 0 8
-object tree-1 68 0 6
+balloon -20.000000 1.0 -2.0 0 0 90
+balloon -20.000000 3.0 -2.0 0 0 90
+balloon -20.000000 5.0 -2.0 0 0 90
+balloon -20.000000 7.0 -2.0 0 0 90
+balloon -20.000000 9.0 -2.0 0 0 90
+balloon -20.000000 11.0 -2.0 0 0 90
+balloon 10.000000 11.0 18.0 0 0 90
+balloon 10.000000 9.0 18.0 0 0 90
+balloon 10.000000 7.0 18.0 0 0 90
+balloon 10.000000 5.0 18.0 0 0 90
+balloon 10.000000 3.0 18.0 0 0 90
+goal -31.0 0.0 -28.0
+player 12.5 1.0 -39.0
+balloon 10.000000 1.0 18.0 0 0 90
+stone 12.500000 0.0 -34.5 0 0 90
+stone 12.500000 0.0 -35.0 0 0 90
+stone 12.500000 0.0 -35.5 0 0 90
+switch 12.500000 0.0 -36. 0 0 90

@@ -24,11 +24,15 @@ class DrawingModel;
 class Player;
 class Balloon;
 class Rocket;
+class Umbrella;
+class Stone;
+class Switch;
 class Medal;
 class Robot;
 class StaticObject;
 class DynamicObject;
 class Ladder;
+
 
 /**
  * ゲーム上に存在する全てのオブジェクトの基底クラス
@@ -94,6 +98,9 @@ public:
 	virtual void on_collide_with( Player* ) { }
 	virtual void on_collide_with( Balloon* ) { }
 	virtual void on_collide_with( Rocket* ) { }
+	virtual void on_collide_with( Umbrella* ) { }
+	virtual void on_collide_with( Stone* ) { }
+	virtual void on_collide_with( Switch* ) { }
 	virtual void on_collide_with( Robot* ) { }
 	virtual void on_collide_with( Medal* ) { }
 	virtual void on_collide_with( StaticObject* ) { }
@@ -118,6 +125,8 @@ public:
 
 	const Vector3& get_velocity() const;
 	void set_velocity( const Vector3& );
+
+	bool is_moving_to( const GameObject* ) const;
 
 }; // class GameObject
 

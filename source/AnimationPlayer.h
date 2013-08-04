@@ -33,7 +33,7 @@ public:
 	AnimationPlayer( const SkinningAnimationSet* );
 	~AnimationPlayer() { }
 
-	void play( const char_t*, bool, bool );
+	void play( const char_t* name, bool force, bool loop );
 	void stop();
 
 	void update();

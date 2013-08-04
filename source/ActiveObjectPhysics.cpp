@@ -116,6 +116,11 @@ class ActiveObjectContactResultCallback : public btCollisionWorld::ContactResult
 public:
 	btScalar addSingleResult( btManifoldPoint& cp, const btCollisionObject* o0,int part_id_0,int index_0, const btCollisionObject* o1, int part_id_1, int index_1 )
 	{
+		return on_collide( o0, o1 );
+	}
+
+	static btScalar on_collide( const btCollisionObject* o0, const btCollisionObject* o1 )
+	{
 		ActiveObject* a0 = reinterpret_cast< ActiveObject* >( o0->getUserPointer() );
 		ActiveObject* a1 = reinterpret_cast< ActiveObject* >( o1->getUserPointer() );
 
@@ -163,6 +168,36 @@ void ActiveObjectPhysics::check_collision_with( ActiveObject* a )
 {
 	ActiveObjectContactResultCallback callback;
 	dynamics_world_->contactTest( a->get_rigid_body(), callback );
+}
+
+void ActiveObjectPhysics::check_collision_all()
+{
+	int numManifolds = dynamics_world_->getDispatcher()->getNumManifolds();
+
+	for ( int i = 0; i < numManifolds; i++ )
+	{
+		btPersistentManifold* contactManifold =  dynamics_world_->getDispatcher()->getManifoldByIndexInternal( i );
+		btCollisionObject* o0 = static_cast< btCollisionObject* >( contactManifold->getBody0() );
+		btCollisionObject* o1 = static_cast< btCollisionObject* >( contactManifold->getBody1() );
+ 
+		int numContacts = contactManifold->getNumContacts();
+
+		for ( int j = 0; j < numContacts; j++ )
+		{
+			btManifoldPoint& pt = contactManifold->getContactPoint( j );
+
+			if ( pt.getDistance() < 0.f )
+			{
+				ActiveObjectContactResultCallback::on_collide( o0, o1 );
+
+				/*
+				const btVector3& ptA = pt.getPositionWorldOnA();
+				const btVector3& ptB = pt.getPositionWorldOnB();
+				const btVector3& normalOnB = pt.m_normalWorldOnB;
+				*/
+			}
+		}
+	}
 }
 
 void ActiveObjectPhysics::check_collision_dynamic_object()

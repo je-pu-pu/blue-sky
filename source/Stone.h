@@ -1,0 +1,39 @@
+#ifndef BLUE_SKY_STONE_H
+#define BLUE_SKY_STONE_H
+
+#include "ActiveObject.h"
+
+namespace blue_sky
+{
+
+/**
+ * êŒ
+ *
+ */
+class Stone : public ActiveObject
+{
+private:
+	bool is_hard() const override { return true; }
+	bool is_block() const override { return false; }
+
+	float get_collision_width()  const override { return 0.2f; }
+	float get_collision_height() const override { return 0.2f; }
+	float get_collision_depth()  const override { return 0.2f; }
+
+	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
+	void on_collide_with( Player* ) override;
+
+public:
+	Stone();
+	~Stone() { }
+
+	/// çXêV
+	void update() override;
+
+	void restart() override;
+	
+}; // class Stone
+
+} // namespace blue_sky
+
+#endif // BLUE_SKY_STONE_H

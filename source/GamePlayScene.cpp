@@ -1177,6 +1177,8 @@ void GamePlayScene::render_text() const
 		ss << L"CAN CLAMBER : " << player_->can_clamber() << std::endl;
 		ss << L"CAN PEER DOWN : " << player_->can_peer_down() << std::endl;
 		ss << L"IS CLAMBERING : " << player_->is_clambering() << std::endl;
+
+		ss << L"IS LADDER STEP ONLY : " << player_->is_ladder_step_only() << std::endl;
 	}
 
 	get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );

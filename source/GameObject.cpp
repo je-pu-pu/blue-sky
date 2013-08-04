@@ -92,10 +92,17 @@ const GameObject::Vector3& GameObject::get_velocity() const
 
 void GameObject::set_velocity( const Vector3& v )
 {
-	get_rigid_body()->setActivationState( true );
+	if ( v == get_velocity() )
+	{
+		return;
+	}
 
 	get_rigid_body()->setLinearVelocity( v );
 	get_rigid_body()->setInterpolationLinearVelocity( v );
+
+	get_rigid_body()->activate();
+	get_rigid_body()->setActivationState( true );
+
 }
 
 bool GameObject::is_moving_to( const GameObject* o ) const

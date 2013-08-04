@@ -62,6 +62,7 @@ void Player::restart()
 
 	get_rigid_body()->setAngularFactor( 0 );
 	get_rigid_body()->setFriction( 0 );
+	set_mass( 50.f );
 
 	is_on_footing_ = false;
 	is_jumping_ = false;
@@ -98,7 +99,6 @@ void Player::restart()
 	hp_ = 1;
 
 	set_last_footing_height_to_current_height();
-	set_mass( 50.f );
 }
 
 /**
@@ -682,7 +682,14 @@ void Player::step( float_t s )
 	step_count_++;
 	update_step_speed();
 
-	set_velocity( get_velocity() + Vector3( ( get_front() * s ).x() * get_step_speed(), 0, ( get_front() * s ).z() * get_step_speed() ) );
+	set_velocity(
+		get_velocity() +
+		Vector3(
+			( get_front() * s ).x() * get_step_speed(),
+			0.f,
+			( get_front() * s ).z() * get_step_speed()
+		)
+	);
 }
 
 void Player::side_step( float_t s )

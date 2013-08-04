@@ -39,23 +39,23 @@ public:
 	virtual ~SoundManager();
 
 	bool is_mute() const { return is_mute_; }
-	virtual void set_mute( bool );
+	virtual void set_mute( bool is_mute );
 
 	float get_volume() const { return volume_; }
-	virtual void set_volume( float v );
+	virtual void set_volume( float volume );
 
-	virtual void push_group( const char_t* );
+	virtual void push_group( const char_t* group_name );
 	virtual void pop_group();
 
-	virtual Sound* load( const char*, const char* );
-	virtual Sound* load_3d_sound( const char*, const char* );
+	virtual Sound* load( const char* name, const char* file_path );
+	virtual Sound* load_3d_sound( const char* name, const char* file_path );
 
-	virtual void unload( const char* );
+	virtual void unload( const char* name );
 	virtual void unload_all();
 
-	virtual Sound* create_sound( const char*, bool ) = 0;
+	virtual Sound* create_sound( const char* file_path, bool is_3d ) = 0;
 
-	virtual Sound* get_sound( const char* ) const;
+	virtual Sound* get_sound( const char* name ) const;
 
 	virtual void update() = 0;
 

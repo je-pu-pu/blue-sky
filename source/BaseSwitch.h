@@ -2,6 +2,7 @@
 #define BLUE_SKY_BASE_SWITCH_H
 
 #include "ActiveObject.h"
+#include <game/TimedCache.h>
 #include <functional>
 #include <list>
 
@@ -15,16 +16,16 @@ namespace blue_sky
 class BaseSwitch : public ActiveObject
 {
 public:
-	enum State { ON = 0, OFF, BROKEN };
+	enum State { OFF = 0, ON, BROKEN };
 
 	typedef std::function< void( void ) > EventHandler;
 	typedef std::list< EventHandler > EventHandlerList;
 	typedef std::map< string_t, EventHandlerList > EventHandlerMap;
 
-	typedef std::map< const GameObject*, float_t > CntactObjectTimerMap;
+	typedef game::TimedCache< const GameObject* > CntactObjectCache;
 private:
 	State state_;
-	CntactObjectTimerMap contact_object_timer_map_; ///< 最近スイッチに接触したオブジェクトの一覧
+	CntactObjectCache contact_object_cache_; ///< 最近スイッチに接触したオブジェクトのキャッシュ
 
 	EventHandlerMap event_handler_map_;
 

@@ -303,7 +303,7 @@ void Player::update_jumpable()
 		return;
 	}
 
-	is_jumpable_ = is_on_footing() || is_on_ladder();
+	is_jumpable_ = is_on_footing() || ( is_on_ladder() && ! is_facing_to_block() );
 }
 
 void Player::update_on_footing()
@@ -737,11 +737,13 @@ void Player::jump()
 		return;
 	}
 
-	set_velocity( Vector3( get_velocity().x(), get_velocity().y() + 4.f, get_velocity().z() ) );
-
 	if ( is_on_ladder() )
 	{
-		set_velocity( get_velocity() + get_front() * 4.f );
+		set_velocity( get_velocity() + Vector3( 0.f, 4.f, 0.f ) + get_front() * 4.f );
+	}
+	else
+	{
+		set_velocity( get_velocity() + Vector3( 0.f, 4.f, 0.f ) );
 	}
 
 	is_jumping_ = true;

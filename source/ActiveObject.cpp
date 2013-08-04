@@ -89,11 +89,6 @@ void ActiveObject::restart()
 	}
 }
 
-void ActiveObject::update()
-{
-
-}
-
 void ActiveObject::limit_velocity()
 {
 	Vector3 v = get_rigid_body()->getLinearVelocity();

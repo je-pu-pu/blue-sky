@@ -48,7 +48,7 @@ public:
 
 	virtual void restart();
 
-	virtual void update();
+	virtual void update() { }
 
 	virtual void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; }
 	virtual const DrawingModel* get_drawing_model() const { return drawing_model_; }

@@ -18,7 +18,7 @@ void BaseSwitch::restart()
 	ActiveObject::restart();
 
 	state_ = OFF;
-	contact_object_timer_map_.clear();
+	contact_object_cache_.clear();
 }
 
 /**
@@ -27,21 +27,7 @@ void BaseSwitch::restart()
  */
 void BaseSwitch::update()
 {
-	//
-
-	for ( auto i = contact_object_timer_map_.begin(); i != contact_object_timer_map_.end(); )
-	{
-		i->second -= get_frame_elapsed_time();
-
-		if ( i->second <= 0.f )
-		{
-			i = contact_object_timer_map_.erase( i );
-		}
-		else
-		{
-			++i;
-		}
-	}
+	contact_object_cache_.update( get_frame_elapsed_time() );
 }
 
 void BaseSwitch::on_collide_with( Player* player )
@@ -51,7 +37,7 @@ void BaseSwitch::on_collide_with( Player* player )
 		do_switch();
 	}
 
-	contact_object_timer_map_[ player ] = 0.5f;
+	contact_object_cache_.cache( player, 0.5f );
 }
 
 void BaseSwitch::on_collide_with( Stone* stone )
@@ -61,7 +47,7 @@ void BaseSwitch::on_collide_with( Stone* stone )
 		do_switch();		
 	}
 
-	contact_object_timer_map_[ stone ] = 0.5f;
+	contact_object_cache_.cache( stone, 0.5f );
 }
 
 bool_t BaseSwitch::do_switch()
@@ -137,14 +123,7 @@ bool_t BaseSwitch::turn_off()
 
 bool_t BaseSwitch::can_game_object_switch( const GameObject* o ) const
 {
-	auto i = contact_object_timer_map_.find( o );
-
-	if ( i == contact_object_timer_map_.end() )
-	{
-		return true;
-	}
-
-	return false;
+	return ! contact_object_cache_.is_cached( o );
 }
 
 } // namespace blue_sky

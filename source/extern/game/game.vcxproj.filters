@@ -11,6 +11,8 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Line.h" />
+    <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="TimedCache.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SoundManager.cpp" />

@@ -207,6 +207,9 @@
     <ClCompile Include="BaseSwitch.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
+    <ClCompile Include="Ladder.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />

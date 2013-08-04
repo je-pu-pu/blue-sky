@@ -127,7 +127,9 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundFile.h" />
+    <ClInclude Include="SoundManager.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="TimedCache.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Config.cpp" />

@@ -137,6 +137,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		get_sound_manager()->load( "switch-on" );
 		get_sound_manager()->load( "switch-off" );
 
+		get_sound_manager()->load( "ladder-contact" );
+
 		get_sound_manager()->load( "medal-get" );
 
 		get_sound_manager()->load_3d_sound( "soda-can-long-1" );

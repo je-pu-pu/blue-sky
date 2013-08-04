@@ -16,7 +16,9 @@
     <ClCompile Include="ActiveObjectPhysics.cpp" />
     <ClCompile Include="AnimationPlayer.cpp" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="AreaSwitch.cpp" />
     <ClCompile Include="Balloon.cpp" />
+    <ClCompile Include="BaseSwitch.cpp" />
     <ClCompile Include="BgSpriteLayer.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -89,7 +91,9 @@
     <ClInclude Include="AnimationKeyFrame.h" />
     <ClInclude Include="AnimationPlayer.h" />
     <ClInclude Include="App.h" />
+    <ClInclude Include="AreaSwitch.h" />
     <ClInclude Include="Balloon.h" />
+    <ClInclude Include="BaseSwitch.h" />
     <ClInclude Include="BgSpriteLayer.h" />
     <ClInclude Include="BoneNode.h" />
     <ClInclude Include="BulletPhysics.h" />

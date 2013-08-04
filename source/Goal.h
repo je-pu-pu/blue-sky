@@ -16,11 +16,13 @@ public:
 
 
 private:
-	float get_collision_width() const { return 4.f; }
-	float get_collision_height() const { return 2.f; }
-	float get_collision_depth() const { return 4.f; }
+	float get_collision_width() const override { return 4.f; }
+	float get_collision_height() const override { return 2.f; }
+	float get_collision_depth() const override { return 4.f; }
 
-	void on_collide_with( GameObject* o ) { }
+	const Vector3& get_default_gravity() const override { return GravityZero; }
+
+	void on_collide_with( GameObject* o ) override { }
 
 public:
 	Goal();

@@ -19,13 +19,15 @@ public:
 private:
 	float_t flicker_;
 
-	float get_collision_width() const { return 0.5f; }
-	float get_collision_height() const { return 1.5f; }
-	float get_collision_depth() const  { return 0.5f; }
+	float get_collision_width() const override { return 0.5f; }
+	float get_collision_height() const override { return 1.5f; }
+	float get_collision_depth() const override { return 0.5f; }
 
-	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
+	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
 
-	bool is_hard() const { return true; }
+	const Vector3& get_default_gravity() const override { return GravityZero; }
+
+	bool is_hard() const override { return true; }
 
 protected:
 

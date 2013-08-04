@@ -20,6 +20,9 @@ private:
 	float get_collision_height() const override { return 0.2f; }
 	float get_collision_depth()  const override { return 0.2f; }
 
+	static Vector3 GravityDefault;
+	const Vector3& get_default_gravity() const override { return GravityDefault; }
+
 	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
 	void on_collide_with( Player* ) override;
 

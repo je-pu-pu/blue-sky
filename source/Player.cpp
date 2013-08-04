@@ -605,11 +605,11 @@ void Player::update_gravity()
 {
 	if ( action_mode_ == ACTION_MODE_BALLOON || action_mode_ == ACTION_MODE_ROCKET || ( is_on_ladder() && ! is_jumping() ) )
 	{
-		get_rigid_body()->setGravity( Vector3( 0, 0, 0 ) );
+		get_rigid_body()->setGravity( GravityZero );
 	}
 	else
 	{
-		get_rigid_body()->setGravity( Vector3( 0, -9.8f, 0 ) );
+		get_rigid_body()->setGravity( get_default_gravity() );
 	}
 }
 
@@ -722,7 +722,7 @@ void Player::ladder_step( float_t s )
 void Player::release_ladder()
 {
 	ladder_ = nullptr;
-	get_rigid_body()->setGravity( Vector3( 0, -9.8f, 0 ) );
+	get_rigid_body()->setGravity( get_default_gravity() );
 }
 
 

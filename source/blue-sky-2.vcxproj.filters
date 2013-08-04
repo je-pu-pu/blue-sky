@@ -201,6 +201,12 @@
     <ClCompile Include="Umbrella.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
+    <ClCompile Include="AreaSwitch.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseSwitch.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -448,6 +454,12 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Umbrella.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="AreaSwitch.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseSwitch.h">
       <Filter>GameObject</Filter>
     </ClInclude>
   </ItemGroup>

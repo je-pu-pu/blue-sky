@@ -51,6 +51,9 @@ public:
 	typedef btRigidBody			RigidBody;
 	typedef btDynamicsWorld		DynamicsWorld;
 
+	static Vector3 GravityDefault;
+	static Vector3 GravityZero;
+
 private:
 	RigidBody*			rigid_body_;		///< RigidBody
 	Transform*			transform_;			///< Transform
@@ -92,6 +95,8 @@ public:
 	virtual float_t get_collision_depth() const = 0;
 	
 	virtual float_t get_height_offset() const { return get_collision_height() * 0.5f; }
+
+	virtual const Vector3& get_default_gravity() const { return is_hard() ? GravityDefault : GravityZero; }
 
 	virtual void on_collide_with( GameObject* );
 

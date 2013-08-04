@@ -1,34 +1,30 @@
 #ifndef BLUE_SKY_SWITCH_H
 #define BLUE_SKY_SWITCH_H
 
-#include "ActiveObject.h"
+#include "BaseSwitch.h"
 
 namespace blue_sky
 {
 
 /**
- * スイッチ
+ * 通常スイッチ
  *
  */
-class Switch : public ActiveObject
+class Switch : public BaseSwitch
 {
 public:
-	enum State { ON = 0, OFF, BROKEN };
 
 private:
-	State state_;
-	float_t state_switching_timer_; ///< 次にスイッチングが可能になるまでの時間
+	bool_t is_hard() const override { return true; }
+	bool_t is_block() const override { return true; }
 
-	bool is_hard() const override { return true; }
-	bool is_block() const override { return true; }
+	float_t get_collision_width()  const override { return 0.6f; }
+	float_t get_collision_height() const override { return 0.9f; }
+	float_t get_collision_depth()  const override { return 0.6f; }
 
-	float get_collision_width()  const override { return 0.6f; }
-	float get_collision_height() const override { return 0.6f; }
-	float get_collision_depth()  const override { return 0.9f; }
-
-	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
-	void on_collide_with( Player* ) override;
-	void on_collide_with( Stone* ) override;
+	void on_turn_on() override;
+	void on_turn_off() override;
+	void on_break() override;
 
 public:
 	Switch();
@@ -38,9 +34,6 @@ public:
 	void update() override;
 
 	void restart() override;
-
-	void do_switch();
-	void do_break();
 	
 }; // class Switch
 

@@ -81,6 +81,8 @@ void ActiveObject::restart()
 		get_rigid_body()->setAngularVelocity( Vector3( 0.f, 0.f, 0.f ) );
 		get_rigid_body()->setInterpolationAngularVelocity( Vector3( 0.f, 0.f, 0.f ) );
 		
+		get_rigid_body()->setGravity( get_default_gravity() );
+
 		get_rigid_body()->clearForces();
 
 		set_direction_degree( start_direction_degree_ );

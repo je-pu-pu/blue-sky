@@ -15,6 +15,7 @@
 #include "Medal.h"
 #include "Stone.h"
 #include "Switch.h"
+#include "AreaSwitch.h"
 #include "Ladder.h"
 #include "Camera.h"
 
@@ -395,6 +396,24 @@ void GamePlayScene::generate_random_stage()
  */
 void GamePlayScene::load_stage_file( const char* file_name )
 {
+	if ( false )
+	{
+		std::list< std::function< void() > > event_list_;
+
+		auto a = [&] ( const string_t& name, bool force, bool loop )
+		{
+			Sound* s = get_sound_manager()->get_sound( name.c_str() );
+			if ( s )
+			{
+				s->play( loop, force );
+			}
+		};
+
+		auto b = [&] () { a( "jump", false, false ); };
+
+		event_list_.push_back( b );
+	}
+
 	std::ifstream in( file_name );
 	
 	if ( ! in.good() )
@@ -679,8 +698,31 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( name == "switch" )
 		{
-			active_object = new Switch();
+			Switch* s = new Switch();
+			s->get_event_handler( "turn-on" ).push_back( [&] { get_sound_manager()->get_sound( "damage-1" )->play( false, false ); } );
+
+			active_object = s;
 			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
+		}
+		else if ( name == "area-switch" )
+		{
+			float_t x = 0.f, y = 0.f, z = 0.f;
+			float_t w = 0.f, h = 0.f, d = 0.f;
+			float_t r = 0.f;
+
+			ss >> x >> y >> z >> w >> h >> d >> r;
+
+			AreaSwitch* s = new AreaSwitch( w, h, d );
+			s->get_event_handler( "turn-on" ).push_back( [&] { get_sound_manager()->get_sound( "damage-1" )->play( false, false ); } );
+
+			DrawingModel* drawing_model = get_drawing_model_manager()->load( name.c_str() );
+			s->set_drawing_model( drawing_model );
+
+			s->set_rigid_body( get_physics()->add_active_object( s ) );
+			s->set_start_location( x, y, z );
+			s->set_start_direction_degree( r );
+
+			get_active_object_manager()->add_active_object( s );
 		}
 
 		if ( active_object )
@@ -741,10 +783,11 @@ void GamePlayScene::update()
 
 	if ( ! is_cleared_ )
 	{
-		get_physics()->update( 1.f / get_main_loop()->get_fps() );
-		// get_physics()->update( get_elapsed_time() );
+		// get_physics()->update( 1.f / get_main_loop()->get_fps() );
+		get_physics()->update( get_elapsed_time() );
 
 		player_->update_transform();
+		goal_->update_transform();
 
 		for ( ActiveObjectManager::ActiveObjectList::iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 		{

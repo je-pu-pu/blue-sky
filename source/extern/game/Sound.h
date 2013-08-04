@@ -68,7 +68,7 @@ public:
 	virtual void set_speed( T ) { };
 
 	/// サウンドを再生する
-	virtual bool play( bool, bool = true ) { return true; };
+	virtual bool play( bool loop, bool force = true ) { return true; };
 
 	/// サウンドが再生中かどうかを取得する
 	virtual bool is_playing() const { return false; }

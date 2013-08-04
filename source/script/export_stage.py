@@ -14,7 +14,7 @@ def export_stage():
 		name = name.replace( "-line", "" )
 
 		# if name[-2:] == "-0":
-		#	name = name[:-2]
+		#   name = name[:-2]
 		
 		if name == "player" or name == "goal":
 			text += name + " "
@@ -40,9 +40,20 @@ def export_stage():
 		if r > 0:
 			r = 360 - r;
 		
+		if name == "area-switch":
+			text += name + " "
+			text += str( o.location[ 0 ] ) + " "
+			text += str( o.location[ 2 ] ) + " "
+			text += str( o.location[ 1 ] ) + " "
+			text += str( o.dimensions[ 0 ] ) + " "
+			text += str( o.dimensions[ 2 ] ) + " "
+			text += str( o.dimensions[ 1 ] ) + " "
+			text += str( r ) + "\n"
+			continue
+
 		if name == "robot" or name == "balloon" or name == "rocket" or name == "umbrella" or name == "medal" or name == "stone":
 			text += name + " "
-			text += "%f " % ( o.location[ 0 ] )
+			text += str( o.location[ 0 ] ) + " "
 			text += str( o.location[ 2 ] ) + " "
 			text += str( o.location[ 1 ] ) + " "
 			text += str( r ) + " " + str( r2 ) + " " + str( r3 )

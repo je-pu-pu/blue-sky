@@ -138,6 +138,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		get_sound_manager()->load( "switch-off" );
 
 		get_sound_manager()->load( "ladder-contact" );
+		get_sound_manager()->load( "ladder-step" );
 
 		get_sound_manager()->load( "medal-get" );
 
@@ -902,15 +903,19 @@ void GamePlayScene::update_main()
 			}
 		}
 
+		bool is_moving_on_ladder = false;
+
 		if ( player_->is_on_ladder() )
 		{
 			if ( get_input()->press( Input::UP ) )
 			{
 				player_->ladder_step( +1.f );
+				is_moving_on_ladder = true;
 			}
 			if ( get_input()->press( Input::DOWN ) )
 			{
 				player_->ladder_step( -1.f );
+				is_moving_on_ladder = true;
 			}
 		}
 		else
@@ -921,6 +926,11 @@ void GamePlayScene::update_main()
 		if ( ! is_moving )
 		{
 			player_->stop();
+		}
+
+		if ( ! is_moving_on_ladder )
+		{
+			player_->stop_ladder_step();
 		}
 
 		if ( get_input()->push( Input::A ) )

@@ -717,6 +717,8 @@ void Player::ladder_step( float_t s )
 	v.setY( math::clamp( v.y(), -get_ladder_step_speed(), get_ladder_step_speed() ) );
 
 	set_velocity( v );
+
+	play_sound( "ladder-step", true, false );
 }
 
 void Player::release_ladder()
@@ -823,6 +825,11 @@ void Player::stop()
 {
 	step_count_ = 0;
 	update_step_speed();
+}
+
+void Player::stop_ladder_step()
+{
+	stop_sound( "ladder-step" );
 }
 
 void Player::rocket( const Vector3& direction )

@@ -163,6 +163,7 @@ public:
 
 	// ’â~
 	void stop();
+	void stop_ladder_step();
 
 	/// •ûŒü‰ÁZ
 	void add_direction_degree( float );

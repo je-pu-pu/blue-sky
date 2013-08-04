@@ -68,8 +68,8 @@ protected:
 
 	void play_animation( const char_t* ) const;
 
-	void play_sound( const char*, bool = false, bool = true ) const;
-	void stop_sound( const char* ) const;
+	void play_sound( const char* name, bool loop = false, bool force = true ) const;
+	void stop_sound( const char* name ) const;
 
 	void fade_in_sound( const char* ) const;
 	void fade_out_sound( const char* ) const;

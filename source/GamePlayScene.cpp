@@ -1649,9 +1649,9 @@ void GamePlayScene::render_sprite()
 		}
 		else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_STONE )
 		{
-			for ( int n = 0; n < player_->get_item_count( Player::ITEM_TYPE_STONE ); n++ )
+			for ( int n = player_->get_item_count( Player::ITEM_TYPE_STONE ) - 1; n >= 0; --n )
 			{
-				const int offset = n * 20;
+				const int offset = n * 50;
 
 				win::Rect src_rect = win::Rect::Size( 256, 96, 128, 96 );
 				win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - 5 - offset );

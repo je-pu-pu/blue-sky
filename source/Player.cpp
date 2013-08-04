@@ -201,7 +201,7 @@ void Player::update()
 		}
 	}
 
-	if ( ! is_falling_to_die() )
+	if ( ! is_falling_to_die() || is_on_ladder() )
 	{
 		stop_sound( "fall" );
 	}

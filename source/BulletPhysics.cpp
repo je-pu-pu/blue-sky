@@ -302,7 +302,7 @@ void BulletPhysics::setConstraint()
 
 void BulletPhysics::update( float time_step )
 {
-	dynamics_world_->stepSimulation( time_step );
+	dynamics_world_->stepSimulation( time_step, 5, 1.f / 120.f );
 
 	dynamics_world_->debugDrawWorld();
 }

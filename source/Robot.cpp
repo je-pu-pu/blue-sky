@@ -1,5 +1,6 @@
 #include "Robot.h"
 #include "Player.h"
+#include "Stone.h"
 
 #include "AnimationPlayer.h"
 
@@ -241,13 +242,8 @@ bool Robot::caluclate_target_visible() const
 	return false;
 }
 
-void Robot::on_collide_with( Player* )
+void Robot::shutdown()
 {
-	if ( mode_ != MODE_STAND )
-	{
-		return;
-	}
-
 	mode_ = MODE_SHUTDOWN;
 
 	stop_sound( "robot-found" );
@@ -258,6 +254,29 @@ void Robot::on_collide_with( Player* )
 	get_animation_player()->play( "Shutdown", false, false );
 
 	set_velocity( Vector3( 0.f, 0.f, 0.f ) );
+}
+
+void Robot::on_collide_with( Player* )
+{
+	if ( mode_ != MODE_STAND )
+	{
+		return;
+	}
+
+	shutdown();
+}
+
+void Robot::on_collide_with( Stone* stone )
+{
+	if ( mode_ != MODE_STAND )
+	{
+		return;
+	}
+
+	if ( stone->is_moving_to( this ) )
+	{
+		shutdown();
+	}
 }
 
 void Robot::render_material_at( uint_t material_index ) const

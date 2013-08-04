@@ -39,11 +39,13 @@ private:
 
 	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 	void on_collide_with( Player* );
+	void on_collide_with( Stone* );
 
 protected:
 	bool caluclate_target_visible() const;
 	bool caluclate_target_lost() const;
 
+	void shutdown();
 
 public:
 	Robot();

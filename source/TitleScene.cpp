@@ -129,31 +129,7 @@ void TitleScene::update()
  */
 void TitleScene::render()
 {
-	{
-		FrameConstantBufferData frame_constant_buffer_data;
-
-		frame_constant_buffer_data.view = XMMatrixTranspose( XMMatrixIdentity() );
-		frame_constant_buffer_data.projection = XMMatrixTranspose( XMMatrixOrthographicLH( 2.f * get_width() / get_height(), 2.f, 0.f, 1.f ) );
-		frame_constant_buffer_data.time = get_total_elapsed_time();
-	
-		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
-	}
-
-	{
-		FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
-
-		frame_drawing_constant_buffer_data.accent = bgm_->get_current_peak_level();
-
-		get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
-	}
-
-	{
-		ObjectConstantBufferData object_constant_buffer_data;
-
-		object_constant_buffer_data.world = XMMatrixTranspose( XMMatrixIdentity() );
-
-		get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
-	}
+	update_constant_buffer_for_sprite_frame();
 
 	get_direct_3d()->clear( Direct3D::Color::from_256( 0xFF, 0xAA, 0x11 ) );
 	get_direct_3d()->getSprite()->begin();
@@ -197,7 +173,7 @@ void TitleScene::render()
 
 			if ( sequence_ == SEQUENCE_LOGO )
 			{
-				brand_logo_model_->get_line()->render_part( static_cast< int >( sequence_elapsed_time_ * 50 ) );
+				brand_logo_model_->get_line()->render_part( static_cast< int >( sequence_elapsed_time_ * 25 ) );
 			}
 			else if ( sequence_ >= SEQUENCE_TITLE_LOGO )
 			{
@@ -227,7 +203,7 @@ void TitleScene::render()
 				}
 				else
 				{
-					title_logo_model_->get_line()->render_part( static_cast< int >( sequence_elapsed_time_ * 50 ) );
+					title_logo_model_->get_line()->render_part( static_cast< int >( sequence_elapsed_time_ * 25 ) );
 				}
 			}
 		}

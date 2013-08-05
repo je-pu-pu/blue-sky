@@ -36,11 +36,6 @@ void DynamicObject::update()
 	// set_direction_degree( get_direction_degree() + 0.1f );
 }
 
-void DynamicObject::update_transform()
-{
-	ActiveObject::update_transform();
-}
-
 void DynamicObject::on_collide_with( Player* o )
 {
 	play_collision_sound( o );

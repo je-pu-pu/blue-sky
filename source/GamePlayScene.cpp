@@ -92,69 +92,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Texture
 	ui_texture_ = get_direct_3d()->getTextureManager()->load( "ui", "media/image/item.png" );
-	// ui_texture_ = get_direct_3d()->getTextureManager()->load( "ui", "media/image/ui.png" );
 
 	// Sound
-	{
-		balloon_bgm_ = get_sound_manager()->load_music( "balloon" );
-
-		get_sound_manager()->load_3d_sound( "enemy" );
-
-		get_sound_manager()->load( "walk" );
-		get_sound_manager()->load( "run" );
-		get_sound_manager()->load( "clamber" );
-		get_sound_manager()->load( "collision-wall" );
-		get_sound_manager()->load( "jump" );
-		get_sound_manager()->load( "short-breath-jump" );
-		get_sound_manager()->load( "land" );
-		get_sound_manager()->load( "short-breath" );
-
-		get_sound_manager()->load( "fall" );
-		get_sound_manager()->load( "damage-1" );
-		get_sound_manager()->load( "dead" );
-
-		get_sound_manager()->load( "balloon-1" );
-		get_sound_manager()->load( "balloon-2" );
-		get_sound_manager()->load( "balloon-3" );
-		get_sound_manager()->load( "balloon-4" );
-		get_sound_manager()->load( "balloon-5" );
-		get_sound_manager()->load( "balloon-6" );
-		get_sound_manager()->load( "balloon-7" );
-
-		get_sound_manager()->load( "balloon-get" );
-		get_sound_manager()->load( "balloon-burst" );
-
-		get_sound_manager()->load( "rocket-get" );
-		get_sound_manager()->load( "rocket" );
-		get_sound_manager()->load( "rocket-burst" );
-
-		get_sound_manager()->load( "umbrella-get" );
-		get_sound_manager()->load( "umbrella-open" );
-
-		get_sound_manager()->load( "stone-get" );
-		get_sound_manager()->load( "stone-throw" );
-
-		get_sound_manager()->load( "switch-on" );
-		get_sound_manager()->load( "switch-off" );
-
-		get_sound_manager()->load( "ladder-contact" );
-		get_sound_manager()->load( "ladder-step" );
-
-		get_sound_manager()->load( "medal-get" );
-
-		get_sound_manager()->load_3d_sound( "soda-can-long-1" );
-		get_sound_manager()->load_3d_sound( "soda-can-long-2" );
-		get_sound_manager()->load_3d_sound( "soda-can-short-1" );
-		get_sound_manager()->load_3d_sound( "soda-can-short-2" );
-		get_sound_manager()->load_3d_sound( "soda-can-short-3" );
-
-		get_sound_manager()->load_3d_sound( "robot-chase" );
-		get_sound_manager()->load_3d_sound( "robot-found" );
-		get_sound_manager()->load_3d_sound( "robot-shutdown" );
-
-		get_sound_manager()->load( "fin" );
-		get_sound_manager()->load( "door" );
-	}
+	load_sound_all( get_stage_name() == "2-3" );
 
 	get_graphics_manager()->setup_loader();
 
@@ -261,6 +201,72 @@ void GamePlayScene::restart()
 	}
 
 	play_sound( "restart" );
+}
+
+void GamePlayScene::load_sound_all( bool is_final_stage )
+{
+	if ( is_final_stage )
+	{
+		get_sound_manager()->load( "fin" );
+		get_sound_manager()->load( "door" );
+	}
+	else
+	{
+		get_sound_manager()->load( "walk" );
+		get_sound_manager()->load( "run" );
+		get_sound_manager()->load( "clamber" );
+		get_sound_manager()->load( "collision-wall" );
+		get_sound_manager()->load( "jump" );
+		get_sound_manager()->load( "short-breath-jump" );
+		get_sound_manager()->load( "land" );
+		get_sound_manager()->load( "short-breath" );
+
+		get_sound_manager()->load( "fall" );
+		get_sound_manager()->load( "damage-1" );
+		get_sound_manager()->load( "dead" );
+
+		get_sound_manager()->load( "balloon-1" );
+		get_sound_manager()->load( "balloon-2" );
+		get_sound_manager()->load( "balloon-3" );
+		get_sound_manager()->load( "balloon-4" );
+		get_sound_manager()->load( "balloon-5" );
+		get_sound_manager()->load( "balloon-6" );
+		get_sound_manager()->load( "balloon-7" );
+
+		get_sound_manager()->load( "balloon-get" );
+		get_sound_manager()->load( "balloon-burst" );
+
+		get_sound_manager()->load( "rocket-get" );
+		get_sound_manager()->load( "rocket" );
+		get_sound_manager()->load( "rocket-burst" );
+
+		get_sound_manager()->load( "umbrella-get" );
+		get_sound_manager()->load( "umbrella-open" );
+
+		get_sound_manager()->load( "stone-get" );
+		get_sound_manager()->load( "stone-throw" );
+
+		get_sound_manager()->load( "switch-on" );
+		get_sound_manager()->load( "switch-off" );
+
+		get_sound_manager()->load( "ladder-contact" );
+		get_sound_manager()->load( "ladder-step" );
+
+		get_sound_manager()->load( "medal-get" );
+
+		get_sound_manager()->load_3d_sound( "soda-can-long-1" );
+		get_sound_manager()->load_3d_sound( "soda-can-long-2" );
+		get_sound_manager()->load_3d_sound( "soda-can-short-1" );
+		get_sound_manager()->load_3d_sound( "soda-can-short-2" );
+		get_sound_manager()->load_3d_sound( "soda-can-short-3" );
+
+		get_sound_manager()->load_3d_sound( "robot-chase" );
+		get_sound_manager()->load_3d_sound( "robot-found" );
+		get_sound_manager()->load_3d_sound( "robot-shutdown" );
+
+		get_sound_manager()->load( "fin" );
+		get_sound_manager()->load( "door" );
+	}
 }
 
 void GamePlayScene::generate_random_stage()
@@ -641,14 +647,15 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			float x = 0, y = 0, z = 0, r = 0;
 			ss >> x >> y >> z >> r;
 
-			Girl* girl = new Girl();
-			girl->set_drawing_model( get_drawing_model_manager()->load( "girl" ) );
-			get_active_object_manager()->add_active_object( girl );
-			girl->set_rigid_body( get_physics()->add_active_object( girl ) );			
+			girl_ = new Girl();
+			girl_->set_player( player_.get() );
+			girl_->set_drawing_model( get_drawing_model_manager()->load( "girl" ) );
+			get_active_object_manager()->add_active_object( girl_.get() );
+			girl_->set_rigid_body( get_physics()->add_active_object( girl_.get() ) );
 
-			girl->set_start_location( x, y, z );
-			girl->set_start_direction_degree( r );
-			girl->setup_animation_player();
+			girl_->set_start_location( x, y, z );
+			girl_->set_start_direction_degree( r );
+			girl_->setup_animation_player();
 		}
 		else if ( name == "robot" )
 		{
@@ -792,7 +799,7 @@ void GamePlayScene::update()
 		player_->update_transform();
 		goal_->update_transform();
 
-		for ( ActiveObjectManager::ActiveObjectList::iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 		{
 			( *i )->update_transform();
 		}
@@ -829,7 +836,10 @@ void GamePlayScene::update()
 
 	if ( action_bgm_after_timer_ > 0.f )
 	{
-		bgm_->fade_out();
+		if ( bgm_ )
+		{
+			bgm_->fade_out();
+		}
 
 		/*
 		if ( balloon_bgm_->is_playing() )
@@ -845,10 +855,16 @@ void GamePlayScene::update()
 	}
 	else
 	{
-		balloon_bgm_->fade_out();
+		if ( balloon_bgm_ )
+		{
+			balloon_bgm_->fade_out();
+		}
 
-		bgm_->play( true, false );
-		bgm_->fade_in();
+		if ( bgm_ )
+		{
+			bgm_->play( true, false );
+			bgm_->fade_in();
+		}
 	}
 
 	update_shadow();
@@ -956,6 +972,17 @@ void GamePlayScene::update_main()
 					}
 					break;
 				}
+			}
+		}
+		else if ( get_input()->push( Input::B ) )
+		{
+			if ( player_->is_flickering() )
+			{
+				player_->stop_flickering();
+			}
+			else
+			{
+				player_->start_flickering();
 			}
 		}
 		else if ( get_input()->push( Input::JUMP ) )
@@ -1225,7 +1252,7 @@ void GamePlayScene::update_render_data_for_frame() const
 	{
 		FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
 
-		frame_drawing_constant_buffer_data.accent = bgm_->get_current_peak_level();
+		frame_drawing_constant_buffer_data.accent = bgm_ ? bgm_->get_current_peak_level() : 0.f;
 
 		get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
 	}

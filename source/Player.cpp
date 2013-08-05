@@ -33,6 +33,7 @@ Player::Player()
 	, is_facing_to_block_( false )
 	, can_clamber_( false )
 	, can_peer_down_( false )
+	, is_flickering_( false )
 	, step_count_( 0 )
 	, step_speed_( 0.25f )
 	, action_mode_( ACTION_MODE_NONE )
@@ -74,6 +75,8 @@ void Player::restart()
 	is_facing_to_block_ = false;
 	can_clamber_ = false;
 	can_peer_down_ = false;
+
+	is_flickering_ = false;
 
 	step_count_ = 0;
 	step_speed_ = 0.25f;
@@ -150,6 +153,11 @@ void Player::update()
 		}
 	}
 
+	if ( is_flickering() )
+	{
+		update_velocity_by_flicker( Vector3( get_location().x(), action_base_position_.y(), get_location().z() ) );
+	}
+
 	if ( ! can_peer_down() )
 	{
 		eye_depth_ *= 0.95f;
@@ -220,19 +228,6 @@ void Player::update()
 
 	// “–‚½‚è”»’è‚Ì‚½‚ß‚ÉƒŠƒZƒbƒg
 	is_on_ladder_ = false;
-}
-
-void Player::update_transform()
-{
-	ActiveObject::update_transform();
-
-	/*
-	if ( get_location().y() < 0.f )
-	{
-		set_location( Vector3( get_location().x(), 0.f, get_location().z() ) );
-		is_on_footing_ = true;
-	}
-	*/
 }
 
 void Player::limit_velocity()
@@ -609,7 +604,7 @@ void Player::update_gravity()
 	}
 	else
 	{
-		get_rigid_body()->setGravity( get_default_gravity() );
+		get_rigid_body()->setGravity( Vector3( 0.f, -2.f, 0.f ) );
 	}
 }
 
@@ -731,7 +726,6 @@ void Player::ladder_step( float_t s )
 void Player::release_ladder()
 {
 	ladder_ = nullptr;
-	get_rigid_body()->setGravity( get_default_gravity() );
 }
 
 
@@ -819,13 +813,6 @@ void Player::add_direction_degree( float d )
 	}
 
 	set_direction_degree( get_direction_degree() + d );
-
-	/*
-	Transform t = get_rigid_body()->getCenterOfMassTransform();
-	t.getRotation().setEulerZYX( 0, get_direction_degree(), 0 );
-
-	get_rigid_body()->setCenterOfMassTransform( t );
-	*/
 }
 
 void Player::stop()

@@ -96,6 +96,9 @@ void ActiveObject::limit_velocity()
 	v.setX( math::clamp( v.x(), -get_max_speed(), get_max_speed() ) );
 	v.setZ( math::clamp( v.z(), -get_max_speed(), get_max_speed() ) );
 
+	// debug
+	// v.setY( math::clamp( v.y(), -0.1f, 0.1f ) );
+
 	set_velocity( v );
 }
 
@@ -121,25 +124,46 @@ void ActiveObject::set_start_direction_degree( float d )
 
 void ActiveObject::set_direction_degree( float d )
 {
-	direction_degree_ = d;
+	{
+		direction_degree_ = d;
 
-	while ( direction_degree_ < 0.f ) direction_degree_ += 360.f;
-	while ( direction_degree_ > 360.f ) direction_degree_ -= 360.f;
+		while ( direction_degree_ < 0.f ) direction_degree_ += 360.f;
+		while ( direction_degree_ > 360.f ) direction_degree_ -= 360.f;
+	}
 
-	Matrix m;
-	m.setEulerZYX( 0, math::degree_to_radian( -direction_degree_ ), 0 );
+	{
+		Matrix m;
+		m.setEulerZYX( 0, math::degree_to_radian( -direction_degree_ ), 0 );
 
-	front_ = Vector3( 0.f, 0.f, 1.f ) * m;
-	right_ = Vector3( 1.f, 0.f, 0.f ) * m;
+		front_ = Vector3( 0.f, 0.f, 1.f ) * m;
+		right_ = Vector3( 1.f, 0.f, 0.f ) * m;
 
-	front_.normalize();
-	right_.normalize();
+		front_.normalize();
+		right_.normalize();
+	}
 
-	Transform t = get_rigid_body()->getCenterOfMassTransform();
+	{
+		Quaternion q;
+		q.setEulerZYX( 0.f, math::degree_to_radian( direction_degree_ ), 0.f );
+		get_transform().setRotation( q );
 
-	m.setEulerZYX( 0.f, math::degree_to_radian( get_direction_degree() ), 0.f );
-	t.setBasis( m );
-	get_rigid_body()->setCenterOfMassTransform( t );
+		commit_transform();
+	}
+}
+
+/**
+ * •ûŒü‚ğw’è‚µ‚½êŠ‚Ì•ûŒü‚É‹ß‚Ã‚¯‚é
+ *
+ * @param location –Ú“I‚ÌêŠ
+ * @param speed ‘¬“x
+ */
+void ActiveObject::chase_direction_to( const Vector3& location, float_t speed )
+{
+	Vector3 relative_position = location - get_location();
+	relative_position.setY( 0 );
+
+	float_t target_direction_degree = math::radian_to_degree( std::atan2( relative_position.x(), relative_position.z() ) );
+	chase_direction_degree( target_direction_degree, speed );
 }
 
 /**

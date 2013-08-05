@@ -9,11 +9,11 @@ FBXHeaderExtension:  {
 	CreationTimeStamp:  {
 		Version: 1000
 		Year: 2013
-		Month: 07
-		Day: 04
-		Hour: 18
-		Minute: 26
-		Second: 34
+		Month: 08
+		Day: 05
+		Hour: 16
+		Minute: 40
+		Second: 26
 		Millisecond: 0
 	}
 	Creator: "FBX SDK/FBX Plugins build 20070228"
@@ -21,7 +21,7 @@ FBXHeaderExtension:  {
 		FlagPLE: 0
 	}
 }
-CreationTime: "2013-07-04 18:26:34:000"
+CreationTime: "2013-08-05 16:40:26:000"
 Creator: "Blender version 2.67 (sub 0)"
 
 ; Object definitions
@@ -29,15 +29,15 @@ Creator: "Blender version 2.67 (sub 0)"
 
 Definitions:  {
 	Version: 100
-	Count: 30
+	Count: 45
 	ObjectType: "Model" {
-		Count: 14
+		Count: 15
 	}
 	ObjectType: "Geometry" {
-		Count: 1
+		Count: 2
 	}
 	ObjectType: "Material" {
-		Count: 1
+		Count: 3
 	}
 	ObjectType: "Texture" {
 		Count: 1
@@ -46,7 +46,7 @@ Definitions:  {
 		Count: 1
 	}
 	ObjectType: "Deformer" {
-		Count: 13
+		Count: 26
 	}
 	ObjectType: "Pose" {
 		Count: 1
@@ -140,6 +140,176 @@ Objects:  {
 		Shading: Y
 		Culling: "CullingOff"
 		TypeFlags: "Skeleton"
+	}
+	Model: "Model::robot-line", "Mesh" {
+		Version: 232
+		Properties60:  {
+			Property: "QuaternionInterpolate", "bool", "",0
+			Property: "Visibility", "Visibility", "A+",1
+			Property: "Lcl Translation", "Lcl Translation", "A+",0.000000000000000,0.000000000000000,0.000000000000000
+			Property: "Lcl Rotation", "Lcl Rotation", "A+",-90.000043485483872,-0.000000000000000,0.000000000000013
+			Property: "Lcl Scaling", "Lcl Scaling", "A+",1.000000000000000,1.000000000000000,1.000000000000000
+			Property: "RotationOffset", "Vector3D", "",0,0,0
+			Property: "RotationPivot", "Vector3D", "",0,0,0
+			Property: "ScalingOffset", "Vector3D", "",0,0,0
+			Property: "ScalingPivot", "Vector3D", "",0,0,0
+			Property: "TranslationActive", "bool", "",0
+			Property: "TranslationMin", "Vector3D", "",0,0,0
+			Property: "TranslationMax", "Vector3D", "",0,0,0
+			Property: "TranslationMinX", "bool", "",0
+			Property: "TranslationMinY", "bool", "",0
+			Property: "TranslationMinZ", "bool", "",0
+			Property: "TranslationMaxX", "bool", "",0
+			Property: "TranslationMaxY", "bool", "",0
+			Property: "TranslationMaxZ", "bool", "",0
+			Property: "RotationOrder", "enum", "",0
+			Property: "RotationSpaceForLimitOnly", "bool", "",0
+			Property: "AxisLen", "double", "",10
+			Property: "PreRotation", "Vector3D", "",0,0,0
+			Property: "PostRotation", "Vector3D", "",0,0,0
+			Property: "RotationActive", "bool", "",0
+			Property: "RotationMin", "Vector3D", "",0,0,0
+			Property: "RotationMax", "Vector3D", "",0,0,0
+			Property: "RotationMinX", "bool", "",0
+			Property: "RotationMinY", "bool", "",0
+			Property: "RotationMinZ", "bool", "",0
+			Property: "RotationMaxX", "bool", "",0
+			Property: "RotationMaxY", "bool", "",0
+			Property: "RotationMaxZ", "bool", "",0
+			Property: "RotationStiffnessX", "double", "",0
+			Property: "RotationStiffnessY", "double", "",0
+			Property: "RotationStiffnessZ", "double", "",0
+			Property: "MinDampRangeX", "double", "",0
+			Property: "MinDampRangeY", "double", "",0
+			Property: "MinDampRangeZ", "double", "",0
+			Property: "MaxDampRangeX", "double", "",0
+			Property: "MaxDampRangeY", "double", "",0
+			Property: "MaxDampRangeZ", "double", "",0
+			Property: "MinDampStrengthX", "double", "",0
+			Property: "MinDampStrengthY", "double", "",0
+			Property: "MinDampStrengthZ", "double", "",0
+			Property: "MaxDampStrengthX", "double", "",0
+			Property: "MaxDampStrengthY", "double", "",0
+			Property: "MaxDampStrengthZ", "double", "",0
+			Property: "PreferedAngleX", "double", "",0
+			Property: "PreferedAngleY", "double", "",0
+			Property: "PreferedAngleZ", "double", "",0
+			Property: "InheritType", "enum", "",0
+			Property: "ScalingActive", "bool", "",0
+			Property: "ScalingMin", "Vector3D", "",1,1,1
+			Property: "ScalingMax", "Vector3D", "",1,1,1
+			Property: "ScalingMinX", "bool", "",0
+			Property: "ScalingMinY", "bool", "",0
+			Property: "ScalingMinZ", "bool", "",0
+			Property: "ScalingMaxX", "bool", "",0
+			Property: "ScalingMaxY", "bool", "",0
+			Property: "ScalingMaxZ", "bool", "",0
+			Property: "GeometricTranslation", "Vector3D", "",0,0,0
+			Property: "GeometricRotation", "Vector3D", "",0,0,0
+			Property: "GeometricScaling", "Vector3D", "",1,1,1
+			Property: "LookAtProperty", "object", ""
+			Property: "UpVectorProperty", "object", ""
+			Property: "Show", "bool", "",1
+			Property: "NegativePercentShapeSupport", "bool", "",1
+			Property: "DefaultAttributeIndex", "int", "",0
+			Property: "Color", "Color", "A",0.8,0.8,0.8
+			Property: "Size", "double", "",100
+			Property: "Look", "enum", "",1
+		}
+		MultiLayer: 0
+		MultiTake: 1
+		Shading: Y
+		Culling: "CullingOff"
+		Vertices: 0.350000,0.200000,1.500000,0.350000,-0.200000,1.500000,-0.350000,-0.200000,1.500000,-0.350000,0.200000,1.500000,0.350000,0.200001,2.000000,0.350000,-0.199999,2.000000,-0.350000,-0.199999,2.000000
+		,-0.350000,0.200001,2.000000,0.250000,0.150000,0.800000,0.250000,-0.150000,0.800000,-0.250000,-0.150000,0.800000,-0.250000,0.150000,0.800000,0.250000,0.150000,1.450000,0.250000,-0.150000,1.450000
+		,-0.250000,-0.150000,1.450000,-0.250000,0.150000,1.450000,0.425000,0.050000,1.025000,0.425000,-0.075000,1.025000,0.300000,-0.075000,1.025000,0.300000,0.050000,1.025000,0.425000,0.050000,1.325000
+		,0.425000,-0.075000,1.325000,0.300000,-0.074999,1.325000,0.300000,0.050000,1.325000,-0.425000,0.050000,0.975000,-0.425000,-0.075000,0.975000,-0.300000,-0.075000,0.975000,-0.300000,0.050000,0.975000
+		,-0.425000,0.050000,0.675000,-0.425000,-0.075000,0.675000,-0.300000,-0.075000,0.675000,-0.300000,0.050000,0.675000,-0.300000,0.050000,1.025000,-0.300000,-0.075000,1.025000,-0.425000,-0.075000,1.025000
+		,-0.425000,0.050000,1.025000,-0.300000,0.050000,1.325000,-0.300000,-0.074999,1.325000,-0.425000,-0.075000,1.325000,-0.425000,0.050000,1.325000,0.300000,0.050000,0.975000,0.300000,-0.075000,0.975000
+		,0.425000,-0.075000,0.975000,0.425000,0.050000,0.975000,0.300000,0.050000,0.675000,0.300000,-0.075000,0.675000,0.425000,-0.075000,0.675000,0.425000,0.050000,0.675000,0.200000,0.075000,0.400000
+		,0.200000,-0.075000,0.400000,0.050000,-0.075000,0.400000,0.050000,0.075000,0.400000,0.200000,0.075000,0.750000,0.200000,-0.075000,0.750000,0.050000,-0.075000,0.750000,0.050000,0.075000,0.750000
+		,0.050000,0.075000,0.350000,0.050000,-0.075000,0.350000,0.200000,-0.075000,0.350000,0.200000,0.075000,0.350000,0.050000,0.075000,-0.000000,0.050000,-0.075000,-0.000000,0.200000,-0.075000,-0.000000
+		,0.200000,0.075000,-0.000000,-0.200000,0.075000,0.350000,-0.200000,-0.075000,0.350000,-0.050000,-0.075000,0.350000,-0.050000,0.075000,0.350000,-0.200000,0.075000,-0.000000,-0.200000,-0.075000,-0.000000
+		,-0.050000,-0.075000,-0.000000,-0.050000,0.075000,-0.000000,-0.050000,0.075000,0.400000,-0.050000,-0.075000,0.400000,-0.200000,-0.075000,0.400000,-0.200000,0.075000,0.400000,-0.050000,0.075000,0.750000
+		,-0.050000,-0.075000,0.750000,-0.200000,-0.075000,0.750000,-0.200000,0.075000,0.750000
+		PolygonVertexIndex: 
+		Edges: 
+		GeometryVersion: 124
+		LayerElementNormal: 0 {
+			Version: 101
+			Name: ""
+			MappingInformationType: "ByVertice"
+			ReferenceInformationType: "Direct"
+			Normals: 0.225318148732185,0.128757596015930,0.965727686882019,0.225318148732185,-0.128757596015930,0.965727686882019
+			 ,-0.225318148732185,-0.128757596015930,0.965727686882019,-0.225318148732185,0.128757596015930,0.965727686882019
+			 ,0.171544536948204,0.098025456070900,0.980285048484802,0.171544536948204,-0.098025456070900,0.980285048484802
+			 ,-0.171544536948204,-0.098025456070900,0.980285048484802,-0.171544536948204,0.098025456070900,0.980285048484802
+			 ,0.293588072061539,0.176152840256691,0.939542829990387,0.293588072061539,-0.176152840256691,0.939542829990387
+			 ,-0.293588072061539,-0.176152840256691,0.939542829990387,-0.293588072061539,0.176152840256691,0.939542829990387
+			 ,0.169011503458023,0.101413004100323,0.980376601219177,0.169011503458023,-0.101413004100323,0.980376601219177
+			 ,-0.169011503458023,-0.101413004100323,0.980376601219177,-0.169011503458023,0.101413004100323,0.980376601219177
+			 ,0.382610559463501,0.045014802366495,0.922788143157959,0.382122248411179,-0.067415386438370,0.921628475189209
+			 ,0.280190438032150,-0.070039980113506,0.957365632057190,0.280587166547775,0.046754356473684,0.958677947521210
+			 ,0.305215626955032,0.035889767110348,0.951597630977631,0.304971456527710,-0.053804133087397,0.950834691524506
+			 ,0.220465719699860,-0.055116429924965,0.973815143108368,0.220648825168610,0.036774802953005,0.974639117717743
+			 ,-0.399121075868607,0.046937465667725,0.915677368640900,-0.398571729660034,-0.070314645767212,0.914395570755005
+			 ,-0.293282866477966,-0.073305457830429,0.953184604644775,-0.293710142374039,0.048951689153910,0.954618990421295
+			 ,-0.531754493713379,0.062532424926758,0.844569206237793,-0.530472755432129,-0.093600265681744,0.842493951320648
+			 ,-0.404034554958344,-0.100985750555992,0.909115850925446,-0.405194252729416,0.067506939172745,0.911709964275360
+			 ,-0.280587166547775,0.046754356473684,0.958677947521210,-0.280190438032150,-0.070039980113506,0.957365632057190
+			 ,-0.382122248411179,-0.067415386438370,0.921628475189209,-0.382610559463501,0.045014802366495,0.922788143157959
+			 ,-0.220648825168610,0.036774802953005,0.974639117717743,-0.220465719699860,-0.055116429924965,0.973815143108368
+			 ,-0.304971456527710,-0.053804133087397,0.950834691524506,-0.305215626955032,0.035889767110348,0.951597630977631
+			 ,0.293710142374039,0.048951689153910,0.954618990421295,0.293282866477966,-0.073305457830429,0.953184604644775
+			 ,0.398571729660034,-0.070314645767212,0.914395570755005,0.399121075868607,0.046937465667725,0.915677368640900
+			 ,0.405194252729416,0.067506939172745,0.911709964275360,0.404034554958344,-0.100985750555992,0.909115850925446
+			 ,0.530472755432129,-0.093600265681744,0.842493951320648,0.531754493713379,0.062532424926758,0.844569206237793
+			 ,0.441053509712219,0.165379807353020,0.882107019424438,0.441053509712219,-0.165379807353020,0.882107019424438
+			 ,0.121921442449093,-0.182897433638573,0.975524127483368,0.121921442449093,0.182897433638573,0.975524127483368
+			 ,0.256447046995163,0.096163824200630,0.961729764938354,0.256447046995163,-0.096163824200630,0.961729764938354
+			 ,0.066164128482342,-0.099276714026928,0.992828130722046,0.066164128482342,0.099276714026928,0.992828130722046
+			 ,0.138340398669243,0.207495346665382,0.968382835388184,0.138340398669243,-0.207495346665382,0.968382835388184
+			 ,0.487746804952621,-0.182897433638573,0.853572189807892,0.487746804952621,0.182897433638573,0.853572189807892
+			 ,0.554673910140991,0.832026124000549,0.000000000000000,0.554673910140991,-0.832026124000549,0.000000000000000
+			 ,0.936307847499847,-0.351115465164185,0.000000000000000,0.936307847499847,0.351115465164185,0.000000000000000
+			 ,-0.487746804952621,0.182897433638573,0.853572189807892,-0.487746804952621,-0.182897433638573,0.853572189807892
+			 ,-0.138340398669243,-0.207495346665382,0.968382835388184,-0.138340398669243,0.207495346665382,0.968382835388184
+			 ,-0.936307847499847,0.351115465164185,0.000000000000000,-0.936307847499847,-0.351115465164185,0.000000000000000
+			 ,-0.554673910140991,-0.832026124000549,0.000000000000000,-0.554673910140991,0.832026124000549,0.000000000000000
+			 ,-0.121921442449093,0.182897433638573,0.975524127483368,-0.121921442449093,-0.182897433638573,0.975524127483368
+			 ,-0.441053509712219,-0.165379807353020,0.882107019424438,-0.441053509712219,0.165379807353020,0.882107019424438
+			 ,-0.066164128482342,0.099276714026928,0.992828130722046,-0.066164128482342,-0.099276714026928,0.992828130722046
+			 ,-0.256447046995163,-0.096163824200630,0.961729764938354,-0.256447046995163,0.096163824200630,0.961729764938354
+		}
+		LayerElementSmoothing: 0 {
+			Version: 102
+			Name: ""
+			MappingInformationType: "ByPolygon"
+			ReferenceInformationType: "Direct"
+			Smoothing: 
+		}
+		LayerElementMaterial: 0 {
+			Version: 101
+			Name: ""
+			MappingInformationType: "AllSame"
+			ReferenceInformationType: "IndexToDirect"
+			Materials: 0
+		}
+		Layer: 0 {
+			Version: 100
+			LayerElement:  {
+				Type: "LayerElementNormal"
+				TypedIndex: 0
+			}
+			LayerElement:  {
+				Type: "LayerElementMaterial"
+				TypedIndex: 0
+			}
+			LayerElement:  {
+				Type: "LayerElementSmoothing"
+				TypedIndex: 0
+			}
+		}
 	}
 	Model: "Model::robot", "Mesh" {
 		Version: 232
@@ -1472,7 +1642,7 @@ Objects:  {
 		Culling: "CullingOff"
 		TypeFlags: "Skeleton"
 	}
-	Material: "Material::robot__robot_png", "" {
+	Material: "Material::robot", "" {
 		Version: 102
 		ShadingModel: "lambert"
 		MultiLayer: 0
@@ -1494,14 +1664,66 @@ Objects:  {
 			Property: "Opacity", "double", "",1.0
 		}
 	}
-	Video: "Video::robot_png", "Clip" {
+	Material: "Material::robot__robot-tender_png", "" {
+		Version: 102
+		ShadingModel: "lambert"
+		MultiLayer: 0
+		Properties60:  {
+			Property: "ShadingModel", "KString", "", "Lambert"
+			Property: "MultiLayer", "bool", "",0
+			Property: "EmissiveColor", "ColorRGB", "",1.0000,1.0000,1.0000
+			Property: "EmissiveFactor", "double", "",0.0000
+			Property: "AmbientColor", "ColorRGB", "",0.0000,0.0000,0.0000
+			Property: "AmbientFactor", "double", "",0.5000
+			Property: "DiffuseColor", "ColorRGB", "",1.0000,1.0000,1.0000
+			Property: "DiffuseFactor", "double", "",1.0000
+			Property: "Bump", "Vector3D", "",0,0,0
+			Property: "TransparentColor", "ColorRGB", "",1,1,1
+			Property: "TransparencyFactor", "double", "",0.0000
+			Property: "Emissive", "ColorRGB", "",0,0,0
+			Property: "Ambient", "ColorRGB", "",0.0,0.0,0.0
+			Property: "Diffuse", "ColorRGB", "",1.0,1.0,1.0
+			Property: "Opacity", "double", "",1.0
+		}
+	}
+	Material: "Material::unnamed", "" {
+		Version: 102
+		ShadingModel: "phong"
+		MultiLayer: 0
+		Properties60:  {
+			Property: "ShadingModel", "KString", "", "Phong"
+			Property: "MultiLayer", "bool", "",0
+			Property: "EmissiveColor", "ColorRGB", "",0.8000,0.8000,0.8000
+			Property: "EmissiveFactor", "double", "",0.0000
+			Property: "AmbientColor", "ColorRGB", "",0.0000,0.0000,0.0000
+			Property: "AmbientFactor", "double", "",0.5000
+			Property: "DiffuseColor", "ColorRGB", "",0.8000,0.8000,0.8000
+			Property: "DiffuseFactor", "double", "",1.0000
+			Property: "Bump", "Vector3D", "",0,0,0
+			Property: "TransparentColor", "ColorRGB", "",1,1,1
+			Property: "TransparencyFactor", "double", "",0.0000
+			Property: "SpecularColor", "ColorRGB", "",0.8000,0.8000,0.8000
+			Property: "SpecularFactor", "double", "",0.2000
+			Property: "ShininessExponent", "double", "",80.0
+			Property: "ReflectionColor", "ColorRGB", "",0,0,0
+			Property: "ReflectionFactor", "double", "",1
+			Property: "Emissive", "ColorRGB", "",0,0,0
+			Property: "Ambient", "ColorRGB", "",0.0,0.0,0.0
+			Property: "Diffuse", "ColorRGB", "",0.8,0.8,0.8
+			Property: "Specular", "ColorRGB", "",0.8,0.8,0.8
+			Property: "Shininess", "double", "",20.0
+			Property: "Opacity", "double", "",1.0
+			Property: "Reflectivity", "double", "",0
+		}
+	}
+	Video: "Video::robot-tender_png", "Clip" {
 		Type: "Clip"
 		Properties60:  {
 			Property: "FrameRate", "double", "",0
 			Property: "LastFrame", "int", "",0
 			Property: "Width", "int", "",0
 			Property: "Height", "int", "",0
-			Property: "Path", "charptr", "", "robot.png"
+			Property: "Path", "charptr", "", "robot-tender.png"
 			Property: "StartFrame", "int", "",0
 			Property: "StopFrame", "int", "",0
 			Property: "PlaySpeed", "double", "",1
@@ -1512,13 +1734,13 @@ Objects:  {
 			Property: "AccessMode", "enum", "",0
 		}
 		UseMipMap: 0
-		Filename: "robot.png"
-		RelativeFilename: "robot.png"
+		Filename: "robot-tender.png"
+		RelativeFilename: "robot-tender.png"
 	}
-	Texture: "Texture::robot_png", "TextureVideoClip" {
+	Texture: "Texture::robot-tender_png", "TextureVideoClip" {
 		Type: "TextureVideoClip"
 		Version: 202
-		TextureName: "Texture::robot_png"
+		TextureName: "Texture::robot-tender_png"
 		Properties60:  {
 			Property: "Translation", "Vector", "A+",0,0,0
 			Property: "Rotation", "Vector", "A+",0,0,0
@@ -1536,13 +1758,190 @@ Objects:  {
 			Property: "TextureScalingPivot", "Vector3D", "",0,0,0
 			Property: "VideoProperty", "object", ""
 		}
-		Media: "Video::robot_png"
-		FileName: "robot.png"
-		RelativeFilename: "robot.png"
+		Media: "Video::robot-tender_png"
+		FileName: "robot-tender.png"
+		RelativeFilename: "robot-tender.png"
 		ModelUVTranslation: 0,0
 		ModelUVScaling: 1,1
 		Texture_Alpha_Source: "None"
 		Cropping: 0,0,0,0
+	}
+	Deformer: "Deformer::Skin robot-line", "Skin" {
+		Version: 100
+		MultiLayer: 0
+		Type: "Skin"
+		Properties60:  {
+		}
+		Link_DeformAcuracy: 50
+	}
+	Deformer: "SubDeformer::Cluster robot-line Root", "Cluster" {
+		Version: 100
+		MultiLayer: 0
+		Type: "Cluster"
+		Properties60:  {
+			Property: "SrcModel", "object", ""
+			Property: "SrcModelReference", "object", ""
+		}
+		UserData: "", ""
+		Indexes: 
+		Weights: 
+		Transform: 0.000000075497937,-1.000000000000000,0.000000236865517,0.000000000000000,1.000000000000000,0.000000075497738,-0.000000834465027,0.000000000000000,0.000000834465027,0.000000236865588,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,1.000000000000000
+		TransformLink: -0.000000226493739,-1.000000000000000,0.000000119209261,0.000000000000000,1.000000000000000,-0.000000226493711,0.000000236865532,0.000000000000000,-0.000000236865503,0.000000119209318,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,1.000000000000000
+	}
+	Deformer: "SubDeformer::Cluster robot-line Body", "Cluster" {
+		Version: 100
+		MultiLayer: 0
+		Type: "Cluster"
+		Properties60:  {
+			Property: "SrcModel", "object", ""
+			Property: "SrcModelReference", "object", ""
+		}
+		UserData: "", ""
+		Indexes: 8,9,10,11,12,13,14,15
+		Weights: 1.00000000,0.99978357,0.98830045,1.00000000,1.00000000,1.00000000,0.99998439,1.00000000
+		Transform: 0.000000075497915,-1.000000000000000,-0.000000000000014,0.000000000000000,-0.000000639757843,-0.000000000000054,-1.000000000000000,0.000000000000000,1.000000000000000,0.000000075497930,-0.000000639757843,0.000000000000000,-0.800000011920929,-0.000000060398342,-0.000000066358780,1.000000000000000
+		TransformLink: -0.000000075497944,-0.000000075497887,1.000000000000000,0.000000000000000,1.000000000000000,-0.000000150995817,0.000000075497915,0.000000000000000,0.000000150995803,1.000000000000000,0.000000075497901,0.000000000000000,-0.000000000000006,0.000000005960458,0.800000011920929,1.000000000000000
+	}
+	Deformer: "SubDeformer::Cluster robot-line Head", "Cluster" {
+		Version: 100
+		MultiLayer: 0
+		Type: "Cluster"
+		Properties60:  {
+			Property: "SrcModel", "object", ""
+			Property: "SrcModelReference", "object", ""
+		}
+		UserData: "", ""
+		Indexes: 0,1,2,3,4,5,6,7
+		Weights: 1.00000000,1.00000000,0.99999998,1.00000000,1.00000000,1.00000000,1.00000000,1.00000000
+		Transform: 0.000000075497915,-1.000000000000000,-0.000000000000000,0.000000000000000,-0.000000639757843,-0.000000000000054,-1.000000000000000,0.000000000000000,1.000000000000000,0.000000075497930,-0.000000639757843,0.000000000000000,-1.500000000000000,-0.000000113246870,-0.000000066358773,1.000000000000000
+		TransformLink: -0.000000075497944,-0.000000075497887,1.000000000000000,0.000000000000000,1.000000000000000,-0.000000150995803,0.000000075497915,0.000000000000000,0.000000150995803,1.000000000000000,0.000000075497901,0.000000000000000,-0.000000000000035,-0.000000046888072,1.500000000000000,1.000000000000000
+	}
+	Deformer: "SubDeformer::Cluster robot-line UpperArm_R", "Cluster" {
+		Version: 100
+		MultiLayer: 0
+		Type: "Cluster"
+		Properties60:  {
+			Property: "SrcModel", "object", ""
+			Property: "SrcModelReference", "object", ""
+		}
+		UserData: "", ""
+		Indexes: 32,33,34,35,36,37,38,39
+		Weights: 1.00000000,1.00000000,1.00000000,1.00000000,1.00000000,1.00000000,1.00000000,1.00000000
+		Transform: -0.000000075497937,1.000000000000000,-0.000000158945753,0.000000000000000,0.000000639757843,-0.000000158945667,-1.000000000000000,0.000000000000000,-1.000000000000000,-0.000000075498058,-0.000000639757843,0.000000000000000,1.375000000000000,0.350000083446503,-0.000000121989800,1.000000000000000
+		TransformLink: 0.000000075497965,0.000000075497880,-1.000000000000000,0.000000000000000,-1.000000000000000,0.000000309941555,-0.000000075497930,0.000000000000000,0.000000309941527,1.000000000000000,0.000000075497901,0.000000000000000,0.349999994039536,-0.000000090299366,1.375000000000000,1.000000000000000
+	}
+	Deformer: "SubDeformer::Cluster robot-line LowerArm_R", "Cluster" {
+		Version: 100
+		MultiLayer: 0
+		Type: "Cluster"
+		Properties60:  {
+			Property: "SrcModel", "object", ""
+			Property: "SrcModelReference", "object", ""
+		}
+		UserData: "", ""
+		Indexes: 24,25,26,27,28,29,30,31
+		Weights: 1.00000000,1.00000000,1.00000000,1.00000000,1.00000000,1.00000000,1.00000000,1.00000000
+		Transform: -0.000000075497944,1.000000000000000,-0.000000000000014,0.000000000000000,0.000000639757843,0.000000000000054,-1.000000000000000,0.000000000000000,-1.000000000000000,-0.000000075497951,-0.000000639757843,0.000000000000000,1.000000000000000,0.350000083446503,-0.000000066358787,1.000000000000000
+		TransformLink: 0.000000075497965,0.000000075497887,-1.000000000000000,0.000000000000000,-1.000000000000000,0.000000150995817,-0.000000075497944,0.000000000000000,0.000000150995803,1.000000000000000,0.000000075497901,0.000000000000000,0.349999994039536,-0.000000061987649,1.000000000000000,1.000000000000000
+	}
+	Deformer: "SubDeformer::Cluster robot-line UpperArm_L", "Cluster" {
+		Version: 100
+		MultiLayer: 0
+		Type: "Cluster"
+		Properties60:  {
+			Property: "SrcModel", "object", ""
+			Property: "SrcModelReference", "object", ""
+		}
+		UserData: "", ""
+		Indexes: 2,9,10,13,14,16,17,18,19,20,21,22,23,25,26,29,33,34,37,38,41,42,45
+		,46,49,50,53,54,57,58,61,62,65,74
+		Weights: 0.00000002,0.00019130,0.00000000,0.00000000,0.00001561,1.00000000,1.00000000,1.00000000,1.00000000,1.00000000,1.00000000,1.00000000,1.00000000,0.00000000,0.00000000,0.00000000,0.00000000,0.00000000,0.00000000,0.00000000,0.00058695,0.00316600,0.02586019,0.01864047,0.00005035,0.00000000,0.00000000,0.00000000,0.00000000,0.00003466,0.00000000,0.00000004,0.00011090,0.00012342
+		Transform: -0.000000075497937,1.000000000000000,-0.000000158945753,0.000000000000000,0.000000639757843,-0.000000158945667,-1.000000000000000,0.000000000000000,-1.000000000000000,-0.000000075498058,-0.000000639757843,0.000000000000000,1.375000000000000,-0.349999904632568,-0.000000010727772,1.000000000000000
+		TransformLink: 0.000000075497965,0.000000075497880,-1.000000000000000,0.000000000000000,-1.000000000000000,0.000000309941555,-0.000000075497930,0.000000000000000,0.000000309941527,1.000000000000000,0.000000075497901,0.000000000000000,-0.349999994039536,0.000000015397696,1.375000000000000,1.000000000000000
+	}
+	Deformer: "SubDeformer::Cluster robot-line LowerArm_L", "Cluster" {
+		Version: 100
+		MultiLayer: 0
+		Type: "Cluster"
+		Properties60:  {
+			Property: "SrcModel", "object", ""
+			Property: "SrcModelReference", "object", ""
+		}
+		UserData: "", ""
+		Indexes: 40,41,42,43,44,45,46,47
+		Weights: 1.00000000,0.99941305,0.99683400,1.00000000,1.00000000,0.97413981,0.98135953,1.00000000
+		Transform: -0.000000075497944,1.000000000000000,-0.000000000000014,0.000000000000000,0.000000639757843,0.000000000000054,-1.000000000000000,0.000000000000000,-1.000000000000000,-0.000000075497951,-0.000000639757843,0.000000000000000,1.000000000000000,-0.349999904632568,-0.000000066358773,1.000000000000000
+		TransformLink: 0.000000075497965,0.000000075497887,-1.000000000000000,0.000000000000000,-1.000000000000000,0.000000150995817,-0.000000075497944,0.000000000000000,0.000000150995803,1.000000000000000,0.000000075497901,0.000000000000000,-0.349999994039536,0.000000043709409,1.000000000000000,1.000000000000000
+	}
+	Deformer: "SubDeformer::Cluster robot-line Switch", "Cluster" {
+		Version: 100
+		MultiLayer: 0
+		Type: "Cluster"
+		Properties60:  {
+			Property: "SrcModel", "object", ""
+			Property: "SrcModelReference", "object", ""
+		}
+		UserData: "", ""
+		Indexes: 
+		Weights: 
+		Transform: -0.000000075497915,-1.000000000000000,-0.000000332845275,0.000000000000000,1.000000000000000,-0.000000075497688,-0.000000715255794,0.000000000000000,0.000000715255737,-0.000000332845303,1.000000000000000,0.000000000000000,-0.050000034272671,0.000000420602817,-1.274999976158142,1.000000000000000
+		TransformLink: -0.000000075497873,-1.000000000000000,0.000000000000025,0.000000000000000,1.000000000000000,-0.000000075497887,-0.000000332845275,0.000000000000000,0.000000332845246,-0.000000000000001,1.000000000000000,0.000000000000000,-0.000000000000027,-0.050000034272671,1.274999976158142,1.000000000000000
+	}
+	Deformer: "SubDeformer::Cluster robot-line UpperLeg_L", "Cluster" {
+		Version: 100
+		MultiLayer: 0
+		Type: "Cluster"
+		Properties60:  {
+			Property: "SrcModel", "object", ""
+			Property: "SrcModelReference", "object", ""
+		}
+		UserData: "", ""
+		Indexes: 48,49,50,51,52,53,54,55
+		Weights: 1.00000000,0.99994719,0.98789280,1.00000000,1.00000000,1.00000000,0.99999999,1.00000000
+		Transform: -0.000000070219492,1.000000000000000,-0.000000091148124,0.000000000000000,0.000000818571777,-0.000000091148074,-1.000000000000000,0.000000000000000,-1.000000000000000,-0.000000070219627,-0.000000818571721,0.000000000000000,0.775000035762787,-0.124999947845936,0.000000088483183,1.000000000000000
+		TransformLink: 0.000000070219535,-0.000000103316012,-1.000000000000000,0.000000000000000,-1.000000000000000,0.000000242143926,-0.000000070219507,0.000000000000000,0.000000242143926,1.000000000000000,-0.000000103316019,0.000000000000000,-0.125000000000000,0.000000021854706,0.775000035762787,1.000000000000000
+	}
+	Deformer: "SubDeformer::Cluster robot-line LowerLeg_L", "Cluster" {
+		Version: 100
+		MultiLayer: 0
+		Type: "Cluster"
+		Properties60:  {
+			Property: "SrcModel", "object", ""
+			Property: "SrcModelReference", "object", ""
+		}
+		UserData: "", ""
+		Indexes: 9,10,49,50,53,54,56,57,58,59,60,61,62,63,66,73,74,77,78
+		Weights: 0.00002513,0.01169955,0.00000246,0.01210720,0.00000000,0.00000001,1.00000000,1.00000000,0.99996534,1.00000000,1.00000000,1.00000000,0.99999996,1.00000000,0.03791987,0.02768478,0.00773745,0.00000000,0.00000000
+		Transform: -0.000000070219485,1.000000000000000,0.000000000000000,0.000000000000000,0.000000818571777,0.000000000000064,-1.000000000000000,0.000000000000000,-1.000000000000000,-0.000000070219542,-0.000000818571721,0.000000000000000,0.375000059604645,-0.124999970197678,0.000000077089666,1.000000000000000
+		TransformLink: 0.000000070219528,-0.000000103316005,-1.000000000000000,0.000000000000000,-1.000000000000000,0.000000150995788,-0.000000070219485,0.000000000000000,0.000000150995803,1.000000000000000,-0.000000103316019,0.000000000000000,-0.125000000000000,-0.000000019471688,0.375000059604645,1.000000000000000
+	}
+	Deformer: "SubDeformer::Cluster robot-line UpperLeg_R", "Cluster" {
+		Version: 100
+		MultiLayer: 0
+		Type: "Cluster"
+		Properties60:  {
+			Property: "SrcModel", "object", ""
+			Property: "SrcModelReference", "object", ""
+		}
+		UserData: "", ""
+		Indexes: 72,73,74,75,76,77,78,79
+		Weights: 1.00000000,0.97231522,0.99213913,1.00000000,1.00000000,1.00000000,1.00000000,1.00000000
+		Transform: -0.000000088845987,1.000000000000000,-0.000000072521658,0.000000000000000,0.000000818571777,-0.000000072521594,-1.000000000000000,0.000000000000000,-1.000000000000000,-0.000000088846043,-0.000000818571721,0.000000000000000,0.774999976158142,0.125000059604645,0.000000068024463,1.000000000000000
+		TransformLink: 0.000000088845972,-0.000000103316019,-1.000000000000000,0.000000000000000,-1.000000000000000,0.000000223517446,-0.000000088845994,0.000000000000000,0.000000223517475,1.000000000000000,-0.000000103316005,0.000000000000000,0.124999992549419,-0.000000015894246,0.774999976158142,1.000000000000000
+	}
+	Deformer: "SubDeformer::Cluster robot-line LowerLeg_R", "Cluster" {
+		Version: 100
+		MultiLayer: 0
+		Type: "Cluster"
+		Properties60:  {
+			Property: "SrcModel", "object", ""
+			Property: "SrcModelReference", "object", ""
+		}
+		UserData: "", ""
+		Indexes: 64,65,66,67,68,69,70,71
+		Weights: 1.00000000,0.99988910,0.96208013,1.00000000,1.00000000,1.00000000,1.00000000,1.00000000
+		Transform: -0.000000088845979,1.000000000000000,0.000000000000000,0.000000000000000,0.000000818571721,0.000000000000078,-1.000000000000000,0.000000000000000,-1.000000000000000,-0.000000088845979,-0.000000818571721,0.000000000000000,0.375000000000000,0.125000029802322,0.000000077089673,1.000000000000000
+		TransformLink: 0.000000088845965,-0.000000103316019,-1.000000000000000,0.000000000000000,-1.000000000000000,0.000000150995788,-0.000000088845979,0.000000000000000,0.000000150995803,1.000000000000000,-0.000000103316005,0.000000000000000,0.125000000000000,-0.000000057220646,0.375000000000000,1.000000000000000
 	}
 	Deformer: "Deformer::Skin robot", "Skin" {
 		Version: 100
@@ -1726,10 +2125,14 @@ Objects:  {
 		Version: 100
 		Properties60:  {
 		}
-		NbPoseNodes: 14
+		NbPoseNodes: 15
 		PoseNode:  {
 			Node: "Model::Armature"
 			Matrix: -1.000000000000000,0.000000150995803,-0.000000000000001,0.000000000000000,-0.000000000000013,-0.000000075497901,1.000000000000000,0.000000000000000,0.000000150995803,1.000000000000000,0.000000075497901,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,1.000000000000000
+		}
+		PoseNode:  {
+			Node: "Model::robot-line"
+			Matrix: -0.000000226493711,-1.000000000000000,-0.000000715255737,0.000000000000000,1.000000000000000,-0.000000226493711,-0.000000000000053,0.000000000000000,-0.000000000000109,-0.000000715255737,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,1.000000000000000
 		}
 		PoseNode:  {
 			Node: "Model::robot"
@@ -1804,6 +2207,8 @@ Objects:  {
 Relations:  {
 	Model: "Model::Armature", "Limb" {
 	}
+	Model: "Model::robot-line", "Mesh" {
+	}
 	Model: "Model::robot", "Mesh" {
 	}
 	Model: "Model::Root", "Limb" {
@@ -1846,35 +2251,65 @@ Relations:  {
 	}
 	Model: "Model::Camera Switcher", "CameraSwitcher" {
 	}
-	Material: "Material::robot__robot_png", "" {
+	Material: "Material::robot", "" {
 	}
-	Texture: "Texture::robot_png", "TextureVideoClip" {
+	Material: "Material::robot__robot-tender_png", "" {
 	}
-	Video: "Video::robot_png", "Clip" {
+	Material: "Material::unnamed", "" {
+	}
+	Texture: "Texture::robot-tender_png", "TextureVideoClip" {
+	}
+	Video: "Video::robot-tender_png", "Clip" {
+	}
+	Deformer: "Deformer::Skin robot-line", "Skin" {
 	}
 	Deformer: "Deformer::Skin robot", "Skin" {
 	}
+	Deformer: "SubDeformer::Cluster robot-line Root", "Cluster" {
+	}
 	Deformer: "SubDeformer::Cluster robot Root", "Cluster" {
+	}
+	Deformer: "SubDeformer::Cluster robot-line Body", "Cluster" {
 	}
 	Deformer: "SubDeformer::Cluster robot Body", "Cluster" {
 	}
+	Deformer: "SubDeformer::Cluster robot-line Head", "Cluster" {
+	}
 	Deformer: "SubDeformer::Cluster robot Head", "Cluster" {
+	}
+	Deformer: "SubDeformer::Cluster robot-line UpperArm_R", "Cluster" {
 	}
 	Deformer: "SubDeformer::Cluster robot UpperArm_R", "Cluster" {
 	}
+	Deformer: "SubDeformer::Cluster robot-line LowerArm_R", "Cluster" {
+	}
 	Deformer: "SubDeformer::Cluster robot LowerArm_R", "Cluster" {
+	}
+	Deformer: "SubDeformer::Cluster robot-line UpperArm_L", "Cluster" {
 	}
 	Deformer: "SubDeformer::Cluster robot UpperArm_L", "Cluster" {
 	}
+	Deformer: "SubDeformer::Cluster robot-line LowerArm_L", "Cluster" {
+	}
 	Deformer: "SubDeformer::Cluster robot LowerArm_L", "Cluster" {
+	}
+	Deformer: "SubDeformer::Cluster robot-line Switch", "Cluster" {
 	}
 	Deformer: "SubDeformer::Cluster robot Switch", "Cluster" {
 	}
+	Deformer: "SubDeformer::Cluster robot-line UpperLeg_L", "Cluster" {
+	}
 	Deformer: "SubDeformer::Cluster robot UpperLeg_L", "Cluster" {
+	}
+	Deformer: "SubDeformer::Cluster robot-line LowerLeg_L", "Cluster" {
 	}
 	Deformer: "SubDeformer::Cluster robot LowerLeg_L", "Cluster" {
 	}
+	Deformer: "SubDeformer::Cluster robot-line UpperLeg_R", "Cluster" {
+	}
 	Deformer: "SubDeformer::Cluster robot UpperLeg_R", "Cluster" {
+	}
+	Deformer: "SubDeformer::Cluster robot-line LowerLeg_R", "Cluster" {
 	}
 	Deformer: "SubDeformer::Cluster robot LowerLeg_R", "Cluster" {
 	}
@@ -1884,35 +2319,62 @@ Relations:  {
 ;------------------------------------------------------------------
 
 Connections:  {
+	Connect: "OO", "Model::robot-line", "Model::Scene"
 	Connect: "OO", "Model::robot", "Model::Scene"
 	Connect: "OO", "Model::Armature", "Model::Scene"
-	Connect: "OO", "Material::robot__robot_png", "Model::robot"
-	Connect: "OO", "Texture::robot_png", "Model::robot"
-	Connect: "OO", "Video::robot_png", "Texture::robot_png"
+	Connect: "OO", "Material::robot", "Model::robot-line"
+	Connect: "OO", "Material::robot__robot-tender_png", "Model::robot"
+	Connect: "OO", "Texture::robot-tender_png", "Model::robot"
+	Connect: "OO", "Video::robot-tender_png", "Texture::robot-tender_png"
+	Connect: "OO", "Deformer::Skin robot-line", "Model::robot-line"
 	Connect: "OO", "Deformer::Skin robot", "Model::robot"
+	Connect: "OO", "SubDeformer::Cluster robot-line Root", "Deformer::Skin robot-line"
 	Connect: "OO", "SubDeformer::Cluster robot Root", "Deformer::Skin robot"
+	Connect: "OO", "SubDeformer::Cluster robot-line Body", "Deformer::Skin robot-line"
 	Connect: "OO", "SubDeformer::Cluster robot Body", "Deformer::Skin robot"
+	Connect: "OO", "SubDeformer::Cluster robot-line Head", "Deformer::Skin robot-line"
 	Connect: "OO", "SubDeformer::Cluster robot Head", "Deformer::Skin robot"
+	Connect: "OO", "SubDeformer::Cluster robot-line UpperArm_R", "Deformer::Skin robot-line"
 	Connect: "OO", "SubDeformer::Cluster robot UpperArm_R", "Deformer::Skin robot"
+	Connect: "OO", "SubDeformer::Cluster robot-line LowerArm_R", "Deformer::Skin robot-line"
 	Connect: "OO", "SubDeformer::Cluster robot LowerArm_R", "Deformer::Skin robot"
+	Connect: "OO", "SubDeformer::Cluster robot-line UpperArm_L", "Deformer::Skin robot-line"
 	Connect: "OO", "SubDeformer::Cluster robot UpperArm_L", "Deformer::Skin robot"
+	Connect: "OO", "SubDeformer::Cluster robot-line LowerArm_L", "Deformer::Skin robot-line"
 	Connect: "OO", "SubDeformer::Cluster robot LowerArm_L", "Deformer::Skin robot"
+	Connect: "OO", "SubDeformer::Cluster robot-line Switch", "Deformer::Skin robot-line"
 	Connect: "OO", "SubDeformer::Cluster robot Switch", "Deformer::Skin robot"
+	Connect: "OO", "SubDeformer::Cluster robot-line UpperLeg_L", "Deformer::Skin robot-line"
 	Connect: "OO", "SubDeformer::Cluster robot UpperLeg_L", "Deformer::Skin robot"
+	Connect: "OO", "SubDeformer::Cluster robot-line LowerLeg_L", "Deformer::Skin robot-line"
 	Connect: "OO", "SubDeformer::Cluster robot LowerLeg_L", "Deformer::Skin robot"
+	Connect: "OO", "SubDeformer::Cluster robot-line UpperLeg_R", "Deformer::Skin robot-line"
 	Connect: "OO", "SubDeformer::Cluster robot UpperLeg_R", "Deformer::Skin robot"
+	Connect: "OO", "SubDeformer::Cluster robot-line LowerLeg_R", "Deformer::Skin robot-line"
 	Connect: "OO", "SubDeformer::Cluster robot LowerLeg_R", "Deformer::Skin robot"
+	Connect: "OO", "Model::Root", "SubDeformer::Cluster robot-line Root"
 	Connect: "OO", "Model::Root", "SubDeformer::Cluster robot Root"
+	Connect: "OO", "Model::Body", "SubDeformer::Cluster robot-line Body"
 	Connect: "OO", "Model::Body", "SubDeformer::Cluster robot Body"
+	Connect: "OO", "Model::Head", "SubDeformer::Cluster robot-line Head"
 	Connect: "OO", "Model::Head", "SubDeformer::Cluster robot Head"
+	Connect: "OO", "Model::UpperArm_R", "SubDeformer::Cluster robot-line UpperArm_R"
 	Connect: "OO", "Model::UpperArm_R", "SubDeformer::Cluster robot UpperArm_R"
+	Connect: "OO", "Model::LowerArm_R", "SubDeformer::Cluster robot-line LowerArm_R"
 	Connect: "OO", "Model::LowerArm_R", "SubDeformer::Cluster robot LowerArm_R"
+	Connect: "OO", "Model::UpperArm_L", "SubDeformer::Cluster robot-line UpperArm_L"
 	Connect: "OO", "Model::UpperArm_L", "SubDeformer::Cluster robot UpperArm_L"
+	Connect: "OO", "Model::LowerArm_L", "SubDeformer::Cluster robot-line LowerArm_L"
 	Connect: "OO", "Model::LowerArm_L", "SubDeformer::Cluster robot LowerArm_L"
+	Connect: "OO", "Model::Switch", "SubDeformer::Cluster robot-line Switch"
 	Connect: "OO", "Model::Switch", "SubDeformer::Cluster robot Switch"
+	Connect: "OO", "Model::UpperLeg_L", "SubDeformer::Cluster robot-line UpperLeg_L"
 	Connect: "OO", "Model::UpperLeg_L", "SubDeformer::Cluster robot UpperLeg_L"
+	Connect: "OO", "Model::LowerLeg_L", "SubDeformer::Cluster robot-line LowerLeg_L"
 	Connect: "OO", "Model::LowerLeg_L", "SubDeformer::Cluster robot LowerLeg_L"
+	Connect: "OO", "Model::UpperLeg_R", "SubDeformer::Cluster robot-line UpperLeg_R"
 	Connect: "OO", "Model::UpperLeg_R", "SubDeformer::Cluster robot UpperLeg_R"
+	Connect: "OO", "Model::LowerLeg_R", "SubDeformer::Cluster robot-line LowerLeg_R"
 	Connect: "OO", "Model::LowerLeg_R", "SubDeformer::Cluster robot LowerLeg_R"
 	Connect: "OO", "Model::Root", "Model::Armature"
 	Connect: "OO", "Model::Body", "Model::Root"
@@ -1931,7 +2393,1591 @@ Connections:  {
 ;----------------------------------------------------
 
 Takes:  {
-	Current: "Shutdown"
+	Current: "Float"
+	Take: "Float" {
+		FileName: "Float.tak"
+		LocalTime: -769769299,61581544000
+		ReferenceTime: -769769299,61581544000
+
+		;Models animation
+		;----------------------------------------------------
+		Model: "Model::Root" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: 0.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.000000000000000
+						KeyVer: 4005
+						KeyCount: 42
+						Key: 
+							0,0.000000000000000,L,
+							30790772000,1.000000000000000,L,
+							31560541300,0.998537838459015,L,
+							32330310600,0.993982672691345,L,
+							33100079900,0.986056387424469,L,
+							33869849200,0.974443137645721,L,
+							34639618500,0.958783328533173,L,
+							35409387800,0.938667058944702,L,
+							36179157100,0.913627445697784,L,
+							36948926400,0.883134186267853,L,
+							37718695700,0.846590578556061,L,
+							38488465000,0.803336620330811,L,
+							39258234300,0.752667069435120,L,
+							40028003600,0.693878233432770,L,
+							40797772900,0.626369476318359,L,
+							41567542200,0.549837172031403,L,
+							42337311500,0.464607894420624,L,
+							43107080800,0.372118562459946,L,
+							43876850100,0.275410681962967,L,
+							44646619400,0.179250627756119,L,
+							45416388700,0.089399211108685,L,
+							46186158000,0.011103209108114,L,
+							46955927300,-0.052269950509071,L,
+							47725696600,-0.099590659141541,L,
+							48495465900,-0.131423652172089,L,
+							49265235200,-0.149233967065811,L,
+							50035004500,-0.154780507087708,L,
+							50804773800,-0.153445094823837,L,
+							51574543100,-0.149407893419266,L,
+							52344312400,-0.142679959535599,L,
+							53114081700,-0.133372649550438,L,
+							53883851000,-0.121726386249065,L,
+							54653620300,-0.108131125569344,L,
+							55423389600,-0.093128353357315,L,
+							56962928200,-0.061643622815609,L,
+							57732697500,-0.046641897410154,L,
+							58502466800,-0.033048160374165,L,
+							59272236100,-0.021403627470136,L,
+							60042005400,-0.012097983621061,L,
+							60811774700,-0.005371414590627,L,
+							61581544000,-0.001335106207989,L,
+							62351313300,0.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 1
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: -89.999988843970513
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-89.999988843970513,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: -89.999988843970513
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-89.999988843970513,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 2
+				}
+				Channel: "S" {
+					Channel: "X" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 3
+				}
+			}
+		}
+		Model: "Model::Body" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: 0.000000089406953
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000089406953,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.000000189492411
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000189492411,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.800000011920929
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.800000011920929,L
+						Color: 0,0,1
+					}
+					LayerType: 1
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: 0.000004325709069
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000004325709069,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: -89.999988843970513
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-89.999988843970513,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 2
+				}
+				Channel: "S" {
+					Channel: "X" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 3
+				}
+			}
+		}
+		Model: "Model::Head" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: 0.699999988079071
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.699999988079071,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.000000052848527
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000052848527,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: -0.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 1
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: 0.000000000000718
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000718,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: -0.000000000000299
+						KeyVer: 4005
+						KeyCount: 63
+						Key: 
+							0,-0.000000000000299,L,
+							15395386000,-0.000000000000299,L,
+							16165155300,0.082431992287818,L,
+							16934924600,0.331610753484667,L,
+							17704693900,0.748313497753112,L,
+							18474463200,1.329843807815096,L,
+							19244232500,2.069057252437942,L,
+							20014001800,2.953449356076963,L,
+							20783771100,3.964499207024049,L,
+							21553540400,5.077498169069892,L,
+							22323309700,6.262069829654549,L,
+							23093079000,7.483495056566426,L,
+							23862848300,8.704737149031182,L,
+							24632617600,9.888873385056252,L,
+							25402386900,11.001497540471389,L,
+							26172156200,12.012689971617400,L,
+							26941925500,12.898248756944021,L,
+							27711694800,13.640113168738475,L,
+							28481464100,14.226144253298374,L,
+							29251233400,14.649381194085837,L,
+							30021002700,14.907130335246945,L,
+							30790772000,15.000000417391476,L,
+							31560541300,15.028058834501847,L,
+							32330310600,15.083852942284310,L,
+							33100079900,15.158575211804141,L,
+							33869849200,15.243291755626981,L,
+							34639618500,15.328846705170436,L,
+							35409387800,15.405739267299037,L,
+							36179157100,15.464002488466456,L,
+							36948926400,15.493097386783376,L,
+							37718695700,15.481754150119293,L,
+							38488465000,15.417902126663520,L,
+							39258234300,15.288461504155503,L,
+							40028003600,15.079218658932461,L,
+							40797772900,14.774602467234086,L,
+							41567542200,14.357370116500702,L,
+							42337311500,13.808262180820194,L,
+							43107080800,13.105446814284292,L,
+							43876850100,12.223865760375551,L,
+							44646619400,11.134296054730111,L,
+							45416388700,9.802152180712017,L,
+							46186158000,8.185816941934794,L,
+							46955927300,6.233945671973415,L,
+							47725696600,3.883228920524300,L,
+							48495465900,1.054159443667206,L,
+							49265235200,-2.356742258957527,L,
+							50035004500,-6.488559756305492,L,
+							50804773800,-11.536244149648320,L,
+							51574543100,-11.765241609498302,L,
+							52344312400,-11.212115815038539,L,
+							53114081700,-10.313661632558951,L,
+							53883851000,-9.240903583781828,L,
+							54653620300,-8.084338260115121,L,
+							55423389600,-6.900702335446755,L,
+							56193158900,-5.729983579159334,L,
+							56962928200,-4.603100976964991,L,
+							57732697500,-3.545957167517317,L,
+							58502466800,-2.581925911929708,L,
+							59272236100,-1.733587708876488,L,
+							60042005400,-1.024159331841849,L,
+							60811774700,-0.478827583637853,L,
+							61581544000,-0.126191666938492,L,
+							62351313300,-0.000000000000299,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: -0.000000000000088
+						KeyVer: 4005
+						KeyCount: 3
+						Key: 
+							0,-0.000000000000088,L,
+							40797772900,-0.000004605452542,L,
+							62351313300,-0.000000000000088,L
+						Color: 0,0,1
+					}
+					LayerType: 2
+				}
+				Channel: "S" {
+					Channel: "X" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 3
+				}
+			}
+		}
+		Model: "Model::UpperArm_R" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: 0.574999988079071
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.574999988079071,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.350000023841858
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.350000023841858,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000007
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000007,L
+						Color: 0,0,1
+					}
+					LayerType: 1
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: 0.000009106919165
+						KeyVer: 4005
+						KeyCount: 11
+						Key: 
+							0,0.000009106919165,L,
+							12316308800,0.000009106919165,L,
+							13855847400,0.000005218800274,L,
+							14625616700,0.000004951027900,L,
+							16165155300,0.000014366885282,L,
+							16934924600,0.000016156585946,L,
+							17704693900,0.000015449072625,L,
+							20783771100,0.000004867263590,L,
+							26172156200,0.000006374581480,L,
+							27711694800,0.000004971878904,L,
+							62351313300,0.000009106919165,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.000000000000299
+						KeyVer: 4005
+						KeyCount: 15
+						Key: 
+							0,0.000000000000299,L,
+							13086078100,-0.000001613150160,L,
+							13855847400,-0.000007370320431,L,
+							15395386000,-0.000026177351241,L,
+							16165155300,-0.000030228095913,L,
+							17704693900,-0.000030822083888,L,
+							19244232500,-0.000026972033540,L,
+							22323309700,-0.000007461900051,L,
+							23862848300,-0.000004445731905,L,
+							24632617600,-0.000008406330803,L,
+							25402386900,-0.000017518077490,L,
+							26172156200,-0.000021466438630,L,
+							26941925500,-0.000020461262032,L,
+							30021002700,-0.000007749348100,L,
+							62351313300,0.000000000000299,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 180.000005008697713
+						KeyVer: 4005
+						KeyCount: 67
+						Key: 
+							0,180.000005008697713,L,
+							12316308800,180.000005008697713,L,
+							13086078100,174.231322858361608,L,
+							13855847400,156.054195061746157,L,
+							14625616700,127.459348554340394,L,
+							15395386000,98.887232916492408,L,
+							16165155300,80.750177839737361,L,
+							16934924600,75.000005502051962,L,
+							17704693900,77.238285813818607,L,
+							18474463200,84.156987405275615,L,
+							19244232500,95.833694395205043,L,
+							20014001800,111.420117779260039,L,
+							20783771100,128.578707276277157,L,
+							21553540400,144.164666207468599,L,
+							22323309700,155.841516631370610,L,
+							23093079000,162.761126637987218,L,
+							23862848300,164.999994346022476,L,
+							24632617600,153.072366696554639,L,
+							25402386900,126.929981572908488,L,
+							26172156200,114.999990677987839,L,
+							26941925500,118.126673695096756,L,
+							27711694800,127.187329440455855,L,
+							28481464100,139.354082012765474,L,
+							29251233400,149.677407509226356,L,
+							30021002700,154.999996344491223,L,
+							30790772000,157.413785197170256,L,
+							31560541300,159.592069127267592,L,
+							32330310600,161.563534929297248,L,
+							33100079900,163.351910680435793,L,
+							33869849200,164.977154193437997,L,
+							34639618500,166.456217997823785,L,
+							35409387800,167.803650396525285,L,
+							36179157100,169.032046258371963,L,
+							36948926400,170.152415848305878,L,
+							37718695700,171.174430714191772,L,
+							38488465000,172.106614932113786,L,
+							39258234300,172.956563672428928,L,
+							40028003600,173.731079803550585,L,
+							40797772900,174.436242193840030,L,
+							41567542200,175.077555975768291,L,
+							42337311500,175.660007187429471,L,
+							43107080800,176.188131074432420,L,
+							43876850100,176.666053071035861,L,
+							44646619400,177.097584422796672,L,
+							45416388700,177.486194865813133,L,
+							46186158000,177.835135570130262,L,
+							46955927300,178.147370837847774,L,
+							47725696600,178.425687386147047,L,
+							48495465900,178.672667026534356,L,
+							49265235200,178.890741306354215,L,
+							50035004500,179.082191508789379,L,
+							50804773800,179.249148652860953,L,
+							51574543100,179.393661795319872,L,
+							52344312400,179.517616068377066,L,
+							53114081700,179.622869283486835,L,
+							53883851000,179.711156308698293,L,
+							54653620300,179.784130049790605,L,
+							55423389600,179.843416091786224,L,
+							56193158900,179.890530736680887,L,
+							56962928200,179.926976626092028,L,
+							57732697500,179.954201760123681,L,
+							58502466800,179.973585836988121,L,
+							59272236100,179.986522215276125,L,
+							60042005400,179.994335951686594,L,
+							60811774700,179.998324782161887,L,
+							61581544000,179.999786442644279,L,
+							62351313300,180.000005008697713,L
+						Color: 0,0,1
+					}
+					LayerType: 2
+				}
+				Channel: "S" {
+					Channel: "X" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 3
+				}
+			}
+		}
+		Model: "Model::LowerArm_R" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: 0.375000029802322
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.375000029802322,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.000000013908963
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000013908963,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: -0.000000000000002
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.000000000000002,L
+						Color: 0,0,1
+					}
+					LayerType: 1
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: -0.000009106919165
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.000009106919165,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: -0.000000000000389
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.000000000000389,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000201
+						KeyVer: 4005
+						KeyCount: 5
+						Key: 
+							0,0.000000000000201,L,
+							25402386900,-0.000001373910160,L,
+							28481464100,0.000001857870586,L,
+							30021002700,0.000000000003604,L,
+							62351313300,0.000000000000201,L
+						Color: 0,0,1
+					}
+					LayerType: 2
+				}
+				Channel: "S" {
+					Channel: "X" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 3
+				}
+			}
+		}
+		Model: "Model::UpperArm_L" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: 0.574999988079071
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.574999988079071,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: -0.349999964237213
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.349999964237213,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 1
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: 0.000009106919165
+						KeyVer: 4005
+						KeyCount: 16
+						Key: 
+							0,0.000009106919165,L,
+							13086078100,0.000009666397155,L,
+							14625616700,0.000015337231092,L,
+							16934924600,0.000033684673480,L,
+							18474463200,0.000039393962308,L,
+							20014001800,0.000038718405573,L,
+							20783771100,0.000034188856026,L,
+							22323309700,0.000017334805888,L,
+							23093079000,0.000012413280101,L,
+							23862848300,0.000011011469098,L,
+							24632617600,0.000015078442029,L,
+							25402386900,0.000025756733928,L,
+							26172156200,0.000030655279113,L,
+							26941925500,0.000030177871443,L,
+							31560541300,0.000015891939369,L,
+							62351313300,0.000009106919165,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.000000000000299
+						KeyVer: 4005
+						KeyCount: 10
+						Key: 
+							0,0.000000000000299,L,
+							13086078100,0.000000643721368,L,
+							14625616700,0.000005004712406,L,
+							16165155300,0.000006984165064,L,
+							18474463200,0.000000772072474,L,
+							20014001800,0.000001470523808,L,
+							21553540400,0.000007217248324,L,
+							23862848300,0.000001994383454,L,
+							25402386900,0.000007232422165,L,
+							62351313300,0.000000000000299,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 180.000005008697713
+						KeyVer: 4005
+						KeyCount: 67
+						Key: 
+							0,180.000005008697713,L,
+							12316308800,180.000005008697713,L,
+							13086078100,182.431784579650525,L,
+							13855847400,189.997885651586273,L,
+							14625616700,202.915836089191174,L,
+							15395386000,220.364087078718939,L,
+							16165155300,239.669070352598624,L,
+							16934924600,257.108865567933947,L,
+							17704693900,270.015081740544758,L,
+							18474463200,277.571839113695944,L,
+							19244232500,279.999998684388629,L,
+							20014001800,274.806541405571863,L,
+							20783771100,258.719150966653842,L,
+							21553540400,233.928842770344772,L,
+							22323309700,209.137305139985102,L,
+							23093079000,193.047346549939135,L,
+							23862848300,187.852454931396636,L,
+							24632617600,202.057937008682103,L,
+							25402386900,233.547472327848482,L,
+							26172156200,247.779919991977124,L,
+							26941925500,246.356180719868348,L,
+							27711694800,242.048243806564102,L,
+							28481464100,235.120847384293683,L,
+							29251233400,226.474565555500305,L,
+							30021002700,217.594185823094278,L,
+							30790772000,209.997608447081973,L,
+							31560541300,204.660334705101604,L,
+							32330310600,201.924188244355122,L,
+							33100079900,200.508918406817145,L,
+							33869849200,199.127990760425945,L,
+							34639618500,197.783959795931111,L,
+							35409387800,196.479339022947187,L,
+							36179157100,195.216600969953731,L,
+							36948926400,193.998163523916901,L,
+							37718695700,192.826348949154522,L,
+							38488465000,191.703329245822630,L,
+							39258234300,190.631139810293917,L,
+							40028003600,189.611624793644268,L,
+							40797772900,188.646396120517778,L,
+							41567542200,187.736765187235136,L,
+							42337311500,186.883770182550137,L,
+							43107080800,186.088080465001497,L,
+							43876850100,185.349996562912622,L,
+							44646619400,184.669409193256854,L,
+							45416388700,184.045799261657237,L,
+							46186158000,183.478210541630006,L,
+							46955927300,182.965263334962771,L,
+							47725696600,182.505181792471376,L,
+							48495465900,182.095821234756414,L,
+							49265235200,181.734695472960027,L,
+							50035004500,181.419004129522506,L,
+							50804773800,181.145755581587366,L,
+							51574543100,180.911766961001405,L,
+							52344312400,180.713718795827987,L,
+							53114081700,180.548291614130534,L,
+							53883851000,180.412124962837339,L,
+							54653620300,180.301913030390182,L,
+							55423389600,180.214459288257473,L,
+							56193158900,180.146662830556011,L,
+							56962928200,180.095627657077756,L,
+							57732697500,180.058594371397987,L,
+							58502466800,180.032981162010486,L,
+							59272236100,180.016424783462384,L,
+							60042005400,180.006739575219342,L,
+							60811774700,180.001944782421987,L,
+							61581544000,180.000250895507833,L,
+							62351313300,180.000005008697713,L
+						Color: 0,0,1
+					}
+					LayerType: 2
+				}
+				Channel: "S" {
+					Channel: "X" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 3
+				}
+			}
+		}
+		Model: "Model::LowerArm_L" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: 0.374999970197678
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.374999970197678,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.000000013908986
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000013908986,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: -0.000000000000008
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.000000000000008,L
+						Color: 0,0,1
+					}
+					LayerType: 1
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: -0.000009106919165
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.000009106919165,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: -0.000000000000389
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.000000000000389,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000201
+						KeyVer: 4005
+						KeyCount: 4
+						Key: 
+							0,0.000000000000201,L,
+							25402386900,0.000001311275115,L,
+							26172156200,-0.000000578538062,L,
+							62351313300,0.000000000000201,L
+						Color: 0,0,1
+					}
+					LayerType: 2
+				}
+				Channel: "S" {
+					Channel: "X" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 3
+				}
+			}
+		}
+		Model: "Model::Switch" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: 0.474999964237213
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.474999964237213,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.000000043411291
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000043411291,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: -0.050000004470348
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.050000004470348,L
+						Color: 0,0,1
+					}
+					LayerType: 1
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: -0.000023396341808
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.000023396341808,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 89.999995674159678
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,89.999995674159678,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 2
+				}
+				Channel: "S" {
+					Channel: "X" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 3
+				}
+			}
+		}
+		Model: "Model::UpperLeg_L" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: 0.000000098844190
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000098844190,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: -0.124999813735485
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.124999813735485,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.775000035762787
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.775000035762787,L
+						Color: 0,0,1
+					}
+					LayerType: 1
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: -180.000005008697713
+						KeyVer: 4005
+						KeyCount: 27
+						Key: 
+							0,-180.000005008697713,L,
+							34639618500,-180.000005008697713,L,
+							35409387800,-167.754787223203067,L,
+							36179157100,-167.583499739197748,L,
+							36948926400,-167.265827640900909,L,
+							37718695700,-166.863816366732891,L,
+							38488465000,-166.481926829859674,L,
+							39258234300,-166.219934433676713,L,
+							40028003600,-166.129775936632655,L,
+							40797772900,-165.621500579357729,L,
+							41567542200,-162.894028458857122,L,
+							42337311500,-138.796560991574836,L,
+							43107080800,-188.795772357665754,L,
+							43876850100,-181.103449389868359,L,
+							44646619400,-180.000005008697713,L,
+							45416388700,-182.128332935205634,L,
+							46186158000,-207.057580839610893,L,
+							46955927300,-152.277646865868121,L,
+							47725696600,-159.042225238704020,L,
+							48495465900,-157.734722125890357,L,
+							49265235200,-146.585148645534247,L,
+							50035004500,-192.528402437180659,L,
+							50804773800,-180.000059650211057,L,
+							51574543100,-180.000086970967743,L,
+							52344312400,-180.000305537021177,L,
+							53114081700,-180.000005008697713,L,
+							62351313300,-180.000005008697713,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 89.999988843970513
+						KeyVer: 4005
+						KeyCount: 27
+						Key: 
+							0,89.999988843970513,L,
+							34639618500,89.999988843970513,L,
+							35409387800,90.641070399466983,L,
+							36179157100,95.036440564336445,L,
+							36948926400,103.165984431473234,L,
+							37718695700,113.288693611632766,L,
+							38488465000,122.600966695825605,L,
+							39258234300,128.763532195217437,L,
+							40028003600,130.836904419663512,L,
+							40797772900,126.802817110941376,L,
+							41567542200,114.609563404652121,L,
+							42337311500,96.916115454110425,L,
+							43107080800,76.555813311951908,L,
+							43876850100,64.319720659188405,L,
+							44646619400,60.315453956382491,L,
+							45416388700,66.715621246431212,L,
+							46186158000,82.926378562137842,L,
+							46955927300,102.074574843620127,L,
+							47725696600,108.181009848412870,L,
+							48495465900,104.689328352248154,L,
+							49265235200,95.795349713204644,L,
+							50035004500,85.989984782261786,L,
+							50804773800,82.760056625659104,L,
+							51574543100,84.509459317393606,L,
+							52344312400,88.250565661668489,L,
+							53114081700,89.999988843970513,L,
+							62351313300,89.999988843970513,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000000
+						KeyVer: 4005
+						KeyCount: 27
+						Key: 
+							0,0.000000000000000,L,
+							34639618500,0.000000000000000,L,
+							35409387800,12.195821003643518,L,
+							36179157100,12.028172302918504,L,
+							36948926400,11.715003006831992,L,
+							37718695700,11.315952619669154,L,
+							38488465000,10.934902342290215,L,
+							39258234300,10.672405365882309,L,
+							40028003600,10.581788392390234,L,
+							40797772900,11.295309226676467,L,
+							41567542200,14.619162729650451,L,
+							42337311500,39.570349201669764,L,
+							43107080800,-9.580725131783337,L,
+							43876850100,-1.303067011669451,L,
+							44646619400,0.000004123581308,L,
+							45416388700,-2.263938130827170,L,
+							46186158000,-27.544530752693969,L,
+							46955927300,26.888962365967917,L,
+							47725696600,19.996280380154040,L,
+							48495465900,21.441136889629167,L,
+							49265235200,32.939072215770238,L,
+							50035004500,-12.659506324695739,L,
+							50804773800,-0.000055093615010,L,
+							51574543100,-0.000079319338002,L,
+							52344312400,-0.000292736075652,L,
+							53114081700,0.000000000000000,L,
+							62351313300,0.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 2
+				}
+				Channel: "S" {
+					Channel: "X" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 3
+				}
+			}
+		}
+		Model: "Model::LowerLeg_L" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: 0.399999976158142
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.399999976158142,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.000000025821706
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000025821706,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000003
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000003,L
+						Color: 0,0,1
+					}
+					LayerType: 1
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: -0.000005222401985
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.000005222401985,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: -0.000000000000388
+						KeyVer: 4005
+						KeyCount: 8
+						Key: 
+							0,-0.000000000000388,L,
+							37718695700,0.000000726915416,L,
+							38488465000,-0.000001246563397,L,
+							39258234300,0.000001427245975,L,
+							43876850100,-0.000001459152384,L,
+							47725696600,0.000001692521334,L,
+							48495465900,0.000000508131421,L,
+							62351313300,-0.000000000000388,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000251
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000251,L
+						Color: 0,0,1
+					}
+					LayerType: 2
+				}
+				Channel: "S" {
+					Channel: "X" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 3
+				}
+			}
+		}
+		Model: "Model::UpperLeg_R" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: 0.000000079969716
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000079969716,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.125000178813934
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.125000178813934,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.774999976158142
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.774999976158142,L
+						Color: 0,0,1
+					}
+					LayerType: 1
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: 180.000005008697713
+						KeyVer: 4005
+						KeyCount: 27
+						Key: 
+							0,180.000005008697713,L,
+							34639618500,180.000005008697713,L,
+							35409387800,210.071265207091301,L,
+							36179157100,210.246732766868661,L,
+							36948926400,210.566795431374999,L,
+							37718695700,210.966033648740023,L,
+							38488465000,211.339453751042413,L,
+							39258234300,211.592430297520991,L,
+							40028003600,211.678873171656562,L,
+							40797772900,213.166174184181358,L,
+							41567542200,220.615520002445066,L,
+							42337311500,263.606287921574335,L,
+							43107080800,343.539882495092002,L,
+							43876850100,357.566659502933476,L,
+							44646619400,360.000064658908798,L,
+							45416388700,356.989809046391713,L,
+							46186158000,317.373318501784013,L,
+							46955927300,210.355469378455126,L,
+							47725696600,204.214883427812367,L,
+							48495465900,206.689105794267590,L,
+							49265235200,234.319311024815477,L,
+							50035004500,172.348827100460426,L,
+							50804773800,180.000073310589414,L,
+							51574543100,180.000086970967743,L,
+							52344312400,180.000223574751146,L,
+							53114081700,180.000005008697713,L,
+							62351313300,180.000005008697713,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 89.999988843970513
+						KeyVer: 4005
+						KeyCount: 27
+						Key: 
+							0,89.999988843970513,L,
+							34639618500,89.999988843970513,L,
+							35409387800,89.544654282952266,L,
+							36179157100,86.433387002800046,L,
+							36948926400,80.717249497748767,L,
+							37718695700,73.632041554705438,L,
+							38488465000,67.101308368482933,L,
+							39258234300,62.750921829487112,L,
+							40028003600,61.279487346404210,L,
+							40797772900,64.176512082860953,L,
+							41567542200,72.592841932867827,L,
+							42337311500,82.624805219714702,L,
+							43107080800,77.858009367780483,L,
+							43876850100,69.810318487657014,L,
+							44646619400,66.972750547925145,L,
+							45416388700,72.223984396930987,L,
+							46186158000,84.901129685158267,L,
+							46955927300,78.083883723632482,L,
+							47725696600,72.957184713763297,L,
+							48495465900,76.642324487979167,L,
+							49265235200,85.757403180644843,L,
+							50035004500,97.051701539324156,L,
+							50804773800,100.564980093644422,L,
+							51574543100,98.003515720920745,L,
+							52344312400,92.547724536462482,L,
+							53114081700,89.999988843970513,L,
+							62351313300,89.999988843970513,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000000
+						KeyVer: 4005
+						KeyCount: 27
+						Key: 
+							0,0.000000000000000,L,
+							34639618500,0.000000000000000,L,
+							35409387800,30.020716798535570,L,
+							36179157100,29.850689484432102,L,
+							36948926400,29.534004348470329,L,
+							37718695700,29.136367810465686,L,
+							38488465000,28.762684745880239,L,
+							39258234300,28.508611954039885,L,
+							40028003600,28.421525334575055,L,
+							40797772900,30.110861635201267,L,
+							41567542200,38.147801797571155,L,
+							42337311500,81.981865852763988,L,
+							43107080800,162.756591392378340,L,
+							43876850100,177.366734857229801,L,
+							44646619400,180.000045989832728,L,
+							45416388700,176.857899424442905,L,
+							46186158000,136.897262968315431,L,
+							46955927300,29.536640801489952,L,
+							47725696600,23.266762784953620,L,
+							48495465900,25.874167010034732,L,
+							49265235200,53.847807812428719,L,
+							50035004500,-7.781198243051112,L,
+							50804773800,0.000064807322534,L,
+							51574543100,0.000079800152376,L,
+							52344312400,0.000210307901271,L,
+							53114081700,0.000000000000000,L,
+							62351313300,0.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 2
+				}
+				Channel: "S" {
+					Channel: "X" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 3
+				}
+			}
+		}
+		Model: "Model::LowerLeg_R" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: 0.399999976158142
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.399999976158142,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.000000026287372
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000026287372,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: -0.000000000000001
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.000000000000001,L
+						Color: 0,0,1
+					}
+					LayerType: 1
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: -0.000004155185334
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,-0.000004155185334,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: -0.000000000000314
+						KeyVer: 4005
+						KeyCount: 4
+						Key: 
+							0,-0.000000000000314,L,
+							40028003600,-0.000000931879927,L,
+							40797772900,0.000000370165269,L,
+							62351313300,-0.000000000000314,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000265
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000265,L
+						Color: 0,0,1
+					}
+					LayerType: 2
+				}
+				Channel: "S" {
+					Channel: "X" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 3
+				}
+			}
+		}
+		Model: "Model::Armature" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: 0.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 0.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 1
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: 89.999995674159678
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,89.999995674159678,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 0.000000000000077
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,0.000000000000077,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 179.999991348319355
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,179.999991348319355,L
+						Color: 0,0,1
+					}
+					LayerType: 2
+				}
+				Channel: "S" {
+					Channel: "X" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 1,0,0
+					}
+					Channel: "Y" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,1,0
+					}
+					Channel: "Z" {
+						Default: 1.000000000000000
+						KeyVer: 4005
+						KeyCount: 1
+						Key: 
+							769769300,1.000000000000000,L
+						Color: 0,0,1
+					}
+					LayerType: 3
+				}
+			}
+		}
+	}
 	Take: "Shutdown" {
 		FileName: "Shutdown.tak"
 		LocalTime: -769769299,106997932700
@@ -9171,7 +11217,7 @@ Version5:  {
 		SnapOnFrames: 0
 		ReferenceTimeIndex: -1
 		TimeLineStartTime: 0
-		TimeLineStopTime: 122393318700
+		TimeLineStopTime: 60811774700
 	}
 	RendererSetting:  {
 		DefaultCamera: "Producer Perspective"

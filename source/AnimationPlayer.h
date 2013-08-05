@@ -21,6 +21,7 @@ public:
 private:
 	const SkinningAnimationSet* skinning_animation_set_;	///< スキニングアニメーションのセット
 	const SkinningAnimation* current_skinning_animation_;	///< 現在のスキニングアニメーション
+	float_t	speed_;											///< 再生スピード
 	float_t current_frame_;									///< 現在の再生フレーム
 	bool is_looping_;										///< ループ再生中フラグ
 
@@ -32,6 +33,10 @@ private:
 public:
 	AnimationPlayer( const SkinningAnimationSet* );
 	~AnimationPlayer() { }
+
+	void set_speed( float_t speed ) { speed_ = speed; }
+	float_t get_speed() const { return speed_; }
+	void reset_speed() { speed_ = 1.f; }
 
 	void play( const char_t* name, bool force, bool loop );
 	void stop();

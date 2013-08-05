@@ -62,6 +62,10 @@ protected:
 	float_t get_frame_elapsed_time() const;
 	float_t get_scene_elapsed_time() const;
 
+	float_t get_flicker_height_offset( float_t scale = 1.f ) const;
+	void update_location_by_flicker( const Vector3& base_location, float_t scale = 1.f );
+	void update_velocity_by_flicker( const Vector3& base_location, float_t scale = 1.f );
+
 	bool_t is_visible_in_blink( float_t ) const;
 
 	DynamicsWorld* get_dynamics_world() const;
@@ -84,6 +88,7 @@ public:
 	/// çXêV
 	virtual void update() = 0;
 	virtual void update_transform();
+	virtual void commit_transform();
 	
 	virtual bool is_hard() const { return true; }
 	virtual bool is_block() const { return is_hard(); }

@@ -40,7 +40,6 @@ public:
 
 	/// XV
 	virtual void update();
-	virtual void update_transform();
 	
 	virtual float get_collision_width() const { return collision_width_; }
 	virtual float get_collision_height() const { return collision_height_; }

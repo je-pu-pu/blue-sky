@@ -80,4 +80,15 @@ bool MainLoop::loop()
 	return false;
 }
 
+/**
+ * 現在の時間を取得する
+ *
+ * get_current_time() は MainLoop に保存されたキャッシュを返すが、
+ * この関数は、本当の現在時間を再取得する。
+ */
+unsigned long MainLoop::get_current_time_force() const
+{
+	return timeGetTime();
+}
+
 } // namespace game

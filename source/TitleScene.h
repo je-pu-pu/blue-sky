@@ -34,12 +34,14 @@ private:
 	int_t sequence_;
 	float_t sequence_elapsed_time_;
 
+	Sound* get_bgm() override { return bgm_; }
+
 public:
 	TitleScene( const GameMain* );
 	~TitleScene();
 
-	void update();				///< メインループ
-	void render();				///< 描画
+	void update() override;				///< メインループ
+	void render() override;				///< 描画
 
 }; // class TitleScene
 

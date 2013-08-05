@@ -49,6 +49,8 @@ private:
 	bool		can_clamber_;			///< よじ登り可能フラグ
 	bool		can_peer_down_;			///< のぞき込み可能フラグ
 
+	bool		is_flickering_;			///< 現在揺らぎ中フラグ
+
 	int			step_count_;			///< 移動カウンタ
 	float		step_speed_;			///< 移動速度
 
@@ -144,7 +146,6 @@ public:
 
 	/// 更新
 	void update() override;
-	void update_transform() override;
 	
 	// 移動
 	void step( float_t );
@@ -173,6 +174,9 @@ public:
 
 	void rocket( const Vector3& );
 	void throw_stone( const Vector3& );
+	void start_flickering() { is_flickering_ = true; action_base_position_ = get_location(); }
+	void stop_flickering() { is_flickering_ = false; }
+
 
 	void damage( const Vector3& );
 	void kill();
@@ -197,6 +201,7 @@ public:
 	bool can_clamber() const { return can_clamber_; }
 	bool can_peer_down() const { return can_peer_down_; }
 	bool is_rocketing() const { return action_mode_ == ACTION_MODE_ROCKET; }
+	bool is_flickering() const { return is_flickering_; }
 
 	bool has_medal() const { return has_medal_; }
 

@@ -1,4 +1,5 @@
 #include "Girl.h"
+#include "Player.h"
 #include "AnimationPlayer.h"
 #include <common/random.h>
 
@@ -27,6 +28,7 @@ void Girl::restart()
 	flicker_ = common::random( 0.f, 10.f );
 
 	get_animation_player()->play( "Float", true, true );
+	get_animation_player()->set_speed( 0.5f );
 }
 
 /**
@@ -35,10 +37,10 @@ void Girl::restart()
  */
 void Girl::update()
 {
-	// get_rigid_body()->setActivationState( true );
+	chase_direction_to( player_->get_location(), 1.f );
 
-	// flicker_ += 0.02f;
-	// set_location( get_location().x(), get_start_location().y() + 1.f + std::sin( flicker_ ), get_location().z() );
+	set_velocity( Vector3( 0.f, 0.f, 0.f ) );
+	update_location_by_flicker( get_start_location() );
 }
 
 } // namespace blue_sky

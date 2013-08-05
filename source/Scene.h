@@ -63,6 +63,7 @@ private:
 	std::string next_stage_name_;
 
 protected:
+	void update_total_elapsed_time();
 	float_t get_elapsed_time() const;
 
 	Direct3D* get_direct_3d() const;	///< @todo íœ‚·‚é
@@ -91,7 +92,10 @@ protected:
 	void play_sound( const char*, bool = false, bool = true ) const;
 	void stop_sound( const char* ) const;
 
+	void update_constant_buffer_for_sprite_frame();
 	void render_fader() const;
+
+	virtual Sound* get_bgm() { return 0; };
 
 public:
 	Scene( const GameMain* );

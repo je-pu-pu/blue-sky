@@ -5,6 +5,7 @@
 #include "StageSelectScene.h"
 #include "StoryTextScene.h"
 #include "GamePlayScene.h"
+#include "EndingScene.h"
 
 #include "DrawingModelManager.h"
 #include "ActiveObjectManager.h"
@@ -150,6 +151,8 @@ GameMain::GameMain()
 
 		setup_scene( "stage_intro" );
 	}
+
+	setup_scene( "ending" );
 }
 
 //■デストラクタ
@@ -270,10 +273,6 @@ void GameMain::check_scene_transition()
 	{
 		set_stage_name( scene_->get_next_stage_name() );
 
-		scene_.release();
-
-		sound_manager_->pop_group();
-
 		setup_scene( next_scene );
 
 		save_data_->save_file( "save/blue-sky.save" );
@@ -287,6 +286,9 @@ void GameMain::check_scene_transition()
  */
 void GameMain::setup_scene( const string_t& scene_name )
 {
+	scene_.release();
+
+	sound_manager_->pop_group();
 	sound_manager_->push_group( scene_name.c_str() );
 
 	if ( scene_name == "title" )
@@ -308,6 +310,10 @@ void GameMain::setup_scene( const string_t& scene_name )
 	else if ( scene_name == "stage_outro" )
 	{
 		scene_ = new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".outro" ).c_str(), "stage_select" );
+	}
+	else if ( scene_name == "ending" )
+	{
+		scene_ = new EndingScene( this );
 	}
 	else
 	{

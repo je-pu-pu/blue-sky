@@ -67,6 +67,7 @@ public:
 	float_t get_direction_degree() const { return direction_degree_; }
 	void set_direction_degree( float_t );
 	void chase_direction_degree( float_t, float_t );
+	void chase_direction_to( const Vector3&, float_t );
 
 	Vector3& get_front() { return front_; }
 	const Vector3& get_front() const { return front_; }

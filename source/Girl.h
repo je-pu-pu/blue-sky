@@ -30,18 +30,20 @@ private:
 	bool is_hard() const override { return true; }
 
 protected:
-
+	const Player* player_;
 
 public:
 	Girl();
 	~Girl() { }
 
-	void restart();
+	void set_player( const Player* p ) { player_ = p; }
+
+	void restart() override;
 
 	/// XV
-	void update();
+	void update() override;
 
-	bool is_visible() const { return true; }
+	bool is_visible() const override { return true; }
 
 }; // class Girl
 

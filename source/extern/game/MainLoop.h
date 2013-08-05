@@ -31,12 +31,18 @@ public:
 	
 	unsigned long get_last_time() const { return last_time_; }
 	unsigned long get_current_time() const { return current_time_; }
+	unsigned long get_current_time_force() const;
 	
+	float get_last_sec() const { return get_last_time() / 1000.f; }
+	float get_current_sec() const { return get_current_time() / 1000.f; }
+	float get_current_sec_force() const { return get_current_time_force() / 1000.f; }
+
 	float get_elapsed_sec() const { return get_elapsed_msec() / 1000.f; }
 	unsigned long get_elapsed_msec() const { return current_time_ - last_time_; }
 	
 	unsigned long get_fps() const { return fps_; }
 	unsigned long get_last_fps() const { return last_fps_; }
+
 }; // class MainLoop
 
 } // game

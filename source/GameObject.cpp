@@ -6,6 +6,7 @@
 #include "Scene.h"
 
 #include <common/math.h>
+#include <common/random.h>
 
 #include "memory.h"
 
@@ -28,17 +29,44 @@ GameObject::~GameObject()
 	delete transform_;
 }
 
+/**
+ * 変換行列を物理演算の結果で更新する
+ *
+ */
 void GameObject::update_transform()
 {
-	if ( rigid_body_ )
+	if ( ! rigid_body_ )
 	{
-		* transform_ = rigid_body_->getWorldTransform();
-		Transform offset;
-		offset.setIdentity();
-		offset.setOrigin( Vector3( 0, -get_height_offset(), 0 ) );
-
-		*transform_ = *transform_ * offset;
+		return;
 	}
+
+	* transform_ = rigid_body_->getWorldTransform();
+	Transform offset;
+	offset.setIdentity();
+	offset.setOrigin( Vector3( 0, -get_height_offset(), 0 ) );
+
+	*transform_ = *transform_ * offset;
+}
+
+/**
+ * 変換行列を物理演算に送る
+ *
+ */
+void GameObject::commit_transform()
+{
+	if ( ! rigid_body_ )
+	{
+		return;
+	}
+
+	Transform offset;
+	offset.setIdentity();
+	offset.setOrigin( Vector3( 0, get_height_offset(), 0 ) );
+
+
+	Transform t = *transform_ * offset;
+	rigid_body_->setWorldTransform( t );
+	rigid_body_->setInterpolationWorldTransform( t );
 }
 
 void GameObject::set_mass( float_t mass )
@@ -64,20 +92,13 @@ const GameObject::Transform& GameObject::get_transform() const
 }
 
 /**
- * @todo 調べる : set_rotation_degree() で設定した角度がクリアされる？
+ * 
  *
  */
 void GameObject::set_location( const Vector3& v )
 {
 	get_transform().getOrigin() = v;
-
-	if ( rigid_body_ )
-	{
-		get_rigid_body()->getMotionState()->setWorldTransform( get_transform() );
-		
-		get_rigid_body()->setWorldTransform( get_transform() );
-		get_rigid_body()->setInterpolationWorldTransform( get_transform() );
-	}
+	commit_transform();
 }
 
 void GameObject::set_location( float_t x, float_t y, float_t z )
@@ -140,6 +161,45 @@ float_t GameObject::get_frame_elapsed_time() const
 float_t GameObject::get_scene_elapsed_time() const
 {
 	return GameMain::get_instance()->get_current_scene()->get_total_elapsed_time();
+}
+
+/**
+ * ゆらぎによる高さのオフセットを取得する
+ *
+ * @param scale ゆらぎの大きさ
+ * @return ゆらぎによる高さのオフセット
+ */
+float_t GameObject::get_flicker_height_offset( float_t scale ) const
+{
+	common::random_set_seed( reinterpret_cast< int >( this ) );
+	float_t a = common::random( 0.f, 10.f );
+
+	return std::cos( a + get_scene_elapsed_time() ) * 10.f * scale * 0.5f;
+}
+
+/**
+ * 指定した位置にゆらぎによる高さのオフセットを加え、現在の位置として設定する
+ *
+ * @param base_location ゆらぎの中心となる位置
+ * @return ゆらぎによる高さのオフセット
+ */
+void GameObject::update_location_by_flicker( const Vector3& base_location, float_t scale )
+{
+	set_location( base_location + Vector3( 0.f, get_flicker_height_offset( scale ), 0.f ) );
+}
+
+/**
+ * 指定した位置にゆらぎによる高さのオフセットを加え、その位置を目標地点として移動量を設定する
+ *
+ * @param base_location ゆらぎの中心となる位置
+ * @return ゆらぎによる高さのオフセット
+ */
+void GameObject::update_velocity_by_flicker( const Vector3& base_location, float_t scale )
+{
+	Vector3 target_location = base_location + Vector3( 0.f, get_flicker_height_offset( scale ), 0.f );
+	Vector3 relative_position = target_location - get_location();
+
+	set_velocity( Vector3( get_velocity().x(), relative_position.y(), get_velocity().z() ) );
 }
 
 /**

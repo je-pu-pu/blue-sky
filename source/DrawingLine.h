@@ -85,7 +85,9 @@ public:
 	bool load_obj( const char* );
 
 	void render() const { render_part(); }
-	void render_part( int level = 99999 ) const;
+	void render_part( int part_count = 99999 ) const;
+
+	int get_part_count() const { return index_size_ / 2; }
 
 	const Color& get_color() const { return color_; }
 	void set_color( const Color& color ) { color_ = color; }

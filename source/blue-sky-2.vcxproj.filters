@@ -210,6 +210,9 @@
     <ClCompile Include="Ladder.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
+    <ClCompile Include="EndingScene.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -465,6 +468,9 @@
     <ClInclude Include="BaseSwitch.h">
       <Filter>GameObject</Filter>
     </ClInclude>
+    <ClInclude Include="EndingScene.h">
+      <Filter>Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -528,6 +534,12 @@
       <Filter>Scenario</Filter>
     </None>
     <None Include="media\stage\2-2.stage">
+      <Filter>Scenario</Filter>
+    </None>
+    <None Include="media\stage\2-3.stage">
+      <Filter>Scenario</Filter>
+    </None>
+    <None Include="media\stage\ending-drawing-model.list">
       <Filter>Scenario</Filter>
     </None>
   </ItemGroup>

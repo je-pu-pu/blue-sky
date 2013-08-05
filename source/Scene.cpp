@@ -30,7 +30,7 @@ Scene::~Scene()
 
 void Scene::update()
 {
-	total_elapsed_time_ += get_main_loop()->get_elapsed_sec();
+	update_total_elapsed_time();
 }
 
 bool Scene::is_first_game_play() const
@@ -40,9 +40,14 @@ bool Scene::is_first_game_play() const
 	// return game_main_->is_first_game_play();
 }
 
+void Scene::update_total_elapsed_time()
+{
+	total_elapsed_time_ += get_main_loop()->get_elapsed_sec();
+}
+
 float Scene::get_elapsed_time() const
 {
-	return game_main_->get_elapsed_time();
+	return get_main_loop()->get_elapsed_sec();
 }
 
 Scene::Direct3D* Scene::get_direct_3d() const
@@ -135,6 +140,35 @@ void Scene::stop_sound( const char* name ) const
 	if ( sound )
 	{
 		sound->stop();
+	}
+}
+
+void Scene::update_constant_buffer_for_sprite_frame()
+{
+	{
+		FrameConstantBufferData frame_constant_buffer_data;
+
+		frame_constant_buffer_data.view = XMMatrixTranspose( XMMatrixIdentity() );
+		frame_constant_buffer_data.projection = XMMatrixTranspose( XMMatrixOrthographicLH( 2.f * get_width() / get_height(), 2.f, 0.f, 1.f ) );
+		frame_constant_buffer_data.time = get_total_elapsed_time();
+	
+		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
+	}
+
+	{
+		FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
+
+		frame_drawing_constant_buffer_data.accent = get_bgm()->get_current_peak_level();
+
+		get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
+	}
+
+	{
+		ObjectConstantBufferData object_constant_buffer_data;
+
+		object_constant_buffer_data.world = XMMatrixTranspose( XMMatrixIdentity() );
+
+		get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
 	}
 }
 

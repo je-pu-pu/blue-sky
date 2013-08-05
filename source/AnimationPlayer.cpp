@@ -12,6 +12,7 @@
 AnimationPlayer::AnimationPlayer( const SkinningAnimationSet* skinning_animation_set )
 	: skinning_animation_set_( skinning_animation_set )
 	, current_skinning_animation_( 0 )
+	, speed_( 1.f )
 	, current_frame_( 0.f )
 	, is_looping_( false )
 	, constant_buffer_( blue_sky::GameMain::get_instance()->get_direct_3d() )
@@ -67,7 +68,7 @@ void AnimationPlayer::update()
 		return;
 	}
 
-	current_frame_ += 1.f;
+	current_frame_ += speed_;
 
 	if ( is_looping_ )
 	{

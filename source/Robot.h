@@ -27,6 +27,7 @@ public:
 		MODE_FIND,
 		MODE_CHASE,
 		MODE_SHUTDOWN,
+		MODE_FLOAT,
 		// MODE_DETOUR
 	};
 
@@ -44,8 +45,6 @@ private:
 protected:
 	bool caluclate_target_visible() const;
 	bool caluclate_target_lost() const;
-
-	void shutdown();
 
 public:
 	Robot();
@@ -65,6 +64,9 @@ public:
 	float get_collision_depth() const  { return 0.5f; }
 
 	void render_material_at( uint_t ) const override;
+
+	void shutdown();
+	void start_floating();
 
 }; // class Robot
 

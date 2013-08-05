@@ -140,9 +140,9 @@ void DrawingLine::create_texture( const char* file_name )
 	// texture_resource_view_ = direct_3d_->getTextureManager()->load( "lines", "media/texture/pen-face-1-loop.png" );
 }
 
-void DrawingLine::render_part( int level ) const
+void DrawingLine::render_part( int part_count ) const
 {
-	if ( level < 1 )
+	if ( part_count < 1 )
 	{
 		return;
 	}
@@ -161,7 +161,7 @@ void DrawingLine::render_part( int level ) const
 	// ID3D11ShaderResourceView* text_view = direct_3d_->getTextView();
 	// direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & text_view );
 
-	direct_3d_->getImmediateContext()->DrawIndexed( std::min< int >( level, index_size_ ), 0, 0 );
+	direct_3d_->getImmediateContext()->DrawIndexed( std::min< int >( part_count * 2, index_size_ ), 0, 0 );
 }
 
 } // namespace blue_sky

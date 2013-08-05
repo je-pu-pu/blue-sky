@@ -45,7 +45,7 @@ void Robot::restart()
 	get_rigid_body()->setFriction( 0 );
 	set_mass( 50.f );
 
-	mode_ = MODE_STAND;
+	mode_ = MODE_FLOAT;
 	timer_ = 0;
 
 	texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
@@ -57,15 +57,13 @@ void Robot::update()
 
 	if ( mode_ == MODE_CHASE )
 	{
-		// ターゲットの方を向く
+		// ターゲットの方を向く ( 表示上の向き )
+		chase_direction_to( player_->get_location(), 2.f );
+		
+		// ターゲットとの距離が遠い場合は、ターゲットの進行方向を予測して進む
 		Vector3 relative_position = player_->get_location() - get_location();
 		relative_position.setY( 0 );
 
-		// 表示上の向きを設定
-		float_t target_direction_degree = math::radian_to_degree( std::atan2( relative_position.x(), relative_position.z() ) );
-		chase_direction_degree( target_direction_degree, 2.f );
-		
-		// ターゲットとの距離が遠い場合は、ターゲットの進行方向を予測して進む
 		Vector3 player_xz_velocity = player_->get_velocity();
 		player_xz_velocity.setY( 0 );
 
@@ -143,6 +141,17 @@ void Robot::update()
 	{
 		set_velocity( get_velocity() * 0.5f );
 		texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
+	}
+	else if ( mode_ == MODE_FLOAT )
+	{
+		set_velocity( Vector3( 0.f, 0.f, 0.f ) );
+		update_location_by_flicker( get_start_location() );
+
+		chase_direction_to( player_->get_location(), 0.5f );
+
+		get_animation_player()->set_speed( 0.25f );
+		get_animation_player()->play( "Float", false, true );
+		texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-tender" );
 	}
 }
 
@@ -255,6 +264,11 @@ void Robot::shutdown()
 	get_animation_player()->play( "Shutdown", false, false );
 
 	set_velocity( Vector3( 0.f, 0.f, 0.f ) );
+}
+
+void Robot::start_floating()
+{
+	mode_ = MODE_FLOAT;
 }
 
 void Robot::on_collide_with( Player* )

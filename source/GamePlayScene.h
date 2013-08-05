@@ -5,6 +5,7 @@
 #include "Direct3D11Vector.h"
 
 #include <common/auto_ptr.h>
+#include <common/safe_ptr.h>
 
 class Direct3D11FarBillboardsMesh;
 class Direct3D11SkyBox;
@@ -23,6 +24,7 @@ namespace blue_sky
 {
 
 class Player;
+class Girl;
 class Goal;
 class ActiveObject;
 class Camera;
@@ -60,10 +62,12 @@ protected:
 	common::auto_ptr< Player >			player_;
 	common::auto_ptr< Camera >			camera_;
 
+	common::safe_ptr< Girl >			girl_;
+
 	common::auto_ptr< Mesh >			scope_mesh_;			///< ‘oŠá‹¾
 
-	Sound*								bgm_;
-	Sound*								balloon_bgm_;
+	common::safe_ptr< Sound >			bgm_;
+	common::safe_ptr< Sound >			balloon_bgm_;
 	float_t								action_bgm_after_timer_;
 
 	float_t								bpm_;
@@ -74,6 +78,8 @@ protected:
 
 	void load_stage_file( const char* );
 	void save_stage_file( const char* ) const;
+
+	void load_sound_all( bool );
 
 	void render_sprite();
 

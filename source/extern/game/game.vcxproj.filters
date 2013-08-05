@@ -13,10 +13,12 @@
     <ClInclude Include="Line.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="TimedCache.h" />
+    <ClInclude Include="ElapsedTimer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="MainLoop.cpp" />
+    <ClCompile Include="ElapsedTimer.cpp" />
   </ItemGroup>
 </Project>

@@ -46,6 +46,11 @@ void SoundManager::push_group( const char_t* group_name )
 
 void SoundManager::pop_group()
 {
+	if ( group_name_.empty() )
+	{
+		return;
+	}
+
 	auto i = grouped_sound_map_.find( group_name_ );
 
 	group_name_.clear();

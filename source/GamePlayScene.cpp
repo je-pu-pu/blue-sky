@@ -967,6 +967,8 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			active_object->set_start_direction_degree( r );
 			
 			get_active_object_manager()->add_active_object( active_object );
+
+			last_object = active_object;
 		}
 	}
 }

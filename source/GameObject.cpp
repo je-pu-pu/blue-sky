@@ -91,6 +91,16 @@ void GameObject::set_gravity( const Vector3& gravity )
 	get_rigid_body()->setGravity( gravity );
 }
 
+void GameObject::set_angular_factor( const Vector3& v )
+{
+	if ( ! get_rigid_body() )
+	{
+		return;
+	}
+
+	get_rigid_body()->setAngularFactor( v );
+}
+
 GameObject::Transform& GameObject::get_transform()
 {
 	return * transform_;
@@ -133,7 +143,6 @@ void GameObject::set_velocity( const Vector3& v )
 
 	get_rigid_body()->activate();
 	get_rigid_body()->setActivationState( true );
-
 }
 
 bool GameObject::is_moving_to( const GameObject* o ) const

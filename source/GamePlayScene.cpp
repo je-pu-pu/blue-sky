@@ -318,6 +318,23 @@ void GamePlayScene::setup_command()
 			o->set_gravity( GameObject::Vector3( x, y, z  ) );
 		}
 	};
+	command_map_[ "game_object.set_angular_factor" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		string_t object_name;
+		float_t x = 0.f, y = 0.f, z = 0.f;
+
+		ss >> object_name >> x >> y >> z;
+
+		GameObject* o = get_active_object_manager()->get_active_object( object_name );
+		
+		if ( o )
+		{
+			o->set_angular_factor( GameObject::Vector3( x, y, z  ) );
+		}
+	};
 	command_map_[ "game_object.set_target_location" ] = [ & ] ( const string_t& s )
 	{
 		std::stringstream ss;

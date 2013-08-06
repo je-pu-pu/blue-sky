@@ -159,7 +159,7 @@ void Player::update()
 
 	if ( ! can_peer_down() )
 	{
-		eye_depth_ *= 0.95f;
+		eye_depth_ *= 0.9f;
 		eye_depth_ = math::clamp( eye_depth_, 0.f, 1.f );
 	}
 
@@ -190,7 +190,7 @@ void Player::update()
 		else
 		{
 			// ’Êí’…’n
-			if ( get_velocity().y() < -1.f )
+			if ( get_velocity().y() < -2.f )
 			{
 				stop_sound( "fall" );
 				play_sound( "land", false, false );
@@ -517,7 +517,7 @@ void Player::update_can_peer_down()
 		return;
 	}
 
-	Vector3 half( 0.02f, 0.02f, 0.02f );
+	Vector3 half( 0.25f, 0.25f, 0.25f );
 	btBoxShape shape( half );
 
 	Transform offset;

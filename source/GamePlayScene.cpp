@@ -1313,6 +1313,10 @@ void GamePlayScene::update_clear()
 		{
 			set_next_scene( "ending" );
 		}
+		else
+		{
+			set_next_scene( "stage_outro" );
+		}
 	}
 }
 

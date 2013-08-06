@@ -91,6 +91,7 @@ protected:
 	std::vector< Texture* >				paper_texture_list_;
 	Texture*							paper_texture_;
 	uint_t								drawing_line_type_index_;
+	float_t								drawing_accent_scale_;	///< ( 0 : アクセントを完全に無効化 ) .. ( 2 : アクセント 2 倍 ) ..
 	
 	common::chase_value< vector3, float_t >		light_position_;
 	common::chase_value< Color, float_t >		shadow_color_;

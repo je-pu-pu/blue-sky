@@ -39,10 +39,12 @@ event turn-on set_shadow_paper_color_target 0 0 0 0
 event turn-on set_light_position_target -100 100 20
 event turn-on set_line_type 1
 event turn-on set_paper_type 1
+event turn-on set_darwing_accent_scale 10
 event turn-off set_shadow_color_target 0 0 1 1
 event turn-off set_shadow_paper_color_target 1 1 1 1
 event turn-off set_light_position_target 100 100 100
 event turn-off set_line_type 0
 event turn-off set_paper_type 0
+event turn-off set_darwing_accent_scale 0
 
 object stage-2-1 0 0 0

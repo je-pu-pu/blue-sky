@@ -32,6 +32,8 @@ namespace blue_sky
 EndingScene::EndingScene( const GameMain* game_main )
 	: Scene( game_main )
 	, elapsed_timer_( new game::ElapsedTimer( get_main_loop() ) )
+	, line_type_( 0 )
+	, drawing_accent_scale_( 1.f )
 	, in_fade_out_( false )
 {
 	get_graphics_manager()->setup_loader();
@@ -46,6 +48,8 @@ EndingScene::EndingScene( const GameMain* game_main )
 	get_graphics_manager()->cleanup_loader();
 
 	bgm_ = get_sound_manager()->load_music( "opening-of-the-day" );
+	switch_sound_ = get_sound_manager()->load( "switch-on" );
+	click_sound_ = get_sound_manager()->load( "click" );
 
 	bg_texture_ = get_direct_3d()->getTextureManager()->load( "bg", "media/texture/cloth.png" );
 
@@ -129,9 +133,43 @@ void EndingScene::update()
 		}
 	}
 
-	if ( is_last && get_input()->push( Input::A ) )
+	if ( get_input()->push( Input::A ) )
 	{
-		in_fade_out_ = true;
+		if ( is_last )
+		{
+			in_fade_out_ = true;
+		}
+		else
+		{
+			line_type_++;
+
+			if ( line_type_ >= DrawingLine::LINE_TYPE_MAX )
+			{
+				line_type_ = 0;
+			}
+
+			switch_sound_->play( false );
+		}
+	}
+	
+	float last_drawing_accent_scale_ = drawing_accent_scale_;
+
+	int wheel = get_input()->pop_mouse_wheel_queue();
+
+	if ( wheel > 0 )
+	{
+		if ( drawing_accent_scale_ == 0.f ) drawing_accent_scale_ = 1.f;
+		else if ( drawing_accent_scale_ == 1.f ) drawing_accent_scale_ = 10.f;
+	}
+	else if ( wheel < 0 )
+	{
+		if ( drawing_accent_scale_ == 1.f ) drawing_accent_scale_ = 0.f;
+		else if ( drawing_accent_scale_ == 10.f ) drawing_accent_scale_ = 1.f;
+	}
+
+	if ( drawing_accent_scale_ != last_drawing_accent_scale_ )
+	{
+		click_sound_->play( false );
 	}
 
 	if ( in_fade_out_ )
@@ -149,7 +187,7 @@ void EndingScene::update()
  */
 void EndingScene::render()
 { 
-	update_constant_buffer_for_sprite_frame();
+	update_constant_buffer_for_sprite_frame( line_type_, drawing_accent_scale_ );
 	
 	get_direct_3d()->clear( Color::from_256( 0xFF, 0xAA, 0x11 ) );
 

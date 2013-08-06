@@ -92,7 +92,7 @@ protected:
 	void play_sound( const char*, bool = false, bool = true ) const;
 	void stop_sound( const char* ) const;
 
-	void update_constant_buffer_for_sprite_frame();
+	void update_constant_buffer_for_sprite_frame( int line_type, float_t drawing_accent_scale = 1.f );
 	void render_fader() const;
 
 	virtual Sound* get_bgm() { return 0; };

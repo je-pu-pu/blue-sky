@@ -129,7 +129,7 @@ void TitleScene::update()
  */
 void TitleScene::render()
 {
-	update_constant_buffer_for_sprite_frame();
+	update_constant_buffer_for_sprite_frame( 0 );
 
 	get_direct_3d()->clear( Direct3D::Color::from_256( 0xFF, 0xAA, 0x11 ) );
 	get_direct_3d()->getSprite()->begin();

@@ -87,6 +87,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, is_cleared_( false )
 	, action_bgm_after_timer_( 0.f )
 	, bpm_( 120.f )
+	, drawing_accent_scale_( 0.f )
 	, light_position_( vector3( 0.25f, 1.f, -1.f ), 0.1f )
 	, shadow_color_( Color( 0.f, 0.f, 0.f, 1.f ), 0.02f )
 	, shadow_paper_color_( Color( 0.9f, 0.9f, 0.9f, 1.f ), 0.02f )
@@ -206,9 +207,9 @@ void GamePlayScene::setup_command()
 		paper_texture_index = math::clamp< int >( paper_texture_index, 0, paper_texture_list_.size() - 1 );
 		paper_texture_ = paper_texture_list_[ paper_texture_index ];
 	};
-	command_map_[ "start_player_flickering" ] = [ & ] ( const string_t& )
+	command_map_[ "set_darwing_accent_scale" ] = [ & ] ( const string_t& s )
 	{
-		player_->start_flickering();
+		drawing_accent_scale_ = common::deserialize< float_t >( s );
 	};
 	command_map_[ "set_shadow_color_target" ] = [ & ] ( const string_t& s )
 	{
@@ -249,6 +250,10 @@ void GamePlayScene::setup_command()
 	{
 		command_map_[ "set_light_position_target" ]( s );
 		light_position_.value() = light_position_.target_value();
+	};
+	command_map_[ "player.start_flickering" ] = [ & ] ( const string_t& )
+	{
+		player_->start_flickering();
 	};
 }
 
@@ -1375,7 +1380,7 @@ void GamePlayScene::update_render_data_for_frame() const
 	{
 		FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
 
-		frame_drawing_constant_buffer_data.accent = bgm_ ? bgm_->get_current_peak_level() : 0.f;
+		frame_drawing_constant_buffer_data.accent = bgm_ ? bgm_->get_current_peak_level() * drawing_accent_scale_ : 0.f;
 		frame_drawing_constant_buffer_data.line_type = drawing_line_type_index_;
 		frame_drawing_constant_buffer_data.shadow_color = shadow_color_.value();
 		frame_drawing_constant_buffer_data.shadow_paper_color = shadow_paper_color_.value();

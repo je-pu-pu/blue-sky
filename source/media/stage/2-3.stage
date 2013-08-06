@@ -8,7 +8,8 @@ robot   5   20  25
 
 goal    0   25  50
 player  0   25  0
-exec start_player_flickering
+exec player.start_flickering
+
 
 medal   25  25  50
 

@@ -37,8 +37,13 @@ private:
 	float_t drawing_model_stop_time_;
 	float_t drawing_model_offset_;
 
+	int line_type_;
+	float_t drawing_accent_scale_;
+
 	Texture* bg_texture_;
 	Sound* bgm_;
+	Sound* switch_sound_;
+	Sound* click_sound_;
 
 	bool in_fade_out_;
 

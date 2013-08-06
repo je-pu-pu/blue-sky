@@ -271,7 +271,7 @@ void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_
 
 	static const float LineTextureSize = 1024.f;
 	
-	static const float DrawingAccentPower = 2.f;
+	static const float DrawingAccentPower = 1.5f;
 	static const float DrawingAccentScale = 10.f;
 	
 	struct line_config

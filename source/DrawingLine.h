@@ -19,6 +19,16 @@ namespace blue_sky
 class DrawingLine : public game::Line
 {
 public:
+	enum LineType
+	{
+		LINE_TYPE_PENCIL = 0,		///< 鉛筆
+		LINE_TYPE_PEN,				///< ペン
+		LINE_TYPE_DOT,				///< ドット
+		LINE_TYPE_COLOR_DOT,		///< 色付きドット
+		LINE_TYPE_BRUSH,			///< 色付きブラシ
+		LINE_TYPE_MAX
+	};
+
 	typedef Direct3D11 Direct3D;
 	typedef Direct3D11Color Color;
 	typedef Direct3D11Texture Texture;

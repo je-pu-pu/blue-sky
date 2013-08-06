@@ -7,6 +7,11 @@
 #include <common/auto_ptr.h>
 #include <common/safe_ptr.h>
 
+#include <map>
+#include <list>
+#include <vector>
+#include <functional>
+
 class Direct3D11FarBillboardsMesh;
 class Direct3D11SkyBox;
 class Direct3D11ShadowMap;
@@ -45,6 +50,12 @@ public:
 	typedef Direct3D11Rectangle			Rectangle;
 	typedef Direct3D11Axis				Axis;
 
+	typedef std::function< void( string_t ) > Command;
+	typedef std::map< string_t, Command > CommandMap;
+
+	typedef std::function< void() > CommandCall;
+	typedef std::list< CommandCall > CommandCallList;
+
 protected:
 	Texture*			ui_texture_;							///< UI 表示用テクスチャ
 	bool				is_cleared_;							///< ステージクリアフラグ
@@ -75,6 +86,13 @@ protected:
 
 	static Vector						light_position_;
 
+	std::vector< Texture* >				paper_texture_list_;
+	Texture*							paper_texture_;
+	uint_t								drawing_line_type_index_;
+
+	CommandMap							command_map_;
+	CommandCallList						stage_setup_command_call_list_;
+
 	void generate_random_stage();
 
 	void load_stage_file( const char* );
@@ -82,6 +100,7 @@ protected:
 
 	void load_sound_all( bool );
 	void setup_stage();
+	void setup_command();
 
 	void render_sprite();
 

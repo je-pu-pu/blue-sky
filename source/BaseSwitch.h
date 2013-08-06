@@ -18,7 +18,7 @@ class BaseSwitch : public ActiveObject
 public:
 	enum State { OFF = 0, ON, BROKEN };
 
-	typedef std::function< void( void ) > EventHandler;
+	typedef std::function< void() > EventHandler;
 	typedef std::list< EventHandler > EventHandlerList;
 	typedef std::map< string_t, EventHandlerList > EventHandlerMap;
 

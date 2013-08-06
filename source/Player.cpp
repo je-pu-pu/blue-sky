@@ -604,7 +604,7 @@ void Player::update_gravity()
 	}
 	else
 	{
-		get_rigid_body()->setGravity( Vector3( 0.f, -1.f, 0.f ) );
+		get_rigid_body()->setGravity( get_default_gravity() );
 	}
 }
 

@@ -115,6 +115,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	camera_->set_aspect( static_cast< float >( get_width() ) / static_cast< float >( get_height() ) );
 	camera_->reset_fov();
 
+	setup_command();
+
 	// balloon_model_ = get_drawing_model_manager()->load( "balloon" );
 
 	if ( get_stage_name().empty() )
@@ -161,12 +163,12 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		bgm_->play( stage_config_->get( "bgm.loop", true ) );
 	}
 
-	// きれいにする
-	get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pencil-face-1.png" );
-	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-1-loop.png" );
-	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/pen-face-2-loop.png" );
-	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/dot-face-1.png" );
-	// get_direct_3d()->getTextureManager()->load( "paper", "media/texture/brush-face-1.png" );
+	paper_texture_list_.push_back( get_direct_3d()->getTextureManager()->load( "paper-0", "media/texture/pencil-face-1.png" ) );
+	paper_texture_list_.push_back( get_direct_3d()->getTextureManager()->load( "paper-1", "media/texture/pen-face-1-loop.png" ) );
+	paper_texture_list_.push_back( get_direct_3d()->getTextureManager()->load( "paper-2", "media/texture/pen-face-2-loop.png" ) );
+	paper_texture_list_.push_back( get_direct_3d()->getTextureManager()->load( "paper-3", "media/texture/dot-face-1.png" ) );
+	paper_texture_list_.push_back( get_direct_3d()->getTextureManager()->load( "paper-4", "media/texture/brush-face-1.png" ) );
+	paper_texture_ = paper_texture_list_.front();
 
 	update_render_data_for_game();
 
@@ -185,14 +187,37 @@ GamePlayScene::~GamePlayScene()
 }
 
 /**
+ * コマンドを準備する
+ *
+ */
+void GamePlayScene::setup_command()
+{
+	command_map_[ "set_line_type" ] = [ & ] ( const string_t& s )
+	{
+		drawing_line_type_index_ = common::deserialize< int >( s );
+		drawing_line_type_index_ = math::clamp< int >( drawing_line_type_index_, 0, DrawingLine::LINE_TYPE_MAX - 1 );
+	};
+	command_map_[ "set_paper_type" ] = [ & ] ( const string_t& s )
+	{
+		int paper_texture_index = common::deserialize< int >( s );
+		paper_texture_index = math::clamp< int >( paper_texture_index, 0, paper_texture_list_.size() - 1 );
+		paper_texture_ = paper_texture_list_[ paper_texture_index ];
+	};
+	command_map_[ "start_player_flickering" ] = [ & ] ( const string_t& )
+	{
+		player_->start_flickering();
+	};
+}
+
+/**
  * ステージの設定に応じて、ステージを準備する
  *
  */
 void GamePlayScene::setup_stage()
 {
-	if ( stage_config_->get( "player.is_flickering", false ) )
+	for ( auto i = stage_setup_command_call_list_.begin(); i != stage_setup_command_call_list_.end(); ++i )
 	{
-		player_->start_flickering();
+		( *i )();
 	}
 }
 
@@ -204,12 +229,15 @@ void GamePlayScene::restart()
 	is_cleared_ = false;
 	action_bgm_after_timer_ = 0.f;
 
+	drawing_line_type_index_ = 0;
+	paper_texture_ = paper_texture_list_[ 0 ];
+
 	player_->restart();
 	goal_->restart();
 
 	camera_->restart();
 
-	for ( ActiveObjectManager::ActiveObjectList::const_iterator i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+	for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 	{
 		ActiveObject* active_object = *i;
 		active_object->restart();
@@ -424,30 +452,14 @@ void GamePlayScene::generate_random_stage()
  */
 void GamePlayScene::load_stage_file( const char* file_name )
 {
-	if ( false )
-	{
-		std::list< std::function< void() > > event_list_;
-
-		auto a = [&] ( const string_t& name, bool force, bool loop )
-		{
-			Sound* s = get_sound_manager()->get_sound( name.c_str() );
-			if ( s )
-			{
-				s->play( loop, force );
-			}
-		};
-
-		auto b = [&] () { a( "jump", false, false ); };
-
-		event_list_.push_back( b );
-	}
-
 	std::ifstream in( file_name );
 	
 	if ( ! in.good() )
 	{
 		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "load stage file \"" ) + file_name + "\" failed." );
 	}
+
+	BaseSwitch* last_base_switch = 0;
 
 	while ( in.good() )
 	{
@@ -731,10 +743,11 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		else if ( name == "switch" )
 		{
 			Switch* s = new Switch();
-			s->get_event_handler( "turn-on" ).push_back( [&] { get_sound_manager()->get_sound( "damage-1" )->play( false, false ); } );
 
 			active_object = s;
 			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
+
+			last_base_switch = s;
 		}
 		else if ( name == "area-switch" )
 		{
@@ -745,8 +758,6 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> x >> y >> z >> w >> h >> d >> r;
 
 			AreaSwitch* s = new AreaSwitch( w, h, d );
-			s->get_event_handler( "turn-on" ).push_back( [&] { get_sound_manager()->get_sound( "damage-1" )->play( false, false ); } );
-
 			DrawingModel* drawing_model = get_drawing_model_manager()->load( name.c_str() );
 			s->set_drawing_model( drawing_model );
 
@@ -755,9 +766,56 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			s->set_start_direction_degree( r );
 
 			get_active_object_manager()->add_active_object( s );
+
+			last_base_switch = s;
+		}
+		else if ( name == "event" || name == "exec" )
+		{
+			string_t event_name;
+			string_t event_handler_name;
+			string_t event_handler_params;
+
+			if ( name == "event" )
+			{
+				ss >> event_name;
+			}
+
+			ss >> event_handler_name;
+
+			while ( ss.good() )
+			{
+				string_t s;
+				ss >> s;
+
+				if ( ! event_handler_params.empty() )
+				{
+					event_handler_params += " ";
+				}
+
+				event_handler_params += s;
+			}
+
+			auto i = command_map_.find( event_handler_name );
+
+			if ( i == command_map_.end() )
+			{
+				COMMON_THROW_EXCEPTION_MESSAGE( ( "event handler not found. ( " ) + event_handler_name + " )" );
+			}
+
+			auto command_call = [ = ] { i->second( event_handler_params ); };
+
+			if ( name == "event" )
+			{
+				last_base_switch->get_event_handler( event_name ).push_back( command_call );
+			}
+			else
+			{
+				stage_setup_command_call_list_.push_back( command_call );
+			}
 		}
 		else
 		{
+			/// @todo コマンドに置き換える？
 			stage_config_->read_line( line );
 		}
 
@@ -1277,7 +1335,7 @@ void GamePlayScene::update_render_data_for_frame() const
 		FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
 
 		frame_drawing_constant_buffer_data.accent = bgm_ ? bgm_->get_current_peak_level() : 0.f;
-		frame_drawing_constant_buffer_data.line_type = 0;
+		frame_drawing_constant_buffer_data.line_type = drawing_line_type_index_;
 
 		get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
 	}
@@ -1527,7 +1585,7 @@ void GamePlayScene::render_object_skin_mesh() const
 			shadow_map_->ready_to_render_scene();
 
 			/// @todo まとめる
-			get_direct_3d()->bind_texture_to_ps( 2, get_direct_3d()->getTextureManager()->get( "paper" ) );
+			get_direct_3d()->bind_texture_to_ps( 2, paper_texture_ );
 		}
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
@@ -1563,7 +1621,7 @@ void GamePlayScene::render_object_mesh() const
 			shadow_map_->ready_to_render_scene();
 
 			/// @todo まとめる
-			get_direct_3d()->bind_texture_to_ps( 2, get_direct_3d()->getTextureManager()->get( "paper" ) );
+			get_direct_3d()->bind_texture_to_ps( 2, paper_texture_ );
 		}
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )

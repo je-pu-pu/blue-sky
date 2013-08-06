@@ -195,7 +195,6 @@ void Sound::update()
 	
 		if ( get_volume() < VOLUME_MAX * 0.5f )
 		{
-			stop();
 			volume_fade_ = 0.f;
 		}
 	}

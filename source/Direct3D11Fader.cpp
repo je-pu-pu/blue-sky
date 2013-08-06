@@ -28,7 +28,7 @@ bool Direct3D11Fader::fade_out( float speed )
 
 	update_color();
 
-	return fade_ == 0.f;
+	return fade_ == 1.f;
 }
 
 void Direct3D11Fader::full_in()

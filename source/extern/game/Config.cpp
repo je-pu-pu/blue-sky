@@ -24,35 +24,42 @@ bool Config::load_file( const char* file_name )
 		std::string line;		
 		std::getline( in, line );
 
-		std::stringstream ss;
-		
-		std::string name;
-		std::string value;
-		
-		ss << line;
-		ss >> name;
-
-		if ( name == "" )
-		{
-			continue;
-		}
-
-		while ( ss.good() )
-		{
-			std::string v;
-
-			ss >> v;
-
-			value += v;
-			value += " ";
-		}
-
-		value.erase( value.size() - 1 );
-
-		value_[ name ] = value;
+		read_line( line );
 	}
 
 	return true;
+}
+
+void Config::read_line( const string_t& line )
+{
+	std::stringstream ss;
+		
+	std::string name;
+	std::string value;
+		
+	ss << line;
+	ss >> name;
+
+	if ( name == "" )
+	{
+		return;
+	}
+
+	while ( ss.good() )
+	{
+		std::string v;
+
+		ss >> v;
+
+		value += v;
+		value += " ";
+	}
+
+	value.erase( value.size() - 1 );
+
+	value_[ name ] = value;
+
+	return;
 }
 
 bool Config::save_file( const char* file_name )

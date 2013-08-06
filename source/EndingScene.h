@@ -40,6 +40,8 @@ private:
 	Texture* bg_texture_;
 	Sound* bgm_;
 
+	bool in_fade_out_;
+
 	void load_sequence_file();
 
 	void render_bg();

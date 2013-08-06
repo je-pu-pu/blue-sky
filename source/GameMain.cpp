@@ -151,8 +151,6 @@ GameMain::GameMain()
 
 		setup_scene( "stage_intro" );
 	}
-
-	setup_scene( "ending" );
 }
 
 //■デストラクタ

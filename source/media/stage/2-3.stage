@@ -1,5 +1,7 @@
 sky-box sky-box-sky
-bgm 
+bgm my-takeoff
+bgm.loop 0
+video.shadow-map-enabled 0
 
 girl   -5   20  25 180
 robot   5   20  25

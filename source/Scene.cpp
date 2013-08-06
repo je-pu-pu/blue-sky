@@ -159,6 +159,7 @@ void Scene::update_constant_buffer_for_sprite_frame()
 		FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
 
 		frame_drawing_constant_buffer_data.accent = get_bgm()->get_current_peak_level();
+		frame_drawing_constant_buffer_data.line_type = 0;
 
 		get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
 	}

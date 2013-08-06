@@ -54,7 +54,8 @@ struct ObjectExtentionConstantBufferData : public BaseConstantBufferData< 3 >
 struct FrameDrawingConstantBufferData : public BaseConstantBufferData< 4 >
 {
 	float_t accent;
-	float_t dummy[ 3 ];
+	uint_t line_type;
+	float_t dummy[ 2 ];
 };
 
 struct BoneConstantBufferData : public BaseConstantBufferData< 5 >

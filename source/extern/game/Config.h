@@ -2,6 +2,7 @@
 #define GAME_CONFIG_H
 
 #include <common/serialize.h>
+#include <type/type.h>
 #include <map>
 
 namespace game
@@ -63,6 +64,8 @@ public:
 
 	bool save_file( const char* );
 	bool load_file( const char* );
+
+	void read_line( const string_t& );
 
 }; // class Config
 

@@ -88,6 +88,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, action_bgm_after_timer_( 0.f )
 	, bpm_( 120.f )
 {
+	stage_config_ = new Config();
+
+	// Physics
 	get_physics()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
 
 	// Texture
@@ -125,7 +128,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		load_stage_file( ( stage_dir_name + get_stage_name() + ".stage" ).c_str() );
 	}
 
-	if ( get_config()->get( "video.shadow-map-enabled", 1 ) != 0 )
+	if ( get_config()->get( "video.shadow-map-enabled", 1 ) != 0 && stage_config_->get( "video.shadow-map-enabled", true ) )
 	{
 		shadow_map_ = new ShadowMap( get_direct_3d(), get_config()->get( "video.shadow-map-cascade-levels", 3 ), get_config()->get( "video.shadow-map-size", 1024 ) );
 	}
@@ -155,7 +158,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	if ( bgm_ )
 	{
-		bgm_->play( true );
+		bgm_->play( stage_config_->get( "bgm.loop", true ) );
 	}
 
 	// ‚«‚ê‚¢‚É‚·‚é
@@ -207,8 +210,10 @@ void GamePlayScene::load_sound_all( bool is_final_stage )
 {
 	if ( is_final_stage )
 	{
-		get_sound_manager()->load( "fin" );
-		get_sound_manager()->load( "door" );
+		get_sound_manager()->load( "medal-get" );
+
+		get_sound_manager()->load( "fin", "girl-see-you" );
+		// get_sound_manager()->load( "door" );
 	}
 	else
 	{
@@ -446,11 +451,14 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 		ActiveObject* active_object = 0;
 
-	
 		if ( name == "bgm" )
 		{
 			std::string name;
+			bool loop = true;
+
 			ss >> name;
+			ss >> loop;
+
 
 			get_sound_manager()->load_music( "bgm", name.c_str() );
 
@@ -734,6 +742,10 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			get_active_object_manager()->add_active_object( s );
 		}
+		else
+		{
+			stage_config_->read_line( line );
+		}
 
 		if ( active_object )
 		{
@@ -818,7 +830,6 @@ void GamePlayScene::update()
 	}
 	
 	get_physics()->check_collision_all();
-	// get_physics()->check_collision_dynamic_object();
 
 	get_sound_manager()->set_listener_position( camera_->position() );
 	// get_sound_manager()->set_listener_velocity( player_->get_velocity() );
@@ -862,7 +873,13 @@ void GamePlayScene::update()
 
 		if ( bgm_ )
 		{
-			bgm_->play( true, false );
+			/*
+			if ( bgm_->is_fader_full_out() && stage_config_->get( "bgm.loop", true ) )
+			{
+				bgm_->play( true, false );
+			}
+			*/
+
 			bgm_->fade_in();
 		}
 	}
@@ -1096,17 +1113,21 @@ void GamePlayScene::update_clear()
 	if (
 		get_sound_manager()->get_sound( "fin" )->get_current_position() >= 6.f &&
 		get_sound_manager()->get_sound( "fin" )->get_current_position() <= 8.f &&
-		! get_sound_manager()->get_sound( "door" )->is_playing() )
+		get_sound_manager()->get_sound( "door" ) && ! get_sound_manager()->get_sound( "door" )->is_playing() )
 	{
 		get_sound_manager()->get_sound( "door" )->play( false );
 	}
 	
-	if ( get_sound_manager()->get_sound( "fin" )->get_current_position() >= 10.f )
+	if ( ! get_sound_manager()->get_sound( "fin" )->is_playing() )
 	{
 		std::string save_param_name = StageSelectScene::get_stage_prefix_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + "." + get_stage_name();
 
 		get_save_data()->set( save_param_name.c_str(), std::max( player_->has_medal() ? 2 : 1, get_save_data()->get( save_param_name.c_str(), 0 ) ) );
-		set_next_scene( "stage_outro" );
+
+		if ( get_stage_name() == "2-3" )
+		{
+			set_next_scene( "ending" );
+		}
 	}
 }
 
@@ -1253,6 +1274,7 @@ void GamePlayScene::update_render_data_for_frame() const
 		FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
 
 		frame_drawing_constant_buffer_data.accent = bgm_ ? bgm_->get_current_peak_level() : 0.f;
+		frame_drawing_constant_buffer_data.line_type = 0;
 
 		get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
 	}

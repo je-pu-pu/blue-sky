@@ -6,6 +6,7 @@
 #include "Sound.h"
 #include "SoundManager.h"
 #include "GameMain.h"
+#include "Input.h"
 
 #include "Direct3D11.h"
 #include "Direct3D11Fader.h"
@@ -31,12 +32,13 @@ namespace blue_sky
 EndingScene::EndingScene( const GameMain* game_main )
 	: Scene( game_main )
 	, elapsed_timer_( new game::ElapsedTimer( get_main_loop() ) )
+	, in_fade_out_( false )
 {
 	get_graphics_manager()->setup_loader();
 	
 	load_sequence_file();
 	current_drawing_model_index_ = 0;
-	current_drawing_model_ = drawing_model_list_.front();
+	current_drawing_model_ = drawing_model_list_[ current_drawing_model_index_ ];
 	drawing_model_elapsed_time_ = 0.f;
 	drawing_model_stop_time_ = 0.f;
 	drawing_model_offset_ = 0.f;
@@ -99,10 +101,13 @@ void EndingScene::load_sequence_file()
  */
 void EndingScene::update()
 {
+	Scene::update();
+
 	elapsed_timer_->update();
 	drawing_model_elapsed_time_ += elapsed_timer_->get_elapsed_sec();
 
 	bool is_last = current_drawing_model_index_ == drawing_model_list_.size() - 1;
+	bool is_end = false;
 
 	if ( get_visible_drawing_line_part_count() > current_drawing_model_->get_line()->get_part_count() )
 	{
@@ -121,6 +126,19 @@ void EndingScene::update()
 				current_drawing_model_index_++;
 				current_drawing_model_ = drawing_model_list_[ current_drawing_model_index_ ];
 			}
+		}
+	}
+
+	if ( is_last && get_input()->push( Input::A ) )
+	{
+		in_fade_out_ = true;
+	}
+
+	if ( in_fade_out_ )
+	{
+		if ( get_direct_3d()->getFader()->fade_out() )
+		{
+			set_next_scene( "title" );
 		}
 	}
 }
@@ -172,7 +190,9 @@ void EndingScene::render_drawing_line()
 		{
 			ObjectConstantBufferData object_constant_buffer_data;
 
-			object_constant_buffer_data.world = XMMatrixTranspose( XMMatrixTranslation( 0.f, drawing_model_offset_, 0.f ) );
+			XMMATRIX s = XMMatrixScaling( 1.25f, 1.25f, 1.f );
+			XMMATRIX t = XMMatrixTranslation( 0.f, drawing_model_offset_, 0.f );
+			object_constant_buffer_data.world = XMMatrixTranspose( s * t );
 			object_constant_buffer_data.color = Color( 0.f, 0.f, 0.f, 0.f );
 
 			get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
@@ -191,7 +211,7 @@ void EndingScene::render_drawing_line()
 
 int EndingScene::get_visible_drawing_line_part_count() const
 {
-	return static_cast< int >( drawing_model_elapsed_time_ * 8.f );
+	return static_cast< int >( drawing_model_elapsed_time_ * 12.f );
 }
 
 } // namespace blue_sky

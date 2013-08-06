@@ -30,7 +30,20 @@ template< typename Type >
 inline Type deserialize( const std::string& str ) { return boost::lexical_cast< Type >( str ); }
 
 template<> inline std::string serialize( bool x ) { return x ? "true" : "false"; }
-template<> inline bool deserialize( const std::string& str ) { return str == "true" ? true : false; }
+template<> inline bool deserialize( const std::string& str )
+{
+	if ( str == "true" )
+	{
+		return true;
+	}
+
+	if ( str == "false" )
+	{
+		return false;
+	}
+
+	return boost::lexical_cast< bool >( str );
+}
 
 } // namespace common
 

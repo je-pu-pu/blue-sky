@@ -17,6 +17,7 @@ namespace game
 {
 
 class Mesh;
+class Config;
 
 }; // namespace game
 
@@ -46,8 +47,8 @@ public:
 
 protected:
 	Texture*			ui_texture_;							///< UI 表示用テクスチャ
-
 	bool				is_cleared_;							///< ステージクリアフラグ
+	common::auto_ptr< Config >			stage_config_;	
 
 	mutable common::auto_ptr< ShadowMap >		shadow_map_;
 	common::auto_ptr< SkyBox >			sky_box_;

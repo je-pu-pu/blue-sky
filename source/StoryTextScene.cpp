@@ -231,7 +231,7 @@ void StoryTextScene::update()
 			get_direct_3d()->getFader()->fade_out();
 		}
 
-		if ( ! sound_->is_playing() && ( ! bgm_ || ! bgm_->is_playing() ) && get_direct_3d()->getFader()->is_full_out() )
+		if ( sound_->is_fade_full_out() && ( ! bgm_ || bgm_->is_fade_full_out() ) && get_direct_3d()->getFader()->is_full_out() )
 		{
 			set_next_scene( next_scene_name_ );
 

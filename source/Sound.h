@@ -111,6 +111,12 @@ public:
 	/// サウンドのフェードアウトを開始する
 	void fade_out( T = 0.01f );
 
+	/// サウンドが完全にフェードインされた状態かどうかを取得する
+	bool is_fade_full_in() const override;
+
+	/// サウンドが完全にフェードアウトされた状態かどうかを取得する
+	bool is_fade_full_out() const override;
+
 	/// 現在の位置 ( 秒 ) を取得する
 	float get_current_position() const;
 

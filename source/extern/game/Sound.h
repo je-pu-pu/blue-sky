@@ -82,6 +82,12 @@ public:
 	/// サウンドのフェードアウトを開始する
 	virtual void fade_out( T = VOLUME_FADE_SPEED_DEFAULT ) { }
 
+	/// サウンドが完全にフェードインされた状態かどうかを取得する
+	virtual bool is_fade_full_in() const = 0;
+
+	/// サウンドが完全にフェードアウトされた状態かどうかを取得する
+	virtual bool is_fade_full_out() const = 0;
+
 	/// サウンドを一時停止する
 	// virtual bool pause() = 0;
 

@@ -179,6 +179,16 @@ void Sound::fade_out( T speed )
 	}
 }
 
+bool Sound::is_fade_full_in() const
+{
+	return get_volume() == get_max_volume();
+}
+
+bool Sound::is_fade_full_out() const
+{
+	return get_volume() == VOLUME_MIN;
+}
+
 float Sound::get_current_position() const
 {
 	DWORD play_pos = 0;

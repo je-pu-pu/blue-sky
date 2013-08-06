@@ -173,10 +173,7 @@ void Sound::fade_in( T speed )
 
 void Sound::fade_out( T speed )
 {
-	if ( is_playing() )
-	{
-		volume_fade_ = -speed;
-	}
+	volume_fade_ = -speed;
 }
 
 bool Sound::is_fade_full_in() const

@@ -604,7 +604,7 @@ void Player::update_gravity()
 	}
 	else
 	{
-		get_rigid_body()->setGravity( Vector3( 0.f, -2.f, 0.f ) );
+		get_rigid_body()->setGravity( Vector3( 0.f, -1.f, 0.f ) );
 	}
 }
 
@@ -956,6 +956,8 @@ void Player::on_collide_with( Balloon* balloon )
 	set_action_base_position_to_current_position();
 
 	set_last_footing_height_to_current_height();
+
+	stop_flickering();
 
 	// play_sound( "balloon-get" );
 

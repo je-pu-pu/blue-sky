@@ -81,6 +81,7 @@ protected:
 	void save_stage_file( const char* ) const;
 
 	void load_sound_all( bool );
+	void setup_stage();
 
 	void render_sprite();
 

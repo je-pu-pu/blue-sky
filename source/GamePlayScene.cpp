@@ -184,6 +184,18 @@ GamePlayScene::~GamePlayScene()
 	get_physics()->clear();
 }
 
+/**
+ * ステージの設定に応じて、ステージを準備する
+ *
+ */
+void GamePlayScene::setup_stage()
+{
+	if ( stage_config_->get( "player.is_flickering", false ) )
+	{
+		player_->start_flickering();
+	}
+}
+
 void GamePlayScene::restart()
 {
 	get_direct_3d()->getFader()->set_color( Direct3D::Color::White );
@@ -202,6 +214,8 @@ void GamePlayScene::restart()
 		ActiveObject* active_object = *i;
 		active_object->restart();
 	}
+
+	setup_stage();
 
 	play_sound( "restart" );
 }
@@ -989,17 +1003,6 @@ void GamePlayScene::update_main()
 					}
 					break;
 				}
-			}
-		}
-		else if ( get_input()->push( Input::B ) )
-		{
-			if ( player_->is_flickering() )
-			{
-				player_->stop_flickering();
-			}
-			else
-			{
-				player_->start_flickering();
 			}
 		}
 		else if ( get_input()->push( Input::JUMP ) )

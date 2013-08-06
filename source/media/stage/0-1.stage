@@ -1,177 +1,84 @@
-bgm road
+bgm twinkle
+collision 0-1.obj
 
-sky-box sky-box-star-2
+sky-box sky-box-3
 
-dynamic-object board-1 20.5 7.300000190734863 57.0 90 0 0
-dynamic-object board-1 19.5 7.300000190734863 57.0 90 0 0
-dynamic-object board-1 20.0 6.700000286102295 58.5 0 0 0
-dynamic-object board-1 20.0 6.700000286102295 55.5 0 0 0
-dynamic-object board-1 18.5 6.900000095367432 57.0 90 0 0
-dynamic-object board-1 21.5 6.900000095367432 57.0 90 0 0
-dynamic-object board-1 20.0 7.099999904632568 58.5 0 0 0
-dynamic-object board-1 20.0 7.099999904632568 55.5 0 0 0
-dynamic-object board-1 18.5 7.300000190734863 57.0 90 0 0
-dynamic-object board-1 21.5 7.300000190734863 57.0 90 0 0
-dynamic-object board-1 21.5 6.5 57.0 90 0 0
-dynamic-object board-1 18.5 6.5 57.0 90 0 0
-dynamic-object board-1 20.0 6.300000190734863 55.5 0 0 0
-dynamic-object board-1 20.0 6.300000190734863 58.5 0 0 0
-dynamic-object board-1 21.5 6.099999904632568 57.0 90 0 0
-dynamic-object board-1 18.5 6.099999904632568 57.0 90 0 0
-dynamic-object board-1 20.0 5.900000095367432 55.5 0 0 0
-dynamic-object board-1 20.0 5.900000095367432 58.5 0 0 0
-dynamic-object board-1 20.0 5.099999904632568 58.5 0 0 0
-dynamic-object board-1 20.0 5.099999904632568 55.5 0 0 0
-dynamic-object board-1 18.5 5.300000190734863 57.0 90 0 0
-dynamic-object board-1 21.5 5.300000190734863 57.0 90 0 0
-dynamic-object board-1 20.0 5.5 58.5 0 0 0
-dynamic-object board-1 20.0 5.5 55.5 0 0 0
-dynamic-object board-1 18.5 5.700000286102295 57.0 90 0 0
-dynamic-object board-1 21.5 5.700000286102295 57.0 90 0 0
-dynamic-object board-1 21.5 4.900000095367432 57.0 90 0 0
-dynamic-object board-1 18.5 4.900000095367432 57.0 90 0 0
-dynamic-object board-1 20.0 4.700000286102295 55.5 0 0 0
-dynamic-object board-1 20.0 4.700000286102295 58.5 0 0 0
-dynamic-object board-1 21.5 4.5 57.0 90 0 0
-dynamic-object board-1 18.5 4.5 57.0 90 0 0
-dynamic-object board-1 20.0 4.300000190734863 55.5 0 0 0
-dynamic-object board-1 20.0 4.300000190734863 58.5 0 0 0
-dynamic-object board-1 20.0 3.5 58.5 0 0 0
-dynamic-object board-1 20.0 3.5 55.5 0 0 0
-dynamic-object board-1 18.5 3.700000047683716 57.0 90 0 0
-dynamic-object board-1 21.5 3.700000047683716 57.0 90 0 0
-dynamic-object board-1 20.0 3.9000000953674316 58.5 0 0 0
-dynamic-object board-1 20.0 3.9000000953674316 55.5 0 0 0
-dynamic-object board-1 18.5 4.099999904632568 57.0 90 0 0
-dynamic-object board-1 21.5 4.099999904632568 57.0 90 0 0
-dynamic-object board-1 21.5 3.299999952316284 57.0 90 0 0
-dynamic-object board-1 18.5 3.299999952316284 57.0 90 0 0
-dynamic-object board-1 20.0 3.1000001430511475 55.5 0 0 0
-dynamic-object board-1 20.0 3.1000001430511475 58.5 0 0 0
-dynamic-object board-1 21.5 2.9000000953674316 57.0 90 0 0
-dynamic-object board-1 18.5 2.9000000953674316 57.0 90 0 0
-dynamic-object board-1 20.0 2.700000047683716 55.5 0 0 0
-dynamic-object board-1 20.0 2.700000047683716 58.5 0 0 0
-object wall-2 22.0 0.0 51.0 0
-robot 33.679279 -1.0664008343042042e-08 18.887592315673828 270 0 0
-object tree-1 34.0 0.0 32.0 0
-object tree-1 34.0 0.0 17.0 0
-object tree-1 29.0 0.0 12.0 0
-object tree-1 23.0 0.0 12.0 0
-dynamic-object board-1 18.0 2.5 57.0 270 0 0
-dynamic-object board-1 19.0 2.5 57.0 270 0 0
-dynamic-object board-1 20.0 2.5 57.0 270 0 0
-dynamic-object board-1 21.0 2.5 57.0 270 0 0
-dynamic-object board-1 22.0 2.5 57.0 270 0 0
-balloon -7.000000 25.0 30.0 0 0 0
-balloon -7.000000 37.0 30.0 0 0 0
-balloon -6.000000 40.0 30.0 0 0 0
-balloon -4.000000 42.0 30.0 0 0 0
-balloon -1.000000 43.0 30.0 0 0 0
-balloon 2.000000 43.0 30.0 0 0 0
-balloon 5.000000 43.0 30.0 0 0 0
-balloon 8.000000 43.0 30.0 0 0 0
-balloon 11.000000 43.0 30.0 0 0 0
-balloon 14.000000 42.0 30.0 0 0 0
-balloon 17.000000 22.0 30.0 0 0 0
-balloon 17.000000 25.0 30.0 0 0 0
-balloon 17.000000 28.0 30.0 0 0 0
-balloon 17.000000 31.0 30.0 0 0 0
-balloon 17.000000 34.0 30.0 0 0 0
-balloon 17.000000 37.0 30.0 0 0 0
-balloon 16.000000 40.0 30.0 0 0 0
-balloon 21.000000 2.0 53.0 0 0 0
-balloon 21.000000 5.0 53.0 0 0 0
-balloon 21.000000 8.0 53.0 0 0 0
-balloon 21.000000 11.0 53.0 0 0 0
-balloon 21.000000 14.0 53.0 0 0 0
-balloon 21.000000 17.0 53.0 0 0 0
-balloon 21.000000 20.0 53.0 0 0 0
-balloon 21.000000 23.0 53.0 0 0 0
-dynamic-object board-1 28.840089797973633 2.6000022888183594 19.976457595825195 270 0 0
-dynamic-object board-1 26.65835952758789 2.6000022888183594 16.605649948120117 270 0 0
-object wall-1 27.494293212890625 0.0 18.29657554626465 0
-object wall-1 14.0 0.0 55.0 0
-object wall-2 10.0 0.0 55.05999755859375 90
-object wall-2 14.0 0.0 59.0 0
-object wall-2 22.0 0.0 59.0 0
-object wall-2 20.0 0.0 55.0 0
-object wall-2 10.0 0.0 47.05999755859375 90
-object wall-2 10.0 0.0 39.05999755859375 90
-object wall-2 14.0 0.0 51.0 0
-balloon 23.000000 23.0 38.0 0 0 0
-balloon 23.000000 20.0 38.0 0 0 0
-balloon 23.000000 17.0 38.0 0 0 0
-balloon 23.000000 14.0 38.0 0 0 0
-balloon 23.000000 11.0 38.0 0 0 0
-balloon 23.000000 8.0 38.0 0 0 0
-balloon 23.000000 5.0 38.0 0 0 0
-balloon 23.000000 2.0 38.0 0 0 0
-object wall-2 33.708641052246094 0.0 36.659786224365234 72
-robot 28.157013 -1.0664008343042042e-08 29.65580940246582 0 0 0
-dynamic-object board-1 19.276002883911133 2.6000022888183594 22.69001007080078 324 0 0
-object wall-2 32.741695404052734 -2.9515367927501757e-09 13.943451881408691 312
-object wall-2 26.0 0.0 11.0 0
-balloon 17.000000 20.0 23.0 0 0 0
-object wall-2 23.157012939453125 -1.0664008343042042e-08 21.65580940246582 235
-object wall-2 14.0 0.0 23.059999465942383 180
-medal 20.000000 5.0 57.0 0 0 0
-dynamic-object soda-can-1 18.69917106628418 1.756048560142517 23.00092124938965 0 0 0
-dynamic-object soda-can-1 11.69999885559082 0.5999992489814758 21.700000762939453 0 0 0
-dynamic-object soda-can-1 18.157798767089844 1.7621687650680542 23.002946853637695 0 0 0
-goal -7.0 20.0 54.0
-balloon 20.000000 2.0 22.0 0 0 0
-object tree-1 46.0 0.0 50.0 0
-object building-20 -7.0 0.0 42.0 0
-object tree-1 -1.0 0.0 60.0 0
-object building-20 -7.0 0.0 54.0 0
+ladder 21.899999618530273 25.0 -68.0 90
+name ladder-a
 
-player 11.0 0.0 15.0
-object ball 11 2 19
+ladder 21.899999618530273 20.0 -69.0 90
+name ladder-b
 
-object building-20 -40.0 0.0 -5.0 0
-object building-20 -40.0 0.0 6.0 0
-object building-20 -45.0 0.0 16.0 0
-object building-20 -33.0 0.0 18.0 0
-object building-20 -33.0 0.0 54.0 0
-object building-20 -43.0 0.0 43.0 0
-object building-20 -33.0 0.0 32.0 0
-object building-20 28.0 0.0 67.0 270
-object building-20 28.0 0.0 56.0 0
-object building-20 28.0 0.0 45.0 0
-object building-20 48.0 0.0 -9.0 0
-object building-20 52.0 0.0 2.0 0
-object building-20 52.0 0.0 15.0 0
-object building-20 16.0 0.0 42.0 90
-dynamic-object soda-can-1 12.199999809265137 20.0 13.199999809265137 0 0 0
-object building-20 -20.0 0.0 18.0 0
-object building-20 -7.0 0.0 30.0 0
-object building-20 -7.0 0.0 18.0 0
-object building-20 -5.0 0.0 -4.0 0
-object building-20 15.0 0.0 -26.0 0
-object building-20 37.0 0.0 -4.0 0
-object tree-1 -1.0 0.0 12.0 0
-object building-20 26.0 0.0 -4.0 0
-object building-20 15.0 0.0 -15.0 0
-object building-20 15.0 0.0 -4.0 0
-object building-20 -5.0 0.0 -15.0 0
-object building-20 -20.0 0.0 -4.0 0
-object building-20 53.0 0.0 43.0 0
-object stage-0-0 0.0 0.0 -1.9073486328125e-06 0
-object wall-2 35.0 0.0 28.659786224365234 90
-object wall-2 10.0 0.0 31.05999755859375 90
-object building-20 17.0 0.0 30.0 0
-object wall-2 35.0 0.0 20.659788131713867 90
-object wall-2 10.0 0.0 23.059999465942383 90
-object outdoor-unit 11.699999809265137 0.0 21.5 90
-object outdoor-unit 11.699999809265137 0.0 18.5 90
-object outdoor-unit 11.699999809265137 0.0 16.5 90
-object outdoor-unit 11.699999809265137 0.0 13.5 90
+balloon -5.000000 41.0 10.0 0 0 90
+balloon -5.000000 39.0 5.0 0 0 90
+balloon -5.000000 38.0 0.0 0 0 90
+balloon -5.000000 36.0 -5.0 0 0 90
+balloon -5.000000 34.0 -10.0 0 0 90
+balloon -5.000000 32.0 -15.0 0 0 90
+balloon -5.000000 30.0 -20.0 0 0 90
+balloon 25.000000 32.0 -32.0 0 0 90
+balloon 21.000000 23.0 -32.0 0 0 90
+balloon 23.000000 27.0 -32.0 0 0 90
+balloon 41.000000 27.0 -26.0 0 0 90
+balloon 50.000000 23.0 -26.0 0 0 90
+balloon 58.000000 20.0 -26.0 0 0 90
+medal 42.500000 25.0 -60.0 0 0 0
+balloon 5.000000 30.0 -80.0 0 0 90
+balloon 61.500000 20.0 -30.0 0 0 90
+balloon 35.500000 20.0 -55.0 0 0 90
+balloon 38.500000 20.0 -60.0 0 0 90
+balloon 35.500000 20.0 -60.0 0 0 90
+balloon 35.500000 20.0 -50.0 0 0 90
+goal -5.0 39.0 15.0
+girl 15.0 20.0 -64.0 180
+player 15.0 20.0 -65.0
 
-dynamic-object god-animation-1 11.7 0.6 21.5 90
+dynamic-object box-2x2x2 12.0 20.0 -67.0 
+name wall-1
 
-object wall-2 10.0 0.0 15.059999465942383 90
-object wall-2 14.0 0.0 11.0 0
-object building-20 17.0 0.0 16.0 0
-object wall-1 20.0 0.0 23.0 0
-object tree-1 11.0 0.0 12.0 0
+dynamic-object box-2x2x2 13.0 25.0 -67.0 
+dynamic-object box-2x2x2 25.0 32.0 -67.0 
+
+
+rocket 17.0 20.0 -65.0
+
+object wall-1 19.0 21.0 -58.0 0
+
+
+switch 17 20 -62
+
+event turn-on set_shadow_color_target 1 0 0 1
+event turn-on set_shadow_paper_color_target 0 0 0 0
+event turn-on set_light_position_target -100 100 20
+event turn-on set_line_type 1
+event turn-on set_paper_type 1
+event turn-on change_bgm semi
+event turn-on set_darwing_accent_scale 2
+
+event turn-off set_shadow_color_target 0 0 1 1
+event turn-off set_shadow_paper_color_target 1 1 1 1
+event turn-off set_light_position_target 100 100 100
+event turn-off set_line_type 0
+event turn-off set_paper_type 0
+event turn-off change_bgm road
+event turn-off set_darwing_accent_scale 0
+
+event turn-on game_object.set_target_location ladder-b 0 20 -65 1
+event turn-on game_object.set_mass ladder-b 1
+event turn-on game_object.set_gravity ladder 0 -1 0
+
+event turn-on  game_object.set_mass wall-1 0
+event turn-off game_object.set_mass wall-1 1
+
+event turn-on game_object.set_gravity wall-1 0
+event turn-on game_object.set_angular_factor wall-1 0
+event turn-on game_object.set_target_location wall-1 19.0 25.0 -58.0 1
+
+
+area-switch 23.0 20.0 -47.0 2.0 2.0 2.0 0
+event turn-on game_object.set_target_location girl -5.0 45.0 15.0 1
+event turn-on game_object.play_animation girl Walk 0 1
+
+
+
+object stage-0-1 0 0 0

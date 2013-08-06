@@ -48,38 +48,33 @@ def export_stage():
 			text += str( o.dimensions[ 0 ] ) + " "
 			text += str( o.dimensions[ 2 ] ) + " "
 			text += str( o.dimensions[ 1 ] ) + " "
-			text += str( r ) + "\n"
-			continue
-
-		if name == "robot" or name == "balloon" or name == "rocket" or name == "umbrella" or name == "medal" or name == "stone":
+		elif name == "robot" or name == "balloon" or name == "rocket" or name == "umbrella" or name == "medal" or name == "stone":
 			text += name + " "
 			text += str( o.location[ 0 ] ) + " "
 			text += str( o.location[ 2 ] ) + " "
 			text += str( o.location[ 1 ] ) + " "
 			text += str( r ) + " " + str( r2 ) + " " + str( r3 )
-			text += "\n"
-			continue
-		
-		if o.name.startswith( "dynamic" ):
-			text += "dynamic-object "
 		else:
-			text += "object "
-			
-		text += name + " "
-		text += str( o.location[ 0 ] ) + " "
-		text += str( o.location[ 2 ] ) + " "
-		text += str( o.location[ 1 ] ) + " "
-		text += str( r )
-		
-		if o.name.startswith( "dynamic" ):
-			text += " " + str( r2 ) + " " + str( r3 )
-		
-		if o.name == "s":
-			text += " 1.0 0.666 0.066"
-		elif o.name == "g":
-			text += " 0.666 1.0 0.666"
+			if o.name.startswith( "dynamic" ):
+				text += "dynamic-object "
+			else:
+				text += "object "
+	
+			text += name + " "
+			text += str( o.location[ 0 ] ) + " "
+			text += str( o.location[ 2 ] ) + " "
+			text += str( o.location[ 1 ] ) + " "
+			text += str( r )
+	
+			if o.name.startswith( "dynamic" ):
+				text += " " + str( r2 ) + " " + str( r3 )
 		
 		text += "\n"
+	
+	commands = o.name.split( ', ' )[1:]
+	
+	for c in commands:
+		text += c + "\n"
 	
 	try:
 		to = bpy.data.texts[ "exported_stage" ]

@@ -284,9 +284,21 @@ void GamePlayScene::setup_command()
 			sound->stop();
 		}
 	};
-	command_map_[ "game_object.set_target_location" ] = [ & ] ( const string_t& )
+	command_map_[ "game_object.set_target_location" ] = [ & ] ( const string_t& s )
 	{
+		std::stringstream ss;
+		ss << s;
 
+		string_t object_name;
+		float_t x = 0.f, y = 0.f, z = 0.f, speed = 0.f;
+		ss >> object_name >> x >> y >> z >> speed;
+
+		ActiveObject* o = get_active_object_manager()->get_active_object( object_name );
+
+		if ( o )
+		{
+			get_active_object_manager()->set_target_location( o, GameObject::Vector3( x, y, z ), speed );
+		}
 	};
 	command_map_[ "game_object.play_animation" ] = [ & ] ( const string_t& s )
 	{
@@ -339,11 +351,7 @@ void GamePlayScene::restart()
 
 	camera_->restart();
 
-	for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
-	{
-		ActiveObject* active_object = *i;
-		active_object->restart();
-	}
+	get_active_object_manager()->restart();
 
 	setup_stage();
 

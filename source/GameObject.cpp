@@ -181,7 +181,7 @@ float_t GameObject::get_flicker_height_offset( float_t scale ) const
  * 指定した位置にゆらぎによる高さのオフセットを加え、現在の位置として設定する
  *
  * @param base_location ゆらぎの中心となる位置
- * @return ゆらぎによる高さのオフセット
+ * @param scale ゆらぎのスケール値
  */
 void GameObject::update_location_by_flicker( const Vector3& base_location, float_t scale )
 {
@@ -192,7 +192,7 @@ void GameObject::update_location_by_flicker( const Vector3& base_location, float
  * 指定した位置にゆらぎによる高さのオフセットを加え、その位置を目標地点として移動量を設定する
  *
  * @param base_location ゆらぎの中心となる位置
- * @return ゆらぎによる高さのオフセット
+ * @param scale ゆらぎのスケール値
  */
 void GameObject::update_velocity_by_flicker( const Vector3& base_location, float_t scale )
 {
@@ -200,6 +200,20 @@ void GameObject::update_velocity_by_flicker( const Vector3& base_location, float
 	Vector3 relative_position = target_location - get_location();
 
 	set_velocity( Vector3( get_velocity().x(), relative_position.y(), get_velocity().z() ) );
+}
+
+/**
+ * 指定した位置に移動するための移動量を設定する
+ *
+ * @param target_location 目的地
+ * @param speed 速度
+ */
+void GameObject::update_velocity_by_target_location( const Vector3& target_location, float_t speed )
+{
+	Vector3 relative_position = target_location - get_location();
+	relative_position.normalize();
+
+	set_velocity( relative_position * speed );
 }
 
 /**

@@ -90,6 +90,8 @@ public:
 	virtual void update_transform();
 	virtual void commit_transform();
 	
+	virtual void update_velocity_by_target_location( const Vector3& target_location, float_t speed );
+
 	virtual bool is_hard() const { return true; }
 	virtual bool is_block() const { return is_hard(); }
 	virtual bool is_balloon() const { return false; }

@@ -61,6 +61,8 @@
 
 #include "Direct3D11.h"
 
+#include "math.h"
+
 #include <game/Sound.h>
 #include <game/Config.h>
 #include <game/MainLoop.h>
@@ -78,8 +80,6 @@
 namespace blue_sky
 {
 
-// Direct3D11Vector GamePlayScene::light_position_( 0.f, -1.f, -0.1f );
-Direct3D11Vector GamePlayScene::light_position_( 0.25f, 1.f, -1.f );
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
@@ -87,6 +87,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, is_cleared_( false )
 	, action_bgm_after_timer_( 0.f )
 	, bpm_( 120.f )
+	, light_position_( vector3( 0.25f, 1.f, -1.f ), 0.1f )
+	, shadow_color_( Color( 0.f, 0.f, 0.f, 1.f ), 0.02f )
+	, shadow_paper_color_( Color( 0.9f, 0.9f, 0.9f, 1.f ), 0.02f )
 {
 	stage_config_ = new Config();
 
@@ -206,6 +209,46 @@ void GamePlayScene::setup_command()
 	command_map_[ "start_player_flickering" ] = [ & ] ( const string_t& )
 	{
 		player_->start_flickering();
+	};
+	command_map_[ "set_shadow_color_target" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		float_t r = 0.f, g = 0.f, b = 0.f, a = 0.f;
+		ss >> shadow_color_.target_value().r() >> shadow_color_.target_value().g() >> shadow_color_.target_value().b() >> shadow_color_.target_value().a();
+	};
+	command_map_[ "set_shadow_color" ] = [ & ] ( const string_t& s )
+	{
+		command_map_[ "set_shadow_color_target" ]( s );
+		shadow_color_.value() = shadow_color_.target_value();
+	};
+	command_map_[ "set_shadow_paper_color_target" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		float_t r = 0.f, g = 0.f, b = 0.f, a = 0.f;
+		ss >> shadow_paper_color_.target_value().r() >> shadow_paper_color_.target_value().g() >> shadow_paper_color_.target_value().b() >> shadow_paper_color_.target_value().a();
+	};
+	command_map_[ "set_shadow_paper_color" ] = [ & ] ( const string_t& s )
+	{
+		command_map_[ "set_shadow_paper_color_target" ]( s );
+		shadow_paper_color_.value() = shadow_paper_color_.target_value();
+	};
+	command_map_[ "set_light_position_target" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		float_t x = 0.f, y = 0.f, z = 0.f;
+		ss >> x >> y >> z;
+		light_position_.target_value().set( x, y, z );
+	};
+	command_map_[ "set_light_position" ] = [ & ] ( const string_t& s )
+	{
+		command_map_[ "set_light_position_target" ]( s );
+		light_position_.value() = light_position_.target_value();
 	};
 }
 
@@ -846,16 +889,6 @@ void GamePlayScene::save_stage_file( const char* file_name ) const
 }
 
 /**
- * 光源の位置を設定する
- *
- * @param pos 光源の位置
- */
-void GamePlayScene::set_light_position( const Direct3D11Vector& pos )
-{
-	light_position_ = pos;
-}
-
-/**
  * メインループ処理
  *
  */
@@ -1135,10 +1168,13 @@ void GamePlayScene::update_shadow()
 			a += 0.0025f;
 
 			const Vector light_origin( 0.f, 100.f, 0.f );
-			light_position_ = light_origin + Vector( cos( a ) * 50.f, 0.f, sin( a ) * 50.f, 0.f );	
+			const Vector v = light_origin + Vector( cos( a ) * 50.f, 0.f, sin( a ) * 50.f, 0.f );	
+
+			light_position_.value().set( v.x(), v.y(), v.z() );
+			light_position_.target_value() = light_position_.value();
 		}
 
-		shadow_map_->set_light_position( light_position_ );
+		shadow_map_->set_light_position( Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z() ) );
 		shadow_map_->set_eye_position( Vector( camera_->position().x(), camera_->position().y(), camera_->position().z() ) );
 	}
 }
@@ -1198,6 +1234,10 @@ void GamePlayScene::update_clear()
  */
 void GamePlayScene::render()
 {
+	light_position_.chase();
+	shadow_color_.chase();
+	shadow_paper_color_.chase();
+
 	get_direct_3d()->setInputLayout( "main" );
 	
 	// render_text()
@@ -1323,7 +1363,7 @@ void GamePlayScene::update_render_data_for_frame() const
 		frame_constant_buffer_data.view = XMMatrixTranspose( frame_constant_buffer_data.view );
 		frame_constant_buffer_data.projection = XMMatrixPerspectiveFovLH( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f );
 		frame_constant_buffer_data.projection = XMMatrixTranspose( frame_constant_buffer_data.projection );
-		frame_constant_buffer_data.light = -light_position_;
+		frame_constant_buffer_data.light = -Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z() );
 		frame_constant_buffer_data.light.normalize();
 		frame_constant_buffer_data.time = get_total_elapsed_time();
 		frame_constant_buffer_data.time_beat = static_cast< uint_t >( get_total_elapsed_time() * ( get_bpm() / 60.f ) );
@@ -1331,11 +1371,14 @@ void GamePlayScene::update_render_data_for_frame() const
 		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
 	}
 
+	/// @todo 整理する
 	{
 		FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
 
 		frame_drawing_constant_buffer_data.accent = bgm_ ? bgm_->get_current_peak_level() : 0.f;
 		frame_drawing_constant_buffer_data.line_type = drawing_line_type_index_;
+		frame_drawing_constant_buffer_data.shadow_color = shadow_color_.value();
+		frame_drawing_constant_buffer_data.shadow_paper_color = shadow_paper_color_.value();
 
 		get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
 	}

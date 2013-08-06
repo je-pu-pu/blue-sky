@@ -6,18 +6,26 @@
 namespace common
 {
 
-template< typename Type >
+template< typename Type, typename SpeedType = Type >
 class chase_value
 {
 private:
 	Type value_;
 	Type target_value_;
-	Type speed_;
+	SpeedType speed_;
 
 public:
-	chase_value( Type value, Type target_value, Type speed )
+	chase_value( Type value, Type target_value, SpeedType speed )
 		: value_( value )
 		, target_value_( target_value )
+		, speed_( speed )
+	{
+
+	}
+
+	chase_value( Type value, SpeedType speed )
+		: value_( value )
+		, target_value_( value )
 		, speed_( speed )
 	{
 
@@ -34,8 +42,8 @@ public:
 	Type& target_value() { return target_value_; }
 	Type target_value() const { return target_value_; }
 	
-	Type& speed() { return speed_; }
-	Type speed() const { return speed_; }
+	SpeedType& speed() { return speed_; }
+	SpeedType speed() const { return speed_; }
 
 	// Type operator Type () { return value_; }
 	// Type operator Type () const { return value_; }

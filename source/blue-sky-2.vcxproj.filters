@@ -471,6 +471,9 @@
     <ClInclude Include="EndingScene.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="math.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

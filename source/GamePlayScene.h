@@ -3,7 +3,11 @@
 
 #include "Scene.h"
 #include "Direct3D11Vector.h"
+#include "Direct3D11Color.h"
 
+#include "vector3.h"
+
+#include <common/chase_value.h>
 #include <common/auto_ptr.h>
 #include <common/safe_ptr.h>
 
@@ -84,11 +88,13 @@ protected:
 
 	float_t								bpm_;
 
-	static Vector						light_position_;
-
 	std::vector< Texture* >				paper_texture_list_;
 	Texture*							paper_texture_;
 	uint_t								drawing_line_type_index_;
+	
+	common::chase_value< vector3, float_t >		light_position_;
+	common::chase_value< Color, float_t >		shadow_color_;
+	common::chase_value< Color, float_t >		shadow_paper_color_;
 
 	CommandMap							command_map_;
 	CommandCallList						stage_setup_command_call_list_;
@@ -110,8 +116,6 @@ protected:
 
 	void set_bpm( const float_t bpm ) { bpm_ = bpm; }
 	float_t get_bpm() const { return bpm_; }
-
-	void set_light_position( const Vector& );
 
 	void update_main();
 	void update_clear();

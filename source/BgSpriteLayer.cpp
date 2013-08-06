@@ -1,4 +1,5 @@
 #include "BgSpriteLayer.h"
+#include "math.h"
 
 #include "memory.h"
 
@@ -26,28 +27,4 @@ void BgSpriteLayer::update()
 	rotation_.chase();
 	scale_.chase();
 	color_.chase();
-}
-
-namespace math
-{
-
-template<> vector3 chase( vector3 value, vector3 target, vector3 speed )
-{
-	value.x() = chase( value.x(), target.x(), speed.x() );
-	value.y() = chase( value.y(), target.y(), speed.y() );
-	value.z() = chase( value.z(), target.z(), speed.z() );
-
-	return value;
-}
-
-template<> BgSpriteLayer::Color chase( BgSpriteLayer::Color value, BgSpriteLayer::Color target, BgSpriteLayer::Color speed )
-{
-	value.r() = chase( value.r(), target.r(), speed.r() );
-	value.g() = chase( value.g(), target.g(), speed.g() );
-	value.b() = chase( value.b(), target.b(), speed.b() );
-	value.a() = chase( value.a(), target.a(), speed.a() );
-
-	return value;
-}
-
 }

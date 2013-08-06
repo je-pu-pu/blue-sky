@@ -35,7 +35,7 @@ template< typename T > inline T radian_to_degree( T radian )
 	return radian * ( 180 / pi );
 }
 
-template< typename T > inline T chase( T value, T target, T speed )
+template< typename T, typename ST > inline T chase( T value, T target, ST speed )
 {
 	if ( value < target )
 	{

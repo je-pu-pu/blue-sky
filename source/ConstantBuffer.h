@@ -53,9 +53,16 @@ struct ObjectExtentionConstantBufferData : public BaseConstantBufferData< 3 >
 
 struct FrameDrawingConstantBufferData : public BaseConstantBufferData< 4 >
 {
+	Color shadow_color;
+	Color shadow_paper_color;
 	float_t accent;
 	uint_t line_type;
 	float_t dummy[ 2 ];
+
+	FrameDrawingConstantBufferData()
+		: shadow_color( 0.f, 0.f, 0.f, 0.f )
+		, shadow_paper_color( 0.f, 0.f, 0.f, 0.f )
+	{ }
 };
 
 struct BoneConstantBufferData : public BaseConstantBufferData< 5 >

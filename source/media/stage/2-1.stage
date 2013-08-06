@@ -33,9 +33,15 @@ dynamic-object box-2x2x2 13.0 25.0 -67.0
 dynamic-object box-2x2x2 25.0 32.0 -67.0 
 
 rocket 17.0 20.0 -65.0
-switch 17 20 -60
+switch 17 20 -62
+event turn-on set_shadow_color_target 1 0 0 1
+event turn-on set_shadow_paper_color_target 0 0 0 0
+event turn-on set_light_position_target -100 100 20
 event turn-on set_line_type 1
 event turn-on set_paper_type 1
+event turn-off set_shadow_color_target 0 0 1 1
+event turn-off set_shadow_paper_color_target 1 1 1 1
+event turn-off set_light_position_target 100 100 100
 event turn-off set_line_type 0
 event turn-off set_paper_type 0
 

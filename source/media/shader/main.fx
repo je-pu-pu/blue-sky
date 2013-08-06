@@ -73,9 +73,10 @@ cbuffer ObjectExtensionConstantBuffer : register( b3 )
 
 cbuffer FrameDrawingConstantBuffer : register( b4 )
 {
+	float4 ShadowColor;
+	float4 ShadowPaperColor;
 	float DrawingAccent;
 	uint LineType;
-	float2 Dummy;
 }
 
 cbuffer BoneConstantBuffer : register( b5 )
@@ -629,17 +630,16 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 
 	diffuse = max( 0.f, diffuse );
 
-	if ( diffuse < 1.f )
 	{
 		// ‰e
-		const float4 shadow_color = float4( 0.25f, 0.25f, 0.5f, 1.f );
+		const float4 shadow_color = ShadowColor;
 		shadow = float4( 1.f, 1.f, 1.f, 1.f ) * ( 1.f - shadow_color.a ) + shadow_color * shadow_color.a;
 		shadow.a = 1.f;
 		
 		// Ž†‚ÌŽ¿Š´‚ð’Ç‰Á‚·‚é
 		if ( true )
 		{
-			const float3 shadow_paper_color = float3( 1.f, 1.f, 1.f );
+			const float3 shadow_paper_color = ( float3 ) ShadowPaperColor;
 
 			float4 paper = sample_paper_texture( ( float2 ) input.Position );
 			shadow.rgb = shadow_paper_color * ( 1.f - paper.a ) + shadow.rgb * paper.a;

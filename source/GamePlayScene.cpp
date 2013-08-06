@@ -251,6 +251,11 @@ void GamePlayScene::setup_command()
 		command_map_[ "set_light_position_target" ]( s );
 		light_position_.value() = light_position_.target_value();
 	};
+	command_map_[ "change_bgm" ] = [ & ] ( const string_t& s )
+	{
+		bgm_ = get_sound_manager()->load_music( "bgm", s.c_str(), true );
+		bgm_->play( stage_config_->get( "bgm.loop", true ) );
+	};
 	command_map_[ "player.start_flickering" ] = [ & ] ( const string_t& )
 	{
 		player_->start_flickering();

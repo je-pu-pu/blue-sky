@@ -82,7 +82,7 @@ protected:
 
 	common::auto_ptr< Mesh >			scope_mesh_;			///< ‘oŠá‹¾
 
-	common::safe_ptr< Sound >			bgm_;
+	Sound*								bgm_;
 	common::safe_ptr< Sound >			balloon_bgm_;
 	float_t								action_bgm_after_timer_;
 

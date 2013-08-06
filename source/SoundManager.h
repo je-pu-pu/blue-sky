@@ -30,17 +30,17 @@ public:
 	SoundManager( HWND );
 	virtual ~SoundManager();
 
-	virtual void set_mute( bool );
-	virtual void set_volume( float );
+	virtual void set_mute( bool ) override;
+	virtual void set_volume( float ) override;
 
-	virtual game::Sound* load( const char*, const char* = 0 );
-	virtual game::Sound* load_3d_sound( const char*, const char* = 0 );
+	virtual game::Sound* load( const char*, const char* = 0 ) override;
+	virtual game::Sound* load_3d_sound( const char*, const char* = 0 ) override;
 
-	virtual game::Sound* load_music( const char*, const char* = 0 );
+	virtual game::Sound* load_music( const char* name, const char* file_name = 0, bool replace = false );
 
-	virtual game::Sound* create_sound( const char*, bool );
+	virtual game::Sound* create_sound( const char*, bool ) override;
 
-	virtual void update();
+	virtual void update() override;
 
 	virtual void stop_all();
 

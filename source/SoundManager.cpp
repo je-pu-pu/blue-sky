@@ -74,8 +74,13 @@ game::Sound* SoundManager::load_3d_sound( const char* name, const char* file_nam
 	return game::SoundManager::load_3d_sound( name, ( std::string( "media/sound/" ) + name + ".ogg" ).c_str() );
 }
 
-game::Sound* SoundManager::load_music( const char* name, const char* file_name )
+game::Sound* SoundManager::load_music( const char* name, const char* file_name, bool replace )
 {
+	if ( replace )
+	{
+		unload( name );
+	}
+
 	if ( file_name )
 	{
 		return game::SoundManager::load( name, ( std::string( "media/music/" ) + file_name + ".ogg" ).c_str() );

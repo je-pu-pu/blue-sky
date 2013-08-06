@@ -256,6 +256,32 @@ void GamePlayScene::setup_command()
 		bgm_ = get_sound_manager()->load_music( "bgm", s.c_str(), true );
 		bgm_->play( stage_config_->get( "bgm.loop", true ) );
 	};
+	command_map_[ "play_sound" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		string_t sound_name;
+		bool loop = false, force = true;
+
+		ss >> sound_name >> loop >> force;
+
+		Sound* sound = get_sound_manager()->load( sound_name.c_str() );
+
+		if ( sound )
+		{
+			sound->play( loop, force );
+		}
+	};
+	command_map_[ "stop_sound" ] = [ & ] ( const string_t& s )
+	{
+		Sound* sound = get_sound_manager()->load( s.c_str() );
+
+		if ( sound )
+		{
+			sound->stop();
+		}
+	};
 	command_map_[ "player.start_flickering" ] = [ & ] ( const string_t& )
 	{
 		player_->start_flickering();

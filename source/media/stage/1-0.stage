@@ -24,3 +24,5 @@ stone 12.500000 0.000000 -34.500000 0 0 90
 stone 12.500000 0.0 -35.0 0 0 90
 stone 12.500000 0.0 -35.5 0 0 90
 switch 12.500000 0.0 -36. 0 0 90
+event turn-on play_sound voice-prologue
+event turn-off stop_sound voice-prologue

@@ -26,7 +26,7 @@ class Balloon;
 class Rocket;
 class Umbrella;
 class Stone;
-class Switch;
+class BaseSwitch;
 class Medal;
 class Robot;
 class StaticObject;
@@ -112,7 +112,7 @@ public:
 	virtual void on_collide_with( Rocket* ) { }
 	virtual void on_collide_with( Umbrella* ) { }
 	virtual void on_collide_with( Stone* ) { }
-	virtual void on_collide_with( Switch* ) { }
+	virtual void on_collide_with( BaseSwitch* ) { }
 	virtual void on_collide_with( Robot* ) { }
 	virtual void on_collide_with( Medal* ) { }
 	virtual void on_collide_with( StaticObject* ) { }
@@ -122,6 +122,7 @@ public:
 	virtual void on_collide_with_ground() { }
 
 	void set_mass( float_t );
+	void set_gravity( const Vector3& );
 
 	inline RigidBody* get_rigid_body() { return rigid_body_; }
 	inline const RigidBody* get_rigid_body() const { return rigid_body_; }

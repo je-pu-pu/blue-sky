@@ -81,6 +81,16 @@ void GameObject::set_mass( float_t mass )
 	get_rigid_body()->setMassProps( mass, local_inertia );
 }
 
+void GameObject::set_gravity( const Vector3& gravity )
+{
+	if ( ! get_rigid_body() )
+	{
+		return;
+	}
+
+	get_rigid_body()->setGravity( gravity );
+}
+
 GameObject::Transform& GameObject::get_transform()
 {
 	return * transform_;

@@ -66,7 +66,7 @@ void ActiveObject::restart()
 	
 	if ( get_rigid_body() )
 	{
-		get_transform().setOrigin( start_location_ + Vector3( 0, get_height_offset(), 0 ) );
+		get_transform().setOrigin( start_location_ );
  		get_transform().setRotation( Quaternion( math::degree_to_radian( start_rotation_.x() ), math::degree_to_radian( start_rotation_.y() ), math::degree_to_radian( start_rotation_.z() ) ) );
 
 		get_rigid_body()->activate( true );

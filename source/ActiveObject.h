@@ -39,8 +39,6 @@ protected:
 	virtual void limit_velocity();
 
 	float get_max_speed() const { return 20.f; }
-	
-	void play_animation( const char_t* ) const;
 
 public:
 	ActiveObject();
@@ -87,6 +85,8 @@ public:
 
 	virtual void render_mesh() const;
 	virtual void render_material_at( uint_t ) const;
+
+	void play_animation( const char_t* name, bool force, bool loop );
 
 	// virtual void render_line() = 0;
 

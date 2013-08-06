@@ -108,10 +108,12 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// Player
 	player_ = new Player();
 	player_->set_drawing_model( get_drawing_model_manager()->load( "player" ) );
+	get_active_object_manager()->name_active_object( "player", player_.get() );
 
 	// Goal
 	goal_ = new Goal();
 	goal_->set_drawing_model( get_drawing_model_manager()->load( "goal" ) );
+	get_active_object_manager()->name_active_object( "goal", player_.get() );
 
 	// Camera
 	camera_ = new Camera();
@@ -280,6 +282,27 @@ void GamePlayScene::setup_command()
 		if ( sound )
 		{
 			sound->stop();
+		}
+	};
+	command_map_[ "game_object.set_target_location" ] = [ & ] ( const string_t& )
+	{
+
+	};
+	command_map_[ "game_object.play_animation" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		string_t object_name, animation_name;
+		bool force = true, loop = false;
+
+		ss >> object_name >> animation_name >> force >> loop;
+
+		ActiveObject* o = get_active_object_manager()->get_active_object( object_name );
+		
+		if ( o )
+		{
+			o->play_animation( animation_name.c_str(), force, loop );
 		}
 	};
 	command_map_[ "player.start_flickering" ] = [ & ] ( const string_t& )
@@ -538,6 +561,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "load stage file \"" ) + file_name + "\" failed." );
 	}
 
+	ActiveObject* last_object = 0;
 	BaseSwitch* last_base_switch = 0;
 
 	while ( in.good() )
@@ -739,6 +763,8 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			{
 				object->get_rigid_body()->setFriction( 10 );
 			}
+
+			last_object = object;
 		}
 		else if ( name == "translation-object" )
 		{
@@ -754,6 +780,8 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			object->set_rigid_body( get_physics()->add_active_object( object ) );
 			get_active_object_manager()->add_active_object( object );
+
+			last_object = object;
 		}
 		else if ( name == "girl" )
 		{
@@ -763,12 +791,15 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			girl_ = new Girl();
 			girl_->set_player( player_.get() );
 			girl_->set_drawing_model( get_drawing_model_manager()->load( "girl" ) );
-			get_active_object_manager()->add_active_object( girl_.get() );
 			girl_->set_rigid_body( get_physics()->add_active_object( girl_.get() ) );
-
 			girl_->set_start_location( x, y, z );
 			girl_->set_start_direction_degree( r );
 			girl_->setup_animation_player();
+
+			get_active_object_manager()->add_active_object( girl_.get() );
+			get_active_object_manager()->name_active_object( "girl", girl_.get() );
+
+			last_object = girl_.get();
 		}
 		else if ( name == "robot" )
 		{
@@ -779,13 +810,14 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			robot->set_player( player_.get() );
 
 			robot->set_drawing_model( get_drawing_model_manager()->load( "robot" ) );
-
-			get_active_object_manager()->add_active_object( robot );
 			robot->set_rigid_body( get_physics()->add_active_object( robot ) );
-
 			robot->set_start_location( x, y, z );
 			robot->set_start_direction_degree( r );
 			robot->setup_animation_player();
+
+			get_active_object_manager()->add_active_object( robot );
+
+			last_object = robot;
 		}
 		else if ( name == "balloon" )
 		{
@@ -891,6 +923,18 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			{
 				stage_setup_command_call_list_.push_back( command_call );
 			}
+		}
+		else if ( name == "name" )
+		{
+			if ( ! last_object )
+			{
+				COMMON_THROW_EXCEPTION_MESSAGE( "naming object not found." );
+			}
+
+			string_t object_name;
+
+			ss >> object_name;
+			get_active_object_manager()->name_active_object( object_name, last_object );
 		}
 		else
 		{

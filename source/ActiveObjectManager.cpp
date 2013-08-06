@@ -25,12 +25,31 @@ void ActiveObjectManager::clear()
 	}
 
 	active_object_list_.clear();
+	named_active_object_map_.clear();
 }
 
 void ActiveObjectManager::add_active_object( ActiveObject* active_object )
 {
 	active_object_list_.insert( active_object );
 }
+
+void ActiveObjectManager::name_active_object( const string_t& name, ActiveObject* active_object )
+{
+	named_active_object_map_[ name ] = active_object;
+}
+
+ActiveObject* ActiveObjectManager::get_active_object( const string_t& name )
+{
+	auto i = named_active_object_map_.find( name );
+
+	if ( i == named_active_object_map_.end() )
+	{
+		return 0;
+	}
+
+	return i->second;
+}
+
 
 void ActiveObjectManager::update()
 {

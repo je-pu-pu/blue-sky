@@ -49,4 +49,8 @@ event turn-off set_paper_type 0
 event turn-off change_bgm road
 event turn-off set_darwing_accent_scale 0
 
+area-switch 23.0 20.0 -47.0 2.0 2.0 2.0 0
+event turn-on game_object.set_target_location girl 100 100 100
+event turn-on game_object.play_animation girl Walk 0 1
+
 object stage-2-1 0 0 0

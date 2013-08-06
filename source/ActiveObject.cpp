@@ -236,4 +236,14 @@ void ActiveObject::render_material_at( uint_t material_index ) const
 	material->render();
 }
 
+void ActiveObject::play_animation( const char* name, bool force, bool loop )
+{
+	if ( ! get_animation_player() )
+	{
+		return;
+	}
+
+	get_animation_player()->play( name, force, loop );
+}
+
 } // namespace blue_sky

@@ -40,7 +40,7 @@ void Girl::update()
 	chase_direction_to( player_->get_location(), 1.f );
 
 	set_velocity( Vector3( 0.f, 0.f, 0.f ) );
-	update_location_by_flicker( get_start_location() );
+	update_velocity_by_flicker( get_start_location() );
 }
 
 } // namespace blue_sky

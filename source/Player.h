@@ -55,6 +55,7 @@ private:
 	float		step_speed_;			///< 移動速度
 
 	ActionMode	action_mode_;			///< 現在のアクションのモード
+	float_t		action_timer_;			///< 現在のアクションが開始してからの経過時間
 	Vector3		action_base_position_;	///< 現在のアクションの基底位置
 	bool		is_action_pre_finish_;	///< 現在のアクションがもうすぐ終わるフラグ
 	int_t		balloon_sequence_count_;///< 現在の連続取得バルーンの数 ( 0 .. 7 )
@@ -129,6 +130,8 @@ protected:
 	void on_collide_with( Robot* ) override;
 	void on_collide_with( Ladder* ) override;
 	void on_collide_with( Stone* ) override;
+	void on_collide_with( StaticObject* ) override;
+	void on_collide_with( DynamicObject* ) override;
 
 public:
 	Player();
@@ -173,6 +176,8 @@ public:
 	bool is_ladder_step_only() const;
 
 	void rocket( const Vector3& );
+	void finish_rocketing();
+
 	void throw_stone( const Vector3& );
 	void start_flickering() { is_flickering_ = true; action_base_position_ = get_location(); }
 	void stop_flickering() { is_flickering_ = false; }

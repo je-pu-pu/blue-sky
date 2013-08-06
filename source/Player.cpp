@@ -37,6 +37,7 @@ Player::Player()
 	, step_count_( 0 )
 	, step_speed_( 0.25f )
 	, action_mode_( ACTION_MODE_NONE )
+	, action_timer_( 0.f )
 	, is_action_pre_finish_( false )
 	, balloon_sequence_count_( 0 )
 	, uncontrollable_timer_( 0.f )
@@ -120,6 +121,8 @@ void Player::update()
 	update_can_clamber();
 	update_can_peer_down();
 
+	action_timer_ += get_frame_elapsed_time();
+
 	if ( action_mode_ == ACTION_MODE_BALLOON )
 	{
 		set_velocity( Vector3( get_velocity().x(), math::chase( get_velocity().y(), 3.f, 0.5f ), get_velocity().z() ) );
@@ -139,13 +142,9 @@ void Player::update()
 	else if ( action_mode_ == ACTION_MODE_ROCKET )
 	{
 		// ƒƒPƒbƒg
-		if ( ( get_location() - action_base_position_ ).length() >= get_rocket_action_length() )
+		if ( ( get_location() - action_base_position_ ).length() >= get_rocket_action_length() || action_timer_ >= 2.5f )
 		{
-			stop_sound( "rocket" );
-			play_sound( "rocket-burst" );
-			set_action_mode( ACTION_MODE_NONE );
-			is_jumping_ = true;
-			is_action_pre_finish_ = false;
+			finish_rocketing();
 		}
 		else if ( ( get_location() - action_base_position_ ).length() >= get_rocket_action_length() * 0.8f )
 		{
@@ -834,6 +833,7 @@ void Player::rocket( const Vector3& direction )
 	}
 
 	is_jumping_ = true;
+	action_timer_ = 0.f;
 
 	set_action_mode( ACTION_MODE_ROCKET );
 	set_action_base_position_to_current_position();
@@ -848,6 +848,15 @@ void Player::rocket( const Vector3& direction )
 	}
 
 	play_sound( "rocket" );
+}
+
+void Player::finish_rocketing()
+{
+	stop_sound( "rocket" );
+	play_sound( "rocket-burst" );
+	set_action_mode( ACTION_MODE_NONE );
+	is_jumping_ = true;
+	is_action_pre_finish_ = false;
 }
 
 void Player::throw_stone( const Vector3& direction )
@@ -1045,6 +1054,22 @@ void Player::on_collide_with( Ladder* l )
 	ladder_ = l;
 }
 
+void Player::on_collide_with( StaticObject* )
+{
+	if ( is_rocketing() )
+	{
+		finish_rocketing();
+	}
+}
+
+void Player::on_collide_with( DynamicObject* )
+{
+	if ( is_rocketing() )
+	{
+		finish_rocketing();
+	}
+}
+
 void Player::set_action_mode( ActionMode action_mode )
 {
 	if ( action_mode == action_mode_ )
@@ -1064,6 +1089,7 @@ void Player::set_action_mode( ActionMode action_mode )
 	*/
 
 	action_mode_ = action_mode;
+	action_timer_ = 0.f;
 
 	stop_sound( "fall" );
 }

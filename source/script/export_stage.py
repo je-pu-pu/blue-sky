@@ -12,7 +12,8 @@ def export_stage():
 	for o in os:
 		name = o.data.name
 		name = name.replace( "-line", "" )
-
+		name = name.replace( "-5", "" )
+		
 		# if name[-2:] == "-0":
 		#   name = name[:-2]
 		
@@ -29,8 +30,6 @@ def export_stage():
 			continue
 		
 		r = int( floor( degrees( o.rotation_euler[2] ) + 0.5 ) )
-		r2 = int( floor( degrees( o.rotation_euler[1] ) + 0.5 ) )
-		r3 = int( floor( degrees( o.rotation_euler[0] ) + 0.5 ) )
 		
 		while r < 0:
 			r += 360
@@ -48,12 +47,12 @@ def export_stage():
 			text += str( o.dimensions[ 0 ] ) + " "
 			text += str( o.dimensions[ 2 ] ) + " "
 			text += str( o.dimensions[ 1 ] ) + " "
-		elif name == "robot" or name == "balloon" or name == "rocket" or name == "umbrella" or name == "medal" or name == "stone":
+		elif name == "robot" or name == "balloon" or name == "rocket" or name == "umbrella" or name == "medal" or name == "stone" or name == "ladder" or name == "switch":
 			text += name + " "
 			text += str( o.location[ 0 ] ) + " "
 			text += str( o.location[ 2 ] ) + " "
 			text += str( o.location[ 1 ] ) + " "
-			text += str( r ) + " " + str( r2 ) + " " + str( r3 )
+			text += str( r )
 		else:
 			if o.name.startswith( "dynamic" ):
 				text += "dynamic-object "

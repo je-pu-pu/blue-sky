@@ -207,6 +207,7 @@ public:
 	bool can_peer_down() const { return can_peer_down_; }
 	bool is_rocketing() const { return action_mode_ == ACTION_MODE_ROCKET; }
 	bool is_flickering() const { return is_flickering_; }
+	bool can_running() const;
 
 	bool has_medal() const { return has_medal_; }
 

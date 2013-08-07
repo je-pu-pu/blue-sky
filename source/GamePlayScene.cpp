@@ -113,7 +113,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// Goal
 	goal_ = new Goal();
 	goal_->set_drawing_model( get_drawing_model_manager()->load( "goal" ) );
-	get_active_object_manager()->name_active_object( "goal", player_.get() );
+	get_active_object_manager()->name_active_object( "goal", goal_.get() );
 
 	// Camera
 	camera_ = new Camera();

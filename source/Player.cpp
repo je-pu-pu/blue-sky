@@ -549,12 +549,12 @@ void Player::update_step_speed()
 		// stop
 		step_speed_ *= 0.5f;
 	}
-	else if ( step_count_ <= 150 )
+	else if ( step_count_ <= 150 || ! can_running() )
 	{
 		// slow walk
 		step_speed_ = math::chase( step_speed_, get_max_walk_step_speed(), 0.01f );
 	}
-	else if ( get_velocity().length() > 1.f )
+	else
 	{
 		// run
 		step_speed_ = math::chase( step_speed_, get_max_run_step_speed(), 0.001f );
@@ -589,6 +589,15 @@ void Player::update_step_speed()
 	{
 		fade_out_sound( "short-breath" );
 	}
+}
+
+/**
+ * ‘–‚é‚±‚Æ‚ª‚Å‚«‚é‚©‚ð’²‚×‚é
+ *
+ */
+bool Player::can_running() const
+{
+	return get_velocity().length() > 1.f && item_count_[ ITEM_TYPE_STONE ] < 3;
 }
 
 /**
@@ -1052,6 +1061,8 @@ void Player::on_collide_with( Ladder* l )
 {
 	is_on_ladder_ = true;
 	ladder_ = l;
+
+	set_last_footing_height_to_current_height();
 }
 
 void Player::on_collide_with( StaticObject* )

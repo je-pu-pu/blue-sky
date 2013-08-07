@@ -19,6 +19,7 @@ void Switch::restart()
 	get_animation_player()->play( "Off", false, false );
 
 	get_rigid_body()->setAngularFactor( 0 );
+	get_rigid_body()->setFriction( 1.5f );
 	set_mass( 100.f );
 }
 

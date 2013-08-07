@@ -36,6 +36,11 @@ public:
 		value_ = math::chase( value_, target_value_, speed_ );
 	}
 
+	void chase_full()
+	{
+		value_ = target_value_;
+	}
+
 	Type& value() { return value_; }
 	Type value() const { return value_; }
 

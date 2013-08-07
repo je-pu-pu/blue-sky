@@ -160,7 +160,7 @@ PS_INPUT vs_main( VS_INPUT input, uint vertex_id : SV_VertexID )
 	output.Normal = mul( input.Normal, ( float3x3 ) World );
 	
 	output.TexCoord = input.TexCoord;
-	output.Color = float4( 0.f, 0.f, 0.f, 0.f );
+	output.Color = ObjectColor;
 
 	/*
 	output.Color = 
@@ -197,7 +197,7 @@ PS_INPUT vs_skin( VS_SKIN_INPUT input )
 	output.Normal = mul( output.Normal, ( float3x3 ) World );
 	
 	output.TexCoord = input.TexCoord;
-	output.Color = float4( 0.f, 0.f, 0.f, 1.f );
+	output.Color = ObjectColor;
 
 	return output;
 }
@@ -210,7 +210,7 @@ PS_FLAT_INPUT vs_flat( VS_INPUT input, uint vertex_id : SV_VertexID )
     output.Position = mul( output.Position, View );
     output.Position = mul( output.Position, Projection );
 	output.TexCoord = input.TexCoord;
-	output.Color = float4( 0.f, 0.f, 0.f, 0.f );
+	output.Color = ObjectColor;
 
 	return output;
 }
@@ -366,7 +366,7 @@ float4 ps_drawing_line( noperspective PS_FLAT_INPUT input ) : SV_Target
 
 float4 ps_flat( PS_FLAT_INPUT input ) : SV_Target
 {
-	return model_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
+	return model_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
 }
 
 float4 ps_flat_with_flicker( PS_FLAT_INPUT input ) : SV_Target

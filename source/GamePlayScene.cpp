@@ -89,6 +89,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, bpm_( 120.f )
 	, drawing_accent_scale_( 0.f )
 	, light_position_( vector3( 0.25f, 1.f, -1.f ), 0.1f )
+	, ambient_color_( Color( 1.f, 1.f, 1.f, 1.f ), 0.02f )
 	, shadow_color_( Color( 0.f, 0.f, 0.f, 1.f ), 0.02f )
 	, shadow_paper_color_( Color( 0.9f, 0.9f, 0.9f, 1.f ), 0.02f )
 {
@@ -198,6 +199,15 @@ GamePlayScene::~GamePlayScene()
  */
 void GamePlayScene::setup_command()
 {
+	auto set_color = [] ( Color& color, const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		float_t r = 0.f, g = 0.f, b = 0.f, a = 0.f;
+		ss >> color.r() >> color.g() >> color.b() >> color.a();
+	};
+
 	command_map_[ "set_line_type" ] = [ & ] ( const string_t& s )
 	{
 		drawing_line_type_index_ = common::deserialize< int >( s );
@@ -213,31 +223,32 @@ void GamePlayScene::setup_command()
 	{
 		drawing_accent_scale_ = common::deserialize< float_t >( s );
 	};
+	command_map_[ "set_ambient_color_target" ] = [ & ] ( const string_t& s )
+	{
+		set_color( ambient_color_.target_value(), s );
+	};
+	command_map_[ "set_ambient_color" ] = [ & ] ( const string_t& s )
+	{
+		set_color( shadow_color_.target_value(), s );
+		ambient_color_.chase_full();
+	};
 	command_map_[ "set_shadow_color_target" ] = [ & ] ( const string_t& s )
 	{
-		std::stringstream ss;
-		ss << s;
-
-		float_t r = 0.f, g = 0.f, b = 0.f, a = 0.f;
-		ss >> shadow_color_.target_value().r() >> shadow_color_.target_value().g() >> shadow_color_.target_value().b() >> shadow_color_.target_value().a();
+		set_color( shadow_color_.target_value(), s );
 	};
 	command_map_[ "set_shadow_color" ] = [ & ] ( const string_t& s )
 	{
-		command_map_[ "set_shadow_color_target" ]( s );
-		shadow_color_.value() = shadow_color_.target_value();
+		set_color( shadow_color_.target_value(), s );
+		shadow_color_.chase_full();
 	};
 	command_map_[ "set_shadow_paper_color_target" ] = [ & ] ( const string_t& s )
 	{
-		std::stringstream ss;
-		ss << s;
-
-		float_t r = 0.f, g = 0.f, b = 0.f, a = 0.f;
-		ss >> shadow_paper_color_.target_value().r() >> shadow_paper_color_.target_value().g() >> shadow_paper_color_.target_value().b() >> shadow_paper_color_.target_value().a();
+		set_color( shadow_paper_color_.target_value(), s );
 	};
 	command_map_[ "set_shadow_paper_color" ] = [ & ] ( const string_t& s )
 	{
-		command_map_[ "set_shadow_paper_color_target" ]( s );
-		shadow_paper_color_.value() = shadow_paper_color_.target_value();
+		set_color( shadow_paper_color_.target_value(), s );
+		shadow_paper_color_.chase_full();
 	};
 	command_map_[ "set_light_position_target" ] = [ & ] ( const string_t& s )
 	{
@@ -676,12 +687,6 @@ void GamePlayScene::load_stage_file( const char* file_name )
 				set_bpm( bpm );
 			}
 		}
-		/*
-		else if ( name == "ambient" )
-		{
-			ss >> ambient_color_[ 0 ] >> ambient_color_[ 1 ] >> ambient_color_[ 2 ];
-		}
-		*/
 		else if ( name == "collision" )
 		{
 			std::string file_name;
@@ -1134,6 +1139,11 @@ void GamePlayScene::update()
 	}
 
 	update_shadow();
+
+	light_position_.chase();
+	ambient_color_.chase();
+	shadow_color_.chase();
+	shadow_paper_color_.chase();
 }
 
 void GamePlayScene::update_main()
@@ -1382,10 +1392,6 @@ void GamePlayScene::update_clear()
  */
 void GamePlayScene::render()
 {
-	light_position_.chase();
-	shadow_color_.chase();
-	shadow_paper_color_.chase();
-
 	get_direct_3d()->setInputLayout( "main" );
 	
 	// render_text()
@@ -1704,6 +1710,7 @@ void GamePlayScene::render_sky_box() const
 		{
 			object_constant_buffer_data.world = XMMatrixTranslationFromVector( XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 ) );
 			object_constant_buffer_data.world = XMMatrixTranspose( object_constant_buffer_data.world );
+			object_constant_buffer_data.color = ambient_color_.value();
 
 			get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
 
@@ -1714,6 +1721,7 @@ void GamePlayScene::render_sky_box() const
 		if ( ground_ )
 		{
 			object_constant_buffer_data.world = XMMatrixIdentity();
+			object_constant_buffer_data.color = ambient_color_.value();
 
 			get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
 	

@@ -21,6 +21,7 @@
 *.suo
 
 /docs/
+/manual/
 
 /package
 

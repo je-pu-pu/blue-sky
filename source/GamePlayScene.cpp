@@ -253,6 +253,23 @@ void GamePlayScene::setup_command()
 		command_map_[ "set_light_position_target" ]( s );
 		light_position_.value() = light_position_.target_value();
 	};
+	command_map_[ "change_sky_box" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		string_t sky_box_name;
+		string_t sky_box_ext;
+
+		ss >> sky_box_name >> sky_box_ext;
+
+		sky_box_.release();
+
+		if ( sky_box_name != "none" )
+		{
+			sky_box_ = new SkyBox( get_direct_3d(), ( string_t( "sky-box-" ) + sky_box_name ).c_str(), sky_box_ext.c_str() );
+		}
+	};
 	command_map_[ "change_bgm" ] = [ & ] ( const string_t& s )
 	{
 		bgm_ = get_sound_manager()->load_music( "bgm", s.c_str(), true );
@@ -696,20 +713,6 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			goal_->set_start_location( x, y, z );
 			goal_->set_rigid_body( get_physics()->add_active_object( goal_.get() ) );
-		}
-		else if ( name == "sky-box" )
-		{
-			std::string sky_box_name;
-			std::string sky_box_ext;
-
-			ss >> sky_box_name >> sky_box_ext;
-
-			sky_box_.release();
-
-			if ( sky_box_name != "none" )
-			{
-				sky_box_ = new SkyBox( get_direct_3d(), sky_box_name.c_str(), sky_box_ext.c_str() );
-			}
 		}
 		else if ( name == "ground" )
 		{
@@ -1697,6 +1700,7 @@ void GamePlayScene::render_sky_box() const
 		ObjectConstantBufferData object_constant_buffer_data;
 
 		// sky box
+		if ( sky_box_ )
 		{
 			object_constant_buffer_data.world = XMMatrixTranslationFromVector( XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 ) );
 			object_constant_buffer_data.world = XMMatrixTranspose( object_constant_buffer_data.world );

@@ -103,6 +103,7 @@ public:
 	
 	virtual float_t get_height_offset() const { return get_collision_height() * 0.5f; }
 
+	virtual float_t get_default_mass() const { return 1.f; }
 	virtual const Vector3& get_default_gravity() const { return is_hard() ? GravityDefault : GravityZero; }
 
 	virtual void on_collide_with( GameObject* );

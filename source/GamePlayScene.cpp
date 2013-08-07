@@ -55,8 +55,6 @@
 #include "DrawingModelManager.h"
 #include "ActiveObjectManager.h"
 
-#include "StaticObject.h"
-#include "DynamicObject.h"
 #include "TranslationObject.h"
 
 #include "Direct3D11.h"
@@ -124,18 +122,13 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	setup_command();
 
-	// balloon_model_ = get_drawing_model_manager()->load( "balloon" );
-
 	if ( get_stage_name().empty() )
 	{
-		generate_random_stage();
+		COMMON_THROW_EXCEPTION_MESSAGE( "stage name is empty" );
 	}
-	else
-	{
-		std::string stage_dir_name = StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) );
 
-		load_stage_file( ( stage_dir_name + get_stage_name() + ".stage" ).c_str() );
-	}
+	std::string stage_dir_name = StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) );
+	load_stage_file( ( stage_dir_name + get_stage_name() + ".stage" ).c_str() );
 
 	if ( get_config()->get( "video.shadow-map-enabled", 1 ) != 0 && stage_config_->get( "video.shadow-map-enabled", true ) )
 	{
@@ -311,6 +304,13 @@ void GamePlayScene::setup_command()
 		{
 			sound->stop();
 		}
+	};
+	command_map_[ "game_object.create" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		get_active_object_manager()->create_object( ss, get_drawing_model_manager(), get_physics() );
 	};
 	command_map_[ "game_object.set_mass" ] = [ & ] ( const string_t& s )
 	{
@@ -520,135 +520,6 @@ void GamePlayScene::load_sound_all( bool is_final_stage )
 	}
 }
 
-void GamePlayScene::generate_random_stage()
-{
-	{
-		DrawingModel* drawing_model = get_drawing_model_manager()->load( "floor" );
-
-		for ( int n = 0; n < 10; n++ )
-		{
-			StaticObject* static_object = new StaticObject();
-			static_object->set_drawing_model( drawing_model );
-			static_object->set_location( 0.f, 0.f, n * 20.f );
-
-			get_active_object_manager()->add_active_object( static_object );
-		}
-	}
-
-	{
-		DrawingModel* drawing_model = get_drawing_model_manager()->load( "soda-can" );
-
-		for ( int n = 0; n < 5; n++ )
-		{
-			DynamicObject* object = new DynamicObject( 0.07f, 0.12f, 0.07f );
-			object->set_drawing_model( drawing_model );
-			object->set_location( 5.f + n * 0.5f, 20.f, 0.f );
-
-			get_active_object_manager()->add_active_object( object );
-
-			// object->set_rigid_body( get_physics()->add_active_object( object ) );
-			object->set_rigid_body( get_physics()->add_active_object_as_cylinder( object ) );
-		}
-	}
-
-	{
-		DrawingModel* drawing_model = get_drawing_model_manager()->load( "wall-1" );
-
-		for ( int n = 0; n < 4; n++ )
-		{
-			StaticObject* static_object = new StaticObject( 4.f, 1.75f, 0.1f );
-			static_object->set_drawing_model( drawing_model );
-			static_object->set_location( n * 5.f, 0, 0.f );
-
-			get_active_object_manager()->add_active_object( static_object );
-
-			static_object->set_rigid_body( get_physics()->add_active_object( static_object ) );
-		}
-	}
-
-	{
-		DrawingModel* drawing_model = get_drawing_model_manager()->load( "outdoor-unit" );
-
-		for ( int n = 0; n < 10; n++ )
-		{
-			StaticObject* static_object = new StaticObject( 0.7f, 0.6f, 0.24f );
-			static_object->set_drawing_model( drawing_model );
-			static_object->set_location( 4.f, 0, -n * 2.f );
-
-			get_active_object_manager()->add_active_object( static_object );
-
-			static_object->set_rigid_body( get_physics()->add_active_object( static_object ) );
-		}
-	}
-
-	{
-		DrawingModel* drawing_model = get_drawing_model_manager()->load( "building-20" );
-
-		for ( int n = 0; n < 10; n++ )
-		{
-			StaticObject* static_object = new StaticObject( 10, 20, 10 );
-			static_object->set_drawing_model( drawing_model );
-			static_object->set_start_location( 10.f, 0, n * 12.f );
-			static_object->set_start_rotation( 15.f, 0, 0 );
-
-			get_active_object_manager()->add_active_object( static_object );
-
-			static_object->set_rigid_body( get_physics()->add_active_object( static_object ) );
-		}
-	}
-
-	{
-		DrawingModel* drawing_model = get_drawing_model_manager()->load( "building-200" );
-
-		for ( int n = 0; n < 5; n++ )
-		{
-			StaticObject* static_object = new StaticObject( 80, 200, 60 );
-			static_object->set_drawing_model( drawing_model );
-			static_object->set_location( -40, 0, n * 70.f );
-
-			get_active_object_manager()->add_active_object( static_object );
-
-			static_object->set_rigid_body( get_physics()->add_active_object( static_object ) );
-		}
-	}
-
-	{
-		DrawingModel* drawing_model = get_drawing_model_manager()->load( "tree-1" );
-
-		for ( int n = 0; n < 20; n++ )
-		{
-			StaticObject* static_object = new StaticObject();
-			static_object->set_drawing_model( drawing_model );
-			static_object->set_location( -5.f + rand() % 3, 0, n * 5.f + rand() % 2 );
-
-			get_active_object_manager()->add_active_object( static_object );
-		}
-	}
-
-	{
-		DrawingModel* drawing_model = get_drawing_model_manager()->load( "rocket" );
-
-		StaticObject* static_object = new StaticObject();
-		static_object->set_drawing_model( drawing_model );
-		static_object->set_location( 0, 0, 0 );
-
-		get_active_object_manager()->add_active_object( static_object );
-	}
-
-	{
-		for ( int n = 0; n < 10; n++ )
-		{
-			DrawingModel* drawing_model = get_drawing_model_manager()->load( "balloon" );
-
-			StaticObject* static_object = new StaticObject();
-			static_object->set_drawing_model( drawing_model );
-			static_object->set_location( float_t( rand() % 3 ), float_t( 3 + n * 3 ), float_t( n * 3 ) );
-
-			get_active_object_manager()->add_active_object( static_object );
-		}
-	}
-}
-
 /**
  * ステージファイルを読み込む
  *
@@ -757,96 +628,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( name == "object" || name == "static-object" || name == "dynamic-object" )
 		{
-			std::string object_name;
-			float x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0;
-
-			ss >> object_name >> x >> y >> z >> rx >> ry >> rz;
-
-			DrawingModel* drawing_model = get_drawing_model_manager()->load( object_name.c_str() );
-
-			std::map< string_t, ActiveObject::Vector3 > size_map;
-			size_map[ "soda-can-1"   ] = ActiveObject::Vector3(  0.07f, 0.12f, 0.07f );
-			size_map[ "wall-1"       ] = ActiveObject::Vector3(  4.f,   1.75f, 0.2f  );
-			size_map[ "wall-2"       ] = ActiveObject::Vector3(  8.f,   2.5f,  0.2f  );
-			size_map[ "outdoor-unit" ] = ActiveObject::Vector3(  0.7f,  0.6f,  0.24f );
-			size_map[ "building-20"  ] = ActiveObject::Vector3( 10.f,  20.f,  10.f   );
-			size_map[ "building-200" ] = ActiveObject::Vector3( 80.f, 200.f,  60.f   );
-			size_map[ "board-1"      ] = ActiveObject::Vector3(  4.f,   0.2f,  0.8f  );
-
-			size_map[ "box-5x5x5"    ] = ActiveObject::Vector3(  5.f,  5.f,  5.f );
-			size_map[ "box-2x2x2"    ] = ActiveObject::Vector3(  2.f,  2.f,  2.f );
-
-			std::map< string_t, float_t > mass_map;
-			mass_map[ "soda-can-1"   ] = 50.f;
-			mass_map[ "board-1"      ] = 20.f;
-			mass_map[ "box-5x5x5"    ] = 1.f;
-			mass_map[ "box-2x2x2"    ] = 100.f;
-
-			float w = 0.f, h = 0.f, d = 0.f, mass = 0.f;
-			
-			{
-				auto i = size_map.find( object_name );
-
-				if ( i != size_map.end() )
-				{
-					w = i->second.x();
-					h = i->second.y();
-					d = i->second.z();
-				}
-			}
-
-			{
-				auto i = mass_map.find( object_name );
-
-				if ( i != mass_map.end() )
-				{
-					mass = i->second;
-				}
-			}
-
-			ActiveObject* object = 0;
-
-			if ( name == "dynamic-object" )
-			{
-				DynamicObject* dynamic_object = new DynamicObject( w, h, d );
-
-				if ( object_name == "soda-can-1" )
-				{
-					dynamic_object->set_collision_sound_name( "soda-can-long-1" );
-				}
-
-				object = dynamic_object;
-			}
-			else
-			{
-				object = new StaticObject( w, h, d );
-			}
-			
-			object->set_drawing_model( drawing_model );
-			object->setup_animation_player();
-
-			object->set_start_location( x, y, z );
-			object->set_start_rotation( rx, ry, rz );
-			object->set_start_direction_degree( rx );
-
-			if ( object_name == "soda-can-1" )
-			{
-				object->set_rigid_body( get_physics()->add_active_object_as_cylinder( object ) );
-			}
-			else
-			{
-				object->set_rigid_body( get_physics()->add_active_object( object ) );
-			}
-
-			object->set_mass( mass );
-			get_active_object_manager()->add_active_object( object );
-
-			if ( object_name == "box-2x2x2" )
-			{
-				object->get_rigid_body()->setFriction( 10 );
-			}
-
-			last_object = object;
+			last_object = get_active_object_manager()->create_object( ss, get_drawing_model_manager(), get_physics() );
 		}
 		else if ( name == "translation-object" )
 		{

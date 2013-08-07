@@ -101,8 +101,6 @@ protected:
 	CommandMap							command_map_;
 	CommandCallList						stage_setup_command_call_list_;
 
-	void generate_random_stage();
-
 	void load_stage_file( const char* );
 	void save_stage_file( const char* ) const;
 

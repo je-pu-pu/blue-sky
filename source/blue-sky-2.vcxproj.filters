@@ -78,9 +78,6 @@
     <ClCompile Include="Balloon.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="DynamicObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="Goal.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
@@ -312,9 +309,6 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Balloon.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="DynamicObject.h">
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Goal.h">

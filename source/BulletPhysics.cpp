@@ -113,7 +113,7 @@ btRigidBody* BulletPhysics::add_ground_rigid_body( const btVector3& box )
  *
  * @todo 同じ CollisionShape を共有する
  */
-btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, bool is_static )
+btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, btScalar mass )
 {
 	// create_box_shape()
 	btBoxShape* shape = new btBoxShape( box );
@@ -123,7 +123,6 @@ btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, cons
 
 	// create_box_rigid_body()
 	{
-		btScalar mass( is_static ? 0.f : 1.f );
 		btVector3 local_inertia( 0, 0, 0 );
 
 		shape->calculateLocalInertia( mass, local_inertia );
@@ -146,9 +145,9 @@ btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, cons
  * @param offset 剛体の中心点のオフセット
  * @param radius シリンダー部の上下に付加される半球の半径
  * @param height シリンダー部の高さ
- * @param is_static 静的剛体フラグ
+ * @param mass 質量
  */
-btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, const Transform& offset, float_t radius, float_t height, bool is_static )
+btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, const Transform& offset, float_t radius, float_t height, btScalar mass )
 {
 	// create_cylinder_shape()
 	btCapsuleShape* shape = new btCapsuleShape( radius, height );
@@ -156,7 +155,6 @@ btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, 
 
 	// create_cylinder_rigid_body()
 	{
-		btScalar mass( is_static ? 0.f : 1.f );
 		btVector3 local_inertia( 0, 0, 0 );
 
 		shape->calculateLocalInertia( mass, local_inertia );
@@ -171,7 +169,7 @@ btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, 
 	}	
 }
 
-btRigidBody* BulletPhysics::add_cylinder_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, bool is_static )
+btRigidBody* BulletPhysics::add_cylinder_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, btScalar mass )
 {
 	// create_cylinder_shape()
 	btCylinderShape* shape = new btCylinderShape( box );
@@ -179,7 +177,6 @@ btRigidBody* BulletPhysics::add_cylinder_rigid_body( const Transform& transform,
 
 	// create_cylinder_rigid_body()
 	{
-		btScalar mass( is_static ? 0.f : 1.f );
 		btVector3 local_inertia( 0, 0, 0 );
 
 		shape->calculateLocalInertia( mass, local_inertia );

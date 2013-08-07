@@ -29,7 +29,7 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object( ActiveOb
 	offset.setIdentity();
 	offset.setOrigin( Vector3( 0, active_object->get_collision_height() / 2, 0 ) );
 
-	RigidBody* rigid_body = add_box_rigid_body( active_object->get_transform(), offset, box, dynamic_cast< const StaticObject* >( active_object ) != 0 );
+	RigidBody* rigid_body = add_box_rigid_body( active_object->get_transform(), offset, box, active_object->get_default_mass() );
 	set_active_object_info_to_rigid_body( rigid_body, active_object );
 
 	return rigid_body;
@@ -49,7 +49,7 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_capsul
 	offset.setIdentity();
 	offset.setOrigin( Vector3( 0, active_object->get_collision_height() / 2, 0 ) );
 
-	RigidBody* rigid_body = add_capsule_rigid_body( active_object->get_transform(), offset, radius, height, dynamic_cast< const StaticObject* >( active_object ) != 0 );
+	RigidBody* rigid_body = add_capsule_rigid_body( active_object->get_transform(), offset, radius, height, active_object->get_default_mass() );
 	set_active_object_info_to_rigid_body( rigid_body, active_object );
 
 	return rigid_body;
@@ -67,7 +67,7 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_cylind
 	offset.setIdentity();
 	offset.setOrigin( Vector3( 0, active_object->get_collision_height() / 2, 0 ) );
 
-	RigidBody* rigid_body = add_cylinder_rigid_body( active_object->get_transform(), offset, box, dynamic_cast< const StaticObject* >( active_object ) != 0 );
+	RigidBody* rigid_body = add_cylinder_rigid_body( active_object->get_transform(), offset, box, active_object->get_default_mass() );
 	set_active_object_info_to_rigid_body( rigid_body, active_object );
 
 	return rigid_body;

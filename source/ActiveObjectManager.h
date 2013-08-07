@@ -2,12 +2,16 @@
 #define BLUE_SKY_ACTIVE_OBJECT_MANAGER_H
 
 #include "ActiveObject.h"
+#include <sstream>
 #include <tuple>
 #include <set>
 #include <map>
 
 namespace blue_sky
 {
+
+class DrawingModelManager;
+class ActiveObjectPhysics;
 
 /**
  * ï°êîÇÃ ActiveObject Çä«óùÇ∑ÇÈ Manager
@@ -39,6 +43,7 @@ public:
 	void name_active_object( const string_t& name, ActiveObject* active_object );
 	void set_target_location( ActiveObject* active_object, const Vector3& target_location, float_t speed );
 
+	ActiveObject* create_object( std::stringstream&, DrawingModelManager*, ActiveObjectPhysics* );
 	ActiveObject* get_active_object( const string_t& name );
 
 	void update();

@@ -51,7 +51,6 @@
     <ClCompile Include="DrawingMesh.cpp" />
     <ClCompile Include="DrawingModel.cpp" />
     <ClCompile Include="DrawingModelManager.cpp" />
-    <ClCompile Include="DynamicObject.cpp" />
     <ClCompile Include="EndingScene.cpp" />
     <ClCompile Include="FbxFileLoader.cpp" />
     <ClCompile Include="GameMain.cpp" />
@@ -136,7 +135,6 @@
     <ClInclude Include="DrawingMesh.h" />
     <ClInclude Include="DrawingModel.h" />
     <ClInclude Include="DrawingModelManager.h" />
-    <ClInclude Include="DynamicObject.h" />
     <ClInclude Include="EndingScene.h" />
     <ClInclude Include="FbxFileLoader.h" />
     <ClInclude Include="Game.h" />

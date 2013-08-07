@@ -7,8 +7,11 @@ exec change_bgm road
 exec change_sky_box 3
 
 switch 4.0 61.0 -33.0 60
-event turn-on set_ambient_color_target 1 0 0 1
-event turn-off set_ambient_color_target 0 0 0 1
+event turn-on set_ambient_color_target 1 1 1 1
+event turn-off set_ambient_color_target 0.5 0.5 0.5 1
+
+event turn-on change_sky_box sky
+event turn-off change_sky_box moon
 
 ladder 9.0 55.0 -2.0 270
 ladder 9.0 49.400001525878906 -2.0 270
@@ -39,5 +42,3 @@ stone -0.505730390548706 62.0 0.8106375932693481 0
 switch 14.0 40.0 -2.0 270
 event turn-on game_object.set_target_location goal 3 60 15 2
 event turn-on change_bgm twinkle
-event turn-on change_sky_box sky
-event turn-off change_sky_box moon

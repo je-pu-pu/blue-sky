@@ -52,16 +52,18 @@ public:
 
 	void set_player( const Player* p ) { player_ = p; }
 
-	void restart();
+	void restart() override;
 
 	/// XV
-	void update();
+	void update() override;
+
+	void action( const string_t& ) override;
 
 	Mode get_mode() const { return mode_; };
 	
-	float get_collision_width() const { return 1.f; }
-	float get_collision_height() const { return 2.f; }
-	float get_collision_depth() const  { return 0.5f; }
+	float get_collision_width() const override { return 1.f; }
+	float get_collision_height() const override { return 2.f; }
+	float get_collision_depth() const  override { return 0.5f; }
 
 	void render_material_at( uint_t ) const override;
 

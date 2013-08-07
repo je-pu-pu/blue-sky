@@ -45,7 +45,7 @@ void Robot::restart()
 	get_rigid_body()->setFriction( 0 );
 	set_mass( 50.f );
 
-	mode_ = MODE_FLOAT;
+	mode_ = MODE_STAND;
 	timer_ = 0;
 
 	texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
@@ -144,14 +144,21 @@ void Robot::update()
 	}
 	else if ( mode_ == MODE_FLOAT )
 	{
-		set_velocity( Vector3( 0.f, 0.f, 0.f ) );
-		update_location_by_flicker( get_start_location() );
+		update_velocity_by_flicker( get_start_location() );
 
 		chase_direction_to( player_->get_location(), 0.5f );
 
 		get_animation_player()->set_speed( 0.25f );
 		get_animation_player()->play( "Float", false, true );
 		texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-tender" );
+	}
+}
+
+void Robot::action( const string_t& s )
+{
+	if ( s == "float" )
+	{
+		mode_ = MODE_FLOAT;
 	}
 }
 

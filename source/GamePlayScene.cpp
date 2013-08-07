@@ -396,6 +396,21 @@ void GamePlayScene::setup_command()
 			o->play_animation( animation_name.c_str(), force, loop );
 		}
 	};
+	command_map_[ "game_object.action" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		string_t object_name, action;
+		ss >> object_name >> action;
+
+		ActiveObject* o = get_active_object_manager()->get_active_object( object_name );
+		
+		if ( o )
+		{
+			o->action( action );
+		}
+	};
 	command_map_[ "player.start_flickering" ] = [ & ] ( const string_t& )
 	{
 		player_->start_flickering();

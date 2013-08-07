@@ -51,6 +51,8 @@ public:
 	virtual void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; }
 	virtual const DrawingModel* get_drawing_model() const { return drawing_model_; }
 
+	virtual void action( const string_t& ) { }
+
 	const ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_; }
 
 	void setup_animation_player();

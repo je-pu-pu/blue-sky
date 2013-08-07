@@ -219,7 +219,7 @@ void GamePlayScene::setup_command()
 		paper_texture_index = math::clamp< int >( paper_texture_index, 0, paper_texture_list_.size() - 1 );
 		paper_texture_ = paper_texture_list_[ paper_texture_index ];
 	};
-	command_map_[ "set_darwing_accent_scale" ] = [ & ] ( const string_t& s )
+	command_map_[ "set_drawing_accent_scale" ] = [ & ] ( const string_t& s )
 	{
 		drawing_accent_scale_ = common::deserialize< float_t >( s );
 	};
@@ -229,7 +229,7 @@ void GamePlayScene::setup_command()
 	};
 	command_map_[ "set_ambient_color" ] = [ & ] ( const string_t& s )
 	{
-		set_color( shadow_color_.target_value(), s );
+		set_color( ambient_color_.target_value(), s );
 		ambient_color_.chase_full();
 	};
 	command_map_[ "set_shadow_color_target" ] = [ & ] ( const string_t& s )
@@ -292,9 +292,9 @@ void GamePlayScene::setup_command()
 		ss << s;
 
 		string_t sound_name;
-		bool loop = false, force = true;
+		bool force = true, loop = false;
 
-		ss >> sound_name >> loop >> force;
+		ss >> sound_name >> force >> loop;
 
 		Sound* sound = get_sound_manager()->load( sound_name.c_str() );
 

@@ -1,0 +1,3 @@
+[submodule "media"]
+	path = media
+	url = ssh://moon.je-pu-pu.jp:/var/git/blue-sky-media.git

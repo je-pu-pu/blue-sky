@@ -48,6 +48,7 @@ private:
 	bool		is_facing_to_block_;	///< 障害物の方を向いて接触中フラグ
 	bool		can_clamber_;			///< よじ登り可能フラグ
 	bool		can_peer_down_;			///< のぞき込み可能フラグ
+	bool		can_throw_;				///< 石投げ可能フラグ
 
 	bool		is_flickering_;			///< 現在揺らぎ中フラグ
 
@@ -109,6 +110,7 @@ protected:
 	void update_facing_to_block();
 	void update_can_clamber();
 	void update_can_peer_down();
+	void update_can_throw();
 
 	void update_falling_to_die();
 
@@ -205,6 +207,7 @@ public:
 	bool is_facing_to_block() const { return is_facing_to_block_; }
 	bool can_clamber() const { return can_clamber_; }
 	bool can_peer_down() const { return can_peer_down_; }
+	bool can_throw() const { return can_throw_; }
 	bool is_rocketing() const { return action_mode_ == ACTION_MODE_ROCKET; }
 	bool is_flickering() const { return is_flickering_; }
 	bool can_running() const;

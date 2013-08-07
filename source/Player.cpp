@@ -33,6 +33,7 @@ Player::Player()
 	, is_facing_to_block_( false )
 	, can_clamber_( false )
 	, can_peer_down_( false )
+	, can_throw_( false )
 	, is_flickering_( false )
 	, step_count_( 0 )
 	, step_speed_( 0.25f )
@@ -76,6 +77,7 @@ void Player::restart()
 	is_facing_to_block_ = false;
 	can_clamber_ = false;
 	can_peer_down_ = false;
+	can_throw_ = false;
 
 	is_flickering_ = false;
 
@@ -120,6 +122,7 @@ void Player::update()
 	update_facing_to_block();
 	update_can_clamber();
 	update_can_peer_down();
+	update_can_throw();
 
 	action_timer_ += get_frame_elapsed_time();
 
@@ -535,6 +538,29 @@ void Player::update_can_peer_down()
 }
 
 /**
+ * 石投げが可能かのフラグを更新する
+ *
+ */
+void Player::update_can_throw()
+{
+	Vector3 half( 0.25f, 0.25f, 0.25f );
+	btBoxShape shape( half );
+
+	Transform offset;
+	offset.setIdentity();
+	offset.setOrigin( Vector3( 0.f, get_eye_height(), get_collision_depth() ) );
+	
+	btCollisionObject collision_object;
+	collision_object.setCollisionShape( & shape );
+	collision_object.setWorldTransform( get_transform() * offset );
+
+	WithoutMeContactResultCallback callback( this );
+	GameMain::get_instance()->get_physics()->get_dynamics_world()->contactTest( & collision_object, callback );
+
+	can_throw_ = ! callback.is_hit();
+}
+
+/**
  * 移動速度を更新する
  *
  */
@@ -871,6 +897,11 @@ void Player::finish_rocketing()
 void Player::throw_stone( const Vector3& direction )
 {
 	if ( get_item_count( ITEM_TYPE_STONE ) <= 0 )
+	{
+		return;
+	}
+
+	if ( ! can_throw() )
 	{
 		return;
 	}

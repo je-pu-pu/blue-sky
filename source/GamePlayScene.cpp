@@ -1276,6 +1276,7 @@ void GamePlayScene::render_text() const
 		ss << L"IS FACING TO BLOCK : " << player_->is_facing_to_block() << std::endl;
 		ss << L"CAN CLAMBER : " << player_->can_clamber() << std::endl;
 		ss << L"CAN PEER DOWN : " << player_->can_peer_down() << std::endl;
+		ss << L"CAN THROW : " << player_->can_throw() << std::endl;
 		ss << L"IS CLAMBERING : " << player_->is_clambering() << std::endl;
 
 		ss << L"IS LADDER STEP ONLY : " << player_->is_ladder_step_only() << std::endl;
@@ -1576,13 +1577,11 @@ void GamePlayScene::render_object_skin_mesh() const
 
 		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs();
 		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_ps();
+		get_direct_3d()->bind_texture_to_ps( 2, paper_texture_ );
 
 		if ( shadow_map_ )
 		{
 			shadow_map_->ready_to_render_scene();
-
-			/// @todo ‚Ü‚Æ‚ß‚é
-			get_direct_3d()->bind_texture_to_ps( 2, paper_texture_ );
 		}
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
@@ -1612,13 +1611,11 @@ void GamePlayScene::render_object_mesh() const
 		
 		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs();
 		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_ps();
+		get_direct_3d()->bind_texture_to_ps( 2, paper_texture_ );
 
 		if ( shadow_map_ )
 		{
 			shadow_map_->ready_to_render_scene();
-
-			/// @todo ‚Ü‚Æ‚ß‚é
-			get_direct_3d()->bind_texture_to_ps( 2, paper_texture_ );
 		}
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
@@ -1776,7 +1773,7 @@ void GamePlayScene::render_sprite()
 			get_direct_3d()->getSprite()->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 		}
 
-		if ( player_->get_selected_item_type() == Player::ITEM_TYPE_ROCKET || player_->get_selected_item_type() == Player::ITEM_TYPE_STONE )
+		if ( player_->get_selected_item_type() == Player::ITEM_TYPE_ROCKET || ( player_->get_selected_item_type() == Player::ITEM_TYPE_STONE && player_->can_throw() ) )
 		{
 			// aim
 			win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );

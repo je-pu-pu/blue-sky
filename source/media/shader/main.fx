@@ -359,6 +359,62 @@ void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_
 	}
 }
 
+/**
+ * 紙の質感テクスチャをサンプリングする
+ *
+ */
+float4 sample_paper_texture( float2 xy )
+{
+	const float Scale = 0.5f; // 0.75f + DrawingAccent * 0.25f;
+			
+	const float PaperTextureWidth  = 512.f * Scale;
+	const float PaperTextureHeight = 512.f * Scale;
+
+	float2 uv = float2(
+		xy.x / ScreenWidth  * ( ScreenWidth  / PaperTextureWidth  ),
+		xy.y / ScreenHeight * ( ScreenHeight / PaperTextureHeight )
+	);
+
+	// アクセントを加える
+	uv += float2( TimeBeat * 0.2f, 0.f );
+			
+	return paper_texture.Sample( wrap_texture_sampler, uv );
+}
+
+float4 ps_with_paper_common( float2 position, float2 uv, float diffuse )
+{
+	float4 shadow = float4( 1.f, 1.f, 1.f, 1.f );
+
+	{
+		// 影
+		const float4 shadow_color = ShadowColor;
+		shadow = float4( 1.f, 1.f, 1.f, 1.f ) * ( 1.f - shadow_color.a ) + shadow_color * shadow_color.a;
+		shadow.a = 1.f;
+		
+		// 紙の質感を追加する
+		if ( true )
+		{
+			const float3 shadow_paper_color = ( float3 ) ShadowPaperColor;
+
+			float4 paper = sample_paper_texture( position );
+			shadow.rgb = shadow_paper_color * ( 1.f - paper.a ) + shadow.rgb * paper.a;
+		}
+
+		const float shadow_rate = ( 1.f - diffuse );
+		shadow.rgb = float3( 1.f, 1.f, 1.f ) * ( 1.f - shadow_rate ) + shadow.rgb * shadow_rate;
+	}
+
+	static const float4 cascade_colors[ 4 ] = 
+	{
+		float4 ( 1.2f, 1.0f, 1.0f, 1.0f ),
+		float4 ( 1.0f, 1.2f, 1.0f, 1.0f ),
+		float4 ( 1.0f, 1.0f, 1.2f, 1.0f ),
+		float4 ( 1.2f, 1.2f, 0.0f, 1.0f ),
+	};
+
+	return model_texture.Sample( wrap_texture_sampler, uv ) * shadow; // * cascade_colors[ cascade_index ];
+}
+
 float4 ps_drawing_line( noperspective PS_FLAT_INPUT input ) : SV_Target
 {
 	return ( line_texture.Sample( u_wrap_texture_sampler, input.TexCoord ) + input.Color ); // * float4( 1.f, 1.f, 1.f, 0.5f );
@@ -377,6 +433,9 @@ float4 ps_flat_with_flicker( PS_FLAT_INPUT input ) : SV_Target
 float4 ps_main_wrap( PS_INPUT input ) : SV_Target
 {
 	// return float4( input.Normal * 0.5f + float3( 0.5f, 0.5f, 0.5f ), 1.f );
+
+	float diffuse = ( 1.f - ( dot( input.Normal, ( float3 ) Light ) * 0.5f + 0.5f ) );
+	return ps_with_paper_common( ( float2 ) input.Position, input.TexCoord, diffuse );
 
 	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ); // /* + input.Color */ * float4( input.Normal, 1.f );
 }
@@ -563,28 +622,6 @@ PS_SHADOW_INPUT vs_skin_with_shadow( VS_SKIN_INPUT input )
 }
 
 /**
- * 紙の質感テクスチャをサンプリングする
- *
- */
-float4 sample_paper_texture( float2 xy )
-{
-	const float Scale = 0.5f; // 0.75f + DrawingAccent * 0.25f;
-			
-	const float PaperTextureWidth  = 512.f * Scale;
-	const float PaperTextureHeight = 512.f * Scale;
-
-	float2 uv = float2(
-		xy.x / ScreenWidth  * ( ScreenWidth  / PaperTextureWidth  ),
-		xy.y / ScreenHeight * ( ScreenHeight / PaperTextureHeight )
-	);
-
-	// アクセントを加える
-	uv += float2( TimeBeat * 0.2f, 0.f );
-			
-	return paper_texture.Sample( wrap_texture_sampler, uv );
-}
-
-/**
  * 
  *
  */
@@ -614,7 +651,6 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 
 	// return float4( input.Normal, 1.f );
 
-	float4 shadow = float4( 1.f, 1.f, 1.f, 1.f );
 	float4 depth = shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy );
 
 	// const float vsm_variance = depth.y - pow( depth.x, 2 );
@@ -630,34 +666,7 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 
 	diffuse = max( 0.f, diffuse );
 
-	{
-		// 影
-		const float4 shadow_color = ShadowColor;
-		shadow = float4( 1.f, 1.f, 1.f, 1.f ) * ( 1.f - shadow_color.a ) + shadow_color * shadow_color.a;
-		shadow.a = 1.f;
-		
-		// 紙の質感を追加する
-		if ( true )
-		{
-			const float3 shadow_paper_color = ( float3 ) ShadowPaperColor;
-
-			float4 paper = sample_paper_texture( ( float2 ) input.Position );
-			shadow.rgb = shadow_paper_color * ( 1.f - paper.a ) + shadow.rgb * paper.a;
-		}
-
-		const float shadow_rate = ( 1.f - diffuse );
-		shadow.rgb = float3( 1.f, 1.f, 1.f ) * ( 1.f - shadow_rate ) + shadow.rgb * shadow_rate;
-	}
-
-	static const float4 cascade_colors[ 4 ] = 
-	{
-		float4 ( 1.2f, 1.0f, 1.0f, 1.0f ),
-		float4 ( 1.0f, 1.2f, 1.0f, 1.0f ),
-		float4 ( 1.0f, 1.0f, 1.2f, 1.0f ),
-		float4 ( 1.2f, 1.2f, 0.0f, 1.0f ),
-	};
-
-	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ) * shadow; // * cascade_colors[ cascade_index ];
+	return ps_with_paper_common( ( float2 ) input.Position, input.TexCoord, diffuse );
 }
 
 // ----------------------------------------

@@ -31,6 +31,8 @@ void ActiveObjectManager::clear()
 	active_object_list_.clear();
 	named_active_object_map_.clear();
 	target_location_map_.clear();
+	target_direction_map_.clear();
+	target_direction_object_map_.clear();
 }
 
 void ActiveObjectManager::restart()
@@ -41,6 +43,8 @@ void ActiveObjectManager::restart()
 	}
 
 	target_location_map_.clear();
+	target_direction_map_.clear();
+	target_direction_object_map_.clear();
 }
 
 void ActiveObjectManager::add_active_object( ActiveObject* active_object )
@@ -56,6 +60,18 @@ void ActiveObjectManager::name_active_object( const string_t& name, ActiveObject
 void ActiveObjectManager::set_target_location( ActiveObject* active_object, const Vector3& target_location, float_t speed )
 {
 	target_location_map_[ active_object ] = std::make_tuple( target_location, speed );
+}
+
+void ActiveObjectManager::set_target_direction( ActiveObject* active_object, float_t target_direction, float_t speed )
+{
+	target_direction_map_[ active_object ] = std::make_tuple( target_direction, speed );
+	target_direction_object_map_.erase( active_object );
+}
+
+void ActiveObjectManager::set_target_direction_object( ActiveObject* active_object, const ActiveObject* target_active_object, float_t speed )
+{
+	target_direction_object_map_[ active_object ] = std::make_tuple( target_active_object, speed );
+	target_direction_map_.erase( active_object );
 }
 
 /**
@@ -180,6 +196,16 @@ void ActiveObjectManager::update()
 		{
 			++i;
 		}
+	}
+
+	for ( auto i = target_direction_map_.begin(); i != target_direction_map_.end(); )
+	{
+		i->first->chase_direction_degree( std::get< 0 >( i->second ), std::get< 1 >( i->second ) );
+	}
+
+	for ( auto i = target_direction_object_map_.begin(); i != target_direction_object_map_.end(); )
+	{
+		i->first->chase_direction_to( std::get< 0 >( i->second )->get_location(), std::get< 1 >( i->second ) );
 	}
 }
 

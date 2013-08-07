@@ -198,7 +198,7 @@ void StageSelectScene::render()
 		if ( stage->completed )
 		{
 			// face
-			if ( false )
+			if ( true )
 			{
 				win::Point circle_dst_point = win::Point( dst_rect.right() - j->width() + ( j->width() - k->width() ) / 2, dst_rect.bottom() - j->height() + ( j->height() - k->height() ) / 2 ) + win::Point( -offset, offset );
 				get_direct_3d()->getSprite()->draw( circle_dst_point, sprite_texture_, *k, Direct3D::Color::from_hex( 0xFFFFFF99 ) );

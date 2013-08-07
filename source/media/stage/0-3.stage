@@ -1,28 +1,11 @@
-bgm road 123
-collision 1-2.obj
+exec change_bgm slap
+exec change_sky_box 3
+ground ground
 
-sky-box sky-box-star-2
+exec set_drawing_accent_scale 0
+exec play_sound fall
 
-player 0 0 1
-goal 0 0 46
+player 0 500.0 0
 
-object stage-1-2 0 0 0
-
-robot -1 0 30 45
-robot +1 0 35 45
-
-robot -9 0 18 0
-robot -11 0 21 180
-
-balloon 0 8 40
-balloon 0 7 35
-balloon 0 6 30
-balloon 0 5 25
-balloon 0 4 20
-balloon 0 3 15
-balloon 0 2 10
-balloon 0 1 5
-
-stone 0   0 3
-stone 0.5 0 3
-stone 1   0 3
+medal 20 150 20 0
+goal -5.0 39.0 15.0

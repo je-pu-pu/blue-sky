@@ -1,8 +1,11 @@
-bgm road 123
 collision 0-0.obj
+object stage-0-0
+ground ground
+
+exec change_bgm road
+exec change_sky_box 3
 
 sky-box sky-box-3
-object stage-0-0 0 0 0
 
 balloon 15.000000 21.0 79.0 0
 balloon 15.000000 21.0 77.0 0

@@ -1,11 +1,84 @@
-exec change_bgm slap
-exec change_sky_box 3
-ground ground
+bgm twinkle
+collision 0-1.obj
 
-exec set_drawing_accent_scale 0
-exec play_sound fall
+sky-box sky-box-3
 
-player 0 500.0 0
+ladder 21.899999618530273 25.0 -68.0 90
+name ladder-a
 
-medal 20 150 20 0
+ladder 21.899999618530273 20.0 -69.0 90
+name ladder-b
+
+balloon -5.000000 41.0 10.0 0 0 90
+balloon -5.000000 39.0 5.0 0 0 90
+balloon -5.000000 38.0 0.0 0 0 90
+balloon -5.000000 36.0 -5.0 0 0 90
+balloon -5.000000 34.0 -10.0 0 0 90
+balloon -5.000000 32.0 -15.0 0 0 90
+balloon -5.000000 30.0 -20.0 0 0 90
+balloon 25.000000 32.0 -32.0 0 0 90
+balloon 21.000000 23.0 -32.0 0 0 90
+balloon 23.000000 27.0 -32.0 0 0 90
+balloon 41.000000 27.0 -26.0 0 0 90
+balloon 50.000000 23.0 -26.0 0 0 90
+balloon 58.000000 20.0 -26.0 0 0 90
+medal 42.500000 25.0 -60.0 0 0 0
+balloon 5.000000 30.0 -80.0 0 0 90
+balloon 61.500000 20.0 -30.0 0 0 90
+balloon 35.500000 20.0 -55.0 0 0 90
+balloon 38.500000 20.0 -60.0 0 0 90
+balloon 35.500000 20.0 -60.0 0 0 90
+balloon 35.500000 20.0 -50.0 0 0 90
 goal -5.0 39.0 15.0
+girl 15.0 20.0 -64.0 180
+player 15.0 20.0 -65.0
+
+dynamic-object box-2x2x2 12.0 20.0 -67.0 
+name wall-1
+
+dynamic-object box-2x2x2 13.0 25.0 -67.0 
+dynamic-object box-2x2x2 25.0 32.0 -67.0 
+
+
+rocket 17.0 20.0 -65.0
+
+object wall-1 19.0 21.0 -58.0 0
+
+
+switch 17 20 -62
+
+event turn-on set_shadow_color_target 1 0 0 1
+event turn-on set_shadow_paper_color_target 0 0 0 0
+event turn-on set_light_position_target -100 100 20
+event turn-on set_line_type 1
+event turn-on set_paper_type 1
+event turn-on change_bgm semi
+event turn-on set_drawing_accent_scale 2
+
+event turn-off set_shadow_color_target 0 0 1 1
+event turn-off set_shadow_paper_color_target 1 1 1 1
+event turn-off set_light_position_target 100 100 100
+event turn-off set_line_type 0
+event turn-off set_paper_type 0
+event turn-off change_bgm road
+event turn-off set_drawing_accent_scale 0
+
+event turn-on game_object.set_target_location ladder-b 0 20 -65 1
+event turn-on game_object.set_mass ladder-b 1
+event turn-on game_object.set_gravity ladder 0 -1 0
+
+event turn-on  game_object.set_mass wall-1 0
+event turn-off game_object.set_mass wall-1 1
+
+event turn-on game_object.set_gravity wall-1 0
+event turn-on game_object.set_angular_factor wall-1 0
+event turn-on game_object.set_target_location wall-1 19.0 25.0 -58.0 1
+
+
+area-switch 23.0 20.0 -47.0 2.0 2.0 2.0 0
+event turn-on game_object.set_target_location girl -5.0 45.0 15.0 1
+event turn-on game_object.play_animation girl Walk 0 1
+
+
+
+object stage-0-1 0 0 0

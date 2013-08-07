@@ -194,6 +194,7 @@
     <None Include="media\stage\0-3.outro" />
     <None Include="media\stage\0-3.stage" />
     <None Include="media\stage\1-0.stage" />
+    <None Include="media\stage\1-1.stage" />
     <None Include="media\stage\1-3.stage" />
     <None Include="media\stage\2-0.stage" />
     <None Include="media\stage\2-1.intro" />

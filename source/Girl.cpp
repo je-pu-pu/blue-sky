@@ -9,7 +9,6 @@ namespace blue_sky
 {
 
 Girl::Girl()
-	: flicker_( 0.f )
 {
 	
 }
@@ -25,10 +24,8 @@ void Girl::restart()
 	get_rigid_body()->setAngularFactor( 0 );
 	get_rigid_body()->setFriction( 0 );
 
-	flicker_ = common::random( 0.f, 10.f );
-
-	get_animation_player()->play( "Float", true, true );
-	get_animation_player()->set_speed( 0.5f );
+	mode_ = MODE_STAND;
+	get_animation_player()->play( "Stand", true, true );
 }
 
 /**
@@ -37,10 +34,26 @@ void Girl::restart()
  */
 void Girl::update()
 {
-	chase_direction_to( player_->get_location(), 1.f );
+	if ( mode_ == MODE_FLOAT )
+	{
+		set_velocity( Vector3( 0.f, 0.f, 0.f ) );
+		update_velocity_by_flicker( get_start_location() );
+	}
 
-	set_velocity( Vector3( 0.f, 0.f, 0.f ) );
-	update_velocity_by_flicker( get_start_location() );
+	/*
+	get_animation_player()->play( "Float", true, true );
+	get_animation_player()->set_speed( 0.5f );
+
+	chase_direction_to( player_->get_location(), 1.f );
+	*/
+}
+
+void Girl::action( const string_t& s )
+{
+	if ( s == "float" )
+	{
+		mode_ = MODE_FLOAT;
+	}
 }
 
 } // namespace blue_sky

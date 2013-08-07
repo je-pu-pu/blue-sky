@@ -379,6 +379,41 @@ void GamePlayScene::setup_command()
 			get_active_object_manager()->set_target_location( o, GameObject::Vector3( x, y, z ), speed );
 		}
 	};
+	command_map_[ "game_object.set_target_direction" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		string_t object_name;
+		float_t r = 0.f, speed = 0.f;
+
+		ss >> object_name >> r >> speed;
+
+		ActiveObject* o = get_active_object_manager()->get_active_object( object_name );
+
+		if ( o )
+		{
+			get_active_object_manager()->set_target_direction( o, r, speed );
+		}
+	};
+	command_map_[ "game_object.set_target_direction_object" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		string_t object_name, target_object_name;
+		float_t speed = 0.f;
+
+		ss >> object_name >> target_object_name >> speed;
+
+		ActiveObject* o = get_active_object_manager()->get_active_object( object_name );
+		ActiveObject* to = get_active_object_manager()->get_active_object( target_object_name );
+
+		if ( o && to )
+		{
+			get_active_object_manager()->set_target_direction_object( o, to, speed );
+		}
+	};
 	command_map_[ "game_object.play_animation" ] = [ & ] ( const string_t& s )
 	{
 		std::stringstream ss;
@@ -394,6 +429,23 @@ void GamePlayScene::setup_command()
 		if ( o )
 		{
 			o->play_animation( animation_name.c_str(), force, loop );
+		}
+	};
+	command_map_[ "game_object.set_animation_speed" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		string_t object_name;
+		float_t speed;
+
+		ss >> object_name >> speed;
+
+		ActiveObject* o = get_active_object_manager()->get_active_object( object_name );
+		
+		if ( o && o->get_animation_player() )
+		{
+			o->get_animation_player()->set_speed( speed );
 		}
 	};
 	command_map_[ "game_object.action" ] = [ & ] ( const string_t& s )

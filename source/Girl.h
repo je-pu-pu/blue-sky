@@ -16,8 +16,14 @@ class Girl : public ActiveObject
 {
 public:
 
+	enum Mode
+	{
+		MODE_STAND = 0,
+		MODE_FLOAT,
+	};
+
 private:
-	float_t flicker_;
+	Mode			mode_;			///< 現在の動作モード
 
 	float get_collision_width() const override { return 0.5f; }
 	float get_collision_height() const override { return 1.5f; }
@@ -42,6 +48,8 @@ public:
 
 	/// 更新
 	void update() override;
+
+	void action( const string_t& ) override;
 
 	bool is_visible() const override { return true; }
 

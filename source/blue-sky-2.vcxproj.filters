@@ -539,6 +539,9 @@
     <None Include="media\stage\0-0.stage">
       <Filter>Stage</Filter>
     </None>
+    <None Include="media\stage\1-1.stage">
+      <Filter>Stage</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Drawing">

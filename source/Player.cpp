@@ -125,7 +125,7 @@ void Player::update()
 
 	if ( action_mode_ == ACTION_MODE_BALLOON )
 	{
-		set_velocity( Vector3( get_velocity().x(), math::chase( get_velocity().y(), 3.f, 0.5f ), get_velocity().z() ) );
+		set_velocity( Vector3( get_velocity().x(), std::min( 3.f, math::chase( get_velocity().y(), 3.f, 0.25f ) ), get_velocity().z() ) );
 
 		if ( get_location().y() - action_base_position_.y() >= get_balloon_action_length() )
 		{
@@ -134,7 +134,7 @@ void Player::update()
 			is_jumping_ = true;
 			is_action_pre_finish_ = false;
 		}
-		else if ( get_location().y() - action_base_position_.y() >= get_balloon_action_length() * 0.5f )
+		else if ( get_location().y() - action_base_position_.y() >= get_balloon_action_length() * 0.75f )
 		{
 			is_action_pre_finish_ = true;
 		}
@@ -1061,6 +1061,11 @@ void Player::on_collide_with( Ladder* l )
 {
 	is_on_ladder_ = true;
 	ladder_ = l;
+
+	if ( is_rocketing() )
+	{
+		finish_rocketing();
+	}
 
 	set_last_footing_height_to_current_height();
 }

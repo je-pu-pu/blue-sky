@@ -25,6 +25,7 @@ public:
 	enum Mode
 	{
 		MODE_STAND = 0,
+		MODE_ROTATION,
 		MODE_PATROL,
 		MODE_ATTENTION,
 		MODE_FIND,
@@ -39,6 +40,7 @@ private:
 	const Texture*	texture_;		///< テクスチャ
 
 	Mode			mode_;			///< 現在の動作モード
+	Mode			mode_backup_;	///< 前回プレイヤーを発見した時の動作モード
 	float_t			timer_;			///< 汎用タイマー
 
 	Vector3Array	patrol_point_list_;	///< 巡回ポイントの一覧
@@ -51,6 +53,8 @@ private:
 protected:
 	bool caluclate_target_visible() const;
 	bool caluclate_target_lost() const;
+
+	bool caluclate_collide_object_to_swtich_off( const GameObject* );
 
 	void update_patrol();
 

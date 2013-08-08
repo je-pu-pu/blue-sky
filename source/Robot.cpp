@@ -51,6 +51,9 @@ void Robot::restart()
 	texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
 	get_animation_player()->play( "Stand", false, true );
 
+	/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
+	get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE );
+
 	patrol_point_list_.clear();
 	current_patrol_point_index_ = 0;
 
@@ -97,23 +100,34 @@ void Robot::update()
 			texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
 		}
 
-		if ( caluclate_target_lost() )
+		timer_ += get_frame_elapsed_time();
+
+		if ( timer_ >= 10.f )
 		{
-			mode_ = MODE_STAND;
-			texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
+			if ( caluclate_target_visible() )
+			{
+				mode_ = MODE_STAND;
+				timer_ = 0.f;
+				texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
+			}
 		}
 
 		play_sound( "robot-chase", false, false );
 	}
-	else if ( mode_ == MODE_STAND )
+	else if ( mode_ == MODE_STAND || mode_ == MODE_ROTATION )
 	{
 		set_velocity( Vector3( 0.f, 0.f, 0.f ) );
-		// get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0, 0, 0, 0 ) );
-		// get_animation_player()->play( "Test", false, true );
+
+		if ( mode_ == MODE_ROTATION )
+		{
+			set_direction_degree( get_direction_degree() + 0.25f );
+		}
+
 		get_animation_player()->play( "Stand", false, true );
 		
 		if ( caluclate_target_visible() )
 		{
+			mode_backup_ = mode_;
 			mode_ = MODE_ATTENTION;
 			timer_ = 0.f;
 
@@ -143,15 +157,30 @@ void Robot::update()
 
 		if ( timer_ >= 3.f )
 		{
-			mode_ = MODE_CHASE;
-
-			play_sound( "robot-found", false, false );
+			if ( caluclate_target_visible() )
+			{
+				mode_ = MODE_CHASE;
+				timer_ = 0.f;
+				play_sound( "robot-chase-start", false, false );
+			}
+			else
+			{
+				mode_ = mode_backup_;
+				timer_ = 0.f;
+				play_sound( "robot-shutdown" );
+			}
 		}
 	}
 	else if ( mode_ == MODE_SHUTDOWN )
 	{
 		set_velocity( get_velocity() * 0.5f );
 		texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
+
+		/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
+		if ( get_animation_player()->get_current_frame() >= 140 )
+		{
+			get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
+		}
 	}
 	else if ( mode_ == MODE_FLOAT )
 	{
@@ -213,11 +242,15 @@ void Robot::update_patrol()
 
 void Robot::action( const string_t& s )
 {
-	if ( s == "patrol" )
+	if ( s == "rotation" )
+	{
+		mode_ = MODE_ROTATION;
+	}
+	else if ( s == "patrol" )
 	{
 		mode_ = MODE_PATROL;
 	}
-	if ( s == "float" )
+	else if ( s == "float" )
 	{
 		mode_ = MODE_FLOAT;
 	}
@@ -320,6 +353,13 @@ bool Robot::caluclate_target_visible() const
 	return false;
 }
 
+bool Robot::caluclate_collide_object_to_swtich_off( const GameObject* o )
+{
+	float_t switch_offset = 1.3f;
+
+	return true;
+}
+
 void Robot::shutdown()
 {
 	mode_ = MODE_SHUTDOWN;
@@ -339,9 +379,14 @@ void Robot::start_floating()
 	mode_ = MODE_FLOAT;
 }
 
-void Robot::on_collide_with( Player* )
+void Robot::on_collide_with( Player* player )
 {
-	if ( mode_ != MODE_STAND )
+	if ( mode_ != MODE_STAND && mode_ != MODE_ROTATION )
+	{
+		return;
+	}
+
+	if ( ! caluclate_collide_object_to_swtich_off( player ) )
 	{
 		return;
 	}
@@ -352,7 +397,12 @@ void Robot::on_collide_with( Player* )
 
 void Robot::on_collide_with( Stone* stone )
 {
-	if ( mode_ != MODE_STAND )
+	if ( mode_ != MODE_STAND && mode_ != MODE_ROTATION )
+	{
+		return;
+	}
+
+	if ( ! caluclate_collide_object_to_swtich_off( stone ) )
 	{
 		return;
 	}

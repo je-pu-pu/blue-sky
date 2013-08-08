@@ -1,18 +1,42 @@
-bgm road 123
 collision 1-2.obj
+object stage-1-2
 ground ground
 
-player 0 0 0
-goal 0 0 10
+exec change_bgm twinkle
+exec change_sky_box star-2
 
-object robot-dead-body 0 1 7
-name wall-1
+# 移動する壁に名前をつける
+object wall-3 0.0 0.0 49.3 0
+name wall
 
-switch 0 0 5
+stone -14.5 0.0 17.399999618530273 0
+stone -15.19999885559082 0.0 19.400001525878906 0
+stone -14.799999237060547 0.0 19.700000762939453 0
+stone -14.399999618530273 0.0 19.200000762939453 0
 
-event turn-on game_object.set_target_location wall-1 0 2 7 1
-event turn-off game_object.set_target_location wall-1 0 0 7 1
+# 手前の 2 体に名前をつける
+robot 5.0 0.0 20.0 180
+name robot-a
 
-stone 0   0 3
-stone 0.5 0 3
-stone 1   0 3
+robot -3.0 0.0 20.0 180
+name robot-b
+
+robot 5.0 0.0 28.0 0
+robot 5.0 0.0 36.0 0
+robot 5.0 0.0 38.0 0
+robot 5.0 0.0 40.0 0
+robot -3.0 0.0 40.0 0
+robot -3.0 0.0 38.0 0
+robot -3.0 0.0 36.0 0
+robot -3.0 0.0 28.0 0
+goal 0.0 0.0 55.0
+player -16.0 1.0 16.0 180
+stone -15.0 0.0 19.0 0
+
+# スイッチの設定
+switch 5.6 0.0 45 270
+event turn-on game_object.set_target_location wall 0.0 4 49.3 0.25
+
+# 手前の 2 体を回転モードにする
+exec game_object.action robot-a rotation
+exec game_object.action robot-b rotation

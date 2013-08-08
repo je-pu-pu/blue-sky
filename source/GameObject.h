@@ -94,7 +94,7 @@ public:
 
 	virtual bool is_hard() const { return true; }
 	virtual bool is_block() const { return is_hard(); }
-	virtual bool is_balloon() const { return false; }
+	virtual bool is_safe_footing() const { return false; }
 	virtual bool is_dynamic_object() const { return false; }
 
 	virtual float_t get_collision_width() const = 0;

@@ -42,7 +42,7 @@ private:
 	bool		is_jumpable_;			///< 現在ジャンプ可能フラグ
 	bool		is_clambering_;			///< 現在よじ登り中フラグ
 	bool		is_falling_to_die_;		///< 現在死亡へ向けて落下中フラグ
-	bool		is_falling_to_balloon_;	///< そのまま落下すると風船を取得するフラグ
+	bool		is_falling_to_safe_;	///< そのまま落下すると風船またはゴールと接触するフラグ
 	
 	bool		is_on_ladder_;			///< 梯子と接触中フラグ
 	bool		is_facing_to_block_;	///< 障害物の方を向いて接触中フラグ
@@ -197,7 +197,7 @@ public:
 	//
 	bool is_falling() const;
 	bool is_falling_to_die() const { return is_falling_to_die_; }
-	bool is_falling_to_balloon() const { return is_falling_to_balloon_; }
+	bool is_falling_to_safe() const { return is_falling_to_safe_; }
 	
 	bool is_on_footing() const { return is_on_footing_; }
 	bool is_on_ladder() const { return is_on_ladder_; }

@@ -24,6 +24,8 @@ private:
 
 	void on_collide_with( GameObject* o ) override { }
 
+	bool is_safe_footing() const override { return true; }
+
 public:
 	Goal();
 	~Goal() { }

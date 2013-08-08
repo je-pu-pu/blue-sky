@@ -27,7 +27,7 @@ private:
 	void on_collide_with( Stone* ) override;
 
 	bool is_hard() const override { return false; }
-	bool is_balloon() const override { return true; }
+	bool is_safe_footing() const override { return true; }
 
 	void kill() override;
 

@@ -279,6 +279,17 @@ void GamePlayScene::setup_command()
 		bgm_ = get_sound_manager()->load_music( "bgm", s.c_str(), true );
 		bgm_->play( stage_config_->get( "bgm.loop", true ) );
 	};
+	command_map_[ "load_sound" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		string_t sound_name, sound_file_name;
+
+		ss >> sound_name >> sound_file_name;
+
+		Sound* sound = get_sound_manager()->load( sound_name.c_str(), ( sound_file_name.empty() ? sound_name : sound_file_name ).c_str() );
+	};
 	command_map_[ "play_sound" ] = [ & ] ( const string_t& s )
 	{
 		std::stringstream ss;

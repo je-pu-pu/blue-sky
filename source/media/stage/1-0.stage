@@ -5,6 +5,7 @@ collision 1-0.obj
 exec change_bgm drain
 exec change_sky_box 3
 exec set_shadow_color 0 0 0 1
+exec set_paper_type 1
 
 object stage-1-0
 

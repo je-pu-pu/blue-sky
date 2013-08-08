@@ -28,7 +28,7 @@ Player::Player()
 	, is_jumpable_( false )
 	, is_clambering_( false )
 	, is_falling_to_die_( false )
-	, is_falling_to_balloon_( false )
+	, is_falling_to_safe_( false )
 	, is_on_ladder_( false )
 	, is_facing_to_block_( false )
 	, can_clamber_( false )
@@ -72,7 +72,7 @@ void Player::restart()
 	is_jumpable_ = false;
 	is_clambering_ = false;
 	is_falling_to_die_ = false;
-	is_falling_to_balloon_ = false;
+	is_falling_to_safe_ = false;
 	is_on_ladder_ = false;
 	is_facing_to_block_ = false;
 	can_clamber_ = false;
@@ -166,7 +166,7 @@ void Player::update()
 		eye_depth_ = math::clamp( eye_depth_, 0.f, 1.f );
 	}
 
-	if ( is_falling_to_balloon() )
+	if ( is_falling_to_safe() )
 	{
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.25f, 0.25f, 1.f, 0.f ) );
 	}
@@ -364,7 +364,7 @@ void Player::update_falling_to_die()
 	const Vector3 right = get_right() * ( get_collision_width() * 0.5f - margin );
 	const Vector3 center = Vector3( x, y, z );
 
-	is_falling_to_balloon_ = false;
+	is_falling_to_safe_ = false;
 
 	// 中心 + 四隅 + 四点 の設置を調べる
 	if (
@@ -682,10 +682,10 @@ float_t Player::get_footing_height( const Vector3& from, bool include_soft_footi
 		/// debug !!!
 		// const char* xxx = typeid( a ).name();
 
-		if ( a->is_balloon() )
+		if ( a->is_safe_footing() )
 		{
 			// !!!
-			const_cast< Player* >( this )->is_falling_to_balloon_ = true;
+			const_cast< Player* >( this )->is_falling_to_safe_ = true;
 		}
 	}
 

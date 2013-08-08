@@ -20,7 +20,7 @@ event turn-on game_object.create robot-dead-body 6 83 -34
 // event turn-off set_ambient_color_target 0.5 0.5 0.5 1
 
 // event turn-on change_sky_box sky
-// event turn-off change_sky_box moon
+event turn-off change_sky_box moon
 
 ladder 9.0 55.0 -2.0 270
 ladder 9.0 49.400001525878906 -2.0 270

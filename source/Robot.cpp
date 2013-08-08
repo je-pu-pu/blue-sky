@@ -144,7 +144,7 @@ void Robot::update()
 	}
 	else if ( mode_ == MODE_FLOAT )
 	{
-		update_velocity_by_flicker( get_start_location() );
+		update_velocity_by_flicker( get_start_location(), get_flicker_scale() );
 
 		chase_direction_to( player_->get_location(), 0.5f );
 

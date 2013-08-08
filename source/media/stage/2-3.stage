@@ -1,9 +1,9 @@
 bgm.loop 0
 video.shadow-map-enabled 0
-video.shading-enabled 0
 
 exec change_sky_box sky
 exec change_bgm my-takeoff
+exec set_shading_enabled 0
 
 girl   -5   20  25 180
 robot   5   20  25
@@ -11,6 +11,10 @@ name robot
 
 goal    0   25  50
 player  0   25  0
+
+exec game_object.set_flicker_scale player 10
+exec game_object.set_flicker_scale girl 10
+exec game_object.set_flicker_scale robot 10
 
 exec game_object.action robot float
 exec game_object.action girl float

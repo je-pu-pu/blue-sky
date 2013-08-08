@@ -157,7 +157,7 @@ void Player::update()
 
 	if ( is_flickering() )
 	{
-		update_velocity_by_flicker( Vector3( get_location().x(), action_base_position_.y(), get_location().z() ) );
+		update_velocity_by_flicker( Vector3( get_location().x(), action_base_position_.y(), get_location().z() ), get_flicker_scale() );
 	}
 
 	if ( ! can_peer_down() )

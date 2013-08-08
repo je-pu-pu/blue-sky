@@ -4,10 +4,18 @@ ground ground
 
 exec set_drawing_accent_scale 0
 exec play_sound fall
+exec set_ambient_color 1 1 1
 
 exec load_sound fin my-failed-takeoff-2
 
 player 0 500.0 0
 
 medal 0 100 13 0
-goal  0 20  10.0
+goal  0 15  10.0
+
+area-switch 0 400 0 100 1 100
+event turn-on set_ambient_color 1 0 0
+event turn-on set_ambient_color_target 0 0 0 0.01
+
+area-switch 0 300 0 100 1 100
+event turn-on set_ambient_color_target 0 0 0 0.01

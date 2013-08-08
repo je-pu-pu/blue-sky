@@ -104,10 +104,12 @@ void Robot::update()
 
 		if ( timer_ >= 10.f )
 		{
-			if ( caluclate_target_visible() )
+			if ( ! caluclate_target_visible() )
 			{
-				mode_ = MODE_STAND;
+				mode_ = MODE_ROTATION;
 				timer_ = 0.f;
+				play_sound( "robot-shutdown" );
+
 				texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
 			}
 		}
@@ -177,7 +179,7 @@ void Robot::update()
 		texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
 
 		/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
-		if ( get_animation_player()->get_current_frame() >= 140 )
+		if ( get_animation_player()->get_current_frame() >= 60 )
 		{
 			get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
 		}

@@ -36,6 +36,7 @@ stone -15.0 0.0 19.0 0
 # スイッチの設定
 switch 5.6 0.0 45 270
 event turn-on game_object.set_target_location wall 0.0 4 49.3 0.25
+event turn-on play_sound machine-translation-long
 
 # 手前の 2 体を回転モードにする
 exec game_object.action robot-a rotation

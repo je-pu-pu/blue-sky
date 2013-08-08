@@ -509,6 +509,9 @@
     <None Include="media\stage\1-1.stage">
       <Filter>Stage</Filter>
     </None>
+    <None Include="media\stage\1-2.stage">
+      <Filter>Stage</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Drawing">
@@ -529,9 +532,6 @@
     <Filter Include="DirectX">
       <UniqueIdentifier>{6084c2f3-79fc-436e-98ca-9ce7f92612e1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Graphics">
-      <UniqueIdentifier>{f044bb29-1e9a-4c67-9582-b1a161bc11a6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Game">
       <UniqueIdentifier>{1d357c30-a5d6-4fcb-a582-73566ac2eb55}</UniqueIdentifier>
     </Filter>
@@ -540,6 +540,9 @@
     </Filter>
     <Filter Include="Stage">
       <UniqueIdentifier>{c55721b5-afe6-4688-ab8c-511f1dff1ac5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{f044bb29-1e9a-4c67-9582-b1a161bc11a6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

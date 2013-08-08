@@ -1,5 +1,4 @@
 #include "ActiveObjectPhysics.h"
-#include "StaticObject.h"
 #include "ActiveObject.h"
 
 #include "memory.h"

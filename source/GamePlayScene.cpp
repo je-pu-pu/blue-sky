@@ -656,7 +656,11 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 		ActiveObject* active_object = 0;
 
-		if ( name == "bgm" )
+		if ( name == "#" )
+		{
+			//
+		}
+		else if ( name == "bgm" )
 		{
 			std::string name;
 			bool loop = true;

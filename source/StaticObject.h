@@ -25,7 +25,7 @@ private:
 
 	float_t get_default_mass() const override { return mass_; }
 
-	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
+	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
 
 protected:
 

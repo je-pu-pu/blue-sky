@@ -1,28 +1,51 @@
-bgm road 123
-collision 1-2.obj
+collision 1-1.obj
+object stage-1-1
+ground ground
 
-sky-box sky-box-star-2
+exec change_bgm twinkle
+exec change_sky_box star-2
+exec set_line_type 4
+exec set_paper_type 4
+exec set_drawing_accent_scale 0.1
 
-player 0 0 1
-goal 0 0 46
+exec set_shadow_color 0.9 0.9 0.95 1
+exec set_shadow_paper_color 1 1 1 1
 
-object stage-1-2 0 0 0
+# robot 0.0 0.0 -46.0 0
+# name robot1
+# exec game_object.action robot1 patrol
 
-robot -1 0 30 45
-robot +1 0 35 45
+# robot 0.0 0.0 -25.0 180
+# name robot2
+# exec game_object.action robot2 patrol
 
-robot -9 0 18 0
-robot -11 0 21 180
+# robot 0.0 0.0 -6.0 180
+# name robot3
+# exec game_object.action robot3 patrol
 
-balloon 0 8 40
-balloon 0 7 35
-balloon 0 6 30
-balloon 0 5 25
-balloon 0 4 20
-balloon 0 3 15
-balloon 0 2 10
-balloon 0 1 5
+stone 1.4999998807907104 0.0 -39.29999923706055 0
+stone 1.1999999284744263 0.0 -31.799999237060547 0
+goal 0.699999988079071 0.0 5.099999904632568
+object tree-1 -3.000000238418579 0.0 1.3999977111816406 0
+object tree-1 -3.000000238418579 0.0 3.3999977111816406 0
+object tree-1 -3.000000238418579 0.0 5.399997711181641 0
+object tree-1 -3.000000238418579 0.0 7.399997711181641 0
+object tree-1 1.999999761581421 0.0 -30.60000228881836 0
+object tree-1 -0.20000019669532776 0.0 -47.80000305175781 0
+player -10.0 1.0 -49.0
+object tree-1 -8.300000190734863 0.0 -45.400001525878906 0
+medal -3.0 2.0 -2.0 0
+stone -1.399999976158142 0.0 0.6000000238418579 0
 
-stone 0   0 3
-stone 0.5 0 3
-stone 1   0 3
+object wall-3 0.0 1.0 0.0 0
+name wall-1
+
+object wall-3 -1.2 1.0 -9.4 90
+name wall-2
+
+switch 1.5 0.0 -6.400000095367432 0
+event turn-on game_object.set_target_location wall-1 0 4 0 1
+event turn-on game_object.set_target_location wall-2 -1.2 4 -9.4 90 1
+
+switch -3.9000000953674316 0.0 -10.0 0
+event turn-on game_object.set_target_location wall-2 -1.2 4 -9.4 90 1

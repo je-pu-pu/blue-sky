@@ -49,6 +49,13 @@ void Robot::restart()
 	timer_ = 0;
 
 	texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
+	get_animation_player()->play( "Stand", false, true );
+
+	patrol_point_list_.clear();
+	current_patrol_point_index_ = 0;
+
+	add_patrol_point( get_location() );
+	add_patrol_point( get_location() + ( get_front() * 5.f ) );
 }
 
 void Robot::update()
@@ -114,6 +121,10 @@ void Robot::update()
 			texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
 		}
 	}
+	else if ( mode_ == MODE_PATROL )
+	{
+		update_patrol();
+	}
 	else if ( mode_ == MODE_ATTENTION )
 	{
 		set_velocity( Vector3( 0.f, 0.f, 0.f ) );
@@ -154,8 +165,58 @@ void Robot::update()
 	}
 }
 
+void Robot::update_patrol()
+{
+	/*
+	if ( current_patrol_point_index_ == patrol_point_list_.end() && ! patrol_point_list_.empty() )
+	{
+		current_patrol_point_ = patrol_point_list_.begin();
+	}
+
+	if ( current_patrol_point_ == patrol_point_list_.end() )
+	{
+		mode_ = MODE_STAND;
+		return;
+	}
+
+	auto next_patrol_point = current_patrol_point_;
+
+	return;
+
+	if ( next_patrol_point == patrol_point_list_.end() )
+	{
+		update_velocity_by_target_location( * current_patrol_point_, 1 );
+	}
+	else
+	{
+		update_velocity_by_target_location( * next_patrol_point, 1 );;
+	}
+	*/
+
+	if ( current_patrol_point_index_ < patrol_point_list_.size() )
+	{
+		const Vector3& point = patrol_point_list_[ current_patrol_point_index_ ];
+
+		update_velocity_by_target_location( point, 0.1f );
+
+		if ( ( point - get_location() ).length() < 0.1f )
+		{
+			// current_patrol_point_index_++;
+			// current_patrol_point_index_ = current_patrol_point_index_ % patrol_point_list_.size();
+		}
+
+		get_animation_player()->play( "Walk", false, true );
+	}
+
+	
+}
+
 void Robot::action( const string_t& s )
 {
+	if ( s == "patrol" )
+	{
+		mode_ = MODE_PATROL;
+	}
 	if ( s == "float" )
 	{
 		mode_ = MODE_FLOAT;
@@ -310,6 +371,16 @@ void Robot::render_material_at( uint_t material_index ) const
 	game::Material* material = get_drawing_model()->get_mesh()->get_material_at( material_index );
 	material->bind_to_ia();
 	material->render();
+}
+
+/**
+ * 巡回ポイントを追加する
+ *
+ * @param point 巡回ポイント
+ */
+void Robot::add_patrol_point( const Vector3& point )
+{
+	patrol_point_list_.push_back( point );
 }
 
 } // namespace blue_sky

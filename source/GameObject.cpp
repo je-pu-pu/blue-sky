@@ -141,7 +141,7 @@ void GameObject::set_velocity( const Vector3& v )
 	get_rigid_body()->setLinearVelocity( v );
 	get_rigid_body()->setInterpolationLinearVelocity( v );
 
-	get_rigid_body()->activate();
+	get_rigid_body()->activate( true );
 	get_rigid_body()->setActivationState( true );
 }
 

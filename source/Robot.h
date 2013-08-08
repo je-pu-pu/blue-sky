@@ -5,6 +5,7 @@
 #include <game/Texture.h>
 
 #include <vector>
+#include <list>
 
 namespace blue_sky
 {
@@ -19,10 +20,12 @@ class Robot : public ActiveObject
 {
 public:
 	typedef game::Texture Texture;
+	typedef btAlignedObjectArray< Vector3 > Vector3Array;
 
 	enum Mode
 	{
 		MODE_STAND = 0,
+		MODE_PATROL,
 		MODE_ATTENTION,
 		MODE_FIND,
 		MODE_CHASE,
@@ -38,6 +41,9 @@ private:
 	Mode			mode_;			///< 現在の動作モード
 	float_t			timer_;			///< 汎用タイマー
 
+	Vector3Array	patrol_point_list_;	///< 巡回ポイントの一覧
+	int_t			current_patrol_point_index_;
+
 	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 	void on_collide_with( Player* );
 	void on_collide_with( Stone* );
@@ -45,6 +51,8 @@ private:
 protected:
 	bool caluclate_target_visible() const;
 	bool caluclate_target_lost() const;
+
+	void update_patrol();
 
 public:
 	Robot();
@@ -69,6 +77,8 @@ public:
 
 	void shutdown();
 	void start_floating();
+
+	void add_patrol_point( const Vector3& point );
 
 }; // class Robot
 

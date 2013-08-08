@@ -89,6 +89,7 @@ ActiveObject* ActiveObjectManager::create_object( std::stringstream& ss, Drawing
 	size_map[ "soda-can-1"   ] = ActiveObject::Vector3(  0.07f, 0.12f, 0.07f );
 	size_map[ "wall-1"       ] = ActiveObject::Vector3(  4.f,   1.75f, 0.2f  );
 	size_map[ "wall-2"       ] = ActiveObject::Vector3(  8.f,   2.5f,  0.2f  );
+	size_map[ "wall-3"       ] = ActiveObject::Vector3(  4.f,   2.5f,  0.2f  );
 	size_map[ "outdoor-unit" ] = ActiveObject::Vector3(  0.7f,  0.6f,  0.24f );
 	size_map[ "building-20"  ] = ActiveObject::Vector3( 10.f,  20.f,  10.f   );
 	size_map[ "building-200" ] = ActiveObject::Vector3( 80.f, 200.f,  60.f   );
@@ -105,6 +106,8 @@ ActiveObject* ActiveObjectManager::create_object( std::stringstream& ss, Drawing
 	mass_map[ "box-5x5x5"    ] = 1.f;
 	mass_map[ "box-2x2x2"    ] = 100.f;
 	mass_map[ "robot-dead-body" ] = 100.f;
+	mass_map[ "wall-3"       ] = 100.f;
+
 
 	float w = 0.f, h = 0.f, d = 0.f, mass = 0.f;
 			
@@ -187,6 +190,7 @@ void ActiveObjectManager::update()
 	for ( auto i = target_location_map_.begin(); i != target_location_map_.end(); )
 	{
 		i->first->update_velocity_by_target_location( std::get< 0 >( i->second ), std::get< 1 >( i->second ) );
+		// i->first->set_location( std::get< 0 >( i->second ) );
 
 		if ( ( std::get< 0 >( i->second ) - i->first->get_location() ).length() < 0.1f )
 		{

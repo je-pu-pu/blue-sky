@@ -63,6 +63,8 @@ public:
 
 	void restart() override;
 
+	void action( const string_t& ) override;
+
 	bool_t do_switch();
 	bool_t do_break();
 

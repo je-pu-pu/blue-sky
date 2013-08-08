@@ -60,6 +60,14 @@ public:
 	typedef std::function< void() > CommandCall;
 	typedef std::list< CommandCall > CommandCallList;
 
+	enum BalloonSoundType
+	{
+		BALLOON_SOUND_TYPE_NONE = 0,		// サウンドなし
+		BALLOON_SOUND_TYPE_MIX,				// サウンドを BGM とミックス
+		BALLOON_SOUND_TYPE_SOLO,			// BGM を消してサウンドのみ再生
+		BALLOON_SOUND_TYPE_SCALE,			// BGM を消して音階を再生
+	};
+
 protected:
 	Texture*			ui_texture_;							///< UI 表示用テクスチャ
 	bool				is_cleared_;							///< ステージクリアフラグ
@@ -99,6 +107,8 @@ protected:
 	common::chase_value< Color, float_t >		shadow_paper_color_;
 	bool										shading_enabled_;
 
+	BalloonSoundType					balloon_sound_type_;
+
 	CommandMap							command_map_;
 	CommandCallList						stage_setup_command_call_list_;
 
@@ -121,6 +131,7 @@ protected:
 	void update_main();
 	void update_clear();
 
+	void update_balloon_sound();
 	void update_shadow();
 
 	/** @todo 移動する */

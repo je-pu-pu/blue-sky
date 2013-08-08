@@ -24,6 +24,7 @@ public:
 
 private:
 	Mode			mode_;			///< Œ»Ý‚Ì“®ìƒ‚[ƒh
+	Vector3			flicker_base_location_;
 
 	float get_collision_width() const override { return 0.5f; }
 	float get_collision_height() const override { return 1.5f; }
@@ -34,6 +35,13 @@ private:
 	const Vector3& get_default_gravity() const override { return GravityZero; }
 
 	bool is_hard() const override { return true; }
+
+	void on_arrive_at_target_location() override
+	{
+		set_velocity( Vector3( 0, 0, 0 ) );
+		flicker_base_location_ = get_location();
+		
+	}
 
 protected:
 	const Player* player_;

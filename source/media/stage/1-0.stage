@@ -3,8 +3,10 @@ video.shadow-map-enabled 0
 collision 1-0.obj
 
 exec change_bgm drain
+exec change_bpm 120 0.25
 exec change_sky_box 3
 exec set_shadow_color 0 0 0 1
+exec set_shadow_paper_color 0.5 0.5 0.5 1
 exec set_paper_type 1
 
 object stage-1-0
@@ -19,3 +21,11 @@ stone -12.46678352355957 40.98952102661133 -5.381356239318848 0
 ladder -40.0 45.0 15.0 270
 medal -43.0 45.0 -43.0 0
 
+area-switch -35.0 50.0 15.0 12.0 2.0 12.0 
+name area-switch-1
+
+event turn-on change_bgm tower
+event turn-on change_bpm 120 
+event turn-on set_shadow_color_target 0.75 0.75 1 1 0.01
+event turn-on set_shadow_paper_color_target 1 1 1 1 0.01
+event turn-on game_object.action area-switch-1 break

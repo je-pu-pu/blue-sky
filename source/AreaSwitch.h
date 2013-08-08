@@ -21,6 +21,7 @@ private:
 
 	bool is_hard() const override { return false; }
 	bool is_block() const override { return false; }
+	bool is_ghost() const override { return true; }
 
 	float get_collision_width()  const override { return width_; }
 	float get_collision_height() const override { return height_; }

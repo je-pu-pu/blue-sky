@@ -24,6 +24,7 @@ ActiveObject::ActiveObject()
 	, object_constant_buffer_( new ObjectConstantBuffer( GameMain::get_instance()->get_direct_3d() ) )
 	, animation_player_( 0 )
 	, is_dead_( false )
+	, flicker_scale_( 1.f )
 
 	, direction_degree_( 0 )
 
@@ -63,6 +64,7 @@ void ActiveObject::setup_animation_player()
 void ActiveObject::restart()
 {
 	is_dead_ = false;
+	flicker_scale_ = 1.f;
 	
 	if ( get_rigid_body() )
 	{

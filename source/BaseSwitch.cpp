@@ -30,6 +30,14 @@ void BaseSwitch::update()
 	contact_object_cache_.update( get_frame_elapsed_time() );
 }
 
+void BaseSwitch::action( const string_t& action )
+{
+	if ( action == "break" )
+	{
+		do_break();
+	}
+}
+
 void BaseSwitch::on_collide_with( Player* player )
 {
 	if ( player->get_velocity().length() >= 0.5f && can_game_object_switch( player ) )

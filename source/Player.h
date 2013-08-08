@@ -60,6 +60,7 @@ private:
 	Vector3		action_base_position_;	///< 現在のアクションの基底位置
 	bool		is_action_pre_finish_;	///< 現在のアクションがもうすぐ終わるフラグ
 	int_t		balloon_sequence_count_;///< 現在の連続取得バルーンの数 ( 0 .. 7 )
+	int_t		balloon_sound_request_;	///< 
 
 	float_t		uncontrollable_timer_;	///< 制御不能タイマー
 
@@ -227,6 +228,7 @@ public:
 
 	void switch_scope_mode();
 
+	int_t pop_balloon_sound_request() { int_t r = balloon_sound_request_; balloon_sound_request_ = 0; return r; }
 
 	const Balloon* get_balloon() const { return balloon_; }
 

@@ -193,7 +193,7 @@ float_t GameObject::get_flicker_height_offset( float_t scale ) const
 	common::random_set_seed( reinterpret_cast< int >( this ) );
 	float_t a = common::random( 0.f, 10.f );
 
-	return std::cos( a + get_scene_elapsed_time() ) * 10.f * scale * 0.5f;
+	return std::cos( a + get_scene_elapsed_time() ) * scale * 0.5f;
 }
 
 /**

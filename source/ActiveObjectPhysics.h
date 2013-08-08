@@ -31,7 +31,6 @@ public:
 	bool is_collision( ActiveObject*, ActiveObject* );
 	void check_collision_with( ActiveObject* );
 	void check_collision_all();
-	void check_collision_dynamic_object();
 
 }; // class ActiveObjectPhysics
 
@@ -60,6 +59,11 @@ public:
 			ActiveObject* a = reinterpret_cast< ActiveObject* >( rayResult.m_collisionObject->getUserPointer() );
 			
 			if ( a->is_dead() )
+			{
+				return 1.0;
+			}
+
+			if ( a->is_ghost() )
 			{
 				return 1.0;
 			}

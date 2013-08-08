@@ -200,32 +200,4 @@ void ActiveObjectPhysics::check_collision_all()
 	}
 }
 
-void ActiveObjectPhysics::check_collision_dynamic_object()
-{
-	for ( int n = 0; n < dynamics_world_->getCollisionObjectArray().size(); n++ )
-	{
-		btRigidBody* rigid_body = btRigidBody::upcast( dynamics_world_->getCollisionObjectArray()[ n ] );
-
-		if ( ! rigid_body )
-		{
-			continue;
-		}
-
-		if ( ! rigid_body->getUserPointer() )
-		{
-			continue;
-		}
-
-		ActiveObject* a = reinterpret_cast< ActiveObject* >( rigid_body->getUserPointer() );
-
-		if ( ! a->is_dynamic_object() )
-		{
-			continue;
-		}
-		
-		ActiveObjectContactResultCallback callback;
-		dynamics_world_->contactTest( a->get_rigid_body(), callback );
-	}
-}
-
 }

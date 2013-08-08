@@ -23,6 +23,7 @@ private:
 	AnimationPlayer*						animation_player_;			///< アニメーション再生
 
 	bool				is_dead_;			///< 死亡フラグ
+	float_t				flicker_scale_;		///< ゆらぎの大きさ
 
 	/** @todo ActiveObject から分離 */
 	float_t				direction_degree_;	///< 方向 ( Y Axis Degree )
@@ -52,6 +53,9 @@ public:
 	virtual const DrawingModel* get_drawing_model() const { return drawing_model_; }
 
 	virtual void action( const string_t& ) { }
+
+	virtual void set_flicker_scale( float_t s ) { flicker_scale_ = s; }
+	virtual float_t get_flicker_scale() const { return flicker_scale_; }
 
 	const ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_; }
 

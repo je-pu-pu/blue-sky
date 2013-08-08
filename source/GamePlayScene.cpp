@@ -78,7 +78,6 @@
 namespace blue_sky
 {
 
-
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
 	, ui_texture_( 0 )
@@ -91,6 +90,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, shadow_color_( Color( 0.f, 0.f, 0.f, 1.f ), 0.02f )
 	, shadow_paper_color_( Color( 0.9f, 0.9f, 0.9f, 1.f ), 0.02f )
 	, shading_enabled_( true )
+	, balloon_sound_type_( BALLOON_SOUND_TYPE_MIX )
 {
 	stage_config_ = new Config();
 
@@ -213,6 +213,10 @@ void GamePlayScene::setup_command()
 		paper_texture_index = math::clamp< int >( paper_texture_index, 0, paper_texture_list_.size() - 1 );
 		paper_texture_ = paper_texture_list_[ paper_texture_index ];
 	};
+	command_map_[ "set_balloon_sound_type" ] = [ & ] ( const string_t& s )
+	{
+		balloon_sound_type_ = static_cast< BalloonSoundType >( common::deserialize< int_t >( s ) );
+	};
 	command_map_[ "set_drawing_accent_scale" ] = [ & ] ( const string_t& s )
 	{
 		drawing_accent_scale_ = common::deserialize< float_t >( s );
@@ -281,8 +285,23 @@ void GamePlayScene::setup_command()
 	};
 	command_map_[ "change_bgm" ] = [ & ] ( const string_t& s )
 	{
+		std::stringstream ss;
+		ss << s;
+
 		bgm_ = get_sound_manager()->load_music( "bgm", s.c_str(), true );
 		bgm_->play( stage_config_->get( "bgm.loop", true ) );
+	};
+	command_map_[ "change_bpm" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		float_t bpm;
+		float_t beat = 1;
+
+		ss >> bpm >> beat;
+
+		set_bpm( bpm * beat );
 	};
 	command_map_[ "load_sound" ] = [ & ] ( const string_t& s )
 	{
@@ -430,6 +449,23 @@ void GamePlayScene::setup_command()
 			get_active_object_manager()->set_target_direction_object( o, to, speed );
 		}
 	};
+	command_map_[ "game_object.set_flicker_scale" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		string_t object_name;
+		float_t scale = 1.f;
+
+		ss >> object_name >> scale;
+
+		ActiveObject* o = get_active_object_manager()->get_active_object( object_name );
+
+		if ( o  )
+		{
+			o->set_flicker_scale( scale );
+		}
+	};
 	command_map_[ "game_object.play_animation" ] = [ & ] ( const string_t& s )
 	{
 		std::stringstream ss;
@@ -544,6 +580,7 @@ void GamePlayScene::load_sound_all( bool is_final_stage )
 		get_sound_manager()->load( "damage-1" );
 		get_sound_manager()->load( "dead" );
 
+		get_sound_manager()->load( "balloon" );
 		get_sound_manager()->load( "balloon-1" );
 		get_sound_manager()->load( "balloon-2" );
 		get_sound_manager()->load( "balloon-3" );
@@ -551,8 +588,6 @@ void GamePlayScene::load_sound_all( bool is_final_stage )
 		get_sound_manager()->load( "balloon-5" );
 		get_sound_manager()->load( "balloon-6" );
 		get_sound_manager()->load( "balloon-7" );
-
-		get_sound_manager()->load( "balloon-get" );
 		get_sound_manager()->load( "balloon-burst" );
 
 		get_sound_manager()->load( "rocket-get" );
@@ -791,6 +826,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
 
 			last_base_switch = s;
+			last_object = s;
 		}
 		else if ( name == "area-switch" )
 		{
@@ -811,6 +847,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			get_active_object_manager()->add_active_object( s );
 
 			last_base_switch = s;
+			last_object = s;
 		}
 		else if ( name == "event" || name == "exec" )
 		{
@@ -955,54 +992,7 @@ void GamePlayScene::update()
 	get_sound_manager()->set_listener_orientation( camera_->front(), camera_->up() );
 	get_sound_manager()->commit();
 
-	if ( player_->get_action_mode() == Player::ACTION_MODE_BALLOON )
-	{
-		action_bgm_after_timer_ = 2.f;
-	}
-	else
-	{
-		action_bgm_after_timer_ -= get_elapsed_time();
-	}
-
-	if ( action_bgm_after_timer_ > 0.f )
-	{
-		if ( bgm_ )
-		{
-			bgm_->fade_out();
-		}
-
-		/*
-		if ( balloon_bgm_->is_playing() )
-		{
-			balloon_bgm_->fade_in( Sound::VOLUME_FADE_SPEED_FAST );
-		}
-		else
-		{
-			balloon_bgm_->play( true );
-			balloon_bgm_->set_volume( Sound::VOLUME_MAX );
-		}
-		*/
-	}
-	else
-	{
-		if ( balloon_bgm_ )
-		{
-			balloon_bgm_->fade_out();
-		}
-
-		if ( bgm_ )
-		{
-			/*
-			if ( bgm_->is_fader_full_out() && stage_config_->get( "bgm.loop", true ) )
-			{
-				bgm_->play( true, false );
-			}
-			*/
-
-			bgm_->fade_in();
-		}
-	}
-
+	update_balloon_sound();
 	update_shadow();
 
 	light_position_.chase();
@@ -1168,6 +1158,87 @@ void GamePlayScene::update_main()
 		{
 			get_direct_3d()->getFader()->set_color( Direct3D::Color( 0.25f, 0.f, 0.f, 0.75f ) );
 			get_direct_3d()->getFader()->fade_out( 0.25f );
+		}
+	}
+}
+
+void GamePlayScene::update_balloon_sound()
+{
+	int_t balloon_sound_request = player_->pop_balloon_sound_request();
+
+	if ( balloon_sound_request >= 1 )
+	{
+		if ( balloon_sound_type_ == BALLOON_SOUND_TYPE_MIX || balloon_sound_type_ == BALLOON_SOUND_TYPE_SOLO )
+		{
+			Sound* sound = get_sound_manager()->get_sound( "balloon" );
+
+			if ( sound )
+			{
+				sound->play( false );
+			}
+		}
+		else if ( balloon_sound_type_ == BALLOON_SOUND_TYPE_SCALE )
+		{
+			// int r = math::clamp( balloon_sound_request, 1, 7 );
+			int r = balloon_sound_request % 7 + 1;
+
+			for ( int n = 1; n <= 7; n++ )
+			{
+				if ( n != r )
+				{
+					stop_sound( ( std::string( "balloon-" ) + common::serialize( n ) ).c_str() );
+				}
+			}
+			
+			play_sound( ( std::string( "balloon-" ) + common::serialize( r ) ).c_str() );
+		}
+	}
+
+	if ( player_->get_action_mode() == Player::ACTION_MODE_BALLOON && balloon_sound_type_ == BALLOON_SOUND_TYPE_SOLO || balloon_sound_type_ == BALLOON_SOUND_TYPE_SCALE )
+	{
+		action_bgm_after_timer_ = 2.f;
+	}
+	else
+	{
+		action_bgm_after_timer_ -= get_elapsed_time();
+	}
+
+	if ( action_bgm_after_timer_ > 0.f )
+	{
+		if ( bgm_ )
+		{
+			bgm_->fade_out();
+		}
+
+		/*
+		if ( balloon_bgm_->is_playing() )
+		{
+			balloon_bgm_->fade_in( Sound::VOLUME_FADE_SPEED_FAST );
+		}
+		else
+		{
+			balloon_bgm_->play( true );
+			balloon_bgm_->set_volume( Sound::VOLUME_MAX );
+		}
+		*/
+	}
+	else
+	{
+		if ( balloon_bgm_ )
+		{
+			balloon_bgm_->fade_out();
+		}
+
+		if ( bgm_ )
+		{
+			/*
+			if ( bgm_->is_fader_full_out() && stage_config_->get( "bgm.loop", true ) )
+			{
+				bgm_->play( true, false );
+			}
+			*/
+
+			bgm_->fade_in();
 		}
 	}
 }
@@ -1346,8 +1417,11 @@ void GamePlayScene::render_text() const
 		ss << L"CAN PEER DOWN : " << player_->can_peer_down() << std::endl;
 		ss << L"CAN THROW : " << player_->can_throw() << std::endl;
 		ss << L"IS CLAMBERING : " << player_->is_clambering() << std::endl;
+		ss << L"IS FALLING TO DIE : " << player_->is_falling_to_die() << std::endl;
+		ss << L"IS FALLING TO SAFE : " << player_->is_falling_to_safe() << std::endl;
 
 		ss << L"IS LADDER STEP ONLY : " << player_->is_ladder_step_only() << std::endl;
+
 	}
 
 	get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );
@@ -1642,10 +1716,10 @@ void GamePlayScene::render_object_skin_mesh() const
 		{
 			technique_name = "|skin_with_shadow";
 		}
-		else
-		{
-			technique_name ="|skin_flat";
-		}
+	}
+	else
+	{
+		technique_name ="|skin_flat";
 	}
 
 	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( technique_name );
@@ -1690,10 +1764,10 @@ void GamePlayScene::render_object_mesh() const
 		{
 			technique_name = "|main_with_shadow";
 		}
-		else
-		{
-			technique_name ="|main_flat";
-		}
+	}
+	else
+	{
+		technique_name ="|main_flat";
 	}
 
 	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( technique_name );

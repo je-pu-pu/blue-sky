@@ -190,6 +190,8 @@ void ActiveObjectManager::update()
 
 		if ( ( std::get< 0 >( i->second ) - i->first->get_location() ).length() < 0.1f )
 		{
+			i->first->on_arrive_at_target_location();
+
 			i = target_location_map_.erase( i );
 		}
 		else

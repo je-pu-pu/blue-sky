@@ -92,10 +92,17 @@ public:
 	
 	virtual void update_velocity_by_target_location( const Vector3& target_location, float_t speed );
 
+	/// 通り抜けられるオブジェクトかどうかを返す
+	virtual bool is_ghost() const { return false; }
+
+	/// ぶつかった時に反発のある、硬いオブジェクトかどうかを返す
 	virtual bool is_hard() const { return true; }
+
+	/// 壁や障害物として有効なオブジェクトどうかを返す
 	virtual bool is_block() const { return is_hard(); }
+
+	/// ( 風船やゴールなど ) そこに着地しても死なない足場かどうかを返す
 	virtual bool is_safe_footing() const { return false; }
-	virtual bool is_dynamic_object() const { return false; }
 
 	virtual float_t get_collision_width() const = 0;
 	virtual float_t get_collision_height() const = 0;
@@ -105,6 +112,8 @@ public:
 
 	virtual float_t get_default_mass() const { return 1.f; }
 	virtual const Vector3& get_default_gravity() const { return is_hard() ? GravityDefault : GravityZero; }
+
+	virtual void on_arrive_at_target_location() { }
 
 	virtual void on_collide_with( GameObject* );
 

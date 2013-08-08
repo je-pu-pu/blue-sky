@@ -26,6 +26,8 @@ void Girl::restart()
 
 	mode_ = MODE_STAND;
 	get_animation_player()->play( "Stand", true, true );
+
+	flicker_base_location_ = get_start_location();
 }
 
 /**
@@ -37,7 +39,7 @@ void Girl::update()
 	if ( mode_ == MODE_FLOAT )
 	{
 		set_velocity( Vector3( 0.f, 0.f, 0.f ) );
-		update_velocity_by_flicker( get_start_location() );
+		update_velocity_by_flicker( flicker_base_location_, get_flicker_scale() );
 	}
 
 	/*

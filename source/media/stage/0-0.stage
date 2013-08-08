@@ -4,6 +4,7 @@ ground ground
 
 exec change_bgm road
 exec change_sky_box 3
+exec set_balloon_sound_type 3
 
 sky-box sky-box-3
 

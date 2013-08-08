@@ -1008,20 +1008,8 @@ void Player::on_collide_with( Balloon* balloon )
 
 	stop_flickering();
 
-	// play_sound( "balloon-get" );
-
 	balloon_sequence_count_ += 1;
-	balloon_sequence_count_ = math::clamp( balloon_sequence_count_, 1, 7 );
-
-	for ( int n = 1; n <= 7; n++ )
-	{
-		if ( n != balloon_sequence_count_ )
-		{
-			stop_sound( ( std::string( "balloon-" ) + common::serialize( n ) ).c_str() );
-		}
-	}
-
-	play_sound( ( std::string( "balloon-" ) + common::serialize( balloon_sequence_count_ ) ).c_str() );
+	balloon_sound_request_ = balloon_sequence_count_;
 }
 
 void Player::on_collide_with( Rocket* rocket )

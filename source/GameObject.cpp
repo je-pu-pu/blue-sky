@@ -91,6 +91,24 @@ void GameObject::set_gravity( const Vector3& gravity )
 	get_rigid_body()->setGravity( gravity );
 }
 
+void GameObject::set_kinematic( bool is_kinematic )
+{
+	if ( ! get_rigid_body() )
+	{
+		return;
+	}
+
+	if ( is_kinematic )
+	{
+		get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT );
+	}
+	else
+	{
+		get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT );
+	}
+}
+
+
 void GameObject::set_angular_factor( const Vector3& v )
 {
 	if ( ! get_rigid_body() )

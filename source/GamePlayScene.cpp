@@ -398,6 +398,23 @@ void GamePlayScene::setup_command()
 			o->set_angular_factor( GameObject::Vector3( x, y, z  ) );
 		}
 	};
+	command_map_[ "game_object.set_kinematic" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		string_t object_name;
+		bool is_kinematic = false;
+
+		ss >> object_name >> is_kinematic;
+
+		GameObject* o = get_active_object_manager()->get_active_object( object_name );
+		
+		if ( o )
+		{
+			o->set_kinematic( is_kinematic );
+		}
+	};
 	command_map_[ "game_object.set_target_location" ] = [ & ] ( const string_t& s )
 	{
 		std::stringstream ss;

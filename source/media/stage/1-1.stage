@@ -4,11 +4,11 @@ ground ground
 
 exec change_bgm twinkle
 exec change_sky_box star-2
-exec set_line_type 4
-exec set_paper_type 4
-exec set_drawing_accent_scale 0.1
+# exec set_line_type 4
+# exec set_paper_type 4
+# exec set_drawing_accent_scale 0.1
 
-exec set_shadow_color 0.9 0.9 0.95 1
+exec set_shadow_color 0.5 0.5 0.5 1
 exec set_shadow_paper_color 1 1 1 1
 
 # robot 0.0 0.0 -46.0 0
@@ -40,12 +40,24 @@ stone -1.399999976158142 0.0 0.6000000238418579 0
 object wall-3 0.0 1.0 0.0 0
 name wall-1
 
-object wall-3 -1.2 1.0 -9.4 90
+object wall-3 -1.2 1.0 -9.5 90
 name wall-2
 
-switch 1.5 0.0 -6.400000095367432 0
+switch 3.5999999046325684 0.0 -7.0 0
 event turn-on game_object.set_target_location wall-1 0 4 0 1
-event turn-on game_object.set_target_location wall-2 -1.2 4 -9.4 90 1
+event turn-on game_object.set_target_location wall-2 -1.2 4 -9.5 1
+event turn-on play_sound machine-translation
 
-switch -3.9000000953674316 0.0 -10.0 0
-event turn-on game_object.set_target_location wall-2 -1.2 4 -9.4 90 1
+switch -4.0 0.0 -10.0 0
+event turn-on game_object.set_target_location wall-2 -1.2 4 -9.5 1
+event turn-on play_sound machine-translation
+
+# 浮き上がり防止
+exec game_object.set_gravity goal 0 -9.8 0
+
+# キネマティックに設定
+# exec game_object.set_kinematic wall-1 1
+# exec game_object.set_kinematic wall-2 1
+
+
+

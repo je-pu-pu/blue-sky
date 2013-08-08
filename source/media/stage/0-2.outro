@@ -1,7 +1,4 @@
-bg cloud-3.jpg
-bgm tower
-text-color 0xFFAA11FF
-text-border-color 0x000000FF
-text
-開発途中のステージでした。
-blue-sky 2 完全版をお楽しみに！
+layer noise.jpg
+layer-scale 1.6 3 0.0001
+layer-rotate 0 180 0.1
+sound 0-2-outro

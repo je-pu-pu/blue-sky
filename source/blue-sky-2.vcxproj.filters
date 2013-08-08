@@ -476,39 +476,6 @@
     <None Include="blue-sky.config" />
     <None Include="blye-sky.ico" />
     <None Include="media\shader\main.fx" />
-    <None Include="media\stage\0-0.intro">
-      <Filter>Scenario</Filter>
-    </None>
-    <None Include="media\stage\0-0.outro">
-      <Filter>Scenario</Filter>
-    </None>
-    <None Include="media\stage\0-1.intro">
-      <Filter>Scenario</Filter>
-    </None>
-    <None Include="media\stage\0-1.outro">
-      <Filter>Scenario</Filter>
-    </None>
-    <None Include="media\stage\0-2.intro">
-      <Filter>Scenario</Filter>
-    </None>
-    <None Include="media\stage\0-2.outro">
-      <Filter>Scenario</Filter>
-    </None>
-    <None Include="media\stage\ending.outro">
-      <Filter>Scenario</Filter>
-    </None>
-    <None Include="media\stage\0-3.intro">
-      <Filter>Scenario</Filter>
-    </None>
-    <None Include="media\stage\0-3.outro">
-      <Filter>Scenario</Filter>
-    </None>
-    <None Include="media\stage\2-1.intro">
-      <Filter>Scenario</Filter>
-    </None>
-    <None Include="media\stage\ending-drawing-model.list">
-      <Filter>Scenario</Filter>
-    </None>
     <None Include="media\stage\2-3.stage">
       <Filter>Stage</Filter>
     </None>
@@ -555,9 +522,6 @@
     </Filter>
     <Filter Include="math">
       <UniqueIdentifier>{b11ead66-58d3-4e7c-93f4-401ac45bf35e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Scenario">
-      <UniqueIdentifier>{89075730-df63-4f10-a52f-1d05c0bebe34}</UniqueIdentifier>
     </Filter>
     <Filter Include="Input">
       <UniqueIdentifier>{3306306a-f212-4428-80eb-8d1355e62c22}</UniqueIdentifier>

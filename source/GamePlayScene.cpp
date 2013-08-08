@@ -90,6 +90,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, ambient_color_( Color( 1.f, 1.f, 1.f, 1.f ), 0.02f )
 	, shadow_color_( Color( 0.f, 0.f, 0.f, 1.f ), 0.02f )
 	, shadow_paper_color_( Color( 0.9f, 0.9f, 0.9f, 1.f ), 0.02f )
+	, shading_enabled_( true )
 {
 	stage_config_ = new Config();
 
@@ -215,6 +216,10 @@ void GamePlayScene::setup_command()
 	command_map_[ "set_drawing_accent_scale" ] = [ & ] ( const string_t& s )
 	{
 		drawing_accent_scale_ = common::deserialize< float_t >( s );
+	};
+	command_map_[ "set_shading_enabled" ] = [ & ] ( const string_t& s )
+	{
+		shading_enabled_ = common::deserialize< bool >( s );
 	};
 	command_map_[ "set_ambient_color_target" ] = [ & ] ( const string_t& s )
 	{
@@ -1629,7 +1634,21 @@ void GamePlayScene::render_far_billboards() const
  */
 void GamePlayScene::render_object_skin_mesh() const
 {
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( shadow_map_ ? "|skin_with_shadow" : "|skin" );
+	const char* technique_name = "|skin";
+
+	if ( shading_enabled_ )
+	{
+		if ( shadow_map_ )
+		{
+			technique_name = "|skin_with_shadow";
+		}
+		else
+		{
+			technique_name ="|skin_flat";
+		}
+	}
+
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( technique_name );
 
 	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 	{
@@ -1663,7 +1682,21 @@ void GamePlayScene::render_object_skin_mesh() const
  */
 void GamePlayScene::render_object_mesh() const
 {
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( shadow_map_ ? "|main_with_shadow" : "|main" );
+	const char* technique_name = "|main";
+
+	if ( shading_enabled_ )
+	{
+		if ( shadow_map_ )
+		{
+			technique_name = "|main_with_shadow";
+		}
+		else
+		{
+			technique_name ="|main_flat";
+		}
+	}
+
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( technique_name );
 
 	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
 	{

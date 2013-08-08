@@ -116,6 +116,11 @@ void EndingScene::update()
 	if ( get_visible_drawing_line_part_count() > current_drawing_model_->get_line()->get_part_count() )
 	{
 		drawing_model_stop_time_ += elapsed_timer_->get_elapsed_sec();
+		
+		if ( is_last )
+		{
+			is_end = true;
+		}
 
 		if ( drawing_model_stop_time_ >= 2.f && ! is_last )
 		{
@@ -135,7 +140,7 @@ void EndingScene::update()
 
 	if ( get_input()->push( Input::A ) )
 	{
-		if ( is_last )
+		if ( is_end )
 		{
 			in_fade_out_ = true;
 		}

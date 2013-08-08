@@ -198,12 +198,12 @@ void ActiveObjectManager::update()
 		}
 	}
 
-	for ( auto i = target_direction_map_.begin(); i != target_direction_map_.end(); )
+	for ( auto i = target_direction_map_.begin(); i != target_direction_map_.end(); ++i )
 	{
 		i->first->chase_direction_degree( std::get< 0 >( i->second ), std::get< 1 >( i->second ) );
 	}
 
-	for ( auto i = target_direction_object_map_.begin(); i != target_direction_object_map_.end(); )
+	for ( auto i = target_direction_object_map_.begin(); i != target_direction_object_map_.end(); ++i )
 	{
 		i->first->chase_direction_to( std::get< 0 >( i->second )->get_location(), std::get< 1 >( i->second ) );
 	}

@@ -97,6 +97,7 @@ protected:
 	common::chase_value< Color, float_t >		ambient_color_;
 	common::chase_value< Color, float_t >		shadow_color_;
 	common::chase_value< Color, float_t >		shadow_paper_color_;
+	bool										shading_enabled_;
 
 	CommandMap							command_map_;
 	CommandCallList						stage_setup_command_call_list_;

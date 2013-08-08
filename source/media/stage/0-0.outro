@@ -1,3 +1,4 @@
-bg sunset-town.jpg
-bgm tower
-sound voice-exit
+layer noise.jpg
+layer-scale 1.6 3 0.0001
+layer-rotate 0 180 0.1
+sound 0-0-outro

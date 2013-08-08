@@ -440,6 +440,16 @@ float4 ps_main_wrap( PS_INPUT input ) : SV_Target
 	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ); // /* + input.Color */ * float4( input.Normal, 1.f );
 }
 
+float4 ps_skin_wrap_flat( PS_INPUT input ) : SV_Target
+{
+	return model_texture.Sample( wrap_texture_sampler, input.TexCoord );
+}
+
+float4 ps_main_wrap_flat( PS_FLAT_INPUT input ) : SV_Target
+{
+	return model_texture.Sample( wrap_texture_sampler, input.TexCoord );
+}
+
 float4 ps_debug( PS_INPUT input ) : SV_Target
 {
 	return float4( 1.f, 0.f, 0.f, 0.25f );
@@ -687,6 +697,21 @@ technique11 main
     }
 }
 
+technique11 main_flat
+{
+	pass main
+    {
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+        SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_4_0, ps_main_wrap_flat() ) );
+
+		RASTERIZERSTATE = Default;
+    }
+}
+
 // ----------------------------------------
 // skin
 // ----------------------------------------
@@ -700,6 +725,21 @@ technique11 skin
         SetVertexShader( CompileShader( vs_4_0, vs_skin() ) );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, ps_main_wrap() ) );
+
+		RASTERIZERSTATE = Default;
+    }
+}
+
+technique11 skin_flat
+{
+	pass main
+    {
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+        SetVertexShader( CompileShader( vs_4_0, vs_skin() ) );
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_4_0, ps_skin_wrap_flat() ) );
 
 		RASTERIZERSTATE = Default;
     }

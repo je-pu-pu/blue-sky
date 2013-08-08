@@ -1241,6 +1241,14 @@ void GamePlayScene::update_balloon_sound()
 			bgm_->fade_in();
 		}
 	}
+
+	// ŠÖ”•ª‚¯‚é
+	if ( player_->get_balloon() )
+	{
+		// ‚©‚­‚©‚­‚·‚é‚Ì‚Å‚±‚±‚Å‚â‚é
+		const_cast< Balloon* >( player_->get_balloon() )->set_location( player_->get_location() + player_->get_front() * 0.25f - player_->get_right() * 0.25f + GameObject::Vector3( 0, 1.75f, 0 ) );
+		const_cast< Balloon* >( player_->get_balloon() )->set_direction_degree( 0 );
+	}
 }
 
 /**

@@ -39,7 +39,7 @@ void Balloon::update()
 		if ( player_->get_balloon() == this )
 		{
 			set_velocity( Vector3( 0, 0, 0 ) );
-			set_location( player_->get_location() + player_->get_front() * 0.25f - player_->get_right() * 0.25f + Vector3( 0, 1.75f + std::sin( flicker_ ) * 0.1f, 0 ) );
+			set_location( player_->get_location() + player_->get_front() * 0.5f - player_->get_right() * 0.25f + Vector3( 0, 1.75f, 0 ) );
 			set_direction_degree( 0 );
 
 			if ( player_->get_action_mode() != Player::ACTION_MODE_BALLOON )

@@ -59,6 +59,8 @@
 
 #include "Direct3D11.h"
 
+#include "DelayedCommand.h"
+
 #include "math.h"
 
 #include <game/Sound.h>
@@ -185,6 +187,18 @@ GamePlayScene::~GamePlayScene()
 	get_direct_3d()->getTextureManager()->unload_all();
 
 	get_physics()->clear();
+	
+	clear_delayed_command();
+}
+
+void GamePlayScene::clear_delayed_command()
+{
+	for ( auto i = delayed_command_list_.begin(); i != delayed_command_list_.end(); ++i )
+	{
+		delete *i;
+	}
+
+	delayed_command_list_.clear();
 }
 
 /**
@@ -197,9 +211,14 @@ void GamePlayScene::setup_command()
 	{
 		std::stringstream ss;
 		ss << s;
-
-		float_t r = 0.f, g = 0.f, b = 0.f, a = 0.f;
 		ss >> color.r() >> color.g() >> color.b() >> color.a();
+	};
+
+	auto set_color_target = [] ( common::chase_value< Color, float_t >& color, const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+		ss >> color.target_value().r() >> color.target_value().g() >> color.target_value().b() >> color.target_value().a() >> color.speed();
 	};
 
 	command_map_[ "set_line_type" ] = [ & ] ( const string_t& s )
@@ -227,7 +246,7 @@ void GamePlayScene::setup_command()
 	};
 	command_map_[ "set_ambient_color_target" ] = [ & ] ( const string_t& s )
 	{
-		set_color( ambient_color_.target_value(), s );
+		set_color_target( ambient_color_, s );
 	};
 	command_map_[ "set_ambient_color" ] = [ & ] ( const string_t& s )
 	{
@@ -236,7 +255,7 @@ void GamePlayScene::setup_command()
 	};
 	command_map_[ "set_shadow_color_target" ] = [ & ] ( const string_t& s )
 	{
-		set_color( shadow_color_.target_value(), s );
+		set_color_target( shadow_color_, s );
 	};
 	command_map_[ "set_shadow_color" ] = [ & ] ( const string_t& s )
 	{
@@ -245,7 +264,7 @@ void GamePlayScene::setup_command()
 	};
 	command_map_[ "set_shadow_paper_color_target" ] = [ & ] ( const string_t& s )
 	{
-		set_color( shadow_paper_color_.target_value(), s );
+		set_color_target( shadow_paper_color_, s );
 	};
 	command_map_[ "set_shadow_paper_color" ] = [ & ] ( const string_t& s )
 	{
@@ -536,6 +555,32 @@ void GamePlayScene::setup_command()
 	{
 		player_->start_flickering();
 	};
+	command_map_[ "timer" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		float_t interval = 1.f;
+		int_t count = 1;
+		string_t command;
+		
+		ss >> interval >> count;
+
+		while ( ss.good() )
+		{
+			string_t s;
+			ss >> s;
+
+			if ( ! command.empty() )
+			{
+				command+= " ";
+			}
+
+			command += s;
+		}
+
+		delayed_command_list_.push_back( new DelayedCommand( interval, count, command ) );
+	};
 }
 
 /**
@@ -568,6 +613,7 @@ void GamePlayScene::restart()
 
 	get_active_object_manager()->restart();
 
+	clear_delayed_command();
 	setup_stage();
 
 	play_sound( "restart" );
@@ -955,6 +1001,39 @@ void GamePlayScene::load_stage_file( const char* file_name )
 	}
 }
 
+void GamePlayScene::exec_command( const string_t& command )
+{
+	std::stringstream ss;
+	ss << command;
+
+	string_t command_name;
+	string_t command_params;
+
+	ss >> command_name;
+
+	while ( ss.good() )
+	{
+		string_t s;
+		ss >> s;
+
+		if ( ! command_params.empty() )
+		{
+			command_params += " ";
+		}
+
+		command_params += s;
+	}
+
+	auto i = command_map_.find( command_name );
+
+	if ( i == command_map_.end() )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( ( "command not found. ( " ) + command_name + " )" );
+	}
+
+	i->second( command_params );
+}
+
 void GamePlayScene::save_stage_file( const char* file_name ) const
 {
 
@@ -1013,6 +1092,7 @@ void GamePlayScene::update()
 	get_sound_manager()->set_listener_orientation( camera_->front(), camera_->up() );
 	get_sound_manager()->commit();
 
+	update_delayed_command();
 	update_balloon_sound();
 	update_shadow();
 
@@ -1179,6 +1259,27 @@ void GamePlayScene::update_main()
 		{
 			get_direct_3d()->getFader()->set_color( Direct3D::Color( 0.25f, 0.f, 0.f, 0.75f ) );
 			get_direct_3d()->getFader()->fade_out( 0.25f );
+		}
+	}
+}
+
+void GamePlayScene::update_delayed_command()
+{
+	for ( auto i = delayed_command_list_.begin(); i != delayed_command_list_.end(); )
+	{
+		if ( ( *i )->update( get_elapsed_time() ) )
+		{
+			exec_command( ( *i )->get_command() );
+		}
+
+		if ( ( *i )->is_over() )
+		{
+			delete *i;
+			i = delayed_command_list_.erase( i );
+		}
+		else
+		{
+			++i;
 		}
 	}
 }

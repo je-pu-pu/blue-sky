@@ -105,7 +105,7 @@ ActiveObject* ActiveObjectManager::create_object( std::stringstream& ss, Drawing
 	mass_map[ "board-1"      ] = 20.f;
 	mass_map[ "box-5x5x5"    ] = 1.f;
 	mass_map[ "box-2x2x2"    ] = 100.f;
-	mass_map[ "robot-dead-body" ] = 100.f;
+	mass_map[ "robot-dead-body" ] = 10.f;
 	mass_map[ "wall-3"       ] = 100.f;
 
 

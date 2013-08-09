@@ -32,7 +32,15 @@ void BaseSwitch::update()
 
 void BaseSwitch::action( const string_t& action )
 {
-	if ( action == "break" )
+	if ( action == "turn-on" )
+	{
+		turn_on();
+	}
+	else if ( action == "turn-off" )
+	{
+		turn_off();
+	}
+	else if ( action == "break" )
 	{
 		do_break();
 	}

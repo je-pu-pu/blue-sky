@@ -33,6 +33,17 @@ goal -5.0 39.0 15.0
 girl 15.0 20.0 -64.0 180
 player 15.0 20.0 -65.0
 
+switch 4.0 61.0 -33.0 60
+event turn-on game_object.create robot-dead-body 5 81 -32
+event turn-on game_object.create robot-dead-body 4 82 -33
+event turn-on game_object.create robot-dead-body 6 83 -34
+
+// event turn-on set_ambient_color_target 1 1 1 1
+// event turn-off set_ambient_color_target 0.5 0.5 0.5 1
+
+// event turn-on change_sky_box sky
+event turn-off change_sky_box moon
+
 dynamic-object box-2x2x2 12.0 20.0 -67.0 
 name wall-1
 

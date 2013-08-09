@@ -468,6 +468,9 @@
     <ClInclude Include="math.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="DelayedCommand.h">
+      <Filter>Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

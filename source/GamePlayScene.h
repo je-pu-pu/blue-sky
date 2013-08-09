@@ -39,6 +39,7 @@ class Goal;
 class ActiveObject;
 class Camera;
 class DrawingModel;
+class DelayedCommand;
 
 /**
  * ƒQ[ƒ€ƒvƒŒƒC’†‚Ìˆ—‚ğŠÇ—‚·‚é
@@ -59,6 +60,7 @@ public:
 
 	typedef std::function< void() > CommandCall;
 	typedef std::list< CommandCall > CommandCallList;
+	typedef std::list< DelayedCommand* > DelayedCommandList;
 
 	enum BalloonSoundType
 	{
@@ -111,6 +113,7 @@ protected:
 
 	CommandMap							command_map_;
 	CommandCallList						stage_setup_command_call_list_;
+	DelayedCommandList					delayed_command_list_;
 
 	void load_stage_file( const char* );
 	void save_stage_file( const char* ) const;
@@ -131,8 +134,13 @@ protected:
 	void update_main();
 	void update_clear();
 
+	void update_delayed_command();
+	void clear_delayed_command();
+
 	void update_balloon_sound();
 	void update_shadow();
+	
+	void exec_command( const string_t& );
 
 	/** @todo ˆÚ“®‚·‚é */
 	void update_render_data_for_game() const;

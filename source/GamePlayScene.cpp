@@ -1215,7 +1215,7 @@ void GamePlayScene::update_balloon_sound()
 		}
 	}
 
-	if ( player_->get_action_mode() == Player::ACTION_MODE_BALLOON && balloon_sound_type_ == BALLOON_SOUND_TYPE_SOLO || balloon_sound_type_ == BALLOON_SOUND_TYPE_SCALE )
+	if ( player_->get_action_mode() == Player::ACTION_MODE_BALLOON && ( balloon_sound_type_ == BALLOON_SOUND_TYPE_SOLO || balloon_sound_type_ == BALLOON_SOUND_TYPE_SCALE ) )
 	{
 		action_bgm_after_timer_ = 2.f;
 	}

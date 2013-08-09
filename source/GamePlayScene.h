@@ -115,6 +115,9 @@ protected:
 	CommandCallList						stage_setup_command_call_list_;
 	DelayedCommandList					delayed_command_list_;
 
+	bool								is_blackout_;
+	float_t								blackout_timer_;
+
 	void load_stage_file( const char* );
 	void save_stage_file( const char* ) const;
 
@@ -133,6 +136,8 @@ protected:
 
 	void update_main();
 	void update_clear();
+	void update_blackout();
+	void go_to_next_scene();
 
 	void update_delayed_command();
 	void clear_delayed_command();

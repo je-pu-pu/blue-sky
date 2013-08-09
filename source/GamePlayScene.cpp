@@ -93,6 +93,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, shadow_paper_color_( Color( 0.9f, 0.9f, 0.9f, 1.f ), 0.02f )
 	, shading_enabled_( true )
 	, balloon_sound_type_( BALLOON_SOUND_TYPE_MIX )
+	, is_blackout_( false )
+	, blackout_timer_( 0.f )
 {
 	stage_config_ = new Config();
 
@@ -328,8 +330,16 @@ void GamePlayScene::setup_command()
 		ss << s;
 
 		string_t sound_name, sound_file_name;
+		bool replace = false;
 
-		ss >> sound_name >> sound_file_name;
+		ss >> sound_name >> sound_file_name >> replace;
+
+		Sound* current_sound = get_sound_manager()->load( sound_name.c_str() );
+
+		if ( replace && current_sound )
+		{
+			get_sound_manager()->unload( sound_name.c_str() );
+		}
 
 		Sound* sound = get_sound_manager()->load( sound_name.c_str(), ( sound_file_name.empty() ? sound_name : sound_file_name ).c_str() );
 	};
@@ -580,6 +590,16 @@ void GamePlayScene::setup_command()
 		}
 
 		delayed_command_list_.push_back( new DelayedCommand( interval, count, command ) );
+	};
+	command_map_[ "end_by_last_switch" ] = [ & ] ( const string_t& s )
+	{
+		bgm_->stop();
+		get_sound_manager()->stop_all();
+
+		Sound* sound = get_sound_manager()->get_sound( "switch-off" );
+		sound->play( false, true );
+
+		is_blackout_ = true;
 	};
 }
 
@@ -1047,7 +1067,11 @@ void GamePlayScene::update()
 {
 	Scene::update();
 
-	if ( is_cleared_ )
+	if ( is_blackout_ )
+	{
+		update_blackout();
+	}
+	else if ( is_cleared_ )
 	{
 		update_clear();
 	}
@@ -1263,6 +1287,19 @@ void GamePlayScene::update_main()
 	}
 }
 
+void GamePlayScene::update_blackout()
+{
+	blackout_timer_ += get_elapsed_time();
+
+	get_direct_3d()->getFader()->set_color( Color::Black );
+	get_direct_3d()->getFader()->full_out();
+
+	if ( blackout_timer_ >= 6.f )
+	{
+		go_to_next_scene();
+	}
+}
+
 void GamePlayScene::update_delayed_command()
 {
 	for ( auto i = delayed_command_list_.begin(); i != delayed_command_list_.end(); )
@@ -1437,18 +1474,23 @@ void GamePlayScene::update_clear()
 	
 	if ( ! get_sound_manager()->get_sound( "fin" )->is_playing() )
 	{
-		std::string save_param_name = StageSelectScene::get_stage_prefix_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + "." + get_stage_name();
+		go_to_next_scene();
+	}
+}
 
-		get_save_data()->set( save_param_name.c_str(), std::max( player_->has_medal() ? 2 : 1, get_save_data()->get( save_param_name.c_str(), 0 ) ) );
+void GamePlayScene::go_to_next_scene()
+{
+	std::string save_param_name = StageSelectScene::get_stage_prefix_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + "." + get_stage_name();
 
-		if ( get_stage_name() == "2-3" )
-		{
-			set_next_scene( "ending" );
-		}
-		else
-		{
-			set_next_scene( "stage_outro" );
-		}
+	get_save_data()->set( save_param_name.c_str(), std::max( player_->has_medal() ? 2 : 1, get_save_data()->get( save_param_name.c_str(), 0 ) ) );
+
+	if ( get_stage_name() == "2-3" )
+	{
+		set_next_scene( "ending" );
+	}
+	else
+	{
+		set_next_scene( "stage_outro" );
 	}
 }
 

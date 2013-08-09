@@ -11,18 +11,6 @@ exec change_sky_box star-2
 exec set_shadow_color 0.5 0.5 0.5 1
 exec set_shadow_paper_color 1 1 1 1
 
-# robot 0.0 0.0 -46.0 0
-# name robot1
-# exec game_object.action robot1 patrol
-
-# robot 0.0 0.0 -25.0 180
-# name robot2
-# exec game_object.action robot2 patrol
-
-# robot 0.0 0.0 -6.0 180
-# name robot3
-# exec game_object.action robot3 patrol
-
 stone 1.4999998807907104 0.0 -39.29999923706055 0
 stone 1.1999999284744263 0.0 -31.799999237060547 0
 goal 0.699999988079071 0.0 5.099999904632568
@@ -43,14 +31,19 @@ name wall-1
 object wall-3 -1.2 1.0 -9.5 90
 name wall-2
 
+# ゴール用スイッチ
 switch 3.5999999046325684 0.0 -7.0 0
+name switch-a
 event turn-on game_object.set_target_location wall-1 0 4 0 1
 event turn-on game_object.set_target_location wall-2 -1.2 4 -9.5 1
 event turn-on play_sound machine-translation
+event turn-on timer 5 1 game_object.action switch-a turn-off
 
 switch -4.0 0.0 -10.0 0
+name switch-b
 event turn-on game_object.set_target_location wall-2 -1.2 4 -9.5 1
 event turn-on play_sound machine-translation
+event turn-on timer 5 1 game_object.action switch-b turn-off
 
 # 浮き上がり防止
 exec game_object.set_gravity goal 0 -9.8 0

@@ -221,7 +221,7 @@ void StoryTextScene::update()
 		}
 		else
 		{
-			sound_->fade_out();
+			sound_->fade_out( Sound::VOLUME_FADE_SPEED_FAST );
 
 			if ( bgm_ )
 			{

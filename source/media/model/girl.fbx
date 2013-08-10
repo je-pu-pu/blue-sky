@@ -12636,7 +12636,7 @@ Objects:  {
 		}
 		UseMipMap: 0
 		Filename: "god-body.png"
-		RelativeFilename: "E:\je\projects\blue-sky\media\models\god-body.png"
+		RelativeFilename: "god-body.png"
 	}
 	Video: "Video::god-eye_png", "Clip" {
 		Type: "Clip"
@@ -12657,7 +12657,7 @@ Objects:  {
 		}
 		UseMipMap: 0
 		Filename: "god-eye.png"
-		RelativeFilename: "E:\je\projects\blue-sky\media\models\god-eye.png"
+		RelativeFilename: "god-eye.png"
 	}
 	Video: "Video::god-face_png", "Clip" {
 		Type: "Clip"
@@ -12678,7 +12678,7 @@ Objects:  {
 		}
 		UseMipMap: 0
 		Filename: "god-face.png"
-		RelativeFilename: "E:\je\projects\blue-sky\media\models\god-face.png"
+		RelativeFilename: "god-face.png"
 	}
 	Video: "Video::god-hair_png", "Clip" {
 		Type: "Clip"
@@ -12699,7 +12699,7 @@ Objects:  {
 		}
 		UseMipMap: 0
 		Filename: "god-hair.png"
-		RelativeFilename: "E:\je\projects\blue-sky\media\models\god-hair.png"
+		RelativeFilename: "god-hair.png"
 	}
 	Texture: "Texture::god-body_png", "TextureVideoClip" {
 		Type: "TextureVideoClip"
@@ -12724,7 +12724,7 @@ Objects:  {
 		}
 		Media: "Video::god-body_png"
 		FileName: "god-body.png"
-		RelativeFilename: "E:\je\projects\blue-sky\media\models\god-body.png"
+		RelativeFilename: "god-body.png"
 		ModelUVTranslation: 0,0
 		ModelUVScaling: 1,1
 		Texture_Alpha_Source: "None"
@@ -12753,7 +12753,7 @@ Objects:  {
 		}
 		Media: "Video::god-eye_png"
 		FileName: "god-eye.png"
-		RelativeFilename: "E:\je\projects\blue-sky\media\models\god-eye.png"
+		RelativeFilename: "god-eye.png"
 		ModelUVTranslation: 0,0
 		ModelUVScaling: 1,1
 		Texture_Alpha_Source: "None"
@@ -12782,7 +12782,7 @@ Objects:  {
 		}
 		Media: "Video::god-face_png"
 		FileName: "god-face.png"
-		RelativeFilename: "E:\je\projects\blue-sky\media\models\god-face.png"
+		RelativeFilename: "god-face.png"
 		ModelUVTranslation: 0,0
 		ModelUVScaling: 1,1
 		Texture_Alpha_Source: "None"
@@ -12811,7 +12811,7 @@ Objects:  {
 		}
 		Media: "Video::god-hair_png"
 		FileName: "god-hair.png"
-		RelativeFilename: "E:\je\projects\blue-sky\media\models\god-hair.png"
+		RelativeFilename: "god-hair.png"
 		ModelUVTranslation: 0,0
 		ModelUVScaling: 1,1
 		Texture_Alpha_Source: "None"

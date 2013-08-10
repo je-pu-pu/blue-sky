@@ -11,6 +11,9 @@ goal 0.0 10.0 -40.0
 medal -7.0 101.0 -47.0 0
 dynamic-object soda-can-1 0.0 0.0 0.0 0
 
+# プレイヤーの足場ラインを表示しない
+exec game_object.action player set_visible 1 0
+
 # 準備
 area-switch 0.0 90.0 -40.0 100.0 4.0 100.0 
 event turn-on load_sound fall silence 1

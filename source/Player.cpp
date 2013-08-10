@@ -986,6 +986,11 @@ bool Player::is_falling() const
 
 void Player::on_collide_with( Balloon* balloon )
 {
+	if ( is_flickering_ )
+	{
+		return;
+	}
+
 	if ( balloon->get_player() )
 	{
 		return;

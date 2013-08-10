@@ -22,6 +22,7 @@ exec game_object.set_animation_speed girl 0.5
 exec game_object.play_animation girl Float 0 1
 exec game_object.set_target_direction_object girl player 1
 exec player.start_flickering
+exec game_object.action player set_visible 0 0
 
 
 medal   25  25  50

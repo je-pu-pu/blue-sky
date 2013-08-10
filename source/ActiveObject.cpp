@@ -265,7 +265,7 @@ void ActiveObject::action( const string_t& s )
 	{
 		get_animation_player()->set_broken( true );
 	}
-	else if ( s == "break_animation 0" )
+	else if ( s == "break_animation 0" && get_animation_player() )
 	{
 		get_animation_player()->set_broken( false );
 	}

@@ -26,6 +26,10 @@ exec game_object.set_animation_speed girl 0.5
 exec game_object.play_animation girl Stand 0 1
 exec game_object.set_target_direction_object girl player 1
 
+# 少女は常に所定の位置へ
+exec timer 1 99999 game_object.set_target_location girl 0.0 99.0 -45.0 10
+
+exec load_sound fin today-and-tomorrow-b 1
 
 # -----
 # 手前のビルのスイッチ
@@ -146,7 +150,7 @@ event turn-on game_object.action switch-l break
 
 # -----
 # ゴール移動用スイッチ
-switch -9.0 99.0 -52.0 180
+switch 0 99.0 -46.0
 name switch-m
 
 # ゴールを移動させる
@@ -163,17 +167,23 @@ event turn-on set_light_position_target -100 100 20
 event turn-on set_line_type 1
 event turn-on set_paper_type 1
 event turn-on change_bgm semi
+# 神を乱れさせる
+event turn-on game_object.set_animation_speed girl 0.2
+event turn-on game_object.play_animation girl Float 0 1
+
 
 # 5 秒後に普通に戻る
 event turn-on timer 5 1 change_sky_box 3
 event turn-on timer 5 1 change_bgm road
-event turn-on timer 5 1 event turn-on set_ambient_color 1 1 1 1
-event turn-on timer 5 1 set_shadow_color_target 1 0 0 1
+event turn-on timer 5 1 set_ambient_color 1 1 1 1
+event turn-on timer 5 1 set_shadow_color_target 0.25 0.25 0.75 1
 event turn-on timer 5 1 set_shadow_paper_color_target 0 0 0 0
 event turn-on timer 5 1 set_light_position_target -100 100 20
 event turn-on timer 5 1 set_line_type 0
 event turn-on timer 5 1 set_paper_type 0
 event turn-on timer 5 1 set_drawing_accent_scale 0
+# 神を消す
+event turn-on timer 5 1 game_object.action girl set_visible 0 0
 
 # 念のため 5 秒後にもゴールを移動させる
 event turn-on timer 5 1 game_object.set_target_location goal 0.0 99.0 -40.0 1
@@ -193,4 +203,3 @@ event turn-on game_object.action switch-k break
 event turn-on game_object.action switch-l break
 event turn-on game_object.action switch-m break
 event turn-on game_object.action area-switch-a break
-

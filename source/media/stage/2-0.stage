@@ -13,6 +13,8 @@ exec set_line_type 1
 exec set_paper_type 1
 exec set_shadow_color 0 0 0 1
 
+exec load_sound fin today-and-tomorrow-b 1
+
 ladder -2.0 55.400001525878906 -35.0 270
 rocket 4.0 60.0 -77.0 0
 rocket 4.0 51.0 -106.0 0

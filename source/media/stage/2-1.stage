@@ -38,6 +38,7 @@ exec load_sound fin today-and-tomorrow-b 1
 switch 1.0 99.0 -79.0 180
 name switch-a
 event turn-on play_sound boku-switch-2
+event turn-on play_sound girl-damage-1
 event turn-on game_object.action switch-a break
 
 
@@ -45,6 +46,7 @@ event turn-on game_object.action switch-a break
 switch -1.0 99.0 -81.0 180
 name switch-b
 event turn-on play_sound boku-switch-1
+event turn-on play_sound girl-damage-2
 event turn-on game_object.action switch-b break
 
 
@@ -75,6 +77,7 @@ event turn-on game_object.action area-switch-a break
 switch 3.0 99.0 -68.0 180
 name switch-d
 event turn-on play_sound boku-switch-3
+event turn-on play_sound girl-damage-3
 event turn-on change_sky_box moon
 event turn-on game_object.action switch-d break
 
@@ -83,6 +86,7 @@ event turn-on game_object.action switch-d break
 switch -6.0 99.0 -58.0 180
 name switch-e
 event turn-on play_sound boku-switch-5
+event turn-on play_sound girl-damage-4
 event turn-on game_object.action switch-e break
 
 # メダルを取れる場所にプレイヤーを運ぶ
@@ -160,13 +164,17 @@ event turn-on game_object.set_target_location goal 0.0 99.0 -40.0 1
 event turn-on game_object.action girl break_animation 1
 event turn-on game_object.set_target_location girl 0.0 99.0 -45.0 10
 
+# 少女の断末魔
+event turn-on play_sound girl-damage-5
+
 # 映像演出
 event turn-on set_shadow_color_target 1 0 0 1
 event turn-on set_shadow_paper_color_target 0 0 0 0
 event turn-on set_light_position_target -100 100 20
 event turn-on set_line_type 1
 event turn-on set_paper_type 1
-event turn-on change_bgm semi
+# event turn-on change_bgm semi
+
 # 神を乱れさせる
 event turn-on game_object.set_animation_speed girl 0.2
 event turn-on game_object.play_animation girl Float 0 1

@@ -24,6 +24,7 @@ private:
 	float_t	speed_;											///< 再生スピード
 	float_t current_frame_;									///< 現在の再生フレーム
 	bool is_looping_;										///< ループ再生中フラグ
+	bool is_broken_;										///< 破壊フラグ
 
 	/// @todo 移動する
 	const BoneConstantBuffer constant_buffer_;				///< 定数バッファ
@@ -52,6 +53,9 @@ public:
 
 	void update_render_data() const;
 	void bind_render_data() const;
+
+	bool is_broken() const { return is_broken_; }
+	void set_broken( bool b ) { is_broken_ = b; }
 
 }; // class AnimationPlayer
 

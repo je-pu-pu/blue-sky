@@ -84,6 +84,7 @@ event turn-off game_object.set_mass wall-1 1
 event turn-on game_object.set_gravity wall-1 0
 event turn-on game_object.set_angular_factor wall-1 0
 event turn-on game_object.set_target_location wall-1 19.0 25.0 -58.0 1
+event turn-on game_object.action girl break_animation 1
 
 
 area-switch 23.0 20.0 -47.0 2.0 2.0 2.0 0

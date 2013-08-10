@@ -552,7 +552,20 @@ void GamePlayScene::setup_command()
 		ss << s;
 
 		string_t object_name, action;
-		ss >> object_name >> action;
+		ss >> object_name;
+
+		while ( ss.good() )
+		{
+			string_t s;
+			ss >> s;
+
+			if ( ! action.empty() )
+			{
+				action += " ";
+			}
+
+			action += s;
+		}
 
 		ActiveObject* o = get_active_object_manager()->get_active_object( object_name );
 		

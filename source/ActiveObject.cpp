@@ -248,4 +248,16 @@ void ActiveObject::play_animation( const char* name, bool force, bool loop )
 	get_animation_player()->play( name, force, loop );
 }
 
+void ActiveObject::action( const string_t& s )
+{
+	if ( s == "break_animation 1" && get_animation_player()	)
+	{
+		get_animation_player()->set_broken( true );
+	}
+	else if ( s == "break_animation 0" )
+	{
+		get_animation_player()->set_broken( false );
+	}
+}
+
 } // namespace blue_sky

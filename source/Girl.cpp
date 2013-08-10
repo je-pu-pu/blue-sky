@@ -52,6 +52,8 @@ void Girl::update()
 
 void Girl::action( const string_t& s )
 {
+	ActiveObject::action( s );
+
 	if ( s == "float" )
 	{
 		mode_ = MODE_FLOAT;

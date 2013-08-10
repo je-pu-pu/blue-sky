@@ -52,7 +52,7 @@ public:
 	virtual void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; }
 	virtual const DrawingModel* get_drawing_model() const { return drawing_model_; }
 
-	virtual void action( const string_t& ) { }
+	virtual void action( const string_t& );
 
 	virtual void set_flicker_scale( float_t s ) { flicker_scale_ = s; }
 	virtual float_t get_flicker_scale() const { return flicker_scale_; }
@@ -93,6 +93,8 @@ public:
 	virtual void render_material_at( uint_t ) const;
 
 	void play_animation( const char_t* name, bool force, bool loop );
+
+	void action( const string_t& s ) const;
 
 	// virtual void render_line() = 0;
 

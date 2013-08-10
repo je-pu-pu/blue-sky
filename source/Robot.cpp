@@ -247,6 +247,8 @@ void Robot::update_patrol()
 
 void Robot::action( const string_t& s )
 {
+	ActiveObject::action( s );
+
 	if ( s == "rotation" )
 	{
 		mode_ = MODE_ROTATION;

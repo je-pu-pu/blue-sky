@@ -15,6 +15,7 @@ AnimationPlayer::AnimationPlayer( const SkinningAnimationSet* skinning_animation
 	, speed_( 1.f )
 	, current_frame_( 0.f )
 	, is_looping_( false )
+	, is_broken_( false )
 	, constant_buffer_( blue_sky::GameMain::get_instance()->get_direct_3d() )
 {
 	
@@ -126,7 +127,14 @@ void AnimationPlayer::calculate_bone_matrix_recursive( BoneConstantBuffer::Data&
 	uint_t parent_bone_index = get_skinning_animation_set()->get_parent_bone_index( bone_index );
 	const Matrix& parent_bone_offset_matrix = bone_index == 0 ? Matrix::identity() : get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( parent_bone_index );
 
-	data.bone_matrix[ bone_index ] = bone_offset_matrix.inverse() * get_bone_local_matrix( bone_index ) * parent_bone_offset_matrix * parent_bone_matrix;
+	if ( is_broken_ )
+	{
+		data.bone_matrix[ bone_index ] = bone_offset_matrix.inverse() * get_bone_local_matrix( bone_index ) * bone_offset_matrix * parent_bone_matrix;
+	}
+	else
+	{
+		data.bone_matrix[ bone_index ] = bone_offset_matrix.inverse() * get_bone_local_matrix( bone_index ) * parent_bone_offset_matrix * parent_bone_matrix;
+	}
 
 	for ( uint_t n = 0; n < get_skinning_animation_set()->get_child_bone_count( bone_index ); ++n )
 	{

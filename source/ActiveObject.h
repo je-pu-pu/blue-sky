@@ -35,6 +35,8 @@ private:
 	Vector3				front_;				///< ‘O
 	Vector3				right_;				///< ‰E
 
+	bool				is_mesh_visible_;	///< ƒƒbƒVƒ…‚ð•`‰æ‚·‚é‚©‚Ç‚¤‚©
+	bool				is_line_visible_;	///< ƒ‰ƒCƒ“‚ð•`‰æ‚·‚é‚©
 
 protected:
 	virtual void limit_velocity();
@@ -87,7 +89,13 @@ public:
 	bool is_dead() const { return is_dead_; }
 
 	/// •`‰æ‚³‚ê‚é‚©‚Ç‚¤‚©‚ð•Ô‚·
-	virtual bool is_visible() const { return ! is_dead(); }
+	virtual bool is_visible() const { return ( is_mesh_visible() || is_line_visible() ); }
+
+	bool is_mesh_visible() const { return is_mesh_visible_; }
+	bool is_line_visible() const { return is_line_visible_; }
+
+	void set_mesh_visible( bool v ) { is_mesh_visible_ = v; }
+	void set_line_visible( bool v ) { is_line_visible_ = v; }
 
 	virtual void render_mesh() const;
 	virtual void render_material_at( uint_t ) const;

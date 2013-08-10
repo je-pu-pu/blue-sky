@@ -2027,7 +2027,7 @@ void GamePlayScene::render_active_object_mesh( const ActiveObject* active_object
  */
 void GamePlayScene::render_active_object_line( const ActiveObject* active_object ) const
 {
-	if ( ! active_object->is_visible() )
+	if ( ! active_object->is_line_visible() )
 	{
 		return;
 	}

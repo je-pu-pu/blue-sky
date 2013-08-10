@@ -14,6 +14,8 @@
 
 #include <common/math.h>
 
+#include <sstream>
+
 #include "memory.h"
 
 namespace blue_sky
@@ -34,6 +36,9 @@ ActiveObject::ActiveObject()
 
 	, front_( 0, 0, 1 )
 	, right_( 1, 0, 0 )
+
+	, is_mesh_visible_( true )
+	, is_line_visible_( true )
 {
 	
 }
@@ -89,6 +94,9 @@ void ActiveObject::restart()
 
 		set_direction_degree( start_direction_degree_ );
 	}
+
+	is_mesh_visible_ = true;
+	is_line_visible_ = true;
 }
 
 void ActiveObject::limit_velocity()
@@ -194,6 +202,9 @@ void ActiveObject::kill()
 {
 	is_dead_ = true;
 
+	is_mesh_visible_ = false;
+	is_line_visible_ = false;
+
 	/*
 	if ( get_rigid_body() )
 	{
@@ -204,11 +215,11 @@ void ActiveObject::kill()
 
 void ActiveObject::render_mesh() const
 {
-	if ( ! is_visible() )
+	if ( ! is_mesh_visible() )
 	{
 		return;
 	}
-	
+
 	get_object_constant_buffer()->bind_to_vs();
 	get_object_constant_buffer()->bind_to_ps();
 	
@@ -257,6 +268,24 @@ void ActiveObject::action( const string_t& s )
 	else if ( s == "break_animation 0" )
 	{
 		get_animation_player()->set_broken( false );
+	}
+	else
+	{
+		std::stringstream ss;
+		ss << s;
+
+		string_t command;
+		ss >> command;
+
+		if ( command == "set_visible" )
+		{
+			bool model = true, line = true;
+
+			ss >> model >> line;
+
+			set_mesh_visible( model );
+			set_line_visible( line );
+		}
 	}
 }
 

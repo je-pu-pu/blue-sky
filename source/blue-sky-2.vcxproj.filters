@@ -515,6 +515,9 @@
     <None Include="media\stage\1-2.stage">
       <Filter>Stage</Filter>
     </None>
+    <None Include="media\stage_ext\staff.stage">
+      <Filter>Stage</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Drawing">

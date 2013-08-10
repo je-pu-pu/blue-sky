@@ -782,7 +782,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			ss >> file_name;
 
-			get_physics()->load_obj( ( std::string( "media/stage/" ) + file_name ).c_str() );
+			get_physics()->load_obj( ( StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + file_name ).c_str() );
 		}
 		else if ( name == "player" )
 		{
@@ -1352,7 +1352,7 @@ void GamePlayScene::update_balloon_sound()
 		else if ( balloon_sound_type_ == BALLOON_SOUND_TYPE_SCALE )
 		{
 			// int r = math::clamp( balloon_sound_request, 1, 7 );
-			int r = balloon_sound_request % 7 + 1;
+			int r = ( balloon_sound_request - 1 ) % 7 + 1;
 
 			for ( int n = 1; n <= 7; n++ )
 			{

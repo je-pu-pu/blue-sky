@@ -1,0 +1,27 @@
+collision staff.obj
+object stage-staff
+ground ground
+
+exec change_bgm road
+exec change_sky_box 3
+exec set_balloon_sound_type 3
+
+sky-box sky-box-3
+
+rocket 0.0 40.0 -45.0 0
+balloon 0.0 40.0 -15.0 0
+balloon 0.0 40.0 35.0 0
+balloon 0.0 40.0 50.0 0
+balloon 0.0 40.0 45.0 0
+balloon 0.0 40.0 40.0 0
+balloon 0.0 40.0 20.0 0
+balloon 0.0 40.0 25.0 0
+balloon 0.0 40.0 30.0 0
+balloon 0.0 40.0 -20.0 0
+balloon 0.0 40.0 -5.0 0
+balloon 0.0 40.0 -10.0 0
+balloon 0.0 40.0 -25.0 0
+goal 0.0 40.0 60.0
+player 0.0 41.0 -48.29999923706055 60
+balloon 0.0 40.0 -30.0 0
+rocket 0.0 40.0 5.0 0

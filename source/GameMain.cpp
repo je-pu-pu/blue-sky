@@ -199,7 +199,17 @@ bool GameMain::update()
 		}
 		else
 		{
-			scene_->set_next_scene( "title" );
+			if (
+				get_save_data()->get< int >( "stage.0-0", 0 ) > 0 &&
+				get_save_data()->get< int >( "stage.0-1", 0 ) > 0 && 
+				get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
+			{
+				scene_->set_next_scene( "title" );
+			}
+			else
+			{
+				get_app()->close();
+			}
 		}
 
 		game::Sound* cancel = sound_manager_->get_sound( "cancel" );

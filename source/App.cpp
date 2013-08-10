@@ -11,6 +11,8 @@
 
 #include "memory.h"
 
+// #define ENABLE_DEBUG_CONSOLE
+
 //□コンストラクタ
 App::App()
 	: hWnd( 0 )
@@ -28,8 +30,10 @@ App::App()
 {
 	setlocale( LC_CTYPE, "" );
 
+#ifdef ENABLE_DEBUG_CONSOLE
 	AllocConsole();
 	freopen( "CONOUT$", "w", stdout );
+#endif
 }
 
 //□デストラクタ
@@ -40,7 +44,9 @@ App::~App()
 
 	clip_cursor( false );
 
+#ifdef ENABLE_DEBUG_CONSOLE
 	FreeConsole();
+#endif
 }
 
 //■初期化

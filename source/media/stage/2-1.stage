@@ -1,96 +1,177 @@
-bgm twinkle
-collision 0-1.obj
+collision 2-1.obj
+object stage-2-1
+name bg
+ground ground
 
-sky-box sky-box-3
+exec change_bgm env
+exec change_sky_box 3
 
-ladder 21.899999618530273 25.0 -68.0 90
-name ladder-a
+stone 3.1853175163269043 99.00005340576172 -56.05538558959961 0
+stone 6.185317516326904 99.00005340576172 -56.05538558959961 0
+stone 2.2804641723632812 99.00003814697266 -64.2720947265625 0
+stone 3.0526764392852783 99.00003814697266 -62.49936294555664 0
+stone 5.534002780914307 99.00004577636719 -62.810699462890625 0
+stone -4.305387020111084 98.99999237060547 -60.75090789794922 0
+stone -3.625433921813965 99.0 -61.940826416015625 0
+goal 0.0 10.0 -80.0
+medal 8.0 105.0 -89.0 0
+player 0.0 101.0 -88.0 60
 
-ladder 21.899999618530273 20.0 -69.0 90
-name ladder-b
+stone -2.916842460632324 99.0 -60.77519226074219 0
 
-balloon -5.000000 41.0 10.0 0 0 90
-balloon -5.000000 39.0 5.0 0 0 90
-balloon -5.000000 38.0 0.0 0 0 90
-balloon -5.000000 36.0 -5.0 0 0 90
-balloon -5.000000 34.0 -10.0 0 0 90
-balloon -5.000000 32.0 -15.0 0 0 90
-balloon -5.000000 30.0 -20.0 0 0 90
-balloon 25.000000 32.0 -32.0 0 0 90
-balloon 21.000000 23.0 -32.0 0 0 90
-balloon 23.000000 27.0 -32.0 0 0 90
-balloon 41.000000 27.0 -26.0 0 0 90
-balloon 50.000000 23.0 -26.0 0 0 90
-balloon 58.000000 20.0 -26.0 0 0 90
-medal 42.500000 25.0 -60.0 0 0 0
-balloon 5.000000 30.0 -80.0 0 0 90
-balloon 61.500000 20.0 -30.0 0 0 90
-balloon 35.500000 20.0 -55.0 0 0 90
-balloon 38.500000 20.0 -60.0 0 0 90
-balloon 35.500000 20.0 -60.0 0 0 90
-balloon 35.500000 20.0 -50.0 0 0 90
-goal -5.0 39.0 15.0
-girl 15.0 20.0 -64.0 180
-player 15.0 20.0 -65.0
+girl 0.0 99.0 -45.0 180
 
-switch 4.0 61.0 -33.0 60
-event turn-on game_object.create robot-dead-body 5 81 -32
-event turn-on game_object.create robot-dead-body 4 82 -33
-event turn-on game_object.create robot-dead-body 6 83 -34
-
-// event turn-on set_ambient_color_target 1 1 1 1
-// event turn-off set_ambient_color_target 0.5 0.5 0.5 1
-
-// event turn-on change_sky_box sky
-event turn-off change_sky_box moon
-
-dynamic-object box-2x2x2 12.0 20.0 -67.0 
-name wall-1
-
-dynamic-object box-2x2x2 13.0 25.0 -67.0 
-dynamic-object box-2x2x2 25.0 32.0 -67.0 
+# 初期化
+exec game_object.set_animation_speed girl 0.5
+exec game_object.play_animation girl Float 0 1
+exec game_object.set_target_direction_object girl player 1
 
 
-rocket 17.0 20.0 -65.0
+# スイッチ X
+switch -1.0 99.0 -64.0 180
+event turn-on play_sound boku-switch-6
+event turn-on change_sky_box moon
+event turn-on game_object.create robot-dead-body -1.0 110.0 -64.0
 
-object wall-1 19.0 21.0 -58.0 0
+# スイッチ X
+switch 6.0 99.0 -61.0 180
+event turn-on play_sound boku-switch-2
+event turn-on change_sky_box none
+
+# 箱を生成
+event turn-on game_object.create box-2x2x2 0 100 -70
+
+# スイッチ X
+switch 2.0 99.0 -55.0 180
+event turn-on change_sky_box star-2
+event turn-on play_sound boku-switch-3
+
+# 少女を移動させる
+event turn-on game_object.set_target_location girl 10 115 -50 10
+
+# スイッチ X
+switch -2.0 99.0 -58.0 180
+event turn-on change_sky_box star-2
+event turn-on play_sound boku-switch-5
+
+# 色
+event turn-on set_shadow_color 0 1 0 1
+event turn-on set_shadow_paper_color 1 0 0 0
+event turn-on set_light_position_target 100 100 20
+event turn-on set_line_type 3
+event turn-on set_paper_type 1
+event turn-on set_drawing_accent_scale 2
+
+# 少女を壊す
+exec game_object.play_animation girl Walk 0 1
+
+# -----
+# 手前のビルのスイッチ
+
+# スイッチ A
+switch 1.0 99.0 -79.0 180
+name switch-a
+event turn-on play_sound boku-switch-2
+event turn-on game_object.action switch-a break
+
+# スイッチ B
+switch -1.0 99.0 -81.0 180
+name switch-b
+event turn-on play_sound boku-switch-1
+event turn-on game_object.action switch-b break
+
+# -----
+# 中央のビルのスイッチ
+
+#
+switch 1.0 99.0 -61.0 180
+event turn-on set_paper_type 4
+event turn-on set_drawing_accent_scale 5
+event turn-on set_ambient_color_target 1 1 1 1
+event turn-on set_ambient_color_target 0.5 0.5 0.5 1
+event turn-on change_sky_box moon
+
+# 手前ビルから中央ビルの間の透明スイッチ
+area-switch 0.0 99.0 -70.5 2.0 2.0 2.0 
+name area-switch-a
+event turn-on set_line_type 2
+event turn-on set_shadow_color 0 0 0 1
+event turn-on play_sound boku-switch-mienai-koremo
+event turn-on play_sound switch-on
+event turn-on game_object.action area-switch-a break
 
 
-switch 17 20 -62
+#
+area-switch 0.0 100.0 -39.0 2.0 2.0 2.0
 
+# 中央の手前のスイッチ C
+switch 3.0 99.0 -68.0 180
+name switch-c
+event turn-on play_sound boku-switch-3
+event turn-on change_sky_box moon
+event turn-on game_object.action switch-c break
+
+# 
+switch -4.0 99.0 -68.0 180
+name switch-d
+event turn-on change_sky_box star-2
+event turn-on play_sound boku-switch-4
+event turn-on game_object.action switch-d break
+
+# メダル用スイッチ
+switch -6.0 99.0 -58.0 180
+name switch-e
+event turn-on play_sound boku-switch-5
+event turn-on game_object.action switch-e break
+
+# メダルを取れる場所にプレイヤーを運ぶ
+event turn-on game_object.set_target_location player 8.0 115.0 -89.0 10
+
+switch 8.0 99.0 -56.0 180
+name switch-f
+event turn-on play_sound boku-switch-6
+event turn-on game_object.action switch-d break
+
+name switch-g
+event turn-on play_sound boku-switch-7
+event turn-on game_object.action switch-g break
+
+
+# -----
+
+# ゴール移動用スイッチ
+switch -9.0 99.0 -52.0 180
+
+# 少女を壊す
+event turn-on game_object.action girl break_animation 1
+
+# 映像演出
+event turn-on game_object.set_target_location girl 0.0 99.0 -45.0 10
 event turn-on set_shadow_color_target 1 0 0 1
 event turn-on set_shadow_paper_color_target 0 0 0 0
 event turn-on set_light_position_target -100 100 20
 event turn-on set_line_type 1
 event turn-on set_paper_type 1
 event turn-on change_bgm semi
-event turn-on set_drawing_accent_scale 2
+event turn-on set_drawing_accent_scale 0
 
-event turn-off set_shadow_color_target 0 0 1 1
-event turn-off set_shadow_paper_color_target 1 1 1 1
-event turn-off set_light_position_target 100 100 100
-event turn-off set_line_type 0
-event turn-off set_paper_type 0
-event turn-off change_bgm road
-event turn-off set_drawing_accent_scale 0
+# 全てのスイッチを壊す
+event turn-on game_object.action switch-a break
+event turn-on game_object.action switch-b break
+event turn-on game_object.action switch-c break
+event turn-on game_object.action switch-d break
+event turn-on game_object.action switch-e break
+event turn-on game_object.action switch-f break
+event turn-on game_object.action switch-g break
+event turn-on game_object.action area-switch-a break
 
-event turn-on game_object.set_target_location ladder-b 0 20 -65 1
-event turn-on game_object.set_mass ladder-b 1
-event turn-on game_object.set_gravity ladder 0 -1 0
+# -----
 
-event turn-on  game_object.set_mass wall-1 0
-event turn-off game_object.set_mass wall-1 1
+# 剛体
+dynamic-object box-2x2x2 13.0 25.0 -67.0 
+dynamic-object box-2x2x2 25.0 32.0 -67.0 
 
-event turn-on game_object.set_gravity wall-1 0
-event turn-on game_object.set_angular_factor wall-1 0
-event turn-on game_object.set_target_location wall-1 19.0 25.0 -58.0 1
-event turn-on game_object.action girl break_animation 1
-
-
-area-switch 23.0 20.0 -47.0 2.0 2.0 2.0 0
+# スイッチ X
+switch 0.0 105.0 -45.0 180
 event turn-on game_object.set_target_location girl -5.0 45.0 15.0 1
 event turn-on game_object.play_animation girl Walk 0 1
-
-
-
-object stage-0-1 0 0 0

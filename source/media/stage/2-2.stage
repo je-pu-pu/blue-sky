@@ -1,5 +1,5 @@
-object stage-2-2
 collision 2-2.obj
+object stage-2-2
 ground ground
 
 exec change_bgm bokuha-dare-nandaro

@@ -14,7 +14,6 @@ medal 0 100 13 0
 goal  0 15  10.0
 
 area-switch 0 400 0 100 1 100
-event turn-on set_ambient_color 1 0 0
 event turn-on set_ambient_color_target 0 0 0 0.01
 
 area-switch 0 300 0 100 1 100

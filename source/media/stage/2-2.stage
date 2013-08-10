@@ -2,7 +2,7 @@ object stage-2-2
 collision 2-2.obj
 ground ground
 
-exec change_bgm road
+exec change_bgm bokuha-dare-nandaro
 exec change_sky_box sky
 
 object soda-can-1 1.0 99.0 -30.100000381469727 0
@@ -19,6 +19,3 @@ event turn-on set_shadow_color_target 1 1 1 1 0.01
 # ’n–Ê
 area-switch 0.0 0.0 -40.0 100.0 1.0 100.0 
 event turn-on end_by_last_switch
-
-
-

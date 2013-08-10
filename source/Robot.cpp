@@ -109,12 +109,15 @@ void Robot::update()
 				mode_ = MODE_ROTATION;
 				timer_ = 0.f;
 				play_sound( "robot-shutdown" );
+				stop_sound( "robot-chase" );
 
 				texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
 			}
 		}
-
-		play_sound( "robot-chase", false, false );
+		else
+		{
+			play_sound( "robot-chase", false, false );
+		}
 	}
 	else if ( mode_ == MODE_STAND || mode_ == MODE_ROTATION )
 	{

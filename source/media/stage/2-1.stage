@@ -160,11 +160,8 @@ name switch-m
 # ƒS[ƒ‹‚ğˆÚ“®‚³‚¹‚é
 event turn-on game_object.set_target_location goal 0.0 99.0 -40.0 1
 
-# ­—‚ğ‰ó‚µ‚ÄAˆÚ“®‚³‚¹‚é
-event turn-on game_object.action girl break_animation 1
-event turn-on game_object.set_target_location girl 0.0 99.0 -45.0 10
-
 # ­—‚Ì’f–––‚
+event turn-on stop_all_sound
 event turn-on play_sound girl-damage-5
 
 # ‰f‘œ‰‰o
@@ -173,12 +170,9 @@ event turn-on set_shadow_paper_color_target 0 0 0 0
 event turn-on set_light_position_target -100 100 20
 event turn-on set_line_type 1
 event turn-on set_paper_type 1
-# event turn-on change_bgm semi
 
-# _‚ğ—‚ê‚³‚¹‚é
-event turn-on game_object.set_animation_speed girl 0.2
-event turn-on game_object.play_animation girl Float 0 1
-
+# _‚ğÁ‚·
+event turn-on timer 5 1 game_object.action girl set_visible 0 0
 
 # 5 •bŒã‚É•’Ê‚É–ß‚é
 event turn-on timer 5 1 change_sky_box 3
@@ -190,8 +184,7 @@ event turn-on timer 5 1 set_light_position_target -100 100 20
 event turn-on timer 5 1 set_line_type 0
 event turn-on timer 5 1 set_paper_type 0
 event turn-on timer 5 1 set_drawing_accent_scale 0
-# _‚ğÁ‚·
-event turn-on timer 5 1 game_object.action girl set_visible 0 0
+
 
 # ”O‚Ì‚½‚ß 5 •bŒã‚É‚àƒS[ƒ‹‚ğˆÚ“®‚³‚¹‚é
 event turn-on timer 5 1 game_object.set_target_location goal 0.0 99.0 -40.0 1

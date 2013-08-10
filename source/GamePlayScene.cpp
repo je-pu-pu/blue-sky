@@ -369,6 +369,10 @@ void GamePlayScene::setup_command()
 			sound->stop();
 		}
 	};
+	command_map_[ "stop_all_sound" ] = [ & ] ( const string_t& s )
+	{
+		get_sound_manager()->stop_all();
+	};
 	command_map_[ "game_object.create" ] = [ & ] ( const string_t& s )
 	{
 		std::stringstream ss;

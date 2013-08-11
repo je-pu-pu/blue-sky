@@ -1,0 +1,180 @@
+*
+{
+	
+}
+
+html
+{
+	/* background: #FFFFFF url(images/page-bg.png) repeat-x top; */
+}
+
+body
+{
+	
+}
+
+h1, h2
+{
+	margin: 1em;
+	padding: 0;
+}
+
+blockquote
+{
+	margin: 0;
+	padding: 0 0 0 2em;
+	font-size: 75%;
+}
+
+img
+{
+	border-style: none;
+}
+
+div#outline
+{
+	text-align: center;
+}
+
+div#outline img
+{
+	text-align: center;
+}
+
+div#footer
+{
+	text-align: center;
+}
+
+/*
+div.title
+{
+	text-align: center;
+	
+	margin: 0 auto;
+	
+	background: url(images/title.png) no-repeat center top;
+}
+
+div.title a
+{
+	width: 729px;
+	height: 0px;
+	
+	padding-top: 65px;
+	
+	display: block;
+	overflow: hidden;
+}
+
+div.title h1
+{
+	width: 729px;
+	height: 65px;
+	
+	margin: auto;
+}
+*/
+
+div.title h1
+{
+	margin: 1em;
+}
+
+
+p.caption
+{
+	font-size: 100%;
+}
+
+p.note
+{
+	color: gray;
+}
+
+ul.list
+{
+	margin: 24px 8px 8px 48px;
+}
+
+ul.problem
+{
+	list-style-image: url(images/icon-x.png);
+}
+
+ul.solution
+{
+	list-style-image: url(images/icon-o.png);
+}
+
+ul.list li
+{
+	margin-top: 1em;
+}
+
+ul.list p
+{
+	margin: 0;
+	padding: 0.5em 1em 1em 1em;
+}
+
+div.button-inquiry
+{
+	text-align: center;
+}
+
+div.button-inquiry a
+{
+	display: block;
+	margin: 0 auto;
+	background: url(images/button-inquiry.png) no-repeat center;
+	width: 333px;
+	height: 78px;
+}
+
+div.button-inquiry a:hover
+{
+	background: url(images/button-inquiry-on.png) no-repeat center;
+}
+
+div.form
+{
+	background-color: #E5E5E5;
+	padding: 8px;
+}
+
+table
+{
+	border-collapse: collapse;
+	margin: 1em auto;
+}
+
+table th, table td
+{
+	text-align: left;
+	background-color: #F2F1EC;
+	border: 1px solid #CCCCCC;
+	padding: 8px;
+	font-weight: normal;
+	
+	font-size: 75%;
+}
+
+table td
+{
+	background-color: #FFF;
+}
+
+div.button-send
+{
+	background: url(images/button-send-on.png) no-repeat center top;
+	margin: 0 auto;
+	text-align: center;
+}
+
+div.button-send input:hover
+{
+	filter: alpha(opacity=0);
+	-ms-filter: alpha(opacity=0);
+	opacity: 0.0;
+}

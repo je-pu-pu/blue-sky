@@ -45,7 +45,10 @@ public:
 	void set_player( const Player* p ) { player_ = p; flicker_ = 0.f; }
 	const Player* get_player() const { return player_; }
 
-	bool is_visible() const override;
+	bool is_mesh_visible() const override;
+	bool is_line_visible() const override;
+
+	bool is_visible_with_player() const;
 
 }; // class Balloon
 

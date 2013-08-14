@@ -1417,14 +1417,6 @@ void GamePlayScene::update_balloon_sound()
 			bgm_->fade_in();
 		}
 	}
-
-	// ŠÖ”•ª‚¯‚é
-	if ( player_->get_balloon() )
-	{
-		// ‚©‚­‚©‚­‚·‚é‚Ì‚Å‚±‚±‚Å‚â‚é
-		const_cast< Balloon* >( player_->get_balloon() )->set_location( player_->get_location() + player_->get_front() * 0.25f - player_->get_right() * 0.25f + GameObject::Vector3( 0, 1.75f, 0 ) );
-		const_cast< Balloon* >( player_->get_balloon() )->set_direction_degree( 0 );
-	}
 }
 
 /**
@@ -1611,6 +1603,14 @@ void GamePlayScene::render_text() const
 
 		ss << L"IS LADDER STEP ONLY : " << player_->is_ladder_step_only() << std::endl;
 
+		ss << L"BALLOON : " << ( player_->get_balloon() != nullptr ) << std::endl;
+
+		if ( player_->get_balloon() )
+		{
+			ss << L"BALLOON : " << player_->get_balloon()->is_visible() << std::endl;
+			ss << L"BALLOON : " << player_->get_balloon()->is_mesh_visible() << std::endl;
+			ss << L"BALLOON : " << player_->get_balloon()->is_line_visible() << std::endl;
+		}
 	}
 
 	get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );
@@ -2031,20 +2031,7 @@ void GamePlayScene::render_active_object_mesh( const ActiveObject* active_object
  */
 void GamePlayScene::render_active_object_line( const ActiveObject* active_object ) const
 {
-	if ( ! active_object->is_line_visible() )
-	{
-		return;
-	}
-
-	if ( ! active_object->get_drawing_model()->get_line() )
-	{
-		return;
-	}
-
-	active_object->get_object_constant_buffer()->bind_to_vs();
-	active_object->get_object_constant_buffer()->bind_to_ps();
-
-	active_object->get_drawing_model()->get_line()->render(); // 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
+	active_object->render_line();
 }
 
 /**

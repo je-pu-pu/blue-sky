@@ -11,7 +11,6 @@ namespace blue_sky
 
 Balloon::Balloon()
 	: player_( 0 )
-	, flicker_( 0 )
 {
 
 }
@@ -32,8 +31,6 @@ void Balloon::set_drawing_model( const DrawingModel* m )
  */
 void Balloon::update()
 {
-	flicker_ += 0.02f;
-
 	if ( player_ )
 	{
 		if ( player_->get_balloon() == this )
@@ -54,7 +51,7 @@ void Balloon::update()
 	}
 	else
 	{
-		set_location( get_location().x(), get_start_location().y() + std::sin( flicker_ ) * 0.5f, get_location().z() );
+		update_location_by_flicker( get_start_location(), 0.5f );
 		set_direction_degree( get_direction_degree() + 1.f );
 	}
 }
@@ -63,7 +60,6 @@ void Balloon::restart()
 {
 	ActiveObject::restart();
 
-	flicker_ = common::random( 0.f, 10.f );
 	player_ = 0;
 }
 
@@ -76,13 +72,35 @@ void Balloon::kill()
 }
 
 /**
- * オブジェクトが表示されるかを返す
+ * オブジェクトのメッシュが表示されるかを返す
  *
- * @return bool オブジェクトが表示される場合は true を、表示されない場合は false を返す
+ * @return bool オブジェクトのメッシュが表示される場合は true を、表示されない場合は false を返す
  */
-bool Balloon::is_visible() const
+bool Balloon::is_mesh_visible() const
 {
-	return ActiveObject::is_visible() && ( ! player_ || ! player_->is_action_pre_finish() || is_visible_in_blink( 6.f / 1.f ) );
+	return ActiveObject::is_mesh_visible() && is_visible_with_player();
+}
+
+/**
+ * オブジェクトのラインが表示されるかを返す
+ *
+ * @return bool オブジェクトのラインが表示される場合は true を、表示されない場合は false を返す
+ */
+bool Balloon::is_line_visible() const
+{
+	return ActiveObject::is_line_visible() && is_visible_with_player();
+}
+
+/**
+ * 風船がプレイヤーに持たれている時、表示されるかどうかを返す
+ *
+ * 風船がプレイヤーに持たれていない場合、この関数は true を返す。
+ *
+ * @param 風船がプレイヤーに持たれている時、表示されえる場合は true を、表示されない場合は false を返す
+ */
+bool Balloon::is_visible_with_player() const
+{
+	return ( ! player_ || ! player_->is_action_pre_finish() || is_visible_in_blink( 6.f / 1.f ) );
 }
 
 void Balloon::on_collide_with( Stone* )

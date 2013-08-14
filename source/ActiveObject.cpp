@@ -8,6 +8,7 @@
 
 #include "DrawingModel.h"
 #include "DrawingMesh.h"
+#include "DrawingLine.h"
 
 #include <game/Material.h>
 #include <game/Texture.h>
@@ -247,6 +248,24 @@ void ActiveObject::render_material_at( uint_t material_index ) const
 
 	material->bind_to_ia();
 	material->render();
+}
+
+void ActiveObject::render_line() const
+{
+	if ( ! is_line_visible() )
+	{
+		return;
+	}
+
+	if ( ! get_drawing_model()->get_line() )
+	{
+		return;
+	}
+
+	get_object_constant_buffer()->bind_to_vs();
+	get_object_constant_buffer()->bind_to_ps();
+
+	get_drawing_model()->get_line()->render(); // 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
 }
 
 void ActiveObject::play_animation( const char* name, bool force, bool loop )

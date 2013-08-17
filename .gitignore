@@ -4,10 +4,12 @@
 
 /source/Debug/
 /source/Release/
+/source/Profile/
 /source/ipch/
 
 /source/extern/*/Debug/
 /source/extern/*/Release/
+/source/extern/*/Profile/
 
 /source/docs/
 

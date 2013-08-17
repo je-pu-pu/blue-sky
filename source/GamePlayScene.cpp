@@ -1417,6 +1417,12 @@ void GamePlayScene::update_balloon_sound()
 			bgm_->fade_in();
 		}
 	}
+
+	// ‚Ô‚ê‚é‚Ì‚Å‚±‚±‚Å‚â‚éB
+	if ( player_->get_balloon() )
+	{
+		const_cast< Balloon* >( player_->get_balloon() )->update();
+	}
 }
 
 /**

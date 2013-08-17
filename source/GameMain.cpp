@@ -176,7 +176,6 @@ bool GameMain::update()
 	/// @todo •ÊƒXƒŒƒbƒh‰»
 	get_sound_manager()->update();
 	
-
 	if ( get_app()->is_active() )
 	{
 		direct_input_->update();
@@ -275,10 +274,10 @@ void GameMain::on_resize()
  */
 void GameMain::check_scene_transition()
 {
-	std::string next_scene = scene_->get_next_scene();
-
-	if ( ! next_scene.empty() )
+	if ( ! scene_->get_next_scene().empty() )
 	{
+		string_t next_scene = scene_->get_next_scene();
+
 		set_stage_name( scene_->get_next_stage_name() );
 
 		setup_scene( next_scene );

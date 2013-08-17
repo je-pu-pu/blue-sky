@@ -46,6 +46,8 @@ protected:
 
 	void convert_coordinate_system();
 
+	static string_t convert_file_path_to_internal_encoding( const char* );
+
 	void print_local_transform( const FbxNode* ) const;
 	void print_matrix( const FbxAMatrix& ) const;
 	void print_axis_system( const FbxAxisSystem& ) const;

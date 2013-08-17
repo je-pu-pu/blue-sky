@@ -623,7 +623,7 @@ void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 
 					if ( file_texture )
 					{
-						texture_file_path = file_texture->GetFileName();
+						texture_file_path = convert_file_path_to_internal_encoding( file_texture->GetFileName() );
 
 						break; /// !!!
 					}
@@ -640,7 +640,7 @@ void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 
 				if ( file_texture )
 				{
-					texture_file_path = file_texture->GetFileName();
+					texture_file_path = convert_file_path_to_internal_encoding( file_texture->GetFileName() );
 				}
 			}
 		}
@@ -977,6 +977,25 @@ bool FbxFileLoader::save( const char_t* file_name )
 	}
 
 	exporter->Destroy();
+
+	return result;
+}
+
+/**
+ * FBX から取得したファイルパス文字列を内部エンコーディングに変換する
+ *
+ * @param s FBX から取得した文字列
+ */
+string_t FbxFileLoader::convert_file_path_to_internal_encoding( const char* s )
+{
+	char* path = 0;
+
+	// FbxAnsiToUTF8( file_texture->GetFileName(), path, & buffer_size );
+	FbxUTF8ToAnsi( s, path );
+
+	string_t result( path );
+
+	delete [] path;
 
 	return result;
 }

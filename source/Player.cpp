@@ -41,6 +41,7 @@ Player::Player()
 	, action_timer_( 0.f )
 	, is_action_pre_finish_( false )
 	, balloon_sequence_count_( 0 )
+	, balloon_sound_request_( 0 )
 	, uncontrollable_timer_( 0.f )
 	, pitch_( 0.f )
 	, eye_height_( 1.5f )
@@ -84,10 +85,17 @@ void Player::restart()
 	step_count_ = 0;
 	step_speed_ = 0.25f;
 
+	set_action_mode( ACTION_MODE_NONE );
+
+	is_action_pre_finish_ = false;
+	balloon_sequence_count_ = 0;
+	balloon_sound_request_ = 0;
+
+	pitch_ = 0.f;
+	
 	eye_height_ = 1.5f;
 	eye_depth_ = 0.f;
 
-	set_action_mode( ACTION_MODE_NONE );
 	has_medal_ = false;
 
 	for ( int n = 0; n < ITEM_TYPE_MAX; n++ )

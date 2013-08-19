@@ -329,8 +329,8 @@ void StageSelectScene::update_stage_list()
 		std::string stage_name = *i;
 		stage_name.resize( stage_name.find_first_of( "." ) );
 
-		// 前のステージをクリアしていないと、このステージは一覧に含まない
-		if ( ! last_stage_name.empty() )
+		// ストーリー用ステージでは、前のステージをクリアしていないと、このステージは一覧に含まない
+		if ( is_story_page() && ! last_stage_name.empty() )
 		{
 			if ( get_save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + last_stage_name ).c_str(), 0 ) == 0 )
 			{

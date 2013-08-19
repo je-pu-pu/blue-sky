@@ -128,7 +128,7 @@ void Player::update()
 
 	if ( action_mode_ == ACTION_MODE_BALLOON )
 	{
-		set_velocity( Vector3( get_velocity().x(), std::min( 3.f, math::chase( get_velocity().y(), 3.f, 0.25f ) ), get_velocity().z() ) );
+		set_velocity( Vector3( get_velocity().x(), std::min( 3.f, math::chase( get_velocity().y(), 3.f, get_velocity().y() < 0.f ? 0.5f : 0.25f ) ), get_velocity().z() ) );
 
 		if ( get_location().y() - action_base_position_.y() >= get_balloon_action_length() )
 		{

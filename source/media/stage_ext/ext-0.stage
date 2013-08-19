@@ -1,0 +1,71 @@
+collision ext-0.obj
+object stage-ext-0
+ground ground
+
+exec change_bgm road
+exec change_sky_box 3
+exec set_balloon_sound_type 3
+
+sky-box sky-box-3
+
+balloon 0.0 70.0 -10.0 0
+balloon 0.0 80.0 -20.0 0
+balloon 0.0 20.0 0.0 0
+balloon 0.0 30.0 0.0 0
+balloon 0.0 40.0 0.0 0
+balloon 0.0 50.0 0.0 0
+balloon 10.0 37.0 0.0 0
+balloon -7.0 22.0 7.0 0
+balloon 7.0 32.0 7.0 0
+balloon 0.0 27.0 10.0 0
+balloon -7.0 53.0 -7.0 0
+balloon -10.0 18.0 0.0 0
+balloon 7.0 42.0 -7.0 0
+balloon 0.0 47.0 -10.0 0
+balloon 0.0 60.0 0.0 0
+balloon 0.0 100.0 24.0 0
+balloon 0.0 100.0 27.0 0
+player 0.0 101.0 -47.0 60
+goal 0.0 99.0 40.0
+balloon 0.0 100.0 30.0 0
+
+robot 4.0 99.0 -44.0 0
+robot -4.0 99.0 -44.0 0
+robot -8.0 99.0 -33.0 90
+robot 8.0 99.0 -33.0 270
+robot 8.0 99.0 -36.0 270
+robot -8.0 99.0 -36.0 90
+
+rocket 7.0 35.0 7.0 0
+name rocket-a
+
+rocket -7.0 25.0 7.0 0
+name rocket-b
+
+rocket -7.0 55.0 -7.0 0
+name rocket-c
+
+rocket -10.0 20.0 0.0 0
+name rocket-d
+
+rocket 0.0 30.0 10.0 0
+name rocket-e
+
+rocket 10.0 40.0 0.0 0
+name rocket-f
+
+rocket 7.0 45.0 -7.0 0
+name rocket-g
+
+rocket 0.0 50.0 -10.0 0
+name rocket-h
+
+# 全てのロケットを宙に浮かす
+exec game_object.set_gravity rocket-a 0 0 0
+exec game_object.set_gravity rocket-b 0 0 0
+exec game_object.set_gravity rocket-c 0 0 0
+exec game_object.set_gravity rocket-d 0 0 0
+exec game_object.set_gravity rocket-e 0 0 0
+exec game_object.set_gravity rocket-f 0 0 0
+exec game_object.set_gravity rocket-g 0 0 0
+exec game_object.set_gravity rocket-h 0 0 0

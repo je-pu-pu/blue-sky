@@ -1234,11 +1234,7 @@ void GamePlayScene::update_main()
 				{
 					player_->switch_scope_mode();
 
-					if ( player_->get_action_mode() != Player::ACTION_MODE_SCOPE )
-					{
-						camera_->reset_fov();
-					}
-					else
+					if ( player_->get_action_mode() == Player::ACTION_MODE_SCOPE )
 					{
 						camera_->set_fov_target( camera_->get_fov_default() * 0.5f );
 						camera_->set_fov( camera_->get_fov_default() * 0.5f );
@@ -1283,6 +1279,8 @@ void GamePlayScene::update_main()
 			{
 				player_->select_prev_item();
 			}
+
+			camera_->reset_fov();
 		}
 
 		player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f * rotation_speed_rate);

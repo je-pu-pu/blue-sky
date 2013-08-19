@@ -36,6 +36,8 @@ public:
 	void check_story_completed();
 	bool is_final_stage_open() const;
 
+	bool is_story_page() const { return page_ < get_max_story_page(); }
+
 private:
 	int page_;
 	int stage_count_;

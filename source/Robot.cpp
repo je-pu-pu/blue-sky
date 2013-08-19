@@ -171,6 +171,8 @@ void Robot::update()
 			else
 			{
 				mode_ = mode_backup_;
+				texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
+
 				timer_ = 0.f;
 				play_sound( "robot-shutdown" );
 			}

@@ -521,6 +521,12 @@
     <None Include="media\stage_ext\ext-0.stage">
       <Filter>Stage</Filter>
     </None>
+    <None Include="media\stage_ext\ext-1.stage">
+      <Filter>Stage</Filter>
+    </None>
+    <None Include="media\stage_ext\ext-2.stage">
+      <Filter>Stage</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Drawing">

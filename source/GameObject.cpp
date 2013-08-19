@@ -108,6 +108,22 @@ void GameObject::set_kinematic( bool is_kinematic )
 	}
 }
 
+void GameObject::set_no_contact_response( bool is_no_contact_response )
+{
+	if ( ! get_rigid_body() )
+	{
+		return;
+	}
+
+	if ( is_no_contact_response )
+	{
+		get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
+	}
+	else
+	{
+		get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE );
+	}
+}
 
 void GameObject::set_angular_factor( const Vector3& v )
 {

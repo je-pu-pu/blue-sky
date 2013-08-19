@@ -135,6 +135,7 @@ public:
 	void set_gravity( const Vector3& );
 	void set_angular_factor( const Vector3& );
 	void set_kinematic( bool is_kinematic );
+	void set_no_contact_response( bool is_no_contact_response );
 
 	inline RigidBody* get_rigid_body() { return rigid_body_; }
 	inline const RigidBody* get_rigid_body() const { return rigid_body_; }

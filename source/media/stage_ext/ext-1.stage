@@ -1,0 +1,42 @@
+collision ext-1.obj
+object stage-ext-1
+ground ground
+
+exec change_bgm twinkle-ep
+exec change_sky_box star-2
+
+exec set_shadow_color 0.5 0.5 1 1
+exec set_shadow_paper_color 1 1 1 1
+
+# 移動する壁に名前をつける
+object wall-3 0.0 0.0 49.3 0
+name wall
+
+stone 21.0 0.0 39.0 0
+robot 21.0 0.0 36.0 180
+robot 13.0 0.0 36.0 180
+robot 21.0 0.0 20.0 180
+robot 21.0 0.0 28.0 275
+robot 13.0 0.0 28.0 270
+robot 13.0 0.0 20.0 270
+stone 21.0 0.0 12.0 0
+robot 5.0 0.0 20.0 180
+robot -3.0 0.0 20.0 180
+robot -3.0 0.0 28.0 180
+robot 5.0 0.0 36.0 180
+robot 1.0 0.0 41.0 180
+robot 3.0 0.0 39.0 90
+robot -1.0 0.0 39.0 180
+robot 1.0 0.0 37.0 180
+robot -3.0 0.0 36.0 180
+robot 5.0 0.0 28.0 180
+goal 0.0 0.0 55.0
+player -6.0 1.0 9.0
+
+# スイッチの設定
+switch 1.0 0.0 39.0 180
+event turn-on game_object.set_target_location wall 0.0 4 49.3 0.25
+event turn-on play_sound machine-translation-long
+
+# 死ぬ前に鳴っていたサウンドを止める
+exec stop_sound machine-translation-long

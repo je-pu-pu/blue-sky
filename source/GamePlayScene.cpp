@@ -448,6 +448,23 @@ void GamePlayScene::setup_command()
 			o->set_kinematic( is_kinematic );
 		}
 	};
+	command_map_[ "game_object.set_no_contact_response" ] = [ & ] ( const string_t& s )
+	{
+		std::stringstream ss;
+		ss << s;
+
+		string_t object_name;
+		bool is_no_contact_response = false;
+
+		ss >> object_name >> is_no_contact_response;
+
+		GameObject* o = get_active_object_manager()->get_active_object( object_name );
+		
+		if ( o )
+		{
+			o->set_no_contact_response( is_no_contact_response );
+		}
+	};
 	command_map_[ "game_object.set_target_location" ] = [ & ] ( const string_t& s )
 	{
 		std::stringstream ss;

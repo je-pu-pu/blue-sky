@@ -1,0 +1,74 @@
+collision ext-2.obj
+object stage-ext-2
+ground ground
+
+exec change_bgm ending
+exec change_sky_box sky
+
+exec set_line_type 1
+exec set_paper_type 1
+
+exec set_shadow_color 0.5 0.5 0.5 1
+exec set_shadow_paper_color 1 1 1 1
+
+balloon 27.0 90.0 5.0 0
+balloon 24.0 93.0 5.0 0
+balloon 21.0 96.0 5.0 0
+balloon 10.0 111.0 5.0 0
+balloon 13.0 108.0 5.0 0
+balloon 16.0 105.0 5.0 0
+balloon 3.0 80.0 -53.0 0
+balloon 7.0 80.0 -53.0 0
+balloon -40.0 60.0 -21.0 0
+balloon -40.0 50.0 -21.0 0
+balloon -40.0 40.0 -21.0 0
+balloon 21.0 98.0 5.0 0
+balloon 21.0 100.0 5.0 0
+balloon 37.0 100.0 0.0 0
+balloon 37.0 100.0 -5.0 0
+balloon 37.0 100.0 -10.0 0
+balloon 37.0 100.0 5.0 0
+balloon 21.0 102.0 5.0 0
+balloon 37.0 100.0 -15.0 0
+balloon 37.0 100.0 -20.0 0
+balloon 37.0 100.0 -35.0 0
+balloon 37.0 100.0 -30.0 0
+balloon 37.0 100.0 -25.0 0
+rocket -23.0 100.0 15.0 0
+rocket -23.0 100.0 17.0 0
+rocket -26.0 100.0 17.0 0
+rocket -26.0 100.0 15.0 0
+balloon -17.0 185.0 -5.0 0
+balloon -17.0 189.0 -7.0 0
+balloon -17.0 197.0 -11.0 0
+balloon -17.0 193.0 -9.0 0
+balloon -17.0 201.0 -13.0 0
+balloon -17.0 205.0 -15.0 0
+rocket -20.0 100.0 15.0 0
+rocket -20.0 100.0 17.0 0
+rocket -17.0 100.0 17.0 0
+rocket -17.0 100.0 15.0 0
+rocket -7.0 90.0 78.0 0
+rocket -7.0 90.0 80.0 0
+rocket -10.0 90.0 80.0 0
+rocket -10.0 90.0 78.0 0
+balloon 5.0 100.0 15.0 0
+balloon 5.0 100.0 10.0 0
+balloon 5.0 100.0 5.0 0
+balloon 5.0 100.0 20.0 0
+balloon 5.0 100.0 25.0 0
+balloon 5.0 100.0 30.0 0
+balloon 5.0 100.0 45.0 0
+balloon 5.0 100.0 40.0 0
+balloon 5.0 100.0 35.0 0
+balloon 5.0 100.0 50.0 0
+balloon 5.0 100.0 55.0 0
+balloon 0.0 100.0 60.0 0
+balloon 5.0 100.0 60.0 0
+rocket -7.0 80.0 -52.0 0
+rocket -7.0 80.0 -50.0 0
+balloon 10.0 80.0 -50.0 0
+balloon 5.0 80.0 -50.0 0
+player 18.0 81.0 -53.0 60
+goal -40.0 30.0 -17.0
+balloon 0.0 80.0 -50.0 0

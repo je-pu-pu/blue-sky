@@ -3,10 +3,12 @@ object stage-ext-0
 ground ground
 
 exec change_bgm road
-exec change_sky_box 3
+exec change_sky_box sky
 exec set_balloon_sound_type 3
 
-sky-box sky-box-3
+exec set_line_type 4
+exec set_paper_type 4
+exec set_shadow_color 0.5 0.5 0.25 0.75
 
 balloon 0.0 70.0 -10.0 0
 balloon 0.0 80.0 -20.0 0
@@ -69,3 +71,13 @@ exec game_object.set_gravity rocket-e 0 0 0
 exec game_object.set_gravity rocket-f 0 0 0
 exec game_object.set_gravity rocket-g 0 0 0
 exec game_object.set_gravity rocket-h 0 0 0
+
+# 全てのロケットの反発をなくす
+exec game_object.set_no_contact_response rocket-a 1
+exec game_object.set_no_contact_response rocket-b 1
+exec game_object.set_no_contact_response rocket-c 1
+exec game_object.set_no_contact_response rocket-d 1
+exec game_object.set_no_contact_response rocket-e 1
+exec game_object.set_no_contact_response rocket-f 1
+exec game_object.set_no_contact_response rocket-g 1
+exec game_object.set_no_contact_response rocket-h 1

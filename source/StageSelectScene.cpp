@@ -36,8 +36,8 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	, ok_( 0 )
 	, click_( 0 )
 	, cursor_src_rect_( win::Rect::Size( 0, 702, 92, 136 ) )
-	, left_allow_src_rect_( win::Rect::Size( 256, 704, 82, 126 ) )
-	, right_allow_src_rect_( win::Rect::Size( 384, 704, 86, 126 ) )
+	, left_arrow_src_rect_( win::Rect::Size( 256, 704, 82, 126 ) )
+	, right_arrow_src_rect_( win::Rect::Size( 384, 704, 86, 126 ) )
 	, stage_src_rect_( 0, 0, 512, 512 )
 {
 	page_ = get_save_data()->get( "stage-select.page", 0 );
@@ -84,13 +84,13 @@ void StageSelectScene::update()
 
 	if ( get_input()->push( Input::A ) )
 	{
-		if ( is_mouse_on_left_allow() )
+		if ( is_mouse_on_left_arrow() )
 		{
 			update_page( page_ - 1 );
 
 			ok_->play( false );
 		}
-		else if ( is_mouse_on_right_allow() )
+		else if ( is_mouse_on_right_arrow() )
 		{
 			update_page( page_ + 1 );
 
@@ -213,32 +213,32 @@ void StageSelectScene::render()
 		n++;
 	}
 
-	// Allow
+	// Arrow
 	if ( has_prev_page() )
 	{
-		win::Rect src_rect = left_allow_src_rect_;
+		win::Rect src_rect = left_arrow_src_rect_;
 
-		if ( is_mouse_on_left_allow() )
+		if ( is_mouse_on_left_arrow() )
 		{
 			src_rect.left() += 256;
 			src_rect.right() += 256;
 		}
 
-		win::Point allow_dst_point = win::Point( get_margin(), ( get_height() - src_rect.height() ) / 2 );
-		get_direct_3d()->getSprite()->draw( allow_dst_point, sprite_texture_, src_rect.get_rect() );
+		win::Point arrow_dst_point = win::Point( get_margin(), ( get_height() - src_rect.height() ) / 2 );
+		get_direct_3d()->getSprite()->draw( arrow_dst_point, sprite_texture_, src_rect.get_rect() );
 	}
 	if ( has_next_page() )
 	{
-		win::Rect src_rect = right_allow_src_rect_;
+		win::Rect src_rect = right_arrow_src_rect_;
 
-		if ( is_mouse_on_right_allow() )
+		if ( is_mouse_on_right_arrow() )
 		{
 			src_rect.left() += 256;
 			src_rect.right() += 256;
 		}
 
-		win::Point allow_dst_point( get_width() - get_margin() - src_rect.width(), ( get_height() - src_rect.height() ) / 2 );
-		get_direct_3d()->getSprite()->draw( allow_dst_point, sprite_texture_, src_rect.get_rect() );
+		win::Point arrow_dst_point( get_width() - get_margin() - src_rect.width(), ( get_height() - src_rect.height() ) / 2 );
+		get_direct_3d()->getSprite()->draw( arrow_dst_point, sprite_texture_, src_rect.get_rect() );
 	}
 
 	// Cursor
@@ -470,11 +470,11 @@ bool StageSelectScene::has_next_page() const
 	}
 }
 
-bool StageSelectScene::is_mouse_on_left_allow() const
+bool StageSelectScene::is_mouse_on_left_arrow() const
 {
 	if ( ! has_prev_page() ) return false;
 
-	win::Rect rect = win::Rect::Size( get_margin(), ( get_height() - left_allow_src_rect_.height() ) / 2, left_allow_src_rect_.width(), left_allow_src_rect_.height() );
+	win::Rect rect = win::Rect::Size( get_margin(), ( get_height() - left_arrow_src_rect_.height() ) / 2, left_arrow_src_rect_.width(), left_arrow_src_rect_.height() );
 
 	if ( get_input()->get_mouse_x() <  rect.left()   ) return false;
 	if ( get_input()->get_mouse_x() >= rect.right()  ) return false;
@@ -484,11 +484,11 @@ bool StageSelectScene::is_mouse_on_left_allow() const
 	return true;
 }
 
-bool StageSelectScene::is_mouse_on_right_allow() const
+bool StageSelectScene::is_mouse_on_right_arrow() const
 {
 	if ( ! has_next_page() ) return false;
 
-	win::Rect rect = win::Rect::Size( get_width() - get_margin() - right_allow_src_rect_.width(), ( get_height() - right_allow_src_rect_.height() ) / 2, right_allow_src_rect_.width(), right_allow_src_rect_.height() );
+	win::Rect rect = win::Rect::Size( get_width() - get_margin() - right_arrow_src_rect_.width(), ( get_height() - right_arrow_src_rect_.height() ) / 2, right_arrow_src_rect_.width(), right_arrow_src_rect_.height() );
 
 	if ( get_input()->get_mouse_x() <  rect.left()   ) return false;
 	if ( get_input()->get_mouse_x() >= rect.right()  ) return false;
@@ -520,7 +520,7 @@ win::Rect StageSelectScene::get_stage_dst_rect( const Stage* stage, int n ) cons
 	const int stage_x_count = 2;
 	const int stage_y_count = 2;
 
-	int w = get_width() - get_margin() - left_allow_src_rect_.width() - get_margin() * 2 - right_allow_src_rect_.width() - get_margin();
+	int w = get_width() - get_margin() - left_arrow_src_rect_.width() - get_margin() * 2 - right_arrow_src_rect_.width() - get_margin();
 	int h = get_height() - get_margin() * 2;
 
 	int stage_interval_w = w / stage_x_count;
@@ -534,7 +534,7 @@ win::Rect StageSelectScene::get_stage_dst_rect( const Stage* stage, int n ) cons
 	int x = n % stage_x_count;
 	int y = n / stage_x_count;
 
-	int dx = get_margin() + left_allow_src_rect_.width() + get_margin() + stage_interval_w * x + stage_interval_w / 2;
+	int dx = get_margin() + left_arrow_src_rect_.width() + get_margin() + stage_interval_w * x + stage_interval_w / 2;
 	int dy = get_margin() + stage_interval_h * y + stage_interval_h / 2;
 
 	return win::Rect::Size( dx - dst_w / 2, dy - dst_w / 2, dst_w, dst_w );

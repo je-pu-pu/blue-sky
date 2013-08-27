@@ -189,15 +189,15 @@ void Input::update_null()
  */
 void Input::update_common()
 {
-	if ( release( DOWN  ) ) allow_pop( DOWN  );
-	if ( release( UP    ) ) allow_pop( UP    );
-	if ( release( RIGHT ) ) allow_pop( RIGHT );
-	if ( release( LEFT  ) ) allow_pop( LEFT  );
+	if ( release( DOWN  ) ) arrow_pop( DOWN  );
+	if ( release( UP    ) ) arrow_pop( UP    );
+	if ( release( RIGHT ) ) arrow_pop( RIGHT );
+	if ( release( LEFT  ) ) arrow_pop( LEFT  );
 
-	if ( push( DOWN  ) ) allow_push( DOWN  );
-	if ( push( UP    ) ) allow_push( UP    );
-	if ( push( RIGHT ) ) allow_push( RIGHT );
-	if ( push( LEFT  ) ) allow_push( LEFT  );
+	if ( push( DOWN  ) ) arrow_push( DOWN  );
+	if ( push( UP    ) ) arrow_push( UP    );
+	if ( push( RIGHT ) ) arrow_push( RIGHT );
+	if ( push( LEFT  ) ) arrow_push( LEFT  );
 }
 
 /**

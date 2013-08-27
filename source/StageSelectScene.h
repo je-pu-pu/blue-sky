@@ -52,8 +52,8 @@ private:
 	Sound* click_;
 
 	win::Rect cursor_src_rect_;
-	win::Rect left_allow_src_rect_;
-	win::Rect right_allow_src_rect_;
+	win::Rect left_arrow_src_rect_;
+	win::Rect right_arrow_src_rect_;
 	win::Rect stage_src_rect_;
 
 	RectList circle_src_rect_list_;
@@ -70,8 +70,8 @@ private:
 	bool has_prev_page() const;
 	bool has_next_page() const;
 
-	bool is_mouse_on_left_allow() const;
-	bool is_mouse_on_right_allow() const;
+	bool is_mouse_on_left_arrow() const;
+	bool is_mouse_on_right_arrow() const;
 
 	Stage* get_pointed_stage() const;
 	

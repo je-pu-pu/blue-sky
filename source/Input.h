@@ -62,7 +62,7 @@ private:
 	const DirectInput* direct_input_;						///< DirectInput
 
 	unsigned int state_[ MAX_BUTTONS ];						///< 全てのボタンの状態
-	ButtonStack allow_stack_;								///< 最優先の方向ボタン
+	ButtonStack arrow_stack_;								///< 最優先の方向ボタン
 
 	bool joystick_enabled_;									///< ジョイスティック有効フラグ
 
@@ -114,15 +114,15 @@ public:
 	void update_null();
 	void update_common();
 
-	void allow_push( Button button )
+	void arrow_push( Button button )
 	{
-		allow_stack_.push_back( button );
+		arrow_stack_.push_back( button );
 	}
 
-	void allow_pop( Button button )
+	void arrow_pop( Button button )
 	{
-		ButtonStack::iterator i = std::find( allow_stack_.begin(), allow_stack_.end(), button );
-		allow_stack_.erase( i );
+		ButtonStack::iterator i = std::find( arrow_stack_.begin(), arrow_stack_.end(), button );
+		arrow_stack_.erase( i );
 	}
 
 	/**
@@ -173,16 +173,16 @@ public:
 	 *
 	 * @return 現在最優先で押されている方向ボタン ( 方向ボタンが押されていない場合は NONE を返す )
 	 */
-	Button get_primary_allow_button() const
+	Button get_primary_arrow_button() const
 	{
-		if ( allow_stack_.empty() ) return NONE;
+		if ( arrow_stack_.empty() ) return NONE;
 
-		return allow_stack_.back();
+		return arrow_stack_.back();
 	}
 
-	const ButtonStack& get_allow_button_stack() const
+	const ButtonStack& get_arrow_button_stack() const
 	{
-		return allow_stack_;
+		return arrow_stack_;
 	}
 
 	static const Input& get_null_input()

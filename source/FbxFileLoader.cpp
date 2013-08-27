@@ -623,7 +623,7 @@ void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 
 					if ( file_texture )
 					{
-						texture_file_path = convert_file_path_to_internal_encoding( file_texture->GetFileName() );
+						texture_file_path = convert_file_path_to_internal_encoding( file_texture->GetRelativeFileName() );
 
 						break; /// !!!
 					}
@@ -640,7 +640,7 @@ void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 
 				if ( file_texture )
 				{
-					texture_file_path = convert_file_path_to_internal_encoding( file_texture->GetFileName() );
+					texture_file_path = convert_file_path_to_internal_encoding( file_texture->GetRelativeFileName() );
 				}
 			}
 		}
@@ -648,6 +648,8 @@ void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 
 	if ( ! texture_file_path.empty() )
 	{
+		texture_file_path = "media/model/" + texture_file_path;
+
 		material->load_texture( texture_file_path.c_str() );
 	}
 }

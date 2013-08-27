@@ -1,6 +1,7 @@
 #include "App.h"
 #include "GameMain.h"
 
+#include <common/log.h>
 #include <common/exception.h>
 #include <common/serialize.h>
 
@@ -21,7 +22,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 	{
 		// アプリケーションを初期化する
 		app = App::GetInstance();
-		app->set_title( "blue-sky 2 ( update 1.0.3 )" );
+		app->set_title( "blue-sky 2 ( update 1.0.4 )" );
 		app->set_class_name( "blue-sky-2" );
 		app->set_size( 800, 600 );
 
@@ -43,6 +44,8 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 			std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() ) + "\n";
 			message += std::string( DXGetErrorString( e.data() ) ) + " : " + DXGetErrorDescription( e.data() );
 
+			common::log( "log/error.log", message );
+
 			MessageBox( app->GetWindowHandle(), message.c_str(), "ERROR", MB_OK );
 		}
 	}
@@ -51,6 +54,9 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 		if ( app )
 		{
 			std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() ) + "\n" + e.data();
+
+			common::log( "log/error.log", message );
+
 			MessageBox( app->GetWindowHandle(), message.c_str(), "ERROR", MB_OK );
 		}
 

@@ -38,7 +38,10 @@
 #include <common/math.h>
 #include <common/log.h>
 
+#include <boost/filesystem/operations.hpp>
+
 #include <sstream>
+
 
 #include "memory.h"
 
@@ -53,6 +56,8 @@ GameMain::GameMain()
 	: total_elapsed_time_( 0.f )
 	, is_display_fps_( false )
 {
+	boost::filesystem::create_directory( "log" );
+
 	win::Version version;
 	version.log( "log/windows_version.log" );
 

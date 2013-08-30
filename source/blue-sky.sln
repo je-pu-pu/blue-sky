@@ -20,6 +20,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "win", "extern\win\win.vcxpr
 		{71BEB03E-40CE-43D7-9F8D-C8E8DD8952AA} = {71BEB03E-40CE-43D7-9F8D-C8E8DD8952AA}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fbx-converter", "fbx-converter.vcxproj", "{090AA333-2B2B-4054-818B-D2CF778D8C95}"
+	ProjectSection(ProjectDependencies) = postProject
+		{71BEB03E-40CE-43D7-9F8D-C8E8DD8952AA} = {71BEB03E-40CE-43D7-9F8D-C8E8DD8952AA}
+		{BD95E740-358A-442B-87CD-4C754058136C} = {BD95E740-358A-442B-87CD-4C754058136C}
+		{8FD31BE5-D334-4354-89C9-1DADC7DE6543} = {8FD31BE5-D334-4354-89C9-1DADC7DE6543}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -60,6 +67,14 @@ Global
 		{BD95E740-358A-442B-87CD-4C754058136C}.Release 64bit|Win32.Build.0 = Release 64bit|Win32
 		{BD95E740-358A-442B-87CD-4C754058136C}.Release|Win32.ActiveCfg = Release|Win32
 		{BD95E740-358A-442B-87CD-4C754058136C}.Release|Win32.Build.0 = Release|Win32
+		{090AA333-2B2B-4054-818B-D2CF778D8C95}.Debug|Win32.ActiveCfg = Debug|Win32
+		{090AA333-2B2B-4054-818B-D2CF778D8C95}.Debug|Win32.Build.0 = Debug|Win32
+		{090AA333-2B2B-4054-818B-D2CF778D8C95}.Profile|Win32.ActiveCfg = Profile|Win32
+		{090AA333-2B2B-4054-818B-D2CF778D8C95}.Profile|Win32.Build.0 = Profile|Win32
+		{090AA333-2B2B-4054-818B-D2CF778D8C95}.Release 64bit|Win32.ActiveCfg = Release|Win32
+		{090AA333-2B2B-4054-818B-D2CF778D8C95}.Release 64bit|Win32.Build.0 = Release|Win32
+		{090AA333-2B2B-4054-818B-D2CF778D8C95}.Release|Win32.ActiveCfg = Release|Win32
+		{090AA333-2B2B-4054-818B-D2CF778D8C95}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

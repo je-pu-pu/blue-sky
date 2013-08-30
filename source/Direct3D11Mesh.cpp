@@ -9,6 +9,7 @@
 
 #include <common/exception.h>
 #include <common/math.h>
+#include <common/log.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string_regex.hpp>
@@ -127,6 +128,8 @@ game::Material* Direct3D11Mesh::get_material_at( uint_t index )
  */
 bool Direct3D11Mesh::load_obj( const char_t* file_name )
 {
+	// common::log( "log/debug.log", string_t( "loading obj : " ) + file_name );
+
 	std::ifstream in( file_name );
 
 	if ( ! in.good() )
@@ -146,7 +149,7 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 	std::string texture_name;
 
 	while ( in.good() )
-	{		
+	{
 		std::string line;		
 		std::getline( in, line );
 
@@ -336,6 +339,8 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
  */
 bool Direct3D11Mesh::load_fbx( const char_t* file_name, FbxFileLoader* loader, common::safe_ptr< SkinningAnimationSet >& skinning_animation_set )
 {
+	// common::log( "log/debug.log", string_t( "loading fbx : " ) + file_name );
+
 	if ( ! loader->load( this, file_name ) )
 	{
 		return false;

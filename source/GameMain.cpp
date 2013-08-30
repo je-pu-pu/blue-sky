@@ -56,6 +56,8 @@ GameMain::GameMain()
 	: total_elapsed_time_( 0.f )
 	, is_display_fps_( false )
 {
+	// common::log( "log/debug.log", "init" );
+
 	boost::filesystem::create_directory( "log" );
 
 	win::Version version;

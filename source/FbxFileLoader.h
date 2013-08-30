@@ -46,6 +46,8 @@ protected:
 
 	void convert_coordinate_system();
 
+	void set_relative_file_name_to_texture_file_name_recursive( FbxNode* );
+
 	static string_t convert_file_path_to_internal_encoding( const char* );
 
 	void print_local_transform( const FbxNode* ) const;
@@ -57,8 +59,12 @@ public:
 	~FbxFileLoader();
 
 	bool load( Mesh*, const char_t* );
-	bool save( const char_t* );
+
+	bool load( const char_t* file_path );
+	bool save( const char_t* file_path );
 	
+	bool convert_to_binaly( const char_t* file_path, const char_t* binary_file_path );
+
 }; // class FbxFileLoader
 
 #endif // FBX_FILE_LOADER_H

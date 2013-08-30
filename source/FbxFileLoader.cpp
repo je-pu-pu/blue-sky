@@ -8,6 +8,8 @@
 #include <common/timer.h>
 #include <common/exception.h>
 
+#include <boost/filesystem/convenience.hpp>
+
 #include <map>
 
 #include <iostream>
@@ -256,19 +258,13 @@ bool FbxFileLoader::load( Mesh* mesh, const char_t* file_name )
 	fbx_material_index_ = 0;
 	bone_index_map_.clear();
 
-	FbxImporter* importer = FbxImporter::Create( fbx_manager_, "" );
-    
-	if ( ! importer->Initialize( file_name, -1, fbx_manager_->GetIOSettings() ) )
+	common::timer t;
+
+	if ( ! load( file_name ) )
 	{
 		return false;
 	}
-    
-	common::timer t;
 
-	fbx_scene_ = FbxScene::Create( fbx_manager_, "scene" );
-	importer->Import( fbx_scene_ );
-	importer->Destroy();
-    
 	std::cout << "imp " << t.elapsed() << std::endl;
 
 	/*
@@ -868,6 +864,81 @@ void FbxFileLoader::convert_coordinate_system()
 	}
 }
 
+/**
+ * 相対パスのファイル名をテクスチャのファイル名として再帰的に設定する
+ *
+ * @param node FbxNode
+ */
+void FbxFileLoader::set_relative_file_name_to_texture_file_name_recursive( FbxNode* node )
+{
+	if ( ! node )
+	{
+		return;
+	}
+
+	for ( int n = 0; n < node->GetMaterialCount(); n++ )
+	{
+		FbxSurfaceMaterial* material = node->GetMaterial( n );
+
+		if ( ! material )
+		{
+			continue;
+		}
+
+		for ( auto p = material->GetFirstProperty(); p.IsValid(); p = material->GetNextProperty( p ) )
+		{
+			for ( int m = 0; m < p.GetSrcObjectCount< FbxTexture >(); m++ )
+			{
+				FbxLayeredTexture* layered_texture = p.GetSrcObject< FbxLayeredTexture >( m );
+				FbxFileTexture* file_texture = nullptr;
+
+				if ( layered_texture )
+				{
+					for ( int l = 0; l < layered_texture->GetSrcObjectCount< FbxTexture >(); l++ )
+					{
+						if ( ! layered_texture->GetSrcObject< FbxTexture >( l ) )
+						{
+							continue;
+						}
+
+						file_texture = FbxCast< FbxFileTexture >( layered_texture->GetSrcObject< FbxTexture >( l ) );
+					}
+				}
+				else
+				{
+					if ( ! p.GetSrcObject< FbxTexture >( m ) )
+					{
+						continue;
+					}
+
+					file_texture = FbxCast< FbxFileTexture >( p.GetSrcObject< FbxTexture >( m ) );
+				}
+
+				if ( file_texture )
+				{
+					const string_t relative_file_name = file_texture->GetRelativeFileName();
+
+					if ( ! file_texture->SetFileName( relative_file_name.c_str() ) )
+					{
+						COMMON_THROW_EXCEPTION_MESSAGE( string_t( "FbxFileTexture::SetFileName failed : " ) + relative_file_name );
+					}
+					/*
+					if ( ! file_texture->SetRelativeFileName( relative_file_name.c_str() ) )
+					{
+						COMMON_THROW_EXCEPTION_MESSAGE( string_t( "FbxFileTexture::SetRelativeFileName failed : " ) + relative_file_name );
+					}
+					*/
+				}
+			}
+		}
+	}
+
+	for ( int n = 0; n < node->GetChildCount(); n++ )
+	{
+		set_relative_file_name_to_texture_file_name_recursive( node->GetChild( n ) );
+	}
+}
+
 void FbxFileLoader::print_local_transform( const FbxNode* node ) const
 {
 	std::cout.setf( std::ios_base::fixed, std::ios_base::floatfield );
@@ -963,17 +1034,46 @@ void FbxFileLoader::print_axis_system( const FbxAxisSystem& axis_system ) const
 }
 
 /**
- * FBX ファイルを保存する
+ * FBX ファイルをシーンに読み込む
  *
- * @param file_name FBX ファイル名
+ * @param file_path FBX ファイルパス
  */
-bool FbxFileLoader::save( const char_t* file_name )
+bool FbxFileLoader::load( const char_t* file_path )
+{
+	bool result = false;
+
+	if ( fbx_scene_ )
+	{
+		fbx_scene_->Destroy( true );
+	}
+
+	fbx_scene_ = FbxScene::Create( fbx_manager_, "scene" );
+
+	FbxImporter* importer = FbxImporter::Create( fbx_manager_, "" );
+    
+	if ( importer->Initialize( file_path, -1, fbx_manager_->GetIOSettings() ) )
+	{
+		result = importer->Import( fbx_scene_ );
+	}
+	
+	importer->Destroy();
+
+	return result;
+}
+
+/**
+ * 現在のシーンを FBX ファイルに保存する
+ *
+ * @param file_path FBX ファイルパス
+ */
+bool FbxFileLoader::save( const char_t* file_path )
 {
 	bool result = false;
 
 	FbxExporter* exporter = FbxExporter::Create( fbx_manager_, "" );
 	
-	if ( exporter->Initialize( file_name, -1, fbx_manager_->GetIOSettings() ) )
+	// if ( exporter->Initialize( boost::filesystem::absolute( file_path ).string().c_str(), -1, fbx_manager_->GetIOSettings() ) )
+	if ( exporter->Initialize( file_path, -1, fbx_manager_->GetIOSettings() ) )
 	{
 		result = exporter->Export( fbx_scene_ );
 	}
@@ -981,6 +1081,26 @@ bool FbxFileLoader::save( const char_t* file_name )
 	exporter->Destroy();
 
 	return result;
+}
+
+/**
+ * 指定した FBX ファイルを読み込みバイナリ形式で保存する
+ *
+ * 
+ * @param file_path 読み込む FBX ファイルのパス
+ * @param binary_file_path バイナリ形で保存する FBX ファイルのパス
+ * @return FBX ファイルの保存に成功した場合は true を、失敗した場合は false を返す
+ */
+bool FbxFileLoader::convert_to_binaly( const char_t* file_path, const char_t* binary_file_path )
+{
+	if ( ! load( file_path ) )
+	{
+		return false;
+	}
+
+	set_relative_file_name_to_texture_file_name_recursive( fbx_scene_->GetRootNode() );
+
+	return save( binary_file_path );
 }
 
 /**

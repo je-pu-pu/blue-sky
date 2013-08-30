@@ -30,7 +30,7 @@ Direct3D11TextureManager::Texture* Direct3D11TextureManager::load( const char* n
 		return i->second;
 	}
 
-	common::log( "log/debug.log", string_t( "loading texture : " ) + name + " : " + file_name );
+	// common::log( "log/debug.log", string_t( "loading texture : " ) + name + " : " + file_name );
 
 	D3DX11_IMAGE_LOAD_INFO image_load_info;
 	image_load_info.Width = D3DX11_DEFAULT; // 256;

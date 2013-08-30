@@ -60,6 +60,8 @@ DrawingMesh* GraphicsManager::load_drawing_mesh( const char_t* name, common::saf
 			loaded = mesh->load_fbx( ( file_path + ".bin.fbx" ).c_str(), fbx_file_loader_.get(), skinning_animation_set );
 		}
 	}
+
+	/*
 	if ( ! loaded && boost::filesystem::exists( file_path  + ".fbx" ) )
 	{
 		loaded = mesh->load_fbx( ( file_path  + ".fbx" ).c_str(), fbx_file_loader_.get(), skinning_animation_set );
@@ -69,6 +71,8 @@ DrawingMesh* GraphicsManager::load_drawing_mesh( const char_t* name, common::saf
 			fbx_file_loader_->save( ( file_path + ".bin.fbx" ).c_str() );
 		}
 	}
+	*/
+
 	if ( ! loaded && boost::filesystem::exists( file_path + ".obj" ) )
 	{
 		loaded = mesh->load_obj( ( file_path + ".obj" ).c_str() );

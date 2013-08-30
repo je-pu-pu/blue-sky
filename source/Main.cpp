@@ -22,7 +22,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 	{
 		// アプリケーションを初期化する
 		app = App::GetInstance();
-		app->set_title( "blue-sky 2 ( update 1.0.4 )" );
+		app->set_title( "blue-sky 2 ( update 1.0.4c )" );
 		app->set_class_name( "blue-sky-2" );
 		app->set_size( 800, 600 );
 

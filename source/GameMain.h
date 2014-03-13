@@ -19,6 +19,8 @@ class DirectWrite;
 
 class DirectInput;
 
+class OculusRift;
+
 namespace game
 {
 	class Config;
@@ -71,6 +73,8 @@ protected:
 	common::auto_ptr< DirectInput >			direct_input_;			///< DirectInput
 	common::auto_ptr< Input >				input_;					///< Game Input
 
+	common::auto_ptr< OculusRift >			oculus_rift_;			///< Oculus Rift
+
 	common::auto_ptr< GraphicsManager >		graphics_manager_;		///< GraphicsManager
 	common::auto_ptr< SoundManager >		sound_manager_;			///< SoundManager
 
@@ -119,6 +123,8 @@ public:
 	Physics* get_physics() const { return physics_.get(); }
 
 	Input* get_input() const { return input_.get(); }
+	
+	OculusRift* get_oculus_rift() const { return oculus_rift_.get(); }
 
 	GraphicsManager* get_graphics_manager() const { return graphics_manager_.get(); }
 	SoundManager* get_sound_manager() const { return sound_manager_.get(); }

@@ -58,11 +58,11 @@ void Camera::update()
 	matrix4x4 zr;
 	zr.rotate_z( rotate_degree().z() );
 	
-	front_ = default_front_ * xr * yr;
-	right_ = default_right_ * xr * yr;
+	front_ = default_front_ * zr * xr * yr;
+	right_ = default_right_ * zr * xr * yr;
 
-	look_at_ = position() + default_front_ * xr * zr * yr;
-	up_ = default_up_ * xr * zr * yr;
+	look_at_ = position() + default_front_ * zr * xr * yr;
+	up_ = default_up_ * zr * xr * yr;
 
 	fov_ = fov_ * 0.9f + fov_target_ * 0.1f;
 	fov_ = math::clamp( fov_, 2.f, 100.f );

@@ -541,6 +541,42 @@ void Direct3D11::set_default_viewport()
 	immediate_context_->RSSetViewports( 1, & viewport_ );
 }
 
+/**
+ * 立体視用に左目用のビューポートを設定する
+ *
+ */
+void Direct3D11::set_viewport_for_left_eye()
+{
+	D3D11_VIEWPORT viewport;
+
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = static_cast< float >( swap_chain_desc_.BufferDesc.Width / 2 );
+	viewport.Height = static_cast< float >( swap_chain_desc_.BufferDesc.Height );
+	viewport.MinDepth = 0.f;
+	viewport.MaxDepth = 1.f;
+
+	immediate_context_->RSSetViewports( 1, & viewport );
+}
+
+/**
+ * 立体視用に右目用のビューポートを設定する
+ *
+ */
+void Direct3D11::set_viewport_for_right_eye()
+{
+	D3D11_VIEWPORT viewport;
+
+	viewport.TopLeftX = static_cast< float >( swap_chain_desc_.BufferDesc.Width / 2 );
+	viewport.TopLeftY = 0;
+	viewport.Width = static_cast< float >( swap_chain_desc_.BufferDesc.Width / 2 );
+	viewport.Height = static_cast< float >( swap_chain_desc_.BufferDesc.Height );
+	viewport.MinDepth = 0.f;
+	viewport.MaxDepth = 1.f;
+
+	immediate_context_->RSSetViewports( 1, & viewport );
+}
+
 void Direct3D11::setInputLayout( const char* name )
 {
 	immediate_context_->IASetInputLayout( vertex_layout_list_[ name ] );

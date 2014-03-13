@@ -137,6 +137,9 @@ public:
 	void set_default_render_target();
 	void set_default_viewport();
 
+	void set_viewport_for_left_eye();
+	void set_viewport_for_right_eye();
+
 	void setInputLayout( const char* );
 
 	void bind_texture_to_ps( uint_t, const Texture* );

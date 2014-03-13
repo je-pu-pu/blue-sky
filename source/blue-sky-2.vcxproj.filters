@@ -210,6 +210,7 @@
     <ClCompile Include="EndingScene.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="OculusRift.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -471,6 +472,7 @@
     <ClInclude Include="DelayedCommand.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="OculusRift.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

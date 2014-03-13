@@ -76,6 +76,8 @@ protected:
 
 	static Color	white_;				/// !!!!!
 
+	float_t			ortho_offset_;		///< —§‘ÌŽ‹—p
+
 	void create_vertex_buffer();
 	void create_index_buffer();
 
@@ -88,6 +90,7 @@ public:
 	void begin();
 
 	void set_transform( const Matrix& );
+	void set_ortho_offset( float_t ortho_offset ) { ortho_offset_ = ortho_offset; }
 
 	void draw( const Point&, const Texture*, const Rect&, const Color& = white_ );
 	void draw( const Rect&, const Texture*, const Rect&, const Color& = white_ );

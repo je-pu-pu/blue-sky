@@ -16,6 +16,7 @@ Direct3D11Sprite::Direct3D11Sprite( Direct3D* direct_3d )
 	, constant_buffer_( 0 )
 	, vertex_buffer_( 0 )
 	, index_buffer_( 0 )
+	, ortho_offset_( 0.f )
 {
 	constant_buffer_ = new ConstantBuffer( direct_3d );
 	
@@ -86,6 +87,7 @@ void Direct3D11Sprite::set_transform( const Matrix& m )
 	ConstantBufferData constant_buffer_data;
 	constant_buffer_data.transform = m;
 	constant_buffer_data.transform *= XMMatrixOrthographicLH( 2.f * static_cast< float >( surface_desc.Width ) / static_cast< float >( surface_desc.Height ), 2.f, -1.f, 1.f );
+	constant_buffer_data.transform *= XMMatrixTranslation( ortho_offset_, 0.f, 0.f );
 	constant_buffer_data.transform = XMMatrixTranspose( constant_buffer_data.transform );
 	constant_buffer_->update( & constant_buffer_data );
 }

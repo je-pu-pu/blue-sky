@@ -57,6 +57,8 @@
 
 #include "TranslationObject.h"
 
+#include "OculusRift.h"
+
 #include "Direct3D11.h"
 
 #include "DelayedCommand.h"
@@ -122,8 +124,16 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// Camera
 	camera_ = new Camera();
 	camera_->set_fov_default( get_config()->get( "camera.fov", 90.f ) );
-	camera_->set_aspect( static_cast< float >( get_width() ) / static_cast< float >( get_height() ) );
 	camera_->reset_fov();
+
+	if ( get_oculus_rift() )
+	{
+		camera_->set_aspect( static_cast< float >( get_width() * 0.5f ) / static_cast< float >( get_height() ) );
+	}
+	else
+	{
+		camera_->set_aspect( static_cast< float >( get_width() ) / static_cast< float >( get_height() ) );
+	}
 
 	setup_command();
 
@@ -191,6 +201,8 @@ GamePlayScene::~GamePlayScene()
 	get_physics()->clear();
 	
 	clear_delayed_command();
+
+	get_direct_3d()->getSprite()->set_ortho_offset( 0.f );
 }
 
 void GamePlayScene::clear_delayed_command()
@@ -1160,12 +1172,25 @@ void GamePlayScene::update()
 	shadow_paper_color_.chase();
 }
 
+/**
+ * 通常時の更新処理
+ *
+ */
 void GamePlayScene::update_main()
 {
 	const float_t rotation_speed_rate = camera_->fov() / camera_->get_fov_default();
 
-	camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f * rotation_speed_rate;
-	camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
+	if ( get_oculus_rift() )
+	{
+		camera_->rotate_degree_target().x() = -math::radian_to_degree( get_oculus_rift()->get_pitch() );
+		camera_->rotate_degree_target().z() = math::radian_to_degree( get_oculus_rift()->get_roll() );
+	}
+	else
+	{
+		camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f * rotation_speed_rate;
+		camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
+	}
+
 	player_->set_pitch( -camera_->rotate_degree_target().x() / 90.f );
 
 	float eye_depth_add = 0.f;
@@ -1176,7 +1201,14 @@ void GamePlayScene::update_main()
 	}
 	else if ( camera_->rotate_degree_target().x() > 0.f )
 	{
-		eye_depth_add = get_input()->get_mouse_dy();
+		if ( get_oculus_rift() )
+		{
+			eye_depth_add = get_oculus_rift()->get_delta_pitch();
+		}
+		else
+		{
+			eye_depth_add = get_input()->get_mouse_dy();
+		}
 	}
 
 	player_->add_eye_depth( eye_depth_add );
@@ -1300,7 +1332,15 @@ void GamePlayScene::update_main()
 			camera_->reset_fov();
 		}
 
-		player_->add_direction_degree( get_input()->get_mouse_dx() * 90.f * rotation_speed_rate);
+		float_t add_direction_degree_by_mouse = get_input()->get_mouse_dx() * 90.f * rotation_speed_rate;
+		float_t add_direction_degree_by_oculus_rift = 0.f;
+		
+		if ( get_oculus_rift() )
+		{
+			math::radian_to_degree( get_oculus_rift()->get_delta_yaw() );
+		}
+
+		player_->add_direction_degree( add_direction_degree_by_mouse + add_direction_degree_by_oculus_rift );
 		camera_->rotate_degree_target().y() = player_->get_direction_degree();
 
 		get_direct_3d()->getFader()->fade_in( 0.05f );
@@ -1556,38 +1596,60 @@ void GamePlayScene::render()
 		render_shadow_map();
 
 		get_direct_3d()->set_default_render_target();
-		get_direct_3d()->set_default_viewport();
-
-		get_direct_3d()->setInputLayout( "main" );
-
-		render_sky_box();
-		render_far_billboards();
-
-		render_object_mesh();
-
-		get_direct_3d()->setInputLayout( "skin" );
-		render_object_skin_mesh();
-
-		get_direct_3d()->setInputLayout( "line" );
-
-		render_object_line();
-
-		// render_debug_axis();
-
-		render_debug_bullet();
-
-		get_direct_3d()->setInputLayout( "main" );
-
-		render_sprite();
-
-		get_direct_3d()->renderText();
-
-		render_fader();
 		
-		// render_debug_shadow_map_window();
+		if ( get_oculus_rift() )
+		{
+			get_direct_3d()->set_viewport_for_left_eye();
+			update_render_data_for_frame( +get_oculus_rift()->get_projection_offset() );
+			render_for_eye( +get_oculus_rift()->get_ortho_offset() );
+
+			get_direct_3d()->set_viewport_for_right_eye();
+			update_render_data_for_frame( -get_oculus_rift()->get_projection_offset() );
+			render_for_eye( -get_oculus_rift()->get_ortho_offset() );
+		}
+		else
+		{
+			get_direct_3d()->set_default_viewport();
+			render_for_eye();
+		}
 
 		get_direct_3d()->end3D();
 	}
+}
+
+/**
+ * 
+ *
+ */
+void GamePlayScene::render_for_eye( float_t ortho_offset ) const
+{
+	get_direct_3d()->setInputLayout( "main" );
+
+	render_sky_box();
+	render_far_billboards();
+
+	render_object_mesh();
+
+	get_direct_3d()->setInputLayout( "skin" );
+	render_object_skin_mesh();
+
+	get_direct_3d()->setInputLayout( "line" );
+
+	render_object_line();
+
+	// render_debug_axis();
+
+	render_debug_bullet();
+
+	get_direct_3d()->setInputLayout( "main" );
+
+	render_sprite( ortho_offset );
+
+	get_direct_3d()->renderText();
+
+	render_fader();
+		
+	// render_debug_shadow_map_window();
 }
 
 void GamePlayScene::render_text() const
@@ -1611,6 +1673,7 @@ void GamePlayScene::render_text() const
 		ss << L"mouse.dx : " << get_input()->get_mouse_dx() << std::endl;
 		ss << L"mouse.dy : " << get_input()->get_mouse_dy() << std::endl;
 
+		/*
 		ss << L"IS JUMPING : " << player_->is_jumping() << std::endl;
 		ss << L"ON FOOTING : " << player_->is_on_footing() << std::endl;
 		ss << L"ON LADDER : " << player_->is_on_ladder() << std::endl;
@@ -1631,6 +1694,16 @@ void GamePlayScene::render_text() const
 			ss << L"BALLOON : " << player_->get_balloon()->is_visible() << std::endl;
 			ss << L"BALLOON : " << player_->get_balloon()->is_mesh_visible() << std::endl;
 			ss << L"BALLOON : " << player_->get_balloon()->is_line_visible() << std::endl;
+		}
+		*/
+
+		if ( get_oculus_rift() )
+		{
+			ss << L"YAW : " << get_oculus_rift()->get_yaw() << std::endl;
+			ss << L"PITCH : " << get_oculus_rift()->get_pitch() << std::endl;
+			ss << L"ROLL : " << get_oculus_rift()->get_roll() << std::endl;
+
+			ss << L"DELTA YAW : " << get_oculus_rift()->get_delta_yaw() << std::endl;
 		}
 	}
 
@@ -1653,19 +1726,32 @@ void GamePlayScene::update_render_data_for_game() const
 /**
  * フレーム毎に更新する必要のある描画用の定数バッファを更新する
  *
+ * @param eye_offset 立体視用視点オフセット
  */
-void GamePlayScene::update_render_data_for_frame() const
+void GamePlayScene::update_render_data_for_frame( float_t eye_offset ) const
 {
 	{
-		XMVECTOR eye = XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 );
-		XMVECTOR at = XMVectorSet( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z(), 0.f );
-		XMVECTOR up = XMVectorSet( camera_->up().x(), camera_->up().y(), camera_->up().z(), 0.f );
+		Camera::Vector3 camera_pos = camera_->position();
+		Camera::Vector3 camera_look_at = camera_->look_at();
+		Camera::Vector3 camera_up = camera_->up();
+
+		/*
+		camera_pos += camera_->right() * eye_offset;
+		camera_look_at += camera_->right() * eye_offset;
+		camera_up += camera_->right() * eye_offset;
+		*/
+
+		XMVECTOR eye = XMVectorSet( camera_pos.x(), camera_pos.y(), camera_pos.z(), 1 );
+		XMVECTOR at = XMVectorSet( camera_look_at.x(), camera_look_at.y(), camera_look_at.z(), 0.f );
+		XMVECTOR up = XMVectorSet( camera_up.x(), camera_up.y(), camera_up.z(), 0.f );
 
 		FrameConstantBufferData frame_constant_buffer_data;
 
 		frame_constant_buffer_data.view = XMMatrixLookAtLH( eye, at, up );
 		frame_constant_buffer_data.view = XMMatrixTranspose( frame_constant_buffer_data.view );
 		frame_constant_buffer_data.projection = XMMatrixPerspectiveFovLH( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f );
+		frame_constant_buffer_data.projection *= XMMatrixTranslation( eye_offset, 0.f, 0.f );
+
 		frame_constant_buffer_data.projection = XMMatrixTranspose( frame_constant_buffer_data.projection );
 		frame_constant_buffer_data.light = -Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z() );
 		frame_constant_buffer_data.light.normalize();
@@ -2059,7 +2145,7 @@ void GamePlayScene::render_active_object_line( const ActiveObject* active_object
  * 2D スプライトを描画する
  *
  */
-void GamePlayScene::render_sprite()
+void GamePlayScene::render_sprite( float_t ortho_offset ) const
 {
 	if ( player_->get_action_mode() == Player::ACTION_MODE_SCOPE )
 	{
@@ -2067,6 +2153,7 @@ void GamePlayScene::render_sprite()
 
 		ObjectConstantBufferData buffer_data;
 		buffer_data.world = XMMatrixOrthographicLH( camera_->aspect() * 2.f, 2.f, 0.f, 1.f );
+		buffer_data.world *= XMMatrixTranslation( ortho_offset, 0.f, 0.f );
 		buffer_data.world = XMMatrixTranspose( buffer_data.world );
 
 		get_game_main()->get_object_constant_buffer()->update( & buffer_data );
@@ -2083,6 +2170,8 @@ void GamePlayScene::render_sprite()
 			scope_mesh_->render();
 		}
 	}
+
+	get_direct_3d()->getSprite()->set_ortho_offset( ortho_offset * 20.f );
 
 	get_direct_3d()->getSprite()->begin();
 

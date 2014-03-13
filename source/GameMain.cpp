@@ -23,6 +23,8 @@
 #include "DirectInput.h"
 #include "Input.h"
 
+#include "OculusRift.h"
+
 #include "ActiveObjectPhysics.h"
 
 #include "SoundManager.h"
@@ -118,6 +120,19 @@ GameMain::GameMain()
 	input_->set_direct_input( direct_input_.get() );
 	input_->load_config( * config_.get() );
 
+	// Oculus Rift
+	if ( get_config()->get( "input.oculus_rift.enabled", 1 ) )
+	{
+		try
+		{
+			oculus_rift_ = new OculusRift();
+		}
+		catch ( ... )
+		{
+
+		}
+	}
+
 	graphics_manager_ = new Direct3D11GraphicsManager( direct_3d_.get() );
 
 	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
@@ -191,6 +206,11 @@ bool GameMain::update()
 	else
 	{
 		input_->update_null();
+	}
+
+	if ( oculus_rift_ )
+	{
+		oculus_rift_->update();
 	}
 
 	if ( input_->push( Input::ESCAPE ) )

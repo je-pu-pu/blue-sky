@@ -10,6 +10,8 @@ class Direct3D11;
 class Direct3D11Color;
 class Direct3D11Texture;
 
+class OculusRift;
+
 namespace game
 {
 
@@ -78,6 +80,8 @@ protected:
 	Input* get_input() const;
 	Config* get_config() const;
 	Config* get_save_data() const;
+
+	OculusRift* get_oculus_rift() const;
 
 	const MainLoop* get_main_loop() const;
 

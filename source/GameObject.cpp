@@ -13,7 +13,8 @@
 namespace blue_sky
 {
 
-GameObject::Vector3 GameObject::GravityDefault( 0.f, -9.8f, 0.f );
+// GameObject::Vector3 GameObject::GravityDefault( 0.f, -3.711f, 0.f ); // âŒêØ
+GameObject::Vector3 GameObject::GravityDefault( 0.f, -9.8f, 0.f ); // ínãÖ
 GameObject::Vector3 GameObject::GravityZero( 0.f, 0.f, 0.f );
 
 GameObject::GameObject()

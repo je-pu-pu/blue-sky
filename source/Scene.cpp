@@ -95,6 +95,11 @@ Scene::Config* Scene::get_save_data() const
 	return game_main_->get_save_data();
 }
 
+OculusRift* Scene::get_oculus_rift() const
+{
+	return game_main_->get_oculus_rift();
+}
+
 const Scene::MainLoop* Scene::get_main_loop() const
 {
 	return game_main_->get_main_loop();

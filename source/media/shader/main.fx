@@ -381,7 +381,7 @@ float4 sample_paper_texture( float2 xy )
 	return paper_texture.Sample( wrap_texture_sampler, uv );
 }
 
-float4 ps_with_paper_common( float2 position, float2 uv, float diffuse )
+float4 ps_with_paper_common( float3 position, float2 uv, float diffuse )
 {
 	float4 shadow = float4( 1.f, 1.f, 1.f, 1.f );
 
@@ -396,7 +396,7 @@ float4 ps_with_paper_common( float2 position, float2 uv, float diffuse )
 		{
 			const float3 shadow_paper_color = ( float3 ) ShadowPaperColor;
 
-			float4 paper = sample_paper_texture( position );
+			float4 paper = sample_paper_texture( float2( position.x + position.z * 0.01f, position.y ) );
 			shadow.rgb = shadow_paper_color * ( 1.f - paper.a ) + shadow.rgb * paper.a;
 		}
 
@@ -435,7 +435,7 @@ float4 ps_main_wrap( PS_INPUT input ) : SV_Target
 	// return float4( input.Normal * 0.5f + float3( 0.5f, 0.5f, 0.5f ), 1.f );
 
 	float diffuse = ( 1.f - ( dot( input.Normal, ( float3 ) Light ) * 0.5f + 0.5f ) );
-	return ps_with_paper_common( ( float2 ) input.Position, input.TexCoord, diffuse );
+	return ps_with_paper_common( ( float3 ) input.Position, input.TexCoord, diffuse );
 
 	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ); // /* + input.Color */ * float4( input.Normal, 1.f );
 }
@@ -676,7 +676,7 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 
 	diffuse = max( 0.f, diffuse );
 
-	return ps_with_paper_common( ( float2 ) input.Position, input.TexCoord, diffuse );
+	return ps_with_paper_common( ( float3 ) input.Position, input.TexCoord, diffuse );
 }
 
 // ----------------------------------------

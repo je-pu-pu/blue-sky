@@ -125,8 +125,6 @@ protected:
 	void setup_stage();
 	void setup_command();
 
-	void render_sprite();
-
 	void restart();
 
 	void on_goal();
@@ -149,13 +147,15 @@ protected:
 
 	/** @todo ˆÚ“®‚·‚é */
 	void update_render_data_for_game() const;
-	void update_render_data_for_frame() const;
+	void update_render_data_for_frame( float_t eye_offset = 0.f ) const;
 	void update_render_data_for_object() const;
 	void update_render_data_for_active_object( const ActiveObject* ) const;
 
 	void bind_game_constant_buffer() const;
 	void bind_frame_constant_buffer() const;
 	void bind_object_constant_buffer() const;
+
+	void render_for_eye( float_t ortho_offset = 0.f ) const;
 
 	void render_text() const;
 
@@ -171,6 +171,8 @@ protected:
 	
 	void render_active_object_mesh( const ActiveObject* ) const;
 	void render_active_object_line( const ActiveObject* ) const;
+	
+	void render_sprite( float_t rotho_offset = 0.f ) const;
 
 	void render_debug_axis() const;
 	void render_debug_bullet() const;

@@ -62,12 +62,12 @@ void Direct3D11Material::load_texture( const char* file_name )
 	texture_ = direct_3d_->getTextureManager()->load( file_name, file_name );
 }
 
-game::Texture* Direct3D11Material::get_texture()
+const game::Texture* Direct3D11Material::get_texture() const
 {
 	return texture_;
 }
 
-void Direct3D11Material::set_texture( game::Texture* texture )
+void Direct3D11Material::set_texture( const game::Texture* texture )
 {
 	texture_ = texture;
 }

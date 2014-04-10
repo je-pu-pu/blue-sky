@@ -1943,7 +1943,7 @@ void GamePlayScene::render_object_skin_mesh() const
 
 		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs();
 		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_ps();
-		get_direct_3d()->bind_texture_to_ps( 2, paper_texture_ );
+		paper_texture_->bind_to_ps( 2 );
 
 		if ( shadow_map_ )
 		{
@@ -1991,7 +1991,7 @@ void GamePlayScene::render_object_mesh() const
 		
 		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs();
 		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_ps();
-		get_direct_3d()->bind_texture_to_ps( 2, paper_texture_ );
+		paper_texture_->bind_to_ps( 2 );
 
 		if ( shadow_map_ )
 		{
@@ -2284,18 +2284,12 @@ void GamePlayScene::render_debug_shadow_map_window() const
 	buffer_data.color = Color( 0.5f, 0.f, 0.f, 0.f );
 	get_game_main()->get_object_constant_buffer()->update( & buffer_data );
 
-	auto technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
-
-	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
-	{
-		( *i )->apply();
-		
+	render_technique( "|main2d", [this] () {
 		bind_object_constant_buffer();
 
-		Texture t( get_direct_3d(), shadow_map_->getShaderResourceView() );
-		rectangle_->get_material_list().front()->set_texture( & t );
+		rectangle_->get_material_list().front()->set_texture( shadow_map_->getTexture() );
 		rectangle_->render();
-	}
+	} );
 }
 
 } // namespace blue_sky

@@ -26,6 +26,7 @@
     <ClCompile Include="BgSpriteLayer.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CanvasTestScene.cpp" />
     <ClCompile Include="Direct3D11.cpp" />
     <ClCompile Include="Direct3D11Axis.cpp" />
     <ClCompile Include="Direct3D11BulletDebugDraw.cpp" />
@@ -103,6 +104,7 @@
     <ClInclude Include="BoneNode.h" />
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CanvasTestScene.h" />
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="DelayedCommand.h" />
     <ClInclude Include="Direct3D11.h" />
@@ -263,7 +265,7 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;NOMINMAX;FBXSDK_NEW_API;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>

@@ -4,6 +4,7 @@
 #include "type.h"
 
 #include <d3d11.h>
+#include <functional>
 
 class App;
 class Direct3D11;
@@ -16,7 +17,7 @@ namespace game
 class Sound;
 class Config;
 class MainLoop;
-// class Texture;
+class Texture;
 
 } // namespace game
 
@@ -44,10 +45,10 @@ public:
 	typedef game::Config				Config;
 	typedef game::MainLoop				MainLoop;
 	
-	// typedef game::Texture				Texture;
+	typedef game::Texture				Texture;
 
 	typedef Direct3D11					Direct3D;
-	typedef Direct3D11Texture			Texture;
+	// typedef Direct3D11Texture			Texture;
 
 	typedef ActiveObjectPhysics			Physics;
 
@@ -93,6 +94,8 @@ protected:
 	void stop_sound( const char* ) const;
 
 	void update_constant_buffer_for_sprite_frame( int line_type, float_t drawing_accent_scale = 1.f );
+	
+	void render_technique( const char_t*, std::function< void() > ) const;
 	void render_fader() const;
 
 	virtual Sound* get_bgm() { return 0; };

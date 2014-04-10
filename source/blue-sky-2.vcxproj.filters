@@ -210,6 +210,9 @@
     <ClCompile Include="EndingScene.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="CanvasTestScene.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -469,6 +472,9 @@
       <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="DelayedCommand.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="CanvasTestScene.h">
       <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>

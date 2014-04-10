@@ -107,15 +107,12 @@ void Direct3D11Sprite::draw( const Rect* dst, const Texture* texture, const Rect
 	UINT src_height;
 
 	{
-		D3D11_TEXTURE2D_DESC texture_2d_desc;
-		direct_3d_->getTexture2dDescByTexture( texture, & texture_2d_desc );
-
 		if ( src )
 		{
-			FLOAT l = src->left()   / static_cast< FLOAT >( texture_2d_desc.Width );
-			FLOAT r = src->right()  / static_cast< FLOAT >( texture_2d_desc.Width );
-			FLOAT t = src->top()    / static_cast< FLOAT >( texture_2d_desc.Height );
-			FLOAT b = src->bottom() / static_cast< FLOAT >( texture_2d_desc.Height );
+			FLOAT l = src->left()   / static_cast< FLOAT >( texture->get_width() );
+			FLOAT r = src->right()  / static_cast< FLOAT >( texture->get_width() );
+			FLOAT t = src->top()    / static_cast< FLOAT >( texture->get_height() );
+			FLOAT b = src->bottom() / static_cast< FLOAT >( texture->get_height() );
 	
 			vertex_list[ 0 ].TexCoord = Vector2( l, t );
 			vertex_list[ 1 ].TexCoord = Vector2( r, t );
@@ -132,8 +129,8 @@ void Direct3D11Sprite::draw( const Rect* dst, const Texture* texture, const Rect
 			vertex_list[ 2 ].TexCoord = Vector2( 0, 1 );
 			vertex_list[ 3 ].TexCoord = Vector2( 1, 1 );
 
-			src_width = texture_2d_desc.Width;
-			src_height = texture_2d_desc.Height;
+			src_width = texture->get_width();
+			src_height = texture->get_height();
 		}
 	}
 
@@ -177,7 +174,8 @@ void Direct3D11Sprite::draw( const Rect* dst, const Texture* texture, const Rect
 
 	constant_buffer_->bind_to_vs();
 
-	direct_3d_->bind_texture_to_ps( 0, texture );
+	texture->bind_to_ps( 0 );
+
 	direct_3d_->getImmediateContext()->DrawIndexed( 6, 0, 0 );
 }
 

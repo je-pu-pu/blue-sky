@@ -13,6 +13,11 @@ namespace win
 	class Point;
 }
 
+namespace game
+{
+	class Texture;
+}
+
 class Direct3D11;
 class Direct3D11Vector;
 class Direct3D11Matrix;
@@ -30,7 +35,7 @@ class Direct3D11Sprite
 public:
 	typedef Direct3D11					Direct3D;
 	typedef Direct3D11Color				Color;
-	typedef Direct3D11Texture			Texture;
+	typedef game::Texture				Texture;
 
 	typedef Direct3D11Sprite			Sprite;
 	

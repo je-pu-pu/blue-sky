@@ -334,6 +334,32 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
  *
  * @param file_name FBX ファイル名
  * @param loader FBX ファイルローダー
+ * @return ファイルの読み込みに成功した場合は true を、失敗した場合は false を返す
+ */
+bool Direct3D11Mesh::load_fbx( const char_t* file_name, FbxFileLoader* loader )
+{
+	if ( ! loader->load( this, file_name ) )
+	{
+		return false;
+	}
+
+	optimize();
+
+	create_vertex_buffer();
+	create_index_buffer();
+
+	clear_vertex_list();
+	clear_skinning_info_list();
+	clear_index_list();
+
+	return true;
+}
+
+/**
+ * FBX ファイルを読み込む
+ *
+ * @param file_name FBX ファイル名
+ * @param loader FBX ファイルローダー
  * @param skinning_animation_set 同時に読み込むスキニングアニメーション情報を格納するポインタ
  * @return ファイルの読み込みに成功した場合は true を、失敗した場合は false を返す
  */

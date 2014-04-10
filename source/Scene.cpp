@@ -178,6 +178,29 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 	}
 }
 
+/**
+ * 指定したテクニックの全てのパスでレンダリング処理を実行する
+ *
+ * @param technique_name テクニック名
+ * @param function レンダリング処理
+ */
+void Scene::render_technique( const char_t* technique_name, std::function< void() > function ) const
+{
+	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( technique_name );
+	
+	if ( ! technique )
+	{
+		return;
+	}
+
+	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	{
+		( *i )->apply();
+
+		function();
+	}
+}
+
 void Scene::render_fader() const
 {
 	ObjectConstantBufferData buffer_data;

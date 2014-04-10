@@ -211,6 +211,9 @@
       <Filter>Game</Filter>
     </ClCompile>
     <ClCompile Include="OculusRift.cpp" />
+    <ClCompile Include="CanvasTestScene.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -473,6 +476,9 @@
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="OculusRift.h" />
+    <ClInclude Include="CanvasTestScene.h">
+      <Filter>Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

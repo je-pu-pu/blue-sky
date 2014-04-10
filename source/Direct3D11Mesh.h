@@ -176,6 +176,7 @@ public:
 	virtual ~Direct3D11Mesh();
 
 	bool load_obj( const char_t* );
+	bool load_fbx( const char_t*, FbxFileLoader* );
 	bool load_fbx( const char_t*, FbxFileLoader*, common::safe_ptr< SkinningAnimationSet >& );
 	
 	Material* get_material_at( int, bool force = true );

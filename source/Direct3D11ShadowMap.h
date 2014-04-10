@@ -2,7 +2,7 @@
 #define DIRECT_3D_11_SHADOW_MAP_H
 
 #include "Direct3D11ConstantBuffer.h"
-
+#include "Direct3D11Texture.h"
 #include "type.h"
 
 #include <common/auto_ptr.h>
@@ -43,8 +43,9 @@ public:
 	static const int shader_resource_view_slot_ = 1;		/// !!!!!!!!!!!
 
 private:
-	Direct3D11*							direct_3d_;
-	common::auto_ptr< ConstantBuffer >	constant_buffer_;
+	Direct3D11*								direct_3d_;
+	common::auto_ptr< ConstantBuffer >		constant_buffer_;
+	common::auto_ptr< Direct3D11Texture >	texture_;
 
 	bool						enabled_;					///< 有効フラグ
 	int							cascade_levels_;			///< CSM のレベル数
@@ -77,13 +78,12 @@ public:
 	bool is_enabled() const { return enabled_; }
 
 	int get_cascade_levels() const { return cascade_levels_; }
-
-	ID3D11ShaderResourceView* getShaderResourceView() { return shader_resource_view_; }
-
+	
 	void set_light_position( const Vector& );
 	void set_eye_position( const Vector& );
 
 	const ConstantBuffer* getConstantBuffer() const { return constant_buffer_.get(); }
+	const const Direct3D11Texture* getTexture() const { return texture_.get(); }
 
 	const Matrix getViewProjectionMatrix( int level ) const { return view_matrix_ * projection_matrix_list_[ level ]; }
 	

@@ -49,6 +49,10 @@ struct ObjectConstantBufferData : public BaseConstantBufferData< 2 >
 struct ObjectExtentionConstantBufferData : public BaseConstantBufferData< 3 >
 {
 	Color color;
+
+	ObjectExtentionConstantBufferData()
+		: color( 0.f, 0.f, 0.f, 0.f )
+	{ }
 };
 
 struct FrameDrawingConstantBufferData : public BaseConstantBufferData< 4 >

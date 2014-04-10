@@ -18,8 +18,8 @@ public:
 	Material() { }
 	virtual ~Material() { }
 
-	virtual Texture* get_texture() = 0;
-	virtual void set_texture( Texture* ) = 0;
+	virtual const Texture* get_texture() const = 0;
+	virtual void set_texture( const Texture* ) = 0;
 	
 	virtual void bind_to_ia() const = 0;
 	virtual void render() const = 0;

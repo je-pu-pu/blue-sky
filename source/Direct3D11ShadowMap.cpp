@@ -65,6 +65,10 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_lev
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateShaderResourceView( depth_stencil_texture_, & view_desc, & shader_resource_view_ ) );
 	}
 
+	{
+		texture_ = new Direct3D11Texture( direct_3d_, shader_resource_view_ );
+	}
+
 	viewport_list_.resize( cascade_levels_ );
 
 	int n = 0;

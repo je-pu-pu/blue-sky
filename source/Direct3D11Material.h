@@ -33,7 +33,7 @@ protected:
 	Direct3D11*					direct_3d_;
 	
 	ID3D11Buffer*				index_buffer_;
-	game::Texture*				texture_;
+	const game::Texture*		texture_;
 
 	IndexList					index_list_;
 	uint_t						index_count_;
@@ -49,8 +49,8 @@ public:
 
 	void load_texture( const char_t* );
 
-	game::Texture* get_texture();
-	void set_texture( game::Texture* );
+	const game::Texture* get_texture() const;
+	void set_texture( const game::Texture* );
 
 	IndexList& get_index_list() { return index_list_; }
 	const IndexList& get_index_list() const { return index_list_; }

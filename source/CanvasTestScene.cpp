@@ -5,6 +5,11 @@
 #include "DrawingModel.h"
 #include "FbxFileLoader.h"
 #include "GameMain.h"
+
+#include "DirectWrite.h"
+
+#include <game/Texture.h>
+
 #include "memory.h"
 
 namespace blue_sky
@@ -12,6 +17,7 @@ namespace blue_sky
 
 CanvasTestScene::CanvasTestScene( const GameMain* game_main )
 	: Scene( game_main )
+	, tablet_( Tablet::get_instance( get_game_main()->get_app()->GetWindowHandle() ) )
 {
 	FbxFileLoader fbx_file_loader;
 
@@ -46,18 +52,6 @@ CanvasTestScene::CanvasTestScene( const GameMain* game_main )
 
 		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
 	}
-	{
-		Matrix m;
-
-		m.set_identity();
-		m.set_translation( 0.f, 0.f, 0.f );
-
-		ObjectConstantBufferData buffer_data;
-		buffer_data.world = m.inverse();
-		buffer_data.color = Color( 1.f, 0.f, 0.f, 1.f );
-
-		get_game_main()->get_object_constant_buffer()->update( & buffer_data );
-	}
 
 	texture_ = get_graphics_manager()->get_texture( "pen" );
 }
@@ -74,6 +68,22 @@ CanvasTestScene::~CanvasTestScene()
 void CanvasTestScene::update()
 {
 	Scene::update();
+
+	{
+		Matrix r, s;
+
+		r.set_identity();
+		r.set_rotation_y( tablet_->get_pressure() );
+
+		s.set_identity();
+		s.set_scaling( tablet_->get_x() * 0.01f, tablet_->get_y() * 0.01f, 1.f );
+
+		ObjectConstantBufferData buffer_data;
+		buffer_data.world = ( r * s ).inverse();
+		buffer_data.color = Color( 1.f, 0.f, 0.f, 1.f );
+
+		get_game_main()->get_object_constant_buffer()->update( & buffer_data );
+	}
 }
 
 /**
@@ -82,6 +92,23 @@ void CanvasTestScene::update()
  */
 void CanvasTestScene::render()
 {
+	{
+		get_direct_3d()->begin2D();
+		get_direct_3d()->getFont()->begin();
+
+		std::wstringstream ss;
+		ss.setf( std::ios_base::fixed, std::ios_base::floatfield );
+
+		ss << L"X : " << tablet_->get_x() << std::endl;
+		ss << L"Y : " << tablet_->get_y() << std::endl;
+		ss << L"P : " << tablet_->get_pressure() << std::endl;
+
+		get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 0.f, 0.f, 0.f, 1.f ) );
+
+		get_direct_3d()->getFont()->end();
+		get_direct_3d()->end2D();
+	}
+
 	get_direct_3d()->begin3D();
 
 	get_direct_3d()->clear();
@@ -91,7 +118,7 @@ void CanvasTestScene::render()
 
 	get_direct_3d()->setInputLayout( "main" );
 
-	render_technique( "|main", [&] () {
+	render_technique( "|main_canvas", [&] {
 		get_game_main()->get_game_constant_buffer()->bind_to_all();
 	
 		get_game_main()->get_frame_constant_buffer()->bind_to_all();
@@ -99,8 +126,11 @@ void CanvasTestScene::render()
 		get_game_main()->get_object_constant_buffer()->bind_to_vs();
 		get_game_main()->get_object_constant_buffer()->bind_to_ps();
 		
+		texture_->bind_to_ps( 1 );
 		mesh_->render();
 	} );
+
+	get_direct_3d()->renderText();
 
 	get_direct_3d()->end3D();
 }

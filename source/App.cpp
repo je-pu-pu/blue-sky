@@ -2,6 +2,7 @@
 #include "Game.h"
 #include "resource.h"
 
+#include <win/Tablet.h>
 #include <win/Rect.h>
 #include <win/Point.h>
 
@@ -106,7 +107,7 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	}
 	
 	// ƒQ[ƒ€‚ð‰Šú‰»‚·‚é
-	Game* game = Game::get_instance();
+	Game::get_instance();
 
 	ShowWindow( hWnd, nCmdShow );		//•\Ž¦
 	UpdateWindow( hWnd );				//•`‰æ
@@ -206,6 +207,16 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	case WM_DESTROY:
 	{
 		PostQuitMessage( 0 );
+		break;
+	}
+	case WM_ACTIVATE:
+	{
+		win::Tablet::get_instance( hwnd )->on_activate( wp, lp );
+		break;
+	}
+	case WT_PACKET:
+	{
+		win::Tablet::get_instance( hwnd )->on_packet( wp, lp );
 		break;
 	}
 	default:

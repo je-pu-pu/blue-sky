@@ -328,8 +328,8 @@ void GameMain::setup_scene( const string_t& scene_name )
 	
 	if ( scene_name == "title" )
 	{
-		scene_ = new TitleScene( this );
-		// scene_ = new CanvasTestScene( this );
+		// scene_ = new TitleScene( this );
+		scene_ = new CanvasTestScene( this );
 	}
 	else if ( scene_name == "stage_select" )
 	{

@@ -2,14 +2,18 @@
 #define BLUE_SKY_CANVAS_TEST_SCENE_H
 
 #include "Scene.h"
+#include <win/Tablet.h>
 #include <common/safe_ptr.h>
 #include <memory>
 
 namespace game
 {
+	class Mesh;
+}
 
-class Mesh;
-
+namespace win
+{
+	class Tablet;
 }
 
 namespace blue_sky
@@ -23,8 +27,11 @@ class CanvasTestScene : public Scene
 {
 public:
 	typedef game::Mesh Mesh;
+	typedef win::Tablet Tablet;
 
 private:
+	common::safe_ptr< Tablet > tablet_;
+
 	std::unique_ptr< Mesh > mesh_;
 	common::safe_ptr< Texture > texture_;
 

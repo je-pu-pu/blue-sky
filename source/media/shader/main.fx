@@ -6,6 +6,7 @@ Texture2D model_texture : register( t0 );		/// モデルのテクスチャ
 Texture2D line_texture : register( t0 );		/// 線のテクスチャ
 Texture2D shadow_texture : register( t1 );		/// シャドウマップ
 Texture2D paper_texture : register( t2 );		/// 紙の質感テクスチャ
+Texture2D pen_texture : register( t1 );			/// ペンのテクスチャ
 
 SamplerState texture_sampler
 {
@@ -455,6 +456,117 @@ float4 ps_debug( PS_INPUT input ) : SV_Target
 	return float4( 1.f, 0.f, 0.f, 0.25f );
 }
 
+struct GS_CANVAS_INPUT
+{
+	float4 Position : SV_POSITION;
+};
+
+/**
+ * Canvas
+ *
+ */
+GS_CANVAS_INPUT vs_canvas( VS_INPUT input )
+{
+	GS_CANVAS_INPUT output;
+
+	output.Position = mul( input.Position, World );
+	output.Position = mul( output.Position, View );
+    output.Position = mul( output.Position, Projection );
+
+	return output;
+}
+
+void add_pen_point( inout TriangleStream<PS_FLAT_INPUT> TriStream , in float4 pos )
+{
+	const float screen_width = ScreenWidth;
+	const float screen_height = ScreenHeight;
+	const float screen_ratio = ( screen_height / screen_width );
+
+	const float l = 1.f;
+	const float hw = l * 0.5f * screen_ratio;
+	const float hh = l * 0.5f;
+	
+	PS_FLAT_INPUT output[ 4 ];
+	
+	// left top
+	output[ 0 ].Position = pos + float4( -hw, -hh, 0.f, 0.f );
+	output[ 0 ].TexCoord.xy = float2( 0.f, 0.f );
+
+	// right top
+	output[ 1 ].Position = pos + float4( +hw, -hh, 0.f, 0.f );
+	output[ 1 ].TexCoord.xy = float2( 1.f, 0.f );
+
+	// left bottom
+	output[ 2 ].Position = pos + float4( -hw, +hh, 0.f, 0.f );
+	output[ 2 ].TexCoord.xy = float2( 0.f, 1.f );
+
+	// right bottom
+	output[ 3 ].Position = pos + float4( +hw, +hh, 0.f, 0.f );
+	output[ 3 ].TexCoord.xy = float2( 1.f, 1.f );
+
+	for ( uint y = 0; y < 4; ++y )
+	{
+		output[ y ].Color = float4( 1.f, 0.f, 0.f, 0.5f );
+	}
+
+	TriStream.Append( output[ 0 ] );
+	TriStream.Append( output[ 2 ] );
+	TriStream.Append( output[ 1 ] );
+	TriStream.RestartStrip();
+
+	TriStream.Append( output[ 1 ] );
+	TriStream.Append( output[ 2 ] );
+	TriStream.Append( output[ 3 ] );
+	TriStream.RestartStrip();
+}
+
+/**
+ * Canvas
+ *
+ */
+[maxvertexcount(96)]
+void gs_canvas( triangle GS_CANVAS_INPUT input[3], inout TriangleStream<PS_FLAT_INPUT> TriStream )
+{
+	static const uint input_vertex_count = 3;
+	static const uint output_vertex_count = 3;
+
+	for ( uint x = 0; x < output_vertex_count; ++x )
+	{
+		add_pen_point( TriStream, input[ x ].Position );
+		add_pen_point( TriStream, input[ x ].Position + float4( 0.1f, 0.f, 0.f, 0.f ) );
+	}
+}
+
+struct PS_CANVAS_OUTPUT
+{
+	float4 Color : SV_Target;
+	float Depth  : SV_Depth;
+};
+
+/**
+ * Canvas
+ *
+ */
+PS_CANVAS_OUTPUT ps_canvas( PS_FLAT_INPUT input )
+{
+	PS_CANVAS_OUTPUT output = ( PS_CANVAS_OUTPUT ) 0;
+	
+	output.Color = pen_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
+
+	if ( output.Color.a >= 0.1f )
+	{
+		output.Depth = input.Position.z;
+	}
+	else
+	{
+		output.Depth = 1;
+	}
+
+	return output;
+}
+
+
+
 BlendState NoBlend
 {
 	BlendEnable[ 0 ] = True;
@@ -468,6 +580,15 @@ BlendState Blend
 	SrcBlend = SRC_ALPHA;
 	DestBlend = INV_SRC_ALPHA;
 	AlphaToCoverageEnable = True;
+};
+
+BlendState CanvasPenBlend
+{
+	BlendEnable[ 0 ] = True;
+	
+	SrcBlend = SRC_ALPHA;
+	DestBlend = INV_SRC_ALPHA;
+	AlphaToCoverageEnable = False;
 };
 
 DepthStencilState NoWriteDepth
@@ -707,6 +828,21 @@ technique11 main_flat
         SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, ps_main_wrap_flat() ) );
+
+		RASTERIZERSTATE = Default;
+    }
+}
+
+technique11 main_canvas
+{
+	pass main
+    {
+		SetBlendState( CanvasPenBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+        SetVertexShader( CompileShader( vs_4_0, vs_canvas() ) );
+		SetGeometryShader( CompileShader( gs_4_0, gs_canvas() ) );
+        SetPixelShader( CompileShader( ps_4_0, ps_canvas() ) );
 
 		RASTERIZERSTATE = Default;
     }

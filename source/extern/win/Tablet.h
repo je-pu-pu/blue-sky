@@ -7,7 +7,7 @@
 
 #include "MSGPACK.H"
 #include "WINTAB.H"
-#define PACKETDATA PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE
+#define PACKETDATA PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_ORIENTATION
 #define PACKETMODE PK_BUTTONS
 #include "PKTDEF.H"
 
@@ -27,10 +27,13 @@ private:
 	HCTX context_handle_;
 
 	AXIS pressure_axis_;
+	AXIS orientation_axis_[ 3 ];
 
 	float x_;
 	float y_;
 	float pressure_;
+	float azimuth_;
+	float altitude_;
 
 	static UINT ( API * DllWTInfo )( UINT, UINT, LPVOID );
 	static HCTX ( API * DllWTOpen )( HWND, LPLOGCONTEXTA, BOOL );
@@ -74,6 +77,8 @@ public:
 	float get_x() const { return x_; }
 	float get_y() const { return y_; }
 	float get_pressure() const { return pressure_; }
+	float get_azimuth() const { return azimuth_; }
+	float get_altitude() const { return altitude_; }
 
 }; // class Tablet
 

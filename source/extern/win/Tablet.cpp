@@ -60,15 +60,19 @@ Tablet::Tablet( HWND hwnd )
 
 	if ( DllWTInfo( WTI_DEVICES, DVC_X, & x_axis ) != sizeof( AXIS ) )
 	{
-		COMMON_THROW_EXCEPTION_MESSAGE( "DllWTInfo() failed." );
+		COMMON_THROW_EXCEPTION_MESSAGE( "DllWTInfo( DVC_X ) failed." );
 	}
 	if ( DllWTInfo( WTI_DEVICES, DVC_Y, & y_axis ) != sizeof( AXIS ) )
 	{
-		COMMON_THROW_EXCEPTION_MESSAGE( "DllWTInfo() failed." );
+		COMMON_THROW_EXCEPTION_MESSAGE( "DllWTInfo( DVC_Y ) failed." );
 	}
 	if ( DllWTInfo( WTI_DEVICES, DVC_NPRESSURE, & pressure_axis_ ) != sizeof( AXIS ) )
 	{
-		COMMON_THROW_EXCEPTION_MESSAGE( "DllWTInfo() failed." );
+		COMMON_THROW_EXCEPTION_MESSAGE( "DllWTInfo( DVC_NPRESSURE ) failed." );
+	}
+	if ( DllWTInfo( WTI_DEVICES, DVC_ORIENTATION, & orientation_axis_ ) != sizeof( orientation_axis_ ) )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( "DllWTInfo( DVC_ORIENTATION ) failed." );
 	}
 	
 	log_context_.lcInOrgX = 0;
@@ -119,9 +123,11 @@ void Tablet::on_packet( WPARAM wp, LPARAM lp )
 
 	if ( DllWTPacket( ( HCTX ) lp, wp, & p ) ) 
 	{
-		x_ = p.pkX;
-		y_ = p.pkY;
+		x_ = static_cast< float >( p.pkX );
+		y_ = static_cast< float >( p.pkY );
 		pressure_ = ( p.pkNormalPressure - pressure_axis_.axMin ) / static_cast< float >( pressure_axis_.axMax - pressure_axis_.axMin );
+		azimuth_ = ( p.pkOrientation.orAzimuth - orientation_axis_[ 0 ].axMin ) / static_cast< float >( orientation_axis_[ 0 ].axMax - orientation_axis_[ 0 ].axMin );
+		altitude_ = ( p.pkOrientation.orAltitude - orientation_axis_[ 1 ].axMin ) / static_cast< float >( orientation_axis_[ 1 ].axMax - orientation_axis_[ 1 ].axMin );
 	}
 }
 

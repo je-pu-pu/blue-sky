@@ -102,6 +102,8 @@ void CanvasTestScene::render()
 		ss << L"X : " << tablet_->get_x() << std::endl;
 		ss << L"Y : " << tablet_->get_y() << std::endl;
 		ss << L"P : " << tablet_->get_pressure() << std::endl;
+		ss << L"AZ : " << tablet_->get_azimuth() << std::endl;
+		ss << L"AL : " << tablet_->get_altitude() << std::endl;
 
 		get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 0.f, 0.f, 0.f, 1.f ) );
 

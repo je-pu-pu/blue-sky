@@ -4,6 +4,8 @@
 #include "type.h"
 #include "SkinningAnimation.h"
 #include "Direct3D11Matrix.h"
+#include <common/exception.h>
+#include <vector>
 #include <map>
 
 /**
@@ -14,7 +16,7 @@ class SkinningAnimationSet
 {
 public:
 	typedef std::map< const string_t, SkinningAnimation > SkinningAnimationMap;
-	typedef std::vector< Matrix > MatrixList;
+	typedef std::vector< Matrix* > MatrixList;
 	typedef std::vector< uint_t > BoneIndexList;
 	typedef std::vector< BoneIndexList > ChildBoneIndexList;
 	typedef std::vector< uint_t > ParentBoneIndexList;
@@ -30,6 +32,14 @@ public:
 	{
 		parent_bone_index_list_.resize( 1 );
 		parent_bone_index_list_[ 0 ] = 0;
+	}
+
+	~SkinningAnimationSet()
+	{
+		for ( auto i = bone_offset_matrix_list_.begin(); i != bone_offset_matrix_list_.end(); ++i )
+		{
+			delete *i;
+		}
 	}
 
 	/**
@@ -76,8 +86,8 @@ public:
 	}
 
 	/*** @todo ®—‚·‚é */
-	Matrix& get_bone_offset_matrix_by_bone_index( uint_t bone_index ) { return bone_offset_matrix_list_[ bone_index ]; }
-	const Matrix& get_bone_offset_matrix_by_bone_index( uint_t bone_index ) const { return bone_offset_matrix_list_[ bone_index ]; }
+	Matrix& get_bone_offset_matrix_by_bone_index( uint_t bone_index ) { return *bone_offset_matrix_list_[ bone_index ]; }
+	const Matrix& get_bone_offset_matrix_by_bone_index( uint_t bone_index ) const { return *bone_offset_matrix_list_[ bone_index ]; }
 
 	/**
 	 * ƒ{[ƒ“‚Ì”‚ğæ“¾‚·‚é
@@ -96,7 +106,17 @@ public:
 	 */
 	void set_bone_count( uint_t count )
 	{
-		bone_offset_matrix_list_.resize( count, Matrix::identity() );
+		if ( ! bone_offset_matrix_list_.empty() )
+		{
+			COMMON_THROW_EXCEPTION_MESSAGE( "duplicate call set_bonoe_count()" );
+		}
+
+		bone_offset_matrix_list_.resize( count );
+
+		for ( auto i = bone_offset_matrix_list_.begin(); i != bone_offset_matrix_list_.end(); ++i )
+		{
+			*i = new Matrix( Matrix::identity() );
+		}
 
 		for ( auto i = skinning_animation_map_.begin(); i != skinning_animation_map_.end(); ++i )
 		{

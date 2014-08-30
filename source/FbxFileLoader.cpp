@@ -399,13 +399,8 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 
 	// load_mesh_smoothing_info()
 	{
-		for ( int n = 0; n < mesh->GetLayerCount(); n++ )
-		{
-			FbxLayer* layer = mesh->GetLayer( n );
-			smoothing = layer->GetSmoothing();
-
-			break;
-		}
+		FbxLayer* layer = mesh->GetLayer( 0 );
+		smoothing = layer->GetSmoothing();
 	}
 
 	if ( ! smoothing )
@@ -491,7 +486,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 				}
 				else
 				{
-					Mesh::Material::Index vertex_index = mesh_->get_vertex_list().size();
+					Mesh::Material::Index vertex_index = static_cast< Mesh::Material::Index >( mesh_->get_vertex_list().size() );
 
 					mesh_->get_vertex_list().push_back( v );
 

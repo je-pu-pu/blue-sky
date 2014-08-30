@@ -1,6 +1,8 @@
 #include "CanvasTestScene.h"
 #include "Direct3D11.h"
 #include "Direct3D11Mesh.h"
+#include "Direct3D11Sprite.h"
+#include "Direct3D11Texture.h"
 #include "GraphicsManager.h"
 #include "DrawingModel.h"
 #include "FbxFileLoader.h"
@@ -9,6 +11,8 @@
 #include "DirectWrite.h"
 
 #include <game/Texture.h>
+
+#include <win/Rect.h>
 
 #include "memory.h"
 
@@ -36,16 +40,18 @@ CanvasTestScene::CanvasTestScene( const GameMain* game_main )
 		get_game_main()->get_game_constant_buffer()->update( & constant_buffer_data );
 	}
 	{
-		XMVECTOR eye = XMVectorSet( -3.f, 3.f, -3.f, 1.f );
-		XMVECTOR at = XMVectorSet( 0.f, 0.f, 0.f, 1.f );
-		XMVECTOR up = XMVectorSet( 0.f, 1.f, 0.f, 1.f );
+		Vector eye( -3.f, 3.f, -3.f );
+		Vector at( 0.f, 0.f, 0.f );
+		Vector up( 0.f, 1.f, 0.f );
 
 		FrameConstantBufferData frame_constant_buffer_data;
 
-		frame_constant_buffer_data.view = XMMatrixLookAtLH( eye, at, up );
-		frame_constant_buffer_data.view = XMMatrixTranspose( frame_constant_buffer_data.view );
-		frame_constant_buffer_data.projection = XMMatrixPerspectiveFovLH( math::degree_to_radian( 90.f ), static_cast< float >( get_width() ) / static_cast< float >( get_height() ), 0.05f, 3000.f );
-		frame_constant_buffer_data.projection = XMMatrixTranspose( frame_constant_buffer_data.projection );
+		frame_constant_buffer_data.view.set_look_at( eye, at, up );
+		frame_constant_buffer_data.view = frame_constant_buffer_data.view.transpose();
+
+		frame_constant_buffer_data.projection.set_perspective_fov( math::degree_to_radian( 90.f ), static_cast< float >( get_width() ) / static_cast< float >( get_height() ), 0.05f, 3000.f );
+		frame_constant_buffer_data.projection = frame_constant_buffer_data.projection.transpose();
+		
 		frame_constant_buffer_data.light = Vector( 0, 0, 0 );
 		frame_constant_buffer_data.time = 0.f;
 		frame_constant_buffer_data.time_beat = 0;
@@ -69,13 +75,17 @@ void CanvasTestScene::update()
 {
 	Scene::update();
 
+	if ( tablet_->get_pressure() > 0.f )
+	{
+		tablet_->get_x();
+		tablet_->get_y();
+	}
+
 	{
 		Matrix r, s;
 
-		r.set_identity();
 		r.set_rotation_y( tablet_->get_pressure() );
 
-		s.set_identity();
 		s.set_scaling( tablet_->get_x() * 0.01f, tablet_->get_y() * 0.01f, 1.f );
 
 		ObjectConstantBufferData buffer_data;
@@ -99,6 +109,7 @@ void CanvasTestScene::render()
 		std::wstringstream ss;
 		ss.setf( std::ios_base::fixed, std::ios_base::floatfield );
 
+		ss << L"C : " << tablet_->get_cursor_index() << std::endl;
 		ss << L"X : " << tablet_->get_x() << std::endl;
 		ss << L"Y : " << tablet_->get_y() << std::endl;
 		ss << L"P : " << tablet_->get_pressure() << std::endl;
@@ -131,6 +142,16 @@ void CanvasTestScene::render()
 		texture_->bind_to_ps( 1 );
 		mesh_->render();
 	} );
+
+	{
+		get_direct_3d()->getSprite()->begin();
+
+		render_technique( "|sprite", [&] {
+			get_direct_3d()->getSprite()->draw( win::Rect::Size( tablet_->get_x(), tablet_->get_y(), 16, 16 ), texture_.get(), win::Rect( 0, 0, 64, 64 ) );
+		} );
+
+		get_direct_3d()->getSprite()->end();
+	}
 
 	get_direct_3d()->renderText();
 

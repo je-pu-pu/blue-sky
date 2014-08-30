@@ -1,16 +1,16 @@
 #ifndef DIRECT_3D_11_VECTOR_H
 #define DIRECT_3D_11_VECTOR_H
 
-#include "Direct3D11Matrix.h"
-
 #include <d3d11.h>
 #include <xnamath.h>
+
+class Direct3D11Matrix;
 
 /**
  * Direct3D 11 Vector
  *
  */
-class Direct3D11Vector
+__declspec( align( 16 ) ) class Direct3D11Vector
 {
 public:
 	typedef float			UnitType;
@@ -18,9 +18,9 @@ public:
 	typedef unsigned int	UintType;
 
 private:
-	__declspec( align( 16) ) XMVECTOR value_;
+	__declspec( align( 16 ) ) XMVECTOR value_;
 
-	Direct3D11Vector( XMVECTOR v )
+	Direct3D11Vector( const XMVECTOR& v )
 		: value_( v )
 	{
 
@@ -37,7 +37,7 @@ public:
 		value_ = XMVectorSet( x, y, z, w );
 	}
 
-	static Direct3D11Vector FromXMVECTOR( XMVECTOR v )
+	static Direct3D11Vector FromXMVECTOR( const XMVECTOR& v )
 	{
 		return Direct3D11Vector( v );
 	}
@@ -73,6 +73,10 @@ public:
 		return *this;
 	}
 
+	operator XMVECTOR () const
+	{
+		return value_;
+	}
 
 	friend Direct3D11Vector operator + ( const Direct3D11Vector& v1, const Direct3D11Vector& v2 )
 	{
@@ -84,10 +88,7 @@ public:
 		return XMVectorSubtract( v1.value_, v2.value_ );
 	}
 
-	friend Direct3D11Vector operator * ( const Direct3D11Vector& v, const Direct3D11Matrix& m )
-	{
-		return XMVector4Transform( v.value_, XMLoadFloat4x4( & m.value_ ) );
-	}
+	friend Direct3D11Vector operator * ( const Direct3D11Vector&, const Direct3D11Matrix& );
 
 	friend Direct3D11Vector operator * ( const Direct3D11Vector& v, UnitType x )
 	{

@@ -182,7 +182,7 @@ void TitleScene::render()
 					{
 						ObjectConstantBufferData object_constant_buffer_data;
 
-						object_constant_buffer_data.world = XMMatrixTranspose( XMMatrixTranslation( +0.01f, +0.01f, 0.f ) );
+						object_constant_buffer_data.world = Matrix().set_translation( +0.01f, +0.01f, 0.f ).transpose();
 						object_constant_buffer_data.color = Color( 0.f, 0.f, 0.f, -0.5f );
 
 						get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
@@ -193,7 +193,7 @@ void TitleScene::render()
 					{
 						ObjectConstantBufferData object_constant_buffer_data;
 
-						object_constant_buffer_data.world = XMMatrixTranspose( XMMatrixIdentity() );
+						object_constant_buffer_data.world = Matrix().set_identity().transpose();
 						object_constant_buffer_data.color = Color( 1.f, 1.f, 1.f, 0.f );
 
 						get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );

@@ -102,10 +102,11 @@ void DirectWrite::draw_text_common( FLOAT left, FLOAT top, FLOAT right, FLOAT bo
 	DIRECT_X_RELEASE( solid_color_brush_ );
 }
 
-FLOAT DirectWrite::get_text_height( const WCHAR* text, FLOAT w, FLOAT h ) const
+FLOAT DirectWrite::get_text_height( const WCHAR* /* text */, FLOAT /* w */, FLOAT /* h */ ) const
 {
 	return 10.f;
 
+	/*
 	std::wstring ws = text;
 
 	IDWriteTextLayout* text_layout;
@@ -117,4 +118,5 @@ FLOAT DirectWrite::get_text_height( const WCHAR* text, FLOAT w, FLOAT h ) const
 	DIRECT_X_RELEASE( text_layout );
 
 	return metrics.height;
+	*/
 }

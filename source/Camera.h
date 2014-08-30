@@ -72,7 +72,7 @@ public:
 	void reset_fov() { fov_ = fov_target_ = fov_default_; }
 
 	float get_rotate_chase_speed() { return rotate_chase_speed_; }
-	void set_rotate_chase_speed( float s ) { rotate_chase_speed_; }
+	void set_rotate_chase_speed( float s ) { rotate_chase_speed_ = s; }
 	void reset_rotate_chase_speed() { rotate_chase_speed_ = 0.2f; }
 
 	void update_with_player( const Player* );

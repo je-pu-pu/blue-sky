@@ -65,7 +65,7 @@ public:
 	{
 		static const int DEFAULT_SLOT = 13;
 
-		XMMATRIX transform;
+		Matrix transform;
 	};
 
 	typedef Direct3D11ConstantBuffer< ConstantBufferData > ConstantBuffer;

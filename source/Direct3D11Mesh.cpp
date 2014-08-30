@@ -248,7 +248,7 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 				}
 				else
 				{
-					Material::Index vertex_index = vertex_list_.size();
+					Material::Index vertex_index = static_cast< Material::Index >( vertex_list_.size() );
 
 					vertex_list_.push_back( v );
 					material->get_index_list().push_back( vertex_index );

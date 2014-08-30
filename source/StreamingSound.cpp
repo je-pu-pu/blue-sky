@@ -154,7 +154,7 @@ void StreamingSound::stream_half( bool first_half )
 
 	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->Lock( lock_offset, lock_size, & data, & size, 0, 0, 0 ) );
 
-	int x = sound_file_->read( data, size, is_loop_ );
+	sound_file_->read( data, size, is_loop_ );
 
 	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->Unlock( data, size, 0, 0 ) );
 

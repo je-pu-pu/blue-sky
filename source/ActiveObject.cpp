@@ -265,7 +265,7 @@ void ActiveObject::render_line() const
 	get_object_constant_buffer()->bind_to_vs();
 	get_object_constant_buffer()->bind_to_ps();
 
-	get_drawing_model()->get_line()->render(); // 200 + static_cast< int >( XMVectorGetZ( eye ) * 10.f ) );
+	get_drawing_model()->get_line()->render();
 }
 
 void ActiveObject::play_animation( const char* name, bool force, bool loop )

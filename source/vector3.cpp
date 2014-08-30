@@ -110,7 +110,7 @@ vector3 vector3::operator * ( const matrix4x4 &_x ) const
 	const T &a = x.get(0,0), &b = x.get(0,1), &c = x.get(0,2), &d = x.get(0,3);
 	const T &e = x.get(1,0), &f = x.get(1,1), &g = x.get(1,2), &h = x.get(1,3);
 	const T &i = x.get(2,0), &j = x.get(2,1), &k = x.get(2,2), &l = x.get(2,3);
-	const T &m = x.get(3,0), &n = x.get(3,1), &o = x.get(3,2), &p = x.get(3,3);
+//	const T &m = x.get(3,0), &n = x.get(3,1), &o = x.get(3,2), &p = x.get(3,3);
 
 	dv.set(
 		sx * a + sy * b + sz * c + d,

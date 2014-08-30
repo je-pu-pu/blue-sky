@@ -353,7 +353,7 @@ void GamePlayScene::setup_command()
 			get_sound_manager()->unload( sound_name.c_str() );
 		}
 
-		Sound* sound = get_sound_manager()->load( sound_name.c_str(), ( sound_file_name.empty() ? sound_name : sound_file_name ).c_str() );
+		get_sound_manager()->load( sound_name.c_str(), ( sound_file_name.empty() ? sound_name : sound_file_name ).c_str() );
 	};
 	command_map_[ "play_sound" ] = [ & ] ( const string_t& s )
 	{
@@ -381,7 +381,7 @@ void GamePlayScene::setup_command()
 			sound->stop();
 		}
 	};
-	command_map_[ "stop_all_sound" ] = [ & ] ( const string_t& s )
+	command_map_[ "stop_all_sound" ] = [ & ] ( const string_t& )
 	{
 		get_sound_manager()->stop_all();
 	};
@@ -637,7 +637,7 @@ void GamePlayScene::setup_command()
 
 		delayed_command_list_.push_back( new DelayedCommand( interval, count, command ) );
 	};
-	command_map_[ "end_by_last_switch" ] = [ & ] ( const string_t& s )
+	command_map_[ "end_by_last_switch" ] = [ & ] ( const string_t& )
 	{
 		bgm_->stop();
 		get_sound_manager()->stop_all();
@@ -1100,7 +1100,7 @@ void GamePlayScene::exec_command( const string_t& command )
 	i->second( command_params );
 }
 
-void GamePlayScene::save_stage_file( const char* file_name ) const
+void GamePlayScene::save_stage_file( const char* ) const
 {
 
 }
@@ -1731,28 +1731,21 @@ void GamePlayScene::update_render_data_for_game() const
 void GamePlayScene::update_render_data_for_frame( float_t eye_offset ) const
 {
 	{
-		Camera::Vector3 camera_pos = camera_->position();
-		Camera::Vector3 camera_look_at = camera_->look_at();
-		Camera::Vector3 camera_up = camera_->up();
-
 		/*
 		camera_pos += camera_->right() * eye_offset;
 		camera_look_at += camera_->right() * eye_offset;
 		camera_up += camera_->right() * eye_offset;
 		*/
 
-		XMVECTOR eye = XMVectorSet( camera_pos.x(), camera_pos.y(), camera_pos.z(), 1 );
-		XMVECTOR at = XMVectorSet( camera_look_at.x(), camera_look_at.y(), camera_look_at.z(), 0.f );
-		XMVECTOR up = XMVectorSet( camera_up.x(), camera_up.y(), camera_up.z(), 0.f );
+		Vector eye( camera_->position().x(), camera_->position().y(), camera_->position().z() );
+		Vector at( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z() );
+		Vector up( camera_->up().x(), camera_->up().y(), camera_->up().z() );
 
 		FrameConstantBufferData frame_constant_buffer_data;
 
-		frame_constant_buffer_data.view = XMMatrixLookAtLH( eye, at, up );
-		frame_constant_buffer_data.view = XMMatrixTranspose( frame_constant_buffer_data.view );
-		frame_constant_buffer_data.projection = XMMatrixPerspectiveFovLH( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f );
-		frame_constant_buffer_data.projection *= XMMatrixTranslation( eye_offset, 0.f, 0.f );
+		frame_constant_buffer_data.view = Matrix().set_look_at( eye, at, up ).transpose();
+		frame_constant_buffer_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f ).transpose();
 
-		frame_constant_buffer_data.projection = XMMatrixTranspose( frame_constant_buffer_data.projection );
 		frame_constant_buffer_data.light = -Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z() );
 		frame_constant_buffer_data.light.normalize();
 		frame_constant_buffer_data.time = get_total_elapsed_time();
@@ -1803,13 +1796,13 @@ void GamePlayScene::update_render_data_for_active_object( const ActiveObject* ac
 
 	const btTransform& trans = active_object->get_transform();
 
-	XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
+	Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
 
 	ObjectConstantBufferData buffer_data;
 
-	buffer_data.world = XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
-	buffer_data.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-	buffer_data.world = XMMatrixTranspose( buffer_data.world );
+	buffer_data.world.set_rotation_quaternion( q );
+	buffer_data.world *= Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+	buffer_data.world = buffer_data.world.transpose();
 
 	if ( active_object->get_drawing_model()->get_line() )
 	{
@@ -1944,8 +1937,7 @@ void GamePlayScene::render_sky_box() const
 		// sky box
 		if ( sky_box_ )
 		{
-			object_constant_buffer_data.world = XMMatrixTranslationFromVector( XMVectorSet( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1 ) );
-			object_constant_buffer_data.world = XMMatrixTranspose( object_constant_buffer_data.world );
+			object_constant_buffer_data.world = Matrix().set_translation( camera_->position().x(), camera_->position().y(), camera_->position().z() ).transpose();
 			object_constant_buffer_data.color = ambient_color_.value();
 
 			get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
@@ -1956,7 +1948,7 @@ void GamePlayScene::render_sky_box() const
 		// ground
 		if ( ground_ )
 		{
-			object_constant_buffer_data.world = XMMatrixIdentity();
+			object_constant_buffer_data.world.set_identity();
 			object_constant_buffer_data.color = ambient_color_.value();
 
 			get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
@@ -1985,7 +1977,7 @@ void GamePlayScene::render_far_billboards() const
 
 		{
 			ObjectConstantBufferData buffer;
-			buffer.world = XMMatrixIdentity();
+			buffer.world.set_identity();
 					
 			get_game_main()->get_object_constant_buffer()->update( & buffer );
 		}
@@ -2152,9 +2144,9 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 		get_direct_3d()->setInputLayout( "main" );
 
 		ObjectConstantBufferData buffer_data;
-		buffer_data.world = XMMatrixOrthographicLH( camera_->aspect() * 2.f, 2.f, 0.f, 1.f );
-		buffer_data.world *= XMMatrixTranslation( ortho_offset, 0.f, 0.f );
-		buffer_data.world = XMMatrixTranspose( buffer_data.world );
+		buffer_data.world = Matrix().set_orthographic( camera_->aspect() * 2.f, 2.f, 0.f, 1.f );
+		buffer_data.world *= Matrix().set_translation( ortho_offset, 0.f, 0.f );
+		buffer_data.world = buffer_data.world.transpose();
 
 		get_game_main()->get_object_constant_buffer()->update( & buffer_data );
 
@@ -2313,15 +2305,15 @@ void GamePlayScene::render_debug_axis() const
 
 				const btTransform& trans = active_object->get_transform();
 
-				XMFLOAT4 q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
+				Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
 
 				ObjectConstantBufferData buffer_data;
 
-				buffer_data.world = XMMatrixScaling( 0.1f, 0.1f, 0.1f );
+				buffer_data.world = Matrix().set_scaling( 0.1f, 0.1f, 0.1f );
 				buffer_data.world *= bone_matrix;
-				buffer_data.world *= XMMatrixRotationQuaternion( XMLoadFloat4( & q ) );
-				buffer_data.world *= XMMatrixTranslation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-				buffer_data.world = XMMatrixTranspose( buffer_data.world );
+				buffer_data.world *= Matrix().set_rotation_quaternion( q );
+				buffer_data.world *= Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+				buffer_data.world = buffer_data.world.transpose();
 
 				if ( active_object->get_drawing_model()->get_line() )
 				{
@@ -2369,7 +2361,7 @@ void GamePlayScene::render_debug_shadow_map_window() const
 	get_direct_3d()->setDebugViewport( 0.f, 0, get_width() / 4.f * shadow_map_->get_cascade_levels(), get_height() / 4.f );
 
 	ObjectConstantBufferData buffer_data;
-	buffer_data.world = XMMatrixIdentity();
+	buffer_data.world.set_identity();
 	buffer_data.color = Color( 0.5f, 0.f, 0.f, 0.f );
 	get_game_main()->get_object_constant_buffer()->update( & buffer_data );
 

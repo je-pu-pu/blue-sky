@@ -97,7 +97,7 @@ public:
 		return S_OK;
 	}
 
-    virtual void STDMETHODCALLTYPE ReleaseFileFragment( void* context )
+    virtual void STDMETHODCALLTYPE ReleaseFileFragment( void* /* context */ )
 	{
 		
 	}

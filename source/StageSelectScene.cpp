@@ -156,8 +156,8 @@ void StageSelectScene::render()
 
 		win::Rect dst_rect = stage->rect;
 
-		float dx = dst_rect.left() + dst_rect.width() * 0.5f - ( get_width() / 2 );
-		float dy = dst_rect.top() + dst_rect.height() * 0.5f - ( get_height() / 2 );
+		// float dx = dst_rect.left() + dst_rect.width() * 0.5f - ( get_width() / 2 );
+		// float dy = dst_rect.top() + dst_rect.height() * 0.5f - ( get_height() / 2 );
 
 		int offset = 0;
 		Direct3D::Color frame_color = Direct3D::Color::White;
@@ -174,8 +174,8 @@ void StageSelectScene::render()
 		win::Rect white_src_rect = win::Rect::Size( 0, 512, 128, 128 );
 		Direct3D::Vector white_center( white_src_rect.width() * 0.5f, white_src_rect.height() * 0.5f, 0.f );
 
-		float scale = static_cast< float >( dst_rect.width() ) / static_cast< float >( stage_src_rect_.width() );
-		float frame_scale = ( dst_rect.width() + 10.f ) / white_src_rect.width();
+		// float scale = static_cast< float >( dst_rect.width() ) / static_cast< float >( stage_src_rect_.width() );
+		// float frame_scale = ( dst_rect.width() + 10.f ) / white_src_rect.width();
 		const win::Rect frame_scale_rect( -5, -5, +5, +5 );
 
 		// shadow
@@ -515,7 +515,7 @@ StageSelectScene::Stage* StageSelectScene::get_pointed_stage() const
 	return 0;
 }
 
-win::Rect StageSelectScene::get_stage_dst_rect( const Stage* stage, int n ) const
+win::Rect StageSelectScene::get_stage_dst_rect( const Stage* /* stage */, int n ) const
 {
 	const int stage_x_count = 2;
 	const int stage_y_count = 2;

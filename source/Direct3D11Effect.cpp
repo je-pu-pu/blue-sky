@@ -50,11 +50,11 @@ void Direct3D11Effect::load( const char* file_path )
 		COMMON_THROW_EXCEPTION_MESSAGE( static_cast< char* >( error_messages->GetBufferPointer() ) );
 	}
 
-	int n = shader->GetBufferSize();
-
 	DIRECT_X_FAIL_CHECK( D3DX11CreateEffectFromMemory( shader->GetBufferPointer(), shader->GetBufferSize(), 0, direct_3d_->getDevice(), & effect_ ) );
 	
 	/*
+	int n = shader->GetBufferSize();
+
 	for ( int n = 0; ; ++n )
 	{
 		D3DX11_EFFECT_VARIABLE_DESC evd;

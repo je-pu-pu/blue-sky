@@ -270,7 +270,7 @@ bool BulletPhysics::load_obj( const char_t* file_name )
 		Transform transform;
 		transform.setIdentity();
 
-		btScalar mass( 0 );
+		// btScalar mass( 0 );
 		btVector3 local_inertia( 0, 0, 0 );
 
 		// shape->calculateLocalInertia( mass, local_inertia ); /// Ã“I‚È„‘Ì‚È‚Ì‚ÅŠµ«‚Í•s—v
@@ -287,7 +287,7 @@ bool BulletPhysics::load_obj( const char_t* file_name )
 
 void BulletPhysics::setConstraint()
 {
-	btRigidBody* a = btRigidBody::upcast( dynamics_world_->getCollisionObjectArray()[ dynamics_world_->getNumCollisionObjects() - 2 ] );
+	// btRigidBody* a = btRigidBody::upcast( dynamics_world_->getCollisionObjectArray()[ dynamics_world_->getNumCollisionObjects() - 2 ] );
 	btRigidBody* b = btRigidBody::upcast( dynamics_world_->getCollisionObjectArray()[ dynamics_world_->getNumCollisionObjects() - 1 ] );
 
 	// btPoint2PointConstraint* constraint = new btPoint2PointConstraint( * a, * b, Vector3( 2, 0, 0 ), Vector3( -2, 0, 0 ) );

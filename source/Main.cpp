@@ -12,7 +12,7 @@
 #include "memory.h"
 
 //■■■　メイン　■■■
-int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int nCmdShow )
+int WINAPI WinMain( HINSTANCE hInst, HINSTANCE /* hPrevInst */, LPSTR /* lpszCmdLine */, int nCmdShow )
 {
     _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 
@@ -32,7 +32,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int
 		}
 
 		// ゲームを初期化する
-		Game* game = Game::get_instance();
+		Game::get_instance();
 
 		// メッセージループ
 		return app->MessageLoop();

@@ -410,7 +410,7 @@ public:
 
 	}
 
-	virtual	btScalar addSingleResult( btManifoldPoint& cp, const btCollisionObject* o1,int partId0, int index0, const btCollisionObject* o2, int partId1, int index1 )
+	virtual	btScalar addSingleResult( btManifoldPoint& /* cp */, const btCollisionObject* o1,int /* partId0 */, int /* index0 */, const btCollisionObject* o2, int /* partId1 */, int /* index1 */ )
 	{
 		GameObject* go1 = static_cast< GameObject* >( o1->getUserPointer() );
 		GameObject* go2 = static_cast< GameObject* >( o2->getUserPointer() );
@@ -1025,7 +1025,7 @@ void Player::on_collide_with( Balloon* balloon )
 	balloon_sound_request_ = balloon_sequence_count_;
 }
 
-void Player::on_collide_with( Rocket* rocket )
+void Player::on_collide_with( Rocket* /* rocket */ )
 {
 	item_count_[ ITEM_TYPE_ROCKET ]++;
 	selected_item_type_ = ITEM_TYPE_ROCKET;

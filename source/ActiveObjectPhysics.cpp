@@ -100,7 +100,7 @@ public:
 
 	}
 
-	btScalar addSingleResult( btManifoldPoint& cp, const btCollisionObject* o0,int part_id_0,int index_0, const btCollisionObject* o1, int part_id_1, int index_1 )
+	btScalar addSingleResult( btManifoldPoint&, const btCollisionObject*, int, int, const btCollisionObject*, int, int )
 	{
 		is_hit_ = true;
 
@@ -113,7 +113,7 @@ public:
 class ActiveObjectContactResultCallback : public btCollisionWorld::ContactResultCallback
 {
 public:
-	btScalar addSingleResult( btManifoldPoint& cp, const btCollisionObject* o0,int part_id_0,int index_0, const btCollisionObject* o1, int part_id_1, int index_1 )
+	btScalar addSingleResult( btManifoldPoint&, const btCollisionObject* o0, int, int, const btCollisionObject* o1, int, int )
 	{
 		return on_collide( o0, o1 );
 	}

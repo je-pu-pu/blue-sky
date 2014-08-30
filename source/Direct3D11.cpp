@@ -47,7 +47,7 @@
  * @param multi_sample_count	マルチサンプリングのサンプル数
  * @param multi_sample_quality	マルチサンプリングのクオリティ
  */
-Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* adapter_format, const char* depth_stencil_format, int multi_sample_count, int multi_sample_quality )
+Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* /* adapter_format */, const char* /* depth_stencil_format */, int multi_sample_count, int multi_sample_quality )
 	: device_( 0 )
 	, immediate_context_( 0 )
 	, swap_chain_( 0 )

@@ -4,22 +4,23 @@
 #include <d3d11.h>
 #include <xnamath.h>
 
-class Direct3D11Vector;
+#include "Direct3D11Vector.h"
 
 /**
  * Direct3D 11 Matrix
  *
  */
-class Direct3D11Matrix
+__declspec( align( 16 ) ) class Direct3D11Matrix
 {
 public:
 	typedef float			UnitType;
 	typedef int				IntType;
 	typedef unsigned int	UintType;
 
+	typedef Direct3D11Vector	VectorType;
+
 private:
-	// __declspec( align( 16) ) XMMATRIX value_;
-	XMFLOAT4X4				value_;
+	__declspec( align( 16 ) ) XMMATRIX value_;
 
 public:
 	Direct3D11Matrix()
@@ -27,17 +28,15 @@ public:
 		
 	}
 
-	Direct3D11Matrix( XMFLOAT4X4 m )
+	Direct3D11Matrix( const XMMATRIX& m )
 	{
 		value_ = m;
 	}
 
-	/*
-	Direct3D11Matrix( XMMATRIX m )
+	Direct3D11Matrix( XMFLOAT4X4 m )
 	{
-		XMStoreFloat4x4( & value_, m );
+		value_ = XMLoadFloat4x4( & m );
 	}
-	*/
 
 	Direct3D11Matrix& operator = ( const Direct3D11Matrix& m )
 	{
@@ -51,97 +50,142 @@ public:
 		return value_.m[ y ][ x ];
 	}
 
-	void set(
+	Direct3D11Matrix& set(
 		UnitType m00, UnitType m01, UnitType m02, UnitType m03,
 		UnitType m10, UnitType m11, UnitType m12, UnitType m13,
 		UnitType m20, UnitType m21, UnitType m22, UnitType m23,
 		UnitType m30, UnitType m31, UnitType m32, UnitType m33 )
 	{
-		XMStoreFloat4x4( & value_, XMMatrixSet( m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33 ) );
+		value_._11 = m00; value_._12 = m01; value_._13 = m02; value_._14 = m03;
+		value_._21 = m10; value_._22 = m11; value_._23 = m12; value_._24 = m13;
+		value_._31 = m20; value_._32 = m21; value_._33 = m22; value_._34 = m23;
+		value_._41 = m30; value_._42 = m31; value_._43 = m32; value_._44 = m33;
+
+		return *this;
 	}
 
-	void set_identity()
+	Direct3D11Matrix& set_identity()
 	{
-		XMStoreFloat4x4( & value_, XMMatrixIdentity() );
+		value_ = XMMatrixIdentity();
+
+		return *this;
 	}
 
-	void set_translation( UnitType tx, UnitType ty, UnitType tz )
+	Direct3D11Matrix& set_translation( UnitType tx, UnitType ty, UnitType tz )
 	{
-		XMStoreFloat4x4( & value_, XMMatrixTranslation( tx, ty, tz ) );
+		value_ = XMMatrixTranslation( tx, ty, tz );
+
+		return *this;
 	}
 
-	void add_translation( UnitType tx, UnitType ty, UnitType tz )
+	Direct3D11Matrix& add_translation( UnitType tx, UnitType ty, UnitType tz )
 	{
 		value_._41 += tx;
 		value_._42 += ty;
 		value_._43 += tz;
+
+		return *this;
 	}
 
-	void set_rotation_x( UnitType r )
+	Direct3D11Matrix& set_rotation_x( UnitType r )
 	{
-		XMStoreFloat4x4( & value_, XMMatrixRotationX( r ) );
+		value_ = XMMatrixRotationX( r );
+
+		return *this;
 	}
 
-	void set_rotation_y( UnitType r )
+	Direct3D11Matrix& set_rotation_y( UnitType r )
 	{
-		XMStoreFloat4x4( & value_, XMMatrixRotationY( r ) );
+		value_ = XMMatrixRotationY( r );
+
+		return *this;
 	}
 
-	void set_rotation_z( UnitType r )
+	Direct3D11Matrix& set_rotation_z( UnitType r )
 	{
-		XMStoreFloat4x4( & value_, XMMatrixRotationZ( r ) );
+		value_ = XMMatrixRotationZ( r );
+
+		return *this;
 	}
 
-	void set_rotation_xyz( UnitType rx, UnitType ry, UnitType rz )
+	Direct3D11Matrix& set_rotation_xyz( UnitType rx, UnitType ry, UnitType rz )
 	{
-		XMStoreFloat4x4( & value_, XMMatrixRotationX( rx ) * XMMatrixRotationY( ry ) * XMMatrixRotationZ( rz ) );
+		value_ = XMMatrixRotationX( rx ) * XMMatrixRotationY( ry ) * XMMatrixRotationZ( rz );
+
+		return *this;
 	}
 
-	void set_rotation_roll_pitch_yaw( UnitType rx, UnitType ry, UnitType rz )
+	Direct3D11Matrix& set_rotation_roll_pitch_yaw( UnitType rx, UnitType ry, UnitType rz )
 	{
-		XMStoreFloat4x4( & value_, XMMatrixRotationRollPitchYaw( rx, ry, rz ) );
+		value_ = XMMatrixRotationRollPitchYaw( rx, ry, rz );
+
+		return *this;
 	}
 
-	void set_scaling( UnitType sx, UnitType sy, UnitType sz )
+	Direct3D11Matrix& set_rotation_quaternion( const VectorType& q )
 	{
-		XMStoreFloat4x4( & value_, XMMatrixScaling( sx, sy, sz ) );
+		value_ = XMMatrixRotationQuaternion( q );
+
+		return *this;
+	}
+
+	Direct3D11Matrix& set_scaling( UnitType sx, UnitType sy, UnitType sz )
+	{
+		value_ = XMMatrixScaling( sx, sy, sz );
+
+		return *this;
+	}
+
+	Direct3D11Matrix& set_look_at( const VectorType& eye, const VectorType& at, const VectorType& up )
+	{
+		value_ = XMMatrixLookAtLH( eye, at, up );
+
+		return *this;
 	}
 
 	Direct3D11Matrix inverse() const
 	{
-		Direct3D11Matrix m;
-
 		XMVECTOR v;
-		XMStoreFloat4x4( & m.value_, XMMatrixInverse( & v, XMLoadFloat4x4( & value_ ) ) );
-
-		return m;
+		return Direct3D11Matrix( XMMatrixInverse( & v, value_ ) );
 	}
 
 	Direct3D11Matrix transpose() const
 	{
-		Direct3D11Matrix m;
-		XMStoreFloat4x4( & m.value_, XMMatrixTranspose( XMLoadFloat4x4( & value_ ) ) );
-
-		return m;
+		return Direct3D11Matrix( XMMatrixTranspose( value_ ) );
 	}
 
+	Direct3D11Matrix& set_perspective_fov( UnitType fov_angle_y, UnitType aspect_ratio, UnitType near_z, UnitType far_z )
+	{
+		value_ = XMMatrixPerspectiveFovLH( fov_angle_y, aspect_ratio, near_z, far_z );
+
+		return *this;
+	}
+
+	Direct3D11Matrix& set_orthographic( UnitType w, UnitType h, UnitType near_z, UnitType far_z )
+	{
+		value_ = XMMatrixOrthographicLH( w, h, near_z, far_z );
+
+		return *this;
+	}
+
+	Direct3D11Matrix& operator *= ( const Direct3D11Matrix& m )
+	{
+		value_ *= m.value_;
+
+		return *this;
+	}
 
 	Direct3D11Matrix operator * ( const Direct3D11Matrix& m ) const
 	{
-		// return Direct3D11Matrix( value_ * m.value_ );
-
-		Direct3D11Matrix d11m;
-		XMStoreFloat4x4( & d11m.value_, XMLoadFloat4x4( & value_ ) * XMLoadFloat4x4( & m.value_ ) );
-		
-		return d11m;
+		return Direct3D11Matrix( value_ * m.value_ );
 	}
 
-	friend Direct3D11Vector operator * ( const Direct3D11Vector&, const Direct3D11Matrix& );
+	friend Direct3D11Vector operator * ( const Direct3D11Vector& v, const Direct3D11Matrix& m )
+	{
+		return XMVector4Transform( v.value_, m.value_ );
+	}
 
-	operator XMMATRIX () const { return XMLoadFloat4x4( & value_ ); }
-
-	XMFLOAT4X4& get() { return value_; }
-	const XMFLOAT4X4& get() const { return value_; }
+	operator XMMATRIX () const { return value_; }
 
 
 	static Direct3D11Matrix identity()
@@ -150,6 +194,16 @@ public:
 		m.set_identity();
 
 		return m;
+	}
+
+	static void* operator new ( size_t size )
+	{
+        return _aligned_malloc( size, 16 );
+    }
+
+	static void operator delete ( void* p )
+	{
+		_aligned_free( p );
 	}
 
 }; // class Direct3D11Matrix

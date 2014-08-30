@@ -31,6 +31,8 @@ private:
 
 	Matrix get_bone_local_matrix( uint_t ) const;
 
+	AnimationPlayer& operator = ( const AnimationPlayer& ) { }
+
 public:
 	AnimationPlayer( const SkinningAnimationSet* );
 	~AnimationPlayer() { }

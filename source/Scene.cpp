@@ -148,8 +148,8 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 	{
 		FrameConstantBufferData frame_constant_buffer_data;
 
-		frame_constant_buffer_data.view = XMMatrixTranspose( XMMatrixIdentity() );
-		frame_constant_buffer_data.projection = XMMatrixTranspose( XMMatrixOrthographicLH( 2.f * get_width() / get_height(), 2.f, 0.f, 1.f ) );
+		frame_constant_buffer_data.view = Matrix().set_identity().transpose();
+		frame_constant_buffer_data.projection = Matrix().set_orthographic( 2.f * get_width() / get_height(), 2.f, 0.f, 1.f ).transpose();
 		frame_constant_buffer_data.time = get_total_elapsed_time();
 	
 		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
@@ -167,7 +167,7 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 	{
 		ObjectConstantBufferData object_constant_buffer_data;
 
-		object_constant_buffer_data.world = XMMatrixTranspose( XMMatrixIdentity() );
+		object_constant_buffer_data.world = Matrix().set_identity().transpose();
 
 		get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
 	}
@@ -199,7 +199,7 @@ void Scene::render_technique( const char_t* technique_name, std::function< void(
 void Scene::render_fader() const
 {
 	ObjectConstantBufferData buffer_data;
-	buffer_data.world = XMMatrixIdentity();
+	buffer_data.world = Matrix().set_identity().transpose();
 	buffer_data.color = get_direct_3d()->getFader()->get_color();
 	get_game_main()->get_object_constant_buffer()->update( & buffer_data );
 

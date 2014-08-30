@@ -14,6 +14,7 @@ BOOL ( API * Tablet::DllWTOverlap )( HCTX, BOOL );
 Tablet::Tablet( HWND hwnd )
 	: module_( 0 )
 	, context_handle_( 0 )
+	, cursor_index_( 0 )
 	, x_( 0.f )
 	, y_( 0.f )
 	, pressure_( 0.f )
@@ -123,6 +124,7 @@ void Tablet::on_packet( WPARAM wp, LPARAM lp )
 
 	if ( DllWTPacket( ( HCTX ) lp, wp, & p ) ) 
 	{
+		cursor_index_ = p.pkCursor;
 		x_ = static_cast< float >( p.pkX );
 		y_ = static_cast< float >( p.pkY );
 		pressure_ = ( p.pkNormalPressure - pressure_axis_.axMin ) / static_cast< float >( pressure_axis_.axMax - pressure_axis_.axMin );

@@ -10,7 +10,7 @@ IDWriteFontCollectionLoader* DirectWriteFontCollectionLoader::GetLoader()
 	return instance;
 }
 
-HRESULT STDMETHODCALLTYPE DirectWriteFontCollectionLoader::CreateEnumeratorFromKey( IDWriteFactory* factory, const void* file_path, UINT32 file_path_length, OUT IDWriteFontFileEnumerator** font_file_enumrator )
+HRESULT STDMETHODCALLTYPE DirectWriteFontCollectionLoader::CreateEnumeratorFromKey( IDWriteFactory* factory, const void* file_path, UINT32 /* file_path_length */, OUT IDWriteFontFileEnumerator** font_file_enumrator )
 {
 	*font_file_enumrator = 0;
 		

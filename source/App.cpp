@@ -160,8 +160,8 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_SIZE:
 	{
-		int w = ( lp >>  0 ) & 0xFFFF;
-		int h = ( lp >> 16 ) & 0xFFFF;
+		// int w = ( lp >>  0 ) & 0xFFFF;
+		// int h = ( lp >> 16 ) & 0xFFFF;
 
 		on_resize( hwnd );
 		break;
@@ -236,7 +236,7 @@ void App::set_active( bool active )
 	}
 }
 
-void App::on_resize( HWND hwnd )
+void App::on_resize( HWND /* hwnd */ )
 {
 	if ( ! App::GetInstance()->hWnd )
 	{

@@ -7,7 +7,7 @@
 
 #include "MSGPACK.H"
 #include "WINTAB.H"
-#define PACKETDATA PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_ORIENTATION
+#define PACKETDATA PK_CURSOR | PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_ORIENTATION
 #define PACKETMODE PK_BUTTONS
 #include "PKTDEF.H"
 
@@ -29,6 +29,7 @@ private:
 	AXIS pressure_axis_;
 	AXIS orientation_axis_[ 3 ];
 
+	int cursor_index_;
 	float x_;
 	float y_;
 	float pressure_;
@@ -74,6 +75,7 @@ public:
 		return & t;
 	}
 
+	int get_cursor_index() const { return cursor_index_; }
 	float get_x() const { return x_; }
 	float get_y() const { return y_; }
 	float get_pressure() const { return pressure_; }

@@ -21,10 +21,10 @@ OggVorbisFile::OggVorbisFile( const char* file_name )
 	vorbis_info_ = ov_info( & file_, -1 );
 
 	format_.wFormatTag = WAVE_FORMAT_PCM;
-	format_.nChannels = vorbis_info_->channels;
+	format_.nChannels = static_cast< WORD >( vorbis_info_->channels );
 	format_.nSamplesPerSec = vorbis_info_->rate;
     format_.nAvgBytesPerSec = 2 * vorbis_info_->rate * vorbis_info_->channels;
-    format_.nBlockAlign = 2 * vorbis_info_->channels;
+    format_.nBlockAlign = static_cast< WORD >( 2 * vorbis_info_->channels );
     format_.wBitsPerSample = 16;
     format_.cbSize = 0;
 }

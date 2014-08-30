@@ -3,12 +3,12 @@
 
 #include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11Texture.h"
+#include "Direct3D11Matrix.h"
 #include "type.h"
 
 #include <common/auto_ptr.h>
 
 #include <d3d11.h>
-#include <xnamath.h>
 
 #include <vector>
 
@@ -24,7 +24,7 @@ public:
 	static const int MaxCascadeLevels = 4;
 
 	typedef Vector								Vector;
-	typedef XMMATRIX							Matrix;
+	typedef Matrix								Matrix;
 	typedef Matrix								MatrixList[ MaxCascadeLevels ];
 
 	typedef D3D11_VIEWPORT						Viewport;
@@ -34,7 +34,7 @@ public:
 	{
 		static const int DEFAULT_SLOT = 10;
 
-		XMMATRIX shadow_view_projection[ 3 ];
+		Matrix shadow_view_projection[ 3 ];
 		float_t view_depth_per_cascade_level[ 4 ];
 	};
 
@@ -83,7 +83,7 @@ public:
 	void set_eye_position( const Vector& );
 
 	const ConstantBuffer* getConstantBuffer() const { return constant_buffer_.get(); }
-	const const Direct3D11Texture* getTexture() const { return texture_.get(); }
+	const Direct3D11Texture* getTexture() const { return texture_.get(); }
 
 	const Matrix getViewProjectionMatrix( int level ) const { return view_matrix_ * projection_matrix_list_[ level ]; }
 	

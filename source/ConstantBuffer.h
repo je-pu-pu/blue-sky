@@ -29,8 +29,8 @@ struct GameConstantBufferData : public BaseConstantBufferData< 0 >
 
 struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
 {
-	XMMATRIX view;
-	XMMATRIX projection;
+	Matrix view;
+	Matrix projection;
 	Vector light;
 	float_t time;
 	uint_t time_beat;
@@ -38,7 +38,7 @@ struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
 
 struct ObjectConstantBufferData : public BaseConstantBufferData< 2 >
 {
-	XMMATRIX world;
+	Matrix world;
 	Color color;
 
 	ObjectConstantBufferData()

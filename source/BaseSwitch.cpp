@@ -73,8 +73,6 @@ bool_t BaseSwitch::do_switch()
 		return false;
 	}
 
-	bool_t result = false;
-
 	if ( state_ == ON )
 	{
 		if ( turn_off() )

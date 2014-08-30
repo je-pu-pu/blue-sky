@@ -22,7 +22,7 @@ private:
 
 	const Vector3& get_default_gravity() const override { return GravityZero; }
 
-	void on_collide_with( GameObject* o ) override { }
+	void on_collide_with( GameObject* ) override { }
 
 	bool is_safe_footing() const override { return true; }
 

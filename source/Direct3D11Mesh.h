@@ -118,7 +118,7 @@ public:
 			{
 				if ( bone_index_list_[ n ] == 0 && weight_list_[ n ] == 0 )
 				{
-					bone_index_list_[ n ] = bone_index;
+					bone_index_list_[ n ] = static_cast< u8_t >( bone_index );
 					weight_list_[ n ] = static_cast< u8_t >( weight * 255 );
 
 					return;

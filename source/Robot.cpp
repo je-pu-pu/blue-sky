@@ -362,10 +362,8 @@ bool Robot::caluclate_target_visible() const
 	return false;
 }
 
-bool Robot::caluclate_collide_object_to_swtich_off( const GameObject* o )
+bool Robot::caluclate_collide_object_to_swtich_off( const GameObject* )
 {
-	float_t switch_offset = 1.3f;
-
 	return true;
 }
 

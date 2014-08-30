@@ -81,7 +81,7 @@ bool DrawingLine::load_obj( const char* file_name )
 		{
 			while ( ss.good() )
 			{
-				PositionList::size_type index;
+				IndexList::value_type index;
 
 				ss >> index;
 
@@ -134,7 +134,7 @@ void DrawingLine::create_index_buffer()
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & index_buffer_ ) );
 }
 
-void DrawingLine::create_texture( const char* file_name )
+void DrawingLine::create_texture( const char* /* file_name */ )
 {
 	texture_ = direct_3d_->getTextureManager()->load( "lines", "media/texture/lines.png" );
 	// texture_resource_view_ = direct_3d_->getTextureManager()->load( "lines", "media/texture/pen-face-1-loop.png" );

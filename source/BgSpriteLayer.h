@@ -32,6 +32,8 @@ private:
 	common::chase_value< float_t > scale_;
 	common::chase_value< Color > color_;
 
+	BgSpriteLayer& operator = ( const BgSpriteLayer& ) { }
+
 public:
 	BgSpriteLayer( const char_t*, const Texture* );
 	~BgSpriteLayer();
@@ -48,7 +50,6 @@ public:
 	common::chase_value< Color >& get_color() { return color_; }
 
 	void update();
-
 
 }; // class BgSpriteLayer
 

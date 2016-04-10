@@ -1,15 +1,13 @@
 #ifndef DIRECT_3D_11_MESH_H
 #define DIRECT_3D_11_MESH_H
 
+#include "Direct3D11Common.h"
 #include "type.h"
 
 #include <game/Mesh.h>
 
 #include <common/safe_ptr.h>
 #include <common/math.h>
-
-#include <d3d11.h>
-#include <xnamath.h>
 
 #include <vector>
 #include <cassert>
@@ -34,9 +32,9 @@ public:
 	typedef Direct3D11Material			Material;
 	typedef Direct3D11Matrix			Matrix;
 
-	typedef XMFLOAT2					Vector2;
-	typedef XMFLOAT3					Vector3;
-	typedef XMFLOAT4					Vector4;
+	typedef DirectX::XMFLOAT2			Vector2;
+	typedef DirectX::XMFLOAT3			Vector3;
+	typedef DirectX::XMFLOAT4			Vector4;
 
 public:
 
@@ -131,9 +129,9 @@ public:
 
 	typedef WORD							Index;
 
-	typedef XMFLOAT3						Position;
-	typedef XMFLOAT3						Normal;
-	typedef XMFLOAT2						TexCoord;
+	typedef Vector3							Position;
+	typedef Vector3							Normal;
+	typedef Vector2							TexCoord;
 
 	typedef std::vector< Position >			PositionList;
 	typedef std::vector< Normal >			NormalList;

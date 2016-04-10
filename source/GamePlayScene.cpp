@@ -589,15 +589,15 @@ void GamePlayScene::setup_command()
 
 		while ( ss.good() )
 		{
-			string_t s;
-			ss >> s;
+			string_t p;
+			ss >> p;
 
 			if ( ! action.empty() )
 			{
 				action += " ";
 			}
 
-			action += s;
+			action += p;
 		}
 
 		ActiveObject* o = get_active_object_manager()->get_active_object( object_name );
@@ -624,15 +624,15 @@ void GamePlayScene::setup_command()
 
 		while ( ss.good() )
 		{
-			string_t s;
-			ss >> s;
+			string_t p;
+			ss >> p;
 
 			if ( ! command.empty() )
 			{
 				command+= " ";
 			}
 
-			command += s;
+			command += p;
 		}
 
 		delayed_command_list_.push_back( new DelayedCommand( interval, count, command ) );
@@ -791,14 +791,14 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( name == "bgm" )
 		{
-			std::string name;
+			std::string bgm_name;
 			bool loop = true;
 
-			ss >> name;
+			ss >> bgm_name;
 			ss >> loop;
 
 
-			get_sound_manager()->load_music( "bgm", name.c_str() );
+			get_sound_manager()->load_music( "bgm", bgm_name.c_str() );
 
 			if ( ss.good() )
 			{
@@ -811,11 +811,11 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( name == "collision" )
 		{
-			std::string file_name;
+			std::string collision_file_name;
 
-			ss >> file_name;
+			ss >> collision_file_name;
 
-			get_physics()->load_obj( ( StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + file_name ).c_str() );
+			get_physics()->load_obj( ( StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + collision_file_name ).c_str() );
 		}
 		else if ( name == "player" )
 		{
@@ -2028,11 +2028,11 @@ void GamePlayScene::render_object_skin_mesh() const
 			shadow_map_->ready_to_render_scene();
 		}
 
-		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+		for ( auto j = get_active_object_manager()->active_object_list().begin(); j != get_active_object_manager()->active_object_list().end(); ++j )
 		{
-			if ( ( *i )->get_drawing_model()->is_skin_mesh() )
+			if ( ( *j )->get_drawing_model()->is_skin_mesh() )
 			{
-				render_active_object_mesh( *i );
+				render_active_object_mesh( *j );
 			}
 		}
 	}
@@ -2076,11 +2076,11 @@ void GamePlayScene::render_object_mesh() const
 			shadow_map_->ready_to_render_scene();
 		}
 
-		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+		for ( auto j = get_active_object_manager()->active_object_list().begin(); j != get_active_object_manager()->active_object_list().end(); ++j )
 		{
-			if ( ! ( *i )->get_drawing_model()->is_skin_mesh() )
+			if ( ! ( *j )->get_drawing_model()->is_skin_mesh() )
 			{
-				render_active_object_mesh( *i );
+				render_active_object_mesh( *j );
 			}
 		}
 
@@ -2104,9 +2104,9 @@ void GamePlayScene::render_object_line() const
 		bind_frame_constant_buffer();
 		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs();
 
-		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+		for ( auto j = get_active_object_manager()->active_object_list().begin(); j != get_active_object_manager()->active_object_list().end(); ++j )
 		{
-			render_active_object_line( *i );
+			render_active_object_line( *j );
 		}
 
 		render_active_object_line( player_.get() );
@@ -2277,29 +2277,29 @@ void GamePlayScene::render_debug_axis() const
 		bind_game_constant_buffer();
 		bind_frame_constant_buffer();
 
-		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+		for ( auto j = get_active_object_manager()->active_object_list().begin(); j != get_active_object_manager()->active_object_list().end(); ++j )
 		{
-			const ActiveObject* active_object = *i;
+			const ActiveObject* active_object = *j;
 
 			if ( active_object->is_dead() )
 			{
 				continue;
 			}
 
-			if ( ! ( *i )->get_animation_player() )
+			if ( ! ( *j )->get_animation_player() )
 			{
 				continue;
 			}
 
-			( *i )->get_object_constant_buffer()->bind_to_vs();
-			( *i )->get_animation_player()->bind_render_data();
+			( *j )->get_object_constant_buffer()->bind_to_vs();
+			( *j )->get_animation_player()->bind_render_data();
 
 			AnimationPlayer::BoneConstantBuffer::Data bone_constant_buffer_data;
 			active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix::identity() );
 
-			for ( uint_t n = 0; n < ( *i )->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )
+			for ( uint_t n = 0; n < ( *j )->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )
 			{
-				const Matrix& bone_offset_matrix = ( *i )->get_animation_player()->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( n );
+				const Matrix& bone_offset_matrix = ( *j )->get_animation_player()->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( n );
 				const Matrix& bone_matrix = bone_offset_matrix * bone_constant_buffer_data.bone_matrix[ n ];
 				// const Matrix& bone_matrix = bone_offset_matrix;
 

@@ -101,7 +101,7 @@ Tablet::~Tablet()
 		std::stringstream ss;
 		ss << "FreeLibrary( Wintab32.dll ) failed. ( error : " << GetLastError() << " )";
 
-		COMMON_THROW_EXCEPTION_MESSAGE( ss.str() );
+		// COMMON_THROW_EXCEPTION_MESSAGE( ss.str() );
 	}
 }
 

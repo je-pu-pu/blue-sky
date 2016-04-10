@@ -1,14 +1,13 @@
 #ifndef DIRECT_3D_11_COLOR_H
 #define DIRECT_3D_11_COLOR_H
 
-#include <d3d11.h>
-#include <xnamath.h>
+#include "Direct3D11Common.h"
 
 /**
  * Direct3D 11 Color
  *
  */
-class Direct3D11Color : public XMFLOAT4
+class Direct3D11Color : public DirectX::XMFLOAT4
 {
 public:
 	typedef float			UnitType;

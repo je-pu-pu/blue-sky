@@ -158,14 +158,3 @@ void vector3::check_index( int i ) const
 		throw "vector3 index over";
 	}
 }
-
-
-// file access
-bool vector3::fwrite( FILE *f )
-{
-	return ( ::fwrite( data, sizeof(vector), 1, f ) == 1 );
-}
-bool vector3::fread( FILE *f )
-{
-	return ( ::fread( data, sizeof(vector), 1, f ) == 1 );
-}

@@ -7,6 +7,10 @@
 
 #include "memory.h"
 
+#include <common/string.h>
+
+#include <d3dcompiler.h>
+
 #pragma comment( lib, "effects11.lib" )
 
 Direct3D11Effect::Direct3D11Effect( Direct3D* direct_3d )
@@ -31,7 +35,9 @@ void Direct3D11Effect::load( const char* file_path )
 	ID3D10Blob* shader = 0;
 	ID3D10Blob* error_messages = 0;
 
-	HRESULT hr = D3DX11CompileFromFile( file_path, 0, 0, 0, "fx_5_0", 0, 0, 0, & shader, & error_messages, 0  );
+	std::wstring ws_file_path = common::convert_to_wstring( file_path );
+
+	HRESULT hr = D3DCompileFromFile( ws_file_path.c_str(), 0, 0, nullptr, "fx_5_0", 0, 0, & shader, & error_messages );
 
 	if ( FAILED( hr ) )
 	{
@@ -43,11 +49,6 @@ void Direct3D11Effect::load( const char* file_path )
 		{
 			DIRECT_X_FAIL_CHECK( hr );
 		}
-	}
-
-	if ( error_messages )
-	{
-		COMMON_THROW_EXCEPTION_MESSAGE( static_cast< char* >( error_messages->GetBufferPointer() ) );
 	}
 
 	DIRECT_X_FAIL_CHECK( D3DX11CreateEffectFromMemory( shader->GetBufferPointer(), shader->GetBufferSize(), 0, direct_3d_->getDevice(), & effect_ ) );

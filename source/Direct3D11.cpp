@@ -15,8 +15,6 @@
 #include <common/serialize.h>
 #include <common/log.h>
 
-#include <xnamath.h>
-
 #include <dxgi.h>
 #include <d3d10_1.h>
 
@@ -28,12 +26,6 @@
 #pragma comment( lib, "d3d11.lib" )
 #pragma comment( lib, "d3d10_1.lib" )
 #pragma comment( lib, "d3dcompiler.lib" )
-
-#ifdef _DEBUG
-#pragma comment( lib, "d3dx11d.lib" )
-#else
-#pragma comment( lib, "d3dx11.lib" )
-#endif
 
 /**
  * コンストラクタ
@@ -134,12 +126,13 @@ Direct3D11::~Direct3D11()
 		device_10_->Flush();
 	}
 
-	if ( false && device_10_ )
+	if ( false )
+	// if ( device_10_ )
 	{
 		ID3D10Debug* debug_ = 0;
 
-		DIRECT_X_FAIL_CHECK( device_10_->QueryInterface( __uuidof( ID3D10Debug ), reinterpret_cast< void** >( & debug_ ) ) );
-		DIRECT_X_FAIL_CHECK( debug_->Validate() );
+		device_10_->QueryInterface( __uuidof( ID3D10Debug ), reinterpret_cast< void** >( &debug_ ) );
+		debug_->Validate();
 
 		DIRECT_X_RELEASE( debug_ );
 	}
@@ -164,8 +157,8 @@ Direct3D11::~Direct3D11()
 	{
 		ID3D11Debug* debug_ = 0;
 
-		DIRECT_X_FAIL_CHECK( device_->QueryInterface( __uuidof( ID3D11Debug ), reinterpret_cast< void** >( & debug_ ) ) );
-		DIRECT_X_FAIL_CHECK( debug_->ReportLiveDeviceObjects( D3D11_RLDO_DETAIL ) );
+		device_->QueryInterface( __uuidof( ID3D11Debug ), reinterpret_cast< void** >( & debug_ ) );
+		debug_->ReportLiveDeviceObjects( D3D11_RLDO_DETAIL );
 
 		DIRECT_X_RELEASE( debug_ );
 	}

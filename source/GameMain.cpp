@@ -68,16 +68,8 @@ GameMain::GameMain()
 
 	// get_app()->clip_cursor( true );
 
-	// Config
-	config_ = new Config();
-	config_->load_file( "blue-sky.config" );
-
 	save_data_ = new Config();
 	save_data_->load_file( "save/blue-sky.save" );
-
-	// App
-	get_app()->set_size( get_config()->get( "video.width", App::DEFAULT_WIDTH ), get_config()->get( "video.height", App::DEFAULT_HEIGHT ) );
-	get_app()->set_full_screen( get_config()->get( "video.full_screen", 0 ) != 0 );
 
 	// Direct3D
 	direct_3d_ = new Direct3D11(
@@ -119,7 +111,7 @@ GameMain::GameMain()
 	direct_input_ = new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() );
 	input_ = new Input();
 	input_->set_direct_input( direct_input_.get() );
-	input_->load_config( * config_.get() );
+	input_->load_config( * get_config() );
 
 	// Oculus Rift
 	if ( get_config()->get( "input.oculus_rift.enabled", 1 ) )
@@ -137,8 +129,8 @@ GameMain::GameMain()
 	graphics_manager_ = new Direct3D11GraphicsManager( direct_3d_.get() );
 
 	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
-	sound_manager_->set_mute( config_->get( "audio.mute", 0 ) != 0 );
-	sound_manager_->set_volume( config_->get( "audio.volume", 1.f ) );
+	sound_manager_->set_mute( get_config()->get( "audio.mute", 0 ) != 0 );
+	sound_manager_->set_volume( get_config()->get( "audio.volume", 1.f ) );
 	
 	sound_manager_->load( "ok" );
 	sound_manager_->load( "cancel" );
@@ -150,39 +142,16 @@ GameMain::GameMain()
 	// MainLoop
 	main_loop_ = new MainLoop( 60 );
 
-	is_display_fps_ = config_->get( "video.display_fps", 0 ) != 0;
-	
-	// Scene
-	if ( get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
-	{
-		setup_scene( "title" );
-	}
-	else
-	{
-		if ( get_save_data()->get< int >( "stage.0-1", 0 ) > 0 )
-		{
-			set_stage_name( "0-2" );
-		}
-		else if ( get_save_data()->get< int >( "stage.0-0", 0 ) > 0 )
-		{
-			set_stage_name( "0-1" );
-		}
-		else
-		{
-			set_stage_name( "0-0" );
-		}
-
-		setup_scene( "stage_intro" );
-	}
+	is_display_fps_ = get_config()->get( "video.display_fps", 0 ) != 0;
 }
 
 //■デストラクタ
 GameMain::~GameMain()
 {
-	config_->set< int >( "audio.mute", sound_manager_->is_mute() );
-	config_->set< int >( "video.full_screen", get_direct_3d()->is_full_screen() );
+	get_config()->set< int >( "audio.mute", sound_manager_->is_mute() );
+	get_config()->set< int >( "video.full_screen", get_direct_3d()->is_full_screen() );
 
-	config_->save_file( "blue-sky.config" );
+	get_config()->save_file( "blue-sky.config" );
 
 	scene_.release();
 }
@@ -311,6 +280,36 @@ void GameMain::check_scene_transition()
 		setup_scene( next_scene );
 
 		save_data_->save_file( "save/blue-sky.save" );
+	}
+}
+
+/**
+ * シーンを準備する
+ *
+ */
+void GameMain::setup_scene()
+{
+	// Scene
+	if ( get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
+	{
+		setup_scene( "title" );
+	}
+	else
+	{
+		if ( get_save_data()->get< int >( "stage.0-1", 0 ) > 0 )
+		{
+			set_stage_name( "0-2" );
+		}
+		else if ( get_save_data()->get< int >( "stage.0-0", 0 ) > 0 )
+		{
+			set_stage_name( "0-1" );
+		}
+		else
+		{
+			set_stage_name( "0-0" );
+		}
+
+		setup_scene( "stage_intro" );
 	}
 }
 

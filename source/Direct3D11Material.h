@@ -4,7 +4,6 @@
 #include "type.h"
 #include <game/Material.h>
 #include <d3d11.h>
-#include <xnamath.h>
 #include <vector>
 
 namespace game

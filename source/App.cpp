@@ -1,5 +1,5 @@
 #include "App.h"
-#include "Game.h"
+#include "GameMain.h"
 #include "resource.h"
 
 #include <win/Tablet.h>
@@ -12,7 +12,7 @@
 
 #include "memory.h"
 
-// #define ENABLE_DEBUG_CONSOLE
+#define ENABLE_DEBUG_CONSOLE
 
 //□コンストラクタ
 App::App()
@@ -28,6 +28,7 @@ App::App()
 	, is_full_screen_( false )
 	, is_mouse_in_window_( false )
 	, is_clip_cursor_enabled_( false )
+	, config_( new Config() )
 {
 	setlocale( LC_CTYPE, "" );
 
@@ -106,8 +107,14 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		return false;
 	}
 	
+	// 設定を読み込む
+	config_->load_file( "blue-sky.config" );
+
+	set_size( get_config()->get( "video.width", DEFAULT_WIDTH ), get_config()->get( "video.height", DEFAULT_HEIGHT ) );
+	set_full_screen( get_config()->get( "video.full_screen", 0 ) != 0 );
+
 	// ゲームを初期化する
-	Game::get_instance();
+	blue_sky::GameMain::get_instance()->setup_scene();
 
 	ShowWindow( hWnd, nCmdShow );		//表示
 	UpdateWindow( hWnd );				//描画
@@ -297,7 +304,7 @@ void App::set_size( int w, int h )
  *
  * @return タイトル
  */
-const char* App::get_title()
+const App::char_t* App::get_title()
 {
 	if ( hWnd )
 	{
@@ -313,7 +320,7 @@ const char* App::get_title()
  *
  * @param t タイトル
  */
-void App::set_title( const char* t )
+void App::set_title( const char_t* t )
 {
 	title_ = t;
 

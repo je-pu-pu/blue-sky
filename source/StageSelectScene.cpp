@@ -102,7 +102,7 @@ void StageSelectScene::update()
 
 			set_next_stage_name( stage->name );
 
-			if ( boost::filesystem::exists( std::string( "media/stage/" ) + stage->name + ".intro" ) )
+			if ( boost::filesystem::exists( string_t( "media/stage/" ) + stage->name + ".intro" ) )
 			{
 				set_next_scene( "stage_intro" );
 			}
@@ -287,11 +287,11 @@ void StageSelectScene::update_stage_list()
 {
 	clear_stage_list();
 
-	std::list< std::string > stage_name_list;
+	std::list< string_t > stage_name_list;
 
 	WIN32_FIND_DATA find_data;
 
-	std::string file_pattern;
+	string_t file_pattern;
 	
 	if ( page_ < get_max_story_page() )
 	{
@@ -322,11 +322,11 @@ void StageSelectScene::update_stage_list()
 	stage_count_ = stage_name_list.size();
 
 	int n = 0;
-	std::string last_stage_name;
+	string_t last_stage_name;
 
-	for ( std::list< std::string >::iterator i = stage_name_list.begin(); i != stage_name_list.end(); ++i )
+	for ( auto i = stage_name_list.begin(); i != stage_name_list.end(); ++i )
 	{
-		std::string stage_name = *i;
+		auto stage_name = *i;
 		stage_name.resize( stage_name.find_first_of( "." ) );
 
 		// ストーリー用ステージでは、前のステージをクリアしていないと、このステージは一覧に含まない
@@ -377,7 +377,7 @@ void StageSelectScene::update_stage_list()
 	std::random_shuffle( face_src_rect_list_.begin(), face_src_rect_list_.end() );
 }
 
-std::string StageSelectScene::get_stage_dir_name_by_page( int page )
+StageSelectScene::string_t StageSelectScene::get_stage_dir_name_by_page( int page )
 {
 	if ( page < get_max_story_page() )
 	{
@@ -389,7 +389,7 @@ std::string StageSelectScene::get_stage_dir_name_by_page( int page )
 	}
 }
 
-std::string StageSelectScene::get_stage_prefix_by_page( int page )
+StageSelectScene::string_t StageSelectScene::get_stage_prefix_by_page( int page )
 {
 	if ( page < get_max_story_page() )
 	{

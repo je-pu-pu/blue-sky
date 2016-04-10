@@ -19,15 +19,13 @@ GameObject::Vector3 GameObject::GravityZero( 0.f, 0.f, 0.f );
 
 GameObject::GameObject()
 	: rigid_body_( 0 )
-	, transform_( 0 )
 {
-	transform_ = new Transform();
-	transform_->setIdentity();
+	transform_.setIdentity();
 }
 
 GameObject::~GameObject()
 {
-	delete transform_;
+	
 }
 
 /**
@@ -41,12 +39,12 @@ void GameObject::update_transform()
 		return;
 	}
 
-	* transform_ = rigid_body_->getWorldTransform();
+	transform_ = rigid_body_->getWorldTransform();
 	Transform offset;
 	offset.setIdentity();
 	offset.setOrigin( Vector3( 0, -get_height_offset(), 0 ) );
 
-	*transform_ = *transform_ * offset;
+	transform_ = transform_ * offset;
 }
 
 /**
@@ -65,7 +63,7 @@ void GameObject::commit_transform()
 	offset.setOrigin( Vector3( 0, get_height_offset(), 0 ) );
 
 
-	Transform t = *transform_ * offset;
+	Transform t = transform_ * offset;
 	rigid_body_->setWorldTransform( t );
 	rigid_body_->setInterpolationWorldTransform( t );
 }
@@ -138,12 +136,12 @@ void GameObject::set_angular_factor( const Vector3& v )
 
 GameObject::Transform& GameObject::get_transform()
 {
-	return * transform_;
+	return transform_;
 }
 
 const GameObject::Transform& GameObject::get_transform() const
 {
-	return * transform_;
+	return transform_;
 }
 
 /**

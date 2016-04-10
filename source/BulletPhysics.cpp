@@ -6,13 +6,13 @@
 #include <sstream>
 
 #ifdef _DEBUG
-#pragma comment( lib, "BulletCollision_debug.lib" )
-#pragma comment( lib, "BulletDynamics_debug.lib" )
-#pragma comment( lib, "LinearMath_debug.lib" )
+#pragma comment( lib, "BulletCollision_vs2010_debug.lib" )
+#pragma comment( lib, "BulletDynamics_vs2010_debug.lib" )
+#pragma comment( lib, "LinearMath_vs2010_debug.lib" )
 #else
-#pragma comment( lib, "BulletCollision.lib" )
-#pragma comment( lib, "BulletDynamics.lib" )
-#pragma comment( lib, "LinearMath.lib" )
+#pragma comment( lib, "BulletCollision_vs2010.lib" )
+#pragma comment( lib, "BulletDynamics_vs2010.lib" )
+#pragma comment( lib, "LinearMath_vs2010.lib" )
 #endif
 
 BulletPhysics::BulletPhysics()

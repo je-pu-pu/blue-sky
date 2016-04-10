@@ -2,6 +2,9 @@
 #include "Direct3D11.h"
 #include "DirectX.h"
 
+#include "WICTextureLoader.h"
+
+#include <common/string.h>
 #include <common/exception.h>
 #include <common/serialize.h>
 #include <common/log.h>
@@ -32,6 +35,7 @@ Direct3D11TextureManager::Texture* Direct3D11TextureManager::load( const char* n
 
 	// common::log( "log/debug.log", string_t( "loading texture : " ) + name + " : " + file_name );
 
+	/*
 	D3DX11_IMAGE_LOAD_INFO image_load_info;
 	image_load_info.Width = D3DX11_DEFAULT; // 256;
 	image_load_info.Height = D3DX11_DEFAULT; // 256;
@@ -46,13 +50,23 @@ Direct3D11TextureManager::Texture* Direct3D11TextureManager::load( const char* n
 	image_load_info.Filter = D3DX11_DEFAULT;
 	image_load_info.MipFilter = D3DX11_DEFAULT;
 	image_load_info.pSrcInfo = nullptr;
+	*/
 
 	ID3D11ShaderResourceView* view = 0;
 
+	std::wstring ws_file_name = common::convert_to_wstring( file_name );
+
+	if ( FAILED( DirectX::CreateWICTextureFromFile( direct_3d_->getDevice(), ws_file_name.c_str(), nullptr, & view ) ) )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "file open failed. " ) + file_name );
+	}
+
+	/*
 	if ( FAILED( D3DX11CreateShaderResourceViewFromFile( direct_3d_->getDevice(), file_name, & image_load_info, 0, & view, 0 ) ) )
 	{
 		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "file open failed. " ) + file_name );
 	}
+	*/
 	
 	Texture* texture = new Texture( direct_3d_, view );
 	texture_list_[ name ] = texture;

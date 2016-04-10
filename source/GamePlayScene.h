@@ -4,7 +4,6 @@
 #include "Scene.h"
 #include "Direct3D11Vector.h"
 #include "Direct3D11Color.h"
-
 #include "vector3.h"
 
 #include <common/chase_value.h>

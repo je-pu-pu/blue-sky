@@ -51,14 +51,14 @@ void Direct3D11FarBillboardsMesh::create_index_buffer( Material* material )
 		bool operator () ( Face a, Face b )
 		{
 			return (
-				XMVectorGetX( XMVector2Length( XMVectorSet( mesh_->get_vertex_list()[ a.index[ 0 ] ].Position.x, mesh_->get_vertex_list()[ a.index[ 0 ] ].Position.z, 0, 0 ) ) ) +
-				XMVectorGetX( XMVector2Length( XMVectorSet( mesh_->get_vertex_list()[ a.index[ 1 ] ].Position.x, mesh_->get_vertex_list()[ a.index[ 1 ] ].Position.z, 0, 0 ) ) ) +
-				XMVectorGetX( XMVector2Length( XMVectorSet( mesh_->get_vertex_list()[ a.index[ 2 ] ].Position.x, mesh_->get_vertex_list()[ a.index[ 2 ] ].Position.z, 0, 0 ) ) )
+				DirectX::XMVectorGetX( DirectX::XMVector2Length( DirectX::XMVectorSet( mesh_->get_vertex_list()[ a.index[ 0 ] ].Position.x, mesh_->get_vertex_list()[ a.index[ 0 ] ].Position.z, 0, 0 ) ) ) +
+				DirectX::XMVectorGetX( DirectX::XMVector2Length( DirectX::XMVectorSet( mesh_->get_vertex_list()[ a.index[ 1 ] ].Position.x, mesh_->get_vertex_list()[ a.index[ 1 ] ].Position.z, 0, 0 ) ) ) +
+				DirectX::XMVectorGetX( DirectX::XMVector2Length( DirectX::XMVectorSet( mesh_->get_vertex_list()[ a.index[ 2 ] ].Position.x, mesh_->get_vertex_list()[ a.index[ 2 ] ].Position.z, 0, 0 ) ) )
 			) >
 			(
-				XMVectorGetX( XMVector2Length( XMVectorSet( mesh_->get_vertex_list()[ b.index[ 0 ] ].Position.x, mesh_->get_vertex_list()[ b.index[ 0 ] ].Position.z, 0, 0 ) ) ) +
-				XMVectorGetX( XMVector2Length( XMVectorSet( mesh_->get_vertex_list()[ b.index[ 1 ] ].Position.x, mesh_->get_vertex_list()[ b.index[ 1 ] ].Position.z, 0, 0 ) ) ) +
-				XMVectorGetX( XMVector2Length( XMVectorSet( mesh_->get_vertex_list()[ b.index[ 2 ] ].Position.x, mesh_->get_vertex_list()[ b.index[ 2 ] ].Position.z, 0, 0 ) ) )
+				DirectX::XMVectorGetX( DirectX::XMVector2Length( DirectX::XMVectorSet( mesh_->get_vertex_list()[ b.index[ 0 ] ].Position.x, mesh_->get_vertex_list()[ b.index[ 0 ] ].Position.z, 0, 0 ) ) ) +
+				DirectX::XMVectorGetX( DirectX::XMVector2Length( DirectX::XMVectorSet( mesh_->get_vertex_list()[ b.index[ 1 ] ].Position.x, mesh_->get_vertex_list()[ b.index[ 1 ] ].Position.z, 0, 0 ) ) ) +
+				DirectX::XMVectorGetX( DirectX::XMVector2Length( DirectX::XMVectorSet( mesh_->get_vertex_list()[ b.index[ 2 ] ].Position.x, mesh_->get_vertex_list()[ b.index[ 2 ] ].Position.z, 0, 0 ) ) )
 			);
 		}
 	};

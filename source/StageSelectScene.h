@@ -16,10 +16,12 @@ namespace blue_sky
 class StageSelectScene : public Scene
 {
 public:
+	typedef std::string string_t;
+
 	class Stage
 	{
 	public:
-		std::string name;
+		string_t name;
 		Texture* texture;
 		win::Rect rect;
 		bool cleared;
@@ -29,8 +31,8 @@ public:
 	typedef std::list< Stage* > StageList;
 	typedef std::vector< win::Rect > RectList;
 
-	static std::string get_stage_dir_name_by_page( int );
-	static std::string get_stage_prefix_by_page( int );
+	static string_t get_stage_dir_name_by_page( int );
+	static string_t get_stage_prefix_by_page( int );
 	static int get_max_story_page() { return 3; }
 
 	void check_story_completed();

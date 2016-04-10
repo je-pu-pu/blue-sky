@@ -134,23 +134,25 @@ void TitleScene::render()
 	get_direct_3d()->clear( Direct3D::Color::from_256( 0xFF, 0xAA, 0x11 ) );
 	get_direct_3d()->getSprite()->begin();
 
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
-
-	for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
 	{
-		( *i )->apply();
+		Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
 
-		win::Rect dst_rect( 0, 0, get_width(), get_height() );
+		for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
+		{
+			( *i )->apply();
 
-		if ( sequence_ >= SEQUENCE_TITLE_FIX )
-		{
-			// render_bg()
-			get_direct_3d()->getSprite()->draw( dst_rect, title_bg_texture_ );
-		}
-		else
-		{
-			// render_bg()
-			get_direct_3d()->getSprite()->draw( dst_rect, cloth_texture_, Direct3D::Color( 1.f, 1.f, 1.f, 0.5f ) );
+			win::Rect dst_rect( 0, 0, get_width(), get_height() );
+
+			if ( sequence_ >= SEQUENCE_TITLE_FIX )
+			{
+				// render_bg()
+				get_direct_3d()->getSprite()->draw( dst_rect, title_bg_texture_ );
+			}
+			else
+			{
+				// render_bg()
+				get_direct_3d()->getSprite()->draw( dst_rect, cloth_texture_, Direct3D::Color( 1.f, 1.f, 1.f, 0.5f ) );
+			}
 		}
 	}
 

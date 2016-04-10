@@ -78,7 +78,6 @@ protected:
 	common::auto_ptr< GraphicsManager >		graphics_manager_;		///< GraphicsManager
 	common::auto_ptr< SoundManager >		sound_manager_;			///< SoundManager
 
-	common::auto_ptr< Config >				config_;				///< Config
 	common::auto_ptr< Config >				save_data_;				///< Save Data
 
 	common::auto_ptr< MainLoop >			main_loop_;				///< ƒ‹[ƒvŠÇ—
@@ -107,6 +106,8 @@ public:
 	GameMain();
 	virtual ~GameMain();
 
+	void setup_scene();
+
 	bool update();
 
 	void render();
@@ -133,7 +134,7 @@ public:
 
 	DrawingModelManager* get_drawing_model_manager() const { return drawing_model_manager_.get(); }
 	
-	Config* get_config() const { return config_.get(); }
+	Config* get_config() const { return get_app()->get_config(); }
 	Config* get_save_data() const { return save_data_.get(); }
 
 	const MainLoop* get_main_loop() const { return main_loop_.get(); }

@@ -3,9 +3,7 @@
 
 #include "Direct3D11Matrix.h"
 #include "Direct3D11ConstantBuffer.h"
-
-#include <d3d11.h>
-#include <xnamath.h>
+#include "Direct3D11Common.h"
 
 namespace win
 {
@@ -42,9 +40,9 @@ public:
 	typedef ID3D11InputLayout			InputLayout;
 	typedef ID3D11Buffer				Buffer;
 
-	typedef XMFLOAT2					Vector2;
-	typedef XMFLOAT3					Vector3;
-	typedef XMFLOAT4					Vector4;
+	typedef DirectX::XMFLOAT2			Vector2;
+	typedef DirectX::XMFLOAT3			Vector3;
+	typedef DirectX::XMFLOAT4			Vector4;
 	
 	typedef Direct3D11Vector			Vector;
 	typedef Direct3D11Matrix			Matrix;

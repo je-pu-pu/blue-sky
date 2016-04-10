@@ -9,8 +9,7 @@
 #ifndef _vector3_
 #define _vector3_
 
-#include <stdio.h>
-#include <math.h>
+#include <cmath>
 
 // uses
 class matrix4x4;
@@ -44,8 +43,8 @@ public:
 	vector3&		operator *= ( T v ) { set( x() * v, y() * v, z() * v ); return *this; }
 	vector3&		operator /= ( T v ) { set( x() / v, y() / v, z() / v ); return *this; }
 
-	T				length() const { return sqrt( x() * x() + y() * y() + z() * z() ); }
-	T				length_xy() const { return sqrt( x() * x() + y() * y() ); }
+	T				length() const { return std::sqrt( x() * x() + y() * y() + z() * z() ); }
+	T				length_xy() const { return std::sqrt( x() * x() + y() * y() ); }
 
 	T				dot_product( const vector3& v ) const { return x() * v.x() + y() * v.y() * z() * v.z(); }
 	vector3			cross_product( const vector3& v ) const
@@ -72,9 +71,6 @@ public:
 	const T&		y() const { return get(1); }
 	const T&		z() const { return get(2); }
 	
-	bool			fwrite( FILE* );
-	bool			fread( FILE* );
-
 protected:
 	typedef T		vector[3];
 	vector			data;

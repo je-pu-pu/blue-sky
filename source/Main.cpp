@@ -7,7 +7,7 @@
 
 #include <windows.h>
 
-#include <dxerr.h>
+// #include <dxerr.h>
 
 #include "memory.h"
 
@@ -42,7 +42,14 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE /* hPrevInst */, LPSTR /* lpszCmd
 		if ( app )
 		{
 			std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() ) + "\n";
-			message += std::string( DXGetErrorString( e.data() ) ) + " : " + DXGetErrorDescription( e.data() );
+
+			/*
+			LPSTR output = 0;
+			FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER, 0, e.data(), MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), output, 0, 0 );
+			message += output;
+			*/
+
+			// message += std::string( DXGetErrorString( e.data() ) ) + " : " + DXGetErrorDescription( e.data() );
 
 			common::log( "log/error.log", message );
 
@@ -61,6 +68,10 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE /* hPrevInst */, LPSTR /* lpszCmd
 		}
 
 		return -1;
+	}
+	catch ( ... )
+	{
+		MessageBox( app->GetWindowHandle(), "Unknown Error", "ERROR", MB_OK );
 	}
 
 	return -1;

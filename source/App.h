@@ -7,7 +7,9 @@
 #ifndef APP_H
 #define APP_H
 
+#include <game/Config.h>
 #include <windows.h>
+#include <memory>
 #include <string>
 
 /**
@@ -20,13 +22,18 @@ public:
 	static const int DEFAULT_WIDTH = 800;
 	static const int DEFAULT_HEIGHT = 600;
 
+	typedef std::string string_t;
+	typedef string_t::value_type char_t;
+
+	typedef game::Config Config;
+
 private:
 	HINSTANCE	hInst;					///< インスタンスハンドル
 	HWND		hWnd;					///< ウィンドウハンドル
 	HANDLE		hMutex;					///< ミューテックスハンドル
 
-	std::string	class_name_;			///< クラス名
-	std::string	title_;					///< タイトル
+	string_t	class_name_;			///< クラス名
+	string_t	title_;					///< タイトル
 	DWORD		style_;					///< スタイル
 
 	int			width_;					///< ウィンドウ横幅
@@ -38,6 +45,8 @@ private:
 
 	bool		is_mouse_in_window_;
 	bool		is_clip_cursor_enabled_;
+
+	std::unique_ptr< Config >			config_;
 
 	App();								//コンストラクタ
 
@@ -67,11 +76,11 @@ public:
 	void set_active( bool );
 	bool is_active() const { return is_active_; }
 
-	const char* get_title();
-	void set_title( const char* );
+	const char_t* get_title();
+	void set_title( const char_t* );
 
-	const char* get_class_name() const { return class_name_.c_str(); }
-	void set_class_name( const char* name ) { class_name_ = name; }
+	const char_t* get_class_name() const { return class_name_.c_str(); }
+	void set_class_name( const char_t* name ) { class_name_ = name; }
 
 	bool is_full_screen() const { return is_full_screen_; }
 	void set_full_screen( bool );
@@ -79,6 +88,8 @@ public:
 	void clip_cursor( bool );
 
 	void close();
+
+	Config* get_config() { return config_.get(); }
 };
 
 #endif // APP_H

@@ -2,11 +2,9 @@
 #include "DirectSound.h"
 #include "DirectSoundBuffer.h"
 #include "DirectX.h"
-// #include "WaveFile.h"
 #include "OggVorbisFile.h"
-
-// #include <common/math.h>
 #include <common/exception.h>
+#include <algorithm>
 
 #include "memory.h"
 

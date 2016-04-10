@@ -55,8 +55,8 @@ public:
 	static Vector3 GravityZero;
 
 private:
-	RigidBody*			rigid_body_;		///< RigidBody
-	Transform*			transform_;			///< Transform
+	Transform	transform_;			///< Transform
+	RigidBody*	rigid_body_;		///< RigidBody
 
 protected:
 	float_t get_frame_elapsed_time() const;
@@ -145,7 +145,7 @@ public:
 	Transform& get_transform();
 	const Transform& get_transform() const;
 	
-	const Vector3& get_location() const { return transform_->getOrigin(); }
+	const Vector3& get_location() const { return get_transform().getOrigin(); }
 	void set_location( const Vector3& );
 	void set_location( float_t, float_t, float_t );
 
@@ -153,6 +153,18 @@ public:
 	void set_velocity( const Vector3& );
 
 	bool is_moving_to( const GameObject* ) const;
+
+	/*
+	void* operator new ( size_t size )
+	{
+		return _aligned_malloc( size, 16 );
+	}
+
+	void operator delete ( void* p )
+	{
+		_aligned_free( p );
+	}
+	*/
 
 }; // class GameObject
 

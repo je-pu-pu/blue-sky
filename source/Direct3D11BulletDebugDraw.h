@@ -1,9 +1,8 @@
 #ifndef DIRECT_3D_11_BULLET_DEBUG_DRAW_H
 #define DIRECT_3D_11_BULLET_DEBUG_DRAW_H
 
+#include "Direct3D11Common.h"
 #include <btBulletCollisionCommon.h>
-#include <d3d11.h>
-#include <xnamath.h>
 #include <vector>
 
 class Direct3D11;
@@ -17,12 +16,12 @@ class Direct3D11BulletDebugDraw : public btIDebugDraw
 public:
 	struct Vertex
 	{
-		XMFLOAT3 Position;
-		XMFLOAT3 Color;
+		DirectX::XMFLOAT3 Position;
+		DirectX::XMFLOAT3 Color;
 	};
 
-	typedef XMFLOAT3 Position;
-	typedef XMFLOAT3 Color;
+	typedef DirectX::XMFLOAT3 Position;
+	typedef DirectX::XMFLOAT3 Color;
 
 	typedef std::vector< Vertex > VertexList;
 

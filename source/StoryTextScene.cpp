@@ -261,23 +261,25 @@ void StoryTextScene::render()
 	get_direct_3d()->clear();
 	get_direct_3d()->getSprite()->begin();
 
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
-
-	for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
 	{
-		( *i )->apply();
+		Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
 
-		for ( auto j = bg_sprite_layer_list_.begin(); j != bg_sprite_layer_list_.end(); ++j )
+		for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
 		{
+			( *i )->apply();
 
-			Matrix r, s, t;
-			
-			r.set_rotation_z( math::degree_to_radian( ( *j )->get_rotation().value() ) );
-			s.set_scaling( ( *j )->get_scale().value(), ( *j )->get_scale().value(), 1.f );
-			t.set_translation( ( *j )->get_translation().value().x(), ( *j )->get_translation().value().y(), 0.f );
+			for ( auto j = bg_sprite_layer_list_.begin(); j != bg_sprite_layer_list_.end(); ++j )
+			{
 
-			get_direct_3d()->getSprite()->set_transform( r * s * t );
-			get_direct_3d()->getSprite()->draw( ( *j )->get_texture(), ( *j )->get_src_rect(), ( *j )->get_color().value() );
+				Matrix r, s, t;
+
+				r.set_rotation_z( math::degree_to_radian( ( *j )->get_rotation().value() ) );
+				s.set_scaling( ( *j )->get_scale().value(), ( *j )->get_scale().value(), 1.f );
+				t.set_translation( ( *j )->get_translation().value().x(), ( *j )->get_translation().value().y(), 0.f );
+
+				get_direct_3d()->getSprite()->set_transform( r * s * t );
+				get_direct_3d()->getSprite()->draw( ( *j )->get_texture(), ( *j )->get_src_rect(), ( *j )->get_color().value() );
+			}
 		}
 	}
 

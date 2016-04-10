@@ -1,6 +1,8 @@
 #include "ActiveObjectPhysics.h"
 #include "ActiveObject.h"
 
+#include <algorithm>
+
 #include "memory.h"
 
 namespace blue_sky
@@ -100,7 +102,7 @@ public:
 
 	}
 
-	btScalar addSingleResult( btManifoldPoint&, const btCollisionObject*, int, int, const btCollisionObject*, int, int )
+	btScalar addSingleResult( btManifoldPoint&, const btCollisionObjectWrapper*, int, int, const btCollisionObjectWrapper*, int, int )
 	{
 		is_hit_ = true;
 
@@ -113,9 +115,9 @@ public:
 class ActiveObjectContactResultCallback : public btCollisionWorld::ContactResultCallback
 {
 public:
-	btScalar addSingleResult( btManifoldPoint&, const btCollisionObject* o0, int, int, const btCollisionObject* o1, int, int )
+	btScalar addSingleResult( btManifoldPoint&, const btCollisionObjectWrapper* o0, int, int, const btCollisionObjectWrapper* o1, int, int )
 	{
-		return on_collide( o0, o1 );
+		return on_collide( o0->getCollisionObject(), o1->getCollisionObject() );
 	}
 
 	static btScalar on_collide( const btCollisionObject* o0, const btCollisionObject* o1 )
@@ -175,15 +177,15 @@ void ActiveObjectPhysics::check_collision_all()
 
 	for ( int i = 0; i < numManifolds; i++ )
 	{
-		btPersistentManifold* contactManifold =  dynamics_world_->getDispatcher()->getManifoldByIndexInternal( i );
-		btCollisionObject* o0 = static_cast< btCollisionObject* >( contactManifold->getBody0() );
-		btCollisionObject* o1 = static_cast< btCollisionObject* >( contactManifold->getBody1() );
+		const btPersistentManifold* contactManifold =  dynamics_world_->getDispatcher()->getManifoldByIndexInternal( i );
+		const btCollisionObject* o0 = static_cast< const btCollisionObject* >( contactManifold->getBody0() );
+		const btCollisionObject* o1 = static_cast< const btCollisionObject* >( contactManifold->getBody1() );
  
 		int numContacts = contactManifold->getNumContacts();
 
 		for ( int j = 0; j < numContacts; j++ )
 		{
-			btManifoldPoint& pt = contactManifold->getContactPoint( j );
+			const btManifoldPoint& pt = contactManifold->getContactPoint( j );
 
 			if ( pt.getDistance() < 0.f )
 			{

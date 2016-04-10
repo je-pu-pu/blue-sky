@@ -2,6 +2,7 @@
 #define BLUE_SKY_DRAWING_LINE_H
 
 #include "Direct3D11Color.h"
+#include "Direct3D11Common.h"
 #include <game/Line.h>
 #include <vector>
 
@@ -33,10 +34,13 @@ public:
 	typedef Direct3D11Color Color;
 	typedef Direct3D11Texture Texture;
 
+	typedef DirectX::XMFLOAT3 PositionType;
+	typedef DirectX::XMFLOAT4 ColorType;
+
 	struct Vertex
 	{
-		XMFLOAT3 Position;
-		XMFLOAT4 Color;
+		PositionType Position;
+		ColorType Color;
 
 		bool operator < ( const Vertex& v ) const
 		{
@@ -56,11 +60,9 @@ public:
 		}
 	};
 
-	typedef XMFLOAT3 Position;
-
 	typedef WORD Index;
 
-	typedef std::vector< Position > PositionList;
+	typedef std::vector< PositionType > PositionList;
 	typedef std::vector< Color > ColorList;
 
 	typedef std::vector< Vertex > VertexList;

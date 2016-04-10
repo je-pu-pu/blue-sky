@@ -7,8 +7,6 @@
 
 #include <common/exception.h>
 
-#include <xnamath.h>
-
 #include "memory.h"
 
 Direct3D11ShadowMap::Vector Direct3D11ShadowMap::light_position_;

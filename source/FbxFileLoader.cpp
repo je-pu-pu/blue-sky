@@ -18,9 +18,9 @@
 #include "memory.h"
 
 #ifdef _DEBUG
-#pragma comment ( lib, "fbxsdk-2013.3-mtd.lib" )
+#pragma comment ( lib, "libfbxsdk-mt.lib" )
 #else
-#pragma comment ( lib, "fbxsdk-2013.3-mt.lib" )
+#pragma comment ( lib, "libfbxsdk-mt.lib" )
 #endif
 
 void print_fbx_node_recursive( FbxNode* node )
@@ -34,17 +34,17 @@ void print_fbx_node_recursive( FbxNode* node )
 	
 	std::map< int_t, string_t > ro_map;
 	ro_map[ FbxEuler::eOrderXYZ ] = "XYZ";
-	ro_map[ FbxEuler::eOrderXYX ] = "XYX";
+//	ro_map[ FbxEuler::eOrderXYX ] = "XYX";
 	ro_map[ FbxEuler::eOrderXZY ] = "XZY";
-	ro_map[ FbxEuler::eOrderXZX ] = "XZX";
+//	ro_map[ FbxEuler::eOrderXZX ] = "XZX";
 	ro_map[ FbxEuler::eOrderYZX ] = "YZX";
-	ro_map[ FbxEuler::eOrderYZY ] = "YZY";
+//	ro_map[ FbxEuler::eOrderYZY ] = "YZY";
 	ro_map[ FbxEuler::eOrderYXZ ] = "YXZ";
-	ro_map[ FbxEuler::eOrderYXY ] = "YXY";
+//	ro_map[ FbxEuler::eOrderYXY ] = "YXY";
 	ro_map[ FbxEuler::eOrderZXY ] = "ZXY";
-	ro_map[ FbxEuler::eOrderZXZ ] = "ZXZ";
+//	ro_map[ FbxEuler::eOrderZXZ ] = "ZXZ";
 	ro_map[ FbxEuler::eOrderZYX ] = "ZYX";
-	ro_map[ FbxEuler::eOrderZYZ ] = "ZYZ";
+//	ro_map[ FbxEuler::eOrderZYZ ] = "ZYZ";
 
 	std::cout << "rotation_order : " << ro_map[ node->RotationOrder.Get() ] << std::endl;
 
@@ -85,8 +85,9 @@ void print_fbx_node_recursive( FbxNode* node )
 				}
 
 				FbxVector2 uv_vector;
+				bool unmapped;
 				
-				if ( mesh->GetPolygonVertexUV( n, m, "UVMap", uv_vector ) )
+				if ( mesh->GetPolygonVertexUV( n, m, "UVMap", uv_vector, unmapped ) )
 				{
 					std::cout << uv_vector[ 0 ] << "," << uv_vector[ 1 ];
 				}
@@ -355,9 +356,6 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 		return;
 	}
 
-	FbxGeometryConverter converter( fbx_manager_ );
-	mesh = converter.TriangulateMesh( mesh );
-
 	typedef std::map< Mesh::Vertex, Mesh::Material::Index > VertexIndexMap;
 	typedef std::vector< Mesh::Vertex > VertexList;
 
@@ -446,8 +444,9 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 			v.Position = Mesh::Position( position_list.at( position_index ) );
 
 			FbxVector2 uv_vector;
+			bool unmapped;
 			
-			if ( mesh->GetPolygonVertexUV( n, m, "UVMap", uv_vector ) )
+			if ( mesh->GetPolygonVertexUV( n, m, "UVMap", uv_vector, unmapped) )
 			{
 				v.TexCoord = Mesh::TexCoord(
 					static_cast< float >( uv_vector[ 0 ] ),
@@ -1052,6 +1051,9 @@ bool FbxFileLoader::load( const char_t* file_path )
 	}
 	
 	importer->Destroy();
+
+	FbxGeometryConverter converter( fbx_manager_ );
+	converter.Triangulate( fbx_scene_, true );
 
 	return result;
 }

@@ -147,7 +147,7 @@ void CanvasTestScene::render()
 		get_direct_3d()->getSprite()->begin();
 
 		render_technique( "|sprite", [&] {
-			get_direct_3d()->getSprite()->draw( win::Rect::Size( tablet_->get_x(), tablet_->get_y(), 16, 16 ), texture_.get(), win::Rect( 0, 0, 64, 64 ) );
+			get_direct_3d()->getSprite()->draw( win::Rect::Size( static_cast< int >( tablet_->get_x() ), static_cast< int >( tablet_->get_y() ), 16, 16 ), texture_.get(), win::Rect( 0, 0, 64, 64 ) );
 		} );
 
 		get_direct_3d()->getSprite()->end();

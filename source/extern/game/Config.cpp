@@ -1,5 +1,4 @@
 #include "Config.h"
-#include <common/exception.h>
 #include <fstream>
 
 namespace game
@@ -30,7 +29,7 @@ bool Config::load_file( const char* file_name )
 	return true;
 }
 
-void Config::read_line( const string_t& line )
+void Config::read_line( const std::string& line )
 {
 	std::stringstream ss;
 		

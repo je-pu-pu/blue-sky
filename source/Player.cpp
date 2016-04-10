@@ -410,12 +410,12 @@ public:
 
 	}
 
-	virtual	btScalar addSingleResult( btManifoldPoint& /* cp */, const btCollisionObject* o1,int /* partId0 */, int /* index0 */, const btCollisionObject* o2, int /* partId1 */, int /* index1 */ )
+	virtual	btScalar addSingleResult( btManifoldPoint& /* cp */, const btCollisionObjectWrapper* o1,int /* partId0 */, int /* index0 */, const btCollisionObjectWrapper* o2, int /* partId1 */, int /* index1 */ )
 	{
-		GameObject* go1 = static_cast< GameObject* >( o1->getUserPointer() );
-		GameObject* go2 = static_cast< GameObject* >( o2->getUserPointer() );
+		GameObject* go1 = static_cast< GameObject* >( o1->getCollisionObject()->getUserPointer() );
+		GameObject* go2 = static_cast< GameObject* >( o2->getCollisionObject()->getUserPointer() );
 
-		if ( o1->getUserPointer() == me_ || o2->getUserPointer() == me_ )
+		if ( go1 == me_ || go2 == me_ )
 		{
 			return 1.f;
 		}

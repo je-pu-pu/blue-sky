@@ -114,6 +114,8 @@ public:
 	virtual void update();					///< ƒƒCƒ“ƒ‹[ƒv
 	virtual void render() = 0;				///< •`‰æ
 
+	virtual void on_function_key_down( int ) { };
+
 	bool is_first_game_play() const;
 	unsigned int get_current_time() const;
 

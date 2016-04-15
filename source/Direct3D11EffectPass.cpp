@@ -18,16 +18,16 @@ Direct3D11EffectPass::~Direct3D11EffectPass()
 
 }
 
-Direct3D11EffectPass::InputLayout* Direct3D11EffectPass::createVertexLayout( D3D11_INPUT_ELEMENT_DESC layout[], UINT layout_array_size )
+Direct3D11EffectPass::InputLayout* Direct3D11EffectPass::create_input_layout( D3D11_INPUT_ELEMENT_DESC layout[], UINT layout_array_size )
 {
 	D3DX11_PASS_DESC pass_desc;
 	pass_->GetDesc( & pass_desc );
 
-	InputLayout* vertex_layout = 0;
+	InputLayout* input_layout = 0;
 
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateInputLayout( layout, layout_array_size, pass_desc.pIAInputSignature, pass_desc.IAInputSignatureSize, & vertex_layout ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateInputLayout( layout, layout_array_size, pass_desc.pIAInputSignature, pass_desc.IAInputSignatureSize, &input_layout ) );
 
-	return vertex_layout;
+	return input_layout;
 }
 
 void Direct3D11EffectPass::apply()

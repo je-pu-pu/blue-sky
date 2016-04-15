@@ -2,6 +2,7 @@
 #define GAME_MAIN_H
 
 #include "Game.h"
+#include "App.h"
 
 #include "type.h"
 
@@ -134,6 +135,11 @@ public:
 
 	DrawingModelManager* get_drawing_model_manager() const { return drawing_model_manager_.get(); }
 	
+	static App* get_app() { return App::GetInstance();  }
+
+	inline int get_width() const { return get_app()->get_width(); }
+	inline int get_height() const { return get_app()->get_height(); }
+
 	Config* get_config() const { return get_app()->get_config(); }
 	Config* get_save_data() const { return save_data_.get(); }
 

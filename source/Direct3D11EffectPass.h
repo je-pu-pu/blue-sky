@@ -26,7 +26,7 @@ public:
 	Direct3D11EffectPass( Direct3D*, ID3DX11EffectPass* );
 	~Direct3D11EffectPass();
 	
-	InputLayout* createVertexLayout( D3D11_INPUT_ELEMENT_DESC[], UINT );
+	InputLayout* create_input_layout( D3D11_INPUT_ELEMENT_DESC[], UINT );
 
 	void apply();
 

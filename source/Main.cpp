@@ -7,8 +7,6 @@
 
 #include <windows.h>
 
-// #include <dxerr.h>
-
 #include "memory.h"
 
 //■■■　メイン　■■■
@@ -31,39 +29,34 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE /* hPrevInst */, LPSTR /* lpszCmd
 			return 0;
 		}
 
-		// ゲームを初期化する
-		Game::get_instance();
-
-		// メッセージループ
 		return app->MessageLoop();
 	}
 	catch ( const common::exception< HRESULT >& e )
 	{
+		
+		std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() ) + "\n";
+
+		LPVOID output = 0;
+		FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER, 0, e.data(), MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), ( LPSTR )( & output ), 0, 0 );
+		message += static_cast< LPCTSTR >( output );
+
+		LocalFree( output );
+
+		common::log( "log/error.log", message );
+
 		if ( app )
 		{
-			std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() ) + "\n";
-
-			/*
-			LPSTR output = 0;
-			FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER, 0, e.data(), MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), output, 0, 0 );
-			message += output;
-			*/
-
-			// message += std::string( DXGetErrorString( e.data() ) ) + " : " + DXGetErrorDescription( e.data() );
-
-			common::log( "log/error.log", message );
-
 			MessageBox( app->GetWindowHandle(), message.c_str(), "ERROR", MB_OK );
 		}
 	}
 	catch ( const common::exception< std::string >& e )
 	{
+		std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() ) + "\n" + e.data();
+		
+		common::log( "log/error.log", message );
+
 		if ( app )
 		{
-			std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() ) + "\n" + e.data();
-
-			common::log( "log/error.log", message );
-
 			MessageBox( app->GetWindowHandle(), message.c_str(), "ERROR", MB_OK );
 		}
 
@@ -71,7 +64,10 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE /* hPrevInst */, LPSTR /* lpszCmd
 	}
 	catch ( ... )
 	{
-		MessageBox( app->GetWindowHandle(), "Unknown Error", "ERROR", MB_OK );
+		if ( app )
+		{
+			MessageBox( app->GetWindowHandle(), "Unknown Error", "ERROR", MB_OK );
+		}
 	}
 
 	return -1;

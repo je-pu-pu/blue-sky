@@ -7,6 +7,7 @@
 #ifndef APP_H
 #define APP_H
 
+#include "Game.h"
 #include <game/Config.h>
 #include <windows.h>
 #include <memory>
@@ -46,6 +47,7 @@ private:
 	bool		is_mouse_in_window_;
 	bool		is_clip_cursor_enabled_;
 
+	Game*		game_;
 	std::unique_ptr< Config >			config_;
 
 	App();								//コンストラクタ

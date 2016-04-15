@@ -250,6 +250,8 @@ void GameMain::on_function_key_down( int function_key )
 		get_direct_3d()->switch_full_screen();
 		get_app()->set_full_screen( get_direct_3d()->is_full_screen() );
 	}
+
+	scene_->on_function_key_down( function_key );
 }
 
 void GameMain::on_mouse_wheel( int wheel )
@@ -327,8 +329,8 @@ void GameMain::setup_scene( const string_t& scene_name )
 	
 	if ( scene_name == "title" )
 	{
-		scene_ = new TitleScene( this );
-		// scene_ = new CanvasTestScene( this );
+		// scene_ = new TitleScene( this );
+		scene_ = new CanvasTestScene( this );
 	}
 	else if ( scene_name == "stage_select" )
 	{

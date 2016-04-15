@@ -145,6 +145,7 @@
     <ClInclude Include="DrawingMesh.h" />
     <ClInclude Include="DrawingModel.h" />
     <ClInclude Include="DrawingModelManager.h" />
+    <ClInclude Include="DynamicPointList.h" />
     <ClInclude Include="EndingScene.h" />
     <ClInclude Include="FbxFileLoader.h" />
     <ClInclude Include="Game.h" />

@@ -8,6 +8,7 @@
 
 #include <winnls32.h>
 
+#include <boost/filesystem.hpp>
 #include <iostream>
 
 #include "memory.h"
@@ -30,6 +31,14 @@ App::App()
 	, is_clip_cursor_enabled_( false )
 	, config_( new Config() )
 {
+	/*
+	TCHAR exe_path[ MAX_PATH ];
+	GetModuleFileName( 0, exe_path, MAX_PATH );
+
+	boost::filesystem::path dir_path = exe_path;
+	boost::filesystem::current_path( dir_path.parent_path() );
+	*/
+
 	setlocale( LC_CTYPE, "" );
 
 #ifdef ENABLE_DEBUG_CONSOLE
@@ -115,6 +124,7 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 
 	// ƒQ[ƒ€‚ð‰Šú‰»‚·‚é
 	blue_sky::GameMain::get_instance()->setup_scene();
+	game_ = blue_sky::GameMain::get_instance();
 
 	ShowWindow( hWnd, nCmdShow );		//•\Ž¦
 	UpdateWindow( hWnd );				//•`‰æ
@@ -128,8 +138,6 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 int App::MessageLoop()
 {
 	MSG msg;
-
-	Game* game = Game::get_instance();
 
 	while ( true )
 	{
@@ -145,7 +153,7 @@ int App::MessageLoop()
 		}
 		else
 		{
-			if ( ! game->update() )
+			if ( ! game_->update() )
 			{
 				Sleep( 0 );
 			}
@@ -175,7 +183,10 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_KEYDOWN:
 	{
-		Game::get_instance()->on_function_key_down( wp - VK_F1 + 1 );
+		if ( App::GetInstance()->game_ )
+		{
+			App::GetInstance()->game_->on_function_key_down( wp - VK_F1 + 1 );
+		}
 
 		break;
 	}
@@ -202,7 +213,10 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_MOUSEWHEEL:
 	{
-		Game::get_instance()->on_mouse_wheel( GET_WHEEL_DELTA_WPARAM( wp ) );
+		if ( App::GetInstance()->game_ )
+		{
+			App::GetInstance()->game_->on_mouse_wheel( GET_WHEEL_DELTA_WPARAM( wp ) );
+		}
 
 		break;
 	}
@@ -251,7 +265,11 @@ void App::on_resize( HWND /* hwnd */ )
 	}
 
 	// App::GetInstance()->clip_cursor( App::GetInstance()->is_clip_cursor_enabled_ );
-	Game::get_instance()->on_resize();
+	
+	if ( App::GetInstance()->game_ )
+	{
+		App::GetInstance()->game_->on_resize();
+	}
 }
 
 void App::clip_cursor( bool clip )
@@ -296,7 +314,7 @@ void App::set_size( int w, int h )
 
 	SetWindowPos( hWnd, HWND_NOTOPMOST, ( sw - ww ) / 2, ( sh - wh ) / 2, ww, wh, SWP_SHOWWINDOW );
 
-	PostMessage( hWnd, WM_EXITSIZEMOVE, 0, 0 );
+	// PostMessage( hWnd, WM_EXITSIZEMOVE, 0, 0 );
 }
 
 /**

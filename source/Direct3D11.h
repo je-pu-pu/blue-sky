@@ -116,6 +116,7 @@ public:
 	void setup_font();
 
 	void create_default_input_layout();
+	void create_input_layout( char_t*, char_t*, D3D11_INPUT_ELEMENT_DESC[], UINT );
 
 	void reset( bool = false );
 

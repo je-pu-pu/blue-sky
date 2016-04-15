@@ -185,6 +185,13 @@ public:
 		return XMVector4Transform( v.value_, m.value_ );
 	}
 
+	friend Direct3D11Vector& operator *= ( Direct3D11Vector& v, const Direct3D11Matrix& m )
+	{
+		v = v * m;
+
+		return v;
+	}
+
 	operator DirectX::XMMATRIX () const { return value_; }
 
 

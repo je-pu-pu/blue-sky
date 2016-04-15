@@ -402,7 +402,7 @@ void Direct3D11::create_default_input_layout()
 		{ "TEXCOORD",    0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-	vertex_layout_list_[ "main" ] = effect_->getTechnique( "|main" )->getPassList().front()->createVertexLayout( layout_main, ARRAYSIZE( layout_main ) );
+	create_input_layout( "main", "|main", layout_main, ARRAYSIZE( layout_main ) );
 
 	// skin
 	D3D11_INPUT_ELEMENT_DESC layout_skin[] =
@@ -414,7 +414,7 @@ void Direct3D11::create_default_input_layout()
 		{ "WEIGHT",   0, DXGI_FORMAT_R8G8B8A8_UNORM,     1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-	vertex_layout_list_[ "skin" ] = effect_->getTechnique( "|skin" )->getPassList().front()->createVertexLayout( layout_skin, ARRAYSIZE( layout_skin ) );
+	create_input_layout( "skin", "|skin", layout_skin, ARRAYSIZE( layout_skin ) );
 
 	// line
 	D3D11_INPUT_ELEMENT_DESC layout_line[] =
@@ -423,7 +423,17 @@ void Direct3D11::create_default_input_layout()
 		{ "COLOR",       0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-	vertex_layout_list_[ "line" ] = effect_->getTechnique( "|drawing_line" )->getPassList().front()->createVertexLayout( layout_line, ARRAYSIZE( layout_line ) );
+	create_input_layout( "line", "|drawing_line", layout_line, ARRAYSIZE( layout_line ) );
+
+	// 
+	D3D11_INPUT_ELEMENT_DESC layout_drawing_point[] =
+	{
+		{ "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "PRESSURE",    0, DXGI_FORMAT_R32_FLOAT,          0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR",       0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+	create_input_layout( "drawing_point", "|drawing_point", layout_drawing_point, ARRAYSIZE( layout_drawing_point ) );
 
 	// sprite 
 	D3D11_INPUT_ELEMENT_DESC layout_sprite[] =
@@ -433,7 +443,12 @@ void Direct3D11::create_default_input_layout()
 		{ "COLOR",       0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-	vertex_layout_list_[ "sprite" ] = effect_->getTechnique( "|sprite" )->getPassList().front()->createVertexLayout( layout_sprite, ARRAYSIZE( layout_sprite ) );
+	create_input_layout( "sprite", "|sprite", layout_sprite, ARRAYSIZE( layout_sprite ) );
+}
+
+void Direct3D11::create_input_layout( char_t* input_layout_name, char_t* teqhnique_name, D3D11_INPUT_ELEMENT_DESC layout[], UINT layout_array_size )
+{
+	vertex_layout_list_[ input_layout_name ] = effect_->getTechnique( teqhnique_name )->getPassList().front()->create_input_layout( layout, layout_array_size );
 }
 
 void Direct3D11::set_full_screen( bool full_screen )

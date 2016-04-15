@@ -47,6 +47,11 @@ public:
 	inline UnitType z() const { UnitType x; DirectX::XMVectorGetZPtr( & x, value_ ); return x; }
 	inline UnitType w() const { UnitType x; DirectX::XMVectorGetWPtr( & x, value_ ); return x; }
 
+	UnitType length() const
+	{
+		return DirectX::XMVectorGetX( DirectX::XMVector3Length( value_ ) );
+	}
+
 	Direct3D11Vector& normalize()
 	{
 		value_ = DirectX::XMVector3Normalize( value_ );

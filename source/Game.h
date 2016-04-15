@@ -1,8 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "App.h"
-
 /**
  * ’ŠÛƒQ[ƒ€ƒNƒ‰ƒX
  *
@@ -26,10 +24,8 @@ public:
 	virtual void on_mouse_wheel( int ) = 0;
 	virtual void on_resize() = 0;
 
-	inline App* get_app() const { return App::GetInstance(); }
-
-	inline int get_width() const { return get_app()->get_width(); }
-	inline int get_height() const { return get_app()->get_height(); }
+	virtual int get_width() const = 0;
+	virtual int get_height() const = 0;
 };
 
 #endif // GAME_H

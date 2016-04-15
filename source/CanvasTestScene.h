@@ -2,6 +2,10 @@
 #define BLUE_SKY_CANVAS_TEST_SCENE_H
 
 #include "Scene.h"
+#include "DynamicPointList.h"
+#include "Direct3D11Vector.h"
+#include "Direct3D11Color.h"
+
 #include <win/Tablet.h>
 #include <common/safe_ptr.h>
 #include <memory>
@@ -16,6 +20,8 @@ namespace win
 	class Tablet;
 }
 
+class Direct3D11SkyBox;
+
 namespace blue_sky
 {
 
@@ -26,14 +32,28 @@ namespace blue_sky
 class CanvasTestScene : public Scene
 {
 public:
-	typedef game::Mesh Mesh;
 	typedef win::Tablet Tablet;
+	
+	typedef DirectX::XMFLOAT3			Vector3;
+	typedef Direct3D11Color				Color;
+
+	struct Vertex
+	{
+		Vector3 position;
+		float pressure;
+		Color color;
+	};
+
+	typedef DynamicPointList< Vertex > DynamicPointList;
+
+	typedef Direct3D11SkyBox			SkyBox;
 
 private:
 	common::safe_ptr< Tablet > tablet_;
 
-	std::unique_ptr< Mesh > mesh_;
+	std::unique_ptr< DynamicPointList > points_;
 	common::safe_ptr< Texture > texture_;
+	std::unique_ptr< Direct3D11SkyBox > sky_box_;
 
 protected:
 
@@ -43,6 +63,8 @@ public:
 
 	void update();				///< ƒƒCƒ“ƒ‹[ƒv
 	void render();				///< •`‰æ
+
+	void on_function_key_down( int ) override;
 
 	bool is_clip_cursor_required() { return true; }
 

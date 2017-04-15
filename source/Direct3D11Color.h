@@ -44,6 +44,52 @@ public:
 		);
 	}
 
+	static Direct3D11Color from_hsv( UnitType h, UnitType s, UnitType v )
+	{
+		float r = v;
+		float g = v;
+		float b = v;
+
+		if ( s > 0.0f )
+		{
+			h *= 6.0f;
+
+			const int i = ( int ) h;
+			const float f = h - ( float ) i;
+
+			switch ( i )
+			{
+			default:
+			case 0:
+				g *= 1 - s * ( 1 - f );
+				b *= 1 - s;
+				break;
+			case 1:
+				r *= 1 - s * f;
+				b *= 1 - s;
+				break;
+			case 2:
+				r *= 1 - s;
+				b *= 1 - s * ( 1 - f );
+				break;
+			case 3:
+				r *= 1 - s;
+				g *= 1 - s * f;
+				break;
+			case 4:
+				r *= 1 - s * ( 1 - f );
+				g *= 1 - s;
+				break;
+			case 5:
+				g *= 1 - s;
+				b *= 1 - s * f;
+				break;
+			}
+		}
+
+		return Direct3D11Color( r, g, b, 1.f );
+	}
+
 	inline UnitType& r() { return x; }
 	inline UnitType& g() { return y; }
 	inline UnitType& b() { return z; }

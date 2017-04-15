@@ -31,9 +31,12 @@ static ObjectConstantBufferData object_constant_buffer_data;
 static Vector eye( 0.f, 0.f, -1.f );
 static Matrix r;
 
+static int pen_mode_ = 0;
+
 CanvasTestScene::CanvasTestScene( const GameMain* game_main )
 	: Scene( game_main )
 	, tablet_( Tablet::get_instance( get_game_main()->get_app()->GetWindowHandle() ) )
+	, pen_color_( 0.f, 0.f, 0.f, 1.f )
 	, points_( new DynamicPointList( get_direct_3d() ) )
 	, sky_box_( new SkyBox( get_direct_3d(), "sky-box-sky" ) )
 {
@@ -68,15 +71,6 @@ void CanvasTestScene::update()
 	static float ss = 0.01f;
 	static float scale = 1.f;
 
-	if ( get_input()->push( Input::B ) )
-	{
-		const std::array< char_t*, 5 > texture_names = { "white-soft-pen", "white-hard-pen", "bump-hard-pen", "bump-cross-pen", "white-grass-pen" };
-
-		static int i = 0;
-		i = ( i + 1 ) % texture_names.size();;
-
-		texture_ = get_graphics_manager()->get_texture( texture_names[ i ] );
-	}
 
 	if ( get_input()->press( Input::LEFT ) )
 	{
@@ -110,20 +104,34 @@ void CanvasTestScene::update()
 
 	scale = math::clamp( scale, 0.1f, 50.f );
 
-	static Color color( common::random( 0.f, 1.f ), common::random( 0.f, 1.f ), common::random( 0.f, 1.f ), 1.f );
-
-	if ( get_input()->release( Input::A ) )
+	if ( pen_mode_ == 1 && get_input()->release( Input::A ) || pen_mode_ == 2 )
 	{
-		color = Color( common::random( 0.f, 1.f ), common::random( 0.f, 1.f ), common::random( 0.f, 1.f ), 1.f );
+		pen_color_ = Color( common::random( 0.f, 1.f ), common::random( 0.f, 1.f ), common::random( 0.f, 1.f ), 1.f );
 	}
 
-	if ( ! get_input()->push( Input::A ) )
+	{
+		static float v = 0.f;
+
+		if ( get_input()->press( Input::B ) )
+		{
+			v += 0.005f;
+
+			if ( v > 1.f )
+			{
+				v -= 1.f;
+			}
+
+			pen_color_ = Color::from_hsv( v, 1.f, 1.f );
+		}
+	}
+
+	if ( get_input()->press( Input::A ) )
 	{
 		const float dc = 0.02f;
 
-		color.r() += common::random( -dc, +dc );
-		color.g() += common::random( -dc, +dc );
-		color.b() += common::random( -dc, +dc );
+		pen_color_.r() += common::random( -dc, +dc );
+		pen_color_.g() += common::random( -dc, +dc );
+		pen_color_.b() += common::random( -dc, +dc );
 	}
 
 	{
@@ -175,7 +183,7 @@ void CanvasTestScene::update()
 	{
 		Vector3( vector.x(), vector.y(), vector.z() ),
 		get_input()->press( Input::A ) ? std::pow( tablet_->get_pressure(), 2 ) : 0.5f,
-		color
+		pen_color_
 	};
 
 	auto pos_comp = [] ( const Vertex& a, const Vertex& b ) { return a.position.x == b.position.x && a.position.y == b.position.y && a.position.z == b.position.z; };
@@ -275,6 +283,21 @@ void CanvasTestScene::on_function_key_down( int key )
 	if ( key == 8 )
 	{
 		points_->clear();
+	}
+
+	if ( key == 9 )
+	{
+		const std::array< char_t*, 5 > texture_names = { "white-soft-pen", "white-hard-pen", "bump-hard-pen", "bump-cross-pen", "white-grass-pen" };
+
+		static int i = 0;
+		i = ( i + 1 ) % texture_names.size();;
+
+		texture_ = get_graphics_manager()->get_texture( texture_names[ i ] );
+	}
+
+	if ( key == 6 )
+	{
+		pen_mode_ = ( pen_mode_ + 1 ) % 3;
 	}
 }
 

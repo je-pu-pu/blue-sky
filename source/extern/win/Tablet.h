@@ -23,7 +23,7 @@ namespace win
 class Tablet
 {
 public:
-	constexpr static bool is_enabled() { return false; }
+	constexpr static bool is_enabled() { return true; }
 
 private:
 	HMODULE module_;

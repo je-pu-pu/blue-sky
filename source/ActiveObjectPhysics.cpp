@@ -1,5 +1,6 @@
 #include "ActiveObjectPhysics.h"
-#include "ActiveObject.h"
+
+#include <GameObject/ActiveObject.h>
 
 #include <algorithm>
 

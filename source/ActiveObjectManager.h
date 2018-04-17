@@ -1,7 +1,7 @@
 #ifndef BLUE_SKY_ACTIVE_OBJECT_MANAGER_H
 #define BLUE_SKY_ACTIVE_OBJECT_MANAGER_H
 
-#include "ActiveObject.h"
+#include <GameObject/ActiveObject.h>
 #include <sstream>
 #include <tuple>
 #include <set>

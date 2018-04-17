@@ -1,6 +1,4 @@
 #include "OculusRift.h"
-#include "Direct3D11Vector.h"
-#include "Direct3D11Matrix.h"
 
 #include <common/exception.h>
 #include <Extras/OVR_Math.h>

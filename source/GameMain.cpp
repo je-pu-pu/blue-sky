@@ -1,27 +1,18 @@
 #include "GameMain.h"
 #include "App.h"
 
-#include "CanvasTestScene.h"
-#include "TitleScene.h"
-#include "StageSelectScene.h"
-#include "StoryTextScene.h"
-#include "GamePlayScene.h"
-#include "EndingScene.h"
+#include <Scene/CanvasTestScene.h>
+#include <Scene/TitleScene.h>
+#include <Scene/StageSelectScene.h>
+#include <Scene/StoryTextScene.h>
+#include <Scene/GamePlayScene.h>
+#include <Scene/EndingScene.h>
 
 #include "DrawingModelManager.h"
 #include "ActiveObjectManager.h"
 
 #include "ConstantBuffer.h"
 
-#include "Direct3D11.h"
-#include "Direct3D11GraphicsManager.h"
-
-#include "Direct3D11MeshManager.h"
-#include "Direct3D11ConstantBuffer.h"
-#include "Direct3D11BulletDebugDraw.h"
-#include "Direct3D11Effect.h"
-
-#include "DirectInput.h"
 #include "Input.h"
 
 #include "OculusRift.h"
@@ -31,7 +22,11 @@
 #include "SoundManager.h"
 #include "Sound.h"
 
-#include "DirectX.h"
+#include <core/graphics/Direct3D11/Direct3D11.h>
+#include <core/graphics/Direct3D11/Direct3D11GraphicsManager.h>
+#include <core/graphics/Direct3D11/Direct3D11BulletDebugDraw.h>
+#include <core/graphics/Direct3D11/Direct3D11Effect.h>
+#include <core/input/DirectInput/DirectInput.h>
 
 #include <win/Version.h>
 

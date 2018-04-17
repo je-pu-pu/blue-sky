@@ -1,6 +1,8 @@
 #include "Camera.h"
-#include "Player.h"
-#include "matrix4x4.h"
+
+#include <GameObject/Player.h>
+
+#include <core/Matrix4x4.h>
 
 #include <common/math.h>
 
@@ -47,13 +49,13 @@ void Camera::update()
 	rotate_degree() = rotate_degree_target();
 
 	// 
-	matrix4x4 xr;
+	Matrix4x4 xr;
 	xr.rotate_x( rotate_degree().x() );
 
-	matrix4x4 yr;
+	Matrix4x4 yr;
 	yr.rotate_y( rotate_degree().y() );
 
-	matrix4x4 zr;
+	Matrix4x4 zr;
 	zr.rotate_z( rotate_degree().z() );
 	
 	front_ = default_front_ * zr * xr * yr;
@@ -75,7 +77,7 @@ void Camera::update_with_player( const Player* player )
 		position_.y() = player->get_transform().getOrigin().y() + player->get_eye_height() + 5.f;
 		position_.z() = player->get_transform().getOrigin().z() + player->get_front().z() * player->get_eye_depth(); // * player->get_collision_depth() * 0.5f;
 
-		position_ += vector3( player->get_front().x(), 0.f, player->get_front().x() ) * -2.f;
+		position_ += Vector3( player->get_front().x(), 0.f, player->get_front().x() ) * -2.f;
 	}
 	else
 	{

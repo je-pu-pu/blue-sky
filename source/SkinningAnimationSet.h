@@ -1,9 +1,8 @@
 #ifndef SKINNING_ANIMATION_SET_H
 #define SKINNING_ANIMATION_SET_H
 
-#include "type.h"
+#include <core/type.h>
 #include "SkinningAnimation.h"
-#include "Direct3D11Matrix.h"
 #include <common/exception.h>
 #include <vector>
 #include <map>

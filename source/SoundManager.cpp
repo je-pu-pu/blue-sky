@@ -2,10 +2,10 @@
 #include "Sound.h"
 #include "StreamingSound.h"
 #include "OggVorbisFile.h"
-#include "DirectSound.h"
-#include "DirectSoundBuffer.h"
-#include "DirectX.h"
-#include "vector3.h"
+#include <core/sound/DirectSound/DirectSound.h>
+#include <core/sound/DirectSound/DirectSoundBuffer.h>
+#include <core/DirectX.h>
+#include <core/Vector3.h>
 
 #include <common/exception.h>
 
@@ -132,17 +132,17 @@ void SoundManager::stop_all()
 	}
 }
 
-void SoundManager::set_listener_position( const vector3& p )
+void SoundManager::set_listener_position( const Vector3& p )
 {
 	direct_sound_->get_listener()->SetPosition( p.x(), p.y(), p.z(), DS3D_DEFERRED );
 }
 
-void SoundManager::set_listener_velocity( const vector3& v )
+void SoundManager::set_listener_velocity( const Vector3& v )
 {
 	direct_sound_->get_listener()->SetVelocity( v.x(), v.y(), v.z(), DS3D_DEFERRED );
 }
 
-void SoundManager::set_listener_orientation( const vector3& front, const vector3& top )
+void SoundManager::set_listener_orientation( const Vector3& front, const Vector3& top )
 {
 	direct_sound_->get_listener()->SetOrientation( front.x(), front.y(), front.z(), top.x(), top.y(), top.z(), DS3D_DEFERRED );
 }

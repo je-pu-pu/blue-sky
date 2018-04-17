@@ -1,17 +1,15 @@
 #include "DrawingLine.h"
-#include "Direct3D11TextureManager.h"
-#include "Direct3D11.h"
-#include "DirectX.h"
+
+#include <core/graphics/Direct3D11/Direct3D11.h>
+#include <core/graphics/Direct3D11/Direct3D11TextureManager.h>
 
 #include <common/exception.h>
 #include <common/math.h>
 
-// #include <boost/filesystem.hpp>
-
-#include <map>
-
 #include <fstream>
 #include <sstream>
+
+#include <map>
 
 namespace blue_sky
 {

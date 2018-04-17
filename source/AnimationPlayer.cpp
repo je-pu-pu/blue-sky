@@ -1,7 +1,6 @@
 #include "AnimationPlayer.h"
-
-#include "Direct3D11Matrix.h"
 #include "GameMain.h"
+#include <core/type.h>
 
 /**
  * コンストラクタ

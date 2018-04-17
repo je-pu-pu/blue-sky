@@ -5,7 +5,7 @@
 #include <windows.h>
 
 class DirectSound;
-class vector3;
+class Vector3;
 
 namespace game
 {
@@ -44,9 +44,9 @@ public:
 
 	virtual void stop_all();
 
-	void set_listener_position( const vector3& );
-	void set_listener_velocity( const vector3& );
-	void set_listener_orientation( const vector3& , const vector3& );
+	void set_listener_position( const Vector3& );
+	void set_listener_velocity( const Vector3& );
+	void set_listener_orientation( const Vector3& , const Vector3& );
 	void commit();
 
 }; // class SoundManager

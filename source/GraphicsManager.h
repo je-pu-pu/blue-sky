@@ -1,7 +1,7 @@
 #ifndef BLUE_SKY_GRAPHICS_MANAGER_H
 #define BLUE_SKY_GRAPHICS_MANAGER_H
 
-#include "type.h"
+#include <core/type.h>
 #include <game/GraphicsManager.h>
 #include <common/safe_ptr.h>
 #include <common/auto_ptr.h>

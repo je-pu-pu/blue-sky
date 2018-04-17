@@ -2,99 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Direct3D11.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11BulletDebugDraw.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11Color.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11ConstantBuffer.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11Effect.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11EffectPass.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11EffectTechnique.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11Fader.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11FarBillboardsMesh.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11Material.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11Mesh.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11MeshManager.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11Rectangle.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11ShadowMap.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11SkyBox.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11Sprite.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11TextureManager.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectInput.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectSound.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectSoundBuffer.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectWrite.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="ActiveObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="ActiveObjectManager.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="ActiveObjectPhysics.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Balloon.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Goal.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Medal.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Robot.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="StaticeObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="TranslationObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="DrawingModel.cpp">
       <Filter>Drawing</Filter>
     </ClCompile>
@@ -113,32 +20,8 @@
     <ClCompile Include="OggVorbisFile.cpp">
       <Filter>Sound</Filter>
     </ClCompile>
-    <ClCompile Include="BulletPhysics.cpp">
-      <Filter>Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="vector3.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="matrix4x4.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="GameMain.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
     <ClCompile Include="Input.cpp">
       <Filter>Input</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="FbxFileLoader.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11GraphicsManager.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsManager.cpp">
-      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="DrawingLine.cpp">
       <Filter>Drawing</Filter>
@@ -146,196 +29,182 @@
     <ClCompile Include="DrawingMesh.cpp">
       <Filter>Drawing</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="AnimationPlayer.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Direct3D11Axis.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Missile.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="BgSpriteLayer.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Girl.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Rocket.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectWriteFontFileLoader.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectWriteFontCollectionLoader.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="GamePlayScene.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
-    <ClCompile Include="StageSelectScene.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
-    <ClCompile Include="StoryTextScene.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
-    <ClCompile Include="TitleScene.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Stone.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Switch.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Umbrella.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="AreaSwitch.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseSwitch.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Ladder.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="EndingScene.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
     <ClCompile Include="OculusRift.cpp" />
-    <ClCompile Include="CanvasTestScene.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
-    <ClCompile Include="WICTextureLoader.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="GameObject\ActiveObject.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\AreaSwitch.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\Balloon.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\BaseSwitch.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\GameObject.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\Girl.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\Goal.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\Ladder.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\Medal.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\Missile.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\Robot.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\Stone.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\Switch.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\TranslationObject.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\Umbrella.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\CanvasTestScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\EndingScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\GamePlayScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\StageSelectScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\StoryTextScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\TitleScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Axis.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Color.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11ConstantBuffer.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Effect.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectPass.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Fader.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11FarBillboardsMesh.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Material.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Mesh.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11MeshManager.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Rectangle.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11ShadowMap.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11SkyBox.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Sprite.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11TextureManager.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\input\DirectInput\DirectInput.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\physics\Bullet\BulletPhysics.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\sound\DirectSound\DirectSound.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\sound\DirectSound\DirectSoundBuffer.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\Player.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Vector3.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="GameMain.cpp" />
+    <ClCompile Include="GameObject\Rocket.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="ActiveObjectManager.cpp" />
+    <ClCompile Include="ActiveObjectPhysics.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="core\Matrix4x4.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationPlayer.cpp" />
+    <ClCompile Include="GameObject\StaticeObject.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="BgSpriteLayer.cpp" />
+    <ClCompile Include="GraphicsManager.cpp" />
+    <ClCompile Include="FbxFileLoader.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="type.h" />
-    <ClInclude Include="DirectX.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11BulletDebugDraw.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11Color.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11ConstantBuffer.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11Effect.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11EffectPass.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11EffectTechnique.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11Fader.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11FarBillboardsMesh.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11Material.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11Matrix.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11Mesh.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11MeshManager.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11Rectangle.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11ShadowMap.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11SkyBox.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11Sprite.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11TextureManager.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11Vector.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectInput.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectSound.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectSoundBuffer.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectWrite.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectWriteFontCollectionLoader.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectWriteFontFileEnumerator.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectWriteFontFileLoader.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectWriteFontFileStream.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="ActiveObjectPhysics.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="ActiveObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="ActiveObjectManager.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Balloon.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Goal.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Medal.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Robot.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="StaticObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="TranslationObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
     <ClInclude Include="DrawingModelManager.h">
       <Filter>Drawing</Filter>
     </ClInclude>
@@ -357,138 +226,212 @@
     <ClInclude Include="OggVorbisFile.h">
       <Filter>Sound</Filter>
     </ClInclude>
-    <ClInclude Include="BulletPhysics.h">
-      <Filter>Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="vector3.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="matrix4x4.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="Game.h">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="GameMain.h">
-      <Filter>Game</Filter>
-    </ClInclude>
     <ClInclude Include="Input.h">
       <Filter>Input</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="ConstantBuffer.h">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="FbxFileLoader.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsManager.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11GraphicsManager.h">
-      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="DrawingMesh.h">
       <Filter>Drawing</Filter>
     </ClInclude>
-    <ClInclude Include="AnimationKeyFrame.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="AnimationChannel.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Animation.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="AnimationPlayer.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="SkinningAnimation.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="BoneNode.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="SkinningAnimationSet.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11Axis.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Missile.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="BgSpriteLayer.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D11Texture.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Girl.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Ladder.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Rocket.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="TitleScene.h">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="GamePlayScene.h">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="StageSelectScene.h">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="StoryTextScene.h">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Stone.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Switch.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Umbrella.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="AreaSwitch.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseSwitch.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="EndingScene.h">
-      <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="math.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="DelayedCommand.h">
-      <Filter>Game</Filter>
-    </ClInclude>
     <ClInclude Include="OculusRift.h" />
-    <ClInclude Include="CanvasTestScene.h">
-      <Filter>Game</Filter>
+    <ClInclude Include="GameObject\ActiveObject.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="Direct3D11Common.h">
-      <Filter>DirectX</Filter>
+    <ClInclude Include="GameObject\AreaSwitch.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="WICTextureLoader.h">
-      <Filter>DirectX</Filter>
+    <ClInclude Include="GameObject\Balloon.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="DynamicPointList.h">
-      <Filter>DirectX</Filter>
+    <ClInclude Include="GameObject\BaseSwitch.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\GameObject.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\Girl.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\Goal.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\Ladder.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\Medal.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\Missile.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\Robot.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\Stone.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\Switch.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\TranslationObject.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\Umbrella.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\CanvasTestScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\EndingScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\GamePlayScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\StageSelectScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\StoryTextScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\TitleScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="core\type.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\d3dx11effect.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Axis.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Color.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Common.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11ConstantBuffer.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Effect.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectPass.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Fader.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11FarBillboardsMesh.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Material.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Matrix.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Mesh.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11MeshManager.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Rectangle.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11ShadowMap.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11SkyBox.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Sprite.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Texture.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11TextureManager.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Vector.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWrite.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileEnumerator.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\input\DirectInput\DirectInput.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\physics\Bullet\BulletPhysics.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\DirectSound\DirectSound.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\DirectSound\DirectSoundBuffer.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\Player.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Vector3.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="GameMain.h" />
+    <ClInclude Include="GameObject\Rocket.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="ActiveObjectManager.h" />
+    <ClInclude Include="ActiveObjectPhysics.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="core\Matrix4x4.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationChannel.h" />
+    <ClInclude Include="AnimationKeyFrame.h" />
+    <ClInclude Include="AnimationPlayer.h" />
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="GameObject\StaticObject.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="BgSpriteLayer.h" />
+    <ClInclude Include="GraphicsManager.h" />
+    <ClInclude Include="FbxFileLoader.h" />
+    <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h">
+      <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -546,7 +489,6 @@
     <None Include="media\stage_ext\ext-2.stage">
       <Filter>Stage</Filter>
     </None>
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Drawing">
@@ -555,20 +497,8 @@
     <Filter Include="Sound">
       <UniqueIdentifier>{512e6d8f-e56b-4c77-aa48-b312db42a82b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Physics">
-      <UniqueIdentifier>{1ec5609d-b94c-4771-860f-a6b42506652b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="math">
-      <UniqueIdentifier>{b11ead66-58d3-4e7c-93f4-401ac45bf35e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Input">
       <UniqueIdentifier>{3306306a-f212-4428-80eb-8d1355e62c22}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DirectX">
-      <UniqueIdentifier>{6084c2f3-79fc-436e-98ca-9ce7f92612e1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Game">
-      <UniqueIdentifier>{1d357c30-a5d6-4fcb-a582-73566ac2eb55}</UniqueIdentifier>
     </Filter>
     <Filter Include="GameObject">
       <UniqueIdentifier>{6a5beb6c-7027-43c9-8b56-4c6b57c6b71b}</UniqueIdentifier>
@@ -576,8 +506,11 @@
     <Filter Include="Stage">
       <UniqueIdentifier>{c55721b5-afe6-4688-ab8c-511f1dff1ac5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Graphics">
-      <UniqueIdentifier>{f044bb29-1e9a-4c67-9582-b1a161bc11a6}</UniqueIdentifier>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{1d357c30-a5d6-4fcb-a582-73566ac2eb55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{c343e3df-2506-45ab-ad83-6d2ad2d3ef12}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

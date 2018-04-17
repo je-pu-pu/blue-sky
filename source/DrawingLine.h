@@ -1,12 +1,15 @@
 #ifndef BLUE_SKY_DRAWING_LINE_H
 #define BLUE_SKY_DRAWING_LINE_H
 
-#include "Direct3D11Color.h"
-#include "Direct3D11Common.h"
+// #include "Direct3D11Color.h"
+// #include "Direct3D11Common.h"
+#include <core/type.h>
 #include <game/Line.h>
+#include <DirectXMath.h>
 #include <vector>
 
 class Direct3D11;
+class Direct3D11Color;
 class Direct3D11Texture;
 
 namespace blue_sky

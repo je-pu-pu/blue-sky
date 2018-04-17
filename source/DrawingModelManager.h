@@ -1,7 +1,7 @@
 #ifndef BLUE_SKY_DRAWING_MODEL_MANAGER_H
 #define BLUE_SKY_DRAWING_MODEL_MANAGER_H
 
-#include "type.h"
+#include <core/type.h>
 #include <map>
 
 namespace blue_sky

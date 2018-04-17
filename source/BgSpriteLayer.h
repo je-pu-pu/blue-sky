@@ -1,13 +1,17 @@
 #ifndef BG_SPRITE_LAYTER_H
 #define BG_SPRITE_LAYTER_H
 
-#include "Direct3D11Texture.h"
-#include "Direct3D11Color.h"
-#include "vector3.h"
-#include "type.h"
+#include <core/Vector3.h>
+
+#include <core/graphics/Direct3D11/Direct3D11Color.h>
+
 #include <win/Rect.h>
+
 #include <common/chase_value.h>
-#include <d3d11.h>
+
+#include <type/type.h>
+
+class Direct3D11Texture;
 
 /**
  * îwåiÉåÉCÉÑÅ[
@@ -27,7 +31,7 @@ private:
 	win::Rect src_rect_;
 	win::Rect dst_rect_;
 
-	common::chase_value< vector3 > translation_;
+	common::chase_value< Vector3 > translation_;
 	common::chase_value< float_t > rotation_;
 	common::chase_value< float_t > scale_;
 	common::chase_value< Color > color_;
@@ -44,7 +48,7 @@ public:
 	win::Rect& get_src_rect() { return src_rect_; }
 	win::Rect& get_dst_rect() { return dst_rect_; }
 
-	common::chase_value< vector3 >& get_translation() { return translation_; }
+	common::chase_value< Vector3 >& get_translation() { return translation_; }
 	common::chase_value< float_t >& get_rotation() { return rotation_; }
 	common::chase_value< float_t >& get_scale() { return scale_; }
 	common::chase_value< Color >& get_color() { return color_; }

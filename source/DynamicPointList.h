@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DirectX.h"
+#include <core/DirectX.h>
 #include <vector>
 
 template< typename VertexType >

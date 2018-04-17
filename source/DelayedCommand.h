@@ -1,7 +1,7 @@
 #ifndef BLUE_SKY_DELAYED_COMMAND_H
 #define BLUE_SKY_DELAYED_COMMAND_H
 
-#include "type.h"
+#include <type/type.h>
 
 namespace blue_sky
 {

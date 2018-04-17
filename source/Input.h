@@ -14,9 +14,9 @@
 #ifndef BLUE_SKY_INPUT_H
 #define BLUE_SKY_INPUT_H
 
-#include "type.h"
+#include <type/type.h>
 
-#include <Windows.h>
+#include <windows.h>
 
 #include <map>
 #include <deque>

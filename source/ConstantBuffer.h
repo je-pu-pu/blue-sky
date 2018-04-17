@@ -1,10 +1,10 @@
 #ifndef BLUE_SKY_CONSTANT_BUFFER_H
 #define BLUE_SKY_CONSTANT_BUFFER_H
 
-#include "Direct3D11ConstantBuffer.h"
-#include "Direct3D11Color.h"
-#include "Direct3D11Matrix.h"
-#include "Direct3D11Vector.h"
+#include <core/graphics/Direct3D11/Direct3D11ConstantBuffer.h>
+#include <core/graphics/Direct3D11/Direct3D11Color.h>
+#include <core/graphics/Direct3D11/Direct3D11Matrix.h>
+#include <core/graphics/Direct3D11/Direct3D11Vector.h>
 
 namespace blue_sky
 {

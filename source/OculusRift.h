@@ -1,10 +1,13 @@
 #ifndef OCULUS_RIFT_H
 #define OCULUS_RIFT_H
 
-#include "type.h"
-#include "Direct3D11.h"
+#include <core/graphics/Direct3D11/Direct3D11.h>
+#include <type/type.h>
+
 #include <OVR_CAPI_D3D.h>
+
 #include <d3d11.h>
+
 #include <vector>
 
 /**

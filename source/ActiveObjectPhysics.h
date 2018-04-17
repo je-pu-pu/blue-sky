@@ -1,8 +1,8 @@
 #ifndef BLUE_SKY_ACTIVE_OBJECT_PHYSICS_H
 #define BLUE_SKY_ACTIVE_OBJECT_PHYSICS_H
 
-#include "BulletPhysics.h"
-#include "ActiveObject.h"
+#include <GameObject/ActiveObject.h>
+#include <core/physics/Bullet/BulletPhysics.h>
 
 namespace blue_sky
 {

@@ -1,7 +1,7 @@
 #ifndef BLUE_SKY_DRAWING_MODEL_H
 #define BLUE_SKY_DRAWING_MODEL_H
 
-#include "type.h"
+#include <core/type.h>
 #include <common/auto_ptr.h>
 #include <common/safe_ptr.h>
 

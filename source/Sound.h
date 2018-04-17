@@ -1,9 +1,9 @@
 #ifndef BLUE_SKY_SOUND_H
 #define BLUE_SKY_SOUND_H
 
-#include "type.h"
-
 #include <game/Sound.h>
+
+#include <type/type.h>
 
 #include <vector>
 #include <string>

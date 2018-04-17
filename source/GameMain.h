@@ -4,8 +4,6 @@
 #include "Game.h"
 #include "App.h"
 
-#include "type.h"
-
 #include "ConstantBuffer.h"
 
 #include <common/auto_ptr.h>

@@ -1,7 +1,7 @@
 #ifndef ANIMATION_KEY_FRAME_H
 #define ANIMATION_KEY_FRAME_H
 
-#include "type.h"
+#include <core/type.h>
 
 /**
  * アニメーションのキーフレーム

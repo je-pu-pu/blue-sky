@@ -1,18 +1,10 @@
 #ifndef FBX_FILE_LOADER_H
 #define FBX_FILE_LOADER_H
 
-#include "type.h"
 #include "Animation.h"
-#include "Direct3D11Mesh.h"
+#include <core/graphics/Direct3D11/Direct3D11Mesh.h>
 #include <fbxsdk.h>
 #include <map>
-
-namespace game
-{
-
-class Mesh;
-
-}
 
 /**
  * FBX File Loader

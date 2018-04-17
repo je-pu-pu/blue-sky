@@ -12,7 +12,7 @@
 
 #include "Input.h"
 #include "App.h"
-#include "DirectInput.h"
+#include <core/input/DirectInput/DirectInput.h>
 
 #include <game/Config.h>
 

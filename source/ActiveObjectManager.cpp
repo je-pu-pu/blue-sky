@@ -1,10 +1,11 @@
 #include "ActiveObjectManager.h"
-#include "ActiveObject.h"
 #include "AnimationPlayer.h"
 
-#include "StaticObject.h"
 #include "DrawingModelManager.h"
 #include "ActiveObjectPhysics.h"
+
+#include <GameObject/ActiveObject.h>
+#include <GameObject/StaticObject.h>
 
 namespace blue_sky
 {

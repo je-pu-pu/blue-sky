@@ -1,8 +1,7 @@
 #ifndef BLUE_SKY_CAMERA_H
 #define BLUE_SKY_CAMERA_H
 
-#include "vector3.h"
-#include "type.h"
+#include <core/Vector3.h>
 
 namespace blue_sky
 {
@@ -16,22 +15,21 @@ class Player;
 class Camera
 {
 public:
-	typedef vector3 Vector3;
 
 private:
-	Vector3 position_;				///< 視点
-	Vector3 look_at_;				///< 注視点
-	Vector3 up_;					///< 上
+	Vector3 position_;					///< 視点
+	Vector3 look_at_;					///< 注視点
+	Vector3 up_;						///< 上
 
-	Vector3 default_front_;			///< デフォルト視点
-	Vector3 default_right_;			///< デフォルト左
-	Vector3 default_up_;			///< デフォルト上
+	Vector3 default_front_;				///< デフォルト視点
+	Vector3 default_right_;				///< デフォルト左
+	Vector3 default_up_;				///< デフォルト上
 
-	Vector3 front_;					///< 前
-	Vector3 right_;					///< 右
+	Vector3 front_;						///< 前
+	Vector3 right_;						///< 右
 
-	Vector3 rotate_degree_;			///< XYZ 各軸に対する回転角度
-	Vector3 rotate_degree_target_;	///< XYZ 各軸に対する回転角度 ( 目標 )
+	Vector3 rotate_degree_;				///< XYZ 各軸に対する回転角度
+	Vector3 rotate_degree_target_;		///< XYZ 各軸に対する回転角度 ( 目標 )
 
 	float_t fov_;						///< FOV
 	float_t fov_target_;				///< FOV ( 目標 )

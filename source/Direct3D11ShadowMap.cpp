@@ -19,11 +19,9 @@ static const float light_y = 500.f;
 Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_levels, size_t size )
 	: direct_3d_( direct_3d )
 	, constant_buffer_( new ConstantBuffer( direct_3d ) )
-	, enabled_( true )
 	, cascade_levels_( cascade_levels )
 	, depth_stencil_texture_( 0 )
 	, depth_stencil_view_( 0 )
-	, shader_resource_view_( 0 )
 {
 	assert( cascade_levels_ <= MaxCascadeLevels );
 
@@ -52,6 +50,8 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_lev
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateDepthStencilView( depth_stencil_texture_, & depth_stencil_view_desc, & depth_stencil_view_ ) );
 	}
 
+	ID3D11ShaderResourceView* view = 0;
+
 	{
 		D3D11_SHADER_RESOURCE_VIEW_DESC view_desc = { DXGI_FORMAT_R32_FLOAT };
 
@@ -60,11 +60,11 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_lev
 		view_desc.Texture2D.MipLevels = static_cast< UINT >( -1 );
 		view_desc.Texture2D.MostDetailedMip = 0;
 
-		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateShaderResourceView( depth_stencil_texture_, & view_desc, & shader_resource_view_ ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateShaderResourceView( depth_stencil_texture_, & view_desc, & view ) );
 	}
 
 	{
-		texture_ = new Direct3D11Texture( direct_3d_, shader_resource_view_ );
+		texture_ = new Direct3D11Texture( direct_3d_, view );
 	}
 
 	viewport_list_.resize( cascade_levels_ );
@@ -88,7 +88,6 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_lev
 
 Direct3D11ShadowMap::~Direct3D11ShadowMap()
 {
-	DIRECT_X_RELEASE( shader_resource_view_ );
 	DIRECT_X_RELEASE( depth_stencil_view_ );
 	DIRECT_X_RELEASE( depth_stencil_texture_ );
 }
@@ -161,13 +160,26 @@ void Direct3D11ShadowMap::ready_to_render_shadow_map_with_cascade_level( int lev
 	direct_3d_->getImmediateContext()->RSSetViewports( 1, & viewport_list_[ level ] );
 }
 
+#if 0
+/**
+ * シャドウマップを描画を完了する
+ *
+ */
+void Direct3D11ShadowMap::finish_render_shadow_map()
+{
+	ID3D11RenderTargetView* render_target_view[] = { 0 };
+	direct_3d_->getImmediateContext()->OMSetRenderTargets( 1, render_target_view, 0 );
+}
+#endif
+
 /**
  * シーンを描画するための準備をする
  *
  */
 void Direct3D11ShadowMap::ready_to_render_scene()
 {
-	direct_3d_->getImmediateContext()->PSSetShaderResources( shader_resource_view_slot_, 1, & shader_resource_view_ );
+	auto view = texture_->get_shader_resource_view();
+	direct_3d_->getImmediateContext()->PSSetShaderResources( shader_resource_view_slot_, 1, & view );
 
 	for ( int n = 0; n < cascade_levels_; n++ )
 	{

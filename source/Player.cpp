@@ -849,12 +849,23 @@ void Player::stop_clamber()
  */
 void Player::add_direction_degree( float d )
 {
-	if ( is_rocketing() )
+	set_direction_degree( get_direction_degree() + d );
+}
+
+/**
+ *
+ */
+void Player::set_direction_degree( float d, bool force )
+{
+	if ( ! force )
 	{
-		return;
+		if ( is_rocketing() )
+		{
+			return;
+		}
 	}
 
-	set_direction_degree( get_direction_degree() + d );
+	ActiveObject::set_direction_degree( d );
 }
 
 void Player::stop()

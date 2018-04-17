@@ -57,6 +57,9 @@ public:
 	typedef std::map< const char*, InputLayout* >		InputLayoutList;
 
 private:
+	static const DXGI_FORMAT DEPTH_STENCIL_FORMAT = DXGI_FORMAT_D32_FLOAT;
+	static const Color DEFAULT_CLEAR_COLOR;
+
 	com_ptr< IDXGIAdapter1 >	dxgi_adapter_;
 
 	ID3D11Device*				device_;				///< Direct3D 11 Device
@@ -113,6 +116,9 @@ public:
 	Direct3D11( HWND, int, int, bool, const char* = 0, const char* = 0, int = 0, int = 0 );
 	~Direct3D11();
 	
+	ID3D11RenderTargetView* create_render_target_view( ID3D11Texture2D* );
+	ID3D11DepthStencilView* create_depth_stencil_view( ID3D11Texture2D* );
+
 	void setup_font();
 
 	void create_default_input_layout();
@@ -124,18 +130,25 @@ public:
 	void set_full_screen( bool );
 	void set_multi_sample( int, int );
 
-	void set_depth_stencil( bool );
-
 	bool is_full_screen() const;
 	void switch_full_screen();
 
 	void on_resize( int, int );
 
-	void clear();
-	void clear( const Color& );
+	void clear_default_view( const Color& = DEFAULT_CLEAR_COLOR );
+
+	void clear_back_buffer_view( const Color& );
+	void clear_depth_stencil_view();
+
+	void clear_render_target_view( ID3D11RenderTargetView*, const Color& = DEFAULT_CLEAR_COLOR );
+	void clear_depth_stencil_view( ID3D11DepthStencilView* );
 
 	void set_default_render_target();
 	void set_default_viewport();
+
+	void set_render_target_for_vr( ID3D11RenderTargetView*, ID3D11DepthStencilView* );
+
+	void unset_render_target();
 
 	void set_viewport_for_left_eye();
 	void set_viewport_for_right_eye();

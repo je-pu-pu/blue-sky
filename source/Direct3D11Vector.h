@@ -93,6 +93,18 @@ public:
 		return DirectX::XMVectorSubtract( v1.value_, v2.value_ );
 	}
 
+	friend Direct3D11Vector& operator += ( Direct3D11Vector& v1, const Direct3D11Vector& v2 )
+	{
+		v1.value_ = DirectX::XMVectorAdd( v1.value_, v2.value_ );
+		return v1;
+	}
+
+	friend Direct3D11Vector& operator -= ( Direct3D11Vector& v1, const Direct3D11Vector& v2 )
+	{
+		v1.value_ = DirectX::XMVectorSubtract( v1.value_, v2.value_ );
+		return v1;
+	}
+
 	friend Direct3D11Vector operator * ( const Direct3D11Vector&, const Direct3D11Matrix& );
 
 	friend Direct3D11Vector operator * ( const Direct3D11Vector& v, UnitType x )

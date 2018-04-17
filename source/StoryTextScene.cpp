@@ -258,7 +258,7 @@ void StoryTextScene::update()
  */
 void StoryTextScene::render()
 {
-	get_direct_3d()->clear();
+	get_direct_3d()->clear_default_view();
 	get_direct_3d()->getSprite()->begin();
 
 	{

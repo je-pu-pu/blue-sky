@@ -47,13 +47,10 @@ private:
 	common::auto_ptr< ConstantBuffer >		constant_buffer_;
 	common::auto_ptr< Direct3D11Texture >	texture_;
 
-	bool						enabled_;					///< 有効フラグ
 	int							cascade_levels_;			///< CSM のレベル数
 
 	ID3D11Texture2D*			depth_stencil_texture_;
 	ID3D11DepthStencilView*		depth_stencil_view_;
-
-	ID3D11ShaderResourceView*	shader_resource_view_;
 
 	ViewportList				viewport_list_;
 
@@ -73,9 +70,6 @@ public:
 	// void finish_render_shadow_map();
 
 	void ready_to_render_scene();
-
-	void set_enabled( bool e ) { enabled_ = e; }
-	bool is_enabled() const { return enabled_; }
 
 	int get_cascade_levels() const { return cascade_levels_; }
 	

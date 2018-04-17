@@ -175,6 +175,8 @@ public:
 	/// •ûŒü‰ÁŽZ
 	void add_direction_degree( float );
 
+	void set_direction_degree( float_t, bool = false );
+
 	void set_pitch( float_t p ) { pitch_ = p; }
 	bool is_ladder_step_only() const;
 

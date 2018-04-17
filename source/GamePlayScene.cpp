@@ -74,6 +74,9 @@
 #include <common/random.h>
 #include <common/math.h>
 
+#include <iostream>
+#include <iomanip>
+
 #include <fstream>
 #include <sstream>
 
@@ -125,15 +128,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	camera_ = new Camera();
 	camera_->set_fov_default( get_config()->get( "camera.fov", 90.f ) );
 	camera_->reset_fov();
-
-	if ( get_oculus_rift() )
-	{
-		camera_->set_aspect( static_cast< float >( get_width() * 0.5f ) / static_cast< float >( get_height() ) );
-	}
-	else
-	{
-		camera_->set_aspect( static_cast< float >( get_width() ) / static_cast< float >( get_height() ) );
-	}
+	camera_->set_aspect( static_cast< float >( get_width() ) / static_cast< float >( get_height() ) );
 
 	setup_command();
 
@@ -192,6 +187,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 GamePlayScene::~GamePlayScene()
 {
+	get_direct_3d()->unset_render_target();
+
 	get_drawing_model_manager()->clear();
 	get_active_object_manager()->clear();
 
@@ -1182,8 +1179,9 @@ void GamePlayScene::update_main()
 
 	if ( get_oculus_rift() )
 	{
-		camera_->rotate_degree_target().x() = -math::radian_to_degree( get_oculus_rift()->get_pitch() );
-		camera_->rotate_degree_target().z() = math::radian_to_degree( get_oculus_rift()->get_roll() );
+		// camera_->rotate_degree_target().x() = math::radian_to_degree( get_oculus_rift()->get_pitch() );
+		// camera_->rotate_degree_target().y() = math::radian_to_degree( get_oculus_rift()->get_yaw() );
+		// camera_->rotate_degree_target().z() = math::radian_to_degree( get_oculus_rift()->get_roll() );
 	}
 	else
 	{
@@ -1201,11 +1199,7 @@ void GamePlayScene::update_main()
 	}
 	else if ( camera_->rotate_degree_target().x() > 0.f )
 	{
-		if ( get_oculus_rift() )
-		{
-			eye_depth_add = get_oculus_rift()->get_delta_pitch();
-		}
-		else
+		if ( ! get_oculus_rift() )
 		{
 			eye_depth_add = get_input()->get_mouse_dy();
 		}
@@ -1333,15 +1327,11 @@ void GamePlayScene::update_main()
 		}
 
 		float_t add_direction_degree_by_mouse = get_input()->get_mouse_dx() * 90.f * rotation_speed_rate;
-		float_t add_direction_degree_by_oculus_rift = 0.f;
+		float_t add_direction_degree_by_hmd   = get_oculus_rift() ? math::radian_to_degree( get_oculus_rift()->get_delta_yaw() ) : 0.f;
 		
-		if ( get_oculus_rift() )
-		{
-			math::radian_to_degree( get_oculus_rift()->get_delta_yaw() );
-		}
-
-		player_->add_direction_degree( add_direction_degree_by_mouse + add_direction_degree_by_oculus_rift );
+		player_->add_direction_degree( add_direction_degree_by_mouse + add_direction_degree_by_hmd );
 		camera_->rotate_degree_target().y() = player_->get_direction_degree();
+
 
 		get_direct_3d()->getFader()->fade_in( 0.05f );
 	}
@@ -1488,13 +1478,13 @@ void GamePlayScene::update_shadow()
 {
 	if ( shadow_map_ )
 	{
-		if ( false )
+		if ( true )
 		{
 			static float a = 0.1f;
 
 			a += 0.0025f;
 
-			const Vector light_origin( 0.f, 100.f, 0.f );
+			const Vector light_origin( 0.f, 50.f, 0.f );
 			const Vector v = light_origin + Vector( cos( a ) * 50.f, 0.f, sin( a ) * 50.f, 0.f );	
 
 			light_position_.value().set( v.x(), v.y(), v.z() );
@@ -1588,38 +1578,67 @@ void GamePlayScene::render()
 	{
 		get_direct_3d()->begin3D();
 
-		get_direct_3d()->clear();
-
-		update_render_data_for_frame();
-		update_render_data_for_object();
-
-		render_shadow_map();
-
-		get_direct_3d()->set_default_render_target();
-		
-		if ( get_oculus_rift() )
-		{
-			get_direct_3d()->set_viewport_for_left_eye();
-			update_render_data_for_frame( +get_oculus_rift()->get_projection_offset() );
-			render_for_eye( +get_oculus_rift()->get_ortho_offset() );
-
-			get_direct_3d()->set_viewport_for_right_eye();
-			update_render_data_for_frame( -get_oculus_rift()->get_projection_offset() );
-			render_for_eye( -get_oculus_rift()->get_ortho_offset() );
-		}
-		else
-		{
-			get_direct_3d()->set_default_viewport();
-			render_for_eye();
-		}
+		render_to_oculus_vr();
+		render_to_display();
 
 		get_direct_3d()->end3D();
 	}
 }
 
 /**
- * 
+ * Oculus Rift に対して描画を行う
  *
+ */
+void GamePlayScene::render_to_oculus_vr() const
+{
+	if ( ! get_oculus_rift() )
+	{
+		return;
+	}
+
+	update_render_data_for_frame_drawing();
+	update_render_data_for_object();
+
+	render_shadow_map();
+
+	get_oculus_rift()->setup_rendering();
+
+	get_oculus_rift()->setup_rendering_for_left_eye();
+	update_render_data_for_frame_for_eye( 0 );
+			
+	render_for_eye();
+
+	get_oculus_rift()->setup_rendering_for_right_eye();
+	update_render_data_for_frame_for_eye( 1 );
+
+	render_for_eye();
+
+	get_oculus_rift()->finish_rendering();
+}
+
+/**
+ * 通常のディスプレイに対して描画を行う
+ *
+ */
+void GamePlayScene::render_to_display() const
+{
+	update_render_data_for_frame();
+	update_render_data_for_frame_drawing();
+	update_render_data_for_object();
+
+	render_shadow_map();
+
+	get_direct_3d()->clear_default_view();
+
+	get_direct_3d()->set_default_render_target();
+	get_direct_3d()->set_default_viewport();
+	render_for_eye();
+}
+
+/**
+ * 各目に対して描画を行う
+ *
+ * @parma ortho_offset UI の両目間オフセット
  */
 void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 {
@@ -1726,45 +1745,85 @@ void GamePlayScene::update_render_data_for_game() const
 /**
  * フレーム毎に更新する必要のある描画用の定数バッファを更新する
  *
- * @param eye_offset 立体視用視点オフセット
  */
-void GamePlayScene::update_render_data_for_frame( float_t eye_offset ) const
+void GamePlayScene::update_render_data_for_frame() const
 {
-	{
-		/*
-		camera_pos += camera_->right() * eye_offset;
-		camera_look_at += camera_->right() * eye_offset;
-		camera_up += camera_->right() * eye_offset;
-		*/
+	FrameConstantBufferData frame_constant_buffer_data;
+	update_frame_constant_buffer_data_sub( frame_constant_buffer_data );
 
-		Vector eye( camera_->position().x(), camera_->position().y(), camera_->position().z() );
-		Vector at( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z() );
-		Vector up( camera_->up().x(), camera_->up().y(), camera_->up().z() );
+	Vector eye( camera_->position().x(), camera_->position().y(), camera_->position().z() );
+	Vector at( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z() );
+	Vector up( camera_->up().x(), camera_->up().y(), camera_->up().z() );
 
-		FrameConstantBufferData frame_constant_buffer_data;
+	Matrix test_t;
+	test_t.set_translation( -1.f, 0.f, 0.f );
 
-		frame_constant_buffer_data.view = Matrix().set_look_at( eye, at, up ).transpose();
-		frame_constant_buffer_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), 0.05f, 3000.f ).transpose();
+	frame_constant_buffer_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
+	frame_constant_buffer_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();
 
-		frame_constant_buffer_data.light = -Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z() );
-		frame_constant_buffer_data.light.normalize();
-		frame_constant_buffer_data.time = get_total_elapsed_time();
-		frame_constant_buffer_data.time_beat = static_cast< uint_t >( get_total_elapsed_time() * ( get_bpm() / 60.f ) );
+	get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
+}
 
-		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
-	}
+/**
+ * フレーム毎に更新する必要のある描画用の定数バッファを更新する
+ *
+ * @param int eye_index 0 : 左目 / 1 : 右目
+ */
+void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
+{
+	FrameConstantBufferData frame_constant_buffer_data;
+	update_frame_constant_buffer_data_sub( frame_constant_buffer_data );
 
+	Matrix camera_rot;
+	camera_rot.set_rotation_xyz(
+		math::degree_to_radian( camera_->rotate_degree().x() ),
+		math::degree_to_radian( camera_->rotate_degree().y() ),
+		math::degree_to_radian( camera_->rotate_degree().z() ) );
+
+	Vector eye_offset = ( get_oculus_rift()->get_eye_position( eye_index ) ) * camera_rot;
+
+	std::cout << std::fixed << std::setprecision( 8 );
+	std::cout << "eye" << eye_index << " offset : " << eye_offset.x() << ", " << eye_offset.y() << ", " << eye_offset.z() << std::endl;
+
+	Matrix r = get_oculus_rift()->get_eye_rotation( eye_index ) * camera_rot;
+	Vector eye = Vector( camera_->position().x(), camera_->position().y(), camera_->position().z() ) + eye_offset;
+	// Vector at( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z() );
+	// Vector up( camera_->up().x(), camera_->up().y(), camera_->up().z() );
+	Vector at = eye + Vector( 0.f, 0.f, 1.f ) * r;
+	Vector up = Vector( 0.f, 1.f, 0.f ) * r;
+
+	frame_constant_buffer_data.view = Matrix().set_look_at( eye, at, up ).transpose();
+	frame_constant_buffer_data.projection = get_oculus_rift()->get_projection_matrix( eye_index, camera_->near_clip(), camera_->far_clip() ).transpose();
+
+	get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
+}
+
+/**
+ * フレーム毎に更新する必要のある描画用の定数バッファ用データのうち、マトリックス以外のデータをを更新する
+ *
+ */
+void GamePlayScene::update_frame_constant_buffer_data_sub( FrameConstantBufferData& frame_constant_buffer_data ) const
+{
+	frame_constant_buffer_data.light = -Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z() );
+	frame_constant_buffer_data.light.normalize();
+	frame_constant_buffer_data.time = get_total_elapsed_time();
+	frame_constant_buffer_data.time_beat = static_cast< uint_t >( get_total_elapsed_time() * ( get_bpm() / 60.f ) );
+}
+/**
+ * フレーム毎に更新する必要のある描画用の定数バッファのうち、手書き風描画に関する定数バッファ更新する
+ *
+ */
+void GamePlayScene::update_render_data_for_frame_drawing() const
+{
 	/// @todo 整理する
-	{
-		FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
+	FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
 
-		frame_drawing_constant_buffer_data.accent = bgm_ ? bgm_->get_current_peak_level() * drawing_accent_scale_ : 0.f;
-		frame_drawing_constant_buffer_data.line_type = drawing_line_type_index_;
-		frame_drawing_constant_buffer_data.shadow_color = shadow_color_.value();
-		frame_drawing_constant_buffer_data.shadow_paper_color = shadow_paper_color_.value();
+	frame_drawing_constant_buffer_data.accent = bgm_ ? bgm_->get_current_peak_level() * drawing_accent_scale_ : 0.f;
+	frame_drawing_constant_buffer_data.line_type = drawing_line_type_index_;
+	frame_drawing_constant_buffer_data.shadow_color = shadow_color_.value();
+	frame_drawing_constant_buffer_data.shadow_paper_color = shadow_paper_color_.value();
 
-		get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
-	}
+	get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
 }
 
 /**
@@ -1867,7 +1926,7 @@ void GamePlayScene::render_shadow_map() const
 	get_direct_3d()->setInputLayout( "skin" );
 	render_shadow_map( "|shadow_map_skin", true );
 
-	// shadow_map_->finish_to_render_shadow_map();
+	// shadow_map_->finish_render_shadow_map();
 }
 
 /**

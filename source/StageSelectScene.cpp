@@ -125,7 +125,11 @@ void StageSelectScene::render()
 {
 	Color bg_color = page_ < get_max_story_page() ? Color::from_256( 0xFF, 0xAA, 0x11 ) : Color::from_256( 0x99, 0xEE, 0xFF );
 
-	get_direct_3d()->clear( bg_color );
+	get_direct_3d()->set_default_render_target();
+	get_direct_3d()->set_default_viewport();
+
+	get_direct_3d()->clear_default_view( bg_color );
+
 	get_direct_3d()->getSprite()->begin();
 
 	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );

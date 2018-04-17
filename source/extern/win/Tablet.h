@@ -22,6 +22,9 @@ namespace win
  */
 class Tablet
 {
+public:
+	constexpr static bool is_enabled() { return false; }
+
 private:
 	HMODULE module_;
 	HCTX context_handle_;

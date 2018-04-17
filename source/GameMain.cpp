@@ -116,14 +116,7 @@ GameMain::GameMain()
 	// Oculus Rift
 	if ( get_config()->get( "input.oculus_rift.enabled", 1 ) )
 	{
-		try
-		{
-			oculus_rift_ = new OculusRift();
-		}
-		catch ( ... )
-		{
-
-		}
+		oculus_rift_ = new OculusRift( direct_3d_.get() );
 	}
 
 	graphics_manager_ = new Direct3D11GraphicsManager( direct_3d_.get() );
@@ -291,6 +284,14 @@ void GameMain::check_scene_transition()
  */
 void GameMain::setup_scene()
 {
+	if ( true )
+	{
+		set_stage_name( "0-0" );
+		setup_scene( "game_play" );
+
+		return;
+	}
+
 	// Scene
 	if ( get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
 	{
@@ -329,8 +330,8 @@ void GameMain::setup_scene( const string_t& scene_name )
 	
 	if ( scene_name == "title" )
 	{
-		// scene_ = new TitleScene( this );
-		scene_ = new CanvasTestScene( this );
+		scene_ = new TitleScene( this );
+		// scene_ = new CanvasTestScene( this );
 	}
 	else if ( scene_name == "stage_select" )
 	{

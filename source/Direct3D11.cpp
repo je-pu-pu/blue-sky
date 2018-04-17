@@ -27,6 +27,8 @@
 #pragma comment( lib, "d3d10_1.lib" )
 #pragma comment( lib, "d3dcompiler.lib" )
 
+const Direct3D11::Color Direct3D11::DEFAULT_CLEAR_COLOR = Direct3D11::Color::Black;
+
 /**
  * コンストラクタ
  *
@@ -236,12 +238,19 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 void Direct3D11::create_back_buffer_view()
 {
 	DIRECT_X_FAIL_CHECK( swap_chain_->GetBuffer( 0, __uuidof( ID3D11Texture2D ), reinterpret_cast< void** >( & back_buffer_texture_ ) ) );
-	DIRECT_X_FAIL_CHECK( device_->CreateRenderTargetView( back_buffer_texture_, 0, & back_buffer_view_ ) );
+	back_buffer_view_ = create_render_target_view( back_buffer_texture_ );
 }
 
 void Direct3D11::create_back_buffer_surface()
 {
 	DIRECT_X_FAIL_CHECK( back_buffer_texture_->QueryInterface( __uuidof( IDXGISurface1 ), reinterpret_cast< void** >( & back_buffer_surface_ ) ) );
+}
+
+ID3D11RenderTargetView* Direct3D11::create_render_target_view( ID3D11Texture2D* texture )
+{
+	ID3D11RenderTargetView* view = 0;
+	DIRECT_X_FAIL_CHECK( device_->CreateRenderTargetView( texture, nullptr, & view ) );
+	return view;
 }
 
 void Direct3D11::create_depth_stencil_view()
@@ -252,7 +261,7 @@ void Direct3D11::create_depth_stencil_view()
 	texture_desc.Height = swap_chain_desc_.BufferDesc.Height;
 	texture_desc.MipLevels = 1;
 	texture_desc.ArraySize = 1;
-	texture_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	texture_desc.Format = DEPTH_STENCIL_FORMAT;
 	texture_desc.SampleDesc = swap_chain_desc_.SampleDesc;
 	texture_desc.Usage = D3D11_USAGE_DEFAULT;
 	texture_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
@@ -261,14 +270,21 @@ void Direct3D11::create_depth_stencil_view()
 
 	DIRECT_X_FAIL_CHECK( device_->CreateTexture2D( & texture_desc, 0, & depth_stencil_texture_ ) );
 
+	depth_stencil_view_ = create_depth_stencil_view( depth_stencil_texture_ );
+}
 
-	D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc = { texture_desc.Format };
+ID3D11DepthStencilView* Direct3D11::create_depth_stencil_view( ID3D11Texture2D* texture )
+{
+	D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc = { 0 };
 	
-	depth_stencil_view_desc.Format = texture_desc.Format;
+	depth_stencil_view_desc.Format = DEPTH_STENCIL_FORMAT;
 	depth_stencil_view_desc.ViewDimension = swap_chain_desc_.SampleDesc.Count > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
 	depth_stencil_view_desc.Texture2D.MipSlice = 0;
 
-	DIRECT_X_FAIL_CHECK( device_->CreateDepthStencilView( depth_stencil_texture_, & depth_stencil_view_desc, & depth_stencil_view_ ) );
+	ID3D11DepthStencilView* view = 0;
+	DIRECT_X_FAIL_CHECK( device_->CreateDepthStencilView( texture, & depth_stencil_view_desc, & view ) );
+
+	return view;
 }
 
 void Direct3D11::setup_viewport()
@@ -487,7 +503,7 @@ void Direct3D11::switch_full_screen()
 
 void Direct3D11::on_resize( int w, int h )
 {
-	immediate_context_->OMSetRenderTargets( 0, 0, 0 );
+	unset_render_target();
 
 	DIRECT_X_RELEASE( back_buffer_surface_ );
 	DIRECT_X_RELEASE( back_buffer_view_ );
@@ -509,26 +525,57 @@ void Direct3D11::on_resize( int w, int h )
 }
 
 /**
- * 画面をクリアする
- *
- */
-void Direct3D11::clear()
-{
-	clear( Color( 1, 1, 1, 1 ) );
-}
-
-/**
  * 指定した色で画面をクリアする
  *
  * @param color クリアに使用する色
  */
-void Direct3D11::clear( const Color& color )
+void Direct3D11::clear_default_view( const Color& color )
 {
-	immediate_context_->ClearRenderTargetView( back_buffer_view_, static_cast< const float* >( & color.r() ) );
-	immediate_context_->ClearDepthStencilView( depth_stencil_view_, D3D11_CLEAR_DEPTH, 1.f, 0 );
+	clear_back_buffer_view( color );
+	clear_depth_stencil_view();
 
-	set_default_render_target();
-	set_default_viewport();
+	// set_default_render_target();
+	// set_default_viewport();
+}
+
+/**
+ * バックバッファのみをクリアする
+ *
+ * @param color クリアに使用する色
+ */
+void Direct3D11::clear_back_buffer_view( const Color& color )
+{
+	clear_render_target_view( back_buffer_view_, color );
+}
+
+/**
+ * デプスバッファとステンシルバッファのみをクリアする
+ *
+ */
+void Direct3D11::clear_depth_stencil_view()
+{
+	clear_depth_stencil_view( depth_stencil_view_ );
+}
+
+/**
+ * 指定したレンダリングターゲットをクリアする
+ *
+ * @param view レンダリングターゲット
+ * @param color クリアに使用する色
+ */
+void Direct3D11::clear_render_target_view( ID3D11RenderTargetView* view, const Color& color )
+{
+	immediate_context_->ClearRenderTargetView( view, static_cast< const float* >( & color.r() ) );
+}
+
+/**
+ * 指定したデプスステンシルをクリアする
+ *
+ * @param view デプスステンシル
+ */
+void Direct3D11::clear_depth_stencil_view( ID3D11DepthStencilView* view )
+{
+	immediate_context_->ClearDepthStencilView( view, D3D11_CLEAR_DEPTH, 1.f, 0 );
 }
 
 /**
@@ -547,6 +594,31 @@ void Direct3D11::set_default_render_target()
 void Direct3D11::set_default_viewport()
 {
 	immediate_context_->RSSetViewports( 1, & viewport_ );
+}
+
+/**
+ * 立体視用にレンダーターゲットを設定する
+ *
+ * @param render_target_view レンダーターゲット
+ * @param depth_stencil_view ビュー
+ */
+void Direct3D11::set_render_target_for_vr( ID3D11RenderTargetView* render_target_view, ID3D11DepthStencilView* depth_stencil_view )
+{
+	const float clear_color[ 4 ] = { 0.f, 0.f, 0.f, 1.f };
+
+	// immediate_context_->ClearRenderTargetView( render_target_view, clear_color );
+	// clear_depth_stencil_view();
+
+	immediate_context_->OMSetRenderTargets( 1, & render_target_view, depth_stencil_view );
+}
+
+/**
+ * レンダーターゲットを解除する
+ *
+ */
+void Direct3D11::unset_render_target()
+{
+	immediate_context_->OMSetRenderTargets( 0, 0, 0 );
 }
 
 /**

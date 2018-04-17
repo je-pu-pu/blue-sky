@@ -234,7 +234,7 @@ void CanvasTestScene::render()
 
 	get_direct_3d()->begin3D();
 
-	get_direct_3d()->clear();
+	get_direct_3d()->clear_default_view();
 
 	get_direct_3d()->set_default_render_target();
 	get_direct_3d()->set_default_viewport();

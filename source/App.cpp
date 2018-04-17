@@ -232,12 +232,18 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_ACTIVATE:
 	{
-		win::Tablet::get_instance( hwnd )->on_activate( wp, lp );
+		if ( win::Tablet::is_enabled() )
+		{
+			win::Tablet::get_instance( hwnd )->on_activate( wp, lp );
+		}
 		break;
 	}
 	case WT_PACKET:
 	{
-		win::Tablet::get_instance( hwnd )->on_packet( wp, lp );
+		if ( win::Tablet::is_enabled() )
+		{
+			win::Tablet::get_instance( hwnd )->on_packet( wp, lp );
+		}
 		break;
 	}
 	default:

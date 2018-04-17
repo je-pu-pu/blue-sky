@@ -194,7 +194,7 @@ void EndingScene::render()
 { 
 	update_constant_buffer_for_sprite_frame( line_type_, drawing_accent_scale_ );
 	
-	get_direct_3d()->clear( Color::from_256( 0xFF, 0xAA, 0x11 ) );
+	get_direct_3d()->clear_default_view( Color::from_256( 0xFF, 0xAA, 0x11 ) );
 
 	render_bg();
 

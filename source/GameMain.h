@@ -12,8 +12,6 @@
 #include <common/safe_ptr.h>
 
 class Direct3D11;
-class Direct3D11ShadowMap;
-class Direct3D11SkyBox;
 class Direct3D11BulletDebugDraw;
 
 class DirectWrite;

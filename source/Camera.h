@@ -81,7 +81,7 @@ public:
 	void set_aspect( float a ) { aspect_ = a; }
 	float aspect() const { return aspect_; }
 	float near_clip() const { return 0.05f; }
-	float far_clip() const { return 4000.f; }
+	float far_clip() const { return 3000.f; }
 };
 
 } // namespace blue_sky

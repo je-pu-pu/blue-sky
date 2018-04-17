@@ -263,9 +263,12 @@ void GameObject::update_velocity_by_flicker( const Vector3& base_location, float
 void GameObject::update_velocity_by_target_location( const Vector3& target_location, float_t speed )
 {
 	Vector3 relative_position = target_location - get_location();
-	relative_position.normalize();
 
-	set_velocity( relative_position * speed );
+	if ( relative_position.length() )
+	{
+		relative_position.normalize();
+		set_velocity( relative_position * speed );
+	}
 }
 
 /**

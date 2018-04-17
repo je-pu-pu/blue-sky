@@ -27,8 +27,6 @@
 #include <common/serialize.h>
 #include <common/exception.h>
 
-#include "memory.h"
-
 namespace blue_sky
 {
 

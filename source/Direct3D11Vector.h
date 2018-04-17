@@ -10,7 +10,7 @@ class Direct3D11Matrix;
  * Direct3D 11 Vector
  *
  */
-class Direct3D11Vector
+class alignas( 16 ) Direct3D11Vector
 {
 public:
 	typedef float			UnitType;
@@ -18,7 +18,7 @@ public:
 	typedef unsigned int	UintType;
 
 private:
-	alignas( 16 ) DirectX::XMVECTOR value_;
+	DirectX::XMVECTOR value_;
 
 	Direct3D11Vector( const DirectX::XMVECTOR& v )
 		: value_( v )

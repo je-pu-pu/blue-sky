@@ -6,8 +6,6 @@
 #include <common/exception.h>
 #include <algorithm>
 
-#include "memory.h"
-
 namespace blue_sky
 {
 

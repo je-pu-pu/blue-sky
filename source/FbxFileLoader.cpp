@@ -15,8 +15,6 @@
 #include <iostream>
 #include <cassert>
 
-#include "memory.h"
-
 #ifdef _DEBUG
 #pragma comment ( lib, "libfbxsdk-mt.lib" )
 #else

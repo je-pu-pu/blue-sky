@@ -20,8 +20,6 @@
 
 #include <string>
 
-#include "memory.h"
-
 #pragma comment( lib, "dxgi.lib" )
 #pragma comment( lib, "d3d11.lib" )
 #pragma comment( lib, "d3d10_1.lib" )

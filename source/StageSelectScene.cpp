@@ -21,8 +21,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include "memory.h"
-
 namespace blue_sky
 {
 

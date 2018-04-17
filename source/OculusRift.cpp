@@ -9,8 +9,6 @@
 
 #include <iostream>
 
-#include "memory.h"
-
 #pragma comment( lib, "LibOVR.lib" )
 
 #define OCULUS_VR_FAIL_CHECK( x ) { if ( OVR_FAILURE( x ) ) { ovrErrorInfo errorInfo; ovr_GetLastErrorInfo( & errorInfo ); COMMON_THROW_EXCEPTION_MESSAGE( std::string( #x ) + " failed. : " + errorInfo.ErrorString ); } }
@@ -173,7 +171,7 @@ void OculusRift::setup_rendering()
 	OCULUS_VR_FAIL_CHECK( ovr_GetTextureSwapChainCurrentIndex( ovr_session_, render_target_texture_swap_chain_, & render_target_view_index ) );
 	OCULUS_VR_FAIL_CHECK( ovr_GetTextureSwapChainCurrentIndex( ovr_session_, depth_stencil_texture_swap_chain_, & depth_stencil_view_index ) );
 
-	ovr_WaitToBeginFrame( ovr_session_, 0 );
+	// ovr_WaitToBeginFrame( ovr_session_, 0 );
 
 	auto render_target_view = render_target_view_list_[ render_target_view_index ];
 	auto depth_stencil_view = depth_stencil_view_list_[ depth_stencil_view_index ];
@@ -186,7 +184,7 @@ void OculusRift::setup_rendering()
 	ovrTrackingState traking_state = ovr_GetTrackingState( ovr_session_, predicated_display_time, ovrTrue );
 	ovr_CalcEyePoses( traking_state.HeadPose.ThePose, hmd_to_eye_pose_, layer_.RenderPose );
 
-	OCULUS_VR_FAIL_CHECK( ovr_BeginFrame( ovr_session_, 0 ) );
+	// OCULUS_VR_FAIL_CHECK( ovr_BeginFrame( ovr_session_, 0 ) );
 }
 
 /**
@@ -243,7 +241,8 @@ void OculusRift::finish_rendering()
 	OCULUS_VR_FAIL_CHECK( ovr_CommitTextureSwapChain( ovr_session_, depth_stencil_texture_swap_chain_ ) );
 
 	ovrLayerHeader* layers = & layer_.Header;
-	OCULUS_VR_FAIL_CHECK( ovr_EndFrame( ovr_session_, 0, nullptr, & layers, 1 ) );
+	OCULUS_VR_FAIL_CHECK( ovr_SubmitFrame( ovr_session_, 0, nullptr, & layers, 1 ) );
+	// OCULUS_VR_FAIL_CHECK( ovr_EndFrame( ovr_session_, 0, nullptr, & layers, 1 ) );
 }
 
 /**

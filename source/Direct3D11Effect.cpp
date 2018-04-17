@@ -5,8 +5,6 @@
 
 #include "include/d3dx11effect.h"
 
-#include "memory.h"
-
 #include <common/string.h>
 
 #include <d3dcompiler.h>

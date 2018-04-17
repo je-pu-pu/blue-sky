@@ -3,8 +3,6 @@
 #include "Direct3D11.h"
 #include "DirectX.h"
 
-#include "memory.h"
-
 Direct3D11Rectangle::Direct3D11Rectangle( Direct3D11* direct_3d )
 	: Direct3D11Mesh( direct_3d )
 {	

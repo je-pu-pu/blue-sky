@@ -7,8 +7,6 @@
 
 #include <windows.h>
 
-#include "memory.h"
-
 //Å°Å°Å°Å@ÉÅÉCÉìÅ@Å°Å°Å°
 int WINAPI WinMain( HINSTANCE hInst, HINSTANCE /* hPrevInst */, LPSTR /* lpszCmdLine */, int nCmdShow )
 {

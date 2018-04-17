@@ -3,6 +3,7 @@
 
 #include "GameObject.h"
 #include "ConstantBuffer.h"
+// #include <stdlib.h>
 
 class AnimationPlayer;
 
@@ -13,11 +14,18 @@ namespace blue_sky
  * 行動するオブジェクト
  *
  */
-class ActiveObject : public GameObject
+class alignas( 16 ) ActiveObject : public GameObject
 {
 public:
 
 private:
+	Vector3				front_;				///< 前
+	Vector3				right_;				///< 右
+
+	Vector3				start_location_;	///< スタート時の位置
+	Vector3				start_rotation_;	///< スタート時の回転 ( Degree )
+	float_t				start_direction_degree_;	///< スタート時の向き ( Y Axis )
+
 	const DrawingModel*						drawing_model_;				///< DrawingModel
 	const ObjectConstantBuffer*				object_constant_buffer_;	///< 定数バッファ
 	AnimationPlayer*						animation_player_;			///< アニメーション再生
@@ -27,13 +35,6 @@ private:
 
 	/** @todo ActiveObject から分離 */
 	float_t				direction_degree_;	///< 方向 ( Y Axis Degree )
-
-	Vector3				start_location_;	///< スタート時の位置
-	Vector3				start_rotation_;	///< スタート時の回転 ( Degree )
-	float_t				start_direction_degree_;	///< スタート時の向き ( Y Axis )
-
-	Vector3				front_;				///< 前
-	Vector3				right_;				///< 右
 
 	bool				is_mesh_visible_;	///< メッシュを描画するかどうか
 	bool				is_line_visible_;	///< ラインを描画するか
@@ -107,6 +108,16 @@ public:
 	void action( const string_t& s ) const;
 
 	// virtual void render_line() = 0;
+
+	static void* operator new ( size_t size )
+	{
+        return _aligned_malloc( size, 16 );
+    }
+
+	static void operator delete ( void* p )
+	{
+		_aligned_free( p );
+	}
 
 }; // class ActiveObject
 

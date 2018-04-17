@@ -3,8 +3,6 @@
 #include "Direct3D11Matrix.h"
 #include "GameMain.h"
 
-#include "memory.h"
-
 /**
  * コンストラクタ
  *

@@ -17,8 +17,6 @@
 #include <common/math.h>
 #include <common/serialize.h>
 
-#include "memory.h"
-
 namespace blue_sky
 {
 

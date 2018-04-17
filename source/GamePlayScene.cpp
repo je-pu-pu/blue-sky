@@ -80,8 +80,6 @@
 #include <fstream>
 #include <sstream>
 
-#include "memory.h"
-
 namespace blue_sky
 {
 
@@ -1782,8 +1780,8 @@ void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
 
 	Vector eye_offset = ( get_oculus_rift()->get_eye_position( eye_index ) ) * camera_rot;
 
-	std::cout << std::fixed << std::setprecision( 8 );
-	std::cout << "eye" << eye_index << " offset : " << eye_offset.x() << ", " << eye_offset.y() << ", " << eye_offset.z() << std::endl;
+	// std::cout << std::fixed << std::setprecision( 8 );
+	// std::cout << "eye" << eye_index << " offset : " << eye_offset.x() << ", " << eye_offset.y() << ", " << eye_offset.z() << std::endl;
 
 	Matrix r = get_oculus_rift()->get_eye_rotation( eye_index ) * camera_rot;
 	Vector eye = Vector( camera_->position().x(), camera_->position().y(), camera_->position().z() ) + eye_offset;

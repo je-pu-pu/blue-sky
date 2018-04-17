@@ -156,7 +156,6 @@
     <ClInclude Include="math.h" />
     <ClInclude Include="matrix4x4.h" />
     <ClInclude Include="Medal.h" />
-    <ClInclude Include="memory.h" />
     <ClInclude Include="Missile.h" />
     <ClInclude Include="OculusRift.h" />
     <ClInclude Include="OggVorbisFile.h" />
@@ -261,10 +260,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;BT_NO_SIMD_OPERATOR_OVERLOADS;WIN32;NOMINMAX;FBXSDK_NEW_API;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <StructMemberAlignment>16Bytes</StructMemberAlignment>
-      <DisableSpecificWarnings>4481</DisableSpecificWarnings>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
       <SDLCheck>
       </SDLCheck>
+      <ForcedIncludeFiles>win\memory_leak_detection.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -286,9 +287,11 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;BT_NO_SIMD_OPERATOR_OVERLOADS;WIN32;NOMINMAX;FBXSDK_NEW_API;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <DisableSpecificWarnings>4481</DisableSpecificWarnings>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
       <SDLCheck>
       </SDLCheck>
+      <ForcedIncludeFiles>win\memory_leak_detection.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

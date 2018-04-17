@@ -8,7 +8,7 @@
  * Direct3D 11 Matrix
  *
  */
-class Direct3D11Matrix
+class alignas( 16 ) Direct3D11Matrix
 {
 public:
 	typedef float			UnitType;
@@ -18,7 +18,7 @@ public:
 	typedef Direct3D11Vector	VectorType;
 
 private:
-	alignas( 16 ) DirectX::XMMATRIX value_;
+	DirectX::XMMATRIX value_;
 
 public:
 	Direct3D11Matrix()

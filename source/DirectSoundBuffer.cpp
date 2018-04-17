@@ -3,8 +3,6 @@
 
 #include <common/exception.h>
 
-#include "memory.h"
-
 DirectSoundBuffer::DirectSoundBuffer( LPDIRECTSOUNDBUFFER8 buffer )
 	: buffer_( buffer )
 	, buffer_3d_( 0 )

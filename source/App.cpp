@@ -11,8 +11,6 @@
 #include <boost/filesystem.hpp>
 #include <iostream>
 
-#include "memory.h"
-
 #define ENABLE_DEBUG_CONSOLE
 
 //□コンストラクタ

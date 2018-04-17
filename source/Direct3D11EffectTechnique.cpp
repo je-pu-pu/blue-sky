@@ -5,8 +5,6 @@
 
 #include "include/d3dx11effect.h"
 
-#include "memory.h"
-
 Direct3D11EffectTechnique::Direct3D11EffectTechnique( Direct3D* direct_3d, ID3DX11EffectTechnique* t )
 {
 	D3DX11_TECHNIQUE_DESC desc;

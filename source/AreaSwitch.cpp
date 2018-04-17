@@ -1,7 +1,5 @@
 #include "AreaSwitch.h"
 
-#include "memory.h"
-
 namespace blue_sky
 {
 

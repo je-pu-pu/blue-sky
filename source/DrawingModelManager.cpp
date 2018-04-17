@@ -1,8 +1,6 @@
 #include "DrawingModelManager.h"
 #include "DrawingModel.h"
 
-#include "memory.h"
-
 namespace blue_sky
 {
 

@@ -2,8 +2,6 @@
 #include "Direct3D11.h"
 #include "DirectX.h"
 
-#include "memory.h"
-
 #if 0
 
 /*

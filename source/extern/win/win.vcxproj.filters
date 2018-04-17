@@ -7,6 +7,8 @@
     <ClInclude Include="Size.h" />
     <ClInclude Include="..\game\SoundManager.h" />
     <ClInclude Include="Tablet.h" />
+    <ClInclude Include="memory_leak_detection.h" />
+    <ClInclude Include="memory_leak_check.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Version.cpp" />

@@ -1,8 +1,6 @@
 #include "DirectWriteFontFileLoader.h"
 #include <new>
 
-#include "memory.h"
-
 IDWriteFontFileLoader* DirectWriteFontFileLoader::GetLoader()
 {
 	static IDWriteFontFileLoader* instance = new DirectWriteFontFileLoader();

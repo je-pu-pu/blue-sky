@@ -3,8 +3,6 @@
 #include <common/exception.h>
 #include <common/serialize.h>
 
-#include "memory.h"
-
 #pragma comment ( lib, "libogg_static.lib" )
 #pragma comment ( lib, "libvorbis_static.lib" )
 #pragma comment ( lib, "libvorbisfile_static.lib" )

@@ -438,7 +438,6 @@
     <ClInclude Include="Rocket.h">
       <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="memory.h" />
     <ClInclude Include="TitleScene.h">
       <Filter>Game</Filter>
     </ClInclude>

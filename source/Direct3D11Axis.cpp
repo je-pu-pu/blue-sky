@@ -2,8 +2,6 @@
 #include "Direct3D11.h"
 #include "DirectX.h"
 
-#include "memory.h"
-
 Direct3D11Axis::Direct3D11Axis( Direct3D11* direct_3d )
 	: direct_3d_( direct_3d )
 	, vertex_buffer_( 0 )

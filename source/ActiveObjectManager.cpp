@@ -6,8 +6,6 @@
 #include "DrawingModelManager.h"
 #include "ActiveObjectPhysics.h"
 
-#include "memory.h"
-
 namespace blue_sky
 {
 

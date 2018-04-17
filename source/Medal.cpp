@@ -1,7 +1,5 @@
 #include "Medal.h"
 
-#include "memory.h"
-
 namespace blue_sky
 {
 

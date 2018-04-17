@@ -1,9 +1,8 @@
 #include "Direct3D11Effect.h"
 #include "Direct3D11EffectTechnique.h"
 #include "Direct3D11.h"
-#include "DirectX.h"
 
-#include "include/d3dx11effect.h"
+#include "d3dx11effect.h"
 
 #include <common/string.h>
 

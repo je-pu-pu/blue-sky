@@ -1,6 +1,5 @@
 #include "Direct3D11FarBillboardsMesh.h"
 #include "Direct3D11Material.h"
-#include "DirectX.h"
 
 #include <list>
 

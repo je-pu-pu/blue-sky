@@ -1,9 +1,8 @@
 #include "Direct3D11EffectTechnique.h"
 #include "Direct3D11EffectPass.h"
 #include "Direct3D11.h"
-#include "DirectX.h"
 
-#include "include/d3dx11effect.h"
+#include "d3dx11effect.h"
 
 Direct3D11EffectTechnique::Direct3D11EffectTechnique( Direct3D* direct_3d, ID3DX11EffectTechnique* t )
 {

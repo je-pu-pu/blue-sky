@@ -1,8 +1,10 @@
 #include "DirectSound.h"
 #include "DirectSoundBuffer.h"
-#include "DirectX.h"
+
+#include <core/DirectX.h>
 
 #include <common/exception.h>
+
 #include <string>
 
 #pragma comment( lib, "dsound.lib" )

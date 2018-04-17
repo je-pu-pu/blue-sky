@@ -1,9 +1,12 @@
 #include "StreamingSound.h"
-#include "DirectSound.h"
-#include "DirectSoundBuffer.h"
-#include "DirectX.h"
 #include "OggVorbisFile.h"
+
+#include <core/sound/DirectSound/DirectSound.h>
+#include <core/sound/DirectSound/DirectSoundBuffer.h>
+#include <core/DirectX.h>
+
 #include <common/exception.h>
+
 #include <algorithm>
 
 namespace blue_sky

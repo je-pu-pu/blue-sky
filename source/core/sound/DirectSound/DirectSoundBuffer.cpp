@@ -1,5 +1,6 @@
 #include "DirectSoundBuffer.h"
-#include "DirectX.h"
+
+#include <core/DirectX.h>
 
 #include <common/exception.h>
 

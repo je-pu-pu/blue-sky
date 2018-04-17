@@ -17,6 +17,8 @@
 /source/save/*.save
 /source/log/*.log
 
+/source/.vs/
+
 *.vcxproj.user
 *.opensdf
 *.sdf
@@ -29,3 +31,5 @@
 /reference/
 
 /log/
+/source/extern/Debug
+/source/extern/Release

@@ -51,7 +51,11 @@ public:
 	DrawingMesh* load_drawing_mesh( const char_t*, common::safe_ptr< SkinningAnimationSet >& );
 	DrawingLine* load_drawing_line( const char_t* );
 	
+	virtual Texture* load_texture( const char_t*, const char_t* ) = 0;
 	virtual Texture* get_texture( const char_t* ) = 0;
+	
+	virtual void unload_texture( const char_t* ) = 0;
+	virtual void unload_texture_all() = 0;
 
 	virtual GameConstantBuffer* get_game_render_data() const = 0;
 	virtual FrameConstantBuffer* get_frame_render_data() const = 0;

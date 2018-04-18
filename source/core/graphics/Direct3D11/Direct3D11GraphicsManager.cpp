@@ -76,6 +76,17 @@ DrawingLine* Direct3D11GraphicsManager::create_drawing_line()
 }
 
 /**
+ * テクスチャを読み込む
+ *
+ * @param name テクスチャ名
+ * @param file_path テクスチャファイルパス
+ */
+Direct3D11GraphicsManager::Texture* Direct3D11GraphicsManager::load_texture( const char_t* name, const char_t* file_path )
+{
+	return direct_3d_->getTextureManager()->load( name, file_path );
+}
+
+/**
  * 指定した名前のテクスチャを取得する
  *
  * @param name テクスチャ名
@@ -84,5 +95,25 @@ Direct3D11GraphicsManager::Texture* Direct3D11GraphicsManager::get_texture( cons
 {
 	return direct_3d_->getTextureManager()->load( name, ( string_t( "media/model/" ) + name + ".png" ).c_str() );
 }
+
+/**
+ * 指定した名前のテクスチャをアンロードする
+ *
+ * @param name テクスチャ名
+ */
+void Direct3D11GraphicsManager::unload_texture( const char_t* name )
+{
+	direct_3d_->getTextureManager()->unload( name );
+}
+
+/**
+ * 全てのテクスチャをアンロードする
+ *
+ */
+void Direct3D11GraphicsManager::unload_texture_all()
+{
+	direct_3d_->getTextureManager()->unload_all();
+}
+
 
 } // namespace blue_sky

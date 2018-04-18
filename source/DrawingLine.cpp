@@ -1,5 +1,6 @@
 #include "DrawingLine.h"
 
+/// @todo Direct3D11 ‚Ö‚ÌˆË‘¶‚ğ’ŠÛ‰»‚·‚é
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/Direct3D11TextureManager.h>
 

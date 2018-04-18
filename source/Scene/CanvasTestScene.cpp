@@ -1,14 +1,15 @@
 #include "CanvasTestScene.h"
-#include <core/graphics/Direct3D11/Direct3D11SkyBox.h>
-#include <core/graphics/DirectWrite/DirectWrite.h>
+
 #include "GraphicsManager.h"
 #include "DrawingModel.h"
 #include "FbxFileLoader.h"
 #include "GameMain.h"
 
-// #include "DirectWrite.h"
-
 #include "Input.h"
+
+/// @todo íäè€âªÇ∑ÇÈ
+#include <core/graphics/Direct3D11/Direct3D11SkyBox.h>
+#include <core/graphics/DirectWrite/DirectWrite.h>
 
 #include <game/Texture.h>
 #include <game/MainLoop.h>

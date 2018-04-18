@@ -11,7 +11,12 @@
 
 #include <type/type.h>
 
-class Direct3D11Texture;
+namespace game
+{
+
+class Texture;
+
+}
 
 /**
  * ”wŒiƒŒƒCƒ„[
@@ -21,7 +26,7 @@ class Direct3D11Texture;
 class BgSpriteLayer
 {
 public:
-	typedef Direct3D11Texture Texture;
+	typedef game::Texture Texture;
 	typedef Direct3D11Color Color;
 
 private:

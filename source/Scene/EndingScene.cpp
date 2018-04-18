@@ -8,10 +8,9 @@
 #include "GameMain.h"
 #include "Input.h"
 
+/// @todo ’ŠÛ‰»‚·‚é
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
-#include <core/graphics/Direct3D11/Direct3D11Effect.h>
 #include <core/graphics/Direct3D11/Direct3D11Fader.h>
-#include <core/graphics/Direct3D11/Direct3D11TextureManager.h>
 
 #include <game/Texture.h>
 #include <game/ElapsedTimer.h>
@@ -47,7 +46,7 @@ EndingScene::EndingScene( const GameMain* game_main )
 	switch_sound_ = get_sound_manager()->load( "switch-on" );
 	click_sound_ = get_sound_manager()->load( "click" );
 
-	bg_texture_ = get_direct_3d()->getTextureManager()->load( "bg", "media/texture/cloth.png" );
+	bg_texture_ = get_graphics_manager()->load_texture( "bg", "media/texture/cloth.png" );
 
 	get_direct_3d()->getFader()->full_in();
 
@@ -204,16 +203,12 @@ void EndingScene::render_bg()
 {
 	get_direct_3d()->getSprite()->begin();
 
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
-
-	for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
+	render_technique( "|sprite", [this]
 	{
-		( *i )->apply();
-
 		win::Rect dst_rect( 0, 0, get_width(), get_height() );
 
 		get_direct_3d()->getSprite()->draw( dst_rect, bg_texture_ );
-	}
+	} );
 
 	get_direct_3d()->getSprite()->end();
 }
@@ -222,12 +217,8 @@ void EndingScene::render_drawing_line()
 {
 	get_direct_3d()->setInputLayout( "line" );
 
-	auto technique = get_direct_3d()->getEffect()->getTechnique( "|drawing_line" );
-
-	for ( auto i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
+	render_technique( "|drawing_line", [this]
 	{
-		( *i )->apply();
-
 		/// @todo ®—‚·‚é
 		{
 			ObjectConstantBufferData object_constant_buffer_data;
@@ -241,7 +232,7 @@ void EndingScene::render_drawing_line()
 		bind_all_render_data();
 
 		current_drawing_model_->get_line()->render_part( get_visible_drawing_line_part_count() );
-	}
+	} );
 
 	render_fader();
 }

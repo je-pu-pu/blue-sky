@@ -1,15 +1,15 @@
 #include "StoryTextScene.h"
 
 #include "BgSpriteLayer.h"
+
+#include "Input.h"
+#include "GraphicsManager.h"
 #include "SoundManager.h"
 #include "Sound.h"
-#include "Input.h"
 
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/Direct3D11/Direct3D11TextureManager.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
-#include <core/graphics/Direct3D11/Direct3D11Effect.h>
 #include <core/graphics/Direct3D11/Direct3D11Fader.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
 
@@ -46,11 +46,11 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 		text_y_target_ = static_cast< float >( -get_direct_3d()->getFont()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) ) );
 	}
 	
-	sprite_texture_ = get_direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
+	sprite_texture_ = get_graphics_manager()->load_texture( "sprite", "media/image/title.png" );
 
 	if ( bg_sprite_layer_list_.empty() )
 	{
-		bg_sprite_layer_list_.push_back( new BgSpriteLayer( "bg", get_direct_3d()->getTextureManager()->load( "bg", "media/image/story-bg-default.jpg" ) ) );
+		bg_sprite_layer_list_.push_back( new BgSpriteLayer( "bg", get_graphics_manager()->load_texture( "bg", "media/image/story-bg-default.jpg" ) ) );
 		// bg_sprite_layer_list_.back()->set_size_from_texture();
 	}
 
@@ -59,11 +59,11 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 
 StoryTextScene::~StoryTextScene()
 {
-	get_direct_3d()->getTextureManager()->unload( "sprite" );
+	get_graphics_manager()->unload_texture( "sprite" );
 
 	for ( auto i = bg_sprite_layer_list_.begin(); i != bg_sprite_layer_list_.end(); ++i )
 	{
-		get_direct_3d()->getTextureManager()->unload( ( *i )->get_name().c_str() );
+		get_graphics_manager()->unload_texture( ( *i )->get_name().c_str() );
 		delete *i;
 	}
 }
@@ -106,7 +106,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 			string_t layer_name;
 			ss >> layer_name;
 
-			current_layer = new BgSpriteLayer( layer_name.c_str(), get_direct_3d()->getTextureManager()->load( layer_name.c_str(), ( std::string( "media/image/" + layer_name ) ).c_str() ) );
+			current_layer = new BgSpriteLayer( layer_name.c_str(), get_graphics_manager()->load_texture( layer_name.c_str(), ( std::string( "media/image/" + layer_name ) ).c_str() ) );
 
 			ss >> current_layer->get_src_rect().left() >> current_layer->get_src_rect().top();
 			ss >> current_layer->get_src_rect().right() >> current_layer->get_src_rect().bottom();
@@ -260,12 +260,8 @@ void StoryTextScene::render()
 	get_direct_3d()->getSprite()->begin();
 
 	{
-		Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
-
-		for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
+		render_technique( "|sprite", [this]
 		{
-			( *i )->apply();
-
 			for ( auto j = bg_sprite_layer_list_.begin(); j != bg_sprite_layer_list_.end(); ++j )
 			{
 
@@ -278,7 +274,7 @@ void StoryTextScene::render()
 				get_direct_3d()->getSprite()->set_transform( r * s * t );
 				get_direct_3d()->getSprite()->draw( ( *j )->get_texture(), ( *j )->get_src_rect(), ( *j )->get_color().value() );
 			}
-		}
+		} );
 	}
 
 	get_direct_3d()->getSprite()->end();
@@ -308,17 +304,13 @@ void StoryTextScene::render()
 	{
 		get_direct_3d()->getSprite()->begin();
 
-		Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
-
-		for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
+		render_technique( "|sprite", [this]
 		{
-			( *i )->apply();
-
 			win::Rect src_rect = win::Rect::Size( 512, 0, 272, 128 );
 			win::Point dst_point( get_width() - src_rect.width(), get_height() - src_rect.height() );
 
 			get_direct_3d()->getSprite()->draw( dst_point, sprite_texture_, src_rect );
-		}
+		} );
 
 		get_direct_3d()->getSprite()->end();
 	}

@@ -1,5 +1,4 @@
 #include "Direct3D11SkyBox.h"
-#include "Direct3D11MeshManager.h"
 #include "Direct3D11.h"
 
 #include <common/exception.h>

@@ -35,10 +35,14 @@ public:
 	Mesh* create_mesh();
 	Line* create_line();
 
-	DrawingMesh* create_drawing_mesh();
-	DrawingLine* create_drawing_line();
+	DrawingMesh* create_drawing_mesh() override;
+	DrawingLine* create_drawing_line() override;
 
-	Texture* get_texture( const char_t* );
+	Texture* load_texture( const char_t*, const char_t* ) override;
+	Texture* get_texture( const char_t* ) override;
+
+	void unload_texture( const char_t* ) override;
+	void unload_texture_all() override;
 
 	GameConstantBuffer* get_game_render_data() const override { return game_render_data_.get(); }
 	FrameConstantBuffer* get_frame_render_data() const override { return frame_render_data_.get(); }

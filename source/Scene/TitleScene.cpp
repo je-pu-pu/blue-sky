@@ -14,9 +14,7 @@
 
 /// @todo ’ŠÛ‰»‚·‚é
 #include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/Direct3D11/Direct3D11TextureManager.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
-#include <core/graphics/Direct3D11/Direct3D11Effect.h>
 #include <core/graphics/Direct3D11/Direct3D11Fader.h>
 
 #include <win/Rect.h>
@@ -43,9 +41,9 @@ TitleScene::TitleScene( const GameMain* game_main )
 	ok_ = get_sound_manager()->get_sound( "ok" );
 	bgm_ = get_sound_manager()->load_music( "bgm", "ending" );
 	
-	// title_texture_ = direct_3d()->getTextureManager()->load( "sprite", "media/texture/title.png" );
-	title_bg_texture_ = get_direct_3d()->getTextureManager()->load( "title-bg", "media/image/cloud-3.jpg" );
-	cloth_texture_ = get_direct_3d()->getTextureManager()->load( "cloth", "media/texture/cloth.png" );
+	// title_texture_ = get_graphics_manager()->load_texture( "sprite", "media/texture/title.png" );
+	title_bg_texture_ = get_graphics_manager()->load_texture( "title-bg", "media/image/cloud-3.jpg" );
+	cloth_texture_ = get_graphics_manager()->load_texture( "cloth", "media/texture/cloth.png" );
 
 	get_graphics_manager()->setup_loader();
 
@@ -127,12 +125,8 @@ void TitleScene::render()
 	get_direct_3d()->getSprite()->begin();
 
 	{
-		Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
-
-		for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
+		render_technique( "|sprite", [this]
 		{
-			( *i )->apply();
-
 			win::Rect dst_rect( 0, 0, get_width(), get_height() );
 
 			if ( sequence_ >= SEQUENCE_TITLE_FIX )
@@ -145,7 +139,7 @@ void TitleScene::render()
 				// render_bg()
 				get_direct_3d()->getSprite()->draw( dst_rect, cloth_texture_, Direct3D::Color( 1.f, 1.f, 1.f, 0.5f ) );
 			}
-		}
+		} );
 	}
 
 	get_direct_3d()->getSprite()->end();
@@ -154,12 +148,8 @@ void TitleScene::render()
 	{
 		get_direct_3d()->setInputLayout( "line" );
 
-		Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|drawing_line" );
-
-		for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
+		render_technique( "|drawing_line", [this]
 		{
-			( *i )->apply();
-
 			bind_all_render_data();
 
 			if ( sequence_ == SEQUENCE_LOGO )
@@ -197,7 +187,7 @@ void TitleScene::render()
 					title_logo_model_->get_line()->render_part( static_cast< int >( sequence_elapsed_time_ * 25 ) );
 				}
 			}
-		}
+		} );
 	}
 
 	render_fader();

@@ -1,12 +1,12 @@
 #include "StageSelectScene.h"
+
 #include "Input.h"
+#include "GraphicsManager.h"
 #include "SoundManager.h"
 
 /// @todo ’ŠÛ‰»‚·‚é
 #include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/Direct3D11/Direct3D11TextureManager.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
-#include <core/graphics/Direct3D11/Direct3D11Effect.h>
 #include <core/graphics/Direct3D11/Direct3D11Fader.h>
 
 #include <game/Sound.h>
@@ -50,8 +50,8 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	face_src_rect_list_.push_back( win::Rect::Size( 704, 384, 64, 64 ) );
 	face_src_rect_list_.push_back( win::Rect::Size( 768, 384, 64, 64 ) );
 
-	sprite_texture_ = get_direct_3d()->getTextureManager()->load( "sprite", "media/image/title.png" );
-	bg_texture_ = get_direct_3d()->getTextureManager()->load( "bg", "media/texture/cloth.png" );
+	sprite_texture_ = get_graphics_manager()->load_texture( "sprite", "media/image/title.png" );
+	bg_texture_ = get_graphics_manager()->load_texture( "bg", "media/texture/cloth.png" );
 
 	ok_ = get_sound_manager()->get_sound( "ok" );
 	click_ = get_sound_manager()->get_sound( "click" );
@@ -64,8 +64,8 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 
 StageSelectScene::~StageSelectScene()
 {
-	// direct_3d()->getTextureManager()->unload( "sprite" );
-	get_direct_3d()->getTextureManager()->unload( "bg" );
+	// get_graphics_manager()->unload_texture( "sprite" );
+	get_graphics_manager()->unload_texture( "bg" );
 
 	clear_stage_list();
 }
@@ -128,17 +128,13 @@ void StageSelectScene::render()
 
 	get_direct_3d()->getSprite()->begin();
 
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
-
-	for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
+	render_technique( "|sprite", [this]
 	{
-		( *i )->apply();
-
 		// render_bg()
 		{
 			get_direct_3d()->getSprite()->draw( win::Rect::Size( 0, 0, get_width(), get_height() ), bg_texture_ );
 		}
-	}
+	} );
 
 	Direct3D::Matrix t, s, transform;
 
@@ -275,7 +271,7 @@ void StageSelectScene::clear_stage_list()
 	{
 		Stage* stage = *i;
 
-		get_direct_3d()->getTextureManager()->unload( stage->name.c_str() );
+		get_graphics_manager()->unload_texture( stage->name.c_str() );
 
 		delete stage;
 	}
@@ -356,11 +352,11 @@ void StageSelectScene::update_stage_list()
 
 		try
 		{
-			stage->texture = get_direct_3d()->getTextureManager()->load( stage->name.c_str(), ( get_stage_dir_name_by_page( page_ ) + stage->name + ".png" ).c_str() );
+			stage->texture = get_graphics_manager()->load_texture( stage->name.c_str(), ( get_stage_dir_name_by_page( page_ ) + stage->name + ".png" ).c_str() );
 		}
 		catch ( ... )
 		{
-			stage->texture = get_direct_3d()->getTextureManager()->load( stage->name.c_str(), "media/stage/default.png" );
+			stage->texture = get_graphics_manager()->load_texture( stage->name.c_str(), "media/stage/default.png" );
 		}
 
 		stage_list_.push_back( stage );

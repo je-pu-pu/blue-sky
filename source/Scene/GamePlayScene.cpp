@@ -30,8 +30,6 @@
 #include "AnimationPlayer.h"
 
 /// @todo íäè€âªÇ∑ÇÈ
-#include <core/graphics/Direct3D11/Direct3D11MeshManager.h>
-#include <core/graphics/Direct3D11/Direct3D11TextureManager.h>
 #include <core/graphics/Direct3D11/Direct3D11ShadowMap.h>
 #include <core/graphics/Direct3D11/Direct3D11SkyBox.h>
 #include <core/graphics/Direct3D11/Direct3D11FarBillboardsMesh.h>
@@ -39,7 +37,6 @@
 #include <core/graphics/Direct3D11/Direct3D11Axis.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
 #include <core/graphics/Direct3D11/Direct3D11Fader.h>
-#include <core/graphics/Direct3D11/Direct3D11Effect.h>
 #include <core/graphics/Direct3D11/Direct3D11Material.h>
 #include <core/graphics/Direct3D11/Direct3D11BulletDebugDraw.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
@@ -101,7 +98,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	get_physics()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
 
 	// Texture
-	ui_texture_ = get_direct_3d()->getTextureManager()->load( "ui", "media/image/item.png" );
+	ui_texture_ = get_graphics_manager()->load_texture( "ui", "media/image/item.png" );
 
 	// Sound
 	load_sound_all( get_stage_name() == "2-3" );
@@ -167,11 +164,11 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		bgm_->play( stage_config_->get( "bgm.loop", true ) );
 	}
 
-	paper_texture_list_.push_back( get_direct_3d()->getTextureManager()->load( "paper-0", "media/texture/pencil-face-1.png" ) );
-	paper_texture_list_.push_back( get_direct_3d()->getTextureManager()->load( "paper-1", "media/texture/pen-face-1-loop.png" ) );
-	paper_texture_list_.push_back( get_direct_3d()->getTextureManager()->load( "paper-2", "media/texture/pen-face-2-loop.png" ) );
-	paper_texture_list_.push_back( get_direct_3d()->getTextureManager()->load( "paper-3", "media/texture/dot-face-1.png" ) );
-	paper_texture_list_.push_back( get_direct_3d()->getTextureManager()->load( "paper-4", "media/texture/brush-face-1.png" ) );
+	paper_texture_list_.push_back( get_graphics_manager()->load_texture( "paper-0", "media/texture/pencil-face-1.png" ) );
+	paper_texture_list_.push_back( get_graphics_manager()->load_texture( "paper-1", "media/texture/pen-face-1-loop.png" ) );
+	paper_texture_list_.push_back( get_graphics_manager()->load_texture( "paper-2", "media/texture/pen-face-2-loop.png" ) );
+	paper_texture_list_.push_back( get_graphics_manager()->load_texture( "paper-3", "media/texture/dot-face-1.png" ) );
+	paper_texture_list_.push_back( get_graphics_manager()->load_texture( "paper-4", "media/texture/brush-face-1.png" ) );
 	paper_texture_ = paper_texture_list_.front();
 
 	restart();
@@ -184,8 +181,7 @@ GamePlayScene::~GamePlayScene()
 	get_drawing_model_manager()->clear();
 	get_active_object_manager()->clear();
 
-	get_direct_3d()->getMeshManager()->unload_all();
-	get_direct_3d()->getTextureManager()->unload_all();
+	get_graphics_manager()->unload_texture_all();
 
 	get_physics()->clear();
 	
@@ -1855,12 +1851,8 @@ void GamePlayScene::render_shadow_map() const
  */
 void GamePlayScene::render_shadow_map( const char* technique_name, bool is_skin_mesh ) const
 {
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( technique_name );
-
-	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	render_technique( technique_name, [this, is_skin_mesh]
 	{
-		( *i )->apply();
-
 		for ( int n = 0; n < shadow_map_->get_cascade_levels(); n++ )
 		{
 			shadow_map_->ready_to_render_shadow_map_with_cascade_level( n );
@@ -1889,7 +1881,7 @@ void GamePlayScene::render_shadow_map( const char* technique_name, bool is_skin_
 				goal_->render_mesh();
 			}
 		}
-	}
+	} );
 }
 
 
@@ -1899,12 +1891,8 @@ void GamePlayScene::render_shadow_map( const char* technique_name, bool is_skin_
  */
 void GamePlayScene::render_sky_box() const
 {
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sky_box" );
-
-	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	render_technique( "|sky_box", [this]
 	{
-		( *i )->apply();
-
 		bind_game_render_data();
 		bind_frame_render_data();
 		bind_shared_object_render_data();
@@ -1932,7 +1920,7 @@ void GamePlayScene::render_sky_box() const
 	
 			ground_->render();
 		}
-	}
+	} );
 }
 
 /**

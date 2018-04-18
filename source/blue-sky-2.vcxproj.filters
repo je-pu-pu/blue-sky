@@ -97,84 +97,6 @@
     <ClCompile Include="Scene\TitleScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Axis.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Color.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11ConstantBuffer.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Effect.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectPass.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Fader.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11FarBillboardsMesh.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Material.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Mesh.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11MeshManager.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Rectangle.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11ShadowMap.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11SkyBox.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Sprite.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11TextureManager.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\input\DirectInput\DirectInput.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\physics\Bullet\BulletPhysics.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\sound\DirectSound\DirectSound.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\sound\DirectSound\DirectSoundBuffer.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="GameObject\Player.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
@@ -198,8 +120,86 @@
     <ClCompile Include="BgSpriteLayer.cpp" />
     <ClCompile Include="GraphicsManager.cpp" />
     <ClCompile Include="FbxFileLoader.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Axis.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Color.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11ConstantBuffer.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Effect.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectPass.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Fader.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11FarBillboardsMesh.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Material.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Mesh.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11MeshManager.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Rectangle.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11ShadowMap.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11SkyBox.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Sprite.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11TextureManager.cpp">
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\input\DirectInput\DirectInput.cpp">
+      <Filter>core\DirectInput</Filter>
+    </ClCompile>
+    <ClCompile Include="core\sound\DirectSound\DirectSound.cpp">
+      <Filter>core\DirectSound</Filter>
+    </ClCompile>
+    <ClCompile Include="core\sound\DirectSound\DirectSoundBuffer.cpp">
+      <Filter>core\DirectSound</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp">
+      <Filter>core\DirectWrite</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp">
+      <Filter>core\DirectWrite</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp">
+      <Filter>core\DirectWrite</Filter>
+    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp">
-      <Filter>core</Filter>
+      <Filter>core\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\physics\Bullet\BulletPhysics.cpp">
+      <Filter>core\Bullet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -305,105 +305,6 @@
     <ClInclude Include="core\math.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\d3dx11effect.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Axis.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Color.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Common.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11ConstantBuffer.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Effect.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectPass.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Fader.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11FarBillboardsMesh.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Material.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Matrix.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Mesh.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11MeshManager.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Rectangle.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11ShadowMap.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11SkyBox.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Sprite.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Texture.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11TextureManager.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Vector.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWrite.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileEnumerator.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\input\DirectInput\DirectInput.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\physics\Bullet\BulletPhysics.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\sound\DirectSound\DirectSound.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\sound\DirectSound\DirectSoundBuffer.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="GameObject\Player.h">
       <Filter>GameObject</Filter>
     </ClInclude>
@@ -430,10 +331,109 @@
     <ClInclude Include="BgSpriteLayer.h" />
     <ClInclude Include="GraphicsManager.h" />
     <ClInclude Include="FbxFileLoader.h" />
-    <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="ConstantBuffer.h" />
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Axis.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Color.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Common.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11ConstantBuffer.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Effect.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectPass.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Fader.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11FarBillboardsMesh.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Material.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Matrix.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Mesh.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11MeshManager.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Rectangle.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11ShadowMap.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11SkyBox.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Sprite.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Texture.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11TextureManager.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Vector.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\d3dx11effect.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\input\DirectInput\DirectInput.h">
+      <Filter>core\DirectInput</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\DirectSound\DirectSound.h">
+      <Filter>core\DirectSound</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\DirectSound\DirectSoundBuffer.h">
+      <Filter>core\DirectSound</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWrite.h">
+      <Filter>core\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.h">
+      <Filter>core\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileEnumerator.h">
+      <Filter>core\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.h">
+      <Filter>core\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h">
+      <Filter>core\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h">
+      <Filter>core\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\physics\Bullet\BulletPhysics.h">
+      <Filter>core\Bullet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -512,6 +512,21 @@
     </Filter>
     <Filter Include="core">
       <UniqueIdentifier>{c343e3df-2506-45ab-ad83-6d2ad2d3ef12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\Direct3D11">
+      <UniqueIdentifier>{8697b4b7-58ec-402a-8977-96eb2af049ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\DirectInput">
+      <UniqueIdentifier>{4ae0ef67-2726-447f-9bb4-682d730461bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\DirectSound">
+      <UniqueIdentifier>{dda2800c-ddab-4892-bc17-a26b440756c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\DirectWrite">
+      <UniqueIdentifier>{84f027f9-a7a1-40c4-8bbe-0549bc5f6baf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\Bullet">
+      <UniqueIdentifier>{b0f122bc-1ef3-4d7f-9dca-f528879b0c06}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

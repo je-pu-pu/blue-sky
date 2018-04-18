@@ -196,8 +196,8 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 //	swap_chain_desc_.BufferDesc.RefreshRate.Denominator = 1;
 	swap_chain_desc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swap_chain_desc_.OutputWindow = hwnd;
-	swap_chain_desc_.SampleDesc.Count = 1;
-	swap_chain_desc_.SampleDesc.Quality = 0;
+	swap_chain_desc_.SampleDesc.Count = multi_sample_count;
+	swap_chain_desc_.SampleDesc.Quality = multi_sample_quality;
 	swap_chain_desc_.Windowed = ! full_screen;
 	swap_chain_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
@@ -212,21 +212,22 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 			multi_sample_quality = 0;
 		}
 
-		UINT uint_multi_sample_quality = 0;
+		UINT available_quality_levels = 0;
 
-		if ( SUCCEEDED( device_->CheckMultisampleQualityLevels( swap_chain_desc_.BufferDesc.Format, multi_sample_count, & uint_multi_sample_quality ) ) )
+		DIRECT_X_FAIL_CHECK( device_->CheckMultisampleQualityLevels( swap_chain_desc_.BufferDesc.Format, multi_sample_count, & available_quality_levels ) );
+
+		if ( available_quality_levels == 0 )
 		{
-			if ( uint_multi_sample_quality > 0 )
-			{
-				if ( static_cast< UINT >( multi_sample_quality ) >= uint_multi_sample_quality )
-				{
-					multi_sample_quality = uint_multi_sample_quality - 1;
-				}
-
-				swap_chain_desc_.SampleDesc.Count = multi_sample_count;
-				swap_chain_desc_.SampleDesc.Quality = multi_sample_quality;
-			}
+			COMMON_THROW_EXCEPTION_MESSAGE( "multi sample quality is not supported" );
 		}
+
+		if ( static_cast< UINT >( multi_sample_quality ) >= available_quality_levels )
+		{
+			multi_sample_quality = available_quality_levels - 1;
+		}
+
+		swap_chain_desc_.SampleDesc.Count = multi_sample_count;
+		swap_chain_desc_.SampleDesc.Quality = multi_sample_quality;
 	}
 		
 	DIRECT_X_FAIL_CHECK( dxgi_factory->CreateSwapChain( device_, & swap_chain_desc_, & swap_chain_ ) );

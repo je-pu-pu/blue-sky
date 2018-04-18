@@ -212,6 +212,54 @@ void ActiveObject::kill()
 	*/
 }
 
+/**
+ * 描画用の定数バッファを更新する
+ *
+ */
+void ActiveObject::update_render_data() const
+{
+	if ( ! is_visible() )
+	{
+		return;
+	}
+
+	const btTransform& trans = get_transform();
+
+	ObjectConstantBufferData::Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
+
+	ObjectConstantBufferData buffer_data;
+
+	buffer_data.world.set_rotation_quaternion( q );
+	buffer_data.world *= ObjectConstantBufferData::Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+	buffer_data.world = buffer_data.world.transpose();
+
+	if ( get_drawing_model()->get_line() )
+	{
+		buffer_data.color = get_drawing_model()->get_line()->get_color();
+	}
+
+	get_object_constant_buffer()->update( & buffer_data );
+
+	if ( get_animation_player() )
+	{
+		get_animation_player()->update_render_data();
+	}
+}
+
+/**
+ * 描画用の定数バッファをシェーダーに設定する
+ *
+ */
+void ActiveObject::bind_render_data() const
+{
+	get_object_constant_buffer()->bind_to_vs();
+	get_object_constant_buffer()->bind_to_ps();
+}
+
+/**
+ * メッシュを描画する
+ *
+ */
 void ActiveObject::render_mesh() const
 {
 	if ( ! is_mesh_visible() )
@@ -219,8 +267,7 @@ void ActiveObject::render_mesh() const
 		return;
 	}
 
-	get_object_constant_buffer()->bind_to_vs();
-	get_object_constant_buffer()->bind_to_ps();
+	bind_render_data();
 	
 	if ( get_animation_player() )
 	{
@@ -235,6 +282,11 @@ void ActiveObject::render_mesh() const
 	}
 }
 
+/**
+ * メッシュ内の指定したマテリアルを描画する
+ *
+ * @param material_index マテリアルのインデックス
+ */
 void ActiveObject::render_material_at( uint_t material_index ) const
 {
 	game::Material* material = get_drawing_model()->get_mesh()->get_material_at( material_index );
@@ -248,6 +300,10 @@ void ActiveObject::render_material_at( uint_t material_index ) const
 	material->render();
 }
 
+/**
+ * 線を描画する
+ *
+ */
 void ActiveObject::render_line() const
 {
 	if ( ! is_line_visible() )
@@ -260,8 +316,7 @@ void ActiveObject::render_line() const
 		return;
 	}
 
-	get_object_constant_buffer()->bind_to_vs();
-	get_object_constant_buffer()->bind_to_ps();
+	bind_render_data();
 
 	get_drawing_model()->get_line()->render();
 }

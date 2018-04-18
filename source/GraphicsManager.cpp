@@ -15,7 +15,7 @@ namespace blue_sky
 
 GraphicsManager::GraphicsManager()
 {
-
+	
 }
 
 GraphicsManager::~GraphicsManager()

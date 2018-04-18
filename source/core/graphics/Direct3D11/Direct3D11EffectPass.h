@@ -28,7 +28,7 @@ public:
 	
 	InputLayout* create_input_layout( D3D11_INPUT_ELEMENT_DESC[], UINT );
 
-	void apply();
+	void apply() const;
 
 }; // class Direct3D11EffectPass
 

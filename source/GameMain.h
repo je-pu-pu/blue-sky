@@ -4,10 +4,10 @@
 #include "Game.h"
 #include "App.h"
 
-#include "ConstantBuffer.h"
-
 #include <common/auto_ptr.h>
 #include <common/safe_ptr.h>
+
+#include <type/type.h>
 
 class Direct3D11;
 class Direct3D11BulletDebugDraw;
@@ -83,18 +83,14 @@ protected:
 
 	common::auto_ptr< DrawingModelManager >	drawing_model_manager_;	///< DrawingModelManager
 
-	/// @todo まとめる
-	common::auto_ptr< GameConstantBuffer >			game_constant_buffer_;
-	common::auto_ptr< FrameConstantBuffer >			frame_constant_buffer_;
-	common::auto_ptr< FrameDrawingConstantBuffer >	frame_drawing_constant_buffer_;
-	common::auto_ptr< ObjectConstantBuffer >		object_constant_buffer_;
-
 	common::auto_ptr< Direct3D11BulletDebugDraw >	bullet_debug_draw_;
 
 	common::safe_ptr< Scene >				scene_;					///< 現在のシーン
 	string_t								stage_name_;			///< 現在のステージ名
 
 	bool									is_display_fps_;		///< FPS 表示フラグ
+
+	void update_render_data_for_game() const;
 
 	void check_scene_transition();
 	void setup_scene( const string_t& );
@@ -141,12 +137,6 @@ public:
 
 	const MainLoop* get_main_loop() const { return main_loop_.get(); }
 
-	/// @todo 整理する
-	GameConstantBuffer* get_game_constant_buffer() const { return game_constant_buffer_.get(); }
-	FrameConstantBuffer* get_frame_constant_buffer() const { return frame_constant_buffer_.get(); }
-	FrameDrawingConstantBuffer* get_frame_drawing_constant_buffer() const { return frame_drawing_constant_buffer_.get(); }
-	ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_.get(); }
-	
 	Direct3D11BulletDebugDraw* get_bullet_debug_draw() const { return bullet_debug_draw_.get(); }
 
 	const std::string& get_stage_name() const { return stage_name_; }

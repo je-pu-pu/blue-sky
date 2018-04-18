@@ -190,6 +190,9 @@ void EndingScene::render()
 { 
 	update_constant_buffer_for_sprite_frame( line_type_, drawing_accent_scale_ );
 	
+	get_direct_3d()->set_default_render_target();
+	get_direct_3d()->set_default_viewport();
+
 	get_direct_3d()->clear_default_view( Color::from_256( 0xFF, 0xAA, 0x11 ) );
 
 	render_bg();
@@ -232,13 +235,10 @@ void EndingScene::render_drawing_line()
 			object_constant_buffer_data.world = ( Matrix().set_scaling( 1.25f, 1.25f, 1.f ) * Matrix().set_translation( 0.f, drawing_model_offset_, 0.f ) ).transpose();
 			object_constant_buffer_data.color = Color( 0.f, 0.f, 0.f, 0.f );
 
-			get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
+			get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data );
 		}
 
-		get_game_main()->get_game_constant_buffer()->bind_to_all(); /// !!!
-		get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// !!!
-		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// !!!
-		get_game_main()->get_object_constant_buffer()->bind_to_all(); /// !!!
+		bind_all_render_data();
 
 		current_drawing_model_->get_line()->render_part( get_visible_drawing_line_part_count() );
 	}

@@ -96,6 +96,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="BgSpriteLayer.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="core\graphics\Direct3D11\d3dx11effect.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Axis.h" />

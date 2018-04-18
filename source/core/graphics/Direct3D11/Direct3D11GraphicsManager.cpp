@@ -3,6 +3,8 @@
 #include "Direct3D11TextureManager.h"
 #include "Direct3D11.h"
 
+
+#include "ConstantBuffer.h"
 #include "DrawingMesh.h"
 #include "DrawingLine.h"
 
@@ -16,6 +18,10 @@ namespace blue_sky
  */
 Direct3D11GraphicsManager::Direct3D11GraphicsManager( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
+	, game_render_data_( new GameConstantBuffer( direct_3d ) )
+	, frame_render_data_( new FrameConstantBuffer( direct_3d ) )
+	, frame_drawing_render_data_( new FrameDrawingConstantBuffer( direct_3d ) )
+	, shared_object_render_data_( new ObjectConstantBuffer( direct_3d ) )
 {
 
 }

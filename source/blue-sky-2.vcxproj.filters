@@ -201,9 +201,6 @@
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="CanvasTestScene.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -436,9 +433,7 @@
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="CanvasTestScene.h">
-      <Filter>Game</Filter>
-    </ClInclude>
+    <ClInclude Include="ConstantBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

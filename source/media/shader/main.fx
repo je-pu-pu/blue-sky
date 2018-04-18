@@ -1045,13 +1045,14 @@ VS_LINE_INPUT vs_line( VS_LINE_INPUT input )
 
 float4 ps_line( VS_LINE_INPUT input ) : SV_Target
 {
-	return float4( input.Color.x, input.Color.y, input.Color.z, 0.5f );
+	return float4( input.Color.x, input.Color.y, input.Color.z, 1.f );
 }
 
 technique11 simple_line
 {
 	pass main
 	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
 		
 		SetVertexShader( CompileShader( vs_4_0, vs_line() ) );
@@ -1078,6 +1079,9 @@ technique11 bullet
 {
 	pass main
 	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
+
 		SetVertexShader( CompileShader( vs_4_0, vs_bullet_debug() ) );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_line() ) );

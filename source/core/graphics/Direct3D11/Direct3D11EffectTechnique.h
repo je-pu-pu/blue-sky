@@ -32,6 +32,7 @@ public:
 	~Direct3D11EffectTechnique();
 	
 	PassList& getPassList() { return pass_list_; }
+	const PassList& getPassList() const { return pass_list_; }
 
 }; // class Direct3D11EffectTechinique
 

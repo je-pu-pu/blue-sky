@@ -2,6 +2,7 @@
 #include "GameMain.h"
 
 #include "ConstantBuffer.h"
+#include "GraphicsManager.h"
 
 #include <core/graphics/Direct3D11/Direct3D11Effect.h>
 #include <core/graphics/Direct3D11/Direct3D11Fader.h>
@@ -20,6 +21,7 @@ Scene::Scene( const GameMain* game_main )
 	: game_main_( game_main )
 	, total_elapsed_time_( 0.f )
 {
+	
 }
 
 Scene::~Scene()
@@ -156,7 +158,7 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 		frame_constant_buffer_data.projection = Matrix().set_orthographic( 2.f * get_width() / get_height(), 2.f, 0.f, 1.f ).transpose();
 		frame_constant_buffer_data.time = get_total_elapsed_time();
 	
-		get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
+		get_graphics_manager()->get_frame_render_data()->update( & frame_constant_buffer_data );
 	}
 
 	{
@@ -165,7 +167,7 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 		frame_drawing_constant_buffer_data.accent = get_bgm()->get_current_peak_level() * drawing_accent_scale;
 		frame_drawing_constant_buffer_data.line_type = line_type;
 
-		get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
+		get_graphics_manager()->get_frame_drawing_render_data()->update( & frame_drawing_constant_buffer_data );
 	}
 
 	{
@@ -173,8 +175,50 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 
 		object_constant_buffer_data.world = Matrix().set_identity().transpose();
 
-		get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
+		get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data );
 	}
+}
+
+/**
+ * 全ての定数バッファをバインドする
+ *
+ */
+void Scene::bind_all_render_data() const
+{
+	get_graphics_manager()->get_game_render_data()->bind_to_all();
+	get_graphics_manager()->get_frame_render_data()->bind_to_all();
+	get_graphics_manager()->get_frame_drawing_render_data()->bind_to_all();
+	get_graphics_manager()->get_shared_object_render_data()->bind_to_all();
+}
+
+/**
+ * ゲーム毎の定数バッファをバインドする
+ *
+ */
+void Scene::bind_game_render_data() const
+{
+	get_graphics_manager()->get_game_render_data()->bind_to_vs();
+	get_graphics_manager()->get_game_render_data()->bind_to_gs();
+	get_graphics_manager()->get_game_render_data()->bind_to_ps();
+}
+
+/**
+ * フレーム毎の定数バッファをバインドする
+ *
+ */
+void Scene::bind_frame_render_data() const
+{
+	get_graphics_manager()->get_frame_render_data()->bind_to_all();
+}
+
+/**
+ * オブジェクト毎の定数バッファをバインドする
+ *
+ */
+void Scene::bind_shared_object_render_data() const
+{
+	get_graphics_manager()->get_shared_object_render_data()->bind_to_vs();
+	get_graphics_manager()->get_shared_object_render_data()->bind_to_ps();
 }
 
 /**
@@ -185,16 +229,16 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
  */
 void Scene::render_technique( const char_t* technique_name, std::function< void() > function ) const
 {
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( technique_name );
+	const auto* technique = get_direct_3d()->getEffect()->getTechnique( technique_name );
 	
 	if ( ! technique )
 	{
 		return;
 	}
 
-	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	for ( const auto& pass : technique->getPassList() )
 	{
-		( *i )->apply();
+		pass->apply();
 
 		function();
 	}
@@ -205,20 +249,16 @@ void Scene::render_fader() const
 	ObjectConstantBufferData buffer_data;
 	buffer_data.world = Matrix().set_identity().transpose();
 	buffer_data.color = get_direct_3d()->getFader()->get_color();
-	get_game_main()->get_object_constant_buffer()->update( & buffer_data );
+	get_graphics_manager()->get_shared_object_render_data()->update( & buffer_data );
 
 	get_direct_3d()->setInputLayout( "main" );
-	auto technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
 
-	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	render_technique( "|main2d", [this]
 	{
-		( *i )->apply();
-
-		get_game_main()->get_object_constant_buffer()->bind_to_vs();
-		get_game_main()->get_object_constant_buffer()->bind_to_ps();
+		bind_shared_object_render_data();
 
 		get_direct_3d()->getFader()->render();
-	}
+	} );
 }
 
 } // namespace blue_sky

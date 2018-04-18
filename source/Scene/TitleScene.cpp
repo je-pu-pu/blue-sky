@@ -53,14 +53,6 @@ TitleScene::TitleScene( const GameMain* game_main )
 	title_logo_model_ = get_drawing_model_manager()->load( "blue-sky" );
 
 	get_graphics_manager()->cleanup_loader();
-
-	{
-		GameConstantBufferData game_constant_buffer_data;
-		game_constant_buffer_data.screen_width = static_cast< float_t >( get_width() );
-		game_constant_buffer_data.screen_height = static_cast< float_t >( get_height() );
-		
-		get_game_main()->get_game_constant_buffer()->update( & game_constant_buffer_data );
-	}
 	
 	reset_total_elapsed_time();
 	bgm_->play( false );
@@ -168,10 +160,7 @@ void TitleScene::render()
 		{
 			( *i )->apply();
 
-			get_game_main()->get_game_constant_buffer()->bind_to_all(); /// !!!
-			get_game_main()->get_frame_constant_buffer()->bind_to_all(); /// !!!
-			get_game_main()->get_frame_drawing_constant_buffer()->bind_to_all(); /// !!!
-			get_game_main()->get_object_constant_buffer()->bind_to_all(); /// !!!
+			bind_all_render_data();
 
 			if ( sequence_ == SEQUENCE_LOGO )
 			{
@@ -187,7 +176,7 @@ void TitleScene::render()
 						object_constant_buffer_data.world = Matrix().set_translation( +0.01f, +0.01f, 0.f ).transpose();
 						object_constant_buffer_data.color = Color( 0.f, 0.f, 0.f, -0.5f );
 
-						get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
+						get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data );
 					}
 
 					title_logo_model_->get_line()->render();
@@ -198,7 +187,7 @@ void TitleScene::render()
 						object_constant_buffer_data.world = Matrix().set_identity().transpose();
 						object_constant_buffer_data.color = Color( 1.f, 1.f, 1.f, 0.f );
 
-						get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
+						get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data );
 					}
 
 					title_logo_model_->get_line()->render();

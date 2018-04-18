@@ -1,8 +1,12 @@
 #ifndef BLUE_SKY_GRAPHICS_MANAGER_H
 #define BLUE_SKY_GRAPHICS_MANAGER_H
 
+#include "ConstantBuffer.h"
+
 #include <core/type.h>
+
 #include <game/GraphicsManager.h>
+
 #include <common/safe_ptr.h>
 #include <common/auto_ptr.h>
 
@@ -48,6 +52,11 @@ public:
 	DrawingLine* load_drawing_line( const char_t* );
 	
 	virtual Texture* get_texture( const char_t* ) = 0;
+
+	virtual GameConstantBuffer* get_game_render_data() const = 0;
+	virtual FrameConstantBuffer* get_frame_render_data() const = 0;
+	virtual FrameDrawingConstantBuffer* get_frame_drawing_render_data() const = 0;
+	virtual ObjectConstantBuffer* get_shared_object_render_data() const = 0;
 
 }; // class GraphicsManager
 

@@ -3,7 +3,6 @@
 
 #include "GameObject.h"
 #include "ConstantBuffer.h"
-// #include <stdlib.h>
 
 class AnimationPlayer;
 
@@ -44,6 +43,8 @@ protected:
 
 	float get_max_speed() const { return 20.f; }
 
+	const ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_; }
+
 public:
 	ActiveObject();
 	virtual ~ActiveObject();
@@ -59,8 +60,6 @@ public:
 
 	virtual void set_flicker_scale( float_t s ) { flicker_scale_ = s; }
 	virtual float_t get_flicker_scale() const { return flicker_scale_; }
-
-	const ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_; }
 
 	void setup_animation_player();
 	
@@ -97,6 +96,9 @@ public:
 
 	void set_mesh_visible( bool v ) { is_mesh_visible_ = v; }
 	void set_line_visible( bool v ) { is_line_visible_ = v; }
+
+	void update_render_data() const;
+	void bind_render_data() const;
 
 	virtual void render_mesh() const;
 	virtual void render_material_at( uint_t ) const;

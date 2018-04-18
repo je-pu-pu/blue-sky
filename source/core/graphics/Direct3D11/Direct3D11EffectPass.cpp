@@ -27,7 +27,7 @@ Direct3D11EffectPass::InputLayout* Direct3D11EffectPass::create_input_layout( D3
 	return input_layout;
 }
 
-void Direct3D11EffectPass::apply()
+void Direct3D11EffectPass::apply() const
 {
 	pass_->Apply( 0, direct_3d_->getImmediateContext() );
 }

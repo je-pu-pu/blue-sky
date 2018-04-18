@@ -29,24 +29,6 @@
 
 #include "AnimationPlayer.h"
 
-/*
-#include "Direct3D11.h"
-#include "Direct3D11SkyBox.h"
-#include "Direct3D11ShadowMap.h"
-#include "Direct3D11Rectangle.h"
-#include "Direct3D11Axis.h"
-#include "Direct3D11MeshManager.h"
-#include "Direct3D11TextureManager.h"
-#include "Direct3D11ConstantBuffer.h"
-#include "Direct3D11FarBillboardsMesh.h"
-#include "Direct3D11Material.h"
-#include "Direct3D11Fader.h"
-#include "Direct3D11Effect.h"
-#include "Direct3D11Sprite.h"
-#include "DirectWrite.h"
-#include "DirectX.h"
-*/
-
 /// @todo 抽象化する
 #include <core/graphics/Direct3D11/Direct3D11MeshManager.h>
 #include <core/graphics/Direct3D11/Direct3D11TextureManager.h>
@@ -62,9 +44,7 @@
 #include <core/graphics/Direct3D11/Direct3D11BulletDebugDraw.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
 
-
 #include "ActiveObjectPhysics.h"
-// #include "Direct3D11BulletDebugDraw.h"
 
 #include "ConstantBuffer.h"
 
@@ -193,8 +173,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	paper_texture_list_.push_back( get_direct_3d()->getTextureManager()->load( "paper-3", "media/texture/dot-face-1.png" ) );
 	paper_texture_list_.push_back( get_direct_3d()->getTextureManager()->load( "paper-4", "media/texture/brush-face-1.png" ) );
 	paper_texture_ = paper_texture_list_.front();
-
-	update_render_data_for_game();
 
 	restart();
 }
@@ -1674,7 +1652,7 @@ void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 
 	render_object_line();
 
-	// render_debug_axis();
+	render_debug_axis();
 
 	render_debug_bullet();
 
@@ -1748,19 +1726,6 @@ void GamePlayScene::render_text() const
 }
 
 /**
- * ゲーム毎に更新する必要のある描画用の定数バッファを更新する
- *
- */
-void GamePlayScene::update_render_data_for_game() const
-{
-	GameConstantBufferData constant_buffer_data;
-	constant_buffer_data.screen_width = static_cast< float_t >( get_width() );
-	constant_buffer_data.screen_height = static_cast< float_t >( get_height() );
-		
-	get_game_main()->get_game_constant_buffer()->update( & constant_buffer_data );
-}
-
-/**
  * フレーム毎に更新する必要のある描画用の定数バッファを更新する
  *
  */
@@ -1779,7 +1744,7 @@ void GamePlayScene::update_render_data_for_frame() const
 	frame_constant_buffer_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
 	frame_constant_buffer_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();
 
-	get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
+	get_graphics_manager()->get_frame_render_data()->update( & frame_constant_buffer_data );
 }
 
 /**
@@ -1813,7 +1778,7 @@ void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
 	frame_constant_buffer_data.view = Matrix().set_look_at( eye, at, up ).transpose();
 	frame_constant_buffer_data.projection = get_oculus_rift()->get_projection_matrix( eye_index, camera_->near_clip(), camera_->far_clip() ).transpose();
 
-	get_game_main()->get_frame_constant_buffer()->update( & frame_constant_buffer_data );
+	get_graphics_manager()->get_frame_render_data()->update( & frame_constant_buffer_data );
 }
 
 /**
@@ -1841,7 +1806,7 @@ void GamePlayScene::update_render_data_for_frame_drawing() const
 	frame_drawing_constant_buffer_data.shadow_color = shadow_color_.value();
 	frame_drawing_constant_buffer_data.shadow_paper_color = shadow_paper_color_.value();
 
-	get_game_main()->get_frame_drawing_constant_buffer()->update( & frame_drawing_constant_buffer_data );
+	get_graphics_manager()->get_frame_drawing_render_data()->update( & frame_drawing_constant_buffer_data );
 }
 
 /**
@@ -1850,78 +1815,13 @@ void GamePlayScene::update_render_data_for_frame_drawing() const
  */
 void GamePlayScene::update_render_data_for_object() const
 {
-	for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+	for ( const auto& active_object : get_active_object_manager()->active_object_list() )
 	{
-		update_render_data_for_active_object( *i );
+		active_object->update_render_data();
 	}
 
-	update_render_data_for_active_object( player_.get() );
-	update_render_data_for_active_object( goal_.get() );
-}
-
-/**
- * 指定した ActiveObject の描画用の定数バッファを更新する
- *
- * @param active_object ActiveObject
- */
-void GamePlayScene::update_render_data_for_active_object( const ActiveObject* active_object ) const
-{
-	if ( ! active_object->is_visible() )
-	{
-		return;
-	}
-
-	const btTransform& trans = active_object->get_transform();
-
-	Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
-
-	ObjectConstantBufferData buffer_data;
-
-	buffer_data.world.set_rotation_quaternion( q );
-	buffer_data.world *= Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-	buffer_data.world = buffer_data.world.transpose();
-
-	if ( active_object->get_drawing_model()->get_line() )
-	{
-		buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
-	}
-
-	active_object->get_object_constant_buffer()->update( & buffer_data );
-
-	if ( active_object->get_animation_player() )
-	{
-		active_object->get_animation_player()->update_render_data();
-	}
-}
-
-/**
- * ゲーム毎の定数バッファをバインドする
- *
- */
-void GamePlayScene::bind_game_constant_buffer() const
-{
-	get_game_main()->get_game_constant_buffer()->bind_to_vs();
-	get_game_main()->get_game_constant_buffer()->bind_to_gs();
-	get_game_main()->get_game_constant_buffer()->bind_to_ps();
-}
-
-/**
- * フレーム毎の定数バッファをバインドする
- *
- */
-void GamePlayScene::bind_frame_constant_buffer() const
-{
-	get_game_main()->get_frame_constant_buffer()->bind_to_all();
-}
-
-/**
- * オブジェクト毎の定数バッファをバインドする
- *
- */
-void GamePlayScene::bind_object_constant_buffer() const
-{
-	get_game_main()->get_object_constant_buffer()->bind_to_vs();
-	get_game_main()->get_object_constant_buffer()->bind_to_ps();
+	player_->update_render_data();
+	goal_->update_render_data();
 }
 
 /**
@@ -1965,28 +1865,28 @@ void GamePlayScene::render_shadow_map( const char* technique_name, bool is_skin_
 		{
 			shadow_map_->ready_to_render_shadow_map_with_cascade_level( n );
 
-			bind_game_constant_buffer();
-			bind_frame_constant_buffer();
+			bind_game_render_data();
+			bind_frame_render_data();
 
-			get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs(); // for line
+			get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs(); // for line
 
-			for ( auto j = get_active_object_manager()->active_object_list().begin(); j != get_active_object_manager()->active_object_list().end(); ++j )
+			for ( const auto* active_object : get_active_object_manager()->active_object_list() )
 			{
-				if ( ( *j )->get_drawing_model()->is_skin_mesh() == is_skin_mesh )
+				if ( active_object->get_drawing_model()->is_skin_mesh() == is_skin_mesh )
 				{
-					render_active_object_mesh( *j );
+					active_object->render_mesh();
 
-					if ( ( *j )->get_drawing_model()->get_line() && ( *j )->get_drawing_model()->get_line()->is_cast_shadow() )
+					if ( active_object->get_drawing_model()->get_line() && active_object->get_drawing_model()->get_line()->is_cast_shadow() )
 					{
-						render_active_object_line( *j );
+						active_object->render_line();
 					}
 				}
 			}
 
 			if ( ! is_skin_mesh )
 			{
-				render_active_object_mesh( player_.get() );
-				render_active_object_mesh( goal_.get() );
+				player_->render_mesh();
+				goal_->render_mesh();
 			}
 		}
 	}
@@ -2005,9 +1905,9 @@ void GamePlayScene::render_sky_box() const
 	{
 		( *i )->apply();
 
-		bind_game_constant_buffer();
-		bind_frame_constant_buffer();
-		bind_object_constant_buffer();
+		bind_game_render_data();
+		bind_frame_render_data();
+		bind_shared_object_render_data();
 
 		ObjectConstantBufferData object_constant_buffer_data;
 
@@ -2017,7 +1917,7 @@ void GamePlayScene::render_sky_box() const
 			object_constant_buffer_data.world = Matrix().set_translation( camera_->position().x(), camera_->position().y(), camera_->position().z() ).transpose();
 			object_constant_buffer_data.color = ambient_color_.value();
 
-			get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
+			get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data );
 
 			sky_box_->render();
 		}
@@ -2028,7 +1928,7 @@ void GamePlayScene::render_sky_box() const
 			object_constant_buffer_data.world.set_identity();
 			object_constant_buffer_data.color = ambient_color_.value();
 
-			get_game_main()->get_object_constant_buffer()->update( & object_constant_buffer_data );
+			get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data );
 	
 			ground_->render();
 		}
@@ -2046,26 +1946,22 @@ void GamePlayScene::render_far_billboards() const
 		return;
 	}
 
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|billboard" );
-
-	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	render_technique( "|billboard", [this]
 	{
-		( *i )->apply();
-
 		{
 			ObjectConstantBufferData buffer;
 			buffer.color = Color::White;
 			buffer.world.set_identity();
 					
-			get_game_main()->get_object_constant_buffer()->update( & buffer );
+			get_graphics_manager()->get_shared_object_render_data()->update( & buffer );
 		}
 
-		bind_game_constant_buffer();
-		bind_frame_constant_buffer();
-		bind_object_constant_buffer();
+		bind_game_render_data();
+		bind_frame_render_data();
+		bind_shared_object_render_data();
 
 		far_billboards_->render();
-	}
+	} );
 }
 
 /**
@@ -2088,17 +1984,13 @@ void GamePlayScene::render_object_skin_mesh() const
 		technique_name ="|skin_flat";
 	}
 
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( technique_name );
-
-	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	render_technique( technique_name, [this]
 	{
-		( *i )->apply();
-		
-		bind_game_constant_buffer();
-		bind_frame_constant_buffer();
+		bind_game_render_data();
+		bind_frame_render_data();
 
-		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs();
-		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_ps();
+		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
+		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
 		paper_texture_->bind_to_ps( 2 );
 
 		if ( shadow_map_ )
@@ -2106,14 +1998,14 @@ void GamePlayScene::render_object_skin_mesh() const
 			shadow_map_->ready_to_render_scene();
 		}
 
-		for ( auto j = get_active_object_manager()->active_object_list().begin(); j != get_active_object_manager()->active_object_list().end(); ++j )
+		for ( const auto* active_object : get_active_object_manager()->active_object_list() )
 		{
-			if ( ( *j )->get_drawing_model()->is_skin_mesh() )
+			if ( active_object->get_drawing_model()->is_skin_mesh() )
 			{
-				render_active_object_mesh( *j );
+				active_object->render_mesh();
 			}
 		}
-	}
+	} );
 }
 
 /**
@@ -2136,17 +2028,13 @@ void GamePlayScene::render_object_mesh() const
 		technique_name ="|main_flat";
 	}
 
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( technique_name );
-
-	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	render_technique( technique_name, [this]
 	{
-		( *i )->apply();
-				
-		bind_game_constant_buffer();
-		bind_frame_constant_buffer();
+		bind_game_render_data();
+		bind_frame_render_data();
 		
-		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs();
-		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_ps();
+		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
+		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
 		paper_texture_->bind_to_ps( 2 );
 
 		if ( shadow_map_ )
@@ -2154,16 +2042,16 @@ void GamePlayScene::render_object_mesh() const
 			shadow_map_->ready_to_render_scene();
 		}
 
-		for ( auto j = get_active_object_manager()->active_object_list().begin(); j != get_active_object_manager()->active_object_list().end(); ++j )
+		for ( const auto* active_object : get_active_object_manager()->active_object_list() )
 		{
-			if ( ! ( *j )->get_drawing_model()->is_skin_mesh() )
+			if ( ! active_object->get_drawing_model()->is_skin_mesh() )
 			{
-				render_active_object_mesh( *j );
+				active_object->render_mesh();
 			}
 		}
 
-		render_active_object_mesh( goal_.get() );
-	}
+		goal_->render_mesh();
+	} );
 }
 
 /**
@@ -2172,43 +2060,19 @@ void GamePlayScene::render_object_mesh() const
  */
 void GamePlayScene::render_object_line() const
 {
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|drawing_line" );
-
-	for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	render_technique( "|drawing_line", [this]
 	{
-		( *i )->apply();
+		bind_game_render_data();
+		bind_frame_render_data();
+		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
 
-		bind_game_constant_buffer();
-		bind_frame_constant_buffer();
-		get_game_main()->get_frame_drawing_constant_buffer()->bind_to_gs();
-
-		for ( auto j = get_active_object_manager()->active_object_list().begin(); j != get_active_object_manager()->active_object_list().end(); ++j )
+		for ( const auto* active_object : get_active_object_manager()->active_object_list() )
 		{
-			render_active_object_line( *j );
+			active_object->render_line();
 		}
 
-		render_active_object_line( player_.get() );
-	}
-}
-
-/**
- * ActiveObject のメッシュを描画する
- *
- * @param active_object ActiveObject
- */
-void GamePlayScene::render_active_object_mesh( const ActiveObject* active_object ) const
-{
-	active_object->render_mesh();
-}
-
-/**
- * ActiveObject の線を描画する
- *
- * @param active_object ActiveObject
- */
-void GamePlayScene::render_active_object_line( const ActiveObject* active_object ) const
-{
-	active_object->render_line();
+		player_->render_line();
+	} );
 }
 
 /**
@@ -2226,31 +2090,22 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 		buffer_data.world *= Matrix().set_translation( ortho_offset, 0.f, 0.f );
 		buffer_data.world = buffer_data.world.transpose();
 
-		get_game_main()->get_object_constant_buffer()->update( & buffer_data );
+		get_graphics_manager()->get_shared_object_render_data()->update( & buffer_data );
 
-		auto technique = get_direct_3d()->getEffect()->getTechnique( "|main2d" );
-
-		for ( auto i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+		render_technique( "|main2d", [this]
 		{
-			( *i )->apply();
-			
-			get_game_main()->get_object_constant_buffer()->bind_to_vs();
-			get_game_main()->get_object_constant_buffer()->bind_to_ps();
+			bind_shared_object_render_data();
 
 			scope_mesh_->render();
-		}
+		} );
 	}
 
 	get_direct_3d()->getSprite()->set_ortho_offset( ortho_offset * 20.f );
 
 	get_direct_3d()->getSprite()->begin();
 
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|sprite" );
-
-	for ( Direct3D::EffectTechnique::PassList::const_iterator i = technique->getPassList().begin(); i != technique->getPassList().end(); ++i )
+	render_technique( "|sprite", [this]
 	{
-		( *i )->apply();
-
 		if ( player_->get_selected_item_type() == Player::ITEM_TYPE_ROCKET )
 		{
 			for ( int n = 0; n < player_->get_item_count( Player::ITEM_TYPE_ROCKET ); n++ )
@@ -2315,7 +2170,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 
 			get_direct_3d()->getSprite()->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 		}
-	}
+	} );
 
 	get_direct_3d()->getSprite()->end();
 }
@@ -2326,83 +2181,70 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
  */
 void GamePlayScene::render_debug_axis() const
 {
-	/*
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|simple_line" );
-
-	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	render_technique( "|simple_line", [this]
 	{
-		( *i )->apply();
-				
-		bind_game_constant_buffer();
-		bind_frame_constant_buffer();
+		bind_game_render_data();
+		bind_frame_render_data();
 
-		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+		for ( const auto* active_object : get_active_object_manager()->active_object_list() )
 		{
-			( *i )->get_object_constant_buffer()->bind_to_vs();
-			( *i )->get_object_constant_buffer()->bind_to_ps();
+			active_object->bind_render_data();
 
 			debug_axis_->render();
+
+			render_debug_axis_for_bones( active_object );
 		}
-	}
-	*/
+	} );
+}
 
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|simple_line" );
-
-	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+/**
+ * ActiveObject の全ボーンに対してデバッグ用の軸を表示する
+ *
+ */
+void GamePlayScene::render_debug_axis_for_bones( const ActiveObject* active_object ) const
+{
+	if ( active_object->is_dead() )
 	{
-		( *i )->apply();
-				
-		bind_game_constant_buffer();
-		bind_frame_constant_buffer();
+		return;
+	}
 
-		for ( auto j = get_active_object_manager()->active_object_list().begin(); j != get_active_object_manager()->active_object_list().end(); ++j )
+	if ( ! active_object->get_animation_player() )
+	{
+		return;
+	}
+	
+	get_graphics_manager()->get_shared_object_render_data()->bind_to_vs();
+	get_graphics_manager()->get_shared_object_render_data()->bind_to_ps();
+
+	AnimationPlayer::BoneConstantBuffer::Data bone_constant_buffer_data;
+	active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix::identity() );
+
+	for ( uint_t n = 0; n < active_object->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )
+	{
+		const Matrix& bone_offset_matrix = active_object->get_animation_player()->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( n );
+		const Matrix& bone_matrix = bone_offset_matrix * bone_constant_buffer_data.bone_matrix[ n ];
+		// const Matrix& bone_matrix = bone_offset_matrix;
+
+		const btTransform& trans = active_object->get_transform();
+
+		Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
+
+		ObjectConstantBufferData buffer_data;
+
+		buffer_data.world = Matrix().set_scaling( 0.1f, 0.1f, 0.1f );
+		buffer_data.world *= bone_matrix;
+		buffer_data.world *= Matrix().set_rotation_quaternion( q );
+		buffer_data.world *= Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+		buffer_data.world = buffer_data.world.transpose();
+
+		if ( active_object->get_drawing_model()->get_line() )
 		{
-			const ActiveObject* active_object = *j;
-
-			if ( active_object->is_dead() )
-			{
-				continue;
-			}
-
-			if ( ! ( *j )->get_animation_player() )
-			{
-				continue;
-			}
-
-			( *j )->get_object_constant_buffer()->bind_to_vs();
-			( *j )->get_animation_player()->bind_render_data();
-
-			AnimationPlayer::BoneConstantBuffer::Data bone_constant_buffer_data;
-			active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix::identity() );
-
-			for ( uint_t n = 0; n < ( *j )->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )
-			{
-				const Matrix& bone_offset_matrix = ( *j )->get_animation_player()->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( n );
-				const Matrix& bone_matrix = bone_offset_matrix * bone_constant_buffer_data.bone_matrix[ n ];
-				// const Matrix& bone_matrix = bone_offset_matrix;
-
-				const btTransform& trans = active_object->get_transform();
-
-				Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
-
-				ObjectConstantBufferData buffer_data;
-
-				buffer_data.world = Matrix().set_scaling( 0.1f, 0.1f, 0.1f );
-				buffer_data.world *= bone_matrix;
-				buffer_data.world *= Matrix().set_rotation_quaternion( q );
-				buffer_data.world *= Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-				buffer_data.world = buffer_data.world.transpose();
-
-				if ( active_object->get_drawing_model()->get_line() )
-				{
-					buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
-				}
-
-				active_object->get_object_constant_buffer()->update( & buffer_data );
-
-				debug_axis_->render();
-			}
+			buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
 		}
+
+		get_graphics_manager()->get_shared_object_render_data()->update( & buffer_data );
+
+		debug_axis_->render();
 	}
 }
 
@@ -2412,17 +2254,13 @@ void GamePlayScene::render_debug_axis() const
  */
 void GamePlayScene::render_debug_bullet() const
 {
-	Direct3D::EffectTechnique* technique = get_direct_3d()->getEffect()->getTechnique( "|bullet" );
-
-	for ( Direct3D::EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	render_technique( "|bullet", [this]
 	{
-		( *i )->apply();
-				
-		bind_game_constant_buffer();
-		bind_frame_constant_buffer();
+		bind_game_render_data();
+		bind_frame_render_data();
 
 		get_game_main()->get_bullet_debug_draw()->render();
-	}
+	} );
 }
 
 /**
@@ -2441,10 +2279,11 @@ void GamePlayScene::render_debug_shadow_map_window() const
 	ObjectConstantBufferData buffer_data;
 	buffer_data.world.set_identity();
 	buffer_data.color = Color( 0.5f, 0.f, 0.f, 0.f );
-	get_game_main()->get_object_constant_buffer()->update( & buffer_data );
+	get_graphics_manager()->get_shared_object_render_data()->update( & buffer_data );
 
-	render_technique( "|main2d", [this] () {
-		bind_object_constant_buffer();
+	render_technique( "|main2d", [this]
+	{
+		bind_shared_object_render_data();
 
 		rectangle_->get_material_list().front()->set_texture( shadow_map_->getTexture() );
 		rectangle_->render();

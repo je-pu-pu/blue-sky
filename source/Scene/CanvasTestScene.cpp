@@ -21,6 +21,7 @@
 namespace blue_sky
 {
 
+/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
 static FrameConstantBufferData frame_constant_buffer_data;
 static ObjectConstantBufferData object_constant_buffer_data;
 static Vector eye( 0.f, 0.f, -1.f );
@@ -35,14 +36,6 @@ CanvasTestScene::CanvasTestScene( const GameMain* game_main )
 	, points_( new DynamicPointList( get_direct_3d() ) )
 	, sky_box_( new SkyBox( get_direct_3d(), "sky-box-sky" ) )
 {
-	{
-		GameConstantBufferData constant_buffer_data;
-		constant_buffer_data.screen_width = static_cast< float_t >( get_width() );
-		constant_buffer_data.screen_height = static_cast< float_t >( get_height() );
-		
-		get_game_main()->get_game_constant_buffer()->update( & constant_buffer_data );
-	}
-
 	texture_ = get_graphics_manager()->get_texture( "white-hard-pen" );
 }
 
@@ -149,7 +142,7 @@ void CanvasTestScene::update()
 		
 		frame_constant_buffer_data.time_beat = 0;
 
-		get_game_main()->get_frame_constant_buffer()->update( &frame_constant_buffer_data );
+		get_graphics_manager()->get_frame_render_data()->update( &frame_constant_buffer_data );
 	}
 
 	Matrix s;
@@ -236,17 +229,17 @@ void CanvasTestScene::render()
 
 	get_direct_3d()->setInputLayout( "main" );
 
-	render_technique( "|sky_box", [&] {
+	render_technique( "|sky_box", [this] {
 		
-		get_game_main()->get_game_constant_buffer()->bind_to_all();
-		get_game_main()->get_frame_constant_buffer()->bind_to_all();
-		get_game_main()->get_object_constant_buffer()->bind_to_all();
+		get_graphics_manager()->get_game_render_data()->bind_to_all();
+		get_graphics_manager()->get_frame_render_data()->bind_to_all();
+		get_graphics_manager()->get_shared_object_render_data()->bind_to_all();
 
 		ObjectConstantBufferData object_constant_buffer_data;
 		object_constant_buffer_data.world = Matrix().set_translation( eye.x(), eye.y(), eye.z() ).transpose() * r;
 		object_constant_buffer_data.color = Color( 1.f, 1.f, 1.f, 1.f );
 
-		get_game_main()->get_object_constant_buffer()->update( &object_constant_buffer_data );
+		get_graphics_manager()->get_shared_object_render_data()->update( &object_constant_buffer_data );
 
 		sky_box_->render();
 	} );
@@ -254,15 +247,15 @@ void CanvasTestScene::render()
 
 	get_direct_3d()->setInputLayout( "drawing_point" );
 
-	render_technique( "|drawing_point", [&] {
-		get_game_main()->get_game_constant_buffer()->bind_to_all();
+	render_technique( "|drawing_point", [this] {
+		get_graphics_manager()->get_game_render_data()->bind_to_all();
 	
-		get_game_main()->get_frame_constant_buffer()->bind_to_all();
+		get_graphics_manager()->get_frame_render_data()->bind_to_all();
 
-		get_game_main()->get_object_constant_buffer()->bind_to_vs();
-		get_game_main()->get_object_constant_buffer()->bind_to_ps();
+		get_graphics_manager()->get_shared_object_render_data()->bind_to_vs();
+		get_graphics_manager()->get_shared_object_render_data()->bind_to_ps();
 		
-		get_game_main()->get_object_constant_buffer()->update( &object_constant_buffer_data );
+		get_graphics_manager()->get_shared_object_render_data()->update( &object_constant_buffer_data );
 
 		texture_->bind_to_ps( 1 );
 		points_->render();

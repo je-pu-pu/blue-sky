@@ -99,6 +99,11 @@ protected:
 
 	void update_constant_buffer_for_sprite_frame( int line_type, float_t drawing_accent_scale = 1.f );
 	
+	void bind_all_render_data() const;
+	void bind_game_render_data() const;
+	void bind_frame_render_data() const;
+	void bind_shared_object_render_data() const;
+
 	void render_technique( const char_t*, std::function< void() > ) const;
 	void render_fader() const;
 

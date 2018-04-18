@@ -83,11 +83,6 @@ GameMain::GameMain()
 		direct_3d_->setup_font();
 	}
 
-	game_constant_buffer_ = new GameConstantBuffer( direct_3d_.get() );
-	frame_constant_buffer_ = new FrameConstantBuffer( direct_3d_.get() );
-	frame_drawing_constant_buffer_ = new FrameDrawingConstantBuffer( direct_3d_.get() );
-	object_constant_buffer_ = new ObjectConstantBuffer( direct_3d_.get() );
-
 	physics_ = new ActiveObjectPhysics();
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
 
@@ -113,7 +108,7 @@ GameMain::GameMain()
 	}
 
 	graphics_manager_ = new Direct3D11GraphicsManager( direct_3d_.get() );
-
+	
 	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
 	sound_manager_->set_mute( get_config()->get( "audio.mute", 0 ) != 0 );
 	sound_manager_->set_volume( get_config()->get( "audio.volume", 1.f ) );
@@ -129,6 +124,9 @@ GameMain::GameMain()
 	main_loop_ = new MainLoop( 60 );
 
 	is_display_fps_ = get_config()->get( "video.display_fps", 0 ) != 0;
+
+
+	update_render_data_for_game();
 }
 
 //■デストラクタ
@@ -140,6 +138,19 @@ GameMain::~GameMain()
 	get_config()->save_file( "blue-sky.config" );
 
 	scene_.release();
+}
+
+/**
+ * ゲーム毎に更新する必要のある描画用の定数バッファを更新する
+ *
+ */
+void GameMain::update_render_data_for_game() const
+{
+	GameConstantBufferData constant_buffer_data;
+	constant_buffer_data.screen_width = static_cast< float_t >( get_width() );
+	constant_buffer_data.screen_height = static_cast< float_t >( get_height() );
+		
+	get_graphics_manager()->get_game_render_data()->update( & constant_buffer_data );
 }
 
 bool GameMain::update()
@@ -321,7 +332,7 @@ void GameMain::setup_scene( const string_t& scene_name )
 	sound_manager_->pop_group();
 	sound_manager_->push_group( scene_name.c_str() );
 	
-	if ( true )
+	if ( false )
 	{
 		scene_ = new CanvasTestScene( this );
 	}

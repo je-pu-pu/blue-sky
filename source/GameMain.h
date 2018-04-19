@@ -92,25 +92,30 @@ protected:
 
 	bool									is_display_fps_;		///< FPS 表示フラグ
 
+	bool									is_command_mode_;		///< 現在コマンドモード中かどうか？
+	string_t								user_command_;			///< ユーザーの入力したコマンド
+
 	void update_render_data_for_game() const;
 
 	void check_scene_transition();
 	void setup_scene( const string_t& );
 
+	void edit_command( char_t );
+
 public:
 	GameMain();
-	virtual ~GameMain();
+	virtual ~GameMain() override;
 
 	void setup_scene();
 
-	bool update();
+	bool update() override;
 
 	void render();
 
-
-	void on_function_key_down( int );
-	void on_mouse_wheel( int );
-	void on_resize();
+	void on_key_down( char_t ) override;
+	void on_function_key_down( int ) override;
+	void on_mouse_wheel( int ) override;
+	void on_resize() override;
 
 	float_t get_total_elapsed_time() const { return total_elapsed_time_; }
 	float_t get_elapsed_time() const;
@@ -132,8 +137,8 @@ public:
 	
 	static App* get_app() { return App::GetInstance();  }
 
-	inline int get_width() const { return get_app()->get_width(); }
-	inline int get_height() const { return get_app()->get_height(); }
+	inline int get_width() const override { return get_app()->get_width(); }
+	inline int get_height() const override { return get_app()->get_height(); }
 
 	Config* get_config() const { return get_app()->get_config(); }
 	Config* get_save_data() const { return save_data_.get(); }

@@ -54,6 +54,10 @@ public:
 	virtual Texture* load_texture( const char_t*, const char_t* ) = 0;
 	virtual Texture* get_texture( const char_t* ) = 0;
 	
+	/// @todo ‚¿‚á‚ñ‚Æì‚é Font, size, w’è‚µ‚½ Texture ‚Ö‚Ì•`‰æ
+	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
+	virtual void draw_text_at_center( const char_t*, const Color& ) const = 0;
+
 	virtual void unload_texture( const char_t* ) = 0;
 	virtual void unload_texture_all() = 0;
 

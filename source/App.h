@@ -8,10 +8,14 @@
 #define APP_H
 
 #include "Game.h"
+
 #include <game/Config.h>
+
+#include <type/type.h>
+
 #include <windows.h>
+
 #include <memory>
-#include <string>
 
 /**
  * アプリケーションとそれに対応するひとつのウィンドウを管理する
@@ -83,6 +87,8 @@ public:
 
 	const char_t* get_class_name() const { return class_name_.c_str(); }
 	void set_class_name( const char_t* name ) { class_name_ = name; }
+
+	void show_error_message( const char_t* ) const;
 
 	bool is_full_screen() const { return is_full_screen_; }
 	void set_full_screen( bool );

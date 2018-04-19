@@ -43,7 +43,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE /* hPrevInst */, LPSTR /* lpszCmd
 
 		if ( app )
 		{
-			MessageBox( app->GetWindowHandle(), message.c_str(), "ERROR", MB_OK );
+			app->show_error_message( message.c_str() );
 		}
 	}
 	catch ( const common::exception< std::string >& e )
@@ -54,7 +54,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE /* hPrevInst */, LPSTR /* lpszCmd
 
 		if ( app )
 		{
-			MessageBox( app->GetWindowHandle(), message.c_str(), "ERROR", MB_OK );
+			app->show_error_message( message.c_str() );
 		}
 
 		return -1;
@@ -63,7 +63,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE /* hPrevInst */, LPSTR /* lpszCmd
 	{
 		if ( app )
 		{
-			MessageBox( app->GetWindowHandle(), "Unknown Error", "ERROR", MB_OK );
+			app->show_error_message( "Unknown Error" );
 		}
 	}
 

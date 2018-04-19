@@ -32,6 +32,7 @@ class ActiveObjectManager;
 class DrawingModelManager;
 class GraphicsManager;
 class SoundManager;
+class ScriptManager;
 class Input;
 
 class DrawingModel;
@@ -77,6 +78,7 @@ protected:
 
 	GraphicsManager* get_graphics_manager() const;
 	SoundManager* get_sound_manager() const;
+	ScriptManager* get_script_manager() const;
 
 	Input* get_input() const;
 	Config* get_config() const;
@@ -92,7 +94,6 @@ protected:
 
 	int get_width() const;
 	int get_height() const;
-
 
 	void play_sound( const char*, bool = false, bool = true ) const;
 	void stop_sound( const char* ) const;

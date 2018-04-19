@@ -91,6 +91,7 @@ private:
 	IDXGISurface1*				text_surface_;
 	IDXGIKeyedMutex*			text_texture_mutex_11_;
 	IDXGIKeyedMutex*			text_texture_mutex_10_;
+	UINT64						text_texture_sync_key_ = 0;
 
 	common::auto_ptr< Font	>				font_;
 
@@ -127,6 +128,9 @@ public:
 	void create_input_layout( char_t*, char_t*, D3D11_INPUT_ELEMENT_DESC[], UINT );
 
 	void reset( bool = false );
+
+	int get_width() const { return swap_chain_desc_.BufferDesc.Width; }
+	int get_height() const { return swap_chain_desc_.BufferDesc.Height; }
 
 	void set_size( int, int );
 	void set_full_screen( bool );
@@ -165,7 +169,7 @@ public:
 	void begin3D();
 	void end3D();
 
-	void end();
+	void present();
 
 	void renderText();
 
@@ -192,8 +196,6 @@ public:
 	inline ID3D11DeviceContext* getImmediateContext() const { return immediate_context_; }
 
 	inline IDXGISurface1* getBackbufferSurface() const { return back_buffer_surface_; }
-
-	inline IDXGISurface1* getTextSurface() const { return text_surface_; }
 
 }; // class Direct3D11
 

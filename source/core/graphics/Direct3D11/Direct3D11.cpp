@@ -53,7 +53,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* /
 	, back_buffer_surface_( 0 )
 	, text_texture_( 0 )
 	, text_view_( 0 )
-	, text_surface_( 0 )
 	, text_texture_mutex_11_( 0 )
 	, text_texture_mutex_10_( 0 )
 {
@@ -106,7 +105,6 @@ Direct3D11::~Direct3D11()
 
 	DIRECT_X_RELEASE( text_texture_mutex_10_ );
 	DIRECT_X_RELEASE( text_texture_mutex_11_ );
-	DIRECT_X_RELEASE( text_surface_ );
 
 	text_view_.release();
 	DIRECT_X_RELEASE( text_texture_ );
@@ -383,6 +381,8 @@ void Direct3D11::setup_font()
 		}
 	}
 
+	com_ptr< IDXGISurface1 > text_surface;
+
 	// create_text_texture_mutex()
 	{
 		HANDLE shared_handle = 0;
@@ -394,14 +394,12 @@ void Direct3D11::setup_font()
 
 		DIRECT_X_RELEASE( text_texture_resource_ );
 
-		DIRECT_X_FAIL_CHECK( device_10_->OpenSharedResource( shared_handle, __uuidof( IDXGISurface1 ), reinterpret_cast< void** >( & text_surface_ ) ) );
-		DIRECT_X_FAIL_CHECK( text_surface_->QueryInterface( __uuidof( IDXGIKeyedMutex ), reinterpret_cast< void** >( & text_texture_mutex_10_ ) ) );
+		DIRECT_X_FAIL_CHECK( device_10_->OpenSharedResource( shared_handle, __uuidof( IDXGISurface1 ), reinterpret_cast< void** >( & text_surface ) ) );
+		DIRECT_X_FAIL_CHECK( text_surface->QueryInterface( __uuidof( IDXGIKeyedMutex ), reinterpret_cast< void** >( & text_texture_mutex_10_ ) ) );
 	}
 
 	// Font
-	font_ = new Font( text_surface_ );
-
-	DIRECT_X_RELEASE( text_surface_ );
+	font_ = new Font( text_surface.get() );
 }
 
 // ???
@@ -679,7 +677,7 @@ void Direct3D11::begin2D()
 		return;
 	}
 
-	DIRECT_X_FAIL_CHECK( text_texture_mutex_10_->AcquireSync( 0, INFINITE ) );
+	DIRECT_X_FAIL_CHECK( text_texture_mutex_10_->AcquireSync( text_texture_sync_key_, INFINITE ) );
 }
 
 void Direct3D11::end2D()
@@ -689,7 +687,9 @@ void Direct3D11::end2D()
 		return;
 	}
 
-	DIRECT_X_FAIL_CHECK( text_texture_mutex_10_->ReleaseSync( 1 ) );
+	text_texture_sync_key_++;
+
+	DIRECT_X_FAIL_CHECK( text_texture_mutex_10_->ReleaseSync( text_texture_sync_key_ ) );
 }
 
 void Direct3D11::begin3D()
@@ -699,7 +699,7 @@ void Direct3D11::begin3D()
 		return;
 	}
 
-	DIRECT_X_FAIL_CHECK( text_texture_mutex_11_->AcquireSync( 1, INFINITE ) );
+	DIRECT_X_FAIL_CHECK( text_texture_mutex_11_->AcquireSync( text_texture_sync_key_, INFINITE ) );
 }
 
 void Direct3D11::end3D()
@@ -709,10 +709,12 @@ void Direct3D11::end3D()
 		return;
 	}
 
-	DIRECT_X_FAIL_CHECK( text_texture_mutex_11_->ReleaseSync( 0 ) );
+	text_texture_sync_key_++;
+
+	DIRECT_X_FAIL_CHECK( text_texture_mutex_11_->ReleaseSync( text_texture_sync_key_ ) );
 }
 
-void Direct3D11::end()
+void Direct3D11::present()
 {
 	DIRECT_X_FAIL_CHECK( swap_chain_->Present( 0, 0 ) );
 }
@@ -732,7 +734,7 @@ void Direct3D11::renderText()
 	{
 		( *i )->apply();
 
-		Sprite::Rect dst_rect( 0, 0, swap_chain_desc_.BufferDesc.Width, swap_chain_desc_.BufferDesc.Height );
+		Sprite::Rect dst_rect( 0, 0, get_width(), get_height() );
 		getSprite()->draw( dst_rect, text_view_.get() );
 	}
 

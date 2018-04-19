@@ -438,6 +438,7 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="ScriptManager.h" />
+    <ClInclude Include="Game.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

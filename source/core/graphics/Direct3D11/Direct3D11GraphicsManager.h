@@ -41,6 +41,10 @@ public:
 	Texture* load_texture( const char_t*, const char_t* ) override;
 	Texture* get_texture( const char_t* ) override;
 
+	/// @todo ‚¿‚á‚ñ‚Æì‚é Font, size, w’è‚µ‚½ Texture ‚Ö‚Ì•`‰æ
+	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
+	void draw_text_at_center( const char_t*, const Color& ) const override;
+
 	void unload_texture( const char_t* ) override;
 	void unload_texture_all() override;
 

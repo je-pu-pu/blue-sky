@@ -34,7 +34,6 @@
 #include <core/graphics/Direct3D11/Direct3D11Fader.h>
 #include <core/graphics/Direct3D11/Direct3D11Material.h>
 #include <core/graphics/Direct3D11/Direct3D11BulletDebugDraw.h>
-#include <core/graphics/DirectWrite/DirectWrite.h>
 
 #include "ActiveObjectPhysics.h"
 
@@ -43,6 +42,8 @@
 #include "Input.h"
 #include "GraphicsManager.h"
 #include "SoundManager.h"
+
+#include "ScriptManager.h"
 
 #include "DrawingModelManager.h"
 #include "ActiveObjectManager.h"
@@ -214,6 +215,14 @@ void GamePlayScene::setup_command()
 		ss << s;
 		ss >> color.target_value().r() >> color.target_value().g() >> color.target_value().b() >> color.target_value().a() >> color.speed();
 	};
+
+	// get_game_main()->get_script_manager()->exec( "a = 0 for n = 1, 10 do a = a + n end" );
+	// int a = get_game_main()->get_script_manager()->get< int >( "a" );
+
+	get_script_manager()->set_function( "set_line_type", [this] ( int type )
+	{
+		drawing_line_type_index_  = math::clamp< int >( type, 0, DrawingLine::LINE_TYPE_MAX - 1 );
+	} );
 
 	command_map_[ "set_line_type" ] = [ & ] ( const string_t& s )
 	{
@@ -663,6 +672,9 @@ void GamePlayScene::restart()
 	setup_stage();
 
 	play_sound( "restart" );
+
+	get_script_manager()->exec( "a = 0" );
+	get_script_manager()->exec( "set_line_type( a )" );
 }
 
 void GamePlayScene::load_sound_all( bool is_final_stage )
@@ -1111,6 +1123,15 @@ void GamePlayScene::update()
  */
 void GamePlayScene::update_main()
 {
+	if ( get_input()->push( Input::A ) )
+	{
+		get_script_manager()->exec( "a = a + 1 set_line_type( a )" );
+	}
+	if ( get_input()->push( Input::B ) )
+	{
+		get_script_manager()->exec( "a = a - 1 set_line_type( a )" );
+	}
+
 	const float_t rotation_speed_rate = camera_->fov() / camera_->get_fov_default();
 
 	if ( get_oculus_rift() )
@@ -1497,29 +1518,10 @@ void GamePlayScene::go_to_next_scene()
  */
 void GamePlayScene::render()
 {
-	get_direct_3d()->setInputLayout( "main" );
-	
-	// render_text()
-	if ( get_direct_3d()->getFont() )
-	{
-		get_direct_3d()->begin2D();
-		get_direct_3d()->getFont()->begin();
+	render_to_oculus_vr();
+	render_to_display();
 
-		render_text();
-
-		get_direct_3d()->getFont()->end();
-		get_direct_3d()->end2D();
-	}
-
-	// render_3d()
-	{
-		get_direct_3d()->begin3D();
-
-		render_to_oculus_vr();
-		render_to_display();
-
-		get_direct_3d()->end3D();
-	}
+	render_text();
 }
 
 /**
@@ -1601,8 +1603,6 @@ void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 
 	render_sprite( ortho_offset );
 
-	get_direct_3d()->renderText();
-
 	render_fader();
 		
 	// render_debug_shadow_map_window();
@@ -1610,60 +1610,60 @@ void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 
 void GamePlayScene::render_text() const
 {
-	std::wstringstream ss;
+	std::stringstream ss;
 	ss.setf( std::ios_base::fixed, std::ios_base::floatfield );
 
 	if ( get_game_main()->is_display_fps() )
 	{
-		ss << L"FPS : " << get_main_loop()->get_last_fps() << std::endl;
-		ss << L"BPM : " << get_bpm() << std::endl;
-		ss << L"POS : " << player_->get_transform().getOrigin().x() << ", " << player_->get_transform().getOrigin().y() << ", " << player_->get_transform().getOrigin().z() << std::endl;
-		ss << L"step speed : " << player_->get_step_speed() << std::endl;
-		ss << L"last footing height : " << player_->get_last_footing_height() << std::endl;
-		ss << L"DX : " << player_->get_velocity().x() << std::endl;
-		ss << L"DY : " << player_->get_velocity().y() << std::endl;
-		ss << L"DZ : " << player_->get_velocity().z() << std::endl;
-		ss << L"VELOCITY : " << player_->get_velocity().length() << std::endl;
-		ss << L"Objects : " << get_active_object_manager()->active_object_list().size() << std::endl;
+		ss << "FPS : " << get_main_loop()->get_last_fps() << std::endl;
+		ss << "BPM : " << get_bpm() << std::endl;
+		ss << "POS : " << player_->get_transform().getOrigin().x() << ", " << player_->get_transform().getOrigin().y() << ", " << player_->get_transform().getOrigin().z() << std::endl;
+		ss << "step speed : " << player_->get_step_speed() << std::endl;
+		ss << "last footing height : " << player_->get_last_footing_height() << std::endl;
+		ss << "DX : " << player_->get_velocity().x() << std::endl;
+		ss << "DY : " << player_->get_velocity().y() << std::endl;
+		ss << "DZ : " << player_->get_velocity().z() << std::endl;
+		ss << "VELOCITY : " << player_->get_velocity().length() << std::endl;
+		ss << "Objects : " << get_active_object_manager()->active_object_list().size() << std::endl;
 
-		ss << L"mouse.dx : " << get_input()->get_mouse_dx() << std::endl;
-		ss << L"mouse.dy : " << get_input()->get_mouse_dy() << std::endl;
+		ss << "mouse.dx : " << get_input()->get_mouse_dx() << std::endl;
+		ss << "mouse.dy : " << get_input()->get_mouse_dy() << std::endl;
 
 		/*
-		ss << L"IS JUMPING : " << player_->is_jumping() << std::endl;
-		ss << L"ON FOOTING : " << player_->is_on_footing() << std::endl;
-		ss << L"ON LADDER : " << player_->is_on_ladder() << std::endl;
-		ss << L"IS FACING TO BLOCK : " << player_->is_facing_to_block() << std::endl;
-		ss << L"CAN CLAMBER : " << player_->can_clamber() << std::endl;
-		ss << L"CAN PEER DOWN : " << player_->can_peer_down() << std::endl;
-		ss << L"CAN THROW : " << player_->can_throw() << std::endl;
-		ss << L"IS CLAMBERING : " << player_->is_clambering() << std::endl;
-		ss << L"IS FALLING TO DIE : " << player_->is_falling_to_die() << std::endl;
-		ss << L"IS FALLING TO SAFE : " << player_->is_falling_to_safe() << std::endl;
+		ss << "IS JUMPING : " << player_->is_jumping() << std::endl;
+		ss << "ON FOOTING : " << player_->is_on_footing() << std::endl;
+		ss << "ON LADDER : " << player_->is_on_ladder() << std::endl;
+		ss << "IS FACING TO BLOCK : " << player_->is_facing_to_block() << std::endl;
+		ss << "CAN CLAMBER : " << player_->can_clamber() << std::endl;
+		ss << "CAN PEER DOWN : " << player_->can_peer_down() << std::endl;
+		ss << "CAN THROW : " << player_->can_throw() << std::endl;
+		ss << "IS CLAMBERING : " << player_->is_clambering() << std::endl;
+		ss << "IS FALLING TO DIE : " << player_->is_falling_to_die() << std::endl;
+		ss << "IS FALLING TO SAFE : " << player_->is_falling_to_safe() << std::endl;
 
-		ss << L"IS LADDER STEP ONLY : " << player_->is_ladder_step_only() << std::endl;
+		ss << "IS LADDER STEP ONLY : " << player_->is_ladder_step_only() << std::endl;
 
-		ss << L"BALLOON : " << ( player_->get_balloon() != nullptr ) << std::endl;
+		ss << "BALLOON : " << ( player_->get_balloon() != nullptr ) << std::endl;
 
 		if ( player_->get_balloon() )
 		{
-			ss << L"BALLOON : " << player_->get_balloon()->is_visible() << std::endl;
-			ss << L"BALLOON : " << player_->get_balloon()->is_mesh_visible() << std::endl;
-			ss << L"BALLOON : " << player_->get_balloon()->is_line_visible() << std::endl;
+			ss << "BALLOON : " << player_->get_balloon()->is_visible() << std::endl;
+			ss << "BALLOON : " << player_->get_balloon()->is_mesh_visible() << std::endl;
+			ss << "BALLOON : " << player_->get_balloon()->is_line_visible() << std::endl;
 		}
 		*/
 
 		if ( get_oculus_rift() )
 		{
-			ss << L"YAW : " << get_oculus_rift()->get_yaw() << std::endl;
-			ss << L"PITCH : " << get_oculus_rift()->get_pitch() << std::endl;
-			ss << L"ROLL : " << get_oculus_rift()->get_roll() << std::endl;
+			ss << "YAW : " << get_oculus_rift()->get_yaw() << std::endl;
+			ss << "PITCH : " << get_oculus_rift()->get_pitch() << std::endl;
+			ss << "ROLL : " << get_oculus_rift()->get_roll() << std::endl;
 
-			ss << L"DELTA YAW : " << get_oculus_rift()->get_delta_yaw() << std::endl;
+			ss << "DELTA YAW : " << get_oculus_rift()->get_delta_yaw() << std::endl;
 		}
 	}
 
-	get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );
+	get_graphics_manager()->draw_text( 10.f, 10.f, get_direct_3d()->get_width() - 10.f, get_direct_3d()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );
 }
 
 /**

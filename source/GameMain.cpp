@@ -53,6 +53,7 @@ namespace blue_sky
 GameMain::GameMain()
 	: total_elapsed_time_( 0.f )
 	, is_display_fps_( false )
+	, is_command_mode_( false )
 {
 	// common::log( "log/debug.log", "init" );
 
@@ -230,7 +231,48 @@ void GameMain::render()
 {
 	scene_->render();
 
-	direct_3d_->end();
+	if ( is_command_mode_ )
+	{
+		graphics_manager_->draw_text_at_center( ( "> " + user_command_ ).c_str(), Color::White );
+	}
+
+	direct_3d_->present();
+}
+
+void GameMain::on_key_down( char_t key )
+{
+	if ( is_command_mode_ )
+	{
+		edit_command( key );
+	}
+}
+
+void GameMain::edit_command( char_t key )
+{
+	if ( key == '\r' )
+	{
+		try
+		{
+			get_script_manager()->exec( user_command_ );
+		}
+		catch ( const ScriptError& e )
+		{
+			get_app()->show_error_message( e.what() );
+		}
+
+		user_command_ = "";
+	}
+	else if ( key == '\b' )
+	{
+		if ( user_command_.size() > 0 )
+		{
+			user_command_.resize( user_command_.size() - 1 );
+		}
+	}
+	else
+	{
+		user_command_ += key;
+	}
 }
 
 void GameMain::on_function_key_down( int function_key )
@@ -250,6 +292,11 @@ void GameMain::on_function_key_down( int function_key )
 	{
 		get_direct_3d()->switch_full_screen();
 		get_app()->set_full_screen( get_direct_3d()->is_full_screen() );
+	}
+
+	if ( function_key == 9 )
+	{
+		is_command_mode_ = ! is_command_mode_;
 	}
 
 	scene_->on_function_key_down( function_key );

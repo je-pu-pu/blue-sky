@@ -188,6 +188,15 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 
 		break;
 	}
+	case WM_CHAR:
+	{
+		if ( App::GetInstance()->game_ )
+		{
+			App::GetInstance()->game_->on_key_down( wp );
+		}
+
+		break;
+	}
 	case WM_MOUSEMOVE:
 	{
 		if ( ! App::GetInstance()->is_mouse_in_window_ )
@@ -350,6 +359,16 @@ void App::set_title( const char_t* t )
 	{
 		SetWindowText( hWnd, title_.c_str() );
 	}
+}
+
+/**
+ * エラーメッセージを表示する
+ *
+ * @param message エラーメッセージ
+ */
+void App::show_error_message( const char_t* message ) const
+{
+	MessageBox( hWnd, message, "ERROR", MB_OK );
 }
 
 void App::set_full_screen( bool full_screen )

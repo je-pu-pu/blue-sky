@@ -1,12 +1,15 @@
 #include "Direct3D11GraphicsManager.h"
-#include "Direct3D11Mesh.h"
 #include "Direct3D11TextureManager.h"
+#include "Direct3D11Mesh.h"
 #include "Direct3D11.h"
 
+#include <core/graphics/DirectWrite/DirectWrite.h>
 
 #include "ConstantBuffer.h"
 #include "DrawingMesh.h"
 #include "DrawingLine.h"
+
+#include <common/string.h>
 
 namespace blue_sky
 {
@@ -94,6 +97,73 @@ Direct3D11GraphicsManager::Texture* Direct3D11GraphicsManager::load_texture( con
 Direct3D11GraphicsManager::Texture* Direct3D11GraphicsManager::get_texture( const char_t* name )
 {
 	return direct_3d_->getTextureManager()->load( name, ( string_t( "media/model/" ) + name + ".png" ).c_str() );
+}
+
+/**
+ * ‰æ–Ê‚É•¶Žš—ñ‚ð•`‰æ‚·‚é
+ *
+ * @param x 
+ * @param y
+ * @param text •¶Žš—ñ
+ * @param color F
+ * @todo ‚‘¬‰»‚·‚é
+ */
+void Direct3D11GraphicsManager::draw_text( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color ) const
+{
+	if ( ! direct_3d_->getFont() )
+	{
+		return;
+	}
+
+	{
+		direct_3d_->begin2D();
+		direct_3d_->getFont()->begin();
+
+		direct_3d_->getFont()->draw_text( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), color );
+
+		direct_3d_->getFont()->end();
+		direct_3d_->end2D();
+	}
+
+	{
+		direct_3d_->setInputLayout( "main" );
+
+		direct_3d_->begin3D();
+		direct_3d_->renderText();
+		direct_3d_->end3D();
+	}
+}
+
+/**
+ * ‰æ–Ê‚Ì’†‰›‚É•¶Žš—ñ‚ð•`‰æ‚·‚é
+ *
+ * @param text •¶Žš—ñ
+ * @param color F
+ * @todo ‚‘¬‰»‚·‚é
+ */
+void Direct3D11GraphicsManager::draw_text_at_center( const char_t* text, const Color& color ) const
+{
+	if ( ! direct_3d_->getFont() )
+	{
+		return;
+	}
+
+	direct_3d_->begin2D();
+	direct_3d_->getFont()->begin();
+
+	float_t left = 0.f;
+	float_t top = ( direct_3d_->get_height() - direct_3d_->getFont()->get_font_height() ) / 2.f;
+	float_t right = static_cast< float_t >( direct_3d_->get_width() );
+	float_t bottom = top + direct_3d_->getFont()->get_font_height();
+
+	direct_3d_->getFont()->draw_text_center( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), color );
+
+	direct_3d_->getFont()->end();
+	direct_3d_->end2D();
+
+	direct_3d_->begin3D();
+	direct_3d_->renderText();
+	direct_3d_->end3D();
 }
 
 /**

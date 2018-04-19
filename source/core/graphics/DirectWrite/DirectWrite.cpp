@@ -27,7 +27,7 @@ DirectWrite::DirectWrite( IDXGISurface1* surface )
 		const wchar_t* font_family_name = L"uzura_font";
 
 		DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateCustomFontCollection( DirectWriteFontCollectionLoader::GetLoader(), font_file_path, strlen( font_file_path ) + 1, & font_collection_ ) );
-		DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateTextFormat( font_family_name, font_collection_, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 26.f, L"ja-jp", & text_format_ ) );
+		DIRECT_X_FAIL_CHECK( dwrite_factory_->CreateTextFormat( font_family_name, font_collection_, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, get_font_size(), L"ja-jp", & text_format_ ) );
 	}
 
 	// create_render_target()
@@ -50,6 +50,11 @@ DirectWrite::~DirectWrite()
 
 	DIRECT_X_RELEASE( dwrite_factory_ );
 	DIRECT_X_RELEASE( direct_2d_factory_ );
+}
+
+FLOAT DirectWrite::get_font_height() const
+{
+	return get_font_size() * ( 96.f / 72.f );
 }
 
 void DirectWrite::begin()

@@ -2,8 +2,11 @@
 #define BLUE_SKY_GAME_OBJECT_H
 
 #include <type/type.h>
+
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
+
+#include <functional>
 
 class btVector3;
 class btTransform;
@@ -50,6 +53,8 @@ public:
 	typedef btTransform			Transform;	
 	typedef btRigidBody			RigidBody;
 	typedef btDynamicsWorld		DynamicsWorld;
+
+	typedef std::function< void() > EventHandler;
 
 	static Vector3 GravityDefault;
 	static Vector3 GravityZero;
@@ -154,17 +159,7 @@ public:
 
 	bool is_moving_to( const GameObject* ) const;
 
-	/*
-	void* operator new ( size_t size )
-	{
-		return _aligned_malloc( size, 16 );
-	}
-
-	void operator delete ( void* p )
-	{
-		_aligned_free( p );
-	}
-	*/
+	virtual void add_event_handler( const char_t*, const EventHandler& ) { }
 
 }; // class GameObject
 

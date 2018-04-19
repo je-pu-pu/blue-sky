@@ -4,6 +4,16 @@
 #include "DrawingModelManager.h"
 #include "ActiveObjectPhysics.h"
 
+#include <GameObject/Balloon.h>
+#include <GameObject/Medal.h>
+#include <GameObject/Ladder.h>
+#include <GameObject/Rocket.h>
+#include <GameObject/Umbrella.h>
+#include <GameObject/Stone.h>
+#include <GameObject/Switch.h>
+#include <GameObject/AreaSwitch.h>
+#include <GameObject/TranslationObject.h>
+
 #include <GameObject/ActiveObject.h>
 #include <GameObject/StaticObject.h>
 
@@ -12,6 +22,19 @@ namespace blue_sky
 
 ActiveObjectManager::ActiveObjectManager()
 {
+	// object_creator_map_[ "girl"        ] = [] () -> ActiveObject* { return 0; };
+	// object_creator_map_[ "robot"       ] = [] () -> ActiveObject* { return 0; };
+
+	object_creator_map_[ "balloon"     ] = [] () -> ActiveObject* { return new Balloon();  };
+	object_creator_map_[ "medal"       ] = [] () -> ActiveObject* { return new Medal();    };
+	object_creator_map_[ "ladder"      ] = [] () -> ActiveObject* { return new Ladder();   };
+	object_creator_map_[ "rocket"      ] = [] () -> ActiveObject* { return new Rocket();   };
+	object_creator_map_[ "umbrella"    ] = [] () -> ActiveObject* { return new Umbrella(); };
+	object_creator_map_[ "stone"       ] = [] () -> ActiveObject* { return new Stone();    };
+	object_creator_map_[ "switch"      ] = [] () -> ActiveObject* { return new Switch();   };
+
+	// object_creator_map_[ "area-switch"        ] = [] () -> ActiveObject* { return 0; };
+	// object_creator_map_[ "translation-object" ] = [] () -> ActiveObject* { return 0; };
 	
 }
 
@@ -74,10 +97,27 @@ void ActiveObjectManager::set_target_direction_object( ActiveObject* active_obje
 }
 
 /**
+ * 指定した名前のオブジェクトを生成する
+ *
+ * @param name オブジェクト名
+ * @return 生成された ActiveObject
+ */
+ActiveObject* ActiveObjectManager::create_object( const string_t& name )
+{
+	ActiveObject* active_object = object_creator_map_.at( name )();
+
+	add_active_object( active_object );
+
+	return active_object;
+}
+
+/**
  * 文字列によりオブジェクトを生成する
  *
+ * @param ss オブジェクトを生成するためのパラメータ
+ * @param 
  */
-ActiveObject* ActiveObjectManager::create_object( std::stringstream& ss, DrawingModelManager* drawing_model_manager, ActiveObjectPhysics* physics )
+ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss, DrawingModelManager* drawing_model_manager, ActiveObjectPhysics* physics )
 {
 	string_t object_name;
 	float_t x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0;

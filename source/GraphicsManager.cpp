@@ -76,7 +76,16 @@ DrawingMesh* GraphicsManager::load_drawing_mesh( const char_t* name, common::saf
 		loaded = mesh->load_obj( ( file_path + ".obj" ).c_str() );
 	}
 
-	std::cout << "--- loaded " << name << " : " << t.elapsed() << "---" << std::endl;
+	if ( loaded )
+	{
+		std::cout << "--- loaded " << name << " : " << t.elapsed() << "---" << std::endl;
+	}
+	else
+	{
+		std::cout << "--- not found " << name << " : " << t.elapsed() << "---" << std::endl;
+	}
+
+	
 
 	return mesh;
 }

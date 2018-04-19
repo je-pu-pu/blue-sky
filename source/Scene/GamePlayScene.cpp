@@ -5,20 +5,15 @@
 
 #include "App.h"
 
-/// @todo GameObjectGenerator を作ってそこへ移動
+/// @todo ActiveObjectManager へ移動
 #include <GameObject/Player.h>
 #include <GameObject/Girl.h>
 #include <GameObject/Goal.h>
 #include <GameObject/Robot.h>
 #include <GameObject/Balloon.h>
-#include <GameObject/Rocket.h>
-#include <GameObject/Umbrella.h>
-#include <GameObject/Medal.h>
-#include <GameObject/Stone.h>
-#include <GameObject/Switch.h>
 #include <GameObject/AreaSwitch.h>
-#include <GameObject/Ladder.h>
 #include <GameObject/TranslationObject.h>
+
 
 #include "Camera.h"
 
@@ -375,7 +370,7 @@ void GamePlayScene::setup_command()
 		std::stringstream ss;
 		ss << s;
 
-		get_active_object_manager()->create_object( ss, get_drawing_model_manager(), get_physics() );
+		get_active_object_manager()->create_static_object( ss, get_drawing_model_manager(), get_physics() );
 	};
 	command_map_[ "game_object.set_mass" ] = [ & ] ( const string_t& s )
 	{
@@ -741,6 +736,7 @@ void GamePlayScene::load_sound_all( bool is_final_stage )
  * ステージファイルを読み込む
  *
  * @param file_name ステージファイル名
+ * @todo 整理する
  */
 void GamePlayScene::load_stage_file( const char* file_name )
 {
@@ -752,7 +748,6 @@ void GamePlayScene::load_stage_file( const char* file_name )
 	}
 
 	ActiveObject* last_object = 0;
-	BaseSwitch* last_base_switch = 0;
 
 	while ( in.good() )
 	{
@@ -767,8 +762,6 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		ss << line;
 
 		ss >> name;
-
-		ActiveObject* active_object = 0;
 
 		if ( name == "#" )
 		{
@@ -853,7 +846,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( name == "object" || name == "static-object" || name == "dynamic-object" )
 		{
-			last_object = get_active_object_manager()->create_object( ss, get_drawing_model_manager(), get_physics() );
+			last_object = get_active_object_manager()->create_static_object( ss, get_drawing_model_manager(), get_physics() );
 		}
 		else if ( name == "translation-object" )
 		{
@@ -908,47 +901,20 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			last_object = robot;
 		}
-		else if ( name == "balloon" )
+		else if ( name == "balloon" || name == "medal" || name == "ladder" || name == "rocket" || name == "umbrella" || name == "stone" || name == "switch" )
 		{
-			active_object = new Balloon();
+			ActiveObject* active_object = get_active_object_manager()->create_object( name );
 			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
-		}
-		else if ( name == "medal" )
-		{
-			active_object = new Medal();
-			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
-		}
-		else if ( name == "ladder" )
-		{
-			active_object = new Ladder();
-			active_object->set_drawing_model( get_drawing_model_manager()->load( "ladder-5" ) );
-			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
-			active_object->set_mass( 0 );
-		}
-		else if ( name == "rocket" )
-		{
-			active_object = new Rocket();
-			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
-		}
-		else if ( name == "umbrella" )
-		{
-			active_object = new Umbrella();
-			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
-		}
-		else if ( name == "stone" )
-		{
-			active_object = new Stone();
-			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
-		}
-		else if ( name == "switch" )
-		{
-			Switch* s = new Switch();
+			active_object->set_drawing_model( get_drawing_model_manager()->load( name.c_str() ) );
+			active_object->setup_animation_player();
 
-			active_object = s;
-			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
+			float x = 0, y = 0, z = 0, r = 0;
+			ss >> x >> y >> z >> r;
 
-			last_base_switch = s;
-			last_object = s;
+			active_object->set_start_location( x, y, z );
+			active_object->set_start_direction_degree( r );
+
+			last_object = active_object;
 		}
 		else if ( name == "area-switch" )
 		{
@@ -968,7 +934,6 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			get_active_object_manager()->add_active_object( s );
 
-			last_base_switch = s;
 			last_object = s;
 		}
 		else if ( name == "event" || name == "exec" )
@@ -1008,7 +973,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			if ( name == "event" )
 			{
-				last_base_switch->get_event_handler( event_name ).push_back( command_call );
+				last_object->add_event_handler( event_name.c_str(), command_call );
 			}
 			else
 			{
@@ -1031,27 +996,6 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		{
 			/// @todo コマンドに置き換える？
 			stage_config_->read_line( line );
-		}
-
-		if ( active_object )
-		{
-			float x = 0, y = 0, z = 0, r = 0;
-			ss >> x >> y >> z >> r;
-
-			if ( ! active_object->get_drawing_model() )
-			{
-				DrawingModel* drawing_model = get_drawing_model_manager()->load( name.c_str() );
-				active_object->set_drawing_model( drawing_model );
-			}
-
-			active_object->setup_animation_player();
-
-			active_object->set_start_location( x, y, z );
-			active_object->set_start_direction_degree( r );
-			
-			get_active_object_manager()->add_active_object( active_object );
-
-			last_object = active_object;
 		}
 	}
 }
@@ -1455,6 +1399,7 @@ void GamePlayScene::update_balloon_sound()
 		}
 	}
 
+	/// @todo 整理する
 	// ぶれるのでここでやる。
 	if ( player_->get_balloon() )
 	{

@@ -13,6 +13,7 @@
 class FbxFileLoader
 {
 public:
+	/// @todo Direct3D11 ‚Ö‚ÌˆË‘¶‚ğ’ŠÛ‰»‚·‚é
 	typedef Direct3D11Mesh Mesh;
 
 private:

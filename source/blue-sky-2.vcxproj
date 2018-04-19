@@ -97,6 +97,7 @@
     <ClInclude Include="BgSpriteLayer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantBuffer.h" />
+    <ClInclude Include="core\DirectX.h" />
     <ClInclude Include="core\graphics\Direct3D11\d3dx11effect.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Axis.h" />
@@ -236,13 +237,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)lib\debug;$(ProjectDir)debug;C:\Program Files\Autodesk\FBX\FBX SDK\2016.1.2\lib\vs2015\x86\debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)lib\$(Configuration);$(ProjectDir)$(Configuration);$(LibraryPath)</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)lib\release;$(ProjectDir)release;C:\Program Files\Autodesk\FBX\FBX SDK\2016.1.2\lib\vs2015\x86\release;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)lib\$(Configuration);$(ProjectDir)$(Configuration);$(LibraryPath)</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

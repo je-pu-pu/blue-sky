@@ -434,6 +434,9 @@
     <ClInclude Include="core\physics\Bullet\BulletPhysics.h">
       <Filter>core\Bullet</Filter>
     </ClInclude>
+    <ClInclude Include="core\DirectX.h">
+      <Filter>core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

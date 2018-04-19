@@ -28,12 +28,17 @@ public:
 	typedef std::map< ActiveObject*, std::tuple< float_t, float_t > > TargetDirectionMap;
 	typedef std::map< ActiveObject*, std::tuple< const ActiveObject*, float_t > > TargetDirectionObjectMap;
 
+	typedef std::function< ActiveObject* () > CreateObjectFunction;
+	
+
 private:
 	ActiveObjectList active_object_list_;
 	ActiveObjectMap named_active_object_map_;
 	TargetLocationMap target_location_map_;
 	TargetDirectionMap target_direction_map_;
 	TargetDirectionObjectMap target_direction_object_map_;
+
+	std::map< string_t, CreateObjectFunction > object_creator_map_;
 
 public:
 	ActiveObjectManager();
@@ -49,7 +54,8 @@ public:
 	void set_target_direction( ActiveObject* active_object, float_t, float_t speed );
 	void set_target_direction_object( ActiveObject* active_object, const ActiveObject* target_active_object, float_t speed );
 
-	ActiveObject* create_object( std::stringstream&, DrawingModelManager*, ActiveObjectPhysics* );
+	ActiveObject* create_object( const string_t& );
+	ActiveObject* create_static_object( std::stringstream&, DrawingModelManager*, ActiveObjectPhysics* );
 	ActiveObject* get_active_object( const string_t& name );
 
 	void update();

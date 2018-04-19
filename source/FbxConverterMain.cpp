@@ -1,22 +1,16 @@
 #include "App.h"
 
 #include "FbxFileLoader.h"
-#include "DirectX.h"
-#include "type.h"
 
 #include <common/log.h>
 #include <common/exception.h>
 #include <common/serialize.h>
 
+#include <type/type.h>
+
 #include <boost/filesystem/convenience.hpp>
 
 #include <windows.h>
-
-#include <dxerr.h>
-
-#include "memory.h"
-
-
 
 void convert_fbx()
 {

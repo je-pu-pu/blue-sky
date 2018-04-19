@@ -133,6 +133,11 @@ bool_t BaseSwitch::turn_off()
 	return true;
 }
 
+void BaseSwitch::add_event_handler( const char_t* name, const EventHandler& handler )
+{
+	event_handler_map_[ name ].push_back( handler );
+}
+
 bool_t BaseSwitch::can_game_object_switch( const GameObject* o ) const
 {
 	return ! contact_object_cache_.is_cached( o );

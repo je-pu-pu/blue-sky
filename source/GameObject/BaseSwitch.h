@@ -3,7 +3,6 @@
 
 #include "ActiveObject.h"
 #include <game/TimedCache.h>
-#include <functional>
 #include <list>
 
 namespace blue_sky
@@ -18,7 +17,6 @@ class BaseSwitch : public ActiveObject
 public:
 	enum State { OFF = 0, ON, BROKEN };
 
-	typedef std::function< void() > EventHandler;
 	typedef std::list< EventHandler > EventHandlerList;
 	typedef std::map< string_t, EventHandlerList > EventHandlerMap;
 
@@ -71,7 +69,7 @@ public:
 	bool_t turn_on();
 	bool_t turn_off();
 
-	EventHandlerList& get_event_handler( const string_t& name ) { return event_handler_map_[ name ]; }
+	void add_event_handler( const char_t*, const EventHandler& ) override;
 	
 }; // class Switch
 

@@ -63,6 +63,7 @@ private:
 
 	com_ptr< IDXGIAdapter1 >	dxgi_adapter_;
 
+	/// @todo スマートポインタ ( com_ptr ) 化する？
 	ID3D11Device*				device_;				///< Direct3D 11 Device
 	ID3D11DeviceContext*		immediate_context_;		///< Direct3D 11 Device Context
 	IDXGISwapChain*				swap_chain_;			///< Direct3D 11 Swap Chain

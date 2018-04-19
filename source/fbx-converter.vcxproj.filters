@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="FbxConverterMain.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Color.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Effect.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectPass.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Fader.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Material.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Mesh.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11MeshManager.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Rectangle.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Sprite.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Direct3D11TextureManager.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="BadDependencies">
+      <UniqueIdentifier>{92a62bcc-ccb7-4e3c-9fe9-0b804dc37b9c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Color.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Effect.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectPass.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Fader.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Material.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Mesh.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11MeshManager.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Rectangle.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Sprite.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Direct3D11TextureManager.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWrite.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileEnumerator.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -32,10 +32,10 @@ public:
 
 	virtual ~Direct3D11Texture() { }
 
-	uint_t get_width() const { return texture_2d_desc_.Width; }
-	uint_t get_height() const { return texture_2d_desc_.Height; }
+	uint_t get_width() const override { return texture_2d_desc_.Width; }
+	uint_t get_height() const override { return texture_2d_desc_.Height; }
 
-	void bind_to_ps( uint_t slot ) const
+	void bind_to_ps( uint_t slot ) const override
 	{
 		direct_3d_->bind_texture_to_ps( slot, this );
 	}

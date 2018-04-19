@@ -151,7 +151,6 @@ Direct3D11::~Direct3D11()
 
 	DIRECT_X_RELEASE( swap_chain_ );
 
-
 	if ( false )
 	{
 		ID3D11Debug* debug_ = 0;

@@ -8,6 +8,8 @@ void Ladder::restart()
 	ActiveObject::restart();
 
 	contact_object_cache_.clear();
+
+	set_mass( 0 );
 }
 
 void Ladder::update()

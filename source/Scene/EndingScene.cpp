@@ -31,16 +31,12 @@ EndingScene::EndingScene( const GameMain* game_main )
 	, drawing_accent_scale_( 1.f )
 	, in_fade_out_( false )
 {
-	get_graphics_manager()->setup_loader();
-	
 	load_sequence_file();
 	current_drawing_model_index_ = 0;
 	current_drawing_model_ = drawing_model_list_[ current_drawing_model_index_ ];
 	drawing_model_elapsed_time_ = 0.f;
 	drawing_model_stop_time_ = 0.f;
 	drawing_model_offset_ = 0.f;
-
-	get_graphics_manager()->cleanup_loader();
 
 	bgm_ = get_sound_manager()->load_music( "opening-of-the-day" );
 	switch_sound_ = get_sound_manager()->load( "switch-on" );

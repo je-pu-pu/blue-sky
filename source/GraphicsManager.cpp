@@ -14,23 +14,14 @@ namespace blue_sky
 {
 
 GraphicsManager::GraphicsManager()
+	: fbx_file_loader_( new FbxFileLoader() )
 {
 	
 }
 
 GraphicsManager::~GraphicsManager()
 {
-	cleanup_loader();
-}
 
-void GraphicsManager::setup_loader()
-{
-	fbx_file_loader_ = new FbxFileLoader();
-}
-
-void GraphicsManager::cleanup_loader()
-{
-	fbx_file_loader_.release();	
 }
 
 /**

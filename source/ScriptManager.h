@@ -5,7 +5,9 @@
 
 /**
  * Sol 2.20.0 では set_function() で関数追加後、定義されていない変数を使って関数を呼び出すと、
- * 例外が投げられた時に 8 バイトのメモリリークが発生する。これを回避するため例外を無効にする。
+ * エラーが発生すると同時に 8 バイトのメモリリークが発生する。
+ *
+ * @todo メモリリークを調査する or Sol のバージョンを変える
  */
 #define SOL_NO_EXCEPTIONS 1
 #include <sol/sol.hpp>
@@ -44,7 +46,7 @@ public:
 
 inline ScriptManager::ScriptManager()
 {
-	
+	// lua_.open_libraries( sol::lib::base, sol::lib::package );
 }
 
 inline ScriptManager::~ScriptManager()

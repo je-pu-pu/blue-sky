@@ -100,11 +100,18 @@ void ActiveObjectManager::set_target_direction_object( ActiveObject* active_obje
  * 指定した名前のオブジェクトを生成する
  *
  * @param name オブジェクト名
- * @return 生成された ActiveObject
+ * @return 生成された ActiveObject ( または失敗時に nullptr を返す )
  */
 ActiveObject* ActiveObjectManager::create_object( const string_t& name )
 {
-	ActiveObject* active_object = object_creator_map_.at( name )();
+	auto i = object_creator_map_.find( name );
+
+	if ( i == object_creator_map_.end() )
+	{
+		return nullptr;
+	}
+
+	ActiveObject* active_object = i->second();
 
 	add_active_object( active_object );
 

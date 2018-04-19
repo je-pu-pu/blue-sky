@@ -123,7 +123,12 @@ protected:
 
 	void load_sound_all( bool );
 	void setup_stage();
+	
 	void setup_command();
+	
+	// commands
+	ActiveObject* create_object( const char_t* );
+	void set_drawing_line_type( int );
 
 	void restart();
 

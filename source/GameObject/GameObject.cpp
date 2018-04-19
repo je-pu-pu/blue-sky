@@ -262,7 +262,7 @@ void GameObject::update_velocity_by_target_location( const Vector3& target_locat
 {
 	Vector3 relative_position = target_location - get_location();
 
-	if ( relative_position.length() )
+	if ( relative_position.length() > 0.f )
 	{
 		relative_position.normalize();
 		set_velocity( relative_position * speed );

@@ -99,8 +99,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// Sound
 	load_sound_all( get_stage_name() == "2-3" );
 
-	get_graphics_manager()->setup_loader();
-
 	// Player
 	player_ = new Player();
 	player_->set_drawing_model( get_drawing_model_manager()->load( "player" ) );
@@ -150,9 +148,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	scope_mesh_ = get_graphics_manager()->create_mesh();
 	scope_mesh_->load_obj( "media/model/scope.obj" );
 
-
-	get_graphics_manager()->cleanup_loader();
-
 	bgm_ = get_sound_manager()->get_sound( "bgm" );
 
 	if ( bgm_ )
@@ -197,8 +192,46 @@ void GamePlayScene::clear_delayed_command()
 }
 
 /**
+ * 手書き風線の種類を指定する
+ *
+ * @param type 手書き風線の種類
+ */
+void GamePlayScene::set_drawing_line_type( int type )
+{
+	drawing_line_type_index_ = math::clamp< int >( type, 0, DrawingLine::LINE_TYPE_MAX - 1 );
+}
+
+/**
+ * オブジェクトを生成する
+ *
+ * @param クラス名
+ * @todo 整理する。 loc, rot の指定をどうするか？ StaticObject の生成をどうするか？
+ */
+ActiveObject* GamePlayScene::create_object( const char_t* class_name )
+{
+	ActiveObject* active_object = get_active_object_manager()->create_object( class_name );
+
+	if ( ! active_object )
+	{
+		return 0;
+	}
+
+	active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
+	active_object->set_drawing_model( get_drawing_model_manager()->load( class_name ) );
+	active_object->setup_animation_player();
+
+	active_object->set_start_location( player_->get_location().x(), player_->get_location().y(), player_->get_location().z() + 3.f );
+	active_object->set_start_direction_degree( 0.f );
+
+	active_object->restart();
+
+	return active_object;
+}
+
+/**
  * コマンドを準備する
  *
+ * @todo Script に移行する
  */
 void GamePlayScene::setup_command()
 {
@@ -216,18 +249,18 @@ void GamePlayScene::setup_command()
 		ss >> color.target_value().r() >> color.target_value().g() >> color.target_value().b() >> color.target_value().a() >> color.speed();
 	};
 
-	// get_game_main()->get_script_manager()->exec( "a = 0 for n = 1, 10 do a = a + n end" );
-	// int a = get_game_main()->get_script_manager()->get< int >( "a" );
+	get_script_manager()->set_function( "set_drawing_line_type", [this] ( int type ) { set_drawing_line_type( type ); } );
+	get_script_manager()->set_function( "create_object", [this] ( const char_t* name ) { return create_object( name ); } );
 
-	get_script_manager()->set_function( "set_line_type", [this] ( int type )
+
+	get_script_manager()->set_function( "up", [this] ( ActiveObject* active_object, float_t v = 10.f )
 	{
-		drawing_line_type_index_  = math::clamp< int >( type, 0, DrawingLine::LINE_TYPE_MAX - 1 );
+		active_object->set_velocity( ActiveObject::Vector3( 0.f, v, 0.f ) );
 	} );
 
-	command_map_[ "set_line_type" ] = [ & ] ( const string_t& s )
+	command_map_[ "set_line_type" ] = [ this ] ( const string_t& s )
 	{
-		drawing_line_type_index_ = common::deserialize< int >( s );
-		drawing_line_type_index_ = math::clamp< int >( drawing_line_type_index_, 0, DrawingLine::LINE_TYPE_MAX - 1 );
+		set_drawing_line_type( common::deserialize< int >( s ) );
 	};
 	command_map_[ "set_paper_type" ] = [ & ] ( const string_t& s )
 	{
@@ -674,7 +707,7 @@ void GamePlayScene::restart()
 	play_sound( "restart" );
 
 	get_script_manager()->exec( "a = 0" );
-	get_script_manager()->exec( "set_line_type( a )" );
+	get_script_manager()->exec( "set_drawing_line_type( a )" );
 }
 
 void GamePlayScene::load_sound_all( bool is_final_stage )
@@ -915,11 +948,8 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( name == "balloon" || name == "medal" || name == "ladder" || name == "rocket" || name == "umbrella" || name == "stone" || name == "switch" )
 		{
-			ActiveObject* active_object = get_active_object_manager()->create_object( name );
-			active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
-			active_object->set_drawing_model( get_drawing_model_manager()->load( name.c_str() ) );
-			active_object->setup_animation_player();
-
+			ActiveObject* active_object = create_object( name.c_str() );
+			
 			float x = 0, y = 0, z = 0, r = 0;
 			ss >> x >> y >> z >> r;
 
@@ -1125,11 +1155,11 @@ void GamePlayScene::update_main()
 {
 	if ( get_input()->push( Input::A ) )
 	{
-		get_script_manager()->exec( "a = a + 1 set_line_type( a )" );
+		get_script_manager()->exec( "a = a + 1 set_drawing_line_type( a )" );
 	}
 	if ( get_input()->push( Input::B ) )
 	{
-		get_script_manager()->exec( "a = a - 1 set_line_type( a )" );
+		get_script_manager()->exec( "a = a - 1 set_drawing_line_type( a )" );
 	}
 
 	const float_t rotation_speed_rate = camera_->fov() / camera_->get_fov_default();

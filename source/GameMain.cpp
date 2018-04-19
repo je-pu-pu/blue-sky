@@ -22,6 +22,8 @@
 #include "SoundManager.h"
 #include "Sound.h"
 
+#include "ScriptManager.h"
+
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/Direct3D11GraphicsManager.h>
 #include <core/graphics/Direct3D11/Direct3D11BulletDebugDraw.h>
@@ -116,6 +118,8 @@ GameMain::GameMain()
 	sound_manager_->load( "ok" );
 	sound_manager_->load( "cancel" );
 	sound_manager_->load( "click" );
+
+	script_manager_ = new ScriptManager();
 
 	active_object_manager_ = new ActiveObjectManager();
 	drawing_model_manager_ = new DrawingModelManager();

@@ -35,6 +35,7 @@ namespace blue_sky
 
 	class GraphicsManager;
 	class SoundManager;
+	class ScriptManager;
 
 	class DrawingModel;
 	class DrawingModelManager;
@@ -74,6 +75,7 @@ protected:
 
 	common::auto_ptr< GraphicsManager >		graphics_manager_;		///< GraphicsManager
 	common::auto_ptr< SoundManager >		sound_manager_;			///< SoundManager
+	common::auto_ptr< ScriptManager >		script_manager_;		///< ScriptManager
 
 	common::auto_ptr< Config >				save_data_;				///< Save Data
 
@@ -122,6 +124,7 @@ public:
 
 	GraphicsManager* get_graphics_manager() const { return graphics_manager_.get(); }
 	SoundManager* get_sound_manager() const { return sound_manager_.get(); }
+	ScriptManager* get_script_manager() const { return script_manager_.get(); }
 
 	ActiveObjectManager* get_active_object_manager() const { return active_object_manager_.get(); }
 

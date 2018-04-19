@@ -4,13 +4,14 @@
 #include "ConstantBuffer.h"
 #include "GraphicsManager.h"
 
+#include "SoundManager.h"
+#include "Sound.h"
+
+#include "ScriptManager.h"
+
 #include <core/graphics/Direct3D11/Direct3D11Effect.h>
 #include <core/graphics/Direct3D11/Direct3D11Fader.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
-
-
-#include "SoundManager.h"
-#include "Sound.h"
 
 #include <game/MainLoop.h>
 
@@ -21,7 +22,8 @@ Scene::Scene( const GameMain* game_main )
 	: game_main_( game_main )
 	, total_elapsed_time_( 0.f )
 {
-	
+	get_game_main()->get_script_manager()->exec( "a = 0 for n = 1, 10 do a = a + n end" );
+	int a = get_game_main()->get_script_manager()->get< int >( "a" );
 }
 
 Scene::~Scene()

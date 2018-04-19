@@ -41,6 +41,7 @@ public:
 	/**
 	 * ’¸“_î•ñ
 	 *
+	 * @todo game::Mesh or blue_sky::Mesh ‚ÉˆÚ“®‚·‚é
 	 */
 	struct Vertex
 	{

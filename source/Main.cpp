@@ -31,7 +31,6 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE /* hPrevInst */, LPSTR /* lpszCmd
 	}
 	catch ( const common::exception< HRESULT >& e )
 	{
-		
 		std::string message = std::string( "exception on " ) + e.file() + ":" + common::serialize( e.line() ) + "\n";
 
 		LPVOID output = 0;

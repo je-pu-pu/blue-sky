@@ -437,6 +437,7 @@
     <ClInclude Include="core\DirectX.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="ScriptManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

@@ -132,9 +132,6 @@
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Color.cpp">
       <Filter>core\Direct3D11</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11ConstantBuffer.cpp">
-      <Filter>core\Direct3D11</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Effect.cpp">
       <Filter>core\Direct3D11</Filter>
     </ClCompile>
@@ -200,6 +197,9 @@
     </ClCompile>
     <ClCompile Include="core\physics\Bullet\BulletPhysics.cpp">
       <Filter>core\Bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\DebugScene.cpp">
+      <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -439,6 +439,9 @@
     </ClInclude>
     <ClInclude Include="ScriptManager.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Scene\DebugScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -446,7 +449,6 @@
   <ItemGroup>
     <None Include="blue-sky.config" />
     <None Include="blye-sky.ico" />
-    <None Include="media\shader\main.fx" />
     <None Include="media\stage\2-3.stage">
       <Filter>Stage</Filter>
     </None>
@@ -495,6 +497,12 @@
     <None Include="media\stage_ext\ext-2.stage">
       <Filter>Stage</Filter>
     </None>
+    <None Include="media\shader\main.fx">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="media\shader\drawing_line.hlsl">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Drawing">
@@ -532,6 +540,9 @@
     </Filter>
     <Filter Include="core\Bullet">
       <UniqueIdentifier>{b0f122bc-1ef3-4d7f-9dca-f528879b0c06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader">
+      <UniqueIdentifier>{4fcc5bdb-7666-4a3f-a4b8-33cc3692d47d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

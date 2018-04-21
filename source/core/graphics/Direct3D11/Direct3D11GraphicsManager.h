@@ -28,6 +28,9 @@ private:
 	std::unique_ptr< FrameDrawingConstantBuffer >	frame_drawing_render_data_;
 	std::unique_ptr< ObjectConstantBuffer >			shared_object_render_data_;
 
+protected:
+	void set_input_layout( const char_t* ) const override;
+
 public:
 	Direct3D11GraphicsManager( Direct3D* );
 	virtual ~Direct3D11GraphicsManager();
@@ -41,10 +44,6 @@ public:
 	Texture* load_texture( const char_t*, const char_t* ) override;
 	Texture* get_texture( const char_t* ) override;
 
-	/// @todo ‚¿‚á‚ñ‚Æì‚é Font, size, w’è‚µ‚½ Texture ‚Ö‚Ì•`‰æ
-	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
-	void draw_text_at_center( const char_t*, const Color& ) const override;
-
 	void unload_texture( const char_t* ) override;
 	void unload_texture_all() override;
 
@@ -52,6 +51,13 @@ public:
 	FrameConstantBuffer* get_frame_render_data() const override { return frame_render_data_.get(); }
 	FrameDrawingConstantBuffer* get_frame_drawing_render_data() const override { return frame_drawing_render_data_.get(); }
 	ObjectConstantBuffer* get_shared_object_render_data() const override { return shared_object_render_data_.get(); }
+
+	void setup_rendering() const override;
+	void render_technique( const char_t*, const std::function< void () >& ) const override;
+
+	/// @todo ‚¿‚á‚ñ‚Æì‚é Font, size, w’è‚µ‚½ Texture ‚Ö‚Ì•`‰æ
+	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
+	void draw_text_at_center( const char_t*, const Color& ) const override;
 
 }; // class GraphicsManager
 

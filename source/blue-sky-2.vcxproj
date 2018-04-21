@@ -21,7 +21,6 @@
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Axis.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Color.cpp" />
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11ConstantBuffer.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Effect.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectPass.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.cpp" />
@@ -76,6 +75,7 @@
     <ClCompile Include="OculusRift.cpp" />
     <ClCompile Include="OggVorbisFile.cpp" />
     <ClCompile Include="Scene\CanvasTestScene.cpp" />
+    <ClCompile Include="Scene\DebugScene.cpp" />
     <ClCompile Include="Scene\EndingScene.cpp" />
     <ClCompile Include="Scene\GamePlayScene.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
@@ -167,6 +167,7 @@
     <ClInclude Include="OggVorbisFile.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene\CanvasTestScene.h" />
+    <ClInclude Include="Scene\DebugScene.h" />
     <ClInclude Include="Scene\EndingScene.h" />
     <ClInclude Include="Scene\GamePlayScene.h" />
     <ClInclude Include="Scene\Scene.h" />
@@ -205,6 +206,11 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="media\shader\drawing_line.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5DB1FAFC-E068-43A8-84D3-0DA42D464BE5}</ProjectGuid>

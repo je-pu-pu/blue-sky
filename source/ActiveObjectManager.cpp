@@ -238,6 +238,7 @@ void ActiveObjectManager::update()
 		i->first->update_velocity_by_target_location( std::get< 0 >( i->second ), std::get< 1 >( i->second ) );
 		// i->first->set_location( std::get< 0 >( i->second ) );
 
+		/// @todo 目的座標に到達したかの判定をもう少し正確にする
 		if ( ( std::get< 0 >( i->second ) - i->first->get_location() ).length() < 0.1f )
 		{
 			i->first->on_arrive_at_target_location();
@@ -265,9 +266,11 @@ void ActiveObjectManager::update()
  * 全ての ActiveObject を描画する
  *
  */
+/*
 void ActiveObjectManager::render()
 {
 
 }
+*/
 
 }; // namespace blue_sky

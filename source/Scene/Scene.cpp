@@ -7,6 +7,10 @@
 #include "SoundManager.h"
 #include "Sound.h"
 
+#include <ActiveObjectManager.h>
+#include <ActiveObjectPhysics.h>
+#include <DrawingModelManager.h>
+
 // #include "ScriptManager.h"
 
 #include <core/graphics/Direct3D11/Direct3D11Effect.h>
@@ -235,19 +239,7 @@ void Scene::bind_shared_object_render_data() const
  */
 void Scene::render_technique( const char_t* technique_name, std::function< void() > function ) const
 {
-	const auto* technique = get_direct_3d()->getEffect()->getTechnique( technique_name );
-	
-	if ( ! technique )
-	{
-		return;
-	}
-
-	for ( const auto& pass : technique->getPassList() )
-	{
-		pass->apply();
-
-		function();
-	}
+	get_graphics_manager()->render_technique( technique_name, function  );
 }
 
 void Scene::render_fader() const
@@ -265,6 +257,29 @@ void Scene::render_fader() const
 
 		get_direct_3d()->getFader()->render();
 	} );
+}
+
+/**
+ * オブジェクトを生成する
+ *
+ * @param class_name  クラス名
+ * @return 生成したオブジェクト
+ * @todo 整理する。 loc, rot の指定をどうするか？ StaticObject の生成をどうするか？ Scenegraph に移動？
+ */
+ActiveObject* Scene::create_object( const char_t* class_name )
+{
+	ActiveObject* active_object = get_active_object_manager()->create_object( class_name );
+
+	if ( ! active_object )
+	{
+		return 0;
+	}
+
+	active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
+	active_object->set_drawing_model( get_drawing_model_manager()->load( class_name ) );
+	active_object->setup_animation_player();
+
+	return active_object;
 }
 
 } // namespace blue_sky

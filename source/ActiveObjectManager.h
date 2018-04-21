@@ -59,7 +59,7 @@ public:
 	ActiveObject* get_active_object( const string_t& name );
 
 	void update();
-	void render();
+	// void render();
 
 	ActiveObjectList& active_object_list() { return active_object_list_; }
 	const ActiveObjectList& active_object_list() const { return active_object_list_; }

@@ -54,6 +54,7 @@ cbuffer GameConstantBuffer : register( b0 )
 
 cbuffer FrameConstantBuffer : register( b1 )
 {
+	/// @todo ViewProejction としてまとめる
 	matrix View;			// ビュー変換行列
 	matrix Projection;		// プロジェクション変換行列
 	float4 Light;			// 光源の向き ( 正規化済み ) 
@@ -123,7 +124,6 @@ struct GS_LINE_INPUT
 {
 	float4 Position : SV_POSITION;
 	float4 Color    : COLOR0;
-	float Depth     : TEXCOORD1; /// ???
 };
 
 struct PS_INPUT
@@ -149,6 +149,8 @@ struct PS_SHADOW_INPUT
 	float2 TexCoord : TEXCOORD4;
 	float Depth : TEXCOORD5;
 };
+
+#include "drawing_line.hlsl"
 
 PS_INPUT vs_main( VS_INPUT input, uint vertex_id : SV_VertexID )
 {
@@ -216,6 +218,7 @@ PS_FLAT_INPUT vs_flat( VS_INPUT input, uint vertex_id : SV_VertexID )
 	return output;
 }
 
+/// @todo drawing_line.hlsl に移動
 GS_LINE_INPUT vs_drawing_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID )
 {
 	GS_LINE_INPUT output;
@@ -225,16 +228,18 @@ GS_LINE_INPUT vs_drawing_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID
     output.Position = mul( output.Position, Projection );
 
 	output.Color = input.Color + ObjectColor;
-	
-	output.Depth = mul( mul( input.Position, World ), View ).z;
 
 	// 色を変動させる
 	static const float color_random_range = 0.1f;
 
-	output.Color.r += ( ( ( uint( Time * 5 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
-	output.Color.g += ( ( ( uint( Time * 15 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
-	output.Color.b += ( ( ( uint( Time * 25 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
-	// output.Color.a -= ( ( uint( Time * 5 ) + vertex_id ) % 8 ) / 8.f * 0.5f;
+	/// @todo 描画毎に vertex_id が変動する場合があるため色がちらつく問題に対応する
+	if ( false )
+	{
+		output.Color.r += ( ( ( uint( Time *  5 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
+		output.Color.g += ( ( ( uint( Time * 15 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
+		output.Color.b += ( ( ( uint( Time * 25 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
+		// output.Color.a -= ( ( uint( Time * 5 ) + vertex_id ) % 8 ) / 8.f * 0.5f;
+	}
 
 	// ぶらす
 	if ( false )
@@ -247,8 +252,19 @@ GS_LINE_INPUT vs_drawing_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID
 	return output;
 }
 
+/**
+ * 手書き風の線を生成する
+ *
+ * input  : 0----------1
+ *
+ * output : 0----------2
+ *          |          |
+ *          1----------3
+ *
+ * @todo drawing_line.hlsl に移動
+ */
 [maxvertexcount(4)]
-void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
+void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> Stream, uint primitive_id : SV_PrimitiveID )
 {
 	static const uint input_vertex_count = 2;
 	static const uint output_vertex_count = 4;
@@ -257,10 +273,6 @@ void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_
 	const float screen_height = ScreenHeight;
 	const float screen_ratio = ( screen_height / screen_width );
 
-	static const float w_fix = 1.f;
-	static const float z_fix = 0.f;
-
-	// static const float z_offset = 0.f;
 	static const float z_offset = -0.00001f;
 	
 	[unroll]
@@ -325,14 +337,19 @@ void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_
 
 		line_width = min( line_width, line_length ); // 線の長さが短い場合に線の幅が太くならないようにする
 
-		float angle = atan2( ly, lx );
-		angle += Pi / 2.f;
+		// 線の向きを 90 度回転させた角度
+		const float line_width_angle = atan2( ly, lx ) + Pi / 2.f;
 
-		float dx = cos( angle ) * line_width * screen_ratio;
-		float dy = sin( angle ) * line_width;
+		float dx = cos( line_width_angle ) * line_width * screen_ratio;
+		float dy = sin( line_width_angle ) * line_width;
 
 		PS_FLAT_INPUT output[ 4 ];
 
+		/**
+		 * 1----------------------------------------3
+		 * |                                        |
+		 * 0----------------------------------------2
+		 */
 		output[ 0 ].Position = input[ n ].Position + float4( -dx, -dy, 0.f, 0.f );
 		output[ 0 ].TexCoord = float2( line_u_origin, line_v_origin );
 		output[ 0 ].Color = input[ 0 ].Color;
@@ -352,11 +369,10 @@ void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_
 		for ( uint x = 0; x < output_vertex_count; ++x )
 		{
 			output[ x ].Position.xyz *= output[ x ].Position.w;
-
-			TriStream.Append( output[ x ] );
+			Stream.Append( output[ x ] );
 		}
-		
-		TriStream.RestartStrip();
+
+		Stream.RestartStrip();
 	}
 }
 
@@ -416,7 +432,7 @@ float4 ps_with_paper_common( float3 position, float2 uv, float diffuse )
 	return model_texture.Sample( wrap_texture_sampler, uv ) * shadow; // * cascade_colors[ cascade_index ];
 }
 
-float4 ps_drawing_line( noperspective PS_FLAT_INPUT input ) : SV_Target
+float4 ps_drawing_line( PS_FLAT_INPUT input ) : SV_Target
 {
 	return ( line_texture.Sample( u_wrap_texture_sampler, input.TexCoord ) + input.Color ); // * float4( 1.f, 1.f, 1.f, 0.5f );
 }
@@ -639,6 +655,7 @@ RasterizerState Default
 {
 	CullMode = BACK;
 	// CullMode = NONE;
+	// DepthClipEnable = False;
 	MultisampleEnable = True;
 };
 
@@ -928,6 +945,7 @@ technique11 skin_with_shadow
 // ----------------------------------------
 technique11 drawing_line
 {
+	/*
 	pass main
 	{
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
@@ -938,6 +956,31 @@ technique11 drawing_line
 		SetPixelShader( CompileShader( ps_4_0, ps_drawing_line() ) );
 
 		RASTERIZERSTATE = Default;
+	}
+	*/
+
+	pass debug
+	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_drawing_line_debug() ) );
+		SetGeometryShader( CompileShader( gs_4_0, gs_drawing_line_debug() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_drawing_line_debug() ) );
+
+		RASTERIZERSTATE = Debug;
+	}
+
+	pass debug_line
+	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_drawing_line_debug() ) );
+		SetGeometryShader( CompileShader( gs_4_0, gs_drawing_line_debug_line() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_drawing_line_debug_line() ) );
+
+		RASTERIZERSTATE = Debug;
 	}
 }
 

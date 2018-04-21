@@ -29,10 +29,35 @@ public:
 	ScriptManager();
 	~ScriptManager();
 
+	/*
+	template< typename ResultType, typename... ArgTypes >
+	void set_function( const string_t& name, const std::function< ResultType ( ArgTypes... ) >& function )
+	{
+		lua_.set_function( name, [ function ] ( ArgTypes... args... ) -> ResultType
+		{
+			try
+			{
+				return function( args... );
+			}
+			catch ( ... )
+			{
+
+			}
+		} );
+	}
+	*/
+
+	/**
+	 * スクリプトから呼び出せる関数を設定する
+	 *
+	 * @param name スクリプトから呼び出す時の関数名
+	 * @param function 関数
+	 * @todo 関数が例外を投げた時にキャッチできるようにする
+	 */
 	template< typename FunctionType >
 	void set_function( const string_t& name, const FunctionType& function )
 	{
-		lua_.set_function( name, function );
+		lua_.set_function( name, function);
 	}
 
 	void exec( const string_t& );
@@ -57,6 +82,20 @@ inline ScriptManager::~ScriptManager()
 inline void ScriptManager::exec( const string_t& script )
 {
 	auto result = lua_.safe_script( script );
+
+	/*
+	sol::protected_function_result result;
+
+	try
+	{
+		result = lua_.safe_script( script );
+	}
+	catch ( ... )
+	{
+		ScriptError e( "unknown script error." );
+		throw e;
+	}
+	*/
 
 	if ( ! result.valid() )
 	{

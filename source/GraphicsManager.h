@@ -10,6 +10,8 @@
 #include <common/safe_ptr.h>
 #include <common/auto_ptr.h>
 
+#include <functional>
+
 class SkinningAnimationSet;
 class FbxFileLoader;
 
@@ -26,6 +28,8 @@ namespace blue_sky
 class DrawingMesh;
 class DrawingLine;
 
+class ActiveObjectManager;
+
 /**
  * グラフィック管理クラス
  *
@@ -37,6 +41,9 @@ public:
 
 private:
 	common::auto_ptr< FbxFileLoader> fbx_file_loader_;
+
+protected:
+	virtual void set_input_layout( const char_t* ) const = 0;
 
 public:
 	GraphicsManager();
@@ -50,10 +57,6 @@ public:
 	
 	virtual Texture* load_texture( const char_t*, const char_t* ) = 0;
 	virtual Texture* get_texture( const char_t* ) = 0;
-	
-	/// @todo ちゃんと作る Font, size, 指定した Texture への描画
-	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
-	virtual void draw_text_at_center( const char_t*, const Color& ) const = 0;
 
 	virtual void unload_texture( const char_t* ) = 0;
 	virtual void unload_texture_all() = 0;
@@ -62,6 +65,16 @@ public:
 	virtual FrameConstantBuffer* get_frame_render_data() const = 0;
 	virtual FrameDrawingConstantBuffer* get_frame_drawing_render_data() const = 0;
 	virtual ObjectConstantBuffer* get_shared_object_render_data() const = 0;
+
+	virtual void setup_rendering() const = 0;
+	virtual void render_technique( const char_t*, const std::function< void () >& ) const = 0;
+	virtual void render_active_objects( const ActiveObjectManager* ) const;
+
+	/// @todo ちゃんと作る Font, size, 指定した Texture への描画
+	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
+	virtual void draw_text_at_center( const char_t*, const Color& ) const = 0;
+
+	// void update_frame_render_data( const Camera*, const Vector3& ) const;
 
 }; // class GraphicsManager
 

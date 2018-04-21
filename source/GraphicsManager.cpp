@@ -3,6 +3,9 @@
 #include "DrawingLine.h"
 #include "FbxFileLoader.h"
 
+#include <DrawingModel.h>
+#include <ActiveObjectManager.h>
+
 #include <common/timer.h>
 #include <common/exception.h>
 
@@ -101,5 +104,105 @@ DrawingLine* GraphicsManager::load_drawing_line( const char_t* name )
 
 	return line;
 }
+
+/**
+ * 全ての ActiveObject を描画する
+ *
+ * @todo shadow_map_, paper_texture_ に対応し GamePlayScene の render_object_mesh(), render_object_line() を置き換える
+ */
+void GraphicsManager::render_active_objects( const ActiveObjectManager* active_object_manager ) const
+{
+	for ( const auto& active_object : active_object_manager->active_object_list() )
+	{
+		active_object->update_render_data();
+	}
+
+	set_input_layout( "main" );
+
+	render_technique( "|main_flat", [ this, active_object_manager ]
+	{
+		/// @todo 必要な定数バッファを必要なシェーダーにだけバインドするようにする
+		get_game_render_data()->bind_to_all();
+		get_frame_render_data()->bind_to_all();
+		get_frame_drawing_render_data()->bind_to_all();
+
+		for ( const auto* active_object : active_object_manager->active_object_list() )
+		{
+			if ( ! active_object->get_drawing_model()->is_skin_mesh() )
+			{
+				active_object->render_mesh();
+			}
+		}
+	} );
+
+	set_input_layout( "skin" );
+
+	render_technique( "|skin_flat", [ this, active_object_manager ]
+	{
+		/*
+		get_game_render_data()->bind_to_vs();
+		get_game_render_data()->bind_to_gs();
+		
+		get_frame_render_data()->bind_to_vs();
+
+		get_frame_drawing_render_data()->bind_to_gs();
+		*/
+
+		get_game_render_data()->bind_to_all();
+		get_frame_render_data()->bind_to_all();
+		get_frame_drawing_render_data()->bind_to_all();
+
+		/*
+		paper_texture_->bind_to_ps( 2 );
+
+		if ( shadow_map_ )
+		{
+			shadow_map_->ready_to_render_scene();
+		}
+		*/
+
+		for ( const auto* active_object : active_object_manager->active_object_list() )
+		{
+			if ( active_object->get_drawing_model()->is_skin_mesh() )
+			{
+				active_object->render_mesh();
+			}
+		}
+	} );
+
+	// setup_rendering();
+
+	set_input_layout( "line" );
+
+	render_technique( "|drawing_line", [ this, active_object_manager ]
+	{
+		/// @todo 必要な定数バッファを必要なシェーダーにだけバインドするようにする
+		get_game_render_data()->bind_to_all();
+		get_frame_render_data()->bind_to_all();
+		get_frame_drawing_render_data()->bind_to_all();
+
+		for ( const auto* active_object : active_object_manager->active_object_list() )
+		{
+			active_object->render_line();
+		}
+	} );
+}
+
+/*
+void GraphicsManager::update_frame_render_data( const Camera* camera_ )
+{
+	FrameConstantBufferData frame_constant_buffer_data;
+	update_frame_constant_buffer_data_sub( frame_constant_buffer_data );
+
+	Vector eye( camera_->position().x(), camera_->position().y(), camera_->position().z() );
+	Vector at( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z() );
+	Vector up( camera_->up().x(), camera_->up().y(), camera_->up().z() );
+
+	frame_constant_buffer_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
+	frame_constant_buffer_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();
+
+	get_frame_render_data()->update( & frame_constant_buffer_data );
+}
+*/
 
 }

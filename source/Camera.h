@@ -11,6 +11,7 @@ class Player;
 /**
  * ƒJƒƒ‰
  *
+ * @todo GameObject ‰»‚µ‚Ä ActiveObjectManager ‚ÅŠÇ—‚·‚é
  */
 class Camera
 {
@@ -44,6 +45,8 @@ public:
 	~Camera();
 
 	void restart();
+
+	Vector3& position() { return position_; }
 
 	const Vector3& position() const { return position_; }
 	const Vector3& look_at() const { return look_at_; }

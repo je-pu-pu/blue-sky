@@ -249,11 +249,13 @@ void ActiveObject::update_render_data() const
 /**
  * 描画用の定数バッファをシェーダーに設定する
  *
+ * @todo 必要なシェーダーにだけ設定できるようにする？
  */
 void ActiveObject::bind_render_data() const
 {
 	get_object_constant_buffer()->bind_to_vs();
-	get_object_constant_buffer()->bind_to_ps();
+	// get_object_constant_buffer()->bind_to_gs();
+	// get_object_constant_buffer()->bind_to_ps(); // 必要？
 }
 
 /**

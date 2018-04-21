@@ -10,7 +10,10 @@ namespace blue_sky
 {
 
 Camera::Camera()
-	: default_front_( 0.f, 0.f, 1.f )
+	: position_()
+	, look_at_( 0.f, 0.f, 1.f )
+	, up_( 0.f, 1.f, 0.f )
+	, default_front_( 0.f, 0.f, 1.f )
 	, default_right_( 1.f, 0.f, 0.f )
 	, default_up_( 0.f, 1.f, 0.f )
 	, fov_( 60.f )

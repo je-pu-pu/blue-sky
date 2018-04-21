@@ -204,21 +204,18 @@ void GamePlayScene::set_drawing_line_type( int type )
 /**
  * オブジェクトを生成する
  *
- * @param クラス名
+ * @param class_name クラス名
+ * @return 生成したオブジェクト
  * @todo 整理する。 loc, rot の指定をどうするか？ StaticObject の生成をどうするか？
  */
 ActiveObject* GamePlayScene::create_object( const char_t* class_name )
 {
-	ActiveObject* active_object = get_active_object_manager()->create_object( class_name );
+	ActiveObject* active_object = Scene::create_object( class_name );
 
 	if ( ! active_object )
 	{
 		return 0;
 	}
-
-	active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
-	active_object->set_drawing_model( get_drawing_model_manager()->load( class_name ) );
-	active_object->setup_animation_player();
 
 	active_object->set_start_location( player_->get_location().x(), player_->get_location().y(), player_->get_location().z() + 3.f );
 	active_object->set_start_direction_degree( 0.f );
@@ -1387,8 +1384,8 @@ void GamePlayScene::update_balloon_sound()
 		}
 		else if ( balloon_sound_type_ == BALLOON_SOUND_TYPE_SCALE )
 		{
-			// int r = math::clamp( balloon_sound_request, 1, 7 );
-			int r = ( balloon_sound_request - 1 ) % 7 + 1;
+			int r = math::clamp( balloon_sound_request, 1, 7 );
+			// int r = ( balloon_sound_request - 1 ) % 7 + 1;
 
 			for ( int n = 1; n <= 7; n++ )
 			{
@@ -1621,6 +1618,9 @@ void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 	get_direct_3d()->setInputLayout( "skin" );
 	render_object_skin_mesh();
 
+	// debug
+	get_direct_3d()->clear_default_view();
+
 	get_direct_3d()->setInputLayout( "line" );
 
 	render_object_line();
@@ -1699,18 +1699,19 @@ void GamePlayScene::render_text() const
 /**
  * フレーム毎に更新する必要のある描画用の定数バッファを更新する
  *
+ * @todo GraphicsManager か ActiveObjectManager か Scenegraph に移動する
+
  */
 void GamePlayScene::update_render_data_for_frame() const
 {
+	// get_graphic_manager()->update_render_data_for_frame( camera_ );
+
 	FrameConstantBufferData frame_constant_buffer_data;
 	update_frame_constant_buffer_data_sub( frame_constant_buffer_data );
 
 	Vector eye( camera_->position().x(), camera_->position().y(), camera_->position().z() );
 	Vector at( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z() );
 	Vector up( camera_->up().x(), camera_->up().y(), camera_->up().z() );
-
-	Matrix test_t;
-	test_t.set_translation( -1.f, 0.f, 0.f );
 
 	frame_constant_buffer_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
 	frame_constant_buffer_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();

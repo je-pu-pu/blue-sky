@@ -1,6 +1,7 @@
 #include "Direct3D11GraphicsManager.h"
 #include "Direct3D11TextureManager.h"
 #include "Direct3D11Mesh.h"
+#include "Direct3D11Effect.h"
 #include "Direct3D11.h"
 
 #include <core/graphics/DirectWrite/DirectWrite.h>
@@ -97,6 +98,52 @@ Direct3D11GraphicsManager::Texture* Direct3D11GraphicsManager::load_texture( con
 Direct3D11GraphicsManager::Texture* Direct3D11GraphicsManager::get_texture( const char_t* name )
 {
 	return direct_3d_->getTextureManager()->load( name, ( string_t( "media/model/" ) + name + ".png" ).c_str() );
+}
+
+/**
+ * 描画のセットアップを行う
+ *
+ */
+void Direct3D11GraphicsManager::setup_rendering() const
+{
+	direct_3d_->setInputLayout( "main" );
+
+	direct_3d_->clear_default_view();
+
+	direct_3d_->set_default_render_target();
+	direct_3d_->set_default_viewport();
+}
+
+/**
+ * 入力レイアウトを指定する
+ *
+ */
+void Direct3D11GraphicsManager::set_input_layout( const char_t* name ) const
+{
+	direct_3d_->setInputLayout( name );
+}
+
+/**
+ * 指定したテクニックの全てのパスでレンダリング処理を実行する
+ *
+ * @param technique_name テクニック名
+ * @param function レンダリング処理
+ */
+void Direct3D11GraphicsManager::render_technique( const char_t* technique_name, const std::function< void() >& function ) const
+{
+	const auto* technique = direct_3d_->getEffect()->getTechnique( technique_name );
+	
+	if ( ! technique )
+	{
+		return;
+	}
+
+	for ( const auto& pass : technique->getPassList() )
+	{
+		pass->apply();
+
+		function();
+	}
 }
 
 /**

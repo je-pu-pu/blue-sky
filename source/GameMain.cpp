@@ -1,12 +1,14 @@
 #include "GameMain.h"
 #include "App.h"
 
-#include <Scene/CanvasTestScene.h>
 #include <Scene/TitleScene.h>
 #include <Scene/StageSelectScene.h>
 #include <Scene/StoryTextScene.h>
 #include <Scene/GamePlayScene.h>
 #include <Scene/EndingScene.h>
+
+#include <Scene/CanvasTestScene.h>
+#include <Scene/DebugScene.h>
 
 #include "DrawingModelManager.h"
 #include "ActiveObjectManager.h"
@@ -341,8 +343,9 @@ void GameMain::setup_scene()
 {
 	if ( true )
 	{
-		set_stage_name( "0-0" );
-		setup_scene( "game_play" );
+		// set_stage_name( "0-1" );
+		// setup_scene( "game_play" );
+		setup_scene( "debug" );
 
 		return;
 	}
@@ -383,11 +386,7 @@ void GameMain::setup_scene( const string_t& scene_name )
 	sound_manager_->pop_group();
 	sound_manager_->push_group( scene_name.c_str() );
 	
-	if ( false )
-	{
-		scene_ = new CanvasTestScene( this );
-	}
-	else if ( scene_name == "title" )
+	if ( scene_name == "title" )
 	{
 		scene_ = new TitleScene( this );
 	}
@@ -410,6 +409,11 @@ void GameMain::setup_scene( const string_t& scene_name )
 	else if ( scene_name == "ending" )
 	{
 		scene_ = new EndingScene( this );
+	}
+	else if ( true )
+	{
+		scene_ = new DebugScene( this );
+		// scene_ = new CanvasTestScene( this );
 	}
 	else
 	{

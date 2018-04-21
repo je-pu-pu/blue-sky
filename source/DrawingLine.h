@@ -18,7 +18,7 @@ namespace blue_sky
 /**
  * è•`‚«•—ƒ‰ƒCƒ“
  *
- * @todo ’ŠÛ‰»‚·‚é
+ * @todo Direct3D11 ‚©‚ç’ŠÛ‰»‚·‚é
  */
 class DrawingLine : public game::Line
 {

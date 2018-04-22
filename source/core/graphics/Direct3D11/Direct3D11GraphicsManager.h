@@ -57,6 +57,11 @@ public:
 	void unload_texture( const char_t* ) override;
 	void unload_texture_all() override;
 
+	void set_shadow_color( const Color& ) override;
+	void set_shadow_paper_color( const Color& ) override;
+	void set_drawing_accent( float_t ) override;
+	void set_drawing_line_type( int_t ) override;
+
 	GameConstantBuffer* get_game_render_data() const override { return game_render_data_.get(); }
 	FrameConstantBuffer* get_frame_render_data() const override { return frame_render_data_.get(); }
 	FrameDrawingConstantBuffer* get_frame_drawing_render_data() const override { return frame_drawing_render_data_.get(); }

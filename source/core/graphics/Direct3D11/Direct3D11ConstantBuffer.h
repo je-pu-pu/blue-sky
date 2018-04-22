@@ -5,7 +5,6 @@
 
 class Direct3D11;
 
-
 /**
  * Direct3D11 定数バッファ
  *
@@ -74,5 +73,28 @@ public:
 	}
 
 }; // class Direct3D11ConstantBuffer
+
+/**
+ * Direct3D11 定数バッファ ( 更新用のデータも内部に保持するバージョン )
+ *
+ */
+template< typename T >
+class Direct3D11ConstantBufferWithData : public Direct3D11ConstantBuffer< T >
+{
+protected:
+	Data data_;
+
+public:
+	Direct3D11ConstantBufferWithData( Direct3D11* direct_3d )
+		: Direct3D11ConstantBuffer( direct_3d )
+	{
+
+	}
+
+	Data& data() { return data_; }
+	const Data& data() const { return data_; }
+
+	void update() const { Direct3D11ConstantBuffer::update( & data_ ); }
+};
 
 #endif // DIRECT_3D_11_CONSTANT_BUFFER_H

@@ -122,6 +122,65 @@ Direct3D11GraphicsManager::Texture* Direct3D11GraphicsManager::get_texture( cons
 }
 
 /**
+ * 指定した名前のテクスチャをアンロードする
+ *
+ * @param name テクスチャ名
+ */
+void Direct3D11GraphicsManager::unload_texture( const char_t* name )
+{
+	direct_3d_->getTextureManager()->unload( name );
+}
+
+/**
+ * 全てのテクスチャをアンロードする
+ *
+ */
+void Direct3D11GraphicsManager::unload_texture_all()
+{
+	direct_3d_->getTextureManager()->unload_all();
+}
+
+/**
+ * 影の色を設定する
+ *
+ * @param color 影の色
+ */
+void Direct3D11GraphicsManager::set_shadow_color( const Color& color )
+{
+	frame_drawing_render_data_->data().shadow_color = color;
+}
+
+/**
+ * 影の紙テクスチャの色を設定する
+ *
+ * @param color 影の紙テクスチャの色
+ */
+void Direct3D11GraphicsManager::set_shadow_paper_color( const Color& color )
+{
+	frame_drawing_render_data_->data().shadow_paper_color = color;
+}
+
+/**
+ * 手書き風表現のアクセントを設定する
+ *
+ * @param accent アクセント
+ */
+void Direct3D11GraphicsManager::set_drawing_accent( float_t accent )
+{
+	frame_drawing_render_data_->data().accent = accent;
+}
+
+/**
+ * 手書き風線のタイプを設定する
+ *
+ * @param type 手書き風線のタイプ
+ */
+void Direct3D11GraphicsManager::set_drawing_line_type( int_t type )
+{
+	frame_drawing_render_data_->data().line_type = math::clamp< int >( type, 0, DrawingLine::LINE_TYPE_MAX - 1 );
+}
+
+/**
  * 描画のセットアップを行う
  *
  */
@@ -133,6 +192,9 @@ void Direct3D11GraphicsManager::setup_rendering() const
 
 	direct_3d_->set_default_render_target();
 	direct_3d_->set_default_viewport();
+
+	/// @todo 毎フレーム行う必要があるか？
+	frame_drawing_render_data_->update();
 }
 
 /**
@@ -312,25 +374,5 @@ void Direct3D11GraphicsManager::render_debug_bullet() const
 		GameMain::get_instance()->get_bullet_debug_draw()->render();
 	} );
 }
-
-/**
- * 指定した名前のテクスチャをアンロードする
- *
- * @param name テクスチャ名
- */
-void Direct3D11GraphicsManager::unload_texture( const char_t* name )
-{
-	direct_3d_->getTextureManager()->unload( name );
-}
-
-/**
- * 全てのテクスチャをアンロードする
- *
- */
-void Direct3D11GraphicsManager::unload_texture_all()
-{
-	direct_3d_->getTextureManager()->unload_all();
-}
-
 
 } // namespace blue_sky

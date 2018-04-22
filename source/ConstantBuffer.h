@@ -66,6 +66,8 @@ struct FrameDrawingConstantBufferData : public BaseConstantBufferData< 4 >
 	FrameDrawingConstantBufferData()
 		: shadow_color( 0.f, 0.f, 0.f, 0.f )
 		, shadow_paper_color( 0.f, 0.f, 0.f, 0.f )
+		, accent( 0.f )
+		, line_type( 0 )
 	{ }
 };
 
@@ -86,7 +88,7 @@ struct BoneConstantBufferData : public BaseConstantBufferData< 5 >
 
 typedef Direct3D11ConstantBuffer< GameConstantBufferData > GameConstantBuffer;
 typedef Direct3D11ConstantBuffer< FrameConstantBufferData > FrameConstantBuffer;
-typedef Direct3D11ConstantBuffer< FrameDrawingConstantBufferData > FrameDrawingConstantBuffer;
+typedef Direct3D11ConstantBufferWithData< FrameDrawingConstantBufferData > FrameDrawingConstantBuffer;
 typedef Direct3D11ConstantBuffer< ObjectConstantBufferData > ObjectConstantBuffer;
 typedef Direct3D11ConstantBuffer< ObjectExtentionConstantBufferData > ObjectExtentionConstantBuffer;
 typedef Direct3D11ConstantBuffer< BoneConstantBufferData > BoneConstantBuffer;

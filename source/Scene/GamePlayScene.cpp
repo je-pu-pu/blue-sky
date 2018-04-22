@@ -188,16 +188,6 @@ void GamePlayScene::clear_delayed_command()
 }
 
 /**
- * 手書き風線の種類を指定する
- *
- * @param type 手書き風線の種類
- */
-void GamePlayScene::set_drawing_line_type( int type )
-{
-	drawing_line_type_index_ = math::clamp< int >( type, 0, DrawingLine::LINE_TYPE_MAX - 1 );
-}
-
-/**
  * オブジェクトを生成する
  *
  * @param class_name クラス名
@@ -245,12 +235,11 @@ void GamePlayScene::setup_command()
 		ss >> color.target_value().r() >> color.target_value().g() >> color.target_value().b() >> color.target_value().a() >> color.speed();
 	};
 
-	get_script_manager()->set_function( "set_drawing_line_type", [this] ( int type ) { set_drawing_line_type( type ); } );
 	get_script_manager()->set_function( "create_object_at_player_front", [this] ( const char_t* name ) { return create_object_at_player_front( name ); } );
 
 	command_map_[ "set_line_type" ] = [ this ] ( const string_t& s )
 	{
-		set_drawing_line_type( common::deserialize< int >( s ) );
+		get_graphics_manager()->set_drawing_line_type( common::deserialize< int >( s ) );
 	};
 	command_map_[ "set_paper_type" ] = [ & ] ( const string_t& s )
 	{
@@ -681,7 +670,6 @@ void GamePlayScene::restart()
 	is_cleared_ = false;
 	action_bgm_after_timer_ = 0.f;
 
-	drawing_line_type_index_ = 0;
 	paper_texture_ = paper_texture_list_[ 0 ];
 
 	player_->restart();
@@ -1762,15 +1750,12 @@ void GamePlayScene::update_frame_constant_buffer_data_sub( FrameConstantBufferDa
  */
 void GamePlayScene::update_render_data_for_frame_drawing() const
 {
-	/// @todo 整理する
-	FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
+	/// @todo GraphicsManager が管理する
+	get_graphics_manager()->set_shadow_color( shadow_color_.value() );
+	get_graphics_manager()->set_shadow_paper_color( shadow_paper_color_.value() );
+	get_graphics_manager()->set_drawing_accent( bgm_ ? bgm_->get_current_peak_level() * drawing_accent_scale_ : 0.f );
 
-	frame_drawing_constant_buffer_data.accent = bgm_ ? bgm_->get_current_peak_level() * drawing_accent_scale_ : 0.f;
-	frame_drawing_constant_buffer_data.line_type = drawing_line_type_index_;
-	frame_drawing_constant_buffer_data.shadow_color = shadow_color_.value();
-	frame_drawing_constant_buffer_data.shadow_paper_color = shadow_paper_color_.value();
-
-	get_graphics_manager()->get_frame_drawing_render_data()->update( & frame_drawing_constant_buffer_data );
+	get_graphics_manager()->get_frame_drawing_render_data()->update();
 }
 
 /**

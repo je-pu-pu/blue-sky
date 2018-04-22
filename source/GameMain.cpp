@@ -166,6 +166,12 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "set_loc", [] ( ActiveObject* o, float x, float y, float z ) { o->set_location( x, y, z ); } );
 	get_script_manager()->set_function( "set_rot", [] ( ActiveObject* o, float r ) { o->set_direction_degree( r ); } );
 
+	// GrahpicsManager
+	get_script_manager()->set_function( "set_shadow_color", [this] ( const Color& color ) { get_graphics_manager()->set_shadow_color( color); } );
+	get_script_manager()->set_function( "set_shadow_paper_color", [this] ( const Color& color ) { get_graphics_manager()->set_shadow_paper_color( color); } );
+	get_script_manager()->set_function( "set_drawing_accent", [this] ( float_t accent ) { get_graphics_manager()->set_drawing_accent( accent ); } );
+	get_script_manager()->set_function( "set_drawing_line_type", [this] ( int_t type ) { get_graphics_manager()->set_drawing_line_type( type ); } );
+
 	// debug
 	get_script_manager()->set_function( "debug_axis", [this] ( int on ) { get_graphics_manager()->set_debug_axis_enabled( on ); } );
 	get_script_manager()->set_function( "debug_bullet", [this] ( int mode ) { bullet_debug_draw_->setDebugMode( mode ); } );

@@ -66,6 +66,11 @@ public:
 	virtual void unload_texture( const char_t* ) = 0;
 	virtual void unload_texture_all() = 0;
 
+	virtual void set_shadow_color( const Color& ) = 0;
+	virtual void set_shadow_paper_color( const Color& ) = 0;
+	virtual void set_drawing_accent( float_t ) = 0;
+	virtual void set_drawing_line_type( int_t ) = 0;
+
 	virtual GameConstantBuffer* get_game_render_data() const = 0;
 	virtual FrameConstantBuffer* get_frame_render_data() const = 0;
 	virtual FrameDrawingConstantBuffer* get_frame_drawing_render_data() const = 0;

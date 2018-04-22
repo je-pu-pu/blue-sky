@@ -95,9 +95,9 @@ protected:
 
 	float_t								bpm_;
 
+	/// @todo GraphicsManager に移行する
 	std::vector< Texture* >				paper_texture_list_;
 	Texture*							paper_texture_;
-	uint_t								drawing_line_type_index_;
 	float_t								drawing_accent_scale_;	///< ( 0 : アクセントを完全に無効化 ) .. ( 2 : アクセント 2 倍 ) ..
 	
 	common::chase_value< Vector3, float_t >		light_position_;
@@ -125,7 +125,6 @@ protected:
 	
 	// commands
 	ActiveObject* create_object_at_player_front( const char_t* );
-	void set_drawing_line_type( int );
 
 	void restart();
 

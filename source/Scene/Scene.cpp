@@ -153,6 +153,11 @@ void Scene::stop_sound( const char* name ) const
 	}
 }
 
+/***
+ * スプライト描画のための定数バッファを更新する
+ *
+ * @todo GraphicsManager に移行する
+ */
 void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t drawing_accent_scale )
 {
 	{
@@ -166,12 +171,10 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 	}
 
 	{
-		FrameDrawingConstantBufferData frame_drawing_constant_buffer_data;
+		get_graphics_manager()->set_drawing_accent( get_bgm()->get_current_peak_level() * drawing_accent_scale );
+		get_graphics_manager()->set_drawing_line_type( line_type );
 
-		frame_drawing_constant_buffer_data.accent = get_bgm()->get_current_peak_level() * drawing_accent_scale;
-		frame_drawing_constant_buffer_data.line_type = line_type;
-
-		get_graphics_manager()->get_frame_drawing_render_data()->update( & frame_drawing_constant_buffer_data );
+		get_graphics_manager()->get_frame_drawing_render_data()->update();
 	}
 
 	{

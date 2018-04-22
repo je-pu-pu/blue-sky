@@ -151,12 +151,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		bgm_->play( stage_config_->get( "bgm.loop", true ) );
 	}
 
-	paper_texture_list_.push_back( get_graphics_manager()->load_texture( "paper-0", "media/texture/pencil-face-1.png" ) );
-	paper_texture_list_.push_back( get_graphics_manager()->load_texture( "paper-1", "media/texture/pen-face-1-loop.png" ) );
-	paper_texture_list_.push_back( get_graphics_manager()->load_texture( "paper-2", "media/texture/pen-face-2-loop.png" ) );
-	paper_texture_list_.push_back( get_graphics_manager()->load_texture( "paper-3", "media/texture/dot-face-1.png" ) );
-	paper_texture_list_.push_back( get_graphics_manager()->load_texture( "paper-4", "media/texture/brush-face-1.png" ) );
-	paper_texture_ = paper_texture_list_.front();
+	get_graphics_manager()->load_paper_textures();
 
 	restart();
 }
@@ -243,9 +238,7 @@ void GamePlayScene::setup_command()
 	};
 	command_map_[ "set_paper_type" ] = [ & ] ( const string_t& s )
 	{
-		int paper_texture_index = common::deserialize< int >( s );
-		paper_texture_index = math::clamp< int >( paper_texture_index, 0, paper_texture_list_.size() - 1 );
-		paper_texture_ = paper_texture_list_[ paper_texture_index ];
+		get_graphics_manager()->set_paper_texture_type( common::deserialize< int >( s ) );
 	};
 	command_map_[ "set_balloon_sound_type" ] = [ & ] ( const string_t& s )
 	{
@@ -670,7 +663,7 @@ void GamePlayScene::restart()
 	is_cleared_ = false;
 	action_bgm_after_timer_ = 0.f;
 
-	paper_texture_ = paper_texture_list_[ 0 ];
+	get_graphics_manager()->set_paper_texture_type( 0 );
 
 	player_->restart();
 	goal_->restart();
@@ -1297,7 +1290,17 @@ void GamePlayScene::update_main()
 		player_->add_direction_degree( add_direction_degree_by_mouse + add_direction_degree_by_hmd );
 		camera_->rotate_degree_target().y() = player_->get_direction_degree();
 
-		get_graphics_manager()->fade_in( 0.05f );
+		if ( player_->is_falling_to_die() )
+		{
+			// 落ちて死のうとしている場合は白くフェードアウトする
+
+			get_graphics_manager()->set_fade_color( Color( 1.f, 1.f, 1.f, 0.5f ) );
+			get_graphics_manager()->fade_out( 0.01f );
+		}
+		else
+		{
+			get_graphics_manager()->fade_in( 0.05f );
+		}
 	}
 	else
 	{
@@ -1932,7 +1935,7 @@ void GamePlayScene::render_object_skin_mesh() const
 
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
-		paper_texture_->bind_to_ps( 2 );
+		get_graphics_manager()->bind_paper_texture();
 
 		if ( shadow_map_ )
 		{
@@ -1976,7 +1979,7 @@ void GamePlayScene::render_object_mesh() const
 		
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
-		paper_texture_->bind_to_ps( 2 );
+		get_graphics_manager()->bind_paper_texture();
 
 		if ( shadow_map_ )
 		{

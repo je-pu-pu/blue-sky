@@ -96,8 +96,6 @@ protected:
 	float_t								bpm_;
 
 	/// @todo GraphicsManager に移行する
-	std::vector< Texture* >				paper_texture_list_;
-	Texture*							paper_texture_;
 	float_t								drawing_accent_scale_;	///< ( 0 : アクセントを完全に無効化 ) .. ( 2 : アクセント 2 倍 ) ..
 	
 	common::chase_value< Vector3, float_t >		light_position_;

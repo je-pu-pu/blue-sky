@@ -8,6 +8,8 @@
 
 #include <AnimationPlayer.h>
 
+#include <game/Texture.h>
+
 #include <common/timer.h>
 #include <common/exception.h>
 
@@ -21,7 +23,6 @@ namespace blue_sky
 GraphicsManager::GraphicsManager()
 	: fbx_file_loader_( new FbxFileLoader() )
 {
-	
 }
 
 GraphicsManager::~GraphicsManager()
@@ -108,6 +109,54 @@ DrawingLine* GraphicsManager::load_drawing_line( const char_t* name )
 }
 
 /**
+ * 紙テクスチャを読み込む
+ *
+ */
+void GraphicsManager::load_paper_textures()
+{
+	paper_texture_list_.clear();
+
+	paper_texture_list_.push_back( load_texture( "paper-0", "media/texture/pencil-face-1.png" ) );
+	paper_texture_list_.push_back( load_texture( "paper-1", "media/texture/pen-face-1-loop.png" ) );
+	paper_texture_list_.push_back( load_texture( "paper-2", "media/texture/pen-face-2-loop.png" ) );
+	paper_texture_list_.push_back( load_texture( "paper-3", "media/texture/dot-face-1.png" ) );
+	paper_texture_list_.push_back( load_texture( "paper-4", "media/texture/brush-face-1.png" ) );
+
+	paper_texture_ = paper_texture_list_.front();
+}
+
+/**
+ * 紙テクスチャのタイプを設定する
+ *
+ * @param type 紙テクスチャのタイプ
+ */
+void GraphicsManager::set_paper_texture_type( int_t type )
+{
+	if ( paper_texture_list_.size() > 0 )
+	{
+		type = math::clamp< int >( type, 0, paper_texture_list_.size() - 1 );
+		paper_texture_ = paper_texture_list_[ type ];
+	}
+	else
+	{
+		paper_texture_ = 0;
+	}
+}
+
+/**
+ * 紙テクスチャをシェーダーにバインドする
+ *
+ * @todo unload_texture(), unload_texture_all() でテクスチャがアンロードされた場合に正しく対応する
+ */
+void GraphicsManager::bind_paper_texture() const
+{
+	if ( paper_texture_ )
+	{
+		paper_texture_->bind_to_ps( 2 );
+	}
+}
+
+/**
  * 全ての ActiveObject を描画する
  *
  * @todo shadow_map_, paper_texture_ に対応し GamePlayScene の render_object_mesh(), render_object_line() を置き換える
@@ -127,6 +176,8 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 		get_game_render_data()->bind_to_all();
 		get_frame_render_data()->bind_to_all();
 		get_frame_drawing_render_data()->bind_to_all();
+
+		bind_paper_texture();
 
 		for ( const auto* active_object : active_object_manager->active_object_list() )
 		{
@@ -154,8 +205,9 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 		get_frame_render_data()->bind_to_all();
 		get_frame_drawing_render_data()->bind_to_all();
 
+		bind_paper_texture();
+
 		/*
-		paper_texture_->bind_to_ps( 2 );
 
 		if ( shadow_map_ )
 		{

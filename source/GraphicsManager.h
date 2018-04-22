@@ -10,6 +10,7 @@
 #include <common/safe_ptr.h>
 #include <common/auto_ptr.h>
 
+#include <vector>
 #include <functional>
 
 class SkinningAnimationSet;
@@ -41,6 +42,9 @@ public:
 	typedef game::Texture Texture;
 
 private:
+	std::vector< Texture* >		paper_texture_list_;
+	Texture*					paper_texture_ = 0;
+
 	common::auto_ptr< FbxFileLoader> fbx_file_loader_;
 	bool is_debug_axis_enabled_ = true;
 
@@ -63,8 +67,13 @@ public:
 	virtual Texture* load_texture( const char_t*, const char_t* ) = 0;
 	virtual Texture* get_texture( const char_t* ) = 0;
 
+	void load_paper_textures();
+
 	virtual void unload_texture( const char_t* ) = 0;
 	virtual void unload_texture_all() = 0;
+
+	void set_paper_texture_type( int_t );
+	void bind_paper_texture() const;
 
 	virtual void set_shadow_color( const Color& ) = 0;
 	virtual void set_shadow_paper_color( const Color& ) = 0;

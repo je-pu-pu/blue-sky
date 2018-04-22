@@ -3,8 +3,11 @@
 #include "Direct3D11Mesh.h"
 #include "Direct3D11Effect.h"
 #include "Direct3D11Fader.h"
+#include "Direct3D11Axis.h"
+#include "Direct3D11BulletDebugDraw.h"
 #include "Direct3D11.h"
 
+#include <GameMain.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
 
 #include "ConstantBuffer.h"
@@ -27,6 +30,7 @@ Direct3D11GraphicsManager::Direct3D11GraphicsManager( Direct3D* direct_3d )
 	, frame_render_data_( new FrameConstantBuffer( direct_3d ) )
 	, frame_drawing_render_data_( new FrameDrawingConstantBuffer( direct_3d ) )
 	, shared_object_render_data_( new ObjectConstantBuffer( direct_3d ) )
+	, debug_axis_( new Direct3D11Axis( direct_3d_ ) )
 {
 
 }
@@ -283,6 +287,30 @@ void Direct3D11GraphicsManager::draw_text_at_center( const char_t* text, const C
 	direct_3d_->begin3D();
 	direct_3d_->renderText();
 	direct_3d_->end3D();
+}
+
+/**
+ * デバッグ用の軸を描画する
+ *
+ */
+void Direct3D11GraphicsManager::render_debug_axis_model() const
+{
+	debug_axis_->render();
+}
+
+/**
+ * Bullet デバッグ
+ *
+ */
+void Direct3D11GraphicsManager::render_debug_bullet() const
+{
+	render_technique( "|bullet", [this]
+	{
+		get_game_render_data()->bind_to_vs();
+		get_frame_render_data()->bind_to_vs();
+
+		GameMain::get_instance()->get_bullet_debug_draw()->render();
+	} );
 }
 
 /**

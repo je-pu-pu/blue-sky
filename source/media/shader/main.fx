@@ -864,62 +864,8 @@ technique11 billboard
 	}
 }
 
-// ----------------------------------------
-// for debug axis
-// ----------------------------------------
-VS_LINE_INPUT vs_line( VS_LINE_INPUT input )
-{
-	input.Position = mul( input.Position, World );
-    input.Position = mul( input.Position, View );
-    input.Position = mul( input.Position, Projection );
-
-	return input;
-}
-
-float4 ps_line( VS_LINE_INPUT input ) : SV_Target
-{
-	return float4( input.Color.x, input.Color.y, input.Color.z, 1.f );
-}
-
-technique11 simple_line
-{
-	pass main
-	{
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
-		
-		SetVertexShader( CompileShader( vs_4_0, vs_line() ) );
-		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_line() ) );
-	}
-}
-
-// ----------------------------------------
-// for Bullet debug
-// ----------------------------------------
-VS_LINE_INPUT vs_bullet_debug( VS_LINE_INPUT input )
-{
-	VS_LINE_INPUT output;
-
-	output.Position = mul( input.Position, View );
-    output.Position = mul( output.Position, Projection );
-	output.Color = input.Color;
-
-	return output;
-}
-
-technique11 bullet
-{
-	pass main
-	{
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
-
-		SetVertexShader( CompileShader( vs_4_0, vs_bullet_debug() ) );
-		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_line() ) );
-	}
-}
+#include "debug_axis.hlsl"
+#include "debug_bullet.hlsl"
 
 // ----------------------------------------
 // for Shadow Map

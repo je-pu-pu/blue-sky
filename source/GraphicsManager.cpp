@@ -6,6 +6,8 @@
 #include <DrawingModel.h>
 #include <ActiveObjectManager.h>
 
+#include <AnimationPlayer.h>
+
 #include <common/timer.h>
 #include <common/exception.h>
 
@@ -186,6 +188,83 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 			active_object->render_line();
 		}
 	} );
+}
+
+/**
+ * デバッグ用の軸を表示する
+ *
+ */
+void GraphicsManager::render_debug_axis( const ActiveObjectManager* active_object_manager ) const
+{
+	if ( ! is_debug_axis_enabled_ )
+	{
+		return;
+	}
+
+	render_technique( "|simple_line", [ this, active_object_manager ]
+	{
+		get_frame_render_data()->bind_to_all();
+
+		for ( const auto* active_object : active_object_manager->active_object_list() )
+		{
+			active_object->bind_render_data();
+
+			render_debug_axis_model();
+
+			render_debug_axis_for_bones( active_object );
+		}
+	} );
+}
+
+/**
+ * ActiveObject の全ボーンに対してデバッグ用の軸を表示する
+ *
+ */
+void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_object ) const
+{
+	if ( active_object->is_dead() )
+	{
+		return;
+	}
+
+	if ( ! active_object->get_animation_player() )
+	{
+		return;
+	}
+	
+	get_shared_object_render_data()->bind_to_vs();
+	get_shared_object_render_data()->bind_to_ps();
+
+	AnimationPlayer::BoneConstantBuffer::Data bone_constant_buffer_data;
+	active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix::identity() );
+
+	for ( uint_t n = 0; n < active_object->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )
+	{
+		const Matrix& bone_offset_matrix = active_object->get_animation_player()->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( n );
+		const Matrix& bone_matrix = bone_offset_matrix * bone_constant_buffer_data.bone_matrix[ n ];
+		// const Matrix& bone_matrix = bone_offset_matrix;
+
+		const btTransform& trans = active_object->get_transform();
+
+		Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
+
+		ObjectConstantBufferData buffer_data;
+
+		buffer_data.world = Matrix().set_scaling( 0.1f, 0.1f, 0.1f );
+		buffer_data.world *= bone_matrix;
+		buffer_data.world *= Matrix().set_rotation_quaternion( q );
+		buffer_data.world *= Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+		buffer_data.world = buffer_data.world.transpose();
+
+		if ( active_object->get_drawing_model()->get_line() )
+		{
+			buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
+		}
+
+		get_shared_object_render_data()->update( & buffer_data );
+
+		render_debug_axis_model();
+	}
 }
 
 /*

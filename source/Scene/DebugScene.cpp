@@ -38,7 +38,6 @@ void DebugScene::update()
 
 	const float moving_speed = 0.1f;
 
-	/*
 	if ( get_input()->press( Input::LEFT ) )
 	{
 		camera_->position().x() -= moving_speed;
@@ -63,12 +62,14 @@ void DebugScene::update()
 	{
 		camera_->position().y() += moving_speed;
 	}
-	*/
 
 	camera_->update();
 
 	get_active_object_manager()->update();
+
 	get_graphics_manager()->update();
+
+	get_physics()->update( get_elapsed_time() );
 }
 
 void DebugScene::render()
@@ -89,6 +90,9 @@ void DebugScene::render()
 	get_graphics_manager()->render_active_objects( get_active_object_manager() );
 
 	get_graphics_manager()->render_fader();
+
+	get_graphics_manager()->render_debug_axis( get_active_object_manager() );
+	get_graphics_manager()->render_debug_bullet();
 
 	std::stringstream ss;
 	ss << "eye : " << eye.x() << ", " << eye.y() << ", " << eye.z() << std::endl;

@@ -40,6 +40,7 @@
 #include <common/math.h>
 #include <common/log.h>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 
 #include <sstream>
@@ -89,19 +90,14 @@ GameMain::GameMain()
 	}
 
 	physics_ = new ActiveObjectPhysics();
-	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
 
-	if ( get_config()->get< int >( "video.bullet_debug_draw", 0 ) )
-	{
-		bullet_debug_draw_->setDebugMode( btIDebugDraw::DBG_DrawWireframe );
-		physics_->setDebugDrawer( bullet_debug_draw_.get() );
-	}
-	else
-	{
-		bullet_debug_draw_->setDebugMode( 0 );
-	}
+	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
+	bullet_debug_draw_->setDebugMode( get_config()->get< int >( "video.debug_bullet", 0 ) );
+
+	physics_->setDebugDrawer( bullet_debug_draw_.get() );
 
 	direct_input_ = new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() );
+
 	input_ = new Input();
 	input_->set_direct_input( direct_input_.get() );
 	input_->load_config( * get_config() );
@@ -113,6 +109,7 @@ GameMain::GameMain()
 	}
 
 	graphics_manager_ = new Direct3D11GraphicsManager( direct_3d_.get() );
+	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "video.debug_axis", 0 ) );
 	
 	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
 	sound_manager_->set_mute( get_config()->get( "audio.mute", 0 ) != 0 );
@@ -168,6 +165,10 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "set_name", [this] ( ActiveObject* o, const char_t* name ) { get_active_object_manager()->name_active_object( name, o ); } );
 	get_script_manager()->set_function( "set_loc", [] ( ActiveObject* o, float x, float y, float z ) { o->set_location( x, y, z ); } );
 	get_script_manager()->set_function( "set_rot", [] ( ActiveObject* o, float r ) { o->set_direction_degree( r ); } );
+
+	// debug
+	get_script_manager()->set_function( "debug_axis", [this] ( int on ) { get_graphics_manager()->set_debug_axis_enabled( on ); } );
+	get_script_manager()->set_function( "debug_bullet", [this] ( int mode ) { bullet_debug_draw_->setDebugMode( mode ); } );
 
 	/// @todo ActiveObject ‚É color ‚ðŽ‚½‚¹‚éH
 	// get_script_manager()->set_function( "set_object_object", [this] ( ActiveObject* o, const Color& c ) { o->set_co } );
@@ -297,22 +298,38 @@ void GameMain::on_key_down( char_t key )
 	{
 		edit_command( key );
 	}
+	else
+	{
+		if ( key == '\r' )
+		{
+			is_command_mode_ = true;
+		}
+	}
 }
 
 void GameMain::edit_command( char_t key )
 {
 	if ( key == '\r' )
 	{
-		try
-		{
-			get_script_manager()->exec( user_command_ );
-		}
-		catch ( const ScriptError& e )
-		{
-			get_app()->show_error_message( e.what() );
-		}
+		boost::trim( user_command_ );
 
-		user_command_ = "";
+		if ( user_command_ == "" )
+		{
+			is_command_mode_ = false;
+		}
+		else
+		{
+			try
+			{
+				get_script_manager()->exec( user_command_ );
+			}
+			catch ( const ScriptError& e )
+			{
+				get_app()->show_error_message( e.what() );
+			}
+
+			user_command_ = "";
+		}
 	}
 	else if ( key == '\b' )
 	{
@@ -358,12 +375,8 @@ void GameMain::on_special_key_down( int key )
 		get_direct_3d()->switch_full_screen();
 		get_app()->set_full_screen( get_direct_3d()->is_full_screen() );
 	}
-	else if ( key == KEY_F9 )
-	{
-		is_command_mode_ = ! is_command_mode_;
-	}
 
-	/// @todo ‚¿‚á‚ñ‚Æ‚é‚·
+	/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
 	scene_->on_function_key_down( key -  KEY_F1 + 1 );
 }
 

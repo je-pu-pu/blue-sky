@@ -548,4 +548,12 @@
       <UniqueIdentifier>{4fcc5bdb-7666-4a3f-a4b8-33cc3692d47d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="media\shader\debug_axis.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="media\shader\debug_bullet.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+  </ItemGroup>
 </Project>

@@ -53,7 +53,6 @@ public:
 	typedef Direct3D11SkyBox			SkyBox;
 	typedef Direct3D11ShadowMap			ShadowMap;
 	typedef Direct3D11Rectangle			Rectangle;
-	typedef Direct3D11Axis				Axis;
 
 	typedef std::function< void( string_t ) > Command;
 	typedef std::map< string_t, Command > CommandMap;
@@ -80,8 +79,6 @@ protected:
 	common::auto_ptr< Mesh >			ground_;
 	common::auto_ptr< Mesh >			far_billboards_;
 	common::auto_ptr< Rectangle >		rectangle_;
-
-	common::auto_ptr< Axis >			debug_axis_;
 
 	common::auto_ptr< Goal >			goal_;
 
@@ -180,10 +177,8 @@ protected:
 	void render_debug_axis() const;
 	void render_debug_axis_for_bones( const ActiveObject* ) const;
 
-	void render_debug_bullet() const;
+	/// @todo GraphicsManager Ç…à⁄çsÇ∑ÇÈ
 	void render_debug_shadow_map_window() const;
-
-
 
 public:
 	GamePlayScene( const GameMain* );

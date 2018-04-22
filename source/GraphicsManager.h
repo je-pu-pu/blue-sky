@@ -28,6 +28,7 @@ namespace blue_sky
 class DrawingMesh;
 class DrawingLine;
 
+class ActiveObject;
 class ActiveObjectManager;
 
 /**
@@ -41,9 +42,11 @@ public:
 
 private:
 	common::auto_ptr< FbxFileLoader> fbx_file_loader_;
+	bool is_debug_axis_enabled_ = true;
 
 protected:
-	virtual void set_input_layout( const char_t* ) const = 0;
+	void render_debug_axis_for_bones( const ActiveObject* ) const;
+	virtual void render_debug_axis_model() const = 0;
 
 public:
 	GraphicsManager();
@@ -68,6 +71,8 @@ public:
 	virtual FrameDrawingConstantBuffer* get_frame_drawing_render_data() const = 0;
 	virtual ObjectConstantBuffer* get_shared_object_render_data() const = 0;
 
+	virtual void set_input_layout( const char_t* ) const = 0;
+
 	virtual void setup_rendering() const = 0;
 	virtual void render_technique( const char_t*, const std::function< void () >& ) const = 0;
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
@@ -86,6 +91,12 @@ public:
 	/// @todo ÇøÇ·ÇÒÇ∆çÏÇÈ Font, size, éwíËÇµÇΩ Texture Ç÷ÇÃï`âÊ
 	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
 	virtual void draw_text_at_center( const char_t*, const Color& ) const = 0;
+
+	void set_debug_axis_enabled( bool e ) { is_debug_axis_enabled_ = e; }
+
+	void render_debug_axis( const ActiveObjectManager* ) const;
+	virtual void render_debug_bullet() const = 0;
+	// virtual void render_debug_axis()
 
 	// void update_frame_render_data( const Camera*, const Vector3& ) const;
 

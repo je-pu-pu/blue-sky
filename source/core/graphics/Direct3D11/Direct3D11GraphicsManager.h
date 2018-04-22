@@ -7,6 +7,7 @@
 #include <memory>
 
 class Direct3D11;
+class Direct3D11Axis;
 
 namespace blue_sky
 {
@@ -28,11 +29,15 @@ private:
 	std::unique_ptr< FrameDrawingConstantBuffer >	frame_drawing_render_data_;
 	std::unique_ptr< ObjectConstantBuffer >			shared_object_render_data_;
 
+	std::unique_ptr< Direct3D11Axis >				debug_axis_;
+
 	bool is_fading_in_ = true;
 	float_t fade_speed_ = 0.f;
 
 protected:
 	void set_input_layout( const char_t* ) const override;
+
+	void render_debug_axis_model() const override;
 
 public:
 	Direct3D11GraphicsManager( Direct3D* );
@@ -73,6 +78,8 @@ public:
 	/// @todo ‚¿‚á‚ñ‚Æì‚é Font, size, w’è‚µ‚½ Texture ‚Ö‚Ì•`‰æ
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;
+
+	void render_debug_bullet() const override;
 
 }; // class GraphicsManager
 

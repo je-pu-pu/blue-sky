@@ -14,22 +14,21 @@
 #include <GameObject/AreaSwitch.h>
 #include <GameObject/TranslationObject.h>
 
+/// @todo 微妙なクラスを整理する
+#include <Camera.h>
+#include <AnimationPlayer.h>
 
-#include "Camera.h"
-
+/// @todo GraphicsManager ? に移行する
 #include "DrawingModelManager.h"
 #include "DrawingModel.h"
 #include "DrawingMesh.h"
 #include "DrawingLine.h"
-
-#include "AnimationPlayer.h"
 
 /// @todo 抽象化する
 #include <core/graphics/Direct3D11/Direct3D11ShadowMap.h>
 #include <core/graphics/Direct3D11/Direct3D11SkyBox.h>
 #include <core/graphics/Direct3D11/Direct3D11FarBillboardsMesh.h>
 #include <core/graphics/Direct3D11/Direct3D11Rectangle.h>
-#include <core/graphics/Direct3D11/Direct3D11Axis.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
 #include <core/graphics/Direct3D11/Direct3D11Material.h>
 #include <core/graphics/Direct3D11/Direct3D11BulletDebugDraw.h>
@@ -141,8 +140,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 
 	rectangle_ = new Rectangle( get_direct_3d() );
-
-	debug_axis_ = new Axis( get_direct_3d() );
 
 	scope_mesh_ = get_graphics_manager()->create_mesh();
 	scope_mesh_->load_obj( "media/model/scope.obj" );
@@ -1603,28 +1600,28 @@ void GamePlayScene::render_to_display() const
  */
 void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 {
-	get_direct_3d()->setInputLayout( "main" );
+	get_graphics_manager()->set_input_layout( "main" );
 
 	render_sky_box();
 	render_far_billboards();
 
 	render_object_mesh();
 
-	get_direct_3d()->setInputLayout( "skin" );
+	get_graphics_manager()->set_input_layout( "skin" );
+
 	render_object_skin_mesh();
 
 	// debug
 	// get_direct_3d()->clear_default_view();
 
-	get_direct_3d()->setInputLayout( "line" );
+	get_graphics_manager()->set_input_layout( "line" );
 
 	render_object_line();
 
-	render_debug_axis();
+	get_graphics_manager()->render_debug_axis( get_active_object_manager() );
+	get_graphics_manager()->render_debug_bullet();
 
-	render_debug_bullet();
-
-	get_direct_3d()->setInputLayout( "main" );
+	get_graphics_manager()->set_input_layout( "main" );
 
 	render_sprite( ortho_offset );
 
@@ -2132,94 +2129,6 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 	} );
 
 	get_direct_3d()->getSprite()->end();
-}
-
-/**
- * デバッグ用の軸を表示する
- *
- */
-void GamePlayScene::render_debug_axis() const
-{
-	render_technique( "|simple_line", [this]
-	{
-		bind_game_render_data();
-		bind_frame_render_data();
-
-		for ( const auto* active_object : get_active_object_manager()->active_object_list() )
-		{
-			active_object->bind_render_data();
-
-			debug_axis_->render();
-
-			render_debug_axis_for_bones( active_object );
-		}
-	} );
-}
-
-/**
- * ActiveObject の全ボーンに対してデバッグ用の軸を表示する
- *
- */
-void GamePlayScene::render_debug_axis_for_bones( const ActiveObject* active_object ) const
-{
-	if ( active_object->is_dead() )
-	{
-		return;
-	}
-
-	if ( ! active_object->get_animation_player() )
-	{
-		return;
-	}
-	
-	get_graphics_manager()->get_shared_object_render_data()->bind_to_vs();
-	get_graphics_manager()->get_shared_object_render_data()->bind_to_ps();
-
-	AnimationPlayer::BoneConstantBuffer::Data bone_constant_buffer_data;
-	active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix::identity() );
-
-	for ( uint_t n = 0; n < active_object->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )
-	{
-		const Matrix& bone_offset_matrix = active_object->get_animation_player()->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( n );
-		const Matrix& bone_matrix = bone_offset_matrix * bone_constant_buffer_data.bone_matrix[ n ];
-		// const Matrix& bone_matrix = bone_offset_matrix;
-
-		const btTransform& trans = active_object->get_transform();
-
-		Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
-
-		ObjectConstantBufferData buffer_data;
-
-		buffer_data.world = Matrix().set_scaling( 0.1f, 0.1f, 0.1f );
-		buffer_data.world *= bone_matrix;
-		buffer_data.world *= Matrix().set_rotation_quaternion( q );
-		buffer_data.world *= Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-		buffer_data.world = buffer_data.world.transpose();
-
-		if ( active_object->get_drawing_model()->get_line() )
-		{
-			buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
-		}
-
-		get_graphics_manager()->get_shared_object_render_data()->update( & buffer_data );
-
-		debug_axis_->render();
-	}
-}
-
-/**
- * Bullet のデバッグ表示を描画する
- *
- */
-void GamePlayScene::render_debug_bullet() const
-{
-	render_technique( "|bullet", [this]
-	{
-		bind_game_render_data();
-		bind_frame_render_data();
-
-		get_game_main()->get_bullet_debug_draw()->render();
-	} );
 }
 
 /**

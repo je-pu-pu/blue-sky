@@ -31,7 +31,6 @@
 #include <core/graphics/Direct3D11/Direct3D11Rectangle.h>
 #include <core/graphics/Direct3D11/Direct3D11Axis.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
-#include <core/graphics/Direct3D11/Direct3D11Fader.h>
 #include <core/graphics/Direct3D11/Direct3D11Material.h>
 #include <core/graphics/Direct3D11/Direct3D11BulletDebugDraw.h>
 
@@ -208,9 +207,12 @@ void GamePlayScene::set_drawing_line_type( int type )
  * @return 生成したオブジェクト
  * @todo 整理する。 loc, rot の指定をどうするか？ StaticObject の生成をどうするか？
  */
-ActiveObject* GamePlayScene::create_object( const char_t* class_name )
+ActiveObject* GamePlayScene::create_object_at_player_front( const char_t* class_name )
 {
-	ActiveObject* active_object = Scene::create_object( class_name );
+	// get_script_manager()->exec( string_t( "active_object_ = create_object( '" ) + class_name + "' )" );
+	// ActiveObject* active_object = get_script_manager()->get< ActiveObject* >( "active_object_" );
+
+	ActiveObject* active_object = GameMain::get_instance()->create_object( class_name );
 
 	if ( ! active_object )
 	{
@@ -247,13 +249,7 @@ void GamePlayScene::setup_command()
 	};
 
 	get_script_manager()->set_function( "set_drawing_line_type", [this] ( int type ) { set_drawing_line_type( type ); } );
-	get_script_manager()->set_function( "create_object", [this] ( const char_t* name ) { return create_object( name ); } );
-
-
-	get_script_manager()->set_function( "up", [this] ( ActiveObject* active_object, float_t v = 10.f )
-	{
-		active_object->set_velocity( ActiveObject::Vector3( 0.f, v, 0.f ) );
-	} );
+	get_script_manager()->set_function( "create_object_at_player_front", [this] ( const char_t* name ) { return create_object_at_player_front( name ); } );
 
 	command_map_[ "set_line_type" ] = [ this ] ( const string_t& s )
 	{
@@ -682,8 +678,8 @@ void GamePlayScene::setup_stage()
 
 void GamePlayScene::restart()
 {
-	get_direct_3d()->getFader()->set_color( Direct3D::Color::White );
-	get_direct_3d()->getFader()->full_out();
+	get_graphics_manager()->set_fade_color( Color::White );
+	get_graphics_manager()->fade_out();
 
 	is_cleared_ = false;
 	action_bgm_after_timer_ = 0.f;
@@ -945,7 +941,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( name == "balloon" || name == "medal" || name == "ladder" || name == "rocket" || name == "umbrella" || name == "stone" || name == "switch" )
 		{
-			ActiveObject* active_object = create_object( name.c_str() );
+			ActiveObject* active_object = GameMain::get_instance()->create_object( name.c_str() );
 			
 			float x = 0, y = 0, z = 0, r = 0;
 			ss >> x >> y >> z >> r;
@@ -1316,8 +1312,7 @@ void GamePlayScene::update_main()
 		player_->add_direction_degree( add_direction_degree_by_mouse + add_direction_degree_by_hmd );
 		camera_->rotate_degree_target().y() = player_->get_direction_degree();
 
-
-		get_direct_3d()->getFader()->fade_in( 0.05f );
+		get_graphics_manager()->fade_in( 0.05f );
 	}
 	else
 	{
@@ -1327,8 +1322,8 @@ void GamePlayScene::update_main()
 		}
 		else
 		{
-			get_direct_3d()->getFader()->set_color( Direct3D::Color( 0.25f, 0.f, 0.f, 0.75f ) );
-			get_direct_3d()->getFader()->fade_out( 0.25f );
+			get_graphics_manager()->set_fade_color( Color( 0.25f, 0.f, 0.f, 0.75f ) );
+			get_graphics_manager()->fade_out( 0.1f );
 		}
 	}
 }
@@ -1337,8 +1332,8 @@ void GamePlayScene::update_blackout()
 {
 	blackout_timer_ += get_elapsed_time();
 
-	get_direct_3d()->getFader()->set_color( Color::Black );
-	get_direct_3d()->getFader()->full_out();
+	get_graphics_manager()->set_fade_color( Color::Black );
+	get_graphics_manager()->fade_out();
 
 	if ( blackout_timer_ >= 6.f )
 	{
@@ -1507,7 +1502,7 @@ void GamePlayScene::update_clear()
 	camera_->rotate_degree_target().z() = 0.f;
 	camera_->set_rotate_chase_speed( 0.1f );
 
-	get_direct_3d()->getFader()->fade_out( 0.0025f );
+	get_graphics_manager()->fade_out( 0.0025f );
 
 	if (
 		get_sound_manager()->get_sound( "fin" )->get_current_position() >= 6.f &&
@@ -1619,7 +1614,7 @@ void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 	render_object_skin_mesh();
 
 	// debug
-	get_direct_3d()->clear_default_view();
+	// get_direct_3d()->clear_default_view();
 
 	get_direct_3d()->setInputLayout( "line" );
 

@@ -503,6 +503,9 @@
     <None Include="media\shader\drawing_line.hlsl">
       <Filter>shader</Filter>
     </None>
+    <None Include="media\shader\2d.hlsl">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Drawing">

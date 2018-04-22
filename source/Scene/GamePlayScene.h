@@ -127,7 +127,7 @@ protected:
 	void setup_command();
 	
 	// commands
-	ActiveObject* create_object( const char_t* );
+	ActiveObject* create_object_at_player_front( const char_t* );
 	void set_drawing_line_type( int );
 
 	void restart();

@@ -133,10 +133,10 @@ void DrawingLine::create_index_buffer()
 
 void DrawingLine::create_texture( const char* /* file_name */ )
 {
-	// texture_ = direct_3d_->getTextureManager()->load( "lines", "media/texture/lines.png" );
+	texture_ = direct_3d_->getTextureManager()->load( "lines", "media/texture/lines.png" );
 	// texture_ = direct_3d_->getTextureManager()->load( "lines", "media/texture/test.png" );
 
-	texture_ = direct_3d_->getTextureManager()->load( "lines", "media/model/building-roof-3.png" );
+	// texture_ = direct_3d_->getTextureManager()->load( "lines", "media/model/building-roof-3.png" );
 }
 
 void DrawingLine::render_part( int part_count ) const

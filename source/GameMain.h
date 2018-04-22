@@ -62,6 +62,27 @@ public:
 	typedef blue_sky::SoundManager			SoundManager;
 	typedef blue_sky::Player				Player;
 
+	enum Key
+	{
+		KEY_LEFT  = VK_LEFT,
+		KEY_RIGHT = VK_RIGHT,
+		KEY_UP    = VK_UP,
+		KEY_DOWN  = VK_DOWN,
+
+		KEY_F1  = VK_F1,
+		KEY_F2  = VK_F2,
+		KEY_F3  = VK_F3,
+		KEY_F4  = VK_F4,
+		KEY_F5  = VK_F5,
+		KEY_F6  = VK_F6,
+		KEY_F7  = VK_F7,
+		KEY_F8  = VK_F8,
+		KEY_F9  = VK_F9,
+		KEY_F10 = VK_F10,
+		KEY_F11 = VK_F11,
+		KEY_F12 = VK_F12,
+	};
+
 protected:
 	float									total_elapsed_time_;	///< ゲームが開始してからの経過時間 ( 秒 )
 
@@ -95,6 +116,8 @@ protected:
 	bool									is_command_mode_;		///< 現在コマンドモード中かどうか？
 	string_t								user_command_;			///< ユーザーの入力したコマンド
 
+	void setup_script_command();
+
 	void update_render_data_for_game() const;
 
 	void check_scene_transition();
@@ -106,6 +129,8 @@ public:
 	GameMain();
 	virtual ~GameMain() override;
 
+	ActiveObject* create_object( const char_t* );
+
 	void setup_scene();
 
 	bool update() override;
@@ -113,7 +138,7 @@ public:
 	void render();
 
 	void on_key_down( char_t ) override;
-	void on_function_key_down( int ) override;
+	void on_special_key_down( int ) override;
 	void on_mouse_wheel( int ) override;
 	void on_resize() override;
 

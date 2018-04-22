@@ -1,5 +1,6 @@
 #pragma once
 
+#include <common/math.h>
 #include <common/exception.h>
 #include <type/type.h>
 
@@ -11,6 +12,8 @@
  */
 #define SOL_NO_EXCEPTIONS 1
 #include <sol/sol.hpp>
+
+#include <queue>
 
 namespace blue_sky
 {
@@ -24,6 +27,11 @@ class ScriptManager
 {
 private:
 	sol::state lua_;
+
+	std::deque< std::string > command_history_;
+	int command_history_index_;
+
+	const std::string empty_command_;
 
 public:
 	ScriptManager();
@@ -67,6 +75,10 @@ public:
 	{
 		return lua_.get< Type >( name );
 	}
+
+	const std::string& get_current_history_command() const { return ( command_history_index_ < static_cast< int >( command_history_.size() ) ? command_history_[ command_history_index_ ] : empty_command_ ); }
+	const std::string& get_prev_hisotry_command() { command_history_index_ = math::clamp< int >( command_history_index_ - 1, 0, command_history_.size() ); return get_current_history_command(); }
+	const std::string& get_next_hisotry_command() { command_history_index_ = math::clamp< int >( command_history_index_ + 1, 0, command_history_.size() ); return get_current_history_command(); }
 };
 
 inline ScriptManager::ScriptManager()
@@ -81,6 +93,14 @@ inline ScriptManager::~ScriptManager()
 
 inline void ScriptManager::exec( const string_t& script )
 {
+	command_history_.push_back( script );
+	command_history_index_ = command_history_.size() - 1;
+
+	if ( command_history_.size() > 100 )
+	{
+		 command_history_.pop_front();
+	}
+
 	auto result = lua_.safe_script( script );
 
 	/*

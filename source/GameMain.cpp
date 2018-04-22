@@ -123,6 +123,7 @@ GameMain::GameMain()
 	sound_manager_->load( "click" );
 
 	script_manager_ = new ScriptManager();
+	setup_script_command();
 
 	active_object_manager_ = new ActiveObjectManager();
 	drawing_model_manager_ = new DrawingModelManager();
@@ -145,6 +146,55 @@ GameMain::~GameMain()
 	get_config()->save_file( "blue-sky.config" );
 
 	scene_.release();
+}
+
+/**
+ * ゲーム全体で共有可能なスクリプトコマンドを準備する
+ *
+ */
+void GameMain::setup_script_command()
+{
+	// Basic
+	get_script_manager()->set_function( "create_color", [this] ( float r, float g, float b, float a ) { return Color( r, g, b, a ); } );
+
+	// Fade
+	get_script_manager()->set_function( "set_fade_color", [this] ( const Color& color ) { get_graphics_manager()->set_fade_color( color ); } );
+	get_script_manager()->set_function( "start_fade_in", [this] ( float_t speed ) { get_graphics_manager()->start_fade_in( speed ); } );
+	get_script_manager()->set_function( "start_fade_out", [this] ( float_t speed ) { get_graphics_manager()->start_fade_out( speed ); } );
+
+	// ActiveObject
+	get_script_manager()->set_function( "create_object", [this] ( const char_t* name ) { auto* o = create_object( name ); o->restart(); return o; } );
+	get_script_manager()->set_function( "get_object", [this] ( const char_t* name ) { return get_active_object_manager()->get_active_object( name ); } );
+	get_script_manager()->set_function( "set_name", [this] ( ActiveObject* o, const char_t* name ) { get_active_object_manager()->name_active_object( name, o ); } );
+	get_script_manager()->set_function( "set_loc", [] ( ActiveObject* o, float x, float y, float z ) { o->set_location( x, y, z ); } );
+	get_script_manager()->set_function( "set_rot", [] ( ActiveObject* o, float r ) { o->set_direction_degree( r ); } );
+
+	/// @todo ActiveObject に color を持たせる？
+	// get_script_manager()->set_function( "set_object_object", [this] ( ActiveObject* o, const Color& c ) { o->set_co } );
+}
+
+/**
+ * オブジェクトを生成する
+ *
+ * @param class_name  クラス名
+ * @return 生成したオブジェクト
+ * @todo 整理する。 loc, rot の指定をどうするか？ StaticObject の生成をどうするか？ Scenegraph に移動？
+ */
+ActiveObject* GameMain::create_object( const char_t* class_name )
+{
+	ActiveObject* active_object = get_active_object_manager()->create_object( class_name );
+
+	/// @todo 例外にしてスクリプト呼び出し側でキャッチできるようにする
+	if ( ! active_object )
+	{
+		return 0;
+	}
+
+	active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
+	active_object->set_drawing_model( get_drawing_model_manager()->load( class_name ) );
+	active_object->setup_animation_player();
+
+	return active_object;
 }
 
 /**
@@ -277,9 +327,23 @@ void GameMain::edit_command( char_t key )
 	}
 }
 
-void GameMain::on_function_key_down( int function_key )
+void GameMain::on_special_key_down( int key )
 {
-	if ( function_key == 2 )
+	if ( key == KEY_UP )
+	{
+		if ( is_command_mode_ )
+		{
+			user_command_ = get_script_manager()->get_prev_hisotry_command();
+		}
+	}
+	else if ( key == KEY_DOWN )
+	{
+		if ( is_command_mode_ )
+		{
+			user_command_ = get_script_manager()->get_next_hisotry_command();
+		}
+	}
+	else if ( key == KEY_F2 )
 	{
 		get_sound_manager()->set_mute( ! get_sound_manager()->is_mute() );
 		game::Sound* bgm = get_sound_manager()->get_sound( "bgm" );
@@ -289,19 +353,18 @@ void GameMain::on_function_key_down( int function_key )
 			bgm->play( true );
 		}
 	}
-
-	if ( function_key == 5 )
+	else if ( key == KEY_F5 )
 	{
 		get_direct_3d()->switch_full_screen();
 		get_app()->set_full_screen( get_direct_3d()->is_full_screen() );
 	}
-
-	if ( function_key == 9 )
+	else if ( key == KEY_F9 )
 	{
 		is_command_mode_ = ! is_command_mode_;
 	}
 
-	scene_->on_function_key_down( function_key );
+	/// @todo ちゃんとるす
+	scene_->on_function_key_down( key -  KEY_F1 + 1 );
 }
 
 void GameMain::on_mouse_wheel( int wheel )

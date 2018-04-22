@@ -28,12 +28,17 @@ private:
 	std::unique_ptr< FrameDrawingConstantBuffer >	frame_drawing_render_data_;
 	std::unique_ptr< ObjectConstantBuffer >			shared_object_render_data_;
 
+	bool is_fading_in_ = true;
+	float_t fade_speed_ = 0.f;
+
 protected:
 	void set_input_layout( const char_t* ) const override;
 
 public:
 	Direct3D11GraphicsManager( Direct3D* );
 	virtual ~Direct3D11GraphicsManager();
+
+	void update() override;
 
 	Mesh* create_mesh();
 	Line* create_line();
@@ -54,6 +59,16 @@ public:
 
 	void setup_rendering() const override;
 	void render_technique( const char_t*, const std::function< void () >& ) const override;
+
+	void set_fade_color( const Color& ) override;
+
+	void start_fade_in( float_t ) override;
+	void start_fade_out( float_t ) override;
+
+	void fade_in( float_t speed = 1.f ) override;
+	void fade_out( float_t speed = 1.f ) override;
+
+	void render_fader() const override;
 
 	/// @todo ‚¿‚á‚ñ‚Æì‚é Font, size, w’è‚µ‚½ Texture ‚Ö‚Ì•`‰æ
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;

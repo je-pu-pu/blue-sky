@@ -49,6 +49,8 @@ public:
 	GraphicsManager();
 	virtual ~GraphicsManager();
 
+	virtual void update() = 0;
+
 	virtual DrawingMesh* create_drawing_mesh() = 0;
 	virtual DrawingLine* create_drawing_line() = 0;
 
@@ -69,6 +71,17 @@ public:
 	virtual void setup_rendering() const = 0;
 	virtual void render_technique( const char_t*, const std::function< void () >& ) const = 0;
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
+
+	/// @todo ®—‚·‚é
+	virtual void set_fade_color( const Color& ) = 0;
+
+	virtual void start_fade_in( float_t speed ) = 0;
+	virtual void start_fade_out( float_t speed ) = 0;
+
+	virtual void fade_in( float_t speed = 1.f ) = 0;
+	virtual void fade_out( float_t speed = 1.f ) = 0;
+
+	virtual void render_fader() const = 0;
 
 	/// @todo ‚¿‚á‚ñ‚Æì‚é Font, size, w’è‚µ‚½ Texture ‚Ö‚Ì•`‰æ
 	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;

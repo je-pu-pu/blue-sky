@@ -111,8 +111,6 @@ protected:
 
 	virtual Sound* get_bgm() { return 0; };
 
-	ActiveObject* create_object( const char_t* );
-
 public:
 	Scene( const GameMain* );
 	virtual ~Scene();

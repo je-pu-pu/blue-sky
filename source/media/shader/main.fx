@@ -46,6 +46,65 @@ SamplerState shadow_texture_sampler
 	MaxAnisotropy = 2.f;
 };
 
+BlendState NoBlend
+{
+	BlendEnable[ 0 ] = True;
+};
+
+BlendState Blend
+{
+	BlendEnable[ 0 ] = True;
+
+	// SrcBlendAlpha = SRC_ALPHA;
+	SrcBlend = SRC_ALPHA;
+	DestBlend = INV_SRC_ALPHA;
+	AlphaToCoverageEnable = True;
+};
+
+BlendState CanvasPenBlend
+{
+	BlendEnable[ 0 ] = True;
+	
+	SrcBlend = SRC_ALPHA;
+	DestBlend = INV_SRC_ALPHA;
+	AlphaToCoverageEnable = False;
+};
+
+DepthStencilState NoWriteDepth
+{
+	// DepthEnable = False;
+	DepthWriteMask = ZERO;
+};
+
+DepthStencilState WriteDepth
+{
+	// DepthEnable = False;
+	DepthWriteMask = ALL;
+};
+
+DepthStencilState NoDepthTest
+{
+	DepthEnable = False;
+};
+
+RasterizerState Default
+{
+	CullMode = BACK;
+	// DepthClipEnable = False;
+	MultisampleEnable = True;
+};
+
+RasterizerState WireFrame
+{
+	FILLMODE = WIREFRAME;
+};
+
+RasterizerState Shadow
+{
+	CullMode = NONE;
+	SlopeScaledDepthBias = 2.f;
+};
+
 cbuffer GameConstantBuffer : register( b0 )
 {
 	float ScreenWidth;
@@ -218,164 +277,6 @@ PS_FLAT_INPUT vs_flat( VS_INPUT input, uint vertex_id : SV_VertexID )
 	return output;
 }
 
-/// @todo drawing_line.hlsl に移動
-GS_LINE_INPUT vs_drawing_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID )
-{
-	GS_LINE_INPUT output;
-
-	output.Position = mul( input.Position, World );
-    output.Position = mul( output.Position, View );
-    output.Position = mul( output.Position, Projection );
-
-	output.Color = input.Color + ObjectColor;
-
-	// 色を変動させる
-	static const float color_random_range = 0.1f;
-
-	/// @todo 描画毎に vertex_id が変動する場合があるため色がちらつく問題に対応する
-	if ( false )
-	{
-		output.Color.r += ( ( ( uint( Time *  5 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
-		output.Color.g += ( ( ( uint( Time * 15 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
-		output.Color.b += ( ( ( uint( Time * 25 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
-		// output.Color.a -= ( ( uint( Time * 5 ) + vertex_id ) % 8 ) / 8.f * 0.5f;
-	}
-
-	// ぶらす
-	if ( false )
-	{
-		float a = Time; // ( vertex_id ) / 10.f + Time * 10.f;
-		output.Position.x += cos( vertex_id + a ) * 0.1f;
-		output.Position.y += sin( vertex_id + Time % 10 / 10 ) * 0.1f;
-	}
-
-	return output;
-}
-
-/**
- * 手書き風の線を生成する
- *
- * input  : 0----------1
- *
- * output : 0----------2
- *          |          |
- *          1----------3
- *
- * @todo drawing_line.hlsl に移動
- */
-[maxvertexcount(4)]
-void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> Stream, uint primitive_id : SV_PrimitiveID )
-{
-	static const uint input_vertex_count = 2;
-	static const uint output_vertex_count = 4;
-
-	const float screen_width = ScreenWidth;
-	const float screen_height = ScreenHeight;
-	const float screen_ratio = ( screen_height / screen_width );
-
-	static const float z_offset = -0.00001f;
-	
-	[unroll]
-	for ( uint n = 0; n < input_vertex_count; n++ )
-	{
-		input[ n ].Position.z += z_offset;
-		input[ n ].Position.xyz /= input[ n ].Position.w;
-	}
-
-	static const float LineTextureSize = 1024.f;
-	
-	static const float DrawingAccentPower = 1.5f;
-	static const float DrawingAccentScale = 10.f;
-	
-	struct line_config
-	{
-		float v_offset;
-		float line_width;
-		uint  pattern_count;
-	};
-
-	static const line_config line_configs[ 5 ]= 
-	{
-		{   0.f, 32.f, 3 },
-		{ 128.f, 32.f, 3 },
-		{ 256.f, 64.f, 4 },
-		{ 512.f, 64.f, 4 },
-		{ 768.f, 64.f, 4 },
-	};
-
-	static const uint line_config_index = LineType;
-
-	const float line_width_pixels = line_configs[ line_config_index ].line_width;
-	const float line_width_scale = 0.5f + pow( abs( DrawingAccent ), DrawingAccentPower ) * DrawingAccentScale;
-	
-	float line_width = line_width_pixels * line_width_scale / screen_height;
-
-	const float line_v_width = line_width_pixels / LineTextureSize;
-	const float line_v_offset = line_configs[ line_config_index ].v_offset / LineTextureSize;
-
-	// 更新パターン数
-	const int pattern_count = line_configs[ line_config_index ].pattern_count;
-
-	{
-		uint n = 0;
-		uint m = 1;
-
-		float ly = ( input[ m ].Position.y * screen_ratio ) - ( input[ n ].Position.y * screen_ratio );
-		float lx = input[ m ].Position.x - input[ n ].Position.x;
-		
-		uint redraw_seed = uint( Time * 5.f ) + primitive_id;
-
-		float line_index = ( uint( Time + primitive_id % 10 / 10.f ) + primitive_id ) % pattern_count; // 全ての線がばらばらのタイミングで更新される
-		// float line_index = redraw_seed % pattern_count; // 全ての線が統一されたタイミングで更新される
-		float line_v_origin = line_v_offset + ( line_index * line_v_width );
-
-		float line_u_origin = ( redraw_seed ) * 0.1f;
-		/// float line_length_ratio = 1.f; // 
-
-		float line_length = length( float2( lx, ly ) );
-		float line_length_ratio = line_length / length( float2( 1.f, 1.f ) );
-
-		line_width = min( line_width, line_length ); // 線の長さが短い場合に線の幅が太くならないようにする
-
-		// 線の向きを 90 度回転させた角度
-		const float line_width_angle = atan2( ly, lx ) + Pi / 2.f;
-
-		float dx = cos( line_width_angle ) * line_width * screen_ratio;
-		float dy = sin( line_width_angle ) * line_width;
-
-		PS_FLAT_INPUT output[ 4 ];
-
-		/**
-		 * 1----------------------------------------3
-		 * |                                        |
-		 * 0----------------------------------------2
-		 */
-		output[ 0 ].Position = input[ n ].Position + float4( -dx, -dy, 0.f, 0.f );
-		output[ 0 ].TexCoord = float2( line_u_origin, line_v_origin );
-		output[ 0 ].Color = input[ 0 ].Color;
-
-		output[ 1 ].Position = input[ n ].Position + float4( +dx, +dy, 0.f, 0.f );
-		output[ 1 ].TexCoord = float2( line_u_origin, line_v_origin + line_v_width );
-		output[ 1 ].Color = input[ 0 ].Color;
-
-		output[ 2 ].Position = input[ m ].Position + float4( -dx, -dy, 0.f, 0.f );
-		output[ 2 ].TexCoord = float2( line_u_origin + line_length_ratio, line_v_origin );
-		output[ 2 ].Color = input[ 1 ].Color;
-
-		output[ 3 ].Position = input[ m ].Position + float4( +dx, +dy, 0.f, 0.f );
-		output[ 3 ].TexCoord = float2( line_u_origin + line_length_ratio, line_v_origin + line_v_width );
-		output[ 3 ].Color = input[ 1 ].Color;
-
-		for ( uint x = 0; x < output_vertex_count; ++x )
-		{
-			output[ x ].Position.xyz *= output[ x ].Position.w;
-			Stream.Append( output[ x ] );
-		}
-
-		Stream.RestartStrip();
-	}
-}
-
 /**
  * 紙の質感テクスチャをサンプリングする
  *
@@ -430,11 +331,6 @@ float4 ps_with_paper_common( float3 position, float2 uv, float diffuse )
 	};
 
 	return model_texture.Sample( wrap_texture_sampler, uv ) * shadow; // * cascade_colors[ cascade_index ];
-}
-
-float4 ps_drawing_line( PS_FLAT_INPUT input ) : SV_Target
-{
-	return ( line_texture.Sample( u_wrap_texture_sampler, input.TexCoord ) + input.Color ); // * float4( 1.f, 1.f, 1.f, 0.5f );
 }
 
 float4 ps_flat( PS_FLAT_INPUT input ) : SV_Target
@@ -607,68 +503,6 @@ PS_CANVAS_OUTPUT ps_canvas( PS_FLAT_INPUT input )
 
 	return output;
 }
-
-
-
-BlendState NoBlend
-{
-	BlendEnable[ 0 ] = True;
-};
-
-BlendState Blend
-{
-	BlendEnable[ 0 ] = True;
-
-	// SrcBlendAlpha = SRC_ALPHA;
-	SrcBlend = SRC_ALPHA;
-	DestBlend = INV_SRC_ALPHA;
-	AlphaToCoverageEnable = True;
-};
-
-BlendState CanvasPenBlend
-{
-	BlendEnable[ 0 ] = True;
-	
-	SrcBlend = SRC_ALPHA;
-	DestBlend = INV_SRC_ALPHA;
-	AlphaToCoverageEnable = False;
-};
-
-DepthStencilState NoWriteDepth
-{
-	// DepthEnable = False;
-	DepthWriteMask = ZERO;
-};
-
-DepthStencilState WriteDepth
-{
-	// DepthEnable = False;
-	DepthWriteMask = ALL;
-};
-
-DepthStencilState NoDepthTest
-{
-	DepthEnable = False;
-};
-
-RasterizerState Default
-{
-	CullMode = BACK;
-	// CullMode = NONE;
-	// DepthClipEnable = False;
-	MultisampleEnable = True;
-};
-
-RasterizerState WireFrame
-{
-	FILLMODE = WIREFRAME;
-};
-
-RasterizerState Shadow
-{
-	CullMode = NONE;
-	SlopeScaledDepthBias = 2.f;
-};
 
 // ----------------------------------------
 // shaders
@@ -941,50 +775,6 @@ technique11 skin_with_shadow
 }
 
 // ----------------------------------------
-// for drawing line
-// ----------------------------------------
-technique11 drawing_line
-{
-	/*
-	pass main
-	{
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
-
-		SetVertexShader( CompileShader( vs_4_0, vs_drawing_line() ) );
-		SetGeometryShader( CompileShader( gs_4_0, gs_drawing_line() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_drawing_line() ) );
-
-		RASTERIZERSTATE = Default;
-	}
-	*/
-
-	pass debug
-	{
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
-
-		SetVertexShader( CompileShader( vs_4_0, vs_drawing_line_debug() ) );
-		SetGeometryShader( CompileShader( gs_4_0, gs_drawing_line_debug() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_drawing_line_debug() ) );
-
-		RASTERIZERSTATE = Debug;
-	}
-
-	pass debug_line
-	{
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
-
-		SetVertexShader( CompileShader( vs_4_0, vs_drawing_line_debug() ) );
-		SetGeometryShader( CompileShader( gs_4_0, gs_drawing_line_debug_line() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_drawing_line_debug_line() ) );
-
-		RASTERIZERSTATE = Debug;
-	}
-}
-
-// ----------------------------------------
 // for Text
 // ----------------------------------------
 GS_2D_INPUT vs_text( VS_INPUT input )
@@ -1190,33 +980,7 @@ technique11 main_with_shadow
 	}
 }
 
-// ----------------------------------------
-// for 2D ( Fader, debug ウィンドウで使用 )
-// ----------------------------------------
-PS_FLAT_INPUT vs_2d( VS_INPUT input )
-{
-	PS_FLAT_INPUT output = ( PS_FLAT_INPUT ) 0;
-
-	output.Position = mul( input.Position, World );
-	output.TexCoord = input.TexCoord;
-
-	return output;
-}
-
-float4 ps_2d( PS_FLAT_INPUT input ) : SV_Target
-{
-	return model_texture.Sample( texture_sampler, input.TexCoord ) + ObjectColor; // + ObjectAdditionalColor;
-}
-
-technique11 main2d
-{
-	pass main
-	{
-		SetVertexShader( CompileShader( vs_4_0, vs_2d() ) );
-		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_2d() ) );
-	}
-}
+#include "2d.hlsl"
 
 // ----------------------------------------
 // for Sprite

@@ -7,6 +7,8 @@
 #include <ScriptManager.h>
 #include <Input.h>
 
+#include <core/graphics/Direct3D11/Direct3D11Fader.h>
+
 #include <common/math.h>
 
 namespace blue_sky
@@ -18,14 +20,6 @@ DebugScene::DebugScene( const GameMain* game_main )
 {
 	// Physics
 	get_physics()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
-
-	get_script_manager()->set_function( "create_object", [this] ( const char_t* name ) { auto* o = create_object( name ); o->restart(); return o; } );
-	get_script_manager()->set_function( "get_object", [this] ( const char_t* name ) { return get_active_object_manager()->get_active_object( name ); } );
-	
-	// get_script_manager()->set_function( "name", [this] ( ActiveObject* o, const char_t* name ) { get_active_object_manager()->name_active_object( o, name ); }
-
-	get_script_manager()->set_function( "set_loc", [] ( ActiveObject* o, float x, float y, float z ) { o->set_location( x, y, z ); } );
-	get_script_manager()->set_function( "set_rot", [] ( ActiveObject* o, float r ) { o->set_direction_degree( r ); } );
 
 	camera_->position().set( 0.f, 0.f, -10.f );
 
@@ -72,7 +66,9 @@ void DebugScene::update()
 	*/
 
 	camera_->update();
+
 	get_active_object_manager()->update();
+	get_graphics_manager()->update();
 }
 
 void DebugScene::render()
@@ -92,8 +88,11 @@ void DebugScene::render()
 	get_graphics_manager()->setup_rendering();
 	get_graphics_manager()->render_active_objects( get_active_object_manager() );
 
+	get_graphics_manager()->render_fader();
+
 	std::stringstream ss;
-	ss << "eye : " << eye.x() << ", " << eye.y() << ", " << eye.z();
+	ss << "eye : " << eye.x() << ", " << eye.y() << ", " << eye.z() << std::endl;
+	ss << "fade :" << get_direct_3d()->getFader()->get_color().a() << std::endl; /// @todo フェーディングがスムーズでない原因を調べる
 
 	get_graphics_manager()->draw_text( 10.f, 10.f, get_width() - 10.f, get_height() - 10.f, ss.str().c_str(), Color::White );
 }

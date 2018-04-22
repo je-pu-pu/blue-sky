@@ -2,6 +2,7 @@
 #define BLUE_SKY_CAMERA_H
 
 #include <core/Vector3.h>
+// #include <GameObject/GameObject.h>
 
 namespace blue_sky
 {
@@ -13,7 +14,7 @@ class Player;
  *
  * @todo GameObject ‰»‚µ‚Ä ActiveObjectManager ‚ÅŠÇ—‚·‚é
  */
-class Camera
+class Camera // : public GameObject
 {
 public:
 

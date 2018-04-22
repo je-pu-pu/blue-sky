@@ -2,6 +2,7 @@
 #include "Direct3D11TextureManager.h"
 #include "Direct3D11Mesh.h"
 #include "Direct3D11Effect.h"
+#include "Direct3D11Fader.h"
 #include "Direct3D11.h"
 
 #include <core/graphics/DirectWrite/DirectWrite.h>
@@ -37,6 +38,22 @@ Direct3D11GraphicsManager::Direct3D11GraphicsManager( Direct3D* direct_3d )
 Direct3D11GraphicsManager::~Direct3D11GraphicsManager()
 {
 	
+}
+
+/**
+ * 更新処理
+ *
+ */
+void Direct3D11GraphicsManager::update()
+{
+	if ( is_fading_in_ )
+	{
+		fade_in( fade_speed_ );
+	}
+	else
+	{
+		fade_out( fade_speed_ );
+	}
 }
 
 /**
@@ -144,6 +161,61 @@ void Direct3D11GraphicsManager::render_technique( const char_t* technique_name, 
 
 		function();
 	}
+}
+
+/**
+ * フェードイン・フェードアウト用の色を設定する
+ *
+ * @param color 色
+ */
+void Direct3D11GraphicsManager::set_fade_color( const Color& color )
+{
+	direct_3d_->getFader()->set_color( color );
+}
+
+void Direct3D11GraphicsManager::start_fade_in( float_t speed )
+{
+	is_fading_in_ = true;
+	fade_speed_ = speed;
+}
+	
+void Direct3D11GraphicsManager::start_fade_out( float_t speed )
+{
+	is_fading_in_ = false;
+	fade_speed_ = speed;
+}
+
+void Direct3D11GraphicsManager::fade_in( float_t speed )
+{
+	direct_3d_->getFader()->fade_in( speed );
+}
+	
+void Direct3D11GraphicsManager::fade_out( float_t speed )
+{
+	direct_3d_->getFader()->fade_out( speed );
+}
+
+/**
+ * フェーダーを描画する
+ *
+ */
+void Direct3D11GraphicsManager::render_fader() const
+{
+	ObjectConstantBufferData buffer_data;
+	buffer_data.world = Matrix().set_identity().transpose();
+	buffer_data.color = direct_3d_->getFader()->get_color();
+	
+	get_shared_object_render_data()->update( & buffer_data );
+
+	set_input_layout( "main" );
+
+	render_technique( "|main2d", [this]
+	{
+		get_shared_object_render_data()->bind_to_vs();
+		get_shared_object_render_data()->bind_to_ps();
+
+		direct_3d_->getFader()->render();
+	} );
 }
 
 /**

@@ -23,7 +23,7 @@ public:
 	virtual bool update() = 0;
 
 	virtual void on_key_down( char_t ) =0;
-	virtual void on_function_key_down( int ) = 0;
+	virtual void on_special_key_down( int ) = 0;
 	virtual void on_mouse_wheel( int ) = 0;
 	virtual void on_resize() = 0;
 

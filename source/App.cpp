@@ -183,7 +183,7 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	{
 		if ( App::GetInstance()->game_ )
 		{
-			App::GetInstance()->game_->on_function_key_down( wp - VK_F1 + 1 );
+			App::GetInstance()->game_->on_special_key_down( wp );
 		}
 
 		break;

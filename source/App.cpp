@@ -117,8 +117,8 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	// İ’è‚ğ“Ç‚İ‚Ş
 	config_->load_file( "blue-sky.config" );
 
-	set_size( get_config()->get( "video.width", DEFAULT_WIDTH ), get_config()->get( "video.height", DEFAULT_HEIGHT ) );
-	set_full_screen( get_config()->get( "video.full_screen", 0 ) != 0 );
+	set_size( get_config()->get( "graphics.width", DEFAULT_WIDTH ), get_config()->get( "graphics.height", DEFAULT_HEIGHT ) );
+	set_full_screen( get_config()->get( "graphics.full_screen", 0 ) != 0 );
 
 	// ƒQ[ƒ€‚ğ‰Šú‰»‚·‚é
 	blue_sky::GameMain::get_instance()->setup_scene();

@@ -78,13 +78,13 @@ GameMain::GameMain()
 		get_app()->is_full_screen(),
 		0,
 		0,
-		get_config()->get( "video.multisample.count", 4 ), 
-		get_config()->get( "video.multisample.quality", 2 )
+		get_config()->get( "graphics.multisample.count", 4 ), 
+		get_config()->get( "graphics.multisample.quality", 2 )
 	);
 	direct_3d_->getEffect()->load( "media/shader/main.fx" );
 	direct_3d_->create_default_input_layout();
 
-	if ( get_config()->get( "video.font_enabled", 1 ) )
+	if ( get_config()->get( "graphics.font_enabled", 1 ) )
 	{
 		direct_3d_->setup_font();
 	}
@@ -92,7 +92,7 @@ GameMain::GameMain()
 	physics_ = new ActiveObjectPhysics();
 
 	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
-	bullet_debug_draw_->setDebugMode( get_config()->get< int >( "video.debug_bullet", 0 ) );
+	bullet_debug_draw_->setDebugMode( get_config()->get< int >( "graphics.debug_bullet", 0 ) );
 
 	physics_->setDebugDrawer( bullet_debug_draw_.get() );
 
@@ -109,7 +109,7 @@ GameMain::GameMain()
 	}
 
 	graphics_manager_ = new Direct3D11GraphicsManager( direct_3d_.get() );
-	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "video.debug_axis", 0 ) );
+	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "graphics.debug_axis", 0 ) );
 	
 	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
 	sound_manager_->set_mute( get_config()->get( "audio.mute", 0 ) != 0 );
@@ -128,7 +128,7 @@ GameMain::GameMain()
 	// MainLoop
 	main_loop_ = new MainLoop( 60 );
 
-	is_display_fps_ = get_config()->get( "video.display_fps", 0 ) != 0;
+	is_display_fps_ = get_config()->get( "graphics.display_fps", 0 ) != 0;
 
 
 	update_render_data_for_game();
@@ -138,7 +138,7 @@ GameMain::GameMain()
 GameMain::~GameMain()
 {
 	get_config()->set< int >( "audio.mute", sound_manager_->is_mute() );
-	get_config()->set< int >( "video.full_screen", get_direct_3d()->is_full_screen() );
+	get_config()->set< int >( "graphics.full_screen", get_direct_3d()->is_full_screen() );
 
 	get_config()->save_file( "blue-sky.config" );
 

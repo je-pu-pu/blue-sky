@@ -123,9 +123,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	std::string stage_dir_name = StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) );
 	load_stage_file( ( stage_dir_name + get_stage_name() + ".stage" ).c_str() );
 
-	if ( get_config()->get( "video.shadow-map-enabled", 1 ) != 0 && stage_config_->get( "video.shadow-map-enabled", true ) )
+	if ( get_config()->get( "graphics.shadow-map-enabled", 1 ) != 0 && stage_config_->get( "graphics.shadow-map-enabled", true ) )
 	{
-		shadow_map_ = new ShadowMap( get_direct_3d(), get_config()->get( "video.shadow-map-cascade-levels", 3 ), get_config()->get( "video.shadow-map-size", 1024 ) );
+		shadow_map_ = new ShadowMap( get_direct_3d(), get_config()->get( "graphics.shadow-map-cascade-levels", 3 ), get_config()->get( "graphics.shadow-map-size", 1024 ) );
 	}
 
 	if ( ! sky_box_ )

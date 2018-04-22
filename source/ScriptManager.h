@@ -94,7 +94,7 @@ inline ScriptManager::~ScriptManager()
 inline void ScriptManager::exec( const string_t& script )
 {
 	command_history_.push_back( script );
-	command_history_index_ = command_history_.size() - 1;
+	command_history_index_ = command_history_.size();
 
 	if ( command_history_.size() > 100 )
 	{

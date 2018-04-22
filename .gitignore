@@ -2,6 +2,8 @@
 *.url
 *.bin.fbx
 
+/doc/html/
+
 /source/Debug/
 /source/Release/
 /source/Profile/
@@ -10,8 +12,6 @@
 /source/extern/*/Debug/
 /source/extern/*/Release/
 /source/extern/*/Profile/
-
-/source/docs/
 
 /source/*.config
 /source/save/*.save

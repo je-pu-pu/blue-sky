@@ -117,7 +117,7 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	// İ’è‚ğ“Ç‚İ‚Ş
 	config_->load_file( "blue-sky.config" );
 
-	set_size( get_config()->get( "graphics.width", DEFAULT_WIDTH ), get_config()->get( "graphics.height", DEFAULT_HEIGHT ) );
+	set_size( get_config()->get( "graphics.screen_width", DEFAULT_WIDTH ), get_config()->get( "graphics.screen_height", DEFAULT_HEIGHT ) );
 	set_full_screen( get_config()->get( "graphics.full_screen", 0 ) != 0 );
 
 	// ƒQ[ƒ€‚ğ‰Šú‰»‚·‚é

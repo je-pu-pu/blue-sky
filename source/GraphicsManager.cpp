@@ -121,8 +121,9 @@ void GraphicsManager::load_paper_textures()
 	paper_texture_list_.push_back( load_texture( "paper-2", "media/texture/pen-face-2-loop.png" ) );
 	paper_texture_list_.push_back( load_texture( "paper-3", "media/texture/dot-face-1.png" ) );
 	paper_texture_list_.push_back( load_texture( "paper-4", "media/texture/brush-face-1.png" ) );
+	paper_texture_list_.push_back( load_texture( "paper-5", "media/texture/blank.png" ) );
 
-	paper_texture_ = paper_texture_list_.front();
+	paper_texture_ = paper_texture_list_.back();
 }
 
 /**

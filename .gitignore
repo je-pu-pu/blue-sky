@@ -24,8 +24,6 @@
 *.sdf
 *.suo
 
-/docs/
-
 /package/
 
 /reference/

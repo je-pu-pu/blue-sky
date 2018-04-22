@@ -13,6 +13,8 @@
 #define SOL_NO_EXCEPTIONS 1
 #include <sol/sol.hpp>
 
+#include <boost/algorithm/string.hpp>
+
 #include <queue>
 
 namespace blue_sky
@@ -28,10 +30,12 @@ class ScriptManager
 private:
 	sol::state lua_;
 
-	std::deque< std::string > command_history_;
+	string_t output_;
+
+	std::deque< string_t > command_history_;
 	int command_history_index_;
 
-	const std::string empty_command_;
+	const string_t empty_command_;
 
 public:
 	ScriptManager();
@@ -68,6 +72,8 @@ public:
 		lua_.set_function( name, function);
 	}
 
+	void auto_complete( string_t& );
+
 	void exec( const string_t& );
 
 	template< typename Type >
@@ -76,9 +82,11 @@ public:
 		return lua_.get< Type >( name );
 	}
 
-	const std::string& get_current_history_command() const { return ( command_history_index_ < static_cast< int >( command_history_.size() ) ? command_history_[ command_history_index_ ] : empty_command_ ); }
-	const std::string& get_prev_hisotry_command() { command_history_index_ = math::clamp< int >( command_history_index_ - 1, 0, command_history_.size() ); return get_current_history_command(); }
-	const std::string& get_next_hisotry_command() { command_history_index_ = math::clamp< int >( command_history_index_ + 1, 0, command_history_.size() ); return get_current_history_command(); }
+	const string_t& get_current_history_command() const { return ( command_history_index_ < static_cast< int >( command_history_.size() ) ? command_history_[ command_history_index_ ] : empty_command_ ); }
+	const string_t& get_prev_hisotry_command() { command_history_index_ = math::clamp< int >( command_history_index_ - 1, 0, command_history_.size() ); return get_current_history_command(); }
+	const string_t& get_next_hisotry_command() { command_history_index_ = math::clamp< int >( command_history_index_ + 1, 0, command_history_.size() ); return get_current_history_command(); }
+
+	const string_t& get_output() const { return output_; }
 };
 
 inline ScriptManager::ScriptManager()
@@ -91,8 +99,61 @@ inline ScriptManager::~ScriptManager()
 	
 }
 
+inline void ScriptManager::auto_complete( string_t& script )
+{
+	output_.clear();
+
+	auto last_space = script.find_last_of( " ,=()" );
+	
+	string_t::size_type input_word_pos = 0;
+	string_t input_word;
+
+	if ( last_space != string_t::npos )
+	{
+		input_word_pos = last_space + 1;
+		input_word = script.substr( input_word_pos );
+	}
+	else
+	{
+		input_word_pos = 0;
+		input_word = script;
+	}
+
+	std::vector< string_t > candidate_list;
+
+	for ( const auto& v : lua_ )
+	{
+		string_t identifier = v.first.as< string_t >();
+
+		if ( boost::starts_with( identifier, input_word ) )
+		{
+			candidate_list.push_back( std::move( identifier ) );
+		}
+	}
+
+	if ( candidate_list.empty() )
+	{
+		return;
+	}
+
+	if ( candidate_list.size() == 1 )
+	{
+		script = script.substr( 0, input_word_pos ) + candidate_list.front();
+		return;
+	}
+
+	for ( const auto& candidate : candidate_list )
+	{
+		output_ += candidate + "\n";
+	}
+
+	output_.resize( output_.size() - 1 );
+}
+
 inline void ScriptManager::exec( const string_t& script )
 {
+	output_.clear();
+
 	command_history_.push_back( script );
 	command_history_index_ = command_history_.size();
 

@@ -294,6 +294,7 @@ void GameMain::render()
 	if ( is_command_mode_ )
 	{
 		graphics_manager_->draw_text_at_center( ( "> " + user_command_ ).c_str(), Color::White );
+		graphics_manager_->draw_text( 0, get_height() / 2.f, get_width(), get_height(), get_script_manager()->get_output().c_str(), Color::White );
 	}
 
 	direct_3d_->present();
@@ -337,6 +338,10 @@ void GameMain::edit_command( char_t key )
 
 			user_command_ = "";
 		}
+	}
+	else if ( key == '\t' )
+	{
+		get_script_manager()->auto_complete( user_command_ );
 	}
 	else if ( key == '\b' )
 	{

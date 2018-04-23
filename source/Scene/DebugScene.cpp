@@ -68,6 +68,7 @@ void DebugScene::update()
 	get_active_object_manager()->update();
 
 	get_graphics_manager()->update();
+	get_graphics_manager()->set_eye_position( camera_->position() );
 
 	get_physics()->update( get_elapsed_time() );
 }
@@ -87,6 +88,7 @@ void DebugScene::render()
 	get_graphics_manager()->get_frame_render_data()->update( & frame_constant_buffer_data );
 
 	get_graphics_manager()->setup_rendering();
+	get_graphics_manager()->render_background();
 	get_graphics_manager()->render_active_objects( get_active_object_manager() );
 
 	get_graphics_manager()->render_fader();

@@ -50,7 +50,6 @@ class GamePlayScene : public Scene
 public:
 	typedef game::Mesh					Mesh;
 	typedef Direct3D11FarBillboardsMesh	FarBillboardsMesh;
-	typedef Direct3D11SkyBox			SkyBox;
 	typedef Direct3D11ShadowMap			ShadowMap;
 	typedef Direct3D11Rectangle			Rectangle;
 
@@ -75,8 +74,7 @@ protected:
 	common::auto_ptr< Config >			stage_config_;	
 
 	mutable common::auto_ptr< ShadowMap >		shadow_map_;
-	common::auto_ptr< SkyBox >			sky_box_;
-	common::auto_ptr< Mesh >			ground_;
+
 	common::auto_ptr< Mesh >			far_billboards_;
 	common::auto_ptr< Rectangle >		rectangle_;
 

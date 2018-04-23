@@ -90,6 +90,7 @@ typedef Direct3D11ConstantBuffer< GameConstantBufferData > GameConstantBuffer;
 typedef Direct3D11ConstantBuffer< FrameConstantBufferData > FrameConstantBuffer;
 typedef Direct3D11ConstantBufferWithData< FrameDrawingConstantBufferData > FrameDrawingConstantBuffer;
 typedef Direct3D11ConstantBuffer< ObjectConstantBufferData > ObjectConstantBuffer;
+typedef Direct3D11ConstantBufferWithData< ObjectConstantBufferData > ObjectConstantBufferWithData;
 typedef Direct3D11ConstantBuffer< ObjectExtentionConstantBufferData > ObjectExtentionConstantBuffer;
 typedef Direct3D11ConstantBuffer< BoneConstantBufferData > BoneConstantBuffer;
 

@@ -26,7 +26,6 @@
 
 /// @todo 抽象化する
 #include <core/graphics/Direct3D11/Direct3D11ShadowMap.h>
-#include <core/graphics/Direct3D11/Direct3D11SkyBox.h>
 #include <core/graphics/Direct3D11/Direct3D11FarBillboardsMesh.h>
 #include <core/graphics/Direct3D11/Direct3D11Rectangle.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
@@ -127,9 +126,9 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		shadow_map_ = new ShadowMap( get_direct_3d(), get_config()->get( "graphics.shadow-map-cascade-levels", 3 ), get_config()->get( "graphics.shadow-map-size", 1024 ) );
 	}
 
-	if ( ! sky_box_ )
+	if ( ! get_graphics_manager()->is_sky_box_set() )
 	{
-		sky_box_ = new SkyBox( get_direct_3d(), "sky-box-3" );
+		get_graphics_manager()->set_sky_box( "sky-box-3" );
 	}
 
 	if ( ! far_billboards_ )
@@ -302,11 +301,15 @@ void GamePlayScene::setup_command()
 
 		ss >> sky_box_name >> sky_box_ext;
 
-		sky_box_.release();
+		assert( sky_box_ext != "png" );
 
-		if ( sky_box_name != "none" )
+		if ( sky_box_name == "none" )
 		{
-			sky_box_ = new SkyBox( get_direct_3d(), ( string_t( "sky-box-" ) + sky_box_name ).c_str(), sky_box_ext.c_str() );
+			get_graphics_manager()->unset_sky_box();
+		}
+		else
+		{
+			get_graphics_manager()->set_sky_box( ( string_t( "sky-box-" ) + sky_box_name ).c_str() );
 		}
 	};
 	command_map_[ "change_bgm" ] = [ & ] ( const string_t& s )
@@ -839,12 +842,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			string_t ground_name;
 			ss >> ground_name;
 
-			if ( ! ground_ )
-			{
-				ground_ = get_graphics_manager()->create_mesh();				
-			}
-			
-			ground_->load_obj( ( string_t( "media/model/" ) + ground_name + ".obj" ).c_str() );
+			get_graphics_manager()->set_ground( ground_name.c_str() );
 		}
 		else if ( name == "far-billboards" )
 		{
@@ -1110,6 +1108,8 @@ void GamePlayScene::update()
 	ambient_color_.chase();
 	shadow_color_.chase();
 	shadow_paper_color_.chase();
+
+	get_graphics_manager()->set_ambient_color( ambient_color_.value() );
 }
 
 /**
@@ -1582,12 +1582,14 @@ void GamePlayScene::render_to_display() const
  * 各目に対して描画を行う
  *
  * @parma ortho_offset UI の両目間オフセット
+ * @todo GraphicsManager に移行する
  */
 void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 {
 	get_graphics_manager()->set_input_layout( "main" );
 
-	render_sky_box();
+	get_graphics_manager()->render_background();
+
 	render_far_billboards();
 
 	render_object_mesh();
@@ -1698,6 +1700,8 @@ void GamePlayScene::update_render_data_for_frame() const
 	frame_constant_buffer_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();
 
 	get_graphics_manager()->get_frame_render_data()->update( & frame_constant_buffer_data );
+
+	get_graphics_manager()->set_eye_position( camera_->position() );
 }
 
 /**
@@ -1732,6 +1736,8 @@ void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
 	frame_constant_buffer_data.projection = get_oculus_rift()->get_projection_matrix( eye_index, camera_->near_clip(), camera_->far_clip() ).transpose();
 
 	get_graphics_manager()->get_frame_render_data()->update( & frame_constant_buffer_data );
+
+	get_graphics_manager()->set_eye_position( Vector3( eye.x(), eye.y(), eye.z() ) );
 }
 
 /**
@@ -1832,45 +1838,6 @@ void GamePlayScene::render_shadow_map( const char* technique_name, bool is_skin_
 			{
 				player_->render_mesh();
 			}
-		}
-	} );
-}
-
-
-/**
- * スカイボックスを描画する
- *
- */
-void GamePlayScene::render_sky_box() const
-{
-	render_technique( "|sky_box", [this]
-	{
-		bind_game_render_data();
-		bind_frame_render_data();
-		bind_shared_object_render_data();
-
-		ObjectConstantBufferData object_constant_buffer_data;
-
-		// sky box
-		if ( sky_box_ )
-		{
-			object_constant_buffer_data.world = Matrix().set_translation( camera_->position().x(), camera_->position().y(), camera_->position().z() ).transpose();
-			object_constant_buffer_data.color = ambient_color_.value();
-
-			get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data );
-
-			sky_box_->render();
-		}
-
-		// ground
-		if ( ground_ )
-		{
-			object_constant_buffer_data.world.set_identity();
-			object_constant_buffer_data.color = ambient_color_.value();
-
-			get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data );
-	
-			ground_->render();
 		}
 	} );
 }

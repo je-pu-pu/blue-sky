@@ -7,6 +7,7 @@
 #include <memory>
 
 class Direct3D11;
+class Direct3D11SkyBox;
 class Direct3D11Axis;
 
 namespace blue_sky
@@ -24,12 +25,18 @@ public:
 private:
 	Direct3D* direct_3d_;
 	
+	std::unique_ptr< Direct3D11SkyBox >				sky_box_;
+	std::unique_ptr< Mesh >							ground_;
+
+	std::unique_ptr< Direct3D11Axis >				debug_axis_;
+
 	std::unique_ptr< GameConstantBuffer >			game_render_data_;
 	std::unique_ptr< FrameConstantBuffer >			frame_render_data_;
 	std::unique_ptr< FrameDrawingConstantBuffer >	frame_drawing_render_data_;
 	std::unique_ptr< ObjectConstantBuffer >			shared_object_render_data_;
 
-	std::unique_ptr< Direct3D11Axis >				debug_axis_;
+	std::unique_ptr< ObjectConstantBufferWithData >	sky_box_render_data_;
+	std::unique_ptr< ObjectConstantBufferWithData > ground_render_data_;
 
 	bool is_fading_in_ = true;
 	float_t fade_speed_ = 0.f;
@@ -57,10 +64,21 @@ public:
 	void unload_texture( const char_t* ) override;
 	void unload_texture_all() override;
 
+	void set_sky_box( const char_t* ) override;
+	void unset_sky_box() override;
+	bool is_sky_box_set() const override;
+
+	void set_ground( const char_t* ) override;
+	void unset_ground() override;
+	// bool is_ground_set() const override;
+
+	void set_ambient_color( const Color& ) override;
 	void set_shadow_color( const Color& ) override;
 	void set_shadow_paper_color( const Color& ) override;
 	void set_drawing_accent( float_t ) override;
 	void set_drawing_line_type( int_t ) override;
+
+	void set_eye_position( const Vector3& );
 
 	GameConstantBuffer* get_game_render_data() const override { return game_render_data_.get(); }
 	FrameConstantBuffer* get_frame_render_data() const override { return frame_render_data_.get(); }
@@ -69,6 +87,7 @@ public:
 
 	void setup_rendering() const override;
 	void render_technique( const char_t*, const std::function< void () >& ) const override;
+	void render_background() const override;
 
 	void set_fade_color( const Color& ) override;
 

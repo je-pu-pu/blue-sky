@@ -173,7 +173,13 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "set_mass", [] ( ActiveObject* o, float_t mass ) { o->set_mass( mass ); } );
 
 	// GrahpicsManager
+	get_script_manager()->set_function( "set_sky_box", [this] ( const char_t* name ) { get_graphics_manager()->set_sky_box( name ); } );
+	get_script_manager()->set_function( "unset_sky_box", [this] () { get_graphics_manager()->unset_sky_box(); } );
+	get_script_manager()->set_function( "set_ground", [this] ( const char_t* name ) { get_graphics_manager()->set_ground( name ); } );
+	get_script_manager()->set_function( "unset_ground", [this] () { get_graphics_manager()->unset_ground(); } );
+
 	get_script_manager()->set_function( "set_paper_texture_type", [this] ( int_t type ) { get_graphics_manager()->set_paper_texture_type( type ); } );
+	get_script_manager()->set_function( "set_ambient_color", [this] ( const Color& color ) { get_graphics_manager()->set_ambient_color( color ); } );
 	get_script_manager()->set_function( "set_shadow_color", [this] ( const Color& color ) { get_graphics_manager()->set_shadow_color( color ); } );
 	get_script_manager()->set_function( "set_shadow_paper_color", [this] ( const Color& color ) { get_graphics_manager()->set_shadow_paper_color( color ); } );
 	get_script_manager()->set_function( "set_drawing_accent", [this] ( float_t accent ) { get_graphics_manager()->set_drawing_accent( accent ); } );

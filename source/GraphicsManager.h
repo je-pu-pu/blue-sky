@@ -13,6 +13,7 @@
 #include <vector>
 #include <functional>
 
+class Vector3;
 class SkinningAnimationSet;
 class FbxFileLoader;
 
@@ -75,10 +76,21 @@ public:
 	void set_paper_texture_type( int_t );
 	void bind_paper_texture() const;
 
+	virtual void set_sky_box( const char_t* ) = 0;
+	virtual void unset_sky_box() = 0;
+	virtual bool is_sky_box_set() const = 0;
+
+	virtual void set_ground( const char_t* ) = 0;
+	virtual void unset_ground() = 0;
+	// virtual bool is_ground_set() const = 0;
+
+	virtual void set_ambient_color( const Color& ) = 0;
 	virtual void set_shadow_color( const Color& ) = 0;
 	virtual void set_shadow_paper_color( const Color& ) = 0;
 	virtual void set_drawing_accent( float_t ) = 0;
 	virtual void set_drawing_line_type( int_t ) = 0;
+
+	virtual void set_eye_position( const Vector3& ) = 0;
 
 	virtual GameConstantBuffer* get_game_render_data() const = 0;
 	virtual FrameConstantBuffer* get_frame_render_data() const = 0;
@@ -89,6 +101,7 @@ public:
 
 	virtual void setup_rendering() const = 0;
 	virtual void render_technique( const char_t*, const std::function< void () >& ) const = 0;
+	virtual void render_background() const = 0;
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
 
 	/// @todo êÆóùÇ∑ÇÈ

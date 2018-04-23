@@ -203,13 +203,6 @@ void ActiveObject::kill()
 
 	is_mesh_visible_ = false;
 	is_line_visible_ = false;
-
-	/*
-	if ( get_rigid_body() )
-	{
-		set_location( 0.f, -100.f, 0.f );
-	}
-	*/
 }
 
 /**

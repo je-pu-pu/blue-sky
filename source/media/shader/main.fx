@@ -264,7 +264,7 @@ PS_INPUT vs_skin( VS_SKIN_INPUT input )
 	return output;
 }
 
-PS_FLAT_INPUT vs_flat( VS_INPUT input, uint vertex_id : SV_VertexID )
+PS_FLAT_INPUT vs_flat( VS_INPUT input )
 {
 	PS_FLAT_INPUT output;
 
@@ -828,22 +828,7 @@ technique11 text
 	}
 }
 
-// ----------------------------------------
-// for SkyBox
-// ----------------------------------------
-technique11 sky_box
-{
-	pass main
-	{
-		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
-
-		SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
-		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_flat() ) );
-
-		RASTERIZERSTATE = Default;
-	}
-}
+#include "sky_box.hlsl"
 
 // ----------------------------------------
 // for Billboard

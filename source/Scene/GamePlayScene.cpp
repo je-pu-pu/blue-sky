@@ -103,9 +103,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	get_active_object_manager()->name_active_object( "player", player_.get() );
 
 	// Goal
-	goal_ = new Goal();
-	goal_->set_drawing_model( get_drawing_model_manager()->load( "goal" ) );
-	get_active_object_manager()->name_active_object( "goal", goal_.get() );
+	goal_ = static_cast< Goal* >( GameMain::get_instance()->create_object( "goal" ) );
+	get_active_object_manager()->name_active_object( "goal", goal_ );
 
 	// Camera
 	camera_ = new Camera();
@@ -666,8 +665,6 @@ void GamePlayScene::restart()
 	get_graphics_manager()->set_paper_texture_type( 0 );
 
 	player_->restart();
-	goal_->restart();
-
 	camera_->restart();
 
 	get_active_object_manager()->restart();
@@ -833,11 +830,9 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		else if ( name == "goal" )
 		{
 			float_t x = 0, y = 0, z = 0;
-
 			ss >> x >> y >> z;
 
 			goal_->set_start_location( x, y, z );
-			goal_->set_rigid_body( get_physics()->add_active_object( goal_.get() ) );
 		}
 		else if ( name == "ground" )
 		{
@@ -1081,7 +1076,6 @@ void GamePlayScene::update()
 		get_physics()->update( get_elapsed_time() );
 
 		player_->update_transform();
-		goal_->update_transform();
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 		{
@@ -1096,7 +1090,7 @@ void GamePlayScene::update()
 	// collision_check
 	get_physics()->check_collision_with( player_.get() );
 
-	if ( get_physics()->is_collision( player_.get(), goal_.get() ) )
+	if ( get_physics()->is_collision( player_.get(), goal_ ) )
 	{
 		on_goal();
 	}
@@ -1552,14 +1546,14 @@ void GamePlayScene::render_to_oculus_vr() const
 
 	get_oculus_rift()->setup_rendering();
 
+	// left eye
 	get_oculus_rift()->setup_rendering_for_left_eye();
 	update_render_data_for_frame_for_eye( 0 );
-			
 	render_for_eye();
 
+	// right eye
 	get_oculus_rift()->setup_rendering_for_right_eye();
 	update_render_data_for_frame_for_eye( 1 );
-
 	render_for_eye();
 
 	get_oculus_rift()->finish_rendering();
@@ -1641,6 +1635,10 @@ void GamePlayScene::render_text() const
 
 		ss << "mouse.dx : " << get_input()->get_mouse_dx() << std::endl;
 		ss << "mouse.dy : " << get_input()->get_mouse_dy() << std::endl;
+
+		ss << "IS LOCATED ON DIE : " << player_->is_located_on_die() << std::endl;
+		ss << "IS LOCATED ON SAFE : " << player_->is_located_on_safe() << std::endl;
+		ss << "IS FALLING TO DIE : " << player_->is_falling_to_die() << std::endl;
 
 		/*
 		ss << "IS JUMPING : " << player_->is_jumping() << std::endl;
@@ -1773,7 +1771,6 @@ void GamePlayScene::update_render_data_for_object() const
 	}
 
 	player_->update_render_data();
-	goal_->update_render_data();
 }
 
 /**
@@ -1834,7 +1831,6 @@ void GamePlayScene::render_shadow_map( const char* technique_name, bool is_skin_
 			if ( ! is_skin_mesh )
 			{
 				player_->render_mesh();
-				goal_->render_mesh();
 			}
 		}
 	} );
@@ -1993,8 +1989,6 @@ void GamePlayScene::render_object_mesh() const
 				active_object->render_mesh();
 			}
 		}
-
-		goal_->render_mesh();
 	} );
 }
 

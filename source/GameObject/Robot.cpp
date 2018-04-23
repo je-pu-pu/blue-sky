@@ -49,9 +49,6 @@ void Robot::restart()
 	texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
 	get_animation_player()->play( "Stand", false, true );
 
-	/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
-	get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE );
-
 	patrol_point_list_.clear();
 	current_patrol_point_index_ = 0;
 
@@ -181,10 +178,9 @@ void Robot::update()
 		set_velocity( get_velocity() * 0.5f );
 		texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
 
-		/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
 		if ( get_animation_player()->get_current_frame() >= 60 )
 		{
-			get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
+			set_no_contact_response( true );
 		}
 	}
 	else if ( mode_ == MODE_FLOAT )

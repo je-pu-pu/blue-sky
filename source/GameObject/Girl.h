@@ -40,7 +40,6 @@ private:
 	{
 		set_velocity( Vector3( 0, 0, 0 ) );
 		flicker_base_location_ = get_location();
-		
 	}
 
 protected:

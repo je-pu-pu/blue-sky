@@ -324,7 +324,8 @@ void gs_drawing_line_debug_line( line GS_LINE_INPUT input[ 2 ], inout LineStream
 
 SamplerState drawing_line_texture_sampler
 {
-	Filter = MIN_MAG_MIP_POINT;
+	// Filter = MIN_MAG_MIP_POINT;
+	Filter = ANISOTROPIC;
     AddressU = WRAP;
     AddressV = WRAP;
     AddressW = WRAP;

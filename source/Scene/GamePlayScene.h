@@ -80,7 +80,7 @@ protected:
 	common::auto_ptr< Mesh >			far_billboards_;
 	common::auto_ptr< Rectangle >		rectangle_;
 
-	common::auto_ptr< Goal >			goal_;
+	Goal*								goal_;
 
 	common::auto_ptr< Player >			player_;
 	common::auto_ptr< Camera >			camera_;

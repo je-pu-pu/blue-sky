@@ -14,7 +14,7 @@ Medal::Medal()
  */
 void Medal::update()
 {
-	set_direction_degree( get_direction_degree() + 1.f );
+	set_direction_degree( get_direction_degree() + per_sec( 90.f ) );
 }
 
 void Medal::restart()

@@ -152,7 +152,8 @@ GameMain::~GameMain()
 void GameMain::setup_script_command()
 {
 	// Basic
-	get_script_manager()->set_function( "create_color", [this] ( float r, float g, float b, float a ) { return Color( r, g, b, a ); } );
+	get_script_manager()->set_function( "color", [this] ( float_t r, float_t g, float_t b, float_t a ) { return Color( r, g, b, a ); } );
+	get_script_manager()->set_function( "vector", [this] ( float_t x, float_t y, float_t z ) { return ActiveObject::Vector3( x, y, z ); } );
 
 	// Fade
 	get_script_manager()->set_function( "set_fade_color", [this] ( const Color& color ) { get_graphics_manager()->set_fade_color( color ); } );
@@ -163,8 +164,13 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "create_object", [this] ( const char_t* name ) { auto* o = create_object( name ); o->restart(); return o; } );
 	get_script_manager()->set_function( "get_object", [this] ( const char_t* name ) { return get_active_object_manager()->get_active_object( name ); } );
 	get_script_manager()->set_function( "set_name", [this] ( ActiveObject* o, const char_t* name ) { get_active_object_manager()->name_active_object( name, o ); } );
-	get_script_manager()->set_function( "set_loc", [] ( ActiveObject* o, float x, float y, float z ) { o->set_location( x, y, z ); } );
-	get_script_manager()->set_function( "set_rot", [] ( ActiveObject* o, float r ) { o->set_direction_degree( r ); } );
+	get_script_manager()->set_function( "set_loc", [] ( ActiveObject* o, float_t x, float_t y, float_t z ) { o->set_location( x, y, z ); } );
+	get_script_manager()->set_function( "set_dir", [] ( ActiveObject* o, float_t r ) { o->set_direction_degree( r ); } );
+	get_script_manager()->set_function( "set_vel", [] ( ActiveObject* o, const ActiveObject::Vector3& v ) { o->set_velocity( v ); } );
+	get_script_manager()->set_function( "set_start_loc", [] ( ActiveObject* o, float_t  x, float_t  y, float_t  z ) { o->set_start_location( x, y, z ); } );
+	get_script_manager()->set_function( "set_start_rot", [] ( ActiveObject* o, float_t rx, float_t ry, float_t rz ) { o->set_start_rotation( rx, ry, rz ); } );
+	get_script_manager()->set_function( "set_start_dir", [] ( ActiveObject* o, float_t r ) { o->set_start_direction_degree( r ); } );
+	get_script_manager()->set_function( "set_mass", [] ( ActiveObject* o, float_t mass ) { o->set_mass( mass ); } );
 
 	// GrahpicsManager
 	get_script_manager()->set_function( "set_paper_texture_type", [this] ( int_t type ) { get_graphics_manager()->set_paper_texture_type( type ); } );
@@ -329,7 +335,7 @@ void GameMain::edit_command( char_t key )
 		{
 			try
 			{
-				get_script_manager()->exec( user_command_ );
+				get_script_manager()->exec( user_command_, true );
 			}
 			catch ( const ScriptError& e )
 			{

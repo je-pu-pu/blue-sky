@@ -11,6 +11,8 @@ Rocket::Rocket()
 void Rocket::restart()
 {
 	ActiveObject::restart();
+
+	set_no_contact_response( false );
 }
 
 /**
@@ -25,6 +27,8 @@ void Rocket::update()
 void Rocket::on_collide_with( Player* )
 {
 	kill();
+
+	set_no_contact_response( true );
 }
 
 } // namespace blue_sky

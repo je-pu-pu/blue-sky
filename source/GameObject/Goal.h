@@ -26,6 +26,11 @@ private:
 
 	bool is_safe_footing() const override { return true; }
 
+	void on_arrive_at_target_location() override
+	{
+		set_velocity( Vector3( 0, 0, 0 ) );
+	}
+
 public:
 	Goal();
 	~Goal() { }

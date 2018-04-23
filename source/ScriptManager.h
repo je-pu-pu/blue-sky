@@ -74,7 +74,7 @@ public:
 
 	void auto_complete( string_t& );
 
-	void exec( const string_t& );
+	void exec( const string_t&, bool = false );
 
 	template< typename Type >
 	Type get( const string_t& name ) const
@@ -150,12 +150,15 @@ inline void ScriptManager::auto_complete( string_t& script )
 	output_.resize( output_.size() - 1 );
 }
 
-inline void ScriptManager::exec( const string_t& script )
+inline void ScriptManager::exec( const string_t& script, bool add_history )
 {
 	output_.clear();
 
-	command_history_.push_back( script );
-	command_history_index_ = command_history_.size();
+	if ( add_history )
+	{
+		command_history_.push_back( script );
+		command_history_index_ = command_history_.size();
+	}
 
 	if ( command_history_.size() > 100 )
 	{

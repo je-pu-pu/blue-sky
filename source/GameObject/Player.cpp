@@ -25,8 +25,8 @@ Player::Player()
 	, is_jumping_( false )
 	, is_jumpable_( false )
 	, is_clambering_( false )
-	, is_falling_to_die_( false )
-	, is_falling_to_safe_( false )
+	, is_located_on_die_( false )
+	, is_located_on_safe_( false )
 	, is_on_ladder_( false )
 	, is_facing_to_block_( false )
 	, can_clamber_( false )
@@ -70,8 +70,8 @@ void Player::restart()
 	is_jumping_ = false;
 	is_jumpable_ = false;
 	is_clambering_ = false;
-	is_falling_to_die_ = false;
-	is_falling_to_safe_ = false;
+	is_located_on_die_ = false;
+	is_located_on_safe_ = false;
 	is_on_ladder_ = false;
 	is_facing_to_block_ = false;
 	can_clamber_ = false;
@@ -124,7 +124,7 @@ void Player::update()
 	update_on_footing();
 	update_jumpable();
 	update_jumping();
-	update_falling_to_die();
+	update_located_to_die();
 	update_facing_to_block();
 	update_can_clamber();
 	update_can_peer_down();
@@ -172,11 +172,11 @@ void Player::update()
 		eye_depth_ = math::clamp( eye_depth_, 0.f, 1.f );
 	}
 
-	if ( is_falling_to_safe() )
+	if ( is_located_on_safe() )
 	{
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.25f, 0.25f, 1.f, 0.f ) );
 	}
-	else if ( is_falling_to_die() )
+	else if ( is_located_on_die() )
 	{
 		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 1.f, 0.f, 0.f, 0.f ) );
 
@@ -192,7 +192,7 @@ void Player::update()
 
 	if ( is_on_footing() )
 	{
-		if ( is_falling_to_die() )
+		if ( is_located_on_die() )
 		{
 			kill();
 		}
@@ -217,7 +217,7 @@ void Player::update()
 		}
 	}
 
-	if ( ! is_falling_to_die() || is_on_ladder() )
+	if ( ! is_located_on_die() || is_on_ladder() )
 	{
 		stop_sound( "fall" );
 	}
@@ -359,7 +359,7 @@ void Player::update_jumping()
  * このまま落下すると死亡するかどうかの状態を更新する
  *
  */
-void Player::update_falling_to_die()
+void Player::update_located_to_die()
 {
 	const float_t x = get_rigid_body()->getCenterOfMassPosition().x();
 	const float_t y = get_rigid_body()->getCenterOfMassPosition().y();
@@ -370,7 +370,7 @@ void Player::update_falling_to_die()
 	const Vector3 right = get_right() * ( get_collision_width() * 0.5f - margin );
 	const Vector3 center = Vector3( x, y, z );
 
-	is_falling_to_safe_ = false;
+	is_located_on_safe_ = false;
 
 	// 中心 + 四隅 + 四点 の設置を調べる
 	if (
@@ -386,11 +386,11 @@ void Player::update_falling_to_die()
 		get_last_footing_height() - get_footing_height( center - front, true ) < get_height_to_die() ||
 		get_last_footing_height() - get_footing_height( center + front, true ) < get_height_to_die() )
 	{
-		is_falling_to_die_ = false;
+		is_located_on_die_ = false;
 	}
 	else
 	{
-		is_falling_to_die_ = true;
+		is_located_on_die_ = true;
 	}
 }
 
@@ -691,7 +691,7 @@ float_t Player::get_footing_height( const Vector3& from, bool include_soft_footi
 		if ( a->is_safe_footing() )
 		{
 			// !!!
-			const_cast< Player* >( this )->is_falling_to_safe_ = true;
+			const_cast< Player* >( this )->is_located_on_safe_ = true;
 		}
 	}
 

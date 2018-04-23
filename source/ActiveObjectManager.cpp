@@ -4,6 +4,7 @@
 #include "DrawingModelManager.h"
 #include "ActiveObjectPhysics.h"
 
+#include <GameObject/Goal.h>
 #include <GameObject/Balloon.h>
 #include <GameObject/Medal.h>
 #include <GameObject/Ladder.h>
@@ -25,6 +26,7 @@ ActiveObjectManager::ActiveObjectManager()
 	// object_creator_map_[ "girl"        ] = [] () -> ActiveObject* { return 0; };
 	// object_creator_map_[ "robot"       ] = [] () -> ActiveObject* { return 0; };
 
+	object_creator_map_[ "goal"        ] = [] () -> ActiveObject* { return new Goal();  };
 	object_creator_map_[ "balloon"     ] = [] () -> ActiveObject* { return new Balloon();  };
 	object_creator_map_[ "medal"       ] = [] () -> ActiveObject* { return new Medal();    };
 	object_creator_map_[ "ladder"      ] = [] () -> ActiveObject* { return new Ladder();   };

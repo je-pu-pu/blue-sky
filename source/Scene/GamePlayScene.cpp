@@ -161,6 +161,8 @@ GamePlayScene::~GamePlayScene()
 	get_drawing_model_manager()->clear();
 	get_active_object_manager()->clear();
 
+	get_graphics_manager()->unset_sky_box();
+	get_graphics_manager()->unset_ground();
 	get_graphics_manager()->unload_texture_all();
 
 	get_physics()->clear();
@@ -1070,7 +1072,7 @@ void GamePlayScene::update()
 
 	if ( ! is_cleared_ )
 	{
-		// get_physics()->update( 1.f / get_main_loop()->get_fps() );
+		get_graphics_manager()->clear_debug_bullet();
 		get_physics()->update( get_elapsed_time() );
 
 		player_->update_transform();
@@ -1588,18 +1590,11 @@ void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 {
 	get_graphics_manager()->set_input_layout( "main" );
 
-	get_graphics_manager()->render_background();
-
-	render_far_billboards();
-
 	render_object_mesh();
 
 	get_graphics_manager()->set_input_layout( "skin" );
 
 	render_object_skin_mesh();
-
-	// debug
-	// get_direct_3d()->clear_default_view();
 
 	get_graphics_manager()->set_input_layout( "line" );
 
@@ -1609,6 +1604,10 @@ void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 	get_graphics_manager()->render_debug_bullet();
 
 	get_graphics_manager()->set_input_layout( "main" );
+
+	render_far_billboards();
+	
+	get_graphics_manager()->render_background();
 
 	render_sprite( ortho_offset );
 

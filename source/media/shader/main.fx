@@ -72,13 +72,13 @@ BlendState CanvasPenBlend
 
 DepthStencilState NoWriteDepth
 {
-	// DepthEnable = False;
+	// DepthEnable = True;
 	DepthWriteMask = ZERO;
 };
 
 DepthStencilState WriteDepth
 {
-	// DepthEnable = False;
+	// DepthEnable = True;
 	DepthWriteMask = ALL;
 };
 
@@ -209,6 +209,7 @@ struct PS_SHADOW_INPUT
 	float Depth : TEXCOORD5;
 };
 
+#include "common.hlsl"
 #include "drawing_line.hlsl"
 
 PS_INPUT vs_main( VS_INPUT input, uint vertex_id : SV_VertexID )
@@ -829,6 +830,7 @@ technique11 text
 }
 
 #include "sky_box.hlsl"
+#include "ground.hlsl"
 
 // ----------------------------------------
 // for Billboard

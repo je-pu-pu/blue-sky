@@ -558,5 +558,11 @@
     <FxCompile Include="media\shader\debug_bullet.hlsl">
       <Filter>shader</Filter>
     </FxCompile>
+    <FxCompile Include="media\shader\ground.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="media\shader\common.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

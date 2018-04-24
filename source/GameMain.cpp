@@ -166,7 +166,7 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "set_name", [this] ( ActiveObject* o, const char_t* name ) { get_active_object_manager()->name_active_object( name, o ); } );
 	get_script_manager()->set_function( "set_loc", [] ( ActiveObject* o, float_t x, float_t y, float_t z ) { o->set_location( x, y, z ); } );
 	get_script_manager()->set_function( "set_dir", [] ( ActiveObject* o, float_t r ) { o->set_direction_degree( r ); } );
-	get_script_manager()->set_function( "set_vel", [] ( ActiveObject* o, const ActiveObject::Vector3& v ) { o->set_velocity( v ); } );
+	get_script_manager()->set_function( "set_vel", [] ( ActiveObject* o, float_t x, float_t y, float_t z ) { o->set_velocity( ActiveObject::Vector3( x, y, z ) ); } );
 	get_script_manager()->set_function( "set_start_loc", [] ( ActiveObject* o, float_t  x, float_t  y, float_t  z ) { o->set_start_location( x, y, z ); } );
 	get_script_manager()->set_function( "set_start_rot", [] ( ActiveObject* o, float_t rx, float_t ry, float_t rz ) { o->set_start_rotation( rx, ry, rz ); } );
 	get_script_manager()->set_function( "set_start_dir", [] ( ActiveObject* o, float_t r ) { o->set_start_direction_degree( r ); } );
@@ -307,6 +307,21 @@ void GameMain::render()
 	{
 		graphics_manager_->draw_text_at_center( ( "> " + user_command_ ).c_str(), Color::White );
 		graphics_manager_->draw_text( 0, get_height() / 2.f, get_width(), get_height(), get_script_manager()->get_output().c_str(), Color::White );
+
+		/// @todo OculusRift ‚É‚à•¶š‚ğ•`‰æ‚Å‚«‚é‚æ‚¤‚É‚·‚é
+		/*
+		if ( get_oculus_rift() )
+		{
+			get_oculus_rift()->setup_rendering();
+			get_oculus_rift()->setup_rendering_for_left_eye();
+			
+			graphics_manager_->draw_text_at_center( ( "> " + user_command_ ).c_str(), Color::White );
+
+			get_oculus_rift()->setup_rendering_for_right_eye();
+
+			graphics_manager_->draw_text_at_center( ( "> " + user_command_ ).c_str(), Color::White );
+		}
+		*/
 	}
 
 	direct_3d_->present();

@@ -1,14 +1,21 @@
-PS_FLAT_INPUT vs_sky_box( VS_INPUT input )
+DepthStencilState SkyBoxDepthStencilState
 {
-	PS_FLAT_INPUT output;
+	DepthWriteMask = ALL;
+	DepthFunc = LESS_EQUAL;
+};
 
-	output.Position = mul( input.Position, World );
-    output.Position = mul( output.Position, View );
-    output.Position = mul( output.Position, Projection );
+struct PS_SKY_BOX_OUTPUT
+{
+	float4 Color : SV_Target;
+	float Depth  : SV_Depth;
+};
 
-	output.TexCoord = input.TexCoord;
+PS_SKY_BOX_OUTPUT ps_sky_box( COMMON_POS_UV input )
+{
+	PS_SKY_BOX_OUTPUT output;
 
-	output.Color = ObjectColor;
+	output.Color = model_texture.Sample( texture_sampler, input.TexCoord ); // * ObjectColor;
+	output.Depth = 1;
 
 	return output;
 }
@@ -20,11 +27,11 @@ technique11 sky_box
 {
 	pass main
 	{
-		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
+		SetDepthStencilState( SkyBoxDepthStencilState, 0xFFFFFFFF );
 
-		SetVertexShader( CompileShader( vs_4_0, vs_sky_box() ) );
+		SetVertexShader( CompileShader( vs_4_0, vs_common_wvp_pos_norm_uv_to_pos_uv() ) );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_flat() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_sky_box() ) );
 
 		RASTERIZERSTATE = Default;
 	}

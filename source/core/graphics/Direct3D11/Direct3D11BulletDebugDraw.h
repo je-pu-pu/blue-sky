@@ -47,6 +47,7 @@ public:
 	void setDebugMode( int debug_mode ) { debug_mode_ = debug_mode; }
 	int getDebugMode() const { return debug_mode_; }
 
+	void clear();
 	void render() const;
 
 }; // class Direct3D11BulletDebugDraw

@@ -8,7 +8,12 @@
 
 #include <d3dcompiler.h>
 
+#ifdef _DEBUG
+#pragma comment( lib, "effects11d.lib" )
+#else
 #pragma comment( lib, "effects11.lib" )
+#endif
+
 
 Direct3D11Effect::Direct3D11Effect( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )

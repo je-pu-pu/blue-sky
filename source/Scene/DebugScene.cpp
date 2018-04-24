@@ -70,6 +70,7 @@ void DebugScene::update()
 	get_graphics_manager()->update();
 	get_graphics_manager()->set_eye_position( camera_->position() );
 
+	get_graphics_manager()->clear_debug_bullet();
 	get_physics()->update( get_elapsed_time() );
 }
 

@@ -103,6 +103,7 @@ public:
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;
 
+	void clear_debug_bullet() const override;
 	void render_debug_bullet() const override;
 
 }; // class GraphicsManager

@@ -328,28 +328,35 @@ void Direct3D11GraphicsManager::render_technique( const char_t* technique_name, 
  */
 void Direct3D11GraphicsManager::render_background() const
 {
-	render_technique( "|sky_box", [this]
+	// ground
+	if ( ground_ )
 	{
-		get_frame_render_data()->bind_to_vs();
-
-		// sky box
-		if ( sky_box_ )
+		render_technique( "|ground", [this]
 		{
-			sky_box_render_data_->update();
-			sky_box_render_data_->bind_to_vs();
+			get_frame_render_data()->bind_to_vs();
 
-			sky_box_->render();
-		}
-
-		// ground
-		if ( ground_ )
-		{
 			ground_render_data_->update();
 			ground_render_data_->bind_to_vs();
+			ground_render_data_->bind_to_ps();
 
 			ground_->render();
-		}
-	} );
+		} );
+	}
+
+	// sky box
+	if ( sky_box_ )
+	{
+		render_technique( "|sky_box", [this]
+		{
+			get_frame_render_data()->bind_to_vs();
+
+			sky_box_render_data_->update();
+			sky_box_render_data_->bind_to_vs();
+			sky_box_render_data_->bind_to_ps();
+
+			sky_box_->render();
+		} );
+	}
 }
 
 /**
@@ -484,7 +491,17 @@ void Direct3D11GraphicsManager::render_debug_axis_model() const
 }
 
 /**
- * Bullet デバッグ
+ * Bullet デバッグ 描画をクリアする
+ * Bullet の更新を行う前に毎フレーム呼び出す必要がある
+ *
+ */
+void Direct3D11GraphicsManager::clear_debug_bullet() const
+{
+	GameMain::get_instance()->get_bullet_debug_draw()->clear();
+}
+
+/**
+ * Bullet デバッグ 描画を行う
  *
  */
 void Direct3D11GraphicsManager::render_debug_bullet() const

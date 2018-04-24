@@ -61,6 +61,11 @@ void Direct3D11BulletDebugDraw::drawLine( const btVector3& from, const btVector3
 	vertex_list_.push_back( to_v );
 }
 
+void Direct3D11BulletDebugDraw::clear()
+{
+	vertex_list_.clear();
+}
+
 void Direct3D11BulletDebugDraw::render() const
 {
 	if ( vertex_list_.empty() )
@@ -76,6 +81,4 @@ void Direct3D11BulletDebugDraw::render() const
 	direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, 1, & vertex_buffer_, & stride, & offset );
 	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
 	direct_3d_->getImmediateContext()->Draw( vertex_list_.size(), 0 );
-
-	const_cast< Direct3D11BulletDebugDraw* >( this )->vertex_list_.clear();
 }

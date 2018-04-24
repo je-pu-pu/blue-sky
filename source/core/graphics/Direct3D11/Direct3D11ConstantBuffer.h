@@ -79,7 +79,7 @@ public:
  *
  */
 template< typename T >
-class Direct3D11ConstantBufferWithData : public Direct3D11ConstantBuffer< T >
+class alignas( 16 ) Direct3D11ConstantBufferWithData : public Direct3D11ConstantBuffer< T >
 {
 protected:
 	Data data_;
@@ -95,6 +95,16 @@ public:
 	const Data& data() const { return data_; }
 
 	void update() const { Direct3D11ConstantBuffer::update( & data_ ); }
+
+	static void* operator new ( size_t size )
+	{
+        return _aligned_malloc( size, 16 );
+    }
+
+	static void operator delete ( void* p )
+	{
+		_aligned_free( p );
+	}
 };
 
 #endif // DIRECT_3D_11_CONSTANT_BUFFER_H

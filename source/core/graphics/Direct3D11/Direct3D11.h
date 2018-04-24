@@ -27,8 +27,6 @@ class Direct3D11TextureManager;
 
 class DirectWrite;
 
-struct ID3DX11Effect;
-
 /**
  * Direct3D 11 のラッパークラス
  *

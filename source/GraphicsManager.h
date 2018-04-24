@@ -122,9 +122,10 @@ public:
 	void set_debug_axis_enabled( bool e ) { is_debug_axis_enabled_ = e; }
 
 	void render_debug_axis( const ActiveObjectManager* ) const;
-	virtual void render_debug_bullet() const = 0;
-	// virtual void render_debug_axis()
 
+	virtual void clear_debug_bullet() const = 0;
+	virtual void render_debug_bullet() const = 0;
+	
 	// void update_frame_render_data( const Camera*, const Vector3& ) const;
 
 }; // class GraphicsManager

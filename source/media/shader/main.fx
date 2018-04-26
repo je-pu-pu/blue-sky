@@ -783,60 +783,6 @@ technique11 skin_with_shadow
     }
 }
 
-// ----------------------------------------
-// for Text
-// ----------------------------------------
-GS_2D_INPUT vs_text( VS_INPUT input )
-{
-	GS_2D_INPUT output;
-	output.Position = input.Position;
-	output.TexCoord = input.TexCoord;
-
-	return output;
-}
-
-[maxvertexcount(4)]
-void gs_text( triangle GS_2D_INPUT input[3], inout TriangleStream<PS_FLAT_INPUT> TriStream )
-{
-	PS_FLAT_INPUT output[ 4 ];
-
-	float w = 1.f;
-	float h = 1.f;
-
-	output[ 0 ].Position = float4( -w, +h, 0.f, 1.f );
-	output[ 0 ].TexCoord = float2( 0.f,  0.f );
-	output[ 0 ].Color = float4( 1.f, 0.f, 0.f, 0.f );
-	
-	output[ 1 ].Position = float4( +w, +h, 0.f, 1.f );
-	output[ 1 ].TexCoord = float2( 1.f,  0.f );
-	output[ 1 ].Color = float4( 0.f, 1.f, 0.f, 0.f );
-
-	output[ 2 ].Position = float4( -w, -h, 0.f, 1.f );
-	output[ 2 ].TexCoord = float2( 0.f,  1.f );
-	output[ 2 ].Color = float4( 0.f, 0.f, 1.f, 0.f );
-
-	output[ 3 ].Position = float4( +w, -h, 0.f, 1.f );
-	output[ 3 ].TexCoord = float2( 1.f,  1.f );
-	output[ 3 ].Color = float4( 0.f, 0.f, 0.f, 0.f );
-
-	TriStream.Append( output[ 0 ] );
-	TriStream.Append( output[ 1 ] );
-	TriStream.Append( output[ 2 ] );
-	TriStream.Append( output[ 3 ] );
-
-	TriStream.RestartStrip();
-}
-
-technique11 text
-{
-	pass main
-	{
-		SetVertexShader( CompileShader( vs_4_0, vs_text() ) );
-		SetGeometryShader( CompileShader( gs_4_0, gs_text() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_flat() ) );
-	}
-}
-
 #include "sky_box.hlsl"
 #include "ground.hlsl"
 #include "billboard.hlsl"

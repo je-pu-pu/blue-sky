@@ -1,10 +1,7 @@
-#ifndef BLUE_SKY_CONSTANT_BUFFER_H
-#define BLUE_SKY_CONSTANT_BUFFER_H
+#pragma once
 
 #include <core/graphics/Direct3D11/Direct3D11ConstantBuffer.h>
-#include <core/graphics/Direct3D11/Direct3D11Color.h>
-#include <core/graphics/Direct3D11/Direct3D11Matrix.h>
-#include <core/graphics/Direct3D11/Direct3D11Vector.h>
+#include <core/type.h>
 
 namespace blue_sky
 {
@@ -12,10 +9,6 @@ namespace blue_sky
 template< int N >
 struct BaseConstantBufferData
 {
-	typedef Direct3D11Color		Color;
-	typedef Direct3D11Matrix	Matrix;
-	typedef Direct3D11Vector	Vector;
-
 	static const int DEFAULT_SLOT = N;
 };
 
@@ -95,5 +88,3 @@ typedef Direct3D11ConstantBuffer< ObjectExtentionConstantBufferData > ObjectExte
 typedef Direct3D11ConstantBuffer< BoneConstantBufferData > BoneConstantBuffer;
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_CONSTANT_BUFFER_H

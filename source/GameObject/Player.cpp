@@ -174,11 +174,11 @@ void Player::update()
 
 	if ( is_located_on_safe() )
 	{
-		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.25f, 0.25f, 1.f, 0.f ) );
+		get_drawing_model()->get_line()->set_color( Color( 0.25f, 0.25f, 1.f, 0.f ) );
 	}
 	else if ( is_located_on_die() )
 	{
-		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 1.f, 0.f, 0.f, 0.f ) );
+		get_drawing_model()->get_line()->set_color( Color( 1.f, 0.f, 0.f, 0.f ) );
 
 		if ( ! is_dead() && ! is_on_footing() && ! is_on_ladder() && get_rigid_body()->getLinearVelocity().y() < -7.5f && get_location().y() > 10.f && get_location().y() < 30.f &&  get_action_mode() == ACTION_MODE_NONE )
 		{
@@ -187,7 +187,7 @@ void Player::update()
 	}
 	else
 	{
-		get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.f, 0.f, 0.f, -0.25f ) );
+		get_drawing_model()->get_line()->set_color( Color( 0.f, 0.f, 0.f, -0.25f ) );
 	}
 
 	if ( is_on_footing() )

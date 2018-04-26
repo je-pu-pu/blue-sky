@@ -10,9 +10,7 @@
  */
 //**********************************************************
 
-
-#ifndef BLUE_SKY_INPUT_H
-#define BLUE_SKY_INPUT_H
+#pragma once
 
 #include <type/type.h>
 
@@ -210,5 +208,3 @@ public:
 }; // class Input
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_INPUT_H

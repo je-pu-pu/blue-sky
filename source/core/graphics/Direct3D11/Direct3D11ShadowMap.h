@@ -1,9 +1,7 @@
-#ifndef DIRECT_3D_11_SHADOW_MAP_H
-#define DIRECT_3D_11_SHADOW_MAP_H
+#pragma once
 
 #include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11Texture.h"
-#include "Direct3D11Matrix.h"
 
 #include <common/auto_ptr.h>
 
@@ -81,5 +79,3 @@ public:
 	const Matrix getViewProjectionMatrix( int level ) const { return view_matrix_ * projection_matrix_list_[ level ]; }
 	
 }; // class Direct3D11ShadowMap
-
-#endif // DIRECT_3D_11_SHADOW_MAP_H

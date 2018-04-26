@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_DIRECT_3D_11_GRAPHICS_MANAGER_H
-#define BLUE_SKY_DIRECT_3D_11_GRAPHICS_MANAGER_H
+#pragma once
 
 #include "GraphicsManager.h"
 #include "ConstantBuffer.h"
@@ -109,5 +108,3 @@ public:
 }; // class GraphicsManager
 
 } // namespace game
-
-#endif // BLUE_SKY_DIRECT_3D_11_GRAPHICS_MANAGER_H

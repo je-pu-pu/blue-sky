@@ -1,5 +1,4 @@
-#ifndef DIRECT_3D_11_EFFECT_TECHNIQUE_H
-#define DIRECT_3D_11_EFFECT_TECHNIQUE_H
+#pragma once
 
 #include <vector>
 
@@ -35,5 +34,3 @@ public:
 	const PassList& getPassList() const { return pass_list_; }
 
 }; // class Direct3D11EffectTechinique
-
-#endif // DIRECT_3D_11_EFFECT_TECHNIQUE_H

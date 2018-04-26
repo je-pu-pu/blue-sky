@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_STORY_TEXT_SCENE_H
-#define BLUE_SKY_STORY_TEXT_SCENE_H
+#pragma once
 
 #include "Scene.h"
 #include <common/chase_value.h>
@@ -17,7 +16,6 @@ namespace blue_sky
 class StoryTextScene : public Scene
 {
 public:
-	typedef Direct3D11Color Color;
 	typedef std::list< BgSpriteLayer* > BgSpriteLayerList;
 
 private:
@@ -52,5 +50,3 @@ public:
 }; // class StoryTextScene
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_STORY_TEXT_SCENE_H

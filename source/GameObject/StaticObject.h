@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_STATIC_OBJECT_H
-#define BLUE_SKY_STATIC_OBJECT_H
+#pragma once
 
 #include "ActiveObject.h"
 #include <type/type.h>
@@ -39,5 +38,3 @@ public:
 }; // class StaticObject
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_STATIC_OBJECT_H

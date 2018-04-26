@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_ROCKET_H
-#define BLUE_SKY_ROCKET_H
+#pragma once
 
 #include "ActiveObject.h"
 
@@ -35,5 +34,3 @@ public:
 }; // class Rocket
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_ROCKET_H

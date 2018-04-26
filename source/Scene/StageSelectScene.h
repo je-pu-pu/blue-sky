@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_STAGE_SELECT_SCENE_H
-#define BLUE_SKY_STAGE_SELECT_SCENE_H
+#pragma once
 
 #include "Scene.h"
 #include <win/Rect.h>
@@ -89,5 +88,3 @@ public:
 }; // class StageSelectScene
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_STAGE_SELECT_SCENE_H

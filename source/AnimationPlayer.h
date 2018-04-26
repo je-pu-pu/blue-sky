@@ -1,5 +1,4 @@
-#ifndef ANIMATION_PLAYER_H
-#define ANIMATION_PLAYER_H
+#pragma once
 
 #include "SkinningAnimationSet.h"
 #include "ConstantBuffer.h"
@@ -60,5 +59,3 @@ public:
 	void set_broken( bool b ) { is_broken_ = b; }
 
 }; // class AnimationPlayer
-
-#endif // ANIMATION_PLAYER_H

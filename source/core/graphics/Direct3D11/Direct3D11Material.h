@@ -1,5 +1,4 @@
-#ifndef DIRECT_3D_11_MATERIAL_H
-#define DIRECT_3D_11_MATERIAL_H
+#pragma once
 
 #include "Direct3D11.h"
 #include <game/Material.h>
@@ -58,5 +57,3 @@ public:
 	void render() const override;
 
 }; // class Direct3D11Material
-
-#endif // DIRECT_3D_11_MATERIAL_H

@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_GAME_OBJECT_H
-#define BLUE_SKY_GAME_OBJECT_H
+#pragma once
 
 #include <type/type.h>
 
@@ -167,5 +166,3 @@ public:
 }; // class GameObject
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_GAME_OBJECT_H

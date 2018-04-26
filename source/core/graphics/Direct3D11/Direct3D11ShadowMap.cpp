@@ -1,6 +1,5 @@
 #include "Direct3D11ShadowMap.h"
 #include "Direct3D11ConstantBuffer.h"
-#include "Direct3D11Vector.h"
 #include "Direct3D11.h"
 
 #include <common/exception.h>
@@ -118,9 +117,9 @@ void Direct3D11ShadowMap::set_light_position( const Vector& pos )
  */
 void Direct3D11ShadowMap::set_eye_position( const Vector& eye )
 {
-	Vector eye_fix( eye.x() + light_position_.x(), eye.y() + light_position_.y(), eye.z() + light_position_.z() );
-	Vector at( eye.x(), eye.y(), eye.z() );
-	Vector up( 0.f, 0.f, 1.f );
+	Vector eye_fix( eye.x() + light_position_.x(), eye.y() + light_position_.y(), eye.z() + light_position_.z(), 1.f );
+	Vector at( eye.x(), eye.y(), eye.z(), 1.f );
+	Vector up( 0.f, 0.f, 1.f, 0.f );
 
 	view_matrix_.set_look_at( eye_fix, at, up );
 }

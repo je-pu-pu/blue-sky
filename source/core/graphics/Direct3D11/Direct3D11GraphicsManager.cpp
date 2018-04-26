@@ -9,7 +9,6 @@
 #include "Direct3D11.h"
 
 #include <GameMain.h>
-#include <core/Vector3.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
 
 #include "ConstantBuffer.h"
@@ -403,6 +402,7 @@ void Direct3D11GraphicsManager::render_fader() const
 	
 	get_shared_object_render_data()->update( & buffer_data );
 
+	/// @todo 2D ‚Ì•`‰æ‚É–@ü‚ğg‚Á‚Ä‚¢‚é‚Ì‚Í–³‘Ê‚È‚Ì‚Å‚È‚ñ‚Æ‚©‚·‚é
 	set_input_layout( "main" );
 
 	render_technique( "|main2d", [this]

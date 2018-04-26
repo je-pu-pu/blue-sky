@@ -5,7 +5,6 @@
 #include "Direct3D11MeshManager.h"
 #include "Direct3D11Texture.h"
 #include "Direct3D11TextureManager.h"
-#include "Direct3D11Color.h"
 #include <core/graphics/DirectWrite/DirectWrite.h>
 
 #include <win/Rect.h>
@@ -455,6 +454,19 @@ void Direct3D11::create_default_input_layout()
     };
 
 	create_input_layout( "sprite", "|sprite", layout_sprite, ARRAYSIZE( layout_sprite ) );
+
+	/// @todo 2D ÇÃï`âÊÇ…ñ@ê¸ÇégÇ¡ÇƒÇ¢ÇÈÇÃÇÕñ≥ë Ç»ÇÃÇ≈Ç»ÇÒÇ∆Ç©Ç∑ÇÈ
+	/*
+	// 2D
+	D3D11_INPUT_ELEMENT_DESC layout_2d[] =
+    {
+        { "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",      0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",    0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+
+	create_input_layout( "main2d", "|main2d", layout_2d, ARRAYSIZE( layout_2d ) );
+	*/
 }
 
 void Direct3D11::create_input_layout( char_t* input_layout_name, char_t* teqhnique_name, D3D11_INPUT_ELEMENT_DESC layout[], UINT layout_array_size )

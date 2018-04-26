@@ -4,7 +4,7 @@
 
 #include <core/graphics/Direct3D11/Direct3D11Mesh.h>
 #include <core/graphics/Direct3D11/Direct3D11Material.h>
-#include <core/graphics/Direct3D11/Direct3D11Matrix.h>
+#include <core/type.h>
 
 #include <common/timer.h>
 #include <common/exception.h>

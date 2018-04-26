@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_UMBRELLA_H
-#define BLUE_SKY_UMBRELLA_H
+#pragma once
 
 #include "ActiveObject.h"
 
@@ -37,5 +36,3 @@ public:
 }; // class Umbrella
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_UMBRELLA_H

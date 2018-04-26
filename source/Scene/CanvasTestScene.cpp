@@ -25,7 +25,7 @@ namespace blue_sky
 /// @todo ‚¿‚á‚ñ‚Æ‚·‚é
 static FrameConstantBufferData frame_constant_buffer_data;
 static ObjectConstantBufferData object_constant_buffer_data;
-static Vector eye( 0.f, 0.f, -1.f );
+static Vector eye( 0.f, 0.f, -1.f, 1.f );
 static Matrix r;
 
 static int pen_mode_ = 0;
@@ -124,9 +124,9 @@ void CanvasTestScene::update()
 	}
 
 	{
-		eye = Vector( 0.f, 0.f, -1.f * scale );
-		Vector at( 0.f, 0.f, 0.f );
-		Vector up( 0.f, 1.f, 0.f );
+		eye = Vector( 0.f, 0.f, -1.f * scale, 1.f );
+		Vector at( 0.f, 0.f, 0.f, 1.f );
+		Vector up( 0.f, 1.f, 0.f, 0.f );
 
 		frame_constant_buffer_data.view.set_look_at( eye, at, up );
 		frame_constant_buffer_data.view = frame_constant_buffer_data.view.transpose();
@@ -134,7 +134,7 @@ void CanvasTestScene::update()
 		frame_constant_buffer_data.projection.set_perspective_fov( math::degree_to_radian( 90.f ), static_cast< float >( get_width() ) / static_cast< float >( get_height() ), 0.05f, 3000.f );
 		frame_constant_buffer_data.projection = frame_constant_buffer_data.projection.transpose();
 
-		frame_constant_buffer_data.light = Vector( 0, 0, 0 );
+		frame_constant_buffer_data.light = Vector( 0, 0, 0, 1 );
 
 		if ( static_cast< int >( get_total_elapsed_time() * 60.f ) % 10 == 0 )
 		{
@@ -156,7 +156,7 @@ void CanvasTestScene::update()
 		object_constant_buffer_data.color = Color( 1.f, 1.f, 1.f, 1.f );
 	}
 
-	Vector vector( tablet_->get_x() / get_width() - 0.5f, -( tablet_->get_y() / get_height() - 0.5f ), 0.f );
+	Vector vector( tablet_->get_x() / get_width() - 0.5f, -( tablet_->get_y() / get_height() - 0.5f ), 0.f, 1.f );
 
 	Matrix m = r;
 
@@ -175,7 +175,7 @@ void CanvasTestScene::update()
 		pen_color_
 	};
 
-	auto pos_comp = [] ( const Vertex& a, const Vertex& b ) { return a.position.x == b.position.x && a.position.y == b.position.y && a.position.z == b.position.z; };
+	auto pos_comp = [] ( const Vertex& a, const Vertex& b ) { return a.position == b.position; };
 
 	points_->update_last_point( v, pos_comp );
 
@@ -187,7 +187,7 @@ void CanvasTestScene::update()
 		}
 		else if ( tablet_->get_cursor_index() == 2 )
 		{
-			points_->erase_point( [this,&vector] ( const Vertex& a ) { Vector aa( a.position.x, a.position.y, a.position.z ); return ( vector - aa ).length() < tablet_->get_pressure() * 0.1f; } );
+			points_->erase_point( [this,&vector] ( const Vertex& a ) { Vector aa( a.position.x(), a.position.y(), a.position.z(), 0.f ); return ( vector - aa ).length() < tablet_->get_pressure() * 0.1f; } );
 		}
 	}
 }
@@ -215,7 +215,7 @@ void CanvasTestScene::render()
 		ss << L"AL : " << tablet_->get_altitude() << std::endl;
 		ss << L"POINTS : " << points_->size() << std::endl;
 
-		get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 0.f, 0.f, 0.f, 1.f ) );
+		get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Color( 0.f, 0.f, 0.f, 1.f ) );
 
 		get_direct_3d()->getFont()->end();
 		get_direct_3d()->end2D();

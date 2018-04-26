@@ -1,5 +1,4 @@
-#ifndef DIRECT_3D_11_EFFECT_PASS_H
-#define DIRECT_3D_11_EFFECT_PASS_H
+#pragma once
 
 #include <d3d11.h>
 
@@ -31,5 +30,3 @@ public:
 	void apply() const;
 
 }; // class Direct3D11EffectPass
-
-#endif // DIRECT_3D_11_EFFECT_PASS_H

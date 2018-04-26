@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_SWITCH_H
-#define BLUE_SKY_SWITCH_H
+#pragma once
 
 #include "BaseSwitch.h"
 
@@ -38,5 +37,3 @@ public:
 }; // class Switch
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_SWITCH_H

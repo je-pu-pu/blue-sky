@@ -1097,9 +1097,9 @@ void GamePlayScene::update()
 	
 	get_physics()->check_collision_all();
 
-	get_sound_manager()->set_listener_position( camera_->position() );
+	get_sound_manager()->set_listener_position( camera_->position().xyz() );
 	// get_sound_manager()->set_listener_velocity( player_->get_velocity() );
-	get_sound_manager()->set_listener_orientation( camera_->front(), camera_->up() );
+	get_sound_manager()->set_listener_orientation( camera_->front().xyz(), camera_->up().xyz() );
 	get_sound_manager()->commit();
 
 	update_delayed_command();
@@ -1139,8 +1139,8 @@ void GamePlayScene::update_main()
 	}
 	else
 	{
-		camera_->rotate_degree_target().x() += get_input()->get_mouse_dy() * 90.f * rotation_speed_rate;
-		camera_->rotate_degree_target().x() = math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f );
+		camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * 90.f * rotation_speed_rate, 0.f, 0.f, 0.f );
+		camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f ) );
 	}
 
 	player_->set_pitch( -camera_->rotate_degree_target().x() / 90.f );
@@ -1284,7 +1284,7 @@ void GamePlayScene::update_main()
 		float_t add_direction_degree_by_hmd   = get_oculus_rift() ? math::radian_to_degree( get_oculus_rift()->get_delta_yaw() ) : 0.f;
 		
 		player_->add_direction_degree( add_direction_degree_by_mouse + add_direction_degree_by_hmd );
-		camera_->rotate_degree_target().y() = player_->get_direction_degree();
+		camera_->rotate_degree_target().set_y( player_->get_direction_degree() );
 
 		if ( player_->is_falling_to_die() )
 		{
@@ -1448,15 +1448,15 @@ void GamePlayScene::update_shadow()
 
 			a += 0.0025f;
 
-			const Vector light_origin( 0.f, 50.f, 0.f );
+			const Vector light_origin( 0.f, 50.f, 0.f, 1.f );
 			const Vector v = light_origin + Vector( cos( a ) * 50.f, 0.f, sin( a ) * 50.f, 0.f );	
 
 			light_position_.value().set( v.x(), v.y(), v.z() );
 			light_position_.target_value() = light_position_.value();
 		}
 
-		shadow_map_->set_light_position( Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z() ) );
-		shadow_map_->set_eye_position( Vector( camera_->position().x(), camera_->position().y(), camera_->position().z() ) );
+		shadow_map_->set_light_position( Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z(), 1.f ) );
+		shadow_map_->set_eye_position( camera_->position() );
 	}
 }
 
@@ -1481,9 +1481,7 @@ void GamePlayScene::update_clear()
 	player_->set_location( player_->get_location() * 0.95f + target_position * 0.05f );
 	player_->set_direction_degree( 0.f );
 
-	camera_->rotate_degree_target().x() = 0.f;
-	camera_->rotate_degree_target().y() = player_->get_direction_degree();
-	camera_->rotate_degree_target().z() = 0.f;
+	camera_->rotate_degree_target().set( 0.f, player_->get_direction_degree(), 0.f, 0.f );
 	camera_->set_rotate_chase_speed( 0.1f );
 
 	get_graphics_manager()->fade_out( 0.0025f );
@@ -1691,16 +1689,16 @@ void GamePlayScene::update_render_data_for_frame() const
 	FrameConstantBufferData frame_constant_buffer_data;
 	update_frame_constant_buffer_data_sub( frame_constant_buffer_data );
 
-	Vector eye( camera_->position().x(), camera_->position().y(), camera_->position().z() );
-	Vector at( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z() );
-	Vector up( camera_->up().x(), camera_->up().y(), camera_->up().z() );
+	const Vector& eye = camera_->position();
+	const Vector& at  = camera_->look_at();
+	const Vector& up  = camera_->up();
 
 	frame_constant_buffer_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
 	frame_constant_buffer_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();
 
 	get_graphics_manager()->get_frame_render_data()->update( & frame_constant_buffer_data );
 
-	get_graphics_manager()->set_eye_position( camera_->position() );
+	get_graphics_manager()->set_eye_position( eye.xyz() );
 }
 
 /**
@@ -1725,11 +1723,11 @@ void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
 	// std::cout << "eye" << eye_index << " offset : " << eye_offset.x() << ", " << eye_offset.y() << ", " << eye_offset.z() << std::endl;
 
 	Matrix r = get_oculus_rift()->get_eye_rotation( eye_index ) * camera_rot;
-	Vector eye = Vector( camera_->position().x(), camera_->position().y(), camera_->position().z() ) + eye_offset;
+	const Vector eye = camera_->position() + eye_offset;
 	// Vector at( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z() );
 	// Vector up( camera_->up().x(), camera_->up().y(), camera_->up().z() );
-	Vector at = eye + Vector( 0.f, 0.f, 1.f ) * r;
-	Vector up = Vector( 0.f, 1.f, 0.f ) * r;
+	Vector at = eye + Vector( 0.f, 0.f, 1.f, 0.f ) * r;
+	Vector up = Vector( 0.f, 1.f, 0.f, 0.f ) * r;
 
 	frame_constant_buffer_data.view = Matrix().set_look_at( eye, at, up ).transpose();
 	frame_constant_buffer_data.projection = get_oculus_rift()->get_projection_matrix( eye_index, camera_->near_clip(), camera_->far_clip() ).transpose();
@@ -1745,7 +1743,7 @@ void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
  */
 void GamePlayScene::update_frame_constant_buffer_data_sub( FrameConstantBufferData& frame_constant_buffer_data ) const
 {
-	frame_constant_buffer_data.light = -Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z() );
+	frame_constant_buffer_data.light = -Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z(), 1.f );
 	frame_constant_buffer_data.light.normalize();
 	frame_constant_buffer_data.time = get_total_elapsed_time();
 	frame_constant_buffer_data.time_beat = static_cast< uint_t >( get_total_elapsed_time() * ( get_bpm() / 60.f ) );
@@ -2029,7 +2027,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				const float offset = n * 50.f;
 
 				win::Rect src_rect = win::Rect::Size( 0, 256, 186, 220 );
-				Vector center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f );
+				// Vector center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f, 1.f );
 
 				Matrix t;
 				t.set_translation( get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f - offset, 0.f );

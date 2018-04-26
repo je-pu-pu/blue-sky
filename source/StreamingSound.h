@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_STREAMING_SOUND_H
-#define BLUE_SKY_STREAMING_SOUND_H
+#pragma once
 
 #include "Sound.h"
 #include <windows.h>
@@ -50,5 +49,3 @@ public:
 }; // class StreamingSound
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_STREAMING_SOUND_H

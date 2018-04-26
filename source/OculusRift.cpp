@@ -253,7 +253,9 @@ Direct3D11::Vector OculusRift::get_eye_position( int eye_index ) const
 	return Direct3D11::Vector(
 		layer_.RenderPose[ eye_index ].Position.x,
 		layer_.RenderPose[ eye_index ].Position.y,
-		layer_.RenderPose[ eye_index ].Position.z ) * COORDINATE_SYSTEM_CONVERT_MATRIX;
+		layer_.RenderPose[ eye_index ].Position.z,
+		1.f
+	) * COORDINATE_SYSTEM_CONVERT_MATRIX;
 }
 
 /**

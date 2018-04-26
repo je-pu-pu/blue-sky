@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_GOAL_H
-#define BLUE_SKY_GOAL_H
+#pragma once
 
 #include "ActiveObject.h"
 
@@ -43,5 +42,3 @@ public:
 }; // class Goal
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_GOAL_H

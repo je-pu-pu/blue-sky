@@ -1,5 +1,4 @@
-#ifndef DIRECT_3D_11_SKY_BOX_H
-#define DIRECT_3D_11_SKY_BOX_H
+#pragma once
 
 #include "Direct3D11Mesh.h"
 
@@ -27,5 +26,3 @@ public:
 	virtual ~Direct3D11SkyBox();
 
 }; // class Direct3D11SkyBox
-
-#endif // DIRECT_3D_11_SKY_BOX_H

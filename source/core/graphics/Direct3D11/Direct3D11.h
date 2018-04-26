@@ -1,5 +1,4 @@
-#ifndef DIRECT_3D_11_H
-#define DIRECT_3D_11_H
+#pragma once
 
 #include <core/DirectX.h>
 #include <core/type.h>
@@ -10,9 +9,6 @@
 
 #include <map>
 
-class Direct3D11Vector;
-class Direct3D11Matrix;
-class Direct3D11Color;
 class Direct3D11Texture;
 
 class Direct3D11Sprite;
@@ -48,9 +44,9 @@ public:
 
 	typedef ID3D11InputLayout			InputLayout;
 	
-	typedef Direct3D11Vector			Vector;
-	typedef Direct3D11Matrix			Matrix;
-	typedef Direct3D11Color				Color;
+	typedef direct_x_math::Vector		Vector;
+	typedef direct_x_math::Matrix		Matrix;
+	typedef direct_x_math::Color		Color;
 	typedef Direct3D11Texture			Texture;
 
 	typedef std::map< const char*, InputLayout* >		InputLayoutList;
@@ -196,5 +192,3 @@ public:
 	inline IDXGISurface1* getBackbufferSurface() const { return back_buffer_surface_; }
 
 }; // class Direct3D11
-
-#endif // DIRECT_3D_11_H

@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_GRAPHICS_MANAGER_H
-#define BLUE_SKY_GRAPHICS_MANAGER_H
+#pragma once
 
 #include "ConstantBuffer.h"
 
@@ -13,7 +12,7 @@
 #include <vector>
 #include <functional>
 
-class Vector3;
+// class Vector3;
 class SkinningAnimationSet;
 class FbxFileLoader;
 
@@ -131,5 +130,3 @@ public:
 }; // class GraphicsManager
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_GRAPHICS_MANAGER_H

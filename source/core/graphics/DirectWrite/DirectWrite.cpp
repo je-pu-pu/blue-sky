@@ -1,6 +1,5 @@
 #include "DirectWrite.h"
 #include "DirectWriteFontCollectionLoader.h"
-#include <core/graphics/Direct3D11/Direct3D11Color.h>
 
 #pragma comment( lib, "d2d1.lib" )
 #pragma comment( lib, "dwrite.lib" )

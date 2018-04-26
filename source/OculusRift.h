@@ -1,5 +1,4 @@
-#ifndef OCULUS_RIFT_H
-#define OCULUS_RIFT_H
+#pragma once
 
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <type/type.h>
@@ -89,5 +88,3 @@ public:
 
 
 }; // class OculusRift
-
-#endif // OCULUS_RIFT_H

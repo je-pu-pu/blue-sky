@@ -1,5 +1,4 @@
-#ifndef ANIMATION_CHANNEL_H
-#define ANIMATION_CHANNEL_H
+#pragma once
 
 #include "AnimationKeyFrame.h"
 #include <vector>
@@ -63,5 +62,3 @@ public:
 	KeyFrame& get_last_key_frame() { return key_frame_list_.back(); }
 
 }; // class AnimationChannel
-
-#endif // ANIMATION_CHANNEL_H

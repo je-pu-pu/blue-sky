@@ -1,9 +1,6 @@
-#ifndef BLUE_SKY_GAME_PLAY_SCENE_H
-#define BLUE_SKY_GAME_PLAY_SCENE_H
+#pragma once
 
 #include "Scene.h"
-
-#include <core/Vector3.h>
 
 #include <common/chase_value.h>
 #include <common/auto_ptr.h>
@@ -187,5 +184,3 @@ public:
 }; // class GamePlayScene
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_GAME_PLAY_SCENE_H

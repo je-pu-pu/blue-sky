@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_DRAWING_MODEL_MANAGER_H
-#define BLUE_SKY_DRAWING_MODEL_MANAGER_H
+#pragma once
 
 #include <core/type.h>
 #include <map>
@@ -35,5 +34,3 @@ public:
 };
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_DRAWING_MODEL_MANAGER_H

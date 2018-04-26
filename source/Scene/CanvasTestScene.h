@@ -1,12 +1,14 @@
-#ifndef BLUE_SKY_CANVAS_TEST_SCENE_H
-#define BLUE_SKY_CANVAS_TEST_SCENE_H
+#pragma once
 
 #include "Scene.h"
 #include "DynamicPointList.h"
 
-#include <DirectXMath.h>
+#include <core/type.h>
+
 #include <win/Tablet.h>
+
 #include <common/safe_ptr.h>
+
 #include <memory>
 
 namespace game
@@ -32,9 +34,6 @@ class CanvasTestScene : public Scene
 {
 public:
 	typedef win::Tablet Tablet;
-	
-	typedef DirectX::XMFLOAT3			Vector3;
-	typedef Direct3D11Color				Color;
 
 	struct Vertex
 	{
@@ -72,5 +71,3 @@ public:
 }; // class CanvasTestScene
 
 } // namespace blue_sky
-
-#endif // #define BLUE_SKY_CANVAS_TEST_SCENE_H

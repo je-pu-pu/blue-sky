@@ -1,8 +1,6 @@
-#ifndef DIRECT_3D_11_FADER_H
-#define DIRECT_3D_11_FADER_H
+#pragma once
 
 #include "Direct3D11Rectangle.h"
-#include "Direct3D11Color.h"
 
 /**
  * Direct3D 11 Fader
@@ -33,5 +31,3 @@ public:
 	const Color& get_color() const { return current_color_; }
 
 }; // class Direct3D11Fader
-
-#endif // DIRECT_3D_11_FADER_H

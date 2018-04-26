@@ -1,5 +1,4 @@
-#ifndef ANIMATION_KEY_FRAME_H
-#define ANIMATION_KEY_FRAME_H
+#pragma once
 
 #include <core/type.h>
 
@@ -43,5 +42,3 @@ public:
 	float_t get_value() const { return value_; }
 
 }; // class AnimationKeyFrame
-
-#endif // ANIMATION_KEY_FRAME_H

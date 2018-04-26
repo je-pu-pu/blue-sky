@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_ACTIVE_OBJECT_MANAGER_H
-#define BLUE_SKY_ACTIVE_OBJECT_MANAGER_H
+#pragma once
 
 #include <GameObject/ActiveObject.h>
 #include <sstream>
@@ -66,5 +65,3 @@ public:
 };
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_ACTIVE_OBJECT_MANAGER_H

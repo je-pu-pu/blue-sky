@@ -1,5 +1,4 @@
-#ifndef DIRECT_3D_11_RECTANGLE_H
-#define DIRECT_3D_11_RECTANGLE_H
+#pragma once
 
 #include "Direct3D11Mesh.h"
 
@@ -14,5 +13,3 @@ public:
 	virtual ~Direct3D11Rectangle() { }
 
 }; // class Direct3D11Rectangle
-
-#endif // DIRECT_3D_11_RECTANGLE_H

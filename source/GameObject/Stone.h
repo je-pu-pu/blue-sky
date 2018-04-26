@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_STONE_H
-#define BLUE_SKY_STONE_H
+#pragma once
 
 #include "ActiveObject.h"
 
@@ -38,5 +37,3 @@ public:
 }; // class Stone
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_STONE_H

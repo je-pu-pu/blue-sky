@@ -1,11 +1,12 @@
-#ifndef BLUE_SKY_SOUND_MANAGER_H
-#define BLUE_SKY_SOUND_MANAGER_H
+#pragma once
+
+#include <core/type.h>
 
 #include <game/SoundManager.h>
+
 #include <windows.h>
 
 class DirectSound;
-class Vector3;
 
 namespace game
 {
@@ -52,5 +53,3 @@ public:
 }; // class SoundManager
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_SOUND_MANAGER_H

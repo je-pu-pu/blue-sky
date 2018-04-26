@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_BALLOON_H
-#define BLUE_SKY_BALLOON_H
+#pragma once
 
 #include "ActiveObject.h"
 
@@ -53,5 +52,3 @@ public:
 }; // class Balloon
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_BALLOON_H

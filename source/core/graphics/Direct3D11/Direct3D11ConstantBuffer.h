@@ -1,5 +1,4 @@
-#ifndef DIRECT_3D_11_CONSTANT_BUFFER_H
-#define DIRECT_3D_11_CONSTANT_BUFFER_H
+#pragma once
 
 #include "Direct3D11.h"
 
@@ -106,5 +105,3 @@ public:
 		_aligned_free( p );
 	}
 };
-
-#endif // DIRECT_3D_11_CONSTANT_BUFFER_H

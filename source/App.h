@@ -4,8 +4,7 @@
 //	ç≈èIçXêVì˙	2001/11/25
 //Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°Å°
 
-#ifndef APP_H
-#define APP_H
+#pragma once
 
 #include "Game.h"
 
@@ -99,5 +98,3 @@ public:
 
 	Config* get_config() { return config_.get(); }
 };
-
-#endif // APP_H

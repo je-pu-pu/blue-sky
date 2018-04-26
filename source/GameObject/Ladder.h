@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_LADDER_H
-#define BLUE_SKY_LADDER_H
+#pragma once
 
 #include "ActiveObject.h"
 #include <game/TimedCache.h>
@@ -38,5 +37,3 @@ public:
 }; // class Ladder
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_LADDER_H

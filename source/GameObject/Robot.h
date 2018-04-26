@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_ROBOT_H
-#define BLUE_SKY_ROBOT_H
+#pragma once
 
 #include "ActiveObject.h"
 #include <game/Texture.h>
@@ -87,5 +86,3 @@ public:
 }; // class Robot
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_ROBOT_H

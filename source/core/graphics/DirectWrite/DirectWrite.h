@@ -1,10 +1,8 @@
-#ifndef DIRECT_WRITE_H
-#define DIRECT_WRITE_H
+#pragma once
 
+#include <core/type.h>
 #include <dwrite.h>
 #include <d2d1.h>
-
-class Direct3D11Color;
 
 /**
  * DirectWrite のラッパークラス
@@ -13,7 +11,6 @@ class Direct3D11Color;
 class DirectWrite
 {
 public:
-	typedef Direct3D11Color		Color;
 
 private:
 	ID2D1Factory*				direct_2d_factory_;
@@ -42,5 +39,3 @@ public:
 	FLOAT get_text_height( const WCHAR*, FLOAT, FLOAT ) const;
 
 }; // class DirectWrite
-
-#endif // DIRECT_WRITE_H

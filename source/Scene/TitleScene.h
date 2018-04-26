@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_TITLE_SCENE_H
-#define BLUE_SKY_TITLE_SCENE_H
+#pragma once
 
 #include "Scene.h"
 
@@ -46,5 +45,3 @@ public:
 }; // class TitleScene
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_TITLE_SCENE_H

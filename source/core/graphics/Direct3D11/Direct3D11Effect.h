@@ -1,5 +1,4 @@
-#ifndef DIRECT_3D_11_EFFECT_H
-#define DIRECT_3D_11_EFFECT_H
+#pragma once
 
 #include "Direct3D11EffectTechnique.h"
 #include "Direct3D11EffectPass.h"
@@ -41,5 +40,3 @@ public:
 	Technique* getTechnique( const char* name );
 
 }; // class Direct3D11Effect
-
-#endif // DIRECT_3D_11_EFFECT_H

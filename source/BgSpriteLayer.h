@@ -1,15 +1,11 @@
-#ifndef BG_SPRITE_LAYTER_H
-#define BG_SPRITE_LAYTER_H
+#pragma once
 
-#include <core/Vector3.h>
-
-#include <core/graphics/Direct3D11/Direct3D11Color.h>
+#include <core/type.h>
 
 #include <win/Rect.h>
 
 #include <common/chase_value.h>
 
-#include <type/type.h>
 
 namespace game
 {
@@ -27,7 +23,6 @@ class BgSpriteLayer
 {
 public:
 	typedef game::Texture Texture;
-	typedef Direct3D11Color Color;
 
 private:
 	const string_t name_;
@@ -61,5 +56,3 @@ public:
 	void update();
 
 }; // class BgSpriteLayer
-
-#endif // BG_SPRITE_LAYTER_H

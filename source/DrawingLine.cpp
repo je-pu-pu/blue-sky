@@ -67,10 +67,10 @@ bool DrawingLine::load_obj( const char* file_name )
 
 			v.Color = Color( 0.f, 0.f, 0.f, 0.f );
 
-			ss >> v.Position.x >> v.Position.y >> v.Position.z;
-			ss >> v.Color.x >> v.Color.y >> v.Color.z >> v.Color.w;
+			ss >> v.Position.x() >> v.Position.y() >> v.Position.z();
+			ss >> v.Color.r() >> v.Color.g() >> v.Color.b() >> v.Color.a();
 
-			v.Position.z = -v.Position.z;
+			v.Position.z() = -v.Position.z();
 			
 			vertex_list_.push_back( v );
 		}

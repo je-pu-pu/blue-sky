@@ -1,5 +1,4 @@
-#ifndef DIRECT_3D_11_MESH_MANAGER_H
-#define DIRECT_3D_11_MESH_MANAGER_H
+#pragma once
 
 #include <map>
 #include <string>
@@ -32,5 +31,3 @@ public:
 	void unload_all();
 
 }; // class Direct3D11MeshManager
-
-#endif // DIRECT_3D_11_MESH_MANAGER_H

@@ -20,7 +20,6 @@
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Axis.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.cpp" />
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Color.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Effect.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectPass.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.cpp" />
@@ -40,11 +39,10 @@
     <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp" />
     <ClCompile Include="core\input\DirectInput\DirectInput.cpp" />
-    <ClCompile Include="core\Matrix4x4.cpp" />
+    <ClCompile Include="core\math\DirectXMath\Color.cpp" />
     <ClCompile Include="core\physics\Bullet\BulletPhysics.cpp" />
     <ClCompile Include="core\sound\DirectSound\DirectSound.cpp" />
     <ClCompile Include="core\sound\DirectSound\DirectSoundBuffer.cpp" />
-    <ClCompile Include="core\Vector3.cpp" />
     <ClCompile Include="DrawingLine.cpp" />
     <ClCompile Include="DrawingMesh.cpp" />
     <ClCompile Include="DrawingModel.cpp" />
@@ -102,7 +100,6 @@
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Axis.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.h" />
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Color.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Common.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11ConstantBuffer.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Effect.h" />
@@ -112,7 +109,6 @@
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11FarBillboardsMesh.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Material.h" />
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Matrix.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Mesh.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11MeshManager.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Rectangle.h" />
@@ -121,7 +117,6 @@
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Sprite.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Texture.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11TextureManager.h" />
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Vector.h" />
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWrite.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.h" />
@@ -130,12 +125,14 @@
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h" />
     <ClInclude Include="core\input\DirectInput\DirectInput.h" />
     <ClInclude Include="core\math.h" />
-    <ClInclude Include="core\Matrix4x4.h" />
+    <ClInclude Include="core\math\DirectXMath\Color.h" />
+    <ClInclude Include="core\math\DirectXMath\Matrix.h" />
+    <ClInclude Include="core\math\DirectXMath\Vector.h" />
+    <ClInclude Include="core\math\DirectXMath\Vector3.h" />
     <ClInclude Include="core\physics\Bullet\BulletPhysics.h" />
     <ClInclude Include="core\sound\DirectSound\DirectSound.h" />
     <ClInclude Include="core\sound\DirectSound\DirectSoundBuffer.h" />
     <ClInclude Include="core\type.h" />
-    <ClInclude Include="core\Vector3.h" />
     <ClInclude Include="DrawingLine.h" />
     <ClInclude Include="DrawingMesh.h" />
     <ClInclude Include="DrawingModel.h" />

@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_ACTIVE_OBJECT_H
-#define BLUE_SKY_ACTIVE_OBJECT_H
+#pragma once
 
 #include "GameObject.h"
 #include "ConstantBuffer.h"
@@ -124,5 +123,3 @@ public:
 }; // class ActiveObject
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_ACTIVE_OBJECT_H

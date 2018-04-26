@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_DRAWING_MODEL_H
-#define BLUE_SKY_DRAWING_MODEL_H
+#pragma once
 
 #include <core/type.h>
 #include <common/auto_ptr.h>
@@ -45,5 +44,3 @@ public:
 }; // class DrawingModel
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_DRAWING_MODEL_H

@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_SCENE_H
-#define BLUE_SKY_SCENE_H
+#pragma once
 
 #include <core/type.h>
 
@@ -8,7 +7,6 @@
 
 class App;
 class Direct3D11;
-class Direct3D11Color;
 class Direct3D11Texture;
 
 class OculusRift;
@@ -55,8 +53,6 @@ public:
 	// typedef Direct3D11Texture			Texture;
 
 	typedef ActiveObjectPhysics			Physics;
-
-	typedef Direct3D11Color				Color;
 
 private:
 	const GameMain* game_main_;
@@ -142,5 +138,3 @@ public:
 }; // class Scene
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_SCENE_H

@@ -1,8 +1,6 @@
-#ifndef BLUE_SKY_CAMERA_H
-#define BLUE_SKY_CAMERA_H
+#pragma once
 
-#include <core/Vector3.h>
-// #include <GameObject/GameObject.h>
+#include <core/type.h>
 
 namespace blue_sky
 {
@@ -14,24 +12,24 @@ class Player;
  *
  * @todo GameObject 化して ActiveObjectManager で管理する
  */
-class Camera // : public GameObject
+class alignas( 16 ) Camera // : public GameObject
 {
 public:
 
 private:
-	Vector3 position_;					///< 視点
-	Vector3 look_at_;					///< 注視点
-	Vector3 up_;						///< 上
+	Vector position_;					///< 視点
+	Vector look_at_;					///< 注視点
+	Vector up_;							///< 上
 
-	Vector3 default_front_;				///< デフォルト視点
-	Vector3 default_right_;				///< デフォルト左
-	Vector3 default_up_;				///< デフォルト上
+	Vector default_front_;				///< デフォルト視点
+	Vector default_right_;				///< デフォルト左
+	Vector default_up_;					///< デフォルト上
 
-	Vector3 front_;						///< 前
-	Vector3 right_;						///< 右
+	Vector front_;						///< 前
+	Vector right_;						///< 右
 
-	Vector3 rotate_degree_;				///< XYZ 各軸に対する回転角度
-	Vector3 rotate_degree_target_;		///< XYZ 各軸に対する回転角度 ( 目標 )
+	Vector rotate_degree_;				///< XYZ 各軸に対する回転角度
+	Vector rotate_degree_target_;		///< XYZ 各軸に対する回転角度 ( 目標 )
 
 	float_t fov_;						///< FOV
 	float_t fov_target_;				///< FOV ( 目標 )
@@ -47,20 +45,20 @@ public:
 
 	void restart();
 
-	Vector3& position() { return position_; }
+	Vector& position() { return position_; }
 
-	const Vector3& position() const { return position_; }
-	const Vector3& look_at() const { return look_at_; }
-	const Vector3& up() const { return up_; }
+	const Vector& position() const { return position_; }
+	const Vector& look_at() const { return look_at_; }
+	const Vector& up() const { return up_; }
 
-	const Vector3& front() const { return front_; }
-	const Vector3& right() const { return right_; }
+	const Vector& front() const { return front_; }
+	const Vector& right() const { return right_; }
 
-	Vector3& rotate_degree() { return rotate_degree_; }
-	Vector3& rotate_degree_target() { return rotate_degree_target_; }
+	Vector& rotate_degree() { return rotate_degree_; }
+	Vector& rotate_degree_target() { return rotate_degree_target_; }
 
-	const Vector3& rotate_degree() const { return rotate_degree_; }
-	const Vector3& rotate_degree_target() const { return rotate_degree_target_; }
+	const Vector& rotate_degree() const { return rotate_degree_; }
+	const Vector& rotate_degree_target() const { return rotate_degree_target_; }
 
 	float fov() const { return fov_; }
 	void set_fov( float );
@@ -84,8 +82,16 @@ public:
 	float aspect() const { return aspect_; }
 	float near_clip() const { return 0.05f; }
 	float far_clip() const { return 3000.f; }
+
+	static void* operator new ( size_t size )
+	{
+        return _aligned_malloc( size, 16 );
+    }
+
+	static void operator delete ( void* p )
+	{
+		_aligned_free( p );
+	}
 };
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_CAMERA_H

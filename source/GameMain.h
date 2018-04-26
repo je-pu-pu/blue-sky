@@ -1,5 +1,4 @@
-#ifndef GAME_MAIN_H
-#define GAME_MAIN_H
+#pragma once
 
 #include "Game.h"
 #include "App.h"
@@ -185,6 +184,3 @@ public:
 } // namespace blue_sky
 
 inline Game* Game::get_instance() { return blue_sky::GameMain::get_instance(); }
-
-
-#endif // GAME_MAIN_H

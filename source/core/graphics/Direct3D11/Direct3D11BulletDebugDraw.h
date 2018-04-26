@@ -1,7 +1,7 @@
-#ifndef DIRECT_3D_11_BULLET_DEBUG_DRAW_H
-#define DIRECT_3D_11_BULLET_DEBUG_DRAW_H
+#pragma once
 
 #include "Direct3D11Common.h"
+#include <DirectXMath.h>
 #include <btBulletCollisionCommon.h>
 #include <vector>
 
@@ -51,5 +51,3 @@ public:
 	void render() const;
 
 }; // class Direct3D11BulletDebugDraw
-
-#endif // DIRECT_3D_11_BULLET_DEBUG_DRAW_H

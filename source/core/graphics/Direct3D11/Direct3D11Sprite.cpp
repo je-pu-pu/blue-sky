@@ -1,7 +1,6 @@
 #include "Direct3D11Sprite.h"
 #include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11.h"
-#include "Direct3D11Color.h"
 #include "Direct3D11Texture.h"
 
 #include <win/Rect.h>

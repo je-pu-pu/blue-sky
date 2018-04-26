@@ -1,17 +1,12 @@
-#ifndef BLUE_SKY_TYPE_H
-#define BLUE_SKY_TYPE_H
+#pragma once
 
-#include <core/graphics/Direct3D11/Direct3D11Vector.h>
-#include <core/graphics/Direct3D11/Direct3D11Matrix.h>
-#include <core/graphics/Direct3D11/Direct3D11Color.h>
+#include <core/math/DirectXMath/Vector3.h>
+#include <core/math/DirectXMath/Vector.h>
+#include <core/math/DirectXMath/Matrix.h>
+#include <core/math/DirectXMath/Color.h>
 #include <type/type.h>
 
-class Direct3D11Vector;
-class Direct3D11Matrix;
-class Direct3D11Color;
-
-typedef Direct3D11Vector Vector;
-typedef Direct3D11Matrix Matrix;
-typedef Direct3D11Color  Color;
-
-#endif // BLUE_SKY_TYPE_H
+typedef direct_x_math::Vector3 Vector3;
+typedef direct_x_math::Vector Vector;
+typedef direct_x_math::Matrix Matrix;
+typedef direct_x_math::Color  Color;

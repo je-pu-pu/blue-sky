@@ -148,7 +148,7 @@ void StageSelectScene::render()
 	{
 		Stage* stage = *i;
 
-		Direct3D::Vector center( stage_src_rect_.width() * 0.5f, stage_src_rect_.height() * 0.5f, 0.f );
+		// Direct3D::Vector center( stage_src_rect_.width() * 0.5f, stage_src_rect_.height() * 0.5f, 0.f );
 
 		win::Rect dst_rect = stage->rect;
 
@@ -168,7 +168,7 @@ void StageSelectScene::render()
 		}
 
 		win::Rect white_src_rect = win::Rect::Size( 0, 512, 128, 128 );
-		Direct3D::Vector white_center( white_src_rect.width() * 0.5f, white_src_rect.height() * 0.5f, 0.f );
+		// Direct3D::Vector white_center( white_src_rect.width() * 0.5f, white_src_rect.height() * 0.5f, 0.f );
 
 		// float scale = static_cast< float >( dst_rect.width() ) / static_cast< float >( stage_src_rect_.width() );
 		// float frame_scale = ( dst_rect.width() + 10.f ) / white_src_rect.width();

@@ -1,5 +1,4 @@
-#ifndef BULLET_PHYSICS_H
-#define BULLET_PHYSICS_H
+#pragma once
 
 #include <type/type.h>
 #include <btBulletDynamicsCommon.h>
@@ -51,5 +50,3 @@ public:
 	void setConstraint();
 
 }; // class BulletPhysics
-
-#endif // BULLET_PHYSICS_H

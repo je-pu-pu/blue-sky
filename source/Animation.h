@@ -1,5 +1,4 @@
-#ifndef ANIMATION_H
-#define ANIMATION_H
+#pragma once
 
 #include "AnimationChannel.h"
 #include <array>
@@ -97,5 +96,3 @@ public:
 	}
 
 }; // class Animation
-
-#endif // ANIMATION_H

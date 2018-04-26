@@ -100,9 +100,6 @@
     <ClCompile Include="GameObject\Player.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="core\Vector3.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="GameObject\Rocket.cpp">
       <Filter>GameObject</Filter>
@@ -110,9 +107,6 @@
     <ClCompile Include="ActiveObjectManager.cpp" />
     <ClCompile Include="ActiveObjectPhysics.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="core\Matrix4x4.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="AnimationPlayer.cpp" />
     <ClCompile Include="GameObject\StaticeObject.cpp">
       <Filter>GameObject</Filter>
@@ -127,9 +121,6 @@
       <Filter>core\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.cpp">
-      <Filter>core\Direct3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Color.cpp">
       <Filter>core\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Effect.cpp">
@@ -200,6 +191,9 @@
     </ClCompile>
     <ClCompile Include="Scene\DebugScene.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="core\math\DirectXMath\Color.cpp">
+      <Filter>core\math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -308,9 +302,6 @@
     <ClInclude Include="GameObject\Player.h">
       <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="core\Vector3.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="GameObject\Rocket.h">
       <Filter>GameObject</Filter>
@@ -318,9 +309,6 @@
     <ClInclude Include="ActiveObjectManager.h" />
     <ClInclude Include="ActiveObjectPhysics.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="core\Matrix4x4.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="AnimationChannel.h" />
     <ClInclude Include="AnimationKeyFrame.h" />
     <ClInclude Include="AnimationPlayer.h" />
@@ -339,9 +327,6 @@
       <Filter>core\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.h">
-      <Filter>core\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Color.h">
       <Filter>core\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Common.h">
@@ -371,9 +356,6 @@
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Material.h">
       <Filter>core\Direct3D11</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Matrix.h">
-      <Filter>core\Direct3D11</Filter>
-    </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Mesh.h">
       <Filter>core\Direct3D11</Filter>
     </ClInclude>
@@ -396,9 +378,6 @@
       <Filter>core\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11TextureManager.h">
-      <Filter>core\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Vector.h">
       <Filter>core\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\d3dx11effect.h">
@@ -441,6 +420,18 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="Scene\DebugScene.h">
       <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\DirectXMath\Color.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\DirectXMath\Matrix.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\DirectXMath\Vector.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\DirectXMath\Vector3.h">
+      <Filter>core\math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -509,6 +500,10 @@
     <None Include="media\shader\sky_box.hlsl">
       <Filter>shader</Filter>
     </None>
+    <None Include="media\shader\debug_axis.hlsl" />
+    <None Include="media\shader\debug_bullet.hlsl" />
+    <None Include="media\shader\ground.hlsl" />
+    <None Include="media\shader\common.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Drawing">
@@ -550,19 +545,8 @@
     <Filter Include="shader">
       <UniqueIdentifier>{4fcc5bdb-7666-4a3f-a4b8-33cc3692d47d}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="media\shader\debug_axis.hlsl">
-      <Filter>shader</Filter>
-    </FxCompile>
-    <FxCompile Include="media\shader\debug_bullet.hlsl">
-      <Filter>shader</Filter>
-    </FxCompile>
-    <FxCompile Include="media\shader\ground.hlsl">
-      <Filter>shader</Filter>
-    </FxCompile>
-    <FxCompile Include="media\shader\common.hlsl">
-      <Filter>shader</Filter>
-    </FxCompile>
+    <Filter Include="core\math">
+      <UniqueIdentifier>{41386a86-d0b5-406c-9192-d8ab630babf0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

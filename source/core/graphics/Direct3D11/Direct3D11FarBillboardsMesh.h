@@ -1,5 +1,4 @@
-#ifndef DIRECT_3D_11_FAR_BILLBOARDS_MESH_H
-#define DIRECT_3D_11_FAR_BILLBOARDS_MESH_H
+#pragma once
 
 #include "Direct3D11Mesh.h"
 
@@ -21,5 +20,3 @@ public:
 	bool has_animation() const { return false; }
 
 }; // class Direct3D11FarBillboardsMesh
-
-#endif // DIRECT_3D_11_FAR_BILLBOARDS_MESH_H

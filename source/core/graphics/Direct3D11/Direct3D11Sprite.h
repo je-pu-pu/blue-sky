@@ -1,7 +1,5 @@
-#ifndef DIRECT_3D_11_SPRITE_H
-#define DIRECT_3D_11_SPRITE_H
+#pragma once
 
-#include "Direct3D11Matrix.h"
 #include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11Common.h"
 
@@ -16,10 +14,14 @@ namespace game
 	class Texture;
 }
 
+namespace direct_x_math
+{
+	class Vector;
+	class Matrix;
+	class Color;
+}
+
 class Direct3D11;
-class Direct3D11Vector;
-class Direct3D11Matrix;
-class Direct3D11Color;
 class Direct3D11Texture;
 
 template< typename T > class Direct3D11ConstantBuffer;
@@ -32,7 +34,6 @@ class Direct3D11Sprite
 {
 public:
 	typedef Direct3D11					Direct3D;
-	typedef Direct3D11Color				Color;
 	typedef game::Texture				Texture;
 
 	typedef Direct3D11Sprite			Sprite;
@@ -44,8 +45,9 @@ public:
 	typedef DirectX::XMFLOAT3			Vector3;
 	typedef DirectX::XMFLOAT4			Vector4;
 	
-	typedef Direct3D11Vector			Vector;
-	typedef Direct3D11Matrix			Matrix;
+	typedef direct_x_math::Color		Color;
+	typedef direct_x_math::Vector		Vector;
+	typedef direct_x_math::Matrix		Matrix;
 
 	typedef WORD						Index;
 
@@ -56,7 +58,7 @@ public:
 	{
 		Vector3 Position;
 		Vector2 TexCoord;
-		Vector4 Color;
+		Color Color;
 	};
 
 	struct ConstantBufferData
@@ -105,5 +107,3 @@ public:
 	void end();
 
 }; // class Direct3D11Sprite
-
-#endif // DIRECT_3D_11_SPRITE_H

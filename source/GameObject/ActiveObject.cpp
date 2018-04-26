@@ -218,12 +218,12 @@ void ActiveObject::update_render_data() const
 
 	const btTransform& trans = get_transform();
 
-	ObjectConstantBufferData::Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
+	Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
 
 	ObjectConstantBufferData buffer_data;
 
 	buffer_data.world.set_rotation_quaternion( q );
-	buffer_data.world *= ObjectConstantBufferData::Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+	buffer_data.world *= ::Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
 	buffer_data.world = buffer_data.world.transpose();
 
 	if ( get_drawing_model()->get_line() )

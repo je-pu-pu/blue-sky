@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_MISSILE_H
-#define BLUE_SKY_MISSILE_H
+#pragma once
 
 #include "ActiveObject.h"
 
@@ -42,5 +41,3 @@ public:
 }; // class Robot
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_ROBOT_H

@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_ENDING_SCENE_H
-#define BLUE_SKY_ENDING_SCENE_H
+#pragma once
 
 #include "Scene.h"
 #include <common/auto_ptr.h>
@@ -66,5 +65,3 @@ public:
 }; // class EndingScene
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_ENDING_SCENE_H

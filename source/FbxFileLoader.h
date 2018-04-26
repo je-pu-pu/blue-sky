@@ -1,5 +1,4 @@
-#ifndef FBX_FILE_LOADER_H
-#define FBX_FILE_LOADER_H
+#pragma once
 
 #include "Animation.h"
 #include <core/graphics/Direct3D11/Direct3D11Mesh.h>
@@ -59,5 +58,3 @@ public:
 	bool convert_to_binaly( const char_t* file_path, const char_t* binary_file_path );
 
 }; // class FbxFileLoader
-
-#endif // FBX_FILE_LOADER_H

@@ -5,7 +5,6 @@
 #include <core/sound/DirectSound/DirectSound.h>
 #include <core/sound/DirectSound/DirectSoundBuffer.h>
 #include <core/DirectX.h>
-#include <core/Vector3.h>
 
 #include <common/exception.h>
 

@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_BASE_SWITCH_H
-#define BLUE_SKY_BASE_SWITCH_H
+#pragma once
 
 #include "ActiveObject.h"
 #include <game/TimedCache.h>
@@ -74,5 +73,3 @@ public:
 }; // class Switch
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_SWITCH_H

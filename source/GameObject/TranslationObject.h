@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_TRANSLATION_OBJECT_H
-#define BLUE_SKY_TRANSLATION_OBJECT_H
+#pragma once
 
 #include "StaticObject.h"
 #include <type/type.h>
@@ -31,5 +30,3 @@ public:
 }; // class TranslationObject
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_TRANSLATION_OBJECT_H

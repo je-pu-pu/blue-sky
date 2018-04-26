@@ -1,7 +1,7 @@
-#ifndef DIRECT_3D_11_AXIS_H
-#define DIRECT_3D_11_AXIS_H
+#pragma once
 
 #include "Direct3D11Common.h"
+#include <DirectXMath.h>
 #include <vector>
 
 class Direct3D11;
@@ -35,5 +35,3 @@ public:
 	void render() const;
 
 }; // class Direct3D11Axis
-
-#endif // DIRECT_3D_11_AXIS_H

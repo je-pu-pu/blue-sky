@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_PLAYER_H
-#define BLUE_SKY_PLAYER_H
+#pragma once
 
 #include "ActiveObject.h"
 #include <common/math.h>
@@ -241,5 +240,3 @@ public:
 }; // class Player
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_PLAYER_H

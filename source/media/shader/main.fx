@@ -58,7 +58,7 @@ BlendState Blend
 	// SrcBlendAlpha = SRC_ALPHA;
 	SrcBlend = SRC_ALPHA;
 	DestBlend = INV_SRC_ALPHA;
-	AlphaToCoverageEnable = True;
+	// AlphaToCoverageEnable = True;
 };
 
 BlendState CanvasPenBlend
@@ -677,6 +677,10 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 	diffuse = max( 0.f, diffuse );
 
 	return ps_with_paper_common( ( float3 ) input.Position, input.TexCoord, diffuse );
+
+	// float4 output = ps_with_paper_common( ( float3 ) input.Position, input.TexCoord, diffuse );
+	// clip( output.a - 0.0001f );
+	// return output;
 }
 
 // ----------------------------------------

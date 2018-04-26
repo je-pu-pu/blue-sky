@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_GIRL_H
-#define BLUE_SKY_GIRL_H
+#pragma once
 
 #include "ActiveObject.h"
 
@@ -63,5 +62,3 @@ public:
 }; // class Girl
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_GIRL_H

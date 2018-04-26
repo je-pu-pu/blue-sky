@@ -1,19 +1,41 @@
+/*
+RasterizerState Main2dRasterizerState
+{
+	CullMode = None;
+};
+
+/// @todo 2D の描画に法線を使っているのは無駄なのでなんとかする
+struct VS_2D_INPUT
+{
+	float4 Position : SV_POSITION;
+	float3 Normal   : NORMAL0;
+	float2 TexCoord : TEXCOORD0;
+};
+*/
+
+struct PS_2D_INPUT
+{
+	float4 Position : SV_POSITION;
+	float2 TexCoord : TEXCOORD0;
+};
+
+
 // ----------------------------------------
 // for 2D ( Fader, debug ウィンドウで使用 )
 // ----------------------------------------
-PS_FLAT_INPUT vs_2d( VS_INPUT input )
+PS_2D_INPUT vs_2d( VS_INPUT input )
 {
-	PS_FLAT_INPUT output = ( PS_FLAT_INPUT ) 0;
+	PS_2D_INPUT output;
 
-	output.Position = mul( input.Position, World );
+	output.Position = input.Position;
 	output.TexCoord = input.TexCoord;
 
 	return output;
 }
 
-float4 ps_2d( PS_FLAT_INPUT input ) : SV_Target
+float4 ps_2d( PS_2D_INPUT input ) : SV_Target
 {
-	return model_texture.Sample( texture_sampler, input.TexCoord ) + ObjectColor; // + ObjectAdditionalColor;
+	return model_texture.Sample( texture_sampler, input.TexCoord ) + ObjectColor;
 }
 
 technique11 main2d
@@ -23,5 +45,7 @@ technique11 main2d
 		SetVertexShader( CompileShader( vs_4_0, vs_2d() ) );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_2d() ) );
+
+		// RASTERIZERSTATE = Main2dRasterizerState;
 	}
 }

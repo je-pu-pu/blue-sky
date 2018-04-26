@@ -1,5 +1,4 @@
-#ifndef DIRECT_3D_11_MESH_H
-#define DIRECT_3D_11_MESH_H
+#pragma once
 
 #include "Direct3D11Common.h"
 #include <core/type.h>
@@ -13,7 +12,6 @@
 #include <cassert>
 
 class Direct3D11;
-class Direct3D11Color;
 class Direct3D11Material;
 class Direct3D11Matrix;
 
@@ -28,9 +26,7 @@ class Direct3D11Mesh : public game::Mesh
 {
 public:
 	typedef Direct3D11					Direct3D;
-	typedef Direct3D11Color				Color;
 	typedef Direct3D11Material			Material;
-	typedef Direct3D11Matrix			Matrix;
 
 	typedef DirectX::XMFLOAT2			Vector2;
 	typedef DirectX::XMFLOAT3			Vector3;
@@ -155,5 +151,3 @@ public:
 	inline const MaterialList& get_material_list() const { return material_list_; }
 
 }; // class Direct3D11Mesh
-
-#endif // DIRECT_3D_11_MESH_H

@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_DRAWING_MESH_H
-#define BLUE_SKY_DRAWING_MESH_H
+#pragma once
 
 #include <core/type.h>
 #include <game/Mesh.h>
@@ -42,5 +41,3 @@ public:
 }; // class DrawingMesh
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_DRAWING_MESH_H

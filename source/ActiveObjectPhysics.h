@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_ACTIVE_OBJECT_PHYSICS_H
-#define BLUE_SKY_ACTIVE_OBJECT_PHYSICS_H
+#pragma once
 
 #include <GameObject/ActiveObject.h>
 #include <core/physics/Bullet/BulletPhysics.h>
@@ -101,5 +100,3 @@ public:
 };
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_ACTIVE_OBJECT_PHYSICS_H

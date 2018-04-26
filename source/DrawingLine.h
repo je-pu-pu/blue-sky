@@ -1,15 +1,14 @@
-#ifndef BLUE_SKY_DRAWING_LINE_H
-#define BLUE_SKY_DRAWING_LINE_H
+#pragma once
 
-// #include "Direct3D11Color.h"
-// #include "Direct3D11Common.h"
 #include <core/type.h>
+#include <core/graphics/Direct3D11/Direct3D11Common.h>
+
 #include <game/Line.h>
-#include <DirectXMath.h>
+
+#include <cstdint>
 #include <vector>
 
 class Direct3D11;
-class Direct3D11Color;
 class Direct3D11Texture;
 
 namespace blue_sky
@@ -34,38 +33,24 @@ public:
 	};
 
 	typedef Direct3D11 Direct3D;
-	typedef Direct3D11Color Color;
 	typedef Direct3D11Texture Texture;
-
-	typedef DirectX::XMFLOAT3 PositionType;
-	typedef DirectX::XMFLOAT4 ColorType;
 
 	struct Vertex
 	{
-		PositionType Position;
-		ColorType Color;
+		Vector3 Position;
+		Color Color;
 
-		bool operator < ( const Vertex& v ) const
+		inline bool operator < ( const Vertex& v ) const
 		{
-			if ( Position.x < v.Position.x ) return true;
-			if ( Position.x > v.Position.x ) return false;
-			if ( Position.y < v.Position.y ) return true;
-			if ( Position.y > v.Position.y ) return false;
-			if ( Position.z < v.Position.z ) return true;
-			if ( Position.z > v.Position.z ) return false;
-
-			if ( Color.x < v.Color.x ) return true;
-			if ( Color.x > v.Color.x ) return false;
-			if ( Color.y < v.Color.y ) return true;
-			if ( Color.y > v.Color.y ) return false;
-
-			return false;
+			return
+				( Position <  v.Position ) ||
+				( Position == v.Position ) && ( Color <  v.Color );
 		}
 	};
 
-	typedef WORD Index;
+	typedef std::uint16_t Index;
 
-	typedef std::vector< PositionType > PositionList;
+	typedef std::vector< Vector3 > PositionList;
 	typedef std::vector< Color > ColorList;
 
 	typedef std::vector< Vertex > VertexList;
@@ -114,5 +99,3 @@ public:
 }; // class DrawingLine
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_DRAWING_LINE_H

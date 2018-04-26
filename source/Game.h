@@ -1,5 +1,4 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 #include <type/type.h>
 
@@ -30,5 +29,3 @@ public:
 	virtual int get_width() const = 0;
 	virtual int get_height() const = 0;
 };
-
-#endif // GAME_H

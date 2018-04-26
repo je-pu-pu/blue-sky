@@ -1,5 +1,4 @@
-#ifndef OGG_VORBIS_FILE_H
-#define OGG_VORBIS_FILE_H
+#pragma once
 
 #include <game/SoundFile.h>
 #include <vorbis/vorbisfile.h>
@@ -30,5 +29,3 @@ public:
 	void seek( SizeType );
 
 }; // class OggVorbisFile
-
-#endif // OGG_VORBIS_FILE_H

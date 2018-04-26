@@ -1,5 +1,4 @@
-#ifndef BLUE_SKY_SOUND_H
-#define BLUE_SKY_SOUND_H
+#pragma once
 
 #include <game/Sound.h>
 
@@ -131,5 +130,3 @@ public:
 }; // class Sound
 
 } // namespace blue_sky
-
-#endif // BLUE_SKY_SOUND_H

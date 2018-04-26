@@ -1,8 +1,4 @@
-#ifndef BLUE_SKY_MATH_H
-#define BLUE_SKY_MATH_H
-
-class Vector3;
-class Direct3D11Color;
+#pragma once
 
 namespace math
 {
@@ -25,7 +21,7 @@ template<> inline Vector3 chase( Vector3 value, Vector3 target, float_t speed )
 	return value;
 }
 
-template<> inline Direct3D11Color chase( Direct3D11Color value, Direct3D11Color target, Direct3D11Color speed )
+template<> inline Color chase( Color value, Color target, Color speed )
 {
 	value.r() = chase( value.r(), target.r(), speed.r() );
 	value.g() = chase( value.g(), target.g(), speed.g() );
@@ -35,7 +31,7 @@ template<> inline Direct3D11Color chase( Direct3D11Color value, Direct3D11Color 
 	return value;
 }
 
-template<> inline Direct3D11Color chase( Direct3D11Color value, Direct3D11Color target, float_t speed )
+template<> inline Color chase( Color value, Color target, float_t speed )
 {
 	value.r() = chase( value.r(), target.r(), speed );
 	value.g() = chase( value.g(), target.g(), speed );
@@ -46,5 +42,3 @@ template<> inline Direct3D11Color chase( Direct3D11Color value, Direct3D11Color 
 }
 
 }
-
-#endif // BLUE_SKY_MATH_H

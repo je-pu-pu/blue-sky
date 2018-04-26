@@ -336,7 +336,11 @@ float4 ps_with_paper_common( float3 position, float2 uv, float diffuse )
 
 float4 ps_flat( PS_FLAT_INPUT input ) : SV_Target
 {
-	return model_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
+	float4 output = model_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
+
+	// clip( output.a - 0.0001f );
+
+	return output;
 }
 
 float4 ps_flat_with_flicker( PS_FLAT_INPUT input ) : SV_Target
@@ -835,25 +839,7 @@ technique11 text
 
 #include "sky_box.hlsl"
 #include "ground.hlsl"
-
-// ----------------------------------------
-// for Billboard
-// ----------------------------------------
-technique11 billboard
-{
-	pass main
-	{
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
-
-		SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
-		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_flat() ) );
-		// SetPixelShader( CompileShader( ps_4_0, ps_flat_with_flicker() ) );
-
-		RASTERIZERSTATE = Default;
-	}
-}
+#include "billboard.hlsl"
 
 #include "debug_axis.hlsl"
 #include "debug_bullet.hlsl"

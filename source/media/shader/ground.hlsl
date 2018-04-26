@@ -1,7 +1,8 @@
 RasterizerState BackgroundRasterizerState
 {
 	CullMode = Back;
-	SlopeScaledDepthBias = 2.f;
+	DepthBias = 8.f;
+	SlopeScaledDepthBias = 8.f;
 };
 
 float4 ps_ground( COMMON_POS_UV input ) : SV_Target

@@ -1856,7 +1856,7 @@ void GamePlayScene::render_far_billboards() const
 			ObjectConstantBufferData buffer;
 			buffer.color = Color::White;
 			buffer.world.set_identity();
-					
+			
 			get_graphics_manager()->get_shared_object_render_data()->update( & buffer );
 		}
 
@@ -1874,7 +1874,7 @@ void GamePlayScene::render_far_billboards() const
  */
 void GamePlayScene::render_object_skin_mesh() const
 {
-	const char* technique_name = "|skin";
+	const char* technique_name = "|skin_flat";
 
 	if ( shading_enabled_ )
 	{
@@ -1882,10 +1882,6 @@ void GamePlayScene::render_object_skin_mesh() const
 		{
 			technique_name = "|skin_with_shadow";
 		}
-	}
-	else
-	{
-		technique_name ="|skin_flat";
 	}
 
 	render_technique( technique_name, [this]
@@ -1896,6 +1892,8 @@ void GamePlayScene::render_object_skin_mesh() const
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
 		get_graphics_manager()->bind_paper_texture();
+
+		get_graphics_manager()->load_texture( "matcap_", "media/texture/matcap/skin.png" )->bind_to_ps( 3 );
 
 		if ( shadow_map_ )
 		{
@@ -1918,7 +1916,7 @@ void GamePlayScene::render_object_skin_mesh() const
  */
 void GamePlayScene::render_object_mesh() const
 {
-	const char* technique_name = "|main";
+	const char* technique_name = "|main_flat";
 
 	if ( shading_enabled_ )
 	{
@@ -1926,10 +1924,6 @@ void GamePlayScene::render_object_mesh() const
 		{
 			technique_name = "|main_with_shadow";
 		}
-	}
-	else
-	{
-		technique_name ="|main_flat";
 	}
 
 	render_technique( technique_name, [this]
@@ -1940,6 +1934,8 @@ void GamePlayScene::render_object_mesh() const
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
 		get_graphics_manager()->bind_paper_texture();
+
+		get_graphics_manager()->load_texture( "matcap", "media/texture/matcap/skin.png" )->bind_to_ps( 3 );
 
 		if ( shadow_map_ )
 		{

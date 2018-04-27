@@ -7,6 +7,7 @@ Texture2D line_texture : register( t0 );		/// 線のテクスチャ
 Texture2D shadow_texture : register( t1 );		/// シャドウマップ
 Texture2D paper_texture : register( t2 );		/// 紙の質感テクスチャ
 Texture2D pen_texture : register( t1 );			/// ペンのテクスチャ
+Texture2D matcap_texture : register( t3 );		/// Matcap テクスチャ
 
 SamplerState texture_sampler
 {
@@ -206,7 +207,7 @@ struct PS_SHADOW_INPUT
 	float3 Normal   : NORMAL0;
 	float4 ShadowTexCoord[ ShadowMapCascadeLevels ] : TEXCOORD0;
 	float2 TexCoord : TEXCOORD4;
-	float Depth : TEXCOORD5;
+	float Depth : DEPTH;
 };
 
 #include "common.hlsl"
@@ -239,27 +240,16 @@ PS_INPUT vs_main( VS_INPUT input, uint vertex_id : SV_VertexID )
 
 PS_INPUT vs_skin( VS_SKIN_INPUT input )
 {
-	PS_INPUT output = ( PS_INPUT ) 0;
+	PS_INPUT output;
 
-	output.Position +=
-		mul( input.Position, BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
-		mul( input.Position, BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
-		mul( input.Position, BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
-		mul( input.Position, BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
-	
-	output.Normal +=
-		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
-		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
-		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
-		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
+	output.Position = common_skinning_pos( input.Position, input.Bone, input.Weight );
+	output.Position = common_wvp_pos( output.Position );
 
-	output.Position = mul( output.Position, World );
-    output.Position = mul( output.Position, View );
-    output.Position = mul( output.Position, Projection );
-
-	output.Normal = mul( output.Normal, ( float3x3 ) World );
+	output.Normal = common_skinning_norm( input.Normal, input.Bone, input.Weight );
+	output.Normal = common_w_norm( output.Normal );
 	
 	output.TexCoord = input.TexCoord;
+
 	output.Color = ObjectColor;
 
 	return output;
@@ -491,7 +481,7 @@ struct PS_CANVAS_OUTPUT
  */
 PS_CANVAS_OUTPUT ps_canvas( PS_FLAT_INPUT input )
 {
-	PS_CANVAS_OUTPUT output = ( PS_CANVAS_OUTPUT ) 0;
+	PS_CANVAS_OUTPUT output;
 	
 	// output.Color = pen_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
 	output.Color = pen_texture.Sample( texture_sampler, input.TexCoord ) + ( ( ( input.Color * float4( 2.f, 2.f, 2.f, 0.f ) ) - float4( 1.f, 1.f, 1.f, 0.f ) ) * float4( 0.5f, 0.5f, 0.5f, 1.f ) );
@@ -533,13 +523,7 @@ float4 vs_shadow_map( VS_INPUT input ) : SV_POSITION
  */
 float4 vs_shadow_map_skin( VS_SKIN_INPUT input ) : SV_POSITION
 {
-	float4 output;
-
-	output =
-		mul( input.Position, BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
-		mul( input.Position, BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
-		mul( input.Position, BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
-		mul( input.Position, BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
+	float4 output = common_skinning_pos( input.Position, input.Bone, input.Weight );
 
 	output = mul( output, World );
     output = mul( output, ShadowViewProjection[ 0 ] );
@@ -556,29 +540,17 @@ PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
 {
 	PS_SHADOW_INPUT output;
 
-	output.Position = mul( input.Position, World );
-    output.Position = mul( output.Position, View );
-    output.Position = mul( output.Position, Projection );
-	
-	output.Normal = normalize( mul( input.Normal, ( float3x3 ) World ) );
-	
+	output.Position = common_wvp_pos( input.Position );
+	output.Normal = common_w_norm( input.Normal );
 	output.TexCoord = input.TexCoord;
 	
 	[unroll]
 	for ( int n = 0; n < ShadowMapCascadeLevels; n++ )
 	{
-		output.ShadowTexCoord[ n ] = mul( input.Position, World );
-		output.ShadowTexCoord[ n ] = mul( output.ShadowTexCoord[ n ], ShadowViewProjection[ n ] );
-		
-		output.ShadowTexCoord[ n ] /= output.ShadowTexCoord[ n ].w;
-	
-		output.ShadowTexCoord[ n ].x = ( output.ShadowTexCoord[ n ].x + 1.f ) / 2.f;
-		output.ShadowTexCoord[ n ].y = ( -output.ShadowTexCoord[ n ].y + 1.f ) / 2.f;
-		// output.ShadowTexCoord[ n ].z -= 0.00001f;
-		// output.ShadowTexCoord[ n ].z -= 0.000005f;
+		output.ShadowTexCoord[ n ] = common_shadow_texcoord( input.Position, n );
 	}
 
-	output.Depth = mul( mul( input.Position, World ), View ).z;
+	output.Depth = common_wv_pos( input.Position ).z;
 
 	return output;
 }
@@ -592,45 +564,22 @@ PS_SHADOW_INPUT vs_skin_with_shadow( VS_SKIN_INPUT input )
 {
 	PS_SHADOW_INPUT output;
 
-	output.Position =
-		mul( input.Position, BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
-		mul( input.Position, BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
-		mul( input.Position, BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
-		mul( input.Position, BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
-
-	output.Position = mul( output.Position, World );
-    output.Position = mul( output.Position, View );
-    output.Position = mul( output.Position, Projection );
+	output.Position = common_skinning_pos( input.Position, input.Bone, input.Weight );
+	output.Position = common_wvp_pos( output.Position );
 	
-	output.Normal =
-		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
-		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
-		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
-		mul( input.Normal, ( float3x3 ) BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
-
-	output.Normal = normalize( mul( output.Normal, ( float3x3 ) World ) );
+	output.Normal = common_skinning_norm( input.Normal, input.Bone, input.Weight );
+	output.Normal = common_w_norm( output.Normal );
 	
 	output.TexCoord = input.TexCoord;
 	
 	[unroll]
 	for ( int n = 0; n < ShadowMapCascadeLevels; n++ )
 	{
-		/// @todo 高速化する
-		output.ShadowTexCoord[ n ] = 
-			mul( input.Position, BoneMatrix[ input.Bone.x ] ) * input.Weight.x +
-			mul( input.Position, BoneMatrix[ input.Bone.y ] ) * input.Weight.y +
-			mul( input.Position, BoneMatrix[ input.Bone.z ] ) * input.Weight.z +
-			mul( input.Position, BoneMatrix[ input.Bone.w ] ) * input.Weight.w;
-		output.ShadowTexCoord[ n ] = mul( output.ShadowTexCoord[ n ], World );
-		output.ShadowTexCoord[ n ] = mul( output.ShadowTexCoord[ n ], ShadowViewProjection[ n ] );
-		
-		output.ShadowTexCoord[ n ] /= output.ShadowTexCoord[ n ].w;
-	
-		output.ShadowTexCoord[ n ].x = ( output.ShadowTexCoord[ n ].x + 1.f ) / 2.f;
-		output.ShadowTexCoord[ n ].y = ( -output.ShadowTexCoord[ n ].y + 1.f ) / 2.f;
+		output.ShadowTexCoord[ n ] = common_skinning_pos( input.Position, input.Bone, input.Weight );
+		output.ShadowTexCoord[ n ] = common_shadow_texcoord( output.ShadowTexCoord[ n ], n );
 	}
 
-	output.Depth = mul( mul( input.Position, World ), View ).z;
+	output.Depth = common_wv_pos( input.Position ).z;
 
 	return output;
 }
@@ -641,39 +590,14 @@ PS_SHADOW_INPUT vs_skin_with_shadow( VS_SKIN_INPUT input )
  */
 float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 {
-	const float4 comp = input.Depth > ShadowMapViewDepthPerCascadeLevel;
-
-	float index =
-		dot(
-			float4(
-				ShadowMapCascadeLevels > 0,
-				ShadowMapCascadeLevels > 1,
-				ShadowMapCascadeLevels > 2,
-				ShadowMapCascadeLevels > 3
-			),
-			comp
-		);
-
-	index = min( index, ShadowMapCascadeLevels - 1 );
-
-	const int cascade_index = ( int ) index;
-
-	float4 shadow_tex_coord = input.ShadowTexCoord[ cascade_index ];
-
-	shadow_tex_coord.x /= ( float ) ShadowMapCascadeLevels;
-	shadow_tex_coord.x += ( float ) cascade_index / ( float ) ShadowMapCascadeLevels;
-
-	// return float4( input.Normal, 1.f );
-
-	float4 depth = shadow_texture.Sample( shadow_texture_sampler, shadow_tex_coord.xy );
-
-	// const float vsm_variance = depth.y - pow( depth.x, 2 );
-	// const float vsm_p = vsm_variance / ( vsm_variance + pow( shadow_tex_coord.z - depth.x, 2 ) );
-	// const float vsm_shadow_rate = 1.f - saturate( max( vsm_p, depth.x <= shadow_tex_coord.z ) );
-
-	float diffuse = ( 1.f - ( dot( input.Normal, ( float3 ) Light ) * 0.5f + 0.5f ) );
+	// return common_sample_matcap( input.Normal );
+	const bool is_shadow = common_sample_is_shadow( input.ShadowTexCoord, input.Depth );
 	
-	if ( shadow_tex_coord.z >= depth.x || diffuse <= 0.5f )
+	float diffuse = common_diffuse( input.Normal );
+
+	return float4( diffuse, diffuse, diffuse, 1.f );
+
+	if ( is_shadow || diffuse <= 0.5f )
 	{
 		diffuse *= 0.5f;
 	}
@@ -685,6 +609,24 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 	// float4 output = ps_with_paper_common( ( float3 ) input.Position, input.TexCoord, diffuse );
 	// clip( output.a - 0.0001f );
 	// return output;
+}
+
+/**
+ *
+ */
+float4 ps_with_shadow_debug_simple( PS_SHADOW_INPUT input ) : SV_Target
+{
+	return common_sample_matcap( common_v_norm( input.Normal ) ) * model_texture.Sample( wrap_texture_sampler, input.TexCoord );
+
+	const float diffuse = common_diffuse( input.Normal );
+	return float4( diffuse, diffuse, diffuse, 1.f );
+
+	const bool is_shadow = common_sample_is_shadow( input.ShadowTexCoord, input.Depth );
+
+	if ( is_shadow )
+	{
+		return float4( diffuse * 0.5f, diffuse * 0.5f, diffuse * 0.5f, 1.f );
+	}
 }
 
 // ----------------------------------------
@@ -777,10 +719,25 @@ technique11 skin_with_shadow
 
         SetVertexShader( CompileShader( vs_4_0, vs_skin_with_shadow() ) );
 		SetGeometryShader( NULL );
-        SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
+        // SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_simple() ) );
 
 		RASTERIZERSTATE = Default;
     }
+
+	/*
+	pass debug_line
+    {
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( DebugLineDepthStencilState, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_common_wvp_skin_to_pos() ) );
+		SetGeometryShader( CompileShader( gs_4_0, gs_common_debug_line() ) );
+        SetPixelShader( CompileShader( ps_4_0, ps_common_debug_line() ) );
+
+		RASTERIZERSTATE = Default;
+    }
+	*/
 }
 
 #include "sky_box.hlsl"
@@ -843,63 +800,12 @@ technique11 main_with_shadow
 
 		SetVertexShader( CompileShader( vs_4_0, vs_with_shadow() ) );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
+		// SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_simple() ) );
 
 		RASTERIZERSTATE = Default;
 	}
 }
 
 #include "2d.hlsl"
-
-// ----------------------------------------
-// for Sprite
-// ----------------------------------------
-cbuffer SpriteConstantBuffer : register( b13 )
-{
-	matrix Transform;
-};
-
-PS_FLAT_INPUT vs_sprite( PS_FLAT_INPUT input )
-{
-	PS_FLAT_INPUT output = input;
-
-	output.Position = mul( input.Position, Transform );
-
-	return output;
-}
-
-float4 ps_sprite( PS_FLAT_INPUT input ) : SV_Target
-{
-	return model_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
-}
-
-float4 ps_sprite_add( PS_FLAT_INPUT input ) : SV_Target
-{
-	return model_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
-}
-
-technique11 sprite
-{
-	pass main
-	{
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
-
-		SetVertexShader( CompileShader( vs_4_0, vs_sprite() ) );
-		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_sprite() ) );
-	}
-}
-
-technique11 sprite_add
-{
-	pass main
-	{
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
-
-		SetVertexShader( CompileShader( vs_4_0, vs_sprite() ) );
-		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_sprite_add() ) );
-	}
-}
+#include "sprite.hlsl"

@@ -549,4 +549,12 @@
       <UniqueIdentifier>{41386a86-d0b5-406c-9192-d8ab630babf0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="media\shader\billboard.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="media\shader\sprite.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+  </ItemGroup>
 </Project>

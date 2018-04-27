@@ -215,26 +215,12 @@ float4 vs_common_wvp_skin_to_pos( VS_SKIN_INPUT input ) : SV_Position
 }
 
 /**
- * デバッグ用の輪郭線を生成するジオメトリシェーダー
- *
- */
-[maxvertexcount(4)]
-void gs_common_debug_line( triangle COMMON_POS input[ 3 ], inout LineStream<COMMON_POS> stream )
-{
-	stream.Append( input[ 0 ] );
-	stream.Append( input[ 1 ] );
-	stream.Append( input[ 2 ] );
-	stream.Append( input[ 0 ] );
-	stream.RestartStrip();
-}
-
-/**
  * デバッグ用の輪郭線を描画するピクセルシェーダー
  *
  */
 float4 ps_common_debug_line( float4 input : SV_Position ) : SV_Target
 {
-	return float4( 1.f, 1.f, 0.f, 1.f );
+	return float4( 1.f, 0.f, 0.f, 1.f );
 }
 
 /***

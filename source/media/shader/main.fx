@@ -95,7 +95,7 @@ RasterizerState Default
 	MultisampleEnable = True;
 };
 
-RasterizerState WireFrame
+RasterizerState WireframeRasterizerState
 {
 	FILLMODE = WIREFRAME;
 };
@@ -744,19 +744,17 @@ technique11 skin_with_shadow
 		RASTERIZERSTATE = Default;
     }
 
-	/*
 	pass debug_line
     {
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( DebugLineDepthStencilState, 0xFFFFFFFF );
 
 		SetVertexShader( CompileShader( vs_4_0, vs_common_wvp_skin_to_pos() ) );
-		SetGeometryShader( CompileShader( gs_4_0, gs_common_debug_line() ) );
+		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, ps_common_debug_line() ) );
 
-		RASTERIZERSTATE = Default;
+		RASTERIZERSTATE = WireframeRasterizerState;
     }
-	*/
 }
 
 #include "sky_box.hlsl"

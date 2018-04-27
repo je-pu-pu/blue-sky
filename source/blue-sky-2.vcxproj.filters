@@ -433,6 +433,9 @@
     <ClInclude Include="core\math\DirectXMath\Vector3.h">
       <Filter>core\math</Filter>
     </ClInclude>
+    <ClInclude Include="core\math\DirectXMath\Vector2.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -500,10 +503,20 @@
     <None Include="media\shader\sky_box.hlsl">
       <Filter>shader</Filter>
     </None>
-    <None Include="media\shader\debug_axis.hlsl" />
-    <None Include="media\shader\debug_bullet.hlsl" />
-    <None Include="media\shader\ground.hlsl" />
-    <None Include="media\shader\common.hlsl" />
+    <None Include="media\shader\billboard.hlsl" />
+    <None Include="media\shader\sprite.hlsl" />
+    <None Include="media\shader\common.hlsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="media\shader\ground.hlsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="media\shader\debug_axis.hlsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="media\shader\debug_bullet.hlsl">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Drawing">
@@ -548,13 +561,5 @@
     <Filter Include="core\math">
       <UniqueIdentifier>{41386a86-d0b5-406c-9192-d8ab630babf0}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="media\shader\billboard.hlsl">
-      <Filter>shader</Filter>
-    </FxCompile>
-    <FxCompile Include="media\shader\sprite.hlsl">
-      <Filter>shader</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>

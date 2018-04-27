@@ -590,12 +590,9 @@ PS_SHADOW_INPUT vs_skin_with_shadow( VS_SKIN_INPUT input )
  */
 float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 {
-	// return common_sample_matcap( input.Normal );
 	const bool is_shadow = common_sample_is_shadow( input.ShadowTexCoord, input.Depth );
 	
 	float diffuse = common_diffuse( input.Normal );
-
-	return float4( diffuse, diffuse, diffuse, 1.f );
 
 	if ( is_shadow || diffuse <= 0.5f )
 	{
@@ -611,12 +608,33 @@ float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 	// return output;
 }
 
+float4 ps_with_shadow_debug_cascade_level( PS_SHADOW_INPUT input ) : SV_Target
+{
+	const bool is_shadow = common_sample_is_shadow( input.ShadowTexCoord, input.Depth );
+
+	if ( is_shadow )
+	{
+		const int cascade_index = common_shadow_cascade_index( input.Depth );
+
+		float4 colors[ 4 ] = {
+			{ 1.f, 0.f, 0.f, 1.f },
+			{ 0.f, 1.f, 0.f, 1.f },
+			{ 0.f, 0.f, 1.f, 1.f },
+			{ 1.f, 1.f, 0.f, 1.f }
+		};
+
+		return 0.5 * colors[ cascade_index ] + 0.5 * model_texture.Sample( wrap_texture_sampler, input.TexCoord );
+	}
+
+	return model_texture.Sample( wrap_texture_sampler, input.TexCoord );
+}
+
 /**
  *
  */
 float4 ps_with_shadow_debug_simple( PS_SHADOW_INPUT input ) : SV_Target
 {
-	return common_sample_matcap( common_v_norm( input.Normal ) ) * model_texture.Sample( wrap_texture_sampler, input.TexCoord );
+	// return common_sample_matcap( normalize( common_v_norm( input.Normal ) ) );
 
 	const float diffuse = common_diffuse( input.Normal );
 	return float4( diffuse, diffuse, diffuse, 1.f );
@@ -720,7 +738,8 @@ technique11 skin_with_shadow
         SetVertexShader( CompileShader( vs_4_0, vs_skin_with_shadow() ) );
 		SetGeometryShader( NULL );
         // SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_simple() ) );
+		// SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_simple() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_cascade_level() ) );
 
 		RASTERIZERSTATE = Default;
     }
@@ -750,17 +769,6 @@ technique11 skin_with_shadow
 // ----------------------------------------
 // for Shadow Map
 // ----------------------------------------
-float4 ps_shadow_map_debug( PS_INPUT input ) : SV_Target
-{
-	// float sz = shadow_texture.Sample( texture_sampler, input.TexCoord );
-	float sz = model_texture.Sample( texture_sampler, input.TexCoord ).x;
-
-	// sz *= 1000.f;
-	// sz -= 999.5f;
-
-	return float4( sz, sz, sz, 0.5f );
-}
-
 technique11 shadow_map
 {
 	pass main
@@ -801,7 +809,8 @@ technique11 main_with_shadow
 		SetVertexShader( CompileShader( vs_4_0, vs_with_shadow() ) );
 		SetGeometryShader( NULL );
 		// SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_simple() ) );
+		// SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_simple() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_cascade_level() ) );
 
 		RASTERIZERSTATE = Default;
 	}

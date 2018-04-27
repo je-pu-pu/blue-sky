@@ -128,6 +128,7 @@
     <ClInclude Include="core\math\DirectXMath\Color.h" />
     <ClInclude Include="core\math\DirectXMath\Matrix.h" />
     <ClInclude Include="core\math\DirectXMath\Vector.h" />
+    <ClInclude Include="core\math\DirectXMath\Vector2.h" />
     <ClInclude Include="core\math\DirectXMath\Vector3.h" />
     <ClInclude Include="core\physics\Bullet\BulletPhysics.h" />
     <ClInclude Include="core\sound\DirectSound\DirectSound.h" />

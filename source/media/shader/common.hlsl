@@ -88,13 +88,12 @@ float4 common_shadow_texcoord( float4 pos, int csm_level )
 }
 
 /**
- * シャドウマップをサンプリングし現在のピクセルが影かどうかを bool で返す
+ * シャドウマップをサンプリングするカスケードレベルを取得する
  *
- * @param shadow_tex_coords ???
  * @param input_depth 現在のピクセルのビュー座標系での Z 値
- * @todo 理解する
+ * @return カスケードレベル ( 0 .. 3 )
  */
-bool common_sample_is_shadow( float4 shadow_tex_coords[ ShadowMapCascadeLevels ], float input_depth )
+int common_shadow_cascade_index( float input_depth )
 {
 	const float4 comp = input_depth > ShadowMapViewDepthPerCascadeLevel;
 
@@ -109,8 +108,19 @@ bool common_sample_is_shadow( float4 shadow_tex_coords[ ShadowMapCascadeLevels ]
 			comp
 		);
 
-	cascade_index = min( cascade_index, ShadowMapCascadeLevels - 1 );
+	return min( cascade_index, ShadowMapCascadeLevels - 1 );
+}
 
+/**
+ * シャドウマップをサンプリングし現在のピクセルが影かどうかを bool で返す
+ *
+ * @param shadow_tex_coords ???
+ * @param input_depth 現在のピクセルのビュー座標系での Z 値
+ * @todo 理解する
+ */
+bool common_sample_is_shadow( float4 shadow_tex_coords[ ShadowMapCascadeLevels ], float input_depth )
+{
+	const float cascade_index = common_shadow_cascade_index( input_depth );
 	float4 shadow_tex_coord = shadow_tex_coords[ ( int ) cascade_index ];
 
 	shadow_tex_coord.x /= ( float ) ShadowMapCascadeLevels;

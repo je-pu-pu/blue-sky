@@ -98,15 +98,14 @@ void Direct3D11ShadowMap::set_light_position( const Vector& pos )
 	light_position_ *= 100.f / light_position_.y(); /// 高さが 100.f になるように調整
 
 	/// @todo 動的に変更できるようにする
-	float_t length[ 4 ] = { 10.f, 50.f, 150.f, 9999.f };
-	// float_t near_length[ 4 ] = { 1.f, 10.f, 50.f, 150.f, };
-	// float_t far_length[ 4 ] = { 10.f, 50.f, 150.f, 300.f };
+	float_t width[ MaxCascadeLevels ] = { 10.f, 50.f, 150.f, 9999.f };
+	float_t depth[ MaxCascadeLevels + 1 ] = { 0.1f, 5.f, 50.f, 150.f, 300.f };
 
-	for ( int n = 0; n < 4; n++ )
+	for ( int n = 0; n < MaxCascadeLevels; n++ )
 	{
 		/// @todo 地面より手前に far clip がこないようにする
-		projection_matrix_list_[ n ].set_orthographic( length[ n ], length[ n ], 1.f, 500.f );
-		constant_buffer_data_.view_depth_per_cascade_level[ n ] = length[ n ] * 0.3f;
+		projection_matrix_list_[ n ].set_orthographic( width[ n ], width[ n ], 1.f, 500.f );
+		constant_buffer_data_.view_depth_per_cascade_level[ n ] = width[ n ] * 0.3f;
 	}
 }
 
@@ -117,11 +116,10 @@ void Direct3D11ShadowMap::set_light_position( const Vector& pos )
  */
 void Direct3D11ShadowMap::set_eye_position( const Vector& eye )
 {
-	Vector eye_fix( eye.x() + light_position_.x(), eye.y() + light_position_.y(), eye.z() + light_position_.z(), 1.f );
 	Vector at( eye.x(), eye.y(), eye.z(), 1.f );
 	Vector up( 0.f, 0.f, 1.f, 0.f );
 
-	view_matrix_.set_look_at( eye_fix, at, up );
+	view_matrix_.set_look_at( light_position_, at, up );
 }
 
 /**
@@ -173,8 +171,7 @@ void Direct3D11ShadowMap::finish_render_shadow_map()
  */
 void Direct3D11ShadowMap::ready_to_render_scene()
 {
-	auto view = texture_->get_shader_resource_view();
-	direct_3d_->getImmediateContext()->PSSetShaderResources( shader_resource_view_slot_, 1, & view );
+	texture_->bind_to_ps( shader_resource_view_slot_ );
 
 	for ( int n = 0; n < cascade_levels_; n++ )
 	{

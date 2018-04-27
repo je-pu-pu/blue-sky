@@ -678,9 +678,6 @@ void GamePlayScene::restart()
 	setup_stage();
 
 	play_sound( "restart" );
-
-	get_script_manager()->exec( "a = 0" );
-	get_script_manager()->exec( "set_drawing_line_type( a )" );
 }
 
 void GamePlayScene::load_sound_all( bool is_final_stage )
@@ -1120,15 +1117,6 @@ void GamePlayScene::update()
  */
 void GamePlayScene::update_main()
 {
-	if ( get_input()->push( Input::A ) )
-	{
-		get_script_manager()->exec( "a = a + 1 set_drawing_line_type( a )" );
-	}
-	if ( get_input()->push( Input::B ) )
-	{
-		get_script_manager()->exec( "a = a - 1 set_drawing_line_type( a )" );
-	}
-
 	const float_t rotation_speed_rate = camera_->fov() / camera_->get_fov_default();
 
 	if ( get_oculus_rift() )
@@ -1442,7 +1430,7 @@ void GamePlayScene::update_shadow()
 {
 	if ( shadow_map_ )
 	{
-		if ( true )
+		if ( false )
 		{
 			static float a = 0.1f;
 
@@ -1611,7 +1599,7 @@ void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 
 	render_fader();
 		
-	// render_debug_shadow_map_window();
+	render_debug_shadow_map_window();
 }
 
 void GamePlayScene::render_text() const
@@ -2091,13 +2079,15 @@ void GamePlayScene::render_debug_shadow_map_window() const
 	buffer_data.color = Color( 0.5f, 0.f, 0.f, 0.f );
 	get_graphics_manager()->get_shared_object_render_data()->update( & buffer_data );
 
-	render_technique( "|main2d", [this]
+	render_technique( "|debug_shadow_map_texture", [this]
 	{
 		bind_shared_object_render_data();
 
 		rectangle_->get_material_list().front()->set_texture( shadow_map_->getTexture() );
 		rectangle_->render();
 	} );
+
+	get_direct_3d()->set_default_viewport();
 }
 
 } // namespace blue_sky

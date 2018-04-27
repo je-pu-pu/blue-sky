@@ -49,3 +49,20 @@ technique11 main2d
 		// RASTERIZERSTATE = Main2dRasterizerState;
 	}
 }
+
+float4 ps_debug_shadow_map_texture( PS_2D_INPUT input ) : SV_Target
+{
+	const float value = model_texture.Sample( texture_sampler, input.TexCoord ).x;
+
+	return float4( value, value, value, 1.f );
+}
+
+technique11 debug_shadow_map_texture
+{
+	pass main
+	{
+		SetVertexShader( CompileShader( vs_4_0, vs_2d() ) );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps_debug_shadow_map_texture() ) );
+	}
+}

@@ -68,6 +68,6 @@ public:
 			( ( x() == v.x() ) && ( y() == v.y() ) && ( z() <  v.z() ) );
 	}
 
-}; // class Vector
+}; // class Vector3
 
 }; // namespace direct_x_math

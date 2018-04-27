@@ -19,23 +19,16 @@ public:
 private:
 	DirectX::XMMATRIX value_;
 
-public:
-	Matrix()
-	{
-		
-	}
-
 	Matrix( const DirectX::XMMATRIX& m )
 	{
 		value_ = m;
 	}
 
-#if 0
-	Matrix( DirectX::XMFLOAT4X4 m )
+public:
+	Matrix()
 	{
-		value_ = DirectX::XMLoadFloat4x4( & m );
+		
 	}
-#endif
 
 	Matrix& operator = ( const Matrix& m )
 	{

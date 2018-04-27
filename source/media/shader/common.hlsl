@@ -186,6 +186,19 @@ float4 common_sample_matcap( float3 norm )
  * World * View * Proejction を COMMON_POS_NORM_UV に適用し COMMON_POS_UV を出力する
  *
  */
+COMMON_POS vs_common_wvp_pos_norm_uv_to_pos( COMMON_POS_NORM_UV input )
+{
+	COMMON_POS output;
+
+	output.Position = common_wvp_pos( input.Position );
+
+	return output;
+}
+
+/**
+ * World * View * Proejction を COMMON_POS_NORM_UV に適用し COMMON_POS_UV を出力する
+ *
+ */
 COMMON_POS_UV vs_common_wvp_pos_norm_uv_to_pos_uv( COMMON_POS_NORM_UV input )
 {
 	COMMON_POS_UV output;

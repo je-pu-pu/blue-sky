@@ -143,6 +143,11 @@ cbuffer ShadowMapBuffer : register( b10 )
 	float4 ShadowMapViewDepthPerCascadeLevel;
 };
 
+cbuffer TessBuffer : register( b6 )
+{
+	float TessFactor;
+	float3 dummy;
+}
 
 struct VS_INPUT
 {
@@ -468,6 +473,8 @@ technique11 main
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
         SetVertexShader( CompileShader( vs_4_0, vs_main() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, ps_main_wrap() ) );
 
@@ -483,6 +490,8 @@ technique11 skin
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
         SetVertexShader( CompileShader( vs_4_0, vs_skin() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, ps_main_wrap() ) );
 
@@ -498,6 +507,8 @@ technique11 main_flat
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
         SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, ps_main_wrap_flat() ) );
 
@@ -513,6 +524,8 @@ technique11 skin_flat
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
         SetVertexShader( CompileShader( vs_4_0, vs_skin() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, ps_skin_wrap_flat() ) );
 
@@ -520,8 +533,88 @@ technique11 skin_flat
     }
 }
 
+COMMON_POS_NORM_UV vs_tes_test( VS_INPUT input )
+{
+	COMMON_POS_NORM_UV output;
+
+	output.Position = input.Position;
+	output.Normal = input.Normal;
+	output.TexCoord = input.TexCoord;
+
+
+	// output.Position = common_wvp_pos( output.Position );
+	// output.Normal = common_w_norm( output.Normal );
+
+	return output;
+}
+
+struct HS_CONSTANT_OUTPUT
+{
+	float factor[ 3 ]  : SV_TessFactor;
+	float inner_factor : SV_InsideTessFactor;
+};
+
+HS_CONSTANT_OUTPUT hs_constant( InputPatch<COMMON_POS_NORM_UV, 3> input )
+{
+	HS_CONSTANT_OUTPUT Out;
+
+	float devide = TessFactor;
+
+	Out.factor[ 0 ] = devide;
+	Out.factor[ 1 ] = devide;
+	Out.factor[ 2 ] = devide;
+
+	Out.inner_factor = devide;
+
+	return Out;
+}
+
+[domain("tri")]
+[partitioning("fractional_odd")]
+[outputtopology("triangle_cw")]
+[outputcontrolpoints(3)]
+[patchconstantfunc("hs_constant")]
+COMMON_POS_NORM_UV hs_test( InputPatch<COMMON_POS_NORM_UV, 3> ip, uint cpid : SV_OutputControlPointID )
+{
+	return ip[ cpid ];
+}
+
+float3
+ProjectPositionToTangentSpace( float3 position, float3 plane_position, float3 plane_normal )
+{
+	float projectValue = dot( ( position - plane_position ), plane_normal );
+	return ( position - projectValue * plane_normal );
+}
+
+[domain("tri")]
+COMMON_POS_NORM_UV ds_test( HS_CONSTANT_OUTPUT In, float3 uvw : SV_DomaInLocation, const OutputPatch<COMMON_POS_NORM_UV, 3> patch )
+{
+	COMMON_POS_NORM_UV output;
+
+	output.Position = patch[ 0 ].Position * uvw.x + patch[ 1 ].Position * uvw.y + patch[ 2 ].Position * uvw.z;
+	output.Normal   = patch[ 0 ].Normal   * uvw.x + patch[ 1 ].Normal   * uvw.y + patch[ 2 ].Normal   * uvw.z;
+	output.TexCoord = patch[ 0 ].TexCoord * uvw.x + patch[ 1 ].TexCoord * uvw.y + patch[ 2 ].TexCoord * uvw.z;
+	
+	// output.Position += float4( uv.x * 0.1f, 0.f, 0.f, 0.f );
+
+	float3 phongPos = float3( 0.0f, 0.0f, 0.0f );
+
+    for ( int n = 0; n < 3; n++ )
+    {
+        phongPos += ( uvw[ n ] * ProjectPositionToTangentSpace( output.Position.xyz, patch[ n ].Position.xyz, patch[ n ].Normal.xyz ) );
+    }
+
+	output.Position = float4( phongPos, 1.f );
+
+	output.Position = common_wvp_pos( output.Position );
+	output.Normal = common_w_norm( output.Normal );
+
+	return output;
+}
+
 technique11 main_with_shadow
 {
+	/*
 	pass main
 	{
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
@@ -535,15 +628,35 @@ technique11 main_with_shadow
 
 		RASTERIZERSTATE = Default;
 	}
+	*/
+
+	pass tessellation_test
+	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_tes_test() ) );
+		SetHullShader( CompileShader( hs_5_0, hs_test() ) );
+		SetDomainShader( CompileShader( ds_5_0, ds_test() ) );
+		SetGeometryShader( NULL );
+		// SetPixelShader( CompileShader( ps_4_0, ps_common_sample_pos_norm_uv() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm() ) );
+
+		RASTERIZERSTATE = Default;
+	}
 
 	pass debug_line
     {
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( DebugLineDepthStencilState, 0xFFFFFFFF );
 
-		SetVertexShader( CompileShader( vs_4_0, vs_common_wvp_pos_norm_uv_to_pos() ) );
+		SetVertexShader( CompileShader( vs_4_0, vs_tes_test() ) );
+		SetHullShader( CompileShader( hs_5_0, hs_test() ) );
+		SetDomainShader( CompileShader( ds_5_0, ds_test() ) );
+		// SetHullShader( NULL );
+		// SetDomainShader( NULL );
 		SetGeometryShader( NULL );
-        SetPixelShader( CompileShader( ps_4_0, ps_common_debug_line() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_common_debug_line_pos_norm() ) );
 
 		RASTERIZERSTATE = WireframeRasterizerState;
     }
@@ -557,6 +670,8 @@ technique11 skin_with_shadow
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
         SetVertexShader( CompileShader( vs_4_0, vs_skin_with_shadow() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
         // SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
 		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_simple() ) );
@@ -571,6 +686,8 @@ technique11 skin_with_shadow
 		SetDepthStencilState( DebugLineDepthStencilState, 0xFFFFFFFF );
 
 		SetVertexShader( CompileShader( vs_4_0, vs_common_wvp_skin_to_pos() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, ps_common_debug_line() ) );
 

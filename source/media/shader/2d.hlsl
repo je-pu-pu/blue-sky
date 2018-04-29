@@ -43,6 +43,8 @@ technique11 main2d
 	pass main
 	{
 		SetVertexShader( CompileShader( vs_4_0, vs_2d() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_2d() ) );
 
@@ -62,6 +64,8 @@ technique11 debug_shadow_map_texture
 	pass main
 	{
 		SetVertexShader( CompileShader( vs_4_0, vs_2d() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_debug_shadow_map_texture() ) );
 	}

@@ -34,6 +34,8 @@ technique11 shadow_map
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
 		SetVertexShader( CompileShader( vs_4_0, vs_shadow_map() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( NULL );
 
@@ -49,6 +51,8 @@ technique11 shadow_map_skin
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
 		SetVertexShader( CompileShader( vs_4_0, vs_shadow_map_skin() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( NULL );
 

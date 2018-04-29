@@ -17,6 +17,8 @@ technique11 ground
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
 		SetVertexShader( CompileShader( vs_4_0, vs_common_wvp_pos_norm_uv_to_pos_uv() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_ground() ) );
 

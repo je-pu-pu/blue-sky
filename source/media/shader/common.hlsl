@@ -20,6 +20,16 @@ struct COMMON_POS
 };
 
 /***
+ * 座標と法線を持つ共通頂点構造
+ *
+ */
+struct COMMON_POS_NORM
+{
+	float4 Position : SV_POSITION;
+	float3 Normal   : NORMAL0;
+};
+
+/***
  * 座標と法線とテクスチャ UV 座標を持つ共通頂点構造
  *
  */
@@ -240,7 +250,18 @@ float4 ps_common_debug_line( float4 input : SV_Position ) : SV_Target
  *
  *
  */
-float4 ps_common_( PS_FLAT_INPUT input ) : SV_Target
+float4 ps_common_diffuse_pos_norm( COMMON_POS_NORM input ) : SV_Target
 {
-	return model_texture.Sample( texture_sampler, input.TexCoord ) * ObjectColor;
+	const float diffuse = common_diffuse( input.Normal );;
+	return float4( diffuse, diffuse, diffuse, 1.f );
+}
+
+float4 ps_common_sample_pos_norm_uv( COMMON_POS_NORM_UV input ) : SV_Target
+{
+	return model_texture.Sample( wrap_texture_sampler, input.TexCoord );
+}
+
+float4 ps_common_debug_line_pos_norm( COMMON_POS_NORM input ) : SV_Target
+{
+	return float4( 1.f, 0.f, 0.f, 1.f );
 }

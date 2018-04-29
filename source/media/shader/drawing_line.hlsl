@@ -72,13 +72,14 @@ void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_
 		uint  pattern_count;
 	};
 
-	static const line_config line_configs[ 5 ]= 
+	static const line_config line_configs[ 6 ]= 
 	{
 		{   0.f, 32.f, 3 },
 		{ 128.f, 32.f, 3 },
 		{ 256.f, 64.f, 4 },
 		{ 512.f, 64.f, 4 },
 		{ 768.f, 64.f, 4 },
+		{  96.f,  1.f, 1 },
 	};
 
 	static const uint line_config_index = LineType;

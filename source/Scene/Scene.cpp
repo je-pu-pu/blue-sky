@@ -215,7 +215,9 @@ void Scene::bind_game_render_data() const
  */
 void Scene::bind_frame_render_data() const
 {
-	get_graphics_manager()->get_frame_render_data()->bind_to_all();
+	get_graphics_manager()->get_frame_render_data()->bind_to_vs();
+	get_graphics_manager()->get_frame_render_data()->bind_to_gs();
+	get_graphics_manager()->get_frame_render_data()->bind_to_ps();
 }
 
 /**
@@ -225,6 +227,7 @@ void Scene::bind_frame_render_data() const
 void Scene::bind_shared_object_render_data() const
 {
 	get_graphics_manager()->get_shared_object_render_data()->bind_to_vs();
+	get_graphics_manager()->get_shared_object_render_data()->bind_to_ds();
 	get_graphics_manager()->get_shared_object_render_data()->bind_to_ps();
 }
 

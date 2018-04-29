@@ -54,6 +54,21 @@ public:
 		direct_3d_->getImmediateContext()->VSSetConstantBuffers( slot, 1, & constant_buffer_ );
 	}
 
+	void bind_to_hs( UINT slot = Slot ) const
+	{
+		direct_3d_->getImmediateContext()->HSSetConstantBuffers( slot, 1, & constant_buffer_ );
+	}
+
+	void bind_to_ds( UINT slot = Slot ) const
+	{
+		direct_3d_->getImmediateContext()->DSSetConstantBuffers( slot, 1, & constant_buffer_ );
+	}
+
+	void bind_to_cs( UINT slot = Slot ) const
+	{
+		direct_3d_->getImmediateContext()->CSSetConstantBuffers( slot, 1, & constant_buffer_ );
+	}
+
 	void bind_to_gs( UINT slot = Slot ) const
 	{
 		direct_3d_->getImmediateContext()->GSSetConstantBuffers( slot, 1, & constant_buffer_ );
@@ -67,6 +82,9 @@ public:
 	void bind_to_all( UINT slot = Slot ) const
 	{
 		bind_to_vs( slot );
+		bind_to_hs( slot );
+		bind_to_ds( slot );
+		bind_to_cs( slot );
 		bind_to_gs( slot );
 		bind_to_ps( slot );
 	}

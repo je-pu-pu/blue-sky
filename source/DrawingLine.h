@@ -29,6 +29,7 @@ public:
 		LINE_TYPE_DOT,				///< ドット
 		LINE_TYPE_COLOR_DOT,		///< 色付きドット
 		LINE_TYPE_BRUSH,			///< 色付きブラシ
+		LINE_TYPE_NONE,				///< なし
 		LINE_TYPE_MAX
 	};
 

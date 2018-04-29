@@ -1898,6 +1898,12 @@ void GamePlayScene::render_object_skin_mesh() const
 	} );
 }
 
+struct TessConstantBufferData : public BaseConstantBufferData< 6 >
+{
+	float tess_factor = 1.f;
+	float dummy[ 3 ];
+};
+
 /**
  * オブジェクトのメッシュを描画する
  *
@@ -1914,13 +1920,35 @@ void GamePlayScene::render_object_mesh() const
 		}
 	}
 
+	static Direct3D11ConstantBufferWithData< TessConstantBufferData > tess_render_data( get_direct_3d() );
+
+	if ( get_input()->press( Input::L ) )
+	{
+		tess_render_data.data().tess_factor -= 1 * get_elapsed_time();
+	}
+	if ( get_input()->press( Input::R ) )
+	{
+		tess_render_data.data().tess_factor += 1 * get_elapsed_time();
+	}
+
+	tess_render_data.data().tess_factor = math::clamp( tess_render_data.data().tess_factor, 1.f, 8.f );
+	tess_render_data.update();
+	
+
 	render_technique( technique_name, [this]
 	{
 		bind_game_render_data();
-		bind_frame_render_data();
+		
+		get_graphics_manager()->get_frame_render_data()->bind_to_vs();
+		get_graphics_manager()->get_frame_render_data()->bind_to_ds();
+		get_graphics_manager()->get_frame_render_data()->bind_to_gs();
+		get_graphics_manager()->get_frame_render_data()->bind_to_ps();
 		
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
+		
+		tess_render_data.bind_to_hs();
+
 		get_graphics_manager()->bind_paper_texture();
 
 		get_graphics_manager()->load_texture( "matcap", "media/texture/matcap/skin.png" )->bind_to_ps( 3 );

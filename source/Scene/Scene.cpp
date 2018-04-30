@@ -161,13 +161,13 @@ void Scene::stop_sound( const char* name ) const
 void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t drawing_accent_scale )
 {
 	{
-		FrameConstantBufferData frame_constant_buffer_data;
+		auto& frame_constant_buffer_data = get_graphics_manager()->get_frame_render_data()->data();
 
 		frame_constant_buffer_data.view = Matrix().set_identity().transpose();
 		frame_constant_buffer_data.projection = Matrix().set_orthographic( 2.f * get_width() / get_height(), 2.f, 0.f, 1.f ).transpose();
 		frame_constant_buffer_data.time = get_total_elapsed_time();
 	
-		get_graphics_manager()->get_frame_render_data()->update( & frame_constant_buffer_data );
+		get_graphics_manager()->get_frame_render_data()->update();
 	}
 
 	{

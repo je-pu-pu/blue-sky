@@ -5,9 +5,6 @@
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp">
       <Filter>BadDependencies</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Color.cpp">
-      <Filter>BadDependencies</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Effect.cpp">
       <Filter>BadDependencies</Filter>
     </ClCompile>
@@ -50,6 +47,10 @@
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp">
       <Filter>BadDependencies</Filter>
     </ClCompile>
+    <ClCompile Include="FbxFileLoader.cpp" />
+    <ClCompile Include="core\math\DirectXMath\Color.cpp">
+      <Filter>BadDependencies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="BadDependencies">
@@ -57,9 +58,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Color.h">
-      <Filter>BadDependencies</Filter>
-    </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Effect.h">
       <Filter>BadDependencies</Filter>
     </ClInclude>
@@ -103,6 +101,10 @@
       <Filter>BadDependencies</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h">
+      <Filter>BadDependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="FbxFileLoader.h" />
+    <ClInclude Include="core\math\DirectXMath\Color.h">
       <Filter>BadDependencies</Filter>
     </ClInclude>
   </ItemGroup>

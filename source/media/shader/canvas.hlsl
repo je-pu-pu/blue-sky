@@ -149,6 +149,8 @@ technique11 drawing_point
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
         SetVertexShader( CompileShader( vs_4_0, vs_canvas() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( CompileShader( gs_4_0, gs_canvas() ) );
         SetPixelShader( CompileShader( ps_4_0, ps_canvas() ) );
 

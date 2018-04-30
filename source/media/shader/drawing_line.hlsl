@@ -350,6 +350,8 @@ technique11 drawing_line
 		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
 
 		SetVertexShader( CompileShader( vs_4_0, vs_drawing_line() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( CompileShader( gs_4_0, gs_drawing_line() ) );
 		SetPixelShader( CompileShader( ps_4_0, ps_drawing_line() ) );
 
@@ -363,6 +365,8 @@ technique11 drawing_line
 		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
 
 		SetVertexShader( CompileShader( vs_4_0, vs_drawing_line_debug() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( CompileShader( gs_4_0, gs_drawing_line_debug() ) );
 		SetPixelShader( CompileShader( ps_4_0, ps_drawing_line_debug() ) );
 
@@ -376,6 +380,8 @@ technique11 drawing_line
 		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
 
 		SetVertexShader( CompileShader( vs_4_0, vs_drawing_line_debug() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( CompileShader( gs_4_0, gs_drawing_line_debug_line() ) );
 		SetPixelShader( CompileShader( ps_4_0, ps_drawing_line_debug_line() ) );
 

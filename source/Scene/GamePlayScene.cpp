@@ -1109,6 +1109,20 @@ void GamePlayScene::update()
 	shadow_paper_color_.chase();
 
 	get_graphics_manager()->set_ambient_color( ambient_color_.value() );
+
+	// tess test
+	{
+		if ( get_input()->press( Input::L ) )
+		{
+			get_graphics_manager()->get_frame_render_data()->data().tess_factor -= 1 * get_elapsed_time();
+		}
+		if ( get_input()->press( Input::R ) )
+		{
+			get_graphics_manager()->get_frame_render_data()->data().tess_factor += 1 * get_elapsed_time();
+		}
+
+		get_graphics_manager()->get_frame_render_data()->data().tess_factor = math::clamp( get_graphics_manager()->get_frame_render_data()->data().tess_factor, 1.f, 8.f );
+	}
 }
 
 /**
@@ -1602,8 +1616,6 @@ void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 	render_debug_shadow_map_window();
 }
 
-static float tess_factor;
-
 void GamePlayScene::render_text() const
 {
 	std::stringstream ss;
@@ -1629,7 +1641,7 @@ void GamePlayScene::render_text() const
 		ss << "IS LOCATED ON SAFE : " << player_->is_located_on_safe() << std::endl;
 		ss << "IS FALLING TO DIE : " << player_->is_falling_to_die() << std::endl;
 
-		ss << "TESS FACTOR : " << tess_factor << std::endl;
+		ss << "TESS FACTOR : " << get_graphics_manager()->get_frame_render_data()->data().tess_factor << std::endl;
 		/*
 		ss << "IS JUMPING : " << player_->is_jumping() << std::endl;
 		ss << "ON FOOTING : " << player_->is_on_footing() << std::endl;
@@ -1677,17 +1689,17 @@ void GamePlayScene::update_render_data_for_frame() const
 {
 	// get_graphic_manager()->update_render_data_for_frame( camera_ );
 
-	FrameConstantBufferData frame_constant_buffer_data;
-	update_frame_constant_buffer_data_sub( frame_constant_buffer_data );
+	auto& frame_render_data = get_graphics_manager()->get_frame_render_data()->data();
+	update_frame_constant_buffer_data_sub( frame_render_data );
 
 	const Vector& eye = camera_->position();
 	const Vector& at  = camera_->look_at();
 	const Vector& up  = camera_->up();
 
-	frame_constant_buffer_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
-	frame_constant_buffer_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();
+	frame_render_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
+	frame_render_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();
 
-	get_graphics_manager()->get_frame_render_data()->update( & frame_constant_buffer_data );
+	get_graphics_manager()->get_frame_render_data()->update();
 
 	get_graphics_manager()->set_eye_position( eye.xyz() );
 }
@@ -1699,8 +1711,8 @@ void GamePlayScene::update_render_data_for_frame() const
  */
 void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
 {
-	FrameConstantBufferData frame_constant_buffer_data;
-	update_frame_constant_buffer_data_sub( frame_constant_buffer_data );
+	auto& frame_render_data = get_graphics_manager()->get_frame_render_data()->data();
+	update_frame_constant_buffer_data_sub( frame_render_data );
 
 	Matrix camera_rot;
 	camera_rot.set_rotation_xyz(
@@ -1720,10 +1732,10 @@ void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
 	Vector at = eye + Vector( 0.f, 0.f, 1.f, 0.f ) * r;
 	Vector up = Vector( 0.f, 1.f, 0.f, 0.f ) * r;
 
-	frame_constant_buffer_data.view = Matrix().set_look_at( eye, at, up ).transpose();
-	frame_constant_buffer_data.projection = get_oculus_rift()->get_projection_matrix( eye_index, camera_->near_clip(), camera_->far_clip() ).transpose();
+	frame_render_data.view = Matrix().set_look_at( eye, at, up ).transpose();
+	frame_render_data.projection = get_oculus_rift()->get_projection_matrix( eye_index, camera_->near_clip(), camera_->far_clip() ).transpose();
 
-	get_graphics_manager()->get_frame_render_data()->update( & frame_constant_buffer_data );
+	get_graphics_manager()->get_frame_render_data()->update();
 
 	get_graphics_manager()->set_eye_position( Vector3( eye.x(), eye.y(), eye.z() ) );
 }
@@ -1878,12 +1890,22 @@ void GamePlayScene::render_object_skin_mesh() const
 	render_technique( technique_name, [this]
 	{
 		bind_game_render_data();
-		bind_frame_render_data();
+
+		get_graphics_manager()->get_frame_render_data()->bind_to_vs();
+		get_graphics_manager()->get_frame_render_data()->bind_to_hs();
+		get_graphics_manager()->get_frame_render_data()->bind_to_ds();
+		get_graphics_manager()->get_frame_render_data()->bind_to_ps();
 
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
+
 		get_graphics_manager()->bind_paper_texture();
 
+		// get_graphics_manager()->load_texture( "matcap_", "media/texture/matcap/mc20.jpg" )->bind_to_ps( 3 );
+		// get_graphics_manager()->load_texture( "matcap_", "media/texture/matcap/mc13.jpg" )->bind_to_ps( 3 );
+		// get_graphics_manager()->load_texture( "matcap_", "media/texture/matcap/mc11.jpg" )->bind_to_ps( 3 );
+		// get_graphics_manager()->load_texture( "matcap_", "media/texture/matcap/toon.png" )->bind_to_ps( 3 );
+		// get_graphics_manager()->load_texture( "matcap_", "media/texture/matcap/skin.jpg" )->bind_to_ps( 3 );
 		get_graphics_manager()->load_texture( "matcap_", "media/texture/matcap/skin.png" )->bind_to_ps( 3 );
 
 		if ( shadow_map_ )
@@ -1901,12 +1923,6 @@ void GamePlayScene::render_object_skin_mesh() const
 	} );
 }
 
-struct TessConstantBufferData : public BaseConstantBufferData< 6 >
-{
-	float tess_factor = 1.f;
-	float dummy[ 3 ];
-};
-
 /**
  * オブジェクトのメッシュを描画する
  *
@@ -1923,28 +1939,12 @@ void GamePlayScene::render_object_mesh() const
 		}
 	}
 
-	static Direct3D11ConstantBufferWithData< TessConstantBufferData > tess_render_data( get_direct_3d() );
-
-	if ( get_input()->press( Input::L ) )
-	{
-		tess_render_data.data().tess_factor -= 1 * get_elapsed_time();
-	}
-	if ( get_input()->press( Input::R ) )
-	{
-		tess_render_data.data().tess_factor += 1 * get_elapsed_time();
-	}
-
-	tess_render_data.data().tess_factor = math::clamp( tess_render_data.data().tess_factor, 1.f, 8.f );
-	tess_render_data.update();
-	
-	tess_factor = tess_render_data.data().tess_factor;
-
-
 	render_technique( technique_name, [this]
 	{
 		bind_game_render_data();
 		
 		get_graphics_manager()->get_frame_render_data()->bind_to_vs();
+		get_graphics_manager()->get_frame_render_data()->bind_to_hs();
 		get_graphics_manager()->get_frame_render_data()->bind_to_ds();
 		get_graphics_manager()->get_frame_render_data()->bind_to_gs();
 		get_graphics_manager()->get_frame_render_data()->bind_to_ps();
@@ -1952,8 +1952,6 @@ void GamePlayScene::render_object_mesh() const
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
 		
-		tess_render_data.bind_to_hs();
-
 		get_graphics_manager()->bind_paper_texture();
 
 		get_graphics_manager()->load_texture( "matcap", "media/texture/matcap/mc12.jpg" )->bind_to_ps( 3 );

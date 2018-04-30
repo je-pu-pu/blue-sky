@@ -33,6 +33,8 @@ technique11 sprite
 		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
 
 		SetVertexShader( CompileShader( vs_4_0, vs_sprite() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_sprite() ) );
 	}
@@ -46,6 +48,8 @@ technique11 sprite_add
 		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
 
 		SetVertexShader( CompileShader( vs_4_0, vs_sprite() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_sprite_add() ) );
 	}

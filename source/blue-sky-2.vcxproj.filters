@@ -436,6 +436,8 @@
     <ClInclude Include="core\math\DirectXMath\Vector2.h">
       <Filter>core\math</Filter>
     </ClInclude>
+    <ClInclude Include="SkinningAnimation.h" />
+    <ClInclude Include="SkinningAnimationSet.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -517,6 +519,8 @@
     <None Include="media\shader\debug_bullet.hlsl">
       <Filter>shader</Filter>
     </None>
+    <None Include="media\shader\canvas.hlsl" />
+    <None Include="media\shader\shadow_map.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Drawing">
@@ -561,13 +565,5 @@
     <Filter Include="core\math">
       <UniqueIdentifier>{41386a86-d0b5-406c-9192-d8ab630babf0}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="media\shader\canvas.hlsl">
-      <Filter>shader</Filter>
-    </FxCompile>
-    <FxCompile Include="media\shader\shadow_map.hlsl">
-      <Filter>shader</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>

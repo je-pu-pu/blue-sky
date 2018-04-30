@@ -27,6 +27,10 @@ struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
 	Vector light;
 	float_t time;
 	uint_t time_beat;
+
+	float_t tess_factor = 1.f;
+
+	float_t dummy;
 };
 
 struct ObjectConstantBufferData : public BaseConstantBufferData< 2 >
@@ -71,7 +75,7 @@ struct BoneConstantBufferData : public BaseConstantBufferData< 5 >
 };
 
 typedef Direct3D11ConstantBuffer< GameConstantBufferData > GameConstantBuffer;
-typedef Direct3D11ConstantBuffer< FrameConstantBufferData > FrameConstantBuffer;
+typedef Direct3D11ConstantBufferWithData< FrameConstantBufferData > FrameConstantBuffer;
 typedef Direct3D11ConstantBufferWithData< FrameDrawingConstantBufferData > FrameDrawingConstantBuffer;
 typedef Direct3D11ConstantBuffer< ObjectConstantBufferData > ObjectConstantBuffer;
 typedef Direct3D11ConstantBufferWithData< ObjectConstantBufferData > ObjectConstantBufferWithData;

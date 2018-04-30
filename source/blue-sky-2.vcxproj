@@ -173,6 +173,8 @@
     <ClInclude Include="Scene\StoryTextScene.h" />
     <ClInclude Include="Scene\TitleScene.h" />
     <ClInclude Include="ScriptManager.h" />
+    <ClInclude Include="SkinningAnimation.h" />
+    <ClInclude Include="SkinningAnimationSet.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="StreamingSound.h" />

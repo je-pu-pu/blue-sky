@@ -25,6 +25,8 @@ technique11 bullet
 		// SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
 
 		SetVertexShader( CompileShader( vs_4_0, vs_debug_bullet() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_debug_bullet() ) );
 	}

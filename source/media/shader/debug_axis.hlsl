@@ -22,6 +22,8 @@ technique11 simple_line
 		// SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 		
 		SetVertexShader( CompileShader( vs_4_0, vs_debug_axis() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_debug_axis() ) );
 	}

@@ -23,7 +23,6 @@ namespace blue_sky
 {
 
 /// @todo ‚¿‚á‚ñ‚Æ‚·‚é
-static FrameConstantBufferData frame_constant_buffer_data;
 static ObjectConstantBufferData object_constant_buffer_data;
 static Vector eye( 0.f, 0.f, -1.f, 1.f );
 static Matrix r;
@@ -128,22 +127,24 @@ void CanvasTestScene::update()
 		Vector at( 0.f, 0.f, 0.f, 1.f );
 		Vector up( 0.f, 1.f, 0.f, 0.f );
 
-		frame_constant_buffer_data.view.set_look_at( eye, at, up );
-		frame_constant_buffer_data.view = frame_constant_buffer_data.view.transpose();
+		auto& render_data = get_graphics_manager()->get_frame_render_data()->data();
+		
+		render_data.view.set_look_at( eye, at, up );
+		render_data.view = render_data.view.transpose();
 
-		frame_constant_buffer_data.projection.set_perspective_fov( math::degree_to_radian( 90.f ), static_cast< float >( get_width() ) / static_cast< float >( get_height() ), 0.05f, 3000.f );
-		frame_constant_buffer_data.projection = frame_constant_buffer_data.projection.transpose();
+		render_data.projection.set_perspective_fov( math::degree_to_radian( 90.f ), static_cast< float >( get_width() ) / static_cast< float >( get_height() ), 0.05f, 3000.f );
+		render_data.projection = render_data.projection.transpose();
 
-		frame_constant_buffer_data.light = Vector( 0, 0, 0, 1 );
+		render_data.light = Vector( 0, 0, 0, 1 );
 
 		if ( static_cast< int >( get_total_elapsed_time() * 60.f ) % 10 == 0 )
 		{
-			frame_constant_buffer_data.time = common::random( -5.f, 5.f );
+			render_data.time = common::random( -5.f, 5.f );
 		}
 		
-		frame_constant_buffer_data.time_beat = 0;
+		render_data.time_beat = 0;
 
-		get_graphics_manager()->get_frame_render_data()->update( &frame_constant_buffer_data );
+		get_graphics_manager()->get_frame_render_data()->update();
 	}
 
 	Matrix s;

@@ -16,7 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp" />
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Color.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Effect.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectPass.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.cpp" />
@@ -31,11 +30,11 @@
     <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp" />
+    <ClCompile Include="core\math\DirectXMath\Color.cpp" />
     <ClCompile Include="FbxConverterMain.cpp" />
     <ClCompile Include="FbxFileLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Color.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Effect.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectPass.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.h" />
@@ -51,6 +50,7 @@
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileEnumerator.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h" />
+    <ClInclude Include="core\math\DirectXMath\Color.h" />
     <ClInclude Include="FbxFileLoader.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

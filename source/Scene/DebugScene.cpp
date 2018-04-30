@@ -76,17 +76,17 @@ void DebugScene::update()
 
 void DebugScene::render()
 {
-	FrameConstantBufferData frame_constant_buffer_data;
+	auto& frame_render_data = get_graphics_manager()->get_frame_render_data()->data();
 
 	Vector eye( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1.f );
 	Vector at( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z(), 1.f );
 //	Vector at( 0.f, 0.f, 0.f );
 	Vector up( camera_->up().x(), camera_->up().y(), camera_->up().z(), 0.f );
 
-	frame_constant_buffer_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
-	frame_constant_buffer_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();
+	frame_render_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
+	frame_render_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();
 
-	get_graphics_manager()->get_frame_render_data()->update( & frame_constant_buffer_data );
+	get_graphics_manager()->get_frame_render_data()->update();
 
 	get_graphics_manager()->setup_rendering();
 	get_graphics_manager()->render_background();

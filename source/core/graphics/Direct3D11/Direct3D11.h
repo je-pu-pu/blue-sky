@@ -155,6 +155,7 @@ public:
 
 	void setInputLayout( const char* );
 
+	void bind_texture_to_ds( uint_t, const Texture* );
 	void bind_texture_to_ps( uint_t, const Texture* );
 
 

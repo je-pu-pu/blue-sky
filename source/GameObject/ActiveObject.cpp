@@ -249,7 +249,7 @@ void ActiveObject::bind_render_data() const
 	get_object_constant_buffer()->bind_to_vs();
 	get_object_constant_buffer()->bind_to_ds();
 	// get_object_constant_buffer()->bind_to_gs();
-	// get_object_constant_buffer()->bind_to_ps(); // 必要？
+	get_object_constant_buffer()->bind_to_ps(); // 必要？
 }
 
 /**

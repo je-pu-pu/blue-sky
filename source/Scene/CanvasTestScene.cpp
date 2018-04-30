@@ -228,7 +228,7 @@ void CanvasTestScene::render()
 	get_direct_3d()->set_default_render_target();
 	get_direct_3d()->set_default_viewport();
 
-	get_direct_3d()->setInputLayout( "main" );
+	get_graphics_manager()->set_input_layout( "main" );
 
 	render_technique( "|sky_box", [this] {
 		
@@ -246,7 +246,7 @@ void CanvasTestScene::render()
 	} );
 
 
-	get_direct_3d()->setInputLayout( "drawing_point" );
+	get_graphics_manager()->set_input_layout( "drawing_point" );
 
 	render_technique( "|drawing_point", [this] {
 		get_graphics_manager()->get_game_render_data()->bind_to_all();

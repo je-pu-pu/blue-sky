@@ -278,7 +278,7 @@ void Direct3D11GraphicsManager::set_eye_position( const Vector3& pos )
  */
 void Direct3D11GraphicsManager::setup_rendering() const
 {
-	direct_3d_->setInputLayout( "main" );
+	set_input_layout( "main" );
 
 	direct_3d_->clear_default_view();
 

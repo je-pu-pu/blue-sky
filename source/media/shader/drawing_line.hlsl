@@ -2,10 +2,7 @@ GS_LINE_INPUT vs_drawing_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID
 {
 	GS_LINE_INPUT output;
 
-	output.Position = mul( input.Position, World );
-    output.Position = mul( output.Position, View );
-    output.Position = mul( output.Position, Projection );
-
+	output.Position = common_wvp_pos( input.Position );
 	output.Color = input.Color + ObjectColor;
 
 	// êFÇïœìÆÇ≥ÇπÇÈ
@@ -180,15 +177,7 @@ GS_LINE_INPUT vs_drawing_line_debug( VS_LINE_INPUT input )
 {
 	GS_LINE_INPUT output;
 
-	output.Position = input.Position;
-	output.Position = mul( input.Position, World );
-    output.Position = mul( output.Position, View );
-	output.Position = mul( output.Position, Projection );
-
-	/*
-	// output.Position.z = max( output.Position.z, 0.5f );
-	*/
-
+	output.Position = common_wvp_pos( input.Position );
 	output.Color = input.Color;
 
 	return output;
@@ -269,9 +258,7 @@ void get_drawing_line_common( line GS_LINE_INPUT input[ 2 ], out PS_FLAT_INPUT o
 	{
 		for ( uint n = 0; n < output_vertex_count; n++ )
 		{
-			// output[ n ].Position = mul( output[ n ].Position, World );
-			// output[ n ].Position = mul( output[ n ].Position, View );
-			// output[ n ].Position = mul( output[ n ].Position, Projection );
+			// output[ n ].Position = common_wvp_pos( output[ n ].Position );
 
 			// output[ n ].Position.z = clamp( output[ n ].Position.z, -1.f, 1.f );
 			output[ n ].Position.xyz *= output[ n ].Position.w;

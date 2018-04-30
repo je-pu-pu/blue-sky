@@ -1602,6 +1602,8 @@ void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 	render_debug_shadow_map_window();
 }
 
+static float tess_factor;
+
 void GamePlayScene::render_text() const
 {
 	std::stringstream ss;
@@ -1627,6 +1629,7 @@ void GamePlayScene::render_text() const
 		ss << "IS LOCATED ON SAFE : " << player_->is_located_on_safe() << std::endl;
 		ss << "IS FALLING TO DIE : " << player_->is_falling_to_die() << std::endl;
 
+		ss << "TESS FACTOR : " << tess_factor << std::endl;
 		/*
 		ss << "IS JUMPING : " << player_->is_jumping() << std::endl;
 		ss << "ON FOOTING : " << player_->is_on_footing() << std::endl;
@@ -1777,11 +1780,11 @@ void GamePlayScene::render_shadow_map() const
 
 	shadow_map_->ready_to_render_shadow_map();
 
-	get_direct_3d()->setInputLayout( "main" );
+	get_graphics_manager()->set_input_layout( "main" );
 	render_shadow_map( "|shadow_map", false );
 
 	// @todo Å“K‰»E‚‘¬‰»
-	get_direct_3d()->setInputLayout( "skin" );
+	get_graphics_manager()->set_input_layout( "skin" );
 	render_shadow_map( "|shadow_map_skin", true );
 
 	// shadow_map_->finish_render_shadow_map();
@@ -1934,6 +1937,8 @@ void GamePlayScene::render_object_mesh() const
 	tess_render_data.data().tess_factor = math::clamp( tess_render_data.data().tess_factor, 1.f, 8.f );
 	tess_render_data.update();
 	
+	tess_factor = tess_render_data.data().tess_factor;
+
 
 	render_technique( technique_name, [this]
 	{
@@ -1951,7 +1956,9 @@ void GamePlayScene::render_object_mesh() const
 
 		get_graphics_manager()->bind_paper_texture();
 
-		get_graphics_manager()->load_texture( "matcap", "media/texture/matcap/skin.png" )->bind_to_ps( 3 );
+		get_graphics_manager()->load_texture( "matcap", "media/texture/matcap/mc12.jpg" )->bind_to_ps( 3 );
+		get_graphics_manager()->load_texture( "balloon_disp", "media/model/balloon-disp.png" )->bind_to_ds( 4 );
+		get_graphics_manager()->load_texture( "balloon_norm", "media/model/balloon-norm.png" )->bind_to_ps( 5 );
 
 		if ( shadow_map_ )
 		{
@@ -1997,7 +2004,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 {
 	if ( player_->get_action_mode() == Player::ACTION_MODE_SCOPE )
 	{
-		get_direct_3d()->setInputLayout( "main" );
+		get_graphics_manager()->set_input_layout( "main" );
 
 		ObjectConstantBufferData buffer_data;
 		buffer_data.world = Matrix().set_orthographic( camera_->aspect() * 2.f, 2.f, 0.f, 1.f );

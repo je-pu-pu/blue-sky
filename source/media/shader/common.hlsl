@@ -60,6 +60,11 @@ float4 common_wvp_pos( float4 input )
 	return mul( mul( mul( input, World ), View ), Projection );
 }
 
+float4 common_vp_pos( float4 input )
+{
+	return mul( mul( input, View ), Projection );
+}
+
 float3 common_w_norm( float3 input )
 {
 	return mul( input, ( float3x3 ) World );
@@ -252,8 +257,30 @@ float4 ps_common_debug_line( float4 input : SV_Position ) : SV_Target
  */
 float4 ps_common_diffuse_pos_norm( COMMON_POS_NORM input ) : SV_Target
 {
-	const float diffuse = common_diffuse( input.Normal );;
+	const float diffuse = common_diffuse( input.Normal );
 	return float4( diffuse, diffuse, diffuse, 1.f );
+}
+
+float4 ps_common_diffuse_pos_norm_uv( COMMON_POS_NORM_UV input ) : SV_Target
+{
+	/// @todo èCê≥Ç∑ÇÈ
+	// const float3 normal = common_w_norm( input.Normal + 2.f * normal_texture.Sample( texture_sampler, input.TexCoord ) - 1.f );
+	
+	const float3 normal = input.Normal;
+	const float diffuse = common_diffuse( normal );
+	return float4( diffuse, diffuse, diffuse, 1.f );
+}
+
+float4 ps_common_sample_matcap_pos_norm( COMMON_POS_NORM input ) : SV_Target
+{
+	return common_sample_matcap( common_v_norm( input.Normal ) );
+}
+
+float4 ps_common_sample_matcap_pos_norm_uv( COMMON_POS_NORM_UV input ) : SV_Target
+{
+	/// @todo èCê≥Ç∑ÇÈ
+	// return common_sample_matcap( common_v_norm( input.Normal + normal_texture.Sample( texture_sampler, input.TexCoord ) ) );
+	return common_sample_matcap( input.Normal );
 }
 
 float4 ps_common_sample_pos_norm_uv( COMMON_POS_NORM_UV input ) : SV_Target

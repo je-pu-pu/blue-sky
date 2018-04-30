@@ -2,12 +2,19 @@ static const int ShadowMapCascadeLevels = 3;
 static const float Pi = 3.14159265f;
 static const uint MaxBones = 100;
 
+// model
 Texture2D model_texture : register( t0 );		/// モデルのテクスチャ
-Texture2D line_texture : register( t0 );		/// 線のテクスチャ
 Texture2D shadow_texture : register( t1 );		/// シャドウマップ
 Texture2D paper_texture : register( t2 );		/// 紙の質感テクスチャ
-Texture2D pen_texture : register( t1 );			/// ペンのテクスチャ
 Texture2D matcap_texture : register( t3 );		/// Matcap テクスチャ
+Texture2D displacement_texture : register( t4 );/// ディスプレイスメントマッピング用テクスチャ
+Texture2D normal_texture : register( t5 );		/// ノーマルマッピング用テクスチャ
+
+// line
+Texture2D line_texture : register( t0 );		/// 線のテクスチャ
+
+// canvas
+Texture2D pen_texture : register( t1 );			/// ペンのテクスチャ
 
 SamplerState texture_sampler
 {
@@ -115,14 +122,9 @@ cbuffer FrameConstantBuffer : register( b1 )
 
 cbuffer ObjectConstantBuffer : register( b2 )
 {
-	matrix World;
-	float4 ObjectColor;
+	matrix World;			// ワールド変換行列
+	float4 ObjectColor;		// オブジェクトの色
 };
-
-cbuffer ObjectExtensionConstantBuffer : register( b3 )
-{
-	float4 ObjectAdditionalColor;
-}
 
 cbuffer FrameDrawingConstantBuffer : register( b4 )
 {
@@ -137,7 +139,7 @@ cbuffer BoneConstantBuffer : register( b5 )
     matrix BoneMatrix[ MaxBones ];
 };
 
-cbuffer ShadowMapBuffer : register( b10 )
+cbuffer ShadowMapConstantBuffer : register( b10 )
 {
 	matrix ShadowViewProjection[ ShadowMapCascadeLevels ];
 	float4 ShadowMapViewDepthPerCascadeLevel;
@@ -208,12 +210,8 @@ PS_INPUT vs_main( VS_INPUT input, uint vertex_id : SV_VertexID )
 {
 	PS_INPUT output;
 
-	output.Position = mul( input.Position, World );
-    output.Position = mul( output.Position, View );
-    output.Position = mul( output.Position, Projection );
-	
-	output.Normal = mul( input.Normal, ( float3x3 ) World );
-	
+	output.Position = common_wvp_pos( input.Position );
+	output.Normal = common_w_norm( input.Normal );
 	output.TexCoord = input.TexCoord;
 	output.Color = ObjectColor;
 
@@ -250,9 +248,7 @@ PS_FLAT_INPUT vs_flat( VS_INPUT input )
 {
 	PS_FLAT_INPUT output;
 
-	output.Position = mul( input.Position, World );
-    output.Position = mul( output.Position, View );
-    output.Position = mul( output.Position, Projection );
+	output.Position = common_wvp_pos( input.Position );
 	output.TexCoord = input.TexCoord;
 	output.Color = ObjectColor;
 
@@ -541,7 +537,6 @@ COMMON_POS_NORM_UV vs_tes_test( VS_INPUT input )
 	output.Normal = input.Normal;
 	output.TexCoord = input.TexCoord;
 
-
 	// output.Position = common_wvp_pos( output.Position );
 	// output.Normal = common_w_norm( output.Normal );
 
@@ -579,35 +574,53 @@ COMMON_POS_NORM_UV hs_test( InputPatch<COMMON_POS_NORM_UV, 3> ip, uint cpid : SV
 	return ip[ cpid ];
 }
 
-float3
-ProjectPositionToTangentSpace( float3 position, float3 plane_position, float3 plane_normal )
+/**
+ * pos を patch_pos から patch_norm 方向に向かうベクトルに対し射影し、その長さだけ pos を patch_norm 方向に移動したベクトルを返す
+ * 
+ * 
+ */
+float3 common_project_pos_to_tangent_space( float3 pos, float3 patch_pos, float3 patch_norm )
 {
-	float projectValue = dot( ( position - plane_position ), plane_normal );
-	return ( position - projectValue * plane_normal );
+	const float length = dot( ( patch_pos - pos ), patch_norm );
+	return pos + patch_norm * length * 0.5f;
 }
 
-[domain("tri")]
-COMMON_POS_NORM_UV ds_test( HS_CONSTANT_OUTPUT In, float3 uvw : SV_DomaInLocation, const OutputPatch<COMMON_POS_NORM_UV, 3> patch )
+/**
+ * フォンテッセレーション
+ *
+ */
+float4 common_phong_tessellation( const OutputPatch<COMMON_POS_NORM_UV, 3> patch, float3 uvw )
 {
-	COMMON_POS_NORM_UV output;
-
-	output.Position = patch[ 0 ].Position * uvw.x + patch[ 1 ].Position * uvw.y + patch[ 2 ].Position * uvw.z;
-	output.Normal   = patch[ 0 ].Normal   * uvw.x + patch[ 1 ].Normal   * uvw.y + patch[ 2 ].Normal   * uvw.z;
-	output.TexCoord = patch[ 0 ].TexCoord * uvw.x + patch[ 1 ].TexCoord * uvw.y + patch[ 2 ].TexCoord * uvw.z;
-	
-	// output.Position += float4( uv.x * 0.1f, 0.f, 0.f, 0.f );
-
-	float3 phongPos = float3( 0.0f, 0.0f, 0.0f );
+	const float4 pos = patch[ 0 ].Position * uvw.x + patch[ 1 ].Position * uvw.y + patch[ 2 ].Position * uvw.z;	
+	float3 output_pos = float3( 0.f, 0.f, 0.f );
 
     for ( int n = 0; n < 3; n++ )
     {
-        phongPos += ( uvw[ n ] * ProjectPositionToTangentSpace( output.Position.xyz, patch[ n ].Position.xyz, patch[ n ].Normal.xyz ) );
+        output_pos += common_project_pos_to_tangent_space( pos.xyz, patch[ n ].Position.xyz, patch[ n ].Normal.xyz ) * uvw[ n ];
     }
 
-	output.Position = float4( phongPos, 1.f );
+	return float4( output_pos, 1.f );
+}
 
+[domain("tri")]
+COMMON_POS_NORM_UV ds_test( HS_CONSTANT_OUTPUT input, float3 uvw : SV_DomaInLocation, const OutputPatch<COMMON_POS_NORM_UV, 3> patch )
+{
+	COMMON_POS_NORM_UV output;
+
+	// output.Position = patch[ 0 ].Position * uvw.x + patch[ 1 ].Position * uvw.y + patch[ 2 ].Position * uvw.z;
+	output.Normal   = patch[ 0 ].Normal   * uvw.x + patch[ 1 ].Normal   * uvw.y + patch[ 2 ].Normal   * uvw.z;
+	output.TexCoord = patch[ 0 ].TexCoord * uvw.x + patch[ 1 ].TexCoord * uvw.y + patch[ 2 ].TexCoord * uvw.z;
+	
+	// displacement mapping
+	// const float height = displacement_texture.SampleLevel( texture_sampler, output.TexCoord, 0 ).x;
+	// output.Position += float4( output.Normal * ( height - 0.5f ), 0 );
+
+	// phong tessellation
+	output.Position = common_phong_tessellation( patch, uvw );
+
+	// 
 	output.Position = common_wvp_pos( output.Position );
-	output.Normal = common_w_norm( output.Normal );
+	output.Normal = common_wv_norm( output.Normal );
 
 	return output;
 }
@@ -640,11 +653,14 @@ technique11 main_with_shadow
 		SetDomainShader( CompileShader( ds_5_0, ds_test() ) );
 		SetGeometryShader( NULL );
 		// SetPixelShader( CompileShader( ps_4_0, ps_common_sample_pos_norm_uv() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm() ) );
+		// SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm() ) );
+		// SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm_uv() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_common_sample_matcap_pos_norm_uv() ) );
 
 		RASTERIZERSTATE = Default;
 	}
 
+	/*
 	pass debug_line
     {
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
@@ -660,6 +676,7 @@ technique11 main_with_shadow
 
 		RASTERIZERSTATE = WireframeRasterizerState;
     }
+	*/
 }
 
 technique11 skin_with_shadow

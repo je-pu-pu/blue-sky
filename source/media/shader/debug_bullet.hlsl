@@ -5,8 +5,7 @@ VS_LINE_INPUT vs_debug_bullet( VS_LINE_INPUT input )
 {
 	VS_LINE_INPUT output;
 
-	output.Position = mul( input.Position, View );
-    output.Position = mul( output.Position, Projection );
+	output.Position = common_vp_pos( input.Position );
 	output.Color = input.Color;
 
 	return output;

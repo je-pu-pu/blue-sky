@@ -211,7 +211,7 @@ void EndingScene::render_bg()
 
 void EndingScene::render_drawing_line()
 {
-	get_direct_3d()->setInputLayout( "line" );
+	get_graphics_manager()->set_input_layout( "line" );
 
 	render_technique( "|drawing_line", [this]
 	{

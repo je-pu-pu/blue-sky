@@ -3,9 +3,7 @@
 // ----------------------------------------
 VS_LINE_INPUT vs_debug_axis( VS_LINE_INPUT input )
 {
-	input.Position = mul( input.Position, World );
-    input.Position = mul( input.Position, View );
-    input.Position = mul( input.Position, Projection );
+	input.Position = common_wvp_pos( input.Position );
 
 	return input;
 }

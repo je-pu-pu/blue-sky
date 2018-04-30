@@ -73,9 +73,7 @@ GS_CANVAS_INPUT vs_canvas( VS_CANVAS_INPUT input, uint vertex_id : SV_VertexID )
 {
 	GS_CANVAS_INPUT output;
 
-	output.Position = mul( input.Position, World );
-	output.Position = mul( output.Position, View );
-    output.Position = mul( output.Position, Projection );
+	output.Position = common_wvp_pos( input.Position );
 	output.Pressure = input.Pressure;
 	output.Color = input.Color;
 

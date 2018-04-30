@@ -670,6 +670,18 @@ void Direct3D11::setInputLayout( const char* name )
 }
 
 /**
+ * テクスチャをドメインシェーダーに関連付ける
+ *
+ * @param slot スロット
+ * @param texture テクスチャ
+ */
+void Direct3D11::bind_texture_to_ds( uint_t slot, const Texture* texture )
+{
+	ID3D11ShaderResourceView* view[] = { texture ? texture->get_shader_resource_view() : nullptr };
+	immediate_context_->DSSetShaderResources( slot, 1, view );
+}
+
+/**
  * テクスチャをピクセルシェーダーに関連付ける
  *
  * @param slot スロット

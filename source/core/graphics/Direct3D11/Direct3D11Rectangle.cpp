@@ -27,22 +27,16 @@ Direct3D11Rectangle::Direct3D11Rectangle( Direct3D11* direct_3d )
 	vertex_list_[ 3 ].Position = Position( +1.f, -1.f, 0.f );
 	vertex_list_[ 3 ].TexCoord = TexCoord( 1.f, 1.f );
 
-	// 
-	get_material_list().push_back( new Material( direct_3d_ ) );
-	Material* material = get_material_list().front();
+	auto* vertex_group = create_vertex_group();
+	
+	vertex_group->add_index( 0 );
+	vertex_group->add_index( 1 );
+	vertex_group->add_index( 2 );
 
-	material->get_index_list().resize( 3 * 2 );
-
-	material->get_index_list()[ 0 ] = 0;
-	material->get_index_list()[ 1 ] = 1;
-	material->get_index_list()[ 2 ] = 2;
-
-	material->get_index_list()[ 3 ] = 2;
-	material->get_index_list()[ 4 ] = 1;
-	material->get_index_list()[ 5 ] = 3;
-
-	// 
+	vertex_group->add_index( 2 );
+	vertex_group->add_index( 1 );
+	vertex_group->add_index( 3 );
+	
 	create_vertex_buffer();
-
-	material->create_index_buffer();
+	create_index_buffer();
 }

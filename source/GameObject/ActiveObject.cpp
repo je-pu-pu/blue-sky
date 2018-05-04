@@ -10,9 +10,6 @@
 #include "DrawingMesh.h"
 #include "DrawingLine.h"
 
-#include <game/Material.h>
-#include <game/Texture.h>
-
 #include <common/math.h>
 
 #include <sstream>
@@ -270,30 +267,7 @@ void ActiveObject::render_mesh() const
 		get_animation_player()->bind_render_data();
 	}
 
-	get_drawing_model()->get_mesh()->bind_to_ia();
-
-	for ( uint_t n = 0; n < get_drawing_model()->get_mesh()->get_material_count(); ++n )
-	{
-		render_material_at( n );
-	}
-}
-
-/**
- * メッシュ内の指定したマテリアルを描画する
- *
- * @param material_index マテリアルのインデックス
- */
-void ActiveObject::render_material_at( uint_t material_index ) const
-{
-	game::Material* material = get_drawing_model()->get_mesh()->get_material_at( material_index );
-
-	if ( material->get_texture() )
-	{
-		material->get_texture()->bind_to_ps( 0 );
-	}
-
-	material->bind_to_ia();
-	material->render();
+	get_drawing_model()->get_mesh()->render();
 }
 
 /**

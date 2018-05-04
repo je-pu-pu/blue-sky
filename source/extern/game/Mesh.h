@@ -14,6 +14,7 @@ class FbxFileLoader;
 namespace game
 {
 
+class VertexGroup;
 class Material;
 
 /**
@@ -37,10 +38,16 @@ public:
 	virtual bool load_fbx( const char_t*, FbxFileLoader* ) { return false; }
 	virtual bool load_fbx( const char_t*, FbxFileLoader*, common::safe_ptr< SkinningAnimationSet >& ) { return false; }
 
+	virtual VertexGroup* create_vertex_group() = 0;
+
 	virtual Material* get_material_at( uint_t ) = 0;
+	virtual void set_material_at( uint_t, Material* ) = 0;
+
 	virtual uint_t get_material_count() const = 0;
 
-	virtual void bind_to_ia() const = 0;
+	virtual void flip() = 0;
+
+	virtual void bind() const = 0;
 	virtual void render() const = 0;
 };
 

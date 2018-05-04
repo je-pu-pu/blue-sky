@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <string>
 
 class Direct3D11;
@@ -14,7 +14,7 @@ class Direct3D11MeshManager
 {
 public:
 	typedef Direct3D11Mesh Mesh;
-	typedef std::map< std::string, Mesh* > MeshList;
+	typedef std::unordered_map< std::string, Mesh* > MeshList;
 
 private:
 	Direct3D11* direct_3d_;

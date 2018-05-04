@@ -35,9 +35,9 @@ uint_t DrawingMesh::get_material_count() const
 	return mesh_->get_material_count();
 }
 
-void DrawingMesh::bind_to_ia() const
+void DrawingMesh::render() const
 {
-	mesh_->bind_to_ia();
+	mesh_->render();
 }
 
 } // namespace blue_sky

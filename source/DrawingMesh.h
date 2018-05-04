@@ -36,7 +36,7 @@ public:
 	Material* get_material_at( uint_t );
 	uint_t get_material_count() const;
 
-	void bind_to_ia() const;
+	void render() const;
 
 }; // class DrawingMesh
 

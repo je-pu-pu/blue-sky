@@ -45,7 +45,6 @@
 
 #include <sstream>
 
-
 #pragma comment( lib, "game.lib" )
 #pragma comment( lib, "win.lib" )
 
@@ -151,6 +150,8 @@ GameMain::~GameMain()
  */
 void GameMain::setup_script_command()
 {
+	get_script_manager()->exec( "function load( s ) dofile( 'media/script/' .. s ) end" );
+
 	// Basic
 	get_script_manager()->set_function( "color", [this] ( float_t r, float_t g, float_t b, float_t a ) { return Color( r, g, b, a ); } );
 	get_script_manager()->set_function( "vector", [this] ( float_t x, float_t y, float_t z ) { return ActiveObject::Vector3( x, y, z ); } );

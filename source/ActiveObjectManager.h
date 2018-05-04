@@ -4,6 +4,7 @@
 #include <sstream>
 #include <tuple>
 #include <set>
+#include <unordered_map>
 #include <map>
 
 namespace blue_sky
@@ -37,7 +38,7 @@ private:
 	TargetDirectionMap target_direction_map_;
 	TargetDirectionObjectMap target_direction_object_map_;
 
-	std::map< string_t, CreateObjectFunction > object_creator_map_;
+	std::unordered_map< string_t, CreateObjectFunction > object_creator_map_;
 
 public:
 	ActiveObjectManager();
@@ -56,6 +57,7 @@ public:
 	ActiveObject* create_object( const string_t& );
 	ActiveObject* create_static_object( std::stringstream&, DrawingModelManager*, ActiveObjectPhysics* );
 	ActiveObject* get_active_object( const string_t& name );
+	GameObject* get_nearest_object( const GameObject::Vector3& );
 
 	void update();
 	// void render();

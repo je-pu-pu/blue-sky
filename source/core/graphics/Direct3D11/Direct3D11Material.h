@@ -2,13 +2,11 @@
 
 #include "Direct3D11.h"
 #include <game/Material.h>
-#include <d3d11.h>
-#include <vector>
 
 namespace game
 {
 
-class Material;
+class Shader;
 class Texture;
 
 }
@@ -22,38 +20,25 @@ class Direct3D11;
 class Direct3D11Material : public game::Material
 {
 public:
-	typedef WORD Index;
-	typedef std::vector< Index > IndexList;
-
-	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
+	typedef game::Shader Shader;
+	typedef game::Texture Texture;
 
 protected:
-	Direct3D11*					direct_3d_;
-	
-	ID3D11Buffer*				index_buffer_;
-	const game::Texture*		texture_;
+	Direct3D11*			direct_3d_;
 
-	IndexList					index_list_;
-	uint_t						index_count_;
-	
-	void create_texture_resource_view( const char* );
+	const Shader*		shader_;
+	const Texture*		texture_;
 
 public:
 	Direct3D11Material( Direct3D11* );
 	virtual ~Direct3D11Material();
 
-	void create_index_buffer();
-	void clear_index_list();
+	const Shader* get_shader() const override { return shader_; }
+	void set_shader( const Shader* s ) override { shader_ = s; }
 
-	void load_texture( const char_t* );
+	const Texture* get_texture() const override { return texture_; }
+	void set_texture( const Texture* t ) override { texture_ = t; }
 
-	const game::Texture* get_texture() const;
-	void set_texture( const game::Texture* );
-
-	IndexList& get_index_list() { return index_list_; }
-	const IndexList& get_index_list() const { return index_list_; }
-
-	void bind_to_ia() const;
-	void render() const override;
+	void bind() const override;
 
 }; // class Direct3D11Material

@@ -19,7 +19,7 @@ private:
 	const char* ext_;
 
 protected:
-	virtual string_t get_texture_file_name_by_texture_name( const char* ) const;
+	virtual string_t get_texture_file_path_by_texture_name( const char* ) const;
 
 public:
 	Direct3D11SkyBox( Direct3D*, const char*, const char* = "png" );

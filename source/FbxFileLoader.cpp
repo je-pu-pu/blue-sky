@@ -355,7 +355,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 		return;
 	}
 
-	typedef std::map< Mesh::Vertex, Mesh::Material::Index > VertexIndexMap;
+	typedef std::map< Mesh::Vertex, Mesh::Index > VertexIndexMap;
 	typedef std::vector< Mesh::Vertex > VertexList;
 
 	VertexIndexMap vertex_index_map;
@@ -411,7 +411,9 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 
 	for ( int n = 0; n < mesh->GetPolygonCount(); n++ )
 	{
-		Mesh::Material* material = mesh_->get_material_at( material_indices->GetAt( n ) );
+		// Mesh::Material* material = mesh_->get_material_at( material_indices->GetAt( n ), true );
+		Mesh::VertexGroup* vertex_group = mesh_->get_vertex_group_at( material_indices->GetAt( n ), true );
+
 		std::vector< Mesh::Vertex > v_tmp_list;
 
 		bool is_smooth = smoothing->GetDirectArray().GetAt( n ) != 0;
@@ -420,13 +422,13 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 		if ( ! is_smooth )
 		{
 			// ƒ|ƒŠƒSƒ“‚Ì–@ü‚ðŒvŽZ‚·‚é
-			Mesh::Position p1 = Mesh::Position( position_list.at( mesh->GetPolygonVertex( n, 0 ) ) );
-			Mesh::Position p2 = Mesh::Position( position_list.at( mesh->GetPolygonVertex( n, 1 ) ) );
-			Mesh::Position p3 = Mesh::Position( position_list.at( mesh->GetPolygonVertex( n, 2 ) ) );
+			Mesh::Position p1( position_list.at( mesh->GetPolygonVertex( n, 0 ) ) );
+			Mesh::Position p2( position_list.at( mesh->GetPolygonVertex( n, 1 ) ) );
+			Mesh::Position p3( position_list.at( mesh->GetPolygonVertex( n, 2 ) ) );
 
-			FbxVector4 a = FbxVector4( p1.x, p1.y, p1.z );
-			FbxVector4 b = FbxVector4( p2.x, p2.y, p2.z );
-			FbxVector4 c = FbxVector4( p3.x, p3.y, p3.z );
+			FbxVector4 a = FbxVector4( p1.x(), p1.y(), p1.z() );
+			FbxVector4 b = FbxVector4( p2.x(), p2.y(), p2.z() );
+			FbxVector4 c = FbxVector4( p3.x(), p3.y(), p3.z() );
 
 			FbxVector4 ab( b - a );
 			FbxVector4 bc( c - b );
@@ -480,11 +482,11 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 
 				if ( i != vertex_index_map.end() )
 				{
-					material->get_index_list().push_back( i->second );
+					vertex_group->add_index( i->second );
 				}
 				else
 				{
-					Mesh::Material::Index vertex_index = static_cast< Mesh::Material::Index >( mesh_->get_vertex_list().size() );
+					Mesh::Index vertex_index = static_cast< Mesh::Index >( mesh_->get_vertex_list().size() );
 
 					mesh_->get_vertex_list().push_back( v );
 
@@ -493,7 +495,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 						mesh_->get_skinning_info_list().push_back( skinning_info_list.at( position_index ) );
 					}
 
-					material->get_index_list().push_back( vertex_index );
+					vertex_group->add_index( vertex_index );
 
 					vertex_index_map[ v ] = vertex_index;
 				}
@@ -587,11 +589,7 @@ void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 		return;
 	}
 
-	Mesh::Material* material = mesh_->get_material_at( fbx_material_index_ );
-
-	fbx_material_index_++;
-
-	string_t texture_file_path;
+	string_t texture_file_name;
 
 	for ( auto p = fbx_material->GetFirstProperty(); p.IsValid(); p = fbx_material->GetNextProperty( p ) )
 	{
@@ -612,7 +610,7 @@ void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 
 					if ( file_texture )
 					{
-						texture_file_path = convert_file_path_to_internal_encoding( file_texture->GetRelativeFileName() );
+						texture_file_name = convert_file_path_to_internal_encoding( file_texture->GetRelativeFileName() );
 
 						break; /// !!!
 					}
@@ -629,17 +627,18 @@ void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 
 				if ( file_texture )
 				{
-					texture_file_path = convert_file_path_to_internal_encoding( file_texture->GetRelativeFileName() );
+					texture_file_name = convert_file_path_to_internal_encoding( file_texture->GetRelativeFileName() );
 				}
 			}
 		}
 	}
 
-	if ( ! texture_file_path.empty() )
+	if ( ! texture_file_name.empty() )
 	{
-		texture_file_path = "media/model/" + texture_file_path;
+		Mesh::Material* material = mesh_->get_material_at( fbx_material_index_, true );
+		material->set_texture( mesh_->load_texture_by_texture_name( texture_file_name.c_str() ) );
 
-		material->load_texture( texture_file_path.c_str() );
+		fbx_material_index_++;
 	}
 }
 
@@ -838,23 +837,11 @@ void FbxFileLoader::convert_coordinate_system()
 {
 	for ( auto i = mesh_->get_vertex_list().begin(); i != mesh_->get_vertex_list().end(); ++i )
 	{
-		i->Position.z = -i->Position.z;
-		i->Normal.z = -i->Normal.z;
-
-		// std::swap( i->Position.y, i->Position.z );
-		// std::swap( i->Normal.y, i->Normal.z );
+		i->Position.z() = -i->Position.z();
+		i->Normal.z() = -i->Normal.z();
 	}
 
-	for ( auto i = mesh_->get_material_list().begin(); i != mesh_->get_material_list().end(); ++i )
-	{
-		for ( uint_t n = 0; n < ( *i )->get_index_list().size(); ++n )
-		{
-			if ( n % 3 == 0 )
-			{
-				std::swap( ( *i )->get_index_list()[ n ], ( *i )->get_index_list()[ n + 1 ] );
-			}
-		}
-	}
+	mesh_->flip();
 }
 
 /**

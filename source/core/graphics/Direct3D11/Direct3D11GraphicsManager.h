@@ -51,8 +51,11 @@ public:
 
 	void update() override;
 
-	Mesh* create_mesh();
-	Line* create_line();
+	Mesh* load_mesh( const char_t*, const char_t* ) override;
+	Mesh* get_mesh( const char_t* ) override;
+
+	void unload_mesh( const char_t* ) override;
+	void unload_mesh_all() override;
 
 	DrawingMesh* create_drawing_mesh() override;
 	DrawingLine* create_drawing_line() override;

@@ -287,6 +287,11 @@ bool Robot::caluclate_target_lost() const
  */
 bool Robot::caluclate_target_visible() const
 {
+	if ( ! player_ )
+	{
+		return false;
+	}
+
 	Vector3 relative_position = player_->get_location() - get_location();
 
 	Scalar relative_length = relative_position.length(); // ターゲットとの距離
@@ -415,15 +420,6 @@ void Robot::on_collide_with( Stone* stone )
 	}
 }
 
-void Robot::render_material_at( uint_t material_index ) const
-{
-	texture_->bind_to_ps( 0 );
-
-	game::Material* material = get_drawing_model()->get_mesh()->get_material_at( material_index );
-	material->bind_to_ia();
-	material->render();
-}
-
 /**
  * 巡回ポイントを追加する
  *
@@ -432,6 +428,13 @@ void Robot::render_material_at( uint_t material_index ) const
 void Robot::add_patrol_point( const Vector3& point )
 {
 	patrol_point_list_.push_back( point );
+}
+
+void Robot::bind_render_data() const
+{
+	ActiveObject::bind_render_data();
+
+	get_drawing_model()->get_mesh()->get_material_at( 0 )->set_texture( texture_ );
 }
 
 } // namespace blue_sky

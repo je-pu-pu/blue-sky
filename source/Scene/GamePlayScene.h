@@ -11,11 +11,8 @@
 #include <vector>
 #include <functional>
 
-class Direct3D11FarBillboardsMesh;
-class Direct3D11SkyBox;
 class Direct3D11ShadowMap;
 class Direct3D11Rectangle;
-class Direct3D11Axis;
 
 namespace game
 {
@@ -46,7 +43,6 @@ class GamePlayScene : public Scene
 {
 public:
 	typedef game::Mesh					Mesh;
-	typedef Direct3D11FarBillboardsMesh	FarBillboardsMesh;
 	typedef Direct3D11ShadowMap			ShadowMap;
 	typedef Direct3D11Rectangle			Rectangle;
 
@@ -66,25 +62,23 @@ public:
 	};
 
 protected:
-	Texture*			ui_texture_;							///< UI 表示用テクスチャ
-	bool				is_cleared_;							///< ステージクリアフラグ
+	Texture*							ui_texture_ = 0;		///< UI 表示用テクスチャ
+	bool								is_cleared_ = false;	///< ステージクリアフラグ
 	common::auto_ptr< Config >			stage_config_;	
 
 	mutable common::auto_ptr< ShadowMap >		shadow_map_;
 
-	common::auto_ptr< Mesh >			far_billboards_;
-	common::auto_ptr< Rectangle >		rectangle_;
-
-	Goal*								goal_;
-
 	common::auto_ptr< Player >			player_;
 	common::auto_ptr< Camera >			camera_;
-
 	common::safe_ptr< Girl >			girl_;
+	Goal*								goal_ = 0;
 
-	common::auto_ptr< Mesh >			scope_mesh_;			///< 双眼鏡
+	/// @todo 整理する
+	Mesh*								far_billboards_ = 0;	///< 遠景ビルボード
+	Mesh*								scope_mesh_ = 0;		///< 双眼鏡
+	common::auto_ptr< Rectangle >		rectangle_;
 
-	Sound*								bgm_;
+	Sound*								bgm_ = 0;
 	common::safe_ptr< Sound >			balloon_bgm_;
 	float_t								action_bgm_after_timer_;
 

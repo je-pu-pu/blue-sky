@@ -63,6 +63,13 @@ void DebugScene::update()
 		camera_->position() += Vector( 0.f, moving_speed, 0.f, 0.f );
 	}
 
+	if ( get_input()->push( Input::A ) )
+	{
+		// GameObject* o = get_active_object_manager()->get_nearest_object( GameObject::Vector3( camera_->position().x(), camera_->position().y(), camera_->position().z() ) );
+		// o->get_component< 
+
+	}
+
 	camera_->update();
 
 	get_active_object_manager()->update();
@@ -80,7 +87,6 @@ void DebugScene::render()
 
 	Vector eye( camera_->position().x(), camera_->position().y(), camera_->position().z(), 1.f );
 	Vector at( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z(), 1.f );
-//	Vector at( 0.f, 0.f, 0.f );
 	Vector up( camera_->up().x(), camera_->up().y(), camera_->up().z(), 0.f );
 
 	frame_render_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
@@ -99,7 +105,6 @@ void DebugScene::render()
 
 	std::stringstream ss;
 	ss << "eye : " << eye.x() << ", " << eye.y() << ", " << eye.z() << std::endl;
-	ss << "fade :" << get_direct_3d()->getFader()->get_color().a() << std::endl; /// @todo フェーディングがスムーズでない原因を調べる
 
 	get_graphics_manager()->draw_text( 10.f, 10.f, get_width() - 10.f, get_height() - 10.f, ss.str().c_str(), Color::White );
 }

@@ -544,9 +544,10 @@ COMMON_POS_NORM_UV vs_skin_tess_test( VS_SKIN_INPUT input )
 	COMMON_POS_NORM_UV output;
 
 	output.Position = common_skinning_pos( input.Position, input.Bone, input.Weight );
-	output.Position /= output.Position.w;
+	output.Position /= output.Position.w; /// @todo ‚È‚º•K—v‚È‚Ì‚©’²‚×‚é
 
 	output.Normal = common_skinning_norm( input.Normal, input.Bone, input.Weight );
+
 	output.TexCoord = input.TexCoord;
 	
 	return output;
@@ -636,7 +637,7 @@ COMMON_POS_NORM_UV ds_test( HS_CONSTANT_OUTPUT input, float3 uvw : SV_DomaInLoca
 
 technique11 main_with_shadow
 {
-	/*
+	
 	pass main
 	{
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
@@ -646,14 +647,14 @@ technique11 main_with_shadow
 		SetHullShader( NULL );
 		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
-		// SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_simple() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
+		// SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_simple() ) );
 		// SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_cascade_level() ) );
 
 		RASTERIZERSTATE = Default;
 	}
-	*/
 
+	/*
 	pass tessellation_test
 	{
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
@@ -686,11 +687,11 @@ technique11 main_with_shadow
 
 		RASTERIZERSTATE = WireframeRasterizerState;
     }
+	*/
 }
 
 technique11 skin_with_shadow
 {
-	/*
 	pass main
     {
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
@@ -700,14 +701,14 @@ technique11 skin_with_shadow
 		SetHullShader( NULL );
 		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
-        // SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_simple() ) );
+        SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
+		// SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_simple() ) );
 		// SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_cascade_level() ) );
 
 		RASTERIZERSTATE = Default;
     }
-	*/
 
+	/*
 	pass tessellation_test
 	{
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
@@ -717,11 +718,12 @@ technique11 skin_with_shadow
 		SetHullShader( CompileShader( hs_5_0, hs_test() ) );
 		SetDomainShader( CompileShader( ds_5_0, ds_test() ) );
 		SetGeometryShader( NULL );
-		// SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm_uv() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_common_sample_matcap_pos_norm_uv() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm_uv() ) );
+		// SetPixelShader( CompileShader( ps_4_0, ps_common_sample_matcap_pos_norm_uv() ) );
 
 		RASTERIZERSTATE = Default;
 	}
+	*/
 
 	/*
 	pass debug_line

@@ -35,17 +35,44 @@ Direct3D11Mesh::Direct3D11Mesh( Direct3D11* direct_3d )
  */
 Direct3D11Mesh::~Direct3D11Mesh()
 {
-	for ( MaterialList::iterator i = material_list_.begin(); i != material_list_.end(); ++i )
+	
+}
+
+/**
+ * 新しい頂点グループを作成する
+ *
+ * @return 作成された頂点グループ
+ */
+Direct3D11Mesh::VertexGroup* Direct3D11Mesh::create_vertex_group()
+{
+	vertex_group_list_.push_back( std::make_unique< VertexGroup >() );
+
+	return vertex_group_list_.back().get();
+}
+
+/**
+ * 頂点グループの一覧の中から指定したインデックスの頂点グループを取得する
+ *
+ * @param index 頂点グループのインデックス
+ * @param force 頂点グループが存在しない場合、新しい頂点グループを作成するフラグ
+ * @return 頂点グループ or 0
+ */
+Direct3D11Mesh::VertexGroup* Direct3D11Mesh::get_vertex_group_at( uint_t index, bool force )
+{
+	if ( index >= vertex_group_list_.size() )
 	{
-		delete *i;
+		if ( ! force )
+		{
+			return 0;
+		}
+		
+		while ( index >= vertex_group_list_.size() )
+		{
+			create_vertex_group();
+		}
 	}
 
-	for ( VertexBufferList::iterator i = vertex_buffer_list_.begin(); i != vertex_buffer_list_.end(); ++i )
-	{
-		DIRECT_X_RELEASE( *i );
-	}
-
-	skinning_animation_set_.release();
+	return vertex_group_list_[ index ].get();
 }
 
 /**
@@ -55,9 +82,9 @@ Direct3D11Mesh::~Direct3D11Mesh()
  */
 Direct3D11Mesh::Material* Direct3D11Mesh::create_material()
 {
-	get_material_list().push_back( new Material( direct_3d_ ) );
+	material_list_.push_back( std::make_unique< Direct3D11Material >( direct_3d_ ) );
 
-	return get_material_list().back();
+	return material_list_.back().get();
 }
 
 /**
@@ -67,43 +94,22 @@ Direct3D11Mesh::Material* Direct3D11Mesh::create_material()
  * @param force マテリアルが存在しない場合、新しいマテリアルを作成するフラグ
  * @return マテリアル or 0
  */
-Direct3D11Mesh::Material* Direct3D11Mesh::get_material_at( int index, bool force )
+Direct3D11Mesh::Material* Direct3D11Mesh::get_material_at( uint_t index, bool force )
 {
-	if ( static_cast< uint_t >( index ) >= material_list_.size() )
+	if ( index >= material_list_.size() )
 	{
 		if ( ! force )
 		{
 			return 0;
 		}
 		
-		while ( static_cast< uint_t >( index ) >= material_list_.size() )
+		while ( index >= material_list_.size() )
 		{
 			create_material();
 		}
 	}
 
-	return material_list_[ index ];
-}
-
-/**
- * マテリアルの一覧の中から最後のマテリアルを取得する
- *
- * @param force マテリアルの一覧が空の場合、新しいマテリアルを作成するフラグ
- * @return マテリアル or 0
- */
-Direct3D11Mesh::Material* Direct3D11Mesh::get_material_at_last( bool force )
-{
-	if ( material_list_.empty() )
-	{
-		if ( force )
-		{
-			return create_material();
-		}
-
-		return 0;
-	}
-
-	return get_material_list().back();
+	return material_list_[ index ].get();
 }
 
 /**
@@ -120,6 +126,8 @@ game::Material* Direct3D11Mesh::get_material_at( uint_t index )
 /**
  * OBJ ファイルを読み込む
  *
+ * @todo Loader として分離する
+ *
  * @param file_name OBJ ファイル名
  * @return ファイルの読み込みに成功した場合は true を、失敗した場合は false を返す
  */
@@ -134,14 +142,15 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 		return false;
 	}
 
-	typedef std::map< Vertex, Material::Index > VertexIndexMap;
+	typedef std::map< Vertex, Index > VertexIndexMap;
 	VertexIndexMap vertex_index_map;
 
 	PositionList position_list;
 	NormalList normal_list;
 	TexCoordList tex_coord_list;
 
-	Material* material = get_material_at_last();
+	VertexGroup* vertex_group = create_vertex_group();
+	Material* material = nullptr;
 
 	std::string texture_name;
 
@@ -160,9 +169,9 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 		{
 			Position v;
 
-			ss >> v.x >> v.y >> v.z;
+			ss >> v.x() >> v.y() >> v.z();
 
-			v.z = -v.z;
+			v.z() = -v.z();
 
 			position_list.push_back( v );
 		}
@@ -170,9 +179,9 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 		{
 			Vector3 n;
 
-			ss >> n.x >> n.y >> n.z;
+			ss >> n.x() >> n.y() >> n.z();
 
-			n.z = -n.z;
+			n.z() = -n.z();
 
 			normal_list.push_back( n );
 		}
@@ -180,7 +189,7 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 		{
 			TexCoord uv;
 
-			ss >> uv.x >> uv.y;
+			ss >> uv.x() >> uv.y();
 
 			tex_coord_list.push_back( uv );
 		}
@@ -226,7 +235,7 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 				
 				v.Position = position_list[ position_index ];
 				v.TexCoord = tex_coord_list[ tex_coord_index ];
-				v.TexCoord.y = 1.f - v.TexCoord.y;
+				v.TexCoord.y() = 1.f - v.TexCoord.y();
 
 				if ( ! fss.eof() )
 				{
@@ -241,14 +250,14 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 
 				if ( i != vertex_index_map.end() )
 				{
-					material->get_index_list().push_back( i->second );
+					vertex_group->add_index( i->second );
 				}
 				else
 				{
-					Material::Index vertex_index = static_cast< Material::Index >( vertex_list_.size() );
+					Index vertex_index = static_cast< Index >( vertex_list_.size() );
 
 					vertex_list_.push_back( v );
-					material->get_index_list().push_back( vertex_index );
+					vertex_group->add_index( vertex_index );
 
 					vertex_index_map[ v ] = vertex_index;
 				}
@@ -257,21 +266,16 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 		else if ( command == "texture" )
 		{
 			ss >> texture_name;
-
-			material->load_texture( get_texture_file_name_by_texture_name( texture_name.c_str() ).c_str() );
+			material->set_texture( load_texture_by_texture_name( texture_name.c_str() ) );
 		}
 		else if ( command == "usemtl" )
 		{
-			if ( ! material->get_index_list().empty() )
+			if ( ! vertex_group->empty() )
 			{
-				material->create_index_buffer();
-
-				material_list_.push_back( new Material( direct_3d_ ) );
-				material = material_list_[ material_list_.size() - 1 ];
-
-				vertex_index_map.clear();
+				vertex_group = create_vertex_group();
 			}
 
+			material = create_material();
 			
 			ss >> texture_name;
 
@@ -279,20 +283,13 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 
 			if ( ! texture_name.empty() )
 			{
-				string_t texture_file_name = get_texture_file_name_by_texture_name( texture_name.c_str() );
-				
-				if ( ! boost::regex_search( texture_file_name, boost::regex( "\\." ) ) )
-				{
-					texture_file_name += ".png";
-				}
-
 				try
 				{
-					material->load_texture( texture_file_name.c_str() );
+					material->set_texture( load_texture_by_texture_name( texture_name.c_str() ) );
 				}
 				catch ( ... )
 				{
-					COMMON_THROW_EXCEPTION_MESSAGE( texture_file_name );
+					COMMON_THROW_EXCEPTION_MESSAGE( texture_name );
 				}
 			}
 		}
@@ -301,21 +298,19 @@ bool Direct3D11Mesh::load_obj( const char_t* file_name )
 	optimize();
 
 	create_vertex_buffer();
-	create_index_buffer( material );
+	create_index_buffer();
 
 	clear_vertex_list();
+	clear_vertex_group_list();
 	clear_skinning_info_list();
-	clear_index_list();
 
 	// !!!
 	if ( texture_name.empty() )
 	{
-		boost::filesystem::path path( file_name );
-		const string_t texture_file_name = std::string( "media/model/" ) + path.stem().string() + ".png";
-
 		try
 		{
-			material->load_texture( get_texture_file_name_by_texture_name( texture_file_name.c_str() ).c_str() );
+			boost::filesystem::path path( file_name );
+			material->set_texture( load_texture_by_texture_name( path.stem().string().c_str() ) );
 		}
 		catch ( ... )
 		{
@@ -346,8 +341,8 @@ bool Direct3D11Mesh::load_fbx( const char_t* file_name, FbxFileLoader* loader )
 	create_index_buffer();
 
 	clear_vertex_list();
+	clear_vertex_group_list();
 	clear_skinning_info_list();
-	clear_index_list();
 
 	return true;
 }
@@ -377,8 +372,8 @@ bool Direct3D11Mesh::load_fbx( const char_t* file_name, FbxFileLoader* loader, c
 	create_index_buffer();
 
 	clear_vertex_list();
+	clear_vertex_group_list();
 	clear_skinning_info_list();
-	clear_index_list();
 
 	return true;
 }
@@ -387,7 +382,7 @@ SkinningAnimationSet* Direct3D11Mesh::setup_skinning_animation_set()
 {
 	if ( ! skinning_animation_set_ )
 	{
-		skinning_animation_set_ = new SkinningAnimationSet();
+		skinning_animation_set_.reset( new SkinningAnimationSet() );
 	}
 
 	return skinning_animation_set_.get();
@@ -455,8 +450,7 @@ void Direct3D11Mesh::create_vertex_buffer()
 	}
 
 	{
-		vertex_buffer_list_.push_back( 0 );
-
+		ID3D11Buffer* buffer = 0;
 		D3D11_BUFFER_DESC buffer_desc = { 0 };
 
 		buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -466,13 +460,14 @@ void Direct3D11Mesh::create_vertex_buffer()
 		D3D11_SUBRESOURCE_DATA data = { 0 };
 		data.pSysMem = & vertex_list_[ 0 ];
 	
-		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & vertex_buffer_list_[ 0 ] ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & buffer ) );
+
+		vertex_buffer_list_.push_back( com_ptr< ID3D11Buffer >( buffer ) );
 	}
 
 	if ( ! skinning_info_list_.empty() )
 	{
-		vertex_buffer_list_.push_back( 0 );
-
+		ID3D11Buffer* buffer = 0;
 		D3D11_BUFFER_DESC buffer_desc = { 0 };
 
 		buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -482,30 +477,42 @@ void Direct3D11Mesh::create_vertex_buffer()
 		D3D11_SUBRESOURCE_DATA data = { 0 };
 		data.pSysMem = & skinning_info_list_[ 0 ];
 	
-		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & vertex_buffer_list_[ 1 ] ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & buffer ) );
+
+		vertex_buffer_list_.push_back( com_ptr< ID3D11Buffer >( buffer ) );
 	}
 }
 
 /**
- * インデックスバッファを作成する
+ * 全ての頂点グループのインデックスバッファを作成する
  *
  */
 void Direct3D11Mesh::create_index_buffer()
 {
-	for ( auto i = get_material_list().begin(); i != get_material_list().end(); ++i )
-	{
-		create_index_buffer( *i );
-	}
-}
+	index_buffer_list_.resize( vertex_group_list_.size() );
 
-/**
- * 指定したマテリアルに対するインデックスバッファを作成する
- *
- * @param material マテリアル
- */
-void Direct3D11Mesh::create_index_buffer( Material* material )
-{
-	material->create_index_buffer();
+	for ( auto n = 0; n < vertex_group_list_.size(); n++ )
+	{
+		if ( vertex_group_list_[ n ]->empty() )
+		{
+			continue;
+		}
+
+		D3D11_BUFFER_DESC buffer_desc = { 0 };
+
+		buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+		buffer_desc.ByteWidth = sizeof( Index ) * vertex_group_list_[ n ]->size();
+
+		D3D11_SUBRESOURCE_DATA data = { 0 };
+		data.pSysMem = vertex_group_list_[ n ]->get_pointer();
+
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & index_buffer_list_[ n ] ) );
+
+		index_count_list_.push_back( vertex_group_list_[ n ]->size() );
+		
+		get_material_at( n, true );
+	}
 }
 
 /**
@@ -518,6 +525,15 @@ void Direct3D11Mesh::clear_vertex_list()
 }
 
 /**
+ * システムメモリ上のインデックス情報をクリアする
+ *
+ */
+void Direct3D11Mesh::clear_vertex_group_list()
+{
+	vertex_group_list_.clear();
+}
+
+/**
  * システムメモリ上のスキニング情報をクリアする
  *
  */
@@ -527,39 +543,59 @@ void Direct3D11Mesh::clear_skinning_info_list()
 }
 
 /**
- * システムメモリ上のインデックス情報をクリアする
+ * 指定したテクスチャ名に対応するテクスチャファイルパスを取得する
  *
+ * @param texture_name テクスチャ名
+ * @return テクスチャファイルパス
  */
-void Direct3D11Mesh::clear_index_list()
+string_t Direct3D11Mesh::get_texture_file_path_by_texture_name( const char_t* texture_name ) const
 {
-	for ( auto i = get_material_list().begin(); i != get_material_list().end(); ++i )
+	string_t texture_file_path = texture_name;
+
+	boost::filesystem::path path( texture_file_path );
+	
+	if ( ! path.has_extension() )
 	{
-		( *i )->clear_index_list();
+		texture_file_path += ".png";
 	}
+
+	if ( ! path.has_parent_path() )
+	{
+		texture_file_path = string_t( "media/model/" ) + texture_file_path;
+	}
+
+	return texture_file_path;
 }
 
 /**
- * 指定したテクスチャ名に対応するテクスチャファイル名を取得する
+ *  指定したテクスチャ名に対応するテクスチャファイルを読み込む
  *
  * @param texture_name テクスチャ名
- * @return テクスチャファイル名
+ * @return テクスチャ
  */
-string_t Direct3D11Mesh::get_texture_file_name_by_texture_name( const char_t* texture_name ) const
+game::Texture* Direct3D11Mesh::load_texture_by_texture_name( const char_t* texture_name ) const
 {
-	/// !!!
-	if ( ! boost::filesystem::path( texture_name ).has_parent_path() )
-	{
-		return string_t( "media/model/" ) + texture_name;
-	}
+	auto texture_file_path = get_texture_file_path_by_texture_name( texture_name );
+	return direct_3d_->getTextureManager()->load( texture_file_path.c_str(), texture_file_path.c_str() );
+}
 
-	return texture_name;
+/**
+ * ポリゴンの裏表を反転する
+ *
+ */
+void Direct3D11Mesh::flip()
+{
+	for ( auto& vertex_group : vertex_group_list_ )
+	{
+		vertex_group->flip();
+	}
 }
 
 /**
  * 入力アセンブラに設定する
  *
  */
-void Direct3D11Mesh::bind_to_ia() const
+void Direct3D11Mesh::bind() const
 {
 	if ( vertex_buffer_list_.empty() )
 	{
@@ -571,8 +607,6 @@ void Direct3D11Mesh::bind_to_ia() const
 	UINT offset[] = { 0, 0 };
 
 	direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, buffer_count, & vertex_buffer_list_[ 0 ], stride, offset );
-	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST );
 }
 
 /**
@@ -581,17 +615,13 @@ void Direct3D11Mesh::bind_to_ia() const
  */
 void Direct3D11Mesh::render() const
 {
-	bind_to_ia();
+	bind();
 
-	for ( auto i = material_list_.begin(); i != material_list_.end(); ++i )
+	for ( auto n = 0; n < index_count_list_.size(); n++ )
 	{
-		( *i )->bind_to_ia();
+		material_list_[ n ]->bind();
 
-		if ( ( *i )->get_texture() )
-		{
-			( *i )->get_texture()->bind_to_ps( 0 );
-		}
-
-		( *i )->render();
+		direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_list_[ n ].get(), IndexBufferFormat, 0 );
+		direct_3d_->getImmediateContext()->DrawIndexed( index_count_list_[ n ], 0, 0 );
 	}
 }

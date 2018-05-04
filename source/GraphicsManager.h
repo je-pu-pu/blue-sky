@@ -19,6 +19,7 @@ class FbxFileLoader;
 namespace game
 {
 
+class Mesh;
 class Texture;
 
 }
@@ -39,6 +40,7 @@ class ActiveObjectManager;
 class GraphicsManager : public game::GraphicsManager
 {
 public:
+	typedef game::Mesh Mesh;
 	typedef game::Texture Texture;
 
 private:
@@ -58,6 +60,9 @@ public:
 
 	virtual void update() = 0;
 
+	virtual Mesh* load_mesh( const char_t*, const char_t* ) = 0;
+	virtual Mesh* get_mesh( const char_t* ) = 0;
+
 	virtual DrawingMesh* create_drawing_mesh() = 0;
 	virtual DrawingLine* create_drawing_line() = 0;
 
@@ -68,6 +73,9 @@ public:
 	virtual Texture* get_texture( const char_t* ) = 0;
 
 	void load_paper_textures();
+
+	virtual void unload_mesh( const char_t* ) = 0;
+	virtual void unload_mesh_all() = 0;
 
 	virtual void unload_texture( const char_t* ) = 0;
 	virtual void unload_texture_all() = 0;

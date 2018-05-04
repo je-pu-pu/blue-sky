@@ -1,5 +1,4 @@
-#ifndef DIRECT_X_H
-#define DIRECT_X_H
+#pragma once
 
 #include <common/exception.h>
 
@@ -56,6 +55,7 @@ public:
 	}
 	
 	inline T** operator & () { return & ptr_; }
+	inline T* const * operator & () const { return & ptr_; }
 
 	inline T* operator -> () { return ptr_; }
 	inline const T* operator -> () const { return ptr_; }
@@ -63,5 +63,3 @@ public:
 	inline T* get() { return ptr_; }
 	inline T* get() const { return ptr_; }
 }; 
-
-#endif // DIRECT_X_H

@@ -26,11 +26,8 @@
 
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Direct3D11ShadowMap.h>
-#include <core/graphics/Direct3D11/Direct3D11FarBillboardsMesh.h>
 #include <core/graphics/Direct3D11/Direct3D11Rectangle.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
-#include <core/graphics/Direct3D11/Direct3D11Material.h>
-#include <core/graphics/Direct3D11/Direct3D11BulletDebugDraw.h>
 
 #include "ActiveObjectPhysics.h"
 
@@ -71,8 +68,6 @@ namespace blue_sky
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
-	, ui_texture_( 0 )
-	, is_cleared_( false )
 	, action_bgm_after_timer_( 0.f )
 	, bpm_( 120.f )
 	, drawing_accent_scale_( 0.f )
@@ -133,14 +128,12 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	if ( ! far_billboards_ )
 	{
-		far_billboards_ = new FarBillboardsMesh( get_direct_3d() );
-		far_billboards_->load_obj( ( std::string( "media/model/stage-" ) + get_stage_name() + "-far-billboards.obj" ).c_str() );
+		far_billboards_ = get_graphics_manager()->load_mesh( "far_billboards", ( std::string( "media/model/stage-" ) + get_stage_name() + "-far-billboards.obj" ).c_str() );
 	}
 
 	rectangle_ = new Rectangle( get_direct_3d() );
 
-	scope_mesh_ = get_graphics_manager()->create_mesh();
-	scope_mesh_->load_obj( "media/model/scope.obj" );
+	scope_mesh_ = get_graphics_manager()->load_mesh( "scope", "media/model/scope.obj" );
 
 	bgm_ = get_sound_manager()->get_sound( "bgm" );
 
@@ -163,6 +156,8 @@ GamePlayScene::~GamePlayScene()
 
 	get_graphics_manager()->unset_sky_box();
 	get_graphics_manager()->unset_ground();
+
+	get_graphics_manager()->unload_mesh_all();
 	get_graphics_manager()->unload_texture_all();
 
 	get_physics()->clear();
@@ -849,8 +844,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			ss >> far_billboards_name;
 
-			far_billboards_ = new FarBillboardsMesh( get_direct_3d() );
-			far_billboards_->load_obj( ( std::string( "media/model/" ) + far_billboards_name + ".obj" ).c_str() );
+			far_billboards_ = get_graphics_manager()->load_mesh( "far_billboards", ( std::string( "media/model/" ) + far_billboards_name + ".obj" ).c_str() );
 		}
 		else if ( name == "object" || name == "static-object" || name == "dynamic-object" )
 		{

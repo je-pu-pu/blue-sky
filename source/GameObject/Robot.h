@@ -76,12 +76,12 @@ public:
 	float get_collision_height() const override { return 2.f; }
 	float get_collision_depth() const  override { return 0.5f; }
 
-	void render_material_at( uint_t ) const override;
-
 	void shutdown();
 	void start_floating();
 
 	void add_patrol_point( const Vector3& point );
+
+	void bind_render_data() const override;
 
 }; // class Robot
 

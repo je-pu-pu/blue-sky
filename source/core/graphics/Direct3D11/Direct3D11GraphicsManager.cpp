@@ -1,4 +1,5 @@
 #include "Direct3D11GraphicsManager.h"
+#include "Direct3D11MeshManager.h"
 #include "Direct3D11TextureManager.h"
 #include "Direct3D11SkyBox.h"
 #include "Direct3D11Mesh.h"
@@ -62,23 +63,43 @@ void Direct3D11GraphicsManager::update()
 }
 
 /**
- * メッシュを生成する
+ * メッシュを読み込む
  *
- * @return メッシュ
+ * @param name メッシュ名
+ * @param file_path メッシュファイルパス
  */
-Direct3D11GraphicsManager::Mesh* Direct3D11GraphicsManager::create_mesh()
+Direct3D11GraphicsManager::Mesh* Direct3D11GraphicsManager::load_mesh( const char_t* name, const char_t* file_path )
 {
-	return new Direct3D11Mesh( direct_3d_ );
+	return direct_3d_->getMeshManager()->load( name, file_path );
 }
 
 /**
- * ラインを生成する
+ * 指定した名前のメッシュを取得する
  *
- * @return ライン
+ * @param name メッシュ名
  */
-Direct3D11GraphicsManager::Line* Direct3D11GraphicsManager::create_line()
+Direct3D11GraphicsManager::Mesh* Direct3D11GraphicsManager::get_mesh( const char_t* name )
 {
-	return create_drawing_line();
+	return direct_3d_->getMeshManager()->get( name );
+}
+
+/**
+ * 指定した名前のメッシュをアンロードする
+ *
+ * @param name テクスチャ名
+ */
+void Direct3D11GraphicsManager::unload_mesh( const char_t* name )
+{
+	direct_3d_->getMeshManager()->unload( name );
+}
+
+/**
+ * 全てのメッシュをアンロードする
+ *
+ */
+void Direct3D11GraphicsManager::unload_mesh_all()
+{
+	direct_3d_->getMeshManager()->unload_all();
 }
 
 /**
@@ -88,7 +109,7 @@ Direct3D11GraphicsManager::Line* Direct3D11GraphicsManager::create_line()
  */
 DrawingMesh* Direct3D11GraphicsManager::create_drawing_mesh()
 {
-	return new DrawingMesh( create_mesh() );
+	return new DrawingMesh( new Direct3D11Mesh( direct_3d_ ) );
 }
 
 /**
@@ -154,8 +175,7 @@ void Direct3D11GraphicsManager::set_sky_box( const char_t* name )
 		sky_box_render_data_->data().color = Color::White;
 	}
 
-	delete sky_box_.release();
-	sky_box_ = std::make_unique< Direct3D11SkyBox >( direct_3d_, name );
+	sky_box_.reset( new Direct3D11SkyBox( direct_3d_, name ) );
 }
 
 /**
@@ -164,8 +184,8 @@ void Direct3D11GraphicsManager::set_sky_box( const char_t* name )
  */
 void Direct3D11GraphicsManager::unset_sky_box()
 {
-	delete sky_box_.release();
-	delete sky_box_render_data_.release();
+	sky_box_.reset();
+	sky_box_render_data_.reset();
 }
 
 /**
@@ -188,10 +208,10 @@ void Direct3D11GraphicsManager::set_ground( const char_t* name )
 	/// @tood Direct3D11Mesh を修正し複数回 load_obj() を読んでもバッファをロストしないようにする
 	unset_ground();
 
-	ground_ = std::make_unique< Direct3D11Mesh >( direct_3d_ );
+	ground_.reset( new Direct3D11Mesh( direct_3d_ ) );
 	ground_->load_obj( ( string_t( "media/model/" ) + name + ".obj" ).c_str() );
 
-	ground_render_data_ = std::make_unique< ObjectConstantBufferWithData >( direct_3d_ );
+	ground_render_data_.reset( new ObjectConstantBufferWithData( direct_3d_ ) );
 	ground_render_data_->data().world.set_identity();
 	ground_render_data_->data().color = Color::White;
 }
@@ -202,8 +222,8 @@ void Direct3D11GraphicsManager::set_ground( const char_t* name )
  */
 void Direct3D11GraphicsManager::unset_ground()
 {
-	delete ground_.release();
-	delete ground_render_data_.release();
+	ground_.reset();
+	ground_render_data_.reset();
 }
 
 /**

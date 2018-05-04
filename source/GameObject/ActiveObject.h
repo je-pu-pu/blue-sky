@@ -97,11 +97,9 @@ public:
 	void set_line_visible( bool v ) { is_line_visible_ = v; }
 
 	void update_render_data() const;
-	void bind_render_data() const;
+	virtual void bind_render_data() const;
 
 	virtual void render_mesh() const;
-	virtual void render_material_at( uint_t ) const;
-
 	virtual void render_line() const;
 
 	void play_animation( const char_t* name, bool force, bool loop );

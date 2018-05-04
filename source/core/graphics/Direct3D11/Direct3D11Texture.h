@@ -1,5 +1,4 @@
-#ifndef DIRECT_3D_11_TEXTURE_H
-#define DIRECT_3D_11_TEXTURE_H
+#pragma once
 
 #include "Direct3D11.h"
 #include <game/Texture.h>
@@ -48,5 +47,3 @@ public:
 	ID3D11ShaderResourceView* get_shader_resource_view() const { return view_.get(); }
 
 }; // class Direct3D11Texture
-
-#endif // DIRECT_3D_11_MATRIX_H

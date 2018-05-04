@@ -24,9 +24,6 @@ public:
 	GraphicsManager() { }
 	virtual ~GraphicsManager() { }
 
-	virtual Mesh* create_mesh() = 0;
-	virtual Line* create_line() = 0;
-
 }; // class GraphicsManager
 
 } // namespace game

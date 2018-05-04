@@ -3,8 +3,6 @@
 #include "SkinningAnimationSet.h"
 #include "ConstantBuffer.h"
 
-class Direct3D11Matrix;
-
 /**
  * スキニングアニメーションの再生
  *

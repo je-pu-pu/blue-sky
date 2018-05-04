@@ -4,16 +4,18 @@
 #include <core/type.h>
 
 #include <game/Mesh.h>
+#include <game/VertexGroup.h>
+#include <game/Material.h>
+#include <game/Texture.h>
 
 #include <common/safe_ptr.h>
 #include <common/math.h>
 
+#include <memory>
 #include <vector>
 #include <cassert>
 
 class Direct3D11;
-class Direct3D11Material;
-class Direct3D11Matrix;
 
 class SkinningAnimationSet;
 class FbxFileLoader;
@@ -26,11 +28,9 @@ class Direct3D11Mesh : public game::Mesh
 {
 public:
 	typedef Direct3D11					Direct3D;
-	typedef Direct3D11Material			Material;
-
-	typedef DirectX::XMFLOAT2			Vector2;
-	typedef DirectX::XMFLOAT3			Vector3;
-	typedef DirectX::XMFLOAT4			Vector4;
+	typedef game::VertexGroup			VertexGroup;
+	typedef game::Material				Material;
+	typedef game::Texture				Texture;
 
 public:
 
@@ -55,26 +55,10 @@ public:
 
 		bool operator < ( const Vertex& v ) const
 		{
-			if ( Position.x < v.Position.x ) return true;
-			if ( Position.x > v.Position.x ) return false;
-			if ( Position.y < v.Position.y ) return true;
-			if ( Position.y > v.Position.y ) return false;
-			if ( Position.z < v.Position.z ) return true;
-			if ( Position.z > v.Position.z ) return false;
-
-			if ( Normal.x < v.Normal.x ) return true;
-			if ( Normal.x > v.Normal.x ) return false;
-			if ( Normal.y < v.Normal.y ) return true;
-			if ( Normal.y > v.Normal.y ) return false;
-			if ( Normal.z < v.Normal.z ) return true;
-			if ( Normal.z > v.Normal.z ) return false;
-
-			if ( TexCoord.x < v.TexCoord.x ) return true;
-			if ( TexCoord.x > v.TexCoord.x ) return false;
-			if ( TexCoord.y < v.TexCoord.y ) return true;
-			if ( TexCoord.y > v.TexCoord.y ) return false;
-
-			return false;
+			return
+				( Position <  v.Position ) ||
+				( Position == v.Position && Normal <  v.Normal ) ||
+				( Position == v.Position && Normal == v.Normal && TexCoord < v.TexCoord );
 		}
 	};
 
@@ -89,20 +73,29 @@ public:
 	typedef std::vector< TexCoord >			TexCoordList;
 
 	typedef std::vector< Vertex >			VertexList;
-	typedef std::vector< Material* >		MaterialList;
+	typedef std::vector< std::unique_ptr< VertexGroup > > VertexGroupList;
+	typedef std::vector< std::unique_ptr< Material > > MaterialList;
+
+	typedef std::vector< VertexGroup::IndexList::size_type > IndexCountList;
 	
-	typedef std::vector< ID3D11Buffer* >	VertexBufferList;
+	typedef std::vector< com_ptr< ID3D11Buffer > >	BufferList;
+
+	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
 
 protected:
 	Direct3D*			direct_3d_;
-	VertexBufferList	vertex_buffer_list_;
+	BufferList			vertex_buffer_list_;
+	BufferList			index_buffer_list_;
 
 	VertexList			vertex_list_;
 	SkinningInfoList	skinning_info_list_;
 
+	IndexCountList		index_count_list_;
+
+	VertexGroupList		vertex_group_list_;
 	MaterialList		material_list_;
 
-	common::safe_ptr< SkinningAnimationSet > skinning_animation_set_;
+	std::unique_ptr< SkinningAnimationSet > skinning_animation_set_;
 
 	Material* create_material();
 
@@ -112,33 +105,39 @@ protected:
 	void create_index_buffer();
 
 	void clear_vertex_list();
+	void clear_vertex_group_list();
 	void clear_skinning_info_list();
-	void clear_index_list();
-
-	virtual void create_index_buffer( Material* );
-
-	virtual string_t get_texture_file_name_by_texture_name( const char_t* ) const;
 
 public:
 	Direct3D11Mesh( Direct3D* );
 	virtual ~Direct3D11Mesh();
 
+	/// @todo êÆóùÇ∑ÇÈ
 	bool load_obj( const char_t* );
 	bool load_fbx( const char_t*, FbxFileLoader* );
 	bool load_fbx( const char_t*, FbxFileLoader*, common::safe_ptr< SkinningAnimationSet >& );
 	
-	Material* get_material_at( int, bool force = true );
-	Material* get_material_at_last( bool force = true );
+	/// @todo Loader Ç™Ç‚ÇÈÇÊÇ§Ç…Ç∑ÇÈ
+	virtual string_t get_texture_file_path_by_texture_name( const char_t* ) const;
+	Texture* load_texture_by_texture_name( const char_t* ) const;
 
-	game::Material* get_material_at( uint_t ) override;
+	VertexGroup* create_vertex_group() override;
+	VertexGroup* get_vertex_group_at( uint_t, bool force );
+
+	Material* get_material_at( uint_t, bool force );
+
+	Material* get_material_at( uint_t ) override;
 	uint_t get_material_count() const override { return material_list_.size(); }
+	void set_material_at( uint_t n, Material* m ) override { material_list_[ n ].reset( m ); }
 
 	SkinningAnimationSet* setup_skinning_animation_set();
 	
 	SkinningAnimationSet* get_skinning_animation_set() { return skinning_animation_set_.get(); }
 	const SkinningAnimationSet* get_skinning_animation_set() const { return skinning_animation_set_.get(); }
 
-	void bind_to_ia() const override;
+	void flip() override;
+
+	void bind() const override;
 	void render() const override;
 
 	inline VertexList& get_vertex_list() { return vertex_list_; }

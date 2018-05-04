@@ -2,7 +2,6 @@
 
 #include "GraphicsManager.h"
 #include "DrawingModel.h"
-#include "FbxFileLoader.h"
 #include "GameMain.h"
 
 #include "Input.h"

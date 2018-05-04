@@ -24,7 +24,6 @@
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectPass.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Fader.cpp" />
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11FarBillboardsMesh.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Material.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Mesh.cpp" />
@@ -106,7 +105,6 @@
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectPass.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Fader.h" />
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11FarBillboardsMesh.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Material.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Mesh.h" />

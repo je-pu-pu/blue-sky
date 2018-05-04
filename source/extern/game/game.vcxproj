@@ -94,11 +94,13 @@
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundFile.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TimedCache.h" />
+    <ClInclude Include="VertexGroup.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Config.cpp" />

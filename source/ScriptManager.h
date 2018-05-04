@@ -91,7 +91,7 @@ public:
 
 inline ScriptManager::ScriptManager()
 {
-	// lua_.open_libraries( sol::lib::base, sol::lib::package );
+	lua_.open_libraries( sol::lib::base, sol::lib::package );
 }
 
 inline ScriptManager::~ScriptManager()

@@ -135,9 +135,6 @@
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Fader.cpp">
       <Filter>core\Direct3D11</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11FarBillboardsMesh.cpp">
-      <Filter>core\Direct3D11</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.cpp">
       <Filter>core\Direct3D11</Filter>
     </ClCompile>
@@ -347,9 +344,6 @@
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Fader.h">
       <Filter>core\Direct3D11</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11FarBillboardsMesh.h">
-      <Filter>core\Direct3D11</Filter>
-    </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.h">
       <Filter>core\Direct3D11</Filter>
     </ClInclude>
@@ -505,8 +499,6 @@
     <None Include="media\shader\sky_box.hlsl">
       <Filter>shader</Filter>
     </None>
-    <None Include="media\shader\billboard.hlsl" />
-    <None Include="media\shader\sprite.hlsl" />
     <None Include="media\shader\common.hlsl">
       <Filter>shader</Filter>
     </None>
@@ -519,8 +511,18 @@
     <None Include="media\shader\debug_bullet.hlsl">
       <Filter>shader</Filter>
     </None>
-    <None Include="media\shader\canvas.hlsl" />
-    <None Include="media\shader\shadow_map.hlsl" />
+    <None Include="media\shader\canvas.hlsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="media\shader\sprite.hlsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="media\shader\shadow_map.hlsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="media\shader\billboard.hlsl">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Drawing">

@@ -48,6 +48,8 @@ public:
 	Girl();
 	~Girl() { }
 
+	DEFINE_ACTIVE_OBJECT_COMMON_FUNCTIONS
+
 	void set_player( const Player* p ) { player_ = p; }
 
 	void restart() override;

@@ -878,7 +878,6 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			girl_->set_rigid_body( get_physics()->add_active_object( girl_.get() ) );
 			girl_->set_start_location( x, y, z );
 			girl_->set_start_direction_degree( r );
-			girl_->setup_animation_player();
 
 			get_active_object_manager()->add_active_object( girl_.get() );
 			get_active_object_manager()->name_active_object( "girl", girl_.get() );
@@ -897,7 +896,6 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			robot->set_rigid_body( get_physics()->add_active_object( robot ) );
 			robot->set_start_location( x, y, z );
 			robot->set_start_direction_degree( r );
-			robot->setup_animation_player();
 
 			get_active_object_manager()->add_active_object( robot );
 

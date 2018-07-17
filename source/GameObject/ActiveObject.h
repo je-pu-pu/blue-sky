@@ -25,7 +25,7 @@ private:
 	float_t				start_direction_degree_;	///< スタート時の向き ( Y Axis )
 
 	const DrawingModel*						drawing_model_;				///< DrawingModel
-	const ObjectConstantBuffer*				object_constant_buffer_;	///< 定数バッファ
+	const ObjectConstantBuffer*				object_constant_buffer_;	///< 定数バッファ @todo インスタンス毎に必要か？
 	AnimationPlayer*						animation_player_;			///< アニメーション再生
 
 	bool				is_dead_;			///< 死亡フラグ
@@ -38,6 +38,8 @@ private:
 	bool				is_line_visible_;	///< ラインを描画するか
 
 protected:
+	void setup_animation_player();
+
 	virtual void limit_velocity();
 
 	float get_max_speed() const { return 20.f; }
@@ -46,13 +48,16 @@ protected:
 
 public:
 	ActiveObject();
+	ActiveObject( const ActiveObject& o );
 	virtual ~ActiveObject();
+
+	virtual ActiveObject* clone() const { COMMON_THROW_EXCEPTION_MESSAGE( "clone() not implemented." ); }
 
 	virtual void restart();
 
 	virtual void update() { }
 
-	virtual void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; }
+	virtual void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; setup_animation_player(); }
 	virtual const DrawingModel* get_drawing_model() const { return drawing_model_; }
 
 	virtual void action( const string_t& );
@@ -60,8 +65,6 @@ public:
 	virtual void set_flicker_scale( float_t s ) { flicker_scale_ = s; }
 	virtual float_t get_flicker_scale() const { return flicker_scale_; }
 
-	void setup_animation_player();
-	
 	AnimationPlayer* get_animation_player() { return animation_player_; }
 	const AnimationPlayer* get_animation_player() const { return animation_player_; }
 
@@ -119,5 +122,8 @@ public:
 	}
 
 }; // class ActiveObject
+
+#define DEFINE_ACTIVE_OBJECT_COMMON_FUNCTIONS \
+	ActiveObject* clone() const override { return new std::remove_const< std::remove_reference< decltype( *this ) >::type >::type( * this ); }
 
 } // namespace blue_sky

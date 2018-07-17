@@ -39,6 +39,29 @@ ActiveObject::ActiveObject()
 	
 }
 
+ActiveObject::ActiveObject( const ActiveObject& o )
+	: GameObject( o )
+	, drawing_model_( o.drawing_model_ )
+	, object_constant_buffer_( new ObjectConstantBuffer( GameMain::get_instance()->get_direct_3d() ) )
+	, animation_player_( 0 )
+	, is_dead_( o.is_dead_ )
+	, flicker_scale_( o.flicker_scale_ )
+
+	, direction_degree_( o.direction_degree_ )
+
+	, start_location_( o.start_location_ )
+	, start_rotation_( o.start_rotation_ )
+	, start_direction_degree_( o.start_direction_degree_ )
+
+	, front_( o.front_ )
+	, right_( o.right_ )
+
+	, is_mesh_visible_( o.is_mesh_visible_ )
+	, is_line_visible_( o.is_line_visible_ )
+{
+	setup_animation_player();
+}
+
 ActiveObject::~ActiveObject()
 {
 	delete object_constant_buffer_;

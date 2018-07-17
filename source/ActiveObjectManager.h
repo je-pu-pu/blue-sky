@@ -59,6 +59,8 @@ public:
 	ActiveObject* get_active_object( const string_t& name );
 	GameObject* get_nearest_object( const GameObject::Vector3& );
 
+	ActiveObject* clone_object( const ActiveObject* );
+
 	void update();
 	// void render();
 

@@ -163,6 +163,7 @@ void GameMain::setup_script_command()
 
 	// ActiveObject
 	get_script_manager()->set_function( "create_object", [this] ( const char_t* name ) { auto* o = create_object( name ); o->restart(); return o; } );
+	get_script_manager()->set_function( "clone_object", [this] ( ActiveObject* o ) { auto* o2 = clone_object( o ); o2->restart(); return o2; } );
 	get_script_manager()->set_function( "get_object", [this] ( const char_t* name ) { return get_active_object_manager()->get_active_object( name ); } );
 	get_script_manager()->set_function( "set_name", [this] ( ActiveObject* o, const char_t* name ) { get_active_object_manager()->name_active_object( name, o ); } );
 	get_script_manager()->set_function( "set_loc", [] ( ActiveObject* o, float_t x, float_t y, float_t z ) { o->set_location( x, y, z ); } );
@@ -213,9 +214,13 @@ ActiveObject* GameMain::create_object( const char_t* class_name )
 
 	active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
 	active_object->set_drawing_model( get_drawing_model_manager()->load( class_name ) );
-	active_object->setup_animation_player();
 
 	return active_object;
+}
+
+ActiveObject* GameMain::clone_object( const ActiveObject* o )
+{
+	return get_active_object_manager()->clone_object( o );
 }
 
 /**

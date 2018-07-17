@@ -203,7 +203,6 @@ ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss, 
 	}
 
 	object->set_drawing_model( drawing_model_manager->load( object_name.c_str() ) );
-	object->setup_animation_player();
 
 	return object;
 }
@@ -220,6 +219,14 @@ ActiveObject* ActiveObjectManager::get_active_object( const string_t& name )
 	return i->second;
 }
 
+ActiveObject* ActiveObjectManager::clone_object( const ActiveObject* o )
+{
+	ActiveObject* o2 = o->clone();
+
+	add_active_object( o2 );
+
+	return o2;
+}
 
 void ActiveObjectManager::update()
 {

@@ -87,6 +87,8 @@ protected:
 
 public:
 	GameObject();
+	GameObject( const GameObject& ) = default;
+
 	virtual ~GameObject();
 
 	/// 

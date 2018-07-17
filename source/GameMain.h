@@ -129,6 +129,7 @@ public:
 	virtual ~GameMain() override;
 
 	ActiveObject* create_object( const char_t* );
+	ActiveObject* clone_object( const ActiveObject* );
 
 	void setup_scene();
 

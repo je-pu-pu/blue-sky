@@ -860,7 +860,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			DrawingModel* drawing_model = get_drawing_model_manager()->load( "box-5x5x5" );
 			
 			object->set_drawing_model( drawing_model );
-			object->set_rigid_body( get_physics_manager()->add_active_object( object ) );
+			object->set_rigid_body( get_physics_manager()->add_active_object_as_box( object ) );
 			object->set_start_location( x, y, z );
 
 			get_active_object_manager()->add_active_object( object );
@@ -903,7 +903,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			DrawingModel* drawing_model = get_drawing_model_manager()->load( name.c_str() ); // @todo DrawingModel ‚ðÝ’è‚µ‚È‚­‚Ä‚à“®ì‚·‚é‚æ‚¤‚É‚·‚é
 			s->set_drawing_model( drawing_model );
 
-			s->set_rigid_body( get_physics_manager()->add_active_object( s ) );
+			s->set_rigid_body( get_physics_manager()->add_active_object_as_box( s ) );
 			s->set_start_location( x, y, z );
 			s->set_start_direction_degree( r );
 

@@ -21,7 +21,7 @@ public:
 	ActiveObjectPhysics();
 	~ActiveObjectPhysics();
 
-	RigidBody* add_active_object( ActiveObject* );
+	RigidBody* add_active_object_as_box( ActiveObject* );
 	RigidBody* add_active_object_as_capsule( ActiveObject* );
 	RigidBody* add_active_object_as_cylinder( ActiveObject* );
 

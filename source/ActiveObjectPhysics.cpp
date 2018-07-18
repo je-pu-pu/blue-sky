@@ -22,7 +22,7 @@ ActiveObjectPhysics::~ActiveObjectPhysics()
  *
  * @param active_object ActiveObject 
  */
-ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object( ActiveObject* active_object )
+ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_box( ActiveObject* active_object )
 {
 	Vector3 box( active_object->get_collision_width() / 2.f, active_object->get_collision_height() / 2.f, active_object->get_collision_depth() / 2.f );
 	

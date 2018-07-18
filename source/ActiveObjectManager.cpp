@@ -191,7 +191,7 @@ ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss, 
 	}
 	else
 	{
-		object->set_rigid_body( physics->add_active_object( object ) );
+		object->set_rigid_body( physics->add_active_object_as_box( object ) );
 	}
 
 	object->set_mass( mass );

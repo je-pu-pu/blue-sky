@@ -211,7 +211,7 @@ ActiveObject* GameMain::create_object( const char_t* class_name )
 		return 0;
 	}
 
-	active_object->set_rigid_body( get_physics_manager()->add_active_object( active_object ) );
+	active_object->set_rigid_body( get_physics_manager()->add_active_object_as_box( active_object ) );
 	active_object->set_drawing_model( get_drawing_model_manager()->load( class_name ) );
 
 	return active_object;

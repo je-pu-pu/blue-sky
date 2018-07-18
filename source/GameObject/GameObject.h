@@ -75,7 +75,7 @@ protected:
 
 	bool_t is_visible_in_blink( float_t ) const;
 
-	DynamicsWorld* get_dynamics_world() const;
+	DynamicsWorld* get_dynamics_world() const; ///< @todo íœ‚·‚é
 
 	void play_animation( const char_t* ) const;
 

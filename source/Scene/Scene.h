@@ -52,7 +52,7 @@ public:
 	typedef Direct3D11					Direct3D;
 	// typedef Direct3D11Texture			Texture;
 
-	typedef ActiveObjectPhysics			Physics;
+	typedef ActiveObjectPhysics			PhysicsManager;
 
 private:
 	const GameMain* game_main_;
@@ -68,11 +68,11 @@ protected:
 	float_t get_elapsed_time() const;
 
 	Direct3D* get_direct_3d() const;	///< @todo íœ‚·‚é
-	Physics* get_physics() const;
 
 	ActiveObjectManager* get_active_object_manager() const;
-	DrawingModelManager* get_drawing_model_manager() const;
+	DrawingModelManager* get_drawing_model_manager() const; ///< @todo GraphicsManager ‚ªŠÇ—‚·‚é‚æ‚¤‚É‚µ‚Äíœ‚·‚é
 
+	PhysicsManager* get_physics_manager() const;
 	GraphicsManager* get_graphics_manager() const;
 	SoundManager* get_sound_manager() const;
 	ScriptManager* get_script_manager() const;

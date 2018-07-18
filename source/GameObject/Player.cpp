@@ -461,7 +461,7 @@ void Player::update_facing_to_block()
 	collision_object.setWorldTransform( get_transform() * offset );
 
 	WithoutMeContactResultCallback callback( this );
-	GameMain::get_instance()->get_physics()->get_dynamics_world()->contactTest( & collision_object, callback );
+	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->contactTest( & collision_object, callback );
 
 	is_facing_to_block_ = callback.is_hit();
 
@@ -497,7 +497,7 @@ void Player::update_can_clamber()
 	collision_object.setWorldTransform( get_transform() * offset );
 
 	WithoutMeContactResultCallback callback_low( this );
-	GameMain::get_instance()->get_physics()->get_dynamics_world()->contactTest( & collision_object, callback_low );
+	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->contactTest( & collision_object, callback_low );
 
 	if ( ! callback_low.is_hit() )
 	{
@@ -509,7 +509,7 @@ void Player::update_can_clamber()
 	collision_object.setWorldTransform( get_transform() * offset );
 
 	WithoutMeContactResultCallback callback_high( this );
-	GameMain::get_instance()->get_physics()->get_dynamics_world()->contactTest( & collision_object, callback_high );
+	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->contactTest( & collision_object, callback_high );
 
 	can_clamber_ = ! callback_high.is_hit();
 }
@@ -538,7 +538,7 @@ void Player::update_can_peer_down()
 	collision_object.setWorldTransform( get_transform() * offset );
 
 	WithoutMeContactResultCallback callback( this );
-	GameMain::get_instance()->get_physics()->get_dynamics_world()->contactTest( & collision_object, callback );
+	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->contactTest( & collision_object, callback );
 
 	can_peer_down_ = ! callback.is_hit();
 }
@@ -561,7 +561,7 @@ void Player::update_can_throw()
 	collision_object.setWorldTransform( get_transform() * offset );
 
 	WithoutMeContactResultCallback callback( this );
-	GameMain::get_instance()->get_physics()->get_dynamics_world()->contactTest( & collision_object, callback );
+	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->contactTest( & collision_object, callback );
 
 	can_throw_ = ! callback.is_hit();
 }

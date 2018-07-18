@@ -55,11 +55,6 @@ Scene::Direct3D* Scene::get_direct_3d() const
 	return game_main_->get_direct_3d();
 }
 
-Scene::Physics* Scene::get_physics() const
-{
-	return game_main_->get_physics();
-}
-
 ActiveObjectManager* Scene::get_active_object_manager() const
 {
 	return game_main_->get_active_object_manager();
@@ -68,6 +63,11 @@ ActiveObjectManager* Scene::get_active_object_manager() const
 DrawingModelManager* Scene::get_drawing_model_manager() const
 {
 	return game_main_->get_drawing_model_manager();
+}
+
+Scene::PhysicsManager* Scene::get_physics_manager() const
+{
+	return game_main_->get_physics_manager();
 }
 
 GraphicsManager* Scene::get_graphics_manager() const

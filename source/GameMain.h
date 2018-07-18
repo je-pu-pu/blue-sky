@@ -55,10 +55,11 @@ public:
 	typedef game::MainLoop					MainLoop;
 
 	typedef Direct3D11						Direct3D;
-	typedef ActiveObjectPhysics				Physics;
-
+	
+	typedef ActiveObjectPhysics				PhysicsManager;
 	typedef blue_sky::GraphicsManager		GraphicsManager;
 	typedef blue_sky::SoundManager			SoundManager;
+
 	typedef blue_sky::Player				Player;
 
 	enum Key
@@ -86,13 +87,13 @@ protected:
 	float									total_elapsed_time_;	///< ゲームが開始してからの経過時間 ( 秒 )
 
 	common::auto_ptr< Direct3D >			direct_3d_;				///< Direct3D
-	common::auto_ptr< Physics >				physics_;				///< Physics
 
 	common::auto_ptr< DirectInput >			direct_input_;			///< DirectInput
 	common::auto_ptr< Input >				input_;					///< Game Input
 
 	common::auto_ptr< OculusRift >			oculus_rift_;			///< Oculus Rift
 
+	common::auto_ptr< PhysicsManager >		physics_manager_;		///< PhysicsManager
 	common::auto_ptr< GraphicsManager >		graphics_manager_;		///< GraphicsManager
 	common::auto_ptr< SoundManager >		sound_manager_;			///< SoundManager
 	common::auto_ptr< ScriptManager >		script_manager_;		///< ScriptManager
@@ -102,8 +103,7 @@ protected:
 	common::auto_ptr< MainLoop >			main_loop_;				///< ループ管理
 
 	common::auto_ptr< ActiveObjectManager >	active_object_manager_;	///< ActiveObjectManager
-
-	common::auto_ptr< DrawingModelManager >	drawing_model_manager_;	///< DrawingModelManager
+	common::auto_ptr< DrawingModelManager >	drawing_model_manager_;	///< DrawingModelManager @todo GraphicsManager が管理するようにして削除する
 
 	common::auto_ptr< Direct3D11BulletDebugDraw >	bullet_debug_draw_;
 
@@ -145,20 +145,20 @@ public:
 	float_t get_total_elapsed_time() const { return total_elapsed_time_; }
 	float_t get_elapsed_time() const;
 
-	Direct3D* get_direct_3d() const { return direct_3d_.get(); }
-	Physics* get_physics() const { return physics_.get(); }
+	/// @todo GraphicsManager に移行して削除する
+	Direct3D* get_direct_3d() const { return direct_3d_.get(); } 
 
 	Input* get_input() const { return input_.get(); }
 	
 	OculusRift* get_oculus_rift() const { return oculus_rift_.get(); }
 
+	PhysicsManager* get_physics_manager() const { return physics_manager_.get(); }
 	GraphicsManager* get_graphics_manager() const { return graphics_manager_.get(); }
 	SoundManager* get_sound_manager() const { return sound_manager_.get(); }
 	ScriptManager* get_script_manager() const { return script_manager_.get(); }
 
 	ActiveObjectManager* get_active_object_manager() const { return active_object_manager_.get(); }
-
-	DrawingModelManager* get_drawing_model_manager() const { return drawing_model_manager_.get(); }
+	DrawingModelManager* get_drawing_model_manager() const { return drawing_model_manager_.get(); } ///< @todo GraphicsManager が管理するようにして削除する
 	
 	static App* get_app() { return App::GetInstance();  }
 

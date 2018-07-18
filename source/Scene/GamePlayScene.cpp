@@ -83,7 +83,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	stage_config_ = new Config();
 
 	// Physics
-	get_physics()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
+	get_physics_manager()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
 
 	// Texture
 	ui_texture_ = get_graphics_manager()->load_texture( "ui", "media/image/item.png" );
@@ -160,7 +160,7 @@ GamePlayScene::~GamePlayScene()
 	get_graphics_manager()->unload_mesh_all();
 	get_graphics_manager()->unload_texture_all();
 
-	get_physics()->clear();
+	get_physics_manager()->clear();
 	
 	clear_delayed_command();
 
@@ -383,7 +383,7 @@ void GamePlayScene::setup_command()
 		std::stringstream ss;
 		ss << s;
 
-		get_active_object_manager()->create_static_object( ss, get_drawing_model_manager(), get_physics() );
+		get_active_object_manager()->create_static_object( ss, get_drawing_model_manager(), get_physics_manager() );
 	};
 	command_map_[ "game_object.set_mass" ] = [ & ] ( const string_t& s )
 	{
@@ -803,7 +803,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			ss >> collision_file_name;
 
-			get_physics()->load_obj( ( StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + collision_file_name ).c_str() );
+			get_physics_manager()->load_obj( ( StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + collision_file_name ).c_str() );
 		}
 		else if ( name == "player" )
 		{
@@ -812,7 +812,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> x >> y >> z;
 
 			player_->set_start_location( x, y, z );
-			player_->set_rigid_body( get_physics()->add_active_object_as_capsule( player_.get() ) );
+			player_->set_rigid_body( get_physics_manager()->add_active_object_as_capsule( player_.get() ) );
 
 			if ( ! ss.eof() )
 			{
@@ -848,7 +848,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( name == "object" || name == "static-object" || name == "dynamic-object" )
 		{
-			last_object = get_active_object_manager()->create_static_object( ss, get_drawing_model_manager(), get_physics() );
+			last_object = get_active_object_manager()->create_static_object( ss, get_drawing_model_manager(), get_physics_manager() );
 		}
 		else if ( name == "translation-object" )
 		{
@@ -860,7 +860,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			DrawingModel* drawing_model = get_drawing_model_manager()->load( "box-5x5x5" );
 			
 			object->set_drawing_model( drawing_model );
-			object->set_rigid_body( get_physics()->add_active_object( object ) );
+			object->set_rigid_body( get_physics_manager()->add_active_object( object ) );
 			object->set_start_location( x, y, z );
 
 			get_active_object_manager()->add_active_object( object );
@@ -903,7 +903,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			DrawingModel* drawing_model = get_drawing_model_manager()->load( name.c_str() ); // @todo DrawingModel ‚ðÝ’è‚µ‚È‚­‚Ä‚à“®ì‚·‚é‚æ‚¤‚É‚·‚é
 			s->set_drawing_model( drawing_model );
 
-			s->set_rigid_body( get_physics()->add_active_object( s ) );
+			s->set_rigid_body( get_physics_manager()->add_active_object( s ) );
 			s->set_start_location( x, y, z );
 			s->set_start_direction_degree( r );
 
@@ -1040,7 +1040,7 @@ void GamePlayScene::update()
 	if ( ! is_cleared_ )
 	{
 		get_graphics_manager()->clear_debug_bullet();
-		get_physics()->update( get_elapsed_time() );
+		get_physics_manager()->update( get_elapsed_time() );
 
 		player_->update_transform();
 
@@ -1055,14 +1055,14 @@ void GamePlayScene::update()
 	
 
 	// collision_check
-	get_physics()->check_collision_with( player_.get() );
+	get_physics_manager()->check_collision_with( player_.get() );
 
-	if ( get_physics()->is_collision( player_.get(), goal_ ) )
+	if ( get_physics_manager()->is_collision( player_.get(), goal_ ) )
 	{
 		on_goal();
 	}
 	
-	get_physics()->check_collision_all();
+	get_physics_manager()->check_collision_all();
 
 	get_sound_manager()->set_listener_position( camera_->position().xyz() );
 	// get_sound_manager()->set_listener_velocity( player_->get_velocity() );

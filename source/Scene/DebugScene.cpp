@@ -19,7 +19,7 @@ DebugScene::DebugScene( const GameMain* game_main )
 	, camera_( new Camera() )
 {
 	// Physics
-	get_physics()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
+	get_physics_manager()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
 
 	camera_->position().set( 0.f, 0.f, -10.f, 1.f );
 
@@ -78,7 +78,7 @@ void DebugScene::update()
 	get_graphics_manager()->set_eye_position( camera_->position().xyz() );
 
 	get_graphics_manager()->clear_debug_bullet();
-	get_physics()->update( get_elapsed_time() );
+	get_physics_manager()->update( get_elapsed_time() );
 }
 
 void DebugScene::render()

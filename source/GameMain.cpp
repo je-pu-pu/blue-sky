@@ -88,13 +88,6 @@ GameMain::GameMain()
 		direct_3d_->setup_font();
 	}
 
-	physics_ = new ActiveObjectPhysics();
-
-	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
-	bullet_debug_draw_->setDebugMode( get_config()->get< int >( "graphics.debug_bullet", 0 ) );
-
-	physics_->setDebugDrawer( bullet_debug_draw_.get() );
-
 	direct_input_ = new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() );
 
 	input_ = new Input();
@@ -106,6 +99,12 @@ GameMain::GameMain()
 	{
 		oculus_rift_ = new OculusRift( direct_3d_.get() );
 	}
+
+	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
+	bullet_debug_draw_->setDebugMode( get_config()->get< int >( "graphics.debug_bullet", 0 ) );
+
+	physics_manager_ = new ActiveObjectPhysics();
+	physics_manager_->setDebugDrawer( bullet_debug_draw_.get() );
 
 	graphics_manager_ = new Direct3D11GraphicsManager( direct_3d_.get() );
 	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "graphics.debug_axis", 0 ) );
@@ -212,7 +211,7 @@ ActiveObject* GameMain::create_object( const char_t* class_name )
 		return 0;
 	}
 
-	active_object->set_rigid_body( get_physics()->add_active_object( active_object ) );
+	active_object->set_rigid_body( get_physics_manager()->add_active_object( active_object ) );
 	active_object->set_drawing_model( get_drawing_model_manager()->load( class_name ) );
 
 	return active_object;

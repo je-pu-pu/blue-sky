@@ -283,7 +283,7 @@ bool_t GameObject::is_visible_in_blink( float_t blink_count ) const
 
 GameObject::DynamicsWorld* GameObject::get_dynamics_world() const
 {
-	return GameMain::get_instance()->get_physics()->get_dynamics_world();
+	return GameMain::get_instance()->get_physics_manager()->get_dynamics_world();
 }
 
 void GameObject::play_sound( const char* name, bool loop, bool force ) const

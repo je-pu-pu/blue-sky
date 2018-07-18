@@ -51,7 +51,7 @@ Player::Player()
 	, balloon_( nullptr )
 	, hp_( 1 )
 {
-	
+	// set_rigid_body( get_physics_manager()->create_capsule_rigid_body( this ) );
 }
 
 /**

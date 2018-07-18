@@ -190,7 +190,7 @@
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="core\math\DirectXMath\Color.cpp">
-      <Filter>core\math</Filter>
+      <Filter>core\DirectXMath</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -416,19 +416,19 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="core\math\DirectXMath\Color.h">
-      <Filter>core\math</Filter>
+      <Filter>core\DirectXMath</Filter>
     </ClInclude>
     <ClInclude Include="core\math\DirectXMath\Matrix.h">
-      <Filter>core\math</Filter>
+      <Filter>core\DirectXMath</Filter>
     </ClInclude>
     <ClInclude Include="core\math\DirectXMath\Vector.h">
-      <Filter>core\math</Filter>
+      <Filter>core\DirectXMath</Filter>
     </ClInclude>
     <ClInclude Include="core\math\DirectXMath\Vector3.h">
-      <Filter>core\math</Filter>
+      <Filter>core\DirectXMath</Filter>
     </ClInclude>
     <ClInclude Include="core\math\DirectXMath\Vector2.h">
-      <Filter>core\math</Filter>
+      <Filter>core\DirectXMath</Filter>
     </ClInclude>
     <ClInclude Include="SkinningAnimation.h" />
     <ClInclude Include="SkinningAnimationSet.h" />
@@ -564,7 +564,7 @@
     <Filter Include="shader">
       <UniqueIdentifier>{4fcc5bdb-7666-4a3f-a4b8-33cc3692d47d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\math">
+    <Filter Include="core\DirectXMath">
       <UniqueIdentifier>{41386a86-d0b5-406c-9192-d8ab630babf0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

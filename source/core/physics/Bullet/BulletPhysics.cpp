@@ -82,60 +82,39 @@ void BulletPhysics::clear()
 	mesh_list_.clear();
 }
 
+/**
+ * 地面用の剛体を追加する
+ *
+ * @param box 地面の形状
+ * @return 追加された剛体
+ */
 btRigidBody* BulletPhysics::add_ground_rigid_body( const btVector3& box )
 {
-	// create_ground_shape()
-	btCollisionShape* ground = new btBoxShape( box );
-	collision_shape_list_.push_back( ground );
+	btTransform transform;
+	transform.setIdentity();
+	transform.setOrigin( btVector3( 0, -box.y(), 0 ) );
 
-	// create_ground_rigid_body()
-	{
-		btTransform ground_transform;
-		ground_transform.setIdentity();
-		ground_transform.setOrigin( btVector3( 0, -box.y(), 0 ) );
+	btTransform offset;
+	offset.setIdentity();
 
-		btScalar mass( 0 );
-		btVector3 local_inertia( 0, 0, 0 );
-
-		ground->calculateLocalInertia( mass, local_inertia );
-
-		btDefaultMotionState* motion_state = new btDefaultMotionState( ground_transform );
-		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, ground, local_inertia );
-	
-		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
-		dynamics_world_->addRigidBody( rigid_body );
-
-		return rigid_body;
-	}
+	return add_box_rigid_body( transform, offset, box, 0 );
 }
 
 /**
- *
- * @todo 同じ CollisionShape を共有する
+ * 立方体形状の剛体を追加する
+ * 
+ * @param transform 座標変換
+ * @param offset 剛体の中心点のオフセット
+ * @param box 立方体の形状
+ * @param mass 質量
+ * @return 追加された剛体
  */
 btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, btScalar mass )
 {
-	// create_box_shape()
 	btBoxShape* shape = new btBoxShape( box );
 	collision_shape_list_.push_back( shape );
 
-	// compound_shape->addChildShape( offset, shape );
-
-	// create_box_rigid_body()
-	{
-		btVector3 local_inertia( 0, 0, 0 );
-
-		shape->calculateLocalInertia( mass, local_inertia );
-		// compound_shape->calculateLocalInertia( mass, local_inertia );
-
-		btDefaultMotionState* motion_state = new btDefaultMotionState( transform * offset );
-		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );
-	
-		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
-		dynamics_world_->addRigidBody( rigid_body );
-
-		return rigid_body;
-	}	
+	return create_rigid_body( shape, transform, offset, mass );
 }
 
 /**
@@ -146,49 +125,55 @@ btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, cons
  * @param radius シリンダー部の上下に付加される半球の半径
  * @param height シリンダー部の高さ
  * @param mass 質量
+ * @return 追加された剛体
  */
 btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, const Transform& offset, float_t radius, float_t height, btScalar mass )
 {
-	// create_cylinder_shape()
 	btCapsuleShape* shape = new btCapsuleShape( radius, height );
 	collision_shape_list_.push_back( shape );
 
-	// create_cylinder_rigid_body()
-	{
-		btVector3 local_inertia( 0, 0, 0 );
-
-		shape->calculateLocalInertia( mass, local_inertia );
-
-		btDefaultMotionState* motion_state = new btDefaultMotionState( transform * offset );
-		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );
-	
-		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
-		dynamics_world_->addRigidBody( rigid_body );
-
-		return rigid_body;
-	}	
+	return create_rigid_body( shape, transform, offset, mass );
 }
 
+/**
+ * 円柱形状の剛体を追加する
+ *
+ * @param transform 座標変換
+ * @param offset 剛体の中心点のオフセット
+ * @param radius シリンダー部の上下に付加される半球の半径
+ * @param height シリンダー部の高さ
+ * @param mass 質量
+ * @return 追加された剛体
+ */
 btRigidBody* BulletPhysics::add_cylinder_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, btScalar mass )
 {
-	// create_cylinder_shape()
 	btCylinderShape* shape = new btCylinderShape( box );
 	collision_shape_list_.push_back( shape );
 
-	// create_cylinder_rigid_body()
-	{
-		btVector3 local_inertia( 0, 0, 0 );
+	return create_rigid_body( shape, transform, offset, mass );
+}
 
-		shape->calculateLocalInertia( mass, local_inertia );
+/**
+ * 剛体を生成し世界に追加する
+ *
+ * @param shape 形状
+ * @param transform 座標変換
+ * @param offset 剛体の中心点のオフセット
+ * @param mass 質量
+ * @return 追加された剛体
+ */
+btRigidBody* BulletPhysics::create_rigid_body( btCollisionShape* shape, const Transform& transform, const Transform& offset, btScalar mass )
+{
+	btVector3 local_inertia( 0, 0, 0 );
+	shape->calculateLocalInertia( mass, local_inertia );
 
-		btDefaultMotionState* motion_state = new btDefaultMotionState( transform * offset );
-		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );
+	btDefaultMotionState* motion_state = new btDefaultMotionState( transform * offset );
+	btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );
 	
-		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
-		dynamics_world_->addRigidBody( rigid_body );
+	btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
+	dynamics_world_->addRigidBody( rigid_body );
 
-		return rigid_body;
-	}	
+	return rigid_body;
 }
 
 /**

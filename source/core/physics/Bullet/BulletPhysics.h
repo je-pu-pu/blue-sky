@@ -7,6 +7,7 @@
 /**
  * Bullet のラッパークラス
  *
+ * @todo 複数の RigidBody で同じ CollisionShape を共有できるようにする
  */
 class BulletPhysics
 {
@@ -26,6 +27,8 @@ protected:
 
 	CollisionShapeArray						collision_shape_list_;
 	MeshList								mesh_list_;
+
+	btRigidBody* create_rigid_body( btCollisionShape*, const Transform&, const Transform&, float_t );
 
 public:
 	BulletPhysics();

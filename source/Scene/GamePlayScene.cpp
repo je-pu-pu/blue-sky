@@ -860,48 +860,14 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			DrawingModel* drawing_model = get_drawing_model_manager()->load( "box-5x5x5" );
 			
 			object->set_drawing_model( drawing_model );
+			object->set_rigid_body( get_physics()->add_active_object( object ) );
 			object->set_start_location( x, y, z );
 
-			object->set_rigid_body( get_physics()->add_active_object( object ) );
 			get_active_object_manager()->add_active_object( object );
 
 			last_object = object;
 		}
-		else if ( name == "girl" )
-		{
-			float x = 0, y = 0, z = 0, r = 0;
-			ss >> x >> y >> z >> r;
-
-			girl_ = new Girl();
-			girl_->set_player( player_.get() );
-			girl_->set_drawing_model( get_drawing_model_manager()->load( "girl" ) );
-			girl_->set_rigid_body( get_physics()->add_active_object( girl_.get() ) );
-			girl_->set_start_location( x, y, z );
-			girl_->set_start_direction_degree( r );
-
-			get_active_object_manager()->add_active_object( girl_.get() );
-			get_active_object_manager()->name_active_object( "girl", girl_.get() );
-
-			last_object = girl_.get();
-		}
-		else if ( name == "robot" )
-		{
-			float x = 0, y = 0, z = 0, r = 0;
-			ss >> x >> y >> z >> r;
-
-			Robot* robot = new Robot();
-			robot->set_player( player_.get() );
-
-			robot->set_drawing_model( get_drawing_model_manager()->load( "robot" ) );
-			robot->set_rigid_body( get_physics()->add_active_object( robot ) );
-			robot->set_start_location( x, y, z );
-			robot->set_start_direction_degree( r );
-
-			get_active_object_manager()->add_active_object( robot );
-
-			last_object = robot;
-		}
-		else if ( name == "balloon" || name == "medal" || name == "ladder" || name == "rocket" || name == "umbrella" || name == "stone" || name == "switch" )
+		else if ( name == "girl" || name == "robot" || name == "balloon" || name == "medal" || name == "ladder" || name == "rocket" || name == "umbrella" || name == "stone" || name == "switch" )
 		{
 			ActiveObject* active_object = GameMain::get_instance()->create_object( name.c_str() );
 			
@@ -910,6 +876,18 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			active_object->set_start_location( x, y, z );
 			active_object->set_start_direction_degree( r );
+
+			if ( name == "girl" )
+			{
+				girl_ = static_cast< Girl* >( active_object );
+				girl_->set_player( player_.get() );
+				get_active_object_manager()->name_active_object( "girl", girl_.get() );
+			}
+			else if ( name == "robot" )
+			{
+				Robot* robot = static_cast< Robot* >( active_object );
+				robot->set_player( player_.get() );
+			}
 
 			last_object = active_object;
 		}
@@ -922,7 +900,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> x >> y >> z >> w >> h >> d >> r;
 
 			AreaSwitch* s = new AreaSwitch( w, h, d );
-			DrawingModel* drawing_model = get_drawing_model_manager()->load( name.c_str() );
+			DrawingModel* drawing_model = get_drawing_model_manager()->load( name.c_str() ); // @todo DrawingModel ‚ðÝ’è‚µ‚È‚­‚Ä‚à“®ì‚·‚é‚æ‚¤‚É‚·‚é
 			s->set_drawing_model( drawing_model );
 
 			s->set_rigid_body( get_physics()->add_active_object( s ) );

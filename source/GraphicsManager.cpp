@@ -160,6 +160,7 @@ void GraphicsManager::bind_paper_texture() const
 /**
  * 全ての ActiveObject を描画する
  *
+ * @todo シェーダーを切り替えられるように整理する
  * @todo shadow_map_, paper_texture_ に対応し GamePlayScene の render_object_mesh(), render_object_line() を置き換える
  */
 void GraphicsManager::render_active_objects( const ActiveObjectManager* active_object_manager ) const

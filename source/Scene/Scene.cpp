@@ -1,8 +1,8 @@
 #include "Scene.h"
 #include "GameMain.h"
 
-#include "ConstantBuffer.h"
-#include "GraphicsManager.h"
+// #include "ConstantBuffer.h"
+#include <blue_sky/graphics/GraphicsManager.h>
 
 #include "SoundManager.h"
 #include "Sound.h"

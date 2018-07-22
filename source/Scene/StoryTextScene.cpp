@@ -3,9 +3,10 @@
 #include "BgSpriteLayer.h"
 
 #include "Input.h"
-#include "GraphicsManager.h"
 #include "SoundManager.h"
 #include "Sound.h"
+
+#include <blue_sky/graphics/GraphicsManager.h>
 
 /// @todo ’ŠÛ‰»‚·‚é
 #include <core/graphics/Direct3D11/Direct3D11.h>

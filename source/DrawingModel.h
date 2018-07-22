@@ -1,5 +1,6 @@
 #pragma once
 
+#include <blue_sky/graphics/Model.h>
 #include <core/type.h>
 #include <common/auto_ptr.h>
 #include <common/safe_ptr.h>
@@ -17,7 +18,7 @@ class DrawingLine;
  * Žè•`‚«•—ƒ‚ƒfƒ‹
  *
  */
-class DrawingModel
+class DrawingModel : public graphics::Model
 {
 public:
 

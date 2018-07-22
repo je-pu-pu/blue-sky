@@ -1,11 +1,12 @@
 #include "DebugScene.h"
 #include "StageSelectScene.h"
 
-#include <GraphicsManager.h>
 #include <ActiveObjectManager.h>
 #include <ActiveObjectPhysics.h>
 #include <ScriptManager.h>
 #include <Input.h>
+
+#include <blue_sky/graphics/GraphicsManager.h>
 
 #include <core/graphics/Direct3D11/Direct3D11Fader.h>
 
@@ -20,6 +21,8 @@ DebugScene::DebugScene( const GameMain* game_main )
 {
 	// Physics
 	get_physics_manager()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
+
+	get_graphics_manager()->setup_default_shaders();
 
 	camera_->position().set( 0.f, 0.f, -10.f, 1.f );
 

@@ -16,15 +16,16 @@
     <ClCompile Include="AnimationPlayer.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="BgSpriteLayer.cpp" />
+    <ClCompile Include="blue_sky\graphics\Direct3D11\GraphicsManager.cpp" />
+    <ClCompile Include="blue_sky\graphics\GraphicsManager.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Axis.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.cpp" />
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Effect.cpp" />
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectPass.cpp" />
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\Effect.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\EffectPass.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\EffectTechnique.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Fader.cpp" />
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Material.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Mesh.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11MeshManager.cpp" />
@@ -66,7 +67,6 @@
     <ClCompile Include="GameObject\Switch.cpp" />
     <ClCompile Include="GameObject\TranslationObject.cpp" />
     <ClCompile Include="GameObject\Umbrella.cpp" />
-    <ClCompile Include="GraphicsManager.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="OculusRift.cpp" />
@@ -92,8 +92,17 @@
     <ClInclude Include="AnimationPlayer.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="BgSpriteLayer.h" />
+    <ClInclude Include="blue_sky\graphics\Direct3D11\GraphicsManager.h" />
+    <ClInclude Include="blue_sky\graphics\Direct3D11\ShaderResource.h" />
+    <ClInclude Include="blue_sky\graphics\GraphicsManager.h" />
+    <ClInclude Include="blue_sky\graphics\Model.h" />
+    <ClInclude Include="blue_sky\graphics\ShaderResource.h" />
+    <ClInclude Include="blue_sky\graphics\shader\BaseShader.h" />
+    <ClInclude Include="blue_sky\graphics\shader\BypassShader.h" />
+    <ClInclude Include="blue_sky\graphics\shader\FlatShader.h" />
+    <ClInclude Include="blue_sky\graphics\shader\MatcapShader.h" />
+    <ClInclude Include="blue_sky\ShaderResources.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="core\DirectX.h" />
     <ClInclude Include="core\graphics\Direct3D11\d3dx11effect.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h" />
@@ -101,11 +110,10 @@
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Common.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11ConstantBuffer.h" />
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Effect.h" />
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectPass.h" />
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.h" />
+    <ClInclude Include="core\graphics\Direct3D11\Effect.h" />
+    <ClInclude Include="core\graphics\Direct3D11\EffectPass.h" />
+    <ClInclude Include="core\graphics\Direct3D11\EffectTechnique.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Fader.h" />
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Material.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Mesh.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11MeshManager.h" />
@@ -115,12 +123,18 @@
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Sprite.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Texture.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11TextureManager.h" />
+    <ClInclude Include="core\graphics\Direct3D11\InputLayout.h" />
+    <ClInclude Include="core\graphics\Direct3D11\PrimitiveTopology.h" />
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWrite.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileEnumerator.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h" />
+    <ClInclude Include="core\graphics\EffectPass.h" />
+    <ClInclude Include="core\graphics\EffectTechnique.h" />
+    <ClInclude Include="core\graphics\InputLayout.h" />
+    <ClInclude Include="core\graphics\PrimitiveTopology.h" />
     <ClInclude Include="core\input\DirectInput\DirectInput.h" />
     <ClInclude Include="core\math.h" />
     <ClInclude Include="core\math\DirectXMath\Color.h" />
@@ -157,7 +171,6 @@
     <ClInclude Include="GameObject\Switch.h" />
     <ClInclude Include="GameObject\TranslationObject.h" />
     <ClInclude Include="GameObject\Umbrella.h" />
-    <ClInclude Include="GraphicsManager.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="OculusRift.h" />
     <ClInclude Include="OggVorbisFile.h" />
@@ -182,6 +195,9 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="blye-sky.ico" />
+    <None Include="media\script\test\clone.lua" />
+    <None Include="media\script\test\init.lua" />
+    <None Include="media\script\test\switch_shader.lua" />
     <None Include="media\shader\main.fx">
       <FileType>Document</FileType>
     </None>
@@ -260,6 +276,13 @@
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="media\shader\matcap.hlsl">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5DB1FAFC-E068-43A8-84D3-0DA42D464BE5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -316,6 +339,8 @@
       <SDLCheck>
       </SDLCheck>
       <ForcedIncludeFiles>win\memory_leak_detection.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -342,6 +367,8 @@
       <SDLCheck>
       </SDLCheck>
       <ForcedIncludeFiles>win\memory_leak_detection.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

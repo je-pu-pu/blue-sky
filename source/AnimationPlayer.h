@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SkinningAnimationSet.h"
-#include "ConstantBuffer.h"
+#include <blue_sky/ShaderResources.h>
 
 /**
  * スキニングアニメーションの再生
@@ -52,6 +52,8 @@ public:
 
 	void update_render_data() const;
 	void bind_render_data() const;
+
+	const BoneConstantBuffer* get_constant_buffer() const { return & constant_buffer_; }
 
 	bool is_broken() const { return is_broken_; }
 	void set_broken( bool b ) { is_broken_ = b; }

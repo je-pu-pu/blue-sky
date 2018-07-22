@@ -1,5 +1,9 @@
 #pragma once
 
+#include <GameObject/ActiveObject.h>
+#include <blue_sky/graphics/Model.h>
+#include <game/Shader.h>
+
 #include <common/math.h>
 #include <common/exception.h>
 #include <type/type.h>
@@ -36,6 +40,27 @@ private:
 	int command_history_index_;
 
 	const string_t empty_command_;
+
+protected:
+	void setup_user_types()
+	{
+		lua_.new_usertype< ActiveObject >(
+			"GameObject",
+			"model", sol::property( & ActiveObject::get_model, & ActiveObject::set_model )
+        );
+
+		lua_.new_usertype< graphics::Model >(
+			"Model",
+			"get_shader_at", & graphics::Model::get_shader_at,
+			"set_shader_at", & graphics::Model::set_shader_at
+		);
+
+		lua_.new_usertype< game::Shader >(
+			"Shader",
+			"get_texture_at", & game::Shader::get_texture_at,
+			"set_texture_at", & game::Shader::set_texture_at
+		);
+	}
 
 public:
 	ScriptManager();
@@ -92,6 +117,8 @@ public:
 inline ScriptManager::ScriptManager()
 {
 	lua_.open_libraries( sol::lib::base, sol::lib::package );
+
+	setup_user_types();
 }
 
 inline ScriptManager::~ScriptManager()

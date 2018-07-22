@@ -1,15 +1,15 @@
 #pragma once
 
-#include <core/graphics/Direct3D11/Direct3D11ConstantBuffer.h>
+#include <blue_sky/graphics/Direct3D11/ShaderResource.h>
 #include <core/type.h>
 
 namespace blue_sky
 {
 
-template< int N >
+template< uint_t N >
 struct BaseConstantBufferData
 {
-	static const int DEFAULT_SLOT = N;
+	static const uint_t SLOT = N;
 };
 
 struct GameConstantBufferData : public BaseConstantBufferData< 0 >
@@ -74,11 +74,11 @@ struct BoneConstantBufferData : public BaseConstantBufferData< 5 >
 	}
 };
 
-typedef Direct3D11ConstantBuffer< GameConstantBufferData > GameConstantBuffer;
-typedef Direct3D11ConstantBufferWithData< FrameConstantBufferData > FrameConstantBuffer;
-typedef Direct3D11ConstantBufferWithData< FrameDrawingConstantBufferData > FrameDrawingConstantBuffer;
-typedef Direct3D11ConstantBuffer< ObjectConstantBufferData > ObjectConstantBuffer;
-typedef Direct3D11ConstantBufferWithData< ObjectConstantBufferData > ObjectConstantBufferWithData;
-typedef Direct3D11ConstantBuffer< BoneConstantBufferData > BoneConstantBuffer;
+typedef graphics::direct_3d_11::ShaderResource< GameConstantBufferData > GameConstantBuffer;
+typedef graphics::direct_3d_11::ShaderResourceWithData< FrameConstantBufferData > FrameConstantBuffer;
+typedef graphics::direct_3d_11::ShaderResourceWithData< FrameDrawingConstantBufferData > FrameDrawingConstantBuffer;
+typedef graphics::direct_3d_11::ShaderResource< ObjectConstantBufferData > ObjectConstantBuffer;
+typedef graphics::direct_3d_11::ShaderResourceWithData< ObjectConstantBufferData > ObjectConstantBufferWithData;
+typedef graphics::direct_3d_11::ShaderResource< BoneConstantBufferData > BoneConstantBuffer;
 
 } // namespace blue_sky

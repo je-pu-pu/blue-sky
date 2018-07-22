@@ -12,7 +12,8 @@
 #include "ActiveObjectPhysics.h"
 
 #include "GameMain.h"
-#include "GraphicsManager.h"
+
+#include <blue_sky/graphics/GraphicsManager.h>
 
 #include <game/Texture.h>
 

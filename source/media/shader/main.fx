@@ -200,6 +200,7 @@ struct PS_SHADOW_INPUT
 };
 
 #include "common.hlsl"
+#include "matcap.hlsl"
 #include "drawing_line.hlsl"
 
 PS_INPUT vs_main( VS_INPUT input, uint vertex_id : SV_VertexID )
@@ -323,6 +324,7 @@ float4 ps_flat_with_flicker( PS_FLAT_INPUT input ) : SV_Target
 
 float4 ps_main_wrap( PS_INPUT input ) : SV_Target
 {
+	// return common_sample_matcap( normalize( common_v_norm( input.Normal ) ) );
 	// return float4( input.Normal * 0.5f + float3( 0.5f, 0.5f, 0.5f ), 1.f );
 
 	float diffuse = ( 1.f - ( dot( input.Normal, ( float3 ) Light ) * 0.5f + 0.5f ) );
@@ -457,6 +459,18 @@ float4 ps_with_shadow_debug_simple( PS_SHADOW_INPUT input ) : SV_Target
 	}
 }
 
+
+/**
+ * @todo 以下の命名規則にまとめる
+ *
+ * 1. 陰影を付ける場合は "shade", 付けない場合は "flat"
+ * 2. スキニングを行う場合は"_skin" を付加
+ * 3. 影を付ける場合は "_shadow" を付加
+ *
+ */
+
+// シェーディングあり・スキニングなし
+/// @todo technique11 shade 
 technique11 main
 {
 	pass main
@@ -474,6 +488,8 @@ technique11 main
     }
 }
 
+// シェーディングあり・スキニングあり
+/// @todo technique11 shade_skin
 technique11 skin
 {
 	pass main
@@ -491,7 +507,8 @@ technique11 skin
     }
 }
 
-technique11 main_flat
+// シェーディングなし・スキニングなし
+technique11 flat
 {
 	pass main
     {
@@ -508,7 +525,8 @@ technique11 main_flat
     }
 }
 
-technique11 skin_flat
+// シェーディングなし・スキニングあり
+technique11 flat_skin
 {
 	pass main
     {
@@ -635,6 +653,8 @@ COMMON_POS_NORM_UV ds_test( HS_CONSTANT_OUTPUT input, float3 uvw : SV_DomaInLoca
 	return output;
 }
 
+// シェーディングあり・スキニングなし・シャドウあり
+/// @todo technique11 shade_shadow
 technique11 main_with_shadow
 {
 	
@@ -690,6 +710,8 @@ technique11 main_with_shadow
 	*/
 }
 
+// シェーディングあり・スキニングあり・シャドウあり
+/// @todo technique11 shade_skin_shadow
 technique11 skin_with_shadow
 {
 	pass main

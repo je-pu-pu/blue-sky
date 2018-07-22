@@ -37,6 +37,7 @@ public:
 	/**
 	 * ’¸“_î•ñ
 	 *
+	 * @todo _“î‚È’¸“_\‘¢‚É‘Î‰‚·‚é
 	 * @todo game::Mesh or blue_sky::Mesh ‚ÉˆÚ“®‚·‚é
 	 */
 	struct Vertex
@@ -127,6 +128,8 @@ public:
 	Material* get_material_at( uint_t, bool force );
 
 	Material* get_material_at( uint_t ) override;
+	const Material* get_material_at( uint_t ) const override;
+
 	uint_t get_material_count() const override { return material_list_.size(); }
 	void set_material_at( uint_t n, Material* m ) override { material_list_[ n ].reset( m ); }
 
@@ -139,6 +142,7 @@ public:
 
 	void bind() const override;
 	void render() const override;
+	void render( uint_t ) const override;
 
 	inline VertexList& get_vertex_list() { return vertex_list_; }
 	inline const VertexList& get_vertex_list() const { return vertex_list_; }

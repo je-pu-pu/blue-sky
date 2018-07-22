@@ -6,6 +6,8 @@
 #include "FbxFileLoader.h"
 #include "SkinningAnimationSet.h"
 
+#include <game/Shader.h>
+
 #include <common/exception.h>
 #include <common/math.h>
 #include <common/log.h>
@@ -82,7 +84,8 @@ Direct3D11Mesh::VertexGroup* Direct3D11Mesh::get_vertex_group_at( uint_t index, 
  */
 Direct3D11Mesh::Material* Direct3D11Mesh::create_material()
 {
-	material_list_.push_back( std::make_unique< Direct3D11Material >( direct_3d_ ) );
+	material_list_.push_back( std::make_unique< Direct3D11Material >() );
+	// material_list_.back()->set_shader( new BypassShader() );
 
 	return material_list_.back().get();
 }
@@ -118,9 +121,14 @@ Direct3D11Mesh::Material* Direct3D11Mesh::get_material_at( uint_t index, bool fo
  * @param index マテリアルのインデックス
  * @return マテリアル or 0
  */
-game::Material* Direct3D11Mesh::get_material_at( uint_t index )
+Direct3D11Mesh::Material* Direct3D11Mesh::get_material_at( uint_t index )
 {
 	return get_material_at( index, false );
+}
+
+const Direct3D11Mesh::Material* Direct3D11Mesh::get_material_at( uint_t index ) const
+{
+	return material_list_[ index ].get();
 }
 
 /**
@@ -570,6 +578,8 @@ string_t Direct3D11Mesh::get_texture_file_path_by_texture_name( const char_t* te
 /**
  *  指定したテクスチャ名に対応するテクスチャファイルを読み込む
  *
+ * @todo どこか別の場所に移動して整理する
+ *
  * @param texture_name テクスチャ名
  * @return テクスチャ
  */
@@ -617,11 +627,23 @@ void Direct3D11Mesh::render() const
 {
 	bind();
 
-	for ( auto n = 0; n < index_count_list_.size(); n++ )
-	{
-		material_list_[ n ]->bind();
+	int n = 0;
 
-		direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_list_[ n ].get(), IndexBufferFormat, 0 );
-		direct_3d_->getImmediateContext()->DrawIndexed( index_count_list_[ n ], 0, 0 );
+	for ( const auto& material : material_list_ )
+	{
+		material->get_shader()->render( this, n );
+
+		n++;
 	}
+}
+
+/**
+ * メッシュ内のインデックスで指定した頂点グループのみを描画する
+ *
+ * @param n 描画する頂点グループのインデックス
+ */
+void Direct3D11Mesh::render( uint_t n ) const
+{
+	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_list_[ n ].get(), IndexBufferFormat, 0 );
+	direct_3d_->getImmediateContext()->DrawIndexed( index_count_list_[ n ], 0, 0 );
 }

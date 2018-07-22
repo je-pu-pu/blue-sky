@@ -29,12 +29,13 @@ class ActiveObject;
 class ActiveObjectPhysics;
 class ActiveObjectManager;
 class DrawingModelManager;
-class GraphicsManager;
 class SoundManager;
 class ScriptManager;
 class Input;
 
 class DrawingModel;
+
+namespace graphics { class GraphicsManager; } using graphics::GraphicsManager;
 
 /**
  * ê–Ê‚²‚Æ‚Ìˆ—A•`‰æ‚ğŠÇ—‚·‚é

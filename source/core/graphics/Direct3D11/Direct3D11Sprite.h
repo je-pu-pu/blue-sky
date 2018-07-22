@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11Common.h"
+#include <core/type.h>
 
 namespace win
 {

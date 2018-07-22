@@ -1,12 +1,18 @@
 #pragma once
 
 #include "GameObject.h"
-#include "ConstantBuffer.h"
+#include "DrawingModel.h"
+#include <blue_sky/ShaderResources.h>
 
 class AnimationPlayer;
 
 namespace blue_sky
 {
+
+namespace graphics
+{
+	class Model;
+}
 
 /**
  * 行動するオブジェクト
@@ -15,6 +21,7 @@ namespace blue_sky
 class alignas( 16 ) ActiveObject : public GameObject
 {
 public:
+	typedef graphics::Model Model;
 
 private:
 	Vector3				front_;				///< 前
@@ -44,8 +51,6 @@ protected:
 
 	float get_max_speed() const { return 20.f; }
 
-	const ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_; }
-
 public:
 	ActiveObject();
 	ActiveObject( const ActiveObject& o );
@@ -58,7 +63,11 @@ public:
 	virtual void update() { }
 
 	virtual void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; setup_animation_player(); }
-	virtual const DrawingModel* get_drawing_model() const { return drawing_model_; }
+	const DrawingModel* get_drawing_model() const { return drawing_model_; }
+
+	void set_model( Model* m ) { drawing_model_ = static_cast< DrawingModel* >( m ); }
+	Model* get_model() { return const_cast< DrawingModel* >( drawing_model_ ); }
+	// const Model* get_model() const { return drawing_model_; }
 
 	virtual void action( const string_t& );
 
@@ -98,6 +107,8 @@ public:
 
 	void set_mesh_visible( bool v ) { is_mesh_visible_ = v; }
 	void set_line_visible( bool v ) { is_line_visible_ = v; }
+
+	const ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_; }
 
 	void update_render_data() const;
 	virtual void bind_render_data() const;

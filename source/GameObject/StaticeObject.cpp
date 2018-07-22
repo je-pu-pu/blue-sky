@@ -1,9 +1,5 @@
 #include "StaticObject.h"
 
-#include <common/math.h>
-
-#include <btBulletDynamicsCommon.h>
-
 namespace blue_sky
 {
 

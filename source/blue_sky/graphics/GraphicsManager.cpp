@@ -3,6 +3,9 @@
 #include "DrawingLine.h"
 #include "FbxFileLoader.h"
 
+#include <blue_sky/graphics/shader/FlatShader.h>
+#include <blue_sky/graphics/shader/MatcapShader.h>
+
 #include <DrawingModel.h>
 #include <ActiveObjectManager.h>
 
@@ -17,12 +20,13 @@
 
 #include <iostream>
 
-namespace blue_sky
+namespace blue_sky::graphics
 {
 
 GraphicsManager::GraphicsManager()
 	: fbx_file_loader_( new FbxFileLoader() )
 {
+	
 }
 
 GraphicsManager::~GraphicsManager()
@@ -82,8 +86,6 @@ DrawingMesh* GraphicsManager::load_drawing_mesh( const char_t* name, common::saf
 		std::cout << "--- not found " << name << " : " << t.elapsed() << "---" << std::endl;
 	}
 
-	
-
 	return mesh;
 }
 
@@ -106,6 +108,20 @@ DrawingLine* GraphicsManager::load_drawing_line( const char_t* name )
 	line->load_obj( file_path.c_str() );
 
 	return line;
+}
+
+/**
+ * デフォルトのシェーダーを準備する
+ *
+ */
+void GraphicsManager::setup_default_shaders()
+{
+	auto* matcap_texture = load_texture( "matcap", "media/texture/matcap/skin.png" );
+
+	shader_manager_.create_named< shader::FlatShader >( "flat", "main", "flat" );
+	shader_manager_.create_named< shader::FlatShader >( "flat_skin", "skin", "flat_skin" );
+	shader_manager_.create_named< shader::MatcapShader >( "matcap", "main", "matcap" )->set_texture( matcap_texture );
+	shader_manager_.create_named< shader::MatcapShader >( "matcap_skin", "skin", "matcap_skin" )->set_texture( matcap_texture );
 }
 
 /**
@@ -167,17 +183,19 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 {
 	for ( const auto& active_object : active_object_manager->active_object_list() )
 	{
+		current_object_shader_resource_ = active_object->get_object_constant_buffer();
+		current_skinning_shader_resource_ = active_object->get_animation_player() ? active_object->get_animation_player()->get_constant_buffer() : nullptr;
+
 		active_object->update_render_data();
+		active_object->render_mesh();
 	}
 
+#if 0
 	set_input_layout( "main" );
 
-	render_technique( "|main_flat", [ this, active_object_manager ]
+	render_technique( "|flat", [ this, active_object_manager ]
 	{
-		/// @todo 必要な定数バッファを必要なシェーダーにだけバインドするようにする
-		get_game_render_data()->bind_to_all();
-		get_frame_render_data()->bind_to_all();
-		get_frame_drawing_render_data()->bind_to_all();
+		
 
 		bind_paper_texture();
 
@@ -192,7 +210,7 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 
 	set_input_layout( "skin" );
 
-	render_technique( "|skin_flat", [ this, active_object_manager ]
+	render_technique( "|flat_skin", [ this, active_object_manager ]
 	{
 		/*
 		get_game_render_data()->bind_to_vs();
@@ -227,6 +245,7 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 	} );
 
 	// setup_rendering();
+#endif
 
 	set_input_layout( "line" );
 
@@ -338,4 +357,4 @@ void GraphicsManager::update_frame_render_data( const Camera* camera_ )
 }
 */
 
-}
+} // namespace blue_sky::graphics

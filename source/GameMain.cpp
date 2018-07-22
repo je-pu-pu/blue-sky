@@ -13,7 +13,7 @@
 #include "DrawingModelManager.h"
 #include "ActiveObjectManager.h"
 
-#include "ConstantBuffer.h"
+// #include "ConstantBuffer.h"
 
 #include "Input.h"
 
@@ -25,15 +25,19 @@
 #include "Sound.h"
 
 #include "ScriptManager.h"
+#include "DrawingModel.h"
+#include "DrawingMesh.h"
+
+#include <blue_sky/graphics/Direct3D11/GraphicsManager.h>
 
 #include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/Direct3D11/Direct3D11GraphicsManager.h>
 #include <core/graphics/Direct3D11/Direct3D11BulletDebugDraw.h>
-#include <core/graphics/Direct3D11/Direct3D11Effect.h>
+#include <core/graphics/Direct3D11/Effect.h>
 #include <core/input/DirectInput/DirectInput.h>
 
 #include <win/Version.h>
 
+#include <game/Shader.h>
 #include <game/Config.h>
 #include <game/MainLoop.h>
 
@@ -80,7 +84,7 @@ GameMain::GameMain()
 		get_config()->get( "graphics.multisample.count", 4 ), 
 		get_config()->get( "graphics.multisample.quality", 2 )
 	);
-	direct_3d_->getEffect()->load( "media/shader/main.fx" );
+	direct_3d_->get_effect()->load( "media/shader/main.fx" );
 	direct_3d_->create_default_input_layout();
 
 	if ( get_config()->get( "graphics.font_enabled", 1 ) )
@@ -106,7 +110,7 @@ GameMain::GameMain()
 	physics_manager_ = new ActiveObjectPhysics();
 	physics_manager_->setDebugDrawer( bullet_debug_draw_.get() );
 
-	graphics_manager_ = new Direct3D11GraphicsManager( direct_3d_.get() );
+	graphics_manager_ = new blue_sky::graphics::direct_3d_11::GraphicsManager( direct_3d_.get() );
 	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "graphics.debug_axis", 0 ) );
 	
 	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
@@ -185,6 +189,13 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "set_shadow_paper_color", [this] ( const Color& color ) { get_graphics_manager()->set_shadow_paper_color( color ); } );
 	get_script_manager()->set_function( "set_drawing_accent", [this] ( float_t accent ) { get_graphics_manager()->set_drawing_accent( accent ); } );
 	get_script_manager()->set_function( "set_drawing_line_type", [this] ( int_t type ) { get_graphics_manager()->set_drawing_line_type( type ); } );
+
+	get_script_manager()->set_function( "get_shader", [this] ( const char_t* name ) { return get_graphics_manager()->get_shader( name ); } );
+	get_script_manager()->set_function( "set_shader", [this] ( ActiveObject* o, int_t n, const game::Shader* s ) { o->get_drawing_model()->get_mesh()->get_material_at( n )->set_shader( s->clone() ); } );
+
+	get_script_manager()->set_function( "get_texture", [this] ( const char_t* name ) { return get_graphics_manager()->get_texture( name ); } );
+	get_script_manager()->set_function( "set_shader_texture", [this] ( game::Shader* s, int_t n, game::Texture* t ) { s->set_texture_at( n, t ); } );
+
 
 	// debug
 	get_script_manager()->set_function( "debug_axis", [this] ( int on ) { get_graphics_manager()->set_debug_axis_enabled( on ); } );

@@ -16,6 +16,8 @@
     <ClInclude Include="ElapsedTimer.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="VertexGroup.h" />
+    <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="Model.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SoundManager.cpp" />

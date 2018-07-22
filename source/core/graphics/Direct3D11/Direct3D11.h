@@ -14,9 +14,16 @@ class Direct3D11Texture;
 class Direct3D11Sprite;
 class Direct3D11Fader;
 
-class Direct3D11Effect;
-class Direct3D11EffectTechnique;
-class Direct3D11EffectPass;
+namespace core::graphics::direct_3d_11
+{
+
+class InputLayout;
+
+class Effect;
+class EffectTechnique;
+class EffectPass;
+
+}
 
 class Direct3D11MeshManager;
 class Direct3D11TextureManager;
@@ -33,17 +40,17 @@ public:
 	typedef Direct3D11Sprite			Sprite;
 	typedef Direct3D11Fader				Fader;
 
-	typedef Direct3D11Effect			Effect;
-	typedef Direct3D11EffectTechnique	EffectTechnique;
-	typedef Direct3D11EffectPass		EffectPass;
+	typedef core::graphics::direct_3d_11::InputLayout		InputLayout;
+
+	typedef core::graphics::direct_3d_11::Effect			Effect;
+	typedef core::graphics::direct_3d_11::EffectTechnique	EffectTechnique;
+	typedef core::graphics::direct_3d_11::EffectPass		EffectPass;
 
 	typedef Direct3D11MeshManager		MeshManager;
 	typedef Direct3D11TextureManager	TextureManager;
 
 	typedef DirectWrite					Font;
 
-	typedef ID3D11InputLayout			InputLayout;
-	
 	typedef direct_x_math::Vector		Vector;
 	typedef direct_x_math::Matrix		Matrix;
 	typedef direct_x_math::Color		Color;
@@ -70,7 +77,7 @@ private:
 	ID3D11Texture2D*			depth_stencil_texture_;
 	ID3D11DepthStencilView*		depth_stencil_view_;
 
-	InputLayoutList				vertex_layout_list_;
+	InputLayoutList				input_layout_list_;
 
 	D3D11_VIEWPORT				viewport_;
 
@@ -90,7 +97,7 @@ private:
 	common::auto_ptr< Font	>				font_;
 
 	common::auto_ptr< Sprite >				sprite_;
-	common::auto_ptr< Fader >				fader_;
+	common::auto_ptr< Fader >				fader_; ///< @todo GraphicsManager ‚ÉˆÚs‚·‚é
 	common::auto_ptr< Effect >				effect_;
 
 	common::auto_ptr< MeshManager >			mesh_manager_;
@@ -155,6 +162,9 @@ public:
 
 	void setInputLayout( const char* );
 
+	const InputLayout* get_input_layout( const char* ) const;
+	void set_input_layout( const InputLayout* );
+
 	void bind_texture_to_ds( uint_t, const Texture* );
 	void bind_texture_to_ps( uint_t, const Texture* );
 
@@ -174,15 +184,15 @@ public:
 
 	inline Font* getFont() { return font_.get(); }
 	inline Sprite* getSprite() { return sprite_.get(); }
-	inline Fader* getFader() { return fader_.get(); }
-	inline Effect* getEffect() { return effect_.get(); }
+	inline Fader* getFader() { return fader_.get(); } ///< @todo GraphicsManager ‚ÉˆÚs‚·‚é
+	inline Effect* get_effect() { return effect_.get(); }
 	inline MeshManager* getMeshManager() { return mesh_manager_.get(); }
 	inline TextureManager* getTextureManager() { return texture_manager_.get(); }
 
 	inline const Font* getFont() const { return font_.get(); }
 	inline const Sprite* getSprite() const { return sprite_.get(); }
-	inline const Fader* getFader() const { return fader_.get(); }
-	inline const Effect* getEffect() const { return effect_.get(); }
+	inline const Fader* getFader() const { return fader_.get(); } ///< @todo GraphicsManager ‚ÉˆÚs‚·‚é
+	inline const Effect* get_effect() const { return effect_.get(); }
 	inline const MeshManager* getMeshManager() const { return mesh_manager_.get(); }
 	inline const TextureManager* getTextureManager() const { return texture_manager_.get(); }
 

@@ -1,10 +1,16 @@
 #pragma once
 
-#include "ConstantBuffer.h"
+#include <blue_sky/graphics/Model.h>
+#include <game/Mesh.h>
 
+#include <blue_sky/ShaderResources.h>
+
+#include <core/graphics/PrimitiveTopology.h>
 #include <core/type.h>
 
 #include <game/GraphicsManager.h>
+#include <game/ResourceManager.h>
+#include <game/Shader.h>
 
 #include <common/safe_ptr.h>
 #include <common/auto_ptr.h>
@@ -20,7 +26,16 @@ namespace game
 {
 
 class Mesh;
+class Shader;
 class Texture;
+
+}
+
+namespace core::graphics
+{
+
+class InputLayout;
+class EffectTechnique;
 
 }
 
@@ -33,6 +48,10 @@ class DrawingLine;
 class ActiveObject;
 class ActiveObjectManager;
 
+namespace graphics
+{
+
+
 /**
  * グラフィック管理クラス
  *
@@ -40,17 +59,36 @@ class ActiveObjectManager;
 class GraphicsManager : public game::GraphicsManager
 {
 public:
+	typedef Model Model;
 	typedef game::Mesh Mesh;
+	typedef game::Shader Shader;
 	typedef game::Texture Texture;
+
+	typedef game::ResourceManager< Model > ModelManager;
+	typedef game::ResourceManager< Mesh > MeshManager;
+	typedef game::ResourceManager< Shader > ShaderManager;
+
+	typedef core::graphics::PrimitiveTopology PrimitiveTopology;
+	typedef core::graphics::InputLayout InputLayout;
+	typedef core::graphics::EffectTechnique EffectTechnique;
 
 private:
 	std::vector< Texture* >		paper_texture_list_;
 	Texture*					paper_texture_ = 0;
 
+	ModelManager				model_manager_;
+	MeshManager					mesh_manager_;
+	ShaderManager				shader_manager_;
+
+	mutable const ShaderResource* current_object_shader_resource_ = 0;
+	mutable const ShaderResource* current_skinning_shader_resource_ = 0;
+
 	common::auto_ptr< FbxFileLoader> fbx_file_loader_;
 	bool is_debug_axis_enabled_ = true;
 
 protected:
+	ShaderManager* get_shader_manager() { return & shader_manager_; }
+
 	void render_debug_axis_for_bones( const ActiveObject* ) const;
 	virtual void render_debug_axis_model() const = 0;
 
@@ -61,7 +99,7 @@ public:
 	virtual void update() = 0;
 
 	virtual Mesh* load_mesh( const char_t*, const char_t* ) = 0;
-	virtual Mesh* get_mesh( const char_t* ) = 0;
+	// virtual Mesh* get_mesh( const char_t* ) = 0;
 
 	virtual DrawingMesh* create_drawing_mesh() = 0;
 	virtual DrawingLine* create_drawing_line() = 0;
@@ -69,9 +107,15 @@ public:
 	DrawingMesh* load_drawing_mesh( const char_t*, common::safe_ptr< SkinningAnimationSet >& );
 	DrawingLine* load_drawing_line( const char_t* );
 	
+	// template< typename Type=Model > Model* get_model( const char_t* name ) { return model_manager_.get< Type >( name ); }
+
+	template< typename Type > Type* create_shader( const char_t* name ) { return shader_manager_.create< Type >( name ); }
+	template< typename Type=Shader > Type* get_shader( const char_t* name ) { return shader_manager_.get< Type >( name ); }
+
 	virtual Texture* load_texture( const char_t*, const char_t* ) = 0;
 	virtual Texture* get_texture( const char_t* ) = 0;
 
+	void setup_default_shaders();
 	void load_paper_textures();
 
 	virtual void unload_mesh( const char_t* ) = 0;
@@ -104,10 +148,20 @@ public:
 	virtual FrameDrawingConstantBuffer* get_frame_drawing_render_data() const = 0;
 	virtual ObjectConstantBuffer* get_shared_object_render_data() const = 0;
 
+	const ShaderResource* get_current_object_shader_resource() const { return current_object_shader_resource_; }
+	const ShaderResource* get_current_skinning_shader_resource() const { return current_skinning_shader_resource_; }
+
+	virtual const InputLayout* get_input_layout( const char_t* ) const = 0;
+	virtual const EffectTechnique* get_effect_technique( const char_t* ) const = 0;
+
 	virtual void set_input_layout( const char_t* ) const = 0;
+	virtual void set_input_layout( const InputLayout* ) const = 0;
+
+	virtual void set_primitive_topology( PrimitiveTopology ) const = 0;
 
 	virtual void setup_rendering() const = 0;
 	virtual void render_technique( const char_t*, const std::function< void () >& ) const = 0;
+	virtual void render_technique( const EffectTechnique*, const std::function< void () >& ) const = 0;
 	virtual void render_background() const = 0;
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
 
@@ -136,5 +190,7 @@ public:
 	// void update_frame_render_data( const Camera*, const Vector3& ) const;
 
 }; // class GraphicsManager
+
+} // namespace graphics
 
 } // namespace blue_sky

@@ -36,7 +36,7 @@ Direct3D11Rectangle::Direct3D11Rectangle( Direct3D11* direct_3d )
 	vertex_group->add_index( 2 );
 	vertex_group->add_index( 1 );
 	vertex_group->add_index( 3 );
-	
+
 	create_vertex_buffer();
 	create_index_buffer();
 }

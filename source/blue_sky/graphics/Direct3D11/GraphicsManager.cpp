@@ -1,24 +1,32 @@
-#include "Direct3D11GraphicsManager.h"
-#include "Direct3D11MeshManager.h"
-#include "Direct3D11TextureManager.h"
-#include "Direct3D11SkyBox.h"
-#include "Direct3D11Mesh.h"
-#include "Direct3D11Effect.h"
-#include "Direct3D11Fader.h"
-#include "Direct3D11Axis.h"
-#include "Direct3D11BulletDebugDraw.h"
-#include "Direct3D11.h"
+#include "GraphicsManager.h"
+
+#include <blue_sky/ShaderResources.h>
+#include <blue_sky/graphics/shader/BypassShader.h>
+
+#include <core/graphics/Direct3D11/Direct3D11MeshManager.h>
+#include <core/graphics/Direct3D11/Direct3D11TextureManager.h>
+#include <core/graphics/Direct3D11/Direct3D11SkyBox.h>
+#include <core/graphics/Direct3D11/Direct3D11Mesh.h>
+#include <core/graphics/Direct3D11/Direct3D11Fader.h>
+#include <core/graphics/Direct3D11/Direct3D11Axis.h>
+#include <core/graphics/Direct3D11/Direct3D11BulletDebugDraw.h>
+#include <core/graphics/Direct3D11/Direct3D11.h>
+
+#include <core/graphics/Direct3D11/InputLayout.h>
+#include <core/graphics/Direct3D11/Effect.h>
+#include <core/graphics/Direct3D11/EffectTechnique.h>
+#include <core/graphics/Direct3D11/EffectPass.h>
 
 #include <GameMain.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
 
-#include "ConstantBuffer.h"
-#include "DrawingMesh.h"
-#include "DrawingLine.h"
+/// @todo 整理する
+#include <DrawingMesh.h>
+#include <DrawingLine.h>
 
 #include <common/string.h>
 
-namespace blue_sky
+namespace blue_sky::graphics::direct_3d_11
 {
 
 /**
@@ -26,7 +34,7 @@ namespace blue_sky
  *
  * @param direct_3d Direct3D
  */
-Direct3D11GraphicsManager::Direct3D11GraphicsManager( Direct3D* direct_3d )
+GraphicsManager::GraphicsManager( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
 	, game_render_data_( new GameConstantBuffer( direct_3d ) )
 	, frame_render_data_( new FrameConstantBuffer( direct_3d ) )
@@ -34,14 +42,15 @@ Direct3D11GraphicsManager::Direct3D11GraphicsManager( Direct3D* direct_3d )
 	, shared_object_render_data_( new ObjectConstantBuffer( direct_3d ) )
 	, debug_axis_( new Direct3D11Axis( direct_3d_ ) )
 {
-	
+	Shader* bypass_shader = get_shader_manager()->create_named< shader::BypassShader >( "bypass" );
+	// direct_3d_->getFader()->get_material()->set_shader( bypass_shader );
 }
 
 /**
  * デストラクタ
  *
  */
-Direct3D11GraphicsManager::~Direct3D11GraphicsManager()
+GraphicsManager::~GraphicsManager()
 {
 	
 }
@@ -50,7 +59,7 @@ Direct3D11GraphicsManager::~Direct3D11GraphicsManager()
  * 更新処理
  *
  */
-void Direct3D11GraphicsManager::update()
+void GraphicsManager::update()
 {
 	if ( is_fading_in_ )
 	{
@@ -68,27 +77,29 @@ void Direct3D11GraphicsManager::update()
  * @param name メッシュ名
  * @param file_path メッシュファイルパス
  */
-Direct3D11GraphicsManager::Mesh* Direct3D11GraphicsManager::load_mesh( const char_t* name, const char_t* file_path )
+GraphicsManager::Mesh* GraphicsManager::load_mesh( const char_t* name, const char_t* file_path )
 {
 	return direct_3d_->getMeshManager()->load( name, file_path );
 }
 
+#if 0
 /**
  * 指定した名前のメッシュを取得する
  *
  * @param name メッシュ名
  */
-Direct3D11GraphicsManager::Mesh* Direct3D11GraphicsManager::get_mesh( const char_t* name )
+GraphicsManager::Mesh* GraphicsManager::get_mesh( const char_t* name )
 {
 	return direct_3d_->getMeshManager()->get( name );
 }
+#endif
 
 /**
  * 指定した名前のメッシュをアンロードする
  *
  * @param name テクスチャ名
  */
-void Direct3D11GraphicsManager::unload_mesh( const char_t* name )
+void GraphicsManager::unload_mesh( const char_t* name )
 {
 	direct_3d_->getMeshManager()->unload( name );
 }
@@ -97,7 +108,7 @@ void Direct3D11GraphicsManager::unload_mesh( const char_t* name )
  * 全てのメッシュをアンロードする
  *
  */
-void Direct3D11GraphicsManager::unload_mesh_all()
+void GraphicsManager::unload_mesh_all()
 {
 	direct_3d_->getMeshManager()->unload_all();
 }
@@ -107,7 +118,7 @@ void Direct3D11GraphicsManager::unload_mesh_all()
  *
  * @return 手描き風メッシュ
  */
-DrawingMesh* Direct3D11GraphicsManager::create_drawing_mesh()
+DrawingMesh* GraphicsManager::create_drawing_mesh()
 {
 	return new DrawingMesh( new Direct3D11Mesh( direct_3d_ ) );
 }
@@ -117,7 +128,7 @@ DrawingMesh* Direct3D11GraphicsManager::create_drawing_mesh()
  *
  * @return ライン
  */
-DrawingLine* Direct3D11GraphicsManager::create_drawing_line()
+DrawingLine* GraphicsManager::create_drawing_line()
 {
 	return new DrawingLine( direct_3d_ );
 }
@@ -128,7 +139,7 @@ DrawingLine* Direct3D11GraphicsManager::create_drawing_line()
  * @param name テクスチャ名
  * @param file_path テクスチャファイルパス
  */
-Direct3D11GraphicsManager::Texture* Direct3D11GraphicsManager::load_texture( const char_t* name, const char_t* file_path )
+GraphicsManager::Texture* GraphicsManager::load_texture( const char_t* name, const char_t* file_path )
 {
 	return direct_3d_->getTextureManager()->load( name, file_path );
 }
@@ -138,7 +149,7 @@ Direct3D11GraphicsManager::Texture* Direct3D11GraphicsManager::load_texture( con
  *
  * @param name テクスチャ名
  */
-Direct3D11GraphicsManager::Texture* Direct3D11GraphicsManager::get_texture( const char_t* name )
+GraphicsManager::Texture* GraphicsManager::get_texture( const char_t* name )
 {
 	return direct_3d_->getTextureManager()->load( name, ( string_t( "media/model/" ) + name + ".png" ).c_str() );
 }
@@ -148,7 +159,7 @@ Direct3D11GraphicsManager::Texture* Direct3D11GraphicsManager::get_texture( cons
  *
  * @param name テクスチャ名
  */
-void Direct3D11GraphicsManager::unload_texture( const char_t* name )
+void GraphicsManager::unload_texture( const char_t* name )
 {
 	direct_3d_->getTextureManager()->unload( name );
 }
@@ -157,7 +168,7 @@ void Direct3D11GraphicsManager::unload_texture( const char_t* name )
  * 全てのテクスチャをアンロードする
  *
  */
-void Direct3D11GraphicsManager::unload_texture_all()
+void GraphicsManager::unload_texture_all()
 {
 	direct_3d_->getTextureManager()->unload_all();
 }
@@ -167,7 +178,7 @@ void Direct3D11GraphicsManager::unload_texture_all()
  *
  * @param name スカイボックス名
  */
-void Direct3D11GraphicsManager::set_sky_box( const char_t* name )
+void GraphicsManager::set_sky_box( const char_t* name )
 {
 	if ( ! sky_box_ )
 	{
@@ -176,13 +187,20 @@ void Direct3D11GraphicsManager::set_sky_box( const char_t* name )
 	}
 
 	sky_box_.reset( new Direct3D11SkyBox( direct_3d_, name ) );
+
+	/*
+	for ( int n = 0; n < sky_box_->get_material_count(); n++ )
+	{
+		sky_box_->get_material_at( n )->set_shader( get_shader( "bypass" ) );
+	}
+	*/
 }
 
 /**
  * スカイボックスの設定を解除する
  *
  */
-void Direct3D11GraphicsManager::unset_sky_box()
+void GraphicsManager::unset_sky_box()
 {
 	sky_box_.reset();
 	sky_box_render_data_.reset();
@@ -193,7 +211,7 @@ void Direct3D11GraphicsManager::unset_sky_box()
  *
  * @return スカイボックスが現在設定されているかどうか
  */
-bool Direct3D11GraphicsManager::is_sky_box_set() const
+bool GraphicsManager::is_sky_box_set() const
 {
 	return static_cast< bool >( sky_box_ );
 }
@@ -203,13 +221,14 @@ bool Direct3D11GraphicsManager::is_sky_box_set() const
  *
  * @param name 地面モデル名
  */
-void Direct3D11GraphicsManager::set_ground( const char_t* name )
+void GraphicsManager::set_ground( const char_t* name )
 {
 	/// @tood Direct3D11Mesh を修正し複数回 load_obj() を読んでもバッファをロストしないようにする
 	unset_ground();
 
 	ground_.reset( new Direct3D11Mesh( direct_3d_ ) );
 	ground_->load_obj( ( string_t( "media/model/" ) + name + ".obj" ).c_str() );
+	// ground_->get_material_at( 0 )->set_shader( get_shader( "bypass" ) );
 
 	ground_render_data_.reset( new ObjectConstantBufferWithData( direct_3d_ ) );
 	ground_render_data_->data().world.set_identity();
@@ -220,7 +239,7 @@ void Direct3D11GraphicsManager::set_ground( const char_t* name )
  * 地面の設定を解除する
  *
  */
-void Direct3D11GraphicsManager::unset_ground()
+void GraphicsManager::unset_ground()
 {
 	ground_.reset();
 	ground_render_data_.reset();
@@ -231,7 +250,7 @@ void Direct3D11GraphicsManager::unset_ground()
  *
  * @param color 環境光の色
  */
-void Direct3D11GraphicsManager::set_ambient_color( const Color& color )
+void GraphicsManager::set_ambient_color( const Color& color )
 {
 	if ( sky_box_render_data_ )
 	{
@@ -249,7 +268,7 @@ void Direct3D11GraphicsManager::set_ambient_color( const Color& color )
  *
  * @param color 影の色
  */
-void Direct3D11GraphicsManager::set_shadow_color( const Color& color )
+void GraphicsManager::set_shadow_color( const Color& color )
 {
 	frame_drawing_render_data_->data().shadow_color = color;
 }
@@ -259,7 +278,7 @@ void Direct3D11GraphicsManager::set_shadow_color( const Color& color )
  *
  * @param color 影の紙テクスチャの色
  */
-void Direct3D11GraphicsManager::set_shadow_paper_color( const Color& color )
+void GraphicsManager::set_shadow_paper_color( const Color& color )
 {
 	frame_drawing_render_data_->data().shadow_paper_color = color;
 }
@@ -269,7 +288,7 @@ void Direct3D11GraphicsManager::set_shadow_paper_color( const Color& color )
  *
  * @param accent アクセント
  */
-void Direct3D11GraphicsManager::set_drawing_accent( float_t accent )
+void GraphicsManager::set_drawing_accent( float_t accent )
 {
 	frame_drawing_render_data_->data().accent = accent;
 }
@@ -279,12 +298,12 @@ void Direct3D11GraphicsManager::set_drawing_accent( float_t accent )
  *
  * @param type 手書き風線のタイプ
  */
-void Direct3D11GraphicsManager::set_drawing_line_type( int_t type )
+void GraphicsManager::set_drawing_line_type( int_t type )
 {
 	frame_drawing_render_data_->data().line_type = math::clamp< int >( type, 0, DrawingLine::LINE_TYPE_MAX - 1 );
 }
 
-void Direct3D11GraphicsManager::set_eye_position( const Vector3& pos )
+void GraphicsManager::set_eye_position( const Vector3& pos )
 {
 	if ( sky_box_ )
 	{
@@ -296,7 +315,7 @@ void Direct3D11GraphicsManager::set_eye_position( const Vector3& pos )
  * 描画のセットアップを行う
  *
  */
-void Direct3D11GraphicsManager::setup_rendering() const
+void GraphicsManager::setup_rendering() const
 {
 	set_input_layout( "main" );
 
@@ -310,12 +329,53 @@ void Direct3D11GraphicsManager::setup_rendering() const
 }
 
 /**
+ * 名前を指定して InputLayout を取得する
+ *
+ * @param InputLayout の名前
+ * @return InputLayout
+ */
+const GraphicsManager::InputLayout* GraphicsManager::get_input_layout( const char_t* name ) const
+{
+	return direct_3d_->get_input_layout( name );
+}
+
+/**
+ * 名前を指定して EffectTechnique を取得する
+ *
+ * @param EffectTechnique の名前
+ * @return EffectTechnique
+ */
+const GraphicsManager::EffectTechnique* GraphicsManager::get_effect_technique( const char_t* name ) const
+{
+	return direct_3d_->get_effect()->get_technique( name );
+}
+
+/**
  * 入力レイアウトを指定する
  *
  */
-void Direct3D11GraphicsManager::set_input_layout( const char_t* name ) const
+void GraphicsManager::set_input_layout( const char_t* name ) const
 {
 	direct_3d_->setInputLayout( name );
+}
+
+/**
+ * 入力レイアウトを指定する
+ *
+ */
+void GraphicsManager::set_input_layout( const InputLayout* input_layout ) const
+{
+	direct_3d_->set_input_layout( static_cast< const core::graphics::direct_3d_11::InputLayout* >( input_layout ) );
+}
+
+/**
+ * プリミティブトポロジーを指定する
+ *
+ * @param primitive_topology プリミティブトポロジー
+ */
+void GraphicsManager::set_primitive_topology( PrimitiveTopology primitive_topology ) const
+{
+	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( static_cast< D3D_PRIMITIVE_TOPOLOGY >( primitive_topology ) );
 }
 
 /**
@@ -324,16 +384,27 @@ void Direct3D11GraphicsManager::set_input_layout( const char_t* name ) const
  * @param technique_name テクニック名
  * @param function レンダリング処理
  */
-void Direct3D11GraphicsManager::render_technique( const char_t* technique_name, const std::function< void() >& function ) const
+void GraphicsManager::render_technique( const char_t* technique_name, const std::function< void() >& function ) const
 {
-	const auto* technique = direct_3d_->getEffect()->getTechnique( technique_name );
+	const auto* technique = direct_3d_->get_effect()->get_technique( technique_name );
 	
 	if ( ! technique )
 	{
 		return;
 	}
 
-	for ( const auto& pass : technique->getPassList() )
+	render_technique( technique, function );
+}
+
+/**
+ * 指定したテクニックの全てのパスでレンダリング処理を実行する
+ *
+ * @param technique テクニック
+ * @param function レンダリング処理
+ */
+void GraphicsManager::render_technique( const EffectTechnique* technique, const std::function< void() >& function ) const
+{
+	for ( const auto& pass : technique->get_pass_list() )
 	{
 		pass->apply();
 
@@ -345,7 +416,7 @@ void Direct3D11GraphicsManager::render_technique( const char_t* technique_name, 
  * 背景 ( スカイボックス・地面 ) を描画する
  *
  */
-void Direct3D11GraphicsManager::render_background() const
+void GraphicsManager::render_background() const
 {
 	// ground
 	if ( ground_ )
@@ -383,29 +454,29 @@ void Direct3D11GraphicsManager::render_background() const
  *
  * @param color 色
  */
-void Direct3D11GraphicsManager::set_fade_color( const Color& color )
+void GraphicsManager::set_fade_color( const Color& color )
 {
 	direct_3d_->getFader()->set_color( color );
 }
 
-void Direct3D11GraphicsManager::start_fade_in( float_t speed )
+void GraphicsManager::start_fade_in( float_t speed )
 {
 	is_fading_in_ = true;
 	fade_speed_ = speed;
 }
 	
-void Direct3D11GraphicsManager::start_fade_out( float_t speed )
+void GraphicsManager::start_fade_out( float_t speed )
 {
 	is_fading_in_ = false;
 	fade_speed_ = speed;
 }
 
-void Direct3D11GraphicsManager::fade_in( float_t speed )
+void GraphicsManager::fade_in( float_t speed )
 {
 	direct_3d_->getFader()->fade_in( speed );
 }
 	
-void Direct3D11GraphicsManager::fade_out( float_t speed )
+void GraphicsManager::fade_out( float_t speed )
 {
 	direct_3d_->getFader()->fade_out( speed );
 }
@@ -414,7 +485,7 @@ void Direct3D11GraphicsManager::fade_out( float_t speed )
  * フェーダーを描画する
  *
  */
-void Direct3D11GraphicsManager::render_fader() const
+void GraphicsManager::render_fader() const
 {
 	ObjectConstantBufferData buffer_data;
 	buffer_data.world = Matrix().set_identity().transpose();
@@ -443,7 +514,7 @@ void Direct3D11GraphicsManager::render_fader() const
  * @param color 色
  * @todo 高速化する
  */
-void Direct3D11GraphicsManager::draw_text( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color ) const
+void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color ) const
 {
 	if ( ! direct_3d_->getFont() )
 	{
@@ -476,7 +547,7 @@ void Direct3D11GraphicsManager::draw_text( float_t left, float_t top, float_t ri
  * @param color 色
  * @todo 高速化する
  */
-void Direct3D11GraphicsManager::draw_text_at_center( const char_t* text, const Color& color ) const
+void GraphicsManager::draw_text_at_center( const char_t* text, const Color& color ) const
 {
 	if ( ! direct_3d_->getFont() )
 	{
@@ -505,7 +576,7 @@ void Direct3D11GraphicsManager::draw_text_at_center( const char_t* text, const C
  * デバッグ用の軸を描画する
  *
  */
-void Direct3D11GraphicsManager::render_debug_axis_model() const
+void GraphicsManager::render_debug_axis_model() const
 {
 	debug_axis_->render();
 }
@@ -515,7 +586,7 @@ void Direct3D11GraphicsManager::render_debug_axis_model() const
  * Bullet の更新を行う前に毎フレーム呼び出す必要がある
  *
  */
-void Direct3D11GraphicsManager::clear_debug_bullet() const
+void GraphicsManager::clear_debug_bullet() const
 {
 	GameMain::get_instance()->get_bullet_debug_draw()->clear();
 }
@@ -524,7 +595,7 @@ void Direct3D11GraphicsManager::clear_debug_bullet() const
  * Bullet デバッグ 描画を行う
  *
  */
-void Direct3D11GraphicsManager::render_debug_bullet() const
+void GraphicsManager::render_debug_bullet() const
 {
 	render_technique( "|bullet", [this]
 	{
@@ -535,4 +606,4 @@ void Direct3D11GraphicsManager::render_debug_bullet() const
 	} );
 }
 
-} // namespace blue_sky
+} // namespace blue_sky::graphics::direct_3d_11

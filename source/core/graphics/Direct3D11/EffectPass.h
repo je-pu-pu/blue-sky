@@ -1,16 +1,20 @@
 #pragma once
 
+#include <core/graphics/EffectPass.h>
 #include <d3d11.h>
 
 class Direct3D11;
 
 struct ID3DX11EffectPass;
 
+namespace core::graphics::direct_3d_11
+{
+
 /**
  * Direct3D 11 Effect Pass のラッパークラス
  *
  */
-class Direct3D11EffectPass
+class EffectPass : public core::graphics::EffectPass
 {
 public:
 	typedef Direct3D11				Direct3D;
@@ -22,11 +26,13 @@ private:
 	ID3DX11EffectPass*				pass_;
 
 public:
-	Direct3D11EffectPass( Direct3D*, ID3DX11EffectPass* );
-	~Direct3D11EffectPass();
+	EffectPass( Direct3D*, ID3DX11EffectPass* );
+	~EffectPass();
 	
 	InputLayout* create_input_layout( D3D11_INPUT_ELEMENT_DESC[], UINT );
 
-	void apply() const;
+	void apply() const override;
 
-}; // class Direct3D11EffectPass
+}; // class EffectPass
+
+} // namespace namespace core::graphics::direct_3d_11

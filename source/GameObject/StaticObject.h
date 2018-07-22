@@ -9,8 +9,9 @@ namespace blue_sky
 /**
  * 移動しないオブジェクト
  *
+ * ゲームの背景や障害物・小物などに使用する
  */
-class StaticObject : public ActiveObject
+class StaticObject : public ActiveObject /// @todo GameObject を継承する
 {
 private:
 	float_t		collision_width_;

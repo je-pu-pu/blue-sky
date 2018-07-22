@@ -1,27 +1,29 @@
 #pragma once
 
-#include "Direct3D11EffectTechnique.h"
-#include "Direct3D11EffectPass.h"
-
 #include <map>
 
 class Direct3D11;
-class Direct3D11EffectTechnique;
 class Direct3D11EffectPass;
 
 struct ID3DX11Effect;
+
+namespace core::graphics::direct_3d_11
+{
+
+class EffectTechnique;
+class EffectPass;
 
 /**
  * Direct3D 11 Effect のラッパークラス
  *
  */
-class Direct3D11Effect
+class Effect
 {
 public:
 	typedef Direct3D11					Direct3D;
 
-	typedef Direct3D11EffectTechnique	Technique;
-	typedef Direct3D11EffectPass		Pass;
+	typedef EffectTechnique				Technique;
+	typedef EffectPass					Pass;
 
 	typedef std::map< const char*, Technique* > TechniqueList;
 
@@ -32,11 +34,13 @@ private:
 	TechniqueList		technique_list_;
 
 public:
-	Direct3D11Effect( Direct3D* );
-	~Direct3D11Effect();
+	Effect( Direct3D* );
+	~Effect();
 	
 	void load( const char* );
 
-	Technique* getTechnique( const char* name );
+	Technique* get_technique( const char* name );
 
-}; // class Direct3D11Effect
+}; // class Effect
+
+} // namespace namespace core::graphics::direct_3d_11

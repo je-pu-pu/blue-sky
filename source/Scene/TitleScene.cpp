@@ -1,16 +1,17 @@
 #include "TitleScene.h"
 
 #include "GameMain.h"
-#include "ConstantBuffer.h"
+// #include "ConstantBuffer.h"
 
 #include "DrawingModelManager.h"
 #include "DrawingModel.h"
 #include "DrawingLine.h"
 
 #include "Input.h"
-#include "GraphicsManager.h"
 #include "SoundManager.h"
 #include "Sound.h"
+
+#include <blue_sky/graphics/GraphicsManager.h>
 
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Direct3D11.h>

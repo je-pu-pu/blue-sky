@@ -94,6 +94,8 @@
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundFile.h" />

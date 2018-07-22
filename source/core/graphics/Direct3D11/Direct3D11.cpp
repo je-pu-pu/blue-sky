@@ -1,10 +1,15 @@
 #include "Direct3D11.h"
 #include "Direct3D11Sprite.h"
 #include "Direct3D11Fader.h"
-#include "Direct3D11Effect.h"
 #include "Direct3D11MeshManager.h"
 #include "Direct3D11Texture.h"
 #include "Direct3D11TextureManager.h"
+
+#include "InputLayout.h"
+#include "Effect.h"
+#include "EffectTechnique.h"
+#include "EffectPass.h"
+
 #include <core/graphics/DirectWrite/DirectWrite.h>
 
 #include <win/Rect.h>
@@ -135,9 +140,9 @@ Direct3D11::~Direct3D11()
 
 	DIRECT_X_RELEASE( device_10_ );
 
-	for ( InputLayoutList::iterator i = vertex_layout_list_.begin(); i != vertex_layout_list_.end(); ++i )
+	for ( auto& input_layout : input_layout_list_ )
 	{
-		DIRECT_X_RELEASE( i->second );
+		delete input_layout.second;
 	}
 
 	DIRECT_X_RELEASE( depth_stencil_view_ );
@@ -269,7 +274,7 @@ void Direct3D11::create_depth_stencil_view()
 
 ID3D11DepthStencilView* Direct3D11::create_depth_stencil_view( ID3D11Texture2D* texture )
 {
-	D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc = { 0 };
+	D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc = { static_cast< DXGI_FORMAT >( 0 ) };
 	
 	depth_stencil_view_desc.Format = DEPTH_STENCIL_FORMAT;
 	depth_stencil_view_desc.ViewDimension = swap_chain_desc_.SampleDesc.Count > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
@@ -471,7 +476,9 @@ void Direct3D11::create_default_input_layout()
 
 void Direct3D11::create_input_layout( char_t* input_layout_name, char_t* teqhnique_name, D3D11_INPUT_ELEMENT_DESC layout[], UINT layout_array_size )
 {
-	vertex_layout_list_[ input_layout_name ] = effect_->getTechnique( teqhnique_name )->getPassList().front()->create_input_layout( layout, layout_array_size );
+	auto* pass = static_cast< EffectPass* >( effect_->get_technique( teqhnique_name )->get_pass_list().front() );
+
+	input_layout_list_[ input_layout_name ] = new InputLayout( pass->create_input_layout( layout, layout_array_size ) );
 }
 
 void Direct3D11::set_full_screen( bool full_screen )
@@ -666,7 +673,24 @@ void Direct3D11::set_viewport_for_right_eye()
 
 void Direct3D11::setInputLayout( const char* name )
 {
-	immediate_context_->IASetInputLayout( vertex_layout_list_[ name ] );
+	set_input_layout( input_layout_list_[ name ] );
+}
+
+const Direct3D11::InputLayout* Direct3D11::get_input_layout( const char* name ) const
+{
+	auto i = input_layout_list_.find( name );
+
+	if ( i == input_layout_list_.end() )
+	{
+		return nullptr;
+	}
+
+	return i->second;
+}
+
+void Direct3D11::set_input_layout( const InputLayout* input_layout )
+{
+	immediate_context_->IASetInputLayout( input_layout->get_input_layout() );
 }
 
 /**
@@ -752,11 +776,11 @@ void Direct3D11::renderText()
 
 	getSprite()->begin();
 
-	EffectTechnique* technique = effect_->getTechnique( "|sprite" );
+	EffectTechnique* technique = effect_->get_technique( "|sprite" );
 
-	for ( EffectTechnique::PassList::iterator i = technique->getPassList().begin(); i !=  technique->getPassList().end(); ++i )
+	for ( const auto& pass : technique->get_pass_list() )
 	{
-		( *i )->apply();
+		pass->apply();
 
 		Sprite::Rect dst_rect( 0, 0, get_width(), get_height() );
 		getSprite()->draw( dst_rect, text_view_.get() );

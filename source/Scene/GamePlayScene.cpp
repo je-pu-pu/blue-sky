@@ -24,6 +24,8 @@
 #include "DrawingMesh.h"
 #include "DrawingLine.h"
 
+#include <blue_sky/graphics/shader/BypassShader.h>
+
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Direct3D11ShadowMap.h>
 #include <core/graphics/Direct3D11/Direct3D11Rectangle.h>
@@ -31,10 +33,10 @@
 
 #include "ActiveObjectPhysics.h"
 
-#include "ConstantBuffer.h"
+// #include "ConstantBuffer.h"
 
 #include "Input.h"
-#include "GraphicsManager.h"
+#include <blue_sky/graphics/GraphicsManager.h>
 #include "SoundManager.h"
 
 #include "ScriptManager.h"
@@ -132,6 +134,10 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 
 	rectangle_ = new Rectangle( get_direct_3d() );
+	rectangle_->get_material()->set_texture( shadow_map_->getTexture() );
+
+	// rectangle_shader_ = get_graphics_manager()->get_shader< BypassShader >( "bypass" );
+	// rectangle_->get_material()->set_shader( rectangle_shader_ );
 
 	scope_mesh_ = get_graphics_manager()->load_mesh( "scope", "media/model/scope.obj" );
 
@@ -1847,7 +1853,7 @@ void GamePlayScene::render_far_billboards() const
  */
 void GamePlayScene::render_object_skin_mesh() const
 {
-	const char* technique_name = "|skin_flat";
+	const char* technique_name = "|flat_skin";
 
 	if ( shading_enabled_ )
 	{
@@ -1899,7 +1905,7 @@ void GamePlayScene::render_object_skin_mesh() const
  */
 void GamePlayScene::render_object_mesh() const
 {
-	const char* technique_name = "|main_flat";
+	const char* technique_name = "|flat";
 
 	if ( shading_enabled_ )
 	{
@@ -2086,7 +2092,7 @@ void GamePlayScene::render_debug_shadow_map_window() const
 	{
 		bind_shared_object_render_data();
 
-		rectangle_->get_material_list().front()->set_texture( shadow_map_->getTexture() );
+		// rectangle_->get_material()->set_texture( shadow_map_->getTexture() );
 		rectangle_->render();
 	} );
 

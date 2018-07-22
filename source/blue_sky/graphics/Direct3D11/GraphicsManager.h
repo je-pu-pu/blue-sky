@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GraphicsManager.h"
-#include "ConstantBuffer.h"
+#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/ShaderResources.h>
 
 #include <memory>
 
@@ -9,14 +9,14 @@ class Direct3D11;
 class Direct3D11SkyBox;
 class Direct3D11Axis;
 
-namespace blue_sky
+namespace blue_sky::graphics::direct_3d_11
 {
 
 /**
  * Direct3D 11 グラフィック管理クラス
  *
  */
-class Direct3D11GraphicsManager : public GraphicsManager
+class GraphicsManager : public blue_sky::graphics::GraphicsManager
 {
 public:
 	typedef Direct3D11 Direct3D;
@@ -41,18 +41,23 @@ private:
 	float_t fade_speed_ = 0.f;
 
 protected:
+	const InputLayout* get_input_layout( const char_t* ) const override;
+	const EffectTechnique* get_effect_technique( const char_t* ) const override;
+
 	void set_input_layout( const char_t* ) const override;
+	void set_input_layout( const InputLayout* ) const override;
+	void set_primitive_topology( PrimitiveTopology ) const override;
 
 	void render_debug_axis_model() const override;
 
 public:
-	Direct3D11GraphicsManager( Direct3D* );
-	virtual ~Direct3D11GraphicsManager();
+	GraphicsManager( Direct3D* );
+	virtual ~GraphicsManager();
 
 	void update() override;
 
 	Mesh* load_mesh( const char_t*, const char_t* ) override;
-	Mesh* get_mesh( const char_t* ) override;
+	// Mesh* get_mesh( const char_t* ) override;
 
 	void unload_mesh( const char_t* ) override;
 	void unload_mesh_all() override;
@@ -89,6 +94,7 @@ public:
 
 	void setup_rendering() const override;
 	void render_technique( const char_t*, const std::function< void () >& ) const override;
+	void render_technique( const EffectTechnique*, const std::function< void () >& ) const override;
 	void render_background() const override;
 
 	void set_fade_color( const Color& ) override;
@@ -110,4 +116,4 @@ public:
 
 }; // class GraphicsManager
 
-} // namespace game
+} // namespace blue_sky::graphics::direct_3d_11

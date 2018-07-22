@@ -35,6 +35,15 @@ class DelayedCommand;
 
 struct FrameConstantBufferData;
 
+namespace graphics
+{
+
+class BypassShader;
+
+}
+
+using graphics::BypassShader;
+
 /**
  * ゲームプレイ中の処理を管理する
  *
@@ -77,6 +86,7 @@ protected:
 	Mesh*								far_billboards_ = 0;	///< 遠景ビルボード
 	Mesh*								scope_mesh_ = 0;		///< 双眼鏡
 	common::auto_ptr< Rectangle >		rectangle_;
+	BypassShader*						rectangle_shader_;
 
 	Sound*								bgm_ = 0;
 	common::safe_ptr< Sound >			balloon_bgm_;

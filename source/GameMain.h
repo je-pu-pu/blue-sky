@@ -32,7 +32,6 @@ namespace blue_sky
 	class ActiveObject;
 	class ActiveObjectManager;
 
-	class GraphicsManager;
 	class SoundManager;
 	class ScriptManager;
 
@@ -43,6 +42,13 @@ namespace blue_sky
 	class Camera;
 
 	class Scene;
+
+	namespace graphics
+	{
+		class GraphicsManager;
+	}
+
+	using graphics::GraphicsManager;
 };
 
 namespace blue_sky

@@ -18,7 +18,9 @@ class VertexGroup;
 class Material;
 
 /**
- * 立体物
+ * 抽象メッシュクラス
+ *
+ * 立体物の形状を保持する
  *
  */
 class Mesh
@@ -41,6 +43,8 @@ public:
 	virtual VertexGroup* create_vertex_group() = 0;
 
 	virtual Material* get_material_at( uint_t ) = 0;
+	virtual const Material* get_material_at( uint_t ) const = 0;
+
 	virtual void set_material_at( uint_t, Material* ) = 0;
 
 	virtual uint_t get_material_count() const = 0;
@@ -49,6 +53,7 @@ public:
 
 	virtual void bind() const = 0;
 	virtual void render() const = 0;
+	virtual void render( uint_t ) const = 0;
 };
 
 /**

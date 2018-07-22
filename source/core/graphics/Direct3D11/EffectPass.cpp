@@ -1,21 +1,24 @@
-#include "Direct3D11EffectPass.h"
+#include "EffectPass.h"
 #include "Direct3D11.h"
 
 #include "d3dx11effect.h"
 
-Direct3D11EffectPass::Direct3D11EffectPass( Direct3D* direct_3d, ID3DX11EffectPass* pass )
+namespace core::graphics::direct_3d_11
+{
+
+EffectPass::EffectPass( Direct3D* direct_3d, ID3DX11EffectPass* pass )
 	: direct_3d_( direct_3d )
 	, pass_( pass )
 {
 
 }
 
-Direct3D11EffectPass::~Direct3D11EffectPass()
+EffectPass::~EffectPass()
 {
 
 }
 
-Direct3D11EffectPass::InputLayout* Direct3D11EffectPass::create_input_layout( D3D11_INPUT_ELEMENT_DESC layout[], UINT layout_array_size )
+EffectPass::InputLayout* EffectPass::create_input_layout( D3D11_INPUT_ELEMENT_DESC layout[], UINT layout_array_size )
 {
 	D3DX11_PASS_DESC pass_desc;
 	pass_->GetDesc( & pass_desc );
@@ -27,7 +30,9 @@ Direct3D11EffectPass::InputLayout* Direct3D11EffectPass::create_input_layout( D3
 	return input_layout;
 }
 
-void Direct3D11EffectPass::apply() const
+void EffectPass::apply() const
 {
 	pass_->Apply( 0, direct_3d_->getImmediateContext() );
 }
+
+} // namespace core::graphics::direct_3d_11

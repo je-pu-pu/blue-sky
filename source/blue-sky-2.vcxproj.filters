@@ -112,55 +112,42 @@
       <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="BgSpriteLayer.cpp" />
-    <ClCompile Include="GraphicsManager.cpp" />
     <ClCompile Include="FbxFileLoader.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Axis.cpp">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.cpp">
-      <Filter>core\Direct3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Effect.cpp">
-      <Filter>core\Direct3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectPass.cpp">
-      <Filter>core\Direct3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.cpp">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Fader.cpp">
-      <Filter>core\Direct3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.cpp">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Material.cpp">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Mesh.cpp">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11MeshManager.cpp">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Rectangle.cpp">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11ShadowMap.cpp">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11SkyBox.cpp">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Sprite.cpp">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11TextureManager.cpp">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\input\DirectInput\DirectInput.cpp">
       <Filter>core\DirectInput</Filter>
@@ -181,7 +168,7 @@
       <Filter>core\DirectWrite</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\physics\Bullet\BulletPhysics.cpp">
       <Filter>core\Bullet</Filter>
@@ -191,6 +178,21 @@
     </ClCompile>
     <ClCompile Include="core\math\DirectXMath\Color.cpp">
       <Filter>core\DirectXMath</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\EffectTechnique.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Effect.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\EffectPass.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\graphics\Direct3D11\GraphicsManager.cpp">
+      <Filter>blue_sky\graphics\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\graphics\GraphicsManager.cpp">
+      <Filter>blue_sky\graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -314,68 +316,54 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="BgSpriteLayer.h" />
-    <ClInclude Include="GraphicsManager.h" />
     <ClInclude Include="FbxFileLoader.h" />
-    <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Axis.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Common.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11ConstantBuffer.h">
-      <Filter>core\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Effect.h">
-      <Filter>core\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectPass.h">
-      <Filter>core\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11EffectTechnique.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Fader.h">
-      <Filter>core\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11GraphicsManager.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Material.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Mesh.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11MeshManager.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Rectangle.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11ShadowMap.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11SkyBox.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Sprite.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Texture.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11TextureManager.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\d3dx11effect.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\input\DirectInput\DirectInput.h">
       <Filter>core\DirectInput</Filter>
@@ -402,7 +390,7 @@
       <Filter>core\DirectWrite</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h">
-      <Filter>core\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\physics\Bullet\BulletPhysics.h">
       <Filter>core\Bullet</Filter>
@@ -432,6 +420,63 @@
     </ClInclude>
     <ClInclude Include="SkinningAnimation.h" />
     <ClInclude Include="SkinningAnimationSet.h" />
+    <ClInclude Include="core\graphics\PrimitiveTopology.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\PrimitiveTopology.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\EffectTechnique.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\EffectTechnique.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Effect.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\EffectPass.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\EffectPass.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\InputLayout.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\InputLayout.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\Direct3D11\GraphicsManager.h">
+      <Filter>blue_sky\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\GraphicsManager.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\BaseShader.h">
+      <Filter>blue_sky\graphics\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\FlatShader.h">
+      <Filter>blue_sky\graphics\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\BypassShader.h">
+      <Filter>blue_sky\graphics\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\MatcapShader.h">
+      <Filter>blue_sky\graphics\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\ShaderResource.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\Direct3D11\ShaderResource.h">
+      <Filter>blue_sky\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ShaderResources.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\Model.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -440,96 +485,102 @@
     <None Include="blue-sky.config" />
     <None Include="blye-sky.ico" />
     <None Include="media\stage\2-3.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage\2-2.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage\2-1.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage\2-0.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage\1-3.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage\1-0.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage\0-3.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage\0-2.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage\0-1.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage\0-0.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage\1-1.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage\1-2.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage_ext\staff.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage_ext\ext-0.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage_ext\ext-1.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\stage_ext\ext-2.stage">
-      <Filter>Stage</Filter>
+      <Filter>media\stage</Filter>
     </None>
     <None Include="media\shader\main.fx">
-      <Filter>shader</Filter>
+      <Filter>media\shader</Filter>
     </None>
     <None Include="media\shader\drawing_line.hlsl">
-      <Filter>shader</Filter>
+      <Filter>media\shader</Filter>
     </None>
     <None Include="media\shader\2d.hlsl">
-      <Filter>shader</Filter>
+      <Filter>media\shader</Filter>
     </None>
     <None Include="media\shader\sky_box.hlsl">
-      <Filter>shader</Filter>
+      <Filter>media\shader</Filter>
     </None>
     <None Include="media\shader\common.hlsl">
-      <Filter>shader</Filter>
+      <Filter>media\shader</Filter>
     </None>
     <None Include="media\shader\ground.hlsl">
-      <Filter>shader</Filter>
+      <Filter>media\shader</Filter>
     </None>
     <None Include="media\shader\debug_axis.hlsl">
-      <Filter>shader</Filter>
+      <Filter>media\shader</Filter>
     </None>
     <None Include="media\shader\debug_bullet.hlsl">
-      <Filter>shader</Filter>
+      <Filter>media\shader</Filter>
     </None>
     <None Include="media\shader\canvas.hlsl">
-      <Filter>shader</Filter>
+      <Filter>media\shader</Filter>
     </None>
     <None Include="media\shader\sprite.hlsl">
-      <Filter>shader</Filter>
+      <Filter>media\shader</Filter>
     </None>
     <None Include="media\shader\shadow_map.hlsl">
-      <Filter>shader</Filter>
+      <Filter>media\shader</Filter>
     </None>
     <None Include="media\shader\billboard.hlsl">
-      <Filter>shader</Filter>
+      <Filter>media\shader</Filter>
+    </None>
+    <None Include="media\script\test\clone.lua">
+      <Filter>media\script</Filter>
+    </None>
+    <None Include="media\script\test\init.lua">
+      <Filter>media\script</Filter>
+    </None>
+    <None Include="media\script\test\switch_shader.lua">
+      <Filter>media\script</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Drawing">
       <UniqueIdentifier>{d58a8a69-eed5-4380-a305-29b0e553d17d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sound">
-      <UniqueIdentifier>{512e6d8f-e56b-4c77-aa48-b312db42a82b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Input">
       <UniqueIdentifier>{3306306a-f212-4428-80eb-8d1355e62c22}</UniqueIdentifier>
@@ -537,17 +588,11 @@
     <Filter Include="GameObject">
       <UniqueIdentifier>{6a5beb6c-7027-43c9-8b56-4c6b57c6b71b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Stage">
-      <UniqueIdentifier>{c55721b5-afe6-4688-ab8c-511f1dff1ac5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{1d357c30-a5d6-4fcb-a582-73566ac2eb55}</UniqueIdentifier>
     </Filter>
     <Filter Include="core">
       <UniqueIdentifier>{c343e3df-2506-45ab-ad83-6d2ad2d3ef12}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="core\Direct3D11">
-      <UniqueIdentifier>{8697b4b7-58ec-402a-8977-96eb2af049ca}</UniqueIdentifier>
     </Filter>
     <Filter Include="core\DirectInput">
       <UniqueIdentifier>{4ae0ef67-2726-447f-9bb4-682d730461bd}</UniqueIdentifier>
@@ -561,11 +606,46 @@
     <Filter Include="core\Bullet">
       <UniqueIdentifier>{b0f122bc-1ef3-4d7f-9dca-f528879b0c06}</UniqueIdentifier>
     </Filter>
-    <Filter Include="shader">
-      <UniqueIdentifier>{4fcc5bdb-7666-4a3f-a4b8-33cc3692d47d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="core\DirectXMath">
       <UniqueIdentifier>{41386a86-d0b5-406c-9192-d8ab630babf0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sound">
+      <UniqueIdentifier>{512e6d8f-e56b-4c77-aa48-b312db42a82b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="media">
+      <UniqueIdentifier>{b24d6732-297b-4a28-bff0-ac59442e19a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="media\script">
+      <UniqueIdentifier>{924cfcf3-aa08-4144-843c-406c8476a4d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="media\shader">
+      <UniqueIdentifier>{4fcc5bdb-7666-4a3f-a4b8-33cc3692d47d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="media\stage">
+      <UniqueIdentifier>{c55721b5-afe6-4688-ab8c-511f1dff1ac5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\graphics">
+      <UniqueIdentifier>{f4bf540f-31d6-4983-a95d-bdff66ad5c1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\graphics\Direct3D11">
+      <UniqueIdentifier>{8697b4b7-58ec-402a-8977-96eb2af049ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="blue_sky">
+      <UniqueIdentifier>{f537d136-cdfa-4a11-8368-82530ae3b718}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="blue_sky\graphics">
+      <UniqueIdentifier>{57933f98-c32c-41af-ba7b-2b6494660374}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="blue_sky\graphics\Direct3D11">
+      <UniqueIdentifier>{c1bbd01d-b5de-4bf4-8fe6-adf2edb9deca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="blue_sky\graphics\shader">
+      <UniqueIdentifier>{6f16dafe-0a4b-48c1-9a58-12e03be01ca2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="media\shader\matcap.hlsl">
+      <Filter>media\shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -4,9 +4,9 @@
 
 #include "AnimationPlayer.h"
 
-#include "GraphicsManager.h"
-
 #include "GameMain.h"
+
+#include <blue_sky/graphics/GraphicsManager.h>
 
 namespace blue_sky
 {

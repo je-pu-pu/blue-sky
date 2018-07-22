@@ -1,8 +1,9 @@
 #include "StageSelectScene.h"
 
 #include "Input.h"
-#include "GraphicsManager.h"
 #include "SoundManager.h"
+
+#include <blue_sky/graphics/GraphicsManager.h>
 
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Direct3D11.h>
@@ -18,6 +19,8 @@
 #include <common/serialize.h>
 
 #include <boost/filesystem.hpp>
+
+#include <random>
 
 namespace blue_sky
 {
@@ -369,8 +372,11 @@ void StageSelectScene::update_stage_list()
 		}
 	}
 
-	std::random_shuffle( circle_src_rect_list_.begin(), circle_src_rect_list_.end() );
-	std::random_shuffle( face_src_rect_list_.begin(), face_src_rect_list_.end() );
+	std::random_device seed_generator;
+	std::mt19937 random_generator( seed_generator() );
+
+	std::shuffle( circle_src_rect_list_.begin(), circle_src_rect_list_.end(), random_generator );
+	std::shuffle( face_src_rect_list_.begin(), face_src_rect_list_.end(), random_generator );
 }
 
 StageSelectScene::string_t StageSelectScene::get_stage_dir_name_by_page( int page )

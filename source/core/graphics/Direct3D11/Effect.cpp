@@ -1,5 +1,5 @@
-#include "Direct3D11Effect.h"
-#include "Direct3D11EffectTechnique.h"
+#include "Effect.h"
+#include "EffectTechnique.h"
 #include "Direct3D11.h"
 
 #include "d3dx11effect.h"
@@ -14,15 +14,17 @@
 #pragma comment( lib, "effects11.lib" )
 #endif
 
+namespace core::graphics::direct_3d_11
+{
 
-Direct3D11Effect::Direct3D11Effect( Direct3D* direct_3d )
+Effect::Effect( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
 	, effect_( 0 )
 {
 
 }
 
-Direct3D11Effect::~Direct3D11Effect()
+Effect::~Effect()
 {
 	for ( TechniqueList::iterator i = technique_list_.begin(); i != technique_list_.end(); ++i )
 	{
@@ -32,7 +34,7 @@ Direct3D11Effect::~Direct3D11Effect()
 	DIRECT_X_RELEASE( effect_ );
 }
 
-void Direct3D11Effect::load( const char* file_path )
+void Effect::load( const char* file_path )
 {
 	ID3D10Blob* shader = 0;
 	ID3D10Blob* error_messages = 0;
@@ -77,7 +79,7 @@ void Direct3D11Effect::load( const char* file_path )
 	*/
 }
 
-Direct3D11Effect::Technique* Direct3D11Effect::getTechnique( const char* name )
+Effect::Technique* Effect::get_technique( const char* name )
 {
 	TechniqueList::iterator i = technique_list_.find( name );
 
@@ -99,3 +101,5 @@ Direct3D11Effect::Technique* Direct3D11Effect::getTechnique( const char* name )
 
 	return technique;
 }
+
+} // namespace core::graphics::direct_3d_11

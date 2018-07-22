@@ -1,10 +1,11 @@
 #include "CanvasTestScene.h"
 
-#include "GraphicsManager.h"
 #include "DrawingModel.h"
 #include "GameMain.h"
 
 #include "Input.h"
+
+#include <blue_sky/graphics/GraphicsManager.h>
 
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Direct3D11SkyBox.h>

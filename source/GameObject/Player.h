@@ -71,7 +71,7 @@ private:
 
 	bool		has_medal_;				///< メダル保持フラグ
 
-	int			item_count_[ ITEM_TYPE_MAX ];	///< 各アイテムの個数
+	int			item_count_[ ITEM_TYPE_MAX ] = { 0 };	///< 各アイテムの個数
 	ItemType	selected_item_type_;	///< 現在選択中のアイテム
 
 	float		last_footing_height_;	///< 前回の足場の高さ ( バルーン含む )

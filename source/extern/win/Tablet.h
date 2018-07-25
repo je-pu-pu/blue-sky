@@ -47,6 +47,9 @@ private:
 	static BOOL ( API * DllWTPacket )( HCTX, UINT, LPVOID );
 	static BOOL ( API * DllWTOverlap )( HCTX, BOOL );
 
+protected:
+	explicit Tablet( HWND );
+
 	template< typename T >
 	void get_proc_address( T& f, const char* name )
 	{
@@ -62,8 +65,6 @@ private:
 
 		f = x;
 	}
-
-	Tablet( HWND );
 
 public:
 	~Tablet();

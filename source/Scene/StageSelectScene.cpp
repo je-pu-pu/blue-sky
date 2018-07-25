@@ -4,11 +4,11 @@
 #include "SoundManager.h"
 
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/Fader.h>
 
 /// @todo ’ŠÛ‰»‚·‚é
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
-#include <core/graphics/Direct3D11/Direct3D11Fader.h>
 
 #include <game/Sound.h>
 #include <game/Config.h>
@@ -61,14 +61,17 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 
 	update_stage_list();
 
-	get_direct_3d()->getFader()->set_color( Color::White );
-	get_direct_3d()->getFader()->full_out();
+	get_graphics_manager()->get_fader()->set_color( Color::White );
+	get_graphics_manager()->get_fader()->full_out();
 }
 
 StageSelectScene::~StageSelectScene()
 {
+	/// @todo ’¼‚·
+#if false
 	// get_graphics_manager()->unload_texture( "sprite" );
 	get_graphics_manager()->unload_texture( "bg" );
+#endif
 
 	clear_stage_list();
 }
@@ -79,7 +82,7 @@ StageSelectScene::~StageSelectScene()
  */
 void StageSelectScene::update()
 {
-	get_direct_3d()->getFader()->fade_in();
+	get_graphics_manager()->get_fader()->fade_in();
 
 	if ( get_input()->push( Input::A ) )
 	{
@@ -142,8 +145,6 @@ void StageSelectScene::render()
 	Direct3D::Matrix t, s, transform;
 
 	// Stage
-	int n = 0;
-
 	RectList::const_iterator j = circle_src_rect_list_.begin();
 	RectList::const_iterator k = face_src_rect_list_.begin();
 
@@ -208,8 +209,6 @@ void StageSelectScene::render()
 			win::Point medal_dst_point = win::Point( dst_rect.left(), dst_rect.bottom() - medal_src_rect.height() ) + win::Point( -offset, offset );
 			get_direct_3d()->getSprite()->draw( medal_dst_point, sprite_texture_, medal_src_rect, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
 		}
-
-		n++;
 	}
 
 	// Arrow
@@ -274,7 +273,10 @@ void StageSelectScene::clear_stage_list()
 	{
 		Stage* stage = *i;
 
+		/// @todo ’¼‚·
+#if 0
 		get_graphics_manager()->unload_texture( stage->name.c_str() );
+#endif
 
 		delete stage;
 	}

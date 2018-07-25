@@ -1,7 +1,6 @@
 #pragma once
 
 #include <blue_sky/graphics/shader/BaseShader.h>
-#include <game/Material.h>
 
 namespace blue_sky::graphics::shader
 {
@@ -16,6 +15,7 @@ public:
 	BypassShader* clone() const override { return new BypassShader( *this ); }
 
 	Texture* get_texture_at( uint_t ) override { return nullptr; }
+	const Texture* get_texture_at( uint_t ) const override { return nullptr; }
 	void set_texture_at( uint_t, Texture* ) override { }
 
 	void bind() const override { }
@@ -23,12 +23,6 @@ public:
 	void render( const Mesh* mesh, uint_t n ) const override
 	{
 		get_graphics_manager()->set_primitive_topology( PrimitiveTopology::TRIANGLE_LIST );
-		
-		if ( mesh->get_material_at( n )->get_texture() )
-		{
-			mesh->get_material_at( n )->get_texture()->bind_to_ps( 0 );
-		}
-
 		mesh->render( n );
 	}
 };

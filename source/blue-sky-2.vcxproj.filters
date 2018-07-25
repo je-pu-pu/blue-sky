@@ -2,12 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="DrawingModel.cpp">
-      <Filter>Drawing</Filter>
-    </ClCompile>
-    <ClCompile Include="DrawingModelManager.cpp">
-      <Filter>Drawing</Filter>
-    </ClCompile>
     <ClCompile Include="Sound.cpp">
       <Filter>Sound</Filter>
     </ClCompile>
@@ -22,12 +16,6 @@
     </ClCompile>
     <ClCompile Include="Input.cpp">
       <Filter>Input</Filter>
-    </ClCompile>
-    <ClCompile Include="DrawingLine.cpp">
-      <Filter>Drawing</Filter>
-    </ClCompile>
-    <ClCompile Include="DrawingMesh.cpp">
-      <Filter>Drawing</Filter>
     </ClCompile>
     <ClCompile Include="OculusRift.cpp" />
     <ClCompile Include="App.cpp" />
@@ -112,7 +100,6 @@
       <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="BgSpriteLayer.cpp" />
-    <ClCompile Include="FbxFileLoader.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
@@ -122,31 +109,10 @@
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Fader.cpp">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Material.cpp">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Mesh.cpp">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11MeshManager.cpp">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Rectangle.cpp">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11ShadowMap.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11SkyBox.cpp">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Sprite.cpp">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11TextureManager.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\input\DirectInput\DirectInput.cpp">
@@ -194,19 +160,40 @@
     <ClCompile Include="blue_sky\graphics\GraphicsManager.cpp">
       <Filter>blue_sky\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\graphics\Mesh.cpp">
+      <Filter>blue_sky\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\graphics\Line.cpp">
+      <Filter>blue_sky\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\graphics\Direct3D11\Line.cpp">
+      <Filter>blue_sky\graphics\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\graphics\Rectangle.cpp">
+      <Filter>blue_sky\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\graphics\SkyBox.cpp">
+      <Filter>blue_sky\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\graphics\Fader.cpp">
+      <Filter>blue_sky\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\graphics\BaseFileLoader.cpp">
+      <Filter>blue_sky\graphics\FileLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\graphics\FbxFileLoader.cpp">
+      <Filter>blue_sky\graphics\FileLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\graphics\ObjFileLoader.cpp">
+      <Filter>blue_sky\graphics\FileLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\graphics\Direct3D11\MeshBuffer.cpp">
+      <Filter>blue_sky\graphics\Direct3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="DrawingModelManager.h">
-      <Filter>Drawing</Filter>
-    </ClInclude>
-    <ClInclude Include="DrawingLine.h">
-      <Filter>Drawing</Filter>
-    </ClInclude>
-    <ClInclude Include="DrawingModel.h">
-      <Filter>Drawing</Filter>
-    </ClInclude>
     <ClInclude Include="StreamingSound.h">
       <Filter>Sound</Filter>
     </ClInclude>
@@ -221,9 +208,6 @@
     </ClInclude>
     <ClInclude Include="Input.h">
       <Filter>Input</Filter>
-    </ClInclude>
-    <ClInclude Include="DrawingMesh.h">
-      <Filter>Drawing</Filter>
     </ClInclude>
     <ClInclude Include="OculusRift.h" />
     <ClInclude Include="GameObject\ActiveObject.h">
@@ -316,7 +300,6 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="BgSpriteLayer.h" />
-    <ClInclude Include="FbxFileLoader.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
@@ -329,37 +312,13 @@
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Common.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11ConstantBuffer.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Fader.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Material.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Mesh.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11MeshManager.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Rectangle.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11ShadowMap.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11SkyBox.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Sprite.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Texture.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11TextureManager.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\d3dx11effect.h">
@@ -477,6 +436,36 @@
     <ClInclude Include="blue_sky\graphics\Model.h">
       <Filter>blue_sky\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\graphics\Mesh.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\Line.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\Direct3D11\Line.h">
+      <Filter>blue_sky\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\Rectangle.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\SkyBox.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\Fader.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\BaseFileLoader.h">
+      <Filter>blue_sky\graphics\FileLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\FbxFileLoader.h">
+      <Filter>blue_sky\graphics\FileLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\ObjFileLoader.h">
+      <Filter>blue_sky\graphics\FileLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\Direct3D11\MeshBuffer.h">
+      <Filter>blue_sky\graphics\Direct3D11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -579,9 +568,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Drawing">
-      <UniqueIdentifier>{d58a8a69-eed5-4380-a305-29b0e553d17d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Input">
       <UniqueIdentifier>{3306306a-f212-4428-80eb-8d1355e62c22}</UniqueIdentifier>
     </Filter>
@@ -641,6 +627,9 @@
     </Filter>
     <Filter Include="blue_sky\graphics\shader">
       <UniqueIdentifier>{6f16dafe-0a4b-48c1-9a58-12e03be01ca2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="blue_sky\graphics\FileLoader">
+      <UniqueIdentifier>{3a0c4342-cd36-41d4-ab0e-68f5b559d1e4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -20,7 +20,7 @@ private:
 	unsigned long current_time_;	// Œ»İ‚ÌƒtƒŒ[ƒ€‚ÌŠÔ
 
 public:
-	ElapsedTimer( const MainLoop* );
+	explicit ElapsedTimer( const MainLoop* );
 	~ElapsedTimer() { }
 	
 	void update();

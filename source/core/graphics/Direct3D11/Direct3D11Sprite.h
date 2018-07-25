@@ -21,10 +21,13 @@ namespace direct_x_math
 	class Color;
 }
 
-class Direct3D11;
-class Direct3D11Texture;
+namespace blue_sky::graphics::direct_3d_11
+{
+	template< typename T > class ShaderResource;
+}
 
-template< typename T > class Direct3D11ConstantBuffer;
+class Direct3D11;
+
 
 /**
  * Direct3D 11 Sprite
@@ -63,12 +66,12 @@ public:
 
 	struct ConstantBufferData
 	{
-		static const int DEFAULT_SLOT = 13;
+		static const int SLOT = 13;
 
 		Matrix transform;
 	};
 
-	typedef Direct3D11ConstantBuffer< ConstantBufferData > ConstantBuffer;
+	typedef blue_sky::graphics::direct_3d_11::ShaderResource< ConstantBufferData > ConstantBuffer;
 
 	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
 
@@ -89,7 +92,7 @@ protected:
 	void draw( const Rect*, const Texture*, const Rect*, const Color* );
 
 public:
-	Direct3D11Sprite( Direct3D* );
+	explicit Direct3D11Sprite( Direct3D* );
 	~Direct3D11Sprite();
 
 	void begin();

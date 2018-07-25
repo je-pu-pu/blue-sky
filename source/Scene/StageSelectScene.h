@@ -79,11 +79,11 @@ private:
 	win::Rect get_stage_dst_rect( const Stage*, int ) const;
 
 public:
-	StageSelectScene( const GameMain* );
+	explicit StageSelectScene( const GameMain* );
 	~StageSelectScene();
 
-	void update();				///< メインループ
-	void render();				///< 描画
+	void update() override;				///< メインループ
+	void render() override;				///< 描画
 
 }; // class StageSelectScene
 

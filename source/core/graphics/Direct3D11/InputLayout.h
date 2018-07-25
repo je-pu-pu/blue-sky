@@ -8,7 +8,7 @@ namespace core::graphics::direct_3d_11
 {
 
 /**
- * Direct3D 11 Effect のラッパークラス
+ * ID3D11InputLayout のラッパークラス
  *
  */
 class InputLayout : public core::graphics::InputLayout
@@ -17,7 +17,7 @@ private:
 	com_ptr< ID3D11InputLayout > input_layout_;
 
 public:
-	InputLayout( ID3D11InputLayout* input_layout )
+	explicit InputLayout( ID3D11InputLayout* input_layout )
 		: input_layout_( input_layout )
 	{
 		

@@ -18,6 +18,7 @@ private:
 
 protected:
 	Texture* get_texture_at( uint_t ) override { return texture_; }
+	const Texture* get_texture_at( uint_t ) const override { return texture_; }
 	void set_texture_at( uint_t, Texture* t ) override { texture_ = t; }
 
 public:

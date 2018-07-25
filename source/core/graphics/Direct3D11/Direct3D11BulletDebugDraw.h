@@ -37,7 +37,7 @@ protected:
 	void create_vertex_buffer();
 
 public:
-	Direct3D11BulletDebugDraw( Direct3D11* );
+	explicit Direct3D11BulletDebugDraw( Direct3D11* );
 	virtual ~Direct3D11BulletDebugDraw();
 
 	void drawLine( const btVector3&, const btVector3&, const btVector3& );

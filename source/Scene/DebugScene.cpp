@@ -8,8 +8,6 @@
 
 #include <blue_sky/graphics/GraphicsManager.h>
 
-#include <core/graphics/Direct3D11/Direct3D11Fader.h>
-
 #include <common/math.h>
 
 namespace blue_sky

@@ -109,7 +109,6 @@ protected:
 	common::auto_ptr< MainLoop >			main_loop_;				///< ƒ‹[ƒvŠÇ—
 
 	common::auto_ptr< ActiveObjectManager >	active_object_manager_;	///< ActiveObjectManager
-	common::auto_ptr< DrawingModelManager >	drawing_model_manager_;	///< DrawingModelManager @todo GraphicsManager ‚ªŠÇ—‚·‚é‚æ‚¤‚É‚µ‚Äíœ‚·‚é
 
 	common::auto_ptr< Direct3D11BulletDebugDraw >	bullet_debug_draw_;
 
@@ -164,7 +163,6 @@ public:
 	ScriptManager* get_script_manager() const { return script_manager_.get(); }
 
 	ActiveObjectManager* get_active_object_manager() const { return active_object_manager_.get(); }
-	DrawingModelManager* get_drawing_model_manager() const { return drawing_model_manager_.get(); } ///< @todo GraphicsManager ‚ªŠÇ—‚·‚é‚æ‚¤‚É‚µ‚Äíœ‚·‚é
 	
 	static App* get_app() { return App::GetInstance();  }
 

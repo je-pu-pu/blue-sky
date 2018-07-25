@@ -1,13 +1,15 @@
 #pragma once
 
-#include "Direct3D11Rectangle.h"
+#include <blue_sky/graphics/Model.h>
+
+namespace blue_sky::graphics
+{
 
 /**
- * Direct3D 11 Fader
- *
  * 画面をフェードイン, フェードアウトさせる
+ *
  */
-class Direct3D11Fader : public Direct3D11Rectangle
+class Fader : public Model
 {
 private:
 	Color			fade_color_;		///< フェードアウト時の色
@@ -16,7 +18,7 @@ private:
 
 	void update_color();
 public:
-	Direct3D11Fader( Direct3D* );
+	Fader();
 
 	bool fade_in( float_t = 0.05f );
 	bool fade_out( float_t = 0.05f );
@@ -30,4 +32,6 @@ public:
 	void set_color( const Color& c ) { fade_color_ = c; current_color_ = Color( c.r(), c.g(), c.b(), current_color_.a() ); }
 	const Color& get_color() const { return current_color_; }
 
-}; // class Direct3D11Fader
+}; // class Fader
+
+} // namespace blue_sky::graphics

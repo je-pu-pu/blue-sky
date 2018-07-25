@@ -12,8 +12,8 @@ namespace blue_sky
 class Balloon : public ActiveObject
 {
 public:
-	const Player* player_;
-	float flicker_;
+	const Player* player_ = nullptr;
+	float flicker_ = 0;
 
 private:
 	float_t get_collision_width() const override { return 1.5f; }
@@ -34,7 +34,7 @@ public:
 	Balloon();
 	~Balloon() { }
 
-	virtual void set_drawing_model( const DrawingModel* m ) override;
+	void set_model( Model* m ) override;
 
 	/// çXêV
 	void update() override;

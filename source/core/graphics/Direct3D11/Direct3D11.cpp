@@ -1,14 +1,13 @@
 #include "Direct3D11.h"
 #include "Direct3D11Sprite.h"
-#include "Direct3D11Fader.h"
-#include "Direct3D11MeshManager.h"
 #include "Direct3D11Texture.h"
-#include "Direct3D11TextureManager.h"
 
 #include "InputLayout.h"
 #include "Effect.h"
 #include "EffectTechnique.h"
 #include "EffectPass.h"
+
+#include "WICTextureLoader.h"
 
 #include <core/graphics/DirectWrite/DirectWrite.h>
 
@@ -16,6 +15,7 @@
 
 #include <common/exception.h>
 #include <common/serialize.h>
+#include <common/string.h>
 #include <common/log.h>
 
 #include <dxgi.h>
@@ -85,11 +85,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* /
 	setup_viewport();
 
 	sprite_ = new Sprite( this );
-	fader_ = new Fader( this );
 	effect_ = new Effect( this );
-	
-	mesh_manager_ = new Direct3D11MeshManager( this );
-	texture_manager_ = new Direct3D11TextureManager( this );
 }
 
 /**
@@ -100,10 +96,7 @@ Direct3D11::~Direct3D11()
 {
 	set_full_screen( false );
 
-	texture_manager_.release();
-	mesh_manager_.release();
 	effect_.release();
-	fader_.release();
 	sprite_.release();
 	font_.release();
 
@@ -618,8 +611,7 @@ void Direct3D11::set_default_viewport()
  */
 void Direct3D11::set_render_target_for_vr( ID3D11RenderTargetView* render_target_view, ID3D11DepthStencilView* depth_stencil_view )
 {
-	const float clear_color[ 4 ] = { 0.f, 0.f, 0.f, 1.f };
-
+	// const float clear_color[ 4 ] = { 0.f, 0.f, 0.f, 1.f };
 	// immediate_context_->ClearRenderTargetView( render_target_view, clear_color );
 	// clear_depth_stencil_view();
 
@@ -691,6 +683,20 @@ const Direct3D11::InputLayout* Direct3D11::get_input_layout( const char* name ) 
 void Direct3D11::set_input_layout( const InputLayout* input_layout )
 {
 	immediate_context_->IASetInputLayout( input_layout->get_input_layout() );
+}
+
+Direct3D11::Texture* Direct3D11::load_texture( const char* file_path ) 
+{
+	ID3D11ShaderResourceView* view = 0;
+
+	std::wstring ws_file_name = common::convert_to_wstring( file_path );
+
+	if ( FAILED( DirectX::CreateWICTextureFromFile( device_, ws_file_name.c_str(), nullptr, & view ) ) )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "file open failed. " ) + file_path );
+	}
+
+	return new Texture( this, view );
 }
 
 /**

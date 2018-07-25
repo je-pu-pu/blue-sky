@@ -1,13 +1,18 @@
 #pragma once
 
-#include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/ShaderResources.h>
+#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/Direct3D11/MeshBuffer.h>
 
 #include <memory>
 
 class Direct3D11;
-class Direct3D11SkyBox;
 class Direct3D11Axis;
+
+namespace blue_sky::graphics
+{
+	class SkyBox;
+}
 
 namespace blue_sky::graphics::direct_3d_11
 {
@@ -22,11 +27,11 @@ public:
 	typedef Direct3D11 Direct3D;
 
 private:
-	Direct3D* direct_3d_;
+	Direct3D*										direct_3d_;
 	
-	std::unique_ptr< Direct3D11SkyBox >				sky_box_;
-	std::unique_ptr< Mesh >							ground_;
-
+	std::unique_ptr< SkyBox >						sky_box_;
+	std::unique_ptr< Model >						ground_;
+	
 	std::unique_ptr< Direct3D11Axis >				debug_axis_;
 
 	std::unique_ptr< GameConstantBuffer >			game_render_data_;
@@ -37,8 +42,8 @@ private:
 	std::unique_ptr< ObjectConstantBufferWithData >	sky_box_render_data_;
 	std::unique_ptr< ObjectConstantBufferWithData > ground_render_data_;
 
-	bool is_fading_in_ = true;
-	float_t fade_speed_ = 0.f;
+	bool											is_fading_in_ = true;
+	float_t											fade_speed_ = 0.f;
 
 protected:
 	const InputLayout* get_input_layout( const char_t* ) const override;
@@ -48,28 +53,27 @@ protected:
 	void set_input_layout( const InputLayout* ) const override;
 	void set_primitive_topology( PrimitiveTopology ) const override;
 
+	Line* create_line() const override;
+	Texture* load_texture_file( const char_t* ) const override;
+
 	void render_debug_axis_model() const override;
 
 public:
-	GraphicsManager( Direct3D* );
+	explicit GraphicsManager( Direct3D* );
 	virtual ~GraphicsManager();
 
 	void update() override;
 
-	Mesh* load_mesh( const char_t*, const char_t* ) override;
-	// Mesh* get_mesh( const char_t* ) override;
+	MeshBuffer* create_mesh_buffer() const override { return new MeshBuffer( direct_3d_ ); }
 
-	void unload_mesh( const char_t* ) override;
-	void unload_mesh_all() override;
+	// void unload_mesh( const char_t* ) override;
+	// void unload_mesh_all() override;
 
-	DrawingMesh* create_drawing_mesh() override;
-	DrawingLine* create_drawing_line() override;
+	// DrawingMesh* create_drawing_mesh() override;
+	// DrawingLine* create_drawing_line() override;
 
-	Texture* load_texture( const char_t*, const char_t* ) override;
-	Texture* get_texture( const char_t* ) override;
-
-	void unload_texture( const char_t* ) override;
-	void unload_texture_all() override;
+	// void unload_texture( const char_t* ) override;
+	// void unload_texture_all() override;
 
 	void set_sky_box( const char_t* ) override;
 	void unset_sky_box() override;

@@ -34,15 +34,8 @@ public:
 	uint_t get_width() const override { return texture_2d_desc_.Width; }
 	uint_t get_height() const override { return texture_2d_desc_.Height; }
 
-	void bind_to_ds( uint_t slot ) const override
-	{
-		direct_3d_->bind_texture_to_ds( slot, this );
-	}
-
-	void bind_to_ps( uint_t slot ) const override
-	{
-		direct_3d_->bind_texture_to_ps( slot, this );
-	}
+	void bind_to_ds( uint_t slot ) const override { direct_3d_->bind_texture_to_ds( slot, this ); }
+	void bind_to_ps( uint_t slot ) const override { direct_3d_->bind_texture_to_ps( slot, this ); }
 
 	ID3D11ShaderResourceView* get_shader_resource_view() const { return view_.get(); }
 

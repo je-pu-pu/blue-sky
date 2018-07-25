@@ -1,17 +1,16 @@
 #include "EndingScene.h"
-#include "DrawingModel.h"
-#include "DrawingLine.h"
-#include "DrawingModelManager.h"
 #include "Sound.h"
 #include "SoundManager.h"
 #include "GameMain.h"
 #include "Input.h"
 
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/Model.h>
+#include <blue_sky/graphics/Line.h>
 
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
-#include <core/graphics/Direct3D11/Direct3D11Fader.h>
+#include <blue_sky/graphics/Fader.h>
 
 #include <game/Texture.h>
 #include <game/ElapsedTimer.h>
@@ -45,7 +44,7 @@ EndingScene::EndingScene( const GameMain* game_main )
 
 	bg_texture_ = get_graphics_manager()->load_texture( "bg", "media/texture/cloth.png" );
 
-	get_direct_3d()->getFader()->full_in();
+	get_graphics_manager()->get_fader()->full_in();
 
 	elapsed_timer_->reset();
 	bgm_->play( false );
@@ -75,7 +74,7 @@ void EndingScene::load_sequence_file()
 			continue;
 		}
 
-		DrawingModel* model = get_drawing_model_manager()->load( model_file_name.c_str() );
+		Model* model = get_graphics_manager()->load_model( model_file_name.c_str() );
 
 		if ( ! model || ! model->get_line() )
 		{
@@ -140,7 +139,7 @@ void EndingScene::update()
 		{
 			line_type_++;
 
-			if ( line_type_ >= DrawingLine::LINE_TYPE_MAX )
+			if ( line_type_ >= Line::LINE_TYPE_MAX )
 			{
 				line_type_ = 0;
 			}
@@ -171,7 +170,7 @@ void EndingScene::update()
 
 	if ( in_fade_out_ )
 	{
-		if ( get_direct_3d()->getFader()->fade_out() )
+		if ( get_graphics_manager()->get_fader()->fade_out() )
 		{
 			set_next_scene( "title" );
 		}

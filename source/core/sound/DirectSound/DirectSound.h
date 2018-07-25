@@ -20,7 +20,7 @@ private:
 	DSCAPS						caps_;				///< Caps
 
 public:
-	DirectSound( HWND );
+	explicit DirectSound( HWND );
 	~DirectSound();
 	
 	DirectSoundBuffer* create_sound_buffer( const DSBUFFERDESC& ) const;

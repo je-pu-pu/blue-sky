@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Direct3D11ConstantBuffer.h"
+#include <blue_sky/graphics/Direct3D11/ShaderResource.h>
 #include "Direct3D11Texture.h"
 
 #include <common/auto_ptr.h>
@@ -29,13 +29,13 @@ public:
 
 	struct ConstantBufferData
 	{
-		static const int DEFAULT_SLOT = 10;
+		static const int SLOT = 10;
 
 		Matrix shadow_view_projection[ 3 ];
 		float_t view_depth_per_cascade_level[ 4 ];
 	};
 
-	typedef Direct3D11ConstantBuffer< ConstantBufferData > ConstantBuffer;
+	typedef blue_sky::graphics::direct_3d_11::ShaderResource< ConstantBufferData > ConstantBuffer;
 
 	static const int shader_resource_view_slot_ = 1;		/// !!!!!!!!!!!
 
@@ -74,6 +74,8 @@ public:
 	void set_eye_position( const Vector& );
 
 	const ConstantBuffer* getConstantBuffer() const { return constant_buffer_.get(); }
+
+	Direct3D11Texture* getTexture() { return texture_.get(); }
 	const Direct3D11Texture* getTexture() const { return texture_.get(); }
 
 	const Matrix getViewProjectionMatrix( int level ) const { return view_matrix_ * projection_matrix_list_[ level ]; }

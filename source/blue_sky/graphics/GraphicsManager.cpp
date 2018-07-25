@@ -1,12 +1,12 @@
 #include "GraphicsManager.h"
-#include "DrawingMesh.h"
-#include "DrawingLine.h"
-#include "FbxFileLoader.h"
 
+#include <blue_sky/graphics/Fader.h>
+#include <blue_sky/graphics/ObjFileLoader.h>
+#include <blue_sky/graphics/FbxFileLoader.h>
 #include <blue_sky/graphics/shader/FlatShader.h>
 #include <blue_sky/graphics/shader/MatcapShader.h>
+#include <blue_sky/graphics/Line.h>
 
-#include <DrawingModel.h>
 #include <ActiveObjectManager.h>
 
 #include <AnimationPlayer.h>
@@ -24,7 +24,7 @@ namespace blue_sky::graphics
 {
 
 GraphicsManager::GraphicsManager()
-	: fbx_file_loader_( new FbxFileLoader() )
+	: fader_( new Fader() )
 {
 	
 }
@@ -35,35 +35,44 @@ GraphicsManager::~GraphicsManager()
 }
 
 /**
- * 手描き風メッシュを読み込む
+ * モデルを読み込む
  *
  * @param name 名前
- * @param skinning_animation_set 同時に読み込むスキニングアニメーション情報を格納するポインタ
- * @return 手描き風メッシュ、または失敗時に 0 を返す
+ * @return モデル
  */
-DrawingMesh* GraphicsManager::load_drawing_mesh( const char_t* name, common::safe_ptr< SkinningAnimationSet >& skinning_animation_set )
+GraphicsManager::Model* GraphicsManager::load_model( const char_t* name )
 {
-	std::string file_path = string_t( "media/model/" ) + name;
+	Model* model = model_manager_.get( name );
+	
+	if ( model )
+	{
+		return model;
+	}
+
+	model = create_named_model( name );
+	// model->set_mesh( get_mesh( name ) );
+
+	string_t file_path = string_t( "media/model/" ) + name;
 
 	std::cout << "--- loading " << name << " ---" << std::endl;
 	common::timer t;
 
-	DrawingMesh* mesh = create_drawing_mesh();
-	
-	bool loaded = false;
+	bool mesh_loaded = false;
 
-	if ( ! loaded && boost::filesystem::exists( file_path + ".bin.fbx" ) )
+	// Mesh
+	if ( boost::filesystem::exists( file_path + ".bin.fbx" ) )
 	{
 		if ( ! boost::filesystem::exists( file_path + ".fbx" ) || boost::filesystem::last_write_time( file_path + ".fbx" ) < boost::filesystem::last_write_time( file_path + ".bin.fbx" ) )
 		{
-			loaded = mesh->load_fbx( ( file_path + ".bin.fbx" ).c_str(), fbx_file_loader_.get(), skinning_animation_set );
+			FbxFileLoader loader( model, name );
+			mesh_loaded = loader.load( ( file_path + ".bin.fbx" ).c_str() );
 		}
 	}
 
 	/*
-	if ( ! loaded && boost::filesystem::exists( file_path  + ".fbx" ) )
+	if ( ! mesh_loaded && boost::filesystem::exists( file_path  + ".fbx" ) )
 	{
-		loaded = mesh->load_fbx( ( file_path  + ".fbx" ).c_str(), fbx_file_loader_.get(), skinning_animation_set );
+		mesh_loaded = mesh->load_fbx( ( file_path  + ".fbx" ).c_str(), fbx_file_loader_.get(), skinning_animation_set );
 
 		if ( loaded )
 		{
@@ -72,12 +81,35 @@ DrawingMesh* GraphicsManager::load_drawing_mesh( const char_t* name, common::saf
 	}
 	*/
 
-	if ( ! loaded && boost::filesystem::exists( file_path + ".obj" ) )
+	if ( ! mesh_loaded && boost::filesystem::exists( file_path + ".obj" ) )
 	{
-		loaded = mesh->load_obj( ( file_path + ".obj" ).c_str() );
+		ObjFileLoader loader( model, name );
+		mesh_loaded = loader.load( ( file_path + ".obj" ).c_str() );
 	}
 
-	if ( loaded )
+	if ( mesh_loaded )
+	{
+		model->get_mesh()->optimize();
+
+		model->get_mesh()->create_vertex_buffer();
+		model->get_mesh()->create_index_buffer();
+
+		model->get_mesh()->clear_vertex_list();
+		model->get_mesh()->clear_vertex_weight_list();
+		model->get_mesh()->clear_vertex_group_list();
+	}
+
+	// Line
+	string_t line_file_path = string_t( "media/model/" ) + name + "-line.obj";
+	bool line_loaded = false;
+
+	if ( boost::filesystem::exists( line_file_path ) )
+	{
+		model->set_line( create_line() );
+		line_loaded = model->get_line()->load_obj( line_file_path.c_str() );
+	}
+
+	if ( mesh_loaded || line_loaded )
 	{
 		std::cout << "--- loaded " << name << " : " << t.elapsed() << "---" << std::endl;
 	}
@@ -86,9 +118,78 @@ DrawingMesh* GraphicsManager::load_drawing_mesh( const char_t* name, common::saf
 		std::cout << "--- not found " << name << " : " << t.elapsed() << "---" << std::endl;
 	}
 
-	return mesh;
+	return model;
 }
 
+/**
+ * モデルを複製する
+ *
+ */
+GraphicsManager::Model* GraphicsManager::clone_model( const Model* m )
+{
+	return model_manager_.create( *m );
+}
+
+/**
+ * 名前とファイル名を指定してテクスチャをファイルから読み込む
+ *
+ * 指定された名前のテクスチャがすでに管理されている場合は、テクスチャをファイルから読み込まず管理されているテクスチャを返す
+ * 指定された名前のテクスチャが管理されていない場合は、指定されたファイルパスからテクスチャを読み込み、名前を付けて管理し、そのテクスチャを返す
+ *
+ * @param name 名前
+ * @param file_name ファイルパス
+ */
+GraphicsManager::Texture* GraphicsManager::load_texture( const char_t* name, const char_t* file_path )
+{
+	Texture* t = texture_manager_.get( name );
+
+	if ( t )
+	{
+		return t;
+	}
+
+	t = load_texture_file( file_path );
+
+	if ( ! t )
+	{
+		return nullptr;
+	}
+
+	texture_manager_.add_named( name, t );
+
+	return t;
+}
+
+/**
+ * 名前を指定してテクスチャを取得する
+ *
+ * 指定された名前のテクスチャがすで管理されている場合は、そのテクスチャを返す
+ * 指定された名前のテクスチャが管理されていない場合は、一定のルールに基づき名前をファイルパスに変換し、テクスチャをファイルから読み込み、名前で監視し、そのテクスチャを返す
+ */
+GraphicsManager::Texture* GraphicsManager::get_texture( const char_t* name )
+{
+	Texture* t = texture_manager_.get( name );
+
+	if ( t )
+	{
+		return t;
+	}
+
+	string_t file_path = string_t( "media/model/" ) + name + ".png";
+
+	t = load_texture_file( file_path.c_str() );
+
+	if ( ! t )
+	{
+		return nullptr;
+	}
+
+	texture_manager_.add_named( name, t );
+
+	return t;
+}
+
+#if 0
 /**
  * 手描き風ラインを読み込む
  *
@@ -109,6 +210,7 @@ DrawingLine* GraphicsManager::load_drawing_line( const char_t* name )
 
 	return line;
 }
+#endif
 
 /**
  * デフォルトのシェーダーを準備する
@@ -118,10 +220,10 @@ void GraphicsManager::setup_default_shaders()
 {
 	auto* matcap_texture = load_texture( "matcap", "media/texture/matcap/skin.png" );
 
-	shader_manager_.create_named< shader::FlatShader >( "flat", "main", "flat" );
-	shader_manager_.create_named< shader::FlatShader >( "flat_skin", "skin", "flat_skin" );
-	shader_manager_.create_named< shader::MatcapShader >( "matcap", "main", "matcap" )->set_texture( matcap_texture );
-	shader_manager_.create_named< shader::MatcapShader >( "matcap_skin", "skin", "matcap_skin" )->set_texture( matcap_texture );
+	create_named_shader< shader::FlatShader >( "flat", "main", "flat" );
+	create_named_shader< shader::FlatShader >( "flat_skin", "skin", "flat_skin" );
+	create_named_shader< shader::MatcapShader >( "matcap", "main", "matcap" )->set_texture( matcap_texture );
+	create_named_shader< shader::MatcapShader >( "matcap_skin", "skin", "matcap_skin" )->set_texture( matcap_texture );
 }
 
 /**
@@ -329,9 +431,9 @@ void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_ob
 		buffer_data.world *= Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
 		buffer_data.world = buffer_data.world.transpose();
 
-		if ( active_object->get_drawing_model()->get_line() )
+		if ( active_object->get_model()->get_line() )
 		{
-			buffer_data.color = active_object->get_drawing_model()->get_line()->get_color();
+			buffer_data.color = active_object->get_model()->get_line()->get_color();
 		}
 
 		get_shared_object_render_data()->update( & buffer_data );

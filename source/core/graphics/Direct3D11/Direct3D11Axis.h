@@ -29,7 +29,7 @@ protected:
 	void create_vertex_buffer();
 
 public:
-	Direct3D11Axis( Direct3D11* );
+	explicit Direct3D11Axis( Direct3D11* );
 	virtual ~Direct3D11Axis();
 
 	void render() const;

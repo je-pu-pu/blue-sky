@@ -1,10 +1,14 @@
 #include "FbxFileLoader.h"
 
-#include "SkinningAnimationSet.h"
+#include <GameMain.h>
+#include <SkinningAnimationSet.h>
 
-#include <core/graphics/Direct3D11/Direct3D11Mesh.h>
-#include <core/graphics/Direct3D11/Direct3D11Material.h>
+#include <blue_sky/graphics/shader/FlatShader.h>
+#include <blue_sky/graphics/Model.h>
+#include <blue_sky/graphics/Mesh.h>
 #include <core/type.h>
+
+#include <game/Shader.h>
 
 #include <common/timer.h>
 #include <common/exception.h>
@@ -21,6 +25,9 @@
 #else
 #pragma comment ( lib, "libfbxsdk-mt.lib" )
 #endif
+
+namespace blue_sky::graphics
+{
 
 void print_fbx_node_recursive( FbxNode* node )
 {
@@ -222,9 +229,9 @@ void print_fbx_node_recursive( FbxNode* node )
 	}
 }
 
-FbxFileLoader::FbxFileLoader()
-	: fbx_manager_( FbxManager::Create() )
-	, mesh_( 0 )
+FbxFileLoader::FbxFileLoader( Model* model, const char_t* name )
+	: BaseFileLoader( model, name )
+	, fbx_manager_( FbxManager::Create() )
 	, fbx_scene_( 0 )
 	, fbx_material_index_( 0 )
 {
@@ -248,19 +255,17 @@ FbxFileLoader::~FbxFileLoader()
 /**
  * FBX ファイルを読み込む
  *
- * @param mesh 読込先のメッシュ
  * @param file_name FBX ファイル名
  * @return ファイルの読み込みに成功した場合は true を、失敗した場合は false を返す
  */
-bool FbxFileLoader::load( Mesh* mesh, const char_t* file_name )
+bool FbxFileLoader::load( const char_t* file_name )
 {
-	mesh_ = mesh;
 	fbx_material_index_ = 0;
 	bone_index_map_.clear();
 
 	common::timer t;
 
-	if ( ! load( file_name ) )
+	if ( ! load_fbx( file_name ) )
 	{
 		return false;
 	}
@@ -355,6 +360,8 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 		return;
 	}
 
+	get_model()->set_mesh( create_mesh() );
+
 	typedef std::map< Mesh::Vertex, Mesh::Index > VertexIndexMap;
 	typedef std::vector< Mesh::Vertex > VertexList;
 
@@ -362,7 +369,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 	VertexList vertex_list;
 
 	Mesh::PositionList position_list;
-	Mesh::SkinningInfoList skinning_info_list;
+	Mesh::VertexWeightList vertex_weight_list;
 
 	// load_mesh_vertex()
 	for ( int n = 0; n < mesh->GetControlPointsCount(); n++ )
@@ -376,7 +383,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 				static_cast< float >( v[ 2 ] ) ) );
 	}
 
-	// load_mesh_skinning_info()
+	// load_mesh_vertex_weight()
 	{
 		int skin_count = mesh->GetDeformerCount( FbxDeformer::eSkin );
 
@@ -384,11 +391,11 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 		{
 			assert( skin_count == 1 );
 
-			skinning_info_list.resize( position_list.size() );
+			vertex_weight_list.resize( position_list.size() );
 
 			FbxSkin* skin = FbxCast< FbxSkin >( mesh->GetDeformer( 0, FbxDeformer::eSkin ) );
 
-			load_mesh_skinning_info( skin, skinning_info_list );
+			load_mesh_vertex_weight( skin, vertex_weight_list );
 		}
 	}
 
@@ -412,9 +419,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 	for ( int n = 0; n < mesh->GetPolygonCount(); n++ )
 	{
 		// Mesh::Material* material = mesh_->get_material_at( material_indices->GetAt( n ), true );
-		Mesh::VertexGroup* vertex_group = mesh_->get_vertex_group_at( material_indices->GetAt( n ), true );
-
-		std::vector< Mesh::Vertex > v_tmp_list;
+		Mesh::VertexGroup* vertex_group = get_model()->get_mesh()->get_vertex_group_at( material_indices->GetAt( n ) );
 
 		bool is_smooth = smoothing->GetDirectArray().GetAt( n ) != 0;
 		FbxVector4 polygon_normal( 0.f, 0.f, 0.f );
@@ -486,13 +491,13 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 				}
 				else
 				{
-					Mesh::Index vertex_index = static_cast< Mesh::Index >( mesh_->get_vertex_list().size() );
+					Mesh::Index vertex_index = static_cast< Mesh::Index >( get_model()->get_mesh()->get_vertex_count() );
 
-					mesh_->get_vertex_list().push_back( v );
+					get_model()->get_mesh()->add_vertex( v );
 
-					if ( ! skinning_info_list.empty() )
+					if ( ! vertex_weight_list.empty() )
 					{
-						mesh_->get_skinning_info_list().push_back( skinning_info_list.at( position_index ) );
+						get_model()->get_mesh()->add_vertex_weight( vertex_weight_list.at( position_index ) );
 					}
 
 					vertex_group->add_index( vertex_index );
@@ -505,12 +510,12 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 }
 
 /**
- * メッシュのスキニング情報を読み込む
+ * メッシュのウエイト情報を読み込む
  *
- * @param mesh メッシュ情報
- * @param skinning_info_list スキニング情報への参照
+ * @param skin FBX スキン情報
+ * @param vertex_weight_list ウエイト情報への参照
  */
-void FbxFileLoader::load_mesh_skinning_info( FbxSkin* skin, Mesh::SkinningInfoList& skinning_info_list )
+void FbxFileLoader::load_mesh_vertex_weight( FbxSkin* skin, Mesh::VertexWeightList& vertex_weight_list )
 {
 	std::cout << skin->GetClusterCount() << " bones" << std::endl;
 
@@ -542,7 +547,7 @@ void FbxFileLoader::load_mesh_skinning_info( FbxSkin* skin, Mesh::SkinningInfoLi
 			int index = cluster->GetControlPointIndices()[ i ];
 			float weight = static_cast< float >( cluster->GetControlPointWeights()[ i ] );
 
-			skinning_info_list[ index ].add( bone_index, weight );
+			vertex_weight_list[ index ].add( bone_index, weight );
 
 			// std::cout << index << ":" << weight << std::endl;
 		}
@@ -567,13 +572,13 @@ void FbxFileLoader::load_mesh_skinning_info( FbxSkin* skin, Mesh::SkinningInfoLi
 			static_cast< float_t >(  initial_matrix.GetT()[ 1 ] ),
 			static_cast< float_t >( -initial_matrix.GetT()[ 2 ] ) );
 
-		mesh_->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( bone_index ) = s * r * t;
+		get_model()->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( bone_index ) = s * r * t;
 	}
 
-	if ( mesh_->get_skinning_animation_set() )
+	if ( get_model()->get_skinning_animation_set() )
 	{
-		mesh_->get_skinning_animation_set()->optimize();
-		mesh_->get_skinning_animation_set()->calculate_length();
+		get_model()->get_skinning_animation_set()->optimize();
+		get_model()->get_skinning_animation_set()->calculate_length();
 	}
 }
 
@@ -635,8 +640,12 @@ void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 
 	if ( ! texture_file_name.empty() )
 	{
-		Mesh::Material* material = mesh_->get_material_at( fbx_material_index_, true );
-		material->set_texture( mesh_->load_texture_by_texture_name( texture_file_name.c_str() ) );
+		Shader* shader = create_shader();
+		shader->set_texture_at( 0, load_texture( texture_file_name.c_str() ) );
+		get_model()->set_shader_at( fbx_material_index_, shader );
+
+		// Mesh::Material* material = mesh_->get_material_at( fbx_material_index_, true );
+		// material->set_texture( mesh_->load_texture_by_texture_name( texture_file_name.c_str() ) );
 
 		fbx_material_index_++;
 	}
@@ -689,7 +698,9 @@ void FbxFileLoader::load_animations()
 		return;
 	}
 
-	SkinningAnimationSet* skinning_animation_set = mesh_->setup_skinning_animation_set();
+	SkinningAnimationSet* skinning_animation_set = create_skinning_animation_set();
+	get_model()->set_skinning_animation_set( skinning_animation_set );
+
 	skinning_animation_set->set_bone_count( bone_index_map_.size() );
 
 	for ( auto i = bone_index_map_.begin(); i != bone_index_map_.end(); ++i )
@@ -733,7 +744,7 @@ void FbxFileLoader::load_animations_for_bone( int bone_index, FbxNode* node )
 			continue;
 		}
 
-		Animation& animation = mesh_->get_skinning_animation_set()->get_skinning_animation( anim_stack->GetName() ).get_bone_animation_by_bone_index( bone_index );
+		Animation& animation = get_model()->get_skinning_animation_set()->get_skinning_animation( anim_stack->GetName() ).get_bone_animation_by_bone_index( bone_index );
 		animation.set_name( node->GetName() );
 
 		for ( int m = 0; m < anim_stack->GetMemberCount< FbxAnimLayer >(); m++ )
@@ -835,13 +846,8 @@ void FbxFileLoader::load_curve_for_animation( Animation& animation, Animation::C
  */
 void FbxFileLoader::convert_coordinate_system()
 {
-	for ( auto i = mesh_->get_vertex_list().begin(); i != mesh_->get_vertex_list().end(); ++i )
-	{
-		i->Position.z() = -i->Position.z();
-		i->Normal.z() = -i->Normal.z();
-	}
-
-	mesh_->flip();
+	get_model()->get_mesh()->invert_vertex_z();
+	get_model()->get_mesh()->flip_polygon();
 }
 
 /**
@@ -1018,7 +1024,7 @@ void FbxFileLoader::print_axis_system( const FbxAxisSystem& axis_system ) const
  *
  * @param file_path FBX ファイルパス
  */
-bool FbxFileLoader::load( const char_t* file_path )
+bool FbxFileLoader::load_fbx( const char_t* file_path )
 {
 	bool result = false;
 
@@ -1049,7 +1055,7 @@ bool FbxFileLoader::load( const char_t* file_path )
  *
  * @param file_path FBX ファイルパス
  */
-bool FbxFileLoader::save( const char_t* file_path )
+bool FbxFileLoader::save_fbx( const char_t* file_path )
 {
 	bool result = false;
 
@@ -1083,7 +1089,7 @@ bool FbxFileLoader::convert_to_binaly( const char_t* file_path, const char_t* bi
 
 	set_relative_file_name_to_texture_file_name_recursive( fbx_scene_->GetRootNode() );
 
-	return save( binary_file_path );
+	return save_fbx( binary_file_path );
 }
 
 /**
@@ -1104,3 +1110,11 @@ string_t FbxFileLoader::convert_file_path_to_internal_encoding( const char* s )
 
 	return result;
 }
+
+FbxFileLoader::Texture* FbxFileLoader::load_texture( const char_t* name ) const
+{
+	const string_t file_path = string_t( "media/model/" ) + name;
+	return GameMain::get_instance()->get_graphics_manager()->load_texture( name, file_path.c_str() );
+}
+
+} // namespace blue_sky::graphics

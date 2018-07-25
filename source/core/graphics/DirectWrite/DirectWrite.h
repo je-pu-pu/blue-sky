@@ -23,7 +23,7 @@ private:
 	void draw_text_common( FLOAT, FLOAT, FLOAT, FLOAT, const WCHAR*, const Color& );
 
 public:
-	DirectWrite( IDXGISurface1* );
+	explicit DirectWrite( IDXGISurface1* );
 	~DirectWrite();
 
 	FLOAT get_font_size() const { return 26.f; }

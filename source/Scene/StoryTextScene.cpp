@@ -7,11 +7,11 @@
 #include "Sound.h"
 
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/Fader.h>
 
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
-#include <core/graphics/Direct3D11/Direct3D11Fader.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
 
 #include <win/Rect.h>
@@ -55,16 +55,22 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 		// bg_sprite_layer_list_.back()->set_size_from_texture();
 	}
 
-	get_direct_3d()->getFader()->full_out();
+	get_graphics_manager()->get_fader()->full_out();
 }
 
 StoryTextScene::~StoryTextScene()
 {
+	/// @todo íºÇ∑
+#if 0
 	get_graphics_manager()->unload_texture( "sprite" );
+#endif
 
 	for ( auto i = bg_sprite_layer_list_.begin(); i != bg_sprite_layer_list_.end(); ++i )
 	{
+		/// @todo íºÇ∑
+#if 0
 		get_graphics_manager()->unload_texture( ( *i )->get_name().c_str() );
+#endif
 		delete *i;
 	}
 }
@@ -94,12 +100,9 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 		}
 
 		std::stringstream ss;
-		
 		std::string name;
-		std::string value;
 		
 		ss << line;
-
 		ss >> name;
 
 		if ( name == "layer" )
@@ -227,10 +230,10 @@ void StoryTextScene::update()
 				bgm_->fade_out();
 			}
 
-			get_direct_3d()->getFader()->fade_out();
+			get_graphics_manager()->get_fader()->fade_out();
 		}
 
-		if ( sound_->is_fade_full_out() && ( ! bgm_ || bgm_->is_fade_full_out() ) && get_direct_3d()->getFader()->is_full_out() )
+		if ( sound_->is_fade_full_out() && ( ! bgm_ || bgm_->is_fade_full_out() ) && get_graphics_manager()->get_fader()->is_full_out() )
 		{
 			set_next_scene( next_scene_name_ );
 
@@ -243,7 +246,7 @@ void StoryTextScene::update()
 
 	if ( ! is_skipped_ )
 	{
-		get_direct_3d()->getFader()->fade_in();
+		get_graphics_manager()->get_fader()->fade_in();
 	}
 
 	for ( auto i = bg_sprite_layer_list_.begin(); i != bg_sprite_layer_list_.end(); ++i )

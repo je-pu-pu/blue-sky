@@ -10,23 +10,16 @@
 #include <map>
 
 class Direct3D11Texture;
-
 class Direct3D11Sprite;
-class Direct3D11Fader;
 
 namespace core::graphics::direct_3d_11
 {
+	class InputLayout;
 
-class InputLayout;
-
-class Effect;
-class EffectTechnique;
-class EffectPass;
-
+	class Effect;
+	class EffectTechnique;
+	class EffectPass;
 }
-
-class Direct3D11MeshManager;
-class Direct3D11TextureManager;
 
 class DirectWrite;
 
@@ -38,16 +31,12 @@ class Direct3D11
 {
 public:
 	typedef Direct3D11Sprite			Sprite;
-	typedef Direct3D11Fader				Fader;
 
 	typedef core::graphics::direct_3d_11::InputLayout		InputLayout;
 
 	typedef core::graphics::direct_3d_11::Effect			Effect;
 	typedef core::graphics::direct_3d_11::EffectTechnique	EffectTechnique;
 	typedef core::graphics::direct_3d_11::EffectPass		EffectPass;
-
-	typedef Direct3D11MeshManager		MeshManager;
-	typedef Direct3D11TextureManager	TextureManager;
 
 	typedef DirectWrite					Font;
 
@@ -97,11 +86,7 @@ private:
 	common::auto_ptr< Font	>				font_;
 
 	common::auto_ptr< Sprite >				sprite_;
-	common::auto_ptr< Fader >				fader_; ///< @todo GraphicsManager ‚ÉˆÚs‚·‚é
 	common::auto_ptr< Effect >				effect_;
-
-	common::auto_ptr< MeshManager >			mesh_manager_;
-	common::auto_ptr< TextureManager >		texture_manager_;
 
 	void create_device();
 	void create_swap_chain( IDXGIFactory1*, HWND, uint_t, uint_t, bool, int, int );
@@ -165,6 +150,8 @@ public:
 	const InputLayout* get_input_layout( const char* ) const;
 	void set_input_layout( const InputLayout* );
 
+	[[nodiscard]] Texture* load_texture( const char* );
+
 	void bind_texture_to_ds( uint_t, const Texture* );
 	void bind_texture_to_ps( uint_t, const Texture* );
 
@@ -184,17 +171,11 @@ public:
 
 	inline Font* getFont() { return font_.get(); }
 	inline Sprite* getSprite() { return sprite_.get(); }
-	inline Fader* getFader() { return fader_.get(); } ///< @todo GraphicsManager ‚ÉˆÚs‚·‚é
 	inline Effect* get_effect() { return effect_.get(); }
-	inline MeshManager* getMeshManager() { return mesh_manager_.get(); }
-	inline TextureManager* getTextureManager() { return texture_manager_.get(); }
 
 	inline const Font* getFont() const { return font_.get(); }
 	inline const Sprite* getSprite() const { return sprite_.get(); }
-	inline const Fader* getFader() const { return fader_.get(); } ///< @todo GraphicsManager ‚ÉˆÚs‚·‚é
 	inline const Effect* get_effect() const { return effect_.get(); }
-	inline const MeshManager* getMeshManager() const { return mesh_manager_.get(); }
-	inline const TextureManager* getTextureManager() const { return texture_manager_.get(); }
 
 	/** BAD functions */
 	inline ID3D11Device* getDevice() const { return device_; }

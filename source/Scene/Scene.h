@@ -1,13 +1,10 @@
 #pragma once
 
 #include <core/type.h>
-
-#include <d3d11.h>
 #include <functional>
 
 class App;
 class Direct3D11;
-class Direct3D11Texture;
 
 class OculusRift;
 
@@ -28,14 +25,18 @@ class GameMain;
 class ActiveObject;
 class ActiveObjectPhysics;
 class ActiveObjectManager;
-class DrawingModelManager;
 class SoundManager;
 class ScriptManager;
 class Input;
 
-class DrawingModel;
+namespace graphics
+{
+	class GraphicsManager;
+	class Model;
+	class Mesh;
+}
 
-namespace graphics { class GraphicsManager; } using graphics::GraphicsManager;
+using graphics::GraphicsManager;
 
 /**
  * èÍñ Ç≤Ç∆ÇÃèàóùÅAï`âÊÇä«óùÇ∑ÇÈ
@@ -44,14 +45,15 @@ namespace graphics { class GraphicsManager; } using graphics::GraphicsManager;
 class Scene
 {
 public:
+	typedef graphics::Model				Model;
+	typedef graphics::Mesh				Mesh;
+	typedef game::Texture				Texture;
+
 	typedef game::Sound					Sound;
 	typedef game::Config				Config;
 	typedef game::MainLoop				MainLoop;
-	
-	typedef game::Texture				Texture;
 
 	typedef Direct3D11					Direct3D;
-	// typedef Direct3D11Texture			Texture;
 
 	typedef ActiveObjectPhysics			PhysicsManager;
 
@@ -71,7 +73,6 @@ protected:
 	Direct3D* get_direct_3d() const;	///< @todo çÌèúÇ∑ÇÈ
 
 	ActiveObjectManager* get_active_object_manager() const;
-	DrawingModelManager* get_drawing_model_manager() const; ///< @todo GraphicsManager Ç™ä«óùÇ∑ÇÈÇÊÇ§Ç…ÇµÇƒçÌèúÇ∑ÇÈ
 
 	PhysicsManager* get_physics_manager() const;
 	GraphicsManager* get_graphics_manager() const;
@@ -109,7 +110,7 @@ protected:
 	virtual Sound* get_bgm() { return 0; };
 
 public:
-	Scene( const GameMain* );
+	explicit Scene( const GameMain* );
 	virtual ~Scene();
 
 	void set_name( const std::string& name ) { name_ = name; }

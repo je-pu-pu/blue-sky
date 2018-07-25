@@ -9,6 +9,7 @@ namespace blue_sky::graphics::direct_3d_11
 /**
  * Direct3D11 定数バッファを使った ShaderResource
  *
+ * @todo core に移動する
  */
 template< typename DataType >
 class ShaderResource : public blue_sky::graphics::ShaderResource
@@ -88,7 +89,7 @@ public:
  *
  */
 template< typename DataType >
-class alignas( 16 ) ShaderResourceWithData : public ShaderResource< DataType >
+class ShaderResourceWithData : public ShaderResource< DataType >
 {
 protected:
 	DataType data_;

@@ -1,6 +1,7 @@
 #include "Direct3D11ShadowMap.h"
-#include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11.h"
+
+#include <blue_sky/graphics/Direct3D11/ShaderResource.h>
 
 #include <common/exception.h>
 
@@ -99,7 +100,7 @@ void Direct3D11ShadowMap::set_light_position( const Vector& pos )
 
 	/// @todo ìÆìIÇ…ïœçXÇ≈Ç´ÇÈÇÊÇ§Ç…Ç∑ÇÈ
 	float_t width[ MaxCascadeLevels ] = { 10.f, 50.f, 150.f, 9999.f };
-	float_t depth[ MaxCascadeLevels + 1 ] = { 0.1f, 5.f, 50.f, 150.f, 300.f };
+	// float_t depth[ MaxCascadeLevels + 1 ] = { 0.1f, 5.f, 50.f, 150.f, 300.f };
 
 	for ( int n = 0; n < MaxCascadeLevels; n++ )
 	{

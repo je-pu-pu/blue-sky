@@ -7,8 +7,8 @@
 namespace game
 {
 
-class Mesh;
-class Line;
+// class Mesh;
+// class Line;
 
 /**
  * グラフィック管理クラス
@@ -17,8 +17,8 @@ class Line;
 class GraphicsManager
 {
 public:
-	typedef Mesh Mesh;
-	typedef Line Line;
+	// typedef Mesh Mesh;
+	// typedef Line Line;
 
 public:
 	GraphicsManager() { }

@@ -1,13 +1,14 @@
 #include "GraphicsManager.h"
 
 #include <blue_sky/ShaderResources.h>
+#include <blue_sky/graphics/SkyBox.h>
+#include <blue_sky/graphics/Fader.h>
+#include <blue_sky/graphics/ObjFileLoader.h>
+#include <blue_sky/graphics/FbxFileLoader.h>
 #include <blue_sky/graphics/shader/BypassShader.h>
+#include <blue_sky/graphics/Direct3D11/Line.h>
 
-#include <core/graphics/Direct3D11/Direct3D11MeshManager.h>
-#include <core/graphics/Direct3D11/Direct3D11TextureManager.h>
-#include <core/graphics/Direct3D11/Direct3D11SkyBox.h>
-#include <core/graphics/Direct3D11/Direct3D11Mesh.h>
-#include <core/graphics/Direct3D11/Direct3D11Fader.h>
+#include <core/graphics/Direct3D11/Direct3D11Texture.h>
 #include <core/graphics/Direct3D11/Direct3D11Axis.h>
 #include <core/graphics/Direct3D11/Direct3D11BulletDebugDraw.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
@@ -19,10 +20,6 @@
 
 #include <GameMain.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
-
-/// @todo 整理する
-#include <DrawingMesh.h>
-#include <DrawingLine.h>
 
 #include <common/string.h>
 
@@ -42,8 +39,7 @@ GraphicsManager::GraphicsManager( Direct3D* direct_3d )
 	, shared_object_render_data_( new ObjectConstantBuffer( direct_3d ) )
 	, debug_axis_( new Direct3D11Axis( direct_3d_ ) )
 {
-	Shader* bypass_shader = get_shader_manager()->create_named< shader::BypassShader >( "bypass" );
-	// direct_3d_->getFader()->get_material()->set_shader( bypass_shader );
+	create_named_shader< shader::BypassShader >( "bypass" );
 }
 
 /**
@@ -71,6 +67,7 @@ void GraphicsManager::update()
 	}
 }
 
+#if 0
 /**
  * メッシュを読み込む
  *
@@ -82,7 +79,6 @@ GraphicsManager::Mesh* GraphicsManager::load_mesh( const char_t* name, const cha
 	return direct_3d_->getMeshManager()->load( name, file_path );
 }
 
-#if 0
 /**
  * 指定した名前のメッシュを取得する
  *
@@ -92,7 +88,6 @@ GraphicsManager::Mesh* GraphicsManager::get_mesh( const char_t* name )
 {
 	return direct_3d_->getMeshManager()->get( name );
 }
-#endif
 
 /**
  * 指定した名前のメッシュをアンロードする
@@ -120,7 +115,7 @@ void GraphicsManager::unload_mesh_all()
  */
 DrawingMesh* GraphicsManager::create_drawing_mesh()
 {
-	return new DrawingMesh( new Direct3D11Mesh( direct_3d_ ) );
+	return new DrawingMesh( new Mesh( direct_3d_ ) );
 }
 
 /**
@@ -132,28 +127,30 @@ DrawingLine* GraphicsManager::create_drawing_line()
 {
 	return new DrawingLine( direct_3d_ );
 }
+#endif
 
 /**
- * テクスチャを読み込む
+ * Line を生成する
  *
- * @param name テクスチャ名
- * @param file_path テクスチャファイルパス
+ * @return Line
  */
-GraphicsManager::Texture* GraphicsManager::load_texture( const char_t* name, const char_t* file_path )
+GraphicsManager::Line* GraphicsManager::create_line() const
 {
-	return direct_3d_->getTextureManager()->load( name, file_path );
+	return new direct_3d_11::Line( direct_3d_ );
 }
 
 /**
- * 指定した名前のテクスチャを取得する
+ * テクスチャをファイルから読み込む
  *
- * @param name テクスチャ名
+ * @param file_name テクスチャファイルパス
+ * @return Texture
  */
-GraphicsManager::Texture* GraphicsManager::get_texture( const char_t* name )
+GraphicsManager::Texture* GraphicsManager::load_texture_file( const char_t* file_path ) const
 {
-	return direct_3d_->getTextureManager()->load( name, ( string_t( "media/model/" ) + name + ".png" ).c_str() );
+	return direct_3d_->load_texture( file_path );
 }
 
+#if 0
 /**
  * 指定した名前のテクスチャをアンロードする
  *
@@ -172,6 +169,7 @@ void GraphicsManager::unload_texture_all()
 {
 	direct_3d_->getTextureManager()->unload_all();
 }
+#endif
 
 /**
  * スカイボックスを設定する
@@ -186,7 +184,7 @@ void GraphicsManager::set_sky_box( const char_t* name )
 		sky_box_render_data_->data().color = Color::White;
 	}
 
-	sky_box_.reset( new Direct3D11SkyBox( direct_3d_, name ) );
+	sky_box_.reset( new SkyBox( name ) );
 
 	/*
 	for ( int n = 0; n < sky_box_->get_material_count(); n++ )
@@ -223,12 +221,11 @@ bool GraphicsManager::is_sky_box_set() const
  */
 void GraphicsManager::set_ground( const char_t* name )
 {
-	/// @tood Direct3D11Mesh を修正し複数回 load_obj() を読んでもバッファをロストしないようにする
 	unset_ground();
 
-	ground_.reset( new Direct3D11Mesh( direct_3d_ ) );
-	ground_->load_obj( ( string_t( "media/model/" ) + name + ".obj" ).c_str() );
-	// ground_->get_material_at( 0 )->set_shader( get_shader( "bypass" ) );
+	ground_.reset( new Model() );
+	ObjFileLoader loader( ground_.get(), "ground" );
+	loader.load( ( string_t( "media/model/" ) + name + ".obj" ).c_str() );
 
 	ground_render_data_.reset( new ObjectConstantBufferWithData( direct_3d_ ) );
 	ground_render_data_->data().world.set_identity();
@@ -300,7 +297,7 @@ void GraphicsManager::set_drawing_accent( float_t accent )
  */
 void GraphicsManager::set_drawing_line_type( int_t type )
 {
-	frame_drawing_render_data_->data().line_type = math::clamp< int >( type, 0, DrawingLine::LINE_TYPE_MAX - 1 );
+	frame_drawing_render_data_->data().line_type = math::clamp< int >( type, 0, Line::LINE_TYPE_MAX - 1 );
 }
 
 void GraphicsManager::set_eye_position( const Vector3& pos )
@@ -418,9 +415,16 @@ void GraphicsManager::render_technique( const EffectTechnique* technique, const 
  */
 void GraphicsManager::render_background() const
 {
+	
+
 	// ground
 	if ( ground_ )
 	{
+		ground_render_data_->update();
+		set_current_object_shader_resource( ground_render_data_.get() );
+		ground_->render();
+
+#if 0
 		render_technique( "|ground", [this]
 		{
 			get_frame_render_data()->bind_to_vs();
@@ -431,8 +435,11 @@ void GraphicsManager::render_background() const
 
 			ground_->render();
 		} );
+#endif
 	}
 
+	/// @todo 直す
+#if 0
 	// sky box
 	if ( sky_box_ )
 	{
@@ -447,6 +454,7 @@ void GraphicsManager::render_background() const
 			sky_box_->render();
 		} );
 	}
+#endif
 }
 
 /**
@@ -456,7 +464,7 @@ void GraphicsManager::render_background() const
  */
 void GraphicsManager::set_fade_color( const Color& color )
 {
-	direct_3d_->getFader()->set_color( color );
+	get_fader()->set_color( color );
 }
 
 void GraphicsManager::start_fade_in( float_t speed )
@@ -473,12 +481,12 @@ void GraphicsManager::start_fade_out( float_t speed )
 
 void GraphicsManager::fade_in( float_t speed )
 {
-	direct_3d_->getFader()->fade_in( speed );
+	get_fader()->fade_in( speed );
 }
 	
 void GraphicsManager::fade_out( float_t speed )
 {
-	direct_3d_->getFader()->fade_out( speed );
+	get_fader()->fade_out( speed );
 }
 
 /**
@@ -487,6 +495,7 @@ void GraphicsManager::fade_out( float_t speed )
  */
 void GraphicsManager::render_fader() const
 {
+#if 0
 	ObjectConstantBufferData buffer_data;
 	buffer_data.world = Matrix().set_identity().transpose();
 	buffer_data.color = direct_3d_->getFader()->get_color();
@@ -503,6 +512,7 @@ void GraphicsManager::render_fader() const
 
 		direct_3d_->getFader()->render();
 	} );
+#endif
 }
 
 /**

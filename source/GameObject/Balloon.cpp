@@ -1,21 +1,20 @@
 #include "Balloon.h"
 #include "Player.h"
-#include "DrawingModel.h"
-#include "DrawingLine.h"
+#include <blue_sky/graphics/Model.h>
+#include <blue_sky/graphics/Line.h>
 #include <common/random.h>
 
 namespace blue_sky
 {
 
 Balloon::Balloon()
-	: player_( 0 )
 {
 
 }
 
-void Balloon::set_drawing_model( const DrawingModel* m )
+void Balloon::set_model( Model* m )
 {
-	ActiveObject::set_drawing_model( m );
+	ActiveObject::set_model( m );
 
 	if ( m->get_line() )
 	{

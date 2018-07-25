@@ -1,6 +1,5 @@
 #include "CanvasTestScene.h"
 
-#include "DrawingModel.h"
 #include "GameMain.h"
 
 #include "Input.h"
@@ -8,7 +7,7 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 
 /// @todo íäè€âªÇ∑ÇÈ
-#include <core/graphics/Direct3D11/Direct3D11SkyBox.h>
+#include <blue_sky/graphics/SkyBox.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
 
 #include <game/Texture.h>
@@ -34,7 +33,7 @@ CanvasTestScene::CanvasTestScene( const GameMain* game_main )
 	, tablet_( Tablet::get_instance( get_game_main()->get_app()->GetWindowHandle() ) )
 	, pen_color_( 0.f, 0.f, 0.f, 1.f )
 	, points_( new DynamicPointList( get_direct_3d() ) )
-	, sky_box_( new SkyBox( get_direct_3d(), "sky-box-sky" ) )
+	, sky_box_( new SkyBox( "sky-box-sky" ) )
 {
 	texture_ = get_graphics_manager()->get_texture( "white-hard-pen" );
 }
@@ -98,10 +97,10 @@ void CanvasTestScene::update()
 	}
 
 	{
-		static float v = 0.f;
-
 		if ( get_input()->press( Input::B ) )
 		{
+			static float v = 0.f;
+
 			v += 0.005f;
 
 			if ( v > 1.f )
@@ -230,7 +229,8 @@ void CanvasTestScene::render()
 	get_direct_3d()->set_default_viewport();
 
 	get_graphics_manager()->set_input_layout( "main" );
-
+	
+#if 0 /// @todo ìÆÇ≠ÇÊÇ§Ç…Ç∑ÇÈ
 	render_technique( "|sky_box", [this] {
 		
 		get_graphics_manager()->get_game_render_data()->bind_to_all();
@@ -245,6 +245,7 @@ void CanvasTestScene::render()
 
 		sky_box_->render();
 	} );
+#endif
 
 
 	get_graphics_manager()->set_input_layout( "drawing_point" );

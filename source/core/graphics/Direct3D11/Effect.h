@@ -34,7 +34,7 @@ private:
 	TechniqueList		technique_list_;
 
 public:
-	Effect( Direct3D* );
+	explicit Effect( Direct3D* );
 	~Effect();
 	
 	void load( const char* );

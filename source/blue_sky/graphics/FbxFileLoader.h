@@ -1,23 +1,22 @@
 #pragma once
 
-#include "Animation.h"
-#include <core/graphics/Direct3D11/Direct3D11Mesh.h>
+#include "BaseFileLoader.h"
+#include <Animation.h>
+#include <blue_sky/graphics/Mesh.h>
 #include <fbxsdk.h>
 #include <map>
+
+namespace blue_sky::graphics
+{
 
 /**
  * FBX File Loader
  *
  */
-class FbxFileLoader
+class FbxFileLoader : public BaseFileLoader
 {
-public:
-	/// @todo Direct3D11 Ç÷ÇÃàÀë∂Çíäè€âªÇ∑ÇÈ
-	typedef Direct3D11Mesh Mesh;
-
 private:
 	FbxManager* fbx_manager_;
-	Mesh*		mesh_;
 	FbxScene*	fbx_scene_;
 	int			fbx_material_index_;
 	std::map< FbxNode*, uint_t > bone_index_map_;
@@ -26,7 +25,7 @@ protected:
 	void load_mesh_recursive( FbxNode* );
 	
 	void load_mesh( FbxMesh* );
-	void load_mesh_skinning_info( FbxSkin*, Mesh::SkinningInfoList& );
+	void load_mesh_vertex_weight( FbxSkin*, Mesh::VertexWeightList& );
 	void load_material( FbxSurfaceMaterial* );
 	
 	void load_limb_recursive( FbxNode* );
@@ -46,15 +45,19 @@ protected:
 	void print_matrix( const FbxAMatrix& ) const;
 	void print_axis_system( const FbxAxisSystem& ) const;
 
+	Texture* load_texture( const char_t* ) const;
+
 public:
-	FbxFileLoader();
+	FbxFileLoader( Model*, const char_t* );
 	~FbxFileLoader();
 
-	bool load( Mesh*, const char_t* );
+	bool load( const char_t* ) override;
 
-	bool load( const char_t* file_path );
-	bool save( const char_t* file_path );
+	bool load_fbx( const char_t* file_path );
+	bool save_fbx( const char_t* file_path );
 	
 	bool convert_to_binaly( const char_t* file_path, const char_t* binary_file_path );
 
 }; // class FbxFileLoader
+
+} // namespace blue_sky::graphics

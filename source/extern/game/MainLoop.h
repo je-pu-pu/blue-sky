@@ -22,7 +22,7 @@ private:
 	unsigned long last_sec_time_;	// ‘O‚Ì 1 •b‚ÌŽžŠÔ
 
 public:
-	MainLoop( unsigned long );
+	explicit MainLoop( unsigned long );
 	~MainLoop();
 
 	void reset();

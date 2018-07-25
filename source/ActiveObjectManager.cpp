@@ -1,7 +1,6 @@
 #include "ActiveObjectManager.h"
 #include "AnimationPlayer.h"
 
-#include "DrawingModelManager.h"
 #include "ActiveObjectPhysics.h"
 
 #include <GameObject/Girl.h>
@@ -19,6 +18,9 @@
 
 #include <GameObject/ActiveObject.h>
 #include <GameObject/StaticObject.h>
+
+#include <GameMain.h>
+#include <blue_sky/graphics/GraphicsManager.h>
 
 namespace blue_sky
 {
@@ -125,9 +127,9 @@ ActiveObject* ActiveObjectManager::create_object( const string_t& name )
  * 文字列によりオブジェクトを生成する
  *
  * @param ss オブジェクトを生成するためのパラメータ
- * @param 
+ * @return 生成したオブジェクト
  */
-ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss, DrawingModelManager* drawing_model_manager, ActiveObjectPhysics* physics )
+ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss )
 {
 	string_t object_name;
 	float_t x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0;
@@ -187,11 +189,11 @@ ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss, 
 
 	if ( object_name == "soda-can-1" )
 	{
-		object->set_rigid_body( physics->add_active_object_as_cylinder( object ) );
+		object->set_rigid_body( GameMain::get_instance()->get_physics_manager()->add_active_object_as_cylinder( object ) );
 	}
 	else
 	{
-		object->set_rigid_body( physics->add_active_object_as_box( object ) );
+		object->set_rigid_body( GameMain::get_instance()->get_physics_manager()->add_active_object_as_box( object ) );
 	}
 
 	object->set_mass( mass );
@@ -202,7 +204,7 @@ ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss, 
 		object->get_rigid_body()->setFriction( 10 );
 	}
 
-	object->set_drawing_model( drawing_model_manager->load( object_name.c_str() ) );
+	object->set_model( GameMain::get_instance()->get_graphics_manager()->load_model( object_name.c_str() ) );
 
 	return object;
 }

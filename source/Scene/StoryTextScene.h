@@ -44,8 +44,8 @@ public:
 	StoryTextScene( const GameMain*, const char*, const char* );
 	~StoryTextScene();
 
-	void update();				///< メインループ
-	void render();				///< 描画
+	void update() override;				///< メインループ
+	void render() override;				///< 描画
 
 }; // class StoryTextScene
 

@@ -10,9 +10,6 @@
 namespace blue_sky
 {
 
-class DrawingModelManager;
-class ActiveObjectPhysics;
-
 /**
  * ï°êîÇÃ ActiveObject Çä«óùÇ∑ÇÈ Manager
  *
@@ -55,7 +52,7 @@ public:
 	void set_target_direction_object( ActiveObject* active_object, const ActiveObject* target_active_object, float_t speed );
 
 	ActiveObject* create_object( const string_t& );
-	ActiveObject* create_static_object( std::stringstream&, DrawingModelManager*, ActiveObjectPhysics* );
+	ActiveObject* create_static_object( std::stringstream& );
 	ActiveObject* get_active_object( const string_t& name );
 	GameObject* get_nearest_object( const GameObject::Vector3& );
 

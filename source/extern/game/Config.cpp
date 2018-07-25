@@ -65,9 +65,9 @@ bool Config::save_file( const char* file_name )
 {
 	std::ofstream out( file_name );
 	
-	for ( ValueMap::const_iterator i = value_.begin(); i != value_.end(); i++ )
+	for ( auto v : value_ )
 	{
-		out <<  i->first << " " << i->second << std::endl;
+		out <<  v.first << " " << v.second << std::endl;
 	}
 
 	return true;

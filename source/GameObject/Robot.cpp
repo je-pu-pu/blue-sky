@@ -4,11 +4,6 @@
 
 #include "AnimationPlayer.h"
 
-#include "DrawingModel.h"
-#include "DrawingMesh.h"
-#include "DrawingLine.h"
-
-
 #include "ActiveObjectPhysics.h"
 
 #include "GameMain.h"
@@ -28,6 +23,7 @@ Robot::Robot()
 	: player_( 0 )
 	, texture_( 0 )
 	, mode_( MODE_STAND )
+	, mode_backup_( MODE_STAND )
 	, timer_( 0 )
 {
 	texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
@@ -194,6 +190,8 @@ void Robot::update()
 		get_animation_player()->play( "Float", false, true );
 		texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-tender" );
 	}
+
+	get_model()->get_shader_at( 0 )->set_texture_at( 0, texture_ );
 }
 
 void Robot::update_patrol()
@@ -434,8 +432,6 @@ void Robot::add_patrol_point( const Vector3& point )
 void Robot::bind_render_data() const
 {
 	ActiveObject::bind_render_data();
-
-	get_drawing_model()->get_mesh()->get_material_at( 0 )->set_texture( texture_ );
 }
 
 } // namespace blue_sky

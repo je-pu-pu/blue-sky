@@ -10,7 +10,6 @@
 #include <Scene/CanvasTestScene.h>
 #include <Scene/DebugScene.h>
 
-#include "DrawingModelManager.h"
 #include "ActiveObjectManager.h"
 
 // #include "ConstantBuffer.h"
@@ -25,8 +24,6 @@
 #include "Sound.h"
 
 #include "ScriptManager.h"
-#include "DrawingModel.h"
-#include "DrawingMesh.h"
 
 #include <blue_sky/graphics/Direct3D11/GraphicsManager.h>
 
@@ -125,7 +122,6 @@ GameMain::GameMain()
 	setup_script_command();
 
 	active_object_manager_ = new ActiveObjectManager();
-	drawing_model_manager_ = new DrawingModelManager();
 
 	// MainLoop
 	main_loop_ = new MainLoop( 60 );
@@ -190,12 +186,13 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "set_drawing_accent", [this] ( float_t accent ) { get_graphics_manager()->set_drawing_accent( accent ); } );
 	get_script_manager()->set_function( "set_drawing_line_type", [this] ( int_t type ) { get_graphics_manager()->set_drawing_line_type( type ); } );
 
+	get_script_manager()->set_function( "clone_model", [this] ( graphics::Model* m ) { auto* m2 =get_graphics_manager()->clone_model( m ); return m2; } );
+
 	get_script_manager()->set_function( "get_shader", [this] ( const char_t* name ) { return get_graphics_manager()->get_shader( name ); } );
-	get_script_manager()->set_function( "set_shader", [this] ( ActiveObject* o, int_t n, const game::Shader* s ) { o->get_drawing_model()->get_mesh()->get_material_at( n )->set_shader( s->clone() ); } );
+	get_script_manager()->set_function( "clone_shader", [this] ( const game::Shader* s ) { return get_graphics_manager()->clone_shader( s ); } );
 
+	get_script_manager()->set_function( "load_texture", [this] ( const char_t* name, const char_t* file_path ) { return get_graphics_manager()->load_texture( name, file_path ); } );
 	get_script_manager()->set_function( "get_texture", [this] ( const char_t* name ) { return get_graphics_manager()->get_texture( name ); } );
-	get_script_manager()->set_function( "set_shader_texture", [this] ( game::Shader* s, int_t n, game::Texture* t ) { s->set_texture_at( n, t ); } );
-
 
 	// debug
 	get_script_manager()->set_function( "debug_axis", [this] ( int on ) { get_graphics_manager()->set_debug_axis_enabled( on ); } );
@@ -223,7 +220,7 @@ ActiveObject* GameMain::create_object( const char_t* class_name )
 	}
 
 	active_object->set_rigid_body( get_physics_manager()->add_active_object_as_box( active_object ) );
-	active_object->set_drawing_model( get_drawing_model_manager()->load( class_name ) );
+	active_object->set_model( get_graphics_manager()->load_model( class_name ) );
 
 	return active_object;
 }

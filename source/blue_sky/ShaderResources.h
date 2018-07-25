@@ -3,6 +3,9 @@
 #include <blue_sky/graphics/Direct3D11/ShaderResource.h>
 #include <core/type.h>
 
+/// @todo ConstantBuffer -> ShaderResource に名前変更する
+/// @todo dummy は不要なのでやめる
+
 namespace blue_sky
 {
 
@@ -25,9 +28,9 @@ struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
 	Matrix view;
 	Matrix projection;
 	Vector light;
-	float_t time;
-	uint_t time_beat;
 
+	float_t time;
+	u32_t time_beat;
 	float_t tess_factor = 1.f;
 
 	float_t dummy;
@@ -47,8 +50,9 @@ struct FrameDrawingConstantBufferData : public BaseConstantBufferData< 4 >
 {
 	Color shadow_color;
 	Color shadow_paper_color;
+
 	float_t accent;
-	uint_t line_type;
+	u32_t line_type;
 	float_t dummy[ 2 ];
 
 	FrameDrawingConstantBufferData()

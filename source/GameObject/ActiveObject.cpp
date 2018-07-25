@@ -2,13 +2,11 @@
 #include "ActiveObjectPhysics.h"
 #include "SoundManager.h"
 #include "Sound.h"
-#include "DrawingModel.h"
 #include "AnimationPlayer.h"
 #include "GameMain.h"
 
-#include "DrawingModel.h"
-#include "DrawingMesh.h"
-#include "DrawingLine.h"
+#include <blue_sky/graphics/Model.h>
+#include <blue_sky/graphics/Line.h>
 
 #include <common/math.h>
 
@@ -18,7 +16,7 @@ namespace blue_sky
 {
 
 ActiveObject::ActiveObject()
-	: drawing_model_( 0 )
+	: model_( 0 )
 	, object_constant_buffer_( new ObjectConstantBuffer( GameMain::get_instance()->get_direct_3d() ) )
 	, animation_player_( 0 )
 	, is_dead_( false )
@@ -41,7 +39,7 @@ ActiveObject::ActiveObject()
 
 ActiveObject::ActiveObject( const ActiveObject& o )
 	: GameObject( o )
-	, drawing_model_( o.drawing_model_ )
+	, model_( o.model_ )
 	, object_constant_buffer_( new ObjectConstantBuffer( GameMain::get_instance()->get_direct_3d() ) )
 	, animation_player_( 0 )
 	, is_dead_( o.is_dead_ )
@@ -79,9 +77,9 @@ void ActiveObject::setup_animation_player()
 		return;
 	}
 
-	if ( get_drawing_model()->has_animation() )
+	if ( get_model()->get_skinning_animation_set() )
 	{
-		animation_player_ = get_drawing_model()->create_animation_player();
+		animation_player_ = new AnimationPlayer( get_model()->get_skinning_animation_set() );
 	}
 }
 
@@ -246,9 +244,9 @@ void ActiveObject::update_render_data() const
 	buffer_data.world *= ::Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
 	buffer_data.world = buffer_data.world.transpose();
 
-	if ( get_drawing_model()->get_line() )
+	if ( get_model()->get_line() )
 	{
-		buffer_data.color = get_drawing_model()->get_line()->get_color();
+		buffer_data.color = get_model()->get_line()->get_color();
 	}
 
 	get_object_constant_buffer()->update( & buffer_data );
@@ -290,7 +288,7 @@ void ActiveObject::render_mesh() const
 		get_animation_player()->bind_render_data();
 	}
 
-	get_drawing_model()->get_mesh()->render();
+	get_model()->render();
 }
 
 /**
@@ -304,14 +302,14 @@ void ActiveObject::render_line() const
 		return;
 	}
 
-	if ( ! get_drawing_model()->get_line() )
+	if ( ! get_model()->get_line() )
 	{
 		return;
 	}
 
 	bind_render_data();
 
-	get_drawing_model()->get_line()->render();
+	get_model()->get_line()->render();
 }
 
 void ActiveObject::play_animation( const char* name, bool force, bool loop )

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GameObject.h"
-#include "DrawingModel.h"
 #include <blue_sky/ShaderResources.h>
 
 class AnimationPlayer;
@@ -31,7 +30,7 @@ private:
 	Vector3				start_rotation_;	///< スタート時の回転 ( Degree )
 	float_t				start_direction_degree_;	///< スタート時の向き ( Y Axis )
 
-	const DrawingModel*						drawing_model_;				///< DrawingModel
+	Model*				model_;				///< Model
 	const ObjectConstantBuffer*				object_constant_buffer_;	///< 定数バッファ @todo インスタンス毎に必要か？
 	AnimationPlayer*						animation_player_;			///< アニメーション再生
 
@@ -62,12 +61,9 @@ public:
 
 	virtual void update() { }
 
-	virtual void set_drawing_model( const DrawingModel* m ) { drawing_model_ = m; setup_animation_player(); }
-	const DrawingModel* get_drawing_model() const { return drawing_model_; }
-
-	void set_model( Model* m ) { drawing_model_ = static_cast< DrawingModel* >( m ); }
-	Model* get_model() { return const_cast< DrawingModel* >( drawing_model_ ); }
-	// const Model* get_model() const { return drawing_model_; }
+	virtual void set_model( Model* m ) { model_ = m; setup_animation_player(); } /// @todo virtual を外す
+	Model* get_model() { return model_; }
+	const Model* get_model() const { return model_; }
 
 	virtual void action( const string_t& );
 

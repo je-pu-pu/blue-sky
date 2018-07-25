@@ -22,7 +22,7 @@ protected:
 	std::unique_ptr< Camera > camera_;
 
 public:
-	DebugScene( const GameMain* );
+	explicit DebugScene( const GameMain* );
 	~DebugScene() override;
 
 	void update() override;

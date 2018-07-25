@@ -1,8 +1,8 @@
 #include "Direct3D11Sprite.h"
-#include "Direct3D11ConstantBuffer.h"
 #include "Direct3D11.h"
-#include "Direct3D11Texture.h"
 
+#include <blue_sky/graphics/Direct3D11/ShaderResource.h>
+#include <game/Texture.h>
 #include <win/Rect.h>
 
 Direct3D11Sprite::Color Direct3D11Sprite::white_( 1, 1, 1, 1 );

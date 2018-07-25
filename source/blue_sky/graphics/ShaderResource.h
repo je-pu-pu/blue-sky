@@ -6,6 +6,7 @@ namespace blue_sky::graphics
 /**
  * シェーダーから利用するリソース
  *
+ * @todo core に移動する
  */
 class ShaderResource
 {

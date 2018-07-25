@@ -18,7 +18,7 @@ private:
 
 	float speed_; ///< 
 public:
-	DirectSoundBuffer( LPDIRECTSOUNDBUFFER8 );
+	explicit DirectSoundBuffer( LPDIRECTSOUNDBUFFER8 );
 	~DirectSoundBuffer();
 	
 	void set_3d_sound( bool );

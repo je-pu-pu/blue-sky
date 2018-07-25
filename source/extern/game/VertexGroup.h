@@ -31,7 +31,7 @@ public:
 	bool empty() const { return index_list_.empty(); }
 	IndexList::size_type size() { return index_list_.size(); }
 
-	void flip()
+	void flip_polygon()
 	{
 		for ( IndexList::size_type n = 0; n < index_list_.size(); n += 3 )
 		{

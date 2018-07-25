@@ -18,31 +18,23 @@
 #include <Camera.h>
 #include <AnimationPlayer.h>
 
-/// @todo GraphicsManager ? Ç…à⁄çsÇ∑ÇÈ
-#include "DrawingModelManager.h"
-#include "DrawingModel.h"
-#include "DrawingMesh.h"
-#include "DrawingLine.h"
-
+#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/Rectangle.h>
+#include <blue_sky/graphics/Model.h>
+#include <blue_sky/graphics/Line.h>
 #include <blue_sky/graphics/shader/BypassShader.h>
 
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Direct3D11ShadowMap.h>
-#include <core/graphics/Direct3D11/Direct3D11Rectangle.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
 
 #include "ActiveObjectPhysics.h"
 
-// #include "ConstantBuffer.h"
-
 #include "Input.h"
-#include <blue_sky/graphics/GraphicsManager.h>
-#include "SoundManager.h"
 
-#include "ScriptManager.h"
-
-#include "DrawingModelManager.h"
 #include "ActiveObjectManager.h"
+#include "SoundManager.h"
+#include "ScriptManager.h"
 
 #include "OculusRift.h"
 
@@ -95,7 +87,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	// Player
 	player_ = new Player();
-	player_->set_drawing_model( get_drawing_model_manager()->load( "player" ) );
+	player_->set_model( get_graphics_manager()->load_model( "player" ) );
 	get_active_object_manager()->name_active_object( "player", player_.get() );
 
 	// Goal
@@ -128,18 +120,19 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 		get_graphics_manager()->set_sky_box( "sky-box-3" );
 	}
 
+	/// @todo íºÇ∑
 	if ( ! far_billboards_ )
 	{
-		far_billboards_ = get_graphics_manager()->load_mesh( "far_billboards", ( std::string( "media/model/stage-" ) + get_stage_name() + "-far-billboards.obj" ).c_str() );
+		far_billboards_ = get_graphics_manager()->load_model( ( get_stage_name() + "-far-billboards" ).c_str() );
 	}
 
-	rectangle_ = new Rectangle( get_direct_3d() );
-	rectangle_->get_material()->set_texture( shadow_map_->getTexture() );
+	/// @todo íºÇ∑
+	rectangle_ = get_graphics_manager()->create_named_model( "rectangle" );
+	rectangle_->set_mesh( get_graphics_manager()->create_named_mesh< Rectangle >( "rectangle" ) );
+	rectangle_->set_shader_at( 0, get_graphics_manager()->get_shader( "bypass" ) );
+	rectangle_->get_shader_at( 0 )->set_texture_at( 0, shadow_map_->getTexture() );
 
-	// rectangle_shader_ = get_graphics_manager()->get_shader< BypassShader >( "bypass" );
-	// rectangle_->get_material()->set_shader( rectangle_shader_ );
-
-	scope_mesh_ = get_graphics_manager()->load_mesh( "scope", "media/model/scope.obj" );
+	scope_mesh_ = get_graphics_manager()->load_model( "scope" );
 
 	bgm_ = get_sound_manager()->get_sound( "bgm" );
 
@@ -157,14 +150,16 @@ GamePlayScene::~GamePlayScene()
 {
 	get_direct_3d()->unset_render_target();
 
-	get_drawing_model_manager()->clear();
 	get_active_object_manager()->clear();
 
 	get_graphics_manager()->unset_sky_box();
 	get_graphics_manager()->unset_ground();
 
+	/// @todo íºÇ∑
+#if 0
 	get_graphics_manager()->unload_mesh_all();
 	get_graphics_manager()->unload_texture_all();
+#endif
 
 	get_physics_manager()->clear();
 	
@@ -389,7 +384,7 @@ void GamePlayScene::setup_command()
 		std::stringstream ss;
 		ss << s;
 
-		get_active_object_manager()->create_static_object( ss, get_drawing_model_manager(), get_physics_manager() );
+		get_active_object_manager()->create_static_object( ss );
 	};
 	command_map_[ "game_object.set_mass" ] = [ & ] ( const string_t& s )
 	{
@@ -771,12 +766,9 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		std::getline( in, line );
 
 		std::stringstream ss;
-		
 		std::string name;
-		std::string value;
 		
 		ss << line;
-
 		ss >> name;
 
 		if ( name == "#" )
@@ -850,11 +842,12 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			ss >> far_billboards_name;
 
-			far_billboards_ = get_graphics_manager()->load_mesh( "far_billboards", ( std::string( "media/model/" ) + far_billboards_name + ".obj" ).c_str() );
+			/// @todo íºÇ∑
+			far_billboards_ = get_graphics_manager()->load_model( far_billboards_name.c_str() );
 		}
 		else if ( name == "object" || name == "static-object" || name == "dynamic-object" )
 		{
-			last_object = get_active_object_manager()->create_static_object( ss, get_drawing_model_manager(), get_physics_manager() );
+			last_object = get_active_object_manager()->create_static_object( ss );
 		}
 		else if ( name == "translation-object" )
 		{
@@ -863,9 +856,9 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			TranslationObject* object = new TranslationObject( 5, 5, 5, tw, th, td, s );
 
-			DrawingModel* drawing_model = get_drawing_model_manager()->load( "box-5x5x5" );
+			Model* model = get_graphics_manager()->load_model( "box-5x5x5" );
 			
-			object->set_drawing_model( drawing_model );
+			object->set_model( model );
 			object->set_rigid_body( get_physics_manager()->add_active_object_as_box( object ) );
 			object->set_start_location( x, y, z );
 
@@ -906,8 +899,8 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> x >> y >> z >> w >> h >> d >> r;
 
 			AreaSwitch* s = new AreaSwitch( w, h, d );
-			DrawingModel* drawing_model = get_drawing_model_manager()->load( name.c_str() ); // @todo DrawingModel Çê›íËÇµÇ»Ç≠ÇƒÇ‡ìÆçÏÇ∑ÇÈÇÊÇ§Ç…Ç∑ÇÈ
-			s->set_drawing_model( drawing_model );
+			Model* model = get_graphics_manager()->load_model( name.c_str() ); // @todo DrawingModel Çê›íËÇµÇ»Ç≠ÇƒÇ‡ìÆçÏÇ∑ÇÈÇÊÇ§Ç…Ç∑ÇÈ
+			s->set_model( model );
 
 			s->set_rigid_body( get_physics_manager()->add_active_object_as_box( s ) );
 			s->set_start_location( x, y, z );
@@ -1799,11 +1792,12 @@ void GamePlayScene::render_shadow_map( const char* technique_name, bool is_skin_
 
 			for ( const auto* active_object : get_active_object_manager()->active_object_list() )
 			{
-				if ( active_object->get_drawing_model()->is_skin_mesh() == is_skin_mesh )
+				if ( active_object->get_model()->is_skin_mesh() == is_skin_mesh )
 				{
+					get_graphics_manager()->set_current_object_shader_resource( active_object->get_object_constant_buffer() );
 					active_object->render_mesh();
 
-					if ( active_object->get_drawing_model()->get_line() && active_object->get_drawing_model()->get_line()->is_cast_shadow() )
+					if ( active_object->get_model()->get_line() && active_object->get_model()->get_line()->is_cast_shadow() )
 					{
 						active_object->render_line();
 					}
@@ -1891,7 +1885,7 @@ void GamePlayScene::render_object_skin_mesh() const
 
 		for ( const auto* active_object : get_active_object_manager()->active_object_list() )
 		{
-			if ( active_object->get_drawing_model()->is_skin_mesh() )
+			if ( active_object->get_model()->is_skin_mesh() )
 			{
 				active_object->render_mesh();
 			}
@@ -1941,7 +1935,7 @@ void GamePlayScene::render_object_mesh() const
 
 		for ( const auto* active_object : get_active_object_manager()->active_object_list() )
 		{
-			if ( ! active_object->get_drawing_model()->is_skin_mesh() )
+			if ( ! active_object->get_model()->is_skin_mesh() )
 			{
 				active_object->render_mesh();
 			}

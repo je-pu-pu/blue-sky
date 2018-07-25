@@ -1,17 +1,19 @@
-#include "Direct3D11Fader.h"
+#include "Fader.h"
 
 #include <common/math.h>
 
-Direct3D11Fader::Direct3D11Fader( Direct3D* direct_3d )
-	: Direct3D11Rectangle( direct_3d )
-	, fade_color_( 1.f, 1.f, 1.f, 1.f )
+namespace blue_sky::graphics
+{
+
+Fader::Fader()
+	: fade_color_( 1.f, 1.f, 1.f, 1.f )
 	, current_color_( 1.f, 1.f, 1.f, 1.f )
 	, fade_( 0.f )
 {	
 
 }
 
-bool Direct3D11Fader::fade_in( float speed )
+bool Fader::fade_in( float speed )
 {
 	fade_ = math::chase( fade_, 0.f, speed );
 
@@ -20,7 +22,7 @@ bool Direct3D11Fader::fade_in( float speed )
 	return fade_ == 0.f;
 }
 
-bool Direct3D11Fader::fade_out( float speed )
+bool Fader::fade_out( float speed )
 {
 	fade_ = math::chase( fade_, 1.f, speed );
 
@@ -29,21 +31,23 @@ bool Direct3D11Fader::fade_out( float speed )
 	return fade_ == 1.f;
 }
 
-void Direct3D11Fader::full_in()
+void Fader::full_in()
 {
 	fade_ = 0.f;
 
 	update_color();
 }
 
-void Direct3D11Fader::full_out()
+void Fader::full_out()
 {
 	fade_ = 1.f;
 
 	update_color();
 }
 
-void Direct3D11Fader::update_color()
+void Fader::update_color()
 {
 	current_color_.a() = fade_color_.a() * fade_;
 }
+
+} // namespace blue_sky::graphics

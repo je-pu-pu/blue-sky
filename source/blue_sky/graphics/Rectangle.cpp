@@ -1,9 +1,10 @@
-#include "Direct3D11Rectangle.h"
-#include "Direct3D11Material.h"
-#include "Direct3D11.h"
+#include "Rectangle.h"
 
-Direct3D11Rectangle::Direct3D11Rectangle( Direct3D11* direct_3d )
-	: Direct3D11Mesh( direct_3d )
+namespace blue_sky::graphics
+{
+
+Rectangle::Rectangle( Buffer* b )
+	: Mesh( b )
 {	
 	/**
 	 * 0----1
@@ -40,3 +41,5 @@ Direct3D11Rectangle::Direct3D11Rectangle( Direct3D11* direct_3d )
 	create_vertex_buffer();
 	create_index_buffer();
 }
+
+} // namespace blue_sky::graphics

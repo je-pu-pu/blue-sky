@@ -22,7 +22,7 @@ public:
 	};
 
 private:
-	Mode			mode_;			///< 現在の動作モード
+	Mode			mode_ = MODE_STAND;			///< 現在の動作モード
 	Vector3			flicker_base_location_;
 
 	float get_collision_width() const override { return 0.5f; }
@@ -42,7 +42,7 @@ private:
 	}
 
 protected:
-	const Player* player_;
+	const Player* player_ = nullptr;
 
 public:
 	Girl();

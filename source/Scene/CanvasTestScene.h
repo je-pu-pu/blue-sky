@@ -21,10 +21,12 @@ namespace win
 	class Tablet;
 }
 
-class Direct3D11SkyBox;
-
 namespace blue_sky
 {
+	namespace graphics
+	{
+		class SkyBox;
+	}
 
 /**
  * 描画テスト用シーンを管理する
@@ -44,7 +46,7 @@ public:
 
 	typedef DynamicPointList< Vertex > DynamicPointList;
 
-	typedef Direct3D11SkyBox			SkyBox;
+	typedef graphics::SkyBox	SkyBox;
 
 private:
 	common::safe_ptr< Tablet > tablet_;
@@ -53,20 +55,20 @@ private:
 
 	std::unique_ptr< DynamicPointList > points_;
 	common::safe_ptr< Texture > texture_;
-	std::unique_ptr< Direct3D11SkyBox > sky_box_;
+	std::unique_ptr< SkyBox > sky_box_;
 
 protected:
 
 public:
-	CanvasTestScene( const GameMain* );
+	explicit CanvasTestScene( const GameMain* );
 	~CanvasTestScene();
 
-	void update();				///< メインループ
-	void render();				///< 描画
+	void update() override;			///< メインループ
+	void render() override;			///< 描画
 
 	void on_function_key_down( int ) override;
 
-	bool is_clip_cursor_required() { return true; }
+	bool is_clip_cursor_required() override { return true; }
 
 }; // class CanvasTestScene
 

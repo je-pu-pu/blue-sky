@@ -2,18 +2,13 @@
 #define GAME_MESH_H
 
 #include <type/type.h>
-
-#include <common/safe_ptr.h>
-
 #include <vector>
-
-/// @todo 依存関係をなんとかする
-class SkinningAnimationSet;
-class FbxFileLoader;
 
 namespace game
 {
 
+class Vertex { };
+class VertexWeight;
 class VertexGroup;
 class Material;
 
@@ -26,41 +21,36 @@ class Material;
 class Mesh
 {
 public:
-	class SkinningInfo;
-	typedef std::vector< SkinningInfo > SkinningInfoList;
+	typedef Vertex Vertex;
+	typedef VertexWeight VertexWeight;
+	typedef std::vector< VertexWeight > VertexWeightList;
 
 public:
 	Mesh() { }
 	virtual ~Mesh() { }
 
-	virtual bool load_obj( const char_t* ) { return false; }
+	virtual void add_vertex( const Vertex& ) = 0;
+	virtual uint_t get_vertex_count() const = 0;
 
-	/** @todo FBX は Mesh 以外も含むため、Mesh::load_fbx() ではなく FbxFileLoader::load() が SceneGraph を返すようにする？ */
-	virtual bool load_fbx( const char_t* ) { return false; }
-	virtual bool load_fbx( const char_t*, FbxFileLoader* ) { return false; }
-	virtual bool load_fbx( const char_t*, FbxFileLoader*, common::safe_ptr< SkinningAnimationSet >& ) { return false; }
+	virtual void add_vertex_weight( const VertexWeight& ) = 0;
 
 	virtual VertexGroup* create_vertex_group() = 0;
+	virtual VertexGroup* get_vertex_group_at( uint_t ) = 0;
+	
+	virtual uint_t get_rendering_vertex_group_count() const = 0;
 
-	virtual Material* get_material_at( uint_t ) = 0;
-	virtual const Material* get_material_at( uint_t ) const = 0;
-
-	virtual void set_material_at( uint_t, Material* ) = 0;
-
-	virtual uint_t get_material_count() const = 0;
-
-	virtual void flip() = 0;
+	virtual void invert_vertex_z() = 0;
+	virtual void flip_polygon() = 0;
 
 	virtual void bind() const = 0;
-	virtual void render() const = 0;
 	virtual void render( uint_t ) const = 0;
 };
 
 /**
- * 頂点毎のスキニング情報
+ * 頂点毎のウエイト情報
  *
  */
-class Mesh::SkinningInfo
+class VertexWeight
 {
 public:
 	typedef u8_t BoneIndexList[ 4 ];
@@ -71,7 +61,7 @@ private:
 	WeightList		weight_list_;		///< ウエイト ( 0 .. 3 )
 	
 public:
-	SkinningInfo()
+	VertexWeight()
 	{
 		for ( int n = 0; n < 4; ++n )
 		{

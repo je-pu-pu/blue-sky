@@ -43,7 +43,7 @@ public:
 	 * 指定した型のリソースを作成する
 	 *
 	 */
-	template< typename Type, typename ... Args >
+	template< typename Type = Resource, typename ... Args >
 	Type* create( Args ... args )
 	{
 		Type* resource = new Type( args ... );
@@ -57,7 +57,7 @@ public:
 	 *
 	 * @param name 作成したリソースに付ける名前
 	 */
-	template< typename Type, typename ... Args >
+	template< typename Type = Resource, typename ... Args >
 	Type* create_named( const string_t& name, Args ... args )
 	{
 		Type* resource = create< Type >( args ... );
@@ -107,6 +107,7 @@ public:
 		return static_cast< Type* >( i->second );
 	}
 
+	/// @todo clear 系
 };
 
 } // namespace game

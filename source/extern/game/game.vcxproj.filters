@@ -8,7 +8,6 @@
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="GraphicsManager.h" />
     <ClInclude Include="Texture.h" />
-    <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="SoundManager.h" />

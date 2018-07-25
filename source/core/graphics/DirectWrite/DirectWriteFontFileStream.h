@@ -23,7 +23,7 @@ public:
     {
 		std::ifstream ifs( file_path, std::ios::in | std::ios::binary );
 
-		std::ios::pos_type current_pos = ifs.tellg();
+		// std::ios::pos_type current_pos = ifs.tellg();
 
 		ifs.seekg( 0, std::ios::end );
 

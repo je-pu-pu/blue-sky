@@ -147,6 +147,7 @@ cbuffer ShadowMapConstantBuffer : register( b10 )
 	float4 ShadowMapViewDepthPerCascadeLevel;
 };
 
+/// @todo COMMON_POS_NORM_UV Ç…ìùçáÇ∑ÇÈ
 struct VS_INPUT
 {
 	float4 Position : SV_POSITION;

@@ -17,6 +17,12 @@ class Texture;
 namespace blue_sky
 {
 
+	namespace graphics
+	{
+		class Model;
+		class Line;
+	}
+
 /**
  * エンディング画面の処理を管理する
  *
@@ -24,14 +30,16 @@ namespace blue_sky
 class EndingScene : public Scene
 {
 public:
-	typedef std::vector< DrawingModel* > DrawingModelList;
+	typedef blue_sky::graphics::Model Model;
+	typedef blue_sky::graphics::Line Line;
+	typedef std::vector< Model* > DrawingModelList;
 
 private:
 	common::auto_ptr< game::ElapsedTimer > elapsed_timer_;
 
 	DrawingModelList drawing_model_list_;
 	uint_t current_drawing_model_index_;
-	DrawingModel* current_drawing_model_;
+	Model* current_drawing_model_;
 	float_t drawing_model_elapsed_time_;
 	float_t drawing_model_stop_time_;
 	float_t drawing_model_offset_;
@@ -56,7 +64,7 @@ private:
 	Sound* get_bgm() override { return bgm_; }
 
 public:
-	EndingScene( const GameMain* );
+	explicit EndingScene( const GameMain* );
 	~EndingScene();
 
 	void update() override;				///< メインループ

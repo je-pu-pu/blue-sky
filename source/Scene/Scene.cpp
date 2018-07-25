@@ -1,7 +1,6 @@
 #include "Scene.h"
 #include "GameMain.h"
 
-// #include "ConstantBuffer.h"
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include "SoundManager.h"
@@ -9,7 +8,6 @@
 
 #include <ActiveObjectManager.h>
 #include <ActiveObjectPhysics.h>
-#include <DrawingModelManager.h>
 
 #include <game/MainLoop.h>
 
@@ -58,11 +56,6 @@ Scene::Direct3D* Scene::get_direct_3d() const
 ActiveObjectManager* Scene::get_active_object_manager() const
 {
 	return game_main_->get_active_object_manager();
-}
-
-DrawingModelManager* Scene::get_drawing_model_manager() const
-{
-	return game_main_->get_drawing_model_manager();
 }
 
 Scene::PhysicsManager* Scene::get_physics_manager() const

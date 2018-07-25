@@ -3,20 +3,19 @@
 #include "GameMain.h"
 // #include "ConstantBuffer.h"
 
-#include "DrawingModelManager.h"
-#include "DrawingModel.h"
-#include "DrawingLine.h"
-
 #include "Input.h"
 #include "SoundManager.h"
 #include "Sound.h"
 
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/Model.h>
+#include <blue_sky/graphics/Line.h>
+#include <blue_sky/graphics/Fader.h>
 
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
-#include <core/graphics/Direct3D11/Direct3D11Fader.h>
+
 
 #include <win/Rect.h>
 
@@ -46,13 +45,13 @@ TitleScene::TitleScene( const GameMain* game_main )
 	title_bg_texture_ = get_graphics_manager()->load_texture( "title-bg", "media/image/cloud-3.jpg" );
 	cloth_texture_ = get_graphics_manager()->load_texture( "cloth", "media/texture/cloth.png" );
 
-	brand_logo_model_ = get_drawing_model_manager()->load( "je-pu-pu" );
-	title_logo_model_ = get_drawing_model_manager()->load( "blue-sky" );
+	brand_logo_model_ = get_graphics_manager()->load_model( "je-pu-pu" );
+	title_logo_model_ = get_graphics_manager()->load_model( "blue-sky" );
 
 	reset_total_elapsed_time();
 	bgm_->play( false );
 
-	get_direct_3d()->getFader()->full_out();
+	get_graphics_manager()->get_fader()->full_out();
 }
 
 TitleScene::~TitleScene()
@@ -69,7 +68,7 @@ void TitleScene::update()
 	Scene::update();
 
 	sequence_elapsed_time_ += get_elapsed_time();
-	get_direct_3d()->getFader()->fade_in();
+	get_graphics_manager()->get_fader()->fade_in();
 
 	if ( get_input()->push( Input::A ) )
 	{
@@ -83,7 +82,7 @@ void TitleScene::update()
 			ok_->play( false );
 			sequence_ = SEQUENCE_TITLE_FIX;
 			sequence_elapsed_time_ = 0.f;
-			get_direct_3d()->getFader()->full_out();
+			get_graphics_manager()->get_fader()->full_out();
 		}
 	}
 
@@ -93,7 +92,7 @@ void TitleScene::update()
 		{
 			sequence_ = SEQUENCE_TITLE_FIX;
 			sequence_elapsed_time_ = 0.f;
-			get_direct_3d()->getFader()->full_out();
+			get_graphics_manager()->get_fader()->full_out();
 		}
 	}
 	else if ( bgm_->get_current_position() >= 4.25f )
@@ -102,7 +101,7 @@ void TitleScene::update()
 		{
 			sequence_ = SEQUENCE_TITLE_LOGO;
 			sequence_elapsed_time_ = 0.f;
-			get_direct_3d()->getFader()->full_out();
+			get_graphics_manager()->get_fader()->full_out();
 		}
 	}
 }

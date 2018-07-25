@@ -12,35 +12,30 @@
 #include <functional>
 
 class Direct3D11ShadowMap;
-class Direct3D11Rectangle;
 
 namespace game
 {
-
-class Mesh;
-class Config;
-
-}; // namespace game
+	class Mesh;
+	class Config;
+};
 
 namespace blue_sky
 {
+	class Player;
+	class Girl;
+	class Goal;
+	class ActiveObject;
+	class Camera;
+	class DrawingModel;
+	class DelayedCommand;
 
-class Player;
-class Girl;
-class Goal;
-class ActiveObject;
-class Camera;
-class DrawingModel;
-class DelayedCommand;
+	struct FrameConstantBufferData;
 
-struct FrameConstantBufferData;
-
-namespace graphics
-{
-
-class BypassShader;
-
-}
+	namespace graphics
+	{
+		class Rectangle;
+		class BypassShader;
+	}
 
 using graphics::BypassShader;
 
@@ -52,8 +47,8 @@ class GamePlayScene : public Scene
 {
 public:
 	typedef game::Mesh					Mesh;
-	typedef Direct3D11ShadowMap			ShadowMap;
-	typedef Direct3D11Rectangle			Rectangle;
+	typedef graphics::Rectangle			Rectangle;
+	typedef Direct3D11ShadowMap			ShadowMap;	
 
 	typedef std::function< void( string_t ) > Command;
 	typedef std::map< string_t, Command > CommandMap;
@@ -83,9 +78,9 @@ protected:
 	Goal*								goal_ = 0;
 
 	/// @todo 整理する
-	Mesh*								far_billboards_ = 0;	///< 遠景ビルボード
-	Mesh*								scope_mesh_ = 0;		///< 双眼鏡
-	common::auto_ptr< Rectangle >		rectangle_;
+	Model*								far_billboards_ = 0;	///< 遠景ビルボード
+	Model*								scope_mesh_ = 0;		///< 双眼鏡
+	Model*								rectangle_;
 	BypassShader*						rectangle_shader_;
 
 	Sound*								bgm_ = 0;
@@ -177,13 +172,13 @@ protected:
 	void render_debug_shadow_map_window() const;
 
 public:
-	GamePlayScene( const GameMain* );
+	explicit GamePlayScene( const GameMain* );
 	~GamePlayScene();
 
-	void update();				///< メインループ
-	void render();				///< 描画
+	void update() override;				///< メインループ
+	void render() override;				///< 描画
 
-	bool is_clip_cursor_required() { return true; }
+	bool is_clip_cursor_required() override { return true; }
 
 }; // class GamePlayScene
 

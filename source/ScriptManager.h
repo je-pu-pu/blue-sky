@@ -2,6 +2,7 @@
 
 #include <GameObject/ActiveObject.h>
 #include <blue_sky/graphics/Model.h>
+#include <blue_sky/graphics/Mesh.h>
 #include <game/Shader.h>
 
 #include <common/math.h>
@@ -28,9 +29,17 @@ typedef sol::error ScriptError;
 
 /**
  * スクリプト管理
+ *
+ * game と blue_sky に分離する
  */
-class ScriptManager
+class ScriptManager // : game::ScriptManager
 {
+public:
+	typedef graphics::Model		Model;
+	typedef graphics::Mesh		Mesh;
+	typedef game::Shader		Shader;
+	typedef game::Texture		Texture;
+
 private:
 	sol::state lua_;
 
@@ -46,19 +55,20 @@ protected:
 	{
 		lua_.new_usertype< ActiveObject >(
 			"GameObject",
-			"model", sol::property( & ActiveObject::get_model, & ActiveObject::set_model )
+			"model", sol::property( sol::resolve< Model* () >( & ActiveObject::get_model ), & ActiveObject::set_model )
         );
 
-		lua_.new_usertype< graphics::Model >(
+		lua_.new_usertype< Model >(
 			"Model",
-			"get_shader_at", & graphics::Model::get_shader_at,
+			"mesh", sol::property( sol::resolve< Mesh* () >( & Model::get_mesh ), & Model::set_mesh ),
+			"get_shader_at", sol::resolve< Shader* ( uint_t ) >( & Model::get_shader_at ),
 			"set_shader_at", & graphics::Model::set_shader_at
 		);
 
-		lua_.new_usertype< game::Shader >(
+		lua_.new_usertype< Shader >(
 			"Shader",
-			"get_texture_at", & game::Shader::get_texture_at,
-			"set_texture_at", & game::Shader::set_texture_at
+			"get_texture_at", sol::resolve< Texture* ( uint_t ) >( & Shader::get_texture_at ),
+			"set_texture_at", & Shader::set_texture_at
 		);
 	}
 

@@ -1,25 +1,17 @@
 #pragma once
 
 #include <core/type.h>
-#include <core/graphics/Direct3D11/Direct3D11Common.h>
-
 #include <game/Line.h>
-
-#include <cstdint>
 #include <vector>
 
-class Direct3D11;
-class Direct3D11Texture;
-
-namespace blue_sky
+namespace blue_sky::graphics
 {
 
 /**
- * è•`‚«•—ƒ‰ƒCƒ“
+ * blue-sky è•`‚«•—ƒ‰ƒCƒ“
  *
- * @todo Direct3D11 ‚©‚ç’ŠÛ‰»‚·‚é
  */
-class DrawingLine : public game::Line
+class Line : public game::Line
 {
 public:
 	enum LineType
@@ -32,9 +24,6 @@ public:
 		LINE_TYPE_NONE,				///< ‚È‚µ
 		LINE_TYPE_MAX
 	};
-
-	typedef Direct3D11 Direct3D;
-	typedef Direct3D11Texture Texture;
 
 	struct Vertex
 	{
@@ -57,36 +46,27 @@ public:
 	typedef std::vector< Vertex > VertexList;
 	typedef std::vector< Index > IndexList;
 
-	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
-
 protected:
-	Direct3D*		direct_3d_;
-
 	Color			color_;
 	bool			is_cast_shadow_;	///< ‰e‚ğ—‚Æ‚·ƒtƒ‰ƒO
-
-	ID3D11Buffer*	vertex_buffer_;
-	ID3D11Buffer*	index_buffer_;
-	
-	Texture*		texture_;
 
 	VertexList		vertex_list_;
 	IndexList		index_list_;
 	uint_t			index_size_;
 
-	void create_vertex_buffer();
-	void create_index_buffer();
+	virtual void create_vertex_buffer() = 0;
+	virtual void create_index_buffer() = 0;
 
-	void create_texture( const char* );
+	virtual void create_texture() = 0;
 
 public:
-	DrawingLine( Direct3D11* );
-	virtual ~DrawingLine();
+	Line();
+	virtual ~Line();
 
 	bool load_obj( const char* );
 
 	void render() const { render_part(); }
-	void render_part( int part_count = 99999 ) const;
+	virtual void render_part( int part_count = 99999 ) const = 0;
 
 	int get_part_count() const { return index_size_ / 2; }
 
@@ -96,7 +76,6 @@ public:
 	bool is_cast_shadow() const { return is_cast_shadow_; }
 	void set_cast_shadow( bool b ) { is_cast_shadow_ = b; }
 
+}; // class Line
 
-}; // class DrawingLine
-
-} // namespace blue_sky
+} // namespace blue_sky::graphics

@@ -24,8 +24,8 @@ private:
 	Texture* title_bg_texture_;
 	Texture* cloth_texture_;
 
-	DrawingModel* brand_logo_model_;
-	DrawingModel* title_logo_model_;
+	Model* brand_logo_model_;
+	Model* title_logo_model_;
 
 	Sound* ok_;
 	Sound* bgm_;
@@ -36,7 +36,7 @@ private:
 	Sound* get_bgm() override { return bgm_; }
 
 public:
-	TitleScene( const GameMain* );
+	explicit TitleScene( const GameMain* );
 	~TitleScene();
 
 	void update() override;				///< ƒƒCƒ“ƒ‹[ƒv

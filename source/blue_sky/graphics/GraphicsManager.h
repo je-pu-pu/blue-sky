@@ -1,15 +1,16 @@
 #pragma once
 
-#include <blue_sky/graphics/Model.h>
-#include <game/Mesh.h>
-
+#include <SkinningAnimationSet.h>
 #include <blue_sky/ShaderResources.h>
+#include <blue_sky/graphics/Model.h>
+#include <blue_sky/graphics/Mesh.h>
 
 #include <core/graphics/PrimitiveTopology.h>
 #include <core/type.h>
 
 #include <game/GraphicsManager.h>
 #include <game/ResourceManager.h>
+#include <game/Mesh.h>
 #include <game/Shader.h>
 
 #include <common/safe_ptr.h>
@@ -18,39 +19,31 @@
 #include <vector>
 #include <functional>
 
-// class Vector3;
 class SkinningAnimationSet;
-class FbxFileLoader;
 
 namespace game
 {
-
-class Mesh;
-class Shader;
-class Texture;
-
+	class Shader;
+	class Texture;
 }
 
 namespace core::graphics
 {
-
-class InputLayout;
-class EffectTechnique;
+	class InputLayout;
+	class EffectTechnique;
 
 }
 
 namespace blue_sky
 {
-
-class DrawingMesh;
-class DrawingLine;
-
-class ActiveObject;
-class ActiveObjectManager;
+	class ActiveObject;
+	class ActiveObjectManager;
 
 namespace graphics
 {
-
+	class Fader;
+	class ObjFileLoader;
+	class FbxFileLoader;
 
 /**
  * グラフィック管理クラス
@@ -59,35 +52,42 @@ namespace graphics
 class GraphicsManager : public game::GraphicsManager
 {
 public:
-	typedef Model Model;
-	typedef game::Mesh Mesh;
-	typedef game::Shader Shader;
-	typedef game::Texture Texture;
+	typedef Model			Model;
+	typedef Mesh			Mesh;
+	typedef Line			Line;
+	typedef game::Shader	Shader;
+	typedef game::Texture	Texture;
 
-	typedef game::ResourceManager< Model > ModelManager;
-	typedef game::ResourceManager< Mesh > MeshManager;
-	typedef game::ResourceManager< Shader > ShaderManager;
+	typedef game::ResourceManager< Model >					ModelManager;
+	typedef game::ResourceManager< Mesh >					MeshManager;
+	typedef game::ResourceManager< Shader >					ShaderManager;
+	typedef game::ResourceManager< Texture >				TextureManager;
+	typedef game::ResourceManager< SkinningAnimationSet >	SkinningAnimationSetManager;
 
-	typedef core::graphics::PrimitiveTopology PrimitiveTopology;
-	typedef core::graphics::InputLayout InputLayout;
-	typedef core::graphics::EffectTechnique EffectTechnique;
+	typedef core::graphics::PrimitiveTopology				PrimitiveTopology;
+	typedef core::graphics::InputLayout						InputLayout;
+	typedef core::graphics::EffectTechnique					EffectTechnique;
 
 private:
+	std::unique_ptr< Fader >	fader_;
+
 	std::vector< Texture* >		paper_texture_list_;
 	Texture*					paper_texture_ = 0;
 
 	ModelManager				model_manager_;
 	MeshManager					mesh_manager_;
 	ShaderManager				shader_manager_;
+	TextureManager				texture_manager_;
+	SkinningAnimationSetManager skinning_animation_set_manager_;
 
 	mutable const ShaderResource* current_object_shader_resource_ = 0;
 	mutable const ShaderResource* current_skinning_shader_resource_ = 0;
 
-	common::auto_ptr< FbxFileLoader> fbx_file_loader_;
 	bool is_debug_axis_enabled_ = true;
 
 protected:
-	ShaderManager* get_shader_manager() { return & shader_manager_; }
+	[[nodiscard]] virtual Line* create_line() const = 0;
+	[[nodiscard]] virtual Texture* load_texture_file( const char_t* ) const = 0;
 
 	void render_debug_axis_for_bones( const ActiveObject* ) const;
 	virtual void render_debug_axis_model() const = 0;
@@ -98,31 +98,51 @@ public:
 
 	virtual void update() = 0;
 
-	virtual Mesh* load_mesh( const char_t*, const char_t* ) = 0;
-	// virtual Mesh* get_mesh( const char_t* ) = 0;
+	
+	Model* create_named_model( const char_t* name ) { return model_manager_.create_named( name ); }
+	Model* load_model( const char_t* name );
+	Model* clone_model( const Model* );
 
-	virtual DrawingMesh* create_drawing_mesh() = 0;
-	virtual DrawingLine* create_drawing_line() = 0;
+	// virtual Model* load_model( const char_t* name ) { Model* m = model_manager_.get( name ); return ( m ? m : nullptr ); }
 
-	DrawingMesh* load_drawing_mesh( const char_t*, common::safe_ptr< SkinningAnimationSet >& );
-	DrawingLine* load_drawing_line( const char_t* );
+	// virtual Mesh* load_mesh( const char_t*, const char_t* ) = 0;
+
+	// DrawingMesh* load_drawing_mesh( const char_t*, common::safe_ptr< SkinningAnimationSet >& );
+	// DrawingLine* load_drawing_line( const char_t* );
 	
 	// template< typename Type=Model > Model* get_model( const char_t* name ) { return model_manager_.get< Type >( name ); }
 
-	template< typename Type > Type* create_shader( const char_t* name ) { return shader_manager_.create< Type >( name ); }
-	template< typename Type=Shader > Type* get_shader( const char_t* name ) { return shader_manager_.get< Type >( name ); }
+	template< typename Type=Mesh > Type* create_named_mesh( const char_t* name )
+	{
+		Mesh::Buffer* b = create_mesh_buffer();
+		Type* m = mesh_manager_.create_named< Type >( name, b );
+		b->set_mesh( m );
+		
+		return m;
+	}
 
-	virtual Texture* load_texture( const char_t*, const char_t* ) = 0;
-	virtual Texture* get_texture( const char_t* ) = 0;
+	Mesh* get_mesh( const char_t* name ) { return mesh_manager_.get( name ); }
+
+	virtual Mesh::Buffer* create_mesh_buffer() const = 0;
+
+	template< typename Type, typename ... Args > Type* create_shader( Args ... args ) { return shader_manager_.create< Type >( args ... ); }
+	template< typename Type, typename ... Args > Type* create_named_shader( const char_t* name, Args ... args ) { return shader_manager_.create_named< Type >( name, args ... ); }
+	template< typename Type=Shader > Type* get_shader( const char_t* name ) { return shader_manager_.get< Type >( name ); }
+	Shader* clone_shader( const Shader* s ) { Shader* s2 = s->clone(); shader_manager_.add( s2 ); return s2; }
+
+	SkinningAnimationSet* create_skinning_animation_set() { return skinning_animation_set_manager_.create(); }
+
+	Texture* load_texture( const char_t* name, const char_t* file_name );
+	Texture* get_texture( const char_t* name );
 
 	void setup_default_shaders();
 	void load_paper_textures();
 
-	virtual void unload_mesh( const char_t* ) = 0;
-	virtual void unload_mesh_all() = 0;
+	// virtual void unload_mesh( const char_t* ) = 0;
+	// virtual void unload_mesh_all() = 0;
 
-	virtual void unload_texture( const char_t* ) = 0;
-	virtual void unload_texture_all() = 0;
+	// virtual void unload_texture( const char_t* ) = 0;
+	// virtual void unload_texture_all() = 0;
 
 	void set_paper_texture_type( int_t );
 	void bind_paper_texture() const;
@@ -148,6 +168,9 @@ public:
 	virtual FrameDrawingConstantBuffer* get_frame_drawing_render_data() const = 0;
 	virtual ObjectConstantBuffer* get_shared_object_render_data() const = 0;
 
+	void set_current_object_shader_resource( const ShaderResource* r ) const { current_object_shader_resource_ = r; }
+	void get_current_skinning_shader_resource( const ShaderResource* r ) const { current_skinning_shader_resource_ = r; }
+	
 	const ShaderResource* get_current_object_shader_resource() const { return current_object_shader_resource_; }
 	const ShaderResource* get_current_skinning_shader_resource() const { return current_skinning_shader_resource_; }
 
@@ -164,6 +187,8 @@ public:
 	virtual void render_technique( const EffectTechnique*, const std::function< void () >& ) const = 0;
 	virtual void render_background() const = 0;
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
+
+	Fader* get_fader() { return fader_.get(); }
 
 	/// @todo 整理する
 	virtual void set_fade_color( const Color& ) = 0;

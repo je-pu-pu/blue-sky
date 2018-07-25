@@ -36,7 +36,7 @@ public:
 
 private:
 	const Player*	player_;
-	const Texture*	texture_;		///< テクスチャ
+	Texture*		texture_;		///< テクスチャ
 
 	Mode			mode_;			///< 現在の動作モード
 	Mode			mode_backup_;	///< 前回プレイヤーを発見した時の動作モード

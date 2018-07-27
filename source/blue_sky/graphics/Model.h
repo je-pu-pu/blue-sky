@@ -1,18 +1,21 @@
 #pragma once
 
-#include <blue_sky/graphics/Mesh.h>
-#include <blue_sky/graphics/Line.h>
+#include "Mesh.h"
+#include "Line.h"
 #include <game/Model.h>
-#include <game/Shader.h>
 #include <vector>
 
 class SkinningAnimationSet;
 
+namespace game
+{
+	class Shader;
+}
+
 namespace blue_sky::graphics
 {
-
-class Mesh;
-class Line;
+	class Mesh;
+	class Line;
 
 /**
  * blue_sky ƒ‚ƒfƒ‹ƒNƒ‰ƒX
@@ -33,6 +36,7 @@ private:
 	ShaderList				shader_list_;
 	SkinningAnimationSet*	skinning_animation_set_;
 
+	Model& operator = ( const Model& m ) = delete;
 public:
 	Model()
 		: mesh_( 0 )
@@ -77,15 +81,10 @@ public:
 
 	bool is_skin_mesh() const { return skinning_animation_set_; }
 
-	void render() const
-	{
-		get_mesh()->bind();
+	virtual Shader* create_shader() const;
+	virtual string_t get_texture_file_path_by_texture_name( const char* ) const;
 
-		for ( uint_t n = 0; n < get_mesh()->get_rendering_vertex_group_count(); n++ )
-		{
-			get_shader_at( n )->render( get_mesh(), n );
-		}
-	}
+	void render() const;
 };
 
-} // namespace game
+} // namespace blue_sky::graphics

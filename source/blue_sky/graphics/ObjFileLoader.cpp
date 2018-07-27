@@ -205,22 +205,4 @@ bool ObjFileLoader::load( const char_t* file_name )
 	return true;
 }
 
-ObjFileLoader::Texture* ObjFileLoader::load_texture( const char_t* name ) const
-{
-	string_t file_path = name;
-	boost::filesystem::path path( file_path );
-	
-	if ( ! path.has_extension() )
-	{
-		file_path += ".png";
-	}
-
-	if ( ! path.has_parent_path() )
-	{
-		file_path = string_t( "media/model/" ) + file_path;
-	}
-
-	return GameMain::get_instance()->get_graphics_manager()->load_texture( name, file_path.c_str() );
-}
-
 } // namespace blue_sky::graphics

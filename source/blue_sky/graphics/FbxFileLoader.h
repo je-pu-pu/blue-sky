@@ -45,8 +45,6 @@ protected:
 	void print_matrix( const FbxAMatrix& ) const;
 	void print_axis_system( const FbxAxisSystem& ) const;
 
-	Texture* load_texture( const char_t* ) const;
-
 public:
 	FbxFileLoader( Model*, const char_t* );
 	~FbxFileLoader();

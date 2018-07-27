@@ -25,6 +25,7 @@
     <ClCompile Include="blue_sky\graphics\GraphicsManager.cpp" />
     <ClCompile Include="blue_sky\graphics\Line.cpp" />
     <ClCompile Include="blue_sky\graphics\Mesh.cpp" />
+    <ClCompile Include="blue_sky\graphics\Model.cpp" />
     <ClCompile Include="blue_sky\graphics\ObjFileLoader.cpp" />
     <ClCompile Include="blue_sky\graphics\Rectangle.cpp" />
     <ClCompile Include="blue_sky\graphics\SkyBox.cpp" />
@@ -108,6 +109,8 @@
     <ClInclude Include="blue_sky\graphics\shader\BypassShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\FlatShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\MatcapShader.h" />
+    <ClInclude Include="blue_sky\graphics\shader\SkyBoxShader.h" />
+    <ClInclude Include="blue_sky\graphics\shader\TessellationMatcapShader.h" />
     <ClInclude Include="blue_sky\graphics\SkyBox.h" />
     <ClInclude Include="blue_sky\ShaderResources.h" />
     <ClInclude Include="Camera.h" />
@@ -272,11 +275,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="media\shader\matcap.hlsl">
+    <None Include="media\shader\matcap.hlsl">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </FxCompile>
+    </None>
+    <None Include="media\shader\tessellation.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5DB1FAFC-E068-43A8-84D3-0DA42D464BE5}</ProjectGuid>
@@ -336,12 +340,13 @@
       <ForcedIncludeFiles>win\memory_leak_detection.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>D:\lib\boost_1_66_0\stage\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>lua53.lib;LibOVR.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -364,13 +369,14 @@
       <ForcedIncludeFiles>win\memory_leak_detection.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>D:\lib\boost_1_66_0\stage\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>lua53.lib;LibOVR.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

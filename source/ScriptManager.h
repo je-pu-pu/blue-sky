@@ -22,6 +22,8 @@
 
 #include <queue>
 
+#pragma comment( lib, "lua53.lib" )
+
 namespace blue_sky
 {
 

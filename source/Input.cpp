@@ -79,8 +79,10 @@ void Input::load_config( Config& config )
 	load_key_code_config( config, B,     "input.key.b",     "MOUSE_R" );
 	load_key_code_config( config, JUMP,   "input.key.jump", "SPACE"   );
 
-	load_key_code_config( config, L,     "input.key.l", "Q" );
-	load_key_code_config( config, R,     "input.key.r", "E" );
+	load_key_code_config( config, L,     "input.key.l",     "Q" );
+	load_key_code_config( config, R,     "input.key.r",     "E" );
+	load_key_code_config( config, L2,    "input.key.l2",    "Z" );
+	load_key_code_config( config, R2,    "input.key.r2",    "C" );
 
 	joystick_code_[ A ] = 1 << ( config.get( "input.joystick.a", 1 ) - 1 );
 	joystick_code_[ B ] = 1 << ( config.get( "input.joystick.b", 3 ) - 1 );

@@ -190,6 +190,9 @@
     <ClCompile Include="blue_sky\graphics\Direct3D11\MeshBuffer.cpp">
       <Filter>blue_sky\graphics\Direct3D11</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\graphics\Model.cpp">
+      <Filter>blue_sky\graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -466,6 +469,12 @@
     <ClInclude Include="blue_sky\graphics\Direct3D11\MeshBuffer.h">
       <Filter>blue_sky\graphics\Direct3D11</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\TessellationMatcapShader.h">
+      <Filter>blue_sky\graphics\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\SkyBoxShader.h">
+      <Filter>blue_sky\graphics\shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -566,6 +575,12 @@
     <None Include="media\script\test\switch_shader.lua">
       <Filter>media\script</Filter>
     </None>
+    <None Include="media\shader\matcap.hlsl">
+      <Filter>media\shader</Filter>
+    </None>
+    <None Include="media\shader\tessellation.hlsl">
+      <Filter>media\shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Input">
@@ -631,10 +646,5 @@
     <Filter Include="blue_sky\graphics\FileLoader">
       <UniqueIdentifier>{3a0c4342-cd36-41d4-ab0e-68f5b559d1e4}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="media\shader\matcap.hlsl">
-      <Filter>media\shader</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>

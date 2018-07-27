@@ -3,9 +3,11 @@
 #include <blue_sky/graphics/Fader.h>
 #include <blue_sky/graphics/ObjFileLoader.h>
 #include <blue_sky/graphics/FbxFileLoader.h>
+#include <blue_sky/graphics/Line.h>
+
 #include <blue_sky/graphics/shader/FlatShader.h>
 #include <blue_sky/graphics/shader/MatcapShader.h>
-#include <blue_sky/graphics/Line.h>
+#include <blue_sky/graphics/shader/TessellationMatcapShader.h>
 
 #include <ActiveObjectManager.h>
 
@@ -35,31 +37,17 @@ GraphicsManager::~GraphicsManager()
 }
 
 /**
- * モデルを読み込む
+ * 指定したモデルにファイルからメッシュを読み込む
  *
- * @param name 名前
- * @return モデル
+ * @param model モデル
+ * @param name モデル名
  */
-GraphicsManager::Model* GraphicsManager::load_model( const char_t* name )
+bool_t GraphicsManager::load_mesh( Model* model, const char_t* name ) const
 {
-	Model* model = model_manager_.get( name );
-	
-	if ( model )
-	{
-		return model;
-	}
-
-	model = create_named_model( name );
-	// model->set_mesh( get_mesh( name ) );
-
-	string_t file_path = string_t( "media/model/" ) + name;
-
-	std::cout << "--- loading " << name << " ---" << std::endl;
-	common::timer t;
+	const auto file_path = string_t( "media/model/" ) + name;
 
 	bool mesh_loaded = false;
 
-	// Mesh
 	if ( boost::filesystem::exists( file_path + ".bin.fbx" ) )
 	{
 		if ( ! boost::filesystem::exists( file_path + ".fbx" ) || boost::filesystem::last_write_time( file_path + ".fbx" ) < boost::filesystem::last_write_time( file_path + ".bin.fbx" ) )
@@ -99,23 +87,67 @@ GraphicsManager::Model* GraphicsManager::load_model( const char_t* name )
 		model->get_mesh()->clear_vertex_group_list();
 	}
 
-	// Line
-	string_t line_file_path = string_t( "media/model/" ) + name + "-line.obj";
-	bool line_loaded = false;
+	return mesh_loaded;
+}
+
+/**
+ * 指定したモデルにファイルからラインを読み込む
+ *
+ * @param model モデル
+ * @param name モデル名
+ */
+bool_t GraphicsManager::load_line( Model* model, const char_t* name ) const
+{
+	const auto line_file_path = string_t( "media/model/" ) + name + "-line.obj";
 
 	if ( boost::filesystem::exists( line_file_path ) )
 	{
 		model->set_line( create_line() );
-		line_loaded = model->get_line()->load_obj( line_file_path.c_str() );
+		return model->get_line()->load_obj( line_file_path.c_str() );
 	}
+
+	return false;
+}
+
+
+/**
+ * モデルを読み込む
+ *
+ * @param name 名前
+ * @return モデル
+ */
+GraphicsManager::Model* GraphicsManager::load_model( const char_t* name )
+{
+	Model* model = model_manager_.get( name );
+	
+	if ( model )
+	{
+		return model;
+	}
+
+	model = create_named_model( name );
+
+	common::timer t;
+
+	std::cout << "--- loading : " << name << " ---" << std::endl;
+	
+	bool mesh_loaded = load_mesh( model, name );
+	bool line_loaded = load_line( model, name );
 
 	if ( mesh_loaded || line_loaded )
 	{
-		std::cout << "--- loaded " << name << " : " << t.elapsed() << "---" << std::endl;
+		if ( mesh_loaded )
+		{
+			std::cout << "--- loaded mesh : " << name << " : " << t.elapsed() << "---" << std::endl;
+		}
+		if ( line_loaded )
+		{
+			std::cout << "--- loaded line : " << name << " : " << t.elapsed() << "---" << std::endl;
+		}
 	}
 	else
 	{
-		std::cout << "--- not found " << name << " : " << t.elapsed() << "---" << std::endl;
+		std::cout << "--- not found : " << name << " : " << t.elapsed() << "---" << std::endl;
 	}
 
 	return model;
@@ -189,29 +221,6 @@ GraphicsManager::Texture* GraphicsManager::get_texture( const char_t* name )
 	return t;
 }
 
-#if 0
-/**
- * 手描き風ラインを読み込む
- *
- * @param name 名前
- * @return 手描き風ライン、または失敗時に 0 を返す
- */
-DrawingLine* GraphicsManager::load_drawing_line( const char_t* name )
-{
-	string_t file_path = string_t( "media/model/" ) + name + "-line.obj";
-
-	if ( ! boost::filesystem::exists( file_path ) )
-	{
-		return 0;
-	}
-
-	DrawingLine* line = create_drawing_line();
-	line->load_obj( file_path.c_str() );
-
-	return line;
-}
-#endif
-
 /**
  * デフォルトのシェーダーを準備する
  *
@@ -224,6 +233,8 @@ void GraphicsManager::setup_default_shaders()
 	create_named_shader< shader::FlatShader >( "flat_skin", "skin", "flat_skin" );
 	create_named_shader< shader::MatcapShader >( "matcap", "main", "matcap" )->set_texture( matcap_texture );
 	create_named_shader< shader::MatcapShader >( "matcap_skin", "skin", "matcap_skin" )->set_texture( matcap_texture );
+	create_named_shader< shader::TessellationMatcapShader >( "tess_matcap" )->set_texture( matcap_texture );
+	create_named_shader< shader::SkinningTessellationMatcapShader >( "tess_matcap_skin" )->set_texture( matcap_texture );
 }
 
 /**

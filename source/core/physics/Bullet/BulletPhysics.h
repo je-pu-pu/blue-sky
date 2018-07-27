@@ -30,6 +30,9 @@ protected:
 
 	btRigidBody* create_rigid_body( btCollisionShape*, const Transform&, const Transform&, float_t );
 
+	BulletPhysics( const BulletPhysics& ) = delete;
+	BulletPhysics& operator = ( const BulletPhysics& ) = delete;
+
 public:
 	BulletPhysics();
 	~BulletPhysics();

@@ -42,6 +42,8 @@ protected:
 	Mesh* create_mesh() const;
 	Shader* create_shader() const;
 	SkinningAnimationSet* create_skinning_animation_set() const;
+	
+	Texture* load_texture( const char_t* ) const;
 
 public:
 	BaseFileLoader( Model* model, const char_t* name )

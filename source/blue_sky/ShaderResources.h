@@ -4,7 +4,6 @@
 #include <core/type.h>
 
 /// @todo ConstantBuffer -> ShaderResource に名前変更する
-/// @todo dummy は不要なのでやめる
 
 namespace blue_sky
 {
@@ -19,7 +18,6 @@ struct GameConstantBufferData : public BaseConstantBufferData< 0 >
 {
 	float_t screen_width;
 	float_t screen_height;
-
 	float_t dummy[ 2 ];
 };
 
@@ -32,7 +30,6 @@ struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
 	float_t time;
 	u32_t time_beat;
 	float_t tess_factor = 1.f;
-
 	float_t dummy;
 };
 

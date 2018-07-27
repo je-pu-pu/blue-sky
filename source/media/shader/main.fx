@@ -112,14 +112,13 @@ cbuffer GameConstantBuffer : register( b0 )
 
 cbuffer FrameConstantBuffer : register( b1 )
 {
-	/// @todo ViewProejction としてまとめる
+	/// @todo ViewProejction としてまとめる？
 	matrix View;			// ビュー変換行列
 	matrix Projection;		// プロジェクション変換行列
 	float4 Light;			// 光源の向き ( 正規化済み ) 
 	float Time;				// シーン開始からの経過秒数
 	uint TimeBeat;			// 現在の音楽の BPM ?
 	float TessFactor;		// テッセレーションの分割数
-	float dummy;
 };
 
 cbuffer ObjectConstantBuffer : register( b2 )
@@ -544,116 +543,6 @@ technique11 flat_skin
     }
 }
 
-COMMON_POS_NORM_UV vs_tess_test( VS_INPUT input )
-{
-	COMMON_POS_NORM_UV output;
-
-	output.Position = input.Position;
-	output.Normal = input.Normal;
-	output.TexCoord = input.TexCoord;
-
-	// output.Position = common_wvp_pos( output.Position );
-	// output.Normal = common_w_norm( output.Normal );
-
-	return output;
-}
-
-COMMON_POS_NORM_UV vs_skin_tess_test( VS_SKIN_INPUT input )
-{
-	COMMON_POS_NORM_UV output;
-
-	output.Position = common_skinning_pos( input.Position, input.Bone, input.Weight );
-	output.Position /= output.Position.w; /// @todo なぜ必要なのか調べる
-
-	output.Normal = common_skinning_norm( input.Normal, input.Bone, input.Weight );
-
-	output.TexCoord = input.TexCoord;
-	
-	return output;
-}
-
-struct HS_CONSTANT_OUTPUT
-{
-	float factor[ 3 ]  : SV_TessFactor;
-	float inner_factor : SV_InsideTessFactor;
-};
-
-HS_CONSTANT_OUTPUT hs_constant( InputPatch<COMMON_POS_NORM_UV, 3> input )
-{
-	HS_CONSTANT_OUTPUT Out;
-
-	float devide = TessFactor;
-
-	Out.factor[ 0 ] = devide;
-	Out.factor[ 1 ] = devide;
-	Out.factor[ 2 ] = devide;
-
-	Out.inner_factor = devide;
-
-	return Out;
-}
-
-[domain("tri")]
-[partitioning("fractional_odd")]
-[outputtopology("triangle_cw")]
-[outputcontrolpoints(3)]
-[patchconstantfunc("hs_constant")]
-COMMON_POS_NORM_UV hs_test( InputPatch<COMMON_POS_NORM_UV, 3> ip, uint cpid : SV_OutputControlPointID )
-{
-	return ip[ cpid ];
-}
-
-/**
- * pos を patch_pos から patch_norm 方向に向かうベクトルに対し射影し、その長さだけ pos を patch_norm 方向に移動したベクトルを返す
- * 
- * 
- */
-float3 common_project_pos_to_tangent_space( float3 pos, float3 patch_pos, float3 patch_norm )
-{
-	const float length = dot( ( patch_pos - pos ), patch_norm );
-	return pos + patch_norm * length * 0.5f;
-}
-
-/**
- * フォンテッセレーション
- *
- */
-float4 common_phong_tessellation( const OutputPatch<COMMON_POS_NORM_UV, 3> patch, float3 uvw )
-{
-	const float4 pos = patch[ 0 ].Position * uvw.x + patch[ 1 ].Position * uvw.y + patch[ 2 ].Position * uvw.z;	
-	float3 output_pos = float3( 0.f, 0.f, 0.f );
-
-    for ( int n = 0; n < 3; n++ )
-    {
-        output_pos += common_project_pos_to_tangent_space( pos.xyz, patch[ n ].Position.xyz, patch[ n ].Normal.xyz ) * uvw[ n ];
-    }
-
-	return float4( output_pos, 1.f );
-}
-
-[domain("tri")]
-COMMON_POS_NORM_UV ds_test( HS_CONSTANT_OUTPUT input, float3 uvw : SV_DomaInLocation, const OutputPatch<COMMON_POS_NORM_UV, 3> patch )
-{
-	COMMON_POS_NORM_UV output;
-
-	// output.Position = patch[ 0 ].Position * uvw.x + patch[ 1 ].Position * uvw.y + patch[ 2 ].Position * uvw.z;
-	output.Normal   = patch[ 0 ].Normal   * uvw.x + patch[ 1 ].Normal   * uvw.y + patch[ 2 ].Normal   * uvw.z;
-	output.TexCoord = patch[ 0 ].TexCoord * uvw.x + patch[ 1 ].TexCoord * uvw.y + patch[ 2 ].TexCoord * uvw.z;
-	
-	// displacement mapping
-	// const float height = displacement_texture.SampleLevel( texture_sampler, output.TexCoord, 0 ).x;
-	// output.Position += float4( output.Normal * ( height - 0.5f ), 0 );
-
-	// phong tessellation
-	output.Position = common_phong_tessellation( patch, uvw );
-
-	// 
-	output.Position = common_wvp_pos( output.Position );
-	output.Normal = common_wv_norm( output.Normal );
-
-	return output;
-}
-
 // シェーディングあり・スキニングなし・シャドウあり
 /// @todo technique11 shade_shadow
 technique11 main_with_shadow
@@ -674,41 +563,6 @@ technique11 main_with_shadow
 
 		RASTERIZERSTATE = Default;
 	}
-
-	/*
-	pass tessellation_test
-	{
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
-
-		SetVertexShader( CompileShader( vs_4_0, vs_tess_test() ) );
-		SetHullShader( CompileShader( hs_5_0, hs_test() ) );
-		SetDomainShader( CompileShader( ds_5_0, ds_test() ) );
-		SetGeometryShader( NULL );
-		// SetPixelShader( CompileShader( ps_4_0, ps_common_sample_pos_norm_uv() ) );
-		// SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm_uv() ) );
-		// SetPixelShader( CompileShader( ps_4_0, ps_common_sample_matcap_pos_norm_uv() ) );
-
-		RASTERIZERSTATE = Default;
-	}
-
-	pass debug_line
-    {
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( DebugLineDepthStencilState, 0xFFFFFFFF );
-
-		SetVertexShader( CompileShader( vs_4_0, vs_tess_test() ) );
-		SetHullShader( CompileShader( hs_5_0, hs_test() ) );
-		SetDomainShader( CompileShader( ds_5_0, ds_test() ) );
-		// SetHullShader( NULL );
-		// SetDomainShader( NULL );
-		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_common_debug_line_pos_norm() ) );
-
-		RASTERIZERSTATE = WireframeRasterizerState;
-    }
-	*/
 }
 
 // シェーディングあり・スキニングあり・シャドウあり
@@ -730,41 +584,9 @@ technique11 skin_with_shadow
 
 		RASTERIZERSTATE = Default;
     }
-
-	/*
-	pass tessellation_test
-	{
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
-
-		SetVertexShader( CompileShader( vs_4_0, vs_skin_tess_test() ) );
-		SetHullShader( CompileShader( hs_5_0, hs_test() ) );
-		SetDomainShader( CompileShader( ds_5_0, ds_test() ) );
-		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm_uv() ) );
-		// SetPixelShader( CompileShader( ps_4_0, ps_common_sample_matcap_pos_norm_uv() ) );
-
-		RASTERIZERSTATE = Default;
-	}
-	*/
-
-	/*
-	pass debug_line
-    {
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( DebugLineDepthStencilState, 0xFFFFFFFF );
-
-		SetVertexShader( CompileShader( vs_4_0, vs_skin_tess_test() ) );
-		SetHullShader( CompileShader( hs_5_0, hs_test() ) );
-		SetDomainShader( CompileShader( ds_5_0, ds_test() ) );
-		SetGeometryShader( NULL );
-        SetPixelShader( CompileShader( ps_4_0, ps_common_debug_line_pos_norm() ) );
-
-		RASTERIZERSTATE = WireframeRasterizerState;
-    }
-	*/
 }
 
+#include "tessellation.hlsl"
 #include "shadow_map.hlsl"
 
 #include "sky_box.hlsl"

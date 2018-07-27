@@ -86,6 +86,9 @@ private:
 	bool is_debug_axis_enabled_ = true;
 
 protected:
+	bool_t load_mesh( Model*, const char_t* name ) const;
+	bool_t load_line( Model*, const char_t* nmae ) const;
+
 	[[nodiscard]] virtual Line* create_line() const = 0;
 	[[nodiscard]] virtual Texture* load_texture_file( const char_t* ) const = 0;
 

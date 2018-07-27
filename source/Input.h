@@ -47,7 +47,7 @@ public:
 	 *
 	 * ã‰º¶‰E‚Æ A, B, X, Y ‚Ìƒ{ƒ^ƒ“‚ğ‚Â
 	 */
-	enum Button { LEFT, RIGHT, UP, DOWN, A, B, JUMP, L, R, ESCAPE, MAX_BUTTONS, NONE };
+	enum Button { LEFT, RIGHT, UP, DOWN, A, B, JUMP, L, R, L2, R2, ESCAPE, MAX_BUTTONS, NONE };
 
 	typedef game::Config Config;
 

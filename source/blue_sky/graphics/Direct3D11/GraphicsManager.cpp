@@ -185,13 +185,7 @@ void GraphicsManager::set_sky_box( const char_t* name )
 	}
 
 	sky_box_.reset( new SkyBox( name ) );
-
-	/*
-	for ( int n = 0; n < sky_box_->get_material_count(); n++ )
-	{
-		sky_box_->get_material_at( n )->set_shader( get_shader( "bypass" ) );
-	}
-	*/
+	load_mesh( sky_box_.get(), "sky-box" );
 }
 
 /**
@@ -224,8 +218,7 @@ void GraphicsManager::set_ground( const char_t* name )
 	unset_ground();
 
 	ground_.reset( new Model() );
-	ObjFileLoader loader( ground_.get(), "ground" );
-	loader.load( ( string_t( "media/model/" ) + name + ".obj" ).c_str() );
+	load_mesh( ground_.get(), name );
 
 	ground_render_data_.reset( new ObjectConstantBufferWithData( direct_3d_ ) );
 	ground_render_data_->data().world.set_identity();
@@ -412,11 +405,10 @@ void GraphicsManager::render_technique( const EffectTechnique* technique, const 
 /**
  * 背景 ( スカイボックス・地面 ) を描画する
  *
+ * @todo 直す
  */
 void GraphicsManager::render_background() const
 {
-	
-
 	// ground
 	if ( ground_ )
 	{
@@ -438,11 +430,14 @@ void GraphicsManager::render_background() const
 #endif
 	}
 
-	/// @todo 直す
-#if 0
 	// sky box
 	if ( sky_box_ )
 	{
+		sky_box_render_data_->update();
+		set_current_object_shader_resource( sky_box_render_data_.get() );
+		sky_box_->render();
+
+#if 0
 		render_technique( "|sky_box", [this]
 		{
 			get_frame_render_data()->bind_to_vs();
@@ -453,8 +448,8 @@ void GraphicsManager::render_background() const
 
 			sky_box_->render();
 		} );
-	}
 #endif
+	}
 }
 
 /**

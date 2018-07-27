@@ -124,17 +124,6 @@ public:
 
 	virtual ~Mesh()	{ }
 
-#if 0
-	/// @todo ®—‚·‚é
-	bool load_obj( const char_t* );
-	bool load_fbx( const char_t*, FbxFileLoader* );
-	bool load_fbx( const char_t*, FbxFileLoader*, common::safe_ptr< SkinningAnimationSet >& );
-	
-	/// @todo Loader ‚ª‚â‚é‚æ‚¤‚É‚·‚é
-	virtual string_t get_texture_file_path_by_texture_name( const char_t* ) const;
-	Texture* load_texture_by_texture_name( const char_t* ) const;
-#endif
-
 	void add_vertex( const game::Vertex& v ) override { vertex_list_.push_back( static_cast< const Vertex& >( v ) ); }
 	uint_t get_vertex_count() const override { return vertex_list_.size(); }
 

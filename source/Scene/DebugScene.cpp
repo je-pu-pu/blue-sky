@@ -71,6 +71,20 @@ void DebugScene::update()
 
 	}
 
+	// tess test
+	{
+		if ( get_input()->press( Input::L2 ) )
+		{
+			get_graphics_manager()->get_frame_render_data()->data().tess_factor -= 1 * get_elapsed_time();
+		}
+		if ( get_input()->press( Input::R2 ) )
+		{
+			get_graphics_manager()->get_frame_render_data()->data().tess_factor += 1 * get_elapsed_time();
+		}
+
+		get_graphics_manager()->get_frame_render_data()->data().tess_factor = math::clamp( get_graphics_manager()->get_frame_render_data()->data().tess_factor, 1.f, 8.f );
+	}
+
 	camera_->update();
 
 	get_active_object_manager()->update();
@@ -92,6 +106,7 @@ void DebugScene::render()
 
 	frame_render_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
 	frame_render_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();
+	frame_render_data.light = Vector( -1.f, -2.f, 0.f, 0.f ).normalize();
 
 	get_graphics_manager()->get_frame_render_data()->update();
 
@@ -106,6 +121,7 @@ void DebugScene::render()
 
 	std::stringstream ss;
 	ss << "eye : " << eye.x() << ", " << eye.y() << ", " << eye.z() << std::endl;
+	ss << "tess : " << frame_render_data.tess_factor << std::endl;
 
 	get_graphics_manager()->draw_text( 10.f, 10.f, get_width() - 10.f, get_height() - 10.f, ss.str().c_str(), Color::White );
 }

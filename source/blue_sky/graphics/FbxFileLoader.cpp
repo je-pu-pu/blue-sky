@@ -20,11 +20,7 @@
 #include <iostream>
 #include <cassert>
 
-#ifdef _DEBUG
 #pragma comment ( lib, "libfbxsdk-mt.lib" )
-#else
-#pragma comment ( lib, "libfbxsdk-mt.lib" )
-#endif
 
 namespace blue_sky::graphics
 {
@@ -1109,12 +1105,6 @@ string_t FbxFileLoader::convert_file_path_to_internal_encoding( const char* s )
 	delete [] path;
 
 	return result;
-}
-
-FbxFileLoader::Texture* FbxFileLoader::load_texture( const char_t* name ) const
-{
-	const string_t file_path = string_t( "media/model/" ) + name;
-	return GameMain::get_instance()->get_graphics_manager()->load_texture( name, file_path.c_str() );
 }
 
 } // namespace blue_sky::graphics

@@ -15,14 +15,14 @@ public:
 
 private:
 	const char* name_;
-	const char* ext_;
 
 protected:
+	virtual Shader* create_shader() const;
 	virtual string_t get_texture_file_path_by_texture_name( const char* ) const;
 
 public:
-	SkyBox( const char*, const char* = "png" );
-	virtual ~SkyBox();
+	explicit SkyBox( const char* );
+	~SkyBox();
 
 }; // class SkyBox
 

@@ -8,6 +8,8 @@
 
 #include <blue_sky/graphics/GraphicsManager.h>
 
+#include <game/MainLoop.h>
+
 #include <common/math.h>
 
 namespace blue_sky
@@ -120,6 +122,11 @@ void DebugScene::render()
 	get_graphics_manager()->render_debug_bullet();
 
 	std::stringstream ss;
+	ss << "Time : " << get_total_elapsed_time() << std::endl;
+	ss << "FPS : " << get_main_loop()->get_last_fps() << std::endl;
+	ss << "pass count : " << get_graphics_manager()->get_pass_count() << std::endl;
+	ss << "draw count : " << get_graphics_manager()->get_draw_count() << std::endl;
+
 	ss << "eye : " << eye.x() << ", " << eye.y() << ", " << eye.z() << std::endl;
 	ss << "tess : " << frame_render_data.tess_factor << std::endl;
 

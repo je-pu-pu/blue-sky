@@ -338,7 +338,7 @@ float4 ps_drawing_line_debug( noperspective PS_FLAT_INPUT input ) : SV_Target
  */
 float4 ps_drawing_line_debug_line( PS_FLAT_INPUT input ) : SV_Target
 {
-	return float4( 0.f, 0.f, 0.f, 0.f );
+	// return float4( 0.f, 0.f, 0.f, 0.f );
 	return float4( 1.f, 0.f, 0.f, 0.75f );
 }
 

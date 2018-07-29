@@ -62,6 +62,8 @@ namespace blue_sky
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
+	, shadow_map_shader_( get_graphics_manager()->get_shader( "shadow_map" ) )
+	, shadow_map_skin_shader_( get_graphics_manager()->get_shader( "shadow_map_skin" ) )
 	, action_bgm_after_timer_( 0.f )
 	, bpm_( 120.f )
 	, drawing_accent_scale_( 0.f )
@@ -80,7 +82,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	get_physics_manager()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
 
 	// Texture
-	ui_texture_ = get_graphics_manager()->load_texture( "ui", "media/image/item.png" );
+	ui_texture_ = get_graphics_manager()->load_named_texture( "ui", "media/image/item.png" );
 
 	// Sound
 	load_sound_all( get_stage_name() == "2-3" );
@@ -121,10 +123,8 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 
 	/// @todo 直す
-	if ( ! far_billboards_ )
-	{
-		far_billboards_ = get_graphics_manager()->load_model( ( get_stage_name() + "-far-billboards" ).c_str() );
-	}
+	// far_billboards_ = get_graphics_manager()->load_model( ( get_stage_name() + "-far-billboards" ).c_str() );
+	far_billboards_ = get_graphics_manager()->load_model( "far-billboards-1" );
 
 	/// @todo 直す
 	rectangle_ = get_graphics_manager()->create_named_model( "rectangle" );
@@ -1081,11 +1081,11 @@ void GamePlayScene::update()
 
 	// tess test
 	{
-		if ( get_input()->press( Input::L ) )
+		if ( get_input()->press( Input::L2 ) )
 		{
 			get_graphics_manager()->get_frame_render_data()->data().tess_factor -= 1 * get_elapsed_time();
 		}
-		if ( get_input()->press( Input::R ) )
+		if ( get_input()->press( Input::R2 ) )
 		{
 			get_graphics_manager()->get_frame_render_data()->data().tess_factor += 1 * get_elapsed_time();
 		}
@@ -1557,13 +1557,7 @@ void GamePlayScene::render_to_display() const
  */
 void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 {
-	get_graphics_manager()->set_input_layout( "main" );
-
 	render_object_mesh();
-
-	get_graphics_manager()->set_input_layout( "skin" );
-
-	render_object_skin_mesh();
 
 	get_graphics_manager()->set_input_layout( "line" );
 
@@ -1751,6 +1745,7 @@ void GamePlayScene::update_render_data_for_object() const
 /**
  * シャドウマップを描画する
  *
+ * @todo 最適化・高速化
  */
 void GamePlayScene::render_shadow_map() const
 {
@@ -1761,12 +1756,8 @@ void GamePlayScene::render_shadow_map() const
 
 	shadow_map_->ready_to_render_shadow_map();
 
-	get_graphics_manager()->set_input_layout( "main" );
-	render_shadow_map( "|shadow_map", false );
-
-	// @todo 最適化・高速化
-	get_graphics_manager()->set_input_layout( "skin" );
-	render_shadow_map( "|shadow_map_skin", true );
+	render_shadow_map( shadow_map_shader_, false );
+	render_shadow_map( shadow_map_skin_shader_, true );
 
 	// shadow_map_->finish_render_shadow_map();
 }
@@ -1774,42 +1765,36 @@ void GamePlayScene::render_shadow_map() const
 /**
  * シャドウマップを描画する
  *
- * @param technique_name テクニック名
+ * @param shader シェーダー
  * @param is_skin_mesh スキンメッシュフラグ
  */
-void GamePlayScene::render_shadow_map( const char* technique_name, bool is_skin_mesh ) const
+void GamePlayScene::render_shadow_map( const Shader* shader, bool is_skin_mesh ) const
 {
-	render_technique( technique_name, [this, is_skin_mesh]
+	for ( int n = 0; n < shadow_map_->get_cascade_levels(); n++ )
 	{
-		for ( int n = 0; n < shadow_map_->get_cascade_levels(); n++ )
+		shadow_map_->ready_to_render_shadow_map_with_cascade_level( n );
+
+		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs(); // for line
+
+		for ( const auto* active_object : get_active_object_manager()->active_object_list() )
 		{
-			shadow_map_->ready_to_render_shadow_map_with_cascade_level( n );
-
-			bind_game_render_data();
-			bind_frame_render_data();
-
-			get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs(); // for line
-
-			for ( const auto* active_object : get_active_object_manager()->active_object_list() )
+			if ( active_object->get_model()->is_skin_mesh() == is_skin_mesh )
 			{
-				if ( active_object->get_model()->is_skin_mesh() == is_skin_mesh )
-				{
-					get_graphics_manager()->set_current_object_shader_resource( active_object->get_object_constant_buffer() );
-					active_object->render_mesh();
+				get_graphics_manager()->set_current_object_shader_resource( active_object->get_object_constant_buffer() );
+				active_object->render_mesh( shader );
 
-					if ( active_object->get_model()->get_line() && active_object->get_model()->get_line()->is_cast_shadow() )
-					{
-						active_object->render_line();
-					}
+				if ( active_object->get_model()->get_line() && active_object->get_model()->get_line()->is_cast_shadow() )
+				{
+					active_object->render_line();
 				}
 			}
-
-			if ( ! is_skin_mesh )
-			{
-				player_->render_mesh();
-			}
 		}
-	} );
+
+		if ( ! is_skin_mesh )
+		{
+			player_->render_mesh( shader );
+		}
+	}
 }
 
 /**
@@ -1823,74 +1808,16 @@ void GamePlayScene::render_far_billboards() const
 		return;
 	}
 
-	render_technique( "|billboard", [this]
-	{
-		{
-			ObjectConstantBufferData buffer;
-			buffer.color = Color::White;
-			buffer.world.set_identity();
+	/// @todo 毎フレーム update() するのは無駄なのでやめる
+	ObjectConstantBufferData buffer;
+	buffer.color = Color::White;
+	buffer.world.set_identity();
 			
-			get_graphics_manager()->get_shared_object_render_data()->update( & buffer );
-		}
+	get_graphics_manager()->get_shared_object_render_data()->update( & buffer );
 
-		bind_game_render_data();
-		bind_frame_render_data();
-		bind_shared_object_render_data();
-
-		far_billboards_->render();
-	} );
-}
-
-/**
- * オブジェクトのスキンメッシュを描画する
- *
- */
-void GamePlayScene::render_object_skin_mesh() const
-{
-	const char* technique_name = "|flat_skin";
-
-	if ( shading_enabled_ )
-	{
-		if ( shadow_map_ )
-		{
-			technique_name = "|skin_with_shadow";
-		}
-	}
-
-	render_technique( technique_name, [this]
-	{
-		bind_game_render_data();
-
-		get_graphics_manager()->get_frame_render_data()->bind_to_vs();
-		get_graphics_manager()->get_frame_render_data()->bind_to_hs();
-		get_graphics_manager()->get_frame_render_data()->bind_to_ds();
-		get_graphics_manager()->get_frame_render_data()->bind_to_ps();
-
-		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
-		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
-
-		get_graphics_manager()->bind_paper_texture();
-
-		// get_graphics_manager()->load_texture( "matcap_", "media/texture/matcap/mc20.jpg" )->bind_to_ps( 3 );
-		// get_graphics_manager()->load_texture( "matcap_", "media/texture/matcap/mc13.jpg" )->bind_to_ps( 3 );
-		// get_graphics_manager()->load_texture( "matcap_", "media/texture/matcap/mc11.jpg" )->bind_to_ps( 3 );
-		// get_graphics_manager()->load_texture( "matcap_", "media/texture/matcap/toon.png" )->bind_to_ps( 3 );
-		// get_graphics_manager()->load_texture( "matcap_", "media/texture/matcap/skin.jpg" )->bind_to_ps( 3 );
-		get_graphics_manager()->load_texture( "matcap_", "media/texture/matcap/skin.png" )->bind_to_ps( 3 );
-
-		if ( shadow_map_ )
-		{
-			shadow_map_->ready_to_render_scene();
-		}
-
-		for ( const auto* active_object : get_active_object_manager()->active_object_list() )
-		{
-			if ( active_object->get_model()->is_skin_mesh() )
-			{
-				active_object->render_mesh();
-			}
-		}
-	} );
+	/// @todo shader を "billboard" にする
+	get_graphics_manager()->set_current_object_shader_resource( get_graphics_manager()->get_shared_object_render_data() );
+	far_billboards_->render();
 }
 
 /**
@@ -1909,38 +1836,33 @@ void GamePlayScene::render_object_mesh() const
 		}
 	}
 
-	render_technique( technique_name, [this]
+	bind_game_render_data();
+		
+	get_graphics_manager()->get_frame_render_data()->bind_to_vs();
+	get_graphics_manager()->get_frame_render_data()->bind_to_hs();
+	get_graphics_manager()->get_frame_render_data()->bind_to_ds();
+	get_graphics_manager()->get_frame_render_data()->bind_to_gs();
+	get_graphics_manager()->get_frame_render_data()->bind_to_ps();
+		
+	get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
+	get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
+		
+	get_graphics_manager()->bind_paper_texture();
+
+	get_graphics_manager()->load_named_texture( "matcap", "media/texture/matcap/mc12.jpg" )->bind_to_ps( 3 );
+	get_graphics_manager()->load_named_texture( "balloon_disp", "media/model/balloon-disp.png" )->bind_to_ds( 4 );
+	get_graphics_manager()->load_named_texture( "balloon_norm", "media/model/balloon-norm.png" )->bind_to_ps( 5 );
+
+	if ( shadow_map_ )
 	{
-		bind_game_render_data();
-		
-		get_graphics_manager()->get_frame_render_data()->bind_to_vs();
-		get_graphics_manager()->get_frame_render_data()->bind_to_hs();
-		get_graphics_manager()->get_frame_render_data()->bind_to_ds();
-		get_graphics_manager()->get_frame_render_data()->bind_to_gs();
-		get_graphics_manager()->get_frame_render_data()->bind_to_ps();
-		
-		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
-		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
-		
-		get_graphics_manager()->bind_paper_texture();
+		shadow_map_->ready_to_render_scene();
+	}
 
-		get_graphics_manager()->load_texture( "matcap", "media/texture/matcap/mc12.jpg" )->bind_to_ps( 3 );
-		get_graphics_manager()->load_texture( "balloon_disp", "media/model/balloon-disp.png" )->bind_to_ds( 4 );
-		get_graphics_manager()->load_texture( "balloon_norm", "media/model/balloon-norm.png" )->bind_to_ps( 5 );
-
-		if ( shadow_map_ )
-		{
-			shadow_map_->ready_to_render_scene();
-		}
-
-		for ( const auto* active_object : get_active_object_manager()->active_object_list() )
-		{
-			if ( ! active_object->get_model()->is_skin_mesh() )
-			{
-				active_object->render_mesh();
-			}
-		}
-	} );
+	for ( const auto* active_object : get_active_object_manager()->active_object_list() )
+	{
+		get_graphics_manager()->set_current_object_shader_resource( active_object->get_object_constant_buffer() );
+		active_object->render_mesh();
+	}
 }
 
 /**

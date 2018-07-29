@@ -2,16 +2,21 @@
 
 #include "GameObject.h"
 #include <blue_sky/ShaderResources.h>
+#include <common/exception.h>
 
 class AnimationPlayer;
 
+namespace game
+{
+	class Shader;
+}
+
 namespace blue_sky
 {
-
-namespace graphics
-{
-	class Model;
-}
+	namespace graphics
+	{
+		class Model;
+	}
 
 /**
  * 行動するオブジェクト
@@ -20,7 +25,8 @@ namespace graphics
 class alignas( 16 ) ActiveObject : public GameObject
 {
 public:
-	typedef graphics::Model Model;
+	typedef graphics::Model					Model;
+	typedef game::Shader					Shader;
 
 private:
 	Vector3				front_;				///< 前
@@ -110,6 +116,7 @@ public:
 	virtual void bind_render_data() const;
 
 	virtual void render_mesh() const;
+	virtual void render_mesh( const Shader* ) const;
 	virtual void render_line() const;
 
 	void play_animation( const char_t* name, bool force, bool loop );

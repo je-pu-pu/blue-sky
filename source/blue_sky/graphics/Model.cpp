@@ -43,13 +43,32 @@ string_t Model::get_texture_file_path_by_texture_name( const char_t* name ) cons
 	return file_path;
 }
 
+/**
+ * モデル自身に設定されているシェーダーでモデルをレンダリングする
+ *
+ */
 void Model::render() const
 {
 	get_mesh()->bind();
 
-	for ( uint_t n = 0; n < get_mesh()->get_rendering_vertex_group_count(); n++ )
+	for ( uint_t n = 0; n < get_shader_count(); n++ )
 	{
 		get_shader_at( n )->render( get_mesh(), n );
+	}
+}
+
+/**
+ * 指定したシェーダーでモデルをレンダリングする
+ *
+ * @param shader シェーダー
+ */
+void Model::render( const Shader* shader ) const
+{
+	get_mesh()->bind();
+
+	for ( uint_t n = 0; n < get_shader_count(); n++ )
+	{
+		shader->render( get_mesh(), n );
 	}
 }
 

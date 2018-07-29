@@ -70,6 +70,8 @@ public:
 
 private:
 	std::unique_ptr< Fader >	fader_;
+	bool_t						is_fading_in_ = true;		///< true : 現在フェードイン中 or false : 現在フェードアウト中
+	float_t						fade_speed_ = 0.f;
 
 	std::vector< Texture* >		paper_texture_list_;
 	Texture*					paper_texture_ = 0;
@@ -83,7 +85,10 @@ private:
 	mutable const ShaderResource* current_object_shader_resource_ = 0;
 	mutable const ShaderResource* current_skinning_shader_resource_ = 0;
 
-	bool is_debug_axis_enabled_ = true;
+	bool						is_debug_axis_enabled_ = true;
+
+	mutable uint_t				pass_count_ = 0;
+	mutable uint_t				draw_count_ = 0;
 
 protected:
 	bool_t load_mesh( Model*, const char_t* name ) const;
@@ -99,22 +104,16 @@ public:
 	GraphicsManager();
 	virtual ~GraphicsManager();
 
-	virtual void update() = 0;
+	void update();
 
-	
-	Model* create_named_model( const char_t* name ) { return model_manager_.create_named( name ); }
+	// Model
+	template< typename Type=Model > Type* create_named_model( const char_t* name ) { return model_manager_.create_named< Type >( name ); }
 	Model* load_model( const char_t* name );
 	Model* clone_model( const Model* );
-
-	// virtual Model* load_model( const char_t* name ) { Model* m = model_manager_.get( name ); return ( m ? m : nullptr ); }
-
-	// virtual Mesh* load_mesh( const char_t*, const char_t* ) = 0;
-
-	// DrawingMesh* load_drawing_mesh( const char_t*, common::safe_ptr< SkinningAnimationSet >& );
-	// DrawingLine* load_drawing_line( const char_t* );
 	
-	// template< typename Type=Model > Model* get_model( const char_t* name ) { return model_manager_.get< Type >( name ); }
-
+	template< typename Type=Model > Type* get_model( const char_t* name ) { return model_manager_.get< Type >( name ); }
+	
+	// Mesh
 	template< typename Type=Mesh > Type* create_named_mesh( const char_t* name )
 	{
 		Mesh::Buffer* b = create_mesh_buffer();
@@ -128,14 +127,18 @@ public:
 
 	virtual Mesh::Buffer* create_mesh_buffer() const = 0;
 
+	// Shader
 	template< typename Type, typename ... Args > Type* create_shader( Args ... args ) { return shader_manager_.create< Type >( args ... ); }
 	template< typename Type, typename ... Args > Type* create_named_shader( const char_t* name, Args ... args ) { return shader_manager_.create_named< Type >( name, args ... ); }
 	template< typename Type=Shader > Type* get_shader( const char_t* name ) { return shader_manager_.get< Type >( name ); }
 	Shader* clone_shader( const Shader* s ) { Shader* s2 = s->clone(); shader_manager_.add( s2 ); return s2; }
 
+	// SkinningAnimationSet
 	SkinningAnimationSet* create_skinning_animation_set() { return skinning_animation_set_manager_.create(); }
 
-	Texture* load_texture( const char_t* name, const char_t* file_name );
+	// Texture
+	Texture* load_texture( const char_t* file_name ) { return load_named_texture( file_name, file_name ); }
+	Texture* load_named_texture( const char_t* name, const char_t* file_name );
 	Texture* get_texture( const char_t* name );
 
 	void setup_default_shaders();
@@ -192,17 +195,18 @@ public:
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
 
 	Fader* get_fader() { return fader_.get(); }
+	const Fader* get_fader() const { return fader_.get(); }
 
 	/// @todo 整理する
-	virtual void set_fade_color( const Color& ) = 0;
+	void set_fade_color( const Color& );
 
-	virtual void start_fade_in( float_t speed ) = 0;
-	virtual void start_fade_out( float_t speed ) = 0;
+	void start_fade_in( float_t speed );
+	void start_fade_out( float_t speed );
 
-	virtual void fade_in( float_t speed = 1.f ) = 0;
-	virtual void fade_out( float_t speed = 1.f ) = 0;
+	void fade_in( float_t speed = 1.f );
+	void fade_out( float_t speed = 1.f );
 
-	virtual void render_fader() const = 0;
+	void render_fader() const;
 
 	/// @todo ちゃんと作る Font, size, 指定した Texture への描画
 	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
@@ -215,6 +219,15 @@ public:
 	virtual void clear_debug_bullet() const = 0;
 	virtual void render_debug_bullet() const = 0;
 	
+
+	void clear_pass_count() const { pass_count_ = 0; }
+	void count_pass() const { pass_count_++; }
+	uint_t get_pass_count() const { return pass_count_; }
+
+	void clear_draw_count() const { draw_count_ = 0; }
+	void count_draw() const { draw_count_++; }
+	uint_t get_draw_count() const { return draw_count_; }
+
 	// void update_frame_render_data( const Camera*, const Vector3& ) const;
 
 }; // class GraphicsManager

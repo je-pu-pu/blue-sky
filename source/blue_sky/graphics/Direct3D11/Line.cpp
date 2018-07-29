@@ -60,9 +60,9 @@ void Line::create_index_buffer()
 
 void Line::create_texture()
 {
-	texture_ = blue_sky::GameMain::get_instance()->get_graphics_manager()->load_texture( "lines", "media/texture/lines.png" );
-	// texture_ = blue_sky::GameMain::get_instance()->get_graphics_manager()->load_texture( "lines", "media/texture/test.png" );
-	// texture_ = blue_sky::GameMain::get_instance()->get_graphics_manager()->load_texture( "lines", "media/model/building-roof-3.png" );
+	texture_ = blue_sky::GameMain::get_instance()->get_graphics_manager()->load_named_texture( "lines", "media/texture/lines.png" );
+	// texture_ = blue_sky::GameMain::get_instance()->get_graphics_manager()->load_named_texture( "lines", "media/texture/test.png" );
+	// texture_ = blue_sky::GameMain::get_instance()->get_graphics_manager()->load_named_texture( "lines", "media/model/building-roof-3.png" );
 }
 
 void Line::render_part( int part_count ) const
@@ -88,6 +88,8 @@ void Line::render_part( int part_count ) const
 	// direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & text_view );
 
 	direct_3d_->getImmediateContext()->DrawIndexed( std::min< int >( part_count * 2, index_size_ ), 0, 0 );
+
+	GameMain::get_instance()->get_graphics_manager()->count_draw();
 }
 
 } // namespace blue_sky::graphics::direct_3d_11

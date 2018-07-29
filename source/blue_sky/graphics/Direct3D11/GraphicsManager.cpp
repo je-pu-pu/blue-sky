@@ -2,6 +2,7 @@
 
 #include <blue_sky/ShaderResources.h>
 #include <blue_sky/graphics/SkyBox.h>
+#include <blue_sky/graphics/Ground.h>
 #include <blue_sky/graphics/Fader.h>
 #include <blue_sky/graphics/ObjFileLoader.h>
 #include <blue_sky/graphics/FbxFileLoader.h>
@@ -51,44 +52,7 @@ GraphicsManager::~GraphicsManager()
 	
 }
 
-/**
- * 更新処理
- *
- */
-void GraphicsManager::update()
-{
-	if ( is_fading_in_ )
-	{
-		fade_in( fade_speed_ );
-	}
-	else
-	{
-		fade_out( fade_speed_ );
-	}
-}
-
 #if 0
-/**
- * メッシュを読み込む
- *
- * @param name メッシュ名
- * @param file_path メッシュファイルパス
- */
-GraphicsManager::Mesh* GraphicsManager::load_mesh( const char_t* name, const char_t* file_path )
-{
-	return direct_3d_->getMeshManager()->load( name, file_path );
-}
-
-/**
- * 指定した名前のメッシュを取得する
- *
- * @param name メッシュ名
- */
-GraphicsManager::Mesh* GraphicsManager::get_mesh( const char_t* name )
-{
-	return direct_3d_->getMeshManager()->get( name );
-}
-
 /**
  * 指定した名前のメッシュをアンロードする
  *
@@ -106,26 +70,6 @@ void GraphicsManager::unload_mesh( const char_t* name )
 void GraphicsManager::unload_mesh_all()
 {
 	direct_3d_->getMeshManager()->unload_all();
-}
-
-/**
- * 手描き風メッシュを生成する
- *
- * @return 手描き風メッシュ
- */
-DrawingMesh* GraphicsManager::create_drawing_mesh()
-{
-	return new DrawingMesh( new Mesh( direct_3d_ ) );
-}
-
-/**
- * 手描き風ラインを生成する
- *
- * @return ライン
- */
-DrawingLine* GraphicsManager::create_drawing_line()
-{
-	return new DrawingLine( direct_3d_ );
 }
 #endif
 
@@ -217,7 +161,7 @@ void GraphicsManager::set_ground( const char_t* name )
 {
 	unset_ground();
 
-	ground_.reset( new Model() );
+	ground_.reset( new Ground() );
 	load_mesh( ground_.get(), name );
 
 	ground_render_data_.reset( new ObjectConstantBufferWithData( direct_3d_ ) );
@@ -307,6 +251,9 @@ void GraphicsManager::set_eye_position( const Vector3& pos )
  */
 void GraphicsManager::setup_rendering() const
 {
+	clear_pass_count();
+	clear_draw_count();
+
 	set_input_layout( "main" );
 
 	direct_3d_->clear_default_view();
@@ -399,6 +346,8 @@ void GraphicsManager::render_technique( const EffectTechnique* technique, const 
 		pass->apply();
 
 		function();
+
+		count_pass();
 	}
 }
 
@@ -450,64 +399,6 @@ void GraphicsManager::render_background() const
 		} );
 #endif
 	}
-}
-
-/**
- * フェードイン・フェードアウト用の色を設定する
- *
- * @param color 色
- */
-void GraphicsManager::set_fade_color( const Color& color )
-{
-	get_fader()->set_color( color );
-}
-
-void GraphicsManager::start_fade_in( float_t speed )
-{
-	is_fading_in_ = true;
-	fade_speed_ = speed;
-}
-	
-void GraphicsManager::start_fade_out( float_t speed )
-{
-	is_fading_in_ = false;
-	fade_speed_ = speed;
-}
-
-void GraphicsManager::fade_in( float_t speed )
-{
-	get_fader()->fade_in( speed );
-}
-	
-void GraphicsManager::fade_out( float_t speed )
-{
-	get_fader()->fade_out( speed );
-}
-
-/**
- * フェーダーを描画する
- *
- */
-void GraphicsManager::render_fader() const
-{
-#if 0
-	ObjectConstantBufferData buffer_data;
-	buffer_data.world = Matrix().set_identity().transpose();
-	buffer_data.color = direct_3d_->getFader()->get_color();
-	
-	get_shared_object_render_data()->update( & buffer_data );
-
-	/// @todo 2D の描画に法線を使っているのは無駄なのでなんとかする
-	set_input_layout( "main" );
-
-	render_technique( "|main2d", [this]
-	{
-		get_shared_object_render_data()->bind_to_vs();
-		get_shared_object_render_data()->bind_to_ps();
-
-		direct_3d_->getFader()->render();
-	} );
-#endif
 }
 
 /**

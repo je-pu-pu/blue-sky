@@ -53,8 +53,8 @@ StageSelectScene::StageSelectScene( const GameMain* game_main )
 	face_src_rect_list_.push_back( win::Rect::Size( 704, 384, 64, 64 ) );
 	face_src_rect_list_.push_back( win::Rect::Size( 768, 384, 64, 64 ) );
 
-	sprite_texture_ = get_graphics_manager()->load_texture( "sprite", "media/image/title.png" );
-	bg_texture_ = get_graphics_manager()->load_texture( "bg", "media/texture/cloth.png" );
+	sprite_texture_ = get_graphics_manager()->load_named_texture( "sprite", "media/image/title.png" );
+	bg_texture_ = get_graphics_manager()->load_named_texture( "bg", "media/texture/cloth.png" );
 
 	ok_ = get_sound_manager()->get_sound( "ok" );
 	click_ = get_sound_manager()->get_sound( "click" );
@@ -357,11 +357,11 @@ void StageSelectScene::update_stage_list()
 
 		try
 		{
-			stage->texture = get_graphics_manager()->load_texture( stage->name.c_str(), ( get_stage_dir_name_by_page( page_ ) + stage->name + ".png" ).c_str() );
+			stage->texture = get_graphics_manager()->load_named_texture( stage->name.c_str(), ( get_stage_dir_name_by_page( page_ ) + stage->name + ".png" ).c_str() );
 		}
 		catch ( ... )
 		{
-			stage->texture = get_graphics_manager()->load_texture( stage->name.c_str(), "media/stage/default.png" );
+			stage->texture = get_graphics_manager()->load_named_texture( stage->name.c_str(), "media/stage/default.png" );
 		}
 
 		stage_list_.push_back( stage );

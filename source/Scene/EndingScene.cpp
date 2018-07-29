@@ -42,7 +42,7 @@ EndingScene::EndingScene( const GameMain* game_main )
 	switch_sound_ = get_sound_manager()->load( "switch-on" );
 	click_sound_ = get_sound_manager()->load( "click" );
 
-	bg_texture_ = get_graphics_manager()->load_texture( "bg", "media/texture/cloth.png" );
+	bg_texture_ = get_graphics_manager()->load_named_texture( "bg", "media/texture/cloth.png" );
 
 	get_graphics_manager()->get_fader()->full_in();
 

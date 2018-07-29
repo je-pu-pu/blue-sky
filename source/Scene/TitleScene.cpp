@@ -41,9 +41,9 @@ TitleScene::TitleScene( const GameMain* game_main )
 	ok_ = get_sound_manager()->get_sound( "ok" );
 	bgm_ = get_sound_manager()->load_music( "bgm", "ending" );
 	
-	// title_texture_ = get_graphics_manager()->load_texture( "sprite", "media/texture/title.png" );
-	title_bg_texture_ = get_graphics_manager()->load_texture( "title-bg", "media/image/cloud-3.jpg" );
-	cloth_texture_ = get_graphics_manager()->load_texture( "cloth", "media/texture/cloth.png" );
+	// title_texture_ = get_graphics_manager()->load_named_texture( "sprite", "media/texture/title.png" );
+	title_bg_texture_ = get_graphics_manager()->load_named_texture( "title-bg", "media/image/cloud-3.jpg" );
+	cloth_texture_ = get_graphics_manager()->load_named_texture( "cloth", "media/texture/cloth.png" );
 
 	brand_logo_model_ = get_graphics_manager()->load_model( "je-pu-pu" );
 	title_logo_model_ = get_graphics_manager()->load_model( "blue-sky" );

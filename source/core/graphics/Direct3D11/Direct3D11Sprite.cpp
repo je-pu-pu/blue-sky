@@ -1,7 +1,8 @@
 #include "Direct3D11Sprite.h"
 #include "Direct3D11.h"
-
+#include <GameMain.h>
 #include <blue_sky/graphics/Direct3D11/ShaderResource.h>
+#include <blue_sky/graphics/GraphicsManager.h>
 #include <game/Texture.h>
 #include <win/Rect.h>
 
@@ -175,6 +176,8 @@ void Direct3D11Sprite::draw( const Rect* dst, const Texture* texture, const Rect
 	texture->bind_to_ps( 0 );
 
 	direct_3d_->getImmediateContext()->DrawIndexed( 6, 0, 0 );
+
+	blue_sky::GameMain::get_instance()->get_graphics_manager()->count_draw();
 }
 
 void Direct3D11Sprite::draw( const Point& dst_point, const Texture* texture, const Rect& src, const Color& color )

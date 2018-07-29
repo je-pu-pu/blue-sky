@@ -7,7 +7,7 @@ RasterizerState BackgroundRasterizerState
 
 float4 ps_ground( COMMON_POS_UV input ) : SV_Target
 {
-	return model_texture.Sample( texture_sampler, input.TexCoord ) * ObjectColor;
+	return model_texture.Sample( texture_sampler, input.TexCoord )  * ObjectColor;
 }
 
 technique11 ground

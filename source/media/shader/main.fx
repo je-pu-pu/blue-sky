@@ -595,6 +595,7 @@ technique11 skin_with_shadow
 
 #include "2d.hlsl"
 #include "sprite.hlsl"
+#include "fader.hlsl"
 
 #include "canvas.hlsl"
 

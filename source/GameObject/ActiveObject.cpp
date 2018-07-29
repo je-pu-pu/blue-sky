@@ -5,6 +5,8 @@
 #include "AnimationPlayer.h"
 #include "GameMain.h"
 
+#include <blue_sky/ShaderResources.h>
+
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
 
@@ -281,6 +283,7 @@ void ActiveObject::render_mesh() const
 		return;
 	}
 
+	/// @todo 削除する
 	bind_render_data();
 	
 	if ( get_animation_player() )
@@ -290,6 +293,26 @@ void ActiveObject::render_mesh() const
 
 	get_model()->render();
 }
+
+/**
+ * 指定したシェーダーでメッシュを描画する
+ *
+ */
+void ActiveObject::render_mesh( const Shader* shader ) const
+{
+	if ( ! is_mesh_visible() )
+	{
+		return;
+	}
+
+	if ( get_animation_player() )
+	{
+		get_animation_player()->bind_render_data();
+	}
+
+	get_model()->render( shader );
+}
+
 
 /**
  * 線を描画する

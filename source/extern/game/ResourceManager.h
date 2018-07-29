@@ -107,7 +107,15 @@ public:
 		return static_cast< Type* >( i->second );
 	}
 
-	/// @todo clear 系
+	/**
+	 * 全てのリソースを削除する
+	 *
+	 */
+	bool_t clear_all()
+	{
+		resource_list_.clear();
+		resource_map_.clear();
+	}
 };
 
 } // namespace game

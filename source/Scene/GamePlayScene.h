@@ -16,6 +16,7 @@ class Direct3D11ShadowMap;
 namespace game
 {
 	class Mesh;
+	class Shader;
 	class Config;
 };
 
@@ -47,6 +48,7 @@ class GamePlayScene : public Scene
 {
 public:
 	typedef game::Mesh					Mesh;
+	typedef game::Shader				Shader;
 	typedef graphics::Rectangle			Rectangle;
 	typedef Direct3D11ShadowMap			ShadowMap;	
 
@@ -71,6 +73,8 @@ protected:
 	common::auto_ptr< Config >			stage_config_;	
 
 	mutable common::auto_ptr< ShadowMap >		shadow_map_;
+	Shader*								shadow_map_shader_;
+	Shader*								shadow_map_skin_shader_;
 
 	common::auto_ptr< Player >			player_;
 	common::auto_ptr< Camera >			camera_;
@@ -154,12 +158,11 @@ protected:
 	void render_text() const;
 
 	void render_shadow_map() const;
-	void render_shadow_map( const char*, bool ) const;
+	void render_shadow_map( const Shader* , bool ) const;
 	
 	void render_sky_box() const;
 	void render_far_billboards() const;
 
-	void render_object_skin_mesh() const;
 	void render_object_mesh() const;
 	void render_object_line() const;
 	

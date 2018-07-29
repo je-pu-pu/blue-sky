@@ -32,7 +32,7 @@ BaseFileLoader::Texture* BaseFileLoader::load_texture( const char_t* name ) cons
 {
 	const string_t file_path = get_model()->get_texture_file_path_by_texture_name( name );
 
-	return GameMain::get_instance()->get_graphics_manager()->load_texture( name, file_path.c_str() );
+	return GameMain::get_instance()->get_graphics_manager()->load_named_texture( name, file_path.c_str() );
 }
 
 } // namespace blue_sky::graphics

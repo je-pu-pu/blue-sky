@@ -186,12 +186,13 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "set_drawing_accent", [this] ( float_t accent ) { get_graphics_manager()->set_drawing_accent( accent ); } );
 	get_script_manager()->set_function( "set_drawing_line_type", [this] ( int_t type ) { get_graphics_manager()->set_drawing_line_type( type ); } );
 
-	get_script_manager()->set_function( "clone_model", [this] ( graphics::Model* m ) { auto* m2 =get_graphics_manager()->clone_model( m ); return m2; } );
+	get_script_manager()->set_function( "clone_model", [this] ( graphics::Model* m ) { auto* m2 = get_graphics_manager()->clone_model( m ); return m2; } );
 
 	get_script_manager()->set_function( "get_shader", [this] ( const char_t* name ) { return get_graphics_manager()->get_shader( name ); } );
 	get_script_manager()->set_function( "clone_shader", [this] ( const game::Shader* s ) { return get_graphics_manager()->clone_shader( s ); } );
 
-	get_script_manager()->set_function( "load_texture", [this] ( const char_t* name, const char_t* file_path ) { return get_graphics_manager()->load_texture( name, file_path ); } );
+	get_script_manager()->set_function( "load_texture", [this] ( const char_t* name, const char_t* file_path ) { return get_graphics_manager()->load_texture( file_path ); } );
+	// get_script_manager()->set_function( "load_named_texture", [this] ( const char_t* name, const char_t* file_path ) { return get_graphics_manager()->load_texture( name, file_path ); } );
 	get_script_manager()->set_function( "get_texture", [this] ( const char_t* name ) { return get_graphics_manager()->get_texture( name ); } );
 
 	// debug

@@ -333,6 +333,8 @@ void FbxFileLoader::load_mesh_recursive( FbxNode* node )
 {
 	load_mesh( node->GetMesh() );
 
+	// std::cout << "material count : " << node->GetMaterialCount() << std::endl;
+
 	for ( int n = 0; n < node->GetMaterialCount(); n++ )
 	{
 		load_material( node->GetMaterial( n ) );

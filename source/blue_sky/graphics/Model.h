@@ -85,6 +85,7 @@ public:
 	virtual string_t get_texture_file_path_by_texture_name( const char* ) const;
 
 	void render() const;
+	void render( const Shader* ) const;
 };
 
 } // namespace blue_sky::graphics

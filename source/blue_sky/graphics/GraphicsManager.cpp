@@ -1,12 +1,15 @@
 #include "GraphicsManager.h"
 
 #include <blue_sky/graphics/Fader.h>
+#include <blue_sky/graphics/Rectangle.h>
 #include <blue_sky/graphics/ObjFileLoader.h>
 #include <blue_sky/graphics/FbxFileLoader.h>
 #include <blue_sky/graphics/Line.h>
 
 #include <blue_sky/graphics/shader/FlatShader.h>
+#include <blue_sky/graphics/shader/FaderShader.h>
 #include <blue_sky/graphics/shader/MatcapShader.h>
+#include <blue_sky/graphics/shader/ShadowMapShader.h>
 #include <blue_sky/graphics/shader/TessellationMatcapShader.h>
 
 #include <ActiveObjectManager.h>
@@ -34,6 +37,22 @@ GraphicsManager::GraphicsManager()
 GraphicsManager::~GraphicsManager()
 {
 
+}
+
+/**
+ * 更新処理
+ *
+ */
+void GraphicsManager::update()
+{
+	if ( is_fading_in_ )
+	{
+		fade_in( fade_speed_ );
+	}
+	else
+	{
+		fade_out( fade_speed_ );
+	}
 }
 
 /**
@@ -125,7 +144,7 @@ GraphicsManager::Model* GraphicsManager::load_model( const char_t* name )
 		return model;
 	}
 
-	model = create_named_model( name );
+	model = new Model();
 
 	common::timer t;
 
@@ -144,10 +163,16 @@ GraphicsManager::Model* GraphicsManager::load_model( const char_t* name )
 		{
 			std::cout << "--- loaded line : " << name << " : " << t.elapsed() << "---" << std::endl;
 		}
+
+		model_manager_.add_named( name, model );
 	}
 	else
 	{
 		std::cout << "--- not found : " << name << " : " << t.elapsed() << "---" << std::endl;
+
+		delete model;
+
+		return nullptr;
 	}
 
 	return model;
@@ -171,7 +196,7 @@ GraphicsManager::Model* GraphicsManager::clone_model( const Model* m )
  * @param name 名前
  * @param file_name ファイルパス
  */
-GraphicsManager::Texture* GraphicsManager::load_texture( const char_t* name, const char_t* file_path )
+GraphicsManager::Texture* GraphicsManager::load_named_texture( const char_t* name, const char_t* file_path )
 {
 	Texture* t = texture_manager_.get( name );
 
@@ -224,17 +249,23 @@ GraphicsManager::Texture* GraphicsManager::get_texture( const char_t* name )
 /**
  * デフォルトのシェーダーを準備する
  *
+ * @todo 関数名直す
  */
 void GraphicsManager::setup_default_shaders()
 {
-	auto* matcap_texture = load_texture( "matcap", "media/texture/matcap/skin.png" );
+	auto* matcap_texture = load_named_texture( "matcap", "media/texture/matcap/skin.png" );
 
 	create_named_shader< shader::FlatShader >( "flat", "main", "flat" );
 	create_named_shader< shader::FlatShader >( "flat_skin", "skin", "flat_skin" );
 	create_named_shader< shader::MatcapShader >( "matcap", "main", "matcap" )->set_texture( matcap_texture );
 	create_named_shader< shader::MatcapShader >( "matcap_skin", "skin", "matcap_skin" )->set_texture( matcap_texture );
+	create_named_shader< shader::ShadowMapShader >( "shadow_map" );
+	create_named_shader< shader::SkinningShadowMapShader >( "shadow_map_skin" );
 	create_named_shader< shader::TessellationMatcapShader >( "tess_matcap" )->set_texture( matcap_texture );
 	create_named_shader< shader::SkinningTessellationMatcapShader >( "tess_matcap_skin" )->set_texture( matcap_texture );
+
+	fader_->set_mesh( create_named_mesh< Rectangle >( "fader" ) );
+	fader_->set_shader_at( 0, create_named_shader< shader::FaderShader >( "fader" ) );
 }
 
 /**
@@ -245,12 +276,12 @@ void GraphicsManager::load_paper_textures()
 {
 	paper_texture_list_.clear();
 
-	paper_texture_list_.push_back( load_texture( "paper-0", "media/texture/pencil-face-1.png" ) );
-	paper_texture_list_.push_back( load_texture( "paper-1", "media/texture/pen-face-1-loop.png" ) );
-	paper_texture_list_.push_back( load_texture( "paper-2", "media/texture/pen-face-2-loop.png" ) );
-	paper_texture_list_.push_back( load_texture( "paper-3", "media/texture/dot-face-1.png" ) );
-	paper_texture_list_.push_back( load_texture( "paper-4", "media/texture/brush-face-1.png" ) );
-	paper_texture_list_.push_back( load_texture( "paper-5", "media/texture/blank.png" ) );
+	paper_texture_list_.push_back( load_named_texture( "paper-0", "media/texture/pencil-face-1.png" ) );
+	paper_texture_list_.push_back( load_named_texture( "paper-1", "media/texture/pen-face-1-loop.png" ) );
+	paper_texture_list_.push_back( load_named_texture( "paper-2", "media/texture/pen-face-2-loop.png" ) );
+	paper_texture_list_.push_back( load_named_texture( "paper-3", "media/texture/dot-face-1.png" ) );
+	paper_texture_list_.push_back( load_named_texture( "paper-4", "media/texture/brush-face-1.png" ) );
+	paper_texture_list_.push_back( load_named_texture( "paper-5", "media/texture/blank.png" ) );
 
 	paper_texture_ = paper_texture_list_.back();
 }
@@ -374,6 +405,73 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 			active_object->render_line();
 		}
 	} );
+}
+
+/**
+ * フェードイン・フェードアウト用の色を設定する
+ *
+ * @param color 色
+ */
+void GraphicsManager::set_fade_color( const Color& color )
+{
+	get_fader()->set_color( color );
+}
+
+void GraphicsManager::start_fade_in( float_t speed )
+{
+	is_fading_in_ = true;
+	fade_speed_ = speed;
+}
+	
+void GraphicsManager::start_fade_out( float_t speed )
+{
+	is_fading_in_ = false;
+	fade_speed_ = speed;
+}
+
+void GraphicsManager::fade_in( float_t speed )
+{
+	get_fader()->fade_in( speed );
+}
+	
+void GraphicsManager::fade_out( float_t speed )
+{
+	get_fader()->fade_out( speed );
+}
+
+/**
+ * フェーダーを描画する
+ *
+ */
+void GraphicsManager::render_fader() const
+{
+	ObjectConstantBufferData buffer_data;
+	buffer_data.world = Matrix().set_identity();
+	buffer_data.color = get_fader()->get_color();
+
+	get_shared_object_render_data()->update( & buffer_data );
+	set_current_object_shader_resource( get_shared_object_render_data() );
+
+	get_fader()->render();
+
+#if 0
+	ObjectConstantBufferData buffer_data;
+	buffer_data.world = Matrix().set_identity().transpose();
+	buffer_data.color = direct_3d_->getFader()->get_color();
+	
+	get_shared_object_render_data()->update( & buffer_data );
+
+	/// @todo 2D の描画に法線を使っているのは無駄なのでなんとかする
+	set_input_layout( "main" );
+
+	render_technique( "|main2d", [this]
+	{
+		get_shared_object_render_data()->bind_to_vs();
+		get_shared_object_render_data()->bind_to_ps();
+
+		direct_3d_->getFader()->render();
+	} );
+#endif
 }
 
 /**

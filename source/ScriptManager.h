@@ -106,7 +106,7 @@ public:
 	template< typename FunctionType >
 	void set_function( const string_t& name, const FunctionType& function )
 	{
-		lua_.set_function( name, function);
+		lua_.set_function( name, function );
 	}
 
 	void auto_complete( string_t& );

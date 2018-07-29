@@ -47,11 +47,11 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 		text_y_target_ = static_cast< float >( -get_direct_3d()->getFont()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) ) );
 	}
 	
-	sprite_texture_ = get_graphics_manager()->load_texture( "sprite", "media/image/title.png" );
+	sprite_texture_ = get_graphics_manager()->load_named_texture( "sprite", "media/image/title.png" );
 
 	if ( bg_sprite_layer_list_.empty() )
 	{
-		bg_sprite_layer_list_.push_back( new BgSpriteLayer( "bg", get_graphics_manager()->load_texture( "bg", "media/image/story-bg-default.jpg" ) ) );
+		bg_sprite_layer_list_.push_back( new BgSpriteLayer( "bg", get_graphics_manager()->load_named_texture( "bg", "media/image/story-bg-default.jpg" ) ) );
 		// bg_sprite_layer_list_.back()->set_size_from_texture();
 	}
 
@@ -110,7 +110,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 			string_t layer_name;
 			ss >> layer_name;
 
-			current_layer = new BgSpriteLayer( layer_name.c_str(), get_graphics_manager()->load_texture( layer_name.c_str(), ( std::string( "media/image/" + layer_name ) ).c_str() ) );
+			current_layer = new BgSpriteLayer( layer_name.c_str(), get_graphics_manager()->load_named_texture( layer_name.c_str(), ( std::string( "media/image/" + layer_name ) ).c_str() ) );
 
 			ss >> current_layer->get_src_rect().left() >> current_layer->get_src_rect().top();
 			ss >> current_layer->get_src_rect().right() >> current_layer->get_src_rect().bottom();

@@ -42,9 +42,6 @@ private:
 	std::unique_ptr< ObjectConstantBufferWithData >	sky_box_render_data_;
 	std::unique_ptr< ObjectConstantBufferWithData > ground_render_data_;
 
-	bool											is_fading_in_ = true;
-	float_t											fade_speed_ = 0.f;
-
 protected:
 	const InputLayout* get_input_layout( const char_t* ) const override;
 	const EffectTechnique* get_effect_technique( const char_t* ) const override;
@@ -62,15 +59,12 @@ public:
 	explicit GraphicsManager( Direct3D* );
 	virtual ~GraphicsManager();
 
-	void update() override;
+	// void update() override;
 
 	MeshBuffer* create_mesh_buffer() const override { return new MeshBuffer( direct_3d_ ); }
 
 	// void unload_mesh( const char_t* ) override;
 	// void unload_mesh_all() override;
-
-	// DrawingMesh* create_drawing_mesh() override;
-	// DrawingLine* create_drawing_line() override;
 
 	// void unload_texture( const char_t* ) override;
 	// void unload_texture_all() override;
@@ -100,16 +94,6 @@ public:
 	void render_technique( const char_t*, const std::function< void () >& ) const override;
 	void render_technique( const EffectTechnique*, const std::function< void () >& ) const override;
 	void render_background() const override;
-
-	void set_fade_color( const Color& ) override;
-
-	void start_fade_in( float_t ) override;
-	void start_fade_out( float_t ) override;
-
-	void fade_in( float_t speed = 1.f ) override;
-	void fade_out( float_t speed = 1.f ) override;
-
-	void render_fader() const override;
 
 	/// @todo ÇøÇ·ÇÒÇ∆çÏÇÈ Font, size, éwíËÇµÇΩ Texture Ç÷ÇÃï`âÊ
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;

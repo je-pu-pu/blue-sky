@@ -1,4 +1,6 @@
 #include "MeshBuffer.h"
+#include <GameMain.h>
+#include <blue_sky/graphics/GraphicsManager.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
 
 namespace blue_sky::graphics::direct_3d_11
@@ -108,6 +110,8 @@ void MeshBuffer::render( uint_t n ) const
 {
 	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_list_[ n ].get(), IndexBufferFormat, 0 );
 	direct_3d_->getImmediateContext()->DrawIndexed( get_index_count_list()[ n ], 0, 0 );
+	
+	GameMain::get_instance()->get_graphics_manager()->count_draw();
 }
 
 } // namespace blue_sky::graphics::direct_3d_11

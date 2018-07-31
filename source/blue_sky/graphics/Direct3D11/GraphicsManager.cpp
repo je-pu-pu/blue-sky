@@ -372,7 +372,6 @@ void GraphicsManager::render_technique( const EffectTechnique* technique, const 
 /**
  * 背景 ( スカイボックス・地面 ) を描画する
  *
- * @todo 直す
  */
 void GraphicsManager::render_background() const
 {
@@ -382,19 +381,6 @@ void GraphicsManager::render_background() const
 		ground_render_data_->update();
 		set_current_object_shader_resource( ground_render_data_.get() );
 		ground_->render();
-
-#if 0
-		render_technique( "|ground", [this]
-		{
-			get_frame_render_data()->bind_to_vs();
-
-			ground_render_data_->update();
-			ground_render_data_->bind_to_vs();
-			ground_render_data_->bind_to_ps();
-
-			ground_->render();
-		} );
-#endif
 	}
 
 	// sky box
@@ -403,19 +389,6 @@ void GraphicsManager::render_background() const
 		sky_box_render_data_->update();
 		set_current_object_shader_resource( sky_box_render_data_.get() );
 		sky_box_->render();
-
-#if 0
-		render_technique( "|sky_box", [this]
-		{
-			get_frame_render_data()->bind_to_vs();
-
-			sky_box_render_data_->update();
-			sky_box_render_data_->bind_to_vs();
-			sky_box_render_data_->bind_to_ps();
-
-			sky_box_->render();
-		} );
-#endif
 	}
 }
 

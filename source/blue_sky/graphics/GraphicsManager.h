@@ -260,6 +260,8 @@ public:
 	void count_draw() const { draw_count_++; }
 	uint_t get_draw_count() const { return draw_count_; }
 
+	void debug_print_resources() const;
+
 	// void update_frame_render_data( const Camera*, const Vector3& ) const;
 
 }; // class GraphicsManager

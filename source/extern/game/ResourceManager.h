@@ -116,6 +116,20 @@ public:
 		resource_list_.clear();
 		resource_map_.clear();
 	}
+
+	/**
+	 * デバッグのためにリソースの一覧を標準出力に出力する
+	 *
+	 */
+	void debug_print_resources() const
+	{
+		std::cout << "list : " << resource_list_.size() << ", named : " << resource_map_.size() << std::endl;
+
+		for ( const auto& r : resource_map_ )
+		{
+			std::cout << "\t" << r.first << " : " << r.second << std::endl;
+		}
+	}
 };
 
 } // namespace game

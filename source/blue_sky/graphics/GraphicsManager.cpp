@@ -590,6 +590,19 @@ void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_ob
 	}
 }
 
+/**
+ * デバッグのためにリソースの一覧を標準出力に出力する
+ *
+ */
+void GraphicsManager::debug_print_resources() const
+{
+	std::cout << "model     : "; model_manager_.debug_print_resources();
+	std::cout << "mesh      : "; mesh_manager_.debug_print_resources();
+	std::cout << "shader    : "; shader_manager_.debug_print_resources();
+	std::cout << "texture   : "; texture_manager_.debug_print_resources();
+	std::cout << "skin_anim : "; skinning_animation_set_manager_.debug_print_resources();
+}
+
 /*
 void GraphicsManager::update_frame_render_data( const Camera* camera_ )
 {

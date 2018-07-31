@@ -220,6 +220,8 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "debug_axis", [this] ( int on ) { get_graphics_manager()->set_debug_axis_enabled( on ); } );
 	get_script_manager()->set_function( "debug_bullet", [this] ( int mode ) { bullet_debug_draw_->setDebugMode( mode ); } );
 
+	get_script_manager()->set_function( "debug_print_resources", [this] () { get_graphics_manager()->debug_print_resources(); } );
+
 	/// @todo ActiveObject ‚É color ‚ğ‚½‚¹‚éH
 	// get_script_manager()->set_function( "set_object_object", [this] ( ActiveObject* o, const Color& c ) { o->set_co } );
 }

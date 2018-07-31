@@ -33,6 +33,7 @@ public:
 	virtual void ready_to_render_shadow_map_with_cascade_level( uint_t ) = 0;
 
 	virtual void ready_to_render_scene() = 0;
+	virtual void bind_to_render_scene() const = 0;
 
 	virtual int get_cascade_levels() const = 0;
 	

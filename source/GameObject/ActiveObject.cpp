@@ -10,6 +10,8 @@
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
 
+#include <game/Shader.h>
+
 #include <common/math.h>
 
 #include <sstream>
@@ -310,7 +312,7 @@ void ActiveObject::render_mesh( const Shader* shader ) const
 		get_animation_player()->bind_render_data();
 	}
 
-	get_model()->render( shader );
+	shader->render_model( get_model() );
 }
 
 

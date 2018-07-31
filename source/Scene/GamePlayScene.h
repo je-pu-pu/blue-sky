@@ -18,11 +18,6 @@ namespace game
 	class Config;
 };
 
-namespace core::graphics
-{
-	class ShadowMap;
-}
-
 namespace blue_sky
 {
 	class Player;
@@ -38,11 +33,6 @@ namespace blue_sky
 	namespace graphics
 	{
 		class Rectangle;
-
-		namespace shader
-		{
-			class BaseShadowMapShader;
-		}
 	}
 
 /**
@@ -55,14 +45,14 @@ public:
 	typedef game::Mesh					Mesh;
 	typedef game::Shader				Shader;
 	typedef graphics::Rectangle			Rectangle;
-	typedef core::graphics::ShadowMap	ShadowMap;	
+	
 
 	typedef std::function< void( string_t ) > Command;
 	typedef std::map< string_t, Command > CommandMap;
 
-	typedef std::function< void() > CommandCall;
-	typedef std::list< CommandCall > CommandCallList;
-	typedef std::list< DelayedCommand* > DelayedCommandList;
+	typedef std::function< void() >			CommandCall;
+	typedef std::list< CommandCall >		CommandCallList;
+	typedef std::list< DelayedCommand* >	DelayedCommandList;
 
 	enum BalloonSoundType
 	{
@@ -72,19 +62,16 @@ public:
 		BALLOON_SOUND_TYPE_SCALE,			// BGM を消して音階を再生
 	};
 
-protected:
+private:
 	Texture*							ui_texture_ = 0;		///< UI 表示用テクスチャ
 	bool								is_cleared_ = false;	///< ステージクリアフラグ
-	common::auto_ptr< Config >			stage_config_;	
+	std::unique_ptr< Config >			stage_config_;	
 
-	mutable common::auto_ptr< ShadowMap >						shadow_map_;
-	mutable graphics::shader::BaseShadowMapShader*				shadow_map_shader_;
-	mutable graphics::shader::BaseShadowMapShader*				shadow_map_skin_shader_;
 	Shader*								debug_texture_shader_;
 
-	common::auto_ptr< Player >			player_;
-	common::auto_ptr< Camera >			camera_;
-	common::safe_ptr< Girl >			girl_;
+	Player*								player_;
+	std::unique_ptr< Camera >			camera_;				///< @todo GameObjectManager で管理して参照するだけにする
+	Girl*								girl_;					
 	Goal*								goal_ = 0;
 
 	/// @todo 整理する
@@ -116,6 +103,7 @@ protected:
 	bool								is_blackout_;
 	float_t								blackout_timer_;
 
+protected:
 	void load_stage_file( const char* );
 	void save_stage_file( const char* ) const;
 
@@ -162,14 +150,8 @@ protected:
 
 	void render_text() const;
 
-	void render_shadow_map() const;
-	void render_shadow_map( graphics::shader::BaseShadowMapShader* , bool ) const;
-	
 	void render_sky_box() const;
 	void render_far_billboards() const;
-
-	void render_object_mesh() const;
-	void render_object_line() const;
 	
 	void render_sprite( float_t rotho_offset = 0.f ) const;
 

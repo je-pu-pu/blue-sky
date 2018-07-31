@@ -18,6 +18,7 @@
 #include <core/graphics/Direct3D11/Effect.h>
 #include <core/graphics/Direct3D11/EffectTechnique.h>
 #include <core/graphics/Direct3D11/EffectPass.h>
+#include <core/graphics/Direct3D11/ShadowMap.h>
 
 #include <GameMain.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
@@ -41,6 +42,8 @@ GraphicsManager::GraphicsManager( Direct3D* direct_3d )
 	, debug_axis_( new Direct3D11Axis( direct_3d_ ) )
 {
 	create_named_shader< shader::BypassShader >( "bypass" );
+
+
 }
 
 /**
@@ -83,6 +86,11 @@ void GraphicsManager::unload_mesh_all()
 	direct_3d_->getMeshManager()->unload_all();
 }
 #endif
+
+GraphicsManager::ShadowMap* GraphicsManager::create_shadow_map( uint_t level, uint_t size ) const
+{
+	return new core::graphics::direct_3d_11::ShadowMap( direct_3d_, level, size );
+}
 
 /**
  * Line を生成する
@@ -272,8 +280,7 @@ void GraphicsManager::setup_rendering() const
 	direct_3d_->set_default_render_target();
 	direct_3d_->set_default_viewport();
 
-	/// @todo 毎フレーム行う必要があるか？
-	frame_drawing_render_data_->update();
+	update_shader_resources();
 }
 
 /**

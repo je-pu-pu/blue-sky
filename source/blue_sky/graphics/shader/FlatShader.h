@@ -1,6 +1,7 @@
 #pragma once
 
 #include <blue_sky/graphics/shader/BaseShader.h>
+#include <core/graphics/ShadowMap.h>
 
 namespace blue_sky::graphics::shader
 {
@@ -60,6 +61,28 @@ public:
 		get_graphics_manager()->set_input_layout( input_layout_ );
 		get_graphics_manager()->set_primitive_topology( PrimitiveTopology::TRIANGLE_LIST );
 		get_graphics_manager()->render_technique( effect_technique_, [=] { bind(); mesh->render( n ); } );
+	}
+};
+
+/**
+ * ‰A‰e‚ð‚Â‚¯‚¸‰e‚ð•t‚¯‚é
+ *
+ */
+class FlatShadowShader : public FlatShader
+{
+public:
+	FlatShadowShader( const char_t* input_layout_name = "main", const char_t* effect_technique_name = "flat" )
+		: FlatShader( input_layout_name, effect_technique_name )
+	{ }
+
+	FlatShadowShader* clone() const override { return new FlatShadowShader( *this ); }
+
+	void bind() const override
+	{
+		FlatShader::bind();
+
+		get_graphics_manager()->bind_paper_texture();
+		get_graphics_manager()->get_shadow_map()->bind_to_render_scene();
 	}
 };
 

@@ -14,6 +14,8 @@
 #include <blue_sky/graphics/shader/TessellationMatcapShader.h>
 #include <blue_sky/graphics/shader/DebugShadowMapTextureShader.h>
 
+#include <core/graphics/ShadowMap.h>
+
 #include <ActiveObjectManager.h>
 
 #include <AnimationPlayer.h>
@@ -33,12 +35,31 @@ namespace blue_sky::graphics
 GraphicsManager::GraphicsManager()
 	: fader_( new Fader() )
 {
-	
+
 }
 
 GraphicsManager::~GraphicsManager()
 {
 
+}
+
+
+void GraphicsManager::setup_shadow_map( uint_t levels, uint_t size )
+{
+	shadow_map_.reset( create_shadow_map( levels, size ) );
+		
+	shadow_map_shader_->set_shader_resource( shadow_map_->get_shader_resource() );
+	shadow_map_skin_shader_->set_shader_resource( shadow_map_->get_shader_resource() );
+}
+
+void GraphicsManager::unset_shadow_map()
+{
+	shadow_map_.reset();
+}
+
+const ActiveObjectManager* GraphicsManager::get_game_object_manager() const
+{
+	return GameMain::get_instance()->get_active_object_manager();
 }
 
 /**
@@ -268,6 +289,9 @@ void GraphicsManager::setup_default_shaders()
 
 	create_named_shader< shader::DebugShadowMapTextureShader >( "debug_shadow_map_texture" );
 
+	shadow_map_shader_ = get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map" );
+	shadow_map_skin_shader_ = get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map_skin" );
+
 	fader_->set_mesh( create_named_mesh< Rectangle >( "fader" ) );
 	fader_->set_shader_at( 0, create_named_shader< shader::FaderShader >( "fader" ) );
 }
@@ -322,78 +346,89 @@ void GraphicsManager::bind_paper_texture() const
 }
 
 /**
+ * 描画に必要なシェーダーリソースをアップデートする
+ *
+ */
+void GraphicsManager::update_shader_resources() const
+{
+	/// @todo 毎フレーム行う必要があるか？
+	get_frame_drawing_render_data()->update();
+
+	for ( const auto& game_object : get_game_object_manager()->active_object_list() )
+	{
+		game_object->update_render_data();
+	}
+}
+
+/**
+ * シャドウマップを描画する
+ *
+ * @todo 最適化・高速化
+ */
+void GraphicsManager::render_shadow_map() const
+{
+	if ( ! shadow_map_ )
+	{
+		return;
+	}
+
+	shadow_map_->ready_to_render_shadow_map();
+
+	render_shadow_map( shadow_map_shader_, false );
+	render_shadow_map( shadow_map_skin_shader_, true );
+}
+
+/**
+ * シャドウマップを描画する
+ *
+ * @param shader シェーダー
+ * @param is_skin_mesh スキンメッシュフラグ
+ */
+void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool is_skin_mesh ) const
+{
+	for ( int n = 0; n < shadow_map_->get_cascade_levels(); n++ )
+	{
+		shadow_map_->ready_to_render_shadow_map_with_cascade_level( n );
+
+		get_frame_drawing_render_data()->bind_to_gs(); // for line
+
+		for ( const auto* active_object : get_game_object_manager()->active_object_list() )
+		{
+			if ( active_object->get_model()->is_skin_mesh() == is_skin_mesh )
+			{
+				set_current_object_shader_resource( active_object->get_object_constant_buffer() );
+				get_current_skinning_shader_resource( active_object->get_animation_player() ? active_object->get_animation_player()->get_shader_resource() : nullptr );
+
+				active_object->render_mesh( shader );
+
+				if ( active_object->get_model()->get_line() && active_object->get_model()->get_line()->is_cast_shadow() )
+				{
+					active_object->render_line();
+				}
+			}
+		}
+	}
+}
+
+/**
  * 全ての ActiveObject を描画する
  *
- * @todo シェーダーを切り替えられるように整理する
- * @todo shadow_map_, paper_texture_ に対応し GamePlayScene の render_object_mesh(), render_object_line() を置き換える
  */
 void GraphicsManager::render_active_objects( const ActiveObjectManager* active_object_manager ) const
 {
+	if ( shadow_map_ )
+	{
+		shadow_map_->ready_to_render_scene();
+	}
+
 	for ( const auto& active_object : active_object_manager->active_object_list() )
 	{
-		current_object_shader_resource_ = active_object->get_object_constant_buffer();
-		current_skinning_shader_resource_ = active_object->get_animation_player() ? active_object->get_animation_player()->get_constant_buffer() : nullptr;
+		set_current_object_shader_resource( active_object->get_object_constant_buffer() );
+		get_current_skinning_shader_resource( active_object->get_animation_player() ? active_object->get_animation_player()->get_shader_resource() : nullptr );
 
-		active_object->update_render_data();
 		active_object->render_mesh();
 	}
 
-#if 0
-	set_input_layout( "main" );
-
-	render_technique( "|flat", [ this, active_object_manager ]
-	{
-		
-
-		bind_paper_texture();
-
-		for ( const auto* active_object : active_object_manager->active_object_list() )
-		{
-			if ( ! active_object->get_drawing_model()->is_skin_mesh() )
-			{
-				active_object->render_mesh();
-			}
-		}
-	} );
-
-	set_input_layout( "skin" );
-
-	render_technique( "|flat_skin", [ this, active_object_manager ]
-	{
-		/*
-		get_game_render_data()->bind_to_vs();
-		get_game_render_data()->bind_to_gs();
-		
-		get_frame_render_data()->bind_to_vs();
-
-		get_frame_drawing_render_data()->bind_to_gs();
-		*/
-
-		get_game_render_data()->bind_to_all();
-		get_frame_render_data()->bind_to_all();
-		get_frame_drawing_render_data()->bind_to_all();
-
-		bind_paper_texture();
-
-		/*
-
-		if ( shadow_map_ )
-		{
-			shadow_map_->ready_to_render_scene();
-		}
-		*/
-
-		for ( const auto* active_object : active_object_manager->active_object_list() )
-		{
-			if ( active_object->get_drawing_model()->is_skin_mesh() )
-			{
-				active_object->render_mesh();
-			}
-		}
-	} );
-
-	// setup_rendering();
-#endif
 
 	set_input_layout( "line" );
 
@@ -523,7 +558,7 @@ void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_ob
 	get_shared_object_render_data()->bind_to_vs();
 	get_shared_object_render_data()->bind_to_ps();
 
-	AnimationPlayer::BoneConstantBuffer::Data bone_constant_buffer_data;
+	AnimationPlayer::BoneShaderResource::Data bone_constant_buffer_data;
 	active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix::identity() );
 
 	for ( uint_t n = 0; n < active_object->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )

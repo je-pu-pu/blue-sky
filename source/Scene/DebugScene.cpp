@@ -32,7 +32,7 @@ DebugScene::DebugScene( const GameMain* game_main )
 
 DebugScene::~DebugScene()
 {
-
+	get_active_object_manager()->clear();
 }
 
 void DebugScene::update()

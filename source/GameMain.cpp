@@ -194,6 +194,7 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "set_mass", [] ( ActiveObject* o, float_t mass ) { o->set_mass( mass ); } );
 
 	// GrahpicsManager
+	get_script_manager()->set_function( "setup_shadow_map", [this] ( uint_t level = 3, uint_t size = 1024 ) { get_graphics_manager()->setup_shadow_map( level, size ); } );
 	get_script_manager()->set_function( "set_sky_box", [this] ( const char_t* name ) { get_graphics_manager()->set_sky_box( name ); } );
 	get_script_manager()->set_function( "unset_sky_box", [this] () { get_graphics_manager()->unset_sky_box(); } );
 	get_script_manager()->set_function( "set_ground", [this] ( const char_t* name ) { get_graphics_manager()->set_ground( name ); } );
@@ -276,7 +277,7 @@ bool GameMain::update()
 	/// @todo •ÊƒXƒŒƒbƒh‰»
 	get_sound_manager()->update();
 	
-	if ( get_app()->is_active() )
+	if ( get_app()->is_active() && ! is_command_mode_ )
 	{
 		direct_input_->update();
 		input_->update();

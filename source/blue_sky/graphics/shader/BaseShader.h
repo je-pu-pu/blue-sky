@@ -41,6 +41,8 @@ protected:
 public:
 	void render_model( const game::Model* m ) const override
 	{
+		m->get_mesh()->bind();
+
 		for ( uint_t n = 0; n < m->get_mesh()->get_rendering_vertex_group_count(); n++ )
 		{
 			render( m->get_mesh(), n );

@@ -68,6 +68,7 @@ public:
 	void ready_to_render_shadow_map_with_cascade_level( uint_t ) override;
 
 	void ready_to_render_scene() override;
+	void bind_to_render_scene() const override;
 
 	int get_cascade_levels() const override { return cascade_levels_; }
 	

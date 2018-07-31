@@ -12,11 +12,11 @@ Model::Shader* Model::create_shader() const
 	{
 		if ( is_skin_mesh() )
 		{
-			return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShader >( "skin", "skin_with_shadow" );
+			return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShadowShader >( "skin", "skin_with_shadow" );
 		}
 		else
 		{
-			return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShader >( "main", "main_with_shadow" );
+			return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShadowShader >( "main", "main_with_shadow" );
 		}
 	}
 	else
@@ -67,21 +67,6 @@ void Model::render() const
 	for ( uint_t n = 0; n < get_shader_count(); n++ )
 	{
 		get_shader_at( n )->render( get_mesh(), n );
-	}
-}
-
-/**
- * 指定したシェーダーでモデルをレンダリングする
- *
- * @param shader シェーダー
- */
-void Model::render( const Shader* shader ) const
-{
-	get_mesh()->bind();
-
-	for ( uint_t n = 0; n < get_shader_count(); n++ )
-	{
-		shader->render( get_mesh(), n );
 	}
 }
 

@@ -24,8 +24,9 @@
 #include <blue_sky/graphics/Line.h>
 #include <blue_sky/graphics/shader/ShadowMapShader.h>
 
+#include <core/graphics/ShadowMap.h>
+
 /// @todo 抽象化する
-#include <core/graphics/Direct3D11/ShadowMap.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
 
 #include "ActiveObjectPhysics.h"
@@ -62,9 +63,9 @@ namespace blue_sky
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
-	, shadow_map_shader_( get_graphics_manager()->get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map" ) )
-	, shadow_map_skin_shader_( get_graphics_manager()->get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map_skin" ) )
+	, stage_config_( new Config() )
 	, debug_texture_shader_( get_graphics_manager()->get_shader( "debug_shadow_map_texture" ) )
+	, camera_( new Camera() )
 	, action_bgm_after_timer_( 0.f )
 	, bpm_( 120.f )
 	, drawing_accent_scale_( 0.f )
@@ -77,7 +78,11 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, is_blackout_( false )
 	, blackout_timer_( 0.f )
 {
-	stage_config_ = new Config();
+	// ShadowMap
+	if ( get_config()->get( "graphics.shadow-map-enabled", 1 ) != 0 && stage_config_->get( "graphics.shadow-map-enabled", true ) )
+	{
+		get_graphics_manager()->setup_shadow_map( get_config()->get( "graphics.shadow-map-cascade-levels", 3 ), get_config()->get( "graphics.shadow-map-size", 1024 ) );
+	}
 
 	// Physics
 	get_physics_manager()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
@@ -88,17 +93,18 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	// Sound
 	load_sound_all( get_stage_name() == "2-3" );
 
+
 	// Player
 	player_ = new Player();
 	player_->set_model( get_graphics_manager()->load_model( "player" ) );
-	get_active_object_manager()->name_active_object( "player", player_.get() );
+	get_active_object_manager()->add_active_object( player_ );
+	get_active_object_manager()->name_active_object( "player", player_ );
 
 	// Goal
 	goal_ = static_cast< Goal* >( GameMain::get_instance()->create_object( "goal" ) );
 	get_active_object_manager()->name_active_object( "goal", goal_ );
 
 	// Camera
-	camera_ = new Camera();
 	camera_->set_fov_default( get_config()->get( "camera.fov", 90.f ) );
 	camera_->reset_fov();
 	camera_->set_aspect( static_cast< float >( get_width() ) / static_cast< float >( get_height() ) );
@@ -112,11 +118,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	std::string stage_dir_name = StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) );
 	load_stage_file( ( stage_dir_name + get_stage_name() + ".stage" ).c_str() );
-
-	if ( get_config()->get( "graphics.shadow-map-enabled", 1 ) != 0 && stage_config_->get( "graphics.shadow-map-enabled", true ) )
-	{
-		shadow_map_ = new core::graphics::direct_3d_11::ShadowMap( get_direct_3d(), get_config()->get( "graphics.shadow-map-cascade-levels", 3 ), get_config()->get( "graphics.shadow-map-size", 1024 ) );
-	}
 
 	if ( ! get_graphics_manager()->is_sky_box_set() )
 	{
@@ -153,6 +154,7 @@ GamePlayScene::~GamePlayScene()
 
 	get_graphics_manager()->unset_sky_box();
 	get_graphics_manager()->unset_ground();
+	get_graphics_manager()->unset_shadow_map();
 
 	/// @todo 直す
 #if 0
@@ -664,7 +666,6 @@ void GamePlayScene::restart()
 
 	get_graphics_manager()->set_paper_texture_type( 0 );
 
-	player_->restart();
 	camera_->restart();
 
 	get_active_object_manager()->restart();
@@ -809,7 +810,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> x >> y >> z;
 
 			player_->set_start_location( x, y, z );
-			player_->set_rigid_body( get_physics_manager()->add_active_object_as_capsule( player_.get() ) );
+			player_->set_rigid_body( get_physics_manager()->add_active_object_as_capsule( player_ ) );
 
 			if ( ! ss.eof() )
 			{
@@ -878,13 +879,13 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			if ( name == "girl" )
 			{
 				girl_ = static_cast< Girl* >( active_object );
-				girl_->set_player( player_.get() );
-				get_active_object_manager()->name_active_object( "girl", girl_.get() );
+				girl_->set_player( player_ );
+				get_active_object_manager()->name_active_object( "girl", girl_ );
 			}
 			else if ( name == "robot" )
 			{
 				Robot* robot = static_cast< Robot* >( active_object );
-				robot->set_player( player_.get() );
+				robot->set_player( player_ );
 			}
 
 			last_object = active_object;
@@ -1030,7 +1031,6 @@ void GamePlayScene::update()
 	else
 	{
 		update_main();
-		player_->update();
 	}
 
 	get_active_object_manager()->update();
@@ -1040,22 +1040,20 @@ void GamePlayScene::update()
 		get_graphics_manager()->clear_debug_bullet();
 		get_physics_manager()->update( get_elapsed_time() );
 
-		player_->update_transform();
-
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 		{
 			( *i )->update_transform();
 		}
 	}
 
-	camera_->update_with_player( player_.get() );
+	camera_->update_with_player( player_ );
 	camera_->update();
 	
 
 	// collision_check
-	get_physics_manager()->check_collision_with( player_.get() );
+	get_physics_manager()->check_collision_with( player_ );
 
-	if ( get_physics_manager()->is_collision( player_.get(), goal_ ) )
+	if ( get_physics_manager()->is_collision( player_, goal_ ) )
 	{
 		on_goal();
 	}
@@ -1410,7 +1408,7 @@ void GamePlayScene::update_balloon_sound()
  */
 void GamePlayScene::update_shadow()
 {
-	if ( shadow_map_ )
+	if ( get_graphics_manager()->is_shadow_enabled() )
 	{
 		if ( false )
 		{
@@ -1425,8 +1423,8 @@ void GamePlayScene::update_shadow()
 			light_position_.target_value() = light_position_.value();
 		}
 
-		shadow_map_->set_light_position( Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z(), 1.f ) );
-		shadow_map_->set_eye_position( camera_->position() );
+		get_graphics_manager()->get_shadow_map()->set_light_position( Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z(), 1.f ) );
+		get_graphics_manager()->get_shadow_map()->set_eye_position( camera_->position() );
 	}
 }
 
@@ -1492,6 +1490,8 @@ void GamePlayScene::go_to_next_scene()
  */
 void GamePlayScene::render()
 {
+	get_graphics_manager()->setup_rendering();
+
 	render_to_oculus_vr();
 	render_to_display();
 
@@ -1512,7 +1512,7 @@ void GamePlayScene::render_to_oculus_vr() const
 	update_render_data_for_frame_drawing();
 	update_render_data_for_object();
 
-	render_shadow_map();
+	get_graphics_manager()->render_shadow_map();
 
 	get_oculus_rift()->setup_rendering();
 
@@ -1539,7 +1539,7 @@ void GamePlayScene::render_to_display() const
 	update_render_data_for_frame_drawing();
 	update_render_data_for_object();
 
-	render_shadow_map();
+	get_graphics_manager()->render_shadow_map();
 
 	get_direct_3d()->clear_default_view();
 
@@ -1556,11 +1556,7 @@ void GamePlayScene::render_to_display() const
  */
 void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 {
-	render_object_mesh();
-
-	get_graphics_manager()->set_input_layout( "line" );
-
-	render_object_line();
+	get_graphics_manager()->render_active_objects( get_active_object_manager() );
 
 	get_graphics_manager()->render_debug_axis( get_active_object_manager() );
 	get_graphics_manager()->render_debug_bullet();
@@ -1737,62 +1733,6 @@ void GamePlayScene::update_render_data_for_object() const
 	{
 		active_object->update_render_data();
 	}
-
-	player_->update_render_data();
-}
-
-/**
- * シャドウマップを描画する
- *
- * @todo 最適化・高速化
- */
-void GamePlayScene::render_shadow_map() const
-{
-	if ( ! shadow_map_ )
-	{
-		return;
-	}
-
-	shadow_map_->ready_to_render_shadow_map();
-
-	render_shadow_map( shadow_map_shader_, false );
-	render_shadow_map( shadow_map_skin_shader_, true );
-}
-
-/**
- * シャドウマップを描画する
- *
- * @param shader シェーダー
- * @param is_skin_mesh スキンメッシュフラグ
- */
-void GamePlayScene::render_shadow_map( graphics::shader::BaseShadowMapShader* shader, bool is_skin_mesh ) const
-{
-	for ( int n = 0; n < shadow_map_->get_cascade_levels(); n++ )
-	{
-		shader->set_shader_resource( shadow_map_->get_shader_resource() );
-		shadow_map_->ready_to_render_shadow_map_with_cascade_level( n );
-
-		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs(); // for line
-
-		for ( const auto* active_object : get_active_object_manager()->active_object_list() )
-		{
-			if ( active_object->get_model()->is_skin_mesh() == is_skin_mesh )
-			{
-				get_graphics_manager()->set_current_object_shader_resource( active_object->get_object_constant_buffer() );
-				active_object->render_mesh( shader );
-
-				if ( active_object->get_model()->get_line() && active_object->get_model()->get_line()->is_cast_shadow() )
-				{
-					active_object->render_line();
-				}
-			}
-		}
-
-		if ( ! is_skin_mesh )
-		{
-			player_->render_mesh( shader );
-		}
-	}
 }
 
 /**
@@ -1816,68 +1756,6 @@ void GamePlayScene::render_far_billboards() const
 	/// @todo shader を "billboard" にする
 	get_graphics_manager()->set_current_object_shader_resource( get_graphics_manager()->get_shared_object_render_data() );
 	far_billboards_->render();
-}
-
-/**
- * オブジェクトのメッシュを描画する
- *
- */
-void GamePlayScene::render_object_mesh() const
-{
-	const char* technique_name = "|flat";
-
-	if ( shading_enabled_ )
-	{
-		if ( shadow_map_ )
-		{
-			technique_name = "|main_with_shadow";
-		}
-	}
-
-	bind_game_render_data();
-		
-	get_graphics_manager()->get_frame_render_data()->bind_to_vs();
-	get_graphics_manager()->get_frame_render_data()->bind_to_hs();
-	get_graphics_manager()->get_frame_render_data()->bind_to_ds();
-	get_graphics_manager()->get_frame_render_data()->bind_to_gs();
-	get_graphics_manager()->get_frame_render_data()->bind_to_ps();
-		
-	get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
-	get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
-		
-	get_graphics_manager()->bind_paper_texture();
-
-	if ( shadow_map_ )
-	{
-		shadow_map_->ready_to_render_scene();
-	}
-
-	for ( const auto* active_object : get_active_object_manager()->active_object_list() )
-	{
-		get_graphics_manager()->set_current_object_shader_resource( active_object->get_object_constant_buffer() );
-		active_object->render_mesh();
-	}
-}
-
-/**
- * オブジェクトの線を描画する
- *
- */
-void GamePlayScene::render_object_line() const
-{
-	render_technique( "|drawing_line", [this]
-	{
-		bind_game_render_data();
-		bind_frame_render_data();
-		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs();
-
-		for ( const auto* active_object : get_active_object_manager()->active_object_list() )
-		{
-			active_object->render_line();
-		}
-
-		player_->render_line();
-	} );
 }
 
 /**
@@ -1986,14 +1864,14 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
  */
 void GamePlayScene::render_debug_shadow_map_window() const
 {
-	if ( ! shadow_map_ )
+	if ( ! get_graphics_manager()->is_shadow_enabled() )
 	{
 		return;
 	}
 
-	get_graphics_manager()->set_viewport( 0.f, 0, get_width() / 4.f * shadow_map_->get_cascade_levels(), get_height() / 4.f );
+	get_graphics_manager()->set_viewport( 0.f, 0, get_width() / 4.f * get_graphics_manager()->get_shadow_map()->get_cascade_levels(), get_height() / 4.f );
 
-	debug_texture_shader_->set_texture_at( 0, shadow_map_->get_texture() );
+	debug_texture_shader_->set_texture_at( 0, get_graphics_manager()->get_shadow_map()->get_texture() );
 	debug_texture_shader_->render_model( rectangle_ );
 
 	get_graphics_manager()->set_default_viewport();

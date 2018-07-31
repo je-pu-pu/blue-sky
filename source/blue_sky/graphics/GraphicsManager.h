@@ -31,7 +31,7 @@ namespace core::graphics
 {
 	class InputLayout;
 	class EffectTechnique;
-
+	class ShadowMap;
 }
 
 namespace blue_sky
@@ -44,6 +44,11 @@ namespace graphics
 	class Fader;
 	class ObjFileLoader;
 	class FbxFileLoader;
+
+	namespace shader
+	{
+		class BaseShadowMapShader;
+	}
 
 /**
  * グラフィック管理クラス
@@ -68,11 +73,18 @@ public:
 	typedef core::graphics::InputLayout						InputLayout;
 	typedef core::graphics::EffectTechnique					EffectTechnique;
 	typedef core::graphics::ShaderResource					ShaderResource;
+	typedef core::graphics::ShadowMap						ShadowMap;
+
+	typedef graphics::shader::BaseShadowMapShader			BaseShadowMapShader;
 
 private:
 	std::unique_ptr< Fader >	fader_;
 	bool_t						is_fading_in_ = true;		///< true : 現在フェードイン中 or false : 現在フェードアウト中
 	float_t						fade_speed_ = 0.f;
+
+	mutable std::unique_ptr< ShadowMap >					shadow_map_;
+	BaseShadowMapShader*									shadow_map_shader_;
+	BaseShadowMapShader*									shadow_map_skin_shader_;
 
 	std::vector< Texture* >		paper_texture_list_;
 	Texture*					paper_texture_ = 0;
@@ -92,11 +104,18 @@ private:
 	mutable uint_t				draw_count_ = 0;
 
 protected:
+	const ActiveObjectManager* get_game_object_manager() const;
+
 	bool_t load_mesh( Model*, const char_t* name ) const;
 	bool_t load_line( Model*, const char_t* nmae ) const;
 
+	[[nodiscard]] virtual ShadowMap* create_shadow_map( uint_t, uint_t ) const = 0;
 	[[nodiscard]] virtual Line* create_line() const = 0;
 	[[nodiscard]] virtual Texture* load_texture_file( const char_t* ) const = 0;
+
+	void update_shader_resources() const;
+
+	void render_shadow_map( const BaseShadowMapShader* , bool ) const;
 
 	void render_debug_axis_for_bones( const ActiveObject* ) const;
 	virtual void render_debug_axis_model() const = 0;
@@ -104,6 +123,9 @@ protected:
 public:
 	GraphicsManager();
 	virtual ~GraphicsManager();
+
+	void setup_shadow_map( uint_t, uint_t );
+	void unset_shadow_map();
 
 	void update();
 
@@ -173,7 +195,9 @@ public:
 
 	virtual void set_eye_position( const Vector3& ) = 0;
 
-	bool_t is_shadow_enabled() const { return false; }
+	bool_t is_shadow_enabled() const { return shadow_map_.get(); }
+	ShadowMap* get_shadow_map() { return shadow_map_.get(); }
+	const ShadowMap* get_shadow_map() const { return shadow_map_.get(); }
 
 	virtual GameConstantBuffer* get_game_render_data() const = 0;
 	virtual FrameConstantBuffer* get_frame_render_data() const = 0;
@@ -198,6 +222,8 @@ public:
 	virtual void render_technique( const char_t*, const std::function< void () >& ) const = 0;
 	virtual void render_technique( const EffectTechnique*, const std::function< void () >& ) const = 0;
 	virtual void render_background() const = 0;
+	
+	virtual void render_shadow_map() const;
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
 
 	Fader* get_fader() { return fader_.get(); }

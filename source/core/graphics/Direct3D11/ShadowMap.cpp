@@ -162,14 +162,18 @@ void ShadowMap::ready_to_render_shadow_map_with_cascade_level( uint_t level )
  */
 void ShadowMap::ready_to_render_scene()
 {
-	texture_->bind_to_ps( shader_resource_view_slot_ );
-
 	for ( int n = 0; n < cascade_levels_; n++ )
 	{
 		shader_resource_->data().shadow_view_projection[ n ] = get_view_projection_matrix( n ).transpose();
 	}
 
 	shader_resource_->update();
+}
+
+void ShadowMap::bind_to_render_scene() const
+{
+	texture_->bind_to_ps( shader_resource_view_slot_ );
+
 	shader_resource_->bind_to_vs();
 	shader_resource_->bind_to_ps();
 }

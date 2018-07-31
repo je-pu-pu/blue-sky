@@ -27,7 +27,7 @@ void add_pen_point( inout TriangleStream<PS_FLAT_INPUT> TriStream , in GS_CANVAS
 	const float screen_height = ScreenHeight;
 	const float screen_ratio = ( screen_height / screen_width );
 
-	const float l = 0.1f * input.Pressure;
+	const float l = 0.2f * input.Pressure;
 	const float hw = l * 0.5f * screen_ratio;
 	const float hh = l * 0.5f;
 	
@@ -93,9 +93,9 @@ GS_CANVAS_INPUT vs_canvas( VS_CANVAS_INPUT input, uint vertex_id : SV_VertexID )
 		const float my = ( ( vertex_id + 10 ) % 28 ) + 1;
 		const float mz = ( ( vertex_id + 15 ) % 15 ) + 1;
 
-		output.Position.x += cos( vertex_id + Time / mx ) * 0.002f;
-		output.Position.y += sin( vertex_id + Time / my ) * 0.002f;
-		output.Position.z += sin( vertex_id + Time / mz ) * 0.002f;
+		output.Position.x += cos( vertex_id + Time / mx ) * 0.005f;
+		output.Position.y += sin( vertex_id + Time / my ) * 0.005f;
+		output.Position.z += sin( vertex_id + Time / mz ) * 0.005f;
 	}
 
 	return output;

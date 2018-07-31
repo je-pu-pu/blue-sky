@@ -6,10 +6,6 @@
 
 #include <blue_sky/graphics/GraphicsManager.h>
 
-/// @todo íäè€âªÇ∑ÇÈ
-#include <blue_sky/graphics/SkyBox.h>
-#include <core/graphics/DirectWrite/DirectWrite.h>
-
 #include <game/Texture.h>
 #include <game/MainLoop.h>
 
@@ -33,9 +29,9 @@ CanvasTestScene::CanvasTestScene( const GameMain* game_main )
 	, tablet_( Tablet::get_instance( get_game_main()->get_app()->GetWindowHandle() ) )
 	, pen_color_( 0.f, 0.f, 0.f, 1.f )
 	, points_( new DynamicPointList( get_direct_3d() ) )
-	, sky_box_( new SkyBox( "sky-box-sky" ) )
 {
-	texture_ = get_graphics_manager()->get_texture( "white-hard-pen" );
+	texture_ = get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" );
+	get_graphics_manager()->set_sky_box( "sky-box-sky" );
 }
 
 CanvasTestScene::~CanvasTestScene()
@@ -110,6 +106,19 @@ void CanvasTestScene::update()
 
 			pen_color_ = Color::from_hsv( v, 1.f, 1.f );
 		}
+
+		if ( get_input()->press( Input::L2 ) )
+		{
+			pen_color_.r() -= 0.005f;
+			pen_color_.g() -= 0.005f;
+			pen_color_.b() -= 0.005f;
+		}
+		if ( get_input()->press( Input::R2 ) )
+		{
+			pen_color_.r() += 0.005f;
+			pen_color_.g() += 0.005f;
+			pen_color_.b() += 0.005f;
+		}
 	}
 
 	if ( get_input()->press( Input::A ) )
@@ -143,6 +152,7 @@ void CanvasTestScene::update()
 		
 		render_data.time_beat = 0;
 
+		get_graphics_manager()->set_eye_position( eye.xyz() );
 		get_graphics_manager()->get_frame_render_data()->update();
 	}
 
@@ -198,55 +208,8 @@ void CanvasTestScene::update()
  */
 void CanvasTestScene::render()
 {
-	{
-		get_direct_3d()->begin2D();
-		get_direct_3d()->getFont()->begin();
-
-		std::wstringstream ss;
-		ss.setf( std::ios_base::fixed, std::ios_base::floatfield );
-
-		ss << L"Time : " << get_total_elapsed_time() << std::endl;
-		ss << L"FPS : " << get_main_loop()->get_last_fps() << std::endl;
-		ss << L"C : " << tablet_->get_cursor_index() << std::endl;
-		ss << L"X : " << tablet_->get_x() << std::endl;
-		ss << L"Y : " << tablet_->get_y() << std::endl;
-		ss << L"P : " << tablet_->get_pressure() << std::endl;
-		ss << L"AZ : " << tablet_->get_azimuth() << std::endl;
-		ss << L"AL : " << tablet_->get_altitude() << std::endl;
-		ss << L"POINTS : " << points_->size() << std::endl;
-
-		get_direct_3d()->getFont()->draw_text( 10.f, 10.f, get_app()->get_width() - 10.f, get_app()->get_height() - 10.f, ss.str().c_str(), Color( 0.f, 0.f, 0.f, 1.f ) );
-
-		get_direct_3d()->getFont()->end();
-		get_direct_3d()->end2D();
-	}
-
-	get_direct_3d()->begin3D();
-
-	get_direct_3d()->clear_default_view();
-
-	get_direct_3d()->set_default_render_target();
-	get_direct_3d()->set_default_viewport();
-
-	get_graphics_manager()->set_input_layout( "main" );
-	
-#if 0 /// @todo ìÆÇ≠ÇÊÇ§Ç…Ç∑ÇÈ
-	render_technique( "|sky_box", [this] {
-		
-		get_graphics_manager()->get_game_render_data()->bind_to_all();
-		get_graphics_manager()->get_frame_render_data()->bind_to_all();
-		get_graphics_manager()->get_shared_object_render_data()->bind_to_all();
-
-		ObjectConstantBufferData object_constant_buffer_data;
-		object_constant_buffer_data.world = Matrix().set_translation( eye.x(), eye.y(), eye.z() ).transpose() * r;
-		object_constant_buffer_data.color = Color( 1.f, 1.f, 1.f, 1.f );
-
-		get_graphics_manager()->get_shared_object_render_data()->update( &object_constant_buffer_data );
-
-		sky_box_->render();
-	} );
-#endif
-
+	get_graphics_manager()->setup_rendering();
+	get_graphics_manager()->render_background();
 
 	get_graphics_manager()->set_input_layout( "drawing_point" );
 
@@ -264,9 +227,23 @@ void CanvasTestScene::render()
 		points_->render();
 	} );
 
-	get_direct_3d()->renderText();
+	{
 
-	get_direct_3d()->end3D();
+		std::stringstream ss;
+		ss.setf( std::ios_base::fixed, std::ios_base::floatfield );
+
+		ss << "Time : " << get_total_elapsed_time() << std::endl;
+		ss << "FPS : " << get_main_loop()->get_last_fps() << std::endl;
+		ss << "C : " << tablet_->get_cursor_index() << std::endl;
+		ss << "X : " << tablet_->get_x() << std::endl;
+		ss << "Y : " << tablet_->get_y() << std::endl;
+		ss << "P : " << tablet_->get_pressure() << std::endl;
+		ss << "AZ : " << tablet_->get_azimuth() << std::endl;
+		ss << "AL : " << tablet_->get_altitude() << std::endl;
+		ss << "POINTS : " << points_->size() << std::endl;
+
+		get_graphics_manager()->draw_text( 10.f, 10.f, get_width() - 10.f, get_height() - 10.f, ss.str().c_str(), Color::Black );
+	}
 }
 
 void CanvasTestScene::on_function_key_down( int key )
@@ -278,12 +255,20 @@ void CanvasTestScene::on_function_key_down( int key )
 
 	if ( key == 9 )
 	{
-		const std::array< char_t*, 5 > texture_names = { "white-soft-pen", "white-hard-pen", "bump-hard-pen", "bump-cross-pen", "white-grass-pen" };
+		const std::array< char_t*, 7 > texture_names = {
+			"media/texture/pen/white-soft-pen.png",
+			"media/texture/pen/white-hard-pen.png",
+			"media/texture/pen/bump-hard-pen.png",
+			"media/texture/pen/bump-cross-pen.png",
+			"media/texture/pen/white-grass-pen.png",
+			"media/texture/pen/white-hard-round-rect-pen.png",
+			"media/texture/pen/white-hard-round-rect-stroke-pen.png"
+		};
 
 		static int i = 0;
 		i = ( i + 1 ) % texture_names.size();;
 
-		texture_ = get_graphics_manager()->get_texture( texture_names[ i ] );
+		texture_ = get_graphics_manager()->load_texture( texture_names[ i ] );
 	}
 
 	if ( key == 6 )

@@ -49,13 +49,10 @@ public:
 	typedef graphics::SkyBox	SkyBox;
 
 private:
-	common::safe_ptr< Tablet > tablet_;
-
-	Color pen_color_;
-
-	std::unique_ptr< DynamicPointList > points_;
-	common::safe_ptr< Texture > texture_;
-	std::unique_ptr< SkyBox > sky_box_;
+	Tablet*								tablet_;
+	Color								pen_color_;
+	std::unique_ptr< DynamicPointList >	points_;
+	Texture*							texture_;
 
 protected:
 

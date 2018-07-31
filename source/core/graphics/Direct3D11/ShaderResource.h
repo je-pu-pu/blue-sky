@@ -1,18 +1,17 @@
 #pragma once
 
-#include <blue_sky/graphics/ShaderResource.h>
+#include <core/graphics/ShaderResource.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
 
-namespace blue_sky::graphics::direct_3d_11
+namespace core::graphics::direct_3d_11
 {
 
 /**
  * Direct3D11 定数バッファを使った ShaderResource
  *
- * @todo core に移動する
  */
 template< typename DataType >
-class ShaderResource : public blue_sky::graphics::ShaderResource
+class ShaderResource : public core::graphics::ShaderResource
 {
 public:
 	typedef DataType Data;
@@ -118,4 +117,4 @@ public:
 
 };
 
-} // namespace blue_sky::graphics::direct_3d_11
+} // namespace core::graphics::direct_3d_11

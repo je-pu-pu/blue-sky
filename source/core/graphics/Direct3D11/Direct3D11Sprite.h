@@ -21,7 +21,7 @@ namespace direct_x_math
 	class Color;
 }
 
-namespace blue_sky::graphics::direct_3d_11
+namespace core::graphics::direct_3d_11
 {
 	template< typename T > class ShaderResource;
 }
@@ -71,7 +71,7 @@ public:
 		Matrix transform;
 	};
 
-	typedef blue_sky::graphics::direct_3d_11::ShaderResource< ConstantBufferData > ConstantBuffer;
+	typedef core::graphics::direct_3d_11::ShaderResource< ConstantBufferData > ConstantBuffer;
 
 	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
 

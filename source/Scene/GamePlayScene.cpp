@@ -25,7 +25,7 @@
 #include <blue_sky/graphics/shader/ShadowMapShader.h>
 
 /// @todo íäè€âªÇ∑ÇÈ
-#include <core/graphics/Direct3D11/Direct3D11ShadowMap.h>
+#include <core/graphics/Direct3D11/ShadowMap.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
 
 #include "ActiveObjectPhysics.h"
@@ -115,7 +115,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	if ( get_config()->get( "graphics.shadow-map-enabled", 1 ) != 0 && stage_config_->get( "graphics.shadow-map-enabled", true ) )
 	{
-		shadow_map_ = new ShadowMap( get_direct_3d(), get_config()->get( "graphics.shadow-map-cascade-levels", 3 ), get_config()->get( "graphics.shadow-map-size", 1024 ) );
+		shadow_map_ = new core::graphics::direct_3d_11::ShadowMap( get_direct_3d(), get_config()->get( "graphics.shadow-map-cascade-levels", 3 ), get_config()->get( "graphics.shadow-map-size", 1024 ) );
 	}
 
 	if ( ! get_graphics_manager()->is_sky_box_set() )
@@ -1757,8 +1757,6 @@ void GamePlayScene::render_shadow_map() const
 
 	render_shadow_map( shadow_map_shader_, false );
 	render_shadow_map( shadow_map_skin_shader_, true );
-
-	// shadow_map_->finish_render_shadow_map();
 }
 
 /**
@@ -1771,7 +1769,7 @@ void GamePlayScene::render_shadow_map( graphics::shader::BaseShadowMapShader* sh
 {
 	for ( int n = 0; n < shadow_map_->get_cascade_levels(); n++ )
 	{
-		shader->set_shader_resource( shadow_map_->getConstantBuffer() );
+		shader->set_shader_resource( shadow_map_->get_shader_resource() );
 		shadow_map_->ready_to_render_shadow_map_with_cascade_level( n );
 
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs(); // for line
@@ -1995,7 +1993,7 @@ void GamePlayScene::render_debug_shadow_map_window() const
 
 	get_graphics_manager()->set_viewport( 0.f, 0, get_width() / 4.f * shadow_map_->get_cascade_levels(), get_height() / 4.f );
 
-	debug_texture_shader_->set_texture_at( 0, shadow_map_->getTexture() );
+	debug_texture_shader_->set_texture_at( 0, shadow_map_->get_texture() );
 	debug_texture_shader_->render_model( rectangle_ );
 
 	get_graphics_manager()->set_default_viewport();

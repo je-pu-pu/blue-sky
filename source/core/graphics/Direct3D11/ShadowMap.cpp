@@ -1,20 +1,22 @@
-#include "Direct3D11ShadowMap.h"
+#include "ShadowMap.h"
 #include "Direct3D11.h"
 
-#include <blue_sky/graphics/Direct3D11/ShaderResource.h>
+#include <core/graphics/Direct3D11/ShaderResource.h>
 
 #include <common/exception.h>
 
-Direct3D11ShadowMap::Vector Direct3D11ShadowMap::light_position_;
-Direct3D11ShadowMap::Matrix Direct3D11ShadowMap::view_matrix_;
-Direct3D11ShadowMap::MatrixList Direct3D11ShadowMap::projection_matrix_list_;
-Direct3D11ShadowMap::ConstantBufferData Direct3D11ShadowMap::constant_buffer_data_;
+namespace core::graphics::direct_3d_11
+{
+
+ShadowMap::Vector				ShadowMap::light_position_;
+ShadowMap::Matrix				ShadowMap::view_matrix_;
+ShadowMap::MatrixList			ShadowMap::projection_matrix_list_;
 
 static const float light_y = 500.f;
 
-Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_levels, size_t size )
+ShadowMap::ShadowMap( Direct3D11* direct_3d, uint_t cascade_levels, size_t size )
 	: direct_3d_( direct_3d )
-	, constant_buffer_( new ConstantBuffer( direct_3d ) )
+	, shader_resource_( new ShaderResource( direct_3d ) )
 	, cascade_levels_( cascade_levels )
 	, depth_stencil_texture_( 0 )
 	, depth_stencil_view_( 0 )
@@ -60,7 +62,7 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_lev
 	}
 
 	{
-		texture_ = new Direct3D11Texture( direct_3d_, view );
+		texture_.reset( new Direct3D11Texture( direct_3d_, view ) );
 	}
 
 	viewport_list_.resize( cascade_levels_ );
@@ -82,7 +84,7 @@ Direct3D11ShadowMap::Direct3D11ShadowMap( Direct3D11* direct_3d, int cascade_lev
 	set_light_position( Vector( 50.f, 100.f, -25.f, 0.f ) );
 }
 
-Direct3D11ShadowMap::~Direct3D11ShadowMap()
+ShadowMap::~ShadowMap()
 {
 	DIRECT_X_RELEASE( depth_stencil_view_ );
 	DIRECT_X_RELEASE( depth_stencil_texture_ );
@@ -93,7 +95,7 @@ Direct3D11ShadowMap::~Direct3D11ShadowMap()
  *
  * @param pos 光源の座標 ( カメラの座標からの相対座標 )
  */
-void Direct3D11ShadowMap::set_light_position( const Vector& pos )
+void ShadowMap::set_light_position( const Vector& pos )
 {
 	light_position_ = pos;
 	light_position_ *= 100.f / light_position_.y(); /// 高さが 100.f になるように調整
@@ -106,7 +108,7 @@ void Direct3D11ShadowMap::set_light_position( const Vector& pos )
 	{
 		/// @todo 地面より手前に far clip がこないようにする
 		projection_matrix_list_[ n ].set_orthographic( width[ n ], width[ n ], 1.f, 500.f );
-		constant_buffer_data_.view_depth_per_cascade_level[ n ] = width[ n ] * 0.3f;
+		shader_resource_->data().view_depth_per_cascade_level[ n ] = width[ n ] * 0.3f;
 	}
 }
 
@@ -115,7 +117,7 @@ void Direct3D11ShadowMap::set_light_position( const Vector& pos )
  *
  * @param pos カメラの座標
  */
-void Direct3D11ShadowMap::set_eye_position( const Vector& eye )
+void ShadowMap::set_eye_position( const Vector& eye )
 {
 	Vector at( eye.x(), eye.y(), eye.z(), 1.f );
 	Vector up( 0.f, 0.f, 1.f, 0.f );
@@ -127,7 +129,7 @@ void Direct3D11ShadowMap::set_eye_position( const Vector& eye )
  * シャドウマップを描画するための準備をする
  *
  */
-void Direct3D11ShadowMap::ready_to_render_shadow_map()
+void ShadowMap::ready_to_render_shadow_map()
 {
 	ID3D11ShaderResourceView* shader_resource_view[] = { 0 };
 	direct_3d_->getImmediateContext()->PSSetShaderResources( shader_resource_view_slot_, 1, shader_resource_view );
@@ -143,43 +145,33 @@ void Direct3D11ShadowMap::ready_to_render_shadow_map()
  *
  * @param level カスケードレベル
  */
-void Direct3D11ShadowMap::ready_to_render_shadow_map_with_cascade_level( int level )
+void ShadowMap::ready_to_render_shadow_map_with_cascade_level( uint_t level )
 {
-	constant_buffer_data_.shadow_view_projection[ level ] = getViewProjectionMatrix( level ).transpose();
-	constant_buffer_data_.shadow_view_projection[ 0 ] = constant_buffer_data_.shadow_view_projection[ level ];
+	shader_resource_->data().shadow_view_projection[ level ] = get_view_projection_matrix( level ).transpose();
+	shader_resource_->data().shadow_view_projection[ 0     ] = shader_resource_->data().shadow_view_projection[ level ];
 
-	constant_buffer_->update( & constant_buffer_data_ );
-	constant_buffer_->bind_to_vs();
+	shader_resource_->update();
+	shader_resource_->bind_to_vs();
 
 	direct_3d_->getImmediateContext()->RSSetViewports( 1, & viewport_list_[ level ] );
 }
-
-#if 0
-/**
- * シャドウマップを描画を完了する
- *
- */
-void Direct3D11ShadowMap::finish_render_shadow_map()
-{
-	ID3D11RenderTargetView* render_target_view[] = { 0 };
-	direct_3d_->getImmediateContext()->OMSetRenderTargets( 1, render_target_view, 0 );
-}
-#endif
 
 /**
  * シーンを描画するための準備をする
  *
  */
-void Direct3D11ShadowMap::ready_to_render_scene()
+void ShadowMap::ready_to_render_scene()
 {
 	texture_->bind_to_ps( shader_resource_view_slot_ );
 
 	for ( int n = 0; n < cascade_levels_; n++ )
 	{
-		constant_buffer_data_.shadow_view_projection[ n ] = getViewProjectionMatrix( n ).transpose();
+		shader_resource_->data().shadow_view_projection[ n ] = get_view_projection_matrix( n ).transpose();
 	}
 
-	constant_buffer_->update( & constant_buffer_data_ );
-	constant_buffer_->bind_to_vs();
-	constant_buffer_->bind_to_ps();
+	shader_resource_->update();
+	shader_resource_->bind_to_vs();
+	shader_resource_->bind_to_ps();
 }
+
+} // namespace core::graphics::direct_3d_11

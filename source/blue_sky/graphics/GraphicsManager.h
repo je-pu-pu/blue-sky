@@ -67,6 +67,7 @@ public:
 	typedef core::graphics::PrimitiveTopology				PrimitiveTopology;
 	typedef core::graphics::InputLayout						InputLayout;
 	typedef core::graphics::EffectTechnique					EffectTechnique;
+	typedef core::graphics::ShaderResource					ShaderResource;
 
 private:
 	std::unique_ptr< Fader >	fader_;
@@ -171,6 +172,8 @@ public:
 	virtual void set_drawing_line_type( int_t ) = 0;
 
 	virtual void set_eye_position( const Vector3& ) = 0;
+
+	bool_t is_shadow_enabled() const { return false; }
 
 	virtual GameConstantBuffer* get_game_render_data() const = 0;
 	virtual FrameConstantBuffer* get_frame_render_data() const = 0;

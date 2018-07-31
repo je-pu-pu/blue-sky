@@ -1,7 +1,7 @@
 #include "Direct3D11Sprite.h"
 #include "Direct3D11.h"
 #include <GameMain.h>
-#include <blue_sky/graphics/Direct3D11/ShaderResource.h>
+#include <core/graphics/Direct3D11/ShaderResource.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <game/Texture.h>
 #include <win/Rect.h>

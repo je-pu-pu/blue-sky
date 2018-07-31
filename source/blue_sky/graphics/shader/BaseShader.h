@@ -24,9 +24,10 @@ public:
 	typedef game::Mesh Mesh;
 	typedef game::Texture Texture;
 
-	typedef core::graphics::PrimitiveTopology PrimitiveTopology;
-	typedef core::graphics::InputLayout InputLayout;
-	typedef core::graphics::EffectTechnique EffectTechnique;
+	typedef core::graphics::PrimitiveTopology	PrimitiveTopology;
+	typedef core::graphics::InputLayout			InputLayout;
+	typedef core::graphics::EffectTechnique		EffectTechnique;
+	typedef core::graphics::ShaderResource		ShaderResource;
 
 protected:
 	GraphicsManager* get_graphics_manager() const { return GameMain::get_instance()->get_graphics_manager(); }

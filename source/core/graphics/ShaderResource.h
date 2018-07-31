@@ -1,12 +1,11 @@
 #pragma once
 
-namespace blue_sky::graphics
+namespace core::graphics
 {
 
 /**
  * シェーダーから利用するリソース
  *
- * @todo core に移動する
  */
 class ShaderResource
 {
@@ -29,4 +28,4 @@ public:
 	}
 };
 
-} // namespace blue_sky::graphics
+} // namespace core::graphics

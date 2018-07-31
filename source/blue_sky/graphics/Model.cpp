@@ -8,14 +8,27 @@ namespace blue_sky::graphics
 
 Model::Shader* Model::create_shader() const
 {
-	/// @todo ‰e‚ª—LŒø‚Èê‡‚É‘Î‰‚·‚é
-	if ( is_skin_mesh() )
+	if ( GameMain::get_instance()->get_graphics_manager()->is_shadow_enabled() )
 	{
-		return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShader >( "skin", "flat_skin" );
+		if ( is_skin_mesh() )
+		{
+			return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShader >( "skin", "skin_with_shadow" );
+		}
+		else
+		{
+			return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShader >( "main", "main_with_shadow" );
+		}
 	}
 	else
 	{
-		return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShader >( "main", "flat" );
+		if ( is_skin_mesh() )
+		{
+			return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShader >( "skin", "flat_skin" );
+		}
+		else
+		{
+			return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShader >( "main", "flat" );
+		}
 	}
 }
 

@@ -109,9 +109,6 @@
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11ShadowMap.cpp">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11Sprite.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
@@ -195,6 +192,9 @@
     </ClCompile>
     <ClCompile Include="blue_sky\graphics\Ground.cpp">
       <Filter>blue_sky\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\ShadowMap.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -318,9 +318,6 @@
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Common.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11ShadowMap.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Sprite.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
@@ -430,12 +427,6 @@
     <ClInclude Include="blue_sky\graphics\shader\MatcapShader.h">
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
-    <ClInclude Include="blue_sky\graphics\ShaderResource.h">
-      <Filter>blue_sky\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="blue_sky\graphics\Direct3D11\ShaderResource.h">
-      <Filter>blue_sky\graphics\Direct3D11</Filter>
-    </ClInclude>
     <ClInclude Include="blue_sky\ShaderResources.h">
       <Filter>blue_sky</Filter>
     </ClInclude>
@@ -495,6 +486,18 @@
     </ClInclude>
     <ClInclude Include="blue_sky\graphics\shader\DebugShadowMapTextureShader.h">
       <Filter>blue_sky\graphics\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\ShadowMap.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\ShaderResource.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\ShaderResource.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\ShadowMap.h">
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

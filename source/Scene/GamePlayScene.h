@@ -11,14 +11,17 @@
 #include <vector>
 #include <functional>
 
-class Direct3D11ShadowMap;
-
 namespace game
 {
 	class Mesh;
 	class Shader;
 	class Config;
 };
+
+namespace core::graphics
+{
+	class ShadowMap;
+}
 
 namespace blue_sky
 {
@@ -52,7 +55,7 @@ public:
 	typedef game::Mesh					Mesh;
 	typedef game::Shader				Shader;
 	typedef graphics::Rectangle			Rectangle;
-	typedef Direct3D11ShadowMap			ShadowMap;	
+	typedef core::graphics::ShadowMap	ShadowMap;	
 
 	typedef std::function< void( string_t ) > Command;
 	typedef std::map< string_t, Command > CommandMap;

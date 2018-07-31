@@ -1,6 +1,6 @@
 #pragma once
 
-#include <blue_sky/graphics/Direct3D11/ShaderResource.h>
+#include <core/graphics/Direct3D11/ShaderResource.h>
 #include <core/type.h>
 
 namespace blue_sky
@@ -73,12 +73,12 @@ struct BoneShaderResourceData : public BaseShaderResourceData< 5 >
 	}
 };
 
-typedef graphics::direct_3d_11::ShaderResource< GameShaderResourceData > GameShaderResource;
-typedef graphics::direct_3d_11::ShaderResourceWithData< FrameShaderResourceData > FrameShaderResource;
-typedef graphics::direct_3d_11::ShaderResourceWithData< FrameDrawingShaderResourceData > FrameDrawingShaderResource;
-typedef graphics::direct_3d_11::ShaderResource< ObjectShaderResourceData > ObjectShaderResource;
-typedef graphics::direct_3d_11::ShaderResourceWithData< ObjectShaderResourceData > ObjectShaderResourceWithData;
-typedef graphics::direct_3d_11::ShaderResource< BoneShaderResourceData > BoneShaderResource;
+typedef core::graphics::direct_3d_11::ShaderResource< GameShaderResourceData > GameShaderResource;
+typedef core::graphics::direct_3d_11::ShaderResourceWithData< FrameShaderResourceData > FrameShaderResource;
+typedef core::graphics::direct_3d_11::ShaderResourceWithData< FrameDrawingShaderResourceData > FrameDrawingShaderResource;
+typedef core::graphics::direct_3d_11::ShaderResource< ObjectShaderResourceData > ObjectShaderResource;
+typedef core::graphics::direct_3d_11::ShaderResourceWithData< ObjectShaderResourceData > ObjectShaderResourceWithData;
+typedef core::graphics::direct_3d_11::ShaderResource< BoneShaderResourceData > BoneShaderResource;
 
 /// @todo ConstantBuffer -> ShaderResource Ç…ñºëOïœçXÇ∑ÇÈ
 /// @todo çÌèúÇ∑ÇÈ

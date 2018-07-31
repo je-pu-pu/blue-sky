@@ -9,6 +9,7 @@
     <ClInclude Include="Tablet.h" />
     <ClInclude Include="memory_leak_detection.h" />
     <ClInclude Include="memory_leak_check.h" />
+    <ClInclude Include="Clipboard.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Version.cpp" />

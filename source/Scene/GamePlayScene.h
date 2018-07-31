@@ -30,15 +30,17 @@ namespace blue_sky
 	class DrawingModel;
 	class DelayedCommand;
 
-	struct FrameConstantBufferData;
+	struct FrameShaderResourceData;
 
 	namespace graphics
 	{
 		class Rectangle;
-		class BypassShader;
-	}
 
-using graphics::BypassShader;
+		namespace shader
+		{
+			class BaseShadowMapShader;
+		}
+	}
 
 /**
  * ゲームプレイ中の処理を管理する
@@ -72,9 +74,10 @@ protected:
 	bool								is_cleared_ = false;	///< ステージクリアフラグ
 	common::auto_ptr< Config >			stage_config_;	
 
-	mutable common::auto_ptr< ShadowMap >		shadow_map_;
-	Shader*								shadow_map_shader_;
-	Shader*								shadow_map_skin_shader_;
+	mutable common::auto_ptr< ShadowMap >						shadow_map_;
+	mutable graphics::shader::BaseShadowMapShader*				shadow_map_shader_;
+	mutable graphics::shader::BaseShadowMapShader*				shadow_map_skin_shader_;
+	Shader*								debug_texture_shader_;
 
 	common::auto_ptr< Player >			player_;
 	common::auto_ptr< Camera >			camera_;
@@ -85,7 +88,6 @@ protected:
 	Model*								far_billboards_ = 0;	///< 遠景ビルボード
 	Model*								scope_mesh_ = 0;		///< 双眼鏡
 	Model*								rectangle_;
-	BypassShader*						rectangle_shader_;
 
 	Sound*								bgm_ = 0;
 	common::safe_ptr< Sound >			balloon_bgm_;
@@ -148,7 +150,7 @@ protected:
 	void update_render_data_for_frame_for_eye( int ) const;
 	void update_render_data_for_object() const;
 
-	void update_frame_constant_buffer_data_sub( FrameConstantBufferData& ) const;
+	void update_frame_constant_buffer_data_sub( FrameShaderResourceData& ) const;
 
 	void render_to_oculus_vr() const;
 	void render_to_display() const;
@@ -158,7 +160,7 @@ protected:
 	void render_text() const;
 
 	void render_shadow_map() const;
-	void render_shadow_map( const Shader* , bool ) const;
+	void render_shadow_map( graphics::shader::BaseShadowMapShader* , bool ) const;
 	
 	void render_sky_box() const;
 	void render_far_billboards() const;

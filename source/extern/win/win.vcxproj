@@ -75,6 +75,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\game\SoundManager.h" />
+    <ClInclude Include="Clipboard.h" />
     <ClInclude Include="memory_leak_check.h" />
     <ClInclude Include="memory_leak_detection.h" />
     <ClInclude Include="Point.h" />

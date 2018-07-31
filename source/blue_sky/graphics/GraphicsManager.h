@@ -106,6 +106,9 @@ public:
 
 	void update();
 
+	virtual void set_default_viewport() = 0;
+	virtual void set_viewport( float_t x, float_t y, float_t w, float_t h, float_t min_d = 0.f, float_t max_d = 1.f ) = 0;
+
 	// Model
 	template< typename Type=Model > Type* create_named_model( const char_t* name ) { return model_manager_.create_named< Type >( name ); }
 	Model* load_model( const char_t* name );

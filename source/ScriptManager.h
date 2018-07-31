@@ -57,7 +57,8 @@ protected:
 	{
 		lua_.new_usertype< ActiveObject >(
 			"GameObject",
-			"model", sol::property( sol::resolve< Model* () >( & ActiveObject::get_model ), & ActiveObject::set_model )
+			"model", sol::property( sol::resolve< Model* () >( & ActiveObject::get_model ), & ActiveObject::set_model ),
+			"play_animation", & ActiveObject::play_animation
         );
 
 		lua_.new_usertype< Model >(
@@ -122,6 +123,8 @@ public:
 	const string_t& get_current_history_command() const { return ( command_history_index_ < static_cast< int >( command_history_.size() ) ? command_history_[ command_history_index_ ] : empty_command_ ); }
 	const string_t& get_prev_hisotry_command() { command_history_index_ = math::clamp< int >( command_history_index_ - 1, 0, command_history_.size() ); return get_current_history_command(); }
 	const string_t& get_next_hisotry_command() { command_history_index_ = math::clamp< int >( command_history_index_ + 1, 0, command_history_.size() ); return get_current_history_command(); }
+
+	const std::deque< string_t >& get_command_history() const { return command_history_; }
 
 	const string_t& get_output() const { return output_; }
 };

@@ -142,8 +142,7 @@ public:
 
 	void unset_render_target();
 
-	void set_viewport_for_left_eye();
-	void set_viewport_for_right_eye();
+	void set_viewport( float_t, float_t, float_t, float_t, float_t = 0.f, float_t = 1.f );
 
 	void setInputLayout( const char* );
 
@@ -164,8 +163,6 @@ public:
 	void present();
 
 	void renderText();
-
-	void setDebugViewport( float, float, float, float );
 
 	void getTexture2dDescByTexture( const Texture*, D3D11_TEXTURE2D_DESC* );
 

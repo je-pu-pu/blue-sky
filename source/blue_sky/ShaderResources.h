@@ -3,25 +3,23 @@
 #include <blue_sky/graphics/Direct3D11/ShaderResource.h>
 #include <core/type.h>
 
-/// @todo ConstantBuffer -> ShaderResource に名前変更する
-
 namespace blue_sky
 {
 
 template< uint_t N >
-struct BaseConstantBufferData
+struct BaseShaderResourceData
 {
 	static const uint_t SLOT = N;
 };
 
-struct GameConstantBufferData : public BaseConstantBufferData< 0 >
+struct GameShaderResourceData : public BaseShaderResourceData< 0 >
 {
 	float_t screen_width;
 	float_t screen_height;
 	float_t dummy[ 2 ];
 };
 
-struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
+struct FrameShaderResourceData : public BaseShaderResourceData< 1 >
 {
 	Matrix view;
 	Matrix projection;
@@ -33,17 +31,17 @@ struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
 	float_t dummy;
 };
 
-struct ObjectConstantBufferData : public BaseConstantBufferData< 2 >
+struct ObjectShaderResourceData : public BaseShaderResourceData< 2 >
 {
 	Matrix world;
 	Color color;
 
-	ObjectConstantBufferData()
+	ObjectShaderResourceData()
 		: color( 0.f, 0.f, 0.f, 0.f )
 	{ }
 };
 
-struct FrameDrawingConstantBufferData : public BaseConstantBufferData< 4 >
+struct FrameDrawingShaderResourceData : public BaseShaderResourceData< 4 >
 {
 	Color shadow_color;
 	Color shadow_paper_color;
@@ -52,7 +50,7 @@ struct FrameDrawingConstantBufferData : public BaseConstantBufferData< 4 >
 	u32_t line_type;
 	float_t dummy[ 2 ];
 
-	FrameDrawingConstantBufferData()
+	FrameDrawingShaderResourceData()
 		: shadow_color( 0.f, 0.f, 0.f, 0.f )
 		, shadow_paper_color( 0.f, 0.f, 0.f, 0.f )
 		, accent( 0.f )
@@ -60,7 +58,7 @@ struct FrameDrawingConstantBufferData : public BaseConstantBufferData< 4 >
 	{ }
 };
 
-struct BoneConstantBufferData : public BaseConstantBufferData< 5 >
+struct BoneShaderResourceData : public BaseShaderResourceData< 5 >
 {
 	static const int MaxBones = 100;
 
@@ -75,11 +73,20 @@ struct BoneConstantBufferData : public BaseConstantBufferData< 5 >
 	}
 };
 
-typedef graphics::direct_3d_11::ShaderResource< GameConstantBufferData > GameConstantBuffer;
-typedef graphics::direct_3d_11::ShaderResourceWithData< FrameConstantBufferData > FrameConstantBuffer;
-typedef graphics::direct_3d_11::ShaderResourceWithData< FrameDrawingConstantBufferData > FrameDrawingConstantBuffer;
-typedef graphics::direct_3d_11::ShaderResource< ObjectConstantBufferData > ObjectConstantBuffer;
-typedef graphics::direct_3d_11::ShaderResourceWithData< ObjectConstantBufferData > ObjectConstantBufferWithData;
-typedef graphics::direct_3d_11::ShaderResource< BoneConstantBufferData > BoneConstantBuffer;
+typedef graphics::direct_3d_11::ShaderResource< GameShaderResourceData > GameShaderResource;
+typedef graphics::direct_3d_11::ShaderResourceWithData< FrameShaderResourceData > FrameShaderResource;
+typedef graphics::direct_3d_11::ShaderResourceWithData< FrameDrawingShaderResourceData > FrameDrawingShaderResource;
+typedef graphics::direct_3d_11::ShaderResource< ObjectShaderResourceData > ObjectShaderResource;
+typedef graphics::direct_3d_11::ShaderResourceWithData< ObjectShaderResourceData > ObjectShaderResourceWithData;
+typedef graphics::direct_3d_11::ShaderResource< BoneShaderResourceData > BoneShaderResource;
+
+/// @todo ConstantBuffer -> ShaderResource に名前変更する
+/// @todo 削除する
+typedef GameShaderResource				GameConstantBuffer;
+typedef FrameShaderResource				FrameConstantBuffer;
+typedef FrameDrawingShaderResource		FrameDrawingConstantBuffer;
+typedef ObjectShaderResource			ObjectConstantBuffer;
+typedef ObjectShaderResourceWithData	ObjectConstantBufferWithData;
+typedef BoneShaderResource				BoneConstantBuffer;
 
 } // namespace blue_sky

@@ -56,8 +56,13 @@ public:
 		get_frame_shader_resource()->bind_to_all();
 		get_frame_drawing_shader_resource()->bind_to_all();
 		
+		get_graphics_manager()->load_texture( "media/model/balloon-disp2.png" )->bind_to_ds( 4 );
+		get_graphics_manager()->load_texture( "media/model/balloon-norm.png"  )->bind_to_ps( 5 );
+
 		get_object_shader_resource()->bind_to_vs();
 		get_object_shader_resource()->bind_to_ds();
+
+		get_object_shader_resource()->bind_to_ps(); // for normal map + world
 
 		if ( get_texture() )
 		{

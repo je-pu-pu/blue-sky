@@ -51,7 +51,7 @@ private:
 
 	ViewportList				viewport_list_;
 
-	static Vector				light_position_;			//!< ( 0, 0, 0 ) ‚ðŒü‚­ sun
+	static Vector				light_position_;			///< ( 0, 0, 0 ) ‚ðŒü‚­ sun
 
 	static Matrix				view_matrix_;
 	static MatrixList			projection_matrix_list_;

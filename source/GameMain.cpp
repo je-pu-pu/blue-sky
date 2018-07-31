@@ -33,6 +33,7 @@
 #include <core/input/DirectInput/DirectInput.h>
 
 #include <win/Version.h>
+#include <win/Clipboard.h>
 
 #include <game/Shader.h>
 #include <game/Config.h>
@@ -128,6 +129,15 @@ GameMain::GameMain()
 
 	is_display_fps_ = get_config()->get( "graphics.display_fps", 0 ) != 0;
 
+	scene_creator_map_[ "title"        ] = [this] () { return new TitleScene( this ); };
+	scene_creator_map_[ "stage_select" ] = [this] () { return new StageSelectScene( this ); };
+	scene_creator_map_[ "stage_intro"  ] = [this] () { return new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".intro" ).c_str(), "game_play" );	};
+	scene_creator_map_[ "game_play"    ] = [this] () { return new GamePlayScene( this ); };
+	scene_creator_map_[ "stage_outro"  ] = [this] () { return new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".outro" ).c_str(), "stage_select" ); };
+	scene_creator_map_[ "ending"       ] = [this] () { return new EndingScene( this ); };
+	
+	scene_creator_map_[ "debug"        ] = [this] () { return new DebugScene( this ); };
+	scene_creator_map_[ "canvas_test"  ] = [this] () { return new CanvasTestScene( this ); };
 
 	update_render_data_for_game();
 }
@@ -141,6 +151,13 @@ GameMain::~GameMain()
 	get_config()->save_file( "blue-sky.config" );
 
 	scene_.release();
+
+	std::ofstream of( "log/script.log", std::ofstream::app );
+
+	for ( const auto& c : get_script_manager()->get_command_history() )
+	{
+		of << c << std::endl;
+	}
 }
 
 /**
@@ -150,6 +167,9 @@ GameMain::~GameMain()
 void GameMain::setup_script_command()
 {
 	get_script_manager()->exec( "function load( s ) dofile( 'media/script/' .. s ) end" );
+
+	// Scene
+	get_script_manager()->set_function( "scene", [this] ( const char_t* name ) { setup_scene( name ); } );
 
 	// Basic
 	get_script_manager()->set_function( "color", [this] ( float_t r, float_t g, float_t b, float_t a ) { return Color( r, g, b, a ); } );
@@ -191,7 +211,7 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "get_shader", [this] ( const char_t* name ) { return get_graphics_manager()->get_shader( name ); } );
 	get_script_manager()->set_function( "clone_shader", [this] ( const game::Shader* s ) { return get_graphics_manager()->clone_shader( s ); } );
 
-	get_script_manager()->set_function( "load_texture", [this] ( const char_t* name, const char_t* file_path ) { return get_graphics_manager()->load_texture( file_path ); } );
+	get_script_manager()->set_function( "load_texture", [this] ( const char_t* file_path ) { return get_graphics_manager()->load_texture( file_path ); } );
 	// get_script_manager()->set_function( "load_named_texture", [this] ( const char_t* name, const char_t* file_path ) { return get_graphics_manager()->load_texture( name, file_path ); } );
 	get_script_manager()->set_function( "get_texture", [this] ( const char_t* name ) { return get_graphics_manager()->get_texture( name ); } );
 
@@ -237,7 +257,7 @@ ActiveObject* GameMain::clone_object( const ActiveObject* o )
  */
 void GameMain::update_render_data_for_game() const
 {
-	GameConstantBufferData constant_buffer_data;
+	GameShaderResourceData constant_buffer_data;
 	constant_buffer_data.screen_width = static_cast< float_t >( get_width() );
 	constant_buffer_data.screen_height = static_cast< float_t >( get_height() );
 		
@@ -391,6 +411,10 @@ void GameMain::edit_command( char_t key )
 			user_command_.resize( user_command_.size() - 1 );
 		}
 	}
+	else if ( key == 0x16 )
+	{
+		user_command_ += win::Clipboard::get_text();
+	}
 	else
 	{
 		user_command_ += key;
@@ -510,44 +534,20 @@ void GameMain::setup_scene()
  */
 void GameMain::setup_scene( const string_t& scene_name )
 {
+	auto i = scene_creator_map_.find( scene_name );
+
+	if ( i == scene_creator_map_.end() )
+	{
+		// COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " ) + scene_name );
+		return;
+	}
+
 	scene_.release();
 
 	sound_manager_->pop_group();
 	sound_manager_->push_group( scene_name.c_str() );
 	
-	if ( scene_name == "title" )
-	{
-		scene_ = new TitleScene( this );
-	}
-	else if ( scene_name == "stage_select" )
-	{
-		scene_ = new StageSelectScene( this );
-	}
-	else if ( scene_name == "stage_intro" )
-	{
-		scene_ = new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".intro" ).c_str(), "game_play" );
-	}
-	else if ( scene_name == "game_play" )
-	{
-		scene_ = new GamePlayScene( this );
-	}
-	else if ( scene_name == "stage_outro" )
-	{
-		scene_ = new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".outro" ).c_str(), "stage_select" );
-	}
-	else if ( scene_name == "ending" )
-	{
-		scene_ = new EndingScene( this );
-	}
-	else if ( true )
-	{
-		scene_ = new DebugScene( this );
-		// scene_ = new CanvasTestScene( this );
-	}
-	else
-	{
-		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " ) + scene_name );
-	}
+	scene_ = i->second();
 
 	scene_->set_name( scene_name );
 	scene_->set_next_stage_name( get_stage_name() );

@@ -13,7 +13,7 @@ public:
 	/// @todo 整理する
 	typedef blue_sky::BoneConstantBuffer			BoneConstantBuffer;
 
-	static const int MaxBones = blue_sky::BoneConstantBufferData::MaxBones;
+	static const int MaxBones = blue_sky::BoneShaderResourceData::MaxBones;
 
 private:
 	const SkinningAnimationSet* skinning_animation_set_;	///< スキニングアニメーションのセット

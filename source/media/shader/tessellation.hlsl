@@ -90,16 +90,31 @@ COMMON_POS_NORM_UV ds_phong_tessellation( HS_CONSTANT_OUTPUT input, float3 uvw :
 {
 	COMMON_POS_NORM_UV output;
 
-	// output.Position = patch[ 0 ].Position * uvw.x + patch[ 1 ].Position * uvw.y + patch[ 2 ].Position * uvw.z;
+	output.Normal   = patch[ 0 ].Normal   * uvw.x + patch[ 1 ].Normal   * uvw.y + patch[ 2 ].Normal   * uvw.z;
+	output.TexCoord = patch[ 0 ].TexCoord * uvw.x + patch[ 1 ].TexCoord * uvw.y + patch[ 2 ].TexCoord * uvw.z;
+
+	// phong tessellation
+	output.Position = common_phong_tessellation( patch, uvw );
+
+	// 
+	output.Position = common_wvp_pos( output.Position );
+	output.Normal = common_wv_norm( output.Normal );
+
+	return output;
+}
+
+[domain("tri")]
+COMMON_POS_NORM_UV ds_displacement( HS_CONSTANT_OUTPUT input, float3 uvw : SV_DomaInLocation, const OutputPatch<COMMON_POS_NORM_UV, 3> patch )
+{
+	COMMON_POS_NORM_UV output;
+
+	output.Position = patch[ 0 ].Position * uvw.x + patch[ 1 ].Position * uvw.y + patch[ 2 ].Position * uvw.z;
 	output.Normal   = patch[ 0 ].Normal   * uvw.x + patch[ 1 ].Normal   * uvw.y + patch[ 2 ].Normal   * uvw.z;
 	output.TexCoord = patch[ 0 ].TexCoord * uvw.x + patch[ 1 ].TexCoord * uvw.y + patch[ 2 ].TexCoord * uvw.z;
 	
 	// displacement mapping
-	// const float height = displacement_texture.SampleLevel( texture_sampler, output.TexCoord, 0 ).x;
-	// output.Position += float4( output.Normal * ( height - 0.5f ), 0 );
-
-	// phong tessellation
-	output.Position = common_phong_tessellation( patch, uvw );
+	const float height = displacement_texture.SampleLevel( texture_sampler, output.TexCoord, 0 ).x;
+	output.Position += float4( output.Normal * ( height - 0.5f ), 0 );
 
 	// 
 	output.Position = common_wvp_pos( output.Position );
@@ -118,10 +133,12 @@ technique11 tessellation
 		SetVertexShader( CompileShader( vs_4_0, vs_nop_pos_norm_uv() ) );
 		SetHullShader( CompileShader( hs_5_0, hs_phong_tessellation() ) );
 		SetDomainShader( CompileShader( ds_5_0, ds_phong_tessellation() ) );
+		// SetDomainShader( CompileShader( ds_5_0, ds_displacement() ) );
 		SetGeometryShader( NULL );
 		// SetPixelShader( CompileShader( ps_4_0, ps_common_sample_pos_norm_uv() ) );
 		// SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm_uv() ) );
+		// SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm_uv() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_common_normal_map_pos_norm_uv() ) );
 		// SetPixelShader( CompileShader( ps_4_0, ps_common_sample_matcap_pos_norm_uv() ) );
 
 		RASTERIZERSTATE = Default;
@@ -155,8 +172,8 @@ technique11 tessellation_skin
 		SetHullShader( CompileShader( hs_5_0, hs_phong_tessellation() ) );
 		SetDomainShader( CompileShader( ds_5_0, ds_phong_tessellation() ) );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm_uv() ) );
-		// SetPixelShader( CompileShader( ps_4_0, ps_common_sample_matcap_pos_norm_uv() ) );
+		// SetPixelShader( CompileShader( ps_4_0, ps_common_diffuse_pos_norm_uv() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_common_sample_matcap_pos_norm_uv() ) );
 
 		RASTERIZERSTATE = Default;
 	}

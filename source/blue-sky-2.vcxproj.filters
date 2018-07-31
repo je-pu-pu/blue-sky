@@ -493,6 +493,9 @@
     <ClInclude Include="blue_sky\graphics\shader\FaderShader.h">
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\DebugShadowMapTextureShader.h">
+      <Filter>blue_sky\graphics\shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

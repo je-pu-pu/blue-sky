@@ -4,9 +4,9 @@
 
 namespace game
 {
-
-class Mesh;
-class Texture;
+	class Model;
+	class Mesh;
+	class Texture;
 
 /**
  * 抽象シェーダークラス
@@ -25,6 +25,7 @@ public:
 	virtual void set_texture_at( uint_t, Texture* ) = 0;
 
 	virtual void bind() const = 0;
+	virtual void render_model( const Model* ) const = 0;
 	virtual void render( const Mesh*, uint_t ) const = 0;
 
 }; // Shader

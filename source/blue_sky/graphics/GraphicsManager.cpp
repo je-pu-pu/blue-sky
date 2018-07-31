@@ -6,11 +6,13 @@
 #include <blue_sky/graphics/FbxFileLoader.h>
 #include <blue_sky/graphics/Line.h>
 
+/// @todo •Ê cpp ‚ÉˆÚ“®
 #include <blue_sky/graphics/shader/FlatShader.h>
 #include <blue_sky/graphics/shader/FaderShader.h>
 #include <blue_sky/graphics/shader/MatcapShader.h>
 #include <blue_sky/graphics/shader/ShadowMapShader.h>
 #include <blue_sky/graphics/shader/TessellationMatcapShader.h>
+#include <blue_sky/graphics/shader/DebugShadowMapTextureShader.h>
 
 #include <ActiveObjectManager.h>
 
@@ -264,6 +266,8 @@ void GraphicsManager::setup_default_shaders()
 	create_named_shader< shader::TessellationMatcapShader >( "tess_matcap" )->set_texture( matcap_texture );
 	create_named_shader< shader::SkinningTessellationMatcapShader >( "tess_matcap_skin" )->set_texture( matcap_texture );
 
+	create_named_shader< shader::DebugShadowMapTextureShader >( "debug_shadow_map_texture" );
+
 	fader_->set_mesh( create_named_mesh< Rectangle >( "fader" ) );
 	fader_->set_shader_at( 0, create_named_shader< shader::FaderShader >( "fader" ) );
 }
@@ -445,11 +449,11 @@ void GraphicsManager::fade_out( float_t speed )
  */
 void GraphicsManager::render_fader() const
 {
-	ObjectConstantBufferData buffer_data;
-	buffer_data.world = Matrix().set_identity();
-	buffer_data.color = get_fader()->get_color();
+	ObjectShaderResourceData shader_data;
+	shader_data.world = Matrix().set_identity();
+	shader_data.color = get_fader()->get_color();
 
-	get_shared_object_render_data()->update( & buffer_data );
+	get_shared_object_render_data()->update( & shader_data );
 	set_current_object_shader_resource( get_shared_object_render_data() );
 
 	get_fader()->render();
@@ -532,20 +536,20 @@ void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_ob
 
 		Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
 
-		ObjectConstantBufferData buffer_data;
+		ObjectShaderResourceData shader_data;
 
-		buffer_data.world = Matrix().set_scaling( 0.1f, 0.1f, 0.1f );
-		buffer_data.world *= bone_matrix;
-		buffer_data.world *= Matrix().set_rotation_quaternion( q );
-		buffer_data.world *= Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-		buffer_data.world = buffer_data.world.transpose();
+		shader_data.world = Matrix().set_scaling( 0.1f, 0.1f, 0.1f );
+		shader_data.world *= bone_matrix;
+		shader_data.world *= Matrix().set_rotation_quaternion( q );
+		shader_data.world *= Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+		shader_data.world = shader_data.world.transpose();
 
 		if ( active_object->get_model()->get_line() )
 		{
-			buffer_data.color = active_object->get_model()->get_line()->get_color();
+			shader_data.color = active_object->get_model()->get_line()->get_color();
 		}
 
-		get_shared_object_render_data()->update( & buffer_data );
+		get_shared_object_render_data()->update( & shader_data );
 
 		render_debug_axis_model();
 	}

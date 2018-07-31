@@ -22,7 +22,7 @@ namespace blue_sky
 {
 
 /// @todo ‚¿‚á‚ñ‚Æ‚·‚é
-static ObjectConstantBufferData object_constant_buffer_data;
+static ObjectShaderResourceData object_constant_buffer_data;
 static Vector eye( 0.f, 0.f, -1.f, 1.f );
 static Matrix r;
 

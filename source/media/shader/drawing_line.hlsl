@@ -20,9 +20,9 @@ GS_LINE_INPUT vs_drawing_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID
 	// ‚Ô‚ç‚·
 	if ( false )
 	{
-		float a = Time; // ( vertex_id ) / 10.f + Time * 10.f;
-		output.Position.x += cos( vertex_id + a ) * 0.1f;
-		output.Position.y += sin( vertex_id + Time % 10 / 10 ) * 0.1f;
+		float a = ( vertex_id ) / 10.f + Time * 10.f;
+		output.Position.x += cos( vertex_id + a ) * 0.01f;
+		output.Position.y += sin( vertex_id + Time % 10 / 10 ) * 0.01f;
 	}
 
 	return output;
@@ -37,6 +37,7 @@ GS_LINE_INPUT vs_drawing_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID
  *          |          |
  *          1----------3
  *
+ * @todo ü‚ª•ö‚ê‚é–â‘è‚Ì‰ğŒˆŒã get_drawing_line_common() ‚Æ‹¤’Ê‰»
  */
 [maxvertexcount(4)]
 void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> Stream, uint primitive_id : SV_PrimitiveID )
@@ -192,6 +193,7 @@ GS_LINE_INPUT vs_drawing_line_debug( VS_LINE_INPUT input )
  *          |          |
  *          0----------2
  *
+ * @todo ü‚ª•ö‚ê‚é–â‘è‚ğŒŸØ
  */
 void get_drawing_line_common( line GS_LINE_INPUT input[ 2 ], out PS_FLAT_INPUT output[ 4 ] )
 {
@@ -229,7 +231,7 @@ void get_drawing_line_common( line GS_LINE_INPUT input[ 2 ], out PS_FLAT_INPUT o
 		const float line_width_angle = atan2( ly, lx ) + Pi / 2.f;
 
 		// ü‚ÌƒTƒCƒY
-		const float line_width_half = 0.1f;
+		const float line_width_half = 0.01f;
 		const float edge_scale_n = 1.f; // abs( input[ n ].Position.z ) / abs( input[ m ].Position.z );
 		const float edge_scale_m = 1.f; // abs( input[ m ].Position.z ) / abs( input[ n ].Position.z );
 
@@ -372,7 +374,6 @@ technique11 drawing_line
 
 		RASTERIZERSTATE = Debug;
 	}
-	*/
 
 	pass debug_line
 	{
@@ -387,4 +388,5 @@ technique11 drawing_line
 
 		RASTERIZERSTATE = Default;
 	}
+	*/
 }

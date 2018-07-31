@@ -240,18 +240,18 @@ void ActiveObject::update_render_data() const
 
 	Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
 
-	ObjectConstantBufferData buffer_data;
+	ObjectShaderResourceData shader_data;
 
-	buffer_data.world.set_rotation_quaternion( q );
-	buffer_data.world *= ::Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-	buffer_data.world = buffer_data.world.transpose();
+	shader_data.world.set_rotation_quaternion( q );
+	shader_data.world *= ::Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+	shader_data.world = shader_data.world.transpose();
 
 	if ( get_model()->get_line() )
 	{
-		buffer_data.color = get_model()->get_line()->get_color();
+		shader_data.color = get_model()->get_line()->get_color();
 	}
 
-	get_object_constant_buffer()->update( & buffer_data );
+	get_object_constant_buffer()->update( & shader_data );
 
 	if ( get_animation_player() )
 	{

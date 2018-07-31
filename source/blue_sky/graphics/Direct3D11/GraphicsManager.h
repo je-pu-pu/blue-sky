@@ -61,6 +61,9 @@ public:
 
 	// void update() override;
 
+	void set_default_viewport() override;
+	void set_viewport( float_t x, float_t y, float_t w, float_t h, float_t min_d = 0.f, float_t max_d = 1.f ) override;
+
 	MeshBuffer* create_mesh_buffer() const override { return new MeshBuffer( direct_3d_ ); }
 
 	// void unload_mesh( const char_t* ) override;

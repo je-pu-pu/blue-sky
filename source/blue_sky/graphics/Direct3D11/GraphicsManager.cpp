@@ -52,6 +52,17 @@ GraphicsManager::~GraphicsManager()
 	
 }
 
+void GraphicsManager::set_default_viewport()
+{
+	direct_3d_->set_default_viewport();
+}
+
+void GraphicsManager::set_viewport( float_t x, float_t y, float_t w, float_t h, float_t min_d, float_t max_d )
+{
+	direct_3d_->set_viewport( x, y, w, h, min_d, max_d );
+}
+
+
 #if 0
 /**
  * 指定した名前のメッシュをアンロードする

@@ -628,37 +628,19 @@ void Direct3D11::unset_render_target()
 }
 
 /**
- * 立体視用に左目用のビューポートを設定する
+ * ビューポートを設定する
  *
  */
-void Direct3D11::set_viewport_for_left_eye()
+void Direct3D11::set_viewport( float_t x, float_t y, float_t w, float_t h, float_t d_min, float_t d_max )
 {
 	D3D11_VIEWPORT viewport;
 
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = static_cast< float >( swap_chain_desc_.BufferDesc.Width / 2 );
-	viewport.Height = static_cast< float >( swap_chain_desc_.BufferDesc.Height );
-	viewport.MinDepth = 0.f;
-	viewport.MaxDepth = 1.f;
-
-	immediate_context_->RSSetViewports( 1, & viewport );
-}
-
-/**
- * 立体視用に右目用のビューポートを設定する
- *
- */
-void Direct3D11::set_viewport_for_right_eye()
-{
-	D3D11_VIEWPORT viewport;
-
-	viewport.TopLeftX = static_cast< float >( swap_chain_desc_.BufferDesc.Width / 2 );
-	viewport.TopLeftY = 0;
-	viewport.Width = static_cast< float >( swap_chain_desc_.BufferDesc.Width / 2 );
-	viewport.Height = static_cast< float >( swap_chain_desc_.BufferDesc.Height );
-	viewport.MinDepth = 0.f;
-	viewport.MaxDepth = 1.f;
+	viewport.TopLeftX = x;
+	viewport.TopLeftY = y;
+	viewport.Width = w;
+	viewport.Height = h;
+	viewport.MinDepth = d_min;
+	viewport.MaxDepth = d_max;
 
 	immediate_context_->RSSetViewports( 1, & viewport );
 }
@@ -793,20 +775,6 @@ void Direct3D11::renderText()
 	}
 
 	getSprite()->end();
-}
-
-void Direct3D11::setDebugViewport( float x, float y, float w, float h )
-{
-	D3D11_VIEWPORT viewport;
-
-	viewport.TopLeftX = x;
-	viewport.TopLeftY = y;
-	viewport.Width = w;
-	viewport.Height = h;
-	viewport.MinDepth = 0.f;
-	viewport.MaxDepth = 1.f;
-
-	immediate_context_->RSSetViewports( 1, & viewport );
 }
 
 void Direct3D11::getTexture2dDescByTexture( const Texture* texture, D3D11_TEXTURE2D_DESC* texture_2d_desc )

@@ -68,6 +68,9 @@ public:
 
 	typedef blue_sky::Player				Player;
 
+	typedef std::function< Scene* () > CreateSceneFunction;
+	typedef std::unordered_map< string_t, CreateSceneFunction > CreateSceneFunctionMap;
+
 	enum Key
 	{
 		KEY_LEFT  = VK_LEFT,
@@ -90,6 +93,8 @@ public:
 	};
 
 protected:
+	CreateSceneFunctionMap					scene_creator_map_;		///< シーン生成マップ
+
 	float									total_elapsed_time_;	///< ゲームが開始してからの経過時間 ( 秒 )
 
 	common::auto_ptr< Direct3D >			direct_3d_;				///< Direct3D

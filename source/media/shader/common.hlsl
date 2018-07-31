@@ -263,10 +263,17 @@ float4 ps_common_diffuse_pos_norm( COMMON_POS_NORM input ) : SV_Target
 
 float4 ps_common_diffuse_pos_norm_uv( COMMON_POS_NORM_UV input ) : SV_Target
 {
-	/// @todo èCê≥Ç∑ÇÈ
-	// const float3 normal = common_w_norm( input.Normal + 2.f * normal_texture.Sample( texture_sampler, input.TexCoord ) - 1.f );
-	
 	const float3 normal = input.Normal;
+	const float diffuse = common_diffuse( normal );
+	return float4( diffuse, diffuse, diffuse, 1.f );
+}
+
+float4 ps_common_normal_map_pos_norm_uv( COMMON_POS_NORM_UV input ) : SV_Target
+{
+	// return float4( common_w_norm( normal_texture.Sample( texture_sampler, input.TexCoord ) ), 1.f );
+
+	// const float3 normal = common_w_norm( input.Normal + 2.f * normal_texture.Sample( texture_sampler, input.TexCoord ) - 1.f );
+	const float3 normal = input.Normal + 2.f * normal_texture.Sample( texture_sampler, input.TexCoord ) - 1.f;
 	const float diffuse = common_diffuse( normal );
 	return float4( diffuse, diffuse, diffuse, 1.f );
 }

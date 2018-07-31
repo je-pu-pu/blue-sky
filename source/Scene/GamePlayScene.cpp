@@ -22,7 +22,7 @@
 #include <blue_sky/graphics/Rectangle.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
-#include <blue_sky/graphics/shader/BypassShader.h>
+#include <blue_sky/graphics/shader/ShadowMapShader.h>
 
 /// @todo 抽象化する
 #include <core/graphics/Direct3D11/Direct3D11ShadowMap.h>
@@ -62,8 +62,9 @@ namespace blue_sky
 
 GamePlayScene::GamePlayScene( const GameMain* game_main )
 	: Scene( game_main )
-	, shadow_map_shader_( get_graphics_manager()->get_shader( "shadow_map" ) )
-	, shadow_map_skin_shader_( get_graphics_manager()->get_shader( "shadow_map_skin" ) )
+	, shadow_map_shader_( get_graphics_manager()->get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map" ) )
+	, shadow_map_skin_shader_( get_graphics_manager()->get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map_skin" ) )
+	, debug_texture_shader_( get_graphics_manager()->get_shader( "debug_shadow_map_texture" ) )
 	, action_bgm_after_timer_( 0.f )
 	, bpm_( 120.f )
 	, drawing_accent_scale_( 0.f )
@@ -129,8 +130,6 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	/// @todo 直す
 	rectangle_ = get_graphics_manager()->create_named_model( "rectangle" );
 	rectangle_->set_mesh( get_graphics_manager()->create_named_mesh< Rectangle >( "rectangle" ) );
-	rectangle_->set_shader_at( 0, get_graphics_manager()->get_shader( "bypass" ) );
-	rectangle_->get_shader_at( 0 )->set_texture_at( 0, shadow_map_->getTexture() );
 
 	scope_mesh_ = get_graphics_manager()->load_model( "scope" );
 
@@ -1707,7 +1706,7 @@ void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
  * フレーム毎に更新する必要のある描画用の定数バッファ用データのうち、マトリックス以外のデータをを更新する
  *
  */
-void GamePlayScene::update_frame_constant_buffer_data_sub( FrameConstantBufferData& frame_constant_buffer_data ) const
+void GamePlayScene::update_frame_constant_buffer_data_sub( FrameShaderResourceData& frame_constant_buffer_data ) const
 {
 	frame_constant_buffer_data.light = -Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z(), 1.f );
 	frame_constant_buffer_data.light.normalize();
@@ -1768,10 +1767,11 @@ void GamePlayScene::render_shadow_map() const
  * @param shader シェーダー
  * @param is_skin_mesh スキンメッシュフラグ
  */
-void GamePlayScene::render_shadow_map( const Shader* shader, bool is_skin_mesh ) const
+void GamePlayScene::render_shadow_map( graphics::shader::BaseShadowMapShader* shader, bool is_skin_mesh ) const
 {
 	for ( int n = 0; n < shadow_map_->get_cascade_levels(); n++ )
 	{
+		shader->set_shader_resource( shadow_map_->getConstantBuffer() );
 		shadow_map_->ready_to_render_shadow_map_with_cascade_level( n );
 
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_gs(); // for line
@@ -1809,7 +1809,7 @@ void GamePlayScene::render_far_billboards() const
 	}
 
 	/// @todo 毎フレーム update() するのは無駄なのでやめる
-	ObjectConstantBufferData buffer;
+	ObjectShaderResourceData buffer;
 	buffer.color = Color::White;
 	buffer.world.set_identity();
 			
@@ -1848,10 +1848,6 @@ void GamePlayScene::render_object_mesh() const
 	get_graphics_manager()->get_frame_drawing_render_data()->bind_to_ps();
 		
 	get_graphics_manager()->bind_paper_texture();
-
-	get_graphics_manager()->load_named_texture( "matcap", "media/texture/matcap/mc12.jpg" )->bind_to_ps( 3 );
-	get_graphics_manager()->load_named_texture( "balloon_disp", "media/model/balloon-disp.png" )->bind_to_ds( 4 );
-	get_graphics_manager()->load_named_texture( "balloon_norm", "media/model/balloon-norm.png" )->bind_to_ps( 5 );
 
 	if ( shadow_map_ )
 	{
@@ -1896,7 +1892,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 	{
 		get_graphics_manager()->set_input_layout( "main" );
 
-		ObjectConstantBufferData buffer_data;
+		ObjectShaderResourceData buffer_data;
 		buffer_data.world = Matrix().set_orthographic( camera_->aspect() * 2.f, 2.f, 0.f, 1.f );
 		buffer_data.world *= Matrix().set_translation( ortho_offset, 0.f, 0.f );
 		buffer_data.world = buffer_data.world.transpose();
@@ -1997,22 +1993,13 @@ void GamePlayScene::render_debug_shadow_map_window() const
 		return;
 	}
 
-	get_direct_3d()->setDebugViewport( 0.f, 0, get_width() / 4.f * shadow_map_->get_cascade_levels(), get_height() / 4.f );
+	get_graphics_manager()->set_viewport( 0.f, 0, get_width() / 4.f * shadow_map_->get_cascade_levels(), get_height() / 4.f );
 
-	ObjectConstantBufferData buffer_data;
-	buffer_data.world.set_identity();
-	buffer_data.color = Color( 0.5f, 0.f, 0.f, 0.f );
-	get_graphics_manager()->get_shared_object_render_data()->update( & buffer_data );
+	debug_texture_shader_->set_texture_at( 0, shadow_map_->getTexture() );
+	debug_texture_shader_->render_model( rectangle_ );
 
-	render_technique( "|debug_shadow_map_texture", [this]
-	{
-		bind_shared_object_render_data();
-
-		// rectangle_->get_material()->set_texture( shadow_map_->getTexture() );
-		rectangle_->render();
-	} );
-
-	get_direct_3d()->set_default_viewport();
+	get_graphics_manager()->set_default_viewport();
+	
 }
 
 } // namespace blue_sky

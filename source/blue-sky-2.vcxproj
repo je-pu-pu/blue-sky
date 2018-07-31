@@ -109,6 +109,7 @@
     <ClInclude Include="blue_sky\graphics\ShaderResource.h" />
     <ClInclude Include="blue_sky\graphics\shader\BaseShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\BypassShader.h" />
+    <ClInclude Include="blue_sky\graphics\shader\DebugShadowMapTextureShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\FaderShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\Flat2DShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\FlatShader.h" />

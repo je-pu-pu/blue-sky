@@ -61,6 +61,12 @@ App::~App()
 //■初期化
 bool App::Init(HINSTANCE hi, int nCmdShow)
 {
+	// 設定を読み込む
+	config_->load_file( "blue-sky.config" );
+	
+	width_ = get_config()->get( "graphics.screen_width", DEFAULT_WIDTH );
+	height_ = get_config()->get( "graphics.screen_height", DEFAULT_HEIGHT );
+
 	//インスタンスハンドルをコピー
 	hInst = hi;
 	//２重起動防止
@@ -86,12 +92,14 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	};
 	//ウィンドウクラスの登録
 	if(! RegisterClass(&wc))	return false;
-	
+
 	// ウィンドウサイズの取得
 	RECT rc = { 0, 0, width_, height_ };
 	AdjustWindowRect( & rc, style_, FALSE );
 	int w = rc.right - rc.left;
 	int h = rc.bottom - rc.top;
+	int x = ( GetSystemMetrics( SM_CXSCREEN ) - w ) / 2;
+	int y = ( GetSystemMetrics( SM_CYSCREEN ) - h ) / 2;
 
 	//ウインドウ作成
 	hWnd = CreateWindowEx(
@@ -99,8 +107,8 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		class_name_.c_str(),	//クラス名
 		title_.c_str(),		//タイトル
 		style_,				//スタイル
-		CW_USEDEFAULT,		//表示座標
-		CW_USEDEFAULT,		//
+		x,					//表示座標
+		y,					//
 		w,					//サイズ
 		h,					//
 		NULL,				//親ウィンドウのハンドル
@@ -114,10 +122,6 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		return false;
 	}
 	
-	// 設定を読み込む
-	config_->load_file( "blue-sky.config" );
-
-	set_size( get_config()->get( "graphics.screen_width", DEFAULT_WIDTH ), get_config()->get( "graphics.screen_height", DEFAULT_HEIGHT ) );
 	set_full_screen( get_config()->get( "graphics.full_screen", 0 ) != 0 );
 
 	// ゲームを初期化する

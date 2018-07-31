@@ -4,6 +4,7 @@
 
 /doc/html/
 
+/source/lib/*
 /source/Debug/
 /source/Release/
 /source/Profile/

@@ -139,7 +139,6 @@ protected:
 	void update_render_data_for_frame() const;
 	void update_render_data_for_frame_drawing() const;
 	void update_render_data_for_frame_for_eye( int ) const;
-	void update_render_data_for_object() const;
 
 	void update_frame_constant_buffer_data_sub( FrameShaderResourceData& ) const;
 

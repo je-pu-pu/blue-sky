@@ -899,9 +899,6 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> x >> y >> z >> w >> h >> d >> r;
 
 			AreaSwitch* s = new AreaSwitch( w, h, d );
-			Model* model = get_graphics_manager()->load_model( name.c_str() ); // @todo DrawingModel を設定しなくても動作するようにする
-			s->set_model( model );
-
 			s->set_rigid_body( get_physics_manager()->add_active_object_as_box( s ) );
 			s->set_start_location( x, y, z );
 			s->set_start_direction_degree( r );
@@ -1510,7 +1507,6 @@ void GamePlayScene::render_to_oculus_vr() const
 	}
 
 	update_render_data_for_frame_drawing();
-	update_render_data_for_object();
 
 	get_graphics_manager()->render_shadow_map();
 
@@ -1537,7 +1533,6 @@ void GamePlayScene::render_to_display() const
 {
 	update_render_data_for_frame();
 	update_render_data_for_frame_drawing();
-	update_render_data_for_object();
 
 	get_graphics_manager()->render_shadow_map();
 
@@ -1721,18 +1716,6 @@ void GamePlayScene::update_render_data_for_frame_drawing() const
 	get_graphics_manager()->set_drawing_accent( bgm_ ? bgm_->get_current_peak_level() * drawing_accent_scale_ : 0.f );
 
 	get_graphics_manager()->get_frame_drawing_render_data()->update();
-}
-
-/**
- * 全てのオブジェクトの描画用の定数バッファを更新する
- *
- */
-void GamePlayScene::update_render_data_for_object() const
-{
-	for ( const auto& active_object : get_active_object_manager()->active_object_list() )
-	{
-		active_object->update_render_data();
-	}
 }
 
 /**

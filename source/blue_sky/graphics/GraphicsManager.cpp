@@ -356,6 +356,11 @@ void GraphicsManager::update_shader_resources() const
 
 	for ( const auto& game_object : get_game_object_manager()->active_object_list() )
 	{
+		if ( ! game_object->get_model() )
+		{
+			continue;
+		}
+
 		game_object->update_render_data();
 	}
 }
@@ -394,6 +399,11 @@ void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool
 
 		for ( const auto* active_object : get_game_object_manager()->active_object_list() )
 		{
+			if ( ! active_object->get_model() )
+			{
+				continue;
+			}
+
 			if ( active_object->get_model()->is_skin_mesh() == is_skin_mesh )
 			{
 				set_current_object_shader_resource( active_object->get_object_constant_buffer() );
@@ -423,6 +433,11 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 
 	for ( const auto& active_object : active_object_manager->active_object_list() )
 	{
+		if ( ! active_object->get_model() )
+		{
+			continue;
+		}
+
 		set_current_object_shader_resource( active_object->get_object_constant_buffer() );
 		get_current_skinning_shader_resource( active_object->get_animation_player() ? active_object->get_animation_player()->get_shader_resource() : nullptr );
 
@@ -441,6 +456,11 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 
 		for ( const auto* active_object : active_object_manager->active_object_list() )
 		{
+			if ( ! active_object->get_model() )
+			{
+				continue;
+			}
+
 			active_object->render_line();
 		}
 	} );

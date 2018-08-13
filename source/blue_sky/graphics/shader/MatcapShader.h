@@ -35,13 +35,18 @@ public:
 
 	void bind() const override
 	{
-		// @todo 必要なものだけをバインドするようにする
+		/// @todo 必要なものだけをバインドするようにする
 		get_game_shader_resource()->bind_to_all();
 		get_frame_shader_resource()->bind_to_all();
 		get_frame_drawing_shader_resource()->bind_to_all();
 		
 		get_object_shader_resource()->bind_to_vs();
-		get_skining_shader_resource()->bind_to_vs();
+
+		/// @todo SkinningMatcapShader として分ける
+		if ( get_skining_shader_resource() )
+		{
+			get_skining_shader_resource()->bind_to_vs();
+		}
 
 		if ( texture_ )
 		{

@@ -1,12 +1,12 @@
 #pragma once
 
-#include <SkinningAnimationSet.h>
 #include <blue_sky/ShaderResources.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Mesh.h>
+#include <blue_sky/type.h>
 
+#include <core/animation/SkinningAnimationSet.h>
 #include <core/graphics/PrimitiveTopology.h>
-#include <core/type.h>
 
 #include <game/GraphicsManager.h>
 #include <game/ResourceManager.h>
@@ -19,12 +19,16 @@
 #include <vector>
 #include <functional>
 
-class SkinningAnimationSet;
 
 namespace game
 {
 	class Shader;
 	class Texture;
+}
+
+namespace core
+{
+	class SkinningAnimationSet;
 }
 
 namespace core::graphics
@@ -57,11 +61,12 @@ namespace graphics
 class GraphicsManager : public game::GraphicsManager
 {
 public:
-	typedef Model			Model;
-	typedef Mesh			Mesh;
-	typedef Line			Line;
-	typedef game::Shader	Shader;
-	typedef game::Texture	Texture;
+	typedef Model											Model;
+	typedef Mesh											Mesh;
+	typedef Line											Line;
+	typedef game::Shader									Shader;
+	typedef game::Texture									Texture;
+	typedef core::SkinningAnimationSet						SkinningAnimationSet;
 
 	typedef game::ResourceManager< Model >					ModelManager;
 	typedef game::ResourceManager< Mesh >					MeshManager;
@@ -193,7 +198,7 @@ public:
 	virtual void set_drawing_accent( float_t ) = 0;
 	virtual void set_drawing_line_type( int_t ) = 0;
 
-	virtual void set_eye_position( const Vector3& ) = 0;
+	virtual void set_eye_position( const Vector& ) = 0;
 
 	bool_t is_shadow_enabled() const { return shadow_map_.get(); }
 	ShadowMap* get_shadow_map() { return shadow_map_.get(); }

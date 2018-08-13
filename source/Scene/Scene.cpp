@@ -1,13 +1,13 @@
 #include "Scene.h"
-#include "GameMain.h"
+
+#include <GameMain.h>
+#include <ActiveObjectManager.h>
+#include <ActiveObjectPhysics.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
 
-#include "SoundManager.h"
-#include "Sound.h"
-
-#include <ActiveObjectManager.h>
-#include <ActiveObjectPhysics.h>
+#include <core/sound/SoundManager.h>
+#include <core/sound/Sound.h>
 
 #include <game/MainLoop.h>
 
@@ -68,7 +68,7 @@ GraphicsManager* Scene::get_graphics_manager() const
 	return game_main_->get_graphics_manager();
 }
 
-SoundManager* Scene::get_sound_manager() const
+Scene::SoundManager* Scene::get_sound_manager() const
 {
 	return game_main_->get_sound_manager();
 }

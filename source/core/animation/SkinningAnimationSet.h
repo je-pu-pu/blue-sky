@@ -1,11 +1,13 @@
-#ifndef SKINNING_ANIMATION_SET_H
-#define SKINNING_ANIMATION_SET_H
+#pragma once
 
-#include <core/type.h>
 #include "SkinningAnimation.h"
+#include <core/type.h>
 #include <common/exception.h>
 #include <vector>
 #include <map>
+
+namespace core
+{
 
 /**
  * スキニングアニメーションの複数セット
@@ -213,4 +215,4 @@ public:
 
 }; // class SkinningAnimation
 
-#endif // SKINNING_ANIMATION_SET_H
+} // namespace core

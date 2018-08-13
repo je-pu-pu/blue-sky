@@ -24,11 +24,11 @@ ActiveObjectPhysics::~ActiveObjectPhysics()
  */
 ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_box( ActiveObject* active_object )
 {
-	Vector3 box( active_object->get_collision_width() / 2.f, active_object->get_collision_height() / 2.f, active_object->get_collision_depth() / 2.f );
+	Vector box( active_object->get_collision_width() / 2.f, active_object->get_collision_height() / 2.f, active_object->get_collision_depth() / 2.f );
 	
 	Transform offset;
-	offset.setIdentity();
-	offset.setOrigin( Vector3( 0, active_object->get_collision_height() / 2, 0 ) );
+	offset.set_identity();
+	offset.set_position( Vector( 0, active_object->get_collision_height() / 2, 0 ) );
 
 	RigidBody* rigid_body = add_box_rigid_body( active_object->get_transform(), offset, box, active_object->get_default_mass() );
 	set_active_object_info_to_rigid_body( rigid_body, active_object );
@@ -47,8 +47,8 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_capsul
 	float_t height = active_object->get_collision_height() - ( radius * 2.f );
 
 	Transform offset;
-	offset.setIdentity();
-	offset.setOrigin( Vector3( 0, active_object->get_collision_height() / 2, 0 ) );
+	offset.set_identity();
+	offset.set_position( Vector( 0, active_object->get_collision_height() / 2, 0 ) );
 
 	RigidBody* rigid_body = add_capsule_rigid_body( active_object->get_transform(), offset, radius, height, active_object->get_default_mass() );
 	set_active_object_info_to_rigid_body( rigid_body, active_object );
@@ -63,11 +63,11 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_capsul
  */
 ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_cylinder( ActiveObject* active_object )
 {
-	Vector3 box( active_object->get_collision_width() / 2.f, active_object->get_collision_height() / 2.f, active_object->get_collision_depth() / 2.f );
+	Vector box( active_object->get_collision_width() / 2.f, active_object->get_collision_height() / 2.f, active_object->get_collision_depth() / 2.f );
 
 	Transform offset;
-	offset.setIdentity();
-	offset.setOrigin( Vector3( 0, active_object->get_collision_height() / 2, 0 ) );
+	offset.set_identity();
+	offset.set_position( Vector( 0, active_object->get_collision_height() / 2, 0 ) );
 
 	RigidBody* rigid_body = add_cylinder_rigid_body( active_object->get_transform(), offset, box, active_object->get_default_mass() );
 	set_active_object_info_to_rigid_body( rigid_body, active_object );

@@ -1,9 +1,10 @@
 #pragma once
 
 #include <GameMain.h>
-#include <AnimationPlayer.h>
+
 #include <blue_sky/graphics/GraphicsManager.h>
 
+#include <core/animation/AnimationPlayer.h>
 #include <core/graphics/PrimitiveTopology.h>
 
 #include <game/Model.h>

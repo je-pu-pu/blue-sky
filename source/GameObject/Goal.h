@@ -19,7 +19,7 @@ private:
 	float get_collision_height() const override { return 2.f; }
 	float get_collision_depth() const override { return 4.f; }
 
-	const Vector3& get_default_gravity() const override { return GravityZero; }
+	const Vector& get_default_gravity() const override { return Vector::Zero; }
 
 	void on_collide_with( GameObject* ) override { }
 
@@ -27,7 +27,7 @@ private:
 
 	void on_arrive_at_target_location() override
 	{
-		set_velocity( Vector3( 0, 0, 0 ) );
+		set_velocity( Vector::Zero );
 	}
 
 public:

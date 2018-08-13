@@ -46,7 +46,7 @@ public:
 		, include_soft_footing_( include_soft_footing )
 	{ }
 
-	virtual	btScalar addSingleResult( btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
+	virtual	btScalar addSingleResult( btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace )
 	{
 		if ( rayResult.m_collisionObject == rigid_body_ )
 		{

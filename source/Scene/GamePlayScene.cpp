@@ -13,10 +13,7 @@
 #include <GameObject/Balloon.h>
 #include <GameObject/AreaSwitch.h>
 #include <GameObject/TranslationObject.h>
-
-/// @todo î˜ñ≠Ç»ÉNÉâÉXÇêÆóùÇ∑ÇÈ
-#include <Camera.h>
-#include <AnimationPlayer.h>
+#include <GameObject/Camera.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Rectangle.h>
@@ -25,6 +22,9 @@
 #include <blue_sky/graphics/shader/ShadowMapShader.h>
 
 #include <core/graphics/ShadowMap.h>
+#include <core/animation/AnimationPlayer.h>
+
+#include <core/sound/SoundManager.h>
 
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
@@ -34,7 +34,6 @@
 #include "Input.h"
 
 #include "ActiveObjectManager.h"
-#include "SoundManager.h"
 #include "ScriptManager.h"
 
 #include "OculusRift.h"
@@ -85,7 +84,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	}
 
 	// Physics
-	get_physics_manager()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
+	get_physics_manager()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
 
 	// Texture
 	ui_texture_ = get_graphics_manager()->load_named_texture( "ui", "media/image/item.png" );
@@ -418,7 +417,7 @@ void GamePlayScene::setup_command()
 		
 		if ( o )
 		{
-			o->set_gravity( GameObject::Vector3( x, y, z  ) );
+			o->set_gravity( Vector( x, y, z  ) );
 		}
 	};
 	command_map_[ "game_object.set_angular_factor" ] = [ & ] ( const string_t& s )
@@ -435,7 +434,7 @@ void GamePlayScene::setup_command()
 		
 		if ( o )
 		{
-			o->set_angular_factor( GameObject::Vector3( x, y, z  ) );
+			o->set_angular_factor( Vector( x, y, z  ) );
 		}
 	};
 	command_map_[ "game_object.set_kinematic" ] = [ & ] ( const string_t& s )
@@ -485,7 +484,7 @@ void GamePlayScene::setup_command()
 
 		if ( o )
 		{
-			get_active_object_manager()->set_target_location( o, GameObject::Vector3( x, y, z ), speed );
+			get_active_object_manager()->set_target_location( o, Vector( x, y, z ), speed );
 		}
 	};
 	command_map_[ "game_object.set_target_direction" ] = [ & ] ( const string_t& s )
@@ -1189,8 +1188,8 @@ void GamePlayScene::update_main()
 			switch ( player_->get_selected_item_type() )
 			{
 				case Player::ITEM_TYPE_NONE: player_->jump(); break;
-				case Player::ITEM_TYPE_ROCKET: player_->rocket( Player::Vector3( camera_->front().x(), camera_->front().y(), camera_->front().z() ) ); break;
-				case Player::ITEM_TYPE_STONE: player_->throw_stone( Player::Vector3( camera_->front().x(), camera_->front().y(), camera_->front().z() ) ); break;
+				case Player::ITEM_TYPE_ROCKET: player_->rocket( camera_->front() ); break;
+				case Player::ITEM_TYPE_STONE: player_->throw_stone( camera_->front() ); break;
 				// case Player::ITEM_TYPE_UMBRELLA: player_->start_umbrella_mode(); player_->jump(); break;
 				case Player::ITEM_TYPE_SCOPE:
 				{
@@ -1440,8 +1439,8 @@ void GamePlayScene::on_goal()
 
 void GamePlayScene::update_clear()
 {
-	ActiveObject::Vector3 target_position = goal_->get_location();
-	target_position.setZ( target_position.z() - 4.f + get_sound_manager()->get_sound( "fin" )->get_current_position() * 0.5f );
+	Vector target_position = goal_->get_location();
+	target_position.set_z( target_position.z() - 4.f + get_sound_manager()->get_sound( "fin" )->get_current_position() * 0.5f );
 
 	player_->set_location( player_->get_location() * 0.95f + target_position * 0.05f );
 	player_->set_direction_degree( 0.f );
@@ -1576,56 +1575,56 @@ void GamePlayScene::render_text() const
 
 	if ( get_game_main()->is_display_fps() )
 	{
-		ss << "FPS : " << get_main_loop()->get_last_fps() << std::endl;
-		ss << "BPM : " << get_bpm() << std::endl;
-		ss << "POS : " << player_->get_transform().getOrigin().x() << ", " << player_->get_transform().getOrigin().y() << ", " << player_->get_transform().getOrigin().z() << std::endl;
-		ss << "step speed : " << player_->get_step_speed() << std::endl;
-		ss << "last footing height : " << player_->get_last_footing_height() << std::endl;
-		ss << "DX : " << player_->get_velocity().x() << std::endl;
-		ss << "DY : " << player_->get_velocity().y() << std::endl;
-		ss << "DZ : " << player_->get_velocity().z() << std::endl;
-		ss << "VELOCITY : " << player_->get_velocity().length() << std::endl;
-		ss << "Objects : " << get_active_object_manager()->active_object_list().size() << std::endl;
+		ss << "FPS : " << get_main_loop()->get_last_fps() << '\n';
+		ss << "BPM : " << get_bpm() << '\n';
+		ss << "POS : " << player_->get_transform().get_position().x() << ", " << player_->get_transform().get_position().y() << ", " << player_->get_transform().get_position().z() << '\n';
+		ss << "step speed : " << player_->get_step_speed() << '\n';
+		ss << "last footing height : " << player_->get_last_footing_height() << '\n';
+		ss << "DX : " << player_->get_velocity().x() << '\n';
+		ss << "DY : " << player_->get_velocity().y() << '\n';
+		ss << "DZ : " << player_->get_velocity().z() << '\n';
+		ss << "VELOCITY : " << player_->get_velocity().length() << '\n';
+		ss << "Objects : " << get_active_object_manager()->active_object_list().size() << '\n';
 
-		ss << "mouse.dx : " << get_input()->get_mouse_dx() << std::endl;
-		ss << "mouse.dy : " << get_input()->get_mouse_dy() << std::endl;
+		ss << "mouse.dx : " << get_input()->get_mouse_dx() << '\n';
+		ss << "mouse.dy : " << get_input()->get_mouse_dy() << '\n';
 
-		ss << "IS LOCATED ON DIE : " << player_->is_located_on_die() << std::endl;
-		ss << "IS LOCATED ON SAFE : " << player_->is_located_on_safe() << std::endl;
-		ss << "IS FALLING TO DIE : " << player_->is_falling_to_die() << std::endl;
+		ss << "IS LOCATED ON DIE : " << player_->is_located_on_die() << '\n';
+		ss << "IS LOCATED ON SAFE : " << player_->is_located_on_safe() << '\n';
+		ss << "IS FALLING TO DIE : " << player_->is_falling_to_die() << '\n';
 
-		ss << "TESS FACTOR : " << get_graphics_manager()->get_frame_render_data()->data().tess_factor << std::endl;
+		ss << "TESS FACTOR : " << get_graphics_manager()->get_frame_render_data()->data().tess_factor << '\n';
 		/*
-		ss << "IS JUMPING : " << player_->is_jumping() << std::endl;
-		ss << "ON FOOTING : " << player_->is_on_footing() << std::endl;
-		ss << "ON LADDER : " << player_->is_on_ladder() << std::endl;
-		ss << "IS FACING TO BLOCK : " << player_->is_facing_to_block() << std::endl;
-		ss << "CAN CLAMBER : " << player_->can_clamber() << std::endl;
-		ss << "CAN PEER DOWN : " << player_->can_peer_down() << std::endl;
-		ss << "CAN THROW : " << player_->can_throw() << std::endl;
-		ss << "IS CLAMBERING : " << player_->is_clambering() << std::endl;
-		ss << "IS FALLING TO DIE : " << player_->is_falling_to_die() << std::endl;
-		ss << "IS FALLING TO SAFE : " << player_->is_falling_to_safe() << std::endl;
+		ss << "IS JUMPING : " << player_->is_jumping() << '\n';
+		ss << "ON FOOTING : " << player_->is_on_footing() << '\n';
+		ss << "ON LADDER : " << player_->is_on_ladder() << '\n';
+		ss << "IS FACING TO BLOCK : " << player_->is_facing_to_block() << '\n';
+		ss << "CAN CLAMBER : " << player_->can_clamber() << '\n';
+		ss << "CAN PEER DOWN : " << player_->can_peer_down() << '\n';
+		ss << "CAN THROW : " << player_->can_throw() << '\n';
+		ss << "IS CLAMBERING : " << player_->is_clambering() << '\n';
+		ss << "IS FALLING TO DIE : " << player_->is_falling_to_die() << '\n';
+		ss << "IS FALLING TO SAFE : " << player_->is_falling_to_safe() << '\n';
 
-		ss << "IS LADDER STEP ONLY : " << player_->is_ladder_step_only() << std::endl;
+		ss << "IS LADDER STEP ONLY : " << player_->is_ladder_step_only() << '\n';
 
-		ss << "BALLOON : " << ( player_->get_balloon() != nullptr ) << std::endl;
+		ss << "BALLOON : " << ( player_->get_balloon() != nullptr ) << '\n';
 
 		if ( player_->get_balloon() )
 		{
-			ss << "BALLOON : " << player_->get_balloon()->is_visible() << std::endl;
-			ss << "BALLOON : " << player_->get_balloon()->is_mesh_visible() << std::endl;
-			ss << "BALLOON : " << player_->get_balloon()->is_line_visible() << std::endl;
+			ss << "BALLOON : " << player_->get_balloon()->is_visible() << '\n';
+			ss << "BALLOON : " << player_->get_balloon()->is_mesh_visible() << '\n';
+			ss << "BALLOON : " << player_->get_balloon()->is_line_visible() << '\n';
 		}
 		*/
 
 		if ( get_oculus_rift() )
 		{
-			ss << "YAW : " << get_oculus_rift()->get_yaw() << std::endl;
-			ss << "PITCH : " << get_oculus_rift()->get_pitch() << std::endl;
-			ss << "ROLL : " << get_oculus_rift()->get_roll() << std::endl;
+			ss << "YAW : " << get_oculus_rift()->get_yaw() << '\n';
+			ss << "PITCH : " << get_oculus_rift()->get_pitch() << '\n';
+			ss << "ROLL : " << get_oculus_rift()->get_roll() << '\n';
 
-			ss << "DELTA YAW : " << get_oculus_rift()->get_delta_yaw() << std::endl;
+			ss << "DELTA YAW : " << get_oculus_rift()->get_delta_yaw() << '\n';
 		}
 	}
 
@@ -1654,7 +1653,7 @@ void GamePlayScene::update_render_data_for_frame() const
 
 	get_graphics_manager()->get_frame_render_data()->update();
 
-	get_graphics_manager()->set_eye_position( eye.xyz() );
+	get_graphics_manager()->set_eye_position( eye );
 }
 
 /**
@@ -1690,7 +1689,7 @@ void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
 
 	get_graphics_manager()->get_frame_render_data()->update();
 
-	get_graphics_manager()->set_eye_position( Vector3( eye.x(), eye.y(), eye.z() ) );
+	get_graphics_manager()->set_eye_position( eye );
 }
 
 /**

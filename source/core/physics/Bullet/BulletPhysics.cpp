@@ -82,14 +82,14 @@ void BulletPhysics::clear()
  * @param box ’n–Ê‚ÌŒ`ó
  * @return ’Ç‰Á‚³‚ê‚½„‘Ì
  */
-btRigidBody* BulletPhysics::add_ground_rigid_body( const btVector3& box )
+btRigidBody* BulletPhysics::add_ground_rigid_body( const Vector& box )
 {
-	btTransform transform;
-	transform.setIdentity();
-	transform.setOrigin( btVector3( 0, -box.y(), 0 ) );
+	Transform transform;
+	transform.set_identity();
+	transform.set_position( Vector( 0, -box.y(), 0 ) );
 
-	btTransform offset;
-	offset.setIdentity();
+	Transform offset;
+	offset.set_identity();
 
 	return add_box_rigid_body( transform, offset, box, 0 );
 }
@@ -103,7 +103,7 @@ btRigidBody* BulletPhysics::add_ground_rigid_body( const btVector3& box )
  * @param mass ¿—Ê
  * @return ’Ç‰Á‚³‚ê‚½„‘Ì
  */
-btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, btScalar mass )
+btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, const Transform& offset, const Vector& box, btScalar mass )
 {
 	btBoxShape* shape = new btBoxShape( box );
 	collision_shape_list_.push_back( shape );
@@ -139,7 +139,7 @@ btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, 
  * @param mass ¿—Ê
  * @return ’Ç‰Á‚³‚ê‚½„‘Ì
  */
-btRigidBody* BulletPhysics::add_cylinder_rigid_body( const Transform& transform, const Transform& offset, const btVector3& box, btScalar mass )
+btRigidBody* BulletPhysics::add_cylinder_rigid_body( const Transform& transform, const Transform& offset, const Vector& box, btScalar mass )
 {
 	btCylinderShape* shape = new btCylinderShape( box );
 	collision_shape_list_.push_back( shape );
@@ -247,7 +247,7 @@ bool BulletPhysics::load_obj( const char_t* file_name )
 		collision_shape_list_.push_back( shape );
 
 		Transform transform;
-		transform.setIdentity();
+		transform.set_identity();
 
 		// btScalar mass( 0 );
 		btVector3 local_inertia( 0, 0, 0 );
@@ -270,7 +270,7 @@ void BulletPhysics::setConstraint()
 	btRigidBody* b = btRigidBody::upcast( dynamics_world_->getCollisionObjectArray()[ dynamics_world_->getNumCollisionObjects() - 1 ] );
 
 	// btPoint2PointConstraint* constraint = new btPoint2PointConstraint( * a, * b, Vector3( 2, 0, 0 ), Vector3( -2, 0, 0 ) );
-	btPoint2PointConstraint* constraint = new btPoint2PointConstraint( * b, Vector3( 0, 5, 0 ) );
+	btPoint2PointConstraint* constraint = new btPoint2PointConstraint( * b, btVector3( 0, 5, 0 ) );
 
 	dynamics_world_->addConstraint( constraint );
 }

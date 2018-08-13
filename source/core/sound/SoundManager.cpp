@@ -10,7 +10,7 @@
 
 #include <string>
 
-namespace blue_sky
+namespace core
 {
 
 SoundManager::SoundManager( HWND hwnd )

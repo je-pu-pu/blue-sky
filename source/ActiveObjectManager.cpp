@@ -1,6 +1,4 @@
 #include "ActiveObjectManager.h"
-#include "AnimationPlayer.h"
-
 #include "ActiveObjectPhysics.h"
 
 #include <GameObject/Girl.h>
@@ -13,6 +11,7 @@
 #include <GameObject/Umbrella.h>
 #include <GameObject/Stone.h>
 #include <GameObject/Switch.h>
+#include <GameObject/StaticObject.h>
 #include <GameObject/AreaSwitch.h>
 #include <GameObject/TranslationObject.h>
 
@@ -20,23 +19,27 @@
 #include <GameObject/StaticObject.h>
 
 #include <GameMain.h>
+
 #include <blue_sky/graphics/GraphicsManager.h>
+
+#include <core/animation/AnimationPlayer.h>
 
 namespace blue_sky
 {
 
 ActiveObjectManager::ActiveObjectManager()
 {
-	object_creator_map_[ "girl"        ] = [] () -> ActiveObject* { return new Girl();     };
-	object_creator_map_[ "robot"       ] = [] () -> ActiveObject* { return new Robot();    };
-	object_creator_map_[ "goal"        ] = [] () -> ActiveObject* { return new Goal();     };
-	object_creator_map_[ "balloon"     ] = [] () -> ActiveObject* { return new Balloon();  };
-	object_creator_map_[ "medal"       ] = [] () -> ActiveObject* { return new Medal();    };
-	object_creator_map_[ "ladder"      ] = [] () -> ActiveObject* { return new Ladder();   };
-	object_creator_map_[ "rocket"      ] = [] () -> ActiveObject* { return new Rocket();   };
-	object_creator_map_[ "umbrella"    ] = [] () -> ActiveObject* { return new Umbrella(); };
-	object_creator_map_[ "stone"       ] = [] () -> ActiveObject* { return new Stone();    };
-	object_creator_map_[ "switch"      ] = [] () -> ActiveObject* { return new Switch();   };
+	object_creator_map_[ "girl"        ] = [] () -> ActiveObject* { return new Girl();         };
+	object_creator_map_[ "robot"       ] = [] () -> ActiveObject* { return new Robot();        };
+	object_creator_map_[ "goal"        ] = [] () -> ActiveObject* { return new Goal();         };
+	object_creator_map_[ "balloon"     ] = [] () -> ActiveObject* { return new Balloon();      };
+	object_creator_map_[ "medal"       ] = [] () -> ActiveObject* { return new Medal();        };
+	object_creator_map_[ "ladder"      ] = [] () -> ActiveObject* { return new Ladder();       };
+	object_creator_map_[ "rocket"      ] = [] () -> ActiveObject* { return new Rocket();       };
+	object_creator_map_[ "umbrella"    ] = [] () -> ActiveObject* { return new Umbrella();     };
+	object_creator_map_[ "stone"       ] = [] () -> ActiveObject* { return new Stone();        };
+	object_creator_map_[ "switch"      ] = [] () -> ActiveObject* { return new Switch();       };
+	object_creator_map_[ "static"      ] = [] () -> ActiveObject* { return new StaticObject(); };
 
 	// object_creator_map_[ "area-switch"        ] = [] () -> ActiveObject* { return 0; };
 	// object_creator_map_[ "translation-object" ] = [] () -> ActiveObject* { return 0; };
@@ -84,7 +87,7 @@ void ActiveObjectManager::name_active_object( const string_t& name, ActiveObject
 	named_active_object_map_[ name ] = active_object;
 }
 
-void ActiveObjectManager::set_target_location( ActiveObject* active_object, const Vector3& target_location, float_t speed )
+void ActiveObjectManager::set_target_location( ActiveObject* active_object, const Vector& target_location, float_t speed )
 {
 	target_location_map_[ active_object ] = std::make_tuple( target_location, speed );
 }
@@ -136,20 +139,20 @@ ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss )
 
 	ss >> object_name >> x >> y >> z >> rx >> ry >> rz;
 
-	std::map< string_t, ActiveObject::Vector3 > size_map;
-	size_map[ "soda-can-1"   ] = ActiveObject::Vector3(  0.07f, 0.12f, 0.07f );
-	size_map[ "wall-1"       ] = ActiveObject::Vector3(  4.f,   1.75f, 0.2f  );
-	size_map[ "wall-2"       ] = ActiveObject::Vector3(  8.f,   2.5f,  0.2f  );
-	size_map[ "wall-3"       ] = ActiveObject::Vector3(  4.f,   2.5f,  0.2f  );
-	size_map[ "outdoor-unit" ] = ActiveObject::Vector3(  0.7f,  0.6f,  0.24f );
-	size_map[ "building-20"  ] = ActiveObject::Vector3( 10.f,  20.f,  10.f   );
-	size_map[ "building-200" ] = ActiveObject::Vector3( 80.f, 200.f,  60.f   );
-	size_map[ "board-1"      ] = ActiveObject::Vector3(  4.f,   0.2f,  0.8f  );
+	std::map< string_t, Vector > size_map;
+	size_map[ "soda-can-1"   ] = Vector(  0.07f, 0.12f, 0.07f );
+	size_map[ "wall-1"       ] = Vector(  4.f,   1.75f, 0.2f  );
+	size_map[ "wall-2"       ] = Vector(  8.f,   2.5f,  0.2f  );
+	size_map[ "wall-3"       ] = Vector(  4.f,   2.5f,  0.2f  );
+	size_map[ "outdoor-unit" ] = Vector(  0.7f,  0.6f,  0.24f );
+	size_map[ "building-20"  ] = Vector( 10.f,  20.f,  10.f   );
+	size_map[ "building-200" ] = Vector( 80.f, 200.f,  60.f   );
+	size_map[ "board-1"      ] = Vector(  4.f,   0.2f,  0.8f  );
 
-	size_map[ "box-5x5x5"    ] = ActiveObject::Vector3(  5.f,  5.f,  5.f );
-	size_map[ "box-2x2x2"    ] = ActiveObject::Vector3(  2.f,  2.f,  2.f );
+	size_map[ "box-5x5x5"    ] = Vector(  5.f,  5.f,  5.f );
+	size_map[ "box-2x2x2"    ] = Vector(  2.f,  2.f,  2.f );
 
-	size_map[ "robot-dead-body" ] = ActiveObject::Vector3( 0.8f, 2.f, 0.5f );
+	size_map[ "robot-dead-body" ] = Vector( 0.8f, 2.f, 0.5f );
 
 	std::map< string_t, float_t > mass_map;
 	mass_map[ "soda-can-1"   ] = 50.f;
@@ -201,7 +204,7 @@ ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss )
 
 	if ( object_name == "box-2x2x2" )
 	{
-		object->get_rigid_body()->setFriction( 10 );
+		object->set_friction( 10.f );
 	}
 
 	object->set_model( GameMain::get_instance()->get_graphics_manager()->load_model( object_name.c_str() ) );

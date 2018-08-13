@@ -2,18 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Sound.cpp">
-      <Filter>Sound</Filter>
-    </ClCompile>
-    <ClCompile Include="SoundManager.cpp">
-      <Filter>Sound</Filter>
-    </ClCompile>
-    <ClCompile Include="StreamingSound.cpp">
-      <Filter>Sound</Filter>
-    </ClCompile>
-    <ClCompile Include="OggVorbisFile.cpp">
-      <Filter>Sound</Filter>
-    </ClCompile>
     <ClCompile Include="Input.cpp">
       <Filter>Input</Filter>
     </ClCompile>
@@ -94,12 +82,9 @@
     </ClCompile>
     <ClCompile Include="ActiveObjectManager.cpp" />
     <ClCompile Include="ActiveObjectPhysics.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="AnimationPlayer.cpp" />
     <ClCompile Include="GameObject\StaticeObject.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="BgSpriteLayer.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
@@ -140,7 +125,7 @@
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="core\math\DirectXMath\Color.cpp">
-      <Filter>core\DirectXMath</Filter>
+      <Filter>core\math\DirectXMath</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\EffectTechnique.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
@@ -196,22 +181,34 @@
     <ClCompile Include="core\graphics\Direct3D11\ShadowMap.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
+    <ClCompile Include="core\math\DirectXMath\Vector.cpp">
+      <Filter>core\math\DirectXMath</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\BgSpriteLayer.cpp">
+      <Filter>core\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="core\sound\OggVorbisFile.cpp">
+      <Filter>core\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="core\sound\Sound.cpp">
+      <Filter>core\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="core\sound\SoundManager.cpp">
+      <Filter>core\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="core\sound\StreamingSound.cpp">
+      <Filter>core\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject\Camera.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="core\animation\AnimationPlayer.cpp">
+      <Filter>core\animation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="StreamingSound.h">
-      <Filter>Sound</Filter>
-    </ClInclude>
-    <ClInclude Include="Sound.h">
-      <Filter>Sound</Filter>
-    </ClInclude>
-    <ClInclude Include="SoundManager.h">
-      <Filter>Sound</Filter>
-    </ClInclude>
-    <ClInclude Include="OggVorbisFile.h">
-      <Filter>Sound</Filter>
-    </ClInclude>
     <ClInclude Include="Input.h">
       <Filter>Input</Filter>
     </ClInclude>
@@ -297,15 +294,9 @@
     </ClInclude>
     <ClInclude Include="ActiveObjectManager.h" />
     <ClInclude Include="ActiveObjectPhysics.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="AnimationChannel.h" />
-    <ClInclude Include="AnimationKeyFrame.h" />
-    <ClInclude Include="AnimationPlayer.h" />
-    <ClInclude Include="Animation.h" />
     <ClInclude Include="GameObject\StaticObject.h">
       <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="BgSpriteLayer.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
@@ -366,19 +357,19 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="core\math\DirectXMath\Color.h">
-      <Filter>core\DirectXMath</Filter>
+      <Filter>core\math\DirectXMath</Filter>
     </ClInclude>
     <ClInclude Include="core\math\DirectXMath\Matrix.h">
-      <Filter>core\DirectXMath</Filter>
+      <Filter>core\math\DirectXMath</Filter>
     </ClInclude>
     <ClInclude Include="core\math\DirectXMath\Vector.h">
-      <Filter>core\DirectXMath</Filter>
+      <Filter>core\math\DirectXMath</Filter>
     </ClInclude>
     <ClInclude Include="core\math\DirectXMath\Vector3.h">
-      <Filter>core\DirectXMath</Filter>
+      <Filter>core\math\DirectXMath</Filter>
     </ClInclude>
     <ClInclude Include="core\math\DirectXMath\Vector2.h">
-      <Filter>core\DirectXMath</Filter>
+      <Filter>core\math\DirectXMath</Filter>
     </ClInclude>
     <ClInclude Include="SkinningAnimation.h" />
     <ClInclude Include="SkinningAnimationSet.h" />
@@ -499,6 +490,60 @@
     <ClInclude Include="core\graphics\Direct3D11\ShadowMap.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
+    <ClInclude Include="core\math\Bullet\Transform.h">
+      <Filter>core\math\Bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\Transform.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\type.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\Bullet\Quaternion.h">
+      <Filter>core\math\Bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\Quaternion.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\Vector.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\BgSpriteLayer.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\OggVorbisFile.h">
+      <Filter>core\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\Sound.h">
+      <Filter>core\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\SoundManager.h">
+      <Filter>core\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\StreamingSound.h">
+      <Filter>core\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\Camera.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="core\animation\SkinningAnimation.h">
+      <Filter>core\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="core\animation\SkinningAnimationSet.h">
+      <Filter>core\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="core\animation\AnimationPlayer.h">
+      <Filter>core\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="core\animation\Animation.h">
+      <Filter>core\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="core\animation\AnimationChannel.h">
+      <Filter>core\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="core\animation\AnimationKeyFrame.h">
+      <Filter>core\animation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -613,9 +658,6 @@
     <Filter Include="Input">
       <UniqueIdentifier>{3306306a-f212-4428-80eb-8d1355e62c22}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameObject">
-      <UniqueIdentifier>{6a5beb6c-7027-43c9-8b56-4c6b57c6b71b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{1d357c30-a5d6-4fcb-a582-73566ac2eb55}</UniqueIdentifier>
     </Filter>
@@ -630,15 +672,6 @@
     </Filter>
     <Filter Include="core\DirectWrite">
       <UniqueIdentifier>{84f027f9-a7a1-40c4-8bbe-0549bc5f6baf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="core\Bullet">
-      <UniqueIdentifier>{b0f122bc-1ef3-4d7f-9dca-f528879b0c06}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="core\DirectXMath">
-      <UniqueIdentifier>{41386a86-d0b5-406c-9192-d8ab630babf0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sound">
-      <UniqueIdentifier>{512e6d8f-e56b-4c77-aa48-b312db42a82b}</UniqueIdentifier>
     </Filter>
     <Filter Include="media">
       <UniqueIdentifier>{b24d6732-297b-4a28-bff0-ac59442e19a1}</UniqueIdentifier>
@@ -672,6 +705,27 @@
     </Filter>
     <Filter Include="blue_sky\graphics\FileLoader">
       <UniqueIdentifier>{3a0c4342-cd36-41d4-ab0e-68f5b559d1e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\math">
+      <UniqueIdentifier>{500c41b6-e75c-422f-b811-bbd9452141f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\math\DirectXMath">
+      <UniqueIdentifier>{41386a86-d0b5-406c-9192-d8ab630babf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\math\Bullet">
+      <UniqueIdentifier>{30e8a0a3-2e2e-419e-a573-223ab7d7855b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject">
+      <UniqueIdentifier>{6a5beb6c-7027-43c9-8b56-4c6b57c6b71b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\sound">
+      <UniqueIdentifier>{07fe4788-2e84-4ba2-b5fa-ebfcf2dff01d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\animation">
+      <UniqueIdentifier>{c4980cea-a104-47f5-a58c-22a39dc019bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\Bullet">
+      <UniqueIdentifier>{b0f122bc-1ef3-4d7f-9dca-f528879b0c06}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

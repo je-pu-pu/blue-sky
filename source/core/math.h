@@ -1,7 +1,11 @@
 #pragma once
 
+#include <core/type.h>
+
 namespace math
 {
+	using core::Vector3;
+	using core::Color;
 
 template<> inline Vector3 chase( Vector3 value, Vector3 target, Vector3 speed )
 {
@@ -41,4 +45,4 @@ template<> inline Color chase( Color value, Color target, float_t speed )
 	return value;
 }
 
-}
+} // namespace math

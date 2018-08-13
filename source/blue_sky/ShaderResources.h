@@ -1,7 +1,7 @@
 #pragma once
 
+#include <blue_sky/type.h>
 #include <core/graphics/Direct3D11/ShaderResource.h>
-#include <core/type.h>
 
 namespace blue_sky
 {

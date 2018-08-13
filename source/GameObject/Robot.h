@@ -19,7 +19,7 @@ class Robot : public ActiveObject
 {
 public:
 	typedef game::Texture Texture;
-	typedef btAlignedObjectArray< Vector3 > Vector3Array;
+	typedef std::vector< Vector > VectorArray;
 
 	enum Mode
 	{
@@ -42,7 +42,7 @@ private:
 	Mode			mode_backup_;	///< 前回プレイヤーを発見した時の動作モード
 	float_t			timer_;			///< 汎用タイマー
 
-	Vector3Array	patrol_point_list_;	///< 巡回ポイントの一覧
+	VectorArray		patrol_point_list_;	///< 巡回ポイントの一覧
 	int_t			current_patrol_point_index_;
 
 	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
@@ -79,7 +79,7 @@ public:
 	void shutdown();
 	void start_floating();
 
-	void add_patrol_point( const Vector3& point );
+	void add_patrol_point( const Vector& point );
 
 	void bind_render_data() const override;
 

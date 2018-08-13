@@ -1,9 +1,12 @@
 #include "GameObject.h"
-#include "ActiveObjectPhysics.h"
-#include "SoundManager.h"
-#include "Sound.h"
-#include "GameMain.h"
+
+#include <ActiveObjectPhysics.h>
+#include <GameMain.h>
+
 #include <Scene/Scene.h>
+
+#include <core/sound/SoundManager.h>
+#include <core/sound/Sound.h>
 
 #include <common/math.h>
 #include <common/random.h>
@@ -12,13 +15,12 @@ namespace blue_sky
 {
 
 // GameObject::Vector3 GameObject::GravityDefault( 0.f, -3.711f, 0.f ); // ‰Î¯
-GameObject::Vector3 GameObject::GravityDefault( 0.f, -9.8f, 0.f ); // ’n‹…
-GameObject::Vector3 GameObject::GravityZero( 0.f, 0.f, 0.f );
+Vector GameObject::GravityDefault( 0.f, -9.8f, 0.f, 0.f ); // ’n‹…
 
 GameObject::GameObject()
 	: rigid_body_( 0 )
 {
-	transform_.setIdentity();
+	transform_.set_identity();
 }
 
 GameObject::~GameObject()
@@ -37,10 +39,10 @@ void GameObject::update_transform()
 		return;
 	}
 
-	transform_ = rigid_body_->getWorldTransform();
+	transform_ = Transform( rigid_body_->getWorldTransform() );
 	Transform offset;
-	offset.setIdentity();
-	offset.setOrigin( Vector3( 0, -get_height_offset(), 0 ) );
+	offset.set_identity();
+	offset.set_position( Vector( 0, -get_height_offset(), 0 ) );
 
 	transform_ = transform_ * offset;
 }
@@ -56,12 +58,12 @@ void GameObject::commit_transform()
 		return;
 	}
 
-	Transform offset;
+	btTransform offset;
 	offset.setIdentity();
-	offset.setOrigin( Vector3( 0, get_height_offset(), 0 ) );
+	offset.setOrigin( btVector3( 0, get_height_offset(), 0 ) );
 
 
-	Transform t = transform_ * offset;
+	btTransform t = btTransform( transform_ ) * offset;
 	rigid_body_->setWorldTransform( t );
 	rigid_body_->setInterpolationWorldTransform( t );
 }
@@ -78,7 +80,7 @@ void GameObject::set_mass( float_t mass )
 	get_rigid_body()->setMassProps( mass, local_inertia );
 }
 
-void GameObject::set_gravity( const Vector3& gravity )
+void GameObject::set_gravity( const Vector& gravity )
 {
 	if ( ! get_rigid_body() )
 	{
@@ -122,7 +124,27 @@ void GameObject::set_no_contact_response( bool is_no_contact_response )
 	}
 }
 
-void GameObject::set_angular_factor( const Vector3& v )
+/**
+ * –€ŽCŒW”‚ðÝ’è‚·‚é
+ *
+ * @param v –€ŽCŒW”
+ */
+void GameObject::set_friction( float_t v )
+{
+	if ( ! get_rigid_body() )
+	{
+		return;
+	}
+
+	get_rigid_body()->setFriction( v );
+}
+
+/**
+ * ‰ñ“]ŒW”‚ðÝ’è‚·‚é
+ *
+ * @param v ‰ñ“]ŒW”
+ */
+void GameObject::set_angular_factor( float_t v )
 {
 	if ( ! get_rigid_body() )
 	{
@@ -132,12 +154,27 @@ void GameObject::set_angular_factor( const Vector3& v )
 	get_rigid_body()->setAngularFactor( v );
 }
 
-GameObject::Transform& GameObject::get_transform()
+/**
+ * ‰ñ“]ŒW”‚ðÝ’è‚·‚é
+ *
+ * @param v Ž²–ˆ‚Ì‰ñ“]ŒW”
+ */
+void GameObject::set_angular_factor( const Vector& v )
+{
+	if ( ! get_rigid_body() )
+	{
+		return;
+	}
+
+	get_rigid_body()->setAngularFactor( v );
+}
+
+Transform& GameObject::get_transform()
 {
 	return transform_;
 }
 
-const GameObject::Transform& GameObject::get_transform() const
+const Transform& GameObject::get_transform() const
 {
 	return transform_;
 }
@@ -146,23 +183,23 @@ const GameObject::Transform& GameObject::get_transform() const
  * 
  *
  */
-void GameObject::set_location( const Vector3& v )
+void GameObject::set_location( const Vector& v )
 {
-	get_transform().getOrigin() = v;
+	get_transform().set_position( v );
 	commit_transform();
 }
 
 void GameObject::set_location( float_t x, float_t y, float_t z )
 {
-	set_location( Vector3( x, y, z ) );
+	set_location( Vector( x, y, z ) );
 }
 
-const GameObject::Vector3& GameObject::get_velocity() const
+const Vector& GameObject::get_velocity() const
 {
-	return get_rigid_body()->getLinearVelocity();
+	return reinterpret_cast< const Vector& >( get_rigid_body()->getLinearVelocity() );
 }
 
-void GameObject::set_velocity( const Vector3& v )
+void GameObject::set_velocity( const Vector& v )
 {
 	if ( v == get_velocity() )
 	{
@@ -178,7 +215,7 @@ void GameObject::set_velocity( const Vector3& v )
 
 bool GameObject::is_moving_to( const GameObject* o ) const
 {
-	Vector3 v = get_velocity();
+	Vector v = get_velocity();
 	v.normalize();
 	v *= 0.01f;
 
@@ -233,9 +270,9 @@ float_t GameObject::get_flicker_height_offset( float_t scale ) const
  * @param base_location ‚ä‚ç‚¬‚Ì’†S‚Æ‚È‚éˆÊ’u
  * @param scale ‚ä‚ç‚¬‚ÌƒXƒP[ƒ‹’l
  */
-void GameObject::update_location_by_flicker( const Vector3& base_location, float_t scale )
+void GameObject::update_location_by_flicker( const Vector& base_location, float_t scale )
 {
-	set_location( base_location + Vector3( 0.f, get_flicker_height_offset( scale ), 0.f ) );
+	set_location( base_location + Vector( 0.f, get_flicker_height_offset( scale ), 0.f ) );
 }
 
 /**
@@ -244,12 +281,12 @@ void GameObject::update_location_by_flicker( const Vector3& base_location, float
  * @param base_location ‚ä‚ç‚¬‚Ì’†S‚Æ‚È‚éˆÊ’u
  * @param scale ‚ä‚ç‚¬‚ÌƒXƒP[ƒ‹’l
  */
-void GameObject::update_velocity_by_flicker( const Vector3& base_location, float_t scale )
+void GameObject::update_velocity_by_flicker( const Vector& base_location, float_t scale )
 {
-	Vector3 target_location = base_location + Vector3( 0.f, get_flicker_height_offset( scale ), 0.f );
-	Vector3 relative_position = target_location - get_location();
+	Vector target_location = base_location + Vector( 0.f, get_flicker_height_offset( scale ), 0.f );
+	Vector relative_position = target_location - get_location();
 
-	set_velocity( Vector3( get_velocity().x(), relative_position.y(), get_velocity().z() ) );
+	set_velocity( Vector( get_velocity().x(), relative_position.y(), get_velocity().z() ) );
 }
 
 /**
@@ -258,11 +295,11 @@ void GameObject::update_velocity_by_flicker( const Vector3& base_location, float
  * @param target_location –Ú“I’n
  * @param speed ‘¬“x
  */
-void GameObject::update_velocity_by_target_location( const Vector3& target_location, float_t speed )
+void GameObject::update_velocity_by_target_location( const Vector& target_location, float_t speed )
 {
-	Vector3 relative_position = target_location - get_location();
+	Vector relative_position = target_location - get_location();
 
-	if ( ! relative_position.fuzzyZero() )
+	if ( relative_position.length() > 0.1f )
 	{
 		relative_position.normalize();
 	}
@@ -279,11 +316,6 @@ void GameObject::update_velocity_by_target_location( const Vector3& target_locat
 bool_t GameObject::is_visible_in_blink( float_t blink_count ) const
 {
 	return std::fmodf( get_scene_elapsed_time(), 1.f / blink_count ) < ( 0.5f / blink_count );
-}
-
-GameObject::DynamicsWorld* GameObject::get_dynamics_world() const
-{
-	return GameMain::get_instance()->get_physics_manager()->get_dynamics_world();
 }
 
 void GameObject::play_sound( const char* name, bool loop, bool force ) const

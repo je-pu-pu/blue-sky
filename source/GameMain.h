@@ -23,6 +23,11 @@ namespace game
 	class MainLoop;
 };
 
+namespace core
+{
+	class SoundManager;
+}
+
 namespace blue_sky
 {
 	class Input;
@@ -32,7 +37,6 @@ namespace blue_sky
 	class ActiveObject;
 	class ActiveObjectManager;
 
-	class SoundManager;
 	class ScriptManager;
 
 	class DrawingModel;
@@ -64,7 +68,7 @@ public:
 	
 	typedef ActiveObjectPhysics				PhysicsManager;
 	typedef blue_sky::GraphicsManager		GraphicsManager;
-	typedef blue_sky::SoundManager			SoundManager;
+	typedef core::SoundManager				SoundManager;
 
 	typedef blue_sky::Player				Player;
 

@@ -256,7 +256,7 @@ void GraphicsManager::set_drawing_line_type( int_t type )
 	frame_drawing_render_data_->data().line_type = math::clamp< int >( type, 0, Line::LINE_TYPE_MAX - 1 );
 }
 
-void GraphicsManager::set_eye_position( const Vector3& pos )
+void GraphicsManager::set_eye_position( const Vector& pos )
 {
 	if ( sky_box_ )
 	{

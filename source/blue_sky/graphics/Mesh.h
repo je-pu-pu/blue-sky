@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/type.h>
+#include <blue_sky/type.h>
 
 #include <game/Mesh.h>
 #include <game/VertexGroup.h>
@@ -12,8 +12,6 @@
 #include <memory>
 #include <vector>
 #include <cassert>
-
-class FbxFileLoader;
 
 namespace blue_sky::graphics
 {

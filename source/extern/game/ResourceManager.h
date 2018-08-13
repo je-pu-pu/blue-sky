@@ -123,12 +123,14 @@ public:
 	 */
 	void debug_print_resources() const
 	{
-		std::cout << "list : " << resource_list_.size() << ", named : " << resource_map_.size() << std::endl;
+		std::cout << "list : " << resource_list_.size() << ", named : " << resource_map_.size() << '\n';
 
 		for ( const auto& r : resource_map_ )
 		{
-			std::cout << "\t" << r.first << " : " << r.second << std::endl;
+			std::cout << "\t" << r.first << " : " << r.second << '\n';
 		}
+
+		std::cout << std::flush;
 	}
 };
 

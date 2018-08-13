@@ -62,8 +62,8 @@ void Player::restart()
 {
 	ActiveObject::restart();
 
-	get_rigid_body()->setAngularFactor( 0 );
-	get_rigid_body()->setFriction( 0 );
+	set_angular_factor( 0.f );
+	set_friction( 0.f );
 	set_mass( 50.f );
 
 	is_on_footing_ = false;
@@ -134,7 +134,7 @@ void Player::update()
 
 	if ( action_mode_ == ACTION_MODE_BALLOON )
 	{
-		set_velocity( Vector3( get_velocity().x(), std::min( 3.f, math::chase( get_velocity().y(), 3.f, get_velocity().y() < 0.f ? 0.5f : 0.25f ) ), get_velocity().z() ) );
+		set_velocity( Vector( get_velocity().x(), std::min( 3.f, math::chase( get_velocity().y(), 3.f, get_velocity().y() < 0.f ? 0.5f : 0.25f ) ), get_velocity().z() ) );
 
 		if ( get_location().y() - action_base_position_.y() >= get_balloon_action_length() )
 		{
@@ -163,7 +163,7 @@ void Player::update()
 
 	if ( is_flickering() )
 	{
-		update_velocity_by_flicker( Vector3( get_location().x(), action_base_position_.y(), get_location().z() ), get_flicker_scale() );
+		update_velocity_by_flicker( Vector( get_location().x(), action_base_position_.y(), get_location().z() ), get_flicker_scale() );
 	}
 
 	if ( ! can_peer_down() )
@@ -205,7 +205,7 @@ void Player::update()
 				play_sound( "land", false, false );
 
 				// バウンドしないようにする
-				set_velocity( Vector3( get_velocity().x(), 0.f, get_velocity().z() ) );
+				set_velocity( Vector( get_velocity().x(), 0.f, get_velocity().z() ) );
 			}
 
 			set_last_footing_height_to_current_height();
@@ -247,7 +247,7 @@ void Player::limit_velocity()
 		return;
 	}
 
-	Vector3 v = get_velocity();
+	Vector v = get_velocity();
 
 	if ( is_rocketing() )
 	{
@@ -255,29 +255,29 @@ void Player::limit_velocity()
 	}
 	else if ( is_jumping() )
 	{
-		v.setX( v.x() * 0.95f );
-		v.setZ( v.z() * 0.95f );
+		v.set_x( v.x() * 0.95f );
+		v.set_z( v.z() * 0.95f );
 	}
 	else
 	{
-		v.setX( v.x() * 0.9f );
-		v.setZ( v.z() * 0.9f );
+		v.set_x( v.x() * 0.9f );
+		v.set_z( v.z() * 0.9f );
 
 		if ( is_on_ladder() )
 		{
-			v.setY( v.y() * 0.5f );
+			v.set_y( v.y() * 0.5f );
 		}
 	}
 
 	if ( ! is_rocketing() )
 	{
-		Vector3 xz_v( v.x(), 0.f, v.z() );
+		Vector xz_v( v.x(), 0.f, v.z() );
 
 		if ( xz_v.length() > get_max_run_velocity() )
 		{
 			xz_v /= xz_v.length() / get_max_run_velocity();
-			v.setX( xz_v.x() );
-			v.setZ( xz_v.z() );
+			v.set_x( xz_v.x() );
+			v.set_z( xz_v.z() );
 		}
 	}
 
@@ -317,9 +317,9 @@ void Player::update_on_footing()
 	const float_t ray_length = get_collision_height() * 0.5f + 0.05f;
 
 	const float_t margin = 0.05f;
-	const Vector3 front = get_front() * ( get_collision_depth() * 0.5f - margin );
-	const Vector3 right = get_right() * ( get_collision_width() * 0.5f - margin );
-	const Vector3 center = Vector3( x, y, z );
+	const Vector front = get_front() * ( get_collision_depth() * 0.5f - margin );
+	const Vector right = get_right() * ( get_collision_width() * 0.5f - margin );
+	const Vector center = Vector( x, y, z );
 
 	// 中心 + 四隅 + 四点 の設置を調べる
 	if (
@@ -366,9 +366,9 @@ void Player::update_located_to_die()
 	const float_t z = get_rigid_body()->getCenterOfMassPosition().z();
 
 	const float_t margin = 0.05f;
-	const Vector3 front = get_front() * ( get_collision_depth() * 0.5f - margin );
-	const Vector3 right = get_right() * ( get_collision_width() * 0.5f - margin );
-	const Vector3 center = Vector3( x, y, z );
+	const Vector front = get_front() * ( get_collision_depth() * 0.5f - margin );
+	const Vector right = get_right() * ( get_collision_width() * 0.5f - margin );
+	const Vector center = Vector( x, y, z );
 
 	is_located_on_safe_ = false;
 
@@ -449,22 +449,25 @@ void Player::update_facing_to_block()
 {
 	is_facing_to_block_ = false;
 
-	Vector3 half( 0.05f, 0.05f, 0.05f );
+	btVector3 half( 0.05f, 0.05f, 0.05f );
 	btBoxShape shape( half );
 
-	Transform offset;
+	btTransform offset;
 	offset.setIdentity();
-	offset.setOrigin( Vector3( 0.f, is_clambering() ? -0.1f : shape.getHalfExtentsWithMargin().y() + 0.25f, get_collision_depth() * 0.5f ) );
+	offset.setOrigin( btVector3( 0.f, is_clambering() ? -0.1f : shape.getHalfExtentsWithMargin().y() + 0.25f, get_collision_depth() * 0.5f ) );
 	
 	btCollisionObject collision_object;
 	collision_object.setCollisionShape( & shape );
-	collision_object.setWorldTransform( get_transform() * offset );
+	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
 	WithoutMeContactResultCallback callback( this );
 	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->contactTest( & collision_object, callback );
 
 	is_facing_to_block_ = callback.is_hit();
 
+
+	// test
+	// get_physics_manager()->contact_test( )
 }
 
 /**
@@ -485,16 +488,16 @@ void Player::update_can_clamber()
 		return;
 	}
 
-	Vector3 half( get_collision_width() * 0.5f, get_collision_height() * 0.5f, get_collision_depth() * 0.5f );
+	btVector3 half( get_collision_width() * 0.5f, get_collision_height() * 0.5f, get_collision_depth() * 0.5f );
 	btBoxShape shape( half );
 
-	Transform offset;
+	btTransform offset;
 	offset.setIdentity();
-	offset.setOrigin( Vector3( 0.f, get_collision_height() * 0.5f + 0.1f, get_collision_depth() * 0.5f ) );
+	offset.setOrigin( btVector3( 0.f, get_collision_height() * 0.5f + 0.1f, get_collision_depth() * 0.5f ) );
 	
 	btCollisionObject collision_object;
 	collision_object.setCollisionShape( & shape );
-	collision_object.setWorldTransform( get_transform() * offset );
+	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
 	WithoutMeContactResultCallback callback_low( this );
 	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->contactTest( & collision_object, callback_low );
@@ -505,8 +508,8 @@ void Player::update_can_clamber()
 		return;
 	}
 
-	offset.setOrigin( Vector3( 0.f, get_collision_height() * 0.5f + 1.5f, get_collision_depth() ) );
-	collision_object.setWorldTransform( get_transform() * offset );
+	offset.setOrigin( btVector3( 0.f, get_collision_height() * 0.5f + 1.5f, get_collision_depth() ) );
+	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
 	WithoutMeContactResultCallback callback_high( this );
 	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->contactTest( & collision_object, callback_high );
@@ -526,16 +529,16 @@ void Player::update_can_peer_down()
 		return;
 	}
 
-	Vector3 half( 0.25f, 0.25f, 0.25f );
+	btVector3 half( 0.25f, 0.25f, 0.25f );
 	btBoxShape shape( half );
 
-	Transform offset;
+	btTransform offset;
 	offset.setIdentity();
-	offset.setOrigin( Vector3( 0.f, get_eye_height(), get_collision_depth() * 0.5f + get_eye_depth() ) );
+	offset.setOrigin( btVector3( 0.f, get_eye_height(), get_collision_depth() * 0.5f + get_eye_depth() ) );
 	
 	btCollisionObject collision_object;
 	collision_object.setCollisionShape( & shape );
-	collision_object.setWorldTransform( get_transform() * offset );
+	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
 	WithoutMeContactResultCallback callback( this );
 	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->contactTest( & collision_object, callback );
@@ -549,16 +552,16 @@ void Player::update_can_peer_down()
  */
 void Player::update_can_throw()
 {
-	Vector3 half( 0.25f, 0.25f, 0.25f );
+	btVector3 half( 0.25f, 0.25f, 0.25f );
 	btBoxShape shape( half );
 
-	Transform offset;
+	btTransform offset;
 	offset.setIdentity();
-	offset.setOrigin( Vector3( 0.f, get_eye_height(), get_collision_depth() ) );
+	offset.setOrigin( btVector3( 0.f, get_eye_height(), get_collision_depth() ) );
 	
 	btCollisionObject collision_object;
 	collision_object.setCollisionShape( & shape );
-	collision_object.setWorldTransform( get_transform() * offset );
+	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
 	WithoutMeContactResultCallback callback( this );
 	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->contactTest( & collision_object, callback );
@@ -640,7 +643,7 @@ void Player::update_gravity()
 {
 	if ( action_mode_ == ACTION_MODE_BALLOON || action_mode_ == ACTION_MODE_ROCKET || ( is_on_ladder() && ! is_jumping() ) )
 	{
-		get_rigid_body()->setGravity( GravityZero );
+		get_rigid_body()->setGravity( Vector::Zero );
 	}
 	else
 	{
@@ -649,18 +652,19 @@ void Player::update_gravity()
 }
 
 /**
+ * 
  *
- *
- *
+ * @param from レイを飛ばし始める原点
+ * @param ray_length レイの長さ
  */
-bool Player::check_on_footing( const Vector3& from, float_t ray_length, bool include_soft_footing ) const
+bool Player::check_on_footing( const Vector& from, float_t ray_length, bool include_soft_footing ) const
 {
-	Vector3 to = from + Vector3( 0, -ray_length, 0 );
+	Vector to = from + Vector( 0, -ray_length, 0 );
 	
 	ClosestNotMe ray_callback( from, to, get_rigid_body(), include_soft_footing );
 	ray_callback.m_closestHitFraction = 1.0;
 
-	get_dynamics_world()->rayTest( from, to, ray_callback );
+	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->rayTest( from, to, ray_callback );
 
 	return ray_callback.hasHit();
 }
@@ -671,15 +675,15 @@ bool Player::check_on_footing( const Vector3& from, float_t ray_length, bool inc
  * @param Vector3 from 
  * @param bool include_soft_footing 風船などのやわらかいものを足場に含むフラグ
  */
-float_t Player::get_footing_height( const Vector3& from, bool include_soft_footing ) const
+float_t Player::get_footing_height( const Vector& from, bool include_soft_footing ) const
 {
-	Vector3 to = from;
-	to.setY( 0.f );
+	Vector to = from;
+	to.set_y( 0.f );
 
 	ClosestNotMe ray_callback( from, to, get_rigid_body(), include_soft_footing );
 	ray_callback.m_closestHitFraction = 1.0;
 
-	get_dynamics_world()->rayTest( from, to, ray_callback );
+	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->rayTest( from, to, ray_callback );
 
 	if ( ray_callback.m_collisionObject && ray_callback.m_collisionObject->getUserPointer() )
 	{
@@ -719,7 +723,7 @@ void Player::step( float_t s )
 
 	set_velocity(
 		get_velocity() +
-		Vector3(
+		Vector(
 			( get_front() * s ).x() * get_step_speed(),
 			0.f,
 			( get_front() * s ).z() * get_step_speed()
@@ -736,7 +740,7 @@ void Player::side_step( float_t s )
 
 	set_velocity(
 		get_velocity() +
-		Vector3(
+		Vector(
 			( get_right() * s ).x() * get_side_step_speed(),
 			0.f,
 			( get_right() * s ).z() * get_side_step_speed()
@@ -755,8 +759,8 @@ void Player::ladder_step( float_t s )
 		return;
 	}
 
-	Vector3 v = get_velocity() + Vector3( 0.f, pitch_ * s, 0.f );
-	v.setY( math::clamp( v.y(), -get_ladder_step_speed(), get_ladder_step_speed() ) );
+	Vector v = get_velocity() + Vector( 0.f, pitch_ * s, 0.f );
+	v.set_y( math::clamp( v.y(), -get_ladder_step_speed(), get_ladder_step_speed() ) );
 
 	set_velocity( v );
 
@@ -782,11 +786,11 @@ void Player::jump()
 
 	if ( is_on_ladder() )
 	{
-		set_velocity( get_velocity() + Vector3( 0.f, 4.f, 0.f ) + get_front() * 4.f );
+		set_velocity( get_velocity() + Vector( 0.f, 4.f, 0.f ) + get_front() * 4.f );
 	}
 	else
 	{
-		set_velocity( get_velocity() + Vector3( 0.f, 4.f, 0.f ) );
+		set_velocity( get_velocity() + Vector( 0.f, 4.f, 0.f ) );
 	}
 
 	is_jumping_ = true;
@@ -807,7 +811,7 @@ void Player::jump()
 
 void Player::super_jump()
 {
-	set_velocity( Vector3( get_velocity().x(), get_velocity().y() + 20.f, get_velocity().z() ) );
+	set_velocity( Vector( get_velocity().x(), get_velocity().y() + 20.f, get_velocity().z() ) );
 }
 
 /**
@@ -818,7 +822,7 @@ void Player::clamber()
 {
 	if ( can_clamber() )
 	{
-		set_velocity( Vector3( 0.f, 2.f, 0.f ) + get_front() * 2.f );
+		set_velocity( Vector( 0.f, 2.f, 0.f ) + get_front() * 2.f );
 
 		if ( ! is_clambering() )
 		{
@@ -877,7 +881,7 @@ void Player::stop_ladder_step()
 	stop_sound( "ladder-step" );
 }
 
-void Player::rocket( const Vector3& direction )
+void Player::rocket( const Vector& direction )
 {
 	if ( get_item_count( ITEM_TYPE_ROCKET ) <= 0 )
 	{
@@ -911,7 +915,7 @@ void Player::finish_rocketing()
 	is_action_pre_finish_ = false;
 }
 
-void Player::throw_stone( const Vector3& direction )
+void Player::throw_stone( const Vector& direction )
 {
 	if ( get_item_count( ITEM_TYPE_STONE ) <= 0 )
 	{
@@ -933,13 +937,13 @@ void Player::throw_stone( const Vector3& direction )
 	}
 
 	stone->restart();
-	stone->set_location( get_location() + ( get_front() * get_collision_depth() ) + Vector3( 0.f, get_eye_height(), 0.f ) );
+	stone->set_location( get_location() + ( get_front() * get_collision_depth() ) + Vector( 0.f, get_eye_height(), 0.f ) );
 	stone->set_velocity( direction * 8.f );
 
 	play_sound( "stone-throw" );
 }
 
-void Player::damage( const Vector3& to )
+void Player::damage( const Vector& to )
 {
 	uncontrollable_timer_ = 1.5f;
 
@@ -966,8 +970,8 @@ void Player::kill()
 	play_sound( "dead" );
 
 	get_rigid_body()->setActivationState( true );
-	get_rigid_body()->setAngularFactor( 1.f );
-	get_rigid_body()->setFriction( 1.f );
+	set_angular_factor( 1.f );
+	set_friction( 1.f );
 	// get_rigid_body()->applyForce( get_front() * 2000.f, Vector3( 0.1f, 1.5f, 0.f ) );
 }
 
@@ -1092,8 +1096,8 @@ void Player::on_collide_with( Robot* robot )
 		return;
 	}
 
-	Vector3 v = -get_front() * 10.f;
-	v.setY( 2.5f );
+	Vector v = -get_front() * 10.f;
+	v.set_y( 2.5f );
 
 	damage( v );
 }

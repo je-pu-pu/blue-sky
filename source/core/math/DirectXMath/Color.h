@@ -16,8 +16,8 @@ public:
 	typedef int				IntType;
 	typedef unsigned int	UintType;
 
-	static Color White;
-	static Color Black;
+	static const Color White;
+	static const Color Black;
 
 public:
 	Color()

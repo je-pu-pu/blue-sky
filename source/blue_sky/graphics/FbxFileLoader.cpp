@@ -1,12 +1,13 @@
 #include "FbxFileLoader.h"
 
 #include <GameMain.h>
-#include <SkinningAnimationSet.h>
 
 #include <blue_sky/graphics/shader/FlatShader.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Mesh.h>
-#include <core/type.h>
+#include <blue_sky/type.h>
+
+#include <core/animation/SkinningAnimationSet.h>
 
 #include <game/Shader.h>
 
@@ -285,12 +286,12 @@ bool FbxFileLoader::load( const char_t* file_name )
 
 	if ( root_node )
 	{
-		/*
+#if 0
 		for ( int n = 0; n < root_node->GetChildCount(); n++ )
 		{
 			print_fbx_node_recursive( root_node->GetChild( n ) );
 		}
-		*/
+#endif
 
 		t.restart();
 
@@ -337,6 +338,7 @@ void FbxFileLoader::load_mesh_recursive( FbxNode* node )
 
 	for ( int n = 0; n < node->GetMaterialCount(); n++ )
 	{
+		fbx_material_index_ = n;
 		load_material( node->GetMaterial( n ) );
 	}
 
@@ -358,7 +360,10 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 		return;
 	}
 
-	get_model()->set_mesh( create_mesh() );
+	if ( ! get_model()->get_mesh() )
+	{
+		get_model()->set_mesh( create_mesh() );
+	}
 
 	typedef std::map< Mesh::Vertex, Mesh::Index > VertexIndexMap;
 	typedef std::vector< Mesh::Vertex > VertexList;
@@ -644,8 +649,6 @@ void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 
 		// Mesh::Material* material = mesh_->get_material_at( fbx_material_index_, true );
 		// material->set_texture( mesh_->load_texture_by_texture_name( texture_file_name.c_str() ) );
-
-		fbx_material_index_++;
 	}
 }
 

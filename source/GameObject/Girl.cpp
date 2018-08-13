@@ -1,6 +1,5 @@
 #include "Girl.h"
 #include "Player.h"
-#include "AnimationPlayer.h"
 #include <common/random.h>
 
 namespace blue_sky
@@ -19,11 +18,12 @@ void Girl::restart()
 {
 	ActiveObject::restart();
 
-	get_rigid_body()->setAngularFactor( 0 );
-	get_rigid_body()->setFriction( 0 );
+	set_angular_factor( 0 );
+	set_friction( 0 );
 
 	mode_ = MODE_STAND;
-	get_animation_player()->play( "Stand", true, true );
+
+	play_animation( "Stand", true, true );
 
 	flicker_base_location_ = get_start_location();
 }
@@ -36,12 +36,12 @@ void Girl::update()
 {
 	if ( mode_ == MODE_FLOAT )
 	{
-		set_velocity( Vector3( 0.f, 0.f, 0.f ) );
+		set_velocity( Vector( 0.f, 0.f, 0.f ) );
 		update_velocity_by_flicker( flicker_base_location_, get_flicker_scale() );
 	}
 
 	/*
-	get_animation_player()->play( "Float", true, true );
+	play_animation( "Float", true, true );
 	get_animation_player()->set_speed( 0.5f );
 
 	chase_direction_to( player_->get_location(), 1.f );

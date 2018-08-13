@@ -20,7 +20,7 @@ class SoundFile;
 
 } // namespace game
 
-namespace blue_sky
+namespace core
 {
 
 /**
@@ -129,4 +129,4 @@ public:
 
 }; // class Sound
 
-} // namespace blue_sky
+} // namespace core

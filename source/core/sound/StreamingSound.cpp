@@ -9,7 +9,7 @@
 
 #include <algorithm>
 
-namespace blue_sky
+namespace core
 {
 
 StreamingSound::StreamingSound( const DirectSound* direct_sound )
@@ -186,4 +186,4 @@ float StreamingSound::get_current_peak_level() const
 	return result;
 }
 
-} // namespace blue_sky
+} // namespace core

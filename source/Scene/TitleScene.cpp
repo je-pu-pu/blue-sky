@@ -4,18 +4,18 @@
 // #include "ConstantBuffer.h"
 
 #include "Input.h"
-#include "SoundManager.h"
-#include "Sound.h"
 
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
 #include <blue_sky/graphics/Fader.h>
 
+#include <core/sound/SoundManager.h>
+#include <core/sound/Sound.h>
+
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
-
 
 #include <win/Rect.h>
 

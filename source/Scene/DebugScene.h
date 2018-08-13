@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Scene.h"
-#include <Camera.h>
-
 #include <memory>
 
 namespace blue_sky
 {
+
+class Camera;
 
 /**
  * デバッグ用シーン

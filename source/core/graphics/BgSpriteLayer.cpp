@@ -1,7 +1,9 @@
 #include "BgSpriteLayer.h"
-
-#include <core/graphics/Direct3D11/Direct3D11Texture.h>
 #include <core/math.h>
+#include <game/Texture.h>
+
+namespace core
+{
 
 BgSpriteLayer::BgSpriteLayer( const char_t* name, const Texture* texture )
 	: name_( name )
@@ -27,4 +29,6 @@ void BgSpriteLayer::update()
 	rotation_.chase();
 	scale_.chase();
 	color_.chase();
+}
+
 }

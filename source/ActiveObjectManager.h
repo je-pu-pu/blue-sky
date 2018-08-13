@@ -17,11 +17,9 @@ namespace blue_sky
 class ActiveObjectManager
 {
 public:
-	typedef GameObject::Vector3 Vector3;
-
 	typedef std::set< ActiveObject* > ActiveObjectList;
 	typedef std::map< string_t, ActiveObject* > ActiveObjectMap;
-	typedef std::map< ActiveObject*, std::tuple< Vector3, float_t > > TargetLocationMap;
+	typedef std::map< ActiveObject*, std::tuple< Vector, float_t > > TargetLocationMap;
 	typedef std::map< ActiveObject*, std::tuple< float_t, float_t > > TargetDirectionMap;
 	typedef std::map< ActiveObject*, std::tuple< const ActiveObject*, float_t > > TargetDirectionObjectMap;
 
@@ -47,14 +45,14 @@ public:
 
 	void add_active_object( ActiveObject* active_object );
 	void name_active_object( const string_t& name, ActiveObject* active_object );
-	void set_target_location( ActiveObject* active_object, const Vector3& target_location, float_t speed );
+	void set_target_location( ActiveObject* active_object, const Vector& target_location, float_t speed );
 	void set_target_direction( ActiveObject* active_object, float_t, float_t speed );
 	void set_target_direction_object( ActiveObject* active_object, const ActiveObject* target_active_object, float_t speed );
 
 	ActiveObject* create_object( const string_t& );
 	ActiveObject* create_static_object( std::stringstream& );
 	ActiveObject* get_active_object( const string_t& name );
-	GameObject* get_nearest_object( const GameObject::Vector3& );
+	GameObject* get_nearest_object( const Vector& );
 
 	ActiveObject* clone_object( const ActiveObject* );
 

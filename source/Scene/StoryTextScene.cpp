@@ -1,18 +1,18 @@
 #include "StoryTextScene.h"
 
-#include "BgSpriteLayer.h"
-
 #include "Input.h"
-#include "SoundManager.h"
-#include "Sound.h"
 
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Fader.h>
+
+#include <core/sound/SoundManager.h>
+#include <core/sound/Sound.h>
 
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/Direct3D11Sprite.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
+#include <core/graphics/BgSpriteLayer.h>
 
 #include <win/Rect.h>
 

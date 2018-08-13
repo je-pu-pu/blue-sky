@@ -1,7 +1,9 @@
-#ifndef SKINNING_ANIMATION_H
-#define SKINNING_ANIMATION_H
+#pragma once
 
 #include "Animation.h"
+
+namespace core
+{
 
 /**
  * スキニングアニメーション
@@ -25,9 +27,9 @@ public:
 		: bone_animation_list_( size )
 		, length_( 0.f )
 	{
-	
+
 	}
-	
+
 	/**
 	 * 指定したボーンインデックスに対応するアニメーションを取得する
 	 *
@@ -106,4 +108,4 @@ public:
 
 }; // class SkinningAnimation
 
-#endif // SKINNING_ANIMATION_H
+} // namespace core

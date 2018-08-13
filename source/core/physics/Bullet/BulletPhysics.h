@@ -1,5 +1,7 @@
 #pragma once
 
+#include <core/math/Transform.h>
+#include <core/math/Vector.h>
 #include <type/type.h>
 #include <btBulletDynamicsCommon.h>
 #include <list>
@@ -12,11 +14,11 @@
 class BulletPhysics
 {
 public:
+	typedef core::Vector Vector;
+	typedef core::Transform Transform;
+
 	typedef btAlignedObjectArray< btCollisionShape* > CollisionShapeArray;
 	typedef std::list< btStridingMeshInterface* > MeshList;
-
-	typedef btVector3						Vector3;
-	typedef btTransform						Transform;
 
 protected:
 	btDefaultCollisionConfiguration*		collision_configuration_;
@@ -41,13 +43,14 @@ public:
 
 	bool load_obj( const char_t* );
 
-	btRigidBody* add_ground_rigid_body( const Vector3& );
-	btRigidBody* add_box_rigid_body( const Transform&, const Transform&, const Vector3&, float_t mass );
+	btRigidBody* add_ground_rigid_body( const Vector& );
+	btRigidBody* add_box_rigid_body( const Transform&, const Transform&, const Vector&, float_t mass );
 	btRigidBody* add_capsule_rigid_body( const Transform&, const Transform&, float_t, float_t, float_t mass );
-	btRigidBody* add_cylinder_rigid_body( const Transform&, const Transform&, const Vector3&, float_t mass );
+	btRigidBody* add_cylinder_rigid_body( const Transform&, const Transform&, const Vector&, float_t mass );
 
 	void update( float = 1.f / 60.f );
 	
+	/// @todo çÌèúÇ∑ÇÈ
 	btDynamicsWorld* get_dynamics_world() { return dynamics_world_; }
 
 	// for debug

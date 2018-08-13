@@ -23,7 +23,7 @@ const Sound::T Sound::PAN_CENTER = 0.f;
 
 }
 
-namespace blue_sky
+namespace core
 {
 
 Sound::Sound( const DirectSound* direct_sound )
@@ -206,4 +206,4 @@ void Sound::update()
 	}
 }
 
-} // namespace blue_sky
+} // namespace core

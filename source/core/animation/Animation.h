@@ -3,6 +3,9 @@
 #include "AnimationChannel.h"
 #include <array>
 
+namespace core
+{
+
 /**
  * アニメーション
  *
@@ -65,7 +68,7 @@ public:
 		{
 			return default_value;
 		}
-		
+
 		return channel_list_[ channel_index ].get_value( frame );
 	}
 
@@ -96,3 +99,5 @@ public:
 	}
 
 }; // class Animation
+
+} // namespace core

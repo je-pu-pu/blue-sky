@@ -1,6 +1,7 @@
 #pragma once
 
 #include <blue_sky/graphics/Model.h>
+#include <blue_sky/type.h>
 
 namespace blue_sky::graphics
 {

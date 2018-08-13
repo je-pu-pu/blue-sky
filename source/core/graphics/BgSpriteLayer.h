@@ -14,6 +14,9 @@ class Texture;
 
 }
 
+namespace core
+{
+
 /**
  * ”wŒiƒŒƒCƒ„[
  *
@@ -56,3 +59,5 @@ public:
 	void update();
 
 }; // class BgSpriteLayer
+
+} // namespace core

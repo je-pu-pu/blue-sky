@@ -1,7 +1,7 @@
 #include "BaseSwitch.h"
-#include "AnimationPlayer.h"
 #include "Player.h"
 #include "Stone.h"
+
 namespace blue_sky
 {
 

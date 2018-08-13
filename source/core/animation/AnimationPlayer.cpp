@@ -2,6 +2,9 @@
 #include "GameMain.h"
 #include <core/type.h>
 
+namespace core
+{
+
 /**
  * コンストラクタ
  *
@@ -15,7 +18,7 @@ AnimationPlayer::AnimationPlayer( const SkinningAnimationSet* skinning_animation
 	, is_broken_( false )
 	, constant_buffer_( blue_sky::GameMain::get_instance()->get_direct_3d() )
 {
-	
+
 }
 
 /**
@@ -87,7 +90,7 @@ void AnimationPlayer::update_render_data() const
 	if ( ! get_current_skinning_animation() )
 	{
 		blue_sky::BoneShaderResourceData data;
-		
+
 		for ( uint_t n = 0; n < get_skinning_animation_set()->get_bone_count(); ++n )
 		{
 			data.bone_matrix[ n ].identity();
@@ -179,3 +182,5 @@ void AnimationPlayer::bind_render_data() const
 {
 	constant_buffer_.bind_to_vs();
 }
+
+} // namespace core

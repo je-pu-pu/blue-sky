@@ -1,8 +1,8 @@
 #pragma once
 
 #include "BaseFileLoader.h"
-#include <Animation.h>
 #include <blue_sky/graphics/Mesh.h>
+#include <core/animation/Animation.h>
 #include <fbxsdk.h>
 #include <map>
 
@@ -15,6 +15,10 @@ namespace blue_sky::graphics
  */
 class FbxFileLoader : public BaseFileLoader
 {
+public:
+	typedef core::Animation Animation;
+	typedef core::AnimationKeyFrame AnimationKeyFrame;
+
 private:
 	FbxManager* fbx_manager_;
 	FbxScene*	fbx_scene_;

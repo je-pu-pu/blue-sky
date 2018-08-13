@@ -5,10 +5,20 @@
 #include <core/math/DirectXMath/Vector.h>
 #include <core/math/DirectXMath/Matrix.h>
 #include <core/math/DirectXMath/Color.h>
+#include <core/math/Bullet/Quaternion.h>
+#include <core/math/Bullet/Transform.h>
 #include <type/type.h>
 
-typedef direct_x_math::Vector2 Vector2;
-typedef direct_x_math::Vector3 Vector3;
-typedef direct_x_math::Vector Vector;
-typedef direct_x_math::Matrix Matrix;
-typedef direct_x_math::Color  Color;
+namespace core
+{
+
+typedef direct_x_math::Vector2			Vector2;
+typedef direct_x_math::Vector3			Vector3;
+typedef direct_x_math::Vector			Vector;
+typedef direct_x_math::Matrix			Matrix;
+typedef direct_x_math::Color			Color;
+
+typedef core::bullet::Quaternion		Quaternion;
+typedef core::bullet::Transform			Transform;
+
+} // namespace core

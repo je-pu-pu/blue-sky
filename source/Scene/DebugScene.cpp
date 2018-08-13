@@ -1,6 +1,8 @@
 #include "DebugScene.h"
 #include "StageSelectScene.h"
 
+#include <GameObject/Camera.h>
+
 #include <ActiveObjectManager.h>
 #include <ActiveObjectPhysics.h>
 #include <ScriptManager.h>
@@ -20,7 +22,7 @@ DebugScene::DebugScene( const GameMain* game_main )
 	, camera_( new Camera() )
 {
 	// Physics
-	get_physics_manager()->add_ground_rigid_body( ActiveObject::Vector3( 1000, 1, 1000 ) );
+	get_physics_manager()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
 
 	get_graphics_manager()->setup_default_shaders();
 
@@ -92,7 +94,7 @@ void DebugScene::update()
 	get_active_object_manager()->update();
 
 	get_graphics_manager()->update();
-	get_graphics_manager()->set_eye_position( camera_->position().xyz() );
+	get_graphics_manager()->set_eye_position( camera_->position() );
 
 	get_graphics_manager()->clear_debug_bullet();
 	get_physics_manager()->update( get_elapsed_time() );
@@ -122,13 +124,13 @@ void DebugScene::render()
 	get_graphics_manager()->render_debug_bullet();
 
 	std::stringstream ss;
-	ss << "Time : " << get_total_elapsed_time() << std::endl;
-	ss << "FPS : " << get_main_loop()->get_last_fps() << std::endl;
-	ss << "pass count : " << get_graphics_manager()->get_pass_count() << std::endl;
-	ss << "draw count : " << get_graphics_manager()->get_draw_count() << std::endl;
+	ss << "Time : " << get_total_elapsed_time() << '\n';
+	ss << "FPS : " << get_main_loop()->get_last_fps() << '\n';
+	ss << "pass count : " << get_graphics_manager()->get_pass_count() << '\n';
+	ss << "draw count : " << get_graphics_manager()->get_draw_count() << '\n';
 
-	ss << "eye : " << eye.x() << ", " << eye.y() << ", " << eye.z() << std::endl;
-	ss << "tess : " << frame_render_data.tess_factor << std::endl;
+	ss << "eye : " << eye.x() << ", " << eye.y() << ", " << eye.z() << '\n';
+	ss << "tess : " << frame_render_data.tess_factor << '\n';
 
 	get_graphics_manager()->draw_text( 10.f, 10.f, get_width() - 10.f, get_height() - 10.f, ss.str().c_str(), Color::White );
 }

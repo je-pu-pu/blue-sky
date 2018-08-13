@@ -87,7 +87,7 @@ public:
 	void set_drawing_accent( float_t ) override;
 	void set_drawing_line_type( int_t ) override;
 
-	void set_eye_position( const Vector3& );
+	void set_eye_position( const Vector& );
 
 	GameConstantBuffer* get_game_render_data() const override { return game_render_data_.get(); }
 	FrameConstantBuffer* get_frame_render_data() const override { return frame_render_data_.get(); }

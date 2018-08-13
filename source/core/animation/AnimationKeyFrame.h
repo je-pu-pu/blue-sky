@@ -2,6 +2,9 @@
 
 #include <core/type.h>
 
+namespace core
+{
+
 /**
  * アニメーションのキーフレーム
  *
@@ -42,3 +45,5 @@ public:
 	float_t get_value() const { return value_; }
 
 }; // class AnimationKeyFrame
+
+} // namespace core

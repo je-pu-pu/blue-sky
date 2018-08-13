@@ -57,7 +57,7 @@ private:
 
 	ActionMode	action_mode_;			///< 現在のアクションのモード
 	float_t		action_timer_;			///< 現在のアクションが開始してからの経過時間
-	Vector3		action_base_position_;	///< 現在のアクションの基底位置
+	Vector		action_base_position_;	///< 現在のアクションの基底位置
 	bool		is_action_pre_finish_;	///< 現在のアクションがもうすぐ終わるフラグ
 	int_t		balloon_sequence_count_;///< 現在の連続取得バルーンの数 ( 0 .. 7 )
 	int_t		balloon_sound_request_;	///< 
@@ -121,8 +121,8 @@ protected:
 
 	void limit_velocity();
 
-	bool check_on_footing( const Vector3&, float_t, bool = false ) const;
-	float_t get_footing_height( const Vector3&, bool = false ) const;
+	bool check_on_footing( const Vector&, float_t, bool = false ) const;
+	float_t get_footing_height( const Vector&, bool = false ) const;
 
 	bool is_uncontrollable() const { return uncontrollable_timer_ > 0.f; }
 
@@ -180,15 +180,15 @@ public:
 	void set_pitch( float_t p ) { pitch_ = p; }
 	bool is_ladder_step_only() const;
 
-	void rocket( const Vector3& );
+	void rocket( const Vector& );
 	void finish_rocketing();
 
-	void throw_stone( const Vector3& );
+	void throw_stone( const Vector& );
 	void start_flickering() { is_flickering_ = true; action_base_position_ = get_location(); }
 	void stop_flickering() { is_flickering_ = false; }
 
 
-	void damage( const Vector3& );
+	void damage( const Vector& );
 	void kill();
 
 	void set_eye_depth( float );

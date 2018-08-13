@@ -66,7 +66,10 @@ void Model::render() const
 
 	for ( uint_t n = 0; n < get_shader_count(); n++ )
 	{
-		get_shader_at( n )->render( get_mesh(), n );
+		if ( get_shader_at( n ) )
+		{
+			get_shader_at( n )->render( get_mesh(), n );
+		}
 	}
 }
 

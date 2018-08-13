@@ -1,6 +1,7 @@
 #pragma once
 
-#include <core/type.h>
+#include <GameObject/GameObject.h>
+#include <blue_sky/type.h>
 
 namespace blue_sky
 {
@@ -10,9 +11,8 @@ class Player;
 /**
  * カメラ
  *
- * @todo GameObject 化して ActiveObjectManager で管理する
  */
-class alignas( 16 ) Camera // : public GameObject
+class Camera : public GameObject
 {
 public:
 
@@ -20,10 +20,6 @@ private:
 	Vector position_;					///< 視点
 	Vector look_at_;					///< 注視点
 	Vector up_;							///< 上
-
-	Vector default_front_;				///< デフォルト視点
-	Vector default_right_;				///< デフォルト左
-	Vector default_up_;					///< デフォルト上
 
 	Vector front_;						///< 前
 	Vector right_;						///< 右
@@ -38,6 +34,11 @@ private:
 	float_t aspect_;					///< アスペクト比
 
 	float_t rotate_chase_speed_;		///< 回転速度
+
+protected:
+	float_t get_collision_width() const override { return 0.f; }
+	float_t get_collision_height() const override { return 0.f; }
+	float_t get_collision_depth() const override { return 0.f; }
 
 public:
 	Camera();
@@ -82,16 +83,6 @@ public:
 	float aspect() const { return aspect_; }
 	float near_clip() const { return 0.05f; }
 	float far_clip() const { return 3000.f; }
-
-	static void* operator new ( size_t size )
-	{
-        return _aligned_malloc( size, 16 );
-    }
-
-	static void operator delete ( void* p )
-	{
-		_aligned_free( p );
-	}
 };
 
 } // namespace blue_sky

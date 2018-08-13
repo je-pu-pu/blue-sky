@@ -152,7 +152,7 @@ void CanvasTestScene::update()
 		
 		render_data.time_beat = 0;
 
-		get_graphics_manager()->set_eye_position( eye.xyz() );
+		get_graphics_manager()->set_eye_position( eye );
 		get_graphics_manager()->get_frame_render_data()->update();
 	}
 
@@ -232,15 +232,15 @@ void CanvasTestScene::render()
 		std::stringstream ss;
 		ss.setf( std::ios_base::fixed, std::ios_base::floatfield );
 
-		ss << "Time : " << get_total_elapsed_time() << std::endl;
-		ss << "FPS : " << get_main_loop()->get_last_fps() << std::endl;
-		ss << "C : " << tablet_->get_cursor_index() << std::endl;
-		ss << "X : " << tablet_->get_x() << std::endl;
-		ss << "Y : " << tablet_->get_y() << std::endl;
-		ss << "P : " << tablet_->get_pressure() << std::endl;
-		ss << "AZ : " << tablet_->get_azimuth() << std::endl;
-		ss << "AL : " << tablet_->get_altitude() << std::endl;
-		ss << "POINTS : " << points_->size() << std::endl;
+		ss << "Time : " << get_total_elapsed_time() << '\n';
+		ss << "FPS : " << get_main_loop()->get_last_fps() << '\n';
+		ss << "C : " << tablet_->get_cursor_index() << '\n';
+		ss << "X : " << tablet_->get_x() << '\n';
+		ss << "Y : " << tablet_->get_y() << '\n';
+		ss << "P : " << tablet_->get_pressure() << '\n';
+		ss << "AZ : " << tablet_->get_azimuth() << '\n';
+		ss << "AL : " << tablet_->get_altitude() << '\n';
+		ss << "POINTS : " << points_->size() << '\n';
 
 		get_graphics_manager()->draw_text( 10.f, 10.f, get_width() - 10.f, get_height() - 10.f, ss.str().c_str(), Color::Black );
 	}

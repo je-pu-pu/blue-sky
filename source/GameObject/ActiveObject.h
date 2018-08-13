@@ -4,11 +4,14 @@
 #include <blue_sky/ShaderResources.h>
 #include <common/exception.h>
 
-class AnimationPlayer;
-
 namespace game
 {
 	class Shader;
+}
+
+namespace core
+{
+	class AnimationPlayer;
 }
 
 namespace blue_sky
@@ -27,13 +30,14 @@ class alignas( 16 ) ActiveObject : public GameObject
 public:
 	typedef graphics::Model					Model;
 	typedef game::Shader					Shader;
+	typedef core::AnimationPlayer			AnimationPlayer;
 
 private:
-	Vector3				front_;				///< 前
-	Vector3				right_;				///< 右
+	Vector				front_;				///< 前
+	Vector				right_;				///< 右
 
-	Vector3				start_location_;	///< スタート時の位置
-	Vector3				start_rotation_;	///< スタート時の回転 ( Degree )
+	Vector				start_location_;	///< スタート時の位置
+	Vector				start_rotation_;	///< スタート時の回転 ( Degree )
 	float_t				start_direction_degree_;	///< スタート時の向き ( Y Axis )
 
 	Model*				model_;				///< Model
@@ -86,16 +90,13 @@ public:
 	float_t get_direction_degree() const { return direction_degree_; }
 	void set_direction_degree( float_t );
 	void chase_direction_degree( float_t, float_t );
-	void chase_direction_to( const Vector3&, float_t );
+	void chase_direction_to( const Vector&, float_t );
 
-	Vector3& get_front() { return front_; }
-	const Vector3& get_front() const { return front_; }
+	const Vector& get_front() const { return front_; }
+	const Vector& get_right() const { return right_; }
 
-	Vector3& get_right() { return right_; }
-	const Vector3& get_right() const { return right_; }
-
-	Vector3& get_start_location() { return start_location_; }
-	const Vector3& get_start_location() const { return start_location_; }
+	Vector& get_start_location() { return start_location_; }
+	const Vector& get_start_location() const { return start_location_; }
 
 	virtual void kill();
 	

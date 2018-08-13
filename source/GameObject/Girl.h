@@ -23,7 +23,7 @@ public:
 
 private:
 	Mode			mode_ = MODE_STAND;			///< Œ»Ý‚Ì“®ìƒ‚[ƒh
-	Vector3			flicker_base_location_;
+	Vector			flicker_base_location_;
 
 	float get_collision_width() const override { return 0.5f; }
 	float get_collision_height() const override { return 1.5f; }
@@ -31,13 +31,13 @@ private:
 
 	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
 
-	const Vector3& get_default_gravity() const override { return GravityZero; }
+	const Vector& get_default_gravity() const override { return Vector::Zero; }
 
 	bool is_hard() const override { return true; }
 
 	void on_arrive_at_target_location() override
 	{
-		set_velocity( Vector3( 0, 0, 0 ) );
+		set_velocity( Vector::Zero );
 		flicker_base_location_ = get_location();
 	}
 

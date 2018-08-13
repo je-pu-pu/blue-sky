@@ -3,7 +3,7 @@
 #include "Scene.h"
 #include "DynamicPointList.h"
 
-#include <core/type.h>
+// #include <core/type.h>
 
 #include <win/Tablet.h>
 

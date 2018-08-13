@@ -1,9 +1,10 @@
 #include "Stone.h"
+#include <btBulletDynamicsCommon.h> ///< @todo Bullet ‚ð’¼ÚŽg‚í‚È‚¢
 
 namespace blue_sky
 {
 
-Stone::Vector3 Stone::GravityDefault( 0.f, -8.f, 0.f );
+Vector Stone::GravityDefault( 0.f, -8.f, 0.f );
 
 Stone::Stone()
 {
@@ -14,6 +15,8 @@ void Stone::restart()
 {
 	ActiveObject::restart();
 
+	// Î‚ª”–‚¢•Ç‚ðŠÑ’Ê‚µ‚È‚¢‚æ‚¤‚É‚·‚é
+	/// @todo Bullet ‚ð’¼ÚŽg‚í‚È‚¢
 	get_rigid_body()->setCcdSweptSphereRadius( 0.2f );
 	get_rigid_body()->setCcdMotionThreshold( 0.2f );
 }

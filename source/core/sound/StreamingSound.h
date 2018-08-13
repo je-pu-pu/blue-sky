@@ -3,7 +3,7 @@
 #include "Sound.h"
 #include <windows.h>
 
-namespace blue_sky
+namespace core
 {
 
 /**
@@ -48,4 +48,4 @@ public:
 
 }; // class StreamingSound
 
-} // namespace blue_sky
+} // namespace core

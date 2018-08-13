@@ -4,7 +4,10 @@
 #include <common/chase_value.h>
 #include <list>
 
-class BgSpriteLayer;
+namespace core
+{
+	class BgSpriteLayer;
+}
 
 namespace blue_sky
 {
@@ -16,7 +19,8 @@ namespace blue_sky
 class StoryTextScene : public Scene
 {
 public:
-	typedef std::list< BgSpriteLayer* > BgSpriteLayerList;
+	typedef core::BgSpriteLayer				BgSpriteLayer;
+	typedef std::list< BgSpriteLayer* >		BgSpriteLayerList;
 
 private:
 	std::wstring	text_;

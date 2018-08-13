@@ -1,5 +1,7 @@
 #include "GraphicsManager.h"
 
+#include <ActiveObjectManager.h>
+
 #include <blue_sky/graphics/Fader.h>
 #include <blue_sky/graphics/Rectangle.h>
 #include <blue_sky/graphics/ObjFileLoader.h>
@@ -14,11 +16,8 @@
 #include <blue_sky/graphics/shader/TessellationMatcapShader.h>
 #include <blue_sky/graphics/shader/DebugShadowMapTextureShader.h>
 
+#include <core/animation/AnimationPlayer.h>
 #include <core/graphics/ShadowMap.h>
-
-#include <ActiveObjectManager.h>
-
-#include <AnimationPlayer.h>
 
 #include <game/Texture.h>
 
@@ -99,17 +98,16 @@ bool_t GraphicsManager::load_mesh( Model* model, const char_t* name ) const
 		}
 	}
 
-	/*
 	if ( ! mesh_loaded && boost::filesystem::exists( file_path  + ".fbx" ) )
 	{
-		mesh_loaded = mesh->load_fbx( ( file_path  + ".fbx" ).c_str(), fbx_file_loader_.get(), skinning_animation_set );
+		FbxFileLoader loader( model, name );
+		mesh_loaded = loader.load( ( file_path + ".fbx" ).c_str() );
 
-		if ( loaded )
+		if ( mesh_loaded )
 		{
-			fbx_file_loader_->save( ( file_path + ".bin.fbx" ).c_str() );
+			loader.save_fbx( ( file_path + ".bin.fbx" ).c_str() );
 		}
 	}
-	*/
 
 	if ( ! mesh_loaded && boost::filesystem::exists( file_path + ".obj" ) )
 	{
@@ -578,7 +576,7 @@ void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_ob
 	get_shared_object_render_data()->bind_to_vs();
 	get_shared_object_render_data()->bind_to_ps();
 
-	AnimationPlayer::BoneShaderResource::Data bone_constant_buffer_data;
+	core::AnimationPlayer::BoneShaderResource::Data bone_constant_buffer_data;
 	active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix::identity() );
 
 	for ( uint_t n = 0; n < active_object->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )
@@ -587,16 +585,14 @@ void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_ob
 		const Matrix& bone_matrix = bone_offset_matrix * bone_constant_buffer_data.bone_matrix[ n ];
 		// const Matrix& bone_matrix = bone_offset_matrix;
 
-		const btTransform& trans = active_object->get_transform();
-
-		Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
+		const core::Transform& t = active_object->get_transform();
 
 		ObjectShaderResourceData shader_data;
 
 		shader_data.world = Matrix().set_scaling( 0.1f, 0.1f, 0.1f );
 		shader_data.world *= bone_matrix;
-		shader_data.world *= Matrix().set_rotation_quaternion( q );
-		shader_data.world *= Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+		shader_data.world *= Matrix().set_rotation_quaternion( t.get_rotation() );
+		shader_data.world *= Matrix().set_translation( t.get_position().x(), t.get_position().y(), t.get_position().z() );
 		shader_data.world = shader_data.world.transpose();
 
 		if ( active_object->get_model()->get_line() )

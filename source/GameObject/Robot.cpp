@@ -2,13 +2,12 @@
 #include "Player.h"
 #include "Stone.h"
 
-#include "AnimationPlayer.h"
-
-#include "ActiveObjectPhysics.h"
-
-#include "GameMain.h"
+#include <ActiveObjectPhysics.h>
+#include <GameMain.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
+
+#include <core/animation/AnimationPlayer.h>
 
 #include <game/Texture.h>
 
@@ -36,15 +35,15 @@ void Robot::restart()
 {
 	ActiveObject::restart();
 
-	get_rigid_body()->setAngularFactor( 0 );
-	get_rigid_body()->setFriction( 0 );
+	set_angular_factor( 0.f );
+	set_friction( 0.f );
 	set_mass( 50.f );
 
 	mode_ = MODE_STAND;
 	timer_ = 0;
 
 	texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
-	get_animation_player()->play( "Stand", false, true );
+	play_animation( "Stand", false, true );
 
 	patrol_point_list_.clear();
 	current_patrol_point_index_ = 0;
@@ -63,25 +62,25 @@ void Robot::update()
 		chase_direction_to( player_->get_location(), 2.f );
 		
 		// ターゲットとの距離が遠い場合は、ターゲットの進行方向を予測して進む
-		Vector3 relative_position = player_->get_location() - get_location();
-		relative_position.setY( 0 );
+		Vector relative_position = player_->get_location() - get_location();
+		relative_position.set_y( 0 );
 
-		Vector3 player_xz_velocity = player_->get_velocity();
-		player_xz_velocity.setY( 0 );
+		Vector player_xz_velocity = player_->get_velocity();
+		player_xz_velocity.set_y( 0 );
 
 		if ( relative_position.length() > 3.f && player_xz_velocity.length() > 1.f )
 		{
 			relative_position = ( player_->get_location() + player_->get_front() * 3.f ) - get_location();
-			relative_position.setY( 0 );
+			relative_position.set_y( 0 );
 		}
 
 		// 進行方向を設定
-		get_front() = relative_position;
-		get_front().normalize();
+		Vector forward = relative_position;
+		forward.normalize();
 
-		set_velocity( Vector3( get_front().x() * 3.f, get_velocity().y(), get_front().z() * 3.f ) );
+		set_velocity( Vector( forward.x() * 3.f, get_velocity().y(), forward.z() * 3.f ) );
 		// get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.8f, 0, 0, -0.25f ) );
-		get_animation_player()->play( "Walk", false, true );
+		play_animation( "Walk", false, true );
 
 		if ( is_visible_in_blink( 2.f ) )
 		{
@@ -113,14 +112,14 @@ void Robot::update()
 	}
 	else if ( mode_ == MODE_STAND || mode_ == MODE_ROTATION )
 	{
-		set_velocity( Vector3( 0.f, 0.f, 0.f ) );
+		set_velocity( Vector( 0.f, 0.f, 0.f ) );
 
 		if ( mode_ == MODE_ROTATION )
 		{
 			set_direction_degree( get_direction_degree() + 0.25f );
 		}
 
-		get_animation_player()->play( "Stand", false, true );
+		play_animation( "Stand", false, true );
 		
 		if ( caluclate_target_visible() )
 		{
@@ -138,17 +137,17 @@ void Robot::update()
 	}
 	else if ( mode_ == MODE_ATTENTION )
 	{
-		set_velocity( Vector3( 0.f, 0.f, 0.f ) );
+		set_velocity( Vector( 0.f, 0.f, 0.f ) );
 
 		// ターゲットの方を向く
-		Vector3 relative_position = player_->get_location() - get_location();
-		relative_position.setY( 0 );
+		Vector relative_position = player_->get_location() - get_location();
+		relative_position.set_y( 0 );
 
 		// 表示上の向きを設定
 		float_t target_direction_degree = math::radian_to_degree( std::atan2( relative_position.x(), relative_position.z() ) );
 		chase_direction_degree( target_direction_degree, 2.f );
 
-		get_animation_player()->play( "Attention", false, true );
+		play_animation( "Attention", false, true );
 
 		timer_ += get_frame_elapsed_time();
 
@@ -187,7 +186,7 @@ void Robot::update()
 		chase_direction_to( player_->get_location(), 0.5f );
 
 		get_animation_player()->set_speed( 0.25f );
-		get_animation_player()->play( "Float", false, true );
+		play_animation( "Float", false, true );
 		texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-tender" );
 	}
 
@@ -218,13 +217,13 @@ void Robot::update_patrol()
 	}
 	else
 	{
-		update_velocity_by_target_location( * next_patrol_point, 1 );;
+		update_velocity_by_target_location( * next_patrol_point, 1 );
 	}
 	*/
 
 	if ( current_patrol_point_index_ < patrol_point_list_.size() )
 	{
-		const Vector3& point = patrol_point_list_[ current_patrol_point_index_ ];
+		const Vector& point = patrol_point_list_[ current_patrol_point_index_ ];
 
 		update_velocity_by_target_location( point, 0.1f );
 
@@ -234,7 +233,7 @@ void Robot::update_patrol()
 			// current_patrol_point_index_ = current_patrol_point_index_ % patrol_point_list_.size();
 		}
 
-		get_animation_player()->play( "Walk", false, true );
+		play_animation( "Walk", false, true );
 	}
 
 	
@@ -265,10 +264,10 @@ void Robot::action( const string_t& s )
  */
 bool Robot::caluclate_target_lost() const
 {
-	Vector3 relative_position = player_->get_location() - get_location();
-	relative_position.setY( 0 );
+	Vector relative_position = player_->get_location() - get_location();
+	relative_position.set_y( 0 );
 
-	Scalar relative_length = relative_position.length(); // ターゲットとの距離
+	auto relative_length = relative_position.length(); // ターゲットとの距離
 
 	/// @todo ちゃんと実装
 	if ( relative_length > 20.f )
@@ -291,9 +290,9 @@ bool Robot::caluclate_target_visible() const
 		return false;
 	}
 
-	Vector3 relative_position = player_->get_location() - get_location();
+	Vector relative_position = player_->get_location() - get_location();
 
-	Scalar relative_length = relative_position.length(); // ターゲットとの距離
+	auto relative_length = relative_position.length(); // ターゲットとの距離
 	
 	/// 視野の距離
 	const float_t eyeshot_length_short = 3.f;
@@ -311,12 +310,12 @@ bool Robot::caluclate_target_visible() const
 	}
 
 	// ロボットの目の位置
-	Vector3 from = get_location();
-	from.setY( from.y() + 1.5f ); // 目線の高さを追加
+	Vector from = get_location();
+	from.set_y( from.y() + 1.5f ); // 目線の高さを追加
 
 	// ターゲットの目の位置
-	Vector3 to = player_->get_location();
-	to.setY( to.y() + 1.5f ); // 目線の高さを追加
+	Vector to = player_->get_location();
+	to.set_y( to.y() + 1.5f ); // 目線の高さを追加
 	
 	float_t eyeshot_angle = 0.f;
 
@@ -345,7 +344,7 @@ bool Robot::caluclate_target_visible() const
 	ClosestNotMeAndHim ray_callback( from, to, get_rigid_body(), player_->get_rigid_body(), false );
 	ray_callback.m_closestHitFraction = 1.0;
 	
-	get_dynamics_world()->rayTest( from, to, ray_callback );
+	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->rayTest( from, to, ray_callback );
 	
 	// ターゲットとの間に障害物がなければ目視できている
 	if ( ! ray_callback.hasHit() )
@@ -374,9 +373,9 @@ void Robot::shutdown()
 
 	play_sound( "robot-shutdown", false, false );
 
-	get_animation_player()->play( "Shutdown", false, false );
+	play_animation( "Shutdown", false, false );
 
-	set_velocity( Vector3( 0.f, 0.f, 0.f ) );
+	set_velocity( Vector::Zero );
 }
 
 void Robot::start_floating()
@@ -424,7 +423,7 @@ void Robot::on_collide_with( Stone* stone )
  *
  * @param point 巡回ポイント
  */
-void Robot::add_patrol_point( const Vector3& point )
+void Robot::add_patrol_point( const Vector& point )
 {
 	patrol_point_list_.push_back( point );
 }

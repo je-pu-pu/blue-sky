@@ -4,7 +4,6 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Mesh.h>
-#include <core/type.h>
 
 #include <game/Shader.h>
 

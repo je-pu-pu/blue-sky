@@ -3,6 +3,9 @@
 #include "SkinningAnimationSet.h"
 #include <blue_sky/ShaderResources.h>
 
+namespace core
+{
+
 /**
  * スキニングアニメーションの再生
  *
@@ -45,7 +48,7 @@ public:
 
 	const SkinningAnimationSet* get_skinning_animation_set() const { return skinning_animation_set_; }
 	const SkinningAnimation* get_current_skinning_animation() const { return current_skinning_animation_; }
-	
+
 	float_t get_current_frame() const { return current_frame_; }
 
 	void calculate_bone_matrix_recursive( BoneShaderResource::Data&, uint_t, const Matrix& ) const;
@@ -59,3 +62,5 @@ public:
 	void set_broken( bool b ) { is_broken_ = b; }
 
 }; // class AnimationPlayer
+
+} // namespace core

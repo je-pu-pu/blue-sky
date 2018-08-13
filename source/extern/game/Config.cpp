@@ -67,7 +67,7 @@ bool Config::save_file( const char* file_name )
 	
 	for ( auto v : value_ )
 	{
-		out <<  v.first << " " << v.second << std::endl;
+		out <<  v.first << " " << v.second << '\n';
 	}
 
 	return true;

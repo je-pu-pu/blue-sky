@@ -1,14 +1,15 @@
 #include "ActiveObject.h"
 #include "ActiveObjectPhysics.h"
-#include "SoundManager.h"
-#include "Sound.h"
-#include "AnimationPlayer.h"
 #include "GameMain.h"
 
 #include <blue_sky/ShaderResources.h>
 
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
+
+#include <core/math/Quaternion.h>
+#include <core/sound/Sound.h>
+#include <core/animation/AnimationPlayer.h>
 
 #include <game/Shader.h>
 
@@ -28,12 +29,12 @@ ActiveObject::ActiveObject()
 
 	, direction_degree_( 0 )
 
-	, start_location_( 0, 0, 0 )
-	, start_rotation_( 0, 0, 0 )
+	, start_location_( Vector::Zero )
+	, start_rotation_( Vector::Zero )
 	, start_direction_degree_( 0 )
 
-	, front_( 0, 0, 1 )
-	, right_( 1, 0, 0 )
+	, front_( Vector::Forward )
+	, right_( Vector::Right )
 
 	, is_mesh_visible_( true )
 	, is_line_visible_( true )
@@ -81,7 +82,7 @@ void ActiveObject::setup_animation_player()
 		return;
 	}
 
-	if ( get_model()->get_skinning_animation_set() )
+	if ( get_model() && get_model()->get_skinning_animation_set() )
 	{
 		animation_player_ = new AnimationPlayer( get_model()->get_skinning_animation_set() );
 	}
@@ -94,8 +95,8 @@ void ActiveObject::restart()
 	
 	if ( get_rigid_body() )
 	{
-		get_transform().setOrigin( start_location_ );
- 		get_transform().setRotation( Quaternion( math::degree_to_radian( start_rotation_.x() ), math::degree_to_radian( start_rotation_.y() ), math::degree_to_radian( start_rotation_.z() ) ) );
+		get_transform().set_position( start_location_ );
+ 		get_transform().set_rotation( Quaternion( math::degree_to_radian( start_rotation_.x() ), math::degree_to_radian( start_rotation_.y() ), math::degree_to_radian( start_rotation_.z() ) ) );
 
 		get_rigid_body()->activate( true );
 		get_rigid_body()->getMotionState()->setWorldTransform( get_transform() );
@@ -103,11 +104,11 @@ void ActiveObject::restart()
 		get_rigid_body()->setWorldTransform( get_transform() );
 		get_rigid_body()->setInterpolationWorldTransform( get_transform() );
 		
-		get_rigid_body()->setLinearVelocity( Vector3( 0.f, 0.f, 0.f ) );
-		get_rigid_body()->setInterpolationLinearVelocity( Vector3( 0.f, 0.f, 0.f ) );
+		get_rigid_body()->setLinearVelocity( btVector3( 0.f, 0.f, 0.f ) );
+		get_rigid_body()->setInterpolationLinearVelocity( btVector3( 0.f, 0.f, 0.f ) );
 		
-		get_rigid_body()->setAngularVelocity( Vector3( 0.f, 0.f, 0.f ) );
-		get_rigid_body()->setInterpolationAngularVelocity( Vector3( 0.f, 0.f, 0.f ) );
+		get_rigid_body()->setAngularVelocity( btVector3( 0.f, 0.f, 0.f ) );
+		get_rigid_body()->setInterpolationAngularVelocity( btVector3( 0.f, 0.f, 0.f ) );
 		
 		get_rigid_body()->setGravity( get_default_gravity() );
 
@@ -122,10 +123,10 @@ void ActiveObject::restart()
 
 void ActiveObject::limit_velocity()
 {
-	Vector3 v = get_rigid_body()->getLinearVelocity();
+	Vector v( get_rigid_body()->getLinearVelocity() );
 
-	v.setX( math::clamp( v.x(), -get_max_speed(), get_max_speed() ) );
-	v.setZ( math::clamp( v.z(), -get_max_speed(), get_max_speed() ) );
+	v.set_x( math::clamp( v.x(), -get_max_speed(), get_max_speed() ) );
+	v.set_z( math::clamp( v.z(), -get_max_speed(), get_max_speed() ) );
 
 	// debug
 	// v.setY( math::clamp( v.y(), -0.1f, 0.1f ) );
@@ -135,17 +136,17 @@ void ActiveObject::limit_velocity()
 
 void ActiveObject::set_start_location( float_t x, float_t y, float_t z )
 {
-	start_location_.setValue( x, y, z );
-	get_transform().getOrigin() = start_location_;
+	start_location_.set( x, y, z );
+	get_transform().set_position( start_location_ );
 }
 
 void ActiveObject::set_start_rotation( float_t x, float_t y, float_t z )
 {
-	start_rotation_.setValue( x, y, z );
+	start_rotation_.set( x, y, z );
 
 	Quaternion q;
-	q.setEulerZYX( math::degree_to_radian( start_rotation_.z() ), math::degree_to_radian( start_rotation_.y() ), math::degree_to_radian( start_rotation_.x() ) );
-	get_transform().setRotation( q );
+	q.set_euler_zyx( math::degree_to_radian( start_rotation_.z() ), math::degree_to_radian( start_rotation_.y() ), math::degree_to_radian( start_rotation_.x() ) );
+	get_transform().set_rotation( q );
 }
 
 void ActiveObject::set_start_direction_degree( float d )
@@ -164,10 +165,10 @@ void ActiveObject::set_direction_degree( float d )
 
 	{
 		Matrix m;
-		m.setEulerZYX( 0, math::degree_to_radian( -direction_degree_ ), 0 );
+		m.set_rotation_xyz( 0, math::degree_to_radian( direction_degree_ ), 0 );
 
-		front_ = Vector3( 0.f, 0.f, 1.f ) * m;
-		right_ = Vector3( 1.f, 0.f, 0.f ) * m;
+		front_ = Vector::Forward * m;
+		right_ = Vector::Right * m;
 
 		front_.normalize();
 		right_.normalize();
@@ -175,8 +176,8 @@ void ActiveObject::set_direction_degree( float d )
 
 	{
 		Quaternion q;
-		q.setEulerZYX( 0.f, math::degree_to_radian( direction_degree_ ), 0.f );
-		get_transform().setRotation( q );
+		q.set_euler_zyx( 0.f, math::degree_to_radian( direction_degree_ ), 0.f );
+		get_transform().set_rotation( q );
 
 		commit_transform();
 	}
@@ -188,10 +189,10 @@ void ActiveObject::set_direction_degree( float d )
  * @param location –Ú“I‚ÌêŠ
  * @param speed ‘¬“x
  */
-void ActiveObject::chase_direction_to( const Vector3& location, float_t speed )
+void ActiveObject::chase_direction_to( const Vector& location, float_t speed )
 {
-	Vector3 relative_position = location - get_location();
-	relative_position.setY( 0 );
+	Vector relative_position = location - get_location();
+	relative_position.set_y( 0 );
 
 	float_t target_direction_degree = math::radian_to_degree( std::atan2( relative_position.x(), relative_position.z() ) );
 	chase_direction_degree( target_direction_degree, speed );
@@ -238,14 +239,12 @@ void ActiveObject::update_render_data() const
 		return;
 	}
 
-	const btTransform& trans = get_transform();
-
-	Vector q( trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), trans.getRotation().w() );
+	const Transform& t = get_transform();
 
 	ObjectShaderResourceData shader_data;
 
-	shader_data.world.set_rotation_quaternion( q );
-	shader_data.world *= ::Matrix().set_translation( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+	shader_data.world.set_rotation_quaternion( t.get_rotation() );
+	shader_data.world *= Matrix().set_translation( t.get_position().x(), t.get_position().y(), t.get_position().z() );
 	shader_data.world = shader_data.world.transpose();
 
 	if ( get_model()->get_line() )
@@ -285,6 +284,11 @@ void ActiveObject::render_mesh() const
 		return;
 	}
 
+	if ( ! get_model()->get_mesh() )
+	{
+		return;
+	}
+
 	/// @todo íœ‚·‚é
 	bind_render_data();
 	
@@ -303,6 +307,11 @@ void ActiveObject::render_mesh() const
 void ActiveObject::render_mesh( const Shader* shader ) const
 {
 	if ( ! is_mesh_visible() )
+	{
+		return;
+	}
+
+	if ( ! get_model()->get_mesh() )
 	{
 		return;
 	}

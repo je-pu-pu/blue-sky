@@ -1,14 +1,8 @@
 #pragma once
 
-#include <type/type.h>
-
-#include <btBulletCollisionCommon.h>
-#include <btBulletDynamicsCommon.h>
-
+#include <blue_sky/type.h>
 #include <functional>
 
-class btVector3;
-class btTransform;
 class btRigidBody;
 
 namespace game
@@ -39,28 +33,22 @@ class Ladder;
 /**
  * ゲーム上に存在する全てのオブジェクトの基底クラス
  *
+ * ゲーム上に存在するすべてのオブジェクトはトランスフォーム ( 移動・回転・拡大縮小 ) 情報を持つ
+ * ゲーム上に存在するすべてのオブジェクトはオプションとして剛体 ( 衝突判定用の形状を含む ) 情報を持つ
+ *
+ * @todo Bullet Physics を隠蔽する
  */
 class GameObject
 {
 public:
-	typedef game::Sound			Sound;
-
-	typedef btScalar			Scalar;
-	typedef btVector3			Vector3;
-	typedef btMatrix3x3			Matrix;
-	typedef btQuaternion		Quaternion;
-	typedef btTransform			Transform;	
-	typedef btRigidBody			RigidBody;
-	typedef btDynamicsWorld		DynamicsWorld;
-
+	typedef game::Sound				Sound;
 	typedef std::function< void() > EventHandler;
 
-	static Vector3 GravityDefault;
-	static Vector3 GravityZero;
+	static Vector GravityDefault;
 
 private:
-	Transform	transform_;			///< Transform
-	RigidBody*	rigid_body_;		///< RigidBody
+	Transform		transform_;		///< トランスフォーム情報
+	btRigidBody*	rigid_body_;	///< 剛体情報
 
 protected:
 	float_t get_frame_elapsed_time() const;
@@ -70,12 +58,10 @@ protected:
 	inline float_t per_sec( float_t value ) const { return value * get_frame_elapsed_time(); }
 
 	float_t get_flicker_height_offset( float_t scale = 1.f ) const;
-	void update_location_by_flicker( const Vector3& base_location, float_t scale = 1.f );
-	void update_velocity_by_flicker( const Vector3& base_location, float_t scale = 1.f );
+	void update_location_by_flicker( const Vector& base_location, float_t scale = 1.f );
+	void update_velocity_by_flicker( const Vector& base_location, float_t scale = 1.f );
 
 	bool_t is_visible_in_blink( float_t ) const;
-
-	DynamicsWorld* get_dynamics_world() const; ///< @todo 削除する
 
 	void play_animation( const char_t* ) const;
 
@@ -99,7 +85,7 @@ public:
 	virtual void update_transform();
 	virtual void commit_transform();
 	
-	virtual void update_velocity_by_target_location( const Vector3& target_location, float_t speed );
+	virtual void update_velocity_by_target_location( const Vector& target_location, float_t speed );
 
 	/// 通り抜けられるオブジェクトかどうかを返す
 	virtual bool is_ghost() const { return false; }
@@ -120,7 +106,7 @@ public:
 	virtual float_t get_height_offset() const { return get_collision_height() * 0.5f; }
 
 	virtual float_t get_default_mass() const { return 1.f; }
-	virtual const Vector3& get_default_gravity() const { return is_hard() ? GravityDefault : GravityZero; }
+	virtual const Vector& get_default_gravity() const { return is_hard() ? GravityDefault : Vector::Zero; }
 
 	virtual void on_arrive_at_target_location() { }
 
@@ -140,26 +126,29 @@ public:
 
 	virtual void on_collide_with_ground() { }
 
+	/// @todo 分離する
 	void set_mass( float_t );
-	void set_gravity( const Vector3& );
-	void set_angular_factor( const Vector3& );
+	void set_gravity( const Vector& );
+	void set_friction( float_t );
+	void set_angular_factor( float_t );
+	void set_angular_factor( const Vector& );
 	void set_kinematic( bool is_kinematic );
 	void set_no_contact_response( bool is_no_contact_response );
-
-	inline RigidBody* get_rigid_body() { return rigid_body_; }
-	inline const RigidBody* get_rigid_body() const { return rigid_body_; }
-
-	inline void set_rigid_body( RigidBody* rigid_body ) { rigid_body_ = rigid_body; }
 
 	Transform& get_transform();
 	const Transform& get_transform() const;
 	
-	const Vector3& get_location() const { return get_transform().getOrigin(); }
-	void set_location( const Vector3& );
+	/// @todo Bullet Physics を隠蔽する
+	inline btRigidBody* get_rigid_body() { return rigid_body_; }
+	inline const btRigidBody* get_rigid_body() const { return rigid_body_; }
+	inline void set_rigid_body( btRigidBody* rigid_body ) { rigid_body_ = rigid_body; }
+
+	const Vector& get_location() const { return get_transform().get_position(); }
+	void set_location( const Vector& );
 	void set_location( float_t, float_t, float_t );
 
-	const Vector3& get_velocity() const;
-	void set_velocity( const Vector3& );
+	const Vector& get_velocity() const;
+	void set_velocity( const Vector& );
 
 	bool is_moving_to( const GameObject* ) const;
 

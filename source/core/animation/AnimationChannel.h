@@ -4,6 +4,9 @@
 #include <vector>
 #include <algorithm>
 
+namespace core
+{
+
 /**
  * アニメーションのチャンネル
  *
@@ -62,3 +65,5 @@ public:
 	KeyFrame& get_last_key_frame() { return key_frame_list_.back(); }
 
 }; // class AnimationChannel
+
+} // namespace core

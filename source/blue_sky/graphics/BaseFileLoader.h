@@ -1,13 +1,16 @@
 #pragma once
 
-#include <core/type.h>
-
-class SkinningAnimationSet;
+#include <type/type.h>
 
 namespace game
 {
 	class Shader;
 	class Texture;
+}
+
+namespace core
+{
+	class SkinningAnimationSet;
 }
 
 namespace blue_sky::graphics
@@ -24,7 +27,7 @@ class BaseFileLoader
 public:
 	typedef blue_sky::graphics::Model	Model; ///< @todo ’ŠÛ‰»‚·‚é
 	typedef blue_sky::graphics::Mesh	Mesh; ///< @todo ’ŠÛ‰»‚·‚é
-	typedef SkinningAnimationSet		SkinningAnimationSet;
+	typedef core::SkinningAnimationSet	SkinningAnimationSet;
 	typedef game::Shader				Shader;
 	typedef game::Texture				Texture;
 

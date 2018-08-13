@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/type.h>
+#include <blue_sky/type.h>
 #include <functional>
 
 class App;
@@ -10,31 +10,32 @@ class OculusRift;
 
 namespace game
 {
+	class Sound;
+	class Config;
+	class MainLoop;
+	class Texture;
+}
 
-class Sound;
-class Config;
-class MainLoop;
-class Texture;
-
-} // namespace game
+namespace core
+{
+	class SoundManager;
+}
 
 namespace blue_sky
 {
+	class GameMain;
+	class ActiveObject;
+	class ActiveObjectPhysics;
+	class ActiveObjectManager;
+	class ScriptManager;
+	class Input;
 
-class GameMain;
-class ActiveObject;
-class ActiveObjectPhysics;
-class ActiveObjectManager;
-class SoundManager;
-class ScriptManager;
-class Input;
-
-namespace graphics
-{
-	class GraphicsManager;
-	class Model;
-	class Mesh;
-}
+	namespace graphics
+	{
+		class GraphicsManager;
+		class Model;
+		class Mesh;
+	}
 
 using graphics::GraphicsManager;
 
@@ -56,6 +57,7 @@ public:
 	typedef Direct3D11					Direct3D;
 
 	typedef ActiveObjectPhysics			PhysicsManager;
+	typedef core::SoundManager			SoundManager;
 
 private:
 	const GameMain* game_main_;

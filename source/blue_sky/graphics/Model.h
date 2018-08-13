@@ -5,11 +5,14 @@
 #include <game/Model.h>
 #include <vector>
 
-class SkinningAnimationSet;
-
 namespace game
 {
 	class Shader;
+}
+
+namespace core
+{
+	class SkinningAnimationSet;
 }
 
 namespace blue_sky::graphics
@@ -28,7 +31,7 @@ public:
 	typedef Line Line;
 	typedef game::Shader Shader;
 	typedef std::vector< Shader* > ShaderList;
-	typedef SkinningAnimationSet SkinningAnimationSet;
+	typedef core::SkinningAnimationSet SkinningAnimationSet;
 
 private:
 	Mesh*					mesh_;

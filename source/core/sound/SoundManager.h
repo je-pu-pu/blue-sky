@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/type.h>
+#include <blue_sky/type.h>
 
 #include <game/SoundManager.h>
 
@@ -15,7 +15,7 @@ class Sound;
 
 }
 
-namespace blue_sky
+namespace core
 {
 
 /**

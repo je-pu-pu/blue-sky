@@ -26,10 +26,7 @@ DebugScene::DebugScene( const GameMain* game_main )
 
 	get_graphics_manager()->setup_default_shaders();
 
-	camera_->position().set( 0.f, 0.f, -10.f, 1.f );
-
-	// new RenderData< >();
-	// new Direct3D11ConstantBuffer< 
+	camera_->position().set( 0.f, 1.5f, -10.f, 1.f );
 }
 
 DebugScene::~DebugScene()
@@ -41,31 +38,34 @@ void DebugScene::update()
 {
 	Scene::update();
 
+	camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * 90.f, get_input()->get_mouse_dx() * 90.f, 0.f );
+	camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f ) );
+
 	const float moving_speed = 0.1f;
 
 	if ( get_input()->press( Input::LEFT ) )
 	{
-		camera_->position() -= Vector( moving_speed, 0.f, 0.f, 0.f );
+		camera_->position() -= camera_->right() * moving_speed;
 	}
 	if ( get_input()->press( Input::RIGHT ) )
 	{
-		camera_->position() += Vector( moving_speed, 0.f, 0.f, 0.f );
+		camera_->position() += camera_->right() * moving_speed;
 	}
 	if ( get_input()->press( Input::UP ) )
 	{
-		camera_->position() += Vector( 0.f, 0.f, moving_speed, 0.f );
+		camera_->position() += camera_->front() * moving_speed;
 	}
 	if ( get_input()->press( Input::DOWN ) )
 	{
-		camera_->position() -= Vector( 0.f, 0.f, moving_speed, 0.f );
+		camera_->position() -= camera_->front() * moving_speed;
 	}
 	if ( get_input()->press( Input::L ) )
 	{
-		camera_->position() -= Vector( 0.f, moving_speed, 0.f, 0.f );
+		camera_->position() += camera_->up() * moving_speed;
 	}
-	if ( get_input()->press( Input::R ) )
+	if ( get_input()->press( Input::L2 ) )
 	{
-		camera_->position() += Vector( 0.f, moving_speed, 0.f, 0.f );
+		camera_->position() -= camera_->up() * moving_speed;
 	}
 
 	if ( get_input()->push( Input::A ) )
@@ -77,11 +77,11 @@ void DebugScene::update()
 
 	// tess test
 	{
-		if ( get_input()->press( Input::L2 ) )
+		if ( get_input()->press( Input::R2 ) )
 		{
 			get_graphics_manager()->get_frame_render_data()->data().tess_factor -= 1 * get_elapsed_time();
 		}
-		if ( get_input()->press( Input::R2 ) )
+		if ( get_input()->press( Input::R ) )
 		{
 			get_graphics_manager()->get_frame_render_data()->data().tess_factor += 1 * get_elapsed_time();
 		}
@@ -130,6 +130,8 @@ void DebugScene::render()
 	ss << "draw count : " << get_graphics_manager()->get_draw_count() << '\n';
 
 	ss << "eye : " << eye.x() << ", " << eye.y() << ", " << eye.z() << '\n';
+	ss << "rot : " << camera_->rotate_degree().x() << ", " << camera_->rotate_degree().y() << ", " << camera_->rotate_degree().z() << '\n';
+
 	ss << "tess : " << frame_render_data.tess_factor << '\n';
 
 	get_graphics_manager()->draw_text( 10.f, 10.f, get_width() - 10.f, get_height() - 10.f, ss.str().c_str(), Color::White );

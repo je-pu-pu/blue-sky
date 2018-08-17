@@ -23,6 +23,8 @@
 
 #include <string>
 
+#include <iostream>
+
 #pragma comment( lib, "dxgi.lib" )
 #pragma comment( lib, "d3d11.lib" )
 #pragma comment( lib, "d3d10_1.lib" )
@@ -207,6 +209,15 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 		}
 
 		UINT available_quality_levels = 0;
+
+		/*
+		for( int n = 1; n < D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT; n++ )
+		{
+			DIRECT_X_FAIL_CHECK( device_->CheckMultisampleQualityLevels( swap_chain_desc_.BufferDesc.Format, n, & available_quality_levels ) );
+
+			std::cout << n << ":" << available_quality_levels << '\n';
+		}
+		*/
 
 		DIRECT_X_FAIL_CHECK( device_->CheckMultisampleQualityLevels( swap_chain_desc_.BufferDesc.Format, multi_sample_count, & available_quality_levels ) );
 
@@ -672,11 +683,13 @@ Direct3D11::Texture* Direct3D11::load_texture( const char* file_path )
 	ID3D11ShaderResourceView* view = 0;
 
 	std::wstring ws_file_name = common::convert_to_wstring( file_path );
-
-	if ( FAILED( DirectX::CreateWICTextureFromFile( device_, ws_file_name.c_str(), nullptr, & view ) ) )
+	
+	if ( FAILED( DirectX::CreateWICTextureFromFileEx( device_, immediate_context_, ws_file_name.c_str(), 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, false, nullptr, & view ) ) )
 	{
 		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "file open failed. " ) + file_path );
 	}
+
+	// immediate_context_->GenerateMips( view );
 
 	return new Texture( this, view );
 }
@@ -775,16 +788,6 @@ void Direct3D11::renderText()
 	}
 
 	getSprite()->end();
-}
-
-void Direct3D11::getTexture2dDescByTexture( const Texture* texture, D3D11_TEXTURE2D_DESC* texture_2d_desc )
-{
-	com_ptr< ID3D11Resource > texture_2d_resource;
-
-	texture->get_shader_resource_view()->GetResource( & texture_2d_resource );
-
-	ID3D11Texture2D* texture_2d = static_cast< ID3D11Texture2D* >( texture_2d_resource.get() );
-	texture_2d->GetDesc( texture_2d_desc );
 }
 
 void Direct3D11::log_all_adapter_desc( IDXGIFactory1* dxgi_factory )

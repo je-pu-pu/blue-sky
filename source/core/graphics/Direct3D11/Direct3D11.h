@@ -164,8 +164,6 @@ public:
 
 	void renderText();
 
-	void getTexture2dDescByTexture( const Texture*, D3D11_TEXTURE2D_DESC* );
-
 	inline Font* getFont() { return font_.get(); }
 	inline Sprite* getSprite() { return sprite_.get(); }
 	inline Effect* get_effect() { return effect_.get(); }

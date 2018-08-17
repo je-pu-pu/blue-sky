@@ -47,6 +47,7 @@
 
 #include <sstream>
 
+#pragma comment( lib, "common.lib" )
 #pragma comment( lib, "game.lib" )
 #pragma comment( lib, "win.lib" )
 

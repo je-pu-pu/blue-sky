@@ -14,6 +14,7 @@
     <ClCompile Include="ActiveObjectManager.cpp" />
     <ClCompile Include="ActiveObjectPhysics.cpp" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="blue_sky\CityGenerator.cpp" />
     <ClCompile Include="blue_sky\graphics\BaseFileLoader.cpp" />
     <ClCompile Include="blue_sky\graphics\Direct3D11\GraphicsManager.cpp" />
     <ClCompile Include="blue_sky\graphics\Direct3D11\Line.cpp" />
@@ -88,6 +89,7 @@
     <ClInclude Include="ActiveObjectManager.h" />
     <ClInclude Include="ActiveObjectPhysics.h" />
     <ClInclude Include="App.h" />
+    <ClInclude Include="blue_sky\CityGenerator.h" />
     <ClInclude Include="blue_sky\graphics\BaseFileLoader.h" />
     <ClInclude Include="blue_sky\graphics\Direct3D11\GraphicsManager.h" />
     <ClInclude Include="blue_sky\graphics\Direct3D11\Line.h" />
@@ -109,6 +111,7 @@
     <ClInclude Include="blue_sky\graphics\shader\FlatShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\GroundShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\MatcapShader.h" />
+    <ClInclude Include="blue_sky\graphics\shader\NullShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\ShadowMapShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\SkyBoxShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\TessellationMatcapShader.h" />
@@ -169,6 +172,7 @@
     <ClInclude Include="core\sound\SoundManager.h" />
     <ClInclude Include="core\sound\StreamingSound.h" />
     <ClInclude Include="core\type.h" />
+    <ClInclude Include="DynamicPointList.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="GameObject\ActiveObject.h" />

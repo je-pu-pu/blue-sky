@@ -30,9 +30,13 @@ protected:
 	void create_vertex_buffer() override;
 	void create_index_buffer() override;
 
+	void update_vertex_buffer() override;
+	void update_index_buffer() override;
+
 public:
-	explicit MeshBuffer( Direct3D* d3d )
-		: direct_3d_( d3d )
+	explicit MeshBuffer( Direct3D* d3d, Type type )
+		: Buffer( type )
+		, direct_3d_( d3d )
 	{
 
 	}

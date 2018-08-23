@@ -129,7 +129,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 
 	/// @todo ’¼‚·
 	rectangle_ = get_graphics_manager()->create_named_model( "rectangle" );
-	rectangle_->set_mesh( get_graphics_manager()->create_named_mesh< Rectangle >( "rectangle" ) );
+	rectangle_->set_mesh( get_graphics_manager()->create_named_mesh< Rectangle >( "rectangle", Rectangle::Buffer::Type::DEFAULT ) );
 
 	scope_mesh_ = get_graphics_manager()->load_model( "scope" );
 

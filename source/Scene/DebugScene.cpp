@@ -9,6 +9,7 @@
 #include <Input.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/CityGenerator.h>
 
 #include <game/MainLoop.h>
 
@@ -27,6 +28,12 @@ DebugScene::DebugScene( const GameMain* game_main )
 	get_graphics_manager()->setup_default_shaders();
 
 	camera_->position().set( 0.f, 1.5f, -10.f, 1.f );
+
+	CityGenerator city_generator;
+	city_generator.step();
+	
+	auto* city = get_active_object_manager()->create_object( "static" );
+	city->set_model( city_generator.get_model() );
 }
 
 DebugScene::~DebugScene()
@@ -67,6 +74,8 @@ void DebugScene::update()
 	{
 		camera_->position() -= camera_->up() * moving_speed;
 	}
+
+	camera_->position().set_y( std::max( camera_->position().y(), 0.1f ) );
 
 	if ( get_input()->push( Input::A ) )
 	{

@@ -12,9 +12,14 @@
 namespace blue_sky::graphics
 {
 
+BaseFileLoader::Shader* BaseFileLoader::get_null_shader() const
+{
+	return GameMain::get_instance()->get_graphics_manager()->get_shader( "null" );
+}
+
 BaseFileLoader::Mesh* BaseFileLoader::create_mesh() const
 {
-	return GameMain::get_instance()->get_graphics_manager()->create_named_mesh( get_name().c_str() );
+	return GameMain::get_instance()->get_graphics_manager()->create_named_mesh( get_name().c_str(), Mesh::Buffer::Type::DEFAULT );
 }
 
 BaseFileLoader::Shader* BaseFileLoader::create_shader() const

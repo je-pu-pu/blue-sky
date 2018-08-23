@@ -40,7 +40,10 @@ bool ObjFileLoader::load( const char_t* file_name )
 	Mesh::TexCoordList tex_coord_list;
 
 	Mesh::VertexGroup* vertex_group = get_model()->get_mesh()->create_vertex_group();
-	Shader* shader = nullptr;
+	
+	Shader* shader = get_null_shader();
+	get_model()->set_shader_at( 0, shader );
+
 	int shader_index = 0;
 
 	std::string texture_name;
@@ -194,7 +197,17 @@ bool ObjFileLoader::load( const char_t* file_name )
 		try
 		{
 			boost::filesystem::path path( file_name );
-			shader->set_texture_at( 0, load_texture( path.stem().string().c_str() ) );
+			auto* texture = load_texture( path.stem().string().c_str() );
+
+			if ( texture )
+			{
+				if ( ! shader )
+				{
+					shader = create_shader();
+				}
+
+				shader->set_texture_at( 0, texture );
+			}
 		}
 		catch ( ... )
 		{

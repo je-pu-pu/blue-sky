@@ -42,6 +42,8 @@ protected:
 	string_t& get_name() { return name_; }
 	const string_t& get_name() const { return name_; }
 
+	Shader* get_null_shader() const;
+
 	Mesh* create_mesh() const;
 	Shader* create_shader() const;
 	SkinningAnimationSet* create_skinning_animation_set() const;

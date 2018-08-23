@@ -421,7 +421,6 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 
 	for ( int n = 0; n < mesh->GetPolygonCount(); n++ )
 	{
-		// Mesh::Material* material = mesh_->get_material_at( material_indices->GetAt( n ), true );
 		Mesh::VertexGroup* vertex_group = get_model()->get_mesh()->get_vertex_group_at( material_indices->GetAt( n ) );
 
 		bool is_smooth = smoothing->GetDirectArray().GetAt( n ) != 0;

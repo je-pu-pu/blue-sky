@@ -9,6 +9,7 @@
 #include <blue_sky/graphics/Line.h>
 
 /// @todo 別 cpp に移動
+#include <blue_sky/graphics/shader/NullShader.h>
 #include <blue_sky/graphics/shader/FlatShader.h>
 #include <blue_sky/graphics/shader/FaderShader.h>
 #include <blue_sky/graphics/shader/MatcapShader.h>
@@ -83,7 +84,7 @@ void GraphicsManager::update()
  * @param model モデル
  * @param name モデル名
  */
-bool_t GraphicsManager::load_mesh( Model* model, const char_t* name ) const
+bool_t GraphicsManager::load_mesh( Model* model, const char_t* name )
 {
 	const auto file_path = string_t( "media/model/" ) + name;
 
@@ -125,6 +126,14 @@ bool_t GraphicsManager::load_mesh( Model* model, const char_t* name ) const
 		model->get_mesh()->clear_vertex_list();
 		model->get_mesh()->clear_vertex_weight_list();
 		model->get_mesh()->clear_vertex_group_list();
+
+		for ( int n = 0; n < model->get_mesh()->get_rendering_vertex_group_count(); n++ )
+		{
+			if ( ! model->get_shader_at( n ) )
+			{
+				model->set_shader_at( n, get_shader( "null" ) );
+			}
+		}
 	}
 
 	return mesh_loaded;
@@ -136,7 +145,7 @@ bool_t GraphicsManager::load_mesh( Model* model, const char_t* name ) const
  * @param model モデル
  * @param name モデル名
  */
-bool_t GraphicsManager::load_line( Model* model, const char_t* name ) const
+bool_t GraphicsManager::load_line( Model* model, const char_t* name )
 {
 	const auto line_file_path = string_t( "media/model/" ) + name + "-line.obj";
 
@@ -276,6 +285,7 @@ void GraphicsManager::setup_default_shaders()
 {
 	auto* matcap_texture = load_named_texture( "matcap", "media/texture/matcap/skin.png" );
 
+	create_named_shader< shader::NullShader >( "null" );
 	create_named_shader< shader::FlatShader >( "flat", "main", "flat" );
 	create_named_shader< shader::FlatShader >( "flat_skin", "skin", "flat_skin" );
 	create_named_shader< shader::MatcapShader >( "matcap", "main", "matcap" )->set_texture( matcap_texture );
@@ -290,7 +300,7 @@ void GraphicsManager::setup_default_shaders()
 	shadow_map_shader_ = get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map" );
 	shadow_map_skin_shader_ = get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map_skin" );
 
-	fader_->set_mesh( create_named_mesh< Rectangle >( "fader" ) );
+	fader_->set_mesh( create_named_mesh< Rectangle >( "fader", Mesh::Buffer::Type::DEFAULT ) );
 	fader_->set_shader_at( 0, create_named_shader< shader::FaderShader >( "fader" ) );
 }
 

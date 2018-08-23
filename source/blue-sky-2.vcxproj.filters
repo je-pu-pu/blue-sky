@@ -205,6 +205,9 @@
     <ClCompile Include="core\animation\AnimationPlayer.cpp">
       <Filter>core\animation</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\CityGenerator.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -543,6 +546,13 @@
     </ClInclude>
     <ClInclude Include="core\animation\AnimationKeyFrame.h">
       <Filter>core\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\CityGenerator.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicPointList.h" />
+    <ClInclude Include="blue_sky\graphics\shader\NullShader.h">
+      <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -27,10 +27,10 @@ struct Vertex : public game::Vertex
 	Vector3 Normal;
 	Vector2 TexCoord;
 
-	Vertex()
-		: Position( 0.f, 0.f, 0.f )
-		, Normal( 0.f, 0.f, 0.f )
-		, TexCoord( 0.f, 0.f )
+	Vertex( const Vector3& pos = Vector3( 0.f, 0.f, 0.f ), const Vector3& norm = Vector3( 0.f, 0.f, 0.f ), const Vector2& uv = Vector2( 0.f, 0.f ) )
+		: Position( pos )
+		, Normal( norm )
+		, TexCoord( uv )
 	{
 
 	}
@@ -71,7 +71,15 @@ public:
 
 	class Buffer
 	{
+	public:
+		enum class Type
+		{
+			DEFAULT,
+			UPDATABLE,
+		};
+
 	private:
+		Type type_;
 		Mesh* mesh_;
 
 	protected:
@@ -88,17 +96,22 @@ public:
 		const IndexCountList& get_index_count_list() const { return mesh_->index_count_list_; }
 
 	public:
-		Buffer()
-			: mesh_( 0 )
+		Buffer( Type type )
+			: type_( type )
+			, mesh_( 0 )
 		{ }
 
 		virtual ~Buffer()
 		{ }
 
 		void set_mesh( Mesh* m ) { mesh_ = m; }
+		Type get_type() const { return type_; }
 
 		virtual void create_vertex_buffer() = 0;
 		virtual void create_index_buffer() = 0;
+
+		virtual void update_vertex_buffer() = 0;
+		virtual void update_index_buffer() = 0;
 
 		virtual void bind() const = 0;
 		virtual void render( uint_t ) const = 0;

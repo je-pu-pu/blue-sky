@@ -3,6 +3,8 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
 
+#include <cstring>
+
 namespace blue_sky::graphics::direct_3d_11
 {
 
@@ -12,6 +14,8 @@ namespace blue_sky::graphics::direct_3d_11
  */
 void MeshBuffer::create_vertex_buffer()
 {
+	///@todo type によってバッファを作り分ける
+
 	if ( get_vertex_list().empty() )
 	{
 		return;
@@ -63,6 +67,7 @@ void MeshBuffer::create_index_buffer()
 	{
 		if ( get_vertex_group_list()[ n ]->empty() )
 		{
+			get_index_count_list().push_back( 0 );
 			continue;
 		}
 
@@ -78,9 +83,35 @@ void MeshBuffer::create_index_buffer()
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & index_buffer_list_[ n ] ) );
 
 		get_index_count_list().push_back( get_vertex_group_list()[ n ]->size() );
-		
-		// get_material_at( n, true );
 	}
+}
+
+/**
+ * 頂点バッファを更新する
+ *
+ */
+void MeshBuffer::update_vertex_buffer()
+{
+	/// @todo 実装する
+
+	/*
+	D3D11_MAPPED_SUBRESOURCE mapped_subresource;
+
+	DIRECT_X_FAIL_CHECK( direct_3d_->getImmediateContext()->Map( vertex_buffer_list_[ 0 ].get(), 0, D3D11_MAP_WRITE_DISCARD, 0, & mapped_subresource ) );
+
+	std::memcpy( mapped_subresource.pData, & get_vertex_list()[ 0 ], sizeof( Mesh::Vertex ) * get_vertex_list().size() );
+
+	direct_3d_->getImmediateContext()->Unmap( vertex_buffer_list_[ 0 ].get(), 0 );
+	*/
+}
+
+/**
+ * インデックスバッファを更新する
+ *
+ */
+void MeshBuffer::update_index_buffer()
+{
+	/// @todo 実装する
 }
 
 /**

@@ -198,7 +198,7 @@ float4 common_sample_matcap( float3 norm )
 }
 
 /**
- * World * View * Proejction を COMMON_POS_NORM_UV に適用し COMMON_POS_UV を出力する
+ * World * View * Proejction を COMMON_POS_NORM_UV に適用し COMMON_POS を出力する
  *
  */
 COMMON_POS vs_common_wvp_pos_norm_uv_to_pos( COMMON_POS_NORM_UV input )
@@ -240,15 +240,6 @@ float4 vs_common_wvp_pos_to_pos( float4 input ) : SV_Position
 float4 vs_common_wvp_skin_to_pos( VS_SKIN_INPUT input ) : SV_Position
 {
 	return common_wvp_pos( common_skinning_pos( input.Position, input.Bone, input.Weight ) );
-}
-
-/**
- * デバッグ用の輪郭線を描画するピクセルシェーダー
- *
- */
-float4 ps_common_debug_line( float4 input : SV_Position ) : SV_Target
-{
-	return float4( 1.f, 0.f, 0.f, 1.f );
 }
 
 /***
@@ -295,6 +286,19 @@ float4 ps_common_sample_pos_norm_uv( COMMON_POS_NORM_UV input ) : SV_Target
 	return model_texture.Sample( wrap_texture_sampler, input.TexCoord );
 }
 
+/**
+ * デバッグ用の輪郭線を描画するピクセルシェーダー
+ *
+ */
+float4 ps_common_debug_line_pos( float4 input : SV_Position ) : SV_Target
+{
+	return float4( 1.f, 0.f, 0.f, 1.f );
+}
+
+/**
+ * デバッグ用の輪郭線を描画するピクセルシェーダー
+ *
+ */
 float4 ps_common_debug_line_pos_norm( COMMON_POS_NORM input ) : SV_Target
 {
 	return float4( 1.f, 0.f, 0.f, 1.f );

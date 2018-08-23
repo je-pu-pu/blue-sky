@@ -2,7 +2,7 @@
  * シャドウマップへのレンダリング
  *
  */
-float4 vs_shadow_map( VS_INPUT input ) : SV_POSITION
+float4 vs_shadow_map( COMMON_POS_NORM_UV input ) : SV_POSITION
 {
 	float4 output;
 

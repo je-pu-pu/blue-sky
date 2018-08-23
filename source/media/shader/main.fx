@@ -146,14 +146,6 @@ cbuffer ShadowMapConstantBuffer : register( b10 )
 	float4 ShadowMapViewDepthPerCascadeLevel;
 };
 
-/// @todo COMMON_POS_NORM_UV Ç…ìùçáÇ∑ÇÈ
-struct VS_INPUT
-{
-	float4 Position : SV_POSITION;
-	float3 Normal   : NORMAL0;
-	float2 TexCoord : TEXCOORD0;
-};
-
 struct VS_SKIN_INPUT
 {
 	float4 Position : POSITION;
@@ -203,7 +195,7 @@ struct PS_SHADOW_INPUT
 #include "matcap.hlsl"
 #include "drawing_line.hlsl"
 
-PS_INPUT vs_main( VS_INPUT input, uint vertex_id : SV_VertexID )
+PS_INPUT vs_main( COMMON_POS_NORM_UV input, uint vertex_id : SV_VertexID )
 {
 	PS_INPUT output;
 
@@ -241,7 +233,7 @@ PS_INPUT vs_skin( VS_SKIN_INPUT input )
 	return output;
 }
 
-PS_FLAT_INPUT vs_flat( VS_INPUT input )
+PS_FLAT_INPUT vs_flat( COMMON_POS_NORM_UV input )
 {
 	PS_FLAT_INPUT output;
 
@@ -348,7 +340,7 @@ float4 ps_main_wrap_flat( PS_FLAT_INPUT input ) : SV_Target
  *
  *
  */
-PS_SHADOW_INPUT vs_with_shadow( VS_INPUT input )
+PS_SHADOW_INPUT vs_with_shadow( COMMON_POS_NORM_UV input )
 {
 	PS_SHADOW_INPUT output;
 
@@ -522,6 +514,20 @@ technique11 flat
         SetPixelShader( CompileShader( ps_4_0, ps_main_wrap_flat() ) );
 
 		RASTERIZERSTATE = Default;
+    }
+
+	pass debug_line
+    {
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( DebugLineDepthStencilState, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_common_wvp_pos_norm_uv_to_pos() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps_common_debug_line_pos() ) );
+
+		RASTERIZERSTATE = WireframeRasterizerState;
     }
 }
 

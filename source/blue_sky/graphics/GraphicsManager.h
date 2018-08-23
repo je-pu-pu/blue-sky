@@ -111,8 +111,8 @@ private:
 protected:
 	const ActiveObjectManager* get_game_object_manager() const;
 
-	bool_t load_mesh( Model*, const char_t* name ) const;
-	bool_t load_line( Model*, const char_t* nmae ) const;
+	bool_t load_mesh( Model*, const char_t* name );
+	bool_t load_line( Model*, const char_t* nmae );
 
 	[[nodiscard]] virtual ShadowMap* create_shadow_map( uint_t, uint_t ) const = 0;
 	[[nodiscard]] virtual Line* create_line() const = 0;
@@ -145,9 +145,9 @@ public:
 	template< typename Type=Model > Type* get_model( const char_t* name ) { return model_manager_.get< Type >( name ); }
 	
 	// Mesh
-	template< typename Type=Mesh > Type* create_named_mesh( const char_t* name )
+	template< typename Type=Mesh > Type* create_named_mesh( const char_t* name, Mesh::Buffer::Type type )
 	{
-		Mesh::Buffer* b = create_mesh_buffer();
+		Mesh::Buffer* b = create_mesh_buffer( type );
 		Type* m = mesh_manager_.create_named< Type >( name, b );
 		b->set_mesh( m );
 		
@@ -156,7 +156,7 @@ public:
 
 	Mesh* get_mesh( const char_t* name ) { return mesh_manager_.get( name ); }
 
-	virtual Mesh::Buffer* create_mesh_buffer() const = 0;
+	virtual Mesh::Buffer* create_mesh_buffer( Mesh::Buffer::Type ) const = 0;
 
 	// Shader
 	template< typename Type, typename ... Args > Type* create_shader( Args ... args ) { return shader_manager_.create< Type >( args ... ); }

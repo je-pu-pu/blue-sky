@@ -1,5 +1,4 @@
-#ifndef GAME_CONFIG_H
-#define GAME_CONFIG_H
+#pragma once
 
 #include <common/serialize.h>
 #include <map>
@@ -68,6 +67,4 @@ public:
 
 }; // class Config
 
-} // game
-
-#endif // GAME_CONFIG_H
+} // namespace game

@@ -4,7 +4,7 @@
 #include <blue_sky/graphics/Mesh.h>
 #include <core/animation/Animation.h>
 #include <fbxsdk.h>
-#include <map>
+#include <unordered_map>
 
 namespace blue_sky::graphics
 {
@@ -23,7 +23,7 @@ private:
 	FbxManager* fbx_manager_;
 	FbxScene*	fbx_scene_;
 	int			fbx_material_index_;
-	std::map< FbxNode*, uint_t > bone_index_map_;
+	std::unordered_map< FbxNode*, uint_t > bone_index_map_;
 
 protected:
 	void load_mesh_recursive( FbxNode* );

@@ -17,7 +17,7 @@ public:
 	enum State { OFF = 0, ON, BROKEN };
 
 	using EventHandlerList	= std::list< EventHandler >;
-	using EventHandlerMap	= std::map< string_t, EventHandlerList >;
+	using EventHandlerMap	= std::unordered_map< string_t, EventHandlerList >;
 
 	using CntactObjectCache	= game::TimedCache< const GameObject* >;
 private:

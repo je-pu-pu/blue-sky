@@ -7,7 +7,7 @@
 
 #include <d3d11.h>
 
-#include <map>
+#include <unordered_map>
 
 class Direct3D11Texture;
 class Direct3D11Sprite;
@@ -33,7 +33,7 @@ class Direct3D11
 {
 public:
 	using InputLayout		= core::graphics::direct_3d_11::InputLayout;
-	using InputLayoutList	= std::map< const char*, InputLayout* >;
+	using InputLayoutList	= std::unordered_map< const char*, InputLayout* >;
 
 	using Effect			= core::graphics::direct_3d_11::Effect;
 	using EffectTechnique	= core::graphics::direct_3d_11::EffectTechnique;

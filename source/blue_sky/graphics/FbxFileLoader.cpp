@@ -16,7 +16,7 @@
 
 #include <boost/filesystem/convenience.hpp>
 
-#include <map>
+#include <unordered_map>
 
 #include <iostream>
 #include <cassert>
@@ -35,7 +35,7 @@ void print_fbx_node_recursive( FbxNode* node )
 
 	FbxMesh* mesh = node->GetMesh();
 	
-	std::map< int_t, string_t > ro_map;
+	std::unordered_map< int_t, string_t > ro_map;
 	ro_map[ FbxEuler::eOrderXYZ ] = "XYZ";
 //	ro_map[ FbxEuler::eOrderXYX ] = "XYX";
 	ro_map[ FbxEuler::eOrderXZY ] = "XZY";

@@ -6,9 +6,8 @@
 #include <common/auto_ptr.h>
 #include <common/safe_ptr.h>
 
-#include <map>
 #include <list>
-#include <vector>
+#include <unordered_map>
 #include <functional>
 
 namespace game
@@ -46,7 +45,7 @@ public:
 	using Rectangle				= graphics::Rectangle;
 	
 	using Command				= std::function< void( string_t ) >;
-	using CommandMap			= std::map< string_t, Command >;
+	using CommandMap			= std::unordered_map< string_t, Command >;
 
 	using CommandCall			= std::function< void() >;
 	using CommandCallList		= std::list< CommandCall >;

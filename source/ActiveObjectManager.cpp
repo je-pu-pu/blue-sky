@@ -139,7 +139,7 @@ ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss )
 
 	ss >> object_name >> x >> y >> z >> rx >> ry >> rz;
 
-	std::map< string_t, Vector > size_map;
+	std::unordered_map< string_t, Vector > size_map;
 	size_map[ "soda-can-1"   ] = Vector(  0.07f, 0.12f, 0.07f );
 	size_map[ "wall-1"       ] = Vector(  4.f,   1.75f, 0.2f  );
 	size_map[ "wall-2"       ] = Vector(  8.f,   2.5f,  0.2f  );
@@ -154,7 +154,7 @@ ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss )
 
 	size_map[ "robot-dead-body" ] = Vector( 0.8f, 2.f, 0.5f );
 
-	std::map< string_t, float_t > mass_map;
+	std::unordered_map< string_t, float_t > mass_map;
 	mass_map[ "soda-can-1"   ] = 50.f;
 	mass_map[ "board-1"      ] = 20.f;
 	mass_map[ "box-5x5x5"    ] = 1.f;

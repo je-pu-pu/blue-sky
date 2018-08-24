@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <unordered_map>
 
 class Direct3D11;
 class Direct3D11EffectPass;
@@ -25,7 +25,7 @@ public:
 	using Technique			= EffectTechnique;
 	using Pass				= EffectPass;
 
-	using TechniqueList		= std::map< const char*, Technique* >;
+	using TechniqueList		= std::unordered_map< const char*, Technique* >;
 
 private:
 	Direct3D*			direct_3d_;

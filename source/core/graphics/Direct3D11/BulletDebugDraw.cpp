@@ -4,10 +4,6 @@
 #include <common/exception.h>
 #include <common/math.h>
 
-// #include <boost/filesystem.hpp>
-
-#include <map>
-
 #include <fstream>
 #include <sstream>
 

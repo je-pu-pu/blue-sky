@@ -3,9 +3,8 @@
 #include <GameObject/ActiveObject.h>
 #include <sstream>
 #include <tuple>
-#include <set>
+#include <unordered_set>
 #include <unordered_map>
-#include <map>
 
 namespace blue_sky
 {
@@ -17,11 +16,11 @@ namespace blue_sky
 class ActiveObjectManager
 {
 public:
-	using ActiveObjectList			= std::set< ActiveObject* >;
-	using ActiveObjectMap			= std::map< string_t, ActiveObject* >;
-	using TargetLocationMap			= std::map< ActiveObject*, std::tuple< Vector, float_t > >;
-	using TargetDirectionMap		= std::map< ActiveObject*, std::tuple< float_t, float_t > >;
-	using TargetDirectionObjectMap	= std::map< ActiveObject*, std::tuple< const ActiveObject*, float_t > >;
+	using ActiveObjectList			= std::unordered_set< ActiveObject* >;
+	using ActiveObjectMap			= std::unordered_map< string_t, ActiveObject* >;
+	using TargetLocationMap			= std::unordered_map< ActiveObject*, std::tuple< Vector, float_t > >;
+	using TargetDirectionMap		= std::unordered_map< ActiveObject*, std::tuple< float_t, float_t > >;
+	using TargetDirectionObjectMap	= std::unordered_map< ActiveObject*, std::tuple< const ActiveObject*, float_t > >;
 
 	using CreateObjectFunction		= std::function< ActiveObject* () >;
 

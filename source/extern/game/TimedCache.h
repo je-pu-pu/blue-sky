@@ -1,8 +1,7 @@
-#ifndef GAME_TIMED_CACHE_H
-#define GAME_TIMED_CACHE_H
+#pragma once
 
 #include <type/type.h>
-#include <list>
+#include <unordered_map>
 
 namespace game
 {
@@ -15,7 +14,7 @@ template< typename T >
 class TimedCache
 {
 public:
-	using TimerMap = std::map< T, float_t >;
+	using TimerMap = std::unordered_map< T, float_t >;
 
 private:
 	TimerMap timer_map_; ///< 最近接触したオブジェクトの一覧
@@ -105,5 +104,3 @@ public:
 }; // class TimedCache
 
 } // namespace game
-
-#endif // GAME_TIMED_CACHE_H

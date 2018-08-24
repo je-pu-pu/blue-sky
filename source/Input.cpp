@@ -218,7 +218,7 @@ void Input::update_state_by_key_for( uint_t button )
 
 DWORD* Input::get_joystick_axis_pos_pointer_by_index( int index )
 {
-	std::map< int, DWORD* > axis_map;
+	std::unordered_map< int, DWORD* > axis_map;
 
 	axis_map[ 0 ] = & joy_info_.dwXpos;
 	axis_map[ 1 ] = & joy_info_.dwYpos;

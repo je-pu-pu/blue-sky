@@ -4,7 +4,7 @@
 #include <core/type.h>
 #include <common/exception.h>
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 namespace core
 {
@@ -16,7 +16,7 @@ namespace core
 class SkinningAnimationSet
 {
 public:
-	using SkinningAnimationMap	= std::map< const string_t, SkinningAnimation >;
+	using SkinningAnimationMap	= std::unordered_map< string_t, SkinningAnimation >;
 	using MatrixList			= std::vector< Matrix* >;
 	using BoneIndexList			= std::vector< uint_t >;
 	using ChildBoneIndexList	= std::vector< BoneIndexList >;

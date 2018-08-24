@@ -1,9 +1,7 @@
-#ifndef GAME_SOUND_MANAGER_H
-#define GAME_SOUND_MANAGER_H
+#pragma once
 
-#include <map>
-#include <list>
 #include <type/type.h>
+#include <unordered_map>
 
 namespace game
 {
@@ -17,8 +15,8 @@ class Sound;
 class SoundManager
 {
 public:
-	using SoundMap			= std::map< string_t, Sound* >;
-	using GroupedSoundMap	= std::map< string_t, SoundMap >;
+	using SoundMap			= std::unordered_map< string_t, Sound* >;
+	using GroupedSoundMap	= std::unordered_map< string_t, SoundMap >;
 
 private:
 	SoundMap sound_map_;
@@ -62,5 +60,3 @@ public:
 }; // class SoundManager
 
 } // namespace game
-
-#endif // GAME_SOUND_MANAGER_H

@@ -10,8 +10,6 @@
 #include <fstream>
 #include <sstream>
 
-#include <map>
-
 namespace blue_sky::graphics::direct_3d_11
 {
 

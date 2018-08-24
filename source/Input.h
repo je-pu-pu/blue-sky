@@ -16,7 +16,7 @@
 
 #include <windows.h>
 
-#include <map>
+#include <unordered_map>
 #include <deque>
 #include <array>
 #include <vector>
@@ -54,7 +54,7 @@ public:
 	using ButtonStack			= std::deque< Button >;
 	using ButtonCodeList		= std::array< unsigned int, MAX_BUTTONS >;
 	using ButtonCodeMultiList	= std::array< std::vector< int >, MAX_BUTTONS >;
-	using ConfigKeyCodeMap		= std::map< std::string, int >;
+	using ConfigKeyCodeMap		= std::unordered_map< std::string, int >;
 
 private:
 	const DirectInput* direct_input_;						///< DirectInput

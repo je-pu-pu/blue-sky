@@ -826,7 +826,7 @@ void Direct3D11::log_adapter_desc( int index, const DXGI_ADAPTER_DESC1& adapter_
 
 void Direct3D11::log_feature_level()
 {
-	std::map< D3D_FEATURE_LEVEL, std::string > feature_level_map;
+	std::unordered_map< D3D_FEATURE_LEVEL, std::string > feature_level_map;
 
 	feature_level_map[ D3D_FEATURE_LEVEL_9_1 ] = "9.1";
 	feature_level_map[ D3D_FEATURE_LEVEL_9_2 ] = "9.2";

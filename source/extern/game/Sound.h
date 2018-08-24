@@ -11,7 +11,7 @@ namespace game
 class Sound
 {
 public:
-	typedef float T;
+	using T = float;
 
 	static const T VOLUME_MIN;
 	static const T VOLUME_MAX;

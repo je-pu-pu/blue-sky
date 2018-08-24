@@ -15,7 +15,7 @@
 
 /// @todo ’ŠÛ‰»‚·‚é
 #include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/Direct3D11/Direct3D11Sprite.h>
+#include <core/graphics/Direct3D11/Sprite.h>
 
 #include <win/Rect.h>
 

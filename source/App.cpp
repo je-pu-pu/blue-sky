@@ -339,7 +339,7 @@ void App::set_size( int w, int h )
  *
  * @return ƒ^ƒCƒgƒ‹
  */
-const App::char_t* App::get_title()
+const char_t* App::get_title()
 {
 	if ( hWnd )
 	{

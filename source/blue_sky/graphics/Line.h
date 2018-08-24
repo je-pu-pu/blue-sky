@@ -38,13 +38,13 @@ public:
 		}
 	};
 
-	typedef std::uint16_t Index;
+	using Index			= std::uint16_t ;
 
-	typedef std::vector< Vector3 > PositionList;
-	typedef std::vector< Color > ColorList;
+	using PositionList	= std::vector< Vector3 >;
+	using ColorList		= std::vector< Color >;
 
-	typedef std::vector< Vertex > VertexList;
-	typedef std::vector< Index > IndexList;
+	using VertexList	= std::vector< Vertex >;
+	using IndexList		= std::vector< Index >;
 
 protected:
 	Color			color_;

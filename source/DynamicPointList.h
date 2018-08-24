@@ -10,10 +10,10 @@ class DynamicPointList
 public:
 	const unsigned int MAX_VERTEX_COUNT = 160000;
 
-	typedef Direct3D11					Direct3D;
-	typedef ID3D11Buffer				Buffer;
+	using Direct3D		= Direct3D11;
+	using Buffer		= ID3D11Buffer;
 
-	typedef std::vector< VertexType >	VertexList;
+	using VertexList	= std::vector< VertexType >;
 
 private:
 	Direct3D*			direct_3d_;

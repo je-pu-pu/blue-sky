@@ -13,7 +13,7 @@ namespace blue_sky
 class Ladder : public ActiveObject
 {
 public:
-	typedef game::TimedCache< const GameObject* > CntactObjectCache;
+	using CntactObjectCache = game::TimedCache< const GameObject* >;
 
 private:
 	CntactObjectCache contact_object_cache_;

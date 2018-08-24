@@ -21,8 +21,8 @@ namespace blue_sky::graphics::direct_3d_11
 class Line : public blue_sky::graphics::Line
 {
 public:
-	typedef Direct3D11 Direct3D;
-	typedef game::Texture Texture;
+	using Direct3D = Direct3D11;
+	using Texture = game::Texture;
 
 	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
 

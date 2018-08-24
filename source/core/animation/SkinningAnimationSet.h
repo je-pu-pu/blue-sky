@@ -16,11 +16,11 @@ namespace core
 class SkinningAnimationSet
 {
 public:
-	typedef std::map< const string_t, SkinningAnimation > SkinningAnimationMap;
-	typedef std::vector< Matrix* > MatrixList;
-	typedef std::vector< uint_t > BoneIndexList;
-	typedef std::vector< BoneIndexList > ChildBoneIndexList;
-	typedef std::vector< uint_t > ParentBoneIndexList;
+	using SkinningAnimationMap	= std::map< const string_t, SkinningAnimation >;
+	using MatrixList			= std::vector< Matrix* >;
+	using BoneIndexList			= std::vector< uint_t >;
+	using ChildBoneIndexList	= std::vector< BoneIndexList >;
+	using ParentBoneIndexList	= std::vector< uint_t >;
 
 private:
 	SkinningAnimationMap	skinning_animation_map_;

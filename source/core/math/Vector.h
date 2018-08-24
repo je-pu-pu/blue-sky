@@ -5,6 +5,6 @@
 namespace core
 {
 
-typedef direct_x_math::Vector Vector;
+using Vector = direct_x_math::Vector;
 
 }; // namespace core

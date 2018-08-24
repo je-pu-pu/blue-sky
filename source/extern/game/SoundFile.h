@@ -11,7 +11,7 @@ namespace game
 class SoundFile
 {
 public:
-	typedef unsigned long SizeType;
+	using SizeType = unsigned long;
 
 	/*
 	struct Info

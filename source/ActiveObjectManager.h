@@ -17,14 +17,13 @@ namespace blue_sky
 class ActiveObjectManager
 {
 public:
-	typedef std::set< ActiveObject* > ActiveObjectList;
-	typedef std::map< string_t, ActiveObject* > ActiveObjectMap;
-	typedef std::map< ActiveObject*, std::tuple< Vector, float_t > > TargetLocationMap;
-	typedef std::map< ActiveObject*, std::tuple< float_t, float_t > > TargetDirectionMap;
-	typedef std::map< ActiveObject*, std::tuple< const ActiveObject*, float_t > > TargetDirectionObjectMap;
+	using ActiveObjectList			= std::set< ActiveObject* >;
+	using ActiveObjectMap			= std::map< string_t, ActiveObject* >;
+	using TargetLocationMap			= std::map< ActiveObject*, std::tuple< Vector, float_t > >;
+	using TargetDirectionMap		= std::map< ActiveObject*, std::tuple< float_t, float_t > >;
+	using TargetDirectionObjectMap	= std::map< ActiveObject*, std::tuple< const ActiveObject*, float_t > >;
 
-	typedef std::function< ActiveObject* () > CreateObjectFunction;
-	
+	using CreateObjectFunction		= std::function< ActiveObject* () >;
 
 private:
 	ActiveObjectList active_object_list_;

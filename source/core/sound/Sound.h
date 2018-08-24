@@ -30,11 +30,10 @@ namespace core
 class Sound : public game::Sound
 {
 public:
-	// typedef WaveFile SoundFile;
-	typedef OggVorbisFile SoundFile;
+	using SoundFile			= OggVorbisFile;
 
-	typedef s16_t SoundSample;
-	typedef std::vector< SoundSample > SoundSampleList;
+	using SoundSample		= s16_t;
+	using SoundSampleList	= std::vector< SoundSample >;
 
 protected:
 	const DirectSound* direct_sound_;

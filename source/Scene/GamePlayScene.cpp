@@ -27,7 +27,7 @@
 #include <core/sound/SoundManager.h>
 
 /// @todo íäè€âªÇ∑ÇÈ
-#include <core/graphics/Direct3D11/Direct3D11Sprite.h>
+#include <core/graphics/Direct3D11/Sprite.h>
 
 #include "ActiveObjectPhysics.h"
 

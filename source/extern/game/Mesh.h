@@ -1,5 +1,4 @@
-#ifndef GAME_MESH_H
-#define GAME_MESH_H
+#pragma once
 
 #include <type/type.h>
 #include <vector>
@@ -21,9 +20,9 @@ class Material;
 class Mesh
 {
 public:
-	typedef Vertex Vertex;
-	typedef VertexWeight VertexWeight;
-	typedef std::vector< VertexWeight > VertexWeightList;
+	using Vertex			= Vertex;
+	using VertexWeight		= VertexWeight;
+	using VertexWeightList	= std::vector< VertexWeight >;
 
 public:
 	Mesh() { }
@@ -53,8 +52,8 @@ public:
 class VertexWeight
 {
 public:
-	typedef u8_t BoneIndexList[ 4 ];
-	typedef u8_t WeightList[ 4 ];
+	using BoneIndexList	= u8_t[ 4 ];
+	using WeightList	= u8_t[ 4 ];
 		
 private:
 	BoneIndexList	bone_index_list_;	///< ボーンインデックス ( 0 .. 3 )
@@ -93,5 +92,3 @@ public:
 };
 
 } // namespace game
-
-#endif // GAME_MESH_H

@@ -33,7 +33,7 @@ public:
 		ITEM_TYPE_MAX
 	};
 
-	typedef std::list< Stone* > StoneList;
+	using StoneList = std::list< Stone* >;
 
 private:
 	bool		is_on_footing_;			///< Œ»Ý‘«êãƒtƒ‰ƒO

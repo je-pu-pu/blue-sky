@@ -17,8 +17,8 @@ class Sound;
 class SoundManager
 {
 public:
-	typedef std::map< string_t, Sound* > SoundMap;
-	typedef std::map< string_t, SoundMap > GroupedSoundMap;
+	using SoundMap			= std::map< string_t, Sound* >;
+	using GroupedSoundMap	= std::map< string_t, SoundMap >;
 
 private:
 	SoundMap sound_map_;

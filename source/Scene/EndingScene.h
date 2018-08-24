@@ -4,8 +4,6 @@
 #include <common/auto_ptr.h>
 #include <vector>
 
-class DrawingModel;
-
 namespace game
 {
 
@@ -30,14 +28,14 @@ namespace blue_sky
 class EndingScene : public Scene
 {
 public:
-	typedef blue_sky::graphics::Model Model;
-	typedef blue_sky::graphics::Line Line;
-	typedef std::vector< Model* > DrawingModelList;
+	using Model		= graphics::Model;
+	using Line		= graphics::Line;
+	using ModelList	= std::vector< Model* >;
 
 private:
 	common::auto_ptr< game::ElapsedTimer > elapsed_timer_;
 
-	DrawingModelList drawing_model_list_;
+	ModelList drawing_model_list_;
 	uint_t current_drawing_model_index_;
 	Model* current_drawing_model_;
 	float_t drawing_model_elapsed_time_;

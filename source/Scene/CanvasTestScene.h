@@ -35,7 +35,7 @@ namespace blue_sky
 class CanvasTestScene : public Scene
 {
 public:
-	typedef win::Tablet Tablet;
+	using Tablet = win::Tablet;
 
 	struct Vertex
 	{
@@ -44,9 +44,9 @@ public:
 		Color color;
 	};
 
-	typedef DynamicPointList< Vertex > DynamicPointList;
+	using DynamicPointList = DynamicPointList< Vertex >;
 
-	typedef graphics::SkyBox	SkyBox;
+	using SkyBox = graphics::SkyBox;
 
 private:
 	Tablet*								tablet_;

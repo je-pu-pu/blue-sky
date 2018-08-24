@@ -18,7 +18,7 @@ class Matrix;
 class alignas( 16 ) Vector
 {
 public:
-	typedef float			UnitType;
+	using UnitType = float;
 
 private:
 	DirectX::XMVECTOR value_;

@@ -18,8 +18,8 @@ class Player;
 class Robot : public ActiveObject
 {
 public:
-	typedef game::Texture Texture;
-	typedef std::vector< Vector > VectorArray;
+	using Texture		= game::Texture;
+	using VectorArray	= std::vector< Vector >;
 
 	enum Mode
 	{

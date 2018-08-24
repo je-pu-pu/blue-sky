@@ -1,4 +1,4 @@
-#include "Direct3D11BulletDebugDraw.h"
+#include "BulletDebugDraw.h"
 #include "Direct3D11.h"
 
 #include <common/exception.h>
@@ -11,7 +11,10 @@
 #include <fstream>
 #include <sstream>
 
-Direct3D11BulletDebugDraw::Direct3D11BulletDebugDraw( Direct3D11* direct_3d )
+namespace core::graphics::direct_3d_11
+{
+
+BulletDebugDraw::BulletDebugDraw( Direct3D11* direct_3d )
 	: direct_3d_( direct_3d )
 	, vertex_buffer_( 0 )
 	, debug_mode_( 0 )
@@ -19,12 +22,12 @@ Direct3D11BulletDebugDraw::Direct3D11BulletDebugDraw( Direct3D11* direct_3d )
 
 }
 
-Direct3D11BulletDebugDraw::~Direct3D11BulletDebugDraw()
+BulletDebugDraw::~BulletDebugDraw()
 {
 	DIRECT_X_RELEASE( vertex_buffer_ );
 }
 
-void Direct3D11BulletDebugDraw::create_vertex_buffer()
+void BulletDebugDraw::create_vertex_buffer()
 {
 	if ( vertex_list_.empty() )
 	{
@@ -46,7 +49,7 @@ void Direct3D11BulletDebugDraw::create_vertex_buffer()
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & vertex_buffer_ ) );
 }
 
-void Direct3D11BulletDebugDraw::drawLine( const btVector3& from, const btVector3& to, const btVector3& color )
+void BulletDebugDraw::drawLine( const btVector3& from, const btVector3& to, const btVector3& color )
 {
 	Vertex from_v;
 	Vertex to_v;
@@ -61,19 +64,19 @@ void Direct3D11BulletDebugDraw::drawLine( const btVector3& from, const btVector3
 	vertex_list_.push_back( to_v );
 }
 
-void Direct3D11BulletDebugDraw::clear()
+void BulletDebugDraw::clear()
 {
 	vertex_list_.clear();
 }
 
-void Direct3D11BulletDebugDraw::render() const
+void BulletDebugDraw::render() const
 {
 	if ( vertex_list_.empty() )
 	{
 		return;
 	}
 
-	const_cast< Direct3D11BulletDebugDraw* >( this )->create_vertex_buffer();
+	const_cast< BulletDebugDraw* >( this )->create_vertex_buffer();
 
 	UINT stride = sizeof( Vertex );
     UINT offset = 0;
@@ -82,3 +85,5 @@ void Direct3D11BulletDebugDraw::render() const
 	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
 	direct_3d_->getImmediateContext()->Draw( vertex_list_.size(), 0 );
 }
+
+} // namespace core::graphics::direct_3d_11

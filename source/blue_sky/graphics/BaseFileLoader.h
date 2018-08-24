@@ -1,6 +1,9 @@
 #pragma once
 
+#include "Mesh.h"
 #include <type/type.h>
+#include <vector>
+#include <map>
 
 namespace game
 {
@@ -25,11 +28,14 @@ namespace blue_sky::graphics
 class BaseFileLoader
 {
 public:
-	typedef blue_sky::graphics::Model	Model; ///< @todo ’ŠÛ‰»‚·‚é
-	typedef blue_sky::graphics::Mesh	Mesh; ///< @todo ’ŠÛ‰»‚·‚é
-	typedef core::SkinningAnimationSet	SkinningAnimationSet;
-	typedef game::Shader				Shader;
-	typedef game::Texture				Texture;
+	using Model					= blue_sky::graphics::Model;	///< @todo ’ŠÛ‰»‚·‚é
+	using Mesh					= blue_sky::graphics::Mesh;		///< @todo ’ŠÛ‰»‚·‚é
+	using SkinningAnimationSet	= core::SkinningAnimationSet;
+	using Shader				= game::Shader;
+	using Texture				= game::Texture;
+
+	using VertexList			= std::vector< Mesh::Vertex >;
+	using VertexIndexMap		= std::map< Mesh::Vertex, Mesh::Index >;
 
 private:
 	Model* model_;

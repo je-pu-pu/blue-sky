@@ -522,7 +522,7 @@ void GraphicsManager::render_fader() const
 	get_fader()->render();
 
 #if 0
-	ObjectConstantBufferData buffer_data;
+	ObjectShaderResourceData buffer_data;
 	buffer_data.world = Matrix().set_identity().transpose();
 	buffer_data.color = direct_3d_->getFader()->get_color();
 	
@@ -632,7 +632,7 @@ void GraphicsManager::debug_print_resources() const
 /*
 void GraphicsManager::update_frame_render_data( const Camera* camera_ )
 {
-	FrameConstantBufferData frame_constant_buffer_data;
+	FrameShaderResourceData frame_constant_buffer_data;
 	update_frame_constant_buffer_data_sub( frame_constant_buffer_data );
 
 	Vector eye( camera_->position().x(), camera_->position().y(), camera_->position().z() );

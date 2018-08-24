@@ -27,7 +27,7 @@
 namespace blue_sky
 {
 
-typedef sol::error ScriptError;
+using ScriptError = sol::error;
 
 /**
  * スクリプト管理
@@ -37,10 +37,10 @@ typedef sol::error ScriptError;
 class ScriptManager // : game::ScriptManager
 {
 public:
-	typedef graphics::Model		Model;
-	typedef graphics::Mesh		Mesh;
-	typedef game::Shader		Shader;
-	typedef game::Texture		Texture;
+	using Model		= graphics::Model;
+	using Mesh		= graphics::Mesh;
+	using Shader	= game::Shader;
+	using Texture	= game::Texture;
 
 private:
 	sol::state lua_;

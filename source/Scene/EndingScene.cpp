@@ -8,7 +8,7 @@
 
 /// @todo ’ŠÛ‰»‚·‚é
 #include <blue_sky/graphics/Fader.h>
-#include <core/graphics/Direct3D11/Direct3D11Sprite.h>
+#include <core/graphics/Direct3D11/Sprite.h>
 
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>

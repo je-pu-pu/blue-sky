@@ -2,6 +2,7 @@
 
 #include "Scene.h"
 #include <win/Rect.h>
+#include <type/type.h>
 #include <vector>
 #include <list>
 
@@ -15,7 +16,6 @@ namespace blue_sky
 class StageSelectScene : public Scene
 {
 public:
-	typedef std::string string_t;
 
 	class Stage
 	{
@@ -27,8 +27,8 @@ public:
 		bool completed;
 	};
 
-	typedef std::list< Stage* > StageList;
-	typedef std::vector< win::Rect > RectList;
+	using StageList	= std::list< Stage* >;
+	using RectList	= std::vector< win::Rect >;
 
 	static string_t get_stage_dir_name_by_page( int );
 	static string_t get_stage_prefix_by_page( int );

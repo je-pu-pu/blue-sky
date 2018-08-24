@@ -5,6 +5,6 @@
 namespace core
 {
 
-typedef bullet::Quaternion Quaternion;
+using Quaternion = bullet::Quaternion;
 
 } // namespace core

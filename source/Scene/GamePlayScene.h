@@ -25,7 +25,6 @@ namespace blue_sky
 	class Goal;
 	class ActiveObject;
 	class Camera;
-	class DrawingModel;
 	class DelayedCommand;
 
 	struct FrameShaderResourceData;
@@ -42,17 +41,16 @@ namespace blue_sky
 class GamePlayScene : public Scene
 {
 public:
-	typedef game::Mesh					Mesh;
-	typedef game::Shader				Shader;
-	typedef graphics::Rectangle			Rectangle;
+	using Mesh					= game::Mesh;
+	using Shader				= game::Shader;
+	using Rectangle				= graphics::Rectangle;
 	
+	using Command				= std::function< void( string_t ) >;
+	using CommandMap			= std::map< string_t, Command >;
 
-	typedef std::function< void( string_t ) > Command;
-	typedef std::map< string_t, Command > CommandMap;
-
-	typedef std::function< void() >			CommandCall;
-	typedef std::list< CommandCall >		CommandCallList;
-	typedef std::list< DelayedCommand* >	DelayedCommandList;
+	using CommandCall			= std::function< void() >;
+	using CommandCallList		= std::list< CommandCall >;
+	using DelayedCommandList	= std::list< DelayedCommand* >;
 
 	enum BalloonSoundType
 	{

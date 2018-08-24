@@ -73,20 +73,11 @@ struct BoneShaderResourceData : public BaseShaderResourceData< 5 >
 	}
 };
 
-typedef core::graphics::direct_3d_11::ShaderResource< GameShaderResourceData > GameShaderResource;
-typedef core::graphics::direct_3d_11::ShaderResourceWithData< FrameShaderResourceData > FrameShaderResource;
-typedef core::graphics::direct_3d_11::ShaderResourceWithData< FrameDrawingShaderResourceData > FrameDrawingShaderResource;
-typedef core::graphics::direct_3d_11::ShaderResource< ObjectShaderResourceData > ObjectShaderResource;
-typedef core::graphics::direct_3d_11::ShaderResourceWithData< ObjectShaderResourceData > ObjectShaderResourceWithData;
-typedef core::graphics::direct_3d_11::ShaderResource< BoneShaderResourceData > BoneShaderResource;
-
-/// @todo ConstantBuffer -> ShaderResource Ç…ñºëOïœçXÇ∑ÇÈ
-/// @todo çÌèúÇ∑ÇÈ
-typedef GameShaderResource				GameConstantBuffer;
-typedef FrameShaderResource				FrameConstantBuffer;
-typedef FrameDrawingShaderResource		FrameDrawingConstantBuffer;
-typedef ObjectShaderResource			ObjectConstantBuffer;
-typedef ObjectShaderResourceWithData	ObjectConstantBufferWithData;
-typedef BoneShaderResource				BoneConstantBuffer;
+using GameShaderResource			= core::graphics::direct_3d_11::ShaderResource< GameShaderResourceData >;
+using FrameShaderResource			= core::graphics::direct_3d_11::ShaderResourceWithData< FrameShaderResourceData >;
+using FrameDrawingShaderResource	= core::graphics::direct_3d_11::ShaderResourceWithData< FrameDrawingShaderResourceData >;
+using ObjectShaderResource			= core::graphics::direct_3d_11::ShaderResource< ObjectShaderResourceData >;
+using ObjectShaderResourceWithData	= core::graphics::direct_3d_11::ShaderResourceWithData< ObjectShaderResourceData >;
+using BoneShaderResource			= core::graphics::direct_3d_11::ShaderResource< BoneShaderResourceData >;
 
 } // namespace blue_sky

@@ -10,7 +10,7 @@ namespace game
 class Config
 {
 public:
-	typedef std::map< std::string, std::string > ValueMap;
+	using ValueMap = std::map< std::string, std::string >;
 
 private:
 	ValueMap value_;

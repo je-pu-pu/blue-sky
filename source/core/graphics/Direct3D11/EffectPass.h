@@ -17,9 +17,8 @@ namespace core::graphics::direct_3d_11
 class EffectPass : public core::graphics::EffectPass
 {
 public:
-	typedef Direct3D11				Direct3D;
-
-	typedef ID3D11InputLayout		InputLayout;
+	using Direct3D		= Direct3D11;
+	using InputLayout	= ID3D11InputLayout;
 
 private:
 	Direct3D*						direct_3d_;			

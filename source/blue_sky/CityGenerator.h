@@ -22,9 +22,9 @@ namespace blue_sky
 class CityGenerator
 {
 public:
-	typedef graphics::Model		Model;
-	typedef graphics::Mesh		Mesh;
-	typedef game::VertexGroup	VertexGroup;
+	using Model			= graphics::Model;
+	using Mesh			= graphics::Mesh;
+	using VertexGroup	= game::VertexGroup;
 
 private:
 	Model* model_;

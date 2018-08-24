@@ -21,41 +21,30 @@ namespace direct_x_math
 	class Color;
 }
 
+class Direct3D11;
+
 namespace core::graphics::direct_3d_11
 {
 	template< typename T > class ShaderResource;
-}
-
-class Direct3D11;
-
 
 /**
  * Direct3D 11 Sprite
  *
+ * @todo êÆóùÇ∑ÇÈ
  */
-class Direct3D11Sprite
+class Sprite
 {
 public:
-	typedef Direct3D11					Direct3D;
-	typedef game::Texture				Texture;
-
-	typedef Direct3D11Sprite			Sprite;
+	using Direct3D		= Direct3D11;
+	using Texture		= game::Texture;
 	
-	typedef ID3D11InputLayout			InputLayout;
-	typedef ID3D11Buffer				Buffer;
-
-	typedef DirectX::XMFLOAT2			Vector2;
-	typedef DirectX::XMFLOAT3			Vector3;
-	typedef DirectX::XMFLOAT4			Vector4;
+	using InputLayout	= ID3D11InputLayout;
+	using Buffer		= ID3D11Buffer;
 	
-	typedef direct_x_math::Color		Color;
-	typedef direct_x_math::Vector		Vector;
-	typedef direct_x_math::Matrix		Matrix;
-
-	typedef WORD						Index;
-
-	typedef win::Rect					Rect;
-	typedef win::Point					Point;
+	using Index			= WORD;
+	
+	using Rect			= win::Rect;
+	using Point			= win::Point;
 
 	struct Vertex
 	{
@@ -71,7 +60,7 @@ public:
 		Matrix transform;
 	};
 
-	typedef core::graphics::direct_3d_11::ShaderResource< ConstantBufferData > ConstantBuffer;
+	using ConstantBuffer = core::graphics::direct_3d_11::ShaderResource< ConstantBufferData >;
 
 	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
 
@@ -82,7 +71,7 @@ protected:
 	Buffer*			vertex_buffer_;
 	Buffer*			index_buffer_;
 
-	static Color	white_;				/// !!!!!
+	static const Color&	white_;			/// !!!!!
 
 	float_t			ortho_offset_;		///< óßëÃéãóp
 
@@ -92,8 +81,8 @@ protected:
 	void draw( const Rect*, const Texture*, const Rect*, const Color* );
 
 public:
-	explicit Direct3D11Sprite( Direct3D* );
-	~Direct3D11Sprite();
+	explicit Sprite( Direct3D* );
+	~Sprite();
 
 	void begin();
 
@@ -109,4 +98,6 @@ public:
 
 	void end();
 
-}; // class Direct3D11Sprite
+}; // class Sprite
+
+} // namespace core::graphics::direct_3d_11

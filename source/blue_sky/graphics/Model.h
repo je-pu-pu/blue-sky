@@ -27,11 +27,11 @@ namespace blue_sky::graphics
 class Model : public game::Model
 {
 public:
-	typedef Mesh Mesh;
-	typedef Line Line;
-	typedef game::Shader Shader;
-	typedef std::vector< Shader* > ShaderList;
-	typedef core::SkinningAnimationSet SkinningAnimationSet;
+	using Mesh					= Mesh;
+	using Line					= Line;
+	using Shader				= game::Shader;
+	using ShaderList			= std::vector< Shader* >;
+	using SkinningAnimationSet	= core::SkinningAnimationSet;
 
 private:
 	Mesh*					mesh_;

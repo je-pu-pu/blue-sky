@@ -15,8 +15,6 @@ class Sound;
 namespace blue_sky
 {
 
-class DrawingModel;
-
 class Player;
 class Balloon;
 class Rocket;
@@ -41,8 +39,8 @@ class Ladder;
 class GameObject
 {
 public:
-	typedef game::Sound				Sound;
-	typedef std::function< void() > EventHandler;
+	using Sound			= game::Sound;
+	using EventHandler	= std::function< void() >;
 
 	static Vector GravityDefault;
 

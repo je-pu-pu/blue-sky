@@ -12,9 +12,9 @@ namespace direct_x_math
 class alignas( 16 ) Matrix
 {
 public:
-	typedef float			UnitType;
-	typedef int				IntType;
-	typedef unsigned int	UintType;
+	using UnitType	= float;
+	using IntType	= int;
+	using UintType	= unsigned int;
 
 private:
 	DirectX::XMMATRIX value_;

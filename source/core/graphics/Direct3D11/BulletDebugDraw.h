@@ -1,29 +1,32 @@
 #pragma once
 
 #include "Direct3D11Common.h"
-#include <DirectXMath.h>
+#include <core/type.h>
 #include <btBulletCollisionCommon.h>
 #include <vector>
 
 class Direct3D11;
 
+namespace core::graphics::direct_3d_11
+{
+
 /**
  * Bullet のデバッグ表示を Direct3D11 で行うためのクラス
  *
  */
-class Direct3D11BulletDebugDraw : public btIDebugDraw
+class BulletDebugDraw : public btIDebugDraw
 {
 public:
+	using Position	= Vector3;
+	using Color		= Vector3;
+
 	struct Vertex
 	{
-		DirectX::XMFLOAT3 Position;
-		DirectX::XMFLOAT3 Color;
+		Position Position;
+		Color Color;
 	};
 
-	typedef DirectX::XMFLOAT3 Position;
-	typedef DirectX::XMFLOAT3 Color;
-
-	typedef std::vector< Vertex > VertexList;
+	using VertexList = std::vector< Vertex >;
 
 protected:
 	Direct3D11*		direct_3d_;
@@ -37,8 +40,8 @@ protected:
 	void create_vertex_buffer();
 
 public:
-	explicit Direct3D11BulletDebugDraw( Direct3D11* );
-	virtual ~Direct3D11BulletDebugDraw();
+	explicit BulletDebugDraw( Direct3D11* );
+	virtual ~BulletDebugDraw();
 
 	void drawLine( const btVector3&, const btVector3&, const btVector3& );
 	void drawContactPoint( const btVector3&, const btVector3&, btScalar, int, const btVector3& ) { }
@@ -50,4 +53,6 @@ public:
 	void clear();
 	void render() const;
 
-}; // class Direct3D11BulletDebugDraw
+}; // class BulletDebugDraw
+
+} // namespace core::graphics::direct_3d_11

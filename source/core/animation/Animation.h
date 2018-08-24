@@ -27,11 +27,11 @@ public:
 		CHANNEL_INDEX_MAX
 	};
 
-	typedef AnimationChannel Channel;
-	typedef std::array< Channel, CHANNEL_INDEX_MAX > ChannelList;
+	using Channel		= AnimationChannel;
+	using ChannelList	= std::array< Channel, CHANNEL_INDEX_MAX >;
 
-	typedef AnimationKeyFrame KeyFrame;
-	typedef Channel::KeyFrameList KeyFrameList;
+	using KeyFrame		= AnimationKeyFrame;
+	using KeyFrameList	= Channel::KeyFrameList;
 
 private:
 	string_t name_;

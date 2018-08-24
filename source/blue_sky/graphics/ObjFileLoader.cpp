@@ -32,7 +32,6 @@ bool ObjFileLoader::load( const char_t* file_name )
 
 	get_model()->set_mesh( create_mesh() );
 
-	typedef std::map< Vertex, Mesh::Index > VertexIndexMap;
 	VertexIndexMap vertex_index_map;
 
 	Mesh::PositionList position_list;

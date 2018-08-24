@@ -14,11 +14,11 @@
 class BulletPhysics
 {
 public:
-	typedef core::Vector Vector;
-	typedef core::Transform Transform;
+	using Vector				= core::Vector;
+	using Transform				= core::Transform;
 
-	typedef btAlignedObjectArray< btCollisionShape* > CollisionShapeArray;
-	typedef std::list< btStridingMeshInterface* > MeshList;
+	using CollisionShapeArray	= btAlignedObjectArray< btCollisionShape* >;
+	using MeshList				= std::list< btStridingMeshInterface* >;
 
 protected:
 	btDefaultCollisionConfiguration*		collision_configuration_;

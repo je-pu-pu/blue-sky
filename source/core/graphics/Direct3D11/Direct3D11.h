@@ -19,6 +19,8 @@ namespace core::graphics::direct_3d_11
 	class Effect;
 	class EffectTechnique;
 	class EffectPass;
+
+	class Sprite;
 }
 
 class DirectWrite;
@@ -30,22 +32,21 @@ class DirectWrite;
 class Direct3D11
 {
 public:
-	typedef Direct3D11Sprite			Sprite;
+	using InputLayout		= core::graphics::direct_3d_11::InputLayout;
+	using InputLayoutList	= std::map< const char*, InputLayout* >;
 
-	typedef core::graphics::direct_3d_11::InputLayout		InputLayout;
+	using Effect			= core::graphics::direct_3d_11::Effect;
+	using EffectTechnique	= core::graphics::direct_3d_11::EffectTechnique;
+	using EffectPass		= core::graphics::direct_3d_11::EffectPass;
 
-	typedef core::graphics::direct_3d_11::Effect			Effect;
-	typedef core::graphics::direct_3d_11::EffectTechnique	EffectTechnique;
-	typedef core::graphics::direct_3d_11::EffectPass		EffectPass;
+	using Sprite			= core::graphics::direct_3d_11::Sprite;
 
-	typedef DirectWrite					Font;
+	using Font				= DirectWrite;
 
-	typedef direct_x_math::Vector		Vector;
-	typedef direct_x_math::Matrix		Matrix;
-	typedef direct_x_math::Color		Color;
-	typedef Direct3D11Texture			Texture;
-
-	typedef std::map< const char*, InputLayout* >		InputLayoutList;
+	using Vector			= direct_x_math::Vector;
+	using Matrix			= direct_x_math::Matrix;
+	using Color				= direct_x_math::Color;
+	using Texture			= Direct3D11Texture;
 
 private:
 	static const DXGI_FORMAT DEPTH_STENCIL_FORMAT = DXGI_FORMAT_D32_FLOAT;

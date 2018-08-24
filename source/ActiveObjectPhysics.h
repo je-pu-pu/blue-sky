@@ -15,7 +15,7 @@ class ActiveObject;
 class ActiveObjectPhysics : public BulletPhysics
 {
 public:
-	typedef btRigidBody RigidBody;
+	using RigidBody = btRigidBody;
 
 public:
 	ActiveObjectPhysics();

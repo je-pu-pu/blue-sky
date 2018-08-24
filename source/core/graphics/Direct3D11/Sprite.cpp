@@ -1,4 +1,4 @@
-#include "Direct3D11Sprite.h"
+#include "Sprite.h"
 #include "Direct3D11.h"
 #include <GameMain.h>
 #include <core/graphics/Direct3D11/ShaderResource.h>
@@ -6,9 +6,12 @@
 #include <game/Texture.h>
 #include <win/Rect.h>
 
-Direct3D11Sprite::Color Direct3D11Sprite::white_( 1, 1, 1, 1 );
+namespace core::graphics::direct_3d_11
+{
 
-Direct3D11Sprite::Direct3D11Sprite( Direct3D* direct_3d )
+const Color& Sprite::white_ = Color::White;
+
+Sprite::Sprite( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
 	, constant_buffer_( 0 )
 	, vertex_buffer_( 0 )
@@ -21,7 +24,7 @@ Direct3D11Sprite::Direct3D11Sprite( Direct3D* direct_3d )
 	create_index_buffer();
 }
 
-Direct3D11Sprite::~Direct3D11Sprite()
+Sprite::~Sprite()
 {
 	DIRECT_X_RELEASE( index_buffer_ );
 	DIRECT_X_RELEASE( vertex_buffer_ );
@@ -29,7 +32,7 @@ Direct3D11Sprite::~Direct3D11Sprite()
 	delete constant_buffer_;
 }
 
-void Direct3D11Sprite::create_vertex_buffer()
+void Sprite::create_vertex_buffer()
 {
 	D3D11_BUFFER_DESC buffer_desc = { 0 };
 
@@ -41,7 +44,7 @@ void Direct3D11Sprite::create_vertex_buffer()
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, 0, & vertex_buffer_ ) );
 }
 
-void Direct3D11Sprite::create_index_buffer()
+void Sprite::create_index_buffer()
 {
 	D3D11_BUFFER_DESC buffer_desc = { 0 };
 
@@ -57,7 +60,7 @@ void Direct3D11Sprite::create_index_buffer()
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & index_buffer_ ) );
 }
 
-void Direct3D11Sprite::begin()
+void Sprite::begin()
 {
 	UINT stride = sizeof( Vertex );
     UINT offset = 0;
@@ -71,12 +74,12 @@ void Direct3D11Sprite::begin()
 	set_transform( Matrix::identity() );
 }
 
-void Direct3D11Sprite::end()
+void Sprite::end()
 {
 	direct_3d_->bind_texture_to_ps( 0, nullptr );
 }
 
-void Direct3D11Sprite::set_transform( const Matrix& m )
+void Sprite::set_transform( const Matrix& m )
 {
 	DXGI_SURFACE_DESC surface_desc;
 	direct_3d_->getBackbufferSurface()->GetDesc( & surface_desc );
@@ -89,7 +92,7 @@ void Direct3D11Sprite::set_transform( const Matrix& m )
 	constant_buffer_->update( & constant_buffer_data );
 }
 
-void Direct3D11Sprite::draw( const Rect* dst, const Texture* texture, const Rect* src, const Color* color )
+void Sprite::draw( const Rect* dst, const Texture* texture, const Rect* src, const Color* color )
 {
 	D3D11_MAPPED_SUBRESOURCE mapped_subresource;
 
@@ -180,28 +183,30 @@ void Direct3D11Sprite::draw( const Rect* dst, const Texture* texture, const Rect
 	blue_sky::GameMain::get_instance()->get_graphics_manager()->count_draw();
 }
 
-void Direct3D11Sprite::draw( const Point& dst_point, const Texture* texture, const Rect& src, const Color& color )
+void Sprite::draw( const Point& dst_point, const Texture* texture, const Rect& src, const Color& color )
 {
 	win::Rect dst = win::Rect::Size( dst_point.x(), dst_point.y(), src.width(), src.height() );
 	draw( & dst, texture, & src, & color );
 }
 
-void Direct3D11Sprite::draw( const Rect& dst, const Texture* texture, const Rect& src, const Color& color )
+void Sprite::draw( const Rect& dst, const Texture* texture, const Rect& src, const Color& color )
 {
 	draw( & dst, texture, & src, & color );
 }
 
-void Direct3D11Sprite::draw( const Rect& dst, const Texture* texture, const Color& color )
+void Sprite::draw( const Rect& dst, const Texture* texture, const Color& color )
 {
 	draw( & dst, texture, 0, & color );
 }
 
-void Direct3D11Sprite::draw( const Texture* texture, const Rect& src, const Color& color )
+void Sprite::draw( const Texture* texture, const Rect& src, const Color& color )
 {
 	draw( 0, texture, & src, & color );
 }
 
-void Direct3D11Sprite::draw( const Texture* texture, const Color& color )
+void Sprite::draw( const Texture* texture, const Color& color )
 {
 	draw( 0, texture, 0, & color );
 }
+
+} // namespace core::graphics::direct_3d_11

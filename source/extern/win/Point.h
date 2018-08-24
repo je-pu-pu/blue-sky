@@ -19,7 +19,8 @@ namespace win
 class Point
 {
 public:
-	typedef long unit;
+	using unit = long;
+
 private:
 	POINT point_;
 

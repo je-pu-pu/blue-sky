@@ -20,12 +20,12 @@ class ShadowMap : public graphics::ShadowMap
 public:
 	static const int MaxCascadeLevels = 4;
 
-	typedef Vector								Vector;
-	typedef Matrix								Matrix;
-	typedef Matrix								MatrixList[ MaxCascadeLevels ];
+	using Vector		= Vector;
+	using Matrix		= Matrix;
+	using MatrixList	= Matrix[ MaxCascadeLevels ];
 
-	typedef D3D11_VIEWPORT						Viewport;
-	typedef std::vector< Viewport >				ViewportList;
+	using Viewport		= D3D11_VIEWPORT;
+	using ViewportList	= std::vector< Viewport >;
 
 	struct ShaderResourceData
 	{
@@ -35,7 +35,7 @@ public:
 		float_t view_depth_per_cascade_level[ 4 ];
 	};
 
-	typedef core::graphics::direct_3d_11::ShaderResourceWithData< ShaderResourceData > ShaderResource;
+	using ShaderResource = core::graphics::direct_3d_11::ShaderResourceWithData< ShaderResourceData >;
 
 	static const int shader_resource_view_slot_ = 1;		/// !!!!!!!!!!!
 

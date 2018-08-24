@@ -7,7 +7,11 @@
 #include <memory>
 
 class Direct3D11;
-class Direct3D11Axis;
+
+namespace core::graphics::direct_3d_11
+{
+	class Axis;
+}
 
 namespace blue_sky::graphics
 {
@@ -24,7 +28,8 @@ namespace blue_sky::graphics::direct_3d_11
 class GraphicsManager : public blue_sky::graphics::GraphicsManager
 {
 public:
-	typedef Direct3D11 Direct3D;
+	using Direct3D	= Direct3D11;
+	using Axis		= core::graphics::direct_3d_11::Axis;
 
 private:
 	Direct3D*										direct_3d_;
@@ -32,15 +37,15 @@ private:
 	std::unique_ptr< SkyBox >						sky_box_;
 	std::unique_ptr< Model >						ground_;
 	
-	std::unique_ptr< Direct3D11Axis >				debug_axis_;
+	std::unique_ptr< Axis >							debug_axis_;
 
-	std::unique_ptr< GameConstantBuffer >			game_render_data_;
-	std::unique_ptr< FrameConstantBuffer >			frame_render_data_;
-	std::unique_ptr< FrameDrawingConstantBuffer >	frame_drawing_render_data_;
-	std::unique_ptr< ObjectConstantBuffer >			shared_object_render_data_;
+	std::unique_ptr< GameShaderResource >			game_render_data_;
+	std::unique_ptr< FrameShaderResource >			frame_render_data_;
+	std::unique_ptr< FrameDrawingShaderResource >	frame_drawing_render_data_;
+	std::unique_ptr< ObjectShaderResource >			shared_object_render_data_;
 
-	std::unique_ptr< ObjectConstantBufferWithData >	sky_box_render_data_;
-	std::unique_ptr< ObjectConstantBufferWithData > ground_render_data_;
+	std::unique_ptr< ObjectShaderResourceWithData >	sky_box_render_data_;
+	std::unique_ptr< ObjectShaderResourceWithData > ground_render_data_;
 
 protected:
 	const InputLayout* get_input_layout( const char_t* ) const override;
@@ -89,10 +94,10 @@ public:
 
 	void set_eye_position( const Vector& );
 
-	GameConstantBuffer* get_game_render_data() const override { return game_render_data_.get(); }
-	FrameConstantBuffer* get_frame_render_data() const override { return frame_render_data_.get(); }
-	FrameDrawingConstantBuffer* get_frame_drawing_render_data() const override { return frame_drawing_render_data_.get(); }
-	ObjectConstantBuffer* get_shared_object_render_data() const override { return shared_object_render_data_.get(); }
+	GameShaderResource* get_game_render_data() const override { return game_render_data_.get(); }
+	FrameShaderResource* get_frame_render_data() const override { return frame_render_data_.get(); }
+	FrameDrawingShaderResource* get_frame_drawing_render_data() const override { return frame_drawing_render_data_.get(); }
+	ObjectShaderResource* get_shared_object_render_data() const override { return shared_object_render_data_.get(); }
 
 	void setup_rendering() const override;
 	void render_technique( const char_t*, const std::function< void () >& ) const override;

@@ -2,14 +2,13 @@
 
 namespace blue_sky
 {
+	using core::Vector2;
+	using core::Vector3;
+	using core::Vector;
+	using core::Matrix;
+	using core::Color;
 
-typedef core::Vector2			Vector2;
-typedef core::Vector3			Vector3;
-typedef core::Vector			Vector;
-typedef core::Matrix			Matrix;
-typedef core::Color				Color;
-
-typedef core::Quaternion		Quaternion;
-typedef core::Transform			Transform;
+	using core::Quaternion;
+	using core::Transform;
 
 } // namespace blue_sky

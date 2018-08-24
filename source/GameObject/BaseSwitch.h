@@ -16,10 +16,10 @@ class BaseSwitch : public ActiveObject
 public:
 	enum State { OFF = 0, ON, BROKEN };
 
-	typedef std::list< EventHandler > EventHandlerList;
-	typedef std::map< string_t, EventHandlerList > EventHandlerMap;
+	using EventHandlerList	= std::list< EventHandler >;
+	using EventHandlerMap	= std::map< string_t, EventHandlerList >;
 
-	typedef game::TimedCache< const GameObject* > CntactObjectCache;
+	using CntactObjectCache	= game::TimedCache< const GameObject* >;
 private:
 	State state_;
 	CntactObjectCache contact_object_cache_; ///< 最近スイッチに接触したオブジェクトのキャッシュ

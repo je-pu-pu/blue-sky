@@ -88,15 +88,6 @@
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Axis.cpp">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.cpp">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\Direct3D11Sprite.cpp">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClCompile>
     <ClCompile Include="core\input\DirectInput\DirectInput.cpp">
       <Filter>core\DirectInput</Filter>
     </ClCompile>
@@ -208,6 +199,15 @@
     <ClCompile Include="blue_sky\CityGenerator.cpp">
       <Filter>blue_sky</Filter>
     </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Axis.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Sprite.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\BulletDebugDraw.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -303,16 +303,7 @@
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Axis.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11BulletDebugDraw.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Common.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Sprite.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Texture.h">
@@ -553,6 +544,15 @@
     <ClInclude Include="DynamicPointList.h" />
     <ClInclude Include="blue_sky\graphics\shader\NullShader.h">
       <Filter>blue_sky\graphics\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Axis.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Sprite.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\BulletDebugDraw.h">
+      <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

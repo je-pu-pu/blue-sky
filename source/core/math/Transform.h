@@ -5,6 +5,6 @@
 namespace core
 {
 
-typedef bullet::Transform Transform;
+using Transform = bullet::Transform;
 
 } // namespace core

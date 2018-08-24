@@ -14,7 +14,7 @@ template< typename DataType >
 class ShaderResource : public core::graphics::ShaderResource
 {
 public:
-	typedef DataType Data;
+	using Data = DataType;
 	static const UINT SLOT = DataType::SLOT;
 
 protected:

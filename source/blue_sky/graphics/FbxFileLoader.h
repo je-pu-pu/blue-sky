@@ -16,8 +16,8 @@ namespace blue_sky::graphics
 class FbxFileLoader : public BaseFileLoader
 {
 public:
-	typedef core::Animation Animation;
-	typedef core::AnimationKeyFrame AnimationKeyFrame;
+	using Animation			= core::Animation;
+	using AnimationKeyFrame	= core::AnimationKeyFrame;
 
 private:
 	FbxManager* fbx_manager_;

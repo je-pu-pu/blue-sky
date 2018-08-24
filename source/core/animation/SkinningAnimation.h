@@ -12,11 +12,11 @@ namespace core
 class SkinningAnimation
 {
 public:
-	typedef std::vector< Animation > AnimationList;
+	using AnimationList	= std::vector< Animation >;
 
-	typedef AnimationChannel Channel;
-	typedef AnimationKeyFrame KeyFrame;
-	typedef Channel::KeyFrameList KeyFrameList;
+	using Channel		= AnimationChannel;
+	using KeyFrame		= AnimationKeyFrame;
+	using KeyFrameList	= Channel::KeyFrameList;
 
 private:
 	AnimationList	bone_animation_list_;					///< ボーン毎のアニメーションの一覧

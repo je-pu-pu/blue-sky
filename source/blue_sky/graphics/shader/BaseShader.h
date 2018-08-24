@@ -22,13 +22,13 @@ namespace blue_sky::graphics::shader
 class BaseShader : public game::Shader
 {
 public:
-	typedef game::Mesh Mesh;
-	typedef game::Texture Texture;
+	using Mesh				= game::Mesh;
+	using Texture			= game::Texture;
 
-	typedef core::graphics::PrimitiveTopology	PrimitiveTopology;
-	typedef core::graphics::InputLayout			InputLayout;
-	typedef core::graphics::EffectTechnique		EffectTechnique;
-	typedef core::graphics::ShaderResource		ShaderResource;
+	using PrimitiveTopology	= core::graphics::PrimitiveTopology;
+	using InputLayout		= core::graphics::InputLayout;
+	using EffectTechnique	= core::graphics::EffectTechnique;
+	using ShaderResource	= core::graphics::ShaderResource;
 
 protected:
 	GraphicsManager* get_graphics_manager() const { return GameMain::get_instance()->get_graphics_manager(); }

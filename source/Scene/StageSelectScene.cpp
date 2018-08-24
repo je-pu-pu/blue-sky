@@ -7,7 +7,7 @@
 
 /// @todo ’ŠÛ‰»‚·‚é
 #include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/Direct3D11/Direct3D11Sprite.h>
+#include <core/graphics/Direct3D11/Sprite.h>
 
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
@@ -383,7 +383,7 @@ void StageSelectScene::update_stage_list()
 	std::shuffle( face_src_rect_list_.begin(), face_src_rect_list_.end(), random_generator );
 }
 
-StageSelectScene::string_t StageSelectScene::get_stage_dir_name_by_page( int page )
+string_t StageSelectScene::get_stage_dir_name_by_page( int page )
 {
 	if ( page < get_max_story_page() )
 	{
@@ -395,7 +395,7 @@ StageSelectScene::string_t StageSelectScene::get_stage_dir_name_by_page( int pag
 	}
 }
 
-StageSelectScene::string_t StageSelectScene::get_stage_prefix_by_page( int page )
+string_t StageSelectScene::get_stage_prefix_by_page( int page )
 {
 	if ( page < get_max_story_page() )
 	{

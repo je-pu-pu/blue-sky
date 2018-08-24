@@ -9,9 +9,6 @@ struct ID3DX11EffectTechnique;
 namespace core::graphics::direct_3d_11
 {
 
-class Effect;
-class EffectPass;
-
 /**
  * Direct3D 11 Effect Technique のラッパークラス
  *
@@ -20,7 +17,7 @@ class EffectTechnique : public core::graphics::EffectTechnique
 
 {
 public:
-	typedef Direct3D11					Direct3D;
+	using Direct3D = Direct3D11;
 
 private:
 	PassList			pass_list_;

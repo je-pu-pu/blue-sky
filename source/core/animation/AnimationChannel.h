@@ -14,8 +14,8 @@ namespace core
 class AnimationChannel
 {
 public:
-	typedef AnimationKeyFrame KeyFrame;
-	typedef std::vector< KeyFrame > KeyFrameList;
+	using KeyFrame		= AnimationKeyFrame;
+	using KeyFrameList	= std::vector< KeyFrame >;
 
 private:
 	KeyFrameList key_frame_list_;

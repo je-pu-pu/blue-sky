@@ -11,7 +11,7 @@
 class DirectWrite
 {
 public:
-	typedef core::Color			Color;
+	using Color = core::Color;
 
 private:
 	ID2D1Factory*				direct_2d_factory_;

@@ -1,5 +1,5 @@
 #include "Direct3D11.h"
-#include "Direct3D11Sprite.h"
+#include "Sprite.h"
 #include "Direct3D11Texture.h"
 
 #include "InputLayout.h"

@@ -20,7 +20,8 @@ namespace win
 class Rect
 {
 public:
-	typedef LONG unit;
+	using unit = LONG;
+
 private:
 	RECT rect_;
 

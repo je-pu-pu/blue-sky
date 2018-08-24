@@ -1,25 +1,22 @@
-#ifndef TYPE_TYPE_H
-#define TYPE_TYPE_H
+#pragma once
 
+#include <cstdint>
 #include <string>
 
-typedef int				int_t;
+using int_t		= int;
+using s32_t		= std::int32_t;
+using s16_t		= std::int16_t;
+using s8_t		= std::int8_t;
 
-typedef long			s32_t;
-typedef short			s16_t;
-typedef char			s8_t;
+using uint_t	= unsigned int;
 
-typedef unsigned int	uint_t;
+using u32_t		= std::uint32_t;
+using u16_t		= std::uint16_t;
+using u8_t		= std::uint8_t;
 
-typedef unsigned long	u32_t;
-typedef unsigned short	u16_t;
-typedef unsigned char	u8_t;
+using float_t	= float;
 
-typedef float			float_t;
+using bool_t	= bool;
 
-typedef bool			bool_t;
-
-typedef char			char_t;
-typedef std::string		string_t;
-
-#endif // BLUE_SKY_TYPE_H
+using char_t	= char;
+using string_t	= std::string;

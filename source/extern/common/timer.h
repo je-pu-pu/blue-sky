@@ -6,7 +6,7 @@
 namespace common
 {
 
-typedef boost::timer timer;
+using timer = boost::timer;
 
 } // namespace common
 

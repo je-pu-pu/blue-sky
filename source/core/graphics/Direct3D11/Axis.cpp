@@ -1,19 +1,22 @@
-#include "Direct3D11Axis.h"
+#include "Axis.h"
 #include "Direct3D11.h"
 
-Direct3D11Axis::Direct3D11Axis( Direct3D11* direct_3d )
+namespace core::graphics::direct_3d_11
+{
+
+Axis::Axis( Direct3D11* direct_3d )
 	: direct_3d_( direct_3d )
 	, vertex_buffer_( 0 )
 {
 	create_vertex_buffer();
 }
 
-Direct3D11Axis::~Direct3D11Axis()
+Axis::~Axis()
 {
 	DIRECT_X_RELEASE( vertex_buffer_ );
 }
 
-void Direct3D11Axis::create_vertex_buffer()
+void Axis::create_vertex_buffer()
 {
 	Vertex vertex_list[ 6 ] = {
 		{ Position( 0.f, 0.f, 0.f ), Color( 1.f, 0.f, 0.f ) },
@@ -36,7 +39,7 @@ void Direct3D11Axis::create_vertex_buffer()
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & vertex_buffer_ ) );
 }
 
-void Direct3D11Axis::render() const
+void Axis::render() const
 {
 	UINT stride = sizeof( Vertex );
     UINT offset = 0;
@@ -45,3 +48,5 @@ void Direct3D11Axis::render() const
 	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
 	direct_3d_->getImmediateContext()->Draw( 6, 0 );
 }
+
+} // core::graphics::direct_3d_11

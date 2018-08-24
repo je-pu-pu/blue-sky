@@ -20,9 +20,9 @@ template< typename ResourceType >
 class ResourceManager
 {
 public:
-	typedef ResourceType Resource;
-	typedef std::vector< std::unique_ptr< Resource > > ResourceList;
-	typedef std::unordered_map< string_t, Resource* > ResourceMap;
+	using Resource		= ResourceType;
+	using ResourceList	= std::vector< std::unique_ptr< Resource > >;
+	using ResourceMap	= std::unordered_map< string_t, Resource* >;
 
 private:
 	ResourceList resource_list_;

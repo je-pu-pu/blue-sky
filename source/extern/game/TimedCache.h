@@ -15,7 +15,7 @@ template< typename T >
 class TimedCache
 {
 public:
-	typedef std::map< T, float_t > TimerMap;
+	using TimerMap = std::map< T, float_t >;
 
 private:
 	TimerMap timer_map_; ///< 最近接触したオブジェクトの一覧

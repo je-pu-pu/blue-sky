@@ -10,8 +10,8 @@
 #include <blue_sky/graphics/Direct3D11/Line.h>
 
 #include <core/graphics/Direct3D11/Direct3D11Texture.h>
-#include <core/graphics/Direct3D11/Direct3D11Axis.h>
-#include <core/graphics/Direct3D11/Direct3D11BulletDebugDraw.h>
+#include <core/graphics/Direct3D11/Axis.h>
+#include <core/graphics/Direct3D11/BulletDebugDraw.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
 
 #include <core/graphics/Direct3D11/InputLayout.h>
@@ -35,11 +35,11 @@ namespace blue_sky::graphics::direct_3d_11
  */
 GraphicsManager::GraphicsManager( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
-	, game_render_data_( new GameConstantBuffer( direct_3d ) )
-	, frame_render_data_( new FrameConstantBuffer( direct_3d ) )
-	, frame_drawing_render_data_( new FrameDrawingConstantBuffer( direct_3d ) )
-	, shared_object_render_data_( new ObjectConstantBuffer( direct_3d ) )
-	, debug_axis_( new Direct3D11Axis( direct_3d_ ) )
+	, game_render_data_( new GameShaderResource( direct_3d ) )
+	, frame_render_data_( new FrameShaderResource( direct_3d ) )
+	, frame_drawing_render_data_( new FrameDrawingShaderResource( direct_3d ) )
+	, shared_object_render_data_( new ObjectShaderResource( direct_3d ) )
+	, debug_axis_( new core::graphics::direct_3d_11::Axis( direct_3d ) )
 {
 	create_named_shader< shader::BypassShader >( "bypass" );
 
@@ -143,7 +143,7 @@ void GraphicsManager::set_sky_box( const char_t* name )
 {
 	if ( ! sky_box_ )
 	{
-		sky_box_render_data_ = std::make_unique< ObjectConstantBufferWithData >( direct_3d_ );
+		sky_box_render_data_ = std::make_unique< ObjectShaderResourceWithData >( direct_3d_ );
 		sky_box_render_data_->data().color = Color::White;
 	}
 
@@ -183,7 +183,7 @@ void GraphicsManager::set_ground( const char_t* name )
 	ground_.reset( new Ground() );
 	load_mesh( ground_.get(), name );
 
-	ground_render_data_.reset( new ObjectConstantBufferWithData( direct_3d_ ) );
+	ground_render_data_.reset( new ObjectShaderResourceWithData( direct_3d_ ) );
 	ground_render_data_->data().world.set_identity();
 	ground_render_data_->data().color = Color::White;
 }

@@ -365,9 +365,6 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 		get_model()->set_mesh( create_mesh() );
 	}
 
-	typedef std::map< Mesh::Vertex, Mesh::Index > VertexIndexMap;
-	typedef std::vector< Mesh::Vertex > VertexList;
-
 	VertexIndexMap vertex_index_map;
 	VertexList vertex_list;
 

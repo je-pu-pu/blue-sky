@@ -28,7 +28,7 @@
 #include <blue_sky/graphics/Direct3D11/GraphicsManager.h>
 
 #include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/Direct3D11/Direct3D11BulletDebugDraw.h>
+#include <core/graphics/Direct3D11/BulletDebugDraw.h>
 #include <core/graphics/Direct3D11/Effect.h>
 #include <core/input/DirectInput/DirectInput.h>
 
@@ -103,7 +103,7 @@ GameMain::GameMain()
 		oculus_rift_ = new OculusRift( direct_3d_.get() );
 	}
 
-	bullet_debug_draw_ = new Direct3D11BulletDebugDraw( direct_3d_.get() );
+	bullet_debug_draw_ = new core::graphics::direct_3d_11::BulletDebugDraw( direct_3d_.get() );
 	bullet_debug_draw_->setDebugMode( get_config()->get< int >( "graphics.debug_bullet", 0 ) );
 
 	physics_manager_ = new ActiveObjectPhysics();

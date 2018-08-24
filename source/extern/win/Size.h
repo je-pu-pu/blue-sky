@@ -22,7 +22,7 @@ namespace win
 class Size
 {
 public:
-	typedef long unit;
+	using unit = long;
 
 private:
 	unit width_;

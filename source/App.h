@@ -26,10 +26,7 @@ public:
 	static const int DEFAULT_WIDTH = 800;
 	static const int DEFAULT_HEIGHT = 600;
 
-	typedef std::string string_t;
-	typedef string_t::value_type char_t;
-
-	typedef game::Config Config;
+	using Config = game::Config;
 
 private:
 	HINSTANCE	hInst;					///< インスタンスハンドル

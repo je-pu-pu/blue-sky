@@ -20,8 +20,8 @@ class ShadowMap
 public:
 	static const int MaxCascadeLevels = 4;
 
-	typedef Vector								Vector;
-	typedef game::Texture						Texture;
+	using Vector	= Vector;
+	using Texture	= game::Texture;
 
 private:
 

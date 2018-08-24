@@ -12,9 +12,9 @@ namespace direct_x_math
 class Color : private DirectX::XMFLOAT4
 {
 public:
-	typedef float			UnitType;
-	typedef int				IntType;
-	typedef unsigned int	UintType;
+	using UnitType	= float;
+	using IntType	= int;
+	using UintType	= unsigned int;
 
 	static const Color White;
 	static const Color Black;

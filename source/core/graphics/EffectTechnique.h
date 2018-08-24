@@ -10,7 +10,7 @@ class EffectPass;
 class EffectTechnique
 {
 public:
-	typedef std::vector< EffectPass* >	PassList;
+	using PassList = std::vector< EffectPass* >;
 
 public:
 	virtual const PassList& get_pass_list() const = 0;

@@ -37,8 +37,6 @@ namespace blue_sky
 		class Mesh;
 	}
 
-using graphics::GraphicsManager;
-
 /**
  * ê–Ê‚²‚Æ‚Ìˆ—A•`‰æ‚ğŠÇ—‚·‚é
  *
@@ -46,18 +44,19 @@ using graphics::GraphicsManager;
 class Scene
 {
 public:
-	typedef graphics::Model				Model;
-	typedef graphics::Mesh				Mesh;
-	typedef game::Texture				Texture;
+	using Model				= graphics::Model;
+	using Mesh				= graphics::Mesh;
+	using Texture			= game::Texture;
 
-	typedef game::Sound					Sound;
-	typedef game::Config				Config;
-	typedef game::MainLoop				MainLoop;
+	using Sound				= game::Sound;
+	using Config			= game::Config;
+	using MainLoop			= game::MainLoop;
 
-	typedef Direct3D11					Direct3D;
+	using GraphicsManager	= graphics::GraphicsManager;
+	using PhysicsManager	= ActiveObjectPhysics;
+	using SoundManager		= core::SoundManager;
 
-	typedef ActiveObjectPhysics			PhysicsManager;
-	typedef core::SoundManager			SoundManager;
+	using Direct3D			= Direct3D11;
 
 private:
 	const GameMain* game_main_;

@@ -25,7 +25,7 @@ namespace core
 class BgSpriteLayer
 {
 public:
-	typedef game::Texture Texture;
+	using Texture = game::Texture;
 
 private:
 	const string_t name_;

@@ -9,7 +9,6 @@
 #include <type/type.h>
 
 class Direct3D11;
-class Direct3D11BulletDebugDraw;
 
 class DirectWrite;
 
@@ -26,6 +25,11 @@ namespace game
 namespace core
 {
 	class SoundManager;
+
+	namespace graphics::direct_3d_11
+	{
+		class BulletDebugDraw;
+	}
 }
 
 namespace blue_sky
@@ -38,9 +42,6 @@ namespace blue_sky
 	class ActiveObjectManager;
 
 	class ScriptManager;
-
-	class DrawingModel;
-	class DrawingModelManager;
 
 	class Player;
 	class Camera;
@@ -61,19 +62,18 @@ namespace blue_sky
 class GameMain : public Game
 {
 public:
-	typedef game::Config					Config;
-	typedef game::MainLoop					MainLoop;
+	using Config					= game::Config;
+	using MainLoop					= game::MainLoop;
 
-	typedef Direct3D11						Direct3D;
-	
-	typedef ActiveObjectPhysics				PhysicsManager;
-	typedef blue_sky::GraphicsManager		GraphicsManager;
-	typedef core::SoundManager				SoundManager;
+	using PhysicsManager			= ActiveObjectPhysics;
+	using GraphicsManager			= GraphicsManager;
+	using SoundManager				= core::SoundManager;
 
-	typedef blue_sky::Player				Player;
+	using CreateSceneFunction		= std::function< Scene* () >;
+	using CreateSceneFunctionMap	= std::unordered_map< string_t, CreateSceneFunction >;
 
-	typedef std::function< Scene* () > CreateSceneFunction;
-	typedef std::unordered_map< string_t, CreateSceneFunction > CreateSceneFunctionMap;
+	using Direct3D					= Direct3D11;
+	using BulletDebugDraw			= core::graphics::direct_3d_11::BulletDebugDraw;
 
 	enum Key
 	{
@@ -119,7 +119,7 @@ protected:
 
 	common::auto_ptr< ActiveObjectManager >	active_object_manager_;	///< ActiveObjectManager
 
-	common::auto_ptr< Direct3D11BulletDebugDraw >	bullet_debug_draw_;
+	common::auto_ptr< BulletDebugDraw >		bullet_debug_draw_;
 
 	common::safe_ptr< Scene >				scene_;					///< 現在のシーン
 	string_t								stage_name_;			///< 現在のステージ名
@@ -183,7 +183,7 @@ public:
 
 	const MainLoop* get_main_loop() const { return main_loop_.get(); }
 
-	Direct3D11BulletDebugDraw* get_bullet_debug_draw() const { return bullet_debug_draw_.get(); }
+	BulletDebugDraw* get_bullet_debug_draw() const { return bullet_debug_draw_.get(); }
 
 	const std::string& get_stage_name() const { return stage_name_; }
 	void set_stage_name( const std::string& stage_name ) { stage_name_ = stage_name; }

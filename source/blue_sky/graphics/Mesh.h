@@ -51,23 +51,23 @@ struct Vertex : public game::Vertex
 class Mesh : public game::Mesh
 {
 public:
-	typedef blue_sky::graphics::Vertex		Vertex;
-	typedef game::VertexGroup				VertexGroup;
-	typedef game::Texture					Texture;
+	using Vertex			= blue_sky::graphics::Vertex;
+	using VertexGroup		= game::VertexGroup;
+	using Texture			= game::Texture;
 	
-	typedef Vector3							Position;
-	typedef Vector3							Normal;
-	typedef Vector2							TexCoord;
+	using Position			= Vector3;
+	using Normal			= Vector3;
+	using TexCoord			= Vector2;
 
-	typedef std::vector< Position >			PositionList;
-	typedef std::vector< Normal >			NormalList;
-	typedef std::vector< TexCoord >			TexCoordList;
+	using PositionList		= std::vector< Position >;
+	using NormalList		= std::vector< Normal >;
+	using TexCoordList		= std::vector< TexCoord >;
 
-	typedef std::vector< Vertex >			VertexList;
-	typedef std::vector< std::unique_ptr< VertexGroup > > VertexGroupList;
+	using VertexList		= std::vector< Vertex >;
+	using VertexGroupList	= std::vector< std::unique_ptr< VertexGroup > >;
 
-	typedef VertexGroup::Index Index;
-	typedef std::vector< VertexGroup::IndexList::size_type > IndexCountList;
+	using Index				= VertexGroup::Index;
+	using IndexCountList	= std::vector< VertexGroup::IndexList::size_type >;
 
 	class Buffer
 	{

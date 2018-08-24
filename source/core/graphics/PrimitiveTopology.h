@@ -5,6 +5,6 @@
 namespace core::graphics
 {
 
-typedef core::graphics::direct_3d_11::PrimitiveTopology PrimitiveTopology;
+using PrimitiveTopology = core::graphics::direct_3d_11::PrimitiveTopology;
 
 } // namespace core::graphics

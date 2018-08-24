@@ -20,12 +20,12 @@ class EffectPass;
 class Effect
 {
 public:
-	typedef Direct3D11					Direct3D;
+	using Direct3D			= Direct3D11;
 
-	typedef EffectTechnique				Technique;
-	typedef EffectPass					Pass;
+	using Technique			= EffectTechnique;
+	using Pass				= EffectPass;
 
-	typedef std::map< const char*, Technique* > TechniqueList;
+	using TechniqueList		= std::map< const char*, Technique* >;
 
 private:
 	Direct3D*			direct_3d_;

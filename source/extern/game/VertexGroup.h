@@ -13,8 +13,8 @@ namespace game
 class VertexGroup
 {
 public:
-	typedef std::uint16_t Index;
-	typedef std::vector< Index > IndexList;
+	using Index		= std::uint16_t;
+	using IndexList	= std::vector< Index >;
 
 private:
 	IndexList index_list_;

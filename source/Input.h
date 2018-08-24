@@ -49,12 +49,12 @@ public:
 	 */
 	enum Button { LEFT, RIGHT, UP, DOWN, A, B, JUMP, L, R, L2, R2, ESCAPE, MAX_BUTTONS, NONE };
 
-	typedef game::Config Config;
+	using Config				= game::Config;
 
-	typedef std::deque< Button > ButtonStack;
-	typedef std::array< unsigned int, MAX_BUTTONS > ButtonCodeList;
-	typedef std::array< std::vector< int >, MAX_BUTTONS > ButtonCodeMultiList;
-	typedef std::map< std::string, int > ConfigKeyCodeMap;
+	using ButtonStack			= std::deque< Button >;
+	using ButtonCodeList		= std::array< unsigned int, MAX_BUTTONS >;
+	using ButtonCodeMultiList	= std::array< std::vector< int >, MAX_BUTTONS >;
+	using ConfigKeyCodeMap		= std::map< std::string, int >;
 
 private:
 	const DirectInput* direct_input_;						///< DirectInput

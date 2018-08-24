@@ -14,7 +14,7 @@ class AnimationPlayer
 {
 public:
 	/// @todo ®—‚·‚é
-	typedef blue_sky::BoneShaderResource			BoneShaderResource;
+	using BoneShaderResource = blue_sky::BoneShaderResource;
 
 	static const int MaxBones = blue_sky::BoneShaderResourceData::MaxBones;
 

@@ -61,27 +61,27 @@ namespace graphics
 class GraphicsManager : public game::GraphicsManager
 {
 public:
-	typedef Model											Model;
-	typedef Mesh											Mesh;
-	typedef Line											Line;
-	typedef game::Shader									Shader;
-	typedef game::Texture									Texture;
-	typedef core::SkinningAnimationSet						SkinningAnimationSet;
-
-	typedef game::ResourceManager< Model >					ModelManager;
-	typedef game::ResourceManager< Mesh >					MeshManager;
-	typedef game::ResourceManager< Shader >					ShaderManager;
-	typedef game::ResourceManager< Texture >				TextureManager;
-	typedef game::ResourceManager< SkinningAnimationSet >	SkinningAnimationSetManager;
-
-	typedef core::graphics::PrimitiveTopology				PrimitiveTopology;
-	typedef core::graphics::InputLayout						InputLayout;
-	typedef core::graphics::EffectTechnique					EffectTechnique;
-	typedef core::graphics::ShaderResource					ShaderResource;
-	typedef core::graphics::ShadowMap						ShadowMap;
-
-	typedef graphics::shader::BaseShadowMapShader			BaseShadowMapShader;
-
+	using Model							= Model;
+	using Mesh							= Mesh;
+	using Line							= Line;
+	using Shader						= game::Shader;
+	using Texture						= game::Texture;
+	using SkinningAnimationSet			= core::SkinningAnimationSet;
+	
+	using ModelManager					= game::ResourceManager< Model >;
+	using MeshManager					= game::ResourceManager< Mesh >;
+	using ShaderManager					= game::ResourceManager< Shader >;
+	using TextureManager				= game::ResourceManager< Texture >;
+	using SkinningAnimationSetManager	= game::ResourceManager< SkinningAnimationSet >;
+	
+	using PrimitiveTopology				= core::graphics::PrimitiveTopology;
+	using InputLayout					= core::graphics::InputLayout;
+	using EffectTechnique				= core::graphics::EffectTechnique;
+	using ShaderResource				= core::graphics::ShaderResource;
+	using ShadowMap						= core::graphics::ShadowMap;
+	
+	using BaseShadowMapShader			= graphics::shader::BaseShadowMapShader;
+	
 private:
 	std::unique_ptr< Fader >	fader_;
 	bool_t						is_fading_in_ = true;		///< true : 現在フェードイン中 or false : 現在フェードアウト中
@@ -204,10 +204,10 @@ public:
 	ShadowMap* get_shadow_map() { return shadow_map_.get(); }
 	const ShadowMap* get_shadow_map() const { return shadow_map_.get(); }
 
-	virtual GameConstantBuffer* get_game_render_data() const = 0;
-	virtual FrameConstantBuffer* get_frame_render_data() const = 0;
-	virtual FrameDrawingConstantBuffer* get_frame_drawing_render_data() const = 0;
-	virtual ObjectConstantBuffer* get_shared_object_render_data() const = 0;
+	virtual GameShaderResource* get_game_render_data() const = 0;
+	virtual FrameShaderResource* get_frame_render_data() const = 0;
+	virtual FrameDrawingShaderResource* get_frame_drawing_render_data() const = 0;
+	virtual ObjectShaderResource* get_shared_object_render_data() const = 0;
 
 	void set_current_object_shader_resource( const ShaderResource* r ) const { current_object_shader_resource_ = r; }
 	void get_current_skinning_shader_resource( const ShaderResource* r ) const { current_skinning_shader_resource_ = r; }

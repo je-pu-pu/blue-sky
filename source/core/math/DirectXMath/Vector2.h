@@ -15,7 +15,7 @@ class Matrix;
 class Vector2
 {
 public:
-	typedef float UnitType;
+	using UnitType = float;
 
 private:
 	DirectX::XMFLOAT2 value_;

@@ -28,9 +28,9 @@ namespace blue_sky
 class alignas( 16 ) ActiveObject : public GameObject
 {
 public:
-	typedef graphics::Model					Model;
-	typedef game::Shader					Shader;
-	typedef core::AnimationPlayer			AnimationPlayer;
+	using Model				= graphics::Model;
+	using Shader			= game::Shader;
+	using AnimationPlayer	= core::AnimationPlayer;
 
 private:
 	Vector				front_;				///< 前
@@ -41,7 +41,7 @@ private:
 	float_t				start_direction_degree_;	///< スタート時の向き ( Y Axis )
 
 	Model*				model_;				///< Model
-	const ObjectConstantBuffer*				object_constant_buffer_;	///< 定数バッファ @todo インスタンス毎に必要か？
+	const ObjectShaderResource*				object_constant_buffer_;	///< 定数バッファ @todo インスタンス毎に必要か？
 	AnimationPlayer*						animation_player_;			///< アニメーション再生
 
 	bool				is_dead_;			///< 死亡フラグ
@@ -111,7 +111,7 @@ public:
 	void set_mesh_visible( bool v ) { is_mesh_visible_ = v; }
 	void set_line_visible( bool v ) { is_line_visible_ = v; }
 
-	const ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_; }
+	const ObjectShaderResource* get_object_constant_buffer() const { return object_constant_buffer_; }
 
 	void update_render_data() const;
 	virtual void bind_render_data() const;

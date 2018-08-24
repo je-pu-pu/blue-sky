@@ -19,8 +19,8 @@ namespace blue_sky
 class StoryTextScene : public Scene
 {
 public:
-	typedef core::BgSpriteLayer				BgSpriteLayer;
-	typedef std::list< BgSpriteLayer* >		BgSpriteLayerList;
+	using BgSpriteLayer		= core::BgSpriteLayer;
+	using BgSpriteLayerList	= std::list< BgSpriteLayer* >;
 
 private:
 	std::wstring	text_;

@@ -104,7 +104,7 @@ void CityGenerator::extend_road( const Vector& control_point, const Vector& vert
 			extend_road( ( vertex_position3 + vertex_position1 ) / 2.f, vertex_position3, vertex_position1, direction + 90.f, life / 2, straight_life );
 		}
 
-		extend_road( control_point2, vertex_position2, vertex_position3, direction + common::random( -2.5f, +2.5f ), life - 1, straight_life - 1 );
+		extend_road( control_point2, vertex_position2, vertex_position3, direction + common::random( 0.f, +10.f ), life - 1, straight_life - 1 );
 	}
 }
 

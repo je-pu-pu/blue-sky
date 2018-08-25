@@ -516,6 +516,7 @@ technique11 flat
 		RASTERIZERSTATE = Default;
     }
 
+#if 0
 	pass debug_line
     {
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
@@ -529,6 +530,7 @@ technique11 flat
 
 		RASTERIZERSTATE = WireframeRasterizerState;
     }
+#endif
 }
 
 // シェーディングなし・スキニングあり

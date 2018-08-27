@@ -98,7 +98,7 @@ GameMain::GameMain()
 	input_->load_config( * get_config() );
 
 	// Oculus Rift
-	if ( get_config()->get( "input.oculus_rift.enabled", 1 ) )
+	if ( get_config()->get( "input.oculus_rift.enabled", 0 ) )
 	{
 		oculus_rift_ = new OculusRift( direct_3d_.get() );
 	}

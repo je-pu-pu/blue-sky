@@ -2,7 +2,7 @@
 #include "EffectPass.h"
 #include "Direct3D11.h"
 
-#include "d3dx11effect.h"
+#include <d3dx11effect.h>
 
 namespace core::graphics::direct_3d_11
 {

@@ -2,13 +2,16 @@
 #include "EffectTechnique.h"
 #include "Direct3D11.h"
 
-#include "d3dx11effect.h"
-
 #include <common/string.h>
 
+#include <d3dx11effect.h>
 #include <d3dcompiler.h>
 
+#ifdef _DEBUG
+#pragma comment( lib, "effects11d.lib" )
+#else
 #pragma comment( lib, "effects11.lib" )
+#endif
 
 namespace core::graphics::direct_3d_11
 {

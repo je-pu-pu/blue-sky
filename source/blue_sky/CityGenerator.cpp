@@ -108,4 +108,13 @@ void CityGenerator::extend_road( const Vector& control_point, const Vector& vert
 	}
 }
 
+/**
+ * ƒƒbƒVƒ…‚ğ¶¬‚·‚é
+ *
+ */
+void CityGenerator::generate_road_mesh()
+{
+
+}
+
 } // namespace blue_sky

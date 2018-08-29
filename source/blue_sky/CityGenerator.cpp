@@ -14,6 +14,7 @@ namespace blue_sky
 CityGenerator::CityGenerator()
 	: model_( GameMain::get_instance()->get_graphics_manager()->create_named_model( "generated_city" ) )
 	, control_point_( 0.f, 0.f, 0.f )
+	, control_point_front_( 0.f, 0.f, 1.f )
 {
 	model_->set_mesh( GameMain::get_instance()->get_graphics_manager()->create_named_mesh( "generated_city", Mesh::Buffer::Type::UPDATABLE ) );
 	
@@ -26,10 +27,11 @@ CityGenerator::CityGenerator()
 	model_->get_mesh()->create_vertex_group();
 	model_->get_mesh()->create_vertex_group();
 
+	road_node_list_.reserve( 1024 );
+	road_node_list_.emplace_back( control_point_ );
+
 	model_->get_mesh()->create_vertex_buffer();
 	model_->get_mesh()->create_index_buffer();
-
-	step();
 }
 
 /**
@@ -51,19 +53,15 @@ void CityGenerator::step()
 
 	// extend_road( control_point_, control_point_ - Vector( 4.f, 0.f, 0.f ), control_point_ + Vector( 4.f, 0.f, 0.f ), 0, 40, 5 );
 
-	road_node_list_.emplace_back( Vector( 0.f, 0.f, 0.f ) );
-	road_node_list_.emplace_back( Vector( 0.f, 0.f, 1.f ) );
-	road_node_list_.emplace_back( Vector( 0.f, 0.f, 2.f ) );
-	road_node_list_.emplace_back( Vector( 0.f, 0.f, 3.f ) );
+	control_point_ += control_point_front_ * 8.f;
 
-	for ( auto& node : road_node_list_ )
-	{
-		node.position *= 8.f;
-	}
+	road_node_list_.emplace_back( control_point_ );
+	road_node_list_[ road_node_list_.size() - 2 ].link_front( road_node_list_[ road_node_list_.size() - 1 ] );
 
-	road_node_list_[ 0 ].link_front( road_node_list_[ 1 ] );
-	road_node_list_[ 1 ].link_front( road_node_list_[ 2 ] );
-	road_node_list_[ 2 ].link_front( road_node_list_[ 3 ] );
+	Matrix m;
+	m.set_rotation_y( math::degree_to_radian( common::random( -5.f, +5.f ) ) );
+	control_point_front_ *= m;
+	control_point_front_.normalize();
 
 	generate_road_mesh();
 
@@ -135,6 +133,10 @@ void CityGenerator::extend_road( const Vector& control_point, const Vector& vert
 */
 void CityGenerator::generate_road_mesh()
 {
+	model_->get_mesh()->clear_vertex_list();
+	model_->get_mesh()->get_vertex_group_at( 0 )->clear();
+	model_->get_mesh()->get_vertex_group_at( 1 )->clear();
+
 	for ( auto& node : road_node_list_ )
 	{
 		generate_road_mesh( node );
@@ -183,10 +185,10 @@ void CityGenerator::generate_road_mesh( const RoadNode& node )
 		end_right = start_right;
 	}
 
-	auto road_front = start_front;
+	// auto road_front = end_front; // ( start_front + end_front ) * 0.5f;
 	
-	auto road_start_pos = node.position - road_front * road_depth * 0.5f;
-	auto road_end_pos   = node.position + road_front * road_depth * 0.5f;
+	auto road_start_pos = node.position - start_front * road_depth * 0.5f;
+	auto road_end_pos   = node.position + end_front   * road_depth * 0.5f;
 
 	auto vertex_position0 = road_start_pos - start_right * road_width * 0.5f;
 	auto vertex_position1 = road_start_pos + start_right * road_width * 0.5f;

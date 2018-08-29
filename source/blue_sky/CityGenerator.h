@@ -75,6 +75,7 @@ private:
 	RoadNodeList road_node_list_;
 
 	Vector control_point_;
+	Vector control_point_front_;
 	// float_t direction_ = 0.f;
 
 protected:

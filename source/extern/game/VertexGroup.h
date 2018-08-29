@@ -23,6 +23,8 @@ public:
 	VertexGroup() { }
 	~VertexGroup() { }
 
+	void clear() { index_list_.clear(); }
+
 	void add_index( Index i ) { index_list_.push_back( i ); }
 	
 	Index* get_pointer() { return & index_list_[ 0 ]; }

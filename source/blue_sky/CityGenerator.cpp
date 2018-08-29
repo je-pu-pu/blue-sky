@@ -22,6 +22,14 @@ CityGenerator::CityGenerator()
 
 	model_->set_shader_at( 1, GameMain::get_instance()->get_graphics_manager()->create_shader< graphics::shader::FlatShader >() );
 	model_->get_shader_at( 1 )->set_texture_at( 0, GameMain::get_instance()->get_graphics_manager()->load_texture( "media/model/road-cross.png" ) );
+
+	model_->get_mesh()->create_vertex_group();
+	model_->get_mesh()->create_vertex_group();
+
+	model_->get_mesh()->create_vertex_buffer();
+	model_->get_mesh()->create_index_buffer();
+
+	step();
 }
 
 /**
@@ -41,10 +49,23 @@ void CityGenerator::step()
 	 *    ....... road_control_point1
 	 */
 
-	model_->get_mesh()->create_vertex_group();
-	model_->get_mesh()->create_vertex_group();
+	// extend_road( control_point_, control_point_ - Vector( 4.f, 0.f, 0.f ), control_point_ + Vector( 4.f, 0.f, 0.f ), 0, 40, 5 );
 
-	extend_road( control_point_, control_point_ - Vector( 4.f, 0.f, 0.f ), control_point_ + Vector( 4.f, 0.f, 0.f ), 0, 40, 5 );
+	road_node_list_.emplace_back( Vector( 0.f, 0.f, 0.f ) );
+	road_node_list_.emplace_back( Vector( 0.f, 0.f, 1.f ) );
+	road_node_list_.emplace_back( Vector( 0.f, 0.f, 2.f ) );
+	road_node_list_.emplace_back( Vector( 0.f, 0.f, 3.f ) );
+
+	for ( auto& node : road_node_list_ )
+	{
+		node.position *= 8.f;
+	}
+
+	road_node_list_[ 0 ].link_front( road_node_list_[ 1 ] );
+	road_node_list_[ 1 ].link_front( road_node_list_[ 2 ] );
+	road_node_list_[ 2 ].link_front( road_node_list_[ 3 ] );
+
+	generate_road_mesh();
 
 	model_->get_mesh()->create_vertex_buffer();
 	model_->get_mesh()->create_index_buffer();
@@ -109,12 +130,94 @@ void CityGenerator::extend_road( const Vector& control_point, const Vector& vert
 }
 
 /**
+* メッシュを生成する
+*
+*/
+void CityGenerator::generate_road_mesh()
+{
+	for ( auto& node : road_node_list_ )
+	{
+		generate_road_mesh( node );
+	}
+}
+
+/**
  * メッシュを生成する
  *
  */
-void CityGenerator::generate_road_mesh()
+void CityGenerator::generate_road_mesh( const RoadNode& node )
 {
+	const float_t road_depth = 8.f;
+	const float_t road_width = 8.f;
 
+	const RoadNode* prev_node = node.back_node;
+	const RoadNode* next_node = node.front_node;
+
+	Vector start_front;
+	Vector start_right;
+
+	Vector end_front;
+	Vector end_right;
+
+	if ( prev_node )
+	{
+		start_front = ( node.position - prev_node->position ).normalize();
+		start_right = Vector::Up.cross( start_front );
+	}
+
+	if ( next_node )
+	{
+		end_front = ( next_node->position - node.position ).normalize();
+		end_right = Vector::Up.cross( end_front );
+	}
+
+	if ( ! prev_node )
+	{
+		start_front = end_front;
+		start_right = end_right;
+	}
+
+	if ( ! next_node )
+	{
+		end_front = start_front;
+		end_right = start_right;
+	}
+
+	auto road_front = start_front;
+	
+	auto road_start_pos = node.position - road_front * road_depth * 0.5f;
+	auto road_end_pos   = node.position + road_front * road_depth * 0.5f;
+
+	auto vertex_position0 = road_start_pos - start_right * road_width * 0.5f;
+	auto vertex_position1 = road_start_pos + start_right * road_width * 0.5f;
+	auto vertex_position2 = road_end_pos - end_right * road_width * 0.5f;
+	auto vertex_position3 = road_end_pos + end_right * road_width * 0.5f;
+	
+	const auto index_offset = model_->get_mesh()->get_vertex_count();
+
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { vertex_position0.xyz() }, { 0.f, 1.f, 0.f }, { 0.f, 1.f } ) ); // 0
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { vertex_position1.xyz() }, { 0.f, 1.f, 0.f }, { 0.f, 0.f } ) ); // 1
+
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { vertex_position2.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 1.f } ) ); // 2
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { vertex_position3.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 0.f } ) ); // 3
+
+	const bool is_cross = node.left_node && node.right_node;
+	auto* vertex_group = get_model()->get_mesh()->get_vertex_group_at( is_cross ? 1 : 0 );
+
+	vertex_group->add_index( index_offset + 0 );
+	vertex_group->add_index( index_offset + 2 );
+	vertex_group->add_index( index_offset + 1 );
+
+	vertex_group->add_index( index_offset + 1 );
+	vertex_group->add_index( index_offset + 2 );
+	vertex_group->add_index( index_offset + 3 );
+
+	/*
+	if ( ! next_node.link_list.empty() )
+	{
+		generate_road_mesh( next_node, ** next_node.link_list.cbegin() );
+	}
+	*/
 }
 
 } // namespace blue_sky

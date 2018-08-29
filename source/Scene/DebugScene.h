@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Scene.h"
+#include <blue_sky/CityGenerator.h>
 #include <memory>
 
 namespace blue_sky
@@ -15,6 +16,9 @@ class Camera;
 class DebugScene : public Scene
 {
 public:
+
+protected:
+	CityGenerator city_generator_;
 
 protected:
 

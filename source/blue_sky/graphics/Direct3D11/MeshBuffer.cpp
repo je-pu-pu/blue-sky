@@ -21,6 +21,8 @@ void MeshBuffer::create_vertex_buffer()
 		return;
 	}
 
+	vertex_buffer_list_.clear();
+
 	{
 		ID3D11Buffer* buffer = 0;
 		D3D11_BUFFER_DESC buffer_desc = { 0 };
@@ -61,6 +63,9 @@ void MeshBuffer::create_vertex_buffer()
  */
 void MeshBuffer::create_index_buffer()
 {
+	index_buffer_list_.clear();
+	get_index_count_list().clear();
+
 	index_buffer_list_.resize( get_vertex_group_list().size() );
 
 	for ( uint_t n = 0; n < get_vertex_group_list().size(); n++ )

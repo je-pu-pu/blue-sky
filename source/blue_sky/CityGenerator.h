@@ -1,6 +1,7 @@
 #pragma once
 
 #include <blue_sky/type.h>
+#include <unordered_set>
 
 namespace game
 {
@@ -27,8 +28,7 @@ public:
 	using VertexGroup	= game::VertexGroup;
 
 	/// 道路タイルの中心を指すコントロールポイント
-
-	struct RoadControlPoint
+	struct RoadNode
 	{
 		enum class Type
 		{
@@ -39,15 +39,40 @@ public:
 		};
 
 		Vector position;
-		float_t direction;
+		RoadNode* front_node = nullptr;
+		RoadNode* back_node  = nullptr;
+		RoadNode* left_node  = nullptr;
+		RoadNode* right_node = nullptr;
+
+		RoadNode( const Vector& pos )
+			: position( pos )
+		{
+
+		}
+
+		void link_front( RoadNode& node )
+		{
+			front_node = & node;
+			node.back_node = this;
+		}
+
+		void unlink_front()
+		{
+			if ( front_node )
+			{
+				front_node->back_node = nullptr;
+			}
+			
+			front_node = nullptr;
+		}
 	};
 
-	using RoadControlPointList = std::vector< RoadControlPoint >;
+	using RoadNodeList = std::vector< RoadNode >;
 
 private:
 	Model* model_;
 
-	RoadControlPointList road_control_point_list_;
+	RoadNodeList road_node_list_;
 
 	Vector control_point_;
 	// float_t direction_ = 0.f;
@@ -55,6 +80,7 @@ private:
 protected:
 	void extend_road( const Vector&, const Vector&, const Vector&, float_t, int_t, int_t );
 	void generate_road_mesh();
+	void generate_road_mesh( const RoadNode& );
 
 public:
 	CityGenerator();

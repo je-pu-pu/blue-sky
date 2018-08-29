@@ -14,8 +14,8 @@ s = get_shader( "tess_matcap_skin" )
 s1 = clone_shader( s )
 s2 = clone_shader( s )
 
-t1 = load_texture( "media/texture/matcap/d.png" )
-t2 = load_texture( "media/texture/matcap/d.png" )
+t1 = load_texture( "media/texture/matcap/skin.png" )
+t2 = load_texture( "media/texture/matcap/skin.png" )
 
 s1:set_texture_at( 0, t1 )
 g1.model:set_shader_at( 0, s1 )

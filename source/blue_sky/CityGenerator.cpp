@@ -26,46 +26,74 @@ CityGenerator::CityGenerator()
 	model_->get_mesh()->create_vertex_group();
 
 	road_node_list_.reserve( 1024 * 4 );
-	road_node_list_.emplace_back( Vector::Zero );
+	road_node_list_.emplace_back( RoadNode::Type::STRAIGHT, Vector::Zero );
 
-	road_control_point_list_.emplace_back( Vector::Zero, Vector::Forward, & road_node_list_.back() );
+	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector::Zero, Vector::Forward, & road_node_list_.back() );
 
 	model_->get_mesh()->create_vertex_buffer();
 	model_->get_mesh()->create_index_buffer();
 }
 
 /**
- * 街を生成する
+ * 街を生成するステップを進める
  *
  */
 void CityGenerator::step()
 {
 	// extend_road( control_point_, control_point_ - Vector( 4.f, 0.f, 0.f ), control_point_ + Vector( 4.f, 0.f, 0.f ), 0, 40, 5 );
+	
+	RoadControlPointList new_cps;
 
 	for ( auto& cp : road_control_point_list_ )
 	{
 		cp.position += cp.front * get_road_depth();
 
-		road_node_list_.emplace_back( cp.position );
+		auto type = RoadNode::Type::STRAIGHT;
+
+		const auto road_count = std::count_if( road_node_list_.begin(), road_node_list_.end(), [=] ( const auto& n ) { return ( n.position - cp.position ).length() <= get_road_width() * get_required_straight_road_count(); } );
+		const auto is_corss_near = std::any_of( road_node_list_.begin(), road_node_list_.end(), [=] ( const auto& n ) { return n.type == RoadNode::Type::CROSS && ( n.position - cp.position ).length() <= get_road_width() * get_required_straight_road_count(); } );
+
+		// if ( common::random( 0, 5 ) == 0 && cp.is_crossable() )
+		if ( road_count == get_required_straight_road_count() && ! is_corss_near )
+		{
+			type = RoadNode::Type::CROSS;
+		}
+
+		road_node_list_.emplace_back( type, cp.position );
 		road_node_list_.back().back_node = cp.node;
-		cp.node->front_node = & road_node_list_.back();
+
+		if ( cp.type == RoadControlPoint::Type::FRONT )
+		{
+			cp.node->front_node = & road_node_list_.back();
+		}
+		else if ( cp.type == RoadControlPoint::Type::LEFT )
+		{
+			cp.node->left_node = & road_node_list_.back();
+		}
+		else if ( cp.type == RoadControlPoint::Type::RIGHT )
+		{
+			cp.node->right_node = & road_node_list_.back();
+		}
 
 		cp.node = & road_node_list_.back();
+		cp.type = RoadControlPoint::Type::FRONT;
 
-		Matrix m;
-		m.set_rotation_y( math::degree_to_radian( common::random( -5.f, +5.f ) ) );
-		cp.front *= m;
-		cp.front.normalize();
+		if ( type != RoadNode::Type::CROSS )
+		{
+			Matrix m;
+			m.set_rotation_y( math::degree_to_radian( common::random( -0.f, +10.f ) ) );
+			cp.front *= m;
+			cp.front.normalize();
+		}
+
+		if ( type == RoadNode::Type::CROSS )
+		{
+			new_cps.emplace_back( RoadControlPoint::Type::LEFT,  cp.position, cp.front.cross( Vector::Up ), & road_node_list_.back() );
+			new_cps.emplace_back( RoadControlPoint::Type::RIGHT, cp.position, Vector::Up.cross( cp.front ), & road_node_list_.back() );
+		}
 	}
 
-	auto& cp = road_control_point_list_.back();
-	const auto road_count = std::count_if( road_node_list_.begin(), road_node_list_.end(), [=] ( const auto& n ) { return ( n.position - cp.position ).length() <= get_road_width() * 3.f; } );
-
-	if ( road_count <= 4 && common::random( 0, 5 ) == 0 )
-	{
-		road_control_point_list_.emplace_back( cp.position, Vector::Up.cross( cp.front ), & road_node_list_.back() );
-		road_control_point_list_.emplace_back( cp.position, cp.front.cross( Vector::Up ), & road_node_list_.back() );
-	}
+	road_control_point_list_.insert( road_control_point_list_.end(), new_cps.begin(), new_cps.end() );
 
 	generate_road_mesh();
 
@@ -73,6 +101,7 @@ void CityGenerator::step()
 	model_->get_mesh()->create_index_buffer();
 }
 
+#if 0
 /**
  * 道路を伸ばす
  *
@@ -111,7 +140,7 @@ void CityGenerator::extend_road( const Vector& control_point, const Vector& vert
 	vertex_group->add_index( index_offset + 2 );
 	vertex_group->add_index( index_offset + 3 );
 
-	//
+	// 
 	// control_point_ = control_point2;
 	
 	if ( life )
@@ -127,11 +156,12 @@ void CityGenerator::extend_road( const Vector& control_point, const Vector& vert
 		extend_road( control_point2, vertex_position2, vertex_position3, direction + common::random( 0.f, +10.f ), life - 1, straight_life - 1 );
 	}
 }
+#endif
 
 /**
-* メッシュを生成する
-*
-*/
+ * メッシュを生成する
+ *
+ */
 void CityGenerator::generate_road_mesh()
 {
 	model_->get_mesh()->clear_vertex_list();
@@ -212,7 +242,7 @@ void CityGenerator::generate_road_mesh( const RoadNode& node )
 	model_->get_mesh()->add_vertex( Mesh::Vertex( { vertex_position2.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 1.f } ) ); // 2
 	model_->get_mesh()->add_vertex( Mesh::Vertex( { vertex_position3.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 0.f } ) ); // 3
 
-	const bool is_cross = node.left_node && node.right_node;
+	const bool is_cross = node.type == RoadNode::Type::CROSS; // node.left_node && node.right_node;
 	auto* vertex_group = get_model()->get_mesh()->get_vertex_group_at( is_cross ? 1 : 0 );
 
 	vertex_group->add_index( index_offset + 0 );

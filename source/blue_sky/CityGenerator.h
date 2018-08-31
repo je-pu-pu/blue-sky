@@ -38,14 +38,16 @@ public:
 			T_INTERSECTION,		///< T Žš˜H
 		};
 
+		Type type;
 		Vector position;
 		RoadNode* front_node = nullptr;
 		RoadNode* back_node  = nullptr;
 		RoadNode* left_node  = nullptr;
 		RoadNode* right_node = nullptr;
 
-		RoadNode( const Vector& pos )
-			: position( pos )
+		RoadNode( Type t, const Vector& pos )
+			: type( t )
+			, position( pos )
 		{
 
 		}
@@ -69,15 +71,42 @@ public:
 
 	struct RoadControlPoint
 	{
+		enum class Type
+		{
+			FRONT,
+			LEFT,
+			RIGHT,
+			BACK
+		};
+
+		Type type = Type::FRONT;
 		Vector position = Vector::Zero;
-		Vector front = Vector::Zero;
+		Vector front = Vector::Forward;
 		RoadNode* node = nullptr;
 
-		RoadControlPoint( const Vector& p, const Vector& f, RoadNode* n )
-			: position( p )
+		RoadControlPoint( Type t, const Vector& p, const Vector& f, RoadNode* n )
+			: type( t )
+			, position( p )
 			, front( f )
 			, node( n )
 		{ }
+
+		bool is_crossable() const
+		{			
+			auto straight_road_count = 0;
+
+			for ( auto* n = node; n && n->type == RoadNode::Type::STRAIGHT; n = n->back_node )
+			{
+				straight_road_count++;
+
+				if ( straight_road_count == CityGenerator::get_required_straight_road_count() )
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
 	};
 
 	using RoadNodeList = std::vector< RoadNode >;
@@ -90,8 +119,9 @@ private:
 	RoadControlPointList road_control_point_list_;
 
 protected:
-	constexpr float_t get_road_width() { return 8.f; }
-	constexpr float_t get_road_depth() { return 8.f; }
+	static constexpr float_t get_road_width() { return 8.f; }
+	static constexpr float_t get_road_depth() { return 8.f; }
+	static constexpr int_t get_required_straight_road_count() { return 5; }
 
 	void extend_road( const Vector&, const Vector&, const Vector&, float_t, int_t, int_t );
 	void generate_road_mesh();

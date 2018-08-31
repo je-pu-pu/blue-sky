@@ -67,18 +67,32 @@ public:
 		}
 	};
 
+	struct RoadControlPoint
+	{
+		Vector position = Vector::Zero;
+		Vector front = Vector::Zero;
+		RoadNode* node = nullptr;
+
+		RoadControlPoint( const Vector& p, const Vector& f, RoadNode* n )
+			: position( p )
+			, front( f )
+			, node( n )
+		{ }
+	};
+
 	using RoadNodeList = std::vector< RoadNode >;
+	using RoadControlPointList = std::list< RoadControlPoint >;
 
 private:
 	Model* model_;
 
 	RoadNodeList road_node_list_;
-
-	Vector control_point_;
-	Vector control_point_front_;
-	// float_t direction_ = 0.f;
+	RoadControlPointList road_control_point_list_;
 
 protected:
+	constexpr float_t get_road_width() { return 8.f; }
+	constexpr float_t get_road_depth() { return 8.f; }
+
 	void extend_road( const Vector&, const Vector&, const Vector&, float_t, int_t, int_t );
 	void generate_road_mesh();
 	void generate_road_mesh( const RoadNode& );

@@ -30,6 +30,8 @@ DebugScene::DebugScene( const GameMain* game_main )
 
 	auto* city = get_active_object_manager()->create_object( "static" );
 	city->set_model( city_generator_.get_model() );
+
+	get_script_manager()->exec( "load( \"test/init.lua\" )" );
 }
 
 DebugScene::~DebugScene()

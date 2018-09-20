@@ -8,8 +8,6 @@
 
 #include <type/type.h>
 
-class Direct3D11;
-
 class DirectWrite;
 
 class DirectInput;
@@ -28,6 +26,7 @@ namespace core
 
 	namespace graphics::direct_3d_11
 	{
+		class Direct3D11;
 		class BulletDebugDraw;
 	}
 }
@@ -72,7 +71,7 @@ public:
 	using CreateSceneFunction		= std::function< Scene* () >;
 	using CreateSceneFunctionMap	= std::unordered_map< string_t, CreateSceneFunction >;
 
-	using Direct3D					= Direct3D11;
+	using Direct3D					= core::graphics::direct_3d_11::Direct3D11;
 	using BulletDebugDraw			= core::graphics::direct_3d_11::BulletDebugDraw;
 
 	enum Key
@@ -173,7 +172,7 @@ public:
 
 	ActiveObjectManager* get_active_object_manager() const { return active_object_manager_.get(); }
 	
-	static App* get_app() { return App::GetInstance();  }
+	static App* get_app() { return App::GetInstance(); }
 
 	inline int get_width() const override { return get_app()->get_width(); }
 	inline int get_height() const override { return get_app()->get_height(); }

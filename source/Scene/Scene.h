@@ -4,8 +4,6 @@
 #include <functional>
 
 class App;
-class Direct3D11;
-
 class OculusRift;
 
 namespace game
@@ -19,6 +17,11 @@ namespace game
 namespace core
 {
 	class SoundManager;
+}
+
+namespace core::graphics::direct_3d_11
+{
+	class Direct3D11;
 }
 
 namespace blue_sky
@@ -56,7 +59,7 @@ public:
 	using PhysicsManager	= ActiveObjectPhysics;
 	using SoundManager		= core::SoundManager;
 
-	using Direct3D			= Direct3D11;
+	using Direct3D			= core::graphics::direct_3d_11::Direct3D11;
 
 private:
 	const GameMain* game_main_;

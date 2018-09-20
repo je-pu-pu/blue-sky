@@ -79,6 +79,7 @@ public:
 	using EffectTechnique				= core::graphics::EffectTechnique;
 	using ShaderResource				= core::graphics::ShaderResource;
 	using ShadowMap						= core::graphics::ShadowMap;
+	using Sprite						= core::graphics::Sprite;
 	
 	using BaseShadowMapShader			= graphics::shader::BaseShadowMapShader;
 	
@@ -204,6 +205,10 @@ public:
 	ShadowMap* get_shadow_map() { return shadow_map_.get(); }
 	const ShadowMap* get_shadow_map() const { return shadow_map_.get(); }
 
+	virtual void resolve_depth_texture() const = 0;
+	virtual Texture* get_depth_texture() const = 0;
+	virtual Sprite* get_sprite() const = 0;
+
 	virtual GameShaderResource* get_game_render_data() const = 0;
 	virtual FrameShaderResource* get_frame_render_data() const = 0;
 	virtual FrameDrawingShaderResource* get_frame_drawing_render_data() const = 0;
@@ -222,6 +227,9 @@ public:
 	virtual void set_input_layout( const InputLayout* ) const = 0;
 
 	virtual void set_primitive_topology( PrimitiveTopology ) const = 0;
+
+	virtual void set_depth_stencil() const = 0;
+	virtual void unset_depth_stencil() const = 0;
 
 	virtual void setup_rendering() const = 0;
 	virtual void render_technique( const char_t*, const std::function< void () >& ) const = 0;

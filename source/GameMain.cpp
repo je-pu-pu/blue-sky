@@ -73,13 +73,11 @@ GameMain::GameMain()
 	save_data_->load_file( "save/blue-sky.save" );
 
 	// Direct3D
-	direct_3d_ = new Direct3D11(
+	direct_3d_ = new Direct3D(
 		get_app()->GetWindowHandle(),
 		get_app()->get_width(),
 		get_app()->get_height(),
 		get_app()->is_full_screen(),
-		0,
-		0,
 		get_config()->get( "graphics.multisample.count", 4 ), 
 		get_config()->get( "graphics.multisample.quality", 2 )
 	);

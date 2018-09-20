@@ -118,7 +118,7 @@ void TitleScene::render()
 
 	get_direct_3d()->clear_default_view( Direct3D::Color::from_256( 0xFF, 0xAA, 0x11 ) );
 
-	get_direct_3d()->getSprite()->begin();
+	get_direct_3d()->get_sprite()->begin();
 
 	{
 		render_technique( "|sprite", [this]
@@ -128,17 +128,17 @@ void TitleScene::render()
 			if ( sequence_ >= SEQUENCE_TITLE_FIX )
 			{
 				// render_bg()
-				get_direct_3d()->getSprite()->draw( dst_rect, title_bg_texture_ );
+				get_direct_3d()->get_sprite()->draw( dst_rect, title_bg_texture_ );
 			}
 			else
 			{
 				// render_bg()
-				get_direct_3d()->getSprite()->draw( dst_rect, cloth_texture_, Direct3D::Color( 1.f, 1.f, 1.f, 0.5f ) );
+				get_direct_3d()->get_sprite()->draw( dst_rect, cloth_texture_, Direct3D::Color( 1.f, 1.f, 1.f, 0.5f ) );
 			}
 		} );
 	}
 
-	get_direct_3d()->getSprite()->end();
+	get_direct_3d()->get_sprite()->end();
 
 	// render_logo()
 	{

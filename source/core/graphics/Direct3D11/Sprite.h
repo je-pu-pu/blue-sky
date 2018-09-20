@@ -1,18 +1,7 @@
 #pragma once
 
-#include "Direct3D11Common.h"
-#include <core/type.h>
-
-namespace win
-{
-	class Rect;
-	class Point;
-}
-
-namespace game
-{
-	class Texture;
-}
+#include <core/graphics/Sprite.h>
+#include <d3d11.h>
 
 namespace direct_x_math
 {
@@ -21,30 +10,26 @@ namespace direct_x_math
 	class Color;
 }
 
-class Direct3D11;
-
 namespace core::graphics::direct_3d_11
 {
 	template< typename T > class ShaderResource;
 
+	class Direct3D11;
+	class InputLayout;
+	class EffectTechnique;
+
 /**
  * Direct3D 11 Sprite
  *
- * @todo êÆóùÇ∑ÇÈ
  */
-class Sprite
+class Sprite : public core::graphics::Sprite
 {
 public:
 	using Direct3D		= Direct3D11;
-	using Texture		= game::Texture;
 	
-	using InputLayout	= ID3D11InputLayout;
 	using Buffer		= ID3D11Buffer;
 	
 	using Index			= WORD;
-	
-	using Rect			= win::Rect;
-	using Point			= win::Point;
 
 	struct Vertex
 	{
@@ -71,32 +56,25 @@ protected:
 	Buffer*			vertex_buffer_;
 	Buffer*			index_buffer_;
 
-	static const Color&	white_;			/// !!!!!
+	const InputLayout*			input_layout_;
+	const EffectTechnique*		effect_technique_;
 
 	float_t			ortho_offset_;		///< óßëÃéãóp
 
 	void create_vertex_buffer();
 	void create_index_buffer();
 
-	void draw( const Rect*, const Texture*, const Rect*, const Color* );
+	void draw( const Rect*, const Texture*, const Rect*, const Color* ) override;
 
 public:
 	explicit Sprite( Direct3D* );
 	~Sprite();
 
-	void begin();
+	void set_transform( const Matrix& ) override;
+	void set_ortho_offset( float_t ortho_offset ) override { ortho_offset_ = ortho_offset; }
 
-	void set_transform( const Matrix& );
-	void set_ortho_offset( float_t ortho_offset ) { ortho_offset_ = ortho_offset; }
-
-	void draw( const Point&, const Texture*, const Rect&, const Color& = white_ );
-	void draw( const Rect&, const Texture*, const Rect&, const Color& = white_ );
-	void draw( const Rect&, const Texture*, const Color& = white_ );
-
-	void draw( const Texture*, const Rect&, const Color& = white_ );
-	void draw( const Texture*, const Color& = white_ );
-
-	void end();
+	void begin() override;
+	void end() override;
 
 }; // class Sprite
 

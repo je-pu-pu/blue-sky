@@ -1,4 +1,7 @@
 #include "Sprite.h"
+#include "Effect.h"
+#include "EffectTechnique.h"
+#include "EffectPass.h"
 #include "Direct3D11.h"
 #include <GameMain.h>
 #include <core/graphics/Direct3D11/ShaderResource.h>
@@ -9,13 +12,13 @@
 namespace core::graphics::direct_3d_11
 {
 
-const Color& Sprite::white_ = Color::White;
-
 Sprite::Sprite( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
 	, constant_buffer_( 0 )
 	, vertex_buffer_( 0 )
 	, index_buffer_( 0 )
+	, input_layout_( direct_3d->get_input_layout( "sprite" ) )
+	, effect_technique_( direct_3d_->get_effect()->get_technique( "sprite" ) )
 	, ortho_offset_( 0.f )
 {
 	constant_buffer_ = new ConstantBuffer( direct_3d );
@@ -49,10 +52,10 @@ void Sprite::create_index_buffer()
 	D3D11_BUFFER_DESC buffer_desc = { 0 };
 
 	buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    buffer_desc.ByteWidth = sizeof( Index ) * 6;
+    buffer_desc.ByteWidth = sizeof( Index ) * 4;
 	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
 
-	Index index_list[ 6 ] = { 0, 1, 2, 2, 1, 3 };
+	Index index_list[ 4 ] = { 0, 1, 2, 3 };
 
 	D3D11_SUBRESOURCE_DATA data = { 0 };
 	data.pSysMem = index_list;
@@ -67,9 +70,9 @@ void Sprite::begin()
 
 	direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, 1, & vertex_buffer_, & stride, & offset );
 	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_, IndexBufferFormat, 0 );
-	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
 
-	direct_3d_->setInputLayout( "sprite" );
+	direct_3d_->set_input_layout( input_layout_ );
 
 	set_transform( Matrix::identity() );
 }
@@ -174,39 +177,18 @@ void Sprite::draw( const Rect* dst, const Texture* texture, const Rect* src, con
 
 	direct_3d_->getImmediateContext()->Unmap( vertex_buffer_, 0 );
 
-	constant_buffer_->bind_to_vs();
+	for ( auto pass : effect_technique_->get_pass_list() )
+	{
+		pass->apply();
 
-	texture->bind_to_ps( 0 );
+		constant_buffer_->bind_to_vs();
 
-	direct_3d_->getImmediateContext()->DrawIndexed( 6, 0, 0 );
+		texture->bind_to_ps( 0 );
+
+		direct_3d_->getImmediateContext()->DrawIndexed( 4, 0, 0 );
+	}
 
 	blue_sky::GameMain::get_instance()->get_graphics_manager()->count_draw();
-}
-
-void Sprite::draw( const Point& dst_point, const Texture* texture, const Rect& src, const Color& color )
-{
-	win::Rect dst = win::Rect::Size( dst_point.x(), dst_point.y(), src.width(), src.height() );
-	draw( & dst, texture, & src, & color );
-}
-
-void Sprite::draw( const Rect& dst, const Texture* texture, const Rect& src, const Color& color )
-{
-	draw( & dst, texture, & src, & color );
-}
-
-void Sprite::draw( const Rect& dst, const Texture* texture, const Color& color )
-{
-	draw( & dst, texture, 0, & color );
-}
-
-void Sprite::draw( const Texture* texture, const Rect& src, const Color& color )
-{
-	draw( 0, texture, & src, & color );
-}
-
-void Sprite::draw( const Texture* texture, const Color& color )
-{
-	draw( 0, texture, 0, & color );
 }
 
 } // namespace core::graphics::direct_3d_11

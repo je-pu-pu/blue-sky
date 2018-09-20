@@ -9,7 +9,7 @@
 #include <blue_sky/graphics/shader/BypassShader.h>
 #include <blue_sky/graphics/Direct3D11/Line.h>
 
-#include <core/graphics/Direct3D11/Direct3D11Texture.h>
+#include <core/graphics/Direct3D11/Texture.h>
 #include <core/graphics/Direct3D11/Axis.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
@@ -43,7 +43,7 @@ GraphicsManager::GraphicsManager( Direct3D* direct_3d )
 {
 	create_named_shader< shader::BypassShader >( "bypass" );
 
-
+	direct_3d_->setup_sprite();
 }
 
 /**
@@ -265,6 +265,25 @@ void GraphicsManager::set_eye_position( const Vector& pos )
 }
 
 /**
+ * 
+ *
+ */
+void GraphicsManager::resolve_depth_texture() const
+{
+	direct_3d_->resolve_depth_texture();
+}
+
+GraphicsManager::Texture* GraphicsManager::get_depth_texture() const
+{
+	return direct_3d_->get_depth_texture();
+}
+
+GraphicsManager::Sprite* GraphicsManager::get_sprite() const
+{
+	return direct_3d_->get_sprite();
+}
+
+/**
  * 描画のセットアップを行う
  *
  */
@@ -311,7 +330,7 @@ const GraphicsManager::EffectTechnique* GraphicsManager::get_effect_technique( c
  */
 void GraphicsManager::set_input_layout( const char_t* name ) const
 {
-	direct_3d_->setInputLayout( name );
+	direct_3d_->set_input_layout( name );
 }
 
 /**
@@ -331,6 +350,24 @@ void GraphicsManager::set_input_layout( const InputLayout* input_layout ) const
 void GraphicsManager::set_primitive_topology( PrimitiveTopology primitive_topology ) const
 {
 	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( static_cast< D3D_PRIMITIVE_TOPOLOGY >( primitive_topology ) );
+}
+
+/**
+ * デプスステンシルを設定する
+ *
+ */
+void GraphicsManager::set_depth_stencil() const
+{
+	direct_3d_->set_default_render_target( true );
+}
+
+/**
+ * デプスステンシルの設定を解除する
+ *
+ */
+void GraphicsManager::unset_depth_stencil() const
+{
+	direct_3d_->set_default_render_target( false );
 }
 
 /**
@@ -403,23 +440,23 @@ void GraphicsManager::render_background() const
  */
 void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color ) const
 {
-	if ( ! direct_3d_->getFont() )
+	if ( ! direct_3d_->get_font() )
 	{
 		return;
 	}
 
 	{
 		direct_3d_->begin2D();
-		direct_3d_->getFont()->begin();
+		direct_3d_->get_font()->begin();
 
-		direct_3d_->getFont()->draw_text( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), color );
+		direct_3d_->get_font()->draw_text( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), color );
 
-		direct_3d_->getFont()->end();
+		direct_3d_->get_font()->end();
 		direct_3d_->end2D();
 	}
 
 	{
-		direct_3d_->setInputLayout( "main" );
+		direct_3d_->set_input_layout( "main" );
 
 		direct_3d_->begin3D();
 		direct_3d_->renderText();
@@ -436,22 +473,22 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
  */
 void GraphicsManager::draw_text_at_center( const char_t* text, const Color& color ) const
 {
-	if ( ! direct_3d_->getFont() )
+	if ( ! direct_3d_->get_font() )
 	{
 		return;
 	}
 
 	direct_3d_->begin2D();
-	direct_3d_->getFont()->begin();
+	direct_3d_->get_font()->begin();
 
 	float_t left = 0.f;
-	float_t top = ( direct_3d_->get_height() - direct_3d_->getFont()->get_font_height() ) / 2.f;
+	float_t top = ( direct_3d_->get_height() - direct_3d_->get_font()->get_font_height() ) / 2.f;
 	float_t right = static_cast< float_t >( direct_3d_->get_width() );
-	float_t bottom = top + direct_3d_->getFont()->get_font_height();
+	float_t bottom = top + direct_3d_->get_font()->get_font_height();
 
-	direct_3d_->getFont()->draw_text_center( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), color );
+	direct_3d_->get_font()->draw_text_center( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), color );
 
-	direct_3d_->getFont()->end();
+	direct_3d_->get_font()->end();
 	direct_3d_->end2D();
 
 	direct_3d_->begin3D();

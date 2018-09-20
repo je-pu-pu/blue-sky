@@ -3,12 +3,14 @@
 #include <blue_sky/graphics/Line.h>
 #include <d3d11.h>
 
-class Direct3D11;
-class Direct3D11Texture;
-
 namespace game
 {
 	class Texture;
+}
+
+namespace core::graphics::direct_3d_11
+{
+	class Direct3D11;
 }
 
 namespace blue_sky::graphics::direct_3d_11
@@ -21,8 +23,8 @@ namespace blue_sky::graphics::direct_3d_11
 class Line : public blue_sky::graphics::Line
 {
 public:
-	using Direct3D = Direct3D11;
 	using Texture = game::Texture;
+	using Direct3D = core::graphics::direct_3d_11::Direct3D11;
 
 	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
 
@@ -40,7 +42,7 @@ protected:
 	void create_texture() override;
 
 public:
-	explicit Line( Direct3D11* );
+	explicit Line( Direct3D* );
 	virtual ~Line();
 
 	void render_part( int part_count = 99999 ) const;

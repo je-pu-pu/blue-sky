@@ -3,10 +3,9 @@
 #include "Direct3D11Common.h"
 #include <core/type.h>
 
-class Direct3D11;
-
 namespace core::graphics::direct_3d_11
 {
+	class Direct3D11;
 
 /**
  * デバッグ表示用の XYZ 軸

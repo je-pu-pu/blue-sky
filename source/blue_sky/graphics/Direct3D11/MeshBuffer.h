@@ -4,7 +4,10 @@
 #include <core/DirectX.h>
 #include <d3d11.h>
 
-class Direct3D11;
+namespace core::graphics::direct_3d_11
+{
+	class Direct3D11;
+}
 
 namespace blue_sky::graphics::direct_3d_11
 {
@@ -16,7 +19,7 @@ namespace blue_sky::graphics::direct_3d_11
 class MeshBuffer : public blue_sky::graphics::Mesh::Buffer
 {
 public:
-	using Direct3D = Direct3D11;
+	using Direct3D = core::graphics::direct_3d_11::Direct3D11;
 	using BufferList = std::vector< com_ptr< ID3D11Buffer > >;
 
 	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;

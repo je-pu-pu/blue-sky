@@ -1,6 +1,6 @@
 #include "Direct3D11.h"
 #include "Sprite.h"
-#include "Direct3D11Texture.h"
+#include "Texture.h"
 
 #include "InputLayout.h"
 #include "Effect.h"
@@ -30,6 +30,9 @@
 #pragma comment( lib, "d3d10_1.lib" )
 #pragma comment( lib, "d3dcompiler.lib" )
 
+namespace core::graphics::direct_3d_11
+{
+
 const Direct3D11::Color Direct3D11::DEFAULT_CLEAR_COLOR = Direct3D11::Color::Black;
 
 /**
@@ -39,12 +42,10 @@ const Direct3D11::Color Direct3D11::DEFAULT_CLEAR_COLOR = Direct3D11::Color::Bla
  * @param w						バックバッファの幅
  * @param h						バックバッファの高さ
  * @param full_screen			フルスクリーンフラグ
- * @param adapter_format		未使用
- * @param depth_stencil_format	未使用
  * @param multi_sample_count	マルチサンプリングのサンプル数
  * @param multi_sample_quality	マルチサンプリングのクオリティ
  */
-Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* /* adapter_format */, const char* /* depth_stencil_format */, int multi_sample_count, int multi_sample_quality )
+Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sample_count, int multi_sample_quality )
 	: device_( 0 )
 	, immediate_context_( 0 )
 	, swap_chain_( 0 )
@@ -58,7 +59,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* /
 	, device_10_( 0 )
 	, back_buffer_surface_( 0 )
 	, text_texture_( 0 )
-	, text_view_( 0 )
+
 	, text_texture_mutex_11_( 0 )
 	, text_texture_mutex_10_( 0 )
 {
@@ -83,11 +84,11 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, const char* /
 	create_back_buffer_surface();
 
 	create_depth_stencil_view();
+	create_depth_texture();
 	
-	setup_viewport();
+	setup_default_viewport();
 
-	sprite_ = new Sprite( this );
-	effect_ = new Effect( this );
+	effect_.reset( new Effect( this ) );
 }
 
 /**
@@ -98,14 +99,14 @@ Direct3D11::~Direct3D11()
 {
 	set_full_screen( false );
 
-	effect_.release();
-	sprite_.release();
-	font_.release();
+	effect_.reset();
+	sprite_.reset();
+	font_.reset();
 
 	DIRECT_X_RELEASE( text_texture_mutex_10_ );
 	DIRECT_X_RELEASE( text_texture_mutex_11_ );
 
-	text_view_.release();
+	text_view_.reset();
 	DIRECT_X_RELEASE( text_texture_ );
 
 	DIRECT_X_RELEASE( back_buffer_surface_ );
@@ -139,6 +140,8 @@ Direct3D11::~Direct3D11()
 	{
 		delete input_layout.second;
 	}
+
+	depth_texture_.reset();
 
 	DIRECT_X_RELEASE( depth_stencil_view_ );
 	DIRECT_X_RELEASE( depth_stencil_texture_ );
@@ -256,6 +259,10 @@ ID3D11RenderTargetView* Direct3D11::create_render_target_view( ID3D11Texture2D* 
 	return view;
 }
 
+/**
+ * デプスステンシルテクスチャを作成する
+ *
+ */
 void Direct3D11::create_depth_stencil_view()
 {
 	D3D11_TEXTURE2D_DESC texture_desc = { 0 };
@@ -264,10 +271,12 @@ void Direct3D11::create_depth_stencil_view()
 	texture_desc.Height = swap_chain_desc_.BufferDesc.Height;
 	texture_desc.MipLevels = 1;
 	texture_desc.ArraySize = 1;
-	texture_desc.Format = DEPTH_STENCIL_FORMAT;
+	texture_desc.Format = DXGI_FORMAT_R32_TYPELESS;
 	texture_desc.SampleDesc = swap_chain_desc_.SampleDesc;
+//	texture_desc.SampleDesc.Count = 1;
+//	texture_desc.SampleDesc.Quality = 0;
 	texture_desc.Usage = D3D11_USAGE_DEFAULT;
-	texture_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	texture_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	texture_desc.CPUAccessFlags = 0;
 	texture_desc.MiscFlags = 0;
 
@@ -276,11 +285,15 @@ void Direct3D11::create_depth_stencil_view()
 	depth_stencil_view_ = create_depth_stencil_view( depth_stencil_texture_ );
 }
 
+/**
+ * デプスステンシルビューを作成する
+ *
+ */
 ID3D11DepthStencilView* Direct3D11::create_depth_stencil_view( ID3D11Texture2D* texture )
 {
 	D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc = { static_cast< DXGI_FORMAT >( 0 ) };
 	
-	depth_stencil_view_desc.Format = DEPTH_STENCIL_FORMAT;
+	depth_stencil_view_desc.Format = DXGI_FORMAT_D32_FLOAT;
 	depth_stencil_view_desc.ViewDimension = swap_chain_desc_.SampleDesc.Count > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
 	depth_stencil_view_desc.Texture2D.MipSlice = 0;
 
@@ -290,7 +303,63 @@ ID3D11DepthStencilView* Direct3D11::create_depth_stencil_view( ID3D11Texture2D* 
 	return view;
 }
 
-void Direct3D11::setup_viewport()
+/**
+ * シェーダーリソースに使用できるデプス参照テクスチャを作成する
+ *
+ */
+void Direct3D11::create_depth_texture()
+{
+	// マルチサンプリングを無効にしたテクスチャ・シェーダーリソースビューを作成する
+	if constexpr ( false )
+	{
+		D3D11_TEXTURE2D_DESC texture_desc = { 0 };
+		texture_desc.Width = swap_chain_desc_.BufferDesc.Width;
+		texture_desc.Height = swap_chain_desc_.BufferDesc.Height;
+		texture_desc.MipLevels = 1;
+		texture_desc.ArraySize = 1;
+		texture_desc.Format = DXGI_FORMAT_R32_FLOAT;
+		texture_desc.SampleDesc.Count = 1;
+		texture_desc.SampleDesc.Quality = 0;
+		texture_desc.Usage = D3D11_USAGE_DEFAULT;
+		texture_desc.BindFlags =  D3D11_BIND_SHADER_RESOURCE;
+		texture_desc.CPUAccessFlags = 0;
+		texture_desc.MiscFlags = 0;
+
+		ID3D11Texture2D* texture = 0;
+		DIRECT_X_FAIL_CHECK( device_->CreateTexture2D( & texture_desc, 0, & texture ) );
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC view_desc = { texture_desc.Format };
+
+		view_desc.Format = DXGI_FORMAT_R32_FLOAT;
+		view_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		view_desc.Texture2D.MipLevels = texture_desc.MipLevels;
+		view_desc.Texture2D.MostDetailedMip = 0;
+
+		ID3D11ShaderResourceView* view = 0;
+		DIRECT_X_FAIL_CHECK( device_->CreateShaderResourceView( texture, & view_desc, & view ) );
+
+		depth_texture_.reset( new Texture( this, view ) );
+	}
+
+	// デプスステンシルバッファを参照するシェーダーリソースビューを作成する
+	if constexpr ( true )
+	{
+		D3D11_SHADER_RESOURCE_VIEW_DESC view_desc = { DXGI_FORMAT_R32_FLOAT };
+
+		view_desc.Format = DXGI_FORMAT_R32_FLOAT;
+		view_desc.ViewDimension = swap_chain_desc_.SampleDesc.Count > 1 ? D3D11_SRV_DIMENSION_TEXTURE2DMS : D3D11_SRV_DIMENSION_TEXTURE2D;
+		view_desc.Texture2D.MipLevels = 1;
+		view_desc.Texture2D.MostDetailedMip = 0;
+
+		ID3D11ShaderResourceView* view = 0;
+		DIRECT_X_FAIL_CHECK( device_->CreateShaderResourceView( depth_stencil_texture_, & view_desc, & view ) );
+
+		depth_texture_.reset( new Texture( this, view ) );
+	}
+}
+
+
+void Direct3D11::setup_default_viewport()
 {
 	viewport_.TopLeftX = 0;
 	viewport_.TopLeftY = 0;
@@ -385,7 +454,7 @@ void Direct3D11::setup_font()
 			ID3D11ShaderResourceView* text_view = 0;
 			DIRECT_X_FAIL_CHECK( device_->CreateShaderResourceView( text_texture_, & view_desc, & text_view ) );
 
-			text_view_ = new Texture( this, text_view );
+			text_view_.reset( new Texture( this, text_view ) );
 		}
 	}
 
@@ -407,7 +476,17 @@ void Direct3D11::setup_font()
 	}
 
 	// Font
-	font_ = new Font( text_surface.get() );
+	font_.reset( new Font( text_surface.get() ) );
+}
+
+/**
+ * スプライトをセットアップする
+ *
+ * この関数は、インプットレイアウトを作成した後、エフェクトファイルを読み込んだ後に呼び出す必要がある
+ */
+void Direct3D11::setup_sprite()
+{
+	sprite_.reset( new core::graphics::direct_3d_11::Sprite( this ) );
 }
 
 // ???
@@ -599,10 +678,11 @@ void Direct3D11::clear_depth_stencil_view( ID3D11DepthStencilView* view )
 /**
  * 通常のレンダーターゲットを設定する
  *
+ * @param bool デプスステンシルビューを同時に設定する
  */
-void Direct3D11::set_default_render_target()
+void Direct3D11::set_default_render_target( bool with_depth_stencil )
 {
-	immediate_context_->OMSetRenderTargets( 1, & back_buffer_view_, depth_stencil_view_ );
+	immediate_context_->OMSetRenderTargets( 1, & back_buffer_view_, with_depth_stencil ? depth_stencil_view_ : nullptr );
 }
 
 /**
@@ -656,7 +736,7 @@ void Direct3D11::set_viewport( float_t x, float_t y, float_t w, float_t h, float
 	immediate_context_->RSSetViewports( 1, & viewport );
 }
 
-void Direct3D11::setInputLayout( const char* name )
+void Direct3D11::set_input_layout( const char* name )
 {
 	set_input_layout( input_layout_list_[ name ] );
 }
@@ -775,7 +855,7 @@ void Direct3D11::renderText()
 		return;
 	}
 
-	getSprite()->begin();
+	get_sprite()->begin();
 
 	EffectTechnique* technique = effect_->get_technique( "|sprite" );
 
@@ -784,10 +864,21 @@ void Direct3D11::renderText()
 		pass->apply();
 
 		Sprite::Rect dst_rect( 0, 0, get_width(), get_height() );
-		getSprite()->draw( dst_rect, text_view_.get() );
+		get_sprite()->draw( dst_rect, text_view_.get() );
 	}
 
-	getSprite()->end();
+	get_sprite()->end();
+}
+
+/**
+ * マルチサンプリングされたデプスバッファをマルチサンプリングされていないデプステクスチャにコピーする
+ *
+ */
+void Direct3D11::resolve_depth_texture()
+{
+#if 0
+	immediate_context_->ResolveSubresource( depth_texture_->get_texture_2d(), 0, depth_stencil_texture_, 0, DXGI_FORMAT_R32_FLOAT );
+#endif
 }
 
 void Direct3D11::log_all_adapter_desc( IDXGIFactory1* dxgi_factory )
@@ -837,3 +928,5 @@ void Direct3D11::log_feature_level()
 
 	common::log( "log/d3d11.log", std::string( "created d3d11 device ( feature_level : " ) + feature_level_map[ device_->GetFeatureLevel() ] + " )" );
 }
+
+} // namespace core::graphics::direct_3d_11

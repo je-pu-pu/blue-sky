@@ -3,7 +3,7 @@
 #include <common/exception.h>
 
 template< typename T > inline void DIRECT_X_ADD_REF( T& x ) { if ( x ) { x->AddRef(); } }
-template< typename T > inline void DIRECT_X_RELEASE( T& x ) { if ( x ) { x->Release(); } x = 0; }
+template< typename T > inline void DIRECT_X_RELEASE( T& x ) { if ( x ) { x->Release(); } x = nullptr; }
 
 #define DIRECT_X_FAIL_CHECK( x ) { HRESULT hresult = x; if ( FAILED( hresult ) ) { throw common::exception< HRESULT >( __FILE__, __LINE__, hresult ); } }
 
@@ -32,7 +32,7 @@ private:
 
 public:
 	explicit com_ptr()
-		: ptr_( 0 )
+		: ptr_( nullptr )
 	{
 		//
 	}
@@ -54,6 +54,13 @@ public:
 		DIRECT_X_RELEASE( ptr_ );
 	}
 	
+	void reset( T* ptr = nullptr )
+	{
+		DIRECT_X_RELEASE( ptr_ );
+
+		ptr_ = ptr;
+	}
+
 	inline T** operator & () { return & ptr_; }
 	inline T* const * operator & () const { return & ptr_; }
 

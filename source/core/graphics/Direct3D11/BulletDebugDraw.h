@@ -5,10 +5,9 @@
 #include <btBulletCollisionCommon.h>
 #include <vector>
 
-class Direct3D11;
-
 namespace core::graphics::direct_3d_11
 {
+	class Direct3D11;
 
 /**
  * Bullet のデバッグ表示を Direct3D11 で行うためのクラス

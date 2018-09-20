@@ -43,6 +43,7 @@
     <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp" />
+    <ClCompile Include="core\graphics\Sprite.cpp" />
     <ClCompile Include="core\input\DirectInput\DirectInput.cpp" />
     <ClCompile Include="core\math\DirectXMath\Color.cpp" />
     <ClCompile Include="core\math\DirectXMath\Vector.cpp" />
@@ -128,18 +129,17 @@
     <ClInclude Include="core\graphics\BgSpriteLayer.h" />
     <ClInclude Include="core\graphics\Direct3D11\Axis.h" />
     <ClInclude Include="core\graphics\Direct3D11\BulletDebugDraw.h" />
-    <ClInclude Include="core\graphics\Direct3D11\d3dx11effect.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Common.h" />
     <ClInclude Include="core\graphics\Direct3D11\Effect.h" />
     <ClInclude Include="core\graphics\Direct3D11\EffectPass.h" />
     <ClInclude Include="core\graphics\Direct3D11\EffectTechnique.h" />
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Texture.h" />
     <ClInclude Include="core\graphics\Direct3D11\InputLayout.h" />
     <ClInclude Include="core\graphics\Direct3D11\PrimitiveTopology.h" />
     <ClInclude Include="core\graphics\Direct3D11\ShaderResource.h" />
     <ClInclude Include="core\graphics\Direct3D11\ShadowMap.h" />
     <ClInclude Include="core\graphics\Direct3D11\Sprite.h" />
+    <ClInclude Include="core\graphics\Direct3D11\Texture.h" />
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWrite.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.h" />
@@ -152,6 +152,7 @@
     <ClInclude Include="core\graphics\PrimitiveTopology.h" />
     <ClInclude Include="core\graphics\ShaderResource.h" />
     <ClInclude Include="core\graphics\ShadowMap.h" />
+    <ClInclude Include="core\graphics\Sprite.h" />
     <ClInclude Include="core\input\DirectInput\DirectInput.h" />
     <ClInclude Include="core\math.h" />
     <ClInclude Include="core\math\Bullet\Quaternion.h" />

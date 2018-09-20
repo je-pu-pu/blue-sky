@@ -2,16 +2,13 @@
 
 #include <unordered_map>
 
-class Direct3D11;
-class Direct3D11EffectPass;
-
 struct ID3DX11Effect;
 
 namespace core::graphics::direct_3d_11
 {
-
-class EffectTechnique;
-class EffectPass;
+	class Direct3D11;
+	class EffectTechnique;
+	class EffectPass;
 
 /**
  * Direct3D 11 Effect のラッパークラス

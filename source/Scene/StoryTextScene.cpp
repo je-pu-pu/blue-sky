@@ -42,9 +42,9 @@ StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name
 	load_story_text_file( file_name );
 
 	/// @todo ®—
-	if ( get_direct_3d()->getFont() )
+	if ( get_direct_3d()->get_font() )
 	{
-		text_y_target_ = static_cast< float >( -get_direct_3d()->getFont()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) ) );
+		text_y_target_ = static_cast< float >( -get_direct_3d()->get_font()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) ) );
 	}
 	
 	sprite_texture_ = get_graphics_manager()->load_named_texture( "sprite", "media/image/title.png" );
@@ -261,7 +261,7 @@ void StoryTextScene::update()
 void StoryTextScene::render()
 {
 	get_direct_3d()->clear_default_view();
-	get_direct_3d()->getSprite()->begin();
+	get_direct_3d()->get_sprite()->begin();
 
 	{
 		render_technique( "|sprite", [this]
@@ -275,26 +275,26 @@ void StoryTextScene::render()
 				s.set_scaling( ( *j )->get_scale().value(), ( *j )->get_scale().value(), 1.f );
 				t.set_translation( ( *j )->get_translation().value().x(), ( *j )->get_translation().value().y(), 0.f );
 
-				get_direct_3d()->getSprite()->set_transform( r * s * t );
-				get_direct_3d()->getSprite()->draw( ( *j )->get_texture(), ( *j )->get_src_rect(), ( *j )->get_color().value() );
+				get_direct_3d()->get_sprite()->set_transform( r * s * t );
+				get_direct_3d()->get_sprite()->draw( ( *j )->get_texture(), ( *j )->get_src_rect(), ( *j )->get_color().value() );
 			}
 		} );
 	}
 
-	get_direct_3d()->getSprite()->end();
+	get_direct_3d()->get_sprite()->end();
 
 	// text
 	/// @todo ®—
-	if ( get_direct_3d()->getFont() )
+	if ( get_direct_3d()->get_font() )
 	{
 		get_direct_3d()->begin2D();
-		get_direct_3d()->getFont()->begin();
-		get_direct_3d()->getFont()->draw_text_center( -1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-		get_direct_3d()->getFont()->draw_text_center( +1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-		get_direct_3d()->getFont()->draw_text_center( -1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-		get_direct_3d()->getFont()->draw_text_center( +1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-		get_direct_3d()->getFont()->draw_text_center( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_color_ );
-		get_direct_3d()->getFont()->end();
+		get_direct_3d()->get_font()->begin();
+		get_direct_3d()->get_font()->draw_text_center( -1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
+		get_direct_3d()->get_font()->draw_text_center( +1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
+		get_direct_3d()->get_font()->draw_text_center( -1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
+		get_direct_3d()->get_font()->draw_text_center( +1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
+		get_direct_3d()->get_font()->draw_text_center( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_color_ );
+		get_direct_3d()->get_font()->end();
 		get_direct_3d()->end2D();
 	}
 
@@ -306,17 +306,17 @@ void StoryTextScene::render()
 	// loading ...
 	if ( is_skipped_ )
 	{
-		get_direct_3d()->getSprite()->begin();
+		get_direct_3d()->get_sprite()->begin();
 
 		render_technique( "|sprite", [this]
 		{
 			win::Rect src_rect = win::Rect::Size( 512, 0, 272, 128 );
 			win::Point dst_point( get_width() - src_rect.width(), get_height() - src_rect.height() );
 
-			get_direct_3d()->getSprite()->draw( dst_point, sprite_texture_, src_rect );
+			get_direct_3d()->get_sprite()->draw( dst_point, sprite_texture_, src_rect );
 		} );
 
-		get_direct_3d()->getSprite()->end();
+		get_direct_3d()->get_sprite()->end();
 	}
 
 	get_direct_3d()->end3D();

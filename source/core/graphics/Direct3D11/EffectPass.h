@@ -3,12 +3,11 @@
 #include <core/graphics/EffectPass.h>
 #include <d3d11.h>
 
-class Direct3D11;
-
 struct ID3DX11EffectPass;
 
 namespace core::graphics::direct_3d_11
 {
+	class Direct3D11;
 
 /**
  * Direct3D 11 Effect Pass のラッパークラス

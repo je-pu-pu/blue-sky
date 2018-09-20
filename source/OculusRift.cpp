@@ -11,9 +11,9 @@
 
 #define OCULUS_VR_FAIL_CHECK( x ) { if ( OVR_FAILURE( x ) ) { ovrErrorInfo errorInfo; ovr_GetLastErrorInfo( & errorInfo ); COMMON_THROW_EXCEPTION_MESSAGE( std::string( #x ) + " failed. : " + errorInfo.ErrorString ); } }
 
-const Direct3D11::Matrix OculusRift::COORDINATE_SYSTEM_CONVERT_MATRIX = [] () { Direct3D11::Matrix m; m.set_scaling( 1, 1, -1 ); return m; }();
+const OculusRift::Matrix OculusRift::COORDINATE_SYSTEM_CONVERT_MATRIX = [] () { Matrix m; m.set_scaling( 1, 1, -1 ); return m; }();
 
-OculusRift::OculusRift( Direct3D11* d3d )
+OculusRift::OculusRift( Direct3D* d3d )
 	: direct_3d_( d3d )
 	, yaw_( 0.f )
 	, pitch_( 0.f )
@@ -191,7 +191,7 @@ void OculusRift::setup_rendering()
  */
 void OculusRift::setup_rendering_for_left_eye()
 {
-	setup_viewport( ovrEye_Left );
+	setup_default_viewport( ovrEye_Left );
 }
 
 /**
@@ -200,7 +200,7 @@ void OculusRift::setup_rendering_for_left_eye()
  */
 void OculusRift::setup_rendering_for_right_eye()
 {
-	setup_viewport( ovrEye_Right );
+	setup_default_viewport( ovrEye_Right );
 }
 
 /**
@@ -208,7 +208,7 @@ void OculusRift::setup_rendering_for_right_eye()
  *
  * @param eye_index ( ovrEye_Left or ovrEye_Right )
  */
-void OculusRift::setup_viewport( int eye_index )
+void OculusRift::setup_default_viewport( int eye_index )
 {
 	D3D11_VIEWPORT viewport;
 
@@ -248,9 +248,9 @@ void OculusRift::finish_rendering()
  *
  * @param eye_index ( ovrEye_Left or ovrEye_Right )
  */
-Direct3D11::Vector OculusRift::get_eye_position( int eye_index ) const
+OculusRift::Vector OculusRift::get_eye_position( int eye_index ) const
 {
-	return Direct3D11::Vector(
+	return Vector(
 		layer_.RenderPose[ eye_index ].Position.x,
 		layer_.RenderPose[ eye_index ].Position.y,
 		layer_.RenderPose[ eye_index ].Position.z,
@@ -263,16 +263,16 @@ Direct3D11::Vector OculusRift::get_eye_position( int eye_index ) const
  * 
  * @param eye_index ( ovrEye_Left or ovrEye_Right )
  */
-Direct3D11::Matrix OculusRift::get_eye_rotation( int eye_index ) const
+OculusRift::Matrix OculusRift::get_eye_rotation( int eye_index ) const
 {
-	Direct3D11::Vector q(
+	Vector q(
 		-layer_.RenderPose[ eye_index ].Orientation.x,
 		-layer_.RenderPose[ eye_index ].Orientation.y,
 		layer_.RenderPose[ eye_index ].Orientation.z,
 		layer_.RenderPose[ eye_index ].Orientation.w
 	);
 
-	Direct3D11::Matrix m;
+	Matrix m;
 	m.set_rotation_quaternion( q );
 
 	return m;
@@ -283,11 +283,11 @@ Direct3D11::Matrix OculusRift::get_eye_rotation( int eye_index ) const
  * 
  * @param eye_index ( ovrEye_Left or ovrEye_Right )
  */
-Direct3D11::Matrix OculusRift::get_projection_matrix( int eye_index, float near_plane, float far_plane ) const
+OculusRift::Matrix OculusRift::get_projection_matrix( int eye_index, float near_plane, float far_plane ) const
 {
 	OVR::Matrix4f projection = ovrMatrix4f_Projection( layer_.Fov[ eye_index ], near_plane, far_plane, ovrProjection_None );
 	
-	Direct3D11::Matrix m;
+	Matrix m;
 
 	m.set(
 		projection.M[ 0 ][ 0 ], projection.M[ 1 ][ 0 ], projection.M[ 2 ][ 0 ], projection.M[ 3 ][ 0 ],

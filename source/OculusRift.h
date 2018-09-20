@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/graphics/Direct3D11/Direct3D11.h>
-#include <type/type.h>
+#include <core/type.h>
 
 #include <OVR_CAPI_D3D.h>
 
@@ -16,9 +16,12 @@
 class OculusRift
 {
 public:
+	using Direct3D = core::graphics::direct_3d_11::Direct3D11;
+	using Vector = core::Vector;
+	using Matrix = core::Matrix;
 
 private:
-	Direct3D11*						direct_3d_;
+	Direct3D*						direct_3d_;
 
 	ovrSession						ovr_session_;
 	ovrGraphicsLuid					ovr_luid_;
@@ -46,7 +49,7 @@ private:
 	float_t							projection_offset_;
 	float_t							ortho_offset_;
 
-	static const Direct3D11::Matrix COORDINATE_SYSTEM_CONVERT_MATRIX;
+	static const Direct3D::Matrix COORDINATE_SYSTEM_CONVERT_MATRIX;
 
 protected:
 	void create_render_target_texture_swap_chain( const ovrSizei& );
@@ -57,10 +60,10 @@ protected:
 
 	void create_layer( const ovrSizei&, const ovrSizei& );
 
-	void setup_viewport( int );
+	void setup_default_viewport( int );
 
 public:
-	OculusRift( Direct3D11* );
+	OculusRift( Direct3D* );
 	~OculusRift();
 
 	void update();
@@ -71,9 +74,9 @@ public:
 
 	void finish_rendering();
 
-	Direct3D11::Vector get_eye_position( int ) const;
-	Direct3D11::Matrix get_eye_rotation( int ) const;
-	Direct3D11::Matrix get_projection_matrix( int, float, float ) const;
+	Vector get_eye_position( int ) const;
+	Matrix get_eye_rotation( int ) const;
+	Matrix get_projection_matrix( int, float, float ) const;
 
 	float_t get_yaw() const { return yaw_; }
 	float_t get_pitch() const { return pitch_; }
@@ -85,6 +88,5 @@ public:
 
 	float_t get_projection_offset() const { return projection_offset_; }
 	float_t get_ortho_offset() const { return ortho_offset_; }
-
 
 }; // class OculusRift

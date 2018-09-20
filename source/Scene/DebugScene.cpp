@@ -9,6 +9,7 @@
 #include <Input.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <core/graphics/Sprite.h>
 
 #include <game/MainLoop.h>
 
@@ -32,6 +33,8 @@ DebugScene::DebugScene( const GameMain* game_main )
 	city->set_model( city_generator_.get_model() );
 
 	get_script_manager()->exec( "load( \"test/init.lua\" )" );
+
+	get_graphics_manager()->load_named_texture( "2x2", "media/texture/rgby.png" );
 }
 
 DebugScene::~DebugScene()
@@ -131,6 +134,19 @@ void DebugScene::render()
 
 	get_graphics_manager()->render_debug_axis( get_active_object_manager() );
 	get_graphics_manager()->render_debug_bullet();
+
+	if ( get_input()->press( Input::B ) )
+	{
+		get_graphics_manager()->unset_depth_stencil();
+		get_graphics_manager()->resolve_depth_texture();
+
+		get_graphics_manager()->get_sprite()->begin();
+		get_graphics_manager()->get_sprite()->draw( win::Rect( get_width() / 4.f, get_height() / 4.f, get_width() / 4.f * 3.f, get_height() / 4.f * 3.f ), get_graphics_manager()->get_depth_texture() );
+		// get_graphics_manager()->get_sprite()->draw( win::Rect( get_width() / 4.f, get_height() / 4.f, get_width() / 4.f * 3.f, get_height() / 4.f * 3.f ), get_graphics_manager()->get_texture( "2x2" ) );
+		get_graphics_manager()->get_sprite()->end();
+
+		get_graphics_manager()->set_depth_stencil();
+	}
 
 	std::stringstream ss;
 	ss << "Time : " << get_total_elapsed_time() << '\n';

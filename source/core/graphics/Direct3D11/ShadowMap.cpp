@@ -62,7 +62,7 @@ ShadowMap::ShadowMap( Direct3D11* direct_3d, uint_t cascade_levels, size_t size 
 	}
 
 	{
-		texture_.reset( new Direct3D11Texture( direct_3d_, view ) );
+		texture_.reset( new direct_3d_11::Texture( direct_3d_, view ) );
 	}
 
 	viewport_list_.resize( cascade_levels_ );

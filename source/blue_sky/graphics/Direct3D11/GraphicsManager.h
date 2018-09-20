@@ -6,10 +6,9 @@
 
 #include <memory>
 
-class Direct3D11;
-
 namespace core::graphics::direct_3d_11
 {
+	class Direct3D11;
 	class Axis;
 }
 
@@ -28,7 +27,7 @@ namespace blue_sky::graphics::direct_3d_11
 class GraphicsManager : public blue_sky::graphics::GraphicsManager
 {
 public:
-	using Direct3D	= Direct3D11;
+	using Direct3D	= core::graphics::direct_3d_11::Direct3D11;
 	using Axis		= core::graphics::direct_3d_11::Axis;
 
 private:
@@ -54,6 +53,9 @@ protected:
 	void set_input_layout( const char_t* ) const override;
 	void set_input_layout( const InputLayout* ) const override;
 	void set_primitive_topology( PrimitiveTopology ) const override;
+
+	void set_depth_stencil() const override;
+	void unset_depth_stencil() const override;
 
 	[[nodiscard]] ShadowMap* create_shadow_map( uint_t, uint_t ) const override;
 	[[nodiscard]] Line* create_line() const override;
@@ -93,6 +95,10 @@ public:
 	void set_drawing_line_type( int_t ) override;
 
 	void set_eye_position( const Vector& );
+
+	void resolve_depth_texture() const override;
+	Texture* get_depth_texture() const override;
+	Sprite* get_sprite() const override;
 
 	GameShaderResource* get_game_render_data() const override { return game_render_data_.get(); }
 	FrameShaderResource* get_frame_render_data() const override { return frame_render_data_.get(); }

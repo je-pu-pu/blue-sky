@@ -97,15 +97,6 @@
     <ClCompile Include="core\sound\DirectSound\DirectSoundBuffer.cpp">
       <Filter>core\DirectSound</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp">
-      <Filter>core\DirectWrite</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp">
-      <Filter>core\DirectWrite</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp">
-      <Filter>core\DirectWrite</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
@@ -208,6 +199,18 @@
     <ClCompile Include="core\graphics\Direct3D11\BulletDebugDraw.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
+    <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp">
+      <Filter>core\graphics\DirectWrite</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp">
+      <Filter>core\graphics\DirectWrite</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp">
+      <Filter>core\graphics\DirectWrite</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Sprite.cpp">
+      <Filter>core\graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -306,12 +309,6 @@
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Common.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Direct3D11Texture.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\d3dx11effect.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
     <ClInclude Include="core\input\DirectInput\DirectInput.h">
       <Filter>core\DirectInput</Filter>
     </ClInclude>
@@ -320,21 +317,6 @@
     </ClInclude>
     <ClInclude Include="core\sound\DirectSound\DirectSoundBuffer.h">
       <Filter>core\DirectSound</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWrite.h">
-      <Filter>core\DirectWrite</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.h">
-      <Filter>core\DirectWrite</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileEnumerator.h">
-      <Filter>core\DirectWrite</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.h">
-      <Filter>core\DirectWrite</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h">
-      <Filter>core\DirectWrite</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h">
       <Filter>core\graphics\Direct3D11</Filter>
@@ -554,6 +536,27 @@
     <ClInclude Include="core\graphics\Direct3D11\BulletDebugDraw.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWrite.h">
+      <Filter>core\graphics\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.h">
+      <Filter>core\graphics\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileEnumerator.h">
+      <Filter>core\graphics\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.h">
+      <Filter>core\graphics\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h">
+      <Filter>core\graphics\DirectWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Sprite.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Texture.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -680,9 +683,6 @@
     <Filter Include="core\DirectSound">
       <UniqueIdentifier>{dda2800c-ddab-4892-bc17-a26b440756c4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\DirectWrite">
-      <UniqueIdentifier>{84f027f9-a7a1-40c4-8bbe-0549bc5f6baf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="media">
       <UniqueIdentifier>{b24d6732-297b-4a28-bff0-ac59442e19a1}</UniqueIdentifier>
     </Filter>
@@ -736,6 +736,9 @@
     </Filter>
     <Filter Include="core\Bullet">
       <UniqueIdentifier>{b0f122bc-1ef3-4d7f-9dca-f528879b0c06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\graphics\DirectWrite">
+      <UniqueIdentifier>{1fe5994d-3867-407c-98a4-60a267fcc6b9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

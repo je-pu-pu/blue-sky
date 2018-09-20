@@ -81,7 +81,7 @@ void CityGenerator::step()
 		if ( type != RoadNode::Type::CROSS )
 		{
 			Matrix m;
-			m.set_rotation_y( math::degree_to_radian( common::random( -0.f, +10.f ) ) );
+			m.set_rotation_y( math::degree_to_radian( common::random( -10.f, +10.f ) ) );
 			cp.front *= m;
 			cp.front.normalize();
 		}

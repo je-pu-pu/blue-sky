@@ -1,15 +1,14 @@
 #pragma once
 
-#include "Direct3D11Texture.h"
+#include "Texture.h"
 #include <core/graphics/Direct3D11/ShaderResource.h>
 #include <core/graphics/ShadowMap.h>
 #include <d3d11.h>
 #include <vector>
 
-class Direct3D11;
-
 namespace core::graphics::direct_3d_11
 {
+	class Direct3D11;
 
 /**
  * Direct3D 11 シャドウマップ
@@ -42,7 +41,7 @@ public:
 private:
 	Direct3D11*								direct_3d_;
 	std::unique_ptr< ShaderResource >		shader_resource_;
-	std::unique_ptr< Direct3D11Texture >	texture_;
+	std::unique_ptr< Texture >				texture_;
 
 	int							cascade_levels_;			///< CSM のレベル数
 

@@ -198,16 +198,16 @@ void EndingScene::render()
 
 void EndingScene::render_bg()
 {
-	get_direct_3d()->getSprite()->begin();
+	get_direct_3d()->get_sprite()->begin();
 
 	render_technique( "|sprite", [this]
 	{
 		win::Rect dst_rect( 0, 0, get_width(), get_height() );
 
-		get_direct_3d()->getSprite()->draw( dst_rect, bg_texture_ );
+		get_direct_3d()->get_sprite()->draw( dst_rect, bg_texture_ );
 	} );
 
-	get_direct_3d()->getSprite()->end();
+	get_direct_3d()->get_sprite()->end();
 }
 
 void EndingScene::render_drawing_line()

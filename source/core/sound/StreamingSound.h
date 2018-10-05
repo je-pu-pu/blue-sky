@@ -23,26 +23,26 @@ private:
 public:
 
 	/// コンストラクタ
-	StreamingSound( const DirectSound* );
+	explicit StreamingSound( const DirectSound* );
 
 	/// デストラクタ
 	~StreamingSound();
 
 	/// ファイルを読み込む
-	bool load( const char* );
+	bool load( const char* ) override;
 
 	/// サウンドを再生する
-	bool play( bool, bool );
+	bool play( bool, bool ) override;
 	bool is_loop() const { return is_loop_; }
 
 	/// 更新処理
-	void update();
+	void update() override;
 
 	/// 現在の位置 ( 秒 ) を取得する
-	float get_current_position() const;
+	float get_current_position() const override;
 
 	/// 現在の位置のピークレベルを取得する
-	float get_current_peak_level() const;
+	float get_current_peak_level() const override;
 
 	static DWORD get_buffer_size() { return 512 * 1024; /* 512 KB */ };
 

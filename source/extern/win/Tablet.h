@@ -11,6 +11,8 @@
 #define PACKETMODE PK_BUTTONS
 #include "PKTDEF.H"
 
+#include <boost/utility.hpp>
+
 #include <sstream>
 
 namespace win
@@ -20,24 +22,24 @@ namespace win
  * ペンタブレット
  *
  */
-class Tablet
+class Tablet : private boost::noncopyable
 {
 public:
 	constexpr static bool is_enabled() { return false; }
 
 private:
-	HMODULE module_;
-	HCTX context_handle_;
+	HMODULE module_ = 0;
+	HCTX context_handle_ = 0;
 
 	AXIS pressure_axis_;
 	AXIS orientation_axis_[ 3 ];
 
-	int cursor_index_;
-	float x_;
-	float y_;
-	float pressure_;
-	float azimuth_;
-	float altitude_;
+	int cursor_index_ = 0;
+	float x_ = 0.f;
+	float y_ = 0.f;
+	float pressure_ = 0.f;
+	float azimuth_ = 0.f;
+	float altitude_ = 0.f;
 
 	static UINT ( API * DllWTInfo )( UINT, UINT, LPVOID );
 	static HCTX ( API * DllWTOpen )( HWND, LPLOGCONTEXTA, BOOL );

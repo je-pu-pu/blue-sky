@@ -13,9 +13,6 @@
 #include <game/Mesh.h>
 #include <game/Shader.h>
 
-#include <common/safe_ptr.h>
-#include <common/auto_ptr.h>
-
 #include <vector>
 #include <functional>
 

@@ -2,7 +2,6 @@
 #define GAME_LINE_H
 
 #include <type/type.h>
-#include <common/safe_ptr.h>
 
 namespace game
 {

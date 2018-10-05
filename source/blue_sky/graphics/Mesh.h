@@ -6,7 +6,6 @@
 #include <game/VertexGroup.h>
 #include <game/Texture.h>
 
-#include <common/safe_ptr.h>
 #include <common/math.h>
 
 #include <memory>

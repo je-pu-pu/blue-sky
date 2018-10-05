@@ -7,17 +7,17 @@ namespace common
 {
 
 template< typename T >
-class auto_ptr
+class [[deprecated("please use std::unique_ptr")]] auto_ptr
 {
 private:
 	T* ptr_;
 
-	auto_ptr( const auto_ptr& ) { }
-	auto_ptr& operator = ( const auto_ptr& ) { return *this; }
+	auto_ptr( const auto_ptr& ) = delete;
+	auto_ptr& operator = ( const auto_ptr& ) = delete;
 
 public:
 	inline auto_ptr() : ptr_( 0 ) { }
-	inline auto_ptr( T* ptr ) : ptr_( ptr ) { }
+	inline explicit auto_ptr( T* ptr ) : ptr_( ptr ) { }
 	inline ~auto_ptr() { release(); }
 
 	inline auto_ptr& operator = ( T* ptr ) { assert( ! ptr_ ); ptr_ = ptr; return *this; }

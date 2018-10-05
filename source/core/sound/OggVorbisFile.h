@@ -17,15 +17,15 @@ private:
 	WAVEFORMATEX	format_;
 
 public:
-	OggVorbisFile( const char* );
+	explicit OggVorbisFile( const char* );
 	~OggVorbisFile();
 	
 	WAVEFORMATEX& format() { return format_; }
 
-	SizeType size() const;
-	SizeType size_per_sec() const;
+	SizeType size() const override;
+	SizeType size_per_sec() const override;
 
-	SizeType read( void*, SizeType, bool = false );
+	SizeType read( void*, SizeType, bool = false ) override;
 	void seek( SizeType );
 
 }; // class OggVorbisFile

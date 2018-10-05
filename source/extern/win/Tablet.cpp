@@ -12,12 +12,6 @@ BOOL ( API * Tablet::DllWTPacket )( HCTX, UINT, LPVOID );
 BOOL ( API * Tablet::DllWTOverlap )( HCTX, BOOL );
 
 Tablet::Tablet( HWND hwnd )
-	: module_( 0 )
-	, context_handle_( 0 )
-	, cursor_index_( 0 )
-	, x_( 0.f )
-	, y_( 0.f )
-	, pressure_( 0.f )
 {
 	module_ = LoadLibrary( "Wintab32.dll" );
 
@@ -49,7 +43,7 @@ Tablet::Tablet( HWND hwnd )
 		COMMON_THROW_EXCEPTION_MESSAGE( "DllWTInfo() failed." );
 	}
 
-	wsprintf( log_context_.lcName, "Tablet %x", module_ );
+	wsprintf( log_context_.lcName, "Tablet %p", module_ );
 	log_context_.lcOptions |= CXO_MESSAGES;
 	log_context_.lcPktData = PACKETDATA;
 	log_context_.lcPktMode = PACKETMODE;

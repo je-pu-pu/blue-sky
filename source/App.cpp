@@ -41,7 +41,10 @@ App::App()
 
 #ifdef ENABLE_DEBUG_CONSOLE
 	AllocConsole();
-	freopen( "CONOUT$", "w", stdout );
+	if ( freopen( "CONOUT$", "w", stdout ) == NULL )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( "freopen() failed." );
+	}
 #endif
 }
 

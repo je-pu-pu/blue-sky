@@ -47,7 +47,7 @@ private:
 	bool		is_mouse_in_window_;
 	bool		is_clip_cursor_enabled_;
 
-	Game*		game_;
+	Game*		game_ = 0;
 	std::unique_ptr< Config >			config_;
 
 	App();								//コンストラクタ

@@ -3,7 +3,6 @@
 #include "Scene.h"
 
 #include <common/chase_value.h>
-#include <common/auto_ptr.h>
 #include <common/safe_ptr.h>
 
 #include <list>

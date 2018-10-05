@@ -56,6 +56,7 @@ void delete_bin_fbx_all()
 			
 		if ( GetModuleFileName( NULL, exe_file_path, MAX_PATH ) == 0 )
 		{
+			FindClose( find_handle );
 			COMMON_THROW_EXCEPTION_MESSAGE( "GetModuleFileName failed." );
 		}
 

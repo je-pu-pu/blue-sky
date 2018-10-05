@@ -7,8 +7,6 @@
 
 #include <win/Tablet.h>
 
-#include <common/safe_ptr.h>
-
 #include <memory>
 
 namespace game

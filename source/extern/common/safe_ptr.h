@@ -7,17 +7,17 @@ namespace common
 {
 
 template< typename T >
-class safe_ptr
+class [[deprecated("please use std::unique_ptr")]] safe_ptr
 {
 private:
 	T* ptr_;
 
-	safe_ptr( const safe_ptr& ) { }
-	safe_ptr& operator = ( const safe_ptr& ) { return *this; }
+	safe_ptr( const safe_ptr& ) = delete;
+	safe_ptr& operator = ( const safe_ptr& ) = delete;
 
 public:
 	safe_ptr() : ptr_( 0 ) { }
-	safe_ptr( T* ptr ) : ptr_( ptr ) { }
+	explicit safe_ptr( T* ptr ) : ptr_( ptr ) { }
 
 	safe_ptr& operator = ( T* ptr ) { assert( ! ptr_ ); ptr_ = ptr; return *this; }
 

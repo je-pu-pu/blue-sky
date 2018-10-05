@@ -19,7 +19,6 @@ template< typename Type >
 inline std::wstring w_serialize( Type x )
 {
 	std::wstringstream ss;
-	std::wstring s;
 
 	ss << x;
 	

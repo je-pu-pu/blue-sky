@@ -171,6 +171,13 @@ int App::MessageLoop()
 //□ウィンドウプロシージャ
 LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 {
+	extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+	if ( ImGui_ImplWin32_WndProcHandler( hwnd, msg, wp, lp ) )
+	{
+		return true;
+	}
+
 	switch ( msg )
 	{
 	case WM_CREATE:
@@ -210,7 +217,7 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		{
 			App::GetInstance()->is_mouse_in_window_ = true;
 
-			ShowCursor( FALSE );
+			ShowCursor( App::GetInstance()->is_show_cursor_enabled_ );
 
 			TRACKMOUSEEVENT track_mouse_event = { sizeof( TRACKMOUSEEVENT ), TME_LEAVE, hwnd };
 			TrackMouseEvent( & track_mouse_event );
@@ -290,6 +297,18 @@ void App::on_resize( HWND /* hwnd */ )
 	{
 		App::GetInstance()->game_->on_resize();
 	}
+}
+
+/**
+ * カーソルの表示を設定する
+ *
+ * @param show 
+ */
+void App::show_cursor( bool show )
+{
+	is_show_cursor_enabled_ = show;
+
+	ShowCursor( show );
 }
 
 void App::clip_cursor( bool clip )

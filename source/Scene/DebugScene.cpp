@@ -15,6 +15,8 @@
 
 #include <common/math.h>
 
+#include <imgui.h>
+
 namespace blue_sky
 {
 
@@ -110,6 +112,24 @@ void DebugScene::update()
 
 	get_graphics_manager()->clear_debug_bullet();
 	get_physics_manager()->update( get_elapsed_time() );
+
+	static float f = 0.f;
+	static std::string s( 256, 0 );
+
+	ImGui::Begin("Hello, world!");
+
+	ImGui::Text("Hello, world %d", 123);
+	if (ImGui::Button("Save"))
+	{
+		
+	}
+
+	static float my_color[ 4 ] = { 0.f };
+	ImGui::ColorEdit4("Color", my_color);
+
+	ImGui::InputText("string", s.data(), s.size());
+	ImGui::SliderFloat("float", & f, 0.0f, 1.0f);
+	ImGui::End();
 }
 
 void DebugScene::render()

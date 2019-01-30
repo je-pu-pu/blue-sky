@@ -42,6 +42,10 @@
 #include <common/math.h>
 #include <common/log.h>
 
+#include <imgui.h>
+#include <imgui_impl_win32.h>
+#include <imgui_impl_dx11.h>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 
@@ -88,6 +92,11 @@ GameMain::GameMain()
 	{
 		direct_3d_->setup_font();
 	}
+
+	ImGui::CreateContext();
+	ImGui_ImplWin32_Init( get_app()->GetWindowHandle() );
+	ImGui_ImplDX11_Init( direct_3d_->getDevice(), direct_3d_->getImmediateContext() );
+
 
 	direct_input_ = new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() );
 
@@ -144,6 +153,10 @@ GameMain::GameMain()
 //■デストラクタ
 GameMain::~GameMain()
 {
+	ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
+
 	get_config()->set< int >( "audio.mute", sound_manager_->is_mute() );
 	get_config()->set< int >( "graphics.full_screen", get_direct_3d()->is_full_screen() );
 
@@ -327,6 +340,10 @@ bool GameMain::update()
 		}
 	}
 
+	ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+
 	scene_->update();
 
 	render();
@@ -361,6 +378,10 @@ void GameMain::render()
 		*/
 	}
 
+	ImGui::Render();
+	get_direct_3d()->set_default_render_target( false );
+    ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );
+
 	direct_3d_->present();
 }
 
@@ -377,6 +398,8 @@ void GameMain::on_key_down( char_t key )
 			is_command_mode_ = true;
 		}
 	}
+
+	get_app()->show_cursor( is_command_mode_ );
 }
 
 void GameMain::edit_command( char_t key )

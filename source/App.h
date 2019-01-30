@@ -45,6 +45,8 @@ private:
 	RECT		last_window_rect_;		///< 前回のウィンドウ位置とサイズ
 
 	bool		is_mouse_in_window_;
+
+	bool		is_show_cursor_enabled_ = false;
 	bool		is_clip_cursor_enabled_;
 
 	Game*		game_ = 0;
@@ -89,6 +91,7 @@ public:
 	bool is_full_screen() const { return is_full_screen_; }
 	void set_full_screen( bool );
 
+	void show_cursor( bool );
 	void clip_cursor( bool );
 
 	void close();

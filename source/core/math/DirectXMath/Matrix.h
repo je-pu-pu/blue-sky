@@ -20,12 +20,14 @@ private:
 	DirectX::XMMATRIX value_;
 
 	Matrix( const DirectX::XMMATRIX& m )
+		: value_( m )
 	{
-		value_ = m;
+		
 	}
 
 public:
 	Matrix()
+		: value_()
 	{
 		
 	}

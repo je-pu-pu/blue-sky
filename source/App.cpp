@@ -25,6 +25,7 @@ App::App()
 	, height_( DEFAULT_HEIGHT )
 	, is_active_( false )
 	, is_full_screen_( false )
+	, last_window_rect_{ 0, 0, 0, 0 }
 	, is_mouse_in_window_( false )
 	, is_clip_cursor_enabled_( false )
 	, config_( new Config() )

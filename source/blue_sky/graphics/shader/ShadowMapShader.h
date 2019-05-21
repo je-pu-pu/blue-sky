@@ -15,7 +15,7 @@ class BaseShadowMapShader : public BaseShader
 private:
 	const InputLayout* input_layout_;
 	const EffectTechnique* effect_technique_;
-	const ShaderResource* resource_;
+	const ShaderResource* resource_ = nullptr;
 
 protected:
 	Texture* get_texture_at( uint_t ) override { return nullptr; }

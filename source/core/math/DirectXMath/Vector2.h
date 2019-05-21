@@ -29,11 +29,13 @@ private:
 
 public:
 	Vector2()
+		: value_()
 	{
 
 	}
 
 	Vector2( UnitType x, UnitType y )
+		: value_()
 	{
 		set( x, y );
 	}

@@ -23,15 +23,15 @@ public:
 private:
 	Direct3D*						direct_3d_;
 
-	ovrSession						ovr_session_;
+	ovrSession						ovr_session_ = nullptr;
 	ovrGraphicsLuid					ovr_luid_;
 	ovrHmdDesc						hmd_desc_;
 	ovrTextureSwapChain				render_target_texture_swap_chain_ = nullptr;
 	ovrTextureSwapChain				depth_stencil_texture_swap_chain_ = nullptr;
 	
-	ovrEyeRenderDesc				eye_render_desc_[ 2 ];
-	ovrPosef						hmd_to_eye_pose_[ 2 ];
-	ovrLayerEyeFovDepth				layer_;
+	ovrEyeRenderDesc				eye_render_desc_[ 2 ] = { ovrEyeRenderDesc(), ovrEyeRenderDesc() };
+	ovrPosef						hmd_to_eye_pose_[ 2 ] = { ovrPosef(), ovrPosef() };
+	ovrLayerEyeFovDepth				layer_ = ovrLayerEyeFovDepth();
 
 	std::vector< ID3D11RenderTargetView* > render_target_view_list_;
 	std::vector< ID3D11DepthStencilView* > depth_stencil_view_list_;
@@ -45,9 +45,6 @@ private:
 	float_t							last_yaw_;
 	float_t							last_pitch_;
 	float_t							last_roll_;
-
-	float_t							projection_offset_;
-	float_t							ortho_offset_;
 
 	static const Direct3D::Matrix COORDINATE_SYSTEM_CONVERT_MATRIX;
 
@@ -85,8 +82,5 @@ public:
 	float_t get_delta_yaw() const { return yaw_ - last_yaw_; }
 	float_t get_delta_pitch() const { return pitch_ - last_pitch_; }
 	float_t get_delta_roll() const { return roll_ - last_roll_; }
-
-	float_t get_projection_offset() const { return projection_offset_; }
-	float_t get_ortho_offset() const { return ortho_offset_; }
 
 }; // class OculusRift

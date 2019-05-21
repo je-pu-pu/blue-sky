@@ -25,6 +25,7 @@ namespace blue_sky
 
 Input::Input()
 	: direct_input_( 0 )
+	, state_()
 	, joystick_enabled_( false )
 	, joystick_axis_threshold_( 0.f )
 	, joystick_x_axis_pos_( 0 )
@@ -38,12 +39,9 @@ Input::Input()
 	, mouse_dx_( 0.f )
 	, mouse_dy_( 0.f )
 	, mouse_wheel_( 0 )
+	, mouse_point_()
+	, joystick_code_()
 {
-	for ( int n = 0; n < MAX_BUTTONS; n++ )
-	{
-		state_[ n ] = 0;
-	}
-
 	joy_info_.dwSize = sizeof( JOYINFOEX );
 	joy_info_.dwFlags = JOY_RETURNALL;
 

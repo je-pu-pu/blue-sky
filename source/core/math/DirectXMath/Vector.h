@@ -31,11 +31,13 @@ private:
 
 public:
 	Vector()
+		: value_()
 	{
 
 	}
 
 	Vector( UnitType x, UnitType y, UnitType z, UnitType w = 0.f )
+		: value_()
 	{
 		set( x, y, z, w );
 	}

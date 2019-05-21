@@ -16,8 +16,8 @@ class ElapsedTimer
 private:
 	const MainLoop* main_loop_;
 
-	unsigned long last_time_;		// 前のフレームの時間
-	unsigned long current_time_;	// 現在のフレームの時間
+	unsigned long last_time_ = 0;		// 前のフレームの時間
+	unsigned long current_time_ = 0;	// 現在のフレームの時間
 
 public:
 	explicit ElapsedTimer( const MainLoop* );

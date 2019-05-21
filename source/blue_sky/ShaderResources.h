@@ -48,7 +48,7 @@ struct FrameDrawingShaderResourceData : public BaseShaderResourceData< 4 >
 
 	float_t accent;
 	u32_t line_type;
-	float_t dummy[ 2 ];
+	float_t dummy[ 2 ] = { 0, 0 };
 
 	FrameDrawingShaderResourceData()
 		: shadow_color( 0.f, 0.f, 0.f, 0.f )

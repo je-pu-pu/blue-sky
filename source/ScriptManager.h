@@ -48,7 +48,7 @@ private:
 	string_t output_;
 
 	std::deque< string_t > command_history_;
-	int command_history_index_;
+	int command_history_index_ = 0;
 
 	const string_t empty_command_;
 

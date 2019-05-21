@@ -29,13 +29,15 @@ private:
 
 public:
 	Vector3()
+		: value_()
 	{
 
 	}
 
 	Vector3( UnitType x, UnitType y, UnitType z )
+		: value_( x, y, z )
 	{
-		set( x, y, z );
+
 	}
 
 	inline UnitType& x() { return value_.x; }

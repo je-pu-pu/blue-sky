@@ -56,17 +56,13 @@ public:
 	using WeightList	= u8_t[ 4 ];
 		
 private:
-	BoneIndexList	bone_index_list_;	///< ボーンインデックス ( 0 .. 3 )
-	WeightList		weight_list_;		///< ウエイト ( 0 .. 3 )
+	BoneIndexList	bone_index_list_ = { 0 };	///< ボーンインデックス ( 0 .. 3 )
+	WeightList		weight_list_ = { 0 };		///< ウエイト ( 0 .. 3 )
 	
 public:
 	VertexWeight()
 	{
-		for ( int n = 0; n < 4; ++n )
-		{
-			bone_index_list_[ n ] = 0;
-			weight_list_[ n ] = 0;
-		}
+
 	}
 
 	void add( int bone_index, float weight )

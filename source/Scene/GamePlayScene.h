@@ -59,23 +59,23 @@ public:
 	};
 
 private:
-	Texture*							ui_texture_ = 0;		///< UI 表示用テクスチャ
+	Texture*							ui_texture_ = nullptr;	///< UI 表示用テクスチャ
 	bool								is_cleared_ = false;	///< ステージクリアフラグ
 	std::unique_ptr< Config >			stage_config_;	
 
-	Shader*								debug_texture_shader_;
+	Shader*								debug_texture_shader_ = nullptr;
 
-	Player*								player_;
+	Player*								player_ = nullptr;
 	std::unique_ptr< Camera >			camera_;				///< @todo GameObjectManager で管理して参照するだけにする
-	Girl*								girl_;					
-	Goal*								goal_ = 0;
+	Girl*								girl_ = nullptr;					
+	Goal*								goal_ = nullptr;
 
 	/// @todo 整理する
-	Model*								far_billboards_ = 0;	///< 遠景ビルボード
-	Model*								scope_mesh_ = 0;		///< 双眼鏡
-	Model*								rectangle_;
+	Model*								far_billboards_ = nullptr;	///< 遠景ビルボード
+	Model*								scope_mesh_ = nullptr;		///< 双眼鏡
+	Model*								rectangle_ = nullptr;
 
-	Sound*								bgm_ = 0;
+	Sound*								bgm_ = nullptr;
 	common::safe_ptr< Sound >			balloon_bgm_;
 	float_t								action_bgm_after_timer_;
 

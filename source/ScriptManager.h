@@ -58,7 +58,9 @@ protected:
 		lua_.new_usertype< ActiveObject >(
 			"GameObject",
 			"model", sol::property( sol::resolve< Model* () >( & ActiveObject::get_model ), & ActiveObject::set_model ),
-			"play_animation", & ActiveObject::play_animation
+			"play_animation", & ActiveObject::play_animation,
+
+			"kill", & ActiveObject::kill
         );
 
 		lua_.new_usertype< Model >(
@@ -73,6 +75,14 @@ protected:
 			"get_texture_at", sol::resolve< Texture* ( uint_t ) >( & Shader::get_texture_at ),
 			"set_texture_at", & Shader::set_texture_at
 		);
+
+		// @todo Texture::load() を実装してスクリプトからテクスチャの内容更新ができるようにする？
+		/*
+		lua_.new_usertype< Texture >(
+			"Texture",
+			"load", & Texture::load
+		);
+		*/
 	}
 
 public:

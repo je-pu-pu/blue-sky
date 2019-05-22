@@ -220,6 +220,12 @@ void ActiveObject::chase_direction_degree( float_t d, float_t speed )
 	set_direction_degree( math::chase( direction_degree_, direction_degree_ + diff, speed ) );
 }
 
+/**
+ * オブジェクトを死亡させる
+ *
+ * オブジェクトは死亡すると is_visible(), is_mesh_visible() is_line_visible() 全てで false を返すようになるため、通常描画されなくなる。
+ * ただし、ActiveObjectManager から削除される事はなく、update() は呼ばれ続ける。
+ */
 void ActiveObject::kill()
 {
 	is_dead_ = true;

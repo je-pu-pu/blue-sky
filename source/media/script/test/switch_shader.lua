@@ -1,3 +1,5 @@
+-- シェーダーを切り替えるテスト
+
 set_sky_box( "sky-box-3" )
 set_ground( "ground" )
 
@@ -14,7 +16,7 @@ s = get_shader( "tess_matcap_skin" )
 s1 = clone_shader( s )
 s2 = clone_shader( s )
 
-t1 = load_texture( "media/texture/matcap/skin.png" )
+t1 = load_texture( "media/texture/matcap/test/a.png" )
 t2 = load_texture( "media/texture/matcap/skin.png" )
 
 s1:set_texture_at( 0, t1 )
@@ -22,3 +24,8 @@ g1.model:set_shader_at( 0, s1 )
 
 s2:set_texture_at( 0, t2 )
 g2.model:set_shader_at( 0, s2 )
+
+
+function switch_texture( file_name )
+	s1:set_texture_at( 0, load_texture( "media/texture/matcap/" .. file_name ) )
+end

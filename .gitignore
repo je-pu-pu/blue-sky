@@ -2,6 +2,8 @@
 *.url
 *.bin.fbx
 
+/.vs
+
 /doc/html/
 
 /source/lib/*
@@ -33,3 +35,5 @@
 /source/extern/Debug
 /source/extern/Release
 /source/blue-sky-cppcheck-build-dir
+
+/source/media/texture/matcap/test/*

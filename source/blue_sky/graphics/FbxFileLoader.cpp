@@ -407,10 +407,12 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 		smoothing = layer->GetSmoothing();
 	}
 
+	/*
 	if ( ! smoothing )
 	{
 		COMMON_THROW_EXCEPTION_MESSAGE( "this FBX format is not supported. ( no smoothing info )" );
 	}
+	*/
 
 	// load_mesh_plygon()
 	FbxLayerElementArrayTemplate< int >* material_indices;
@@ -420,7 +422,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 	{
 		Mesh::VertexGroup* vertex_group = get_model()->get_mesh()->get_vertex_group_at( material_indices->GetAt( n ) );
 
-		bool is_smooth = smoothing->GetDirectArray().GetAt( n ) != 0;
+		bool is_smooth = smoothing && smoothing->GetDirectArray().GetAt( n ) != 0;
 		FbxVector4 polygon_normal( 0.f, 0.f, 0.f );
 
 		if ( ! is_smooth )

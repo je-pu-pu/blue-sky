@@ -129,7 +129,7 @@ bool_t GraphicsManager::load_mesh( Model* model, const char_t* name )
 
 		for ( int n = 0; n < model->get_mesh()->get_rendering_vertex_group_count(); n++ )
 		{
-			if ( ! model->get_shader_at( n ) )
+			if ( n >= model->get_shader_count() || ! model->get_shader_at( n ) )
 			{
 				model->set_shader_at( n, get_shader( "null" ) );
 			}

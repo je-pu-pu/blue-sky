@@ -26,6 +26,7 @@ s:set_texture_at( 0, t )
 
 -- スタティックなオブジェクトを作成する
 o = create_object( "static" )
+set_loc( o, 0, 1, 0 )
 
 -- モデルを FBX から読み込んでシェーダーを設定する
 o.model = load_model( "sphere" )

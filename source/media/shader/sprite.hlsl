@@ -2,8 +2,8 @@
 // for Sprite
 // ----------------------------------------
 
-// Texture2D sprite_texture : register( t0 );
-Texture2DMS< float4, 8 > sprite_texture : register( t0 );
+Texture2D sprite_texture : register( t0 );
+Texture2DMS< float4, 8 > sprite_texture_ms : register( t0 );
 
 cbuffer SpriteConstantBuffer : register( b13 )
 {
@@ -21,29 +21,28 @@ PS_FLAT_INPUT vs_sprite( PS_FLAT_INPUT input )
 
 float4 ps_sprite( PS_FLAT_INPUT input ) : SV_Target
 {
-	float2 texture_size;
-	float samples;
+	return sprite_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
 
-	sprite_texture.GetDimensions( texture_size.x, texture_size.y, samples );
-
-	return sprite_texture.Load( int3( input.TexCoord * texture_size, 0 ), 0 );
-
-	// return sprite_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
 	// return sprite_texture.sample[ 0 ][ input.Position.xy ] * input.Color;
 	// return sprite_texture.Load( input.Position, 0 ) * input.Color;
 }
 
 float4 ps_sprite_add( PS_FLAT_INPUT input ) : SV_Target
 {
-	return float4( 1, 0, 0, 0 );
-
-	// return sprite_texture.Load( int3( 0, 0, 0 ) );
-
-	// return sprite_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
-	// return sprite_texture.sample[ 7 ][ input.TexCoord ] + input.Color;
-	// return sprite_texture.Load( input.TexCoord, 0 ) * input.Color;
+	return sprite_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
 }
 
+float4 ps_sprite_ms( PS_FLAT_INPUT input ) : SV_Target
+{
+	float2 texture_size;
+	float samples;
+
+	sprite_texture_ms.GetDimensions( texture_size.x, texture_size.y, samples );
+
+	return sprite_texture_ms.Load( int3( input.TexCoord * texture_size, 0 ), 0 );
+}
+
+// スプライト描画
 technique11 sprite
 {
 	pass main
@@ -59,6 +58,7 @@ technique11 sprite
 	}
 }
 
+// スプライト描画 ( 加算 )
 technique11 sprite_add
 {
 	pass main
@@ -71,5 +71,21 @@ technique11 sprite_add
 		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_sprite_add() ) );
+	}
+}
+
+// スプライト描画 ( マルチサンプリング )
+technique11 sprite_ms
+{
+	pass main
+	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_sprite() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps_sprite_ms() ) );
 	}
 }

@@ -63,7 +63,12 @@ private:
 
 	DXGI_SWAP_CHAIN_DESC		swap_chain_desc_;
 
-	ID3D11Texture2D*			back_buffer_texture_;
+	/*
+	ID3D11Texture2D*			render_result_texture_;
+	ID3D11RenderTargetView*		render_result_view_;
+	std::unique_ptr< Texture >	render_result_texture_;			///<
+	*/
+
 	ID3D11RenderTargetView*		back_buffer_view_;		///< Direct3D 11 Render Target View
 
 	ID3D11Texture2D*			depth_stencil_texture_;
@@ -76,8 +81,6 @@ private:
 
 	// for Direct2D & DirectWrite
 	ID3D10Device1*				device_10_;
-
-	IDXGISurface1*				back_buffer_surface_;
 
 	ID3D11Texture2D*			text_texture_;
 	std::unique_ptr< Texture >	text_view_;
@@ -93,9 +96,11 @@ private:
 	std::unique_ptr< Effect >	effect_;
 
 	void create_device();
+	
 	void create_swap_chain( IDXGIFactory1*, HWND, uint_t, uint_t, bool, int, int );
+	
 	void create_back_buffer_view();
-	void create_back_buffer_surface();
+
 	void create_depth_stencil_view();
 	void create_depth_texture();
 
@@ -184,8 +189,6 @@ public:
 	/** BAD functions */
 	inline ID3D11Device* getDevice() const { return device_; }
 	inline ID3D11DeviceContext* getImmediateContext() const { return immediate_context_; }
-
-	inline IDXGISurface1* getBackbufferSurface() const { return back_buffer_surface_; }
 
 }; // class Direct3D11
 

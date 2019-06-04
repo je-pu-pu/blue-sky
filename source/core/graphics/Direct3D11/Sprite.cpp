@@ -84,12 +84,9 @@ void Sprite::end()
 
 void Sprite::set_transform( const Matrix& m )
 {
-	DXGI_SURFACE_DESC surface_desc;
-	direct_3d_->getBackbufferSurface()->GetDesc( & surface_desc );
-
 	ConstantBufferData constant_buffer_data;
 	constant_buffer_data.transform = m;
-	constant_buffer_data.transform *= Matrix().set_orthographic( 2.f * static_cast< float >( surface_desc.Width ) / static_cast< float >( surface_desc.Height ), 2.f, -1.f, 1.f );
+	constant_buffer_data.transform *= Matrix().set_orthographic( 2.f * static_cast< float >( direct_3d_->get_width() ) / static_cast< float >( direct_3d_->get_height() ), 2.f, -1.f, 1.f );
 	constant_buffer_data.transform *= Matrix().set_translation( ortho_offset_, 0.f, 0.f );
 	constant_buffer_data.transform = constant_buffer_data.transform.transpose();
 	constant_buffer_->update( & constant_buffer_data );
@@ -140,32 +137,32 @@ void Sprite::draw( const Rect* dst, const Texture* texture, const Rect* src, con
 	}
 
 	{
-		DXGI_SURFACE_DESC surface_desc;
-		direct_3d_->getBackbufferSurface()->GetDesc( & surface_desc );
+		const auto screen_width = direct_3d_->get_width();
+		const auto screen_height = direct_3d_->get_height();
 
-		const FLOAT surface_ratio = static_cast< FLOAT >( surface_desc.Width ) / static_cast< FLOAT >( surface_desc.Height );
+		const FLOAT surface_ratio = static_cast< FLOAT >( screen_width ) / static_cast< FLOAT >( screen_height );
 
 		FLOAT l, r, t, b;
 
 		if ( dst )
 		{
-			l = +( dst->left()   * 2.f / static_cast< FLOAT >( surface_desc.Height ) - surface_ratio );
-			r = +( dst->right()  * 2.f / static_cast< FLOAT >( surface_desc.Height ) - surface_ratio );
-			t = -( dst->top()    * 2.f / static_cast< FLOAT >( surface_desc.Height ) - 1.f );
-			b = -( dst->bottom() * 2.f / static_cast< FLOAT >( surface_desc.Height ) - 1.f );
+			l = +( dst->left()   * 2.f / static_cast< FLOAT >( screen_height ) - surface_ratio );
+			r = +( dst->right()  * 2.f / static_cast< FLOAT >( screen_height ) - surface_ratio );
+			t = -( dst->top()    * 2.f / static_cast< FLOAT >( screen_height ) - 1.f );
+			b = -( dst->bottom() * 2.f / static_cast< FLOAT >( screen_height ) - 1.f );
 		}
 		else
 		{
-			l = +( ( ( static_cast< FLOAT >( surface_desc.Height ) - src_width  ) / 2               ) / surface_desc.Height * 2.f - 1.f );
-			r = +( ( ( static_cast< FLOAT >( surface_desc.Height ) - src_width  ) / 2 + src_width   ) / surface_desc.Height * 2.f - 1.f );
-			t = -( ( ( static_cast< FLOAT >( surface_desc.Height ) - src_height ) / 2               ) / surface_desc.Height * 2.f - 1.f );
-			b = -( ( ( static_cast< FLOAT >( surface_desc.Height ) - src_height ) / 2 + src_height  ) / surface_desc.Height * 2.f - 1.f );
+			l = +( ( ( static_cast< FLOAT >( screen_height ) - src_width  ) / 2               ) / screen_height * 2.f - 1.f );
+			r = +( ( ( static_cast< FLOAT >( screen_height ) - src_width  ) / 2 + src_width   ) / screen_height * 2.f - 1.f );
+			t = -( ( ( static_cast< FLOAT >( screen_height ) - src_height ) / 2               ) / screen_height * 2.f - 1.f );
+			b = -( ( ( static_cast< FLOAT >( screen_height ) - src_height ) / 2 + src_height  ) / screen_height * 2.f - 1.f );
 
 			/*
-			l = ( static_cast< FLOAT >( surface_desc.Width  ) - src_width  ) / 2;
-			r = ( static_cast< FLOAT >( surface_desc.Width  ) - src_width  ) / 2 + src_width;
-			t = ( static_cast< FLOAT >( surface_desc.Height ) - src_height ) / 2;
-			b = ( static_cast< FLOAT >( surface_desc.Height ) - src_height ) / 2 + src_height;
+			l = ( static_cast< FLOAT >( screen_width  ) - src_width  ) / 2;
+			r = ( static_cast< FLOAT >( screen_width  ) - src_width  ) / 2 + src_width;
+			t = ( static_cast< FLOAT >( screen_height ) - src_height ) / 2;
+			b = ( static_cast< FLOAT >( screen_height ) - src_height ) / 2 + src_height;
 			*/
 		}
 

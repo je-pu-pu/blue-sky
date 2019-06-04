@@ -50,14 +50,12 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sam
 	, immediate_context_( 0 )
 	, swap_chain_( 0 )
 	
-	, back_buffer_texture_( 0 )
 	, back_buffer_view_( 0 )
 
 	, depth_stencil_texture_( 0 )
 	, depth_stencil_view_( 0 )
 
 	, device_10_( 0 )
-	, back_buffer_surface_( 0 )
 	, text_texture_( 0 )
 
 	, text_texture_mutex_11_( 0 )
@@ -81,7 +79,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sam
 	DIRECT_X_RELEASE( dxgi_factory );
 
 	create_back_buffer_view();
-	create_back_buffer_surface();
 
 	create_depth_stencil_view();
 	create_depth_texture();
@@ -108,8 +105,6 @@ Direct3D11::~Direct3D11()
 
 	text_view_.reset();
 	DIRECT_X_RELEASE( text_texture_ );
-
-	DIRECT_X_RELEASE( back_buffer_surface_ );
 
 	if ( immediate_context_ )
 	{
@@ -147,7 +142,6 @@ Direct3D11::~Direct3D11()
 	DIRECT_X_RELEASE( depth_stencil_texture_ );
 
 	DIRECT_X_RELEASE( back_buffer_view_ );
-	DIRECT_X_RELEASE( back_buffer_texture_ );
 
 	DIRECT_X_RELEASE( swap_chain_ );
 
@@ -190,7 +184,7 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 	swap_chain_desc_.BufferCount = 1;
 	swap_chain_desc_.BufferDesc.Width = w;
 	swap_chain_desc_.BufferDesc.Height = h;
-	swap_chain_desc_.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	swap_chain_desc_.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // DXGI_FORMAT_R8G8B8A8_UNORM;
 //	swap_chain_desc_.BufferDesc.RefreshRate.Numerator = 60;
 //	swap_chain_desc_.BufferDesc.RefreshRate.Denominator = 1;
 	swap_chain_desc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -243,13 +237,51 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 
 void Direct3D11::create_back_buffer_view()
 {
-	DIRECT_X_FAIL_CHECK( swap_chain_->GetBuffer( 0, __uuidof( ID3D11Texture2D ), reinterpret_cast< void** >( & back_buffer_texture_ ) ) );
-	back_buffer_view_ = create_render_target_view( back_buffer_texture_ );
-}
+	/*
+	D3D11_TEXTURE2D_DESC texture_desc = { 0 };
 
-void Direct3D11::create_back_buffer_surface()
-{
-	DIRECT_X_FAIL_CHECK( back_buffer_texture_->QueryInterface( __uuidof( IDXGISurface1 ), reinterpret_cast< void** >( & back_buffer_surface_ ) ) );
+	texture_desc.Width = swap_chain_desc_.BufferDesc.Width;
+	texture_desc.Height = swap_chain_desc_.BufferDesc.Height;
+	texture_desc.MipLevels = 1;
+	texture_desc.ArraySize = 1;
+	texture_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	texture_desc.SampleDesc = swap_chain_desc_.SampleDesc;
+	//	texture_desc.SampleDesc.Count = 1;
+	//	texture_desc.SampleDesc.Quality = 0;
+	texture_desc.Usage = D3D11_USAGE_DEFAULT;
+	texture_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+	texture_desc.CPUAccessFlags = 0;
+	texture_desc.MiscFlags = 0;
+
+	ID3D11Texture2D* texture = nullptr;
+	DIRECT_X_FAIL_CHECK( device_->CreateTexture2D( & texture_desc, 0, & texture ) );
+	*/
+
+	com_ptr< ID3D11Texture2D > texture;
+	DIRECT_X_FAIL_CHECK( swap_chain_->GetBuffer( 0, __uuidof( ID3D11Texture2D ), reinterpret_cast< void** >( & texture ) ) );
+	back_buffer_view_ = create_render_target_view( texture.get() );
+
+	/*
+	D3D11 ERROR: ID3D11Device::CreateShaderResourceView: The base resource was created as a multisample resource. You must specify D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY or D3D11_SRV_DIMENSION_TEXTURE2DMS. [ STATE_CREATION ERROR #126: CREATESHADERRESOURCEVIEW_INVALIDDESC]
+	D3D11 ERROR: ID3D11Device::CreateShaderResourceView: A ShaderResourceView cannot be created of a Resource that did not specify the D3D11_BIND_SHADER_RESOURCE BindFlag. [ STATE_CREATION ERROR #129: CREATESHADERRESOURCEVIEW_INVALIDRESOURCE]
+	0x742D1942 で例外がスローされました (blue-sky-2.exe 内): Microsoft C++ の例外: _com_error (メモリの場所 0x034FE878)。
+	D3D11 ERROR: ID3D11Device::CreateShaderResourceView: Returning E_INVALIDARG, meaning invalid parameters were passed. [ STATE_CREATION ERROR #131: CREATESHADERRESOURCEVIEW_INVALIDARG_RETURN]
+	0x742D1942 で例外がスローされました (blue-sky-2.exe 内): Microsoft C++ の例外: common::exception<long> (メモリの場所 0x034FE9AC)。
+	*/
+
+	/*
+	D3D11_SHADER_RESOURCE_VIEW_DESC view_desc = {};
+
+	view_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	view_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+	view_desc.Texture2D.MipLevels = 1;
+	view_desc.Texture2D.MostDetailedMip = 0;
+
+	ID3D11ShaderResourceView* view = 0;
+	DIRECT_X_FAIL_CHECK( device_->CreateShaderResourceView( back_buffer_texture_, & view_desc, & view ) );
+
+	// depth_texture_.reset( new Texture( this, view ) );
+	*/
 }
 
 ID3D11RenderTargetView* Direct3D11::create_render_target_view( ID3D11Texture2D* texture )
@@ -602,9 +634,7 @@ void Direct3D11::on_resize( int w, int h )
 {
 	unset_render_target();
 
-	DIRECT_X_RELEASE( back_buffer_surface_ );
 	DIRECT_X_RELEASE( back_buffer_view_ );
-	DIRECT_X_RELEASE( back_buffer_texture_ );
 
 	swap_chain_desc_.BufferDesc.Width = w;
 	swap_chain_desc_.BufferDesc.Height = h;
@@ -618,7 +648,6 @@ void Direct3D11::on_resize( int w, int h )
 	) );
 
 	create_back_buffer_view();
-	create_back_buffer_surface();
 }
 
 /**

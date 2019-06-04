@@ -8,7 +8,7 @@
 #include <windows.h>
 
 //Å°Å°Å°Å@ÉÅÉCÉìÅ@Å°Å°Å°
-int WINAPI WinMain( HINSTANCE hInst, HINSTANCE /* hPrevInst */, LPSTR /* lpszCmdLine */, int nCmdShow )
+int WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow )
 {
     _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 

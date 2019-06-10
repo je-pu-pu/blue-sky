@@ -474,6 +474,11 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 	} );
 }
 
+void GraphicsManager::render_post_effect() const
+{
+	/// @todo 実装する
+}
+
 /**
  * フェードイン・フェードアウト用の色を設定する
  *

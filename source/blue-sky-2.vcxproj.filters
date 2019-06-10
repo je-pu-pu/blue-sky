@@ -211,6 +211,9 @@
     <ClCompile Include="core\graphics\Sprite.cpp">
       <Filter>core\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\RenderTargetTexture.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -555,6 +558,12 @@
       <Filter>core\graphics</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Texture.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\RenderTargetTexture.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\PixelFormat.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
   </ItemGroup>

@@ -86,8 +86,8 @@ private:
 	float_t						fade_speed_ = 0.f;
 
 	mutable std::unique_ptr< ShadowMap >					shadow_map_;
-	BaseShadowMapShader*									shadow_map_shader_;
-	BaseShadowMapShader*									shadow_map_skin_shader_;
+	BaseShadowMapShader*									shadow_map_shader_ = nullptr;
+	BaseShadowMapShader*									shadow_map_skin_shader_ = nullptr;
 
 	std::vector< Texture* >		paper_texture_list_;
 	Texture*					paper_texture_ = 0;
@@ -235,6 +235,8 @@ public:
 	
 	virtual void render_shadow_map() const;
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
+
+	virtual void render_post_effect() const;
 
 	Fader* get_fader() { return fader_.get(); }
 	const Fader* get_fader() const { return fader_.get(); }

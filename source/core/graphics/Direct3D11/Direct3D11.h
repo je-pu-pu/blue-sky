@@ -18,6 +18,7 @@ namespace core::graphics
 namespace core::graphics::direct_3d_11
 {
 	class Texture;
+	class RenderTargetTexture;
 
 	class InputLayout;
 
@@ -63,17 +64,13 @@ private:
 
 	DXGI_SWAP_CHAIN_DESC		swap_chain_desc_;
 
-	/*
-	ID3D11Texture2D*			render_result_texture_;
-	ID3D11RenderTargetView*		render_result_view_;
-	std::unique_ptr< Texture >	render_result_texture_;			///<
-	*/
-
-	ID3D11RenderTargetView*		back_buffer_view_;		///< Direct3D 11 Render Target View
+	com_ptr< ID3D11RenderTargetView > back_buffer_render_target_view_;	///< Direct3D 11 Render Target View
 
 	ID3D11Texture2D*			depth_stencil_texture_;
 	ID3D11DepthStencilView*		depth_stencil_view_;
 	std::unique_ptr< Texture >	depth_texture_;
+
+	std::unique_ptr< RenderTargetTexture >	render_result_texture_;		///< レンダリング結果描画用テクスチャ
 
 	InputLayoutList				input_layout_list_;
 
@@ -99,7 +96,8 @@ private:
 	
 	void create_swap_chain( IDXGIFactory1*, HWND, uint_t, uint_t, bool, int, int );
 	
-	void create_back_buffer_view();
+	void create_back_buffer_render_target_view();
+	void create_render_result_texture();
 
 	void create_depth_stencil_view();
 	void create_depth_texture();

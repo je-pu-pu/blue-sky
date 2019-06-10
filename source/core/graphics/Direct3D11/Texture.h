@@ -12,19 +12,20 @@ namespace core::graphics::direct_3d_11
  */
 class Texture : public game::Texture
 {
-private:
-	Direct3D11* direct_3d_;
-	com_ptr< ID3D11ShaderResourceView > view_;
+protected:
+	Direct3D11* direct_3d_ = nullptr;
+	com_ptr< ID3D11ShaderResourceView > shader_resource_view_;
 	com_ptr< ID3D11Texture2D > texture_2d_;
-	D3D11_TEXTURE2D_DESC texture_2d_desc_;
+	D3D11_TEXTURE2D_DESC texture_2d_desc_{};
 
+protected:
 	Texture()
 	{ }
 
 public:
 	Texture( Direct3D11* direct_3d, ID3D11ShaderResourceView* view )
 		: direct_3d_( direct_3d )
-		, view_( view )
+		, shader_resource_view_( view )
 	{
 		ID3D11Resource* resource;
 		view->GetResource( & resource );
@@ -41,7 +42,7 @@ public:
 	void bind_to_ds( uint_t slot ) const override { direct_3d_->bind_texture_to_ds( slot, this ); }
 	void bind_to_ps( uint_t slot ) const override { direct_3d_->bind_texture_to_ps( slot, this ); }
 
-	ID3D11ShaderResourceView* get_shader_resource_view() const { return view_.get(); }
+	ID3D11ShaderResourceView* get_shader_resource_view() const { return shader_resource_view_.get(); }
 	ID3D11Texture2D* get_texture_2d() const { return texture_2d_.get(); }
 
 }; // class Texture

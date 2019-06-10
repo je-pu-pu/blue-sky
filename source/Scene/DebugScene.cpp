@@ -150,6 +150,8 @@ void DebugScene::render()
 	get_graphics_manager()->render_background();
 	get_graphics_manager()->render_active_objects( get_active_object_manager() );
 
+	get_graphics_manager()->render_post_effect();
+
 	get_graphics_manager()->render_fader();
 
 	get_graphics_manager()->render_debug_axis( get_active_object_manager() );
@@ -160,6 +162,7 @@ void DebugScene::render()
 		get_graphics_manager()->unset_depth_stencil();
 		get_graphics_manager()->resolve_depth_texture();
 
+		/// @todo sprite_ms ‚Å‚Ì•`‰æ‚É‘Î‰‚·‚é
 		get_graphics_manager()->get_sprite()->begin();
 		get_graphics_manager()->get_sprite()->draw( win::Rect( get_width() / 4.f, get_height() / 4.f, get_width() / 4.f * 3.f, get_height() / 4.f * 3.f ), get_graphics_manager()->get_depth_texture() );
 		// get_graphics_manager()->get_sprite()->draw( win::Rect( get_width() / 4.f, get_height() / 4.f, get_width() / 4.f * 3.f, get_height() / 4.f * 3.f ), get_graphics_manager()->get_texture( "2x2" ) );

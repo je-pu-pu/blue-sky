@@ -37,6 +37,7 @@
     <ClCompile Include="core\graphics\Direct3D11\Effect.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\EffectPass.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\EffectTechnique.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\RenderTargetTexture.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\ShadowMap.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Sprite.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp" />
@@ -135,7 +136,9 @@
     <ClInclude Include="core\graphics\Direct3D11\EffectPass.h" />
     <ClInclude Include="core\graphics\Direct3D11\EffectTechnique.h" />
     <ClInclude Include="core\graphics\Direct3D11\InputLayout.h" />
+    <ClInclude Include="core\graphics\Direct3D11\PixelFormat.h" />
     <ClInclude Include="core\graphics\Direct3D11\PrimitiveTopology.h" />
+    <ClInclude Include="core\graphics\Direct3D11\RenderTargetTexture.h" />
     <ClInclude Include="core\graphics\Direct3D11\ShaderResource.h" />
     <ClInclude Include="core\graphics\Direct3D11\ShadowMap.h" />
     <ClInclude Include="core\graphics\Direct3D11\Sprite.h" />

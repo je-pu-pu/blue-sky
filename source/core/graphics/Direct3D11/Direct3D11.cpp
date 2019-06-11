@@ -2,6 +2,7 @@
 #include "Sprite.h"
 #include "Texture.h"
 #include "RenderTargetTexture.h"
+#include "BackBufferTexture.h"
 
 #include "InputLayout.h"
 #include "Effect.h"
@@ -77,8 +78,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sam
 
 	DIRECT_X_RELEASE( dxgi_factory );
 
-	create_back_buffer_render_target_view();
-
+	create_back_buffer_texture();
 	create_render_result_texture();
 
 	create_depth_stencil_view();
@@ -144,7 +144,7 @@ Direct3D11::~Direct3D11()
 	DIRECT_X_RELEASE( depth_stencil_view_ );
 	DIRECT_X_RELEASE( depth_stencil_texture_ );
 
-	back_buffer_render_target_view_.reset();
+	back_buffer_texture_.reset();
 
 	DIRECT_X_RELEASE( swap_chain_ );
 
@@ -243,14 +243,12 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 }
 
 /**
- * スワップチェインからバックバッファのレンダーターゲットビューを作成する
+ * スワップチェインからバックバッファへの描画用テクスチャを作成する
  *
  */
-void Direct3D11::create_back_buffer_render_target_view()
+void Direct3D11::create_back_buffer_texture()
 {
-	com_ptr< ID3D11Texture2D > texture;
-	DIRECT_X_FAIL_CHECK( swap_chain_->GetBuffer( 0, __uuidof( ID3D11Texture2D ), reinterpret_cast< void** >( & texture ) ) );
-	back_buffer_render_target_view_.reset( create_render_target_view( texture.get() ) );
+	back_buffer_texture_.reset( new BackBufferTexture( this, swap_chain_ ) );
 }
 
 /**
@@ -260,13 +258,6 @@ void Direct3D11::create_back_buffer_render_target_view()
 void Direct3D11::create_render_result_texture()
 {
 	render_result_texture_.reset( new RenderTargetTexture( this, PixelFormat::R8G8B8A8_UNORM, swap_chain_desc_.BufferDesc.Width, swap_chain_desc_.BufferDesc.Height ) );
-}
-
-ID3D11RenderTargetView* Direct3D11::create_render_target_view( ID3D11Texture2D* texture )
-{
-	ID3D11RenderTargetView* view = 0;
-	DIRECT_X_FAIL_CHECK( device_->CreateRenderTargetView( texture, nullptr, & view ) );
-	return view;
 }
 
 /**
@@ -296,7 +287,18 @@ void Direct3D11::create_depth_stencil_view()
 }
 
 /**
- * デプスステンシルビューを作成する
+ * 既存の Texture2D からレンダリング結果を書き込むためのビューを作成する
+ *
+ */
+ID3D11RenderTargetView* Direct3D11::create_render_target_view( ID3D11Texture2D* texture )
+{
+	ID3D11RenderTargetView* view = 0;
+	DIRECT_X_FAIL_CHECK( device_->CreateRenderTargetView( texture, nullptr, & view ) );
+	return view;
+}
+
+/**
+ * 既存の Texture2D からデプスステンシルビューを作成する
  *
  */
 ID3D11DepthStencilView* Direct3D11::create_depth_stencil_view( ID3D11Texture2D* texture )
@@ -623,7 +625,7 @@ void Direct3D11::on_resize( int w, int h )
 		swap_chain_desc_.Flags
 	) );
 
-	create_back_buffer_render_target_view();
+	create_back_buffer_texture();
 	create_render_result_texture();
 }
 
@@ -648,7 +650,7 @@ void Direct3D11::clear_default_view( const Color& color )
  */
 void Direct3D11::clear_back_buffer_view( const Color& color )
 {
-	clear_render_target_view( back_buffer_render_target_view_.get(), color );
+	clear_render_target_view( back_buffer_texture_->get_render_target_view(), color );
 }
 
 /**
@@ -688,7 +690,8 @@ void Direct3D11::clear_depth_stencil_view( ID3D11DepthStencilView* view )
  */
 void Direct3D11::set_default_render_target( bool with_depth_stencil )
 {
-	immediate_context_->OMSetRenderTargets( 1, & back_buffer_render_target_view_, with_depth_stencil ? depth_stencil_view_ : nullptr );
+	ID3D11RenderTargetView* views[] = { back_buffer_texture_->get_render_target_view() };
+	immediate_context_->OMSetRenderTargets( 1, views, with_depth_stencil ? depth_stencil_view_ : nullptr );
 }
 
 /**

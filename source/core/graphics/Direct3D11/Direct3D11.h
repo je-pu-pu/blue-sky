@@ -19,6 +19,7 @@ namespace core::graphics::direct_3d_11
 {
 	class Texture;
 	class RenderTargetTexture;
+	class BackBufferTexture;
 
 	class InputLayout;
 
@@ -64,7 +65,7 @@ private:
 
 	DXGI_SWAP_CHAIN_DESC		swap_chain_desc_;
 
-	com_ptr< ID3D11RenderTargetView > back_buffer_render_target_view_;	///< Direct3D 11 Render Target View
+	std::unique_ptr< BackBufferTexture >	back_buffer_texture_;		///< バックバッファへの描画用テクスチャ
 
 	ID3D11Texture2D*			depth_stencil_texture_;
 	ID3D11DepthStencilView*		depth_stencil_view_;
@@ -96,7 +97,7 @@ private:
 	
 	void create_swap_chain( IDXGIFactory1*, HWND, uint_t, uint_t, bool, int, int );
 	
-	void create_back_buffer_render_target_view();
+	void create_back_buffer_texture();
 	void create_render_result_texture();
 
 	void create_depth_stencil_view();
@@ -114,6 +115,7 @@ public:
 	Direct3D11( HWND, int, int, bool, int = 0, int = 0 );
 	~Direct3D11();
 	
+	/// OculusRift で使用
 	ID3D11RenderTargetView* create_render_target_view( ID3D11Texture2D* );
 	ID3D11DepthStencilView* create_depth_stencil_view( ID3D11Texture2D* );
 

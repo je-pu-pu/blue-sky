@@ -32,6 +32,7 @@
     <ClCompile Include="core\animation\AnimationPlayer.cpp" />
     <ClCompile Include="core\graphics\BgSpriteLayer.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Axis.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\BackBufferTexture.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\BulletDebugDraw.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Effect.cpp" />
@@ -40,6 +41,7 @@
     <ClCompile Include="core\graphics\Direct3D11\RenderTargetTexture.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\ShadowMap.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Sprite.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\Texture.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp" />
@@ -129,6 +131,7 @@
     <ClInclude Include="core\DirectX.h" />
     <ClInclude Include="core\graphics\BgSpriteLayer.h" />
     <ClInclude Include="core\graphics\Direct3D11\Axis.h" />
+    <ClInclude Include="core\graphics\Direct3D11\BackBufferTexture.h" />
     <ClInclude Include="core\graphics\Direct3D11\BulletDebugDraw.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h" />
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11Common.h" />

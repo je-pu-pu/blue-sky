@@ -211,8 +211,14 @@
     <ClCompile Include="core\graphics\Sprite.cpp">
       <Filter>core\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\BackBufferTexture.cpp">
+      <Filter>core\graphics\Direct3D11\Texture</Filter>
+    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\RenderTargetTexture.cpp">
-      <Filter>core\graphics\Direct3D11</Filter>
+      <Filter>core\graphics\Direct3D11\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\Texture.cpp">
+      <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -557,14 +563,17 @@
     <ClInclude Include="core\graphics\Sprite.h">
       <Filter>core\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\Texture.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\RenderTargetTexture.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\PixelFormat.h">
       <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\BackBufferTexture.h">
+      <Filter>core\graphics\Direct3D11\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\RenderTargetTexture.h">
+      <Filter>core\graphics\Direct3D11\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\Texture.h">
+      <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -748,6 +757,9 @@
     </Filter>
     <Filter Include="core\graphics\DirectWrite">
       <UniqueIdentifier>{1fe5994d-3867-407c-98a4-60a267fcc6b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\graphics\Direct3D11\Texture">
+      <UniqueIdentifier>{1587694f-e22c-4cf0-93f5-b16af1ddac1a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

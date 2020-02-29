@@ -3,6 +3,7 @@
 #include <blue_sky/ShaderResources.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Direct3D11/MeshBuffer.h>
+#include <core/graphics/Direct3D11/RenderTargetTexture.h>
 
 #include <memory>
 
@@ -10,6 +11,8 @@ namespace core::graphics::direct_3d_11
 {
 	class Direct3D11;
 	class Axis;
+
+	enum class PixelFormat;
 }
 
 namespace blue_sky::graphics
@@ -27,8 +30,10 @@ namespace blue_sky::graphics::direct_3d_11
 class GraphicsManager : public blue_sky::graphics::GraphicsManager
 {
 public:
-	using Direct3D	= core::graphics::direct_3d_11::Direct3D11;
-	using Axis		= core::graphics::direct_3d_11::Axis;
+	using Direct3D				= core::graphics::direct_3d_11::Direct3D11;
+	using RenderTargetTexture	= core::graphics::direct_3d_11::RenderTargetTexture;
+	using PixelFormat			= core::graphics::direct_3d_11::PixelFormat;
+	using Axis					= core::graphics::direct_3d_11::Axis;
 
 private:
 	Direct3D*										direct_3d_;
@@ -72,6 +77,11 @@ public:
 	void set_default_viewport() override;
 	void set_viewport( float_t x, float_t y, float_t w, float_t h, float_t min_d = 0.f, float_t max_d = 1.f ) override;
 
+	RenderTargetTexture* create_render_target_texture() override;
+	BackBufferTexture* get_back_buffer_texture() override;
+
+	void set_render_target( game::RenderTargetTexture* ) override;
+
 	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type ); }
 
 	// void unload_mesh( const char_t* ) override;
@@ -109,6 +119,10 @@ public:
 	void render_technique( const char_t*, const std::function< void () >& ) const override;
 	void render_technique( const EffectTechnique*, const std::function< void () >& ) const override;
 	void render_background() const override;
+
+#if 0
+	void render_post_effect() override;
+#endif
 
 	/// @todo ÇøÇ·ÇÒÇ∆çÏÇÈ Font, size, éwíËÇµÇΩ Texture Ç÷ÇÃï`âÊ
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;

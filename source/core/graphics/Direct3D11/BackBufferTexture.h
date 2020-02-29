@@ -8,7 +8,7 @@ namespace core::graphics::direct_3d_11
 	 * Direct3D11 のバックバッファを参照するテクスチャ
 	 *
 	 */
-	class BackBufferTexture : public RenderTargetTexture
+	class BackBufferTexture : public game::BackBufferTexture
 	{
 	public:
 		BackBufferTexture( Direct3D11* d3d, IDXGISwapChain* swap_chain );

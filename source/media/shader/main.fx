@@ -609,3 +609,5 @@ technique11 skin_with_shadow
 
 #include "debug_axis.hlsl"
 #include "debug_bullet.hlsl"
+
+#include "post_effect/default.hlsl"

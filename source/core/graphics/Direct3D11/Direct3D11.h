@@ -150,6 +150,8 @@ public:
 	void set_default_render_target( bool = true );
 	void set_default_viewport();
 
+	void set_render_target( RenderTargetTexture* );
+
 	void set_render_target_for_vr( ID3D11RenderTargetView*, ID3D11DepthStencilView* );
 
 	void unset_render_target();
@@ -182,6 +184,8 @@ public:
 	inline const Font* get_font() const { return font_.get(); }
 	inline const Sprite* get_sprite() const { return sprite_.get(); }
 	inline const Effect* get_effect() const { return effect_.get(); }
+
+	BackBufferTexture* get_back_buffer_texture() { return back_buffer_texture_.get(); }
 
 	void resolve_depth_texture();
 	Texture* get_depth_texture() { return depth_texture_.get(); }

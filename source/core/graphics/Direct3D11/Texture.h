@@ -24,7 +24,7 @@ protected:
 		: direct_3d_( direct_3d )
 	{ }
 
-	void create_texture_2d( PixelFormat, int, int );
+	void create_texture_2d( PixelFormat, int, int, bool );
 	void create_shader_resource_view( PixelFormat );
 
 public:
@@ -46,6 +46,9 @@ public:
 
 	uint_t get_width() const override { return texture_2d_desc_.Width; }
 	uint_t get_height() const override { return texture_2d_desc_.Height; }
+
+	uint_t get_multi_sample_count() const override { return texture_2d_desc_.SampleDesc.Count; }
+	uint_t get_multi_sample_quality() const override { return texture_2d_desc_.SampleDesc.Quality; }
 
 	void bind_to_ds( uint_t slot ) const override { direct_3d_->bind_texture_to_ds( slot, this ); }
 	void bind_to_ps( uint_t slot ) const override { direct_3d_->bind_texture_to_ps( slot, this ); }

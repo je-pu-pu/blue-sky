@@ -21,6 +21,8 @@ namespace game
 {
 	class Shader;
 	class Texture;
+	class RenderTargetTexture;
+	class BackBufferTexture;
 }
 
 namespace core
@@ -39,8 +41,9 @@ namespace blue_sky
 {
 	class ActiveObject;
 	class ActiveObjectManager;
+}
 
-namespace graphics
+namespace blue_sky::graphics
 {
 	class Fader;
 	class ObjFileLoader;
@@ -63,6 +66,9 @@ public:
 	using Line							= Line;
 	using Shader						= game::Shader;
 	using Texture						= game::Texture;
+	using RenderTargetTexture			= game::RenderTargetTexture;
+	using BackBufferTexture				= game::BackBufferTexture;
+
 	using SkinningAnimationSet			= core::SkinningAnimationSet;
 	
 	using ModelManager					= game::ResourceManager< Model >;
@@ -84,6 +90,8 @@ private:
 	std::unique_ptr< Fader >	fader_;
 	bool_t						is_fading_in_ = true;		///< true : 現在フェードイン中 or false : 現在フェードアウト中
 	float_t						fade_speed_ = 0.f;
+
+	std::unique_ptr< Model >	post_effect_rectangle_;		///< ポストエフェクトレンダリング用矩形
 
 	mutable std::unique_ptr< ShadowMap >					shadow_map_;
 	BaseShadowMapShader*									shadow_map_shader_ = nullptr;
@@ -134,6 +142,10 @@ public:
 
 	virtual void set_default_viewport() = 0;
 	virtual void set_viewport( float_t x, float_t y, float_t w, float_t h, float_t min_d = 0.f, float_t max_d = 1.f ) = 0;
+
+	virtual RenderTargetTexture* create_render_target_texture() = 0;
+	virtual BackBufferTexture* get_back_buffer_texture() = 0;
+	virtual void set_render_target( RenderTargetTexture* ) = 0;
 
 	// Model
 	template< typename Type=Model > Type* create_named_model( const char_t* name ) { return model_manager_.create_named< Type >( name ); }
@@ -236,7 +248,7 @@ public:
 	virtual void render_shadow_map() const;
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
 
-	virtual void render_post_effect() const;
+	virtual void render_post_effect( RenderTargetTexture* );
 
 	Fader* get_fader() { return fader_.get(); }
 	const Fader* get_fader() const { return fader_.get(); }
@@ -278,6 +290,4 @@ public:
 
 }; // class GraphicsManager
 
-} // namespace graphics
-
-} // namespace blue_sky
+} // namespace blue_sky::graphics

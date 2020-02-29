@@ -16,6 +16,7 @@
 #include <blue_sky/graphics/shader/ShadowMapShader.h>
 #include <blue_sky/graphics/shader/TessellationMatcapShader.h>
 #include <blue_sky/graphics/shader/DebugShadowMapTextureShader.h>
+#include <blue_sky/graphics/shader/post_effect/DefaultShader.h>
 
 #include <core/animation/AnimationPlayer.h>
 #include <core/graphics/ShadowMap.h>
@@ -33,7 +34,8 @@ namespace blue_sky::graphics
 {
 
 GraphicsManager::GraphicsManager()
-	: fader_( new Fader() )
+	: fader_( std::make_unique< Fader >() )
+	, post_effect_rectangle_( std::make_unique< Model >() )
 {
 
 }
@@ -300,8 +302,13 @@ void GraphicsManager::setup_default_shaders()
 	shadow_map_shader_ = get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map" );
 	shadow_map_skin_shader_ = get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map_skin" );
 
-	fader_->set_mesh( create_named_mesh< Rectangle >( "fader", Mesh::Buffer::Type::DEFAULT ) );
+	auto rectangle = create_named_mesh< Rectangle >( "rectangle", Mesh::Buffer::Type::DEFAULT );
+
+	fader_->set_mesh( rectangle );
 	fader_->set_shader_at( 0, create_named_shader< shader::FaderShader >( "fader" ) );
+
+	post_effect_rectangle_->set_mesh( rectangle );
+	post_effect_rectangle_->set_shader_at( 0, create_named_shader< shader::post_effect::DefaultShader >( "post_effect_default" ) );
 }
 
 /**
@@ -474,9 +481,13 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 	} );
 }
 
-void GraphicsManager::render_post_effect() const
+void GraphicsManager::render_post_effect( RenderTargetTexture* t )
 {
 	/// @todo ŽÀ‘•‚·‚é
+	set_render_target( get_back_buffer_texture() );
+
+	post_effect_rectangle_->get_shader_at( 0 )->set_texture_at( 0, t );
+	post_effect_rectangle_->render();
 }
 
 /**

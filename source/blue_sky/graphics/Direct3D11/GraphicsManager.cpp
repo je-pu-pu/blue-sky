@@ -9,7 +9,10 @@
 #include <blue_sky/graphics/shader/BypassShader.h>
 #include <blue_sky/graphics/Direct3D11/Line.h>
 
+#include <core/graphics/Direct3D11/PixelFormat.h>
 #include <core/graphics/Direct3D11/Texture.h>
+#include <core/graphics/Direct3D11/RenderTargetTexture.h>
+#include <core/graphics/Direct3D11/BackBufferTexture.h>
 #include <core/graphics/Direct3D11/Axis.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
@@ -63,6 +66,21 @@ void GraphicsManager::set_default_viewport()
 void GraphicsManager::set_viewport( float_t x, float_t y, float_t w, float_t h, float_t min_d, float_t max_d )
 {
 	direct_3d_->set_viewport( x, y, w, h, min_d, max_d );
+}
+
+GraphicsManager::RenderTargetTexture* GraphicsManager::create_render_target_texture()
+{
+	return new RenderTargetTexture( direct_3d_, PixelFormat::R8G8B8A8_UNORM, direct_3d_->get_width(), direct_3d_->get_height() );
+}
+
+GraphicsManager::BackBufferTexture* GraphicsManager::get_back_buffer_texture()
+{
+	return direct_3d_->get_back_buffer_texture();
+}
+
+void GraphicsManager::set_render_target( game::RenderTargetTexture* t )
+{
+	direct_3d_->set_render_target( dynamic_cast< RenderTargetTexture* >( t ) );
 }
 
 
@@ -428,6 +446,13 @@ void GraphicsManager::render_background() const
 		sky_box_->render();
 	}
 }
+
+#if 0
+void GraphicsManager::render_post_effect()
+{
+	set_render_target( get_back_buffer_texture() );
+}
+#endif
 
 /**
  * ‰æ–Ê‚É•¶Žš—ñ‚ð•`‰æ‚·‚é

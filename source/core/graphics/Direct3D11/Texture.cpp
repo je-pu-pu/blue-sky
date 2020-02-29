@@ -1,16 +1,27 @@
 #include "Texture.h"
+#include "BackBufferTexture.h"
 
 namespace core::graphics::direct_3d_11
 {
-	void Texture::create_texture_2d( PixelFormat format, int width, int height )
+	void Texture::create_texture_2d( PixelFormat format, int width, int height, bool multi_sample )
 	{
 		texture_2d_desc_.Width = width;
 		texture_2d_desc_.Height = height;
 		texture_2d_desc_.MipLevels = 1;
 		texture_2d_desc_.ArraySize = 1;
 		texture_2d_desc_.Format = static_cast< DXGI_FORMAT >( format );
-		texture_2d_desc_.SampleDesc.Count = 1;
-		texture_2d_desc_.SampleDesc.Quality = 0;
+
+		if ( multi_sample )
+		{
+			texture_2d_desc_.SampleDesc.Count = direct_3d_->get_back_buffer_texture()->get_multi_sample_count();
+			texture_2d_desc_.SampleDesc.Quality = direct_3d_->get_back_buffer_texture()->get_multi_sample_quality();
+		}
+		else
+		{
+			texture_2d_desc_.SampleDesc.Count = 1;
+			texture_2d_desc_.SampleDesc.Quality = 0;
+		}
+		
 		texture_2d_desc_.Usage = D3D11_USAGE_DEFAULT;
 		texture_2d_desc_.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 		texture_2d_desc_.CPUAccessFlags = 0;

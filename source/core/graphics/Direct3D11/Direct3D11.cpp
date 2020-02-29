@@ -704,6 +704,17 @@ void Direct3D11::set_default_viewport()
 }
 
 /**
+ * レンダリング結果を書き込むテクスチャを設定する
+ *
+ * @param texture レンダリング結果を書き込むテクスチャ
+ */
+void Direct3D11::set_render_target( RenderTargetTexture* texture )
+{
+	ID3D11RenderTargetView* views[] = { texture->get_render_target_view() };
+	immediate_context_->OMSetRenderTargets( 1, views, depth_stencil_view_ );
+}
+
+/**
  * 立体視用にレンダーターゲットを設定する
  *
  * @param render_target_view レンダーターゲット

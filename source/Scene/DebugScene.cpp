@@ -23,6 +23,7 @@ namespace blue_sky
 DebugScene::DebugScene( const GameMain* game_main )
 	: Scene( game_main )
 	, camera_( new Camera() )
+	, render_result_texture_( get_graphics_manager()->create_render_target_texture() )
 {
 	// Physics
 	get_physics_manager()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
@@ -147,10 +148,14 @@ void DebugScene::render()
 	get_graphics_manager()->get_frame_render_data()->update();
 
 	get_graphics_manager()->setup_rendering();
+
+	get_graphics_manager()->set_render_target( render_result_texture_.get() );
+	// get_graphics_manager()->get_back_buffer_texture();
+
 	get_graphics_manager()->render_background();
 	get_graphics_manager()->render_active_objects( get_active_object_manager() );
 
-	get_graphics_manager()->render_post_effect();
+	get_graphics_manager()->render_post_effect( render_result_texture_ );
 
 	get_graphics_manager()->render_fader();
 

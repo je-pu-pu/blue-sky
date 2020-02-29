@@ -575,6 +575,9 @@
     <ClInclude Include="core\graphics\Direct3D11\Texture.h">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\post_effect\DefaultShader.h">
+      <Filter>blue_sky\graphics\shader\post_effect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -684,6 +687,9 @@
     <None Include="media\shader\fader.hlsl">
       <Filter>media\shader</Filter>
     </None>
+    <None Include="media\shader\post_effect\default.hlsl">
+      <Filter>media\shader\post_effect</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Input">
@@ -760,6 +766,12 @@
     </Filter>
     <Filter Include="core\graphics\Direct3D11\Texture">
       <UniqueIdentifier>{1587694f-e22c-4cf0-93f5-b16af1ddac1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="blue_sky\graphics\shader\post_effect">
+      <UniqueIdentifier>{48d85982-504f-440b-85d7-917d351d7b7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="media\shader\post_effect">
+      <UniqueIdentifier>{9a23cbef-d0d5-4583-9292-4739d4b69c1c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

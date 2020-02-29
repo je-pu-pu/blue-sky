@@ -4,6 +4,11 @@
 #include <blue_sky/CityGenerator.h>
 #include <memory>
 
+namespace game
+{
+	class RenderTargetTexture;
+}
+
 namespace blue_sky
 {
 
@@ -19,6 +24,8 @@ public:
 
 protected:
 	CityGenerator city_generator_;
+
+	std::unique_ptr< game::RenderTargetTexture > render_result_texture_;
 
 protected:
 

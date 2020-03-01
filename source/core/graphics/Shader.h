@@ -6,7 +6,7 @@ namespace core::graphics
 {
 	class Model;
 	class Mesh;
-	class ShaderResource;
+	class Texture;
 
 /**
  * 抽象シェーダークラス
@@ -15,7 +15,7 @@ namespace core::graphics
 class Shader
 {
 public:
-	using Texture = ShaderResource;
+	using Texture = Texture;
 
 public:
 	Shader() { }

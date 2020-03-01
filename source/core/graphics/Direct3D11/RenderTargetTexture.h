@@ -36,7 +36,7 @@ namespace core::graphics::direct_3d_11
 	class RenderTargetTexture : public core::graphics::RenderTargetTexture
 	{
 	private:
-		Texture texture_;
+		core::graphics::direct_3d_11::Texture texture_;
 		com_ptr< ID3D11RenderTargetView > render_target_view_;
 
 	protected:
@@ -46,6 +46,12 @@ namespace core::graphics::direct_3d_11
 
 		void bind_to_ds( uint_t slot ) const override { texture_.bind_to_ds( slot ); }
 		void bind_to_ps( uint_t slot ) const override { texture_.bind_to_ps( slot ); }
+
+		uint_t get_width() const override { return texture_.get_width(); };
+		uint_t get_height() const override { return texture_.get_height(); };
+
+		uint_t get_multi_sample_count() const override { return texture_.get_multi_sample_count(); };
+		uint_t get_multi_sample_quality() const override { return texture_.get_multi_sample_quality(); };
 
 		ID3D11RenderTargetView* get_render_target_view() { return render_target_view_.get(); }
 

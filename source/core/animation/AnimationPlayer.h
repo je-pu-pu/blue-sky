@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SkinningAnimationSet.h"
-#include <blue_sky/ShaderResources.h>
+#include <blue_sky/ConstantBuffers.h>
 
 namespace core
 {
@@ -14,9 +14,9 @@ class AnimationPlayer
 {
 public:
 	/// @todo 整理する
-	using BoneShaderResource = blue_sky::BoneShaderResource;
+	using BoneConstantBuffer = blue_sky::BoneConstantBuffer;
 
-	static const int MaxBones = blue_sky::BoneShaderResourceData::MaxBones;
+	static const int MaxBones = blue_sky::BoneConstantBufferData::MaxBones;
 
 private:
 	const SkinningAnimationSet* skinning_animation_set_;	///< スキニングアニメーションのセット
@@ -27,7 +27,7 @@ private:
 	bool is_broken_;										///< 破壊フラグ
 
 	/// @todo 移動する
-	const BoneShaderResource constant_buffer_;				///< 定数バッファ
+	const BoneConstantBuffer constant_buffer_;				///< 定数バッファ
 
 	Matrix get_bone_local_matrix( uint_t ) const;
 
@@ -51,12 +51,12 @@ public:
 
 	float_t get_current_frame() const { return current_frame_; }
 
-	void calculate_bone_matrix_recursive( BoneShaderResource::Data&, uint_t, const Matrix& ) const;
+	void calculate_bone_matrix_recursive( BoneConstantBuffer::Data&, uint_t, const Matrix& ) const;
 
 	void update_render_data() const;
 	void bind_render_data() const;
 
-	const BoneShaderResource* get_shader_resource() const { return & constant_buffer_; }
+	const BoneConstantBuffer* get_constant_buffer() const { return & constant_buffer_; }
 
 	bool is_broken() const { return is_broken_; }
 	void set_broken( bool b ) { is_broken_ = b; }

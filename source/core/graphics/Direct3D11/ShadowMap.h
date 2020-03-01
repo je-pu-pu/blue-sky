@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Texture.h"
-#include <core/graphics/Direct3D11/ShaderResource.h>
+#include <core/graphics/Direct3D11/ConstantBuffer.h>
 #include <core/graphics/ShadowMap.h>
 #include <d3d11.h>
 #include <vector>
@@ -26,7 +26,7 @@ public:
 	using Viewport		= D3D11_VIEWPORT;
 	using ViewportList	= std::vector< Viewport >;
 
-	struct ShaderResourceData
+	struct ConstantBufferData
 	{
 		static const int SLOT = 10;
 
@@ -34,13 +34,13 @@ public:
 		float_t view_depth_per_cascade_level[ 4 ];
 	};
 
-	using ShaderResource = core::graphics::direct_3d_11::ShaderResourceWithData< ShaderResourceData >;
+	using ConstantBuffer = core::graphics::direct_3d_11::ConstantBufferWithData< ConstantBufferData >;
 
 	static const int shader_resource_view_slot_ = 1;		/// !!!!!!!!!!!
 
 private:
 	Direct3D11*								direct_3d_;
-	std::unique_ptr< ShaderResource >		shader_resource_;
+	std::unique_ptr< ConstantBuffer >		shader_resource_;
 	std::unique_ptr< Texture >				texture_;
 
 	int							cascade_levels_;			///< CSM ‚ÌƒŒƒxƒ‹”
@@ -74,7 +74,7 @@ public:
 	void set_light_position( const Vector& ) override;
 	void set_eye_position( const Vector& ) override;
 
-	const ShaderResource* get_shader_resource() const override { return shader_resource_.get(); }
+	const ConstantBuffer* get_constant_buffer() const override { return shader_resource_.get(); }
 
 	Texture* get_texture() override { return texture_.get(); }
 	const Texture* get_texture() const override { return texture_.get(); }

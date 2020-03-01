@@ -11,10 +11,14 @@
 
 namespace game
 {
-	class Mesh;
-	class Shader;
 	class Config;
 };
+
+namespace core::graphics
+{
+	class Mesh;
+	class Shader;
+}
 
 namespace blue_sky
 {
@@ -25,7 +29,7 @@ namespace blue_sky
 	class Camera;
 	class DelayedCommand;
 
-	struct FrameShaderResourceData;
+	struct FrameConstantBufferData;
 
 	namespace graphics
 	{
@@ -39,8 +43,8 @@ namespace blue_sky
 class GamePlayScene : public Scene
 {
 public:
-	using Mesh					= game::Mesh;
-	using Shader				= game::Shader;
+	using Mesh					= core::graphics::Mesh;
+	using Shader				= core::graphics::Shader;
 	using Rectangle				= graphics::Rectangle;
 	
 	using Command				= std::function< void( string_t ) >;
@@ -136,7 +140,7 @@ protected:
 	void update_render_data_for_frame_drawing() const;
 	void update_render_data_for_frame_for_eye( int ) const;
 
-	void update_frame_constant_buffer_data_sub( FrameShaderResourceData& ) const;
+	void update_frame_constant_buffer_data_sub( FrameConstantBufferData& ) const;
 
 	void render_to_oculus_vr() const;
 	void render_to_display() const;

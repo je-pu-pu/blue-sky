@@ -13,7 +13,6 @@
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
 
-#include <game/Texture.h>
 #include <game/ElapsedTimer.h>
 
 #include <win/Rect.h>
@@ -218,7 +217,7 @@ void EndingScene::render_drawing_line()
 	{
 		/// @todo ®—‚·‚é
 		{
-			ObjectShaderResourceData object_constant_buffer_data;
+			ObjectConstantBufferData object_constant_buffer_data;
 
 			object_constant_buffer_data.world = ( Matrix().set_scaling( 1.25f, 1.25f, 1.f ) * Matrix().set_translation( 0.f, drawing_model_offset_, 0.f ) ).transpose();
 			object_constant_buffer_data.color = Color( 0.f, 0.f, 0.f, 0.f );

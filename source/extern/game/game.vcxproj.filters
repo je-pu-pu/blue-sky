@@ -4,19 +4,10 @@
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundFile.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="AABB.h" />
     <ClInclude Include="MainLoop.h" />
-    <ClInclude Include="GraphicsManager.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Line.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="TimedCache.h" />
     <ClInclude Include="ElapsedTimer.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="VertexGroup.h" />
-    <ClInclude Include="ResourceManager.h" />
-    <ClInclude Include="Model.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SoundManager.cpp" />

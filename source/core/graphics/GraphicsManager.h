@@ -1,11 +1,12 @@
 #pragma once
 
-namespace game
+namespace core::graphics
 {
 
 /**
  * グラフィック管理クラス
  *
+ * @todo 太らせる
  */
 class GraphicsManager
 {
@@ -15,4 +16,4 @@ public:
 
 }; // class GraphicsManager
 
-} // namespace game
+} // namespace core::graphics

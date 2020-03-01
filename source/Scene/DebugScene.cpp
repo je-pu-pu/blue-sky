@@ -9,7 +9,9 @@
 #include <Input.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
+
 #include <core/graphics/Sprite.h>
+#include <core/graphics/RenderTargetTexture.h>
 
 #include <game/MainLoop.h>
 
@@ -149,13 +151,13 @@ void DebugScene::render()
 
 	get_graphics_manager()->setup_rendering();
 
-	get_graphics_manager()->set_render_target( render_result_texture_.get() );
+	// get_graphics_manager()->set_render_target( render_result_texture_.get() );
 	// get_graphics_manager()->get_back_buffer_texture();
 
 	get_graphics_manager()->render_background();
 	get_graphics_manager()->render_active_objects( get_active_object_manager() );
 
-	get_graphics_manager()->render_post_effect( render_result_texture_ );
+	// get_graphics_manager()->render_post_effect( render_result_texture_.get() );
 
 	get_graphics_manager()->render_fader();
 

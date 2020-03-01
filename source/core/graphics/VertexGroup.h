@@ -3,7 +3,7 @@
 #include <type/type.h>
 #include <vector>
 
-namespace game
+namespace core::graphics
 {
 
 /**
@@ -42,4 +42,4 @@ public:
 	}
 };
 
-} // namespace game
+} // namespace core::graphics

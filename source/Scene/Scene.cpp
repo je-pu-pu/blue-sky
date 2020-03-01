@@ -171,7 +171,7 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 	}
 
 	{
-		ObjectShaderResourceData object_constant_buffer_data;
+		ObjectConstantBufferData object_constant_buffer_data;
 
 		object_constant_buffer_data.world = Matrix().set_identity().transpose();
 

@@ -1,6 +1,6 @@
 #include "BgSpriteLayer.h"
 #include <core/math.h>
-#include <game/Texture.h>
+#include <core/graphics/Texture.h>
 
 namespace core
 {

@@ -1,17 +1,17 @@
 #pragma once
 
-#include <core/graphics/ShaderResource.h>
+#include <core/graphics/ConstantBuffer.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
 
 namespace core::graphics::direct_3d_11
 {
 
 /**
- * Direct3D11 定数バッファを使った ShaderResource
+ * Direct3D11 定数バッファ
  *
  */
 template< typename DataType >
-class ShaderResource : public core::graphics::ShaderResource
+class ConstantBuffer : public core::graphics::ConstantBuffer
 {
 public:
 	using Data = DataType;
@@ -33,14 +33,14 @@ protected:
 	}
 
 public:
-	ShaderResource( Direct3D11* direct_3d )
+	ConstantBuffer( Direct3D11* direct_3d )
 		: direct_3d_( direct_3d )
 		, constant_buffer_( 0 )
 	{
 		create_constant_buffer( sizeof( DataType ) );
 	}
 
-	~ShaderResource()
+	~ConstantBuffer()
 	{
 		DIRECT_X_RELEASE( constant_buffer_ );
 	}
@@ -81,21 +81,21 @@ public:
 		direct_3d_->getImmediateContext()->PSSetConstantBuffers( SLOT, 1, & constant_buffer_ );
 	}
 
-}; // class ShaderResource
+}; // class ConstantBuffer
 
 /**
  * Direct3D11 定数バッファ ( 更新用のデータも内部に保持するバージョン )
  *
  */
 template< typename DataType >
-class ShaderResourceWithData : public ShaderResource< DataType >
+class ConstantBufferWithData : public ConstantBuffer< DataType >
 {
 protected:
 	DataType data_;
 
 public:
-	ShaderResourceWithData( Direct3D11* direct_3d )
-		: ShaderResource( direct_3d )
+	ConstantBufferWithData( Direct3D11* direct_3d )
+		: ConstantBuffer( direct_3d )
 	{
 
 	}
@@ -103,7 +103,7 @@ public:
 	DataType& data() { return data_; }
 	const DataType& data() const { return data_; }
 
-	void update() const { ShaderResource::update( & data_ ); }
+	void update() const { ConstantBuffer::update( & data_ ); }
 
 	static void* operator new ( size_t size )
 	{

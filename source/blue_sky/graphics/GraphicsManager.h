@@ -1,41 +1,42 @@
 #pragma once
 
-#include <blue_sky/ShaderResources.h>
+#include <blue_sky/ConstantBuffers.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Mesh.h>
 #include <blue_sky/type.h>
 
 #include <core/animation/SkinningAnimationSet.h>
-#include <core/graphics/PrimitiveTopology.h>
 
-#include <game/GraphicsManager.h>
-#include <game/ResourceManager.h>
-#include <game/Mesh.h>
-#include <game/Shader.h>
+#include <core/graphics/GraphicsManager.h>
+#include <core/graphics/PrimitiveTopology.h>
+#include <core/graphics/Mesh.h>
+#include <core/graphics/Shader.h>
+
+#include <core/ResourceManager.h>
 
 #include <vector>
 #include <functional>
 
 
-namespace game
-{
-	class Shader;
-	class Texture;
-	class RenderTargetTexture;
-	class BackBufferTexture;
-}
-
 namespace core
 {
 	class SkinningAnimationSet;
+
+	namespace graphics
+	{
+		class InputLayout;
+		class EffectTechnique;
+		class ShadowMap;
+
+		class Shader;
+		class Texture;
+		class RenderTarget;
+		class RenderTargetTexture;
+		class BackBufferTexture;
+	}
 }
 
-namespace core::graphics
-{
-	class InputLayout;
-	class EffectTechnique;
-	class ShadowMap;
-}
+
 
 namespace blue_sky
 {
@@ -58,29 +59,30 @@ namespace blue_sky::graphics
  * グラフィック管理クラス
  *
  */
-class GraphicsManager : public game::GraphicsManager
+class GraphicsManager : public core::graphics::GraphicsManager
 {
 public:
 	using Model							= Model;
 	using Mesh							= Mesh;
 	using Line							= Line;
-	using Shader						= game::Shader;
-	using Texture						= game::Texture;
-	using RenderTargetTexture			= game::RenderTargetTexture;
-	using BackBufferTexture				= game::BackBufferTexture;
+	using Shader						= core::graphics::Shader;
+	using Texture						= core::graphics::Texture;
+	using RenderTarget					= core::graphics::RenderTarget;
+	using RenderTargetTexture			= core::graphics::RenderTargetTexture;
+	using BackBufferTexture				= core::graphics::BackBufferTexture;
 
 	using SkinningAnimationSet			= core::SkinningAnimationSet;
 	
-	using ModelManager					= game::ResourceManager< Model >;
-	using MeshManager					= game::ResourceManager< Mesh >;
-	using ShaderManager					= game::ResourceManager< Shader >;
-	using TextureManager				= game::ResourceManager< Texture >;
-	using SkinningAnimationSetManager	= game::ResourceManager< SkinningAnimationSet >;
+	using ModelManager					= core::ResourceManager< Model >;
+	using MeshManager					= core::ResourceManager< Mesh >;
+	using ShaderManager					= core::ResourceManager< Shader >;
+	using TextureManager				= core::ResourceManager< Texture >;
+	using SkinningAnimationSetManager	= core::ResourceManager< SkinningAnimationSet >;
 	
 	using PrimitiveTopology				= core::graphics::PrimitiveTopology;
 	using InputLayout					= core::graphics::InputLayout;
 	using EffectTechnique				= core::graphics::EffectTechnique;
-	using ShaderResource				= core::graphics::ShaderResource;
+	using ConstantBuffer				= core::graphics::ConstantBuffer;
 	using ShadowMap						= core::graphics::ShadowMap;
 	using Sprite						= core::graphics::Sprite;
 	
@@ -106,8 +108,8 @@ private:
 	TextureManager				texture_manager_;
 	SkinningAnimationSetManager skinning_animation_set_manager_;
 
-	mutable const ShaderResource* current_object_shader_resource_ = 0;
-	mutable const ShaderResource* current_skinning_shader_resource_ = 0;
+	mutable const ConstantBuffer* current_object_constant_buffer_ = 0;
+	mutable const ConstantBuffer* current_skinning_constant_buffer_ = 0;
 
 	bool						is_debug_axis_enabled_ = true;
 
@@ -124,7 +126,7 @@ protected:
 	[[nodiscard]] virtual Line* create_line() const = 0;
 	[[nodiscard]] virtual Texture* load_texture_file( const char_t* ) const = 0;
 
-	void update_shader_resources() const;
+	void update_constant_buffers() const;
 
 	void render_shadow_map( const BaseShadowMapShader* , bool ) const;
 
@@ -145,7 +147,7 @@ public:
 
 	virtual RenderTargetTexture* create_render_target_texture() = 0;
 	virtual BackBufferTexture* get_back_buffer_texture() = 0;
-	virtual void set_render_target( RenderTargetTexture* ) = 0;
+	virtual void set_render_target( RenderTarget* ) = 0;
 
 	// Model
 	template< typename Type=Model > Type* create_named_model( const char_t* name ) { return model_manager_.create_named< Type >( name ); }
@@ -218,16 +220,16 @@ public:
 	virtual Texture* get_depth_texture() const = 0;
 	virtual Sprite* get_sprite() const = 0;
 
-	virtual GameShaderResource* get_game_render_data() const = 0;
-	virtual FrameShaderResource* get_frame_render_data() const = 0;
-	virtual FrameDrawingShaderResource* get_frame_drawing_render_data() const = 0;
-	virtual ObjectShaderResource* get_shared_object_render_data() const = 0;
+	virtual GameConstantBuffer* get_game_render_data() const = 0;
+	virtual FrameConstantBuffer* get_frame_render_data() const = 0;
+	virtual FrameDrawingConstantBuffer* get_frame_drawing_render_data() const = 0;
+	virtual ObjectConstantBuffer* get_shared_object_render_data() const = 0;
 
-	void set_current_object_shader_resource( const ShaderResource* r ) const { current_object_shader_resource_ = r; }
-	void get_current_skinning_shader_resource( const ShaderResource* r ) const { current_skinning_shader_resource_ = r; }
+	void set_current_object_constant_buffer( const ConstantBuffer* r ) const { current_object_constant_buffer_ = r; }
+	void get_current_skinning_constant_buffer( const ConstantBuffer* r ) const { current_skinning_constant_buffer_ = r; }
 	
-	const ShaderResource* get_current_object_shader_resource() const { return current_object_shader_resource_; }
-	const ShaderResource* get_current_skinning_shader_resource() const { return current_skinning_shader_resource_; }
+	const ConstantBuffer* get_current_object_constant_buffer() const { return current_object_constant_buffer_; }
+	const ConstantBuffer* get_current_skinning_constant_buffer() const { return current_skinning_constant_buffer_; }
 
 	virtual const InputLayout* get_input_layout( const char_t* ) const = 0;
 	virtual const EffectTechnique* get_effect_technique( const char_t* ) const = 0;

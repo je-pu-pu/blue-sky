@@ -88,6 +88,7 @@
     <ClCompile Include="Scene\StageSelectScene.cpp" />
     <ClCompile Include="Scene\StoryTextScene.cpp" />
     <ClCompile Include="Scene\TitleScene.cpp" />
+    <ClCompile Include="ScriptManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ActiveObjectManager.h" />
@@ -116,11 +117,12 @@
     <ClInclude Include="blue_sky\graphics\shader\GroundShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\MatcapShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\NullShader.h" />
+    <ClInclude Include="blue_sky\graphics\shader\post_effect\DefaultShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\ShadowMapShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\SkyBoxShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\TessellationMatcapShader.h" />
     <ClInclude Include="blue_sky\graphics\SkyBox.h" />
-    <ClInclude Include="blue_sky\ShaderResources.h" />
+    <ClInclude Include="blue_sky\ConstantBuffers.h" />
     <ClInclude Include="blue_sky\type.h" />
     <ClInclude Include="core\animation\Animation.h" />
     <ClInclude Include="core\animation\AnimationChannel.h" />
@@ -129,6 +131,7 @@
     <ClInclude Include="core\animation\SkinningAnimation.h" />
     <ClInclude Include="core\animation\SkinningAnimationSet.h" />
     <ClInclude Include="core\DirectX.h" />
+    <ClInclude Include="core\graphics\BackBufferTexture.h" />
     <ClInclude Include="core\graphics\BgSpriteLayer.h" />
     <ClInclude Include="core\graphics\Direct3D11\Axis.h" />
     <ClInclude Include="core\graphics\Direct3D11\BackBufferTexture.h" />
@@ -142,7 +145,7 @@
     <ClInclude Include="core\graphics\Direct3D11\PixelFormat.h" />
     <ClInclude Include="core\graphics\Direct3D11\PrimitiveTopology.h" />
     <ClInclude Include="core\graphics\Direct3D11\RenderTargetTexture.h" />
-    <ClInclude Include="core\graphics\Direct3D11\ShaderResource.h" />
+    <ClInclude Include="core\graphics\Direct3D11\ConstantBuffer.h" />
     <ClInclude Include="core\graphics\Direct3D11\ShadowMap.h" />
     <ClInclude Include="core\graphics\Direct3D11\Sprite.h" />
     <ClInclude Include="core\graphics\Direct3D11\Texture.h" />
@@ -154,11 +157,20 @@
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h" />
     <ClInclude Include="core\graphics\EffectPass.h" />
     <ClInclude Include="core\graphics\EffectTechnique.h" />
+    <ClInclude Include="core\graphics\GraphicsManager.h" />
     <ClInclude Include="core\graphics\InputLayout.h" />
+    <ClInclude Include="core\graphics\Mesh.h" />
+    <ClInclude Include="core\graphics\Model.h" />
     <ClInclude Include="core\graphics\PrimitiveTopology.h" />
+    <ClInclude Include="core\graphics\RenderTarget.h" />
+    <ClInclude Include="core\graphics\RenderTargetTexture.h" />
+    <ClInclude Include="core\graphics\Shader.h" />
+    <ClInclude Include="core\graphics\ConstantBuffer.h" />
     <ClInclude Include="core\graphics\ShaderResource.h" />
     <ClInclude Include="core\graphics\ShadowMap.h" />
     <ClInclude Include="core\graphics\Sprite.h" />
+    <ClInclude Include="core\graphics\Texture.h" />
+    <ClInclude Include="core\graphics\VertexGroup.h" />
     <ClInclude Include="core\input\DirectInput\DirectInput.h" />
     <ClInclude Include="core\math.h" />
     <ClInclude Include="core\math\Bullet\Quaternion.h" />
@@ -172,6 +184,7 @@
     <ClInclude Include="core\math\Transform.h" />
     <ClInclude Include="core\math\Vector.h" />
     <ClInclude Include="core\physics\Bullet\BulletPhysics.h" />
+    <ClInclude Include="core\ResourceManager.h" />
     <ClInclude Include="core\sound\DirectSound\DirectSound.h" />
     <ClInclude Include="core\sound\DirectSound\DirectSoundBuffer.h" />
     <ClInclude Include="core\sound\OggVorbisFile.h" />
@@ -315,6 +328,11 @@
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="media\shader\post_effect\default.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5DB1FAFC-E068-43A8-84D3-0DA42D464BE5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -347,16 +365,16 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)lib\$(Configuration);$(ProjectDir)$(Configuration);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(BlueSkyInclude);$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\$(Configuration);$(ProjectDir)$(Configuration);$(BlueSkyLib);$(LibraryPath)</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)lib\$(Configuration);$(ProjectDir)$(Configuration);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(BlueSkyInclude);$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\$(Configuration);$(ProjectDir)$(Configuration);$(BlueSkyLib);$(LibraryPath)</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>

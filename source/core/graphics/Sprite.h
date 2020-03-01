@@ -9,13 +9,9 @@ namespace win
 	class Point;
 }
 
-namespace game
-{
-	class Texture;
-}
-
 namespace core::graphics
 {
+	class Texture;
 
 /**
  * Sprite
@@ -24,8 +20,8 @@ namespace core::graphics
 class Sprite
 {
 public:
-	using Texture		= game::Texture;
-	
+	using Texture		= Texture;
+
 	using Rect			= win::Rect;
 	using Point			= win::Point;
 

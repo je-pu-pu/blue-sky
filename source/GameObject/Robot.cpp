@@ -8,8 +8,7 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <core/animation/AnimationPlayer.h>
-
-#include <game/Texture.h>
+#include <core/graphics/Texture.h>
 
 #include <common/math.h>
 

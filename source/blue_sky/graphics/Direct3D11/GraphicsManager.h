@@ -1,8 +1,9 @@
 #pragma once
 
-#include <blue_sky/ShaderResources.h>
+#include <blue_sky/ConstantBuffers.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Direct3D11/MeshBuffer.h>
+
 #include <core/graphics/Direct3D11/RenderTargetTexture.h>
 
 #include <memory>
@@ -13,6 +14,8 @@ namespace core::graphics::direct_3d_11
 	class Axis;
 
 	enum class PixelFormat;
+
+	class RenderTargetTexture;
 }
 
 namespace blue_sky::graphics
@@ -31,9 +34,10 @@ class GraphicsManager : public blue_sky::graphics::GraphicsManager
 {
 public:
 	using Direct3D				= core::graphics::direct_3d_11::Direct3D11;
-	using RenderTargetTexture	= core::graphics::direct_3d_11::RenderTargetTexture;
 	using PixelFormat			= core::graphics::direct_3d_11::PixelFormat;
 	using Axis					= core::graphics::direct_3d_11::Axis;
+
+	using RenderTargetTexture	= core::graphics::direct_3d_11::RenderTargetTexture;
 
 private:
 	Direct3D*										direct_3d_;
@@ -43,13 +47,13 @@ private:
 	
 	std::unique_ptr< Axis >							debug_axis_;
 
-	std::unique_ptr< GameShaderResource >			game_render_data_;
-	std::unique_ptr< FrameShaderResource >			frame_render_data_;
-	std::unique_ptr< FrameDrawingShaderResource >	frame_drawing_render_data_;
-	std::unique_ptr< ObjectShaderResource >			shared_object_render_data_;
+	std::unique_ptr< GameConstantBuffer >			game_render_data_;
+	std::unique_ptr< FrameConstantBuffer >			frame_render_data_;
+	std::unique_ptr< FrameDrawingConstantBuffer >	frame_drawing_render_data_;
+	std::unique_ptr< ObjectConstantBuffer >			shared_object_render_data_;
 
-	std::unique_ptr< ObjectShaderResourceWithData >	sky_box_render_data_;
-	std::unique_ptr< ObjectShaderResourceWithData > ground_render_data_;
+	std::unique_ptr< ObjectConstantBufferWithData >	sky_box_render_data_;
+	std::unique_ptr< ObjectConstantBufferWithData > ground_render_data_;
 
 protected:
 	const InputLayout* get_input_layout( const char_t* ) const override;
@@ -80,7 +84,7 @@ public:
 	RenderTargetTexture* create_render_target_texture() override;
 	BackBufferTexture* get_back_buffer_texture() override;
 
-	void set_render_target( game::RenderTargetTexture* ) override;
+	void set_render_target( core::graphics::RenderTarget* ) override;
 
 	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type ); }
 
@@ -110,10 +114,10 @@ public:
 	Texture* get_depth_texture() const override;
 	Sprite* get_sprite() const override;
 
-	GameShaderResource* get_game_render_data() const override { return game_render_data_.get(); }
-	FrameShaderResource* get_frame_render_data() const override { return frame_render_data_.get(); }
-	FrameDrawingShaderResource* get_frame_drawing_render_data() const override { return frame_drawing_render_data_.get(); }
-	ObjectShaderResource* get_shared_object_render_data() const override { return shared_object_render_data_.get(); }
+	GameConstantBuffer* get_game_render_data() const override { return game_render_data_.get(); }
+	FrameConstantBuffer* get_frame_render_data() const override { return frame_render_data_.get(); }
+	FrameDrawingConstantBuffer* get_frame_drawing_render_data() const override { return frame_drawing_render_data_.get(); }
+	ObjectConstantBuffer* get_shared_object_render_data() const override { return shared_object_render_data_.get(); }
 
 	void setup_rendering() const override;
 	void render_technique( const char_t*, const std::function< void () >& ) const override;

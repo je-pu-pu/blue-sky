@@ -11,17 +11,21 @@ namespace game
 	class Sound;
 	class Config;
 	class MainLoop;
-	class Texture;
 }
 
 namespace core
 {
 	class SoundManager;
-}
 
-namespace core::graphics::direct_3d_11
-{
-	class Direct3D11;
+	namespace graphics
+	{
+		class Texture;
+
+		namespace direct_3d_11
+		{
+			class Direct3D11;
+		}
+	}
 }
 
 namespace blue_sky
@@ -49,7 +53,7 @@ class Scene
 public:
 	using Model				= graphics::Model;
 	using Mesh				= graphics::Mesh;
-	using Texture			= game::Texture;
+	using Texture			= core::graphics::Texture;
 
 	using Sound				= game::Sound;
 	using Config			= game::Config;

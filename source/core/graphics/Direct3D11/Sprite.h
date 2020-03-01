@@ -12,7 +12,7 @@ namespace direct_x_math
 
 namespace core::graphics::direct_3d_11
 {
-	template< typename T > class ShaderResource;
+	template< typename T > class ConstantBuffer;
 
 	class Direct3D11;
 	class InputLayout;
@@ -45,7 +45,7 @@ public:
 		Matrix transform;
 	};
 
-	using ConstantBuffer = core::graphics::direct_3d_11::ShaderResource< ConstantBufferData >;
+	using ConstantBuffer = core::graphics::direct_3d_11::ConstantBuffer< ConstantBufferData >;
 
 	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
 

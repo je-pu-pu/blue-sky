@@ -32,7 +32,7 @@ public:
 
 	void bind() const override
 	{
-		get_object_shader_resource()->bind_to_ps();
+		get_object_constant_buffer()->bind_to_ps();
 	}
 
 	void render( const Mesh* mesh, uint_t n ) const override

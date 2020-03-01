@@ -1,17 +1,18 @@
 #pragma once
 
 #include "GameObject.h"
-#include <blue_sky/ShaderResources.h>
+#include <blue_sky/ConstantBuffers.h>
 #include <common/exception.h>
-
-namespace game
-{
-	class Shader;
-}
 
 namespace core
 {
 	class AnimationPlayer;
+
+	namespace graphics
+	{
+		class Shader;
+		class Texture;
+	}
 }
 
 namespace blue_sky
@@ -29,7 +30,8 @@ class alignas( 16 ) ActiveObject : public GameObject
 {
 public:
 	using Model				= graphics::Model;
-	using Shader			= game::Shader;
+	using Shader			= core::graphics::Shader;
+	using Texture			= core::graphics::Texture;
 	using AnimationPlayer	= core::AnimationPlayer;
 
 private:
@@ -41,7 +43,7 @@ private:
 	float_t				start_direction_degree_;	///< スタート時の向き ( Y Axis )
 
 	Model*				model_;				///< Model
-	const ObjectShaderResource*				object_constant_buffer_;	///< 定数バッファ @todo インスタンス毎に必要か？
+	const ObjectConstantBuffer*				object_constant_buffer_;	///< 定数バッファ @todo インスタンス毎に必要か？
 	AnimationPlayer*						animation_player_;			///< アニメーション再生
 
 	bool				is_dead_;			///< 死亡フラグ
@@ -111,7 +113,7 @@ public:
 	void set_mesh_visible( bool v ) { is_mesh_visible_ = v; }
 	void set_line_visible( bool v ) { is_line_visible_ = v; }
 
-	const ObjectShaderResource* get_object_constant_buffer() const { return object_constant_buffer_; }
+	const ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_; }
 
 	void update_render_data() const;
 	virtual void bind_render_data() const;

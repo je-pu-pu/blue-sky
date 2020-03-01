@@ -11,17 +11,19 @@ set_dir( girl, 180 )
 
 
 -- 
-load( "test/switch_shader.lua" )
+-- load( "test/switch_shader.lua" )
 
 
 -- FBX を読み込んで表示する
 -- FBX にテクスチャが設定されていなくてもスクリプトでテクスチャを設定できる
 
 -- テクスチャを読み込む
-t = load_texture( "media/texture/matcap/test/test.png" )
+-- t = load_texture( "media/texture/matcap/test/test.png" )
 
 -- フラットシェーダーを指定してテクスチャを指定する
 s = get_shader( "flat" )
+
+t = s:get_texture_at( 0 )
 s:set_texture_at( 0, t )
 
 -- スタティックなオブジェクトを作成する

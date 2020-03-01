@@ -2,14 +2,10 @@
 
 #include <type/type.h>
 
-namespace game
-{
-	class Texture;
-}
-
 namespace core::graphics
 {
-	class ShaderResource;
+	class Texture;
+	class ConstantBuffer;
 
 /**
  * 抽象シャドウマップ
@@ -21,7 +17,7 @@ public:
 	static const int MaxCascadeLevels = 4;
 
 	using Vector	= Vector;
-	using Texture	= game::Texture;
+	using Texture	= Texture;
 
 private:
 
@@ -40,7 +36,7 @@ public:
 	virtual void set_light_position( const Vector& ) = 0;
 	virtual void set_eye_position( const Vector& ) = 0;
 
-	virtual const ShaderResource* get_shader_resource() const = 0;
+	virtual const ConstantBuffer* get_constant_buffer() const = 0;
 
 	virtual Texture* get_texture() = 0;
 	virtual const Texture* get_texture() const = 0;

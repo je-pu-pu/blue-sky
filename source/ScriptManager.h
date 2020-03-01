@@ -3,7 +3,8 @@
 #include <GameObject/ActiveObject.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Mesh.h>
-#include <game/Shader.h>
+
+#include <core/graphics/Shader.h>
 
 #include <common/math.h>
 #include <common/exception.h>
@@ -15,14 +16,12 @@
  *
  * @todo メモリリークを調査する or Sol のバージョンを変える
  */
-#define SOL_NO_EXCEPTIONS 1
+// #define SOL_NO_EXCEPTIONS 1
 #include <sol/sol.hpp>
 
 #include <boost/algorithm/string.hpp>
 
 #include <queue>
-
-#pragma comment( lib, "lua53.lib" )
 
 namespace blue_sky
 {
@@ -39,8 +38,8 @@ class ScriptManager // : game::ScriptManager
 public:
 	using Model		= graphics::Model;
 	using Mesh		= graphics::Mesh;
-	using Shader	= game::Shader;
-	using Texture	= game::Texture;
+	using Shader	= core::graphics::Shader;
+	using Texture	= core::graphics::Texture;
 
 private:
 	sol::state lua_;
@@ -72,7 +71,7 @@ protected:
 
 		lua_.new_usertype< Shader >(
 			"Shader",
-			"get_texture_at", sol::resolve< Texture* ( uint_t ) >( & Shader::get_texture_at ),
+			"get_texture_at", sol::resolve< Shader::Texture* ( uint_t ) >( & Shader::get_texture_at ),
 			"set_texture_at", & Shader::set_texture_at
 		);
 

@@ -2,17 +2,17 @@
 
 #include "Mesh.h"
 #include "Line.h"
-#include <game/Model.h>
+#include <core/graphics/Model.h>
 #include <vector>
-
-namespace game
-{
-	class Shader;
-}
 
 namespace core
 {
 	class SkinningAnimationSet;
+
+	namespace graphics
+	{
+		class Shader;
+	}
 }
 
 namespace blue_sky::graphics
@@ -24,12 +24,12 @@ namespace blue_sky::graphics
  * blue_sky ƒ‚ƒfƒ‹ƒNƒ‰ƒX
  *
  */
-class Model : public game::Model
+class Model : public core::graphics::Model
 {
 public:
 	using Mesh					= Mesh;
 	using Line					= Line;
-	using Shader				= game::Shader;
+	using Shader				= core::graphics::Shader;
 	using ShaderList			= std::vector< Shader* >;
 	using SkinningAnimationSet	= core::SkinningAnimationSet;
 
@@ -57,7 +57,7 @@ public:
 
 	Mesh* get_mesh() override { return mesh_; };
 	const Mesh* get_mesh() const override { return mesh_; };
-	void set_mesh( game::Mesh* m ) override { mesh_ = static_cast< Mesh* >( m ); }
+	void set_mesh( core::graphics::Mesh* m ) override { mesh_ = static_cast< Mesh* >( m ); }
 
 	/// @todo Mesh ‚É‚Ü‚Æ‚ß‚é
 	Line* get_line() { return line_.get(); }

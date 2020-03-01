@@ -9,7 +9,7 @@
 
 #include <core/animation/SkinningAnimationSet.h>
 
-#include <game/Shader.h>
+#include <core/graphics/Shader.h>
 
 #include <common/timer.h>
 #include <common/exception.h>

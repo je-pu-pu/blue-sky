@@ -2,7 +2,7 @@
 
 #include "PixelFormat.h"
 #include "Direct3D11.h"
-#include <game/Texture.h>
+#include <core/graphics/Texture.h>
 
 namespace core::graphics::direct_3d_11
 {
@@ -11,7 +11,7 @@ namespace core::graphics::direct_3d_11
  * Direct3D 11 Texture
  *
  */
-class Texture : public game::Texture
+class Texture : public core::graphics::Texture
 {
 protected:
 	Direct3D11*								direct_3d_ = nullptr;		///< Direct3D11 への参照
@@ -20,14 +20,20 @@ protected:
 	D3D11_TEXTURE2D_DESC					texture_2d_desc_{};			///< 2D テクスチャについての説明
 
 protected:
-	Texture( Direct3D11* direct_3d )
-		: direct_3d_( direct_3d )
-	{ }
-
 	void create_texture_2d( PixelFormat, int, int, bool );
 	void create_shader_resource_view( PixelFormat );
 
 public:
+	/**
+	 * 新規にテクスチャを作成する
+	 */
+	Texture( Direct3D11* direct_3d, PixelFormat format, int width, int height, bool multi_sample )
+		: direct_3d_( direct_3d )
+	{
+		create_texture_2d( format, width, height, multi_sample );
+		create_shader_resource_view( format );
+	}
+
 	/**
 	 * 既に存在する ShaderResourceView を設定してテクスチャオブジェクトを構築する ( 画像からテクスチャを読み込んだ場合などに使用 )
 	 */

@@ -89,7 +89,7 @@ void AnimationPlayer::update_render_data() const
 {
 	if ( ! get_current_skinning_animation() )
 	{
-		blue_sky::BoneShaderResourceData data;
+		blue_sky::BoneConstantBufferData data;
 
 		for ( uint_t n = 0; n < get_skinning_animation_set()->get_bone_count(); ++n )
 		{
@@ -101,7 +101,7 @@ void AnimationPlayer::update_render_data() const
 		return;
 	}
 
-	blue_sky::BoneShaderResourceData data;
+	blue_sky::BoneConstantBufferData data;
 
 	calculate_bone_matrix_recursive( data, 0, Matrix::identity() );
 
@@ -120,7 +120,7 @@ void AnimationPlayer::update_render_data() const
  * @param bone_index ボーンのインデックス
  * @param parent_bone_matrix 親ボーン行列
  */
-void AnimationPlayer::calculate_bone_matrix_recursive( BoneShaderResource::Data& data, uint_t bone_index, const Matrix& parent_bone_matrix ) const
+void AnimationPlayer::calculate_bone_matrix_recursive( BoneConstantBuffer::Data& data, uint_t bone_index, const Matrix& parent_bone_matrix ) const
 {
 	const Matrix& bone_offset_matrix = get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( bone_index );
 

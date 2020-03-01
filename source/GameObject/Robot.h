@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ActiveObject.h"
-#include <game/Texture.h>
 
 #include <vector>
 #include <list>
@@ -18,7 +17,6 @@ class Player;
 class Robot : public ActiveObject
 {
 public:
-	using Texture		= game::Texture;
 	using VectorArray	= std::vector< Vector >;
 
 	enum Mode

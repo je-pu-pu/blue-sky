@@ -3,7 +3,7 @@
 #include <type/type.h>
 #include <unordered_map>
 
-namespace game
+namespace core
 {
 
 /**
@@ -134,4 +134,4 @@ public:
 	}
 };
 
-} // namespace game
+} // namespace core

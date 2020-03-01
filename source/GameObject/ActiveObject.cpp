@@ -2,7 +2,7 @@
 #include "ActiveObjectPhysics.h"
 #include "GameMain.h"
 
-#include <blue_sky/ShaderResources.h>
+#include <blue_sky/ConstantBuffers.h>
 
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
@@ -11,7 +11,7 @@
 #include <core/sound/Sound.h>
 #include <core/animation/AnimationPlayer.h>
 
-#include <game/Shader.h>
+#include <core/graphics/Shader.h>
 
 #include <common/math.h>
 
@@ -22,7 +22,7 @@ namespace blue_sky
 
 ActiveObject::ActiveObject()
 	: model_( 0 )
-	, object_constant_buffer_( new ObjectShaderResource( GameMain::get_instance()->get_direct_3d() ) )
+	, object_constant_buffer_( new ObjectConstantBuffer( GameMain::get_instance()->get_direct_3d() ) )
 	, animation_player_( 0 )
 	, is_dead_( false )
 	, flicker_scale_( 1.f )
@@ -45,7 +45,7 @@ ActiveObject::ActiveObject()
 ActiveObject::ActiveObject( const ActiveObject& o )
 	: GameObject( o )
 	, model_( o.model_ )
-	, object_constant_buffer_( new ObjectShaderResource( GameMain::get_instance()->get_direct_3d() ) )
+	, object_constant_buffer_( new ObjectConstantBuffer( GameMain::get_instance()->get_direct_3d() ) )
 	, animation_player_( 0 )
 	, is_dead_( o.is_dead_ )
 	, flicker_scale_( o.flicker_scale_ )
@@ -247,7 +247,7 @@ void ActiveObject::update_render_data() const
 
 	const Transform& t = get_transform();
 
-	ObjectShaderResourceData shader_data;
+	ObjectConstantBufferData shader_data;
 
 	shader_data.world.set_rotation_quaternion( t.get_rotation() );
 	shader_data.world *= Matrix().set_translation( t.get_position().x(), t.get_position().y(), t.get_position().z() );

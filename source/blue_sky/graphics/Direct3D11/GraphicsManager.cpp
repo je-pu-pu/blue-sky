@@ -1,6 +1,6 @@
 #include "GraphicsManager.h"
 
-#include <blue_sky/ShaderResources.h>
+#include <blue_sky/ConstantBuffers.h>
 #include <blue_sky/graphics/SkyBox.h>
 #include <blue_sky/graphics/Ground.h>
 #include <blue_sky/graphics/Fader.h>
@@ -38,10 +38,10 @@ namespace blue_sky::graphics::direct_3d_11
  */
 GraphicsManager::GraphicsManager( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
-	, game_render_data_( new GameShaderResource( direct_3d ) )
-	, frame_render_data_( new FrameShaderResource( direct_3d ) )
-	, frame_drawing_render_data_( new FrameDrawingShaderResource( direct_3d ) )
-	, shared_object_render_data_( new ObjectShaderResource( direct_3d ) )
+	, game_render_data_( new GameConstantBuffer( direct_3d ) )
+	, frame_render_data_( new FrameConstantBuffer( direct_3d ) )
+	, frame_drawing_render_data_( new FrameDrawingConstantBuffer( direct_3d ) )
+	, shared_object_render_data_( new ObjectConstantBuffer( direct_3d ) )
 	, debug_axis_( new core::graphics::direct_3d_11::Axis( direct_3d ) )
 {
 	create_named_shader< shader::BypassShader >( "bypass" );
@@ -78,9 +78,9 @@ GraphicsManager::BackBufferTexture* GraphicsManager::get_back_buffer_texture()
 	return direct_3d_->get_back_buffer_texture();
 }
 
-void GraphicsManager::set_render_target( game::RenderTargetTexture* t )
+void GraphicsManager::set_render_target( core::graphics::RenderTarget* render_target )
 {
-	direct_3d_->set_render_target( dynamic_cast< RenderTargetTexture* >( t ) );
+	direct_3d_->set_render_target( static_cast< RenderTargetTexture* >( render_target ) );
 }
 
 
@@ -161,7 +161,7 @@ void GraphicsManager::set_sky_box( const char_t* name )
 {
 	if ( ! sky_box_ )
 	{
-		sky_box_render_data_ = std::make_unique< ObjectShaderResourceWithData >( direct_3d_ );
+		sky_box_render_data_ = std::make_unique< ObjectConstantBufferWithData >( direct_3d_ );
 		sky_box_render_data_->data().color = Color::White;
 	}
 
@@ -201,7 +201,7 @@ void GraphicsManager::set_ground( const char_t* name )
 	ground_.reset( new Ground() );
 	load_mesh( ground_.get(), name );
 
-	ground_render_data_.reset( new ObjectShaderResourceWithData( direct_3d_ ) );
+	ground_render_data_.reset( new ObjectConstantBufferWithData( direct_3d_ ) );
 	ground_render_data_->data().world.set_identity();
 	ground_render_data_->data().color = Color::White;
 }
@@ -317,7 +317,7 @@ void GraphicsManager::setup_rendering() const
 	direct_3d_->set_default_render_target();
 	direct_3d_->set_default_viewport();
 
-	update_shader_resources();
+	update_constant_buffers();
 }
 
 /**
@@ -434,7 +434,7 @@ void GraphicsManager::render_background() const
 	if ( ground_ )
 	{
 		ground_render_data_->update();
-		set_current_object_shader_resource( ground_render_data_.get() );
+		set_current_object_constant_buffer( ground_render_data_.get() );
 		ground_->render();
 	}
 
@@ -442,7 +442,7 @@ void GraphicsManager::render_background() const
 	if ( sky_box_ )
 	{
 		sky_box_render_data_->update();
-		set_current_object_shader_resource( sky_box_render_data_.get() );
+		set_current_object_constant_buffer( sky_box_render_data_.get() );
 		sky_box_->render();
 	}
 }

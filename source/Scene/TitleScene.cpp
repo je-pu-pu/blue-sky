@@ -157,7 +157,7 @@ void TitleScene::render()
 				if ( sequence_ >= SEQUENCE_TITLE_FIX )
 				{
 					{
-						ObjectShaderResourceData object_constant_buffer_data;
+						ObjectConstantBufferData object_constant_buffer_data;
 
 						object_constant_buffer_data.world = Matrix().set_translation( +0.01f, +0.01f, 0.f ).transpose();
 						object_constant_buffer_data.color = Color( 0.f, 0.f, 0.f, -0.5f );
@@ -168,7 +168,7 @@ void TitleScene::render()
 					title_logo_model_->get_line()->render();
 
 					{
-						ObjectShaderResourceData object_constant_buffer_data;
+						ObjectConstantBufferData object_constant_buffer_data;
 
 						object_constant_buffer_data.world = Matrix().set_identity().transpose();
 						object_constant_buffer_data.color = Color( 1.f, 1.f, 1.f, 0.f );

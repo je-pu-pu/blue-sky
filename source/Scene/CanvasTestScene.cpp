@@ -5,8 +5,6 @@
 #include "Input.h"
 
 #include <blue_sky/graphics/GraphicsManager.h>
-
-#include <game/Texture.h>
 #include <game/MainLoop.h>
 
 #include <win/Rect.h>
@@ -18,7 +16,7 @@ namespace blue_sky
 {
 
 /// @todo ‚¿‚á‚ñ‚Æ‚·‚é
-static ObjectShaderResourceData object_constant_buffer_data;
+static ObjectConstantBufferData object_constant_buffer_data;
 static Vector eye( 0.f, 0.f, -1.f, 1.f );
 static Matrix r;
 

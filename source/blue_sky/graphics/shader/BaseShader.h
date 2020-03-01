@@ -7,10 +7,8 @@
 #include <core/animation/AnimationPlayer.h>
 #include <core/graphics/PrimitiveTopology.h>
 
-#include <game/Model.h>
-#include <game/Mesh.h>
-#include <game/Shader.h>
-#include <game/Texture.h>
+#include <core/graphics/Model.h>
+#include <core/graphics/Mesh.h>
 
 namespace blue_sky::graphics::shader
 {
@@ -19,28 +17,27 @@ namespace blue_sky::graphics::shader
  * blue-sky シェーダー基底クラス
  *
  */
-class BaseShader : public game::Shader
+class BaseShader : public core::graphics::Shader
 {
 public:
-	using Mesh				= game::Mesh;
-	using Texture			= game::Texture;
+	using Mesh				= core::graphics::Mesh;
 
 	using PrimitiveTopology	= core::graphics::PrimitiveTopology;
 	using InputLayout		= core::graphics::InputLayout;
 	using EffectTechnique	= core::graphics::EffectTechnique;
-	using ShaderResource	= core::graphics::ShaderResource;
+	using ConstantBuffer	= core::graphics::ConstantBuffer;
 
 protected:
 	GraphicsManager* get_graphics_manager() const { return GameMain::get_instance()->get_graphics_manager(); }
 
-	const ShaderResource* get_game_shader_resource() const { return get_graphics_manager()->get_game_render_data(); }
-	const ShaderResource* get_frame_shader_resource() const { return get_graphics_manager()->get_frame_render_data(); }
-	const ShaderResource* get_frame_drawing_shader_resource() const { return get_graphics_manager()->get_frame_drawing_render_data(); }
-	const ShaderResource* get_object_shader_resource() const { return get_graphics_manager()->get_current_object_shader_resource(); }
-	const ShaderResource* get_skining_shader_resource() const { return get_graphics_manager()->get_current_skinning_shader_resource(); }
+	const ConstantBuffer* get_game_constant_buffer() const { return get_graphics_manager()->get_game_render_data(); }
+	const ConstantBuffer* get_frame_constant_buffer() const { return get_graphics_manager()->get_frame_render_data(); }
+	const ConstantBuffer* get_frame_drawing_constant_buffer() const { return get_graphics_manager()->get_frame_drawing_render_data(); }
+	const ConstantBuffer* get_object_constant_buffer() const { return get_graphics_manager()->get_current_object_constant_buffer(); }
+	const ConstantBuffer* get_skining_constant_buffer() const { return get_graphics_manager()->get_current_skinning_constant_buffer(); }
 
 public:
-	void render_model( const game::Model* m ) const override
+	void render_model( const core::graphics::Model* m ) const override
 	{
 		m->get_mesh()->bind();
 

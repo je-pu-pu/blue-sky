@@ -30,12 +30,14 @@
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 #include <core/graphics/Direct3D11/Effect.h>
+
 #include <core/input/DirectInput/DirectInput.h>
+
+#include <core/graphics/Shader.h>
 
 #include <win/Version.h>
 #include <win/Clipboard.h>
 
-#include <game/Shader.h>
 #include <game/Config.h>
 #include <game/MainLoop.h>
 
@@ -223,7 +225,7 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "clone_model", [this] ( graphics::Model* m ) { auto* m2 = get_graphics_manager()->clone_model( m ); return m2; } );
 
 	get_script_manager()->set_function( "get_shader", [this] ( const char_t* name ) { return get_graphics_manager()->get_shader( name ); } );
-	get_script_manager()->set_function( "clone_shader", [this] ( const game::Shader* s ) { return get_graphics_manager()->clone_shader( s ); } );
+	get_script_manager()->set_function( "clone_shader", [this] ( const core::graphics::Shader* s ) { return get_graphics_manager()->clone_shader( s ); } );
 
 	get_script_manager()->set_function( "load_texture", [this] ( const char_t* file_path ) { return get_graphics_manager()->load_texture( file_path ); } );
 	// get_script_manager()->set_function( "load_named_texture", [this] ( const char_t* name, const char_t* file_path ) { return get_graphics_manager()->load_texture( name, file_path ); } );
@@ -273,7 +275,7 @@ ActiveObject* GameMain::clone_object( const ActiveObject* o )
  */
 void GameMain::update_render_data_for_game() const
 {
-	GameShaderResourceData constant_buffer_data;
+	GameConstantBufferData constant_buffer_data;
 	constant_buffer_data.screen_width = static_cast< float_t >( get_width() );
 	constant_buffer_data.screen_height = static_cast< float_t >( get_height() );
 		

@@ -2,9 +2,9 @@
 
 #include <blue_sky/type.h>
 
-#include <game/Mesh.h>
-#include <game/VertexGroup.h>
-#include <game/Texture.h>
+#include <core/graphics/Mesh.h>
+#include <core/graphics/VertexGroup.h>
+#include <core/graphics/Texture.h>
 
 #include <common/math.h>
 
@@ -20,7 +20,7 @@ namespace blue_sky::graphics
  * 
  * @todo 柔軟な頂点構造に対応する
  */
-struct Vertex : public game::Vertex
+struct Vertex : public core::graphics::Vertex
 {
 	Vector3 Position;
 	Vector3 Normal;
@@ -47,12 +47,12 @@ struct Vertex : public game::Vertex
  * blue-sky メッシュ
  *
  */
-class Mesh : public game::Mesh
+class Mesh : public core::graphics::Mesh
 {
 public:
 	using Vertex			= blue_sky::graphics::Vertex;
-	using VertexGroup		= game::VertexGroup;
-	using Texture			= game::Texture;
+	using VertexGroup		= core::graphics::VertexGroup;
+	using Texture			= core::graphics::Texture;
 	
 	using Position			= Vector3;
 	using Normal			= Vector3;
@@ -134,7 +134,7 @@ public:
 
 	virtual ~Mesh()	{ }
 
-	void add_vertex( const game::Vertex& v ) override { vertex_list_.push_back( static_cast< const Vertex& >( v ) ); }
+	void add_vertex( const core::graphics::Vertex& v ) override { vertex_list_.push_back( static_cast< const Vertex& >( v ) ); }
 	uint_t get_vertex_count() const override { return vertex_list_.size(); }
 
 	void add_vertex_weight( const VertexWeight& w ) override { vertex_weight_list_.push_back( w ); }

@@ -2,7 +2,7 @@
 
 #include <type/type.h>
 
-namespace game
+namespace core::graphics
 {
 
 class Mesh;
@@ -36,4 +36,4 @@ public:
 
 };
 
-} // namespace game
+} // namespace core::graphics

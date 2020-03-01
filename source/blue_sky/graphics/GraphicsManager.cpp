@@ -21,7 +21,9 @@
 #include <core/animation/AnimationPlayer.h>
 #include <core/graphics/ShadowMap.h>
 
-#include <game/Texture.h>
+#include <core/graphics/Shader.h>
+#include <core/graphics/RenderTargetTexture.h>
+#include <core/graphics/BackBufferTexture.h>
 
 #include <common/timer.h>
 #include <common/exception.h>
@@ -50,8 +52,8 @@ void GraphicsManager::setup_shadow_map( uint_t levels, uint_t size )
 {
 	shadow_map_.reset( create_shadow_map( levels, size ) );
 		
-	shadow_map_shader_->set_shader_resource( shadow_map_->get_shader_resource() );
-	shadow_map_skin_shader_->set_shader_resource( shadow_map_->get_shader_resource() );
+	shadow_map_shader_->set_constant_buffer( shadow_map_->get_constant_buffer() );
+	shadow_map_skin_shader_->set_constant_buffer( shadow_map_->get_constant_buffer() );
 }
 
 void GraphicsManager::unset_shadow_map()
@@ -364,7 +366,7 @@ void GraphicsManager::bind_paper_texture() const
  * 描画に必要なシェーダーリソースをアップデートする
  *
  */
-void GraphicsManager::update_shader_resources() const
+void GraphicsManager::update_constant_buffers() const
 {
 	/// @todo 毎フレーム行う必要があるか？
 	get_frame_drawing_render_data()->update();
@@ -421,8 +423,8 @@ void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool
 
 			if ( active_object->get_model()->is_skin_mesh() == is_skin_mesh )
 			{
-				set_current_object_shader_resource( active_object->get_object_constant_buffer() );
-				get_current_skinning_shader_resource( active_object->get_animation_player() ? active_object->get_animation_player()->get_shader_resource() : nullptr );
+				set_current_object_constant_buffer( active_object->get_object_constant_buffer() );
+				get_current_skinning_constant_buffer( active_object->get_animation_player() ? active_object->get_animation_player()->get_constant_buffer() : nullptr );
 
 				active_object->render_mesh( shader );
 
@@ -453,8 +455,8 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 			continue;
 		}
 
-		set_current_object_shader_resource( active_object->get_object_constant_buffer() );
-		get_current_skinning_shader_resource( active_object->get_animation_player() ? active_object->get_animation_player()->get_shader_resource() : nullptr );
+		set_current_object_constant_buffer( active_object->get_object_constant_buffer() );
+		get_current_skinning_constant_buffer( active_object->get_animation_player() ? active_object->get_animation_player()->get_constant_buffer() : nullptr );
 
 		active_object->render_mesh();
 	}
@@ -528,17 +530,17 @@ void GraphicsManager::fade_out( float_t speed )
  */
 void GraphicsManager::render_fader() const
 {
-	ObjectShaderResourceData shader_data;
+	ObjectConstantBufferData shader_data;
 	shader_data.world = Matrix().set_identity();
 	shader_data.color = get_fader()->get_color();
 
 	get_shared_object_render_data()->update( & shader_data );
-	set_current_object_shader_resource( get_shared_object_render_data() );
+	set_current_object_constant_buffer( get_shared_object_render_data() );
 
 	get_fader()->render();
 
 #if 0
-	ObjectShaderResourceData buffer_data;
+	ObjectConstantBufferData buffer_data;
 	buffer_data.world = Matrix().set_identity().transpose();
 	buffer_data.color = direct_3d_->getFader()->get_color();
 	
@@ -602,7 +604,7 @@ void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_ob
 	get_shared_object_render_data()->bind_to_vs();
 	get_shared_object_render_data()->bind_to_ps();
 
-	core::AnimationPlayer::BoneShaderResource::Data bone_constant_buffer_data;
+	core::AnimationPlayer::BoneConstantBuffer::Data bone_constant_buffer_data;
 	active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix::identity() );
 
 	for ( uint_t n = 0; n < active_object->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )
@@ -613,7 +615,7 @@ void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_ob
 
 		const core::Transform& t = active_object->get_transform();
 
-		ObjectShaderResourceData shader_data;
+		ObjectConstantBufferData shader_data;
 
 		shader_data.world = Matrix().set_scaling( 0.1f, 0.1f, 0.1f );
 		shader_data.world *= bone_matrix;
@@ -648,7 +650,7 @@ void GraphicsManager::debug_print_resources() const
 /*
 void GraphicsManager::update_frame_render_data( const Camera* camera_ )
 {
-	FrameShaderResourceData frame_constant_buffer_data;
+	FrameConstantBufferData frame_constant_buffer_data;
 	update_frame_constant_buffer_data_sub( frame_constant_buffer_data );
 
 	Vector eye( camera_->position().x(), camera_->position().y(), camera_->position().z() );

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <blue_sky/type.h>
-#include <game/Line.h>
 #include <vector>
 
 namespace blue_sky::graphics
@@ -11,7 +10,7 @@ namespace blue_sky::graphics
  * blue-sky Žè•`‚«•—ƒ‰ƒCƒ“
  *
  */
-class Line : public game::Line
+class Line
 {
 public:
 	enum LineType

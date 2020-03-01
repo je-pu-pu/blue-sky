@@ -2,11 +2,11 @@
 
 #include <type/type.h>
 
-namespace game
+namespace core::graphics
 {
 	class Model;
 	class Mesh;
-	class Texture;
+	class ShaderResource;
 
 /**
  * 抽象シェーダークラス
@@ -14,6 +14,9 @@ namespace game
  */
 class Shader
 {
+public:
+	using Texture = ShaderResource;
+
 public:
 	Shader() { }
 	virtual ~Shader() { }
@@ -30,4 +33,4 @@ public:
 
 }; // Shader
 
-} // namespace game
+} // namespace core::graphics

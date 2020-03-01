@@ -3,7 +3,7 @@
 #include <blue_sky/graphics/Line.h>
 #include <d3d11.h>
 
-namespace game
+namespace core::graphics
 {
 	class Texture;
 }
@@ -23,7 +23,7 @@ namespace blue_sky::graphics::direct_3d_11
 class Line : public blue_sky::graphics::Line
 {
 public:
-	using Texture = game::Texture;
+	using Texture = core::graphics::Texture;
 	using Direct3D = core::graphics::direct_3d_11::Direct3D11;
 
 	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;

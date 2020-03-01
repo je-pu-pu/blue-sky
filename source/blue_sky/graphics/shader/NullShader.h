@@ -19,7 +19,7 @@ public:
 	void set_texture_at( uint_t, Texture* ) override { }
 
 	void bind() const override { }
-	void render_model( const game::Model* ) const override { }
+	void render_model( const core::graphics::Model* ) const override { }
 	void render( const Mesh*, uint_t ) const override { }
 };
 

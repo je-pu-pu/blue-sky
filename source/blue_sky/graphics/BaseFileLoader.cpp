@@ -5,7 +5,7 @@
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Mesh.h>
 
-#include <game/Shader.h>
+#include <core/graphics/Shader.h>
 
 #include <boost/filesystem.hpp>
 

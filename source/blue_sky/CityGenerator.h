@@ -3,7 +3,7 @@
 #include <blue_sky/type.h>
 #include <unordered_set>
 
-namespace game
+namespace core::graphics
 {
 	class VertexGroup;
 }
@@ -25,7 +25,7 @@ class CityGenerator
 public:
 	using Model			= graphics::Model;
 	using Mesh			= graphics::Mesh;
-	using VertexGroup	= game::VertexGroup;
+	using VertexGroup	= core::graphics::VertexGroup;
 
 	/// 道路タイルの中心を指すコントロールポイント
 	struct RoadNode

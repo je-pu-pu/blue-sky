@@ -7,6 +7,7 @@ namespace game
 /**
  * サウンド基底クラス
  *
+ * @todo core/sound/Sound に統合する
  */
 class Sound
 {

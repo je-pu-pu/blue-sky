@@ -4,7 +4,7 @@
 #include <blue_sky/CityGenerator.h>
 #include <memory>
 
-namespace game
+namespace core::graphics
 {
 	class RenderTargetTexture;
 }
@@ -25,7 +25,7 @@ public:
 protected:
 	CityGenerator city_generator_;
 
-	std::unique_ptr< game::RenderTargetTexture > render_result_texture_;
+	std::unique_ptr< core::graphics::RenderTargetTexture > render_result_texture_;
 
 protected:
 

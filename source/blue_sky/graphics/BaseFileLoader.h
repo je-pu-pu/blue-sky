@@ -5,15 +5,15 @@
 #include <vector>
 #include <map>
 
-namespace game
-{
-	class Shader;
-	class Texture;
-}
-
 namespace core
 {
 	class SkinningAnimationSet;
+
+	namespace graphics
+	{
+		class Shader;
+		class Texture;
+	}
 }
 
 namespace blue_sky::graphics
@@ -31,8 +31,8 @@ public:
 	using Model					= blue_sky::graphics::Model;	///< @todo ’ŠÛ‰»‚·‚é
 	using Mesh					= blue_sky::graphics::Mesh;		///< @todo ’ŠÛ‰»‚·‚é
 	using SkinningAnimationSet	= core::SkinningAnimationSet;
-	using Shader				= game::Shader;
-	using Texture				= game::Texture;
+	using Shader				= core::graphics::Shader;
+	using Texture				= core::graphics::Texture;
 
 	using VertexList			= std::vector< Mesh::Vertex >;
 	using VertexIndexMap		= std::map< Mesh::Vertex, Mesh::Index >;

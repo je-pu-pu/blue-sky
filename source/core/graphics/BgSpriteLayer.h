@@ -7,15 +7,13 @@
 #include <common/chase_value.h>
 
 
-namespace game
-{
-
-class Texture;
-
-}
-
 namespace core
 {
+
+	namespace graphics
+	{
+		class Texture;
+	}
 
 /**
  * îwåiÉåÉCÉÑÅ[
@@ -25,7 +23,7 @@ namespace core
 class BgSpriteLayer
 {
 public:
-	using Texture = game::Texture;
+	using Texture = core::graphics::Texture;
 
 private:
 	const string_t name_;

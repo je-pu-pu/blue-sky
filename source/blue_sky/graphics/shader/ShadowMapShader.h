@@ -15,14 +15,14 @@ class BaseShadowMapShader : public BaseShader
 private:
 	const InputLayout* input_layout_;
 	const EffectTechnique* effect_technique_;
-	const ShaderResource* resource_ = nullptr;
+	const ConstantBuffer* constant_buffer_ = nullptr;
 
 protected:
 	Texture* get_texture_at( uint_t ) override { return nullptr; }
 	const Texture* get_texture_at( uint_t ) const override { return nullptr; }
 	void set_texture_at( uint_t, Texture* ) override { }
 
-	const ShaderResource* get_shader_resource() const { return resource_; }
+	const ConstantBuffer* get_constant_buffer() const { return constant_buffer_; }
 
 public:
 	BaseShadowMapShader( const char_t* input_layout_name, const char_t* effect_technique_name )
@@ -32,7 +32,7 @@ public:
 
 	}
 
-	void set_shader_resource( const ShaderResource* r ) { resource_ = r; }
+	void set_constant_buffer( const ConstantBuffer* r ) { constant_buffer_ = r; }
 
 	void render( const Mesh* mesh, uint_t n ) const override
 	{
@@ -56,12 +56,12 @@ public:
 
 	void bind() const override
 	{
-		get_frame_shader_resource()->bind_to_vs();
+		get_frame_constant_buffer()->bind_to_vs();
 		
-		get_object_shader_resource()->bind_to_vs();
-		get_object_shader_resource()->bind_to_ds();
+		get_object_constant_buffer()->bind_to_vs();
+		get_object_constant_buffer()->bind_to_ds();
 
-		get_shader_resource()->bind_to_vs();
+		get_constant_buffer()->bind_to_vs();
 	}
 };
 
@@ -76,14 +76,14 @@ public:
 
 	void bind() const override
 	{
-		get_frame_shader_resource()->bind_to_vs();
+		get_frame_constant_buffer()->bind_to_vs();
 		
-		get_object_shader_resource()->bind_to_vs();
-		get_object_shader_resource()->bind_to_ds();
+		get_object_constant_buffer()->bind_to_vs();
+		get_object_constant_buffer()->bind_to_ds();
 
-		get_skining_shader_resource()->bind_to_vs();
+		get_skining_constant_buffer()->bind_to_vs();
 
-		get_shader_resource()->bind_to_vs();
+		get_constant_buffer()->bind_to_vs();
 	}
 };
 

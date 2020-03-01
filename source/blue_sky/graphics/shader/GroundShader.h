@@ -36,9 +36,9 @@ public:
 
 	void bind() const override
 	{
-		get_frame_shader_resource()->bind_to_vs();
-		get_object_shader_resource()->bind_to_vs();
-		get_object_shader_resource()->bind_to_ps();
+		get_frame_constant_buffer()->bind_to_vs();
+		get_object_constant_buffer()->bind_to_vs();
+		get_object_constant_buffer()->bind_to_ps();
 		get_texture()->bind_to_ps( 0 );
 	}
 

@@ -220,6 +220,7 @@
     <ClCompile Include="core\graphics\Direct3D11\Texture.cpp">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClCompile>
+    <ClCompile Include="ScriptManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -403,9 +404,6 @@
     <ClInclude Include="blue_sky\graphics\shader\MatcapShader.h">
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
-    <ClInclude Include="blue_sky\ShaderResources.h">
-      <Filter>blue_sky</Filter>
-    </ClInclude>
     <ClInclude Include="blue_sky\graphics\Model.h">
       <Filter>blue_sky\graphics</Filter>
     </ClInclude>
@@ -464,12 +462,6 @@
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\ShadowMap.h">
-      <Filter>core\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\ShaderResource.h">
-      <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\ShaderResource.h">
       <Filter>core\graphics</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\ShadowMap.h">
@@ -578,6 +570,40 @@
     <ClInclude Include="blue_sky\graphics\shader\post_effect\DefaultShader.h">
       <Filter>blue_sky\graphics\shader\post_effect</Filter>
     </ClInclude>
+    <ClInclude Include="core\ResourceManager.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\GraphicsManager.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Mesh.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Model.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Shader.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Texture.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\VertexGroup.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\ConstantBuffer.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ConstantBuffers.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\ConstantBuffer.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\RenderTarget.h" />
+    <ClInclude Include="core\graphics\ShaderResource.h" />
+    <ClInclude Include="core\graphics\RenderTargetTexture.h" />
+    <ClInclude Include="core\graphics\BackBufferTexture.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

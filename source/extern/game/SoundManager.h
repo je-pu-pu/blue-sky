@@ -11,6 +11,7 @@ class Sound;
 /**
  * サウンド管理クラス
  *
+ * @todo core/sound/SoundManager に統合する
  */
 class SoundManager
 {

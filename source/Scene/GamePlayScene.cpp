@@ -1696,7 +1696,7 @@ void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
  * フレーム毎に更新する必要のある描画用の定数バッファ用データのうち、マトリックス以外のデータをを更新する
  *
  */
-void GamePlayScene::update_frame_constant_buffer_data_sub( FrameShaderResourceData& frame_constant_buffer_data ) const
+void GamePlayScene::update_frame_constant_buffer_data_sub( FrameConstantBufferData& frame_constant_buffer_data ) const
 {
 	frame_constant_buffer_data.light = -Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z(), 1.f );
 	frame_constant_buffer_data.light.normalize();
@@ -1729,14 +1729,14 @@ void GamePlayScene::render_far_billboards() const
 	}
 
 	/// @todo 毎フレーム update() するのは無駄なのでやめる
-	ObjectShaderResourceData buffer;
+	ObjectConstantBufferData buffer;
 	buffer.color = Color::White;
 	buffer.world.set_identity();
 			
 	get_graphics_manager()->get_shared_object_render_data()->update( & buffer );
 
 	/// @todo shader を "billboard" にする
-	get_graphics_manager()->set_current_object_shader_resource( get_graphics_manager()->get_shared_object_render_data() );
+	get_graphics_manager()->set_current_object_constant_buffer( get_graphics_manager()->get_shared_object_render_data() );
 	far_billboards_->render();
 }
 
@@ -1750,7 +1750,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 	{
 		get_graphics_manager()->set_input_layout( "main" );
 
-		ObjectShaderResourceData buffer_data;
+		ObjectConstantBufferData buffer_data;
 		buffer_data.world = Matrix().set_orthographic( camera_->aspect() * 2.f, 2.f, 0.f, 1.f );
 		buffer_data.world *= Matrix().set_translation( ortho_offset, 0.f, 0.f );
 		buffer_data.world = buffer_data.world.transpose();

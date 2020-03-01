@@ -4,9 +4,9 @@
 #include "EffectPass.h"
 #include "Direct3D11.h"
 #include <GameMain.h>
-#include <core/graphics/Direct3D11/ShaderResource.h>
 #include <blue_sky/graphics/GraphicsManager.h>
-#include <game/Texture.h>
+#include <core/graphics/Direct3D11/ConstantBuffer.h>
+#include <core/graphics/Texture.h>
 #include <win/Rect.h>
 
 namespace core::graphics::direct_3d_11

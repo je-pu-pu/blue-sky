@@ -147,7 +147,7 @@ public:
 
 	virtual RenderTargetTexture* create_render_target_texture() = 0;
 	virtual BackBufferTexture* get_back_buffer_texture() = 0;
-	virtual void set_render_target( RenderTarget* ) = 0;
+	virtual void set_render_target( RenderTarget* );
 
 	// Model
 	template< typename Type=Model > Type* create_named_model( const char_t* name ) { return model_manager_.create_named< Type >( name ); }

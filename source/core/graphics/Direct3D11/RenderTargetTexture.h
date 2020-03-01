@@ -9,25 +9,6 @@ namespace core::graphics::direct_3d_11
 {
 	class Direct3D11;
 
-	/*
-	namespace detail
-	{
-		class RenderTargetView
-		{
-		private:
-			com_ptr< ID3D11RenderTargetView > render_target_view_;
-
-		protected:
-			void create_render_target_view()
-			{
-				// DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateRenderTargetView( texture_2d_.get(), nullptr, & render_target_view_ ) );
-			}
-
-		public:
-			ID3D11RenderTargetView* get_render_target_view() const { return render_target_view_.get(); }
-		};
-	}
-	/*
 
 	/**
 	 * Direct3D 11 ƒŒƒ“ƒ_ƒŠƒ“ƒOŒ‹‰Ê‚ğ‘‚«‚Ş–‚ª‚Å‚«‚é Texture
@@ -36,6 +17,7 @@ namespace core::graphics::direct_3d_11
 	class RenderTargetTexture : public core::graphics::RenderTargetTexture
 	{
 	private:
+		Direct3D11* direct_3d_;
 		core::graphics::direct_3d_11::Texture texture_;
 		com_ptr< ID3D11RenderTargetView > render_target_view_;
 
@@ -55,9 +37,7 @@ namespace core::graphics::direct_3d_11
 
 		ID3D11RenderTargetView* get_render_target_view() { return render_target_view_.get(); }
 
-		// override { return }
-
-		// void activate() override;
+		void activate() override;
 
 		// void clear( const game::Color& ) override;
 

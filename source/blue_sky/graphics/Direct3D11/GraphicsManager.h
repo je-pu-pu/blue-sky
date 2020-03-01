@@ -84,8 +84,6 @@ public:
 	RenderTargetTexture* create_render_target_texture() override;
 	BackBufferTexture* get_back_buffer_texture() override;
 
-	void set_render_target( core::graphics::RenderTarget* ) override;
-
 	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type ); }
 
 	// void unload_mesh( const char_t* ) override;

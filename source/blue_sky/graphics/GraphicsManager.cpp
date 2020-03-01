@@ -483,6 +483,11 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 	} );
 }
 
+void GraphicsManager::set_render_target( RenderTarget* render_target )
+{
+	render_target->activate();
+}
+
 void GraphicsManager::render_post_effect( RenderTargetTexture* t )
 {
 	/// @todo ŽÀ‘•‚·‚é

@@ -214,13 +214,13 @@
     <ClCompile Include="core\graphics\Direct3D11\BackBufferTexture.cpp">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Direct3D11\RenderTargetTexture.cpp">
-      <Filter>core\graphics\Direct3D11\Texture</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Texture.cpp">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClCompile>
     <ClCompile Include="ScriptManager.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\RenderTargetTexture.cpp">
+      <Filter>core\graphics\Direct3D11\Texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -561,9 +561,6 @@
     <ClInclude Include="core\graphics\Direct3D11\BackBufferTexture.h">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\Direct3D11\RenderTargetTexture.h">
-      <Filter>core\graphics\Direct3D11\Texture</Filter>
-    </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Texture.h">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClInclude>
@@ -605,6 +602,9 @@
     <ClInclude Include="core\graphics\RenderTargetTexture.h" />
     <ClInclude Include="core\graphics\BackBufferTexture.h" />
     <ClInclude Include="DelayedCommand.h" />
+    <ClInclude Include="core\graphics\Direct3D11\RenderTargetTexture.h">
+      <Filter>core\graphics\Direct3D11\Texture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

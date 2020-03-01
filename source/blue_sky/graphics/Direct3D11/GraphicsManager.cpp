@@ -78,11 +78,6 @@ GraphicsManager::BackBufferTexture* GraphicsManager::get_back_buffer_texture()
 	return direct_3d_->get_back_buffer_texture();
 }
 
-void GraphicsManager::set_render_target( core::graphics::RenderTarget* render_target )
-{
-	direct_3d_->set_render_target( static_cast< RenderTargetTexture* >( render_target ) );
-}
-
 
 #if 0
 /**

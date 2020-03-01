@@ -79,7 +79,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sam
 	DIRECT_X_RELEASE( dxgi_factory );
 
 	create_back_buffer_texture();
-	create_render_result_texture();
 
 	create_depth_stencil_view();
 	create_depth_texture();
@@ -136,8 +135,6 @@ Direct3D11::~Direct3D11()
 	{
 		delete input_layout.second;
 	}
-
-	render_result_texture_.reset();
 
 	depth_texture_.reset();
 
@@ -249,15 +246,6 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 void Direct3D11::create_back_buffer_texture()
 {
 	back_buffer_texture_.reset( new BackBufferTexture( this, swap_chain_ ) );
-}
-
-/**
- * レンダリング結果を保持するテクスチャを作成する
- *
- */
-void Direct3D11::create_render_result_texture()
-{
-	render_result_texture_.reset( new RenderTargetTexture( this, PixelFormat::R8G8B8A8_UNORM, swap_chain_desc_.BufferDesc.Width, swap_chain_desc_.BufferDesc.Height ) );
 }
 
 /**
@@ -626,7 +614,8 @@ void Direct3D11::on_resize( int w, int h )
 	) );
 
 	create_back_buffer_texture();
-	create_render_result_texture();
+
+	/// @todo 全ての RenderTargetTexture を再作成する？ ( 必要があるか要調査 )
 }
 
 /**
@@ -709,6 +698,12 @@ void Direct3D11::set_default_viewport()
  * @param texture レンダリング結果を書き込むテクスチャ
  */
 void Direct3D11::set_render_target( RenderTargetTexture* texture )
+{
+	ID3D11RenderTargetView* views[] = { texture->get_render_target_view() };
+	immediate_context_->OMSetRenderTargets( 1, views, depth_stencil_view_ );
+}
+
+void Direct3D11::set_render_target( BackBufferTexture* texture )
 {
 	ID3D11RenderTargetView* views[] = { texture->get_render_target_view() };
 	immediate_context_->OMSetRenderTargets( 1, views, depth_stencil_view_ );

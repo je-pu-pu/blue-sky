@@ -71,8 +71,6 @@ private:
 	ID3D11DepthStencilView*		depth_stencil_view_;
 	std::unique_ptr< Texture >	depth_texture_;
 
-	std::unique_ptr< RenderTargetTexture >	render_result_texture_;		///< レンダリング結果描画用テクスチャ
-
 	InputLayoutList				input_layout_list_;
 
 	D3D11_VIEWPORT				viewport_;
@@ -98,7 +96,6 @@ private:
 	void create_swap_chain( IDXGIFactory1*, HWND, uint_t, uint_t, bool, int, int );
 	
 	void create_back_buffer_texture();
-	void create_render_result_texture();
 
 	void create_depth_stencil_view();
 	void create_depth_texture();
@@ -151,6 +148,7 @@ public:
 	void set_default_viewport();
 
 	void set_render_target( RenderTargetTexture* );
+	void set_render_target( BackBufferTexture* );
 
 	void set_render_target_for_vr( ID3D11RenderTargetView*, ID3D11DepthStencilView* );
 

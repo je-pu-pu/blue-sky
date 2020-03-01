@@ -15,6 +15,7 @@ namespace core::graphics::direct_3d_11
 	{
 	private:
 		// @todo Texture と共通化する
+		Direct3D11*							direct_3d_;
 		com_ptr< ID3D11Texture2D >			texture_2d_;				///< 実際の 2D テクスチャデータ
 		com_ptr< ID3D11RenderTargetView >	render_target_view_;		///< シェーダーから利用するための View
 		D3D11_TEXTURE2D_DESC				texture_2d_desc_{};			///< 2D テクスチャについての説明
@@ -26,6 +27,8 @@ namespace core::graphics::direct_3d_11
 
 		uint_t get_multi_sample_count() const { return texture_2d_desc_.SampleDesc.Count; }
 		uint_t get_multi_sample_quality() const { return texture_2d_desc_.SampleDesc.Quality; }
+
+		void activate() override;
 	};
 
 } // namespace core::graphics::direct_3d_11

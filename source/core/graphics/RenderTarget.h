@@ -12,6 +12,10 @@ namespace core::graphics
 class RenderTarget
 {
 public:
+    RenderTarget() { }
+    virtual ~RenderTarget() { }
+
+    virtual void activate() = 0;
 
 }; // RenderTarget
 

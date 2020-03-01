@@ -604,6 +604,7 @@
     <ClInclude Include="core\graphics\ShaderResource.h" />
     <ClInclude Include="core\graphics\RenderTargetTexture.h" />
     <ClInclude Include="core\graphics\BackBufferTexture.h" />
+    <ClInclude Include="DelayedCommand.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

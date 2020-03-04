@@ -193,7 +193,7 @@ float3 common_skinning_norm( float3 norm, uint4 bone_index, float4 weight )
  */
 float4 common_sample_matcap( float3 norm )
 {
-	float2 uv = float2( norm.x * 0.5f + 0.5, 1.f - ( norm.y * 0.5f + 0.5 ) );
+	float2 uv = float2( norm.x * 0.5f + 0.5, 1.f - ( norm.y * 0.5f + 0.5f ) );
 	return matcap_texture.Sample( texture_sampler, uv );
 }
 

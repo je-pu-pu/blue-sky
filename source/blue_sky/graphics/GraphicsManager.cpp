@@ -283,6 +283,7 @@ GraphicsManager::Texture* GraphicsManager::get_texture( const char_t* name )
 /**
  * デフォルトのシェーダーを準備する
  *
+ * @todo スクリプトから行えるようにする
  * @todo 関数名直す
  */
 void GraphicsManager::setup_default_shaders()
@@ -299,6 +300,9 @@ void GraphicsManager::setup_default_shaders()
 	create_named_shader< shader::TessellationMatcapShader >( "tess_matcap" )->set_texture( matcap_texture );
 	create_named_shader< shader::SkinningTessellationMatcapShader >( "tess_matcap_skin" )->set_texture( matcap_texture );
 
+	auto post_effect_shader = create_named_shader< shader::post_effect::DefaultShader >( "post_effect_default" );
+	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_chromatic_aberrration", "main", "post_effect_chromatic_aberrration" );
+
 	create_named_shader< shader::DebugShadowMapTextureShader >( "debug_shadow_map_texture" );
 
 	shadow_map_shader_ = get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map" );
@@ -310,7 +314,7 @@ void GraphicsManager::setup_default_shaders()
 	fader_->set_shader_at( 0, create_named_shader< shader::FaderShader >( "fader" ) );
 
 	post_effect_rectangle_->set_mesh( rectangle );
-	post_effect_rectangle_->set_shader_at( 0, create_named_shader< shader::post_effect::DefaultShader >( "post_effect_default" ) );
+	set_post_effect_shader( post_effect_shader );
 }
 
 /**
@@ -488,9 +492,18 @@ void GraphicsManager::set_render_target( RenderTarget* render_target )
 	render_target->activate();
 }
 
+/**
+ * ポストエフェクト用のシェーダを設定する
+ *
+ * @param shader ポストエフェクト用のシェーダー
+ */
+void GraphicsManager::set_post_effect_shader( Shader* shader )
+{
+	post_effect_rectangle_->set_shader_at( 0, shader );
+}
+
 void GraphicsManager::render_post_effect( RenderTargetTexture* t )
 {
-	/// @todo 実装する
 	set_render_target( get_back_buffer_texture() );
 
 	post_effect_rectangle_->get_shader_at( 0 )->set_texture_at( 0, t );

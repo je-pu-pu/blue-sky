@@ -250,6 +250,7 @@ public:
 	virtual void render_shadow_map() const;
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
 
+	virtual void set_post_effect_shader( Shader* );
 	virtual void render_post_effect( RenderTargetTexture* );
 
 	Fader* get_fader() { return fader_.get(); }

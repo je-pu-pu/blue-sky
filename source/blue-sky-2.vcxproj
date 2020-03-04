@@ -245,6 +245,7 @@
     <None Include="blye-sky.ico" />
     <None Include="media\script\test\clone.lua" />
     <None Include="media\script\test\init.lua" />
+    <None Include="media\script\test\switch_post_effect_shader.lua" />
     <None Include="media\script\test\switch_shader.lua" />
     <None Include="media\shader\main.fx">
       <FileType>Document</FileType>
@@ -339,6 +340,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\post_effect\default.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="media\shader\post_effect\chromatic_aberration.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="media\shader\post_effect\common.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

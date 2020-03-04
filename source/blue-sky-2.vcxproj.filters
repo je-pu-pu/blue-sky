@@ -717,6 +717,9 @@
     <None Include="media\shader\post_effect\default.hlsl">
       <Filter>media\shader\post_effect</Filter>
     </None>
+    <None Include="media\shader\post_effect\common.hlsl" />
+    <None Include="media\shader\post_effect\chromatic_aberration.hlsl" />
+    <None Include="media\script\test\switch_post_effect_shader.lua" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Input">

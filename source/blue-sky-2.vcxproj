@@ -235,8 +235,6 @@
     <ClInclude Include="Scene\StoryTextScene.h" />
     <ClInclude Include="Scene\TitleScene.h" />
     <ClInclude Include="ScriptManager.h" />
-    <ClInclude Include="SkinningAnimation.h" />
-    <ClInclude Include="SkinningAnimationSet.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="blue-sky.config">

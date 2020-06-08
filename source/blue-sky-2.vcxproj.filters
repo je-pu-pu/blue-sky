@@ -357,8 +357,6 @@
     <ClInclude Include="core\math\DirectXMath\Vector2.h">
       <Filter>core\math\DirectXMath</Filter>
     </ClInclude>
-    <ClInclude Include="SkinningAnimation.h" />
-    <ClInclude Include="SkinningAnimationSet.h" />
     <ClInclude Include="core\graphics\PrimitiveTopology.h">
       <Filter>core\graphics</Filter>
     </ClInclude>

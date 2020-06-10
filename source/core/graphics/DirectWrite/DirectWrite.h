@@ -27,7 +27,8 @@ public:
 	explicit DirectWrite( IDXGISurface1* );
 	~DirectWrite();
 
-	FLOAT get_font_size() const { return 26.f; }
+	/** フォントサイズを変えられるようにする */
+	FLOAT get_font_size() const { return 64.f; }
 	FLOAT get_font_height() const;
 
 	void begin();

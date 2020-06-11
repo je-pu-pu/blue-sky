@@ -302,6 +302,7 @@ void GraphicsManager::setup_default_shaders()
 
 	auto post_effect_shader = create_named_shader< shader::post_effect::DefaultShader >( "post_effect_default" );
 	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_chromatic_aberrration", "main", "post_effect_chromatic_aberrration" );
+	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_hand_drawing", "main", "post_effect_hand_drawing" );
 
 	create_named_shader< shader::DebugShadowMapTextureShader >( "debug_shadow_map_texture" );
 

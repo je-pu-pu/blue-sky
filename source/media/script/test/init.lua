@@ -2,11 +2,11 @@ set_sky_box( "sky-box-3" )
 -- set_ground( "ground" )
 
 robot = create_object( "robot" )
-set_loc( robot, 2.5, 0, 0 )
+set_loc( robot, 1, 0, 0 )
 set_dir( robot, 180 )
 
 girl = create_object( "girl" )
-set_loc( girl, -2.5, 0, 0 )
+set_loc( girl, -1, 0, 0 )
 set_dir( girl, 180 )
 
 -- 
@@ -35,3 +35,13 @@ set_loc( o, 0, 1, 2 )
 -- モデルを FBX から読み込んでシェーダーを設定する
 o.model = load_model( "sphere-2" )
 o.model:set_shader_at( 0, s )
+
+function pe_on()
+	s = get_shader( "post_effect_hand_drawing" )
+	set_post_effect_shader( s )
+end
+
+function pe_off()
+	s = get_shader( "post_effect_default" )
+	set_post_effect_shader( s )
+end

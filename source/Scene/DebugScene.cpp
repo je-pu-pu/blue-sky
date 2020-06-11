@@ -104,6 +104,7 @@ void DebugScene::update()
 		}
 
 		get_graphics_manager()->get_frame_render_data()->data().tess_factor = math::clamp( get_graphics_manager()->get_frame_render_data()->data().tess_factor, 1.f, 8.f );
+		get_graphics_manager()->get_frame_render_data()->data().time = get_total_elapsed_time();
 	}
 
 	camera_->update();

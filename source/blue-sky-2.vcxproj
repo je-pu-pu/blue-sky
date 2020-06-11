@@ -349,6 +349,12 @@
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="media\shader\post_effect\hand_drawing.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5DB1FAFC-E068-43A8-84D3-0DA42D464BE5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

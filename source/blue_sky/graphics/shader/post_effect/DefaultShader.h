@@ -27,7 +27,15 @@ public:
 		: input_layout_( get_graphics_manager()->get_input_layout( input_layout_name ) )
 		, effect_technique_( get_graphics_manager()->get_effect_technique( effect_technique_name ) )
 	{
-
+		if ( ! input_layout_ )
+		{
+			COMMON_THROW_EXCEPTION_MESSAGE( string_t( "input layout \"" ) + input_layout_name +  "\" not found." );
+		}
+		
+		if ( ! effect_technique_ )
+		{
+			COMMON_THROW_EXCEPTION_MESSAGE( string_t( "effect technique \"" ) + effect_technique_name + "\"not found." );
+		}
 	}
 
 	DefaultShader* clone() const override { return new DefaultShader( *this ); }

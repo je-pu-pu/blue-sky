@@ -802,4 +802,7 @@
       <UniqueIdentifier>{9a23cbef-d0d5-4583-9292-4739d4b69c1c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="media\shader\post_effect\hand_drawing.hlsl" />
+  </ItemGroup>
 </Project>

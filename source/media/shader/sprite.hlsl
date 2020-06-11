@@ -39,7 +39,7 @@ float4 ps_sprite_ms( PS_FLAT_INPUT input ) : SV_Target
 
 	sprite_texture_ms.GetDimensions( texture_size.x, texture_size.y, samples );
 
-	return sprite_texture_ms.Load( int3( input.TexCoord * texture_size, 0 ), 0 );
+	return sprite_texture_ms.Load( input.TexCoord * texture_size, 0 );
 }
 
 // スプライト描画

@@ -4,7 +4,7 @@
 
 float4 ps_post_effect_chromatic_aberrration( COMMON_POS_UV input ) : SV_Target
 {
-	float2 h = ( 0.5f, 0.5f );
+	float2 h = float2( 0.5f, 0.5f );
 
 	return float4(
 		source_texture.Sample( texture_sampler, ( input.TexCoord - h ) * 1.00f + h ).r,

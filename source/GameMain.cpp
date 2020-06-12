@@ -130,6 +130,7 @@ GameMain::GameMain()
 	sound_manager_->load( "click" );
 
 	script_manager_ = new ScriptManager();
+	script_manager_->load_command_history( "log/script.log" );
 	setup_script_command();
 
 	active_object_manager_ = new ActiveObjectManager();
@@ -166,12 +167,7 @@ GameMain::~GameMain()
 
 	scene_.release();
 
-	std::ofstream of( "log/script.log", std::ofstream::app );
-
-	for ( const auto& c : get_script_manager()->get_command_history() )
-	{
-		of << c << '\n';
-	}
+	get_script_manager()->save_command_history( "log/script.log" );
 }
 
 /**

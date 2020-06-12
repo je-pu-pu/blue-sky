@@ -22,6 +22,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <queue>
+#include <fstream>
 
 namespace blue_sky
 {
@@ -135,6 +136,9 @@ public:
 
 	const std::deque< string_t >& get_command_history() const { return command_history_; }
 
+	void load_command_history( const string_t& );
+	void save_command_history( const string_t& );
+
 	const string_t& get_output() const { return output_; }
 };
 
@@ -236,6 +240,41 @@ inline void ScriptManager::exec( const string_t& script, bool add_history )
 	{
 		ScriptError e = result;
 		throw e;
+	}
+}
+
+/**
+ * コマンド履歴をファイルから読み込む
+ *
+ * @param file_path 読み込むファイルのパス
+ */
+inline void ScriptManager::load_command_history( const string_t& file_path )
+{
+	std::ifstream in( file_path );
+
+	while( ! in.eof() )
+	{
+		string_t command;
+		
+		in >> command;
+		command_history_.push_back( command );
+	}
+
+	command_history_index_ = command_history_.size() - 1;
+}
+
+/**
+ * コマンド履歴をファイルに書き出す
+ *
+ * @param file_path 書き出すファイルのパス
+ */
+inline void ScriptManager::save_command_history( const string_t& file_path )
+{
+	std::ofstream of( file_path );
+
+	for ( const auto& c : command_history_ )
+	{
+		of << c << '\n';
 	}
 }
 

@@ -42,6 +42,8 @@ public:
 	using Shader	= core::graphics::Shader;
 	using Texture	= core::graphics::Texture;
 
+	const int MAX_COMMAND_HISTORY_SIZE = 1000; ///< コマンド履歴の最大数
+
 private:
 	sol::state lua_;
 
@@ -139,6 +141,8 @@ public:
 	void load_command_history( const string_t& );
 	void save_command_history( const string_t& );
 
+	void truncate_command_history( int );
+
 	const string_t& get_output() const { return output_; }
 };
 
@@ -215,7 +219,7 @@ inline void ScriptManager::exec( const string_t& script, bool add_history )
 		command_history_index_ = command_history_.size();
 	}
 
-	if ( command_history_.size() > 100 )
+	if ( command_history_.size() > MAX_COMMAND_HISTORY_SIZE )
 	{
 		 command_history_.pop_front();
 	}
@@ -261,6 +265,8 @@ inline void ScriptManager::load_command_history( const string_t& file_path )
 	}
 
 	command_history_index_ = command_history_.size() - 1;
+
+	truncate_command_history( MAX_COMMAND_HISTORY_SIZE );
 }
 
 /**
@@ -276,6 +282,23 @@ inline void ScriptManager::save_command_history( const string_t& file_path )
 	{
 		of << c << '\n';
 	}
+}
+
+/**
+ * コマンド履歴の長さを切り詰める
+ *
+ * @param size 長さ
+ */
+inline void ScriptManager::truncate_command_history( int size )
+{
+	if ( command_history_.size() <= size )
+	{
+		return;
+	}
+
+	command_history_.erase( command_history_.begin(), command_history_.begin() + ( command_history_.size() - size ) );
+	
+	command_history_index_ = command_history_.size() - 1;
 }
 
 }

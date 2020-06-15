@@ -37,6 +37,8 @@ namespace core::graphics::direct_3d_11
 
 const Direct3D11::Color Direct3D11::DEFAULT_CLEAR_COLOR = Direct3D11::Color::Black;
 
+Direct3D11* Direct3D11::instance_ = nullptr;
+
 /**
  * コンストラクタ
  *
@@ -61,6 +63,8 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sam
 	, text_texture_mutex_11_( 0 )
 	, text_texture_mutex_10_( 0 )
 {
+	instance_ = this;
+
 	common::log( "log/d3d11.log", "init", false );
 
 	IDXGIFactory1* dxgi_factory = 0;

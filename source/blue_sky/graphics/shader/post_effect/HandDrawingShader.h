@@ -11,7 +11,21 @@ namespace blue_sky::graphics::shader::post_effect
  */
 class HandDrawingShader : public DefaultShader
 {
+public:
+	struct ConstantBufferData : public BaseConstantBufferData< 0 >
+	{
+		float_t UvFactor	= 20.f;		// UV ŒW”
+		float_t TimeFactor	= 10.f;		// ŠÔŒW”
+		float_t Gain1		= 0.001f;	// U• 1
+		float_t Gain2		= 0.0005f;	// U• 2
+		float_t Gain3		= 0.00025f;	// U• 3
+		float_t dummy[ 3 ];
+	};
+
+	using ConstantBuffer = blue_sky::ConstantBufferWithData< ConstantBufferData >;
+
 private:
+	ConstantBuffer constant_buffer_;
 
 public:
 	HandDrawingShader( const char_t* input_layout_name = "main", const char_t* effect_technique_name = "post_effect_hand_drawing" )
@@ -30,6 +44,9 @@ public:
 		get_frame_drawing_constant_buffer()->bind_to_all();
 		
 		get_object_constant_buffer()->bind_to_vs();
+
+		constant_buffer_.update();
+		constant_buffer_.bind_to_all();
 
 		get_texture_at( 0 )->bind_to_ps( 0 );
 	}

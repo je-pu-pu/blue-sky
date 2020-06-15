@@ -56,6 +56,8 @@ public:
 private:
 	static const Color DEFAULT_CLEAR_COLOR;
 
+	static Direct3D11* instance_;
+
 	com_ptr< IDXGIAdapter1 >	dxgi_adapter_;
 
 	/// @todo スマートポインタ ( com_ptr ) 化する？
@@ -111,6 +113,8 @@ private:
 public:
 	Direct3D11( HWND, int, int, bool, int = 0, int = 0 );
 	~Direct3D11();
+
+	inline static Direct3D11* get_instance() { return instance_; }
 	
 	/// OculusRift で使用
 	ID3D11RenderTargetView* create_render_target_view( ID3D11Texture2D* );

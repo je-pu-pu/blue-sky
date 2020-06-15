@@ -33,7 +33,7 @@ protected:
 	}
 
 public:
-	ConstantBuffer( Direct3D11* direct_3d )
+	ConstantBuffer( Direct3D11* direct_3d = Direct3D11::get_instance() )
 		: direct_3d_( direct_3d )
 		, constant_buffer_( 0 )
 	{
@@ -94,7 +94,7 @@ protected:
 	DataType data_;
 
 public:
-	ConstantBufferWithData( Direct3D11* direct_3d )
+	ConstantBufferWithData( Direct3D11* direct_3d = Direct3D11::get_instance() )
 		: ConstantBuffer( direct_3d )
 	{
 

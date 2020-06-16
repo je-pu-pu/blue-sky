@@ -50,6 +50,12 @@ public:
 
 		get_texture_at( 0 )->bind_to_ps( 0 );
 	}
+
+	float_t& getUvFactor() { return constant_buffer_.data().UvFactor; }
+	float_t& getTimeFactor() { return constant_buffer_.data().TimeFactor; }
+	float_t& getGain1() { return constant_buffer_.data().Gain1; }
+	float_t& getGain2() { return constant_buffer_.data().Gain2; }
+	float_t& getGain3() { return constant_buffer_.data().Gain3; }
 };
 
 

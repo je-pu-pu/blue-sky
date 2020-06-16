@@ -9,6 +9,7 @@
 #include <Input.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/shader/post_effect/HandDrawingShader.h>
 
 #include <core/graphics/Sprite.h>
 #include <core/graphics/RenderTargetTexture.h>
@@ -133,6 +134,14 @@ void DebugScene::update()
 
 	ImGui::InputText("string", s.data(), s.size());
 	ImGui::SliderFloat("float", & f, 0.0f, 1.0f);
+
+	auto* hand_drawing_shader = get_graphics_manager()->get_shader< graphics::shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing" );
+	ImGui::SliderFloat( "UvFactor", & hand_drawing_shader->getUvFactor(), 0.f, 100.f );
+	ImGui::SliderFloat( "TimeFactor", & hand_drawing_shader->getTimeFactor(), 0.f, 100.f );
+	ImGui::SliderFloat( "Gain1", & hand_drawing_shader->getGain1(), 0.00001f, 0.01f, "%.5f" );
+	ImGui::SliderFloat( "Gain2", & hand_drawing_shader->getGain2(), 0.00001f, 0.01f, "%.5f" );
+	ImGui::SliderFloat( "Gain3", & hand_drawing_shader->getGain3(), 0.00001f, 0.01f, "%.5f" );
+
 	ImGui::End();
 }
 

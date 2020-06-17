@@ -76,6 +76,9 @@ public:
 	explicit GraphicsManager( Direct3D* );
 	virtual ~GraphicsManager();
 
+	int get_screen_width() const override;		///< ‰æ–Ê‚Ì•‚ð•Ô‚·
+	int get_screen_height() const override;		///< ‰æ–Ê‚Ì‚‚³‚ð•Ô‚·
+
 	// void update() override;
 
 	void set_default_viewport() override;

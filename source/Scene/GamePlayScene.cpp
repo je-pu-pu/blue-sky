@@ -1628,7 +1628,7 @@ void GamePlayScene::render_text() const
 		}
 	}
 
-	get_graphics_manager()->draw_text( 10.f, 10.f, get_direct_3d()->get_width() - 10.f, get_direct_3d()->get_height() - 10.f, ss.str().c_str(), Direct3D::Color( 1.f, 0.95f, 0.95f, 1.f ) );
+	get_graphics_manager()->draw_text( 10.f, 10.f, get_graphics_manager()->get_screen_width() - 10.f, get_graphics_manager()->get_screen_height() - 10.f, ss.str().c_str(), Color( 1.f, 0.95f, 0.95f, 1.f ) );
 }
 
 /**

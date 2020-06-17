@@ -118,13 +118,12 @@ void DebugScene::update()
 	get_graphics_manager()->clear_debug_bullet();
 	get_physics_manager()->update( get_elapsed_time() );
 
-	static float f = 0.f;
-	static std::string s( 256, 0 );
+	ImGui::Begin( "HandDrawingShader params" );
 
-	ImGui::Begin("Hello, world!");
-
+	/*
 	ImGui::Text("Hello, world %d", 123);
-	if (ImGui::Button("Save"))
+	
+	if ( ImGui::Button( "Save" ) )
 	{
 		
 	}
@@ -132,8 +131,9 @@ void DebugScene::update()
 	static float my_color[ 4 ] = { 0.f };
 	ImGui::ColorEdit4("Color", my_color);
 
+	static std::string s( 256, 0 );
 	ImGui::InputText("string", s.data(), s.size());
-	ImGui::SliderFloat("float", & f, 0.0f, 1.0f);
+	*/
 
 	auto* hand_drawing_shader = get_graphics_manager()->get_shader< graphics::shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing" );
 	ImGui::SliderFloat( "UvFactor", & hand_drawing_shader->getUvFactor(), 0.f, 100.f );

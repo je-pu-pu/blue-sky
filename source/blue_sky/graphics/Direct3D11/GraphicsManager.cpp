@@ -58,6 +58,26 @@ GraphicsManager::~GraphicsManager()
 	
 }
 
+/**
+ * ‰æ–Ê‚Ì•‚ð•Ô‚·
+ *
+ * @return ‰æ–Ê‚Ì•
+ */
+int GraphicsManager::get_screen_width() const
+{
+	return direct_3d_->get_width();
+}
+
+/**
+ * ‰æ–Ê‚Ì‚‚³‚ð•Ô‚·
+ *
+ * @return ‰æ–Ê‚Ì‚‚³
+ */
+int GraphicsManager::get_screen_height() const
+{
+	return direct_3d_->get_height();
+}
+
 void GraphicsManager::set_default_viewport()
 {
 	direct_3d_->set_default_viewport();

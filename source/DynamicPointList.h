@@ -23,7 +23,7 @@ private:
 	bool changed_;
 
 public:
-	DynamicPointList( Direct3D* direct_3d )
+	DynamicPointList( Direct3D* direct_3d = Direct3D::get_instance() )
 		: direct_3d_( direct_3d )
 		, changed_( false )
 	{

@@ -1,3 +1,7 @@
+/**
+ * @todo get_direct_3d() の使用をやめて GraphicsManager を使うようにする。
+ */
+
 #include "StageSelectScene.h"
 
 #include "Input.h"

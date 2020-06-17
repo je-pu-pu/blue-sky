@@ -137,6 +137,9 @@ public:
 	GraphicsManager();
 	virtual ~GraphicsManager();
 
+	virtual int get_screen_width() const = 0;		///< ‰æ–Ê‚Ì•‚ð•Ô‚·
+	virtual int get_screen_height() const = 0;		///< ‰æ–Ê‚Ì‚‚³‚ð•Ô‚·
+
 	void setup_shadow_map( uint_t, uint_t );
 	void unset_shadow_map();
 

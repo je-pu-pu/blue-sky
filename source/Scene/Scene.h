@@ -21,6 +21,7 @@ namespace core
 	{
 		class Texture;
 
+		/// @todo íœ‚·‚é
 		namespace direct_3d_11
 		{
 			class Direct3D11;
@@ -63,6 +64,7 @@ public:
 	using PhysicsManager	= ActiveObjectPhysics;
 	using SoundManager		= core::SoundManager;
 
+	/// @todo íœ‚·‚é
 	using Direct3D			= core::graphics::direct_3d_11::Direct3D11;
 
 private:

@@ -1,5 +1,4 @@
 #include "AnimationPlayer.h"
-#include "GameMain.h"
 #include <core/type.h>
 
 namespace core
@@ -16,7 +15,7 @@ AnimationPlayer::AnimationPlayer( const SkinningAnimationSet* skinning_animation
 	, current_frame_( 0.f )
 	, is_looping_( false )
 	, is_broken_( false )
-	, constant_buffer_( blue_sky::GameMain::get_instance()->get_direct_3d() )
+	, constant_buffer_()
 {
 
 }

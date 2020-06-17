@@ -57,34 +57,34 @@ void DebugScene::update()
 
 	const float moving_speed = 0.1f;
 
-	if ( get_input()->press( Input::LEFT ) )
+	if ( get_input()->press( Input::Button::LEFT ) )
 	{
 		camera_->position() -= camera_->right() * moving_speed;
 	}
-	if ( get_input()->press( Input::RIGHT ) )
+	if ( get_input()->press( Input::Button::RIGHT ) )
 	{
 		camera_->position() += camera_->right() * moving_speed;
 	}
-	if ( get_input()->press( Input::UP ) )
+	if ( get_input()->press( Input::Button::UP ) )
 	{
 		camera_->position() += camera_->front() * moving_speed;
 	}
-	if ( get_input()->press( Input::DOWN ) )
+	if ( get_input()->press( Input::Button::DOWN ) )
 	{
 		camera_->position() -= camera_->front() * moving_speed;
 	}
-	if ( get_input()->press( Input::L ) )
+	if ( get_input()->press( Input::Button::L ) )
 	{
 		camera_->position() += camera_->up() * moving_speed;
 	}
-	if ( get_input()->press( Input::L2 ) )
+	if ( get_input()->press( Input::Button::L2 ) )
 	{
 		camera_->position() -= camera_->up() * moving_speed;
 	}
 
 	camera_->position().set_y( std::max( camera_->position().y(), 0.1f ) );
 
-	if ( get_input()->push( Input::A ) )
+	if ( get_input()->push( Input::Button::A ) )
 	{
 		city_generator_.step();
 
@@ -95,11 +95,11 @@ void DebugScene::update()
 
 	// tess test
 	{
-		if ( get_input()->press( Input::R2 ) )
+		if ( get_input()->press( Input::Button::R2 ) )
 		{
 			get_graphics_manager()->get_frame_render_data()->data().tess_factor -= 1 * get_elapsed_time();
 		}
-		if ( get_input()->press( Input::R ) )
+		if ( get_input()->press( Input::Button::R ) )
 		{
 			get_graphics_manager()->get_frame_render_data()->data().tess_factor += 1 * get_elapsed_time();
 		}
@@ -173,7 +173,7 @@ void DebugScene::render()
 	get_graphics_manager()->render_debug_axis( get_active_object_manager() );
 	get_graphics_manager()->render_debug_bullet();
 
-	if ( get_input()->press( Input::B ) )
+	if ( get_input()->press( Input::Button::B ) )
 	{
 		get_graphics_manager()->unset_depth_stencil();
 		get_graphics_manager()->resolve_depth_texture();

@@ -21,10 +21,10 @@ public:
 	{
 	public:
 		string_t name;
-		Texture* texture;
+		Texture* texture = nullptr;
 		win::Rect rect;
-		bool cleared;
-		bool completed;
+		bool cleared = false;
+		bool completed = false;
 	};
 
 	using StageList	= std::list< Stage* >;

@@ -755,17 +755,17 @@ void FbxFileLoader::load_animations_for_bone( int bone_index, FbxNode* node )
 				continue;
 			}
 
-			load_curve_for_animation( animation, Animation::CHANNEL_INDEX_TX, node->LclTranslation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_X ) );
-			load_curve_for_animation( animation, Animation::CHANNEL_INDEX_TY, node->LclTranslation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Y ) );
-			load_curve_for_animation( animation, Animation::CHANNEL_INDEX_TZ, node->LclTranslation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Z ) );
+			load_curve_for_animation( animation, Animation::ChannelIndex::TX, node->LclTranslation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_X ) );
+			load_curve_for_animation( animation, Animation::ChannelIndex::TY, node->LclTranslation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Y ) );
+			load_curve_for_animation( animation, Animation::ChannelIndex::TZ, node->LclTranslation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Z ) );
 
-			load_curve_for_animation( animation, Animation::CHANNEL_INDEX_RX, node->LclRotation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_X ) );
-			load_curve_for_animation( animation, Animation::CHANNEL_INDEX_RY, node->LclRotation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Y ) );
-			load_curve_for_animation( animation, Animation::CHANNEL_INDEX_RZ, node->LclRotation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Z ) );
+			load_curve_for_animation( animation, Animation::ChannelIndex::RX, node->LclRotation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_X ) );
+			load_curve_for_animation( animation, Animation::ChannelIndex::RY, node->LclRotation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Y ) );
+			load_curve_for_animation( animation, Animation::ChannelIndex::RZ, node->LclRotation.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Z ) );
 
-			load_curve_for_animation( animation, Animation::CHANNEL_INDEX_SX, node->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_X ) );
-			load_curve_for_animation( animation, Animation::CHANNEL_INDEX_SY, node->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Y ) );
-			load_curve_for_animation( animation, Animation::CHANNEL_INDEX_SZ, node->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Z ) );
+			load_curve_for_animation( animation, Animation::ChannelIndex::SX, node->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_X ) );
+			load_curve_for_animation( animation, Animation::ChannelIndex::SY, node->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Y ) );
+			load_curve_for_animation( animation, Animation::ChannelIndex::SZ, node->LclScaling.GetCurve( anim_layer, FBXSDK_CURVENODE_COMPONENT_Z ) );
 
 			/*
 			std::for_each(
@@ -785,9 +785,9 @@ void FbxFileLoader::load_animations_for_bone( int bone_index, FbxNode* node )
 			*/
 
 			const Animation::ChannelIndex rotate_channel_indexes[] = {
-				Animation::CHANNEL_INDEX_RX,
-				Animation::CHANNEL_INDEX_RY,
-				Animation::CHANNEL_INDEX_RZ
+				Animation::ChannelIndex::RX,
+				Animation::ChannelIndex::RY,
+				Animation::ChannelIndex::RZ
 			};
 
 			for ( int o = 0; o < 3; ++o )
@@ -799,9 +799,9 @@ void FbxFileLoader::load_animations_for_bone( int bone_index, FbxNode* node )
 			}
 
 			const Animation::ChannelIndex inverse_channel_indexes[] = {
-				Animation::CHANNEL_INDEX_TZ,
-				Animation::CHANNEL_INDEX_RX,
-				Animation::CHANNEL_INDEX_RY
+				Animation::ChannelIndex::TZ,
+				Animation::ChannelIndex::RX,
+				Animation::ChannelIndex::RY
 			};
 
 			for ( int o = 0; o < 3; ++o )

@@ -19,17 +19,17 @@ class Robot : public ActiveObject
 public:
 	using VectorArray	= std::vector< Vector >;
 
-	enum Mode
+	enum class Mode
 	{
-		MODE_STAND = 0,
-		MODE_ROTATION,
-		MODE_PATROL,
-		MODE_ATTENTION,
-		MODE_FIND,
-		MODE_CHASE,
-		MODE_SHUTDOWN,
-		MODE_FLOAT,
-		// MODE_DETOUR
+		STAND = 0,
+		ROTATION,
+		PATROL,
+		ATTENTION,
+		FIND,
+		CHASE,
+		SHUTDOWN,
+		FLOAT,
+		// DETOUR
 	};
 
 private:

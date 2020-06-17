@@ -66,27 +66,27 @@ Input::~Input()
 
 void Input::load_config( Config& config )
 {
-	key_code_[ ESCAPE ].push_back( VK_ESCAPE );
+	key_code_[ static_cast< int >( Button::ESCAPE ) ].push_back( VK_ESCAPE );
 
-	load_key_code_config( config, LEFT,  "input.key.left",  "A" );
-	load_key_code_config( config, RIGHT, "input.key.right", "D" );
-	load_key_code_config( config, UP,    "input.key.up",    "W" );
-	load_key_code_config( config, DOWN,  "input.key.down",  "S" );
+	load_key_code_config( config, Button::LEFT,  "input.key.left",  "A" );
+	load_key_code_config( config, Button::RIGHT, "input.key.right", "D" );
+	load_key_code_config( config, Button::UP,    "input.key.up",    "W" );
+	load_key_code_config( config, Button::DOWN,  "input.key.down",  "S" );
 	
-	load_key_code_config( config, A,     "input.key.a",     "MOUSE_L" );
-	load_key_code_config( config, B,     "input.key.b",     "MOUSE_R" );
-	load_key_code_config( config, JUMP,   "input.key.jump", "SPACE"   );
+	load_key_code_config( config, Button::A,     "input.key.a",     "MOUSE_L" );
+	load_key_code_config( config, Button::B,     "input.key.b",     "MOUSE_R" );
+	load_key_code_config( config, Button::JUMP,   "input.key.jump", "SPACE"   );
 
-	load_key_code_config( config, L,     "input.key.l",     "Q" );
-	load_key_code_config( config, R,     "input.key.r",     "E" );
-	load_key_code_config( config, L2,    "input.key.l2",    "Z" );
-	load_key_code_config( config, R2,    "input.key.r2",    "C" );
+	load_key_code_config( config, Button::L,     "input.key.l",     "Q" );
+	load_key_code_config( config, Button::R,     "input.key.r",     "E" );
+	load_key_code_config( config, Button::L2,    "input.key.l2",    "Z" );
+	load_key_code_config( config, Button::R2,    "input.key.r2",    "C" );
 
-	joystick_code_[ A ] = 1 << ( config.get( "input.joystick.a", 1 ) - 1 );
-	joystick_code_[ B ] = 1 << ( config.get( "input.joystick.b", 3 ) - 1 );
+	joystick_code_[ static_cast< int >( Button::A ) ] = 1 << ( config.get( "input.joystick.a", 1 ) - 1 );
+	joystick_code_[ static_cast< int >( Button::B ) ] = 1 << ( config.get( "input.joystick.b", 3 ) - 1 );
 	
-	joystick_code_[ L ] = 1 << ( config.get( "input.joystick.l", 5 ) - 1 );
-	joystick_code_[ R ] = 1 << ( config.get( "input.joystick.r", 6 ) - 1 );
+	joystick_code_[ static_cast< int >( Button::L ) ] = 1 << ( config.get( "input.joystick.l", 5 ) - 1 );
+	joystick_code_[ static_cast< int >( Button::R ) ] = 1 << ( config.get( "input.joystick.r", 6 ) - 1 );
 
 	joystick_axis_threshold_ = config.get( "input.joystick.axis.threshold", 0.25f );
 
@@ -100,7 +100,7 @@ void Input::load_config( Config& config )
 	joystick_y_sensitivity_ = config.get( "input.joystick.axis.y_sensitivity", 1.f );
 }
 
-void Input::load_key_code_config( Config& config, uint_t button, const char_t* name, const char_t* default_value )
+void Input::load_key_code_config( Config& config, Button button, const char_t* name, const char_t* default_value )
 {
 	std::string values = config.get( name, std::string( default_value ) );
 	std::stringstream ss;
@@ -117,11 +117,11 @@ void Input::load_key_code_config( Config& config, uint_t button, const char_t* n
 
 		if ( i != config_key_code_map_.end() )
 		{
-			key_code_[ button ].push_back( i->second );
+			key_code_[ static_cast< int >( button ) ].push_back( i->second );
 		}
 		else if ( key_code.size() == 1 )
 		{
-			key_code_[ button ].push_back( key_code.at( 0 ) );
+			key_code_[ static_cast< int >( button ) ].push_back( key_code.at( 0 ) );
 		}
 		else
 		{
@@ -135,7 +135,7 @@ void Input::load_key_code_config( Config& config, uint_t button, const char_t* n
  */
 void Input::update()
 {
-	for ( int n = 0; n < MAX_BUTTONS; n++ )
+	for ( int n = 0; n < static_cast< int >( Button::MAX ); n++ )
 	{
 		state_[ n ] <<= 1;
 
@@ -156,16 +156,16 @@ void Input::update()
 
 	if ( joystick_enabled_ && joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR )
 	{
-		if ( joy_info_.dwXpos <  0xFFFF / 4 * 1 ) state_[ LEFT  ] |= 1;
-		if ( joy_info_.dwXpos >= 0xFFFF / 4 * 3 ) state_[ RIGHT ] |= 1;
-		if ( joy_info_.dwYpos <  0xFFFF / 4 * 1 ) state_[ UP    ] |= 1;
-		if ( joy_info_.dwYpos >= 0xFFFF / 4 * 3 ) state_[ DOWN  ] |= 1;
+		if ( joy_info_.dwXpos <  0xFFFF / 4 * 1 ) state_[ static_cast< int >( Button::LEFT  ) ] |= 1;
+		if ( joy_info_.dwXpos >= 0xFFFF / 4 * 3 ) state_[ static_cast< int >( Button::RIGHT ) ] |= 1;
+		if ( joy_info_.dwYpos <  0xFFFF / 4 * 1 ) state_[ static_cast< int >( Button::UP    ) ] |= 1;
+		if ( joy_info_.dwYpos >= 0xFFFF / 4 * 3 ) state_[ static_cast< int >( Button::DOWN  ) ] |= 1;
 	
-		if ( joy_info_.dwButtons & joystick_code_[ A ] ) state_[ A ] |= 1;
-		if ( joy_info_.dwButtons & joystick_code_[ B ] ) state_[ B ] |= 1;
+		if ( joy_info_.dwButtons & joystick_code_[ static_cast< int >( Button::A ) ] ) state_[ static_cast< int >( Button::A ) ] |= 1;
+		if ( joy_info_.dwButtons & joystick_code_[ static_cast< int >( Button::B ) ] ) state_[ static_cast< int >( Button::B ) ] |= 1;
 	
-		if ( joy_info_.dwButtons & joystick_code_[ L ] ) state_[ L ] |= 1;
-		if ( joy_info_.dwButtons & joystick_code_[ R ] ) state_[ R ] |= 1;
+		if ( joy_info_.dwButtons & joystick_code_[ static_cast< int >( Button::L ) ] ) state_[ static_cast< int >( Button::L ) ] |= 1;
+		if ( joy_info_.dwButtons & joystick_code_[ static_cast< int >( Button::R ) ] ) state_[ static_cast< int >( Button::R ) ] |= 1;
 
 		mouse_dx_ += get_rate_by_joystick_axis_pos( * joystick_x_axis_pos_ ) * 0.01f * joystick_x_sensitivity_;
 		mouse_dy_ += get_rate_by_joystick_axis_pos( * joystick_y_axis_pos_ ) * 0.01f * joystick_y_sensitivity_;
@@ -176,7 +176,7 @@ void Input::update()
 
 void Input::update_null()
 {
-	for ( int n = 0; n < MAX_BUTTONS; n++ )
+	for ( int n = 0; n < static_cast< int >( Button::MAX ); n++ )
 	{
 		state_[ n ] <<= 1;
 	}
@@ -187,15 +187,15 @@ void Input::update_null()
  */
 void Input::update_common()
 {
-	if ( release( DOWN  ) ) arrow_pop( DOWN  );
-	if ( release( UP    ) ) arrow_pop( UP    );
-	if ( release( RIGHT ) ) arrow_pop( RIGHT );
-	if ( release( LEFT  ) ) arrow_pop( LEFT  );
+	if ( release( Button::DOWN  ) ) arrow_pop( Button::DOWN  );
+	if ( release( Button::UP    ) ) arrow_pop( Button::UP    );
+	if ( release( Button::RIGHT ) ) arrow_pop( Button::RIGHT );
+	if ( release( Button::LEFT  ) ) arrow_pop( Button::LEFT  );
 
-	if ( push( DOWN  ) ) arrow_push( DOWN  );
-	if ( push( UP    ) ) arrow_push( UP    );
-	if ( push( RIGHT ) ) arrow_push( RIGHT );
-	if ( push( LEFT  ) ) arrow_push( LEFT  );
+	if ( push( Button::DOWN  ) ) arrow_push( Button::DOWN  );
+	if ( push( Button::UP    ) ) arrow_push( Button::UP    );
+	if ( push( Button::RIGHT ) ) arrow_push( Button::RIGHT );
+	if ( push( Button::LEFT  ) ) arrow_push( Button::LEFT  );
 }
 
 /**

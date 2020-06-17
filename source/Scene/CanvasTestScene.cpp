@@ -53,45 +53,45 @@ void CanvasTestScene::update()
 	static float scale = 1.f;
 
 
-	if ( get_input()->press( Input::LEFT ) )
+	if ( get_input()->press( Input::Button::LEFT ) )
 	{
 		ry -= rs;
 	}
 
-	if ( get_input()->press( Input::RIGHT ) )
+	if ( get_input()->press( Input::Button::RIGHT ) )
 	{
 		ry += rs;
 	}
 
-	if ( get_input()->press( Input::UP ) )
+	if ( get_input()->press( Input::Button::UP ) )
 	{
 		rx -= rs;
 	}
 
-	if ( get_input()->press( Input::DOWN ) )
+	if ( get_input()->press( Input::Button::DOWN ) )
 	{
 		rx += rs;
 	}
 
-	if ( get_input()->press( Input::L ) )
+	if ( get_input()->press( Input::Button::L ) )
 	{
 		scale *= 0.98f;
 	}
 
-	if ( get_input()->press( Input::R ) )
+	if ( get_input()->press( Input::Button::R ) )
 	{
 		scale *= 1.02f;
 	}
 
 	scale = math::clamp( scale, 0.1f, 50.f );
 
-	if ( pen_mode_ == 1 && get_input()->release( Input::A ) || pen_mode_ == 2 )
+	if ( pen_mode_ == 1 && get_input()->release( Input::Button::A ) || pen_mode_ == 2 )
 	{
 		pen_color_ = Color( common::random( 0.f, 1.f ), common::random( 0.f, 1.f ), common::random( 0.f, 1.f ), 1.f );
 	}
 
 	{
-		if ( get_input()->press( Input::B ) )
+		if ( get_input()->press( Input::Button::B ) )
 		{
 			static float v = 0.f;
 
@@ -105,13 +105,13 @@ void CanvasTestScene::update()
 			pen_color_ = Color::from_hsv( v, 1.f, 1.f );
 		}
 
-		if ( get_input()->press( Input::L2 ) )
+		if ( get_input()->press( Input::Button::L2 ) )
 		{
 			pen_color_.r() -= 0.005f;
 			pen_color_.g() -= 0.005f;
 			pen_color_.b() -= 0.005f;
 		}
-		if ( get_input()->press( Input::R2 ) )
+		if ( get_input()->press( Input::Button::R2 ) )
 		{
 			pen_color_.r() += 0.005f;
 			pen_color_.g() += 0.005f;
@@ -119,7 +119,7 @@ void CanvasTestScene::update()
 		}
 	}
 
-	if ( get_input()->press( Input::A ) )
+	if ( get_input()->press( Input::Button::A ) )
 	{
 		const float dc = 0.02f;
 
@@ -179,7 +179,7 @@ void CanvasTestScene::update()
 	Vertex v
 	{
 		Vector3( vector.x(), vector.y(), vector.z() ),
-		get_input()->press( Input::A ) ? std::pow( tablet_->get_pressure(), 2 ) : 0.5f,
+		get_input()->press( Input::Button::A ) ? std::pow( tablet_->get_pressure(), 2 ) : 0.5f,
 		pen_color_
 	};
 
@@ -187,7 +187,7 @@ void CanvasTestScene::update()
 
 	points_->update_last_point( v, pos_comp );
 
-	if ( get_input()->press( Input::A ) )
+	if ( get_input()->press( Input::Button::A ) )
 	{
 		if ( tablet_->get_cursor_index() == 1 )
 		{

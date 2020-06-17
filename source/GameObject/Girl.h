@@ -15,14 +15,14 @@ class Girl : public ActiveObject
 {
 public:
 
-	enum Mode
+	enum class Mode
 	{
-		MODE_STAND = 0,
-		MODE_FLOAT,
+		STAND = 0,
+		FLOAT,
 	};
 
 private:
-	Mode			mode_ = MODE_STAND;			///< 現在の動作モード
+	Mode			mode_ = Mode::STAND;			///< 現在の動作モード
 	Vector			flicker_base_location_;
 
 	float get_collision_width() const override { return 0.5f; }

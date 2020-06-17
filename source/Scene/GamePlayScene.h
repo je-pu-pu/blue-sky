@@ -54,12 +54,12 @@ public:
 	using CommandCallList		= std::list< CommandCall >;
 	using DelayedCommandList	= std::list< DelayedCommand* >;
 
-	enum BalloonSoundType
+	enum class BalloonSoundType
 	{
-		BALLOON_SOUND_TYPE_NONE = 0,		// サウンドなし
-		BALLOON_SOUND_TYPE_MIX,				// サウンドを BGM とミックス
-		BALLOON_SOUND_TYPE_SOLO,			// BGM を消してサウンドのみ再生
-		BALLOON_SOUND_TYPE_SCALE,			// BGM を消して音階を再生
+		NONE = 0,				// サウンドなし
+		MIX,					// サウンドを BGM とミックス
+		SOLO,					// BGM を消してサウンドのみ再生
+		SCALE,					// BGM を消して音階を再生
 	};
 
 private:

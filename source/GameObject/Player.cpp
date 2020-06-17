@@ -35,7 +35,7 @@ Player::Player()
 	, is_flickering_( false )
 	, step_count_( 0 )
 	, step_speed_( 0.25f )
-	, action_mode_( ACTION_MODE_NONE )
+	, action_mode_( ActionMode::NONE )
 	, action_timer_( 0.f )
 	, is_action_pre_finish_( false )
 	, balloon_sequence_count_( 0 )
@@ -45,7 +45,7 @@ Player::Player()
 	, eye_height_( 1.5f )
 	, eye_depth_( 0.f )
 	, has_medal_( false )
-	, selected_item_type_( ITEM_TYPE_NONE )
+	, selected_item_type_( ItemType::NONE )
 	, last_footing_height_( 0.f )
 	, ladder_( nullptr )
 	, balloon_( nullptr )
@@ -83,7 +83,7 @@ void Player::restart()
 	step_count_ = 0;
 	step_speed_ = 0.25f;
 
-	set_action_mode( ACTION_MODE_NONE );
+	set_action_mode( ActionMode::NONE );
 
 	is_action_pre_finish_ = false;
 	balloon_sequence_count_ = 0;
@@ -96,13 +96,13 @@ void Player::restart()
 
 	has_medal_ = false;
 
-	for ( int n = 0; n < ITEM_TYPE_MAX; n++ )
+	for ( int n = 0; n < static_cast< int >( ItemType::MAX ); n++ )
 	{
 		item_count_[ n ] = 0;
 	}
-	item_count_[ ITEM_TYPE_SCOPE ] = 1;
+	item_count_[ static_cast< int >( ItemType::SCOPE ) ] = 1;
 
-	selected_item_type_ = ITEM_TYPE_NONE;
+	selected_item_type_ = ItemType::NONE;
 
 	ladder_ = nullptr;
 	balloon_ = nullptr;
@@ -132,14 +132,14 @@ void Player::update()
 
 	action_timer_ += get_frame_elapsed_time();
 
-	if ( action_mode_ == ACTION_MODE_BALLOON )
+	if ( action_mode_ == ActionMode::BALLOON )
 	{
 		set_velocity( Vector( get_velocity().x(), std::min( 3.f, math::chase( get_velocity().y(), 3.f, get_velocity().y() < 0.f ? 0.5f : 0.25f ) ), get_velocity().z() ) );
 
 		if ( get_location().y() - action_base_position_.y() >= get_balloon_action_length() )
 		{
 			play_sound( "balloon-burst" );
-			set_action_mode( ACTION_MODE_NONE );
+			set_action_mode( ActionMode::NONE );
 			is_jumping_ = true;
 			is_action_pre_finish_ = false;
 		}
@@ -148,7 +148,7 @@ void Player::update()
 			is_action_pre_finish_ = true;
 		}
 	}
-	else if ( action_mode_ == ACTION_MODE_ROCKET )
+	else if ( action_mode_ == ActionMode::ROCKET )
 	{
 		// ロケット
 		if ( ( get_location() - action_base_position_ ).length() >= get_rocket_action_length() || action_timer_ >= 2.5f )
@@ -180,7 +180,7 @@ void Player::update()
 	{
 		get_model()->get_line()->set_color( Color( 1.f, 0.f, 0.f, 0.f ) );
 
-		if ( ! is_dead() && ! is_on_footing() && ! is_on_ladder() && get_rigid_body()->getLinearVelocity().y() < -7.5f && get_location().y() > 10.f && get_location().y() < 30.f &&  get_action_mode() == ACTION_MODE_NONE )
+		if ( ! is_dead() && ! is_on_footing() && ! is_on_ladder() && get_rigid_body()->getLinearVelocity().y() < -7.5f && get_location().y() > 10.f && get_location().y() < 30.f &&  get_action_mode() == ActionMode::NONE )
 		{
 			play_sound( "fall", false, false );
 		}
@@ -211,7 +211,7 @@ void Player::update()
 			set_last_footing_height_to_current_height();
 		}
 
-		if ( action_mode_ != ACTION_MODE_BALLOON )
+		if ( action_mode_ != ActionMode::BALLOON )
 		{
 			balloon_sequence_count_ = 0;
 		}
@@ -294,7 +294,7 @@ void Player::update_jumpable()
 {
 	is_jumpable_ = false;
 
-	if ( action_mode_ == ACTION_MODE_BALLOON || action_mode_ == ACTION_MODE_ROCKET )
+	if ( action_mode_ == ActionMode::BALLOON || action_mode_ == ActionMode::ROCKET )
 	{
 		is_jumpable_ = true;
 		return;
@@ -575,7 +575,7 @@ void Player::update_can_throw()
  */
 void Player::update_step_speed()
 {
-	if ( action_mode_ == ACTION_MODE_BALLOON )
+	if ( action_mode_ == ActionMode::BALLOON )
 	{
 		step_speed_ = math::chase( step_speed_, get_max_walk_step_speed(), 0.01f );
 	}
@@ -632,7 +632,7 @@ void Player::update_step_speed()
  */
 bool Player::can_running() const
 {
-	return get_velocity().length() > 1.f && item_count_[ ITEM_TYPE_STONE ] < 3;
+	return get_velocity().length() > 1.f && item_count_[ static_cast< int >( ItemType::STONE ) ] < 3;
 }
 
 /**
@@ -641,7 +641,7 @@ bool Player::can_running() const
  */
 void Player::update_gravity()
 {
-	if ( action_mode_ == ACTION_MODE_BALLOON || action_mode_ == ACTION_MODE_ROCKET || ( is_on_ladder() && ! is_jumping() ) )
+	if ( action_mode_ == ActionMode::BALLOON || action_mode_ == ActionMode::ROCKET || ( is_on_ladder() && ! is_jumping() ) )
 	{
 		get_rigid_body()->setGravity( Vector::Zero );
 	}
@@ -795,7 +795,7 @@ void Player::jump()
 
 	is_jumping_ = true;
 
-	set_action_mode( ACTION_MODE_NONE );
+	set_action_mode( ActionMode::NONE );
 
 	stop_sound( "short-breath" );
 
@@ -883,7 +883,7 @@ void Player::stop_ladder_step()
 
 void Player::rocket( const Vector& direction )
 {
-	if ( get_item_count( ITEM_TYPE_ROCKET ) <= 0 )
+	if ( get_item_count( ItemType::ROCKET ) <= 0 )
 	{
 		return;
 	}
@@ -891,16 +891,16 @@ void Player::rocket( const Vector& direction )
 	is_jumping_ = true;
 	action_timer_ = 0.f;
 
-	set_action_mode( ACTION_MODE_ROCKET );
+	set_action_mode( ActionMode::ROCKET );
 	set_action_base_position_to_current_position();
 
 	set_velocity( direction * get_rocket_initial_velocity() );
 
-	item_count_[ ITEM_TYPE_ROCKET ]--;
+	item_count_[ static_cast< int >( ItemType::ROCKET ) ]--;
 
-	if ( item_count_[ ITEM_TYPE_ROCKET ] <= 0 )
+	if ( item_count_[ static_cast< int >( ItemType::ROCKET ) ] <= 0 )
 	{
-		selected_item_type_ = ITEM_TYPE_NONE;
+		selected_item_type_ = ItemType::NONE;
 	}
 
 	play_sound( "rocket" );
@@ -910,14 +910,14 @@ void Player::finish_rocketing()
 {
 	stop_sound( "rocket" );
 	play_sound( "rocket-burst" );
-	set_action_mode( ACTION_MODE_NONE );
+	set_action_mode( ActionMode::NONE );
 	is_jumping_ = true;
 	is_action_pre_finish_ = false;
 }
 
 void Player::throw_stone( const Vector& direction )
 {
-	if ( get_item_count( ITEM_TYPE_STONE ) <= 0 )
+	if ( get_item_count( ItemType::STONE ) <= 0 )
 	{
 		return;
 	}
@@ -929,11 +929,11 @@ void Player::throw_stone( const Vector& direction )
 	
 	Stone* stone = stone_list_.back();
 	stone_list_.pop_back();
-	item_count_[ ITEM_TYPE_STONE ]--;
+	item_count_[ static_cast< int >( ItemType::STONE ) ]--;
 
-	if ( item_count_[ ITEM_TYPE_STONE ] <= 0 )
+	if ( item_count_[ static_cast< int >( ItemType::STONE ) ] <= 0 )
 	{
-		selected_item_type_ = ITEM_TYPE_NONE;
+		selected_item_type_ = ItemType::NONE;
 	}
 
 	stone->restart();
@@ -1027,7 +1027,7 @@ void Player::on_collide_with( Balloon* balloon )
 	is_action_pre_finish_ = false;
 	*/
 
-	set_action_mode( ACTION_MODE_BALLOON );
+	set_action_mode( ActionMode::BALLOON );
 	set_action_base_position_to_current_position();
 
 	set_last_footing_height_to_current_height();
@@ -1040,16 +1040,16 @@ void Player::on_collide_with( Balloon* balloon )
 
 void Player::on_collide_with( Rocket* /* rocket */ )
 {
-	item_count_[ ITEM_TYPE_ROCKET ]++;
-	selected_item_type_ = ITEM_TYPE_ROCKET;
+	item_count_[ static_cast< int >( ItemType::ROCKET ) ]++;
+	selected_item_type_ = ItemType::ROCKET;
 
 	play_sound( "rocket-get" );
 }
 
 void Player::on_collide_with( Stone* stone )
 {
-	item_count_[ ITEM_TYPE_STONE ]++;
-	selected_item_type_ = ITEM_TYPE_STONE;
+	item_count_[ static_cast< int >( ItemType::STONE ) ]++;
+	selected_item_type_ = ItemType::STONE;
 
 	stone_list_.push_back( stone );
 
@@ -1079,7 +1079,7 @@ void Player::on_collide_with( Robot* robot )
 	}
 	*/
 
-	if ( robot->get_mode() != Robot::MODE_CHASE )
+	if ( robot->get_mode() != Robot::Mode::CHASE )
 	{
 		return;
 	}
@@ -1140,11 +1140,11 @@ void Player::set_action_mode( ActionMode action_mode )
 
 	/*
 	// 自動傘選択
-	if ( action_mode_ != ACTION_MODE_UMBRELLA && action_mode_ != ACTION_MODE_NONE )
+	if ( action_mode_ != ActionMode::UMBRELLA && action_mode_ != ActionMode::NONE )
 	{
-		if ( action_mode == ACTION_MODE_NONE && item_count_[ ITEM_TYPE_UMBRELLA ] && floor_cell() && is_if_fall_to_die( floor_cell()->height() ) )
+		if ( action_mode == ActionMode::NONE && item_count_[ ItemType::UMBRELLA ] && floor_cell() && is_if_fall_to_die( floor_cell()->height() ) )
 		{
-			action_mode = ACTION_MODE_UMBRELLA;
+			action_mode = ActionMode::UMBRELLA;
 		}
 	}
 	*/
@@ -1157,17 +1157,17 @@ void Player::set_action_mode( ActionMode action_mode )
 
 int Player::get_item_count( ItemType item_type ) const
 {
-	if ( item_type <= ITEM_TYPE_NONE ) return 0;
-	if ( item_type >= ITEM_TYPE_MAX ) return 0;
+	if ( item_type <= ItemType::NONE ) return 0;
+	if ( item_type >= ItemType::MAX ) return 0;
 
-	return item_count_[ item_type ];
+	return item_count_[ static_cast< int >( item_type ) ];
 }
 
 void Player::select_prev_item()
 {
-	for ( int type = static_cast< int >( selected_item_type_ ) - 1; type >= ITEM_TYPE_NONE; type-- )
+	for ( int type = static_cast< int >( selected_item_type_ ) - 1; type >= static_cast< int >( ItemType::NONE ); type-- )
 	{
-		if ( type == ITEM_TYPE_NONE || item_count_[ type ] )
+		if ( type == static_cast< int >( ItemType::NONE ) || item_count_[ type ] )
 		{
 			selected_item_type_ = static_cast< ItemType >( type );
 			play_sound( "click" );
@@ -1178,7 +1178,7 @@ void Player::select_prev_item()
 
 void Player::select_next_item()
 {
-	for ( int type = static_cast< int >( selected_item_type_ ) + 1; type < ITEM_TYPE_MAX; type++ )
+	for ( int type = static_cast< int >( selected_item_type_ ) + 1; type < static_cast< int >( ItemType::MAX ); type++ )
 	{
 		if ( item_count_[ type ] )
 		{
@@ -1195,14 +1195,14 @@ void Player::select_next_item()
  */
 void Player::switch_scope_mode()
 {
-	if ( action_mode_ == ACTION_MODE_SCOPE )
+	if ( action_mode_ == ActionMode::SCOPE )
 	{
-		set_action_mode( ACTION_MODE_NONE );
-		selected_item_type_ = ITEM_TYPE_NONE;
+		set_action_mode( ActionMode::NONE );
+		selected_item_type_ = ItemType::NONE;
 	}
 	else
 	{
-		action_mode_ = ACTION_MODE_SCOPE;
+		action_mode_ = ActionMode::SCOPE;
 	}
 }
 

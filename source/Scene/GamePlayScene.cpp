@@ -73,7 +73,7 @@ GamePlayScene::GamePlayScene( const GameMain* game_main )
 	, shadow_color_( Color( 0.f, 0.f, 0.f, 1.f ), 0.02f )
 	, shadow_paper_color_( Color( 0.9f, 0.9f, 0.9f, 1.f ), 0.02f )
 	, shading_enabled_( true )
-	, balloon_sound_type_( BALLOON_SOUND_TYPE_MIX )
+	, balloon_sound_type_( BalloonSoundType::MIX )
 	, is_blackout_( false )
 	, blackout_timer_( 0.f )
 {
@@ -1074,11 +1074,11 @@ void GamePlayScene::update()
 
 	// tess test
 	{
-		if ( get_input()->press( Input::L2 ) )
+		if ( get_input()->press( Input::Button::L2 ) )
 		{
 			get_graphics_manager()->get_frame_render_data()->data().tess_factor -= 1 * get_elapsed_time();
 		}
-		if ( get_input()->press( Input::R2 ) )
+		if ( get_input()->press( Input::Button::R2 ) )
 		{
 			get_graphics_manager()->get_frame_render_data()->data().tess_factor += 1 * get_elapsed_time();
 		}
@@ -1131,22 +1131,22 @@ void GamePlayScene::update_main()
 
 		if ( ! player_->is_ladder_step_only() )
 		{
-			if ( get_input()->press( Input::LEFT ) )
+			if ( get_input()->press( Input::Button::LEFT ) )
 			{
 				player_->side_step( -1.f );
 				is_moving = true;
 			}
-			if ( get_input()->press( Input::RIGHT ) )
+			if ( get_input()->press( Input::Button::RIGHT ) )
 			{
 				player_->side_step( +1.f );
 				is_moving = true;
 			}
-			if ( get_input()->press( Input::UP ) )
+			if ( get_input()->press( Input::Button::UP ) )
 			{
 				player_->step( +1.f );
 				is_moving = true;
 			}
-			if ( get_input()->press( Input::DOWN ) )
+			if ( get_input()->press( Input::Button::DOWN ) )
 			{
 				player_->step( -1.f );
 				is_moving = true;
@@ -1157,12 +1157,12 @@ void GamePlayScene::update_main()
 
 		if ( player_->is_on_ladder() )
 		{
-			if ( get_input()->press( Input::UP ) )
+			if ( get_input()->press( Input::Button::UP ) )
 			{
 				player_->ladder_step( +1.f );
 				is_moving_on_ladder = true;
 			}
-			if ( get_input()->press( Input::DOWN ) )
+			if ( get_input()->press( Input::Button::DOWN ) )
 			{
 				player_->ladder_step( -1.f );
 				is_moving_on_ladder = true;
@@ -1183,19 +1183,19 @@ void GamePlayScene::update_main()
 			player_->stop_ladder_step();
 		}
 
-		if ( get_input()->push( Input::A ) )
+		if ( get_input()->push( Input::Button::A ) )
 		{
 			switch ( player_->get_selected_item_type() )
 			{
-				case Player::ITEM_TYPE_NONE: player_->jump(); break;
-				case Player::ITEM_TYPE_ROCKET: player_->rocket( camera_->front() ); break;
-				case Player::ITEM_TYPE_STONE: player_->throw_stone( camera_->front() ); break;
-				// case Player::ITEM_TYPE_UMBRELLA: player_->start_umbrella_mode(); player_->jump(); break;
-				case Player::ITEM_TYPE_SCOPE:
+				case Player::ItemType::NONE: player_->jump(); break;
+				case Player::ItemType::ROCKET: player_->rocket( camera_->front() ); break;
+				case Player::ItemType::STONE: player_->throw_stone( camera_->front() ); break;
+				// case Player::ItemType::UMBRELLA: player_->start_umbrella_mode(); player_->jump(); break;
+				case Player::ItemType::SCOPE:
 				{
 					player_->switch_scope_mode();
 
-					if ( player_->get_action_mode() == Player::ACTION_MODE_SCOPE )
+					if ( player_->get_action_mode() == Player::ActionMode::SCOPE )
 					{
 						camera_->set_fov_target( camera_->get_fov_default() * 0.5f );
 						camera_->set_fov( camera_->get_fov_default() * 0.5f );
@@ -1204,11 +1204,11 @@ void GamePlayScene::update_main()
 				}
 			}
 		}
-		else if ( get_input()->push( Input::JUMP ) )
+		else if ( get_input()->push( Input::Button::JUMP ) )
 		{
 			player_->jump();
 		}
-		else if ( get_input()->press( Input::A ) || get_input()->press( Input::JUMP ) )
+		else if ( get_input()->press( Input::Button::A ) || get_input()->press( Input::Button::JUMP ) )
 		{
 			player_->clamber();
 		}
@@ -1219,7 +1219,7 @@ void GamePlayScene::update_main()
 
 		int wheel = get_input()->pop_mouse_wheel_queue();
 
-		if ( player_->get_action_mode() == Player::ACTION_MODE_SCOPE )
+		if ( player_->get_action_mode() == Player::ActionMode::SCOPE )
 		{
 			if ( wheel > 0 )
 			{
@@ -1264,7 +1264,7 @@ void GamePlayScene::update_main()
 	}
 	else
 	{
-		if ( get_input()->push( Input::A ) )
+		if ( get_input()->push( Input::Button::A ) )
 		{
 			restart();
 		}
@@ -1316,7 +1316,7 @@ void GamePlayScene::update_balloon_sound()
 
 	if ( balloon_sound_request >= 1 )
 	{
-		if ( balloon_sound_type_ == BALLOON_SOUND_TYPE_MIX || balloon_sound_type_ == BALLOON_SOUND_TYPE_SOLO )
+		if ( balloon_sound_type_ == BalloonSoundType::MIX || balloon_sound_type_ == BalloonSoundType::SOLO )
 		{
 			Sound* sound = get_sound_manager()->get_sound( "balloon" );
 
@@ -1325,7 +1325,7 @@ void GamePlayScene::update_balloon_sound()
 				sound->play( false );
 			}
 		}
-		else if ( balloon_sound_type_ == BALLOON_SOUND_TYPE_SCALE )
+		else if ( balloon_sound_type_ == BalloonSoundType::SCALE )
 		{
 			int r = math::clamp( balloon_sound_request, 1, 7 );
 			// int r = ( balloon_sound_request - 1 ) % 7 + 1;
@@ -1342,7 +1342,7 @@ void GamePlayScene::update_balloon_sound()
 		}
 	}
 
-	if ( player_->get_action_mode() == Player::ACTION_MODE_BALLOON && ( balloon_sound_type_ == BALLOON_SOUND_TYPE_SOLO || balloon_sound_type_ == BALLOON_SOUND_TYPE_SCALE ) )
+	if ( player_->get_action_mode() == Player::ActionMode::BALLOON && ( balloon_sound_type_ == BalloonSoundType::SOLO || balloon_sound_type_ == BalloonSoundType::SCALE ) )
 	{
 		action_bgm_after_timer_ = 2.f;
 	}
@@ -1746,7 +1746,7 @@ void GamePlayScene::render_far_billboards() const
  */
 void GamePlayScene::render_sprite( float_t ortho_offset ) const
 {
-	if ( player_->get_action_mode() == Player::ACTION_MODE_SCOPE )
+	if ( player_->get_action_mode() == Player::ActionMode::SCOPE )
 	{
 		get_graphics_manager()->set_input_layout( "main" );
 
@@ -1771,9 +1771,9 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 
 	render_technique( "|sprite", [this]
 	{
-		if ( player_->get_selected_item_type() == Player::ITEM_TYPE_ROCKET )
+		if ( player_->get_selected_item_type() == Player::ItemType::ROCKET )
 		{
-			for ( int n = 0; n < player_->get_item_count( Player::ITEM_TYPE_ROCKET ); n++ )
+			for ( int n = 0; n < player_->get_item_count( Player::ItemType::ROCKET ); n++ )
 			{
 				const int offset = n * 20;
 
@@ -1783,9 +1783,9 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				get_direct_3d()->get_sprite()->draw( dst_point, ui_texture_, src_rect.get_rect() );
 			}
 		}
-		else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_UMBRELLA )
+		else if ( player_->get_selected_item_type() == Player::ItemType::UMBRELLA )
 		{
-			for ( int n = 0; n < player_->get_item_count( Player::ITEM_TYPE_UMBRELLA ); n++ )
+			for ( int n = 0; n < player_->get_item_count( Player::ItemType::UMBRELLA ); n++ )
 			{
 				const float offset = n * 50.f;
 
@@ -1799,9 +1799,9 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				get_direct_3d()->get_sprite()->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 			}
 		}
-		else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_STONE )
+		else if ( player_->get_selected_item_type() == Player::ItemType::STONE )
 		{
-			for ( int n = player_->get_item_count( Player::ITEM_TYPE_STONE ) - 1; n >= 0; --n )
+			for ( int n = player_->get_item_count( Player::ItemType::STONE ) - 1; n >= 0; --n )
 			{
 				const int offset = n * 50;
 
@@ -1811,7 +1811,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				get_direct_3d()->get_sprite()->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 			}
 		}
-		else if ( player_->get_selected_item_type() == Player::ITEM_TYPE_SCOPE )
+		else if ( player_->get_selected_item_type() == Player::ItemType::SCOPE )
 		{
 			win::Rect src_rect = win::Rect::Size( 256, 256, 192, 140 );
 			win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - 5 );
@@ -1819,7 +1819,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 			get_direct_3d()->get_sprite()->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 		}
 
-		if ( player_->get_selected_item_type() == Player::ITEM_TYPE_ROCKET || ( player_->get_selected_item_type() == Player::ITEM_TYPE_STONE && player_->can_throw() ) )
+		if ( player_->get_selected_item_type() == Player::ItemType::ROCKET || ( player_->get_selected_item_type() == Player::ItemType::STONE && player_->can_throw() ) )
 		{
 			// aim
 			win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );

@@ -47,19 +47,19 @@ public:
 	 *
 	 * 上下左右と A, B, X, Y のボタンを持つ
 	 */
-	enum Button { LEFT, RIGHT, UP, DOWN, A, B, JUMP, L, R, L2, R2, ESCAPE, MAX_BUTTONS, NONE };
+	enum class Button { LEFT, RIGHT, UP, DOWN, A, B, JUMP, L, R, L2, R2, ESCAPE, MAX, NONE };
 
 	using Config				= game::Config;
 
 	using ButtonStack			= std::deque< Button >;
-	using ButtonCodeList		= std::array< unsigned int, MAX_BUTTONS >;
-	using ButtonCodeMultiList	= std::array< std::vector< int >, MAX_BUTTONS >;
+	using ButtonCodeList		= std::array< unsigned int, static_cast< int >( Button::MAX ) >;
+	using ButtonCodeMultiList	= std::array< std::vector< int >, static_cast< int >( Button::MAX ) >;
 	using ConfigKeyCodeMap		= std::unordered_map< std::string, int >;
 
 private:
 	const DirectInput* direct_input_;						///< DirectInput
 
-	unsigned int state_[ MAX_BUTTONS ];						///< 全てのボタンの状態
+	unsigned int state_[ static_cast< int >( Button::MAX ) ];						///< 全てのボタンの状態
 	ButtonStack arrow_stack_;								///< 最優先の方向ボタン
 
 	bool joystick_enabled_;									///< ジョイスティック有効フラグ
@@ -91,7 +91,7 @@ private:
 
 	ConfigKeyCodeMap config_key_code_map_;					///< コンフィグファイルのキー名 から GetAsyncKeyState() の引数に渡すキーへのマップ
 
-	void load_key_code_config( Config&, const uint_t, const char_t*, const char_t* );
+	void load_key_code_config( Config&, Button, const char_t*, const char_t* );
 	
 	void update_state_by_key_for( uint_t );
 
@@ -130,7 +130,7 @@ public:
 	 */
 	void clear( Button button )
 	{
-		state_[ button ] = 0;
+		state_[ static_cast< int >( button ) ] = 0;
 	}
 
 	/**
@@ -141,7 +141,7 @@ public:
 	 */
 	bool press( Button button ) const
 	{
-		return ( state_[ button ] & 1 ) > 0;
+		return ( state_[ static_cast< int >( button ) ] & 1 ) > 0;
 	}
 
 	/**
@@ -152,7 +152,7 @@ public:
 	 */
 	bool push( Button button ) const
 	{
-		return ( state_[ button ] & 1 ) > 0 && ( state_[ button ] & 2 ) == 0;
+		return ( state_[ static_cast< int >( button ) ] & 1 ) > 0 && ( state_[ static_cast< int >( button ) ] & 2 ) == 0;
 	}
 
 	/**
@@ -163,7 +163,7 @@ public:
 	 */
 	bool release( Button button ) const
 	{
-		return ( state_[ button ] & 1 ) == 0 && ( state_[ button ] & 2 ) > 0;
+		return ( state_[ static_cast< int >( button ) ] & 1 ) == 0 && ( state_[ static_cast< int >( button ) ] & 2 ) > 0;
 	}
 
 	/**
@@ -173,7 +173,7 @@ public:
 	 */
 	Button get_primary_arrow_button() const
 	{
-		if ( arrow_stack_.empty() ) return NONE;
+		if ( arrow_stack_.empty() ) return Button::NONE;
 
 		return arrow_stack_.back();
 	}

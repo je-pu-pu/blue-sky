@@ -20,8 +20,8 @@ namespace blue_sky
 Robot::Robot()
 	: player_( 0 )
 	, texture_( 0 )
-	, mode_( MODE_STAND )
-	, mode_backup_( MODE_STAND )
+	, mode_( Mode::STAND )
+	, mode_backup_( Mode::STAND )
 	, timer_( 0 )
 {
 	texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
@@ -38,7 +38,7 @@ void Robot::restart()
 	set_friction( 0.f );
 	set_mass( 50.f );
 
-	mode_ = MODE_STAND;
+	mode_ = Mode::STAND;
 	timer_ = 0;
 
 	texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
@@ -55,7 +55,7 @@ void Robot::update()
 {
 	get_rigid_body()->setActivationState( true );
 
-	if ( mode_ == MODE_CHASE )
+	if ( mode_ == Mode::CHASE )
 	{
 		// ターゲットの方を向く ( 表示上の向き )
 		chase_direction_to( player_->get_location(), 2.f );
@@ -96,7 +96,7 @@ void Robot::update()
 		{
 			if ( ! caluclate_target_visible() )
 			{
-				mode_ = MODE_ROTATION;
+				mode_ = Mode::ROTATION;
 				timer_ = 0.f;
 				play_sound( "robot-shutdown" );
 				stop_sound( "robot-chase" );
@@ -109,11 +109,11 @@ void Robot::update()
 			play_sound( "robot-chase", false, false );
 		}
 	}
-	else if ( mode_ == MODE_STAND || mode_ == MODE_ROTATION )
+	else if ( mode_ == Mode::STAND || mode_ == Mode::ROTATION )
 	{
 		set_velocity( Vector( 0.f, 0.f, 0.f ) );
 
-		if ( mode_ == MODE_ROTATION )
+		if ( mode_ == Mode::ROTATION )
 		{
 			set_direction_degree( get_direction_degree() + 0.25f );
 		}
@@ -123,18 +123,18 @@ void Robot::update()
 		if ( caluclate_target_visible() )
 		{
 			mode_backup_ = mode_;
-			mode_ = MODE_ATTENTION;
+			mode_ = Mode::ATTENTION;
 			timer_ = 0.f;
 
 			play_sound( "robot-found", false, false );
 			texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
 		}
 	}
-	else if ( mode_ == MODE_PATROL )
+	else if ( mode_ == Mode::PATROL )
 	{
 		update_patrol();
 	}
-	else if ( mode_ == MODE_ATTENTION )
+	else if ( mode_ == Mode::ATTENTION )
 	{
 		set_velocity( Vector( 0.f, 0.f, 0.f ) );
 
@@ -154,7 +154,7 @@ void Robot::update()
 		{
 			if ( caluclate_target_visible() )
 			{
-				mode_ = MODE_CHASE;
+				mode_ = Mode::CHASE;
 				timer_ = 0.f;
 				play_sound( "robot-chase-start", false, false );
 			}
@@ -168,7 +168,7 @@ void Robot::update()
 			}
 		}
 	}
-	else if ( mode_ == MODE_SHUTDOWN )
+	else if ( mode_ == Mode::SHUTDOWN )
 	{
 		set_velocity( get_velocity() * 0.5f );
 		texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
@@ -178,7 +178,7 @@ void Robot::update()
 			set_no_contact_response( true );
 		}
 	}
-	else if ( mode_ == MODE_FLOAT )
+	else if ( mode_ == Mode::FLOAT )
 	{
 		update_velocity_by_flicker( get_start_location(), get_flicker_scale() );
 
@@ -202,7 +202,7 @@ void Robot::update_patrol()
 
 	if ( current_patrol_point_ == patrol_point_list_.end() )
 	{
-		mode_ = MODE_STAND;
+		mode_ = Mode::STAND;
 		return;
 	}
 
@@ -244,15 +244,15 @@ void Robot::action( const string_t& s )
 
 	if ( s == "rotation" )
 	{
-		mode_ = MODE_ROTATION;
+		mode_ = Mode::ROTATION;
 	}
 	else if ( s == "patrol" )
 	{
-		mode_ = MODE_PATROL;
+		mode_ = Mode::PATROL;
 	}
 	else if ( s == "float" )
 	{
-		mode_ = MODE_FLOAT;
+		mode_ = Mode::FLOAT;
 	}
 }
 
@@ -365,7 +365,7 @@ bool Robot::caluclate_collide_object_to_swtich_off( const GameObject* )
 
 void Robot::shutdown()
 {
-	mode_ = MODE_SHUTDOWN;
+	mode_ = Mode::SHUTDOWN;
 
 	stop_sound( "robot-found" );
 	stop_sound( "robot-chase" );
@@ -379,12 +379,12 @@ void Robot::shutdown()
 
 void Robot::start_floating()
 {
-	mode_ = MODE_FLOAT;
+	mode_ = Mode::FLOAT;
 }
 
 void Robot::on_collide_with( Player* player )
 {
-	if ( mode_ != MODE_STAND && mode_ != MODE_ROTATION )
+	if ( mode_ != Mode::STAND && mode_ != Mode::ROTATION )
 	{
 		return;
 	}
@@ -400,7 +400,7 @@ void Robot::on_collide_with( Player* player )
 
 void Robot::on_collide_with( Stone* stone )
 {
-	if ( mode_ != MODE_STAND && mode_ != MODE_ROTATION )
+	if ( mode_ != Mode::STAND && mode_ != Mode::ROTATION )
 	{
 		return;
 	}

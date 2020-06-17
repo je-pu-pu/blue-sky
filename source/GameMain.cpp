@@ -310,7 +310,7 @@ bool GameMain::update()
 		oculus_rift_->update();
 	}
 
-	if ( input_->push( Input::ESCAPE ) )
+	if ( input_->push( Input::Button::ESCAPE ) )
 	{
 		if ( scene_->get_name() == "title" )
 		{

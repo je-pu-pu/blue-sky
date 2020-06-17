@@ -200,11 +200,11 @@ void StoryTextScene::update()
 
 	if ( ! text_.empty() )
 	{
-		if ( get_input()->press( Input::A ) )
+		if ( get_input()->press( Input::Button::A ) )
 		{
 			speed *= 8.f;
 		}
-		if ( get_input()->press( Input::B ) )
+		if ( get_input()->press( Input::Button::B ) )
 		{
 			speed *= 8.f;
 		}
@@ -220,7 +220,7 @@ void StoryTextScene::update()
 	{
 		if ( ! is_skipped_ )
 		{
-			if ( get_input()->push( Input::A ) || ! sound_->is_playing() )
+			if ( get_input()->push( Input::Button::A ) || ! sound_->is_playing() )
 			{
 				is_skipped_ = true;
 			}

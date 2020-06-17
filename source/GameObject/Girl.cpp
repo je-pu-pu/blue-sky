@@ -21,7 +21,7 @@ void Girl::restart()
 	set_angular_factor( 0 );
 	set_friction( 0 );
 
-	mode_ = MODE_STAND;
+	mode_ = Mode::STAND;
 
 	play_animation( "Stand", true, true );
 
@@ -34,7 +34,7 @@ void Girl::restart()
  */
 void Girl::update()
 {
-	if ( mode_ == MODE_FLOAT )
+	if ( mode_ == Mode::FLOAT )
 	{
 		set_velocity( Vector( 0.f, 0.f, 0.f ) );
 		update_velocity_by_flicker( flicker_base_location_, get_flicker_scale() );
@@ -54,7 +54,7 @@ void Girl::action( const string_t& s )
 
 	if ( s == "float" )
 	{
-		mode_ = MODE_FLOAT;
+		mode_ = Mode::FLOAT;
 	}
 }
 

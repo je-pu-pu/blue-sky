@@ -36,7 +36,7 @@ void Balloon::update()
 			set_location( player_->get_location() + player_->get_front() * 0.5f - player_->get_right() * 0.25f + Vector( 0, 1.75f, 0 ) );
 			set_direction_degree( 0 );
 
-			if ( player_->get_action_mode() != Player::ACTION_MODE_BALLOON )
+			if ( player_->get_action_mode() != Player::ActionMode::BALLOON )
 			{
 				kill();
 			}

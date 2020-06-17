@@ -13,22 +13,22 @@ namespace core
 class Animation
 {
 public:
-	enum ChannelIndex
+	enum class ChannelIndex
 	{
-		CHANNEL_INDEX_TX = 0,
-		CHANNEL_INDEX_TY,
-		CHANNEL_INDEX_TZ,
-		CHANNEL_INDEX_RX,
-		CHANNEL_INDEX_RY,
-		CHANNEL_INDEX_RZ,
-		CHANNEL_INDEX_SX,
-		CHANNEL_INDEX_SY,
-		CHANNEL_INDEX_SZ,
-		CHANNEL_INDEX_MAX
+		TX = 0,
+		TY,
+		TZ,
+		RX,
+		RY,
+		RZ,
+		SX,
+		SY,
+		SZ,
+		MAX
 	};
 
 	using Channel		= AnimationChannel;
-	using ChannelList	= std::array< Channel, CHANNEL_INDEX_MAX >;
+	using ChannelList	= std::array< Channel, static_cast< int >( ChannelIndex::MAX ) >;
 
 	using KeyFrame		= AnimationKeyFrame;
 	using KeyFrameList	= Channel::KeyFrameList;
@@ -46,12 +46,12 @@ public:
 
 	bool has_channel( ChannelIndex index ) const
 	{
-		return index >= 0 && static_cast< uint_t >( index ) < channel_list_.size();
+		return static_cast< int >( index ) >= 0 && static_cast< uint_t >( index ) < channel_list_.size();
 	}
 
-	Channel& get_channel( uint_t index )
+	Channel& get_channel( ChannelIndex index )
 	{
-		return channel_list_[ index ];
+		return channel_list_[ static_cast< int >( index ) ];
 	}
 
 	/**
@@ -69,7 +69,7 @@ public:
 			return default_value;
 		}
 
-		return channel_list_[ channel_index ].get_value( frame );
+		return channel_list_[ static_cast< int >( channel_index ) ].get_value( frame );
 	}
 
 	/**

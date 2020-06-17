@@ -74,7 +74,7 @@ void TitleScene::update()
 	sequence_elapsed_time_ += get_elapsed_time();
 	get_graphics_manager()->get_fader()->fade_in();
 
-	if ( get_input()->push( Input::A ) )
+	if ( get_input()->push( Input::Button::A ) )
 	{
 		if ( sequence_ == SEQUENCE_TITLE_FIX )
 		{

@@ -19,7 +19,7 @@ public:
 		float_t Gain1		= 0.001f;	// U• 1
 		float_t Gain2		= 0.0005f;	// U• 2
 		float_t Gain3		= 0.00025f;	// U• 3
-		float_t dummy[ 3 ];
+		float_t dummy[ 3 ]	= { 0.f };
 	};
 
 	using ConstantBuffer = blue_sky::ConstantBufferWithData< ConstantBufferData >;

@@ -14,23 +14,23 @@ namespace blue_sky
 class Player : public ActiveObject
 {
 public:
-	enum ActionMode
+	enum class ActionMode
 	{
-		ACTION_MODE_NONE = 0,
-		ACTION_MODE_BALLOON,
-		ACTION_MODE_ROCKET,
-		ACTION_MODE_UMBRELLA,
-		ACTION_MODE_SCOPE,
+		NONE = 0,
+		BALLOON,
+		ROCKET,
+		UMBRELLA,
+		SCOPE,
 	};
 
-	enum ItemType
+	enum class ItemType
 	{
-		ITEM_TYPE_NONE = -1,
-		ITEM_TYPE_ROCKET = 0,
-		ITEM_TYPE_UMBRELLA,
-		ITEM_TYPE_STONE,
-		ITEM_TYPE_SCOPE,
-		ITEM_TYPE_MAX
+		NONE = -1,
+		ROCKET = 0,
+		UMBRELLA,
+		STONE,
+		SCOPE,
+		MAX
 	};
 
 	using StoneList = std::list< Stone* >;
@@ -71,7 +71,7 @@ private:
 
 	bool		has_medal_;				///< メダル保持フラグ
 
-	int			item_count_[ ITEM_TYPE_MAX ] = { 0 };	///< 各アイテムの個数
+	int			item_count_[ static_cast< int >( ItemType::MAX ) ] = { 0 };	///< 各アイテムの個数
 	ItemType	selected_item_type_;	///< 現在選択中のアイテム
 
 	float		last_footing_height_;	///< 前回の足場の高さ ( バルーン含む )
@@ -212,7 +212,7 @@ public:
 	bool can_clamber() const { return can_clamber_; }
 	bool can_peer_down() const { return can_peer_down_; }
 	bool can_throw() const { return can_throw_; }
-	bool is_rocketing() const { return action_mode_ == ACTION_MODE_ROCKET; }
+	bool is_rocketing() const { return action_mode_ == ActionMode::ROCKET; }
 	bool is_flickering() const { return is_flickering_; }
 	bool can_running() const;
 

@@ -129,7 +129,7 @@ void EndingScene::update()
 		}
 	}
 
-	if ( get_input()->push( Input::A ) )
+	if ( get_input()->push( Input::Button::A ) )
 	{
 		if ( is_end )
 		{

@@ -90,7 +90,7 @@ void StageSelectScene::update()
 {
 	get_graphics_manager()->get_fader()->fade_in();
 
-	if ( get_input()->push( Input::A ) )
+	if ( get_input()->push( Input::Button::A ) )
 	{
 		if ( is_mouse_on_left_arrow() )
 		{
@@ -170,7 +170,7 @@ void StageSelectScene::render()
 
 		if ( stage == get_pointed_stage() )
 		{
-			if ( get_input()->press( Input::A ) )
+			if ( get_input()->press( Input::Button::A ) )
 			{
 				offset = 3;
 			}
@@ -249,7 +249,7 @@ void StageSelectScene::render()
 	{
 		win::Rect src_rect = cursor_src_rect_;
 
-		if ( get_input()->press( Input::A ) )
+		if ( get_input()->press( Input::Button::A ) )
 		{
 			src_rect.left() += 128;
 			src_rect.right() += 128;

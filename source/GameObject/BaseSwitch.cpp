@@ -6,7 +6,7 @@ namespace blue_sky
 {
 
 BaseSwitch::BaseSwitch()
-	: state_( OFF )
+	: state_( State::OFF )
 {
 	
 }
@@ -15,7 +15,7 @@ void BaseSwitch::restart()
 {
 	ActiveObject::restart();
 
-	state_ = OFF;
+	state_ = State::OFF;
 	contact_object_cache_.clear();
 }
 
@@ -66,12 +66,12 @@ void BaseSwitch::on_collide_with( Stone* stone )
 
 bool_t BaseSwitch::do_switch()
 {
-	if ( state_ == BROKEN )
+	if ( state_ == State::BROKEN )
 	{
 		return false;
 	}
 
-	if ( state_ == ON )
+	if ( state_ == State::ON )
 	{
 		if ( turn_off() )
 		{
@@ -79,7 +79,7 @@ bool_t BaseSwitch::do_switch()
 			return true;
 		}
 	}
-	else if ( state_ == OFF )
+	else if ( state_ == State::OFF )
 	{
 		if ( turn_on() )
 		{
@@ -93,12 +93,12 @@ bool_t BaseSwitch::do_switch()
 
 bool_t BaseSwitch::do_break()
 {
-	if ( state_ == BROKEN )
+	if ( state_ == State::BROKEN )
 	{
 		return false;
 	}
 
-	state_ = BROKEN;
+	state_ = State::BROKEN;
 
 	on_break();
 
@@ -107,12 +107,12 @@ bool_t BaseSwitch::do_break()
 
 bool_t BaseSwitch::turn_on()
 {
-	if ( state_ == ON )
+	if ( state_ == State::ON )
 	{
 		return false;
 	}
 
-	state_ = ON;
+	state_ = State::ON;
 
 	on_turn_on();
 
@@ -121,12 +121,12 @@ bool_t BaseSwitch::turn_on()
 
 bool_t BaseSwitch::turn_off()
 {
-	if ( state_ == OFF )
+	if ( state_ == State::OFF )
 	{
 		return false;
 	}
 
-	state_ = OFF;
+	state_ = State::OFF;
 
 	on_turn_off();
 

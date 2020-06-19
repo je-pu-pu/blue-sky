@@ -14,7 +14,7 @@ namespace blue_sky
 class BaseSwitch : public ActiveObject
 {
 public:
-	enum State { OFF = 0, ON, BROKEN };
+	enum class State { OFF = 0, ON, BROKEN };
 
 	using EventHandlerList	= std::list< EventHandler >;
 	using EventHandlerMap	= std::unordered_map< string_t, EventHandlerList >;

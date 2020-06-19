@@ -31,7 +31,7 @@ public:
 		static const int SLOT = 10;
 
 		Matrix shadow_view_projection[ 3 ];
-		float_t view_depth_per_cascade_level[ 4 ];
+		float_t view_depth_per_cascade_level[ 4 ] = { 0.f };
 	};
 
 	using ConstantBuffer = core::graphics::direct_3d_11::ConstantBufferWithData< ConstantBufferData >;

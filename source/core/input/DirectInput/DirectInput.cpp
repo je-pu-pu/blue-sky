@@ -10,6 +10,7 @@
 DirectInput::DirectInput( HINSTANCE hinstance, HWND hwnd )
 	: direct_input_( 0 )
 	, mouse_device_( 0 )
+	, mouse_state_( { 0 } )
 {
 	DIRECT_X_FAIL_CHECK( DirectInput8Create( hinstance, DIRECTINPUT_VERSION, IID_IDirectInput8, reinterpret_cast< void** >( & direct_input_ ), 0 ) );
 

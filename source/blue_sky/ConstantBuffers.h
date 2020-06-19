@@ -26,7 +26,7 @@ struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
 	Vector light;
 
 	float_t time = 0.f;
-	u32_t time_beat;
+	u32_t time_beat = 0;
 	float_t tess_factor = 1.f;
 	float_t dummy = 0.f;
 };

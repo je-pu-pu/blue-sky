@@ -9,6 +9,7 @@ namespace blue_sky::graphics
 Line::Line()
 	: color_( 0.f, 0.f, 0.f, 0.f )
 	, is_cast_shadow_( false )
+	, index_size_( 0 )
 {
 
 }

@@ -60,7 +60,7 @@ protected:
 
 	virtual void limit_velocity();
 
-	float get_max_speed() const { return 20.f; }
+	constexpr float get_max_speed() const { return 20.f; }
 
 public:
 	ActiveObject();

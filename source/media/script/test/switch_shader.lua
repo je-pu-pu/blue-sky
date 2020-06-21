@@ -21,9 +21,11 @@ t2 = load_texture( "media/texture/matcap/skin.png" )
 
 s1:set_texture_at( 0, t1 )
 g1.model:set_shader_at( 0, s1 )
+g1.model:set_shader_at( 2, s1 )
 
 s2:set_texture_at( 0, t2 )
 g2.model:set_shader_at( 0, s2 )
+g2.model:set_shader_at( 2, s2 )
 
 
 function switch_texture( file_name )

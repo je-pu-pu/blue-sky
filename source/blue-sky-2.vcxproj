@@ -169,6 +169,7 @@
     <ClInclude Include="core\graphics\InputLayout.h" />
     <ClInclude Include="core\graphics\Mesh.h" />
     <ClInclude Include="core\graphics\Model.h" />
+    <ClInclude Include="core\graphics\NullTexture.h" />
     <ClInclude Include="core\graphics\PrimitiveTopology.h" />
     <ClInclude Include="core\graphics\RenderTarget.h" />
     <ClInclude Include="core\graphics\RenderTargetTexture.h" />

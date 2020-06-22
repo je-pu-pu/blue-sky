@@ -603,6 +603,7 @@
     <ClInclude Include="core\graphics\Direct3D11\RenderTargetTexture.h">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClInclude>
+    <ClInclude Include="core\graphics\NullTexture.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

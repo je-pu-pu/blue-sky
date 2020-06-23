@@ -23,6 +23,7 @@
 #include <core/graphics/ShadowMap.h>
 
 #include <core/graphics/Shader.h>
+#include <core/graphics/NullTexture.h>
 #include <core/graphics/RenderTargetTexture.h>
 #include <core/graphics/BackBufferTexture.h>
 
@@ -39,8 +40,9 @@ namespace blue_sky::graphics
 GraphicsManager::GraphicsManager()
 	: fader_( std::make_unique< Fader >() )
 	, post_effect_rectangle_( std::make_unique< Model >() )
+	, null_texture_( texture_manager_.create< core::graphics::NullTexture >() )
 {
-
+	
 }
 
 GraphicsManager::~GraphicsManager()

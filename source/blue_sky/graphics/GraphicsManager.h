@@ -108,6 +108,8 @@ private:
 	TextureManager				texture_manager_;
 	SkinningAnimationSetManager skinning_animation_set_manager_;
 
+	Texture*					null_texture_ = 0;
+
 	mutable const ConstantBuffer* current_object_constant_buffer_ = 0;
 	mutable const ConstantBuffer* current_skinning_constant_buffer_ = 0;
 
@@ -186,6 +188,7 @@ public:
 	Texture* load_texture( const char_t* file_name ) { return load_named_texture( file_name, file_name ); }
 	Texture* load_named_texture( const char_t* name, const char_t* file_name );
 	Texture* get_texture( const char_t* name );
+	Texture* get_null_texture() { return null_texture_; }
 
 	void setup_default_shaders();
 	void load_paper_textures();

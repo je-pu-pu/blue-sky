@@ -24,7 +24,8 @@ protected:
 
 public:
 	FlatShader( const char_t* input_layout_name = "main", const char_t* effect_technique_name = "flat" )
-		: input_layout_( get_graphics_manager()->get_input_layout( input_layout_name ) )
+		: texture_( get_graphics_manager()->get_null_texture() )
+		, input_layout_( get_graphics_manager()->get_input_layout( input_layout_name ) )
 		, effect_technique_( get_graphics_manager()->get_effect_technique( effect_technique_name ) )
 	{
 
@@ -49,11 +50,9 @@ public:
 			get_skining_constant_buffer()->bind_to_vs();
 		}
 
-		/// @tood NullTexture “I‚È‚à‚Ì‚ğì‚Á‚Ä if ‚ğ‚È‚­‚·
-		if ( texture_ )
-		{
-			texture_->bind_to_ps( 0 );
-		}
+		texture_->bind_to_ps( 0 );
+
+		get_graphics_manager()->bind_paper_texture();
 	}
 
 	void render( const Mesh* mesh, uint_t n ) const override

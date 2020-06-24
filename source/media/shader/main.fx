@@ -325,9 +325,24 @@ float4 ps_main_wrap( PS_INPUT input ) : SV_Target
 	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ); // /* + input.Color */ * float4( input.Normal, 1.f );
 }
 
+/**
+ * 陰影なし、スキニングあり、影なしのシェーダー
+ */
 float4 ps_skin_wrap_flat( PS_INPUT input ) : SV_Target
 {
 	return model_texture.Sample( wrap_texture_sampler, input.TexCoord );
+}
+
+/**
+ * 陰影なし、スキニングあり、影なし + 紙の質感のシェーダー
+ */
+float4 ps_skin_wrap_flat_paper( PS_INPUT input ) : SV_Target
+{
+	float4 model_color = model_texture.Sample( wrap_texture_sampler, input.TexCoord );
+	float4 paper_color = sample_paper_texture( input.Position.xy );
+	float paper_factor = 0.25f;
+
+	return float4( lerp( model_color.rgb, paper_color.rgb, float3( 1.f - paper_color.a, 1.f - paper_color.a , 1.f - paper_color.a ) * paper_factor ), model_color.a );
 }
 
 float4 ps_main_wrap_flat( PS_FLAT_INPUT input ) : SV_Target
@@ -546,6 +561,7 @@ technique11 flat_skin
 		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, ps_skin_wrap_flat() ) );
+		// SetPixelShader( CompileShader( ps_4_0, ps_skin_wrap_flat_paper() ) );
 
 		RASTERIZERSTATE = Default;
     }

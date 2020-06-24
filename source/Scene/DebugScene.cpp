@@ -32,6 +32,7 @@ DebugScene::DebugScene( const GameMain* game_main )
 	get_physics_manager()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
 
 	get_graphics_manager()->setup_default_shaders();
+	get_graphics_manager()->load_paper_textures();
 
 	camera_->position().set( 0.f, 1.5f, -10.f, 1.f );
 

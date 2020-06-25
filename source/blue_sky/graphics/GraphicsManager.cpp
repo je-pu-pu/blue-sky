@@ -506,6 +506,11 @@ void GraphicsManager::set_post_effect_shader( Shader* shader )
 	post_effect_rectangle_->set_shader_at( 0, shader );
 }
 
+/**
+ * ポストエフェクトをレンダリングする
+ *
+ * @param t ポストエフェクト適用対象のレンダリング後テクスチャ
+ */
 void GraphicsManager::render_post_effect( RenderTargetTexture* t )
 {
 	set_render_target( get_back_buffer_texture() );

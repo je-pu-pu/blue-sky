@@ -27,7 +27,7 @@ public:
 	using Mesh			= graphics::Mesh;
 	using VertexGroup	= core::graphics::VertexGroup;
 
-	/// 道路タイルの中心を指すコントロールポイント
+	// 道路タイル
 	struct RoadNode
 	{
 		enum class Type
@@ -69,6 +69,7 @@ public:
 		}
 	};
 
+	/// 道路タイルの中心を指すコントロールポイント
 	struct RoadControlPoint
 	{
 		enum class Type
@@ -91,6 +92,9 @@ public:
 			, node( n )
 		{ }
 
+		/**
+		 * 現在伸びている方向から見て後ろに数えて行き、必要な直線タイル分伸びていれば、交差点になれると返す
+		 */
 		bool is_crossable() const
 		{			
 			auto straight_road_count = 0;
@@ -119,9 +123,16 @@ private:
 	RoadControlPointList road_control_point_list_;
 
 protected:
+	/// 道 1 タイル分の幅 ( m )
 	static constexpr float_t get_road_width() { return 8.f; }
+
+	// 道 1 タイル分の奥行 ( m )
 	static constexpr float_t get_road_depth() { return 8.f; }
+
+	// 交差点ではなく、まっすぐな道が何タイル続くか
 	static constexpr int_t get_required_straight_road_count() { return 5; }
+
+	void format_crossroad();
 
 	void extend_road( const Vector&, const Vector&, const Vector&, float_t, int_t, int_t );
 	void generate_road_mesh();

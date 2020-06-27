@@ -53,8 +53,8 @@ void CityGenerator::step()
 		const auto road_count = std::count_if( road_node_list_.begin(), road_node_list_.end(), [=] ( const auto& n ) { return ( n.position - cp.position ).length() <= get_road_width() * get_required_straight_road_count(); } );
 		const auto is_corss_near = std::any_of( road_node_list_.begin(), road_node_list_.end(), [=] ( const auto& n ) { return n.type == RoadNode::Type::CROSS && ( n.position - cp.position ).length() <= get_road_width() * get_required_straight_road_count(); } );
 
-		// if ( common::random( 0, 5 ) == 0 && cp.is_crossable() )
-		if ( road_count == get_required_straight_road_count() && ! is_corss_near )
+		if ( common::random( 0, 5 ) == 0 && cp.is_crossable() )
+		// if ( road_count == get_required_straight_road_count() && ! is_corss_near )
 		{
 			type = RoadNode::Type::CROSS;
 		}
@@ -95,10 +95,21 @@ void CityGenerator::step()
 
 	road_control_point_list_.insert( road_control_point_list_.end(), new_cps.begin(), new_cps.end() );
 
+
+	format_crossroad();
+
 	generate_road_mesh();
 
 	model_->get_mesh()->create_vertex_buffer();
 	model_->get_mesh()->create_index_buffer();
+}
+
+/**
+ * Œğ·‚µ‚½“¹˜H‚ğ®Œ`‚·‚é
+ */
+void CityGenerator::format_crossroad()
+{
+
 }
 
 #if 0

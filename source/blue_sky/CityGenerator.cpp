@@ -8,6 +8,8 @@
 
 #include <common/random.h>
 
+#include <iostream>
+
 namespace blue_sky
 {
 
@@ -109,7 +111,16 @@ void CityGenerator::step()
  */
 void CityGenerator::format_crossroad()
 {
-
+	for ( auto i = road_node_list_.begin(); i != road_node_list_.end(); ++i )
+	{
+		for ( auto j = i + 1; j != road_node_list_.end(); ++j )
+		{
+			if ( i->is_collition_with( *j ) )
+			{
+				std::cout << i->position.x() << ", " << i->position.y() << ", " << i->position.z() << std::endl;
+			}
+		}
+	}
 }
 
 #if 0

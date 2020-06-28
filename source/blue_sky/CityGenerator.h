@@ -67,6 +67,16 @@ public:
 			
 			front_node = nullptr;
 		}
+
+		/**
+		 * 指定したノードと衝突しているかを返す
+		 *
+		 * @parma node ノード
+		 */
+		bool is_collition_with( const RoadNode& )
+		{
+			return true;
+		}
 	};
 
 	/// 道路タイルの中心を指すコントロールポイント

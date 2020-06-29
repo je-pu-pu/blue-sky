@@ -2,7 +2,9 @@
 
 #include "Vector3.h"
 #include <DirectXMath.h>
-#include <stdlib.h>
+// #include <stdlib.h>
+
+#include <ostream>
 
 class btVector3;
 
@@ -85,6 +87,11 @@ public:
 	friend Vector& operator -= ( Vector& v1, const Vector& v2 ) { v1 = v1 - v2; return v1; }
 	friend Vector& operator *= ( Vector& v, UnitType x ) { v = v * x; return v; }
 	friend Vector& operator /= ( Vector& v, UnitType x ) { v = v / x; return v; }
+
+	friend std::ostream& operator << ( std::ostream& out, const Vector& v )
+	{
+	    return out << "( " << v.x() << ", " << v.y() << ", " << v.z() << " )";
+	}
 
 	UnitType dot( const Vector& v2 ) const { return DirectX::XMVectorGetX( DirectX::XMVector3Dot( value_, v2.value_ ) ); }
 	Vector cross( const Vector& v2 ) const { return Vector( DirectX::XMVector3Cross( value_, v2.value_ ) ); }

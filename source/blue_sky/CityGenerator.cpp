@@ -117,7 +117,7 @@ void CityGenerator::format_crossroad()
 		{
 			if ( i->is_collition_with( *j ) )
 			{
-				std::cout << i->position.x() << ", " << i->position.y() << ", " << i->position.z() << std::endl;
+				std::cout << i->position << std::endl;
 			}
 		}
 	}

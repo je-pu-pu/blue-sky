@@ -5,6 +5,7 @@
 #include <GameMain.h>
 
 #include <blue_sky/type.h>
+#include <core/math/LineSegment2.h>
 
 #include <common/random.h>
 
@@ -111,6 +112,30 @@ void CityGenerator::step()
  */
 void CityGenerator::format_crossroad()
 {
+	auto a = core::LineSegment2::intersection( core::LineSegment2( Vector2( -1.f, 0.f ), Vector2( +1.f, 0.f ) ), core::LineSegment2( Vector2( 0.f, -1.f ), Vector2( 0.f, +1.f ) ) );
+	auto b = core::LineSegment2::intersection( core::LineSegment2( Vector2( -1.f, -1.f ), Vector2( -1.f, +1.f ) ), core::LineSegment2( Vector2( +1.f, -1.f ), Vector2( +1.f, +1.f ) ) );
+
+	if ( a )
+	{
+		std::cout << "a : " << a.value() << std::endl;
+	}
+	else
+	{
+		std::cout << "a : nullopt" << std::endl;
+	}
+
+	if ( b )
+	{
+		std::cout << "b : " << b.value() << std::endl;
+	}
+	else
+	{
+		std::cout << "b : nullopt" << std::endl;
+	}
+	
+
+	return;
+
 	for ( auto i = road_node_list_.begin(); i != road_node_list_.end(); ++i )
 	{
 		for ( auto j = i + 1; j != road_node_list_.end(); ++j )

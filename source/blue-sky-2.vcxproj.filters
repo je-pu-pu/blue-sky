@@ -604,6 +604,7 @@
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\NullTexture.h" />
+    <ClInclude Include="core\math\LineSegment2.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

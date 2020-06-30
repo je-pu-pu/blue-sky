@@ -184,6 +184,7 @@
     <ClInclude Include="core\math.h" />
     <ClInclude Include="core\math\Bullet\Quaternion.h" />
     <ClInclude Include="core\math\Bullet\Transform.h" />
+    <ClInclude Include="core\math\LineSegment2.h" />
     <ClInclude Include="core\math\DirectXMath\Color.h" />
     <ClInclude Include="core\math\DirectXMath\Matrix.h" />
     <ClInclude Include="core\math\DirectXMath\Vector.h" />

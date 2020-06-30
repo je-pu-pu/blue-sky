@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DirectXMath.h>
+#include <ostream>
 #include <cmath>
 
 namespace direct_x_math
@@ -64,6 +65,11 @@ public:
 		return
 			( ( x() <  v.x() ) ) ||
 			( ( x() == v.x() ) && ( y() <  v.y() ) );
+	}
+
+	friend std::ostream& operator << ( std::ostream& out, const Vector2& v )
+	{
+	    return out << "( " << v.x() << ", " << v.y() << " )";
 	}
 
 }; // class Vector2

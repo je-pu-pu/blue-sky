@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vector3.h"
+#include "Vector2.h"
 #include <DirectXMath.h>
 // #include <stdlib.h>
 
@@ -57,6 +58,10 @@ public:
 	inline UnitType y() const { return DirectX::XMVectorGetY( value_ ); }
 	inline UnitType z() const { return DirectX::XMVectorGetZ( value_ ); }
 	inline UnitType w() const { return DirectX::XMVectorGetW( value_ ); }
+
+	inline Vector2 xy() const { return Vector2( x(), y() ); }
+	inline Vector2 yz() const { return Vector2( y(), z() ); }
+	inline Vector2 xz() const { return Vector2( x(), z() ); }
 
 	inline Vector3 xyz() const { return Vector3( x(), y(), z() ); }
 

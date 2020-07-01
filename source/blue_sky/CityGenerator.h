@@ -39,11 +39,18 @@ public:
 		};
 
 		Type type;
+		
 		Vector position;
+
 		RoadNode* front_node = nullptr;
 		RoadNode* back_node  = nullptr;
 		RoadNode* left_node  = nullptr;
 		RoadNode* right_node = nullptr;
+
+		Vector back_left_pos;
+		Vector back_right_pos;
+		Vector front_left_pos;
+		Vector front_right_pos;
 
 		RoadNode( Type t, const Vector& pos )
 			: type( t )
@@ -77,9 +84,13 @@ public:
 		{
 			return true;
 		}
+
+		void update_vertex_pos();
 	};
 
-	/// 道路タイルの中心を指すコントロールポイント
+	/**
+	 * 伸びて行く道路の先頭を指すコントロールポイント
+	 */
 	struct RoadControlPoint
 	{
 		enum class Type
@@ -121,6 +132,9 @@ public:
 
 			return false;
 		}
+
+		Vector front_left_pos() const { return node->front_left_pos; }
+		Vector front_right_pos() const { return node->front_right_pos; }
 	};
 
 	using RoadNodeList = std::vector< RoadNode >;

@@ -45,6 +45,7 @@ void CityGenerator::step()
 {
 	// extend_road( control_point_, control_point_ - Vector( 4.f, 0.f, 0.f ), control_point_ + Vector( 4.f, 0.f, 0.f ), 0, 40, 5 );
 	
+	// 新しく発生したコントロールポイント
 	RoadControlPointList new_cps;
 
 	for ( auto& cp : road_control_point_list_ )
@@ -98,8 +99,18 @@ void CityGenerator::step()
 
 	road_control_point_list_.insert( road_control_point_list_.end(), new_cps.begin(), new_cps.end() );
 
+	for ( auto& node : road_node_list_ )
+	{
+		node.update_vertex_pos();
+	}
 
-	format_crossroad();
+	for ( const auto& cp : road_control_point_list_ )
+	{
+		auto a = core::LineSegment2( cp.front_left_pos().xz(), cp.front_right_pos().xz() );
+		std::cout << cp.front_left_pos().xz() << ", " << cp.front_right_pos().xz() << std::endl;
+	}
+
+	// format_crossroad();
 
 	generate_road_mesh();
 
@@ -113,7 +124,7 @@ void CityGenerator::step()
 void CityGenerator::format_crossroad()
 {
 	auto a = core::LineSegment2::intersection( core::LineSegment2( Vector2( -1.f, 0.f ), Vector2( +1.f, 0.f ) ), core::LineSegment2( Vector2( 0.f, -1.f ), Vector2( 0.f, +1.f ) ) );
-	auto b = core::LineSegment2::intersection( core::LineSegment2( Vector2( -1.f, -1.f ), Vector2( -1.f, +1.f ) ), core::LineSegment2( Vector2( +1.f, -1.f ), Vector2( +1.f, +1.f ) ) );
+	auto b = core::LineSegment2::intersection( core::LineSegment2( Vector2( -1.f, -1.f ), Vector2( -1.f, +1.f ) ), core::LineSegment2( Vector2( -1.f, -1.f ), Vector2( +1.f, -1.f ) ) );
 
 	if ( a )
 	{
@@ -222,6 +233,50 @@ void CityGenerator::generate_road_mesh()
 }
 
 /**
+ * 四隅の座標を計算し更新する
+ */
+void CityGenerator::RoadNode::update_vertex_pos()
+{
+	Vector start_front;
+	Vector start_right;
+
+	Vector end_front;
+	Vector end_right;
+
+	if ( back_node )
+	{
+		start_front = ( position - back_node->position ).normalize();
+		start_right = Vector::Up.cross( start_front );
+	}
+
+	if ( front_node )
+	{
+		end_front = ( front_node->position - position ).normalize();
+		end_right = Vector::Up.cross( end_front );
+	}
+
+	if ( ! back_node )
+	{
+		start_front = end_front;
+		start_right = end_right;
+	}
+
+	if ( ! front_node )
+	{
+		end_front = start_front;
+		end_right = start_right;
+	}
+
+	auto road_start_pos = position - start_front * get_road_depth() * 0.5f;
+	auto road_end_pos   = position + end_front   * get_road_depth() * 0.5f;
+
+	back_left_pos   = road_start_pos - start_right * get_road_width() * 0.5f;
+	back_right_pos  = road_start_pos + start_right * get_road_width() * 0.5f;
+	front_left_pos  = road_end_pos - end_right * get_road_width() * 0.5f;
+	front_right_pos = road_end_pos + end_right * get_road_width() * 0.5f;
+}
+
+/**
  * メッシュを生成する
  *
  */
@@ -238,56 +293,13 @@ void CityGenerator::generate_road_mesh( const RoadNode& node )
 	 * 0 .. 3 : vertex
 	 */
 
-	const RoadNode* prev_node = node.back_node;
-	const RoadNode* next_node = node.front_node;
-
-	Vector start_front;
-	Vector start_right;
-
-	Vector end_front;
-	Vector end_right;
-
-	if ( prev_node )
-	{
-		start_front = ( node.position - prev_node->position ).normalize();
-		start_right = Vector::Up.cross( start_front );
-	}
-
-	if ( next_node )
-	{
-		end_front = ( next_node->position - node.position ).normalize();
-		end_right = Vector::Up.cross( end_front );
-	}
-
-	if ( ! prev_node )
-	{
-		start_front = end_front;
-		start_right = end_right;
-	}
-
-	if ( ! next_node )
-	{
-		end_front = start_front;
-		end_right = start_right;
-	}
-
-	// auto road_front = end_front; // ( start_front + end_front ) * 0.5f;
-	
-	auto road_start_pos = node.position - start_front * get_road_depth() * 0.5f;
-	auto road_end_pos   = node.position + end_front   * get_road_depth() * 0.5f;
-
-	auto vertex_position0 = road_start_pos - start_right * get_road_width() * 0.5f;
-	auto vertex_position1 = road_start_pos + start_right * get_road_width() * 0.5f;
-	auto vertex_position2 = road_end_pos - end_right * get_road_width() * 0.5f;
-	auto vertex_position3 = road_end_pos + end_right * get_road_width() * 0.5f;
-	
 	const auto index_offset = model_->get_mesh()->get_vertex_count();
 
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { vertex_position0.xyz() }, { 0.f, 1.f, 0.f }, { 0.f, 1.f } ) ); // 0
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { vertex_position1.xyz() }, { 0.f, 1.f, 0.f }, { 0.f, 0.f } ) ); // 1
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { node.back_left_pos.xyz() }, { 0.f, 1.f, 0.f }, { 0.f, 1.f } ) ); // 0
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { node.back_right_pos.xyz() }, { 0.f, 1.f, 0.f }, { 0.f, 0.f } ) ); // 1
 
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { vertex_position2.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 1.f } ) ); // 2
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { vertex_position3.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 0.f } ) ); // 3
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { node.front_left_pos.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 1.f } ) ); // 2
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { node.front_right_pos.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 0.f } ) ); // 3
 
 	const bool is_cross = node.type == RoadNode::Type::CROSS; // node.left_node && node.right_node;
 	auto* vertex_group = get_model()->get_mesh()->get_vertex_group_at( is_cross ? 1 : 0 );
@@ -301,9 +313,9 @@ void CityGenerator::generate_road_mesh( const RoadNode& node )
 	vertex_group->add_index( index_offset + 3 );
 
 	/*
-	if ( ! next_node.link_list.empty() )
+	if ( ! front_node.link_list.empty() )
 	{
-		generate_road_mesh( next_node, ** next_node.link_list.cbegin() );
+		generate_road_mesh( front_node, ** front_node.link_list.cbegin() );
 	}
 	*/
 }

@@ -106,8 +106,35 @@ void CityGenerator::step()
 
 	for ( const auto& cp : road_control_point_list_ )
 	{
-		auto a = core::LineSegment2( cp.front_left_pos().xz(), cp.front_right_pos().xz() );
-		std::cout << cp.front_left_pos().xz() << ", " << cp.front_right_pos().xz() << std::endl;
+		const auto a = core::LineSegment2( cp.front_left_pos().xz(), cp.front_right_pos().xz() );
+
+		for ( const auto& node : road_node_list_ )
+		{
+			if ( cp.node == & node )
+			{
+				continue;
+			}
+
+			const auto left_edge = core::LineSegment2( node.back_left_pos.xz(), node.front_left_pos.xz() );			///< ¶‚Ì•Ó
+			const auto front_edge = core::LineSegment2( node.front_left_pos.xz(), node.front_right_pos.xz() );		///< ‘O•û‚Ì•Ó
+			const auto right_edge = core::LineSegment2( node.front_right_pos.xz(), node.back_right_pos.xz() );		///< ‰E‚Ì•Ó
+
+			auto hit_pos = a.intersection( left_edge );
+
+			if ( ! hit_pos )
+			{
+				hit_pos = a.intersection( front_edge );
+			}
+			if ( ! hit_pos )
+			{
+				hit_pos = a.intersection( right_edge );
+			}
+
+			if ( hit_pos )
+			{
+				std::cout << "hit at : " << hit_pos.value() << std::endl;
+			}
+		}
 	}
 
 	// format_crossroad();

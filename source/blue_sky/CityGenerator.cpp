@@ -104,6 +104,8 @@ void CityGenerator::step()
 		node.update_vertex_pos();
 	}
 
+	std::vector< RoadNode* > del_nodes; // 削除するノード
+
 	for ( const auto& cp : road_control_point_list_ )
 	{
 		const auto a = core::LineSegment2( cp.front_left_pos().xz(), cp.front_right_pos().xz() );
@@ -133,9 +135,15 @@ void CityGenerator::step()
 			if ( hit_pos )
 			{
 				std::cout << "hit at : " << hit_pos.value() << std::endl;
+				del_nodes.push_back( cp.node );
+				break;
 			}
 		}
 	}
+
+	// 他の道路にぶつかったノードとコントロールポイントを削除する
+	road_control_point_list_.erase( std::remove_if( road_control_point_list_.begin(), road_control_point_list_.end(),[&]( auto& cp ) { return std::find( del_nodes.begin(), del_nodes.end(), cp.node ) != del_nodes.end(); } ), road_control_point_list_.end() );
+	road_node_list_.erase( std::remove_if( road_node_list_.begin(), road_node_list_.end(),[&]( auto& node ) { return std::find( del_nodes.begin(), del_nodes.end(), & node ) != del_nodes.end(); } ), road_node_list_.end() );
 
 	// format_crossroad();
 

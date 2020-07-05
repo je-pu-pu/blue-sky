@@ -59,6 +59,55 @@ public:
 
 		}
 
+		~RoadNode()
+		{
+			if ( front_node )
+			{
+				front_node->unlink( this );
+			}
+
+			if ( back_node )
+			{
+				back_node->unlink( this );
+			}
+
+			if ( left_node )
+			{
+				left_node->unlink( this );
+			}
+
+			if ( right_node )
+			{
+				right_node->unlink( this );
+			}
+		}
+
+		/**
+		 * 指定したノードとのリンクを解除する
+		 */
+		void unlink( RoadNode* node )
+		{
+			if ( front_node == node )
+			{
+				front_node = nullptr;
+			}
+
+			if ( back_node == node )
+			{
+				back_node = nullptr;
+			}
+
+			if ( left_node == node )
+			{
+				left_node = nullptr;
+			}
+
+			if ( right_node == node )
+			{
+				right_node = nullptr;
+			}
+		}
+
 		void link_front( RoadNode& node )
 		{
 			front_node = & node;

@@ -57,8 +57,9 @@ void CityGenerator::step()
 		const auto road_count = std::count_if( road_node_list_.begin(), road_node_list_.end(), [=] ( const auto& n ) { return ( n.position - cp.position ).length() <= get_road_width() * get_required_straight_road_count(); } );
 		const auto is_corss_near = std::any_of( road_node_list_.begin(), road_node_list_.end(), [=] ( const auto& n ) { return n.type == RoadNode::Type::CROSS && ( n.position - cp.position ).length() <= get_road_width() * get_required_straight_road_count(); } );
 
-		if ( common::random( 0, 5 ) == 0 && cp.is_crossable() )
+		// if ( common::random( 0, 5 ) == 0 && cp.is_crossable() )
 		// if ( road_count == get_required_straight_road_count() && ! is_corss_near )
+		if ( false )
 		{
 			type = RoadNode::Type::CROSS;
 		}
@@ -85,7 +86,8 @@ void CityGenerator::step()
 		if ( type != RoadNode::Type::CROSS )
 		{
 			Matrix m;
-			m.set_rotation_y( math::degree_to_radian( common::random( -10.f, +10.f ) ) );
+			// m.set_rotation_y( math::degree_to_radian( common::random( -10.f, +10.f ) ) );
+			m.set_rotation_y( math::degree_to_radian( 20.f ) );
 			cp.front *= m;
 			cp.front.normalize();
 		}
@@ -134,7 +136,7 @@ void CityGenerator::step()
 
 			if ( hit_pos )
 			{
-				std::cout << "hit at : " << hit_pos.value() << std::endl;
+				std::cout << "hit at : " << hit_pos.value() << ", cp = " << cp.position << std::endl;
 				del_nodes.push_back( cp.node );
 				break;
 			}
@@ -145,7 +147,17 @@ void CityGenerator::step()
 	road_control_point_list_.erase( std::remove_if( road_control_point_list_.begin(), road_control_point_list_.end(),[&]( auto& cp ) { return std::find( del_nodes.begin(), del_nodes.end(), cp.node ) != del_nodes.end(); } ), road_control_point_list_.end() );
 	road_node_list_.erase( std::remove_if( road_node_list_.begin(), road_node_list_.end(),[&]( auto& node ) { return std::find( del_nodes.begin(), del_nodes.end(), & node ) != del_nodes.end(); } ), road_node_list_.end() );
 
+	std::cout << "--------------------" << std::endl;
+
+	for ( auto& cp : road_control_point_list_ )
+	{
+		std::cout << "CP : " << static_cast< int >( cp.type ) << ", " << cp.position << std::endl;
+	}
+
 	// format_crossroad();
+
+	std::cout << "cp count : " << road_control_point_list_.size() << std::endl;
+	std::cout << "node cout : " << road_node_list_.size() << std::endl;
 
 	generate_road_mesh();
 

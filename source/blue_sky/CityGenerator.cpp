@@ -33,6 +33,12 @@ CityGenerator::CityGenerator()
 
 	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector::Zero, Vector::Forward, & road_node_list_.back() );
 
+	road_node_list_.emplace_back( RoadNode::Type::STRAIGHT, Vector( 100.f, 0.f, 0.f ) );
+	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector( 100.f, 0.f, 0.f ), Vector::Left, & road_node_list_.back() );
+
+	road_node_list_.emplace_back( RoadNode::Type::STRAIGHT, Vector( 50.f, 0.f, 100.f ) );
+	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector( 50.f, 0.f, 100.f ), Vector::Back, & road_node_list_.back() );
+
 	model_->get_mesh()->create_vertex_buffer();
 	model_->get_mesh()->create_index_buffer();
 }
@@ -86,8 +92,8 @@ void CityGenerator::step()
 		if ( type != RoadNode::Type::CROSS )
 		{
 			Matrix m;
-			// m.set_rotation_y( math::degree_to_radian( common::random( -10.f, +10.f ) ) );
-			m.set_rotation_y( math::degree_to_radian( 20.f ) );
+			m.set_rotation_y( math::degree_to_radian( common::random( -30.f, +30.f ) ) );
+			// m.set_rotation_y( math::degree_to_radian( 20.f ) );
 			cp.front *= m;
 			cp.front.normalize();
 		}

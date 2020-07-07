@@ -16,6 +16,7 @@ namespace blue_sky
 
 CityGenerator::CityGenerator()
 	: model_( GameMain::get_instance()->get_graphics_manager()->create_named_model( "generated_city" ) )
+	, debug_model_( GameMain::get_instance()->get_graphics_manager()->create_named_model( "generated_city_debug" ) )
 {
 	model_->set_mesh( GameMain::get_instance()->get_graphics_manager()->create_named_mesh( "generated_city", Mesh::Buffer::Type::UPDATABLE ) );
 	

@@ -39,6 +39,9 @@ DebugScene::DebugScene( const GameMain* game_main )
 	auto* city = get_active_object_manager()->create_object( "static" );
 	city->set_model( city_generator_.get_model() );
 
+	auto* city_debug = get_active_object_manager()->create_object( "static" );
+	city_debug->set_model( city_generator_.get_debug_model() );
+
 	get_script_manager()->exec( "load( \"test/init.lua\" )" );
 
 	get_graphics_manager()->load_named_texture( "2x2", "media/texture/rgby.png" );

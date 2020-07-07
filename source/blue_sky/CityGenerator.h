@@ -190,7 +190,8 @@ public:
 	using RoadControlPointList = std::list< RoadControlPoint >;
 
 private:
-	Model* model_;
+	Model* model_; // 街のモデル
+	Model* debug_model_; // デバッグ用のモデル
 
 	RoadNodeList road_node_list_;
 	RoadControlPointList road_control_point_list_;
@@ -217,6 +218,7 @@ public:
 	void step();
 
 	Model* get_model() { return model_; }
+	Model* get_debug_model() { return debug_model_; }
 };
 
 } // namespace blue_sky

@@ -42,6 +42,28 @@ CityGenerator::CityGenerator()
 
 	model_->get_mesh()->create_vertex_buffer();
 	model_->get_mesh()->create_index_buffer();
+
+	debug_model_->set_mesh( GameMain::get_instance()->get_graphics_manager()->create_named_mesh( "generated_city_debug", Mesh::Buffer::Type::DEFAULT ) );
+	
+	debug_model_->set_shader_at( 0, GameMain::get_instance()->get_graphics_manager()->create_shader< graphics::shader::FlatShader >() );
+	debug_model_->get_shader_at( 0 )->set_texture_at( 0, GameMain::get_instance()->get_graphics_manager()->load_texture( "media/model/road.png" ) );
+
+	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( { -1.f, 3.f, 0.f }, { 0.f, 0.f, -1.f }, { 0.f, 1.f } ) ); // 0
+	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( { +1.f, 3.f, 0.f }, { 0.f, 0.f, -1.f }, { 1.f, 1.f } ) ); // 1
+	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( { -1.f, 1.f, 0.f }, { 0.f, 0.f, -1.f }, { 0.f, 0.f } ) ); // 2
+	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( { +1.f, 1.f, 0.f }, { 0.f, 0.f, -1.f }, { 1.f, 0.f } ) ); // 3
+
+	auto* vertex_group = debug_model_->get_mesh()->create_vertex_group();
+	vertex_group->add_index( 0 );
+	vertex_group->add_index( 3 );
+	vertex_group->add_index( 2 );
+
+	vertex_group->add_index( 0 );
+	vertex_group->add_index( 1 );
+	vertex_group->add_index( 3 );
+
+	debug_model_->get_mesh()->create_vertex_buffer();
+	debug_model_->get_mesh()->create_index_buffer();
 }
 
 /**

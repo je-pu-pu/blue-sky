@@ -46,21 +46,9 @@ CityGenerator::CityGenerator()
 	debug_model_->set_mesh( GameMain::get_instance()->get_graphics_manager()->create_named_mesh( "generated_city_debug", Mesh::Buffer::Type::DEFAULT ) );
 	
 	debug_model_->set_shader_at( 0, GameMain::get_instance()->get_graphics_manager()->create_shader< graphics::shader::FlatShader >() );
-	debug_model_->get_shader_at( 0 )->set_texture_at( 0, GameMain::get_instance()->get_graphics_manager()->load_texture( "media/model/road.png" ) );
+	debug_model_->get_shader_at( 0 )->set_texture_at( 0, GameMain::get_instance()->get_graphics_manager()->load_texture( "media/model/road.png" ) );	
 
-	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( { -1.f, 3.f, 0.f }, { 0.f, 0.f, -1.f }, { 0.f, 1.f } ) ); // 0
-	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( { +1.f, 3.f, 0.f }, { 0.f, 0.f, -1.f }, { 1.f, 1.f } ) ); // 1
-	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( { -1.f, 1.f, 0.f }, { 0.f, 0.f, -1.f }, { 0.f, 0.f } ) ); // 2
-	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( { +1.f, 1.f, 0.f }, { 0.f, 0.f, -1.f }, { 1.f, 0.f } ) ); // 3
-
-	auto* vertex_group = debug_model_->get_mesh()->create_vertex_group();
-	vertex_group->add_index( 0 );
-	vertex_group->add_index( 3 );
-	vertex_group->add_index( 2 );
-
-	vertex_group->add_index( 0 );
-	vertex_group->add_index( 1 );
-	vertex_group->add_index( 3 );
+	debug_model_->get_mesh()->create_vertex_group();
 
 	debug_model_->get_mesh()->create_vertex_buffer();
 	debug_model_->get_mesh()->create_index_buffer();
@@ -192,6 +180,11 @@ void CityGenerator::step()
 
 	model_->get_mesh()->create_vertex_buffer();
 	model_->get_mesh()->create_index_buffer();
+
+	generate_debug_mesh();
+
+	debug_model_->get_mesh()->create_vertex_buffer();
+	debug_model_->get_mesh()->create_index_buffer();
 }
 
 /**
@@ -394,6 +387,42 @@ void CityGenerator::generate_road_mesh( const RoadNode& node )
 		generate_road_mesh( front_node, ** front_node.link_list.cbegin() );
 	}
 	*/
+}
+
+/**
+ * デバッグ用のメッシュを生成する
+ */
+void CityGenerator::generate_debug_mesh()
+{
+	model_->get_mesh()->clear_vertex_list();
+	model_->get_mesh()->get_vertex_group_at( 0 )->clear();
+
+	for ( const auto& cp : road_control_point_list_ )
+	{
+		generate_debug_road_control_point_mesh( cp );
+	}
+}
+
+/**
+ * デバッグ用のコントロールポイントのメッシュを生成する
+ */
+void CityGenerator::generate_debug_road_control_point_mesh( const RoadControlPoint& cp ) const
+{
+	const auto index_offset = debug_model_->get_mesh()->get_vertex_count();
+
+	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( ( cp.position + Vector( -1.f, 3.f, 0.f ) ).xyz(), { 0.f, 0.f, -1.f }, { 0.f, 1.f } ) ); // 0
+	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( ( cp.position + Vector( +1.f, 3.f, 0.f ) ).xyz(), { 0.f, 0.f, -1.f }, { 1.f, 1.f } ) ); // 1
+	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( ( cp.position + Vector( -1.f, 1.f, 0.f ) ).xyz(), { 0.f, 0.f, -1.f }, { 0.f, 0.f } ) ); // 2
+	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( ( cp.position + Vector( +1.f, 1.f, 0.f ) ).xyz(), { 0.f, 0.f, -1.f }, { 1.f, 0.f } ) ); // 3
+
+	auto* vertex_group = debug_model_->get_mesh()->get_vertex_group_at( 0 );
+	vertex_group->add_index( index_offset + 0 );
+	vertex_group->add_index( index_offset + 3 );
+	vertex_group->add_index( index_offset + 2 );
+
+	vertex_group->add_index( index_offset + 0 );
+	vertex_group->add_index( index_offset + 1 );
+	vertex_group->add_index( index_offset + 3 );
 }
 
 } // namespace blue_sky

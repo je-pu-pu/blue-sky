@@ -17,8 +17,8 @@ set_dir( girl, 180 )
 -- FBX にテクスチャが設定されていなくてもスクリプトでテクスチャを設定できる
 
 -- テクスチャを読み込む
-t = load_texture( "media/texture/matcap/test/a.png" )
--- t = load_texture( "media/texture/matcap/skin.png" )
+-- t = load_texture( "media/texture/matcap/test/a.png" )
+t = load_texture( "media/texture/matcap/skin.png" )
 
 -- フラットシェーダーを指定してテクスチャを指定する
 -- s = get_shader( "flat" )

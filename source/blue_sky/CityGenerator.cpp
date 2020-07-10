@@ -75,8 +75,8 @@ void CityGenerator::step()
 		const auto is_corss_near = std::any_of( road_node_list_.begin(), road_node_list_.end(), [=] ( const auto& n ) { return n.type == RoadNode::Type::CROSS && ( n.position - cp.position ).length() <= get_road_width() * get_required_straight_road_count(); } );
 
 		// if ( common::random( 0, 5 ) == 0 && cp.is_crossable() )
-		// if ( road_count == get_required_straight_road_count() && ! is_corss_near )
-		if ( false )
+		if ( road_count == get_required_straight_road_count() && ! is_corss_near )
+		// if ( false )
 		{
 			type = RoadNode::Type::CROSS;
 		}
@@ -394,13 +394,15 @@ void CityGenerator::generate_road_mesh( const RoadNode& node )
  */
 void CityGenerator::generate_debug_mesh()
 {
-	model_->get_mesh()->clear_vertex_list();
-	model_->get_mesh()->get_vertex_group_at( 0 )->clear();
+	debug_model_->get_mesh()->clear_vertex_list();
+	debug_model_->get_mesh()->get_vertex_group_at( 0 )->clear();
 
 	for ( const auto& cp : road_control_point_list_ )
 	{
 		generate_debug_road_control_point_mesh( cp );
 	}
+
+	std::cout << "cp size : " << road_control_point_list_.size() << std::endl;
 }
 
 /**

@@ -34,11 +34,11 @@ CityGenerator::CityGenerator()
 
 	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector::Zero, Vector::Forward, & road_node_list_.back() );
 
-	road_node_list_.emplace_back( RoadNode::Type::STRAIGHT, Vector( 100.f, 0.f, 0.f ) );
-	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector( 100.f, 0.f, 0.f ), Vector::Left, & road_node_list_.back() );
+	road_node_list_.emplace_back( RoadNode::Type::STRAIGHT, Vector( 50.f, 0.f, 0.f ) );
+	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector( 50.f, 0.f, 0.f ), Vector::Left, & road_node_list_.back() );
 
-	road_node_list_.emplace_back( RoadNode::Type::STRAIGHT, Vector( 50.f, 0.f, 100.f ) );
-	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector( 50.f, 0.f, 100.f ), Vector::Back, & road_node_list_.back() );
+	road_node_list_.emplace_back( RoadNode::Type::STRAIGHT, Vector( 25.f, 0.f, 50.f ) );
+	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector( 25.f, 0.f, 50.f ), Vector::Back, & road_node_list_.back() );
 
 	model_->get_mesh()->create_vertex_buffer();
 	model_->get_mesh()->create_index_buffer();
@@ -158,6 +158,11 @@ void CityGenerator::step()
 				break;
 			}
 		}
+	}
+
+	for ( const auto* node : del_nodes )
+	{
+		std::cout << "del : " << static_cast< int >( node->type ) << ", " << node->position << std::endl;
 	}
 
 	// 他の道路にぶつかったノードとコントロールポイントを削除する

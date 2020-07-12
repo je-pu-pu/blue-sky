@@ -61,6 +61,11 @@ public:
 
 		~RoadNode()
 		{
+			unlink();
+		}
+
+		void unlink()
+		{
 			if ( front_node )
 			{
 				front_node->unlink( this );
@@ -80,6 +85,11 @@ public:
 			{
 				right_node->unlink( this );
 			}
+
+			unlink( front_node );
+			unlink( back_node );
+			unlink( left_node );
+			unlink( right_node );
 		}
 
 		/**

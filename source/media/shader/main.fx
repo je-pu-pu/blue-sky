@@ -531,7 +531,7 @@ technique11 flat
 		RASTERIZERSTATE = Default;
     }
 
-#if 0
+#if 1
 	pass debug_line
     {
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );

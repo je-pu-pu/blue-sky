@@ -30,15 +30,15 @@ CityGenerator::CityGenerator()
 	model_->get_mesh()->create_vertex_group();
 
 	road_node_list_.reserve( 1024 * 4 );
-	road_node_list_.emplace_back( RoadNode::Type::STRAIGHT, Vector::Zero );
+	road_node_list_.emplace_back( std::make_unique< RoadNode >( RoadNode::Type::STRAIGHT, Vector::Zero ) );
 
-	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector::Zero, Vector::Forward, & road_node_list_.back() );
+	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector::Zero, Vector::Forward, road_node_list_.back().get() );
 
-	road_node_list_.emplace_back( RoadNode::Type::STRAIGHT, Vector( 50.f, 0.f, 0.f ) );
-	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector( 50.f, 0.f, 0.f ), Vector::Left, & road_node_list_.back() );
+	road_node_list_.emplace_back( std::make_unique< RoadNode >( RoadNode::Type::STRAIGHT, Vector( 50.f, 0.f, 0.f ) ) );
+	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector( 50.f, 0.f, 0.f ), Vector::Left, road_node_list_.back().get() );
 
-	road_node_list_.emplace_back( RoadNode::Type::STRAIGHT, Vector( 25.f, 0.f, 50.f ) );
-	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector( 25.f, 0.f, 50.f ), Vector::Back, & road_node_list_.back() );
+	road_node_list_.emplace_back( std::make_unique< RoadNode >( RoadNode::Type::STRAIGHT, Vector( 25.f, 0.f, 50.f ) ) );
+	road_control_point_list_.emplace_back( RoadControlPoint::Type::FRONT, Vector( 25.f, 0.f, 50.f ), Vector::Back, road_node_list_.back().get() );
 
 	model_->get_mesh()->create_vertex_buffer();
 	model_->get_mesh()->create_index_buffer();
@@ -71,8 +71,8 @@ void CityGenerator::step()
 
 		auto type = RoadNode::Type::STRAIGHT;
 
-		const auto road_count = std::count_if( road_node_list_.begin(), road_node_list_.end(), [=] ( const auto& n ) { return ( n.position - cp.position ).length() <= get_road_width() * get_required_straight_road_count(); } );
-		const auto is_corss_near = std::any_of( road_node_list_.begin(), road_node_list_.end(), [=] ( const auto& n ) { return n.type == RoadNode::Type::CROSS && ( n.position - cp.position ).length() <= get_road_width() * get_required_straight_road_count(); } );
+		const auto road_count = std::count_if( road_node_list_.begin(), road_node_list_.end(), [=] ( const auto& n ) { return ( n->position - cp.position ).length() <= get_road_width() * get_required_straight_road_count(); } );
+		const auto is_corss_near = std::any_of( road_node_list_.begin(), road_node_list_.end(), [=] ( const auto& n ) { return n->type == RoadNode::Type::CROSS && ( n->position - cp.position ).length() <= get_road_width() * get_required_straight_road_count(); } );
 
 		// if ( common::random( 0, 5 ) == 0 && cp.is_crossable() )
 		if ( road_count == get_required_straight_road_count() && ! is_corss_near )
@@ -81,23 +81,23 @@ void CityGenerator::step()
 			type = RoadNode::Type::CROSS;
 		}
 
-		road_node_list_.emplace_back( type, cp.position );
-		road_node_list_.back().back_node = cp.node;
+		road_node_list_.emplace_back( std::make_unique< RoadNode >( type, cp.position ) );
+		road_node_list_.back()->back_node = cp.node;
 
 		if ( cp.type == RoadControlPoint::Type::FRONT )
 		{
-			cp.node->front_node = & road_node_list_.back();
+			cp.node->front_node = road_node_list_.back().get();
 		}
 		else if ( cp.type == RoadControlPoint::Type::LEFT )
 		{
-			cp.node->left_node = & road_node_list_.back();
+			cp.node->left_node = road_node_list_.back().get();
 		}
 		else if ( cp.type == RoadControlPoint::Type::RIGHT )
 		{
-			cp.node->right_node = & road_node_list_.back();
+			cp.node->right_node = road_node_list_.back().get();
 		}
 
-		cp.node = & road_node_list_.back();
+		cp.node = road_node_list_.back().get();
 		cp.type = RoadControlPoint::Type::FRONT;
 
 		if ( type != RoadNode::Type::CROSS )
@@ -111,8 +111,8 @@ void CityGenerator::step()
 
 		if ( type == RoadNode::Type::CROSS )
 		{
-			new_cps.emplace_back( RoadControlPoint::Type::LEFT,  cp.position, cp.front.cross( Vector::Up ), & road_node_list_.back() );
-			new_cps.emplace_back( RoadControlPoint::Type::RIGHT, cp.position, Vector::Up.cross( cp.front ), & road_node_list_.back() );
+			new_cps.emplace_back( RoadControlPoint::Type::LEFT,  cp.position, cp.front.cross( Vector::Up ), road_node_list_.back().get() );
+			new_cps.emplace_back( RoadControlPoint::Type::RIGHT, cp.position, Vector::Up.cross( cp.front ), road_node_list_.back().get() );
 		}
 	}
 
@@ -120,7 +120,7 @@ void CityGenerator::step()
 
 	for ( auto& node : road_node_list_ )
 	{
-		node.update_vertex_pos();
+		node->update_vertex_pos();
 	}
 
 	std::vector< RoadNode* > del_nodes; // 削除するノード
@@ -131,14 +131,14 @@ void CityGenerator::step()
 
 		for ( const auto& node : road_node_list_ )
 		{
-			if ( cp.node == & node )
+			if ( cp.node == node.get() )
 			{
 				continue;
 			}
 
-			const auto left_edge = core::LineSegment2( node.back_left_pos.xz(), node.front_left_pos.xz() );			///< 左の辺
-			const auto front_edge = core::LineSegment2( node.front_left_pos.xz(), node.front_right_pos.xz() );		///< 前方の辺
-			const auto right_edge = core::LineSegment2( node.front_right_pos.xz(), node.back_right_pos.xz() );		///< 右の辺
+			const auto left_edge = core::LineSegment2( node->back_left_pos.xz(), node->front_left_pos.xz() );			///< 左の辺
+			const auto front_edge = core::LineSegment2( node->front_left_pos.xz(), node->front_right_pos.xz() );		///< 前方の辺
+			const auto right_edge = core::LineSegment2( node->front_right_pos.xz(), node->back_right_pos.xz() );		///< 右の辺
 
 			auto hit_pos = a.intersection( left_edge );
 
@@ -167,7 +167,7 @@ void CityGenerator::step()
 
 	// 他の道路にぶつかったノードとコントロールポイントを削除する
 	road_control_point_list_.erase( std::remove_if( road_control_point_list_.begin(), road_control_point_list_.end(),[&]( auto& cp ) { return std::find( del_nodes.begin(), del_nodes.end(), cp.node ) != del_nodes.end(); } ), road_control_point_list_.end() );
-	road_node_list_.erase( std::remove_if( road_node_list_.begin(), road_node_list_.end(),[&]( auto& node ) { return std::find( del_nodes.begin(), del_nodes.end(), & node ) != del_nodes.end(); } ), road_node_list_.end() );
+	road_node_list_.erase( std::remove_if( road_node_list_.begin(), road_node_list_.end(),[&]( auto& node ) { return std::find( del_nodes.begin(), del_nodes.end(), node.get() ) != del_nodes.end(); } ), road_node_list_.end() );
 
 	std::cout << "--------------------" << std::endl;
 
@@ -225,9 +225,9 @@ void CityGenerator::format_crossroad()
 	{
 		for ( auto j = i + 1; j != road_node_list_.end(); ++j )
 		{
-			if ( i->is_collition_with( *j ) )
+			if ( ( *i )->is_collition_with( * j->get() ) )
 			{
-				std::cout << i->position << std::endl;
+				std::cout << ( *i )->position << std::endl;
 			}
 		}
 	}
@@ -302,7 +302,7 @@ void CityGenerator::generate_road_mesh()
 
 	for ( auto& node : road_node_list_ )
 	{
-		generate_road_mesh( node );
+		generate_road_mesh( * node );
 	}
 }
 

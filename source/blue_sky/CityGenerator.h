@@ -196,7 +196,7 @@ public:
 		Vector front_right_pos() const { return node->front_right_pos; }
 	};
 
-	using RoadNodeList = std::vector< RoadNode >;
+	using RoadNodeList = std::vector< std::unique_ptr< RoadNode > >;
 	using RoadControlPointList = std::list< RoadControlPoint >;
 
 private:

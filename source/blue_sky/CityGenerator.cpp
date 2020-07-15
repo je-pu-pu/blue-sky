@@ -127,8 +127,6 @@ void CityGenerator::step()
 
 	for ( const auto& cp : road_control_point_list_ )
 	{
-		const auto a = core::LineSegment2( cp.front_left_pos().xz(), cp.front_right_pos().xz() );
-
 		for ( const auto& node : road_node_list_ )
 		{
 			if ( cp.node == node.get() )
@@ -136,24 +134,21 @@ void CityGenerator::step()
 				continue;
 			}
 
-			const auto left_edge = core::LineSegment2( node->back_left_pos.xz(), node->front_left_pos.xz() );			///< ¶‚Ì•Ó
-			const auto front_edge = core::LineSegment2( node->front_left_pos.xz(), node->front_right_pos.xz() );		///< ‘O•û‚Ì•Ó
-			const auto right_edge = core::LineSegment2( node->front_right_pos.xz(), node->back_right_pos.xz() );		///< ‰E‚Ì•Ó
-
-			auto hit_pos = a.intersection( left_edge );
-
-			if ( ! hit_pos )
+			if ( cp.node->back_node == node.get() )
 			{
-				hit_pos = a.intersection( front_edge );
-			}
-			if ( ! hit_pos )
-			{
-				hit_pos = a.intersection( right_edge );
+				continue;
 			}
 
-			if ( hit_pos )
+			// “–‚è”»’è‚Ì”¼Œa
+			const auto radius = std::sqrt( get_road_width() * 2.f + get_road_depth() * 2.f ) * 1.5f;
+
+			const auto lx = cp.position.x() - node->position.x();
+			const auto lz = cp.position.z() - node->position.z();
+			const auto length = std::sqrt( lx * lx + lz * lz );
+
+			if ( length <= radius )
 			{
-				std::cout << "hit at : " << hit_pos.value() << ", cp = " << cp.position << std::endl;
+				// std::cout << "hit at : " << hit_pos.value() << ", cp = " << cp.position << std::endl;
 				del_nodes.push_back( cp.node );
 				break;
 			}

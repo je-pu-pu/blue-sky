@@ -150,6 +150,11 @@ void CityGenerator::step()
 			{
 				// std::cout << "hit at : " << hit_pos.value() << ", cp = " << cp.position << std::endl;
 				del_nodes.push_back( cp.node );
+
+
+				// “–‚½‚Á‚½ƒm[ƒh‚ÆŒq‚®
+				cp.node->back_node->front_node = node.get();
+
 				break;
 			}
 		}

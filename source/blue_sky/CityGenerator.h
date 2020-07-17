@@ -47,6 +47,8 @@ public:
 		RoadNode* left_node  = nullptr;
 		RoadNode* right_node = nullptr;
 
+		bool is_end = false;	///< ‚±‚Ìƒm[ƒh‚ªI’[‚©‚Ç‚¤‚©H ( ‘¼‚Ì“¹˜H‚É‚Ô‚Â‚©‚Á‚ÄŽ~‚Ü‚Á‚½‚©‚Ç‚¤‚© )
+
 		Vector back_left_pos;
 		Vector back_right_pos;
 		Vector front_left_pos;

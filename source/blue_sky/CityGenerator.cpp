@@ -154,6 +154,7 @@ void CityGenerator::step()
 
 				// “–‚½‚Á‚½ƒm[ƒh‚ÆŒq‚®
 				cp.node->back_node->front_node = node.get();
+				cp.node->back_node->is_end = true;
 
 				break;
 			}
@@ -348,6 +349,29 @@ void CityGenerator::RoadNode::update_vertex_pos()
 	back_right_pos  = road_start_pos + start_right * get_road_width() * 0.5f;
 	front_left_pos  = road_end_pos - end_right * get_road_width() * 0.5f;
 	front_right_pos = road_end_pos + end_right * get_road_width() * 0.5f;
+
+	// I’[‚Ìˆ—
+	if ( is_end )
+	{
+		if ( true )
+		{
+			// Šù‘¶‚Ì“¹˜H‚É‰E‚©‚ç‚Ô‚Â‚©‚Á‚½ê‡
+			front_left_pos = front_node->back_right_pos;
+			front_right_pos = front_node->front_right_pos;
+		}
+		else if ( false )
+		{
+			// Šù‘¶‚Ì“¹˜H‚É¶‚©‚ç‚Ô‚Â‚©‚Á‚½ê‡
+			front_left_pos = front_node->front_left_pos;
+			front_right_pos = front_node->back_left_pos;
+		}
+		else if ( false )
+		{
+			// Šù‘¶‚Ì“¹˜H‚É³–Ê‚©‚ç‚Ô‚Â‚©‚Á‚½ê‡
+			front_left_pos = front_node->front_right_pos;
+			front_right_pos = front_node->front_left_pos;
+		}
+	}
 }
 
 /**

@@ -49,6 +49,12 @@ public:
 
 		bool is_end = false;	///< このノードが終端かどうか？ ( 他の道路にぶつかって止まったかどうか )
 
+		Vector start_front;		///< 開始地点での前方単位ベクトル
+		Vector start_right;		///< 開始地点での右方単位ベクトル
+
+		Vector end_front;		///< 終了地点での前方単位ベクトル
+		Vector end_right;		///< 終了地点での右方単位ベクトル
+
 		Vector back_left_pos;
 		Vector back_right_pos;
 		Vector front_left_pos;

@@ -312,12 +312,6 @@ void CityGenerator::generate_road_mesh()
  */
 void CityGenerator::RoadNode::update_vertex_pos()
 {
-	Vector start_front;
-	Vector start_right;
-
-	Vector end_front;
-	Vector end_right;
-
 	if ( back_node )
 	{
 		start_front = ( position - back_node->position ).normalize();
@@ -353,13 +347,15 @@ void CityGenerator::RoadNode::update_vertex_pos()
 	// I’[‚Ìˆ—
 	if ( is_end )
 	{
-		if ( true )
+		const float cross = front_node->start_front.xz().cross( ( position - front_node->position ).xz() );
+
+		if ( cross < 0.f )
 		{
 			// Šù‘¶‚Ì“¹˜H‚É‰E‚©‚ç‚Ô‚Â‚©‚Á‚½ê‡
 			front_left_pos = front_node->back_right_pos;
 			front_right_pos = front_node->front_right_pos;
 		}
-		else if ( false )
+		else if ( cross > 0.f )
 		{
 			// Šù‘¶‚Ì“¹˜H‚É¶‚©‚ç‚Ô‚Â‚©‚Á‚½ê‡
 			front_left_pos = front_node->front_left_pos;

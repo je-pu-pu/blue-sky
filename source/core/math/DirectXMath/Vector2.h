@@ -72,6 +72,11 @@ public:
 	    return out << "( " << v.x() << ", " << v.y() << " )";
 	}
 
+	inline UnitType cross( const Vector2& v2 ) const
+	{
+		return DirectX::XMVectorGetX( DirectX::XMVector2Cross( DirectX::XMLoadFloat2( & value_ ), DirectX::XMLoadFloat2( & v2.value_ ) ) );
+	}
+
 }; // class Vector2
 
 }; // namespace direct_x_math

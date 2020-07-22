@@ -163,7 +163,7 @@ void CityGenerator::step()
 
 	for ( const auto* node : del_nodes )
 	{
-		std::cout << "del : " << static_cast< int >( node->type ) << ", " << node->position << std::endl;
+		std::cout << "del : " << node << ", " << static_cast< int >( node->type ) << ", " << node->position << std::endl;
 	}
 
 	// 他の道路にぶつかったノードとコントロールポイントを削除する
@@ -366,6 +366,13 @@ void CityGenerator::RoadNode::update_vertex_pos()
 			// 既存の道路に正面からぶつかった場合
 			front_left_pos = front_node->front_right_pos;
 			front_right_pos = front_node->front_left_pos;
+		}
+
+		if ( ( position - front_node->position ).length() > get_road_width() * 3.f )
+		{
+			std::cout << "--- ??? ---" << std::endl;
+			std::cout << "node : " << this << std::endl;
+			std::cout << "front node : " << front_node << std::endl;
 		}
 	}
 }

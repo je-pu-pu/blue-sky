@@ -64,7 +64,7 @@ public:
 			: type( t )
 			, position( pos )
 		{
-
+			update_vertex_pos();
 		}
 
 		~RoadNode()
@@ -232,6 +232,8 @@ protected:
 	
 	void generate_debug_mesh();
 	void generate_debug_road_control_point_mesh( const RoadControlPoint& ) const;
+
+	bool check_collision( RoadControlPoint& ) const;
 
 public:
 	CityGenerator();

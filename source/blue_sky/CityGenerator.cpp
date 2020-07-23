@@ -65,9 +65,20 @@ void CityGenerator::step()
 	// 新しく発生したコントロールポイント
 	RoadControlPointList new_cps;
 
+	// 削除するコントロールポイント
+	RoadControlPointList del_cps;
+
+	std::vector< RoadNode* > del_nodes; // 削除するノード
+
 	for ( auto& cp : road_control_point_list_ )
 	{
 		cp.position += cp.front * get_road_depth();
+
+		if ( check_collision( cp ) )
+		{
+			del_cps.push_back( cp );
+			continue;
+		}
 
 		auto type = RoadNode::Type::STRAIGHT;
 
@@ -123,52 +134,18 @@ void CityGenerator::step()
 		node->update_vertex_pos();
 	}
 
-	std::vector< RoadNode* > del_nodes; // 削除するノード
-
-	for ( const auto& cp : road_control_point_list_ )
-	{
-		for ( const auto& node : road_node_list_ )
-		{
-			if ( cp.node == node.get() )
-			{
-				continue;
-			}
-
-			if ( cp.node->back_node == node.get() )
-			{
-				continue;
-			}
-
-			// 当り判定の半径
-			const auto radius = std::sqrt( get_road_width() * 2.f + get_road_depth() * 2.f ) * 1.5f;
-
-			const auto lx = cp.position.x() - node->position.x();
-			const auto lz = cp.position.z() - node->position.z();
-			const auto length = std::sqrt( lx * lx + lz * lz );
-
-			if ( length <= radius )
-			{
-				// std::cout << "hit at : " << hit_pos.value() << ", cp = " << cp.position << std::endl;
-				del_nodes.push_back( cp.node );
-
-
-				// 当たったノードと繋ぐ
-				cp.node->back_node->front_node = node.get();
-				cp.node->back_node->is_end = true;
-
-				break;
-			}
-		}
-	}
-
-	for ( const auto* node : del_nodes )
-	{
-		std::cout << "del : " << node << ", " << static_cast< int >( node->type ) << ", " << node->position << std::endl;
-	}
-
 	// 他の道路にぶつかったノードとコントロールポイントを削除する
-	road_control_point_list_.erase( std::remove_if( road_control_point_list_.begin(), road_control_point_list_.end(),[&]( auto& cp ) { return std::find( del_nodes.begin(), del_nodes.end(), cp.node ) != del_nodes.end(); } ), road_control_point_list_.end() );
-	road_node_list_.erase( std::remove_if( road_node_list_.begin(), road_node_list_.end(),[&]( auto& node ) { return std::find( del_nodes.begin(), del_nodes.end(), node.get() ) != del_nodes.end(); } ), road_node_list_.end() );
+	road_control_point_list_.erase(
+		std::remove_if(
+			road_control_point_list_.begin(),
+			road_control_point_list_.end(),
+			[&]( auto& cp )
+			{
+				return std::find_if( del_cps.begin(), del_cps.end(), [&] ( auto& cp2 ) { return cp2.node == cp.node; } ) != del_cps.end();
+			}
+		),
+		road_control_point_list_.end()
+	);
 
 	std::cout << "--------------------" << std::endl;
 
@@ -191,6 +168,48 @@ void CityGenerator::step()
 
 	debug_model_->get_mesh()->create_vertex_buffer();
 	debug_model_->get_mesh()->create_index_buffer();
+}
+
+/**
+ * 伸ばしたコントロールポイントと既存の道ノードとの衝突判定を行う
+ *
+ * 衝突していた場合は伸ばした道路と既存の道路を接続する
+ *
+ * @param cp 伸ばしたコントロールポイント
+ * @return コントロールポイントが既存の道ノードと衝突した場合は true を、衝突しなかった場合は false を返す
+ */
+bool CityGenerator::check_collision( RoadControlPoint& cp ) const
+{
+	for ( const auto& node : road_node_list_ )
+	{
+		if ( cp.node == node.get() )
+		{
+			continue;
+		}
+
+		if ( cp.node->back_node == node.get() )
+		{
+			continue;
+		}
+
+		// 当り判定の半径
+		const auto radius = std::sqrt( get_road_width() * 2.f + get_road_depth() * 2.f ) * 1.5f;
+
+		const auto lx = cp.position.x() - node->position.x();
+		const auto lz = cp.position.z() - node->position.z();
+		const auto length = std::sqrt( lx * lx + lz * lz );
+
+		if ( length <= radius )
+		{
+			// 当たったノードと繋ぐ
+			cp.node->front_node = node.get();
+			cp.node->is_end = true;
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**

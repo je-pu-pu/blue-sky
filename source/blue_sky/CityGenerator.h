@@ -228,12 +228,14 @@ protected:
 
 	void extend_road( const Vector&, const Vector&, const Vector&, float_t, int_t, int_t );
 	void generate_road_mesh();
-	void generate_road_mesh( const RoadNode& );
+	void generate_road_mesh( const RoadNode* );
 	
 	void generate_debug_mesh();
 	void generate_debug_road_control_point_mesh( const RoadControlPoint& ) const;
 
 	bool check_collision( RoadControlPoint& ) const;
+
+	VertexGroup* get_vertex_group_by_road_node( const RoadNode* );
 
 public:
 	CityGenerator();
@@ -241,6 +243,7 @@ public:
 	void step();
 
 	Model* get_model() { return model_; }
+
 	Model* get_debug_model() { return debug_model_; }
 };
 

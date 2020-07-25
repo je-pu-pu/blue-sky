@@ -26,8 +26,13 @@ CityGenerator::CityGenerator()
 	model_->set_shader_at( 1, GameMain::get_instance()->get_graphics_manager()->create_shader< graphics::shader::FlatShader >() );
 	model_->get_shader_at( 1 )->set_texture_at( 0, GameMain::get_instance()->get_graphics_manager()->load_texture( "media/model/road-cross.png" ) );
 
-	model_->get_mesh()->create_vertex_group();
-	model_->get_mesh()->create_vertex_group();
+	model_->set_shader_at( 2, GameMain::get_instance()->get_graphics_manager()->create_shader< graphics::shader::FlatShader >() );
+	model_->get_shader_at( 2 )->set_texture_at( 0, GameMain::get_instance()->get_graphics_manager()->load_texture( "media/model/road-t.png" ) );
+
+	for ( int n = 0; n < model_->get_shader_count(); n++ )
+	{
+		model_->get_mesh()->create_vertex_group();
+	}
 
 	road_node_list_.reserve( 1024 * 4 );
 	road_node_list_.emplace_back( std::make_unique< RoadNode >( RoadNode::Type::STRAIGHT, Vector::Zero ) );
@@ -205,6 +210,11 @@ bool CityGenerator::check_collision( RoadControlPoint& cp ) const
 			cp.node->front_node = node.get();
 			cp.node->is_end = true;
 
+			if ( node->type == RoadNode::Type::STRAIGHT )
+			{
+				node->type = RoadNode::Type::T_INTERSECTION;
+			}
+
 			return true;
 		}
 	}
@@ -317,12 +327,15 @@ void CityGenerator::extend_road( const Vector& control_point, const Vector& vert
 void CityGenerator::generate_road_mesh()
 {
 	model_->get_mesh()->clear_vertex_list();
-	model_->get_mesh()->get_vertex_group_at( 0 )->clear();
-	model_->get_mesh()->get_vertex_group_at( 1 )->clear();
+
+	for ( auto& vg : model_->get_mesh()->get_vertex_group_list() )
+	{
+		vg->clear();
+	}
 
 	for ( auto& node : road_node_list_ )
 	{
-		generate_road_mesh( * node );
+		generate_road_mesh( node.get() );
 	}
 }
 
@@ -400,7 +413,7 @@ void CityGenerator::RoadNode::update_vertex_pos()
  * メッシュを生成する
  *
  */
-void CityGenerator::generate_road_mesh( const RoadNode& node )
+void CityGenerator::generate_road_mesh( const RoadNode* node )
 {
 	/**
 	 * 2-------3
@@ -415,14 +428,14 @@ void CityGenerator::generate_road_mesh( const RoadNode& node )
 
 	const auto index_offset = model_->get_mesh()->get_vertex_count();
 
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { node.back_left_pos.xyz() }, { 0.f, 1.f, 0.f }, { 0.f, 1.f } ) ); // 0
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { node.back_right_pos.xyz() }, { 0.f, 1.f, 0.f }, { 0.f, 0.f } ) ); // 1
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->back_left_pos.xyz() }, { 0.f, 1.f, 0.f }, { 0.f, 1.f } ) ); // 0
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->back_right_pos.xyz() }, { 0.f, 1.f, 0.f }, { 0.f, 0.f } ) ); // 1
 
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { node.front_left_pos.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 1.f } ) ); // 2
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { node.front_right_pos.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 0.f } ) ); // 3
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->front_left_pos.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 1.f } ) ); // 2
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->front_right_pos.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 0.f } ) ); // 3
 
-	const bool is_cross = node.type == RoadNode::Type::CROSS; // node.left_node && node.right_node;
-	auto* vertex_group = get_model()->get_mesh()->get_vertex_group_at( is_cross ? 1 : 0 );
+	auto* vertex_group = get_vertex_group_by_road_node( node );
+	
 
 	vertex_group->add_index( index_offset + 0 );
 	vertex_group->add_index( index_offset + 2 );
@@ -439,6 +452,23 @@ void CityGenerator::generate_road_mesh( const RoadNode& node )
 	}
 	*/
 }
+
+/**
+ * 道路ノードから該当する VertexGroup を取得する
+ */
+CityGenerator::VertexGroup* CityGenerator::get_vertex_group_by_road_node( const RoadNode* node )
+{
+	std::array< VertexGroup*, 4 > vertex_group_map = {
+		get_model()->get_mesh()->get_vertex_group_at( 0 ),	 // STRAIGHT,			///< 直線
+		get_model()->get_mesh()->get_vertex_group_at( 1 ),	 // CROSS,				///< 十字路
+		get_model()->get_mesh()->get_vertex_group_at( 0 ),	 // CURVE,				///< カーブ
+		get_model()->get_mesh()->get_vertex_group_at( 2 ),	 // T_INTERSECTION,		///< T 字路
+	};
+
+	return vertex_group_map[ static_cast< int >( node->type ) ];
+}
+
+
 
 /**
  * デバッグ用のメッシュを生成する

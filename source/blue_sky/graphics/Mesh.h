@@ -150,6 +150,9 @@ public:
 	inline VertexList& get_vertex_list() { return vertex_list_; }
 	inline const VertexList& get_vertex_list() const { return vertex_list_; }
 
+	inline VertexGroupList& get_vertex_group_list() { return vertex_group_list_; }
+	inline const VertexGroupList& get_vertex_group_list() const { return vertex_group_list_; }
+
 	void optimize();
 
 	void create_vertex_buffer() { buffer_->create_vertex_buffer(); }

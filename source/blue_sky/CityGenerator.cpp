@@ -8,6 +8,7 @@
 #include <core/math/LineSegment2.h>
 
 #include <common/random.h>
+#include <common/math.h>
 
 #include <iostream>
 
@@ -213,6 +214,20 @@ bool CityGenerator::check_collision( RoadControlPoint& cp ) const
 			if ( node->type == RoadNode::Type::STRAIGHT )
 			{
 				node->type = RoadNode::Type::T_INTERSECTION;
+
+				// @todo ‹¤’Ê‰»‚·‚é
+				const float cross = node->start_front.xz().cross( ( cp.position - node->position ).xz() );
+
+				if ( cross < 0.f )
+				{
+					// Šù‘¶‚Ì“¹˜H‚É‰E‚©‚ç‚Ô‚Â‚©‚Á‚½ê‡
+					node->right_node = cp.node;
+				}
+				else if ( cross > 0.f )
+				{
+					// Šù‘¶‚Ì“¹˜H‚É¶‚©‚ç‚Ô‚Â‚©‚Á‚½ê‡
+					node->left_node = cp.node;
+				}
 			}
 
 			return true;
@@ -428,11 +443,37 @@ void CityGenerator::generate_road_mesh( const RoadNode* node )
 
 	const auto index_offset = model_->get_mesh()->get_vertex_count();
 
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->back_left_pos.xyz() }, { 0.f, 1.f, 0.f }, { 0.f, 1.f } ) ); // 0
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->back_right_pos.xyz() }, { 0.f, 1.f, 0.f }, { 0.f, 0.f } ) ); // 1
+	float rotation_degree = 0.f;
 
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->front_left_pos.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 1.f } ) ); // 2
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->front_right_pos.xyz() }, { 0.f, 1.f, 0.f }, { 1.f, 0.f } ) ); // 3
+	if ( node->type == RoadNode::Type::STRAIGHT )
+	{
+		rotation_degree = 90.f;
+	}
+	else if ( node->type == RoadNode::Type::T_INTERSECTION )
+	{
+		if ( node->left_node )
+		{
+			rotation_degree = -90.f;
+		}
+		else if ( node->right_node )
+		{
+			rotation_degree = 90.f;
+		}
+	}
+
+	Matrix t, r, t2, m;
+	
+	t.set_translation( -0.5f, -0.5f, 0.f );
+	r.set_rotation_z( math::degree_to_radian( rotation_degree ) );
+	t2.set_translation( 0.5f, 0.5f, 0.f );
+
+	m = t * r * t2;
+
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->back_left_pos.xyz() }, { 0.f, 1.f, 0.f }, ( Vector( 0.f, 0.f, 0.f, 1.f ) * m ).xy() ) ); // 0
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->back_right_pos.xyz() }, { 0.f, 1.f, 0.f }, ( Vector( 1.f, 0.f, 0.f, 1.f ) * m ).xy() ) ); // 1
+
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->front_left_pos.xyz() }, { 0.f, 1.f, 0.f }, ( Vector( 0.f, 1.f, 0.f, 1.f ) * m ).xy() ) ); // 2
+	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->front_right_pos.xyz() }, { 0.f, 1.f, 0.f }, ( Vector( 1.f, 1.f, 0.f, 1.f ) * m ).xy() ) ); // 3
 
 	auto* vertex_group = get_vertex_group_by_road_node( node );
 	

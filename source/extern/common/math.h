@@ -59,6 +59,14 @@ template< typename T, typename ST > inline T chase( T value, T target, ST speed 
 	return value;
 }
 
+/**
+ * üŒ`•âŠÔ
+ */
+template< typename T > inline T lerp( T a, T b, float t )
+{
+	return a + ( t * ( b - a ) );
+}
+
 } // namespace math
 
 #endif // COMMON_MATH_H

@@ -431,14 +431,25 @@ void CityGenerator::RoadNode::update_vertex_pos()
 void CityGenerator::generate_road_mesh( const RoadNode* node )
 {
 	/**
+	 * •ªŠ„” 0 ‚Ìê‡
+	 *
 	 * 2-------3
 	 * |       |
 	 * |   +   | 
 	 * |       |
 	 * 0-------1
 	 *
+	 *
+	 * •ªŠ„” 1 ‚Ìê‡
+	 *
+	 * 4-------5
+	 * |       |
+	 * 2---+---3
+	 * |       |
+	 * 0-------1
+	 *
 	 * +      : node.position
-	 * 0 .. 3 : vertex
+	 * 0 .. 5 : vertex
 	 */
 
 	const auto index_offset = model_->get_mesh()->get_vertex_count();
@@ -469,29 +480,29 @@ void CityGenerator::generate_road_mesh( const RoadNode* node )
 
 	m = t * r * t2;
 
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->back_left_pos.xyz() }, { 0.f, 1.f, 0.f }, ( Vector( 0.f, 0.f, 0.f, 1.f ) * m ).xy() ) ); // 0
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->back_right_pos.xyz() }, { 0.f, 1.f, 0.f }, ( Vector( 1.f, 0.f, 0.f, 1.f ) * m ).xy() ) ); // 1
+	model_->get_mesh()->add_vertex( Mesh::Vertex( node->back_left_pos.xyz(), Vector::Up.xyz(), ( Vector( 0.f, 0.f, 0.f, 1.f ) * m ).xy() ) ); // 0
+	model_->get_mesh()->add_vertex( Mesh::Vertex( node->back_right_pos.xyz(), Vector::Up.xyz(), ( Vector( 1.f, 0.f, 0.f, 1.f ) * m ).xy() ) ); // 1
 
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->front_left_pos.xyz() }, { 0.f, 1.f, 0.f }, ( Vector( 0.f, 1.f, 0.f, 1.f ) * m ).xy() ) ); // 2
-	model_->get_mesh()->add_vertex( Mesh::Vertex( { node->front_right_pos.xyz() }, { 0.f, 1.f, 0.f }, ( Vector( 1.f, 1.f, 0.f, 1.f ) * m ).xy() ) ); // 3
+	// •ªŠ„” ( 0 : •ªŠ„‚µ‚È‚¢ )
+	const int subdivision_level = 3;
 
 	auto* vertex_group = get_vertex_group_by_road_node( node );
-	
 
-	vertex_group->add_index( index_offset + 0 );
-	vertex_group->add_index( index_offset + 2 );
-	vertex_group->add_index( index_offset + 1 );
-
-	vertex_group->add_index( index_offset + 1 );
-	vertex_group->add_index( index_offset + 2 );
-	vertex_group->add_index( index_offset + 3 );
-
-	/*
-	if ( ! front_node.link_list.empty() )
+	for ( auto n = 0; n < subdivision_level + 1; n++ )
 	{
-		generate_road_mesh( front_node, ** front_node.link_list.cbegin() );
+		const float a = static_cast< float >( n + 1 ) / static_cast< float >( subdivision_level + 1 );
+
+		model_->get_mesh()->add_vertex( Mesh::Vertex( Vector::lerp( node->back_left_pos, node->front_left_pos, a ).xyz(), Vector::Up.xyz(), ( Vector( 0.f, a, 0.f, 1.f ) * m ).xy() ) ); // 2
+		model_->get_mesh()->add_vertex( Mesh::Vertex( Vector::lerp( node->back_right_pos, node->front_right_pos, a ).xyz(), Vector::Up.xyz(), ( Vector( 1.f, a, 0.f, 1.f ) * m ).xy() ) ); // 3
+
+		vertex_group->add_index( index_offset + ( n * 2 ) + 0 );
+		vertex_group->add_index( index_offset + ( n * 2 ) + 2 );
+		vertex_group->add_index( index_offset + ( n * 2 ) + 1 );
+
+		vertex_group->add_index( index_offset + ( n * 2 ) + 1 );
+		vertex_group->add_index( index_offset + ( n * 2 ) + 2 );
+		vertex_group->add_index( index_offset + ( n * 2 ) + 3 );
 	}
-	*/
 }
 
 /**

@@ -93,6 +93,11 @@ public:
 	friend Vector& operator *= ( Vector& v, UnitType x ) { v = v * x; return v; }
 	friend Vector& operator /= ( Vector& v, UnitType x ) { v = v / x; return v; }
 
+	static Vector lerp( const Vector& v1, const Vector& v2, UnitType t )
+	{
+		return v1 + ( ( v2 - v1 ) * t );
+	}
+
 	friend std::ostream& operator << ( std::ostream& out, const Vector& v )
 	{
 	    return out << "( " << v.x() << ", " << v.y() << ", " << v.z() << " )";

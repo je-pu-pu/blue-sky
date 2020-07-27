@@ -241,6 +241,8 @@
   <ItemGroup>
     <None Include="blue-sky.config">
       <SubType>Designer</SubType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </None>
     <None Include="blye-sky.ico" />
     <None Include="media\script\test\clone.lua" />

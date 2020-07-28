@@ -59,7 +59,7 @@ void DebugScene::update()
 	camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * 90.f, get_input()->get_mouse_dx() * 90.f, 0.f );
 	camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f ) );
 
-	const float moving_speed = 0.1f;
+	const float moving_speed = get_input()->press( Input::Button::R2 ) ? 0.3f : 0.1f;
 
 	if ( get_input()->press( Input::Button::LEFT ) )
 	{

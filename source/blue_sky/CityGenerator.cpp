@@ -484,16 +484,38 @@ void CityGenerator::generate_road_mesh( const RoadNode* node )
 	model_->get_mesh()->add_vertex( Mesh::Vertex( node->back_right_pos.xyz(), Vector::Up.xyz(), ( Vector( 1.f, 0.f, 0.f, 1.f ) * m ).xy() ) ); // 1
 
 	// •ªŠ„” ( 0 : •ªŠ„‚µ‚È‚¢ )
-	const int subdivision_level = 3;
+	const int subdivision_level = 1;
 
 	auto* vertex_group = get_vertex_group_by_road_node( node );
+
+	Vector pos = node->position;		// ˆÊ’u
+	Vector front = node->start_front;	// Œü‚«
 
 	for ( auto n = 0; n < subdivision_level + 1; n++ )
 	{
 		const float a = static_cast< float >( n + 1 ) / static_cast< float >( subdivision_level + 1 );
 
-		model_->get_mesh()->add_vertex( Mesh::Vertex( Vector::lerp( node->back_left_pos, node->front_left_pos, a ).xyz(), Vector::Up.xyz(), ( Vector( 0.f, a, 0.f, 1.f ) * m ).xy() ) ); // 2
-		model_->get_mesh()->add_vertex( Mesh::Vertex( Vector::lerp( node->back_right_pos, node->front_right_pos, a ).xyz(), Vector::Up.xyz(), ( Vector( 1.f, a, 0.f, 1.f ) * m ).xy() ) ); // 3
+		Vector left_pos;
+		Vector right_pos;
+
+		if ( n == subdivision_level )
+		{
+			left_pos = node->front_left_pos;
+			right_pos = node->front_right_pos;
+		}
+		else
+		{
+			front = Vector::lerp( node->start_front, node->end_front, a ).normalize();
+			pos += front;
+
+			const Vector right = Vector::Up.cross( front );
+
+			left_pos = pos + -( right * get_road_width() * 0.5f );
+			right_pos = pos + ( right * get_road_width() * 0.5f );
+		}
+		
+		model_->get_mesh()->add_vertex( Mesh::Vertex( left_pos.xyz(), Vector::Up.xyz(), ( Vector( 0.f, a, 0.f, 1.f ) * m ).xy() ) ); // 2
+		model_->get_mesh()->add_vertex( Mesh::Vertex( right_pos.xyz(), Vector::Up.xyz(), ( Vector( 1.f, a, 0.f, 1.f ) * m ).xy() ) ); // 3
 
 		vertex_group->add_index( index_offset + ( n * 2 ) + 0 );
 		vertex_group->add_index( index_offset + ( n * 2 ) + 2 );

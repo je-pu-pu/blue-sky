@@ -484,7 +484,7 @@ void CityGenerator::generate_road_mesh( const RoadNode* node )
 	model_->get_mesh()->add_vertex( Mesh::Vertex( node->back_right_pos.xyz(), Vector::Up.xyz(), ( Vector( 1.f, 0.f, 0.f, 1.f ) * m ).xy() ) ); // 1
 
 	// •ªŠ„” ( 0 : •ªŠ„‚µ‚È‚¢ )
-	const int subdivision_level = 1;
+	const int subdivision_level = 7;
 
 	auto* vertex_group = get_vertex_group_by_road_node( node );
 

@@ -32,6 +32,23 @@ public:
 		
 	}
 
+	Matrix( UnitType m00, UnitType m01, UnitType m02, UnitType m03,
+		UnitType m10, UnitType m11, UnitType m12, UnitType m13,
+		UnitType m20, UnitType m21, UnitType m22, UnitType m23,
+		UnitType m30, UnitType m31, UnitType m32, UnitType m33
+	)
+		: value_(
+			m00, m01, m02, m03,
+			m10, m11, m12, m13,
+			m20, m21, m22, m23,
+			m30, m31, m32, m33
+		)
+	{ }
+
+	Matrix( const Vector& v0, const Vector& v1, const Vector& v2, const Vector& v3 )
+		: value_( v0.value_, v1.value_, v2.value_, v3.value_ )
+	{ }
+
 	Matrix& operator = ( const Matrix& m )
 	{
 		value_ = m.value_;
@@ -60,6 +77,22 @@ public:
 		);
 		
 		return *this;
+	}
+
+	inline static Matrix create(
+		UnitType m00, UnitType m01, UnitType m02, UnitType m03,
+		UnitType m10, UnitType m11, UnitType m12, UnitType m13,
+		UnitType m20, UnitType m21, UnitType m22, UnitType m23,
+		UnitType m30, UnitType m31, UnitType m32, UnitType m33 )
+	{
+		Matrix m;
+		m.set(
+			m00, m01, m02, m03,
+			m10, m11, m12, m13,
+			m20, m21, m22, m23,
+			m30, m31, m32, m33 );
+
+		return m;
 	}
 
 	Matrix& set_identity()

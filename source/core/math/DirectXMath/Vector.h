@@ -21,6 +21,8 @@ class Matrix;
 class alignas( 16 ) Vector
 {
 public:
+	friend class Matrix;
+
 	using UnitType = float;
 
 private:

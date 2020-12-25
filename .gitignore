@@ -6,7 +6,7 @@
 
 /doc/html/
 
-/source/lib/*
+/source/lib/x86/*
 /source/Debug/
 /source/Release/
 /source/Profile/
@@ -16,6 +16,7 @@
 /source/extern/*/Release/
 /source/extern/*/Profile/
 
+/source/imgui.ini
 /source/*.config
 /source/save/*.save
 /source/log/*.log
@@ -27,13 +28,10 @@
 *.sdf
 *.suo
 
+/log/
 /package/
-
 /reference/
 
-/log/
-/source/extern/Debug
-/source/extern/Release
 /source/blue-sky-cppcheck-build-dir
 
 /source/media/texture/matcap/test/*

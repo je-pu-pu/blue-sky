@@ -21,7 +21,11 @@
 #include <iostream>
 #include <cassert>
 
+// #pragma comment ( lib, "libfbxsdk.lib" )
 #pragma comment ( lib, "libfbxsdk-mt.lib" )
+#pragma comment ( lib, "libxml2-mt.lib" )
+#pragma comment ( lib, "zlib-mt.lib" )
+
 
 namespace blue_sky::graphics
 {

@@ -6,6 +6,9 @@
 #include <fbxsdk.h>
 #include <unordered_map>
 
+// FBX SDK 2020.2 fbxarch.h ‚É‚æ‚é #define snprintf _snprintf ‚ðŒ³‚É–ß‚·
+#undef snprintf
+
 namespace blue_sky::graphics
 {
 

@@ -221,6 +221,7 @@
     <ClCompile Include="core\graphics\Direct3D11\RenderTargetTexture.cpp">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClCompile>
+    <ClCompile Include="lib.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />

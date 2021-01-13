@@ -256,7 +256,7 @@ inline void ScriptManager::load_command_history( const string_t& file_path )
 {
 	std::ifstream in( file_path );
 
-	while( ! in.eof() )
+	while( in && ! in.eof() )
 	{
 		string_t command;
 		

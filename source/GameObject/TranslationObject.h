@@ -7,7 +7,7 @@ namespace blue_sky
 {
 
 /**
- * 移動しないオブジェクト
+ * 移動しないオブジェクト @todo 名前を直す StaticObject から継承してるのは変
  *
  */
 class TranslationObject : public StaticObject

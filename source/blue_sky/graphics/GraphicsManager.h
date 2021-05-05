@@ -100,7 +100,7 @@ private:
 	BaseShadowMapShader*									shadow_map_skin_shader_ = nullptr;
 
 	std::vector< Texture* >		paper_texture_list_;
-	Texture*					paper_texture_ = 0;
+	Texture*					paper_texture_ = nullptr;
 
 	ModelManager				model_manager_;
 	MeshManager					mesh_manager_;
@@ -108,10 +108,10 @@ private:
 	TextureManager				texture_manager_;
 	SkinningAnimationSetManager skinning_animation_set_manager_;
 
-	Texture*					null_texture_ = 0;
+	Texture*					null_texture_ = nullptr;
 
-	mutable const ConstantBuffer* current_object_constant_buffer_ = 0;
-	mutable const ConstantBuffer* current_skinning_constant_buffer_ = 0;
+	mutable const ConstantBuffer* current_object_constant_buffer_ = nullptr;
+	mutable const ConstantBuffer* current_skinning_constant_buffer_ = nullptr;
 
 	bool						is_debug_axis_enabled_ = true;
 

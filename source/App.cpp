@@ -196,29 +196,29 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_KEYDOWN:
 	{
-		if ( App::GetInstance()->game_ )
+		if ( App::get_instance()->game_ )
 		{
-			App::GetInstance()->game_->on_special_key_down( wp );
+			App::get_instance()->game_->on_special_key_down( wp );
 		}
 
 		break;
 	}
 	case WM_CHAR:
 	{
-		if ( App::GetInstance()->game_ )
+		if ( App::get_instance()->game_ )
 		{
-			App::GetInstance()->game_->on_key_down( wp );
+			App::get_instance()->game_->on_key_down( wp );
 		}
 
 		break;
 	}
 	case WM_MOUSEMOVE:
 	{
-		if ( ! App::GetInstance()->is_mouse_in_window_ )
+		if ( ! App::get_instance()->is_mouse_in_window_ )
 		{
-			App::GetInstance()->is_mouse_in_window_ = true;
+			App::get_instance()->is_mouse_in_window_ = true;
 
-			ShowCursor( App::GetInstance()->is_show_cursor_enabled_ );
+			ShowCursor( App::get_instance()->is_show_cursor_enabled_ );
 
 			TRACKMOUSEEVENT track_mouse_event = { sizeof( TRACKMOUSEEVENT ), TME_LEAVE, hwnd };
 			TrackMouseEvent( & track_mouse_event );
@@ -227,7 +227,7 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_MOUSELEAVE:
 	{
-		App::GetInstance()->is_mouse_in_window_ = false;
+		App::get_instance()->is_mouse_in_window_ = false;
 
 		ShowCursor( TRUE );
 
@@ -235,16 +235,16 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_MOUSEWHEEL:
 	{
-		if ( App::GetInstance()->game_ )
+		if ( App::get_instance()->game_ )
 		{
-			App::GetInstance()->game_->on_mouse_wheel( GET_WHEEL_DELTA_WPARAM( wp ) );
+			App::get_instance()->game_->on_mouse_wheel( GET_WHEEL_DELTA_WPARAM( wp ) );
 		}
 
 		break;
 	}
 	case WM_ACTIVATEAPP:
 	{
-		App::GetInstance()->set_active( LOWORD( wp ) != 0 );
+		App::get_instance()->set_active( LOWORD( wp ) != 0 );
 		break;
 	}
 	case WM_DESTROY:
@@ -281,22 +281,22 @@ void App::set_active( bool active )
 
 	if ( active )
 	{
-		App::GetInstance()->clip_cursor( is_clip_cursor_enabled_ );
+		App::get_instance()->clip_cursor( is_clip_cursor_enabled_ );
 	}
 }
 
 void App::on_resize( HWND /* hwnd */ )
 {
-	if ( ! App::GetInstance()->hWnd )
+	if ( ! App::get_instance()->hWnd )
 	{
 		return;
 	}
 
 	// App::GetInstance()->clip_cursor( App::GetInstance()->is_clip_cursor_enabled_ );
 	
-	if ( App::GetInstance()->game_ )
+	if ( App::get_instance()->game_ )
 	{
-		App::GetInstance()->game_->on_resize();
+		App::get_instance()->game_->on_resize();
 	}
 }
 

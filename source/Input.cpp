@@ -144,13 +144,13 @@ void Input::update()
 
 	POINT point;
 	GetCursorPos( & point );
-	ScreenToClient( App::GetInstance()->GetWindowHandle(), & point );
+	ScreenToClient( App::get_instance()->GetWindowHandle(), & point );
 
-	mouse_x_rate_ = math::clamp( point.x / static_cast< float >( App::GetInstance()->get_width() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_x_sensitivity_;
-	mouse_y_rate_ = math::clamp( point.y / static_cast< float >( App::GetInstance()->get_height() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_y_sensitivity_;
+	mouse_x_rate_ = math::clamp( point.x / static_cast< float >( App::get_instance()->get_width() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_x_sensitivity_;
+	mouse_y_rate_ = math::clamp( point.y / static_cast< float >( App::get_instance()->get_height() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_y_sensitivity_;
 
-	mouse_dx_ = static_cast< float >( direct_input_->get_mouse_state().lX ) / static_cast< float >( App::GetInstance()->get_width() - 1 ) * 2.f * mouse_x_sensitivity_;
-	mouse_dy_ = static_cast< float >( direct_input_->get_mouse_state().lY ) / static_cast< float >( App::GetInstance()->get_height() - 1 ) * 2.f * mouse_y_sensitivity_;
+	mouse_dx_ = static_cast< float >( direct_input_->get_mouse_state().lX ) / static_cast< float >( App::get_instance()->get_width() - 1 ) * 2.f * mouse_x_sensitivity_;
+	mouse_dy_ = static_cast< float >( direct_input_->get_mouse_state().lY ) / static_cast< float >( App::get_instance()->get_height() - 1 ) * 2.f * mouse_y_sensitivity_;
 
 	mouse_point_ = point;
 

@@ -172,7 +172,7 @@ public:
 
 	ActiveObjectManager* get_active_object_manager() const { return active_object_manager_.get(); }
 	
-	static App* get_app() { return App::GetInstance(); }
+	static App* get_app() { return App::get_instance(); }
 
 	inline int get_width() const override { return get_app()->get_width(); }
 	inline int get_height() const override { return get_app()->get_height(); }

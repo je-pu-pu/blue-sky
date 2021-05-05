@@ -9,7 +9,7 @@
 #include "Game.h"
 
 #include <game/Config.h>
-
+#include <common/Singleton.h>
 #include <type/type.h>
 
 #include <windows.h>
@@ -20,9 +20,11 @@
  * アプリケーションとそれに対応するひとつのウィンドウを管理する
  *
  */
-class App
+class App : public common::Singleton< App >
 {
 public:
+	friend class common::Singleton< App >;
+
 	static const int DEFAULT_WIDTH = 800;
 	static const int DEFAULT_HEIGHT = 600;
 
@@ -65,9 +67,6 @@ public:
 
 	bool		Init(HINSTANCE, int);	//初期化
 	int			MessageLoop();			//メッセージループ
-	
-	// get
-	static App* GetInstance() { static App app; return & app; }
 
 	HINSTANCE	GetInstanceHandle(){ return hInst; }
 	HWND		GetWindowHandle(){ return hWnd; }

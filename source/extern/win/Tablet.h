@@ -25,7 +25,8 @@ namespace win
 class Tablet : private boost::noncopyable
 {
 public:
-	constexpr static bool is_enabled() { return false; }
+	/** ここを false にするとタブレットの入力が取れないので注意！ */
+	constexpr static bool is_enabled() { return true; }
 
 private:
 	HMODULE module_ = 0;

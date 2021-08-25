@@ -12,6 +12,8 @@
 #include <common/math.h>
 #include <common/random.h>
 
+#include <imgui.h>
+
 namespace blue_sky
 {
 
@@ -198,6 +200,17 @@ void CanvasTestScene::update()
 			points_->erase_point( [this,&vector] ( const Vertex& a ) { Vector aa( a.position.x(), a.position.y(), a.position.z(), 0.f ); return ( vector - aa ).length() < tablet_->get_pressure() * 0.1f; } );
 		}
 	}
+
+	ImGui::Begin( "Canvas params" );
+
+	float color[ 3 ] = { pen_color_.r(), pen_color_.g(), pen_color_.b() };
+
+	if ( ImGui::ColorEdit3( "Color", color ) )
+	{
+		pen_color_ = Color( color[ 0 ], color[ 1 ], color[ 2 ], 1.f );
+	}
+
+	ImGui::End();
 }
 
 /**

@@ -528,6 +528,7 @@ void GameMain::setup_scene()
 		// set_stage_name( "0-1" );
 		// setup_scene( "game_play" );
 		setup_scene( "debug" );
+		// setup_scene( "canvas_test" );
 
 		return;
 	}

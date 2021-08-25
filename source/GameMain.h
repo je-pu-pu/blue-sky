@@ -74,6 +74,7 @@ public:
 	using Direct3D					= core::graphics::direct_3d_11::Direct3D11;
 	using BulletDebugDraw			= core::graphics::direct_3d_11::BulletDebugDraw;
 
+	// @todo Input クラスにあるべきでは？
 	enum Key
 	{
 		KEY_LEFT  = VK_LEFT,
@@ -100,6 +101,7 @@ protected:
 
 	float									total_elapsed_time_;	///< ゲームが開始してからの経過時間 ( 秒 )
 
+	// @todo std::unique_ptr にする？
 	common::auto_ptr< Direct3D >			direct_3d_;				///< Direct3D
 
 	common::auto_ptr< DirectInput >			direct_input_;			///< DirectInput

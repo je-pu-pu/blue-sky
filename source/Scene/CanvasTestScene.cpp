@@ -4,6 +4,7 @@
 
 #include "Input.h"
 
+#include <ActiveObjectManager.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <game/MainLoop.h>
 
@@ -47,6 +48,7 @@ void CanvasTestScene::update()
 {
 	Scene::update();
 
+	/// @todo GraphicsManager ‚ÉˆÚs‚·‚é
 	const float rs = 0.05f;
 	static float ry = 0.f;
 	static float rx = 0.f;
@@ -112,12 +114,26 @@ void CanvasTestScene::update()
 			pen_color_.r() -= 0.005f;
 			pen_color_.g() -= 0.005f;
 			pen_color_.b() -= 0.005f;
+
+			auto* o = get_active_object_manager()->get_active_object( "paint_guide_plane" );
+
+			if ( o )
+			{
+				o->get_transform().set_position( o->get_transform().get_position() + Vector( 0.f, 0.f, 0.01f ) );
+			}
 		}
 		if ( get_input()->press( Input::Button::R2 ) )
 		{
 			pen_color_.r() += 0.005f;
 			pen_color_.g() += 0.005f;
 			pen_color_.b() += 0.005f;
+
+			auto* o = get_active_object_manager()->get_active_object( "paint_guide_plane" );
+
+			if ( o )
+			{
+				o->get_transform().set_position( o->get_transform().get_position() - Vector( 0.f, 0.f, 0.01f ) );
+			}
 		}
 	}
 
@@ -221,6 +237,7 @@ void CanvasTestScene::render()
 {
 	get_graphics_manager()->setup_rendering();
 	get_graphics_manager()->render_background();
+	get_graphics_manager()->render_active_objects( get_active_object_manager() );
 
 	get_graphics_manager()->set_input_layout( "drawing_point" );
 

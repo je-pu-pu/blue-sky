@@ -718,9 +718,14 @@
     <None Include="media\shader\post_effect\default.hlsl">
       <Filter>media\shader\post_effect</Filter>
     </None>
-    <None Include="media\shader\post_effect\common.hlsl" />
-    <None Include="media\shader\post_effect\chromatic_aberration.hlsl" />
     <None Include="media\script\test\switch_post_effect_shader.lua" />
+    <None Include="media\shader\post_effect\chromatic_aberration.hlsl">
+      <Filter>media\shader\post_effect</Filter>
+    </None>
+    <None Include="media\shader\post_effect\common.hlsl">
+      <Filter>media\shader\post_effect</Filter>
+    </None>
+    <None Include="media\script\scene\canvas_test.lua" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Input">
@@ -806,6 +811,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="media\shader\post_effect\hand_drawing.hlsl" />
+    <FxCompile Include="media\shader\post_effect\hand_drawing.hlsl">
+      <Filter>media\shader\post_effect</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -237,8 +237,8 @@ void CanvasTestScene::render()
 {
 	get_graphics_manager()->setup_rendering();
 	get_graphics_manager()->render_background();
-	get_graphics_manager()->render_active_objects( get_active_object_manager() );
 
+	/// @todo 点も一括で GraphicsManager で描画する。
 	get_graphics_manager()->set_input_layout( "drawing_point" );
 
 	render_technique( "|drawing_point", [this] {
@@ -254,6 +254,9 @@ void CanvasTestScene::render()
 		texture_->bind_to_ps( 1 );
 		points_->render();
 	} );
+
+	/// @todo 描画順の管理を GraphicsManager で行い 半透明のオブジェクトは後で描画されるようにする
+	get_graphics_manager()->render_active_objects( get_active_object_manager() );
 
 	{
 

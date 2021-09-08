@@ -16,6 +16,9 @@ namespace blue_sky::graphics
 /**
  * OBJ ファイルを読み込む
  *
+ * @todo マテリアル・テクスチャの指定のないモデルも読み込めるようにする ( plane.obj, teapot.obj など )
+ * @todo 不完全な .obj を読み込んだ時にエラーを出力する
+ * 
  * @param file_name OBJ ファイル名
  * @return ファイルの読み込みに成功した場合は true を、失敗した場合は false を返す
  */

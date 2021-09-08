@@ -286,7 +286,7 @@ GraphicsManager::Texture* GraphicsManager::get_texture( const char_t* name )
 /**
  * デフォルトのシェーダーを準備する
  *
- * @todo スクリプトから行えるようにする
+ * @todo スクリプトから行えるようにする ( C++ のシェーダークラスに名前を付けておき、スクリプトからシェーダークラス名, InputLayout 名, テクニック名を指定してシェーダーオブジェクトを new できないか？ )
  * @todo 関数名直す
  */
 void GraphicsManager::setup_default_shaders()
@@ -296,6 +296,7 @@ void GraphicsManager::setup_default_shaders()
 	create_named_shader< shader::NullShader >( "null" );
 	create_named_shader< shader::FlatShader >( "flat", "main", "flat" );
 	create_named_shader< shader::FlatShader >( "flat_skin", "skin", "flat_skin" );
+	create_named_shader< shader::FlatShader >( "transparent", "main", "transparent" );
 	create_named_shader< shader::MatcapShader >( "matcap", "main", "matcap" )->set_texture( matcap_texture );
 	create_named_shader< shader::MatcapShader >( "matcap_skin", "skin", "matcap_skin" )->set_texture( matcap_texture );
 	create_named_shader< shader::ShadowMapShader >( "shadow_map" );

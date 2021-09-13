@@ -219,12 +219,16 @@ void CanvasTestScene::update()
 
 	ImGui::Begin( "Canvas params" );
 
-	float color[ 3 ] = { pen_color_.r(), pen_color_.g(), pen_color_.b() };
+	float pen_color[ 3 ] = { pen_color_.r(), pen_color_.g(), pen_color_.b() };
 
-	if ( ImGui::ColorEdit3( "Color", color ) )
+	if ( ImGui::ColorEdit3( "Pen Color", pen_color ) )
 	{
-		pen_color_ = Color( color[ 0 ], color[ 1 ], color[ 2 ], 1.f );
+		pen_color_ = Color( pen_color[ 0 ], pen_color[ 1 ], pen_color[ 2 ], 1.f );
 	}
+
+	/// @todo プレーンオブジェクトの色を変更できるようにする
+	// auto* plane = get_active_object_manager()->get_active_object( "paint_guide_plane" );
+	// float plane_color = { plane->col }
 
 	ImGui::End();
 }

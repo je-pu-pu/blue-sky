@@ -66,6 +66,10 @@ void Model::render() const
 
 	for ( uint_t n = 0; n < get_shader_count(); n++ )
 	{
+		/// @todo Shader 毎にレンダリングする。モデルの描画毎に update(), bind() しない
+		get_shader_at( n )->update();
+		get_shader_at( n )->bind();
+
 		get_shader_at( n )->render( get_mesh(), n );
 	}
 }

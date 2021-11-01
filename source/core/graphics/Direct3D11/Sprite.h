@@ -12,7 +12,7 @@ namespace direct_x_math
 
 namespace core::graphics::direct_3d_11
 {
-	template< typename T > class ConstantBuffer;
+	template< typename, int > class ConstantBufferTyped;
 
 	class Direct3D11;
 	class InputLayout;
@@ -40,12 +40,10 @@ public:
 
 	struct ConstantBufferData
 	{
-		static const int SLOT = 13;
-
 		Matrix transform;
 	};
 
-	using ConstantBuffer = core::graphics::direct_3d_11::ConstantBuffer< ConstantBufferData >;
+	using ConstantBuffer = ConstantBufferTyped< ConstantBufferData, 13 >;
 
 	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
 

@@ -2,7 +2,6 @@
 
 #include <GameMain.h>
 
-#include <blue_sky/graphics/shader/FlatShader.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Mesh.h>
 #include <blue_sky/type.h>

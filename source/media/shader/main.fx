@@ -192,7 +192,7 @@ struct PS_SHADOW_INPUT
 };
 
 #include "common.hlsl"
-#include "transparent.hlsl"
+#include "unicolor.hlsl"
 #include "matcap.hlsl"
 #include "drawing_line.hlsl"
 

@@ -79,8 +79,6 @@ public:
 
 	void add_patrol_point( const Vector& point );
 
-	void bind_render_data() const override;
-
 }; // class Robot
 
 } // namespace blue_sky

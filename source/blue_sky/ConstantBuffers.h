@@ -1,25 +1,19 @@
 #pragma once
 
 #include <blue_sky/type.h>
-#include <core/graphics/Direct3D11/ConstantBuffer.h>
+#include <core/graphics/Direct3D11/ConstantBufferWithData.h>
 
 namespace blue_sky
 {
 
-template< uint_t N >
-struct BaseConstantBufferData
-{
-	static const uint_t SLOT = N;
-};
-
-struct GameConstantBufferData : public BaseConstantBufferData< 0 >
+struct GameConstantBufferData
 {
 	float_t screen_width;
 	float_t screen_height;
 	float_t dummy[ 2 ];
 };
 
-struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
+struct FrameConstantBufferData
 {
 	Matrix view;
 	Matrix projection;
@@ -31,7 +25,7 @@ struct FrameConstantBufferData : public BaseConstantBufferData< 1 >
 	float_t dummy = 0.f;
 };
 
-struct ObjectConstantBufferData : public BaseConstantBufferData< 2 >
+struct ObjectConstantBufferData
 {
 	Matrix world;
 	Color color;
@@ -41,7 +35,7 @@ struct ObjectConstantBufferData : public BaseConstantBufferData< 2 >
 	{ }
 };
 
-struct FrameDrawingConstantBufferData : public BaseConstantBufferData< 4 >
+struct FrameDrawingConstantBufferData
 {
 	Color shadow_color;
 	Color shadow_paper_color;
@@ -58,7 +52,7 @@ struct FrameDrawingConstantBufferData : public BaseConstantBufferData< 4 >
 	{ }
 };
 
-struct BoneConstantBufferData : public BaseConstantBufferData< 5 >
+struct BoneConstantBufferData
 {
 	static const int MaxBones = 100;
 
@@ -73,11 +67,11 @@ struct BoneConstantBufferData : public BaseConstantBufferData< 5 >
 	}
 };
 
-using GameConstantBuffer			= core::graphics::direct_3d_11::ConstantBuffer< GameConstantBufferData >;
-using FrameConstantBuffer			= core::graphics::direct_3d_11::ConstantBufferWithData< FrameConstantBufferData >;
-using FrameDrawingConstantBuffer	= core::graphics::direct_3d_11::ConstantBufferWithData< FrameDrawingConstantBufferData >;
-using ObjectConstantBuffer			= core::graphics::direct_3d_11::ConstantBuffer< ObjectConstantBufferData >;
-using ObjectConstantBufferWithData	= core::graphics::direct_3d_11::ConstantBufferWithData< ObjectConstantBufferData >;
-using BoneConstantBuffer			= core::graphics::direct_3d_11::ConstantBuffer< BoneConstantBufferData >;
+using GameConstantBuffer			= core::graphics::direct_3d_11::ConstantBufferTyped< GameConstantBufferData, 0 >;
+using FrameConstantBuffer			= core::graphics::direct_3d_11::ConstantBufferWithData< FrameConstantBufferData, 1 >;
+using FrameDrawingConstantBuffer	= core::graphics::direct_3d_11::ConstantBufferWithData< FrameDrawingConstantBufferData, 4 >;
+using ObjectConstantBuffer			= core::graphics::direct_3d_11::ConstantBufferTyped< ObjectConstantBufferData, 2 >;
+using ObjectConstantBufferWithData	= core::graphics::direct_3d_11::ConstantBufferWithData< ObjectConstantBufferData, 2 >;
+using BoneConstantBuffer			= core::graphics::direct_3d_11::ConstantBufferTyped< BoneConstantBufferData, 5 >;
 
 } // namespace blue_sky

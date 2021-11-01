@@ -1,10 +1,14 @@
-float4 ps_transparent( COMMON_POS input ) : SV_Target
+cbuffer GameConstantBuffer : register( b10 )
 {
-	return float4( 1.0f, 0.0f, 0.0f, 0.5f );
-	// return ObjectColor;
+	float4 UnicolorObjectColor;
+};
+
+float4 ps_unicolor( COMMON_POS input ) : SV_Target
+{
+	 return UnicolorObjectColor;
 }
 
-technique11 transparent
+technique11 unicolor
 {
 	pass main
     {
@@ -15,7 +19,7 @@ technique11 transparent
 		SetHullShader( NULL );
 		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_transparent() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_unicolor() ) );
 
 		RASTERIZERSTATE = Default;
     }

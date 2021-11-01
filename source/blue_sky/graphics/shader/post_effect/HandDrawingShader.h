@@ -12,7 +12,7 @@ namespace blue_sky::graphics::shader::post_effect
 class HandDrawingShader : public DefaultShader
 {
 public:
-	struct ConstantBufferData : public BaseConstantBufferData< 0 >
+	struct ConstantBufferData
 	{
 		float_t UvFactor	= 20.f;		// UV ŒW”
 		float_t TimeFactor	= 10.f;		// ŠÔŒW”
@@ -22,7 +22,7 @@ public:
 		float_t dummy[ 3 ]	= { 0.f };
 	};
 
-	using ConstantBuffer = blue_sky::ConstantBufferWithData< ConstantBufferData >;
+	using ConstantBuffer = blue_sky::ConstantBufferWithData< ConstantBufferData, 0 >;
 
 private:
 	ConstantBuffer constant_buffer_;

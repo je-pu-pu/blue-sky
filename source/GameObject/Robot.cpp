@@ -28,6 +28,9 @@ Robot::Robot()
 
 	GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
 	GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-error" );
+
+	// ‚±‚ÌŽž“_‚Å‚Í‚Ü‚¾ get_model() ‚Í nullptr ‚ð•Ô‚·
+	// get_model()->set_shader_at( 0, GameMain::get_instance()->get_graphics_manager()->clone_shader( get_model()->get_shader_at( 0 ) ) );
 }
 
 void Robot::restart()
@@ -425,11 +428,6 @@ void Robot::on_collide_with( Stone* stone )
 void Robot::add_patrol_point( const Vector& point )
 {
 	patrol_point_list_.push_back( point );
-}
-
-void Robot::bind_render_data() const
-{
-	ActiveObject::bind_render_data();
 }
 
 } // namespace blue_sky

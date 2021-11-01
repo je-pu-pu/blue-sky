@@ -15,8 +15,9 @@ class AnimationPlayer
 public:
 	/// @todo 整理する
 	using BoneConstantBuffer = blue_sky::BoneConstantBuffer;
+	using BoneConstantBufferData = blue_sky::BoneConstantBufferData;
 
-	static const int MaxBones = blue_sky::BoneConstantBufferData::MaxBones;
+	static const int MaxBones = BoneConstantBufferData::MaxBones;
 
 private:
 	const SkinningAnimationSet* skinning_animation_set_;	///< スキニングアニメーションのセット
@@ -51,7 +52,7 @@ public:
 
 	float_t get_current_frame() const { return current_frame_; }
 
-	void calculate_bone_matrix_recursive( BoneConstantBuffer::Data&, uint_t, const Matrix& ) const;
+	void calculate_bone_matrix_recursive( BoneConstantBufferData&, uint_t, const Matrix& ) const;
 
 	void update_render_data() const;
 	void bind_render_data() const;

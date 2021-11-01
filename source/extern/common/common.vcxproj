@@ -89,6 +89,7 @@
     <ClInclude Include="..\type\type.h" />
     <ClInclude Include="auto_ptr.h" />
     <ClInclude Include="chase_value.h" />
+    <ClInclude Include="enum_set.h" />
     <ClInclude Include="exception.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="math.h" />

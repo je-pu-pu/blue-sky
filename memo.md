@@ -192,3 +192,75 @@ void MyScene::init()
 
 * ShaderResource インターフェイス
 * RenderTarget インターフェイス
+
+# 2021-10-17
+
+## core::graphics::direct_3d_11::ConstantBuffer について
+
+* DataType ( 構造体 ) が無くても使えるようにしたい
+    * そのためには以下の情報が必要
+        * サイズ
+        * SLOT 
+* SLOT はコンパイル時に固定できるのでは？
+    * **SetConstantBuffers() はスロットを指定できる = 実行時に変更できる
+
+## 2021-10-18
+
+ConstantBuffer には以下の 3 種類が欲しい。
+
+* データの型は指定ぜず、データも保持しない ( 更新時に間違った型のデータを送ってしまう危険性がある )
+    * ConstantBuffer
+* データの型は指定する、データは保持しない ( )
+    * ConstantBufferTyped
+* データの型を指定し、データも保持する
+    * ConstantBufferWithData
+
+## 2021-10-20
+
+* ConstantBuffer はどれぐらいの場所で使われているのか？
+    * ConstantBuffer -> ConstantBufferTyped への置換
+
+## 2021-10-22
+
+* ShaderMixin を使う事で CanvasTestScene のプレーンの色を変更・保持する事に成功
+    * 描画はまだ未対応
+
+## 2021-10-24
+
+* 暫定的に Model::render() の中で Shader::update() が必要？
+* Shader から ConstantBuffer の update() が必要
+
+## 2021-10-26
+
+* ShaderMixin から ConstantBuffer の更新。
+* 設計が綺麗かは置いておいて、とりあえず動く事を目指す。
+
+## 2021-10-27
+
+* unicolor.hlsl を実装。
+* CanvasTestScene で UI で色を変えるとプレーンの色が変わるようにできた！
+    * ただし、色が変。白黒にしかならない。要調査。
+
+## 2021-10-28
+
+* CanvasTestScene で UI で色を変えるた時にプレーンの色が白黒にしかならない件
+    * unicolor.hlsl で float4 とする所を float としてしまっていた
+    * 解決
+## 2021-10-30
+
+* enum の集合を保持できるクラス common::enum_set を実装
+* CanvasTestScene でプレーンの色を UI から変更できるようになった。 UnicolorShader を追加。ShaderMixin によりシェーダーに独自のパラメータを持てるようになった。 ConstantBuffer 整理。
+
+## 2021-10-31
+
+* [c++]std::bitset と scoped enumでビットフラグ
+    * https://qiita.com/cmaru/items/a6e9e0cc64ff920526c1
+* [C++] 列挙体でビットフラグしたい
+    * https://jumble-note.blogspot.com/2017/12/c.html
+
+## 2021-11-02
+
+* ShaderStage::VS | ShaderStage::PS で common::enum_set::operator | () を呼べないか検証
+    * => namespace common の外で using すれば OK
+        * だが、enum_set< N > の N をどうするか？といった問題もあるため、 { ShaderStage::VS, ShaderStage::PS } としてコンストラクタで受ける方法がベターか
+* 

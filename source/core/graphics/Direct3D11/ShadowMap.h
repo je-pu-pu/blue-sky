@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Texture.h"
-#include <core/graphics/Direct3D11/ConstantBuffer.h>
+#include <core/graphics/Direct3D11/ConstantBufferWithData.h>
 #include <core/graphics/ShadowMap.h>
 #include <d3d11.h>
 #include <vector>
@@ -28,13 +28,11 @@ public:
 
 	struct ConstantBufferData
 	{
-		static const int SLOT = 10;
-
 		Matrix shadow_view_projection[ 3 ];
 		float_t view_depth_per_cascade_level[ 4 ] = { 0.f };
 	};
 
-	using ConstantBuffer = core::graphics::direct_3d_11::ConstantBufferWithData< ConstantBufferData >;
+	using ConstantBuffer = core::graphics::direct_3d_11::ConstantBufferWithData< ConstantBufferData, 10 >;
 
 	static const int shader_resource_view_slot_ = 1;		/// !!!!!!!!!!!
 

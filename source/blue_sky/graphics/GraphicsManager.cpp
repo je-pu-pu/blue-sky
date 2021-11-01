@@ -15,6 +15,7 @@
 #include <blue_sky/graphics/shader/MatcapShader.h>
 #include <blue_sky/graphics/shader/ShadowMapShader.h>
 #include <blue_sky/graphics/shader/TessellationMatcapShader.h>
+#include <blue_sky/graphics/shader/UnicolorShader.h>
 #include <blue_sky/graphics/shader/DebugShadowMapTextureShader.h>
 #include <blue_sky/graphics/shader/post_effect/DefaultShader.h>
 #include <blue_sky/graphics/shader/post_effect/HandDrawingShader.h>
@@ -296,13 +297,13 @@ void GraphicsManager::setup_default_shaders()
 	create_named_shader< shader::NullShader >( "null" );
 	create_named_shader< shader::FlatShader >( "flat", "main", "flat" );
 	create_named_shader< shader::FlatShader >( "flat_skin", "skin", "flat_skin" );
-	create_named_shader< shader::FlatShader >( "transparent", "main", "transparent" );
 	create_named_shader< shader::MatcapShader >( "matcap", "main", "matcap" )->set_texture( matcap_texture );
 	create_named_shader< shader::MatcapShader >( "matcap_skin", "skin", "matcap_skin" )->set_texture( matcap_texture );
 	create_named_shader< shader::ShadowMapShader >( "shadow_map" );
 	create_named_shader< shader::SkinningShadowMapShader >( "shadow_map_skin" );
 	create_named_shader< shader::TessellationMatcapShader >( "tess_matcap" )->set_texture( matcap_texture );
 	create_named_shader< shader::SkinningTessellationMatcapShader >( "tess_matcap_skin" )->set_texture( matcap_texture );
+	create_named_shader< shader::UnicolorShader >( "unicolor", "main", "unicolor" );
 
 	auto post_effect_shader = create_named_shader< shader::post_effect::DefaultShader >( "post_effect_default" );
 	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_chromatic_aberrration", "main", "post_effect_chromatic_aberrration" );
@@ -632,7 +633,7 @@ void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_ob
 	get_shared_object_render_data()->bind_to_vs();
 	get_shared_object_render_data()->bind_to_ps();
 
-	core::AnimationPlayer::BoneConstantBuffer::Data bone_constant_buffer_data;
+	core::AnimationPlayer::BoneConstantBufferData bone_constant_buffer_data;
 	active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix::identity() );
 
 	for ( uint_t n = 0; n < active_object->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )

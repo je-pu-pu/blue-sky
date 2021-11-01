@@ -10,6 +10,8 @@
 #include <core/graphics/Model.h>
 #include <core/graphics/Mesh.h>
 
+#include <core/math/Vector.h>
+
 namespace blue_sky::graphics::shader
 {
 
@@ -36,7 +38,32 @@ protected:
 	const ConstantBuffer* get_object_constant_buffer() const { return get_graphics_manager()->get_current_object_constant_buffer(); }
 	const ConstantBuffer* get_skining_constant_buffer() const { return get_graphics_manager()->get_current_skinning_constant_buffer(); }
 
+	float_t get_scalar( const char_t* ) const override { return 0.f; }
+	float_t get_scalar_at( uint_t ) const override { return 0.f; }
+
+	void set_scalar( const char_t*, float_t ) override { }
+	void set_scalar_at( uint_t, float_t ) override { }
+
+	Vector get_vector( const char_t* ) const override { return Vector::Zero; }
+	Vector get_vector_at( uint_t ) const override { return Vector::Zero; }
+
+	void set_vector( const char_t*, Vector ) override { }
+	void set_vector_at( uint_t, Vector ) override { }
+
+	Color get_color( const char_t* ) const override { return Color::Black; }
+	Color get_color_at( uint_t ) const override { return Color::Black; }
+
+	void set_color( const char_t*, Color ) override { }
+	void set_color_at( uint_t, Color ) override { }
+
+	Texture* get_texture( const char_t* ) override { return nullptr; }
+	const Texture* get_texture( const char_t* ) const override { return nullptr; }
+
+	void set_texture( const char_t*, Texture* ) override { }
+
 public:
+	void update() const override { }
+
 	void render_model( const core::graphics::Model* m ) const override
 	{
 		m->get_mesh()->bind();

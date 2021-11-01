@@ -10,6 +10,10 @@ namespace core::graphics
 class ConstantBuffer
 {
 public:
+	ConstantBuffer() { }
+	ConstantBuffer( const ConstantBuffer& ) = delete;
+	ConstantBuffer& operator = ( const ConstantBuffer& ) = delete;
+
 	virtual void bind_to_vs() const = 0;
 	virtual void bind_to_hs() const = 0;
 	virtual void bind_to_ds() const = 0;

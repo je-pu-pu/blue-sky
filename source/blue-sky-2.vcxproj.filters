@@ -606,6 +606,10 @@
     </ClInclude>
     <ClInclude Include="core\graphics\NullTexture.h" />
     <ClInclude Include="core\math\LineSegment2.h" />
+    <ClInclude Include="blue_sky\graphics\shader\ShaderMixin.h" />
+    <ClInclude Include="blue_sky\graphics\shader\UnicolorShader.h" />
+    <ClInclude Include="core\graphics\Direct3D11\ConstantBufferTyped.h" />
+    <ClInclude Include="core\graphics\Direct3D11\ConstantBufferWithData.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -726,7 +730,6 @@
       <Filter>media\shader\post_effect</Filter>
     </None>
     <None Include="media\script\scene\canvas_test.lua" />
-    <None Include="media\shader\transparent.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Input">
@@ -815,5 +818,6 @@
     <FxCompile Include="media\shader\post_effect\hand_drawing.hlsl">
       <Filter>media\shader\post_effect</Filter>
     </FxCompile>
+    <FxCompile Include="media\shader\unicolor.hlsl" />
   </ItemGroup>
 </Project>

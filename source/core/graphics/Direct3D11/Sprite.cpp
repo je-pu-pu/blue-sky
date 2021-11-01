@@ -21,7 +21,7 @@ Sprite::Sprite( Direct3D* direct_3d )
 	, effect_technique_( direct_3d_->get_effect()->get_technique( "sprite" ) )
 	, ortho_offset_( 0.f )
 {
-	constant_buffer_ = new ConstantBuffer( direct_3d );
+	constant_buffer_ = new ConstantBuffer();
 	
 	create_vertex_buffer();
 	create_index_buffer();

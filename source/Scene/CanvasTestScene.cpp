@@ -226,9 +226,16 @@ void CanvasTestScene::update()
 		pen_color_ = Color( pen_color[ 0 ], pen_color[ 1 ], pen_color[ 2 ], 1.f );
 	}
 
-	/// @todo プレーンオブジェクトの色を変更できるようにする
-	// auto* plane = get_active_object_manager()->get_active_object( "paint_guide_plane" );
-	// float plane_color = { plane->col }
+	// プレーンオブジェクトの色を変更する
+	auto* plane = get_active_object_manager()->get_active_object( "paint_guide_plane" );
+	auto plane_color = plane->get_model()->get_shader_at( 0 )->get_color( "color" );
+
+	float plane_color2[ 4 ] = { plane_color.r(), plane_color.g(), plane_color.b(), plane_color.a() };
+
+	if ( ImGui::ColorEdit4( "Plane Color", plane_color2 ) )
+	{
+		plane->get_model()->get_shader_at( 0 )->set_color( "color", Color( plane_color2[ 0 ], plane_color2[ 1 ], plane_color2[ 2 ], plane_color2[ 3 ] ) );
+	}
 
 	ImGui::End();
 }

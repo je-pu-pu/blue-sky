@@ -262,6 +262,8 @@ ActiveObject* GameMain::create_object( const char_t* class_name )
 	active_object->set_rigid_body( get_physics_manager()->add_active_object_as_box( active_object ) );
 	active_object->set_model( get_graphics_manager()->load_model( class_name ) );
 
+	/// @todo “¯‚¶í—Ş‚Ì•¡”‚Ì ActiveObject ‚ªAShader ‚ğ‹¤—L‚¹‚¸AŒÂ•Ê‚É•Û‚Å‚«‚é‚æ‚¤‚É‚·‚é
+
 	return active_object;
 }
 

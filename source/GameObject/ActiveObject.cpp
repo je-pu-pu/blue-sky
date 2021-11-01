@@ -269,7 +269,7 @@ void ActiveObject::update_render_data() const
 /**
  * 描画用の定数バッファをシェーダーに設定する
  *
- * @todo 必要なシェーダーにだけ設定できるようにする？
+ * @todo 必要なシェーダーにだけ設定できるようにする？ ( どの ConstantBuffer が必要かは Technique 依存のはず )
  */
 void ActiveObject::bind_render_data() const
 {
@@ -295,7 +295,7 @@ void ActiveObject::render_mesh() const
 		return;
 	}
 
-	/// @todo 削除する
+	/// @todo 削除する。データのバインドは Shader が行う。 ( どのデータがどのシェーダーに必要かは Shader 依存のため )
 	bind_render_data();
 	
 	if ( get_animation_player() )

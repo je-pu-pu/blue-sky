@@ -231,7 +231,7 @@ GraphicsManager::Model* GraphicsManager::clone_model( const Model* m )
  * 指定された名前のテクスチャがすでに管理されている場合は、テクスチャをファイルから読み込まず管理されているテクスチャを返す
  * 指定された名前のテクスチャが管理されていない場合は、指定されたファイルパスからテクスチャを読み込み、名前を付けて管理し、そのテクスチャを返す
  *
- * @param name 名前
+ * @param name テクスチャ名
  * @param file_name ファイルパス
  */
 GraphicsManager::Texture* GraphicsManager::load_named_texture( const char_t* name, const char_t* file_path )
@@ -282,6 +282,16 @@ GraphicsManager::Texture* GraphicsManager::get_texture( const char_t* name )
 	texture_manager_.add_named( name, t );
 
 	return t;
+}
+
+/**
+ * 名前を指定してテクスチャをアンロードする
+ *
+ * @param name テクスチャ名
+ */
+void GraphicsManager::unload_named_texture( const char_t* name )
+{
+	texture_manager_.remove_named( name );
 }
 
 /**

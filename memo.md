@@ -258,9 +258,20 @@ ConstantBuffer には以下の 3 種類が欲しい。
 * [C++] 列挙体でビットフラグしたい
     * https://jumble-note.blogspot.com/2017/12/c.html
 
-## 2021-11-02
+## 2021-11-01
 
 * ShaderStage::VS | ShaderStage::PS で common::enum_set::operator | () を呼べないか検証
     * => namespace common の外で using すれば OK
         * だが、enum_set< N > の N をどうするか？といった問題もあるため、 { ShaderStage::VS, ShaderStage::PS } としてコンストラクタで受ける方法がベターか
-* 
+
+## 2021-11-02
+
+* CanvasTestScene の色を変えれるようになった
+    * => 次は？
+* パーティクルシステムを構築したい
+
+## 2021-11-04
+
+* set_sky_box() スクリプトコマンドを実行しても 2 回目以降 SkyBox が変更できない問題を発見
+    * GraphicsManager::load_named_texture() がキャッシュされたテクスチャを返す事が原因
+        * ひとまず GraphicsManager::set_sky_box() 内で古いテクスチャを削除するようにした

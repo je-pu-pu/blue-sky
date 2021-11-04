@@ -196,7 +196,7 @@ public:
 	// virtual void unload_mesh( const char_t* ) = 0;
 	// virtual void unload_mesh_all() = 0;
 
-	// virtual void unload_texture( const char_t* ) = 0;
+	virtual void unload_named_texture( const char_t* );
 	// virtual void unload_texture_all() = 0;
 
 	void set_paper_texture_type( int_t );

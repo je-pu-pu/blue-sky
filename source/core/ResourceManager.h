@@ -2,6 +2,7 @@
 
 #include <type/type.h>
 #include <unordered_map>
+#include <execution>
 
 namespace core
 {
@@ -86,6 +87,22 @@ public:
 	{
 		add( resource );
 		resource_map_[ name ] = resource;
+	}
+
+	/**
+	 * add_named() ‚Å’Ç‰Á‚µ‚½ƒŠƒ\[ƒX‚ðíœ‚·‚é
+	 */
+	void remove_named( const string_t& name )
+	{
+		auto i = resource_map_.find( name );
+
+		if ( i == resource_map_.end() )
+		{
+			return;
+		}
+
+		resource_list_.erase( std::find_if( std::execution::par_unseq, resource_list_.begin(), resource_list_.end(), [&] ( const auto& x ) { return x.get() == i->second; } ) );
+		resource_map_.erase( i );
 	}
 
 	/**

@@ -180,6 +180,15 @@ void GraphicsManager::set_sky_box( const char_t* name )
 		sky_box_render_data_->data().color = Color::White;
 	}
 
+	// スカイボックスが使用しているテクスチャをクリアする
+	/// @todo スカイボックスが使用するテクスチャ名をユニークにする
+	unload_named_texture( "front" );
+	unload_named_texture( "back" );
+	unload_named_texture( "top" );
+	unload_named_texture( "bottom" );
+	unload_named_texture( "left" );
+	unload_named_texture( "right" );
+
 	sky_box_.reset( new SkyBox( name ) );
 	load_mesh( sky_box_.get(), "sky-box" );
 }

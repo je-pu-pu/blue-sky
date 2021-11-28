@@ -2,8 +2,12 @@ BlendState CanvasPenBlend
 {
 	BlendEnable[ 0 ] = True;
 	
-	SrcBlend = SRC_ALPHA;
-	DestBlend = INV_SRC_ALPHA;
+	// SrcBlend = SRC_ALPHA;
+	// DestBlend = INV_SRC_ALPHA;
+	
+	SrcBlend = ONE;
+	DestBlend = ONE;
+
 	AlphaToCoverageEnable = False;
 };
 
@@ -146,7 +150,7 @@ technique11 drawing_point
 	pass main
     {
 		SetBlendState( CanvasPenBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
 
         SetVertexShader( CompileShader( vs_4_0, vs_canvas() ) );
 		SetHullShader( NULL );

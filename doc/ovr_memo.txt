@@ -1,0 +1,8 @@
+1. ovr_Initialize() で初期化
+2. ovr_Create(), ovr_GetHmdDesc( nullptr ) で HDM の状態を取得
+3. GetPredictedDisplayTime(), ovr_GetTrackingState() でヘッドトラッキング情報を取得
+4. ovr_GetFovTextureSize(), ovr_GetRenderDesc(), ovr_CreateTextureSwapChainDX() 描画の準備
+5. ovr_SubmitFrame()
+6. ヘッドセット内でうまく動作するように UI 画面をカスタマイズ
+7. 終了時、作成したリソースを破棄
+	ovr_DestroyTextureSwapChain(), ovr_Destroy(), ovr_Shutdown()

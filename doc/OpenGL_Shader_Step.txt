@@ -1,0 +1,31 @@
+----------
+OpenGL によるシェーダーを使った描画手順のまとめ
+
+http://www.opengl-tutorial.org/jp/
+
+----------
+初期化時
+
+シェーダーを作成
+	glCreateShader()
+	glShaderSource()
+	glCompileShader()
+	
+	glCreateProgram()
+	glAttachShader()
+	glLinkProgram()
+	
+シェーダーで使うデータを確保
+	glGetUniformLocation()
+	
+----------
+描画時
+
+シェーダーを指定
+	glUseProgram()
+	
+シェーダーで使うデータを更新
+	glUniform()
+	
+
+----------

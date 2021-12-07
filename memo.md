@@ -397,3 +397,29 @@ void test()
 ## 2021-11-26
 
 * Visual Studio 2022 をインストールした
+
+## 2021-11-28
+
+* 開発環境を Visual Studio 2022 にバージョンアップ
+
+## 2021-11-30
+
+* Visual Studio 2022 で AI によるコードブロックの入力は C++ では使えない事が判明
+    * https://docs.microsoft.com/ja-jp/visualstudio/intellicode/intellicode-visual-studio
+
+## 2021-12-03
+
+* ホットリロードが有効にならなかったため、全てのプロジェクトで /INCREMENTAL, 非 /LTCG である事を確認した
+    * しかし、/INCREMENTAL は /LTCG の指定によって無視されます。とのリンク時警告が表示されている
+        * おそらく、ライブラリ側の設定も修正する必要がある
+
+## 2021-12-04
+
+* lua, libOVR を非 /LTCG で作成し、blue-sky にリンクしてみたが、前日のリンクエラーは消えず。
+
+## 2021-12-06
+
+* dumpbin というプログラムで .lib の情報を出力できる事が分かった
+    * スタートメニュー > Visual Studio 2022 > Command Prompt のプロンプト内で実行できる
+    * link というプログラムもある
+* その .lib がコンパイルされた時のオプションが出力できるかはまだ未調査

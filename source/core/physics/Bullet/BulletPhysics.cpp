@@ -5,10 +5,6 @@
 #include <fstream>
 #include <sstream>
 
-#pragma comment( lib, "BulletCollision.lib" )
-#pragma comment( lib, "BulletDynamics.lib" )
-#pragma comment( lib, "LinearMath.lib" )
-
 BulletPhysics::BulletPhysics()
 	: collision_configuration_( 0 )
 	, collision_dispatcher_( 0 )

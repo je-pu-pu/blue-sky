@@ -7,8 +7,6 @@
 
 #include <iostream>
 
-#pragma comment( lib, "LibOVR.lib" )
-
 #define OCULUS_VR_FAIL_CHECK( x ) { if ( OVR_FAILURE( x ) ) { ovrErrorInfo errorInfo; ovr_GetLastErrorInfo( & errorInfo ); COMMON_THROW_EXCEPTION_MESSAGE( std::string( #x ) + " failed. : " + errorInfo.ErrorString ); } }
 
 const OculusRift::Matrix OculusRift::COORDINATE_SYSTEM_CONVERT_MATRIX = [] () { Matrix m; m.set_scaling( 1, 1, -1 ); return m; }();

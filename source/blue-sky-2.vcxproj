@@ -77,6 +77,7 @@
     <ClCompile Include="GameObject\Ladder.cpp" />
     <ClCompile Include="GameObject\Medal.cpp" />
     <ClCompile Include="GameObject\Missile.cpp" />
+    <ClCompile Include="GameObject\ParticleSystem.cpp" />
     <ClCompile Include="GameObject\Player.cpp" />
     <ClCompile Include="GameObject\Robot.cpp" />
     <ClCompile Include="GameObject\Rocket.cpp" />
@@ -93,6 +94,7 @@
     <ClCompile Include="Scene\DebugScene.cpp" />
     <ClCompile Include="Scene\EndingScene.cpp" />
     <ClCompile Include="Scene\GamePlayScene.cpp" />
+    <ClCompile Include="Scene\ParticleSystemTestScene.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="Scene\StageSelectScene.cpp" />
     <ClCompile Include="Scene\StoryTextScene.cpp" />
@@ -222,6 +224,7 @@
     <ClInclude Include="GameObject\Ladder.h" />
     <ClInclude Include="GameObject\Medal.h" />
     <ClInclude Include="GameObject\Missile.h" />
+    <ClInclude Include="GameObject\ParticleSystem.h" />
     <ClInclude Include="GameObject\Player.h" />
     <ClInclude Include="GameObject\Robot.h" />
     <ClInclude Include="GameObject\Rocket.h" />
@@ -233,10 +236,12 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="OculusRift.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Scene\CanvasTestScene.h" />
     <ClInclude Include="Scene\DebugScene.h" />
     <ClInclude Include="Scene\EndingScene.h" />
     <ClInclude Include="Scene\GamePlayScene.h" />
+    <ClInclude Include="Scene\ParticleSystemTestScene.h" />
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="Scene\StageSelectScene.h" />
     <ClInclude Include="Scene\StoryTextScene.h" />
@@ -360,14 +365,28 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <None Include="media\shader\particle.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </None>
     <FxCompile Include="media\shader\post_effect\hand_drawing.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="media\shader\unicolor.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </FxCompile>
+    <None Include="media\shader\unicolor.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5DB1FAFC-E068-43A8-84D3-0DA42D464BE5}</ProjectGuid>

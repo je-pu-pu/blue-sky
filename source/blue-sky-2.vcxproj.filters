@@ -222,6 +222,8 @@
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClCompile>
     <ClCompile Include="lib.cpp" />
+    <ClCompile Include="GameObject\ParticleSystem.cpp" />
+    <ClCompile Include="Scene\ParticleSystemTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -610,6 +612,9 @@
     <ClInclude Include="blue_sky\graphics\shader\UnicolorShader.h" />
     <ClInclude Include="core\graphics\Direct3D11\ConstantBufferTyped.h" />
     <ClInclude Include="core\graphics\Direct3D11\ConstantBufferWithData.h" />
+    <ClInclude Include="GameObject\ParticleSystem.h" />
+    <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="Scene\ParticleSystemTestScene.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -730,6 +735,8 @@
       <Filter>media\shader\post_effect</Filter>
     </None>
     <None Include="media\script\scene\canvas_test.lua" />
+    <None Include="media\shader\particle.hlsl" />
+    <None Include="media\shader\unicolor.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Input">
@@ -818,6 +825,5 @@
     <FxCompile Include="media\shader\post_effect\hand_drawing.hlsl">
       <Filter>media\shader\post_effect</Filter>
     </FxCompile>
-    <FxCompile Include="media\shader\unicolor.hlsl" />
   </ItemGroup>
 </Project>

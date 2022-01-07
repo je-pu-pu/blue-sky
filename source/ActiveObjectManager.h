@@ -12,6 +12,7 @@ namespace blue_sky
 /**
  * •¡”‚Ì ActiveObject ‚ğŠÇ—‚·‚é Manager
  *
+ * @todo GameObjectManager ‚Æ‚·‚é
  */
 class ActiveObjectManager
 {
@@ -55,7 +56,6 @@ public:
 	ActiveObject* clone_object( const ActiveObject* );
 
 	void update();
-	// void render();
 
 	ActiveObjectList& active_object_list() { return active_object_list_; }
 	const ActiveObjectList& active_object_list() const { return active_object_list_; }

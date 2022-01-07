@@ -197,7 +197,7 @@ void CanvasTestScene::update()
 	Vertex v
 	{
 		Vector3( vector.x(), vector.y(), vector.z() ),
-		get_input()->press( Input::Button::A ) ? std::pow( tablet_->get_pressure(), 2 ) : 0.5f,
+		get_input()->press( Input::Button::A ) ? std::pow( tablet_->get_pressure(), 2.f ) : 0.5f,
 		pen_color_
 	};
 

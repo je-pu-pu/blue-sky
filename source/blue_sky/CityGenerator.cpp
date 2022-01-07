@@ -30,7 +30,7 @@ CityGenerator::CityGenerator()
 	model_->set_shader_at( 2, GameMain::get_instance()->get_graphics_manager()->create_shader< graphics::shader::FlatShader >() );
 	model_->get_shader_at( 2 )->set_texture_at( 0, GameMain::get_instance()->get_graphics_manager()->load_texture( "media/model/road-t.png" ) );
 
-	for ( int n = 0; n < model_->get_shader_count(); n++ )
+	for ( uint_t n = 0; n < model_->get_shader_count(); n++ )
 	{
 		model_->get_mesh()->create_vertex_group();
 	}
@@ -263,9 +263,7 @@ void CityGenerator::format_crossroad()
 		std::cout << "b : nullopt" << std::endl;
 	}
 	
-
-	return;
-
+	/*
 	for ( auto i = road_node_list_.begin(); i != road_node_list_.end(); ++i )
 	{
 		for ( auto j = i + 1; j != road_node_list_.end(); ++j )
@@ -276,6 +274,7 @@ void CityGenerator::format_crossroad()
 			}
 		}
 	}
+	*/
 }
 
 #if 0
@@ -392,7 +391,7 @@ void CityGenerator::RoadNode::update_vertex_pos()
 	front_right_pos = road_end_pos + end_right * get_road_width() * 0.5f;
 
 	// I’[‚Ìˆ—
-	if ( is_end )
+	if ( is_end && front_node )
 	{
 		const float cross = front_node->start_front.xz().cross( ( position - front_node->position ).xz() );
 
@@ -452,7 +451,7 @@ void CityGenerator::generate_road_mesh( const RoadNode* node )
 	 * 0 .. 5 : vertex
 	 */
 
-	const auto index_offset = model_->get_mesh()->get_vertex_count();
+	const uint16_t index_offset = static_cast< uint16_t >( model_->get_mesh()->get_vertex_count() );
 
 	float rotation_degree = 0.f;
 
@@ -488,7 +487,7 @@ void CityGenerator::generate_road_mesh( const RoadNode* node )
 
 	auto* vertex_group = get_vertex_group_by_road_node( node );
 
-	for ( auto n = 0; n < subdivision_level + 1; n++ )
+	for ( uint16_t n = 0; n < subdivision_level + 1; n++ )
 	{
 		const float a = static_cast< float >( n + 1 ) / static_cast< float >( subdivision_level + 1 );
 
@@ -543,7 +542,7 @@ void CityGenerator::generate_debug_mesh()
  */
 void CityGenerator::generate_debug_road_control_point_mesh( const RoadControlPoint& cp ) const
 {
-	const auto index_offset = debug_model_->get_mesh()->get_vertex_count();
+	const uint16_t index_offset = static_cast< uint16_t >( debug_model_->get_mesh()->get_vertex_count() );
 
 	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( ( cp.position + Vector( -1.f, 3.f, 0.f ) ).xyz(), { 0.f, 0.f, -1.f }, { 0.f, 1.f } ) ); // 0
 	debug_model_->get_mesh()->add_vertex( Mesh::Vertex( ( cp.position + Vector( +1.f, 3.f, 0.f ) ).xyz(), { 0.f, 0.f, -1.f }, { 1.f, 1.f } ) ); // 1

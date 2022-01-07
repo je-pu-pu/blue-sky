@@ -42,6 +42,7 @@ private:
 	Vector				start_rotation_;	///< スタート時の回転 ( Degree )
 	float_t				start_direction_degree_;	///< スタート時の向き ( Y Axis )
 
+	/** @todo ActiveObject から分離 */
 	Model*				model_;				///< Model
 	const ObjectConstantBuffer*				object_constant_buffer_;	///< 定数バッファ @todo インスタンス毎に必要か？
 	AnimationPlayer*						animation_player_;			///< アニメーション再生
@@ -115,8 +116,8 @@ public:
 
 	const ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_; }
 
-	void update_render_data() const;
-	virtual void bind_render_data() const;
+	virtual void update_render_data() const;
+	[[deprecated]] virtual void bind_render_data() const;
 
 	virtual void render_mesh() const;
 	virtual void render_mesh( const Shader* ) const;

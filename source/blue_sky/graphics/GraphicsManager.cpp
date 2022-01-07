@@ -444,7 +444,7 @@ void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool
 			if ( active_object->get_model()->is_skin_mesh() == is_skin_mesh )
 			{
 				set_current_object_constant_buffer( active_object->get_object_constant_buffer() );
-				get_current_skinning_constant_buffer( active_object->get_animation_player() ? active_object->get_animation_player()->get_constant_buffer() : nullptr );
+				set_current_skinning_constant_buffer( active_object->get_animation_player() ? active_object->get_animation_player()->get_constant_buffer() : nullptr );
 
 				active_object->render_mesh( shader );
 
@@ -476,11 +476,10 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 		}
 
 		set_current_object_constant_buffer( active_object->get_object_constant_buffer() );
-		get_current_skinning_constant_buffer( active_object->get_animation_player() ? active_object->get_animation_player()->get_constant_buffer() : nullptr );
+		set_current_skinning_constant_buffer( active_object->get_animation_player() ? active_object->get_animation_player()->get_constant_buffer() : nullptr );
 
 		active_object->render_mesh();
 	}
-
 
 	set_input_layout( "line" );
 

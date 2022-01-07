@@ -1,6 +1,7 @@
 #include "GameMain.h"
 #include "App.h"
 
+/// @todo SceneManager ‚È‚Ç‚Å‚â‚é
 #include <Scene/TitleScene.h>
 #include <Scene/StageSelectScene.h>
 #include <Scene/StoryTextScene.h>
@@ -9,6 +10,7 @@
 
 #include <Scene/CanvasTestScene.h>
 #include <Scene/DebugScene.h>
+#include <Scene/ParticleSystemTestScene.h>
 
 #include "ActiveObjectManager.h"
 
@@ -145,6 +147,7 @@ GameMain::GameMain()
 	
 	scene_creator_map_[ "debug"        ] = [this] () { return new DebugScene( this ); };
 	scene_creator_map_[ "canvas_test"  ] = [this] () { return new CanvasTestScene( this ); };
+	scene_creator_map_[ "particle_system_test" ] = [this]() { return new ParticleSystemTestScene( this ); };
 
 	update_render_data_for_game();
 }

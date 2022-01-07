@@ -24,11 +24,11 @@ drawing_model->get_mesh()->set_material_at( 0, new_material );
 class MyShader : public Shader
 {
 public:
-	MyShader::MyShader()
-	{
-		bind_to_vs< GameConstantBuffer >();
-		bind_to_
-	}
+    MyShader::MyShader()
+    {
+        bind_to_vs< GameConstantBuffer >();
+        bind_to_
+    }
 }
 ```
 
@@ -434,3 +434,191 @@ void test()
 
 * TODO : パーティクル数固定、処理固定のパーティクルを実装してみる
     * 整理は後から
+
+# 2021-12-08
+
+* ParticleSystem の仮実装を開始
+* ECS について調査
+    * https://ja.wikipedia.org/wiki/%E3%82%A8%E3%83%B3%E3%83%86%E3%82%A3%E3%83%86%E3%82%A3%E3%83%BB%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88%E3%83%BB%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0
+    * https://gist.github.com/LearnCocos2D/77f0ced228292676689f
+
+
+* entity = class: no logic + no data OR at most small set of frequently used data (ie position)
+* component = class: logic + data
+* componentSystem = array of components of the same class
+
+```
+    foreach componentSystem in allComponentSystems do
+        foreach component in componentSystem.components do
+            component.update()
+        end
+    end
+```
+
+# 2021-12-13
+
+* ParticleSystemTestScene を実装中
+
+# 2021-12-16
+
+* GraphicsManager::render_active_objects() が以下を呼んでいるのは変ではないか？
+    * active_object->get_model()
+    * active_object->render_mesh();
+    * active_object->render_line();
+    * ParticleSystem は Model を持っていない。描画するべき手描き風線も無いため、 render_line() も無意味。
+    * 対応策
+        * ParticleSystem に空の Model, 空の render_line() を持たせる
+        * GraphicsManager::render_active_objects() を変える。再設計が必要。
+
+* Entity Component System について調査
+    * https://www.slideshare.net/DADA246/component-basedgameenginedesign-23304862
+    * https://mikan-daisuki.hatenablog.com/entry/2015/10/22/220439
+
+# 2021-12-17
+
+* Game Programing Jems 6 : Game Object Component System を読む。
+
+# 2021-12-26
+
+* ParticleSystem 仮実装を進めた。
+* GraphicsManager::render_active_objects() によって ParticleSystem が描画されるためには現状
+    * Model, Mesh が必要
+
+# 2021-12-27
+
+* Game Programing Jems 6 : Game Object Component System 読了。
+
+# 2021-12-28
+
+* CEDEC2018 ESC 動画視聴
+    * https://www.youtube.com/watch?v=T8lGD__aSm8
+
+# 2021-12-29
+
+* CEDEC2018 ESC 動画視聴完了
+    * https://www.youtube.com/watch?v=T8lGD__aSm8
+
+# 2021-12-30
+
+* Unity 調査
+    * Cube などの通常のオブジェクトは Mesh, Mesh Renderer ( , Box Collider ) コンポーネントを持つ
+    * ParticleSystem は ParticleSystem コンポーネントのみを持つ ( Renderer は持たない )
+
+# 2021-12-31
+
+* ESC 動画視聴
+    * https://www.youtube.com/watch?v=s6TMa33niJo
+
+# 2022-01-01
+
+* ESC 動画視聴
+    * Entity Component System #1
+        * 配信者は Sims 4 などのリード AI プログラマー "Rez Bot"
+            * Twitter : https://twitter.com/rezibot
+            * Web : https://bleachkitty.com/
+        * https://www.youtube.com/watch?v=5KugyHKsXLQ
+        * ESC とは
+            * Component は機能を提供しない
+            * System は状態を持たない
+            * Entity は単に ID
+        * 古い Component System では
+            * O(G*C) の仮想関数呼び出しが起こってしまう ( G は GameObject の数, C はコンポーネントの数 )
+
+# 2022-01-02
+
+* ESC 動画視聴
+    * Entity Component System #2
+        * https://youtu.be/sOG4M-T__tQ
+        * どう設計するべきか？を考察した動画
+        * 検討内容
+            1. Entity とは何か？
+                * a. ID
+                * b. index
+                * c. class
+            2. Component / System のクラス階層とは何か？
+                * a. 単純なベースクラスと、複数のサブクラス ( 1 階層のみ )
+                * b. 単純なベースクラスと、複数のサブクラス ( 複数階層 )
+                * c. それぞれの System はユニーク
+            3. System はどのように保存されるか？
+                * a. ポインタの配列
+                * b. 個々のオブジェクト
+            4. Component はどのように保存されるか？
+                * a. Entity に所有される
+                * b. Manager に所有される
+                * c. System に所有される
+            5. どのように呼び出しコンテキストを生成し、また有効なコンポーネントを抽出するか？
+            6. 共通コードをどのように管理するか？
+
+        * 検討結果
+            1. Entity とは何か？
+                * a. ID ( おそらく )
+                * Index は早いが、各 Entity が持っている Component はバラバラなため、 Index でアクセスする形式だとメモリが無駄になってしまう
+            2. Component / System のクラス階層とは何か？
+                * a. 単純なベースクラスと、複数のサブクラス ( 1 階層のみ )
+                * System をループで更新したいし、必要に応じて System を追加・削除したいので c. はダメ
+            3. System はどのように保存されるか？
+                * a. ポインタの配列
+                * 汎用性がなさそうなので b. はダメ
+            4. Component はどのように保存されるか？
+                * b. Manager に所有される
+                * 同じ型の Component をメモリ上に連続して配置したいため
+
+        
+    * Entity Component System #3
+        * https://youtu.be/4s7Py5nOg0E
+        * #2 で考察した内容を実際に C++ コードで書いていく動画
+    
+    * Entity Component System #4
+        * https://youtu.be/4s7Py5nOg0E
+        * #3 に引き続き、 C++ コードで書いていく動画
+        * BreachUtils というライブラリを使っていたが検索しても見つけられなかった。配信者のオリジナルライブラリか？
+            * BreachUtils は new, delete のオーバーロードに使われていた。
+        * Component がメモリ上に並ぶよう、new をオーバーライドする。
+
+# 2022-01-03
+
+* ESC 動画視聴
+    * Entity Component System #5
+        * https://youtu.be/vm7kuSIh6oE
+        * コンパイル時に ID を振る仕組みが上手く動かない
+            * 代替案 #1 enum class で ID を定義する
+                * enum class は拡張できないため、ゲームエンジン側で定義したコンポーネント ID をゲームプレイ側で自由に追加する事ができないのでダメ
+            * 代替案 #2 enum class で ID を定義し、最後の項目に MAX のような値を定義しておく。ゲームプレイ側で enum class を定義し、 kMAX から始める。
+                * 動くが満足していない
+                * 利点 : 速い
+                * 欠点 : 管理が難しい
+            * 代替案 #3 GUID を使う
+                * Visual Studio > メニュー > ツール > GUID の生成で生成できる！！！
+                * GUID をハッシュマップに使うとパフォーマンスはどうか？
+                * 利点 : 速い
+                * 欠点 : 手作業で GUID を生成しなければならない
+            * 代替案 #4 ファイルパスをハッシュして ID として使う
+                * 環境が異なるとパスも異なるため、一貫性が失われる問題
+                * コンパイル時文字列ハッシュについては Game Engine Gems 3 に載っている
+                * 利点 : ほとんど自動
+                * 利点 : 実行時に ID を計算可能 ( たとえば Lua のようなスクリプトでも )
+                * 欠点 : 多くのコンポーネントがあった場合、コンパイルが遅い
+
+# 2022-01-04
+
+* ESC 動画視聴
+    * Entity Component System #6
+        * https://youtu.be/39e1qpsutBU
+        * System の実装
+            * 以下のように、ComponentSystem のテンプレート引数に、System が使う Component を複数指定し継承する
+                * class RenderSystem : public ComponentSystem< Renderable, TransformComponent >
+
+# 2022-01-06
+
+* ESC 動画視聴
+    * Entity Component System #6
+        * System が使用するコンポーネントの一覧 Comps を、テンプレートパラメーターパックを使って展開し、Entity の持っている Component と比較するテクニックが紹介された。
+        * https://cpprefjp.github.io/lang/cpp11/variadic_templates.html
+
+# 2022-01-07
+
+* ESC テスト実装を開始
+    * Rez Bot の ESC 動画を参考に、blue-sky に ESC のテスト導入を開始
+    * ひとまず GameObject に add_component() と get_component() を実装。
+
+# 

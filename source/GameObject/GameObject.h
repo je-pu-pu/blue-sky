@@ -27,6 +27,7 @@ class StaticObject;
 class DynamicObject;
 class Ladder;
 
+class Component;
 
 /**
  * ゲーム上に存在する全てのオブジェクトの基底クラス
@@ -35,6 +36,8 @@ class Ladder;
  * ゲーム上に存在するすべてのオブジェクトはオプションとして剛体 ( 衝突判定用の形状を含む ) 情報を持つ
  *
  * @todo Bullet Physics を隠蔽する
+ * @todo ECS に移行する
+ * @todo core に移動する
  */
 class GameObject
 {
@@ -42,11 +45,15 @@ public:
 	using Sound			= game::Sound;
 	using EventHandler	= std::function< void() >;
 
+	using ComponentMap	= std::unordered_map< core::ecs::ComponentTypeId, Component* >;
+
 	static Vector GravityDefault;
 
 private:
 	Transform		transform_;		///< トランスフォーム情報
 	btRigidBody*	rigid_body_;	///< 剛体情報
+
+	ComponentMap	component_map_;	///< GameObject が保有しているコンポーネントの一覧 ( コンポーネント ID から コンポーネントのポインタへのマップ )
 
 protected:
 	float_t get_frame_elapsed_time() const;
@@ -151,6 +158,35 @@ public:
 	bool is_moving_to( const GameObject* ) const;
 
 	virtual void add_event_handler( const char_t*, const EventHandler& ) { }
+
+	/**
+	 * コンポーネントを追加する
+	 * 
+	 * @param id 追加するコンポーネントの ID
+	 * @param component 追加する
+	 */
+	void add_component( core::ecs::ComponentTypeId id, Component* component )
+	{
+		component_map_.emplace( id, component );
+	}
+
+	/**
+	 * 指定した型のコンポーネントを取得する
+	 * 
+	 * @return コンポーネント
+	 */
+	template< typename ComponentType >
+	ComponentType* get_component()
+	{
+		auto i = component_map_.find( ComponentType::ID );
+
+		if ( i == component_map_.end() )
+		{
+			return nullptr;
+		}
+
+		return i->secont;
+	}
 
 }; // class GameObject
 

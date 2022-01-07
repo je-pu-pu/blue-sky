@@ -232,7 +232,7 @@ public:
 	virtual ObjectConstantBuffer* get_shared_object_render_data() const = 0;
 
 	void set_current_object_constant_buffer( const ConstantBuffer* r ) const { current_object_constant_buffer_ = r; }
-	void get_current_skinning_constant_buffer( const ConstantBuffer* r ) const { current_skinning_constant_buffer_ = r; }
+	void set_current_skinning_constant_buffer( const ConstantBuffer* r ) const { current_skinning_constant_buffer_ = r; }
 	
 	const ConstantBuffer* get_current_object_constant_buffer() const { return current_object_constant_buffer_; }
 	const ConstantBuffer* get_current_skinning_constant_buffer() const { return current_skinning_constant_buffer_; }

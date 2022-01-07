@@ -12,6 +12,13 @@
 
 namespace core
 {
+	namespace graphics::direct_3d_11
+	{
+		template< int > class ConstantBuffer;
+	}
+
+	using graphics::direct_3d_11::ConstantBuffer;
+
 	using direct_x_math::Vector2;
 	using direct_x_math::Vector3;
 	using direct_x_math::Vector;
@@ -20,5 +27,10 @@ namespace core
 
 	using bullet::Quaternion;
 	using bullet::Transform;
+
+	namespace ecs
+	{
+		using ComponentTypeId = uint_t;
+	}
 
 } // namespace core

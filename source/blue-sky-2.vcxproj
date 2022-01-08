@@ -38,6 +38,12 @@
     <ClCompile Include="blue_sky\graphics\Rectangle.cpp" />
     <ClCompile Include="blue_sky\graphics\SkyBox.cpp" />
     <ClCompile Include="core\animation\AnimationPlayer.cpp" />
+    <ClCompile Include="core\ecs\Component.cpp" />
+    <ClCompile Include="core\ecs\component\ParticleSystemComponent.cpp" />
+    <ClCompile Include="core\ecs\Entity.cpp" />
+    <ClCompile Include="core\ecs\System.cpp" />
+    <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp" />
+    <ClCompile Include="core\ecs\system\ParticleSystem.cpp" />
     <ClCompile Include="core\graphics\BgSpriteLayer.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Axis.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\BackBufferTexture.cpp" />
@@ -65,6 +71,7 @@
     <ClCompile Include="core\sound\Sound.cpp" />
     <ClCompile Include="core\sound\SoundManager.cpp" />
     <ClCompile Include="core\sound\StreamingSound.cpp" />
+    <ClCompile Include="core\ecs\EntityManager.cpp" />
     <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="GameObject\ActiveObject.cpp" />
     <ClCompile Include="GameObject\AreaSwitch.cpp" />
@@ -77,7 +84,6 @@
     <ClCompile Include="GameObject\Ladder.cpp" />
     <ClCompile Include="GameObject\Medal.cpp" />
     <ClCompile Include="GameObject\Missile.cpp" />
-    <ClCompile Include="GameObject\ParticleSystem.cpp" />
     <ClCompile Include="GameObject\Player.cpp" />
     <ClCompile Include="GameObject\Robot.cpp" />
     <ClCompile Include="GameObject\Rocket.cpp" />
@@ -144,6 +150,13 @@
     <ClInclude Include="core\animation\SkinningAnimation.h" />
     <ClInclude Include="core\animation\SkinningAnimationSet.h" />
     <ClInclude Include="core\DirectX.h" />
+    <ClInclude Include="core\ecs\Component.h" />
+    <ClInclude Include="core\ecs\component\ParticleSystemComponent.h" />
+    <ClInclude Include="core\ecs\Entity.h" />
+    <ClInclude Include="core\ecs\System.h" />
+    <ClInclude Include="core\ecs\system\ParticleRenderSystem.h" />
+    <ClInclude Include="core\ecs\system\ParticleSystem.h" />
+    <ClInclude Include="core\ecs\type.h" />
     <ClInclude Include="core\graphics\BackBufferTexture.h" />
     <ClInclude Include="core\graphics\BgSpriteLayer.h" />
     <ClInclude Include="core\graphics\Direct3D11\Axis.h" />
@@ -211,6 +224,7 @@
     <ClInclude Include="core\type.h" />
     <ClInclude Include="DelayedCommand.h" />
     <ClInclude Include="DynamicPointList.h" />
+    <ClInclude Include="core\ecs\EntityManager.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="GameObject\ActiveObject.h" />
@@ -224,7 +238,6 @@
     <ClInclude Include="GameObject\Ladder.h" />
     <ClInclude Include="GameObject\Medal.h" />
     <ClInclude Include="GameObject\Missile.h" />
-    <ClInclude Include="GameObject\ParticleSystem.h" />
     <ClInclude Include="GameObject\Player.h" />
     <ClInclude Include="GameObject\Robot.h" />
     <ClInclude Include="GameObject\Rocket.h" />

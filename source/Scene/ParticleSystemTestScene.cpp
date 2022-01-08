@@ -7,8 +7,6 @@
 #include <ActiveObjectManager.h>
 #include <ActiveObjectPhysics.h>
 
-#include <GameObject/ParticleSystem.h>
-
 #include <game/MainLoop.h>
 
 #include <common/math.h>
@@ -28,7 +26,11 @@ ParticleSystemTestScene::ParticleSystemTestScene( const GameMain* game_main )
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
-	get_active_object_manager()->add_active_object( new ParticleSystem() );
+	// get_active_object_manager()->add_active_object( new ParticleSystem() );
+
+	auto* e = get_entity_manager()->create_entity();
+	auto* c = get_entity_manager()->add_component< ParticleSystemComponent >();
+	c->particle_list.resize( 100 );
 
 	camera_->position().set( 0.f, 1.5f, -10.f, 1.f );
 }

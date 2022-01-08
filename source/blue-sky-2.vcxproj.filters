@@ -222,8 +222,14 @@
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClCompile>
     <ClCompile Include="lib.cpp" />
-    <ClCompile Include="GameObject\ParticleSystem.cpp" />
     <ClCompile Include="Scene\ParticleSystemTestScene.cpp" />
+    <ClCompile Include="core\ecs\component\ParticleSystemComponent.cpp" />
+    <ClCompile Include="core\ecs\Component.cpp" />
+    <ClCompile Include="core\ecs\system\ParticleSystem.cpp" />
+    <ClCompile Include="core\ecs\System.cpp" />
+    <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp" />
+    <ClCompile Include="core\ecs\EntityManager.cpp" />
+    <ClCompile Include="core\ecs\Entity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -612,9 +618,16 @@
     <ClInclude Include="blue_sky\graphics\shader\UnicolorShader.h" />
     <ClInclude Include="core\graphics\Direct3D11\ConstantBufferTyped.h" />
     <ClInclude Include="core\graphics\Direct3D11\ConstantBufferWithData.h" />
-    <ClInclude Include="GameObject\ParticleSystem.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Scene\ParticleSystemTestScene.h" />
+    <ClInclude Include="core\ecs\component\ParticleSystemComponent.h" />
+    <ClInclude Include="core\ecs\Component.h" />
+    <ClInclude Include="core\ecs\system\ParticleSystem.h" />
+    <ClInclude Include="core\ecs\System.h" />
+    <ClInclude Include="core\ecs\system\ParticleRenderSystem.h" />
+    <ClInclude Include="core\ecs\EntityManager.h" />
+    <ClInclude Include="core\ecs\Entity.h" />
+    <ClInclude Include="core\ecs\type.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

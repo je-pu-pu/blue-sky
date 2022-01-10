@@ -227,7 +227,7 @@ public:
 		}
 		*/
 
-		for ( auto n = 0; n < bind_function_list_.size(); n++ )
+		for ( size_t n = 0; n < bind_function_list_.size(); n++ )
 		{
 			if ( shader_stage_set_.test( static_cast< ShaderStage >( n ) ) )
 			{

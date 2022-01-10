@@ -10,8 +10,8 @@ namespace core::ecs
 class Component
 {
 public:
-	Component();
-	virtual ~Component();
+	Component() = default;
+	virtual ~Component() = default;
 
 }; // class Component
 

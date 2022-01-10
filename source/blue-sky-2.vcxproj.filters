@@ -223,7 +223,6 @@
     </ClCompile>
     <ClCompile Include="lib.cpp" />
     <ClCompile Include="Scene\ParticleSystemTestScene.cpp" />
-    <ClCompile Include="core\ecs\component\ParticleSystemComponent.cpp" />
     <ClCompile Include="core\ecs\Component.cpp" />
     <ClCompile Include="core\ecs\system\ParticleSystem.cpp" />
     <ClCompile Include="core\ecs\System.cpp" />
@@ -628,6 +627,7 @@
     <ClInclude Include="core\ecs\EntityManager.h" />
     <ClInclude Include="core\ecs\Entity.h" />
     <ClInclude Include="core\ecs\type.h" />
+    <ClInclude Include="core\ecs\component\TransformComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

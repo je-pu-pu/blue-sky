@@ -490,12 +490,12 @@ void test()
 
 # 2021-12-28
 
-* CEDEC2018 ESC 動画視聴
+* CEDEC2018 ECS 動画視聴
     * https://www.youtube.com/watch?v=T8lGD__aSm8
 
 # 2021-12-29
 
-* CEDEC2018 ESC 動画視聴完了
+* CEDEC2018 ECS 動画視聴完了
     * https://www.youtube.com/watch?v=T8lGD__aSm8
 
 # 2021-12-30
@@ -506,18 +506,18 @@ void test()
 
 # 2021-12-31
 
-* ESC 動画視聴
+* ECS 動画視聴
     * https://www.youtube.com/watch?v=s6TMa33niJo
 
 # 2022-01-01
 
-* ESC 動画視聴
+* ECS 動画視聴
     * Entity Component System #1
         * 配信者は Sims 4 などのリード AI プログラマー "Rez Bot"
             * Twitter : https://twitter.com/rezibot
             * Web : https://bleachkitty.com/
         * https://www.youtube.com/watch?v=5KugyHKsXLQ
-        * ESC とは
+        * ECS とは
             * Component は機能を提供しない
             * System は状態を持たない
             * Entity は単に ID
@@ -526,7 +526,7 @@ void test()
 
 # 2022-01-02
 
-* ESC 動画視聴
+* ECS 動画視聴
     * Entity Component System #2
         * https://youtu.be/sOG4M-T__tQ
         * どう設計するべきか？を考察した動画
@@ -577,7 +577,7 @@ void test()
 
 # 2022-01-03
 
-* ESC 動画視聴
+* ECS 動画視聴
     * Entity Component System #5
         * https://youtu.be/vm7kuSIh6oE
         * コンパイル時に ID を振る仕組みが上手く動かない
@@ -601,7 +601,7 @@ void test()
 
 # 2022-01-04
 
-* ESC 動画視聴
+* ECS 動画視聴
     * Entity Component System #6
         * https://youtu.be/39e1qpsutBU
         * System の実装
@@ -610,15 +610,35 @@ void test()
 
 # 2022-01-06
 
-* ESC 動画視聴
+* ECS 動画視聴
     * Entity Component System #6
         * System が使用するコンポーネントの一覧 Comps を、テンプレートパラメーターパックを使って展開し、Entity の持っている Component と比較するテクニックが紹介された。
         * https://cpprefjp.github.io/lang/cpp11/variadic_templates.html
 
 # 2022-01-07
 
-* ESC テスト実装を開始
-    * Rez Bot の ESC 動画を参考に、blue-sky に ESC のテスト導入を開始
+* ECS テスト実装を開始
+    * Rez Bot の ECS 動画を参考に、blue-sky に ECS のテスト導入を開始
     * ひとまず GameObject に add_component() と get_component() を実装。
 
-# 
+# 2022-01-08
+
+* ECS 動画視聴
+    * CppCon 2015: Vittorio Romeo “Implementation of a component-based entity system in modern C++”
+        * https://youtu.be/NTWSeQtHZ9M
+        * コンパイル時に多くを解決するので実行速度が速いが実装が複雑
+        * ゲームエンジンとゲーム本体を分離する事は考慮されていなさそう
+    * Vittorio Romeo: Implementation of a multithreaded compile-time ECS in C++14
+        * https://youtu.be/3N1pLtTV2Uc
+        * lambda 式が使われている
+        * マルチスレッディングが考慮されている
+        * さらに複雑
+
+# 2022-01-10
+
+* ESC テスト実装の続き
+    * 以下の枠組みを実装してコンパイルできた
+        * エンティティの追加
+        * エンティティへのコンポーネントの追加
+        * システムの追加
+        * システムの実行

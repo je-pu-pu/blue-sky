@@ -30,6 +30,7 @@ public:
 	{
 		EntityManager::get_instance()->destroy_entity( this );
 	}
+	*/
 
 	template< typename ComponentType >
 	ComponentType* add_component()
@@ -43,6 +44,7 @@ public:
 		return EntityManager::get_instance()->get_component< ComponentType >( this );
 	}
 
+	/*
 	void remove_component()
 	{
 

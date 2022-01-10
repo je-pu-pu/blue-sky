@@ -13,11 +13,11 @@ namespace core::ecs
 class ParticleSystem : public System
 {
 public:
-	static constexpr uint_t ID = 1; // typeid( ParticleSystem* );
+	// static constexpr uint_t ID = 1; // typeid( ParticleSystem* );
 
 public:
-	ParticleSystem();
-	~ParticleSystem();
+	ParticleSystem() = default;
+	~ParticleSystem() = default;
 
 	void update() override;
 

@@ -4,6 +4,11 @@
 #include <blue_sky/CityGenerator.h>
 #include <memory>
 
+namespace core::ecs
+{
+	class EntityManager;
+}
+
 namespace core::graphics
 {
 	class RenderTargetTexture;
@@ -21,9 +26,10 @@ class Camera;
 class ParticleSystemTestScene : public Scene
 {
 public:
+	using EntityManager = core::ecs::EntityManager;
 
 protected:
-
+	EntityManager* get_entity_manager();
 
 protected:
 

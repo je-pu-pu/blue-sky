@@ -14,6 +14,8 @@ namespace core::ecs
 class ParticleSystemComponent : public Component
 {
 public:
+	// const size_t ID = 1;
+
 	struct Vertex
 	{
 		Vector3 Position;
@@ -23,8 +25,8 @@ public:
 	std::array< Vertex, 1000 > particle_list;
 
 public:
-	ParticleSystemComponent();
-	~ParticleSystemComponent();
+	ParticleSystemComponent() = default;
+	~ParticleSystemComponent() = default;
 
 }; // class ParticleSystemComponent
 

@@ -39,7 +39,6 @@
     <ClCompile Include="blue_sky\graphics\SkyBox.cpp" />
     <ClCompile Include="core\animation\AnimationPlayer.cpp" />
     <ClCompile Include="core\ecs\Component.cpp" />
-    <ClCompile Include="core\ecs\component\ParticleSystemComponent.cpp" />
     <ClCompile Include="core\ecs\Entity.cpp" />
     <ClCompile Include="core\ecs\System.cpp" />
     <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp" />
@@ -152,6 +151,7 @@
     <ClInclude Include="core\DirectX.h" />
     <ClInclude Include="core\ecs\Component.h" />
     <ClInclude Include="core\ecs\component\ParticleSystemComponent.h" />
+    <ClInclude Include="core\ecs\component\TransformComponent.h" />
     <ClInclude Include="core\ecs\Entity.h" />
     <ClInclude Include="core\ecs\System.h" />
     <ClInclude Include="core\ecs\system\ParticleRenderSystem.h" />

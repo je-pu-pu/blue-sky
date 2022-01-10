@@ -31,6 +31,7 @@ namespace core
 	namespace ecs
 	{
 		using ComponentTypeId = uint_t;
+		using SystemTypeId = uint_t;
 	}
 
 } // namespace core

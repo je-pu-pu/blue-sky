@@ -7,6 +7,11 @@
 #include <ActiveObjectManager.h>
 #include <ActiveObjectPhysics.h>
 
+#include <core/ecs/Component/TransformComponent.h>
+#include <core/ecs/Component/ParticleSystemComponent.h>
+#include <core/ecs/System/ParticleSystem.h>
+#include <core/ecs/EntityManager.h>
+
 #include <game/MainLoop.h>
 
 #include <common/math.h>
@@ -28,9 +33,16 @@ ParticleSystemTestScene::ParticleSystemTestScene( const GameMain* game_main )
 
 	// get_active_object_manager()->add_active_object( new ParticleSystem() );
 
-	auto* e = get_entity_manager()->create_entity();
-	auto* c = get_entity_manager()->add_component< ParticleSystemComponent >();
-	c->particle_list.resize( 100 );
+	get_entity_manager()->add_system< core::ecs::ParticleSystem >();
+
+	for ( int n = 0; n < 10000; n++ )
+	{
+		auto* e = get_entity_manager()->create_entity();
+		auto* tc = e->add_component< core::ecs::TransformComponent >();
+		auto* psc = e->add_component< core::ecs::ParticleSystemComponent >();
+	}
+
+	// psc->particle_list.resize( 100 );
 
 	camera_->position().set( 0.f, 1.5f, -10.f, 1.f );
 }
@@ -40,9 +52,16 @@ ParticleSystemTestScene::~ParticleSystemTestScene()
 	get_active_object_manager()->clear();
 }
 
+ParticleSystemTestScene::EntityManager* ParticleSystemTestScene::get_entity_manager()
+{
+	return EntityManager::get_instance();
+}
+
 void ParticleSystemTestScene::update()
 {
 	Scene::update();
+
+	get_entity_manager()->update();
 
 	camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * 90.f, get_input()->get_mouse_dx() * 90.f, 0.f );
 	camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f ) );

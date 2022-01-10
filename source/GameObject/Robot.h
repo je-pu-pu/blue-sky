@@ -41,7 +41,7 @@ private:
 	float_t			timer_;			///< 汎用タイマー
 
 	VectorArray		patrol_point_list_;	///< 巡回ポイントの一覧
-	int_t			current_patrol_point_index_ = 0;
+	uint_t			current_patrol_point_index_ = 0;
 
 	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 	void on_collide_with( Player* );

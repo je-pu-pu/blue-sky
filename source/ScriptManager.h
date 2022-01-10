@@ -42,7 +42,7 @@ public:
 	using Shader	= core::graphics::Shader;
 	using Texture	= core::graphics::Texture;
 
-	const int MAX_COMMAND_HISTORY_SIZE = 1000; ///< コマンド履歴の最大数
+	const size_t MAX_COMMAND_HISTORY_SIZE = 1000; ///< コマンド履歴の最大数
 
 private:
 	sol::state lua_;
@@ -141,7 +141,7 @@ public:
 	void load_command_history( const string_t& );
 	void save_command_history( const string_t& );
 
-	void truncate_command_history( int );
+	void truncate_command_history( uint_t );
 
 	const string_t& get_output() const { return output_; }
 };
@@ -289,7 +289,7 @@ inline void ScriptManager::save_command_history( const string_t& file_path )
  *
  * @param size 長さ
  */
-inline void ScriptManager::truncate_command_history( int size )
+inline void ScriptManager::truncate_command_history( uint_t size )
 {
 	if ( command_history_.size() <= size )
 	{

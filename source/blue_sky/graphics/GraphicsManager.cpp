@@ -135,7 +135,7 @@ bool_t GraphicsManager::load_mesh( Model* model, const char_t* name )
 		model->get_mesh()->clear_vertex_weight_list();
 		model->get_mesh()->clear_vertex_group_list();
 
-		for ( int n = 0; n < model->get_mesh()->get_rendering_vertex_group_count(); n++ )
+		for ( size_t n = 0; n < model->get_mesh()->get_rendering_vertex_group_count(); n++ )
 		{
 			if ( n >= model->get_shader_count() || ! model->get_shader_at( n ) )
 			{

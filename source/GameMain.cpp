@@ -277,9 +277,10 @@ ActiveObject* GameMain::clone_object( const ActiveObject* o )
  */
 void GameMain::update_render_data_for_game() const
 {
-	GameConstantBufferData constant_buffer_data;
-	constant_buffer_data.screen_width = static_cast< float_t >( get_width() );
-	constant_buffer_data.screen_height = static_cast< float_t >( get_height() );
+	GameConstantBufferData constant_buffer_data = {
+		static_cast< float_t >( get_width() ),
+		static_cast< float_t >( get_height() )
+	};
 		
 	get_graphics_manager()->get_game_render_data()->update( & constant_buffer_data );
 }
@@ -364,7 +365,7 @@ void GameMain::render()
 	if ( is_command_mode_ )
 	{
 		graphics_manager_->draw_text_at_center( ( "> " + user_command_ ).c_str(), Color::White );
-		graphics_manager_->draw_text( 0, get_height() / 2.f, get_width(), get_height(), get_script_manager()->get_output().c_str(), Color::White );
+		graphics_manager_->draw_text( 0, get_height() / 2.f, static_cast< float_t >( get_width() ), static_cast< float_t >( get_height() ), get_script_manager()->get_output().c_str(), Color::White );
 
 		/// @todo OculusRift ‚É‚à•¶Žš‚ð•`‰æ‚Å‚«‚é‚æ‚¤‚É‚·‚é
 		/*

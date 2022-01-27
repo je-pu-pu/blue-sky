@@ -636,9 +636,167 @@ void test()
 
 # 2022-01-10
 
-* ESC テスト実装の続き
+* ECS テスト実装の続き
     * 以下の枠組みを実装してコンパイルできた
         * エンティティの追加
         * エンティティへのコンポーネントの追加
         * システムの追加
         * システムの実行
+
+# 2022-01-11
+
+* ECS テスト実装の続き
+    * Entity Component System #6 の動画を参考に、System のテンプレートパラメータで System が使用する Component を複数設定可能に。
+        * https://youtu.be/39e1qpsutBU
+
+# 2022-01-14
+
+* 他人の作った ECS の調査
+    * CORGI
+        * http://google.github.io/corgi/index.html
+        * CORGI = コーギー ( 犬 )
+            * https://www.google.com/search?q=CORGI&tbm=isch
+        * Google の公開している ECS のライブラリ
+        * System はなく、ComponentData がデータ、それを継承した ( ？ ) Component がロジックを含むという仕組みらしい
+
+# 2022-01-16
+
+* CORGI 調査
+    * Entity を追加すると EntitiManager::entities_ に追加される
+    * entities_ は VectorPool<Entity>
+    * VectorPool の各要素 ( VectorPoolElement ) は以下のメンバ変数を持つ
+        * data ( Entity )
+        * prev ( 前の要素の index )
+        * next ( 次の要素の index )
+        * unique_id ( ID )
+    * Entity のメンバ変数は uint16_t + bool のみ ( ID と削除するべきかのフラグ？ )
+
+# 2022-01-17
+
+* CORGI 調査
+    * Entity クラスは以下のメンバん変数を持つ
+        * 
+    * EntityManager クラスは以下のメンバ変数を持つ
+        * VectorPool<Entity> entities_;
+        * std::vector<ComponentInterface*> components_;
+    * Component クラスは以下のメンバ変数を持つ
+        * VectorPool<ComponentData> component_data_;
+        * std::unordered_map<EntityIdType, ComponentIndex> component_index_lookup_;
+    * ComponentData 構造体は以下のメンバ変数を持つ
+        * EntityRef entity                      ( Entity への参照 )
+        * T data;                               ( 各コンポーネントのデータ )
+    * EntityRef ( = VectorPool< Entity >::VectorPoolReference ) は以下のメンバ変数を持つ
+        * VectorPool< Entity >* container_;     ( Entity の配列へのポインタ )
+        * size_t index_;                        ( Entity の配列上でのインデックス)
+        * UniqueIdType unique_id_;              ( Entity の ID )
+    * `entity_manager.RegisterComponent< CounterType >( & component );` でコンポーネントを登録する
+        * EntityManager::RegisterComponent() は components_ にコンポーネントを追加する
+    * `entity_manager.AddEntityToComponent< ComponentType >( entity );` でコンポーネントを Enitty で使用する
+        * EntityManager::AddEntityToComponent() からは `component->AddEntityGenerically( entity );` が呼ばれる
+
+# 2022-01-18
+
+* CORGI 評価
+    * ComponentData から Entity の参照は高速
+        * entity.container_[ entity.index ]
+    * Entity から Component の参照はやや高速
+        * EntityManager::GetComponentDataAsVoid()
+            * components_[ component_id ]                               ( Vector の index 参照 )
+        * Component::GetComponentDataAsVoid() -> GetComponentData()
+            * Component::GetComponentDataIndex()
+                * component_index_lookup_.find(entity->entity_id());    ( unordered_map の検索 )
+            * component_data_.GetElementData(data_index);               ( Vector の index 参照 )
+    * Entity のメモリ配列
+        * 各要素は Entity
+            * EntityIdType  entity_id_;                 ( = uint16_t )
+            * bool          marked_for_deletion_;
+    * Component のメモリ配列
+        * 各要素は ComponentData
+            * EntitiRef
+                * VectorPool< Entity >* container_;     ( Entity の配列へのポインタ )
+                * size_t index_;                        ( Entity の配列上でのインデックス)
+                * UniqueIdType unique_id_;              ( Entity の ID )
+            * data                                      ( 実際のデータ )
+
+# 2022-01-19
+
+* ECS に関する記事調査
+    * https://namekdev.net/2017/03/why-entity-component-systems-matter/
+        * ECS とは何か？
+        * 理由 : より簡単なリファクタリング
+        * クラス階層は悪
+        * ゲーム開発だけ？
+        * 長所は分かったけど短所は？
+        * MMO の開発に有効との別記事あり
+            * http://t-machine.org/index.php/2007/09/03/entity-systems-are-the-future-of-mmog-development-part-1/
+
+# 2022-01-20
+
+* ECS に関する記事調査
+    * http://t-machine.org/index.php/2007/09/03/entity-systems-are-the-future-of-mmog-development-part-1/
+        * Operation チームの開発者
+        *  Scott Bilas ( 2002 に GDC で ECS について発表したダンジョンシージのプログラマ？ ) と連絡をとった結果、ブログを進められた
+            * https://gist.github.com/LearnCocos2D/77f0ced228292676689f
+        * 導入のみ。MMO のように複雑で、運用が開始されてからもコードを変更するようなプロジェクトでは、ECS しかないじゃないか？みたいな感じ
+
+# 2022-01-21
+
+* ECS に関する記事調査
+    * Entity System とは何か？
+        * http://t-machine.org/index.php/2007/11/11/entity-systems-are-the-future-of-mmog-development-part-2/
+        * あるレイヤーにおいては、オブジェクト指向か Entity System かは排他的であるため、どちらかを選ばなければならない
+
+# 2022-01-22
+
+* ECS に関する記事調査
+    * Entity System とは何か？
+        * http://t-machine.org/index.php/2007/11/11/entity-systems-are-the-future-of-mmog-development-part-2/
+        * Entity とは何か？
+            * ゲームの世界で認識できるすべての「もの」に対して 1 つの Entity がある
+            * ゲーム中に戦車が 1,000 体出るなら、Entity も 1,000 個ある
+            * Entity にはデータもメソッドもない
+        * Component とは何か？
+            * ゲーム中のアイテムの、ひとつの側面
+            * アイテムの Entity がアイテムの色々な側面を表すには、側面ごとに 1 つのコンポーネントを持つ
+            * ひとつの Component は、ひとつの重要なことを行う
+            * 補足 : オブジェクト指向プログラミングでは、この複数の側面の概念がない。複数の側面が一つの塊としてハードコードされる
+                * C++ の多重継承、 Java のインターフェイスによって一部似たような事はできるが、すぐに破綻する
+# 2022-01-23
+
+* ECS に関する記事調査
+    * Entity System とは何か？
+        * http://t-machine.org/index.php/2007/11/11/entity-systems-are-the-future-of-mmog-development-part-2/
+        * System ( または subsystem ) とは何か？
+            * Enitity System ではデータを Entity + Component に、コードを System に分割する
+                * オブジェクト指向プログラミングでは全てをオブジェクトにする
+            * 各システムは、 ( 各システムが独自のプライベートスレッドで動いているように ) 継続的に実行される
+            * ゲームにおける一般的な System は以下のようなもの
+                * レンダリング System
+                * アニメーション System
+                * 入力 System
+
+# 2022-01-24
+
+* ECS に関する記事調査
+    * Entity System とは何か？
+        * http://t-machine.org/index.php/2007/11/11/entity-systems-are-the-future-of-mmog-development-part-2/
+        * System ( または subsystem ) とは何か？
+            * レンダリング System
+                * 16 ミリ秒ごとに立ち上がり、レンダリング可能な Component を持つ全ての Entity をレンダリングし、スリープする
+            * アニメーション System
+                * 新しいアニメーションをトリガーしたり、( 例えばプレイヤーが移動の途中に方向を変える等、 ) 既存のアニメーションを変更したりするものを探し、影響を受ける各 Entity のデータを更新する
+            * 入力 System
+                * ゲームパッドやマウスなどの入力をチェックし、プレイヤーによってコントロールされているとマークされている入力可能な Component を持っているエンティティーの状態を変更する
+        * オブジェクト指向プログラミングでは、戦場に 100 のユニットがあった場合、論理的には、ユニットが呼び出す事のできるメソッドのコピーが 100 個ある
+            * 実際には、これらのメソッドは裏で共有され、メモリの無駄遣いを回避している
+            * スクリプト言語の場合、メソッドの共有を行わない事もあり、すべてのメソッドをインスタンスごとに個別に変更できる
+        * 一方、Entity System では、戦場に 100 のユニットがあり、それが Entity で表されている場合、Entity にはメソッドが含まれないので、ユニットで呼び出すことのできる各メソッドのコピーは 0
+            * Component にもメソッドも含まれていない
+            * 代わりに、各側面に外部の System があり、System には、その System と互換性のあることを示す Component を所有する Entity で呼び出す事のできる全てのメソッドが含まれている
+
+# 2022-01-26
+
+* ECS に関する記事調査
+    * Entity System とは何か？
+        * それは Entity System ではない！
+            * 

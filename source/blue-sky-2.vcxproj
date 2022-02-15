@@ -38,6 +38,7 @@
     <ClCompile Include="blue_sky\graphics\Rectangle.cpp" />
     <ClCompile Include="blue_sky\graphics\SkyBox.cpp" />
     <ClCompile Include="core\animation\AnimationPlayer.cpp" />
+    <ClCompile Include="core\ecs\BaseSystem.cpp" />
     <ClCompile Include="core\ecs\Component.cpp" />
     <ClCompile Include="core\ecs\Entity.cpp" />
     <ClCompile Include="core\ecs\System.cpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="core\animation\SkinningAnimation.h" />
     <ClInclude Include="core\animation\SkinningAnimationSet.h" />
     <ClInclude Include="core\DirectX.h" />
+    <ClInclude Include="core\ecs\BaseSystem.h" />
     <ClInclude Include="core\ecs\Component.h" />
     <ClInclude Include="core\ecs\component\ParticleSystemComponent.h" />
     <ClInclude Include="core\ecs\component\TransformComponent.h" />

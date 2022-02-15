@@ -10,6 +10,7 @@
 #include <core/ecs/Component/TransformComponent.h>
 #include <core/ecs/Component/ParticleSystemComponent.h>
 #include <core/ecs/System/ParticleSystem.h>
+#include <core/ecs/System/ParticleRenderSystem.h>
 #include <core/ecs/EntityManager.h>
 
 #include <game/MainLoop.h>
@@ -18,8 +19,11 @@
 
 #include <imgui.h>
 
+#include <iostream>
+
 namespace blue_sky
 {
+	core::ecs::Entity* entity = nullptr;
 
 ParticleSystemTestScene::ParticleSystemTestScene( const GameMain* game_main )
 	: Scene( game_main )
@@ -34,12 +38,15 @@ ParticleSystemTestScene::ParticleSystemTestScene( const GameMain* game_main )
 	// get_active_object_manager()->add_active_object( new ParticleSystem() );
 
 	get_entity_manager()->add_system< core::ecs::ParticleSystem >();
+	get_entity_manager()->add_system< core::ecs::ParticleRenderSystem >();
 
-	for ( int n = 0; n < 10000; n++ )
+	// for ( int n = 0; n < 10000; n++ )
 	{
 		auto* e = get_entity_manager()->create_entity();
-		auto* tc = e->add_component< core::ecs::TransformComponent >();
+		// auto* tc = e->add_component< core::ecs::TransformComponent >();
 		auto* psc = e->add_component< core::ecs::ParticleSystemComponent >();
+
+		entity = e;
 	}
 
 	// psc->particle_list.resize( 100 );
@@ -70,10 +77,15 @@ void ParticleSystemTestScene::update()
 
 	if ( get_input()->press( Input::Button::LEFT ) )
 	{
+		get_entity_manager()->remove_system< core::ecs::ParticleSystem >();
+		get_entity_manager()->remove_system< core::ecs::ParticleRenderSystem >();
+
 		camera_->position() -= camera_->right() * moving_speed;
 	}
 	if ( get_input()->press( Input::Button::RIGHT ) )
 	{
+		get_entity_manager()->add_system< core::ecs::ParticleSystem >();
+
 		camera_->position() += camera_->right() * moving_speed;
 	}
 	if ( get_input()->press( Input::Button::UP ) )
@@ -114,6 +126,20 @@ void ParticleSystemTestScene::update()
 	// ImGui::SliderFloat( "Gain3", & hand_drawing_shader->getGain3(), 0.00001f, 0.01f, "%.5f" );
 
 	ImGui::End();
+
+	if ( get_input()->push( Input::Button::UP ) )
+	{
+		entity->add_component< core::ecs::TransformComponent >();
+		
+		std::cout << "TransformComponent : " << entity->get_component< core::ecs::TransformComponent >() << std::endl;
+	}
+
+	if ( get_input()->push( Input::Button::DOWN ) )
+	{
+		entity->remove_component< core::ecs::TransformComponent >();
+		std::cout << "TransformComponent : " << entity->get_component< core::ecs::TransformComponent >() << std::endl;
+
+	}
 }
 
 void ParticleSystemTestScene::render()

@@ -18,7 +18,7 @@ public:
 
 	struct Vertex
 	{
-		Vector3 Position;
+		Vector3 position;
 	};
 
 public:

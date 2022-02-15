@@ -229,6 +229,7 @@
     <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp" />
     <ClCompile Include="core\ecs\EntityManager.cpp" />
     <ClCompile Include="core\ecs\Entity.cpp" />
+    <ClCompile Include="core\ecs\BaseSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -628,6 +629,7 @@
     <ClInclude Include="core\ecs\Entity.h" />
     <ClInclude Include="core\ecs\type.h" />
     <ClInclude Include="core\ecs\component\TransformComponent.h" />
+    <ClInclude Include="core\ecs\BaseSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

@@ -44,12 +44,13 @@ public:
 		return EntityManager::get_instance()->get_component< ComponentType >( this );
 	}
 
-	/*
+	template< typename ComponentType >
 	void remove_component()
 	{
-
+		return EntityManager::get_instance()->remove_component< ComponentType >( this );
 	}
 
+	/*
 	const ComponentList& get_component_list()
 	{
 	}

@@ -1484,3 +1484,14 @@ VS Code でも以下を参照して逆アセンブラしたコードが表示で
 # 2022-02-28
 
 * System::has_component_type() のコンパイルに成功。
+
+# 2022-03-01
+
+* Google Test を導入
+* blue-sky-2 本体のコードをどうリンクするかが課題。
+    * 現状、 *.cpp に書いてあるコードはテストできない。
+    * 案
+        * blue-sky-2-google-test にソースコードをぶち込む
+            * 良くない
+        * blue-sky-2 を .lib と exe に分けて、blue-sky-2-google-test から blue-sky-2.lib をリンクする
+        * blue-sky-2.exe にリンクする事はできないのか？

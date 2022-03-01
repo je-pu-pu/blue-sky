@@ -14,7 +14,7 @@ TEST( EcsTest, EntityManagerTest )
 	EXPECT_NE( nullptr, entity );
 
 	auto tc = entity->add_component< core::ecs::TransformComponent >();
-	EXPECT_EQ( nullptr, tc );
+	EXPECT_NE( nullptr, tc );
 
 	EXPECT_EQ( tc, entity->get_component< core::ecs::TransformComponent >() );
 

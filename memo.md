@@ -1208,3 +1208,279 @@ Entity Systems are the future of MMOG development に対する考察。
 自作 ECS の動作確認。
 EntityManager::remove_system() で動的に System の削除が可能な事を確認。
 TODO : System から Component にアクセスする手段を確認する。
+
+# 2022-02-15
+
+# 2022-02-16
+
+System::component_list_ にコンポーネントを追加・削除する処理が必要。
+必要があるのは以下のタイミング
+
+* Entity に Component が追加された時
+* Entity から Component が削除された時
+    * Entity が削除された時を含む
+
+# 2022-02-17
+
+# 2022-02-18
+
+* 自作 ECS の実装。
+    * 新しい疑問「System は Component の Tupple の List」を知っているだけで良いのか？
+        * つまり、Entity を知る必要は無いのか？
+        * => 今の時点での答え : Entity を知る必要は無い。Component の Tupple の List のみで良い
+            * 理由 : System が扱うのはあくまで Component であって、そのコンポーネントがどの Entity によって保持されているかは感知しない
+            * 本当にそれで良いかは、ゲーム本体の実装を進める中で検証されるはず
+    * ひとまず、自身が ComponentType を含むかを調べる System::has_component< ComponentType >() を実装する。
+
+# 2022-02-19
+
+* System::has_component< ComponentType >() はテンプレートパラメータを取るため仮想関数にできない事に気付いた
+
+# 2022-02-20
+
+* ひとまず仮想関数ではない関数テンプレートとして System::has_component< ComponentType >() を実装
+    * 良く分からないなりに constexpr, tuple_element, is_same などを使ってやってみた
+
+# 2022-02-21
+
+コンパイルエラー。
+
+* constexpr 関数内でも for ループ変数 n を tuple_element< n, xxx > とテンプレート引数に使うとコンパイルエラー
+* Head, Tail で型リストを再帰で回す形式に変えてみたが、実引数が無いため？エラー
+
+# 2022-02-22
+
+* コンパイルエラー。直らず。
+
+# 2022-02-26
+
+* C++ テンプレートについて調査。
+
+以下のようなシンプルなサンプルプログラムを書いてみたが、コンパイルエラー。
+実引数が無いとダメか。
+
+```c++
+#include <tuple>
+#include <iostream>
+
+template< typename Head, typename ... Tail >
+constexpr int get_total_size()
+{
+        return sizeof( Head ) + get_total_size< Tail ... >();
+}
+
+template< typename Head >
+constexpr int get_total_size< Head >()
+{
+        return sizeof( Head );
+}
+
+int main( int, char** )
+{
+        std::cout << "1 : " << get_total_size< int >() << std::endl;
+        std::cout << "2 : " << get_total_size< int, char >() << std::endl;
+        std::cout << "3 : " << get_total_size< int, char, double >() << std::endl;
+
+        return 0;
+}
+```
+
+```
+$ g++ 2.cpp
+2.cpp:11:38: error: non-class, non-variable partial specialization ‘get_total_size<Head>’ is not allowed
+   11 | constexpr int get_total_size< Head >()
+      |                                      ^
+2.cpp: In function ‘int main(int, char**)’:
+2.cpp:18:47: error: call of overloaded ‘get_total_size<int>()’ is ambiguous
+   18 |  std::cout << "1 : " << get_total_size< int >() << std::endl;
+      |                                               ^
+2.cpp:5:15: note: candidate: ‘constexpr int get_total_size() [with Head = int; Tail = {}]’
+    5 | constexpr int get_total_size()
+      |               ^~~~~~~~~~~~~~
+2.cpp:11:15: note: candidate: ‘constexpr int get_total_size() [with Head = int]’
+   11 | constexpr int get_total_size< Head >()
+      |               ^~~~~~~~~~~~~~~~~~~~~~
+2.cpp: In instantiation of ‘constexpr int get_total_size() [with Head = char; Tail = {}]’:
+2.cpp:7:52:   required from ‘constexpr int get_total_size() [with Head = int; Tail = {char}]’
+2.cpp:19:53:   required from here
+2.cpp:7:52: error: no matching function for call to ‘get_total_size<>()’
+    7 |  return sizeof( Head ) + get_total_size< Tail ... >();
+      |                          ~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+2.cpp:5:15: note: candidate: ‘template<class Head, class ... Tail> constexpr int get_total_size()’
+    5 | constexpr int get_total_size()
+      |               ^~~~~~~~~~~~~~
+2.cpp:5:15: note:   template argument deduction/substitution failed:
+2.cpp:7:52: note:   couldn’t deduce template parameter ‘Head’
+    7 |  return sizeof( Head ) + get_total_size< Tail ... >();
+      |                          ~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+2.cpp: In instantiation of ‘constexpr int get_total_size() [with Head = double; Tail = {}]’:
+2.cpp:7:52:   recursively required from ‘constexpr int get_total_size() [with Head = char; Tail = {double}]’
+2.cpp:7:52:   required from ‘constexpr int get_total_size() [with Head = int; Tail = {char, double}]’
+2.cpp:20:61:   required from here
+2.cpp:7:52: error: no matching function for call to ‘get_total_size<>()’
+2.cpp:5:15: note: candidate: ‘template<class Head, class ... Tail> constexpr int get_total_size()’
+    5 | constexpr int get_total_size()
+      |               ^~~~~~~~~~~~~~
+2.cpp:5:15: note:   template argument deduction/substitution failed:
+2.cpp:7:52: note:   couldn’t deduce template parameter ‘Head’
+    7 |  return sizeof( Head ) + get_total_size< Tail ... >();
+      |                          ~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+```
+
+```non-class, non-variable partial specialization ‘get_total_size<Head>’ is not allowed```
+
+と言われたので、class の static 関数にしてみたが、ダメ。
+
+```c++
+class Hoge
+{
+public:
+    template< typename Head, typename ... Tail >
+    constexpr static int get_total_size()
+    {
+        return sizeof( Head ) + get_total_size< Tail ... >();
+    }
+
+    template< typename Head >
+    constexpr static int get_total_size< Head >()
+    {
+        return sizeof( Head );
+    }
+};
+```
+
+```
+$ g++ 3.cpp
+3.cpp:13:49: error: non-class, non-variable partial specialization ‘get_total_size<Head>’ is not allowed
+   13 |     constexpr static int get_total_size< Head >()
+      |                                                 ^
+3.cpp: In function ‘int main(int, char**)’:
+3.cpp:21:56: error: call of overloaded ‘get_total_size()’ is ambiguous
+   21 |     std::cout << "1 : " << Hoge::get_total_size< int >() << std::endl;
+      |                                                        ^
+3.cpp:7:26: note: candidate: ‘static constexpr int Hoge::get_total_size() [with Head = int; Tail = {}]’
+    7 |     constexpr static int get_total_size()
+      |                          ^~~~~~~~~~~~~~
+3.cpp:13:26: note: candidate: ‘static constexpr int Hoge::get_total_size() [with Head = int]’
+   13 |     constexpr static int get_total_size< Head >()
+      |                          ^~~~~~~~~~~~~~~~~~~~~~
+3.cpp: In instantiation of ‘static constexpr int Hoge::get_total_size() [with Head = int; Tail = {char}]’:
+3.cpp:22:62:   required from here
+3.cpp:9:59: error: call of overloaded ‘get_total_size()’ is ambiguous
+    9 |         return sizeof( Head ) + get_total_size< Tail ... >();
+      |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+3.cpp:7:26: note: candidate: ‘static constexpr int Hoge::get_total_size() [with Head = char; Tail = {}]’
+    7 |     constexpr static int get_total_size()
+      |                          ^~~~~~~~~~~~~~
+3.cpp:13:26: note: candidate: ‘static constexpr int Hoge::get_total_size() [with Head = char]’
+   13 |     constexpr static int get_total_size< Head >()
+      |                          ^~~~~~~~~~~~~~~~~~~~~~
+3.cpp: In instantiation of ‘static constexpr int Hoge::get_total_size() [with Head = char; Tail = {double}]’:
+3.cpp:9:59:   required from ‘static constexpr int Hoge::get_total_size() [with Head = int; Tail = {char, double}]’
+3.cpp:23:70:   required from here
+3.cpp:9:59: error: call of overloaded ‘get_total_size()’ is ambiguous
+    9 |         return sizeof( Head ) + get_total_size< Tail ... >();
+      |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+3.cpp:7:26: note: candidate: ‘static constexpr int Hoge::get_total_size() [with Head = double; Tail = {}]’
+    7 |     constexpr static int get_total_size()
+      |                          ^~~~~~~~~~~~~~
+3.cpp:13:26: note: candidate: ‘static constexpr int Hoge::get_total_size() [with Head = double]’
+   13 |     constexpr static int get_total_size< Head >()
+      |                          ^~~~~~~~~~~~~~~~~~~~~~
+```
+
+#
+
+まさに欲しかった情報が見つかった。
+「C++ template の（部分）特殊化ができるとき、できないとき」
+
+https://mimosa-pudica.net/cpp-specialization.html
+
+こちらを参考に、関数テンプレートからクラステンプレートに変更したらコンパイルが通った。
+最適化によって関数呼び出しも無くなり、単に 22 ( 0x16 ) を return する処理になった。
+
+```c++
+#include <iostream>
+
+template< typename Head, typename ... Tail >
+struct Hoge
+{
+    static int get_total_size()
+    {
+        return sizeof( Head ) + Hoge< Tail ... >::get_total_size();
+    }
+};
+
+template< typename Head >
+struct Hoge< Head >
+{
+    static int get_total_size()
+    {
+        return sizeof( Head );
+    }
+};
+
+int main( int, char** )
+{
+    return
+        Hoge< int >::get_total_size() +
+        Hoge< int, char >::get_total_size() + 
+        Hoge< int, char, double >::get_total_size();
+}
+```
+
+```
+g++ 6.cpp -O4 -g -c
+objdump 6.o -S
+```
+
+```
+6.o:     file format elf64-x86-64
+
+
+Disassembly of section .text.startup:
+
+0000000000000000 <main>:
+        return sizeof( Head );
+    }
+};
+
+int main( int, char** )
+{
+   0:   f3 0f 1e fa             endbr64
+
+    return
+        Hoge< int >::get_total_size() +
+        Hoge< int, char >::get_total_size() +
+        Hoge< int, char, double >::get_total_size();
+}
+   4:   b8 16 00 00 00          mov    $0x16,%eax
+   9:   c3                      retq
+   a:   66 0f 1f 44 00 00       nopw   0x0(%rax,%rax,1)
+
+0000000000000010 <_GLOBAL__sub_I_main>:
+  10:   f3 0f 1e fa             endbr64
+  14:   48 83 ec 08             sub    $0x8,%rsp
+  extern wostream wclog;        /// Linked to standard error (buffered)
+#endif
+  //@}
+
+  // For construction of filebuffers for cout, cin, cerr, clog et. al.
+  static ios_base::Init __ioinit;
+  18:   48 8d 3d 00 00 00 00    lea    0x0(%rip),%rdi        # 1f <_GLOBAL__sub_I_main+0xf>
+  1f:   e8 00 00 00 00          callq  24 <_GLOBAL__sub_I_main+0x14>
+  24:   48 8b 3d 00 00 00 00    mov    0x0(%rip),%rdi        # 2b <_GLOBAL__sub_I_main+0x1b>
+  2b:   48 83 c4 08             add    $0x8,%rsp
+  2f:   48 8d 15 00 00 00 00    lea    0x0(%rip),%rdx        # 36 <_GLOBAL__sub_I_main+0x26>
+  36:   48 8d 35 00 00 00 00    lea    0x0(%rip),%rsi        # 3d <_GLOBAL__sub_I_main+0x2d>
+  3d:   e9 00 00 00 00          jmpq   42 <_GLOBAL__sub_I_main+0x32>
+```
+
+VS Code でも以下を参照して逆アセンブラしたコードが表示できるようにした。
+
+* https://code.visualstudio.com/docs/cpp/config-msvc
+* https://devblogs.microsoft.com/cppblog/visual-studio-code-c-july-2021-update-disassembly-view-macro-expansion-and-windows-arm64-debugging/
+
+# 2022-02-28
+
+* System::has_component_type() のコンパイルに成功。

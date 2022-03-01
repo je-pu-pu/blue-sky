@@ -43,7 +43,7 @@ ParticleSystemTestScene::ParticleSystemTestScene( const GameMain* game_main )
 	// for ( int n = 0; n < 10000; n++ )
 	{
 		auto* e = get_entity_manager()->create_entity();
-		// auto* tc = e->add_component< core::ecs::TransformComponent >();
+		auto* tc = e->add_component< core::ecs::TransformComponent >();
 		auto* psc = e->add_component< core::ecs::ParticleSystemComponent >();
 
 		entity = e;

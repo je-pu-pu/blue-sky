@@ -74,6 +74,11 @@ public:
 
 			i->second.emplace( e->get_id(), c );
 
+			for ( auto& s : system_list_ )
+			{
+				s.second->on_add_component( e, c );
+			}
+
 			return c;
 		}
 
@@ -130,6 +135,8 @@ public:
 		}
 
 		system_list_.emplace( id, new SystemType() );
+
+		/// @todo 既存の全コンポーネントに対して走査を行い、システムにコンポーネントへの参照を追加する？
 	}
 
 	/**

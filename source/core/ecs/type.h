@@ -1,6 +1,6 @@
 #pragma once
 
-#include <type/type.h>
+#include "../type.h"
 #include <vector>
 
 namespace core::ecs

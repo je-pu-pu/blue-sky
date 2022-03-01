@@ -38,11 +38,20 @@ public:
 		return EntityManager::get_instance()->add_component< ComponentType >( this );
 	}
 
+	/// @todo ”ñ const ComponentType ‚ğ•Ô‚µ‚Ä—Ç‚¢‚©H
 	template< typename ComponentType >
-	ComponentType* get_component()
+	ComponentType* get_component() const
 	{
 		return EntityManager::get_instance()->get_component< ComponentType >( this );
 	}
+
+	/*
+	template< typename ComponentType >
+	const ComponentType* get_component() const
+	{
+		return EntityManager::get_instance()->get_component< ComponentType >( this );
+	}
+	*/
 
 	template< typename ComponentType >
 	void remove_component()

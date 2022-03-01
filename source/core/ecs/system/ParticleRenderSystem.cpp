@@ -8,11 +8,11 @@ void ParticleRenderSystem::update()
 {
 	std::cout << "ParticleRenderSystem::update()" << std::endl;
 
-	for ( auto& component_tuple : get_component_list() )
+	for ( auto& i : get_component_list() )
 	{
-		auto* transform = std::get< TransformComponent* >( component_tuple );
+		auto* transform = std::get< TransformComponent* >( i.second );
 
-		std::cout << "postion : " << transform->position.x() << std::endl;
+		std::cout << "postion : " << transform->position << std::endl;
 	}
 }
 

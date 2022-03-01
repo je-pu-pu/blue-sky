@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.28729.10
+VisualStudioVersion = 16.0.32126.315
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "blue-sky-2", "blue-sky-2.vcxproj", "{5DB1FAFC-E068-43A8-84D3-0DA42D464BE5}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -28,6 +28,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fbx-converter", "fbx-conver
 		{BD95E740-358A-442B-87CD-4C754058136C} = {BD95E740-358A-442B-87CD-4C754058136C}
 		{8FD31BE5-D334-4354-89C9-1DADC7DE6543} = {8FD31BE5-D334-4354-89C9-1DADC7DE6543}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "blue-sky-2-google-test", "blue-sky-2-google-test\blue-sky-2-google-test.vcxproj", "{8C4F128F-88B9-4C3E-8316-0BFC3E780433}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -79,6 +81,16 @@ Global
 		{090AA333-2B2B-4054-818B-D2CF778D8C95}.Release|Win32.ActiveCfg = Release|Win32
 		{090AA333-2B2B-4054-818B-D2CF778D8C95}.Release|Win32.Build.0 = Release|Win32
 		{090AA333-2B2B-4054-818B-D2CF778D8C95}.Release|x64.ActiveCfg = Release|Win32
+		{8C4F128F-88B9-4C3E-8316-0BFC3E780433}.Debug|ARM.ActiveCfg = Debug|Win32
+		{8C4F128F-88B9-4C3E-8316-0BFC3E780433}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8C4F128F-88B9-4C3E-8316-0BFC3E780433}.Debug|Win32.Build.0 = Debug|Win32
+		{8C4F128F-88B9-4C3E-8316-0BFC3E780433}.Debug|x64.ActiveCfg = Debug|x64
+		{8C4F128F-88B9-4C3E-8316-0BFC3E780433}.Debug|x64.Build.0 = Debug|x64
+		{8C4F128F-88B9-4C3E-8316-0BFC3E780433}.Release|ARM.ActiveCfg = Release|Win32
+		{8C4F128F-88B9-4C3E-8316-0BFC3E780433}.Release|Win32.ActiveCfg = Release|Win32
+		{8C4F128F-88B9-4C3E-8316-0BFC3E780433}.Release|Win32.Build.0 = Release|Win32
+		{8C4F128F-88B9-4C3E-8316-0BFC3E780433}.Release|x64.ActiveCfg = Release|x64
+		{8C4F128F-88B9-4C3E-8316-0BFC3E780433}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

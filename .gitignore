@@ -33,6 +33,13 @@
 /package/
 /reference/
 
-/source/blue-sky-cppcheck-build-dir
+/source/packages/
+/source/blue-sky-cppcheck-build-dir/
+
+/source/blue-sky-2-google-test/Debug/
+/source/blue-sky-2-google-test/.vs/
 
 /source/media/texture/matcap/test/*
+
+
+

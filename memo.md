@@ -1495,3 +1495,8 @@ VS Code でも以下を参照して逆アセンブラしたコードが表示で
             * 良くない
         * blue-sky-2 を .lib と exe に分けて、blue-sky-2-google-test から blue-sky-2.lib をリンクする
         * blue-sky-2.exe にリンクする事はできないのか？
+
+# 2022-03-02
+
+* BaseSystem::on_remove_component() を実装。
+    * Entity から Component が取り除かれた時に、正しく System からも Component が取り除かれるようになった。

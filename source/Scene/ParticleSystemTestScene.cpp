@@ -46,6 +46,9 @@ ParticleSystemTestScene::ParticleSystemTestScene( const GameMain* game_main )
 		auto* tc = e->add_component< core::ecs::TransformComponent >();
 		auto* psc = e->add_component< core::ecs::ParticleSystemComponent >();
 
+		// e->remove_component< core::ecs::ParticleSystemComponent >();
+		e->remove_component< core::ecs::TransformComponent >();
+
 		entity = e;
 	}
 

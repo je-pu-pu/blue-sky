@@ -75,6 +75,7 @@ private:
 	};
 
 private:
+	/// 操作対象となる Component の一覧
 	ComponentList component_list_;
 
 	/**
@@ -88,7 +89,12 @@ private:
 		return ComponentTypeList< ComponentTypes ... >::has_component_type( component_type_id  );
 	}
 
-	void check_entity( const Entity* entity ) override
+	/**
+	 * entity をチェックし、entity が自身の System の操作対象となる Component を全て持っていれば、操作対象として追加する
+	 * 
+	 * @param entity チェックする entity
+	 */
+	void add_entity_component_if_all_components_ready( const Entity* entity ) override
 	{
 		ComponentTuple component_tuple;
 
@@ -96,10 +102,16 @@ private:
 		{
 			component_list_.emplace( entity->get_id(), component_tuple );
 		}
-		else
-		{
-			component_list_.erase( entity->get_id() );
-		}
+	}
+
+	/**
+	 * 操作対象から entity の Component を削除する
+	 * 
+	 * @param entity entity
+	 */
+	void remove_entity_component( const Entity* entity ) override
+	{
+		component_list_.erase( entity->get_id() );
 	}
 
 protected:

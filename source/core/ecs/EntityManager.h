@@ -76,7 +76,7 @@ public:
 
 			for ( auto& s : system_list_ )
 			{
-				s.second->on_add_component( e, c );
+				s.second->on_add_component< ComponentType >( e );
 			}
 
 			return c;
@@ -117,6 +117,11 @@ public:
 		}
 
 		i->second.erase( e->get_id() );
+
+		for ( auto& s : system_list_ )
+		{
+			s.second->on_remove_component< ComponentType >( e );
+		}
 	}
 
 	/**

@@ -139,9 +139,15 @@ public:
 			return;
 		}
 
-		system_list_.emplace( id, new SystemType() );
+		auto system = new SystemType();
 
-		/// @todo 既存の全コンポーネントに対して走査を行い、システムにコンポーネントへの参照を追加する？
+		system_list_.emplace( id, system );
+
+		// 既存の全 Entity に対して走査を行い、 Entity が System の操作対象となる Component を全て持っていた場合、System に Component への参照を追加する
+		for ( auto& entity : entity_list_ )
+		{
+			system->add_entity_component_if_all_components_ready( & entity.second );
+		}
 	}
 
 	/**

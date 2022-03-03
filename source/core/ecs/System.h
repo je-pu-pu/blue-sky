@@ -90,21 +90,6 @@ private:
 	}
 
 	/**
-	 * entity をチェックし、entity が自身の System の操作対象となる Component を全て持っていれば、操作対象として追加する
-	 * 
-	 * @param entity チェックする entity
-	 */
-	void add_entity_component_if_all_components_ready( const Entity* entity ) override
-	{
-		ComponentTuple component_tuple;
-
-		if ( ComponentTypeList< ComponentTypes ... >::gather_entity_components( entity, component_tuple ) )
-		{
-			component_list_.emplace( entity->get_id(), component_tuple );
-		}
-	}
-
-	/**
 	 * 操作対象から entity の Component を削除する
 	 * 
 	 * @param entity entity
@@ -121,6 +106,21 @@ protected:
 public:
 	System() = default;
 	virtual ~System() = default;
+
+	/**
+	 * entity をチェックし、entity が自身の System の操作対象となる Component を全て持っていれば、操作対象として追加する
+	 * 
+	 * @param entity チェックする entity
+	 */
+	void add_entity_component_if_all_components_ready( const Entity* entity ) override
+	{
+		ComponentTuple component_tuple;
+
+		if ( ComponentTypeList< ComponentTypes ... >::gather_entity_components( entity, component_tuple ) )
+		{
+			component_list_.emplace( entity->get_id(), component_tuple );
+		}
+	}
 
 }; // class System
 

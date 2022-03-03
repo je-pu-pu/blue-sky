@@ -18,7 +18,6 @@ public:
 
 protected:
 	virtual bool has_component_type( ComponentTypeId ) const = 0;
-	virtual void add_entity_component_if_all_components_ready( const Entity* ) = 0;
 	virtual void remove_entity_component( const Entity* ) = 0;
 
 public:
@@ -62,6 +61,8 @@ public:
 		// entity から取り除かれた Component が自身の System の操作対象であれば、entity の Component をシステムから取り除く
 		remove_entity_component( entity );
 	}
+
+	virtual void add_entity_component_if_all_components_ready( const Entity* ) = 0;
 
 }; // class System
 

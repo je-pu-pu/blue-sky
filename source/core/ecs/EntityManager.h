@@ -13,6 +13,8 @@
 
 #include <memory>
 
+#include <iostream>
+
 namespace core::ecs
 {
 
@@ -22,10 +24,19 @@ public:
 	using EntityComponentMap = std::unordered_map< EntityId, std::unique_ptr< Component > >;
 
 private:
+	// Entity の一覧
 	std::unordered_map< EntityId, Entity > entity_list_;
-	std::unordered_map< ComponentTypeId, EntityComponentMap > component_list_;
-	std::unordered_map< SystemTypeId, std::unique_ptr< BaseSystem > > system_list_;
 
+	// Component の一覧
+	std::unordered_map< ComponentTypeId, EntityComponentMap > component_list_;
+
+	// ( SystemTypeId => System の実態 ) のマップ ( System の実態を保持する )
+	std::unordered_map< SystemTypeId, std::unique_ptr< BaseSystem > > system_map_;
+
+	// System の一覧 ( 常に実行順に並んでいる事が保証されている )
+	std::vector< BaseSystem* > system_list_;
+
+	/// 次に付与する Entity ID
 	EntityId next_entity_id_ = 0;
 
 public:
@@ -76,7 +87,7 @@ public:
 
 			for ( auto& s : system_list_ )
 			{
-				s.second->on_add_component< ComponentType >( e );
+				s->on_add_component< ComponentType >( e );
 			}
 
 			return c;
@@ -120,7 +131,7 @@ public:
 
 		for ( auto& s : system_list_ )
 		{
-			s.second->on_remove_component< ComponentType >( e );
+			s->on_remove_component< ComponentType >( e );
 		}
 	}
 
@@ -130,18 +141,22 @@ public:
 	 * すでにシステムが追加されている場合は、何もしない
 	 */
 	template< typename SystemType >
-	void add_system()
+	void add_system( int priority )
 	{
 		const auto id = typeid( SystemType ).hash_code();
 
-		if ( system_list_.find( id ) != system_list_.end() )
+		if ( system_map_.find( id ) != system_map_.end() )
 		{
 			return;
 		}
 
 		auto system = new SystemType();
+		system->set_priority( priority );
 
-		system_list_.emplace( id, system );
+		system_map_.emplace( id, system );
+		
+		system_list_.push_back( system );
+		std::sort( system_list_.begin(), system_list_.end(), [] ( const BaseSystem* a, const BaseSystem* b ) { return a->get_priority() < b->get_priority(); } );
 
 		// 既存の全 Entity に対して走査を行い、 Entity が System の操作対象となる Component を全て持っていた場合、System に Component への参照を追加する
 		for ( auto& entity : entity_list_ )
@@ -160,28 +175,29 @@ public:
 	{
 		const auto id = typeid( SystemType ).hash_code();
 
-		auto i = system_list_.find( id );
+		auto i = system_map_.find( id );
 
-		if ( i == system_list_.end() )
+		if ( i == system_map_.end() )
 		{
 			return;
 		}
-		
-		// i->second;
 
-		system_list_.erase( i );
+		system_list_.erase( std::remove( system_list_.begin(), system_list_.end(), i->second.get() ) );
+
+		system_map_.erase( i );	
 	}
 
 	/**
 	 * EntityManager に追加されている全ての System を実行する
 	 *
-	 * @todo System の実行順を制御できるようにする
 	 */
 	void update()
 	{
+		std::cout << "EntityManager::update()" << std::endl;
+
 		for ( auto& s : system_list_ )
 		{
-			s.second->update();
+			s->update();
 		}
 	}
 

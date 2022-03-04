@@ -16,6 +16,10 @@ class BaseSystem
 {
 public:
 
+private:
+	/// システムの実行優先度 ( priority_ が小さい順に実行される )
+	int_t priority_;
+
 protected:
 	virtual bool has_component_type( ComponentTypeId ) const = 0;
 	virtual void remove_entity_component( const Entity* ) = 0;
@@ -25,6 +29,20 @@ public:
 	virtual ~BaseSystem() = default;
 
 	virtual void update() = 0;
+
+	/**
+	 * このシステムの実行優先度を取得する
+	 * 
+	 * @return システムの実行優先度 ( 数値が小さい順に実行される )
+	 */
+	int_t get_priority() const { return priority_; }
+
+	/**
+	 * このシステムの実行優先度を設定する
+	 * 
+	 * @param priority システムの実行優先度 ( 数値が小さい順に実行される )
+	 */
+	void set_priority( int_t priority = 0 ) { priority_ = priority; }
 
 	/**
 	 * Entity に Component が追加された時の処理

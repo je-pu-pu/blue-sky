@@ -6,7 +6,7 @@ namespace core::ecs
 
 void ParticleRenderSystem::update()
 {
-	std::cout << "ParticleRenderSystem::update()" << std::endl;
+	std::cout << get_priority() << " : ParticleRenderSystem::update()" << std::endl;
 
 	for ( auto& i : get_component_list() )
 	{

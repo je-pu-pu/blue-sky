@@ -1,6 +1,6 @@
 #include "ActiveObject.h"
-#include "ActiveObjectPhysics.h"
-#include "GameMain.h"
+#include <blue_sky/ActiveObjectPhysics.h>
+#include <blue_sky/GameMain.h>
 
 #include <blue_sky/ConstantBuffers.h>
 

@@ -4,11 +4,8 @@
 
 #include "TitleScene.h"
 
-#include "GameMain.h"
-// #include "ConstantBuffer.h"
-
-#include "Input.h"
-
+#include <blue_sky/GameMain.h>
+#include <blue_sky/Input.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>

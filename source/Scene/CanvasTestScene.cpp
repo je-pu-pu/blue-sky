@@ -1,11 +1,10 @@
 #include "CanvasTestScene.h"
 
-#include "GameMain.h"
-
-#include "Input.h"
-
-#include <ActiveObjectManager.h>
+#include <blue_sky/GameMain.h>
+#include <blue_sky/Input.h>
+#include <blue_sky/ActiveObjectManager.h>
 #include <blue_sky/graphics/GraphicsManager.h>
+
 #include <game/MainLoop.h>
 
 #include <win/Rect.h>

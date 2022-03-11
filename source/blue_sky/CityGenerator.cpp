@@ -2,9 +2,10 @@
 #include "graphics/Mesh.h"
 #include "graphics/GraphicsManager.h"
 #include "graphics/shader/FlatShader.h"
-#include <GameMain.h>
 
+#include <blue_sky/GameMain.h>
 #include <blue_sky/type.h>
+
 #include <core/math/LineSegment2.h>
 
 #include <common/random.h>

@@ -18,12 +18,7 @@
 
 #include "Input.h"
 
-#include "OculusRift.h"
-
 #include "ActiveObjectPhysics.h"
-
-#include <core/sound/SoundManager.h>
-#include <core/sound/Sound.h>
 
 #include "ScriptManager.h"
 
@@ -32,10 +27,13 @@
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 #include <core/graphics/Direct3D11/Effect.h>
+#include <core/graphics/Shader.h>
+#include <core/graphics/OculusRift.h>
+
+#include <core/sound/SoundManager.h>
+#include <core/sound/Sound.h>
 
 #include <core/input/DirectInput/DirectInput.h>
-
-#include <core/graphics/Shader.h>
 
 #include <win/Version.h>
 #include <win/Clipboard.h>

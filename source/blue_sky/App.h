@@ -6,10 +6,11 @@
 
 #pragma once
 
-#include "Game.h"
-
+#include <game/Game.h>
 #include <game/Config.h>
+
 #include <common/Singleton.h>
+
 #include <type/type.h>
 
 #include <windows.h>

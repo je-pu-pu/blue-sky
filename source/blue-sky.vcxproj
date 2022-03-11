@@ -19,10 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ActiveObjectManager.cpp" />
-    <ClCompile Include="ActiveObjectPhysics.cpp" />
-    <ClCompile Include="App.cpp" />
+    <ClCompile Include="blue_sky\ActiveObjectManager.cpp" />
+    <ClCompile Include="blue_sky\ActiveObjectPhysics.cpp" />
+    <ClCompile Include="blue_sky\App.cpp" />
     <ClCompile Include="blue_sky\CityGenerator.cpp" />
+    <ClCompile Include="blue_sky\GameMain.cpp" />
     <ClCompile Include="blue_sky\graphics\BaseFileLoader.cpp" />
     <ClCompile Include="blue_sky\graphics\Direct3D11\GraphicsManager.cpp" />
     <ClCompile Include="blue_sky\graphics\Direct3D11\Line.cpp" />
@@ -37,6 +38,8 @@
     <ClCompile Include="blue_sky\graphics\ObjFileLoader.cpp" />
     <ClCompile Include="blue_sky\graphics\Rectangle.cpp" />
     <ClCompile Include="blue_sky\graphics\SkyBox.cpp" />
+    <ClCompile Include="blue_sky\Input.cpp" />
+    <ClCompile Include="blue_sky\ScriptManager.cpp" />
     <ClCompile Include="core\animation\AnimationPlayer.cpp" />
     <ClCompile Include="core\ecs\BaseSystem.cpp" />
     <ClCompile Include="core\ecs\Component.cpp" />
@@ -60,6 +63,7 @@
     <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp" />
+    <ClCompile Include="core\graphics\OculusRift.cpp" />
     <ClCompile Include="core\graphics\Sprite.cpp" />
     <ClCompile Include="core\input\DirectInput\DirectInput.cpp" />
     <ClCompile Include="core\math\DirectXMath\Color.cpp" />
@@ -72,7 +76,6 @@
     <ClCompile Include="core\sound\SoundManager.cpp" />
     <ClCompile Include="core\sound\StreamingSound.cpp" />
     <ClCompile Include="core\ecs\EntityManager.cpp" />
-    <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="GameObject\ActiveObject.cpp" />
     <ClCompile Include="GameObject\AreaSwitch.cpp" />
     <ClCompile Include="GameObject\Balloon.cpp" />
@@ -92,9 +95,7 @@
     <ClCompile Include="GameObject\Switch.cpp" />
     <ClCompile Include="GameObject\TranslationObject.cpp" />
     <ClCompile Include="GameObject\Umbrella.cpp" />
-    <ClCompile Include="Input.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="OculusRift.cpp" />
     <ClCompile Include="Scene\CanvasTestScene.cpp" />
     <ClCompile Include="Scene\DebugScene.cpp" />
     <ClCompile Include="Scene\EndingScene.cpp" />
@@ -104,13 +105,14 @@
     <ClCompile Include="Scene\StageSelectScene.cpp" />
     <ClCompile Include="Scene\StoryTextScene.cpp" />
     <ClCompile Include="Scene\TitleScene.cpp" />
-    <ClCompile Include="ScriptManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ActiveObjectManager.h" />
-    <ClInclude Include="ActiveObjectPhysics.h" />
-    <ClInclude Include="App.h" />
+    <ClInclude Include="blue_sky\ActiveObjectManager.h" />
+    <ClInclude Include="blue_sky\ActiveObjectPhysics.h" />
+    <ClInclude Include="blue_sky\App.h" />
     <ClInclude Include="blue_sky\CityGenerator.h" />
+    <ClInclude Include="blue_sky\DelayedCommand.h" />
+    <ClInclude Include="blue_sky\GameMain.h" />
     <ClInclude Include="blue_sky\graphics\BaseFileLoader.h" />
     <ClInclude Include="blue_sky\graphics\Direct3D11\GraphicsManager.h" />
     <ClInclude Include="blue_sky\graphics\Direct3D11\Line.h" />
@@ -141,6 +143,9 @@
     <ClInclude Include="blue_sky\graphics\shader\UnicolorShader.h" />
     <ClInclude Include="blue_sky\graphics\SkyBox.h" />
     <ClInclude Include="blue_sky\ConstantBuffers.h" />
+    <ClInclude Include="blue_sky\Input.h" />
+    <ClInclude Include="blue_sky\SceneManager.h" />
+    <ClInclude Include="blue_sky\ScriptManager.h" />
     <ClInclude Include="blue_sky\type.h" />
     <ClInclude Include="core\animation\Animation.h" />
     <ClInclude Include="core\animation\AnimationChannel.h" />
@@ -191,6 +196,7 @@
     <ClInclude Include="core\graphics\Mesh.h" />
     <ClInclude Include="core\graphics\Model.h" />
     <ClInclude Include="core\graphics\NullTexture.h" />
+    <ClInclude Include="core\graphics\OculusRift.h" />
     <ClInclude Include="core\graphics\PrimitiveTopology.h" />
     <ClInclude Include="core\graphics\RenderTarget.h" />
     <ClInclude Include="core\graphics\RenderTargetTexture.h" />
@@ -223,11 +229,7 @@
     <ClInclude Include="core\sound\SoundManager.h" />
     <ClInclude Include="core\sound\StreamingSound.h" />
     <ClInclude Include="core\type.h" />
-    <ClInclude Include="DelayedCommand.h" />
-    <ClInclude Include="DynamicPointList.h" />
     <ClInclude Include="core\ecs\EntityManager.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameMain.h" />
     <ClInclude Include="GameObject\ActiveObject.h" />
     <ClInclude Include="GameObject\AreaSwitch.h" />
     <ClInclude Include="GameObject\Balloon.h" />
@@ -247,10 +249,7 @@
     <ClInclude Include="GameObject\Switch.h" />
     <ClInclude Include="GameObject\TranslationObject.h" />
     <ClInclude Include="GameObject\Umbrella.h" />
-    <ClInclude Include="Input.h" />
-    <ClInclude Include="OculusRift.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Scene\CanvasTestScene.h" />
     <ClInclude Include="Scene\DebugScene.h" />
     <ClInclude Include="Scene\EndingScene.h" />
@@ -260,7 +259,6 @@
     <ClInclude Include="Scene\StageSelectScene.h" />
     <ClInclude Include="Scene\StoryTextScene.h" />
     <ClInclude Include="Scene\TitleScene.h" />
-    <ClInclude Include="ScriptManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="blue-sky.config">

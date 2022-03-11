@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GameMain.h>
+#include <blue_sky/GameMain.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
 

@@ -1,5 +1,5 @@
-#include "App.h"
-#include "GameMain.h"
+#include <blue_sky/App.h>
+#include <blue_sky/GameMain.h>
 
 #include <common/log.h>
 #include <common/exception.h>

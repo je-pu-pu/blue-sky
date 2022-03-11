@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Game.h"
+
 #include "App.h"
+
+#include <game/Game.h>
 
 #include <common/auto_ptr.h>
 #include <common/safe_ptr.h>

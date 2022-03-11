@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Scene.h"
-#include "DynamicPointList.h"
+#include <core/graphics/DynamicPointList.h>
 
 // #include <core/type.h>
 

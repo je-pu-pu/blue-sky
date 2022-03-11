@@ -8,6 +8,8 @@
 
 #include <type/type.h>
 
+#include <unordered_map>
+
 class DirectWrite;
 
 class DirectInput;

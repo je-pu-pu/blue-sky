@@ -141,7 +141,7 @@ public:
 	 * すでにシステムが追加されている場合は、何もしない
 	 */
 	template< typename SystemType >
-	void add_system( int priority )
+	void add_system( int priority = 0 )
 	{
 		const auto id = typeid( SystemType ).hash_code();
 

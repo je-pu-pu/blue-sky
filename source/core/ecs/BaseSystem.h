@@ -18,7 +18,7 @@ public:
 
 private:
 	/// システムの実行優先度 ( priority_ が小さい順に実行される )
-	int_t priority_;
+	int_t priority_ = 0;
 
 protected:
 	virtual bool has_component_type( ComponentTypeId ) const = 0;

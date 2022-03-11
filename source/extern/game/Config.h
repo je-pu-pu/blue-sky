@@ -18,13 +18,13 @@ public:
 	Config();
 	virtual ~Config();
 
-	template< typename T > T get( const char* name, T default ) const
+	template< typename T > T get( const char* name, T default_value ) const
 	{
 		ValueMap::const_iterator i = value_.find( name );
 
 		if ( i == value_.end() )
 		{
-			return default;
+			return default_value;
 		}
 
 		try
@@ -33,18 +33,18 @@ public:
 		}
 		catch ( boost::bad_lexical_cast )
 		{
-			return default;
+			return default_value;
 		}
 	}
 
-	template< typename T > T get( const char* name, T default )
+	template< typename T > T get( const char* name, T default_value )
 	{
 		ValueMap::const_iterator i = value_.find( name );
 
 		if ( i == value_.end() )
 		{
-			set( name, default );
-			return default;
+			set( name, default_value );
+			return default_value;
 		}
 
 		try
@@ -53,8 +53,8 @@ public:
 		}
 		catch ( boost::bad_lexical_cast )
 		{
-			set( name, default );
-			return default;
+			set( name, default_value );
+			return default_value;
 		}
 	}
 

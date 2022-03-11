@@ -6,6 +6,10 @@
 namespace common
 {
 
+/**
+ * コピーできず、デストラクタで自動的に delete されないスマートポインタ
+ * 
+ */
 template< typename T >
 class [[deprecated("please use std::unique_ptr")]] safe_ptr
 {

@@ -221,15 +221,26 @@
     <ClCompile Include="core\graphics\Direct3D11\RenderTargetTexture.cpp">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClCompile>
-    <ClCompile Include="lib.cpp" />
-    <ClCompile Include="Scene\ParticleSystemTestScene.cpp" />
-    <ClCompile Include="core\ecs\Component.cpp" />
-    <ClCompile Include="core\ecs\system\ParticleSystem.cpp" />
-    <ClCompile Include="core\ecs\System.cpp" />
-    <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp" />
     <ClCompile Include="core\ecs\EntityManager.cpp" />
     <ClCompile Include="core\ecs\Entity.cpp" />
-    <ClCompile Include="core\ecs\BaseSystem.cpp" />
+    <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp">
+      <Filter>core\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ecs\system\ParticleSystem.cpp">
+      <Filter>core\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\ParticleSystemTestScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ecs\Component.cpp">
+      <Filter>core\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ecs\System.cpp">
+      <Filter>core\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ecs\BaseSystem.cpp">
+      <Filter>core\ecs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -616,20 +627,40 @@
     <ClInclude Include="core\math\LineSegment2.h" />
     <ClInclude Include="blue_sky\graphics\shader\ShaderMixin.h" />
     <ClInclude Include="blue_sky\graphics\shader\UnicolorShader.h" />
-    <ClInclude Include="core\graphics\Direct3D11\ConstantBufferTyped.h" />
-    <ClInclude Include="core\graphics\Direct3D11\ConstantBufferWithData.h" />
     <ClInclude Include="SceneManager.h" />
-    <ClInclude Include="Scene\ParticleSystemTestScene.h" />
-    <ClInclude Include="core\ecs\component\ParticleSystemComponent.h" />
-    <ClInclude Include="core\ecs\Component.h" />
-    <ClInclude Include="core\ecs\system\ParticleSystem.h" />
-    <ClInclude Include="core\ecs\System.h" />
-    <ClInclude Include="core\ecs\system\ParticleRenderSystem.h" />
     <ClInclude Include="core\ecs\EntityManager.h" />
     <ClInclude Include="core\ecs\Entity.h" />
-    <ClInclude Include="core\ecs\type.h" />
     <ClInclude Include="core\ecs\component\TransformComponent.h" />
-    <ClInclude Include="core\ecs\BaseSystem.h" />
+    <ClInclude Include="core\ecs\system\ParticleRenderSystem.h">
+      <Filter>core\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\system\ParticleSystem.h">
+      <Filter>core\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\component\ParticleSystemComponent.h">
+      <Filter>core\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\ParticleSystemTestScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\Component.h">
+      <Filter>core\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\System.h">
+      <Filter>core\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\type.h">
+      <Filter>core\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\BaseSystem.h">
+      <Filter>core\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\ConstantBufferWithData.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\ConstantBufferTyped.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -834,6 +865,15 @@
     </Filter>
     <Filter Include="media\shader\post_effect">
       <UniqueIdentifier>{9a23cbef-d0d5-4583-9292-4739d4b69c1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\ecs">
+      <UniqueIdentifier>{6d246d24-d5eb-47bd-a3a0-08d5a30d1e43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\ecs\component">
+      <UniqueIdentifier>{a79da315-419e-48d4-ba23-3b984db58ea9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\ecs\system">
+      <UniqueIdentifier>{de79cb91-d739-411f-94a9-7588bf6f4b30}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

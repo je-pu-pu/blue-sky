@@ -1500,3 +1500,82 @@ VS Code でも以下を参照して逆アセンブラしたコードが表示で
 
 * BaseSystem::on_remove_component() を実装。
     * Entity から Component が取り除かれた時に、正しく System からも Component が取り除かれるようになった。
+
+# 2022-03-03
+
+* System 追加時、 System に必要な Component への参照が正しく追加されるように修正。
+
+# 2022-03-04
+
+* システムに優先度を設定できるようにした。
+
+# 2022-03-05
+
+* Test のためのプロジェクト設定見直し
+    * blue-sky-2 プロジェクトの「構成の種類」を「アプリケーション(.exe)」から「スタティックライブラリ(.lib)」にすると、
+        * blue-sky-2-google-test プロジェクトの追加の依存ファイルに何も設定しなくても、リンクが成功した。
+    * blue-sky-2 プロジェクトの「構成の種類」が「アプリケーション(.exe)(.exe)」だと
+        * blue-sky-2-google-test から blue-sky-2 の .cpp に書かれている処理が見つけられず、リンクエラーとなる
+
+# 2022-03-06
+
+* Test のためのプロジェクト設定変更
+    * blue-sky-2 プロジェクトを .lib に変更
+    * 新しく .exe を生成するための blue-sky-2-exe プロジェクトを作成
+    * blue-sky-2 では警告だったものが blue-sky-2-exe ではエラーとなる場合があるため、要調査
+
+# 2022-03-07
+
+* Test のためのプロジェクト設定変更
+    * blue-sky-2-exe プロジェクトの設定が C++14 だったので C++17 に修正
+    * common::auto_ptr のエラーがまだ出る
+    * default を仮引数名として使っていた common Config.h がエラーになったため修正
+
+# 2022-03-08
+
+* Test のためのプロジェクト設定変更
+    * blue-sky-2-exe プロジェクトの設定で「準拠モード」を「なし」に変えてみたが、common::auto_ptr のエラーは消えず
+    * common に auto_ptr と safe_ptr を見つけ、両方 blue-sky から使われており、違いが分からなかったため調査
+        * auto_ptr と safe_ptr のコメントに違いを明記した
+
+# 2022-03-09
+
+* Test のためのプロジェクト設定変更
+    * VS 2022 でビルドするようになった事が関係しているのかと思って、Debug/ Release/ ディレクトリを削除し、 blue-sky-2 をリビルドしてみた
+        * 結果はエラーなし
+            * つまり、blue-sky-2 プロジェクトの設定 + VS 2022 でのビルドは問題無し
+    * blue-sky-2 プロジェクトをコピーし blue-sky-2-exe-2 プロジェクトとして「構成の種類」を「アプリケーション(.exe)」に変えるだけしてビルドしてみた
+        * 結果は common::auto_ptr の deprecated エラーが出てしまう
+            * 設定は同じはずなのに、なぜ？
+
+# 2022-03-10
+
+* Test のためのプロジェクト設定変更
+    * 再度、blue-sky-2 プロジェクトをコピーして blue-sky-2-exe-2 プロジェクトを作ってみた
+        * 昨日は deprecated がエラーになった以外に、リンクのエラーが出ていた
+        * プロジェクトに lib.cpp を追加
+        * 結果はエラーなし
+        * 昨日の deprecated エラーは消えた。なぜ？
+    * このまま進むか？
+    * やはり新規にプロジェクトを作り、そこでエラーが出ないようにソースを修正した方が安全では？
+    * プロジェクトファイル、ソリューションファイルの配置も整理したい。
+        * 整理してみた
+            * 問題が出た
+                * build/ にソリューションファイル・プロジェクトファイルを移動して ../source/ のソースコードを参照すると
+                    * build/Win32/Debug/ を中間ディレクトリ設定したはずが build/Win32/source に中間ファイルができてしまう ( ソースへの相対パスが ../source/ で始まるため )
+                * source/ にソリューションファイル・プロジェクトファイルを移動すると謎のエラー
+                    * Main.obj : error LNK2019: 未解決の外部シンボル "private: __thiscall App::App(void)" (??0App@@AAE@XZ) が関数 "public: static class App * __cdecl common::Singleton<class App>::get_instance(void)" (?get_instance@?$Singleton@VApp@@@common@@SAPAVApp@@XZ) で参照されました
+                    * 基本的に、複数のプロジェクトを同じディレクトリに設置すると、問題が起こりやすいのではないか？
+                        * 以下のように、プロジェクトごとにディレクトリを分けて、各ディレクトリにプロジェクトファイルを設置するべきか？
+                            * source/blue-sky/
+                            * source/blue-sky-exe/
+                            * source/blue-sky-test/
+
+# 2022-03-11
+
+* Test のためのプロジェクト設定変更
+    * 対応完了！！！
+    * blue-sky.sln blue-sky.vcproj, blue-sky-exe.vcproj, blue-sky-test.vcproj を source/ に配置した
+    * ビルド時に仕様される出力用ディレクトリ、中間ファイル用ディレクトリは全て .build/ に統一した
+    * 今後、 source/ 直下に配置されている .h, .cpp を サブディレクトリに整理していく ( おそらく大半は blue_sky/ 以下に移動 )
+    * なぜかビルドした実行ファイルのウィンドウサイズが 1.5 倍ぐらいに大きくなっている気がする ( 開発環境の画面設定が 150% になっているが、それが反映されるようになったのか？ )

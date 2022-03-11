@@ -2,42 +2,33 @@
 *.url
 *.bin.fbx
 
-/.vs
-
-/doc/html/
-
-/source/lib/x86/*
-/source/lib/x64/*
-/source/Debug/
-/source/Release/
-/source/Profile/
-/source/ipch/
-
-/source/extern/*/Debug/
-/source/extern/*/Release/
-/source/extern/*/Profile/
-
-/source/imgui.ini
-/source/*.config
-/source/save/*.save
-/source/log/*.log
-
-/source/.vs/
-
 *.vcxproj.user
 *.opensdf
 *.sdf
 *.suo
 
+/.vs/
 /log/
 /package/
 /reference/
 
+/doc/html/
+
+/source/.vs/
+/source/.build/
 /source/packages/
 /source/blue-sky-cppcheck-build-dir/
 
-/source/blue-sky-2-google-test/Debug/
-/source/blue-sky-2-google-test/.vs/
+/source/lib/x86/*
+/source/lib/x64/*
+/source/lib/*.zip
+
+/source/imgui.ini
+/source/blue-sky.config
+/source/save/*.save
+/source/log/*.log
+
+
 
 /source/media/texture/matcap/test/*
 

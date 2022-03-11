@@ -25,19 +25,15 @@ TEST( EcsTest, EntityManagerTest )
 	EXPECT_NE( nullptr, psc );
 }
 
-/// @todo ƒŠƒ“ƒN‚·‚éB
-/*
 TEST( EcsTest, SystemTest )
 {
 	auto entity_manager = core::ecs::EntityManager::get_instance();
 	entity_manager->add_system< core::ecs::ParticleSystem >();
 	entity_manager->add_system< core::ecs::ParticleRenderSystem >();
 
-	auto entity = nullptr; // entity_manager->create_entity();
+	auto entity = entity_manager->create_entity();
+	EXPECT_NE( nullptr, entity );
 
 	entity_manager->remove_system< core::ecs::ParticleSystem >();
 	entity_manager->remove_system< core::ecs::ParticleRenderSystem >();
-
-	EXPECT_NE( nullptr, entity );
 }
-*/

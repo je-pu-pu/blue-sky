@@ -109,7 +109,7 @@ public:
 	void set_drawing_accent( float_t ) override;
 	void set_drawing_line_type( int_t ) override;
 
-	void set_eye_position( const Vector& );
+	void set_eye_position( const Vector& ) override;
 
 	void resolve_depth_texture() const override;
 	Texture* get_depth_texture() const override;

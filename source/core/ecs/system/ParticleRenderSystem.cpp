@@ -12,7 +12,7 @@ void ParticleRenderSystem::update()
 	{
 		auto* transform = std::get< TransformComponent* >( i.second );
 
-		std::cout << "postion : " << transform->position << std::endl;
+		std::cout << "postion : " << transform->transform.get_position() << std::endl;
 	}
 }
 

@@ -100,7 +100,7 @@ public:
 		KEY_F12 = VK_F12,
 	};
 
-protected:
+private:
 	CreateSceneFunctionMap					scene_creator_map_;		///< シーン生成マップ
 
 	float									total_elapsed_time_;	///< ゲームが開始してからの経過時間 ( 秒 )

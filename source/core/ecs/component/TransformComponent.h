@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/ecs/Component.h>
-#include <core/type.h>
+#include <core/math/Transform.h>
 #include <array>
 
 namespace core::ecs
@@ -18,7 +18,7 @@ public:
 	// const size_t ID = 2;
 
 public:
-	core::Vector3 position;
+	core::Transform transform;
 
 public:
 	TransformComponent() = default;

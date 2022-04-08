@@ -7,6 +7,7 @@
 namespace core::ecs
 {
 	class EntityManager;
+	class Entity;
 }
 
 namespace core::graphics
@@ -27,14 +28,13 @@ class ParticleSystemTestScene : public Scene
 {
 public:
 	using EntityManager = core::ecs::EntityManager;
+	using Entity = core::ecs::Entity;
 
 protected:
 	EntityManager* get_entity_manager();
 
 protected:
-
-	/// @todo Scenegraph ‚ÉˆÚ“®‚·‚é
-	std::unique_ptr< Camera > camera_;
+	Entity* camera_;
 
 public:
 	explicit ParticleSystemTestScene( const GameMain* );

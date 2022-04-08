@@ -212,8 +212,6 @@
     <ClCompile Include="core\graphics\Direct3D11\RenderTargetTexture.cpp">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClCompile>
-    <ClCompile Include="core\ecs\EntityManager.cpp" />
-    <ClCompile Include="core\ecs\Entity.cpp" />
     <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp">
       <Filter>core\ecs\system</Filter>
     </ClCompile>
@@ -252,6 +250,12 @@
     </ClCompile>
     <ClCompile Include="core\graphics\OculusRift.cpp">
       <Filter>core\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ecs\Entity.cpp">
+      <Filter>core\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ecs\EntityManager.cpp">
+      <Filter>core\ecs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -616,16 +620,9 @@
     <ClInclude Include="core\graphics\ConstantBuffer.h">
       <Filter>core\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\BackBufferTexture.h" />
     <ClInclude Include="core\graphics\Direct3D11\RenderTargetTexture.h">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\NullTexture.h" />
-    <ClInclude Include="core\math\LineSegment2.h" />
-    <ClInclude Include="blue_sky\graphics\shader\UnicolorShader.h" />
-    <ClInclude Include="core\ecs\EntityManager.h" />
-    <ClInclude Include="core\ecs\Entity.h" />
-    <ClInclude Include="core\ecs\component\TransformComponent.h" />
     <ClInclude Include="core\ecs\system\ParticleRenderSystem.h">
       <Filter>core\ecs\system</Filter>
     </ClInclude>
@@ -694,6 +691,27 @@
     </ClInclude>
     <ClInclude Include="core\graphics\OculusRift.h">
       <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\Entity.h">
+      <Filter>core\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\EntityManager.h">
+      <Filter>core\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\BackBufferTexture.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\LineSegment2.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\component\TransformComponent.h">
+      <Filter>core\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\NullTexture.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\UnicolorShader.h">
+      <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -813,7 +831,6 @@
     <None Include="media\shader\post_effect\common.hlsl">
       <Filter>media\shader\post_effect</Filter>
     </None>
-    <None Include="media\script\scene\canvas_test.lua" />
     <None Include="media\shader\particle.hlsl">
       <Filter>media\shader</Filter>
     </None>
@@ -821,6 +838,9 @@
       <Filter>media\shader</Filter>
     </None>
     <None Include="media\script\test\switch_post_effect_shader.lua">
+      <Filter>media\script</Filter>
+    </None>
+    <None Include="media\script\scene\canvas_test.lua">
       <Filter>media\script</Filter>
     </None>
   </ItemGroup>

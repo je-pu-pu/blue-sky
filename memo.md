@@ -1641,3 +1641,56 @@ VS Code でも以下を参照して逆アセンブラしたコードが表示で
 * DirectXMath, Bullet のテストを修正した
 * 溜まっていた変更をコミット
 * 今後は毎日細かくコミットした方が良い
+
+# 2022-04-09
+
+* DirectXTK の SimpleMath の Quaternion を確認
+    * データの保持には XMFLOAT4 を使っている
+        * というか XMFLOAT4 を継承している
+        * https://github.com/microsoft/DirectXTK/blob/main/Inc/SimpleMath.h#L683
+* blue_sky にも direct_x_math::Quaternion を作るべきか？
+    * SimpleMath を使うのもアリかも
+
+# 2022-04-10
+
+* GameObject::transform_ に対して set_rotation() しているのはどこか？既存のソースを調べてみた。結果は以下の通り
+    * ActiveObject::restart()
+    * ActiveObject::set_start_rotation()
+    * ActiveObject::set_direction_degree()
+    * どれも毎フレームなど頻繁に呼ばれているようではない。
+    * Transform の保持は DirectXMath の Quaternion で保持して、Bullet が物理演算する時だけ Bullet に回転を設定するようにできるか？要検討
+
+
+# 2022-04-11
+
+* 昨日の考えについて今の時点での結論
+    * 基本的に DirectXMath が回転を保持して「Bullet が物理演算する時だけ Bullet に回転を設定する」よりも・・・
+    * 基本的に「Bullet が回転を保持して、描画など、必要な時だけ取り出す」とした方がよさそう
+    * 理由は、
+        * 直接回転角度を設定するような事は、毎フレーム起こらない。
+        * Bullet の物理演算は基本的に毎フレーム行われる
+        * 描画も毎フレーム行われる
+        * 毎フレーム Bullet <-> DirectX の変換が必要であれば、どちらでも同じ？
+
+# 2022-04-12
+
+* Unity がどうやって回転を保持しているのか？
+    * たとえば Rotation X に 0.123456789 を入力すると 0.1234568 と変更される
+    * Position X も同様で 0.123456789 を入力すると 0.1234568 と変更される
+
+# 2022-04-13
+
+* 左手座標系 Y Up で core::bullet を整理したいが、正しく動いているかの判断のため、画面を描画しながらやりたい
+    * まずは Cube などを表示するテスト用の Scene を新たに作るか。
+
+# 2022-04-15
+
+* TransformTestScene を作った。
+
+# 2022-04-16
+
+* TransformTestScene に ImGui で Position と Rotation を設定できるようにした。
+
+# 2022-04-18
+
+* RenderSystem, RenderComponent を追加し、簡単なモデルを ECS を使って表示するように。

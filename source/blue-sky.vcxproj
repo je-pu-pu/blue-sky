@@ -47,6 +47,7 @@
     <ClCompile Include="core\ecs\System.cpp" />
     <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp" />
     <ClCompile Include="core\ecs\system\ParticleSystem.cpp" />
+    <ClCompile Include="core\ecs\system\RenderSystem.cpp" />
     <ClCompile Include="core\graphics\BgSpriteLayer.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Axis.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\BackBufferTexture.cpp" />
@@ -105,6 +106,7 @@
     <ClCompile Include="Scene\StageSelectScene.cpp" />
     <ClCompile Include="Scene\StoryTextScene.cpp" />
     <ClCompile Include="Scene\TitleScene.cpp" />
+    <ClCompile Include="Scene\TransformTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blue_sky\ActiveObjectManager.h" />
@@ -157,11 +159,13 @@
     <ClInclude Include="core\ecs\BaseSystem.h" />
     <ClInclude Include="core\ecs\Component.h" />
     <ClInclude Include="core\ecs\component\ParticleSystemComponent.h" />
+    <ClInclude Include="core\ecs\component\RenderComponent.h" />
     <ClInclude Include="core\ecs\component\TransformComponent.h" />
     <ClInclude Include="core\ecs\Entity.h" />
     <ClInclude Include="core\ecs\System.h" />
     <ClInclude Include="core\ecs\system\ParticleRenderSystem.h" />
     <ClInclude Include="core\ecs\system\ParticleSystem.h" />
+    <ClInclude Include="core\ecs\system\RenderSystem.h" />
     <ClInclude Include="core\ecs\type.h" />
     <ClInclude Include="core\graphics\BackBufferTexture.h" />
     <ClInclude Include="core\graphics\BgSpriteLayer.h" />
@@ -259,6 +263,7 @@
     <ClInclude Include="Scene\StageSelectScene.h" />
     <ClInclude Include="Scene\StoryTextScene.h" />
     <ClInclude Include="Scene\TitleScene.h" />
+    <ClInclude Include="Scene\TransformTestScene.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="blue-sky.config">

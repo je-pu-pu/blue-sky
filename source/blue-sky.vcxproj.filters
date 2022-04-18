@@ -257,6 +257,10 @@
     <ClCompile Include="core\ecs\EntityManager.cpp">
       <Filter>core\ecs</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\TransformTestScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ecs\system\RenderSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -713,6 +717,11 @@
     <ClInclude Include="blue_sky\graphics\shader\UnicolorShader.h">
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\TransformTestScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\system\RenderSystem.h" />
+    <ClInclude Include="core\ecs\component\RenderComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

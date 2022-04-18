@@ -11,6 +11,7 @@
 #include <Scene/CanvasTestScene.h>
 #include <Scene/DebugScene.h>
 #include <Scene/ParticleSystemTestScene.h>
+#include <Scene/TransformTestScene.h>
 
 #include "ActiveObjectManager.h"
 
@@ -136,6 +137,7 @@ GameMain::GameMain()
 
 	is_display_fps_ = get_config()->get( "graphics.display_fps", 0 ) != 0;
 
+	/// @todo SceneManager ‚Å‚â‚é
 	scene_creator_map_[ "title"        ] = [this] () { return new TitleScene( this ); };
 	scene_creator_map_[ "stage_select" ] = [this] () { return new StageSelectScene( this ); };
 	scene_creator_map_[ "stage_intro"  ] = [this] () { return new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".intro" ).c_str(), "game_play" );	};
@@ -145,7 +147,8 @@ GameMain::GameMain()
 	
 	scene_creator_map_[ "debug"        ] = [this] () { return new DebugScene( this ); };
 	scene_creator_map_[ "canvas_test"  ] = [this] () { return new CanvasTestScene( this ); };
-	scene_creator_map_[ "particle_system_test" ] = [this]() { return new ParticleSystemTestScene( this ); };
+	scene_creator_map_[ "particle_system_test"	] = [this]() { return new ParticleSystemTestScene( this ); };
+	scene_creator_map_[ "transform_test"		] = [this]() { return new TransformTestScene( this ); };
 
 	update_render_data_for_game();
 }

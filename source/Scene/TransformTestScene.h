@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Scene.h"
+#include <memory>
 
 namespace core::ecs
 {
@@ -11,13 +12,11 @@ namespace core::ecs
 namespace blue_sky
 {
 
-class Camera;
-
 /**
- * パーティクルシステムのテスト用シーン
+ * Transform のテスト用シーン
  *
  */
-class ParticleSystemTestScene : public Scene
+class TransformTestScene : public Scene
 {
 public:
 	using EntityManager = core::ecs::EntityManager;
@@ -30,8 +29,8 @@ protected:
 	Entity* camera_;
 
 public:
-	explicit ParticleSystemTestScene( const GameMain* );
-	~ParticleSystemTestScene() override;
+	explicit TransformTestScene( const GameMain* );
+	~TransformTestScene() override;
 
 	void update() override;
 	void render() override;

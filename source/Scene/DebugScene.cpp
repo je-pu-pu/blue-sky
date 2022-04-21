@@ -3,10 +3,10 @@
 
 #include <GameObject/Camera.h>
 
-#include <ActiveObjectManager.h>
-#include <ActiveObjectPhysics.h>
-#include <ScriptManager.h>
-#include <Input.h>
+#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ActiveObjectPhysics.h>
+#include <blue_sky/ScriptManager.h>
+#include <blue_sky/Input.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/shader/post_effect/HandDrawingShader.h>

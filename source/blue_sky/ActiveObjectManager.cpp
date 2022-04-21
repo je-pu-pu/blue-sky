@@ -18,8 +18,7 @@
 #include <GameObject/ActiveObject.h>
 #include <GameObject/StaticObject.h>
 
-#include <GameMain.h>
-
+#include <blue_sky/GameMain.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <core/animation/AnimationPlayer.h>

@@ -1,4 +1,4 @@
-#include "ParticleSystemTestScene.h"
+#include "TransformTestScene.h"
 
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/ActiveObjectManager.h>
@@ -6,9 +6,8 @@
 #include <blue_sky/Input.h>
 
 #include <core/ecs/Component/TransformComponent.h>
-#include <core/ecs/Component/ParticleSystemComponent.h>
-#include <core/ecs/System/ParticleSystem.h>
-#include <core/ecs/System/ParticleRenderSystem.h>
+#include <core/ecs/Component/RenderComponent.h>
+#include <core/ecs/System/RenderSystem.h>
 #include <core/ecs/EntityManager.h>
 
 #include <game/MainLoop.h>
@@ -22,41 +21,39 @@
 namespace blue_sky
 {
 
-ParticleSystemTestScene::ParticleSystemTestScene( const GameMain* game_main )
+TransformTestScene::TransformTestScene( const GameMain* game_main )
 	: Scene( game_main )
 	, camera_( EntityManager::get_instance()->create_entity() )
 {
-	// Physics
-	get_physics_manager()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
-
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
+	get_graphics_manager()->load_model( "wall-1" );
+
 	// System ‚ð’Ç‰Á‚·‚é
-	get_entity_manager()->add_system< core::ecs::ParticleRenderSystem >( 1000 );
-	get_entity_manager()->add_system< core::ecs::ParticleSystem >( 0 );
+	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
 
 	// Entity ‚Æ Component ‚ð’Ç‰Á‚·‚é
-	auto particle_system = get_entity_manager()->create_entity();
-	particle_system->add_component< core::ecs::TransformComponent >()->transform.set_identity();
-	particle_system->add_component< core::ecs::ParticleSystemComponent >();
+	auto cube = get_entity_manager()->create_entity();
+	cube->add_component< core::ecs::TransformComponent >()->transform.set_identity();
+	cube->add_component< core::ecs::RenderComponent >();
 
 	auto camera_transform = camera_->add_component< core::ecs::TransformComponent >();
 	camera_transform->transform.set_identity();
 	camera_transform->transform.set_position( Vector( 0.f, 1.5f, -10.f ) );
 }
 
-ParticleSystemTestScene::~ParticleSystemTestScene()
+TransformTestScene::~TransformTestScene()
 {
 	get_active_object_manager()->clear();
 }
 
-ParticleSystemTestScene::EntityManager* ParticleSystemTestScene::get_entity_manager()
+TransformTestScene::EntityManager* TransformTestScene::get_entity_manager()
 {
 	return EntityManager::get_instance();
 }
 
-void ParticleSystemTestScene::update()
+void TransformTestScene::update()
 {
 	Scene::update();
 
@@ -110,15 +107,17 @@ void ParticleSystemTestScene::update()
 	get_graphics_manager()->set_eye_position( t->transform.get_position() );
 
 	get_graphics_manager()->clear_debug_bullet();
-	get_physics_manager()->update( get_elapsed_time() );
 
-	/*
-	ImGui::Begin( " params" );
+	static float pos[ 3 ] = { 0 };
+	static float rot[ 3 ] = { 0 };
+
+	ImGui::Begin( "transform test params" );
+	ImGui::InputFloat3( "Position", pos );
+	ImGui::InputFloat3( "Rotation", rot );
 	ImGui::End();
-	*/
 }
 
-void ParticleSystemTestScene::render()
+void TransformTestScene::render()
 {
 	auto& frame_render_data = get_graphics_manager()->get_frame_render_data()->data();
 
@@ -139,6 +138,9 @@ void ParticleSystemTestScene::render()
 
 	get_graphics_manager()->render_background();
 	get_graphics_manager()->render_active_objects( get_active_object_manager() );
+
+	/// @todo ®—‚·‚éB
+	get_entity_manager()->update();
 
 	get_graphics_manager()->render_fader();
 

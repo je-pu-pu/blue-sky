@@ -2,11 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Input.cpp">
-      <Filter>Input</Filter>
-    </ClCompile>
-    <ClCompile Include="OculusRift.cpp" />
-    <ClCompile Include="App.cpp" />
     <ClCompile Include="GameObject\ActiveObject.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
@@ -76,12 +71,9 @@
     <ClCompile Include="GameObject\Player.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="GameObject\Rocket.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="ActiveObjectManager.cpp" />
-    <ClCompile Include="ActiveObjectPhysics.cpp" />
     <ClCompile Include="GameObject\StaticeObject.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
@@ -217,12 +209,9 @@
     <ClCompile Include="core\graphics\Direct3D11\Texture.cpp">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClCompile>
-    <ClCompile Include="ScriptManager.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\RenderTargetTexture.cpp">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClCompile>
-    <ClCompile Include="core\ecs\EntityManager.cpp" />
-    <ClCompile Include="core\ecs\Entity.cpp" />
     <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp">
       <Filter>core\ecs\system</Filter>
     </ClCompile>
@@ -241,14 +230,40 @@
     <ClCompile Include="core\ecs\BaseSystem.cpp">
       <Filter>core\ecs</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\ScriptManager.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\GameMain.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ActiveObjectManager.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ActiveObjectPhysics.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\App.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\Input.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\OculusRift.cpp">
+      <Filter>core\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ecs\Entity.cpp">
+      <Filter>core\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ecs\EntityManager.cpp">
+      <Filter>core\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\TransformTestScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ecs\system\RenderSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="App.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="Input.h">
-      <Filter>Input</Filter>
-    </ClInclude>
-    <ClInclude Include="OculusRift.h" />
     <ClInclude Include="GameObject\ActiveObject.h">
       <Filter>GameObject</Filter>
     </ClInclude>
@@ -324,12 +339,9 @@
     <ClInclude Include="GameObject\Player.h">
       <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="GameMain.h" />
     <ClInclude Include="GameObject\Rocket.h">
       <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="ActiveObjectManager.h" />
-    <ClInclude Include="ActiveObjectPhysics.h" />
     <ClInclude Include="GameObject\StaticObject.h">
       <Filter>GameObject</Filter>
     </ClInclude>
@@ -357,8 +369,6 @@
     <ClInclude Include="core\DirectX.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="ScriptManager.h" />
-    <ClInclude Include="Game.h" />
     <ClInclude Include="Scene\DebugScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -542,7 +552,6 @@
     <ClInclude Include="blue_sky\CityGenerator.h">
       <Filter>blue_sky</Filter>
     </ClInclude>
-    <ClInclude Include="DynamicPointList.h" />
     <ClInclude Include="blue_sky\graphics\shader\NullShader.h">
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
@@ -615,22 +624,9 @@
     <ClInclude Include="core\graphics\ConstantBuffer.h">
       <Filter>core\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\RenderTarget.h" />
-    <ClInclude Include="core\graphics\ShaderResource.h" />
-    <ClInclude Include="core\graphics\RenderTargetTexture.h" />
-    <ClInclude Include="core\graphics\BackBufferTexture.h" />
-    <ClInclude Include="DelayedCommand.h" />
     <ClInclude Include="core\graphics\Direct3D11\RenderTargetTexture.h">
       <Filter>core\graphics\Direct3D11\Texture</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\NullTexture.h" />
-    <ClInclude Include="core\math\LineSegment2.h" />
-    <ClInclude Include="blue_sky\graphics\shader\ShaderMixin.h" />
-    <ClInclude Include="blue_sky\graphics\shader\UnicolorShader.h" />
-    <ClInclude Include="SceneManager.h" />
-    <ClInclude Include="core\ecs\EntityManager.h" />
-    <ClInclude Include="core\ecs\Entity.h" />
-    <ClInclude Include="core\ecs\component\TransformComponent.h" />
     <ClInclude Include="core\ecs\system\ParticleRenderSystem.h">
       <Filter>core\ecs\system</Filter>
     </ClInclude>
@@ -661,6 +657,71 @@
     <ClInclude Include="core\graphics\Direct3D11\ConstantBufferTyped.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
+    <ClInclude Include="core\graphics\ShaderResource.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\ShaderMixin.h">
+      <Filter>core\graphics\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\RenderTargetTexture.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\RenderTarget.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\SceneManager.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ScriptManager.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\DelayedCommand.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\GameMain.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ActiveObjectManager.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ActiveObjectPhysics.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\App.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\Input.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\OculusRift.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\Entity.h">
+      <Filter>core\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\EntityManager.h">
+      <Filter>core\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\BackBufferTexture.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\LineSegment2.h">
+      <Filter>core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\component\TransformComponent.h">
+      <Filter>core\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\NullTexture.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\UnicolorShader.h">
+      <Filter>blue_sky\graphics\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\TransformTestScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\system\RenderSystem.h" />
+    <ClInclude Include="core\ecs\component\RenderComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -773,21 +834,26 @@
     <None Include="media\shader\post_effect\default.hlsl">
       <Filter>media\shader\post_effect</Filter>
     </None>
-    <None Include="media\script\test\switch_post_effect_shader.lua" />
     <None Include="media\shader\post_effect\chromatic_aberration.hlsl">
       <Filter>media\shader\post_effect</Filter>
     </None>
     <None Include="media\shader\post_effect\common.hlsl">
       <Filter>media\shader\post_effect</Filter>
     </None>
-    <None Include="media\script\scene\canvas_test.lua" />
-    <None Include="media\shader\particle.hlsl" />
-    <None Include="media\shader\unicolor.hlsl" />
+    <None Include="media\shader\particle.hlsl">
+      <Filter>media\shader</Filter>
+    </None>
+    <None Include="media\shader\unicolor.hlsl">
+      <Filter>media\shader</Filter>
+    </None>
+    <None Include="media\script\test\switch_post_effect_shader.lua">
+      <Filter>media\script</Filter>
+    </None>
+    <None Include="media\script\scene\canvas_test.lua">
+      <Filter>media\script</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Input">
-      <UniqueIdentifier>{3306306a-f212-4428-80eb-8d1355e62c22}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{1d357c30-a5d6-4fcb-a582-73566ac2eb55}</UniqueIdentifier>
     </Filter>
@@ -874,6 +940,9 @@
     </Filter>
     <Filter Include="core\ecs\system">
       <UniqueIdentifier>{de79cb91-d739-411f-94a9-7588bf6f4b30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\graphics\shader">
+      <UniqueIdentifier>{41247baa-753b-4f65-8bff-fbc0276d96dc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 #include "GraphicsManager.h"
 
-#include <ActiveObjectManager.h>
+#include <blue_sky/ActiveObjectManager.h>
 
 #include <blue_sky/graphics/Fader.h>
 #include <blue_sky/graphics/Rectangle.h>

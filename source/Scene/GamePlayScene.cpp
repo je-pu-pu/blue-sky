@@ -1,9 +1,9 @@
 #include "GamePlayScene.h"
 #include "StageSelectScene.h"
 
-#include "GameMain.h"
+#include <blue_sky/GameMain.h>
 
-#include "App.h"
+#include <blue_sky/App.h>
 
 /// @todo ActiveObjectManager Ç÷à⁄ìÆ
 #include <GameObject/Player.h>
@@ -29,16 +29,16 @@
 /// @todo íäè€âªÇ∑ÇÈ
 #include <core/graphics/Direct3D11/Sprite.h>
 
-#include "ActiveObjectPhysics.h"
+#include <blue_sky/ActiveObjectPhysics.h>
 
-#include "Input.h"
+#include <blue_sky/Input.h>
 
-#include "ActiveObjectManager.h"
-#include "ScriptManager.h"
+#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ScriptManager.h>
 
-#include "OculusRift.h"
+#include <core/graphics/OculusRift.h>
 
-#include "DelayedCommand.h"
+#include <blue_sky/DelayedCommand.h>
 
 #include <core/math.h>
 

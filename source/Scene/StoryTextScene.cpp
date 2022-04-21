@@ -4,7 +4,7 @@
 
 #include "StoryTextScene.h"
 
-#include "Input.h"
+#include "blue_sky/Input.h"
 
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Fader.h>

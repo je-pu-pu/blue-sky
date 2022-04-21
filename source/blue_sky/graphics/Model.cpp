@@ -1,5 +1,5 @@
 #include "Model.h"
-#include <GameMain.h>
+#include <blue_sky/GameMain.h>
 #include <blue_sky/graphics/shader/FlatShader.h>
 #include <boost/filesystem.hpp>
 

@@ -1,6 +1,6 @@
 #include "Line.h"
 
-#include <GameMain.h>
+#include <blue_sky/GameMain.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
 

@@ -1,6 +1,6 @@
 #include "SkyBox.h"
 #include <blue_sky/graphics/shader/SkyBoxShader.h>
-#include <GameMain.h>
+#include <blue_sky/GameMain.h>
 
 namespace blue_sky::graphics
 {

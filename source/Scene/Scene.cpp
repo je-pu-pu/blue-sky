@@ -1,9 +1,8 @@
 #include "Scene.h"
 
-#include <GameMain.h>
-#include <ActiveObjectManager.h>
-#include <ActiveObjectPhysics.h>
-
+#include <blue_sky/GameMain.h>
+#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <core/sound/SoundManager.h>

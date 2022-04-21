@@ -1,5 +1,6 @@
 #include "GraphicsManager.h"
 
+#include <blue_sky/GameMain.h>
 #include <blue_sky/ConstantBuffers.h>
 #include <blue_sky/graphics/SkyBox.h>
 #include <blue_sky/graphics/Ground.h>
@@ -23,7 +24,6 @@
 #include <core/graphics/Direct3D11/EffectPass.h>
 #include <core/graphics/Direct3D11/ShadowMap.h>
 
-#include <GameMain.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
 
 #include <common/string.h>

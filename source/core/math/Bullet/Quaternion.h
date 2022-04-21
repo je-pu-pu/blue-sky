@@ -29,6 +29,8 @@ public:
 		value_.setEulerZYX( yaw_z, pitch_y, roll_x );
 	}
 
+	Quaternion operator * ( const Quaternion& q ) { return Quaternion( value_ * q.value_ ); }
+
 	operator btQuaternion& () { return value_; }
 	operator const btQuaternion& () const { return value_; }
 

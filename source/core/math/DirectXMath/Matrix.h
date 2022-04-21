@@ -69,6 +69,13 @@ public:
 		return *this;
 	}
 
+	Matrix& set_translation( const Vector& v )
+	{
+		value_ = DirectX::XMMatrixTranslationFromVector( v );
+
+		return *this;
+	}
+
 	Matrix& set_translation( UnitType tx, UnitType ty, UnitType tz )
 	{
 		value_ = DirectX::XMMatrixTranslation( tx, ty, tz );

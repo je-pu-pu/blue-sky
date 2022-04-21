@@ -7,9 +7,8 @@
 #include "Robot.h"
 #include "Stone.h"
 
-#include "GameMain.h"
-
-#include "ActiveObjectPhysics.h"
+#include <blue_sky/GameMain.h>
+#include <blue_sky/ActiveObjectPhysics.h>
 
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>

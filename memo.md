@@ -1579,3 +1579,125 @@ VS Code でも以下を参照して逆アセンブラしたコードが表示で
     * ビルド時に仕様される出力用ディレクトリ、中間ファイル用ディレクトリは全て .build/ に統一した
     * 今後、 source/ 直下に配置されている .h, .cpp を サブディレクトリに整理していく ( おそらく大半は blue_sky/ 以下に移動 )
     * なぜかビルドした実行ファイルのウィンドウサイズが 1.5 倍ぐらいに大きくなっている気がする ( 開発環境の画面設定が 150% になっているが、それが反映されるようになったのか？ )
+
+# 2022-03-12
+
+* プロジェクト整理
+    * source/ 直下のファイルを移動して整理。
+
+# 2022-03-14
+
+* ECS を使ったパーティクルシステムの実装
+    * まずは ParticleSystemTestScene において Camera の挙動を Entity + Component + System を使ったものに置き換える。
+    * TransformComponent の実装が必要。
+
+# 2022-03-15
+
+* ParticleSystemTestScene を ECS を使った実装にするために、まずは Camera を ECS に置き換え中。
+    * btTransform から forward, right, up を取り出す方法について調べる必要がある
+
+# 2022-03-16
+
+* btVector, btTransform を理解・テストするために BulletTest.cpp を test プロジェクトに作成。
+
+# 2022-03-21
+
+* 座標系について調べた。Bullet は右手座標系。 DirectX は左手座標系なので、変換について考える必要がある。
+    * https://github.com/bulletphysics/bullet3/blob/master/docs/Bullet_User_Manual.pdf
+
+# 2022-03-22
+
+* ParticleSystemTestScene で set_identity() を呼ぶのを忘れていた事に起因するバグを修正。
+
+# 2022-03-23
+
+* ParticleSystemTestScene マウスによるカメラの角度変更動作を調整。動いてはいるが、 roll pich yow について、正しく使えているか要確認。
+
+# 2022-03-24
+
+* Quaternion() の引数は、 yaw_z, pitch_y, roll_x の順番となっている。現状、 mouse dx を yaw_z に渡しているが、おかしい気がする。
+
+# 2022-03-26
+
+* 「Bullet は右手座標系を使用している」
+    * https://github.com/bulletphysics/bullet3/blob/master/docs/Bullet_User_Manual.pdf
+* その図によると、X が右, Y が上, Z は手前。
+    * Z が上なのでは？という心配しなくてよさそう？
+
+# 2022-04-06
+
+* 左手座標系である DirectX も、右手座標系である Bullet も、「原点に向かって右回りがプラスの回転」という点は同じらしい
+* DirextXMath の回転をテストするテストコードを作って原点に向かって右回りがプラスの回転である事を確認した。
+
+# 2022-04-07
+
+* 昨日書いた回転の向きの解釈は間違い。正しくは、以下の通り
+    * DirectX は「原点に向かって右回りがプラスの回転」
+    * Bullet は「原点に向かって左回りがプラスの回転」
+* DirectXMath と Bullet で Z 軸まわりの回転を比較
+
+# 2022-04-08
+
+* DirectXMath, Bullet のテストを修正した
+* 溜まっていた変更をコミット
+* 今後は毎日細かくコミットした方が良い
+
+# 2022-04-09
+
+* DirectXTK の SimpleMath の Quaternion を確認
+    * データの保持には XMFLOAT4 を使っている
+        * というか XMFLOAT4 を継承している
+        * https://github.com/microsoft/DirectXTK/blob/main/Inc/SimpleMath.h#L683
+* blue_sky にも direct_x_math::Quaternion を作るべきか？
+    * SimpleMath を使うのもアリかも
+
+# 2022-04-10
+
+* GameObject::transform_ に対して set_rotation() しているのはどこか？既存のソースを調べてみた。結果は以下の通り
+    * ActiveObject::restart()
+    * ActiveObject::set_start_rotation()
+    * ActiveObject::set_direction_degree()
+    * どれも毎フレームなど頻繁に呼ばれているようではない。
+    * Transform の保持は DirectXMath の Quaternion で保持して、Bullet が物理演算する時だけ Bullet に回転を設定するようにできるか？要検討
+
+
+# 2022-04-11
+
+* 昨日の考えについて今の時点での結論
+    * 基本的に DirectXMath が回転を保持して「Bullet が物理演算する時だけ Bullet に回転を設定する」よりも・・・
+    * 基本的に「Bullet が回転を保持して、描画など、必要な時だけ取り出す」とした方がよさそう
+    * 理由は、
+        * 直接回転角度を設定するような事は、毎フレーム起こらない。
+        * Bullet の物理演算は基本的に毎フレーム行われる
+        * 描画も毎フレーム行われる
+        * 毎フレーム Bullet <-> DirectX の変換が必要であれば、どちらでも同じ？
+
+# 2022-04-12
+
+* Unity がどうやって回転を保持しているのか？
+    * たとえば Rotation X に 0.123456789 を入力すると 0.1234568 と変更される
+    * Position X も同様で 0.123456789 を入力すると 0.1234568 と変更される
+
+# 2022-04-13
+
+* 左手座標系 Y Up で core::bullet を整理したいが、正しく動いているかの判断のため、画面を描画しながらやりたい
+    * まずは Cube などを表示するテスト用の Scene を新たに作るか。
+
+# 2022-04-15
+
+* TransformTestScene を作った。
+
+# 2022-04-16
+
+* TransformTestScene に ImGui で Position と Rotation を設定できるようにした。
+
+# 2022-04-18
+
+* RenderSystem, RenderComponent を追加し、簡単なモデルを ECS を使って表示するように。
+
+# 2022-04-19
+
+* Unity の PureECS について調べた
+    * https://docs.google.com/presentation/d/11ej0BfUxs7eyFeGGplJJR5v-UgVAZt-L-1EBCLLw5FA/htmlpresent
+    * https://qiita.com/mao_/items/c4a217b33a0a94d5d52f
+    * デフォルトでは Position, Rotation, Scale が分かれているらしい

@@ -7,6 +7,7 @@ namespace core::ecs
 {
 	class EntityManager;
 	class Entity;
+	class TransformComponent;
 }
 
 namespace blue_sky
@@ -20,13 +21,17 @@ class TransformTestScene : public Scene
 {
 public:
 	using EntityManager = core::ecs::EntityManager;
+	using TransformComponent = core::ecs::TransformComponent;
 	using Entity = core::ecs::Entity;
 
 protected:
 	EntityManager* get_entity_manager();
 
 protected:
-	Entity* camera_;
+	Entity* cube_ = nullptr;
+	TransformComponent* cube_transform_ = nullptr; 
+
+	Entity* camera_ = nullptr;
 
 public:
 	explicit TransformTestScene( const GameMain* );

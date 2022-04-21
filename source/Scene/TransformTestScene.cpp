@@ -34,9 +34,11 @@ TransformTestScene::TransformTestScene( const GameMain* game_main )
 	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
 
 	// Entity ‚Æ Component ‚ð’Ç‰Á‚·‚é
-	auto cube = get_entity_manager()->create_entity();
-	cube->add_component< core::ecs::TransformComponent >()->transform.set_identity();
-	cube->add_component< core::ecs::RenderComponent >();
+	cube_ = get_entity_manager()->create_entity();
+	cube_transform_ = cube_->add_component< core::ecs::TransformComponent >();
+	cube_->add_component< core::ecs::RenderComponent >();
+
+	cube_transform_->transform.set_identity();
 
 	auto camera_transform = camera_->add_component< core::ecs::TransformComponent >();
 	camera_transform->transform.set_identity();
@@ -108,13 +110,17 @@ void TransformTestScene::update()
 
 	get_graphics_manager()->clear_debug_bullet();
 
-	static float pos[ 3 ] = { 0 };
-	static float rot[ 3 ] = { 0 };
+	static Vector rot;
 
 	ImGui::Begin( "transform test params" );
-	ImGui::InputFloat3( "Position", pos );
-	ImGui::InputFloat3( "Rotation", rot );
+	ImGui::DragFloat3( "Position", reinterpret_cast< float* >( & cube_transform_->transform.get_position() ), 0.1f );
+	ImGui::DragFloat3( "Rotation", reinterpret_cast< float* >( & rot ), 1.f, -360.f, 360.f );
 	ImGui::End();
+
+	Quaternion q;
+	Vector r = math::degree_to_radian( rot );
+	q.set_euler_zyx( r.z(), r.y(), r.x() );
+	cube_transform_->transform.set_rotation( q );
 }
 
 void TransformTestScene::render()

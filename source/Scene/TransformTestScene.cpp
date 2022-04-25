@@ -114,7 +114,7 @@ void TransformTestScene::update()
 
 	ImGui::Begin( "transform test params" );
 	ImGui::DragFloat3( "Position", reinterpret_cast< float* >( & cube_transform_->transform.get_position() ), 0.1f );
-	ImGui::DragFloat3( "Rotation", reinterpret_cast< float* >( & rot ), 1.f, -360.f, 360.f );
+	ImGui::DragFloat3( "Rotation", reinterpret_cast< float* >( & rot ), 0.1f, -360.f, 360.f );
 	ImGui::End();
 
 	Quaternion q;
@@ -127,7 +127,7 @@ void TransformTestScene::render()
 {
 	auto& frame_render_data = get_graphics_manager()->get_frame_render_data()->data();
 
-	auto ct = camera_->get_component< core::ecs::TransformComponent >()->transform;
+	const auto& ct = camera_->get_component< core::ecs::TransformComponent >()->transform;
 	// auto c = camera_->get_component< core::ecs::CameraComponent >();
 
 	const auto& eye = ct.get_position();

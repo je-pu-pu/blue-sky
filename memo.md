@@ -1701,3 +1701,57 @@ VS Code でも以下を参照して逆アセンブラしたコードが表示で
     * https://docs.google.com/presentation/d/11ej0BfUxs7eyFeGGplJJR5v-UgVAZt-L-1EBCLLw5FA/htmlpresent
     * https://qiita.com/mao_/items/c4a217b33a0a94d5d52f
     * デフォルトでは Position, Rotation, Scale が分かれているらしい
+
+# 2022-04-21
+
+* TransformTestScene で ImGui で設定した Position と Rotation がテストで表示されている「壁」オブジェクトに反映されるようにした。
+
+# 2022-04-22
+
+* ImGui 検証
+    * DragFloat3 の引数 format で Prefix を設定できるが、
+        * 例えば "pos : %.3f" とすると
+            * "pos : 0.000  pos : 0.000  pos : 0.000" のような表示にはできる
+            * "x : 0.000  y : 0.000  x : 0.000" のような表示はできない
+            * 似たような疑問が GitHub Issues でも出ているが、対応していないよう
+                * https://github.com/ocornut/imgui/issues/1831
+
+# 2022-04-23
+
+* 回転順序について調査
+    * 現状 blue-sky は ZYX の順のよう
+        * setEulerZYX() を使っているから多分そう
+        * 動作させてみると、 Unity とは異なる結果になった
+        * エディタでは、Z -> Y -> X の順で回転させると、回転後の軸を使って次の回転を行える
+
+    * Unity は ZXY の順らしい
+        * https://forum.unity.com/threads/rotation-order.13469/
+        * https://docs.unity3d.com/ScriptReference/Transform-eulerAngles.html
+            * In Unity these rotations are performed around the Z axis, the X axis, and the Y axis, in that order
+        * エディタでは、Y -> X -> Z の順で回転させると、回転後の軸を使って次の回転を行える
+    * Unreal Engine は ZYX の順っぽい
+        * そもそも座標系が違うので、比較する意味はないかも？
+            * Unity, DirectX と同じく左手座標系だが、
+            * X+ が奥, Y+ が右, Z+ が上？
+        * エディタでは、Z -> Y -> X の順で回転させると、回転後の軸を使って次の回転を行える
+* 回転方向について調査
+    * Unity は回転軸に沿って原点を見た時に右回り ( = 時計回り ) が + の回転
+    * Unreal Engine は X, Y と Z で異なる？？？
+        * X, Y : 回転軸に沿って原点を見た時に、左回り ( = 反時計回り ) が + の回転
+        * Z : 回転軸に沿って原点を見た時に、右回り ( = 時計回り ) が + の回転
+    * blue-sky は回転軸に沿って原点を見た時に右回り ( = 時計回り ) が + の回転
+
+# 2022-04-24
+
+* 今後の方向性について検討
+    * 回転順序、回転方向については、一旦このままとする。
+        * 問題が起こったら再度検討する。
+
+# 2022-04-25
+
+* Scene::update() と Scene::render() の統合について検討
+* 全てを ECS に移行すれば UpdateSystem, RenderSystem() に分けられるはず？
+* 試しに、TransformSystem::render() の中の処理を、新しく作る System に移動して、 TransformSystem::render() を空にしてみてはどうか？
+    * TransformSystem::render() だけでなく、TransformSystem::update() の中の処理も移動する必要がある。
+        * なぜなら、get_entity_manager()->update() はループにつき 1 回しか呼ばれないため、全てを ECS で処理する必要がある。
+        * 現状は、TransformSystem::update() の中で更新処理のために 1 回、 TransformSystem::render() の中で描画のために 1 回呼んでしまっていて、非常に汚い。 ( 仮ではあるが )

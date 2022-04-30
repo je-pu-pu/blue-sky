@@ -7,7 +7,9 @@
 
 #include <core/ecs/Component/TransformComponent.h>
 #include <core/ecs/Component/RenderComponent.h>
+#include <core/ecs/Component/TransformControlComponent.h>
 #include <core/ecs/System/RenderSystem.h>
+#include <core/ecs/System/TransformControlSystem.h>
 #include <core/ecs/EntityManager.h>
 
 #include <game/MainLoop.h>
@@ -32,6 +34,7 @@ TransformTestScene::TransformTestScene( const GameMain* game_main )
 
 	// System ‚ð’Ç‰Á‚·‚é
 	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
+	get_entity_manager()->add_system< core::ecs::TransformControlSystem >();
 
 	// Entity ‚Æ Component ‚ð’Ç‰Á‚·‚é
 	cube_ = get_entity_manager()->create_entity();
@@ -40,9 +43,11 @@ TransformTestScene::TransformTestScene( const GameMain* game_main )
 
 	cube_transform_->transform.set_identity();
 
-	auto camera_transform = camera_->add_component< core::ecs::TransformComponent >();
-	camera_transform->transform.set_identity();
-	camera_transform->transform.set_position( Vector( 0.f, 1.5f, -10.f ) );
+	camera_transform_ = camera_->add_component< core::ecs::TransformComponent >();
+	camera_transform_->transform.set_identity();
+	camera_transform_->transform.set_position( Vector( 0.f, 1.5f, -10.f ) );
+
+	camera_->add_component< core::ecs::TransformControlComponent >();
 }
 
 TransformTestScene::~TransformTestScene()
@@ -60,19 +65,6 @@ void TransformTestScene::update()
 	Scene::update();
 
 	get_entity_manager()->update();
-
-	auto t = camera_->get_component< core::ecs::TransformComponent >();
-
-	if ( get_input()->press( Input::Button::LEFT ) )
-	{
-		t->transform.get_position() -= t->transform.right() * 0.001f;
-	}
-	if ( get_input()->press( Input::Button::RIGHT) )
-	{
-		t->transform.get_position() += t->transform.right() * 0.001f;
-	}
-
-	t->transform.set_rotation( Quaternion( get_input()->get_mouse_dx(), get_input()->get_mouse_dy(), 0.f ) *  t->transform.get_rotation() );
 
 #ifdef ECS
 	camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * 90.f, get_input()->get_mouse_dx() * 90.f, 0.f );
@@ -106,7 +98,7 @@ void TransformTestScene::update()
 
 	get_graphics_manager()->update();
 
-	get_graphics_manager()->set_eye_position( t->transform.get_position() );
+	get_graphics_manager()->set_eye_position( camera_transform_->transform.get_position() );
 
 	get_graphics_manager()->clear_debug_bullet();
 

@@ -32,6 +32,7 @@ protected:
 	TransformComponent* cube_transform_ = nullptr; 
 
 	Entity* camera_ = nullptr;
+	TransformComponent* camera_transform_ = nullptr;
 
 public:
 	explicit TransformTestScene( const GameMain* );

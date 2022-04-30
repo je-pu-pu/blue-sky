@@ -260,7 +260,12 @@
     <ClCompile Include="Scene\TransformTestScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="core\ecs\system\RenderSystem.cpp" />
+    <ClCompile Include="core\ecs\system\TransformControlSystem.cpp">
+      <Filter>core\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ecs\system\RenderSystem.cpp">
+      <Filter>core\ecs\system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -720,8 +725,18 @@
     <ClInclude Include="Scene\TransformTestScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="core\ecs\system\RenderSystem.h" />
-    <ClInclude Include="core\ecs\component\RenderComponent.h" />
+    <ClInclude Include="core\ecs\system\TransformControlSystem.h">
+      <Filter>core\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\system\RenderSystem.h">
+      <Filter>core\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\component\TransformControlComponent.h">
+      <Filter>core\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\component\RenderComponent.h">
+      <Filter>core\ecs\component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

@@ -33,15 +33,22 @@ TransformTestScene::TransformTestScene( const GameMain* game_main )
 	get_graphics_manager()->load_model( "wall-1" );
 
 	// System ‚ð’Ç‰Á‚·‚é
-	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
 	get_entity_manager()->add_system< core::ecs::TransformControlSystem >();
+	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
 
 	// Entity ‚Æ Component ‚ð’Ç‰Á‚·‚é
 	cube_ = get_entity_manager()->create_entity();
 	cube_transform_ = cube_->add_component< core::ecs::TransformComponent >();
+	cube_transform_->transform.set_identity();
 	cube_->add_component< core::ecs::RenderComponent >();
 
-	cube_transform_->transform.set_identity();
+	/*
+	cube_ = get_entity_manager()->create_entity();
+	cube_transform_ = cube_->add_component< core::ecs::TransformComponent >();
+	cube_transform_->transform.set_position( Vector( 3.f, 0.f, 0.f ) );
+	cube_->add_component< core::ecs::RenderComponent >();
+	cube_->add_component< core::ecs::TransformControlComponent >();
+	*/
 
 	camera_transform_ = camera_->add_component< core::ecs::TransformComponent >();
 	camera_transform_->transform.set_identity();

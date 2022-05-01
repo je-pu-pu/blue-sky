@@ -1751,7 +1751,24 @@ VS Code でも以下を参照して逆アセンブラしたコードが表示で
 
 * Scene::update() と Scene::render() の統合について検討
 * 全てを ECS に移行すれば UpdateSystem, RenderSystem() に分けられるはず？
-* 試しに、TransformSystem::render() の中の処理を、新しく作る System に移動して、 TransformSystem::render() を空にしてみてはどうか？
-    * TransformSystem::render() だけでなく、TransformSystem::update() の中の処理も移動する必要がある。
+* 試しに、TransformTestScene::render() の中の処理を、新しく作る System に移動して、 TransformTestScene::render() を空にしてみてはどうか？
+    * TransformTestScene::render() だけでなく、TransformTestScene::update() の中の処理も移動する必要がある。
         * なぜなら、get_entity_manager()->update() はループにつき 1 回しか呼ばれないため、全てを ECS で処理する必要がある。
-        * 現状は、TransformSystem::update() の中で更新処理のために 1 回、 TransformSystem::render() の中で描画のために 1 回呼んでしまっていて、非常に汚い。 ( 仮ではあるが )
+        * TransformTestScene::update() の中で更新処理のために 1 回、 TransformTestScene::render() の中で描画のために 1 回呼んでしまっていて、非常に汚い。 ( 仮ではあるが )
+    
+# 2022-04-30
+
+* TransformTestScene::update() にあったキーボードとマウスの入力によってカメラを移動・回転させる処理を TransformControlComponent / TransformControlSystem に移動。
+
+# 2022-05-01
+
+* 西田さんと blue-sky 制作日誌 #1 配信。西田さんと以下について話した
+    * Unreal Engine 4 の回転方向
+    * 複素数, 三角関数, ベクトル, 行列
+        * 虚数・複素数について
+            * https://atarimae.biz/archives/500
+    * ECS について説明。
+        * メモリの断片化に注意 ( 特にコンソールを意識する場合、仮想メモリがない？ため、new に失敗するかもしれない ) とのアドバイスあり
+
+# 2022-05-02
+

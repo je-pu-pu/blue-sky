@@ -28,6 +28,9 @@
 #include <core/graphics/RenderTargetTexture.h>
 #include <core/graphics/BackBufferTexture.h>
 
+#include <core/ecs/component/TransformComponent.h>
+#include <core/ecs/component/CameraComponent.h>
+
 #include <common/timer.h>
 #include <common/exception.h>
 
@@ -400,6 +403,37 @@ void GraphicsManager::update_constant_buffers() const
 
 		game_object->update_render_data();
 	}
+}
+
+/**
+ * 描画に必要な準備を行う
+ */
+void GraphicsManager::setup_rendering()
+{
+	// メインカメラの情報が設定されていない場合は何もしない
+	if ( ! main_camera_transform_component_ || ! main_camera_component_ )
+	{
+		return;
+	}
+
+	const auto& camera_transform = main_camera_transform_component_->transform;
+	const auto* camera_component = main_camera_component_;
+
+	const auto& eye = camera_transform.get_position();
+	const auto at = camera_transform.get_position() + camera_transform.forward();
+	const auto up = camera_transform.up();
+
+	const auto aspect = static_cast< float >( GameMain::get_instance()->get_width() ) / static_cast< float >( GameMain::get_instance()->get_height() );
+
+	get_frame_render_data()->data().view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
+	get_frame_render_data()->data().projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_component->fov ), aspect, camera_component->near_clip, camera_component->far_clip ).transpose();
+	
+	/// @todo ちゃんとやる ( ECS 化？ set_light_info() ? )
+	get_frame_render_data()->data().light = Vector( -1.f, -2.f, 0.f, 0.f ).normalize();
+
+	get_frame_render_data()->update();
+
+	set_eye_position( eye );
 }
 
 /**

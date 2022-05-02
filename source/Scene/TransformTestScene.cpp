@@ -55,7 +55,16 @@ TransformTestScene::TransformTestScene( const GameMain* game_main )
 	camera_transform_->transform.set_position( Vector( 0.f, 1.5f, -10.f ) );
 
 	camera_->add_component< core::ecs::TransformControlComponent >();
-	camera_->add_component< core::ecs::CameraComponent >();
+	const auto* camera_component = camera_->add_component< core::ecs::CameraComponent >();
+
+	get_graphics_manager()->set_main_camera_info( camera_transform_, camera_component );
+
+	/*
+	camera_->remove_component< core::ecs::CameraComponent >();
+	cube_->add_component< core::ecs::CameraComponent >();
+
+	get_graphics_manager()->set_main_camera( cube_ );
+	*/
 }
 
 TransformTestScene::~TransformTestScene()
@@ -72,19 +81,13 @@ void TransformTestScene::update()
 {
 	Scene::update();
 
-	get_entity_manager()->update();
-
-#ifdef ECS
-	camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * 90.f, get_input()->get_mouse_dx() * 90.f, 0.f );
-	camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f ) );
-#endif
-
 	get_graphics_manager()->update();
-
-	get_graphics_manager()->set_eye_position( camera_transform_->transform.get_position() );
-
 	get_graphics_manager()->clear_debug_bullet();
 
+	get_entity_manager()->update();
+
+	// GUI によってオブジェクトの位置・回転を変更する
+	/// @todo Component の値を GUI で変更する仕組みを整理する
 	static Vector rot;
 
 	ImGui::Begin( "transform test params" );
@@ -100,42 +103,17 @@ void TransformTestScene::update()
 
 void TransformTestScene::render()
 {
-	auto& frame_render_data = get_graphics_manager()->get_frame_render_data()->data();
-
-	const auto& camera_transform = camera_->get_component< core::ecs::TransformComponent >()->transform;
-	const auto& camera_component = camera_->get_component< core::ecs::CameraComponent >();
-
-	const auto& eye = camera_transform.get_position();
-	const auto at = camera_transform.get_position() + camera_transform.forward();
-	const auto up = camera_transform.up();
-
-	/// @todo FOV, ニアクリップ平面, ファークリップ平面の情報を CameraComponent から取得する
-	frame_render_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
-	frame_render_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_component->fov ), static_cast< float >( get_width() ) / static_cast< float >( get_height() ), camera_component->near_clip, camera_component->far_clip ).transpose();
-	frame_render_data.light = Vector( -1.f, -2.f, 0.f, 0.f ).normalize();
-
-	get_graphics_manager()->get_frame_render_data()->update();
-
-	get_graphics_manager()->setup_rendering();
-
-	get_graphics_manager()->render_background();
-
-	/// @todo 整理する。
-	get_entity_manager()->update();
-
-	get_graphics_manager()->render_fader();
-	get_graphics_manager()->render_debug_bullet();
-
 	std::stringstream ss;
 	ss << "Time : " << get_total_elapsed_time() << '\n';
 	ss << "FPS : " << get_main_loop()->get_last_fps() << '\n';
 	ss << "pass count : " << get_graphics_manager()->get_pass_count() << '\n';
 	ss << "draw count : " << get_graphics_manager()->get_draw_count() << '\n';
 
-#ifdef ECS
-	ss << "eye : " << eye.x() << ", " << eye.y() << ", " << eye.z() << '\n';
-	ss << "rot : " << camera_->rotate_degree().x() << ", " << camera_->rotate_degree().y() << ", " << camera_->rotate_degree().z() << '\n';
-#endif
+	ss << "eye : "
+		<< camera_transform_->transform.get_position().x() << ", "
+		<< camera_transform_->transform.get_position().y() << ", "
+		<< camera_transform_->transform.get_position().z() << '\n';
+	// ss << "rot : " << camera_->rotate_degree().x() << ", " << camera_->rotate_degree().y() << ", " << camera_->rotate_degree().z() << '\n';
 
 	ss << "psts "<< '\n';
 

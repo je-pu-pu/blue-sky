@@ -9,14 +9,15 @@ namespace core::ecs
 
 void RenderSystem::update()
 {
-	// std::cout << get_priority() << " : ParticleRenderSystem::update()" << std::endl;
+	get_graphics_manager()->setup_rendering();
+
+	get_graphics_manager()->render_background();
 
 	for ( auto& i : get_component_list() )
 	{
 		auto* transform = std::get< TransformComponent* >( i.second );
-		// std::cout << "postion : " << transform->transform.get_position() << std::endl;
 
-		/// @todo Transform ‚ð Direct3D ‚É update ‚·‚é
+		/// Transform ‚ð Shader ‚É update ‚·‚é
 		blue_sky::ObjectConstantBufferWithData shader_data;
 
 		shader_data.data().world.set_identity();
@@ -26,10 +27,13 @@ void RenderSystem::update()
 
 		shader_data.update();
 
-		blue_sky::GameMain::get_instance()->get_graphics_manager()->set_current_object_constant_buffer( & shader_data );
-		blue_sky::GameMain::get_instance()->get_graphics_manager()->set_current_skinning_constant_buffer( nullptr );
-		blue_sky::GameMain::get_instance()->get_graphics_manager()->get_model( "wall-1" )->render();
+		get_graphics_manager()->set_current_object_constant_buffer( & shader_data );
+		get_graphics_manager()->set_current_skinning_constant_buffer( nullptr );
+		get_graphics_manager()->get_model( "wall-1" )->render();
 	}
+
+	get_graphics_manager()->render_fader();
+	get_graphics_manager()->render_debug_bullet();
 }
 
 } // namespace core::ecs

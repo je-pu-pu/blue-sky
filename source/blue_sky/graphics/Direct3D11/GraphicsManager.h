@@ -120,7 +120,7 @@ public:
 	FrameDrawingConstantBuffer* get_frame_drawing_render_data() const override { return frame_drawing_render_data_.get(); }
 	ObjectConstantBuffer* get_shared_object_render_data() const override { return shared_object_render_data_.get(); }
 
-	void setup_rendering() const override;
+	void setup_rendering() override;
 	void render_technique( const char_t*, const std::function< void () >& ) const override;
 	void render_technique( const EffectTechnique*, const std::function< void () >& ) const override;
 	void render_background() const override;

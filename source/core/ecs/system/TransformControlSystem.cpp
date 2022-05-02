@@ -44,10 +44,16 @@ void TransformControlSystem::update( ComponentTuple& component_tuple )
 		transform->transform.get_position() -= transform->transform.up() * moving_speed;
 	}
 
+	/// @todo ‰ñ“]‚ð‚¿‚á‚ñ‚Æ‚â‚é
 	const auto q = Quaternion( input->get_mouse_dx(), input->get_mouse_dy(), 0.f ) * transform->transform.get_rotation();
 	// const auto zyx = q.get_euler_zyx();
 	// q.set_euler_zyx( 0.f, zyx.y(), zyx.x() );
 	transform->transform.set_rotation( q );
+
+	/*
+	camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * 90.f, get_input()->get_mouse_dx() * 90.f, 0.f );
+	camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f ) );
+	*/
 }
 
 } // namespace core::ecs

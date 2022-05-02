@@ -34,9 +34,13 @@ namespace core
 		class RenderTargetTexture;
 		class BackBufferTexture;
 	}
+
+	namespace ecs
+	{
+		class TransformComponent;
+		class CameraComponent;
+	}
 }
-
-
 
 namespace blue_sky
 {
@@ -58,6 +62,8 @@ namespace blue_sky::graphics
 /**
  * グラフィック管理クラス
  *
+ * このクラスが実体化される事はない。
+ * 実際にはこのクラスを継承した blue_sky::graphics::direct_3d_11::GraphicsManager が実体化される。
  */
 class GraphicsManager : public core::graphics::GraphicsManager
 {
@@ -85,6 +91,9 @@ public:
 	using ConstantBuffer				= core::graphics::ConstantBuffer;
 	using ShadowMap						= core::graphics::ShadowMap;
 	using Sprite						= core::graphics::Sprite;
+
+	using TransformComponent			= core::ecs::TransformComponent;
+	using CameraComponent				= core::ecs::CameraComponent;
 	
 	using BaseShadowMapShader			= graphics::shader::BaseShadowMapShader;
 	
@@ -112,6 +121,10 @@ private:
 
 	mutable const ConstantBuffer* current_object_constant_buffer_ = nullptr;
 	mutable const ConstantBuffer* current_skinning_constant_buffer_ = nullptr;
+
+	// Camera
+	const TransformComponent*	main_camera_transform_component_ = nullptr;
+	const CameraComponent*		main_camera_component_ = nullptr;
 
 	bool						is_debug_axis_enabled_ = true;
 
@@ -248,7 +261,7 @@ public:
 	virtual void set_depth_stencil() const = 0;
 	virtual void unset_depth_stencil() const = 0;
 
-	virtual void setup_rendering() const = 0;
+	virtual void setup_rendering();
 	virtual void render_technique( const char_t*, const std::function< void () >& ) const = 0;
 	virtual void render_technique( const EffectTechnique*, const std::function< void () >& ) const = 0;
 	virtual void render_background() const = 0;
@@ -283,7 +296,18 @@ public:
 
 	virtual void clear_debug_bullet() const = 0;
 	virtual void render_debug_bullet() const = 0;
-	
+
+	/**
+	 * メインカメラの情報を設定する
+	 * 
+	 * @param transform 位置・回転情報
+	 * @param camera カメラ情報 ( FOV など )
+	 */
+	void set_main_camera_info( const TransformComponent* transform, const CameraComponent* camera )
+	{
+		main_camera_transform_component_ = transform;
+		main_camera_component_ = camera;
+	}
 
 	void clear_pass_count() const { pass_count_ = 0; }
 	void count_pass() const { pass_count_++; }

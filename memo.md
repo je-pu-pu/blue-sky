@@ -1776,8 +1776,17 @@ VS Code でも以下を参照して逆アセンブラしたコードが表示で
 * 以下の処理が必要
     1. 全 Entity の位置情報などの更新 ( update )
     2. カメラの情報を Shader に送る
+        * そのための方法
+            1. **GraphicsManager::set_main_camera() みたいな関数を作る**
+                * System が増えなくて済む。 RenderSystem だけでレンダリングできる
+                * Entity から Component を取得するのは時間がかかるので、GraphicsManager が Camera の Entity ではなくて、 TransformComponent と CameraComponent を持つ必要がある
+            2. ~~CameraRenderSetupSystem みたいな System を作る_~~
+                * 動的にメインカメラが変わっても、自動的に追従する
+                * System が増える
     3. 全 Entity の描画
     * これらは全て System が行う
 * 本来ならば、GraphicsManager がメインカメラの情報を持つべきなのでは？
-    * GraphicsManager::set_main_camera() みたいな関数を作るか？
-* CameraComponent を作る
+    * GraphicsManager::set_main_camera() みたいな関数を作るか
+* CameraComponent を作った
+* GraphicsManager::set_main_camera() を作った。
+* TransformTestScene::render() の中の処理を、 RenderSystem に移動できた！

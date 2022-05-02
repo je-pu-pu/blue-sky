@@ -300,6 +300,7 @@ void GraphicsManager::set_drawing_line_type( int_t type )
 
 void GraphicsManager::set_eye_position( const Vector& pos )
 {
+	// どこに移動しても、同じように SkyBox が表示されるようにする
 	if ( sky_box_ )
 	{
 		sky_box_render_data_->data().world = Matrix().set_translation( pos.x(), pos.y(), pos.z() ).transpose();
@@ -329,8 +330,10 @@ GraphicsManager::Sprite* GraphicsManager::get_sprite() const
  * 描画のセットアップを行う
  *
  */
-void GraphicsManager::setup_rendering() const
+void GraphicsManager::setup_rendering()
 {
+	blue_sky::GraphicsManager::setup_rendering();
+
 	clear_pass_count();
 	clear_draw_count();
 

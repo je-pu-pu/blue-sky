@@ -2,6 +2,12 @@
 
 #include "type.h"
 
+/// @todo きれいにする
+namespace blue_sky::graphics
+{
+	class GraphicsManager;
+}
+
 namespace core::ecs
 {
 
@@ -15,6 +21,7 @@ class Component;
 class BaseSystem
 {
 public:
+	using GraphicsManager = blue_sky::graphics::GraphicsManager;
 
 private:
 	/// システムの実行優先度 ( priority_ が小さい順に実行される )
@@ -23,6 +30,8 @@ private:
 protected:
 	virtual bool has_component_type( ComponentTypeId ) const = 0;
 	virtual void remove_entity_component( const Entity* ) = 0;
+
+	GraphicsManager* get_graphics_manager();
 
 public:
 	BaseSystem() = default;

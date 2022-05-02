@@ -1767,8 +1767,17 @@ VS Code でも以下を参照して逆アセンブラしたコードが表示で
     * 複素数, 三角関数, ベクトル, 行列
         * 虚数・複素数について
             * https://atarimae.biz/archives/500
-    * ECS について説明。
+    * 西田さんに blue-sky の ECS について説明。以下の意見をもらった
         * メモリの断片化に注意 ( 特にコンソールを意識する場合、仮想メモリがない？ため、new に失敗するかもしれない ) とのアドバイスあり
 
 # 2022-05-02
 
+* TransformTestScene を ECS に移行
+* 以下の処理が必要
+    1. 全 Entity の位置情報などの更新 ( update )
+    2. カメラの情報を Shader に送る
+    3. 全 Entity の描画
+    * これらは全て System が行う
+* 本来ならば、GraphicsManager がメインカメラの情報を持つべきなのでは？
+    * GraphicsManager::set_main_camera() みたいな関数を作るか？
+* CameraComponent を作る

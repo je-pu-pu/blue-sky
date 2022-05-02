@@ -1,15 +1,14 @@
 #include "TransformTestScene.h"
 
 #include <blue_sky/graphics/GraphicsManager.h>
-#include <blue_sky/ActiveObjectManager.h>
-#include <blue_sky/ActiveObjectPhysics.h>
-#include <blue_sky/Input.h>
 
-#include <core/ecs/Component/TransformComponent.h>
-#include <core/ecs/Component/RenderComponent.h>
-#include <core/ecs/Component/TransformControlComponent.h>
-#include <core/ecs/System/RenderSystem.h>
-#include <core/ecs/System/TransformControlSystem.h>
+#include <core/ecs/component/TransformComponent.h>
+#include <core/ecs/component/TransformControlComponent.h>
+#include <core/ecs/component/CameraComponent.h>
+#include <core/ecs/component/RenderComponent.h>
+
+#include <core/ecs/system/RenderSystem.h>
+#include <core/ecs/system/TransformControlSystem.h>
 #include <core/ecs/EntityManager.h>
 
 #include <game/MainLoop.h>
@@ -18,7 +17,7 @@
 
 #include <imgui.h>
 
-#include <iostream>
+#include <sstream>
 
 namespace blue_sky
 {
@@ -34,6 +33,7 @@ TransformTestScene::TransformTestScene( const GameMain* game_main )
 
 	// System を追加する
 	get_entity_manager()->add_system< core::ecs::TransformControlSystem >();
+	// get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 - 1 );
 	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
 
 	// Entity と Component を追加する
@@ -55,11 +55,12 @@ TransformTestScene::TransformTestScene( const GameMain* game_main )
 	camera_transform_->transform.set_position( Vector( 0.f, 1.5f, -10.f ) );
 
 	camera_->add_component< core::ecs::TransformControlComponent >();
+	camera_->add_component< core::ecs::CameraComponent >();
 }
 
 TransformTestScene::~TransformTestScene()
 {
-	get_active_object_manager()->clear();
+	
 }
 
 TransformTestScene::EntityManager* TransformTestScene::get_entity_manager()
@@ -76,32 +77,7 @@ void TransformTestScene::update()
 #ifdef ECS
 	camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * 90.f, get_input()->get_mouse_dx() * 90.f, 0.f );
 	camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f ) );
-
-	const float moving_speed = get_input()->press( Input::Button::R2 ) ? 0.3f : 0.1f;
-
-	
-	if ( get_input()->press( Input::Button::UP ) )
-	{
-		camera_->position() += camera_->front() * moving_speed;
-	}
-	if ( get_input()->press( Input::Button::DOWN ) )
-	{
-		camera_->position() -= camera_->front() * moving_speed;
-	}
-	if ( get_input()->press( Input::Button::L ) )
-	{
-		camera_->position() += camera_->up() * moving_speed;
-	}
-	if ( get_input()->press( Input::Button::L2 ) )
-	{
-		camera_->position() -= camera_->up() * moving_speed;
-	}
-
-	camera_->position().set_y( std::max( camera_->position().y(), 0.1f ) );
-	camera_->update();
 #endif
-
-	get_active_object_manager()->update();
 
 	get_graphics_manager()->update();
 
@@ -126,15 +102,16 @@ void TransformTestScene::render()
 {
 	auto& frame_render_data = get_graphics_manager()->get_frame_render_data()->data();
 
-	const auto& ct = camera_->get_component< core::ecs::TransformComponent >()->transform;
-	// auto c = camera_->get_component< core::ecs::CameraComponent >();
+	const auto& camera_transform = camera_->get_component< core::ecs::TransformComponent >()->transform;
+	const auto& camera_component = camera_->get_component< core::ecs::CameraComponent >();
 
-	const auto& eye = ct.get_position();
-	const auto at = ct.get_position() + ct.forward();
-	const auto up = ct.up();
+	const auto& eye = camera_transform.get_position();
+	const auto at = camera_transform.get_position() + camera_transform.forward();
+	const auto up = camera_transform.up();
 
+	/// @todo FOV, ニアクリップ平面, ファークリップ平面の情報を CameraComponent から取得する
 	frame_render_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
-	frame_render_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( 90.f ), static_cast< float >( get_width() ) / static_cast< float >( get_height() ), 0.05f, 1500.f ).transpose();
+	frame_render_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_component->fov ), static_cast< float >( get_width() ) / static_cast< float >( get_height() ), camera_component->near_clip, camera_component->far_clip ).transpose();
 	frame_render_data.light = Vector( -1.f, -2.f, 0.f, 0.f ).normalize();
 
 	get_graphics_manager()->get_frame_render_data()->update();
@@ -142,14 +119,11 @@ void TransformTestScene::render()
 	get_graphics_manager()->setup_rendering();
 
 	get_graphics_manager()->render_background();
-	get_graphics_manager()->render_active_objects( get_active_object_manager() );
 
 	/// @todo 整理する。
 	get_entity_manager()->update();
 
 	get_graphics_manager()->render_fader();
-
-	get_graphics_manager()->render_debug_axis( get_active_object_manager() );
 	get_graphics_manager()->render_debug_bullet();
 
 	std::stringstream ss;

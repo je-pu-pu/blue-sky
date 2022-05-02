@@ -1,8 +1,6 @@
 #pragma once
 
 #include <core/ecs/Component.h>
-#include <core/type.h>
-#include <array>
 
 namespace core::ecs
 {

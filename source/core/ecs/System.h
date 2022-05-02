@@ -122,6 +122,19 @@ public:
 		}
 	}
 
+	virtual void update() override
+	{
+		for ( auto& i : get_component_list() )
+		{
+			update( i.second );
+		}
+	}
+
+	virtual void update( ComponentTuple& component_tuple )
+	{
+
+	}
+
 }; // class System
 
 } // namespace core::ecs

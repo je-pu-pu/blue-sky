@@ -19,7 +19,7 @@ public:
 	TransformControlSystem() = default;
 	~TransformControlSystem() = default;
 
-	void update() override;
+	void update( ComponentTuple& ) override;
 
 }; // class TransformControlSystem
 

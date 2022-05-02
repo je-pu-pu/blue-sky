@@ -2,7 +2,6 @@
 
 #include <core/ecs/Component.h>
 #include <core/math/Transform.h>
-#include <array>
 
 namespace core::ecs
 {

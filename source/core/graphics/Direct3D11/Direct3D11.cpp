@@ -876,15 +876,8 @@ void Direct3D11::renderText()
 
 	get_sprite()->begin();
 
-	EffectTechnique* technique = effect_->get_technique( "|sprite" );
-
-	for ( const auto& pass : technique->get_pass_list() )
-	{
-		pass->apply();
-
-		Sprite::Rect dst_rect( 0, 0, get_width(), get_height() );
-		get_sprite()->draw( dst_rect, text_view_.get() );
-	}
+	Sprite::Rect dst_rect( 0, 0, get_width(), get_height() );
+	get_sprite()->draw( dst_rect, text_view_.get() );
 
 	get_sprite()->end();
 }

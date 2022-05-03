@@ -49,6 +49,7 @@ ParticleSystemTestScene::ParticleSystemTestScene( const GameMain* game_main )
 ParticleSystemTestScene::~ParticleSystemTestScene()
 {
 	get_active_object_manager()->clear();
+	get_entity_manager()->clear();
 }
 
 ParticleSystemTestScene::EntityManager* ParticleSystemTestScene::get_entity_manager()
@@ -68,7 +69,7 @@ void ParticleSystemTestScene::update()
 	{
 		t->transform.get_position() -= t->transform.right() * 0.001f;
 	}
-	if ( get_input()->press( Input::Button::RIGHT) )
+	if ( get_input()->press( Input::Button::RIGHT ) )
 	{
 		t->transform.get_position() += t->transform.right() * 0.001f;
 	}

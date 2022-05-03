@@ -69,7 +69,7 @@ TransformTestScene::TransformTestScene( const GameMain* game_main )
 
 TransformTestScene::~TransformTestScene()
 {
-	
+	get_entity_manager()->clear();
 }
 
 TransformTestScene::EntityManager* TransformTestScene::get_entity_manager()

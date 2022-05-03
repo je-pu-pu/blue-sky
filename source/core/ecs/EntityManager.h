@@ -201,6 +201,19 @@ public:
 		}
 	}
 
+	/**
+	 * ‘S‚Ä‚Ì Entity, Component, System ‚ğíœ‚·‚é
+	 */
+	void clear()
+	{
+		entity_list_.clear();
+		component_list_.clear();
+		system_map_.clear();
+		system_list_.clear();
+
+		// next_entity_id_ = 0;
+	}
+
 }; // EntityManager
 
 } // core::ecs

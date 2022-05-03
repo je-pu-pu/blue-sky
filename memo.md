@@ -1790,3 +1790,9 @@ VS Code でも以下を参照して逆アセンブラしたコードが表示で
 * CameraComponent を作った
 * GraphicsManager::set_main_camera() を作った。
 * TransformTestScene::render() の中の処理を、 RenderSystem に移動できた！
+
+# 2022-05-03
+
+* TransformTestScene でのテキスト描画の不具合を修正する
+    * 
+* EntityManager::clear() を実装した

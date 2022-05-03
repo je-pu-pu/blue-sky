@@ -303,7 +303,7 @@ void GraphicsManager::set_eye_position( const Vector& pos )
 	// ‚Ç‚±‚ÉˆÚ“®‚µ‚Ä‚àA“¯‚¶‚æ‚¤‚É SkyBox ‚ª•\¦‚³‚ê‚é‚æ‚¤‚É‚·‚é
 	if ( sky_box_ )
 	{
-		sky_box_render_data_->data().world = Matrix().set_translation( pos.x(), pos.y(), pos.z() ).transpose();
+		sky_box_render_data_->data().world = Matrix().set_translation( pos ).transpose();
 	}
 }
 
@@ -508,8 +508,6 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
 	}
 
 	{
-		direct_3d_->set_input_layout( "main" );
-
 		direct_3d_->begin3D();
 		direct_3d_->renderText();
 		direct_3d_->end3D();

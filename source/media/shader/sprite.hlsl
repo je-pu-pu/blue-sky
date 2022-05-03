@@ -55,6 +55,8 @@ technique11 sprite
 		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_sprite() ) );
+
+		RASTERIZERSTATE = Default;
 	}
 }
 
@@ -71,6 +73,8 @@ technique11 sprite_add
 		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_sprite_add() ) );
+
+		RASTERIZERSTATE = Default;
 	}
 }
 
@@ -87,5 +91,7 @@ technique11 sprite_ms
 		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_sprite_ms() ) );
+
+		RASTERIZERSTATE = Default;
 	}
 }

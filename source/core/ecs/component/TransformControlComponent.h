@@ -11,13 +11,6 @@ namespace core::ecs
  */
 class TransformControlComponent : public Component
 {
-public:
-
-public:
-
-public:
-	TransformControlComponent() = default;
-	~TransformControlComponent() = default;
 
 }; // class TransformControlComponent
 

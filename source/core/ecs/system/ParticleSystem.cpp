@@ -8,7 +8,7 @@ namespace core::ecs
 
 void ParticleSystem::update()
 {
-	std::cout << get_priority() << "ParticleSystem::update()" << std::endl;
+	// std::cout << get_priority() << "ParticleSystem::update()" << std::endl;
 
 	for ( auto i : get_component_list() )
 	{

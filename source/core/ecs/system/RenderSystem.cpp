@@ -2,6 +2,7 @@
 #include <blue_sky/ConstantBuffers.h> /// @todo core から blue_sky を参照しているのは変なので、基本的な ConstatntBuffer は core に移す
 #include <blue_sky/GameMain.h> /// @todo core から blue_sky を参照しているのは変なので、直す
 #include <blue_sky/graphics/GraphicsManager.h> /// @todo core から blue_sky を参照しているのは変なので、直す
+#include <core/graphics/Model.h>
 #include <iostream>
 
 namespace core::ecs
@@ -16,6 +17,7 @@ void RenderSystem::update()
 	for ( auto& i : get_component_list() )
 	{
 		auto* transform = std::get< TransformComponent* >( i.second );
+		auto* model = std::get< ModelComponent* >( i.second );
 
 		/// Transform を Shader に update する
 		blue_sky::ObjectConstantBufferWithData shader_data;
@@ -29,7 +31,7 @@ void RenderSystem::update()
 
 		get_graphics_manager()->set_current_object_constant_buffer( & shader_data );
 		get_graphics_manager()->set_current_skinning_constant_buffer( nullptr );
-		get_graphics_manager()->get_model( "wall-1" )->render();
+		model->model->render();
 	}
 
 	get_graphics_manager()->render_fader();

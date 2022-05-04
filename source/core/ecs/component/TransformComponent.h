@@ -14,14 +14,7 @@ namespace core::ecs
 class TransformComponent : public Component
 {
 public:
-	// const size_t ID = 2;
-
-public:
 	core::Transform transform;
-
-public:
-	TransformComponent() = default;
-	~TransformComponent() = default;
 
 }; // class TransformComponent
 

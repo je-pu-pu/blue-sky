@@ -193,8 +193,6 @@ public:
 	 */
 	void update()
 	{
-		std::cout << "EntityManager::update()" << std::endl;
-
 		for ( auto& s : system_list_ )
 		{
 			s->update();

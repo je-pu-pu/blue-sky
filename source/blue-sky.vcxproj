@@ -160,6 +160,7 @@
     <ClInclude Include="core\ecs\BaseSystem.h" />
     <ClInclude Include="core\ecs\Component.h" />
     <ClInclude Include="core\ecs\component\CameraComponent.h" />
+    <ClInclude Include="core\ecs\component\ModelComponent.h" />
     <ClInclude Include="core\ecs\component\ParticleSystemComponent.h" />
     <ClInclude Include="core\ecs\component\RenderComponent.h" />
     <ClInclude Include="core\ecs\component\TransformComponent.h" />

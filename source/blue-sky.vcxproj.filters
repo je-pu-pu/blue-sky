@@ -740,6 +740,9 @@
     <ClInclude Include="core\ecs\component\CameraComponent.h">
       <Filter>core\ecs\component</Filter>
     </ClInclude>
+    <ClInclude Include="core\ecs\component\ModelComponent.h">
+      <Filter>core\ecs\component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

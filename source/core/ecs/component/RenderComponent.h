@@ -6,18 +6,11 @@ namespace core::ecs
 {
 
 /**
- * 描画用コンポーネント
+ * 描画される事をタグ付けするためのコンポーネント
  *
  */
 class RenderComponent : public Component
 {
-public:
-
-public:
-
-public:
-	RenderComponent() = default;
-	~RenderComponent() = default;
 
 }; // class RenderComponent
 

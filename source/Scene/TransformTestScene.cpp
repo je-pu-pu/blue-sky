@@ -5,6 +5,7 @@
 #include <core/ecs/component/TransformComponent.h>
 #include <core/ecs/component/TransformControlComponent.h>
 #include <core/ecs/component/CameraComponent.h>
+#include <core/ecs/component/ModelComponent.h>
 #include <core/ecs/component/RenderComponent.h>
 
 #include <core/ecs/system/RenderSystem.h>
@@ -18,6 +19,8 @@
 #include <imgui.h>
 
 #include <sstream>
+#include <filesystem>
+#include <regex>
 
 namespace blue_sky
 {
@@ -29,26 +32,19 @@ TransformTestScene::TransformTestScene( const GameMain* game_main )
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
-	get_graphics_manager()->load_model( "wall-1" );
-
 	// System を追加する
 	get_entity_manager()->add_system< core::ecs::TransformControlSystem >();
 	// get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 - 1 );
 	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
 
 	// Entity と Component を追加する
-	cube_ = get_entity_manager()->create_entity();
-	cube_transform_ = cube_->add_component< core::ecs::TransformComponent >();
-	cube_transform_->transform.set_identity();
-	cube_->add_component< core::ecs::RenderComponent >();
+	current_entity_ = get_entity_manager()->create_entity();
+	current_entity_transform_ = current_entity_->add_component< core::ecs::TransformComponent >();
+	current_entity_transform_->transform.set_identity();
+	current_entity_->add_component< core::ecs::RenderComponent >();
+	current_entity_model_ = current_entity_->add_component< core::ecs::ModelComponent >();
 
-	/*
-	cube_ = get_entity_manager()->create_entity();
-	cube_transform_ = cube_->add_component< core::ecs::TransformComponent >();
-	cube_transform_->transform.set_position( Vector( 3.f, 0.f, 0.f ) );
-	cube_->add_component< core::ecs::RenderComponent >();
-	cube_->add_component< core::ecs::TransformControlComponent >();
-	*/
+	current_entity_model_->model = get_graphics_manager()->load_model( "goal" );
 
 	camera_transform_ = camera_->add_component< core::ecs::TransformComponent >();
 	camera_transform_->transform.set_identity();
@@ -59,12 +55,18 @@ TransformTestScene::TransformTestScene( const GameMain* game_main )
 
 	get_graphics_manager()->set_main_camera_info( camera_transform_, camera_component );
 
-	/*
-	camera_->remove_component< core::ecs::CameraComponent >();
-	cube_->add_component< core::ecs::CameraComponent >();
+	std::regex re(R"(.*\.bin\.fbx$)");
 
-	get_graphics_manager()->set_main_camera( cube_ );
-	*/
+	for ( const auto & file : std::filesystem::directory_iterator( "media/model/" ) )
+	{
+		if ( ! std::regex_match( file.path().string(), re ) )
+		{
+			continue;
+		}
+
+		std::cout << file.path().stem().stem() << std::endl;
+		model_file_name_list_.push_back( file.path().stem().stem().string() );
+	}
 }
 
 TransformTestScene::~TransformTestScene()
@@ -86,19 +88,35 @@ void TransformTestScene::update()
 
 	get_entity_manager()->update();
 
-	// GUI によってオブジェクトの位置・回転を変更する
+	
 	/// @todo Component の値を GUI で変更する仕組みを整理する
+	
+	// GUI によってモデルを変更する
+	static int model_index = 0;
+	std::vector< const char* > combo_items;
+
+	std::for_each( model_file_name_list_.begin(), model_file_name_list_.end(), [&] ( const auto& s ) { combo_items.push_back( s.c_str() ); } );
+
+	ImGui::Begin( "Model params" );
+	if ( ImGui::Combo( "Model", & model_index, & combo_items[ 0 ], model_file_name_list_.size() ) )
+	{
+		std::cout << "index : " << model_index << std::endl;
+		current_entity_model_->model = get_graphics_manager()->load_model( combo_items[ model_index ] );
+	}
+	ImGui::End();
+
+	// GUI によってオブジェクトの位置・回転を変更する
 	static Vector rot;
 
-	ImGui::Begin( "transform test params" );
-	ImGui::DragFloat3( "Position", reinterpret_cast< float* >( & cube_transform_->transform.get_position() ), 0.1f );
+	ImGui::Begin( "Transform test params" );
+	ImGui::DragFloat3( "Position", reinterpret_cast< float* >( & current_entity_transform_->transform.get_position() ), 0.1f );
 	ImGui::DragFloat3( "Rotation", reinterpret_cast< float* >( & rot ), 0.1f, -360.f, 360.f );
 	ImGui::End();
 
 	Quaternion q;
 	Vector r = math::degree_to_radian( rot );
 	q.set_euler_zyx( r.z(), r.y(), r.x() );
-	cube_transform_->transform.set_rotation( q );
+	current_entity_transform_->transform.set_rotation( q );
 }
 
 void TransformTestScene::render()

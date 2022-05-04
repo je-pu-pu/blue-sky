@@ -87,7 +87,7 @@ public:
 	virtual Shader* create_shader() const;
 	virtual string_t get_texture_file_path_by_texture_name( const char* ) const;
 
-	void render() const;
+	void render() const override;
 };
 
 } // namespace blue_sky::graphics

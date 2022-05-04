@@ -34,6 +34,7 @@ public:
 
 	virtual uint_t get_shader_count() const = 0;
 
+	virtual void render() const = 0;
 };
 
 } // namespace core::graphics

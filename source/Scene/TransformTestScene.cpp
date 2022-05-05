@@ -34,7 +34,6 @@ TransformTestScene::TransformTestScene( const GameMain* game_main )
 
 	// System ‚ð’Ç‰Á‚·‚é
 	get_entity_manager()->add_system< core::ecs::TransformControlSystem >();
-	// get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 - 1 );
 	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
 
 	// Entity ‚Æ Component ‚ð’Ç‰Á‚·‚é
@@ -51,9 +50,9 @@ TransformTestScene::TransformTestScene( const GameMain* game_main )
 	camera_transform_->transform.set_position( Vector( 0.f, 1.5f, -10.f ) );
 
 	camera_->add_component< core::ecs::TransformControlComponent >();
-	const auto* camera_component = camera_->add_component< core::ecs::CameraComponent >();
+	camera_component_ = camera_->add_component< core::ecs::CameraComponent >();
 
-	get_graphics_manager()->set_main_camera_info( camera_transform_, camera_component );
+	get_graphics_manager()->set_main_camera_info( camera_transform_, camera_component_ );
 
 	std::regex re(R"(.*\.bin\.fbx$)");
 
@@ -117,6 +116,13 @@ void TransformTestScene::update()
 	Vector r = math::degree_to_radian( rot );
 	q.set_euler_zyx( r.z(), r.y(), r.x() );
 	current_entity_transform_->transform.set_rotation( q );
+
+	// GUI ‚É‚æ‚Á‚ÄƒJƒƒ‰‚Ìî•ñ‚ð•ÏX‚·‚é
+	ImGui::Begin( "Camera params" );
+	ImGui::DragFloat( "FOV", & camera_component_->fov, 0.1f, 0.f, 180.f );
+	ImGui::DragFloat( "Near clip", & camera_component_->near_clip, 0.1f, 0.1f, 3000.f );
+	ImGui::DragFloat( "Far clip", & camera_component_->far_clip, 0.1f, 0.1f, 3000.f );
+	ImGui::End();
 }
 
 void TransformTestScene::render()

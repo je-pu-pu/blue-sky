@@ -9,6 +9,7 @@ namespace core::ecs
 	class Entity;
 	class TransformComponent;
 	class ModelComponent;
+	class CameraComponent;
 }
 
 namespace blue_sky
@@ -24,6 +25,7 @@ public:
 	using EntityManager = core::ecs::EntityManager;
 	using TransformComponent = core::ecs::TransformComponent;
 	using ModelComponent = core::ecs::ModelComponent;
+	using CameraComponent = core::ecs::CameraComponent;
 	using Entity = core::ecs::Entity;
 
 protected:
@@ -36,6 +38,7 @@ protected:
 
 	Entity* camera_ = nullptr;
 	TransformComponent* camera_transform_ = nullptr;
+	CameraComponent* camera_component_ = nullptr;
 
 	std::vector< std::string > model_file_name_list_;
 

@@ -1796,3 +1796,13 @@ VS Code でも以下を参照して逆アセンブラしたコードが表示で
 * TransformTestScene でのテキスト描画の不具合を修正する
     * Sprite 用の RASTERIZERSTATE の設定が抜けていたせいで TransformTestScene で Text が正しく描画できていなかった問題を修正した。
 * EntityManager::clear() を実装した
+
+# 2022-05-04
+
+* ModelComponent を作った
+* TransformTestScene で GUI で任意のモデルを読み込めるようにした
+* 任意のモデルを ECS で表示できるようになった。
+
+# 2022-05-05
+
+* カメラの情報を GUI で変更できるようにした

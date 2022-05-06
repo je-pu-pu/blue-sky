@@ -17,14 +17,14 @@ class exception
 {
 private:
 	const char* file_;
-	unsigned int line_;
+	int line_;
 	data_type data_;
 
 public:
-	exception( const char* file, unsigned int line, const data_type& data ) : file_( file ), line_( line ), data_( data ) { }
+	exception( const char* file, int line, const data_type& data ) : file_( file ), line_( line ), data_( data ) { }
 
 	const char* file() const { return file_; }
-	unsigned int line() const { return line_; }
+	int line() const { return line_; }
 	const data_type& data() const { return data_; }
 };
 

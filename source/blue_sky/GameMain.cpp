@@ -116,7 +116,7 @@ GameMain::GameMain()
 	physics_manager_->setDebugDrawer( bullet_debug_draw_.get() );
 
 	graphics_manager_ = new blue_sky::graphics::direct_3d_11::GraphicsManager( direct_3d_.get() );
-	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "graphics.debug_axis", 0 ) );
+	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "graphics.debug_axis", 0 ) != 0 );
 	
 	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
 	sound_manager_->set_mute( get_config()->get( "audio.mute", 0 ) != 0 );
@@ -233,7 +233,7 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "play_sound", [this] ( const char_t* name ) { if ( auto* s = get_sound_manager()->get_sound( name ) ) { s->play( false ); } } );
 
 	// debug
-	get_script_manager()->set_function( "debug_axis", [this] ( int on ) { get_graphics_manager()->set_debug_axis_enabled( on ); } );
+	get_script_manager()->set_function( "debug_axis", [this] ( int on ) { get_graphics_manager()->set_debug_axis_enabled( on != 0 ); } );
 	get_script_manager()->set_function( "debug_bullet", [this] ( int mode ) { bullet_debug_draw_->setDebugMode( mode ); } );
 
 	get_script_manager()->set_function( "debug_print_resources", [this] () { get_graphics_manager()->debug_print_resources(); } );
@@ -366,7 +366,7 @@ void GameMain::render()
 	if ( is_command_mode_ )
 	{
 		graphics_manager_->draw_text_at_center( ( "> " + user_command_ ).c_str(), Color::White );
-		graphics_manager_->draw_text( 0, get_height() / 2.f, static_cast< float_t >( get_width() ), static_cast< float_t >( get_height() ), get_script_manager()->get_output().c_str(), Color::White );
+		graphics_manager_->draw_text( 0, static_cast< float_t >( get_height() ) / 2.f, static_cast< float_t >( get_width() ), static_cast< float_t >( get_height() ), get_script_manager()->get_output().c_str(), Color::White );
 
 		/// @todo OculusRift ‚É‚à•¶Žš‚ð•`‰æ‚Å‚«‚é‚æ‚¤‚É‚·‚é
 		/*

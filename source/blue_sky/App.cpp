@@ -15,8 +15,8 @@
 
 //□コンストラクタ
 App::App()
-	: hWnd( 0 )
-	, hInst( 0 )
+	: hInst( 0 )
+	, hWnd( 0 )
 	, hMutex( 0 )
 	, class_name_( "blue-sky" )
 	, title_( "blue-sky" )
@@ -166,7 +166,7 @@ int App::MessageLoop()
 		}
 	}
 
-	return msg.wParam;
+	return static_cast< int >( msg.wParam );
 }
 
 //□ウィンドウプロシージャ
@@ -198,7 +198,7 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	{
 		if ( App::get_instance()->game_ )
 		{
-			App::get_instance()->game_->on_special_key_down( wp );
+			App::get_instance()->game_->on_special_key_down( static_cast< int >( wp ) );
 		}
 
 		break;
@@ -207,7 +207,7 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	{
 		if ( App::get_instance()->game_ )
 		{
-			App::get_instance()->game_->on_key_down( wp );
+			App::get_instance()->game_->on_key_down( static_cast< char_t >( wp ) );
 		}
 
 		break;
@@ -366,8 +366,8 @@ const char_t* App::get_title()
 {
 	if ( hWnd )
 	{
-		title_.resize( GetWindowTextLength( hWnd ) + 1 );
-		GetWindowText( hWnd, & title_[ 0 ], title_.size() );
+		title_.resize( static_cast< string_t::size_type >( GetWindowTextLength( hWnd ) + 1 ) );
+		GetWindowText( hWnd, & title_[ 0 ], static_cast< int >( title_.size() ) );
 	}
 
 	return title_.c_str();
@@ -426,12 +426,12 @@ void App::set_full_screen( bool full_screen )
 	is_full_screen_ = full_screen;
 }
 
-LONG App::get_window_style() const
+DWORD App::get_window_style() const
 {
 	return WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE;
 }
 
-LONG App::get_window_style_full_scrren() const
+DWORD App::get_window_style_full_scrren() const
 {
 	return WS_POPUP;
 }

@@ -60,8 +60,8 @@ private:
 	static LRESULT CALLBACK WinProc(HWND, UINT, WPARAM, LPARAM);
 	static void on_resize( HWND );
 
-	LONG get_window_style() const;
-	LONG get_window_style_full_scrren() const;
+	DWORD get_window_style() const;
+	DWORD get_window_style_full_scrren() const;
 
 public:
 	virtual ~App();						///< デストラクタ

@@ -217,19 +217,18 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		if ( ! App::get_instance()->is_mouse_in_window_ )
 		{
 			App::get_instance()->is_mouse_in_window_ = true;
-
-			ShowCursor( App::get_instance()->is_show_cursor_enabled_ );
+			App::get_instance()->show_cursor( App::get_instance()->game_->is_show_cursor() );
 
 			TRACKMOUSEEVENT track_mouse_event = { sizeof( TRACKMOUSEEVENT ), TME_LEAVE, hwnd };
 			TrackMouseEvent( & track_mouse_event );
 		}
+
 		break;
 	}
 	case WM_MOUSELEAVE:
 	{
 		App::get_instance()->is_mouse_in_window_ = false;
-
-		ShowCursor( TRUE );
+		App::get_instance()->show_cursor( App::get_instance()->game_->is_show_cursor() );
 
 		break;
 	}
@@ -303,13 +302,17 @@ void App::on_resize( HWND /* hwnd */ )
 /**
  * カーソルの表示を設定する
  *
- * @param show 
+ * @param show カーソルを表示する場合は true を、表示しない場合は false を指定する 
  */
 void App::show_cursor( bool show )
 {
-	is_show_cursor_enabled_ = show;
+	if ( show != is_show_cursor_enabled_ )
+	{
+		is_show_cursor_enabled_ = show;
 
-	ShowCursor( show );
+		ShowCursor( show );
+		// std::cout << "ShowCursor : " << ShowCursor( show ) << std::endl;
+	}
 }
 
 void App::clip_cursor( bool clip )

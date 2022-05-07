@@ -2,10 +2,12 @@
 
 #include <type/type.h>
 
+namespace game
+{
+
 /**
  * ’ŠÛƒQ[ƒ€ƒNƒ‰ƒX
  *
- * @todo game ‚ÉˆÚ“®‚·‚é
  */
 class Game
 {
@@ -28,4 +30,8 @@ public:
 
 	virtual int get_width() const = 0;
 	virtual int get_height() const = 0;
+
+	virtual bool is_show_cursor() const = 0;
 };
+
+} // namespace game

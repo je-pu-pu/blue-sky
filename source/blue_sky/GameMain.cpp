@@ -62,6 +62,7 @@ GameMain::GameMain()
 	: total_elapsed_time_( 0.f )
 	, is_display_fps_( false )
 	, is_command_mode_( false )
+	, is_show_cursor_( false )
 {
 	// common::log( "log/debug.log", "init" );
 
@@ -405,7 +406,7 @@ void GameMain::on_key_down( char_t key )
 		}
 	}
 
-	get_app()->show_cursor( is_command_mode_ );
+	set_show_cursor( is_command_mode_ );
 }
 
 void GameMain::edit_command( char_t key )

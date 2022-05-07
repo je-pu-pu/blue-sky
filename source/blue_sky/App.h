@@ -29,7 +29,8 @@ public:
 	static const int DEFAULT_WIDTH = 800;
 	static const int DEFAULT_HEIGHT = 600;
 
-	using Config = game::Config;
+	using Game		= game::Game;
+	using Config	= game::Config;
 
 private:
 	HINSTANCE	hInst;					///< インスタンスハンドル
@@ -49,7 +50,7 @@ private:
 
 	bool		is_mouse_in_window_;
 
-	bool		is_show_cursor_enabled_ = false;
+	bool		is_show_cursor_enabled_ = true;
 	bool		is_clip_cursor_enabled_;
 
 	Game*		game_ = 0;

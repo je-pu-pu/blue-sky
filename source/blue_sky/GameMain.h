@@ -62,7 +62,7 @@ namespace blue_sky
 namespace blue_sky
 {
 
-class GameMain : public Game
+class GameMain : public game::Game
 {
 public:
 	using Config					= game::Config;
@@ -134,6 +134,8 @@ private:
 	bool									is_command_mode_;		///< 現在コマンドモード中かどうか？
 	string_t								user_command_;			///< ユーザーの入力したコマンド
 
+	bool									is_show_cursor_;		///< 現在カーソルを表示するかどうか
+
 	void setup_script_command();
 
 	void update_render_data_for_game() const;
@@ -198,8 +200,10 @@ public:
 	inline static GameMain* get_instance() { static GameMain game_main; return & game_main; }
 	const Scene* get_current_scene() const { return scene_.get(); }
 
+	void set_show_cursor( bool show_cursor ) { is_show_cursor_ = show_cursor; get_app()->show_cursor( is_show_cursor_ ); }
+	bool is_show_cursor() const override { return is_show_cursor_; }
 };
 
 } // namespace blue_sky
 
-inline Game* Game::get_instance() { return blue_sky::GameMain::get_instance(); }
+inline game::Game* game::Game::get_instance() { return blue_sky::GameMain::get_instance(); }

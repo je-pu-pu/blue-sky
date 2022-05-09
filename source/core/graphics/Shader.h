@@ -26,6 +26,8 @@ public:
 
 	virtual Shader* clone() const = 0;
 
+	virtual const char_t* get_name() const { return typeid( *this ).name(); }
+
 	virtual float_t get_scalar( const char_t* ) const = 0;
 	virtual float_t get_scalar_at( uint_t ) const = 0;
 	

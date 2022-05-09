@@ -194,6 +194,8 @@ public:
 	template< typename Type=Shader > Type* get_shader( const char_t* name ) { return shader_manager_.get< Type >( name ); }
 	Shader* clone_shader( const Shader* s ) { Shader* s2 = s->clone(); shader_manager_.add( s2 ); return s2; }
 
+	const ShaderManager::ResourceList& get_shader_list() const { return shader_manager_.get_resource_list(); }
+
 	// SkinningAnimationSet
 	SkinningAnimationSet* create_skinning_animation_set() { return skinning_animation_set_manager_.create(); }
 

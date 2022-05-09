@@ -97,11 +97,33 @@ void TransformTestScene::update()
 	std::for_each( model_file_name_list_.begin(), model_file_name_list_.end(), [&] ( const auto& s ) { combo_items.push_back( s.c_str() ); } );
 
 	ImGui::Begin( "Model params" );
-	if ( ImGui::Combo( "Model", & model_index, & combo_items[ 0 ], model_file_name_list_.size() ) )
+	if ( ImGui::Combo( "Model", & model_index, & combo_items[ 0 ], combo_items.size() ) )
 	{
 		std::cout << "index : " << model_index << std::endl;
 		current_entity_model_->model = get_graphics_manager()->load_model( combo_items[ model_index ] );
 	}
+
+	static std::vector< int > shader_index_list;
+	std::vector< const char* > shader_combo_items;
+
+	// get_graphics_manager()->debug_print_resources();
+
+	for ( const auto& s : get_graphics_manager()->get_shader_list() )
+	{
+		shader_combo_items.push_back( s->get_name() );
+	}
+
+	shader_index_list.resize( current_entity_model_->model->get_shader_count() );
+
+	for ( int n = 0; n < current_entity_model_->model->get_shader_count(); n++ )
+	{
+		if ( ImGui::Combo( string_t( "Shader " + std::to_string( n ) ).c_str(), & shader_index_list[ n ], & shader_combo_items[ 0 ], shader_combo_items.size() ) )
+		{
+			std::cout << "index : " << shader_index_list[ n ] << std::endl;
+			current_entity_model_->model->set_shader_at( n, get_graphics_manager()->get_shader_list()[ shader_index_list[ n ] ].get() );
+		}
+	}
+
 	ImGui::End();
 
 	// GUI によってオブジェクトの位置・回転を変更する
@@ -141,7 +163,7 @@ void TransformTestScene::render()
 
 	ss << "psts "<< '\n';
 
-	get_graphics_manager()->draw_text( 10.f, 10.f, get_width() - 10.f, get_height() - 10.f, ss.str().c_str(), Color::White );
+	get_graphics_manager()->draw_text( 10.f, 10.f, static_cast< float >( get_width() ) - 10.f, static_cast< float >( get_height() ) - 10.f, ss.str().c_str(), Color::White );
 }
 
 } // namespace blue_sky

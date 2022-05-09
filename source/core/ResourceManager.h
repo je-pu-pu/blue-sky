@@ -125,6 +125,14 @@ public:
 	}
 
 	/**
+	 * リソースの一覧を取得する
+	 */
+	const ResourceList& get_resource_list() const
+	{
+		return resource_list_;
+	}
+
+	/**
 	 * 全てのリソースを削除する
 	 *
 	 */

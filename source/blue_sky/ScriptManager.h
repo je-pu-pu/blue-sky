@@ -213,10 +213,10 @@ inline void ScriptManager::exec( const string_t& script, bool add_history )
 {
 	output_.clear();
 
-	if ( add_history )
+	if ( add_history && command_history_.back() != script )
 	{
 		command_history_.push_back( script );
-		command_history_index_ = command_history_.size();
+		command_history_index_ = command_history_.size() - 1;
 	}
 
 	if ( command_history_.size() > MAX_COMMAND_HISTORY_SIZE )

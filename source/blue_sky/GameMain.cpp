@@ -448,7 +448,7 @@ void GameMain::edit_command( char_t key )
 	{
 		user_command_ += win::Clipboard::get_text();
 	}
-	else
+	else if ( std::isprint( key ) )
 	{
 		user_command_ += key;
 	}

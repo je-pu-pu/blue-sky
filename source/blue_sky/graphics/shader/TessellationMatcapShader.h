@@ -13,7 +13,7 @@ template< typename Traits >
 class BaseTessellationMatcapShader : public BaseShader
 {
 private:
-	Texture* texture_ = 0;
+	Texture* texture_ = nullptr;
 	const InputLayout* input_layout_;
 	const EffectTechnique* effect_technique_;
 
@@ -41,8 +41,8 @@ public:
 	}
 };
 
-struct StaticTesselationMatcapTraits   { static constexpr char* input_layout_name = "main"; static constexpr char* effect_technique_name = "tessellation";      };
-struct SkinningTesselationMatcapTraits { static constexpr char* input_layout_name = "skin"; static constexpr char* effect_technique_name = "tessellation_skin"; };
+struct StaticTesselationMatcapTraits   { static constexpr const char* input_layout_name = "main"; static constexpr const char* effect_technique_name = "tessellation";      };
+struct SkinningTesselationMatcapTraits { static constexpr const char* input_layout_name = "skin"; static constexpr const char* effect_technique_name = "tessellation_skin"; };
 
 class TessellationMatcapShader : public BaseTessellationMatcapShader< StaticTesselationMatcapTraits >
 {

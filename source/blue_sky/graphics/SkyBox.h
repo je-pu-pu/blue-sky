@@ -22,7 +22,7 @@ protected:
 
 public:
 	explicit SkyBox( const char* );
-	~SkyBox();
+	~SkyBox() override;
 
 }; // class SkyBox
 

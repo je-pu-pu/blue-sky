@@ -84,7 +84,7 @@ private:
 	 * @param component_type_id ComponentTypeId
 	 * @return bool w’è‚µ‚½ Component ‚ª©g‚Ì System ‚Ì‘€ì‘ÎÛ‚ÉŠÜ‚Ü‚ê‚Ä‚¢‚éê‡‚Í true ‚ğAŠÜ‚Ü‚ê‚Ä‚¢‚È‚¯‚ê‚Î false ‚ğ•Ô‚·
 	 */
-	constexpr bool has_component_type( ComponentTypeId component_type_id ) const override
+	bool has_component_type( ComponentTypeId component_type_id ) const override
 	{
 		return ComponentTypeList< ComponentTypes ... >::has_component_type( component_type_id  );
 	}

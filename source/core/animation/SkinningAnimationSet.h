@@ -67,7 +67,7 @@ public:
 
 		if ( i == skinning_animation_map_.end() )
 		{
-			return 0;
+			return nullptr;
 		}
 
 		return & i->second;

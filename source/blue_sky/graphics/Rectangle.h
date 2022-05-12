@@ -13,7 +13,7 @@ class Rectangle : public Mesh
 {
 public:
 	explicit Rectangle( Buffer* );
-	virtual ~Rectangle() { }
+	virtual ~Rectangle() override { }
 
 }; // class Rectangle
 

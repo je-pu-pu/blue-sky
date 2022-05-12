@@ -43,7 +43,7 @@ protected:
 
 public:
 	explicit Line( Direct3D* );
-	virtual ~Line();
+	virtual ~Line() override;
 
 	void render_part( int part_count = 99999 ) const;
 

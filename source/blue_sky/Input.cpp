@@ -24,12 +24,12 @@ namespace blue_sky
 {
 
 Input::Input()
-	: direct_input_( 0 )
+	: direct_input_( nullptr )
 	, state_()
 	, joystick_enabled_( false )
 	, joystick_axis_threshold_( 0.f )
-	, joystick_x_axis_pos_( 0 )
-	, joystick_y_axis_pos_( 0 )
+	, joystick_x_axis_pos_( nullptr )
+	, joystick_y_axis_pos_( nullptr )
 	, joystick_x_sensitivity_( 1.f )
 	, joystick_y_sensitivity_( 1.f )
 	, mouse_x_sensitivity_( 1.f )

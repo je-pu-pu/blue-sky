@@ -20,7 +20,7 @@ private:
 
 public:
 	ConstantBufferTyped( )
-		: ConstantBuffer( sizeof( DataType ) )
+		: ConstantBuffer< Slot >( sizeof( DataType ) )
 	{
 
 	}

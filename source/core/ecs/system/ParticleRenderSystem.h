@@ -17,9 +17,9 @@ public:
 
 public:
 	ParticleRenderSystem() = default;
-	~ParticleRenderSystem() = default;
+	virtual ~ParticleRenderSystem() = default;
 
-	void update() override;
+	virtual void update() override;
 
 }; // class ParticleRenderSystem
 

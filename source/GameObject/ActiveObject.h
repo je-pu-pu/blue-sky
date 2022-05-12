@@ -66,13 +66,13 @@ protected:
 public:
 	ActiveObject();
 	ActiveObject( const ActiveObject& o );
-	virtual ~ActiveObject();
+	virtual ~ActiveObject() override;
 
 	virtual ActiveObject* clone() const { COMMON_THROW_EXCEPTION_MESSAGE( "clone() not implemented." ); }
 
 	virtual void restart();
 
-	virtual void update() { }
+	virtual void update() override { }
 
 	virtual void set_model( Model* m ) { model_ = m; setup_animation_player(); } /// @todo virtual ‚ðŠO‚·
 	Model* get_model() { return model_; }

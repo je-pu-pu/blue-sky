@@ -368,7 +368,7 @@ void GraphicsManager::set_paper_texture_type( int_t type )
 	}
 	else
 	{
-		paper_texture_ = 0;
+		paper_texture_ = nullptr;
 	}
 }
 

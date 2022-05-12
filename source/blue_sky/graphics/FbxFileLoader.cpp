@@ -226,7 +226,7 @@ void print_fbx_node_recursive( FbxNode* node )
 FbxFileLoader::FbxFileLoader( Model* model, const char_t* name )
 	: BaseFileLoader( model, name )
 	, fbx_manager_( FbxManager::Create() )
-	, fbx_scene_( 0 )
+	, fbx_scene_( nullptr )
 	, fbx_material_index_( 0 )
 {
 	FbxIOSettings* io_settings = FbxIOSettings::Create( fbx_manager_, IOSROOT );
@@ -396,7 +396,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 		}
 	}
 
-	FbxLayerElementSmoothing* smoothing = 0;
+	FbxLayerElementSmoothing* smoothing = nullptr;
 
 	// load_mesh_smoothing_info()
 	{
@@ -1095,7 +1095,7 @@ bool FbxFileLoader::convert_to_binaly( const char_t* file_path, const char_t* bi
  */
 string_t FbxFileLoader::convert_file_path_to_internal_encoding( const char* s )
 {
-	char* path = 0;
+	char* path = nullptr;
 
 	// FbxAnsiToUTF8( file_texture->GetFileName(), path, & buffer_size );
 	FbxUTF8ToAnsi( s, path );

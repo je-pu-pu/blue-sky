@@ -53,7 +53,7 @@ private:
 	bool		is_show_cursor_enabled_ = true;
 	bool		is_clip_cursor_enabled_;
 
-	Game*		game_ = 0;
+	Game*		game_ = nullptr;
 	std::unique_ptr< Config >			config_;
 
 	App();								//コンストラクタ

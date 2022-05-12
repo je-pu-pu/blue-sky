@@ -14,9 +14,9 @@ namespace core::graphics::direct_3d_11
 
 Sprite::Sprite( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
-	, constant_buffer_( 0 )
-	, vertex_buffer_( 0 )
-	, index_buffer_( 0 )
+	, constant_buffer_( nullptr )
+	, vertex_buffer_( nullptr )
+	, index_buffer_( nullptr )
 	, input_layout_( direct_3d->get_input_layout( "sprite" ) )
 	, effect_technique_( direct_3d_->get_effect()->get_technique( "sprite" ) )
 	, ortho_offset_( 0.f )
@@ -44,7 +44,7 @@ void Sprite::create_vertex_buffer()
     buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
     buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	
-	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, 0, & vertex_buffer_ ) );
+	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, nullptr, & vertex_buffer_ ) );
 }
 
 void Sprite::create_index_buffer()
@@ -57,7 +57,7 @@ void Sprite::create_index_buffer()
 
 	Index index_list[ 4 ] = { 0, 1, 2, 3 };
 
-	D3D11_SUBRESOURCE_DATA data = { 0 };
+	D3D11_SUBRESOURCE_DATA data = { nullptr };
 	data.pSysMem = index_list;
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & index_buffer_ ) );
@@ -111,18 +111,18 @@ void Sprite::draw( const Rect* dst, const Texture* texture, const Rect* src, con
 	{
 		if ( src )
 		{
-			FLOAT l = src->left()   / static_cast< FLOAT >( texture->get_width() );
-			FLOAT r = src->right()  / static_cast< FLOAT >( texture->get_width() );
-			FLOAT t = src->top()    / static_cast< FLOAT >( texture->get_height() );
-			FLOAT b = src->bottom() / static_cast< FLOAT >( texture->get_height() );
+			FLOAT l = static_cast< FLOAT >( src->left()   ) / static_cast< FLOAT >( texture->get_width()  );
+			FLOAT r = static_cast< FLOAT >( src->right()  ) / static_cast< FLOAT >( texture->get_width()  );
+			FLOAT t = static_cast< FLOAT >( src->top()    ) / static_cast< FLOAT >( texture->get_height() );
+			FLOAT b = static_cast< FLOAT >( src->bottom() ) / static_cast< FLOAT >( texture->get_height() );
 	
 			vertex_list[ 0 ].TexCoord = Vector2( l, t );
 			vertex_list[ 1 ].TexCoord = Vector2( r, t );
 			vertex_list[ 2 ].TexCoord = Vector2( l, b );
 			vertex_list[ 3 ].TexCoord = Vector2( r, b );
 
-			src_width = src->width();
-			src_height = src->height();
+			src_width  = static_cast< UINT >( src->width()  );
+			src_height = static_cast< UINT >( src->height() );
 		}
 		else
 		{
@@ -146,17 +146,17 @@ void Sprite::draw( const Rect* dst, const Texture* texture, const Rect* src, con
 
 		if ( dst )
 		{
-			l = +( dst->left()   * 2.f / static_cast< FLOAT >( screen_height ) - surface_ratio );
-			r = +( dst->right()  * 2.f / static_cast< FLOAT >( screen_height ) - surface_ratio );
-			t = -( dst->top()    * 2.f / static_cast< FLOAT >( screen_height ) - 1.f );
-			b = -( dst->bottom() * 2.f / static_cast< FLOAT >( screen_height ) - 1.f );
+			l = +( static_cast< FLOAT >( dst->left()   ) * 2.f / static_cast< FLOAT >( screen_height ) - surface_ratio );
+			r = +( static_cast< FLOAT >( dst->right()  ) * 2.f / static_cast< FLOAT >( screen_height ) - surface_ratio );
+			t = -( static_cast< FLOAT >( dst->top()    ) * 2.f / static_cast< FLOAT >( screen_height ) - 1.f );
+			b = -( static_cast< FLOAT >( dst->bottom() ) * 2.f / static_cast< FLOAT >( screen_height ) - 1.f );
 		}
 		else
 		{
-			l = +( ( ( static_cast< FLOAT >( screen_height ) - src_width  ) / 2               ) / screen_height * 2.f - 1.f );
-			r = +( ( ( static_cast< FLOAT >( screen_height ) - src_width  ) / 2 + src_width   ) / screen_height * 2.f - 1.f );
-			t = -( ( ( static_cast< FLOAT >( screen_height ) - src_height ) / 2               ) / screen_height * 2.f - 1.f );
-			b = -( ( ( static_cast< FLOAT >( screen_height ) - src_height ) / 2 + src_height  ) / screen_height * 2.f - 1.f );
+			l = +( ( static_cast< FLOAT >( screen_height - src_width  ) / 2                                       ) / static_cast< FLOAT >( screen_height ) * 2.f - 1.f );
+			r = +( ( static_cast< FLOAT >( screen_height - src_width  ) / 2 + static_cast< FLOAT >( src_width  )  ) / static_cast< FLOAT >( screen_height ) * 2.f - 1.f );
+			t = -( ( static_cast< FLOAT >( screen_height - src_height ) / 2                                       ) / static_cast< FLOAT >( screen_height ) * 2.f - 1.f );
+			b = -( ( static_cast< FLOAT >( screen_height - src_height ) / 2 + static_cast< FLOAT >( src_height )  ) / static_cast< FLOAT >( screen_height ) * 2.f - 1.f );
 
 			/*
 			l = ( static_cast< FLOAT >( screen_width  ) - src_width  ) / 2;

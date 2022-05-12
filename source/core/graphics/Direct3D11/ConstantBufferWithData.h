@@ -12,6 +12,9 @@ namespace core::graphics::direct_3d_11
 template< typename DataType, int Slot >
 class ConstantBufferWithData : public ConstantBufferTyped< DataType, Slot >
 {
+public:
+	using ConstantBufferTyped = ConstantBufferTyped< DataType, Slot >;
+
 protected:
 	DataType data_;
 

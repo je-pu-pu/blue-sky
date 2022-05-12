@@ -42,13 +42,13 @@ public:
 	}
 };
 
-struct ShadowMapShaderTraits         { static constexpr char* input_layout_name = "main"; static constexpr char* effect_technique_name = "shadow_map";      };
-struct SkinningShadowMapShaderTraits { static constexpr char* input_layout_name = "skin"; static constexpr char* effect_technique_name = "shadow_map_skin"; };
+struct ShadowMapShaderTraits         { static constexpr const char* input_layout_name = "main"; static constexpr const char* effect_technique_name = "shadow_map";      };
+struct SkinningShadowMapShaderTraits { static constexpr const char* input_layout_name = "skin"; static constexpr const char* effect_technique_name = "shadow_map_skin"; };
 
 class ShadowMapShader : public BaseShadowMapShader // < ShadowMapShaderTraits >
 {
 public:
-	ShadowMapShader::ShadowMapShader()
+	ShadowMapShader()
 		: BaseShadowMapShader( "main", "shadow_map" )
 	{ }
 
@@ -68,7 +68,7 @@ public:
 class SkinningShadowMapShader : public BaseShadowMapShader // < SkinningShadowMapShaderTraits >
 {
 public:
-	SkinningShadowMapShader::SkinningShadowMapShader()
+	SkinningShadowMapShader()
 		: BaseShadowMapShader( "skin", "shadow_map_skin" )
 	{ }
 

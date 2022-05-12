@@ -15,9 +15,9 @@
 
 //□コンストラクタ
 App::App()
-	: hInst( 0 )
-	, hWnd( 0 )
-	, hMutex( 0 )
+	: hInst( nullptr )
+	, hWnd( nullptr )
+	, hMutex( nullptr )
 	, class_name_( "blue-sky" )
 	, title_( "blue-sky" )
 	, style_( get_window_style() )
@@ -42,7 +42,7 @@ App::App()
 
 #ifdef ENABLE_DEBUG_CONSOLE
 	AllocConsole();
-	if ( freopen( "CONOUT$", "w", stdout ) == NULL )
+	if ( freopen( "CONOUT$", "w", stdout ) == nullptr )
 	{
 		COMMON_THROW_EXCEPTION_MESSAGE( "freopen() failed." );
 	}
@@ -74,25 +74,28 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	//インスタンスハンドルをコピー
 	hInst = hi;
 	//２重起動防止
-	hMutex = OpenMutex(MUTEX_ALL_ACCESS, FALSE, title_.c_str() );
-	if(hMutex != NULL){
+	hMutex = OpenMutex( MUTEX_ALL_ACCESS, FALSE, title_.c_str() );
+	
+	if ( hMutex )
+	{
 		CloseHandle(hMutex);
 		return false;
 	}
-	hMutex = CreateMutex(NULL, FALSE, title_.c_str());
+
+	hMutex = CreateMutex( nullptr, FALSE, title_.c_str());
 
 	//WNDCLASS構造体
 	WNDCLASS wc = {
 		CS_HREDRAW | CS_VREDRAW,				//スタイル
 		WinProc,								//プロシージャ関数
-		NULL,									//拡張用パラメータ
-		NULL,									//拡張用パラメータ
+		0,										//拡張用パラメータ
+		0,										//拡張用パラメータ
 		hInst,									//インスタンスハンドル
 		LoadIcon( hi, MAKEINTRESOURCE( IDI_ICON1 ) ),			//アイコン
-		LoadCursor( NULL, IDC_ARROW ),							//マウスカーソル
+		LoadCursor( nullptr, IDC_ARROW ),		//マウスカーソル
 		(HBRUSH)GetStockObject(BLACK_BRUSH),	//背景色
-		NULL,									//メニュー
-		class_name_.c_str(),						//クラス名
+		nullptr,								//メニュー
+		class_name_.c_str(),					//クラス名
 	};
 	//ウィンドウクラスの登録
 	if(! RegisterClass(&wc))	return false;
@@ -115,10 +118,10 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		y,					//
 		w,					//サイズ
 		h,					//
-		NULL,				//親ウィンドウのハンドル
-		NULL,				//メニューのハンドル
+		nullptr,			//親ウィンドウのハンドル
+		nullptr,			//メニューのハンドル
 		hInst,				//インスタンスハンドル
-		NULL				//ウィンドウ作成データ アドレス
+		nullptr				//ウィンドウ作成データ アドレス
 	);
 
 	if ( ! hWnd )
@@ -147,7 +150,7 @@ int App::MessageLoop()
 
 	while ( true )
 	{
-		if ( PeekMessage( & msg, NULL, 0, 0, PM_REMOVE ) )
+		if ( PeekMessage( & msg, nullptr, 0, 0, PM_REMOVE ) )
 		{
 			if ( msg.message == WM_QUIT)
 			{
@@ -183,7 +186,7 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	{
 	case WM_CREATE:
 	{
-		SetCursor( 0 );
+		SetCursor( nullptr );
 		break;
 	}
 	case WM_SIZE:
@@ -336,7 +339,7 @@ void App::clip_cursor( bool clip )
 	}
 	else
 	{
-		ClipCursor( 0 );
+		ClipCursor( nullptr );
 	}
 }
 

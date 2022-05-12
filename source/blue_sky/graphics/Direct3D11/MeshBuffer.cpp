@@ -24,14 +24,14 @@ void MeshBuffer::create_vertex_buffer()
 	vertex_buffer_list_.clear();
 
 	{
-		ID3D11Buffer* buffer = 0;
+		ID3D11Buffer* buffer = nullptr;
 		D3D11_BUFFER_DESC buffer_desc = { 0 };
 
 		buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
 		buffer_desc.ByteWidth = sizeof( Mesh::Vertex ) * get_vertex_list().size();
     
-		D3D11_SUBRESOURCE_DATA data = { 0 };
+		D3D11_SUBRESOURCE_DATA data = { nullptr };
 		data.pSysMem = & get_vertex_list()[ 0 ];
 	
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & buffer ) );
@@ -41,14 +41,14 @@ void MeshBuffer::create_vertex_buffer()
 
 	if ( ! get_vertex_weight_list().empty() )
 	{
-		ID3D11Buffer* buffer = 0;
+		ID3D11Buffer* buffer = nullptr;
 		D3D11_BUFFER_DESC buffer_desc = { 0 };
 
 		buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
 		buffer_desc.ByteWidth = sizeof( Mesh::VertexWeight ) * get_vertex_weight_list().size();
     
-		D3D11_SUBRESOURCE_DATA data = { 0 };
+		D3D11_SUBRESOURCE_DATA data = { nullptr };
 		data.pSysMem = & get_vertex_weight_list()[ 0 ];
 	
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & buffer ) );
@@ -82,7 +82,7 @@ void MeshBuffer::create_index_buffer()
 		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
 		buffer_desc.ByteWidth = sizeof( Mesh::Index ) * get_vertex_group_list()[ n ]->size();
 
-		D3D11_SUBRESOURCE_DATA data = { 0 };
+		D3D11_SUBRESOURCE_DATA data = { nullptr };
 		data.pSysMem = get_vertex_group_list()[ n ]->get_pointer();
 
 		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & index_buffer_list_[ n ] ) );

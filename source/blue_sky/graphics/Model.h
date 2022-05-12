@@ -42,8 +42,8 @@ private:
 	Model& operator = ( const Model& m ) = delete;
 public:
 	Model()
-		: mesh_( 0 )
-		, skinning_animation_set_( 0 )
+		: mesh_( nullptr )
+		, skinning_animation_set_( nullptr )
 	{ }
 
 	Model( const Model& m )
@@ -53,7 +53,7 @@ public:
 		, skinning_animation_set_( m.skinning_animation_set_ )
 	{ }
 
-	virtual ~Model() { }
+	virtual ~Model() override { }
 
 	Mesh* get_mesh() override { return mesh_; };
 	const Mesh* get_mesh() const override { return mesh_; };

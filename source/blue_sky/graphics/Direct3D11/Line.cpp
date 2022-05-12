@@ -15,9 +15,9 @@ namespace blue_sky::graphics::direct_3d_11
 
 Line::Line( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
-	, vertex_buffer_( 0 )
-	, index_buffer_( 0 )
-	, texture_( 0 )
+	, vertex_buffer_( nullptr )
+	, index_buffer_( nullptr )
+	, texture_( nullptr )
 {
 
 }
@@ -36,7 +36,7 @@ void Line::create_vertex_buffer()
 	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
 	buffer_desc.ByteWidth = sizeof( Vertex ) * vertex_list_.size();
     
-	D3D11_SUBRESOURCE_DATA data = { 0 };
+	D3D11_SUBRESOURCE_DATA data = { nullptr };
 	data.pSysMem = & vertex_list_[ 0 ];
 	
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & vertex_buffer_ ) );
@@ -50,7 +50,7 @@ void Line::create_index_buffer()
 	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
     buffer_desc.ByteWidth = sizeof( Index ) * index_list_.size();
 
-	D3D11_SUBRESOURCE_DATA data = { 0 };
+	D3D11_SUBRESOURCE_DATA data = { nullptr };
 	data.pSysMem = & index_list_[ 0 ];
 
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & index_buffer_ ) );

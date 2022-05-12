@@ -10,7 +10,7 @@ namespace core
  */
 AnimationPlayer::AnimationPlayer( const SkinningAnimationSet* skinning_animation_set )
 	: skinning_animation_set_( skinning_animation_set )
-	, current_skinning_animation_( 0 )
+	, current_skinning_animation_( nullptr )
 	, speed_( 1.f )
 	, current_frame_( 0.f )
 	, is_looping_( false )

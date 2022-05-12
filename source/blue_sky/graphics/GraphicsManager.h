@@ -150,7 +150,7 @@ protected:
 
 public:
 	GraphicsManager();
-	virtual ~GraphicsManager();
+	virtual ~GraphicsManager() override;
 
 	virtual int get_screen_width() const = 0;		///< ‰æ–Ê‚Ì•‚ð•Ô‚·
 	virtual int get_screen_height() const = 0;		///< ‰æ–Ê‚Ì‚‚³‚ð•Ô‚·
@@ -233,7 +233,7 @@ public:
 
 	virtual void set_eye_position( const Vector& ) = 0;
 
-	bool_t is_shadow_enabled() const { return shadow_map_.get(); }
+	bool_t is_shadow_enabled() const { return static_cast< bool_t >( shadow_map_ ); }
 	ShadowMap* get_shadow_map() { return shadow_map_.get(); }
 	const ShadowMap* get_shadow_map() const { return shadow_map_.get(); }
 

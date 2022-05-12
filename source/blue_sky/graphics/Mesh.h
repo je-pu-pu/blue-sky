@@ -97,7 +97,7 @@ public:
 	public:
 		Buffer( Type type )
 			: type_( type )
-			, mesh_( 0 )
+			, mesh_( nullptr )
 		{ }
 
 		virtual ~Buffer()
@@ -132,7 +132,7 @@ public:
 		buffer_->set_mesh( this );
 	}
 
-	virtual ~Mesh()	{ }
+	virtual ~Mesh()	override { }
 
 	void add_vertex( const core::graphics::Vertex& v ) override { vertex_list_.push_back( static_cast< const Vertex& >( v ) ); }
 	uint_t get_vertex_count() const override { return vertex_list_.size(); }

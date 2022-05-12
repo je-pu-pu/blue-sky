@@ -13,7 +13,7 @@ namespace blue_sky::graphics::shader
 class FlatShader : public BaseShader
 {
 private:
-	Texture* texture_ = 0;
+	Texture* texture_ = nullptr;
 	const InputLayout* input_layout_;
 	const EffectTechnique* effect_technique_;
 

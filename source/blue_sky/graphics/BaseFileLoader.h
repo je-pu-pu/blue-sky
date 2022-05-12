@@ -64,6 +64,8 @@ public:
 
 	}
 
+	virtual ~BaseFileLoader() = default;
+
 	virtual bool load( const char_t* file_name ) = 0;
 
 }; // class BaseFileLoader

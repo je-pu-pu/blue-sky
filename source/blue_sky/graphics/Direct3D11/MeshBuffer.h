@@ -44,7 +44,7 @@ public:
 
 	}
 	
-	~MeshBuffer()
+	~MeshBuffer() override
 	{
 
 	}

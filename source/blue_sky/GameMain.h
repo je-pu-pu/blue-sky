@@ -5,8 +5,6 @@
 
 #include <game/Game.h>
 
-#include <common/auto_ptr.h>
-
 #include <type/type.h>
 
 #include <unordered_map>
@@ -104,26 +102,25 @@ private:
 
 	float									total_elapsed_time_;	///< ゲームが開始してからの経過時間 ( 秒 )
 
-	// @todo std::unique_ptr にする？
-	common::auto_ptr< Direct3D >			direct_3d_;				///< Direct3D
+	std::unique_ptr< Direct3D >				direct_3d_;				///< Direct3D
 
-	common::auto_ptr< DirectInput >			direct_input_;			///< DirectInput
-	common::auto_ptr< Input >				input_;					///< Game Input
+	std::unique_ptr< DirectInput >			direct_input_;			///< DirectInput
+	std::unique_ptr< Input >				input_;					///< Game Input
 
-	common::auto_ptr< OculusRift >			oculus_rift_;			///< Oculus Rift
+	std::unique_ptr< OculusRift >			oculus_rift_;			///< Oculus Rift
 
-	common::auto_ptr< PhysicsManager >		physics_manager_;		///< PhysicsManager
-	common::auto_ptr< GraphicsManager >		graphics_manager_;		///< GraphicsManager
-	common::auto_ptr< SoundManager >		sound_manager_;			///< SoundManager
-	common::auto_ptr< ScriptManager >		script_manager_;		///< ScriptManager
+	std::unique_ptr< PhysicsManager >		physics_manager_;		///< PhysicsManager
+	std::unique_ptr< GraphicsManager >		graphics_manager_;		///< GraphicsManager
+	std::unique_ptr< SoundManager >			sound_manager_;			///< SoundManager
+	std::unique_ptr< ScriptManager >		script_manager_;		///< ScriptManager
 
-	common::auto_ptr< Config >				save_data_;				///< Save Data
+	std::unique_ptr< Config >				save_data_;				///< Save Data
 
-	common::auto_ptr< MainLoop >			main_loop_;				///< ループ管理
+	std::unique_ptr< MainLoop >				main_loop_;				///< ループ管理
 
-	common::auto_ptr< ActiveObjectManager >	active_object_manager_;	///< ActiveObjectManager
+	std::unique_ptr< ActiveObjectManager >	active_object_manager_;	///< ActiveObjectManager
 
-	common::auto_ptr< BulletDebugDraw >		bullet_debug_draw_;
+	std::unique_ptr< BulletDebugDraw >		bullet_debug_draw_;
 
 	std::unique_ptr< Scene >				scene_;					///< 現在のシーン
 	string_t								stage_name_;			///< 現在のステージ名

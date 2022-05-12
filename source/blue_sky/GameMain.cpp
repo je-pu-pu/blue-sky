@@ -73,18 +73,18 @@ GameMain::GameMain()
 
 	// get_app()->clip_cursor( true );
 
-	save_data_ = new Config();
+	save_data_.reset( new Config() );
 	save_data_->load_file( "save/blue-sky.save" );
 
 	// Direct3D
-	direct_3d_ = new Direct3D(
+	direct_3d_.reset( new Direct3D(
 		get_app()->GetWindowHandle(),
 		get_app()->get_width(),
 		get_app()->get_height(),
 		get_app()->is_full_screen(),
 		get_config()->get( "graphics.multisample.count", 4 ), 
 		get_config()->get( "graphics.multisample.quality", 2 )
-	);
+	) );
 	direct_3d_->get_effect()->load( "media/shader/main.fx" );
 	direct_3d_->create_default_input_layout();
 
@@ -98,28 +98,28 @@ GameMain::GameMain()
 	ImGui_ImplDX11_Init( direct_3d_->getDevice(), direct_3d_->getImmediateContext() );
 
 
-	direct_input_ = new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() );
+	direct_input_.reset( new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() ) );
 
-	input_ = new Input();
+	input_.reset( new Input() );
 	input_->set_direct_input( direct_input_.get() );
 	input_->load_config( * get_config() );
 
 	// Oculus Rift
 	if ( get_config()->get( "input.oculus_rift.enabled", 0 ) )
 	{
-		oculus_rift_ = new OculusRift( direct_3d_.get() );
+		oculus_rift_.reset( new OculusRift( direct_3d_.get() ) );
 	}
 
-	bullet_debug_draw_ = new core::graphics::direct_3d_11::BulletDebugDraw( direct_3d_.get() );
+	bullet_debug_draw_.reset( new core::graphics::direct_3d_11::BulletDebugDraw( direct_3d_.get() ) );
 	bullet_debug_draw_->setDebugMode( get_config()->get< int >( "graphics.debug_bullet", 0 ) );
 
-	physics_manager_ = new ActiveObjectPhysics();
+	physics_manager_.reset( new ActiveObjectPhysics() );
 	physics_manager_->setDebugDrawer( bullet_debug_draw_.get() );
 
-	graphics_manager_ = new blue_sky::graphics::direct_3d_11::GraphicsManager( direct_3d_.get() );
+	graphics_manager_.reset( new blue_sky::graphics::direct_3d_11::GraphicsManager( direct_3d_.get() ) );
 	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "graphics.debug_axis", 0 ) != 0 );
 	
-	sound_manager_ = new SoundManager( get_app()->GetWindowHandle() );
+	sound_manager_.reset( new SoundManager( get_app()->GetWindowHandle() ) );
 	sound_manager_->set_mute( get_config()->get( "audio.mute", 0 ) != 0 );
 	sound_manager_->set_volume( get_config()->get( "audio.volume", 1.f ) );
 	
@@ -127,14 +127,14 @@ GameMain::GameMain()
 	sound_manager_->load( "cancel" );
 	sound_manager_->load( "click" );
 
-	script_manager_ = new ScriptManager();
+	script_manager_.reset( new ScriptManager() );
 	script_manager_->load_command_history( "log/script.log" );
 	setup_script_command();
 
-	active_object_manager_ = new ActiveObjectManager();
+	active_object_manager_.reset( new ActiveObjectManager() );
 
 	// MainLoop
-	main_loop_ = new MainLoop( 60 );
+	main_loop_.reset( new MainLoop( 60 ) );
 
 	is_display_fps_ = get_config()->get( "graphics.display_fps", 0 ) != 0;
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Scene.h"
-#include <common/auto_ptr.h>
 #include <vector>
+#include <memory>
 
 namespace game
 {
@@ -33,7 +33,7 @@ public:
 	using ModelList	= std::vector< Model* >;
 
 private:
-	common::auto_ptr< game::ElapsedTimer > elapsed_timer_;
+	std::unique_ptr< game::ElapsedTimer > elapsed_timer_;
 
 	ModelList drawing_model_list_;
 	uint_t current_drawing_model_index_;

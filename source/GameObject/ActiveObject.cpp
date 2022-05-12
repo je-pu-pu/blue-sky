@@ -21,20 +21,20 @@ namespace blue_sky
 {
 
 ActiveObject::ActiveObject()
-	: model_( 0 )
+	: front_( Vector::Forward )
+	, right_( Vector::Right )
+
+	, start_location_( Vector::Zero )
+	, start_rotation_( Vector::Zero )
+	, start_direction_degree_( 0 )
+
+	, model_( 0 )
 	, object_constant_buffer_( new ObjectConstantBuffer() )
 	, animation_player_( 0 )
 	, is_dead_( false )
 	, flicker_scale_( 1.f )
 
 	, direction_degree_( 0 )
-
-	, start_location_( Vector::Zero )
-	, start_rotation_( Vector::Zero )
-	, start_direction_degree_( 0 )
-
-	, front_( Vector::Forward )
-	, right_( Vector::Right )
 
 	, is_mesh_visible_( true )
 	, is_line_visible_( true )
@@ -44,6 +44,13 @@ ActiveObject::ActiveObject()
 
 ActiveObject::ActiveObject( const ActiveObject& o )
 	: GameObject( o )
+	, front_( o.front_ )
+	, right_( o.right_ )
+
+	, start_location_( o.start_location_ )
+	, start_rotation_( o.start_rotation_ )
+	, start_direction_degree_( o.start_direction_degree_ )
+
 	, model_( o.model_ )
 	, object_constant_buffer_( new ObjectConstantBuffer() )
 	, animation_player_( 0 )
@@ -51,13 +58,6 @@ ActiveObject::ActiveObject( const ActiveObject& o )
 	, flicker_scale_( o.flicker_scale_ )
 
 	, direction_degree_( o.direction_degree_ )
-
-	, start_location_( o.start_location_ )
-	, start_rotation_( o.start_rotation_ )
-	, start_direction_degree_( o.start_direction_degree_ )
-
-	, front_( o.front_ )
-	, right_( o.right_ )
 
 	, is_mesh_visible_( o.is_mesh_visible_ )
 	, is_line_visible_( o.is_line_visible_ )

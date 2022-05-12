@@ -3,7 +3,6 @@
 #include "Scene.h"
 
 #include <common/chase_value.h>
-#include <common/safe_ptr.h>
 
 #include <list>
 #include <unordered_map>
@@ -80,7 +79,7 @@ private:
 	Model*								rectangle_ = nullptr;
 
 	Sound*								bgm_ = nullptr;
-	common::safe_ptr< Sound >			balloon_bgm_;
+	Sound*								balloon_bgm_ = nullptr;
 	float_t								action_bgm_after_timer_;
 
 	float_t								bpm_;

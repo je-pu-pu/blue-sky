@@ -166,8 +166,6 @@ GameMain::~GameMain()
 
 	get_config()->save_file( "blue-sky.config" );
 
-	scene_.release();
-
 	get_script_manager()->save_command_history( "log/script.log" );
 }
 
@@ -576,12 +574,10 @@ void GameMain::setup_scene( const string_t& scene_name )
 		return;
 	}
 
-	scene_.release();
-
 	sound_manager_->pop_group();
 	sound_manager_->push_group( scene_name.c_str() );
 	
-	scene_ = i->second();
+	scene_.reset( i->second() );
 
 	scene_->set_name( scene_name );
 	scene_->set_next_stage_name( get_stage_name() );

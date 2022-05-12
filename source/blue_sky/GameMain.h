@@ -6,7 +6,6 @@
 #include <game/Game.h>
 
 #include <common/auto_ptr.h>
-#include <common/safe_ptr.h>
 
 #include <type/type.h>
 
@@ -126,7 +125,7 @@ private:
 
 	common::auto_ptr< BulletDebugDraw >		bullet_debug_draw_;
 
-	common::safe_ptr< Scene >				scene_;					///< 現在のシーン
+	std::unique_ptr< Scene >				scene_;					///< 現在のシーン
 	string_t								stage_name_;			///< 現在のステージ名
 
 	bool									is_display_fps_;		///< FPS 表示フラグ

@@ -17,14 +17,14 @@ namespace core::graphics::direct_3d_11
 	class RenderTargetTexture : public core::graphics::RenderTargetTexture
 	{
 	private:
-		Direct3D11* direct_3d_;
 		core::graphics::direct_3d_11::Texture texture_;
 		com_ptr< ID3D11RenderTargetView > render_target_view_;
 
 	protected:
 
 	public:
-		RenderTargetTexture( Direct3D11* d3d, PixelFormat format, int width, int height );
+		RenderTargetTexture( PixelFormat format );
+		RenderTargetTexture( PixelFormat format, int width, int height );
 
 		void bind_to_ds( uint_t slot ) const override { texture_.bind_to_ds( slot ); }
 		void bind_to_ps( uint_t slot ) const override { texture_.bind_to_ps( slot ); }

@@ -123,7 +123,7 @@ void ParticleSystemTestScene::render()
 {
 	auto& frame_render_data = get_graphics_manager()->get_frame_render_data()->data();
 
-	auto ct = camera_->get_component< core::ecs::TransformComponent >()->transform;
+	const auto& ct = camera_->get_component< core::ecs::TransformComponent >()->transform;
 	// auto c = camera_->get_component< core::ecs::CameraComponent >();
 
 	const auto& eye = ct.get_position();

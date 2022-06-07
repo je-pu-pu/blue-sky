@@ -743,6 +743,9 @@
     <ClInclude Include="core\ecs\component\ModelComponent.h">
       <Filter>core\ecs\component</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\post_effect\HandDrawingShader.h">
+      <Filter>blue_sky\graphics\shader\post_effect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

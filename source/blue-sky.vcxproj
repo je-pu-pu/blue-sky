@@ -139,6 +139,7 @@
     <ClInclude Include="blue_sky\graphics\shader\MatcapShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\NullShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\post_effect\DefaultShader.h" />
+    <ClInclude Include="blue_sky\graphics\shader\post_effect\HandDrawingShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\ShadowMapShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\SkyBoxShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\TessellationMatcapShader.h" />

@@ -125,10 +125,6 @@ public:
 	void render_technique( const EffectTechnique*, const std::function< void () >& ) const override;
 	void render_background() const override;
 
-#if 0
-	void render_post_effect() override;
-#endif
-
 	/// @todo ‚¿‚á‚ñ‚Æì‚é Font, size, w’è‚µ‚½ Texture ‚Ö‚Ì•`‰æ
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;

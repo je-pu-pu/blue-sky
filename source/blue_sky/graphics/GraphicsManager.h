@@ -272,7 +272,8 @@ public:
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
 
 	virtual void set_post_effect_shader( Shader* );
-	virtual void render_post_effect( RenderTargetTexture* );
+	virtual void render_post_effect( Texture* );
+	virtual void render_post_effect( Texture*, RenderTarget* );
 
 	Fader* get_fader() { return fader_.get(); }
 	const Fader* get_fader() const { return fader_.get(); }

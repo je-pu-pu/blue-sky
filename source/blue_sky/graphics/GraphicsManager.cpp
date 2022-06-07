@@ -552,15 +552,26 @@ void GraphicsManager::set_post_effect_shader( Shader* shader )
 }
 
 /**
- * ポストエフェクトをレンダリングする
+ * ポストエフェクトを BackBuffer にレンダリングする
  *
- * @param t ポストエフェクト適用対象のレンダリング後テクスチャ
+ * @param t 使用するテクスチャ
  */
-void GraphicsManager::render_post_effect( RenderTargetTexture* t )
+void GraphicsManager::render_post_effect( Texture* texture )
 {
-	set_render_target( get_back_buffer_texture() );
+	render_post_effect( texture, get_back_buffer_texture() );
+}
 
-	post_effect_rectangle_->get_shader_at( 0 )->set_texture_at( 0, t );
+/**
+ * ポストエフェクトを指定した RenderTarget にレンダリングする
+ *
+ * @param texture 使用するテクスチャ
+ * @param render_target レンダリング対象の RenderTarget
+ */
+void GraphicsManager::render_post_effect( Texture* texture, RenderTarget* render_target )
+{
+	set_render_target( render_target );
+
+	post_effect_rectangle_->get_shader_at( 0 )->set_texture_at( 0, texture );
 	post_effect_rectangle_->render();
 }
 

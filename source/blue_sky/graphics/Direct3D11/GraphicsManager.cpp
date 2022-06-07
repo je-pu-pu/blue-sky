@@ -474,13 +474,6 @@ void GraphicsManager::render_background() const
 	}
 }
 
-#if 0
-void GraphicsManager::render_post_effect()
-{
-	set_render_target( get_back_buffer_texture() );
-}
-#endif
-
 /**
  * ‰æ–Ê‚É•¶Žš—ñ‚ð•`‰æ‚·‚é
  *

@@ -1830,3 +1830,39 @@ VS Code でも以下を参照して逆アセンブラしたコードが表示で
 # 2022-05-12
 
 * Clang でコンパイルした際のエラー・警告に一部対応。
+
+# 2022-06-06
+
+* 手描き風の表現について検討
+    1. バッファに Material ID のようなものを描画
+    2. 描画されたバッファを歪ませる
+    3. 歪んだバッファの Material ID 参照して ID 毎に異なる素材のテクスチャを描画
+    * Texture2DArray が使えそう
+        * https://docs.microsoft.com/ja-jp/windows/win32/direct3dhlsl/texture2darray-sample
+        * 最大何枚のテクスチャを 1 回の Draw で使えるのだろう？
+
+# 2022-06-07
+
+```c++
+void test()
+{
+    // フォーマットを指定してテクスチャを作成
+    // 第 2, 第 3 引数を省略すると画面幅 * 画面高さのテクスチャを作成してくれる
+    auto a = new RenderTargetTexture( PixelFormat::R8_UINT );
+    auto b = new RenderTargetTexture( PixelFormat::R8G8B8A8_UNORM );
+
+    // a に世界を描画
+    get_graphics_manager()->set_render_target( a );
+    
+    get_graphics_manager()->render_xxx();
+    get_graphics_manager()->render_xxx();
+
+    // a から b に shader_a_to_b を使ってポストエフェクトを描画
+    get_graphics_manager()->set_post_effect_shader( shader_a_to_b );
+    get_graphics_manager()->render_post_effect( a, b );
+
+    // b から back buffer に shader_b_to_back_buffer を使ってポストエフェクトを描画
+    get_graphics_manager()->set_post_effect_shader( shader_b_to_back_buffer );
+    get_graphics_manager()->render_post_effect( b );
+}
+````

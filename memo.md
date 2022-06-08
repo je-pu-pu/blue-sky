@@ -1843,6 +1843,8 @@ VS Code でも以下を参照して逆アセンブラしたコードが表示で
 
 # 2022-06-07
 
+* 昨日思いついた手描き風の表現のためには、複数回の描画が必要なため、複数回 Post Effect を行える仕組みを検討
+
 ```c++
 void test()
 {
@@ -1865,4 +1867,19 @@ void test()
     get_graphics_manager()->set_post_effect_shader( shader_b_to_back_buffer );
     get_graphics_manager()->render_post_effect( b );
 }
-````
+```
+
+# 2022-06-09
+
+* Unity での 複数の Post Effect の設定方法を調査
+    * Unity のポストプロセッシングには 3 種類ある。レンダーパイプラインの種類に対応している。
+        * ビルトインレンダーパイプライン
+        * ユニバーサルレンダーパイプライン (URP)
+        * HD レンダーパイプライン (HDRP)
+        * https://docs.unity3d.com/ja/2020.3/Manual/PostProcessingOverview.html
+    * 今回は、ビルトインレンダーパイプライン + Post Processing でのポストエフェクトの設定の方法を確認した
+        * MainCamera に Post-processing コンポーネントを追加し、それに対して各エフェクトを追加できる
+        * https://docs.unity3d.com/Packages/com.unity.postprocessing@3.2/manual/index.html
+        * この形であれば、 6/7 に検討した仕組みで blue-sky でも実現できそう
+    * 現在のプロジェクトのレンダーパイプラインの確認・変更方法
+        * https://docs.unity3d.com/ja/2020.3/Manual/srp-setting-render-pipeline-asset.html

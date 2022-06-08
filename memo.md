@@ -1879,6 +1879,10 @@ void test()
         * https://docs.unity3d.com/ja/2020.3/Manual/PostProcessingOverview.html
     * 今回は、ビルトインレンダーパイプライン + Post Processing でのポストエフェクトの設定の方法を確認した
         * MainCamera に Post-processing コンポーネントを追加し、それに対して各エフェクトを追加できる
+            * 簡単なシーンを作って Stats で描画負荷を確認
+                * Bloom を有効にすると、 Batches と SetPass calls が 13 増えた
+                * Color Grading を有効にしても、Batches と SetPass calls は増えなかった
+                * Ambient Occlusion を有効にすると、 Batches と SetPass calls が 2 増えた
         * https://docs.unity3d.com/Packages/com.unity.postprocessing@3.2/manual/index.html
         * この形であれば、 6/7 に検討した仕組みで blue-sky でも実現できそう
     * 現在のプロジェクトのレンダーパイプラインの確認・変更方法

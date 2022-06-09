@@ -12,9 +12,15 @@
 
 namespace core
 {
-	namespace graphics::direct_3d_11
+	namespace graphics
 	{
-		template< int > class ConstantBuffer;
+		namespace direct_3d_11
+		{
+			template< int > class ConstantBuffer;
+			enum class PixelFormat;
+		}
+
+		using direct_3d_11::PixelFormat;
 	}
 
 	using graphics::direct_3d_11::ConstantBuffer;

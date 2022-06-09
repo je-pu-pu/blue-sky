@@ -31,7 +31,6 @@ namespace core
 		class Shader;
 		class Texture;
 		class RenderTarget;
-		class RenderTargetTexture;
 		class BackBufferTexture;
 	}
 
@@ -74,7 +73,6 @@ public:
 	using Shader						= core::graphics::Shader;
 	using Texture						= core::graphics::Texture;
 	using RenderTarget					= core::graphics::RenderTarget;
-	using RenderTargetTexture			= core::graphics::RenderTargetTexture;
 	using BackBufferTexture				= core::graphics::BackBufferTexture;
 
 	using SkinningAnimationSet			= core::SkinningAnimationSet;
@@ -163,7 +161,6 @@ public:
 	virtual void set_default_viewport() = 0;
 	virtual void set_viewport( float_t x, float_t y, float_t w, float_t h, float_t min_d = 0.f, float_t max_d = 1.f ) = 0;
 
-	virtual RenderTargetTexture* create_render_target_texture() = 0;
 	virtual BackBufferTexture* get_back_buffer_texture() = 0;
 	virtual void set_render_target( RenderTarget* );
 

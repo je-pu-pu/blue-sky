@@ -207,6 +207,7 @@
     <ClInclude Include="core\graphics\Model.h" />
     <ClInclude Include="core\graphics\NullTexture.h" />
     <ClInclude Include="core\graphics\OculusRift.h" />
+    <ClInclude Include="core\graphics\PixelFormat.h" />
     <ClInclude Include="core\graphics\PrimitiveTopology.h" />
     <ClInclude Include="core\graphics\RenderTarget.h" />
     <ClInclude Include="core\graphics\RenderTargetTexture.h" />
@@ -399,10 +400,17 @@
       </ExcludedFromBuild>
       <FileType>Document</FileType>
     </None>
-    <FxCompile Include="media\shader\post_effect\hand_drawing.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </FxCompile>
+    <None Include="media\shader\post_effect\hand_drawing.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </None>
     <None Include="media\shader\unicolor.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>

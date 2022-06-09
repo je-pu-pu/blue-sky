@@ -90,7 +90,13 @@ void GraphicsManager::set_viewport( float_t x, float_t y, float_t w, float_t h, 
 
 GraphicsManager::RenderTargetTexture* GraphicsManager::create_render_target_texture()
 {
-	return new RenderTargetTexture( PixelFormat::R8G8B8A8_UNORM );
+	return create_render_target_texture( PixelFormat::R8G8B8A8_UNORM );
+}
+
+GraphicsManager::RenderTargetTexture* GraphicsManager::create_render_target_texture( PixelFormat format )
+{
+
+	return new core::graphics::direct_3d_11::RenderTargetTexture( format );
 }
 
 GraphicsManager::BackBufferTexture* GraphicsManager::get_back_buffer_texture()

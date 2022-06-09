@@ -4,8 +4,6 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Direct3D11/MeshBuffer.h>
 
-#include <core/graphics/Direct3D11/RenderTargetTexture.h>
-
 #include <memory>
 
 namespace core::graphics::direct_3d_11
@@ -36,8 +34,6 @@ public:
 	using Direct3D				= core::graphics::direct_3d_11::Direct3D11;
 	using PixelFormat			= core::graphics::direct_3d_11::PixelFormat;
 	using Axis					= core::graphics::direct_3d_11::Axis;
-
-	using RenderTargetTexture	= core::graphics::direct_3d_11::RenderTargetTexture;
 
 private:
 	Direct3D*										direct_3d_;
@@ -85,6 +81,8 @@ public:
 	void set_viewport( float_t x, float_t y, float_t w, float_t h, float_t min_d = 0.f, float_t max_d = 1.f ) override;
 
 	RenderTargetTexture* create_render_target_texture() override;
+	RenderTargetTexture* create_render_target_texture( PixelFormat ) override;
+
 	BackBufferTexture* get_back_buffer_texture() override;
 
 	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type ); }

@@ -65,6 +65,7 @@
     <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp" />
+    <ClCompile Include="core\graphics\GraphicsManager.cpp" />
     <ClCompile Include="core\graphics\OculusRift.cpp" />
     <ClCompile Include="core\graphics\Sprite.cpp" />
     <ClCompile Include="core\input\DirectInput\DirectInput.cpp" />

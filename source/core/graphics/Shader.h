@@ -1,6 +1,6 @@
 #pragma once
 
-#include <type/type.h>
+#include <core/type.h>
 
 namespace core::graphics
 {

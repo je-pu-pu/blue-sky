@@ -536,11 +536,6 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 	} );
 }
 
-void GraphicsManager::set_render_target( RenderTarget* render_target )
-{
-	render_target->activate();
-}
-
 /**
  * ポストエフェクト用のシェーダを設定する
  *
@@ -725,7 +720,7 @@ void GraphicsManager::debug_print_resources() const
 {
 	std::cout << "model     : "; model_manager_.debug_print_resources();
 	std::cout << "mesh      : "; mesh_manager_.debug_print_resources();
-	std::cout << "shader    : "; shader_manager_.debug_print_resources();
+	std::cout << "shader    : "; get_shader_manager().debug_print_resources();
 	std::cout << "texture   : "; texture_manager_.debug_print_resources();
 	std::cout << "skin_anim : "; skinning_animation_set_manager_.debug_print_resources();
 }

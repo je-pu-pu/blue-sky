@@ -23,5 +23,7 @@ technique11 post_effect_chromatic_aberrration
 		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_post_effect_chromatic_aberrration() ) );
+
+		RASTERIZERSTATE = Default;
 	}
 }

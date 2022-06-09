@@ -2,13 +2,23 @@
 #include <blue_sky/ConstantBuffers.h> /// @todo core から blue_sky を参照しているのは変なので、基本的な ConstatntBuffer は core に移す
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Model.h>
+#include <core/graphics/RenderTargetTexture.h>
 
 namespace core::ecs
 {
 
+RenderSystem::RenderSystem()
+	: render_result_texture_1_( get_graphics_manager()->create_render_target_texture() )
+	, render_result_texture_2_( get_graphics_manager()->create_render_target_texture() )
+{
+	//
+}
+
 void RenderSystem::update()
 {
 	get_graphics_manager()->setup_rendering();
+
+	get_graphics_manager()->set_render_target( render_result_texture_1_.get() );
 
 	get_graphics_manager()->render_background();
 
@@ -31,6 +41,12 @@ void RenderSystem::update()
 		get_graphics_manager()->set_current_skinning_constant_buffer( nullptr );
 		model->model->render();
 	}
+
+	get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_chromatic_aberrration" ) );
+	get_graphics_manager()->render_post_effect( render_result_texture_1_.get(), render_result_texture_2_.get() );
+
+	get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_hand_drawing" ) );
+	get_graphics_manager()->render_post_effect( render_result_texture_2_.get() );
 
 	get_graphics_manager()->render_fader();
 	get_graphics_manager()->render_debug_bullet();

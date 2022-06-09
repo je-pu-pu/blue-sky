@@ -10,9 +10,6 @@
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/PrimitiveTopology.h>
 #include <core/graphics/Mesh.h>
-#include <core/graphics/Shader.h>
-
-#include <core/ResourceManager.h>
 
 #include <vector>
 #include <functional>
@@ -20,8 +17,6 @@
 
 namespace core
 {
-	class SkinningAnimationSet;
-
 	namespace graphics
 	{
 		class InputLayout;
@@ -30,7 +25,6 @@ namespace core
 
 		class Shader;
 		class Texture;
-		class RenderTarget;
 		class BackBufferTexture;
 	}
 
@@ -60,6 +54,9 @@ namespace blue_sky::graphics
 
 /**
  * グラフィック管理クラス
+ * 
+ * @todo blue_sky::graphics::GraphicsManager と core::graphics::GraphicsManager のどちらに何が含まれるべきかを整理する
+ * @todo 必要なメンバを core::graphics::GraphicsManager に移動する
  *
  * このクラスが実体化される事はない。
  * 実際にはこのクラスを継承した blue_sky::graphics::direct_3d_11::GraphicsManager が実体化される。
@@ -70,18 +67,9 @@ public:
 	using Model							= Model;
 	using Mesh							= Mesh;
 	using Line							= Line;
-	using Shader						= core::graphics::Shader;
-	using Texture						= core::graphics::Texture;
-	using RenderTarget					= core::graphics::RenderTarget;
-	using BackBufferTexture				= core::graphics::BackBufferTexture;
-
-	using SkinningAnimationSet			= core::SkinningAnimationSet;
 	
 	using ModelManager					= core::ResourceManager< Model >;
 	using MeshManager					= core::ResourceManager< Mesh >;
-	using ShaderManager					= core::ResourceManager< Shader >;
-	using TextureManager				= core::ResourceManager< Texture >;
-	using SkinningAnimationSetManager	= core::ResourceManager< SkinningAnimationSet >;
 	
 	using PrimitiveTopology				= core::graphics::PrimitiveTopology;
 	using InputLayout					= core::graphics::InputLayout;
@@ -110,7 +98,6 @@ private:
 
 	ModelManager				model_manager_;
 	MeshManager					mesh_manager_;
-	ShaderManager				shader_manager_;
 	TextureManager				texture_manager_;
 	SkinningAnimationSetManager skinning_animation_set_manager_;
 
@@ -160,9 +147,6 @@ public:
 	virtual void set_default_viewport() = 0;
 	virtual void set_viewport( float_t x, float_t y, float_t w, float_t h, float_t min_d = 0.f, float_t max_d = 1.f ) = 0;
 
-	virtual BackBufferTexture* get_back_buffer_texture() = 0;
-	virtual void set_render_target( RenderTarget* );
-
 	// Model
 	template< typename Type=Model > Type* create_named_model( const char_t* name ) { return model_manager_.create_named< Type >( name ); }
 	Model* load_model( const char_t* name );
@@ -183,14 +167,6 @@ public:
 	Mesh* get_mesh( const char_t* name ) { return mesh_manager_.get( name ); }
 
 	virtual Mesh::Buffer* create_mesh_buffer( Mesh::Buffer::Type ) const = 0;
-
-	// Shader
-	template< typename Type, typename ... Args > Type* create_shader( Args ... args ) { return shader_manager_.create< Type >( args ... ); }
-	template< typename Type, typename ... Args > Type* create_named_shader( const char_t* name, Args ... args ) { return shader_manager_.create_named< Type >( name, args ... ); }
-	template< typename Type=Shader > Type* get_shader( const char_t* name ) { return shader_manager_.get< Type >( name ); }
-	Shader* clone_shader( const Shader* s ) { Shader* s2 = s->clone(); shader_manager_.add( s2 ); return s2; }
-
-	const ShaderManager::ResourceList& get_shader_list() const { return shader_manager_.get_resource_list(); }
 
 	// SkinningAnimationSet
 	SkinningAnimationSet* create_skinning_animation_set() { return skinning_animation_set_manager_.create(); }
@@ -266,9 +242,9 @@ public:
 	virtual void render_shadow_map() const;
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
 
-	virtual void set_post_effect_shader( Shader* );
-	virtual void render_post_effect( Texture* );
-	virtual void render_post_effect( Texture*, RenderTarget* );
+	virtual void set_post_effect_shader( Shader* ) override;
+	virtual void render_post_effect( Texture* ) override;
+	virtual void render_post_effect( Texture*, RenderTarget* ) override;
 
 	Fader* get_fader() { return fader_.get(); }
 	const Fader* get_fader() const { return fader_.get(); }

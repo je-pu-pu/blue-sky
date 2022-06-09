@@ -1887,3 +1887,7 @@ void test()
         * この形であれば、 6/7 に検討した仕組みで blue-sky でも実現できそう
     * 現在のプロジェクトのレンダーパイプラインの確認・変更方法
         * https://docs.unity3d.com/ja/2020.3/Manual/srp-setting-render-pipeline-asset.html
+
+# 2022-06-10
+
+* RenderSystem で仮で 手描き風ポストエフェクトと色収差ポストエフェクトの 2 つを適用

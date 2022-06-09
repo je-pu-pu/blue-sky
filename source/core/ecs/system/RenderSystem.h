@@ -5,6 +5,11 @@
 #include <core/ecs/component/RenderComponent.h>
 #include <core/ecs/System.h>
 
+namespace core::graphics
+{
+	class RenderTargetTexture;
+}
+
 namespace core::ecs
 {
 
@@ -14,10 +19,12 @@ namespace core::ecs
  */
 class RenderSystem : public System< TransformComponent, ModelComponent, RenderComponent >
 {
-public:
+private:
+	std::unique_ptr< core::graphics::RenderTargetTexture > render_result_texture_1_;
+	std::unique_ptr< core::graphics::RenderTargetTexture > render_result_texture_2_;
 
 public:
-	RenderSystem() = default;
+	RenderSystem();
 	~RenderSystem() = default;
 
 	void update() override;

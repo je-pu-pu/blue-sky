@@ -266,6 +266,9 @@
     <ClCompile Include="core\ecs\system\RenderSystem.cpp">
       <Filter>core\ecs\system</Filter>
     </ClCompile>
+    <ClCompile Include="core\graphics\GraphicsManager.cpp">
+      <Filter>core\graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />

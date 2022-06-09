@@ -12,7 +12,7 @@
 namespace common
 {
 
-inline std::wstring convert_to_wstring( const std::string s )
+inline std::wstring convert_to_wstring( const std::string& s )
 {
 	wchar_t* ws = new wchar_t[ s.length() + 1 ];
 
@@ -25,7 +25,7 @@ inline std::wstring convert_to_wstring( const std::string s )
 	return result;
 }
 
-inline std::string convert_to_string( const std::wstring ws )
+inline std::string convert_to_string( const std::wstring& ws )
 {
 	char* s = new char[ ws.length() * MB_CUR_MAX + 1 ];
 

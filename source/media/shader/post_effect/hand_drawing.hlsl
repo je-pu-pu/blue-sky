@@ -32,5 +32,7 @@ technique11 post_effect_hand_drawing
 		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_post_effect_hand_drawing() ) );
+
+		RASTERIZERSTATE = Default;
 	}
 }

@@ -1,9 +1,7 @@
 #include "RenderSystem.h"
 #include <blue_sky/ConstantBuffers.h> /// @todo core から blue_sky を参照しているのは変なので、基本的な ConstatntBuffer は core に移す
-#include <blue_sky/GameMain.h> /// @todo core から blue_sky を参照しているのは変なので、直す
-#include <blue_sky/graphics/GraphicsManager.h> /// @todo core から blue_sky を参照しているのは変なので、直す
+#include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Model.h>
-#include <iostream>
 
 namespace core::ecs
 {

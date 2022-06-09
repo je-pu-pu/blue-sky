@@ -3,7 +3,7 @@
 #include "type.h"
 
 /// @todo きれいにする
-namespace blue_sky::graphics
+namespace core::graphics
 {
 	class GraphicsManager;
 }
@@ -21,7 +21,7 @@ class Component;
 class BaseSystem
 {
 public:
-	using GraphicsManager = blue_sky::graphics::GraphicsManager;
+	using GraphicsManager = core::graphics::GraphicsManager;
 
 private:
 	/// システムの実行優先度 ( priority_ が小さい順に実行される )

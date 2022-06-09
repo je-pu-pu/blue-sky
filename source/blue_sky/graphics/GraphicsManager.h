@@ -86,7 +86,6 @@ public:
 	using PrimitiveTopology				= core::graphics::PrimitiveTopology;
 	using InputLayout					= core::graphics::InputLayout;
 	using EffectTechnique				= core::graphics::EffectTechnique;
-	using ConstantBuffer				= core::graphics::ConstantBuffer;
 	using ShadowMap						= core::graphics::ShadowMap;
 	using Sprite						= core::graphics::Sprite;
 
@@ -243,8 +242,8 @@ public:
 	virtual FrameDrawingConstantBuffer* get_frame_drawing_render_data() const = 0;
 	virtual ObjectConstantBuffer* get_shared_object_render_data() const = 0;
 
-	void set_current_object_constant_buffer( const ConstantBuffer* r ) const { current_object_constant_buffer_ = r; }
-	void set_current_skinning_constant_buffer( const ConstantBuffer* r ) const { current_skinning_constant_buffer_ = r; }
+	virtual void set_current_object_constant_buffer( const ConstantBuffer* r ) const override { current_object_constant_buffer_ = r; }
+	virtual void set_current_skinning_constant_buffer( const ConstantBuffer* r ) const override { current_skinning_constant_buffer_ = r; }
 	
 	const ConstantBuffer* get_current_object_constant_buffer() const { return current_object_constant_buffer_; }
 	const ConstantBuffer* get_current_skinning_constant_buffer() const { return current_skinning_constant_buffer_; }
@@ -260,10 +259,9 @@ public:
 	virtual void set_depth_stencil() const = 0;
 	virtual void unset_depth_stencil() const = 0;
 
-	virtual void setup_rendering();
+	virtual void setup_rendering() override;
 	virtual void render_technique( const char_t*, const std::function< void () >& ) const = 0;
 	virtual void render_technique( const EffectTechnique*, const std::function< void () >& ) const = 0;
-	virtual void render_background() const = 0;
 	
 	virtual void render_shadow_map() const;
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
@@ -284,7 +282,7 @@ public:
 	void fade_in( float_t speed = 1.f );
 	void fade_out( float_t speed = 1.f );
 
-	void render_fader() const;
+	void render_fader() const override;
 
 	/// @todo ‚¿‚á‚ñ‚Æì‚é Font, size, w’è‚µ‚½ Texture ‚Ö‚Ì•`‰æ
 	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
@@ -293,9 +291,6 @@ public:
 	void set_debug_axis_enabled( bool e ) { is_debug_axis_enabled_ = e; }
 
 	void render_debug_axis( const ActiveObjectManager* ) const;
-
-	virtual void clear_debug_bullet() const = 0;
-	virtual void render_debug_bullet() const = 0;
 
 	/**
 	 * ƒƒCƒ“ƒJƒƒ‰‚Ìî•ñ‚ğİ’è‚·‚é

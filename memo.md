@@ -1892,5 +1892,16 @@ void test()
 
 * RenderSystem で仮で 手描き風ポストエフェクトと色収差ポストエフェクトの 2 つを適用
 * 1 pixel 8 bit のテクスチャに VertexID を書き込み、その後ポストエフェクトで色に変換するテストを実装
+    * HLSL 内では GetDimensions() でテクスチャのサイズを取得できる
+        * https://docs.microsoft.com/ja-jp/windows/win32/direct3dhlsl/dx-graphics-hlsl-to-getdimensions
+        * https://wlog.flatlib.jp/item/1045
+        * https://github.com/altseed/ALSL/issues/10
+            * 調査の過程で見つけたゲームエンジン
+                * https://github.com/altseed/Altseed2
+* 調査の過程で見つけた情報 : 頂点シェーダーから InputLayout を構築する方法
+    * http://masafumi.cocolog-nifty.com/masafumis_diary/2013/09/input-layout-e8.html
+    * https://takinginitiative.wordpress.com/2011/12/11/directx-1011-basic-shader-reflection-automatic-input-layout-creation/
+    * D3DReflect() を使う
+        * https://docs.microsoft.com/en-us/windows/win32/api/d3d11shader/nn-d3d11shader-id3d11shaderreflection
 
 # 

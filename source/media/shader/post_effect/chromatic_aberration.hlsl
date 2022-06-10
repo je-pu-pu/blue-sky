@@ -18,6 +18,7 @@ technique11 post_effect_chromatic_aberrration
 {
 	pass main
 	{
+		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
 		SetVertexShader( CompileShader( vs_4_0, vs_post_effect() ) );
 		SetHullShader( NULL );
 		SetDomainShader( NULL );

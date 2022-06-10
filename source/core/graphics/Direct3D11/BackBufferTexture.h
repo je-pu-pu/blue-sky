@@ -29,6 +29,7 @@ namespace core::graphics::direct_3d_11
 		uint_t get_multi_sample_quality() const { return texture_2d_desc_.SampleDesc.Quality; }
 
 		void activate() override;
+		void clear( const Color& ) override;
 	};
 
 } // namespace core::graphics::direct_3d_11

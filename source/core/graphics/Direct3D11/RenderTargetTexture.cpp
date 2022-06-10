@@ -44,4 +44,9 @@ void RenderTargetTexture::activate()
 	Direct3D11::get_instance()->set_render_target( this );
 }
 
+void RenderTargetTexture::clear( const Color& color )
+{
+	Direct3D11::get_instance()->clear_render_target_view( get_render_target_view(), color );
+}
+
 } // namespace core::graphics::direct_3d_11

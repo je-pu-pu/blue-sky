@@ -95,13 +95,17 @@ GraphicsManager::RenderTargetTexture* GraphicsManager::create_render_target_text
 
 GraphicsManager::RenderTargetTexture* GraphicsManager::create_render_target_texture( PixelFormat format )
 {
-
 	return new core::graphics::direct_3d_11::RenderTargetTexture( format );
 }
 
 GraphicsManager::BackBufferTexture* GraphicsManager::get_back_buffer_texture()
 {
 	return direct_3d_->get_back_buffer_texture();
+}
+
+void GraphicsManager::set_default_render_target()
+{
+	direct_3d_->set_default_render_target();
 }
 
 

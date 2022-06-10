@@ -45,8 +45,11 @@ PS_PRIMITIVE_INPUT vs_primitive_id( COMMON_POS_NORM_UV input, uint vertex_id : S
 	return output;
 }
 
-float4 ps_primitive_id( PS_PRIMITIVE_INPUT input ) : SV_Target
+uint ps_primitive_id( PS_PRIMITIVE_INPUT input ) : SV_Target
 {
+	return input.id;
+
+	/*
 	float4 colors[] = {
 		{ 1.f, 0.f, 0.f, 1.f },
 		{ 0.f, 1.f, 0.f, 1.f },
@@ -57,6 +60,7 @@ float4 ps_primitive_id( PS_PRIMITIVE_INPUT input ) : SV_Target
 	};
 
 	return colors[ input.id % 6 ];
+	*/
 }
 
 
@@ -65,7 +69,7 @@ technique11 flat
 {
 	pass main
     {
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
         // SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
@@ -80,7 +84,7 @@ technique11 flat
 		RASTERIZERSTATE = Default;
     }
 
-#if 1
+#if 0
 	pass debug_line
     {
 		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );

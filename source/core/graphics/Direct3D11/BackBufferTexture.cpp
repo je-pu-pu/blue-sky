@@ -17,4 +17,9 @@ namespace core::graphics::direct_3d_11
 		direct_3d_->set_render_target( this );
 	}
 
+	void BackBufferTexture::clear( const Color& color )
+	{
+		direct_3d_->clear_render_target_view( get_render_target_view(), color );
+	}
+
 } // namespace core::graphics::direct_3d_11

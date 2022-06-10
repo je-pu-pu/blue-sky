@@ -322,6 +322,8 @@ void GraphicsManager::setup_default_shaders()
 	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_chromatic_aberrration", "main", "post_effect_chromatic_aberrration" );
 	create_named_shader< shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing", "main", "post_effect_hand_drawing" );
 
+	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_id_to_color", "main", "post_effect_id_to_color" );
+
 	create_named_shader< shader::DebugShadowMapTextureShader >( "debug_shadow_map_texture" );
 
 	shadow_map_shader_ = get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map" );

@@ -25,7 +25,7 @@ struct GS_CANVAS_INPUT
 	float4 Color    : COLOR0;
 };
 
-void add_pen_point( inout TriangleStream<PS_FLAT_INPUT> TriStream , in GS_CANVAS_INPUT input, uint primitive_id )
+void add_pen_point( inout TriangleStream<COMMON_POS_UV_COLOR> TriStream , in GS_CANVAS_INPUT input, uint primitive_id )
 {
 	const float screen_width = ScreenWidth;
 	const float screen_height = ScreenHeight;
@@ -35,7 +35,7 @@ void add_pen_point( inout TriangleStream<PS_FLAT_INPUT> TriStream , in GS_CANVAS
 	const float hw = l * 0.5f * screen_ratio;
 	const float hh = l * 0.5f;
 	
-	PS_FLAT_INPUT output[ 4 ];
+	COMMON_POS_UV_COLOR output[ 4 ];
 	
 	// left top
 	output[ 0 ].Position = input.Position + float4( -hw, -hh, 0.f, 0.f );
@@ -110,7 +110,7 @@ GS_CANVAS_INPUT vs_canvas( VS_CANVAS_INPUT input, uint vertex_id : SV_VertexID )
  *
  */
 [maxvertexcount(6)]
-void gs_canvas( point GS_CANVAS_INPUT input[ 1 ], inout TriangleStream<PS_FLAT_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
+void gs_canvas( point GS_CANVAS_INPUT input[ 1 ], inout TriangleStream<COMMON_POS_UV_COLOR> TriStream, uint primitive_id : SV_PrimitiveID )
 {
 	add_pen_point( TriStream, input[ 0 ], primitive_id );
 }
@@ -125,7 +125,7 @@ struct PS_CANVAS_OUTPUT
  * Canvas
  *
  */
-PS_CANVAS_OUTPUT ps_canvas( PS_FLAT_INPUT input )
+PS_CANVAS_OUTPUT ps_canvas( COMMON_POS_UV_COLOR input )
 {
 	PS_CANVAS_OUTPUT output;
 	

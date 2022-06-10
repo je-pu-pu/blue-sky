@@ -10,16 +10,16 @@ cbuffer SpriteConstantBuffer : register( b13 )
 	matrix Transform;
 };
 
-PS_FLAT_INPUT vs_sprite( PS_FLAT_INPUT input )
+COMMON_POS_UV_COLOR vs_sprite( COMMON_POS_UV_COLOR input )
 {
-	PS_FLAT_INPUT output = input;
+	COMMON_POS_UV_COLOR output = input;
 
 	output.Position = mul( input.Position, Transform );
 
 	return output;
 }
 
-float4 ps_sprite( PS_FLAT_INPUT input ) : SV_Target
+float4 ps_sprite( COMMON_POS_UV_COLOR input ) : SV_Target
 {
 	return sprite_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
 
@@ -27,12 +27,12 @@ float4 ps_sprite( PS_FLAT_INPUT input ) : SV_Target
 	// return sprite_texture.Load( input.Position, 0 ) * input.Color;
 }
 
-float4 ps_sprite_add( PS_FLAT_INPUT input ) : SV_Target
+float4 ps_sprite_add( COMMON_POS_UV_COLOR input ) : SV_Target
 {
 	return sprite_texture.Sample( texture_sampler, input.TexCoord ) + input.Color;
 }
 
-float4 ps_sprite_ms( PS_FLAT_INPUT input ) : SV_Target
+float4 ps_sprite_ms( COMMON_POS_UV_COLOR input ) : SV_Target
 {
 	float2 texture_size;
 	float samples;

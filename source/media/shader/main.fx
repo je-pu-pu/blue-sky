@@ -175,13 +175,6 @@ struct PS_INPUT
 	float4 Color    : COLOR0;
 };
 
-struct PS_FLAT_INPUT
-{
-	float4 Position : SV_POSITION;
-	float2 TexCoord : TEXCOORD0;
-	float4 Color    : COLOR0;
-};
-
 struct PS_SHADOW_INPUT
 {
 	float4 Position : SV_POSITION;
@@ -229,17 +222,6 @@ PS_INPUT vs_skin( VS_SKIN_INPUT input )
 	
 	output.TexCoord = input.TexCoord;
 
-	output.Color = ObjectColor;
-
-	return output;
-}
-
-PS_FLAT_INPUT vs_flat( COMMON_POS_NORM_UV input )
-{
-	PS_FLAT_INPUT output;
-
-	output.Position = common_wvp_pos( input.Position );
-	output.TexCoord = input.TexCoord;
 	output.Color = ObjectColor;
 
 	return output;
@@ -301,20 +283,6 @@ float4 ps_with_paper_common( float3 position, float2 uv, float diffuse )
 	return model_texture.Sample( wrap_texture_sampler, uv ) * shadow; // * cascade_colors[ cascade_index ];
 }
 
-float4 ps_flat( PS_FLAT_INPUT input ) : SV_Target
-{
-	float4 output = model_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
-
-	// clip( output.a - 0.0001f );
-
-	return output;
-}
-
-float4 ps_flat_with_flicker( PS_FLAT_INPUT input ) : SV_Target
-{
-	return model_texture.Sample( texture_sampler, input.TexCoord + float2( sin( input.TexCoord.y * 50.f + TimeBeat ) * 0.01f, 0.f ) ) + input.Color;
-}
-
 float4 ps_main_wrap( PS_INPUT input ) : SV_Target
 {
 	// return common_sample_matcap( normalize( common_v_norm( input.Normal ) ) );
@@ -344,11 +312,6 @@ float4 ps_skin_wrap_flat_paper( PS_INPUT input ) : SV_Target
 	float paper_factor = 0.25f;
 
 	return float4( lerp( model_color.rgb, paper_color.rgb, float3( 1.f - paper_color.a, 1.f - paper_color.a , 1.f - paper_color.a ) * paper_factor ), model_color.a );
-}
-
-float4 ps_main_wrap_flat( PS_FLAT_INPUT input ) : SV_Target
-{
-	return model_texture.Sample( wrap_texture_sampler, input.TexCoord );
 }
 
 /**
@@ -515,40 +478,6 @@ technique11 skin
     }
 }
 
-// シェーディングなし・スキニングなし
-technique11 flat
-{
-	pass main
-    {
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
-
-        SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
-		SetHullShader( NULL );
-		SetDomainShader( NULL );
-		SetGeometryShader( NULL );
-        SetPixelShader( CompileShader( ps_4_0, ps_main_wrap_flat() ) );
-
-		RASTERIZERSTATE = Default;
-    }
-
-#if 1
-	pass debug_line
-    {
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( DebugLineDepthStencilState, 0xFFFFFFFF );
-
-		SetVertexShader( CompileShader( vs_4_0, vs_common_wvp_pos_norm_uv_to_pos() ) );
-		SetHullShader( NULL );
-		SetDomainShader( NULL );
-		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_common_debug_line_pos() ) );
-
-		RASTERIZERSTATE = WireframeRasterizerState;
-    }
-#endif
-}
-
 // シェーディングなし・スキニングあり
 technique11 flat_skin
 {
@@ -610,6 +539,8 @@ technique11 skin_with_shadow
 		RASTERIZERSTATE = Default;
     }
 }
+
+#include "flat.hlsl"
 
 #include "tessellation.hlsl"
 #include "shadow_map.hlsl"

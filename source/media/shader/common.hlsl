@@ -50,6 +50,17 @@ struct COMMON_POS_UV
 	float2 TexCoord : TEXCOORD0;
 };
 
+/**
+ * 座標とテクスチャ UV 座標と色を持つ共通頂点構造
+ *
+ */
+struct COMMON_POS_UV_COLOR
+{
+	float4 Position : SV_POSITION;
+	float2 TexCoord : TEXCOORD0;
+	float4 Color    : COLOR0;
+};
+
 float4 common_wv_pos( float4 input )
 {
 	return mul( mul( input, World ), View );

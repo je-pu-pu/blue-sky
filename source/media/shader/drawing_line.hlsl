@@ -40,7 +40,7 @@ GS_LINE_INPUT vs_drawing_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID
  * @todo 線が崩れる問題の解決後 get_drawing_line_common() と共通化
  */
 [maxvertexcount(4)]
-void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> Stream, uint primitive_id : SV_PrimitiveID )
+void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream, uint primitive_id : SV_PrimitiveID )
 {
 	static const uint input_vertex_count = 2;
 	static const uint output_vertex_count = 4;
@@ -120,7 +120,7 @@ void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_
 		float dx = cos( line_width_angle ) * line_width * screen_ratio;
 		float dy = sin( line_width_angle ) * line_width;
 
-		PS_FLAT_INPUT output[ 4 ];
+		COMMON_POS_UV_COLOR output[ 4 ];
 
 		/**
 		 * 1----------------------------------------3
@@ -153,7 +153,7 @@ void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_
 	}
 }
 
-float4 ps_drawing_line( PS_FLAT_INPUT input ) : SV_Target
+float4 ps_drawing_line( COMMON_POS_UV_COLOR input ) : SV_Target
 {
 	return ( line_texture.Sample( u_wrap_texture_sampler, input.TexCoord ) + input.Color ); // * float4( 1.f, 1.f, 1.f, 0.5f );
 }
@@ -195,7 +195,7 @@ GS_LINE_INPUT vs_drawing_line_debug( VS_LINE_INPUT input )
  *
  * @todo 線が崩れる問題を検証
  */
-void get_drawing_line_common( line GS_LINE_INPUT input[ 2 ], out PS_FLAT_INPUT output[ 4 ] )
+void get_drawing_line_common( line GS_LINE_INPUT input[ 2 ], out COMMON_POS_UV_COLOR output[ 4 ] )
 {
 	static const uint input_vertex_count = 2;
 	static const uint output_vertex_count = 4;
@@ -275,9 +275,9 @@ void get_drawing_line_common( line GS_LINE_INPUT input[ 2 ], out PS_FLAT_INPUT o
  *
  */
 [maxvertexcount(4)]
-void gs_drawing_line_debug( line GS_LINE_INPUT input[2], inout TriangleStream<PS_FLAT_INPUT> Stream )
+void gs_drawing_line_debug( line GS_LINE_INPUT input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream )
 {
-	PS_FLAT_INPUT output[ 4 ];
+	COMMON_POS_UV_COLOR output[ 4 ];
 
 	get_drawing_line_common( input, output );
 
@@ -294,9 +294,9 @@ void gs_drawing_line_debug( line GS_LINE_INPUT input[2], inout TriangleStream<PS
  *
  */
 [maxvertexcount(7)]
-void gs_drawing_line_debug_line( line GS_LINE_INPUT input[ 2 ], inout LineStream<PS_FLAT_INPUT> Stream )
+void gs_drawing_line_debug_line( line GS_LINE_INPUT input[ 2 ], inout LineStream<COMMON_POS_UV_COLOR> Stream )
 {
-	PS_FLAT_INPUT output[ 4 ];
+	COMMON_POS_UV_COLOR output[ 4 ];
 
 	get_drawing_line_common( input, output );
 
@@ -327,8 +327,8 @@ SamplerState drawing_line_texture_sampler
  * 手書き風線 デバッグ用ピクセルシェーダー
  *
  */
-float4 ps_drawing_line_debug( noperspective PS_FLAT_INPUT input ) : SV_Target
-// float4 ps_drawing_line_debug( PS_FLAT_INPUT input ) : SV_Target
+float4 ps_drawing_line_debug( noperspective COMMON_POS_UV_COLOR input ) : SV_Target
+// float4 ps_drawing_line_debug( COMMON_POS_UV_COLOR input ) : SV_Target
 {
 	return float4( 0.f, 0.f, 1.f, 1.f );
 	// return ( line_texture.Sample( drawing_line_texture_sampler, input.TexCoord ) );
@@ -338,7 +338,7 @@ float4 ps_drawing_line_debug( noperspective PS_FLAT_INPUT input ) : SV_Target
  * 手書き風線 デバッグ用ピクセルシェーダー ( 輪郭線 )
  *
  */
-float4 ps_drawing_line_debug_line( PS_FLAT_INPUT input ) : SV_Target
+float4 ps_drawing_line_debug_line( COMMON_POS_UV_COLOR input ) : SV_Target
 {
 	// return float4( 0.f, 0.f, 0.f, 0.f );
 	return float4( 1.f, 0.f, 0.f, 0.75f );

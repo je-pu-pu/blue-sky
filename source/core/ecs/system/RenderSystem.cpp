@@ -8,6 +8,7 @@ namespace core::ecs
 {
 
 RenderSystem::RenderSystem()
+	// : render_result_texture_1_( get_graphics_manager()->create_render_target_texture( core::graphics::PixelFormat::R8_UINT ) )
 	: render_result_texture_1_( get_graphics_manager()->create_render_target_texture() )
 	, render_result_texture_2_( get_graphics_manager()->create_render_target_texture() )
 {

@@ -6,6 +6,12 @@
 namespace blue_sky::graphics
 {
 
+/**
+ * このモデル用のシェーダーを作成する
+ * 
+ * @todo より柔軟にする。
+ * @todo どのシェーダーを使うかはモデルによって異なるため、
+ */
 Model::Shader* Model::create_shader() const
 {
 	if ( GameMain::get_instance()->get_graphics_manager()->is_shadow_enabled() )

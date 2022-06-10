@@ -888,6 +888,9 @@
     <None Include="media\shader\flat.hlsl">
       <Filter>media\shader</Filter>
     </None>
+    <None Include="media\shader\post_effect\id_to_color.hlsl">
+      <Filter>media\shader\post_effect</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Scene">

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <type/type.h>
+#include <core/type.h>
 
 namespace core::graphics
 {
@@ -16,6 +16,7 @@ public:
     virtual ~RenderTarget() { }
 
     virtual void activate() = 0;
+    virtual void clear( const Color& = Color::Black ) = 0;
 
 }; // RenderTarget
 

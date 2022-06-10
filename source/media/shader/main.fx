@@ -56,7 +56,7 @@ SamplerState shadow_texture_sampler
 
 BlendState NoBlend
 {
-	BlendEnable[ 0 ] = True;
+	BlendEnable[ 0 ] = False;
 };
 
 BlendState Blend
@@ -562,3 +562,4 @@ technique11 skin_with_shadow
 #include "post_effect/default.hlsl"
 #include "post_effect/chromatic_aberration.hlsl"
 #include "post_effect/hand_drawing.hlsl"
+#include "post_effect/id_to_color.hlsl"

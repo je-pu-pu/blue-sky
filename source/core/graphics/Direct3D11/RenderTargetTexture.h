@@ -38,8 +38,7 @@ namespace core::graphics::direct_3d_11
 		ID3D11RenderTargetView* get_render_target_view() { return render_target_view_.get(); }
 
 		void activate() override;
-
-		// void clear( const game::Color& ) override;
+		void clear( const Color& ) override;
 
 	}; // class RenderTargetTexture
 

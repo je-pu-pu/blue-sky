@@ -137,6 +137,7 @@
     <ClInclude Include="blue_sky\graphics\shader\Flat2DShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\FlatShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\GroundShader.h" />
+    <ClInclude Include="blue_sky\graphics\shader\post_effect\NoiseShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\MatcapShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\NullShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\post_effect\DefaultShader.h" />
@@ -427,6 +428,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="media\shader\post_effect\id_to_color.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="media\shader\post_effect\noise.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

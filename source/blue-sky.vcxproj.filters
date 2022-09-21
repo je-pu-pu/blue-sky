@@ -752,6 +752,7 @@
     <ClInclude Include="core\graphics\PixelFormat.h">
       <Filter>core\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\post_effect\NoiseShader.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -891,6 +892,7 @@
     <None Include="media\shader\post_effect\id_to_color.hlsl">
       <Filter>media\shader\post_effect</Filter>
     </None>
+    <None Include="media\shader\post_effect\noise.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Scene">

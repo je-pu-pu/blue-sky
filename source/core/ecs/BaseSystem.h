@@ -1,6 +1,7 @@
 #pragma once
 
 #include "type.h"
+#include <boost/noncopyable.hpp>
 
 /// @todo きれいにする
 namespace core::graphics
@@ -18,7 +19,7 @@ class Component;
  * システムの基底クラス
  *
  */
-class BaseSystem
+class BaseSystem : private boost::noncopyable
 {
 public:
 	using GraphicsManager = core::graphics::GraphicsManager;

@@ -563,3 +563,4 @@ technique11 skin_with_shadow
 #include "post_effect/chromatic_aberration.hlsl"
 #include "post_effect/hand_drawing.hlsl"
 #include "post_effect/id_to_color.hlsl"
+#include "post_effect/noise.hlsl"

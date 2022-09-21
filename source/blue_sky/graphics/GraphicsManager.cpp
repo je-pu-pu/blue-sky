@@ -19,6 +19,7 @@
 #include <blue_sky/graphics/shader/DebugShadowMapTextureShader.h>
 #include <blue_sky/graphics/shader/post_effect/DefaultShader.h>
 #include <blue_sky/graphics/shader/post_effect/HandDrawingShader.h>
+#include <blue_sky/graphics/shader/post_effect/NoiseShader.h>
 
 #include <core/animation/AnimationPlayer.h>
 #include <core/graphics/ShadowMap.h>
@@ -323,6 +324,9 @@ void GraphicsManager::setup_default_shaders()
 	create_named_shader< shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing", "main", "post_effect_hand_drawing" );
 
 	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_id_to_color", "main", "post_effect_id_to_color" );
+	auto noise_shader = create_named_shader< shader::post_effect::NoiseShader >( "post_effect_noise", "main", "post_effect_noise" );
+	noise_shader->set_int( "seed", 0 );
+	noise_shader->set_float( "gain", 0.05f );
 
 	create_named_shader< shader::DebugShadowMapTextureShader >( "debug_shadow_map_texture" );
 

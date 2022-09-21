@@ -1904,4 +1904,67 @@ void test()
     * D3DReflect() を使う
         * https://docs.microsoft.com/en-us/windows/win32/api/d3d11shader/nn-d3d11shader-id3d11shaderreflection
 
-# 
+# 2022-06-11
+
+* 1 回の Draw で参照できる Texture の枚数について調査した
+    * たぶん 128 枚
+    * ID3D11DeviceContext::PSSetShaderResources
+        * https://docs.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-pssetshaderresources
+        * シェーダーリソースは最大 128 スロットまで使用可能
+
+*
+
+```c++
+void test()
+{
+    // setup
+    auto shader = get_graphics_manager()->load_shader( "id_to_texture.hlsl" );
+
+    std::vector< Texture* > textures;
+
+    for ( int n = 0; n < 100; n++ )
+    {
+        textures.push_back( get_graphics_manager()->load_texture( std::to_string( n ) + ".png" ) );
+    }
+
+    shader->set_textures( "textures", textures );
+    // shader->set_textures_at( 1, textures );
+
+    // draw
+    get_graphics_manager()->set_post_effect_shader( shader );
+    get_graphics_manager()->render_post_effect( a );
+}
+```
+
+* 定数バッファをどう設定するか問題
+    * https://docs.microsoft.com/ja-jp/windows/win32/direct3dhlsl/dx-graphics-hlsl-constants
+    * 定数バッファは最大 14 個
+    * Shader::set_scalar( "name", value ) 毎にスロットを使っていると足りなくなるので、構造体を渡したい
+    * Shader::set_struct( "name", value ) ???
+
+```c++
+struct Param
+{
+    Vector v;
+    float a;
+    float b;
+    float c;
+}
+
+// どこかに独自に持っておく
+Param param;
+
+void test()
+{
+    auto shader = get_graphics_manager()->get_shader( "id_to_texture" );
+
+    shader->set_struct( "param", & param );
+    shader->set_struct_at( 0, & param );
+}
+```
+
+# 2022-09-21
+
+ポストエフェクト用 NoiseShader を実装。ランダムにずらした点から色をサンプリングする。
+実装には ShaderMixin を使った。今後、自動的に UI でシェーダー用のパラメーターを変更できる仕組みを作りたい。
+

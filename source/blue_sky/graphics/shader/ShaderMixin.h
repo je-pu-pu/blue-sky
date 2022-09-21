@@ -44,7 +44,8 @@ public:
 	 */
 	enum class ParameterType
 	{
-		SCALAR,
+		INT,
+		FLOAT,
 		VECTOR,
 		COLOR,
 	};
@@ -65,11 +66,13 @@ protected:
 	const InputLayout* input_layout_;
 	const EffectTechnique* effect_technique_;
 
-	std::map< string_t, int > scalar_index_map_;
+	std::map< string_t, int > int_index_map_;
+	std::map< string_t, int > float_index_map_;
 	std::map< string_t, int > vector_index_map_;
 	std::map< string_t, int > color_index_map_;
 
-	std::vector< float_t* > scalar_address_list_;
+	std::vector< int_t* > int_address_list_;
+	std::vector< float_t* > float_address_list_;
 	std::vector< Vector* > vector_address_list_;
 	std::vector< Color* > color_address_list_;
 
@@ -79,8 +82,6 @@ protected:
 	std::vector< BaseShader::Texture* > textures_;
 
 	ShaderStageSet shader_stage_set_;
-
-	// void setup_color_parameter( int, const char_t*, ShaderStage );
 
 	/// シェーダーステージ => そのシェーダーステージへ定数バッファをバインドする関数のマップ
 	static inline const std::vector< std::function< void ( const ConstantBuffer< Slot >& ) > > bind_function_list_ = {
@@ -108,7 +109,8 @@ protected:
 
 			switch ( p.type )
 			{
-				case ParameterType::SCALAR: size += sizeof( float_t ); break;
+				case ParameterType::INT:	size += sizeof( int_t ); break;
+				case ParameterType::FLOAT:	size += sizeof( float_t ); break;
 				case ParameterType::VECTOR: size += sizeof( Vector ); break;
 				case ParameterType::COLOR:  size += sizeof( Color ); break;
 			}
@@ -126,10 +128,16 @@ protected:
 
 			switch ( p.type )
 			{
-				case ParameterType::SCALAR:
-					scalar_address_list_.resize( scalar_index_map_.size() + 1 );
-					scalar_address_list_[ scalar_index_map_.size() ] = reinterpret_cast< float_t* >( pointer );
-					scalar_index_map_[ p.name ] = scalar_index_map_.size();
+				case ParameterType::INT:
+					int_address_list_.resize( int_index_map_.size() + 1 );
+					int_address_list_[ int_index_map_.size() ] = reinterpret_cast< int_t* >( pointer );
+					int_index_map_[ p.name ] = int_index_map_.size();
+					pointer += sizeof( int_t );
+					break;
+				case ParameterType::FLOAT:
+					float_address_list_.resize( float_index_map_.size() + 1 );
+					float_address_list_[ float_index_map_.size() ] = reinterpret_cast< float_t* >( pointer );
+					float_index_map_[ p.name ] = float_index_map_.size();
 					pointer += sizeof( float_t );
 					break;
 				case ParameterType::VECTOR:
@@ -163,6 +171,78 @@ public:
 	~ShaderMixin()
 	{
 		delete [] buffer_;
+	}
+
+	/**
+	 * パラメータ名を指定して整数を取得する
+	 * 
+	 * @param name パラメータ名
+	 * @return 整数
+	 */
+	int_t get_int( const string_t& name ) const
+	{
+		auto i = int_index_map.find( name );
+
+		if ( i == int_index_map_.end() )
+		{
+			return 0;
+		}
+
+		return * int_address_list_[ i->second ];
+	}
+
+	/**
+	 * パラメータ名を指定して整数を設定する
+	 * 
+	 * @param name パラメータ名
+	 * @param value 設定する整数
+	 */
+	void set_int( const string_t& name, int_t value )
+	{
+		auto i = int_index_map_.find( name );
+
+		if ( i == int_index_map_.end() )
+		{
+			return;
+		}
+
+		* int_address_list_[ i->second ] = value;
+	}
+
+	/**
+	 * パラメータ名を指定して実数を取得する
+	 * 
+	 * @param name パラメータ名
+	 * @return 実数
+	 */
+	float_t get_float( const string_t& name ) const
+	{
+		auto i = float_index_map.find( name );
+
+		if ( i == float_index_map_.end() )
+		{
+			return 0.f;
+		}
+
+		return * float_address_list_[ i->second ];
+	}
+
+	/**
+	 * パラメータ名を指定して実数を設定する
+	 * 
+	 * @param name パラメータ名
+	 * @param value 設定する実数
+	 */
+	void set_float( const string_t& name, float_t value )
+	{
+		auto i = float_index_map_.find( name );
+
+		if ( i == float_index_map_.end() )
+		{
+			return;
+		}
+
+		* float_address_list_[ i->second ] = value;
 	}
 
 	/**
@@ -201,6 +281,26 @@ public:
 		*color_address_list_[ i->second ] = color;
 	}
 
+	BaseShader::Texture* get_texture_at( uint_t n )
+	{
+		return  n < textures_.size() ? textures_[ n ] : nullptr;
+	}
+	
+	const BaseShader::Texture* get_texture_at( uint_t n ) const
+	{
+		return  n < textures_.size() ? textures_[ n ] : nullptr;
+	}
+
+	void set_texture_at( uint_t n , BaseShader::Texture* t )
+	{
+		if ( n >= textures_.size() )
+		{
+			textures_.resize( n + 1, nullptr );
+		}
+
+		textures_[ n ] = t;
+	}
+
 	/**
 	 * GPU メモリを更新する
 	 */
@@ -210,29 +310,23 @@ public:
 	}
 
 	/**
-	 * 定数バッファを必要なシェーダーステージで使えるようにバインドする
+	 * 定数バッファとテクスチャを必要なシェーダーステージで使えるようにバインドする
 	 */
 	void bind() const
 	{
-		/// @todo 必要なシェーダーにのみバインドする
-		// constant_buffer_.bind_to_all();
-
-		/*
-		for ( int n = 0; n < static_cast< int >( ShaderStage::Max ); n++ )
-		{
-			if ( shader_stage_set_.test( n ) )
-			{
-				shader_stage_bind_function_map_[ n ]();
-			}
-		}
-		*/
-
+		// 必要なシェーダーにのみバインドする
 		for ( size_t n = 0; n < bind_function_list_.size(); n++ )
 		{
 			if ( shader_stage_set_.test( static_cast< ShaderStage >( n ) ) )
 			{
 				bind_function_list_[ n ]( constant_buffer_ );
 			}
+		}
+
+		/// @tood 必要なシェーダーにのみバインドする
+		for ( auto n = 0; n < textures_.size(); n++ )
+		{
+			textures_[ n ]->bind_to_ps( n );
 		}
 	}
 };

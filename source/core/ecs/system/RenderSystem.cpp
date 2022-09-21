@@ -52,7 +52,11 @@ void RenderSystem::update()
 	*/
 
 	get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_id_to_color" ) );
-	get_graphics_manager()->render_post_effect( render_result_texture_1_.get() );
+	get_graphics_manager()->render_post_effect( render_result_texture_1_.get(), render_result_texture_2_.get() );
+
+	// get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_hand_drawing" ) );
+	get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_noise" ) );
+	get_graphics_manager()->render_post_effect( render_result_texture_2_.get() );
 
 	get_graphics_manager()->set_default_render_target();
 

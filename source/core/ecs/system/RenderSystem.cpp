@@ -4,6 +4,8 @@
 #include <core/graphics/Model.h>
 #include <core/graphics/RenderTargetTexture.h>
 
+#include <imgui.h>
+
 namespace core::ecs
 {
 
@@ -62,6 +64,42 @@ void RenderSystem::update()
 
 	// get_graphics_manager()->render_fader();
 	// get_graphics_manager()->render_debug_bullet();
+	
+	/// @todo 適切な場所に移動する
+	// ImGUI によるシェーダーパラメター変更用 UI の自動描画
+	auto* shader = get_graphics_manager()->get_shader( "post_effect_noise" );
+
+	if ( shader->get_parameter_info_list() )
+	{
+		ImGui::Begin( shader->get_name() );
+
+		for ( auto p : * shader->get_parameter_info_list() )
+		{
+			switch ( p.type )
+			{
+				case core::graphics::Shader::ParameterType::INT:
+				{
+					int n = shader->get_int( p.name.c_str() );
+					if ( ImGui::DragInt( p.name.c_str(), & n ) )
+					{
+						shader->set_int( p.name.c_str(), n );
+					}
+					break;
+				}
+				case core::graphics::Shader::ParameterType::FLOAT:
+				{
+					float f = shader->get_float( p.name.c_str() );
+					if ( ImGui::DragFloat( p.name.c_str(), & f ) )
+					{
+						shader->set_float( p.name.c_str(), f );
+					}
+					break;
+				}
+			}
+		}
+
+		ImGui::End();
+	}
 }
 
 } // namespace core::ecs

@@ -38,23 +38,31 @@ protected:
 	const ConstantBuffer* get_object_constant_buffer() const { return get_graphics_manager()->get_current_object_constant_buffer(); }
 	const ConstantBuffer* get_skining_constant_buffer() const { return get_graphics_manager()->get_current_skinning_constant_buffer(); }
 
-	float_t get_scalar( const char_t* ) const override { return 0.f; }
-	float_t get_scalar_at( uint_t ) const override { return 0.f; }
+	const ParameterInfoList* get_parameter_info_list() const { return nullptr; }
 
-	void set_scalar( const char_t*, float_t ) override { }
-	void set_scalar_at( uint_t, float_t ) override { }
+	int_t get_int( const char_t* ) const override { return 0; }
+	int_t get_int_at( uint_t ) const override { return 0; }
+
+	void set_int( const char_t*, int_t ) override { }
+	void set_int_at( uint_t, int_t ) override { }
+
+	float_t get_float( const char_t* ) const override { return 0.f; }
+	float_t get_float_at( uint_t ) const override { return 0.f; }
+
+	void set_float( const char_t*, float_t ) override { }
+	void set_float_at( uint_t, float_t ) override { }
 
 	Vector get_vector( const char_t* ) const override { return Vector::Zero; }
 	Vector get_vector_at( uint_t ) const override { return Vector::Zero; }
 
-	void set_vector( const char_t*, Vector ) override { }
-	void set_vector_at( uint_t, Vector ) override { }
+	void set_vector( const char_t*, const Vector& ) override { }
+	void set_vector_at( uint_t, const Vector& ) override { }
 
 	Color get_color( const char_t* ) const override { return Color::Black; }
 	Color get_color_at( uint_t ) const override { return Color::Black; }
 
-	void set_color( const char_t*, Color ) override { }
-	void set_color_at( uint_t, Color ) override { }
+	void set_color( const char_t*, const Color& ) override { }
+	void set_color_at( uint_t, const Color& ) override { }
 
 	Texture* get_texture( const char_t* ) override { return nullptr; }
 	const Texture* get_texture( const char_t* ) const override { return nullptr; }

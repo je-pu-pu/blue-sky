@@ -145,7 +145,7 @@
     <ClInclude Include="blue_sky\graphics\shader\ShadowMapShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\SkyBoxShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\TessellationMatcapShader.h" />
-    <ClInclude Include="blue_sky\graphics\shader\ShaderMixin.h" />
+    <ClInclude Include="blue_sky\graphics\shader\Shader.h" />
     <ClInclude Include="blue_sky\graphics\shader\UnicolorShader.h" />
     <ClInclude Include="blue_sky\graphics\SkyBox.h" />
     <ClInclude Include="blue_sky\ConstantBuffers.h" />

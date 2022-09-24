@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/type.h>
+#include <vector>
 
 namespace core::graphics
 {
@@ -20,6 +21,28 @@ public:
 	using Color = core::Color;
 	using Texture = Texture;
 
+	/**
+	 * パラメータの型
+	 */
+	enum class ParameterType
+	{
+		INT,
+		FLOAT,
+		VECTOR,
+		COLOR,
+	};
+
+	/// 各パラメータの情報
+	struct ParameterInfo
+	{
+		ParameterType	type;	// 型
+		std::string		name;	// 名前
+		std::size_t		offset;	// メモリアドレスのオフセット ( 通常 0 で良い )
+	};
+
+	/// 全パラメーターの情報
+	using ParameterInfoList = std::vector< ParameterInfo >;
+
 public:
 	Shader() { }
 	virtual ~Shader() { }
@@ -28,23 +51,31 @@ public:
 
 	virtual const char_t* get_name() const { return typeid( *this ).name(); }
 
-	virtual float_t get_scalar( const char_t* ) const = 0;
-	virtual float_t get_scalar_at( uint_t ) const = 0;
+	virtual const ParameterInfoList* get_parameter_info_list() const = 0;
+
+	virtual int_t get_int( const char_t* ) const = 0;
+	virtual int_t get_int_at( uint_t ) const = 0;
 	
-	virtual void set_scalar( const char_t*, float_t ) = 0;
-	virtual void set_scalar_at( uint_t, float_t ) = 0;
+	virtual void set_int( const char_t*, int_t ) = 0;
+	virtual void set_int_at( uint_t, int_t ) = 0;
+
+	virtual float_t get_float( const char_t* ) const = 0;
+	virtual float_t get_float_at( uint_t ) const = 0;
+	
+	virtual void set_float( const char_t*, float_t ) = 0;
+	virtual void set_float_at( uint_t, float_t ) = 0;
 
 	virtual Vector get_vector( const char_t* ) const = 0;
 	virtual Vector get_vector_at( uint_t ) const = 0;
 
-	virtual void set_vector( const char_t*, Vector ) = 0;
-	virtual void set_vector_at( uint_t, Vector ) = 0;
+	virtual void set_vector( const char_t*, const Vector& ) = 0;
+	virtual void set_vector_at( uint_t, const Vector& ) = 0;
 
 	virtual Color get_color( const char_t* ) const = 0;
 	virtual Color get_color_at( uint_t ) const = 0;
 
-	virtual void set_color( const char_t*, Color ) = 0;
-	virtual void set_color_at( uint_t, Color ) = 0;
+	virtual void set_color( const char_t*, const Color& ) = 0;
+	virtual void set_color_at( uint_t, const Color& ) = 0;
 
 	virtual Texture* get_texture( const char_t* ) = 0;
 	virtual Texture* get_texture_at( uint_t ) = 0;

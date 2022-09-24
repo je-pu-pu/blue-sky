@@ -18,11 +18,12 @@ namespace blue_sky::graphics::shader
  *		シェーダー固有の名前付きパラメータ
  */
 template< typename ShaderType, int Slot >
-class ShaderMixin
+class Shader : public BaseShader
 {
 public:
 	using InputLayout		= core::graphics::InputLayout;
 	using EffectTechnique	= core::graphics::EffectTechnique;
+	using ConstantBuffer	= core::graphics::direct_3d_11::ConstantBuffer< Slot >;
 
 	/**
 	 * シェーダーステージ
@@ -39,28 +40,9 @@ public:
 		Max,
 	};
 
-	/**
-	 * パラメータの型
-	 */
-	enum class ParameterType
-	{
-		INT,
-		FLOAT,
-		VECTOR,
-		COLOR,
-	};
-
 	/// シェーダーステージの集合
 	// using ShaderStageSet = common::enum_set< ShaderStage, static_cast< size_t >( ShaderStage::Max ) >;
 	using ShaderStageSet = common::enum_set< ShaderStage, 32 >;
-
-	/// 各パラメータの情報
-	struct ParameterInfo
-	{
-		ParameterType	type;	// 型
-		std::string		name;	// 名前
-		std::size_t		offset;	// メモリアドレスのオフセット ( 通常 0 で良い )
-	};
 
 protected:
 	const InputLayout* input_layout_;
@@ -77,30 +59,36 @@ protected:
 	std::vector< Color* > color_address_list_;
 
 	uint8_t* buffer_ = nullptr;
-	ConstantBuffer< Slot > constant_buffer_;
+	ConstantBuffer constant_buffer_;
 
-	std::vector< BaseShader::Texture* > textures_;
+	std::vector< Texture* > textures_;
 
 	ShaderStageSet shader_stage_set_;
 
 	/// シェーダーステージ => そのシェーダーステージへ定数バッファをバインドする関数のマップ
-	static inline const std::vector< std::function< void ( const ConstantBuffer< Slot >& ) > > bind_function_list_ = {
-		{ [] ( const ConstantBuffer< Slot >& constant_buffer ) { constant_buffer.bind_to_vs(); } },
-		{ [] ( const ConstantBuffer< Slot >& constant_buffer ) { constant_buffer.bind_to_hs(); } },
-		{ [] ( const ConstantBuffer< Slot >& constant_buffer ) { constant_buffer.bind_to_ds(); } },
-		{ [] ( const ConstantBuffer< Slot >& constant_buffer ) { constant_buffer.bind_to_cs(); } },
-		{ [] ( const ConstantBuffer< Slot >& constant_buffer ) { constant_buffer.bind_to_gs(); } },
-		{ [] ( const ConstantBuffer< Slot >& constant_buffer ) { constant_buffer.bind_to_ps(); } },
+	static inline const std::vector< std::function< void ( const ConstantBuffer& ) > > bind_function_list_ = {
+		{ [] ( const ConstantBuffer& constant_buffer ) { constant_buffer.bind_to_vs(); } },
+		{ [] ( const ConstantBuffer& constant_buffer ) { constant_buffer.bind_to_hs(); } },
+		{ [] ( const ConstantBuffer& constant_buffer ) { constant_buffer.bind_to_ds(); } },
+		{ [] ( const ConstantBuffer& constant_buffer ) { constant_buffer.bind_to_cs(); } },
+		{ [] ( const ConstantBuffer& constant_buffer ) { constant_buffer.bind_to_gs(); } },
+		{ [] ( const ConstantBuffer& constant_buffer ) { constant_buffer.bind_to_ps(); } },
 	};
 
 	/**
 	 * シェーダーに対して設定できる固有のパラメータをセットアップする
 	 * 
-	 * @param params パラメータ情報の一覧
 	 * @return パラメータの合計サイズ ( バイト数 )
 	 */
-	size_t setup_parameters( std::initializer_list< ParameterInfo > params )
+	size_t setup_parameters()
 	{
+		if ( ! get_parameter_info_list() )
+		{
+			return 0;
+		}
+
+		const auto& params = * get_parameter_info_list();
+
 		std::size_t size = 0;
 
 		for ( auto p : params )
@@ -159,19 +147,21 @@ protected:
 	}
 
 public:
-	ShaderMixin( const char_t* input_layout_name, const char_t* effect_technique_name, std::initializer_list< ParameterInfo > params, ShaderStageSet sss )
+	Shader( const char_t* input_layout_name, const char_t* effect_technique_name, ShaderStageSet sss )
 		: input_layout_( GameMain::get_instance()->get_graphics_manager()->get_input_layout( input_layout_name ) )
 		, effect_technique_( GameMain::get_instance()->get_graphics_manager()->get_effect_technique( effect_technique_name ) )
-		, constant_buffer_( setup_parameters( params ) )
+		, constant_buffer_( setup_parameters() )
 		, shader_stage_set_( sss )
 	{
 
 	}
 
-	~ShaderMixin()
+	~Shader()
 	{
 		delete [] buffer_;
 	}
+
+	const ParameterInfoList* get_parameter_info_list() const override { return & ShaderType::parameter_info_list; }
 
 	/**
 	 * パラメータ名を指定して整数を取得する
@@ -179,9 +169,9 @@ public:
 	 * @param name パラメータ名
 	 * @return 整数
 	 */
-	int_t get_int( const string_t& name ) const
+	int_t get_int( const char* name ) const override
 	{
-		auto i = int_index_map.find( name );
+		auto i = int_index_map_.find( name );
 
 		if ( i == int_index_map_.end() )
 		{
@@ -197,7 +187,7 @@ public:
 	 * @param name パラメータ名
 	 * @param value 設定する整数
 	 */
-	void set_int( const string_t& name, int_t value )
+	void set_int( const char* name, int_t value ) override
 	{
 		auto i = int_index_map_.find( name );
 
@@ -215,9 +205,9 @@ public:
 	 * @param name パラメータ名
 	 * @return 実数
 	 */
-	float_t get_float( const string_t& name ) const
+	float_t get_float( const char* name ) const override
 	{
-		auto i = float_index_map.find( name );
+		auto i = float_index_map_.find( name );
 
 		if ( i == float_index_map_.end() )
 		{
@@ -233,7 +223,7 @@ public:
 	 * @param name パラメータ名
 	 * @param value 設定する実数
 	 */
-	void set_float( const string_t& name, float_t value )
+	void set_float( const char* name, float_t value ) override
 	{
 		auto i = float_index_map_.find( name );
 
@@ -251,7 +241,7 @@ public:
 	 * @param name パラメータ名
 	 * @return 色
 	 */
-	Color get_color( const string_t& name ) const
+	Color get_color( const char* name ) const override
 	{
 		auto i = color_index_map_.find( name );
 
@@ -269,7 +259,7 @@ public:
 	 * @param name パラメータ名
 	 * @param color 設定する色
 	 */
-	void set_color( const string_t& name, const Color& color )
+	void set_color( const char* name, const Color& color ) override
 	{
 		auto i = color_index_map_.find( name );
 
@@ -281,17 +271,17 @@ public:
 		*color_address_list_[ i->second ] = color;
 	}
 
-	BaseShader::Texture* get_texture_at( uint_t n )
+	Texture* get_texture_at( uint_t n ) override
 	{
 		return  n < textures_.size() ? textures_[ n ] : nullptr;
 	}
 	
-	const BaseShader::Texture* get_texture_at( uint_t n ) const
+	const Texture* get_texture_at( uint_t n ) const override
 	{
 		return  n < textures_.size() ? textures_[ n ] : nullptr;
 	}
 
-	void set_texture_at( uint_t n , BaseShader::Texture* t )
+	void set_texture_at( uint_t n , Texture* t ) override
 	{
 		if ( n >= textures_.size() )
 		{
@@ -304,7 +294,7 @@ public:
 	/**
 	 * GPU メモリを更新する
 	 */
-	void update() const
+	void update() const override
 	{
 		constant_buffer_.update( buffer_ );
 	}
@@ -312,7 +302,7 @@ public:
 	/**
 	 * 定数バッファとテクスチャを必要なシェーダーステージで使えるようにバインドする
 	 */
-	void bind() const
+	void bind() const override
 	{
 		// 必要なシェーダーにのみバインドする
 		for ( size_t n = 0; n < bind_function_list_.size(); n++ )

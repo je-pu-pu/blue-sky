@@ -1968,3 +1968,80 @@ void test()
 ポストエフェクト用 NoiseShader を実装。ランダムにずらした点から色をサンプリングする。
 実装には ShaderMixin を使った。今後、自動的に UI でシェーダー用のパラメーターを変更できる仕組みを作りたい。
 
+# 2022-09-22
+
+シェーダーの理想形を考える。
+
+新しいシェーダーを作る時のステップ
+
+1. xxx.hlsl を書いて media/shader/ 以下に配置する
+    * テクスチャ
+    * 定数バッファ
+
+2. XxxShader を書いて source/blue_sky/graphics/shader/ 以下に配置する
+    * 
+    * 
+
+# 2022-09-24
+
+* 現状のシェーダーの問題点
+    1. シェーダーパラメーターの型情報が実行時に処理される
+    2. シェーダーパラメーターの型情報がシェーダーのインスタンスごとに処理される
+    3. シェーダーとシェーダーステージの対応が 1:1 になってしまっている
+        * 本来であれば、シェーダー内には以下の情報があり、それぞれにシェーダーステージが違う
+            * 複数の定数バッファ ( 現状考慮しなくて良いかも )
+            * 複数のテクスチャ
+
+* 理想のシェーダー
+    1. シェーダーパラメーターの型情報はコンパイル時に解決される
+    2. 
+
+```c++
+class MyShader : public BaseShader
+{
+private:
+    static const ParameterInfoList& get_parameter_info_list_ = {
+        { "seed", ParameterType::INT },
+        { "gain", ParameterType::FLOAT }
+    };
+
+public:
+    const ParameterInfoList& get_parameter_info_list() override
+    {
+
+    }
+}
+
+/**
+ * シェーダーパラメーターを変更するための UI を描画する
+ */
+void ui()
+{
+    auto shader = xxx;
+
+    ImGui::Begin( shader->get_name() );
+    
+    for ( const auto& p : shader->get_parameter_info_list() )
+    {
+        switch ( p.get_type() )
+        {
+            case ParameterType::INT:
+                ImGui::DragInt( p.get_name(), & shader->get_int( p.get_name() ) )
+                break;
+                break;
+            case ParameterType::FLOAT:
+                ImGui::DragFloat( p.get_name(), & shader->get_float( p.get_name() ) )
+                break;
+            case ParameterType::VECTOR:
+                ImGui::DragFloat3( p.get_name(), & shader->get_vector( p.get_name() ) )
+                break;
+            case ParameterType::COLOR:
+                ImGui::ColorEdit4( p.get_name(), & shader->get_color( p.get_name() ) )
+                break;
+        }
+    }
+
+    ImGui::End();
+}
+
+```

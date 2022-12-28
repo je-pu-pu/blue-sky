@@ -35,9 +35,11 @@ public:
 	/// 各パラメータの情報
 	struct ParameterInfo
 	{
-		ParameterType	type;	// 型
-		std::string		name;	// 名前
-		std::size_t		offset;	// メモリアドレスのオフセット ( 通常 0 で良い )
+		ParameterType	type;		// 型
+		std::string		name;		// 名前
+		float_t			min = 0.f;	// 最小値
+		float_t			max = 0.f;	// 最大値
+		std::size_t		offset = 0;	// メモリアドレスのオフセット ( 通常 0 で良い )
 	};
 
 	/// 全パラメーターの情報
@@ -90,6 +92,8 @@ public:
 	virtual void bind() const = 0;
 	virtual void render_model( const Model* ) const = 0;
 	virtual void render( const Mesh*, uint_t ) const = 0;
+
+	virtual void render_parameter_gui();
 
 }; // Shader
 

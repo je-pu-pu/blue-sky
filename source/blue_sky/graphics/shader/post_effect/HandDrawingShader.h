@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DefaultShader.h"
+#include "../Shader.h"
 
 namespace blue_sky::graphics::shader::post_effect
 {
@@ -9,54 +9,37 @@ namespace blue_sky::graphics::shader::post_effect
  * 手書き風変換ポストエフェクト用シェーダー
  *
  */
-class HandDrawingShader : public DefaultShader
+class HandDrawingShader : public Shader< HandDrawingShader, 0 >
 {
 public:
-	struct ConstantBufferData
-	{
-		float_t UvFactor	= 20.f;		// UV 係数
-		float_t TimeFactor	= 10.f;		// 時間係数
-		float_t Gain1		= 0.001f;	// 振幅 1
-		float_t Gain2		= 0.0005f;	// 振幅 2
-		float_t Gain3		= 0.00025f;	// 振幅 3
-		float_t dummy[ 3 ]	= { 0.f };
+	static inline const ParameterInfoList parameter_info_list = {
+		{ ParameterType::FLOAT, "uv_factor",   0.f,      100.f }, // UV 係数
+		{ ParameterType::FLOAT, "time_factor", 0.f,      100.f }, // 時間係数
+		{ ParameterType::FLOAT, "gain1",       0.00001f, 0.01f }, // 振幅 1
+		{ ParameterType::FLOAT, "gain2",       0.00001f, 0.01f }, // 振幅 2
+		{ ParameterType::FLOAT, "gain3",       0.00001f, 0.01f }, // 振幅 3
+		{ ParameterType::COLOR, "color",       0.00001f, 0.01f }, // test
 	};
-
-	using ConstantBuffer = blue_sky::ConstantBufferWithData< ConstantBufferData, 0 >;
-
-private:
-	ConstantBuffer constant_buffer_;
 
 public:
 	HandDrawingShader( const char_t* input_layout_name = "main", const char_t* effect_technique_name = "post_effect_hand_drawing" )
-		: DefaultShader( input_layout_name, effect_technique_name )
+		: Shader( input_layout_name, effect_technique_name, { ShaderStage::PS } )
 	{
-
+		set_float( "uv_factor",   20.f     );
+		set_float( "time_factor", 10.f     );
+		set_float( "gain1",       0.001f   );
+		set_float( "gain2",       0.0005f  );
+		set_float( "gain3",       0.00025f );
 	}
 
 	HandDrawingShader* clone() const override { return new HandDrawingShader( *this ); }
 
 	void bind() const override
 	{
-		/// @todo 必要なものだけをバインドするようにする
-		get_game_constant_buffer()->bind_to_all();
-		get_frame_constant_buffer()->bind_to_all();
-		get_frame_drawing_constant_buffer()->bind_to_all();
-		
-		get_object_constant_buffer()->bind_to_vs();
+		Shader::bind();
 
-		constant_buffer_.update();
-		constant_buffer_.bind_to_all();
-
-		get_texture_at( 0 )->bind_to_ps( 0 );
+		get_frame_constant_buffer()->bind_to_ps();
 	}
-
-	float_t& getUvFactor() { return constant_buffer_.data().UvFactor; }
-	float_t& getTimeFactor() { return constant_buffer_.data().TimeFactor; }
-	float_t& getGain1() { return constant_buffer_.data().Gain1; }
-	float_t& getGain2() { return constant_buffer_.data().Gain2; }
-	float_t& getGain3() { return constant_buffer_.data().Gain3; }
 };
-
 
 } // namespace blue_sky::graphics::shader::post_effect

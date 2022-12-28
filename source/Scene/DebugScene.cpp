@@ -122,31 +122,8 @@ void DebugScene::update()
 	get_graphics_manager()->clear_debug_bullet();
 	get_physics_manager()->update( get_elapsed_time() );
 
-	ImGui::Begin( "HandDrawingShader params" );
-
-	/*
-	ImGui::Text("Hello, world %d", 123);
-	
-	if ( ImGui::Button( "Save" ) )
-	{
-		
-	}
-
-	static float my_color[ 4 ] = { 0.f };
-	ImGui::ColorEdit4("Color", my_color);
-
-	static std::string s( 256, 0 );
-	ImGui::InputText("string", s.data(), s.size());
-	*/
-
 	auto* hand_drawing_shader = get_graphics_manager()->get_shader< graphics::shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing" );
-	ImGui::SliderFloat( "UvFactor", & hand_drawing_shader->getUvFactor(), 0.f, 100.f );
-	ImGui::SliderFloat( "TimeFactor", & hand_drawing_shader->getTimeFactor(), 0.f, 100.f );
-	ImGui::SliderFloat( "Gain1", & hand_drawing_shader->getGain1(), 0.00001f, 0.01f, "%.5f" );
-	ImGui::SliderFloat( "Gain2", & hand_drawing_shader->getGain2(), 0.00001f, 0.01f, "%.5f" );
-	ImGui::SliderFloat( "Gain3", & hand_drawing_shader->getGain3(), 0.00001f, 0.01f, "%.5f" );
-
-	ImGui::End();
+	hand_drawing_shader->render_parameter_gui();
 }
 
 void DebugScene::render()

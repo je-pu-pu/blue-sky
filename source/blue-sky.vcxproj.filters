@@ -269,6 +269,7 @@
     <ClCompile Include="core\graphics\GraphicsManager.cpp">
       <Filter>core\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="core\graphics\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />

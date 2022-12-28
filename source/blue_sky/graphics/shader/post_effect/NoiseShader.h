@@ -16,6 +16,7 @@ public:
 	static inline const ParameterInfoList parameter_info_list = {
 		{ ParameterType::INT,	"seed" },
 		{ ParameterType::FLOAT,	"gain" },
+		{ ParameterType::FLOAT,	"offset" },
 	};
 
 public:

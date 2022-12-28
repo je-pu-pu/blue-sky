@@ -1,5 +1,6 @@
 #include "RenderSystem.h"
 #include <blue_sky/ConstantBuffers.h> /// @todo core から blue_sky を参照しているのは変なので、基本的な ConstatntBuffer は core に移す
+#include <Scene/Scene.h>
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Model.h>
 #include <core/graphics/RenderTargetTexture.h>
@@ -16,6 +17,9 @@ RenderSystem::RenderSystem()
 
 void RenderSystem::update()
 {
+	auto noise_shader = get_graphics_manager()->get_shader( "post_effect_noise" );
+	noise_shader->set_float( "offset", get_current_scene()->get_total_elapsed_time() );
+
 	get_graphics_manager()->setup_rendering();
 
 	render_result_texture_1_->clear();
@@ -55,7 +59,9 @@ void RenderSystem::update()
 	get_graphics_manager()->render_post_effect( render_result_texture_1_.get(), render_result_texture_2_.get() );
 
 	// get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_hand_drawing" ) );
-	get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_noise" ) );
+	noise_shader->set_texture_at( 1, get_graphics_manager()->load_texture( "media/texture/noise.png" ) );
+
+	get_graphics_manager()->set_post_effect_shader( noise_shader );
 	get_graphics_manager()->render_post_effect( render_result_texture_2_.get() );
 
 	get_graphics_manager()->set_default_render_target();

@@ -172,7 +172,7 @@ public:
 	SkinningAnimationSet* create_skinning_animation_set() { return skinning_animation_set_manager_.create(); }
 
 	// Texture
-	Texture* load_texture( const char_t* file_name ) { return load_named_texture( file_name, file_name ); }
+	Texture* load_texture( const char_t* file_name ) override { return load_named_texture( file_name, file_name ); }
 	Texture* load_named_texture( const char_t* name, const char_t* file_name );
 	Texture* get_texture( const char_t* name );
 	Texture* get_null_texture() { return null_texture_; }

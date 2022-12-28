@@ -60,6 +60,8 @@ public:
 
 	const ShaderManager::ResourceList& get_shader_list() const { return shader_manager_.get_resource_list(); }
 
+	virtual Texture* load_texture( const char_t* ) = 0;
+
 	virtual RenderTargetTexture* create_render_target_texture() = 0;
 	virtual RenderTargetTexture* create_render_target_texture( PixelFormat ) = 0;
 

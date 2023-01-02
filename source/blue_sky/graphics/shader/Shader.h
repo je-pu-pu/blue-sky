@@ -91,7 +91,7 @@ protected:
 
 		std::size_t size = 0;
 
-		for ( auto p : params )
+		for ( const auto& p : params )
 		{
 			size += p.offset;
 
@@ -110,7 +110,7 @@ protected:
 
 		uint8_t* pointer = buffer_;
 
-		for ( auto p : params )
+		for ( const auto& p : params )
 		{
 			pointer += p.offset;
 
@@ -119,24 +119,40 @@ protected:
 				case ParameterType::INT:
 					int_address_list_.resize( int_index_map_.size() + 1 );
 					int_address_list_[ int_index_map_.size() ] = reinterpret_cast< int_t* >( pointer );
+					*int_address_list_[ int_index_map_.size() ] = p.default_value.value_or( 0 );
 					int_index_map_[ p.name ] = int_index_map_.size();
 					pointer += sizeof( int_t );
 					break;
 				case ParameterType::FLOAT:
 					float_address_list_.resize( float_index_map_.size() + 1 );
 					float_address_list_[ float_index_map_.size() ] = reinterpret_cast< float_t* >( pointer );
+					*float_address_list_[ float_index_map_.size() ] = p.default_value.value_or( 0.f );
 					float_index_map_[ p.name ] = float_index_map_.size();
 					pointer += sizeof( float_t );
 					break;
 				case ParameterType::VECTOR:
 					vector_address_list_.resize( vector_index_map_.size() + 1 );
 					vector_address_list_[ vector_index_map_.size() ] = reinterpret_cast< Vector* >( pointer );
+
+					if ( p.default_value )
+					{
+						auto v = p.default_value.value();
+						*vector_address_list_[ vector_index_map_.size() ] = Vector( v, v, v );
+					}
+					
 					vector_index_map_[ p.name ] = vector_index_map_.size();
 					pointer += sizeof( Vector );
 					break;
 				case ParameterType::COLOR:
 					color_address_list_.resize( color_index_map_.size() + 1 );
 					color_address_list_[ color_index_map_.size() ] = reinterpret_cast< Color* >( pointer );
+					
+					if ( p.default_value )
+					{
+						auto v = p.default_value.value();
+						*color_address_list_[ color_index_map_.size() ] = Color( v, v, v, 1.f );
+					}
+
 					color_index_map_[ p.name ] = color_index_map_.size();
 					pointer += sizeof( Color );
 					break;

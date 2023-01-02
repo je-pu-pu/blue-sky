@@ -2,6 +2,7 @@
 
 #include <core/type.h>
 #include <vector>
+#include <optional>
 
 namespace core::graphics
 {
@@ -32,14 +33,16 @@ public:
 		COLOR,
 	};
 
+	/// @todo float 以外のデフォルト値に対応する？
 	/// 各パラメータの情報
 	struct ParameterInfo
 	{
-		ParameterType	type;		// 型
-		std::string		name;		// 名前
-		float_t			min = 0.f;	// 最小値
-		float_t			max = 0.f;	// 最大値
-		std::size_t		offset = 0;	// メモリアドレスのオフセット ( 通常 0 で良い )
+		ParameterType				type;			// 型
+		std::string					name;			// 名前
+		std::optional< float_t >	default_value;	// デフォルト値
+		float_t						min;			// 最小値
+		float_t						max;			// 最大値
+		std::size_t					offset = 0;		// メモリアドレスのオフセット ( 通常 0 で良い )
 	};
 
 	/// 全パラメーターの情報

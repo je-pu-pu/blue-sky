@@ -5,6 +5,8 @@ cbuffer ObjectConstantBuffer : register( b0 )
 	int Seed;			// ランダムシード
 	float Gain;			// 振幅
 	float Offset;		// オフセット
+	float Size;			// 細かさ
+	float Speed;		// 切り替えスピード
 };
 
 float random( float2 texCoord, int Seed )
@@ -17,7 +19,7 @@ float random( float2 texCoord, int Seed )
  */
 float4 ps_post_effect_noise( COMMON_POS_UV input ) : SV_Target
 {
-	float2 uv = input.TexCoord + noise_texture.Sample( wrap_texture_sampler, input.TexCoord + Offset * 0.01f ).xy * Gain;
+	float2 uv = input.TexCoord + noise_texture.Sample( wrap_texture_sampler, input.TexCoord / Size + floor( Offset * Speed ) / Speed * 0.1f ).xy * Gain;
 
 	return source_texture.Sample( texture_sampler, uv );
 

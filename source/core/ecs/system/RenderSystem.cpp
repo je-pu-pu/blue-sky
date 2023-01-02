@@ -32,6 +32,7 @@ void RenderSystem::update()
 		auto* transform = std::get< TransformComponent* >( i.second );
 		auto* model = std::get< ModelComponent* >( i.second );
 
+		/// @todo 毎回定数バッファを確保しているのでやめる
 		/// Transform を Shader に update する
 		blue_sky::ObjectConstantBufferWithData shader_data;
 
@@ -70,8 +71,7 @@ void RenderSystem::update()
 	// get_graphics_manager()->render_debug_bullet();
 	
 	// ImGUI によるシェーダーパラメター変更用 UI の自動描画
-	auto* shader = get_graphics_manager()->get_shader( "post_effect_noise" );
-	shader->render_parameter_gui();
+	noise_shader->render_parameter_gui();
 }
 
 } // namespace core::ecs

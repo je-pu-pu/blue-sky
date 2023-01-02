@@ -31,7 +31,7 @@ void Shader::render_parameter_gui()
 
 	ImGui::Begin( get_name() );
 
-	for ( auto p : * get_parameter_info_list() )
+	for ( const auto& p : * get_parameter_info_list() )
 	{
 		// const auto max_digit = std::max( calc_digit_number_after_decimal_point( p.min ), calc_digit_number_after_decimal_point( p.max ) );
 		// std::pow( 0.1f, max_digit );

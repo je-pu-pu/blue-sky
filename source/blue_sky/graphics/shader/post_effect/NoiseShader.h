@@ -14,9 +14,11 @@ class NoiseShader : public Shader< NoiseShader, 0 >
 {
 public:
 	static inline const ParameterInfoList parameter_info_list = {
-		{ ParameterType::INT,	"seed" },
-		{ ParameterType::FLOAT,	"gain" },
-		{ ParameterType::FLOAT,	"offset" },
+		{ ParameterType::INT,	"seed"         },
+		{ ParameterType::FLOAT,	"gain",   0.1f },
+		{ ParameterType::FLOAT,	"offset"       },
+		{ ParameterType::FLOAT,	"size",   5.f  },
+		{ ParameterType::FLOAT,	"speed",  5.f  },
 	};
 
 public:

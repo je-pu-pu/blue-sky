@@ -24,7 +24,7 @@ protected:
 		
 		buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		buffer_desc.Usage = D3D11_USAGE_DEFAULT; /// @todo D3D11_USAGE_DYNAMIC ‚ÆŽg‚¢•ª‚¯‚é
-		buffer_desc.ByteWidth = size + ( size % 16 == 0 ? 0 : 16 - size );
+		buffer_desc.ByteWidth = size + ( size % 16 == 0 ? 0 : 16 - size % 16 );
 		
 		DIRECT_X_FAIL_CHECK( Direct3D11::get_instance()->getDevice()->CreateBuffer( & buffer_desc, 0, & constant_buffer_ ) );
 	}

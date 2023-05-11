@@ -32,6 +32,34 @@ CanvasTestScene::CanvasTestScene( const GameMain* game_main )
 {
 	texture_ = get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" );
 	get_graphics_manager()->set_sky_box( "sky-box-sky" );
+
+	// 描画性能を調べるために、デフォルトで大量の点を追加する
+	if ( true )
+	{
+		const int N = 100;
+
+		for ( int z = 0; z < N; z++ )
+		{
+			for ( int y = 0; y < N; y++ )
+			{
+				for ( int x = 0; x < N; x++ )
+				{
+					const float xr = x / static_cast< float >( N );
+					const float yr = y / static_cast< float >( N );
+					const float zr = z / static_cast< float >( N );
+
+					Vertex v
+					{
+						Vector3( xr * 2.f - 1.f, yr * 2.f - 1.f, zr * 2.f - 1.f ),
+						0.2f,
+						Color( xr, yr, zr, 1.f )
+					};
+
+					points_->add_point( v, [] ( auto a, auto b ) -> bool { return false; } );
+				}
+			}
+		}
+	}
 }
 
 CanvasTestScene::~CanvasTestScene()

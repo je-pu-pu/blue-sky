@@ -754,6 +754,9 @@
       <Filter>core\graphics</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\graphics\shader\post_effect\NoiseShader.h" />
+    <ClInclude Include="core\graphics\DynamicPointList.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

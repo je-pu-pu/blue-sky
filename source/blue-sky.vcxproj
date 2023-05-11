@@ -202,6 +202,7 @@
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileEnumerator.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h" />
+    <ClInclude Include="core\graphics\DynamicPointList.h" />
     <ClInclude Include="core\graphics\EffectPass.h" />
     <ClInclude Include="core\graphics\EffectTechnique.h" />
     <ClInclude Include="core\graphics\GraphicsManager.h" />

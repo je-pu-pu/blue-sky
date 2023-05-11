@@ -1,7 +1,8 @@
 -- CanvasTestScene に切り替える
 scene( "canvas_test" )
 
-set_sky_box( "sky-box-star-2" )
+-- set_sky_box( "sky-box-star-2" )
+set_sky_box( "sky-box-3" )
 
 -- Plane オブジェクトを生成し名前を付ける
 plane = create_object( "static" )

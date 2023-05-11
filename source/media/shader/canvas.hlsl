@@ -2,11 +2,11 @@ BlendState CanvasPenBlend
 {
 	BlendEnable[ 0 ] = True;
 	
-	// SrcBlend = SRC_ALPHA;
-	// DestBlend = INV_SRC_ALPHA;
+	SrcBlend = SRC_ALPHA;
+	DestBlend = INV_SRC_ALPHA;
 	
-	SrcBlend = ONE;
-	DestBlend = ONE;
+	// SrcBlend = ONE;
+	// DestBlend = ONE;
 
 	AlphaToCoverageEnable = False;
 };
@@ -84,7 +84,7 @@ GS_CANVAS_INPUT vs_canvas( VS_CANVAS_INPUT input, uint vertex_id : SV_VertexID )
 	// êFïœìÆ
 	if ( true )
 	{
-		static const float color_random_range = 0.02f;
+		static const float color_random_range = 0.1f;
 		output.Color.r += ( ( ( uint( Time * 5 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
 		output.Color.g += ( ( ( uint( Time * 15 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
 		output.Color.b += ( ( ( uint( Time * 25 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
@@ -93,13 +93,14 @@ GS_CANVAS_INPUT vs_canvas( VS_CANVAS_INPUT input, uint vertex_id : SV_VertexID )
 	// à íuïœìÆ
 	if ( true )
 	{
+		static const float factor = 0.02f;
 		const float mx = ( ( vertex_id + 8  ) % 10 ) + 1;
 		const float my = ( ( vertex_id + 10 ) % 28 ) + 1;
 		const float mz = ( ( vertex_id + 15 ) % 15 ) + 1;
 
-		output.Position.x += cos( vertex_id + Time / mx ) * 0.005f;
-		output.Position.y += sin( vertex_id + Time / my ) * 0.005f;
-		output.Position.z += sin( vertex_id + Time / mz ) * 0.005f;
+		output.Position.x += cos( vertex_id + Time / mx ) * factor;
+		output.Position.y += sin( vertex_id + Time / my ) * factor;
+		output.Position.z += sin( vertex_id + Time / mz ) * factor;
 	}
 
 	return output;
@@ -150,7 +151,8 @@ technique11 drawing_point
 	pass main
     {
 		SetBlendState( CanvasPenBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
+		// SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
         SetVertexShader( CompileShader( vs_4_0, vs_canvas() ) );
 		SetHullShader( NULL );

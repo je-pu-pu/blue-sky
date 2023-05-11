@@ -8,7 +8,7 @@ template< typename VertexType >
 class DynamicPointList
 {
 public:
-	const unsigned int MAX_VERTEX_COUNT = 160000;
+	const unsigned int MAX_VERTEX_COUNT = 200 * 200 * 200;
 
 	using Direct3D		= core::graphics::direct_3d_11::Direct3D11;
 	using Buffer		= ID3D11Buffer;
@@ -28,6 +28,8 @@ public:
 		, changed_( false )
 	{
 		create_vertex_buffer();
+
+		vertex_list_.reserve( MAX_VERTEX_COUNT );
 	}
 
 	void DynamicPointList::create_vertex_buffer()

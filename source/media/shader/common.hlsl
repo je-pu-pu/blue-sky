@@ -61,6 +61,14 @@ struct COMMON_POS_UV_COLOR
 	float4 Color    : COLOR0;
 };
 
+/**
+ * ˆø”‚É“n‚³‚ê‚½ seed ‚É‘Î‰‚·‚éƒ‰ƒ“ƒ_ƒ€‚È 0.f ` 1.f ‚Ì’l‚ğ•Ô‚·
+ */
+float random( float seed )
+{
+	return frac( sin( dot( float2( seed, seed ), float2( 12.9898, 78.233 ) ) ) * 10000.0 );
+}
+
 float4 common_wv_pos( float4 input )
 {
 	return mul( mul( input, World ), View );

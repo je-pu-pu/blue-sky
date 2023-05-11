@@ -84,16 +84,23 @@ GS_CANVAS_INPUT vs_canvas( VS_CANVAS_INPUT input, uint vertex_id : SV_VertexID )
 	// 色変動
 	if ( true )
 	{
-		static const float color_random_range = 0.1f;
+		static const float color_random_range = 0.01f;
 		output.Color.r += ( ( ( uint( Time * 5 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
 		output.Color.g += ( ( ( uint( Time * 15 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
 		output.Color.b += ( ( ( uint( Time * 25 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
 	}
 
-	// 位置変動
+	// サイズ変動
 	if ( true )
 	{
-		static const float factor = 0.02f;
+		static const float factor = 0.75f;
+		output.Pressure += ( random( output.Position.x * 100.f + output.Position.y * 10.f + output.Position.z + Time ) - 0.5f ) * factor;
+	}
+
+	// 位置変動
+	if ( false )
+	{
+		static const float factor = 0.05f;
 		const float mx = ( ( vertex_id + 8  ) % 10 ) + 1;
 		const float my = ( ( vertex_id + 10 ) % 28 ) + 1;
 		const float mz = ( ( vertex_id + 15 ) % 15 ) + 1;

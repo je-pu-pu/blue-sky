@@ -269,7 +269,9 @@
     <ClCompile Include="core\graphics\GraphicsManager.cpp">
       <Filter>core\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Shader.cpp" />
+    <ClCompile Include="core\graphics\Shader.cpp">
+      <Filter>core\graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -753,9 +755,11 @@
     <ClInclude Include="core\graphics\PixelFormat.h">
       <Filter>core\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="blue_sky\graphics\shader\post_effect\NoiseShader.h" />
     <ClInclude Include="core\graphics\DynamicPointList.h">
       <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\post_effect\NoiseShader.h">
+      <Filter>blue_sky\graphics\shader\post_effect</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -896,7 +900,9 @@
     <None Include="media\shader\post_effect\id_to_color.hlsl">
       <Filter>media\shader\post_effect</Filter>
     </None>
-    <None Include="media\shader\post_effect\noise.hlsl" />
+    <None Include="media\shader\post_effect\noise.hlsl">
+      <Filter>media\shader\post_effect</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Scene">

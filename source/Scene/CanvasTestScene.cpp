@@ -55,6 +55,19 @@ CanvasTestScene::CanvasTestScene( const GameMain* game_main )
 						Color( xr, yr, zr, 1.f )
 					};
 
+					// —ÖŠs‚ğ•‚­‚·‚é
+					const int a = x == 0 || x == N - 1;
+					const int b = y == 0 || y == N - 1;
+					const int c = z == 0 || z == N - 1;
+
+					if ( a + b + c >= 2 )
+					{
+						// v.color = Color::Black;
+						v.color.r() *= 0.25f;
+						v.color.g() *= 0.25f;
+						v.color.b() *= 0.25f;
+					}
+
 					points_->add_point( v, [] ( auto a, auto b ) -> bool { return false; } );
 				}
 			}

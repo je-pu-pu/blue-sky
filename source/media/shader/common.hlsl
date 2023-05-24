@@ -1,3 +1,5 @@
+static const float PI = 3.14159265f;
+
 /**
  * デバッグ用の線のための DepthStencilState
  *

@@ -99,7 +99,7 @@ GS_CANVAS_INPUT vs_canvas( VS_CANVAS_INPUT input, uint vertex_id : SV_VertexID )
 	// 色変動
 	if ( true )
 	{
-		static const float color_random_range = 0.01f;
+		static const float color_random_range = 0.05f;
 		output.Color.r += ( ( ( uint( Time * 5 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
 		output.Color.g += ( ( ( uint( Time * 15 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
 		output.Color.b += ( ( ( uint( Time * 25 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
@@ -108,12 +108,12 @@ GS_CANVAS_INPUT vs_canvas( VS_CANVAS_INPUT input, uint vertex_id : SV_VertexID )
 	// サイズ変動
 	if ( false )
 	{
-		static const float factor = 0.75f;
-		output.Pressure += ( random( output.Position.x * 100.f + output.Position.y * 10.f + output.Position.z + Time ) - 0.5f ) * factor;
+		static const float factor = 0.1f;
+		output.Pressure += ( random( ( output.Position.x * 100.f + output.Position.y * 10.f + output.Position.z ) * Time * vertex_id * 100.f ) - 0.5f ) * factor;
 	}
 
 	// 位置変動
-	if ( true )
+	if ( false )
 	{
 		static const float factor = 0.01f;
 		const float mx = ( ( vertex_id + 8  ) % 10 ) + 1;
@@ -163,7 +163,21 @@ PS_CANVAS_OUTPUT ps_canvas( PS_CANVAS_INPUT input )
 		discard;
 	}
 
-	output.Depth = input.Depth / input.Position.w;
+	// 中心からの距離に応じて Depth を設定
+	if ( true )
+	{
+		const float2 d = input.TexCoord - float2( 0.5f, 0.5f );
+		const float l = sqrt( d.x * d.x + d.y * d.y ); // 円の中心からの距離 ( 0.f .. 1.f )
+
+		output.Depth = sin( l * ( PI / 2.f ) ); // 0.f .. 1.f をそのまま Depth に設定
+	}
+	else
+	{
+		// 通常のポイントスプライトの Depth 設定
+		output.Depth = input.Depth / input.Position.w;
+	}
+	
+
 	// output.Depth = input.Position.z;
 
 	return output;

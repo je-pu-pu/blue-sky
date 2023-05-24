@@ -75,12 +75,8 @@ void add_pen_point( inout TriangleStream<PS_CANVAS_INPUT> TriStream , in GS_CANV
 	TriStream.Append( output[ 0 ] );
 	TriStream.Append( output[ 2 ] );
 	TriStream.Append( output[ 1 ] );
-	TriStream.RestartStrip();
-
-	TriStream.Append( output[ 1 ] );
-	TriStream.Append( output[ 2 ] );
 	TriStream.Append( output[ 3 ] );
-	TriStream.RestartStrip();
+	// TriStream.RestartStrip();
 }
 
 /**
@@ -132,7 +128,7 @@ GS_CANVAS_INPUT vs_canvas( VS_CANVAS_INPUT input, uint vertex_id : SV_VertexID )
  * Canvas
  *
  */
-[maxvertexcount(6)]
+[maxvertexcount(4)]
 void gs_canvas( point GS_CANVAS_INPUT input[ 1 ], inout TriangleStream<PS_CANVAS_INPUT> TriStream, uint primitive_id : SV_PrimitiveID )
 {
 	add_pen_point( TriStream, input[ 0 ], primitive_id );
@@ -164,7 +160,7 @@ PS_CANVAS_OUTPUT ps_canvas( PS_CANVAS_INPUT input )
 	}
 
 	// ’†S‚©‚ç‚Ì‹——£‚É‰‚¶‚Ä Depth ‚ğİ’è
-	if ( true )
+	if ( false )
 	{
 		const float2 d = input.TexCoord - float2( 0.5f, 0.5f );
 		const float l = sqrt( d.x * d.x + d.y * d.y ); // ‰~‚Ì’†S‚©‚ç‚Ì‹——£ ( 0.f .. 1.f )

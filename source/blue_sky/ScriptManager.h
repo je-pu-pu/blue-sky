@@ -213,9 +213,11 @@ inline void ScriptManager::exec( const string_t& script, bool add_history )
 {
 	output_.clear();
 
-	if ( add_history && command_history_.back() != script )
+	string_t command = boost::trim_copy( script );
+
+	if ( add_history && command_history_.back() != command && command != "" )
 	{
-		command_history_.push_back( script );
+		command_history_.push_back( command );
 		command_history_index_ = command_history_.size() - 1;
 	}
 
@@ -261,9 +263,18 @@ inline void ScriptManager::load_command_history( const string_t& file_path )
 		string_t command;
 		
 		in >> command;
+
+		boost::trim( command );
+
+		if ( command == "" || ! command_history_.empty() && command == command_history_.back() )
+		{
+			continue;
+		}
+
 		command_history_.push_back( command );
 	}
 
+	command_history_.push_back( "" );
 	command_history_index_ = command_history_.size() - 1;
 
 	truncate_command_history( MAX_COMMAND_HISTORY_SIZE );

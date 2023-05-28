@@ -546,32 +546,118 @@ technique11 skin_with_shadow
  *
  *
  */
-float4 vs_line_cube( float4 input : SV_POSITION ) : SV_POSITION
+VS_LINE_INPUT vs_line_cube( VS_LINE_INPUT input )
 {
-	return vs_common_wvp_pos_to_pos( input );
-	// return input;
+	VS_LINE_INPUT output;
+
+	output.Position = vs_common_wvp_pos_to_pos( input.Position );
+	output.Color = input.Color;
+	
+	return output;
 }
 
-float4 ps_line_cube( float4 input : SV_POSITION ) : SV_Target
+void add_point( inout TriangleStream<COMMON_POS_UV_COLOR> TriStream , in GS_LINE_INPUT input )
 {
-	return float4( 1.f, 0.f, 0.f, 1.f );
+	const float screen_width = ScreenWidth;
+	const float screen_height = ScreenHeight;
+	const float screen_ratio = ( screen_height / screen_width );
+
+	const float l = 0.2f * 1.f; // input.Preasure;
+	const float hw = l * 0.5f * screen_ratio;
+	const float hh = l * 0.5f;
+	
+	COMMON_POS_UV_COLOR output[ 4 ];
+	
+	// left top
+	output[ 0 ].Position = input.Position + float4( -hw, -hh, 0.f, 0.f );
+	output[ 0 ].TexCoord.xy = float2( 0.f, 1.f );
+
+	// right top
+	output[ 1 ].Position = input.Position + float4( +hw, -hh, 0.f, 0.f );
+	output[ 1 ].TexCoord.xy = float2( 1.f, 1.f );
+
+	// left bottom
+	output[ 2 ].Position = input.Position + float4( -hw, +hh, 0.f, 0.f );
+	output[ 2 ].TexCoord.xy = float2( 0.f, 0.f );
+
+	// right bottom
+	output[ 3 ].Position = input.Position + float4( +hw, +hh, 0.f, 0.f );
+	output[ 3 ].TexCoord.xy = float2( 1.f, 0.f );
+
+	for ( uint y = 0; y < 4; ++y )
+	{
+		output[ y ].Color = input.Color;
+	}
+
+	TriStream.Append( output[ 0 ] );
+	TriStream.Append( output[ 2 ] );
+	TriStream.Append( output[ 1 ] );
+	TriStream.Append( output[ 3 ] );
+	TriStream.RestartStrip();
 }
 
+GS_LINE_INPUT interpolate( GS_LINE_INPUT a, GS_LINE_INPUT b, float r )
+{
+	GS_LINE_INPUT output;
+	
+	output.Position = a.Position * r + b.Position * ( 1.f - r );
+	output.Color = a.Color * r + b.Color * ( 1.f - r );
+
+	return output;
+}
+
+[maxvertexcount(64)]
+void gs_line_cube( line GS_LINE_INPUT input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream )
+{
+	add_point( Stream, interpolate( input[ 0 ], input[ 1 ], 1.f ) );
+	add_point( Stream, interpolate( input[ 0 ], input[ 1 ], 2.f / 3.f ) );
+	add_point( Stream, interpolate( input[ 0 ], input[ 1 ], 0.5f ) );
+	add_point( Stream, interpolate( input[ 0 ], input[ 1 ], 1.f / 3.f ) );
+	add_point( Stream, interpolate( input[ 0 ], input[ 1 ], 0.f ) );
+}
+
+float4 ps_line_cube( COMMON_POS_UV_COLOR input ) : SV_Target
+{
+	float4 output = pen_texture.Sample( texture_sampler, input.TexCoord ) * input.Color;
+
+	if ( output.a <= 0.95f )
+	{
+		discard;
+	}
+
+	return output;
+	// return input.Color;
+}
+
+BlendState LineCubeBlend
+{
+	BlendEnable[ 0 ] = True;
+	
+	SrcBlend = SRC_ALPHA;
+	DestBlend = INV_SRC_ALPHA;
+	
+	// SrcBlend = ONE;
+	// DestBlend = ONE;
+
+	AlphaToCoverageEnable = False;
+};
 
 technique11 line_cube
 {
 	pass main
     {
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetBlendState( LineCubeBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
         SetVertexShader( CompileShader( vs_4_0, vs_line_cube() ) );
 		SetHullShader( NULL );
 		SetDomainShader( NULL );
-		SetGeometryShader( NULL );
+		SetGeometryShader( CompileShader( gs_4_0, gs_line_cube() ) );
+		// SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, ps_line_cube() ) );
 
-		RASTERIZERSTATE = WireframeRasterizerState;
+		// RASTERIZERSTATE = WireframeRasterizerState;
+		RASTERIZERSTATE = Default;
     }
 }
 

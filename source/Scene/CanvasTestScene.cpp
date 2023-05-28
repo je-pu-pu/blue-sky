@@ -348,7 +348,7 @@ void CanvasTestScene::on_function_key_down( int key )
 		};
 
 		static int i = 0;
-		i = ( i + 1 ) % texture_names.size();;
+		i = ( i + 1 ) % texture_names.size();
 
 		texture_ = get_graphics_manager()->load_texture( texture_names[ i ] );
 	}

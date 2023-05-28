@@ -14,6 +14,7 @@
 
 #include <core/graphics/Mesh.h>
 
+#include <blue_sky/Input.h>
 #include <game/MainLoop.h>
 
 #include <common/math.h>
@@ -34,16 +35,18 @@ GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene( const GameMain* ga
 	, input_layout_( get_graphics_manager()->get_input_layout( "line_cube" ) )
 
 	, camera_( EntityManager::get_instance()->create_entity() )
+
+	, texture_( get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" ) )
 {
 	// 頂点
-	mesh_->add_vertex( Vertex( Vector3( -1.f,  1.f, -1.f ) ) );
-	mesh_->add_vertex( Vertex( Vector3(  1.f,  1.f, -1.f ) ) );
-	mesh_->add_vertex( Vertex( Vector3( -1.f, -1.f, -1.f ) ) );
-	mesh_->add_vertex( Vertex( Vector3(  1.f, -1.f, -1.f ) ) );
-	mesh_->add_vertex( Vertex( Vector3( -1.f,  1.f,  1.f ) ) );
-	mesh_->add_vertex( Vertex( Vector3(  1.f,  1.f,  1.f ) ) );
-	mesh_->add_vertex( Vertex( Vector3( -1.f, -1.f,  1.f ) ) );
-	mesh_->add_vertex( Vertex( Vector3(  1.f, -1.f,  1.f ) ) );
+	mesh_->add_vertex( Vertex( Vector3( -1.f,  1.f, -1.f ), Color::Black ) );
+	mesh_->add_vertex( Vertex( Vector3(  1.f,  1.f, -1.f ), Color::White ) );
+	mesh_->add_vertex( Vertex( Vector3( -1.f, -1.f, -1.f ), Color::White ) );
+	mesh_->add_vertex( Vertex( Vector3(  1.f, -1.f, -1.f ), Color::Black ) );
+	mesh_->add_vertex( Vertex( Vector3( -1.f,  1.f,  1.f ), Color::White ) );
+	mesh_->add_vertex( Vertex( Vector3(  1.f,  1.f,  1.f ), Color::Black ) );
+	mesh_->add_vertex( Vertex( Vector3( -1.f, -1.f,  1.f ), Color::Black ) );
+	mesh_->add_vertex( Vertex( Vector3(  1.f, -1.f,  1.f ), Color::White ) );
 	
 	// インデックス
 	auto vertex_group = mesh_->get_vertex_group_at( 0 );
@@ -101,6 +104,24 @@ void GeometryShaderCanvasTestScene::update()
 	Scene::update();
 
 	get_entity_manager()->update();
+
+	if ( get_input()->push( Input::Button::B ) )
+	{
+		const std::array< char_t*, 7 > texture_names = {
+			"media/texture/pen/white-soft-pen.png",
+			"media/texture/pen/white-hard-pen.png",
+			"media/texture/pen/bump-hard-pen.png",
+			"media/texture/pen/bump-cross-pen.png",
+			"media/texture/pen/white-grass-pen.png",
+			"media/texture/pen/white-hard-round-rect-pen.png",
+			"media/texture/pen/white-hard-round-rect-stroke-pen.png"
+		};
+
+		static int i = 0;
+		i = ( i + 1 ) % texture_names.size();
+
+		texture_ = get_graphics_manager()->load_texture( texture_names[ i ] );
+	}
 }
 
 void GeometryShaderCanvasTestScene::render()
@@ -133,6 +154,8 @@ void GeometryShaderCanvasTestScene::render()
 		get_graphics_manager()->get_frame_render_data()->bind_to_all();
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_all();
 		get_graphics_manager()->get_current_object_constant_buffer()->bind_to_all();
+
+		texture_->bind_to_ps( 1 );
 
 		mesh_->bind();
 		mesh_->render( 0 );

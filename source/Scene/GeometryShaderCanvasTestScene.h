@@ -37,9 +37,11 @@ public:
 	struct Vertex : public core::graphics::Vertex
 	{
 		Vector3 Position;
+		Color Color;
 
-		Vertex( const Vector3& pos )
+		Vertex( const Vector3& pos, const blue_sky::Color& col )
 			: Position( pos )
+			, Color( col )
 		{ }
 	};
 
@@ -53,6 +55,8 @@ protected:
 	Entity* camera_ = nullptr;
 	TransformComponent* camera_transform_ = nullptr;
 	CameraComponent* camera_component_ = nullptr;
+
+	Texture* texture_;
 public:
 	explicit GeometryShaderCanvasTestScene( const GameMain* );
 	~GeometryShaderCanvasTestScene() override;

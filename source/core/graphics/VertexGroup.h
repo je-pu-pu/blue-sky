@@ -26,6 +26,7 @@ public:
 	void clear() { index_list_.clear(); }
 
 	void add_index( Index i ) { index_list_.push_back( i ); }
+	void set_index( std::initializer_list< Index > is ) { index_list_ = is; }
 	
 	Index* get_pointer() { return & index_list_[ 0 ]; }
 	const Index* get_pointer() const { return & index_list_[ 0 ]; }

@@ -547,6 +547,14 @@ void Direct3D11::create_default_input_layout()
 
 	create_input_layout( "sprite", "|sprite", layout_sprite, ARRAYSIZE( layout_sprite ) );
 
+	//
+	D3D11_INPUT_ELEMENT_DESC layout_line_cube[] =
+    {
+        { "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+
+	create_input_layout( "line_cube", "|line_cube", layout_line_cube, ARRAYSIZE( layout_line_cube ) );
+
 	/// @todo 2D ÇÃï`âÊÇ…ñ@ê¸ÇégÇ¡ÇƒÇ¢ÇÈÇÃÇÕñ≥ë Ç»ÇÃÇ≈Ç»ÇÒÇ∆Ç©Ç∑ÇÈ
 	/*
 	// 2D

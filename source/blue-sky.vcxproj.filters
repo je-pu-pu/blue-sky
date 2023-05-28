@@ -272,6 +272,7 @@
     <ClCompile Include="core\graphics\Shader.cpp">
       <Filter>core\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\GeometryShaderCanvasTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -761,6 +762,7 @@
     <ClInclude Include="blue_sky\graphics\shader\post_effect\NoiseShader.h">
       <Filter>blue_sky\graphics\shader\post_effect</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\GeometryShaderCanvasTestScene.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

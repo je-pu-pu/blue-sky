@@ -540,6 +540,41 @@ technique11 skin_with_shadow
     }
 }
 
+
+/**
+ * 
+ *
+ *
+ */
+float4 vs_line_cube( float4 input : SV_POSITION ) : SV_POSITION
+{
+	return vs_common_wvp_pos_to_pos( input );
+	// return input;
+}
+
+float4 ps_line_cube( float4 input : SV_POSITION ) : SV_Target
+{
+	return float4( 1.f, 0.f, 0.f, 1.f );
+}
+
+
+technique11 line_cube
+{
+	pass main
+    {
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+        SetVertexShader( CompileShader( vs_4_0, vs_line_cube() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_4_0, ps_line_cube() ) );
+
+		RASTERIZERSTATE = WireframeRasterizerState;
+    }
+}
+
 #include "flat.hlsl"
 
 #include "tessellation.hlsl"

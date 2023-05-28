@@ -12,6 +12,7 @@
 #include <Scene/DebugScene.h>
 #include <Scene/ParticleSystemTestScene.h>
 #include <Scene/TransformTestScene.h>
+#include <Scene/GeometryShaderCanvasTestScene.h>
 
 #include "ActiveObjectManager.h"
 
@@ -150,6 +151,17 @@ GameMain::GameMain()
 	scene_creator_map_[ "canvas_test"  ] = [this] () { return new CanvasTestScene( this ); };
 	scene_creator_map_[ "particle_system_test"	] = [this]() { return new ParticleSystemTestScene( this ); };
 	scene_creator_map_[ "transform_test"		] = [this]() { return new TransformTestScene( this ); };
+	scene_creator_map_[ "geometry_shader_canvas_test" ] = [this]() { return new GeometryShaderCanvasTestScene( this ); };
+
+	/*
+	scene_manager_->register_scene< TitleScene >();
+
+
+	for ( const auto name : Scene::GetCreatorMap() )
+	{
+
+	}
+	*/
 
 	update_render_data_for_game();
 }
@@ -579,6 +591,7 @@ void GameMain::setup_scene( const string_t& scene_name )
 	
 	scene_.reset( i->second() );
 
+	/// @todo 各 Scene クラスが自分の名前を持ち、
 	scene_->set_name( scene_name );
 	scene_->set_next_stage_name( get_stage_name() );
 

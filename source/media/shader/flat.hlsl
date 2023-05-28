@@ -72,14 +72,14 @@ technique11 flat
 		SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
 
-        // SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
-		SetVertexShader( CompileShader( vs_4_0, vs_primitive_id() ) );
+        SetVertexShader( CompileShader( vs_4_0, vs_flat() ) );
+		// SetVertexShader( CompileShader( vs_4_0, vs_primitive_id() ) );
 		SetHullShader( NULL );
 		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
-        // SetPixelShader( CompileShader( ps_4_0, ps_main_wrap_flat() ) );
+        SetPixelShader( CompileShader( ps_4_0, ps_main_wrap_flat() ) );
 		// SetPixelShader( CompileShader( ps_4_0, ps_flat_with_flicker() ) );
-		SetPixelShader( CompileShader( ps_4_0, ps_primitive_id() ) );
+		// SetPixelShader( CompileShader( ps_4_0, ps_primitive_id() ) );
 
 		RASTERIZERSTATE = Default;
     }

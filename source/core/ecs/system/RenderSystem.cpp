@@ -9,7 +9,8 @@ namespace core::ecs
 {
 
 RenderSystem::RenderSystem()
-	: render_result_texture_1_( get_graphics_manager()->create_render_target_texture( core::graphics::PixelFormat::R8_UINT ) )
+	// : render_result_texture_1_( get_graphics_manager()->create_render_target_texture( core::graphics::PixelFormat::R8_UINT ) )
+	: render_result_texture_1_( get_graphics_manager()->create_render_target_texture() )
 	, render_result_texture_2_( get_graphics_manager()->create_render_target_texture() )
 {
 	//
@@ -25,7 +26,7 @@ void RenderSystem::update()
 	render_result_texture_1_->clear();
 	get_graphics_manager()->set_render_target( render_result_texture_1_.get() );
 
-	// get_graphics_manager()->render_background();
+	get_graphics_manager()->render_background();
 
 	for ( auto& i : get_component_list() )
 	{
@@ -56,14 +57,14 @@ void RenderSystem::update()
 	get_graphics_manager()->render_post_effect( render_result_texture_2_.get() );
 	*/
 
-	get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_id_to_color" ) );
-	get_graphics_manager()->render_post_effect( render_result_texture_1_.get(), render_result_texture_2_.get() );
+	// get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_id_to_color" ) );
+	// get_graphics_manager()->render_post_effect( render_result_texture_1_.get(), render_result_texture_2_.get() );
 
 	// get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_hand_drawing" ) );
 	noise_shader->set_texture_at( 1, get_graphics_manager()->load_texture( "media/texture/noise.png" ) );
 
 	get_graphics_manager()->set_post_effect_shader( noise_shader );
-	get_graphics_manager()->render_post_effect( render_result_texture_2_.get() );
+	get_graphics_manager()->render_post_effect( render_result_texture_1_.get() );
 
 	get_graphics_manager()->set_default_render_target();
 

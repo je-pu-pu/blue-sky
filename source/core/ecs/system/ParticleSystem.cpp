@@ -12,7 +12,7 @@ void ParticleSystem::update()
 
 	for ( auto i : get_component_list() )
 	{
-		for ( auto p : std::get< ParticleSystemComponent* >( i.second )->particle_list )
+		for ( auto& p : std::get< ParticleSystemComponent* >( i.second )->particle_list )
 		{
 			p.position.y() += 1.f;
 		}

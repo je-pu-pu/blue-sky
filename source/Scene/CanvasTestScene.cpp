@@ -337,7 +337,7 @@ void CanvasTestScene::on_function_key_down( int key )
 
 	if ( key == 9 )
 	{
-		const std::array< char_t*, 7 > texture_names = {
+		const std::array< const char_t*, 7 > texture_names = {
 			"media/texture/pen/white-soft-pen.png",
 			"media/texture/pen/white-hard-pen.png",
 			"media/texture/pen/bump-hard-pen.png",

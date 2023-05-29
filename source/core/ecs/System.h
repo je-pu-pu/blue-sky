@@ -28,7 +28,7 @@ private:
 		 */
 		static constexpr bool has_component_type( ComponentTypeId component_type_id )
 		{
-			if ( Head::get_type_id< Head >() == component_type_id )
+			if ( Head::template get_type_id< Head >() == component_type_id )
 			{
 				return true;
 			}
@@ -61,7 +61,7 @@ private:
 	{
 		static constexpr bool has_component_type( ComponentTypeId component_type_id )
 		{
-			return Head::get_type_id< Head >() == component_type_id;
+			return Head::template get_type_id< Head >() == component_type_id;
 		}
 
 		static constexpr bool gather_entity_components( const Entity* entity, ComponentTuple& component_tuple )

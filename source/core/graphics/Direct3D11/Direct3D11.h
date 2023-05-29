@@ -124,7 +124,7 @@ public:
 	void setup_sprite();
 
 	void create_default_input_layout();
-	void create_input_layout( char_t*, char_t*, D3D11_INPUT_ELEMENT_DESC[], UINT );
+	void create_input_layout( const char_t*, const char_t*, D3D11_INPUT_ELEMENT_DESC[], UINT );
 
 	void reset( bool = false );
 

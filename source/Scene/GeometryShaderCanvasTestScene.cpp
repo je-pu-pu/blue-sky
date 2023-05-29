@@ -107,7 +107,7 @@ void GeometryShaderCanvasTestScene::update()
 
 	if ( get_input()->push( Input::Button::B ) )
 	{
-		const std::array< char_t*, 7 > texture_names = {
+		const std::array< const char_t*, 7 > texture_names = {
 			"media/texture/pen/white-soft-pen.png",
 			"media/texture/pen/white-hard-pen.png",
 			"media/texture/pen/bump-hard-pen.png",

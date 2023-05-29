@@ -71,7 +71,7 @@ public:
 	void on_add_component( const Entity* entity )
 	{
 		// entity に追加された component が自身の System の操作対象に含まれているか調べ、含まれていなければ何もしない
-		if ( ! has_component_type( ComponentType::get_type_id< ComponentType >() ) )
+		if ( ! has_component_type( ComponentType::template get_type_id< ComponentType >() ) )
 		{
 			return;
 		}
@@ -89,7 +89,7 @@ public:
 	void on_remove_component( const Entity* entity )
 	{
 		// entity から取り除かれた Component が自身の System の操作対象に含まれているか調べ、含まれていなければ何もしない
-		if ( ! has_component_type( ComponentType::get_type_id< ComponentType >() ) )
+		if ( ! has_component_type( ComponentType::template get_type_id< ComponentType >() ) )
 		{
 			return;
 		}

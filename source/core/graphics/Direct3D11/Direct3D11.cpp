@@ -570,7 +570,7 @@ void Direct3D11::create_default_input_layout()
 	*/
 }
 
-void Direct3D11::create_input_layout( char_t* input_layout_name, char_t* teqhnique_name, D3D11_INPUT_ELEMENT_DESC layout[], UINT layout_array_size )
+void Direct3D11::create_input_layout( const char_t* input_layout_name, const char_t* teqhnique_name, D3D11_INPUT_ELEMENT_DESC layout[], UINT layout_array_size )
 {
 	auto* pass = static_cast< EffectPass* >( effect_->get_technique( teqhnique_name )->get_pass_list().front() );
 

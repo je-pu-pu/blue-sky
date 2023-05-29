@@ -6,6 +6,8 @@
 namespace core::ecs
 {
 
+class EntityManager;
+
 /**
  * エンティティ
  *
@@ -33,7 +35,7 @@ public:
 	*/
 
 	template< typename ComponentType >
-	ComponentType* add_component()
+	ComponentType* add_component() const
 	{
 		return EntityManager::get_instance()->add_component< ComponentType >( this );
 	}

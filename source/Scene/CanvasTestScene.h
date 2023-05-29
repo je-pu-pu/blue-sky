@@ -55,7 +55,7 @@ private:
 protected:
 
 public:
-	explicit CanvasTestScene( const GameMain* );
+	explicit CanvasTestScene();
 	~CanvasTestScene();
 
 	void update() override;			///< ƒƒCƒ“ƒ‹[ƒv

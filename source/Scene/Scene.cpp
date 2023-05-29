@@ -13,9 +13,8 @@
 namespace blue_sky
 {
 
-Scene::Scene( const GameMain* game_main )
-	: game_main_( game_main )
-	, total_elapsed_time_( 0.f )
+Scene::Scene()
+	: total_elapsed_time_( 0.f )
 {
 	
 }
@@ -49,82 +48,87 @@ float Scene::get_elapsed_time() const
 
 Scene::Direct3D* Scene::get_direct_3d() const
 {
-	return game_main_->get_direct_3d();
+	return get_game_main()->get_direct_3d();
 }
 
 ActiveObjectManager* Scene::get_active_object_manager() const
 {
-	return game_main_->get_active_object_manager();
+	return get_game_main()->get_active_object_manager();
 }
 
 Scene::PhysicsManager* Scene::get_physics_manager() const
 {
-	return game_main_->get_physics_manager();
+	return get_game_main()->get_physics_manager();
 }
 
 GraphicsManager* Scene::get_graphics_manager() const
 {
-	return game_main_->get_graphics_manager();
+	return get_game_main()->get_graphics_manager();
 }
 
 Scene::SoundManager* Scene::get_sound_manager() const
 {
-	return game_main_->get_sound_manager();
+	return get_game_main()->get_sound_manager();
 }
 
 ScriptManager* Scene::get_script_manager() const
 {
-	return game_main_->get_script_manager();
+	return get_game_main()->get_script_manager();
 }
 
 Input* Scene::get_input() const
 {
-	return game_main_->get_input();
+	return get_game_main()->get_input();
 }
 
 Scene::Config* Scene::get_config() const
 {
-	return game_main_->get_config();
+	return get_game_main()->get_config();
 }
 
 Scene::Config* Scene::get_save_data() const
 {
-	return game_main_->get_save_data();
+	return get_game_main()->get_save_data();
 }
 
 OculusRift* Scene::get_oculus_rift() const
 {
-	return game_main_->get_oculus_rift();
+	return get_game_main()->get_oculus_rift();
 }
 
 const Scene::MainLoop* Scene::get_main_loop() const
 {
-	return game_main_->get_main_loop();
+	return get_game_main()->get_main_loop();
 }
 
 const App* Scene::get_app() const
 {
-	return game_main_->get_app();
+	return get_game_main()->get_app();
+}
+
+const GameMain* Scene::get_game_main() const
+{
+	return GameMain::get_instance();
 }
 
 int Scene::get_width() const
 {
-	return game_main_->get_width();
+	return get_game_main()->get_width();
 }
 
 int Scene::get_height() const
 {
-	return game_main_->get_height();
+	return get_game_main()->get_height();
 }
 
 const std::string& Scene::get_stage_name() const
 {
-	return game_main_->get_stage_name();
+	return get_game_main()->get_stage_name();
 }
 
 void Scene::play_sound( const char* name, bool loop, bool force ) const
 {
-	Sound* sound = GameMain::get_instance()->get_sound_manager()->get_sound( name );
+	Sound* sound = get_sound_manager()->get_sound( name );
 	
 	if ( sound )
 	{
@@ -137,7 +141,7 @@ void Scene::play_sound( const char* name, bool loop, bool force ) const
 
 void Scene::stop_sound( const char* name ) const
 {
-	Sound* sound = GameMain::get_instance()->get_sound_manager()->get_sound( name );
+	Sound* sound = get_sound_manager()->get_sound( name );
 	
 	if ( sound )
 	{
@@ -156,7 +160,7 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 		auto& frame_constant_buffer_data = get_graphics_manager()->get_frame_render_data()->data();
 
 		frame_constant_buffer_data.view = Matrix().set_identity().transpose();
-		frame_constant_buffer_data.projection = Matrix().set_orthographic( 2.f * get_width() / get_height(), 2.f, 0.f, 1.f ).transpose();
+		frame_constant_buffer_data.projection = Matrix().set_orthographic( 2.f * static_cast< float >( get_width() ) / static_cast< float >( get_height() ), 2.f, 0.f, 1.f ).transpose();
 		frame_constant_buffer_data.time = get_total_elapsed_time();
 	
 		get_graphics_manager()->get_frame_render_data()->update();

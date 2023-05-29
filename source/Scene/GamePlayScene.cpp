@@ -60,9 +60,8 @@
 namespace blue_sky
 {
 
-GamePlayScene::GamePlayScene( const GameMain* game_main )
-	: Scene( game_main )
-	, stage_config_( new Config() )
+GamePlayScene::GamePlayScene()
+	: stage_config_( new Config() )
 	, debug_texture_shader_( get_graphics_manager()->get_shader( "debug_shadow_map_texture" ) )
 	, camera_( new Camera() )
 	, action_bgm_after_timer_( 0.f )

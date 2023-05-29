@@ -68,8 +68,6 @@ public:
 	using Direct3D			= core::graphics::direct_3d_11::Direct3D11;
 
 private:
-	const GameMain* game_main_;
-
 	float_t total_elapsed_time_;		///< シーンが開始してからの総経過時間 ( 秒 )
 
 	std::string name_;
@@ -97,9 +95,8 @@ protected:
 
 	const MainLoop* get_main_loop() const;
 
-	const GameMain* get_game_main() const { return game_main_; }
-
 	const App* get_app() const;
+	const GameMain* get_game_main() const;
 
 	int get_width() const;
 	int get_height() const;
@@ -120,7 +117,7 @@ protected:
 	virtual Sound* get_bgm() { return 0; };
 
 public:
-	explicit Scene( const GameMain* );
+	explicit Scene();
 	virtual ~Scene();
 
 	void set_name( const std::string& name ) { name_ = name; }

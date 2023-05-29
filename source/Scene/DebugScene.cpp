@@ -23,9 +23,8 @@
 namespace blue_sky
 {
 
-DebugScene::DebugScene( const GameMain* game_main )
-	: Scene( game_main )
-	, camera_( new Camera() )
+DebugScene::DebugScene()
+	: camera_( new Camera() )
 	, render_result_texture_( get_graphics_manager()->create_render_target_texture() )
 {
 	// Physics

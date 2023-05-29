@@ -43,7 +43,7 @@ protected:
 	std::vector< std::string > model_file_name_list_;
 
 public:
-	explicit TransformTestScene( const GameMain* );
+	explicit TransformTestScene();
 	~TransformTestScene() override;
 
 	void update() override;

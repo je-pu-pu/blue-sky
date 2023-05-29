@@ -28,9 +28,8 @@
 namespace blue_sky
 {
 
-StoryTextScene::StoryTextScene( const GameMain* game_main, const char* file_name, const char* next_scene_name )
-	: Scene( game_main )
-	, text_y_( static_cast< float >( get_height() ) )
+StoryTextScene::StoryTextScene( const char* file_name, const char* next_scene_name )
+	: text_y_( static_cast< float >( get_height() ) )
 	, text_y_target_( 0.f )
 	, text_scroll_speed_( 0.5f )
 	, text_color_( Direct3D::Color::from_256( 255, 255, 255, 127 ) )

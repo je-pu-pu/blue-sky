@@ -28,6 +28,8 @@ namespace blue_sky
 class GeometryShaderCanvasTestScene : public Scene
 {
 public:
+	static inline const char_t* name = "geometry_shader_canvas_test";
+
 	using EntityManager = core::ecs::EntityManager;
 	using TransformComponent = core::ecs::TransformComponent;
 	using ModelComponent = core::ecs::ModelComponent;
@@ -58,7 +60,7 @@ protected:
 
 	Texture* texture_;
 public:
-	explicit GeometryShaderCanvasTestScene( const GameMain* );
+	explicit GeometryShaderCanvasTestScene();
 	~GeometryShaderCanvasTestScene() override;
 
 	void update() override;

@@ -30,7 +30,7 @@ protected:
 	Entity* camera_;
 
 public:
-	explicit ParticleSystemTestScene( const GameMain* );
+	explicit ParticleSystemTestScene();
 	~ParticleSystemTestScene() override;
 
 	void update() override;

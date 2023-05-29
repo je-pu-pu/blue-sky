@@ -62,7 +62,7 @@ private:
 	Sound* get_bgm() override { return bgm_; }
 
 public:
-	explicit EndingScene( const GameMain* );
+	explicit EndingScene();
 	~EndingScene();
 
 	void update() override;				///< ƒƒCƒ“ƒ‹[ƒv

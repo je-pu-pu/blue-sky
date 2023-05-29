@@ -24,9 +24,8 @@
 namespace blue_sky
 {
 
-EndingScene::EndingScene( const GameMain* game_main )
-	: Scene( game_main )
-	, elapsed_timer_( new game::ElapsedTimer( get_main_loop() ) )
+EndingScene::EndingScene()
+	: elapsed_timer_( new game::ElapsedTimer( get_main_loop() ) )
 	, line_type_( 0 )
 	, drawing_accent_scale_( 1.f )
 	, in_fade_out_( false )

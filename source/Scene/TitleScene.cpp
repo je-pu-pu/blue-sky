@@ -27,9 +27,8 @@
 namespace blue_sky
 {
 
-TitleScene::TitleScene( const GameMain* game_main )
-	: Scene( game_main )
-	, title_texture_( 0 )
+TitleScene::TitleScene()
+	: title_texture_( 0 )
 	, title_bg_texture_( 0 )
 	, cloth_texture_( 0 )
 	, brand_logo_model_( 0 )

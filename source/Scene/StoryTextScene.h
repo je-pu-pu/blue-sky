@@ -45,7 +45,7 @@ private:
 	void load_story_text_file( const char* );
 
 public:
-	StoryTextScene( const GameMain*, const char*, const char* );
+	StoryTextScene( const char*, const char* );
 	~StoryTextScene();
 
 	void update() override;				///< ƒƒCƒ“ƒ‹[ƒv

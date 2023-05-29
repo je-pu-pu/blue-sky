@@ -30,9 +30,8 @@
 namespace blue_sky
 {
 
-StageSelectScene::StageSelectScene( const GameMain* game_main )
-	: Scene( game_main )
-	, page_( 0 )
+StageSelectScene::StageSelectScene()
+	: page_( 0 )
 	, stage_count_( 0 )
 	, is_story_completed_( false )
 	, sprite_texture_( 0 )

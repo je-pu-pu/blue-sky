@@ -24,9 +24,8 @@ static Matrix r;
 
 static int pen_mode_ = 0;
 
-CanvasTestScene::CanvasTestScene( const GameMain* game_main )
-	: Scene( game_main )
-	, tablet_( Tablet::get_instance( get_game_main()->get_app()->GetWindowHandle() ) )
+CanvasTestScene::CanvasTestScene()
+	: tablet_( Tablet::get_instance( get_game_main()->get_app()->GetWindowHandle() ) )
 	, pen_color_( 0.f, 0.f, 0.f, 1.f )
 	, points_( new DynamicPointList() )
 {

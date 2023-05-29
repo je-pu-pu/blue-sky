@@ -140,18 +140,18 @@ GameMain::GameMain()
 	is_display_fps_ = get_config()->get( "graphics.display_fps", 0 ) != 0;
 
 	/// @todo SceneManager ‚Å‚â‚é
-	scene_creator_map_[ "title"        ] = [this] () { return new TitleScene( this ); };
-	scene_creator_map_[ "stage_select" ] = [this] () { return new StageSelectScene( this ); };
-	scene_creator_map_[ "stage_intro"  ] = [this] () { return new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".intro" ).c_str(), "game_play" );	};
-	scene_creator_map_[ "game_play"    ] = [this] () { return new GamePlayScene( this ); };
-	scene_creator_map_[ "stage_outro"  ] = [this] () { return new StoryTextScene( this, ( std::string( "media/stage/" ) + get_stage_name() + ".outro" ).c_str(), "stage_select" ); };
-	scene_creator_map_[ "ending"       ] = [this] () { return new EndingScene( this ); };
+	scene_creator_map_[ "title"        ] = [] () { return new TitleScene(); };
+	scene_creator_map_[ "stage_select" ] = [] () { return new StageSelectScene(); };
+	scene_creator_map_[ "stage_intro"  ] = [ this ] () { return new StoryTextScene( ( std::string( "media/stage/" ) + get_stage_name() + ".intro" ).c_str(), "game_play" );	};
+	scene_creator_map_[ "game_play"    ] = [] () { return new GamePlayScene(); };
+	scene_creator_map_[ "stage_outro"  ] = [ this ] () { return new StoryTextScene( ( std::string( "media/stage/" ) + get_stage_name() + ".outro" ).c_str(), "stage_select" ); };
+	scene_creator_map_[ "ending"       ] = [] () { return new EndingScene(); };
 	
-	scene_creator_map_[ "debug"        ] = [this] () { return new DebugScene( this ); };
-	scene_creator_map_[ "canvas_test"  ] = [this] () { return new CanvasTestScene( this ); };
-	scene_creator_map_[ "particle_system_test"	] = [this]() { return new ParticleSystemTestScene( this ); };
-	scene_creator_map_[ "transform_test"		] = [this]() { return new TransformTestScene( this ); };
-	scene_creator_map_[ "geometry_shader_canvas_test" ] = [this]() { return new GeometryShaderCanvasTestScene( this ); };
+	scene_creator_map_[ "debug"        ] = [] () { return new DebugScene(); };
+	scene_creator_map_[ "canvas_test"  ] = [] () { return new CanvasTestScene(); };
+	scene_creator_map_[ "particle_system_test"	] = [] () { return new ParticleSystemTestScene(); };
+	scene_creator_map_[ "transform_test"		] = [] () { return new TransformTestScene(); };
+	scene_creator_map_[ "geometry_shader_canvas_test" ] = [] () { return new GeometryShaderCanvasTestScene(); };
 
 	/*
 	scene_manager_->register_scene< TitleScene >();

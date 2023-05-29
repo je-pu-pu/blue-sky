@@ -589,6 +589,10 @@ void GameMain::setup_scene( const string_t& scene_name )
 	sound_manager_->pop_group();
 	sound_manager_->push_group( scene_name.c_str() );
 	
+	// 現在のシーンを解放
+	scene_.reset();
+
+	// 新しいシーンを設定
 	scene_.reset( i->second() );
 
 	/// @todo 各 Scene クラスが自分の名前を持ち、

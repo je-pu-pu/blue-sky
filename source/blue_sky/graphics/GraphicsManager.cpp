@@ -21,6 +21,8 @@
 #include <blue_sky/graphics/shader/post_effect/HandDrawingShader.h>
 #include <blue_sky/graphics/shader/post_effect/NoiseShader.h>
 
+#include <Scene/Scene.h>
+
 #include <core/animation/AnimationPlayer.h>
 #include <core/graphics/ShadowMap.h>
 
@@ -411,6 +413,7 @@ void GraphicsManager::update_constant_buffers() const
 
 /**
  * 描画に必要な準備を行う
+ * 
  */
 void GraphicsManager::setup_rendering()
 {
@@ -434,6 +437,9 @@ void GraphicsManager::setup_rendering()
 	
 	/// @todo ちゃんとやる ( ECS 化？ set_light_info() ? )
 	get_frame_render_data()->data().light = Vector( -1.f, -2.f, 0.f, 0.f ).normalize();
+
+	/// @todo ここでやるべき？
+	get_frame_render_data()->data().time = GameMain::get_instance()->get_current_scene()->get_total_elapsed_time();
 
 	get_frame_render_data()->update();
 

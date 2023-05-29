@@ -1,18 +1,8 @@
 #include "GameMain.h"
 #include "App.h"
 
-/// @todo SceneManager などでやる
-#include <Scene/TitleScene.h>
-#include <Scene/StageSelectScene.h>
-#include <Scene/StoryTextScene.h>
-#include <Scene/GamePlayScene.h>
-#include <Scene/EndingScene.h>
-
-#include <Scene/CanvasTestScene.h>
-#include <Scene/DebugScene.h>
-#include <Scene/ParticleSystemTestScene.h>
-#include <Scene/TransformTestScene.h>
-#include <Scene/GeometryShaderCanvasTestScene.h>
+#include "SceneManager.h"
+#include "Scene/Scene.h"
 
 #include "ActiveObjectManager.h"
 
@@ -138,30 +128,6 @@ GameMain::GameMain()
 	main_loop_.reset( new MainLoop( 60 ) );
 
 	is_display_fps_ = get_config()->get( "graphics.display_fps", 0 ) != 0;
-
-	/// @todo SceneManager でやる
-	scene_creator_map_[ "title"        ] = [] () { return new TitleScene(); };
-	scene_creator_map_[ "stage_select" ] = [] () { return new StageSelectScene(); };
-	scene_creator_map_[ "stage_intro"  ] = [ this ] () { return new StoryTextScene( ( std::string( "media/stage/" ) + get_stage_name() + ".intro" ).c_str(), "game_play" );	};
-	scene_creator_map_[ "game_play"    ] = [] () { return new GamePlayScene(); };
-	scene_creator_map_[ "stage_outro"  ] = [ this ] () { return new StoryTextScene( ( std::string( "media/stage/" ) + get_stage_name() + ".outro" ).c_str(), "stage_select" ); };
-	scene_creator_map_[ "ending"       ] = [] () { return new EndingScene(); };
-	
-	scene_creator_map_[ "debug"        ] = [] () { return new DebugScene(); };
-	scene_creator_map_[ "canvas_test"  ] = [] () { return new CanvasTestScene(); };
-	scene_creator_map_[ "particle_system_test"	] = [] () { return new ParticleSystemTestScene(); };
-	scene_creator_map_[ "transform_test"		] = [] () { return new TransformTestScene(); };
-	scene_creator_map_[ "geometry_shader_canvas_test" ] = [] () { return new GeometryShaderCanvasTestScene(); };
-
-	/*
-	scene_manager_->register_scene< TitleScene >();
-
-
-	for ( const auto name : Scene::GetCreatorMap() )
-	{
-
-	}
-	*/
 
 	update_render_data_for_game();
 }
@@ -578,10 +544,9 @@ void GameMain::setup_scene()
  */
 void GameMain::setup_scene( const string_t& scene_name )
 {
-	auto i = scene_creator_map_.find( scene_name );
-
-	if ( i == scene_creator_map_.end() )
+	if ( ! SceneManager::get_instance()->is_scene_registered( scene_name ) )
 	{
+		// スクリプトの途中で例外が発生し、その後のスクリプトが実行されない問題に対処している？
 		// COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " ) + scene_name );
 		return;
 	}
@@ -593,7 +558,7 @@ void GameMain::setup_scene( const string_t& scene_name )
 	scene_.reset();
 
 	// 新しいシーンを設定
-	scene_.reset( i->second() );
+	scene_.reset( SceneManager::get_instance()->generate_scene( scene_name ) );
 
 	/// @todo 各 Scene クラスが自分の名前を持ち、
 	scene_->set_name( scene_name );

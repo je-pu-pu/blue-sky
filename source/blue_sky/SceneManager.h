@@ -18,13 +18,13 @@ public:
 	using SceneGenerator = std::function< Scene* () >;
 	using SceneGeneratorMap = std::unordered_map< string_t, SceneGenerator >;
 
-	template< typename SceneType >
+	template < typename SceneType >
 	class RegisterScene
 	{
 	public:
-		RegisterScene()
+		RegisterScene( const char_t* scene_name = SceneType::name, SceneGenerator generator = [] { return new SceneType(); } )
 		{
-			SceneManager::get_instance()->register_scene< SceneType >();
+			SceneManager::get_instance()->register_scene( scene_name, generator );
 		}
 	};
 
@@ -35,13 +35,36 @@ public:
 	SceneManager() { }
 	~SceneManager() { }
 
-
-	template< typename SceneType >
-	void register_scene()
+	/**
+	 * 指定した名前のシーンを登録する
+	 */
+	void register_scene( const string_t& scene_name, SceneGenerator generator )
 	{
-		scene_generator_map_[ SceneType::name ] = [] { return new SceneType(); };
+		scene_generator_map_[ scene_name ] = generator;
 	}
 
+	/**
+	 * 指定した名前のシーンが登録済みかどうかを調べる
+	 */
+	bool is_scene_registered( const string_t& scene_name ) const
+	{
+		return scene_generator_map_.find( scene_name ) != scene_generator_map_.end();
+	}
+
+	/**
+	 * 指定した名前のシーンを生成する
+	 */
+	Scene* generate_scene( const string_t& scene_name ) const
+	{
+		auto i = scene_generator_map_.find( scene_name );
+
+		if ( i == scene_generator_map_.end() )
+		{
+			return nullptr;
+		}
+
+		return i->second();
+	}
 
 };
 

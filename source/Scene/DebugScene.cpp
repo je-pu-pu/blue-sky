@@ -3,6 +3,7 @@
 
 #include <GameObject/Camera.h>
 
+#include <blue_sky/SceneManager.h>
 #include <blue_sky/ActiveObjectManager.h>
 #include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/ScriptManager.h>
@@ -22,6 +23,8 @@
 
 namespace blue_sky
 {
+
+SceneManager::RegisterScene< DebugScene > scene;
 
 DebugScene::DebugScene()
 	: camera_( new Camera() )

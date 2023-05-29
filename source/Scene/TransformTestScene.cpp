@@ -1,5 +1,6 @@
 #include "TransformTestScene.h"
 
+#include <blue_sky/SceneManager.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <core/ecs/component/TransformComponent.h>
@@ -24,6 +25,8 @@
 
 namespace blue_sky
 {
+
+SceneManager::RegisterScene< TransformTestScene > scene;
 
 TransformTestScene::TransformTestScene()
 	: camera_( EntityManager::get_instance()->create_entity() )

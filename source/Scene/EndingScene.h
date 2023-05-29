@@ -28,6 +28,8 @@ namespace blue_sky
 class EndingScene : public Scene
 {
 public:
+	static inline const char_t* name = "ending";
+
 	using Model		= graphics::Model;
 	using Line		= graphics::Line;
 	using ModelList	= std::vector< Model* >;

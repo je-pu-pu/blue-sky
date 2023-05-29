@@ -4,6 +4,7 @@
 
 #include "StageSelectScene.h"
 
+#include <blue_sky/SceneManager.h>
 #include <blue_sky/Input.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Fader.h>
@@ -29,6 +30,8 @@
 
 namespace blue_sky
 {
+
+SceneManager::RegisterScene< StageSelectScene > scene;
 
 StageSelectScene::StageSelectScene()
 	: page_( 0 )

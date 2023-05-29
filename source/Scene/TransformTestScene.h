@@ -22,6 +22,8 @@ namespace blue_sky
 class TransformTestScene : public Scene
 {
 public:
+	static inline const char_t* name = "transform_test";
+
 	using EntityManager = core::ecs::EntityManager;
 	using TransformComponent = core::ecs::TransformComponent;
 	using ModelComponent = core::ecs::ModelComponent;

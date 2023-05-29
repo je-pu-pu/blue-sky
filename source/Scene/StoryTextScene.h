@@ -19,6 +19,8 @@ namespace blue_sky
 class StoryTextScene : public Scene
 {
 public:
+	static inline const char_t* name = "story_text";
+
 	using BgSpriteLayer		= core::BgSpriteLayer;
 	using BgSpriteLayerList	= std::list< BgSpriteLayer* >;
 

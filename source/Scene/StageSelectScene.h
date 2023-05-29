@@ -16,6 +16,7 @@ namespace blue_sky
 class StageSelectScene : public Scene
 {
 public:
+	static inline const char_t* name = "stage_select";
 
 	class Stage
 	{

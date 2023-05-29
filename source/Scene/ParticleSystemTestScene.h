@@ -20,6 +20,8 @@ class Camera;
 class ParticleSystemTestScene : public Scene
 {
 public:
+	static inline const char_t* name = "particle_system_test";
+
 	using EntityManager = core::ecs::EntityManager;
 	using Entity = core::ecs::Entity;
 

@@ -42,6 +42,8 @@ namespace blue_sky
 class GamePlayScene : public Scene
 {
 public:
+	static inline const char_t* name = "game_play";
+
 	using Mesh					= core::graphics::Mesh;
 	using Shader				= core::graphics::Shader;
 	using Rectangle				= graphics::Rectangle;

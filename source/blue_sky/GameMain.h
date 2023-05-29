@@ -41,6 +41,7 @@ namespace blue_sky
 	class ActiveObject;
 	class ActiveObjectManager;
 
+	class SceneManager;
 	class ScriptManager;
 
 	class Player;
@@ -69,9 +70,6 @@ public:
 	using GraphicsManager			= GraphicsManager;
 	using SoundManager				= core::SoundManager;
 
-	using CreateSceneFunction		= std::function< Scene* () >;
-	using CreateSceneFunctionMap	= std::unordered_map< string_t, CreateSceneFunction >;
-
 	using Direct3D					= core::graphics::direct_3d_11::Direct3D11;
 	using BulletDebugDraw			= core::graphics::direct_3d_11::BulletDebugDraw;
 
@@ -98,8 +96,6 @@ public:
 	};
 
 private:
-	CreateSceneFunctionMap					scene_creator_map_;		///< シーン生成マップ
-
 	float									total_elapsed_time_;	///< ゲームが開始してからの経過時間 ( 秒 )
 
 	std::unique_ptr< Direct3D >				direct_3d_;				///< Direct3D

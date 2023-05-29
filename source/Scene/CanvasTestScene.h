@@ -33,6 +33,8 @@ namespace blue_sky
 class CanvasTestScene : public Scene
 {
 public:
+	static inline const char_t* name = "canvas_test";
+
 	using Tablet = win::Tablet;
 
 	struct Vertex

@@ -21,6 +21,7 @@ class Camera;
 class DebugScene : public Scene
 {
 public:
+	static inline const char_t* name = "debug";
 
 protected:
 	CityGenerator city_generator_;

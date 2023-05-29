@@ -12,6 +12,8 @@ namespace blue_sky
 class TitleScene : public Scene
 {
 public:
+	static inline const char_t* name = "title";
+
 	enum Sequence
 	{
 		SEQUENCE_LOGO = 0,

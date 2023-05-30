@@ -70,7 +70,7 @@ CanvasTestScene::CanvasTestScene()
 						v.color.b() *= 0.25f;
 					}
 
-					points_->add_point( v, [] ( auto a, auto b ) -> bool { return false; } );
+					points_->add_point( v, [] ( auto, auto ) -> bool { return false; } );
 				}
 			}
 		}

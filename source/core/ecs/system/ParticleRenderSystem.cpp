@@ -20,7 +20,7 @@ void ParticleRenderSystem::update()
 		for ( const auto& p : particle_system->particle_list )
 		{
 			// 遅いのでコメントアウト
-			// std::cout << "\tp : " << p.position << std::endl;
+			std::cout << "\tp : " << p.position << std::endl;
 		}
 	}
 }

@@ -117,7 +117,7 @@ void TransformTestScene::update()
 
 	shader_index_list.resize( current_entity_model_->model->get_shader_count() );
 
-	for ( int n = 0; n < current_entity_model_->model->get_shader_count(); n++ )
+	for ( uint_t n = 0; n < current_entity_model_->model->get_shader_count(); n++ )
 	{
 		if ( ImGui::Combo( string_t( "Shader " + std::to_string( n ) ).c_str(), & shader_index_list[ n ], & shader_combo_items[ 0 ], shader_combo_items.size() ) )
 		{

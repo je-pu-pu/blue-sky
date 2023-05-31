@@ -39,6 +39,7 @@
     <ClCompile Include="blue_sky\graphics\Rectangle.cpp" />
     <ClCompile Include="blue_sky\graphics\SkyBox.cpp" />
     <ClCompile Include="blue_sky\Input.cpp" />
+    <ClCompile Include="blue_sky\SceneManager.cpp" />
     <ClCompile Include="blue_sky\ScriptManager.cpp" />
     <ClCompile Include="core\animation\AnimationPlayer.cpp" />
     <ClCompile Include="core\ecs\BaseSystem.cpp" />
@@ -502,11 +503,13 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
     <IntDir>.build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(ProjectDir)lib\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
     <IntDir>.build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(ProjectDir)lib\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -529,6 +532,7 @@
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <OmitFramePointers />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -545,6 +549,9 @@
     <ResourceCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -596,6 +603,8 @@
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>NOMINMAX</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -611,6 +620,7 @@
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PreprocessorDefinitions>NOMINMAX</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,6 +1,8 @@
 #pragma once
 
+#include <blue_sky/type.h>
 #include <common/Singleton.h>
+#include <unordered_map>
 #include <functional>
 
 namespace blue_sky
@@ -36,9 +38,15 @@ public:
 	~SceneManager() { }
 
 	/**
+	 * 全てのシーンを登録する
+	 */
+	void register_all_scene();
+
+	/**
 	 * 指定した名前のシーンを登録する
 	 */
-	void register_scene( const string_t& scene_name, SceneGenerator generator )
+	template< typename SceneType >
+	void register_scene( const string_t& scene_name = SceneType::name, SceneGenerator generator = [] { return new SceneType(); } )
 	{
 		scene_generator_map_[ scene_name ] = generator;
 	}

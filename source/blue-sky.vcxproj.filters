@@ -275,6 +275,9 @@
     <ClCompile Include="Scene\GeometryShaderCanvasTestScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\SceneManager.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />

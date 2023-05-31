@@ -15,7 +15,6 @@
 #include <GameObject/TranslationObject.h>
 #include <GameObject/Camera.h>
 
-#include <blue_sky/SceneManager.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Rectangle.h>
 #include <blue_sky/graphics/Model.h>
@@ -60,8 +59,6 @@
 
 namespace blue_sky
 {
-
-SceneManager::RegisterScene< GamePlayScene > scene;
 
 GamePlayScene::GamePlayScene()
 	: stage_config_( new Config() )

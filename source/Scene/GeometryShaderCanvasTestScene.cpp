@@ -1,6 +1,5 @@
 #include "GeometryShaderCanvasTestScene.h"
 
-#include <blue_sky/SceneManager.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <core/ecs/component/TransformComponent.h>
@@ -28,8 +27,6 @@
 
 namespace blue_sky
 {
-
-SceneManager::RegisterScene< GeometryShaderCanvasTestScene > scene;
 
 GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene()
 	: mesh_( get_graphics_manager()->create_named_mesh( "line_cube", Mesh::Buffer::Type::DEFAULT ) )

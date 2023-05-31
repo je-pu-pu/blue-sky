@@ -4,7 +4,6 @@
 
 #include "TitleScene.h"
 
-#include <blue_sky/SceneManager.h>
 #include <blue_sky/GameMain.h>
 #include <blue_sky/Input.h>
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -27,8 +26,6 @@
 
 namespace blue_sky
 {
-
-SceneManager::RegisterScene< TitleScene > scene;
 
 TitleScene::TitleScene()
 	: title_texture_( 0 )

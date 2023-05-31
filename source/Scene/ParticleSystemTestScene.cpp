@@ -1,6 +1,5 @@
 #include "ParticleSystemTestScene.h"
 
-#include <blue_sky/SceneManager.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/ActiveObjectManager.h>
 #include <blue_sky/ActiveObjectPhysics.h>
@@ -22,8 +21,6 @@
 
 namespace blue_sky
 {
-
-SceneManager::RegisterScene< ParticleSystemTestScene > scene;
 
 ParticleSystemTestScene::ParticleSystemTestScene()
 	: camera_( EntityManager::get_instance()->create_entity() )

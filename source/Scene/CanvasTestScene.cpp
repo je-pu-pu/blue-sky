@@ -4,7 +4,6 @@
 #include <blue_sky/Input.h>
 #include <blue_sky/ActiveObjectManager.h>
 #include <blue_sky/graphics/GraphicsManager.h>
-#include <blue_sky/SceneManager.h>
 
 #include <game/MainLoop.h>
 
@@ -24,8 +23,6 @@ static Vector eye( 0.f, 0.f, -1.f, 1.f );
 static Matrix r;
 
 static int pen_mode_ = 0;
-
-SceneManager::RegisterScene< CanvasTestScene > scene;
 
 CanvasTestScene::CanvasTestScene()
 	: tablet_( Tablet::get_instance( get_game_main()->get_app()->GetWindowHandle() ) )

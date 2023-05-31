@@ -26,8 +26,6 @@
 namespace blue_sky
 {
 
-SceneManager::RegisterScene< TransformTestScene > scene;
-
 TransformTestScene::TransformTestScene()
 	: camera_( EntityManager::get_instance()->create_entity() )
 {

@@ -2,7 +2,6 @@
 #include <blue_sky/GameMain.h>
 #include <blue_sky/Input.h>
 
-#include <blue_sky/SceneManager.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
@@ -24,8 +23,6 @@
 
 namespace blue_sky
 {
-
-SceneManager::RegisterScene< EndingScene > scene;
 
 EndingScene::EndingScene()
 	: elapsed_timer_( new game::ElapsedTimer( get_main_loop() ) )

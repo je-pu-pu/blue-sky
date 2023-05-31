@@ -5,7 +5,6 @@
 #include "StoryTextScene.h"
 
 #include <blue_sky/GameMain.h>
-#include <blue_sky/SceneManager.h>
 #include <blue_sky/Input.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -29,9 +28,6 @@
 
 namespace blue_sky
 {
-
-SceneManager::RegisterScene< StoryTextScene > intro_scene( "stage_intro", [] () { return new StoryTextScene( ( std::string( "media/stage/" ) + GameMain::get_instance()->get_stage_name() + ".intro" ).c_str(), "game_play" ); } );
-SceneManager::RegisterScene< StoryTextScene > outro_scene( "stage_outro", [] () { return new StoryTextScene( ( std::string( "media/stage/" ) + GameMain::get_instance()->get_stage_name() + ".outro" ).c_str(), "stage_select" ); } );
 
 StoryTextScene::StoryTextScene( const char* file_name, const char* next_scene_name )
 	: text_y_( static_cast< float >( get_height() ) )

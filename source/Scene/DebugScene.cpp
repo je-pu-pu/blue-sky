@@ -24,8 +24,6 @@
 namespace blue_sky
 {
 
-SceneManager::RegisterScene< DebugScene > scene;
-
 DebugScene::DebugScene()
 	: camera_( new Camera() )
 	, render_result_texture_( get_graphics_manager()->create_render_target_texture() )

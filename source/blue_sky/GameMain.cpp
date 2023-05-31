@@ -104,6 +104,8 @@ GameMain::GameMain()
 	bullet_debug_draw_.reset( new core::graphics::direct_3d_11::BulletDebugDraw( direct_3d_.get() ) );
 	bullet_debug_draw_->setDebugMode( get_config()->get< int >( "graphics.debug_bullet", 0 ) );
 
+	SceneManager::get_instance()->register_all_scene();
+
 	physics_manager_.reset( new ActiveObjectPhysics() );
 	physics_manager_->setDebugDrawer( bullet_debug_draw_.get() );
 

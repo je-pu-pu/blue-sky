@@ -37,15 +37,21 @@ GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene()
 
 	, texture_( get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" ) )
 {
+
+	// 色
+	const Color& c1 = Color::Red;
+	const Color& c2 = Color::Green;
+	const Color& c3 = Color::Blue;
+
 	// 頂点
-	mesh_->add_vertex( Vertex( Vector3( -1.f,  1.f, -1.f ), Color::Black ) );
-	mesh_->add_vertex( Vertex( Vector3(  1.f,  1.f, -1.f ), Color::White ) );
-	mesh_->add_vertex( Vertex( Vector3( -1.f, -1.f, -1.f ), Color::White ) );
-	mesh_->add_vertex( Vertex( Vector3(  1.f, -1.f, -1.f ), Color::Black ) );
-	mesh_->add_vertex( Vertex( Vector3( -1.f,  1.f,  1.f ), Color::White ) );
-	mesh_->add_vertex( Vertex( Vector3(  1.f,  1.f,  1.f ), Color::Black ) );
-	mesh_->add_vertex( Vertex( Vector3( -1.f, -1.f,  1.f ), Color::Black ) );
-	mesh_->add_vertex( Vertex( Vector3(  1.f, -1.f,  1.f ), Color::White ) );
+	mesh_->add_vertex( Vertex( Vector3( -1.f,  1.f, -1.f ), c1 ) );
+	mesh_->add_vertex( Vertex( Vector3(  1.f,  1.f, -1.f ), c2 ) );
+	mesh_->add_vertex( Vertex( Vector3( -1.f, -1.f, -1.f ), c3 ) );
+	mesh_->add_vertex( Vertex( Vector3(  1.f, -1.f, -1.f ), c1 ) );
+	mesh_->add_vertex( Vertex( Vector3( -1.f,  1.f,  1.f ), c2 ) );
+	mesh_->add_vertex( Vertex( Vector3(  1.f,  1.f,  1.f ), c3 ) );
+	mesh_->add_vertex( Vertex( Vector3( -1.f, -1.f,  1.f ), c1 ) );
+	mesh_->add_vertex( Vertex( Vector3(  1.f, -1.f,  1.f ), c2 ) );
 	
 	// インデックス
 	auto vertex_group = mesh_->get_vertex_group_at( 0 );
@@ -135,11 +141,32 @@ void GeometryShaderCanvasTestScene::render()
 
 	blue_sky::ObjectConstantBufferWithData shader_data;
 
+	static const int bpm = 120;
+	static int last_step = 0;
+	const int step = static_cast< int >( std::round( get_total_elapsed_time() * ( bpm / 60 ) * 8 ) );
+
 	static float a = 0.f;
+	static float aa = 0.f;
+	float scale = 1.f;
+
 	a += 0.01f;
 
+	if ( step != last_step )
+	{
+		aa = a;
+
+		last_step = step;
+	}
+
+	if ( step / 2 % 4 == 0 )
+	{
+		scale = 1.05f;
+	}
+	
+
 	shader_data.data().world.set_identity();
-	shader_data.data().world *= Matrix().set_rotation_y( a );
+	shader_data.data().world *= Matrix().set_rotation_y( aa );
+	shader_data.data().world *= Matrix().set_scaling( scale, scale, scale );
 	shader_data.data().world = shader_data.data().world.transpose();
 
 	shader_data.update();

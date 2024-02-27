@@ -556,17 +556,19 @@ VS_LINE_INPUT vs_line_cube( VS_LINE_INPUT input )
 	return output;
 }
 
-void add_point( inout TriangleStream<COMMON_POS_UV_COLOR> TriStream , in GS_LINE_INPUT input )
+void add_point( inout TriangleStream<COMMON_POS_UV_COLOR> TriStream , in GS_LINE_INPUT input, in float power )
 {
 	const float screen_width = ScreenWidth;
 	const float screen_height = ScreenHeight;
 	const float screen_ratio = ( screen_height / screen_width );
 
-	const float l = 0.2f * 1.f; // input.Preasure;
+    const float l = 0.1f; // 0.2f * power; // input.Preasure;
 	const float hw = l * 0.5f * screen_ratio;
 	const float hh = l * 0.5f;
 	
 	COMMON_POS_UV_COLOR output[ 4 ];
+	
+    input.Position /= input.Position.w;
 	
 	// left top
 	output[ 0 ].Position = input.Position + float4( -hw, -hh, 0.f, 0.f );
@@ -606,14 +608,43 @@ GS_LINE_INPUT interpolate( GS_LINE_INPUT a, GS_LINE_INPUT b, float r )
 	return output;
 }
 
-[maxvertexcount(64)]
-void gs_line_cube( line GS_LINE_INPUT input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream )
+static const int MaxVertexCount = 102;
+static const int MaxPointCount = ( MaxVertexCount / 4 );
+
+[maxvertexcount(102)]
+void gs_line_cube( line GS_LINE_INPUT input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream, uint primitive_id : SV_PrimitiveID )
 {
-	add_point( Stream, interpolate( input[ 0 ], input[ 1 ], 1.f ) );
-	add_point( Stream, interpolate( input[ 0 ], input[ 1 ], 2.f / 3.f ) );
-	add_point( Stream, interpolate( input[ 0 ], input[ 1 ], 0.5f ) );
-	add_point( Stream, interpolate( input[ 0 ], input[ 1 ], 1.f / 3.f ) );
-	add_point( Stream, interpolate( input[ 0 ], input[ 1 ], 0.f ) );
+	GS_LINE_INPUT v = input[ 0 ];
+	
+    float l = 0.00025f;
+    // length(dp.xyz);
+	
+	float4 dp = ( input[ 1 ].Position - v.Position ) / MaxPointCount;
+	float4 dc = ( input[ 1 ].Color - v.Color ) / MaxPointCount;
+
+	// float power = 0.5f;
+	// dp *= power;
+	// dc *= power;
+	
+	const int bpm = 120;
+	const int random_seed = round( Time * ( bpm / 60 ) * 8 );
+
+	for ( int n = 0; n < MaxPointCount; n++ )
+	{
+		add_point( Stream, v, 1.f );
+		
+        dp += float4(random(random_seed * primitive_id) - 0.5f, random(random_seed + primitive_id) - 0.5f, random(random_seed - primitive_id) - 0.5f, 0.f) * l;
+		
+		v.Position += dp;
+		v.Color += dc;
+
+		// v.Position  += (  ) * 0.001f;
+
+		// power += 0.01f;
+		
+		// dp *= 1.01f;
+		// dc *= 1.01f;
+	}
 }
 
 float4 ps_line_cube( COMMON_POS_UV_COLOR input ) : SV_Target
@@ -624,6 +655,10 @@ float4 ps_line_cube( COMMON_POS_UV_COLOR input ) : SV_Target
 	{
 		discard;
 	}
+	else
+    {
+        // output.a = 0.5f;
+    }
 
 	return output;
 	// return input.Color;
@@ -639,7 +674,7 @@ BlendState LineCubeBlend
 	// SrcBlend = ONE;
 	// DestBlend = ONE;
 
-	AlphaToCoverageEnable = False;
+	// AlphaToCoverageEnable = False;
 };
 
 technique11 line_cube

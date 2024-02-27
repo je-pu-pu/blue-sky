@@ -556,38 +556,53 @@ VS_LINE_INPUT vs_line_cube( VS_LINE_INPUT input )
 	return output;
 }
 
-void add_point( inout TriangleStream<COMMON_POS_UV_COLOR> TriStream , in GS_LINE_INPUT input, in float power )
+void add_point( inout TriangleStream<COMMON_POS_UV_COLOR> TriStream , in GS_LINE_INPUT input, in float power, in float angle )
 {
 	const float screen_width = ScreenWidth;
 	const float screen_height = ScreenHeight;
 	const float screen_ratio = ( screen_height / screen_width );
 
-    const float l = 0.1f; // 0.2f * power; // input.Preasure;
-	const float hw = l * 0.5f * screen_ratio;
+    const float l = 0.1f * power;
+	const float hw = l * 0.5f;
 	const float hh = l * 0.5f;
 	
 	COMMON_POS_UV_COLOR output[ 4 ];
 	
-    input.Position /= input.Position.w;
+	const float w_original = input.Position.w;
+	const float perspective_cancel_factor = 1.f; // 0.f .. 1.f
+	
+	if ( perspective_cancel_factor > 0.f )
+	{
+		input.Position /= input.Position.w * perspective_cancel_factor;		  
+	}
+	
+	const float2x2 rot = float2x2 (
+		cos( angle ), sin( angle ),
+		-sin( angle ), cos( angle ) );
 	
 	// left top
-	output[ 0 ].Position = input.Position + float4( -hw, -hh, 0.f, 0.f );
+	output[ 0 ].Position = input.Position + float4( mul( float2( -hw, -hh ), rot ), 0.f, 0.f ) * float4( screen_ratio, 1.f, 1.f, 1.f );
 	output[ 0 ].TexCoord.xy = float2( 0.f, 1.f );
 
 	// right top
-	output[ 1 ].Position = input.Position + float4( +hw, -hh, 0.f, 0.f );
+	output[ 1 ].Position = input.Position + float4( mul( float2( +hw, -hh ), rot ), 0.f, 0.f ) * float4( screen_ratio, 1.f, 1.f, 1.f );
 	output[ 1 ].TexCoord.xy = float2( 1.f, 1.f );
 
 	// left bottom
-	output[ 2 ].Position = input.Position + float4( -hw, +hh, 0.f, 0.f );
+	output[ 2 ].Position = input.Position + float4( mul( float2( -hw, +hh ), rot ), 0.f, 0.f ) * float4( screen_ratio, 1.f, 1.f, 1.f );
 	output[ 2 ].TexCoord.xy = float2( 0.f, 0.f );
 
 	// right bottom
-	output[ 3 ].Position = input.Position + float4( +hw, +hh, 0.f, 0.f );
+	output[ 3 ].Position = input.Position + float4( mul( float2( +hw, +hh ), rot ), 0.f, 0.f ) * float4( screen_ratio, 1.f, 1.f, 1.f );
 	output[ 3 ].TexCoord.xy = float2( 1.f, 0.f );
 
 	for ( uint y = 0; y < 4; ++y )
 	{
+		if ( perspective_cancel_factor > 0.f )
+		{
+			output[ y ].Position *= w_original * perspective_cancel_factor;			 
+		}
+		
 		output[ y ].Color = input.Color;
 	}
 
@@ -614,36 +629,56 @@ static const int MaxPointCount = ( MaxVertexCount / 4 );
 [maxvertexcount(102)]
 void gs_line_cube( line GS_LINE_INPUT input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream, uint primitive_id : SV_PrimitiveID )
 {
+	input[ 0 ].Position /= input[ 0 ].Position.w;
+	input[ 1 ].Position /= input[ 1 ].Position.w;
+	
 	GS_LINE_INPUT v = input[ 0 ];
 	
-    float l = 0.00025f;
-    // length(dp.xyz);
+    const float direction_randomize_factor = 0.5f; // 0.1f; // 0.0025f; // 線の荒々しさ ( 線の方向のズレやすさ )
 	
-	float4 dp = ( input[ 1 ].Position - v.Position ) / MaxPointCount;
+	float3 dp_original = ( ( input[ 1 ].Position - v.Position ) / MaxPointCount ).xyz;
+	float dp_original_length = length( dp_original );
+	float3 dp = dp_original;
 	float4 dc = ( input[ 1 ].Color - v.Color ) / MaxPointCount;
 
-	// float power = 0.5f;
-	// dp *= power;
-	// dc *= power;
+	const float power_randomize_factor = 0.5f; // 0.5f;
+	float power = 1.f;
+	float ap = 0.1f;
 	
 	const int bpm = 120;
-	const int random_seed = round( Time * ( bpm / 60 ) * 8 );
+	const int random_seed = round( Time * ( bpm / 60 ) * 4 );
 
 	for ( int n = 0; n < MaxPointCount; n++ )
 	{
-		add_point( Stream, v, 1.f );
+		add_point( Stream, v, power, atan2( dp.y, dp.x ) );
 		
-        dp += float4(random(random_seed * primitive_id) - 0.5f, random(random_seed + primitive_id) - 0.5f, random(random_seed - primitive_id) - 0.5f, 0.f) * l;
+		const float3 random_direction = normalize( float3( random( random_seed * primitive_id + n ) - 0.5f, random( random_seed + primitive_id + n ) - 0.5f, random( random_seed - primitive_id + n ) - 0.5f ) );
+        dp += float4( random_direction * direction_randomize_factor, 0.f );
+		dp *= power;
 		
-		v.Position += dp;
+		// 線の進む距離を一定の範囲内に収める
+		if ( length( dp ) < dp_original_length * 0.5f )
+		{
+			dp = normalize( dp ) * dp_original_length * 0.5f;
+		}
+		else if ( length( dp ) > dp_original_length * 1.5f )
+		{
+			dp = normalize( dp ) * dp_original_length * 1.5f;
+		}
+		
+		// 線の方向が初期の方向からズレ過ぎたら正しい向きに直す
+		if ( dot( normalize( dp_original ), normalize( dp ) ) < 0.9f )
+		{
+			dp = ( input[ 1 ].Position - v.Position ) / ( MaxPointCount - n );
+		}
+
+		power *= 1.f + ( random( random_seed * primitive_id + n ) - 0.5f ) * power_randomize_factor;
+		power = clamp( power, 0.5f, 1.5f );
+		
+		// dc *= power;
+		
+		v.Position += float4( dp, 0.f );
 		v.Color += dc;
-
-		// v.Position  += (  ) * 0.001f;
-
-		// power += 0.01f;
-		
-		// dp *= 1.01f;
-		// dc *= 1.01f;
 	}
 }
 

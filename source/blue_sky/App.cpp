@@ -247,6 +247,13 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	case WM_ACTIVATEAPP:
 	{
 		App::get_instance()->set_active( LOWORD( wp ) != 0 );
+
+		if ( wp )
+		{
+			// アプリケーションがアクティブになった際、監視対象のディレクトリの変更をチェックする
+			App::get_instance()->check_directory_change();
+		}
+
 		break;
 	}
 	case WM_DESTROY:
@@ -440,6 +447,38 @@ DWORD App::get_window_style() const
 DWORD App::get_window_style_full_scrren() const
 {
 	return WS_POPUP;
+}
+
+/**
+ * ディレクトリが変更された際に実行するハンドラを登録する
+ * 
+ * @param
+ */
+void App::watch_directory_change( const char* dir_path, std::function< void () > f )
+{
+	HANDLE h = FindFirstChangeNotification( dir_path, true, FILE_NOTIFY_CHANGE_LAST_WRITE );
+
+	if ( h == INVALID_HANDLE_VALUE )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( string_t( "App::watch_directory_change() " ) + dir_path + " failed." )
+	}
+
+	watch_directory_change_handler_list_[ h ] = f;
+}
+
+/**
+ * ディレクトリの変更をチェックする
+ * 
+ */
+void App::check_directory_change() const
+{
+	for ( auto i: watch_directory_change_handler_list_ )
+	{
+		if ( WaitForSingleObject( i.first, 0 ) == WAIT_OBJECT_0 )
+		{
+			i.second();
+		}
+	}
 }
 
 void App::close()

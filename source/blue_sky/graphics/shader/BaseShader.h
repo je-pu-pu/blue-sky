@@ -29,6 +29,39 @@ public:
 	using EffectTechnique	= core::graphics::EffectTechnique;
 	using ConstantBuffer	= core::graphics::ConstantBuffer;
 
+	class RenderSetting
+	{
+	private:
+		const InputLayout* input_layout_;
+		const string_t effect_technique_name_;
+		const EffectTechnique* effect_technique_;
+
+	public:
+		RenderSetting( const char_t* input_layout_name, const char_t* effect_technique_name )
+			: input_layout_( GameMain::get_instance()->get_graphics_manager()->get_input_layout( input_layout_name ) )
+			, effect_technique_name_( effect_technique_name )
+			, effect_technique_( GameMain::get_instance()->get_graphics_manager()->get_effect_technique( effect_technique_name ) )
+		{
+			if ( ! input_layout_ )
+			{
+				COMMON_THROW_EXCEPTION_MESSAGE( string_t( "input layout \"" ) + input_layout_name +  "\" not found." );
+			}
+		
+			if ( ! effect_technique_ )
+			{
+				COMMON_THROW_EXCEPTION_MESSAGE( string_t( "effect technique \"" ) + effect_technique_name + "\"not found." );
+			}
+		}
+
+		void reload()
+		{
+			effect_technique_ = GameMain::get_instance()->get_graphics_manager()->get_effect_technique( effect_technique_name_.c_str() );
+		}
+
+		const InputLayout* get_input_layout() const { return input_layout_; }
+		const EffectTechnique* get_effect_technique() const { return effect_technique_; }
+	};
+
 protected:
 	GraphicsManager* get_graphics_manager() const { return GameMain::get_instance()->get_graphics_manager(); }
 

@@ -46,6 +46,7 @@ private:
 	ShaderManager				shader_manager_;
 
 protected:
+	ShaderManager& get_shader_manager() { return shader_manager_; }
 	const ShaderManager& get_shader_manager() const { return shader_manager_; }
 
 public:

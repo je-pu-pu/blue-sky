@@ -56,6 +56,8 @@ public:
 
 	virtual const char_t* get_name() const { return typeid( *this ).name(); }
 
+	virtual void reload() = 0;
+
 	virtual const ParameterInfoList* get_parameter_info_list() const = 0;
 
 	virtual int_t get_int( const char_t* ) const = 0;

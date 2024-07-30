@@ -177,6 +177,31 @@ void GraphicsManager::unload_texture_all()
 }
 #endif
 
+void GraphicsManager::refresh_all_shaders()
+{
+	blue_sky::graphics::GraphicsManager::refresh_all_shaders();
+
+	direct_3d_->setup_sprite();
+
+#if 0
+	if ( sky_box_ )
+	{
+		for ( int n = 0; n < sky_box_->get_shader_count(); n++ )
+		{
+			sky_box_->set_shader_at( n, sky_box_->create_shader() );
+		}
+	}
+
+	if ( ground_ )
+	{
+		for ( int n = 0; n < ground_->get_shader_count(); n++ )
+		{
+			ground_->set_shader_at( n, ground_->create_shader() );
+		}
+	}
+#endif
+}
+
 /**
  * スカイボックスを設定する
  *
@@ -374,7 +399,7 @@ const GraphicsManager::InputLayout* GraphicsManager::get_input_layout( const cha
  * @param EffectTechnique の名前
  * @return EffectTechnique
  */
-const GraphicsManager::EffectTechnique* GraphicsManager::get_effect_technique( const char_t* name ) const
+GraphicsManager::EffectTechnique* GraphicsManager::get_effect_technique( const char_t* name ) const
 {
 	return direct_3d_->get_effect()->get_technique( name );
 }

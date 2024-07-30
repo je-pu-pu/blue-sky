@@ -57,7 +57,6 @@ GraphicsManager::~GraphicsManager()
 
 }
 
-
 void GraphicsManager::setup_shadow_map( uint_t levels, uint_t size )
 {
 	shadow_map_.reset( create_shadow_map( levels, size ) );
@@ -326,7 +325,8 @@ void GraphicsManager::setup_default_shaders()
 	create_named_shader< shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing", "main", "post_effect_hand_drawing" );
 
 	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_id_to_color", "main", "post_effect_id_to_color" );
-	auto noise_shader = create_named_shader< shader::post_effect::NoiseShader >( "post_effect_noise", "main", "post_effect_noise" );
+	create_named_shader< shader::post_effect::NoiseShader >( "post_effect_noise", "main", "post_effect_noise" );
+	// auto noise_shader = create_named_shader< shader::post_effect::NoiseShader >( "post_effect_noise", "main", "post_effect_noise" );
 
 	create_named_shader< shader::DebugShadowMapTextureShader >( "debug_shadow_map_texture" );
 
@@ -340,6 +340,41 @@ void GraphicsManager::setup_default_shaders()
 
 	post_effect_rectangle_->set_mesh( rectangle );
 	set_post_effect_shader( post_effect_shader );
+}
+
+/**
+ * 全てのシェーダーを作成しなおす
+ * 
+ */
+void GraphicsManager::refresh_all_shaders()
+{
+	// 全てのシェーダーを再読み込みする
+	for ( auto& s: get_shader_manager().get_resource_list() )
+	{
+		s->reload();
+	}
+	
+#if 0
+	// 全てのシェーダーを削除する
+	get_shader_manager().clear_all();
+
+	// デフォルトのシェーダーを作成する
+	setup_default_shaders();
+
+	// 全ての GameObject のシェーダーを作成する
+	for ( auto* o: get_game_object_manager()->active_object_list() )
+	{
+		if ( ! o->get_model() )
+		{
+			continue;
+		}
+
+		for ( int n = 0; n < o->get_model()->get_shader_count(); n++ )
+		{
+			o->get_model()->set_shader_at( n, o->get_model()->create_shader() );
+		}
+	}
+#endif
 }
 
 /**

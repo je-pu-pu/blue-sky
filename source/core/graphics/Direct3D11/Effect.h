@@ -35,6 +35,7 @@ public:
 	~Effect();
 	
 	void load( const char* );
+	void clear();
 
 	Technique* get_technique( const char* name );
 

@@ -56,6 +56,8 @@ private:
 	Game*		game_ = nullptr;
 	std::unique_ptr< Config >			config_;
 
+	std::unordered_map< HANDLE, std::function< void() > > watch_directory_change_handler_list_;
+
 	App();								//コンストラクタ
 
 	static LRESULT CALLBACK WinProc(HWND, UINT, WPARAM, LPARAM);
@@ -63,6 +65,8 @@ private:
 
 	DWORD get_window_style() const;
 	DWORD get_window_style_full_scrren() const;
+
+	void check_directory_change() const;
 
 public:
 	virtual ~App();						///< デストラクタ
@@ -94,6 +98,8 @@ public:
 
 	void show_cursor( bool );
 	void clip_cursor( bool );
+
+	void watch_directory_change( const char*, std::function<void()> );
 
 	void close();
 

@@ -138,7 +138,7 @@ public:
 	 * 全てのリソースを削除する
 	 *
 	 */
-	bool_t clear_all()
+	void clear_all()
 	{
 		resource_list_.clear();
 		resource_map_.clear();

@@ -14,8 +14,7 @@ class DefaultShader : public BaseShader
 {
 private:
 	Texture* texture_ = 0;
-	const InputLayout* input_layout_;
-	const EffectTechnique* effect_technique_;
+	RenderSetting render_setting_;
 
 protected:
 	Texture* get_texture_at( uint_t ) override { return texture_; }
@@ -24,18 +23,14 @@ protected:
 
 public:
 	DefaultShader( const char_t* input_layout_name = "main", const char_t* effect_technique_name = "post_effect_default" )
-		: input_layout_( get_graphics_manager()->get_input_layout( input_layout_name ) )
-		, effect_technique_( get_graphics_manager()->get_effect_technique( effect_technique_name ) )
+		: render_setting_( input_layout_name, effect_technique_name )
 	{
-		if ( ! input_layout_ )
-		{
-			COMMON_THROW_EXCEPTION_MESSAGE( string_t( "input layout \"" ) + input_layout_name +  "\" not found." );
-		}
 		
-		if ( ! effect_technique_ )
-		{
-			COMMON_THROW_EXCEPTION_MESSAGE( string_t( "effect technique \"" ) + effect_technique_name + "\"not found." );
-		}
+	}
+
+	void reload() override
+	{
+		render_setting_.reload();
 	}
 
 	DefaultShader* clone() const override { return new DefaultShader( *this ); }
@@ -56,9 +51,9 @@ public:
 
 	void render( const Mesh* mesh, uint_t n ) const override
 	{
-		get_graphics_manager()->set_input_layout( input_layout_ );
+		get_graphics_manager()->set_input_layout( render_setting_.get_input_layout() );
 		get_graphics_manager()->set_primitive_topology( PrimitiveTopology::TRIANGLE_LIST );
-		get_graphics_manager()->render_technique( effect_technique_, [=] { bind(); mesh->render( n ); } );
+		get_graphics_manager()->render_technique( render_setting_.get_effect_technique(), [=] { bind(); mesh->render( n ); } );
 	}
 };
 

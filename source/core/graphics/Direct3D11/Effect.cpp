@@ -25,16 +25,13 @@ Effect::Effect( Direct3D* direct_3d )
 
 Effect::~Effect()
 {
-	for ( TechniqueList::iterator i = technique_list_.begin(); i != technique_list_.end(); ++i )
-	{
-		delete i->second;
-	}
-
-	DIRECT_X_RELEASE( effect_ );
+	clear();
 }
 
 void Effect::load( const char* file_path )
 {
+	clear();
+
 	ID3D10Blob* shader = 0;
 	ID3D10Blob* error_messages = 0;
 
@@ -76,6 +73,22 @@ void Effect::load( const char* file_path )
 
 	vs = vs;
 	*/
+}
+
+/**
+ * 全てのリソースをクリアする
+ * 
+ */
+void Effect::clear()
+{
+	for ( TechniqueList::iterator i = technique_list_.begin(); i != technique_list_.end(); ++i )
+	{
+		delete i->second;
+	}
+
+	technique_list_.clear();
+
+	DIRECT_X_RELEASE( effect_ );
 }
 
 Effect::Technique* Effect::get_technique( const char* name )

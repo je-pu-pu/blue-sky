@@ -76,8 +76,21 @@ GameMain::GameMain()
 		get_config()->get( "graphics.multisample.count", 4 ), 
 		get_config()->get( "graphics.multisample.quality", 2 )
 	) );
+
 	direct_3d_->get_effect()->load( "media/shader/main.fx" );
+
 	direct_3d_->create_default_input_layout();
+
+	/// @todo 各シェーダーの effect_technique_ が古いままなのを解消する
+	get_app()->watch_directory_change( "media/shader/", [this] () {
+		direct_3d_->get_effect()->load( "media/shader/main.fx" );
+		direct_3d_->create_default_input_layout();
+
+		if ( graphics_manager_ )
+		{
+			graphics_manager_->refresh_all_shaders();
+		}
+	} );
 
 	if ( get_config()->get( "graphics.font_enabled", 1 ) )
 	{

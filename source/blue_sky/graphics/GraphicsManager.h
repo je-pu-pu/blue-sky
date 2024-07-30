@@ -178,6 +178,8 @@ public:
 	Texture* get_null_texture() { return null_texture_; }
 
 	void setup_default_shaders();
+	virtual void refresh_all_shaders();
+
 	void load_paper_textures();
 
 	// virtual void unload_mesh( const char_t* ) = 0;
@@ -225,7 +227,7 @@ public:
 	const ConstantBuffer* get_current_skinning_constant_buffer() const { return current_skinning_constant_buffer_; }
 
 	virtual const InputLayout* get_input_layout( const char_t* ) const = 0;
-	virtual const EffectTechnique* get_effect_technique( const char_t* ) const = 0;
+	virtual EffectTechnique* get_effect_technique( const char_t* ) const = 0;
 
 	virtual void set_input_layout( const char_t* ) const = 0;
 	virtual void set_input_layout( const InputLayout* ) const = 0;

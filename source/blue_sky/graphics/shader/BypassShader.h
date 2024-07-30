@@ -12,6 +12,8 @@ namespace blue_sky::graphics::shader
 class BypassShader : public BaseShader
 {
 public:
+	void reload() override { }
+
 	BypassShader* clone() const override { return new BypassShader( *this ); }
 
 	Texture* get_texture_at( uint_t ) override { return nullptr; }

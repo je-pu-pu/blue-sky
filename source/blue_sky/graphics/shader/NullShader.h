@@ -12,6 +12,8 @@ namespace blue_sky::graphics::shader
 class NullShader : public BaseShader
 {
 public:
+	void reload() override { }
+
 	NullShader* clone() const override { return new NullShader( *this ); }
 
 	Texture* get_texture_at( uint_t ) override { return nullptr; }

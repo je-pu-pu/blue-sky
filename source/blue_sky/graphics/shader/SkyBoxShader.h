@@ -13,8 +13,7 @@ class SkyBoxShader : public BaseShader
 {
 private:
 	Texture* texture_ = 0;
-	const InputLayout* input_layout_;
-	const EffectTechnique* effect_technique_;
+	RenderSetting render_setting_;
 
 protected:
 	Texture* get_texture() const { return texture_; }
@@ -24,10 +23,14 @@ protected:
 
 public:
 	SkyBoxShader()
-		: input_layout_( get_graphics_manager()->get_input_layout( "main" ) )
-		, effect_technique_( get_graphics_manager()->get_effect_technique( "sky_box" ) )
+		: render_setting_( "main", "sky_box" )
 	{
 
+	}
+
+	void reload() override
+	{
+		render_setting_.reload();
 	}
 
 	SkyBoxShader* clone() const override { return new SkyBoxShader( *this ); }
@@ -43,9 +46,9 @@ public:
 
 	void render( const Mesh* mesh, uint_t n ) const override
 	{
-		get_graphics_manager()->set_input_layout( input_layout_ );
+		get_graphics_manager()->set_input_layout( render_setting_.get_input_layout() );
 		get_graphics_manager()->set_primitive_topology( PrimitiveTopology::TRIANGLE_LIST );
-		get_graphics_manager()->render_technique( effect_technique_, [=] { bind(); mesh->render( n ); } );
+		get_graphics_manager()->render_technique( render_setting_.get_effect_technique(), [=] { bind(); mesh->render( n ); } );
 	}
 };
 

@@ -572,6 +572,17 @@ void Direct3D11::create_default_input_layout()
 
 void Direct3D11::create_input_layout( const char_t* input_layout_name, const char_t* teqhnique_name, D3D11_INPUT_ELEMENT_DESC layout[], UINT layout_array_size )
 {
+	// すでに同じ名前でインプットレイアウトが作成済みであればスキップする
+	const auto i = input_layout_list_.find( input_layout_name );
+	
+	if ( i != input_layout_list_.end() )
+	{
+		return;
+
+		// delete i->second;
+		// input_layout_list_.erase( i );
+	}
+
 	auto* pass = static_cast< EffectPass* >( effect_->get_technique( teqhnique_name )->get_pass_list().front() );
 
 	input_layout_list_[ input_layout_name ] = new InputLayout( pass->create_input_layout( layout, layout_array_size ) );

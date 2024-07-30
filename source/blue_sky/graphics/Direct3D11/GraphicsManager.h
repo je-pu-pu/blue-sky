@@ -53,7 +53,7 @@ private:
 
 protected:
 	const InputLayout* get_input_layout( const char_t* ) const override;
-	const EffectTechnique* get_effect_technique( const char_t* ) const override;
+	EffectTechnique* get_effect_technique( const char_t* ) const override;
 
 	void set_input_layout( const char_t* ) const override;
 	void set_input_layout( const InputLayout* ) const override;
@@ -93,6 +93,8 @@ public:
 
 	// void unload_texture( const char_t* ) override;
 	// void unload_texture_all() override;
+
+	void refresh_all_shaders() override;
 
 	void set_sky_box( const char_t* ) override;
 	void unset_sky_box() override;

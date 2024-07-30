@@ -677,9 +677,6 @@
     <ClInclude Include="core\graphics\ShaderResource.h">
       <Filter>core\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="blue_sky\graphics\shader\Shader.h">
-      <Filter>core\graphics\shader</Filter>
-    </ClInclude>
     <ClInclude Include="core\graphics\RenderTargetTexture.h">
       <Filter>core\graphics</Filter>
     </ClInclude>
@@ -769,6 +766,9 @@
     </ClInclude>
     <ClInclude Include="Scene\GeometryShaderCanvasTestScene.h">
       <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\Shader.h">
+      <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

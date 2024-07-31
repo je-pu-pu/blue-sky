@@ -257,14 +257,14 @@ bool FbxFileLoader::load( const char_t* file_name )
 	fbx_material_index_ = 0;
 	bone_index_map_.clear();
 
-	common::timer t;
+	common::timer t{};
 
 	if ( ! load_fbx( file_name ) )
 	{
 		return false;
 	}
 
-	std::cout << "imp " << t.elapsed() << std::endl;
+	std::cout << "imp " << t.format() << std::endl;
 
 	/*
 	std::cout << "*** DirectX ***" << std::endl;
@@ -290,34 +290,34 @@ bool FbxFileLoader::load( const char_t* file_name )
 		}
 #endif
 
-		t.restart();
+		t.start();
 
 		for ( int n = 0; n < root_node->GetChildCount(); n++ )
 		{
 			load_limb_recursive( root_node->GetChild( n ) );
 		}
 
-		std::cout << "limb " << t.elapsed() << std::endl;
-		t.restart();
+		std::cout << "limb " << t.format() << std::endl;
+		t.start();
 
 		load_animations();
 
-		std::cout << "anim " << t.elapsed() << std::endl;
-		t.restart();
+		std::cout << "anim " << t.format() << std::endl;
+		t.start();
 
 		for ( int n = 0; n < root_node->GetChildCount(); n++ )
 		{
 			load_mesh_recursive( root_node->GetChild( n ) );
 		}
 
-		std::cout << "mesh " << t.elapsed() << std::endl;
-		t.restart();
+		std::cout << "mesh " << t.format() << std::endl;
+		t.start();
 	}
 
 	convert_coordinate_system();
 
-	std::cout << "convert_coordinate_system " << t.elapsed() << std::endl;
-	t.restart();
+	std::cout << "convert_coordinate_system " << t.format() << std::endl;
+	t.start();
 
 	return true;
 }

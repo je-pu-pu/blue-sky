@@ -200,18 +200,18 @@ GraphicsManager::Model* GraphicsManager::load_model( const char_t* name )
 	{
 		if ( mesh_loaded )
 		{
-			std::cout << "--- loaded mesh : " << name << " : " << t.elapsed() << "---" << std::endl;
+			std::cout << "--- loaded mesh : " << name << " : " << t.format() << "---" << std::endl;
 		}
 		if ( line_loaded )
 		{
-			std::cout << "--- loaded line : " << name << " : " << t.elapsed() << "---" << std::endl;
+			std::cout << "--- loaded line : " << name << " : " << t.format() << "---" << std::endl;
 		}
 
 		model_manager_.add_named( name, model );
 	}
 	else
 	{
-		std::cout << "--- not found : " << name << " : " << t.elapsed() << "---" << std::endl;
+		std::cout << "--- not found : " << name << " : " << t.format() << "---" << std::endl;
 
 		delete model;
 

@@ -1,12 +1,12 @@
 #ifndef COMMON_TIMER_H
 #define COMMON_TIMER_H
 
-#include <boost/timer.hpp>
+#include <boost/timer/timer.hpp>
 
 namespace common
 {
 
-using timer = boost::timer;
+using timer = boost::timer::cpu_timer;
 
 } // namespace common
 

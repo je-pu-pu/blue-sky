@@ -5,6 +5,7 @@
 #include <win/Tablet.h>
 #include <win/Rect.h>
 #include <win/Point.h>
+#include <win/LastError.h>
 
 #include <winnls32.h>
 
@@ -472,11 +473,24 @@ void App::watch_directory_change( const char* dir_path, std::function< void () >
  */
 void App::check_directory_change() const
 {
-	for ( auto i: watch_directory_change_handler_list_ )
+	for ( const auto& i: watch_directory_change_handler_list_ )
 	{
-		if ( WaitForSingleObject( i.first, 0 ) == WAIT_OBJECT_0 )
+		const auto result = WaitForSingleObject( i.first, 0 );
+
+		if ( result == WAIT_FAILED )
+		{
+			COMMON_THROW_EXCEPTION_MESSAGE( win::LastError().get_error_message() );
+		}
+
+		if ( result == WAIT_OBJECT_0 )
 		{
 			i.second();
+
+			// ŠÄŽ‹‚ðŒp‘±‚·‚é
+			if ( ! FindNextChangeNotification( i.first ) )
+			{
+				COMMON_THROW_EXCEPTION_MESSAGE( win::LastError().get_error_message() );
+			}
 		}
 	}
 }

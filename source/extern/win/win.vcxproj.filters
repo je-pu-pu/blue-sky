@@ -10,6 +10,7 @@
     <ClInclude Include="memory_leak_detection.h" />
     <ClInclude Include="memory_leak_check.h" />
     <ClInclude Include="Clipboard.h" />
+    <ClInclude Include="LastError.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Version.cpp" />

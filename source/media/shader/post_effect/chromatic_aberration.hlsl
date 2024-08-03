@@ -2,19 +2,19 @@
  * 色収差ポストエフェクト
  */
 
-float4 ps_post_effect_chromatic_aberrration( COMMON_POS_UV input ) : SV_Target
+float4 ps_post_effect_chromatic_aberration( COMMON_POS_UV input ) : SV_Target
 {
 	float2 h = float2( 0.5f, 0.5f );
 
 	return float4(
 		source_texture.Sample( texture_sampler, ( input.TexCoord - h ) * 1.00f + h ).r,
-		source_texture.Sample( texture_sampler, ( input.TexCoord - h ) * 0.99f + h ).g,
-		source_texture.Sample( texture_sampler, ( input.TexCoord - h ) * 0.98f + h ).b,
+		source_texture.Sample( texture_sampler, ( input.TexCoord - h ) * 0.95f + h ).g,
+		source_texture.Sample( texture_sampler, ( input.TexCoord - h ) * 0.90f + h ).b,
 		1.f
 	);
 }
 
-technique11 post_effect_chromatic_aberrration
+technique11 post_effect_chromatic_aberration
 {
 	pass main
 	{
@@ -23,7 +23,7 @@ technique11 post_effect_chromatic_aberrration
 		SetHullShader( NULL );
 		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
-		SetPixelShader( CompileShader( ps_4_0, ps_post_effect_chromatic_aberrration() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_post_effect_chromatic_aberration() ) );
 
 		RASTERIZERSTATE = Default;
 	}

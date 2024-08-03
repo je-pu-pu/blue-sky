@@ -321,7 +321,7 @@ void GraphicsManager::setup_default_shaders()
 	create_named_shader< shader::UnicolorShader >( "unicolor", "main", "unicolor" );
 
 	auto post_effect_shader = create_named_shader< shader::post_effect::DefaultShader >( "post_effect_default" );
-	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_chromatic_aberrration", "main", "post_effect_chromatic_aberrration" );
+	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_chromatic_aberration", "main", "post_effect_chromatic_aberration" );
 	create_named_shader< shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing", "main", "post_effect_hand_drawing" );
 
 	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_id_to_color", "main", "post_effect_id_to_color" );

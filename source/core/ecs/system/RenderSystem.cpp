@@ -49,10 +49,13 @@ void RenderSystem::update()
 		model->model->render();
 	}
 
-	/*
-	get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_chromatic_aberrration" ) );
+	auto ca_shader = get_graphics_manager()->get_shader( "post_effect_chromatic_aberration" );
+
+	get_graphics_manager()->set_post_effect_shader( ca_shader );
 	get_graphics_manager()->render_post_effect( render_result_texture_1_.get(), render_result_texture_2_.get() );
 
+
+	/*
 	get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_hand_drawing" ) );
 	get_graphics_manager()->render_post_effect( render_result_texture_2_.get() );
 	*/
@@ -64,7 +67,7 @@ void RenderSystem::update()
 	noise_shader->set_texture_at( 1, get_graphics_manager()->load_texture( "media/texture/noise.png" ) );
 
 	get_graphics_manager()->set_post_effect_shader( noise_shader );
-	get_graphics_manager()->render_post_effect( render_result_texture_1_.get() );
+	get_graphics_manager()->render_post_effect( render_result_texture_2_.get() );
 
 	get_graphics_manager()->set_default_render_target();
 
@@ -73,6 +76,7 @@ void RenderSystem::update()
 	
 	// ImGUI によるシェーダーパラメター変更用 UI の自動描画
 	noise_shader->render_parameter_gui();
+	ca_shader->render_parameter_gui();
 }
 
 } // namespace core::ecs

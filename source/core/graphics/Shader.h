@@ -3,6 +3,7 @@
 #include <core/type.h>
 #include <vector>
 #include <optional>
+#include <limits>
 
 namespace core::graphics
 {
@@ -40,8 +41,8 @@ public:
 		ParameterType				type;			// 型
 		std::string					name;			// 名前
 		std::optional< float_t >	default_value;	// デフォルト値
-		float_t						min;			// 最小値
-		float_t						max;			// 最大値
+		float_t						min = std::numeric_limits< float_t >::lowest();	// 最小値
+		float_t						max  = std::numeric_limits< float_t >::max();	// 最大値
 		std::size_t					offset = 0;		// メモリアドレスのオフセット ( 通常 0 で良い )
 	};
 

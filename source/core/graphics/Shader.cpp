@@ -36,7 +36,8 @@ void Shader::render_parameter_gui()
 		// const auto max_digit = std::max( calc_digit_number_after_decimal_point( p.min ), calc_digit_number_after_decimal_point( p.max ) );
 		// std::pow( 0.1f, max_digit );
 
-		const auto step = ( p.max - p.min ) * 0.001f;
+		const auto step = ( p.min == std::numeric_limits< float_t >::lowest() || p.max == std::numeric_limits< float_t >::max() ) ? 0.1f : ( p.max - p.min ) * 0.001f;
+
 		// const auto s = common::serialize( step );
 		// const auto l = s.length();
 

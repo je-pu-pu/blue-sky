@@ -135,8 +135,6 @@ private:
 	void check_scene_transition();
 	void setup_scene( const string_t& );
 
-	void edit_command( char_t );
-
 public:
 	GameMain();
 	virtual ~GameMain() override;

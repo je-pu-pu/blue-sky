@@ -27,6 +27,8 @@
 
 #include <core/input/DirectInput/DirectInput.h>
 
+#include <core/Logger.h>
+
 #include <win/Version.h>
 #include <win/Clipboard.h>
 
@@ -37,6 +39,7 @@
 #include <common/log.h>
 
 #include <imgui.h>
+#include <imgui_stdlib.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 
@@ -54,6 +57,7 @@ GameMain::GameMain()
 	, is_display_fps_( false )
 	, is_command_mode_( false )
 	, is_show_cursor_( false )
+	, user_command_( 1024, '\0' )
 {
 	// common::log( "log/debug.log", "init" );
 
@@ -100,6 +104,9 @@ GameMain::GameMain()
 	ImGui::CreateContext();
 	ImGui_ImplWin32_Init( get_app()->GetWindowHandle() );
 	ImGui_ImplDX11_Init( direct_3d_->getDevice(), direct_3d_->getImmediateContext() );
+
+	ImGuiIO& io = ImGui::GetIO();
+	io.Fonts->AddFontFromFileTTF( "media/font/uzura.ttf", 22 );
 
 
 	direct_input_.reset( new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() ) );
@@ -355,26 +362,146 @@ void GameMain::render()
 {
 	scene_->render();
 
-	if ( is_command_mode_ )
-	{
-		graphics_manager_->draw_text_at_center( ( "> " + user_command_ ).c_str(), Color::White );
-		graphics_manager_->draw_text( 0, static_cast< float_t >( get_height() ) / 2.f, static_cast< float_t >( get_width() ), static_cast< float_t >( get_height() ), get_script_manager()->get_output().c_str(), Color::White );
+	if ( is_command_mode_ && ImGui::Begin( "Console", 0, ImGuiWindowFlags_NoCollapse ) )
+    {
+		static auto scroll_to_bottom = false;
 
-		/// @todo OculusRift ‚É‚à•¶Žš‚ð•`‰æ‚Å‚«‚é‚æ‚¤‚É‚·‚é
-		/*
-		if ( get_oculus_rift() )
-		{
-			get_oculus_rift()->setup_rendering();
-			get_oculus_rift()->setup_rendering_for_left_eye();
-			
-			graphics_manager_->draw_text_at_center( ( "> " + user_command_ ).c_str(), Color::White );
+		const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+		if ( ImGui::BeginChild( "ScrollingRegion", ImVec2( 0, -footer_height_to_reserve ), 0, ImGuiWindowFlags_HorizontalScrollbar ) )
+        {
+			if ( ImGui::BeginPopupContextWindow() )
+            {
+                if ( ImGui::Selectable( "Clear" ) )
+				{
+					// clear log
+				}
 
-			get_oculus_rift()->setup_rendering_for_right_eye();
+                ImGui::EndPopup();
+            }
 
-			graphics_manager_->draw_text_at_center( ( "> " + user_command_ ).c_str(), Color::White );
+			for ( const auto& log: core::logger.get_log_list() )
+			{
+				auto has_color = false;
+
+				switch ( log.get_type() )
+				{
+				case core::Logger::Log::Type::ERROR:
+					ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 0.4f, 0.4f, 1.0f ) );
+					has_color = true;
+					break;
+				case core::Logger::Log::Type::WARN:
+					ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 0.7f, 0.1f, 1.0f ) );
+					has_color = true;
+					break;
+				case core::Logger::Log::Type::INFO:
+					break;
+				case core::Logger::Log::Type::DEBUG:
+					break;
+				}
+                    
+
+				ImGui::TextUnformatted( log.get_message().c_str() );
+
+				if ( has_color )
+				{
+					ImGui::PopStyleColor();
+				}
+			}
+
+			if ( scroll_to_bottom )
+			{
+                ImGui::SetScrollHereY( 1.f );
+			}
+
+            scroll_to_bottom = false;
 		}
-		*/
-	}
+
+		ImGui::EndChild();
+
+		ImGui::Separator();
+
+		const auto input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
+
+		ImGui::SetNextItemWidth( -FLT_MIN );
+
+		bool reclaim_focus = false;
+
+		const auto callback = [] (ImGuiInputTextCallbackData* data) -> int
+		{
+			auto game_main = static_cast< GameMain* >( data->UserData );
+			string_t command;
+
+			switch ( data->EventFlag )
+			{
+			case ImGuiInputTextFlags_CallbackCompletion:
+				command = game_main->user_command_;
+
+				game_main->get_script_manager()->auto_complete( command );
+
+				if ( ! game_main->get_script_manager()->get_output().empty() )
+				{
+					core::logger.info( game_main->get_script_manager()->get_output() );
+				}
+
+				scroll_to_bottom = true;
+
+				break;
+			case ImGuiInputTextFlags_CallbackHistory:
+				if ( data->EventKey == ImGuiKey_UpArrow )
+				{
+					command = game_main->get_script_manager()->get_prev_hisotry_command();
+			
+				}
+				else if ( data->EventKey == ImGuiKey_DownArrow )
+				{
+					command = game_main->get_script_manager()->get_next_hisotry_command();	
+				}
+			}
+
+			if ( command != game_main->user_command_ )
+			{
+				data->DeleteChars( 0, data->BufTextLen );
+				data->InsertChars( 0, command.c_str() );
+			}
+
+			return 0;
+		};
+
+		if ( ImGui::InputText( "##command", & user_command_, input_text_flags, callback, this ) )
+        {
+			boost::trim( user_command_ );
+
+			if ( user_command_ != "" )
+			{
+				core::logger.info( user_command_ );
+
+				try
+				{
+					get_script_manager()->exec( user_command_, true );
+				}
+				catch ( const ScriptError& e )
+				{
+					// get_app()->show_error_message( e.what() );
+					core::logger.error( e.what() );
+				}
+
+				user_command_ = "";
+				scroll_to_bottom = true;
+			}
+
+			reclaim_focus = true;
+		}
+
+		ImGui::SetItemDefaultFocus();
+
+        if ( reclaim_focus || ! ImGui::IsAnyItemActive() )
+		{
+			ImGui::SetKeyboardFocusHere( -1 );
+		}
+
+		ImGui::End();
+    }
+
 
 	ImGui::Render();
 	get_direct_3d()->set_default_render_target( false );
@@ -383,83 +510,17 @@ void GameMain::render()
 	direct_3d_->present();
 }
 
-void GameMain::on_key_down( char_t key )
+void GameMain::on_key_down( char_t )
 {
-	if ( is_command_mode_ )
-	{
-		edit_command( key );
-	}
-	else
-	{
-		if ( key == '\r' )
-		{
-			is_command_mode_ = true;
-		}
-	}
-
-	set_show_cursor( is_command_mode_ );
-}
-
-void GameMain::edit_command( char_t key )
-{
-	if ( key == '\r' )
-	{
-		boost::trim( user_command_ );
-
-		if ( user_command_ == "" )
-		{
-			is_command_mode_ = false;
-		}
-		else
-		{
-			try
-			{
-				get_script_manager()->exec( user_command_, true );
-			}
-			catch ( const ScriptError& e )
-			{
-				get_app()->show_error_message( e.what() );
-			}
-
-			user_command_ = "";
-		}
-	}
-	else if ( key == '\t' )
-	{
-		get_script_manager()->auto_complete( user_command_ );
-	}
-	else if ( key == '\b' )
-	{
-		if ( user_command_.size() > 0 )
-		{
-			user_command_.resize( user_command_.size() - 1 );
-		}
-	}
-	else if ( key == 0x16 )
-	{
-		user_command_ += win::Clipboard::get_text();
-	}
-	else if ( std::isprint( key ) )
-	{
-		user_command_ += key;
-	}
+	
 }
 
 void GameMain::on_special_key_down( int key )
 {
-	if ( key == KEY_UP )
+	if ( key == KEY_F1 )
 	{
-		if ( is_command_mode_ )
-		{
-			user_command_ = get_script_manager()->get_prev_hisotry_command();
-		}
-	}
-	else if ( key == KEY_DOWN )
-	{
-		if ( is_command_mode_ )
-		{
-			user_command_ = get_script_manager()->get_next_hisotry_command();
-		}
+		is_command_mode_ = ! is_command_mode_;
+		set_show_cursor( is_command_mode_ );
 	}
 	else if ( key == KEY_F2 )
 	{

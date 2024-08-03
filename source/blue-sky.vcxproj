@@ -100,6 +100,13 @@
     <ClCompile Include="GameObject\Switch.cpp" />
     <ClCompile Include="GameObject\TranslationObject.cpp" />
     <ClCompile Include="GameObject\Umbrella.cpp" />
+    <ClCompile Include="lib\src\imgui\imgui.cpp" />
+    <ClCompile Include="lib\src\imgui\imgui_draw.cpp" />
+    <ClCompile Include="lib\src\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="lib\src\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="lib\src\imgui\imgui_stdlib.cpp" />
+    <ClCompile Include="lib\src\imgui\imgui_tables.cpp" />
+    <ClCompile Include="lib\src\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Scene\CanvasTestScene.cpp" />
     <ClCompile Include="Scene\DebugScene.cpp" />
@@ -225,6 +232,7 @@
     <ClInclude Include="core\graphics\Texture.h" />
     <ClInclude Include="core\graphics\VertexGroup.h" />
     <ClInclude Include="core\input\DirectInput\DirectInput.h" />
+    <ClInclude Include="core\Logger.h" />
     <ClInclude Include="core\math.h" />
     <ClInclude Include="core\math\Bullet\Quaternion.h" />
     <ClInclude Include="core\math\Bullet\Transform.h" />

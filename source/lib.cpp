@@ -1,4 +1,4 @@
-#pragma comment ( lib, "imgui.lib" )
+// #pragma comment ( lib, "imgui.lib" )
 
 #pragma comment( lib, "LibOVR.lib" )
 

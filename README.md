@@ -24,13 +24,13 @@ Windows 10 ( 32bit )
 - DirectWrite
 - DirectSound
 - DirectInput
-- [imgui 1.75](https://github.com/ocornut/imgui/releases/tag/v1.75)
+- [imgui v1.91.0](https://github.com/ocornut/imgui/releases/tag/v1.91.0)
 - [lua 5.3.4](https://www.lua.org/ftp/)
 - [sol2 3.2.3](https://github.com/ThePhD/sol2/tree/v3.2.3)
 - [FBX SDK 2020.2 VS2019](https://www.autodesk.com/developer-network/platform-technologies/fbx-sdk-2020-2)
 - [Oculus SDK for Windows 1.43.0](https://developer.oculus.com/downloads/package/oculus-sdk-for-windows/1.43.0/)
 - [boost 1.6.7](https://www.boost.org/)
-- [bullet3 2.87](https://github.com/bulletphysics/bullet3/releases/tag/2.87)
+- [bullet3 3.25](https://github.com/bulletphysics/bullet3/releases/tag/3.25)
 - [libogg 1.3.4](https://xiph.org/downloads/)
 - [libvorbis 1.3.7](https://xiph.org/downloads/)
 - [Effects for Direct3D 11 (FX11) jun2020](https://github.com/microsoft/FX11/tree/jun2020)

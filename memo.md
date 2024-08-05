@@ -2045,3 +2045,147 @@ void ui()
 }
 
 ```
+
+# 2024-08-03
+
+現在、ポストエフェクトを動的に追加したり変更したりできないため、シェーダーグラフの案を考える。
+( ただ、グラフにするとかなり複雑になるため、ポストエフェクトシェーダーのリストを管理するだけのシンプルなものの方が良いかも )
+
+```c++
+void test()
+{
+    auto& graph = get_graphics_manager()->get_shader_graph( "post_process" );
+
+    const noise_shader = get_graphics_manager()->get_shader( "noise_shader" );
+    const toon_shader = get_graphics_manager()->get_shader( "toon_shader" );
+
+    auto node1 = ShaderGraphNode( noise_shader );
+    auto node2 = ShaderGraphNode( toon_shader );
+
+    node1.add_link_to( node2 );
+    node2.add_link_to( )
+}
+```
+
+# 2024-08-05
+
+Bullet Physics の Linear Math は信頼性が低いのではないか？という疑惑が出たため、
+可能な部分は DirectXTK の SimpleMath に置き換えられないか検討。
+( 物理シミュレーションは Bullet を使っているため、完全に Liner Math を捨てることはできない )
+
+以下 Bullet の Liner Math の問題点。
+
+## 回転軸が直観とズレる問題
+
+setEulerYPR(), getEulerYPR() を使って回転を行うと、思っているのと違う軸で回転する。
+
+* Yaw   を変更したはずが Z 軸 で回転している ( 本来は Y 軸では？ )
+* Pitch を変更したはずが Y 軸 で回転している ( 本来は X 軸では？ )
+* Roll  を変更したはずが X 軸 で回転している ( 本来は Z 軸では？ )
+* 回転方向は全て左手座標系の右回り ( しかし Bullet は右手座標系なのになぜ？ )
+
+もしかして Bullet は、Yaw, Pitch, Roll で回転を指定する際、 ( 飛行機のイメージで )
+飛行機の前が X+ 方向を向き、
+飛行機の上が Z+ 方向 ( 右手座標系の場合 ) を向いている事を想定している？
+( どちらにせよ値がおかしくなるという別の問題もあるため、使えないが )
+
+## 角度を加算していくと途中で値がおかしくなる問題
+
+setEulerYPR(), getEulerYPR() を使って回転を行うと、
+値が 90 度や 180 度などを超えたあたりで動作がおかしくなり、正しく回転しなくなる。 
+
+Bullet Physics を最新の bullet3-3.25 に更新してみたが解決せず。
+
+## 検証用コード
+
+検証したのは以下のようなコード。
+
+```c++
+void update()
+{
+    static btTransform t;
+    float_t yaw, pitch, roll;
+
+    t.getBasis().getEulerYPR( yaw, pitch, roll );
+
+    yaw += math::degree_to_radian( 0.1f );
+
+    t.getBasis().setEulerYPR( yaw, pitch, roll );
+
+    const auto up = btVector3( 0.f, 1.f, 0.f ) * t.getBasis(); // かける順番を変えてもおかしい。
+
+    std::cout <<
+        math::radian_to_degree( yaw ) << ", " <<
+        math::radian_to_degree( pitch ) << ", " <<
+        math::radian_to_degree( roll ) << std::endl;
+
+    std::cout <<
+        "up : " << up.x() << ", " << up.y() << ", " << up.z() << std::endl;
+}
+```
+
+たとえば、以下のように毎フレーム pitch を + 0.1f した場合、
+
+```c++
+static btTransform t;
+float_t yaw, pitch, roll;
+
+t.getBasis().getEulerYPR( yaw, pitch, roll );
+pitch += math::degree_to_radian( 0.1f );
+t.getBasis().setEulerYPR( yaw, pitch, roll );
+
+const auto up = t.getBasis() * btVector3( 0.f, 1.f, 0.f );
+```
+
+pitch が 90 までは正しいが、90 を超えたあたりから、89.99991 のまま動かなくなる、
+そして、yaw と roll が 180 と -180 を繰り返す。使えない。
+
+```
+yaw, pitch, roll : 0, 89.8006, 0
+up : 0, 1, 0
+
+yaw, pitch, roll : 0, 89.9002, 0
+up : 0, 1, 0
+
+yaw, pitch, roll : 0, 90.0011, 0
+up : 0, 1, -0
+
+yaw, pitch, roll : 0, 90.1, 0
+up : 0, 1, -0
+
+yaw, pitch, roll : -180, 89.9991, -180
+up : 0, 1, 1.33014e-12
+
+yaw, pitch, roll : -1.36604e-05, 90.1, -1.36604e-05
+up : 3.69482e-13, 1, 4.16132e-10
+
+yaw, pitch, roll : 180, 89.9991, 180
+up : 0, 1, 2.29741e-12
+
+yaw, pitch, roll : -1.36604e-05, 90.1, -1.36604e-05
+up : 3.69482e-13, 1, 4.16132e-10
+
+yaw, pitch, roll : 180, 89.9991, 180
+up : 0, 1, 2.29741e-12
+```
+
+## SimpleMath を使えそうか？
+
+結論 : 使える。
+
+まず、上記と同じ動きをコードは、 SimpleMath の Vector3 と Quaternion を使えば問題無く動く。
+
+また、一つのアプリの中で Bullet Physics と SimpleMath を両方使うことで極端に効率が悪くならいか？についてだが、
+現状、 GameObject の位置や回転を変更した場合は、以下の処理を行っている。
+
+1. GameObject::commit_transform() で GameObject の Transform 情報を Bullet Physics に転送、
+
+また、毎フレーム以下の処理を行っている。
+
+2. Bullet Physics で物理演算
+3. 物理演算の結果を GameObject::update_transform() で GameObject の Transform 情報に反映
+
+つまり、現状でも GameObject の Transform <-> Bullet Physics の物理演算の間で、データの転送は行っている。
+GameObject が保持するデータを SimpleMath に切り替えても、今と比べて極端に遅くはならない。
+
+上記の 1. と 3. で変換処理を行うようにすれば、 GameObject が保持している Transform 情報は、Bullet のものである必要がない。

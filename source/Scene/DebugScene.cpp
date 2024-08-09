@@ -161,7 +161,7 @@ void DebugScene::render()
 
 		/// @todo sprite_ms ‚Å‚Ì•`‰æ‚É‘Î‰‚·‚é
 		get_graphics_manager()->get_sprite()->begin();
-		get_graphics_manager()->get_sprite()->draw( win::Rect( get_width() / 4.f, get_height() / 4.f, get_width() / 4.f * 3.f, get_height() / 4.f * 3.f ), get_graphics_manager()->get_depth_texture() );
+		get_graphics_manager()->get_sprite()->draw( win::Rect( get_width() / 4, get_height() / 4, get_width() / 4 * 3, get_height() / 4 * 3 ), get_graphics_manager()->get_depth_texture() );
 		// get_graphics_manager()->get_sprite()->draw( win::Rect( get_width() / 4.f, get_height() / 4.f, get_width() / 4.f * 3.f, get_height() / 4.f * 3.f ), get_graphics_manager()->get_texture( "2x2" ) );
 		get_graphics_manager()->get_sprite()->end();
 

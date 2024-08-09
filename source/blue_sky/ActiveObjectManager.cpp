@@ -11,7 +11,6 @@
 #include <GameObject/Umbrella.h>
 #include <GameObject/Stone.h>
 #include <GameObject/Switch.h>
-#include <GameObject/StaticObject.h>
 #include <GameObject/AreaSwitch.h>
 #include <GameObject/TranslationObject.h>
 

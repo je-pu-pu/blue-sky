@@ -26,12 +26,6 @@ public:
 private:
 	DirectX::XMVECTOR value_;
 
-	explicit Vector( const DirectX::XMVECTOR& v )
-		: value_( v )
-	{
-
-	}
-
 public:
 	Vector()
 		: value_()
@@ -43,6 +37,12 @@ public:
 		: value_()
 	{
 		set( x, y, z, w );
+	}
+
+	explicit Vector( const DirectX::XMVECTOR& v )
+		: value_( v )
+	{
+
 	}
 
 	explicit Vector( const btVector3& v )

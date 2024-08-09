@@ -5,8 +5,6 @@
 #include <core/math/DirectXMath/Vector.h>
 #include <core/math/DirectXMath/Matrix.h>
 #include <core/math/DirectXMath/Color.h>
-#include <core/math/Bullet/Quaternion.h>
-#include <core/math/Bullet/Transform.h>
 
 #include <type/type.h>
 
@@ -31,8 +29,14 @@ namespace core
 	using direct_x_math::Matrix;
 	using direct_x_math::Color;
 
-	using bullet::Quaternion;
-	using bullet::Transform;
+	namespace simple_math
+	{
+		class Transform;
+		class Quaternion;
+	}
+
+	using Transform = simple_math::Transform;
+	using Quaternion = simple_math::Quaternion;
 
 	namespace ecs
 	{

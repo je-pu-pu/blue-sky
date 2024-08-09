@@ -794,6 +794,8 @@
     <ClInclude Include="core\Logger.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="core\math\SimpleMath\Transform.h" />
+    <ClInclude Include="core\math\SimpleMath\Quaternion.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -936,6 +938,7 @@
     <None Include="media\script\scene\canvas_test.lua">
       <Filter>media\script\scene</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Scene">

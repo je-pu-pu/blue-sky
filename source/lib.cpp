@@ -17,7 +17,7 @@
 #pragma comment ( lib, "libvorbis_static.lib" )
 #pragma comment ( lib, "libvorbisfile_static.lib" )
 
-// #pragma comment( lib, "DirectXTK.lib" )
+#pragma comment( lib, "DirectXTK.lib" )
 
 #ifdef _DEBUG
 #pragma comment( lib, "BulletCollision_vs2010_debug.lib" )

@@ -243,6 +243,8 @@
     <ClInclude Include="core\math\DirectXMath\Vector2.h" />
     <ClInclude Include="core\math\DirectXMath\Vector3.h" />
     <ClInclude Include="core\math\Quaternion.h" />
+    <ClInclude Include="core\math\SimpleMath\Quaternion.h" />
+    <ClInclude Include="core\math\SimpleMath\Transform.h" />
     <ClInclude Include="core\math\Transform.h" />
     <ClInclude Include="core\math\Vector.h" />
     <ClInclude Include="core\physics\Bullet\BulletPhysics.h" />
@@ -318,6 +320,7 @@
     <None Include="media\stage_ext\ext-1.stage" />
     <None Include="media\stage_ext\ext-2.stage" />
     <None Include="media\stage_ext\staff.stage" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -640,6 +643,5 @@
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

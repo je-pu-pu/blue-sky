@@ -2189,3 +2189,15 @@ up : 0, 1, 2.29741e-12
 GameObject が保持するデータを SimpleMath に切り替えても、今と比べて極端に遅くはならない。
 
 上記の 1. と 3. で変換処理を行うようにすれば、 GameObject が保持している Transform 情報は、Bullet のものである必要がない。
+
+# 2024-08-10
+
+SimpleMath に置き換えたところ、カメラが逆を向いている。移動方向が逆になっているなど、何かおかしい。調べた結果、
+SimpleMath は右手座標系だったことが発覚。
+
+* https://github.com/microsoft/DirectXTK/wiki/Mixing-SimpleMath-and-DirectXMath
+* https://qiita.com/sisomoti/items/52be06363da1495ec19a
+
+また、 SimpleMath は DirectXMath をラップしており DirectXMath と比較して遅い。自分で DirectXMath をラップして左手座標系でいくのが良いのでは。
+
+https://github.com/microsoft/DirectXTK/wiki/SimpleMath#enter-simplemath

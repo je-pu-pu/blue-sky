@@ -136,7 +136,7 @@ void TransformTestScene::update()
 
 	Quaternion q;
 	Vector r = math::degree_to_radian( rot );
-	q.set_euler_zyx( r.z(), r.y(), r.x() );
+	q.set_yaw_pitch_roll( r.y(), r.x(), r.z() );
 	current_entity_transform_->transform.set_rotation( q );
 
 	// GUI ‚É‚æ‚Á‚ÄƒJƒƒ‰‚Ìî•ñ‚ğ•ÏX‚·‚é

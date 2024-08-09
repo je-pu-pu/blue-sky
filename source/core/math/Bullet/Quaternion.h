@@ -25,18 +25,14 @@ public:
 		: value_( yaw, pitch, roll )
 	{ }
 
-	Vector get_euler_zyx() const
+	void get_yaw_pitch_roll( btScalar& yaw, btScalar& pitch, btScalar& roll ) const
 	{
-		float_t x, y, z;
-
-		value_.getEulerZYX( z, y, x );
-
-		return Vector( x, y, z );
+		value_.getEulerZYX( yaw, pitch, roll );
 	}
 
-	void set_euler_zyx( const btScalar& yaw_z, const btScalar& pitch_y, const btScalar& roll_x )
+	void set_yaw_pitch_roll( const btScalar& yaw, const btScalar& pitch, const btScalar& roll )
 	{
-		value_.setEulerZYX( yaw_z, pitch_y, roll_x );
+		value_.setEuler( yaw, pitch, roll );
 	}
 
 	Quaternion operator * ( const Quaternion& q ) { return Quaternion( value_ * q.value_ ); }

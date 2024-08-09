@@ -145,7 +145,7 @@ void ActiveObject::set_start_rotation( float_t x, float_t y, float_t z )
 	start_rotation_.set( x, y, z );
 
 	Quaternion q;
-	q.set_euler_zyx( math::degree_to_radian( start_rotation_.z() ), math::degree_to_radian( start_rotation_.y() ), math::degree_to_radian( start_rotation_.x() ) );
+	q.set_yaw_pitch_roll( math::degree_to_radian( start_rotation_.y() ), math::degree_to_radian( start_rotation_.x() ), math::degree_to_radian( start_rotation_.z() ) );
 	get_transform().set_rotation( q );
 }
 
@@ -176,7 +176,7 @@ void ActiveObject::set_direction_degree( float d )
 
 	{
 		Quaternion q;
-		q.set_euler_zyx( 0.f, math::degree_to_radian( direction_degree_ ), 0.f );
+		q.set_yaw_pitch_roll( math::degree_to_radian( direction_degree_ ), 0.f, 0.f );
 		get_transform().set_rotation( q );
 
 		commit_transform();

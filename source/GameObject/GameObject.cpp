@@ -39,12 +39,19 @@ void GameObject::update_transform()
 		return;
 	}
 
-	transform_ = Transform( rigid_body_->getWorldTransform() );
+	auto t = rigid_body_->getWorldTransform();
+
 	Transform offset;
 	offset.set_identity();
 	offset.set_position( Vector( 0, -get_height_offset(), 0 ) );
 
-	transform_ = transform_ * offset;
+	t *= offset;
+
+	/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
+	transform_.set_position( reinterpret_cast< const Vector& >( t.getOrigin() ) );
+
+	auto q = t.getRotation();
+	transform_.set_rotation( reinterpret_cast< const Quaternion& >( q ) );
 }
 
 /**

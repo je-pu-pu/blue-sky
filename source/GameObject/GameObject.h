@@ -1,6 +1,8 @@
 #pragma once
 
 #include <blue_sky/type.h>
+#include <core/math/Transform.h>
+
 #include <functional>
 
 class btRigidBody;

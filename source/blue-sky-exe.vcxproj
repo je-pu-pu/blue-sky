@@ -27,6 +27,9 @@
       <Project>{5db1fafc-e068-43a8-84d3-0da42d464be5}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AB51C17B-1859-4735-8ACB-9513EB532182}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -197,6 +200,5 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

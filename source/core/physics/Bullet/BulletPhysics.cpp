@@ -157,7 +157,19 @@ btRigidBody* BulletPhysics::create_rigid_body( btCollisionShape* shape, const Tr
 	btVector3 local_inertia( 0, 0, 0 );
 	shape->calculateLocalInertia( mass, local_inertia );
 
-	btDefaultMotionState* motion_state = new btDefaultMotionState( transform * offset );
+	auto t_to_btt = [] ( const Transform& t ) {
+		float yaw, pitch, roll;
+		t.get_rotation().get_yaw_pitch_roll( yaw, pitch, roll );
+
+		btQuaternion q{ yaw, pitch, roll };
+
+
+		btVector3 c{ t.get_position().x(), t.get_position().y(), t.get_position().z() };
+
+		return btTransform( q, c );
+	};
+
+	btDefaultMotionState* motion_state = new btDefaultMotionState( t_to_btt( transform ) * t_to_btt( offset ) );
 	btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );
 	
 	btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
@@ -242,8 +254,8 @@ bool BulletPhysics::load_obj( const char_t* file_name )
 		btBvhTriangleMeshShape* shape = new btBvhTriangleMeshShape( triangle, true );
 		collision_shape_list_.push_back( shape );
 
-		Transform transform;
-		transform.set_identity();
+		btTransform transform;
+		transform.setIdentity();
 
 		// btScalar mass( 0 );
 		btVector3 local_inertia( 0, 0, 0 );

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <core/math/Bullet/Quaternion.h>
+#include <core/math/SimpleMath/Quaternion.h>
 
 namespace core
 {
 
-using Quaternion = bullet::Quaternion;
+using Quaternion = simple_math::Quaternion;
 
 } // namespace core

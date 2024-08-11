@@ -11,6 +11,9 @@ namespace core::ecs
  */
 class TransformControlComponent : public Component
 {
+public:
+	float yaw = 0.f;
+	float pitch = 0.f;
 
 }; // class TransformControlComponent
 

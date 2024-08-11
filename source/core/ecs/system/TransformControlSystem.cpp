@@ -17,6 +17,8 @@ void TransformControlSystem::update( ComponentTuple& component_tuple )
 	const auto* input = GameMain::get_instance()->get_input();
 
 	auto* transform = std::get< TransformComponent* >( component_tuple );
+	auto* transform_control = std::get< TransformControlComponent* >( component_tuple );
+
 	const auto moving_speed = input->press( Input::Button::R2 ) ? 0.3f : 0.1f;
 
 	if ( input->press( Input::Button::LEFT ) )
@@ -49,13 +51,12 @@ void TransformControlSystem::update( ComponentTuple& component_tuple )
 		transform->transform.get_position() -= transform->transform.up() * moving_speed;
 	}
 
-	float yaw, pitch, roll;
-	transform->transform.get_rotation().get_yaw_pitch_roll( yaw, pitch, roll );
+	transform_control->yaw += input->get_mouse_dx();
+	transform_control->pitch += input->get_mouse_dy();
 
-	yaw += input->get_mouse_dx();
-	pitch += input->get_mouse_dy();
+	transform_control->pitch = ::math::clamp( transform_control->pitch, ::math::degree_to_radian( -90.f ), ::math::degree_to_radian( 90.f ) );
 
-	transform->transform.get_rotation().set_yaw_pitch_roll( yaw, pitch, 0 );
+	transform->transform.get_rotation().set_yaw_pitch_roll( transform_control->yaw, transform_control->pitch, 0 );
 }
 
 } // namespace core::ecs

@@ -142,7 +142,7 @@ void TitleScene::render()
 
 	// render_logo()
 	{
-		get_graphics_manager()->set_input_layout( "line" );
+		get_graphics_manager()->set_input_layout( "pos_color" );
 
 		render_technique( "|drawing_line", [this]
 		{

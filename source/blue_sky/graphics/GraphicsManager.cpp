@@ -560,7 +560,7 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 		active_object->render_mesh();
 	}
 
-	set_input_layout( "line" );
+	set_input_layout( "pos_color" );
 
 	render_technique( "|drawing_line", [ this, active_object_manager ]
 	{
@@ -692,6 +692,8 @@ void GraphicsManager::render_debug_axis( const ActiveObjectManager* active_objec
 	{
 		return;
 	}
+
+	set_input_layout( "pos_color" );
 
 	render_technique( "|simple_line", [ this, active_object_manager ]
 	{

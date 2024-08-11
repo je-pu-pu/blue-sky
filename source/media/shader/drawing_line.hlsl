@@ -1,6 +1,6 @@
-GS_LINE_INPUT vs_drawing_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID )
+COMMON_POS_COLOR vs_drawing_line( COMMON_POS_COLOR input, uint vertex_id : SV_VertexID )
 {
-	GS_LINE_INPUT output;
+	COMMON_POS_COLOR output;
 
 	output.Position = common_wvp_pos( input.Position );
 	output.Color = input.Color + ObjectColor;
@@ -40,7 +40,7 @@ GS_LINE_INPUT vs_drawing_line( VS_LINE_INPUT input, uint vertex_id : SV_VertexID
  * @todo 線が崩れる問題の解決後 get_drawing_line_common() と共通化
  */
 [maxvertexcount(4)]
-void gs_drawing_line( line GS_LINE_INPUT input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream, uint primitive_id : SV_PrimitiveID )
+void gs_drawing_line( line COMMON_POS_COLOR input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream, uint primitive_id : SV_PrimitiveID )
 {
 	static const uint input_vertex_count = 2;
 	static const uint output_vertex_count = 4;
@@ -174,9 +174,9 @@ RasterizerState Debug
  * 手書き風の線のためのバーテックスシェーダー
  *
  */
-GS_LINE_INPUT vs_drawing_line_debug( VS_LINE_INPUT input )
+COMMON_POS_COLOR vs_drawing_line_debug( COMMON_POS_COLOR input )
 {
-	GS_LINE_INPUT output;
+	COMMON_POS_COLOR output;
 
 	output.Position = common_wvp_pos( input.Position );
 	output.Color = input.Color;
@@ -195,7 +195,7 @@ GS_LINE_INPUT vs_drawing_line_debug( VS_LINE_INPUT input )
  *
  * @todo 線が崩れる問題を検証
  */
-void get_drawing_line_common( line GS_LINE_INPUT input[ 2 ], out COMMON_POS_UV_COLOR output[ 4 ] )
+void get_drawing_line_common( line COMMON_POS_COLOR input[ 2 ], out COMMON_POS_UV_COLOR output[ 4 ] )
 {
 	static const uint input_vertex_count = 2;
 	static const uint output_vertex_count = 4;
@@ -275,7 +275,7 @@ void get_drawing_line_common( line GS_LINE_INPUT input[ 2 ], out COMMON_POS_UV_C
  *
  */
 [maxvertexcount(4)]
-void gs_drawing_line_debug( line GS_LINE_INPUT input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream )
+void gs_drawing_line_debug( line COMMON_POS_COLOR input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream )
 {
 	COMMON_POS_UV_COLOR output[ 4 ];
 
@@ -294,7 +294,7 @@ void gs_drawing_line_debug( line GS_LINE_INPUT input[2], inout TriangleStream<CO
  *
  */
 [maxvertexcount(7)]
-void gs_drawing_line_debug_line( line GS_LINE_INPUT input[ 2 ], inout LineStream<COMMON_POS_UV_COLOR> Stream )
+void gs_drawing_line_debug_line( line COMMON_POS_COLOR input[ 2 ], inout LineStream<COMMON_POS_UV_COLOR> Stream )
 {
 	COMMON_POS_UV_COLOR output[ 4 ];
 

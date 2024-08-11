@@ -155,18 +155,6 @@ struct VS_SKIN_INPUT
 	float4 Weight   : WEIGHT;
 };
 
-struct VS_LINE_INPUT
-{
-	float4 Position : SV_POSITION;
-	float4 Color    : COLOR0;
-};
-
-struct GS_LINE_INPUT
-{
-	float4 Position : SV_POSITION;
-	float4 Color    : COLOR0;
-};
-
 struct PS_INPUT
 {
 	float4 Position : SV_POSITION;
@@ -546,9 +534,9 @@ technique11 skin_with_shadow
  *
  *
  */
-VS_LINE_INPUT vs_line_cube( VS_LINE_INPUT input )
+COMMON_POS_COLOR vs_line_cube( COMMON_POS_COLOR input )
 {
-	VS_LINE_INPUT output;
+	COMMON_POS_COLOR output;
 
 	output.Position = vs_common_wvp_pos_to_pos( input.Position );
 	output.Color = input.Color;
@@ -556,7 +544,7 @@ VS_LINE_INPUT vs_line_cube( VS_LINE_INPUT input )
 	return output;
 }
 
-void add_point( inout TriangleStream<COMMON_POS_UV_COLOR> TriStream , in GS_LINE_INPUT input, in float power, in float angle )
+void add_point( inout TriangleStream<COMMON_POS_UV_COLOR> TriStream , in COMMON_POS_COLOR input, in float power, in float angle )
 {
 	const float screen_width = ScreenWidth;
 	const float screen_height = ScreenHeight;
@@ -613,9 +601,9 @@ void add_point( inout TriangleStream<COMMON_POS_UV_COLOR> TriStream , in GS_LINE
 	TriStream.RestartStrip();
 }
 
-GS_LINE_INPUT interpolate( GS_LINE_INPUT a, GS_LINE_INPUT b, float r )
+COMMON_POS_COLOR interpolate( COMMON_POS_COLOR a, COMMON_POS_COLOR b, float r )
 {
-	GS_LINE_INPUT output;
+	COMMON_POS_COLOR output;
 	
 	output.Position = a.Position * r + b.Position * ( 1.f - r );
 	output.Color = a.Color * r + b.Color * ( 1.f - r );
@@ -627,12 +615,12 @@ static const int MaxVertexCount = 102;
 static const int MaxPointCount = ( MaxVertexCount / 4 );
 
 [maxvertexcount(102)]
-void gs_line_cube( line GS_LINE_INPUT input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream, uint primitive_id : SV_PrimitiveID )
+void gs_line_cube( line COMMON_POS_COLOR input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream, uint primitive_id : SV_PrimitiveID )
 {
 	input[ 0 ].Position /= input[ 0 ].Position.w;
 	input[ 1 ].Position /= input[ 1 ].Position.w;
 	
-	GS_LINE_INPUT v = input[ 0 ];
+	COMMON_POS_COLOR v = input[ 0 ];
 	
     const float direction_randomize_factor = 0.5f; // 0.1f; // 0.0025f; // 線の荒々しさ ( 線の方向のズレやすさ )
 	
@@ -640,8 +628,13 @@ void gs_line_cube( line GS_LINE_INPUT input[2], inout TriangleStream<COMMON_POS_
 	float dp_original_length = length( dp_original );
 	float3 dp = dp_original;
 	float4 dc = ( input[ 1 ].Color - v.Color ) / MaxPointCount;
+	
+	const float max_random_degree = 15.f; // 本来進むべき方向からのズレを何度まで許可するか？
 
-	const float power_randomize_factor = 0.5f; // 0.5f;
+	const float power_randomize_factor = 0.f; // 0.5f;
+	const float min_power = 0.9f; // 0.5f;
+	const float max_power = 1.1f; // 1.5f;
+	
 	float power = 1.f;
 	float ap = 0.1f;
 	
@@ -653,7 +646,7 @@ void gs_line_cube( line GS_LINE_INPUT input[2], inout TriangleStream<COMMON_POS_
 		add_point( Stream, v, power, atan2( dp.y, dp.x ) );
 		
 		const float3 random_direction = normalize( float3( random( random_seed * primitive_id + n ) - 0.5f, random( random_seed + primitive_id + n ) - 0.5f, random( random_seed - primitive_id + n ) - 0.5f ) );
-        dp += float4( random_direction * direction_randomize_factor, 0.f );
+        dp += random_direction * direction_randomize_factor;
 		dp *= power;
 		
 		// 線の進む距離を一定の範囲内に収める
@@ -667,13 +660,13 @@ void gs_line_cube( line GS_LINE_INPUT input[2], inout TriangleStream<COMMON_POS_
 		}
 		
 		// 線の方向が初期の方向からズレ過ぎたら正しい向きに直す
-		if ( dot( normalize( dp_original ), normalize( dp ) ) < 0.9f )
+		if ( dot( normalize( dp_original ), normalize( dp ) ) < 1.f - ( max_random_degree / 90.f ) )
 		{
 			dp = ( input[ 1 ].Position - v.Position ) / ( MaxPointCount - n );
 		}
 
 		power *= 1.f + ( random( random_seed * primitive_id + n ) - 0.5f ) * power_randomize_factor;
-		power = clamp( power, 0.5f, 1.5f );
+		power = clamp( power, min_power, max_power );
 		
 		// dc *= power;
 		

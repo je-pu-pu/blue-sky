@@ -64,6 +64,15 @@ struct COMMON_POS_UV_COLOR
 };
 
 /**
+ * 座標と色を持つ共通頂点構造
+ */
+struct COMMON_POS_COLOR
+{
+	float4 Position : SV_POSITION;
+	float4 Color    : COLOR0;
+};
+
+/**
  * 引数に渡された seed に対応するランダムな 0.f ～ 1.f の値を返す
  */
 float random( float seed )

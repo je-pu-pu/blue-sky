@@ -19,16 +19,21 @@ float random( float2 texCoord, int Seed )
  */
 float4 ps_post_effect_noise( COMMON_POS_UV input ) : SV_Target
 {
-	float2 uv = input.TexCoord + noise_texture.Sample( wrap_texture_sampler, input.TexCoord / Size + floor( Offset * Speed ) / Speed * 0.1f ).xy * Gain;
+	// return source_texture.Sample( texture_sampler, input.TexCoord );
+	
+	float2 uv = input.TexCoord + noise_texture.Sample( wrap_texture_sampler, input.TexCoord / Size + floor( Offset * Speed ) / Speed * 0.1f ).xw * Gain;
 
 	return source_texture.Sample( texture_sampler, uv );
+	
 
 	float4 c1 = source_texture.Sample( texture_sampler, input.TexCoord + random( input.TexCoord, Seed + 0 ) * Gain );
 	float4 c2 = source_texture.Sample( texture_sampler, input.TexCoord + random( input.TexCoord, Seed + 1 ) * Gain );
 	float4 c3 = source_texture.Sample( texture_sampler, input.TexCoord + random( input.TexCoord, Seed + 2 ) * Gain );
 	float4 c4 = source_texture.Sample( texture_sampler, input.TexCoord + random( input.TexCoord, Seed + 3 ) * Gain );
 
-	return ( c1 + c2 + c3 + c4 ) / 4.f;
+	// return ( c1 + c2 + c3 + c4 ) / 4.f;
+	
+	return float4( c1.r, c2.g, c3.b, 1.f );
 }
 
 technique11 post_effect_noise

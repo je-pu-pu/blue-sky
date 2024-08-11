@@ -599,6 +599,8 @@ void GraphicsManager::clear_debug_bullet() const
  */
 void GraphicsManager::render_debug_bullet() const
 {
+	set_input_layout( "pos_color" );
+
 	render_technique( "|bullet", [this]
 	{
 		get_game_render_data()->bind_to_vs();

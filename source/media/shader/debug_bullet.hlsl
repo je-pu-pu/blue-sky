@@ -1,9 +1,9 @@
 // ----------------------------------------
 // for Bullet debug
 // ----------------------------------------
-VS_LINE_INPUT vs_debug_bullet( VS_LINE_INPUT input )
+COMMON_POS_COLOR vs_debug_bullet( COMMON_POS_COLOR input )
 {
-	VS_LINE_INPUT output;
+	COMMON_POS_COLOR output;
 
 	output.Position = common_vp_pos( input.Position );
 	output.Color = input.Color;
@@ -11,7 +11,7 @@ VS_LINE_INPUT vs_debug_bullet( VS_LINE_INPUT input )
 	return output;
 }
 
-float4 ps_debug_bullet( VS_LINE_INPUT input ) : SV_Target
+float4 ps_debug_bullet( COMMON_POS_COLOR input ) : SV_Target
 {
 	return float4( input.Color.x, input.Color.y, input.Color.z, 0.75f );
 }

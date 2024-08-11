@@ -519,13 +519,13 @@ void Direct3D11::create_default_input_layout()
 	create_input_layout( "skin", "|skin", layout_skin, ARRAYSIZE( layout_skin ) );
 
 	// line
-	D3D11_INPUT_ELEMENT_DESC layout_line[] =
+	D3D11_INPUT_ELEMENT_DESC layout_pos_color[] =
     {
         { "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR",       0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-	create_input_layout( "line", "|drawing_line", layout_line, ARRAYSIZE( layout_line ) );
+	create_input_layout( "pos_color", "|drawing_line", layout_pos_color, ARRAYSIZE( layout_pos_color ) );
 
 	// ポイント 
 	D3D11_INPUT_ELEMENT_DESC layout_drawing_point[] =
@@ -546,15 +546,6 @@ void Direct3D11::create_default_input_layout()
     };
 
 	create_input_layout( "sprite", "|sprite", layout_sprite, ARRAYSIZE( layout_sprite ) );
-
-	//
-	D3D11_INPUT_ELEMENT_DESC layout_line_cube[] =
-    {
-        { "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR",       0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    };
-
-	create_input_layout( "line_cube", "|line_cube", layout_line_cube, ARRAYSIZE( layout_line_cube ) );
 
 	/// @todo 2D の描画に法線を使っているのは無駄なのでなんとかする
 	/*

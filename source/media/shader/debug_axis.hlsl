@@ -1,14 +1,14 @@
 // ----------------------------------------
 // for debug axis
 // ----------------------------------------
-VS_LINE_INPUT vs_debug_axis( VS_LINE_INPUT input )
+COMMON_POS_COLOR vs_debug_axis( COMMON_POS_COLOR input )
 {
 	input.Position = common_wvp_pos( input.Position );
 
 	return input;
 }
 
-float4 ps_debug_axis( VS_LINE_INPUT input ) : SV_Target
+float4 ps_debug_axis( COMMON_POS_COLOR input ) : SV_Target
 {
 	return float4( input.Color.x, input.Color.y, input.Color.z, 1.f );
 }

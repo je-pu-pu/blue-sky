@@ -165,7 +165,7 @@ PS_CANVAS_OUTPUT ps_canvas( PS_CANVAS_INPUT input )
 		const float2 d = input.TexCoord - float2( 0.5f, 0.5f );
 		const float l = sqrt( d.x * d.x + d.y * d.y ); // ‰~‚Ì’†S‚©‚ç‚Ì‹——£ ( 0.f .. 1.f )
 
-		output.Depth = sin( l * ( PI / 2.f ) ); // 0.f .. 1.f ‚ğ‚»‚Ì‚Ü‚Ü Depth ‚Éİ’è
+		output.Depth = sin( l * ( Pi / 2.f ) ); // 0.f .. 1.f ‚ğ‚»‚Ì‚Ü‚Ü Depth ‚Éİ’è
 	}
 	else
 	{

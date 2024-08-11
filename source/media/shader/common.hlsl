@@ -1,4 +1,6 @@
-static const float PI = 3.14159265f;
+#include "common_state.hlsl"
+#include "common_cbuffer.hlsl"
+#include "common_texture.hlsl"
 
 /**
  * デバッグ用の線のための DepthStencilState
@@ -9,8 +11,6 @@ DepthStencilState DebugLineDepthStencilState
 	DepthWriteMask = ALL;
 	DepthFunc = LESS_EQUAL;
 };
-
-
 
 /***
  * 座標のみを持つ共通頂点構造
@@ -71,6 +71,37 @@ struct COMMON_POS_COLOR
 	float4 Position : SV_POSITION;
 	float4 Color    : COLOR0;
 };
+
+
+/// @todo 名前を整理する
+struct VS_SKIN_INPUT
+{
+	float4 Position : POSITION;
+	float3 Normal   : NORMAL0;
+	float2 TexCoord : TEXCOORD0;
+	uint4  Bone     : BONE;
+	float4 Weight   : WEIGHT;
+};
+
+/// @todo 名前を整理する
+struct PS_INPUT
+{
+	float4 Position : SV_POSITION;
+	float3 Normal   : NORMAL0;
+	float2 TexCoord : TEXCOORD0;
+	float4 Color    : COLOR0;
+};
+
+/// @todo 名前を整理する
+struct PS_SHADOW_INPUT
+{
+	float4 Position : SV_POSITION;
+	float3 Normal   : NORMAL0;
+	float4 ShadowTexCoord[ ShadowMapCascadeLevels ] : TEXCOORD0;
+	float2 TexCoord : TEXCOORD4;
+	float Depth : DEPTH;
+};
+
 
 /**
  * 引数に渡された seed に対応するランダムな 0.f ～ 1.f の値を返す

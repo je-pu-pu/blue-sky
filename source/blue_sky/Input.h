@@ -196,6 +196,15 @@ public:
 	float get_mouse_x_rate() const { return mouse_x_rate_; }
 	float get_mouse_y_rate() const { return mouse_y_rate_; }
 
+	/**
+	 * @brief マウスの移動量をクリアする
+	 */
+	void clear_mouse_move()
+	{
+		mouse_dx_ = 0.f;
+		mouse_dy_ = 0.f;
+	}
+
 	float get_mouse_dx() const { return mouse_dx_; }
 	float get_mouse_dy() const { return mouse_dy_; }
 

@@ -51,7 +51,7 @@ public:
 	void update() override;
 	void render() override;
 
-	bool is_clip_cursor_required() override { return false; }
+	bool is_clip_cursor_required() override { return true; }
 };
 
 } // namespace blue_sky

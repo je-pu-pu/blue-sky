@@ -297,10 +297,15 @@ bool GameMain::update()
 	/// @todo •ÊƒXƒŒƒbƒh‰»
 	get_sound_manager()->update();
 	
-	if ( get_app()->is_active() && ! is_command_mode_ )
+	if ( get_app()->is_active() )
 	{
 		direct_input_->update();
 		input_->update();
+
+		if ( is_command_mode_ )
+		{
+			input_->clear_mouse_move();
+		}
 	}
 	else
 	{
@@ -521,6 +526,7 @@ void GameMain::on_special_key_down( int key )
 	{
 		is_command_mode_ = ! is_command_mode_;
 		set_show_cursor( is_command_mode_ );
+		get_app()->clip_cursor( is_command_mode_ ? false : scene_->is_clip_cursor_required() );
 	}
 	else if ( key == KEY_F2 )
 	{

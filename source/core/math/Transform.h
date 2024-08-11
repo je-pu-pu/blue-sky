@@ -1,10 +1,10 @@
 #pragma once
 
-#include <core/math/SimpleMath/Transform.h>
+#include <core/math/DirectXMath/Transform.h>
 
-namespace core
+namespace core::math
 {
 
-using Transform = simple_math::Transform;
+using Transform = direct_x_math::Transform;
 
-} // namespace core
+} // namespace core::math

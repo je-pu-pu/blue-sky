@@ -7,8 +7,15 @@
 
 #include <windows.h>
 
-//■■■　メイン　■■■
-int WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow )
+/**
+ * @brief メイン
+ * @param hInst 
+ * @param  
+ * @param  
+ * @param nCmdShow 
+ * @return 
+ */
+int WINAPI WinMain( _In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int nCmdShow )
 {
     _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 

@@ -1,8 +1,9 @@
 #pragma once
 
+#include "Quaternion.h"
 #include "Vector.h"
 
-namespace direct_x_math
+namespace core::math::direct_x_math
 {
 
 /**
@@ -125,9 +126,9 @@ public:
 		return *this;
 	}
 
-	Matrix& set_rotation_quaternion( const Vector& q )
+	Matrix& set_rotation_quaternion( const Quaternion& q )
 	{
-		value_ = DirectX::XMMatrixRotationQuaternion( q );
+		value_ = DirectX::XMMatrixRotationQuaternion( q.value_ );
 
 		return *this;
 	}
@@ -209,4 +210,4 @@ public:
 
 }; // class Matrix
 
-}; // namespace direct_x_math
+}; // namespace core::math::direct_x_math

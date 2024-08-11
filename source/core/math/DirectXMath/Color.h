@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 
-namespace direct_x_math
+namespace core::math::direct_x_math
 {
 
 /**
@@ -127,4 +127,4 @@ public:
 
 }; // class Color
 
-}; // namespace direct_x_math
+}; // namespace core::math::direct_x_math

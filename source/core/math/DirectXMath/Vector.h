@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Quaternion.h"
 #include "Vector3.h"
 #include "Vector2.h"
 #include <DirectXMath.h>
@@ -9,9 +10,10 @@
 
 class btVector3;
 
-namespace direct_x_math
+namespace core::math::direct_x_math
 {
 
+class Quaternion;
 class Matrix;
 
 /**
@@ -26,6 +28,10 @@ public:
 private:
 	DirectX::XMVECTOR value_;
 
+	explicit Vector( const DirectX::XMVECTOR& v )
+		: value_( v )
+	{ }
+
 public:
 	Vector()
 		: value_()
@@ -37,12 +43,6 @@ public:
 		: value_()
 	{
 		set( x, y, z, w );
-	}
-
-	explicit Vector( const DirectX::XMVECTOR& v )
-		: value_( v )
-	{
-
 	}
 
 	explicit Vector( const btVector3& v )
@@ -103,6 +103,11 @@ public:
 	    return out << "( " << v.x() << ", " << v.y() << ", " << v.z() << " )";
 	}
 
+	static Vector transform( const Vector& v, const Quaternion& q )
+	{
+		return Vector( DirectX::XMVector3Rotate( v.value_, q.value_ ) );
+	}
+
 	UnitType dot( const Vector& v2 ) const { return DirectX::XMVectorGetX( DirectX::XMVector3Dot( value_, v2.value_ ) ); }
 	Vector cross( const Vector& v2 ) const { return Vector( DirectX::XMVector3Cross( value_, v2.value_ ) ); }
 
@@ -120,4 +125,4 @@ public:
 
 }; // class Vector
 
-}; // namespace direct_x_math
+}; // namespace core::math::direct_x_math

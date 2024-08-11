@@ -243,8 +243,8 @@ bool CityGenerator::check_collision( RoadControlPoint& cp ) const
  */
 void CityGenerator::format_crossroad()
 {
-	auto a = core::LineSegment2::intersection( core::LineSegment2( Vector2( -1.f, 0.f ), Vector2( +1.f, 0.f ) ), core::LineSegment2( Vector2( 0.f, -1.f ), Vector2( 0.f, +1.f ) ) );
-	auto b = core::LineSegment2::intersection( core::LineSegment2( Vector2( -1.f, -1.f ), Vector2( -1.f, +1.f ) ), core::LineSegment2( Vector2( -1.f, -1.f ), Vector2( +1.f, -1.f ) ) );
+	auto a = core::math::LineSegment2::intersection( core::math::LineSegment2( Vector2( -1.f, 0.f ), Vector2( +1.f, 0.f ) ), core::math::LineSegment2( Vector2( 0.f, -1.f ), Vector2( 0.f, +1.f ) ) );
+	auto b = core::math::LineSegment2::intersection( core::math::LineSegment2( Vector2( -1.f, -1.f ), Vector2( -1.f, +1.f ) ), core::math::LineSegment2( Vector2( -1.f, -1.f ), Vector2( +1.f, -1.f ) ) );
 
 	if ( a )
 	{

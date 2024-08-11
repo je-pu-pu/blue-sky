@@ -18,6 +18,7 @@ class OculusRift
 public:
 	using Direct3D = core::graphics::direct_3d_11::Direct3D11;
 	using Vector = core::Vector;
+	using Quaternion = core::Quaternion;
 	using Matrix = core::Matrix;
 
 private:

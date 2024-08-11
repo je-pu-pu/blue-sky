@@ -3,7 +3,7 @@
 #include "Quaternion.h"
 #include <LinearMath/btTransform.h>
 
-namespace core::bullet
+namespace core::math::bullet
 {
 
 class Transform
@@ -42,4 +42,4 @@ public:
 	operator const btTransform& () const { return transform_; }
 };
 
-} // namespace core::bullet
+} // namespace core::math::bullet

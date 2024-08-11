@@ -73,7 +73,8 @@ void ParticleSystemTestScene::update()
 		t->transform.get_position() += t->transform.right() * 0.001f;
 	}
 
-	t->transform.set_rotation( Quaternion( get_input()->get_mouse_dx(), get_input()->get_mouse_dy(), 0.f ) *  t->transform.get_rotation() );
+	const auto q = Quaternion::from_yaw_pitch_roll( get_input()->get_mouse_dx(), get_input()->get_mouse_dy(), 0.f );
+	t->transform.set_rotation( q * t->transform.get_rotation() );
 
 #ifdef ECS
 	camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * 90.f, get_input()->get_mouse_dx() * 90.f, 0.f );

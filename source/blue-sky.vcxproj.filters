@@ -299,6 +299,7 @@
     <ClCompile Include="lib\src\imgui\imgui_widgets.cpp">
       <Filter>lib\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="core\math\DirectXMath\Quaternion.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -796,6 +797,8 @@
     </ClInclude>
     <ClInclude Include="core\math\SimpleMath\Transform.h" />
     <ClInclude Include="core\math\SimpleMath\Quaternion.h" />
+    <ClInclude Include="core\math\DirectXMath\Transform.h" />
+    <ClInclude Include="core\math\DirectXMath\Quaternion.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

@@ -2,9 +2,9 @@
 
 #include "DirectXMath/Vector.h"
 
-namespace core
+namespace core::math
 {
 
 using Vector = direct_x_math::Vector;
 
-}; // namespace core
+}; // namespace core::math

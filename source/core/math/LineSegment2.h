@@ -3,7 +3,7 @@
 #include "../type.h"
 #include <optional>
 
-namespace core
+namespace core::math
 {
 
 /**
@@ -53,4 +53,4 @@ public:
 	}
 };
 
-}; // namespace core
+}; // namespace core::math

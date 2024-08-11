@@ -14,8 +14,8 @@
 class BulletPhysics
 {
 public:
-	using Vector				= core::Vector;
-	using Transform				= core::Transform;
+	using Vector				= core::math::Vector;
+	using Transform				= core::math::Transform;
 
 	using CollisionShapeArray	= btAlignedObjectArray< btCollisionShape* >;
 	using MeshList				= std::list< btStridingMeshInterface* >;

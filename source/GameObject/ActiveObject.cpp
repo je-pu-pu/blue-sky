@@ -96,7 +96,9 @@ void ActiveObject::restart()
 	if ( get_rigid_body() )
 	{
 		get_transform().set_position( start_location_ );
- 		get_transform().set_rotation( Quaternion( math::degree_to_radian( start_rotation_.x() ), math::degree_to_radian( start_rotation_.y() ), math::degree_to_radian( start_rotation_.z() ) ) );
+
+		auto q = Quaternion::from_yaw_pitch_roll( math::degree_to_radian( start_rotation_.y() ), math::degree_to_radian( start_rotation_.x() ), math::degree_to_radian( start_rotation_.z() ) );
+ 		get_transform().set_rotation( q );
 
 		get_rigid_body()->activate( true );
 		get_rigid_body()->getMotionState()->setWorldTransform( get_transform() );

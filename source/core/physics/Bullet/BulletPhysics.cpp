@@ -158,15 +158,7 @@ btRigidBody* BulletPhysics::create_rigid_body( btCollisionShape* shape, const Tr
 	shape->calculateLocalInertia( mass, local_inertia );
 
 	auto t_to_btt = [] ( const Transform& t ) {
-		float yaw, pitch, roll;
-		t.get_rotation().get_yaw_pitch_roll( yaw, pitch, roll );
-
-		btQuaternion q{ yaw, pitch, roll };
-
-
-		btVector3 c{ t.get_position().x(), t.get_position().y(), t.get_position().z() };
-
-		return btTransform( q, c );
+		return btTransform( t.get_rotation(), t.get_position() );
 	};
 
 	btDefaultMotionState* motion_state = new btDefaultMotionState( t_to_btt( transform ) * t_to_btt( offset ) );

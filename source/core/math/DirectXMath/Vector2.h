@@ -4,7 +4,7 @@
 #include <ostream>
 #include <cmath>
 
-namespace direct_x_math
+namespace core::math::direct_x_math
 {
 
 class Matrix;
@@ -79,4 +79,4 @@ public:
 
 }; // class Vector2
 
-}; // namespace direct_x_math
+}; // namespace core::math::direct_x_math

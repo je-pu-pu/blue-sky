@@ -14,7 +14,7 @@ namespace core::ecs
 class TransformComponent : public Component
 {
 public:
-	core::Transform transform;
+	core::math::Transform transform;
 
 }; // class TransformComponent
 

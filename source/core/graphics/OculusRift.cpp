@@ -1,4 +1,5 @@
 #include "OculusRift.h"
+#include <core/math/Quaternion.h>
 
 #include <common/exception.h>
 #include <Extras/OVR_Math.h>
@@ -263,7 +264,7 @@ OculusRift::Vector OculusRift::get_eye_position( int eye_index ) const
  */
 OculusRift::Matrix OculusRift::get_eye_rotation( int eye_index ) const
 {
-	Vector q(
+	Quaternion q(
 		-layer_.RenderPose[ eye_index ].Orientation.x,
 		-layer_.RenderPose[ eye_index ].Orientation.y,
 		layer_.RenderPose[ eye_index ].Orientation.z,

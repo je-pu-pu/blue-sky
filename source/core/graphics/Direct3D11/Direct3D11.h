@@ -49,9 +49,9 @@ public:
 
 	using Font				= DirectWrite;
 
-	using Vector			= direct_x_math::Vector;
-	using Matrix			= direct_x_math::Matrix;
-	using Color				= direct_x_math::Color;
+	using Vector			= core::math::direct_x_math::Vector;
+	using Matrix			= core::math::direct_x_math::Matrix;
+	using Color				= core::math::direct_x_math::Color;
 
 private:
 	static const Color DEFAULT_CLEAR_COLOR;

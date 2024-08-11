@@ -3,7 +3,7 @@
 #include <core/math/Vector.h>
 #include <LinearMath/btTransform.h>
 
-namespace core::bullet
+namespace core::math::bullet
 {
 
 class Quaternion
@@ -44,4 +44,4 @@ public:
 	operator const Vector& () const { return reinterpret_cast< const Vector& >( value_ ); }
 };
 
-} // namespace core::bullet
+} // namespace core::math::bullet

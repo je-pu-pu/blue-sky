@@ -1,10 +1,10 @@
 #pragma once
 
-#include <core/math/SimpleMath/Quaternion.h>
+#include <core/math/DirectXMath/Quaternion.h>
 
-namespace core
+namespace core::math
 {
 
-using Quaternion = simple_math::Quaternion;
+using Quaternion = direct_x_math::Quaternion;
 
-} // namespace core
+} // namespace core::math

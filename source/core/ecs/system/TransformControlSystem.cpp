@@ -54,6 +54,16 @@ void TransformControlSystem::update( ComponentTuple& component_tuple )
 	transform_control->yaw += input->get_mouse_dx();
 	transform_control->pitch += input->get_mouse_dy();
 
+	if ( transform_control->yaw < ::math::degree_to_radian( -180.f ) )
+	{
+		transform_control->yaw += ::math::degree_to_radian( 360.f );
+	}
+
+	if ( transform_control->yaw > ::math::degree_to_radian( 180.f ) )
+	{
+		transform_control->yaw -= ::math::degree_to_radian( 360.f );
+	}
+
 	transform_control->pitch = ::math::clamp( transform_control->pitch, ::math::degree_to_radian( -90.f ), ::math::degree_to_radian( 90.f ) );
 
 	transform->transform.get_rotation().set_yaw_pitch_roll( transform_control->yaw, transform_control->pitch, 0 );

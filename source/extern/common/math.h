@@ -69,4 +69,19 @@ template< typename T > constexpr inline T lerp( T a, T b, float t )
 
 } // namespace math
 
+namespace math::literals
+{
+
+constexpr inline float operator "" _deg( unsigned long long int d )
+{
+	return math::degree_to_radian( static_cast< float >( d ) );
+}
+
+constexpr inline float operator "" _deg( long double d )
+{
+	return math::degree_to_radian( static_cast< float >( d ) );
+}
+
+} // namespace math::literals
+
 #endif // COMMON_MATH_H

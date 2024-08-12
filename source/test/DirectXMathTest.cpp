@@ -8,15 +8,7 @@ using core::math::direct_x_math::Vector;
 using core::math::direct_x_math::Quaternion;
 using core::math::direct_x_math::Matrix;
 
-float operator "" _deg( unsigned long long int d )
-{
-	return math::degree_to_radian( static_cast< float >( d ) );
-}
-
-float operator "" _deg( long double d )
-{
-	return math::degree_to_radian( static_cast< float >( d ) );
-}
+using namespace math::literals;
 
 /**
  * DirectX では、回転軸の + 側から原点を見た状態で、右回り ( 時計回り ) が正の回転となる

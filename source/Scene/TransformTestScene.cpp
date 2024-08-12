@@ -71,6 +71,7 @@ TransformTestScene::TransformTestScene()
 TransformTestScene::~TransformTestScene()
 {
 	get_entity_manager()->clear();
+	get_graphics_manager()->set_main_camera_info( nullptr, nullptr );
 }
 
 TransformTestScene::EntityManager* TransformTestScene::get_entity_manager()

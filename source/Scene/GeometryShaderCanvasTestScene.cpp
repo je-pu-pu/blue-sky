@@ -97,6 +97,7 @@ GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene()
 GeometryShaderCanvasTestScene::~GeometryShaderCanvasTestScene()
 {
 	get_entity_manager()->clear();
+	get_graphics_manager()->set_main_camera_info( nullptr, nullptr );
 }
 
 GeometryShaderCanvasTestScene::EntityManager* GeometryShaderCanvasTestScene::get_entity_manager()

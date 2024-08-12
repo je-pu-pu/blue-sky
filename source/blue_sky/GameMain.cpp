@@ -106,7 +106,8 @@ GameMain::GameMain()
 	ImGui_ImplDX11_Init( direct_3d_->getDevice(), direct_3d_->getImmediateContext() );
 
 	ImGuiIO& io = ImGui::GetIO();
-	io.Fonts->AddFontFromFileTTF( "media/font/uzura.ttf", 22 );
+	// io.Fonts->AddFontFromFileTTF( "media/font/uzura.ttf", 22 );
+	io.Fonts->AddFontFromFileTTF( "media/font/rounded-mplus-1p-regular.ttf", 28 );
 
 
 	direct_input_.reset( new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() ) );

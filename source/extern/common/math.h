@@ -15,9 +15,9 @@
 namespace math
 {
 
-const float pi = 3.14159265358979323846f;
+constexpr float pi = 3.14159265358979323846f;
 
-template< typename T > inline T clamp( T value, T min_value, T max_value )
+template< typename T > constexpr inline T clamp( T value, T min_value, T max_value )
 {
 	value = std::max( min_value, value );
 	value = std::min( max_value, value );
@@ -25,17 +25,17 @@ template< typename T > inline T clamp( T value, T min_value, T max_value )
 	return value;
 }
 
-template< typename T > inline T degree_to_radian( T degree )
+template< typename T > constexpr inline T degree_to_radian( T degree )
 {
 	return degree * ( pi / 180 );
 }
 
-template< typename T > inline T radian_to_degree( T radian )
+template< typename T > constexpr inline T radian_to_degree( T radian )
 {
 	return radian * ( 180 / pi );
 }
 
-template< typename T, typename ST > inline T chase( T value, T target, ST speed )
+template< typename T, typename ST > constexpr inline T chase( T value, T target, ST speed )
 {
 	if ( value < target )
 	{
@@ -62,7 +62,7 @@ template< typename T, typename ST > inline T chase( T value, T target, ST speed 
 /**
  * ê¸å`ï‚ä‘
  */
-template< typename T > inline T lerp( T a, T b, float t )
+template< typename T > constexpr inline T lerp( T a, T b, float t )
 {
 	return a + ( t * ( b - a ) );
 }

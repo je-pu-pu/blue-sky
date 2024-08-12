@@ -58,6 +58,16 @@ public:
 
 	inline UnitType length() const { return std::sqrt( x() * x() + y() * y() + z() * z() ); }
 
+	friend Vector3 operator + ( const Vector3& v1, const Vector3& v2 ) { return Vector3( v1.x() + v2.x(), v1.y() + v2.y(), v1.z() + v2.z() ); }
+	friend Vector3 operator - ( const Vector3& v1, const Vector3& v2 ) { return Vector3( v1.x() - v2.x(), v1.y() - v2.y(), v1.z() - v2.z() ); }
+	friend Vector3 operator * ( const Vector3& v, UnitType x ) { return Vector3( v.x() * x, v.y() * x, v.z() * x ); }
+	friend Vector3 operator / ( const Vector3& v, UnitType x ) { return Vector3( v.x() / x, v.y() / x, v.z() / x ); }
+
+	friend Vector3& operator += ( Vector3& v1, const Vector3& v2 ) { v1 = v1 + v2; return v1; }
+	friend Vector3& operator -= ( Vector3& v1, const Vector3& v2 ) { v1 = v1 - v2; return v1; }
+	friend Vector3& operator *= ( Vector3& v, UnitType x ) { v = v * x; return v; }
+	friend Vector3& operator /= ( Vector3& v, UnitType x ) { v = v / x; return v; }
+
 	inline bool operator == ( const Vector3& v ) const
 	{
 		return ( x() == v.x() ) && ( y() == v.y() ) && ( z() == v.z() );

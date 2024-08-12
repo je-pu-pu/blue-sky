@@ -1,10 +1,14 @@
 #include "ParticleSystem.h"
+#include <core/math/Quaternion.h>
+#include <common/random.h>
+#include <common/math.h>
 
 #include <iostream>
 
 namespace core::ecs
 {
 
+using namespace ::math::literals;
 
 void ParticleSystem::update()
 {
@@ -14,7 +18,20 @@ void ParticleSystem::update()
 	{
 		for ( auto& p : std::get< ParticleSystemComponent* >( i.second )->particle_list )
 		{
-			p.position.y() += 1.f;
+			p.position += p.velocity;
+			p.velocity.y() -= 9.80665f / 60.f;
+
+			if ( p.position.y() < 0.f )
+			{
+				p.position.set( 0.f, 0.f, 0.f );
+
+				float yaw = ::common::random( -180._deg, 180._deg );
+				float pitch = ::common::random( 0._deg, 45._deg );
+
+				const auto v = Vector::transform( Vector::Up, Quaternion::from_yaw_pitch_roll( yaw, pitch, 0.f ) );
+
+				p.velocity.set( v.x(), v.y(), v.z() );
+			}
 		}
 	}
 }

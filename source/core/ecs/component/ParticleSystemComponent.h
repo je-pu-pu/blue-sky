@@ -19,6 +19,7 @@ public:
 	struct Vertex
 	{
 		Vector3 position;
+		Vector3 velocity;
 	};
 
 public:

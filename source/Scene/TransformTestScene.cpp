@@ -70,13 +70,7 @@ TransformTestScene::TransformTestScene()
 
 TransformTestScene::~TransformTestScene()
 {
-	get_entity_manager()->clear();
-	get_graphics_manager()->set_main_camera_info( nullptr, nullptr );
-}
-
-TransformTestScene::EntityManager* TransformTestScene::get_entity_manager()
-{
-	return EntityManager::get_instance();
+	
 }
 
 void TransformTestScene::update()
@@ -161,8 +155,6 @@ void TransformTestScene::render()
 		<< camera_transform_->transform.get_position().y() << ", "
 		<< camera_transform_->transform.get_position().z() << '\n';
 	// ss << "rot : " << camera_->rotate_degree().x() << ", " << camera_->rotate_degree().y() << ", " << camera_->rotate_degree().z() << '\n';
-
-	ss << "psts "<< '\n';
 
 	get_graphics_manager()->draw_text( 10.f, 10.f, static_cast< float >( get_width() ) - 10.f, static_cast< float >( get_height() ) - 10.f, ss.str().c_str(), Color::White );
 }

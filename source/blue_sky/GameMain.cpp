@@ -16,6 +16,7 @@
 
 #include <blue_sky/graphics/Direct3D11/GraphicsManager.h>
 
+#include <core/ecs/EntityManager.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 #include <core/graphics/Direct3D11/Effect.h>
@@ -368,152 +369,205 @@ void GameMain::render()
 {
 	scene_->render();
 
-	if ( is_command_mode_ && ImGui::Begin( "Console", 0, ImGuiWindowFlags_NoCollapse ) )
+	if ( is_command_mode_ )
     {
-		static auto scroll_to_bottom = false;
-
-		const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
-		if ( ImGui::BeginChild( "ScrollingRegion", ImVec2( 0, -footer_height_to_reserve ), 0, ImGuiWindowFlags_HorizontalScrollbar ) )
-        {
-			if ( ImGui::BeginPopupContextWindow() )
-            {
-                if ( ImGui::Selectable( "Clear" ) )
-				{
-					// clear log
-				}
-
-                ImGui::EndPopup();
-            }
-
-			for ( const auto& log: core::logger.get_log_list() )
-			{
-				auto has_color = false;
-
-				switch ( log.get_type() )
-				{
-				case core::Logger::Log::Type::ERROR:
-					ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 0.4f, 0.4f, 1.0f ) );
-					has_color = true;
-					break;
-				case core::Logger::Log::Type::WARN:
-					ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 0.7f, 0.1f, 1.0f ) );
-					has_color = true;
-					break;
-				case core::Logger::Log::Type::INFO:
-					break;
-				case core::Logger::Log::Type::DEBUG:
-					break;
-				}
-                    
-
-				ImGui::TextUnformatted( log.get_message().c_str() );
-
-				if ( has_color )
-				{
-					ImGui::PopStyleColor();
-				}
-			}
-
-			if ( scroll_to_bottom )
-			{
-                ImGui::SetScrollHereY( 1.f );
-			}
-
-            scroll_to_bottom = false;
-		}
-
-		ImGui::EndChild();
-
-		ImGui::Separator();
-
-		const auto input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
-
-		ImGui::SetNextItemWidth( -FLT_MIN );
-
-		bool reclaim_focus = false;
-
-		const auto callback = [] (ImGuiInputTextCallbackData* data) -> int
-		{
-			auto game_main = static_cast< GameMain* >( data->UserData );
-			string_t command;
-
-			switch ( data->EventFlag )
-			{
-			case ImGuiInputTextFlags_CallbackCompletion:
-				command = game_main->user_command_;
-
-				game_main->get_script_manager()->auto_complete( command );
-
-				if ( ! game_main->get_script_manager()->get_output().empty() )
-				{
-					core::logger.info( game_main->get_script_manager()->get_output() );
-				}
-
-				scroll_to_bottom = true;
-
-				break;
-			case ImGuiInputTextFlags_CallbackHistory:
-				if ( data->EventKey == ImGuiKey_UpArrow )
-				{
-					command = game_main->get_script_manager()->get_prev_hisotry_command();
-			
-				}
-				else if ( data->EventKey == ImGuiKey_DownArrow )
-				{
-					command = game_main->get_script_manager()->get_next_hisotry_command();	
-				}
-			}
-
-			if ( command != game_main->user_command_ )
-			{
-				data->DeleteChars( 0, data->BufTextLen );
-				data->InsertChars( 0, command.c_str() );
-			}
-
-			return 0;
-		};
-
-		if ( ImGui::InputText( "##command", & user_command_, input_text_flags, callback, this ) )
-        {
-			boost::trim( user_command_ );
-
-			if ( user_command_ != "" )
-			{
-				core::logger.info( user_command_ );
-
-				try
-				{
-					get_script_manager()->exec( user_command_, true );
-				}
-				catch ( const ScriptError& e )
-				{
-					// get_app()->show_error_message( e.what() );
-					core::logger.error( e.what() );
-				}
-
-				user_command_ = "";
-				scroll_to_bottom = true;
-			}
-
-			reclaim_focus = true;
-		}
-
-		ImGui::SetItemDefaultFocus();
-
-        if ( reclaim_focus || ! ImGui::IsAnyItemActive() )
-		{
-			ImGui::SetKeyboardFocusHere( -1 );
-		}
-
-		ImGui::End();
-    }
-
+		render_console_window();
+		render_scene_list_window();
+	}
 
 	ImGui::Render();
 	get_direct_3d()->set_default_render_target( false );
     ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );
 
 	direct_3d_->present();
+}
+
+/**
+ * @brief コンソールウィンドウを描画する
+ */
+void GameMain::render_console_window()
+{
+	if ( ! ImGui::Begin( "Console", 0 ) )
+    {
+		ImGui::End();
+		return;
+	}
+
+	static auto scroll_to_bottom = false;
+
+	const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+	if ( ImGui::BeginChild( "ScrollingRegion", ImVec2( 0, -footer_height_to_reserve ), 0, ImGuiWindowFlags_HorizontalScrollbar ) )
+    {
+		if ( ImGui::BeginPopupContextWindow() )
+        {
+            if ( ImGui::Selectable( "Clear" ) )
+			{
+				// clear log
+			}
+
+            ImGui::EndPopup();
+        }
+
+		for ( const auto& log: core::logger.get_log_list() )
+		{
+			auto has_color = false;
+
+			switch ( log.get_type() )
+			{
+			case core::Logger::Log::Type::ERROR:
+				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 0.4f, 0.4f, 1.0f ) );
+				has_color = true;
+				break;
+			case core::Logger::Log::Type::WARN:
+				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 0.7f, 0.1f, 1.0f ) );
+				has_color = true;
+				break;
+			case core::Logger::Log::Type::INFO:
+				break;
+			case core::Logger::Log::Type::DEBUG:
+				break;
+			}
+                    
+
+			ImGui::TextUnformatted( log.get_message().c_str() );
+
+			if ( has_color )
+			{
+				ImGui::PopStyleColor();
+			}
+		}
+
+		if ( scroll_to_bottom )
+		{
+            ImGui::SetScrollHereY( 1.f );
+		}
+
+        scroll_to_bottom = false;
+	}
+
+	ImGui::EndChild();
+
+	ImGui::Separator();
+
+	const auto input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
+
+	ImGui::SetNextItemWidth( -FLT_MIN );
+
+	bool reclaim_focus = false;
+
+	const auto callback = [] (ImGuiInputTextCallbackData* data) -> int
+	{
+		auto game_main = static_cast< GameMain* >( data->UserData );
+		string_t command;
+
+		switch ( data->EventFlag )
+		{
+		case ImGuiInputTextFlags_CallbackCompletion:
+			command = game_main->user_command_;
+
+			game_main->get_script_manager()->auto_complete( command );
+
+			if ( ! game_main->get_script_manager()->get_output().empty() )
+			{
+				core::logger.info( game_main->get_script_manager()->get_output() );
+			}
+
+			scroll_to_bottom = true;
+
+			break;
+		case ImGuiInputTextFlags_CallbackHistory:
+			if ( data->EventKey == ImGuiKey_UpArrow )
+			{
+				command = game_main->get_script_manager()->get_prev_hisotry_command();
+			
+			}
+			else if ( data->EventKey == ImGuiKey_DownArrow )
+			{
+				command = game_main->get_script_manager()->get_next_hisotry_command();	
+			}
+		}
+
+		if ( command != game_main->user_command_ )
+		{
+			data->DeleteChars( 0, data->BufTextLen );
+			data->InsertChars( 0, command.c_str() );
+		}
+
+		return 0;
+	};
+
+	if ( ImGui::InputText( "##command", & user_command_, input_text_flags, callback, this ) )
+    {
+		boost::trim( user_command_ );
+
+		if ( user_command_ != "" )
+		{
+			core::logger.info( user_command_ );
+
+			try
+			{
+				get_script_manager()->exec( user_command_, true );
+			}
+			catch ( const ScriptError& e )
+			{
+				// get_app()->show_error_message( e.what() );
+				core::logger.error( e.what() );
+			}
+
+			user_command_ = "";
+			scroll_to_bottom = true;
+		}
+
+		reclaim_focus = true;
+	}
+
+	ImGui::SetItemDefaultFocus();
+
+    if ( reclaim_focus || ! ImGui::IsAnyItemActive() )
+	{
+		ImGui::SetKeyboardFocusHere( -1 );
+	}
+
+	ImGui::End();
+}
+/**
+ * @brief シーン一覧ウィンドウを描画する
+ */
+void GameMain::render_scene_list_window()
+{
+	if ( ! ImGui::Begin( "SceneList" ) )
+    {
+		ImGui::End();
+		return;
+	}
+
+	if ( ImGui::BeginListBox( "##SceneListBox", ImVec2( -FLT_MIN, 0 ) ) )
+    {
+		static int selected_item_index = -1;
+
+		int n = 0;
+
+        for ( const auto& scene: SceneManager::get_instance()->get_scene_generator_map() )
+        {
+            ImGuiSelectableFlags flags = n == selected_item_index ? ImGuiSelectableFlags_Highlight : 0;
+
+            if ( ImGui::Selectable( scene.first.c_str(), n == selected_item_index, flags ) )
+			{
+				selected_item_index = n;
+			}
+
+			if ( ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked( 0 ) )
+			{
+				setup_scene( scene.first );
+			}
+
+			n++;
+        }
+        
+		ImGui::EndListBox();
+    }
+
+	ImGui::End();
 }
 
 void GameMain::on_key_down( char_t )
@@ -639,6 +693,12 @@ void GameMain::setup_scene( const string_t& scene_name )
 	
 	// 現在のシーンを解放
 	scene_.reset();
+
+	// シーンによって設定されていたデータをクリア
+	{
+		core::ecs::EntityManager::get_instance()->clear();
+		get_graphics_manager()->set_main_camera_info( nullptr, nullptr );
+	}
 
 	// 新しいシーンを設定
 	scene_.reset( SceneManager::get_instance()->generate_scene( scene_name ) );

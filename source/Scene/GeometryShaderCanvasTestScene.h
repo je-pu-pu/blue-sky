@@ -48,9 +48,6 @@ public:
 	};
 
 protected:
-	EntityManager* get_entity_manager();
-
-protected:
 	Mesh* mesh_;
 	const core::graphics::InputLayout* input_layout_;
 

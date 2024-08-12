@@ -17,6 +17,11 @@ namespace core
 {
 	class SoundManager;
 
+	namespace ecs
+	{
+		class EntityManager;
+	}
+
 	namespace graphics
 	{
 		class Texture;
@@ -60,6 +65,7 @@ public:
 	using Config			= game::Config;
 	using MainLoop			= game::MainLoop;
 
+	using EntityManager		= core::ecs::EntityManager;
 	using GraphicsManager	= graphics::GraphicsManager;
 	using PhysicsManager	= ActiveObjectPhysics;
 	using SoundManager		= core::SoundManager;
@@ -79,6 +85,8 @@ protected:
 	float_t get_elapsed_time() const;
 
 	Direct3D* get_direct_3d() const;	///< @todo íœ‚·‚é
+
+	EntityManager* get_entity_manager() const;
 
 	ActiveObjectManager* get_active_object_manager() const;
 

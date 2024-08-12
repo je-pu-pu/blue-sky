@@ -5,6 +5,7 @@
 #include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
+#include <core/ecs/EntityManager.h>
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
 
@@ -49,6 +50,11 @@ float Scene::get_elapsed_time() const
 Scene::Direct3D* Scene::get_direct_3d() const
 {
 	return get_game_main()->get_direct_3d();
+}
+
+Scene::EntityManager* Scene::get_entity_manager() const
+{
+	return EntityManager::get_instance();
 }
 
 ActiveObjectManager* Scene::get_active_object_manager() const

@@ -22,11 +22,7 @@ class ParticleSystemTestScene : public Scene
 public:
 	static inline const char_t* name = "particle_system_test";
 
-	using EntityManager = core::ecs::EntityManager;
 	using Entity = core::ecs::Entity;
-
-protected:
-	EntityManager* get_entity_manager();
 
 protected:
 	Entity* camera_;
@@ -38,7 +34,7 @@ public:
 	void update() override;
 	void render() override;
 
-	bool is_clip_cursor_required() override { return false; }
+	bool is_clip_cursor_required() override { return true; }
 };
 
 } // namespace blue_sky

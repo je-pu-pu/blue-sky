@@ -74,6 +74,8 @@ public:
 		return i->second();
 	}
 
+
+	const SceneGeneratorMap& get_scene_generator_map() const { return scene_generator_map_; }
 };
 
 } // namespace blue_sky

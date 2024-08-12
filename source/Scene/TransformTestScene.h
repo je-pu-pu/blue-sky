@@ -24,14 +24,10 @@ class TransformTestScene : public Scene
 public:
 	static inline const char_t* name = "transform_test";
 
-	using EntityManager = core::ecs::EntityManager;
 	using TransformComponent = core::ecs::TransformComponent;
 	using ModelComponent = core::ecs::ModelComponent;
 	using CameraComponent = core::ecs::CameraComponent;
 	using Entity = core::ecs::Entity;
-
-protected:
-	EntityManager* get_entity_manager();
 
 protected:
 	Entity* current_entity_ = nullptr;

@@ -10,7 +10,7 @@
 namespace core::ecs
 {
 
-void TransformControlSystem::update( ComponentTuple& component_tuple )
+void TransformControlSystem::update( ComponentTuple& component_tuple ) const
 {
 	using namespace blue_sky;
 

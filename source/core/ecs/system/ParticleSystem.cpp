@@ -10,28 +10,23 @@ namespace core::ecs
 
 using namespace ::math::literals;
 
-void ParticleSystem::update()
+void ParticleSystem::update( ComponentTuple& component_tuple ) const
 {
-	// std::cout << get_priority() << "ParticleSystem::update()" << std::endl;
-
-	for ( auto i : get_component_list() )
+	for ( auto& p : std::get< ParticleSystemComponent* >( component_tuple )->particle_list )
 	{
-		for ( auto& p : std::get< ParticleSystemComponent* >( i.second )->particle_list )
+		p.position += p.velocity;
+		p.velocity.y() -= 9.80665f / 60.f;
+
+		if ( p.position.y() < 0.f )
 		{
-			p.position += p.velocity;
-			p.velocity.y() -= 9.80665f / 60.f;
+			p.position.set( 0.f, 0.f, 0.f );
 
-			if ( p.position.y() < 0.f )
-			{
-				p.position.set( 0.f, 0.f, 0.f );
+			float yaw = ::common::random( -180._deg, 180._deg );
+			float pitch = ::common::random( 0._deg, 45._deg );
 
-				float yaw = ::common::random( -180._deg, 180._deg );
-				float pitch = ::common::random( 0._deg, 45._deg );
+			const auto v = Vector::transform( Vector::Up, Quaternion::from_yaw_pitch_roll( yaw, pitch, 0.f ) );
 
-				const auto v = Vector::transform( Vector::Up, Quaternion::from_yaw_pitch_roll( yaw, pitch, 0.f ) );
-
-				p.velocity.set( v.x(), v.y(), v.z() );
-			}
+			p.velocity.set( v.x(), v.y(), v.z() );
 		}
 	}
 }

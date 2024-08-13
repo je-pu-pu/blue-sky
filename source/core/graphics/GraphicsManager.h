@@ -2,7 +2,9 @@
 
 #include <core/graphics/Shader.h>
 #include <core/graphics/PixelFormat.h>
+#include <core/graphics/PrimitiveTopology.h>
 #include <core/ResourceManager.h>
+#include <functional>
 
 namespace core
 {
@@ -18,6 +20,10 @@ class RenderTarget;
 class RenderTargetTexture;
 class BackBufferTexture;
 class ConstantBuffer;
+
+// enum class PrimitiveTopology;
+class InputLayout;
+class EffectTechnique;
 
 /**
  * グラフィック管理クラス
@@ -41,6 +47,10 @@ public:
 	using ShaderManager					= core::ResourceManager< Shader >;
 	using TextureManager				= core::ResourceManager< Texture >;
 	using SkinningAnimationSetManager	= core::ResourceManager< SkinningAnimationSet >;
+
+	using PrimitiveTopology				= core::graphics::PrimitiveTopology;
+	using InputLayout					= core::graphics::InputLayout;
+	using EffectTechnique				= core::graphics::EffectTechnique;
 
 private:
 	ShaderManager				shader_manager_;
@@ -72,6 +82,17 @@ public:
 
 	virtual void setup_rendering() = 0;
 	virtual void render_background() const = 0;
+
+	virtual const InputLayout* get_input_layout( const char_t* ) const = 0;
+	virtual EffectTechnique* get_effect_technique( const char_t* ) const = 0;
+
+	virtual void set_input_layout( const char_t* ) const = 0;
+	virtual void set_input_layout( const InputLayout* ) const = 0;
+
+	virtual void set_primitive_topology( PrimitiveTopology ) const = 0;
+
+	virtual void render_technique( const char_t*, const std::function< void () >& ) const = 0;
+	virtual void render_technique( const EffectTechnique*, const std::function< void () >& ) const = 0;
 
 	virtual void set_current_object_constant_buffer( const ConstantBuffer* ) const = 0;
 	virtual void set_current_skinning_constant_buffer( const ConstantBuffer* ) const = 0;

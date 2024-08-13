@@ -565,6 +565,8 @@ technique11 line_cube
 
 #include "canvas.hlsl"
 
+#include "point_sprite.hlsl"
+
 #include "debug_axis.hlsl"
 #include "debug_bullet.hlsl"
 

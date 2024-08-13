@@ -7,6 +7,7 @@
  *          |  |
  *          0--2
  */
+#if 0
 void get_drawing_line_common( point COMMON_POS input[ 1 ], out COMMON_POS output[ 4 ] )
 {
 	float4 vw = 0.5f;
@@ -34,3 +35,4 @@ technique11 particle
 		RASTERIZERSTATE = Default;
 	}
 }
+#endif

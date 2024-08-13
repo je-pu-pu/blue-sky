@@ -799,6 +799,10 @@
     <ClInclude Include="core\math\SimpleMath\Quaternion.h" />
     <ClInclude Include="core\math\DirectXMath\Transform.h" />
     <ClInclude Include="core\math\DirectXMath\Quaternion.h" />
+    <ClInclude Include="blue_sky\graphics\shader\PointSpriteShader.h" />
+    <ClInclude Include="core\graphics\Direct3D11\VertexBuffer.h" />
+    <ClInclude Include="core\graphics\VertexBuffer.h" />
+    <ClInclude Include="core\graphics\BufferType.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -952,6 +956,9 @@
       <Filter>media\shader</Filter>
     </None>
     <None Include="media\shader\common_state.hlsl">
+      <Filter>media\shader</Filter>
+    </None>
+    <None Include="media\shader\point_sprite.hlsl">
       <Filter>media\shader</Filter>
     </None>
   </ItemGroup>

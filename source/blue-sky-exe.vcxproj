@@ -72,33 +72,33 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(ProjectDir)lib\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)lib\$(PlatformShortName)\$(Configuration);$(ProjectDir)lib\$(PlatformShortName)\common;$(SolutionDir).build/$(Platform)/$(Configuration)/;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)lib\$(PlatformShortName)\$(Configuration);$(ProjectDir)lib\$(PlatformShortName)\common;$(SolutionDir).build\$(Platform)\$(Configuration);$(LibraryPath)</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
-    <IntDir>.build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(ProjectDir)lib\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)lib\$(PlatformShortName)\$(Configuration);$(ProjectDir)lib\$(PlatformShortName)\common;$(SolutionDir).build/$(Platform)/$(Configuration)/;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)lib\$(PlatformShortName)\$(Configuration);$(ProjectDir)lib\$(PlatformShortName)\common;$(SolutionDir).build\$(Platform)\$(Configuration);$(LibraryPath)</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
-    <IntDir>.build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
-    <IntDir>.build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
     <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(ProjectDir)lib\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
-    <IntDir>.build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
     <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(ProjectDir)lib\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

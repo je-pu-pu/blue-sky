@@ -37,7 +37,13 @@ void Effect::load( const char* file_path )
 
 	std::wstring ws_file_path = common::convert_to_wstring( file_path );
 
-	HRESULT hr = D3DCompileFromFile( ws_file_path.c_str(), 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, "", "fx_5_0", 0, 0, & shader, & error_messages );
+#ifdef _DEBUG
+	const UINT flags1 = D3DCOMPILE_DEBUG;
+#else
+	const UINT flags1 = 0;
+#endif
+
+	HRESULT hr = D3DCompileFromFile( ws_file_path.c_str(), 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, "", "fx_5_0", flags1, 0, & shader, & error_messages );
 
 	if ( FAILED( hr ) )
 	{

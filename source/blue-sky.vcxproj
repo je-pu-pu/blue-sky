@@ -148,6 +148,7 @@
     <ClInclude Include="blue_sky\graphics\shader\Flat2DShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\FlatShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\GroundShader.h" />
+    <ClInclude Include="blue_sky\graphics\shader\PointSpriteShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\post_effect\NoiseShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\MatcapShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\NullShader.h" />
@@ -188,6 +189,7 @@
     <ClInclude Include="core\ecs\type.h" />
     <ClInclude Include="core\graphics\BackBufferTexture.h" />
     <ClInclude Include="core\graphics\BgSpriteLayer.h" />
+    <ClInclude Include="core\graphics\BufferType.h" />
     <ClInclude Include="core\graphics\Direct3D11\Axis.h" />
     <ClInclude Include="core\graphics\Direct3D11\BackBufferTexture.h" />
     <ClInclude Include="core\graphics\Direct3D11\BulletDebugDraw.h" />
@@ -206,6 +208,7 @@
     <ClInclude Include="core\graphics\Direct3D11\ShadowMap.h" />
     <ClInclude Include="core\graphics\Direct3D11\Sprite.h" />
     <ClInclude Include="core\graphics\Direct3D11\Texture.h" />
+    <ClInclude Include="core\graphics\Direct3D11\VertexBuffer.h" />
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWrite.h" />
     <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.h" />
@@ -231,6 +234,7 @@
     <ClInclude Include="core\graphics\ShadowMap.h" />
     <ClInclude Include="core\graphics\Sprite.h" />
     <ClInclude Include="core\graphics\Texture.h" />
+    <ClInclude Include="core\graphics\VertexBuffer.h" />
     <ClInclude Include="core\graphics\VertexGroup.h" />
     <ClInclude Include="core\input\DirectInput\DirectInput.h" />
     <ClInclude Include="core\Logger.h" />
@@ -471,6 +475,11 @@
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="media\shader\point_sprite.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5DB1FAFC-E068-43A8-84D3-0DA42D464BE5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -516,7 +525,7 @@
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
-    <IntDir>.build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -526,19 +535,19 @@
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
-    <IntDir>.build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
-    <IntDir>.build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
     <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(ProjectDir)lib\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
-    <IntDir>.build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
     <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(ProjectDir)lib\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

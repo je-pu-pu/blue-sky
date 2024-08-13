@@ -228,7 +228,7 @@ DWORD* Input::get_joystick_axis_pos_pointer_by_index( int index )
 	return axis_map.at( index );
 }
 
-float Input::get_rate_by_joystick_axis_pos( DWORD pos )
+float Input::get_rate_by_joystick_axis_pos( DWORD pos ) const
 {
 	float rate = ( pos / static_cast< float >( 0xFFFF ) * 2.f ) - 1.f;
 

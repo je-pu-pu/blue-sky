@@ -71,9 +71,6 @@ public:
 	using ModelManager					= core::ResourceManager< Model >;
 	using MeshManager					= core::ResourceManager< Mesh >;
 	
-	using PrimitiveTopology				= core::graphics::PrimitiveTopology;
-	using InputLayout					= core::graphics::InputLayout;
-	using EffectTechnique				= core::graphics::EffectTechnique;
 	using ShadowMap						= core::graphics::ShadowMap;
 	using Sprite						= core::graphics::Sprite;
 
@@ -226,20 +223,10 @@ public:
 	const ConstantBuffer* get_current_object_constant_buffer() const { return current_object_constant_buffer_; }
 	const ConstantBuffer* get_current_skinning_constant_buffer() const { return current_skinning_constant_buffer_; }
 
-	virtual const InputLayout* get_input_layout( const char_t* ) const = 0;
-	virtual EffectTechnique* get_effect_technique( const char_t* ) const = 0;
-
-	virtual void set_input_layout( const char_t* ) const = 0;
-	virtual void set_input_layout( const InputLayout* ) const = 0;
-
-	virtual void set_primitive_topology( PrimitiveTopology ) const = 0;
-
 	virtual void set_depth_stencil() const = 0;
 	virtual void unset_depth_stencil() const = 0;
 
 	virtual void setup_rendering() override;
-	virtual void render_technique( const char_t*, const std::function< void () >& ) const = 0;
-	virtual void render_technique( const EffectTechnique*, const std::function< void () >& ) const = 0;
 	
 	virtual void render_shadow_map() const;
 	virtual void render_active_objects( const ActiveObjectManager* ) const;

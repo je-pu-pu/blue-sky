@@ -20,7 +20,7 @@ public:
 	ParticleSystem() = default;
 	~ParticleSystem() = default;
 
-	void update() override;
+	void update( ComponentTuple& ) const override;
 
 }; // class ParticleSystem
 

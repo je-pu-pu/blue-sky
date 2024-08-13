@@ -250,7 +250,7 @@ void GameMain::setup_script_command()
  * @return 生成したオブジェクト
  * @todo 整理する。 loc, rot の指定をどうするか？ StaticObject の生成をどうするか？ Scenegraph に移動？
  */
-ActiveObject* GameMain::create_object( const char_t* class_name )
+ActiveObject* GameMain::create_object( const char_t* class_name ) const
 {
 	ActiveObject* active_object = get_active_object_manager()->create_object( class_name );
 
@@ -268,7 +268,7 @@ ActiveObject* GameMain::create_object( const char_t* class_name )
 	return active_object;
 }
 
-ActiveObject* GameMain::clone_object( const ActiveObject* o )
+ActiveObject* GameMain::clone_object( const ActiveObject* o ) const
 {
 	return get_active_object_manager()->clone_object( o );
 }

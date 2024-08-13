@@ -14,16 +14,16 @@ namespace core::ecs
 class ParticleSystemComponent : public Component
 {
 public:
-	// const size_t ID = 1;
-
 	struct Vertex
 	{
 		Vector3 position;
 		Vector3 velocity;
 	};
 
+	using ParticleList = std::array< Vertex, 1000 >;
+
 public:
-	std::array< Vertex, 1000 > particle_list;
+	 ParticleList particle_list;
 
 public:
 	ParticleSystemComponent() = default;

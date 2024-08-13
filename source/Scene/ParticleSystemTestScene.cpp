@@ -31,10 +31,10 @@ ParticleSystemTestScene::ParticleSystemTestScene()
 	get_graphics_manager()->load_paper_textures();
 
 	// System ‚ð’Ç‰Á‚·‚é
-	get_entity_manager()->add_system< core::ecs::ParticleRenderSystem >( 1000 );
+	get_entity_manager()->add_system< core::ecs::ParticleRenderSystem >( 1001 );
 	get_entity_manager()->add_system< core::ecs::ParticleSystem >( 0 );
 	get_entity_manager()->add_system< core::ecs::TransformControlSystem >();
-	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1001 );
+	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
 
 	// Entity ‚Æ Component ‚ð’Ç‰Á‚·‚é
 	auto particle_system = get_entity_manager()->create_entity();

@@ -96,7 +96,7 @@ private:
 	void update_state_by_key_for( uint_t );
 
 	DWORD* get_joystick_axis_pos_pointer_by_index( int );
-	float get_rate_by_joystick_axis_pos( DWORD );
+	float get_rate_by_joystick_axis_pos( DWORD ) const;
 
 public:
 	Input();
@@ -152,6 +152,11 @@ public:
 	 */
 	bool push( Button button ) const
 	{
+		if ( static_cast< int >( button ) < 0 || button >= Button::MAX )
+		{
+			return false;
+		}
+
 		return ( state_[ static_cast< int >( button ) ] & 1 ) > 0 && ( state_[ static_cast< int >( button ) ] & 2 ) == 0;
 	}
 

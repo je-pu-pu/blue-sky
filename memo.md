@@ -2201,3 +2201,19 @@ SimpleMath は右手座標系だったことが発覚。
 また、 SimpleMath は DirectXMath をラップしており DirectXMath と比較して遅い。自分で DirectXMath をラップして左手座標系でいくのが良いのでは。
 
 https://github.com/microsoft/DirectXTK/wiki/SimpleMath#enter-simplemath
+
+# 2024-08-14
+
+SimpleMath から DirectXMath への移行は上手く行った。
+
+blue-sky のテストが Visual Studio のテストエクスプローラーに表示されないという問題が発生した。
+その代わりに。 xml や tar といったよくわからないテストが表示されていた。かなり時間をかけて調べたところ、原因は、
+lib.cpp で #pragma comment ( lib, "libxml2-mt.lib" ) として libxml2-mt.lib をリンクしていたこと。
+libxml2-mt.lib をリンクすること自体は FBXSDK を使うために必要なのだが、 #pragma comment で行うと、
+Visual Studio が libxml2-mt.lib に含まれるテストを表示してしまい、現在のプロジェクトのテストを正しく表示できないといった不具合なのではないかと思う。
+この問題に対処するため、 libxml2-mt.lib のみ lib.cpp でリンクせず、プロジェクトの設定でリンクを行うように修正した。
+
+source/ に blue-sky.lib.txt という 1.7GB のファイルと blue-sky-exe.exe.txt という 251 MB のファイルがあったため削除。
+作成日時はいずれも 2023-05-31 。COFF/PE Dumper で出力したダンプファイルのよう。何に使ったのか、、多分出力してみただけなのでいらないだろう。
+
+[知っておくといざというときに役に立つ優れモノ！その名は COFF/PE Dumper（dumpbin.exe）！｜lingmu](https://note.com/1in9mu/n/ndaf4f15b247d)

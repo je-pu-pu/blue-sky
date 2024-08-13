@@ -1,4 +1,5 @@
 #include "ParticleRenderSystem.h"
+#include <blue_sky/graphics/shader/PointSpriteShader.h>
 #include <core/graphics/VertexBuffer.h>
 #include <core/graphics/GraphicsManager.h>
 #include <iostream>
@@ -15,7 +16,6 @@ namespace core::ecs
 using core::graphics::BufferType;
 using core::graphics::VertexBuffer;
 using core::graphics::direct_3d_11::Direct3D11;
-
 
 void ParticleRenderSystem::update()
 {
@@ -45,6 +45,7 @@ void ParticleRenderSystem::update()
 		std::cout << "p0 pos, vel : " << p.position << ", " <<  p.velocity << std::endl;
 
 		static auto vb = VertexBuffer{ particle_system->particle_list, BufferType::UPDATABLE };
+		static auto shader = blue_sky::graphics::shader::PointSpriteShader();
 
 		vb.update( particle_system->particle_list );
 
@@ -52,13 +53,17 @@ void ParticleRenderSystem::update()
 		static blue_sky::ObjectConstantBufferWithData object_data;
 		object_data.data().world.set_identity();
 		object_data.data().color = Color::White;
-		object_data.bind_to_all();
-
-		vb.bind();
+		object_data.update();
 
 		get_graphics_manager()->set_input_layout( "pos_norm" );
 		get_graphics_manager()->set_primitive_topology( core::graphics::PrimitiveTopology::POINT_LIST );
 		get_graphics_manager()->render_technique( "point_sprite", [=] {
+
+			object_data.bind_to_vs();
+			object_data.bind_to_gs();
+			shader.bind();
+			vb.bind();
+
 			// Draw
 			Direct3D11::get_instance()->getImmediateContext()->Draw( particle_system->particle_list.size(), 0 );
 		} );

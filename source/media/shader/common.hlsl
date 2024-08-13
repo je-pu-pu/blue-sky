@@ -116,6 +116,11 @@ float4 common_wv_pos( float4 input )
 	return mul( mul( input, World ), View );
 }
 
+float4 common_p_pos( float4 input )
+{
+	return mul( input, Projection );
+}
+
 float4 common_wvp_pos( float4 input )
 {
 	return mul( mul( mul( input, World ), View ), Projection );

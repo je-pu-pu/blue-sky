@@ -16,6 +16,8 @@ namespace blue_sky::graphics::shader
  *		入力レイアウト
  *		テクニック
  *		シェーダー固有の名前付きパラメータ
+ * 
+ * @todo 各テクスチャごとに、そのテクスチャを必要とするシェーダーステージを設定できるようにする
  */
 template< typename ShaderType, int Slot = 0 >
 class Shader : public BaseShader
@@ -58,7 +60,7 @@ protected:
 	std::vector< Color* > color_address_list_;
 
 	uint8_t* buffer_ = nullptr;
-	ConstantBuffer constant_buffer_;
+	std::unique_ptr< ConstantBuffer > constant_buffer_;
 
 	std::vector< Texture* > textures_;
 
@@ -81,7 +83,7 @@ protected:
 	 */
 	size_t setup_parameters()
 	{
-		if ( ! get_parameter_info_list() )
+		if ( ! get_parameter_info_list() || get_parameter_info_list()->empty() )
 		{
 			return 0;
 		}
@@ -164,10 +166,26 @@ protected:
 public:
 	Shader( const char_t* input_layout_name, const char_t* effect_technique_name, ShaderStageSet sss )
 		: render_setting_( input_layout_name, effect_technique_name )
-		, constant_buffer_( setup_parameters() )
 		, shader_stage_set_( sss )
 	{
+		auto n = setup_parameters();
 
+		if ( n > 0 )
+		{
+			constant_buffer_ = std::make_unique< ConstantBuffer >( n );
+		}
+	}
+
+	Shader( const Shader& s )
+		: render_setting_( s.render_setting_ )
+		, shader_stage_set_( s.shader_stage_set_ )
+	{
+		auto n = setup_parameters();
+
+		if ( n > 0 )
+		{
+			constant_buffer_ = std::make_unique< ConstantBuffer >( n );
+		}
 	}
 
 	~Shader()
@@ -315,7 +333,10 @@ public:
 	 */
 	void update() const override
 	{
-		constant_buffer_.update( buffer_ );
+		if ( constant_buffer_ )
+		{
+			constant_buffer_->update( buffer_ );
+		}
 	}
 
 	/**
@@ -323,16 +344,19 @@ public:
 	 */
 	void bind() const override
 	{
-		// 必要なシェーダーにのみバインドする
-		for ( size_t n = 0; n < bind_function_list_.size(); n++ )
+		// 定数バッファを必要なシェーダーにバインドする
+		if ( constant_buffer_ )
 		{
-			if ( shader_stage_set_.test( static_cast< ShaderStage >( n ) ) )
+			for ( size_t n = 0; n < bind_function_list_.size(); n++ )
 			{
-				bind_function_list_[ n ]( constant_buffer_ );
+				if ( shader_stage_set_.test( static_cast< ShaderStage >( n ) ) )
+				{
+					bind_function_list_[ n ]( * constant_buffer_ );
+				}
 			}
 		}
 
-		/// @tood 必要なシェーダーにのみバインドする
+		// テクスチャを必要なシェーダーにバインドする
 		for ( auto n = 0; n < textures_.size(); n++ )
 		{
 			textures_[ n ]->bind_to_ps( n );

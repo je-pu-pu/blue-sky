@@ -17,6 +17,8 @@ Tablet::Tablet( HWND hwnd )
 
 	if ( ! module_ )
 	{
+		return;
+
 		std::stringstream ss;
 		ss << "LoadLibrary( Wintab32.dll ) failed. ( error : " << GetLastError() << " )";
 

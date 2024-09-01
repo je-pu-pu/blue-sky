@@ -20,7 +20,7 @@ public:
 		Vector3 velocity;
 	};
 
-	using ParticleList = std::array< Vertex, 10000 >;
+	using ParticleList = std::array< Vertex, 100000 >;
 
 public:
 	 ParticleList particle_list;

@@ -64,6 +64,8 @@ void RenderSystem::update()
 	// get_graphics_manager()->render_post_effect( render_result_texture_1_.get(), render_result_texture_2_.get() );
 
 	// get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_hand_drawing" ) );
+
+	/// @todo ノイズ用のテクスチャは 0 番に設定しつつ、HLSL では t1 として使えるようにバインドできるようにする ( t0 はポストエフェクト対象 )
 	noise_shader->set_texture_at( 1, get_graphics_manager()->load_texture( "media/texture/noise.png" ) );
 
 	get_graphics_manager()->set_post_effect_shader( noise_shader );

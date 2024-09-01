@@ -48,7 +48,26 @@ BlendState Blend
 	// SrcBlendAlpha = SRC_ALPHA;
 	SrcBlend = SRC_ALPHA;
 	DestBlend = INV_SRC_ALPHA;
+
 	// AlphaToCoverageEnable = True;
+};
+
+/** ‰ÁŽZ */
+BlendState Add
+{
+    BlendEnable[ 0 ] = True;
+
+    SrcBlend = SRC_ALPHA;
+    DestBlend = ONE;
+};
+
+/** Œ¸ŽZ */
+BlendState Sub
+{
+    BlendEnable[ 0 ] = True;
+
+    SrcBlend = ZERO;
+    DestBlend = INV_SRC_ALPHA;
 };
 
 DepthStencilState NoWriteDepth

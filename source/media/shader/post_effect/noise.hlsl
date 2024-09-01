@@ -1,3 +1,7 @@
+/**
+ * 画面を一定の間隔で歪めるポストエフェクトシェーダー
+ */
+
 Texture2D noise_texture : register( t1 );
 
 cbuffer ObjectConstantBuffer : register( b0 )

@@ -15,7 +15,7 @@ void ParticleSystem::update( ComponentTuple& component_tuple ) const
 	for ( auto& p : std::get< ParticleSystemComponent* >( component_tuple )->particle_list )
 	{
 		p.position += p.velocity;
-		p.velocity.y() -= 9.80665f / 60.f * 0.01f;
+		p.velocity.y() -= 9.80665f / 60.f * 0.001f;
 
 		if ( p.position.y() < 0.f )
 		{

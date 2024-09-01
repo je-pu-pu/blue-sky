@@ -3,6 +3,7 @@
 #include <core/ecs/component/TransformComponent.h>
 #include <core/ecs/component/ParticleSystemComponent.h>
 #include <core/ecs/System.h>
+#include <core/graphics/Shader.h>
 
 namespace core::ecs
 {
@@ -15,8 +16,11 @@ class ParticleRenderSystem : public System< TransformComponent, ParticleSystemCo
 {
 public:
 
+private:
+	std::unique_ptr< core::graphics::Shader > shader_;
+
 public:
-	ParticleRenderSystem() = default;
+	ParticleRenderSystem();
 	virtual ~ParticleRenderSystem() = default;
 
 	virtual void update() override;

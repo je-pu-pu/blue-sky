@@ -6,7 +6,7 @@ COMMON_POS_COLOR vs_point_sprite( COMMON_POS_NORM input )
 	COMMON_POS_COLOR output;
 	output.Position = common_wv_pos( input.Position );
 
-	const float f = clamp( input.Position.y * 0.1f, 0.f, 1.f );
+	const float f = clamp( input.Position.y * 0.01f, 0.f, 1.f );
 	output.Color = lerp( float4( 1.f, 0.f, 0.f, 0.5f ), float4( 1.f, 1.f, 0.f, 0.5f ), float4( f, f, f, f ) );
 	
 	return output;
@@ -27,16 +27,21 @@ RasterizerState PointSpriteRasterizerState
  *          0--2
  */
 [maxvertexcount(4)]
-void gs_particle( point COMMON_POS_COLOR input[ 1 ], inout TriangleStream<COMMON_POS_COLOR> Stream )
+void gs_particle(point COMMON_POS_COLOR input[1], inout TriangleStream<COMMON_POS_UV_COLOR> Stream)
 {
-	float vw = 0.1f;
+	float vw = 0.5f;
 	
-	COMMON_POS_COLOR output[ 4 ];
+    COMMON_POS_UV_COLOR output[4];
 	
 	output[ 0 ].Position = input[ 0 ].Position + float4( -vw, -vw, 0.f, 0.f );
 	output[ 1 ].Position = input[ 0 ].Position + float4( -vw,  vw, 0.f, 0.f );
 	output[ 2 ].Position = input[ 0 ].Position + float4(  vw, -vw, 0.f, 0.f );
 	output[ 3 ].Position = input[ 0 ].Position + float4(  vw,  vw, 0.f, 0.f );
+	
+    output[ 0 ].TexCoord = float2( 0.f, 1.f );
+    output[ 1 ].TexCoord = float2( 0.f, 0.f );
+    output[ 2 ].TexCoord = float2( 1.f, 1.f );
+    output[ 3 ].TexCoord = float2( 1.f, 0.f );
 	
 	for ( int n = 0; n < 4; n++ )
 	{
@@ -50,16 +55,26 @@ void gs_particle( point COMMON_POS_COLOR input[ 1 ], inout TriangleStream<COMMON
 	Stream.Append( output[ 3 ] );
 }
 
-float4 ps_point_sprite( COMMON_POS_COLOR input ) : SV_Target
+float4 ps_point_sprite( COMMON_POS_UV_COLOR input ) : SV_Target
 {
-	return input.Color;
+    float4 output = model_texture.Sample( texture_sampler, input.TexCoord );
+	
+    // return output * 0.5f;
+	
+    // clip( output.a - 0.5f );
+	
+    return float4( ( input.Color.rgb ), output.a );
+    // return float4( ( input.Color.rgb ), output.a * 0.25f );
 }
 
 technique11 point_sprite
 {
 	pass main
 	{
-		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+        // SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+        // SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+        SetBlendState( Add, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
 		
 		SetVertexShader( CompileShader( vs_4_0, vs_point_sprite() ) );

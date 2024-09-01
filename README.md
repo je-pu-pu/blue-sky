@@ -34,6 +34,7 @@ Windows 10 ( 32bit )
 - [libogg 1.3.4](https://xiph.org/downloads/)
 - [libvorbis 1.3.7](https://xiph.org/downloads/)
 - [Effects for Direct3D 11 (FX11) jun2020](https://github.com/microsoft/FX11/tree/jun2020)
+- [portable-file-dialogs 0.0.1](https://github.com/samhocevar/portable-file-dialogs)
 
 ディレクトリ構成
 ========

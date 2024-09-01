@@ -17,6 +17,13 @@ using core::graphics::BufferType;
 using core::graphics::VertexBuffer;
 using core::graphics::direct_3d_11::Direct3D11;
 
+ParticleRenderSystem::ParticleRenderSystem()
+	: shader_( std::make_unique< blue_sky::graphics::shader::PointSpriteShader >() )
+{
+	// shader_->set_texture_at( 0, get_graphics_manager()->load_texture( "media/texture/pen/white-grass-pen.png" ) );
+	shader_->set_texture_at( 0, get_graphics_manager()->load_texture( "media/texture/pen/circle.png" ) );
+}
+
 void ParticleRenderSystem::update()
 {
 	// std::cout << get_priority() << " : ParticleRenderSystem::update()" << std::endl;
@@ -41,11 +48,10 @@ void ParticleRenderSystem::update()
 		}
 		*/
 
-		const auto& p = particle_system->particle_list.front();
-		std::cout << "p0 pos, vel : " << p.position << ", " <<  p.velocity << std::endl;
+		// const auto& p = particle_system->particle_list.front();
+		// std::cout << "p0 pos, vel : " << p.position << ", " <<  p.velocity << std::endl;
 
 		static auto vb = VertexBuffer{ particle_system->particle_list, BufferType::UPDATABLE };
-		static auto shader = blue_sky::graphics::shader::PointSpriteShader();
 
 		vb.update( particle_system->particle_list );
 
@@ -61,13 +67,15 @@ void ParticleRenderSystem::update()
 
 			object_data.bind_to_vs();
 			object_data.bind_to_gs();
-			shader.bind();
+			shader_->bind();
 			vb.bind();
 
 			// Draw
 			Direct3D11::get_instance()->getImmediateContext()->Draw( particle_system->particle_list.size(), 0 );
 		} );
 	}
+
+	shader_->render_parameter_gui();
 }
 
 } // namespace core::ecs

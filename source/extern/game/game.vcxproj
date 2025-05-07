@@ -142,6 +142,7 @@
     <ClInclude Include="MainLoop.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundFile.h" />
+    <ClInclude Include="SoundFormat.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="TimedCache.h" />
   </ItemGroup>

@@ -4,6 +4,7 @@
 
 #include <type/type.h>
 
+#include <memory>
 #include <vector>
 #include <string>
 
@@ -22,6 +23,11 @@ class SoundFile;
 
 namespace core
 {
+	namespace sound
+	{
+		class SoundEngine;
+		class SoundBuffer;
+	}
 
 /**
  * サウンドクラス
@@ -35,11 +41,15 @@ public:
 	using SoundSample		= s16_t;
 	using SoundSampleList	= std::vector< SoundSample >;
 
-protected:
-	const DirectSound* direct_sound_;
-	DirectSoundBuffer* direct_sound_buffer_;
+	using SoundEngine		= sound::SoundEngine;
+	using SoundBuffer		= sound::SoundBuffer;
 
-	SoundFile* sound_file_;
+protected:
+	const SoundEngine* sound_engine_;
+	
+	std::unique_ptr< SoundBuffer > sound_buffer_;
+
+	std::unique_ptr< SoundFile > sound_file_;
 	SoundSampleList sound_sample_buffer_;
 
 	std::string name_;
@@ -52,7 +62,7 @@ protected:
 public:
 
 	/// コンストラクタ
-	explicit Sound( const DirectSound* );
+	explicit Sound( const SoundEngine* );
 
 	/// デストラクタ
 	virtual ~Sound() override;
@@ -119,9 +129,6 @@ public:
 	float get_current_position() const override;
 
 	void update() override;
-
-	DirectSoundBuffer* get_direct_sound_buffer() { return direct_sound_buffer_; };
-	void set_direct_sound_buffer( DirectSoundBuffer* b ) { direct_sound_buffer_ = b; }
 
 	/// サウンドを一時停止する
 	// virtual bool pause() = 0;

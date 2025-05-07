@@ -19,10 +19,7 @@ constexpr float pi = 3.14159265358979323846f;
 
 template< typename T > constexpr inline T clamp( T value, T min_value, T max_value )
 {
-	value = std::max( min_value, value );
-	value = std::min( max_value, value );
-
-	return value;
+	return std::clamp( value, min_value, max_value );
 }
 
 template< typename T > constexpr inline T degree_to_radian( T degree )

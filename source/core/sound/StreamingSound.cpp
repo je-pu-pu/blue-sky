@@ -1,9 +1,7 @@
 #include "StreamingSound.h"
+#include "SoundEngine.h"
+#include "SoundBuffer.h"
 #include "OggVorbisFile.h"
-
-#include <core/sound/DirectSound/DirectSound.h>
-#include <core/sound/DirectSound/DirectSoundBuffer.h>
-#include <core/DirectX.h>
 
 #include <common/exception.h>
 
@@ -12,8 +10,8 @@
 namespace core
 {
 
-StreamingSound::StreamingSound( const DirectSound* direct_sound )
-	: Sound( direct_sound )
+StreamingSound::StreamingSound( const SoundEngine* sound_engine )
+	: Sound( sound_engine )
 	, is_loop_( false )
 	, is_first_half_playing_( true )
 	, current_position_offset_( 0.f )
@@ -28,9 +26,9 @@ StreamingSound::~StreamingSound()
 
 bool StreamingSound::load( const char* file_name )
 {
-	if ( direct_sound_buffer_ )
+	if ( sound_buffer_ )
 	{
-		COMMON_THROW_EXCEPTION_MESSAGE( "direct_sound_buffer_ is not null." );
+		COMMON_THROW_EXCEPTION_MESSAGE( "sound_buffer_ is not null." );
 	}
 
 	if ( sound_file_ )
@@ -38,25 +36,9 @@ bool StreamingSound::load( const char* file_name )
 		COMMON_THROW_EXCEPTION_MESSAGE( "sound_file_ is not null." );
 	}
 
-	sound_file_ = new SoundFile( file_name );
+	sound_file_.reset( new SoundFile( file_name ) );
 
-	DSBUFFERDESC buffer_desc = { sizeof( DSBUFFERDESC ) };
-
-	if ( is_3d_sound() )
-	{
-		buffer_desc.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY | DSBCAPS_CTRL3D;
-		buffer_desc.guid3DAlgorithm = DS3DALG_DEFAULT;
-	}
-	else
-	{
-		buffer_desc.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPAN | DSBCAPS_CTRLFREQUENCY;
-	}
-	buffer_desc.dwBufferBytes = std::min( sound_file_->size(), get_buffer_size() );
-	buffer_desc.lpwfxFormat = & sound_file_->format();
-	buffer_desc.guid3DAlgorithm = DS3DALG_DEFAULT;
-
-	direct_sound_buffer_ = direct_sound_->create_sound_buffer( buffer_desc );
-	direct_sound_buffer_->set_3d_sound( is_3d_sound() );
+	sound_buffer_.reset( sound_engine_->create_sound_buffer( is_3d_sound(), true, std::min( sound_file_->size(), get_buffer_size() ), sound_file_->format() ) );
 
 	sound_sample_buffer_.resize( get_buffer_size() / sizeof( SoundSample ) );
 
@@ -84,7 +66,7 @@ bool StreamingSound::play( bool loop, bool force )
 	is_first_half_playing_ = true;
 	current_position_offset_ = 0.f;
 
-	direct_sound_buffer_->play( true );
+	sound_buffer_->play( true );
 
 	return true;
 }
@@ -92,9 +74,6 @@ bool StreamingSound::play( bool loop, bool force )
 void StreamingSound::update()
 {
 	Sound::update();
-
-	DWORD play_pos = 0;
-	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->GetCurrentPosition( & play_pos, 0 ) );
 
 	// 再生終了チェック
 	if ( ! is_loop_ )
@@ -105,32 +84,31 @@ void StreamingSound::update()
 		}
 	}
 
+	auto pos = sound_buffer_->get_current_position();
+
 	// バッファ書き込みチェック
-	if ( is_first_half_playing_ && play_pos >= direct_sound_buffer_->get_caps().dwBufferBytes / 2 )
+	if ( is_first_half_playing_ && pos >= sound_buffer_->get_size() / 2 )
 	{
 		stream_half( false );
 		is_first_half_playing_ = ! is_first_half_playing_;
 	}
-	else if ( ! is_first_half_playing_ && play_pos < direct_sound_buffer_->get_caps().dwBufferBytes / 2 ) 
+	else if ( ! is_first_half_playing_ && pos < sound_buffer_->get_size() / 2 ) 
 	{
 		stream_half( true );
 		is_first_half_playing_ = ! is_first_half_playing_;
-		current_position_offset_ += static_cast< float >( direct_sound_buffer_->get_caps().dwBufferBytes ) / static_cast< float >( sound_file_->size_per_sec() );
+		current_position_offset_ += static_cast< float >( sound_buffer_->get_size() ) / static_cast< float >( sound_file_->size_per_sec() );
 	}
 }
 
 void StreamingSound::stream_all()
 {
-	void* data = 0;
-	DWORD size = 0;
-
-	direct_sound_buffer_->get_direct_sound_buffer()->Lock( 0, 0, & data, & size, 0, 0, DSBLOCK_ENTIREBUFFER );
+	void* data = sound_buffer_->lock();
 	
-	sound_file_->read( data, direct_sound_buffer_->get_caps().dwBufferBytes );
+	sound_file_->read( data, sound_buffer_->get_size() );
 	
-	direct_sound_buffer_->get_direct_sound_buffer()->Unlock( data, size, 0, 0 );
+	sound_buffer_->unlock();
 
-	memcpy( & sound_sample_buffer_[ 0 ], data, size );
+	memcpy( & sound_sample_buffer_[ 0 ], data, sound_buffer_->get_size() );
 }
 
 void StreamingSound::stream_half( bool first_half )
@@ -140,38 +118,33 @@ void StreamingSound::stream_half( bool first_half )
 
 	if ( first_half )
 	{
-		lock_offset = direct_sound_buffer_->get_caps().dwBufferBytes / 2;
-		lock_size = direct_sound_buffer_->get_caps().dwBufferBytes - lock_offset;
+		lock_offset = sound_buffer_->get_size() / 2;
+		lock_size = sound_buffer_->get_size() - lock_offset;
 	}
 	else
 	{
-		lock_size = direct_sound_buffer_->get_caps().dwBufferBytes / 2;
+		lock_size = sound_buffer_->get_size() / 2;
 	}
 
-	void* data = 0;
-	DWORD size = 0;
+	void* data = sound_buffer_->lock( lock_offset, lock_size );
 
-	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->Lock( lock_offset, lock_size, & data, & size, 0, 0, 0 ) );
+	sound_file_->read( data, lock_size, is_loop_ );
 
-	sound_file_->read( data, size, is_loop_ );
+	sound_buffer_->unlock();
 
-	DIRECT_X_FAIL_CHECK( direct_sound_buffer_->get_direct_sound_buffer()->Unlock( data, size, 0, 0 ) );
-
-	memcpy( & sound_sample_buffer_[ lock_offset / sizeof( SoundSample ) ], data, size );
+	memcpy( & sound_sample_buffer_[ lock_offset / sizeof( SoundSample ) ], data, lock_size );
 }
 
 float StreamingSound::get_current_position() const
 {
-	DWORD play_pos = 0;
-	direct_sound_buffer_->get_direct_sound_buffer()->GetCurrentPosition( & play_pos, 0 );
+	auto play_pos = sound_buffer_->get_current_position();
 
 	return current_position_offset_ + static_cast< float >( play_pos ) / static_cast< float >( sound_file_->size_per_sec() );
 }
 
 float StreamingSound::get_current_peak_level() const
 {
-	DWORD play_pos = 0;
-	direct_sound_buffer_->get_direct_sound_buffer()->GetCurrentPosition( & play_pos, 0 );
+	auto play_pos = sound_buffer_->get_current_position();
 
 	const float sample_sec = 1.f / 20.f;
 	const int sample_count = static_cast< int >( sound_file_->size_per_sec() * sample_sec ) / sizeof( SoundSample );

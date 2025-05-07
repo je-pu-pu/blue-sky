@@ -1,5 +1,4 @@
-#ifndef DIRECT_SOUND_H
-#define DIRECT_SOUND_H
+#pragma once
 
 #define DIRECTSOUND_VERSION 0x1000
 #include <dsound.h>
@@ -31,4 +30,3 @@ public:
 
 }; // class DirectSound
 
-#endif // DIRECT_SOUND_H

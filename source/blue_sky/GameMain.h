@@ -23,6 +23,11 @@ namespace game
 
 namespace core
 {
+	namespace sound
+	{
+		class SoundEngine;
+	}
+
 	class SoundManager;
 
 	namespace graphics::direct_3d_11
@@ -66,6 +71,8 @@ public:
 	using Config					= game::Config;
 	using MainLoop					= game::MainLoop;
 
+	using SoundEngine				= core::sound::SoundEngine;
+
 	using PhysicsManager			= ActiveObjectPhysics;
 	using GraphicsManager			= GraphicsManager;
 	using SoundManager				= core::SoundManager;
@@ -104,6 +111,8 @@ private:
 	std::unique_ptr< Input >				input_;					///< Game Input
 
 	std::unique_ptr< OculusRift >			oculus_rift_;			///< Oculus Rift
+
+	std::unique_ptr< SoundEngine >			sound_engine_;			///< SoundEngine
 
 	std::unique_ptr< PhysicsManager >		physics_manager_;		///< PhysicsManager
 	std::unique_ptr< GraphicsManager >		graphics_manager_;		///< GraphicsManager

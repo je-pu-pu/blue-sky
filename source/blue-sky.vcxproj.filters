@@ -83,12 +83,6 @@
     <ClCompile Include="core\input\DirectInput\DirectInput.cpp">
       <Filter>core\DirectInput</Filter>
     </ClCompile>
-    <ClCompile Include="core\sound\DirectSound\DirectSound.cpp">
-      <Filter>core\DirectSound</Filter>
-    </ClCompile>
-    <ClCompile Include="core\sound\DirectSound\DirectSoundBuffer.cpp">
-      <Filter>core\DirectSound</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
@@ -300,6 +294,18 @@
       <Filter>lib\imgui</Filter>
     </ClCompile>
     <ClCompile Include="core\math\DirectXMath\Quaternion.cpp" />
+    <ClCompile Include="core\sound\DirectSound\DirectSound.cpp">
+      <Filter>core\sound\DirectSound</Filter>
+    </ClCompile>
+    <ClCompile Include="core\sound\DirectSound\DirectSoundBuffer.cpp">
+      <Filter>core\sound\DirectSound</Filter>
+    </ClCompile>
+    <ClCompile Include="core\sound\DirectSound\SoundEngine.cpp">
+      <Filter>core\sound\DirectSound</Filter>
+    </ClCompile>
+    <ClCompile Include="core\sound\DirectSound\SoundBuffer.cpp">
+      <Filter>core\sound\DirectSound</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -392,12 +398,6 @@
     </ClInclude>
     <ClInclude Include="core\input\DirectInput\DirectInput.h">
       <Filter>core\DirectInput</Filter>
-    </ClInclude>
-    <ClInclude Include="core\sound\DirectSound\DirectSound.h">
-      <Filter>core\DirectSound</Filter>
-    </ClInclude>
-    <ClInclude Include="core\sound\DirectSound\DirectSoundBuffer.h">
-      <Filter>core\DirectSound</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h">
       <Filter>core\graphics\Direct3D11</Filter>
@@ -803,6 +803,24 @@
     <ClInclude Include="core\graphics\Direct3D11\VertexBuffer.h" />
     <ClInclude Include="core\graphics\VertexBuffer.h" />
     <ClInclude Include="core\graphics\BufferType.h" />
+    <ClInclude Include="core\sound\DirectSound\DirectSound.h">
+      <Filter>core\sound\DirectSound</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\DirectSound\DirectSoundBuffer.h">
+      <Filter>core\sound\DirectSound</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\DirectSound\SoundEngine.h">
+      <Filter>core\sound\DirectSound</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\SoundEngine.h">
+      <Filter>core\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\SoundBuffer.h">
+      <Filter>core\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\DirectSound\SoundBuffer.h">
+      <Filter>core\sound\DirectSound</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -972,9 +990,6 @@
     <Filter Include="core\DirectInput">
       <UniqueIdentifier>{4ae0ef67-2726-447f-9bb4-682d730461bd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\DirectSound">
-      <UniqueIdentifier>{dda2800c-ddab-4892-bc17-a26b440756c4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="media">
       <UniqueIdentifier>{b24d6732-297b-4a28-bff0-ac59442e19a1}</UniqueIdentifier>
     </Filter>
@@ -1061,6 +1076,9 @@
     </Filter>
     <Filter Include="media\script\scene">
       <UniqueIdentifier>{f559e430-e6cf-4884-8f66-f47f64c12ecd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\sound\DirectSound">
+      <UniqueIdentifier>{9be5b618-4fec-4d4f-8f36-838939f6662a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

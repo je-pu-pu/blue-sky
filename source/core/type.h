@@ -20,19 +20,20 @@ namespace core
 			enum class PixelFormat;
 		}
 
-		using direct_3d_11::PixelFormat;
+		using PixelFormat	= direct_3d_11::PixelFormat;
 	}
 
-	using graphics::direct_3d_11::ConstantBuffer;
+	template< int Slot >
+	using ConstantBuffer	= graphics::direct_3d_11::ConstantBuffer< Slot >;
 
-	using math::direct_x_math::Vector2;
-	using math::direct_x_math::Vector3;
-	using math::direct_x_math::Vector;
-	using math::direct_x_math::Matrix;
-	using math::direct_x_math::Color;
+	using Vector2			= math::direct_x_math::Vector2;
+	using Vector3			= math::direct_x_math::Vector3;
+	using Vector			= math::direct_x_math::Vector;
+	using Matrix			= math::direct_x_math::Matrix;
+	using Color				= math::direct_x_math::Color;
 
-	using math::direct_x_math::Transform;
-	using math::direct_x_math::Quaternion;
+	using Transform			= math::direct_x_math::Transform;
+	using Quaternion		= math::direct_x_math::Quaternion;
 
 	namespace ecs
 	{

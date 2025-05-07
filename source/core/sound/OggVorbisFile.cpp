@@ -14,13 +14,11 @@ OggVorbisFile::OggVorbisFile( const char* file_name )
 
 	vorbis_info_ = ov_info( & file_, -1 );
 
-	format_.wFormatTag = WAVE_FORMAT_PCM;
-	format_.nChannels = static_cast< WORD >( vorbis_info_->channels );
-	format_.nSamplesPerSec = vorbis_info_->rate;
-    format_.nAvgBytesPerSec = 2 * vorbis_info_->rate * vorbis_info_->channels;
-    format_.nBlockAlign = static_cast< WORD >( 2 * vorbis_info_->channels );
-    format_.wBitsPerSample = 16;
-    format_.cbSize = 0;
+	format_ = {
+		.channels = vorbis_info_->channels,
+		.sampling_rate = vorbis_info_->rate,
+		.bit_depth = 16,
+	};
 }
 
 OggVorbisFile::~OggVorbisFile()
@@ -42,7 +40,7 @@ OggVorbisFile::SizeType OggVorbisFile::size() const
 
 OggVorbisFile::SizeType OggVorbisFile::size_per_sec() const
 {
-	return format_.nAvgBytesPerSec;
+	return 2 * format_.sampling_rate * format_.channels;
 }
 
 OggVorbisFile::SizeType OggVorbisFile::read( void* data, SizeType size, bool loop )

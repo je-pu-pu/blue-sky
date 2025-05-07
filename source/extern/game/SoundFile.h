@@ -1,8 +1,8 @@
-#ifndef GAME_SOUND_FILE_H
-#define GAME_SOUND_FILE_H
+#pragma once
 
 namespace game
 {
+	class SoundFormat;
 
 /**
  * サウンドファイル基底クラス
@@ -12,15 +12,7 @@ class SoundFile
 {
 public:
 	using SizeType = unsigned long;
-
-	/*
-	struct Info
-	{
-		unsigned short channels;
-		unsigned short sampling_rate;
-		unsigned short 
-	};
-	*/
+	using SoundFormat = SoundFormat;
 
 public:
 
@@ -39,10 +31,9 @@ public:
 	/// ファイルからデータを読み込む
 	virtual SizeType read( void*, SizeType, bool ) = 0;
 
-
+	/// サウンドファイルのフォーマットを取得する
+	virtual const SoundFormat& format() const = 0;
 
 }; // class SoundFile
 
 } // namespace game
-
-#endif // GAME_SOUND_FILE_H

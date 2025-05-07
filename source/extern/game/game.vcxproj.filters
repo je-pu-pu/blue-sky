@@ -9,6 +9,7 @@
     <ClInclude Include="TimedCache.h" />
     <ClInclude Include="ElapsedTimer.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="SoundFormat.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SoundManager.cpp" />

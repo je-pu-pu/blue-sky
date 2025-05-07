@@ -6,8 +6,6 @@
 
 #include <windows.h>
 
-class DirectSound;
-
 namespace game
 {
 
@@ -17,6 +15,11 @@ class Sound;
 
 namespace core
 {
+	namespace sound
+	{
+		class SoundEngine;
+		class SoundBuffer;
+	}
 
 /**
  *サウンド管理クラス
@@ -24,11 +27,15 @@ namespace core
  */
 class SoundManager : public game::SoundManager
 {
+public:
+	using SoundEngine = sound::SoundEngine;
+	using SoundBuffer = sound::SoundBuffer;
+
 private:
-	DirectSound* direct_sound_;
+	SoundEngine* sound_engine_;
 
 public:
-	SoundManager( HWND );
+	SoundManager( SoundEngine* );
 	virtual ~SoundManager();
 
 	virtual void set_mute( bool ) override;

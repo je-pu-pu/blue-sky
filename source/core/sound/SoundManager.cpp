@@ -2,9 +2,7 @@
 #include "Sound.h"
 #include "StreamingSound.h"
 #include "OggVorbisFile.h"
-#include <core/sound/DirectSound/DirectSound.h>
-#include <core/sound/DirectSound/DirectSoundBuffer.h>
-#include <core/DirectX.h>
+#include "SoundEngine.h"
 
 #include <common/exception.h>
 
@@ -13,8 +11,8 @@
 namespace core
 {
 
-SoundManager::SoundManager( HWND hwnd )
-	: direct_sound_( new DirectSound( hwnd ) )
+SoundManager::SoundManager( SoundEngine* sound_engine )
+	: sound_engine_( sound_engine )
 {
 
 }
@@ -22,8 +20,6 @@ SoundManager::SoundManager( HWND hwnd )
 SoundManager::~SoundManager()
 {
 	unload_all();
-
-	delete direct_sound_;
 }
 
 void SoundManager::set_mute( bool mute )
@@ -32,7 +28,7 @@ void SoundManager::set_mute( bool mute )
 
 	if ( is_mute() )
 	{
-		DIRECT_X_FAIL_CHECK( direct_sound_->get_primary_buffer()->SetVolume( DSBVOLUME_MIN ) );
+		sound_engine_->set_volume( Sound::VOLUME_MIN );
 	}
 	else
 	{
@@ -46,8 +42,7 @@ void SoundManager::set_volume( float v )
 
 	if ( ! is_mute() )
 	{
-		LONG volume = static_cast< long >( ( get_volume() - Sound::VOLUME_MIN ) / ( Sound::VOLUME_MAX - Sound::VOLUME_MIN ) * ( DSBVOLUME_MAX - DSBVOLUME_MIN ) + DSBVOLUME_MIN );
-		DIRECT_X_FAIL_CHECK( direct_sound_->get_primary_buffer()->SetVolume( volume ) );
+		sound_engine_->set_volume( get_volume() );
 	}
 }
 
@@ -88,29 +83,20 @@ game::Sound* SoundManager::load_music( const char* name, const char* file_name, 
 
 game::Sound* SoundManager::create_sound( const char* file_name, bool is_3d )
 {
-	Sound::SoundFile* file = new Sound::SoundFile( file_name );
-	Sound* sound = 0;
+	auto file = Sound::SoundFile( file_name );
+	Sound* sound = nullptr;
 
-	if ( file->size() <= StreamingSound::get_buffer_size() )
+	if ( file.size() <= StreamingSound::get_buffer_size() )
 	{
-		sound = new Sound( direct_sound_ );
+		sound = new Sound( sound_engine_ );
 	}
 	else
 	{
-		sound = new StreamingSound( direct_sound_ );
+		sound = new StreamingSound( sound_engine_ );
 	}
-
-	delete file;
 
 	sound->set_3d_sound( is_3d );
 	sound->load( file_name );
-
-	if ( is_3d )
-	{
-		DIRECT_X_FAIL_CHECK( sound->get_direct_sound_buffer()->get_direct_sound_3d_buffer()->SetMinDistance( 2.f, DS3D_DEFERRED ) );
-		DIRECT_X_FAIL_CHECK( sound->get_direct_sound_buffer()->get_direct_sound_3d_buffer()->SetMaxDistance( 50.f, DS3D_DEFERRED ) );
-		DIRECT_X_FAIL_CHECK( sound->get_direct_sound_buffer()->get_direct_sound_3d_buffer()->SetMode( DS3DMODE_NORMAL, DS3D_DEFERRED ) );
-	}
 
 	return sound;
 }
@@ -133,22 +119,22 @@ void SoundManager::stop_all()
 
 void SoundManager::set_listener_position( const Vector3& p )
 {
-	direct_sound_->get_listener()->SetPosition( p.x(), p.y(), p.z(), DS3D_DEFERRED );
+	sound_engine_->set_listener_position( p );
 }
 
 void SoundManager::set_listener_velocity( const Vector3& v )
 {
-	direct_sound_->get_listener()->SetVelocity( v.x(), v.y(), v.z(), DS3D_DEFERRED );
+	sound_engine_->set_listener_velocity( v );
 }
 
 void SoundManager::set_listener_orientation( const Vector3& front, const Vector3& top )
 {
-	direct_sound_->get_listener()->SetOrientation( front.x(), front.y(), front.z(), top.x(), top.y(), top.z(), DS3D_DEFERRED );
+	sound_engine_->set_listener_orientation( front, top );
 }
 
 void SoundManager::commit()
 {
-	direct_sound_->get_listener()->CommitDeferredSettings();
+	sound_engine_->commit();
 }
 
 }

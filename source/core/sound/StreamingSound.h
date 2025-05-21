@@ -23,7 +23,7 @@ private:
 public:
 
 	/// コンストラクタ
-	explicit StreamingSound( const SoundEngine* );
+	explicit StreamingSound( SoundEngine* );
 
 	/// デストラクタ
 	~StreamingSound();

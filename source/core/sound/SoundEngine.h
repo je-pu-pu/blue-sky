@@ -27,7 +27,7 @@ public:
 
 	virtual void set_volume( float ) = 0;
 
-	virtual SoundBuffer* create_sound_buffer( bool is_3d, bool is_streaming, size_t size, const SoundFormat& format ) const = 0;
+	virtual SoundBuffer* create_sound_buffer( bool is_3d, bool is_streaming, size_t size, const SoundFormat& format ) = 0;
 
 	// 3D
 	virtual void set_listener_position( const Vector3& ) = 0;

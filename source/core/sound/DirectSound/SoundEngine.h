@@ -31,7 +31,7 @@ public:
 
 	void set_volume( float ) override;
 
-	SoundBuffer* create_sound_buffer( bool is_3d, bool is_streaming, size_t size, const SoundFormat& format ) const override;
+	SoundBuffer* create_sound_buffer( bool is_3d, bool is_streaming, size_t size, const SoundFormat& format ) override;
 
 	// 3D
 	void set_listener_position( const Vector3& ) override;

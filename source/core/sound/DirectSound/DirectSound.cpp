@@ -33,6 +33,13 @@ DirectSound::DirectSound( HWND hwnd )
 	DIRECT_X_FAIL_CHECK( listener_->SetRolloffFactor( 0.25f, DS3D_DEFERRED ) );
 
 	/*
+	WAVEFORMATEX format = { 0 };
+	DWORD size = 0;
+
+	DIRECT_X_FAIL_CHECK( primary_buffer_->GetFormat( & format, sizeof( WAVEFORMATEX ), & size ) );
+	*/
+
+	/*
 	PCMWAVEFORMAT format = { 0 };
 	format.wf.wFormatTag = WAVE_FORMAT_PCM;
 	format.wf.nChannels = 2;

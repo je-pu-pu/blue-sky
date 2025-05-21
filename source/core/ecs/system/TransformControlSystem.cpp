@@ -5,8 +5,6 @@
 #include <common/math.h>
 #include <iostream>
 
-#include <DirectXTK/SimpleMath.h>
-
 namespace core::ecs
 {
 

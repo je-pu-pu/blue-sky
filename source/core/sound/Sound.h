@@ -45,7 +45,7 @@ public:
 	using SoundBuffer		= sound::SoundBuffer;
 
 protected:
-	const SoundEngine* sound_engine_;
+	SoundEngine* sound_engine_;
 	
 	std::unique_ptr< SoundBuffer > sound_buffer_;
 
@@ -62,7 +62,7 @@ protected:
 public:
 
 	/// コンストラクタ
-	explicit Sound( const SoundEngine* );
+	explicit Sound( SoundEngine* );
 
 	/// デストラクタ
 	virtual ~Sound() override;

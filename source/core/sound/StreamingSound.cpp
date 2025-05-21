@@ -10,7 +10,7 @@
 namespace core
 {
 
-StreamingSound::StreamingSound( const SoundEngine* sound_engine )
+StreamingSound::StreamingSound( SoundEngine* sound_engine )
 	: Sound( sound_engine )
 	, is_loop_( false )
 	, is_first_half_playing_( true )

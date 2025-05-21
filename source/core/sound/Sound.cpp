@@ -22,7 +22,7 @@ const Sound::T Sound::PAN_CENTER = 0.f;
 namespace core
 {
 
-Sound::Sound( const SoundEngine* sound_engine )
+Sound::Sound( SoundEngine* sound_engine )
 	: sound_engine_( sound_engine )
 	, is_3d_sound_( false )
 	, max_volume_( VOLUME_MAX )

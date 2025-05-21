@@ -306,6 +306,12 @@
     <ClCompile Include="core\sound\DirectSound\SoundBuffer.cpp">
       <Filter>core\sound\DirectSound</Filter>
     </ClCompile>
+    <ClCompile Include="core\sound\PortAudio\SoundBuffer.cpp">
+      <Filter>core\sound\PortAudio</Filter>
+    </ClCompile>
+    <ClCompile Include="core\sound\PortAudio\SoundEngine.cpp">
+      <Filter>core\sound\PortAudio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -795,8 +801,6 @@
     <ClInclude Include="core\Logger.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="core\math\SimpleMath\Transform.h" />
-    <ClInclude Include="core\math\SimpleMath\Quaternion.h" />
     <ClInclude Include="core\math\DirectXMath\Transform.h" />
     <ClInclude Include="core\math\DirectXMath\Quaternion.h" />
     <ClInclude Include="blue_sky\graphics\shader\PointSpriteShader.h" />
@@ -820,6 +824,12 @@
     </ClInclude>
     <ClInclude Include="core\sound\DirectSound\SoundBuffer.h">
       <Filter>core\sound\DirectSound</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\PortAudio\SoundBuffer.h">
+      <Filter>core\sound\PortAudio</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\PortAudio\SoundEngine.h">
+      <Filter>core\sound\PortAudio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1079,6 +1089,9 @@
     </Filter>
     <Filter Include="core\sound\DirectSound">
       <UniqueIdentifier>{9be5b618-4fec-4d4f-8f36-838939f6662a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\sound\PortAudio">
+      <UniqueIdentifier>{c83c9270-5c52-438f-a9ca-b2a48144f8e8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

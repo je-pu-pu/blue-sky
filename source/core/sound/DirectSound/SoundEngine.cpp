@@ -26,7 +26,7 @@ void SoundEngine::set_volume( float volume )
 	DIRECT_X_FAIL_CHECK( direct_sound_->get_primary_buffer()->SetVolume( long_volume ) );
 }
 
-SoundEngine::SoundBuffer* SoundEngine::create_sound_buffer( bool is_3d_sound, bool is_streaming, size_t size, const SoundFormat& format ) const
+SoundEngine::SoundBuffer* SoundEngine::create_sound_buffer( bool is_3d_sound, bool is_streaming, size_t size, const SoundFormat& format )
 {
 	DSBUFFERDESC buffer_desc = { sizeof( DSBUFFERDESC ) };
 

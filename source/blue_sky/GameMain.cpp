@@ -25,6 +25,7 @@
 
 
 #include <core/sound/DirectSound/SoundEngine.h>
+#include <core/sound/PortAudio/SoundEngine.h>
 
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
@@ -137,7 +138,8 @@ GameMain::GameMain()
 	graphics_manager_.reset( new blue_sky::graphics::direct_3d_11::GraphicsManager( direct_3d_.get() ) );
 	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "graphics.debug_axis", 0 ) != 0 );
 	
-	sound_engine_.reset( new core::sound::direct_sound::SoundEngine( get_app()->GetWindowHandle() ) );
+	// sound_engine_.reset( new core::sound::direct_sound::SoundEngine( get_app()->GetWindowHandle() ) );
+	sound_engine_.reset( new core::sound::port_audio::SoundEngine() );
 	sound_manager_.reset( new SoundManager( sound_engine_.get() ) );
 	sound_manager_->set_mute( get_config()->get( "audio.mute", 0 ) != 0 );
 	sound_manager_->set_volume( get_config()->get( "audio.volume", 1.f ) );

@@ -80,6 +80,8 @@
     <ClCompile Include="core\sound\DirectSound\SoundBuffer.cpp" />
     <ClCompile Include="core\sound\DirectSound\SoundEngine.cpp" />
     <ClCompile Include="core\sound\OggVorbisFile.cpp" />
+    <ClCompile Include="core\sound\PortAudio\SoundBuffer.cpp" />
+    <ClCompile Include="core\sound\PortAudio\SoundEngine.cpp" />
     <ClCompile Include="core\sound\Sound.cpp" />
     <ClCompile Include="core\sound\SoundManager.cpp" />
     <ClCompile Include="core\sound\StreamingSound.cpp" />
@@ -252,8 +254,6 @@
     <ClInclude Include="core\math\DirectXMath\Vector2.h" />
     <ClInclude Include="core\math\DirectXMath\Vector3.h" />
     <ClInclude Include="core\math\Quaternion.h" />
-    <ClInclude Include="core\math\SimpleMath\Quaternion.h" />
-    <ClInclude Include="core\math\SimpleMath\Transform.h" />
     <ClInclude Include="core\math\Transform.h" />
     <ClInclude Include="core\math\Vector.h" />
     <ClInclude Include="core\physics\Bullet\BulletPhysics.h" />
@@ -263,6 +263,8 @@
     <ClInclude Include="core\sound\DirectSound\SoundBuffer.h" />
     <ClInclude Include="core\sound\DirectSound\SoundEngine.h" />
     <ClInclude Include="core\sound\OggVorbisFile.h" />
+    <ClInclude Include="core\sound\PortAudio\SoundBuffer.h" />
+    <ClInclude Include="core\sound\PortAudio\SoundEngine.h" />
     <ClInclude Include="core\sound\Sound.h" />
     <ClInclude Include="core\sound\SoundBuffer.h" />
     <ClInclude Include="core\sound\SoundEngine.h" />

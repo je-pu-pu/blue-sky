@@ -8,6 +8,8 @@
 
 #include <portaudio/pa_win_wasapi.h>
 
+#include <thread>
+#include <chrono>
 
 namespace core::sound::port_audio
 {
@@ -78,6 +80,8 @@ int SoundEngine::callback( const void* input, void* output, unsigned long frame_
 	auto sound_engine = static_cast< SoundEngine* >( user_data );
 	auto out = static_cast< float* >( output );
 
+	std::lock_guard< std::mutex > lock( sound_engine->sound_buffer_list_mutex_ );
+
 	for ( unsigned long n = 0; n < frame_count; n++ )
 	{
 		float l_value = 0.f;
@@ -85,6 +89,8 @@ int SoundEngine::callback( const void* input, void* output, unsigned long frame_
 
 		for ( auto sb: sound_engine->sound_buffer_list_ )
 		{
+			// std::this_thread::sleep_for( std::chrono::milliseconds( 2 ) );
+
 			if ( ! sb->is_playing() )
 			{
 				continue;
@@ -119,6 +125,8 @@ SoundEngine::SoundBuffer* SoundEngine::create_sound_buffer( bool is_3d_sound, bo
 {
 	auto sound_buffer = new SoundBuffer( *this, format, size );
 
+	std::lock_guard< std::mutex > lock( sound_buffer_list_mutex_ );
+
 	sound_buffer_list_.push_back( sound_buffer );
 
 	return sound_buffer;
@@ -126,6 +134,8 @@ SoundEngine::SoundBuffer* SoundEngine::create_sound_buffer( bool is_3d_sound, bo
 
 void SoundEngine::unregister_sound_buffer( SoundBuffer* sound_buffer )
 {
+	std::lock_guard< std::mutex > lock( sound_buffer_list_mutex_ );
+
 	std::erase( sound_buffer_list_, sound_buffer );
 }
 

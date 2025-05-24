@@ -4,6 +4,7 @@
 #include "SoundBuffer.h"
 #include <game/SoundFormat.h>
 #include <portaudio/portaudio.h>
+#include <mutex>
 
 namespace core::sound::port_audio
 {
@@ -21,6 +22,8 @@ private:
 	PaStream* stream_ = nullptr;
 	std::vector< SoundBuffer* > sound_buffer_list_;
 	SoundFormat format_;
+
+	std::mutex sound_buffer_list_mutex_;
 
 	static int callback( const void* input, void* output, unsigned long frame_count, const PaStreamCallbackTimeInfo* time_info, PaStreamCallbackFlags flags, void* );
 

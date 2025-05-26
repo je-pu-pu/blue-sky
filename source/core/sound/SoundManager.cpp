@@ -147,4 +147,9 @@ void SoundManager::commit()
 	sound_engine_->commit();
 }
 
+const SoundManager::SoundFormat& SoundManager::get_format() const
+{
+	return sound_engine_->get_format();
 }
+
+} // namespace core

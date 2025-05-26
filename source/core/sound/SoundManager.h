@@ -10,6 +10,7 @@ namespace game
 {
 
 class Sound;
+class SoundFormat;
 
 }
 
@@ -32,6 +33,8 @@ public:
 	using SoundEngine = sound::SoundEngine;
 	using SoundBuffer = sound::SoundBuffer;
 	using SoundFilter = sound::SoundFilter;
+
+	using SoundFormat = game::SoundFormat;
 
 private:
 	SoundEngine* sound_engine_;
@@ -61,6 +64,8 @@ public:
 	void set_listener_velocity( const Vector3& );
 	void set_listener_orientation( const Vector3& , const Vector3& );
 	void commit();
+
+	const SoundFormat& get_format() const;
 
 }; // class SoundManager
 

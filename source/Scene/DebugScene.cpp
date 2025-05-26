@@ -15,7 +15,12 @@
 #include <core/graphics/Sprite.h>
 #include <core/graphics/RenderTargetTexture.h>
 
+#include <core/sound/SoundManager.h>
+#include <core/sound/filter/BiquadFilter.h>
+
 #include <game/MainLoop.h>
+#include <game/SoundFormat.h>
+#include <game/Sound.h>
 
 #include <common/math.h>
 
@@ -23,6 +28,8 @@
 
 namespace blue_sky
 {
+
+core::sound::filter::BiquadFilter* filter = nullptr;
 
 DebugScene::DebugScene()
 	: camera_( new Camera() )
@@ -45,6 +52,11 @@ DebugScene::DebugScene()
 	get_script_manager()->exec( "load( \"test/init.lua\" )" );
 
 	get_graphics_manager()->load_named_texture( "2x2", "media/texture/rgby.png" );
+
+	filter = new core::sound::filter::BiquadFilter( get_sound_manager()->get_format().channels, static_cast< float >( get_sound_manager()->get_format().sampling_rate ), 800, 10, core::sound::filter::BiquadFilter::FilterType::Bandpass );
+	get_sound_manager()->add_sound_filter( filter );
+
+	get_sound_manager()->load_music( "opening-of-the-day" )->play( true );
 }
 
 DebugScene::~DebugScene()
@@ -96,6 +108,8 @@ void DebugScene::update()
 		// o->get_component< 
 
 	}
+
+	filter->setCutoff( camera_->position().length() * 50.f );
 
 	// tess test
 	{

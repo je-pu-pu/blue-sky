@@ -2,6 +2,7 @@
 
 #include "SoundBuffer.h"
 #include <core/sound/SoundEngine.h>
+#include <game/SoundFormat.h>
 
 #define DIRECTSOUND_VERSION 0x1000
 #include <dsound.h>
@@ -24,6 +25,7 @@ public:
 
 private:
 	std::unique_ptr< DirectSound > direct_sound_;
+	SoundFormat format_;
 
 public:
 	SoundEngine( HWND );
@@ -38,6 +40,11 @@ public:
 	void set_listener_velocity( const Vector3& ) override;
 	void set_listener_orientation( const Vector3& , const Vector3& ) override;
 	void commit() override;
+
+	const SoundFormat& get_format() const override { return format_; }
+
+	void add_sound_filter( SoundFilter* ) override { }
+	void clear_sound_filter_list() override { }
 
 }; // class SoundEngine
 

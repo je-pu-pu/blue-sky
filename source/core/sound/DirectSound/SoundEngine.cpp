@@ -13,7 +13,13 @@ namespace core::sound::direct_sound
 
 SoundEngine::SoundEngine( HWND hwnd )
 	: direct_sound_( new DirectSound( hwnd ) )
-{ }
+{
+	format_ = {
+		.channels = direct_sound_->get_format().nChannels,
+		.sampling_rate = static_cast< int >( direct_sound_->get_format().nSamplesPerSec ),
+		.bit_depth = direct_sound_->get_format().wBitsPerSample
+	};	
+}
 
 SoundEngine::~SoundEngine()
 {

@@ -17,6 +17,7 @@ private:
 	LPDIRECTSOUND3DLISTENER8	listener_;			///< 3D Listener
 
 	DSCAPS						caps_;				///< Caps
+	WAVEFORMATEX				format_;			///< Wave Format	
 
 public:
 	explicit DirectSound( HWND );
@@ -27,6 +28,8 @@ public:
 	LPDIRECTSOUND8 get_direct_sound() const { return direct_sound_; }
 	LPDIRECTSOUNDBUFFER get_primary_buffer() { return primary_buffer_; }
 	LPDIRECTSOUND3DLISTENER8 get_listener() const { return listener_; }
+
+	const WAVEFORMATEX& get_format() const { return format_; }
 
 }; // class DirectSound
 

@@ -831,6 +831,12 @@
     <ClInclude Include="core\sound\PortAudio\SoundEngine.h">
       <Filter>core\sound\PortAudio</Filter>
     </ClInclude>
+    <ClInclude Include="core\sound\SoundFilter.h">
+      <Filter>core\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\filter\BiquadFilter.h">
+      <Filter>core\sound\filter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -1092,6 +1098,9 @@
     </Filter>
     <Filter Include="core\sound\PortAudio">
       <UniqueIdentifier>{c83c9270-5c52-438f-a9ca-b2a48144f8e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\sound\filter">
+      <UniqueIdentifier>{d3f4e547-2c6c-407c-87a7-42a9d3bb30cd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

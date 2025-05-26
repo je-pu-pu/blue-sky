@@ -29,6 +29,8 @@
 
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
+#include <core/sound/filter/BiquadFilter.h>
+
 
 #include <core/input/DirectInput/DirectInput.h>
 
@@ -147,6 +149,8 @@ GameMain::GameMain()
 	sound_manager_->load( "ok" );
 	sound_manager_->load( "cancel" );
 	sound_manager_->load( "click" );
+
+	sound_manager_->add_sound_filter( new core::sound::filter::BiquadFilter( sound_engine_->get_format().channels, static_cast< float >( sound_engine_->get_format().sampling_rate ), 800, 1 ) );
 
 	script_manager_.reset( new ScriptManager() );
 	script_manager_->load_command_history( "log/script.log" );

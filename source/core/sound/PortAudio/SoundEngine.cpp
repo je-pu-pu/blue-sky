@@ -1,5 +1,6 @@
 #include "SoundEngine.h"
-#include "SoundBuffer.h"
+#include <core/sound/SoundBuffer.h>
+#include <core/sound/SoundFilter.h>
 #include <core/sound/Sound.h>
 #include <core/type.h>
 
@@ -10,6 +11,9 @@
 
 #include <thread>
 #include <chrono>
+
+#include <algorithm> 
+#include <ranges>
 
 namespace core::sound::port_audio
 {
@@ -75,12 +79,12 @@ SoundEngine::~SoundEngine()
 	Pa_Terminate();
 }
 
-int SoundEngine::callback( const void* input, void* output, unsigned long frame_count, const PaStreamCallbackTimeInfo* time_info, PaStreamCallbackFlags flags, void* user_data )
+int SoundEngine::callback( const void* input, void* output, unsigned long frame_count, const PaStreamCallbackTimeInfo* time_info, PaStreamCallbackFlags _flags, void* user_data )
 {
 	auto sound_engine = static_cast< SoundEngine* >( user_data );
 	auto out = static_cast< float* >( output );
 
-	std::lock_guard< std::mutex > lock( sound_engine->sound_buffer_list_mutex_ );
+	std::lock_guard< std::mutex > lock( sound_engine->callback_mutex_ );
 
 	for ( unsigned long n = 0; n < frame_count; n++ )
 	{
@@ -113,6 +117,8 @@ int SoundEngine::callback( const void* input, void* output, unsigned long frame_
 		*out++ = r_value;
 	}
 
+	std::ranges::for_each( sound_engine->sound_filter_list_, [ output, frame_count ] ( auto& filter ) { filter->process( static_cast< float* >( output ), frame_count ); } );
+
 	return 0;
 }
 
@@ -125,7 +131,7 @@ SoundEngine::SoundBuffer* SoundEngine::create_sound_buffer( bool is_3d_sound, bo
 {
 	auto sound_buffer = new SoundBuffer( *this, format, size );
 
-	std::lock_guard< std::mutex > lock( sound_buffer_list_mutex_ );
+	std::lock_guard< std::mutex > lock( callback_mutex_ );
 
 	sound_buffer_list_.push_back( sound_buffer );
 
@@ -134,7 +140,7 @@ SoundEngine::SoundBuffer* SoundEngine::create_sound_buffer( bool is_3d_sound, bo
 
 void SoundEngine::unregister_sound_buffer( SoundBuffer* sound_buffer )
 {
-	std::lock_guard< std::mutex > lock( sound_buffer_list_mutex_ );
+	std::lock_guard< std::mutex > lock( callback_mutex_ );
 
 	std::erase( sound_buffer_list_, sound_buffer );
 }
@@ -157,6 +163,20 @@ void SoundEngine::set_listener_orientation( const Vector3&, const Vector3& )
 void SoundEngine::commit()
 {
 	
+}
+
+void SoundEngine::add_sound_filter( SoundFilter* filter )
+{
+	std::lock_guard< std::mutex > lock( callback_mutex_ );
+
+	sound_filter_list_.push_back( filter );
+}
+
+void SoundEngine::clear_sound_filter_list()
+{
+	std::lock_guard< std::mutex > lock( callback_mutex_ );
+
+	sound_filter_list_.clear();
 }
 
 } // namespace core::sound::port_audio

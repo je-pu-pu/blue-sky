@@ -6,6 +6,11 @@
 #include <portaudio/portaudio.h>
 #include <mutex>
 
+namespace core::sound
+{
+	class SoundFilter;
+}
+
 namespace core::sound::port_audio
 {
 
@@ -23,7 +28,9 @@ private:
 	std::vector< SoundBuffer* > sound_buffer_list_;
 	SoundFormat format_;
 
-	std::mutex sound_buffer_list_mutex_;
+	std::mutex callback_mutex_;
+
+	std::vector< SoundFilter* > sound_filter_list_;
 
 	static int callback( const void* input, void* output, unsigned long frame_count, const PaStreamCallbackTimeInfo* time_info, PaStreamCallbackFlags flags, void* );
 
@@ -42,7 +49,10 @@ public:
 	void set_listener_orientation( const Vector3& , const Vector3& ) override;
 	void commit() override;
 
-	const SoundFormat& get_format() const { return format_; }
+	const SoundFormat& get_format() const override { return format_; }
+
+	void add_sound_filter( SoundFilter* ) override;
+	void clear_sound_filter_list() override;
 
 }; // class SoundEngine
 

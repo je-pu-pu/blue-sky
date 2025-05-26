@@ -3,6 +3,7 @@
 #include "StreamingSound.h"
 #include "OggVorbisFile.h"
 #include "SoundEngine.h"
+#include "SoundFilter.h"
 
 #include <common/exception.h>
 
@@ -20,6 +21,8 @@ SoundManager::SoundManager( SoundEngine* sound_engine )
 SoundManager::~SoundManager()
 {
 	unload_all();
+
+	sound_engine_->clear_sound_filter_list();
 }
 
 void SoundManager::set_mute( bool mute )
@@ -115,6 +118,13 @@ void SoundManager::stop_all()
 	{
 		i->second->stop();
 	}
+}
+
+void SoundManager::add_sound_filter( SoundFilter* filter )
+{
+	sound_filter_list_.emplace_back( filter );
+
+	sound_engine_->add_sound_filter( filter );
 }
 
 void SoundManager::set_listener_position( const Vector3& p )

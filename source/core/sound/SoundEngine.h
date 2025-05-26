@@ -11,6 +11,7 @@ namespace core::sound
 {
 
 class SoundBuffer;
+class SoundFilter;
 
 /**
  * ƒTƒEƒ“ƒhˆ—‚ğ’ŠÛ‰»
@@ -21,9 +22,10 @@ class SoundEngine
 public:
 	using SoundFormat = game::SoundFormat;
 	using SoundBuffer = SoundBuffer;
+	using SoundFilter = SoundFilter;
 
 public:
-	virtual ~SoundEngine() { }
+	virtual ~SoundEngine() = default;
 
 	virtual void set_volume( float ) = 0;
 
@@ -35,6 +37,10 @@ public:
 	virtual void set_listener_orientation( const Vector3& , const Vector3& ) = 0;
 	virtual void commit() = 0;
 
+	virtual const SoundFormat& get_format() const = 0;
+
+	virtual void add_sound_filter( SoundFilter* ) = 0;
+	virtual void clear_sound_filter_list() = 0;
 
 }; // class SoundEngine
 

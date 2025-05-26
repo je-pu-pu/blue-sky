@@ -32,12 +32,9 @@ DirectSound::DirectSound( HWND hwnd )
 	DIRECT_X_FAIL_CHECK( listener_->SetDopplerFactor( DS3D_DEFAULTDOPPLERFACTOR , DS3D_DEFERRED ) );
 	DIRECT_X_FAIL_CHECK( listener_->SetRolloffFactor( 0.25f, DS3D_DEFERRED ) );
 
-	/*
-	WAVEFORMATEX format = { 0 };
-	DWORD size = 0;
 
-	DIRECT_X_FAIL_CHECK( primary_buffer_->GetFormat( & format, sizeof( WAVEFORMATEX ), & size ) );
-	*/
+	DWORD size = 0;
+	DIRECT_X_FAIL_CHECK( primary_buffer_->GetFormat( & format_, sizeof( WAVEFORMATEX ), & size ) );
 
 	/*
 	PCMWAVEFORMAT format = { 0 };

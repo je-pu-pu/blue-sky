@@ -1,7 +1,7 @@
 #pragma once
 
-#include <blue_sky/type.h>
 
+#include <core/type.h>
 #include <game/SoundManager.h>
 
 #include <windows.h>
@@ -19,10 +19,11 @@ namespace core
 	{
 		class SoundEngine;
 		class SoundBuffer;
+		class SoundFilter;
 	}
 
 /**
- *サウンド管理クラス
+ * サウンド管理クラス
  *
  */
 class SoundManager : public game::SoundManager
@@ -30,9 +31,11 @@ class SoundManager : public game::SoundManager
 public:
 	using SoundEngine = sound::SoundEngine;
 	using SoundBuffer = sound::SoundBuffer;
+	using SoundFilter = sound::SoundFilter;
 
 private:
 	SoundEngine* sound_engine_;
+	std::vector< std::unique_ptr< SoundFilter > > sound_filter_list_;
 
 public:
 	SoundManager( SoundEngine* );
@@ -52,6 +55,8 @@ public:
 
 	virtual void stop_all();
 
+	void add_sound_filter( SoundFilter* filter );
+
 	void set_listener_position( const Vector3& );
 	void set_listener_velocity( const Vector3& );
 	void set_listener_orientation( const Vector3& , const Vector3& );
@@ -59,4 +64,4 @@ public:
 
 }; // class SoundManager
 
-} // namespace blue_sky
+} // namespace core

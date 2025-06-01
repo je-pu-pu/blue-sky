@@ -12,6 +12,7 @@ namespace core::sound
 
 class SoundBuffer;
 class SoundFilter;
+class MidiSynthesizer;
 
 /**
  * ƒTƒEƒ“ƒhˆ—‚ğ’ŠÛ‰»
@@ -23,6 +24,7 @@ public:
 	using SoundFormat = game::SoundFormat;
 	using SoundBuffer = SoundBuffer;
 	using SoundFilter = SoundFilter;
+	using MidiSynthesizer = MidiSynthesizer;
 
 public:
 	virtual ~SoundEngine() = default;
@@ -41,6 +43,8 @@ public:
 
 	virtual void add_sound_filter( SoundFilter* ) = 0;
 	virtual void clear_sound_filter_list() = 0;
+
+	virtual MidiSynthesizer* get_midi_synthesizer() = 0;
 
 }; // class SoundEngine
 

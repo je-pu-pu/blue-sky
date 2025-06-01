@@ -44,6 +44,8 @@ public:
 	SoundManager( SoundEngine* );
 	virtual ~SoundManager();
 
+	SoundEngine* get_sound_engine() const { return sound_engine_; }
+
 	virtual void set_mute( bool ) override;
 	virtual void set_volume( float ) override;
 

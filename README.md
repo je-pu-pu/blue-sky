@@ -35,6 +35,9 @@ Windows 10 ( 32bit )
 - [libvorbis 1.3.7](https://xiph.org/downloads/)
 - [Effects for Direct3D 11 (FX11) jun2020](https://github.com/microsoft/FX11/tree/jun2020)
 - [portable-file-dialogs 0.0.1](https://github.com/samhocevar/portable-file-dialogs)
+- [portaudio 19.7.0](https://github.com/PortAudio/portaudio/releases/tag/v19.7.0)
+- [libremidi 5.1.0](https://github.com/celtera/libremidi/releases/tag/v5.1.0)
+- [TinySoundFont](https://github.com/schellingb/TinySoundFont)
 
 ディレクトリ構成
 ========

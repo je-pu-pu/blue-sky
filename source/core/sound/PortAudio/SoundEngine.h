@@ -32,6 +32,8 @@ private:
 
 	std::vector< SoundFilter* > sound_filter_list_;
 
+	std::unique_ptr< MidiSynthesizer > midi_synthesizer_;
+
 	static int callback( const void* input, void* output, unsigned long frame_count, const PaStreamCallbackTimeInfo* time_info, PaStreamCallbackFlags flags, void* );
 
 public:
@@ -53,6 +55,8 @@ public:
 
 	void add_sound_filter( SoundFilter* ) override;
 	void clear_sound_filter_list() override;
+
+	MidiSynthesizer* get_midi_synthesizer() override { return midi_synthesizer_.get(); }
 
 }; // class SoundEngine
 

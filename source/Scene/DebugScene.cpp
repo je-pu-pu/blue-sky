@@ -16,7 +16,10 @@
 #include <core/graphics/RenderTargetTexture.h>
 
 #include <core/sound/SoundManager.h>
+#include <core/sound/SoundEngine.h>
 #include <core/sound/filter/BiquadFilter.h>
+
+#include <core/sound/MidiSequencer.h>
 
 #include <game/MainLoop.h>
 #include <game/SoundFormat.h>
@@ -30,6 +33,7 @@ namespace blue_sky
 {
 
 core::sound::filter::BiquadFilter* filter = nullptr;
+std::unique_ptr< core::sound::MidiSequencer > midi_sequencer;
 
 DebugScene::DebugScene()
 	: camera_( new Camera() )
@@ -56,7 +60,10 @@ DebugScene::DebugScene()
 	filter = new core::sound::filter::BiquadFilter( get_sound_manager()->get_format().channels, static_cast< float >( get_sound_manager()->get_format().sampling_rate ), 800, 10, core::sound::filter::BiquadFilter::FilterType::Bandpass );
 	get_sound_manager()->add_sound_filter( filter );
 
-	get_sound_manager()->load_music( "opening-of-the-day" )->play( true );
+	// get_sound_manager()->load_music( "opening-of-the-day" )->play( true );
+
+	// midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/opening-of-the-day.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
+	midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/gun.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
 }
 
 DebugScene::~DebugScene()
@@ -109,7 +116,8 @@ void DebugScene::update()
 
 	}
 
-	filter->setCutoff( camera_->position().length() * 50.f );
+	filter->setCutoff( camera_->position().xz().length() * 300.f );
+	midi_sequencer->set_bpm( std::abs( camera_->position().y() ) * 10.f );
 
 	// tess test
 	{
@@ -138,6 +146,8 @@ void DebugScene::update()
 
 	auto* hand_drawing_shader = get_graphics_manager()->get_shader< graphics::shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing" );
 	hand_drawing_shader->render_parameter_gui();
+
+	midi_sequencer->process();
 }
 
 void DebugScene::render()

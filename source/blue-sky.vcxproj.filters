@@ -312,6 +312,9 @@
     <ClCompile Include="core\sound\PortAudio\SoundEngine.cpp">
       <Filter>core\sound\PortAudio</Filter>
     </ClCompile>
+    <ClCompile Include="core\sound\MidiSynthesizer.cpp">
+      <Filter>core\sound</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -836,6 +839,12 @@
     </ClInclude>
     <ClInclude Include="core\sound\filter\BiquadFilter.h">
       <Filter>core\sound\filter</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\MidiSequencer.h">
+      <Filter>core\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\MidiSynthesizer.h">
+      <Filter>core\sound</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

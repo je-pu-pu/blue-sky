@@ -29,6 +29,8 @@
 
 #pragma comment( lib, "portaudio_static.lib" )
 
+// #pragma comment( lib, "libremidi.lib" )
+
 #pragma comment( lib, "lua.lib" )
 
 #pragma comment( lib, "common.lib" )

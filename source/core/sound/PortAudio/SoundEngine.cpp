@@ -2,6 +2,7 @@
 #include <core/sound/SoundBuffer.h>
 #include <core/sound/SoundFilter.h>
 #include <core/sound/Sound.h>
+#include <core/sound/MidiSynthesizer.h>
 #include <core/type.h>
 
 #include <game/SoundFormat.h>
@@ -33,6 +34,14 @@ SoundEngine::SoundEngine()
 	const auto sample_format = paFloat32;
 	const auto sample_rate = 44100; // info->defaultSampleRate; // 44100;
 
+	format_ = {
+		.channels = channel_count,
+		.sampling_rate = static_cast< int >( sample_rate ),
+		.bit_depth = 32
+	};
+
+	midi_synthesizer_.reset( new MidiSynthesizer( "media/music/SGM-V2.01.sf2", format_ ) );
+
 	auto wasapi_streawm_info = PaWasapiStreamInfo{
 		.size = sizeof( PaWasapiStreamInfo ),
 		.hostApiType = paWASAPI,
@@ -62,12 +71,6 @@ SoundEngine::SoundEngine()
 	{
 		COMMON_THROW_EXCEPTION_MESSAGE( string_t( "Pa_StartStream() failed.\n" ) + Pa_GetErrorText( e ) );
 	}
-
-	format_ = {
-		.channels = channel_count,
-		.sampling_rate = static_cast< int >( sample_rate ),
-		.bit_depth = 32
-	};
 }
 
 SoundEngine::~SoundEngine()
@@ -84,12 +87,15 @@ int SoundEngine::callback( const void* input, void* output, unsigned long frame_
 	auto sound_engine = static_cast< SoundEngine* >( user_data );
 	auto out = static_cast< float* >( output );
 
+	sound_engine->midi_synthesizer_->render( out, frame_count  );
+	// tsf_render_float( sound_font, out, frame_count );
+
 	std::lock_guard< std::mutex > lock( sound_engine->callback_mutex_ );
 
 	for ( unsigned long n = 0; n < frame_count; n++ )
 	{
-		float l_value = 0.f;
-		float r_value = 0.f;
+		float l_value = out[ 0 ];
+		float r_value = out[ 1 ];
 
 		for ( auto sb: sound_engine->sound_buffer_list_ )
 		{

@@ -64,6 +64,9 @@ DebugScene::DebugScene()
 
 	// midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/opening-of-the-day.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
 	midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/gun.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
+	midi_sequencer->set_beat_handler( [ this ]( int beat ) {
+		camera_->set_fov( 120.f );
+	} );
 }
 
 DebugScene::~DebugScene()
@@ -74,6 +77,11 @@ DebugScene::~DebugScene()
 void DebugScene::update()
 {
 	Scene::update();
+
+	if ( camera_->fov() > 60.f )
+	{
+		camera_->set_fov( camera_->fov() - 2.f );
+	}
 
 	camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * 90.f, get_input()->get_mouse_dx() * 90.f, 0.f );
 	camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f ) );

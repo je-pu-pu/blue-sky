@@ -37,7 +37,7 @@ private:
 		/**
 		 *
 		 * 
-		 * @param tick 再生開始からら経過時間 ( tick )
+		 * @param tick 再生開始からの経過時間 ( tick )
 		 */
 		void process( MidiSequencer& sequencer, int total_tick )
 		{
@@ -94,6 +94,11 @@ private:
 	std::vector< Track > tracks_;
 
 	MidiSynthesizer* midi_synthesizer_ = nullptr;
+
+	int beat_ = 0; // beat 数 ( 再生開始からの経過 Beat )
+	int last_beat_ = 0; // 最後に処理した beat
+
+	std::function< void(int) > beat_handler_; // ビートが変化したときのハンドラ
 
 	/**
 	* MIDI メッセージを処理する
@@ -242,12 +247,27 @@ public:
 		// std::cout << "ticks_per_ms : " << ticks_per_ms_ << std::endl;
 	}
 
+	void set_beat_handler( std::function< void(int) > handler )
+	{
+		beat_handler_ = std::move( handler );
+	}
+
 	void process()
 	{
 		auto now = std::chrono::system_clock::now();
 
 		elapsed_ticks_ += std::chrono::duration_cast< std::chrono::milliseconds >( now - last_time_ ).count() * ticks_per_ms_;
 		last_time_ = now;
+
+		beat_ = static_cast< int >( elapsed_ticks_ / reader_.ticksPerBeat );
+		
+		if ( beat_ != last_beat_ )
+		{
+			beat_handler_( beat_ );
+			// std::cout << "beat: " << beat_ << std::endl;
+			last_beat_ = beat_;
+		}	
+
 
 		for ( auto& t : tracks_ )
 		{

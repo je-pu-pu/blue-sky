@@ -177,7 +177,7 @@ public:
 
 		auto bpm = reader_.startingTempo;
 
-		for ( auto e : reader_.tracks[ 0 ] )
+		for ( const auto& e : reader_.tracks[ 0 ] )
 		{
 			if ( e.m.is_meta_event() )
 			{
@@ -252,6 +252,16 @@ public:
 		beat_handler_ = std::move( handler );
 	}
 
+	int get_ticks_per_beat() const
+	{
+		return reader_.ticksPerBeat;
+	}
+
+	int get_ticks() const
+	{
+		return static_cast< int >( std::fmod( elapsed_ticks_, get_ticks_per_beat() ) );
+	}
+
 	void process()
 	{
 		auto now = std::chrono::system_clock::now();
@@ -263,11 +273,14 @@ public:
 		
 		if ( beat_ != last_beat_ )
 		{
-			beat_handler_( beat_ );
+			if ( beat_handler_ )
+			{
+				beat_handler_( beat_ );
+			}
+			
 			// std::cout << "beat: " << beat_ << std::endl;
 			last_beat_ = beat_;
-		}	
-
+		}
 
 		for ( auto& t : tracks_ )
 		{

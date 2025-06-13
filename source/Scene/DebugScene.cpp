@@ -64,9 +64,12 @@ DebugScene::DebugScene()
 
 	// midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/opening-of-the-day.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
 	midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/gun.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
+
+	/*
 	midi_sequencer->set_beat_handler( [ this ]( int beat ) {
 		camera_->set_fov( 120.f );
 	} );
+	*/
 }
 
 DebugScene::~DebugScene()
@@ -156,6 +159,16 @@ void DebugScene::update()
 	hand_drawing_shader->render_parameter_gui();
 
 	midi_sequencer->process();
+	// std::cout << midi_sequencer->get_ticks() << std::endl;
+
+	if ( midi_sequencer->get_ticks() >= midi_sequencer->get_ticks_per_beat() / 2 )
+	{
+		camera_->set_fov( 90.f );
+	}
+	else
+	{
+		camera_->set_fov( 60.f );
+	}
 }
 
 void DebugScene::render()

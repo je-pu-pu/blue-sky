@@ -119,8 +119,8 @@ int SoundEngine::callback( const void* input, void* output, unsigned long frame_
 			}
 		}
 
-		*out++ = l_value;
-		*out++ = r_value;
+		*out++ = l_value * sound_engine->volume_;
+		*out++ = r_value * sound_engine->volume_;
 	}
 
 	std::ranges::for_each( sound_engine->sound_filter_list_, [ output, frame_count ] ( auto& filter ) { filter->process( static_cast< float* >( output ), frame_count ); } );
@@ -130,7 +130,7 @@ int SoundEngine::callback( const void* input, void* output, unsigned long frame_
 
 void SoundEngine::set_volume( float volume )
 {
-	
+	volume_ = volume;
 }
 
 SoundEngine::SoundBuffer* SoundEngine::create_sound_buffer( bool is_3d_sound, bool is_streaming, size_t size, const SoundFormat& format )

@@ -34,6 +34,8 @@ private:
 
 	std::unique_ptr< MidiSynthesizer > midi_synthesizer_;
 
+	float volume_ = 1.0f;
+
 	static int callback( const void* input, void* output, unsigned long frame_count, const PaStreamCallbackTimeInfo* time_info, PaStreamCallbackFlags flags, void* );
 
 public:

@@ -15,7 +15,6 @@ namespace core::sound
 /** 
  * MIDI シーケンサー
  * 
- * @todo Sequnecer と Synthesizer 分離する
  */
 class MidiSequencer
 {

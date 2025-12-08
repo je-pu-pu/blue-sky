@@ -146,17 +146,17 @@ void ActiveObject::set_start_rotation( float_t x, float_t y, float_t z )
 {
 	start_rotation_.set( x, y, z );
 
-	Quaternion q;
+	Quaternion q{};
 	q.set_yaw_pitch_roll( math::degree_to_radian( start_rotation_.y() ), math::degree_to_radian( start_rotation_.x() ), math::degree_to_radian( start_rotation_.z() ) );
 	get_transform().set_rotation( q );
 }
 
-void ActiveObject::set_start_direction_degree( float d )
+void ActiveObject::set_start_direction_degree( float_t d )
 {
 	start_direction_degree_ = d;
 }
 
-void ActiveObject::set_direction_degree( float d )
+void ActiveObject::set_direction_degree( float_t d )
 {
 	{
 		direction_degree_ = d;
@@ -177,7 +177,7 @@ void ActiveObject::set_direction_degree( float d )
 	}
 
 	{
-		Quaternion q;
+		Quaternion q{};
 		q.set_yaw_pitch_roll( math::degree_to_radian( direction_degree_ ), 0.f, 0.f );
 		get_transform().set_rotation( q );
 
@@ -354,7 +354,7 @@ void ActiveObject::render_line() const
 	get_model()->get_line()->render();
 }
 
-void ActiveObject::play_animation( const char* name, bool force, bool loop )
+void ActiveObject::play_animation( const char_t* name, bool force, bool loop )
 {
 	if ( ! get_animation_player() )
 	{
@@ -364,6 +364,11 @@ void ActiveObject::play_animation( const char* name, bool force, bool loop )
 	get_animation_player()->play( name, force, loop );
 }
 
+/**
+ * 固有のアクションを実行する
+ * 
+ * @param s
+ */
 void ActiveObject::action( const string_t& s )
 {
 	if ( s == "break_animation 1" && get_animation_player()	)

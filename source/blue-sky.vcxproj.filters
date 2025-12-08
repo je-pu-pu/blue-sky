@@ -87,7 +87,7 @@
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
     <ClCompile Include="core\physics\Bullet\BulletPhysics.cpp">
-      <Filter>core\Bullet</Filter>
+      <Filter>core\physics\Bullet</Filter>
     </ClCompile>
     <ClCompile Include="Scene\DebugScene.cpp">
       <Filter>Scene</Filter>
@@ -315,6 +315,15 @@
     <ClCompile Include="core\sound\MidiSynthesizer.cpp">
       <Filter>core\sound</Filter>
     </ClCompile>
+    <ClCompile Include="core\ecs\system\PhysicsSystem.cpp">
+      <Filter>core\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="core\physics\RigidBody.cpp">
+      <Filter>core\physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\PhysicsTestScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -412,7 +421,7 @@
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
     <ClInclude Include="core\physics\Bullet\BulletPhysics.h">
-      <Filter>core\Bullet</Filter>
+      <Filter>core\physics\Bullet</Filter>
     </ClInclude>
     <ClInclude Include="core\DirectX.h">
       <Filter>core</Filter>
@@ -846,6 +855,18 @@
     <ClInclude Include="core\sound\MidiSynthesizer.h">
       <Filter>core\sound</Filter>
     </ClInclude>
+    <ClInclude Include="core\ecs\system\PhysicsSystem.h">
+      <Filter>core\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\component\RigidBodyComponent.h">
+      <Filter>core\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="core\physics\RigidBody.h">
+      <Filter>core\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\PhysicsTestScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -1066,9 +1087,6 @@
     <Filter Include="core\animation">
       <UniqueIdentifier>{c4980cea-a104-47f5-a58c-22a39dc019bb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\Bullet">
-      <UniqueIdentifier>{b0f122bc-1ef3-4d7f-9dca-f528879b0c06}</UniqueIdentifier>
-    </Filter>
     <Filter Include="core\graphics\DirectWrite">
       <UniqueIdentifier>{1fe5994d-3867-407c-98a4-60a267fcc6b9}</UniqueIdentifier>
     </Filter>
@@ -1110,6 +1128,12 @@
     </Filter>
     <Filter Include="core\sound\filter">
       <UniqueIdentifier>{d3f4e547-2c6c-407c-87a7-42a9d3bb30cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\physics">
+      <UniqueIdentifier>{6ee4d49b-143c-4437-9a3e-38f29ae8996c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\physics\Bullet">
+      <UniqueIdentifier>{b0f122bc-1ef3-4d7f-9dca-f528879b0c06}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

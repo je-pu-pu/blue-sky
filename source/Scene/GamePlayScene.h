@@ -150,12 +150,11 @@ protected:
 
 	void render_text() const;
 
-	void render_sky_box() const;
+	/// @todo GraphicsManager ‚ÉˆÚs‚·‚é
 	void render_far_billboards() const;
 	
 	void render_sprite( float_t rotho_offset = 0.f ) const;
 
-	void render_debug_axis() const;
 	void render_debug_axis_for_bones( const ActiveObject* ) const;
 
 	/// @todo GraphicsManager ‚ÉˆÚs‚·‚é

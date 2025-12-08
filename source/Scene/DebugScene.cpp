@@ -63,7 +63,8 @@ DebugScene::DebugScene()
 	// get_sound_manager()->load_music( "opening-of-the-day" )->play( true );
 
 	// midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/opening-of-the-day.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
-	midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/gun.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
+	// midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/gun.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
+	midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/takarajima.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
 
 	/*
 	midi_sequencer->set_beat_handler( [ this ]( int beat ) {

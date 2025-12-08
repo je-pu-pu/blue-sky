@@ -104,12 +104,12 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 		}
 
 		std::stringstream ss;
-		std::string name;
+		std::string command;
 		
 		ss << line;
-		ss >> name;
+		ss >> command;
 
-		if ( name == "layer" )
+		if ( command == "layer" )
 		{
 			string_t layer_name;
 			ss >> layer_name;
@@ -121,27 +121,27 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 
 			bg_sprite_layer_list_.push_back( current_layer );
 		}
-		else if ( name == "layer-translation" )
+		else if ( command == "layer-translation" )
 		{
 			ss >> current_layer->get_translation().value().x() >> current_layer->get_translation().value().y();
 			ss >> current_layer->get_translation().target_value().x() >> current_layer->get_translation().target_value().y();
 			ss >> current_layer->get_translation().speed().x() >> current_layer->get_translation().speed().y();
 		}
-		else if ( name == "layer-rotation" )
+		else if ( command == "layer-rotation" )
 		{
 			ss >> current_layer->get_rotation().value() >> current_layer->get_rotation().target_value() >> current_layer->get_rotation().speed();
 		}
-		else if ( name == "layer-scale" )
+		else if ( command == "layer-scale" )
 		{
 			ss >> current_layer->get_scale().value() >> current_layer->get_scale().target_value() >> current_layer->get_scale().speed();
 		}
-		else if ( name == "layer-color" )
+		else if ( command == "layer-color" )
 		{
 			ss >> current_layer->get_color().value().r() >> current_layer->get_color().value().g() >> current_layer->get_color().value().b() >> current_layer->get_color().value().a();
 			ss >> current_layer->get_color().target_value().r() >> current_layer->get_color().target_value().g() >> current_layer->get_color().target_value().b() >> current_layer->get_color().value().a();
 			ss >> current_layer->get_color().speed().r() >> current_layer->get_color().speed().g() >> current_layer->get_color().speed().b() >> current_layer->get_color().speed().a();
 		}
-		else if ( name == "bgm" )
+		else if ( command == "bgm" )
 		{
 			std::string bgm_name;
 			float_t volume = 1.f;
@@ -152,7 +152,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 			bgm_->set_volume( volume );
 			bgm_->play( false );
 		}
-		else if ( name == "text-color" )
+		else if ( command == "text-color" )
 		{
 			uint_t hex;
 
@@ -160,7 +160,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 
 			text_color_ = Direct3D::Color::from_hex( hex );
 		}
-		else if( name == "text-border-color" )
+		else if( command == "text-border-color" )
 		{
 			uint_t hex;
 
@@ -168,22 +168,22 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 
 			text_border_color_ = Direct3D::Color::from_hex( hex );
 		}
-		else if ( name == "text" )
+		else if ( command == "text" )
 		{
 			in_text = true;
 		}
-		else if ( name == "sound" )
+		else if ( command == "sound" )
 		{
 			std::string sound_name;
 			ss >> sound_name;
 			sound_ = get_sound_manager()->load( "sound", sound_name.c_str() );
 			sound_->play( false );
 		}
-		else if ( name == "next-scene" )
+		else if ( command == "next-scene" )
 		{
 			ss >> next_scene_name_;
 		}
-		else if ( name == "next-stage-name" )
+		else if ( command == "next-stage-name" )
 		{
 			ss >> next_stage_name_;
 		}

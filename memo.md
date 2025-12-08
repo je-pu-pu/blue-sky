@@ -2300,3 +2300,66 @@ void DirectSoundBuffer::play( bool loop )
 ```
 
 * ゲームに合わせて音楽が奏でられるようなシステム ( いわゆるインタラクティブミュージック ) を組み込むにあたっては、クリップノイズへの対処が必要。
+
+# 2025-12-06
+
+## ファイル数
+
+* HLSL : 28
+* .cpp : 138
+
+## ランタイムコンパイル C++
+
+[Runtime-Compiled C++](https://runtimecompiledcplusplus.blogspot.com/)
+https://www.gameaipro.com/GameAIPro/GameAIPro_Chapter15_Runtime_Compiled_C++_for_Rapid_AI_Development.pdf
+
+# 2025-12-08
+
+### LNK4075 警告まとめ
+
+**警告内容**
+
+```
+libvorbisfile_static.lib(vorbisfile.obj) : warning LNK4075: /EDITANDCONTINUE は /SAFESEH の指定によって無視されます。
+```
+
+**原因**
+
+* `libvorbisfile_static.lib` が **`/ZI`**（Edit and Continue 対応デバッグ情報）でビルドされていた。
+* プロジェクト `blue-sky-test` が **`/SAFESEH`** を指定してリンク。
+* `/SAFESEH` と Edit and Continue は競合するため、リンカが警告を出した。
+
+**解決方法**
+
+* `libvorbisfile_static.lib` のビルドオプションを **`/ZI` → `/Zi`** に変更。
+
+  * `/Zi` は単なるデバッグ情報で Edit and Continue 対応ではないため、SAFESEH と競合せず警告が消える。
+
+**ポイント**
+
+* 警告は `.lib` 側のデバッグ情報形式が原因。
+* プロジェクト側の `/SAFESEH` を変更する必要はない。
+
+## blue-sky ファイル数
+
+```
+github.com/AlDanial/cloc v 1.92  T=1.33 s (310.2 files/s, 46411.5 lines/s)
+------------------------------------------------------------------------------------
+Language                          files          blank        comment           code
+------------------------------------------------------------------------------------
+C/C++ Header                        246           6060           7088          25152
+C++                                 116           4223           2421          14021
+HLSL                                 28            398            402           1438
+Visual Studio Solution                1              1              1            129
+JSON                                  2              0              0            115
+Python                                2             30              5             89
+Markdown                              6             49              0             85
+Lua                                   7             32             25             75
+INI                                   1             16              0             50
+Bourne Shell                          3              0              1              8
+Windows Resource File                 1              5              6              6
+DOS Batch                             1              0              0              3
+------------------------------------------------------------------------------------
+SUM:                                414          10814           9949          41171
+------------------------------------------------------------------------------------
+```

@@ -20,13 +20,22 @@ public:
 	using SceneGenerator = std::function< Scene* () >;
 	using SceneGeneratorMap = std::unordered_map< string_t, SceneGenerator >;
 
+	/**
+	 * シーンを自動登録するためのヘルパークラス
+	 * 
+	 * 各シーンのソースファイル内で static なインスタンスを生成することで、シーンを自動登録できるようにする。
+	 * ただし、現状はコードの最適化により、インスタンス生成が削除されてしまうため、使用しない。代わりに SceneManager::register_all_scene() 内で手動登録している。
+	 * 
+	 * SceneRegister::SceneRegister< MyScene > scene_register; // MyScene::name と new MyScene() を使って登録する
+	 * SceneRegister::SceneRegister< MyScene > scene_register( "name", [] { new MyScene( 1, 2.f, "3" ) } ) ; // 指定した名前と関数を使って登録する
+	 */
 	template < typename SceneType >
-	class RegisterScene
+	class SceneRegister
 	{
 	public:
-		RegisterScene( const char_t* scene_name = SceneType::name, SceneGenerator generator = [] { return new SceneType(); } )
+		SceneRegister( const string_t& scene_name = SceneType::name, SceneGenerator generator = [] { return new SceneType(); } )
 		{
-			SceneManager::get_instance()->register_scene( scene_name, generator );
+			SceneManager::get_instance()->register_scene< SceneType >( scene_name, generator );
 		}
 	};
 

@@ -12,11 +12,20 @@
 #include <Scene/ParticleSystemTestScene.h>
 #include <Scene/GeometryShaderCanvasTestScene.h>
 
+#include <Scene/PhysicsTestScene.h>
+
 #include <blue_sky/GameMain.h>
 
 namespace blue_sky
 {
 
+/**
+ * 全てのシーンを登録する
+ * 
+ * 新しいシーンを追加した場合は、ここに登録コードを追加する必要がある
+ * 
+ * @todo シーンの自動登録機能を実装する
+ */
 void SceneManager::register_all_scene()
 {
 	register_scene< TitleScene >();
@@ -33,6 +42,8 @@ void SceneManager::register_all_scene()
 	register_scene< TransformTestScene >();
 	register_scene< ParticleSystemTestScene >();
 	register_scene< GeometryShaderCanvasTestScene >();
+
+	register_scene< PhysicsTestScene >();
 }
 
 } // namespace blue_sky

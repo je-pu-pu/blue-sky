@@ -763,14 +763,14 @@ void Direct3D11::unset_render_target()
  */
 void Direct3D11::set_viewport( float_t x, float_t y, float_t w, float_t h, float_t d_min, float_t d_max )
 {
-	D3D11_VIEWPORT viewport;
-
-	viewport.TopLeftX = x;
-	viewport.TopLeftY = y;
-	viewport.Width = w;
-	viewport.Height = h;
-	viewport.MinDepth = d_min;
-	viewport.MaxDepth = d_max;
+	D3D11_VIEWPORT viewport = {
+		.TopLeftX = x,
+		.TopLeftY = y,
+		.Width = w,
+		.Height = h,
+		.MinDepth = d_min,
+		.MaxDepth = d_max
+	};
 
 	immediate_context_->RSSetViewports( 1, & viewport );
 }

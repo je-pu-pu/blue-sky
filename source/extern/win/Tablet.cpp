@@ -12,6 +12,8 @@ BOOL ( API * Tablet::DllWTPacket )( HCTX, UINT, LPVOID );
 BOOL ( API * Tablet::DllWTOverlap )( HCTX, BOOL );
 
 Tablet::Tablet( HWND hwnd )
+	: pressure_axis_{ 0, 0, 0, 0 }
+	, orientation_axis_{ { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } }
 {
 	module_ = LoadLibrary( "Wintab32.dll" );
 
@@ -19,10 +21,12 @@ Tablet::Tablet( HWND hwnd )
 	{
 		return;
 
+#if 0
 		std::stringstream ss;
 		ss << "LoadLibrary( Wintab32.dll ) failed. ( error : " << GetLastError() << " )";
 
 		COMMON_THROW_EXCEPTION_MESSAGE( ss.str() );
+#endif
 	}
 
 	get_proc_address( DllWTInfo,  "WTInfoA" );
@@ -101,7 +105,7 @@ Tablet::~Tablet()
 	}
 }
 
-void Tablet::on_activate( WPARAM wp, LPARAM lp )
+void Tablet::on_activate( WPARAM wp, [[maybe_unused]] LPARAM lp )
 {
 	if ( context_handle_ )
 	{
@@ -116,7 +120,7 @@ void Tablet::on_activate( WPARAM wp, LPARAM lp )
 
 void Tablet::on_packet( WPARAM wp, LPARAM lp )
 {
-	PACKET p;
+	PACKET p = { 0 };
 
 	if ( DllWTPacket( ( HCTX ) lp, wp, & p ) ) 
 	{

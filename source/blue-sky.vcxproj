@@ -48,6 +48,7 @@
     <ClCompile Include="core\ecs\System.cpp" />
     <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp" />
     <ClCompile Include="core\ecs\system\ParticleSystem.cpp" />
+    <ClCompile Include="core\ecs\system\PhysicsSystem.cpp" />
     <ClCompile Include="core\ecs\system\RenderSystem.cpp" />
     <ClCompile Include="core\ecs\system\TransformControlSystem.cpp" />
     <ClCompile Include="core\graphics\BgSpriteLayer.cpp" />
@@ -75,6 +76,7 @@
     <ClCompile Include="core\math\DirectXMath\Color.cpp" />
     <ClCompile Include="core\math\DirectXMath\Vector.cpp" />
     <ClCompile Include="core\physics\Bullet\BulletPhysics.cpp" />
+    <ClCompile Include="core\physics\RigidBody.cpp" />
     <ClCompile Include="core\sound\DirectSound\DirectSound.cpp" />
     <ClCompile Include="core\sound\DirectSound\DirectSoundBuffer.cpp" />
     <ClCompile Include="core\sound\DirectSound\SoundBuffer.cpp" />
@@ -120,6 +122,7 @@
     <ClCompile Include="Scene\GamePlayScene.cpp" />
     <ClCompile Include="Scene\GeometryShaderCanvasTestScene.cpp" />
     <ClCompile Include="Scene\ParticleSystemTestScene.cpp" />
+    <ClCompile Include="Scene\PhysicsTestScene.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="Scene\StageSelectScene.cpp" />
     <ClCompile Include="Scene\StoryTextScene.cpp" />
@@ -183,12 +186,14 @@
     <ClInclude Include="core\ecs\component\ModelComponent.h" />
     <ClInclude Include="core\ecs\component\ParticleSystemComponent.h" />
     <ClInclude Include="core\ecs\component\RenderComponent.h" />
+    <ClInclude Include="core\ecs\component\RigidBodyComponent.h" />
     <ClInclude Include="core\ecs\component\TransformComponent.h" />
     <ClInclude Include="core\ecs\component\TransformControlComponent.h" />
     <ClInclude Include="core\ecs\Entity.h" />
     <ClInclude Include="core\ecs\System.h" />
     <ClInclude Include="core\ecs\system\ParticleRenderSystem.h" />
     <ClInclude Include="core\ecs\system\ParticleSystem.h" />
+    <ClInclude Include="core\ecs\system\PhysicsSystem.h" />
     <ClInclude Include="core\ecs\system\RenderSystem.h" />
     <ClInclude Include="core\ecs\system\TransformControlSystem.h" />
     <ClInclude Include="core\ecs\type.h" />
@@ -258,6 +263,7 @@
     <ClInclude Include="core\math\Transform.h" />
     <ClInclude Include="core\math\Vector.h" />
     <ClInclude Include="core\physics\Bullet\BulletPhysics.h" />
+    <ClInclude Include="core\physics\RigidBody.h" />
     <ClInclude Include="core\ResourceManager.h" />
     <ClInclude Include="core\sound\DirectSound\DirectSound.h" />
     <ClInclude Include="core\sound\DirectSound\DirectSoundBuffer.h" />
@@ -303,6 +309,7 @@
     <ClInclude Include="Scene\GamePlayScene.h" />
     <ClInclude Include="Scene\GeometryShaderCanvasTestScene.h" />
     <ClInclude Include="Scene\ParticleSystemTestScene.h" />
+    <ClInclude Include="Scene\PhysicsTestScene.h" />
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="Scene\StageSelectScene.h" />
     <ClInclude Include="Scene\StoryTextScene.h" />
@@ -533,35 +540,39 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(ProjectDir)lib\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)lib\$(PlatformShortName)\$(Configuration);$(ProjectDir)lib\$(PlatformShortName)\common;$(ProjectDir)$(Configuration);$(LibraryPath)</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
+    <ExternalIncludePath>$(ProjectDir)lib\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(ProjectDir)lib\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)lib\$(PlatformShortName)\$(Configuration);$(ProjectDir)lib\$(PlatformShortName)\common;$(ProjectDir)$(Configuration);$(LibraryPath)</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
+    <ExternalIncludePath>$(ProjectDir)lib\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
     <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
-    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(ProjectDir)lib\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(ProjectDir)lib\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
     <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
-    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(ProjectDir)lib\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)extern;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(ProjectDir)lib\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -585,6 +596,8 @@
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OmitFramePointers>false</OmitFramePointers>
+      <DisableAnalyzeExternal>true</DisableAnalyzeExternal>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -602,7 +615,7 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Lib>
-      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -627,6 +640,8 @@
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <DisableAnalyzeExternal>true</DisableAnalyzeExternal>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -641,6 +656,9 @@
     <ResourceCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
@@ -659,9 +677,11 @@
       <PreprocessorDefinitions>NOMINMAX</PreprocessorDefinitions>
       <OmitFramePointers>
       </OmitFramePointers>
+      <DisableAnalyzeExternal>true</DisableAnalyzeExternal>
+      <SupportJustMyCode>true</SupportJustMyCode>
     </ClCompile>
     <Lib>
-      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -678,6 +698,10 @@
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PreprocessorDefinitions>NOMINMAX</PreprocessorDefinitions>
+      <DisableAnalyzeExternal>true</DisableAnalyzeExternal>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Lib>
       <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>

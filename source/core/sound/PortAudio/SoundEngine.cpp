@@ -82,7 +82,7 @@ SoundEngine::~SoundEngine()
 	Pa_Terminate();
 }
 
-int SoundEngine::callback( const void* input, void* output, unsigned long frame_count, const PaStreamCallbackTimeInfo* time_info, PaStreamCallbackFlags _flags, void* user_data )
+int SoundEngine::callback( const void*, void* output, unsigned long frame_count, const PaStreamCallbackTimeInfo*, PaStreamCallbackFlags, void* user_data )
 {
 	auto sound_engine = static_cast< SoundEngine* >( user_data );
 	auto out = static_cast< float* >( output );
@@ -133,7 +133,7 @@ void SoundEngine::set_volume( float volume )
 	volume_ = volume;
 }
 
-SoundEngine::SoundBuffer* SoundEngine::create_sound_buffer( bool is_3d_sound, bool is_streaming, size_t size, const SoundFormat& format )
+SoundEngine::SoundBuffer* SoundEngine::create_sound_buffer( bool, bool, size_t size, const SoundFormat& format )
 {
 	auto sound_buffer = new SoundBuffer( *this, format, size );
 

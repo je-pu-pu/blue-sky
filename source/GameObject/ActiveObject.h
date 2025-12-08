@@ -125,8 +125,6 @@ public:
 
 	void play_animation( const char_t* name, bool force, bool loop );
 
-	void action( const string_t& s ) const;
-
 	// virtual void render_line() = 0;
 
 	static void* operator new ( size_t size )

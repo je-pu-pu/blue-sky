@@ -56,22 +56,28 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)..\;$(SolutionDir)lib\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
     <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <ExternalIncludePath>$(SolutionDir)lib\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)..\;$(SolutionDir)lib\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
     <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <ExternalIncludePath>$(SolutionDir)lib\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
     <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <ExternalIncludePath>$(SolutionDir)lib\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <IncludePath>$(ProjectDir)..\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir).build/$(Platform)/$(Configuration)/</OutDir>
     <IntDir>$(SolutionDir).build/$(Platform)/$(Configuration)/$(ProjectName)/</IntDir>
+    <ExternalIncludePath>$(SolutionDir)lib\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <IncludePath>$(ProjectDir)..\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -84,6 +90,7 @@
       <ForcedIncludeFiles>win/memory_leak_detection.h</ForcedIncludeFiles>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -126,6 +133,7 @@
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <SupportJustMyCode>true</SupportJustMyCode>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

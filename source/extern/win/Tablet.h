@@ -1,16 +1,14 @@
 #ifndef WIN_TABLET_H
 #define WIN_TABLET_H
 
-#include <Windows.h>
-
 #include <common/exception.h>
 
+#include <windows.h>
 #include "MSGPACK.H"
 #include "WINTAB.H"
 #define PACKETDATA PK_CURSOR | PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_ORIENTATION
 #define PACKETMODE PK_BUTTONS
 #include "PKTDEF.H"
-
 #include <boost/utility.hpp>
 
 #include <sstream>

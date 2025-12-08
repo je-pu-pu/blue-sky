@@ -37,7 +37,7 @@ public:
 	{
 		for ( auto e : es )
 		{
-			set_ |= 1 << static_cast< int >( e );
+			set_ |= std::bitset< N >( 1 << static_cast< size_t >( e ) );
 		}
 	}
 

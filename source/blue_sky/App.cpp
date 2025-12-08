@@ -133,9 +133,9 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	set_full_screen( get_config()->get( "graphics.full_screen", 0 ) != 0 );
 
 	// ƒQ[ƒ€‚ð‰Šú‰»‚·‚é
-	blue_sky::GameMain::get_instance()->setup_scene();
 	game_ = blue_sky::GameMain::get_instance();
-
+	blue_sky::GameMain::get_instance()->setup_scene();
+	
 	ShowWindow( hWnd, nCmdShow );		//•\Ž¦
 	UpdateWindow( hWnd );				//•`‰æ
 

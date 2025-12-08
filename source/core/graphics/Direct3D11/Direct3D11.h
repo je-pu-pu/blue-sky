@@ -39,7 +39,7 @@ public:
 	using Texture			= core::graphics::direct_3d_11::Texture;
 
 	using InputLayout		= core::graphics::direct_3d_11::InputLayout;
-	using InputLayoutList	= std::unordered_map< const char*, InputLayout* >;
+	using InputLayoutList	= std::unordered_map< string_t, InputLayout* >;
 
 	using Effect			= core::graphics::direct_3d_11::Effect;
 	using EffectTechnique	= core::graphics::direct_3d_11::EffectTechnique;
@@ -108,8 +108,6 @@ private:
 	void log_adapter_desc( int, const DXGI_ADAPTER_DESC1& );
 	void log_feature_level();
 
-	void text_out_device_caps( const char*, bool = false );
-
 public:
 	Direct3D11( HWND, int, int, bool, int = 0, int = 0 );
 	~Direct3D11();
@@ -126,14 +124,11 @@ public:
 	void create_default_input_layout();
 	void create_input_layout( const char_t*, const char_t*, D3D11_INPUT_ELEMENT_DESC[], UINT );
 
-	void reset( bool = false );
-
 	int get_width() const { return swap_chain_desc_.BufferDesc.Width; }
 	int get_height() const { return swap_chain_desc_.BufferDesc.Height; }
 
 	void set_size( int, int );
 	void set_full_screen( bool );
-	void set_multi_sample( int, int );
 
 	bool is_full_screen() const;
 	void switch_full_screen();

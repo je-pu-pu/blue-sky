@@ -225,7 +225,7 @@ void GamePlayScene::setup_command()
 		ss >> color.target_value().r() >> color.target_value().g() >> color.target_value().b() >> color.target_value().a() >> color.speed();
 	};
 
-	get_script_manager()->set_function( "create_object_at_player_front", [this] ( const char_t* name ) { return create_object_at_player_front( name ); } );
+	get_script_manager()->set_function( "create_object_at_player_front", [this] ( const char_t* class_name ) { return create_object_at_player_front( class_name ); } );
 
 	command_map_[ "set_line_type" ] = [ this ] ( const string_t& s )
 	{
@@ -764,16 +764,16 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		std::getline( in, line );
 
 		std::stringstream ss;
-		std::string name;
+		std::string command;
 		
 		ss << line;
-		ss >> name;
+		ss >> command;
 
-		if ( name == "#" )
+		if ( command == "#" )
 		{
 			//
 		}
-		else if ( name == "bgm" )
+		else if ( command == "bgm" )
 		{
 			std::string bgm_name;
 			bool loop = true;
@@ -793,7 +793,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 				set_bpm( bpm );
 			}
 		}
-		else if ( name == "collision" )
+		else if ( command == "collision" )
 		{
 			std::string collision_file_name;
 
@@ -801,7 +801,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			get_physics_manager()->load_obj( ( StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + collision_file_name ).c_str() );
 		}
-		else if ( name == "player" )
+		else if ( command == "player" )
 		{
 			float_t x = 0, y = 0, z = 0;
 
@@ -820,21 +820,21 @@ void GamePlayScene::load_stage_file( const char* file_name )
 				camera_->rotate_degree().set_x( r );
 			}
 		}
-		else if ( name == "goal" )
+		else if ( command == "goal" )
 		{
 			float_t x = 0, y = 0, z = 0;
 			ss >> x >> y >> z;
 
 			goal_->set_start_location( x, y, z );
 		}
-		else if ( name == "ground" )
+		else if ( command == "ground" )
 		{
 			string_t ground_name;
 			ss >> ground_name;
 
 			get_graphics_manager()->set_ground( ground_name.c_str() );
 		}
-		else if ( name == "far-billboards" )
+		else if ( command == "far-billboards" )
 		{
 			std::string far_billboards_name;
 
@@ -843,11 +843,11 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			/// @todo ’¼‚·
 			far_billboards_ = get_graphics_manager()->load_model( far_billboards_name.c_str() );
 		}
-		else if ( name == "object" || name == "static-object" || name == "dynamic-object" )
+		else if ( command == "object" || command == "static-object" || command == "dynamic-object" )
 		{
 			last_object = get_active_object_manager()->create_static_object( ss );
 		}
-		else if ( name == "translation-object" )
+		else if ( command == "translation-object" )
 		{
 			float_t x = 0, y = 0, z = 0, tw = 0, th = 0, td = 0, s = 0.01f;
 			ss >> x >> y >> z >> tw >> th >> td >> s;
@@ -864,9 +864,9 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			last_object = object;
 		}
-		else if ( name == "girl" || name == "robot" || name == "balloon" || name == "medal" || name == "ladder" || name == "rocket" || name == "umbrella" || name == "stone" || name == "switch" )
+		else if ( command == "girl" || command == "robot" || command == "balloon" || command == "medal" || command == "ladder" || command == "rocket" || command == "umbrella" || command == "stone" || command == "switch" )
 		{
-			ActiveObject* active_object = GameMain::get_instance()->create_object( name.c_str() );
+			ActiveObject* active_object = GameMain::get_instance()->create_object( command.c_str() );
 			
 			float x = 0, y = 0, z = 0, r = 0;
 			ss >> x >> y >> z >> r;
@@ -874,13 +874,13 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			active_object->set_start_location( x, y, z );
 			active_object->set_start_direction_degree( r );
 
-			if ( name == "girl" )
+			if ( command == "girl" )
 			{
 				girl_ = static_cast< Girl* >( active_object );
 				girl_->set_player( player_ );
 				get_active_object_manager()->name_active_object( "girl", girl_ );
 			}
-			else if ( name == "robot" )
+			else if ( command == "robot" )
 			{
 				Robot* robot = static_cast< Robot* >( active_object );
 				robot->set_player( player_ );
@@ -888,7 +888,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			last_object = active_object;
 		}
-		else if ( name == "area-switch" )
+		else if ( command == "area-switch" )
 		{
 			float_t x = 0.f, y = 0.f, z = 0.f;
 			float_t w = 0.f, h = 0.f, d = 0.f;
@@ -905,13 +905,13 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			last_object = s;
 		}
-		else if ( name == "event" || name == "exec" )
+		else if ( command == "event" || command == "exec" )
 		{
 			string_t event_name;
 			string_t event_handler_name;
 			string_t event_handler_params;
 
-			if ( name == "event" )
+			if ( command == "event" )
 			{
 				ss >> event_name;
 			}
@@ -940,7 +940,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			auto command_call = [ = ] { i->second( event_handler_params ); };
 
-			if ( name == "event" )
+			if ( command == "event" )
 			{
 				last_object->add_event_handler( event_name.c_str(), command_call );
 			}
@@ -949,7 +949,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 				stage_setup_command_call_list_.push_back( command_call );
 			}
 		}
-		else if ( name == "name" )
+		else if ( command == "name" )
 		{
 			if ( ! last_object )
 			{

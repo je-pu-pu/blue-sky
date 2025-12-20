@@ -13,6 +13,7 @@
 /reference/
 
 /doc/html/
+/doc/Steamworks/
 
 /source/.vs/
 /source/.build/
@@ -34,4 +35,4 @@
 
 
 
-/do_de_show
+/do_de_show/

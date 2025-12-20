@@ -82,7 +82,7 @@ void Effect::load( const char* file_path )
 }
 
 /**
- * 全てのリソースをクリアする
+ * 蜈ｨ縺ｦ縺ｮ繝ｪ繧ｽ繝ｼ繧ｹ繧偵け繝ｪ繧｢縺吶ｋ
  * 
  */
 void Effect::clear()

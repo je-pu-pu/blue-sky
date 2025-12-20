@@ -6,7 +6,7 @@ namespace blue_sky::graphics
 {
 
 /**
- * ’n–Ê
+ * åœ°é¢
  *
  */
 class Ground : public Model

@@ -38,12 +38,12 @@ GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene()
 	, texture_( get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" ) )
 {
 
-	// 色
+	// 濶ｲ
 	const Color& c1 = Color::Red;
 	const Color& c2 = Color::Green;
 	const Color& c3 = Color::Blue;
 
-	// 頂点
+	// 鬆らせ
 	mesh_->add_vertex( Vertex( Vector3( -1.f,  1.f, -1.f ), c1 ) );
 	mesh_->add_vertex( Vertex( Vector3(  1.f,  1.f, -1.f ), c2 ) );
 	mesh_->add_vertex( Vertex( Vector3( -1.f, -1.f, -1.f ), c3 ) );
@@ -53,7 +53,7 @@ GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene()
 	mesh_->add_vertex( Vertex( Vector3( -1.f, -1.f,  1.f ), c1 ) );
 	mesh_->add_vertex( Vertex( Vector3(  1.f, -1.f,  1.f ), c2 ) );
 	
-	// インデックス
+	// 繧､繝ｳ繝�繝�繧ｯ繧ｹ
 	auto vertex_group = mesh_->get_vertex_group_at( 0 );
 	vertex_group->set_index( {
 		0, 1,

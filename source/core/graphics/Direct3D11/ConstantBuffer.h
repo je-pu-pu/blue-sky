@@ -7,9 +7,9 @@ namespace core::graphics::direct_3d_11
 {
 
 /**
- * Direct3D11 ’è”ƒoƒbƒtƒ@
+ * Direct3D11 å®šæ•°ãƒãƒƒãƒ•ã‚¡
  * 
-` * ƒoƒbƒtƒ@‚ÌŒ^‚ğ‚ğ‚½‚¸Aƒf[ƒ^‚à•Û‚µ‚È‚¢
+` * ãƒãƒƒãƒ•ã‚¡ã®å‹ã‚’ã‚’æŒãŸãšã€ãƒ‡ãƒ¼ã‚¿ã‚‚ä¿æŒã—ãªã„
  */
 template< int Slot >
 class ConstantBuffer : public core::graphics::ConstantBuffer
@@ -23,7 +23,7 @@ protected:
 		D3D11_BUFFER_DESC buffer_desc = { 0 };
 		
 		buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		buffer_desc.Usage = D3D11_USAGE_DEFAULT; /// @todo D3D11_USAGE_DYNAMIC ‚Æg‚¢•ª‚¯‚é
+		buffer_desc.Usage = D3D11_USAGE_DEFAULT; /// @todo D3D11_USAGE_DYNAMIC ã¨ä½¿ã„åˆ†ã‘ã‚‹
 		buffer_desc.ByteWidth = size + ( size % 16 == 0 ? 0 : 16 - size % 16 );
 		
 		DIRECT_X_FAIL_CHECK( Direct3D11::get_instance()->getDevice()->CreateBuffer( & buffer_desc, 0, & constant_buffer_ ) );
@@ -51,7 +51,7 @@ public:
 
 	virtual void update( const void* data ) const
 	{
-		/// @todo Map() ‚Æg‚¢•ª‚¯‚é
+		/// @todo Map() ã¨ä½¿ã„åˆ†ã‘ã‚‹
 		Direct3D11::get_instance()->getImmediateContext()->UpdateSubresource( constant_buffer_, 0, 0, data, 0, 0 );
 	}
 

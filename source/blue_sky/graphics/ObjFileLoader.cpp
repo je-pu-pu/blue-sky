@@ -14,13 +14,13 @@ namespace blue_sky::graphics
 {
 
 /**
- * OBJ �t�@�C����ǂݍ���
+ * OBJ ファイルを読み込む
  *
- * @todo �}�e���A���E�e�N�X�`���̎w��̂Ȃ����f�����ǂݍ��߂�悤�ɂ��� ( plane.obj, teapot.obj �Ȃ� )
- * @todo �s���S�� .obj ��ǂݍ��񂾎��ɃG���[���o�͂���
+ * @todo マテリアル・テクスチャの指定のないモデルも読み込めるようにする ( plane.obj, teapot.obj など )
+ * @todo 不完全な .obj を読み込んだ時にエラーを出力する
  * 
- * @param file_name OBJ �t�@�C����
- * @return �t�@�C���̓ǂݍ��݂ɐ��������ꍇ�� true ���A���s�����ꍇ�� false ��Ԃ�
+ * @param file_name OBJ ファイル名
+ * @return ファイルの読み込みに成功した場合は true を、失敗した場合は false を返す
  */
 bool ObjFileLoader::load( const char_t* file_name )
 {

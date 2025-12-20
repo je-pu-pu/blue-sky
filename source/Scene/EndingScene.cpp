@@ -6,7 +6,7 @@
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
 
-/// @todo ’ŠÛ‰»‚·‚é
+/// @todo æŠ½è±¡åŒ–ã™ã‚‹
 #include <blue_sky/graphics/Fader.h>
 #include <core/graphics/Direct3D11/Sprite.h>
 
@@ -90,7 +90,7 @@ void EndingScene::load_sequence_file()
 }
 
 /**
- * ƒƒCƒ“ƒ‹[ƒvˆ—
+ * ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—å‡¦ç†
  *
  */
 void EndingScene::update()
@@ -177,7 +177,7 @@ void EndingScene::update()
 }
 
 /**
- * •`‰æ
+ * æç”»
  *
  */
 void EndingScene::render()
@@ -214,7 +214,7 @@ void EndingScene::render_drawing_line()
 
 	render_technique( "|drawing_line", [this]
 	{
-		/// @todo ®—‚·‚é
+		/// @todo æ•´ç†ã™ã‚‹
 		{
 			ObjectConstantBufferData object_constant_buffer_data;
 

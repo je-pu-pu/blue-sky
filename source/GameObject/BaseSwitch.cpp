@@ -20,7 +20,7 @@ void BaseSwitch::restart()
 }
 
 /**
- * XV
+ * æ›´æ–°
  *
  */
 void BaseSwitch::update()

@@ -7,7 +7,7 @@ namespace common
 {
 
 /**
- * —ñ‹“Œ^ ( enum ) ‚ÌW‡‚ğ•Û‚·‚é
+ * åˆ—æŒ™å‹ ( enum ) ã®é›†åˆã‚’ä¿æŒã™ã‚‹
  */
 template< typename EnumType, size_t N >
 class enum_set
@@ -19,19 +19,19 @@ private:
 
 public:
 	/**
-	 * ‚Ç‚Ì—v‘f‚à‚½‚È‚¢‹ó‚ÌW‡‚ğì¬‚·‚é
+	 * ã©ã®è¦ç´ ã‚‚æŒãŸãªã„ç©ºã®é›†åˆã‚’ä½œæˆã™ã‚‹
 	 */
 	enum_set() { }
 
 	/**
-	 * w’è‚³‚ê‚½—v‘f‚Ì‚İ‚ğ‚ÂW‡‚ğì¬‚·‚é
+	 * æŒ‡å®šã•ã‚ŒãŸè¦ç´ ã®ã¿ã‚’æŒã¤é›†åˆã‚’ä½œæˆã™ã‚‹
 	 */
 	enum_set( EnumType e )
 		: set_( 1 << static_cast< int >( e ) )
 	{ }
 
 	/**
-	 * ƒŠƒXƒg‚Åw’è‚³‚ê‚½—v‘f‚ğ‚ÂW‡‚ğì¬‚·‚é
+	 * ãƒªã‚¹ãƒˆã§æŒ‡å®šã•ã‚ŒãŸè¦ç´ ã‚’æŒã¤é›†åˆã‚’ä½œæˆã™ã‚‹
 	 */
 	enum_set( std::initializer_list< EnumType > es )
 	{
@@ -42,7 +42,7 @@ public:
 	}
 
 	/**
-	 * ˆø”‚Åw’è‚³‚ê‚½—v‘f‚ğ‚Á‚Ä‚¢‚é‚©‚Ç‚¤‚©‚ğ•Ô‚·
+	 * å¼•æ•°ã§æŒ‡å®šã•ã‚ŒãŸè¦ç´ ã‚’æŒã£ã¦ã„ã‚‹ã‹ã©ã†ã‹ã‚’è¿”ã™
 	 */
 	bool test( EnumType e ) const { return set_.test( static_cast< size_t >( e ) ); }
 
@@ -53,7 +53,7 @@ public:
 } // namespace common
 
 /*
-ShaderStage::VS | ShaderStage::PS ‚Æ‚µ‚Ä‚àA‚±‚ÌŠÖ”‚Í‰½ŒÌ‚©ŒÄ‚Î‚ê‚È‚¢
+ShaderStage::VS | ShaderStage::PS ã¨ã—ã¦ã‚‚ã€ã“ã®é–¢æ•°ã¯ä½•æ•…ã‹å‘¼ã°ã‚Œãªã„
 template< typename EnumType >
 common::enum_set< EnumType, EnumType::Max > operator | ( EnumType e1, EnumType e2 )
 {
@@ -66,13 +66,13 @@ common::enum_set< EnumType, EnumType::Max > operator | ( EnumType e1, EnumType e
 */
 
 /*
-// ƒrƒbƒg”‚ğ 32 ‚ÉŒÅ’è‚·‚ê‚Î operator | ‚ğg‚¦‚é‚ªA”ü‚µ‚­‚È‚¢‚Ì‚Å‹p‰º
+// ãƒ“ãƒƒãƒˆæ•°ã‚’ 32 ã«å›ºå®šã™ã‚Œã° operator | ã‚’ä½¿ãˆã‚‹ãŒã€ç¾ã—ããªã„ã®ã§å´ä¸‹
 template< typename EnumType >
 common::enum_set< EnumType, 32 > operator | ( EnumType e1, EnumType e2 ) { common::enum_set< EnumType, 32 > s( e1 ); return s | e2; }
 */
 
 /*
-// s.set_ ‚Í private ‚È‚Ì‚ÅƒRƒ“ƒpƒCƒ‹ƒGƒ‰[
+// s.set_ ã¯ private ãªã®ã§ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã‚¨ãƒ©ãƒ¼
 template< typename EnumType >
 constexpr common::enum_set< EnumType, 32 > operator | ( const common::enum_set< EnumType, 32 > s, EnumType e ) { s.set_ |= e; return s; }
 

@@ -32,7 +32,7 @@ namespace blue_sky::graphics::direct_3d_11
 {
 
 /**
- * ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+ * ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
  *
  * @param direct_3d Direct3D
  */
@@ -50,7 +50,7 @@ GraphicsManager::GraphicsManager( Direct3D* direct_3d )
 }
 
 /**
- * ƒfƒXƒgƒ‰ƒNƒ^
+ * ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
  *
  */
 GraphicsManager::~GraphicsManager()
@@ -59,9 +59,9 @@ GraphicsManager::~GraphicsManager()
 }
 
 /**
- * ‰æ–Ê‚Ì•‚ğ•Ô‚·
+ * ç”»é¢ã®å¹…ã‚’è¿”ã™
  *
- * @return ‰æ–Ê‚Ì•
+ * @return ç”»é¢ã®å¹…
  */
 int GraphicsManager::get_screen_width() const
 {
@@ -69,9 +69,9 @@ int GraphicsManager::get_screen_width() const
 }
 
 /**
- * ‰æ–Ê‚Ì‚‚³‚ğ•Ô‚·
+ * ç”»é¢ã®é«˜ã•ã‚’è¿”ã™
  *
- * @return ‰æ–Ê‚Ì‚‚³
+ * @return ç”»é¢ã®é«˜ã•
  */
 int GraphicsManager::get_screen_height() const
 {
@@ -111,9 +111,9 @@ void GraphicsManager::set_default_render_target()
 
 #if 0
 /**
- * w’è‚µ‚½–¼‘O‚ÌƒƒbƒVƒ…‚ğƒAƒ“ƒ[ƒh‚·‚é
+ * æŒ‡å®šã—ãŸåå‰ã®ãƒ¡ãƒƒã‚·ãƒ¥ã‚’ã‚¢ãƒ³ãƒ­ãƒ¼ãƒ‰ã™ã‚‹
  *
- * @param name ƒeƒNƒXƒ`ƒƒ–¼
+ * @param name ãƒ†ã‚¯ã‚¹ãƒãƒ£å
  */
 void GraphicsManager::unload_mesh( const char_t* name )
 {
@@ -121,7 +121,7 @@ void GraphicsManager::unload_mesh( const char_t* name )
 }
 
 /**
- * ‘S‚Ä‚ÌƒƒbƒVƒ…‚ğƒAƒ“ƒ[ƒh‚·‚é
+ * å…¨ã¦ã®ãƒ¡ãƒƒã‚·ãƒ¥ã‚’ã‚¢ãƒ³ãƒ­ãƒ¼ãƒ‰ã™ã‚‹
  *
  */
 void GraphicsManager::unload_mesh_all()
@@ -136,7 +136,7 @@ GraphicsManager::ShadowMap* GraphicsManager::create_shadow_map( uint_t level, ui
 }
 
 /**
- * Line ‚ğ¶¬‚·‚é
+ * Line ã‚’ç”Ÿæˆã™ã‚‹
  *
  * @return Line
  */
@@ -146,9 +146,9 @@ GraphicsManager::Line* GraphicsManager::create_line() const
 }
 
 /**
- * ƒeƒNƒXƒ`ƒƒ‚ğƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚Ş
+ * ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰èª­ã¿è¾¼ã‚€
  *
- * @param file_name ƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹ƒpƒX
+ * @param file_name ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹
  * @return Texture
  */
 GraphicsManager::Texture* GraphicsManager::load_texture_file( const char_t* file_path ) const
@@ -158,9 +158,9 @@ GraphicsManager::Texture* GraphicsManager::load_texture_file( const char_t* file
 
 #if 0
 /**
- * w’è‚µ‚½–¼‘O‚ÌƒeƒNƒXƒ`ƒƒ‚ğƒAƒ“ƒ[ƒh‚·‚é
+ * æŒ‡å®šã—ãŸåå‰ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚¢ãƒ³ãƒ­ãƒ¼ãƒ‰ã™ã‚‹
  *
- * @param name ƒeƒNƒXƒ`ƒƒ–¼
+ * @param name ãƒ†ã‚¯ã‚¹ãƒãƒ£å
  */
 void GraphicsManager::unload_texture( const char_t* name )
 {
@@ -168,7 +168,7 @@ void GraphicsManager::unload_texture( const char_t* name )
 }
 
 /**
- * ‘S‚Ä‚ÌƒeƒNƒXƒ`ƒƒ‚ğƒAƒ“ƒ[ƒh‚·‚é
+ * å…¨ã¦ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚¢ãƒ³ãƒ­ãƒ¼ãƒ‰ã™ã‚‹
  *
  */
 void GraphicsManager::unload_texture_all()
@@ -203,9 +203,9 @@ void GraphicsManager::refresh_all_shaders()
 }
 
 /**
- * ƒXƒJƒCƒ{ƒbƒNƒX‚ğİ’è‚·‚é
+ * ã‚¹ã‚«ã‚¤ãƒœãƒƒã‚¯ã‚¹ã‚’è¨­å®šã™ã‚‹
  *
- * @param name ƒXƒJƒCƒ{ƒbƒNƒX–¼
+ * @param name ã‚¹ã‚«ã‚¤ãƒœãƒƒã‚¯ã‚¹å
  */
 void GraphicsManager::set_sky_box( const char_t* name )
 {
@@ -215,8 +215,8 @@ void GraphicsManager::set_sky_box( const char_t* name )
 		sky_box_render_data_->data().color = Color::White;
 	}
 
-	// ƒXƒJƒCƒ{ƒbƒNƒX‚ªg—p‚µ‚Ä‚¢‚éƒeƒNƒXƒ`ƒƒ‚ğƒNƒŠƒA‚·‚é
-	/// @todo ƒXƒJƒCƒ{ƒbƒNƒX‚ªg—p‚·‚éƒeƒNƒXƒ`ƒƒ–¼‚ğƒ†ƒj[ƒN‚É‚·‚é
+	// ã‚¹ã‚«ã‚¤ãƒœãƒƒã‚¯ã‚¹ãŒä½¿ç”¨ã—ã¦ã„ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
+	/// @todo ã‚¹ã‚«ã‚¤ãƒœãƒƒã‚¯ã‚¹ãŒä½¿ç”¨ã™ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£åã‚’ãƒ¦ãƒ‹ãƒ¼ã‚¯ã«ã™ã‚‹
 	unload_named_texture( "front" );
 	unload_named_texture( "back" );
 	unload_named_texture( "top" );
@@ -229,7 +229,7 @@ void GraphicsManager::set_sky_box( const char_t* name )
 }
 
 /**
- * ƒXƒJƒCƒ{ƒbƒNƒX‚Ìİ’è‚ğ‰ğœ‚·‚é
+ * ã‚¹ã‚«ã‚¤ãƒœãƒƒã‚¯ã‚¹ã®è¨­å®šã‚’è§£é™¤ã™ã‚‹
  *
  */
 void GraphicsManager::unset_sky_box()
@@ -239,9 +239,9 @@ void GraphicsManager::unset_sky_box()
 }
 
 /**
- * ƒXƒJƒCƒ{ƒbƒNƒX‚ªŒ»İİ’è‚³‚ê‚Ä‚¢‚é‚©‚Ç‚¤‚©‚ğ•Ô‚·
+ * ã‚¹ã‚«ã‚¤ãƒœãƒƒã‚¯ã‚¹ãŒç¾åœ¨è¨­å®šã•ã‚Œã¦ã„ã‚‹ã‹ã©ã†ã‹ã‚’è¿”ã™
  *
- * @return ƒXƒJƒCƒ{ƒbƒNƒX‚ªŒ»İİ’è‚³‚ê‚Ä‚¢‚é‚©‚Ç‚¤‚©
+ * @return ã‚¹ã‚«ã‚¤ãƒœãƒƒã‚¯ã‚¹ãŒç¾åœ¨è¨­å®šã•ã‚Œã¦ã„ã‚‹ã‹ã©ã†ã‹
  */
 bool GraphicsManager::is_sky_box_set() const
 {
@@ -249,9 +249,9 @@ bool GraphicsManager::is_sky_box_set() const
 }
 
 /**
- * ’n–Ê‚ğİ’è‚·‚é
+ * åœ°é¢ã‚’è¨­å®šã™ã‚‹
  *
- * @param name ’n–Êƒ‚ƒfƒ‹–¼
+ * @param name åœ°é¢ãƒ¢ãƒ‡ãƒ«å
  */
 void GraphicsManager::set_ground( const char_t* name )
 {
@@ -266,7 +266,7 @@ void GraphicsManager::set_ground( const char_t* name )
 }
 
 /**
- * ’n–Ê‚Ìİ’è‚ğ‰ğœ‚·‚é
+ * åœ°é¢ã®è¨­å®šã‚’è§£é™¤ã™ã‚‹
  *
  */
 void GraphicsManager::unset_ground()
@@ -276,9 +276,9 @@ void GraphicsManager::unset_ground()
 }
 
 /**
- * ŠÂ‹«Œõ‚ÌF‚ğİ’è‚·‚é
+ * ç’°å¢ƒå…‰ã®è‰²ã‚’è¨­å®šã™ã‚‹
  *
- * @param color ŠÂ‹«Œõ‚ÌF
+ * @param color ç’°å¢ƒå…‰ã®è‰²
  */
 void GraphicsManager::set_ambient_color( const Color& color )
 {
@@ -294,9 +294,9 @@ void GraphicsManager::set_ambient_color( const Color& color )
 }
 
 /**
- * ‰e‚ÌF‚ğİ’è‚·‚é
+ * å½±ã®è‰²ã‚’è¨­å®šã™ã‚‹
  *
- * @param color ‰e‚ÌF
+ * @param color å½±ã®è‰²
  */
 void GraphicsManager::set_shadow_color( const Color& color )
 {
@@ -304,9 +304,9 @@ void GraphicsManager::set_shadow_color( const Color& color )
 }
 
 /**
- * ‰e‚Ì†ƒeƒNƒXƒ`ƒƒ‚ÌF‚ğİ’è‚·‚é
+ * å½±ã®ç´™ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®è‰²ã‚’è¨­å®šã™ã‚‹
  *
- * @param color ‰e‚Ì†ƒeƒNƒXƒ`ƒƒ‚ÌF
+ * @param color å½±ã®ç´™ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®è‰²
  */
 void GraphicsManager::set_shadow_paper_color( const Color& color )
 {
@@ -314,9 +314,9 @@ void GraphicsManager::set_shadow_paper_color( const Color& color )
 }
 
 /**
- * è‘‚«•—•\Œ»‚ÌƒAƒNƒZƒ“ƒg‚ğİ’è‚·‚é
+ * æ‰‹æ›¸ãé¢¨è¡¨ç¾ã®ã‚¢ã‚¯ã‚»ãƒ³ãƒˆã‚’è¨­å®šã™ã‚‹
  *
- * @param accent ƒAƒNƒZƒ“ƒg
+ * @param accent ã‚¢ã‚¯ã‚»ãƒ³ãƒˆ
  */
 void GraphicsManager::set_drawing_accent( float_t accent )
 {
@@ -324,9 +324,9 @@ void GraphicsManager::set_drawing_accent( float_t accent )
 }
 
 /**
- * è‘‚«•—ü‚Ìƒ^ƒCƒv‚ğİ’è‚·‚é
+ * æ‰‹æ›¸ãé¢¨ç·šã®ã‚¿ã‚¤ãƒ—ã‚’è¨­å®šã™ã‚‹
  *
- * @param type è‘‚«•—ü‚Ìƒ^ƒCƒv
+ * @param type æ‰‹æ›¸ãé¢¨ç·šã®ã‚¿ã‚¤ãƒ—
  */
 void GraphicsManager::set_drawing_line_type( int_t type )
 {
@@ -335,7 +335,7 @@ void GraphicsManager::set_drawing_line_type( int_t type )
 
 void GraphicsManager::set_eye_position( const Vector& pos )
 {
-	// ‚Ç‚±‚ÉˆÚ“®‚µ‚Ä‚àA“¯‚¶‚æ‚¤‚É SkyBox ‚ª•\¦‚³‚ê‚é‚æ‚¤‚É‚·‚é
+	// ã©ã“ã«ç§»å‹•ã—ã¦ã‚‚ã€åŒã˜ã‚ˆã†ã« SkyBox ãŒè¡¨ç¤ºã•ã‚Œã‚‹ã‚ˆã†ã«ã™ã‚‹
 	if ( sky_box_ )
 	{
 		sky_box_render_data_->data().world = Matrix().set_translation( pos );
@@ -362,7 +362,7 @@ GraphicsManager::Sprite* GraphicsManager::get_sprite() const
 }
 
 /**
- * •`‰æ‚ÌƒZƒbƒgƒAƒbƒv‚ğs‚¤
+ * æç”»ã®ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—ã‚’è¡Œã†
  *
  */
 void GraphicsManager::setup_rendering()
@@ -383,9 +383,9 @@ void GraphicsManager::setup_rendering()
 }
 
 /**
- * –¼‘O‚ğw’è‚µ‚Ä InputLayout ‚ğæ“¾‚·‚é
+ * åå‰ã‚’æŒ‡å®šã—ã¦ InputLayout ã‚’å–å¾—ã™ã‚‹
  *
- * @param InputLayout ‚Ì–¼‘O
+ * @param InputLayout ã®åå‰
  * @return InputLayout
  */
 const GraphicsManager::InputLayout* GraphicsManager::get_input_layout( const char_t* name ) const
@@ -394,9 +394,9 @@ const GraphicsManager::InputLayout* GraphicsManager::get_input_layout( const cha
 }
 
 /**
- * –¼‘O‚ğw’è‚µ‚Ä EffectTechnique ‚ğæ“¾‚·‚é
+ * åå‰ã‚’æŒ‡å®šã—ã¦ EffectTechnique ã‚’å–å¾—ã™ã‚‹
  *
- * @param EffectTechnique ‚Ì–¼‘O
+ * @param EffectTechnique ã®åå‰
  * @return EffectTechnique
  */
 GraphicsManager::EffectTechnique* GraphicsManager::get_effect_technique( const char_t* name ) const
@@ -405,7 +405,7 @@ GraphicsManager::EffectTechnique* GraphicsManager::get_effect_technique( const c
 }
 
 /**
- * “ü—ÍƒŒƒCƒAƒEƒg‚ğw’è‚·‚é
+ * å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’æŒ‡å®šã™ã‚‹
  *
  */
 void GraphicsManager::set_input_layout( const char_t* name ) const
@@ -414,7 +414,7 @@ void GraphicsManager::set_input_layout( const char_t* name ) const
 }
 
 /**
- * “ü—ÍƒŒƒCƒAƒEƒg‚ğw’è‚·‚é
+ * å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’æŒ‡å®šã™ã‚‹
  *
  */
 void GraphicsManager::set_input_layout( const InputLayout* input_layout ) const
@@ -423,9 +423,9 @@ void GraphicsManager::set_input_layout( const InputLayout* input_layout ) const
 }
 
 /**
- * ƒvƒŠƒ~ƒeƒBƒuƒgƒ|ƒƒW[‚ğw’è‚·‚é
+ * ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–ãƒˆãƒãƒ­ã‚¸ãƒ¼ã‚’æŒ‡å®šã™ã‚‹
  *
- * @param primitive_topology ƒvƒŠƒ~ƒeƒBƒuƒgƒ|ƒƒW[
+ * @param primitive_topology ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–ãƒˆãƒãƒ­ã‚¸ãƒ¼
  */
 void GraphicsManager::set_primitive_topology( PrimitiveTopology primitive_topology ) const
 {
@@ -433,7 +433,7 @@ void GraphicsManager::set_primitive_topology( PrimitiveTopology primitive_topolo
 }
 
 /**
- * ƒfƒvƒXƒXƒeƒ“ƒVƒ‹‚ğİ’è‚·‚é
+ * ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ã‚’è¨­å®šã™ã‚‹
  *
  */
 void GraphicsManager::set_depth_stencil() const
@@ -442,7 +442,7 @@ void GraphicsManager::set_depth_stencil() const
 }
 
 /**
- * ƒfƒvƒXƒXƒeƒ“ƒVƒ‹‚Ìİ’è‚ğ‰ğœ‚·‚é
+ * ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ã®è¨­å®šã‚’è§£é™¤ã™ã‚‹
  *
  */
 void GraphicsManager::unset_depth_stencil() const
@@ -451,10 +451,10 @@ void GraphicsManager::unset_depth_stencil() const
 }
 
 /**
- * w’è‚µ‚½ƒeƒNƒjƒbƒN‚Ì‘S‚Ä‚ÌƒpƒX‚ÅƒŒƒ“ƒ_ƒŠƒ“ƒOˆ—‚ğÀs‚·‚é
+ * æŒ‡å®šã—ãŸãƒ†ã‚¯ãƒ‹ãƒƒã‚¯ã®å…¨ã¦ã®ãƒ‘ã‚¹ã§ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å‡¦ç†ã‚’å®Ÿè¡Œã™ã‚‹
  *
- * @param technique_name ƒeƒNƒjƒbƒN–¼
- * @param function ƒŒƒ“ƒ_ƒŠƒ“ƒOˆ—
+ * @param technique_name ãƒ†ã‚¯ãƒ‹ãƒƒã‚¯å
+ * @param function ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å‡¦ç†
  */
 void GraphicsManager::render_technique( const char_t* technique_name, const std::function< void() >& function ) const
 {
@@ -469,10 +469,10 @@ void GraphicsManager::render_technique( const char_t* technique_name, const std:
 }
 
 /**
- * w’è‚µ‚½ƒeƒNƒjƒbƒN‚Ì‘S‚Ä‚ÌƒpƒX‚ÅƒŒƒ“ƒ_ƒŠƒ“ƒOˆ—‚ğÀs‚·‚é
+ * æŒ‡å®šã—ãŸãƒ†ã‚¯ãƒ‹ãƒƒã‚¯ã®å…¨ã¦ã®ãƒ‘ã‚¹ã§ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å‡¦ç†ã‚’å®Ÿè¡Œã™ã‚‹
  *
- * @param technique ƒeƒNƒjƒbƒN
- * @param function ƒŒƒ“ƒ_ƒŠƒ“ƒOˆ—
+ * @param technique ãƒ†ã‚¯ãƒ‹ãƒƒã‚¯
+ * @param function ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å‡¦ç†
  */
 void GraphicsManager::render_technique( const EffectTechnique* technique, const std::function< void() >& function ) const
 {
@@ -487,7 +487,7 @@ void GraphicsManager::render_technique( const EffectTechnique* technique, const 
 }
 
 /**
- * ”wŒi ( ƒXƒJƒCƒ{ƒbƒNƒXE’n–Ê ) ‚ğ•`‰æ‚·‚é
+ * èƒŒæ™¯ ( ã‚¹ã‚«ã‚¤ãƒœãƒƒã‚¯ã‚¹ãƒ»åœ°é¢ ) ã‚’æç”»ã™ã‚‹
  *
  */
 void GraphicsManager::render_background() const
@@ -510,13 +510,13 @@ void GraphicsManager::render_background() const
 }
 
 /**
- * ‰æ–Ê‚É•¶š—ñ‚ğ•`‰æ‚·‚é
+ * ç”»é¢ã«æ–‡å­—åˆ—ã‚’æç”»ã™ã‚‹
  *
  * @param x 
  * @param y
- * @param text •¶š—ñ
- * @param color F
- * @todo ‚‘¬‰»‚·‚é
+ * @param text æ–‡å­—åˆ—
+ * @param color è‰²
+ * @todo é«˜é€ŸåŒ–ã™ã‚‹
  */
 void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color ) const
 {
@@ -543,11 +543,11 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
 }
 
 /**
- * ‰æ–Ê‚Ì’†‰›‚É•¶š—ñ‚ğ•`‰æ‚·‚é
+ * ç”»é¢ã®ä¸­å¤®ã«æ–‡å­—åˆ—ã‚’æç”»ã™ã‚‹
  *
- * @param text •¶š—ñ
- * @param color F
- * @todo ‚‘¬‰»‚·‚é
+ * @param text æ–‡å­—åˆ—
+ * @param color è‰²
+ * @todo é«˜é€ŸåŒ–ã™ã‚‹
  */
 void GraphicsManager::draw_text_at_center( const char_t* text, const Color& color ) const
 {
@@ -575,7 +575,7 @@ void GraphicsManager::draw_text_at_center( const char_t* text, const Color& colo
 }
 
 /**
- * ƒfƒoƒbƒO—p‚Ì²‚ğ•`‰æ‚·‚é
+ * ãƒ‡ãƒãƒƒã‚°ç”¨ã®è»¸ã‚’æç”»ã™ã‚‹
  *
  */
 void GraphicsManager::render_debug_axis_model() const
@@ -584,8 +584,8 @@ void GraphicsManager::render_debug_axis_model() const
 }
 
 /**
- * Bullet ƒfƒoƒbƒO •`‰æ‚ğƒNƒŠƒA‚·‚é
- * Bullet ‚ÌXV‚ğs‚¤‘O‚É–ˆƒtƒŒ[ƒ€ŒÄ‚Ño‚·•K—v‚ª‚ ‚é
+ * Bullet ãƒ‡ãƒãƒƒã‚° æç”»ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
+ * Bullet ã®æ›´æ–°ã‚’è¡Œã†å‰ã«æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å‘¼ã³å‡ºã™å¿…è¦ãŒã‚ã‚‹
  *
  */
 void GraphicsManager::clear_debug_bullet() const
@@ -594,7 +594,7 @@ void GraphicsManager::clear_debug_bullet() const
 }
 
 /**
- * Bullet ƒfƒoƒbƒO •`‰æ‚ğs‚¤
+ * Bullet ãƒ‡ãƒãƒƒã‚° æç”»ã‚’è¡Œã†
  *
  */
 void GraphicsManager::render_debug_bullet() const

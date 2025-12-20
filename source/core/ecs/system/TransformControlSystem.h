@@ -8,7 +8,7 @@ namespace core::ecs
 {
 
 /**
- * 入力によって姿勢を更新するシステム
+ * 蜈･蜉帙↓繧医▲縺ｦ蟋ｿ蜍｢繧呈峩譁ｰ縺吶ｋ繧ｷ繧ｹ繝�繝
  *
  */
 class TransformControlSystem : public System< TransformComponent, TransformControlComponent >

@@ -8,7 +8,7 @@ namespace core::graphics
 	class ConstantBuffer;
 
 /**
- * ’ŠÛƒVƒƒƒhƒEƒ}ƒbƒv
+ * æŠ½è±¡ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—
  *
  */
 class ShadowMap

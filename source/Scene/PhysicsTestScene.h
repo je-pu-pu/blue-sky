@@ -16,7 +16,7 @@ namespace blue_sky
 {
 
 /**
- * Physics のテスト用シーン
+ * Physics 縺ｮ繝�繧ｹ繝育畑繧ｷ繝ｼ繝ｳ
  *
  */
 class PhysicsTestScene : public Scene
@@ -31,8 +31,8 @@ public:
 
 protected:
 	Entity* current_entity_ = nullptr;
-	TransformComponent* current_entity_transform_ = nullptr; 
-	ModelComponent* current_entity_model_ = nullptr; 
+	TransformComponent* current_entity_transform_ = nullptr;
+	ModelComponent* current_entity_model_ = nullptr;
 
 	Entity* camera_ = nullptr;
 	TransformComponent* camera_transform_ = nullptr;

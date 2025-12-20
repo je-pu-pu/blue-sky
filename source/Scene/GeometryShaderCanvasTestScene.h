@@ -22,7 +22,7 @@ namespace blue_sky
 {
 
 /**
- * ジオメトリシェーダーを使った手描き風描画のテスト用シーン
+ * 繧ｸ繧ｪ繝｡繝医Μ繧ｷ繧ｧ繝ｼ繝繝ｼ繧剃ｽｿ縺｣縺滓焔謠上″鬚ｨ謠冗判縺ｮ繝�繧ｹ繝育畑繧ｷ繝ｼ繝ｳ
  *
  */
 class GeometryShaderCanvasTestScene : public Scene

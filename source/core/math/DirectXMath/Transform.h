@@ -38,6 +38,13 @@ public:
 	Transform operator * ( const Transform& t ) const { return Transform( transform_ * t.transform_ ); }
 	void operator *= ( const Transform& t ) { transform_ *= t.transform_; }
 	*/
+
+	static Transform identity()
+	{
+		Transform t;
+		t.set_identity();
+		return t;
+	}
 };
 
 } // namespace core::math::direct_x_math

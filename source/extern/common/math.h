@@ -57,7 +57,7 @@ template< typename T, typename ST > constexpr inline T chase( T value, T target,
 }
 
 /**
- * üŒ`•âŠÔ
+ * ç·šå½¢è£œé–“
  */
 template< typename T > constexpr inline T lerp( T a, T b, float t )
 {

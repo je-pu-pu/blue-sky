@@ -4,7 +4,7 @@ namespace core::graphics
 {
 
 /**
- * シェーダーから利用する定数バッファ
+ * 繧ｷ繧ｧ繝ｼ繝繝ｼ縺九ｉ蛻ｩ逕ｨ縺吶ｋ螳壽焚繝舌ャ繝輔ぃ
  *
  */
 class ConstantBuffer

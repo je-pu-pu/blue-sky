@@ -7,10 +7,10 @@ namespace blue_sky::graphics
 {
 
 /**
- * ‚±‚Ìƒ‚ƒfƒ‹—p‚ÌƒVƒF[ƒ_[‚ğì¬‚·‚é
+ * ã“ã®ãƒ¢ãƒ‡ãƒ«ç”¨ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ä½œæˆã™ã‚‹
  * 
- * @todo ‚æ‚è_“î‚É‚·‚éB
- * @todo ‚Ç‚ÌƒVƒF[ƒ_[‚ğg‚¤‚©‚Íƒ‚ƒfƒ‹‚É‚æ‚Á‚ÄˆÙ‚È‚é‚½‚ßA
+ * @todo ã‚ˆã‚ŠæŸ”è»Ÿã«ã™ã‚‹ã€‚
+ * @todo ã©ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ä½¿ã†ã‹ã¯ãƒ¢ãƒ‡ãƒ«ã«ã‚ˆã£ã¦ç•°ãªã‚‹ãŸã‚ã€
  */
 Model::Shader* Model::create_shader() const
 {
@@ -39,10 +39,10 @@ Model::Shader* Model::create_shader() const
 }
 
 /**
- * w’è‚µ‚½ƒeƒNƒXƒ`ƒƒ–¼‚É‘Î‰‚·‚éƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹ƒpƒX‚ğæ“¾‚·‚é
+ * æŒ‡å®šã—ãŸãƒ†ã‚¯ã‚¹ãƒãƒ£åã«å¯¾å¿œã™ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ã‚’å–å¾—ã™ã‚‹
  *
- * @param texture_name ƒeƒNƒXƒ`ƒƒ–¼
- * @return ƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹ƒpƒX
+ * @param texture_name ãƒ†ã‚¯ã‚¹ãƒãƒ£å
+ * @return ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹
  */
 string_t Model::get_texture_file_path_by_texture_name( const char_t* name ) const
 {
@@ -63,7 +63,7 @@ string_t Model::get_texture_file_path_by_texture_name( const char_t* name ) cons
 }
 
 /**
- * ƒ‚ƒfƒ‹©g‚Éİ’è‚³‚ê‚Ä‚¢‚éƒVƒF[ƒ_[‚Åƒ‚ƒfƒ‹‚ğƒŒƒ“ƒ_ƒŠƒ“ƒO‚·‚é
+ * ãƒ¢ãƒ‡ãƒ«è‡ªèº«ã«è¨­å®šã•ã‚Œã¦ã„ã‚‹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã§ãƒ¢ãƒ‡ãƒ«ã‚’ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã™ã‚‹
  *
  */
 void Model::render() const
@@ -72,7 +72,7 @@ void Model::render() const
 
 	for ( uint_t n = 0; n < get_shader_count(); n++ )
 	{
-		/// @todo Shader –ˆ‚ÉƒŒƒ“ƒ_ƒŠƒ“ƒO‚·‚éBƒ‚ƒfƒ‹‚Ì•`‰æ–ˆ‚É update(), bind() ‚µ‚È‚¢
+		/// @todo Shader æ¯ã«ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã™ã‚‹ã€‚ãƒ¢ãƒ‡ãƒ«ã®æç”»æ¯ã« update(), bind() ã—ãªã„
 		get_shader_at( n )->update();
 		get_shader_at( n )->bind();
 

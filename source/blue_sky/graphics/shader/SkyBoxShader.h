@@ -6,7 +6,7 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * SkyBox シェーダー
+ * SkyBox 繧ｷ繧ｧ繝ｼ繝繝ｼ
  *
  */
 class SkyBoxShader : public BaseShader

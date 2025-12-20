@@ -17,7 +17,7 @@ namespace blue_sky::graphics::direct_3d_11
 {
 
 /**
- * Direct3D11 è•`‚«•—ƒ‰ƒCƒ“
+ * Direct3D11 æ‰‹æãé¢¨ãƒ©ã‚¤ãƒ³
  *
  */
 class Line : public blue_sky::graphics::Line

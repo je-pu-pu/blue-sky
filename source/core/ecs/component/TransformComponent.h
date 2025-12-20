@@ -7,9 +7,9 @@ namespace core::ecs
 {
 
 /**
- * ƒgƒ‰ƒ“ƒXƒtƒH[ƒ€ƒRƒ“ƒ|[ƒlƒ“ƒg
+ * ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
  *
- * ˆÊ’uE‰ñ“]E
+ * ä½ç½®ãƒ»å›è»¢ãƒ»
  */
 class TransformComponent : public Component
 {

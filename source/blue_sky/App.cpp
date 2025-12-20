@@ -14,7 +14,7 @@
 
 #define ENABLE_DEBUG_CONSOLE
 
-// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+//â–¡ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 App::App()
 	: hInst( nullptr )
 	, hWnd( nullptr )
@@ -50,11 +50,11 @@ App::App()
 #endif
 }
 
-// ƒfƒXƒgƒ‰ƒNƒ^
+//â–¡ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 App::~App()
 {
-	ReleaseMutex( hMutex );			// ƒ~ƒ…[ƒeƒbƒNƒXŠJ•ú
-	WINNLSEnableIME( hWnd, TRUE );	// IME•\¦
+	ReleaseMutex( hMutex );			// ãƒŸãƒ¥ãƒ¼ãƒ†ãƒƒã‚¯ã‚¹é–‹æ”¾
+	WINNLSEnableIME( hWnd, TRUE );	// IMEè¡¨ç¤º
 
 	clip_cursor( false );
 
@@ -63,18 +63,18 @@ App::~App()
 #endif
 }
 
-//¡‰Šú‰»
+//â– åˆæœŸåŒ–
 bool App::Init(HINSTANCE hi, int nCmdShow)
 {
-	// İ’è‚ğ“Ç‚İ‚Ş
+	// è¨­å®šã‚’èª­ã¿è¾¼ã‚€
 	config_->load_file( "blue-sky.config" );
 	
 	width_ = get_config()->get( "graphics.screen_width", DEFAULT_WIDTH );
 	height_ = get_config()->get( "graphics.screen_height", DEFAULT_HEIGHT );
 
-	//ƒCƒ“ƒXƒ^ƒ“ƒXƒnƒ“ƒhƒ‹‚ğƒRƒs[
+	//ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãƒãƒ³ãƒ‰ãƒ«ã‚’ã‚³ãƒ”ãƒ¼
 	hInst = hi;
-	//‚Qd‹N“®–h~
+	//ï¼’é‡èµ·å‹•é˜²æ­¢
 	hMutex = OpenMutex( MUTEX_ALL_ACCESS, FALSE, title_.c_str() );
 	
 	if ( hMutex )
@@ -85,23 +85,23 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 
 	hMutex = CreateMutex( nullptr, FALSE, title_.c_str());
 
-	//WNDCLASS\‘¢‘Ì
+	//WNDCLASSæ§‹é€ ä½“
 	WNDCLASS wc = {
-		CS_HREDRAW | CS_VREDRAW,				//ƒXƒ^ƒCƒ‹
-		WinProc,								//ƒvƒƒV[ƒWƒƒŠÖ”
-		0,										//Šg’£—pƒpƒ‰ƒ[ƒ^
-		0,										//Šg’£—pƒpƒ‰ƒ[ƒ^
-		hInst,									//ƒCƒ“ƒXƒ^ƒ“ƒXƒnƒ“ƒhƒ‹
-		LoadIcon( hi, MAKEINTRESOURCE( IDI_ICON1 ) ),			//ƒAƒCƒRƒ“
-		LoadCursor( nullptr, IDC_ARROW ),		//ƒ}ƒEƒXƒJ[ƒ\ƒ‹
-		(HBRUSH)GetStockObject(BLACK_BRUSH),	//”wŒiF
-		nullptr,								//ƒƒjƒ…[
-		class_name_.c_str(),					//ƒNƒ‰ƒX–¼
+		CS_HREDRAW | CS_VREDRAW,				//ã‚¹ã‚¿ã‚¤ãƒ«
+		WinProc,								//ãƒ—ãƒ­ã‚·ãƒ¼ã‚¸ãƒ£é–¢æ•°
+		0,										//æ‹¡å¼µç”¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
+		0,										//æ‹¡å¼µç”¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
+		hInst,									//ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãƒãƒ³ãƒ‰ãƒ«
+		LoadIcon( hi, MAKEINTRESOURCE( IDI_ICON1 ) ),			//ã‚¢ã‚¤ã‚³ãƒ³
+		LoadCursor( nullptr, IDC_ARROW ),		//ãƒã‚¦ã‚¹ã‚«ãƒ¼ã‚½ãƒ«
+		(HBRUSH)GetStockObject(BLACK_BRUSH),	//èƒŒæ™¯è‰²
+		nullptr,								//ãƒ¡ãƒ‹ãƒ¥ãƒ¼
+		class_name_.c_str(),					//ã‚¯ãƒ©ã‚¹å
 	};
-	//ƒEƒBƒ“ƒhƒEƒNƒ‰ƒX‚Ì“o˜^
+	//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚¯ãƒ©ã‚¹ã®ç™»éŒ²
 	if(! RegisterClass(&wc))	return false;
 
-	// ƒEƒBƒ“ƒhƒEƒTƒCƒY‚Ìæ“¾
+	// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºã®å–å¾—
 	RECT rc = { 0, 0, width_, height_ };
 	AdjustWindowRect( & rc, style_, FALSE );
 	int w = rc.right - rc.left;
@@ -109,20 +109,20 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	int x = ( GetSystemMetrics( SM_CXSCREEN ) - w ) / 2;
 	int y = ( GetSystemMetrics( SM_CYSCREEN ) - h ) / 2;
 
-	//ƒEƒCƒ“ƒhƒEì¬
+	//ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦ä½œæˆ
 	hWnd = CreateWindowEx(
-		0 /* WS_EX_TOPMOST */,		//è‘O‚É•\¦
-		class_name_.c_str(),	//ƒNƒ‰ƒX–¼
-		title_.c_str(),		//ƒ^ƒCƒgƒ‹
-		style_,				//ƒXƒ^ƒCƒ‹
-		x,					//•\¦À•W
+		0 /* WS_EX_TOPMOST */,		//æ‰‹å‰ã«è¡¨ç¤º
+		class_name_.c_str(),	//ã‚¯ãƒ©ã‚¹å
+		title_.c_str(),		//ã‚¿ã‚¤ãƒˆãƒ«
+		style_,				//ã‚¹ã‚¿ã‚¤ãƒ«
+		x,					//è¡¨ç¤ºåº§æ¨™
 		y,					//
-		w,					//ƒTƒCƒY
+		w,					//ã‚µã‚¤ã‚º
 		h,					//
-		nullptr,			//eƒEƒBƒ“ƒhƒE‚Ìƒnƒ“ƒhƒ‹
-		nullptr,			//ƒƒjƒ…[‚Ìƒnƒ“ƒhƒ‹
-		hInst,				//ƒCƒ“ƒXƒ^ƒ“ƒXƒnƒ“ƒhƒ‹
-		nullptr				//ƒEƒBƒ“ƒhƒEì¬ƒf[ƒ^ ƒAƒhƒŒƒX
+		nullptr,			//è¦ªã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ãƒãƒ³ãƒ‰ãƒ«
+		nullptr,			//ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®ãƒãƒ³ãƒ‰ãƒ«
+		hInst,				//ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãƒãƒ³ãƒ‰ãƒ«
+		nullptr				//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ä½œæˆãƒ‡ãƒ¼ã‚¿ ã‚¢ãƒ‰ãƒ¬ã‚¹
 	);
 
 	if ( ! hWnd )
@@ -132,19 +132,19 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	
 	set_full_screen( get_config()->get( "graphics.full_screen", 0 ) != 0 );
 
-	// ƒQ[ƒ€‚ğ‰Šú‰»‚·‚é
+	// ã‚²ãƒ¼ãƒ ã‚’åˆæœŸåŒ–ã™ã‚‹
 	game_ = blue_sky::GameMain::get_instance();
 	blue_sky::GameMain::get_instance()->setup_scene();
 	
-	ShowWindow( hWnd, nCmdShow );		//•\¦
-	UpdateWindow( hWnd );				//•`‰æ
+	ShowWindow( hWnd, nCmdShow );		//è¡¨ç¤º
+	UpdateWindow( hWnd );				//æç”»
 
-	// WINNLSEnableIME(hWnd, FALSE);	//IME”ñ•\¦
+	// WINNLSEnableIME(hWnd, FALSE);	//IMEéè¡¨ç¤º
 
 	return true;
 }
 
-// ƒƒbƒZ[ƒWƒ‹[ƒv
+//â–¡ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒ«ãƒ¼ãƒ—
 int App::MessageLoop()
 {
 	MSG msg;
@@ -173,7 +173,7 @@ int App::MessageLoop()
 	return static_cast< int >( msg.wParam );
 }
 
-// ƒEƒBƒ“ƒhƒEƒvƒƒV[ƒWƒƒ
+//â–¡ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒ—ãƒ­ã‚·ãƒ¼ã‚¸ãƒ£
 LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 {
 	extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -251,7 +251,7 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 
 		if ( wp )
 		{
-			// ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ªƒAƒNƒeƒBƒu‚É‚È‚Á‚½ÛAŠÄ‹‘ÎÛ‚ÌƒfƒBƒŒƒNƒgƒŠ‚Ì•ÏX‚ğƒ`ƒFƒbƒN‚·‚é
+			// ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ãŒã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã«ãªã£ãŸéš›ã€ç›£è¦–å¯¾è±¡ã®ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã®å¤‰æ›´ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
 			App::get_instance()->check_directory_change();
 		}
 
@@ -311,9 +311,9 @@ void App::on_resize( HWND /* hwnd */ )
 }
 
 /**
- * ƒJ[ƒ\ƒ‹‚Ì•\¦‚ğİ’è‚·‚é
+ * ã‚«ãƒ¼ã‚½ãƒ«ã®è¡¨ç¤ºã‚’è¨­å®šã™ã‚‹
  *
- * @param show ƒJ[ƒ\ƒ‹‚ğ•\¦‚·‚éê‡‚Í true ‚ğA•\¦‚µ‚È‚¢ê‡‚Í false ‚ğw’è‚·‚é 
+ * @param show ã‚«ãƒ¼ã‚½ãƒ«ã‚’è¡¨ç¤ºã™ã‚‹å ´åˆã¯ true ã‚’ã€è¡¨ç¤ºã—ãªã„å ´åˆã¯ false ã‚’æŒ‡å®šã™ã‚‹ 
  */
 void App::show_cursor( bool show )
 {
@@ -372,9 +372,9 @@ void App::set_size( int w, int h )
 }
 
 /**
- * ƒ^ƒCƒgƒ‹‚ğæ“¾‚·‚é
+ * ã‚¿ã‚¤ãƒˆãƒ«ã‚’å–å¾—ã™ã‚‹
  *
- * @return ƒ^ƒCƒgƒ‹
+ * @return ã‚¿ã‚¤ãƒˆãƒ«
  */
 const char_t* App::get_title()
 {
@@ -388,9 +388,9 @@ const char_t* App::get_title()
 }
 
 /**
- * ƒ^ƒCƒgƒ‹‚ğİ’è‚·‚é
+ * ã‚¿ã‚¤ãƒˆãƒ«ã‚’è¨­å®šã™ã‚‹
  *
- * @param t ƒ^ƒCƒgƒ‹
+ * @param t ã‚¿ã‚¤ãƒˆãƒ«
  */
 void App::set_title( const char_t* t )
 {
@@ -403,9 +403,9 @@ void App::set_title( const char_t* t )
 }
 
 /**
- * ƒGƒ‰[ƒƒbƒZ[ƒW‚ğ•\¦‚·‚é
+ * ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’è¡¨ç¤ºã™ã‚‹
  *
- * @param message ƒGƒ‰[ƒƒbƒZ[ƒW
+ * @param message ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸
  */
 void App::show_error_message( const char_t* message ) const
 {
@@ -451,7 +451,7 @@ DWORD App::get_window_style_full_scrren() const
 }
 
 /**
- * ƒfƒBƒŒƒNƒgƒŠ‚ª•ÏX‚³‚ê‚½Û‚ÉÀs‚·‚éƒnƒ“ƒhƒ‰‚ğ“o˜^‚·‚é
+ * ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãŒå¤‰æ›´ã•ã‚ŒãŸéš›ã«å®Ÿè¡Œã™ã‚‹ãƒãƒ³ãƒ‰ãƒ©ã‚’ç™»éŒ²ã™ã‚‹
  * 
  * @param
  */
@@ -468,7 +468,7 @@ void App::watch_directory_change( const char* dir_path, std::function< void () >
 }
 
 /**
- * ƒfƒBƒŒƒNƒgƒŠ‚Ì•ÏX‚ğƒ`ƒFƒbƒN‚·‚é
+ * ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã®å¤‰æ›´ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
  * 
  */
 void App::check_directory_change() const
@@ -486,7 +486,7 @@ void App::check_directory_change() const
 		{
 			i.second();
 
-			// ŠÄ‹‚ğŒp‘±‚·‚é
+			// ç›£è¦–ã‚’ç¶™ç¶šã™ã‚‹
 			if ( ! FindNextChangeNotification( i.first ) )
 			{
 				COMMON_THROW_EXCEPTION_MESSAGE( win::LastError().get_error_message() );

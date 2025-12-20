@@ -15,7 +15,7 @@ namespace blue_sky
 class Camera;
 
 /**
- * ƒfƒoƒbƒO—pƒV[ƒ“
+ * ãƒ‡ãƒãƒƒã‚°ç”¨ã‚·ãƒ¼ãƒ³
  *
  */
 class DebugScene : public Scene
@@ -30,7 +30,7 @@ protected:
 
 protected:
 
-	/// @todo Scenegraph ‚ÉˆÚ“®‚·‚é
+	/// @todo Scenegraph ã«ç§»å‹•ã™ã‚‹
 	std::unique_ptr< Camera > camera_;
 
 public:

@@ -10,7 +10,7 @@ namespace core
 {
 
 /**
- * ƒXƒLƒjƒ“ƒOƒAƒjƒ[ƒVƒ‡ƒ“‚Ì•¡”ƒZƒbƒg
+ * ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®è¤‡æ•°ã‚»ãƒƒãƒˆ
  *
  */
 class SkinningAnimationSet
@@ -44,10 +44,10 @@ public:
 	}
 
 	/**
-	 * w’è‚µ‚½–¼‘O‚É‘Î‰‚µ‚½ƒXƒLƒjƒ“ƒOƒAƒjƒ[ƒVƒ‡ƒ“‚ğæ“¾‚·‚é
+	 * æŒ‡å®šã—ãŸåå‰ã«å¯¾å¿œã—ãŸã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’å–å¾—ã™ã‚‹
 	 *
-	 * @param name ƒXƒLƒjƒ“ƒOƒAƒjƒ[ƒVƒ‡ƒ“‚Ì–¼‘O
-	 * @return ƒXƒLƒjƒ“ƒOƒAƒjƒ[ƒVƒ‡ƒ“
+	 * @param name ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®åå‰
+	 * @return ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 	 */
 	SkinningAnimation& get_skinning_animation( const char_t* name )
 	{
@@ -75,25 +75,25 @@ public:
 
 
 	/**
-	 * w’è‚µ‚½–¼‘O‚Æƒ{[ƒ“ƒCƒ“ƒfƒbƒNƒX‚É‘Î‰‚·‚éƒAƒjƒ[ƒVƒ‡ƒ“‚ğæ“¾‚·‚é
+	 * æŒ‡å®šã—ãŸåå‰ã¨ãƒœãƒ¼ãƒ³ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã«å¯¾å¿œã™ã‚‹ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’å–å¾—ã™ã‚‹
 	 *
-	 * @param name ƒXƒLƒjƒ“ƒOƒAƒjƒ[ƒVƒ‡ƒ“‚Ì–¼‘O
-	 * @param bone_index ƒ{[ƒ“ƒCƒ“ƒfƒbƒNƒX
-	 * @return ƒAƒjƒ[ƒVƒ‡ƒ“
+	 * @param name ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®åå‰
+	 * @param bone_index ãƒœãƒ¼ãƒ³ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+	 * @return ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 	 */
 	Animation& get_bone_animation( const char_t* name, uint_t bone_index )
 	{
 		return get_skinning_animation( name ).get_bone_animation_by_bone_index( bone_index );
 	}
 
-	/*** @todo ®—‚·‚é */
+	/*** @todo æ•´ç†ã™ã‚‹ */
 	Matrix& get_bone_offset_matrix_by_bone_index( uint_t bone_index ) { return *bone_offset_matrix_list_[ bone_index ]; }
 	const Matrix& get_bone_offset_matrix_by_bone_index( uint_t bone_index ) const { return *bone_offset_matrix_list_[ bone_index ]; }
 
 	/**
-	 * ƒ{[ƒ“‚Ì”‚ğæ“¾‚·‚é
+	 * ãƒœãƒ¼ãƒ³ã®æ•°ã‚’å–å¾—ã™ã‚‹
 	 *
-	 * @return ƒ{[ƒ“‚Ì”
+	 * @return ãƒœãƒ¼ãƒ³ã®æ•°
 	 */
 	uint_t get_bone_count() const
 	{
@@ -101,9 +101,9 @@ public:
 	}
 
 	/**
-	 * ƒ{[ƒ“‚Ì”‚ğİ’è‚·‚é
+	 * ãƒœãƒ¼ãƒ³ã®æ•°ã‚’è¨­å®šã™ã‚‹
 	 *
-	 * @param count ƒ{[ƒ“‚Ì”
+	 * @param count ãƒœãƒ¼ãƒ³ã®æ•°
 	 */
 	void set_bone_count( uint_t count )
 	{
@@ -129,10 +129,10 @@ public:
 	}
 
 	/**
-	 * eƒ{[ƒ“‚ÌƒCƒ“ƒfƒbƒNƒX‚Éqƒ{[ƒ“‚ÌƒCƒ“ƒfƒbƒNƒX‚ğ‘Î‰‚³‚¹‚é
+	 * è¦ªãƒœãƒ¼ãƒ³ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã«å­ãƒœãƒ¼ãƒ³ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’å¯¾å¿œã•ã›ã‚‹
 	 *
-	 * @param bone_index eƒ{[ƒ“‚ÌƒCƒ“ƒfƒbƒNƒX
-	 * @param child_bone_index ƒ{[ƒ“‚ÌƒCƒ“ƒfƒbƒNƒX
+	 * @param bone_index è¦ªãƒœãƒ¼ãƒ³ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+	 * @param child_bone_index ãƒœãƒ¼ãƒ³ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
 	 */
 	void add_child_bone_index( uint_t bone_index, uint_t child_bone_index )
 	{
@@ -152,9 +152,9 @@ public:
 	}
 
 	/**
-	 * ƒCƒ“ƒfƒbƒNƒX‚Åw’è‚µ‚½ƒ{[ƒ“‚Ìqƒ{[ƒ“‚Ì”‚ğæ“¾‚·‚é
+	 * ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã§æŒ‡å®šã—ãŸãƒœãƒ¼ãƒ³ã®å­ãƒœãƒ¼ãƒ³ã®æ•°ã‚’å–å¾—ã™ã‚‹
 	 *
-	 * @param bone_index ƒ{[ƒ“‚ÌƒCƒ“ƒfƒbƒNƒX
+	 * @param bone_index ãƒœãƒ¼ãƒ³ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
 	 */
 	uint_t get_child_bone_count( uint_t bone_index ) const
 	{
@@ -167,11 +167,11 @@ public:
 	}
 
 	/**
-	 * qƒ{[ƒ“‚ÌƒCƒ“ƒfƒbƒNƒX‚ğæ“¾‚·‚é
+	 * å­ãƒœãƒ¼ãƒ³ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’å–å¾—ã™ã‚‹
 	 *
-	 * @param bone_index ƒ{[ƒ“‚ÌƒCƒ“ƒfƒbƒNƒX
-	 * @param n qƒ{[ƒ“‚Ìeƒ{[ƒ““à‚Å‚ÌƒCƒ“ƒfƒbƒNƒX
-	 * @return qƒ{[ƒ“‚Ì‘Sƒ{[ƒ““à‚Å‚ÌƒCƒ“ƒfƒbƒNƒX
+	 * @param bone_index ãƒœãƒ¼ãƒ³ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+	 * @param n å­ãƒœãƒ¼ãƒ³ã®è¦ªãƒœãƒ¼ãƒ³å†…ã§ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+	 * @return å­ãƒœãƒ¼ãƒ³ã®å…¨ãƒœãƒ¼ãƒ³å†…ã§ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
 	 */
 	uint_t get_child_bone_index( uint_t bone_index, uint_t n ) const
 	{
@@ -179,10 +179,10 @@ public:
 	}
 
 	/**
-	 * eƒ{[ƒ“‚ÌƒCƒ“ƒfƒbƒNƒX‚ğæ“¾‚·‚é
+	 * è¦ªãƒœãƒ¼ãƒ³ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’å–å¾—ã™ã‚‹
 	 *
-	 * @param bone_index ƒ{[ƒ“‚ÌƒCƒ“ƒfƒbƒNƒX
-	 * @return eƒ{[ƒ“‚Ì‘Sƒ{[ƒ““à‚Å‚ÌƒCƒ“ƒfƒbƒNƒX
+	 * @param bone_index ãƒœãƒ¼ãƒ³ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+	 * @return è¦ªãƒœãƒ¼ãƒ³ã®å…¨ãƒœãƒ¼ãƒ³å†…ã§ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
 	 */
 	uint_t get_parent_bone_index( uint_t bone_index ) const
 	{
@@ -190,7 +190,7 @@ public:
 	}
 
 	/**
-	 * Å“K‰»‚·‚é
+	 * æœ€é©åŒ–ã™ã‚‹
 	 *
 	 */
 	void optimize()
@@ -202,7 +202,7 @@ public:
 	}
 
 	/**
-	 * ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’·‚³‚ğŒvZ‚·‚é
+	 * ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®é•·ã•ã‚’è¨ˆç®—ã™ã‚‹
 	 *
 	 */
 	void calculate_length()

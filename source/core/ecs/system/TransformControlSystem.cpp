@@ -1,6 +1,6 @@
 #include "TransformControlSystem.h"
-#include <blue_sky/GameMain.h> /// @todo core ‚©‚ç blue_sky ‚ğQÆ‚µ‚Ä‚¢‚é‚Ì‚Í•Ï‚È‚Ì‚ÅA’¼‚·
-#include <blue_sky/Input.h> /// @todo core ‚©‚ç blue_sky ‚ğQÆ‚µ‚Ä‚¢‚é‚Ì‚Í•Ï‚È‚Ì‚ÅA’¼‚·
+#include <blue_sky/GameMain.h> /// @todo core ã‹ã‚‰ blue_sky ã‚’å‚ç…§ã—ã¦ã„ã‚‹ã®ã¯å¤‰ãªã®ã§ã€ç›´ã™
+#include <blue_sky/Input.h> /// @todo core ã‹ã‚‰ blue_sky ã‚’å‚ç…§ã—ã¦ã„ã‚‹ã®ã¯å¤‰ãªã®ã§ã€ç›´ã™
 
 #include <common/math.h>
 #include <iostream>

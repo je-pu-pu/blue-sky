@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BaseShader.h"
-#include <core/graphics/Direct3D11/ConstantBuffer.h> /// @todo Direct3D11 ‚ğ’¼ÚQÆ‚µ‚È‚¢
+#include <core/graphics/Direct3D11/ConstantBuffer.h> /// @todo Direct3D11 ã‚’ç›´æ¥å‚ç…§ã—ãªã„
 #include <common/enum_set.h>
 #include <vector>
 #include <functional>
@@ -10,14 +10,14 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * ƒVƒF[ƒ_[‚Ì‹¤’Ê‹@”\
+ * ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®å…±é€šæ©Ÿèƒ½
  * 
- * ˆÈ‰º‚Ìî•ñ‚ğ•Û‚·‚é
- *		“ü—ÍƒŒƒCƒAƒEƒg
- *		ƒeƒNƒjƒbƒN
- *		ƒVƒF[ƒ_[ŒÅ—L‚Ì–¼‘O•t‚«ƒpƒ‰ƒ[ƒ^
+ * ä»¥ä¸‹ã®æƒ…å ±ã‚’ä¿æŒã™ã‚‹
+ *		å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆ
+ *		ãƒ†ã‚¯ãƒ‹ãƒƒã‚¯
+ *		ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å›ºæœ‰ã®åå‰ä»˜ããƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
  * 
- * @todo ŠeƒeƒNƒXƒ`ƒƒ‚²‚Æ‚ÉA‚»‚ÌƒeƒNƒXƒ`ƒƒ‚ğ•K—v‚Æ‚·‚éƒVƒF[ƒ_[ƒXƒe[ƒW‚ğİ’è‚Å‚«‚é‚æ‚¤‚É‚·‚é
+ * @todo å„ãƒ†ã‚¯ã‚¹ãƒãƒ£ã”ã¨ã«ã€ãã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’å¿…è¦ã¨ã™ã‚‹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚¹ãƒ†ãƒ¼ã‚¸ã‚’è¨­å®šã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹
  */
 template< typename ShaderType, int Slot = 0 >
 class Shader : public BaseShader
@@ -28,7 +28,7 @@ public:
 	using ConstantBuffer	= core::graphics::direct_3d_11::ConstantBuffer< Slot >;
 
 	/**
-	 * ƒVƒF[ƒ_[ƒXƒe[ƒW
+	 * ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚¹ãƒ†ãƒ¼ã‚¸
 	 */
 	enum class ShaderStage
 	{
@@ -42,7 +42,7 @@ public:
 		Max,
 	};
 
-	/// ƒVƒF[ƒ_[ƒXƒe[ƒW‚ÌW‡
+	/// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚¹ãƒ†ãƒ¼ã‚¸ã®é›†åˆ
 	// using ShaderStageSet = common::enum_set< ShaderStage, static_cast< size_t >( ShaderStage::Max ) >;
 	using ShaderStageSet = common::enum_set< ShaderStage, 32 >;
 
@@ -66,7 +66,7 @@ protected:
 
 	ShaderStageSet shader_stage_set_;
 
-	/// ƒVƒF[ƒ_[ƒXƒe[ƒW => ‚»‚ÌƒVƒF[ƒ_[ƒXƒe[ƒW‚Ö’è”ƒoƒbƒtƒ@‚ğƒoƒCƒ“ƒh‚·‚éŠÖ”‚Ìƒ}ƒbƒv
+	/// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚¹ãƒ†ãƒ¼ã‚¸ => ãã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚¹ãƒ†ãƒ¼ã‚¸ã¸å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹é–¢æ•°ã®ãƒãƒƒãƒ—
 	static inline const std::vector< std::function< void ( const ConstantBuffer& ) > > bind_function_list_ = {
 		{ [] ( const ConstantBuffer& constant_buffer ) { constant_buffer.bind_to_vs(); } },
 		{ [] ( const ConstantBuffer& constant_buffer ) { constant_buffer.bind_to_hs(); } },
@@ -77,9 +77,9 @@ protected:
 	};
 
 	/**
-	 * ƒVƒF[ƒ_[‚É‘Î‚µ‚Äİ’è‚Å‚«‚éŒÅ—L‚Ìƒpƒ‰ƒ[ƒ^‚ğƒZƒbƒgƒAƒbƒv‚·‚é
+	 * ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«å¯¾ã—ã¦è¨­å®šã§ãã‚‹å›ºæœ‰ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—ã™ã‚‹
 	 * 
-	 * @return ƒpƒ‰ƒ[ƒ^‚Ì‡ŒvƒTƒCƒY ( ƒoƒCƒg” )
+	 * @return ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®åˆè¨ˆã‚µã‚¤ã‚º ( ãƒã‚¤ãƒˆæ•° )
 	 */
 	size_t setup_parameters()
 	{
@@ -201,10 +201,10 @@ public:
 	}
 
 	/**
-	 * ƒpƒ‰ƒ[ƒ^–¼‚ğw’è‚µ‚Ä®”‚ğæ“¾‚·‚é
+	 * ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿åã‚’æŒ‡å®šã—ã¦æ•´æ•°ã‚’å–å¾—ã™ã‚‹
 	 * 
-	 * @param name ƒpƒ‰ƒ[ƒ^–¼
-	 * @return ®”
+	 * @param name ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿å
+	 * @return æ•´æ•°
 	 */
 	int_t get_int( const char* name ) const override
 	{
@@ -219,10 +219,10 @@ public:
 	}
 
 	/**
-	 * ƒpƒ‰ƒ[ƒ^–¼‚ğw’è‚µ‚Ä®”‚ğİ’è‚·‚é
+	 * ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿åã‚’æŒ‡å®šã—ã¦æ•´æ•°ã‚’è¨­å®šã™ã‚‹
 	 * 
-	 * @param name ƒpƒ‰ƒ[ƒ^–¼
-	 * @param value İ’è‚·‚é®”
+	 * @param name ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿å
+	 * @param value è¨­å®šã™ã‚‹æ•´æ•°
 	 */
 	void set_int( const char* name, int_t value ) override
 	{
@@ -237,10 +237,10 @@ public:
 	}
 
 	/**
-	 * ƒpƒ‰ƒ[ƒ^–¼‚ğw’è‚µ‚ÄÀ”‚ğæ“¾‚·‚é
+	 * ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿åã‚’æŒ‡å®šã—ã¦å®Ÿæ•°ã‚’å–å¾—ã™ã‚‹
 	 * 
-	 * @param name ƒpƒ‰ƒ[ƒ^–¼
-	 * @return À”
+	 * @param name ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿å
+	 * @return å®Ÿæ•°
 	 */
 	float_t get_float( const char* name ) const override
 	{
@@ -255,10 +255,10 @@ public:
 	}
 
 	/**
-	 * ƒpƒ‰ƒ[ƒ^–¼‚ğw’è‚µ‚ÄÀ”‚ğİ’è‚·‚é
+	 * ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿åã‚’æŒ‡å®šã—ã¦å®Ÿæ•°ã‚’è¨­å®šã™ã‚‹
 	 * 
-	 * @param name ƒpƒ‰ƒ[ƒ^–¼
-	 * @param value İ’è‚·‚éÀ”
+	 * @param name ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿å
+	 * @param value è¨­å®šã™ã‚‹å®Ÿæ•°
 	 */
 	void set_float( const char* name, float_t value ) override
 	{
@@ -273,10 +273,10 @@ public:
 	}
 
 	/**
-	 * ƒpƒ‰ƒ[ƒ^–¼‚ğw’è‚µ‚ÄF‚ğæ“¾‚·‚é
+	 * ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿åã‚’æŒ‡å®šã—ã¦è‰²ã‚’å–å¾—ã™ã‚‹
 	 * 
-	 * @param name ƒpƒ‰ƒ[ƒ^–¼
-	 * @return F
+	 * @param name ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿å
+	 * @return è‰²
 	 */
 	Color get_color( const char* name ) const override
 	{
@@ -291,10 +291,10 @@ public:
 	}
 
 	/**
-	 * ƒpƒ‰ƒ[ƒ^–¼‚ğw’è‚µ‚ÄF‚ğİ’è‚·‚é
+	 * ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿åã‚’æŒ‡å®šã—ã¦è‰²ã‚’è¨­å®šã™ã‚‹
 	 * 
-	 * @param name ƒpƒ‰ƒ[ƒ^–¼
-	 * @param color İ’è‚·‚éF
+	 * @param name ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿å
+	 * @param color è¨­å®šã™ã‚‹è‰²
 	 */
 	void set_color( const char* name, const Color& color ) override
 	{
@@ -329,7 +329,7 @@ public:
 	}
 
 	/**
-	 * GPU ƒƒ‚ƒŠ‚ğXV‚·‚é
+	 * GPU ãƒ¡ãƒ¢ãƒªã‚’æ›´æ–°ã™ã‚‹
 	 */
 	void update() const override
 	{
@@ -340,11 +340,11 @@ public:
 	}
 
 	/**
-	 * ’è”ƒoƒbƒtƒ@‚ÆƒeƒNƒXƒ`ƒƒ‚ğ•K—v‚ÈƒVƒF[ƒ_[ƒXƒe[ƒW‚Åg‚¦‚é‚æ‚¤‚ÉƒoƒCƒ“ƒh‚·‚é
+	 * å®šæ•°ãƒãƒƒãƒ•ã‚¡ã¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’å¿…è¦ãªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚¹ãƒ†ãƒ¼ã‚¸ã§ä½¿ãˆã‚‹ã‚ˆã†ã«ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹
 	 */
 	void bind() const override
 	{
-		// ’è”ƒoƒbƒtƒ@‚ğ•K—v‚ÈƒVƒF[ƒ_[‚ÉƒoƒCƒ“ƒh‚·‚é
+		// å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’å¿…è¦ãªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹
 		if ( constant_buffer_ )
 		{
 			for ( size_t n = 0; n < bind_function_list_.size(); n++ )
@@ -356,7 +356,7 @@ public:
 			}
 		}
 
-		// ƒeƒNƒXƒ`ƒƒ‚ğ•K—v‚ÈƒVƒF[ƒ_[‚ÉƒoƒCƒ“ƒh‚·‚é
+		// ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’å¿…è¦ãªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹
 		for ( size_t n = 0; n < textures_.size(); n++ )
 		{
 			textures_[ n ]->bind_to_ps( n );
@@ -364,7 +364,7 @@ public:
 	}
 
 	/**
-	 * •`‰æ‚·‚é
+	 * æç”»ã™ã‚‹
 	 */
 	void render( const Mesh* mesh, uint_t n ) const override
 	{

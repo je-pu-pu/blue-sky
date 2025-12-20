@@ -14,26 +14,26 @@
 namespace win
 {
 
-//! sndPlaySound ‚ğg—p‚·‚é windows ƒTƒEƒ“ƒhÄ¶ƒNƒ‰ƒX
+//! sndPlaySound ã‚’ä½¿ç”¨ã™ã‚‹ windows ã‚µã‚¦ãƒ³ãƒ‰å†ç”Ÿã‚¯ãƒ©ã‚¹
 class Sound
 {
 private:
 	std::string file_name_;
 
 public:
-	//! ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//! ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	Sound();
 
-	//! ƒfƒXƒgƒ‰ƒNƒ^
+	//! ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	virtual ~Sound();
 
-	//! ƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
+	//! ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
 	virtual bool load( const char* file_name );
 
-	//! ƒTƒEƒ“ƒh‚ğÄ¶‚·‚é
+	//! ã‚µã‚¦ãƒ³ãƒ‰ã‚’å†ç”Ÿã™ã‚‹
 	virtual bool play();
 
-	//! ƒTƒEƒ“ƒh‚ğ’â~‚·‚é
+	//! ã‚µã‚¦ãƒ³ãƒ‰ã‚’åœæ­¢ã™ã‚‹
 	virtual bool stop();
 
 }; // class Sound

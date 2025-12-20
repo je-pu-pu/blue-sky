@@ -4,7 +4,7 @@
 //! \file		Sound.cpp
 //! \date		2003/05/20
 //! \author		JE
-//! \brief		Sound ‚ÌÀ‘•
+//! \brief		Sound ã®å®Ÿè£…
 //**********************************************************
 
 #include "Sound.h"
@@ -14,32 +14,32 @@
 namespace win
 {
 
-//! ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+//! ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 Sound::Sound()
 {
 
 }
 
-//! ƒfƒXƒgƒ‰ƒNƒ^
+//! ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 Sound::~Sound()
 {
 	
 }
 
-//! ƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
+//! ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
 bool Sound::load( const char* file_name )
 {
 	file_name_ = file_name;
 	return true;
 }
 
-//! ƒTƒEƒ“ƒh‚ğÄ¶‚·‚é
+//! ã‚µã‚¦ãƒ³ãƒ‰ã‚’å†ç”Ÿã™ã‚‹
 bool Sound::play()
 {
 	return sndPlaySoundA( file_name_.c_str(), SND_ASYNC ) != 0;
 }
 
-//! ƒTƒEƒ“ƒh‚ğ’â~‚·‚é
+//! ã‚µã‚¦ãƒ³ãƒ‰ã‚’åœæ­¢ã™ã‚‹
 bool Sound::stop()
 {
 	return false;

@@ -21,7 +21,7 @@ namespace blue_sky::graphics
 	class Line;
 
 /**
- * blue_sky ƒ‚ƒfƒ‹ƒNƒ‰ƒX
+ * blue_sky ãƒ¢ãƒ‡ãƒ«ã‚¯ãƒ©ã‚¹
  *
  */
 class Model : public core::graphics::Model
@@ -35,7 +35,7 @@ public:
 
 private:
 	Mesh*					mesh_;
-	std::unique_ptr< Line >	line_; ///< @todo Mesh ‚É‚Ü‚Æ‚ß‚éH
+	std::unique_ptr< Line >	line_; ///< @todo Mesh ã«ã¾ã¨ã‚ã‚‹ï¼Ÿ
 	ShaderList				shader_list_;
 	SkinningAnimationSet*	skinning_animation_set_;
 
@@ -48,7 +48,7 @@ public:
 
 	Model( const Model& m )
 		: mesh_( m.mesh_ )
-		, line_() /// @todo À‘•‚·‚é
+		, line_() /// @todo å®Ÿè£…ã™ã‚‹
 		, shader_list_( m.shader_list_ )
 		, skinning_animation_set_( m.skinning_animation_set_ )
 	{ }
@@ -59,7 +59,7 @@ public:
 	const Mesh* get_mesh() const override { return mesh_; };
 	void set_mesh( core::graphics::Mesh* m ) override { mesh_ = static_cast< Mesh* >( m ); }
 
-	/// @todo Mesh ‚É‚Ü‚Æ‚ß‚é
+	/// @todo Mesh ã«ã¾ã¨ã‚ã‚‹
 	Line* get_line() { return line_.get(); }
 	const Line* get_line() const { return line_.get(); }
 	void set_line( Line* l ) { line_.reset( l ); }

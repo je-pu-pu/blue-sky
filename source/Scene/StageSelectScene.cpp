@@ -1,5 +1,5 @@
 /**
- * @todo get_direct_3d() ‚Ìg—p‚ğ‚â‚ß‚Ä GraphicsManager ‚ğg‚¤‚æ‚¤‚É‚·‚éB
+ * @todo get_direct_3d() ã®ä½¿ç”¨ã‚’ã‚„ã‚ã¦ GraphicsManager ã‚’ä½¿ã†ã‚ˆã†ã«ã™ã‚‹ã€‚
  */
 
 #include "StageSelectScene.h"
@@ -8,7 +8,7 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Fader.h>
 
-/// @todo ’ŠÛ‰»‚·‚é
+/// @todo æŠ½è±¡åŒ–ã™ã‚‹
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/Sprite.h>
 
@@ -71,7 +71,7 @@ StageSelectScene::StageSelectScene()
 
 StageSelectScene::~StageSelectScene()
 {
-	/// @todo ’¼‚·
+	/// @todo ç›´ã™
 #if false
 	// get_graphics_manager()->unload_texture( "sprite" );
 	get_graphics_manager()->unload_texture( "bg" );
@@ -81,7 +81,7 @@ StageSelectScene::~StageSelectScene()
 }
 
 /**
- * ƒƒCƒ“ƒ‹[ƒvˆ—
+ * ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—å‡¦ç†
  *
  */
 void StageSelectScene::update()
@@ -125,7 +125,7 @@ void StageSelectScene::update()
 }
 
 /**
- * •`‰æ
+ * æç”»
  */
 void StageSelectScene::render()
 {
@@ -277,7 +277,7 @@ void StageSelectScene::clear_stage_list()
 	{
 		Stage* stage = *i;
 
-		/// @todo ’¼‚·
+		/// @todo ç›´ã™
 #if 0
 		get_graphics_manager()->unload_texture( stage->name.c_str() );
 #endif
@@ -334,7 +334,7 @@ void StageSelectScene::update_stage_list()
 		auto stage_name = *i;
 		stage_name.resize( stage_name.find_first_of( "." ) );
 
-		// ƒXƒg[ƒŠ[—pƒXƒe[ƒW‚Å‚ÍA‘O‚ÌƒXƒe[ƒW‚ğƒNƒŠƒA‚µ‚Ä‚¢‚È‚¢‚ÆA‚±‚ÌƒXƒe[ƒW‚Íˆê——‚ÉŠÜ‚Ü‚È‚¢
+		// ã‚¹ãƒˆãƒ¼ãƒªãƒ¼ç”¨ã‚¹ãƒ†ãƒ¼ã‚¸ã§ã¯ã€å‰ã®ã‚¹ãƒ†ãƒ¼ã‚¸ã‚’ã‚¯ãƒªã‚¢ã—ã¦ã„ãªã„ã¨ã€ã“ã®ã‚¹ãƒ†ãƒ¼ã‚¸ã¯ä¸€è¦§ã«å«ã¾ãªã„
 		if ( is_story_page() && ! last_stage_name.empty() )
 		{
 			if ( get_save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + last_stage_name ).c_str(), 0 ) == 0 )

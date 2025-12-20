@@ -15,7 +15,7 @@ namespace core::sound::port_audio
 {
 
 /**
- * PortAudio ‚ğg‚Á‚½ SoundEngine
+ * PortAudio ã‚’ä½¿ã£ãŸ SoundEngine
  *
  */
 class SoundEngine : public core::sound::SoundEngine

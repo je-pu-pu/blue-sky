@@ -4,13 +4,13 @@ namespace core::graphics::direct_3d_11
 {
 
 /**
-* ƒŒƒ“ƒ_ƒŠƒ“ƒOŒ‹‰Ê‚ğ‘‚«‚Ş–‚ª‚Å‚«‚éƒeƒNƒXƒ`ƒƒ‚ğì¬‚·‚é
-* ì¬‚³‚ê‚éƒeƒNƒXƒ`ƒƒ‚Í‰æ–Ê‚Ì• * ‰æ–Ê‚Ì‚‚³‚ÌƒTƒCƒY‚É‚È‚é
+* ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°çµæœã‚’æ›¸ãè¾¼ã‚€äº‹ãŒã§ãã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ä½œæˆã™ã‚‹
+* ä½œæˆã•ã‚Œã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£ã¯ç”»é¢ã®å¹… * ç”»é¢ã®é«˜ã•ã®ã‚µã‚¤ã‚ºã«ãªã‚‹
 * 
 * 
-* @todo MipLevels, SampleDesc ‚ğ‰Â•Ï‚É‚·‚é
+* @todo MipLevels, SampleDesc ã‚’å¯å¤‰ã«ã™ã‚‹
 *
-* @param Format ì¬‚·‚éƒeƒNƒXƒ`ƒƒ‚ÌƒtƒH[ƒ}ƒbƒg
+* @param Format ä½œæˆã™ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆ
 */
 RenderTargetTexture::RenderTargetTexture( PixelFormat format )
 	: texture_(
@@ -25,13 +25,13 @@ RenderTargetTexture::RenderTargetTexture( PixelFormat format )
 }
 
 /**
-	* ƒŒƒ“ƒ_ƒŠƒ“ƒOŒ‹‰Ê‚ğ‘‚«‚Ş–‚ª‚Å‚«‚éƒeƒNƒXƒ`ƒƒ‚ğì¬‚·‚é
+	* ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°çµæœã‚’æ›¸ãè¾¼ã‚€äº‹ãŒã§ãã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ä½œæˆã™ã‚‹
 	*
-	* @todo MipLevels, SampleDesc ‚ğ‰Â•Ï‚É‚·‚é
+	* @todo MipLevels, SampleDesc ã‚’å¯å¤‰ã«ã™ã‚‹
 	*
-	* @param Format ì¬‚·‚éƒeƒNƒXƒ`ƒƒ‚ÌƒtƒH[ƒ}ƒbƒg
-	* @param width ì¬‚·‚éƒeƒNƒXƒ`ƒƒ‚Ì•
-	* @param height ì¬‚·‚éƒeƒNƒXƒ`ƒƒ‚Ì‚‚³
+	* @param Format ä½œæˆã™ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆ
+	* @param width ä½œæˆã™ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®å¹…
+	* @param height ä½œæˆã™ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®é«˜ã•
 	*/
 RenderTargetTexture::RenderTargetTexture( PixelFormat format, int width, int height )
 	: texture_( Direct3D11::get_instance(), format, width, height, true )

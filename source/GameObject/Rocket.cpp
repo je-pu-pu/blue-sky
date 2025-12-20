@@ -16,7 +16,7 @@ void Rocket::restart()
 }
 
 /**
- * XV
+ * æ›´æ–°
  *
  */
 void Rocket::update()

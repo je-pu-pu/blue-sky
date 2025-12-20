@@ -24,7 +24,7 @@ namespace core
 	}
 
 /**
- * サウンド管理クラス
+ * 繧ｵ繧ｦ繝ｳ繝臥ｮ｡逅�繧ｯ繝ｩ繧ｹ
  *
  */
 class SoundManager : public game::SoundManager

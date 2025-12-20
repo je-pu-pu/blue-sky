@@ -1,30 +1,83 @@
 #include "PhysicsSystem.h"
-
-/// @todo core ���� blue_sky �� include ���Ȃ�
-#include <blue_sky/GameMain.h>
-#include <blue_sky/ActiveObjectPhysics.h>
+#include <core/physics/PhysicsManager.h>
+#include <core/math/Quaternion.h>
 
 namespace core::ecs
 {
 
-PhysicsSystem::PhysicsSystem()
+using PhysicsManager = core::physics::PhysicsManager;
+using RigidBodyCreateInfo = core::physics::RigidBodyCreateInfo;
+using Quaternion = core::math::Quaternion;
+
+void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, TransformComponent* transform )
 {
-	//
+	if ( rigid_body->handle.is_valid() )
+	{
+		return;
+	}
+
+	auto* physics_manager = PhysicsManager::get_instance();
+
+	if ( ! physics_manager )
+	{
+		return;
+	}
+
+	// 生成パラメータを設定
+	RigidBodyCreateInfo info;
+	info.shape_type = rigid_body->shape_type;
+	info.shape_size = rigid_body->shape_size;
+	info.mass = rigid_body->mass;
+	info.transform = transform->transform;
+	info.offset = rigid_body->offset;
+
+	// 剛体を生成
+	rigid_body->handle = physics_manager->create_rigid_body( info );
 }
 
-void PhysicsSystem::update( ComponentTuple& component_tuple ) const
+void PhysicsSystem::update()
 {
-	// �������Z�̃X�e�b�v��i�߂�
-	blue_sky::GameMain::get_instance()->get_physics_manager()->update();
+	auto* physics_manager = PhysicsManager::get_instance();
 
-	auto rigid_body = std::get< RigidBodyComponent* >( component_tuple );
-	auto transform = std::get< TransformComponent* >( component_tuple );
-	
-	// �������Z�̌��ʂ� TransformComponent �ɓK�p����
-	transform->transform.set_position( Vector( rigid_body->rigid_body.getWorldTransform().getOrigin() ) );
+	if ( ! physics_manager )
+	{
+		return;
+	}
 
-	auto q = rigid_body->rigid_body.getWorldTransform().getRotation();
-	transform->transform.set_rotation( reinterpret_cast< const Quaternion& >( q ) );
+	// 物理シミュレーションのステップを進める
+	physics_manager->step_simulation();
+
+	// 各 Entity の Component を更新
+	for ( auto& pair : get_component_list() )
+	{
+		auto& component_tuple = pair.second;
+
+		auto* rigid_body = std::get<RigidBodyComponent*>( component_tuple );
+		auto* transform = std::get<TransformComponent*>( component_tuple );
+
+		// 未初期化の RigidBody を初期化
+		if ( ! rigid_body->handle.is_valid() )
+		{
+			initialize_rigid_body( rigid_body, transform );
+		}
+
+		// 物理演算の結果を TransformComponent に反映
+		if ( rigid_body->handle.is_valid() )
+		{
+			Vector position;
+			Quaternion rotation;
+
+			physics_manager->get_rigid_body_transform( rigid_body->handle, position, rotation );
+
+			transform->transform.set_position( position );
+			transform->transform.set_rotation( rotation );
+		}
+	}
+}
+
+void PhysicsSystem::update( ComponentTuple& ) const
+{
+	// update() でまとめて処理するため、ここでは何もしない
 }
 
 } // namespace core::ecs

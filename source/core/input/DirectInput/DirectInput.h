@@ -5,7 +5,7 @@
 #include <dinput.h>
 
 /**
- * DirectInput のラッパークラス
+ * DirectInput 縺ｮ繝ｩ繝�繝代�ｼ繧ｯ繝ｩ繧ｹ
  *
  */
 class DirectInput

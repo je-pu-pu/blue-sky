@@ -3,7 +3,7 @@
 #include <common/math.h>
 
 /**
- * Bullet ‚Å‚Í ²‚ÌŒ´“_‚ÉŒü‚©‚Á‚Ä¶‰ñ‚è‚ª³‚Ì‰ñ“]‚Æ‚È‚é
+ * Bullet ã§ã¯ è»¸ã®åŸç‚¹ã«å‘ã‹ã£ã¦å·¦å›ã‚ŠãŒæ­£ã®å›è»¢ã¨ãªã‚‹
  */
 TEST( BulletTest, BulletTransformTest )
 {
@@ -12,7 +12,7 @@ TEST( BulletTest, BulletTransformTest )
 	t.setRotation( btQuaternion( btVector3( 0, 1, 0 ), math::degree_to_radian( 90.f ) ) );
 
 	auto v1 = btVector3( 1, 0, 0 );
-	auto v2 = t * btVector3( 0, 0, 1 ); // Z+ ‚Ì“_‚ğ Y ²‚Å 90 “x‰ñ“]‚³‚¹‚é‚Æ X+ ‚É‚È‚é
+	auto v2 = t * btVector3( 0, 0, 1 ); // Z+ ã®ç‚¹ã‚’ Y è»¸ã§ 90 åº¦å›è»¢ã•ã›ã‚‹ã¨ X+ ã«ãªã‚‹
 
 	EXPECT_NEAR( v1.x(), v2.x(), 1e-6f ) << v2;
 	EXPECT_NEAR( v1.y(), v2.y(), 1e-6f ) << v2;
@@ -26,7 +26,7 @@ TEST( BulletTest, BulletTransformTest2 )
 	t.setRotation( btQuaternion( btVector3( 0, 0, 1 ), math::degree_to_radian( 90.f ) ) );
 
 	auto v1 = btVector3( 0, -1, 0 );
-	auto v2 = t * btVector3( -1, 0, 0 ); // X- ‚Ì“_‚ğ Z ²‚Å 90 “x‰ñ“]‚³‚¹‚é‚Æ Y- ‚É‚È‚é
+	auto v2 = t * btVector3( -1, 0, 0 ); // X- ã®ç‚¹ã‚’ Z è»¸ã§ 90 åº¦å›è»¢ã•ã›ã‚‹ã¨ Y- ã«ãªã‚‹
 
 	EXPECT_NEAR( v1.x(), v2.x(), 1e-6f ) << v2;
 	EXPECT_NEAR( v1.y(), v2.y(), 1e-6f ) << v2;

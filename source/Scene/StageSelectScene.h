@@ -10,7 +10,7 @@ namespace blue_sky
 {
 
 /**
- * ƒXƒe[ƒW‘I‘ğ‰æ–Ê‚Ìˆ—‚ğŠÇ—‚·‚é
+ * ã‚¹ãƒ†ãƒ¼ã‚¸é¸æŠç”»é¢ã®å‡¦ç†ã‚’ç®¡ç†ã™ã‚‹
  *
  */
 class StageSelectScene : public Scene
@@ -83,8 +83,8 @@ public:
 	explicit StageSelectScene();
 	~StageSelectScene();
 
-	void update() override;				///< ƒƒCƒ“ƒ‹[ƒv
-	void render() override;				///< •`‰æ
+	void update() override;				///< ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—
+	void render() override;				///< æç”»
 
 }; // class StageSelectScene
 

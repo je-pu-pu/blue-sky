@@ -5,7 +5,7 @@
 
 #include <blue_sky/App.h>
 
-/// @todo ActiveObjectManager ‚ÖˆÚ“®
+/// @todo ActiveObjectManager ã¸ç§»å‹•
 #include <GameObject/Player.h>
 #include <GameObject/Girl.h>
 #include <GameObject/Goal.h>
@@ -26,7 +26,7 @@
 
 #include <core/sound/SoundManager.h>
 
-/// @todo ’ŠÛ‰»‚·‚é
+/// @todo æŠ½è±¡åŒ–ã™ã‚‹
 #include <core/graphics/Direct3D11/Sprite.h>
 
 #include <blue_sky/ActiveObjectPhysics.h>
@@ -122,11 +122,11 @@ GamePlayScene::GamePlayScene()
 		get_graphics_manager()->set_sky_box( "sky-box-3" );
 	}
 
-	/// @todo ’¼‚·
+	/// @todo ç›´ã™
 	// far_billboards_ = get_graphics_manager()->load_model( ( get_stage_name() + "-far-billboards" ).c_str() );
 	far_billboards_ = get_graphics_manager()->load_model( "far-billboards-1" );
 
-	/// @todo ’¼‚·
+	/// @todo ç›´ã™
 	rectangle_ = get_graphics_manager()->create_named_model( "rectangle" );
 	rectangle_->set_mesh( get_graphics_manager()->create_named_mesh< Rectangle >( "rectangle", Rectangle::Buffer::Type::DEFAULT ) );
 
@@ -154,7 +154,7 @@ GamePlayScene::~GamePlayScene()
 	get_graphics_manager()->unset_ground();
 	get_graphics_manager()->unset_shadow_map();
 
-	/// @todo ’¼‚·
+	/// @todo ç›´ã™
 #if 0
 	get_graphics_manager()->unload_mesh_all();
 	get_graphics_manager()->unload_texture_all();
@@ -178,11 +178,11 @@ void GamePlayScene::clear_delayed_command()
 }
 
 /**
- * ƒIƒuƒWƒFƒNƒg‚ğ¶¬‚·‚é
+ * ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆã™ã‚‹
  *
- * @param class_name ƒNƒ‰ƒX–¼
- * @return ¶¬‚µ‚½ƒIƒuƒWƒFƒNƒg
- * @todo ®—‚·‚éB loc, rot ‚Ìw’è‚ğ‚Ç‚¤‚·‚é‚©H StaticObject ‚Ì¶¬‚ğ‚Ç‚¤‚·‚é‚©H
+ * @param class_name ã‚¯ãƒ©ã‚¹å
+ * @return ç”Ÿæˆã—ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+ * @todo æ•´ç†ã™ã‚‹ã€‚ loc, rot ã®æŒ‡å®šã‚’ã©ã†ã™ã‚‹ã‹ï¼Ÿ StaticObject ã®ç”Ÿæˆã‚’ã©ã†ã™ã‚‹ã‹ï¼Ÿ
  */
 ActiveObject* GamePlayScene::create_object_at_player_front( const char_t* class_name )
 {
@@ -205,9 +205,9 @@ ActiveObject* GamePlayScene::create_object_at_player_front( const char_t* class_
 }
 
 /**
- * ƒRƒ}ƒ“ƒh‚ğ€”õ‚·‚é
+ * ã‚³ãƒãƒ³ãƒ‰ã‚’æº–å‚™ã™ã‚‹
  *
- * @todo Script ‚ÉˆÚs‚·‚é
+ * @todo Script ã«ç§»è¡Œã™ã‚‹
  */
 void GamePlayScene::setup_command()
 {
@@ -643,7 +643,7 @@ void GamePlayScene::setup_command()
 }
 
 /**
- * ƒXƒe[ƒW‚Ìİ’è‚É‰‚¶‚ÄAƒXƒe[ƒW‚ğ€”õ‚·‚é
+ * ã‚¹ãƒ†ãƒ¼ã‚¸ã®è¨­å®šã«å¿œã˜ã¦ã€ã‚¹ãƒ†ãƒ¼ã‚¸ã‚’æº–å‚™ã™ã‚‹
  *
  */
 void GamePlayScene::setup_stage()
@@ -742,10 +742,10 @@ void GamePlayScene::load_sound_all( bool is_final_stage )
 }
 
 /**
- * ƒXƒe[ƒWƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
+ * ã‚¹ãƒ†ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
  *
- * @param file_name ƒXƒe[ƒWƒtƒ@ƒCƒ‹–¼
- * @todo ®—‚·‚é
+ * @param file_name ã‚¹ãƒ†ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«å
+ * @todo æ•´ç†ã™ã‚‹
  */
 void GamePlayScene::load_stage_file( const char* file_name )
 {
@@ -840,7 +840,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			ss >> far_billboards_name;
 
-			/// @todo ’¼‚·
+			/// @todo ç›´ã™
 			far_billboards_ = get_graphics_manager()->load_model( far_billboards_name.c_str() );
 		}
 		else if ( command == "object" || command == "static-object" || command == "dynamic-object" )
@@ -963,7 +963,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else
 		{
-			/// @todo ƒRƒ}ƒ“ƒh‚É’u‚«Š·‚¦‚éH
+			/// @todo ã‚³ãƒãƒ³ãƒ‰ã«ç½®ãæ›ãˆã‚‹ï¼Ÿ
 			stage_config_->read_line( line );
 		}
 	}
@@ -1008,7 +1008,7 @@ void GamePlayScene::save_stage_file( const char* ) const
 }
 
 /**
- * ƒƒCƒ“ƒ‹[ƒvˆ—
+ * ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—å‡¦ç†
  *
  */
 void GamePlayScene::update()
@@ -1087,7 +1087,7 @@ void GamePlayScene::update()
 }
 
 /**
- * ’Êí‚ÌXVˆ—
+ * é€šå¸¸æ™‚ã®æ›´æ–°å‡¦ç†
  *
  */
 void GamePlayScene::update_main()
@@ -1251,7 +1251,7 @@ void GamePlayScene::update_main()
 
 		if ( player_->is_falling_to_die() )
 		{
-			// —‚¿‚Ä€‚Ì‚¤‚Æ‚µ‚Ä‚¢‚éê‡‚Í”’‚­ƒtƒF[ƒhƒAƒEƒg‚·‚é
+			// è½ã¡ã¦æ­»ã®ã†ã¨ã—ã¦ã„ã‚‹å ´åˆã¯ç™½ããƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆã™ã‚‹
 
 			get_graphics_manager()->set_fade_color( Color( 1.f, 1.f, 1.f, 0.5f ) );
 			get_graphics_manager()->fade_out( 0.01f );
@@ -1389,8 +1389,8 @@ void GamePlayScene::update_balloon_sound()
 		}
 	}
 
-	/// @todo ®—‚·‚é
-	// ‚Ô‚ê‚é‚Ì‚Å‚±‚±‚Å‚â‚éB
+	/// @todo æ•´ç†ã™ã‚‹
+	// ã¶ã‚Œã‚‹ã®ã§ã“ã“ã§ã‚„ã‚‹ã€‚
 	if ( player_->get_balloon() )
 	{
 		const_cast< Balloon* >( player_->get_balloon() )->update();
@@ -1398,7 +1398,7 @@ void GamePlayScene::update_balloon_sound()
 }
 
 /**
- * ‰eŠÖ˜A‚Ìî•ñ‚ğXV‚·‚é
+ * å½±é–¢é€£ã®æƒ…å ±ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void GamePlayScene::update_shadow()
@@ -1480,7 +1480,7 @@ void GamePlayScene::go_to_next_scene()
 }
 
 /**
- * •`‰æ
+ * æç”»
  *
  */
 void GamePlayScene::render()
@@ -1494,7 +1494,7 @@ void GamePlayScene::render()
 }
 
 /**
- * Oculus Rift ‚É‘Î‚µ‚Ä•`‰æ‚ğs‚¤
+ * Oculus Rift ã«å¯¾ã—ã¦æç”»ã‚’è¡Œã†
  *
  */
 void GamePlayScene::render_to_oculus_vr() const
@@ -1524,7 +1524,7 @@ void GamePlayScene::render_to_oculus_vr() const
 }
 
 /**
- * ’Êí‚ÌƒfƒBƒXƒvƒŒƒC‚É‘Î‚µ‚Ä•`‰æ‚ğs‚¤
+ * é€šå¸¸ã®ãƒ‡ã‚£ã‚¹ãƒ—ãƒ¬ã‚¤ã«å¯¾ã—ã¦æç”»ã‚’è¡Œã†
  *
  */
 void GamePlayScene::render_to_display() const
@@ -1542,10 +1542,10 @@ void GamePlayScene::render_to_display() const
 }
 
 /**
- * Še–Ú‚É‘Î‚µ‚Ä•`‰æ‚ğs‚¤
+ * å„ç›®ã«å¯¾ã—ã¦æç”»ã‚’è¡Œã†
  *
- * @parma ortho_offset UI ‚Ì—¼–ÚŠÔƒIƒtƒZƒbƒg
- * @todo GraphicsManager ‚ÉˆÚs‚·‚é
+ * @parma ortho_offset UI ã®ä¸¡ç›®é–“ã‚ªãƒ•ã‚»ãƒƒãƒˆ
+ * @todo GraphicsManager ã«ç§»è¡Œã™ã‚‹
  */
 void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 {
@@ -1631,9 +1631,9 @@ void GamePlayScene::render_text() const
 }
 
 /**
- * ƒtƒŒ[ƒ€–ˆ‚ÉXV‚·‚é•K—v‚Ì‚ ‚é•`‰æ—p‚Ì’è”ƒoƒbƒtƒ@‚ğXV‚·‚é
+ * ãƒ•ãƒ¬ãƒ¼ãƒ æ¯ã«æ›´æ–°ã™ã‚‹å¿…è¦ã®ã‚ã‚‹æç”»ç”¨ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’æ›´æ–°ã™ã‚‹
  *
- * @todo GraphicsManager ‚© ActiveObjectManager ‚© Scenegraph ‚ÉˆÚ“®‚·‚é
+ * @todo GraphicsManager ã‹ ActiveObjectManager ã‹ Scenegraph ã«ç§»å‹•ã™ã‚‹
 
  */
 void GamePlayScene::update_render_data_for_frame() const
@@ -1656,9 +1656,9 @@ void GamePlayScene::update_render_data_for_frame() const
 }
 
 /**
- * ƒtƒŒ[ƒ€–ˆ‚ÉXV‚·‚é•K—v‚Ì‚ ‚é•`‰æ—p‚Ì’è”ƒoƒbƒtƒ@‚ğXV‚·‚é
+ * ãƒ•ãƒ¬ãƒ¼ãƒ æ¯ã«æ›´æ–°ã™ã‚‹å¿…è¦ã®ã‚ã‚‹æç”»ç”¨ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’æ›´æ–°ã™ã‚‹
  *
- * @param int eye_index 0 : ¶–Ú / 1 : ‰E–Ú
+ * @param int eye_index 0 : å·¦ç›® / 1 : å³ç›®
  */
 void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
 {
@@ -1692,7 +1692,7 @@ void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
 }
 
 /**
- * ƒtƒŒ[ƒ€–ˆ‚ÉXV‚·‚é•K—v‚Ì‚ ‚é•`‰æ—p‚Ì’è”ƒoƒbƒtƒ@—pƒf[ƒ^‚Ì‚¤‚¿Aƒ}ƒgƒŠƒbƒNƒXˆÈŠO‚Ìƒf[ƒ^‚ğ‚ğXV‚·‚é
+ * ãƒ•ãƒ¬ãƒ¼ãƒ æ¯ã«æ›´æ–°ã™ã‚‹å¿…è¦ã®ã‚ã‚‹æç”»ç”¨ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡ç”¨ãƒ‡ãƒ¼ã‚¿ã®ã†ã¡ã€ãƒãƒˆãƒªãƒƒã‚¯ã‚¹ä»¥å¤–ã®ãƒ‡ãƒ¼ã‚¿ã‚’ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void GamePlayScene::update_frame_constant_buffer_data_sub( FrameConstantBufferData& frame_constant_buffer_data ) const
@@ -1703,12 +1703,12 @@ void GamePlayScene::update_frame_constant_buffer_data_sub( FrameConstantBufferDa
 	frame_constant_buffer_data.time_beat = static_cast< uint_t >( get_total_elapsed_time() * ( get_bpm() / 60.f ) );
 }
 /**
- * ƒtƒŒ[ƒ€–ˆ‚ÉXV‚·‚é•K—v‚Ì‚ ‚é•`‰æ—p‚Ì’è”ƒoƒbƒtƒ@‚Ì‚¤‚¿Aè‘‚«•—•`‰æ‚ÉŠÖ‚·‚é’è”ƒoƒbƒtƒ@XV‚·‚é
+ * ãƒ•ãƒ¬ãƒ¼ãƒ æ¯ã«æ›´æ–°ã™ã‚‹å¿…è¦ã®ã‚ã‚‹æç”»ç”¨ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡ã®ã†ã¡ã€æ‰‹æ›¸ãé¢¨æç”»ã«é–¢ã™ã‚‹å®šæ•°ãƒãƒƒãƒ•ã‚¡æ›´æ–°ã™ã‚‹
  *
  */
 void GamePlayScene::update_render_data_for_frame_drawing() const
 {
-	/// @todo GraphicsManager ‚ªŠÇ—‚·‚é
+	/// @todo GraphicsManager ãŒç®¡ç†ã™ã‚‹
 	get_graphics_manager()->set_shadow_color( shadow_color_.value() );
 	get_graphics_manager()->set_shadow_paper_color( shadow_paper_color_.value() );
 	get_graphics_manager()->set_drawing_accent( bgm_ ? bgm_->get_current_peak_level() * drawing_accent_scale_ : 0.f );
@@ -1717,7 +1717,7 @@ void GamePlayScene::update_render_data_for_frame_drawing() const
 }
 
 /**
- * ‰“Œiƒrƒ‹ƒ{[ƒhƒƒbƒVƒ…‚ğ•`‰æ‚·‚é
+ * é æ™¯ãƒ“ãƒ«ãƒœãƒ¼ãƒ‰ãƒ¡ãƒƒã‚·ãƒ¥ã‚’æç”»ã™ã‚‹
  *
  */
 void GamePlayScene::render_far_billboards() const
@@ -1727,20 +1727,20 @@ void GamePlayScene::render_far_billboards() const
 		return;
 	}
 
-	/// @todo –ˆƒtƒŒ[ƒ€ update() ‚·‚é‚Ì‚Í–³‘Ê‚È‚Ì‚Å‚â‚ß‚é
+	/// @todo æ¯ãƒ•ãƒ¬ãƒ¼ãƒ  update() ã™ã‚‹ã®ã¯ç„¡é§„ãªã®ã§ã‚„ã‚ã‚‹
 	ObjectConstantBufferData buffer;
 	buffer.color = Color::White;
 	buffer.world.set_identity();
 			
 	get_graphics_manager()->get_shared_object_render_data()->update( & buffer );
 
-	/// @todo shader ‚ğ "billboard" ‚É‚·‚é
+	/// @todo shader ã‚’ "billboard" ã«ã™ã‚‹
 	get_graphics_manager()->set_current_object_constant_buffer( get_graphics_manager()->get_shared_object_render_data() );
 	far_billboards_->render();
 }
 
 /**
- * 2D ƒXƒvƒ‰ƒCƒg‚ğ•`‰æ‚·‚é
+ * 2D ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã‚’æç”»ã™ã‚‹
  *
  */
 void GamePlayScene::render_sprite( float_t ortho_offset ) const
@@ -1839,7 +1839,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 }
 
 /**
- * ƒVƒƒƒhƒEƒ}ƒbƒv‚ÌƒfƒoƒbƒOƒEƒBƒ“ƒhƒE‚ğ•`‰æ‚·‚é
+ * ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã®ãƒ‡ãƒãƒƒã‚°ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’æç”»ã™ã‚‹
  *
  */
 void GamePlayScene::render_debug_shadow_map_window() const

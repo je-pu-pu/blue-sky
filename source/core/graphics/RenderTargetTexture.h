@@ -7,7 +7,7 @@ namespace core::graphics
 {
 
 /**
- * レンダリング結果を書き込むことができ、かつ、シェーダーリソースとして使用できるテクスチャ 
+ * 繝ｬ繝ｳ繝繝ｪ繝ｳ繧ｰ邨先棡繧呈嶌縺崎ｾｼ繧縺薙→縺後〒縺阪√°縺､縲√す繧ｧ繝ｼ繝繝ｼ繝ｪ繧ｽ繝ｼ繧ｹ縺ｨ縺励※菴ｿ逕ｨ縺ｧ縺阪ｋ繝�繧ｯ繧ｹ繝√Ε 
  *
  */
 class RenderTargetTexture : public Texture, public RenderTarget

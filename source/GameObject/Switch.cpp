@@ -22,7 +22,7 @@ void Switch::restart()
 }
 
 /**
- * XV
+ * æ›´æ–°
  *
  */
 void Switch::update()

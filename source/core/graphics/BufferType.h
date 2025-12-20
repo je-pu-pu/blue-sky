@@ -4,11 +4,11 @@ namespace core::graphics
 {
 
 /**
- * @brief �o�b�t�@�̎��
+ * @brief バッファの種類
  */
 enum class BufferType {
-	DEFAULT,		// �ʏ�̃o�b�t�@ ( �X�V���Ȃ��o�b�t�@ )
-	UPDATABLE		// CPU ����̏������݂��s����o�b�t�@
+	DEFAULT,		// 通常のバッファ ( 更新しないバッファ )
+	UPDATABLE		// CPU からの書き込みを行えるバッファ
 };
 
 } // namespace core::graphics

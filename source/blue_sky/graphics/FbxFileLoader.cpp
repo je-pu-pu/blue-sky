@@ -247,10 +247,10 @@ FbxFileLoader::~FbxFileLoader()
 }
 
 /**
- * FBX ƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
+ * FBX ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
  *
- * @param file_name FBX ƒtƒ@ƒCƒ‹–¼
- * @return ƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ‚É¬Œ÷‚µ‚½ê‡‚Í true ‚ğA¸”s‚µ‚½ê‡‚Í false ‚ğ•Ô‚·
+ * @param file_name FBX ãƒ•ã‚¡ã‚¤ãƒ«å
+ * @return ãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿ã«æˆåŠŸã—ãŸå ´åˆã¯ true ã‚’ã€å¤±æ•—ã—ãŸå ´åˆã¯ false ã‚’è¿”ã™
  */
 bool FbxFileLoader::load( const char_t* file_name )
 {
@@ -323,7 +323,7 @@ bool FbxFileLoader::load( const char_t* file_name )
 }
 
 /**
- * FbxNode ‚©‚çƒƒbƒVƒ…î•ñ‚ğÄ‹A“I‚É“Ç‚İ‚Ş
+ * FbxNode ã‹ã‚‰ãƒ¡ãƒƒã‚·ãƒ¥æƒ…å ±ã‚’å†å¸°çš„ã«èª­ã¿è¾¼ã‚€
  *
  * @param node FbxNode
  */
@@ -346,9 +346,9 @@ void FbxFileLoader::load_mesh_recursive( FbxNode* node )
 }
 
 /**
- * ƒƒbƒVƒ…î•ñ‚ğ“Ç‚İ‚Ş
+ * ãƒ¡ãƒƒã‚·ãƒ¥æƒ…å ±ã‚’èª­ã¿è¾¼ã‚€
  *
- * @param mesh ƒƒbƒVƒ…î•ñ
+ * @param mesh ãƒ¡ãƒƒã‚·ãƒ¥æƒ…å ±
  */
 void FbxFileLoader::load_mesh( FbxMesh* mesh )
 {
@@ -424,7 +424,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 
 		if ( ! is_smooth )
 		{
-			// ƒ|ƒŠƒSƒ“‚Ì–@ü‚ğŒvZ‚·‚é
+			// ãƒãƒªã‚´ãƒ³ã®æ³•ç·šã‚’è¨ˆç®—ã™ã‚‹
 			Mesh::Position p1( position_list.at( mesh->GetPolygonVertex( n, 0 ) ) );
 			Mesh::Position p2( position_list.at( mesh->GetPolygonVertex( n, 1 ) ) );
 			Mesh::Position p3( position_list.at( mesh->GetPolygonVertex( n, 2 ) ) );
@@ -461,7 +461,7 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 			{
 				FbxVector4 normal_vector;
 
-				// ’¸“_‚Ì–@ü
+				// é ‚ç‚¹ã®æ³•ç·š
 				if ( mesh->GetPolygonVertexNormal( n, m, normal_vector ) )
 				{
 					v.Normal = Mesh::Normal(
@@ -472,14 +472,14 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 			}
 			else
 			{
-				// ƒ|ƒŠƒSƒ“‚Ì–@ü
+				// ãƒãƒªã‚´ãƒ³ã®æ³•ç·š
 				v.Normal = Mesh::Normal(
 					static_cast< float >( polygon_normal[ 0 ] ),
 					static_cast< float >( polygon_normal[ 1 ] ),
 					static_cast< float >( polygon_normal[ 2 ] ) );
 			}
 			
-			// ’¸“_‚Ìˆê——‚É’Ç‰Á
+			// é ‚ç‚¹ã®ä¸€è¦§ã«è¿½åŠ 
 			{
 				VertexIndexMap::iterator i = vertex_index_map.find( v );
 
@@ -508,10 +508,10 @@ void FbxFileLoader::load_mesh( FbxMesh* mesh )
 }
 
 /**
- * ƒƒbƒVƒ…‚ÌƒEƒGƒCƒgî•ñ‚ğ“Ç‚İ‚Ş
+ * ãƒ¡ãƒƒã‚·ãƒ¥ã®ã‚¦ã‚¨ã‚¤ãƒˆæƒ…å ±ã‚’èª­ã¿è¾¼ã‚€
  *
- * @param skin FBX ƒXƒLƒ“î•ñ
- * @param vertex_weight_list ƒEƒGƒCƒgî•ñ‚Ö‚ÌQÆ
+ * @param skin FBX ã‚¹ã‚­ãƒ³æƒ…å ±
+ * @param vertex_weight_list ã‚¦ã‚¨ã‚¤ãƒˆæƒ…å ±ã¸ã®å‚ç…§
  */
 void FbxFileLoader::load_mesh_vertex_weight( FbxSkin* skin, Mesh::VertexWeightList& vertex_weight_list )
 {
@@ -581,9 +581,9 @@ void FbxFileLoader::load_mesh_vertex_weight( FbxSkin* skin, Mesh::VertexWeightLi
 }
 
 /**
- * ƒ}ƒeƒŠƒAƒ‹î•ñ‚ğ“Ç‚İ‚Ş
+ * ãƒãƒ†ãƒªã‚¢ãƒ«æƒ…å ±ã‚’èª­ã¿è¾¼ã‚€
  *
- * @param fbx_material ƒ}ƒeƒŠƒAƒ‹î•ñ
+ * @param fbx_material ãƒãƒ†ãƒªã‚¢ãƒ«æƒ…å ±
  */
 void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 {
@@ -648,7 +648,7 @@ void FbxFileLoader::load_material( FbxSurfaceMaterial* fbx_material )
 }
 
 /**
- * FbxNode ‚©‚çƒ{[ƒ“î•ñ‚ğÄ‹A“I‚É“Ç‚İ‚Ş
+ * FbxNode ã‹ã‚‰ãƒœãƒ¼ãƒ³æƒ…å ±ã‚’å†å¸°çš„ã«èª­ã¿è¾¼ã‚€
  *
  * @param node FbxNode
  */
@@ -663,7 +663,7 @@ void FbxFileLoader::load_limb_recursive( FbxNode* node )
 }
 
 /**
- * ƒXƒPƒ‹ƒgƒ“î•ñ‚ğ“Ç‚İ‚Ş
+ * ã‚¹ã‚±ãƒ«ãƒˆãƒ³æƒ…å ±ã‚’èª­ã¿è¾¼ã‚€
  *
  */
 void FbxFileLoader::load_limb( FbxNode* node )
@@ -684,7 +684,7 @@ void FbxFileLoader::load_limb( FbxNode* node )
 }
 
 /**
- * ƒAƒjƒ[ƒVƒ‡ƒ“î•ñ‚ğ“Ç‚İ‚Ş
+ * ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æƒ…å ±ã‚’èª­ã¿è¾¼ã‚€
  *
  */
 void FbxFileLoader::load_animations()
@@ -719,9 +719,9 @@ void FbxFileLoader::load_animations()
 }
 
 /**
- * w’è‚µ‚½ƒCƒ“ƒfƒbƒNƒX‚Ìƒ{[ƒ“‚É‘Î‰‚·‚éƒAƒjƒ[ƒVƒ‡ƒ“‚Ìˆê——‚ğ“Ç‚İ‚Ş
+ * æŒ‡å®šã—ãŸã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã®ãƒœãƒ¼ãƒ³ã«å¯¾å¿œã™ã‚‹ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ä¸€è¦§ã‚’èª­ã¿è¾¼ã‚€
  *
- * @param bone_index ƒ{[ƒ“‚ÌƒCƒ“ƒfƒbƒNƒX
+ * @param bone_index ãƒœãƒ¼ãƒ³ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
  * @param cluster FbxCluster
  */
 void FbxFileLoader::load_animations_for_bone( int bone_index, FbxNode* node )
@@ -813,10 +813,10 @@ void FbxFileLoader::load_animations_for_bone( int bone_index, FbxNode* node )
 }
 
 /**
- * w’è‚µ‚½ƒAƒjƒ[ƒVƒ‡ƒ“‚ÉƒAƒjƒ[ƒVƒ‡ƒ“ƒJ[ƒu‚ğ“Ç‚İ‚Ş
+ * æŒ‡å®šã—ãŸã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã«ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚«ãƒ¼ãƒ–ã‚’èª­ã¿è¾¼ã‚€
  *
- * @param animation ƒAƒjƒ[ƒVƒ‡ƒ“
- * @param channel_index ƒAƒjƒ[ƒVƒ‡ƒ“‚Ìƒ`ƒƒƒ“ƒlƒ‹‚ÌƒCƒ“ƒfƒbƒNƒX
+ * @param animation ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
+ * @param channel_index ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ãƒãƒ£ãƒ³ãƒãƒ«ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
  * @param anim_curve FbxAnimCurve
  */
 void FbxFileLoader::load_curve_for_animation( Animation& animation, Animation::ChannelIndex channel_index, const FbxAnimCurve* anim_curve )
@@ -837,7 +837,7 @@ void FbxFileLoader::load_curve_for_animation( Animation& animation, Animation::C
 }
 
 /**
- * À•WŒn‚ğ•ÏŠ·‚·‚é
+ * åº§æ¨™ç³»ã‚’å¤‰æ›ã™ã‚‹
  *
  */
 void FbxFileLoader::convert_coordinate_system()
@@ -847,7 +847,7 @@ void FbxFileLoader::convert_coordinate_system()
 }
 
 /**
- * ‘Š‘ÎƒpƒX‚Ìƒtƒ@ƒCƒ‹–¼‚ğƒeƒNƒXƒ`ƒƒ‚Ìƒtƒ@ƒCƒ‹–¼‚Æ‚µ‚ÄÄ‹A“I‚Éİ’è‚·‚é
+ * ç›¸å¯¾ãƒ‘ã‚¹ã®ãƒ•ã‚¡ã‚¤ãƒ«åã‚’ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ãƒ•ã‚¡ã‚¤ãƒ«åã¨ã—ã¦å†å¸°çš„ã«è¨­å®šã™ã‚‹
  *
  * @param node FbxNode
  */
@@ -946,7 +946,7 @@ void FbxFileLoader::print_matrix( const FbxAMatrix& m ) const
 }
 
 /**
- * À•WŒn‚ğ•\¦‚·‚é
+ * åº§æ¨™ç³»ã‚’è¡¨ç¤ºã™ã‚‹
  *
  */
 void FbxFileLoader::print_axis_system( const FbxAxisSystem& axis_system ) const
@@ -1016,9 +1016,9 @@ void FbxFileLoader::print_axis_system( const FbxAxisSystem& axis_system ) const
 }
 
 /**
- * FBX ƒtƒ@ƒCƒ‹‚ğƒV[ƒ“‚É“Ç‚İ‚Ş
+ * FBX ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚·ãƒ¼ãƒ³ã«èª­ã¿è¾¼ã‚€
  *
- * @param file_path FBX ƒtƒ@ƒCƒ‹ƒpƒX
+ * @param file_path FBX ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹
  */
 bool FbxFileLoader::load_fbx( const char_t* file_path )
 {
@@ -1047,9 +1047,9 @@ bool FbxFileLoader::load_fbx( const char_t* file_path )
 }
 
 /**
- * Œ»İ‚ÌƒV[ƒ“‚ğ FBX ƒtƒ@ƒCƒ‹‚É•Û‘¶‚·‚é
+ * ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ã‚’ FBX ãƒ•ã‚¡ã‚¤ãƒ«ã«ä¿å­˜ã™ã‚‹
  *
- * @param file_path FBX ƒtƒ@ƒCƒ‹ƒpƒX
+ * @param file_path FBX ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹
  */
 bool FbxFileLoader::save_fbx( const char_t* file_path )
 {
@@ -1069,12 +1069,12 @@ bool FbxFileLoader::save_fbx( const char_t* file_path )
 }
 
 /**
- * w’è‚µ‚½ FBX ƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚İƒoƒCƒiƒŠŒ`®‚Å•Û‘¶‚·‚é
+ * æŒ‡å®šã—ãŸ FBX ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã¿ãƒã‚¤ãƒŠãƒªå½¢å¼ã§ä¿å­˜ã™ã‚‹
  *
  * 
- * @param file_path “Ç‚İ‚Ş FBX ƒtƒ@ƒCƒ‹‚ÌƒpƒX
- * @param binary_file_path ƒoƒCƒiƒŠŒ`‚Å•Û‘¶‚·‚é FBX ƒtƒ@ƒCƒ‹‚ÌƒpƒX
- * @return FBX ƒtƒ@ƒCƒ‹‚Ì•Û‘¶‚É¬Œ÷‚µ‚½ê‡‚Í true ‚ğA¸”s‚µ‚½ê‡‚Í false ‚ğ•Ô‚·
+ * @param file_path èª­ã¿è¾¼ã‚€ FBX ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹
+ * @param binary_file_path ãƒã‚¤ãƒŠãƒªå½¢ã§ä¿å­˜ã™ã‚‹ FBX ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹
+ * @return FBX ãƒ•ã‚¡ã‚¤ãƒ«ã®ä¿å­˜ã«æˆåŠŸã—ãŸå ´åˆã¯ true ã‚’ã€å¤±æ•—ã—ãŸå ´åˆã¯ false ã‚’è¿”ã™
  */
 bool FbxFileLoader::convert_to_binaly( const char_t* file_path, const char_t* binary_file_path )
 {
@@ -1089,9 +1089,9 @@ bool FbxFileLoader::convert_to_binaly( const char_t* file_path, const char_t* bi
 }
 
 /**
- * FBX ‚©‚çæ“¾‚µ‚½ƒtƒ@ƒCƒ‹ƒpƒX•¶š—ñ‚ğ“à•”ƒGƒ“ƒR[ƒfƒBƒ“ƒO‚É•ÏŠ·‚·‚é
+ * FBX ã‹ã‚‰å–å¾—ã—ãŸãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹æ–‡å­—åˆ—ã‚’å†…éƒ¨ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã«å¤‰æ›ã™ã‚‹
  *
- * @param s FBX ‚©‚çæ“¾‚µ‚½•¶š—ñ
+ * @param s FBX ã‹ã‚‰å–å¾—ã—ãŸæ–‡å­—åˆ—
  */
 string_t FbxFileLoader::convert_file_path_to_internal_encoding( const char* s )
 {

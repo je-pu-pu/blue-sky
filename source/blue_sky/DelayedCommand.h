@@ -7,7 +7,7 @@ namespace blue_sky
 {
 
 /**
- * ’x‰„Às‚³‚ê‚éƒRƒ}ƒ“ƒh‚Ìİ’è
+ * é…å»¶å®Ÿè¡Œã•ã‚Œã‚‹ã‚³ãƒãƒ³ãƒ‰ã®è¨­å®š
  *
  */
 class DelayedCommand
@@ -15,14 +15,14 @@ class DelayedCommand
 public:
 
 private:
-	float_t interval_; ///< ’x‰„ŠÔ ( •b )
-	int_t loop_count_; ///< Às‰ñ”
-	string_t command_; ///< ƒRƒ}ƒ“ƒh + ˆø”
+	float_t interval_; ///< é…å»¶æ™‚é–“ ( ç§’ )
+	int_t loop_count_; ///< å®Ÿè¡Œå›æ•°
+	string_t command_; ///< ã‚³ãƒãƒ³ãƒ‰ + å¼•æ•°
 
-	int_t exec_count_; ///< ÀsÏ‚İ‰ñ”
+	int_t exec_count_; ///< å®Ÿè¡Œæ¸ˆã¿å›æ•°
 
-	float_t elapsed_; ///< ƒIƒuƒWƒFƒNƒg‚ª¶¬‚³‚ê‚Ä‚©‚ç‚ÌŒo‰ßŠÔ
-	float_t last_exec_elapsed_; ///< ÅŒã‚ÉƒRƒ}ƒ“ƒh‚ğÀs‚µ‚½“_‚Å‚ÌŒo‰ßŠÔ
+	float_t elapsed_; ///< ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒç”Ÿæˆã•ã‚Œã¦ã‹ã‚‰ã®çµŒéæ™‚é–“
+	float_t last_exec_elapsed_; ///< æœ€å¾Œã«ã‚³ãƒãƒ³ãƒ‰ã‚’å®Ÿè¡Œã—ãŸæ™‚ç‚¹ã§ã®çµŒéæ™‚é–“
 
 public:
 	DelayedCommand( float_t interval, int loop_count, const string_t& command )
@@ -36,7 +36,7 @@ public:
 
 	}
 
-	/// XV
+	/// æ›´æ–°
 	bool update( float_t elapsed_time )
 	{
 		elapsed_ += elapsed_time;

@@ -57,7 +57,7 @@ protected:
 	const InputLayout*			input_layout_;
 	const EffectTechnique*		effect_technique_;
 
-	float_t			ortho_offset_;		///< —§‘ÌŽ‹—p
+	float_t			ortho_offset_;		///< ç«‹ä½“è¦–ç”¨
 
 	void create_vertex_buffer();
 	void create_index_buffer();

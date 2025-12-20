@@ -5,7 +5,7 @@
 #include <dsound.h>
 
 /**
- * DirectSoundBuffer8 のラッパークラス
+ * DirectSoundBuffer8 縺ｮ繝ｩ繝�繝代�ｼ繧ｯ繝ｩ繧ｹ
  *
  */
 class DirectSoundBuffer

@@ -9,7 +9,7 @@ namespace core::sound::direct_sound
 {
 
 /**
- * DirectSound サウンドバッファ
+ * DirectSound 繧ｵ繧ｦ繝ｳ繝峨ヰ繝�繝輔ぃ
  *
  */
 class SoundBuffer : public core::sound::SoundBuffer

@@ -53,13 +53,13 @@ namespace blue_sky::graphics
 	}
 
 /**
- * ƒOƒ‰ƒtƒBƒbƒNŠÇ—ƒNƒ‰ƒX
+ * ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ç®¡ç†ã‚¯ãƒ©ã‚¹
  * 
- * @todo blue_sky::graphics::GraphicsManager ‚Æ core::graphics::GraphicsManager ‚Ì‚Ç‚¿‚ç‚É‰½‚ªŠÜ‚Ü‚ê‚é‚×‚«‚©‚ğ®—‚·‚é
- * @todo •K—v‚Èƒƒ“ƒo‚ğ core::graphics::GraphicsManager ‚ÉˆÚ“®‚·‚é
+ * @todo blue_sky::graphics::GraphicsManager ã¨ core::graphics::GraphicsManager ã®ã©ã¡ã‚‰ã«ä½•ãŒå«ã¾ã‚Œã‚‹ã¹ãã‹ã‚’æ•´ç†ã™ã‚‹
+ * @todo å¿…è¦ãªãƒ¡ãƒ³ãƒã‚’ core::graphics::GraphicsManager ã«ç§»å‹•ã™ã‚‹
  *
- * ‚±‚ÌƒNƒ‰ƒX‚ªÀ‘Ì‰»‚³‚ê‚é–‚Í‚È‚¢B
- * ÀÛ‚É‚Í‚±‚ÌƒNƒ‰ƒX‚ğŒp³‚µ‚½ blue_sky::graphics::direct_3d_11::GraphicsManager ‚ªÀ‘Ì‰»‚³‚ê‚éB
+ * ã“ã®ã‚¯ãƒ©ã‚¹ãŒå®Ÿä½“åŒ–ã•ã‚Œã‚‹äº‹ã¯ãªã„ã€‚
+ * å®Ÿéš›ã«ã¯ã“ã®ã‚¯ãƒ©ã‚¹ã‚’ç¶™æ‰¿ã—ãŸ blue_sky::graphics::direct_3d_11::GraphicsManager ãŒå®Ÿä½“åŒ–ã•ã‚Œã‚‹ã€‚
  */
 class GraphicsManager : public core::graphics::GraphicsManager
 {
@@ -81,10 +81,10 @@ public:
 	
 private:
 	std::unique_ptr< Fader >	fader_;
-	bool_t						is_fading_in_ = true;		///< true : Œ»İƒtƒF[ƒhƒCƒ“’† or false : Œ»İƒtƒF[ƒhƒAƒEƒg’†
+	bool_t						is_fading_in_ = true;		///< true : ç¾åœ¨ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³ä¸­ or false : ç¾åœ¨ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆä¸­
 	float_t						fade_speed_ = 0.f;
 
-	std::unique_ptr< Model >	post_effect_rectangle_;		///< ƒ|ƒXƒgƒGƒtƒFƒNƒgƒŒƒ“ƒ_ƒŠƒ“ƒO—p‹éŒ`
+	std::unique_ptr< Model >	post_effect_rectangle_;		///< ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ç”¨çŸ©å½¢
 
 	mutable std::unique_ptr< ShadowMap >					shadow_map_;
 	BaseShadowMapShader*									shadow_map_shader_ = nullptr;
@@ -133,8 +133,8 @@ public:
 	GraphicsManager();
 	virtual ~GraphicsManager() override;
 
-	virtual int get_screen_width() const = 0;		///< ‰æ–Ê‚Ì•‚ğ•Ô‚·
-	virtual int get_screen_height() const = 0;		///< ‰æ–Ê‚Ì‚‚³‚ğ•Ô‚·
+	virtual int get_screen_width() const = 0;		///< ç”»é¢ã®å¹…ã‚’è¿”ã™
+	virtual int get_screen_height() const = 0;		///< ç”»é¢ã®é«˜ã•ã‚’è¿”ã™
 
 	void setup_shadow_map( uint_t, uint_t );
 	void unset_shadow_map();
@@ -238,7 +238,7 @@ public:
 	Fader* get_fader() { return fader_.get(); }
 	const Fader* get_fader() const { return fader_.get(); }
 
-	/// @todo ®—‚·‚é
+	/// @todo æ•´ç†ã™ã‚‹
 	void set_fade_color( const Color& );
 
 	void start_fade_in( float_t speed );
@@ -249,7 +249,7 @@ public:
 
 	void render_fader() const override;
 
-	/// @todo ‚¿‚á‚ñ‚Æì‚é Font, size, w’è‚µ‚½ Texture ‚Ö‚Ì•`‰æ
+	/// @todo ã¡ã‚ƒã‚“ã¨ä½œã‚‹ Font, size, æŒ‡å®šã—ãŸ Texture ã¸ã®æç”»
 	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
 	virtual void draw_text_at_center( const char_t*, const Color& ) const = 0;
 
@@ -258,10 +258,10 @@ public:
 	void render_debug_axis( const ActiveObjectManager* ) const;
 
 	/**
-	 * ƒƒCƒ“ƒJƒƒ‰‚Ìî•ñ‚ğİ’è‚·‚é
+	 * ãƒ¡ã‚¤ãƒ³ã‚«ãƒ¡ãƒ©ã®æƒ…å ±ã‚’è¨­å®šã™ã‚‹
 	 * 
-	 * @param transform ˆÊ’uE‰ñ“]î•ñ
-	 * @param camera ƒJƒƒ‰î•ñ ( FOV ‚È‚Ç )
+	 * @param transform ä½ç½®ãƒ»å›è»¢æƒ…å ±
+	 * @param camera ã‚«ãƒ¡ãƒ©æƒ…å ± ( FOV ãªã© )
 	 */
 	void set_main_camera_info( const TransformComponent* transform, const CameraComponent* camera )
 	{

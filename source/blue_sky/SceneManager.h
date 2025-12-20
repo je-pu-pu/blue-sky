@@ -11,7 +11,7 @@ namespace blue_sky
 class Scene;
 
 /**
- * •¡”‚Ì Scene ‚ğŠÇ—‚·‚é Manager
+ * è¤‡æ•°ã® Scene ã‚’ç®¡ç†ã™ã‚‹ Manager
  *
  */
 class SceneManager : public common::Singleton< SceneManager >
@@ -21,13 +21,13 @@ public:
 	using SceneGeneratorMap = std::unordered_map< string_t, SceneGenerator >;
 
 	/**
-	 * ƒV[ƒ“‚ğ©“®“o˜^‚·‚é‚½‚ß‚Ìƒwƒ‹ƒp[ƒNƒ‰ƒX
+	 * ã‚·ãƒ¼ãƒ³ã‚’è‡ªå‹•ç™»éŒ²ã™ã‚‹ãŸã‚ã®ãƒ˜ãƒ«ãƒ‘ãƒ¼ã‚¯ãƒ©ã‚¹
 	 * 
-	 * ŠeƒV[ƒ“‚Ìƒ\[ƒXƒtƒ@ƒCƒ‹“à‚Å static ‚ÈƒCƒ“ƒXƒ^ƒ“ƒX‚ğ¶¬‚·‚é‚±‚Æ‚ÅAƒV[ƒ“‚ğ©“®“o˜^‚Å‚«‚é‚æ‚¤‚É‚·‚éB
-	 * ‚½‚¾‚µAŒ»ó‚ÍƒR[ƒh‚ÌÅ“K‰»‚É‚æ‚èAƒCƒ“ƒXƒ^ƒ“ƒX¶¬‚ªíœ‚³‚ê‚Ä‚µ‚Ü‚¤‚½‚ßAg—p‚µ‚È‚¢B‘ã‚í‚è‚É SceneManager::register_all_scene() “à‚Åè“®“o˜^‚µ‚Ä‚¢‚éB
+	 * å„ã‚·ãƒ¼ãƒ³ã®ã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«å†…ã§ static ãªã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ç”Ÿæˆã™ã‚‹ã“ã¨ã§ã€ã‚·ãƒ¼ãƒ³ã‚’è‡ªå‹•ç™»éŒ²ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ã€‚
+	 * ãŸã ã—ã€ç¾çŠ¶ã¯ã‚³ãƒ¼ãƒ‰ã®æœ€é©åŒ–ã«ã‚ˆã‚Šã€ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ç”ŸæˆãŒå‰Šé™¤ã•ã‚Œã¦ã—ã¾ã†ãŸã‚ã€ä½¿ç”¨ã—ãªã„ã€‚ä»£ã‚ã‚Šã« SceneManager::register_all_scene() å†…ã§æ‰‹å‹•ç™»éŒ²ã—ã¦ã„ã‚‹ã€‚
 	 * 
-	 * SceneRegister::SceneRegister< MyScene > scene_register; // MyScene::name ‚Æ new MyScene() ‚ğg‚Á‚Ä“o˜^‚·‚é
-	 * SceneRegister::SceneRegister< MyScene > scene_register( "name", [] { new MyScene( 1, 2.f, "3" ) } ) ; // w’è‚µ‚½–¼‘O‚ÆŠÖ”‚ğg‚Á‚Ä“o˜^‚·‚é
+	 * SceneRegister::SceneRegister< MyScene > scene_register; // MyScene::name ã¨ new MyScene() ã‚’ä½¿ã£ã¦ç™»éŒ²ã™ã‚‹
+	 * SceneRegister::SceneRegister< MyScene > scene_register( "name", [] { new MyScene( 1, 2.f, "3" ) } ) ; // æŒ‡å®šã—ãŸåå‰ã¨é–¢æ•°ã‚’ä½¿ã£ã¦ç™»éŒ²ã™ã‚‹
 	 */
 	template < typename SceneType >
 	class SceneRegister
@@ -47,12 +47,12 @@ public:
 	~SceneManager() { }
 
 	/**
-	 * ‘S‚Ä‚ÌƒV[ƒ“‚ğ“o˜^‚·‚é
+	 * å…¨ã¦ã®ã‚·ãƒ¼ãƒ³ã‚’ç™»éŒ²ã™ã‚‹
 	 */
 	void register_all_scene();
 
 	/**
-	 * w’è‚µ‚½–¼‘O‚ÌƒV[ƒ“‚ğ“o˜^‚·‚é
+	 * æŒ‡å®šã—ãŸåå‰ã®ã‚·ãƒ¼ãƒ³ã‚’ç™»éŒ²ã™ã‚‹
 	 */
 	template< typename SceneType >
 	void register_scene( const string_t& scene_name = SceneType::name, SceneGenerator generator = [] { return new SceneType(); } )
@@ -61,7 +61,7 @@ public:
 	}
 
 	/**
-	 * w’è‚µ‚½–¼‘O‚ÌƒV[ƒ“‚ª“o˜^Ï‚İ‚©‚Ç‚¤‚©‚ğ’²‚×‚é
+	 * æŒ‡å®šã—ãŸåå‰ã®ã‚·ãƒ¼ãƒ³ãŒç™»éŒ²æ¸ˆã¿ã‹ã©ã†ã‹ã‚’èª¿ã¹ã‚‹
 	 */
 	bool is_scene_registered( const string_t& scene_name ) const
 	{
@@ -69,7 +69,7 @@ public:
 	}
 
 	/**
-	 * w’è‚µ‚½–¼‘O‚ÌƒV[ƒ“‚ğ¶¬‚·‚é
+	 * æŒ‡å®šã—ãŸåå‰ã®ã‚·ãƒ¼ãƒ³ã‚’ç”Ÿæˆã™ã‚‹
 	 */
 	Scene* generate_scene( const string_t& scene_name ) const
 	{

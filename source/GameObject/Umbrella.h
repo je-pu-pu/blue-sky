@@ -6,7 +6,7 @@ namespace blue_sky
 {
 
 /**
- * P
+ * å‚˜
  *
  */
 class Umbrella : public ActiveObject
@@ -28,7 +28,7 @@ public:
 	Umbrella();
 	~Umbrella() { }
 
-	/// XV
+	/// æ›´æ–°
 	void update() override;
 
 	void restart() override;

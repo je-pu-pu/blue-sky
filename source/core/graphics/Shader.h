@@ -12,9 +12,9 @@ namespace core::graphics
 	class Texture;
 
 /**
- * ’ŠÛƒVƒF[ƒ_[ƒNƒ‰ƒX
+ * æŠ½è±¡ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚¯ãƒ©ã‚¹
  *
- * @todo scalar, vector, color, texture ‚É–¼‘O‚ğ•t‚¯‚Äİ’èA–¼‘O‚ğw’è‚µ‚Äæ“¾‚Å‚«‚é‚æ‚¤‚É‚·‚é
+ * @todo scalar, vector, color, texture ã«åå‰ã‚’ä»˜ã‘ã¦è¨­å®šã€åå‰ã‚’æŒ‡å®šã—ã¦å–å¾—ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹
  */
 class Shader
 {
@@ -24,7 +24,7 @@ public:
 	using Texture = Texture;
 
 	/**
-	 * ƒpƒ‰ƒ[ƒ^‚ÌŒ^
+	 * ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®å‹
 	 */
 	enum class ParameterType
 	{
@@ -34,19 +34,19 @@ public:
 		COLOR,
 	};
 
-	/// @todo float ˆÈŠO‚ÌƒfƒtƒHƒ‹ƒg’l‚É‘Î‰‚·‚éH
-	/// Šeƒpƒ‰ƒ[ƒ^‚Ìî•ñ
+	/// @todo float ä»¥å¤–ã®ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤ã«å¯¾å¿œã™ã‚‹ï¼Ÿ
+	/// å„ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®æƒ…å ±
 	struct ParameterInfo
 	{
-		ParameterType				type;			// Œ^
-		std::string					name;			// –¼‘O
-		std::optional< float_t >	default_value;	// ƒfƒtƒHƒ‹ƒg’l
-		float_t						min = std::numeric_limits< float_t >::lowest();	// Å¬’l
-		float_t						max  = std::numeric_limits< float_t >::max();	// Å‘å’l
-		std::size_t					offset = 0;		// ƒƒ‚ƒŠƒAƒhƒŒƒX‚ÌƒIƒtƒZƒbƒg ( ’Êí 0 ‚Å—Ç‚¢ )
+		ParameterType				type;			// å‹
+		std::string					name;			// åå‰
+		std::optional< float_t >	default_value;	// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤
+		float_t						min = std::numeric_limits< float_t >::lowest();	// æœ€å°å€¤
+		float_t						max  = std::numeric_limits< float_t >::max();	// æœ€å¤§å€¤
+		std::size_t					offset = 0;		// ãƒ¡ãƒ¢ãƒªã‚¢ãƒ‰ãƒ¬ã‚¹ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆ ( é€šå¸¸ 0 ã§è‰¯ã„ )
 	};
 
-	/// ‘Sƒpƒ‰ƒ[ƒ^[‚Ìî•ñ
+	/// å…¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼ã®æƒ…å ±
 	using ParameterInfoList = std::vector< ParameterInfo >;
 
 public:

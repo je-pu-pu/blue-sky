@@ -26,7 +26,7 @@ namespace core
 	{
 		class Texture;
 
-		/// @todo íœ‚·‚é
+		/// @todo å‰Šé™¤ã™ã‚‹
 		namespace direct_3d_11
 		{
 			class Direct3D11;
@@ -51,7 +51,7 @@ namespace blue_sky
 	}
 
 /**
- * ê–Ê‚²‚Æ‚Ìˆ—A•`‰æ‚ğŠÇ—‚·‚é
+ * å ´é¢ã”ã¨ã®å‡¦ç†ã€æç”»ã‚’ç®¡ç†ã™ã‚‹
  *
  */
 class Scene
@@ -70,11 +70,11 @@ public:
 	using PhysicsManager	= ActiveObjectPhysics;
 	using SoundManager		= core::SoundManager;
 
-	/// @todo íœ‚·‚é
+	/// @todo å‰Šé™¤ã™ã‚‹
 	using Direct3D			= core::graphics::direct_3d_11::Direct3D11;
 
 private:
-	float_t total_elapsed_time_;		///< ƒV[ƒ“‚ªŠJn‚µ‚Ä‚©‚ç‚Ì‘Œo‰ßŠÔ ( •b )
+	float_t total_elapsed_time_;		///< ã‚·ãƒ¼ãƒ³ãŒé–‹å§‹ã—ã¦ã‹ã‚‰ã®ç·çµŒéæ™‚é–“ ( ç§’ )
 
 	std::string name_;
 	std::string next_scene_;
@@ -84,7 +84,7 @@ protected:
 	void update_total_elapsed_time();
 	float_t get_elapsed_time() const;
 
-	Direct3D* get_direct_3d() const;	///< @todo íœ‚·‚é
+	Direct3D* get_direct_3d() const;	///< @todo å‰Šé™¤ã™ã‚‹
 
 	EntityManager* get_entity_manager() const;
 
@@ -131,8 +131,8 @@ public:
 	void set_name( const std::string& name ) { name_ = name; }
 	const std::string& get_name() const { return name_; }
 
-	virtual void update();					///< ƒƒCƒ“ƒ‹[ƒv
-	virtual void render() = 0;				///< •`‰æ
+	virtual void update();					///< ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—
+	virtual void render() = 0;				///< æç”»
 
 	virtual void on_function_key_down( int ) { };
 

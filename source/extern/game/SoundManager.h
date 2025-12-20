@@ -9,9 +9,9 @@ namespace game
 class Sound;
 
 /**
- * ƒTƒEƒ“ƒhŠÇ—ƒNƒ‰ƒX
+ * ã‚µã‚¦ãƒ³ãƒ‰ç®¡ç†ã‚¯ãƒ©ã‚¹
  *
- * @todo core/sound/SoundManager ‚É“‡‚·‚é
+ * @todo core/sound/SoundManager ã«çµ±åˆã™ã‚‹
  */
 class SoundManager
 {

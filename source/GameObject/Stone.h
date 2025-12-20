@@ -6,7 +6,7 @@ namespace blue_sky
 {
 
 /**
- * Î
+ * çŸ³
  *
  */
 class Stone : public ActiveObject
@@ -29,7 +29,7 @@ public:
 	Stone();
 	~Stone() { }
 
-	/// XV
+	/// æ›´æ–°
 	void update() override;
 
 	void restart() override;

@@ -5,7 +5,7 @@
 #include <d2d1.h>
 
 /**
- * DirectWrite �̃��b�p�[�N���X
+ * DirectWrite のラッパークラス
  *
  */
 class DirectWrite
@@ -27,7 +27,7 @@ public:
 	explicit DirectWrite( IDXGISurface1* );
 	~DirectWrite();
 
-	/** �t�H���g�T�C�Y��ς�����悤�ɂ��� */
+	/** フォントサイズを変えられるようにする */
 	FLOAT get_font_size() const { return 64.f; }
 	FLOAT get_font_height() const;
 

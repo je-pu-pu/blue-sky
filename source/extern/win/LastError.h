@@ -7,7 +7,7 @@ namespace win
 {
 
 /**
- * @brief GetLastError() をラップし、エラーメッセージを取得できるようにしたクラス
+ * @brief GetLastError() 繧偵Λ繝�繝励＠縲√お繝ｩ繝ｼ繝｡繝�繧ｻ繝ｼ繧ｸ繧貞叙蠕励〒縺阪ｋ繧医≧縺ｫ縺励◆繧ｯ繝ｩ繧ｹ
  * 
  */
 class LastError

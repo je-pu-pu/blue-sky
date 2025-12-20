@@ -17,7 +17,7 @@ namespace blue_sky
 	}
 
 /**
- * ŠX‚Ì©“®¶¬
+ * è¡—ã®è‡ªå‹•ç”Ÿæˆ
  *
  */
 class CityGenerator
@@ -27,15 +27,15 @@ public:
 	using Mesh			= graphics::Mesh;
 	using VertexGroup	= core::graphics::VertexGroup;
 
-	// “¹˜Hƒ^ƒCƒ‹
+	// é“è·¯ã‚¿ã‚¤ãƒ«
 	struct RoadNode
 	{
 		enum class Type
 		{
-			STRAIGHT,			///< ’¼ü
-			CROSS,				///< \š˜H
-			CURVE,				///< ƒJ[ƒu
-			T_INTERSECTION,		///< T š˜H
+			STRAIGHT,			///< ç›´ç·š
+			CROSS,				///< åå­—è·¯
+			CURVE,				///< ã‚«ãƒ¼ãƒ–
+			T_INTERSECTION,		///< T å­—è·¯
 		};
 
 		Type type;
@@ -47,13 +47,13 @@ public:
 		RoadNode* left_node  = nullptr;
 		RoadNode* right_node = nullptr;
 
-		bool is_end = false;	///< ‚±‚Ìƒm[ƒh‚ªI’[‚©‚Ç‚¤‚©H ( ‘¼‚Ì“¹˜H‚É‚Ô‚Â‚©‚Á‚Ä~‚Ü‚Á‚½‚©‚Ç‚¤‚© )
+		bool is_end = false;	///< ã“ã®ãƒãƒ¼ãƒ‰ãŒçµ‚ç«¯ã‹ã©ã†ã‹ï¼Ÿ ( ä»–ã®é“è·¯ã«ã¶ã¤ã‹ã£ã¦æ­¢ã¾ã£ãŸã‹ã©ã†ã‹ )
 
-		Vector start_front;		///< ŠJn’n“_‚Å‚Ì‘O•û’PˆÊƒxƒNƒgƒ‹
-		Vector start_right;		///< ŠJn’n“_‚Å‚Ì‰E•û’PˆÊƒxƒNƒgƒ‹
+		Vector start_front;		///< é–‹å§‹åœ°ç‚¹ã§ã®å‰æ–¹å˜ä½ãƒ™ã‚¯ãƒˆãƒ«
+		Vector start_right;		///< é–‹å§‹åœ°ç‚¹ã§ã®å³æ–¹å˜ä½ãƒ™ã‚¯ãƒˆãƒ«
 
-		Vector end_front;		///< I—¹’n“_‚Å‚Ì‘O•û’PˆÊƒxƒNƒgƒ‹
-		Vector end_right;		///< I—¹’n“_‚Å‚Ì‰E•û’PˆÊƒxƒNƒgƒ‹
+		Vector end_front;		///< çµ‚äº†åœ°ç‚¹ã§ã®å‰æ–¹å˜ä½ãƒ™ã‚¯ãƒˆãƒ«
+		Vector end_right;		///< çµ‚äº†åœ°ç‚¹ã§ã®å³æ–¹å˜ä½ãƒ™ã‚¯ãƒˆãƒ«
 
 		Vector back_left_pos;
 		Vector back_right_pos;
@@ -101,7 +101,7 @@ public:
 		}
 
 		/**
-		 * w’è‚µ‚½ƒm[ƒh‚Æ‚ÌƒŠƒ“ƒN‚ğ‰ğœ‚·‚é
+		 * æŒ‡å®šã—ãŸãƒãƒ¼ãƒ‰ã¨ã®ãƒªãƒ³ã‚¯ã‚’è§£é™¤ã™ã‚‹
 		 */
 		void unlink( RoadNode* node )
 		{
@@ -143,9 +143,9 @@ public:
 		}
 
 		/**
-		 * w’è‚µ‚½ƒm[ƒh‚ÆÕ“Ë‚µ‚Ä‚¢‚é‚©‚ğ•Ô‚·
+		 * æŒ‡å®šã—ãŸãƒãƒ¼ãƒ‰ã¨è¡çªã—ã¦ã„ã‚‹ã‹ã‚’è¿”ã™
 		 *
-		 * @parma node ƒm[ƒh
+		 * @parma node ãƒãƒ¼ãƒ‰
 		 */
 		bool is_collition_with( const RoadNode& )
 		{
@@ -156,7 +156,7 @@ public:
 	};
 
 	/**
-	 * L‚Ñ‚Äs‚­“¹˜H‚Ìæ“ª‚ğw‚·ƒRƒ“ƒgƒ[ƒ‹ƒ|ƒCƒ“ƒg
+	 * ä¼¸ã³ã¦è¡Œãé“è·¯ã®å…ˆé ­ã‚’æŒ‡ã™ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ãƒã‚¤ãƒ³ãƒˆ
 	 */
 	struct RoadControlPoint
 	{
@@ -181,7 +181,7 @@ public:
 		{ }
 
 		/**
-		 * Œ»İL‚Ñ‚Ä‚¢‚é•ûŒü‚©‚çŒ©‚ÄŒã‚ë‚É”‚¦‚Äs‚«A•K—v‚È’¼üƒ^ƒCƒ‹•ªL‚Ñ‚Ä‚¢‚ê‚ÎAŒğ·“_‚É‚È‚ê‚é‚Æ•Ô‚·
+		 * ç¾åœ¨ä¼¸ã³ã¦ã„ã‚‹æ–¹å‘ã‹ã‚‰è¦‹ã¦å¾Œã‚ã«æ•°ãˆã¦è¡Œãã€å¿…è¦ãªç›´ç·šã‚¿ã‚¤ãƒ«åˆ†ä¼¸ã³ã¦ã„ã‚Œã°ã€äº¤å·®ç‚¹ã«ãªã‚Œã‚‹ã¨è¿”ã™
 		 */
 		bool is_crossable() const
 		{			
@@ -208,20 +208,20 @@ public:
 	using RoadControlPointList = std::list< RoadControlPoint >;
 
 private:
-	Model* model_; // ŠX‚Ìƒ‚ƒfƒ‹
-	Model* debug_model_; // ƒfƒoƒbƒO—p‚Ìƒ‚ƒfƒ‹
+	Model* model_; // è¡—ã®ãƒ¢ãƒ‡ãƒ«
+	Model* debug_model_; // ãƒ‡ãƒãƒƒã‚°ç”¨ã®ãƒ¢ãƒ‡ãƒ«
 
 	RoadNodeList road_node_list_;
 	RoadControlPointList road_control_point_list_;
 
 protected:
-	/// “¹ 1 ƒ^ƒCƒ‹•ª‚Ì• ( m )
+	/// é“ 1 ã‚¿ã‚¤ãƒ«åˆ†ã®å¹… ( m )
 	static constexpr float_t get_road_width() { return 8.f; }
 
-	// “¹ 1 ƒ^ƒCƒ‹•ª‚Ì‰œs ( m )
+	// é“ 1 ã‚¿ã‚¤ãƒ«åˆ†ã®å¥¥è¡Œ ( m )
 	static constexpr float_t get_road_depth() { return 8.f; }
 
-	// Œğ·“_‚Å‚Í‚È‚­A‚Ü‚Á‚·‚®‚È“¹‚ª‰½ƒ^ƒCƒ‹‘±‚­‚©
+	// äº¤å·®ç‚¹ã§ã¯ãªãã€ã¾ã£ã™ããªé“ãŒä½•ã‚¿ã‚¤ãƒ«ç¶šãã‹
 	static constexpr int_t get_required_straight_road_count() { return 5; }
 
 	void format_crossroad();

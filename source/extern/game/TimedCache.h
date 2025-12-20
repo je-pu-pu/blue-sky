@@ -7,7 +7,7 @@ namespace game
 {
 
 /**
- * ŒÀƒLƒƒƒbƒVƒ…
+ * æ™‚é™ã‚­ãƒ£ãƒƒã‚·ãƒ¥
  *
  */
 template< typename T >
@@ -17,17 +17,17 @@ public:
 	using TimerMap = std::unordered_map< T, float_t >;
 
 private:
-	TimerMap timer_map_; ///< Å‹ßÚG‚µ‚½ƒIƒuƒWƒFƒNƒg‚Ìˆê——
+	TimerMap timer_map_; ///< æœ€è¿‘æ¥è§¦ã—ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ä¸€è¦§
 
 public:
 	TimedCache()
 	{ }
 
 	/**
-	 * XV‚·‚é
+	 * æ›´æ–°ã™ã‚‹
 	 *
-	 * @param elapsed ‘O‰ñ‚©‚ç‚ÌŒo‰ßŠÔ ( •b )
-	 * @param bool “¯‚É cleanup() ‚ğs‚¤ƒtƒ‰ƒO
+	 * @param elapsed å‰å›ã‹ã‚‰ã®çµŒéæ™‚é–“ ( ç§’ )
+	 * @param bool åŒæ™‚ã« cleanup() ã‚’è¡Œã†ãƒ•ãƒ©ã‚°
 	 */
 	void update( float_t elapsed, bool cleanup = true )
 	{
@@ -47,7 +47,7 @@ public:
 	}
 
 	/**
-	 * —£‚ê‚½ƒIƒuƒWƒFƒNƒg‚ğˆê——‚©‚çíœ‚·‚é
+	 * é›¢ã‚ŒãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä¸€è¦§ã‹ã‚‰å‰Šé™¤ã™ã‚‹
 	 *
 	 */
 	void cleanup()
@@ -66,10 +66,10 @@ public:
 	}
 
 	/**
-	 * ƒLƒƒƒbƒVƒ…‚É’Ç‰Á‚·‚é
+	 * ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã«è¿½åŠ ã™ã‚‹
 	 *
-	 * @param o ƒIƒuƒWƒFƒNƒg
-	 * @param life_time ƒLƒƒƒbƒVƒ…‚©‚çíœ‚³‚ê‚é‚Ü‚Å‚ÌŠÔ ( •b )
+	 * @param o ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	 * @param life_time ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‹ã‚‰å‰Šé™¤ã•ã‚Œã‚‹ã¾ã§ã®æ™‚é–“ ( ç§’ )
 	 */
 	void cache( T o, float_t life_time )
 	{
@@ -77,7 +77,7 @@ public:
 	}
 
 	/**
-	 * Œ»İƒLƒƒƒbƒVƒ…‚³‚ê‚Ä‚¢‚é‚©‚ğ•Ô‚·
+	 * ç¾åœ¨ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã•ã‚Œã¦ã„ã‚‹ã‹ã‚’è¿”ã™
 	 *
 	 */
 	bool_t is_cached( T o ) const
@@ -93,7 +93,7 @@ public:
 	}
 	
 	/**
-	 * ƒLƒƒƒbƒVƒ…‚ğƒNƒŠƒA‚·‚é
+	 * ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
 	 *
 	 */
 	void clear()

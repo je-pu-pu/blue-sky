@@ -3,13 +3,13 @@
 #include "type.h"
 #include <boost/noncopyable.hpp>
 
-/// @todo ‚«‚ê‚¢‚É‚·‚é
+/// @todo ãã‚Œã„ã«ã™ã‚‹
 namespace core::graphics
 {
 	class GraphicsManager;
 }
 
-/// @todo ‚«‚ê‚¢‚É‚·‚é
+/// @todo ãã‚Œã„ã«ã™ã‚‹
 namespace blue_sky
 {
 	class Scene;
@@ -22,17 +22,17 @@ class Entity;
 class Component;
 
 /**
- * ƒVƒXƒeƒ€‚ÌŠî’êƒNƒ‰ƒX
+ * ã‚·ã‚¹ãƒ†ãƒ ã®åŸºåº•ã‚¯ãƒ©ã‚¹
  *
  */
 class BaseSystem : private boost::noncopyable
 {
 public:
 	using GraphicsManager = core::graphics::GraphicsManager;
-	using Scene = blue_sky::Scene; /// @todo core ‚ÉˆÚ“®‚·‚é
+	using Scene = blue_sky::Scene; /// @todo core ã«ç§»å‹•ã™ã‚‹
 
 private:
-	/// ƒVƒXƒeƒ€‚ÌÀs—Dæ“x ( priority_ ‚ª¬‚³‚¢‡‚ÉÀs‚³‚ê‚é )
+	/// ã‚·ã‚¹ãƒ†ãƒ ã®å®Ÿè¡Œå„ªå…ˆåº¦ ( priority_ ãŒå°ã•ã„é †ã«å®Ÿè¡Œã•ã‚Œã‚‹ )
 	int_t priority_ = 0;
 
 protected:
@@ -49,52 +49,52 @@ public:
 	virtual void update() = 0;
 
 	/**
-	 * ‚±‚ÌƒVƒXƒeƒ€‚ÌÀs—Dæ“x‚ğæ“¾‚·‚é
+	 * ã“ã®ã‚·ã‚¹ãƒ†ãƒ ã®å®Ÿè¡Œå„ªå…ˆåº¦ã‚’å–å¾—ã™ã‚‹
 	 * 
-	 * @return ƒVƒXƒeƒ€‚ÌÀs—Dæ“x ( ”’l‚ª¬‚³‚¢‡‚ÉÀs‚³‚ê‚é )
+	 * @return ã‚·ã‚¹ãƒ†ãƒ ã®å®Ÿè¡Œå„ªå…ˆåº¦ ( æ•°å€¤ãŒå°ã•ã„é †ã«å®Ÿè¡Œã•ã‚Œã‚‹ )
 	 */
 	int_t get_priority() const { return priority_; }
 
 	/**
-	 * ‚±‚ÌƒVƒXƒeƒ€‚ÌÀs—Dæ“x‚ğİ’è‚·‚é
+	 * ã“ã®ã‚·ã‚¹ãƒ†ãƒ ã®å®Ÿè¡Œå„ªå…ˆåº¦ã‚’è¨­å®šã™ã‚‹
 	 * 
-	 * @param priority ƒVƒXƒeƒ€‚ÌÀs—Dæ“x ( ”’l‚ª¬‚³‚¢‡‚ÉÀs‚³‚ê‚é )
+	 * @param priority ã‚·ã‚¹ãƒ†ãƒ ã®å®Ÿè¡Œå„ªå…ˆåº¦ ( æ•°å€¤ãŒå°ã•ã„é †ã«å®Ÿè¡Œã•ã‚Œã‚‹ )
 	 */
 	void set_priority( int_t priority = 0 ) { priority_ = priority; }
 
 	/**
-	 * Entity ‚É Component ‚ª’Ç‰Á‚³‚ê‚½‚Ìˆ—
+	 * Entity ã« Component ãŒè¿½åŠ ã•ã‚ŒãŸæ™‚ã®å‡¦ç†
 	 * 
-	 * @param entity ComponentType ‚Ì Component ‚ª’Ç‰Á‚³‚ê‚½ Entity
+	 * @param entity ComponentType ã® Component ãŒè¿½åŠ ã•ã‚ŒãŸ Entity
 	 */
 	template< typename ComponentType >
 	void on_add_component( const Entity* entity )
 	{
-		// entity ‚É’Ç‰Á‚³‚ê‚½ component ‚ª©g‚Ì System ‚Ì‘€ì‘ÎÛ‚ÉŠÜ‚Ü‚ê‚Ä‚¢‚é‚©’²‚×AŠÜ‚Ü‚ê‚Ä‚¢‚È‚¯‚ê‚Î‰½‚à‚µ‚È‚¢
+		// entity ã«è¿½åŠ ã•ã‚ŒãŸ component ãŒè‡ªèº«ã® System ã®æ“ä½œå¯¾è±¡ã«å«ã¾ã‚Œã¦ã„ã‚‹ã‹èª¿ã¹ã€å«ã¾ã‚Œã¦ã„ãªã‘ã‚Œã°ä½•ã‚‚ã—ãªã„
 		if ( ! has_component_type( ComponentType::template get_type_id< ComponentType >() ) )
 		{
 			return;
 		}
 
-		// entity ‚É component ‚ª’Ç‰Á‚³‚ê‚½–‚É‚æ‚èAentity ‚É©g‚Ì System ‚Ì‘€ì‘ÎÛ‚Æ‚È‚é‘S‚Ä‚Ì Component ‚ª‘µ‚Á‚Ä‚¢‚ê‚ÎAComponent ‚ğƒVƒXƒeƒ€‚Ì‘€ì‘ÎÛ‚Æ‚µ‚Ä’Ç‰Á‚·‚é
+		// entity ã« component ãŒè¿½åŠ ã•ã‚ŒãŸäº‹ã«ã‚ˆã‚Šã€entity ã«è‡ªèº«ã® System ã®æ“ä½œå¯¾è±¡ã¨ãªã‚‹å…¨ã¦ã® Component ãŒæƒã£ã¦ã„ã‚Œã°ã€Component ã‚’ã‚·ã‚¹ãƒ†ãƒ ã®æ“ä½œå¯¾è±¡ã¨ã—ã¦è¿½åŠ ã™ã‚‹
 		add_entity_component_if_all_components_ready( entity );
 	}
 
 	/**
-	 * Entity ‚©‚ç Component ‚ªæ‚èœ‚©‚ê‚½‚Ìˆ—
+	 * Entity ã‹ã‚‰ Component ãŒå–ã‚Šé™¤ã‹ã‚ŒãŸæ™‚ã®å‡¦ç†
 	 * 
-	 * @param entity ComponentType ‚Ì Component ‚ªæ‚èœ‚©‚ê‚½ Entity
+	 * @param entity ComponentType ã® Component ãŒå–ã‚Šé™¤ã‹ã‚ŒãŸ Entity
 	 */
 	template< typename ComponentType >
 	void on_remove_component( const Entity* entity )
 	{
-		// entity ‚©‚çæ‚èœ‚©‚ê‚½ Component ‚ª©g‚Ì System ‚Ì‘€ì‘ÎÛ‚ÉŠÜ‚Ü‚ê‚Ä‚¢‚é‚©’²‚×AŠÜ‚Ü‚ê‚Ä‚¢‚È‚¯‚ê‚Î‰½‚à‚µ‚È‚¢
+		// entity ã‹ã‚‰å–ã‚Šé™¤ã‹ã‚ŒãŸ Component ãŒè‡ªèº«ã® System ã®æ“ä½œå¯¾è±¡ã«å«ã¾ã‚Œã¦ã„ã‚‹ã‹èª¿ã¹ã€å«ã¾ã‚Œã¦ã„ãªã‘ã‚Œã°ä½•ã‚‚ã—ãªã„
 		if ( ! has_component_type( ComponentType::template get_type_id< ComponentType >() ) )
 		{
 			return;
 		}
 
-		// entity ‚©‚çæ‚èœ‚©‚ê‚½ Component ‚ª©g‚Ì System ‚Ì‘€ì‘ÎÛ‚Å‚ ‚ê‚ÎAentity ‚Ì Component ‚ğƒVƒXƒeƒ€‚©‚çæ‚èœ‚­
+		// entity ã‹ã‚‰å–ã‚Šé™¤ã‹ã‚ŒãŸ Component ãŒè‡ªèº«ã® System ã®æ“ä½œå¯¾è±¡ã§ã‚ã‚Œã°ã€entity ã® Component ã‚’ã‚·ã‚¹ãƒ†ãƒ ã‹ã‚‰å–ã‚Šé™¤ã
 		remove_entity_component( entity );
 	}
 

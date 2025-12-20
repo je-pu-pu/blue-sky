@@ -16,7 +16,7 @@ void Goal::restart()
 }
 
 /**
- * XV
+ * æ›´æ–°
  *
  */
 void Goal::update()

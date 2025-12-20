@@ -7,7 +7,7 @@ namespace blue_sky
 {
 
 /**
- * ˆÚ“®‚µ‚È‚¢ƒIƒuƒWƒFƒNƒg @todo –¼‘O‚ğ’¼‚· StaticObject ‚©‚çŒp³‚µ‚Ä‚é‚Ì‚Í•Ï
+ * ç§»å‹•ã—ãªã„ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ @todo åå‰ã‚’ç›´ã™ StaticObject ã‹ã‚‰ç¶™æ‰¿ã—ã¦ã‚‹ã®ã¯å¤‰
  *
  */
 class TranslationObject : public StaticObject
@@ -24,7 +24,7 @@ public:
 	TranslationObject( float_t, float_t, float_t, float_t, float_t, float_t, float_t );
 	~TranslationObject();
 
-	/// XV
+	/// æ›´æ–°
 	void update();
 
 }; // class TranslationObject

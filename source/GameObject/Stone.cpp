@@ -1,5 +1,5 @@
 #include "Stone.h"
-#include <btBulletDynamicsCommon.h> ///< @todo Bullet ‚ğ’¼Úg‚í‚È‚¢
+#include <btBulletDynamicsCommon.h> ///< @todo Bullet ã‚’ç›´æ¥ä½¿ã‚ãªã„
 
 namespace blue_sky
 {
@@ -15,14 +15,14 @@ void Stone::restart()
 {
 	ActiveObject::restart();
 
-	// Î‚ª”–‚¢•Ç‚ğŠÑ’Ê‚µ‚È‚¢‚æ‚¤‚É‚·‚é
-	/// @todo Bullet ‚ğ’¼Úg‚í‚È‚¢
+	// çŸ³ãŒè–„ã„å£ã‚’è²«é€šã—ãªã„ã‚ˆã†ã«ã™ã‚‹
+	/// @todo Bullet ã‚’ç›´æ¥ä½¿ã‚ãªã„
 	get_rigid_body()->setCcdSweptSphereRadius( 0.2f );
 	get_rigid_body()->setCcdMotionThreshold( 0.2f );
 }
 
 /**
- * XV
+ * æ›´æ–°
  *
  */
 void Stone::update()

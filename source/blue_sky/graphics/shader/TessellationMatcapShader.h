@@ -6,7 +6,7 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * Tessellation + Matcap ƒVƒF[ƒ_[
+ * Tessellation + Matcap ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 template< typename Traits >
@@ -54,7 +54,7 @@ public:
 
 	void bind() const override
 	{
-		// @todo •K—v‚È‚à‚Ì‚¾‚¯‚ðƒoƒCƒ“ƒh‚·‚é‚æ‚¤‚É‚·‚é
+		// @todo å¿…è¦ãªã‚‚ã®ã ã‘ã‚’ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹ã‚ˆã†ã«ã™ã‚‹
 		get_game_constant_buffer()->bind_to_all();
 		get_frame_constant_buffer()->bind_to_all();
 		get_frame_drawing_constant_buffer()->bind_to_all();
@@ -81,7 +81,7 @@ public:
 
 	void bind() const override
 	{
-		// @todo •K—v‚È‚à‚Ì‚¾‚¯‚ðƒoƒCƒ“ƒh‚·‚é‚æ‚¤‚É‚·‚é
+		// @todo å¿…è¦ãªã‚‚ã®ã ã‘ã‚’ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹ã‚ˆã†ã«ã™ã‚‹
 		get_game_constant_buffer()->bind_to_all();
 		get_frame_constant_buffer()->bind_to_all();
 		get_frame_drawing_constant_buffer()->bind_to_all();

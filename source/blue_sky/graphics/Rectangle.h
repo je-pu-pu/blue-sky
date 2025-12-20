@@ -6,7 +6,7 @@ namespace blue_sky::graphics
 {
 
 /**
- * lŠpŒ`
+ * å››è§’å½¢
  *
  */
 class Rectangle : public Mesh 

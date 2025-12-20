@@ -25,7 +25,7 @@ namespace blue_sky::graphics::direct_3d_11
 {
 
 /**
- * Direct3D 11 ƒOƒ‰ƒtƒBƒbƒNŠÇ—ƒNƒ‰ƒX
+ * Direct3D 11 ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ç®¡ç†ã‚¯ãƒ©ã‚¹
  *
  */
 class GraphicsManager : public blue_sky::graphics::GraphicsManager
@@ -72,8 +72,8 @@ public:
 	explicit GraphicsManager( Direct3D* );
 	virtual ~GraphicsManager() override;
 
-	int get_screen_width() const override;		///< ‰æ–Ê‚Ì•‚ğ•Ô‚·
-	int get_screen_height() const override;		///< ‰æ–Ê‚Ì‚‚³‚ğ•Ô‚·
+	int get_screen_width() const override;		///< ç”»é¢ã®å¹…ã‚’è¿”ã™
+	int get_screen_height() const override;		///< ç”»é¢ã®é«˜ã•ã‚’è¿”ã™
 
 	// void update() override;
 
@@ -126,7 +126,7 @@ public:
 	void render_technique( const EffectTechnique*, const std::function< void () >& ) const override;
 	void render_background() const override;
 
-	/// @todo ‚¿‚á‚ñ‚Æì‚é Font, size, w’è‚µ‚½ Texture ‚Ö‚Ì•`‰æ
+	/// @todo ã¡ã‚ƒã‚“ã¨ä½œã‚‹ Font, size, æŒ‡å®šã—ãŸ Texture ã¸ã®æç”»
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;
 

@@ -23,7 +23,7 @@ namespace blue_sky
 	}
 
 /**
- * s“®‚·‚éƒIƒuƒWƒFƒNƒg
+ * è¡Œå‹•ã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
  *
  */
 class alignas( 16 ) ActiveObject : public GameObject
@@ -35,26 +35,26 @@ public:
 	using AnimationPlayer	= core::AnimationPlayer;
 
 private:
-	Vector				front_;				///< ‘O
-	Vector				right_;				///< ‰E
+	Vector				front_;				///< å‰
+	Vector				right_;				///< å³
 
-	Vector				start_location_;	///< ƒXƒ^[ƒg‚ÌˆÊ’u
-	Vector				start_rotation_;	///< ƒXƒ^[ƒg‚Ì‰ñ“] ( Degree )
-	float_t				start_direction_degree_;	///< ƒXƒ^[ƒg‚ÌŒü‚« ( Y Axis )
+	Vector				start_location_;	///< ã‚¹ã‚¿ãƒ¼ãƒˆæ™‚ã®ä½ç½®
+	Vector				start_rotation_;	///< ã‚¹ã‚¿ãƒ¼ãƒˆæ™‚ã®å›è»¢ ( Degree )
+	float_t				start_direction_degree_;	///< ã‚¹ã‚¿ãƒ¼ãƒˆæ™‚ã®å‘ã ( Y Axis )
 
-	/** @todo ActiveObject ‚©‚ç•ª—£ */
+	/** @todo ActiveObject ã‹ã‚‰åˆ†é›¢ */
 	Model*				model_;				///< Model
-	const ObjectConstantBuffer*				object_constant_buffer_;	///< ’è”ƒoƒbƒtƒ@ @todo ƒCƒ“ƒXƒ^ƒ“ƒX–ˆ‚É•K—v‚©H
-	AnimationPlayer*						animation_player_;			///< ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶
+	const ObjectConstantBuffer*				object_constant_buffer_;	///< å®šæ•°ãƒãƒƒãƒ•ã‚¡ @todo ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹æ¯ã«å¿…è¦ã‹ï¼Ÿ
+	AnimationPlayer*						animation_player_;			///< ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿ
 
-	bool				is_dead_;			///< €–Sƒtƒ‰ƒO
-	float_t				flicker_scale_;		///< ‚ä‚ç‚¬‚Ì‘å‚«‚³
+	bool				is_dead_;			///< æ­»äº¡ãƒ•ãƒ©ã‚°
+	float_t				flicker_scale_;		///< ã‚†ã‚‰ãã®å¤§ãã•
 
-	/** @todo ActiveObject ‚©‚ç•ª—£ */
-	float_t				direction_degree_;	///< •ûŒü ( Y Axis Degree )
+	/** @todo ActiveObject ã‹ã‚‰åˆ†é›¢ */
+	float_t				direction_degree_;	///< æ–¹å‘ ( Y Axis Degree )
 
-	bool				is_mesh_visible_;	///< ƒƒbƒVƒ…‚ğ•`‰æ‚·‚é‚©‚Ç‚¤‚©
-	bool				is_line_visible_;	///< ƒ‰ƒCƒ“‚ğ•`‰æ‚·‚é‚©
+	bool				is_mesh_visible_;	///< ãƒ¡ãƒƒã‚·ãƒ¥ã‚’æç”»ã™ã‚‹ã‹ã©ã†ã‹
+	bool				is_line_visible_;	///< ãƒ©ã‚¤ãƒ³ã‚’æç”»ã™ã‚‹ã‹
 
 protected:
 	void setup_animation_player();
@@ -74,7 +74,7 @@ public:
 
 	virtual void update() override { }
 
-	virtual void set_model( Model* m ) { model_ = m; setup_animation_player(); } /// @todo virtual ‚ğŠO‚·
+	virtual void set_model( Model* m ) { model_ = m; setup_animation_player(); } /// @todo virtual ã‚’å¤–ã™
 	Model* get_model() { return model_; }
 	const Model* get_model() const { return model_; }
 
@@ -105,7 +105,7 @@ public:
 	
 	bool is_dead() const { return is_dead_; }
 
-	/// •`‰æ‚³‚ê‚é‚©‚Ç‚¤‚©‚ğ•Ô‚·
+	/// æç”»ã•ã‚Œã‚‹ã‹ã©ã†ã‹ã‚’è¿”ã™
 	virtual bool is_visible() const { return ( is_mesh_visible() || is_line_visible() ); }
 
 	virtual bool is_mesh_visible() const { return is_mesh_visible_; }

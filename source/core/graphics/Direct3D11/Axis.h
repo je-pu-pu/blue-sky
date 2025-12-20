@@ -8,7 +8,7 @@ namespace core::graphics::direct_3d_11
 	class Direct3D11;
 
 /**
- * デバッグ表示用の XYZ 軸
+ * 繝�繝舌ャ繧ｰ陦ｨ遉ｺ逕ｨ縺ｮ XYZ 霆ｸ
  *
  */
 class Axis

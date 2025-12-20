@@ -11,14 +11,14 @@ using core::math::direct_x_math::Matrix;
 using namespace math::literals;
 
 /**
- * DirectX ‚Å‚ÍA‰ñ“]²‚Ì + ‘¤‚©‚çŒ´“_‚ğŒ©‚½ó‘Ô‚ÅA‰E‰ñ‚è ( Œv‰ñ‚è ) ‚ª³‚Ì‰ñ“]‚Æ‚È‚é
+ * DirectX ã§ã¯ã€å›è»¢è»¸ã® + å´ã‹ã‚‰åŸç‚¹ã‚’è¦‹ãŸçŠ¶æ…‹ã§ã€å³å›ã‚Š ( æ™‚è¨ˆå›ã‚Š ) ãŒæ­£ã®å›è»¢ã¨ãªã‚‹
  */
 TEST( DirectXMathTest, RotationY )
 {
 	auto m = Matrix::identity();
 	m.set_rotation_y( 90._deg );
 
-	auto v = Vector::Forward * m; // Z+ ‚Ì“_‚ğ Y ²‚Å 90 “x‰ñ“]‚³‚¹‚é‚Æ X+ ‚É‚È‚é
+	auto v = Vector::Forward * m; // Z+ ã®ç‚¹ã‚’ Y è»¸ã§ 90 åº¦å›è»¢ã•ã›ã‚‹ã¨ X+ ã«ãªã‚‹
 
 	EXPECT_NEAR( v.x(), Vector::Right.x(), 1e-6f ) << v;
 	EXPECT_NEAR( v.y(), Vector::Right.y(), 1e-6f ) << v;
@@ -30,7 +30,7 @@ TEST( DirectXMathTest, RotationX )
 	auto m = Matrix::identity();
 	m.set_rotation_x( 90._deg );
 
-	auto v = Vector::Up * m; // Y+ ‚Ì“_‚ğ X ²‚Å 90 “x‰ñ“]‚³‚¹‚é‚Æ Z+ ‚É‚È‚é
+	auto v = Vector::Up * m; // Y+ ã®ç‚¹ã‚’ X è»¸ã§ 90 åº¦å›è»¢ã•ã›ã‚‹ã¨ Z+ ã«ãªã‚‹
 
 	EXPECT_NEAR( v.x(), Vector::Forward.x(), 1e-6f ) << v;
 	EXPECT_NEAR( v.y(), Vector::Forward.y(), 1e-6f ) << v;
@@ -42,7 +42,7 @@ TEST( DirectXMathTest, RotationZ )
 	auto m = Matrix::identity();
 	m.set_rotation_z( 90._deg );
 
-	auto v = Vector::Right * m; // X+ ‚Ì“_‚ğ Z ²‚Å 90 “x‰ñ“]‚³‚¹‚é‚Æ Y+ ‚É‚È‚é
+	auto v = Vector::Right * m; // X+ ã®ç‚¹ã‚’ Z è»¸ã§ 90 åº¦å›è»¢ã•ã›ã‚‹ã¨ Y+ ã«ãªã‚‹
 
 	EXPECT_NEAR( v.x(), Vector::Up.x(), 1e-6f ) << v;
 	EXPECT_NEAR( v.y(), Vector::Up.y(), 1e-6f ) << v;
@@ -52,7 +52,7 @@ TEST( DirectXMathTest, RotationZ )
 TEST( DirectXMathTest, RotationYaw )
 {
 	Quaternion q = Quaternion::from_yaw_pitch_roll( 90._deg, 0.f, 0.f );
-	auto v = Vector::transform( Vector::Forward, q ); // Z+ ‚Ì“_‚ğ Y ²‚Å 90 “x‰ñ“]‚³‚¹‚é‚Æ X+ ‚É‚È‚é
+	auto v = Vector::transform( Vector::Forward, q ); // Z+ ã®ç‚¹ã‚’ Y è»¸ã§ 90 åº¦å›è»¢ã•ã›ã‚‹ã¨ X+ ã«ãªã‚‹
 
 	EXPECT_NEAR( v.x(), Vector::Right.x(), 1e-6f ) << v;
 	EXPECT_NEAR( v.y(), Vector::Right.y(), 1e-6f ) << v;
@@ -62,7 +62,7 @@ TEST( DirectXMathTest, RotationYaw )
 TEST( DirectXMathTest, RotationPitch )
 {
 	Quaternion q = Quaternion::from_yaw_pitch_roll( 0.f, 90._deg, 0.f );
-	auto v = Vector::transform( Vector::Up, q ); // Y+ ‚Ì“_‚ğ X ²‚Å 90 “x‰ñ“]‚³‚¹‚é‚Æ Z+ ‚É‚È‚é
+	auto v = Vector::transform( Vector::Up, q ); // Y+ ã®ç‚¹ã‚’ X è»¸ã§ 90 åº¦å›è»¢ã•ã›ã‚‹ã¨ Z+ ã«ãªã‚‹
 
 	EXPECT_NEAR( v.x(), Vector::Forward.x(), 1e-6f ) << v;
 	EXPECT_NEAR( v.y(), Vector::Forward.y(), 1e-6f ) << v;
@@ -72,7 +72,7 @@ TEST( DirectXMathTest, RotationPitch )
 TEST( DirectXMathTest, RotationRoll )
 {
 	Quaternion q = Quaternion::from_yaw_pitch_roll( 0.f, 0.f, 90._deg );
-	auto v = Vector::transform( Vector::Right, q ); // X+ ‚Ì“_‚ğ Z ²‚Å 90 “x‰ñ“]‚³‚¹‚é‚Æ Y+ ‚É‚È‚é
+	auto v = Vector::transform( Vector::Right, q ); // X+ ã®ç‚¹ã‚’ Z è»¸ã§ 90 åº¦å›è»¢ã•ã›ã‚‹ã¨ Y+ ã«ãªã‚‹
 
 	EXPECT_NEAR( v.x(), Vector::Up.x(), 1e-6f ) << v;
 	EXPECT_NEAR( v.y(), Vector::Up.y(), 1e-6f ) << v;

@@ -15,7 +15,7 @@ class SoundFilter;
 class MidiSynthesizer;
 
 /**
- * ƒTƒEƒ“ƒhˆ—‚ğ’ŠÛ‰»
+ * ã‚µã‚¦ãƒ³ãƒ‰å‡¦ç†ã‚’æŠ½è±¡åŒ–
  *
  */
 class SoundEngine

@@ -5,7 +5,7 @@ namespace game
 	struct SoundFormat;
 
 /**
- * ƒTƒEƒ“ƒhƒtƒ@ƒCƒ‹Šî’êƒNƒ‰ƒX
+ * ã‚µã‚¦ãƒ³ãƒ‰ãƒ•ã‚¡ã‚¤ãƒ«åŸºåº•ã‚¯ãƒ©ã‚¹
  *
  */
 class SoundFile
@@ -16,22 +16,22 @@ public:
 
 public:
 
-	/// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	/// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	SoundFile() { }
 
-	/// ƒfƒXƒgƒ‰ƒNƒ^
+	/// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	virtual ~SoundFile() { }
 
-	/// ƒTƒCƒY‚ğæ“¾‚·‚é
+	/// ã‚µã‚¤ã‚ºã‚’å–å¾—ã™ã‚‹
 	virtual SizeType size() const = 0;
 
-	/// 1 •b‚ ‚½‚è‚ÌƒTƒCƒY‚ğæ“¾‚·‚é
+	/// 1 ç§’ã‚ãŸã‚Šã®ã‚µã‚¤ã‚ºã‚’å–å¾—ã™ã‚‹
 	virtual SizeType size_per_sec() const = 0;
 
-	/// ƒtƒ@ƒCƒ‹‚©‚çƒf[ƒ^‚ğ“Ç‚İ‚Ş
+	/// ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã‚€
 	virtual SizeType read( void*, SizeType, bool ) = 0;
 
-	/// ƒTƒEƒ“ƒhƒtƒ@ƒCƒ‹‚ÌƒtƒH[ƒ}ƒbƒg‚ğæ“¾‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã‚’å–å¾—ã™ã‚‹
 	virtual const SoundFormat& format() const = 0;
 
 }; // class SoundFile

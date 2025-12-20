@@ -8,7 +8,7 @@ namespace blue_sky
 {
 
 /**
- * �X�C�b�`���N���X
+ * スイッチ基底クラス
  *
  */
 class BaseSwitch : public ActiveObject
@@ -22,7 +22,7 @@ public:
 	using CntactObjectCache	= game::TimedCache< const GameObject* >;
 private:
 	State state_;
-	CntactObjectCache contact_object_cache_; ///< �ŋ߃X�C�b�`�ɐڐG�����I�u�W�F�N�g�̃L���b�V��
+	CntactObjectCache contact_object_cache_; ///< 最近スイッチに接触したオブジェクトのキャッシュ
 
 	EventHandlerMap event_handler_map_;
 
@@ -55,7 +55,7 @@ public:
 	BaseSwitch();
 	~BaseSwitch() { }
 
-	/// �X�V
+	/// 更新
 	void update() override;
 
 	void restart() override;

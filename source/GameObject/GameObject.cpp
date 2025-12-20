@@ -14,8 +14,8 @@
 namespace blue_sky
 {
 
-// GameObject::Vector3 GameObject::GravityDefault( 0.f, -3.711f, 0.f ); // ‰Î¯
-Vector GameObject::GravityDefault( 0.f, -9.8f, 0.f, 0.f ); // ’n‹…
+// GameObject::Vector3 GameObject::GravityDefault( 0.f, -3.711f, 0.f ); // ç«æ˜Ÿ
+Vector GameObject::GravityDefault( 0.f, -9.8f, 0.f, 0.f ); // åœ°çƒ
 
 GameObject::GameObject()
 	: rigid_body_( 0 )
@@ -29,7 +29,7 @@ GameObject::~GameObject()
 }
 
 /**
- * •ÏŠ·s—ñ‚ğ•¨—‰‰Z‚ÌŒ‹‰Ê‚ÅXV‚·‚é
+ * å¤‰æ›è¡Œåˆ—ã‚’ç‰©ç†æ¼”ç®—ã®çµæœã§æ›´æ–°ã™ã‚‹
  *
  */
 void GameObject::update_transform()
@@ -47,7 +47,7 @@ void GameObject::update_transform()
 
 	t *= offset;
 
-	/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
+	/// @todo ã¡ã‚ƒã‚“ã¨ã™ã‚‹
 	transform_.set_position( reinterpret_cast< const Vector& >( t.getOrigin() ) );
 
 	auto q = t.getRotation();
@@ -55,7 +55,7 @@ void GameObject::update_transform()
 }
 
 /**
- * •ÏŠ·s—ñ‚ğ•¨—‰‰Z‚É‘—‚é
+ * å¤‰æ›è¡Œåˆ—ã‚’ç‰©ç†æ¼”ç®—ã«é€ã‚‹
  *
  */
 void GameObject::commit_transform()
@@ -132,9 +132,9 @@ void GameObject::set_no_contact_response( bool is_no_contact_response )
 }
 
 /**
- * –€CŒW”‚ğİ’è‚·‚é
+ * æ‘©æ“¦ä¿‚æ•°ã‚’è¨­å®šã™ã‚‹
  *
- * @param v –€CŒW”
+ * @param v æ‘©æ“¦ä¿‚æ•°
  */
 void GameObject::set_friction( float_t v )
 {
@@ -147,9 +147,9 @@ void GameObject::set_friction( float_t v )
 }
 
 /**
- * ‰ñ“]ŒW”‚ğİ’è‚·‚é
+ * å›è»¢ä¿‚æ•°ã‚’è¨­å®šã™ã‚‹
  *
- * @param v ‰ñ“]ŒW”
+ * @param v å›è»¢ä¿‚æ•°
  */
 void GameObject::set_angular_factor( float_t v )
 {
@@ -162,9 +162,9 @@ void GameObject::set_angular_factor( float_t v )
 }
 
 /**
- * ‰ñ“]ŒW”‚ğİ’è‚·‚é
+ * å›è»¢ä¿‚æ•°ã‚’è¨­å®šã™ã‚‹
  *
- * @param v ²–ˆ‚Ì‰ñ“]ŒW”
+ * @param v è»¸æ¯ã®å›è»¢ä¿‚æ•°
  */
 void GameObject::set_angular_factor( const Vector& v )
 {
@@ -238,9 +238,9 @@ void GameObject::on_collide_with( GameObject* o )
 }
 
 /**
- * ‘O‚ÌƒtƒŒ[ƒ€‚©‚ç‚ÌŒo‰ß•b‚ğ•Ô‚·
+ * å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã‹ã‚‰ã®çµŒéç§’ã‚’è¿”ã™
  *
- * @return ‘O‚ÌƒtƒŒ[ƒ€‚©‚ç‚ÌŒo‰ß•b
+ * @return å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã‹ã‚‰ã®çµŒéç§’
  */
 float_t GameObject::get_frame_elapsed_time() const
 {
@@ -248,9 +248,9 @@ float_t GameObject::get_frame_elapsed_time() const
 }
 
 /**
- * Œ»İ‚ÌƒV[ƒ“‚ªŠJn‚µ‚Ä‚©‚ç‚ÌŒo‰ß•b‚ğ•Ô‚·
+ * ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ãŒé–‹å§‹ã—ã¦ã‹ã‚‰ã®çµŒéç§’ã‚’è¿”ã™
  *
- * @return Œ»İ‚ÌƒV[ƒ“‚ªŠJn‚µ‚Ä‚©‚ç‚ÌŒo‰ß•b
+ * @return ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ãŒé–‹å§‹ã—ã¦ã‹ã‚‰ã®çµŒéç§’
  */
 float_t GameObject::get_scene_elapsed_time() const
 {
@@ -258,10 +258,10 @@ float_t GameObject::get_scene_elapsed_time() const
 }
 
 /**
- * ‚ä‚ç‚¬‚É‚æ‚é‚‚³‚ÌƒIƒtƒZƒbƒg‚ğæ“¾‚·‚é
+ * ã‚†ã‚‰ãã«ã‚ˆã‚‹é«˜ã•ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’å–å¾—ã™ã‚‹
  *
- * @param scale ‚ä‚ç‚¬‚Ì‘å‚«‚³
- * @return ‚ä‚ç‚¬‚É‚æ‚é‚‚³‚ÌƒIƒtƒZƒbƒg
+ * @param scale ã‚†ã‚‰ãã®å¤§ãã•
+ * @return ã‚†ã‚‰ãã«ã‚ˆã‚‹é«˜ã•ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆ
  */
 float_t GameObject::get_flicker_height_offset( float_t scale ) const
 {
@@ -272,10 +272,10 @@ float_t GameObject::get_flicker_height_offset( float_t scale ) const
 }
 
 /**
- * w’è‚µ‚½ˆÊ’u‚É‚ä‚ç‚¬‚É‚æ‚é‚‚³‚ÌƒIƒtƒZƒbƒg‚ğ‰Á‚¦AŒ»İ‚ÌˆÊ’u‚Æ‚µ‚Äİ’è‚·‚é
+ * æŒ‡å®šã—ãŸä½ç½®ã«ã‚†ã‚‰ãã«ã‚ˆã‚‹é«˜ã•ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’åŠ ãˆã€ç¾åœ¨ã®ä½ç½®ã¨ã—ã¦è¨­å®šã™ã‚‹
  *
- * @param base_location ‚ä‚ç‚¬‚Ì’†S‚Æ‚È‚éˆÊ’u
- * @param scale ‚ä‚ç‚¬‚ÌƒXƒP[ƒ‹’l
+ * @param base_location ã‚†ã‚‰ãã®ä¸­å¿ƒã¨ãªã‚‹ä½ç½®
+ * @param scale ã‚†ã‚‰ãã®ã‚¹ã‚±ãƒ¼ãƒ«å€¤
  */
 void GameObject::update_location_by_flicker( const Vector& base_location, float_t scale )
 {
@@ -283,10 +283,10 @@ void GameObject::update_location_by_flicker( const Vector& base_location, float_
 }
 
 /**
- * w’è‚µ‚½ˆÊ’u‚É‚ä‚ç‚¬‚É‚æ‚é‚‚³‚ÌƒIƒtƒZƒbƒg‚ğ‰Á‚¦A‚»‚ÌˆÊ’u‚ğ–Ú•W’n“_‚Æ‚µ‚ÄˆÚ“®—Ê‚ğİ’è‚·‚é
+ * æŒ‡å®šã—ãŸä½ç½®ã«ã‚†ã‚‰ãã«ã‚ˆã‚‹é«˜ã•ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’åŠ ãˆã€ãã®ä½ç½®ã‚’ç›®æ¨™åœ°ç‚¹ã¨ã—ã¦ç§»å‹•é‡ã‚’è¨­å®šã™ã‚‹
  *
- * @param base_location ‚ä‚ç‚¬‚Ì’†S‚Æ‚È‚éˆÊ’u
- * @param scale ‚ä‚ç‚¬‚ÌƒXƒP[ƒ‹’l
+ * @param base_location ã‚†ã‚‰ãã®ä¸­å¿ƒã¨ãªã‚‹ä½ç½®
+ * @param scale ã‚†ã‚‰ãã®ã‚¹ã‚±ãƒ¼ãƒ«å€¤
  */
 void GameObject::update_velocity_by_flicker( const Vector& base_location, float_t scale )
 {
@@ -297,10 +297,10 @@ void GameObject::update_velocity_by_flicker( const Vector& base_location, float_
 }
 
 /**
- * w’è‚µ‚½ˆÊ’u‚ÉˆÚ“®‚·‚é‚½‚ß‚ÌˆÚ“®—Ê‚ğİ’è‚·‚é
+ * æŒ‡å®šã—ãŸä½ç½®ã«ç§»å‹•ã™ã‚‹ãŸã‚ã®ç§»å‹•é‡ã‚’è¨­å®šã™ã‚‹
  *
- * @param target_location –Ú“I’n
- * @param speed ‘¬“x
+ * @param target_location ç›®çš„åœ°
+ * @param speed é€Ÿåº¦
  */
 void GameObject::update_velocity_by_target_location( const Vector& target_location, float_t speed )
 {
@@ -315,10 +315,10 @@ void GameObject::update_velocity_by_target_location( const Vector& target_locati
 }
 
 /**
- * “_–Å‚É‚¨‚¢‚ÄƒIƒuƒWƒFƒNƒg‚ª•\¦‚³‚ê‚é‚©‚Ç‚¤‚©‚ğ•Ô‚·
+ * ç‚¹æ»…æ™‚ã«ãŠã„ã¦ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒè¡¨ç¤ºã•ã‚Œã‚‹ã‹ã©ã†ã‹ã‚’è¿”ã™
  *
- * @param blink_count 1 •b‚ÌŠÔ‚É“_–Å‚·‚é‰ñ”
- * @return bool “_–Å‚É‚¨‚¢‚ÄAŒ»İƒIƒuƒWƒFƒNƒg‚ª•\¦‚³‚ê‚éê‡‚Í true ‚ğA•\¦‚³‚ê‚È‚¢ê‡‚Í false ‚ğ•Ô‚·
+ * @param blink_count 1 ç§’ã®é–“ã«ç‚¹æ»…ã™ã‚‹å›æ•°
+ * @return bool ç‚¹æ»…æ™‚ã«ãŠã„ã¦ã€ç¾åœ¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒè¡¨ç¤ºã•ã‚Œã‚‹å ´åˆã¯ true ã‚’ã€è¡¨ç¤ºã•ã‚Œãªã„å ´åˆã¯ false ã‚’è¿”ã™
  */
 bool_t GameObject::is_visible_in_blink( float_t blink_count ) const
 {

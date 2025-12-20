@@ -6,7 +6,7 @@ namespace blue_sky
 {
 
 /**
- * ƒS[ƒ‹‚Ì”à
+ * ã‚´ãƒ¼ãƒ«ã®æ‰‰
  *
  */
 class Goal : public ActiveObject
@@ -36,7 +36,7 @@ public:
 
 	void restart();
 
-	/// XV
+	/// æ›´æ–°
 	void update();
 	
 }; // class Goal

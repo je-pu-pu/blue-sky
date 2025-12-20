@@ -11,7 +11,7 @@ Girl::Girl()
 }
 
 /**
- * リスタート時の処理
+ * 繝ｪ繧ｹ繧ｿ繝ｼ繝域凾縺ｮ蜃ｦ逅�
  *
  */
 void Girl::restart()
@@ -29,7 +29,7 @@ void Girl::restart()
 }
 
 /**
- * 更新
+ * 譖ｴ譁ｰ
  *
  */
 void Girl::update()

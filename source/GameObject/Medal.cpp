@@ -9,7 +9,7 @@ Medal::Medal()
 }
 
 /**
- * XV
+ * æ›´æ–°
  *
  */
 void Medal::update()

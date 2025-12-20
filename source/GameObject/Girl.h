@@ -8,7 +8,7 @@ namespace blue_sky
 class Player;
 
 /**
- * è≠èó
+ * Â∞ëÂ•≥
  *
  */
 class Girl : public ActiveObject
@@ -22,7 +22,7 @@ public:
 	};
 
 private:
-	Mode			mode_ = Mode::STAND;			///< åªç›ÇÃìÆçÏÉÇÅ[Éh
+	Mode			mode_ = Mode::STAND;			///< ÁèæÂú®„ÅÆÂãï‰Ωú„É¢„Éº„Éâ
 	Vector			flicker_base_location_;
 
 	float get_collision_width() const override { return 0.5f; }
@@ -54,7 +54,7 @@ public:
 
 	void restart() override;
 
-	/// çXêV
+	/// Êõ¥Êñ∞
 	void update() override;
 
 	void action( const string_t& ) override;

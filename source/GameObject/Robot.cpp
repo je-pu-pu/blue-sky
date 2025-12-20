@@ -29,7 +29,7 @@ Robot::Robot()
 	GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
 	GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-error" );
 
-	// ‚±‚Ì“_‚Å‚Í‚Ü‚¾ get_model() ‚Í nullptr ‚ğ•Ô‚·
+	// ã“ã®æ™‚ç‚¹ã§ã¯ã¾ã  get_model() ã¯ nullptr ã‚’è¿”ã™
 	// get_model()->set_shader_at( 0, GameMain::get_instance()->get_graphics_manager()->clone_shader( get_model()->get_shader_at( 0 ) ) );
 }
 
@@ -60,10 +60,10 @@ void Robot::update()
 
 	if ( mode_ == Mode::CHASE )
 	{
-		// ƒ^[ƒQƒbƒg‚Ì•û‚ğŒü‚­ ( •\¦ã‚ÌŒü‚« )
+		// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®æ–¹ã‚’å‘ã ( è¡¨ç¤ºä¸Šã®å‘ã )
 		chase_direction_to( player_->get_location(), 2.f );
 		
-		// ƒ^[ƒQƒbƒg‚Æ‚Ì‹——£‚ª‰“‚¢ê‡‚ÍAƒ^[ƒQƒbƒg‚Ìis•ûŒü‚ğ—\‘ª‚µ‚Äi‚Ş
+		// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¨ã®è·é›¢ãŒé ã„å ´åˆã¯ã€ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®é€²è¡Œæ–¹å‘ã‚’äºˆæ¸¬ã—ã¦é€²ã‚€
 		Vector relative_position = player_->get_location() - get_location();
 		relative_position.set_y( 0 );
 
@@ -76,7 +76,7 @@ void Robot::update()
 			relative_position.set_y( 0 );
 		}
 
-		// is•ûŒü‚ğİ’è
+		// é€²è¡Œæ–¹å‘ã‚’è¨­å®š
 		Vector forward = relative_position;
 		forward.normalize();
 
@@ -141,11 +141,11 @@ void Robot::update()
 	{
 		set_velocity( Vector( 0.f, 0.f, 0.f ) );
 
-		// ƒ^[ƒQƒbƒg‚Ì•û‚ğŒü‚­
+		// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®æ–¹ã‚’å‘ã
 		Vector relative_position = player_->get_location() - get_location();
 		relative_position.set_y( 0 );
 
-		// •\¦ã‚ÌŒü‚«‚ğİ’è
+		// è¡¨ç¤ºä¸Šã®å‘ãã‚’è¨­å®š
 		float_t target_direction_degree = math::radian_to_degree( std::atan2( relative_position.x(), relative_position.z() ) );
 		chase_direction_degree( target_direction_degree, 2.f );
 
@@ -260,18 +260,18 @@ void Robot::action( const string_t& s )
 }
 
 /**
- * ƒ^[ƒQƒbƒg ( ƒvƒŒƒCƒ„[ ) ‚ğŒ©¸‚Á‚½‚©‚ğŒvZ‚·‚é
+ * ã‚¿ãƒ¼ã‚²ãƒƒãƒˆ ( ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ ) ã‚’è¦‹å¤±ã£ãŸã‹ã‚’è¨ˆç®—ã™ã‚‹
  *
- * @param ƒ^[ƒQƒbƒg‚ğŒ©¸‚Á‚½ê‡‚ÍAtrue ‚ğAƒ^[ƒQƒbƒg‚ğ•â‘«’†‚Ìê‡‚Í false ‚ğ•Ô‚·
+ * @param ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’è¦‹å¤±ã£ãŸå ´åˆã¯ã€true ã‚’ã€ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’è£œè¶³ä¸­ã®å ´åˆã¯ false ã‚’è¿”ã™
  */
 bool Robot::caluclate_target_lost() const
 {
 	Vector relative_position = player_->get_location() - get_location();
 	relative_position.set_y( 0 );
 
-	auto relative_length = relative_position.length(); // ƒ^[ƒQƒbƒg‚Æ‚Ì‹——£
+	auto relative_length = relative_position.length(); // ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¨ã®è·é›¢
 
-	/// @todo ‚¿‚á‚ñ‚ÆÀ‘•
+	/// @todo ã¡ã‚ƒã‚“ã¨å®Ÿè£…
 	if ( relative_length > 20.f )
 	{
 		return true;
@@ -281,9 +281,9 @@ bool Robot::caluclate_target_lost() const
 }
 
 /**
- * ƒ^[ƒQƒbƒg ( ƒvƒŒƒCƒ„[ ) ‚ğ–Ú‹‚Å‚«‚é‚©‚ğŒvZ‚·‚é
+ * ã‚¿ãƒ¼ã‚²ãƒƒãƒˆ ( ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ ) ã‚’ç›®è¦–ã§ãã‚‹ã‹ã‚’è¨ˆç®—ã™ã‚‹
  *
- * @param ƒ^[ƒQƒbƒg ( ƒvƒŒƒCƒ„[ ) ‚ğ–Ú‹‚Å‚«‚éê‡‚ÍAtrue ‚ğA–Ú‹‚Å‚«‚È‚¢ê‡‚Í false ‚ğ•Ô‚·
+ * @param ã‚¿ãƒ¼ã‚²ãƒƒãƒˆ ( ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ ) ã‚’ç›®è¦–ã§ãã‚‹å ´åˆã¯ã€true ã‚’ã€ç›®è¦–ã§ããªã„å ´åˆã¯ false ã‚’è¿”ã™
  */
 bool Robot::caluclate_target_visible() const
 {
@@ -294,14 +294,14 @@ bool Robot::caluclate_target_visible() const
 
 	Vector relative_position = player_->get_location() - get_location();
 
-	auto relative_length = relative_position.length(); // ƒ^[ƒQƒbƒg‚Æ‚Ì‹——£
+	auto relative_length = relative_position.length(); // ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¨ã®è·é›¢
 	
-	/// ‹–ì‚Ì‹——£
+	/// è¦–é‡ã®è·é›¢
 	const float_t eyeshot_length_short = 3.f;
 	const float_t eyeshot_length_middle = 10.f;
 	const float_t eyeshot_length_long = 20.f;
 
-	/// ‹–ì‚Ì‹——£‚É‰‚¶‚½‹–ìŠp ( -1.f .. 1.f ) ( 1.f : ³–Ê / 0.f : ^‰¡ / -1.f : ^Œã‚ë  ) 
+	/// è¦–é‡ã®è·é›¢ã«å¿œã˜ãŸè¦–é‡è§’ ( -1.f .. 1.f ) ( 1.f : æ­£é¢ / 0.f : çœŸæ¨ª / -1.f : çœŸå¾Œã‚  ) 
 	const float_t eyeshot_angle_short = -0.25f;
 	const float_t eyeshot_angle_middle = 0.25f;
 	const float_t eyeshot_angle_long = 0.75f;
@@ -311,13 +311,13 @@ bool Robot::caluclate_target_visible() const
 		return false;
 	}
 
-	// ƒƒ{ƒbƒg‚Ì–Ú‚ÌˆÊ’u
+	// ãƒ­ãƒœãƒƒãƒˆã®ç›®ã®ä½ç½®
 	Vector from = get_location();
-	from.set_y( from.y() + 1.5f ); // –Úü‚Ì‚‚³‚ğ’Ç‰Á
+	from.set_y( from.y() + 1.5f ); // ç›®ç·šã®é«˜ã•ã‚’è¿½åŠ 
 
-	// ƒ^[ƒQƒbƒg‚Ì–Ú‚ÌˆÊ’u
+	// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®ç›®ã®ä½ç½®
 	Vector to = player_->get_location();
-	to.set_y( to.y() + 1.5f ); // –Úü‚Ì‚‚³‚ğ’Ç‰Á
+	to.set_y( to.y() + 1.5f ); // ç›®ç·šã®é«˜ã•ã‚’è¿½åŠ 
 	
 	float_t eyeshot_angle = 0.f;
 
@@ -336,19 +336,19 @@ bool Robot::caluclate_target_visible() const
 	
 	// std::cout << relative_length << " : " << eyeshot_angle << " : " << get_front().dot( ( to - from ).normalize() ) << std::endl;
 
-	// ƒ^[ƒQƒbƒg‚Æ‚Ì‹——£‚É‰‚¶‚½‹–ìŠp‚É“ü‚Á‚Ä‚¢‚È‚¯‚ê‚ÎA–Ú‹‚Å‚«‚È‚¢
+	// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¨ã®è·é›¢ã«å¿œã˜ãŸè¦–é‡è§’ã«å…¥ã£ã¦ã„ãªã‘ã‚Œã°ã€ç›®è¦–ã§ããªã„
 	if ( get_front().dot( ( to - from ).normalize() ) < eyeshot_angle )
 	{
 		return false;
 	}
 
-	// áŠQ•¨”»’è
+	// éšœå®³ç‰©åˆ¤å®š
 	ClosestNotMeAndHim ray_callback( from, to, get_rigid_body(), player_->get_rigid_body(), false );
 	ray_callback.m_closestHitFraction = 1.0;
 	
 	GameMain::get_instance()->get_physics_manager()->get_dynamics_world()->rayTest( from, to, ray_callback );
 	
-	// ƒ^[ƒQƒbƒg‚Æ‚ÌŠÔ‚ÉáŠQ•¨‚ª‚È‚¯‚ê‚Î–Ú‹‚Å‚«‚Ä‚¢‚é
+	// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¨ã®é–“ã«éšœå®³ç‰©ãŒãªã‘ã‚Œã°ç›®è¦–ã§ãã¦ã„ã‚‹
 	if ( ! ray_callback.hasHit() )
 	{
 		std::cout << "*** target_visible ***" << std::endl;
@@ -421,9 +421,9 @@ void Robot::on_collide_with( Stone* stone )
 }
 
 /**
- * „‰ñƒ|ƒCƒ“ƒg‚ğ’Ç‰Á‚·‚é
+ * å·¡å›ãƒã‚¤ãƒ³ãƒˆã‚’è¿½åŠ ã™ã‚‹
  *
- * @param point „‰ñƒ|ƒCƒ“ƒg
+ * @param point å·¡å›ãƒã‚¤ãƒ³ãƒˆ
  */
 void Robot::add_patrol_point( const Vector& point )
 {

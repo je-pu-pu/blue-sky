@@ -9,7 +9,7 @@ namespace core::ecs
 {
 
 /**
- * ƒp[ƒeƒBƒNƒ‹•`‰æƒVƒXƒeƒ€
+ * ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«æç”»ã‚·ã‚¹ãƒ†ãƒ 
  *
  */
 class ParticleRenderSystem : public System< TransformComponent, ParticleSystemComponent >

@@ -7,7 +7,7 @@ namespace core::graphics
 {
 
 /**
- * ƒp[ƒeƒBƒNƒ‹ƒVƒXƒeƒ€
+ * ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã‚·ã‚¹ãƒ†ãƒ 
  *
  */
 class ParticleSystem : public 

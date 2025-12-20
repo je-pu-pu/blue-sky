@@ -7,7 +7,7 @@ namespace core::ecs
 {
 
 /**
- * •`‰æ—p‚Ìƒ‚ƒfƒ‹‚ğ•Û‚·‚éƒRƒ“ƒ|[ƒlƒ“ƒg
+ * æç”»ç”¨ã®ãƒ¢ãƒ‡ãƒ«ã‚’ä¿æŒã™ã‚‹ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
  *
  */
 class ModelComponent : public Component

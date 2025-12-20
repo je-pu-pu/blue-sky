@@ -8,7 +8,7 @@ namespace core::graphics::direct_3d_11
 {
 
 /**
- * ID3D11InputLayout のラッパークラス
+ * ID3D11InputLayout 縺ｮ繝ｩ繝�繝代�ｼ繧ｯ繝ｩ繧ｹ
  *
  */
 class InputLayout : public core::graphics::InputLayout

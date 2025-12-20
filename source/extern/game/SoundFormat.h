@@ -4,14 +4,14 @@ namespace game
 {
 
 /**
-* ƒTƒEƒ“ƒhƒtƒH[ƒ}ƒbƒg
+* ã‚µã‚¦ãƒ³ãƒ‰ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆ
 *
 */
 struct SoundFormat
 {
-	int channels;			///< ƒ`ƒƒƒ“ƒlƒ‹”
-	int sampling_rate;		///< ƒTƒ“ƒvƒŠƒ“ƒOü”g”
-	int bit_depth;			///< —Êq‰»ƒrƒbƒg”
+	int channels;			///< ãƒãƒ£ãƒ³ãƒãƒ«æ•°
+	int sampling_rate;		///< ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°å‘¨æ³¢æ•°
+	int bit_depth;			///< é‡å­åŒ–ãƒ“ãƒƒãƒˆæ•°
 
 }; // class SoundFormat
 

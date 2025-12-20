@@ -88,7 +88,7 @@ void delete_bin_fbx_all()
 	}
 }
 
-//Å°Å°Å°Å@ÉÅÉCÉìÅ@Å°Å°Å°
+//‚ñ†‚ñ†‚ñ†„ÄÄ„É°„Ç§„É≥„ÄÄ‚ñ†‚ñ†‚ñ†
 int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int nCmdShow )
 {
     _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );

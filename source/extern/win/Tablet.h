@@ -17,13 +17,13 @@ namespace win
 {
 
 /**
- * ƒyƒ“ƒ^ƒuƒŒƒbƒg
+ * ãƒšãƒ³ã‚¿ãƒ–ãƒ¬ãƒƒãƒˆ
  *
  */
 class Tablet : private boost::noncopyable
 {
 public:
-	/** ‚±‚±‚ğ false ‚É‚·‚é‚Æƒ^ƒuƒŒƒbƒg‚Ì“ü—Í‚ªæ‚ê‚È‚¢‚Ì‚Å’ˆÓI */
+	/** ã“ã“ã‚’ false ã«ã™ã‚‹ã¨ã‚¿ãƒ–ãƒ¬ãƒƒãƒˆã®å…¥åŠ›ãŒå–ã‚Œãªã„ã®ã§æ³¨æ„ï¼ */
 	constexpr static bool is_enabled() { return true; }
 
 private:

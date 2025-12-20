@@ -6,7 +6,7 @@ namespace core::ecs
 {
 
 /**
- * ƒRƒ“ƒ|[ƒlƒ“ƒgŠî’êƒNƒ‰ƒX
+ * ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆåŸºåº•ã‚¯ãƒ©ã‚¹
  *
  */
 class Component
@@ -16,7 +16,7 @@ public:
 	virtual ~Component() = default;
 
 	/**
-	 * ‚±‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg‚ÌŒ^‚Ì ID ‚ð•Ô‚·
+	 * ã“ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®åž‹ã® ID ã‚’è¿”ã™
 	 */
 	std::size_t get_type_id() const
 	{
@@ -24,7 +24,7 @@ public:
 	}
 
 	/**
-	 * Žw’è‚µ‚½ƒRƒ“ƒ|[ƒlƒ“ƒg‚ÌŒ^‚Ì ID ‚ð•Ô‚·
+	 * æŒ‡å®šã—ãŸã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®åž‹ã® ID ã‚’è¿”ã™
 	 */
 	template< typename ComponentType >
 	static constexpr std::size_t get_type_id()

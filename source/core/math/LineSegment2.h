@@ -7,7 +7,7 @@ namespace core::math
 {
 
 /**
- * ü•ª ( 2D )
+ * ç·šåˆ† ( 2D )
  */
 class LineSegment2
 {
@@ -24,7 +24,7 @@ public:
 	}
 
 	/**
-	 * ü•ª“¯m‚ÌŒğ·”»’è
+	 * ç·šåˆ†åŒå£«ã®äº¤å·®åˆ¤å®š
 	 */
 	std::optional< Vector2 > intersection( const LineSegment2& ls ) const
 	{

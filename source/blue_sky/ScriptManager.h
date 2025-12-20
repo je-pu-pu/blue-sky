@@ -11,10 +11,10 @@
 #include <type/type.h>
 
 /**
- * Sol 2.20.0 ‚Å‚Í set_function() ‚ÅŠÖ”’Ç‰ÁŒãA’è‹`‚³‚ê‚Ä‚¢‚È‚¢•Ï”‚ğg‚Á‚ÄŠÖ”‚ğŒÄ‚Ño‚·‚ÆA
- * ƒGƒ‰[‚ª”­¶‚·‚é‚Æ“¯‚É 8 ƒoƒCƒg‚Ìƒƒ‚ƒŠƒŠ[ƒN‚ª”­¶‚·‚éB
+ * Sol 2.20.0 ã§ã¯ set_function() ã§é–¢æ•°è¿½åŠ å¾Œã€å®šç¾©ã•ã‚Œã¦ã„ãªã„å¤‰æ•°ã‚’ä½¿ã£ã¦é–¢æ•°ã‚’å‘¼ã³å‡ºã™ã¨ã€
+ * ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã™ã‚‹ã¨åŒæ™‚ã« 8 ãƒã‚¤ãƒˆã®ãƒ¡ãƒ¢ãƒªãƒªãƒ¼ã‚¯ãŒç™ºç”Ÿã™ã‚‹ã€‚
  *
- * @todo ƒƒ‚ƒŠƒŠ[ƒN‚ğ’²¸‚·‚é or Sol ‚Ìƒo[ƒWƒ‡ƒ“‚ğ•Ï‚¦‚é
+ * @todo ãƒ¡ãƒ¢ãƒªãƒªãƒ¼ã‚¯ã‚’èª¿æŸ»ã™ã‚‹ or Sol ã®ãƒãƒ¼ã‚¸ãƒ§ãƒ³ã‚’å¤‰ãˆã‚‹
  */
 // #define SOL_NO_EXCEPTIONS 1
 #include <sol/sol.hpp>
@@ -30,9 +30,9 @@ namespace blue_sky
 using ScriptError = sol::error;
 
 /**
- * ƒXƒNƒŠƒvƒgŠÇ—
+ * ã‚¹ã‚¯ãƒªãƒ—ãƒˆç®¡ç†
  *
- * game ‚Æ blue_sky ‚É•ª—£‚·‚é
+ * game ã¨ blue_sky ã«åˆ†é›¢ã™ã‚‹
  */
 class ScriptManager // : game::ScriptManager
 {
@@ -42,7 +42,7 @@ public:
 	using Shader	= core::graphics::Shader;
 	using Texture	= core::graphics::Texture;
 
-	const size_t MAX_COMMAND_HISTORY_SIZE = 1000; ///< ƒRƒ}ƒ“ƒh—š—ğ‚ÌÅ‘å”
+	const size_t MAX_COMMAND_HISTORY_SIZE = 1000; ///< ã‚³ãƒãƒ³ãƒ‰å±¥æ­´ã®æœ€å¤§æ•°
 
 private:
 	sol::state lua_;
@@ -78,7 +78,7 @@ protected:
 			"set_texture_at", & Shader::set_texture_at
 		);
 
-		// @todo Texture::load() ‚ğÀ‘•‚µ‚ÄƒXƒNƒŠƒvƒg‚©‚çƒeƒNƒXƒ`ƒƒ‚Ì“à—eXV‚ª‚Å‚«‚é‚æ‚¤‚É‚·‚éH
+		// @todo Texture::load() ã‚’å®Ÿè£…ã—ã¦ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‹ã‚‰ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®å†…å®¹æ›´æ–°ãŒã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ï¼Ÿ
 		/*
 		lua_.new_usertype< Texture >(
 			"Texture",
@@ -110,11 +110,11 @@ public:
 	*/
 
 	/**
-	 * ƒXƒNƒŠƒvƒg‚©‚çŒÄ‚Ño‚¹‚éŠÖ”‚ğİ’è‚·‚é
+	 * ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‹ã‚‰å‘¼ã³å‡ºã›ã‚‹é–¢æ•°ã‚’è¨­å®šã™ã‚‹
 	 *
-	 * @param name ƒXƒNƒŠƒvƒg‚©‚çŒÄ‚Ño‚·‚ÌŠÖ”–¼
-	 * @param function ŠÖ”
-	 * @todo ŠÖ”‚ª—áŠO‚ğ“Š‚°‚½‚ÉƒLƒƒƒbƒ`‚Å‚«‚é‚æ‚¤‚É‚·‚é
+	 * @param name ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‹ã‚‰å‘¼ã³å‡ºã™æ™‚ã®é–¢æ•°å
+	 * @param function é–¢æ•°
+	 * @todo é–¢æ•°ãŒä¾‹å¤–ã‚’æŠ•ã’ãŸæ™‚ã«ã‚­ãƒ£ãƒƒãƒã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹
 	 */
 	template< typename FunctionType >
 	void set_function( const string_t& name, const FunctionType& function )
@@ -250,9 +250,9 @@ inline void ScriptManager::exec( const string_t& script, bool add_history )
 }
 
 /**
- * ƒRƒ}ƒ“ƒh—š—ğ‚ğƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚Ş
+ * ã‚³ãƒãƒ³ãƒ‰å±¥æ­´ã‚’ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰èª­ã¿è¾¼ã‚€
  *
- * @param file_path “Ç‚İ‚Şƒtƒ@ƒCƒ‹‚ÌƒpƒX
+ * @param file_path èª­ã¿è¾¼ã‚€ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹
  */
 inline void ScriptManager::load_command_history( const string_t& file_path )
 {
@@ -281,9 +281,9 @@ inline void ScriptManager::load_command_history( const string_t& file_path )
 }
 
 /**
- * ƒRƒ}ƒ“ƒh—š—ğ‚ğƒtƒ@ƒCƒ‹‚É‘‚«o‚·
+ * ã‚³ãƒãƒ³ãƒ‰å±¥æ­´ã‚’ãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãå‡ºã™
  *
- * @param file_path ‘‚«o‚·ƒtƒ@ƒCƒ‹‚ÌƒpƒX
+ * @param file_path æ›¸ãå‡ºã™ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹
  */
 inline void ScriptManager::save_command_history( const string_t& file_path )
 {
@@ -296,9 +296,9 @@ inline void ScriptManager::save_command_history( const string_t& file_path )
 }
 
 /**
- * ƒRƒ}ƒ“ƒh—š—ğ‚Ì’·‚³‚ğØ‚è‹l‚ß‚é
+ * ã‚³ãƒãƒ³ãƒ‰å±¥æ­´ã®é•·ã•ã‚’åˆ‡ã‚Šè©°ã‚ã‚‹
  *
- * @param size ’·‚³
+ * @param size é•·ã•
  */
 inline void ScriptManager::truncate_command_history( uint_t size )
 {

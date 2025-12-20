@@ -6,7 +6,7 @@ namespace core::graphics
 {
 
 /**
- * 何もしないテクスチャ
+ * 菴輔ｂ縺励↑縺�繝�繧ｯ繧ｹ繝√Ε
  *
  */
 class NullTexture : public Texture

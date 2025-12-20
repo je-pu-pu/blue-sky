@@ -32,11 +32,11 @@ TransformTestScene::TransformTestScene()
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
-	// System ‚ğ’Ç‰Á‚·‚é
+	// System ã‚’è¿½åŠ ã™ã‚‹
 	get_entity_manager()->add_system< core::ecs::TransformControlSystem >();
 	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
 
-	// Entity ‚Æ Component ‚ğ’Ç‰Á‚·‚é
+	// Entity ã¨ Component ã‚’è¿½åŠ ã™ã‚‹
 	current_entity_ = get_entity_manager()->create_entity();
 	current_entity_transform_ = current_entity_->add_component< core::ecs::TransformComponent >();
 	current_entity_transform_->transform.set_identity();
@@ -83,9 +83,9 @@ void TransformTestScene::update()
 	get_entity_manager()->update();
 
 	
-	/// @todo Component ‚Ì’l‚ğ GUI ‚Å•ÏX‚·‚éd‘g‚İ‚ğ®—‚·‚é
+	/// @todo Component ã®å€¤ã‚’ GUI ã§å¤‰æ›´ã™ã‚‹ä»•çµ„ã¿ã‚’æ•´ç†ã™ã‚‹
 	
-	// GUI ‚É‚æ‚Á‚Äƒ‚ƒfƒ‹‚ğ•ÏX‚·‚é
+	// GUI ã«ã‚ˆã£ã¦ãƒ¢ãƒ‡ãƒ«ã‚’å¤‰æ›´ã™ã‚‹
 	static int model_index = 0;
 	std::vector< const char* > combo_items;
 
@@ -121,7 +121,7 @@ void TransformTestScene::update()
 
 	ImGui::End();
 
-	// GUI ‚É‚æ‚Á‚ÄƒIƒuƒWƒFƒNƒg‚ÌˆÊ’uE‰ñ“]‚ğ•ÏX‚·‚é
+	// GUI ã«ã‚ˆã£ã¦ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ä½ç½®ãƒ»å›è»¢ã‚’å¤‰æ›´ã™ã‚‹
 	static Vector rot;
 	// static Vector scale( 1.f, 1.f, 1.f );
 
@@ -136,7 +136,7 @@ void TransformTestScene::update()
 	q.set_yaw_pitch_roll( r.y(), r.x(), r.z() );
 	current_entity_transform_->transform.set_rotation( q );
 
-	// GUI ‚É‚æ‚Á‚ÄƒJƒƒ‰‚Ìî•ñ‚ğ•ÏX‚·‚é
+	// GUI ã«ã‚ˆã£ã¦ã‚«ãƒ¡ãƒ©ã®æƒ…å ±ã‚’å¤‰æ›´ã™ã‚‹
 	ImGui::Begin( "Camera params" );
 	ImGui::DragFloat( "FOV", & camera_component_->fov, 0.1f, 0.f, 180.f );
 	ImGui::DragFloat( "Near clip", & camera_component_->near_clip, 0.1f, 0.1f, 3000.f );

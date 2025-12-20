@@ -6,7 +6,7 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * シャドウマップテクスチャデバッグ表示用シェーダー
+ * 繧ｷ繝｣繝峨え繝槭ャ繝励ユ繧ｯ繧ｹ繝√Ε繝�繝舌ャ繧ｰ陦ｨ遉ｺ逕ｨ繧ｷ繧ｧ繝ｼ繝繝ｼ
  *
  */
 class DebugShadowMapTextureShader : public BaseShader

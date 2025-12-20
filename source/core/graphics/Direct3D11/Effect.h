@@ -11,7 +11,7 @@ namespace core::graphics::direct_3d_11
 	class EffectPass;
 
 /**
- * Direct3D 11 Effect のラッパークラス
+ * Direct3D 11 Effect 縺ｮ繝ｩ繝�繝代�ｼ繧ｯ繝ｩ繧ｹ
  *
  */
 class Effect

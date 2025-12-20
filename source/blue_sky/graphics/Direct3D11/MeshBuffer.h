@@ -13,7 +13,7 @@ namespace blue_sky::graphics::direct_3d_11
 {
 
 /**
- * Direct3D11 メッシュバッファ
+ * Direct3D11 繝｡繝�繧ｷ繝･繝舌ャ繝輔ぃ
  *
  */
 class MeshBuffer : public blue_sky::graphics::Mesh::Buffer

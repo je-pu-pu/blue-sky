@@ -7,28 +7,28 @@ namespace core
 {
 
 /**
- * ƒXƒLƒjƒ“ƒOƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶
+ * ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å†ç”Ÿ
  *
  */
 class AnimationPlayer
 {
 public:
-	/// @todo ®—‚·‚é
+	/// @todo æ•´ç†ã™ã‚‹
 	using BoneConstantBuffer = blue_sky::BoneConstantBuffer;
 	using BoneConstantBufferData = blue_sky::BoneConstantBufferData;
 
 	static const int MaxBones = BoneConstantBufferData::MaxBones;
 
 private:
-	const SkinningAnimationSet* skinning_animation_set_;	///< ƒXƒLƒjƒ“ƒOƒAƒjƒ[ƒVƒ‡ƒ“‚ÌƒZƒbƒg
-	const SkinningAnimation* current_skinning_animation_;	///< Œ»İ‚ÌƒXƒLƒjƒ“ƒOƒAƒjƒ[ƒVƒ‡ƒ“
-	float_t	speed_;											///< Ä¶ƒXƒs[ƒh
-	float_t current_frame_;									///< Œ»İ‚ÌÄ¶ƒtƒŒ[ƒ€
-	bool is_looping_;										///< ƒ‹[ƒvÄ¶’†ƒtƒ‰ƒO
-	bool is_broken_;										///< ”j‰óƒtƒ‰ƒO
+	const SkinningAnimationSet* skinning_animation_set_;	///< ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ã‚»ãƒƒãƒˆ
+	const SkinningAnimation* current_skinning_animation_;	///< ç¾åœ¨ã®ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
+	float_t	speed_;											///< å†ç”Ÿã‚¹ãƒ”ãƒ¼ãƒ‰
+	float_t current_frame_;									///< ç¾åœ¨ã®å†ç”Ÿãƒ•ãƒ¬ãƒ¼ãƒ 
+	bool is_looping_;										///< ãƒ«ãƒ¼ãƒ—å†ç”Ÿä¸­ãƒ•ãƒ©ã‚°
+	bool is_broken_;										///< ç ´å£Šãƒ•ãƒ©ã‚°
 
-	/// @todo ˆÚ“®‚·‚é
-	const BoneConstantBuffer constant_buffer_;				///< ’è”ƒoƒbƒtƒ@
+	/// @todo ç§»å‹•ã™ã‚‹
+	const BoneConstantBuffer constant_buffer_;				///< å®šæ•°ãƒãƒƒãƒ•ã‚¡
 
 	Matrix get_bone_local_matrix( uint_t ) const;
 

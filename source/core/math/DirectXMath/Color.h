@@ -6,7 +6,7 @@ namespace core::math::direct_x_math
 {
 
 /**
- * “à•”“I‚É DirectXMath ‚ğg—p‚µ‚½ Color
+ * å†…éƒ¨çš„ã« DirectXMath ã‚’ä½¿ç”¨ã—ãŸ Color
  *
  */
 class Color : private DirectX::XMFLOAT4

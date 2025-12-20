@@ -4,7 +4,7 @@
 //! \file		SoundManager.cpp
 //! \date		2008/09/21
 //! \author		JE
-//! \brief		SoundManager ‚ÌÀ‘•
+//! \brief		SoundManager ã®å®Ÿè£…
 //**********************************************************
 
 #include "SoundManager.h"
@@ -62,7 +62,7 @@ void SoundManager::pop_group()
 
 	for ( auto j = i->second.begin(); j != i->second.end(); ++j )
 	{
-		/// j->second ‚Í–³Œø‚Èê‡‚ª‚ ‚é–‚É’ˆÓ
+		/// j->second ã¯ç„¡åŠ¹ãªå ´åˆãŒã‚ã‚‹äº‹ã«æ³¨æ„
 		unload( j->first.c_str() );
 	}
 

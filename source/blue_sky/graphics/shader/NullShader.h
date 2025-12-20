@@ -6,7 +6,7 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * 何もしないシェーダー
+ * 菴輔ｂ縺励↑縺�繧ｷ繧ｧ繝ｼ繝繝ｼ
  *
  */
 class NullShader : public BaseShader

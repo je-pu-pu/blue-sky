@@ -22,7 +22,7 @@ namespace blue_sky
 	}
 
 /**
- * ƒGƒ“ƒfƒBƒ“ƒO‰æ–Ê‚Ìˆ—‚ğŠÇ—‚·‚é
+ * ã‚¨ãƒ³ãƒ‡ã‚£ãƒ³ã‚°ç”»é¢ã®å‡¦ç†ã‚’ç®¡ç†ã™ã‚‹
  *
  */
 class EndingScene : public Scene
@@ -67,8 +67,8 @@ public:
 	explicit EndingScene();
 	~EndingScene();
 
-	void update() override;				///< ƒƒCƒ“ƒ‹[ƒv
-	void render() override;				///< •`‰æ
+	void update() override;				///< ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—
+	void render() override;				///< æç”»
 
 }; // class EndingScene
 

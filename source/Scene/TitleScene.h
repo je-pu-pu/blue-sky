@@ -6,7 +6,7 @@ namespace blue_sky
 {
 
 /**
- * ƒ^ƒCƒgƒ‹‰æ–Ê‚Ìˆ—‚ğŠÇ—‚·‚é
+ * ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢ã®å‡¦ç†ã‚’ç®¡ç†ã™ã‚‹
  *
  */
 class TitleScene : public Scene
@@ -41,8 +41,8 @@ public:
 	explicit TitleScene();
 	~TitleScene();
 
-	void update() override;				///< ƒƒCƒ“ƒ‹[ƒv
-	void render() override;				///< •`‰æ
+	void update() override;				///< ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—
+	void render() override;				///< æç”»
 
 }; // class TitleScene
 

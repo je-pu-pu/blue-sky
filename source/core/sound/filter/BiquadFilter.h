@@ -12,14 +12,14 @@ class BiquadFilter : public SoundFilter
 {
 private:
     /**
-	 * ƒ`ƒƒƒ“ƒlƒ‹‚²‚Æ‚Ìó‘Ô‚ğŠÇ—‚·‚é\‘¢‘Ì
+	 * ãƒãƒ£ãƒ³ãƒãƒ«ã”ã¨ã®çŠ¶æ…‹ã‚’ç®¡ç†ã™ã‚‹æ§‹é€ ä½“
      */
     struct ChannelState
     {
-        float x1 = 0.0f; // ‘O‚Ì“ü—ÍƒTƒ“ƒvƒ‹
-        float x2 = 0.0f; // 2‚Â‘O‚Ì“ü—ÍƒTƒ“ƒvƒ‹
-        float y1 = 0.0f; // ‘O‚Ìo—ÍƒTƒ“ƒvƒ‹
-		float y2 = 0.0f; // 2‚Â‘O‚Ìo—ÍƒTƒ“ƒvƒ‹
+        float x1 = 0.0f; // å‰ã®å…¥åŠ›ã‚µãƒ³ãƒ—ãƒ«
+        float x2 = 0.0f; // 2ã¤å‰ã®å…¥åŠ›ã‚µãƒ³ãƒ—ãƒ«
+        float y1 = 0.0f; // å‰ã®å‡ºåŠ›ã‚µãƒ³ãƒ—ãƒ«
+		float y2 = 0.0f; // 2ã¤å‰ã®å‡ºåŠ›ã‚µãƒ³ãƒ—ãƒ«
 
         void reset()
         {
@@ -112,7 +112,7 @@ private:
         float alpha = std::sin( omega ) / (2.0f * Q);
         float cos_omega = std::cos( omega );
 
-        // ƒtƒBƒ‹ƒ^ƒ^ƒCƒv‚É‰‚¶‚ÄŒW”ŒvZ
+        // ãƒ•ã‚£ãƒ«ã‚¿ã‚¿ã‚¤ãƒ—ã«å¿œã˜ã¦ä¿‚æ•°è¨ˆç®—
         switch ( filterType )
         {
             case FilterType::Lowpass:

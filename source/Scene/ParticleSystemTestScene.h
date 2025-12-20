@@ -14,7 +14,7 @@ namespace blue_sky
 class Camera;
 
 /**
- * ƒp[ƒeƒBƒNƒ‹ƒVƒXƒeƒ€‚ÌƒeƒXƒg—pƒV[ƒ“
+ * ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã‚·ã‚¹ãƒ†ãƒ ã®ãƒ†ã‚¹ãƒˆç”¨ã‚·ãƒ¼ãƒ³
  *
  */
 class ParticleSystemTestScene : public Scene

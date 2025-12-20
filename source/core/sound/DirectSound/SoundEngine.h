@@ -15,7 +15,7 @@ namespace core::sound::direct_sound
 {
 
 /**
- * DirectSound ‚ğg‚Á‚½ SoundEngine
+ * DirectSound ã‚’ä½¿ã£ãŸ SoundEngine
  *
  */
 class SoundEngine : public core::sound::SoundEngine

@@ -6,7 +6,7 @@ namespace core
 {
 
 /**
- * アニメーションのキーフレーム
+ * 繧｢繝九Γ繝ｼ繧ｷ繝ｧ繝ｳ縺ｮ繧ｭ繝ｼ繝輔Ξ繝ｼ繝
  *
  */
 class AnimationKeyFrame
@@ -27,8 +27,8 @@ public:
 	};
 
 private:
-	float_t frame_;			///< フレーム
-	float_t value_;			///< 値
+	float_t frame_;			///< 繝輔Ξ繝ｼ繝
+	float_t value_;			///< 蛟､
 
 	AnimationKeyFrame();
 

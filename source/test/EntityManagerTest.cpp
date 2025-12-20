@@ -31,11 +31,11 @@ TEST( EcsTest, EntityManagerTest )
 TEST( EcsTest, SystemTest )
 {
 	/**
-	 * ‚±‚ÌƒeƒXƒg‚ğÀs‚·‚é‚ÆA entity_manager->add_system< core::ecs::ParticleRenderSystem >(); ‚Ì’†‚ÅA
-	 * new ParticleRenderSystem ‚ªŒÄ‚Î‚êAŠÔÚ“I‚É GameMain::get_instance() ‚ªŒÄ‚Î‚ê‚éB‚»‚Ì’†‚Å Direct3D11 ‚ğ‰Šú‰»‚µ‚æ‚¤‚Æ‚·‚é‚ª hWnd ‚ª nullptr ‚È‚Ì‚Å—‚¿‚éB
-	 * ‚æ‚Á‚ÄƒeƒXƒg‚Í¸”s‚·‚éB
+	 * ã“ã®ãƒ†ã‚¹ãƒˆã‚’å®Ÿè¡Œã™ã‚‹ã¨ã€ entity_manager->add_system< core::ecs::ParticleRenderSystem >(); ã®ä¸­ã§ã€
+	 * new ParticleRenderSystem ãŒå‘¼ã°ã‚Œã€é–“æ¥çš„ã« GameMain::get_instance() ãŒå‘¼ã°ã‚Œã‚‹ã€‚ãã®ä¸­ã§ Direct3D11 ã‚’åˆæœŸåŒ–ã—ã‚ˆã†ã¨ã™ã‚‹ãŒ hWnd ãŒ nullptr ãªã®ã§è½ã¡ã‚‹ã€‚
+	 * ã‚ˆã£ã¦ãƒ†ã‚¹ãƒˆã¯å¤±æ•—ã™ã‚‹ã€‚
 	 * 
-	 * @todo GameMain ‚ğƒ‚ƒbƒN‰»‚·‚é‚©A Direct3D11 ‚Ì‰Šú‰»‚ğƒXƒLƒbƒv‚·‚é•û–@‚ğl‚¦‚éB
+	 * @todo GameMain ã‚’ãƒ¢ãƒƒã‚¯åŒ–ã™ã‚‹ã‹ã€ Direct3D11 ã®åˆæœŸåŒ–ã‚’ã‚¹ã‚­ãƒƒãƒ—ã™ã‚‹æ–¹æ³•ã‚’è€ƒãˆã‚‹ã€‚
 	 */
 
 	// blue_sky::GameMain::get_instance();

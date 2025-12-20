@@ -7,9 +7,9 @@
 #include <list>
 
 /**
- * Bullet ‚Ìƒ‰ƒbƒp[ƒNƒ‰ƒX
+ * Bullet ã®ãƒ©ãƒƒãƒ‘ãƒ¼ã‚¯ãƒ©ã‚¹
  *
- * @todo •¡”‚Ì RigidBody ‚Å“¯‚¶ CollisionShape ‚ð‹¤—L‚Å‚«‚é‚æ‚¤‚É‚·‚é
+ * @todo è¤‡æ•°ã® RigidBody ã§åŒã˜ CollisionShape ã‚’å…±æœ‰ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹
  */
 class BulletPhysics
 {
@@ -50,7 +50,7 @@ public:
 
 	void update( float = 1.f / 60.f );
 	
-	/// @todo íœ‚·‚é
+	/// @todo å‰Šé™¤ã™ã‚‹
 	btDynamicsWorld* get_dynamics_world() { return dynamics_world_; }
 
 	// for debug

@@ -18,7 +18,7 @@ ActiveObjectPhysics::~ActiveObjectPhysics()
 }
 
 /**
- * ActiveObject ‚ğƒ{ƒbƒNƒXŒ`ó‚Ì„‘Ì‚Æ‚µ‚Ä•¨—‹óŠÔ‚É’Ç‰Á‚·‚é
+ * ActiveObject ã‚’ãƒœãƒƒã‚¯ã‚¹å½¢çŠ¶ã®å‰›ä½“ã¨ã—ã¦ç‰©ç†ç©ºé–“ã«è¿½åŠ ã™ã‚‹
  *
  * @param active_object ActiveObject 
  */
@@ -37,7 +37,7 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_box( A
 }
 
 /**
- * ActiveObject ‚ğƒJƒvƒZƒ‹Œ`ó‚Ì„‘Ì‚Æ‚µ‚Ä•¨—‹óŠÔ‚É’Ç‰Á‚·‚é
+ * ActiveObject ã‚’ã‚«ãƒ—ã‚»ãƒ«å½¢çŠ¶ã®å‰›ä½“ã¨ã—ã¦ç‰©ç†ç©ºé–“ã«è¿½åŠ ã™ã‚‹
  *
  * @param active_object ActiveObject 
  */
@@ -57,7 +57,7 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_capsul
 }
 
 /**
- * ActiveObject ‚ğƒVƒŠƒ“ƒ_[Œ`ó‚Ì„‘Ì‚Æ‚µ‚Ä•¨—‹óŠÔ‚É’Ç‰Á‚·‚é
+ * ActiveObject ã‚’ã‚·ãƒªãƒ³ãƒ€ãƒ¼å½¢çŠ¶ã®å‰›ä½“ã¨ã—ã¦ç‰©ç†ç©ºé–“ã«è¿½åŠ ã™ã‚‹
  *
  * @param active_object ActiveObject 
  */
@@ -76,7 +76,7 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_cylind
 }
 
 /**
- * ActiveObject ‚Ìî•ñ‚ğ RigidBody ‚Éİ’è‚·‚é
+ * ActiveObject ã®æƒ…å ±ã‚’ RigidBody ã«è¨­å®šã™ã‚‹
  *
  * @param rigid_body RigidBody
  * @param active_object ActiveObject

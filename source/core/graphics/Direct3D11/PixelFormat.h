@@ -5,7 +5,7 @@
 namespace core::graphics::direct_3d_11
 {
 	/**
-	 * ƒsƒNƒZƒ‹ƒtƒH[ƒ}ƒbƒg
+	 * ãƒ”ã‚¯ã‚»ãƒ«ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆ
 	 *
 	 */
 	enum class PixelFormat

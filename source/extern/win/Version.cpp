@@ -4,7 +4,7 @@
 //! \file		Version.cpp
 //! \date		2012/07/15
 //! \author		JE
-//! \brief		Version ‚ÌŽÀ‘•
+//! \brief		Version ã®å®Ÿè£…
 //**********************************************************
 
 #include "Version.h"
@@ -17,7 +17,7 @@
 namespace win
 {
 
-//! ƒo[ƒWƒ‡ƒ“î•ñ‚ðƒƒO‚É‹L˜^‚·‚é
+//! ãƒãƒ¼ã‚¸ãƒ§ãƒ³æƒ…å ±ã‚’ãƒ­ã‚°ã«è¨˜éŒ²ã™ã‚‹
 bool Version::log( const char* file_path ) const
 {
 	OSVERSIONINFO version_info = { sizeof( OSVERSIONINFO ) };

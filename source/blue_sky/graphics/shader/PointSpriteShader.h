@@ -6,7 +6,7 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * ƒ|ƒCƒ“ƒgƒXƒvƒ‰ƒCƒgƒVƒF[ƒ_[
+ * ãƒã‚¤ãƒ³ãƒˆã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 class PointSpriteShader : public Shader< PointSpriteShader >
@@ -29,10 +29,10 @@ public:
 	{
 		Shader::bind();
 
-		get_game_constant_buffer()->bind_to_gs();	// ‰æ–Ê‚Ì•A‚‚³‚ğ GS ‚Å—˜—p‚·‚é
-		get_frame_constant_buffer()->bind_to_vs();	// View, Projection ‚ğ VS ‚Å—˜—p‚·‚é
-		get_frame_constant_buffer()->bind_to_gs();	// View, Projection ‚ğ GS ‚Å—˜—p‚·‚é
-		// get_object_constant_buffer()->bind_to_vs();	// World ‚ğ VS ‚Å—˜—p‚·‚é
+		get_game_constant_buffer()->bind_to_gs();	// ç”»é¢ã®å¹…ã€é«˜ã•ã‚’ GS ã§åˆ©ç”¨ã™ã‚‹
+		get_frame_constant_buffer()->bind_to_vs();	// View, Projection ã‚’ VS ã§åˆ©ç”¨ã™ã‚‹
+		get_frame_constant_buffer()->bind_to_gs();	// View, Projection ã‚’ GS ã§åˆ©ç”¨ã™ã‚‹
+		// get_object_constant_buffer()->bind_to_vs();	// World ã‚’ VS ã§åˆ©ç”¨ã™ã‚‹
 	};
 
 	void render( const Mesh* mesh, uint_t n ) const override

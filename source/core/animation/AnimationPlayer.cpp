@@ -5,7 +5,7 @@ namespace core
 {
 
 /**
- * ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+ * ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
  *
  */
 AnimationPlayer::AnimationPlayer( const SkinningAnimationSet* skinning_animation_set )
@@ -21,11 +21,11 @@ AnimationPlayer::AnimationPlayer( const SkinningAnimationSet* skinning_animation
 }
 
 /**
- * ƒAƒjƒ[ƒVƒ‡ƒ“‚ğÄ¶‚·‚é
+ * ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’å†ç”Ÿã™ã‚‹
  *
- * @param name ƒAƒjƒ[ƒVƒ‡ƒ“–¼
- * @param force ‹­§“I‚ÉÅ‰‚©‚çÄ¶‚·‚éƒtƒ‰ƒO
- * @param loop ƒ‹[ƒvÄ¶ƒtƒ‰ƒO
+ * @param name ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å
+ * @param force å¼·åˆ¶çš„ã«æœ€åˆã‹ã‚‰å†ç”Ÿã™ã‚‹ãƒ•ãƒ©ã‚°
+ * @param loop ãƒ«ãƒ¼ãƒ—å†ç”Ÿãƒ•ãƒ©ã‚°
  */
 void AnimationPlayer::play( const char_t* name, bool force, bool loop )
 {
@@ -48,7 +48,7 @@ void AnimationPlayer::play( const char_t* name, bool force, bool loop )
 }
 
 /**
- * Œ»İÄ¶’†‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚ğ’â~‚·‚é
+ * ç¾åœ¨å†ç”Ÿä¸­ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’åœæ­¢ã™ã‚‹
  *
  */
 void AnimationPlayer::stop()
@@ -58,7 +58,7 @@ void AnimationPlayer::stop()
 }
 
 /**
- * ƒAƒjƒ[ƒVƒ‡ƒ“‚ğXV‚·‚é
+ * ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void AnimationPlayer::update()
@@ -80,9 +80,9 @@ void AnimationPlayer::update()
 }
 
 /**
- * •`‰æ—p‚Ìƒf[ƒ^‚ğXV‚·‚é
+ * æç”»ç”¨ã®ãƒ‡ãƒ¼ã‚¿ã‚’æ›´æ–°ã™ã‚‹
  *
- * @todo •K—vÅ’áŒÀ‚Ìƒ{[ƒ“s—ñ‚¾‚¯XV‚·‚é‚æ‚¤‚É‚·‚é
+ * @todo å¿…è¦æœ€ä½é™ã®ãƒœãƒ¼ãƒ³è¡Œåˆ—ã ã‘æ›´æ–°ã™ã‚‹ã‚ˆã†ã«ã™ã‚‹
  */
 void AnimationPlayer::update_render_data() const
 {
@@ -108,11 +108,11 @@ void AnimationPlayer::update_render_data() const
 }
 
 /**
- * ƒ{[ƒ“ƒ}ƒgƒŠƒbƒNƒX‚ğÄ‹A“I‚ÉŒvZ‚·‚é
+ * ãƒœãƒ¼ãƒ³ãƒãƒˆãƒªãƒƒã‚¯ã‚¹ã‚’å†å¸°çš„ã«è¨ˆç®—ã™ã‚‹
  *
- * @param data ƒ{[ƒ“ƒ}ƒgƒŠƒbƒNƒX
- * @param bone_index ƒ{[ƒ“‚ÌƒCƒ“ƒfƒbƒNƒX
- * @param parent_bone_matrix eƒ{[ƒ“s—ñ
+ * @param data ãƒœãƒ¼ãƒ³ãƒãƒˆãƒªãƒƒã‚¯ã‚¹
+ * @param bone_index ãƒœãƒ¼ãƒ³ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+ * @param parent_bone_matrix è¦ªãƒœãƒ¼ãƒ³è¡Œåˆ—
  */
 void AnimationPlayer::calculate_bone_matrix_recursive( BoneConstantBufferData& data, uint_t bone_index, const Matrix& parent_bone_matrix ) const
 {
@@ -137,10 +137,10 @@ void AnimationPlayer::calculate_bone_matrix_recursive( BoneConstantBufferData& d
 }
 
 /**
- * w’è‚µ‚½ƒCƒ“ƒfƒbƒNƒX‚Ìƒ{[ƒ“‚Ìƒ[ƒJƒ‹ƒ}ƒgƒŠƒbƒNƒX‚ğæ“¾‚·‚é
+ * æŒ‡å®šã—ãŸã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã®ãƒœãƒ¼ãƒ³ã®ãƒ­ãƒ¼ã‚«ãƒ«ãƒãƒˆãƒªãƒƒã‚¯ã‚¹ã‚’å–å¾—ã™ã‚‹
  *
- * @param bone_index ƒ{[ƒ“‚ÌƒCƒ“ƒfƒbƒNƒX
- * @return ƒ{[ƒ“‚Ìƒ[ƒJƒ‹ƒ}ƒgƒŠƒbƒNƒX
+ * @param bone_index ãƒœãƒ¼ãƒ³ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+ * @return ãƒœãƒ¼ãƒ³ã®ãƒ­ãƒ¼ã‚«ãƒ«ãƒãƒˆãƒªãƒƒã‚¯ã‚¹
  */
 Matrix AnimationPlayer::get_bone_local_matrix( uint_t bone_index ) const
 {
@@ -169,7 +169,7 @@ Matrix AnimationPlayer::get_bone_local_matrix( uint_t bone_index ) const
 }
 
 /**
- * •`‰æ—p‚Ìƒf[ƒ^‚ğƒVƒF[ƒ_[‚ÉƒoƒCƒ“ƒh‚·‚é
+ * æç”»ç”¨ã®ãƒ‡ãƒ¼ã‚¿ã‚’ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹
  *
  */
 void AnimationPlayer::bind_render_data() const

@@ -13,7 +13,7 @@ namespace core::sound
 {
 
 /** 
- * MIDI ƒV[ƒPƒ“ƒT[
+ * MIDI ã‚·ãƒ¼ã‚±ãƒ³ã‚µãƒ¼
  * 
  */
 class MidiSequencer
@@ -24,7 +24,7 @@ private:
 	private:
 		const libremidi::midi_track& track_;
 		libremidi::midi_track::const_iterator current_track_event_;
-		int last_tick_ = 0; // ÅŒã‚Éˆ—‚µ‚½ƒCƒxƒ“ƒg‚ÌÄ¶ŠJn“_‚©‚ç‚Ì tick ” ( Œo‰ßŠÔ )
+		int last_tick_ = 0; // æœ€å¾Œã«å‡¦ç†ã—ãŸã‚¤ãƒ™ãƒ³ãƒˆã®å†ç”Ÿé–‹å§‹æ™‚ç‚¹ã‹ã‚‰ã® tick æ•° ( çµŒéæ™‚é–“ )
 
 	public:
 		Track( const libremidi::midi_track& track )
@@ -36,7 +36,7 @@ private:
 		/**
 		 *
 		 * 
-		 * @param tick Ä¶ŠJn‚©‚ç‚ÌŒo‰ßŠÔ ( tick )
+		 * @param tick å†ç”Ÿé–‹å§‹ã‹ã‚‰ã®çµŒéæ™‚é–“ ( tick )
 		 */
 		void process( MidiSequencer& sequencer, int total_tick )
 		{
@@ -85,7 +85,7 @@ private:
 	float bpm_ = 0.f;
 	float ticks_per_ms_ = 0.f;
 
-	float elapsed_ticks_ = 0.f; // Ä¶‚ğŠJn‚µ‚Ä‚©‚ç‚ÌŒo‰ß Ticks
+	float elapsed_ticks_ = 0.f; // å†ç”Ÿã‚’é–‹å§‹ã—ã¦ã‹ã‚‰ã®çµŒé Ticks
 
 	// auto midi_event = track.begin();
     std::chrono::system_clock::time_point last_time_ = std::chrono::system_clock::now(); //
@@ -94,15 +94,15 @@ private:
 
 	MidiSynthesizer* midi_synthesizer_ = nullptr;
 
-	int beat_ = 0; // beat ” ( Ä¶ŠJn‚©‚ç‚ÌŒo‰ß Beat )
-	int last_beat_ = 0; // ÅŒã‚Éˆ—‚µ‚½ beat
+	int beat_ = 0; // beat æ•° ( å†ç”Ÿé–‹å§‹ã‹ã‚‰ã®çµŒé Beat )
+	int last_beat_ = 0; // æœ€å¾Œã«å‡¦ç†ã—ãŸ beat
 
-	std::function< void(int) > beat_handler_; // ƒr[ƒg‚ª•Ï‰»‚µ‚½‚Æ‚«‚Ìƒnƒ“ƒhƒ‰
+	std::function< void(int) > beat_handler_; // ãƒ“ãƒ¼ãƒˆãŒå¤‰åŒ–ã—ãŸã¨ãã®ãƒãƒ³ãƒ‰ãƒ©
 
 	/**
-	* MIDI ƒƒbƒZ[ƒW‚ğˆ—‚·‚é
+	* MIDI ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’å‡¦ç†ã™ã‚‹
 	* 
-	* @param m MIDI ƒƒbƒZ[ƒW
+	* @param m MIDI ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸
 	*/
 	void process_midi_message( const libremidi::message& m )
 	{
@@ -212,9 +212,9 @@ public:
 	}
 
 	/**
-	 * Œ»İ‚Ì BPM ‚ğæ“¾‚·‚é
+	 * ç¾åœ¨ã® BPM ã‚’å–å¾—ã™ã‚‹
 	 * 
-	 * @return Œ»İ‚Ì BPM
+	 * @return ç¾åœ¨ã® BPM
 	 */
 	float get_bpm() const
 	{
@@ -222,9 +222,9 @@ public:
 	}
 
 	/**
-	 * BPM ‚ğİ’è‚·‚é
+	 * BPM ã‚’è¨­å®šã™ã‚‹
 	 * 
-	 * @param bpm İ’è‚·‚é BPM
+	 * @param bpm è¨­å®šã™ã‚‹ BPM
 	 */
 	void set_bpm( float bpm )
 	{

@@ -7,7 +7,7 @@ namespace blue_sky
 {
 
 /**
- * ’òq
+ * æ¢¯å­
  *
  */
 class Ladder : public ActiveObject

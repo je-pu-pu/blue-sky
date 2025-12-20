@@ -7,7 +7,7 @@ namespace blue_sky::graphics
 {
 
 /**
- * blue-sky è•`‚«•—ƒ‰ƒCƒ“
+ * blue-sky æ‰‹æãé¢¨ãƒ©ã‚¤ãƒ³
  *
  */
 class Line
@@ -15,12 +15,12 @@ class Line
 public:
 	enum LineType
 	{
-		LINE_TYPE_PENCIL = 0,		///< ‰”•M
-		LINE_TYPE_PEN,				///< ƒyƒ“
-		LINE_TYPE_DOT,				///< ƒhƒbƒg
-		LINE_TYPE_COLOR_DOT,		///< F•t‚«ƒhƒbƒg
-		LINE_TYPE_BRUSH,			///< F•t‚«ƒuƒ‰ƒV
-		LINE_TYPE_NONE,				///< ‚È‚µ
+		LINE_TYPE_PENCIL = 0,		///< é‰›ç­†
+		LINE_TYPE_PEN,				///< ãƒšãƒ³
+		LINE_TYPE_DOT,				///< ãƒ‰ãƒƒãƒˆ
+		LINE_TYPE_COLOR_DOT,		///< è‰²ä»˜ããƒ‰ãƒƒãƒˆ
+		LINE_TYPE_BRUSH,			///< è‰²ä»˜ããƒ–ãƒ©ã‚·
+		LINE_TYPE_NONE,				///< ãªã—
 		LINE_TYPE_MAX
 	};
 
@@ -47,7 +47,7 @@ public:
 
 protected:
 	Color			color_;
-	bool			is_cast_shadow_;	///< ‰e‚ğ—‚Æ‚·ƒtƒ‰ƒO
+	bool			is_cast_shadow_;	///< å½±ã‚’è½ã¨ã™ãƒ•ãƒ©ã‚°
 
 	VertexList		vertex_list_;
 	IndexList		index_list_;

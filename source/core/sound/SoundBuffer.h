@@ -6,7 +6,7 @@ namespace core::sound
 {
 
 /**
- * 抽象サウンドバッファ
+ * 謚ｽ雎｡繧ｵ繧ｦ繝ｳ繝峨ヰ繝�繝輔ぃ
  *
  */
 class SoundBuffer

@@ -22,14 +22,14 @@ namespace blue_sky::graphics
 	class Mesh;
 
 /**
- * File Loader Šî’êƒNƒ‰ƒX
+ * File Loader åŸºåº•ã‚¯ãƒ©ã‚¹
  *
  */
 class BaseFileLoader
 {
 public:
-	using Model					= blue_sky::graphics::Model;	///< @todo ’ŠÛ‰»‚·‚é
-	using Mesh					= blue_sky::graphics::Mesh;		///< @todo ’ŠÛ‰»‚·‚é
+	using Model					= blue_sky::graphics::Model;	///< @todo æŠ½è±¡åŒ–ã™ã‚‹
+	using Mesh					= blue_sky::graphics::Mesh;		///< @todo æŠ½è±¡åŒ–ã™ã‚‹
 	using SkinningAnimationSet	= core::SkinningAnimationSet;
 	using Shader				= core::graphics::Shader;
 	using Texture				= core::graphics::Texture;

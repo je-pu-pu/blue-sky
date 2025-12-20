@@ -6,18 +6,18 @@ namespace blue_sky::graphics::shader::post_effect
 {
 
 /**
- * Žè‘‚«•—•ÏŠ·ƒ|ƒXƒgƒGƒtƒFƒNƒg—pƒVƒF[ƒ_[
+ * æ‰‹æ›¸ãé¢¨å¤‰æ›ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆç”¨ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 class HandDrawingShader : public Shader< HandDrawingShader, 0 >
 {
 public:
 	static inline const ParameterInfoList parameter_info_list = {
-		{ ParameterType::FLOAT, "uv_factor",   20.f,         0.f,      100.f }, // UV ŒW”
-		{ ParameterType::FLOAT, "time_factor", 10.f,         0.f,      100.f }, // ŽžŠÔŒW”
-		{ ParameterType::FLOAT, "gain1",       0.001f,       0.00001f, 0.01f }, // U• 1
-		{ ParameterType::FLOAT, "gain2",       0.0005f,      0.00001f, 0.01f }, // U• 2
-		{ ParameterType::FLOAT, "gain3",       0.00025f,     0.00001f, 0.01f }, // U• 3
+		{ ParameterType::FLOAT, "uv_factor",   20.f,         0.f,      100.f }, // UV ä¿‚æ•°
+		{ ParameterType::FLOAT, "time_factor", 10.f,         0.f,      100.f }, // æ™‚é–“ä¿‚æ•°
+		{ ParameterType::FLOAT, "gain1",       0.001f,       0.00001f, 0.01f }, // æŒ¯å¹… 1
+		{ ParameterType::FLOAT, "gain2",       0.0005f,      0.00001f, 0.01f }, // æŒ¯å¹… 2
+		{ ParameterType::FLOAT, "gain3",       0.00025f,     0.00001f, 0.01f }, // æŒ¯å¹… 3
 		{ ParameterType::COLOR, "color",       std::nullopt, 0.00001f, 0.01f }, // test
 	};
 

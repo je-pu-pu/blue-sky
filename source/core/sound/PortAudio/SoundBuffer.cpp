@@ -30,15 +30,15 @@ void* SoundBuffer::lock( size_t offset, size_t )
 
 void SoundBuffer::unlock()
 {
-	/// @todo Œø—¦‰»‚·‚é
+	/// @todo åŠ¹ç‡åŒ–ã™ã‚‹
 
 	// auto old_data = data_;
 
 	// data_.reserve( data_.size() * 2 );
 
-	/// •ÏŠ·ŒãE•ÏŠ·‘O‚Ìü”g”‚Ì”ä‚ÆŒ^‚©‚ç dst ‚ÌƒTƒCƒY‚ğ‹‚ß‚é
+	/// å¤‰æ›å¾Œãƒ»å¤‰æ›å‰ã®å‘¨æ³¢æ•°ã®æ¯”ã¨å‹ã‹ã‚‰ dst ã®ã‚µã‚¤ã‚ºã‚’æ±‚ã‚ã‚‹
 	
-	/// •ÏŠ·‚ğs‚¤
+	/// å¤‰æ›ã‚’è¡Œã†
 }
 
 void SoundBuffer::set_3d_position( const Vector3& )

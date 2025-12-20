@@ -1,6 +1,6 @@
 //**********************************************************
 /**
- * Input �̎���
+ * Input の実装
  *
  * copyright (c) je-pu-pu all rights reserved
  *
@@ -131,7 +131,7 @@ void Input::load_key_code_config( Config& config, Button button, const char_t* n
 }
 
 /**
- * �L�[�{�[�h����̓��͂ɂ���Ԃ̍X�V���s��
+ * キーボードからの入力による状態の更新を行う
  */
 void Input::update()
 {
@@ -183,7 +183,7 @@ void Input::update_null()
 }
 
 /**
- * �L�[�{�[�h�E�W���C�X�e�B�b�N���ʂ̍X�V�������s��
+ * キーボード・ジョイスティック共通の更新処理を行う
  */
 void Input::update_common()
 {
@@ -199,9 +199,9 @@ void Input::update_common()
 }
 
 /**
- * �L�[���͂��`�F�b�N���w�肵���{�^���̏�Ԃ��X�V����
+ * キー入力をチェックし指定したボタンの状態を更新する
  *
- * @param button �{�^��
+ * @param button ボタン
  */
 void Input::update_state_by_key_for( uint_t button )
 {

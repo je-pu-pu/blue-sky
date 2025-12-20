@@ -6,7 +6,7 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * 地面シェーダー
+ * 蝨ｰ髱｢繧ｷ繧ｧ繝ｼ繝繝ｼ
  *
  */
 class GroundShader : public BaseShader

@@ -8,7 +8,7 @@ namespace core
 {
 
 /**
- * アニメーションのチャンネル
+ * 繧｢繝九Γ繝ｼ繧ｷ繝ｧ繝ｳ縺ｮ繝√Ε繝ｳ繝阪Ν
  *
  */
 class AnimationChannel

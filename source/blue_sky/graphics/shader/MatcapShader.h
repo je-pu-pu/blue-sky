@@ -6,7 +6,7 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * Matcap ƒVƒF[ƒ_[
+ * Matcap ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 class MatcapShader : public BaseShader
@@ -38,14 +38,14 @@ public:
 
 	void bind() const override
 	{
-		/// @todo •K—v‚È‚à‚Ì‚¾‚¯‚ðƒoƒCƒ“ƒh‚·‚é‚æ‚¤‚É‚·‚é
+		/// @todo å¿…è¦ãªã‚‚ã®ã ã‘ã‚’ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹ã‚ˆã†ã«ã™ã‚‹
 		get_game_constant_buffer()->bind_to_all();
 		get_frame_constant_buffer()->bind_to_all();
 		get_frame_drawing_constant_buffer()->bind_to_all();
 		
 		get_object_constant_buffer()->bind_to_vs();
 
-		/// @todo SkinningMatcapShader ‚Æ‚µ‚Ä•ª‚¯‚é
+		/// @todo SkinningMatcapShader ã¨ã—ã¦åˆ†ã‘ã‚‹
 		if ( get_skining_constant_buffer() )
 		{
 			get_skining_constant_buffer()->bind_to_vs();

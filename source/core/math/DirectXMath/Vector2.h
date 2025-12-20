@@ -10,7 +10,7 @@ namespace core::math::direct_x_math
 class Matrix;
 
 /**
- * “à•”“I‚É DirectXMath ‚ğg—p‚µ‚½ Vector2
+ * å†…éƒ¨çš„ã« DirectXMath ã‚’ä½¿ç”¨ã—ãŸ Vector2
  *
  */
 class Vector2

@@ -26,9 +26,9 @@ class InputLayout;
 class EffectTechnique;
 
 /**
- * ƒOƒ‰ƒtƒBƒbƒNŠÇ—ƒNƒ‰ƒX
+ * ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ç®¡ç†ã‚¯ãƒ©ã‚¹
  *
- * @todo ‘¾‚ç‚¹‚é
+ * @todo å¤ªã‚‰ã›ã‚‹
  */
 class GraphicsManager
 {

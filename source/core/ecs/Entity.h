@@ -9,7 +9,7 @@ namespace core::ecs
 class EntityManager;
 
 /**
- * ƒGƒ“ƒeƒBƒeƒB
+ * ã‚¨ãƒ³ãƒ†ã‚£ãƒ†ã‚£
  *
  */
 class Entity
@@ -40,7 +40,7 @@ public:
 		return EntityManager::get_instance()->add_component< ComponentType >( this );
 	}
 
-	/// @todo ”ñ const ComponentType ‚ğ•Ô‚µ‚Ä—Ç‚¢‚©H
+	/// @todo é const ComponentType ã‚’è¿”ã—ã¦è‰¯ã„ã‹ï¼Ÿ
 	template< typename ComponentType >
 	ComponentType* get_component() const
 	{

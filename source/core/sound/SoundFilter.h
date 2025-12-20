@@ -6,7 +6,7 @@ namespace core::sound
 {
 
 /**
- * サウンドフィルタ基底クラス
+ * 繧ｵ繧ｦ繝ｳ繝峨ヵ繧｣繝ｫ繧ｿ蝓ｺ蠎輔け繝ｩ繧ｹ
  *
  */
 class SoundFilter

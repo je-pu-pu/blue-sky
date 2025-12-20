@@ -9,7 +9,7 @@ namespace core::graphics::direct_3d_11
 	class Direct3D11;
 
 /**
- * Direct3D 11 Effect Technique のラッパークラス
+ * Direct3D 11 Effect Technique 縺ｮ繝ｩ繝�繝代�ｼ繧ｯ繝ｩ繧ｹ
  *
  */
 class EffectTechnique : public core::graphics::EffectTechnique

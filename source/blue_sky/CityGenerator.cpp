@@ -62,20 +62,20 @@ CityGenerator::CityGenerator()
 }
 
 /**
- * ŠX‚ğ¶¬‚·‚éƒXƒeƒbƒv‚ği‚ß‚é
+ * è¡—ã‚’ç”Ÿæˆã™ã‚‹ã‚¹ãƒ†ãƒƒãƒ—ã‚’é€²ã‚ã‚‹
  *
  */
 void CityGenerator::step()
 {
 	// extend_road( control_point_, control_point_ - Vector( 4.f, 0.f, 0.f ), control_point_ + Vector( 4.f, 0.f, 0.f ), 0, 40, 5 );
 	
-	// V‚µ‚­”­¶‚µ‚½ƒRƒ“ƒgƒ[ƒ‹ƒ|ƒCƒ“ƒg
+	// æ–°ã—ãç™ºç”Ÿã—ãŸã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ãƒã‚¤ãƒ³ãƒˆ
 	RoadControlPointList new_cps;
 
-	// íœ‚·‚éƒRƒ“ƒgƒ[ƒ‹ƒ|ƒCƒ“ƒg
+	// å‰Šé™¤ã™ã‚‹ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ãƒã‚¤ãƒ³ãƒˆ
 	RoadControlPointList del_cps;
 
-	std::vector< RoadNode* > del_nodes; // íœ‚·‚éƒm[ƒh
+	std::vector< RoadNode* > del_nodes; // å‰Šé™¤ã™ã‚‹ãƒãƒ¼ãƒ‰
 
 	for ( auto& cp : road_control_point_list_ )
 	{
@@ -141,7 +141,7 @@ void CityGenerator::step()
 		node->update_vertex_pos();
 	}
 
-	// ‘¼‚Ì“¹˜H‚É‚Ô‚Â‚©‚Á‚½ƒm[ƒh‚ÆƒRƒ“ƒgƒ[ƒ‹ƒ|ƒCƒ“ƒg‚ğíœ‚·‚é
+	// ä»–ã®é“è·¯ã«ã¶ã¤ã‹ã£ãŸãƒãƒ¼ãƒ‰ã¨ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ãƒã‚¤ãƒ³ãƒˆã‚’å‰Šé™¤ã™ã‚‹
 	road_control_point_list_.erase(
 		std::remove_if(
 			road_control_point_list_.begin(),
@@ -178,12 +178,12 @@ void CityGenerator::step()
 }
 
 /**
- * L‚Î‚µ‚½ƒRƒ“ƒgƒ[ƒ‹ƒ|ƒCƒ“ƒg‚ÆŠù‘¶‚Ì“¹ƒm[ƒh‚Æ‚ÌÕ“Ë”»’è‚ğs‚¤
+ * ä¼¸ã°ã—ãŸã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ãƒã‚¤ãƒ³ãƒˆã¨æ—¢å­˜ã®é“ãƒãƒ¼ãƒ‰ã¨ã®è¡çªåˆ¤å®šã‚’è¡Œã†
  *
- * Õ“Ë‚µ‚Ä‚¢‚½ê‡‚ÍL‚Î‚µ‚½“¹˜H‚ÆŠù‘¶‚Ì“¹˜H‚ğÚ‘±‚·‚é
+ * è¡çªã—ã¦ã„ãŸå ´åˆã¯ä¼¸ã°ã—ãŸé“è·¯ã¨æ—¢å­˜ã®é“è·¯ã‚’æ¥ç¶šã™ã‚‹
  *
- * @param cp L‚Î‚µ‚½ƒRƒ“ƒgƒ[ƒ‹ƒ|ƒCƒ“ƒg
- * @return ƒRƒ“ƒgƒ[ƒ‹ƒ|ƒCƒ“ƒg‚ªŠù‘¶‚Ì“¹ƒm[ƒh‚ÆÕ“Ë‚µ‚½ê‡‚Í true ‚ğAÕ“Ë‚µ‚È‚©‚Á‚½ê‡‚Í false ‚ğ•Ô‚·
+ * @param cp ä¼¸ã°ã—ãŸã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ãƒã‚¤ãƒ³ãƒˆ
+ * @return ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ãƒã‚¤ãƒ³ãƒˆãŒæ—¢å­˜ã®é“ãƒãƒ¼ãƒ‰ã¨è¡çªã—ãŸå ´åˆã¯ true ã‚’ã€è¡çªã—ãªã‹ã£ãŸå ´åˆã¯ false ã‚’è¿”ã™
  */
 bool CityGenerator::check_collision( RoadControlPoint& cp ) const
 {
@@ -199,7 +199,7 @@ bool CityGenerator::check_collision( RoadControlPoint& cp ) const
 			continue;
 		}
 
-		// “–‚è”»’è‚Ì”¼Œa
+		// å½“ã‚Šåˆ¤å®šã®åŠå¾„
 		const auto radius = std::sqrt( get_road_width() * 2.f + get_road_depth() * 2.f ) * 1.5f;
 
 		const auto lx = cp.position.x() - node->position.x();
@@ -208,7 +208,7 @@ bool CityGenerator::check_collision( RoadControlPoint& cp ) const
 
 		if ( length <= radius )
 		{
-			// “–‚½‚Á‚½ƒm[ƒh‚ÆŒq‚®
+			// å½“ãŸã£ãŸãƒãƒ¼ãƒ‰ã¨ç¹‹ã
 			cp.node->front_node = node.get();
 			cp.node->is_end = true;
 
@@ -216,17 +216,17 @@ bool CityGenerator::check_collision( RoadControlPoint& cp ) const
 			{
 				node->type = RoadNode::Type::T_INTERSECTION;
 
-				// @todo ‹¤’Ê‰»‚·‚é
+				// @todo å…±é€šåŒ–ã™ã‚‹
 				const float cross = node->start_front.xz().cross( ( cp.position - node->position ).xz() );
 
 				if ( cross < 0.f )
 				{
-					// Šù‘¶‚Ì“¹˜H‚É‰E‚©‚ç‚Ô‚Â‚©‚Á‚½ê‡
+					// æ—¢å­˜ã®é“è·¯ã«å³ã‹ã‚‰ã¶ã¤ã‹ã£ãŸå ´åˆ
 					node->right_node = cp.node;
 				}
 				else if ( cross > 0.f )
 				{
-					// Šù‘¶‚Ì“¹˜H‚É¶‚©‚ç‚Ô‚Â‚©‚Á‚½ê‡
+					// æ—¢å­˜ã®é“è·¯ã«å·¦ã‹ã‚‰ã¶ã¤ã‹ã£ãŸå ´åˆ
 					node->left_node = cp.node;
 				}
 			}
@@ -239,7 +239,7 @@ bool CityGenerator::check_collision( RoadControlPoint& cp ) const
 }
 
 /**
- * Œğ·‚µ‚½“¹˜H‚ğ®Œ`‚·‚é
+ * äº¤å·®ã—ãŸé“è·¯ã‚’æ•´å½¢ã™ã‚‹
  */
 void CityGenerator::format_crossroad()
 {
@@ -280,7 +280,7 @@ void CityGenerator::format_crossroad()
 
 #if 0
 /**
- * “¹˜H‚ğL‚Î‚·
+ * é“è·¯ã‚’ä¼¸ã°ã™
  *
  */
 void CityGenerator::extend_road( const Vector& control_point, const Vector& vertex_position0, const Vector& vertex_position1, float_t direction, int life, int straight_life )
@@ -336,7 +336,7 @@ void CityGenerator::extend_road( const Vector& control_point, const Vector& vert
 #endif
 
 /**
- * ƒƒbƒVƒ…‚ğ¶¬‚·‚é
+ * ãƒ¡ãƒƒã‚·ãƒ¥ã‚’ç”Ÿæˆã™ã‚‹
  *
  */
 void CityGenerator::generate_road_mesh()
@@ -355,7 +355,7 @@ void CityGenerator::generate_road_mesh()
 }
 
 /**
- * l‹÷‚ÌÀ•W‚ğŒvZ‚µXV‚·‚é
+ * å››éš…ã®åº§æ¨™ã‚’è¨ˆç®—ã—æ›´æ–°ã™ã‚‹
  */
 void CityGenerator::RoadNode::update_vertex_pos()
 {
@@ -391,26 +391,26 @@ void CityGenerator::RoadNode::update_vertex_pos()
 	front_left_pos  = road_end_pos - end_right * get_road_width() * 0.5f;
 	front_right_pos = road_end_pos + end_right * get_road_width() * 0.5f;
 
-	// I’[‚Ìˆ—
+	// çµ‚ç«¯ã®å‡¦ç†
 	if ( is_end && front_node )
 	{
 		const float cross = front_node->start_front.xz().cross( ( position - front_node->position ).xz() );
 
 		if ( cross < 0.f )
 		{
-			// Šù‘¶‚Ì“¹˜H‚É‰E‚©‚ç‚Ô‚Â‚©‚Á‚½ê‡
+			// æ—¢å­˜ã®é“è·¯ã«å³ã‹ã‚‰ã¶ã¤ã‹ã£ãŸå ´åˆ
 			front_left_pos = front_node->back_right_pos;
 			front_right_pos = front_node->front_right_pos;
 		}
 		else if ( cross > 0.f )
 		{
-			// Šù‘¶‚Ì“¹˜H‚É¶‚©‚ç‚Ô‚Â‚©‚Á‚½ê‡
+			// æ—¢å­˜ã®é“è·¯ã«å·¦ã‹ã‚‰ã¶ã¤ã‹ã£ãŸå ´åˆ
 			front_left_pos = front_node->front_left_pos;
 			front_right_pos = front_node->back_left_pos;
 		}
 		else if ( false )
 		{
-			// Šù‘¶‚Ì“¹˜H‚É³–Ê‚©‚ç‚Ô‚Â‚©‚Á‚½ê‡
+			// æ—¢å­˜ã®é“è·¯ã«æ­£é¢ã‹ã‚‰ã¶ã¤ã‹ã£ãŸå ´åˆ
 			front_left_pos = front_node->front_right_pos;
 			front_right_pos = front_node->front_left_pos;
 		}
@@ -425,13 +425,13 @@ void CityGenerator::RoadNode::update_vertex_pos()
 }
 
 /**
- * ƒƒbƒVƒ…‚ğ¶¬‚·‚é
+ * ãƒ¡ãƒƒã‚·ãƒ¥ã‚’ç”Ÿæˆã™ã‚‹
  *
  */
 void CityGenerator::generate_road_mesh( const RoadNode* node )
 {
 	/**
-	 * •ªŠ„” 0 ‚Ìê‡
+	 * åˆ†å‰²æ•° 0 ã®å ´åˆ
 	 *
 	 * 2-------3
 	 * |       |
@@ -440,7 +440,7 @@ void CityGenerator::generate_road_mesh( const RoadNode* node )
 	 * 0-------1
 	 *
 	 *
-	 * •ªŠ„” 1 ‚Ìê‡
+	 * åˆ†å‰²æ•° 1 ã®å ´åˆ
 	 *
 	 * 4-------5
 	 * |       |
@@ -483,7 +483,7 @@ void CityGenerator::generate_road_mesh( const RoadNode* node )
 	model_->get_mesh()->add_vertex( Mesh::Vertex( node->back_left_pos.xyz(), Vector::Up.xyz(), ( Vector( 0.f, 0.f, 0.f, 1.f ) * m ).xy() ) ); // 0
 	model_->get_mesh()->add_vertex( Mesh::Vertex( node->back_right_pos.xyz(), Vector::Up.xyz(), ( Vector( 1.f, 0.f, 0.f, 1.f ) * m ).xy() ) ); // 1
 
-	// •ªŠ„” ( 0 : •ªŠ„‚µ‚È‚¢ )
+	// åˆ†å‰²æ•° ( 0 : åˆ†å‰²ã—ãªã„ )
 	const int subdivision_level = 3;
 
 	auto* vertex_group = get_vertex_group_by_road_node( node );
@@ -506,15 +506,15 @@ void CityGenerator::generate_road_mesh( const RoadNode* node )
 }
 
 /**
- * “¹˜Hƒm[ƒh‚©‚çŠY“–‚·‚é VertexGroup ‚ğæ“¾‚·‚é
+ * é“è·¯ãƒãƒ¼ãƒ‰ã‹ã‚‰è©²å½“ã™ã‚‹ VertexGroup ã‚’å–å¾—ã™ã‚‹
  */
 CityGenerator::VertexGroup* CityGenerator::get_vertex_group_by_road_node( const RoadNode* node )
 {
 	std::array< VertexGroup*, 4 > vertex_group_map = {
-		get_model()->get_mesh()->get_vertex_group_at( 0 ),	 // STRAIGHT,			///< ’¼ü
-		get_model()->get_mesh()->get_vertex_group_at( 1 ),	 // CROSS,				///< \š˜H
-		get_model()->get_mesh()->get_vertex_group_at( 0 ),	 // CURVE,				///< ƒJ[ƒu
-		get_model()->get_mesh()->get_vertex_group_at( 2 ),	 // T_INTERSECTION,		///< T š˜H
+		get_model()->get_mesh()->get_vertex_group_at( 0 ),	 // STRAIGHT,			///< ç›´ç·š
+		get_model()->get_mesh()->get_vertex_group_at( 1 ),	 // CROSS,				///< åå­—è·¯
+		get_model()->get_mesh()->get_vertex_group_at( 0 ),	 // CURVE,				///< ã‚«ãƒ¼ãƒ–
+		get_model()->get_mesh()->get_vertex_group_at( 2 ),	 // T_INTERSECTION,		///< T å­—è·¯
 	};
 
 	return vertex_group_map[ static_cast< int >( node->type ) ];
@@ -523,7 +523,7 @@ CityGenerator::VertexGroup* CityGenerator::get_vertex_group_by_road_node( const 
 
 
 /**
- * ƒfƒoƒbƒO—p‚ÌƒƒbƒVƒ…‚ğ¶¬‚·‚é
+ * ãƒ‡ãƒãƒƒã‚°ç”¨ã®ãƒ¡ãƒƒã‚·ãƒ¥ã‚’ç”Ÿæˆã™ã‚‹
  */
 void CityGenerator::generate_debug_mesh()
 {
@@ -539,7 +539,7 @@ void CityGenerator::generate_debug_mesh()
 }
 
 /**
- * ƒfƒoƒbƒO—p‚ÌƒRƒ“ƒgƒ[ƒ‹ƒ|ƒCƒ“ƒg‚ÌƒƒbƒVƒ…‚ğ¶¬‚·‚é
+ * ãƒ‡ãƒãƒƒã‚°ç”¨ã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ãƒã‚¤ãƒ³ãƒˆã®ãƒ¡ãƒƒã‚·ãƒ¥ã‚’ç”Ÿæˆã™ã‚‹
  */
 void CityGenerator::generate_debug_road_control_point_mesh( const RoadControlPoint& cp ) const
 {

@@ -6,7 +6,7 @@ namespace blue_sky
 {
 
 /**
- * ƒƒ_ƒ‹
+ * ãƒ¡ãƒ€ãƒ«
  *
  */
 class Medal : public ActiveObject
@@ -28,7 +28,7 @@ public:
 	Medal();
 	~Medal() { }
 
-	/// XV
+	/// æ›´æ–°
 	void update();
 
 	void restart();

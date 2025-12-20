@@ -7,7 +7,7 @@ namespace core::math::direct_x_math
 {
 
 /**
- * “à•”“I‚É DirectXMath ‚ğg—p‚µ‚½ Matrix
+ * å†…éƒ¨çš„ã« DirectXMath ã‚’ä½¿ç”¨ã—ãŸ Matrix
  *
  */
 class alignas( 16 ) Matrix

@@ -1,5 +1,5 @@
 #include "RenderSystem.h"
-#include <blue_sky/ConstantBuffers.h> /// @todo core ‚©‚ç blue_sky ‚ğQÆ‚µ‚Ä‚¢‚é‚Ì‚Í•Ï‚È‚Ì‚ÅAŠî–{“I‚È ConstatntBuffer ‚Í core ‚ÉˆÚ‚·
+#include <blue_sky/ConstantBuffers.h> /// @todo core ã‹ã‚‰ blue_sky ã‚’å‚ç…§ã—ã¦ã„ã‚‹ã®ã¯å¤‰ãªã®ã§ã€åŸºæœ¬çš„ãª ConstatntBuffer ã¯ core ã«ç§»ã™
 #include <Scene/Scene.h>
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Model.h>
@@ -25,8 +25,13 @@ void RenderSystem::update()
 
 	get_graphics_manager()->setup_rendering();
 
-	render_result_texture_1_->clear();
-	get_graphics_manager()->set_render_target( render_result_texture_1_.get() );
+	const auto is_post_effect_enabled = false;
+
+	if ( is_post_effect_enabled )
+	{
+		render_result_texture_1_->clear();
+		get_graphics_manager()->set_render_target( render_result_texture_1_.get() );
+	}
 
 	get_graphics_manager()->render_background();
 
@@ -35,8 +40,8 @@ void RenderSystem::update()
 		auto* transform = std::get< TransformComponent* >( i.second );
 		auto* model = std::get< ModelComponent* >( i.second );
 
-		/// @todo –ˆ‰ñ’è”ƒoƒbƒtƒ@‚ğŠm•Û‚µ‚Ä‚¢‚é‚Ì‚Å‚â‚ß‚é
-		/// Transform ‚ğ Shader ‚É update ‚·‚é
+		/// @todo æ¯å›å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’ç¢ºä¿ã—ã¦ã„ã‚‹ã®ã§ã‚„ã‚ã‚‹
+		/// Transform ã‚’ Shader ã« update ã™ã‚‹
 		blue_sky::ObjectConstantBufferWithData shader_data;
 
 		shader_data.data().world.set_identity();
@@ -50,36 +55,45 @@ void RenderSystem::update()
 		model->model->render();
 	}
 
-	auto ca_shader = get_graphics_manager()->get_shader( "post_effect_chromatic_aberration" );
+	core::graphics::Shader* ca_shader = nullptr;
 
-	get_graphics_manager()->set_post_effect_shader( ca_shader );
-	get_graphics_manager()->render_post_effect( render_result_texture_1_.get(), render_result_texture_2_.get() );
+	if ( is_post_effect_enabled )
+	{
+		ca_shader = get_graphics_manager()->get_shader( "post_effect_chromatic_aberration" );
+
+		get_graphics_manager()->set_post_effect_shader( ca_shader );
+		get_graphics_manager()->render_post_effect( render_result_texture_1_.get(), render_result_texture_2_.get() );
 
 
-	/*
-	get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_hand_drawing" ) );
-	get_graphics_manager()->render_post_effect( render_result_texture_2_.get() );
-	*/
+		/*
+		get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_hand_drawing" ) );
+		get_graphics_manager()->render_post_effect( render_result_texture_2_.get() );
+		*/
 
-	// get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_id_to_color" ) );
-	// get_graphics_manager()->render_post_effect( render_result_texture_1_.get(), render_result_texture_2_.get() );
+		// get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_id_to_color" ) );
+		// get_graphics_manager()->render_post_effect( render_result_texture_1_.get(), render_result_texture_2_.get() );
 
-	// get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_hand_drawing" ) );
+		// get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_hand_drawing" ) );
 
-	/// @todo ƒmƒCƒY—p‚ÌƒeƒNƒXƒ`ƒƒ‚Í 0 ”Ô‚Éİ’è‚µ‚Â‚ÂAHLSL ‚Å‚Í t1 ‚Æ‚µ‚Äg‚¦‚é‚æ‚¤‚ÉƒoƒCƒ“ƒh‚Å‚«‚é‚æ‚¤‚É‚·‚é ( t0 ‚Íƒ|ƒXƒgƒGƒtƒFƒNƒg‘ÎÛ )
-	noise_shader->set_texture_at( 1, get_graphics_manager()->load_texture( "media/texture/noise.png" ) );
+		/// @todo ãƒã‚¤ã‚ºç”¨ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã¯ 0 ç•ªã«è¨­å®šã—ã¤ã¤ã€HLSL ã§ã¯ t1 ã¨ã—ã¦ä½¿ãˆã‚‹ã‚ˆã†ã«ãƒã‚¤ãƒ³ãƒ‰ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ ( t0 ã¯ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆå¯¾è±¡ )
+		noise_shader->set_texture_at( 1, get_graphics_manager()->load_texture( "media/texture/noise.png" ) );
 
-	get_graphics_manager()->set_post_effect_shader( noise_shader );
-	get_graphics_manager()->render_post_effect( render_result_texture_2_.get() );
+		get_graphics_manager()->set_post_effect_shader( noise_shader );
+		get_graphics_manager()->render_post_effect( render_result_texture_2_.get() );
 
-	get_graphics_manager()->set_default_render_target();
+		get_graphics_manager()->set_default_render_target();
+	}
 
 	// get_graphics_manager()->render_fader();
 	// get_graphics_manager()->render_debug_bullet();
 	
-	// ImGUI ‚É‚æ‚éƒVƒF[ƒ_[ƒpƒ‰ƒƒ^[•ÏX—p UI ‚Ì©“®•`‰æ
+	// ImGUI ã«ã‚ˆã‚‹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ‘ãƒ©ãƒ¡ã‚¿ãƒ¼å¤‰æ›´ç”¨ UI ã®è‡ªå‹•æç”»
 	noise_shader->render_parameter_gui();
-	ca_shader->render_parameter_gui();
+
+	if ( is_post_effect_enabled )
+	{
+		ca_shader->render_parameter_gui();
+	}
 }
 
 } // namespace core::ecs

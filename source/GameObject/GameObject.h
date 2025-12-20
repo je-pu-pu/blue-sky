@@ -32,14 +32,14 @@ class Ladder;
 class Component;
 
 /**
- * �Q�[����ɑ��݂���S�ẴI�u�W�F�N�g�̊��N���X
+ * ゲーム上に存在する全てのオブジェクトの基底クラス
  *
- * �Q�[����ɑ��݂��邷�ׂẴI�u�W�F�N�g�̓g�����X�t�H�[�� ( �ړ��E��]�E�g��k�� ) ��������
- * �Q�[����ɑ��݂��邷�ׂẴI�u�W�F�N�g�̓I�v�V�����Ƃ��č��� ( �Փ˔���p�̌`����܂� ) ��������
+ * ゲーム上に存在するすべてのオブジェクトはトランスフォーム ( 移動・回転・拡大縮小 ) 情報を持つ
+ * ゲーム上に存在するすべてのオブジェクトはオプションとして剛体 ( 衝突判定用の形状を含む ) 情報を持つ
  *
- * @todo Bullet Physics ���B������
- * @todo ECS �Ɉڍs����
- * @todo core �Ɉړ�����
+ * @todo Bullet Physics を隠蔽する
+ * @todo ECS に移行する
+ * @todo core に移動する
  */
 class GameObject
 {
@@ -52,16 +52,16 @@ public:
 	static Vector GravityDefault;
 
 private:
-	Transform		transform_;		///< �g�����X�t�H�[�����
-	btRigidBody*	rigid_body_;	///< ���̏��
+	Transform		transform_;		///< トランスフォーム情報
+	btRigidBody*	rigid_body_;	///< 剛体情報
 
-	ComponentMap	component_map_;	///< GameObject ���ۗL���Ă���R���|�[�l���g�̈ꗗ ( �R���|�[�l���g ID ���� �R���|�[�l���g�̃|�C���^�ւ̃}�b�v )
+	ComponentMap	component_map_;	///< GameObject が保有しているコンポーネントの一覧 ( コンポーネント ID から コンポーネントのポインタへのマップ )
 
 protected:
 	float_t get_frame_elapsed_time() const;
 	float_t get_scene_elapsed_time() const;
 
-	/// 1 �b������̐��l���猻�݂̃t���[���̐��l��Ԃ�
+	/// 1 秒あたりの数値から現在のフレームの数値を返す
 	inline float_t per_sec( float_t value ) const { return value * get_frame_elapsed_time(); }
 
 	float_t get_flicker_height_offset( float_t scale = 1.f ) const;
@@ -87,23 +87,23 @@ public:
 	/// 
 	virtual void restart() = 0;
 
-	/// �X�V
+	/// 更新
 	virtual void update() = 0;
 	virtual void update_transform();
 	virtual void commit_transform();
 	
 	virtual void update_velocity_by_target_location( const Vector& target_location, float_t speed );
 
-	/// �ʂ蔲������I�u�W�F�N�g���ǂ�����Ԃ�
+	/// 通り抜けられるオブジェクトかどうかを返す
 	virtual bool is_ghost() const { return false; }
 
-	/// �Ԃ��������ɔ����̂���A�d���I�u�W�F�N�g���ǂ�����Ԃ�
+	/// ぶつかった時に反発のある、硬いオブジェクトかどうかを返す
 	virtual bool is_hard() const { return true; }
 
-	/// �ǂ��Q���Ƃ��ėL���ȃI�u�W�F�N�g�ǂ�����Ԃ�
+	/// 壁や障害物として有効なオブジェクトどうかを返す
 	virtual bool is_block() const { return is_hard(); }
 
-	/// ( ���D��S�[���Ȃ� ) �����ɒ��n���Ă����ȂȂ����ꂩ�ǂ�����Ԃ�
+	/// ( 風船やゴールなど ) そこに着地しても死なない足場かどうかを返す
 	virtual bool is_safe_footing() const { return false; }
 
 	virtual float_t get_collision_width() const = 0;
@@ -133,7 +133,7 @@ public:
 
 	virtual void on_collide_with_ground() { }
 
-	/// @todo ��������
+	/// @todo 分離する
 	void set_mass( float_t );
 	void set_gravity( const Vector& );
 	void set_friction( float_t );
@@ -145,7 +145,7 @@ public:
 	Transform& get_transform();
 	const Transform& get_transform() const;
 	
-	/// @todo Bullet Physics ���B������
+	/// @todo Bullet Physics を隠蔽する
 	inline btRigidBody* get_rigid_body() { return rigid_body_; }
 	inline const btRigidBody* get_rigid_body() const { return rigid_body_; }
 	inline void set_rigid_body( btRigidBody* rigid_body ) { rigid_body_ = rigid_body; }
@@ -162,10 +162,10 @@ public:
 	virtual void add_event_handler( const char_t*, const EventHandler& ) { }
 
 	/**
-	 * �R���|�[�l���g��ǉ�����
+	 * コンポーネントを追加する
 	 * 
-	 * @param id �ǉ�����R���|�[�l���g�� ID
-	 * @param component �ǉ�����
+	 * @param id 追加するコンポーネントの ID
+	 * @param component 追加する
 	 */
 	void add_component( core::ecs::ComponentTypeId id, Component* component )
 	{
@@ -173,9 +173,9 @@ public:
 	}
 
 	/**
-	 * �w�肵���^�̃R���|�[�l���g���擾����
+	 * 指定した型のコンポーネントを取得する
 	 * 
-	 * @return �R���|�[�l���g
+	 * @return コンポーネント
 	 */
 	template< typename ComponentType >
 	ComponentType* get_component()

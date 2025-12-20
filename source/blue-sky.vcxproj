@@ -76,6 +76,7 @@
     <ClCompile Include="core\math\DirectXMath\Color.cpp" />
     <ClCompile Include="core\math\DirectXMath\Vector.cpp" />
     <ClCompile Include="core\physics\Bullet\BulletPhysics.cpp" />
+    <ClCompile Include="core\physics\PhysicsManager.cpp" />
     <ClCompile Include="core\physics\RigidBody.cpp" />
     <ClCompile Include="core\sound\DirectSound\DirectSound.cpp" />
     <ClCompile Include="core\sound\DirectSound\DirectSoundBuffer.cpp" />
@@ -263,6 +264,7 @@
     <ClInclude Include="core\math\Transform.h" />
     <ClInclude Include="core\math\Vector.h" />
     <ClInclude Include="core\physics\Bullet\BulletPhysics.h" />
+    <ClInclude Include="core\physics\PhysicsManager.h" />
     <ClInclude Include="core\physics\RigidBody.h" />
     <ClInclude Include="core\ResourceManager.h" />
     <ClInclude Include="core\sound\DirectSound\DirectSound.h" />
@@ -589,7 +591,7 @@
       <ForcedIncludeFiles>win\memory_leak_detection.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>true</EnablePREfast>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
@@ -634,7 +636,7 @@
       <ForcedIncludeFiles>win\memory_leak_detection.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>true</EnablePREfast>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>

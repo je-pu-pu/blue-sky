@@ -11,7 +11,7 @@ ElapsedTimer::ElapsedTimer( const MainLoop* main_loop )
 }
 
 /**
- * リセット
+ * 繝ｪ繧ｻ繝�繝�
  *
  *
  */
@@ -22,9 +22,9 @@ void ElapsedTimer::reset()
 }
 
 /**
- * 更新
+ * 譖ｴ譁ｰ
  *
- * MainLoop から現在の時間を取得し、経過時間を計算できるようにする
+ * MainLoop 縺九ｉ迴ｾ蝨ｨ縺ｮ譎る俣繧貞叙蠕励＠縲∫ｵ碁℃譎る俣繧定ｨ育ｮ励〒縺阪ｋ繧医≧縺ｫ縺吶ｋ
  */
 void ElapsedTimer::update()
 {

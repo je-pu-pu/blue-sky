@@ -9,7 +9,7 @@ namespace core
 {
 
 /**
- * ƒƒOŠÇ—ƒNƒ‰ƒX
+ * ãƒ­ã‚°ç®¡ç†ã‚¯ãƒ©ã‚¹
  *
  */
 class Logger

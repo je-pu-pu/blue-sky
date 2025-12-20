@@ -23,24 +23,24 @@ public:
 	using EntityComponentMap = std::unordered_map< EntityId, std::unique_ptr< Component > >;
 
 private:
-	// Entity ‚Ìˆê——
+	// Entity ã®ä¸€è¦§
 	std::unordered_map< EntityId, Entity > entity_list_;
 
-	// Component ‚Ìˆê——
+	// Component ã®ä¸€è¦§
 	std::unordered_map< ComponentTypeId, EntityComponentMap > component_list_;
 
-	// ( SystemTypeId => System ‚ÌÀ‘Ô ) ‚Ìƒ}ƒbƒv ( System ‚ÌÀ‘Ô‚ğ•Û‚·‚é )
+	// ( SystemTypeId => System ã®å®Ÿä½“ ) ã®ãƒãƒƒãƒ— ( System ã®å®Ÿä½“ã‚’ä¿æŒã™ã‚‹ )
 	std::unordered_map< SystemTypeId, std::unique_ptr< BaseSystem > > system_map_;
 
-	// System ‚Ìˆê—— ( í‚ÉÀs‡‚É•À‚ñ‚Å‚¢‚é–‚ª•ÛØ‚³‚ê‚Ä‚¢‚é )
+	// System ã®ä¸€è¦§ ( å¸¸ã«å®Ÿè¡Œé †ã«ã‚½ãƒ¼ãƒˆã•ã‚Œã¦ã„ã‚‹äº‹ãŒä¿è¨¼ã•ã‚Œã¦ã„ã‚‹ )
 	std::vector< BaseSystem* > system_list_;
 
-	/// Ÿ‚É•t—^‚·‚é Entity ID
+	/// æ¬¡ã«ä»˜ä¸ã™ã‚‹ Entity ID
 	EntityId next_entity_id_ = 0;
 
 public:
 	/**
-	 * Entity ‚ğ¶¬‚·‚é
+	 * Entity ã‚’ç”Ÿæˆã™ã‚‹
 	 */
 	Entity* create_entity()
 	{
@@ -52,7 +52,7 @@ public:
 	}
 
 	/**
-	 * w’è‚µ‚½ Entity ‚ğ”jŠü‚·‚é
+	 * æŒ‡å®šã—ãŸ Entity ã‚’ç ´æ£„ã™ã‚‹
 	 */
 	void destroy_entity( EntityId id )
 	{
@@ -60,10 +60,10 @@ public:
 	}
 
 	/**
-	 * Entity ‚É Component ‚ğ’Ç‰Á‚·‚é
-	 * 
+	 * Entity ã« Component ã‚’è¿½åŠ ã™ã‚‹
+	 *
 	 * @param e Entity
-	 * @return ’Ç‰Á‚µ‚½ Component
+	 * @return è¿½åŠ ã—ãŸ Component
 	 */
 	template< typename ComponentType >
 	ComponentType* add_component( const Entity* e )
@@ -111,8 +111,8 @@ public:
 	}
 
 	/**
-	 * Entity ‚©‚ç Component ‚ğæ‚èœ‚­
-	 * 
+	 * Entity ã‹ã‚‰ Component ã‚’å–ã‚Šé™¤ã
+	 *
 	 * @param e Entity
 	 */
 	template< typename ComponentType >
@@ -135,9 +135,9 @@ public:
 	}
 
 	/**
-	 * EntityManager ‚ÉƒVƒXƒeƒ€‚ğ’Ç‰Á‚·‚éB
+	 * EntityManager ã«ã‚·ã‚¹ãƒ†ãƒ ã‚’è¿½åŠ ã™ã‚‹ã€‚
 	 *
-	 * ‚·‚Å‚ÉƒVƒXƒeƒ€‚ª’Ç‰Á‚³‚ê‚Ä‚¢‚éê‡‚ÍA‰½‚à‚µ‚È‚¢
+	 * æ—¢ã«ã‚·ã‚¹ãƒ†ãƒ ãŒè¿½åŠ ã•ã‚Œã¦ã„ã‚‹å ´åˆã¯ã€ä½•ã‚‚ã—ãªã„
 	 */
 	template< typename SystemType >
 	void add_system( int priority = 0 )
@@ -153,11 +153,11 @@ public:
 		system->set_priority( priority );
 
 		system_map_.emplace( id, system );
-		
+
 		system_list_.push_back( system );
 		std::sort( system_list_.begin(), system_list_.end(), [] ( const BaseSystem* a, const BaseSystem* b ) { return a->get_priority() < b->get_priority(); } );
 
-		// Šù‘¶‚Ì‘S Entity ‚É‘Î‚µ‚Ä‘–¸‚ğs‚¢A Entity ‚ª System ‚Ì‘€ì‘ÎÛ‚Æ‚È‚é Component ‚ğ‘S‚Ä‚Á‚Ä‚¢‚½ê‡ASystem ‚É Component ‚Ö‚ÌQÆ‚ğ’Ç‰Á‚·‚é
+		// æ—¢å­˜ã®å…¨ Entity ã«å¯¾ã—ã¦èµ°æŸ»ã‚’è¡Œã„ã€ Entity ãŒ System ã®æ“ä½œå¯¾è±¡ã¨ãªã‚‹ Component ã‚’å…¨ã¦æŒã£ã¦ã„ãŸå ´åˆã€System ã« Component ã¸ã®å‚ç…§ã‚’è¿½åŠ ã™ã‚‹
 		for ( auto& entity : entity_list_ )
 		{
 			system->add_entity_component_if_all_components_ready( & entity.second );
@@ -165,9 +165,9 @@ public:
 	}
 
 	/**
-	 * EntityManager ‚©‚ç System ‚ğæ‚èœ‚­
+	 * EntityManager ã‹ã‚‰ System ã‚’å–ã‚Šé™¤ã
 	 *
-	 * EntityManager ‚É System ‚ª‘¶İ‚µ‚È‚¢ê‡‚ÍA‰½‚à‚µ‚È‚¢
+	 * EntityManager ã« System ãŒå­˜åœ¨ã—ãªã„å ´åˆã¯ã€ä½•ã‚‚ã—ãªã„
 	 */
 	template< typename SystemType >
 	void remove_system()
@@ -183,11 +183,31 @@ public:
 
 		system_list_.erase( std::remove( system_list_.begin(), system_list_.end(), i->second.get() ) );
 
-		system_map_.erase( i );	
+		system_map_.erase( i );
 	}
 
 	/**
-	 * EntityManager ‚É’Ç‰Á‚³‚ê‚Ä‚¢‚é‘S‚Ä‚Ì System ‚ğÀs‚·‚é
+	 * EntityManager ã‹ã‚‰ System ã‚’å–å¾—ã™ã‚‹
+	 *
+	 * @return System ã¸ã®ãƒã‚¤ãƒ³ã‚¿ (å­˜åœ¨ã—ãªã„å ´åˆã¯ nullptr)
+	 */
+	template< typename SystemType >
+	SystemType* get_system()
+	{
+		const auto id = typeid( SystemType ).hash_code();
+
+		auto i = system_map_.find( id );
+
+		if ( i == system_map_.end() )
+		{
+			return nullptr;
+		}
+
+		return static_cast< SystemType* >( i->second.get() );
+	}
+
+	/**
+	 * EntityManager ã«è¿½åŠ ã•ã‚Œã¦ã„ã‚‹å…¨ã¦ã® System ã‚’å®Ÿè¡Œã™ã‚‹
 	 *
 	 */
 	void update()
@@ -199,7 +219,7 @@ public:
 	}
 
 	/**
-	 * ‘S‚Ä‚Ì Entity, Component, System ‚ğíœ‚·‚é
+	 * å…¨ã¦ã® Entity, Component, System ã‚’å‰Šé™¤ã™ã‚‹
 	 */
 	void clear()
 	{

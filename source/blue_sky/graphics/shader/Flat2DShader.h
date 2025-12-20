@@ -6,7 +6,7 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * ‰A‰e‚ğ‚Â‚¯‚È‚¢ 2D ƒVƒF[ƒ_[
+ * é™°å½±ã‚’ã¤ã‘ãªã„ 2D ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 class Flat2DShader : public BaseShader

@@ -13,7 +13,7 @@ inline void random_set_seed( int seed )
 }
 
 /**
- * min <= n <= max ‚Ìƒ‰ƒ“ƒ_ƒ€‚È’l‚ğæ“¾‚·‚é
+ * min <= n <= max ã®ãƒ©ãƒ³ãƒ€ãƒ ãªå€¤ã‚’å–å¾—ã™ã‚‹
  *
  */
 template< typename T > inline T random( T min, T max )
@@ -24,7 +24,7 @@ template< typename T > inline T random( T min, T max )
 }
 
 /**
- * min <= n < max ‚Ìƒ‰ƒ“ƒ_ƒ€‚È’l‚ğæ“¾‚·‚é
+ * min <= n < max ã®ãƒ©ãƒ³ãƒ€ãƒ ãªå€¤ã‚’å–å¾—ã™ã‚‹
  *
  */
 template<> inline int random< int >( int min, int max )

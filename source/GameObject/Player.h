@@ -8,7 +8,7 @@ namespace blue_sky
 {
 
 /**
- * ÉvÉåÉCÉÑÅ[
+ * „Éó„É¨„Ç§„É§„Éº
  *
  */
 class Player : public ActiveObject
@@ -36,49 +36,49 @@ public:
 	using StoneList = std::list< Stone* >;
 
 private:
-	bool		is_on_footing_;			///< åªç›ë´èÍè„ÉtÉâÉO
-	bool		is_jumping_;			///< åªç›ÉWÉÉÉìÉvíÜÉtÉâÉO
-	bool		is_jumpable_;			///< åªç›ÉWÉÉÉìÉvâ¬î\ÉtÉâÉO
-	bool		is_clambering_;			///< åªç›ÇÊÇ∂ìoÇËíÜÉtÉâÉO
+	bool		is_on_footing_;			///< ÁèæÂú®Ë∂≥Â†¥‰∏ä„Éï„É©„Ç∞
+	bool		is_jumping_;			///< ÁèæÂú®„Ç∏„É£„É≥„Éó‰∏≠„Éï„É©„Ç∞
+	bool		is_jumpable_;			///< ÁèæÂú®„Ç∏„É£„É≥„ÉóÂèØËÉΩ„Éï„É©„Ç∞
+	bool		is_clambering_;			///< ÁèæÂú®„Çà„ÅòÁôª„Çä‰∏≠„Éï„É©„Ç∞
 
-	bool		is_located_on_die_;		///< åªç›éÄñSÇ÷å¸ÇØÇƒóéâ∫íÜÉtÉâÉO
-	bool		is_located_on_safe_;	///< ÇªÇÃÇ‹Ç‹óéâ∫Ç∑ÇÈÇ∆ïóëDÇ‹ÇΩÇÕÉSÅ[ÉãÇ∆ê⁄êGÇ∑ÇÈÉtÉâÉO
+	bool		is_located_on_die_;		///< ÁèæÂú®Ê≠ª‰∫°„Å∏Âêë„Åë„Å¶ËêΩ‰∏ã‰∏≠„Éï„É©„Ç∞
+	bool		is_located_on_safe_;	///< „Åù„ÅÆ„Åæ„ÅæËêΩ‰∏ã„Åô„Çã„Å®È¢®Ëàπ„Åæ„Åü„ÅØ„Ç¥„Éº„É´„Å®Êé•Ëß¶„Åô„Çã„Éï„É©„Ç∞
 	
-	bool		is_on_ladder_;			///< íÚéqÇ∆ê⁄êGíÜÉtÉâÉO
-	bool		is_facing_to_block_;	///< è·äQï®ÇÃï˚Çå¸Ç¢Çƒê⁄êGíÜÉtÉâÉO
-	bool		can_clamber_;			///< ÇÊÇ∂ìoÇËâ¬î\ÉtÉâÉO
-	bool		can_peer_down_;			///< ÇÃÇºÇ´çûÇ›â¬î\ÉtÉâÉO
-	bool		can_throw_;				///< êŒìäÇ∞â¬î\ÉtÉâÉO
+	bool		is_on_ladder_;			///< Ê¢ØÂ≠ê„Å®Êé•Ëß¶‰∏≠„Éï„É©„Ç∞
+	bool		is_facing_to_block_;	///< ÈöúÂÆ≥Áâ©„ÅÆÊñπ„ÇíÂêë„ÅÑ„Å¶Êé•Ëß¶‰∏≠„Éï„É©„Ç∞
+	bool		can_clamber_;			///< „Çà„ÅòÁôª„ÇäÂèØËÉΩ„Éï„É©„Ç∞
+	bool		can_peer_down_;			///< „ÅÆ„Åû„ÅçËæº„ÅøÂèØËÉΩ„Éï„É©„Ç∞
+	bool		can_throw_;				///< Áü≥Êäï„ÅíÂèØËÉΩ„Éï„É©„Ç∞
 
-	bool		is_flickering_;			///< åªç›óhÇÁÇ¨íÜÉtÉâÉO
+	bool		is_flickering_;			///< ÁèæÂú®Êè∫„Çâ„Åé‰∏≠„Éï„É©„Ç∞
 
-	int			step_count_;			///< à⁄ìÆÉJÉEÉìÉ^
-	float		step_speed_;			///< à⁄ìÆë¨ìx
+	int			step_count_;			///< ÁßªÂãï„Ç´„Ç¶„É≥„Çø
+	float		step_speed_;			///< ÁßªÂãïÈÄüÂ∫¶
 
-	ActionMode	action_mode_;			///< åªç›ÇÃÉAÉNÉVÉáÉìÇÃÉÇÅ[Éh
-	float_t		action_timer_;			///< åªç›ÇÃÉAÉNÉVÉáÉìÇ™äJénÇµÇƒÇ©ÇÁÇÃåoâﬂéûä‘
-	Vector		action_base_position_;	///< åªç›ÇÃÉAÉNÉVÉáÉìÇÃäÓíÍà íu
-	bool		is_action_pre_finish_;	///< åªç›ÇÃÉAÉNÉVÉáÉìÇ™Ç‡Ç§Ç∑ÇÆèIÇÌÇÈÉtÉâÉO
-	int_t		balloon_sequence_count_;///< åªç›ÇÃòAë±éÊìæÉoÉãÅ[ÉìÇÃêî ( 0 .. 7 )
+	ActionMode	action_mode_;			///< ÁèæÂú®„ÅÆ„Ç¢„ÇØ„Ç∑„Éß„É≥„ÅÆ„É¢„Éº„Éâ
+	float_t		action_timer_;			///< ÁèæÂú®„ÅÆ„Ç¢„ÇØ„Ç∑„Éß„É≥„ÅåÈñãÂßã„Åó„Å¶„Åã„Çâ„ÅÆÁµåÈÅéÊôÇÈñì
+	Vector		action_base_position_;	///< ÁèæÂú®„ÅÆ„Ç¢„ÇØ„Ç∑„Éß„É≥„ÅÆÂü∫Â∫ï‰ΩçÁΩÆ
+	bool		is_action_pre_finish_;	///< ÁèæÂú®„ÅÆ„Ç¢„ÇØ„Ç∑„Éß„É≥„Åå„ÇÇ„ÅÜ„Åô„ÅêÁµÇ„Çè„Çã„Éï„É©„Ç∞
+	int_t		balloon_sequence_count_;///< ÁèæÂú®„ÅÆÈÄ£Á∂öÂèñÂæó„Éê„É´„Éº„É≥„ÅÆÊï∞ ( 0 .. 7 )
 	int_t		balloon_sound_request_;	///< 
 
-	float_t		uncontrollable_timer_;	///< êßå‰ïsî\É^ÉCÉ}Å[
+	float_t		uncontrollable_timer_;	///< Âà∂Âæ°‰∏çËÉΩ„Çø„Ç§„Éû„Éº
 
-	float_t		pitch_;					///< è„â∫ÇÃå¸Ç´ ( ê^â∫ : -1.f / ê^è„ : 1.f )
+	float_t		pitch_;					///< ‰∏ä‰∏ã„ÅÆÂêë„Åç ( Áúü‰∏ã : -1.f / Áúü‰∏ä : 1.f )
 
-	float_t		eye_height_;			///< ñ⁄ÇÃçÇÇ≥
-	float_t		eye_depth_;				///< ñ⁄ÇÃâúçsÇ´ÉIÉtÉZÉbÉg ( m ) ( êgÇèÊÇËèoÇµÇΩéûÇ…ëùÇ¶ÇÈ ) ( 0.f .. 1.f )
+	float_t		eye_height_;			///< ÁõÆ„ÅÆÈ´ò„Åï
+	float_t		eye_depth_;				///< ÁõÆ„ÅÆÂ••Ë°å„Åç„Ç™„Éï„Çª„ÉÉ„Éà ( m ) ( Ë∫´„Çí‰πó„ÇäÂá∫„Åó„ÅüÊôÇ„Å´Â¢ó„Åà„Çã ) ( 0.f .. 1.f )
 
-	bool		has_medal_;				///< ÉÅÉ_Éãï€éùÉtÉâÉO
+	bool		has_medal_;				///< „É°„ÉÄ„É´‰øùÊåÅ„Éï„É©„Ç∞
 
-	int			item_count_[ static_cast< int >( ItemType::MAX ) ] = { 0 };	///< äeÉAÉCÉeÉÄÇÃå¬êî
-	ItemType	selected_item_type_;	///< åªç›ëIëíÜÇÃÉAÉCÉeÉÄ
+	int			item_count_[ static_cast< int >( ItemType::MAX ) ] = { 0 };	///< ÂêÑ„Ç¢„Ç§„ÉÜ„É†„ÅÆÂÄãÊï∞
+	ItemType	selected_item_type_;	///< ÁèæÂú®ÈÅ∏Êäû‰∏≠„ÅÆ„Ç¢„Ç§„ÉÜ„É†
 
-	float		last_footing_height_;	///< ëOâÒÇÃë´èÍÇÃçÇÇ≥ ( ÉoÉãÅ[Éìä‹Çﬁ )
+	float		last_footing_height_;	///< ÂâçÂõû„ÅÆË∂≥Â†¥„ÅÆÈ´ò„Åï ( „Éê„É´„Éº„É≥Âê´„ÇÄ )
 
-	Ladder*		ladder_;				///< åªç›ê⁄êGÇµÇƒÇ¢ÇÈíÚéq
-	Balloon*	balloon_;				///< åªç›éùÇ¡ÇƒÇ¢ÇÈïóëD
-	StoneList	stone_list_;			///< åªç›éùÇ¡ÇƒÇ¢ÇÈêŒÇÃÉäÉXÉg
+	Ladder*		ladder_;				///< ÁèæÂú®Êé•Ëß¶„Åó„Å¶„ÅÑ„ÇãÊ¢ØÂ≠ê
+	Balloon*	balloon_;				///< ÁèæÂú®ÊåÅ„Å£„Å¶„ÅÑ„ÇãÈ¢®Ëàπ
+	StoneList	stone_list_;			///< ÁèæÂú®ÊåÅ„Å£„Å¶„ÅÑ„ÇãÁü≥„ÅÆ„É™„Çπ„Éà
 
 	int			hp_;					///< HP
 
@@ -150,29 +150,29 @@ public:
 
 	void restart() override;
 
-	/// çXêV
+	/// Êõ¥Êñ∞
 	void update() override;
 	
-	// à⁄ìÆ
+	// ÁßªÂãï
 	void step( float_t );
 	void side_step( float_t );
 	void ladder_step( float_t );
 
 	void release_ladder();
 
-	/// ÉWÉÉÉìÉvèàóù
+	/// „Ç∏„É£„É≥„ÉóÂá¶ÁêÜ
 	void jump();
 	void super_jump();
 
-	/// ÇÊÇ∂ìoÇË
+	/// „Çà„ÅòÁôª„Çä
 	void clamber();
 	void stop_clamber();
 
-	// í‚é~
+	// ÂÅúÊ≠¢
 	void stop();
 	void stop_ladder_step();
 
-	/// ï˚å¸â¡éZ
+	/// ÊñπÂêëÂä†ÁÆó
 	void add_direction_degree( float );
 
 	void set_direction_degree( float_t, bool = false );

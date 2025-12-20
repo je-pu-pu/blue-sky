@@ -17,7 +17,7 @@
 namespace blue_sky
 {
 
-/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
+/// @todo ã¡ã‚ƒã‚“ã¨ã™ã‚‹
 static ObjectConstantBufferData object_constant_buffer_data;
 static Vector eye( 0.f, 0.f, -1.f, 1.f );
 static Matrix r;
@@ -32,7 +32,7 @@ CanvasTestScene::CanvasTestScene()
 	texture_ = get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" );
 	get_graphics_manager()->set_sky_box( "sky-box-sky" );
 
-	// •`‰æ«”\‚ð’²‚×‚é‚½‚ß‚ÉAƒfƒtƒHƒ‹ƒg‚Å‘å—Ê‚Ì“_‚ð’Ç‰Á‚·‚é
+	// æç”»æ€§èƒ½ã‚’èª¿ã¹ã‚‹ãŸã‚ã«ã€ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã§å¤§é‡ã®ç‚¹ã‚’è¿½åŠ ã™ã‚‹
 	if ( true )
 	{
 		const int N = 100;
@@ -54,7 +54,7 @@ CanvasTestScene::CanvasTestScene()
 						Color( xr, yr, zr, 1.f )
 					};
 
-					// —ÖŠs‚ð•‚­‚·‚é
+					// è¼ªéƒ­ã‚’é»’ãã™ã‚‹
 					const int a = x == 0 || x == N - 1;
 					const int b = y == 0 || y == N - 1;
 					const int c = z == 0 || z == N - 1;
@@ -80,14 +80,14 @@ CanvasTestScene::~CanvasTestScene()
 }
 
 /**
- * ƒƒCƒ“ƒ‹[ƒvˆ—
+ * ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—å‡¦ç†
  *
  */
 void CanvasTestScene::update()
 {
 	Scene::update();
 
-	/// @todo GraphicsManager ‚ÉˆÚs‚·‚é
+	/// @todo GraphicsManager ã«ç§»è¡Œã™ã‚‹
 	const float rs = 0.05f;
 	static float ry = 0.f;
 	static float rx = 0.f;
@@ -263,7 +263,7 @@ void CanvasTestScene::update()
 		pen_color_ = Color( pen_color[ 0 ], pen_color[ 1 ], pen_color[ 2 ], 1.f );
 	}
 
-	// ƒvƒŒ[ƒ“ƒIƒuƒWƒFƒNƒg‚ÌF‚ð•ÏX‚·‚é
+	// ãƒ—ãƒ¬ãƒ¼ãƒ³ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®è‰²ã‚’å¤‰æ›´ã™ã‚‹
 	auto* plane = get_active_object_manager()->get_active_object( "paint_guide_plane" );
 	auto plane_color = plane->get_model()->get_shader_at( 0 )->get_color( "color" );
 
@@ -278,7 +278,7 @@ void CanvasTestScene::update()
 }
 
 /**
- * •`‰æ
+ * æç”»
  *
  */
 void CanvasTestScene::render()
@@ -286,7 +286,7 @@ void CanvasTestScene::render()
 	get_graphics_manager()->setup_rendering();
 	get_graphics_manager()->render_background();
 
-	/// @todo “_‚àˆêŠ‡‚Å GraphicsManager ‚Å•`‰æ‚·‚éB
+	/// @todo ç‚¹ã‚‚ä¸€æ‹¬ã§ GraphicsManager ã§æç”»ã™ã‚‹ã€‚
 	get_graphics_manager()->set_input_layout( "drawing_point" );
 
 	render_technique( "|drawing_point", [this] {
@@ -303,7 +303,7 @@ void CanvasTestScene::render()
 		points_->render();
 	} );
 
-	/// @todo •`‰æ‡‚ÌŠÇ—‚ð GraphicsManager ‚Ås‚¢ ”¼“§–¾‚ÌƒIƒuƒWƒFƒNƒg‚ÍŒã‚Å•`‰æ‚³‚ê‚é‚æ‚¤‚É‚·‚é
+	/// @todo æç”»é †ã®ç®¡ç†ã‚’ GraphicsManager ã§è¡Œã„ åŠé€æ˜Žã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¯å¾Œã§æç”»ã•ã‚Œã‚‹ã‚ˆã†ã«ã™ã‚‹
 	get_graphics_manager()->render_active_objects( get_active_object_manager() );
 
 	{

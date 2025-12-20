@@ -8,7 +8,7 @@
 #include <windows.h>
 
 /**
- * @brief メイン
+ * @brief 繝｡繧､繝ｳ
  * @param hInst 
  * @param  
  * @param  
@@ -23,7 +23,7 @@ int WINAPI WinMain( _In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ i
 	
 	try
 	{
-		// アプリケーションを初期化する
+		// 繧｢繝励Μ繧ｱ繝ｼ繧ｷ繝ｧ繝ｳ繧貞�晄悄蛹悶☆繧�
 		app = App::get_instance();
 		app->set_title( "blue-sky 2 ( update 1.0.4 )" );
 		app->set_class_name( "blue-sky-2" );

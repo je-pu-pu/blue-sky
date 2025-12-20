@@ -12,9 +12,9 @@ class VertexGroup;
 class Material;
 
 /**
- * ’ŠÛƒƒbƒVƒ…ƒNƒ‰ƒX
+ * æŠ½è±¡ãƒ¡ãƒƒã‚·ãƒ¥ã‚¯ãƒ©ã‚¹
  *
- * —§‘Ì•¨‚ÌŒ`ó‚ğ•Û‚·‚é
+ * ç«‹ä½“ç‰©ã®å½¢çŠ¶ã‚’ä¿æŒã™ã‚‹
  *
  */
 class Mesh
@@ -46,7 +46,7 @@ public:
 };
 
 /**
- * ’¸“_–ˆ‚ÌƒEƒGƒCƒgî•ñ
+ * é ‚ç‚¹æ¯ã®ã‚¦ã‚¨ã‚¤ãƒˆæƒ…å ±
  *
  */
 class VertexWeight
@@ -56,8 +56,8 @@ public:
 	using WeightList	= u8_t[ 4 ];
 		
 private:
-	BoneIndexList	bone_index_list_ = { 0 };	///< ƒ{[ƒ“ƒCƒ“ƒfƒbƒNƒX ( 0 .. 3 )
-	WeightList		weight_list_ = { 0 };		///< ƒEƒGƒCƒg ( 0 .. 3 )
+	BoneIndexList	bone_index_list_ = { 0 };	///< ãƒœãƒ¼ãƒ³ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ ( 0 .. 3 )
+	WeightList		weight_list_ = { 0 };		///< ã‚¦ã‚¨ã‚¤ãƒˆ ( 0 .. 3 )
 	
 public:
 	VertexWeight()

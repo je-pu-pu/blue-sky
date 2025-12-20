@@ -5,21 +5,21 @@ namespace game
 {
 
 /**
- * ƒƒCƒ“ƒ‹[ƒvŠÇ—ƒNƒ‰ƒX
+ * ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—ç®¡ç†ã‚¯ãƒ©ã‚¹
  * 
  */
 class MainLoop
 {
 private:
-	unsigned long fps_;				// –Ú•W FPS
-	unsigned long last_fps_;		// ‘O‚Ì 1 •bŠÔ‚Ì FPS
-	unsigned long current_fps_;		// Œ»İ‚Ì 1 •bŠÔ‚Ì FPS
+	unsigned long fps_;				// ç›®æ¨™ FPS
+	unsigned long last_fps_;		// å‰ã® 1 ç§’é–“ã® FPS
+	unsigned long current_fps_;		// ç¾åœ¨ã® 1 ç§’é–“ã® FPS
 
-	bool is_active_;				// ƒAƒNƒeƒBƒuƒtƒ‰ƒO
+	bool is_active_;				// ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ãƒ•ãƒ©ã‚°
 
-	unsigned long last_time_;		// ‘O‚ÌƒtƒŒ[ƒ€‚ÌŠÔ
-	unsigned long current_time_;	// Œ»İ‚ÌƒtƒŒ[ƒ€‚ÌŠÔ
-	unsigned long last_sec_time_;	// ‘O‚Ì 1 •b‚ÌŠÔ
+	unsigned long last_time_;		// å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ™‚é–“
+	unsigned long current_time_;	// ç¾åœ¨ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ™‚é–“
+	unsigned long last_sec_time_;	// å‰ã® 1 ç§’ã®æ™‚é–“
 
 public:
 	explicit MainLoop( unsigned long );

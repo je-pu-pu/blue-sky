@@ -6,14 +6,14 @@ namespace core::ecs
 {
 
 /**
- * “ü—Í‚É‚æ‚Á‚Äp¨‚ğXV‚·‚é–‚ğƒ^ƒO•t‚¯‚·‚é‚½‚ß‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg
+ * å…¥åŠ›ã«ã‚ˆã£ã¦å§¿å‹¢ã‚’æ›´æ–°ã™ã‚‹äº‹ã‚’ã‚¿ã‚°ä»˜ã‘ã™ã‚‹ãŸã‚ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
  *
  */
 class TransformControlComponent : public Component
 {
 public:
-	float yaw	= 0.f; /// p¨‚Ì Y ²‚É‚¨‚¯‚é‰ñ“]Šp“x ( radian ) 
-	float pitch	= 0.f; /// p¨‚Ì X ²‚É‚¨‚¯‚é‰ñ“]Šp“x ( radian ) 
+	float yaw	= 0.f; /// å§¿å‹¢ã® Y è»¸ã«ãŠã‘ã‚‹å›è»¢è§’åº¦ ( radian ) 
+	float pitch	= 0.f; /// å§¿å‹¢ã® X è»¸ã«ãŠã‘ã‚‹å›è»¢è§’åº¦ ( radian ) 
 
 }; // class TransformControlComponent
 

@@ -13,7 +13,7 @@ namespace blue_sky
 {
 
 /**
- * ƒXƒg[ƒŠ[‰æ–Ê‚Ìˆ—‚ğŠÇ—‚·‚é
+ * ã‚¹ãƒˆãƒ¼ãƒªãƒ¼ç”»é¢ã®å‡¦ç†ã‚’ç®¡ç†ã™ã‚‹
  *
  */
 class StoryTextScene : public Scene
@@ -50,8 +50,8 @@ public:
 	StoryTextScene( const char*, const char* );
 	~StoryTextScene();
 
-	void update() override;				///< ƒƒCƒ“ƒ‹[ƒv
-	void render() override;				///< •`‰æ
+	void update() override;				///< ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—
+	void render() override;				///< æç”»
 
 }; // class StoryTextScene
 

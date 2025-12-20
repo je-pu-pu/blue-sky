@@ -156,9 +156,9 @@ void Scene::stop_sound( const char* name ) const
 }
 
 /***
- * ƒXƒvƒ‰ƒCƒg•`‰æ‚Ì‚½‚ß‚Ì’è”ƒoƒbƒtƒ@‚ğXV‚·‚é
+ * ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆæç”»ã®ãŸã‚ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’æ›´æ–°ã™ã‚‹
  *
- * @todo GraphicsManager ‚ÉˆÚs‚·‚é
+ * @todo GraphicsManager ã«ç§»è¡Œã™ã‚‹
  */
 void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t drawing_accent_scale )
 {
@@ -189,7 +189,7 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 }
 
 /**
- * ‘S‚Ä‚Ì’è”ƒoƒbƒtƒ@‚ğƒoƒCƒ“ƒh‚·‚é
+ * å…¨ã¦ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹
  *
  */
 void Scene::bind_all_render_data() const
@@ -201,7 +201,7 @@ void Scene::bind_all_render_data() const
 }
 
 /**
- * ƒQ[ƒ€–ˆ‚Ì’è”ƒoƒbƒtƒ@‚ğƒoƒCƒ“ƒh‚·‚é
+ * ã‚²ãƒ¼ãƒ æ¯ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹
  *
  */
 void Scene::bind_game_render_data() const
@@ -212,7 +212,7 @@ void Scene::bind_game_render_data() const
 }
 
 /**
- * ƒtƒŒ[ƒ€–ˆ‚Ì’è”ƒoƒbƒtƒ@‚ğƒoƒCƒ“ƒh‚·‚é
+ * ãƒ•ãƒ¬ãƒ¼ãƒ æ¯ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹
  *
  */
 void Scene::bind_frame_render_data() const
@@ -223,7 +223,7 @@ void Scene::bind_frame_render_data() const
 }
 
 /**
- * ƒIƒuƒWƒFƒNƒg–ˆ‚Ì’è”ƒoƒbƒtƒ@‚ğƒoƒCƒ“ƒh‚·‚é
+ * ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆæ¯ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹
  *
  */
 void Scene::bind_shared_object_render_data() const
@@ -234,10 +234,10 @@ void Scene::bind_shared_object_render_data() const
 }
 
 /**
- * w’è‚µ‚½ƒeƒNƒjƒbƒN‚Ì‘S‚Ä‚ÌƒpƒX‚ÅƒŒƒ“ƒ_ƒŠƒ“ƒOˆ—‚ğÀs‚·‚é
+ * æŒ‡å®šã—ãŸãƒ†ã‚¯ãƒ‹ãƒƒã‚¯ã®å…¨ã¦ã®ãƒ‘ã‚¹ã§ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å‡¦ç†ã‚’å®Ÿè¡Œã™ã‚‹
  *
- * @param technique_name ƒeƒNƒjƒbƒN–¼
- * @param function ƒŒƒ“ƒ_ƒŠƒ“ƒOˆ—
+ * @param technique_name ãƒ†ã‚¯ãƒ‹ãƒƒã‚¯å
+ * @param function ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å‡¦ç†
  */
 void Scene::render_technique( const char_t* technique_name, std::function< void() > function ) const
 {
@@ -245,7 +245,7 @@ void Scene::render_technique( const char_t* technique_name, std::function< void(
 }
 
 /**
- * ƒtƒF[ƒ_[‚ğ•`‰æ‚·‚é
+ * ãƒ•ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’æç”»ã™ã‚‹
  *
  */
 void Scene::render_fader() const

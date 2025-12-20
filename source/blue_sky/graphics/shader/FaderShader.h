@@ -6,7 +6,7 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * フェーダー用シェーダー
+ * 繝輔ぉ繝ｼ繝繝ｼ逕ｨ繧ｷ繧ｧ繝ｼ繝繝ｼ
  *
  */
 class FaderShader : public BaseShader

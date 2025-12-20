@@ -9,7 +9,7 @@ namespace blue_sky
 class Player;
 
 /**
- * ƒJƒƒ‰
+ * ã‚«ãƒ¡ãƒ©
  *
  */
 class Camera : public GameObject
@@ -17,23 +17,23 @@ class Camera : public GameObject
 public:
 
 private:
-	Vector position_;					///< ‹“_
-	Vector look_at_;					///< ’‹“_
-	Vector up_;							///< ã
+	Vector position_;					///< è¦–ç‚¹
+	Vector look_at_;					///< æ³¨è¦–ç‚¹
+	Vector up_;							///< ä¸Š
 
-	Vector front_;						///< ‘O
-	Vector right_;						///< ‰E
+	Vector front_;						///< å‰
+	Vector right_;						///< å³
 
-	Vector rotate_degree_;				///< XYZ Še²‚É‘Î‚·‚é‰ñ“]Šp“x
-	Vector rotate_degree_target_;		///< XYZ Še²‚É‘Î‚·‚é‰ñ“]Šp“x ( –Ú•W )
+	Vector rotate_degree_;				///< XYZ å„è»¸ã«å¯¾ã™ã‚‹å›è»¢è§’åº¦
+	Vector rotate_degree_target_;		///< XYZ å„è»¸ã«å¯¾ã™ã‚‹å›è»¢è§’åº¦ ( ç›®æ¨™ )
 
 	float_t fov_;						///< FOV
-	float_t fov_target_;				///< FOV ( –Ú•W )
-	float_t fov_default_;				///< FOV ( •W€ )
+	float_t fov_target_;				///< FOV ( ç›®æ¨™ )
+	float_t fov_default_;				///< FOV ( æ¨™æº– )
 
-	float_t aspect_;					///< ƒAƒXƒyƒNƒg”ä
+	float_t aspect_;					///< ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”
 
-	float_t rotate_chase_speed_;		///< ‰ñ“]‘¬“x
+	float_t rotate_chase_speed_;		///< å›è»¢é€Ÿåº¦
 
 protected:
 	float_t get_collision_width() const override { return 0.f; }

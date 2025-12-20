@@ -75,7 +75,7 @@ void StreamingSound::update()
 {
 	Sound::update();
 
-	// Ä¶I—¹ƒ`ƒFƒbƒN
+	// å†ç”Ÿçµ‚äº†ãƒã‚§ãƒƒã‚¯
 	if ( ! is_loop_ )
 	{
 		if ( get_current_position() >= static_cast< float >( sound_file_->size() ) / static_cast< float >( sound_file_->size_per_sec() ) )
@@ -86,7 +86,7 @@ void StreamingSound::update()
 
 	auto pos = sound_buffer_->get_current_position();
 
-	// ƒoƒbƒtƒ@‘‚«ž‚Ýƒ`ƒFƒbƒN
+	// ãƒãƒƒãƒ•ã‚¡æ›¸ãè¾¼ã¿ãƒã‚§ãƒƒã‚¯
 	if ( is_first_half_playing_ && pos >= sound_buffer_->get_size() / 2 )
 	{
 		stream_half( false );

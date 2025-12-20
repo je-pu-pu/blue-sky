@@ -11,7 +11,7 @@ namespace core::graphics::direct_3d_11
 
 
 	/**
-	 * Direct3D 11 ƒŒƒ“ƒ_ƒŠƒ“ƒOŒ‹‰Ê‚ğ‘‚«‚Ş–‚ª‚Å‚«‚é Texture
+	 * Direct3D 11 ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°çµæœã‚’æ›¸ãè¾¼ã‚€äº‹ãŒã§ãã‚‹ Texture
 	 *
 	 */
 	class RenderTargetTexture : public core::graphics::RenderTargetTexture

@@ -9,7 +9,7 @@ namespace core::ecs
 {
 
 /**
- * ƒVƒXƒeƒ€‚ÌŠî’êƒNƒ‰ƒX
+ * ã‚·ã‚¹ãƒ†ãƒ ã®åŸºåº•ã‚¯ãƒ©ã‚¹
  *
  */
 template< typename ... ComponentTypes >
@@ -24,7 +24,7 @@ private:
 	struct ComponentTypeList
 	{
 		/**
-		 * ComponentTypes ‚Éw’è‚µ‚½ Component ‚ÌŒ^‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é‚©‚ğ’²‚×‚é
+		 * ComponentTypes ã«æŒ‡å®šã—ãŸ Component ã®å‹ãŒå«ã¾ã‚Œã¦ã„ã‚‹ã‹ã‚’èª¿ã¹ã‚‹
 		 */
 		static constexpr bool has_component_type( ComponentTypeId component_type_id )
 		{
@@ -37,9 +37,9 @@ private:
 		}
 
 		/**
-		 * Entity ‚É ComponentTypes ‚Ì Component ‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é‚©‚ğ’²‚×AŠÜ‚Ü‚ê‚Ä‚¢‚ê‚Î‚»‚ê‚ğ component_tuple ‚É’Ç‰Á‚·‚é
+		 * Entity ã« ComponentTypes ã® Component ãŒå«ã¾ã‚Œã¦ã„ã‚‹ã‹ã‚’èª¿ã¹ã€å«ã¾ã‚Œã¦ã„ã‚Œã°ãã‚Œã‚’ component_tuple ã«è¿½åŠ ã™ã‚‹
 		 * 
-		 * @return bool Entity ‚É ComponentTypes ‚Ì Component ‚ª‘S‚ÄŠÜ‚Ü‚ê‚Ä‚¢‚ê‚Î true ‚ğA‚Ğ‚Æ‚Â‚Å‚àŠÜ‚Ü‚ê‚Ä‚¢‚È‚¢‚à‚Ì‚ª‚ ‚ê‚Î false ‚ğ•Ô‚·
+		 * @return bool Entity ã« ComponentTypes ã® Component ãŒå…¨ã¦å«ã¾ã‚Œã¦ã„ã‚Œã° true ã‚’ã€ã²ã¨ã¤ã§ã‚‚å«ã¾ã‚Œã¦ã„ãªã„ã‚‚ã®ãŒã‚ã‚Œã° false ã‚’è¿”ã™
 		 */
 		static constexpr bool gather_entity_components( const Entity* entity, ComponentTuple& component_tuple )
 		{
@@ -75,14 +75,14 @@ private:
 	};
 
 private:
-	/// ‘€ì‘ÎÛ‚Æ‚È‚é Component ‚Ìˆê——
+	/// æ“ä½œå¯¾è±¡ã¨ãªã‚‹ Component ã®ä¸€è¦§
 	ComponentList component_list_;
 
 	/**
-	 * w’è‚µ‚½ Component ‚ª©g‚Ì System ‚Ì‘€ì‘ÎÛ‚ÉŠÜ‚Ü‚ê‚Ä‚¢‚é‚©‚ğ’²‚×‚é
+	 * æŒ‡å®šã—ãŸ Component ãŒè‡ªèº«ã® System ã®æ“ä½œå¯¾è±¡ã«å«ã¾ã‚Œã¦ã„ã‚‹ã‹ã‚’èª¿ã¹ã‚‹
 	 * 
 	 * @param component_type_id ComponentTypeId
-	 * @return bool w’è‚µ‚½ Component ‚ª©g‚Ì System ‚Ì‘€ì‘ÎÛ‚ÉŠÜ‚Ü‚ê‚Ä‚¢‚éê‡‚Í true ‚ğAŠÜ‚Ü‚ê‚Ä‚¢‚È‚¯‚ê‚Î false ‚ğ•Ô‚·
+	 * @return bool æŒ‡å®šã—ãŸ Component ãŒè‡ªèº«ã® System ã®æ“ä½œå¯¾è±¡ã«å«ã¾ã‚Œã¦ã„ã‚‹å ´åˆã¯ true ã‚’ã€å«ã¾ã‚Œã¦ã„ãªã‘ã‚Œã° false ã‚’è¿”ã™
 	 */
 	bool has_component_type( ComponentTypeId component_type_id ) const override
 	{
@@ -90,7 +90,7 @@ private:
 	}
 
 	/**
-	 * ‘€ì‘ÎÛ‚©‚ç entity ‚Ì Component ‚ğíœ‚·‚é
+	 * æ“ä½œå¯¾è±¡ã‹ã‚‰ entity ã® Component ã‚’å‰Šé™¤ã™ã‚‹
 	 * 
 	 * @param entity entity
 	 */
@@ -108,9 +108,9 @@ public:
 	virtual ~System() = default;
 
 	/**
-	 * entity ‚ğƒ`ƒFƒbƒN‚µAentity ‚ª©g‚Ì System ‚Ì‘€ì‘ÎÛ‚Æ‚È‚é Component ‚ğ‘S‚Ä‚Á‚Ä‚¢‚ê‚ÎA‘€ì‘ÎÛ‚Æ‚µ‚Ä’Ç‰Á‚·‚é
+	 * entity ã‚’ãƒã‚§ãƒƒã‚¯ã—ã€entity ãŒè‡ªèº«ã® System ã®æ“ä½œå¯¾è±¡ã¨ãªã‚‹ Component ã‚’å…¨ã¦æŒã£ã¦ã„ã‚Œã°ã€æ“ä½œå¯¾è±¡ã¨ã—ã¦è¿½åŠ ã™ã‚‹
 	 * 
-	 * @param entity ƒ`ƒFƒbƒN‚·‚é entity
+	 * @param entity ãƒã‚§ãƒƒã‚¯ã™ã‚‹ entity
 	 */
 	void add_entity_component_if_all_components_ready( const Entity* entity ) override
 	{

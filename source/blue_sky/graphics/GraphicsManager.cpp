@@ -8,7 +8,7 @@
 #include <blue_sky/graphics/FbxFileLoader.h>
 #include <blue_sky/graphics/Line.h>
 
-/// @todo •Ê cpp ‚ÉˆÚ“®
+/// @todo åˆ¥ cpp ã«ç§»å‹•
 #include <blue_sky/graphics/shader/NullShader.h>
 #include <blue_sky/graphics/shader/FlatShader.h>
 #include <blue_sky/graphics/shader/FaderShader.h>
@@ -76,7 +76,7 @@ const ActiveObjectManager* GraphicsManager::get_game_object_manager() const
 }
 
 /**
- * XVˆ—
+ * æ›´æ–°å‡¦ç†
  *
  */
 void GraphicsManager::update()
@@ -92,10 +92,10 @@ void GraphicsManager::update()
 }
 
 /**
- * w’è‚µ‚½ƒ‚ƒfƒ‹‚Éƒtƒ@ƒCƒ‹‚©‚çƒƒbƒVƒ…‚ğ“Ç‚İ‚Ş
+ * æŒ‡å®šã—ãŸãƒ¢ãƒ‡ãƒ«ã«ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ãƒ¡ãƒƒã‚·ãƒ¥ã‚’èª­ã¿è¾¼ã‚€
  *
- * @param model ƒ‚ƒfƒ‹
- * @param name ƒ‚ƒfƒ‹–¼
+ * @param model ãƒ¢ãƒ‡ãƒ«
+ * @param name ãƒ¢ãƒ‡ãƒ«å
  */
 bool_t GraphicsManager::load_mesh( Model* model, const char_t* name )
 {
@@ -153,10 +153,10 @@ bool_t GraphicsManager::load_mesh( Model* model, const char_t* name )
 }
 
 /**
- * w’è‚µ‚½ƒ‚ƒfƒ‹‚Éƒtƒ@ƒCƒ‹‚©‚çƒ‰ƒCƒ“‚ğ“Ç‚İ‚Ş
+ * æŒ‡å®šã—ãŸãƒ¢ãƒ‡ãƒ«ã«ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ãƒ©ã‚¤ãƒ³ã‚’èª­ã¿è¾¼ã‚€
  *
- * @param model ƒ‚ƒfƒ‹
- * @param name ƒ‚ƒfƒ‹–¼
+ * @param model ãƒ¢ãƒ‡ãƒ«
+ * @param name ãƒ¢ãƒ‡ãƒ«å
  */
 bool_t GraphicsManager::load_line( Model* model, const char_t* name )
 {
@@ -173,10 +173,10 @@ bool_t GraphicsManager::load_line( Model* model, const char_t* name )
 
 
 /**
- * ƒ‚ƒfƒ‹‚ğ“Ç‚İ‚Ş
+ * ãƒ¢ãƒ‡ãƒ«ã‚’èª­ã¿è¾¼ã‚€
  *
- * @param name –¼‘O
- * @return ƒ‚ƒfƒ‹
+ * @param name åå‰
+ * @return ãƒ¢ãƒ‡ãƒ«
  */
 GraphicsManager::Model* GraphicsManager::load_model( const char_t* name )
 {
@@ -222,7 +222,7 @@ GraphicsManager::Model* GraphicsManager::load_model( const char_t* name )
 }
 
 /**
- * ƒ‚ƒfƒ‹‚ğ•¡»‚·‚é
+ * ãƒ¢ãƒ‡ãƒ«ã‚’è¤‡è£½ã™ã‚‹
  *
  */
 GraphicsManager::Model* GraphicsManager::clone_model( const Model* m )
@@ -231,13 +231,13 @@ GraphicsManager::Model* GraphicsManager::clone_model( const Model* m )
 }
 
 /**
- * –¼‘O‚Æƒtƒ@ƒCƒ‹–¼‚ğw’è‚µ‚ÄƒeƒNƒXƒ`ƒƒ‚ğƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚Ş
+ * åå‰ã¨ãƒ•ã‚¡ã‚¤ãƒ«åã‚’æŒ‡å®šã—ã¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰èª­ã¿è¾¼ã‚€
  *
- * w’è‚³‚ê‚½–¼‘O‚ÌƒeƒNƒXƒ`ƒƒ‚ª‚·‚Å‚ÉŠÇ—‚³‚ê‚Ä‚¢‚éê‡‚ÍAƒeƒNƒXƒ`ƒƒ‚ğƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚Ü‚¸ŠÇ—‚³‚ê‚Ä‚¢‚éƒeƒNƒXƒ`ƒƒ‚ğ•Ô‚·
- * w’è‚³‚ê‚½–¼‘O‚ÌƒeƒNƒXƒ`ƒƒ‚ªŠÇ—‚³‚ê‚Ä‚¢‚È‚¢ê‡‚ÍAw’è‚³‚ê‚½ƒtƒ@ƒCƒ‹ƒpƒX‚©‚çƒeƒNƒXƒ`ƒƒ‚ğ“Ç‚İ‚İA–¼‘O‚ğ•t‚¯‚ÄŠÇ—‚µA‚»‚ÌƒeƒNƒXƒ`ƒƒ‚ğ•Ô‚·
+ * æŒ‡å®šã•ã‚ŒãŸåå‰ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ãŒã™ã§ã«ç®¡ç†ã•ã‚Œã¦ã„ã‚‹å ´åˆã¯ã€ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰èª­ã¿è¾¼ã¾ãšç®¡ç†ã•ã‚Œã¦ã„ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’è¿”ã™
+ * æŒ‡å®šã•ã‚ŒãŸåå‰ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ãŒç®¡ç†ã•ã‚Œã¦ã„ãªã„å ´åˆã¯ã€æŒ‡å®šã•ã‚ŒãŸãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ã‹ã‚‰ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’èª­ã¿è¾¼ã¿ã€åå‰ã‚’ä»˜ã‘ã¦ç®¡ç†ã—ã€ãã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’è¿”ã™
  *
- * @param name ƒeƒNƒXƒ`ƒƒ–¼
- * @param file_name ƒtƒ@ƒCƒ‹ƒpƒX
+ * @param name ãƒ†ã‚¯ã‚¹ãƒãƒ£å
+ * @param file_name ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹
  */
 GraphicsManager::Texture* GraphicsManager::load_named_texture( const char_t* name, const char_t* file_path )
 {
@@ -261,10 +261,10 @@ GraphicsManager::Texture* GraphicsManager::load_named_texture( const char_t* nam
 }
 
 /**
- * –¼‘O‚ğw’è‚µ‚ÄƒeƒNƒXƒ`ƒƒ‚ğæ“¾‚·‚é
+ * åå‰ã‚’æŒ‡å®šã—ã¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’å–å¾—ã™ã‚‹
  *
- * w’è‚³‚ê‚½–¼‘O‚ÌƒeƒNƒXƒ`ƒƒ‚ª‚·‚ÅŠÇ—‚³‚ê‚Ä‚¢‚éê‡‚ÍA‚»‚ÌƒeƒNƒXƒ`ƒƒ‚ğ•Ô‚·
- * w’è‚³‚ê‚½–¼‘O‚ÌƒeƒNƒXƒ`ƒƒ‚ªŠÇ—‚³‚ê‚Ä‚¢‚È‚¢ê‡‚ÍAˆê’è‚Ìƒ‹[ƒ‹‚ÉŠî‚Ã‚«–¼‘O‚ğƒtƒ@ƒCƒ‹ƒpƒX‚É•ÏŠ·‚µAƒeƒNƒXƒ`ƒƒ‚ğƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚İA–¼‘O‚ÅŠÄ‹‚µA‚»‚ÌƒeƒNƒXƒ`ƒƒ‚ğ•Ô‚·
+ * æŒ‡å®šã•ã‚ŒãŸåå‰ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ãŒã™ã§ç®¡ç†ã•ã‚Œã¦ã„ã‚‹å ´åˆã¯ã€ãã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’è¿”ã™
+ * æŒ‡å®šã•ã‚ŒãŸåå‰ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ãŒç®¡ç†ã•ã‚Œã¦ã„ãªã„å ´åˆã¯ã€ä¸€å®šã®ãƒ«ãƒ¼ãƒ«ã«åŸºã¥ãåå‰ã‚’ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ã«å¤‰æ›ã—ã€ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰èª­ã¿è¾¼ã¿ã€åå‰ã§ç›£è¦–ã—ã€ãã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’è¿”ã™
  */
 GraphicsManager::Texture* GraphicsManager::get_texture( const char_t* name )
 {
@@ -290,9 +290,9 @@ GraphicsManager::Texture* GraphicsManager::get_texture( const char_t* name )
 }
 
 /**
- * –¼‘O‚ğw’è‚µ‚ÄƒeƒNƒXƒ`ƒƒ‚ğƒAƒ“ƒ[ƒh‚·‚é
+ * åå‰ã‚’æŒ‡å®šã—ã¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚¢ãƒ³ãƒ­ãƒ¼ãƒ‰ã™ã‚‹
  *
- * @param name ƒeƒNƒXƒ`ƒƒ–¼
+ * @param name ãƒ†ã‚¯ã‚¹ãƒãƒ£å
  */
 void GraphicsManager::unload_named_texture( const char_t* name )
 {
@@ -300,10 +300,10 @@ void GraphicsManager::unload_named_texture( const char_t* name )
 }
 
 /**
- * ƒfƒtƒHƒ‹ƒg‚ÌƒVƒF[ƒ_[‚ğ€”õ‚·‚é
+ * ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’æº–å‚™ã™ã‚‹
  *
- * @todo ƒXƒNƒŠƒvƒg‚©‚çs‚¦‚é‚æ‚¤‚É‚·‚é ( C++ ‚ÌƒVƒF[ƒ_[ƒNƒ‰ƒX‚É–¼‘O‚ğ•t‚¯‚Ä‚¨‚«AƒXƒNƒŠƒvƒg‚©‚çƒVƒF[ƒ_[ƒNƒ‰ƒX–¼, InputLayout –¼, ƒeƒNƒjƒbƒN–¼‚ğw’è‚µ‚ÄƒVƒF[ƒ_[ƒIƒuƒWƒFƒNƒg‚ğ new ‚Å‚«‚È‚¢‚©H )
- * @todo ŠÖ”–¼’¼‚·
+ * @todo ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‹ã‚‰è¡Œãˆã‚‹ã‚ˆã†ã«ã™ã‚‹ ( C++ ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚¯ãƒ©ã‚¹ã«åå‰ã‚’ä»˜ã‘ã¦ãŠãã€ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‹ã‚‰ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚¯ãƒ©ã‚¹å, InputLayout å, ãƒ†ã‚¯ãƒ‹ãƒƒã‚¯åã‚’æŒ‡å®šã—ã¦ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ new ã§ããªã„ã‹ï¼Ÿ )
+ * @todo é–¢æ•°åç›´ã™
  */
 void GraphicsManager::setup_default_shaders()
 {
@@ -343,25 +343,25 @@ void GraphicsManager::setup_default_shaders()
 }
 
 /**
- * ‘S‚Ä‚ÌƒVƒF[ƒ_[‚ğì¬‚µ‚È‚¨‚·
+ * å…¨ã¦ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ä½œæˆã—ãªãŠã™
  * 
  */
 void GraphicsManager::refresh_all_shaders()
 {
-	// ‘S‚Ä‚ÌƒVƒF[ƒ_[‚ğÄ“Ç‚İ‚İ‚·‚é
+	// å…¨ã¦ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’å†èª­ã¿è¾¼ã¿ã™ã‚‹
 	for ( auto& s: get_shader_manager().get_resource_list() )
 	{
 		s->reload();
 	}
 	
 #if 0
-	// ‘S‚Ä‚ÌƒVƒF[ƒ_[‚ğíœ‚·‚é
+	// å…¨ã¦ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’å‰Šé™¤ã™ã‚‹
 	get_shader_manager().clear_all();
 
-	// ƒfƒtƒHƒ‹ƒg‚ÌƒVƒF[ƒ_[‚ğì¬‚·‚é
+	// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ä½œæˆã™ã‚‹
 	setup_default_shaders();
 
-	// ‘S‚Ä‚Ì GameObject ‚ÌƒVƒF[ƒ_[‚ğì¬‚·‚é
+	// å…¨ã¦ã® GameObject ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ä½œæˆã™ã‚‹
 	for ( auto* o: get_game_object_manager()->active_object_list() )
 	{
 		if ( ! o->get_model() )
@@ -378,7 +378,7 @@ void GraphicsManager::refresh_all_shaders()
 }
 
 /**
- * †ƒeƒNƒXƒ`ƒƒ‚ğ“Ç‚İ‚Ş
+ * ç´™ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’èª­ã¿è¾¼ã‚€
  *
  */
 void GraphicsManager::load_paper_textures()
@@ -396,9 +396,9 @@ void GraphicsManager::load_paper_textures()
 }
 
 /**
- * †ƒeƒNƒXƒ`ƒƒ‚Ìƒ^ƒCƒv‚ğİ’è‚·‚é
+ * ç´™ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ã‚¿ã‚¤ãƒ—ã‚’è¨­å®šã™ã‚‹
  *
- * @param type †ƒeƒNƒXƒ`ƒƒ‚Ìƒ^ƒCƒv
+ * @param type ç´™ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ã‚¿ã‚¤ãƒ—
  */
 void GraphicsManager::set_paper_texture_type( int_t type )
 {
@@ -414,9 +414,9 @@ void GraphicsManager::set_paper_texture_type( int_t type )
 }
 
 /**
- * †ƒeƒNƒXƒ`ƒƒ‚ğƒVƒF[ƒ_[‚ÉƒoƒCƒ“ƒh‚·‚é
+ * ç´™ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹
  *
- * @todo unload_texture(), unload_texture_all() ‚ÅƒeƒNƒXƒ`ƒƒ‚ªƒAƒ“ƒ[ƒh‚³‚ê‚½ê‡‚É³‚µ‚­‘Î‰‚·‚é
+ * @todo unload_texture(), unload_texture_all() ã§ãƒ†ã‚¯ã‚¹ãƒãƒ£ãŒã‚¢ãƒ³ãƒ­ãƒ¼ãƒ‰ã•ã‚ŒãŸå ´åˆã«æ­£ã—ãå¯¾å¿œã™ã‚‹
  */
 void GraphicsManager::bind_paper_texture() const
 {
@@ -427,12 +427,12 @@ void GraphicsManager::bind_paper_texture() const
 }
 
 /**
- * •`‰æ‚É•K—v‚ÈƒVƒF[ƒ_[ƒŠƒ\[ƒX‚ğƒAƒbƒvƒf[ƒg‚·‚é
+ * æç”»ã«å¿…è¦ãªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ã‚’ã‚¢ãƒƒãƒ—ãƒ‡ãƒ¼ãƒˆã™ã‚‹
  *
  */
 void GraphicsManager::update_constant_buffers() const
 {
-	/// @todo –ˆƒtƒŒ[ƒ€s‚¤•K—v‚ª‚ ‚é‚©H
+	/// @todo æ¯ãƒ•ãƒ¬ãƒ¼ãƒ è¡Œã†å¿…è¦ãŒã‚ã‚‹ã‹ï¼Ÿ
 	get_frame_drawing_render_data()->update();
 
 	for ( const auto& game_object : get_game_object_manager()->active_object_list() )
@@ -447,12 +447,12 @@ void GraphicsManager::update_constant_buffers() const
 }
 
 /**
- * •`‰æ‚É•K—v‚È€”õ‚ğs‚¤
+ * æç”»ã«å¿…è¦ãªæº–å‚™ã‚’è¡Œã†
  * 
  */
 void GraphicsManager::setup_rendering()
 {
-	// ƒƒCƒ“ƒJƒƒ‰‚Ìî•ñ‚ªİ’è‚³‚ê‚Ä‚¢‚È‚¢ê‡‚Í‰½‚à‚µ‚È‚¢
+	// ãƒ¡ã‚¤ãƒ³ã‚«ãƒ¡ãƒ©ã®æƒ…å ±ãŒè¨­å®šã•ã‚Œã¦ã„ãªã„å ´åˆã¯ä½•ã‚‚ã—ãªã„
 	if ( ! main_camera_transform_component_ || ! main_camera_component_ )
 	{
 		return;
@@ -470,10 +470,10 @@ void GraphicsManager::setup_rendering()
 	get_frame_render_data()->data().view = ( Matrix().set_look_at( eye, at, up ) );
 	get_frame_render_data()->data().projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_component->fov ), aspect, camera_component->near_clip, camera_component->far_clip );
 	
-	/// @todo ‚¿‚á‚ñ‚Æ‚â‚é ( ECS ‰»H set_light_info() ? )
+	/// @todo ã¡ã‚ƒã‚“ã¨ã‚„ã‚‹ ( ECS åŒ–ï¼Ÿ set_light_info() ? )
 	get_frame_render_data()->data().light = Vector( -1.f, -2.f, 0.f, 0.f ).normalize();
 
-	/// @todo ‚±‚±‚Å‚â‚é‚×‚«H
+	/// @todo ã“ã“ã§ã‚„ã‚‹ã¹ãï¼Ÿ
 	get_frame_render_data()->data().time = GameMain::get_instance()->get_current_scene()->get_total_elapsed_time();
 
 	get_frame_render_data()->update();
@@ -482,9 +482,9 @@ void GraphicsManager::setup_rendering()
 }
 
 /**
- * ƒVƒƒƒhƒEƒ}ƒbƒv‚ğ•`‰æ‚·‚é
+ * ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã‚’æç”»ã™ã‚‹
  *
- * @todo Å“K‰»E‚‘¬‰»
+ * @todo æœ€é©åŒ–ãƒ»é«˜é€ŸåŒ–
  */
 void GraphicsManager::render_shadow_map() const
 {
@@ -500,10 +500,10 @@ void GraphicsManager::render_shadow_map() const
 }
 
 /**
- * ƒVƒƒƒhƒEƒ}ƒbƒv‚ğ•`‰æ‚·‚é
+ * ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã‚’æç”»ã™ã‚‹
  *
- * @param shader ƒVƒF[ƒ_[
- * @param is_skin_mesh ƒXƒLƒ“ƒƒbƒVƒ…ƒtƒ‰ƒO
+ * @param shader ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
+ * @param is_skin_mesh ã‚¹ã‚­ãƒ³ãƒ¡ãƒƒã‚·ãƒ¥ãƒ•ãƒ©ã‚°
  */
 void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool is_skin_mesh ) const
 {
@@ -537,7 +537,7 @@ void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool
 }
 
 /**
- * ‘S‚Ä‚Ì ActiveObject ‚ğ•`‰æ‚·‚é
+ * å…¨ã¦ã® ActiveObject ã‚’æç”»ã™ã‚‹
  *
  */
 void GraphicsManager::render_active_objects( const ActiveObjectManager* active_object_manager ) const
@@ -564,7 +564,7 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 
 	render_technique( "|drawing_line", [ this, active_object_manager ]
 	{
-		/// @todo •K—v‚È’è”ƒoƒbƒtƒ@‚ğ•K—v‚ÈƒVƒF[ƒ_[‚É‚¾‚¯ƒoƒCƒ“ƒh‚·‚é‚æ‚¤‚É‚·‚é
+		/// @todo å¿…è¦ãªå®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’å¿…è¦ãªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«ã ã‘ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹ã‚ˆã†ã«ã™ã‚‹
 		get_game_render_data()->bind_to_all();
 		get_frame_render_data()->bind_to_all();
 		get_frame_drawing_render_data()->bind_to_all();
@@ -582,9 +582,9 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 }
 
 /**
- * ƒ|ƒXƒgƒGƒtƒFƒNƒg—p‚ÌƒVƒF[ƒ_‚ğİ’è‚·‚é
+ * ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆç”¨ã®ã‚·ã‚§ãƒ¼ãƒ€ã‚’è¨­å®šã™ã‚‹
  *
- * @param shader ƒ|ƒXƒgƒGƒtƒFƒNƒg—p‚ÌƒVƒF[ƒ_[
+ * @param shader ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆç”¨ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  */
 void GraphicsManager::set_post_effect_shader( Shader* shader )
 {
@@ -592,9 +592,9 @@ void GraphicsManager::set_post_effect_shader( Shader* shader )
 }
 
 /**
- * ƒ|ƒXƒgƒGƒtƒFƒNƒg‚ğ BackBuffer ‚ÉƒŒƒ“ƒ_ƒŠƒ“ƒO‚·‚é
+ * ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’ BackBuffer ã«ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã™ã‚‹
  *
- * @param t g—p‚·‚éƒeƒNƒXƒ`ƒƒ
+ * @param t ä½¿ç”¨ã™ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£
  */
 void GraphicsManager::render_post_effect( Texture* texture )
 {
@@ -602,10 +602,10 @@ void GraphicsManager::render_post_effect( Texture* texture )
 }
 
 /**
- * ƒ|ƒXƒgƒGƒtƒFƒNƒg‚ğw’è‚µ‚½ RenderTarget ‚ÉƒŒƒ“ƒ_ƒŠƒ“ƒO‚·‚é
+ * ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’æŒ‡å®šã—ãŸ RenderTarget ã«ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã™ã‚‹
  *
- * @param texture g—p‚·‚éƒeƒNƒXƒ`ƒƒ
- * @param render_target ƒŒƒ“ƒ_ƒŠƒ“ƒO‘ÎÛ‚Ì RenderTarget
+ * @param texture ä½¿ç”¨ã™ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£
+ * @param render_target ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å¯¾è±¡ã® RenderTarget
  */
 void GraphicsManager::render_post_effect( Texture* texture, RenderTarget* render_target )
 {
@@ -616,9 +616,9 @@ void GraphicsManager::render_post_effect( Texture* texture, RenderTarget* render
 }
 
 /**
- * ƒtƒF[ƒhƒCƒ“EƒtƒF[ƒhƒAƒEƒg—p‚ÌF‚ğİ’è‚·‚é
+ * ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³ãƒ»ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆç”¨ã®è‰²ã‚’è¨­å®šã™ã‚‹
  *
- * @param color F
+ * @param color è‰²
  */
 void GraphicsManager::set_fade_color( const Color& color )
 {
@@ -648,7 +648,7 @@ void GraphicsManager::fade_out( float_t speed )
 }
 
 /**
- * ƒtƒF[ƒ_[‚ğ•`‰æ‚·‚é
+ * ãƒ•ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’æç”»ã™ã‚‹
  *
  */
 void GraphicsManager::render_fader() const
@@ -669,7 +669,7 @@ void GraphicsManager::render_fader() const
 	
 	get_shared_object_render_data()->update( & buffer_data );
 
-	/// @todo 2D ‚Ì•`‰æ‚É–@ü‚ğg‚Á‚Ä‚¢‚é‚Ì‚Í–³‘Ê‚È‚Ì‚Å‚È‚ñ‚Æ‚©‚·‚é
+	/// @todo 2D ã®æç”»ã«æ³•ç·šã‚’ä½¿ã£ã¦ã„ã‚‹ã®ã¯ç„¡é§„ãªã®ã§ãªã‚“ã¨ã‹ã™ã‚‹
 	set_input_layout( "main" );
 
 	render_technique( "|main2d", [this]
@@ -683,7 +683,7 @@ void GraphicsManager::render_fader() const
 }
 
 /**
- * ƒfƒoƒbƒO—p‚Ì²‚ğ•\¦‚·‚é
+ * ãƒ‡ãƒãƒƒã‚°ç”¨ã®è»¸ã‚’è¡¨ç¤ºã™ã‚‹
  *
  */
 void GraphicsManager::render_debug_axis( const ActiveObjectManager* active_object_manager ) const
@@ -711,7 +711,7 @@ void GraphicsManager::render_debug_axis( const ActiveObjectManager* active_objec
 }
 
 /**
- * ActiveObject ‚Ì‘Sƒ{[ƒ“‚É‘Î‚µ‚ÄƒfƒoƒbƒO—p‚Ì²‚ğ•\¦‚·‚é
+ * ActiveObject ã®å…¨ãƒœãƒ¼ãƒ³ã«å¯¾ã—ã¦ãƒ‡ãƒãƒƒã‚°ç”¨ã®è»¸ã‚’è¡¨ç¤ºã™ã‚‹
  *
  */
 void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_object ) const
@@ -759,7 +759,7 @@ void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_ob
 }
 
 /**
- * ƒfƒoƒbƒO‚Ì‚½‚ß‚ÉƒŠƒ\[ƒX‚Ìˆê——‚ğ•W€o—Í‚Éo—Í‚·‚é
+ * ãƒ‡ãƒãƒƒã‚°ã®ãŸã‚ã«ãƒªã‚½ãƒ¼ã‚¹ã®ä¸€è¦§ã‚’æ¨™æº–å‡ºåŠ›ã«å‡ºåŠ›ã™ã‚‹
  *
  */
 void GraphicsManager::debug_print_resources() const

@@ -7,15 +7,15 @@ namespace blue_sky::graphics
 {
 
 /**
- * 画面をフェードイン, フェードアウトさせる
+ * 逕ｻ髱｢繧偵ヵ繧ｧ繝ｼ繝峨う繝ｳ, 繝輔ぉ繝ｼ繝峨い繧ｦ繝医＆縺帙ｋ
  *
  */
 class Fader : public Model
 {
 private:
-	Color			fade_color_;		///< フェードアウト時の色
-	Color			current_color_;		///< 現在の色
-	float_t			fade_;				///< フェード値 ( 0.f .. 1.f )
+	Color			fade_color_;		///< 繝輔ぉ繝ｼ繝峨い繧ｦ繝域凾縺ｮ濶ｲ
+	Color			current_color_;		///< 迴ｾ蝨ｨ縺ｮ濶ｲ
+	float_t			fade_;				///< 繝輔ぉ繝ｼ繝牙､ ( 0.f .. 1.f )
 
 	void update_color();
 public:

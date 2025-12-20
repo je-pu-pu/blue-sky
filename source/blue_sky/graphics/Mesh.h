@@ -16,9 +16,9 @@ namespace blue_sky::graphics
 {
 
 /**
- * blue-sky ’¸“_î•ñ
+ * blue-sky é ‚ç‚¹æƒ…å ±
  * 
- * @todo _“î‚È’¸“_\‘¢‚É‘Î‰‚·‚é
+ * @todo æŸ”è»Ÿãªé ‚ç‚¹æ§‹é€ ã«å¯¾å¿œã™ã‚‹
  */
 struct Vertex : public core::graphics::Vertex
 {
@@ -44,7 +44,7 @@ struct Vertex : public core::graphics::Vertex
 };
 
 /**
- * blue-sky ƒƒbƒVƒ…
+ * blue-sky ãƒ¡ãƒƒã‚·ãƒ¥
  *
  */
 class Mesh : public core::graphics::Mesh

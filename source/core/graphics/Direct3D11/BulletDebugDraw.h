@@ -10,7 +10,7 @@ namespace core::graphics::direct_3d_11
 	class Direct3D11;
 
 /**
- * Bullet ‚ÌƒfƒoƒbƒO•\¦‚ğ Direct3D11 ‚Ås‚¤‚½‚ß‚ÌƒNƒ‰ƒX
+ * Bullet ã®ãƒ‡ãƒãƒƒã‚°è¡¨ç¤ºã‚’ Direct3D11 ã§è¡Œã†ãŸã‚ã®ã‚¯ãƒ©ã‚¹
  *
  */
 class BulletDebugDraw : public btIDebugDraw

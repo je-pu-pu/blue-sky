@@ -11,7 +11,7 @@ namespace blue_sky
 class Player;
 
 /**
- * “G
+ * æ•µ
  *
  */
 class Robot : public ActiveObject
@@ -34,13 +34,13 @@ public:
 
 private:
 	const Player*	player_;
-	Texture*		texture_;		///< ƒeƒNƒXƒ`ƒƒ
+	Texture*		texture_;		///< ãƒ†ã‚¯ã‚¹ãƒãƒ£
 
-	Mode			mode_;			///< Œ»İ‚Ì“®ìƒ‚[ƒh
-	Mode			mode_backup_;	///< ‘O‰ñƒvƒŒƒCƒ„[‚ğ”­Œ©‚µ‚½‚Ì“®ìƒ‚[ƒh
-	float_t			timer_;			///< ”Ä—pƒ^ƒCƒ}[
+	Mode			mode_;			///< ç¾åœ¨ã®å‹•ä½œãƒ¢ãƒ¼ãƒ‰
+	Mode			mode_backup_;	///< å‰å›ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’ç™ºè¦‹ã—ãŸæ™‚ã®å‹•ä½œãƒ¢ãƒ¼ãƒ‰
+	float_t			timer_;			///< æ±ç”¨ã‚¿ã‚¤ãƒãƒ¼
 
-	VectorArray		patrol_point_list_;	///< „‰ñƒ|ƒCƒ“ƒg‚Ìˆê——
+	VectorArray		patrol_point_list_;	///< å·¡å›ãƒã‚¤ãƒ³ãƒˆã®ä¸€è¦§
 	uint_t			current_patrol_point_index_ = 0;
 
 	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
@@ -63,7 +63,7 @@ public:
 
 	void restart() override;
 
-	/// XV
+	/// æ›´æ–°
 	void update() override;
 
 	void action( const string_t& ) override;

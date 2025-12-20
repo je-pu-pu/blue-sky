@@ -30,7 +30,7 @@ namespace core::graphics::direct_3d_11
 	class Sprite;
 
 /**
- * Direct3D 11 ‚Ìƒ‰ƒbƒp[ƒNƒ‰ƒX
+ * Direct3D 11 ã®ãƒ©ãƒƒãƒ‘ãƒ¼ã‚¯ãƒ©ã‚¹
  *
  */
 class Direct3D11
@@ -60,14 +60,14 @@ private:
 
 	com_ptr< IDXGIAdapter1 >	dxgi_adapter_;
 
-	/// @todo ƒXƒ}[ƒgƒ|ƒCƒ“ƒ^ ( com_ptr ) ‰»‚·‚éH
+	/// @todo ã‚¹ãƒãƒ¼ãƒˆãƒã‚¤ãƒ³ã‚¿ ( com_ptr ) åŒ–ã™ã‚‹ï¼Ÿ
 	ID3D11Device*				device_;				///< Direct3D 11 Device
 	ID3D11DeviceContext*		immediate_context_;		///< Direct3D 11 Device Context
 	IDXGISwapChain*				swap_chain_;			///< Direct3D 11 Swap Chain
 
 	DXGI_SWAP_CHAIN_DESC		swap_chain_desc_;
 
-	std::unique_ptr< BackBufferTexture >	back_buffer_texture_;		///< ƒoƒbƒNƒoƒbƒtƒ@‚Ö‚Ì•`‰æ—pƒeƒNƒXƒ`ƒƒ
+	std::unique_ptr< BackBufferTexture >	back_buffer_texture_;		///< ãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡ã¸ã®æç”»ç”¨ãƒ†ã‚¯ã‚¹ãƒãƒ£
 
 	ID3D11Texture2D*			depth_stencil_texture_;
 	ID3D11DepthStencilView*		depth_stencil_view_;
@@ -114,7 +114,7 @@ public:
 
 	inline static Direct3D11* get_instance() { return instance_; }
 	
-	/// OculusRift ‚Åg—p
+	/// OculusRift ã§ä½¿ç”¨
 	ID3D11RenderTargetView* create_render_target_view( ID3D11Texture2D* );
 	ID3D11DepthStencilView* create_depth_stencil_view( ID3D11Texture2D* );
 

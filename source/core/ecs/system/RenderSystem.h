@@ -14,7 +14,7 @@ namespace core::ecs
 {
 
 /**
- * •`‰æƒVƒXƒeƒ€
+ * æç”»ã‚·ã‚¹ãƒ†ãƒ 
  *
  */
 class RenderSystem : public System< TransformComponent, ModelComponent, RenderComponent >

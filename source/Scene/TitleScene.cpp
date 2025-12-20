@@ -1,5 +1,5 @@
 /**
- * @todo get_direct_3d() ‚Ìg—p‚ğ‚â‚ß‚Ä GraphicsManager ‚ğg‚¤‚æ‚¤‚É‚·‚éB
+ * @todo get_direct_3d() ã®ä½¿ç”¨ã‚’ã‚„ã‚ã¦ GraphicsManager ã‚’ä½¿ã†ã‚ˆã†ã«ã™ã‚‹ã€‚
  */
 
 #include "TitleScene.h"
@@ -14,7 +14,7 @@
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
 
-/// @todo ’ŠÛ‰»‚·‚é
+/// @todo æŠ½è±¡åŒ–ã™ã‚‹
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/Sprite.h>
 
@@ -60,7 +60,7 @@ TitleScene::~TitleScene()
 }
 
 /**
- * ƒƒCƒ“ƒ‹[ƒvˆ—
+ * ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—å‡¦ç†
  *
  */
 void TitleScene::update()
@@ -107,7 +107,7 @@ void TitleScene::update()
 }
 
 /**
- * •`‰æ
+ * æç”»
  */
 void TitleScene::render()
 {

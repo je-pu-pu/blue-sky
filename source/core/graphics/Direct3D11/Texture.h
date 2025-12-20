@@ -14,10 +14,10 @@ namespace core::graphics::direct_3d_11
 class Texture : public core::graphics::Texture
 {
 protected:
-	Direct3D11*								direct_3d_ = nullptr;		///< Direct3D11 ‚Ö‚ÌŽQÆ
-	com_ptr< ID3D11Texture2D >				texture_2d_;				///< ŽÀÛ‚Ì 2D ƒeƒNƒXƒ`ƒƒƒf[ƒ^
-	com_ptr< ID3D11ShaderResourceView >		shader_resource_view_;		///< ƒVƒF[ƒ_[‚ÅŽg‚¤‚½‚ß‚Ì View
-	D3D11_TEXTURE2D_DESC					texture_2d_desc_{};			///< 2D ƒeƒNƒXƒ`ƒƒ‚É‚Â‚¢‚Ä‚Ìà–¾
+	Direct3D11*								direct_3d_ = nullptr;		///< Direct3D11 ã¸ã®å‚ç…§
+	com_ptr< ID3D11Texture2D >				texture_2d_;				///< å®Ÿéš›ã® 2D ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ‡ãƒ¼ã‚¿
+	com_ptr< ID3D11ShaderResourceView >		shader_resource_view_;		///< ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã§ä½¿ã†ãŸã‚ã® View
+	D3D11_TEXTURE2D_DESC					texture_2d_desc_{};			///< 2D ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«ã¤ã„ã¦ã®èª¬æ˜Ž
 
 protected:
 	void create_texture_2d( PixelFormat, int, int, bool );
@@ -25,7 +25,7 @@ protected:
 
 public:
 	/**
-	 * V‹K‚ÉƒeƒNƒXƒ`ƒƒ‚ðì¬‚·‚é
+	 * æ–°è¦ã«ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ä½œæˆã™ã‚‹
 	 */
 	Texture( Direct3D11* direct_3d, PixelFormat format, int width, int height, bool multi_sample )
 		: direct_3d_( direct_3d )
@@ -35,7 +35,7 @@ public:
 	}
 
 	/**
-	 * Šù‚É‘¶Ý‚·‚é ShaderResourceView ‚ðÝ’è‚µ‚ÄƒeƒNƒXƒ`ƒƒƒIƒuƒWƒFƒNƒg‚ð\’z‚·‚é ( ‰æ‘œ‚©‚çƒeƒNƒXƒ`ƒƒ‚ð“Ç‚Ýž‚ñ‚¾ê‡‚È‚Ç‚ÉŽg—p )
+	 * æ—¢ã«å­˜åœ¨ã™ã‚‹ ShaderResourceView ã‚’è¨­å®šã—ã¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æ§‹ç¯‰ã™ã‚‹ ( ç”»åƒã‹ã‚‰ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’èª­ã¿è¾¼ã‚“ã å ´åˆãªã©ã«ä½¿ç”¨ )
 	 */
 	Texture( Direct3D11* direct_3d, ID3D11ShaderResourceView* shader_resource_view )
 		: direct_3d_( direct_3d )

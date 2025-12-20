@@ -1,6 +1,6 @@
 //**********************************************************
 /**
- * Input ‚ÌƒCƒ“ƒ^[ƒtƒFƒCƒX
+ * Input ã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹
  *
  * copyright (c) je-pu-pu all rights reserved
  *
@@ -35,17 +35,17 @@ namespace blue_sky
 {
 
 /**
- * “ü—Í
+ * å…¥åŠ›
  *
- * @todo Windows ‚ÆØ‚è—£‚·
+ * @todo Windows ã¨åˆ‡ã‚Šé›¢ã™
  */
 class Input
 {
 public:
 	/**
-	 * ƒ{ƒ^ƒ“‚Ì’è‹`
+	 * ãƒœã‚¿ãƒ³ã®å®šç¾©
 	 *
-	 * ã‰º¶‰E‚Æ A, B, X, Y ‚Ìƒ{ƒ^ƒ“‚ğ‚Â
+	 * ä¸Šä¸‹å·¦å³ã¨ A, B, X, Y ã®ãƒœã‚¿ãƒ³ã‚’æŒã¤
 	 */
 	enum class Button { LEFT, RIGHT, UP, DOWN, A, B, JUMP, L, R, L2, R2, ESCAPE, MAX, NONE };
 
@@ -59,37 +59,37 @@ public:
 private:
 	const DirectInput* direct_input_;						///< DirectInput
 
-	unsigned int state_[ static_cast< int >( Button::MAX ) ];						///< ‘S‚Ä‚Ìƒ{ƒ^ƒ“‚Ìó‘Ô
-	ButtonStack arrow_stack_;								///< Å—Dæ‚Ì•ûŒüƒ{ƒ^ƒ“
+	unsigned int state_[ static_cast< int >( Button::MAX ) ];						///< å…¨ã¦ã®ãƒœã‚¿ãƒ³ã®çŠ¶æ…‹
+	ButtonStack arrow_stack_;								///< æœ€å„ªå…ˆã®æ–¹å‘ãƒœã‚¿ãƒ³
 
-	bool joystick_enabled_;									///< ƒWƒ‡ƒCƒXƒeƒBƒbƒN—LŒøƒtƒ‰ƒO
+	bool joystick_enabled_;									///< ã‚¸ãƒ§ã‚¤ã‚¹ãƒ†ã‚£ãƒƒã‚¯æœ‰åŠ¹ãƒ•ãƒ©ã‚°
 
-	JOYINFOEX joy_info_;									///< ƒWƒ‡ƒCƒXƒeƒBƒbƒN
-	float joystick_axis_threshold_;							///< ƒWƒ‡ƒCƒXƒeƒBƒbƒN‚Ì“ü—Í‚Ìè‡’l ( 0.f .. 1.f )
+	JOYINFOEX joy_info_;									///< ã‚¸ãƒ§ã‚¤ã‚¹ãƒ†ã‚£ãƒƒã‚¯
+	float joystick_axis_threshold_;							///< ã‚¸ãƒ§ã‚¤ã‚¹ãƒ†ã‚£ãƒƒã‚¯ã®å…¥åŠ›ã®é–¾å€¤ ( 0.f .. 1.f )
 
-	DWORD* joystick_x_axis_pos_;							///< ƒWƒ‡ƒCƒXƒeƒBƒbƒN X À•W 
-	DWORD* joystick_y_axis_pos_;							///< ƒWƒ‡ƒCƒXƒeƒBƒbƒN Y À•W 
+	DWORD* joystick_x_axis_pos_;							///< ã‚¸ãƒ§ã‚¤ã‚¹ãƒ†ã‚£ãƒƒã‚¯ X åº§æ¨™ 
+	DWORD* joystick_y_axis_pos_;							///< ã‚¸ãƒ§ã‚¤ã‚¹ãƒ†ã‚£ãƒƒã‚¯ Y åº§æ¨™ 
 
-	float joystick_x_sensitivity_;							///< ƒWƒ‡ƒCƒXƒeƒBƒbƒN X À•W Š´“x ( default : 1.f )
-	float joystick_y_sensitivity_;							///< ƒWƒ‡ƒCƒXƒeƒBƒbƒN Y À•W Š´“x ( default : 1.f )
+	float joystick_x_sensitivity_;							///< ã‚¸ãƒ§ã‚¤ã‚¹ãƒ†ã‚£ãƒƒã‚¯ X åº§æ¨™ æ„Ÿåº¦ ( default : 1.f )
+	float joystick_y_sensitivity_;							///< ã‚¸ãƒ§ã‚¤ã‚¹ãƒ†ã‚£ãƒƒã‚¯ Y åº§æ¨™ æ„Ÿåº¦ ( default : 1.f )
 
-	float mouse_x_sensitivity_;								///< ƒ}ƒEƒX X À•W Š´“x ( default : 1.f )
-	float mouse_y_sensitivity_;								///< ƒ}ƒEƒX X À•W Š´“x ( default : 1.f )
+	float mouse_x_sensitivity_;								///< ãƒã‚¦ã‚¹ X åº§æ¨™ æ„Ÿåº¦ ( default : 1.f )
+	float mouse_y_sensitivity_;								///< ãƒã‚¦ã‚¹ X åº§æ¨™ æ„Ÿåº¦ ( default : 1.f )
 
-	float mouse_x_rate_;									///< ƒ}ƒEƒX X À•W ( -1.f .. 1.f )
-	float mouse_y_rate_;									///< ƒ}ƒEƒX Y À•W ( -1.f .. 1.f )
+	float mouse_x_rate_;									///< ãƒã‚¦ã‚¹ X åº§æ¨™ ( -1.f .. 1.f )
+	float mouse_y_rate_;									///< ãƒã‚¦ã‚¹ Y åº§æ¨™ ( -1.f .. 1.f )
 	
-	float mouse_dx_;										///< ƒ}ƒEƒX X ˆÚ“®—Ê
+	float mouse_dx_;										///< ãƒã‚¦ã‚¹ X ç§»å‹•é‡
 	float mouse_dy_;
 
-	int mouse_wheel_;										///< ƒ}ƒEƒXƒzƒC[ƒ‹ ( + : front / - : back )
+	int mouse_wheel_;										///< ãƒã‚¦ã‚¹ãƒ›ã‚¤ãƒ¼ãƒ« ( + : front / - : back )
 
-	POINT mouse_point_;										///< ƒ}ƒEƒX À•W
+	POINT mouse_point_;										///< ãƒã‚¦ã‚¹ åº§æ¨™
 
 	ButtonCodeMultiList key_code_;
 	ButtonCodeList joystick_code_;
 
-	ConfigKeyCodeMap config_key_code_map_;					///< ƒRƒ“ƒtƒBƒOƒtƒ@ƒCƒ‹‚ÌƒL[–¼ ‚©‚ç GetAsyncKeyState() ‚Ìˆø”‚É“n‚·ƒL[‚Ö‚Ìƒ}ƒbƒv
+	ConfigKeyCodeMap config_key_code_map_;					///< ã‚³ãƒ³ãƒ•ã‚£ã‚°ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚­ãƒ¼å ã‹ã‚‰ GetAsyncKeyState() ã®å¼•æ•°ã«æ¸¡ã™ã‚­ãƒ¼ã¸ã®ãƒãƒƒãƒ—
 
 	void load_key_code_config( Config&, Button, const char_t*, const char_t* );
 	
@@ -124,9 +124,9 @@ public:
 	}
 
 	/**
-	 * ƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚Ä‚¢‚È‚¢ó‘Ô‚ÉXV‚·‚é
+	 * ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚Œã¦ã„ãªã„çŠ¶æ…‹ã«æ›´æ–°ã™ã‚‹
 	 *
-	 * @param button ‰Ÿ‚³‚ê‚Ä‚¢‚È‚¢ó‘Ô‚É‚·‚éƒ{ƒ^ƒ“
+	 * @param button æŠ¼ã•ã‚Œã¦ã„ãªã„çŠ¶æ…‹ã«ã™ã‚‹ãƒœã‚¿ãƒ³
 	 */
 	void clear( Button button )
 	{
@@ -134,10 +134,10 @@ public:
 	}
 
 	/**
-	 * Œ»İƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚Ä‚¢‚é‚©‚Ç‚¤‚©‚ğæ“¾‚·‚é
+	 * ç¾åœ¨ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚Œã¦ã„ã‚‹ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹
 	 *
-	 * @param button ’²‚×‚éƒ{ƒ^ƒ“
-	 * @return Œ»İƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚Ä‚¢‚éê‡‚Í true ‚ğA‚»‚¤‚Å‚È‚¢ê‡‚Í false ‚ğ•Ô‚·
+	 * @param button èª¿ã¹ã‚‹ãƒœã‚¿ãƒ³
+	 * @return ç¾åœ¨ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚Œã¦ã„ã‚‹å ´åˆã¯ true ã‚’ã€ãã†ã§ãªã„å ´åˆã¯ false ã‚’è¿”ã™
 	 */
 	bool press( Button button ) const
 	{
@@ -145,10 +145,10 @@ public:
 	}
 
 	/**
-	 * ‚½‚Á‚½¡ƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½‚©‚Ç‚¤‚©‚ğæ“¾‚·‚é
+	 * ãŸã£ãŸä»Šãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚ŒãŸã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹
 	 *
-	 * @param button ’²‚×‚éƒ{ƒ^ƒ“
-	 * @return ‚½‚Á‚½¡ƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½ê‡‚Í true ‚ğA‚»‚¤‚Å‚È‚¢ê‡‚Í false ‚ğ•Ô‚·
+	 * @param button èª¿ã¹ã‚‹ãƒœã‚¿ãƒ³
+	 * @return ãŸã£ãŸä»Šãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚ŒãŸå ´åˆã¯ true ã‚’ã€ãã†ã§ãªã„å ´åˆã¯ false ã‚’è¿”ã™
 	 */
 	bool push( Button button ) const
 	{
@@ -161,10 +161,10 @@ public:
 	}
 
 	/**
-	 * ‚½‚Á‚½¡ƒ{ƒ^ƒ“‚ª—£‚³‚ê‚½‚©‚Ç‚¤‚©‚ğæ“¾‚·‚é
+	 * ãŸã£ãŸä»Šãƒœã‚¿ãƒ³ãŒé›¢ã•ã‚ŒãŸã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹
 	 *
-	 * button ’²‚×‚éƒ{ƒ^ƒ“
-	 * @return ‚½‚Á‚½¡ƒ{ƒ^ƒ“‚ª—£‚³‚ê‚½ê‡‚Í true ‚ğA‚»‚¤‚Å‚È‚¢ê‡‚Í false ‚ğ•Ô‚·
+	 * button èª¿ã¹ã‚‹ãƒœã‚¿ãƒ³
+	 * @return ãŸã£ãŸä»Šãƒœã‚¿ãƒ³ãŒé›¢ã•ã‚ŒãŸå ´åˆã¯ true ã‚’ã€ãã†ã§ãªã„å ´åˆã¯ false ã‚’è¿”ã™
 	 */
 	bool release( Button button ) const
 	{
@@ -172,9 +172,9 @@ public:
 	}
 
 	/**
-	 * Œ»İÅ—Dæ‚Å‰Ÿ‚³‚ê‚Ä‚¢‚é•ûŒüƒ{ƒ^ƒ“‚ğæ“¾‚·‚é
+	 * ç¾åœ¨æœ€å„ªå…ˆã§æŠ¼ã•ã‚Œã¦ã„ã‚‹æ–¹å‘ãƒœã‚¿ãƒ³ã‚’å–å¾—ã™ã‚‹
 	 *
-	 * @return Œ»İÅ—Dæ‚Å‰Ÿ‚³‚ê‚Ä‚¢‚é•ûŒüƒ{ƒ^ƒ“ ( •ûŒüƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚Ä‚¢‚È‚¢ê‡‚Í NONE ‚ğ•Ô‚· )
+	 * @return ç¾åœ¨æœ€å„ªå…ˆã§æŠ¼ã•ã‚Œã¦ã„ã‚‹æ–¹å‘ãƒœã‚¿ãƒ³ ( æ–¹å‘ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚Œã¦ã„ãªã„å ´åˆã¯ NONE ã‚’è¿”ã™ )
 	 */
 	Button get_primary_arrow_button() const
 	{
@@ -202,7 +202,7 @@ public:
 	float get_mouse_y_rate() const { return mouse_y_rate_; }
 
 	/**
-	 * @brief ƒ}ƒEƒX‚ÌˆÚ“®—Ê‚ğƒNƒŠƒA‚·‚é
+	 * @brief ãƒã‚¦ã‚¹ã®ç§»å‹•é‡ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
 	 */
 	void clear_mouse_move()
 	{

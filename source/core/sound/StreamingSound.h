@@ -7,7 +7,7 @@ namespace core
 {
 
 /**
- * ƒXƒgƒŠ[ƒ~ƒ“ƒOƒTƒEƒ“ƒhƒNƒ‰ƒX
+ * ã‚¹ãƒˆãƒªãƒ¼ãƒŸãƒ³ã‚°ã‚µã‚¦ãƒ³ãƒ‰ã‚¯ãƒ©ã‚¹
  *
  */
 class StreamingSound : public Sound
@@ -22,26 +22,26 @@ private:
 
 public:
 
-	/// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	/// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	explicit StreamingSound( SoundEngine* );
 
-	/// ƒfƒXƒgƒ‰ƒNƒ^
+	/// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	~StreamingSound();
 
-	/// ƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
+	/// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
 	bool load( const char* ) override;
 
-	/// ƒTƒEƒ“ƒh‚ğÄ¶‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ã‚’å†ç”Ÿã™ã‚‹
 	bool play( bool, bool ) override;
 	bool is_loop() const { return is_loop_; }
 
-	/// XVˆ—
+	/// æ›´æ–°å‡¦ç†
 	void update() override;
 
-	/// Œ»İ‚ÌˆÊ’u ( •b ) ‚ğæ“¾‚·‚é
+	/// ç¾åœ¨ã®ä½ç½® ( ç§’ ) ã‚’å–å¾—ã™ã‚‹
 	float get_current_position() const override;
 
-	/// Œ»İ‚ÌˆÊ’u‚Ìƒs[ƒNƒŒƒxƒ‹‚ğæ“¾‚·‚é
+	/// ç¾åœ¨ã®ä½ç½®ã®ãƒ”ãƒ¼ã‚¯ãƒ¬ãƒ™ãƒ«ã‚’å–å¾—ã™ã‚‹
 	float get_current_peak_level() const override;
 
 	static DWORD get_buffer_size() { return 512 * 1024; /* 512 KB */ };

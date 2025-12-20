@@ -6,7 +6,7 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * ƒVƒƒƒhƒEƒ}ƒbƒv ƒVƒF[ƒ_[
+ * ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ— ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 // template< typename Traits >

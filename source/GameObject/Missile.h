@@ -6,7 +6,7 @@ namespace blue_sky
 {
 
 /**
- * 敵ロボットが発射するミサイル
+ * 謨ｵ繝ｭ繝懊ャ繝医′逋ｺ蟆�縺吶ｋ繝溘し繧､繝ｫ
  *
  */
 class Missile : public ActiveObject
@@ -29,7 +29,7 @@ public:
 
 	void restart();
 
-	/// 更新
+	/// 譖ｴ譁ｰ
 	void update();
 
 	Mode get_mode() const { return mode_; };

@@ -3,7 +3,7 @@
 #pragma comment( lib, "LibOVR.lib" )
 
 #pragma comment ( lib, "libfbxsdk-mt.lib" )
-// #pragma comment ( lib, "libxml2-mt.lib" ) /// libxml2-mt.lib ‚ğ #pragma comment ‚ÅƒŠƒ“ƒN‚·‚é‚Æ blue-sky ‚ÌƒeƒXƒg‚ª Visual Studio ‚ÌƒeƒXƒgƒGƒNƒXƒvƒ[ƒ‰[‚É•\¦‚³‚ê‚È‚­‚È‚é•s‹ï‡‚ğ‰ñ”ğ‚·‚é‚½‚ßAƒvƒƒWƒFƒNƒg‚Ìİ’è‚ÅƒŠƒ“ƒN‚ğs‚¤B
+// #pragma comment ( lib, "libxml2-mt.lib" ) /// libxml2-mt.lib ã‚’ #pragma comment ã§ãƒªãƒ³ã‚¯ã™ã‚‹ã¨ blue-sky ã®ãƒ†ã‚¹ãƒˆãŒ Visual Studio ã®ãƒ†ã‚¹ãƒˆã‚¨ã‚¯ã‚¹ãƒ—ãƒ­ãƒ¼ãƒ©ãƒ¼ã«è¡¨ç¤ºã•ã‚Œãªããªã‚‹ä¸å…·åˆã‚’å›é¿ã™ã‚‹ãŸã‚ã€ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã®è¨­å®šã§ãƒªãƒ³ã‚¯ã‚’è¡Œã†ã€‚
 #pragma comment ( lib, "zlib-mt.lib" )
 
 #pragma comment ( lib, "libogg.lib" )

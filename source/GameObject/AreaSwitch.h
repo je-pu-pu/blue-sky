@@ -6,7 +6,7 @@ namespace blue_sky
 {
 
 /**
- * 空間スイッチ
+ * 遨ｺ髢薙せ繧､繝�繝�
  *
  */
 class AreaSwitch : public BaseSwitch
@@ -34,7 +34,7 @@ public:
 	AreaSwitch( float_t, float_t, float_t );
 	~AreaSwitch() { }
 
-	/// 更新
+	/// 譖ｴ譁ｰ
 	void update() override;
 
 	void restart() override;

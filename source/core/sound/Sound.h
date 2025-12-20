@@ -30,7 +30,7 @@ namespace core
 	}
 
 /**
- * ƒTƒEƒ“ƒhƒNƒ‰ƒX
+ * ã‚µã‚¦ãƒ³ãƒ‰ã‚¯ãƒ©ã‚¹
  *
  */
 class Sound : public game::Sound
@@ -56,81 +56,81 @@ protected:
 	std::string file_name_;
 	bool is_3d_sound_;
 
-	T max_volume_;						///< Å‘åƒ{ƒŠƒ…[ƒ€
-	T volume_fade_;						///< ƒtƒF[ƒh ( –ˆƒtƒŒ[ƒ€‚Ì‰ÁŽZ’l )
+	T max_volume_;						///< æœ€å¤§ãƒœãƒªãƒ¥ãƒ¼ãƒ 
+	T volume_fade_;						///< ãƒ•ã‚§ãƒ¼ãƒ‰ ( æ¯Žãƒ•ãƒ¬ãƒ¼ãƒ ã®åŠ ç®—å€¤ )
 
 public:
 
-	/// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	/// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	explicit Sound( SoundEngine* );
 
-	/// ƒfƒXƒgƒ‰ƒNƒ^
+	/// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	virtual ~Sound() override;
 
 	/// 3D Sound
 	void set_3d_sound( bool x = true ) { is_3d_sound_ = x; }
 	bool is_3d_sound() const override { return is_3d_sound_; }
 	
-	/// ƒtƒ@ƒCƒ‹‚ð“Ç‚Ýž‚Þ
+	/// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
 	bool load( const char* ) override;
 
-	/// –¼‘O‚ðŽæ“¾‚·‚é
+	/// åå‰ã‚’å–å¾—ã™ã‚‹
 	const char* get_name() override { return name_.c_str(); };
 	void set_name( const char* name ) override { name_ = name; };
 
-	/// ƒtƒ@ƒCƒ‹–¼‚ðŽæ“¾‚·‚é
+	/// ãƒ•ã‚¡ã‚¤ãƒ«åã‚’å–å¾—ã™ã‚‹
 	const char* get_file_name() const override { return file_name_.c_str(); }
 	void set_file_name( const char* file_name ) override { file_name_ = file_name; };
 
-	/// 3D ˆÊ’u
+	/// 3D ä½ç½®
 	void set_3d_position( T, T, T ) override;
 
-	/// 3D ‘¬“x
+	/// 3D é€Ÿåº¦
 	void set_3d_velocity( T, T, T ) override;
 
-	/// ƒ{ƒŠƒ…[ƒ€
+	/// ãƒœãƒªãƒ¥ãƒ¼ãƒ 
 	T get_volume() const override;
 	void set_volume( T ) override;
 
-	/// Å‘åƒ{ƒŠƒ…[ƒ€
+	/// æœ€å¤§ãƒœãƒªãƒ¥ãƒ¼ãƒ 
 	T get_max_volume() const override { return max_volume_; }
 	void set_max_volume( T v ) override { max_volume_ = v; set_volume( get_volume() ); }
 
-	/// ƒpƒ“
+	/// ãƒ‘ãƒ³
 	T get_pan() const override { return 0; };
 	void set_pan( T ) override { };
 
-	/// Ä¶ƒXƒs[ƒh
+	/// å†ç”Ÿã‚¹ãƒ”ãƒ¼ãƒ‰
 	T get_speed() const override;
 	void set_speed( T ) override;
 
-	/// ƒTƒEƒ“ƒh‚ðÄ¶‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ã‚’å†ç”Ÿã™ã‚‹
 	bool play( bool, bool ) override;
 
-	/// ƒTƒEƒ“ƒh‚ªÄ¶’†‚©‚Ç‚¤‚©‚ðŽæ“¾‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ãŒå†ç”Ÿä¸­ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹
 	bool is_playing() const override;
 
-	/// ƒTƒEƒ“ƒh‚ð’âŽ~‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ã‚’åœæ­¢ã™ã‚‹
 	bool stop() override;
 
-	/// ƒTƒEƒ“ƒh‚ÌƒtƒF[ƒhƒCƒ“‚ðŠJŽn‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ã®ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³ã‚’é–‹å§‹ã™ã‚‹
 	void fade_in( T = 0.01f ) override;
 
-	/// ƒTƒEƒ“ƒh‚ÌƒtƒF[ƒhƒAƒEƒg‚ðŠJŽn‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ã®ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆã‚’é–‹å§‹ã™ã‚‹
 	void fade_out( T = 0.01f ) override;
 
-	/// ƒTƒEƒ“ƒh‚ªŠ®‘S‚ÉƒtƒF[ƒhƒCƒ“‚³‚ê‚½ó‘Ô‚©‚Ç‚¤‚©‚ðŽæ“¾‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ãŒå®Œå…¨ã«ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³ã•ã‚ŒãŸçŠ¶æ…‹ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹
 	bool is_fade_full_in() const override;
 
-	/// ƒTƒEƒ“ƒh‚ªŠ®‘S‚ÉƒtƒF[ƒhƒAƒEƒg‚³‚ê‚½ó‘Ô‚©‚Ç‚¤‚©‚ðŽæ“¾‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ãŒå®Œå…¨ã«ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆã•ã‚ŒãŸçŠ¶æ…‹ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹
 	bool is_fade_full_out() const override;
 
-	/// Œ»Ý‚ÌˆÊ’u ( •b ) ‚ðŽæ“¾‚·‚é
+	/// ç¾åœ¨ã®ä½ç½® ( ç§’ ) ã‚’å–å¾—ã™ã‚‹
 	float get_current_position() const override;
 
 	void update() override;
 
-	/// ƒTƒEƒ“ƒh‚ðˆêŽž’âŽ~‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ã‚’ä¸€æ™‚åœæ­¢ã™ã‚‹
 	// virtual bool pause() = 0;
 
 }; // class Sound

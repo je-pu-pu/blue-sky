@@ -8,17 +8,17 @@ namespace core::graphics::direct_3d_11
 	class Direct3D11;
 
 	/**
-	 * Direct3D11 ‚ÌƒoƒbƒNƒoƒbƒtƒ@‚ğQÆ‚·‚éƒeƒNƒXƒ`ƒƒ
+	 * Direct3D11 ã®ãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡ã‚’å‚ç…§ã™ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£
 	 *
 	 */
 	class BackBufferTexture : public core::graphics::BackBufferTexture
 	{
 	private:
-		// @todo Texture ‚Æ‹¤’Ê‰»‚·‚é
+		// @todo Texture ã¨å…±é€šåŒ–ã™ã‚‹
 		Direct3D11*							direct_3d_;
-		com_ptr< ID3D11Texture2D >			texture_2d_;				///< ÀÛ‚Ì 2D ƒeƒNƒXƒ`ƒƒƒf[ƒ^
-		com_ptr< ID3D11RenderTargetView >	render_target_view_;		///< ƒVƒF[ƒ_[‚©‚ç—˜—p‚·‚é‚½‚ß‚Ì View
-		D3D11_TEXTURE2D_DESC				texture_2d_desc_{};			///< 2D ƒeƒNƒXƒ`ƒƒ‚É‚Â‚¢‚Ä‚Ìà–¾
+		com_ptr< ID3D11Texture2D >			texture_2d_;				///< å®Ÿéš›ã® 2D ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ‡ãƒ¼ã‚¿
+		com_ptr< ID3D11RenderTargetView >	render_target_view_;		///< ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‹ã‚‰åˆ©ç”¨ã™ã‚‹ãŸã‚ã® View
+		D3D11_TEXTURE2D_DESC				texture_2d_desc_{};			///< 2D ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«ã¤ã„ã¦ã®èª¬æ˜
 
 	public:
 		BackBufferTexture( Direct3D11* d3d, IDXGISwapChain* swap_chain );

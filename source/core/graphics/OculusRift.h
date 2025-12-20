@@ -37,12 +37,12 @@ private:
 	std::vector< ID3D11RenderTargetView* > render_target_view_list_;
 	std::vector< ID3D11DepthStencilView* > depth_stencil_view_list_;
 
-	/// ŠeŽ²Žü‚è‚Ì‰ñ“] ( ¶ŽèÀ•WŒn / radian )
+	/// å„è»¸å‘¨ã‚Šã®å›žè»¢ ( å·¦æ‰‹åº§æ¨™ç³» / radian )
 	float_t							yaw_;
 	float_t							pitch_;
 	float_t							roll_;
 	
-	// ‘O‰ñ‚ÌƒtƒŒ[ƒ€‚ÌŠeŽ²Žü‚è‚Ì‰ñ“] ( ¶ŽèÀ•WŒn / radian )
+	// å‰å›žã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®å„è»¸å‘¨ã‚Šã®å›žè»¢ ( å·¦æ‰‹åº§æ¨™ç³» / radian )
 	float_t							last_yaw_;
 	float_t							last_pitch_;
 	float_t							last_roll_;

@@ -6,7 +6,7 @@ namespace core
 {
 
 /**
- * ƒXƒLƒjƒ“ƒOƒAƒjƒ[ƒVƒ‡ƒ“
+ * ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
  *
  */
 class SkinningAnimation
@@ -19,8 +19,8 @@ public:
 	using KeyFrameList	= Channel::KeyFrameList;
 
 private:
-	AnimationList	bone_animation_list_;					///< ƒ{[ƒ“–ˆ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚Ìˆê——
-	float_t			length_;								///< ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’·‚³ ( ƒtƒŒ[ƒ€ )
+	AnimationList	bone_animation_list_;					///< ãƒœãƒ¼ãƒ³æ¯ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ä¸€è¦§
+	float_t			length_;								///< ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®é•·ã• ( ãƒ•ãƒ¬ãƒ¼ãƒ  )
 
 public:
 	SkinningAnimation( uint_t size )
@@ -31,10 +31,10 @@ public:
 	}
 
 	/**
-	 * w’è‚µ‚½ƒ{[ƒ“ƒCƒ“ƒfƒbƒNƒX‚É‘Î‰‚·‚éƒAƒjƒ[ƒVƒ‡ƒ“‚ğæ“¾‚·‚é
+	 * æŒ‡å®šã—ãŸãƒœãƒ¼ãƒ³ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã«å¯¾å¿œã™ã‚‹ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’å–å¾—ã™ã‚‹
 	 *
-	 * @param bone_index ƒ{[ƒ“ƒCƒ“ƒfƒbƒNƒX
-	 * @return ƒAƒjƒ[ƒVƒ‡ƒ“
+	 * @param bone_index ãƒœãƒ¼ãƒ³ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+	 * @return ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 	 */
 	Animation& get_bone_animation_by_bone_index( uint_t bone_index )
 	{
@@ -52,9 +52,9 @@ public:
 	}
 
 	/**
-	 * ƒ{[ƒ“–ˆ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚ÌƒTƒCƒY‚ğæ“¾‚·‚é
+	 * ãƒœãƒ¼ãƒ³æ¯ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ã‚µã‚¤ã‚ºã‚’å–å¾—ã™ã‚‹
 	 *
-	 * @return ƒ{[ƒ“–ˆ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚Ìˆê——‚ÌƒTƒCƒY
+	 * @return ãƒœãƒ¼ãƒ³æ¯ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ä¸€è¦§ã®ã‚µã‚¤ã‚º
 	 */
 	uint_t get_bone_animation_list_size() const
 	{
@@ -62,9 +62,9 @@ public:
 	}
 
 	/**
-	 * ƒ{[ƒ“–ˆ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚Ìˆê——‚ğƒŠƒTƒCƒY‚·‚é
+	 * ãƒœãƒ¼ãƒ³æ¯ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ä¸€è¦§ã‚’ãƒªã‚µã‚¤ã‚ºã™ã‚‹
 	 *
-	 * @param size ƒ{[ƒ“–ˆ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚Ìˆê——‚ÌƒTƒCƒY
+	 * @param size ãƒœãƒ¼ãƒ³æ¯ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ä¸€è¦§ã®ã‚µã‚¤ã‚º
 	 */
 	void resize_bone_animation_list( uint_t size )
 	{
@@ -72,7 +72,7 @@ public:
 	}
 
 	/**
-	 * Å“K‰»‚·‚é
+	 * æœ€é©åŒ–ã™ã‚‹
 	 *
 	 */
 	void optimize()
@@ -84,7 +84,7 @@ public:
 	}
 
 	/**
-	 * ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’·‚³‚ğŒvZ‚·‚é
+	 * ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®é•·ã•ã‚’è¨ˆç®—ã™ã‚‹
 	 *
 	 */
 	float_t calculate_length()
@@ -98,7 +98,7 @@ public:
 	}
 
 	/**
-	 * ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’·‚³‚ğæ“¾‚·‚é
+	 * ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®é•·ã•ã‚’å–å¾—ã™ã‚‹
 	 *
 	 */
 	float_t get_length() const

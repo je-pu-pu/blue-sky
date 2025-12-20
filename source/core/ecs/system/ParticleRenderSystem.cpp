@@ -31,7 +31,7 @@ void ParticleRenderSystem::update()
 	// get_graphics_manager()->setup_rendering();
 	// get_graphics_manager()->set_default_render_target();
 
-	// ƒeƒXƒg‚Æ‚µ‚ÄˆÊ’uî•ñ‚ğ•W€o—Í‚Öo—Í
+	// ãƒ†ã‚¹ãƒˆã¨ã—ã¦ä½ç½®æƒ…å ±ã‚’æ¨™æº–å‡ºåŠ›ã¸å‡ºåŠ›
 	for ( auto& i : get_component_list() )
 	{
 		// auto* transform = std::get< TransformComponent* >( i.second );
@@ -39,11 +39,11 @@ void ParticleRenderSystem::update()
 
 		auto* particle_system = std::get< ParticleSystemComponent* >( i.second );
 		
-		// ‘S‚Ä‚Ìƒp[ƒeƒBƒNƒ‹‚ÌˆÊ’u‚ğo—Í‚·‚é
+		// å…¨ã¦ã®ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã®ä½ç½®ã‚’å‡ºåŠ›ã™ã‚‹
 		/*
 		for ( const auto& p : particle_system->particle_list )
 		{
-			// ’x‚¢‚Ì‚ÅƒRƒƒ“ƒgƒAƒEƒg
+			// é…ã„ã®ã§ã‚³ãƒ¡ãƒ³ãƒˆã‚¢ã‚¦ãƒˆ
 			std::cout << "\tp : " << p.position << std::endl;
 		}
 		*/

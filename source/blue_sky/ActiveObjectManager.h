@@ -10,9 +10,9 @@ namespace blue_sky
 {
 
 /**
- * •¡”‚Ì ActiveObject ‚ğŠÇ—‚·‚é Manager
+ * è¤‡æ•°ã® ActiveObject ã‚’ç®¡ç†ã™ã‚‹ Manager
  *
- * @todo GameObjectManager ‚Æ‚·‚é
+ * @todo GameObjectManager ã¨ã™ã‚‹
  */
 class ActiveObjectManager
 {

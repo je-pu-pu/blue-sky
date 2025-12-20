@@ -7,11 +7,11 @@ namespace blue_sky
 {
 
 /**
- * ˆÚ“®‚µ‚È‚¢ƒIƒuƒWƒFƒNƒg
+ * ç§»å‹•ã—ãªã„ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
  *
- * ƒQ[ƒ€‚Ì”wŒi‚âáŠQ•¨E¬•¨‚È‚Ç‚Ég—p‚·‚é
+ * ã‚²ãƒ¼ãƒ ã®èƒŒæ™¯ã‚„éšœå®³ç‰©ãƒ»å°ç‰©ãªã©ã«ä½¿ç”¨ã™ã‚‹
  */
-class StaticObject : public ActiveObject /// @todo GameObject ‚ğŒp³‚·‚é
+class StaticObject : public ActiveObject /// @todo GameObject ã‚’ç¶™æ‰¿ã™ã‚‹
 {
 private:
 	float_t		collision_width_;
@@ -33,7 +33,7 @@ public:
 	StaticObject( float_t w = 0, float_t h = 0, float_t d = 0, float_t mass_ = 0.f );
 	~StaticObject();
 
-	/// XV
+	/// æ›´æ–°
 	void update();
 
 }; // class StaticObject

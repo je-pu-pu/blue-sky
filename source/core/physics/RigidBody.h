@@ -1,14 +1,12 @@
 #pragma once
 
-#pragma warning( push, 0 )
 #include <btBulletDynamicsCommon.h>
-#pragma warning( pop )
 
 namespace core::physics
 {
 
 /**
- * „‘Ì
+ * å‰›ä½“
  * 
  */
 using RigidBody = btRigidBody;

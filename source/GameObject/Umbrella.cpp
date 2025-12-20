@@ -10,7 +10,7 @@ Umbrella::Umbrella()
 }
 
 /**
- * XV
+ * æ›´æ–°
  *
  */
 void Umbrella::update()

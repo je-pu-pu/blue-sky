@@ -6,7 +6,7 @@ namespace core::graphics::direct_3d_11
 {
 
 /**
- * Direct3D11 �萔�o�b�t�@ ( �X�V�p�̃f�[�^�������ɕێ�����o�[�W���� )
+ * Direct3D11 定数バッファ ( 更新用のデータも内部に保持するバージョン )
  *
  */
 template< typename DataType, int Slot >

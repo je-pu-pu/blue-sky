@@ -73,10 +73,10 @@ void BulletPhysics::clear()
 }
 
 /**
- * ’n–Ê—p‚Ì„‘Ì‚ğ’Ç‰Á‚·‚é
+ * åœ°é¢ç”¨ã®å‰›ä½“ã‚’è¿½åŠ ã™ã‚‹
  *
- * @param box ’n–Ê‚ÌŒ`ó
- * @return ’Ç‰Á‚³‚ê‚½„‘Ì
+ * @param box åœ°é¢ã®å½¢çŠ¶
+ * @return è¿½åŠ ã•ã‚ŒãŸå‰›ä½“
  */
 btRigidBody* BulletPhysics::add_ground_rigid_body( const Vector& box )
 {
@@ -91,13 +91,13 @@ btRigidBody* BulletPhysics::add_ground_rigid_body( const Vector& box )
 }
 
 /**
- * —§•û‘ÌŒ`ó‚Ì„‘Ì‚ğ’Ç‰Á‚·‚é
+ * ç«‹æ–¹ä½“å½¢çŠ¶ã®å‰›ä½“ã‚’è¿½åŠ ã™ã‚‹
  * 
- * @param transform À•W•ÏŠ·
- * @param offset „‘Ì‚Ì’†S“_‚ÌƒIƒtƒZƒbƒg
- * @param box —§•û‘Ì‚ÌŒ`ó
- * @param mass ¿—Ê
- * @return ’Ç‰Á‚³‚ê‚½„‘Ì
+ * @param transform åº§æ¨™å¤‰æ›
+ * @param offset å‰›ä½“ã®ä¸­å¿ƒç‚¹ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆ
+ * @param box ç«‹æ–¹ä½“ã®å½¢çŠ¶
+ * @param mass è³ªé‡
+ * @return è¿½åŠ ã•ã‚ŒãŸå‰›ä½“
  */
 btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, const Transform& offset, const Vector& box, btScalar mass )
 {
@@ -108,14 +108,14 @@ btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, cons
 }
 
 /**
- * ƒJƒvƒZƒ‹Œ`ó‚Ì„‘Ì‚ğ’Ç‰Á‚·‚é
+ * ã‚«ãƒ—ã‚»ãƒ«å½¢çŠ¶ã®å‰›ä½“ã‚’è¿½åŠ ã™ã‚‹
  *
- * @param transform À•W•ÏŠ·
- * @param offset „‘Ì‚Ì’†S“_‚ÌƒIƒtƒZƒbƒg
- * @param radius ƒVƒŠƒ“ƒ_[•”‚Ìã‰º‚É•t‰Á‚³‚ê‚é”¼‹…‚Ì”¼Œa
- * @param height ƒVƒŠƒ“ƒ_[•”‚Ì‚‚³
- * @param mass ¿—Ê
- * @return ’Ç‰Á‚³‚ê‚½„‘Ì
+ * @param transform åº§æ¨™å¤‰æ›
+ * @param offset å‰›ä½“ã®ä¸­å¿ƒç‚¹ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆ
+ * @param radius ã‚·ãƒªãƒ³ãƒ€ãƒ¼éƒ¨ã®ä¸Šä¸‹ã«ä»˜åŠ ã•ã‚Œã‚‹åŠçƒã®åŠå¾„
+ * @param height ã‚·ãƒªãƒ³ãƒ€ãƒ¼éƒ¨ã®é«˜ã•
+ * @param mass è³ªé‡
+ * @return è¿½åŠ ã•ã‚ŒãŸå‰›ä½“
  */
 btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, const Transform& offset, float_t radius, float_t height, btScalar mass )
 {
@@ -126,14 +126,14 @@ btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, 
 }
 
 /**
- * ‰~’ŒŒ`ó‚Ì„‘Ì‚ğ’Ç‰Á‚·‚é
+ * å††æŸ±å½¢çŠ¶ã®å‰›ä½“ã‚’è¿½åŠ ã™ã‚‹
  *
- * @param transform À•W•ÏŠ·
- * @param offset „‘Ì‚Ì’†S“_‚ÌƒIƒtƒZƒbƒg
- * @param radius ƒVƒŠƒ“ƒ_[•”‚Ìã‰º‚É•t‰Á‚³‚ê‚é”¼‹…‚Ì”¼Œa
- * @param height ƒVƒŠƒ“ƒ_[•”‚Ì‚‚³
- * @param mass ¿—Ê
- * @return ’Ç‰Á‚³‚ê‚½„‘Ì
+ * @param transform åº§æ¨™å¤‰æ›
+ * @param offset å‰›ä½“ã®ä¸­å¿ƒç‚¹ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆ
+ * @param radius ã‚·ãƒªãƒ³ãƒ€ãƒ¼éƒ¨ã®ä¸Šä¸‹ã«ä»˜åŠ ã•ã‚Œã‚‹åŠçƒã®åŠå¾„
+ * @param height ã‚·ãƒªãƒ³ãƒ€ãƒ¼éƒ¨ã®é«˜ã•
+ * @param mass è³ªé‡
+ * @return è¿½åŠ ã•ã‚ŒãŸå‰›ä½“
  */
 btRigidBody* BulletPhysics::add_cylinder_rigid_body( const Transform& transform, const Transform& offset, const Vector& box, btScalar mass )
 {
@@ -144,13 +144,13 @@ btRigidBody* BulletPhysics::add_cylinder_rigid_body( const Transform& transform,
 }
 
 /**
- * „‘Ì‚ğ¶¬‚µ¢ŠE‚É’Ç‰Á‚·‚é
+ * å‰›ä½“ã‚’ç”Ÿæˆã—ä¸–ç•Œã«è¿½åŠ ã™ã‚‹
  *
- * @param shape Œ`ó
- * @param transform À•W•ÏŠ·
- * @param offset „‘Ì‚Ì’†S“_‚ÌƒIƒtƒZƒbƒg
- * @param mass ¿—Ê
- * @return ’Ç‰Á‚³‚ê‚½„‘Ì
+ * @param shape å½¢çŠ¶
+ * @param transform åº§æ¨™å¤‰æ›
+ * @param offset å‰›ä½“ã®ä¸­å¿ƒç‚¹ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆ
+ * @param mass è³ªé‡
+ * @return è¿½åŠ ã•ã‚ŒãŸå‰›ä½“
  */
 btRigidBody* BulletPhysics::create_rigid_body( btCollisionShape* shape, const Transform& transform, const Transform& offset, btScalar mass )
 {
@@ -171,7 +171,7 @@ btRigidBody* BulletPhysics::create_rigid_body( btCollisionShape* shape, const Tr
 }
 
 /**
- * Wavefront OBJ ƒtƒ@ƒCƒ‹‚©‚çƒ|ƒŠƒSƒ“Œ`ó‚ğ„‘Ì‚Æ‚µ‚Ä“Ç‚İ‚Ş
+ * Wavefront OBJ ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ãƒãƒªã‚´ãƒ³å½¢çŠ¶ã‚’å‰›ä½“ã¨ã—ã¦èª­ã¿è¾¼ã‚€
  *
  */
 bool BulletPhysics::load_obj( const char_t* file_name )
@@ -252,7 +252,7 @@ bool BulletPhysics::load_obj( const char_t* file_name )
 		// btScalar mass( 0 );
 		btVector3 local_inertia( 0, 0, 0 );
 
-		// shape->calculateLocalInertia( mass, local_inertia ); /// Ã“I‚È„‘Ì‚È‚Ì‚ÅŠµ«‚Í•s—v
+		// shape->calculateLocalInertia( mass, local_inertia ); /// é™çš„ãªå‰›ä½“ãªã®ã§æ…£æ€§ã¯ä¸è¦
 
 		btDefaultMotionState* motion_state = new btDefaultMotionState( transform );
 		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( 0.f, motion_state, shape, local_inertia );

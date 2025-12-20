@@ -6,7 +6,7 @@ namespace blue_sky
 {
 
 /**
- * 通常スイッチ
+ * 騾壼ｸｸ繧ｹ繧､繝�繝�
  *
  */
 class Switch : public BaseSwitch
@@ -29,7 +29,7 @@ public:
 	Switch();
 	~Switch() { }
 
-	/// 更新
+	/// 譖ｴ譁ｰ
 	void update() override;
 
 	void restart() override;

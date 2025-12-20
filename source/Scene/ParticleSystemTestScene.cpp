@@ -30,13 +30,13 @@ ParticleSystemTestScene::ParticleSystemTestScene()
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
-	// System ‚ð’Ç‰Á‚·‚é
+	// System ã‚’è¿½åŠ ã™ã‚‹
 	get_entity_manager()->add_system< core::ecs::ParticleRenderSystem >( 1001 );
 	get_entity_manager()->add_system< core::ecs::ParticleSystem >( 0 );
 	get_entity_manager()->add_system< core::ecs::TransformControlSystem >();
 	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
 
-	// Entity ‚Æ Component ‚ð’Ç‰Á‚·‚é
+	// Entity ã¨ Component ã‚’è¿½åŠ ã™ã‚‹
 	auto particle_system = get_entity_manager()->create_entity();
 	particle_system->add_component< core::ecs::TransformComponent >()->transform.set_identity();
 	particle_system->add_component< core::ecs::ParticleSystemComponent >();

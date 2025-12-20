@@ -40,14 +40,14 @@ const Direct3D11::Color Direct3D11::DEFAULT_CLEAR_COLOR = Direct3D11::Color::Bla
 Direct3D11* Direct3D11::instance_ = nullptr;
 
 /**
- * ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+ * ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
  *
- * @param hwnd					ƒEƒBƒ“ƒhƒEƒnƒ“ƒhƒ‹
- * @param w						ƒoƒbƒNƒoƒbƒtƒ@‚Ì•
- * @param h						ƒoƒbƒNƒoƒbƒtƒ@‚Ì‚‚³
- * @param full_screen			ƒtƒ‹ƒXƒNƒŠ[ƒ“ƒtƒ‰ƒO
- * @param multi_sample_count	ƒ}ƒ‹ƒ`ƒTƒ“ƒvƒŠƒ“ƒO‚ÌƒTƒ“ƒvƒ‹”
- * @param multi_sample_quality	ƒ}ƒ‹ƒ`ƒTƒ“ƒvƒŠƒ“ƒO‚ÌƒNƒIƒŠƒeƒB
+ * @param hwnd					ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒãƒ³ãƒ‰ãƒ«
+ * @param w						ãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡ã®å¹…
+ * @param h						ãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡ã®é«˜ã•
+ * @param full_screen			ãƒ•ãƒ«ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ãƒ•ãƒ©ã‚°
+ * @param multi_sample_count	ãƒãƒ«ãƒã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã®ã‚µãƒ³ãƒ—ãƒ«æ•°
+ * @param multi_sample_quality	ãƒãƒ«ãƒã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã®ã‚¯ã‚ªãƒªãƒ†ã‚£
  */
 Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sample_count, int multi_sample_quality )
 	: device_( 0 )
@@ -93,7 +93,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sam
 }
 
 /**
- * ƒfƒXƒgƒ‰ƒNƒ^
+ * ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
  *
  */
 Direct3D11::~Direct3D11()
@@ -164,7 +164,7 @@ Direct3D11::~Direct3D11()
 }
 
 /**
- * Direct3D 11 ƒfƒoƒCƒX‚ğì¬‚·‚é
+ * Direct3D 11 ãƒ‡ãƒã‚¤ã‚¹ã‚’ä½œæˆã™ã‚‹
  *
  */
 void Direct3D11::create_device()
@@ -192,7 +192,7 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 	swap_chain_desc_.BufferCount = 1;
 	swap_chain_desc_.BufferDesc.Width = w;
 	swap_chain_desc_.BufferDesc.Height = h;
-	swap_chain_desc_.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; /// Direct2D ‚Æ‹¤‘¶‚·‚é‚½‚ß BGRA ‚É‚·‚éH // DXGI_FORMAT_R8G8B8A8_UNORM;
+	swap_chain_desc_.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; /// Direct2D ã¨å…±å­˜ã™ã‚‹ãŸã‚ BGRA ã«ã™ã‚‹ï¼Ÿ // DXGI_FORMAT_R8G8B8A8_UNORM;
 //	swap_chain_desc_.BufferDesc.RefreshRate.Numerator = 60;
 //	swap_chain_desc_.BufferDesc.RefreshRate.Denominator = 1;
 	swap_chain_desc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -244,7 +244,7 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 }
 
 /**
- * ƒXƒƒbƒvƒ`ƒFƒCƒ“‚©‚çƒoƒbƒNƒoƒbƒtƒ@‚Ö‚Ì•`‰æ—pƒeƒNƒXƒ`ƒƒ‚ğì¬‚·‚é
+ * ã‚¹ãƒ¯ãƒƒãƒ—ãƒã‚§ã‚¤ãƒ³ã‹ã‚‰ãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡ã¸ã®æç”»ç”¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ä½œæˆã™ã‚‹
  *
  */
 void Direct3D11::create_back_buffer_texture()
@@ -253,7 +253,7 @@ void Direct3D11::create_back_buffer_texture()
 }
 
 /**
- * ƒfƒvƒXƒXƒeƒ“ƒVƒ‹ƒeƒNƒXƒ`ƒƒ‚ğì¬‚·‚é
+ * ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ä½œæˆã™ã‚‹
  *
  */
 void Direct3D11::create_depth_stencil_view()
@@ -279,7 +279,7 @@ void Direct3D11::create_depth_stencil_view()
 }
 
 /**
- * Šù‘¶‚Ì Texture2D ‚©‚çƒŒƒ“ƒ_ƒŠƒ“ƒOŒ‹‰Ê‚ğ‘‚«‚Ş‚½‚ß‚Ìƒrƒ…[‚ğì¬‚·‚é
+ * æ—¢å­˜ã® Texture2D ã‹ã‚‰ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°çµæœã‚’æ›¸ãè¾¼ã‚€ãŸã‚ã®ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆã™ã‚‹
  *
  */
 ID3D11RenderTargetView* Direct3D11::create_render_target_view( ID3D11Texture2D* texture )
@@ -290,7 +290,7 @@ ID3D11RenderTargetView* Direct3D11::create_render_target_view( ID3D11Texture2D* 
 }
 
 /**
- * Šù‘¶‚Ì Texture2D ‚©‚çƒfƒvƒXƒXƒeƒ“ƒVƒ‹ƒrƒ…[‚ğì¬‚·‚é
+ * æ—¢å­˜ã® Texture2D ã‹ã‚‰ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆã™ã‚‹
  *
  */
 ID3D11DepthStencilView* Direct3D11::create_depth_stencil_view( ID3D11Texture2D* texture )
@@ -308,12 +308,12 @@ ID3D11DepthStencilView* Direct3D11::create_depth_stencil_view( ID3D11Texture2D* 
 }
 
 /**
- * ƒVƒF[ƒ_[ƒŠƒ\[ƒX‚Ég—p‚Å‚«‚éƒfƒvƒXQÆƒeƒNƒXƒ`ƒƒ‚ğì¬‚·‚é
+ * ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ã«ä½¿ç”¨ã§ãã‚‹ãƒ‡ãƒ—ã‚¹å‚ç…§ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ä½œæˆã™ã‚‹
  *
  */
 void Direct3D11::create_depth_texture()
 {
-	// ƒ}ƒ‹ƒ`ƒTƒ“ƒvƒŠƒ“ƒO‚ğ–³Œø‚É‚µ‚½ƒeƒNƒXƒ`ƒƒEƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[‚ğì¬‚·‚é
+	// ãƒãƒ«ãƒã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã‚’ç„¡åŠ¹ã«ã—ãŸãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ»ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆã™ã‚‹
 	if constexpr ( false )
 	{
 		D3D11_TEXTURE2D_DESC texture_desc = { 0 };
@@ -345,7 +345,7 @@ void Direct3D11::create_depth_texture()
 		depth_texture_.reset( new Texture( this, view ) );
 	}
 
-	// ƒfƒvƒXƒXƒeƒ“ƒVƒ‹ƒoƒbƒtƒ@‚ğQÆ‚·‚éƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[‚ğì¬‚·‚é
+	// ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ãƒãƒƒãƒ•ã‚¡ã‚’å‚ç…§ã™ã‚‹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆã™ã‚‹
 	if constexpr ( true )
 	{
 		D3D11_SHADER_RESOURCE_VIEW_DESC view_desc = { DXGI_FORMAT_R32_FLOAT };
@@ -374,7 +374,7 @@ void Direct3D11::setup_default_viewport()
 }
 
 /**
- * ƒtƒHƒ“ƒg‚ğƒZƒbƒgƒAƒbƒv‚·‚é
+ * ãƒ•ã‚©ãƒ³ãƒˆã‚’ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—ã™ã‚‹
  *
  */
 void Direct3D11::setup_font()
@@ -426,7 +426,7 @@ void Direct3D11::setup_font()
 			COMMON_THROW_EXCEPTION_MESSAGE( "D3D10CreateDevice1() failed." );
 		}
 
-		// D2D ‚ÌƒfƒoƒbƒOƒŒƒCƒ„[ƒƒbƒZ[ƒW‚ğ—}§
+		// D2D ã®ãƒ‡ãƒãƒƒã‚°ãƒ¬ã‚¤ãƒ¤ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’æŠ‘åˆ¶
 		device_10_->IASetPrimitiveTopology( D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 	}
 
@@ -484,9 +484,9 @@ void Direct3D11::setup_font()
 }
 
 /**
- * ƒXƒvƒ‰ƒCƒg‚ğƒZƒbƒgƒAƒbƒv‚·‚é
+ * ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã‚’ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—ã™ã‚‹
  *
- * ‚±‚ÌŠÖ”‚ÍAƒCƒ“ƒvƒbƒgƒŒƒCƒAƒEƒg‚ğì¬‚µ‚½ŒãAƒGƒtƒFƒNƒgƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚ñ‚¾Œã‚ÉŒÄ‚Ño‚·•K—v‚ª‚ ‚é
+ * ã“ã®é–¢æ•°ã¯ã€ã‚¤ãƒ³ãƒ—ãƒƒãƒˆãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’ä½œæˆã—ãŸå¾Œã€ã‚¨ãƒ•ã‚§ã‚¯ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚“ã å¾Œã«å‘¼ã³å‡ºã™å¿…è¦ãŒã‚ã‚‹
  */
 void Direct3D11::setup_sprite()
 {
@@ -536,7 +536,7 @@ void Direct3D11::create_default_input_layout()
 
 	create_input_layout( "pos_color", "|drawing_line", layout_pos_color, ARRAYSIZE( layout_pos_color ) );
 
-	// ƒ|ƒCƒ“ƒg 
+	// ãƒã‚¤ãƒ³ãƒˆ 
 	D3D11_INPUT_ELEMENT_DESC layout_drawing_point[] =
 	{
 		{ "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -556,7 +556,7 @@ void Direct3D11::create_default_input_layout()
 
 	create_input_layout( "sprite", "|sprite", layout_sprite, ARRAYSIZE( layout_sprite ) );
 
-	/// @todo 2D ‚Ì•`‰æ‚É–@ü‚ğg‚Á‚Ä‚¢‚é‚Ì‚Í–³‘Ê‚È‚Ì‚Å‚È‚ñ‚Æ‚©‚·‚é
+	/// @todo 2D ã®æç”»ã«æ³•ç·šã‚’ä½¿ã£ã¦ã„ã‚‹ã®ã¯ç„¡é§„ãªã®ã§ãªã‚“ã¨ã‹ã™ã‚‹
 	/*
 	// 2D
 	D3D11_INPUT_ELEMENT_DESC layout_2d[] =
@@ -572,7 +572,7 @@ void Direct3D11::create_default_input_layout()
 
 void Direct3D11::create_input_layout( const char_t* input_layout_name, const char_t* teqhnique_name, D3D11_INPUT_ELEMENT_DESC layout[], UINT layout_array_size )
 {
-	// ‚·‚Å‚É“¯‚¶–¼‘O‚ÅƒCƒ“ƒvƒbƒgƒŒƒCƒAƒEƒg‚ªì¬Ï‚İ‚Å‚ ‚ê‚ÎƒXƒLƒbƒv‚·‚é
+	// ã™ã§ã«åŒã˜åå‰ã§ã‚¤ãƒ³ãƒ—ãƒƒãƒˆãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆãŒä½œæˆæ¸ˆã¿ã§ã‚ã‚Œã°ã‚¹ã‚­ãƒƒãƒ—ã™ã‚‹
 	const auto i = input_layout_list_.find( input_layout_name );
 	
 	if ( i != input_layout_list_.end() )
@@ -639,13 +639,13 @@ void Direct3D11::on_resize( int w, int h )
 
 	create_back_buffer_texture();
 
-	/// @todo ‘S‚Ä‚Ì RenderTargetTexture ‚ğÄì¬‚·‚éH ( •K—v‚ª‚ ‚é‚©—v’²¸ )
+	/// @todo å…¨ã¦ã® RenderTargetTexture ã‚’å†ä½œæˆã™ã‚‹ï¼Ÿ ( å¿…è¦ãŒã‚ã‚‹ã‹è¦èª¿æŸ» )
 }
 
 /**
- * w’è‚µ‚½F‚Å‰æ–Ê‚ğƒNƒŠƒA‚·‚é
+ * æŒ‡å®šã—ãŸè‰²ã§ç”»é¢ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
  *
- * @param color ƒNƒŠƒA‚Ég—p‚·‚éF
+ * @param color ã‚¯ãƒªã‚¢ã«ä½¿ç”¨ã™ã‚‹è‰²
  */
 void Direct3D11::clear_default_view( const Color& color )
 {
@@ -657,9 +657,9 @@ void Direct3D11::clear_default_view( const Color& color )
 }
 
 /**
- * ƒoƒbƒNƒoƒbƒtƒ@‚Ì‚İ‚ğƒNƒŠƒA‚·‚é
+ * ãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡ã®ã¿ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
  *
- * @param color ƒNƒŠƒA‚Ég—p‚·‚éF
+ * @param color ã‚¯ãƒªã‚¢ã«ä½¿ç”¨ã™ã‚‹è‰²
  */
 void Direct3D11::clear_back_buffer_view( const Color& color )
 {
@@ -667,7 +667,7 @@ void Direct3D11::clear_back_buffer_view( const Color& color )
 }
 
 /**
- * ƒfƒvƒXƒoƒbƒtƒ@‚ÆƒXƒeƒ“ƒVƒ‹ƒoƒbƒtƒ@‚Ì‚İ‚ğƒNƒŠƒA‚·‚é
+ * ãƒ‡ãƒ—ã‚¹ãƒãƒƒãƒ•ã‚¡ã¨ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ãƒãƒƒãƒ•ã‚¡ã®ã¿ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
  *
  */
 void Direct3D11::clear_depth_stencil_view()
@@ -676,10 +676,10 @@ void Direct3D11::clear_depth_stencil_view()
 }
 
 /**
- * w’è‚µ‚½ƒŒƒ“ƒ_ƒŠƒ“ƒOƒ^[ƒQƒbƒg‚ğƒNƒŠƒA‚·‚é
+ * æŒ‡å®šã—ãŸãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
  *
- * @param view ƒŒƒ“ƒ_ƒŠƒ“ƒOƒ^[ƒQƒbƒg
- * @param color ƒNƒŠƒA‚Ég—p‚·‚éF
+ * @param view ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã‚¿ãƒ¼ã‚²ãƒƒãƒˆ
+ * @param color ã‚¯ãƒªã‚¢ã«ä½¿ç”¨ã™ã‚‹è‰²
  */
 void Direct3D11::clear_render_target_view( ID3D11RenderTargetView* view, const Color& color )
 {
@@ -687,9 +687,9 @@ void Direct3D11::clear_render_target_view( ID3D11RenderTargetView* view, const C
 }
 
 /**
- * w’è‚µ‚½ƒfƒvƒXƒXƒeƒ“ƒVƒ‹‚ğƒNƒŠƒA‚·‚é
+ * æŒ‡å®šã—ãŸãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
  *
- * @param view ƒfƒvƒXƒXƒeƒ“ƒVƒ‹
+ * @param view ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«
  */
 void Direct3D11::clear_depth_stencil_view( ID3D11DepthStencilView* view )
 {
@@ -697,9 +697,9 @@ void Direct3D11::clear_depth_stencil_view( ID3D11DepthStencilView* view )
 }
 
 /**
- * ’Êí‚ÌƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg‚ğİ’è‚·‚é
+ * é€šå¸¸ã®ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’è¨­å®šã™ã‚‹
  *
- * @param bool ƒfƒvƒXƒXƒeƒ“ƒVƒ‹ƒrƒ…[‚ğ“¯‚Éİ’è‚·‚é
+ * @param bool ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ãƒ“ãƒ¥ãƒ¼ã‚’åŒæ™‚ã«è¨­å®šã™ã‚‹
  */
 void Direct3D11::set_default_render_target( bool with_depth_stencil )
 {
@@ -708,7 +708,7 @@ void Direct3D11::set_default_render_target( bool with_depth_stencil )
 }
 
 /**
- * ’Êí‚Ìƒrƒ…[ƒ|[ƒg‚ğİ’è‚·‚é
+ * é€šå¸¸ã®ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆã‚’è¨­å®šã™ã‚‹
  *
  */
 void Direct3D11::set_default_viewport()
@@ -717,9 +717,9 @@ void Direct3D11::set_default_viewport()
 }
 
 /**
- * ƒŒƒ“ƒ_ƒŠƒ“ƒOŒ‹‰Ê‚ğ‘‚«‚ŞƒeƒNƒXƒ`ƒƒ‚ğİ’è‚·‚é
+ * ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°çµæœã‚’æ›¸ãè¾¼ã‚€ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’è¨­å®šã™ã‚‹
  *
- * @param texture ƒŒƒ“ƒ_ƒŠƒ“ƒOŒ‹‰Ê‚ğ‘‚«‚ŞƒeƒNƒXƒ`ƒƒ
+ * @param texture ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°çµæœã‚’æ›¸ãè¾¼ã‚€ãƒ†ã‚¯ã‚¹ãƒãƒ£
  */
 void Direct3D11::set_render_target( RenderTargetTexture* texture )
 {
@@ -734,10 +734,10 @@ void Direct3D11::set_render_target( BackBufferTexture* texture )
 }
 
 /**
- * —§‘Ì‹—p‚ÉƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg‚ğİ’è‚·‚é
+ * ç«‹ä½“è¦–ç”¨ã«ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’è¨­å®šã™ã‚‹
  *
- * @param render_target_view ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg
- * @param depth_stencil_view ƒrƒ…[
+ * @param render_target_view ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆ
+ * @param depth_stencil_view ãƒ“ãƒ¥ãƒ¼
  */
 void Direct3D11::set_render_target_for_vr( ID3D11RenderTargetView* render_target_view, ID3D11DepthStencilView* depth_stencil_view )
 {
@@ -749,7 +749,7 @@ void Direct3D11::set_render_target_for_vr( ID3D11RenderTargetView* render_target
 }
 
 /**
- * ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg‚ğ‰ğœ‚·‚é
+ * ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’è§£é™¤ã™ã‚‹
  *
  */
 void Direct3D11::unset_render_target()
@@ -758,7 +758,7 @@ void Direct3D11::unset_render_target()
 }
 
 /**
- * ƒrƒ…[ƒ|[ƒg‚ğİ’è‚·‚é
+ * ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆã‚’è¨­å®šã™ã‚‹
  *
  */
 void Direct3D11::set_viewport( float_t x, float_t y, float_t w, float_t h, float_t d_min, float_t d_max )
@@ -814,10 +814,10 @@ Direct3D11::Texture* Direct3D11::load_texture( const char* file_path )
 }
 
 /**
- * ƒeƒNƒXƒ`ƒƒ‚ğƒhƒƒCƒ“ƒVƒF[ƒ_[‚ÉŠÖ˜A•t‚¯‚é
+ * ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ãƒ‰ãƒ¡ã‚¤ãƒ³ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«é–¢é€£ä»˜ã‘ã‚‹
  *
- * @param slot ƒXƒƒbƒg
- * @param texture ƒeƒNƒXƒ`ƒƒ
+ * @param slot ã‚¹ãƒ­ãƒƒãƒˆ
+ * @param texture ãƒ†ã‚¯ã‚¹ãƒãƒ£
  */
 void Direct3D11::bind_texture_to_ds( uint_t slot, const Texture* texture )
 {
@@ -826,10 +826,10 @@ void Direct3D11::bind_texture_to_ds( uint_t slot, const Texture* texture )
 }
 
 /**
- * ƒeƒNƒXƒ`ƒƒ‚ğƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚ÉŠÖ˜A•t‚¯‚é
+ * ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«é–¢é€£ä»˜ã‘ã‚‹
  *
- * @param slot ƒXƒƒbƒg
- * @param texture ƒeƒNƒXƒ`ƒƒ
+ * @param slot ã‚¹ãƒ­ãƒƒãƒˆ
+ * @param texture ãƒ†ã‚¯ã‚¹ãƒãƒ£
  */
 void Direct3D11::bind_texture_to_ps( uint_t slot, const Texture* texture )
 {
@@ -903,7 +903,7 @@ void Direct3D11::renderText()
 }
 
 /**
- * ƒ}ƒ‹ƒ`ƒTƒ“ƒvƒŠƒ“ƒO‚³‚ê‚½ƒfƒvƒXƒoƒbƒtƒ@‚ğƒ}ƒ‹ƒ`ƒTƒ“ƒvƒŠƒ“ƒO‚³‚ê‚Ä‚¢‚È‚¢ƒfƒvƒXƒeƒNƒXƒ`ƒƒ‚ÉƒRƒs[‚·‚é
+ * ãƒãƒ«ãƒã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã•ã‚ŒãŸãƒ‡ãƒ—ã‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ãƒãƒ«ãƒã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã•ã‚Œã¦ã„ãªã„ãƒ‡ãƒ—ã‚¹ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«ã‚³ãƒ”ãƒ¼ã™ã‚‹
  *
  */
 void Direct3D11::resolve_depth_texture()

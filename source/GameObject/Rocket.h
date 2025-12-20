@@ -6,7 +6,7 @@ namespace blue_sky
 {
 
 /**
- * ロケット
+ * 繝ｭ繧ｱ繝�繝�
  *
  */
 class Rocket : public ActiveObject
@@ -26,7 +26,7 @@ public:
 	Rocket();
 	~Rocket() { }
 
-	/// 更新
+	/// 譖ｴ譁ｰ
 	void update() override;
 
 	void restart() override;

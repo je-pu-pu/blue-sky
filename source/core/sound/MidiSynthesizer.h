@@ -7,7 +7,7 @@ namespace core::sound
 {
 
 /** 
- * MIDI シンセサイザー
+ * MIDI 繧ｷ繝ｳ繧ｻ繧ｵ繧､繧ｶ繝ｼ
  * 
  */
 class MidiSynthesizer

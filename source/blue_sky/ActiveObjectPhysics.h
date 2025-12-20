@@ -9,7 +9,7 @@ namespace blue_sky
 class ActiveObject;
 
 /**
- * ActiveObject ‘Î‰ž BulletPhysics
+ * ActiveObject å¯¾å¿œ BulletPhysics
  *
  */
 class ActiveObjectPhysics : public BulletPhysics

@@ -72,7 +72,7 @@ ActiveObject::~ActiveObject()
 }
 
 /**
- * ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶‚ğƒZƒbƒgƒAƒbƒv‚·‚é
+ * ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿã‚’ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—ã™ã‚‹
  *
  */
 void ActiveObject::setup_animation_player()
@@ -186,10 +186,10 @@ void ActiveObject::set_direction_degree( float_t d )
 }
 
 /**
- * •ûŒü‚ğw’è‚µ‚½êŠ‚Ì•ûŒü‚É‹ß‚Ã‚¯‚é
+ * æ–¹å‘ã‚’æŒ‡å®šã—ãŸå ´æ‰€ã®æ–¹å‘ã«è¿‘ã¥ã‘ã‚‹
  *
- * @param location –Ú“I‚ÌêŠ
- * @param speed ‘¬“x
+ * @param location ç›®çš„ã®å ´æ‰€
+ * @param speed é€Ÿåº¦
  */
 void ActiveObject::chase_direction_to( const Vector& location, float_t speed )
 {
@@ -201,10 +201,10 @@ void ActiveObject::chase_direction_to( const Vector& location, float_t speed )
 }
 
 /**
- * •ûŒü‚ğw’è‚µ‚½–Ú“I‚Ì•ûŒü‚É‹ß‚Ã‚¯‚é
+ * æ–¹å‘ã‚’æŒ‡å®šã—ãŸç›®çš„ã®æ–¹å‘ã«è¿‘ã¥ã‘ã‚‹
  *
- * @param d –Ú“I‚Ì•ûŒü
- * @param speed ‘¬“x
+ * @param d ç›®çš„ã®æ–¹å‘
+ * @param speed é€Ÿåº¦
  */
 void ActiveObject::chase_direction_degree( float_t d, float_t speed )
 {
@@ -223,10 +223,10 @@ void ActiveObject::chase_direction_degree( float_t d, float_t speed )
 }
 
 /**
- * ƒIƒuƒWƒFƒNƒg‚ğ€–S‚³‚¹‚é
+ * ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æ­»äº¡ã•ã›ã‚‹
  *
- * ƒIƒuƒWƒFƒNƒg‚Í€–S‚·‚é‚Æ is_visible(), is_mesh_visible() is_line_visible() ‘S‚Ä‚Å false ‚ğ•Ô‚·‚æ‚¤‚É‚È‚é‚½‚ßA’Êí•`‰æ‚³‚ê‚È‚­‚È‚éB
- * ‚½‚¾‚µAActiveObjectManager ‚©‚çíœ‚³‚ê‚é–‚Í‚È‚­Aupdate() ‚ÍŒÄ‚Î‚ê‘±‚¯‚éB
+ * ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¯æ­»äº¡ã™ã‚‹ã¨ is_visible(), is_mesh_visible() is_line_visible() å…¨ã¦ã§ false ã‚’è¿”ã™ã‚ˆã†ã«ãªã‚‹ãŸã‚ã€é€šå¸¸æç”»ã•ã‚Œãªããªã‚‹ã€‚
+ * ãŸã ã—ã€ActiveObjectManager ã‹ã‚‰å‰Šé™¤ã•ã‚Œã‚‹äº‹ã¯ãªãã€update() ã¯å‘¼ã°ã‚Œç¶šã‘ã‚‹ã€‚
  */
 void ActiveObject::kill()
 {
@@ -237,7 +237,7 @@ void ActiveObject::kill()
 }
 
 /**
- * •`‰æ—p‚Ì’è”ƒoƒbƒtƒ@‚ğXV‚·‚é
+ * æç”»ç”¨ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void ActiveObject::update_render_data() const
@@ -268,20 +268,20 @@ void ActiveObject::update_render_data() const
 }
 
 /**
- * •`‰æ—p‚Ì’è”ƒoƒbƒtƒ@‚ğƒVƒF[ƒ_[‚Éİ’è‚·‚é
+ * æç”»ç”¨ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«è¨­å®šã™ã‚‹
  *
- * @todo íœ‚·‚éB‚Ç‚Ì ConstantBuffer ‚ª‚Ç‚ÌƒVƒF[ƒ_[ƒXƒe[ƒW‚Å•K—v‚©‚Í Shader ˆË‘¶‚Ì‚½‚ßA bind ‚Í Shader ‚Ås‚¤ )
+ * @todo å‰Šé™¤ã™ã‚‹ã€‚ã©ã® ConstantBuffer ãŒã©ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚¹ãƒ†ãƒ¼ã‚¸ã§å¿…è¦ã‹ã¯ Shader ä¾å­˜ã®ãŸã‚ã€ bind ã¯ Shader ã§è¡Œã† )
  */
 void ActiveObject::bind_render_data() const
 {
 	get_object_constant_buffer()->bind_to_vs();
 	get_object_constant_buffer()->bind_to_ds();
 	// get_object_constant_buffer()->bind_to_gs();
-	get_object_constant_buffer()->bind_to_ps(); // •K—vH
+	get_object_constant_buffer()->bind_to_ps(); // å¿…è¦ï¼Ÿ
 }
 
 /**
- * ƒƒbƒVƒ…‚ğ•`‰æ‚·‚é
+ * ãƒ¡ãƒƒã‚·ãƒ¥ã‚’æç”»ã™ã‚‹
  *
  */
 void ActiveObject::render_mesh() const
@@ -296,7 +296,7 @@ void ActiveObject::render_mesh() const
 		return;
 	}
 
-	/// @todo íœ‚·‚éBƒf[ƒ^‚ÌƒoƒCƒ“ƒh‚Í Shader ‚ªs‚¤B ( ‚Ç‚Ìƒf[ƒ^‚ª‚Ç‚ÌƒVƒF[ƒ_[‚É•K—v‚©‚Í Shader ˆË‘¶‚Ì‚½‚ß )
+	/// @todo å‰Šé™¤ã™ã‚‹ã€‚ãƒ‡ãƒ¼ã‚¿ã®ãƒã‚¤ãƒ³ãƒ‰ã¯ Shader ãŒè¡Œã†ã€‚ ( ã©ã®ãƒ‡ãƒ¼ã‚¿ãŒã©ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«å¿…è¦ã‹ã¯ Shader ä¾å­˜ã®ãŸã‚ )
 	bind_render_data();
 	
 	if ( get_animation_player() )
@@ -308,7 +308,7 @@ void ActiveObject::render_mesh() const
 }
 
 /**
- * w’è‚µ‚½ƒVƒF[ƒ_[‚ÅƒƒbƒVƒ…‚ğ•`‰æ‚·‚é
+ * æŒ‡å®šã—ãŸã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã§ãƒ¡ãƒƒã‚·ãƒ¥ã‚’æç”»ã™ã‚‹
  *
  */
 void ActiveObject::render_mesh( const Shader* shader ) const
@@ -333,7 +333,7 @@ void ActiveObject::render_mesh( const Shader* shader ) const
 
 
 /**
- * ü‚ğ•`‰æ‚·‚é
+ * ç·šã‚’æç”»ã™ã‚‹
  *
  */
 void ActiveObject::render_line() const
@@ -364,7 +364,7 @@ void ActiveObject::play_animation( const char_t* name, bool force, bool loop )
 }
 
 /**
- * ŒÅ—L‚ÌƒAƒNƒVƒ‡ƒ“‚ğÀs‚·‚é
+ * å›ºæœ‰ã®ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã‚’å®Ÿè¡Œã™ã‚‹
  * 
  * @param s
  */

@@ -9,12 +9,12 @@ namespace blue_sky::graphics::direct_3d_11
 {
 
 /**
- * ’¸“_ƒoƒbƒtƒ@‚ğì¬‚·‚é
+ * é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ä½œæˆã™ã‚‹
  *
  */
 void MeshBuffer::create_vertex_buffer()
 {
-	///@todo type ‚É‚æ‚Á‚Äƒoƒbƒtƒ@‚ğì‚è•ª‚¯‚é
+	///@todo type ã«ã‚ˆã£ã¦ãƒãƒƒãƒ•ã‚¡ã‚’ä½œã‚Šåˆ†ã‘ã‚‹
 
 	if ( get_vertex_list().empty() )
 	{
@@ -58,7 +58,7 @@ void MeshBuffer::create_vertex_buffer()
 }
 
 /**
- * ‘S‚Ä‚Ì’¸“_ƒOƒ‹[ƒv‚ÌƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚ğì¬‚·‚é
+ * å…¨ã¦ã®é ‚ç‚¹ã‚°ãƒ«ãƒ¼ãƒ—ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ä½œæˆã™ã‚‹
  *
  */
 void MeshBuffer::create_index_buffer()
@@ -92,12 +92,12 @@ void MeshBuffer::create_index_buffer()
 }
 
 /**
- * ’¸“_ƒoƒbƒtƒ@‚ğXV‚·‚é
+ * é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void MeshBuffer::update_vertex_buffer()
 {
-	/// @todo À‘•‚·‚é
+	/// @todo å®Ÿè£…ã™ã‚‹
 
 	/*
 	D3D11_MAPPED_SUBRESOURCE mapped_subresource;
@@ -111,16 +111,16 @@ void MeshBuffer::update_vertex_buffer()
 }
 
 /**
- * ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚ğXV‚·‚é
+ * ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void MeshBuffer::update_index_buffer()
 {
-	/// @todo À‘•‚·‚é
+	/// @todo å®Ÿè£…ã™ã‚‹
 }
 
 /**
- * “ü—ÍƒAƒZƒ“ƒuƒ‰‚Éİ’è‚·‚é
+ * å…¥åŠ›ã‚¢ã‚»ãƒ³ãƒ–ãƒ©ã«è¨­å®šã™ã‚‹
  *
  */
 void MeshBuffer::bind() const
@@ -138,9 +138,9 @@ void MeshBuffer::bind() const
 }
 
 /**
- * ƒƒbƒVƒ…“à‚ÌƒCƒ“ƒfƒbƒNƒX‚Åw’è‚µ‚½’¸“_ƒOƒ‹[ƒv‚Ì‚İ‚ğ•`‰æ‚·‚é
+ * ãƒ¡ãƒƒã‚·ãƒ¥å†…ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã§æŒ‡å®šã—ãŸé ‚ç‚¹ã‚°ãƒ«ãƒ¼ãƒ—ã®ã¿ã‚’æç”»ã™ã‚‹
  *
- * @param n •`‰æ‚·‚é’¸“_ƒOƒ‹[ƒv‚ÌƒCƒ“ƒfƒbƒNƒX
+ * @param n æç”»ã™ã‚‹é ‚ç‚¹ã‚°ãƒ«ãƒ¼ãƒ—ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
  */
 void MeshBuffer::render( uint_t n ) const
 {

@@ -5,9 +5,9 @@ namespace game
 {
 
 /**
- * ƒTƒEƒ“ƒhŠî’êƒNƒ‰ƒX
+ * ã‚µã‚¦ãƒ³ãƒ‰åŸºåº•ã‚¯ãƒ©ã‚¹
  *
- * @todo core/sound/Sound ‚É“‡‚·‚é
+ * @todo core/sound/Sound ã«çµ±åˆã™ã‚‹
  */
 class Sound
 {
@@ -26,79 +26,79 @@ public:
 
 public:
 
-	/// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	/// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	Sound() { }
 
-	/// ƒfƒXƒgƒ‰ƒNƒ^
+	/// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	virtual ~Sound() { }
 
-	/// ƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
+	/// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
 	virtual bool load( const char* ) { return true; };
 
-	/// –¼‘O‚ğæ“¾‚·‚é
+	/// åå‰ã‚’å–å¾—ã™ã‚‹
 	virtual const char* get_name() { return ""; };
 	virtual void set_name( const char* ) { };
 
-	/// ƒtƒ@ƒCƒ‹–¼‚ğæ“¾‚·‚é
+	/// ãƒ•ã‚¡ã‚¤ãƒ«åã‚’å–å¾—ã™ã‚‹
 	virtual const char* get_file_name() const { return ""; }
 	virtual void set_file_name( const char* ) { };
 
 	/// 3D
 	virtual bool is_3d_sound() const { return false; }
 
-	/// 3D ˆÊ’u
+	/// 3D ä½ç½®
 	virtual void set_3d_position( T, T, T ) { }
 
-	/// 3D ‘¬“x
+	/// 3D é€Ÿåº¦
 	virtual void set_3d_velocity( T, T, T ) { }
 
-	/// ƒ{ƒŠƒ…[ƒ€
+	/// ãƒœãƒªãƒ¥ãƒ¼ãƒ 
 	virtual T get_volume() const { return 0.f; };
 	virtual void set_volume( T ) { };
 
-	/// Å‘åƒ{ƒŠƒ…[ƒ€
+	/// æœ€å¤§ãƒœãƒªãƒ¥ãƒ¼ãƒ 
 	virtual T get_max_volume() const { return VOLUME_MIN; }
 	virtual void set_max_volume( T ) { };
 
-	/// ƒpƒ“
+	/// ãƒ‘ãƒ³
 	virtual T get_pan() const { return 0.f; };
 	virtual void set_pan( T ) { };
 
-	/// Ä¶ƒXƒs[ƒh
+	/// å†ç”Ÿã‚¹ãƒ”ãƒ¼ãƒ‰
 	virtual T get_speed() const { return 1.f; };
 	virtual void set_speed( T ) { };
 
-	/// ƒTƒEƒ“ƒh‚ğÄ¶‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ã‚’å†ç”Ÿã™ã‚‹
 	virtual bool play( bool /* loop */, bool /* force */ = true ) { return true; };
 
-	/// ƒTƒEƒ“ƒh‚ªÄ¶’†‚©‚Ç‚¤‚©‚ğæ“¾‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ãŒå†ç”Ÿä¸­ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹
 	virtual bool is_playing() const { return false; }
 
-	/// ƒTƒEƒ“ƒh‚ğ’â~‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ã‚’åœæ­¢ã™ã‚‹
 	virtual bool stop() { return true; }
 
-	/// ƒTƒEƒ“ƒh‚ÌƒtƒF[ƒhƒCƒ“‚ğŠJn‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ã®ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³ã‚’é–‹å§‹ã™ã‚‹
 	virtual void fade_in( T = VOLUME_FADE_SPEED_DEFAULT ) { }
 
-	/// ƒTƒEƒ“ƒh‚ÌƒtƒF[ƒhƒAƒEƒg‚ğŠJn‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ã®ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆã‚’é–‹å§‹ã™ã‚‹
 	virtual void fade_out( T = VOLUME_FADE_SPEED_DEFAULT ) { }
 
-	/// ƒTƒEƒ“ƒh‚ªŠ®‘S‚ÉƒtƒF[ƒhƒCƒ“‚³‚ê‚½ó‘Ô‚©‚Ç‚¤‚©‚ğæ“¾‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ãŒå®Œå…¨ã«ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³ã•ã‚ŒãŸçŠ¶æ…‹ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹
 	virtual bool is_fade_full_in() const = 0;
 
-	/// ƒTƒEƒ“ƒh‚ªŠ®‘S‚ÉƒtƒF[ƒhƒAƒEƒg‚³‚ê‚½ó‘Ô‚©‚Ç‚¤‚©‚ğæ“¾‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ãŒå®Œå…¨ã«ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆã•ã‚ŒãŸçŠ¶æ…‹ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹
 	virtual bool is_fade_full_out() const = 0;
 
-	/// ƒTƒEƒ“ƒh‚ğˆê’â~‚·‚é
+	/// ã‚µã‚¦ãƒ³ãƒ‰ã‚’ä¸€æ™‚åœæ­¢ã™ã‚‹
 	// virtual bool pause() = 0;
 
-	/// Œ»İ‚ÌˆÊ’u ( •b ) ‚ğæ“¾‚·‚é
+	/// ç¾åœ¨ã®ä½ç½® ( ç§’ ) ã‚’å–å¾—ã™ã‚‹
 	virtual float get_current_position() const { return 0.f; }
 
-	/// Œ»İ‚ÌˆÊ’u‚Ìƒs[ƒNƒŒƒxƒ‹‚ğæ“¾‚·‚é
+	/// ç¾åœ¨ã®ä½ç½®ã®ãƒ”ãƒ¼ã‚¯ãƒ¬ãƒ™ãƒ«ã‚’å–å¾—ã™ã‚‹
 	virtual float get_current_peak_level() const { return 0.f; }
 
-	/// XVˆ—
+	/// æ›´æ–°å‡¦ç†
 	virtual void update() { };
 
 }; // class Sound

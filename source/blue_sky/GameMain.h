@@ -80,7 +80,7 @@ public:
 	using Direct3D					= core::graphics::direct_3d_11::Direct3D11;
 	using BulletDebugDraw			= core::graphics::direct_3d_11::BulletDebugDraw;
 
-	// @todo Input ƒNƒ‰ƒX‚É‚ ‚é‚×‚«‚Å‚ÍH
+	// @todo Input ã‚¯ãƒ©ã‚¹ã«ã‚ã‚‹ã¹ãã§ã¯ï¼Ÿ
 	enum Key
 	{
 		KEY_LEFT  = VK_LEFT,
@@ -103,7 +103,7 @@ public:
 	};
 
 private:
-	float									total_elapsed_time_;	///< ƒQ[ƒ€‚ªŠJn‚µ‚Ä‚©‚ç‚ÌŒo‰ßŠÔ ( •b )
+	float									total_elapsed_time_;	///< ã‚²ãƒ¼ãƒ ãŒé–‹å§‹ã—ã¦ã‹ã‚‰ã®çµŒéæ™‚é–“ ( ç§’ )
 
 	std::unique_ptr< Direct3D >				direct_3d_;				///< Direct3D
 
@@ -121,21 +121,21 @@ private:
 
 	std::unique_ptr< Config >				save_data_;				///< Save Data
 
-	std::unique_ptr< MainLoop >				main_loop_;				///< ƒ‹[ƒvŠÇ—
+	std::unique_ptr< MainLoop >				main_loop_;				///< ãƒ«ãƒ¼ãƒ—ç®¡ç†
 
 	std::unique_ptr< ActiveObjectManager >	active_object_manager_;	///< ActiveObjectManager
 
 	std::unique_ptr< BulletDebugDraw >		bullet_debug_draw_;
 
-	std::unique_ptr< Scene >				scene_;					///< Œ»İ‚ÌƒV[ƒ“
-	string_t								stage_name_;			///< Œ»İ‚ÌƒXƒe[ƒW–¼
+	std::unique_ptr< Scene >				scene_;					///< ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³
+	string_t								stage_name_;			///< ç¾åœ¨ã®ã‚¹ãƒ†ãƒ¼ã‚¸å
 
-	bool									is_display_fps_;		///< FPS •\¦ƒtƒ‰ƒO
+	bool									is_display_fps_;		///< FPS è¡¨ç¤ºãƒ•ãƒ©ã‚°
 
-	bool									is_command_mode_;		///< Œ»İƒRƒ}ƒ“ƒhƒ‚[ƒh’†‚©‚Ç‚¤‚©H
-	string_t								user_command_;			///< ƒ†[ƒU[‚Ì“ü—Í‚µ‚½ƒRƒ}ƒ“ƒh
+	bool									is_command_mode_;		///< ç¾åœ¨ã‚³ãƒãƒ³ãƒ‰ãƒ¢ãƒ¼ãƒ‰ä¸­ã‹ã©ã†ã‹ï¼Ÿ
+	string_t								user_command_;			///< ãƒ¦ãƒ¼ã‚¶ãƒ¼ã®å…¥åŠ›ã—ãŸã‚³ãƒãƒ³ãƒ‰
 
-	bool									is_show_cursor_;		///< Œ»İƒJ[ƒ\ƒ‹‚ğ•\¦‚·‚é‚©‚Ç‚¤‚©
+	bool									is_show_cursor_;		///< ç¾åœ¨ã‚«ãƒ¼ã‚½ãƒ«ã‚’è¡¨ç¤ºã™ã‚‹ã‹ã©ã†ã‹
 
 	void setup_script_command();
 
@@ -168,7 +168,7 @@ public:
 	float_t get_total_elapsed_time() const { return total_elapsed_time_; }
 	float_t get_elapsed_time() const;
 
-	/// @todo GraphicsManager ‚ÉˆÚs‚µ‚Äíœ‚·‚é
+	/// @todo GraphicsManager ã«ç§»è¡Œã—ã¦å‰Šé™¤ã™ã‚‹
 	Direct3D* get_direct_3d() const { return direct_3d_.get(); } 
 
 	Input* get_input() const { return input_.get(); }

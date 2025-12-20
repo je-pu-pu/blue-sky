@@ -8,7 +8,7 @@ namespace core::ecs
 {
 
 /**
- * ƒp[ƒeƒBƒNƒ‹ƒVƒXƒeƒ€—pƒRƒ“ƒ|[ƒlƒ“ƒg
+ * ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã‚·ã‚¹ãƒ†ãƒ ç”¨ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
  *
  */
 class ParticleSystemComponent : public Component

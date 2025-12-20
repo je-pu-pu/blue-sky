@@ -1,5 +1,5 @@
 /**
- * @todo get_direct_3d() ‚Ìg—p‚ğ‚â‚ß‚Ä GraphicsManager ‚ğg‚¤‚æ‚¤‚É‚·‚éB
+ * @todo get_direct_3d() ã®ä½¿ç”¨ã‚’ã‚„ã‚ã¦ GraphicsManager ã‚’ä½¿ã†ã‚ˆã†ã«ã™ã‚‹ã€‚
  */
 
 #include "StoryTextScene.h"
@@ -13,7 +13,7 @@
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
 
-/// @todo ’ŠÛ‰»‚·‚é
+/// @todo æŠ½è±¡åŒ–ã™ã‚‹
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/Sprite.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
@@ -45,7 +45,7 @@ StoryTextScene::StoryTextScene( const char* file_name, const char* next_scene_na
 
 	load_story_text_file( file_name );
 
-	/// @todo ®—
+	/// @todo æ•´ç†
 	if ( get_direct_3d()->get_font() )
 	{
 		text_y_target_ = static_cast< float >( -get_direct_3d()->get_font()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) ) );
@@ -64,14 +64,14 @@ StoryTextScene::StoryTextScene( const char* file_name, const char* next_scene_na
 
 StoryTextScene::~StoryTextScene()
 {
-	/// @todo ’¼‚·
+	/// @todo ç›´ã™
 #if 0
 	get_graphics_manager()->unload_texture( "sprite" );
 #endif
 
 	for ( auto i = bg_sprite_layer_list_.begin(); i != bg_sprite_layer_list_.end(); ++i )
 	{
-		/// @todo ’¼‚·
+		/// @todo ç›´ã™
 #if 0
 		get_graphics_manager()->unload_texture( ( *i )->get_name().c_str() );
 #endif
@@ -191,7 +191,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 }
 
 /**
- * ƒƒCƒ“ƒ‹[ƒvˆ—
+ * ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—å‡¦ç†
  *
  */
 void StoryTextScene::update()
@@ -260,7 +260,7 @@ void StoryTextScene::update()
 }
 
 /**
- * •`‰æ
+ * æç”»
  */
 void StoryTextScene::render()
 {
@@ -288,7 +288,7 @@ void StoryTextScene::render()
 	get_direct_3d()->get_sprite()->end();
 
 	// text
-	/// @todo ®—
+	/// @todo æ•´ç†
 	if ( get_direct_3d()->get_font() )
 	{
 		get_direct_3d()->begin2D();

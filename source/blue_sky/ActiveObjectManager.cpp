@@ -103,10 +103,10 @@ void ActiveObjectManager::set_target_direction_object( ActiveObject* active_obje
 }
 
 /**
- * w’è‚µ‚½–¼‘O‚ÌƒIƒuƒWƒFƒNƒg‚ğ¶¬‚·‚é
+ * æŒ‡å®šã—ãŸåå‰ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆã™ã‚‹
  *
- * @param name ƒIƒuƒWƒFƒNƒg–¼
- * @return ¶¬‚³‚ê‚½ ActiveObject ( ‚Ü‚½‚Í¸”s‚É nullptr ‚ğ•Ô‚· )
+ * @param name ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆå
+ * @return ç”Ÿæˆã•ã‚ŒãŸ ActiveObject ( ã¾ãŸã¯å¤±æ•—æ™‚ã« nullptr ã‚’è¿”ã™ )
  */
 ActiveObject* ActiveObjectManager::create_object( const string_t& name )
 {
@@ -125,10 +125,10 @@ ActiveObject* ActiveObjectManager::create_object( const string_t& name )
 }
 
 /**
- * •¶š—ñ‚É‚æ‚èƒIƒuƒWƒFƒNƒg‚ğ¶¬‚·‚é
+ * æ–‡å­—åˆ—ã«ã‚ˆã‚Šã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆã™ã‚‹
  *
- * @param ss ƒIƒuƒWƒFƒNƒg‚ğ¶¬‚·‚é‚½‚ß‚Ìƒpƒ‰ƒ[ƒ^
- * @return ¶¬‚µ‚½ƒIƒuƒWƒFƒNƒg
+ * @param ss ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆã™ã‚‹ãŸã‚ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
+ * @return ç”Ÿæˆã—ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
  */
 ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss )
 {
@@ -251,7 +251,7 @@ void ActiveObjectManager::update()
 		i->first->update_velocity_by_target_location( std::get< 0 >( i->second ), std::get< 1 >( i->second ) );
 		// i->first->set_location( std::get< 0 >( i->second ) );
 
-		/// @todo –Ú“IÀ•W‚É“’B‚µ‚½‚©‚Ì”»’è‚ğ‚à‚¤­‚µ³Šm‚É‚·‚é
+		/// @todo ç›®çš„åº§æ¨™ã«åˆ°é”ã—ãŸã‹ã®åˆ¤å®šã‚’ã‚‚ã†å°‘ã—æ­£ç¢ºã«ã™ã‚‹
 		if ( ( std::get< 0 >( i->second ) - i->first->get_location() ).length() < 0.1f )
 		{
 			i->first->on_arrive_at_target_location();

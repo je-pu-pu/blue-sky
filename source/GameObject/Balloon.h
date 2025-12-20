@@ -6,7 +6,7 @@ namespace blue_sky
 {
 
 /**
- * •—‘D
+ * é¢¨èˆ¹
  *
  */
 class Balloon : public ActiveObject
@@ -36,7 +36,7 @@ public:
 
 	void set_model( Model* m ) override;
 
-	/// XV
+	/// æ›´æ–°
 	void update() override;
 
 	void restart() override;

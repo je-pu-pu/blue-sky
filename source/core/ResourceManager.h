@@ -10,14 +10,14 @@ namespace core
 {
 
 /**
- * ���\�[�X�Ǘ��e���v���[�g�N���X
+ * リソース管理テンプレートクラス
  *
- * ���̃N���X�͕����̃��\�[�X���Ǘ�����
+ * このクラスは複数のリソースを管理する
  *
- * �S�Ẵ��\�[�X�͂��̃N���X�̃f�X�g���N�^�ɂ�胁������������
+ * 全てのリソースはこのクラスのデストラクタによりメモリ解放される
  *
- * ���̃N���X�̓��\�[�X�ɖ��O��t���ĊǗ����A���O�Ń��\�[�X���������擾�ł���
- * ( ����̓X�N���v�g����̃A�N�Z�X��e�Ղɂ��� )
+ * このクラスはリソースに名前を付けて管理し、名前でリソースを検索し取得できる
+ * ( これはスクリプトからのアクセスを容易にする )
  */
 template< typename ResourceType >
 class ResourceManager
@@ -43,7 +43,7 @@ public:
 	}
 
 	/**
-	 * �w�肵���^�̃��\�[�X���쐬����
+	 * 指定した型のリソースを作成する
 	 *
 	 */
 	template< typename Type = Resource, typename ... Args >
@@ -56,9 +56,9 @@ public:
 	}
 
 	/**
-	 * �w�肵���^�̃��\�[�X���쐬�����O��t����
+	 * 指定した型のリソースを作成し名前を付ける
 	 *
-	 * @param name �쐬�������\�[�X�ɕt���閼�O
+	 * @param name 作成したリソースに付ける名前
 	 */
 	template< typename Type = Resource, typename ... Args >
 	Type* create_named( const string_t& name, Args ... args )
@@ -70,9 +70,9 @@ public:
 	}
 
 	/**
-	 * �O���ō쐬�������\�[�X��ǉ��� ResourceManager �ŊǗ�����
+	 * 外部で作成したリソースを追加し ResourceManager で管理する
 	 *
-	 * @param resource ���\�[�X
+	 * @param resource リソース
 	 */
 	void add( ResourceType* resource )
 	{
@@ -80,10 +80,10 @@ public:
 	}
 
 	/**
-	 * �O���ō쐬�������\�[�X�𖼑O��t���Ēǉ��� ResourceManager �ŊǗ�����
+	 * 外部で作成したリソースを名前を付けて追加し ResourceManager で管理する
 	 *
-	 * @param name ���\�[�X�ɕt���閼�O
-	 * @param resource ���\�[�X
+	 * @param name リソースに付ける名前
+	 * @param resource リソース
 	 */
 	void add_named( const string_t& name, ResourceType* resource )
 	{
@@ -92,7 +92,7 @@ public:
 	}
 
 	/**
-	 * add_named() �Œǉ��������\�[�X���폜����
+	 * add_named() で追加したリソースを削除する
 	 */
 	void remove_named( const string_t& name )
 	{
@@ -108,10 +108,10 @@ public:
 	}
 
 	/**
-	 * ���O�Ń��\�[�X���������擾����
+	 * 名前でリソースを検索し取得する
 	 *
-	 * @param name ���\�[�X�ɕt�������O
-	 * @return ���\�[�X�����������ꍇ�̓��\�[�X���A������Ȃ������ꍇ�� nullptr ��Ԃ�
+	 * @param name リソースに付けた名前
+	 * @return リソースが見つかった場合はリソースを、見つからなかった場合は nullptr を返す
 	 */
 	template< typename Type = ResourceType >
 	Type* get( const string_t& name )
@@ -127,7 +127,7 @@ public:
 	}
 
 	/**
-	 * ���\�[�X�̈ꗗ���擾����
+	 * リソースの一覧を取得する
 	 */
 	const ResourceList& get_resource_list() const
 	{
@@ -135,7 +135,7 @@ public:
 	}
 
 	/**
-	 * �S�Ẵ��\�[�X���폜����
+	 * 全てのリソースを削除する
 	 *
 	 */
 	void clear_all()
@@ -145,7 +145,7 @@ public:
 	}
 
 	/**
-	 * �f�o�b�O�̂��߂Ƀ��\�[�X�̈ꗗ��W���o�͂ɏo�͂���
+	 * デバッグのためにリソースの一覧を標準出力に出力する
 	 *
 	 */
 	void debug_print_resources() const

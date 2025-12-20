@@ -54,7 +54,7 @@ Player::Player()
 }
 
 /**
- * ÄƒXƒ^[ƒg
+ * å†ã‚¹ã‚¿ãƒ¼ãƒˆ
  *
  */
 void Player::restart()
@@ -113,7 +113,7 @@ void Player::restart()
 }
 
 /**
- * XV
+ * æ›´æ–°
  *
  */
 void Player::update()
@@ -149,7 +149,7 @@ void Player::update()
 	}
 	else if ( action_mode_ == ActionMode::ROCKET )
 	{
-		// ƒƒPƒbƒg
+		// ãƒ­ã‚±ãƒƒãƒˆ
 		if ( ( get_location() - action_base_position_ ).length() >= get_rocket_action_length() || action_timer_ >= 2.5f )
 		{
 			finish_rocketing();
@@ -197,13 +197,13 @@ void Player::update()
 		}
 		else
 		{
-			// ’Êí’…’n
+			// é€šå¸¸ç€åœ°
 			if ( get_velocity().y() < -2.f )
 			{
 				stop_sound( "fall" );
 				play_sound( "land", false, false );
 
-				// ƒoƒEƒ“ƒh‚µ‚È‚¢‚æ‚¤‚É‚·‚é
+				// ãƒã‚¦ãƒ³ãƒ‰ã—ãªã„ã‚ˆã†ã«ã™ã‚‹
 				set_velocity( Vector( get_velocity().x(), 0.f, get_velocity().z() ) );
 			}
 
@@ -233,7 +233,7 @@ void Player::update()
 
 	update_gravity();
 
-	// “–‚½‚è”»’è‚Ì‚½‚ß‚ÉƒŠƒZƒbƒg
+	// å½“ãŸã‚Šåˆ¤å®šã®ãŸã‚ã«ãƒªã‚»ãƒƒãƒˆ
 	is_on_ladder_ = false;
 }
 
@@ -286,7 +286,7 @@ void Player::limit_velocity()
 }
 
 /**
- * Œ»İƒWƒƒƒ“ƒv‰Â”\‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO‚ğXV‚·‚é
+ * ç¾åœ¨ã‚¸ãƒ£ãƒ³ãƒ—å¯èƒ½ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void Player::update_jumpable()
@@ -299,7 +299,7 @@ void Player::update_jumpable()
 		return;
 	}
 
-	// ƒWƒƒƒ“ƒv’¼Œã‚Æ’…’n’¼Œã‚ÍƒWƒƒƒ“ƒv‚Å‚«‚È‚¢
+	// ã‚¸ãƒ£ãƒ³ãƒ—ç›´å¾Œã¨ç€åœ°ç›´å¾Œã¯ã‚¸ãƒ£ãƒ³ãƒ—ã§ããªã„
 	if ( abs( get_velocity().y() ) > 3.f )
 	{
 		return;
@@ -320,7 +320,7 @@ void Player::update_on_footing()
 	const Vector right = get_right() * ( get_collision_width() * 0.5f - margin );
 	const Vector center = Vector( x, y, z );
 
-	// ’†S + l‹÷ + l“_ ‚Ìİ’u‚ğ’²‚×‚é
+	// ä¸­å¿ƒ + å››éš… + å››ç‚¹ ã®è¨­ç½®ã‚’èª¿ã¹ã‚‹
 	if (
 		check_on_footing( center, ray_length ) ||
 
@@ -343,7 +343,7 @@ void Player::update_on_footing()
 }
 
 /**
- * Œ»İƒWƒƒƒ“ƒv’†‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO‚ğXV‚·‚é
+ * ç¾åœ¨ã‚¸ãƒ£ãƒ³ãƒ—ä¸­ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void Player::update_jumping()
@@ -355,7 +355,7 @@ void Player::update_jumping()
 }
 
 /**
- * ‚±‚Ì‚Ü‚Ü—‰º‚·‚é‚Æ€–S‚·‚é‚©‚Ç‚¤‚©‚Ìó‘Ô‚ğXV‚·‚é
+ * ã“ã®ã¾ã¾è½ä¸‹ã™ã‚‹ã¨æ­»äº¡ã™ã‚‹ã‹ã©ã†ã‹ã®çŠ¶æ…‹ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void Player::update_located_to_die()
@@ -371,7 +371,7 @@ void Player::update_located_to_die()
 
 	is_located_on_safe_ = false;
 
-	// ’†S + l‹÷ + l“_ ‚Ìİ’u‚ğ’²‚×‚é
+	// ä¸­å¿ƒ + å››éš… + å››ç‚¹ ã®è¨­ç½®ã‚’èª¿ã¹ã‚‹
 	if (
 		get_last_footing_height() - get_footing_height( center, true ) < get_height_to_die() ||
 
@@ -439,9 +439,9 @@ public:
 };
 
 /**
- * áŠQ•¨‚É’¼–Ê‚µ‚Ä‚¢‚é‚©‚Ìƒtƒ‰ƒO‚ğXV‚·‚é
+ * éšœå®³ç‰©ã«ç›´é¢ã—ã¦ã„ã‚‹ã‹ã®ãƒ•ãƒ©ã‚°ã‚’æ›´æ–°ã™ã‚‹
  *
- * facing_to_block_ ‚Í 
+ * facing_to_block_ ã¯ 
  * 
  */
 void Player::update_facing_to_block()
@@ -470,7 +470,7 @@ void Player::update_facing_to_block()
 }
 
 /**
- * ‚æ‚¶“o‚è‚ª‰Â”\‚©‚Ìƒtƒ‰ƒO‚ğXV‚·‚é
+ * ã‚ˆã˜ç™»ã‚ŠãŒå¯èƒ½ã‹ã®ãƒ•ãƒ©ã‚°ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void Player::update_can_clamber()
@@ -517,7 +517,7 @@ void Player::update_can_clamber()
 }
 
 /**
- * ‚Ì‚¼‚«‚İ‚ª‰Â”\‚©‚Ìƒtƒ‰ƒO‚ğXV‚·‚é
+ * ã®ããè¾¼ã¿ãŒå¯èƒ½ã‹ã®ãƒ•ãƒ©ã‚°ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void Player::update_can_peer_down()
@@ -546,7 +546,7 @@ void Player::update_can_peer_down()
 }
 
 /**
- * Î“Š‚°‚ª‰Â”\‚©‚Ìƒtƒ‰ƒO‚ğXV‚·‚é
+ * çŸ³æŠ•ã’ãŒå¯èƒ½ã‹ã®ãƒ•ãƒ©ã‚°ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void Player::update_can_throw()
@@ -569,7 +569,7 @@ void Player::update_can_throw()
 }
 
 /**
- * ˆÚ“®‘¬“x‚ğXV‚·‚é
+ * ç§»å‹•é€Ÿåº¦ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void Player::update_step_speed()
@@ -626,7 +626,7 @@ void Player::update_step_speed()
 }
 
 /**
- * ‘–‚é‚±‚Æ‚ª‚Å‚«‚é‚©‚ğ’²‚×‚é
+ * èµ°ã‚‹ã“ã¨ãŒã§ãã‚‹ã‹ã‚’èª¿ã¹ã‚‹
  *
  */
 bool Player::can_running() const
@@ -635,7 +635,7 @@ bool Player::can_running() const
 }
 
 /**
- * d—Í‚ğXV‚·‚é
+ * é‡åŠ›ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void Player::update_gravity()
@@ -653,8 +653,8 @@ void Player::update_gravity()
 /**
  * 
  *
- * @param from ƒŒƒC‚ğ”ò‚Î‚µn‚ß‚éŒ´“_
- * @param ray_length ƒŒƒC‚Ì’·‚³
+ * @param from ãƒ¬ã‚¤ã‚’é£›ã°ã—å§‹ã‚ã‚‹åŸç‚¹
+ * @param ray_length ãƒ¬ã‚¤ã®é•·ã•
  */
 bool Player::check_on_footing( const Vector& from, float_t ray_length, bool include_soft_footing ) const
 {
@@ -669,10 +669,10 @@ bool Player::check_on_footing( const Vector& from, float_t ray_length, bool incl
 }
 
 /**
- * w’è‚µ‚½À•W‚©‚ç’n–Ê‚Ü‚Å‚ÌŠÔ‚ÅAˆê”Ô‚‚¢‘«ê‚Ì‚‚³‚ğæ“¾‚·‚é
+ * æŒ‡å®šã—ãŸåº§æ¨™ã‹ã‚‰åœ°é¢ã¾ã§ã®é–“ã§ã€ä¸€ç•ªé«˜ã„è¶³å ´ã®é«˜ã•ã‚’å–å¾—ã™ã‚‹
  *
  * @param Vector3 from 
- * @param bool include_soft_footing •—‘D‚È‚Ç‚Ì‚â‚í‚ç‚©‚¢‚à‚Ì‚ğ‘«ê‚ÉŠÜ‚Şƒtƒ‰ƒO
+ * @param bool include_soft_footing é¢¨èˆ¹ãªã©ã®ã‚„ã‚ã‚‰ã‹ã„ã‚‚ã®ã‚’è¶³å ´ã«å«ã‚€ãƒ•ãƒ©ã‚°
  */
 float_t Player::get_footing_height( const Vector& from, bool include_soft_footing ) const
 {
@@ -702,7 +702,7 @@ float_t Player::get_footing_height( const Vector& from, bool include_soft_footin
 }
 
 /**
- * Œ»İ’òq‚Ìã‚è‰º‚èˆÈŠO‚ÌˆÚ“®‚ğ‹Ö~‚·‚é‚©
+ * ç¾åœ¨æ¢¯å­ã®ä¸Šã‚Šä¸‹ã‚Šä»¥å¤–ã®ç§»å‹•ã‚’ç¦æ­¢ã™ã‚‹ã‹
  *
  */
 bool Player::is_ladder_step_only() const
@@ -773,7 +773,7 @@ void Player::release_ladder()
 
 
 /**
- * ƒWƒƒƒ“ƒvŠJn
+ * ã‚¸ãƒ£ãƒ³ãƒ—é–‹å§‹
  * 
  */	
 void Player::jump()
@@ -814,7 +814,7 @@ void Player::super_jump()
 }
 
 /**
- * ‚æ‚¶“o‚é
+ * ã‚ˆã˜ç™»ã‚‹
  *
  */
 void Player::clamber()
@@ -837,7 +837,7 @@ void Player::clamber()
 }
 
 /**
- * ‚æ‚¶“o‚è‚Ì’†~
+ * ã‚ˆã˜ç™»ã‚Šã®ä¸­æ­¢
  *
  */
 void Player::stop_clamber()
@@ -1138,7 +1138,7 @@ void Player::set_action_mode( ActionMode action_mode )
 	}
 
 	/*
-	// ©“®P‘I‘ğ
+	// è‡ªå‹•å‚˜é¸æŠ
 	if ( action_mode_ != ActionMode::UMBRELLA && action_mode_ != ActionMode::NONE )
 	{
 		if ( action_mode == ActionMode::NONE && item_count_[ ItemType::UMBRELLA ] && floor_cell() && is_if_fall_to_die( floor_cell()->height() ) )
@@ -1189,7 +1189,7 @@ void Player::select_next_item()
 }
 
 /**
- * –]‰“‹¾ƒ‚[ƒh‚ğØ‚è‘Ö‚¦‚é
+ * æœ›é é¡ãƒ¢ãƒ¼ãƒ‰ã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹
  *
  */
 void Player::switch_scope_mode()

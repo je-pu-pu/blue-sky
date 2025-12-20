@@ -36,7 +36,7 @@ namespace blue_sky
 	}
 
 /**
- * ƒQ[ƒ€ƒvƒŒƒC’†‚Ìˆ—‚ğŠÇ—‚·‚é
+ * ã‚²ãƒ¼ãƒ ãƒ—ãƒ¬ã‚¤ä¸­ã®å‡¦ç†ã‚’ç®¡ç†ã™ã‚‹
  *
  */
 class GamePlayScene : public Scene
@@ -57,27 +57,27 @@ public:
 
 	enum class BalloonSoundType
 	{
-		NONE = 0,				// ƒTƒEƒ“ƒh‚È‚µ
-		MIX,					// ƒTƒEƒ“ƒh‚ğ BGM ‚Æƒ~ƒbƒNƒX
-		SOLO,					// BGM ‚ğÁ‚µ‚ÄƒTƒEƒ“ƒh‚Ì‚İÄ¶
-		SCALE,					// BGM ‚ğÁ‚µ‚Ä‰¹ŠK‚ğÄ¶
+		NONE = 0,				// ã‚µã‚¦ãƒ³ãƒ‰ãªã—
+		MIX,					// ã‚µã‚¦ãƒ³ãƒ‰ã‚’ BGM ã¨ãƒŸãƒƒã‚¯ã‚¹
+		SOLO,					// BGM ã‚’æ¶ˆã—ã¦ã‚µã‚¦ãƒ³ãƒ‰ã®ã¿å†ç”Ÿ
+		SCALE,					// BGM ã‚’æ¶ˆã—ã¦éŸ³éšã‚’å†ç”Ÿ
 	};
 
 private:
-	Texture*							ui_texture_ = nullptr;	///< UI •\¦—pƒeƒNƒXƒ`ƒƒ
-	bool								is_cleared_ = false;	///< ƒXƒe[ƒWƒNƒŠƒAƒtƒ‰ƒO
+	Texture*							ui_texture_ = nullptr;	///< UI è¡¨ç¤ºç”¨ãƒ†ã‚¯ã‚¹ãƒãƒ£
+	bool								is_cleared_ = false;	///< ã‚¹ãƒ†ãƒ¼ã‚¸ã‚¯ãƒªã‚¢ãƒ•ãƒ©ã‚°
 	std::unique_ptr< Config >			stage_config_;	
 
 	Shader*								debug_texture_shader_ = nullptr;
 
 	Player*								player_ = nullptr;
-	std::unique_ptr< Camera >			camera_;				///< @todo GameObjectManager ‚ÅŠÇ—‚µ‚ÄQÆ‚·‚é‚¾‚¯‚É‚·‚é
+	std::unique_ptr< Camera >			camera_;				///< @todo GameObjectManager ã§ç®¡ç†ã—ã¦å‚ç…§ã™ã‚‹ã ã‘ã«ã™ã‚‹
 	Girl*								girl_ = nullptr;					
 	Goal*								goal_ = nullptr;
 
-	/// @todo ®—‚·‚é
-	Model*								far_billboards_ = nullptr;	///< ‰“Œiƒrƒ‹ƒ{[ƒh
-	Model*								scope_mesh_ = nullptr;		///< ‘oŠá‹¾
+	/// @todo æ•´ç†ã™ã‚‹
+	Model*								far_billboards_ = nullptr;	///< é æ™¯ãƒ“ãƒ«ãƒœãƒ¼ãƒ‰
+	Model*								scope_mesh_ = nullptr;		///< åŒçœ¼é¡
 	Model*								rectangle_ = nullptr;
 
 	Sound*								bgm_ = nullptr;
@@ -86,8 +86,8 @@ private:
 
 	float_t								bpm_;
 
-	/// @todo GraphicsManager ‚ÉˆÚs‚·‚é
-	float_t								drawing_accent_scale_;	///< ( 0 : ƒAƒNƒZƒ“ƒg‚ğŠ®‘S‚É–³Œø‰» ) .. ( 2 : ƒAƒNƒZƒ“ƒg 2 ”{ ) ..
+	/// @todo GraphicsManager ã«ç§»è¡Œã™ã‚‹
+	float_t								drawing_accent_scale_;	///< ( 0 : ã‚¢ã‚¯ã‚»ãƒ³ãƒˆã‚’å®Œå…¨ã«ç„¡åŠ¹åŒ– ) .. ( 2 : ã‚¢ã‚¯ã‚»ãƒ³ãƒˆ 2 å€ ) ..
 	
 	common::chase_value< Vector3, float_t >		light_position_;
 	common::chase_value< Color, float_t >		ambient_color_;
@@ -136,7 +136,7 @@ protected:
 	
 	void exec_command( const string_t& );
 
-	/** @todo ˆÚ“®‚·‚é */
+	/** @todo ç§»å‹•ã™ã‚‹ */
 	void update_render_data_for_frame() const;
 	void update_render_data_for_frame_drawing() const;
 	void update_render_data_for_frame_for_eye( int ) const;
@@ -150,22 +150,22 @@ protected:
 
 	void render_text() const;
 
-	/// @todo GraphicsManager ‚ÉˆÚs‚·‚é
+	/// @todo GraphicsManager ã«ç§»è¡Œã™ã‚‹
 	void render_far_billboards() const;
 	
 	void render_sprite( float_t rotho_offset = 0.f ) const;
 
 	void render_debug_axis_for_bones( const ActiveObject* ) const;
 
-	/// @todo GraphicsManager ‚ÉˆÚs‚·‚é
+	/// @todo GraphicsManager ã«ç§»è¡Œã™ã‚‹
 	void render_debug_shadow_map_window() const;
 
 public:
 	explicit GamePlayScene();
 	~GamePlayScene();
 
-	void update() override;				///< ƒƒCƒ“ƒ‹[ƒv
-	void render() override;				///< •`‰æ
+	void update() override;				///< ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—
+	void render() override;				///< æç”»
 
 	bool is_clip_cursor_required() override { return true; }
 

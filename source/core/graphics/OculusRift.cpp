@@ -157,7 +157,7 @@ void OculusRift::update()
 }
 
 /**
- * ƒtƒŒ[ƒ€–ˆ‚És‚¤•`‰æ‚Ì€”õ
+ * ãƒ•ãƒ¬ãƒ¼ãƒ æ¯Žã«è¡Œã†æç”»ã®æº–å‚™
  *
  */
 void OculusRift::setup_rendering()
@@ -185,7 +185,7 @@ void OculusRift::setup_rendering()
 }
 
 /**
- * ƒtƒŒ[ƒ€–ˆ‚És‚¤¶–Ú—p•`‰æ‚Ì€”õ
+ * ãƒ•ãƒ¬ãƒ¼ãƒ æ¯Žã«è¡Œã†å·¦ç›®ç”¨æç”»ã®æº–å‚™
  *
  */
 void OculusRift::setup_rendering_for_left_eye()
@@ -194,7 +194,7 @@ void OculusRift::setup_rendering_for_left_eye()
 }
 
 /**
- * ƒtƒŒ[ƒ€–ˆ‚És‚¤‰E–Ú—p•`‰æ‚Ì€”õ
+ * ãƒ•ãƒ¬ãƒ¼ãƒ æ¯Žã«è¡Œã†å³ç›®ç”¨æç”»ã®æº–å‚™
  *
  */
 void OculusRift::setup_rendering_for_right_eye()
@@ -203,7 +203,7 @@ void OculusRift::setup_rendering_for_right_eye()
 }
 
 /**
- * ƒrƒ…[ƒ|[ƒg‚ÌÝ’è‚ðs‚¤
+ * ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆã®è¨­å®šã‚’è¡Œã†
  *
  * @param eye_index ( ovrEye_Left or ovrEye_Right )
  */
@@ -229,7 +229,7 @@ void OculusRift::setup_default_viewport( int eye_index )
 }
 
 /**
- * ƒtƒŒ[ƒ€Ž–‚És‚¤•`‰æI—¹ˆ—
+ * ãƒ•ãƒ¬ãƒ¼ãƒ äº‹ã«è¡Œã†æç”»çµ‚äº†å‡¦ç†
  *
  */
 void OculusRift::finish_rendering()

@@ -33,13 +33,13 @@ void Keyboard::update()
 	}
 }
 
-//! キーの状態を返す
+//! 繧ｭ繝ｼ縺ｮ迥ｶ諷九ｒ霑斐☆
 const Keyboard::State Keyboard::key( Keys key ) const
 {
 	return state_[ key_map_[ key ] ];
 }
 
-//! キーマップを作成する
+//! 繧ｭ繝ｼ繝槭ャ繝励ｒ菴懈�舌☆繧�
 void Keyboard::create_key_map()
 {
 	for ( int n = Key::KEY_A; n <= Key::KEY_Z; n++ )

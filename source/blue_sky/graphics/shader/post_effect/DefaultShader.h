@@ -7,7 +7,7 @@ namespace blue_sky::graphics::shader::post_effect
 {
 
 /**
- * �f�t�H���g�̃|�X�g�G�t�F�N�g�p�V�F�[�_�[
+ * デフォルトのポストエフェクト用シェーダー
  *
  */
 class DefaultShader : public BaseShader
@@ -39,7 +39,7 @@ public:
 
 	void bind() const override
 	{
-		/// @todo �K�v�Ȃ��̂������o�C���h����悤�ɂ���
+		/// @todo 必要なものだけをバインドするようにする
 		get_game_constant_buffer()->bind_to_all();
 		get_frame_constant_buffer()->bind_to_all();
 		get_frame_drawing_constant_buffer()->bind_to_all();

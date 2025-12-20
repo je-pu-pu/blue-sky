@@ -6,7 +6,7 @@
 class DirectSoundBuffer;
 
 /**
- * DirectSound のラッパークラス
+ * DirectSound 縺ｮ繝ｩ繝�繝代�ｼ繧ｯ繝ｩ繧ｹ
  *
  */
 class DirectSound

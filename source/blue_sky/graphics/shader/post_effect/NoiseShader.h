@@ -7,7 +7,7 @@ namespace blue_sky::graphics::shader::post_effect
 {
 
 /**
- * ノイズポストエフェクト用シェーダー
+ * 繝弱う繧ｺ繝昴せ繝医お繝輔ぉ繧ｯ繝育畑繧ｷ繧ｧ繝ｼ繝繝ｼ
  *
  */
 class NoiseShader : public Shader< NoiseShader, 0 >

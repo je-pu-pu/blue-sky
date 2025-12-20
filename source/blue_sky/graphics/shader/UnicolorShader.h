@@ -8,7 +8,7 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * ’PF‚ÅƒeƒNƒXƒ`ƒƒ‚àŽ‚½‚È‚¢ƒVƒF[ƒ_[
+ * å˜è‰²ã§ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚‚æŒãŸãªã„ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 class UnicolorShader : public Shader< UnicolorShader, 10 >
@@ -29,7 +29,7 @@ public:
 
 	void bind() const override
 	{
-		/// @todo •K—v‚È‚à‚Ì‚¾‚¯‚ðƒoƒCƒ“ƒh‚·‚é‚æ‚¤‚É‚·‚é
+		/// @todo å¿…è¦ãªã‚‚ã®ã ã‘ã‚’ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹ã‚ˆã†ã«ã™ã‚‹
 		get_game_constant_buffer()->bind_to_all();
 		get_frame_constant_buffer()->bind_to_all();
 		get_frame_drawing_constant_buffer()->bind_to_all();

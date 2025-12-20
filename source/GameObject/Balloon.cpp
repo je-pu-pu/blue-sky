@@ -23,7 +23,7 @@ void Balloon::set_model( Model* m )
 }
 
 /**
- * �X�V
+ * 更新
  *
  */
 void Balloon::update()
@@ -64,14 +64,14 @@ void Balloon::kill()
 {
 	ActiveObject::kill();
 
-	// �e���̖̂����ꏊ�ɑޔ�������
+	// 影響のの無い場所に退避させる
 	set_location( 0.f, -100.f, 0.f );
 }
 
 /**
- * �I�u�W�F�N�g�̃��b�V�����\������邩��Ԃ�
+ * オブジェクトのメッシュが表示されるかを返す
  *
- * @return bool �I�u�W�F�N�g�̃��b�V�����\�������ꍇ�� true ���A�\������Ȃ��ꍇ�� false ��Ԃ�
+ * @return bool オブジェクトのメッシュが表示される場合は true を、表示されない場合は false を返す
  */
 bool Balloon::is_mesh_visible() const
 {
@@ -79,9 +79,9 @@ bool Balloon::is_mesh_visible() const
 }
 
 /**
- * �I�u�W�F�N�g�̃��C�����\������邩��Ԃ�
+ * オブジェクトのラインが表示されるかを返す
  *
- * @return bool �I�u�W�F�N�g�̃��C�����\�������ꍇ�� true ���A�\������Ȃ��ꍇ�� false ��Ԃ�
+ * @return bool オブジェクトのラインが表示される場合は true を、表示されない場合は false を返す
  */
 bool Balloon::is_line_visible() const
 {
@@ -89,11 +89,11 @@ bool Balloon::is_line_visible() const
 }
 
 /**
- * ���D���v���C���[�Ɏ�����Ă��鎞�A�\������邩�ǂ�����Ԃ�
+ * 風船がプレイヤーに持たれている時、表示されるかどうかを返す
  *
- * ���D���v���C���[�Ɏ�����Ă��Ȃ��ꍇ�A���̊֐��� true ��Ԃ��B
+ * 風船がプレイヤーに持たれていない場合、この関数は true を返す。
  *
- * @param ���D���v���C���[�Ɏ�����Ă��鎞�A�\�����ꂦ��ꍇ�� true ���A�\������Ȃ��ꍇ�� false ��Ԃ�
+ * @param 風船がプレイヤーに持たれている時、表示されえる場合は true を、表示されない場合は false を返す
  */
 bool Balloon::is_visible_with_player() const
 {

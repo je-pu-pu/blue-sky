@@ -27,7 +27,7 @@ namespace blue_sky
 	}
 
 /**
- * •`‰æƒeƒXƒg—pƒV[ƒ“‚ğŠÇ—‚·‚é
+ * æç”»ãƒ†ã‚¹ãƒˆç”¨ã‚·ãƒ¼ãƒ³ã‚’ç®¡ç†ã™ã‚‹
  *
  */
 class CanvasTestScene : public Scene
@@ -60,8 +60,8 @@ public:
 	explicit CanvasTestScene();
 	~CanvasTestScene();
 
-	void update() override;			///< ƒƒCƒ“ƒ‹[ƒv
-	void render() override;			///< •`‰æ
+	void update() override;			///< ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—
+	void render() override;			///< æç”»
 
 	void on_function_key_down( int ) override;
 

@@ -7,7 +7,7 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * ‰A‰e‚ğ‚Â‚¯‚È‚¢ƒVƒF[ƒ_[
+ * é™°å½±ã‚’ã¤ã‘ãªã„ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 class FlatShader : public BaseShader
@@ -40,14 +40,14 @@ public:
 
 	void bind() const override
 	{
-		/// @todo •K—v‚È‚à‚Ì‚¾‚¯‚ğƒoƒCƒ“ƒh‚·‚é‚æ‚¤‚É‚·‚é
+		/// @todo å¿…è¦ãªã‚‚ã®ã ã‘ã‚’ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹ã‚ˆã†ã«ã™ã‚‹
 		get_game_constant_buffer()->bind_to_all();
 		get_frame_constant_buffer()->bind_to_all();
 		get_frame_drawing_constant_buffer()->bind_to_all();
 		
 		get_object_constant_buffer()->bind_to_vs();
 
-		/// @todo ƒXƒLƒjƒ“ƒO‚ ‚è‚Æ‚È‚µ‚ÅƒVƒF[ƒ_[‚ÌŒ^‚ğ•ª‚¯‚éH
+		/// @todo ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚ã‚Šã¨ãªã—ã§ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®å‹ã‚’åˆ†ã‘ã‚‹ï¼Ÿ
 		if ( get_skining_constant_buffer() )
 		{
 			get_skining_constant_buffer()->bind_to_vs();
@@ -67,7 +67,7 @@ public:
 };
 
 /**
- * ‰A‰e‚ğ‚Â‚¯‚¸‰e‚ğ•t‚¯‚é
+ * é™°å½±ã‚’ã¤ã‘ãšå½±ã‚’ä»˜ã‘ã‚‹
  *
  */
 class FlatShadowShader : public FlatShader

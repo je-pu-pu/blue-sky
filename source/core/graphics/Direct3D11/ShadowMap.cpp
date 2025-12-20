@@ -91,31 +91,31 @@ ShadowMap::~ShadowMap()
 }
 
 /**
- * ŒõŒ¹‚ÌÀ•W‚ğİ’è‚·‚é
+ * å…‰æºã®åº§æ¨™ã‚’è¨­å®šã™ã‚‹
  *
- * @param pos ŒõŒ¹‚ÌÀ•W ( ƒJƒƒ‰‚ÌÀ•W‚©‚ç‚Ì‘Š‘ÎÀ•W )
+ * @param pos å…‰æºã®åº§æ¨™ ( ã‚«ãƒ¡ãƒ©ã®åº§æ¨™ã‹ã‚‰ã®ç›¸å¯¾åº§æ¨™ )
  */
 void ShadowMap::set_light_position( const Vector& pos )
 {
 	light_position_ = pos;
-	light_position_ *= 100.f / light_position_.y(); /// ‚‚³‚ª 100.f ‚É‚È‚é‚æ‚¤‚É’²®
+	light_position_ *= 100.f / light_position_.y(); /// é«˜ã•ãŒ 100.f ã«ãªã‚‹ã‚ˆã†ã«èª¿æ•´
 
-	/// @todo “®“I‚É•ÏX‚Å‚«‚é‚æ‚¤‚É‚·‚é
+	/// @todo å‹•çš„ã«å¤‰æ›´ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹
 	float_t width[ MaxCascadeLevels ] = { 10.f, 50.f, 150.f, 9999.f };
 	// float_t depth[ MaxCascadeLevels + 1 ] = { 0.1f, 5.f, 50.f, 150.f, 300.f };
 
 	for ( int n = 0; n < MaxCascadeLevels; n++ )
 	{
-		/// @todo ’n–Ê‚æ‚èè‘O‚É far clip ‚ª‚±‚È‚¢‚æ‚¤‚É‚·‚é
+		/// @todo åœ°é¢ã‚ˆã‚Šæ‰‹å‰ã« far clip ãŒã“ãªã„ã‚ˆã†ã«ã™ã‚‹
 		projection_matrix_list_[ n ].set_orthographic( width[ n ], width[ n ], 1.f, 500.f );
 		shader_resource_->data().view_depth_per_cascade_level[ n ] = width[ n ] * 0.3f;
 	}
 }
 
 /**
- * ƒJƒƒ‰‚ÌÀ•W‚ğİ’è‚·‚é
+ * ã‚«ãƒ¡ãƒ©ã®åº§æ¨™ã‚’è¨­å®šã™ã‚‹
  *
- * @param pos ƒJƒƒ‰‚ÌÀ•W
+ * @param pos ã‚«ãƒ¡ãƒ©ã®åº§æ¨™
  */
 void ShadowMap::set_eye_position( const Vector& eye )
 {
@@ -126,7 +126,7 @@ void ShadowMap::set_eye_position( const Vector& eye )
 }
 
 /**
- * ƒVƒƒƒhƒEƒ}ƒbƒv‚ğ•`‰æ‚·‚é‚½‚ß‚Ì€”õ‚ğ‚·‚é
+ * ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã‚’æç”»ã™ã‚‹ãŸã‚ã®æº–å‚™ã‚’ã™ã‚‹
  *
  */
 void ShadowMap::ready_to_render_shadow_map()
@@ -141,9 +141,9 @@ void ShadowMap::ready_to_render_shadow_map()
 }
 
 /**
- * w’è‚µ‚½ƒJƒXƒP[ƒhƒŒƒxƒ‹‚ÌƒVƒƒƒhƒEƒ}ƒbƒv‚ğ•`‰æ‚·‚é‚½‚ß‚Ì€”õ‚ğ‚·‚é
+ * æŒ‡å®šã—ãŸã‚«ã‚¹ã‚±ãƒ¼ãƒ‰ãƒ¬ãƒ™ãƒ«ã®ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã‚’æç”»ã™ã‚‹ãŸã‚ã®æº–å‚™ã‚’ã™ã‚‹
  *
- * @param level ƒJƒXƒP[ƒhƒŒƒxƒ‹
+ * @param level ã‚«ã‚¹ã‚±ãƒ¼ãƒ‰ãƒ¬ãƒ™ãƒ«
  */
 void ShadowMap::ready_to_render_shadow_map_with_cascade_level( uint_t level )
 {
@@ -157,7 +157,7 @@ void ShadowMap::ready_to_render_shadow_map_with_cascade_level( uint_t level )
 }
 
 /**
- * ƒV[ƒ“‚ğ•`‰æ‚·‚é‚½‚ß‚Ì€”õ‚ğ‚·‚é
+ * ã‚·ãƒ¼ãƒ³ã‚’æç”»ã™ã‚‹ãŸã‚ã®æº–å‚™ã‚’ã™ã‚‹
  *
  */
 void ShadowMap::ready_to_render_scene()

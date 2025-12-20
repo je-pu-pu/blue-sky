@@ -11,7 +11,7 @@ namespace core::graphics::direct_3d_11
 	class Direct3D11;
 
 /**
- * Direct3D 11 ƒVƒƒƒhƒEƒ}ƒbƒv
+ * Direct3D 11 ã‚·ãƒ£ãƒ‰ã‚¦ãƒžãƒƒãƒ—
  *
  */
 class ShadowMap : public graphics::ShadowMap
@@ -41,15 +41,15 @@ private:
 	std::unique_ptr< ConstantBuffer >		shader_resource_;
 	std::unique_ptr< Texture >				texture_;
 
-	int							cascade_levels_;			///< CSM ‚ÌƒŒƒxƒ‹”
+	int							cascade_levels_;			///< CSM ã®ãƒ¬ãƒ™ãƒ«æ•°
 
 	ID3D11Texture2D*			depth_stencil_texture_;
 	ID3D11DepthStencilView*		depth_stencil_view_;
 
 	ViewportList				viewport_list_;
 
-	/// @todo static ‚ð‚â‚ß‚é
-	static Vector				light_position_;			///< ( 0, 0, 0 ) ‚ðŒü‚­ sun
+	/// @todo static ã‚’ã‚„ã‚ã‚‹
+	static Vector				light_position_;			///< ( 0, 0, 0 ) ã‚’å‘ã sun
 
 	static Matrix				view_matrix_;
 	static MatrixList			projection_matrix_list_;

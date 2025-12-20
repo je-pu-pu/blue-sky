@@ -17,7 +17,7 @@ class Quaternion;
 class Matrix;
 
 /**
- * “à•”“I‚É DirectXMath ‚ğg—p‚µ‚½ Vector
+ * å†…éƒ¨çš„ã« DirectXMath ã‚’ä½¿ç”¨ã—ãŸ Vector
  *
  */
 class alignas( 16 ) Vector

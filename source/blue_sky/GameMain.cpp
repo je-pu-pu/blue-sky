@@ -54,7 +54,7 @@
 namespace blue_sky
 {
 
-//¡ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+//â– ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 GameMain::GameMain()
 	: total_elapsed_time_( 0.f )
 	, is_display_fps_( false )
@@ -88,7 +88,7 @@ GameMain::GameMain()
 
 	direct_3d_->create_default_input_layout();
 
-	/// @todo ŠeƒVƒF[ƒ_[‚Ì effect_technique_ ‚ªŒÃ‚¢‚Ü‚Ü‚È‚Ì‚ğ‰ğÁ‚·‚é
+	/// @todo å„ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã® effect_technique_ ãŒå¤ã„ã¾ã¾ãªã®ã‚’è§£æ¶ˆã™ã‚‹
 	get_app()->watch_directory_change( "media/shader/", [this] () {
 		direct_3d_->get_effect()->load( "media/shader/main.fx" );
 		direct_3d_->create_default_input_layout();
@@ -160,7 +160,7 @@ GameMain::GameMain()
 	update_render_data_for_game();
 }
 
-//¡ƒfƒXƒgƒ‰ƒNƒ^
+//â– ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 GameMain::~GameMain()
 {
 	ImGui_ImplDX11_Shutdown();
@@ -176,7 +176,7 @@ GameMain::~GameMain()
 }
 
 /**
- * ƒQ[ƒ€‘S‘Ì‚Å‹¤—L‰Â”\‚ÈƒXƒNƒŠƒvƒgƒRƒ}ƒ“ƒh‚ğ€”õ‚·‚é
+ * ã‚²ãƒ¼ãƒ å…¨ä½“ã§å…±æœ‰å¯èƒ½ãªã‚¹ã‚¯ãƒªãƒ—ãƒˆã‚³ãƒãƒ³ãƒ‰ã‚’æº–å‚™ã™ã‚‹
  *
  */
 void GameMain::setup_script_command()
@@ -243,22 +243,22 @@ void GameMain::setup_script_command()
 
 	get_script_manager()->set_function( "debug_print_resources", [this] () { get_graphics_manager()->debug_print_resources(); } );
 
-	/// @todo ActiveObject ‚É color ‚ğ‚½‚¹‚éH
+	/// @todo ActiveObject ã« color ã‚’æŒãŸã›ã‚‹ï¼Ÿ
 	// get_script_manager()->set_function( "set_object_object", [this] ( ActiveObject* o, const Color& c ) { o->set_co } );
 }
 
 /**
- * ƒIƒuƒWƒFƒNƒg‚ğ¶¬‚·‚é
+ * ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆã™ã‚‹
  *
- * @param class_name  ƒNƒ‰ƒX–¼
- * @return ¶¬‚µ‚½ƒIƒuƒWƒFƒNƒg
- * @todo ®—‚·‚éB loc, rot ‚Ìw’è‚ğ‚Ç‚¤‚·‚é‚©H StaticObject ‚Ì¶¬‚ğ‚Ç‚¤‚·‚é‚©H Scenegraph ‚ÉˆÚ“®H
+ * @param class_name  ã‚¯ãƒ©ã‚¹å
+ * @return ç”Ÿæˆã—ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+ * @todo æ•´ç†ã™ã‚‹ã€‚ loc, rot ã®æŒ‡å®šã‚’ã©ã†ã™ã‚‹ã‹ï¼Ÿ StaticObject ã®ç”Ÿæˆã‚’ã©ã†ã™ã‚‹ã‹ï¼Ÿ Scenegraph ã«ç§»å‹•ï¼Ÿ
  */
 ActiveObject* GameMain::create_object( const char_t* class_name ) const
 {
 	ActiveObject* active_object = get_active_object_manager()->create_object( class_name );
 
-	/// @todo —áŠO‚É‚µ‚ÄƒXƒNƒŠƒvƒgŒÄ‚Ño‚µ‘¤‚ÅƒLƒƒƒbƒ`‚Å‚«‚é‚æ‚¤‚É‚·‚é
+	/// @todo ä¾‹å¤–ã«ã—ã¦ã‚¹ã‚¯ãƒªãƒ—ãƒˆå‘¼ã³å‡ºã—å´ã§ã‚­ãƒ£ãƒƒãƒã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹
 	if ( ! active_object )
 	{
 		return 0;
@@ -267,7 +267,7 @@ ActiveObject* GameMain::create_object( const char_t* class_name ) const
 	active_object->set_rigid_body( get_physics_manager()->add_active_object_as_box( active_object ) );
 	active_object->set_model( get_graphics_manager()->load_model( class_name ) );
 
-	/// @todo “¯‚¶í—Ş‚Ì•¡”‚Ì ActiveObject ‚ªAShader ‚ğ‹¤—L‚¹‚¸AŒÂ•Ê‚É•Û‚Å‚«‚é‚æ‚¤‚É‚·‚é
+	/// @todo åŒã˜ç¨®é¡ã®è¤‡æ•°ã® ActiveObject ãŒã€Shader ã‚’å…±æœ‰ã›ãšã€å€‹åˆ¥ã«ä¿æŒã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹
 
 	return active_object;
 }
@@ -278,7 +278,7 @@ ActiveObject* GameMain::clone_object( const ActiveObject* o ) const
 }
 
 /**
- * ƒQ[ƒ€–ˆ‚ÉXV‚·‚é•K—v‚Ì‚ ‚é•`‰æ—p‚Ì’è”ƒoƒbƒtƒ@‚ğXV‚·‚é
+ * ã‚²ãƒ¼ãƒ æ¯ã«æ›´æ–°ã™ã‚‹å¿…è¦ã®ã‚ã‚‹æç”»ç”¨ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’æ›´æ–°ã™ã‚‹
  *
  */
 void GameMain::update_render_data_for_game() const
@@ -300,7 +300,7 @@ bool GameMain::update()
 
 	total_elapsed_time_ += main_loop_->get_elapsed_sec();
 
-	/// @todo •ÊƒXƒŒƒbƒh‰»
+	/// @todo åˆ¥ã‚¹ãƒ¬ãƒƒãƒ‰åŒ–
 	get_sound_manager()->update();
 	
 	if ( get_app()->is_active() )
@@ -387,7 +387,7 @@ void GameMain::render()
 }
 
 /**
- * @brief ƒRƒ“ƒ\[ƒ‹ƒEƒBƒ“ƒhƒE‚ğ•`‰æ‚·‚é
+ * @brief ã‚³ãƒ³ã‚½ãƒ¼ãƒ«ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’æç”»ã™ã‚‹
  */
 void GameMain::render_console_window()
 {
@@ -535,7 +535,7 @@ void GameMain::render_console_window()
 	ImGui::End();
 }
 /**
- * @brief ƒV[ƒ“ˆê——ƒEƒBƒ“ƒhƒE‚ğ•`‰æ‚·‚é
+ * @brief ã‚·ãƒ¼ãƒ³ä¸€è¦§ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’æç”»ã™ã‚‹
  */
 void GameMain::render_scene_list_window()
 {
@@ -603,7 +603,7 @@ void GameMain::on_special_key_down( int key )
 		get_app()->set_full_screen( get_direct_3d()->is_full_screen() );
 	}
 
-	/// @todo ‚¿‚á‚ñ‚Æ‚·‚é
+	/// @todo ã¡ã‚ƒã‚“ã¨ã™ã‚‹
 	scene_->on_function_key_down( key -  KEY_F1 + 1 );
 }
 
@@ -621,7 +621,7 @@ void GameMain::on_resize()
 }
 
 /**
- * Ÿ‚ÌƒV[ƒ“‚Ö‚Ì‘JˆÚ‚ğƒ`ƒFƒbƒN‚·‚é
+ * æ¬¡ã®ã‚·ãƒ¼ãƒ³ã¸ã®é·ç§»ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
  *
  */
 void GameMain::check_scene_transition()
@@ -639,7 +639,7 @@ void GameMain::check_scene_transition()
 }
 
 /**
- * ƒV[ƒ“‚ğ€”õ‚·‚é
+ * ã‚·ãƒ¼ãƒ³ã‚’æº–å‚™ã™ã‚‹
  *
  */
 void GameMain::setup_scene()
@@ -679,15 +679,15 @@ void GameMain::setup_scene()
 }
 
 /**
- * ƒV[ƒ“‚ğ€”õ‚·‚é
+ * ã‚·ãƒ¼ãƒ³ã‚’æº–å‚™ã™ã‚‹
  *
- * @param scene_name ƒV[ƒ“–¼
+ * @param scene_name ã‚·ãƒ¼ãƒ³å
  */
 void GameMain::setup_scene( const string_t& scene_name )
 {
 	if ( ! SceneManager::get_instance()->is_scene_registered( scene_name ) )
 	{
-		// ƒXƒNƒŠƒvƒg‚Ì“r’†‚Å—áŠO‚ª”­¶‚µA‚»‚ÌŒã‚ÌƒXƒNƒŠƒvƒg‚ªÀs‚³‚ê‚È‚¢–â‘è‚É‘Îˆ‚µ‚Ä‚¢‚éH
+		// ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®é€”ä¸­ã§ä¾‹å¤–ãŒç™ºç”Ÿã—ã€ãã®å¾Œã®ã‚¹ã‚¯ãƒªãƒ—ãƒˆãŒå®Ÿè¡Œã•ã‚Œãªã„å•é¡Œã«å¯¾å‡¦ã—ã¦ã„ã‚‹ï¼Ÿ
 		// COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " ) + scene_name );
 		return;
 	}
@@ -695,19 +695,19 @@ void GameMain::setup_scene( const string_t& scene_name )
 	sound_manager_->pop_group();
 	sound_manager_->push_group( scene_name.c_str() );
 	
-	// Œ»İ‚ÌƒV[ƒ“‚ğ‰ğ•ú
+	// ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ã‚’è§£æ”¾
 	scene_.reset();
 
-	// ƒV[ƒ“‚É‚æ‚Á‚Äİ’è‚³‚ê‚Ä‚¢‚½ƒf[ƒ^‚ğƒNƒŠƒA
+	// ã‚·ãƒ¼ãƒ³ã«ã‚ˆã£ã¦è¨­å®šã•ã‚Œã¦ã„ãŸãƒ‡ãƒ¼ã‚¿ã‚’ã‚¯ãƒªã‚¢
 	{
 		core::ecs::EntityManager::get_instance()->clear();
 		get_graphics_manager()->set_main_camera_info( nullptr, nullptr );
 	}
 
-	// V‚µ‚¢ƒV[ƒ“‚ğİ’è
+	// æ–°ã—ã„ã‚·ãƒ¼ãƒ³ã‚’è¨­å®š
 	scene_.reset( SceneManager::get_instance()->generate_scene( scene_name ) );
 
-	/// @todo Še Scene ƒNƒ‰ƒX‚ª©•ª‚Ì–¼‘O‚ğ‚¿A
+	/// @todo å„ Scene ã‚¯ãƒ©ã‚¹ãŒè‡ªåˆ†ã®åå‰ã‚’æŒã¡ã€
 	scene_->set_name( scene_name );
 	scene_->set_next_stage_name( get_stage_name() );
 

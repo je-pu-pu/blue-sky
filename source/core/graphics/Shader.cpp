@@ -26,7 +26,7 @@ int_t calc_digit_number_after_decimal_point( float_t value )
 }
 
 /**
- * シェーダーのパラメーターを操作するための GUI を描画する
+ * 繧ｷ繧ｧ繝ｼ繝繝ｼ縺ｮ繝代Λ繝｡繝ｼ繧ｿ繝ｼ繧呈桃菴懊☆繧九◆繧√�ｮ GUI 繧呈緒逕ｻ縺吶ｋ
  */
 void Shader::render_parameter_gui()
 {

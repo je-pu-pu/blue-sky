@@ -9,10 +9,10 @@ namespace core::math::direct_x_math
 const Quaternion Quaternion::Identity = Quaternion( 0.f, 0.f, 0.f, 1.f );
 
 /**
- * @brief ƒNƒH[ƒ^ƒjƒIƒ“‚©‚ç yaw, pitch, roll ‚ğæ‚èo‚·
- * @param yaw æ‚èo‚µ‚½ yaw ‚ğŠi”[‚·‚é‚½‚ß‚ÌQÆ
- * @param pitch æ‚èo‚µ‚½ pitch ‚ğŠi”[‚·‚é‚½‚ß‚ÌQÆ
- * @param roll æ‚èo‚µ‚½ roll ‚ğŠi”[‚·‚é‚½‚ß‚ÌQÆ
+ * @brief ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‹ã‚‰ yaw, pitch, roll ã‚’å–ã‚Šå‡ºã™
+ * @param yaw å–ã‚Šå‡ºã—ãŸ yaw ã‚’æ ¼ç´ã™ã‚‹ãŸã‚ã®å‚ç…§
+ * @param pitch å–ã‚Šå‡ºã—ãŸ pitch ã‚’æ ¼ç´ã™ã‚‹ãŸã‚ã®å‚ç…§
+ * @param roll å–ã‚Šå‡ºã—ãŸ roll ã‚’æ ¼ç´ã™ã‚‹ãŸã‚ã®å‚ç…§
  */
 void Quaternion ::get_yaw_pitch_roll( float& yaw, float& pitch, float& roll ) const
 {
@@ -24,14 +24,14 @@ void Quaternion ::get_yaw_pitch_roll( float& yaw, float& pitch, float& roll ) co
 
 	// DirectX::XMStoreFloat( v, value_ );
 
-	/// À—á‚ÅŠw‚ÔƒQ[ƒ€ 3D ”Šw 193p ƒŠƒXƒg 9-6 uƒIƒuƒWƒFƒNƒg‹óŠÔ‚©‚çŠµ«‹óŠÔ‚ÖlŒ³”‚ğƒIƒCƒ‰[Šp‚É•ÏŠ·‚·‚év‚æ‚è
+	/// å®Ÿä¾‹ã§å­¦ã¶ã‚²ãƒ¼ãƒ  3D æ•°å­¦ 193p ãƒªã‚¹ãƒˆ 9-6 ã€Œã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç©ºé–“ã‹ã‚‰æ…£æ€§ç©ºé–“ã¸å››å…ƒæ•°ã‚’ã‚ªã‚¤ãƒ©ãƒ¼è§’ã«å¤‰æ›ã™ã‚‹ã€ã‚ˆã‚Š
 	float sp = -2.f * ( y * z - w * x );
 
-	// ƒWƒ“ƒoƒ‹ƒƒbƒN‚ğƒ`ƒFƒbƒN‚·‚é
-	// ”’l“I‚È•s³Šm‚³‚É­‚µ—]—T‚ğ‚½‚¹‚é
+	// ã‚¸ãƒ³ãƒãƒ«ãƒ­ãƒƒã‚¯ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
+	// æ•°å€¤çš„ãªä¸æ­£ç¢ºã•ã«å°‘ã—ä½™è£•ã‚’æŒãŸã›ã‚‹
 	if ( std::abs( sp ) > 0.9999f )
 	{
-		// ^ã‚©^‰º‚ğŒü‚¢‚Ä‚¢‚é
+		// çœŸä¸Šã‹çœŸä¸‹ã‚’å‘ã„ã¦ã„ã‚‹
 		yaw = std::atan2( -x * z - w * y, 0.5f - y * y - z * z );
 		pitch = 1.570796f * sp;
 		roll = 0.f;

@@ -1,8 +1,8 @@
-//¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡
+//â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
 //	App.h
-//	ƒVƒ“ƒOƒ‹ƒgƒ“ƒAƒvƒŠƒP[ƒVƒ‡ƒ“ƒNƒ‰ƒX
-//	ÅIXV“ú	2001/11/25
-//¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡
+//	ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚¯ãƒ©ã‚¹
+//	æœ€çµ‚æ›´æ–°æ—¥	2001/11/25
+//â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
 
 #pragma once
 
@@ -18,7 +18,7 @@
 #include <memory>
 
 /**
- * ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚Æ‚»‚ê‚É‘Î‰ž‚·‚é‚Ð‚Æ‚Â‚ÌƒEƒBƒ“ƒhƒE‚ðŠÇ—‚·‚é
+ * ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã¨ãã‚Œã«å¯¾å¿œã™ã‚‹ã²ã¨ã¤ã®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’ç®¡ç†ã™ã‚‹
  *
  */
 class App : public common::Singleton< App >
@@ -33,20 +33,20 @@ public:
 	using Config	= game::Config;
 
 private:
-	HINSTANCE	hInst;					///< ƒCƒ“ƒXƒ^ƒ“ƒXƒnƒ“ƒhƒ‹
-	HWND		hWnd;					///< ƒEƒBƒ“ƒhƒEƒnƒ“ƒhƒ‹
-	HANDLE		hMutex;					///< ƒ~ƒ…[ƒeƒbƒNƒXƒnƒ“ƒhƒ‹
+	HINSTANCE	hInst;					///< ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãƒãƒ³ãƒ‰ãƒ«
+	HWND		hWnd;					///< ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒãƒ³ãƒ‰ãƒ«
+	HANDLE		hMutex;					///< ãƒŸãƒ¥ãƒ¼ãƒ†ãƒƒã‚¯ã‚¹ãƒãƒ³ãƒ‰ãƒ«
 
-	string_t	class_name_;			///< ƒNƒ‰ƒX–¼
-	string_t	title_;					///< ƒ^ƒCƒgƒ‹
-	DWORD		style_;					///< ƒXƒ^ƒCƒ‹
+	string_t	class_name_;			///< ã‚¯ãƒ©ã‚¹å
+	string_t	title_;					///< ã‚¿ã‚¤ãƒˆãƒ«
+	DWORD		style_;					///< ã‚¹ã‚¿ã‚¤ãƒ«
 
-	int			width_;					///< ƒEƒBƒ“ƒhƒE‰¡•
-	int			height_;				///< ƒEƒBƒ“ƒhƒE‚‚³
+	int			width_;					///< ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦æ¨ªå¹…
+	int			height_;				///< ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦é«˜ã•
 
-	bool		is_active_;				///< ƒAƒNƒeƒBƒuƒtƒ‰ƒO
-	bool		is_full_screen_;		///< ƒtƒ‹ƒXƒNƒŠ[ƒ“
-	RECT		last_window_rect_;		///< ‘O‰ñ‚ÌƒEƒBƒ“ƒhƒEˆÊ’u‚ÆƒTƒCƒY
+	bool		is_active_;				///< ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ãƒ•ãƒ©ã‚°
+	bool		is_full_screen_;		///< ãƒ•ãƒ«ã‚¹ã‚¯ãƒªãƒ¼ãƒ³
+	RECT		last_window_rect_;		///< å‰å›žã®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ä½ç½®ã¨ã‚µã‚¤ã‚º
 
 	bool		is_mouse_in_window_;
 
@@ -58,7 +58,7 @@ private:
 
 	std::unordered_map< HANDLE, std::function< void() > > watch_directory_change_handler_list_;
 
-	App();								//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	App();								//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 
 	static LRESULT CALLBACK WinProc(HWND, UINT, WPARAM, LPARAM);
 	static void on_resize( HWND );
@@ -69,10 +69,10 @@ private:
 	void check_directory_change() const;
 
 public:
-	virtual ~App();						///< ƒfƒXƒgƒ‰ƒNƒ^
+	virtual ~App();						///< ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 
-	bool		Init(HINSTANCE, int);	//‰Šú‰»
-	int			MessageLoop();			//ƒƒbƒZ[ƒWƒ‹[ƒv
+	bool		Init(HINSTANCE, int);	//åˆæœŸåŒ–
+	int			MessageLoop();			//ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒ«ãƒ¼ãƒ—
 
 	HINSTANCE	GetInstanceHandle(){ return hInst; }
 	HWND		GetWindowHandle(){ return hWnd; }

@@ -16,7 +16,7 @@ namespace blue_sky
 {
 
 /**
- * Transform のテスト用シーン
+ * Transform 縺ｮ繝�繧ｹ繝育畑繧ｷ繝ｼ繝ｳ
  *
  */
 class TransformTestScene : public Scene

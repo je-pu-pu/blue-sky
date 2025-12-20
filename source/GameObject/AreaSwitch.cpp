@@ -17,7 +17,7 @@ void AreaSwitch::restart()
 }
 
 /**
- * XV
+ * æ›´æ–°
  *
  */
 void AreaSwitch::update()

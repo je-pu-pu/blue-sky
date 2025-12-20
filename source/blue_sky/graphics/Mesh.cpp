@@ -4,9 +4,9 @@ namespace blue_sky::graphics
 {
 
 /**
- * V‚µ‚¢’¸“_ƒOƒ‹[ƒv‚ğì¬‚·‚é
+ * æ–°ã—ã„é ‚ç‚¹ã‚°ãƒ«ãƒ¼ãƒ—ã‚’ä½œæˆã™ã‚‹
  *
- * @return ì¬‚³‚ê‚½’¸“_ƒOƒ‹[ƒv
+ * @return ä½œæˆã•ã‚ŒãŸé ‚ç‚¹ã‚°ãƒ«ãƒ¼ãƒ—
  */
 Mesh::VertexGroup* Mesh::create_vertex_group()
 {
@@ -16,10 +16,10 @@ Mesh::VertexGroup* Mesh::create_vertex_group()
 }
 
 /**
- * ’¸“_ƒOƒ‹[ƒv‚Ìˆê——‚Ì’†‚©‚çw’è‚µ‚½ƒCƒ“ƒfƒbƒNƒX‚Ì’¸“_ƒOƒ‹[ƒv‚ğæ“¾‚·‚é
+ * é ‚ç‚¹ã‚°ãƒ«ãƒ¼ãƒ—ã®ä¸€è¦§ã®ä¸­ã‹ã‚‰æŒ‡å®šã—ãŸã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã®é ‚ç‚¹ã‚°ãƒ«ãƒ¼ãƒ—ã‚’å–å¾—ã™ã‚‹
  *
- * @param index ’¸“_ƒOƒ‹[ƒv‚ÌƒCƒ“ƒfƒbƒNƒX
- * @return ’¸“_ƒOƒ‹[ƒv or 0
+ * @param index é ‚ç‚¹ã‚°ãƒ«ãƒ¼ãƒ—ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+ * @return é ‚ç‚¹ã‚°ãƒ«ãƒ¼ãƒ— or 0
  */
 Mesh::VertexGroup* Mesh::get_vertex_group_at( uint_t index )
 {
@@ -32,7 +32,7 @@ Mesh::VertexGroup* Mesh::get_vertex_group_at( uint_t index )
 }
 
 /**
- * Å“K‰»‚·‚é
+ * æœ€é©åŒ–ã™ã‚‹
  *
  *
  */
@@ -42,7 +42,7 @@ void Mesh::optimize()
 }
 
 /**
- * ƒVƒXƒeƒ€ƒƒ‚ƒŠã‚Ì’¸“_î•ñ‚ğƒNƒŠƒA‚·‚é
+ * ã‚·ã‚¹ãƒ†ãƒ ãƒ¡ãƒ¢ãƒªä¸Šã®é ‚ç‚¹æƒ…å ±ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
  *
  */
 void Mesh::clear_vertex_list()
@@ -51,7 +51,7 @@ void Mesh::clear_vertex_list()
 }
 
 /**
- * ƒVƒXƒeƒ€ƒƒ‚ƒŠã‚ÌƒEƒGƒCƒgî•ñ‚ğƒNƒŠƒA‚·‚é
+ * ã‚·ã‚¹ãƒ†ãƒ ãƒ¡ãƒ¢ãƒªä¸Šã®ã‚¦ã‚¨ã‚¤ãƒˆæƒ…å ±ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
  *
  */
 void Mesh::clear_vertex_weight_list()
@@ -60,7 +60,7 @@ void Mesh::clear_vertex_weight_list()
 }
 
 /**
- * ƒVƒXƒeƒ€ƒƒ‚ƒŠã‚ÌƒCƒ“ƒfƒbƒNƒXî•ñ‚ğƒNƒŠƒA‚·‚é
+ * ã‚·ã‚¹ãƒ†ãƒ ãƒ¡ãƒ¢ãƒªä¸Šã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹æƒ…å ±ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
  *
  */
 void Mesh::clear_vertex_group_list()
@@ -69,7 +69,7 @@ void Mesh::clear_vertex_group_list()
 }
 
 /**
- * ’¸“_‚Ì Z ’l‚ğ”½“]‚·‚é
+ * é ‚ç‚¹ã® Z å€¤ã‚’åè»¢ã™ã‚‹
  *
  */
 void Mesh::invert_vertex_z()
@@ -82,7 +82,7 @@ void Mesh::invert_vertex_z()
 }
 
 /**
- * ƒ|ƒŠƒSƒ“‚Ì— •\‚ğ”½“]‚·‚é
+ * ãƒãƒªã‚´ãƒ³ã®è£è¡¨ã‚’åè»¢ã™ã‚‹
  *
  */
 void Mesh::flip_polygon()

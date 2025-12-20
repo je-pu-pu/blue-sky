@@ -7,17 +7,17 @@ namespace game
 class MainLoop;
 
 /**
- * 経過時間計計測
+ * 邨碁℃譎る俣險郁ｨ域ｸｬ
  * 
- * このクラスは MainLoop を参照し、経過時間を計測する
+ * 縺薙�ｮ繧ｯ繝ｩ繧ｹ縺ｯ MainLoop 繧貞盾辣ｧ縺励∫ｵ碁℃譎る俣繧定ｨ域ｸｬ縺吶ｋ
  */
 class ElapsedTimer
 {
 private:
 	const MainLoop* main_loop_;
 
-	unsigned long last_time_ = 0;		// 前のフレームの時間
-	unsigned long current_time_ = 0;	// 現在のフレームの時間
+	unsigned long last_time_ = 0;		// 蜑阪�ｮ繝輔Ξ繝ｼ繝縺ｮ譎る俣
+	unsigned long current_time_ = 0;	// 迴ｾ蝨ｨ縺ｮ繝輔Ξ繝ｼ繝縺ｮ譎る俣
 
 public:
 	explicit ElapsedTimer( const MainLoop* );

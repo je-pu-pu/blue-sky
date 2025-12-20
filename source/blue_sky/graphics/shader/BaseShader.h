@@ -16,7 +16,7 @@ namespace blue_sky::graphics::shader
 {
 
 /**
- * blue-sky シェーダー基底クラス
+ * blue-sky 繧ｷ繧ｧ繝ｼ繝繝ｼ蝓ｺ蠎輔け繝ｩ繧ｹ
  *
  */
 class BaseShader : public core::graphics::Shader

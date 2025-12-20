@@ -7,7 +7,7 @@ namespace core
 {
 
 /**
- * ƒAƒjƒ[ƒVƒ‡ƒ“
+ * ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
  *
  */
 class Animation
@@ -55,12 +55,12 @@ public:
 	}
 
 	/**
-	 * w’è‚µ‚½ƒ`ƒƒƒ“ƒlƒ‹‚Ìw’è‚µ‚½ƒtƒŒ[ƒ€‚Ì’l‚ğæ“¾‚·‚é
+	 * æŒ‡å®šã—ãŸãƒãƒ£ãƒ³ãƒãƒ«ã®æŒ‡å®šã—ãŸãƒ•ãƒ¬ãƒ¼ãƒ ã®å€¤ã‚’å–å¾—ã™ã‚‹
 	 *
-	 * @param channel_index ƒ`ƒƒƒ“ƒlƒ‹‚ÌƒCƒ“ƒfƒbƒNƒX
-	 * @param frame ƒtƒŒ[ƒ€
-	 * @param default_value ƒ`ƒƒƒ“ƒlƒ‹‚ª‘¶İ‚µ‚È‚¢ê‡‚É•Ô‚·ƒfƒtƒHƒ‹ƒg’l
-	 * @return ’l
+	 * @param channel_index ãƒãƒ£ãƒ³ãƒãƒ«ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+	 * @param frame ãƒ•ãƒ¬ãƒ¼ãƒ 
+	 * @param default_value ãƒãƒ£ãƒ³ãƒãƒ«ãŒå­˜åœ¨ã—ãªã„å ´åˆã«è¿”ã™ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤
+	 * @return å€¤
 	 */
 	float_t get_value( ChannelIndex channel_index, float_t frame, float_t default_value ) const
 	{
@@ -73,7 +73,7 @@ public:
 	}
 
 	/**
-	 * Å“K‰»‚·‚é
+	 * æœ€é©åŒ–ã™ã‚‹
 	 *
 	 */
 	void optimize()
@@ -82,9 +82,9 @@ public:
 	}
 
 	/**
-	 * ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’·‚³‚ğŒvZ‚·‚é
+	 * ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®é•·ã•ã‚’è¨ˆç®—ã™ã‚‹
 	 *
-	 * @return ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’·‚³
+	 * @return ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®é•·ã•
 	 */
 	float_t calculate_length()
 	{

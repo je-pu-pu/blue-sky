@@ -38,8 +38,6 @@ protected:
 	TransformComponent* camera_transform_ = nullptr;
 	CameraComponent* camera_component_ = nullptr;
 
-	std::vector< std::string > model_file_name_list_;
-
 public:
 	explicit PhysicsTestScene();
 	~PhysicsTestScene() override = default;

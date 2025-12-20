@@ -5,6 +5,8 @@
 #include <core/graphics/Model.h>
 #include <core/graphics/RenderTargetTexture.h>
 
+#include <common/math.h>
+
 namespace core::ecs
 {
 
@@ -38,7 +40,7 @@ void RenderSystem::update()
 		blue_sky::ObjectConstantBufferWithData shader_data;
 
 		shader_data.data().world.set_identity();
-		shader_data.data().world.set_rotation_quaternion( transform->transform.get_rotation() );
+		shader_data.data().world *= Matrix().set_rotation_quaternion( transform->transform.get_rotation() );
 		shader_data.data().world *= Matrix().set_translation( transform->transform.get_position() );
 		shader_data.data().world = shader_data.data().world.transpose();
 

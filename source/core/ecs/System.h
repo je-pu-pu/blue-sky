@@ -130,7 +130,7 @@ public:
 		}
 	}
 
-	virtual void update( ComponentTuple& component_tuple ) const
+	virtual void update( ComponentTuple& ) const
 	{
 
 	}

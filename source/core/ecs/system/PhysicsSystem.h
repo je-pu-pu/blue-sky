@@ -20,7 +20,7 @@ public:
 	PhysicsSystem();
 	~PhysicsSystem() = default;
 
-	void update() override;
+	void update( ComponentTuple& ) const override;
 
 }; // class PhysicsSystem
 

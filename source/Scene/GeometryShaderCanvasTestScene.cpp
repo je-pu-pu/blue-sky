@@ -163,7 +163,6 @@ void GeometryShaderCanvasTestScene::render()
 	shader_data.data().world.set_identity();
 	shader_data.data().world *= Matrix().set_rotation_y( aa );
 	shader_data.data().world *= Matrix().set_scaling( scale, scale, scale );
-	shader_data.data().world = shader_data.data().world.transpose();
 
 	shader_data.update();
 

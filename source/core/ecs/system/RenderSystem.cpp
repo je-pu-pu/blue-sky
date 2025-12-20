@@ -42,7 +42,6 @@ void RenderSystem::update()
 		shader_data.data().world.set_identity();
 		shader_data.data().world *= Matrix().set_rotation_quaternion( transform->transform.get_rotation() );
 		shader_data.data().world *= Matrix().set_translation( transform->transform.get_position() );
-		shader_data.data().world = shader_data.data().world.transpose();
 
 		shader_data.update();
 

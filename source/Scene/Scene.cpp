@@ -165,8 +165,8 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 	{
 		auto& frame_constant_buffer_data = get_graphics_manager()->get_frame_render_data()->data();
 
-		frame_constant_buffer_data.view = Matrix().set_identity().transpose();
-		frame_constant_buffer_data.projection = Matrix().set_orthographic( 2.f * static_cast< float >( get_width() ) / static_cast< float >( get_height() ), 2.f, 0.f, 1.f ).transpose();
+		frame_constant_buffer_data.view = Matrix().set_identity();
+		frame_constant_buffer_data.projection = Matrix().set_orthographic( 2.f * static_cast< float >( get_width() ) / static_cast< float >( get_height() ), 2.f, 0.f, 1.f );
 		frame_constant_buffer_data.time = get_total_elapsed_time();
 	
 		get_graphics_manager()->get_frame_render_data()->update();
@@ -182,7 +182,7 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 	{
 		ObjectConstantBufferData object_constant_buffer_data;
 
-		object_constant_buffer_data.world = Matrix().set_identity().transpose();
+		object_constant_buffer_data.world = Matrix().set_identity();
 
 		get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data );
 	}

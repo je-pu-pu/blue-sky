@@ -193,10 +193,8 @@ void CanvasTestScene::update()
 		auto& render_data = get_graphics_manager()->get_frame_render_data()->data();
 		
 		render_data.view.set_look_at( eye, at, up );
-		render_data.view = render_data.view.transpose();
 
 		render_data.projection.set_perspective_fov( math::degree_to_radian( 90.f ), static_cast< float >( get_width() ) / static_cast< float >( get_height() ), 0.05f, 3000.f );
-		render_data.projection = render_data.projection.transpose();
 
 		render_data.light = Vector( 0, 0, 0, 1 );
 

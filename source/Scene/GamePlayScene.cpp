@@ -1647,8 +1647,8 @@ void GamePlayScene::update_render_data_for_frame() const
 	const Vector& at  = camera_->look_at();
 	const Vector& up  = camera_->up();
 
-	frame_render_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
-	frame_render_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();
+	frame_render_data.view = ( Matrix().set_look_at( eye, at, up ) );
+	frame_render_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() );
 
 	get_graphics_manager()->get_frame_render_data()->update();
 
@@ -1683,8 +1683,8 @@ void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
 	Vector at = eye + Vector( 0.f, 0.f, 1.f, 0.f ) * r;
 	Vector up = Vector( 0.f, 1.f, 0.f, 0.f ) * r;
 
-	frame_render_data.view = Matrix().set_look_at( eye, at, up ).transpose();
-	frame_render_data.projection = get_oculus_rift()->get_projection_matrix( eye_index, camera_->near_clip(), camera_->far_clip() ).transpose();
+	frame_render_data.view = Matrix().set_look_at( eye, at, up );
+	frame_render_data.projection = get_oculus_rift()->get_projection_matrix( eye_index, camera_->near_clip(), camera_->far_clip() );
 
 	get_graphics_manager()->get_frame_render_data()->update();
 
@@ -1752,7 +1752,6 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 		ObjectConstantBufferData buffer_data;
 		buffer_data.world = Matrix().set_orthographic( camera_->aspect() * 2.f, 2.f, 0.f, 1.f );
 		buffer_data.world *= Matrix().set_translation( ortho_offset, 0.f, 0.f );
-		buffer_data.world = buffer_data.world.transpose();
 
 		get_graphics_manager()->get_shared_object_render_data()->update( & buffer_data );
 

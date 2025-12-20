@@ -88,7 +88,7 @@ void Sprite::set_transform( const Matrix& m )
 	constant_buffer_data.transform = m;
 	constant_buffer_data.transform *= Matrix().set_orthographic( 2.f * static_cast< float >( direct_3d_->get_width() ) / static_cast< float >( direct_3d_->get_height() ), 2.f, -1.f, 1.f );
 	constant_buffer_data.transform *= Matrix().set_translation( ortho_offset_, 0.f, 0.f );
-	constant_buffer_data.transform = constant_buffer_data.transform.transpose();
+	constant_buffer_data.transform = constant_buffer_data.transform;
 	constant_buffer_->update( & constant_buffer_data );
 }
 

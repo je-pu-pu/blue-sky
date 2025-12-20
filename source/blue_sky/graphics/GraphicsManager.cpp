@@ -467,8 +467,8 @@ void GraphicsManager::setup_rendering()
 
 	const auto aspect = static_cast< float >( GameMain::get_instance()->get_width() ) / static_cast< float >( GameMain::get_instance()->get_height() );
 
-	get_frame_render_data()->data().view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
-	get_frame_render_data()->data().projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_component->fov ), aspect, camera_component->near_clip, camera_component->far_clip ).transpose();
+	get_frame_render_data()->data().view = ( Matrix().set_look_at( eye, at, up ) );
+	get_frame_render_data()->data().projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_component->fov ), aspect, camera_component->near_clip, camera_component->far_clip );
 	
 	/// @todo ‚¿‚á‚ñ‚Æ‚â‚é ( ECS ‰»H set_light_info() ? )
 	get_frame_render_data()->data().light = Vector( -1.f, -2.f, 0.f, 0.f ).normalize();
@@ -664,7 +664,7 @@ void GraphicsManager::render_fader() const
 
 #if 0
 	ObjectConstantBufferData buffer_data;
-	buffer_data.world = Matrix().set_identity().transpose();
+	buffer_data.world = Matrix().set_identity();
 	buffer_data.color = direct_3d_->getFader()->get_color();
 	
 	get_shared_object_render_data()->update( & buffer_data );
@@ -746,7 +746,6 @@ void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_ob
 		shader_data.world *= bone_matrix;
 		shader_data.world *= Matrix().set_rotation_quaternion( t.get_rotation() );
 		shader_data.world *= Matrix().set_translation( t.get_position().x(), t.get_position().y(), t.get_position().z() );
-		shader_data.world = shader_data.world.transpose();
 
 		if ( active_object->get_model()->get_line() )
 		{
@@ -782,8 +781,8 @@ void GraphicsManager::update_frame_render_data( const Camera* camera_ )
 	Vector at( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z() );
 	Vector up( camera_->up().x(), camera_->up().y(), camera_->up().z() );
 
-	frame_constant_buffer_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
-	frame_constant_buffer_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();
+	frame_constant_buffer_data.view = ( Matrix().set_look_at( eye, at, up ) );
+	frame_constant_buffer_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() );
 
 	get_frame_render_data()->update( & frame_constant_buffer_data );
 }

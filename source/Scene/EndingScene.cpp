@@ -218,7 +218,7 @@ void EndingScene::render_drawing_line()
 		{
 			ObjectConstantBufferData object_constant_buffer_data;
 
-			object_constant_buffer_data.world = ( Matrix().set_scaling( 1.25f, 1.25f, 1.f ) * Matrix().set_translation( 0.f, drawing_model_offset_, 0.f ) ).transpose();
+			object_constant_buffer_data.world = ( Matrix().set_scaling( 1.25f, 1.25f, 1.f ) * Matrix().set_translation( 0.f, drawing_model_offset_, 0.f ) );
 			object_constant_buffer_data.color = Color( 0.f, 0.f, 0.f, 0.f );
 
 			get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data );

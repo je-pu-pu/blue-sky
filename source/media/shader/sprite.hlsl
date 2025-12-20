@@ -7,7 +7,7 @@ Texture2DMS< float4, 8 > sprite_texture_ms : register( t0 );
 
 cbuffer SpriteConstantBuffer : register( b13 )
 {
-	matrix Transform;
+    row_major matrix Transform;
 };
 
 COMMON_POS_UV_COLOR vs_sprite( COMMON_POS_UV_COLOR input )

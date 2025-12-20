@@ -147,7 +147,7 @@ void ShadowMap::ready_to_render_shadow_map()
  */
 void ShadowMap::ready_to_render_shadow_map_with_cascade_level( uint_t level )
 {
-	shader_resource_->data().shadow_view_projection[ level ] = get_view_projection_matrix( level ).transpose();
+	shader_resource_->data().shadow_view_projection[ level ] = get_view_projection_matrix( level );
 	shader_resource_->data().shadow_view_projection[ 0     ] = shader_resource_->data().shadow_view_projection[ level ];
 
 	shader_resource_->update();
@@ -164,7 +164,7 @@ void ShadowMap::ready_to_render_scene()
 {
 	for ( int n = 0; n < cascade_levels_; n++ )
 	{
-		shader_resource_->data().shadow_view_projection[ n ] = get_view_projection_matrix( n ).transpose();
+		shader_resource_->data().shadow_view_projection[ n ] = get_view_projection_matrix( n );
 	}
 
 	shader_resource_->update();

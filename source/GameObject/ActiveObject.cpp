@@ -253,7 +253,6 @@ void ActiveObject::update_render_data() const
 
 	shader_data.world.set_rotation_quaternion( t.get_rotation() );
 	shader_data.world *= Matrix().set_translation( t.get_position().x(), t.get_position().y(), t.get_position().z() );
-	shader_data.world = shader_data.world.transpose();
 
 	if ( get_model()->get_line() )
 	{

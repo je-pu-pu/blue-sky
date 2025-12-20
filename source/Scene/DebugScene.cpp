@@ -180,8 +180,8 @@ void DebugScene::render()
 	Vector at( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z(), 1.f );
 	Vector up( camera_->up().x(), camera_->up().y(), camera_->up().z(), 0.f );
 
-	frame_render_data.view = ( Matrix().set_look_at( eye, at, up ) ).transpose();
-	frame_render_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() ).transpose();
+	frame_render_data.view = ( Matrix().set_look_at( eye, at, up ) );
+	frame_render_data.projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() );
 	frame_render_data.light = Vector( -1.f, -2.f, 0.f, 0.f ).normalize();
 
 	get_graphics_manager()->get_frame_render_data()->update();

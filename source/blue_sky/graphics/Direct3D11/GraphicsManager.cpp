@@ -338,7 +338,7 @@ void GraphicsManager::set_eye_position( const Vector& pos )
 	// ‚Ç‚±‚ÉˆÚ“®‚µ‚Ä‚àA“¯‚¶‚æ‚¤‚É SkyBox ‚ª•\Ž¦‚³‚ê‚é‚æ‚¤‚É‚·‚é
 	if ( sky_box_ )
 	{
-		sky_box_render_data_->data().world = Matrix().set_translation( pos ).transpose();
+		sky_box_render_data_->data().world = Matrix().set_translation( pos );
 	}
 }
 

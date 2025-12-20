@@ -123,10 +123,12 @@ void TransformTestScene::update()
 
 	// GUI によってオブジェクトの位置・回転を変更する
 	static Vector rot;
+	// static Vector scale( 1.f, 1.f, 1.f );
 
 	ImGui::Begin( "Transform test params" );
 	ImGui::DragFloat3( "Position", reinterpret_cast< float* >( & current_entity_transform_->transform.get_position() ), 0.1f );
 	ImGui::DragFloat3( "Rotation", reinterpret_cast< float* >( & rot ), 0.1f, -360.f, 360.f );
+	// ImGui::DragFloat3( "Scale",    reinterpret_cast< float* >( & scale ), 0.1f, -0.1f, 10.f );
 	ImGui::End();
 
 	Quaternion q;

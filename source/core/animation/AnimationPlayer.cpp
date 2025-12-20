@@ -104,11 +104,6 @@ void AnimationPlayer::update_render_data() const
 
 	calculate_bone_matrix_recursive( data, 0, Matrix::identity() );
 
-	for ( uint_t n = 0; n < get_skinning_animation_set()->get_bone_count(); ++n )
-	{
-		data.bone_matrix[ n ] = data.bone_matrix[ n ].transpose();
-	}
-
 	constant_buffer_.update( & data );
 }
 

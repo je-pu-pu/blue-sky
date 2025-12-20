@@ -129,9 +129,10 @@ float4 ps_skin_wrap_flat_paper( PS_INPUT input ) : SV_Target
 }
 
 /**
- * 
+ * スキニングなし・シャドウありの頂点シェーダー
  *
- *
+ * @param input 入力頂点情報
+ * @return 出力頂点情報
  */
 PS_SHADOW_INPUT vs_with_shadow( COMMON_POS_NORM_UV input )
 {
@@ -153,9 +154,10 @@ PS_SHADOW_INPUT vs_with_shadow( COMMON_POS_NORM_UV input )
 }
 
 /**
- * 
+ * スキニングあり・シャドウありの頂点シェーダー 
  *
- *
+ * @param input 入力頂点情報
+ * @return 出力頂点情報
  */
 PS_SHADOW_INPUT vs_skin_with_shadow( VS_SKIN_INPUT input )
 {
@@ -182,8 +184,10 @@ PS_SHADOW_INPUT vs_skin_with_shadow( VS_SKIN_INPUT input )
 }
 
 /**
- * 
+ * ピクセルシェーダー ( シャドウあり )
  *
+ * @param input 入力ピクセル情報
+ * @return 出力ピクセル情報
  */
 float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 {

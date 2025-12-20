@@ -357,7 +357,7 @@ public:
 		}
 
 		// テクスチャを必要なシェーダーにバインドする
-		for ( auto n = 0; n < textures_.size(); n++ )
+		for ( size_t n = 0; n < textures_.size(); n++ )
 		{
 			textures_[ n ]->bind_to_ps( n );
 		}

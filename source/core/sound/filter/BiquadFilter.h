@@ -77,7 +77,7 @@ public:
     {
         for ( size_t n = 0; n < frame_count; ++n )
         {
-            for ( int ch = 0; ch < channel_state_list_.size(); ++ch )
+            for ( size_t ch = 0; ch < channel_state_list_.size(); ++ch )
             {
                 data[ n * channel_state_list_.size() + ch ] = process( channel_state_list_[ ch ], data[ n * channel_state_list_.size() + ch ] );
             }

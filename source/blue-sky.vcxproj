@@ -593,7 +593,7 @@
       <EnablePREfast>true</EnablePREfast>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
-      <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
+      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <OmitFramePointers>false</OmitFramePointers>
       <DisableAnalyzeExternal>true</DisableAnalyzeExternal>

@@ -32,7 +32,7 @@ public:
 		vertex_list_.reserve( MAX_VERTEX_COUNT );
 	}
 
-	void DynamicPointList::create_vertex_buffer()
+	void create_vertex_buffer()
 	{
 		D3D11_BUFFER_DESC buffer_desc = { 0 };
 

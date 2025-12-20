@@ -50,7 +50,7 @@ private:
 					{
 						std::cout << "track name : ";
 
-						for ( int n = 3; n < current_track_event_->m.size(); n++ )
+						for ( size_t n = 3; n < current_track_event_->m.size(); n++ )
 						{
 							std::cout << current_track_event_->m[ n ];
 						}
@@ -186,7 +186,7 @@ public:
 				{
 					std::cout << "track name : ";
 
-					for ( int n = 3; n < e.m.size(); n++ )
+					for ( size_t n = 3; n < e.m.size(); n++ )
 					{
 						std::cout << e.m[ n ];
 					}
@@ -251,7 +251,7 @@ public:
 		beat_handler_ = std::move( handler );
 	}
 
-	int get_ticks_per_beat() const
+	float get_ticks_per_beat() const
 	{
 		return reader_.ticksPerBeat;
 	}

@@ -131,6 +131,11 @@ float4 common_vp_pos( float4 input )
 	return mul( mul( input, View ), Projection );
 }
 
+/**
+ * 法線をワールド座標系へ変換する
+ *
+ * @todo ワールド変換行列に非同一性スケールが入っている場合の対応 ( 逆行列転置行列を使う )
+ */
 float3 common_w_norm( float3 input )
 {
 	return mul( input, ( float3x3 ) World );
@@ -149,9 +154,13 @@ float3 common_wv_norm( float3 input )
 /**
  * シャドウマップのテクスチャ座標を返す
  *
+ * モデルのローカル座標系での頂点座標を引数に取り、指定されたカスケードレベルのシャドウマップのテクスチャ座標を返す
+ * ( 光源をカメラと見立てたときの座標に変換し、最終的に UV 座標系に変換する )
+ *
+ * @todo 頂点シェーダーで UV 座標にまで変換してしまうと、ピクセルシェーダーでの補間誤差が大きくなり結果が不正確になる可能性があるため、ここでの変換は「光源をカメラと見立てたときの座標への変換」に留め、UV 座標への変換はピクセルシェーダーで行うようにする
+ * 
  * @param pos ローカル座標系での頂点座標
  * @param csm_level カスケードレベル
- * @todo 理解する
  */
 float4 common_shadow_texcoord( float4 pos, int csm_level )
 {
@@ -195,9 +204,8 @@ int common_shadow_cascade_index( float input_depth )
 /**
  * シャドウマップをサンプリングし現在のピクセルが影かどうかを bool で返す
  *
- * @param shadow_tex_coords ???
- * @param input_depth 現在のピクセルのビュー座標系での Z 値
- * @todo 理解する
+ * @param shadow_tex_coords シャドウマップ上の UV 座標 ( * カスケードレベル数 )
+ * @param input_depth 現在のピクセルのビュー座標系での Z 値 ( カスケードレベルの選択に使用する )
  */
 bool common_sample_is_shadow( float4 shadow_tex_coords[ ShadowMapCascadeLevels ], float input_depth )
 {

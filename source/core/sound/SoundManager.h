@@ -10,7 +10,7 @@ namespace game
 {
 
 class Sound;
-class SoundFormat;
+struct SoundFormat;
 
 }
 

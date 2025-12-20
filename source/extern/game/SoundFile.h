@@ -2,7 +2,7 @@
 
 namespace game
 {
-	class SoundFormat;
+	struct SoundFormat;
 
 /**
  * サウンドファイル基底クラス

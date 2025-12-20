@@ -27,7 +27,7 @@ public:
 	 * 指定された要素のみを持つ集合を作成する
 	 */
 	enum_set( EnumType e )
-		: set_( 1 << static_cast< int >( e ) )
+		: set_( 1ull << static_cast< size_t >( e ) )
 	{ }
 
 	/**
@@ -37,7 +37,7 @@ public:
 	{
 		for ( auto e : es )
 		{
-			set_ |= std::bitset< N >( 1 << static_cast< size_t >( e ) );
+			set_ |= 1ull << static_cast< size_t >( e );
 		}
 	}
 

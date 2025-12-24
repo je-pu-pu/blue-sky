@@ -48,11 +48,12 @@ PhysicsTestScene::PhysicsTestScene()
 
 		ground->add_component< core::ecs::RenderComponent >();
 		auto* ground_model = ground->add_component< core::ecs::ModelComponent >();
-		ground_model->model = get_graphics_manager()->load_model( "box-5x5x5" );
+		ground_model->model = get_graphics_manager()->load_model( "wall-1" );
 
 		auto* ground_rigid_body = ground->add_component< core::ecs::RigidBodyComponent >();
 		ground_rigid_body->shape_type = RigidBodyShapeType::Box;
-		ground_rigid_body->shape_size = Vector( 2.5f, 2.5f, 2.5f );
+		ground_rigid_body->shape_size = Vector( 2.f, 0.875f, 0.05f );
+		ground_rigid_body->offset = Vector( 0.f, 0.875f, 0.f );
 		ground_rigid_body->mass = 0.f; // 静的オブジェクト
 	}
 

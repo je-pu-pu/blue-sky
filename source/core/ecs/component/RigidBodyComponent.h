@@ -16,7 +16,6 @@ namespace core::ecs
 struct RigidBodyComponent : public Component
 {
 	using Vector = core::math::Vector;
-	using Transform = core::math::Transform;
 	using RigidBodyShapeType = core::physics::RigidBodyShapeType;
 	using RigidBodyHandle = core::physics::RigidBodyHandle;
 
@@ -30,7 +29,7 @@ struct RigidBodyComponent : public Component
 	float mass = 1.f;
 
 	/// 剛体の中心点のオフセット
-	Transform offset = Transform::identity();
+	Vector offset = Vector( 0.f, 0.f, 0.f );
 
 	/// 剛体ハンドル (PhysicsSystem によって設定される)
 	RigidBodyHandle handle;

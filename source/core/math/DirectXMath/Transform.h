@@ -14,6 +14,9 @@ private:
 	Quaternion rotation_;
 
 public:
+	Transform() = default;
+	~Transform() = default;
+
 	void set_identity()
 	{
 		position_.set( 0.f, 0.f, 0.f );

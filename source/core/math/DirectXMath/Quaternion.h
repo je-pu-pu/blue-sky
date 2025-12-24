@@ -24,7 +24,9 @@ private:
 	{ }
 
 public:
-	Quaternion() = default;
+	Quaternion()
+		: value_()
+	{ }
 
 	explicit Quaternion( float x, float y, float z, float w )
 		: value_( DirectX::XMVectorSet( x, y, z, w ) )

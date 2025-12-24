@@ -37,7 +37,6 @@ struct RigidBodyCreateInfo
 	Vector shape_size = Vector( 0.5f, 0.5f, 0.5f );
 	float mass = 1.f;
 	Transform transform;
-	Transform offset;
 };
 
 /**

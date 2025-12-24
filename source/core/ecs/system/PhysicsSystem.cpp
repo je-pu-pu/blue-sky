@@ -8,6 +8,7 @@ namespace core::ecs
 using PhysicsManager = core::physics::PhysicsManager;
 using RigidBodyCreateInfo = core::physics::RigidBodyCreateInfo;
 using Quaternion = core::math::Quaternion;
+using Vector = core::math::Vector;
 
 void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, TransformComponent* transform )
 {
@@ -28,8 +29,11 @@ void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, Trans
 	info.shape_type = rigid_body->shape_type;
 	info.shape_size = rigid_body->shape_size;
 	info.mass = rigid_body->mass;
+
+	// offset を適用した transform を設定
 	info.transform = transform->transform;
-	info.offset = rigid_body->offset;
+	Vector rotated_offset = Vector::transform( rigid_body->offset, transform->transform.get_rotation() );
+	info.transform.get_position() += rotated_offset;
 
 	// 剛体を生成
 	rigid_body->handle = physics_manager->create_rigid_body( info );
@@ -69,7 +73,9 @@ void PhysicsSystem::update()
 
 			physics_manager->get_rigid_body_transform( rigid_body->handle, position, rotation );
 
-			transform->transform.set_position( position );
+			// offset を引いて Entity の位置を算出
+			Vector rotated_offset = Vector::transform( rigid_body->offset, rotation );
+			transform->transform.set_position( position - rotated_offset );
 			transform->transform.set_rotation( rotation );
 		}
 	}

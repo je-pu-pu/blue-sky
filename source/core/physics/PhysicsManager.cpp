@@ -130,10 +130,9 @@ RigidBodyHandle PhysicsManager::create_rigid_body( const RigidBodyCreateInfo& in
 
 	// Transform を btTransform に変換
 	btTransform bt_transform = info.transform;
-	btTransform bt_offset = info.offset;
 
 	// MotionState を生成
-	handle.motion_state = new btDefaultMotionState( bt_transform * bt_offset );
+	handle.motion_state = new btDefaultMotionState( bt_transform );
 
 	// RigidBody を生成
 	btRigidBody::btRigidBodyConstructionInfo rigid_body_info(

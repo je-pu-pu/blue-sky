@@ -1015,7 +1015,6 @@
     <None Include="media\script\scene\canvas_test.lua">
       <Filter>media\script\scene</Filter>
     </None>
-    <None Include="packages.config" />
     <None Include="media\shader\common_texture.hlsl">
       <Filter>media\shader</Filter>
     </None>
@@ -1031,6 +1030,7 @@
     <None Include="media\shader\point_sprite.hlsl">
       <Filter>media\shader</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Scene">

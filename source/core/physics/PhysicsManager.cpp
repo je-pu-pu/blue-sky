@@ -142,7 +142,12 @@ RigidBodyHandle PhysicsManager::create_rigid_body( const RigidBodyCreateInfo& in
 		local_inertia
 	);
 
+	// rigid_body_info.m_friction = 0.01f;
+	// rigid_body_info.m_restitution = 0.5f;
+
 	handle.rigid_body = new btRigidBody( rigid_body_info );
+	handle.rigid_body->setFriction( 0.1f );
+	// handle.rigid_body->setActivationState( DISABLE_DEACTIVATION );
 
 	// dynamics_world に登録
 	impl_->dynamics_world->addRigidBody( handle.rigid_body );

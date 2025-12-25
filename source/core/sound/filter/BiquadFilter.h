@@ -85,7 +85,7 @@ public:
 
     }
 
-    float process( ChannelState& channel_state, float x0 ) const
+    float process( ChannelState& channel_state, const float x0 ) const
     {
         float y0 = b0 * x0 + b1 * channel_state.x1 + b2 * channel_state.x2 - a1 * channel_state.y1 - a2 * channel_state.y2;
 
@@ -94,7 +94,7 @@ public:
         channel_state.y2 = channel_state.y1;
         channel_state.y1 = y0;
 
-        return y0;
+        return mix( x0, y0 );
     }
 
 private:

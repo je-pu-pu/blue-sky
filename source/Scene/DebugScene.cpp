@@ -64,7 +64,7 @@ DebugScene::DebugScene()
 
 	// midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/opening-of-the-day.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
 	// midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/gun.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
-	midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/takarajima.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
+	midi_sequencer = std::make_unique< core::sound::MidiSequencer >( "media/music/gun.mid", get_sound_manager()->get_sound_engine()->get_midi_synthesizer() );
 
 	/*
 	midi_sequencer->set_beat_handler( [ this ]( int beat ) {
@@ -128,7 +128,9 @@ void DebugScene::update()
 
 	}
 
-	filter->setCutoff( camera_->position().xz().length() * 300.f );
+	// filter->setCutoff( camera_->position().xz().length() * 300.f );
+	filter->set_mix( camera_->position().xz().length() * 0.05f );
+
 	midi_sequencer->set_bpm( std::abs( camera_->position().y() ) * 10.f );
 
 	// tess test

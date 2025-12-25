@@ -15,9 +15,9 @@ private:
 
 	inline com_ptr& operator = ( T* ptr )
 	{
-		DIREXT_X_RELEASE( ptr_ );
+		DIRECT_X_RELEASE( ptr_ );
 		ptr_ = ptr;
-		DIREXT_X_ADD_REF( ptr_ );
+		DIRECT_X_ADD_REF( ptr_ );
 
 		return *this;
 	}
@@ -25,7 +25,7 @@ private:
 	{
 		DIRECT_X_RELEASE( ptr_ );
 		ptr_ = ptr.ptr_;
-		DIREXT_X_ADD_REF( ptr_ );
+		DIRECT_X_ADD_REF( ptr_ );
 
 		return *this;
 	}

@@ -142,6 +142,7 @@ RigidBodyHandle PhysicsManager::create_rigid_body( const RigidBodyCreateInfo& in
 		local_inertia
 	);
 
+	/// @todo 摩擦係数などをコントロールできるようにする
 	// rigid_body_info.m_friction = 0.01f;
 	// rigid_body_info.m_restitution = 0.5f;
 

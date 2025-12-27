@@ -273,7 +273,7 @@ bool FbxFileLoader::load( const char_t* file_name )
 	std::cout << "*** FBX ***" << std::endl;
 	print_axis_system( fbx_scene_->GetGlobalSettings().GetAxisSystem() );
 
-	// FbxAxisSystem::DirectX.ConvertScene( fbx_scene_ );
+	FbxAxisSystem::DirectX.ConvertScene( fbx_scene_ );
 
 	std::cout << "*** Converted FBX ***" << std::endl;
 	print_axis_system( fbx_scene_->GetGlobalSettings().GetAxisSystem() );

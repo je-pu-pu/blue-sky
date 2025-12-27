@@ -327,6 +327,9 @@
     <ClCompile Include="core\physics\PhysicsManager.cpp">
       <Filter>core\physics</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\MusicGamePrototypeScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -872,6 +875,9 @@
     </ClInclude>
     <ClInclude Include="core\physics\PhysicsManager.h">
       <Filter>core\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\MusicGamePrototypeScene.h">
+      <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

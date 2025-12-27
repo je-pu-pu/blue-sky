@@ -122,6 +122,7 @@
     <ClCompile Include="Scene\EndingScene.cpp" />
     <ClCompile Include="Scene\GamePlayScene.cpp" />
     <ClCompile Include="Scene\GeometryShaderCanvasTestScene.cpp" />
+    <ClCompile Include="Scene\MusicGamePrototypeScene.cpp" />
     <ClCompile Include="Scene\ParticleSystemTestScene.cpp" />
     <ClCompile Include="Scene\PhysicsTestScene.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
@@ -310,6 +311,7 @@
     <ClInclude Include="Scene\EndingScene.h" />
     <ClInclude Include="Scene\GamePlayScene.h" />
     <ClInclude Include="Scene\GeometryShaderCanvasTestScene.h" />
+    <ClInclude Include="Scene\MusicGamePrototypeScene.h" />
     <ClInclude Include="Scene\ParticleSystemTestScene.h" />
     <ClInclude Include="Scene\PhysicsTestScene.h" />
     <ClInclude Include="Scene\Scene.h" />

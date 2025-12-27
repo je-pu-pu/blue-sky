@@ -13,6 +13,7 @@
 #include <Scene/GeometryShaderCanvasTestScene.h>
 
 #include <Scene/PhysicsTestScene.h>
+#include <Scene/MusicGamePrototypeScene.h>
 
 #include <blue_sky/GameMain.h>
 
@@ -44,6 +45,7 @@ void SceneManager::register_all_scene()
 	register_scene< GeometryShaderCanvasTestScene >();
 
 	register_scene< PhysicsTestScene >();
+	register_scene< MusicGamePrototypeScene >();
 }
 
 } // namespace blue_sky

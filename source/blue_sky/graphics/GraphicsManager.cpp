@@ -117,10 +117,13 @@ bool_t GraphicsManager::load_mesh( Model* model, const char_t* name )
 		FbxFileLoader loader( model, name );
 		mesh_loaded = loader.load( ( file_path + ".fbx" ).c_str() );
 
+		/// Blender 5 系でエクスポートした FBX はもともとバイナリ形式なので変換しない
+#if false
 		if ( mesh_loaded )
 		{
 			loader.save_fbx( ( file_path + ".bin.fbx" ).c_str() );
 		}
+#endif
 	}
 
 	if ( ! mesh_loaded && boost::filesystem::exists( file_path + ".obj" ) )

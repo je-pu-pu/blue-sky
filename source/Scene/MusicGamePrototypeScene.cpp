@@ -61,6 +61,24 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 		m->model = get_graphics_manager()->load_model( "ground" );
 	}
 
+	Model* models[ 2 ] = {
+		get_graphics_manager()->load_model( "building-red" ),
+		get_graphics_manager()->load_model( "building-white" ),
+	};
+
+	/// @todo もっとスマートにやる
+	// シェーダーを設定 ( flat から lit に変更 )
+	for ( auto* m : models )
+	{
+		for ( size_t n = 0; n < m->get_shader_count(); n++ )
+		{
+			auto* shader = get_graphics_manager()->get_shader( "lit" )->clone();
+			shader->set_texture_at( 0, m->get_shader_at( n )->get_texture_at( 0 ) );
+
+			m->set_shader_at( n, shader );
+		}
+	}
+
 	// 建物をランダムに配置
 	for ( int z = 0; z < 30; z++ )
 	{
@@ -74,19 +92,11 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 			auto* e = get_entity_manager()->create_entity();
 			auto* t = e->add_component< core::ecs::TransformComponent >();
 			t->transform.set_identity();
-			t->transform.set_position( Vector( x * 12.f, common::random( -80.f, 0.f ), z * 12.f ) );
+			t->transform.set_position( Vector( x * 12.f, common::random( -8, 0 ) * 10.f, z * 12.f ) );
 
 			e->add_component< core::ecs::RenderComponent >();
 			auto* m = e->add_component< core::ecs::ModelComponent>();
-
-			if ( common::random( 0, 1 ) == 0 )
-			{
-				m->model = get_graphics_manager()->load_model( "building-red" );
-			}
-			else 
-			{
-				m->model = get_graphics_manager()->load_model( "building-white" );
-			}
+			m->model = models[ common::random( 0, 1 ) ];
 		}
 	}
 }

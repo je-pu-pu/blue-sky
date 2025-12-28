@@ -555,6 +555,7 @@ technique11 line_cube
 }
 
 #include "flat.hlsl"
+#include "lit.hlsl"
 
 #include "tessellation.hlsl"
 #include "shadow_map.hlsl"

@@ -158,6 +158,7 @@
     <ClInclude Include="blue_sky\graphics\shader\Flat2DShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\FlatShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\GroundShader.h" />
+    <ClInclude Include="blue_sky\graphics\shader\LitShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\PointSpriteShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\post_effect\NoiseShader.h" />
     <ClInclude Include="blue_sky\graphics\shader\MatcapShader.h" />
@@ -503,6 +504,11 @@
     <None Include="media\shader\point_sprite.hlsl">
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="media\shader\lit.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5DB1FAFC-E068-43A8-84D3-0DA42D464BE5}</ProjectGuid>

@@ -74,11 +74,19 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 			auto* e = get_entity_manager()->create_entity();
 			auto* t = e->add_component< core::ecs::TransformComponent >();
 			t->transform.set_identity();
-			t->transform.set_position( Vector( x * 12.f, 0.f, z * 12.f ) );
+			t->transform.set_position( Vector( x * 12.f, common::random( -80.f, 0.f ), z * 12.f ) );
 
 			e->add_component< core::ecs::RenderComponent >();
 			auto* m = e->add_component< core::ecs::ModelComponent>();
-			m->model = get_graphics_manager()->load_model( "building-white" );
+
+			if ( common::random( 0, 1 ) == 0 )
+			{
+				m->model = get_graphics_manager()->load_model( "building-red" );
+			}
+			else 
+			{
+				m->model = get_graphics_manager()->load_model( "building-white" );
+			}
 		}
 	}
 }

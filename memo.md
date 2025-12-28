@@ -2363,3 +2363,12 @@ DOS Batch                             1              0              0           
 SUM:                                414          10814           9949          41171
 ------------------------------------------------------------------------------------
 ```
+
+# 2025-12-28
+
+## core レイヤーが blue_sky レイヤーを参照しなくてよい方法
+
+```c++
+Game::get_instance()->get_graphics_manager()->xxx();
+Game::get_instance()->get_physics_manager()->xxx();
+```

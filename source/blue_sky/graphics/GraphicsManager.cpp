@@ -476,7 +476,7 @@ void GraphicsManager::setup_rendering()
 	get_frame_render_data()->data().projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_component->fov ), aspect, camera_component->near_clip, camera_component->far_clip );
 	
 	/// @todo ちゃんとやる ( ECS 化？ set_light_info() ? )
-	get_frame_render_data()->data().light = Vector( -1.f, -2.f, 0.f, 0.f ).normalize();
+	get_frame_render_data()->data().light = Vector( -1.f, -2.f, 0.5f, 0.f ).normalize();
 
 	/// @todo ここでやるべき？
 	get_frame_render_data()->data().time = GameMain::get_instance()->get_current_scene()->get_total_elapsed_time();

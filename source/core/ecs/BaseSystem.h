@@ -4,18 +4,6 @@
 #include <boost/noncopyable.hpp>
 #include <typeinfo>
 
-/// @todo きれいにする
-namespace core::graphics
-{
-	class GraphicsManager;
-}
-
-/// @todo きれいにする
-namespace blue_sky
-{
-	class Scene;
-}
-
 namespace core::ecs
 {
 
@@ -28,10 +16,6 @@ class Component;
  */
 class BaseSystem : private boost::noncopyable
 {
-public:
-	using GraphicsManager = core::graphics::GraphicsManager;
-	using Scene = blue_sky::Scene; /// @todo core に移動する
-
 private:
 	/// システムの実行優先度 ( priority_ が小さい順に実行される )
 	int_t priority_ = 0;
@@ -39,9 +23,6 @@ private:
 protected:
 	virtual bool has_component_type( ComponentTypeId ) const = 0;
 	virtual void remove_entity_component( const Entity* ) = 0;
-
-	GraphicsManager* get_graphics_manager();
-	const Scene* get_current_scene() const;
 
 public:
 	BaseSystem() = default;

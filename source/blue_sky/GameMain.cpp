@@ -58,8 +58,7 @@ namespace blue_sky
 
 //■コンストラクタ
 GameMain::GameMain()
-	: total_elapsed_time_( 0.f )
-	, is_display_fps_( false )
+	: is_display_fps_( false )
 	, is_command_mode_( false )
 	, is_show_cursor_( false )
 	, user_command_( 1024, '\0' )
@@ -155,6 +154,7 @@ GameMain::GameMain()
 	core::Service::get_instance()->set_sound_manager( sound_manager_.get() );
 	core::Service::get_instance()->set_input_manager( input_.get() );
 	core::Service::get_instance()->set_physics_manager( physics_manager_.get() );
+	core::Service::get_instance()->set_time_manager( &time_manager_ );
 
 	script_manager_.reset( new ScriptManager() );
 	script_manager_->load_command_history( "log/script.log" );
@@ -308,7 +308,7 @@ bool GameMain::update()
 		return false;
 	}
 
-	total_elapsed_time_ += main_loop_->get_elapsed_sec();
+	time_manager_.update( main_loop_->get_elapsed_sec() );
 
 	/// @todo 別スレッド化
 	get_sound_manager()->update();
@@ -722,11 +722,6 @@ void GameMain::setup_scene( const string_t& scene_name )
 	scene_->set_next_stage_name( get_stage_name() );
 
 	get_app()->clip_cursor( scene_->is_clip_cursor_required() );
-}
-
-float_t GameMain::get_elapsed_time() const
-{
-	return get_main_loop()->get_elapsed_sec();
 }
 
 } // namespace blue_sky

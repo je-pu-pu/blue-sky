@@ -1,6 +1,7 @@
 #include "ParticleRenderSystem.h"
 #include <blue_sky/graphics/shader/PointSpriteShader.h> /// @todo core に移動
 #include <blue_sky/ConstantBuffers.h> /// @todo core に移動
+#include <core/Service.h>
 #include <core/graphics/VertexBuffer.h>
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>

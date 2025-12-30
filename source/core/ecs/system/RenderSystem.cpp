@@ -1,7 +1,7 @@
 #include "RenderSystem.h"
 #include <blue_sky/ConstantBuffers.h> /// @todo core から blue_sky を参照しているのは変なので、基本的な ConstantBuffer は core に移す
-#include <blue_sky/graphics/Model.h> /// @todo core::graphics::Model に仮想関数を追加して解消する
-#include <Scene/Scene.h> /// @todo Service に時間情報を追加して解消する
+#include <core/Service.h>
+#include <core/TimeManager.h>
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Model.h>
 #include <core/graphics/Shader.h>
@@ -26,7 +26,7 @@ RenderSystem::RenderSystem()
 void RenderSystem::update()
 {
 	auto noise_shader = get_graphics_manager()->get_shader( "post_effect_noise" );
-	noise_shader->set_float( "offset", get_current_scene()->get_total_elapsed_time() );
+	noise_shader->set_float( "offset", core::get_time_manager()->get_total_elapsed_time() );
 
 	get_graphics_manager()->setup_rendering();
 
@@ -86,14 +86,11 @@ void RenderSystem::update()
 	auto* instanced_shader = get_graphics_manager()->get_shader( "lit_instanced" );
 
 	// 各モデルグループを描画
-	for ( auto& [ base_model, matrices ] : model_instances )
+	for ( auto& [ model, matrices ] : model_instances )
 	{
 		if ( matrices.empty() ) continue;
 
 		const size_t instance_count = matrices.size();
-
-		// blue_sky::graphics::Model にキャスト (render_instanced などを呼ぶため)
-		auto* model = static_cast< blue_sky::graphics::Model* >( base_model );
 
 		if ( instancing_enabled_ && instance_count > 1 && instanced_shader )
 		{

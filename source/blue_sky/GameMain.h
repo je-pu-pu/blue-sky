@@ -2,6 +2,7 @@
 
 
 #include "App.h"
+#include "TimeManager.h"
 
 #include <game/Game.h>
 
@@ -107,7 +108,7 @@ public:
 	};
 
 private:
-	float									total_elapsed_time_;	///< ゲームが開始してからの経過時間 ( 秒 )
+	TimeManager								time_manager_;			///< 時間管理
 
 	std::unique_ptr< Direct3D >				direct_3d_;				///< Direct3D
 
@@ -170,8 +171,8 @@ public:
 	void on_mouse_wheel( int ) override;
 	void on_resize() override;
 
-	float_t get_total_elapsed_time() const { return total_elapsed_time_; }
-	float_t get_elapsed_time() const;
+	float_t get_total_elapsed_time() const { return time_manager_.get_total_elapsed_time(); }
+	float_t get_elapsed_time() const { return time_manager_.get_elapsed_time(); }
 
 	/// @todo GraphicsManager に移行して削除する
 	Direct3D* get_direct_3d() const { return direct_3d_.get(); } 

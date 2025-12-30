@@ -42,7 +42,6 @@
     <ClCompile Include="blue_sky\SceneManager.cpp" />
     <ClCompile Include="blue_sky\ScriptManager.cpp" />
     <ClCompile Include="core\animation\AnimationPlayer.cpp" />
-    <ClCompile Include="core\ecs\BaseSystem.cpp" />
     <ClCompile Include="core\ecs\Component.cpp" />
     <ClCompile Include="core\ecs\Entity.cpp" />
     <ClCompile Include="core\ecs\System.cpp" />
@@ -140,6 +139,7 @@
     <ClInclude Include="blue_sky\CityGenerator.h" />
     <ClInclude Include="blue_sky\DelayedCommand.h" />
     <ClInclude Include="blue_sky\GameMain.h" />
+    <ClInclude Include="blue_sky\TimeManager.h" />
     <ClInclude Include="blue_sky\graphics\BaseFileLoader.h" />
     <ClInclude Include="blue_sky\graphics\Direct3D11\GraphicsManager.h" />
     <ClInclude Include="blue_sky\graphics\Direct3D11\Line.h" />
@@ -186,6 +186,7 @@
     <ClInclude Include="core\animation\SkinningAnimationSet.h" />
     <ClInclude Include="core\DirectX.h" />
     <ClInclude Include="core\Service.h" />
+    <ClInclude Include="core\TimeManager.h" />
     <ClInclude Include="core\ecs\BaseSystem.h" />
     <ClInclude Include="core\ecs\Component.h" />
     <ClInclude Include="core\ecs\component\CameraComponent.h" />

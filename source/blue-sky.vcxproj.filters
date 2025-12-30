@@ -221,9 +221,6 @@
     <ClCompile Include="core\ecs\System.cpp">
       <Filter>core\ecs</Filter>
     </ClCompile>
-    <ClCompile Include="core\ecs\BaseSystem.cpp">
-      <Filter>core\ecs</Filter>
-    </ClCompile>
     <ClCompile Include="blue_sky\ScriptManager.cpp">
       <Filter>blue_sky</Filter>
     </ClCompile>
@@ -906,6 +903,12 @@
       <Filter>core\math\DirectXMath</Filter>
     </ClInclude>
     <ClInclude Include="core\Service.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\TimeManager.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="core\TimeManager.h">
       <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>

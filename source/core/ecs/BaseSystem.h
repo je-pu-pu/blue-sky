@@ -2,6 +2,7 @@
 
 #include "type.h"
 #include <boost/noncopyable.hpp>
+#include <typeinfo>
 
 /// @todo きれいにする
 namespace core::graphics
@@ -50,10 +51,15 @@ public:
 
 	/**
 	 * このシステムの実行優先度を取得する
-	 * 
+	 *
 	 * @return システムの実行優先度 ( 数値が小さい順に実行される )
 	 */
 	int_t get_priority() const { return priority_; }
+
+	/**
+	 * このシステムの名前を取得する (デバッグ用)
+	 */
+	virtual const char* get_name() const { return typeid( *this ).name(); }
 
 	/**
 	 * このシステムの実行優先度を設定する

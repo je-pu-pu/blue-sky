@@ -51,6 +51,7 @@ public:
 
 	void bind() const override;
 	void render( uint_t ) const override;
+	void render_instanced( uint_t n, uint_t instance_count ) const override;
 
 }; // class MeshBuffer
 

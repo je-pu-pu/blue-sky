@@ -4,6 +4,8 @@
 #include <core/math/Transform.h>
 #include <core/math/Quaternion.h>
 #include <common/Singleton.h>
+#include <vector>
+#include <functional>
 
 class btDynamicsWorld;
 class btIDebugDraw;
@@ -26,6 +28,17 @@ enum class RigidBodyShapeType
 };
 
 /**
+ * 衝突グループ (ビットフラグ)
+ */
+namespace CollisionGroup
+{
+	constexpr short Default  = 1 << 0;  // 地面、建物など
+	constexpr short Player   = 1 << 1;  // プレイヤー
+	constexpr short Balloon  = 1 << 2;  // 風船
+	constexpr short All      = 0x7FFF;  // 全て
+}
+
+/**
  * 剛体の生成パラメータ
  */
 struct RigidBodyCreateInfo
@@ -37,6 +50,9 @@ struct RigidBodyCreateInfo
 	Vector shape_size = Vector( 0.5f, 0.5f, 0.5f );
 	float mass = 1.f;
 	Transform transform;
+
+	short collision_group = CollisionGroup::Default;  // 自身の衝突グループ
+	short collision_mask = CollisionGroup::All;       // 衝突対象のマスク
 };
 
 /**
@@ -49,6 +65,7 @@ struct RigidBodyHandle
 	btRigidBody* rigid_body = nullptr;
 	btCollisionShape* collision_shape = nullptr;
 	btMotionState* motion_state = nullptr;
+	void* user_pointer = nullptr;  // Entity へのポインタなど
 
 	bool is_valid() const { return rigid_body != nullptr; }
 };
@@ -170,6 +187,23 @@ public:
 	 * @return ヒットした場合 true
 	 */
 	bool ray_test_excluding( const Vector& from, const Vector& to, const RigidBodyHandle& exclude ) const;
+
+	/**
+	 * 2つの剛体が接触しているかを調べる
+	 * @param a 剛体A
+	 * @param b 剛体B
+	 * @return 接触している場合 true
+	 */
+	bool check_contact( const RigidBodyHandle& a, const RigidBodyHandle& b ) const;
+
+	/**
+	 * 指定した衝突グループ間の全ての衝突を処理する
+	 * @param group_a 衝突グループA
+	 * @param group_b 衝突グループB
+	 * @param callback 衝突時に呼ばれるコールバック (user_pointer_a, user_pointer_b)
+	 */
+	void for_each_contact( short group_a, short group_b,
+		const std::function< void( void*, void* ) >& callback ) const;
 
 }; // class PhysicsManager
 

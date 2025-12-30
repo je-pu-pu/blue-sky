@@ -12,6 +12,7 @@
 #include <blue_sky/graphics/shader/NullShader.h>
 #include <blue_sky/graphics/shader/FlatShader.h>
 #include <blue_sky/graphics/shader/LitShader.h>
+#include <blue_sky/graphics/shader/LitInstancedShader.h>
 #include <blue_sky/graphics/shader/FaderShader.h>
 #include <blue_sky/graphics/shader/MatcapShader.h>
 #include <blue_sky/graphics/shader/ShadowMapShader.h>
@@ -317,6 +318,7 @@ void GraphicsManager::setup_default_shaders()
 	create_named_shader< shader::FlatShader >( "flat", "main", "flat" );
 	create_named_shader< shader::FlatShader >( "flat_skin", "skin", "flat_skin" );
 	create_named_shader< shader::LitShader >( "lit", "main", "lit" );
+	create_named_shader< shader::LitInstancedShader >( "lit_instanced", "main", "lit_instanced" );
 	create_named_shader< shader::MatcapShader >( "matcap", "main", "matcap" )->set_texture( matcap_texture );
 	create_named_shader< shader::MatcapShader >( "matcap_skin", "skin", "matcap_skin" )->set_texture( matcap_texture );
 	create_named_shader< shader::ShadowMapShader >( "shadow_map" );

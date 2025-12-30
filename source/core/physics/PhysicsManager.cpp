@@ -150,8 +150,11 @@ RigidBodyHandle PhysicsManager::create_rigid_body( const RigidBodyCreateInfo& in
 	handle.rigid_body->setFriction( 0.1f );
 	// handle.rigid_body->setActivationState( DISABLE_DEACTIVATION );
 
-	// dynamics_world に登録
-	impl_->dynamics_world->addRigidBody( handle.rigid_body );
+	// user_pointer を設定
+	handle.rigid_body->setUserPointer( nullptr );
+
+	// dynamics_world に登録 (衝突グループ/マスク付き)
+	impl_->dynamics_world->addRigidBody( handle.rigid_body, info.collision_group, info.collision_mask );
 
 	return handle;
 }
@@ -326,6 +329,82 @@ bool PhysicsManager::ray_test_excluding( const Vector& from, const Vector& to, c
 	}
 
 	return ray_callback.hasHit();
+}
+
+bool PhysicsManager::check_contact( const RigidBodyHandle& a, const RigidBodyHandle& b ) const
+{
+	if ( ! a.is_valid() || ! b.is_valid() )
+	{
+		return false;
+	}
+
+	// 全てのコンタクトマニフォールドを走査
+	const int num_manifolds = impl_->dynamics_world->getDispatcher()->getNumManifolds();
+
+	for ( int i = 0; i < num_manifolds; i++ )
+	{
+		btPersistentManifold* manifold = impl_->dynamics_world->getDispatcher()->getManifoldByIndexInternal( i );
+
+		const btCollisionObject* body0 = manifold->getBody0();
+		const btCollisionObject* body1 = manifold->getBody1();
+
+		// a と b のペアかどうかを確認
+		bool is_pair = ( body0 == a.rigid_body && body1 == b.rigid_body ) ||
+		               ( body0 == b.rigid_body && body1 == a.rigid_body );
+
+		if ( is_pair && manifold->getNumContacts() > 0 )
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void PhysicsManager::for_each_contact( short group_a, short group_b,
+	const std::function< void( void*, void* ) >& callback ) const
+{
+	const int num_manifolds = impl_->dynamics_world->getDispatcher()->getNumManifolds();
+
+	for ( int i = 0; i < num_manifolds; i++ )
+	{
+		btPersistentManifold* manifold = impl_->dynamics_world->getDispatcher()->getManifoldByIndexInternal( i );
+
+		if ( manifold->getNumContacts() == 0 )
+		{
+			continue;
+		}
+
+		const btCollisionObject* body0 = manifold->getBody0();
+		const btCollisionObject* body1 = manifold->getBody1();
+
+		const short group0 = static_cast< short >( body0->getBroadphaseHandle()->m_collisionFilterGroup );
+		const short group1 = static_cast< short >( body1->getBroadphaseHandle()->m_collisionFilterGroup );
+
+		// group_a と group_b のペアかどうかを確認
+		void* ptr_a = nullptr;
+		void* ptr_b = nullptr;
+
+		if ( ( group0 & group_a ) && ( group1 & group_b ) )
+		{
+			ptr_a = body0->getUserPointer();
+			ptr_b = body1->getUserPointer();
+		}
+		else if ( ( group0 & group_b ) && ( group1 & group_a ) )
+		{
+			ptr_a = body1->getUserPointer();
+			ptr_b = body0->getUserPointer();
+		}
+		else
+		{
+			continue;
+		}
+
+		if ( ptr_a && ptr_b )
+		{
+			callback( ptr_a, ptr_b );
+		}
+	}
 }
 
 } // namespace core::physics

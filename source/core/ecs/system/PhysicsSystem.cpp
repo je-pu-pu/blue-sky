@@ -30,6 +30,8 @@ void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, Trans
 	info.shape_type = rigid_body->shape_type;
 	info.shape_size = rigid_body->shape_size;
 	info.mass = rigid_body->mass;
+	info.collision_group = rigid_body->collision_group;
+	info.collision_mask = rigid_body->collision_mask;
 
 	// offset を適用した transform を設定
 	info.transform = transform->transform;
@@ -44,6 +46,10 @@ void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, Trans
 	{
 		physics_manager->set_rigid_body_angular_factor( rigid_body->handle, rigid_body->angular_factor );
 		rigid_body->handle.rigid_body->setFriction( rigid_body->friction );
+
+		// user_pointer に RigidBodyComponent へのポインタを設定
+		rigid_body->handle.user_pointer = rigid_body;
+		rigid_body->handle.rigid_body->setUserPointer( rigid_body );
 	}
 }
 

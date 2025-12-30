@@ -1,11 +1,16 @@
 #include "RenderSystem.h"
 #include <blue_sky/ConstantBuffers.h> /// @todo core から blue_sky を参照しているのは変なので、基本的な ConstatntBuffer は core に移す
+#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/Model.h>
+#include <blue_sky/graphics/shader/LitInstancedShader.h>
 #include <Scene/Scene.h>
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Model.h>
 #include <core/graphics/RenderTargetTexture.h>
 
 #include <common/math.h>
+
+#include <unordered_map>
 
 namespace core::ecs
 {
@@ -14,6 +19,7 @@ RenderSystem::RenderSystem()
 	// : render_result_texture_1_( get_graphics_manager()->create_render_target_texture( core::graphics::PixelFormat::R8_UINT ) )
 	: render_result_texture_1_( get_graphics_manager()->create_render_target_texture() )
 	, render_result_texture_2_( get_graphics_manager()->create_render_target_texture() )
+	, instance_buffer_( std::make_unique< core::graphics::direct_3d_11::InstanceBuffer >() )
 {
 	//
 }
@@ -35,24 +41,102 @@ void RenderSystem::update()
 
 	get_graphics_manager()->render_background();
 
+	// カメラ位置を取得してカリングに使用
+	auto* bs_graphics_manager = static_cast< blue_sky::graphics::GraphicsManager* >( get_graphics_manager() );
+	Vector camera_position( 0.f, 0.f, 0.f );
+	Vector camera_forward( 0.f, 0.f, 1.f );
+
+	if ( bs_graphics_manager )
+	{
+		camera_position = bs_graphics_manager->get_camera_position();
+		camera_forward = bs_graphics_manager->get_camera_forward();
+	}
+
+	const float culling_distance_sq = culling_distance_ * culling_distance_;
+
+	// モデルごとにインスタンスをグループ化
+	using ModelType = core::graphics::Model;
+	std::unordered_map< ModelType*, std::vector< Matrix > > model_instances;
+
 	for ( auto& i : get_component_list() )
 	{
 		auto* transform = std::get< TransformComponent* >( i.second );
-		auto* model = std::get< ModelComponent* >( i.second );
+		auto* model_component = std::get< ModelComponent* >( i.second );
 
-		/// @todo 毎回定数バッファを確保しているのでやめる
-		/// Transform を Shader に update する
-		blue_sky::ObjectConstantBufferWithData shader_data;
+		// 距離カリング
+		const Vector& entity_pos = transform->transform.get_position();
+		const Vector to_entity = entity_pos - camera_position;
+		const float distance_sq = to_entity.x() * to_entity.x() + to_entity.y() * to_entity.y() + to_entity.z() * to_entity.z();
 
-		shader_data.data().world.set_identity();
-		shader_data.data().world *= Matrix().set_rotation_quaternion( transform->transform.get_rotation() );
-		shader_data.data().world *= Matrix().set_translation( transform->transform.get_position() );
+		if ( distance_sq > culling_distance_sq )
+		{
+			continue; // カリング距離を超えているのでスキップ
+		}
 
-		shader_data.update();
+		// 背面カリング (カメラの後ろにあるオブジェクトをスキップ)
+		const float dot = to_entity.x() * camera_forward.x() + to_entity.y() * camera_forward.y() + to_entity.z() * camera_forward.z();
+		if ( dot < -50.f ) // 少し余裕を持たせる (50m 後ろまでは描画)
+		{
+			continue;
+		}
 
-		get_graphics_manager()->set_current_object_constant_buffer( & shader_data );
-		get_graphics_manager()->set_current_skinning_constant_buffer( nullptr );
-		model->model->render();
+		// ワールド行列を計算
+		Matrix world;
+		world.set_identity();
+		world *= Matrix().set_rotation_quaternion( transform->transform.get_rotation() );
+		world *= Matrix().set_translation( transform->transform.get_position() );
+
+		// モデルごとにグループ化
+		model_instances[ model_component->model ].push_back( world );
+	}
+
+	// インスタンシングシェーダーを取得
+	auto* instanced_shader = static_cast< blue_sky::graphics::shader::LitInstancedShader* >(
+		get_graphics_manager()->get_shader( "lit_instanced" ) );
+
+	// 各モデルグループを描画
+	for ( auto& [ base_model, matrices ] : model_instances )
+	{
+		if ( matrices.empty() ) continue;
+
+		const size_t instance_count = matrices.size();
+
+		// blue_sky::graphics::Model にキャスト (render_instanced などを呼ぶため)
+		auto* model = static_cast< blue_sky::graphics::Model* >( base_model );
+
+		if ( instancing_enabled_ && instance_count > 1 && instanced_shader )
+		{
+			// インスタンシング描画
+			instance_buffer_->update( matrices.data(), instance_count );
+
+			for ( uint_t n = 0; n < model->get_shader_count(); n++ )
+			{
+				auto* shader = model->get_shader_at( n );
+
+				// テクスチャをバインド
+				if ( shader->get_texture_at( 0 ) )
+				{
+					instanced_shader->set_texture( shader->get_texture_at( 0 ) );
+				}
+
+				// インスタンシングシェーダーを使用して描画
+				instanced_shader->render_instanced( model->get_mesh(), n, static_cast< uint_t >( instance_count ), instance_buffer_.get() );
+			}
+		}
+		else
+		{
+			// 通常描画 (1インスタンスずつ)
+			for ( const auto& world : matrices )
+			{
+				blue_sky::ObjectConstantBufferWithData shader_data;
+				shader_data.data().world = world;
+				shader_data.update();
+
+				get_graphics_manager()->set_current_object_constant_buffer( & shader_data );
+				get_graphics_manager()->set_current_skinning_constant_buffer( nullptr );
+				model->render();
+			}
+		}
 	}
 
 	core::graphics::Shader* beat_pulse_shader = nullptr;

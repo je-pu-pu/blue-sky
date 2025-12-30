@@ -333,6 +333,9 @@
     <ClCompile Include="Scene\MusicGamePrototypeScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="core\ecs\system\BalloonSystem.cpp">
+      <Filter>core\ecs\system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -891,6 +894,12 @@
     <ClInclude Include="blue_sky\graphics\shader\LitShader.h">
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
+    <ClInclude Include="core\ecs\system\BalloonSystem.h">
+      <Filter>core\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\component\BalloonComponent.h">
+      <Filter>core\ecs\component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -1049,6 +1058,15 @@
       <Filter>media\shader</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="media\shader\lit.hlsl">
+      <Filter>media\shader</Filter>
+    </None>
+    <None Include="media\shader\lit_instanced.hlsl">
+      <Filter>media\shader</Filter>
+    </None>
+    <None Include="media\shader\flat_instanced.hlsl">
+      <Filter>media\shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Scene">
@@ -1159,10 +1177,5 @@
     <Filter Include="core\physics\Bullet">
       <UniqueIdentifier>{b0f122bc-1ef3-4d7f-9dca-f528879b0c06}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="media\shader\lit.hlsl">
-      <Filter>media\shader</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>

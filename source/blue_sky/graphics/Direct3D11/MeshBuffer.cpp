@@ -146,7 +146,21 @@ void MeshBuffer::render( uint_t n ) const
 {
 	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_list_[ n ].get(), IndexBufferFormat, 0 );
 	direct_3d_->getImmediateContext()->DrawIndexed( get_index_count_list()[ n ], 0, 0 );
-	
+
+	GameMain::get_instance()->get_graphics_manager()->count_draw();
+}
+
+/**
+ * インスタンシングを使用してメッシュを描画する
+ *
+ * @param n 描画する頂点グループのインデックス
+ * @param instance_count インスタンス数
+ */
+void MeshBuffer::render_instanced( uint_t n, uint_t instance_count ) const
+{
+	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_list_[ n ].get(), IndexBufferFormat, 0 );
+	direct_3d_->getImmediateContext()->DrawIndexedInstanced( get_index_count_list()[ n ], instance_count, 0, 0, 0 );
+
 	GameMain::get_instance()->get_graphics_manager()->count_draw();
 }
 

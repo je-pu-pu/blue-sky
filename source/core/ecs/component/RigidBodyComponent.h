@@ -37,6 +37,12 @@ struct RigidBodyComponent : public Component
 	/// 摩擦係数
 	float friction = 0.5f;
 
+	/// 衝突グループ (自身が属するグループ)
+	short collision_group = core::physics::CollisionGroup::Default;
+
+	/// 衝突マスク (衝突対象のグループ)
+	short collision_mask = core::physics::CollisionGroup::All;
+
 	/// 剛体ハンドル (PhysicsSystem によって設定される)
 	RigidBodyHandle handle;
 

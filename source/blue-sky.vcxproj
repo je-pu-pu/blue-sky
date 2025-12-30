@@ -48,6 +48,7 @@
     <ClCompile Include="core\ecs\System.cpp" />
     <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp" />
     <ClCompile Include="core\ecs\system\FpsPlayerControlSystem.cpp" />
+    <ClCompile Include="core\ecs\system\BalloonSystem.cpp" />
     <ClCompile Include="core\ecs\system\ParticleSystem.cpp" />
     <ClCompile Include="core\ecs\system\PhysicsSystem.cpp" />
     <ClCompile Include="core\ecs\system\RenderSystem.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="core\ecs\Component.h" />
     <ClInclude Include="core\ecs\component\CameraComponent.h" />
     <ClInclude Include="core\ecs\component\FpsPlayerComponent.h" />
+    <ClInclude Include="core\ecs\component\BalloonComponent.h" />
     <ClInclude Include="core\ecs\component\ModelComponent.h" />
     <ClInclude Include="core\ecs\component\ParticleSystemComponent.h" />
     <ClInclude Include="core\ecs\component\RenderComponent.h" />
@@ -197,6 +199,7 @@
     <ClInclude Include="core\ecs\Entity.h" />
     <ClInclude Include="core\ecs\System.h" />
     <ClInclude Include="core\ecs\system\FpsPlayerControlSystem.h" />
+    <ClInclude Include="core\ecs\system\BalloonSystem.h" />
     <ClInclude Include="core\ecs\system\ParticleRenderSystem.h" />
     <ClInclude Include="core\ecs\system\ParticleSystem.h" />
     <ClInclude Include="core\ecs\system\PhysicsSystem.h" />
@@ -509,12 +512,25 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="media\shader\lit.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
+    <None Include="media\shader\lit.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="media\shader\lit_instanced.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="media\shader\flat_instanced.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5DB1FAFC-E068-43A8-84D3-0DA42D464BE5}</ProjectGuid>

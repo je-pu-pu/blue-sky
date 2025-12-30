@@ -11,6 +11,9 @@
 #include <core/graphics/PrimitiveTopology.h>
 #include <core/graphics/Mesh.h>
 
+#include <core/ecs/component/TransformComponent.h>
+#include <core/ecs/component/CameraComponent.h>
+
 #include <vector>
 #include <functional>
 
@@ -28,11 +31,6 @@ namespace core
 		class BackBufferTexture;
 	}
 
-	namespace ecs
-	{
-		class TransformComponent;
-		class CameraComponent;
-	}
 }
 
 namespace blue_sky
@@ -267,6 +265,30 @@ public:
 	{
 		main_camera_transform_component_ = transform;
 		main_camera_component_ = camera;
+	}
+
+	/**
+	 * カメラの位置を取得する
+	 */
+	Vector get_camera_position() const
+	{
+		if ( main_camera_transform_component_ && main_camera_component_ )
+		{
+			return main_camera_transform_component_->transform.get_position() + main_camera_component_->eye_offset;
+		}
+		return Vector( 0.f, 0.f, 0.f );
+	}
+
+	/**
+	 * カメラの前方ベクトルを取得する
+	 */
+	Vector get_camera_forward() const
+	{
+		if ( main_camera_transform_component_ )
+		{
+			return main_camera_transform_component_->transform.forward();
+		}
+		return Vector( 0.f, 0.f, 1.f );
 	}
 
 	void clear_pass_count() const { pass_count_ = 0; }

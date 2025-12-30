@@ -18,7 +18,7 @@ RasterizerState PointSpriteRasterizerState
 };
 
 /**
- * �r���{�[�h�𐶐�����𐶐�����W�I���g���V�F�[�_�[���痘�p���鋤�ʊ֐�
+ * ビルボードを生成するを生成するジオメトリシェーダーから利用する共通関数
  *
  * input  : 0
  *

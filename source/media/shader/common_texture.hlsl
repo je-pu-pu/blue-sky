@@ -1,13 +1,13 @@
 // model
-Texture2D model_texture : register( t0 );		/// ƒ‚ƒfƒ‹‚ÌƒeƒNƒXƒ`ƒƒ
-Texture2D shadow_texture : register( t1 );		/// ƒVƒƒƒhƒEƒ}ƒbƒv
-Texture2D paper_texture : register( t2 );		/// †‚Ì¿Š´ƒeƒNƒXƒ`ƒƒ
-Texture2D matcap_texture : register( t3 );		/// Matcap ƒeƒNƒXƒ`ƒƒ
-Texture2D displacement_texture : register( t4 );/// ƒfƒBƒXƒvƒŒƒCƒXƒƒ“ƒgƒ}ƒbƒsƒ“ƒO—pƒeƒNƒXƒ`ƒƒ
-Texture2D normal_texture : register( t5 );		/// ƒm[ƒ}ƒ‹ƒ}ƒbƒsƒ“ƒO—pƒeƒNƒXƒ`ƒƒ
+Texture2D model_texture : register( t0 );		/// ãƒ¢ãƒ‡ãƒ«ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£
+Texture2D shadow_texture : register( t1 );		/// ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—
+Texture2D paper_texture : register( t2 );		/// ç´™ã®è³ªæ„Ÿãƒ†ã‚¯ã‚¹ãƒãƒ£
+Texture2D matcap_texture : register( t3 );		/// Matcap ãƒ†ã‚¯ã‚¹ãƒãƒ£
+Texture2D displacement_texture : register( t4 );/// ãƒ‡ã‚£ã‚¹ãƒ—ãƒ¬ã‚¤ã‚¹ãƒ¡ãƒ³ãƒˆãƒãƒƒãƒ”ãƒ³ã‚°ç”¨ãƒ†ã‚¯ã‚¹ãƒãƒ£
+Texture2D normal_texture : register( t5 );		/// ãƒãƒ¼ãƒãƒ«ãƒãƒƒãƒ”ãƒ³ã‚°ç”¨ãƒ†ã‚¯ã‚¹ãƒãƒ£
 
 // line
-Texture2D line_texture : register( t0 );		/// ü‚ÌƒeƒNƒXƒ`ƒƒ
+Texture2D line_texture : register( t0 );		/// ç·šã®ãƒ†ã‚¯ã‚¹ãƒãƒ£
 
 // canvas
-Texture2D pen_texture : register( t1 );			/// ƒyƒ“‚ÌƒeƒNƒXƒ`ƒƒ
+Texture2D pen_texture : register( t1 );			/// ãƒšãƒ³ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£

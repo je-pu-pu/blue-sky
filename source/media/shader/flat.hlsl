@@ -64,7 +64,7 @@ uint ps_primitive_id( PS_PRIMITIVE_INPUT input ) : SV_Target
 }
 
 
-// ƒVƒF[ƒfƒBƒ“ƒO‚È‚µEƒXƒLƒjƒ“ƒO‚È‚µ
+// ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ãªã—ãƒ»ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ãªã—
 technique11 flat
 {
 	pass main

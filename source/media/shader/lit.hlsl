@@ -1,5 +1,5 @@
 /**
- * ƒVƒF[ƒfƒBƒ“ƒO‚ ‚è‚Ì’¸“_ƒVƒF[ƒ_[
+ * ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã‚ã‚Šã®é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  */
 COMMON_POS_UV_COLOR vs_lit( COMMON_POS_NORM_UV input )
 {
@@ -13,11 +13,11 @@ COMMON_POS_UV_COLOR vs_lit( COMMON_POS_NORM_UV input )
 }
 
 /**
- * ƒVƒF[ƒfƒBƒ“ƒO‚ ‚è‚ÌƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+ * ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã‚ã‚Šã®ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  */
 float4 ps_lit( COMMON_POS_UV_COLOR input ) : SV_Target
 {
-	// ƒr[ƒg“¯Šú‚Ì–¾‚é‚³ (BeatProgress: 1.0 -> 0.0)
+	// ãƒ“ãƒ¼ãƒˆåŒæœŸã®æ˜ã‚‹ã• (BeatProgress: 1.0 -> 0.0)
 	float beatBrightness = 1.0f + pow( BeatProgress, 0.5f ) * 0.5f;
 
 	float4 color = model_texture.Sample( wrap_texture_sampler, input.TexCoord ) * input.Color;
@@ -26,7 +26,7 @@ float4 ps_lit( COMMON_POS_UV_COLOR input ) : SV_Target
 	return color;
 }
 
-// ƒVƒF[ƒfƒBƒ“ƒO‚ ‚èEƒXƒLƒjƒ“ƒO‚È‚µ
+// ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã‚ã‚Šãƒ»ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ãªã—
 technique11 lit
 {
 	pass main

@@ -1,5 +1,5 @@
 /**
- * Fû·ƒ|ƒXƒgƒGƒtƒFƒNƒg
+ * è‰²åå·®ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
  */
 
 float4 ps_post_effect_chromatic_aberration( COMMON_POS_UV input ) : SV_Target

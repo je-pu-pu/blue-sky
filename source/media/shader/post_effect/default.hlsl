@@ -1,5 +1,5 @@
 /**
- * ‰½‚à‚µ‚È‚¢ƒ|ƒXƒgƒGƒtƒFƒNƒg
+ * ä½•ã‚‚ã—ãªã„ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
  */
 
 float4 ps_post_effect_default( COMMON_POS_UV input ) : SV_Target

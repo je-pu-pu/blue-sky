@@ -42,7 +42,7 @@ PS_INPUT vs_skin( VS_SKIN_INPUT input )
 }
 
 /**
- * †‚Ì¿Š´ƒeƒNƒXƒ`ƒƒ‚ğƒTƒ“ƒvƒŠƒ“ƒO‚·‚é
+ * ç´™ã®è³ªæ„Ÿãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã™ã‚‹
  *
  */
 float4 sample_paper_texture( float2 xy )
@@ -57,7 +57,7 @@ float4 sample_paper_texture( float2 xy )
 		xy.y / ScreenHeight * ( ScreenHeight / PaperTextureHeight )
 	);
 
-	// ƒAƒNƒZƒ“ƒg‚ğ‰Á‚¦‚é
+	// ã‚¢ã‚¯ã‚»ãƒ³ãƒˆã‚’åŠ ãˆã‚‹
 	uv += float2( TimeBeat * 0.2f, 0.f );
 			
 	return paper_texture.Sample( wrap_texture_sampler, uv );
@@ -68,12 +68,12 @@ float4 ps_with_paper_common( float3 position, float2 uv, float diffuse )
 	float4 shadow = float4( 1.f, 1.f, 1.f, 1.f );
 
 	{
-		// ‰e
+		// å½±
 		const float4 shadow_color = ShadowColor;
 		shadow = float4( 1.f, 1.f, 1.f, 1.f ) * ( 1.f - shadow_color.a ) + shadow_color * shadow_color.a;
 		shadow.a = 1.f;
 		
-		// †‚Ì¿Š´‚ğ’Ç‰Á‚·‚é
+		// ç´™ã®è³ªæ„Ÿã‚’è¿½åŠ ã™ã‚‹
 		if ( true )
 		{
 			const float3 shadow_paper_color = ( float3 ) ShadowPaperColor;
@@ -109,7 +109,7 @@ float4 ps_main_wrap( PS_INPUT input ) : SV_Target
 }
 
 /**
- * ‰A‰e‚È‚µAƒXƒLƒjƒ“ƒO‚ ‚èA‰e‚È‚µ‚ÌƒVƒF[ƒ_[
+ * é™°å½±ãªã—ã€ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚ã‚Šã€å½±ãªã—ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  */
 float4 ps_skin_wrap_flat( PS_INPUT input ) : SV_Target
 {
@@ -117,7 +117,7 @@ float4 ps_skin_wrap_flat( PS_INPUT input ) : SV_Target
 }
 
 /**
- * ‰A‰e‚È‚µAƒXƒLƒjƒ“ƒO‚ ‚èA‰e‚È‚µ + †‚Ì¿Š´‚ÌƒVƒF[ƒ_[
+ * é™°å½±ãªã—ã€ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚ã‚Šã€å½±ãªã— + ç´™ã®è³ªæ„Ÿã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  */
 float4 ps_skin_wrap_flat_paper( PS_INPUT input ) : SV_Target
 {
@@ -129,10 +129,10 @@ float4 ps_skin_wrap_flat_paper( PS_INPUT input ) : SV_Target
 }
 
 /**
- * ƒXƒLƒjƒ“ƒO‚È‚µEƒVƒƒƒhƒE‚ ‚è‚Ì’¸“_ƒVƒF[ƒ_[
+ * ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ãªã—ãƒ»ã‚·ãƒ£ãƒ‰ã‚¦ã‚ã‚Šã®é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
- * @param input “ü—Í’¸“_î•ñ
- * @return o—Í’¸“_î•ñ
+ * @param input å…¥åŠ›é ‚ç‚¹æƒ…å ±
+ * @return å‡ºåŠ›é ‚ç‚¹æƒ…å ±
  */
 PS_SHADOW_INPUT vs_with_shadow( COMMON_POS_NORM_UV input )
 {
@@ -154,10 +154,10 @@ PS_SHADOW_INPUT vs_with_shadow( COMMON_POS_NORM_UV input )
 }
 
 /**
- * ƒXƒLƒjƒ“ƒO‚ ‚èEƒVƒƒƒhƒE‚ ‚è‚Ì’¸“_ƒVƒF[ƒ_[ 
+ * ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚ã‚Šãƒ»ã‚·ãƒ£ãƒ‰ã‚¦ã‚ã‚Šã®é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ 
  *
- * @param input “ü—Í’¸“_î•ñ
- * @return o—Í’¸“_î•ñ
+ * @param input å…¥åŠ›é ‚ç‚¹æƒ…å ±
+ * @return å‡ºåŠ›é ‚ç‚¹æƒ…å ±
  */
 PS_SHADOW_INPUT vs_skin_with_shadow( VS_SKIN_INPUT input )
 {
@@ -184,10 +184,10 @@ PS_SHADOW_INPUT vs_skin_with_shadow( VS_SKIN_INPUT input )
 }
 
 /**
- * ƒsƒNƒZƒ‹ƒVƒF[ƒ_[ ( ƒVƒƒƒhƒE‚ ‚è )
+ * ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ ( ã‚·ãƒ£ãƒ‰ã‚¦ã‚ã‚Š )
  *
- * @param input “ü—ÍƒsƒNƒZƒ‹î•ñ
- * @return o—ÍƒsƒNƒZƒ‹î•ñ
+ * @param input å…¥åŠ›ãƒ”ã‚¯ã‚»ãƒ«æƒ…å ±
+ * @return å‡ºåŠ›ãƒ”ã‚¯ã‚»ãƒ«æƒ…å ±
  */
 float4 ps_with_shadow( PS_SHADOW_INPUT input ) : SV_Target
 {
@@ -250,15 +250,15 @@ float4 ps_with_shadow_debug_simple( PS_SHADOW_INPUT input ) : SV_Target
 
 
 /**
- * @todo ˆÈ‰º‚Ì–½–¼‹K‘¥‚É‚Ü‚Æ‚ß‚é
+ * @todo ä»¥ä¸‹ã®å‘½åè¦å‰‡ã«ã¾ã¨ã‚ã‚‹
  *
- * 1. ‰A‰e‚ğ•t‚¯‚éê‡‚Í "shade", •t‚¯‚È‚¢ê‡‚Í "flat"
- * 2. ƒXƒLƒjƒ“ƒO‚ğs‚¤ê‡‚Í"_skin" ‚ğ•t‰Á
- * 3. ‰e‚ğ•t‚¯‚éê‡‚Í "_shadow" ‚ğ•t‰Á
+ * 1. é™°å½±ã‚’ä»˜ã‘ã‚‹å ´åˆã¯ "shade", ä»˜ã‘ãªã„å ´åˆã¯ "flat"
+ * 2. ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚’è¡Œã†å ´åˆã¯"_skin" ã‚’ä»˜åŠ 
+ * 3. å½±ã‚’ä»˜ã‘ã‚‹å ´åˆã¯ "_shadow" ã‚’ä»˜åŠ 
  *
  */
 
-// ƒVƒF[ƒfƒBƒ“ƒO‚ ‚èEƒXƒLƒjƒ“ƒO‚È‚µ
+// ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã‚ã‚Šãƒ»ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ãªã—
 /// @todo technique11 shade 
 technique11 main
 {
@@ -277,7 +277,7 @@ technique11 main
     }
 }
 
-// ƒVƒF[ƒfƒBƒ“ƒO‚ ‚èEƒXƒLƒjƒ“ƒO‚ ‚è
+// ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã‚ã‚Šãƒ»ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚ã‚Š
 /// @todo technique11 shade_skin
 technique11 skin
 {
@@ -296,7 +296,7 @@ technique11 skin
     }
 }
 
-// ƒVƒF[ƒfƒBƒ“ƒO‚È‚µEƒXƒLƒjƒ“ƒO‚ ‚è
+// ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ãªã—ãƒ»ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚ã‚Š
 technique11 flat_skin
 {
 	pass main
@@ -315,7 +315,7 @@ technique11 flat_skin
     }
 }
 
-// ƒVƒF[ƒfƒBƒ“ƒO‚ ‚èEƒXƒLƒjƒ“ƒO‚È‚µEƒVƒƒƒhƒE‚ ‚è
+// ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã‚ã‚Šãƒ»ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ãªã—ãƒ»ã‚·ãƒ£ãƒ‰ã‚¦ã‚ã‚Š
 /// @todo technique11 shade_shadow
 technique11 main_with_shadow
 {
@@ -337,7 +337,7 @@ technique11 main_with_shadow
 	}
 }
 
-// ƒVƒF[ƒfƒBƒ“ƒO‚ ‚èEƒXƒLƒjƒ“ƒO‚ ‚èEƒVƒƒƒhƒE‚ ‚è
+// ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã‚ã‚Šãƒ»ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚ã‚Šãƒ»ã‚·ãƒ£ãƒ‰ã‚¦ã‚ã‚Š
 /// @todo technique11 shade_skin_shadow
 technique11 skin_with_shadow
 {
@@ -452,14 +452,14 @@ void gs_line_cube( line COMMON_POS_COLOR input[2], inout TriangleStream<COMMON_P
 	
 	COMMON_POS_COLOR v = input[ 0 ];
 	
-    const float direction_randomize_factor = 0.5f; // 0.1f; // 0.0025f; // ü‚ÌrX‚µ‚³ ( ü‚Ì•ûŒü‚ÌƒYƒŒ‚â‚·‚³ )
+    const float direction_randomize_factor = 0.5f; // 0.1f; // 0.0025f; // ç·šã®è’ã€…ã—ã• ( ç·šã®æ–¹å‘ã®ã‚ºãƒ¬ã‚„ã™ã• )
 	
 	float3 dp_original = ( ( input[ 1 ].Position - v.Position ) / MaxPointCount ).xyz;
 	float dp_original_length = length( dp_original );
 	float3 dp = dp_original;
 	float4 dc = ( input[ 1 ].Color - v.Color ) / MaxPointCount;
 	
-	const float max_random_degree = 15.f; // –{—ˆi‚Ş‚×‚«•ûŒü‚©‚ç‚ÌƒYƒŒ‚ğ‰½“x‚Ü‚Å‹–‰Â‚·‚é‚©H
+	const float max_random_degree = 15.f; // æœ¬æ¥é€²ã‚€ã¹ãæ–¹å‘ã‹ã‚‰ã®ã‚ºãƒ¬ã‚’ä½•åº¦ã¾ã§è¨±å¯ã™ã‚‹ã‹ï¼Ÿ
 
 	const float power_randomize_factor = 0.f; // 0.5f;
 	const float min_power = 0.9f; // 0.5f;
@@ -479,7 +479,7 @@ void gs_line_cube( line COMMON_POS_COLOR input[2], inout TriangleStream<COMMON_P
         dp += random_direction * direction_randomize_factor;
 		dp *= power;
 		
-		// ü‚Ìi‚Ş‹——£‚ğˆê’è‚Ì”ÍˆÍ“à‚Éû‚ß‚é
+		// ç·šã®é€²ã‚€è·é›¢ã‚’ä¸€å®šã®ç¯„å›²å†…ã«åã‚ã‚‹
 		if ( length( dp ) < dp_original_length * 0.5f )
 		{
 			dp = normalize( dp ) * dp_original_length * 0.5f;
@@ -489,7 +489,7 @@ void gs_line_cube( line COMMON_POS_COLOR input[2], inout TriangleStream<COMMON_P
 			dp = normalize( dp ) * dp_original_length * 1.5f;
 		}
 		
-		// ü‚Ì•ûŒü‚ª‰Šú‚Ì•ûŒü‚©‚çƒYƒŒ‰ß‚¬‚½‚ç³‚µ‚¢Œü‚«‚É’¼‚·
+		// ç·šã®æ–¹å‘ãŒåˆæœŸã®æ–¹å‘ã‹ã‚‰ã‚ºãƒ¬éããŸã‚‰æ­£ã—ã„å‘ãã«ç›´ã™
 		if ( dot( normalize( dp_original ), normalize( dp ) ) < 1.f - ( max_random_degree / 90.f ) )
 		{
 			dp = ( input[ 1 ].Position - v.Position ) / ( MaxPointCount - n );
@@ -556,6 +556,8 @@ technique11 line_cube
 
 #include "flat.hlsl"
 #include "lit.hlsl"
+#include "lit_instanced.hlsl"
+#include "flat_instanced.hlsl"
 
 #include "tessellation.hlsl"
 #include "shadow_map.hlsl"

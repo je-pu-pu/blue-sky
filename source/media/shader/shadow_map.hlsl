@@ -1,5 +1,5 @@
 /**
- * シャドウマップへのレンダリング
+ * 繧ｷ繝｣繝峨え繝槭ャ繝励∈縺ｮ繝ｬ繝ｳ繝繝ｪ繝ｳ繧ｰ
  *
  */
 float4 vs_shadow_map( COMMON_POS_NORM_UV input ) : SV_POSITION
@@ -13,7 +13,7 @@ float4 vs_shadow_map( COMMON_POS_NORM_UV input ) : SV_POSITION
 }
 
 /**
- * シャドウマップへのスキンメッシュのレンダリング
+ * 繧ｷ繝｣繝峨え繝槭ャ繝励∈縺ｮ繧ｹ繧ｭ繝ｳ繝｡繝�繧ｷ繝･縺ｮ繝ｬ繝ｳ繝繝ｪ繝ｳ繧ｰ
  *
  */
 float4 vs_shadow_map_skin( VS_SKIN_INPUT input ) : SV_POSITION

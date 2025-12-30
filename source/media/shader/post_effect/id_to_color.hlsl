@@ -1,7 +1,7 @@
-Texture2D< uint > source_uint_texture : register( t0 ); /// ƒ|ƒXƒgƒGƒtƒFƒNƒg“K—p‘O‚ÌƒŒƒ“ƒ_ƒŠƒ“ƒOŒ‹‰Ê‚ª‘‚«‚Ü‚ê‚Ä‚¢‚éƒeƒNƒXƒ`ƒƒ
+Texture2D< uint > source_uint_texture : register( t0 ); /// ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆé©ç”¨å‰ã®ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°çµæœãŒæ›¸ãè¾¼ã¾ã‚Œã¦ã„ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£
 
 /**
- * ID -> F •ÏŠ·ƒ|ƒXƒgƒGƒtƒFƒNƒg
+ * ID -> è‰² å¤‰æ›ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
  */
 float4 ps_post_effect_id_to_color( COMMON_POS_UV input ) : SV_Target
 {

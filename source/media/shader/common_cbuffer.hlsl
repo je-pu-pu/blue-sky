@@ -8,20 +8,20 @@ cbuffer GameConstantBuffer : register( b0 )
 
 cbuffer FrameConstantBuffer : register( b1 )
 {
-	/// @todo ViewProjection ‚Æ‚µ‚Ä‚Ü‚Æ‚ß‚éH
-    row_major matrix View;			// ƒrƒ…[•ÏŠ·s—ñ
-    row_major matrix Projection;	// ƒvƒƒWƒFƒNƒVƒ‡ƒ“•ÏŠ·s—ñ
-	float4 Light;					// ŒõŒ¹‚ÌŒü‚« ( ³‹K‰»Ï‚İ ) 
-	float Time;						// ƒV[ƒ“ŠJn‚©‚ç‚ÌŒo‰ß•b”
-	uint TimeBeat;					// Œ»İ‚Ì‰¹Šy‚Ì BPM ?
-	float TessFactor;				// ƒeƒbƒZƒŒ[ƒVƒ‡ƒ“‚Ì•ªŠ„”
-	float BeatProgress;				// ƒr[ƒgis“x (1.0 -> 0.0)
+	/// @todo ViewProjection ã¨ã—ã¦ã¾ã¨ã‚ã‚‹ï¼Ÿ
+    row_major matrix View;			// ãƒ“ãƒ¥ãƒ¼å¤‰æ›è¡Œåˆ—
+    row_major matrix Projection;	// ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³å¤‰æ›è¡Œåˆ—
+	float4 Light;					// å…‰æºã®å‘ã ( æ­£è¦åŒ–æ¸ˆã¿ ) 
+	float Time;						// ã‚·ãƒ¼ãƒ³é–‹å§‹ã‹ã‚‰ã®çµŒéç§’æ•°
+	uint TimeBeat;					// ç¾åœ¨ã®éŸ³æ¥½ã® BPM ?
+	float TessFactor;				// ãƒ†ãƒƒã‚»ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ã®åˆ†å‰²æ•°
+	float BeatProgress;				// ãƒ“ãƒ¼ãƒˆé€²è¡Œåº¦ (1.0 -> 0.0)
 };
 
 cbuffer ObjectConstantBuffer : register( b2 )
 {
-    row_major matrix World;			// ƒ[ƒ‹ƒh•ÏŠ·s—ñ
-	float4 ObjectColor;				// ƒIƒuƒWƒFƒNƒg‚ÌF
+    row_major matrix World;			// ãƒ¯ãƒ¼ãƒ«ãƒ‰å¤‰æ›è¡Œåˆ—
+	float4 ObjectColor;				// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®è‰²
 };
 
 cbuffer FrameDrawingConstantBuffer : register( b4 )

@@ -3,7 +3,7 @@
 #include "common_texture.hlsl"
 
 /**
- * ƒfƒoƒbƒO—p‚Ìü‚Ì‚½‚ß‚Ì DepthStencilState
+ * ãƒ‡ãƒãƒƒã‚°ç”¨ã®ç·šã®ãŸã‚ã® DepthStencilState
  *
  */
 DepthStencilState DebugLineDepthStencilState
@@ -13,7 +13,7 @@ DepthStencilState DebugLineDepthStencilState
 };
 
 /***
- * À•W‚Ì‚İ‚ğ‚Â‹¤’Ê’¸“_\‘¢
+ * åº§æ¨™ã®ã¿ã‚’æŒã¤å…±é€šé ‚ç‚¹æ§‹é€ 
  *
  */
 struct COMMON_POS
@@ -22,7 +22,7 @@ struct COMMON_POS
 };
 
 /***
- * À•W‚Æ–@ü‚ğ‚Â‹¤’Ê’¸“_\‘¢
+ * åº§æ¨™ã¨æ³•ç·šã‚’æŒã¤å…±é€šé ‚ç‚¹æ§‹é€ 
  *
  */
 struct COMMON_POS_NORM
@@ -32,7 +32,7 @@ struct COMMON_POS_NORM
 };
 
 /***
- * À•W‚Æ–@ü‚ÆƒeƒNƒXƒ`ƒƒ UV À•W‚ğ‚Â‹¤’Ê’¸“_\‘¢
+ * åº§æ¨™ã¨æ³•ç·šã¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ UV åº§æ¨™ã‚’æŒã¤å…±é€šé ‚ç‚¹æ§‹é€ 
  *
  */
 struct COMMON_POS_NORM_UV
@@ -43,7 +43,7 @@ struct COMMON_POS_NORM_UV
 };
 
 /**
- * À•W‚ÆƒeƒNƒXƒ`ƒƒ UV À•W‚ğ‚Â‹¤’Ê’¸“_\‘¢
+ * åº§æ¨™ã¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ UV åº§æ¨™ã‚’æŒã¤å…±é€šé ‚ç‚¹æ§‹é€ 
  *
  */
 struct COMMON_POS_UV
@@ -53,7 +53,7 @@ struct COMMON_POS_UV
 };
 
 /**
- * À•W‚ÆƒeƒNƒXƒ`ƒƒ UV À•W‚ÆF‚ğ‚Â‹¤’Ê’¸“_\‘¢
+ * åº§æ¨™ã¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ UV åº§æ¨™ã¨è‰²ã‚’æŒã¤å…±é€šé ‚ç‚¹æ§‹é€ 
  *
  */
 struct COMMON_POS_UV_COLOR
@@ -64,7 +64,7 @@ struct COMMON_POS_UV_COLOR
 };
 
 /**
- * À•W‚ÆF‚ğ‚Â‹¤’Ê’¸“_\‘¢
+ * åº§æ¨™ã¨è‰²ã‚’æŒã¤å…±é€šé ‚ç‚¹æ§‹é€ 
  */
 struct COMMON_POS_COLOR
 {
@@ -73,7 +73,7 @@ struct COMMON_POS_COLOR
 };
 
 
-/// @todo –¼‘O‚ğ®—‚·‚é
+/// @todo åå‰ã‚’æ•´ç†ã™ã‚‹
 struct VS_SKIN_INPUT
 {
 	float4 Position : POSITION;
@@ -83,7 +83,7 @@ struct VS_SKIN_INPUT
 	float4 Weight   : WEIGHT;
 };
 
-/// @todo –¼‘O‚ğ®—‚·‚é
+/// @todo åå‰ã‚’æ•´ç†ã™ã‚‹
 struct PS_INPUT
 {
 	float4 Position : SV_POSITION;
@@ -92,7 +92,7 @@ struct PS_INPUT
 	float4 Color    : COLOR0;
 };
 
-/// @todo –¼‘O‚ğ®—‚·‚é
+/// @todo åå‰ã‚’æ•´ç†ã™ã‚‹
 struct PS_SHADOW_INPUT
 {
 	float4 Position : SV_POSITION;
@@ -104,7 +104,7 @@ struct PS_SHADOW_INPUT
 
 
 /**
- * ˆø”‚É“n‚³‚ê‚½ seed ‚É‘Î‰‚·‚éƒ‰ƒ“ƒ_ƒ€‚È 0.f ` 1.f ‚Ì’l‚ğ•Ô‚·
+ * å¼•æ•°ã«æ¸¡ã•ã‚ŒãŸ seed ã«å¯¾å¿œã™ã‚‹ãƒ©ãƒ³ãƒ€ãƒ ãª 0.f ã€œ 1.f ã®å€¤ã‚’è¿”ã™
  */
 float random( float seed )
 {
@@ -132,9 +132,9 @@ float4 common_vp_pos( float4 input )
 }
 
 /**
- * –@ü‚ğƒ[ƒ‹ƒhÀ•WŒn‚Ö•ÏŠ·‚·‚é
+ * æ³•ç·šã‚’ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ç³»ã¸å¤‰æ›ã™ã‚‹
  *
- * @todo ƒ[ƒ‹ƒh•ÏŠ·s—ñ‚É”ñ“¯ˆê«ƒXƒP[ƒ‹‚ª“ü‚Á‚Ä‚¢‚éê‡‚Ì‘Î‰ ( ‹ts—ñ“]’us—ñ‚ğg‚¤ )
+ * @todo ãƒ¯ãƒ¼ãƒ«ãƒ‰å¤‰æ›è¡Œåˆ—ã«éåŒä¸€æ€§ã‚¹ã‚±ãƒ¼ãƒ«ãŒå…¥ã£ã¦ã„ã‚‹å ´åˆã®å¯¾å¿œ ( é€†è¡Œåˆ—è»¢ç½®è¡Œåˆ—ã‚’ä½¿ã† )
  */
 float3 common_w_norm( float3 input )
 {
@@ -152,15 +152,15 @@ float3 common_wv_norm( float3 input )
 }
 
 /**
- * ƒVƒƒƒhƒEƒ}ƒbƒv‚ÌƒeƒNƒXƒ`ƒƒÀ•W‚ğ•Ô‚·
+ * ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã‚’è¿”ã™
  *
- * ƒ‚ƒfƒ‹‚Ìƒ[ƒJƒ‹À•WŒn‚Å‚Ì’¸“_À•W‚ğˆø”‚Éæ‚èAw’è‚³‚ê‚½ƒJƒXƒP[ƒhƒŒƒxƒ‹‚ÌƒVƒƒƒhƒEƒ}ƒbƒv‚ÌƒeƒNƒXƒ`ƒƒÀ•W‚ğ•Ô‚·
- * ( ŒõŒ¹‚ğƒJƒƒ‰‚ÆŒ©—§‚Ä‚½‚Æ‚«‚ÌÀ•W‚É•ÏŠ·‚µAÅI“I‚É UV À•WŒn‚É•ÏŠ·‚·‚é )
+ * ãƒ¢ãƒ‡ãƒ«ã®ãƒ­ãƒ¼ã‚«ãƒ«åº§æ¨™ç³»ã§ã®é ‚ç‚¹åº§æ¨™ã‚’å¼•æ•°ã«å–ã‚Šã€æŒ‡å®šã•ã‚ŒãŸã‚«ã‚¹ã‚±ãƒ¼ãƒ‰ãƒ¬ãƒ™ãƒ«ã®ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã‚’è¿”ã™
+ * ( å…‰æºã‚’ã‚«ãƒ¡ãƒ©ã¨è¦‹ç«‹ã¦ãŸã¨ãã®åº§æ¨™ã«å¤‰æ›ã—ã€æœ€çµ‚çš„ã« UV åº§æ¨™ç³»ã«å¤‰æ›ã™ã‚‹ )
  *
- * @todo ’¸“_ƒVƒF[ƒ_[‚Å UV À•W‚É‚Ü‚Å•ÏŠ·‚µ‚Ä‚µ‚Ü‚¤‚ÆAƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚Å‚Ì•âŠÔŒë·‚ª‘å‚«‚­‚È‚èŒ‹‰Ê‚ª•s³Šm‚É‚È‚é‰Â”\«‚ª‚ ‚é‚½‚ßA‚±‚±‚Å‚Ì•ÏŠ·‚ÍuŒõŒ¹‚ğƒJƒƒ‰‚ÆŒ©—§‚Ä‚½‚Æ‚«‚ÌÀ•W‚Ö‚Ì•ÏŠ·v‚É—¯‚ßAUV À•W‚Ö‚Ì•ÏŠ·‚ÍƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚Ås‚¤‚æ‚¤‚É‚·‚é
+ * @todo é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã§ UV åº§æ¨™ã«ã¾ã§å¤‰æ›ã—ã¦ã—ã¾ã†ã¨ã€ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã§ã®è£œé–“èª¤å·®ãŒå¤§ãããªã‚ŠçµæœãŒä¸æ­£ç¢ºã«ãªã‚‹å¯èƒ½æ€§ãŒã‚ã‚‹ãŸã‚ã€ã“ã“ã§ã®å¤‰æ›ã¯ã€Œå…‰æºã‚’ã‚«ãƒ¡ãƒ©ã¨è¦‹ç«‹ã¦ãŸã¨ãã®åº§æ¨™ã¸ã®å¤‰æ›ã€ã«ç•™ã‚ã€UV åº§æ¨™ã¸ã®å¤‰æ›ã¯ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã§è¡Œã†ã‚ˆã†ã«ã™ã‚‹
  * 
- * @param pos ƒ[ƒJƒ‹À•WŒn‚Å‚Ì’¸“_À•W
- * @param csm_level ƒJƒXƒP[ƒhƒŒƒxƒ‹
+ * @param pos ãƒ­ãƒ¼ã‚«ãƒ«åº§æ¨™ç³»ã§ã®é ‚ç‚¹åº§æ¨™
+ * @param csm_level ã‚«ã‚¹ã‚±ãƒ¼ãƒ‰ãƒ¬ãƒ™ãƒ«
  */
 float4 common_shadow_texcoord( float4 pos, int csm_level )
 {
@@ -178,10 +178,10 @@ float4 common_shadow_texcoord( float4 pos, int csm_level )
 }
 
 /**
- * ƒVƒƒƒhƒEƒ}ƒbƒv‚ğƒTƒ“ƒvƒŠƒ“ƒO‚·‚éƒJƒXƒP[ƒhƒŒƒxƒ‹‚ğæ“¾‚·‚é
+ * ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã‚’ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã™ã‚‹ã‚«ã‚¹ã‚±ãƒ¼ãƒ‰ãƒ¬ãƒ™ãƒ«ã‚’å–å¾—ã™ã‚‹
  *
- * @param input_depth Œ»İ‚ÌƒsƒNƒZƒ‹‚Ìƒrƒ…[À•WŒn‚Å‚Ì Z ’l
- * @return ƒJƒXƒP[ƒhƒŒƒxƒ‹ ( 0 .. 3 )
+ * @param input_depth ç¾åœ¨ã®ãƒ”ã‚¯ã‚»ãƒ«ã®ãƒ“ãƒ¥ãƒ¼åº§æ¨™ç³»ã§ã® Z å€¤
+ * @return ã‚«ã‚¹ã‚±ãƒ¼ãƒ‰ãƒ¬ãƒ™ãƒ« ( 0 .. 3 )
  */
 int common_shadow_cascade_index( float input_depth )
 {
@@ -202,10 +202,10 @@ int common_shadow_cascade_index( float input_depth )
 }
 
 /**
- * ƒVƒƒƒhƒEƒ}ƒbƒv‚ğƒTƒ“ƒvƒŠƒ“ƒO‚µŒ»İ‚ÌƒsƒNƒZƒ‹‚ª‰e‚©‚Ç‚¤‚©‚ğ bool ‚Å•Ô‚·
+ * ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã‚’ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã—ç¾åœ¨ã®ãƒ”ã‚¯ã‚»ãƒ«ãŒå½±ã‹ã©ã†ã‹ã‚’ bool ã§è¿”ã™
  *
- * @param shadow_tex_coords ƒVƒƒƒhƒEƒ}ƒbƒvã‚Ì UV À•W ( * ƒJƒXƒP[ƒhƒŒƒxƒ‹” )
- * @param input_depth Œ»İ‚ÌƒsƒNƒZƒ‹‚Ìƒrƒ…[À•WŒn‚Å‚Ì Z ’l ( ƒJƒXƒP[ƒhƒŒƒxƒ‹‚Ì‘I‘ğ‚Ég—p‚·‚é )
+ * @param shadow_tex_coords ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ä¸Šã® UV åº§æ¨™ ( * ã‚«ã‚¹ã‚±ãƒ¼ãƒ‰ãƒ¬ãƒ™ãƒ«æ•° )
+ * @param input_depth ç¾åœ¨ã®ãƒ”ã‚¯ã‚»ãƒ«ã®ãƒ“ãƒ¥ãƒ¼åº§æ¨™ç³»ã§ã® Z å€¤ ( ã‚«ã‚¹ã‚±ãƒ¼ãƒ‰ãƒ¬ãƒ™ãƒ«ã®é¸æŠã«ä½¿ç”¨ã™ã‚‹ )
  */
 bool common_sample_is_shadow( float4 shadow_tex_coords[ ShadowMapCascadeLevels ], float input_depth )
 {
@@ -225,9 +225,9 @@ bool common_sample_is_shadow( float4 shadow_tex_coords[ ShadowMapCascadeLevels ]
 }
 
 /**
- * ŠgU‚ğŒvZ‚·‚é
+ * æ‹¡æ•£ã‚’è¨ˆç®—ã™ã‚‹
  * 
- * @param norm ƒ[ƒ‹ƒhÀ•WŒn‚Å‚Ì–@ü
+ * @param norm ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ç³»ã§ã®æ³•ç·š
  */
 float common_diffuse( float3 norm )
 {
@@ -235,7 +235,7 @@ float common_diffuse( float3 norm )
 }
 
 /**
- * ’¸“_‚É‘Î‚µ‚ÄƒXƒLƒjƒ“ƒO‚ğs‚¤‹¤’ÊŠÖ”
+ * é ‚ç‚¹ã«å¯¾ã—ã¦ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚’è¡Œã†å…±é€šé–¢æ•°
  *
  */
 float4 common_skinning_pos( float4 pos, uint4 bone_index, float4 weight )
@@ -248,7 +248,7 @@ float4 common_skinning_pos( float4 pos, uint4 bone_index, float4 weight )
 }
 
 /**
- * –@ü‚É‘Î‚µ‚ÄƒXƒLƒjƒ“ƒO‚ğs‚¤‹¤’ÊŠÖ”
+ * æ³•ç·šã«å¯¾ã—ã¦ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ã‚’è¡Œã†å…±é€šé–¢æ•°
  *
  */
 float3 common_skinning_norm( float3 norm, uint4 bone_index, float4 weight )
@@ -261,9 +261,9 @@ float3 common_skinning_norm( float3 norm, uint4 bone_index, float4 weight )
 }
 
 /**
- * Matcap ‚É‚æ‚éƒTƒ“ƒvƒŠƒ“ƒO‚ğs‚¤‹¤’ÊŠÖ”
+ * Matcap ã«ã‚ˆã‚‹ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã‚’è¡Œã†å…±é€šé–¢æ•°
  *
- * @param ƒrƒ…[À•WŒn‚É•ÏŠ·‚³‚ê‚½–@ü
+ * @param ãƒ“ãƒ¥ãƒ¼åº§æ¨™ç³»ã«å¤‰æ›ã•ã‚ŒãŸæ³•ç·š
  */
 float4 common_sample_matcap( float3 norm )
 {
@@ -272,7 +272,7 @@ float4 common_sample_matcap( float3 norm )
 }
 
 /**
- * World * View * Proejction ‚ğ COMMON_POS_NORM_UV ‚É“K—p‚µ COMMON_POS ‚ğo—Í‚·‚é
+ * World * View * Proejction ã‚’ COMMON_POS_NORM_UV ã«é©ç”¨ã— COMMON_POS ã‚’å‡ºåŠ›ã™ã‚‹
  *
  */
 COMMON_POS vs_common_wvp_pos_norm_uv_to_pos( COMMON_POS_NORM_UV input )
@@ -285,7 +285,7 @@ COMMON_POS vs_common_wvp_pos_norm_uv_to_pos( COMMON_POS_NORM_UV input )
 }
 
 /**
- * World * View * Proejction ‚ğ COMMON_POS_NORM_UV ‚É“K—p‚µ COMMON_POS_UV ‚ğo—Í‚·‚é
+ * World * View * Proejction ã‚’ COMMON_POS_NORM_UV ã«é©ç”¨ã— COMMON_POS_UV ã‚’å‡ºåŠ›ã™ã‚‹
  *
  */
 COMMON_POS_UV vs_common_wvp_pos_norm_uv_to_pos_uv( COMMON_POS_NORM_UV input )
@@ -299,7 +299,7 @@ COMMON_POS_UV vs_common_wvp_pos_norm_uv_to_pos_uv( COMMON_POS_NORM_UV input )
 }
 
 /**
- * World * View * Proejction ‚ğ COMMON_POS ‚É“K—p‚µ COMMON_POS ‚ğo—Í‚·‚éƒo[ƒeƒbƒNƒXƒVƒF[ƒ_[
+ * World * View * Proejction ã‚’ COMMON_POS ã«é©ç”¨ã— COMMON_POS ã‚’å‡ºåŠ›ã™ã‚‹ãƒãƒ¼ãƒ†ãƒƒã‚¯ã‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 float4 vs_common_wvp_pos_to_pos( float4 input ) : SV_Position
@@ -308,7 +308,7 @@ float4 vs_common_wvp_pos_to_pos( float4 input ) : SV_Position
 }
 
 /**
- * World * View * Proejction ‚ğƒXƒLƒ“ƒƒbƒVƒ…‚É“K—p‚µ COMMON_POS ‚ğo—Í‚·‚éƒo[ƒeƒbƒNƒXƒVƒF[ƒ_[
+ * World * View * Proejction ã‚’ã‚¹ã‚­ãƒ³ãƒ¡ãƒƒã‚·ãƒ¥ã«é©ç”¨ã— COMMON_POS ã‚’å‡ºåŠ›ã™ã‚‹ãƒãƒ¼ãƒ†ãƒƒã‚¯ã‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 float4 vs_common_wvp_skin_to_pos( VS_SKIN_INPUT input ) : SV_Position
@@ -350,7 +350,7 @@ float4 ps_common_sample_matcap_pos_norm( COMMON_POS_NORM input ) : SV_Target
 
 float4 ps_common_sample_matcap_pos_norm_uv( COMMON_POS_NORM_UV input ) : SV_Target
 {
-	/// @todo C³‚·‚é
+	/// @todo ä¿®æ­£ã™ã‚‹
 	// return common_sample_matcap( common_v_norm( input.Normal + normal_texture.Sample( texture_sampler, input.TexCoord ) ) );
 	return common_sample_matcap( input.Normal );
 }
@@ -361,7 +361,7 @@ float4 ps_common_sample_pos_norm_uv( COMMON_POS_NORM_UV input ) : SV_Target
 }
 
 /**
- * ƒfƒoƒbƒO—p‚Ì—ÖŠsü‚ğ•`‰æ‚·‚éƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+ * ãƒ‡ãƒãƒƒã‚°ç”¨ã®è¼ªéƒ­ç·šã‚’æç”»ã™ã‚‹ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 float4 ps_common_debug_line_pos( float4 input : SV_Position ) : SV_Target
@@ -370,7 +370,7 @@ float4 ps_common_debug_line_pos( float4 input : SV_Position ) : SV_Target
 }
 
 /**
- * ƒfƒoƒbƒO—p‚Ì—ÖŠsü‚ğ•`‰æ‚·‚éƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+ * ãƒ‡ãƒãƒƒã‚°ç”¨ã®è¼ªéƒ­ç·šã‚’æç”»ã™ã‚‹ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 float4 ps_common_debug_line_pos_norm( COMMON_POS_NORM input ) : SV_Target

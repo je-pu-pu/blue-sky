@@ -52,7 +52,7 @@ BlendState Blend
 	// AlphaToCoverageEnable = True;
 };
 
-/** ‰ÁŽZ */
+/** åŠ ç®— */
 BlendState Add
 {
     BlendEnable[ 0 ] = True;
@@ -61,7 +61,7 @@ BlendState Add
     DestBlend = ONE;
 };
 
-/** Œ¸ŽZ */
+/** æ¸›ç®— */
 BlendState Sub
 {
     BlendEnable[ 0 ] = True;

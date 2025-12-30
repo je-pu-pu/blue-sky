@@ -1,16 +1,16 @@
 /**
- * ‰æ–Ê‚ğˆê’è‚ÌŠÔŠu‚Å˜c‚ß‚éƒ|ƒXƒgƒGƒtƒFƒNƒgƒVƒF[ƒ_[
+ * ç”»é¢ã‚’ä¸€å®šã®é–“éš”ã§æ­ªã‚ã‚‹ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  */
 
 Texture2D noise_texture : register( t1 );
 
 cbuffer ObjectConstantBuffer : register( b0 )
 {
-	int Seed;			// ƒ‰ƒ“ƒ_ƒ€ƒV[ƒh
-	float Gain;			// U•
-	float Offset;		// ƒIƒtƒZƒbƒg
-	float Size;			// ×‚©‚³
-	float Speed;		// Ø‚è‘Ö‚¦ƒXƒs[ƒh
+	int Seed;			// ãƒ©ãƒ³ãƒ€ãƒ ã‚·ãƒ¼ãƒ‰
+	float Gain;			// æŒ¯å¹…
+	float Offset;		// ã‚ªãƒ•ã‚»ãƒƒãƒˆ
+	float Size;			// ç´°ã‹ã•
+	float Speed;		// åˆ‡ã‚Šæ›¿ãˆã‚¹ãƒ”ãƒ¼ãƒ‰
 };
 
 float random( float2 texCoord, int Seed )
@@ -19,7 +19,7 @@ float random( float2 texCoord, int Seed )
 }
 
 /**
- * •ÏŠ·ƒ|ƒXƒgƒGƒtƒFƒNƒg
+ * å¤‰æ›ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
  */
 float4 ps_post_effect_noise( COMMON_POS_UV input ) : SV_Target
 {

@@ -23,7 +23,7 @@ struct GS_CANVAS_INPUT
 	float4 Position : SV_POSITION;
 	float  Pressure : PRESSURE;
 	float4 Color    : COLOR0;
-	float  Depth    : DEPTH; // ƒ‰ƒ“ƒ_ƒ€‚ÉˆÚ“®‚·‚é‘O‚Ì Position.z
+	float  Depth    : DEPTH; // ãƒ©ãƒ³ãƒ€ãƒ ã«ç§»å‹•ã™ã‚‹å‰ã® Position.z
 };
 
 struct PS_CANVAS_INPUT
@@ -92,7 +92,7 @@ GS_CANVAS_INPUT vs_canvas( VS_CANVAS_INPUT input, uint vertex_id : SV_VertexID )
 	output.Color = input.Color;
 	output.Depth = output.Position.z;
 
-	// F•Ï“®
+	// è‰²å¤‰å‹•
 	if ( true )
 	{
 		static const float color_random_range = 0.05f;
@@ -101,14 +101,14 @@ GS_CANVAS_INPUT vs_canvas( VS_CANVAS_INPUT input, uint vertex_id : SV_VertexID )
 		output.Color.b += ( ( ( uint( Time * 25 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
 	}
 
-	// ƒTƒCƒY•Ï“®
+	// ã‚µã‚¤ã‚ºå¤‰å‹•
 	if ( false )
 	{
 		static const float factor = 0.1f;
 		output.Pressure += ( random( ( output.Position.x * 100.f + output.Position.y * 10.f + output.Position.z ) * Time * vertex_id * 100.f ) - 0.5f ) * factor;
 	}
 
-	// ˆÊ’u•Ï“®
+	// ä½ç½®å¤‰å‹•
 	if ( false )
 	{
 		static const float factor = 0.01f;
@@ -159,17 +159,17 @@ PS_CANVAS_OUTPUT ps_canvas( PS_CANVAS_INPUT input )
 		discard;
 	}
 
-	// ’†S‚©‚ç‚Ì‹——£‚É‰‚¶‚Ä Depth ‚ğİ’è
+	// ä¸­å¿ƒã‹ã‚‰ã®è·é›¢ã«å¿œã˜ã¦ Depth ã‚’è¨­å®š
 	if ( false )
 	{
 		const float2 d = input.TexCoord - float2( 0.5f, 0.5f );
-		const float l = sqrt( d.x * d.x + d.y * d.y ); // ‰~‚Ì’†S‚©‚ç‚Ì‹——£ ( 0.f .. 1.f )
+		const float l = sqrt( d.x * d.x + d.y * d.y ); // å††ã®ä¸­å¿ƒã‹ã‚‰ã®è·é›¢ ( 0.f .. 1.f )
 
-		output.Depth = sin( l * ( Pi / 2.f ) ); // 0.f .. 1.f ‚ğ‚»‚Ì‚Ü‚Ü Depth ‚Éİ’è
+		output.Depth = sin( l * ( Pi / 2.f ) ); // 0.f .. 1.f ã‚’ãã®ã¾ã¾ Depth ã«è¨­å®š
 	}
 	else
 	{
-		// ’Êí‚Ìƒ|ƒCƒ“ƒgƒXƒvƒ‰ƒCƒg‚Ì Depth İ’è
+		// é€šå¸¸ã®ãƒã‚¤ãƒ³ãƒˆã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã® Depth è¨­å®š
 		output.Depth = input.Depth / input.Position.w;
 	}
 	

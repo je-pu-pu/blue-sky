@@ -1,7 +1,7 @@
-Texture2D source_texture : register( t0 ); /// ƒ|ƒXƒgƒGƒtƒFƒNƒg“K—p‘O‚ÌƒŒƒ“ƒ_ƒŠƒ“ƒOŒ‹‰Ê‚ª‘‚«‚Ü‚ê‚Ä‚¢‚éƒeƒNƒXƒ`ƒƒ
+Texture2D source_texture : register( t0 ); /// ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆé©ç”¨å‰ã®ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°çµæœãŒæ›¸ãè¾¼ã¾ã‚Œã¦ã„ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£
 
 /**
- * ƒ|ƒXƒgƒGƒtƒFƒNƒg—p‹¤’Ê Vertex Shader
+ * ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆç”¨å…±é€š Vertex Shader
  */
 COMMON_POS_UV vs_post_effect( COMMON_POS_NORM_UV input )
 {

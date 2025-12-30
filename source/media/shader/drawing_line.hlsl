@@ -5,10 +5,10 @@ COMMON_POS_COLOR vs_drawing_line( COMMON_POS_COLOR input, uint vertex_id : SV_Ve
 	output.Position = common_wvp_pos( input.Position );
 	output.Color = input.Color + ObjectColor;
 
-	// F‚ğ•Ï“®‚³‚¹‚é
+	// è‰²ã‚’å¤‰å‹•ã•ã›ã‚‹
 	static const float color_random_range = 0.1f;
 
-	/// @todo •`‰æ–ˆ‚É vertex_id ‚ª•Ï“®‚·‚éê‡‚ª‚ ‚é‚½‚ßF‚ª‚¿‚ç‚Â‚­–â‘è‚É‘Î‰‚·‚é
+	/// @todo æç”»æ¯ã« vertex_id ãŒå¤‰å‹•ã™ã‚‹å ´åˆãŒã‚ã‚‹ãŸã‚è‰²ãŒã¡ã‚‰ã¤ãå•é¡Œã«å¯¾å¿œã™ã‚‹
 	if ( false )
 	{
 		output.Color.r += ( ( ( uint( Time *  5 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
@@ -17,7 +17,7 @@ COMMON_POS_COLOR vs_drawing_line( COMMON_POS_COLOR input, uint vertex_id : SV_Ve
 		// output.Color.a -= ( ( uint( Time * 5 ) + vertex_id ) % 8 ) / 8.f * 0.5f;
 	}
 
-	// ‚Ô‚ç‚·
+	// ã¶ã‚‰ã™
 	if ( false )
 	{
 		float a = ( vertex_id ) / 10.f + Time * 10.f;
@@ -29,7 +29,7 @@ COMMON_POS_COLOR vs_drawing_line( COMMON_POS_COLOR input, uint vertex_id : SV_Ve
 }
 
 /**
- * è‘‚«•—‚Ìü‚ğ¶¬‚·‚é
+ * æ‰‹æ›¸ãé¢¨ã®ç·šã‚’ç”Ÿæˆã™ã‚‹
  *
  * input  : 0----------1
  *
@@ -37,7 +37,7 @@ COMMON_POS_COLOR vs_drawing_line( COMMON_POS_COLOR input, uint vertex_id : SV_Ve
  *          |          |
  *          1----------3
  *
- * @todo ü‚ª•ö‚ê‚é–â‘è‚Ì‰ğŒˆŒã get_drawing_line_common() ‚Æ‹¤’Ê‰»
+ * @todo ç·šãŒå´©ã‚Œã‚‹å•é¡Œã®è§£æ±ºå¾Œ get_drawing_line_common() ã¨å…±é€šåŒ–
  */
 [maxvertexcount(4)]
 void gs_drawing_line( line COMMON_POS_COLOR input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream, uint primitive_id : SV_PrimitiveID )
@@ -90,7 +90,7 @@ void gs_drawing_line( line COMMON_POS_COLOR input[2], inout TriangleStream<COMMO
 	const float line_v_width = line_width_pixels / LineTextureSize;
 	const float line_v_offset = line_configs[ line_config_index ].v_offset / LineTextureSize;
 
-	// XVƒpƒ^[ƒ“”
+	// æ›´æ–°ãƒ‘ã‚¿ãƒ¼ãƒ³æ•°
 	const int pattern_count = line_configs[ line_config_index ].pattern_count;
 
 	{
@@ -102,8 +102,8 @@ void gs_drawing_line( line COMMON_POS_COLOR input[2], inout TriangleStream<COMMO
 		
 		uint redraw_seed = uint( Time * 5.f ) + primitive_id;
 
-		float line_index = ( uint( Time + primitive_id % 10 / 10.f ) + primitive_id ) % pattern_count; // ‘S‚Ä‚Ìü‚ª‚Î‚ç‚Î‚ç‚Ìƒ^ƒCƒ~ƒ“ƒO‚ÅXV‚³‚ê‚é
-		// float line_index = redraw_seed % pattern_count; // ‘S‚Ä‚Ìü‚ª“ˆê‚³‚ê‚½ƒ^ƒCƒ~ƒ“ƒO‚ÅXV‚³‚ê‚é
+		float line_index = ( uint( Time + primitive_id % 10 / 10.f ) + primitive_id ) % pattern_count; // å…¨ã¦ã®ç·šãŒã°ã‚‰ã°ã‚‰ã®ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§æ›´æ–°ã•ã‚Œã‚‹
+		// float line_index = redraw_seed % pattern_count; // å…¨ã¦ã®ç·šãŒçµ±ä¸€ã•ã‚ŒãŸã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§æ›´æ–°ã•ã‚Œã‚‹
 		float line_v_origin = line_v_offset + ( line_index * line_v_width );
 
 		float line_u_origin = ( redraw_seed ) * 0.1f;
@@ -112,9 +112,9 @@ void gs_drawing_line( line COMMON_POS_COLOR input[2], inout TriangleStream<COMMO
 		float line_length = length( float2( lx, ly ) );
 		float line_length_ratio = line_length / length( float2( 1.f, 1.f ) );
 
-		line_width = min( line_width, line_length ); // ü‚Ì’·‚³‚ª’Z‚¢ê‡‚Éü‚Ì•‚ª‘¾‚­‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é
+		line_width = min( line_width, line_length ); // ç·šã®é•·ã•ãŒçŸ­ã„å ´åˆã«ç·šã®å¹…ãŒå¤ªããªã‚‰ãªã„ã‚ˆã†ã«ã™ã‚‹
 
-		// ü‚ÌŒü‚«‚ğ 90 “x‰ñ“]‚³‚¹‚½Šp“x
+		// ç·šã®å‘ãã‚’ 90 åº¦å›è»¢ã•ã›ãŸè§’åº¦
 		const float line_width_angle = atan2( ly, lx ) + Pi / 2.f;
 
 		float dx = cos( line_width_angle ) * line_width * screen_ratio;
@@ -159,19 +159,19 @@ float4 ps_drawing_line( COMMON_POS_UV_COLOR input ) : SV_Target
 }
 
 /**
- * ƒfƒoƒbƒO—pƒ‰ƒXƒ^ƒ‰ƒCƒU
+ * ãƒ‡ãƒãƒƒã‚°ç”¨ãƒ©ã‚¹ã‚¿ãƒ©ã‚¤ã‚¶
  *
  */
 RasterizerState Debug
 {
 	// CullMode = Front;
 	// CullMode = BACK;
-	CullMode = NONE; // ”w–ÊƒJƒŠƒ“ƒO‚ğs‚í‚È‚¢
+	CullMode = NONE; // èƒŒé¢ã‚«ãƒªãƒ³ã‚°ã‚’è¡Œã‚ãªã„
 	MultisampleEnable = True;
 };
 
 /**
- * è‘‚«•—‚Ìü‚Ì‚½‚ß‚Ìƒo[ƒeƒbƒNƒXƒVƒF[ƒ_[
+ * æ‰‹æ›¸ãé¢¨ã®ç·šã®ãŸã‚ã®ãƒãƒ¼ãƒ†ãƒƒã‚¯ã‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 COMMON_POS_COLOR vs_drawing_line_debug( COMMON_POS_COLOR input )
@@ -185,7 +185,7 @@ COMMON_POS_COLOR vs_drawing_line_debug( COMMON_POS_COLOR input )
 }
 
 /**
- * è‘‚«•—‚Ìü‚ğ¶¬‚·‚éƒWƒIƒƒgƒŠƒVƒF[ƒ_[‚©‚ç—˜—p‚·‚é‹¤’ÊŠÖ”
+ * æ‰‹æ›¸ãé¢¨ã®ç·šã‚’ç”Ÿæˆã™ã‚‹ã‚¸ã‚ªãƒ¡ãƒˆãƒªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‹ã‚‰åˆ©ç”¨ã™ã‚‹å…±é€šé–¢æ•°
  *
  * input  : 0----------1
  *
@@ -193,7 +193,7 @@ COMMON_POS_COLOR vs_drawing_line_debug( COMMON_POS_COLOR input )
  *          |          |
  *          0----------2
  *
- * @todo ü‚ª•ö‚ê‚é–â‘è‚ğŒŸØ
+ * @todo ç·šãŒå´©ã‚Œã‚‹å•é¡Œã‚’æ¤œè¨¼
  */
 void get_drawing_line_common( line COMMON_POS_COLOR input[ 2 ], out COMMON_POS_UV_COLOR output[ 4 ] )
 {
@@ -227,15 +227,15 @@ void get_drawing_line_common( line COMMON_POS_COLOR input[ 2 ], out COMMON_POS_U
 		const float lx = input[ m ].Position.x - input[ n ].Position.x;
 		const float ly = ( input[ m ].Position.y * screen_ratio ) - ( input[ n ].Position.y * screen_ratio );
 
-		// ü‚ÌŒü‚«‚ğ 90 “x‰ñ“]‚³‚¹‚Ä
+		// ç·šã®å‘ãã‚’ 90 åº¦å›è»¢ã•ã›ã¦
 		const float line_width_angle = atan2( ly, lx ) + Pi / 2.f;
 
-		// ü‚ÌƒTƒCƒY
+		// ç·šã®ã‚µã‚¤ã‚º
 		const float line_width_half = 0.01f;
 		const float edge_scale_n = 1.f; // abs( input[ n ].Position.z ) / abs( input[ m ].Position.z );
 		const float edge_scale_m = 1.f; // abs( input[ m ].Position.z ) / abs( input[ n ].Position.z );
 
-		// •ûŒü
+		// æ–¹å‘
 		float4 vw = float4( cos( line_width_angle ), sin( line_width_angle ), 0.f, 0.f ) * line_width_half;
 
 		static const float v_bottom = 1.f; // 32.f / 1024.f;
@@ -271,7 +271,7 @@ void get_drawing_line_common( line COMMON_POS_COLOR input[ 2 ], out COMMON_POS_U
 }
 
 /**
- * è‘‚«•—‚Ìü‚ğ¶¬‚·‚éƒWƒIƒƒgƒŠƒVƒF[ƒ_[
+ * æ‰‹æ›¸ãé¢¨ã®ç·šã‚’ç”Ÿæˆã™ã‚‹ã‚¸ã‚ªãƒ¡ãƒˆãƒªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 [maxvertexcount(4)]
@@ -290,7 +290,7 @@ void gs_drawing_line_debug( line COMMON_POS_COLOR input[2], inout TriangleStream
 }
 
 /**
- * è‘‚«•—‚Ìü‚ğ¶¬‚·‚éƒWƒIƒƒgƒŠƒVƒF[ƒ_[ ( —ÖŠsü )
+ * æ‰‹æ›¸ãé¢¨ã®ç·šã‚’ç”Ÿæˆã™ã‚‹ã‚¸ã‚ªãƒ¡ãƒˆãƒªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ ( è¼ªéƒ­ç·š )
  *
  */
 [maxvertexcount(7)]
@@ -324,7 +324,7 @@ SamplerState drawing_line_texture_sampler
 };
 
 /**
- * è‘‚«•—ü ƒfƒoƒbƒO—pƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+ * æ‰‹æ›¸ãé¢¨ç·š ãƒ‡ãƒãƒƒã‚°ç”¨ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
  *
  */
 float4 ps_drawing_line_debug( noperspective COMMON_POS_UV_COLOR input ) : SV_Target
@@ -335,7 +335,7 @@ float4 ps_drawing_line_debug( noperspective COMMON_POS_UV_COLOR input ) : SV_Tar
 }
 
 /**
- * è‘‚«•—ü ƒfƒoƒbƒO—pƒsƒNƒZƒ‹ƒVƒF[ƒ_[ ( —ÖŠsü )
+ * æ‰‹æ›¸ãé¢¨ç·š ãƒ‡ãƒãƒƒã‚°ç”¨ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ ( è¼ªéƒ­ç·š )
  *
  */
 float4 ps_drawing_line_debug_line( COMMON_POS_UV_COLOR input ) : SV_Target

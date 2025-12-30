@@ -1,14 +1,14 @@
 cbuffer ObjectConstantBuffer : register( b0 )
 {
-	float UvFactor;			// UV ŒW”	( default : 20.f )
-	float TimeFactor;		// ŠÔŒW”	( default : 10.f )
-	float Gain1;			// U• 1	( default : 0.001f )
-	float Gain2;			// U• 2	( default : 0.0005f )
-	float Gain3;			// U• 3	( default : 0.00025f )
+	float UvFactor;			// UV ä¿‚æ•°	( default : 20.f )
+	float TimeFactor;		// æ™‚é–“ä¿‚æ•°	( default : 10.f )
+	float Gain1;			// æŒ¯å¹… 1	( default : 0.001f )
+	float Gain2;			// æŒ¯å¹… 2	( default : 0.0005f )
+	float Gain3;			// æŒ¯å¹… 3	( default : 0.00025f )
 };
 
 /**
- * è•`‚«•—•ÏŠ·ƒ|ƒXƒgƒGƒtƒFƒNƒg
+ * æ‰‹æãé¢¨å¤‰æ›ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
  */
 
 float4 ps_post_effect_hand_drawing( COMMON_POS_UV input ) : SV_Target

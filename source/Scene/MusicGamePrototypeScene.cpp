@@ -111,7 +111,7 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 	{
 		for ( size_t n = 0; n < m->get_shader_count(); n++ )
 		{
-			auto* shader = get_graphics_manager()->get_shader( "lit" )->clone();
+			auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit" ) );
 			shader->set_texture_at( 0, m->get_shader_at( n )->get_texture_at( 0 ) );
 
 			m->set_shader_at( n, shader );

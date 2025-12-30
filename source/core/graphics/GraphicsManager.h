@@ -4,6 +4,7 @@
 #include <core/graphics/PixelFormat.h>
 #include <core/graphics/PrimitiveTopology.h>
 #include <core/ResourceManager.h>
+#include <core/math/Vector.h>
 #include <functional>
 
 namespace core
@@ -105,6 +106,13 @@ public:
 
 	virtual void clear_debug_bullet() const = 0;
 	virtual void render_debug_bullet() const = 0;
+
+	/// 描画回数をカウントする (デバッグ用)
+	virtual void count_draw() const = 0;
+
+	// カメラ情報
+	virtual Vector get_camera_position() const = 0;
+	virtual Vector get_camera_forward() const = 0;
 
 }; // class GraphicsManager
 

@@ -26,9 +26,13 @@ namespace core
 	namespace sound
 	{
 		class SoundEngine;
+		class SoundManager;
 	}
 
-	class SoundManager;
+	namespace physics
+	{
+		class PhysicsManager;
+	}
 
 	namespace graphics::direct_3d_11
 	{
@@ -73,9 +77,9 @@ public:
 
 	using SoundEngine				= core::sound::SoundEngine;
 
-	using PhysicsManager			= ActiveObjectPhysics;
 	using GraphicsManager			= GraphicsManager;
-	using SoundManager				= core::SoundManager;
+	using SoundManager				= core::sound::SoundManager;
+	using PhysicsManager			= core::physics::PhysicsManager;
 
 	using Direct3D					= core::graphics::direct_3d_11::Direct3D11;
 	using BulletDebugDraw			= core::graphics::direct_3d_11::BulletDebugDraw;
@@ -114,6 +118,7 @@ private:
 
 	std::unique_ptr< SoundEngine >			sound_engine_;			///< SoundEngine
 
+	std::unique_ptr< ActiveObjectPhysics >	active_object_physics_;	///< ActiveObjectPhysics (レガシー)
 	std::unique_ptr< PhysicsManager >		physics_manager_;		///< PhysicsManager
 	std::unique_ptr< GraphicsManager >		graphics_manager_;		///< GraphicsManager
 	std::unique_ptr< SoundManager >			sound_manager_;			///< SoundManager
@@ -175,7 +180,7 @@ public:
 	
 	OculusRift* get_oculus_rift() const { return oculus_rift_.get(); }
 
-	PhysicsManager* get_physics_manager() const { return physics_manager_.get(); }
+	ActiveObjectPhysics* get_active_object_physics() const { return active_object_physics_.get(); }
 	GraphicsManager* get_graphics_manager() const { return graphics_manager_.get(); }
 	SoundManager* get_sound_manager() const { return sound_manager_.get(); }
 	ScriptManager* get_script_manager() const { return script_manager_.get(); }

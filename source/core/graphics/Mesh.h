@@ -43,6 +43,7 @@ public:
 
 	virtual void bind() const = 0;
 	virtual void render( uint_t ) const = 0;
+	virtual void render_instanced( uint_t, uint_t ) const = 0;
 };
 
 /**

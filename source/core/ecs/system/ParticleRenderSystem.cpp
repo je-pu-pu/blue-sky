@@ -1,13 +1,10 @@
 #include "ParticleRenderSystem.h"
-#include <blue_sky/graphics/shader/PointSpriteShader.h>
+#include <blue_sky/graphics/shader/PointSpriteShader.h> /// @todo core に移動
+#include <blue_sky/ConstantBuffers.h> /// @todo core に移動
 #include <core/graphics/VertexBuffer.h>
 #include <core/graphics/GraphicsManager.h>
-#include <iostream>
-
-
-#include <blue_sky/GameMain.h>
-#include <blue_sky/ConstantBuffers.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
+#include <iostream>
 
 
 namespace core::ecs

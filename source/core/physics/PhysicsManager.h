@@ -3,7 +3,6 @@
 #include <core/math/Vector.h>
 #include <core/math/Transform.h>
 #include <core/math/Quaternion.h>
-#include <common/Singleton.h>
 #include <vector>
 #include <functional>
 
@@ -76,7 +75,7 @@ struct RigidBodyHandle
  * 物理シミュレーションを管理する。
  * Bullet Physics の詳細を隠蔽し、抽象的なインターフェースを提供する。
  */
-class PhysicsManager : public common::Singleton<PhysicsManager>
+class PhysicsManager
 {
 public:
 	using Vector = math::Vector;

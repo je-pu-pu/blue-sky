@@ -15,7 +15,7 @@ namespace game
 
 namespace core
 {
-	class SoundManager;
+	namespace sound { class SoundManager; }
 
 	namespace ecs
 	{
@@ -68,7 +68,7 @@ public:
 	using EntityManager		= core::ecs::EntityManager;
 	using GraphicsManager	= graphics::GraphicsManager;
 	using PhysicsManager	= ActiveObjectPhysics;
-	using SoundManager		= core::SoundManager;
+	using SoundManager		= core::sound::SoundManager;
 
 	/// @todo 削除する
 	using Direct3D			= core::graphics::direct_3d_11::Direct3D11;
@@ -90,7 +90,7 @@ protected:
 
 	ActiveObjectManager* get_active_object_manager() const;
 
-	PhysicsManager* get_physics_manager() const;
+	ActiveObjectPhysics* get_active_object_physics() const;
 	GraphicsManager* get_graphics_manager() const;
 	SoundManager* get_sound_manager() const;
 	ScriptManager* get_script_manager() const;

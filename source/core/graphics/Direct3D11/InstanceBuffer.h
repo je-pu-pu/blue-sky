@@ -1,7 +1,7 @@
 #pragma once
 
+#include <core/graphics/InstanceBuffer.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/type.h>
 #include <vector>
 
 namespace core::graphics::direct_3d_11
@@ -12,7 +12,7 @@ namespace core::graphics::direct_3d_11
  *
  * 複数のインスタンスのワールド行列を格納する StructuredBuffer
  */
-class InstanceBuffer
+class InstanceBuffer : public core::graphics::InstanceBuffer
 {
 public:
 	static constexpr int MAX_INSTANCES = 1024;
@@ -71,7 +71,7 @@ public:
 	 * @param matrices ワールド行列の配列
 	 * @param count インスタンス数
 	 */
-	void update( const Matrix* matrices, size_t count )
+	void update( const Matrix* matrices, size_t count ) override
 	{
 		if ( count == 0 || count > MAX_INSTANCES )
 		{
@@ -91,7 +91,7 @@ public:
 	/**
 	 * 頂点シェーダーにバインド
 	 */
-	void bind_to_vs() const
+	void bind_to_vs() const override
 	{
 		Direct3D11::get_instance()->getImmediateContext()->VSSetShaderResources( SLOT, 1, &srv_ );
 	}
@@ -99,7 +99,7 @@ public:
 	/**
 	 * バインドを解除
 	 */
-	void unbind_from_vs() const
+	void unbind_from_vs() const override
 	{
 		ID3D11ShaderResourceView* null_srv = nullptr;
 		Direct3D11::get_instance()->getImmediateContext()->VSSetShaderResources( SLOT, 1, &null_srv );
@@ -108,7 +108,7 @@ public:
 	/**
 	 * 現在のインスタンス数を取得
 	 */
-	size_t get_current_count() const { return current_count_; }
+	size_t get_current_count() const override { return current_count_; }
 
 }; // class InstanceBuffer
 

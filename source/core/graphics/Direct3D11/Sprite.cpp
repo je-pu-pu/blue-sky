@@ -3,9 +3,9 @@
 #include "EffectTechnique.h"
 #include "EffectPass.h"
 #include "Direct3D11.h"
-#include <blue_sky/GameMain.h>
-#include <blue_sky/graphics/GraphicsManager.h>
-#include <core/graphics/Direct3D11/ConstantBuffer.h>
+#include "ConstantBufferTyped.h"
+#include <core/Service.h>
+#include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Texture.h>
 #include <win/Rect.h>
 
@@ -185,7 +185,7 @@ void Sprite::draw( const Rect* dst, const Texture* texture, const Rect* src, con
 		direct_3d_->getImmediateContext()->DrawIndexed( 4, 0, 0 );
 	}
 
-	blue_sky::GameMain::get_instance()->get_graphics_manager()->count_draw();
+	core::get_graphics_manager()->count_draw();
 }
 
 } // namespace core::graphics::direct_3d_11

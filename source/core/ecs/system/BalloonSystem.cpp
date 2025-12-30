@@ -1,5 +1,6 @@
 #include "BalloonSystem.h"
 #include <core/ecs/EntityManager.h>
+#include <core/Service.h>
 #include <core/physics/PhysicsManager.h>
 
 namespace core::ecs
@@ -7,7 +8,7 @@ namespace core::ecs
 
 void BalloonSystem::update()
 {
-	auto* physics_manager = core::physics::PhysicsManager::get_instance();
+	auto* physics_manager = core::get_physics_manager();
 
 	if ( ! physics_manager )
 	{

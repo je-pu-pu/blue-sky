@@ -17,6 +17,7 @@
 #include <core/ecs/system/PhysicsSystem.h>
 
 #include <core/ecs/EntityManager.h>
+#include <core/Service.h>
 #include <core/physics/PhysicsManager.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 
@@ -36,7 +37,7 @@ PhysicsTestScene::PhysicsTestScene()
 	get_graphics_manager()->load_paper_textures();
 
 	// PhysicsManager にデバッグ描画を設定
-	core::physics::PhysicsManager::get_instance()->set_debug_drawer( GameMain::get_instance()->get_bullet_debug_draw() );
+	core::get_physics_manager()->set_debug_drawer( GameMain::get_instance()->get_bullet_debug_draw() );
 
 	// System を追加する
 	get_entity_manager()->add_system< core::ecs::TransformControlSystem >();

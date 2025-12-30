@@ -83,7 +83,7 @@ GamePlayScene::GamePlayScene()
 	}
 
 	// Physics
-	get_physics_manager()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
+	get_active_object_physics()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
 
 	// Texture
 	ui_texture_ = get_graphics_manager()->load_named_texture( "ui", "media/image/item.png" );
@@ -160,7 +160,7 @@ GamePlayScene::~GamePlayScene()
 	get_graphics_manager()->unload_texture_all();
 #endif
 
-	get_physics_manager()->clear();
+	get_active_object_physics()->clear();
 	
 	clear_delayed_command();
 
@@ -799,7 +799,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			ss >> collision_file_name;
 
-			get_physics_manager()->load_obj( ( StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + collision_file_name ).c_str() );
+			get_active_object_physics()->load_obj( ( StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + collision_file_name ).c_str() );
 		}
 		else if ( command == "player" )
 		{
@@ -808,7 +808,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> x >> y >> z;
 
 			player_->set_start_location( x, y, z );
-			player_->set_rigid_body( get_physics_manager()->add_active_object_as_capsule( player_ ) );
+			player_->set_rigid_body( get_active_object_physics()->add_active_object_as_capsule( player_ ) );
 
 			if ( ! ss.eof() )
 			{
@@ -857,7 +857,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			Model* model = get_graphics_manager()->load_model( "box-5x5x5" );
 			
 			object->set_model( model );
-			object->set_rigid_body( get_physics_manager()->add_active_object_as_box( object ) );
+			object->set_rigid_body( get_active_object_physics()->add_active_object_as_box( object ) );
 			object->set_start_location( x, y, z );
 
 			get_active_object_manager()->add_active_object( object );
@@ -897,7 +897,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			ss >> x >> y >> z >> w >> h >> d >> r;
 
 			AreaSwitch* s = new AreaSwitch( w, h, d );
-			s->set_rigid_body( get_physics_manager()->add_active_object_as_box( s ) );
+			s->set_rigid_body( get_active_object_physics()->add_active_object_as_box( s ) );
 			s->set_start_location( x, y, z );
 			s->set_start_direction_degree( r );
 
@@ -1033,7 +1033,7 @@ void GamePlayScene::update()
 	if ( ! is_cleared_ )
 	{
 		get_graphics_manager()->clear_debug_bullet();
-		get_physics_manager()->update( get_elapsed_time() );
+		get_active_object_physics()->update( get_elapsed_time() );
 
 		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
 		{
@@ -1046,14 +1046,14 @@ void GamePlayScene::update()
 	
 
 	// collision_check
-	get_physics_manager()->check_collision_with( player_ );
+	get_active_object_physics()->check_collision_with( player_ );
 
-	if ( get_physics_manager()->is_collision( player_, goal_ ) )
+	if ( get_active_object_physics()->is_collision( player_, goal_ ) )
 	{
 		on_goal();
 	}
 	
-	get_physics_manager()->check_collision_all();
+	get_active_object_physics()->check_collision_all();
 
 	get_sound_manager()->set_listener_position( camera_->position().xyz() );
 	// get_sound_manager()->set_listener_velocity( player_->get_velocity() );

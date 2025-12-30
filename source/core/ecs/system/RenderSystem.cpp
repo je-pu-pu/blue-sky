@@ -1,11 +1,10 @@
 #include "RenderSystem.h"
-#include <blue_sky/ConstantBuffers.h> /// @todo core から blue_sky を参照しているのは変なので、基本的な ConstatntBuffer は core に移す
-#include <blue_sky/graphics/GraphicsManager.h>
-#include <blue_sky/graphics/Model.h>
-#include <blue_sky/graphics/shader/LitInstancedShader.h>
-#include <Scene/Scene.h>
+#include <blue_sky/ConstantBuffers.h> /// @todo core から blue_sky を参照しているのは変なので、基本的な ConstantBuffer は core に移す
+#include <blue_sky/graphics/Model.h> /// @todo core::graphics::Model に仮想関数を追加して解消する
+#include <Scene/Scene.h> /// @todo Service に時間情報を追加して解消する
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Model.h>
+#include <core/graphics/Shader.h>
 #include <core/graphics/RenderTargetTexture.h>
 
 #include <common/math.h>
@@ -42,15 +41,8 @@ void RenderSystem::update()
 	get_graphics_manager()->render_background();
 
 	// カメラ位置を取得してカリングに使用
-	auto* bs_graphics_manager = static_cast< blue_sky::graphics::GraphicsManager* >( get_graphics_manager() );
-	Vector camera_position( 0.f, 0.f, 0.f );
-	Vector camera_forward( 0.f, 0.f, 1.f );
-
-	if ( bs_graphics_manager )
-	{
-		camera_position = bs_graphics_manager->get_camera_position();
-		camera_forward = bs_graphics_manager->get_camera_forward();
-	}
+	Vector camera_position = get_graphics_manager()->get_camera_position();
+	Vector camera_forward = get_graphics_manager()->get_camera_forward();
 
 	const float culling_distance_sq = culling_distance_ * culling_distance_;
 
@@ -91,8 +83,7 @@ void RenderSystem::update()
 	}
 
 	// インスタンシングシェーダーを取得
-	auto* instanced_shader = static_cast< blue_sky::graphics::shader::LitInstancedShader* >(
-		get_graphics_manager()->get_shader( "lit_instanced" ) );
+	auto* instanced_shader = get_graphics_manager()->get_shader( "lit_instanced" );
 
 	// 各モデルグループを描画
 	for ( auto& [ base_model, matrices ] : model_instances )

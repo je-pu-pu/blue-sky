@@ -185,6 +185,7 @@
     <ClInclude Include="core\animation\SkinningAnimation.h" />
     <ClInclude Include="core\animation\SkinningAnimationSet.h" />
     <ClInclude Include="core\DirectX.h" />
+    <ClInclude Include="core\Service.h" />
     <ClInclude Include="core\ecs\BaseSystem.h" />
     <ClInclude Include="core\ecs\Component.h" />
     <ClInclude Include="core\ecs\component\CameraComponent.h" />
@@ -256,6 +257,7 @@
     <ClInclude Include="core\graphics\VertexBuffer.h" />
     <ClInclude Include="core\graphics\VertexGroup.h" />
     <ClInclude Include="core\input\DirectInput\DirectInput.h" />
+    <ClInclude Include="core\input\InputManager.h" />
     <ClInclude Include="core\Logger.h" />
     <ClInclude Include="core\math.h" />
     <ClInclude Include="core\math\Bullet\Quaternion.h" />

@@ -14,14 +14,12 @@ struct SoundFormat;
 
 }
 
-namespace core
+namespace core::sound
 {
-	namespace sound
-	{
-		class SoundEngine;
-		class SoundBuffer;
-		class SoundFilter;
-	}
+
+class SoundEngine;
+class SoundBuffer;
+class SoundFilter;
 
 /**
  * サウンド管理クラス
@@ -30,10 +28,6 @@ namespace core
 class SoundManager : public game::SoundManager
 {
 public:
-	using SoundEngine = sound::SoundEngine;
-	using SoundBuffer = sound::SoundBuffer;
-	using SoundFilter = sound::SoundFilter;
-
 	using SoundFormat = game::SoundFormat;
 
 private:
@@ -71,4 +65,4 @@ public:
 
 }; // class SoundManager
 
-} // namespace core
+} // namespace core::sound

@@ -429,6 +429,9 @@
     <ClInclude Include="core\input\DirectInput\DirectInput.h">
       <Filter>core\DirectInput</Filter>
     </ClInclude>
+    <ClInclude Include="core\input\InputManager.h">
+      <Filter>core\input</Filter>
+    </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
@@ -825,7 +828,6 @@
     <ClInclude Include="core\Logger.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="core\math\DirectXMath\Transform.h" />
     <ClInclude Include="core\math\DirectXMath\Quaternion.h" />
     <ClInclude Include="blue_sky\graphics\shader\PointSpriteShader.h" />
     <ClInclude Include="core\graphics\Direct3D11\VertexBuffer.h" />
@@ -899,6 +901,12 @@
     </ClInclude>
     <ClInclude Include="core\ecs\component\BalloonComponent.h">
       <Filter>core\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\DirectXMath\Transform.h">
+      <Filter>core\math\DirectXMath</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Service.h">
+      <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1077,6 +1085,9 @@
     </Filter>
     <Filter Include="core\DirectInput">
       <UniqueIdentifier>{4ae0ef67-2726-447f-9bb4-682d730461bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\input">
+      <UniqueIdentifier>{a1b2c3d4-e5f6-7890-abcd-ef1234567890}</UniqueIdentifier>
     </Filter>
     <Filter Include="media">
       <UniqueIdentifier>{b24d6732-297b-4a28-bff0-ac59442e19a1}</UniqueIdentifier>

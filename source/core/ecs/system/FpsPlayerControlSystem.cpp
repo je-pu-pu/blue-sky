@@ -1,6 +1,6 @@
 #include "FpsPlayerControlSystem.h"
-#include <blue_sky/GameMain.h>
-#include <blue_sky/Input.h>
+#include <core/Service.h>
+#include <core/input/InputManager.h>
 #include <core/physics/PhysicsManager.h>
 #include <common/math.h>
 #include <cmath>
@@ -10,11 +10,11 @@ namespace core::ecs
 
 void FpsPlayerControlSystem::update( ComponentTuple& component_tuple ) const
 {
-	using namespace blue_sky;
 	using Vector = core::math::Vector;
+	using Button = core::input::Button;
 
-	const auto* input = GameMain::get_instance()->get_input();
-	auto* physics_manager = core::physics::PhysicsManager::get_instance();
+	const auto* input = core::get_input_manager();
+	auto* physics_manager = core::get_physics_manager();
 
 	auto* fps_player = std::get< FpsPlayerComponent* >( component_tuple );
 	auto* rigid_body = std::get< RigidBodyComponent* >( component_tuple );
@@ -45,14 +45,14 @@ void FpsPlayerControlSystem::update( ComponentTuple& component_tuple ) const
 	float move_x = 0.f; // 左右
 	float move_z = 0.f; // 前後
 
-	if ( input->press( Input::Button::LEFT ) )  { move_x -= 1.f; }
-	if ( input->press( Input::Button::RIGHT ) ) { move_x += 1.f; }
-	if ( input->press( Input::Button::UP ) )    { move_z += 1.f; }
-	if ( input->press( Input::Button::DOWN ) )  { move_z -= 1.f; }
+	if ( input->press( Button::LEFT ) )  { move_x -= 1.f; }
+	if ( input->press( Button::RIGHT ) ) { move_x += 1.f; }
+	if ( input->press( Button::UP ) )    { move_z += 1.f; }
+	if ( input->press( Button::DOWN ) )  { move_z -= 1.f; }
 
 	// --- 3. 移動速度の計算 ---
 	float speed = fps_player->move_speed;
-	if ( input->press( Input::Button::R2 ) )
+	if ( input->press( Button::R2 ) )
 	{
 		speed *= fps_player->sprint_multiplier;
 	}
@@ -102,7 +102,7 @@ void FpsPlayerControlSystem::update( ComponentTuple& component_tuple ) const
 		physics_manager->activate_rigid_body( rigid_body->handle );
 
 		// --- 6. ジャンプ処理 ---
-		if ( fps_player->is_grounded && input->push( Input::Button::JUMP ) )
+		if ( fps_player->is_grounded && input->push( Button::JUMP ) )
 		{
 			Vector jump_impulse( 0.f, fps_player->jump_impulse, 0.f );
 			physics_manager->apply_impulse( rigid_body->handle, jump_impulse );

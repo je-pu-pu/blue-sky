@@ -9,7 +9,7 @@
 
 #include <string>
 
-namespace core
+namespace core::sound
 {
 
 SoundManager::SoundManager( SoundEngine* sound_engine )
@@ -152,4 +152,4 @@ const SoundManager::SoundFormat& SoundManager::get_format() const
 	return sound_engine_->get_format();
 }
 
-} // namespace core
+} // namespace core::sound

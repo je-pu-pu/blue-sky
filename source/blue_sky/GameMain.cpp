@@ -17,6 +17,7 @@
 #include <blue_sky/graphics/Direct3D11/GraphicsManager.h>
 
 #include <core/ecs/EntityManager.h>
+#include <core/Service.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 #include <core/graphics/Direct3D11/Effect.h>
@@ -31,6 +32,7 @@
 #include <core/sound/Sound.h>
 
 #include <core/input/DirectInput/DirectInput.h>
+#include <core/physics/PhysicsManager.h>
 
 #include <core/Logger.h>
 
@@ -130,8 +132,10 @@ GameMain::GameMain()
 
 	SceneManager::get_instance()->register_all_scene();
 
-	physics_manager_.reset( new ActiveObjectPhysics() );
-	physics_manager_->setDebugDrawer( bullet_debug_draw_.get() );
+	active_object_physics_.reset( new ActiveObjectPhysics() );
+	active_object_physics_->setDebugDrawer( bullet_debug_draw_.get() );
+
+	physics_manager_.reset( new core::physics::PhysicsManager() );
 
 	graphics_manager_.reset( new blue_sky::graphics::direct_3d_11::GraphicsManager( direct_3d_.get() ) );
 	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "graphics.debug_axis", 0 ) != 0 );
@@ -145,6 +149,12 @@ GameMain::GameMain()
 	sound_manager_->load( "ok" );
 	sound_manager_->load( "cancel" );
 	sound_manager_->load( "click" );
+
+	// Service に登録
+	core::Service::get_instance()->set_graphics_manager( graphics_manager_.get() );
+	core::Service::get_instance()->set_sound_manager( sound_manager_.get() );
+	core::Service::get_instance()->set_input_manager( input_.get() );
+	core::Service::get_instance()->set_physics_manager( physics_manager_.get() );
 
 	script_manager_.reset( new ScriptManager() );
 	script_manager_->load_command_history( "log/script.log" );
@@ -264,7 +274,7 @@ ActiveObject* GameMain::create_object( const char_t* class_name ) const
 		return 0;
 	}
 
-	active_object->set_rigid_body( get_physics_manager()->add_active_object_as_box( active_object ) );
+	active_object->set_rigid_body( get_active_object_physics()->add_active_object_as_box( active_object ) );
 	active_object->set_model( get_graphics_manager()->load_model( class_name ) );
 
 	/// @todo 同じ種類の複数の ActiveObject が、Shader を共有せず、個別に保持できるようにする

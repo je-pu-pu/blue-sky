@@ -165,7 +165,7 @@ public:
 
 	void bind() const override { buffer_->bind(); }
 	void render( uint_t n ) const override { buffer_->render( n ); }
-	void render_instanced( uint_t n, uint_t instance_count ) const { buffer_->render_instanced( n, instance_count ); }
+	void render_instanced( uint_t n, uint_t instance_count ) const override { buffer_->render_instanced( n, instance_count ); }
 
 }; // class Mesh
 

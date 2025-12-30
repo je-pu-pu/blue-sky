@@ -190,11 +190,11 @@ ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss )
 
 	if ( object_name == "soda-can-1" )
 	{
-		object->set_rigid_body( GameMain::get_instance()->get_physics_manager()->add_active_object_as_cylinder( object ) );
+		object->set_rigid_body( GameMain::get_instance()->get_active_object_physics()->add_active_object_as_cylinder( object ) );
 	}
 	else
 	{
-		object->set_rigid_body( GameMain::get_instance()->get_physics_manager()->add_active_object_as_box( object ) );
+		object->set_rigid_body( GameMain::get_instance()->get_active_object_physics()->add_active_object_as_box( object ) );
 	}
 
 	object->set_mass( mass );

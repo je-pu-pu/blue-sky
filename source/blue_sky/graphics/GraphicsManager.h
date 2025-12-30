@@ -270,7 +270,7 @@ public:
 	/**
 	 * カメラの位置を取得する
 	 */
-	Vector get_camera_position() const
+	Vector get_camera_position() const override
 	{
 		if ( main_camera_transform_component_ && main_camera_component_ )
 		{
@@ -282,7 +282,7 @@ public:
 	/**
 	 * カメラの前方ベクトルを取得する
 	 */
-	Vector get_camera_forward() const
+	Vector get_camera_forward() const override
 	{
 		if ( main_camera_transform_component_ )
 		{
@@ -296,7 +296,7 @@ public:
 	uint_t get_pass_count() const { return pass_count_; }
 
 	void clear_draw_count() const { draw_count_ = 0; }
-	void count_draw() const { draw_count_++; }
+	void count_draw() const override { draw_count_++; }
 	uint_t get_draw_count() const { return draw_count_; }
 
 	void debug_print_resources() const;

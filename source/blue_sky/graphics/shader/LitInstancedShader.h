@@ -1,14 +1,11 @@
 #pragma once
 
 #include <blue_sky/graphics/shader/BaseShader.h>
-#include <blue_sky/graphics/Mesh.h>
-#include <core/graphics/Direct3D11/InstanceBuffer.h>
+#include <core/graphics/Mesh.h>
+#include <core/graphics/InstanceBuffer.h>
 
 namespace blue_sky::graphics::shader
 {
-
-using BlueSkyMesh = blue_sky::graphics::Mesh;
-using InstanceBuffer = core::graphics::direct_3d_11::InstanceBuffer;
 
 /**
  * インスタンシング対応のシェーダー
@@ -66,7 +63,7 @@ public:
 	/**
 	 * インスタンシング描画
 	 */
-	void render_instanced( const BlueSkyMesh* mesh, uint_t n, uint_t instance_count, const InstanceBuffer* instance_buffer ) const
+	void render_instanced( const core::graphics::Mesh* mesh, uint_t n, uint_t instance_count, const core::graphics::InstanceBuffer* instance_buffer ) const override
 	{
 		get_graphics_manager()->set_input_layout( render_setting_.get_input_layout() );
 		get_graphics_manager()->set_primitive_topology( PrimitiveTopology::TRIANGLE_LIST );

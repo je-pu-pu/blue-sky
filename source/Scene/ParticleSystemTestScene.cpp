@@ -25,7 +25,7 @@ ParticleSystemTestScene::ParticleSystemTestScene()
 	: camera_( EntityManager::get_instance()->create_entity() )
 {
 	// Physics
-	get_physics_manager()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
+	get_active_object_physics()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
 
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
@@ -64,7 +64,7 @@ void ParticleSystemTestScene::update()
 	get_graphics_manager()->update();
 
 	get_graphics_manager()->clear_debug_bullet();
-	get_physics_manager()->update( get_elapsed_time() );
+	get_active_object_physics()->update( get_elapsed_time() );
 }
 
 void ParticleSystemTestScene::render()

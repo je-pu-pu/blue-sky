@@ -40,7 +40,7 @@ DebugScene::DebugScene()
 	, render_result_texture_( get_graphics_manager()->create_render_target_texture() )
 {
 	// Physics
-	get_physics_manager()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
+	get_active_object_physics()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
 
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
@@ -156,7 +156,7 @@ void DebugScene::update()
 	get_graphics_manager()->set_eye_position( camera_->position() );
 
 	get_graphics_manager()->clear_debug_bullet();
-	get_physics_manager()->update( get_elapsed_time() );
+	get_active_object_physics()->update( get_elapsed_time() );
 
 	auto* hand_drawing_shader = get_graphics_manager()->get_shader< graphics::shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing" );
 	hand_drawing_shader->render_parameter_gui();

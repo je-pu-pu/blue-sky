@@ -1,4 +1,5 @@
 #include "PhysicsSystem.h"
+#include <core/Service.h>
 #include <core/physics/PhysicsManager.h>
 #include <core/math/Quaternion.h>
 #include <btBulletDynamicsCommon.h>
@@ -18,7 +19,7 @@ void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, Trans
 		return;
 	}
 
-	auto* physics_manager = PhysicsManager::get_instance();
+	auto* physics_manager = core::get_physics_manager();
 
 	if ( ! physics_manager )
 	{
@@ -55,7 +56,7 @@ void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, Trans
 
 void PhysicsSystem::update()
 {
-	auto* physics_manager = PhysicsManager::get_instance();
+	auto* physics_manager = core::get_physics_manager();
 
 	if ( ! physics_manager )
 	{

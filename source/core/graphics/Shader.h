@@ -10,6 +10,7 @@ namespace core::graphics
 	class Model;
 	class Mesh;
 	class Texture;
+	class InstanceBuffer;
 
 /**
  * 抽象シェーダークラス
@@ -98,6 +99,10 @@ public:
 	virtual void bind() const = 0;
 	virtual void render_model( const Model* ) const = 0;
 	virtual void render( const Mesh*, uint_t ) const = 0;
+
+	// インスタンシング描画 (デフォルトは何もしない)
+	virtual void set_texture( Texture* t ) { set_texture_at( 0, t ); }
+	virtual void render_instanced( const Mesh*, uint_t, uint_t, const InstanceBuffer* ) const { }
 
 	virtual void render_parameter_gui();
 

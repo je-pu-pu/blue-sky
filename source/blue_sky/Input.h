@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <core/input/InputManager.h>
 #include <type/type.h>
 
 #include <windows.h>
@@ -39,15 +40,10 @@ namespace blue_sky
  *
  * @todo Windows と切り離す
  */
-class Input
+class Input : public core::input::InputManager
 {
 public:
-	/**
-	 * ボタンの定義
-	 *
-	 * 上下左右と A, B, X, Y のボタンを持つ
-	 */
-	enum class Button { LEFT, RIGHT, UP, DOWN, A, B, JUMP, L, R, L2, R2, ESCAPE, MAX, NONE };
+	using Button = core::input::Button;
 
 	using Config				= game::Config;
 
@@ -139,7 +135,7 @@ public:
 	 * @param button 調べるボタン
 	 * @return 現在ボタンが押されている場合は true を、そうでない場合は false を返す
 	 */
-	bool press( Button button ) const
+	bool press( Button button ) const override
 	{
 		return ( state_[ static_cast< int >( button ) ] & 1 ) > 0;
 	}
@@ -150,7 +146,7 @@ public:
 	 * @param button 調べるボタン
 	 * @return たった今ボタンが押された場合は true を、そうでない場合は false を返す
 	 */
-	bool push( Button button ) const
+	bool push( Button button ) const override
 	{
 		if ( static_cast< int >( button ) < 0 || button >= Button::MAX )
 		{
@@ -166,7 +162,7 @@ public:
 	 * button 調べるボタン
 	 * @return たった今ボタンが離された場合は true を、そうでない場合は false を返す
 	 */
-	bool release( Button button ) const
+	bool release( Button button ) const override
 	{
 		return ( state_[ static_cast< int >( button ) ] & 1 ) == 0 && ( state_[ static_cast< int >( button ) ] & 2 ) > 0;
 	}
@@ -195,8 +191,8 @@ public:
 		return null_input;
 	}
 
-	int get_mouse_x() const { return mouse_point_.x; }
-	int get_mouse_y() const { return mouse_point_.y; }
+	int get_mouse_x() const override { return mouse_point_.x; }
+	int get_mouse_y() const override { return mouse_point_.y; }
 
 	float get_mouse_x_rate() const { return mouse_x_rate_; }
 	float get_mouse_y_rate() const { return mouse_y_rate_; }
@@ -204,14 +200,14 @@ public:
 	/**
 	 * @brief マウスの移動量をクリアする
 	 */
-	void clear_mouse_move()
+	void clear_mouse_move() override
 	{
 		mouse_dx_ = 0.f;
 		mouse_dy_ = 0.f;
 	}
 
-	float get_mouse_dx() const { return mouse_dx_; }
-	float get_mouse_dy() const { return mouse_dy_; }
+	float get_mouse_dx() const override { return mouse_dx_; }
+	float get_mouse_dy() const override { return mouse_dy_; }
 
 //	void set_mouse_x_rate( float );
 //	void set_mouse_y_rate( float );

@@ -22,7 +22,7 @@ struct FrameConstantBufferData
 	float_t time = 0.f;
 	u32_t time_beat = 0;
 	float_t tess_factor = 1.f;
-	float_t dummy = 0.f;
+	float_t beat_progress = 0.f; // ビート進行度 (1.0 → 0.0)
 };
 
 struct ObjectConstantBufferData

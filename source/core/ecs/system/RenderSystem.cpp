@@ -25,7 +25,7 @@ void RenderSystem::update()
 
 	get_graphics_manager()->setup_rendering();
 
-	const auto is_post_effect_enabled = false;
+	const auto is_post_effect_enabled = true;
 
 	if ( is_post_effect_enabled )
 	{
@@ -55,14 +55,14 @@ void RenderSystem::update()
 		model->model->render();
 	}
 
-	core::graphics::Shader* ca_shader = nullptr;
+	core::graphics::Shader* beat_pulse_shader = nullptr;
 
 	if ( is_post_effect_enabled )
 	{
-		ca_shader = get_graphics_manager()->get_shader( "post_effect_chromatic_aberration" );
+		beat_pulse_shader = get_graphics_manager()->get_shader( "post_effect_beat_pulse" );
 
-		get_graphics_manager()->set_post_effect_shader( ca_shader );
-		get_graphics_manager()->render_post_effect( render_result_texture_1_.get(), render_result_texture_2_.get() );
+		get_graphics_manager()->set_post_effect_shader( beat_pulse_shader );
+		get_graphics_manager()->render_post_effect( render_result_texture_1_.get() ); // 直接バックバッファへ
 
 
 		/*
@@ -75,13 +75,10 @@ void RenderSystem::update()
 
 		// get_graphics_manager()->set_post_effect_shader( get_graphics_manager()->get_shader( "post_effect_hand_drawing" ) );
 
-		/// @todo ノイズ用のテクスチャは 0 番に設定しつつ、HLSL では t1 として使えるようにバインドできるようにする ( t0 はポストエフェクト対象 )
-		noise_shader->set_texture_at( 1, get_graphics_manager()->load_texture( "media/texture/noise.png" ) );
-
-		get_graphics_manager()->set_post_effect_shader( noise_shader );
-		get_graphics_manager()->render_post_effect( render_result_texture_2_.get() );
-
-		get_graphics_manager()->set_default_render_target();
+		// ノイズシェーダーは無効化
+		// noise_shader->set_texture_at( 1, get_graphics_manager()->load_texture( "media/texture/noise.png" ) );
+		// get_graphics_manager()->set_post_effect_shader( noise_shader );
+		// get_graphics_manager()->render_post_effect( render_result_texture_2_.get() );
 	}
 
 	// get_graphics_manager()->render_fader();
@@ -92,7 +89,7 @@ void RenderSystem::update()
 
 	if ( is_post_effect_enabled )
 	{
-		ca_shader->render_parameter_gui();
+		beat_pulse_shader->render_parameter_gui();
 	}
 }
 

@@ -20,7 +20,13 @@
 #include <core/physics/PhysicsManager.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 
+#include <core/sound/SoundManager.h>
+#include <core/sound/SoundEngine.h>
+#include <core/sound/MidiSequencer.h>
+
 #include <common/random.h>
+
+#include <algorithm>
 
 namespace blue_sky
 {
@@ -134,6 +140,12 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 			building_rigid_body->mass = 0.f; // 静的オブジェクト
 		}
 	}
+
+	// MIDI シーケンサーを初期化
+	midi_sequencer_ = std::make_unique< core::sound::MidiSequencer >(
+		"media/music/gun.mid",
+		get_sound_manager()->get_sound_engine()->get_midi_synthesizer()
+	);
 }
 
 void MusicGamePrototypeScene::update()
@@ -163,6 +175,20 @@ void MusicGamePrototypeScene::update()
 	get_graphics_manager()->clear_debug_bullet();
 
 	get_entity_manager()->update();
+
+	// MIDI シーケンサーを処理
+	midi_sequencer_->process();
+
+	// ビート進行度を計算 (1.0 → 0.0)
+	// get_ticks() は現在のビート内での経過 ticks を返す
+	float beat_progress = 0.f;
+	const float ticks_per_beat = midi_sequencer_->get_ticks_per_beat();
+	if ( ticks_per_beat > 0.f )
+	{
+		beat_progress = 1.f - static_cast< float >( midi_sequencer_->get_ticks() ) / ticks_per_beat;
+		beat_progress = std::clamp( beat_progress, 0.f, 1.f );
+	}
+	get_graphics_manager()->get_frame_render_data()->data().beat_progress = beat_progress;
 }
 
 void MusicGamePrototypeScene::render()

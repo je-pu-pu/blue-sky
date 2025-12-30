@@ -331,6 +331,7 @@ void GraphicsManager::setup_default_shaders()
 
 	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_id_to_color", "main", "post_effect_id_to_color" );
 	create_named_shader< shader::post_effect::NoiseShader >( "post_effect_noise", "main", "post_effect_noise" );
+	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_beat_pulse", "main", "post_effect_beat_pulse" );
 	// auto noise_shader = create_named_shader< shader::post_effect::NoiseShader >( "post_effect_noise", "main", "post_effect_noise" );
 
 	create_named_shader< shader::DebugShadowMapTextureShader >( "debug_shadow_map_texture" );

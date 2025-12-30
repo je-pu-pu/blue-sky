@@ -6,8 +6,8 @@
 #include <libremidi/libremidi.hpp>
 #include <libremidi/reader.hpp>
 
-
 #include <chrono>
+#include <fstream>
 
 namespace core::sound
 {

@@ -581,3 +581,4 @@ technique11 line_cube
 #include "post_effect/hand_drawing.hlsl"
 #include "post_effect/id_to_color.hlsl"
 #include "post_effect/noise.hlsl"
+#include "post_effect/beat_pulse.hlsl"

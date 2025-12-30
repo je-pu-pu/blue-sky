@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Scene.h"
+#include <memory>
 
 namespace core::ecs
 {
@@ -10,6 +11,11 @@ namespace core::ecs
 	class ModelComponent;
 	class CameraComponent;
 	struct FpsPlayerComponent;
+}
+
+namespace core::sound
+{
+	class MidiSequencer;
 }
 
 namespace blue_sky
@@ -39,6 +45,8 @@ protected:
 	TransformComponent* player_transform_ = nullptr;
 	CameraComponent* player_camera_ = nullptr;
 	FpsPlayerComponent* fps_player_ = nullptr;
+
+	std::unique_ptr< core::sound::MidiSequencer > midi_sequencer_;
 
 public:
 	explicit MusicGamePrototypeScene();

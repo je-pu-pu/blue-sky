@@ -17,7 +17,13 @@ COMMON_POS_UV_COLOR vs_lit( COMMON_POS_NORM_UV input )
  */
 float4 ps_lit( COMMON_POS_UV_COLOR input ) : SV_Target
 {
-	return model_texture.Sample( wrap_texture_sampler, input.TexCoord ) * input.Color;
+	// ビート同期の明るさ (BeatProgress: 1.0 -> 0.0)
+	float beatBrightness = 1.0f + pow( BeatProgress, 0.5f ) * 0.5f;
+
+	float4 color = model_texture.Sample( wrap_texture_sampler, input.TexCoord ) * input.Color;
+	color.rgb *= beatBrightness;
+
+	return color;
 }
 
 // シェーディングあり・スキニングなし

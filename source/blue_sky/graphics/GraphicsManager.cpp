@@ -466,8 +466,8 @@ void GraphicsManager::setup_rendering()
 	const auto& camera_transform = main_camera_transform_component_->transform;
 	const auto* camera_component = main_camera_component_;
 
-	const auto& eye = camera_transform.get_position();
-	const auto at = camera_transform.get_position() + camera_transform.forward();
+	const auto eye = camera_transform.get_position() + camera_component->eye_offset;
+	const auto at = eye + camera_transform.forward();
 	const auto up = camera_transform.up();
 
 	const auto aspect = static_cast< float >( GameMain::get_instance()->get_width() ) / static_cast< float >( GameMain::get_instance()->get_height() );

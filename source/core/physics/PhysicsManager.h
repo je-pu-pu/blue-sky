@@ -128,6 +128,49 @@ public:
 	 */
 	btDynamicsWorld* get_dynamics_world();
 
+	/**
+	 * 剛体の線形速度を設定する
+	 */
+	void set_rigid_body_linear_velocity( const RigidBodyHandle& handle, const Vector& velocity );
+
+	/**
+	 * 剛体の線形速度を取得する
+	 */
+	Vector get_rigid_body_linear_velocity( const RigidBodyHandle& handle ) const;
+
+	/**
+	 * 剛体の角速度係数を設定する (回転の制限)
+	 * @param factor 各軸の係数 (0 = 回転なし, 1 = 通常)
+	 */
+	void set_rigid_body_angular_factor( const RigidBodyHandle& handle, const Vector& factor );
+
+	/**
+	 * 剛体にインパルスを適用する (ジャンプ用)
+	 */
+	void apply_impulse( const RigidBodyHandle& handle, const Vector& impulse );
+
+	/**
+	 * 剛体をアクティブ化する (スリープ解除)
+	 */
+	void activate_rigid_body( const RigidBodyHandle& handle );
+
+	/**
+	 * レイキャストを行う (接地判定用)
+	 * @param from 開始点
+	 * @param to 終点
+	 * @return ヒットした場合 true
+	 */
+	bool ray_test( const Vector& from, const Vector& to ) const;
+
+	/**
+	 * レイキャストを行う (自分自身を除外)
+	 * @param from 開始点
+	 * @param to 終点
+	 * @param exclude 除外する剛体
+	 * @return ヒットした場合 true
+	 */
+	bool ray_test_excluding( const Vector& from, const Vector& to, const RigidBodyHandle& exclude ) const;
+
 }; // class PhysicsManager
 
 } // namespace core::physics

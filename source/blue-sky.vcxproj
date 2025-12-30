@@ -47,6 +47,7 @@
     <ClCompile Include="core\ecs\Entity.cpp" />
     <ClCompile Include="core\ecs\System.cpp" />
     <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp" />
+    <ClCompile Include="core\ecs\system\FpsPlayerControlSystem.cpp" />
     <ClCompile Include="core\ecs\system\ParticleSystem.cpp" />
     <ClCompile Include="core\ecs\system\PhysicsSystem.cpp" />
     <ClCompile Include="core\ecs\system\RenderSystem.cpp" />
@@ -186,6 +187,7 @@
     <ClInclude Include="core\ecs\BaseSystem.h" />
     <ClInclude Include="core\ecs\Component.h" />
     <ClInclude Include="core\ecs\component\CameraComponent.h" />
+    <ClInclude Include="core\ecs\component\FpsPlayerComponent.h" />
     <ClInclude Include="core\ecs\component\ModelComponent.h" />
     <ClInclude Include="core\ecs\component\ParticleSystemComponent.h" />
     <ClInclude Include="core\ecs\component\RenderComponent.h" />
@@ -194,6 +196,7 @@
     <ClInclude Include="core\ecs\component\TransformControlComponent.h" />
     <ClInclude Include="core\ecs\Entity.h" />
     <ClInclude Include="core\ecs\System.h" />
+    <ClInclude Include="core\ecs\system\FpsPlayerControlSystem.h" />
     <ClInclude Include="core\ecs\system\ParticleRenderSystem.h" />
     <ClInclude Include="core\ecs\system\ParticleSystem.h" />
     <ClInclude Include="core\ecs\system\PhysicsSystem.h" />
@@ -508,6 +511,9 @@
   <ItemGroup>
     <FxCompile Include="media\shader\lit.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">

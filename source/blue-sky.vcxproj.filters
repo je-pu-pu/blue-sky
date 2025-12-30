@@ -318,6 +318,9 @@
     <ClCompile Include="core\ecs\system\PhysicsSystem.cpp">
       <Filter>core\ecs\system</Filter>
     </ClCompile>
+    <ClCompile Include="core\ecs\system\FpsPlayerControlSystem.cpp">
+      <Filter>core\ecs\system</Filter>
+    </ClCompile>
     <ClCompile Include="core\physics\RigidBody.cpp">
       <Filter>core\physics</Filter>
     </ClCompile>
@@ -864,7 +867,13 @@
     <ClInclude Include="core\ecs\system\PhysicsSystem.h">
       <Filter>core\ecs\system</Filter>
     </ClInclude>
+    <ClInclude Include="core\ecs\system\FpsPlayerControlSystem.h">
+      <Filter>core\ecs\system</Filter>
+    </ClInclude>
     <ClInclude Include="core\ecs\component\RigidBodyComponent.h">
+      <Filter>core\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\component\FpsPlayerComponent.h">
       <Filter>core\ecs\component</Filter>
     </ClInclude>
     <ClInclude Include="core\physics\RigidBody.h">

@@ -1,6 +1,7 @@
 #include "PhysicsSystem.h"
 #include <core/physics/PhysicsManager.h>
 #include <core/math/Quaternion.h>
+#include <btBulletDynamicsCommon.h>
 
 namespace core::ecs
 {
@@ -37,6 +38,13 @@ void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, Trans
 
 	// 剛体を生成
 	rigid_body->handle = physics_manager->create_rigid_body( info );
+
+	// 角速度係数と摩擦係数を設定
+	if ( rigid_body->handle.is_valid() )
+	{
+		physics_manager->set_rigid_body_angular_factor( rigid_body->handle, rigid_body->angular_factor );
+		rigid_body->handle.rigid_body->setFriction( rigid_body->friction );
+	}
 }
 
 void PhysicsSystem::update()

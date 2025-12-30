@@ -9,6 +9,7 @@ namespace core::ecs
 	class TransformComponent;
 	class ModelComponent;
 	class CameraComponent;
+	struct FpsPlayerComponent;
 }
 
 namespace blue_sky
@@ -26,6 +27,7 @@ public:
 	using TransformComponent = core::ecs::TransformComponent;
 	using ModelComponent = core::ecs::ModelComponent;
 	using CameraComponent = core::ecs::CameraComponent;
+	using FpsPlayerComponent = core::ecs::FpsPlayerComponent;
 	using Entity = core::ecs::Entity;
 
 protected:
@@ -33,9 +35,10 @@ protected:
 	TransformComponent* current_entity_transform_ = nullptr;
 	ModelComponent* current_entity_model_ = nullptr;
 
-	Entity* camera_ = nullptr;
-	TransformComponent* camera_transform_ = nullptr;
-	CameraComponent* camera_component_ = nullptr;
+	Entity* player_ = nullptr;
+	TransformComponent* player_transform_ = nullptr;
+	CameraComponent* player_camera_ = nullptr;
+	FpsPlayerComponent* fps_player_ = nullptr;
 
 public:
 	explicit MusicGamePrototypeScene();

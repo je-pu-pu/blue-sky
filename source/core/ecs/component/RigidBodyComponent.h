@@ -31,6 +31,12 @@ struct RigidBodyComponent : public Component
 	/// 剛体の中心点のオフセット
 	Vector offset = Vector( 0.f, 0.f, 0.f );
 
+	/// 角速度係数 (各軸の回転を制限。0 = 回転なし、1 = 通常)
+	Vector angular_factor = Vector( 1.f, 1.f, 1.f );
+
+	/// 摩擦係数
+	float friction = 0.5f;
+
 	/// 剛体ハンドル (PhysicsSystem によって設定される)
 	RigidBodyHandle handle;
 

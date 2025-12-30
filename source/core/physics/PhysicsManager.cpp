@@ -239,4 +239,93 @@ btDynamicsWorld* PhysicsManager::get_dynamics_world()
 	return impl_->dynamics_world;
 }
 
+void PhysicsManager::set_rigid_body_linear_velocity( const RigidBodyHandle& handle, const Vector& velocity )
+{
+	if ( ! handle.is_valid() )
+	{
+		return;
+	}
+
+	handle.rigid_body->setLinearVelocity( btVector3( velocity.x(), velocity.y(), velocity.z() ) );
+}
+
+PhysicsManager::Vector PhysicsManager::get_rigid_body_linear_velocity( const RigidBodyHandle& handle ) const
+{
+	if ( ! handle.is_valid() )
+	{
+		return Vector( 0.f, 0.f, 0.f );
+	}
+
+	const btVector3& v = handle.rigid_body->getLinearVelocity();
+	return Vector( v.x(), v.y(), v.z() );
+}
+
+void PhysicsManager::set_rigid_body_angular_factor( const RigidBodyHandle& handle, const Vector& factor )
+{
+	if ( ! handle.is_valid() )
+	{
+		return;
+	}
+
+	handle.rigid_body->setAngularFactor( btVector3( factor.x(), factor.y(), factor.z() ) );
+}
+
+void PhysicsManager::apply_impulse( const RigidBodyHandle& handle, const Vector& impulse )
+{
+	if ( ! handle.is_valid() )
+	{
+		return;
+	}
+
+	handle.rigid_body->applyCentralImpulse( btVector3( impulse.x(), impulse.y(), impulse.z() ) );
+}
+
+void PhysicsManager::activate_rigid_body( const RigidBodyHandle& handle )
+{
+	if ( ! handle.is_valid() )
+	{
+		return;
+	}
+
+	handle.rigid_body->activate( true );
+}
+
+bool PhysicsManager::ray_test( const Vector& from, const Vector& to ) const
+{
+	btVector3 bt_from( from.x(), from.y(), from.z() );
+	btVector3 bt_to( to.x(), to.y(), to.z() );
+
+	btCollisionWorld::ClosestRayResultCallback ray_callback( bt_from, bt_to );
+	impl_->dynamics_world->rayTest( bt_from, bt_to, ray_callback );
+
+	return ray_callback.hasHit();
+}
+
+bool PhysicsManager::ray_test_excluding( const Vector& from, const Vector& to, const RigidBodyHandle& exclude ) const
+{
+	btVector3 bt_from( from.x(), from.y(), from.z() );
+	btVector3 bt_to( to.x(), to.y(), to.z() );
+
+	btCollisionWorld::ClosestRayResultCallback ray_callback( bt_from, bt_to );
+
+	// 除外する剛体を設定
+	if ( exclude.is_valid() )
+	{
+		ray_callback.m_collisionFilterMask &= ~exclude.rigid_body->getBroadphaseProxy()->m_collisionFilterGroup;
+	}
+
+	impl_->dynamics_world->rayTest( bt_from, bt_to, ray_callback );
+
+	// ヒットしたオブジェクトが除外対象でないか確認
+	if ( ray_callback.hasHit() && exclude.is_valid() )
+	{
+		if ( ray_callback.m_collisionObject == exclude.rigid_body )
+		{
+			return false;
+		}
+	}
+
+	return ray_callback.hasHit();
+}
+
 } // namespace core::physics

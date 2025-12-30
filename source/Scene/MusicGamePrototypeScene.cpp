@@ -97,6 +97,12 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 			e->add_component< core::ecs::RenderComponent >();
 			auto* m = e->add_component< core::ecs::ModelComponent>();
 			m->model = models[ common::random( 0, 1 ) ];
+
+			auto* rigid_body = e->add_component< core::ecs::RigidBodyComponent >();
+			rigid_body->shape_type = RigidBodyShapeType::Box;
+			rigid_body->shape_size = Vector( 5.f, 50.f, 5.f );
+			rigid_body->offset = Vector( 0.f, 50.f, 0.f );
+			rigid_body->mass = 0.f; // 静的オブジェクト
 		}
 	}
 }
@@ -104,6 +110,25 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 void MusicGamePrototypeScene::update()
 {
 	Scene::update();
+
+	if ( get_input()->push( Input::Button::A ) )
+	{
+		// 落下する球を作成
+		auto* e = get_entity_manager()->create_entity();
+		auto* t = e->add_component< core::ecs::TransformComponent >();
+		t->transform.set_identity();
+		t->transform.set_position( camera_transform_->transform.get_position() + Vector( 0.f, 0.5f, 0.f ) );
+
+		e->add_component< core::ecs::RenderComponent >();
+		auto* m = e->add_component< core::ecs::ModelComponent >();
+		m->model = get_graphics_manager()->load_model( "box-1x1x1" );
+
+		auto* rigid_body = e->add_component< core::ecs::RigidBodyComponent >();
+		rigid_body->shape_type = RigidBodyShapeType::Box;
+		rigid_body->shape_size = Vector( 0.5f, 0.5f, 0.5f );
+		rigid_body->offset = Vector( 0.f, 0.5f, 0.f );
+		rigid_body->mass = 1.f; // 動的オブジェクト
+	}
 
 	get_graphics_manager()->update();
 	get_graphics_manager()->clear_debug_bullet();

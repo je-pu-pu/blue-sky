@@ -14,7 +14,7 @@ public:
 	virtual ~TimeManager() = default;
 
 	/// フレーム間の経過時間 (秒)
-	virtual float get_elapsed_time() const = 0;
+	virtual float get_delta_time() const = 0;
 
 	/// ゲーム開始からの総経過時間 (秒)
 	virtual float get_total_elapsed_time() const = 0;

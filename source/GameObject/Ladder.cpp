@@ -14,7 +14,7 @@ void Ladder::restart()
 
 void Ladder::update()
 {
-	contact_object_cache_.update( get_frame_elapsed_time() );
+	contact_object_cache_.update( get_delta_time() );
 }
 
 void Ladder::on_collide_with( Player* p )

@@ -171,9 +171,6 @@ public:
 	void on_mouse_wheel( int ) override;
 	void on_resize() override;
 
-	float_t get_total_elapsed_time() const { return time_manager_.get_total_elapsed_time(); }
-	float_t get_elapsed_time() const { return time_manager_.get_elapsed_time(); }
-
 	/// @todo GraphicsManager に移行して削除する
 	Direct3D* get_direct_3d() const { return direct_3d_.get(); } 
 

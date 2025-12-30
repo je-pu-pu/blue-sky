@@ -18,7 +18,7 @@ private:
 
 public:
 	/// フレーム間の経過時間 (秒)
-	float get_elapsed_time() const override { return elapsed_time_; }
+	float get_delta_time() const override { return elapsed_time_; }
 
 	/// ゲーム開始からの総経過時間 (秒)
 	float get_total_elapsed_time() const override { return total_elapsed_time_; }

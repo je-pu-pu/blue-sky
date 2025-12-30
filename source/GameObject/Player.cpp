@@ -129,7 +129,7 @@ void Player::update()
 	update_can_peer_down();
 	update_can_throw();
 
-	action_timer_ += get_frame_elapsed_time();
+	action_timer_ += get_delta_time();
 
 	if ( action_mode_ == ActionMode::BALLOON )
 	{
@@ -227,7 +227,7 @@ void Player::update()
 		eye_height_ = std::max( eye_height_, 0.15f );
 	}
 
-	uncontrollable_timer_ = math::chase< float_t >( uncontrollable_timer_, 0.f, get_frame_elapsed_time() );
+	uncontrollable_timer_ = math::chase< float_t >( uncontrollable_timer_, 0.f, get_delta_time() );
 
 	limit_velocity();
 

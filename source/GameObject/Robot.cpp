@@ -93,7 +93,7 @@ void Robot::update()
 			texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
 		}
 
-		timer_ += get_frame_elapsed_time();
+		timer_ += get_delta_time();
 
 		if ( timer_ >= 10.f )
 		{
@@ -151,7 +151,7 @@ void Robot::update()
 
 		play_animation( "Attention", false, true );
 
-		timer_ += get_frame_elapsed_time();
+		timer_ += get_delta_time();
 
 		if ( timer_ >= 3.f )
 		{

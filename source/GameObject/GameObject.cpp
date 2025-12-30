@@ -7,6 +7,8 @@
 
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
+#include <core/Service.h>
+#include <core/TimeManager.h>
 
 #include <common/math.h>
 #include <common/random.h>
@@ -242,9 +244,9 @@ void GameObject::on_collide_with( GameObject* o )
  *
  * @return 前のフレームからの経過秒
  */
-float_t GameObject::get_frame_elapsed_time() const
+float_t GameObject::get_delta_time() const
 {
-	return GameMain::get_instance()->get_elapsed_time();
+	return core::get_time_manager()->get_delta_time();
 }
 
 /**

@@ -58,11 +58,11 @@ private:
 	ComponentMap	component_map_;	///< GameObject が保有しているコンポーネントの一覧 ( コンポーネント ID から コンポーネントのポインタへのマップ )
 
 protected:
-	float_t get_frame_elapsed_time() const;
+	float_t get_delta_time() const;
 	float_t get_scene_elapsed_time() const;
 
 	/// 1 秒あたりの数値から現在のフレームの数値を返す
-	inline float_t per_sec( float_t value ) const { return value * get_frame_elapsed_time(); }
+	inline float_t per_sec( float_t value ) const { return value * get_delta_time(); }
 
 	float_t get_flicker_height_offset( float_t scale = 1.f ) const;
 	void update_location_by_flicker( const Vector& base_location, float_t scale = 1.f );

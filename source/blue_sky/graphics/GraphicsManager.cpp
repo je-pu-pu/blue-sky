@@ -35,6 +35,8 @@
 
 #include <core/ecs/component/TransformComponent.h>
 #include <core/ecs/component/CameraComponent.h>
+#include <core/Service.h>
+#include <core/TimeManager.h>
 
 #include <common/timer.h>
 #include <common/exception.h>
@@ -482,7 +484,7 @@ void GraphicsManager::setup_rendering()
 	get_frame_render_data()->data().light = Vector( -1.f, -2.f, 0.5f, 0.f ).normalize();
 
 	/// @todo ここでやるべき？
-	get_frame_render_data()->data().time = GameMain::get_instance()->get_current_scene()->get_total_elapsed_time();
+	get_frame_render_data()->data().time = core::get_time_manager()->get_total_elapsed_time();
 
 	get_frame_render_data()->update();
 

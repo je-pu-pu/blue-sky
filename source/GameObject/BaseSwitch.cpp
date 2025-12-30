@@ -25,7 +25,7 @@ void BaseSwitch::restart()
  */
 void BaseSwitch::update()
 {
-	contact_object_cache_.update( get_frame_elapsed_time() );
+	contact_object_cache_.update( get_delta_time() );
 }
 
 void BaseSwitch::action( const string_t& action )

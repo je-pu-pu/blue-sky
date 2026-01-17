@@ -1,7 +1,3 @@
-/**
- * @todo get_direct_3d() の使用をやめて GraphicsManager を使うようにする。
- */
-
 #include "TitleScene.h"
 
 #include <blue_sky/GameMain.h>
@@ -13,10 +9,7 @@
 
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
-
-/// @todo 抽象化する
-#include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/Direct3D11/Sprite.h>
+#include <core/graphics/Sprite.h>
 
 #include <win/Rect.h>
 
@@ -113,32 +106,33 @@ void TitleScene::render()
 {
 	update_constant_buffer_for_sprite_frame( 0 );
 
-	get_direct_3d()->set_default_render_target();
-	get_direct_3d()->set_default_viewport();
+	get_graphics_manager()->set_default_render_target();
+	get_graphics_manager()->set_default_viewport();
 
-	get_direct_3d()->clear_default_view( Direct3D::Color::from_256( 0xFF, 0xAA, 0x11 ) );
+	get_graphics_manager()->clear_default_view( Color::from_256( 0xFF, 0xAA, 0x11 ) );
 
-	get_direct_3d()->get_sprite()->begin();
+	auto* sprite = get_graphics_manager()->get_sprite();
+	sprite->begin();
 
 	{
-		render_technique( "|sprite", [this]
+		render_technique( "|sprite", [this, sprite]
 		{
 			win::Rect dst_rect( 0, 0, get_width(), get_height() );
 
 			if ( sequence_ >= SEQUENCE_TITLE_FIX )
 			{
 				// render_bg()
-				get_direct_3d()->get_sprite()->draw( dst_rect, title_bg_texture_ );
+				sprite->draw( dst_rect, title_bg_texture_ );
 			}
 			else
 			{
 				// render_bg()
-				get_direct_3d()->get_sprite()->draw( dst_rect, cloth_texture_, Direct3D::Color( 1.f, 1.f, 1.f, 0.5f ) );
+				sprite->draw( dst_rect, cloth_texture_, Color( 1.f, 1.f, 1.f, 0.5f ) );
 			}
 		} );
 	}
 
-	get_direct_3d()->get_sprite()->end();
+	sprite->end();
 
 	// render_logo()
 	{

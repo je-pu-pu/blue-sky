@@ -171,9 +171,6 @@ public:
 	void on_mouse_wheel( int ) override;
 	void on_resize() override;
 
-	/// @todo GraphicsManager に移行して削除する
-	Direct3D* get_direct_3d() const { return direct_3d_.get(); } 
-
 	Input* get_input() const { return input_.get(); }
 	
 	OculusRift* get_oculus_rift() const { return oculus_rift_.get(); }

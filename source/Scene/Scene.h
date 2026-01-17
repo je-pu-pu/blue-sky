@@ -25,12 +25,6 @@ namespace core
 	namespace graphics
 	{
 		class Texture;
-
-		/// @todo 削除する
-		namespace direct_3d_11
-		{
-			class Direct3D11;
-		}
 	}
 }
 
@@ -70,9 +64,6 @@ public:
 	using PhysicsManager	= ActiveObjectPhysics;
 	using SoundManager		= core::sound::SoundManager;
 
-	/// @todo 削除する
-	using Direct3D			= core::graphics::direct_3d_11::Direct3D11;
-
 private:
 	float_t total_elapsed_time_;		///< シーンが開始してからの総経過時間 ( 秒 )
 
@@ -83,8 +74,6 @@ private:
 protected:
 	void update_total_elapsed_time();
 	float_t get_elapsed_time() const;
-
-	Direct3D* get_direct_3d() const;	///< @todo 削除する
 
 	EntityManager* get_entity_manager() const;
 

@@ -18,6 +18,8 @@
 #include <functional>
 
 
+class DirectWrite;
+
 namespace core
 {
 	namespace graphics
@@ -209,6 +211,19 @@ public:
 	virtual void resolve_depth_texture() const = 0;
 	virtual Texture* get_depth_texture() const = 0;
 	virtual Sprite* get_sprite() const = 0;
+
+	virtual void clear_default_view( const Color& = Color::Black ) = 0;
+	virtual void unset_render_target() = 0;
+	virtual DirectWrite* get_font() = 0;
+
+	virtual void begin_2d() = 0;
+	virtual void end_2d() = 0;
+	virtual void begin_3d() = 0;
+	virtual void end_3d() = 0;
+	virtual void render_text() = 0;
+
+	virtual bool is_full_screen() const = 0;
+	virtual void switch_full_screen() = 0;
 
 	virtual GameConstantBuffer* get_game_render_data() const = 0;
 	virtual FrameConstantBuffer* get_frame_render_data() const = 0;

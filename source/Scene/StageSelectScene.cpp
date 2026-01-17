@@ -1,16 +1,10 @@
-/**
- * @todo get_direct_3d() の使用をやめて GraphicsManager を使うようにする。
- */
-
 #include "StageSelectScene.h"
 
 #include <blue_sky/Input.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Fader.h>
 
-/// @todo 抽象化する
-#include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/Direct3D11/Sprite.h>
+#include <core/graphics/Sprite.h>
 
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
@@ -131,22 +125,23 @@ void StageSelectScene::render()
 {
 	Color bg_color = page_ < get_max_story_page() ? Color::from_256( 0xFF, 0xAA, 0x11 ) : Color::from_256( 0x99, 0xEE, 0xFF );
 
-	get_direct_3d()->set_default_render_target();
-	get_direct_3d()->set_default_viewport();
+	get_graphics_manager()->set_default_render_target();
+	get_graphics_manager()->set_default_viewport();
 
-	get_direct_3d()->clear_default_view( bg_color );
+	get_graphics_manager()->clear_default_view( bg_color );
 
-	get_direct_3d()->get_sprite()->begin();
+	auto* sprite = get_graphics_manager()->get_sprite();
+	sprite->begin();
 
-	render_technique( "|sprite", [this]
+	render_technique( "|sprite", [this, sprite]
 	{
 		// render_bg()
 		{
-			get_direct_3d()->get_sprite()->draw( win::Rect::Size( 0, 0, get_width(), get_height() ), bg_texture_ );
+			sprite->draw( win::Rect::Size( 0, 0, get_width(), get_height() ), bg_texture_ );
 		}
 	} );
 
-	Direct3D::Matrix t, s, transform;
+	Matrix t, s, transform;
 
 	// Stage
 	RectList::const_iterator j = circle_src_rect_list_.begin();
@@ -164,7 +159,7 @@ void StageSelectScene::render()
 		// float dy = dst_rect.top() + dst_rect.height() * 0.5f - ( get_height() / 2 );
 
 		int offset = 0;
-		Direct3D::Color frame_color = Direct3D::Color::White;
+		Color frame_color = Direct3D::Color::White;
 
 		if ( stage == get_pointed_stage() )
 		{
@@ -183,19 +178,19 @@ void StageSelectScene::render()
 		const win::Rect frame_scale_rect( -5, -5, +5, +5 );
 
 		// shadow
-		get_direct_3d()->get_sprite()->draw( dst_rect + frame_scale_rect + win::Point( -5, 5 ), sprite_texture_, white_src_rect, Direct3D::Color::from_hex( 0x00000099 ) );
+		sprite->draw( dst_rect + frame_scale_rect + win::Point( -5, 5 ), sprite_texture_, white_src_rect, Direct3D::Color::from_hex( 0x00000099 ) );
 
 		// white
-		get_direct_3d()->get_sprite()->draw( dst_rect + frame_scale_rect + win::Point( -offset, offset ), sprite_texture_, white_src_rect, frame_color );
+		sprite->draw( dst_rect + frame_scale_rect + win::Point( -offset, offset ), sprite_texture_, white_src_rect, frame_color );
 
 		// stage
-		get_direct_3d()->get_sprite()->draw( dst_rect + win::Point( -offset, offset ), stage->texture, stage_src_rect_, Direct3D::Color::White );
+		sprite->draw( dst_rect + win::Point( -offset, offset ), stage->texture, stage_src_rect_, Direct3D::Color::White );
 
 		// circle
 		if ( stage->cleared )
 		{
 			win::Point circle_dst_point = win::Point( dst_rect.right() - j->width(), dst_rect.bottom() - j->height() ) + win::Point( -offset, offset );
-			get_direct_3d()->get_sprite()->draw( circle_dst_point, sprite_texture_, *j, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
+			sprite->draw( circle_dst_point, sprite_texture_, *j, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
 		}
 
 		// face
@@ -205,13 +200,13 @@ void StageSelectScene::render()
 			if ( true )
 			{
 				win::Point circle_dst_point = win::Point( dst_rect.right() - j->width() + ( j->width() - k->width() ) / 2, dst_rect.bottom() - j->height() + ( j->height() - k->height() ) / 2 ) + win::Point( -offset, offset );
-				get_direct_3d()->get_sprite()->draw( circle_dst_point, sprite_texture_, *k, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
+				sprite->draw( circle_dst_point, sprite_texture_, *k, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
 			}
 
 			// medal
 			win::Rect medal_src_rect = win::Rect::Size( 832, 384, 64, 64 );
 			win::Point medal_dst_point = win::Point( dst_rect.left(), dst_rect.bottom() - medal_src_rect.height() ) + win::Point( -offset, offset );
-			get_direct_3d()->get_sprite()->draw( medal_dst_point, sprite_texture_, medal_src_rect, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
+			sprite->draw( medal_dst_point, sprite_texture_, medal_src_rect, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
 		}
 	}
 
@@ -227,7 +222,7 @@ void StageSelectScene::render()
 		}
 
 		win::Point arrow_dst_point = win::Point( get_margin(), ( get_height() - src_rect.height() ) / 2 );
-		get_direct_3d()->get_sprite()->draw( arrow_dst_point, sprite_texture_, src_rect.get_rect() );
+		sprite->draw( arrow_dst_point, sprite_texture_, src_rect.get_rect() );
 	}
 	if ( has_next_page() )
 	{
@@ -240,7 +235,7 @@ void StageSelectScene::render()
 		}
 
 		win::Point arrow_dst_point( get_width() - get_margin() - src_rect.width(), ( get_height() - src_rect.height() ) / 2 );
-		get_direct_3d()->get_sprite()->draw( arrow_dst_point, sprite_texture_, src_rect.get_rect() );
+		sprite->draw( arrow_dst_point, sprite_texture_, src_rect.get_rect() );
 	}
 
 	// Cursor
@@ -254,10 +249,10 @@ void StageSelectScene::render()
 		}
 
 		win::Point cursor_dst_point( get_input()->get_mouse_x(), get_input()->get_mouse_y() );
-		get_direct_3d()->get_sprite()->draw( cursor_dst_point, sprite_texture_, src_rect.get_rect() );
+		sprite->draw( cursor_dst_point, sprite_texture_, src_rect.get_rect() );
 	}
 
-	get_direct_3d()->get_sprite()->end();
+	sprite->end();
 
 	render_fader();
 }

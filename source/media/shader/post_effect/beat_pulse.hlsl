@@ -20,7 +20,7 @@ float4 ps_post_effect_beat_pulse( COMMON_POS_UV input ) : SV_Target
 
 	// --- 色収差 ---
 	// ビート時に強い色収差、減衰していく
-	float aberrationStrength = beatPow * 0.02f;
+	float aberrationStrength = beatPow * 0.05f;
 
 	float2 dir = uv - center;
 	float3 color;

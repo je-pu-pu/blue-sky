@@ -103,11 +103,6 @@ GraphicsManager::BackBufferTexture* GraphicsManager::get_back_buffer_texture()
 	return direct_3d_->get_back_buffer_texture();
 }
 
-void GraphicsManager::set_default_render_target()
-{
-	direct_3d_->set_default_render_target();
-}
-
 void GraphicsManager::set_default_render_target( bool clear )
 {
 	direct_3d_->set_default_render_target( clear );

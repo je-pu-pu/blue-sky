@@ -79,7 +79,7 @@ public:
 
 	virtual BackBufferTexture* get_back_buffer_texture() = 0;
 	virtual void set_render_target( RenderTarget* );
-	virtual void set_default_render_target() = 0;
+	virtual void set_default_render_target( bool clear = true ) = 0;
 
 	virtual void setup_rendering() = 0;
 	virtual void render_background() const = 0;

@@ -159,7 +159,7 @@ void StageSelectScene::render()
 		// float dy = dst_rect.top() + dst_rect.height() * 0.5f - ( get_height() / 2 );
 
 		int offset = 0;
-		Color frame_color = Direct3D::Color::White;
+		Color frame_color = Color::White;
 
 		if ( stage == get_pointed_stage() )
 		{
@@ -167,7 +167,7 @@ void StageSelectScene::render()
 			{
 				offset = 3;
 			}
-			frame_color = Direct3D::Color::from_hex( 0xFFAA11FF );
+			frame_color = Color::from_hex( 0xFFAA11FF );
 		}
 
 		win::Rect white_src_rect = win::Rect::Size( 0, 512, 128, 128 );
@@ -178,19 +178,19 @@ void StageSelectScene::render()
 		const win::Rect frame_scale_rect( -5, -5, +5, +5 );
 
 		// shadow
-		sprite->draw( dst_rect + frame_scale_rect + win::Point( -5, 5 ), sprite_texture_, white_src_rect, Direct3D::Color::from_hex( 0x00000099 ) );
+		sprite->draw( dst_rect + frame_scale_rect + win::Point( -5, 5 ), sprite_texture_, white_src_rect, Color::from_hex( 0x00000099 ) );
 
 		// white
 		sprite->draw( dst_rect + frame_scale_rect + win::Point( -offset, offset ), sprite_texture_, white_src_rect, frame_color );
 
 		// stage
-		sprite->draw( dst_rect + win::Point( -offset, offset ), stage->texture, stage_src_rect_, Direct3D::Color::White );
+		sprite->draw( dst_rect + win::Point( -offset, offset ), stage->texture, stage_src_rect_, Color::White );
 
 		// circle
 		if ( stage->cleared )
 		{
 			win::Point circle_dst_point = win::Point( dst_rect.right() - j->width(), dst_rect.bottom() - j->height() ) + win::Point( -offset, offset );
-			sprite->draw( circle_dst_point, sprite_texture_, *j, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
+			sprite->draw( circle_dst_point, sprite_texture_, *j, Color::from_hex( 0xFFFFFF99 ) );
 		}
 
 		// face
@@ -200,13 +200,13 @@ void StageSelectScene::render()
 			if ( true )
 			{
 				win::Point circle_dst_point = win::Point( dst_rect.right() - j->width() + ( j->width() - k->width() ) / 2, dst_rect.bottom() - j->height() + ( j->height() - k->height() ) / 2 ) + win::Point( -offset, offset );
-				sprite->draw( circle_dst_point, sprite_texture_, *k, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
+				sprite->draw( circle_dst_point, sprite_texture_, *k, Color::from_hex( 0xFFFFFF99 ) );
 			}
 
 			// medal
 			win::Rect medal_src_rect = win::Rect::Size( 832, 384, 64, 64 );
 			win::Point medal_dst_point = win::Point( dst_rect.left(), dst_rect.bottom() - medal_src_rect.height() ) + win::Point( -offset, offset );
-			sprite->draw( medal_dst_point, sprite_texture_, medal_src_rect, Direct3D::Color::from_hex( 0xFFFFFF99 ) );
+			sprite->draw( medal_dst_point, sprite_texture_, medal_src_rect, Color::from_hex( 0xFFFFFF99 ) );
 		}
 	}
 

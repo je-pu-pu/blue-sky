@@ -84,8 +84,7 @@ public:
 	RenderTargetTexture* create_render_target_texture( PixelFormat ) override;
 
 	BackBufferTexture* get_back_buffer_texture() override;
-	void set_default_render_target() override;
-	void set_default_render_target( bool clear );
+	void set_default_render_target( bool clear = true ) override;
 
 	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type ); }
 

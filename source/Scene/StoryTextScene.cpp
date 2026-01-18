@@ -27,8 +27,8 @@ StoryTextScene::StoryTextScene( const char* file_name, const char* next_scene_na
 	: text_y_( static_cast< float >( get_height() ) )
 	, text_y_target_( 0.f )
 	, text_scroll_speed_( 0.5f )
-	, text_color_( Direct3D::Color::from_256( 255, 255, 255, 127 ) )
-	, text_border_color_( Direct3D::Color::from_256( 0, 0, 0, 127 ) )
+	, text_color_( Color::from_256( 255, 255, 255, 127 ) )
+	, text_border_color_( Color::from_256( 0, 0, 0, 127 ) )
 	, next_scene_name_( next_scene_name )
 	, sprite_texture_( 0 )
 	, bgm_( 0 )
@@ -152,7 +152,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 
 			ss >> std::hex >> hex;
 
-			text_color_ = Direct3D::Color::from_hex( hex );
+			text_color_ = Color::from_hex( hex );
 		}
 		else if( command == "text-border-color" )
 		{
@@ -160,7 +160,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 
 			ss >> std::hex >> hex;
 
-			text_border_color_ = Direct3D::Color::from_hex( hex );
+			text_border_color_ = Color::from_hex( hex );
 		}
 		else if ( command == "text" )
 		{

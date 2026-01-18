@@ -103,9 +103,9 @@ GraphicsManager::BackBufferTexture* GraphicsManager::get_back_buffer_texture()
 	return direct_3d_->get_back_buffer_texture();
 }
 
-void GraphicsManager::set_default_render_target()
+void GraphicsManager::set_default_render_target( bool clear )
 {
-	direct_3d_->set_default_render_target();
+	direct_3d_->set_default_render_target( clear );
 }
 
 
@@ -374,10 +374,10 @@ void GraphicsManager::setup_rendering()
 
 	set_input_layout( "main" );
 
-	direct_3d_->clear_default_view();
+	clear_default_view();
 
-	direct_3d_->set_default_render_target();
-	direct_3d_->set_default_viewport();
+	set_default_render_target();
+	set_default_viewport();
 
 	update_constant_buffers();
 }
@@ -608,6 +608,99 @@ void GraphicsManager::render_debug_bullet() const
 
 		GameMain::get_instance()->get_bullet_debug_draw()->render();
 	} );
+}
+
+/**
+ * デフォルトビューをクリアする
+ *
+ * @param color クリア色
+ */
+void GraphicsManager::clear_default_view( const Color& color )
+{
+	direct_3d_->clear_default_view( color );
+}
+
+/**
+ * レンダーターゲットを解除する
+ *
+ */
+void GraphicsManager::unset_render_target()
+{
+	direct_3d_->unset_render_target();
+}
+
+/**
+ * フォントオブジェクトを取得する
+ *
+ * @return フォントオブジェクト
+ */
+DirectWrite* GraphicsManager::get_font()
+{
+	return direct_3d_->get_font();
+}
+
+/**
+ * 2D 描画モードを開始する
+ *
+ */
+void GraphicsManager::begin_2d()
+{
+	direct_3d_->begin2D();
+}
+
+/**
+ * 2D 描画モードを終了する
+ *
+ */
+void GraphicsManager::end_2d()
+{
+	direct_3d_->end2D();
+}
+
+/**
+ * 3D 描画モードを開始する
+ *
+ */
+void GraphicsManager::begin_3d()
+{
+	direct_3d_->begin3D();
+}
+
+/**
+ * 3D 描画モードを終了する
+ *
+ */
+void GraphicsManager::end_3d()
+{
+	direct_3d_->end3D();
+}
+
+/**
+ * テキストをレンダリングする
+ *
+ */
+void GraphicsManager::render_text()
+{
+	direct_3d_->renderText();
+}
+
+/**
+ * フルスクリーン状態を取得する
+ *
+ * @return フルスクリーンの場合 true
+ */
+bool GraphicsManager::is_full_screen() const
+{
+	return direct_3d_->is_full_screen();
+}
+
+/**
+ * フルスクリーン/ウィンドウモードを切り替える
+ *
+ */
+void GraphicsManager::switch_full_screen()
+{
+	direct_3d_->switch_full_screen();
 }
 
 } // namespace blue_sky::graphics::direct_3d_11

@@ -5,10 +5,9 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
-
-/// @todo 抽象化する
 #include <blue_sky/graphics/Fader.h>
-#include <core/graphics/Direct3D11/Sprite.h>
+
+#include <core/graphics/Sprite.h>
 
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
@@ -181,13 +180,13 @@ void EndingScene::update()
  *
  */
 void EndingScene::render()
-{ 
+{
 	update_constant_buffer_for_sprite_frame( line_type_, drawing_accent_scale_ );
-	
-	get_direct_3d()->set_default_render_target();
-	get_direct_3d()->set_default_viewport();
 
-	get_direct_3d()->clear_default_view( Color::from_256( 0xFF, 0xAA, 0x11 ) );
+	get_graphics_manager()->set_default_render_target();
+	get_graphics_manager()->set_default_viewport();
+
+	get_graphics_manager()->clear_default_view( Color::from_256( 0xFF, 0xAA, 0x11 ) );
 
 	render_bg();
 
@@ -196,16 +195,17 @@ void EndingScene::render()
 
 void EndingScene::render_bg()
 {
-	get_direct_3d()->get_sprite()->begin();
+	auto* sprite = get_graphics_manager()->get_sprite();
+	sprite->begin();
 
-	render_technique( "|sprite", [this]
+	render_technique( "|sprite", [this, sprite]
 	{
 		win::Rect dst_rect( 0, 0, get_width(), get_height() );
 
-		get_direct_3d()->get_sprite()->draw( dst_rect, bg_texture_ );
+		sprite->draw( dst_rect, bg_texture_ );
 	} );
 
-	get_direct_3d()->get_sprite()->end();
+	sprite->end();
 }
 
 void EndingScene::render_drawing_line()

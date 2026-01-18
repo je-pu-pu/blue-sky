@@ -178,7 +178,7 @@ GameMain::~GameMain()
     ImGui::DestroyContext();
 
 	get_config()->set< int >( "audio.mute", sound_manager_->is_mute() );
-	get_config()->set< int >( "graphics.full_screen", get_direct_3d()->is_full_screen() );
+	get_config()->set< int >( "graphics.full_screen", get_graphics_manager()->is_full_screen() );
 
 	get_config()->save_file( "blue-sky.config" );
 
@@ -390,7 +390,7 @@ void GameMain::render()
 	}
 
 	ImGui::Render();
-	get_direct_3d()->set_default_render_target( false );
+	get_graphics_manager()->set_default_render_target( false );
     ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );
 
 	direct_3d_->present();
@@ -609,8 +609,8 @@ void GameMain::on_special_key_down( int key )
 	}
 	else if ( key == KEY_F5 )
 	{
-		get_direct_3d()->switch_full_screen();
-		get_app()->set_full_screen( get_direct_3d()->is_full_screen() );
+		get_graphics_manager()->switch_full_screen();
+		get_app()->set_full_screen( get_graphics_manager()->is_full_screen() );
 	}
 
 	/// @todo ちゃんとする

@@ -84,7 +84,7 @@ public:
 	RenderTargetTexture* create_render_target_texture( PixelFormat ) override;
 
 	BackBufferTexture* get_back_buffer_texture() override;
-	void set_default_render_target() override;
+	void set_default_render_target( bool clear = true ) override;
 
 	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type ); }
 
@@ -115,6 +115,19 @@ public:
 	void resolve_depth_texture() const override;
 	Texture* get_depth_texture() const override;
 	Sprite* get_sprite() const override;
+
+	void clear_default_view( const Color& = Color::Black ) override;
+	void unset_render_target() override;
+	DirectWrite* get_font() override;
+
+	void begin_2d() override;
+	void end_2d() override;
+	void begin_3d() override;
+	void end_3d() override;
+	void render_text() override;
+
+	bool is_full_screen() const override;
+	void switch_full_screen() override;
 
 	GameConstantBuffer* get_game_render_data() const override { return game_render_data_.get(); }
 	FrameConstantBuffer* get_frame_render_data() const override { return frame_render_data_.get(); }

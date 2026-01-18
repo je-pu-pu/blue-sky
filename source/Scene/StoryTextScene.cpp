@@ -1,7 +1,3 @@
-/**
- * @todo get_direct_3d() の使用をやめて GraphicsManager を使うようにする。
- */
-
 #include "StoryTextScene.h"
 
 #include <blue_sky/GameMain.h>
@@ -13,9 +9,7 @@
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
 
-/// @todo 抽象化する
-#include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/Direct3D11/Sprite.h>
+#include <core/graphics/Sprite.h>
 #include <core/graphics/DirectWrite/DirectWrite.h>
 #include <core/graphics/BgSpriteLayer.h>
 
@@ -33,8 +27,8 @@ StoryTextScene::StoryTextScene( const char* file_name, const char* next_scene_na
 	: text_y_( static_cast< float >( get_height() ) )
 	, text_y_target_( 0.f )
 	, text_scroll_speed_( 0.5f )
-	, text_color_( Direct3D::Color::from_256( 255, 255, 255, 127 ) )
-	, text_border_color_( Direct3D::Color::from_256( 0, 0, 0, 127 ) )
+	, text_color_( Color::from_256( 255, 255, 255, 127 ) )
+	, text_border_color_( Color::from_256( 0, 0, 0, 127 ) )
 	, next_scene_name_( next_scene_name )
 	, sprite_texture_( 0 )
 	, bgm_( 0 )
@@ -46,9 +40,9 @@ StoryTextScene::StoryTextScene( const char* file_name, const char* next_scene_na
 	load_story_text_file( file_name );
 
 	/// @todo 整理
-	if ( get_direct_3d()->get_font() )
+	if ( get_graphics_manager()->get_font() )
 	{
-		text_y_target_ = static_cast< float >( -get_direct_3d()->get_font()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) ) );
+		text_y_target_ = static_cast< float >( -get_graphics_manager()->get_font()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) ) );
 	}
 	
 	sprite_texture_ = get_graphics_manager()->load_named_texture( "sprite", "media/image/title.png" );
@@ -158,7 +152,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 
 			ss >> std::hex >> hex;
 
-			text_color_ = Direct3D::Color::from_hex( hex );
+			text_color_ = Color::from_hex( hex );
 		}
 		else if( command == "text-border-color" )
 		{
@@ -166,7 +160,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 
 			ss >> std::hex >> hex;
 
-			text_border_color_ = Direct3D::Color::from_hex( hex );
+			text_border_color_ = Color::from_hex( hex );
 		}
 		else if ( command == "text" )
 		{
@@ -264,11 +258,12 @@ void StoryTextScene::update()
  */
 void StoryTextScene::render()
 {
-	get_direct_3d()->clear_default_view();
-	get_direct_3d()->get_sprite()->begin();
+	get_graphics_manager()->clear_default_view();
+	auto* sprite = get_graphics_manager()->get_sprite();
+	sprite->begin();
 
 	{
-		render_technique( "|sprite", [this]
+		render_technique( "|sprite", [this, sprite]
 		{
 			for ( auto j = bg_sprite_layer_list_.begin(); j != bg_sprite_layer_list_.end(); ++j )
 			{
@@ -279,51 +274,52 @@ void StoryTextScene::render()
 				s.set_scaling( ( *j )->get_scale().value(), ( *j )->get_scale().value(), 1.f );
 				t.set_translation( ( *j )->get_translation().value().x(), ( *j )->get_translation().value().y(), 0.f );
 
-				get_direct_3d()->get_sprite()->set_transform( r * s * t );
-				get_direct_3d()->get_sprite()->draw( ( *j )->get_texture(), ( *j )->get_src_rect(), ( *j )->get_color().value() );
+				sprite->set_transform( r * s * t );
+				sprite->draw( ( *j )->get_texture(), ( *j )->get_src_rect(), ( *j )->get_color().value() );
 			}
 		} );
 	}
 
-	get_direct_3d()->get_sprite()->end();
+	sprite->end();
 
 	// text
 	/// @todo 整理
-	if ( get_direct_3d()->get_font() )
+	auto* font = get_graphics_manager()->get_font();
+	if ( font )
 	{
-		get_direct_3d()->begin2D();
-		get_direct_3d()->get_font()->begin();
-		get_direct_3d()->get_font()->draw_text_center( -1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-		get_direct_3d()->get_font()->draw_text_center( +1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-		get_direct_3d()->get_font()->draw_text_center( -1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-		get_direct_3d()->get_font()->draw_text_center( +1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-		get_direct_3d()->get_font()->draw_text_center( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_color_ );
-		get_direct_3d()->get_font()->end();
-		get_direct_3d()->end2D();
+		get_graphics_manager()->begin_2d();
+		font->begin();
+		font->draw_text_center( -1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
+		font->draw_text_center( +1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
+		font->draw_text_center( -1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
+		font->draw_text_center( +1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
+		font->draw_text_center( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_color_ );
+		font->end();
+		get_graphics_manager()->end_2d();
 	}
 
-	get_direct_3d()->begin3D();
-	get_direct_3d()->renderText();
+	get_graphics_manager()->begin_3d();
+	get_graphics_manager()->render_text();
 
 	render_fader();
 
 	// loading ...
 	if ( is_skipped_ )
 	{
-		get_direct_3d()->get_sprite()->begin();
+		sprite->begin();
 
-		render_technique( "|sprite", [this]
+		render_technique( "|sprite", [this, sprite]
 		{
 			win::Rect src_rect = win::Rect::Size( 512, 0, 272, 128 );
 			win::Point dst_point( get_width() - src_rect.width(), get_height() - src_rect.height() );
 
-			get_direct_3d()->get_sprite()->draw( dst_point, sprite_texture_, src_rect );
+			sprite->draw( dst_point, sprite_texture_, src_rect );
 		} );
 
-		get_direct_3d()->get_sprite()->end();
+		sprite->end();
 	}
 
-	get_direct_3d()->end3D();
+	get_graphics_manager()->end_3d();
 }
 
 } // namespace blue_sky

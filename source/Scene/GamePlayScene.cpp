@@ -146,7 +146,7 @@ GamePlayScene::GamePlayScene()
 
 GamePlayScene::~GamePlayScene()
 {
-	get_direct_3d()->unset_render_target();
+	get_graphics_manager()->unset_render_target();
 
 	get_active_object_manager()->clear();
 
@@ -161,10 +161,10 @@ GamePlayScene::~GamePlayScene()
 #endif
 
 	get_active_object_physics()->clear();
-	
+
 	clear_delayed_command();
 
-	get_direct_3d()->get_sprite()->set_ortho_offset( 0.f );
+	get_graphics_manager()->get_sprite()->set_ortho_offset( 0.f );
 }
 
 void GamePlayScene::clear_delayed_command()
@@ -1534,10 +1534,10 @@ void GamePlayScene::render_to_display() const
 
 	get_graphics_manager()->render_shadow_map();
 
-	get_direct_3d()->clear_default_view();
+	get_graphics_manager()->clear_default_view();
 
-	get_direct_3d()->set_default_render_target();
-	get_direct_3d()->set_default_viewport();
+	get_graphics_manager()->set_default_render_target();
+	get_graphics_manager()->set_default_viewport();
 	render_for_eye();
 }
 
@@ -1763,11 +1763,12 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 		} );
 	}
 
-	get_direct_3d()->get_sprite()->set_ortho_offset( ortho_offset * 20.f );
+	auto* sprite = get_graphics_manager()->get_sprite();
+	sprite->set_ortho_offset( ortho_offset * 20.f );
 
-	get_direct_3d()->get_sprite()->begin();
+	sprite->begin();
 
-	render_technique( "|sprite", [this]
+	render_technique( "|sprite", [this, sprite]
 	{
 		if ( player_->get_selected_item_type() == Player::ItemType::ROCKET )
 		{
@@ -1778,7 +1779,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				win::Rect src_rect = win::Rect::Size( 0, 0, 202, 200 );
 				win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - offset - 5 );
 
-				get_direct_3d()->get_sprite()->draw( dst_point, ui_texture_, src_rect.get_rect() );
+				sprite->draw( dst_point, ui_texture_, src_rect.get_rect() );
 			}
 		}
 		else if ( player_->get_selected_item_type() == Player::ItemType::UMBRELLA )
@@ -1793,8 +1794,8 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				Matrix t;
 				t.set_translation( get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f - offset, 0.f );
 
-				get_direct_3d()->get_sprite()->set_transform( t );
-				get_direct_3d()->get_sprite()->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+				sprite->set_transform( t );
+				sprite->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 			}
 		}
 		else if ( player_->get_selected_item_type() == Player::ItemType::STONE )
@@ -1805,8 +1806,8 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 
 				win::Rect src_rect = win::Rect::Size( 256, 96, 128, 96 );
 				win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - 5 - offset );
-				
-				get_direct_3d()->get_sprite()->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+
+				sprite->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 			}
 		}
 		else if ( player_->get_selected_item_type() == Player::ItemType::SCOPE )
@@ -1814,7 +1815,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 			win::Rect src_rect = win::Rect::Size( 256, 256, 192, 140 );
 			win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - 5 );
 
-			get_direct_3d()->get_sprite()->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+			sprite->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 		}
 
 		if ( player_->get_selected_item_type() == Player::ItemType::ROCKET || ( player_->get_selected_item_type() == Player::ItemType::STONE && player_->can_throw() ) )
@@ -1822,8 +1823,8 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 			// aim
 			win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );
 			win::Point dst_point( ( get_width() - src_rect.width() ) / 2, ( get_height() - src_rect.height() ) / 2 );
-			
-			get_direct_3d()->get_sprite()->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.5f ) );
+
+			sprite->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.5f ) );
 		}
 
 		if ( player_->has_medal() )
@@ -1831,11 +1832,11 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 			win::Rect src_rect = win::Rect::Size( 384, 0, 64, 64 );
 			win::Point dst_point( 5, get_height() - src_rect.height() - 5 );
 
-			get_direct_3d()->get_sprite()->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+			sprite->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 		}
 	} );
 
-	get_direct_3d()->get_sprite()->end();
+	sprite->end();
 }
 
 /**

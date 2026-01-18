@@ -47,11 +47,6 @@ float Scene::get_elapsed_time() const
 	return get_main_loop()->get_elapsed_sec();
 }
 
-Scene::Direct3D* Scene::get_direct_3d() const
-{
-	return get_game_main()->get_direct_3d();
-}
-
 Scene::EntityManager* Scene::get_entity_manager() const
 {
 	return EntityManager::get_instance();

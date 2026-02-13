@@ -87,6 +87,8 @@ private:
 
 	ConfigKeyCodeMap config_key_code_map_;					///< コンフィグファイルのキー名 から GetAsyncKeyState() の引数に渡すキーへのマップ
 
+	bool is_blocked_;										///< 入力ブロックフラグ ( オーバーレイ UI がアクティブな時にゲーム入力をブロックする )
+
 	void load_key_code_config( Config&, Button, const char_t*, const char_t* );
 	
 	void update_state_by_key_for( uint_t );
@@ -101,6 +103,10 @@ public:
 	void set_direct_input( const DirectInput* i ) { direct_input_ = i; }
 	void set_mouse_x_sensitivity( float s ) { mouse_x_sensitivity_ = s; }
 	void set_mouse_y_sensitivity( float s ) { mouse_y_sensitivity_ = s; }
+
+	/// 入力ブロック : オーバーレイ UI がアクティブな時にゲーム入力をブロックする
+	void set_blocked( bool blocked ) { is_blocked_ = blocked; }
+	bool is_blocked() const { return is_blocked_; }
 
 	void load_config( Config& );
 
@@ -137,6 +143,7 @@ public:
 	 */
 	bool press( Button button ) const override
 	{
+		if ( is_blocked_ ) return false;
 		return ( state_[ static_cast< int >( button ) ] & 1 ) > 0;
 	}
 
@@ -148,6 +155,8 @@ public:
 	 */
 	bool push( Button button ) const override
 	{
+		if ( is_blocked_ ) return false;
+
 		if ( static_cast< int >( button ) < 0 || button >= Button::MAX )
 		{
 			return false;
@@ -164,6 +173,7 @@ public:
 	 */
 	bool release( Button button ) const override
 	{
+		if ( is_blocked_ ) return false;
 		return ( state_[ static_cast< int >( button ) ] & 1 ) == 0 && ( state_[ static_cast< int >( button ) ] & 2 ) > 0;
 	}
 
@@ -206,8 +216,8 @@ public:
 		mouse_dy_ = 0.f;
 	}
 
-	float get_mouse_dx() const override { return mouse_dx_; }
-	float get_mouse_dy() const override { return mouse_dy_; }
+	float get_mouse_dx() const override { return is_blocked_ ? 0.f : mouse_dx_; }
+	float get_mouse_dy() const override { return is_blocked_ ? 0.f : mouse_dy_; }
 
 //	void set_mouse_x_rate( float );
 //	void set_mouse_y_rate( float );

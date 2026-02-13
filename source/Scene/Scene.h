@@ -66,6 +66,7 @@ public:
 
 private:
 	float_t total_elapsed_time_;		///< シーンが開始してからの総経過時間 ( 秒 )
+	bool is_paused_;					///< ポーズ中かどうか
 
 	std::string name_;
 	std::string next_scene_;
@@ -124,6 +125,16 @@ public:
 	virtual void render() = 0;				///< 描画
 
 	virtual void on_function_key_down( int ) { };
+
+	/// オーバーレイシーン ( ポーズメニューなど ) かどうか
+	virtual bool is_overlay() const { return false; }
+
+	/// オーバーレイシーンの場合、下のシーンを描画するかどうか
+	virtual bool is_transparent() const { return false; }
+
+	/// ポーズ状態にする
+	void set_paused( bool paused ) { is_paused_ = paused; }
+	bool is_paused() const { return is_paused_; }
 
 	bool is_first_game_play() const;
 	unsigned int get_current_time() const;

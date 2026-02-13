@@ -12,8 +12,6 @@
 
 #include <common/math.h>
 
-#include <iostream>
-
 namespace blue_sky
 {
 
@@ -29,8 +27,6 @@ Robot::Robot()
 	GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
 	GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-error" );
 
-	// この時点ではまだ get_model() は nullptr を返す
-	// get_model()->set_shader_at( 0, GameMain::get_instance()->get_graphics_manager()->clone_shader( get_model()->get_shader_at( 0 ) ) );
 }
 
 void Robot::restart()
@@ -81,7 +77,6 @@ void Robot::update()
 		forward.normalize();
 
 		set_velocity( Vector( forward.x() * 3.f, get_velocity().y(), forward.z() * 3.f ) );
-		// get_drawing_model()->get_line()->set_color( DrawingLine::Color( 0.8f, 0, 0, -0.25f ) );
 		play_animation( "Walk", false, true );
 
 		if ( is_visible_in_blink( 2.f ) )
@@ -97,7 +92,7 @@ void Robot::update()
 
 		if ( timer_ >= 10.f )
 		{
-			if ( ! caluclate_target_visible() )
+			if ( ! calculate_target_visible() )
 			{
 				mode_ = Mode::ROTATION;
 				timer_ = 0.f;
@@ -123,7 +118,7 @@ void Robot::update()
 
 		play_animation( "Stand", false, true );
 		
-		if ( caluclate_target_visible() )
+		if ( calculate_target_visible() )
 		{
 			mode_backup_ = mode_;
 			mode_ = Mode::ATTENTION;
@@ -155,7 +150,7 @@ void Robot::update()
 
 		if ( timer_ >= 3.f )
 		{
-			if ( caluclate_target_visible() )
+			if ( calculate_target_visible() )
 			{
 				mode_ = Mode::CHASE;
 				timer_ = 0.f;
@@ -197,48 +192,14 @@ void Robot::update()
 
 void Robot::update_patrol()
 {
-	/*
-	if ( current_patrol_point_index_ == patrol_point_list_.end() && ! patrol_point_list_.empty() )
-	{
-		current_patrol_point_ = patrol_point_list_.begin();
-	}
-
-	if ( current_patrol_point_ == patrol_point_list_.end() )
-	{
-		mode_ = Mode::STAND;
-		return;
-	}
-
-	auto next_patrol_point = current_patrol_point_;
-
-	return;
-
-	if ( next_patrol_point == patrol_point_list_.end() )
-	{
-		update_velocity_by_target_location( * current_patrol_point_, 1 );
-	}
-	else
-	{
-		update_velocity_by_target_location( * next_patrol_point, 1 );
-	}
-	*/
-
 	if ( current_patrol_point_index_ < patrol_point_list_.size() )
 	{
 		const Vector& point = patrol_point_list_[ current_patrol_point_index_ ];
 
 		update_velocity_by_target_location( point, 0.1f );
 
-		if ( ( point - get_location() ).length() < 0.1f )
-		{
-			// current_patrol_point_index_++;
-			// current_patrol_point_index_ = current_patrol_point_index_ % patrol_point_list_.size();
-		}
-
 		play_animation( "Walk", false, true );
 	}
-
-	
 }
 
 void Robot::action( const string_t& s )
@@ -264,7 +225,7 @@ void Robot::action( const string_t& s )
  *
  * @param ターゲットを見失った場合は、true を、ターゲットを補足中の場合は false を返す
  */
-bool Robot::caluclate_target_lost() const
+bool Robot::calculate_target_lost() const
 {
 	Vector relative_position = player_->get_location() - get_location();
 	relative_position.set_y( 0 );
@@ -285,7 +246,7 @@ bool Robot::caluclate_target_lost() const
  *
  * @param ターゲット ( プレイヤー ) を目視できる場合は、true を、目視できない場合は false を返す
  */
-bool Robot::caluclate_target_visible() const
+bool Robot::calculate_target_visible() const
 {
 	if ( ! player_ )
 	{
@@ -334,8 +295,6 @@ bool Robot::caluclate_target_visible() const
 		eyeshot_angle = eyeshot_angle_short;
 	}
 	
-	// std::cout << relative_length << " : " << eyeshot_angle << " : " << get_front().dot( ( to - from ).normalize() ) << std::endl;
-
 	// ターゲットとの距離に応じた視野角に入っていなければ、目視できない
 	if ( get_front().dot( ( to - from ).normalize() ) < eyeshot_angle )
 	{
@@ -351,17 +310,13 @@ bool Robot::caluclate_target_visible() const
 	// ターゲットとの間に障害物がなければ目視できている
 	if ( ! ray_callback.hasHit() )
 	{
-		std::cout << "*** target_visible ***" << std::endl;
-		std::cout << "from : " << from.x() << ", " << from.y() << ", " << from.z() << std::endl;
-		std::cout << "to : " << to.x() << ", " << to.y() << ", " << to.z() << std::endl;
-
 		return true;
 	}
 
 	return false;
 }
 
-bool Robot::caluclate_collide_object_to_swtich_off( const GameObject* )
+bool Robot::calculate_collide_object_to_switch_off( const GameObject* )
 {
 	return true;
 }
@@ -392,7 +347,7 @@ void Robot::on_collide_with( Player* player )
 		return;
 	}
 
-	if ( ! caluclate_collide_object_to_swtich_off( player ) )
+	if ( ! calculate_collide_object_to_switch_off( player ) )
 	{
 		return;
 	}
@@ -408,7 +363,7 @@ void Robot::on_collide_with( Stone* stone )
 		return;
 	}
 
-	if ( ! caluclate_collide_object_to_swtich_off( stone ) )
+	if ( ! calculate_collide_object_to_switch_off( stone ) )
 	{
 		return;
 	}

@@ -335,36 +335,47 @@ bool GameMain::update()
 		oculus_rift_->update();
 	}
 
-	if ( input_->push( Input::Button::ESCAPE ) )
+	// ESC キーはオーバーレイの有無に関わらず検出する (ブロックをバイパス)
 	{
-		if ( scene_->get_name() == "title" )
+		const bool escape_blocked = input_->is_blocked();
+		input_->set_blocked( false );
+		const bool escape_pushed = input_->push( Input::Button::ESCAPE );
+		input_->set_blocked( escape_blocked );
+
+		if ( escape_pushed )
 		{
-			get_app()->close();
-		}
-		else if ( scene_->get_name() == "game_play" )
-		{
-			scene_->set_next_scene( "stage_select" );
-		}
-		else
-		{
-			if (
-				get_save_data()->get< int >( "stage.0-0", 0 ) > 0 &&
-				get_save_data()->get< int >( "stage.0-1", 0 ) > 0 && 
-				get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
+			if ( has_overlay_scene() )
 			{
-				scene_->set_next_scene( "title" );
+				// オーバーレイが開いている場合は閉じる
+				pop_overlay_scene();
+				if ( auto* s = sound_manager_->get_sound( "cancel" ) ) { s->play( false ); }
 			}
-			else
+			else if ( scene_->get_name() == "title" )
 			{
 				get_app()->close();
 			}
-		}
+			else if ( scene_->get_name() == "game_play" )
+			{
+				// ゲームプレイ中はポーズメニューを開く
+				push_overlay_scene( "pause_menu" );
+				if ( auto* s = sound_manager_->get_sound( "ok" ) ) { s->play( false ); }
+			}
+			else
+			{
+				if (
+					get_save_data()->get< int >( "stage.0-0", 0 ) > 0 &&
+					get_save_data()->get< int >( "stage.0-1", 0 ) > 0 &&
+					get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
+				{
+					scene_->set_next_scene( "title" );
+				}
+				else
+				{
+					get_app()->close();
+				}
 
-		game::Sound* cancel = sound_manager_->get_sound( "cancel" );
-
-		if ( cancel )
-		{
-			cancel->play( false );
+				if ( auto* s = sound_manager_->get_sound( "cancel" ) ) { s->play( false ); }
+			}
 		}
 	}
 

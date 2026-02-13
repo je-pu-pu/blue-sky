@@ -16,8 +16,9 @@ namespace blue_sky
 
 Scene::Scene()
 	: total_elapsed_time_( 0.f )
+	, is_paused_( false )
 {
-	
+
 }
 
 Scene::~Scene()

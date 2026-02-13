@@ -41,6 +41,7 @@ Input::Input()
 	, mouse_wheel_( 0 )
 	, mouse_point_()
 	, joystick_code_()
+	, is_blocked_( false )
 {
 	joy_info_.dwSize = sizeof( JOYINFOEX );
 	joy_info_.dwFlags = JOY_RETURNALL;

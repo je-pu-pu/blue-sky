@@ -51,9 +51,6 @@
 #include <common/random.h>
 #include <common/math.h>
 
-#include <iostream>
-#include <iomanip>
-
 #include <fstream>
 #include <sstream>
 
@@ -154,12 +151,6 @@ GamePlayScene::~GamePlayScene()
 	get_graphics_manager()->unset_ground();
 	get_graphics_manager()->unset_shadow_map();
 
-	/// @todo 直す
-#if 0
-	get_graphics_manager()->unload_mesh_all();
-	get_graphics_manager()->unload_texture_all();
-#endif
-
 	get_active_object_physics()->clear();
 
 	clear_delayed_command();
@@ -186,9 +177,6 @@ void GamePlayScene::clear_delayed_command()
  */
 ActiveObject* GamePlayScene::create_object_at_player_front( const char_t* class_name )
 {
-	// get_script_manager()->exec( string_t( "active_object_ = create_object( '" ) + class_name + "' )" );
-	// ActiveObject* active_object = get_script_manager()->get< ActiveObject* >( "active_object_" );
-
 	ActiveObject* active_object = GameMain::get_instance()->create_object( class_name );
 
 	if ( ! active_object )
@@ -681,7 +669,6 @@ void GamePlayScene::load_sound_all( bool is_final_stage )
 		get_sound_manager()->load( "medal-get" );
 
 		get_sound_manager()->load( "fin", "girl-see-you" );
-		// get_sound_manager()->load( "door" );
 	}
 	else
 	{
@@ -1056,7 +1043,6 @@ void GamePlayScene::update()
 	get_active_object_physics()->check_collision_all();
 
 	get_sound_manager()->set_listener_position( camera_->position().xyz() );
-	// get_sound_manager()->set_listener_velocity( player_->get_velocity() );
 	get_sound_manager()->set_listener_orientation( camera_->front().xyz(), camera_->up().xyz() );
 	get_sound_manager()->commit();
 
@@ -1094,13 +1080,7 @@ void GamePlayScene::update_main()
 {
 	const float_t rotation_speed_rate = camera_->fov() / camera_->get_fov_default();
 
-	if ( get_oculus_rift() )
-	{
-		// camera_->rotate_degree_target().x() = math::radian_to_degree( get_oculus_rift()->get_pitch() );
-		// camera_->rotate_degree_target().y() = math::radian_to_degree( get_oculus_rift()->get_yaw() );
-		// camera_->rotate_degree_target().z() = math::radian_to_degree( get_oculus_rift()->get_roll() );
-	}
-	else
+	if ( ! get_oculus_rift() )
 	{
 		camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * 90.f * rotation_speed_rate, 0.f, 0.f, 0.f );
 		camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f ) );
@@ -1189,8 +1169,7 @@ void GamePlayScene::update_main()
 				case Player::ItemType::NONE: player_->jump(); break;
 				case Player::ItemType::ROCKET: player_->rocket( camera_->front() ); break;
 				case Player::ItemType::STONE: player_->throw_stone( camera_->front() ); break;
-				// case Player::ItemType::UMBRELLA: player_->start_umbrella_mode(); player_->jump(); break;
-				case Player::ItemType::SCOPE:
+					case Player::ItemType::SCOPE:
 				{
 					player_->switch_scope_mode();
 
@@ -1327,7 +1306,6 @@ void GamePlayScene::update_balloon_sound()
 		else if ( balloon_sound_type_ == BalloonSoundType::SCALE )
 		{
 			int r = math::clamp( balloon_sound_request, 1, 7 );
-			// int r = ( balloon_sound_request - 1 ) % 7 + 1;
 
 			for ( int n = 1; n <= 7; n++ )
 			{
@@ -1356,18 +1334,6 @@ void GamePlayScene::update_balloon_sound()
 		{
 			bgm_->fade_out();
 		}
-
-		/*
-		if ( balloon_bgm_->is_playing() )
-		{
-			balloon_bgm_->fade_in( Sound::VOLUME_FADE_SPEED_FAST );
-		}
-		else
-		{
-			balloon_bgm_->play( true );
-			balloon_bgm_->set_volume( Sound::VOLUME_MAX );
-		}
-		*/
 	}
 	else
 	{
@@ -1378,13 +1344,6 @@ void GamePlayScene::update_balloon_sound()
 
 		if ( bgm_ )
 		{
-			/*
-			if ( bgm_->is_fader_full_out() && stage_config_->get( "bgm.loop", true ) )
-			{
-				bgm_->play( true, false );
-			}
-			*/
-
 			bgm_->fade_in();
 		}
 	}
@@ -1405,19 +1364,6 @@ void GamePlayScene::update_shadow()
 {
 	if ( get_graphics_manager()->is_shadow_enabled() )
 	{
-		if ( false )
-		{
-			static float a = 0.1f;
-
-			a += 0.0025f;
-
-			const Vector light_origin( 0.f, 50.f, 0.f, 1.f );
-			const Vector v = light_origin + Vector( cos( a ) * 50.f, 0.f, sin( a ) * 50.f, 0.f );	
-
-			light_position_.value().set( v.x(), v.y(), v.z() );
-			light_position_.target_value() = light_position_.value();
-		}
-
 		get_graphics_manager()->get_shadow_map()->set_light_position( Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z(), 1.f ) );
 		get_graphics_manager()->get_shadow_map()->set_eye_position( camera_->position() );
 	}
@@ -1593,29 +1539,6 @@ void GamePlayScene::render_text() const
 		ss << "IS FALLING TO DIE : " << player_->is_falling_to_die() << '\n';
 
 		ss << "TESS FACTOR : " << get_graphics_manager()->get_frame_render_data()->data().tess_factor << '\n';
-		/*
-		ss << "IS JUMPING : " << player_->is_jumping() << '\n';
-		ss << "ON FOOTING : " << player_->is_on_footing() << '\n';
-		ss << "ON LADDER : " << player_->is_on_ladder() << '\n';
-		ss << "IS FACING TO BLOCK : " << player_->is_facing_to_block() << '\n';
-		ss << "CAN CLAMBER : " << player_->can_clamber() << '\n';
-		ss << "CAN PEER DOWN : " << player_->can_peer_down() << '\n';
-		ss << "CAN THROW : " << player_->can_throw() << '\n';
-		ss << "IS CLAMBERING : " << player_->is_clambering() << '\n';
-		ss << "IS FALLING TO DIE : " << player_->is_falling_to_die() << '\n';
-		ss << "IS FALLING TO SAFE : " << player_->is_falling_to_safe() << '\n';
-
-		ss << "IS LADDER STEP ONLY : " << player_->is_ladder_step_only() << '\n';
-
-		ss << "BALLOON : " << ( player_->get_balloon() != nullptr ) << '\n';
-
-		if ( player_->get_balloon() )
-		{
-			ss << "BALLOON : " << player_->get_balloon()->is_visible() << '\n';
-			ss << "BALLOON : " << player_->get_balloon()->is_mesh_visible() << '\n';
-			ss << "BALLOON : " << player_->get_balloon()->is_line_visible() << '\n';
-		}
-		*/
 
 		if ( get_oculus_rift() )
 		{
@@ -1638,8 +1561,6 @@ void GamePlayScene::render_text() const
  */
 void GamePlayScene::update_render_data_for_frame() const
 {
-	// get_graphic_manager()->update_render_data_for_frame( camera_ );
-
 	auto& frame_render_data = get_graphics_manager()->get_frame_render_data()->data();
 	update_frame_constant_buffer_data_sub( frame_render_data );
 
@@ -1673,13 +1594,8 @@ void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
 
 	Vector eye_offset = ( get_oculus_rift()->get_eye_position( eye_index ) ) * camera_rot;
 
-	// std::cout << std::fixed << std::setprecision( 8 );
-	// std::cout << "eye" << eye_index << " offset : " << eye_offset.x() << ", " << eye_offset.y() << ", " << eye_offset.z() << std::endl;
-
 	Matrix r = get_oculus_rift()->get_eye_rotation( eye_index ) * camera_rot;
 	const Vector eye = camera_->position() + eye_offset;
-	// Vector at( camera_->look_at().x(), camera_->look_at().y(), camera_->look_at().z() );
-	// Vector up( camera_->up().x(), camera_->up().y(), camera_->up().z() );
 	Vector at = eye + Vector( 0.f, 0.f, 1.f, 0.f ) * r;
 	Vector up = Vector( 0.f, 1.f, 0.f, 0.f ) * r;
 
@@ -1789,7 +1705,6 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				const float offset = n * 50.f;
 
 				win::Rect src_rect = win::Rect::Size( 0, 256, 186, 220 );
-				// Vector center( src_rect.width() * 0.5f, src_rect.height() * 0.5f, 0.f, 1.f );
 
 				Matrix t;
 				t.set_translation( get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f - offset, 0.f );

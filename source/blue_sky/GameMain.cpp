@@ -195,6 +195,8 @@ void GameMain::setup_script_command()
 
 	// Scene
 	get_script_manager()->set_function( "scene", [this] ( const char_t* name ) { setup_scene( name ); } );
+	get_script_manager()->set_function( "push_overlay", [this] ( const char_t* name ) { push_overlay_scene( name ); } );
+	get_script_manager()->set_function( "pop_overlay", [this] () { pop_overlay_scene(); } );
 
 	// Basic
 	get_script_manager()->set_function( "color", [this] ( float_t r, float_t g, float_t b, float_t a ) { return Color( r, g, b, a ); } );
@@ -333,36 +335,47 @@ bool GameMain::update()
 		oculus_rift_->update();
 	}
 
-	if ( input_->push( Input::Button::ESCAPE ) )
+	// ESC キーはオーバーレイの有無に関わらず検出する (ブロックをバイパス)
 	{
-		if ( scene_->get_name() == "title" )
+		const bool escape_blocked = input_->is_blocked();
+		input_->set_blocked( false );
+		const bool escape_pushed = input_->push( Input::Button::ESCAPE );
+		input_->set_blocked( escape_blocked );
+
+		if ( escape_pushed )
 		{
-			get_app()->close();
-		}
-		else if ( scene_->get_name() == "game_play" )
-		{
-			scene_->set_next_scene( "stage_select" );
-		}
-		else
-		{
-			if (
-				get_save_data()->get< int >( "stage.0-0", 0 ) > 0 &&
-				get_save_data()->get< int >( "stage.0-1", 0 ) > 0 && 
-				get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
+			if ( has_overlay_scene() )
 			{
-				scene_->set_next_scene( "title" );
+				// オーバーレイが開いている場合は閉じる
+				pop_overlay_scene();
+				if ( auto* s = sound_manager_->get_sound( "cancel" ) ) { s->play( false ); }
 			}
-			else
+			else if ( scene_->get_name() == "title" )
 			{
 				get_app()->close();
 			}
-		}
+			else if ( scene_->get_name() == "game_play" )
+			{
+				// ゲームプレイ中はポーズメニューを開く
+				push_overlay_scene( "pause_menu" );
+				if ( auto* s = sound_manager_->get_sound( "ok" ) ) { s->play( false ); }
+			}
+			else
+			{
+				if (
+					get_save_data()->get< int >( "stage.0-0", 0 ) > 0 &&
+					get_save_data()->get< int >( "stage.0-1", 0 ) > 0 &&
+					get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
+				{
+					scene_->set_next_scene( "title" );
+				}
+				else
+				{
+					get_app()->close();
+				}
 
-		game::Sound* cancel = sound_manager_->get_sound( "cancel" );
-
-		if ( cancel )
-		{
-			cancel->play( false );
+				if ( auto* s = sound_manager_->get_sound( "cancel" ) ) { s->play( false ); }
+			}
 		}
 	}
 
@@ -370,18 +383,55 @@ bool GameMain::update()
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-	scene_->update();
+	// オーバーレイシーンが存在する場合、ベースシーンの入力をブロック
+	input_->set_blocked( has_overlay_scene() );
+
+	if ( has_overlay_scene() )
+	{
+		// ベースシーンはポーズ中 (更新しない)
+		// オーバーレイシーンのトップのみ更新
+		overlay_scene_stack_.back()->update();
+	}
+	else
+	{
+		scene_->update();
+	}
 
 	render();
 
-	check_scene_transition();
+	// オーバーレイシーンの遷移チェック
+	if ( has_overlay_scene() && ! overlay_scene_stack_.back()->get_next_scene().empty() )
+	{
+		string_t next = overlay_scene_stack_.back()->get_next_scene();
+
+		if ( next == "pop" )
+		{
+			pop_overlay_scene();
+		}
+		else
+		{
+			pop_overlay_scene();
+			push_overlay_scene( next );
+		}
+	}
+	else
+	{
+		check_scene_transition();
+	}
 
 	return true;
 }
 
 void GameMain::render()
 {
+	// ベースシーンを常に描画
 	scene_->render();
+
+	// オーバーレイシーンを上から順に描画
+	for ( auto& overlay : overlay_scene_stack_ )
+	{
+		overlay->render();
+	}
 
 	if ( is_command_mode_ )
     {
@@ -722,6 +772,61 @@ void GameMain::setup_scene( const string_t& scene_name )
 	scene_->set_next_stage_name( get_stage_name() );
 
 	get_app()->clip_cursor( scene_->is_clip_cursor_required() );
+}
+
+/**
+ * オーバーレイシーンをスタックにプッシュする
+ *
+ * ベースシーンを破棄せずに、上にオーバーレイシーン (ポーズメニュー等) を重ねる。
+ * ベースシーンの更新は停止し、入力はオーバーレイシーンのみが受け取る。
+ *
+ * @param scene_name シーン名
+ */
+void GameMain::push_overlay_scene( const string_t& scene_name )
+{
+	if ( ! SceneManager::get_instance()->is_scene_registered( scene_name ) )
+	{
+		return;
+	}
+
+	// ベースシーンをポーズ
+	scene_->set_paused( true );
+
+	// オーバーレイシーンを生成してスタックに追加
+	std::unique_ptr< Scene > overlay( SceneManager::get_instance()->generate_scene( scene_name ) );
+	overlay->set_name( scene_name );
+	overlay->set_next_stage_name( get_stage_name() );
+
+	overlay_scene_stack_.push_back( std::move( overlay ) );
+
+	// カーソルを表示 (メニュー操作用)
+	set_show_cursor( true );
+	get_app()->clip_cursor( false );
+}
+
+/**
+ * オーバーレイシーンをスタックからポップする
+ *
+ * スタックが空になった場合、ベースシーンのポーズを解除する。
+ */
+void GameMain::pop_overlay_scene()
+{
+	if ( overlay_scene_stack_.empty() )
+	{
+		return;
+	}
+
+	overlay_scene_stack_.pop_back();
+
+	if ( overlay_scene_stack_.empty() )
+	{
+		// 全てのオーバーレイが閉じた → ベースシーンのポーズ解除
+		scene_->set_paused( false );
+		input_->set_blocked( false );
+
+		set_show_cursor( is_command_mode_ );
+		get_app()->clip_cursor( is_command_mode_ ? false : scene_->is_clip_cursor_required() );
+	}
 }
 
 } // namespace blue_sky

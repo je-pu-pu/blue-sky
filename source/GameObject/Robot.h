@@ -48,10 +48,10 @@ private:
 	void on_collide_with( Stone* );
 
 protected:
-	bool caluclate_target_visible() const;
-	bool caluclate_target_lost() const;
+	bool calculate_target_visible() const;
+	bool calculate_target_lost() const;
 
-	bool caluclate_collide_object_to_swtich_off( const GameObject* );
+	bool calculate_collide_object_to_switch_off( const GameObject* );
 
 	void update_patrol();
 

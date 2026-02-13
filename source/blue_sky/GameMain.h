@@ -9,6 +9,7 @@
 #include <type/type.h>
 
 #include <unordered_map>
+#include <vector>
 
 class DirectWrite;
 
@@ -133,7 +134,8 @@ private:
 
 	std::unique_ptr< BulletDebugDraw >		bullet_debug_draw_;
 
-	std::unique_ptr< Scene >				scene_;					///< 現在のシーン
+	std::unique_ptr< Scene >				scene_;					///< 現在のベースシーン
+	std::vector< std::unique_ptr< Scene > >	overlay_scene_stack_;	///< オーバーレイシーンのスタック
 	string_t								stage_name_;			///< 現在のステージ名
 
 	bool									is_display_fps_;		///< FPS 表示フラグ
@@ -201,6 +203,13 @@ public:
 
 	inline static GameMain* get_instance() { static GameMain game_main; return & game_main; }
 	const Scene* get_current_scene() const { return scene_.get(); }
+
+	/// オーバーレイシーンをスタックにプッシュする ( ベースシーンはポーズ状態になる )
+	void push_overlay_scene( const string_t& scene_name );
+	/// オーバーレイシーンをスタックからポップする ( ベースシーンのポーズが解除される )
+	void pop_overlay_scene();
+	/// オーバーレイシーンが存在するか
+	bool has_overlay_scene() const { return ! overlay_scene_stack_.empty(); }
 
 	void set_show_cursor( bool show_cursor ) { is_show_cursor_ = show_cursor; get_app()->show_cursor( is_show_cursor_ ); }
 	bool is_show_cursor() const override { return is_show_cursor_; }

@@ -50,7 +50,6 @@ Player::Player()
 	, balloon_( nullptr )
 	, hp_( 1 )
 {
-	// set_rigid_body( get_physics_manager()->create_capsule_rigid_body( this ) );
 }
 
 /**
@@ -250,7 +249,6 @@ void Player::limit_velocity()
 
 	if ( is_rocketing() )
 	{
-		// v *= 1.01f;
 	}
 	else if ( is_jumping() )
 	{
@@ -463,10 +461,6 @@ void Player::update_facing_to_block()
 	GameMain::get_instance()->get_active_object_physics()->get_dynamics_world()->contactTest( & collision_object, callback );
 
 	is_facing_to_block_ = callback.is_hit();
-
-
-	// test
-	// get_physics_manager()->contact_test( )
 }
 
 /**
@@ -688,9 +682,6 @@ float_t Player::get_footing_height( const Vector& from, bool include_soft_footin
 	{
 		const ActiveObject* a = reinterpret_cast< const ActiveObject* >( ray_callback.m_collisionObject->getUserPointer() );
 		
-		/// debug !!!
-		// const char* xxx = typeid( a ).name();
-
 		if ( a->is_safe_footing() )
 		{
 			// !!!
@@ -971,7 +962,6 @@ void Player::kill()
 	get_rigid_body()->setActivationState( true );
 	set_angular_factor( 1.f );
 	set_friction( 1.f );
-	// get_rigid_body()->applyForce( get_front() * 2000.f, Vector3( 0.1f, 1.5f, 0.f ) );
 }
 
 void Player::set_eye_depth( float d )
@@ -1021,11 +1011,6 @@ void Player::on_collide_with( Balloon* balloon )
 
 	is_jumping_ = false;
 
-	/*
-	is_falling_ = false;
-	is_action_pre_finish_ = false;
-	*/
-
 	set_action_mode( ActionMode::BALLOON );
 	set_action_base_position_to_current_position();
 
@@ -1066,18 +1051,6 @@ void Player::on_collide_with( Medal* medal )
 
 void Player::on_collide_with( Robot* robot )
 {
-	/*
-	if ( is_uncontrollable() )
-	{
-		if ( uncontrollable_timer_ < 1.f )
-		{
-			kill();
-
-			return;
-		}
-	}
-	*/
-
 	if ( robot->get_mode() != Robot::Mode::CHASE )
 	{
 		return;
@@ -1136,17 +1109,6 @@ void Player::set_action_mode( ActionMode action_mode )
 	{
 		return;
 	}
-
-	/*
-	// 自動傘選択
-	if ( action_mode_ != ActionMode::UMBRELLA && action_mode_ != ActionMode::NONE )
-	{
-		if ( action_mode == ActionMode::NONE && item_count_[ ItemType::UMBRELLA ] && floor_cell() && is_if_fall_to_die( floor_cell()->height() ) )
-		{
-			action_mode = ActionMode::UMBRELLA;
-		}
-	}
-	*/
 
 	action_mode_ = action_mode;
 	action_timer_ = 0.f;

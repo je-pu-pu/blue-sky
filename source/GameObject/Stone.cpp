@@ -1,5 +1,5 @@
 #include "Stone.h"
-#include <btBulletDynamicsCommon.h> ///< @todo Bullet を直接使わない
+#include <btBulletDynamicsCommon.h>
 
 namespace blue_sky
 {
@@ -15,8 +15,7 @@ void Stone::restart()
 {
 	ActiveObject::restart();
 
-	// 石が薄い壁を貫通しないようにする
-	/// @todo Bullet を直接使わない
+	// 石が薄い壁を貫通しないようにする (Bullet CCD)
 	get_rigid_body()->setCcdSweptSphereRadius( 0.2f );
 	get_rigid_body()->setCcdMotionThreshold( 0.2f );
 }

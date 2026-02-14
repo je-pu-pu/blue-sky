@@ -11,7 +11,6 @@
 
 #include <core/graphics/ShadowMap.h>
 
-/// @todo 抽象化する
 #include <core/graphics/Direct3D11/Sprite.h>
 
 #include <blue_sky/Input.h>
@@ -98,8 +97,7 @@ void GamePlayScene::render_to_display() const
 /**
  * 各目に対して描画を行う
  *
- * @parma ortho_offset UI の両目間オフセット
- * @todo GraphicsManager に移行する
+ * @param ortho_offset UI の両目間オフセット
  */
 void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 {
@@ -164,7 +162,7 @@ void GamePlayScene::render_text() const
 /**
  * フレーム毎に更新する必要のある描画用の定数バッファを更新する
  *
- * @todo GraphicsManager か ActiveObjectManager か Scenegraph に移動する
+
 
  */
 void GamePlayScene::update_render_data_for_frame() const
@@ -232,7 +230,6 @@ void GamePlayScene::update_frame_constant_buffer_data_sub( FrameConstantBufferDa
  */
 void GamePlayScene::update_render_data_for_frame_drawing() const
 {
-	/// @todo GraphicsManager が管理する
 	get_graphics_manager()->set_shadow_color( shadow_color_.value() );
 	get_graphics_manager()->set_shadow_paper_color( shadow_paper_color_.value() );
 	get_graphics_manager()->set_drawing_accent( bgm_ ? bgm_->get_current_peak_level() * drawing_accent_scale_ : 0.f );
@@ -251,14 +248,12 @@ void GamePlayScene::render_far_billboards() const
 		return;
 	}
 
-	/// @todo 毎フレーム update() するのは無駄なのでやめる
 	ObjectConstantBufferData buffer;
 	buffer.color = Color::White;
 	buffer.world.set_identity();
 
 	get_graphics_manager()->get_shared_object_render_data()->update( & buffer );
 
-	/// @todo shader を "billboard" にする
 	get_graphics_manager()->set_current_object_constant_buffer( get_graphics_manager()->get_shared_object_render_data() );
 	far_billboards_->render();
 }

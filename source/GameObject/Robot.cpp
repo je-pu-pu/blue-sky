@@ -232,7 +232,7 @@ bool Robot::calculate_target_lost() const
 
 	auto relative_length = relative_position.length(); // ターゲットとの距離
 
-	/// @todo ちゃんと実装
+	// 距離が 20 を超えたらターゲットを見失う
 	if ( relative_length > 20.f )
 	{
 		return true;

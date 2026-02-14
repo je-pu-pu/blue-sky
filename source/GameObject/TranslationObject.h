@@ -7,8 +7,10 @@ namespace blue_sky
 {
 
 /**
- * 移動しないオブジェクト @todo 名前を直す StaticObject から継承してるのは変
+ * 周期的に移動するオブジェクト（動く床など）
  *
+ * StaticObject を基底に sin/cos で位置を振動させる。
+ * 物理的には kinematic body として扱われる。
  */
 class TranslationObject : public StaticObject
 {

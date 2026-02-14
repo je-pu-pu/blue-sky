@@ -38,7 +38,10 @@ namespace blue_sky
 /**
  * 入力
  *
- * @todo Windows と切り離す
+ * Windows 依存: GetAsyncKeyState, GetCursorPos, JOYINFOEX (joystick),
+ * DirectInput (mouse delta), POINT, DWORD, VK_* 仮想キーコード。
+ * クロスプラットフォーム対応する場合は InputManager インターフェースに
+ * プラットフォーム固有の実装を分離する。
  */
 class Input : public core::input::InputManager
 {
@@ -218,9 +221,6 @@ public:
 
 	float get_mouse_dx() const override { return is_blocked_ ? 0.f : mouse_dx_; }
 	float get_mouse_dy() const override { return is_blocked_ ? 0.f : mouse_dy_; }
-
-//	void set_mouse_x_rate( float );
-//	void set_mouse_y_rate( float );
 
 	void push_mouse_wheel_queue( int wheel ) { mouse_wheel_ += wheel; }
 	int pop_mouse_wheel_queue() { int w = mouse_wheel_; mouse_wheel_ = 0; return w; }

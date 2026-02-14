@@ -11,10 +11,8 @@
 #include <type/type.h>
 
 /**
- * Sol 2.20.0 では set_function() で関数追加後、定義されていない変数を使って関数を呼び出すと、
- * エラーが発生すると同時に 8 バイトのメモリリークが発生する。
- *
- * @todo メモリリークを調査する or Sol のバージョンを変える
+ * Sol 2.20.0 の既知問題: set_function() で追加した関数を未定義変数で呼ぶと
+ * 8 バイトのメモリリークが発生する。Sol のアップグレードで解消される可能性あり。
  */
 // #define SOL_NO_EXCEPTIONS 1
 #include <sol/sol.hpp>
@@ -215,7 +213,7 @@ inline void ScriptManager::exec( const string_t& script, bool add_history )
 
 	string_t command = boost::trim_copy( script );
 
-	if ( add_history && command_history_.back() != command && command != "" )
+	if ( add_history && ! command.empty() && ( command_history_.empty() || command_history_.back() != command ) )
 	{
 		command_history_.push_back( command );
 		command_history_index_ = command_history_.size() - 1;
@@ -266,7 +264,7 @@ inline void ScriptManager::load_command_history( const string_t& file_path )
 
 		boost::trim( command );
 
-		if ( command == "" || ! command_history_.empty() && command == command_history_.back() )
+		if ( command.empty() || ( ! command_history_.empty() && command == command_history_.back() ) )
 		{
 			continue;
 		}

@@ -31,8 +31,7 @@ void UIRenderer::draw_text( float_t x, float_t y, float_t w, float_t h, const ch
 
 void UIRenderer::draw_text_center( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color )
 {
-	/// @todo DirectWrite の中央揃え API を使うようにする
-	gm_->draw_text( x, y, x + w, y + h, text, color );
+	gm_->draw_text_center( x, y, x + w, y + h, text, color );
 }
 
 void UIRenderer::draw_rect( float_t x, float_t y, float_t w, float_t h, const Color& color )

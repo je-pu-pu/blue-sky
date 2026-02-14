@@ -52,7 +52,7 @@ void GameObject::update_transform()
 
 	t *= offset;
 
-	/// @todo ちゃんとする
+	// btVector3 と Vector はメモリレイアウトが同一のため reinterpret_cast で変換
 	transform_.set_position( reinterpret_cast< const Vector& >( t.getOrigin() ) );
 
 	auto q = t.getRotation();

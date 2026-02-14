@@ -54,9 +54,6 @@ namespace blue_sky::graphics
 
 /**
  * グラフィック管理クラス
- * 
- * @todo blue_sky::graphics::GraphicsManager と core::graphics::GraphicsManager のどちらに何が含まれるべきかを整理する
- * @todo 必要なメンバを core::graphics::GraphicsManager に移動する
  *
  * このクラスが実体化される事はない。
  * 実際にはこのクラスを継承した blue_sky::graphics::direct_3d_11::GraphicsManager が実体化される。
@@ -251,7 +248,6 @@ public:
 	Fader* get_fader() { return fader_.get(); }
 	const Fader* get_fader() const { return fader_.get(); }
 
-	/// @todo 整理する
 	void set_fade_color( const Color& );
 
 	void start_fade_in( float_t speed );
@@ -262,8 +258,8 @@ public:
 
 	void render_fader() const override;
 
-	/// @todo ちゃんと作る Font, size, 指定した Texture への描画
 	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
+	virtual void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
 	virtual void draw_text_at_center( const char_t*, const Color& ) const = 0;
 
 	void set_debug_axis_enabled( bool e ) { is_debug_axis_enabled_ = e; }

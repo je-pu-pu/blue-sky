@@ -256,45 +256,5 @@ float Input::get_rate_by_joystick_axis_pos( DWORD pos ) const
 	return math::chase( rate, 0.f, joystick_axis_threshold_ ) / ( 1.f - joystick_axis_threshold_ );
 }
 
-#if 0
-
-void Input::set_mouse_x_rate( float x )
-{
-	mouse_x_rate_ = x;
-	mouse_dx_ = 0.f;
-
-	POINT point;
-
-	point.x = static_cast< int >( ( mouse_x_rate_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_width() - 1 ) );
-	point.y = static_cast< int >( ( mouse_y_rate_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_height() - 1 ) );
-
-	mouse_point_.x = point.x;
-
-	ClientToScreen( App::GetInstance()->GetWindowHandle(), & point );
-	SetCursorPos( point.x, point.y );
-
-	POINT new_point;
-	GetCursorPos( & new_point );
-}
-
-void Input::set_mouse_y_rate( float y )
-{
-	return;
-
-	mouse_y_rate_ = y;
-	mouse_dy_ = 0.f;
-
-	POINT point;
-
-	point.x = static_cast< int >( ( mouse_x_rate_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_width() - 1 ) );
-	point.y = static_cast< int >( ( mouse_x_rate_ + 1.f ) * 0.5f * static_cast< float >( App::GetInstance()->get_height() - 1 ) );
-
-	mouse_point_.y = point.y;
-
-	ClientToScreen( App::GetInstance()->GetWindowHandle(), & point );
-	SetCursorPos( point.x, point.y );
-}
-
-#endif // 0
 
 } // namespace blue_sky

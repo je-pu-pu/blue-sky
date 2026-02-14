@@ -37,9 +37,8 @@ class Component;
  * ゲーム上に存在するすべてのオブジェクトはトランスフォーム ( 移動・回転・拡大縮小 ) 情報を持つ
  * ゲーム上に存在するすべてのオブジェクトはオプションとして剛体 ( 衝突判定用の形状を含む ) 情報を持つ
  *
- * @todo Bullet Physics を隠蔽する
- * @todo ECS に移行する
- * @todo core に移動する
+ * 現在 ECS (core::ecs) と共存しており、ComponentMap で ECS コンポーネントを
+ * 保持できるブリッジ構造になっている。Bullet Physics を直接参照している。
  */
 class GameObject
 {
@@ -133,7 +132,7 @@ public:
 
 	virtual void on_collide_with_ground() { }
 
-	/// @todo 分離する
+	// Bullet Physics 操作
 	void set_mass( float_t );
 	void set_gravity( const Vector& );
 	void set_friction( float_t );
@@ -145,7 +144,6 @@ public:
 	Transform& get_transform();
 	const Transform& get_transform() const;
 	
-	/// @todo Bullet Physics を隠蔽する
 	inline btRigidBody* get_rigid_body() { return rigid_body_; }
 	inline const btRigidBody* get_rigid_body() const { return rigid_body_; }
 	inline void set_rigid_body( btRigidBody* rigid_body ) { rigid_body_ = rigid_body; }
@@ -187,7 +185,7 @@ public:
 			return nullptr;
 		}
 
-		return i->secont;
+		return static_cast< ComponentType* >( i->second );
 	}
 
 }; // class GameObject

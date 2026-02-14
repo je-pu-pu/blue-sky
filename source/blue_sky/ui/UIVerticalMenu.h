@@ -50,8 +50,9 @@ private:
 public:
 	UIVerticalMenu();
 
-	/// メニュー項目の追加・クリア
+	/// メニュー項目の追加・更新・クリア
 	void add_item( const string_t& text, std::function< void() > on_select );
+	void set_item_text( int index, const string_t& text );
 	void clear_items();
 
 	/// レイアウト設定

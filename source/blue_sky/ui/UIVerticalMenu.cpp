@@ -17,6 +17,14 @@ void UIVerticalMenu::add_item( const string_t& text, std::function< void() > on_
 	items_.push_back( { text, on_select } );
 }
 
+void UIVerticalMenu::set_item_text( int index, const string_t& text )
+{
+	if ( index >= 0 && index < static_cast< int >( items_.size() ) )
+	{
+		items_[ index ].text = text;
+	}
+}
+
 void UIVerticalMenu::clear_items()
 {
 	items_.clear();

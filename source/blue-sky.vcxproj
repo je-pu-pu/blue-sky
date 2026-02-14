@@ -126,6 +126,7 @@
     <ClCompile Include="Scene\GamePlayScene.cpp" />
     <ClCompile Include="Scene\GamePlayScene_command.cpp" />
     <ClCompile Include="Scene\GamePlayScene_render.cpp" />
+    <ClCompile Include="Scene\OptionsScene.cpp" />
     <ClCompile Include="Scene\PauseMenuScene.cpp" />
     <ClCompile Include="Scene\GeometryShaderCanvasTestScene.cpp" />
     <ClCompile Include="Scene\MusicGamePrototypeScene.cpp" />
@@ -327,6 +328,7 @@
     <ClInclude Include="Scene\DebugScene.h" />
     <ClInclude Include="Scene\EndingScene.h" />
     <ClInclude Include="Scene\GamePlayScene.h" />
+    <ClInclude Include="Scene\OptionsScene.h" />
     <ClInclude Include="Scene\PauseMenuScene.h" />
     <ClInclude Include="Scene\GeometryShaderCanvasTestScene.h" />
     <ClInclude Include="Scene\MusicGamePrototypeScene.h" />

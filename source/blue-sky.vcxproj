@@ -122,6 +122,8 @@
     <ClCompile Include="Scene\DebugScene.cpp" />
     <ClCompile Include="Scene\EndingScene.cpp" />
     <ClCompile Include="Scene\GamePlayScene.cpp" />
+    <ClCompile Include="Scene\GamePlayScene_command.cpp" />
+    <ClCompile Include="Scene\GamePlayScene_render.cpp" />
     <ClCompile Include="Scene\PauseMenuScene.cpp" />
     <ClCompile Include="Scene\GeometryShaderCanvasTestScene.cpp" />
     <ClCompile Include="Scene\MusicGamePrototypeScene.cpp" />

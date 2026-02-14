@@ -83,6 +83,13 @@ void Input::load_config( Config& config )
 	load_key_code_config( config, Button::L2,    "input.key.l2",    "Z" );
 	load_key_code_config( config, Button::R2,    "input.key.r2",    "C" );
 
+	// 矢印キーと Enter を常に追加 (メニュー操作用)
+	key_code_[ static_cast< int >( Button::UP ) ].push_back( VK_UP );
+	key_code_[ static_cast< int >( Button::DOWN ) ].push_back( VK_DOWN );
+	key_code_[ static_cast< int >( Button::LEFT ) ].push_back( VK_LEFT );
+	key_code_[ static_cast< int >( Button::RIGHT ) ].push_back( VK_RIGHT );
+	key_code_[ static_cast< int >( Button::A ) ].push_back( VK_RETURN );
+
 	joystick_code_[ static_cast< int >( Button::A ) ] = 1 << ( config.get( "input.joystick.a", 1 ) - 1 );
 	joystick_code_[ static_cast< int >( Button::B ) ] = 1 << ( config.get( "input.joystick.b", 3 ) - 1 );
 	
@@ -185,18 +192,31 @@ void Input::update_null()
 
 /**
  * キーボード・ジョイスティック共通の更新処理を行う
+ *
+ * is_blocked_ に関わらず arrow_stack_ を正しく更新するため、
+ * push/release の代わりに raw state を直接チェックする。
  */
 void Input::update_common()
 {
-	if ( release( Button::DOWN  ) ) arrow_pop( Button::DOWN  );
-	if ( release( Button::UP    ) ) arrow_pop( Button::UP    );
-	if ( release( Button::RIGHT ) ) arrow_pop( Button::RIGHT );
-	if ( release( Button::LEFT  ) ) arrow_pop( Button::LEFT  );
+	auto raw_push = [this]( Button b ) -> bool {
+		auto n = static_cast< int >( b );
+		return ( state_[ n ] & 1 ) > 0 && ( state_[ n ] & 2 ) == 0;
+	};
 
-	if ( push( Button::DOWN  ) ) arrow_push( Button::DOWN  );
-	if ( push( Button::UP    ) ) arrow_push( Button::UP    );
-	if ( push( Button::RIGHT ) ) arrow_push( Button::RIGHT );
-	if ( push( Button::LEFT  ) ) arrow_push( Button::LEFT  );
+	auto raw_release = [this]( Button b ) -> bool {
+		auto n = static_cast< int >( b );
+		return ( state_[ n ] & 1 ) == 0 && ( state_[ n ] & 2 ) > 0;
+	};
+
+	if ( raw_release( Button::DOWN  ) ) arrow_pop( Button::DOWN  );
+	if ( raw_release( Button::UP    ) ) arrow_pop( Button::UP    );
+	if ( raw_release( Button::RIGHT ) ) arrow_pop( Button::RIGHT );
+	if ( raw_release( Button::LEFT  ) ) arrow_pop( Button::LEFT  );
+
+	if ( raw_push( Button::DOWN  ) ) arrow_push( Button::DOWN  );
+	if ( raw_push( Button::UP    ) ) arrow_push( Button::UP    );
+	if ( raw_push( Button::RIGHT ) ) arrow_push( Button::RIGHT );
+	if ( raw_push( Button::LEFT  ) ) arrow_push( Button::LEFT  );
 }
 
 /**

@@ -68,6 +68,7 @@ void UIVerticalMenu::update( Input* input )
 		return;
 	}
 
+	// キーボード / コントローラー : 上下キーで選択
 	if ( input->push( Input::Button::UP ) )
 	{
 		select_prev();
@@ -78,6 +79,34 @@ void UIVerticalMenu::update( Input* input )
 		select_next();
 	}
 
+	// マウスホバーによる項目選択（マウスが移動した場合のみ）
+	{
+		int mx = input->get_mouse_x();
+		int my = input->get_mouse_y();
+
+		bool is_mouse_moved = ( mx != last_mouse_x_ || my != last_mouse_y_ );
+		last_mouse_x_ = mx;
+		last_mouse_y_ = my;
+
+		if ( is_mouse_moved )
+		{
+			float_t fmx = static_cast< float_t >( mx );
+			float_t fmy = static_cast< float_t >( my );
+
+			for ( int i = 0; i < static_cast< int >( items_.size() ); i++ )
+			{
+				float_t item_y = y_ + item_height_ * static_cast< float_t >( i );
+
+				if ( fmx >= x_ && fmx <= x_ + width_ && fmy >= item_y && fmy < item_y + item_height_ )
+				{
+					selected_index_ = i;
+					break;
+				}
+			}
+		}
+	}
+
+	// 決定 : Enter / マウス左クリック / コントローラーボタン
 	if ( input->push( Input::Button::A ) )
 	{
 		if ( selected_index_ >= 0 && selected_index_ < static_cast< int >( items_.size() ) )

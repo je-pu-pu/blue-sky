@@ -39,7 +39,7 @@ private:
 	float_t fov_ = 90.f;
 	bool is_fullscreen_ = false;
 
-	// ステップ値
+	// ステップ値・範囲
 	float_t get_volume_step() const { return 0.1f; }
 	float_t get_sensitivity_step() const { return 0.1f; }
 	float_t get_fov_step() const { return 5.f; }
@@ -47,6 +47,10 @@ private:
 	float_t get_max_fov() const { return 120.f; }
 	float_t get_min_sensitivity() const { return 0.1f; }
 	float_t get_max_sensitivity() const { return 3.f; }
+
+	// レイアウト
+	float_t get_panel_width() const { return 700.f; }
+	float_t get_content_width() const { return 600.f; }
 
 	void setup_menu();
 	void update_all_text();

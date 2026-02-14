@@ -34,6 +34,9 @@ public:
 
 private:
 	GraphicsManager* gm_;
+	Texture* white_texture_ = nullptr;
+
+	Texture* get_white_texture();
 
 public:
 	explicit UIRenderer( GraphicsManager* );
@@ -47,6 +50,9 @@ public:
 
 	/// テキスト描画（矩形内に中央寄せ）
 	void draw_text_center( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color );
+
+	/// 塗りつぶし矩形の描画
+	void draw_rect( float_t x, float_t y, float_t w, float_t h, const Color& color );
 
 	/// スプライトバッチの開始・終了
 	Sprite* begin_sprite();

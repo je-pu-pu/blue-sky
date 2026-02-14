@@ -389,8 +389,10 @@ bool GameMain::update()
 	if ( has_overlay_scene() )
 	{
 		// ベースシーンはポーズ中 (更新しない)
-		// オーバーレイシーンのトップのみ更新
+		// オーバーレイシーンのトップのみ更新（入力を一時的に許可）
+		input_->set_blocked( false );
 		overlay_scene_stack_.back()->update();
+		input_->set_blocked( true );
 	}
 	else
 	{

@@ -33,7 +33,7 @@ Player::Player()
 	, can_throw_( false )
 	, is_flickering_( false )
 	, step_count_( 0 )
-	, step_speed_( 0.25f )
+	, step_speed_( get_max_walk_step_speed() )
 	, action_mode_( ActionMode::NONE )
 	, action_timer_( 0.f )
 	, is_action_pre_finish_( false )
@@ -41,7 +41,7 @@ Player::Player()
 	, balloon_sound_request_( 0 )
 	, uncontrollable_timer_( 0.f )
 	, pitch_( 0.f )
-	, eye_height_( 1.5f )
+	, eye_height_( get_default_eye_height() )
 	, eye_depth_( 0.f )
 	, has_medal_( false )
 	, selected_item_type_( ItemType::NONE )
@@ -62,7 +62,7 @@ void Player::restart()
 
 	set_angular_factor( 0.f );
 	set_friction( 0.f );
-	set_mass( 50.f );
+	set_mass( get_player_mass() );
 
 	is_on_footing_ = false;
 	is_jumping_ = false;
@@ -79,7 +79,7 @@ void Player::restart()
 	is_flickering_ = false;
 
 	step_count_ = 0;
-	step_speed_ = 0.25f;
+	step_speed_ = get_max_walk_step_speed();
 
 	set_action_mode( ActionMode::NONE );
 
@@ -89,7 +89,7 @@ void Player::restart()
 
 	pitch_ = 0.f;
 	
-	eye_height_ = 1.5f;
+	eye_height_ = get_default_eye_height();
 	eye_depth_ = 0.f;
 
 	has_medal_ = false;
@@ -132,7 +132,7 @@ void Player::update()
 
 	if ( action_mode_ == ActionMode::BALLOON )
 	{
-		set_velocity( Vector( get_velocity().x(), std::min( 3.f, math::chase( get_velocity().y(), 3.f, get_velocity().y() < 0.f ? 0.5f : 0.25f ) ), get_velocity().z() ) );
+		set_velocity( Vector( get_velocity().x(), std::min( get_balloon_max_velocity(), math::chase( get_velocity().y(), get_balloon_max_velocity(), get_velocity().y() < 0.f ? get_balloon_chase_speed_down() : get_balloon_chase_speed_up() ) ), get_velocity().z() ) );
 
 		if ( get_location().y() - action_base_position_.y() >= get_balloon_action_length() )
 		{
@@ -141,7 +141,7 @@ void Player::update()
 			is_jumping_ = true;
 			is_action_pre_finish_ = false;
 		}
-		else if ( get_location().y() - action_base_position_.y() >= get_balloon_action_length() * 0.75f )
+		else if ( get_location().y() - action_base_position_.y() >= get_balloon_action_length() * get_balloon_pre_finish_ratio() )
 		{
 			is_action_pre_finish_ = true;
 		}
@@ -149,11 +149,11 @@ void Player::update()
 	else if ( action_mode_ == ActionMode::ROCKET )
 	{
 		// ロケット
-		if ( ( get_location() - action_base_position_ ).length() >= get_rocket_action_length() || action_timer_ >= 2.5f )
+		if ( ( get_location() - action_base_position_ ).length() >= get_rocket_action_length() || action_timer_ >= get_rocket_timeout() )
 		{
 			finish_rocketing();
 		}
-		else if ( ( get_location() - action_base_position_ ).length() >= get_rocket_action_length() * 0.8f )
+		else if ( ( get_location() - action_base_position_ ).length() >= get_rocket_action_length() * get_rocket_pre_finish_ratio() )
 		{
 			is_action_pre_finish_ = true;
 		}
@@ -166,7 +166,7 @@ void Player::update()
 
 	if ( ! can_peer_down() )
 	{
-		eye_depth_ *= 0.9f;
+		eye_depth_ *= get_eye_depth_decay();
 		eye_depth_ = math::clamp( eye_depth_, 0.f, 1.f );
 	}
 
@@ -178,7 +178,7 @@ void Player::update()
 	{
 		get_model()->get_line()->set_color( Color( 1.f, 0.f, 0.f, 0.f ) );
 
-		if ( ! is_dead() && ! is_on_footing() && ! is_on_ladder() && get_rigid_body()->getLinearVelocity().y() < -7.5f && get_location().y() > 10.f && get_location().y() < 30.f &&  get_action_mode() == ActionMode::NONE )
+		if ( ! is_dead() && ! is_on_footing() && ! is_on_ladder() && get_rigid_body()->getLinearVelocity().y() < get_fall_sound_velocity() && get_location().y() > 10.f && get_location().y() < 30.f &&  get_action_mode() == ActionMode::NONE )
 		{
 			play_sound( "fall", false, false );
 		}
@@ -197,7 +197,7 @@ void Player::update()
 		else
 		{
 			// 通常着地
-			if ( get_velocity().y() < -2.f )
+			if ( get_velocity().y() < -get_landing_velocity_threshold() )
 			{
 				stop_sound( "fall" );
 				play_sound( "land", false, false );
@@ -222,8 +222,8 @@ void Player::update()
 
 	if ( is_dead() )
 	{
-		eye_height_ *= 0.95f;
-		eye_height_ = std::max( eye_height_, 0.15f );
+		eye_height_ *= get_dead_eye_decay();
+		eye_height_ = std::max( eye_height_, get_dead_eye_min_height() );
 	}
 
 	uncontrollable_timer_ = math::chase< float_t >( uncontrollable_timer_, 0.f, get_delta_time() );
@@ -252,17 +252,17 @@ void Player::limit_velocity()
 	}
 	else if ( is_jumping() )
 	{
-		v.set_x( v.x() * 0.95f );
-		v.set_z( v.z() * 0.95f );
+		v.set_x( v.x() * get_velocity_damping_jumping() );
+		v.set_z( v.z() * get_velocity_damping_jumping() );
 	}
 	else
 	{
-		v.set_x( v.x() * 0.9f );
-		v.set_z( v.z() * 0.9f );
+		v.set_x( v.x() * get_velocity_damping_normal() );
+		v.set_z( v.z() * get_velocity_damping_normal() );
 
 		if ( is_on_ladder() )
 		{
-			v.set_y( v.y() * 0.5f );
+			v.set_y( v.y() * get_velocity_damping_ladder() );
 		}
 	}
 
@@ -298,7 +298,7 @@ void Player::update_jumpable()
 	}
 
 	// ジャンプ直後と着地直後はジャンプできない
-	if ( abs( get_velocity().y() ) > 3.f )
+	if ( abs( get_velocity().y() ) > get_jump_velocity_threshold() )
 	{
 		return;
 	}
@@ -476,7 +476,7 @@ void Player::update_can_clamber()
 		return;
 	}
 
-	if ( get_last_footing_height() - get_location().y() > 5.f )
+	if ( get_last_footing_height() - get_location().y() > get_max_height_drop_for_clamber() )
 	{
 		return;
 	}
@@ -570,22 +570,22 @@ void Player::update_step_speed()
 {
 	if ( action_mode_ == ActionMode::BALLOON )
 	{
-		step_speed_ = math::chase( step_speed_, get_max_walk_step_speed(), 0.01f );
+		step_speed_ = math::chase( step_speed_, get_max_walk_step_speed(), get_step_speed_chase_rate() );
 	}
 	else if ( step_count_ <= 0 )
 	{
 		// stop
-		step_speed_ *= 0.5f;
+		step_speed_ *= get_step_speed_stop_decay();
 	}
-	else if ( step_count_ <= 150 || ! can_running() )
+	else if ( step_count_ <= get_step_count_to_run() || ! can_running() )
 	{
 		// slow walk
-		step_speed_ = math::chase( step_speed_, get_max_walk_step_speed(), 0.01f );
+		step_speed_ = math::chase( step_speed_, get_max_walk_step_speed(), get_step_speed_chase_rate() );
 	}
 	else
 	{
 		// run
-		step_speed_ = math::chase( step_speed_, get_max_run_step_speed(), 0.001f );
+		step_speed_ = math::chase( step_speed_, get_max_run_step_speed(), get_run_speed_chase_rate() );
 	}
 
 	if ( ! is_on_footing() )
@@ -625,7 +625,7 @@ void Player::update_step_speed()
  */
 bool Player::can_running() const
 {
-	return get_velocity().length() > 1.f && item_count_[ static_cast< int >( ItemType::STONE ) ] < 3;
+	return get_velocity().length() > get_min_velocity_for_run() && item_count_[ static_cast< int >( ItemType::STONE ) ] < get_max_stones_for_running();
 }
 
 /**
@@ -776,11 +776,11 @@ void Player::jump()
 
 	if ( is_on_ladder() )
 	{
-		set_velocity( get_velocity() + Vector( 0.f, 4.f, 0.f ) + get_front() * 4.f );
+		set_velocity( get_velocity() + Vector( 0.f, get_jump_velocity(), 0.f ) + get_front() * get_jump_velocity() );
 	}
 	else
 	{
-		set_velocity( get_velocity() + Vector( 0.f, 4.f, 0.f ) );
+		set_velocity( get_velocity() + Vector( 0.f, get_jump_velocity(), 0.f ) );
 	}
 
 	is_jumping_ = true;
@@ -801,7 +801,7 @@ void Player::jump()
 
 void Player::super_jump()
 {
-	set_velocity( Vector( get_velocity().x(), get_velocity().y() + 20.f, get_velocity().z() ) );
+	set_velocity( Vector( get_velocity().x(), get_velocity().y() + get_super_jump_velocity(), get_velocity().z() ) );
 }
 
 /**
@@ -812,7 +812,7 @@ void Player::clamber()
 {
 	if ( can_clamber() )
 	{
-		set_velocity( Vector( 0.f, 2.f, 0.f ) + get_front() * 2.f );
+		set_velocity( Vector( 0.f, get_clamber_velocity(), 0.f ) + get_front() * get_clamber_velocity() );
 
 		if ( ! is_clambering() )
 		{
@@ -928,14 +928,14 @@ void Player::throw_stone( const Vector& direction )
 
 	stone->restart();
 	stone->set_location( get_location() + ( get_front() * get_collision_depth() ) + Vector( 0.f, get_eye_height(), 0.f ) );
-	stone->set_velocity( direction * 8.f );
+	stone->set_velocity( direction * get_stone_throw_speed() );
 
 	play_sound( "stone-throw" );
 }
 
 void Player::damage( const Vector& to )
 {
-	uncontrollable_timer_ = 1.5f;
+	uncontrollable_timer_ = get_uncontrollable_duration();
 
 	set_velocity( to );
 
@@ -971,7 +971,7 @@ void Player::set_eye_depth( float d )
 		return;
 	}
 
-	if ( get_location().y() < 5.f )
+	if ( get_location().y() < get_min_height_for_peer() )
 	{
 		return;
 	}
@@ -991,7 +991,7 @@ void Player::add_eye_depth( float d )
 
 bool Player::is_falling() const
 {
-	return get_rigid_body()->getLinearVelocity().y() < -1.f;
+	return get_rigid_body()->getLinearVelocity().y() < get_falling_velocity_threshold();
 }
 
 void Player::on_collide_with( Balloon* balloon )
@@ -1068,8 +1068,8 @@ void Player::on_collide_with( Robot* robot )
 		return;
 	}
 
-	Vector v = -get_front() * 10.f;
-	v.set_y( 2.5f );
+	Vector v = -get_front() * get_knockback_speed();
+	v.set_y( get_knockback_y_velocity() );
 
 	damage( v );
 }

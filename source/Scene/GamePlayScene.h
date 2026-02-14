@@ -106,6 +106,29 @@ private:
 	float_t								blackout_timer_;
 
 protected:
+	// Timing constants
+	float_t get_blackout_timeout() const { return 6.f; }
+	float_t get_action_bgm_fade_delay() const { return 2.f; }
+	float_t get_mouse_rotation_speed() const { return 90.f; }
+	float_t get_scope_zoom_factor() const { return 0.5f; }
+	float_t get_min_scope_fov() const { return 5.f; }
+	float_t get_camera_chase_speed_on_clear() const { return 0.1f; }
+
+	// Fade speeds
+	float_t get_fade_speed_falling() const { return 0.01f; }
+	float_t get_fade_speed_normal() const { return 0.05f; }
+	float_t get_fade_speed_dead() const { return 0.1f; }
+	float_t get_fade_speed_clear() const { return 0.0025f; }
+
+	// Goal camera
+	float_t get_goal_camera_z_offset() const { return 4.f; }
+	float_t get_goal_camera_z_speed() const { return 0.5f; }
+	float_t get_goal_position_lerp() const { return 0.05f; }
+
+	// Door sound timing
+	float_t get_door_sound_start() const { return 6.f; }
+	float_t get_door_sound_end() const { return 8.f; }
+
 	void load_stage_file( const char* );
 	void save_stage_file( const char* ) const;
 

@@ -101,6 +101,47 @@ protected:
 
 	float_t get_rocket_initial_velocity() const { return 10.f; }
 	float_t get_rocket_action_length() const { return 10.f; }
+	float_t get_rocket_timeout() const { return 2.5f; }
+	float_t get_rocket_pre_finish_ratio() const { return 0.8f; }
+
+	float_t get_balloon_max_velocity() const { return 3.f; }
+	float_t get_balloon_chase_speed_down() const { return 0.5f; }
+	float_t get_balloon_chase_speed_up() const { return 0.25f; }
+	float_t get_balloon_pre_finish_ratio() const { return 0.75f; }
+
+	float_t get_jump_velocity() const { return 4.f; }
+	float_t get_super_jump_velocity() const { return 20.f; }
+	float_t get_clamber_velocity() const { return 2.f; }
+	float_t get_player_mass() const { return 50.f; }
+	float_t get_stone_throw_speed() const { return 8.f; }
+	float_t get_knockback_speed() const { return 10.f; }
+	float_t get_knockback_y_velocity() const { return 2.5f; }
+
+	float_t get_velocity_damping_normal() const { return 0.9f; }
+	float_t get_velocity_damping_jumping() const { return 0.95f; }
+	float_t get_velocity_damping_ladder() const { return 0.5f; }
+
+	float_t get_default_eye_height() const { return 1.5f; }
+	float_t get_eye_depth_decay() const { return 0.9f; }
+	float_t get_dead_eye_decay() const { return 0.95f; }
+	float_t get_dead_eye_min_height() const { return 0.15f; }
+	float_t get_min_height_for_peer() const { return 5.f; }
+
+	float_t get_uncontrollable_duration() const { return 1.5f; }
+
+	float_t get_jump_velocity_threshold() const { return 3.f; }
+	float_t get_landing_velocity_threshold() const { return 2.f; }
+	float_t get_fall_sound_velocity() const { return -7.5f; }
+	float_t get_falling_velocity_threshold() const { return -1.f; }
+
+	int get_step_count_to_run() const { return 150; }
+	float_t get_step_speed_stop_decay() const { return 0.5f; }
+	float_t get_step_speed_chase_rate() const { return 0.01f; }
+	float_t get_run_speed_chase_rate() const { return 0.001f; }
+	float_t get_min_velocity_for_run() const { return 1.f; }
+	int get_max_stones_for_running() const { return 3; }
+
+	float_t get_max_height_drop_for_clamber() const { return 5.f; }
 
 	bool is_walking() const { return get_step_speed() > get_min_walk_step_speed(); }
 	bool is_running() const { return get_step_speed() > get_max_walk_step_speed(); }

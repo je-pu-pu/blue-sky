@@ -1082,11 +1082,11 @@ void GamePlayScene::update_main()
 
 	if ( ! get_oculus_rift() )
 	{
-		camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * 90.f * rotation_speed_rate, 0.f, 0.f, 0.f );
-		camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -90.f, +90.f ) );
+		camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * get_mouse_rotation_speed() * rotation_speed_rate, 0.f, 0.f, 0.f );
+		camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -get_mouse_rotation_speed(), +get_mouse_rotation_speed() ) );
 	}
 
-	player_->set_pitch( -camera_->rotate_degree_target().x() / 90.f );
+	player_->set_pitch( -camera_->rotate_degree_target().x() / get_mouse_rotation_speed() );
 
 	float eye_depth_add = 0.f;
 
@@ -1175,8 +1175,8 @@ void GamePlayScene::update_main()
 
 					if ( player_->get_action_mode() == Player::ActionMode::SCOPE )
 					{
-						camera_->set_fov_target( camera_->get_fov_default() * 0.5f );
-						camera_->set_fov( camera_->get_fov_default() * 0.5f );
+						camera_->set_fov_target( camera_->get_fov_default() * get_scope_zoom_factor() );
+						camera_->set_fov( camera_->get_fov_default() * get_scope_zoom_factor() );
 					}
 					break;
 				}
@@ -1201,11 +1201,11 @@ void GamePlayScene::update_main()
 		{
 			if ( wheel > 0 )
 			{
-				camera_->set_fov_target( std::max( camera_->get_fov_target() * 0.5f, 5.f ) );
+				camera_->set_fov_target( std::max( camera_->get_fov_target() * get_scope_zoom_factor(), get_min_scope_fov() ) );
 			}
 			else if ( wheel < 0 )
 			{
-				camera_->set_fov_target( std::min( camera_->get_fov_target() * 2.f, camera_->get_fov_default() * 0.5f ) );
+				camera_->set_fov_target( std::min( camera_->get_fov_target() / get_scope_zoom_factor(), camera_->get_fov_default() * get_scope_zoom_factor() ) );
 			}
 		}
 		else
@@ -1222,7 +1222,7 @@ void GamePlayScene::update_main()
 			camera_->reset_fov();
 		}
 
-		float_t add_direction_degree_by_mouse = get_input()->get_mouse_dx() * 90.f * rotation_speed_rate;
+		float_t add_direction_degree_by_mouse = get_input()->get_mouse_dx() * get_mouse_rotation_speed() * rotation_speed_rate;
 		float_t add_direction_degree_by_hmd   = get_oculus_rift() ? math::radian_to_degree( get_oculus_rift()->get_delta_yaw() ) : 0.f;
 		
 		player_->add_direction_degree( add_direction_degree_by_mouse + add_direction_degree_by_hmd );
@@ -1233,11 +1233,11 @@ void GamePlayScene::update_main()
 			// 落ちて死のうとしている場合は白くフェードアウトする
 
 			get_graphics_manager()->set_fade_color( Color( 1.f, 1.f, 1.f, 0.5f ) );
-			get_graphics_manager()->fade_out( 0.01f );
+			get_graphics_manager()->fade_out( get_fade_speed_falling() );
 		}
 		else
 		{
-			get_graphics_manager()->fade_in( 0.05f );
+			get_graphics_manager()->fade_in( get_fade_speed_normal() );
 		}
 	}
 	else
@@ -1249,7 +1249,7 @@ void GamePlayScene::update_main()
 		else
 		{
 			get_graphics_manager()->set_fade_color( Color( 0.25f, 0.f, 0.f, 0.75f ) );
-			get_graphics_manager()->fade_out( 0.1f );
+			get_graphics_manager()->fade_out( get_fade_speed_dead() );
 		}
 	}
 }
@@ -1261,7 +1261,7 @@ void GamePlayScene::update_blackout()
 	get_graphics_manager()->set_fade_color( Color::Black );
 	get_graphics_manager()->fade_out();
 
-	if ( blackout_timer_ >= 6.f )
+	if ( blackout_timer_ >= get_blackout_timeout() )
 	{
 		go_to_next_scene();
 	}
@@ -1320,7 +1320,7 @@ void GamePlayScene::update_balloon_sound()
 
 	if ( player_->get_action_mode() == Player::ActionMode::BALLOON && ( balloon_sound_type_ == BalloonSoundType::SOLO || balloon_sound_type_ == BalloonSoundType::SCALE ) )
 	{
-		action_bgm_after_timer_ = 2.f;
+		action_bgm_after_timer_ = get_action_bgm_fade_delay();
 	}
 	else
 	{
@@ -1388,23 +1388,23 @@ void GamePlayScene::on_goal()
 void GamePlayScene::update_clear()
 {
 	Vector target_position = goal_->get_location();
-	target_position.set_z( target_position.z() - 4.f + get_sound_manager()->get_sound( "fin" )->get_current_position() * 0.5f );
+	target_position.set_z( target_position.z() - get_goal_camera_z_offset() + get_sound_manager()->get_sound( "fin" )->get_current_position() * get_goal_camera_z_speed() );
 
-	player_->set_location( player_->get_location() * 0.95f + target_position * 0.05f );
+	player_->set_location( player_->get_location() * ( 1.f - get_goal_position_lerp() ) + target_position * get_goal_position_lerp() );
 	player_->set_direction_degree( 0.f );
 
 	camera_->rotate_degree_target().set( 0.f, player_->get_direction_degree(), 0.f, 0.f );
-	camera_->set_rotate_chase_speed( 0.1f );
+	camera_->set_rotate_chase_speed( get_camera_chase_speed_on_clear() );
 
-	get_graphics_manager()->fade_out( 0.0025f );
+	get_graphics_manager()->fade_out( get_fade_speed_clear() );
 
 	Sound* fin_sound = get_sound_manager()->get_sound( "fin" );
 
 	if ( fin_sound )
 	{
 		if (
-			fin_sound->get_current_position() >= 6.f &&
-			fin_sound->get_current_position() <= 8.f &&
+			fin_sound->get_current_position() >= get_door_sound_start() &&
+			fin_sound->get_current_position() <= get_door_sound_end() &&
 			get_sound_manager()->get_sound( "door" ) && ! get_sound_manager()->get_sound( "door" )->is_playing() )
 		{
 			get_sound_manager()->get_sound( "door" )->play( false );

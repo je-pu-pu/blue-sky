@@ -39,6 +39,8 @@
     <ClCompile Include="blue_sky\graphics\Rectangle.cpp" />
     <ClCompile Include="blue_sky\graphics\SkyBox.cpp" />
     <ClCompile Include="blue_sky\Input.cpp" />
+    <ClCompile Include="blue_sky\ui\UIRenderer.cpp" />
+    <ClCompile Include="blue_sky\ui\UIVerticalMenu.cpp" />
     <ClCompile Include="blue_sky\SceneManager.cpp" />
     <ClCompile Include="blue_sky\ScriptManager.cpp" />
     <ClCompile Include="core\animation\AnimationPlayer.cpp" />
@@ -124,6 +126,7 @@
     <ClCompile Include="Scene\GamePlayScene.cpp" />
     <ClCompile Include="Scene\GamePlayScene_command.cpp" />
     <ClCompile Include="Scene\GamePlayScene_render.cpp" />
+    <ClCompile Include="Scene\OptionsScene.cpp" />
     <ClCompile Include="Scene\PauseMenuScene.cpp" />
     <ClCompile Include="Scene\GeometryShaderCanvasTestScene.cpp" />
     <ClCompile Include="Scene\MusicGamePrototypeScene.cpp" />
@@ -178,6 +181,8 @@
     <ClInclude Include="blue_sky\graphics\SkyBox.h" />
     <ClInclude Include="blue_sky\ConstantBuffers.h" />
     <ClInclude Include="blue_sky\Input.h" />
+    <ClInclude Include="blue_sky\ui\UIRenderer.h" />
+    <ClInclude Include="blue_sky\ui\UIVerticalMenu.h" />
     <ClInclude Include="blue_sky\SceneManager.h" />
     <ClInclude Include="blue_sky\ScriptManager.h" />
     <ClInclude Include="blue_sky\type.h" />
@@ -323,6 +328,7 @@
     <ClInclude Include="Scene\DebugScene.h" />
     <ClInclude Include="Scene\EndingScene.h" />
     <ClInclude Include="Scene\GamePlayScene.h" />
+    <ClInclude Include="Scene\OptionsScene.h" />
     <ClInclude Include="Scene\PauseMenuScene.h" />
     <ClInclude Include="Scene\GeometryShaderCanvasTestScene.h" />
     <ClInclude Include="Scene\MusicGamePrototypeScene.h" />

@@ -24,7 +24,7 @@ void PauseMenuScene::update()
 
 	const auto& io = ImGui::GetIO();
 	const float window_width = 300.f;
-	const float window_height = 200.f;
+	const float window_height = 250.f;
 
 	ImGui::SetNextWindowPos( ImVec2( ( io.DisplaySize.x - window_width ) * 0.5f, ( io.DisplaySize.y - window_height ) * 0.5f ), ImGuiCond_Always );
 	ImGui::SetNextWindowSize( ImVec2( window_width, window_height ), ImGuiCond_Always );
@@ -43,6 +43,17 @@ void PauseMenuScene::update()
 		if ( ImGui::Button( "Resume", ImVec2( button_width, button_height ) ) )
 		{
 			set_next_scene( "pop" );
+			play_sound( "ok" );
+		}
+
+		ImGui::Dummy( ImVec2( 0.f, 5.f ) );
+
+		// オプションボタン
+		ImGui::SetCursorPosX( ( window_width - button_width ) * 0.5f );
+		if ( ImGui::Button( "Options", ImVec2( button_width, button_height ) ) )
+		{
+			GameMain::get_instance()->pop_overlay_scene();
+			GameMain::get_instance()->push_overlay_scene( "options" );
 			play_sound( "ok" );
 		}
 

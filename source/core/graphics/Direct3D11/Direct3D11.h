@@ -39,7 +39,7 @@ public:
 	using Texture			= core::graphics::direct_3d_11::Texture;
 
 	using InputLayout		= core::graphics::direct_3d_11::InputLayout;
-	using InputLayoutList	= std::unordered_map< string_t, InputLayout* >;
+	using InputLayoutList	= std::unordered_map< string_t, std::unique_ptr< InputLayout > >;
 
 	using Effect			= core::graphics::direct_3d_11::Effect;
 	using EffectTechnique	= core::graphics::direct_3d_11::EffectTechnique;

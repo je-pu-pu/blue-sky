@@ -149,7 +149,7 @@ void StageSelectScene::render()
 
 	for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i, ++j, ++k )
 	{
-		Stage* stage = *i;
+		const auto& stage = *i;
 
 		// Direct3D::Vector center( stage_src_rect_.width() * 0.5f, stage_src_rect_.height() * 0.5f, 0.f );
 
@@ -161,7 +161,7 @@ void StageSelectScene::render()
 		int offset = 0;
 		Color frame_color = Color::White;
 
-		if ( stage == get_pointed_stage() )
+		if ( stage.get() == get_pointed_stage() )
 		{
 			if ( get_input()->press( Input::Button::A ) )
 			{
@@ -268,18 +268,6 @@ void StageSelectScene::update_page( int page )
 
 void StageSelectScene::clear_stage_list()
 {
-	for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i )
-	{
-		Stage* stage = *i;
-
-		/// @todo 直す
-#if 0
-		get_graphics_manager()->unload_texture( stage->name.c_str() );
-#endif
-
-		delete stage;
-	}
-
 	stage_list_.clear();
 }
 
@@ -348,9 +336,9 @@ void StageSelectScene::update_stage_list()
 
 		last_stage_name = stage_name;
 
-		Stage* stage = new Stage();
+		auto stage = std::make_unique< Stage >();
 		stage->name = stage_name;
-		stage->rect = get_stage_dst_rect( stage, n );
+		stage->rect = get_stage_dst_rect( stage.get(), n );
 		stage->cleared = get_save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + stage->name ).c_str(), 0 ) != 0;
 		stage->completed = get_save_data()->get( ( get_stage_prefix_by_page( page_ ) + "." + stage->name ).c_str(), 0 ) == 2;
 
@@ -363,7 +351,7 @@ void StageSelectScene::update_stage_list()
 			stage->texture = get_graphics_manager()->load_named_texture( stage->name.c_str(), "media/stage/default.png" );
 		}
 
-		stage_list_.push_back( stage );
+		stage_list_.push_back( std::move( stage ) );
 
 		n++;
 
@@ -454,10 +442,8 @@ bool StageSelectScene::has_next_page() const
 	else if ( page_ < get_max_story_page() )
 	{
 		// story normal page
-		for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i )
+		for ( const auto& stage : stage_list_ )
 		{
-			Stage* stage = *i;
-
 			if ( ! stage->cleared )
 			{
 				return false;
@@ -503,19 +489,17 @@ bool StageSelectScene::is_mouse_on_right_arrow() const
 
 StageSelectScene::Stage* StageSelectScene::get_pointed_stage() const
 {
-	for ( StageList::const_iterator i = stage_list_.begin(); i != stage_list_.end(); ++i )
+	for ( const auto& stage : stage_list_ )
 	{
-		Stage* stage = *i;
-
 		if ( get_input()->get_mouse_x() <  stage->rect.left()   ) continue;
 		if ( get_input()->get_mouse_x() >= stage->rect.right()  ) continue;
 		if ( get_input()->get_mouse_y() <  stage->rect.top()    ) continue;
 		if ( get_input()->get_mouse_y() >= stage->rect.bottom() ) continue;
 
-		return stage;
+		return stage.get();
 	}
 
-	return 0;
+	return nullptr;
 }
 
 win::Rect StageSelectScene::get_stage_dst_rect( const Stage* /* stage */, int n ) const

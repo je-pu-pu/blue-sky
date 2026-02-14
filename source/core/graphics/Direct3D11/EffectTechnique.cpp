@@ -15,16 +15,10 @@ EffectTechnique::EffectTechnique( Direct3D* direct_3d, ID3DX11EffectTechnique* t
 
 	for ( UINT n = 0; n < desc.Passes; n++ )
 	{
-		pass_list_.push_back( new EffectPass( direct_3d, t->GetPassByIndex( n ) ) );
+		pass_list_.push_back( std::make_unique< EffectPass >( direct_3d, t->GetPassByIndex( n ) ) );
 	}
 }
 
-EffectTechnique::~EffectTechnique()
-{
-	for ( PassList::iterator i = pass_list_.begin(); i != pass_list_.end(); ++i )
-	{
-		delete *i;
-	}
-}
+EffectTechnique::~EffectTechnique() = default;
 
 } // namespace core::graphics::direct_3d_11

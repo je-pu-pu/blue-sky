@@ -135,10 +135,7 @@ Direct3D11::~Direct3D11()
 
 	DIRECT_X_RELEASE( device_10_ );
 
-	for ( auto& input_layout : input_layout_list_ )
-	{
-		delete input_layout.second;
-	}
+	input_layout_list_.clear();
 
 	depth_texture_.reset();
 
@@ -583,9 +580,9 @@ void Direct3D11::create_input_layout( const char_t* input_layout_name, const cha
 		// input_layout_list_.erase( i );
 	}
 
-	auto* pass = static_cast< EffectPass* >( effect_->get_technique( teqhnique_name )->get_pass_list().front() );
+	auto* pass = static_cast< EffectPass* >( effect_->get_technique( teqhnique_name )->get_pass_list().front().get() );
 
-	input_layout_list_[ input_layout_name ] = new InputLayout( pass->create_input_layout( layout, layout_array_size ) );
+	input_layout_list_[ input_layout_name ] = std::make_unique< InputLayout >( pass->create_input_layout( layout, layout_array_size ) );
 }
 
 void Direct3D11::set_full_screen( bool full_screen )
@@ -777,7 +774,7 @@ void Direct3D11::set_viewport( float_t x, float_t y, float_t w, float_t h, float
 
 void Direct3D11::set_input_layout( const char* name )
 {
-	set_input_layout( input_layout_list_[ name ] );
+	set_input_layout( input_layout_list_[ name ].get() );
 }
 
 const Direct3D11::InputLayout* Direct3D11::get_input_layout( const char* name ) const
@@ -789,7 +786,7 @@ const Direct3D11::InputLayout* Direct3D11::get_input_layout( const char* name ) 
 		return nullptr;
 	}
 
-	return i->second;
+	return i->second.get();
 }
 
 void Direct3D11::set_input_layout( const InputLayout* input_layout )

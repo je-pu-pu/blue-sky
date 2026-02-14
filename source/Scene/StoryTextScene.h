@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include <common/chase_value.h>
 #include <list>
+#include <memory>
 
 namespace core
 {
@@ -22,7 +23,7 @@ public:
 	static inline const char_t* name = "story_text";
 
 	using BgSpriteLayer		= core::BgSpriteLayer;
-	using BgSpriteLayerList	= std::list< BgSpriteLayer* >;
+	using BgSpriteLayerList	= std::list< std::unique_ptr< BgSpriteLayer > >;
 
 private:
 	std::wstring	text_;

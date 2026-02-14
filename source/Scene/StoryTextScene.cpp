@@ -49,29 +49,13 @@ StoryTextScene::StoryTextScene( const char* file_name, const char* next_scene_na
 
 	if ( bg_sprite_layer_list_.empty() )
 	{
-		bg_sprite_layer_list_.push_back( new BgSpriteLayer( "bg", get_graphics_manager()->load_named_texture( "bg", "media/image/story-bg-default.jpg" ) ) );
-		// bg_sprite_layer_list_.back()->set_size_from_texture();
+		bg_sprite_layer_list_.push_back( std::make_unique< BgSpriteLayer >( "bg", get_graphics_manager()->load_named_texture( "bg", "media/image/story-bg-default.jpg" ) ) );
 	}
 
 	get_graphics_manager()->get_fader()->full_out();
 }
 
-StoryTextScene::~StoryTextScene()
-{
-	/// @todo 直す
-#if 0
-	get_graphics_manager()->unload_texture( "sprite" );
-#endif
-
-	for ( auto i = bg_sprite_layer_list_.begin(); i != bg_sprite_layer_list_.end(); ++i )
-	{
-		/// @todo 直す
-#if 0
-		get_graphics_manager()->unload_texture( ( *i )->get_name().c_str() );
-#endif
-		delete *i;
-	}
-}
+StoryTextScene::~StoryTextScene() = default;
 
 void StoryTextScene::load_story_text_file( const char* file_name )
 {
@@ -84,7 +68,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 	}
 
 	bool in_text = false;
-	BgSpriteLayer* current_layer = 0;
+	BgSpriteLayer* current_layer = nullptr;
 
 	while ( in.good() )
 	{
@@ -99,7 +83,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 
 		std::stringstream ss;
 		std::string command;
-		
+
 		ss << line;
 		ss >> command;
 
@@ -108,12 +92,13 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 			string_t layer_name;
 			ss >> layer_name;
 
-			current_layer = new BgSpriteLayer( layer_name.c_str(), get_graphics_manager()->load_named_texture( layer_name.c_str(), ( std::string( "media/image/" + layer_name ) ).c_str() ) );
+			auto layer = std::make_unique< BgSpriteLayer >( layer_name.c_str(), get_graphics_manager()->load_named_texture( layer_name.c_str(), ( std::string( "media/image/" + layer_name ) ).c_str() ) );
+			current_layer = layer.get();
 
 			ss >> current_layer->get_src_rect().left() >> current_layer->get_src_rect().top();
 			ss >> current_layer->get_src_rect().right() >> current_layer->get_src_rect().bottom();
 
-			bg_sprite_layer_list_.push_back( current_layer );
+			bg_sprite_layer_list_.push_back( std::move( layer ) );
 		}
 		else if ( command == "layer-translation" )
 		{

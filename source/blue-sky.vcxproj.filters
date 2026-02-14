@@ -56,6 +56,12 @@
     <ClCompile Include="Scene\GamePlayScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\GamePlayScene_command.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\GamePlayScene_render.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
     <ClCompile Include="Scene\PauseMenuScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>

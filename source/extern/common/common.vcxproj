@@ -132,14 +132,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\type\type.h" />
-    <ClInclude Include="auto_ptr.h" />
+
     <ClInclude Include="chase_value.h" />
     <ClInclude Include="enum_set.h" />
     <ClInclude Include="exception.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="random.h" />
-    <ClInclude Include="safe_ptr.h" />
+
     <ClInclude Include="serialize.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="string.h" />

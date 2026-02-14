@@ -250,7 +250,7 @@ void ActiveObject::update_render_data() const
 	shader_data.world.set_rotation_quaternion( t.get_rotation() );
 	shader_data.world *= Matrix().set_translation( t.get_position().x(), t.get_position().y(), t.get_position().z() );
 
-	if ( get_model()->get_line() )
+	if ( get_model() && get_model()->get_line() )
 	{
 		shader_data.color = get_model()->get_line()->get_color();
 	}
@@ -287,7 +287,7 @@ void ActiveObject::render_mesh() const
 		return;
 	}
 
-	if ( ! get_model()->get_mesh() )
+	if ( ! get_model() || ! get_model()->get_mesh() )
 	{
 		return;
 	}
@@ -314,7 +314,7 @@ void ActiveObject::render_mesh( const Shader* shader ) const
 		return;
 	}
 
-	if ( ! get_model()->get_mesh() )
+	if ( ! get_model() || ! get_model()->get_mesh() )
 	{
 		return;
 	}
@@ -339,7 +339,7 @@ void ActiveObject::render_line() const
 		return;
 	}
 
-	if ( ! get_model()->get_line() )
+	if ( ! get_model() || ! get_model()->get_line() )
 	{
 		return;
 	}

@@ -615,11 +615,16 @@ void GamePlayScene::setup_command()
 	};
 	command_map_[ "end_by_last_switch" ] = [ & ] ( const string_t& )
 	{
-		bgm_->stop();
+		if ( bgm_ )
+		{
+			bgm_->stop();
+		}
 		get_sound_manager()->stop_all();
 
-		Sound* sound = get_sound_manager()->get_sound( "switch-off" );
-		sound->play( false, true );
+		if ( Sound* sound = get_sound_manager()->get_sound( "switch-off" ) )
+		{
+			sound->play( false, true );
+		}
 
 		is_blackout_ = true;
 	};
@@ -1373,7 +1378,11 @@ void GamePlayScene::on_goal()
 	is_cleared_ = true;
 
 	get_sound_manager()->stop_all();
-	get_sound_manager()->get_sound( "fin" )->play( false );
+
+	if ( Sound* fin = get_sound_manager()->get_sound( "fin" ) )
+	{
+		fin->play( false );
+	}
 }
 
 void GamePlayScene::update_clear()
@@ -1389,17 +1398,22 @@ void GamePlayScene::update_clear()
 
 	get_graphics_manager()->fade_out( 0.0025f );
 
-	if (
-		get_sound_manager()->get_sound( "fin" )->get_current_position() >= 6.f &&
-		get_sound_manager()->get_sound( "fin" )->get_current_position() <= 8.f &&
-		get_sound_manager()->get_sound( "door" ) && ! get_sound_manager()->get_sound( "door" )->is_playing() )
+	Sound* fin_sound = get_sound_manager()->get_sound( "fin" );
+
+	if ( fin_sound )
 	{
-		get_sound_manager()->get_sound( "door" )->play( false );
-	}
-	
-	if ( ! get_sound_manager()->get_sound( "fin" )->is_playing() )
-	{
-		go_to_next_scene();
+		if (
+			fin_sound->get_current_position() >= 6.f &&
+			fin_sound->get_current_position() <= 8.f &&
+			get_sound_manager()->get_sound( "door" ) && ! get_sound_manager()->get_sound( "door" )->is_playing() )
+		{
+			get_sound_manager()->get_sound( "door" )->play( false );
+		}
+
+		if ( ! fin_sound->is_playing() )
+		{
+			go_to_next_scene();
+		}
 	}
 }
 

@@ -42,7 +42,7 @@ float4 ps_sprite_ms( COMMON_POS_UV_COLOR input ) : SV_Target
 	return sprite_texture_ms.Load( input.TexCoord * texture_size, 0 );
 }
 
-// ƒXƒvƒ‰ƒCƒg•`‰æ
+// ï¿½Xï¿½vï¿½ï¿½ï¿½Cï¿½gï¿½`ï¿½ï¿½
 technique11 sprite
 {
 	pass main
@@ -60,7 +60,7 @@ technique11 sprite
 	}
 }
 
-// ƒXƒvƒ‰ƒCƒg•`‰æ ( ‰ÁZ )
+// ï¿½Xï¿½vï¿½ï¿½ï¿½Cï¿½gï¿½`ï¿½ï¿½ ( ï¿½ï¿½ï¿½Z )
 technique11 sprite_add
 {
 	pass main
@@ -78,7 +78,7 @@ technique11 sprite_add
 	}
 }
 
-// ƒXƒvƒ‰ƒCƒg•`‰æ ( ƒ}ƒ‹ƒ`ƒTƒ“ƒvƒŠƒ“ƒO )
+// ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆæç”» ( ãƒãƒ«ãƒã‚µãƒ³ãƒ—ãƒªãƒ³ã‚° )
 technique11 sprite_ms
 {
 	pass main
@@ -91,6 +91,31 @@ technique11 sprite_ms
 		SetDomainShader( NULL );
 		SetGeometryShader( NULL );
 		SetPixelShader( CompileShader( ps_4_0, ps_sprite_ms() ) );
+
+		RASTERIZERSTATE = Default;
+	}
+}
+
+// ----------------------------------------
+// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãªã—ãƒ»é ‚ç‚¹ã‚«ãƒ©ãƒ¼ã®ã¿ã§å¡—ã‚Šã¤ã¶ã—çŸ©å½¢ã‚’æç”»
+// ----------------------------------------
+float4 ps_sprite_color( COMMON_POS_UV_COLOR input ) : SV_Target
+{
+	return input.Color;
+}
+
+technique11 sprite_color
+{
+	pass main
+	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( NoDepthTest, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_sprite() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps_sprite_color() ) );
 
 		RASTERIZERSTATE = Default;
 	}

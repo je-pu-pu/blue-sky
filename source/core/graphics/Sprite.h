@@ -65,6 +65,9 @@ public:
 		draw( 0, t, 0, & c );
 	}
 
+	/// テクスチャなしで塗りつぶし矩形を描画
+	virtual void draw_color( const Rect& dr, const Color& c ) { }
+
 	virtual void end() = 0;
 
 }; // class Sprite

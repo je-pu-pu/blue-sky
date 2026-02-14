@@ -14,16 +14,6 @@ UIRenderer::UIRenderer( GraphicsManager* gm )
 {
 }
 
-UIRenderer::Texture* UIRenderer::get_white_texture()
-{
-	if ( ! white_texture_ )
-	{
-		white_texture_ = gm_->load_named_texture( "ui-white", "data/texture/white.png" );
-	}
-
-	return white_texture_;
-}
-
 int UIRenderer::get_screen_width() const
 {
 	return gm_->get_screen_width();
@@ -47,17 +37,10 @@ void UIRenderer::draw_text_center( float_t x, float_t y, float_t w, float_t h, c
 
 void UIRenderer::draw_rect( float_t x, float_t y, float_t w, float_t h, const Color& color )
 {
-	auto* texture = get_white_texture();
-
-	if ( ! texture )
-	{
-		return;
-	}
-
 	auto* sprite = gm_->get_sprite();
 
 	sprite->begin();
-	sprite->draw( win::Rect::Size( static_cast< LONG >( x ), static_cast< LONG >( y ), static_cast< LONG >( w ), static_cast< LONG >( h ) ), texture, color );
+	sprite->draw_color( win::Rect::Size( static_cast< LONG >( x ), static_cast< LONG >( y ), static_cast< LONG >( w ), static_cast< LONG >( h ) ), color );
 	sprite->end();
 }
 

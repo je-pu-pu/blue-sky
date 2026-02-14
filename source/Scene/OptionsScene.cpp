@@ -199,40 +199,47 @@ void OptionsScene::update()
 
 void OptionsScene::render()
 {
-	// 半透明の暗幕
-	get_graphics_manager()->set_fade_color( Color( 0.f, 0.f, 0.f, 0.7f ) );
+	// 半透明の暗幕（全画面）
+	get_graphics_manager()->set_fade_color( Color( 0.f, 0.f, 0.f, 0.5f ) );
 	render_fader();
 
 	float_t screen_w = static_cast< float_t >( ui_renderer_.get_screen_width() );
 	float_t screen_h = static_cast< float_t >( ui_renderer_.get_screen_height() );
 
+	// パネル背景
+	float_t panel_w = get_panel_width();
+	float_t panel_x = ( screen_w - panel_w ) * 0.5f;
+	float_t panel_y = screen_h * 0.08f;
+	float_t panel_h = screen_h * 0.86f;
+
+	ui_renderer_.draw_rect( panel_x, panel_y, panel_w, panel_h, Color( 0.05f, 0.05f, 0.1f, 0.85f ) );
+
 	// タイトル
-	float_t title_w = 600.f;
-	float_t title_x = ( screen_w - title_w ) * 0.5f;
+	float_t content_w = get_content_width();
+	float_t title_x = ( screen_w - content_w ) * 0.5f;
 	float_t title_y = screen_h * 0.12f;
-	ui_renderer_.draw_text( title_x, title_y, title_w, 80.f, "OPTIONS", Color( 1.f, 1.f, 1.f, 1.f ) );
+	ui_renderer_.draw_text( title_x, title_y, content_w, 80.f, "OPTIONS", Color( 1.f, 1.f, 1.f, 1.f ) );
 
 	// メニュー
 	menu_.render( ui_renderer_ );
 
 	// 操作ヒント
-	float_t hint_y = screen_h * 0.88f;
-	float_t hint_w = 600.f;
-	float_t hint_x = ( screen_w - hint_w ) * 0.5f;
+	float_t hint_y = screen_h * 0.85f;
+	float_t hint_x = ( screen_w - content_w ) * 0.5f;
 
 	int selected = menu_.get_selected_index();
 
 	if ( selected == volume_index_ || selected == mouse_sens_index_ || selected == fov_index_ )
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, hint_w, 60.f, "< > Adjust    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 60.f, "< > Adjust    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 	}
 	else if ( selected == mute_index_ || selected == fullscreen_index_ )
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, hint_w, 60.f, "Enter Toggle    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 60.f, "Enter Toggle    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 	}
 	else
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, hint_w, 60.f, "Enter Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 60.f, "Enter Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 	}
 }
 

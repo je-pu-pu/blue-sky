@@ -588,11 +588,6 @@ void GamePlayScene::update_balloon_sound()
 	}
 	else
 	{
-		if ( balloon_bgm_ )
-		{
-			balloon_bgm_->fade_out();
-		}
-
 		if ( bgm_ )
 		{
 			bgm_->fade_in();

@@ -43,15 +43,13 @@ private:
 	Vector				start_rotation_;	///< スタート時の回転 ( Degree )
 	float_t				start_direction_degree_;	///< スタート時の向き ( Y Axis )
 
-	/** @todo ActiveObject から分離 */
-	Model*				model_;				///< Model
-	std::unique_ptr< const ObjectConstantBuffer >	object_constant_buffer_;	///< 定数バッファ @todo インスタンス毎に必要か？
+	Model*				model_;				///< Model (GraphicsManager が所有)
+	std::unique_ptr< const ObjectConstantBuffer >	object_constant_buffer_;	///< 定数バッファ
 	std::unique_ptr< AnimationPlayer >				animation_player_;			///< アニメーション再生
 
 	bool				is_dead_;			///< 死亡フラグ
 	float_t				flicker_scale_;		///< ゆらぎの大きさ
 
-	/** @todo ActiveObject から分離 */
 	float_t				direction_degree_;	///< 方向 ( Y Axis Degree )
 
 	bool				is_mesh_visible_;	///< メッシュを描画するかどうか
@@ -75,7 +73,7 @@ public:
 
 	virtual void update() override { }
 
-	virtual void set_model( Model* m ) { model_ = m; setup_animation_player(); } /// @todo virtual を外す
+	virtual void set_model( Model* m ) { model_ = m; setup_animation_player(); }
 	Model* get_model() { return model_; }
 	const Model* get_model() const { return model_; }
 

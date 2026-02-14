@@ -65,24 +65,24 @@ public:
 	};
 
 private:
-	Texture*							ui_texture_ = nullptr;	///< UI 表示用テクスチャ
-	bool								is_cleared_ = false;	///< ステージクリアフラグ
-	std::unique_ptr< Config >			stage_config_;	
+	// 非所有参照 (各 Manager が所有)
+	Texture*							ui_texture_ = nullptr;			///< UI テクスチャ (GraphicsManager)
+	Shader*								debug_texture_shader_ = nullptr;///< デバッグシェーダー (GraphicsManager)
+	Model*								far_billboards_ = nullptr;		///< 遠景ビルボード (GraphicsManager)
+	Model*								scope_mesh_ = nullptr;			///< 双眼鏡 (GraphicsManager)
+	Model*								rectangle_ = nullptr;			///< 矩形モデル (GraphicsManager)
+	Sound*								bgm_ = nullptr;					///< BGM (SoundManager)
 
-	Shader*								debug_texture_shader_ = nullptr;
-
+	// 非所有参照 (ActiveObjectManager が所有)
 	Player*								player_ = nullptr;
-	std::unique_ptr< Camera >			camera_;				///< @todo GameObjectManager で管理して参照するだけにする
-	Girl*								girl_ = nullptr;					
+	Girl*								girl_ = nullptr;
 	Goal*								goal_ = nullptr;
 
-	/// @todo 整理する
-	Model*								far_billboards_ = nullptr;	///< 遠景ビルボード
-	Model*								scope_mesh_ = nullptr;		///< 双眼鏡
-	Model*								rectangle_ = nullptr;
+	// 所有リソース
+	std::unique_ptr< Config >			stage_config_;
+	std::unique_ptr< Camera >			camera_;
 
-	Sound*								bgm_ = nullptr;
-	Sound*								balloon_bgm_ = nullptr;
+	bool								is_cleared_ = false;	///< ステージクリアフラグ
 	float_t								action_bgm_after_timer_;
 
 	float_t								bpm_;

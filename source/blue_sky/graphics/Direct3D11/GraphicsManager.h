@@ -139,8 +139,8 @@ public:
 	void render_technique( const EffectTechnique*, const std::function< void () >& ) const override;
 	void render_background() const override;
 
-	/// @todo ちゃんと作る Font, size, 指定した Texture への描画
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
+	void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;
 
 	void clear_debug_bullet() const override;

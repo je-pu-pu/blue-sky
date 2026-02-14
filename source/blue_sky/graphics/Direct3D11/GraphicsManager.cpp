@@ -543,6 +543,33 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
 }
 
 /**
+ * 矩形内に中央揃えで文字列を描画する
+ */
+void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color ) const
+{
+	if ( ! direct_3d_->get_font() )
+	{
+		return;
+	}
+
+	{
+		direct_3d_->begin2D();
+		direct_3d_->get_font()->begin();
+
+		direct_3d_->get_font()->draw_text_center( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), color );
+
+		direct_3d_->get_font()->end();
+		direct_3d_->end2D();
+	}
+
+	{
+		direct_3d_->begin3D();
+		direct_3d_->renderText();
+		direct_3d_->end3D();
+	}
+}
+
+/**
  * 画面の中央に文字列を描画する
  *
  * @param text 文字列

@@ -19,6 +19,7 @@ Sprite::Sprite( Direct3D* direct_3d )
 	, index_buffer_( nullptr )
 	, input_layout_( direct_3d->get_input_layout( "sprite" ) )
 	, effect_technique_( direct_3d_->get_effect()->get_technique( "sprite" ) )
+	, color_technique_( direct_3d_->get_effect()->get_technique( "sprite_color" ) )
 	, ortho_offset_( 0.f )
 {
 	constant_buffer_ = std::make_unique< ConstantBuffer >();
@@ -179,6 +180,54 @@ void Sprite::draw( const Rect* dst, const Texture* texture, const Rect* src, con
 		constant_buffer_->bind_to_vs();
 
 		texture->bind_to_ps( 0 );
+
+		direct_3d_->getImmediateContext()->DrawIndexed( 4, 0, 0 );
+	}
+
+	core::get_graphics_manager()->count_draw();
+}
+
+void Sprite::draw_color( const Rect& dst, const Color& color )
+{
+	D3D11_MAPPED_SUBRESOURCE mapped_subresource;
+
+	DIRECT_X_FAIL_CHECK( direct_3d_->getImmediateContext()->Map( vertex_buffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, & mapped_subresource ) );
+
+	Vertex* vertex_list = static_cast< Vertex* >( mapped_subresource.pData );
+
+	vertex_list[ 0 ].Color = color;
+	vertex_list[ 1 ].Color = color;
+	vertex_list[ 2 ].Color = color;
+	vertex_list[ 3 ].Color = color;
+
+	vertex_list[ 0 ].TexCoord = Vector2( 0, 0 );
+	vertex_list[ 1 ].TexCoord = Vector2( 0, 0 );
+	vertex_list[ 2 ].TexCoord = Vector2( 0, 0 );
+	vertex_list[ 3 ].TexCoord = Vector2( 0, 0 );
+
+	{
+		const auto screen_height = direct_3d_->get_height();
+		const auto screen_width = direct_3d_->get_width();
+		const FLOAT surface_ratio = static_cast< FLOAT >( screen_width ) / static_cast< FLOAT >( screen_height );
+
+		FLOAT l = +( static_cast< FLOAT >( dst.left()   ) * 2.f / static_cast< FLOAT >( screen_height ) - surface_ratio );
+		FLOAT r = +( static_cast< FLOAT >( dst.right()  ) * 2.f / static_cast< FLOAT >( screen_height ) - surface_ratio );
+		FLOAT t = -( static_cast< FLOAT >( dst.top()    ) * 2.f / static_cast< FLOAT >( screen_height ) - 1.f );
+		FLOAT b = -( static_cast< FLOAT >( dst.bottom() ) * 2.f / static_cast< FLOAT >( screen_height ) - 1.f );
+
+		vertex_list[ 0 ].Position = Vector3( l, t, 0 );
+		vertex_list[ 1 ].Position = Vector3( r, t, 0 );
+		vertex_list[ 2 ].Position = Vector3( l, b, 0 );
+		vertex_list[ 3 ].Position = Vector3( r, b, 0 );
+	}
+
+	direct_3d_->getImmediateContext()->Unmap( vertex_buffer_, 0 );
+
+	for ( const auto& pass : color_technique_->get_pass_list() )
+	{
+		pass->apply();
+
+		constant_buffer_->bind_to_vs();
 
 		direct_3d_->getImmediateContext()->DrawIndexed( 4, 0, 0 );
 	}

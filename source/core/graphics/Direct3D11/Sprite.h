@@ -57,6 +57,7 @@ protected:
 
 	const InputLayout*			input_layout_;
 	const EffectTechnique*		effect_technique_;
+	const EffectTechnique*		color_technique_;		///< テクスチャなし・頂点カラーのみ
 
 	float_t			ortho_offset_;		///< 立体視用
 
@@ -73,6 +74,7 @@ public:
 	void set_ortho_offset( float_t ortho_offset ) override { ortho_offset_ = ortho_offset; }
 
 	void begin() override;
+	void draw_color( const Rect& dr, const Color& c ) override;
 	void end() override;
 
 }; // class Sprite

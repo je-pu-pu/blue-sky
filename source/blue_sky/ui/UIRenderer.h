@@ -34,9 +34,6 @@ public:
 
 private:
 	GraphicsManager* gm_;
-	Texture* white_texture_ = nullptr;
-
-	Texture* get_white_texture();
 
 public:
 	explicit UIRenderer( GraphicsManager* );

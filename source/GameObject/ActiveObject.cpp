@@ -28,9 +28,9 @@ ActiveObject::ActiveObject()
 	, start_rotation_( Vector::Zero )
 	, start_direction_degree_( 0 )
 
-	, model_( 0 )
-	, object_constant_buffer_( new ObjectConstantBuffer() )
-	, animation_player_( 0 )
+	, model_( nullptr )
+	, object_constant_buffer_( std::make_unique< ObjectConstantBuffer >() )
+	, animation_player_( nullptr )
 	, is_dead_( false )
 	, flicker_scale_( 1.f )
 
@@ -52,8 +52,8 @@ ActiveObject::ActiveObject( const ActiveObject& o )
 	, start_direction_degree_( o.start_direction_degree_ )
 
 	, model_( o.model_ )
-	, object_constant_buffer_( new ObjectConstantBuffer() )
-	, animation_player_( 0 )
+	, object_constant_buffer_( std::make_unique< ObjectConstantBuffer >() )
+	, animation_player_( nullptr )
 	, is_dead_( o.is_dead_ )
 	, flicker_scale_( o.flicker_scale_ )
 
@@ -65,11 +65,7 @@ ActiveObject::ActiveObject( const ActiveObject& o )
 	setup_animation_player();
 }
 
-ActiveObject::~ActiveObject()
-{
-	delete object_constant_buffer_;
-	delete animation_player_;
-}
+ActiveObject::~ActiveObject() = default;
 
 /**
  * アニメーション再生をセットアップする
@@ -84,7 +80,7 @@ void ActiveObject::setup_animation_player()
 
 	if ( get_model() && get_model()->get_skinning_animation_set() )
 	{
-		animation_player_ = new AnimationPlayer( get_model()->get_skinning_animation_set() );
+		animation_player_ = std::make_unique< AnimationPlayer >( get_model()->get_skinning_animation_set() );
 	}
 }
 

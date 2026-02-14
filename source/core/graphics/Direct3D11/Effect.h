@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <unordered_map>
 
 struct ID3DX11Effect;
@@ -22,7 +23,7 @@ public:
 	using Technique			= EffectTechnique;
 	using Pass				= EffectPass;
 
-	using TechniqueList		= std::unordered_map< const char*, Technique* >;
+	using TechniqueList		= std::unordered_map< const char*, std::unique_ptr< Technique > >;
 
 private:
 	Direct3D*			direct_3d_;

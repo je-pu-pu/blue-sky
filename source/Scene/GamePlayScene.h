@@ -5,6 +5,7 @@
 #include <common/chase_value.h>
 
 #include <list>
+#include <memory>
 #include <unordered_map>
 #include <functional>
 
@@ -53,7 +54,7 @@ public:
 
 	using CommandCall			= std::function< void() >;
 	using CommandCallList		= std::list< CommandCall >;
-	using DelayedCommandList	= std::list< DelayedCommand* >;
+	using DelayedCommandList	= std::list< std::unique_ptr< DelayedCommand > >;
 
 	enum class BalloonSoundType
 	{

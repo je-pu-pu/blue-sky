@@ -21,7 +21,7 @@ Sprite::Sprite( Direct3D* direct_3d )
 	, effect_technique_( direct_3d_->get_effect()->get_technique( "sprite" ) )
 	, ortho_offset_( 0.f )
 {
-	constant_buffer_ = new ConstantBuffer();
+	constant_buffer_ = std::make_unique< ConstantBuffer >();
 	
 	create_vertex_buffer();
 	create_index_buffer();
@@ -31,8 +31,6 @@ Sprite::~Sprite()
 {
 	DIRECT_X_RELEASE( index_buffer_ );
 	DIRECT_X_RELEASE( vertex_buffer_ );
-
-	delete constant_buffer_;
 }
 
 void Sprite::create_vertex_buffer()
@@ -174,7 +172,7 @@ void Sprite::draw( const Rect* dst, const Texture* texture, const Rect* src, con
 
 	direct_3d_->getImmediateContext()->Unmap( vertex_buffer_, 0 );
 
-	for ( auto pass : effect_technique_->get_pass_list() )
+	for ( const auto& pass : effect_technique_->get_pass_list() )
 	{
 		pass->apply();
 

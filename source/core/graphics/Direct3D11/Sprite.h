@@ -2,6 +2,7 @@
 
 #include <core/graphics/Sprite.h>
 #include <d3d11.h>
+#include <memory>
 
 namespace direct_x_math
 {
@@ -49,7 +50,7 @@ public:
 
 protected:
 	Direct3D*		direct_3d_;
-	ConstantBuffer*	constant_buffer_;
+	std::unique_ptr< ConstantBuffer >	constant_buffer_;
 
 	Buffer*			vertex_buffer_;
 	Buffer*			index_buffer_;

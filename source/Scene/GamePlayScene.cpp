@@ -160,11 +160,6 @@ GamePlayScene::~GamePlayScene()
 
 void GamePlayScene::clear_delayed_command()
 {
-	for ( auto i = delayed_command_list_.begin(); i != delayed_command_list_.end(); ++i )
-	{
-		delete *i;
-	}
-
 	delayed_command_list_.clear();
 }
 
@@ -616,7 +611,7 @@ void GamePlayScene::setup_command()
 			command += p;
 		}
 
-		delayed_command_list_.push_back( new DelayedCommand( interval, count, command ) );
+		delayed_command_list_.push_back( std::make_unique< DelayedCommand >( interval, count, command ) );
 	};
 	command_map_[ "end_by_last_switch" ] = [ & ] ( const string_t& )
 	{
@@ -1278,7 +1273,6 @@ void GamePlayScene::update_delayed_command()
 
 		if ( ( *i )->is_over() )
 		{
-			delete *i;
 			i = delayed_command_list_.erase( i );
 		}
 		else

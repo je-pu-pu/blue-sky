@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 namespace core::graphics
@@ -10,7 +11,7 @@ class EffectPass;
 class EffectTechnique
 {
 public:
-	using PassList = std::vector< EffectPass* >;
+	using PassList = std::vector< std::unique_ptr< EffectPass > >;
 
 public:
 	virtual ~EffectTechnique() { }

@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include <win/Rect.h>
 #include <type/type.h>
+#include <memory>
 #include <vector>
 #include <list>
 
@@ -28,7 +29,7 @@ public:
 		bool completed = false;
 	};
 
-	using StageList	= std::list< Stage* >;
+	using StageList	= std::list< std::unique_ptr< Stage > >;
 	using RectList	= std::vector< win::Rect >;
 
 	static string_t get_stage_dir_name_by_page( int );

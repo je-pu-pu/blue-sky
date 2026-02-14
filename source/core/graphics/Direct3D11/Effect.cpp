@@ -87,11 +87,6 @@ void Effect::load( const char* file_path )
  */
 void Effect::clear()
 {
-	for ( TechniqueList::iterator i = technique_list_.begin(); i != technique_list_.end(); ++i )
-	{
-		delete i->second;
-	}
-
 	technique_list_.clear();
 
 	DIRECT_X_RELEASE( effect_ );
@@ -103,21 +98,22 @@ Effect::Technique* Effect::get_technique( const char* name )
 
 	if ( i != technique_list_.end() )
 	{
-		return i->second;
+		return i->second.get();
 	}
 
 	ID3DX11EffectTechnique* t = effect_->GetTechniqueByName( name );
 
 	if ( ! t->IsValid() )
 	{
-		return 0;
+		return nullptr;
 	}
 
-	Technique* technique = new Technique( direct_3d_, t );
+	auto technique = std::make_unique< Technique >( direct_3d_, t );
+	Technique* result = technique.get();
 
-	technique_list_[ name ] = technique;
+	technique_list_[ name ] = std::move( technique );
 
-	return technique;
+	return result;
 }
 
 } // namespace core::graphics::direct_3d_11

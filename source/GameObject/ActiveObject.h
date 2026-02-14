@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include <blue_sky/ConstantBuffers.h>
 #include <common/exception.h>
+#include <memory>
 
 namespace core
 {
@@ -44,8 +45,8 @@ private:
 
 	/** @todo ActiveObject から分離 */
 	Model*				model_;				///< Model
-	const ObjectConstantBuffer*				object_constant_buffer_;	///< 定数バッファ @todo インスタンス毎に必要か？
-	AnimationPlayer*						animation_player_;			///< アニメーション再生
+	std::unique_ptr< const ObjectConstantBuffer >	object_constant_buffer_;	///< 定数バッファ @todo インスタンス毎に必要か？
+	std::unique_ptr< AnimationPlayer >				animation_player_;			///< アニメーション再生
 
 	bool				is_dead_;			///< 死亡フラグ
 	float_t				flicker_scale_;		///< ゆらぎの大きさ
@@ -83,8 +84,8 @@ public:
 	virtual void set_flicker_scale( float_t s ) { flicker_scale_ = s; }
 	virtual float_t get_flicker_scale() const { return flicker_scale_; }
 
-	AnimationPlayer* get_animation_player() { return animation_player_; }
-	const AnimationPlayer* get_animation_player() const { return animation_player_; }
+	AnimationPlayer* get_animation_player() { return animation_player_.get(); }
+	const AnimationPlayer* get_animation_player() const { return animation_player_.get(); }
 
 	void set_start_location( float_t, float_t, float_t );
 	void set_start_rotation( float_t, float_t, float_t );
@@ -114,7 +115,7 @@ public:
 	void set_mesh_visible( bool v ) { is_mesh_visible_ = v; }
 	void set_line_visible( bool v ) { is_line_visible_ = v; }
 
-	const ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_; }
+	const ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_.get(); }
 
 	virtual void update_render_data() const;
 	[[deprecated]] virtual void bind_render_data() const;

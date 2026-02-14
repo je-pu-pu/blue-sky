@@ -27,7 +27,10 @@ GameObject::GameObject()
 
 GameObject::~GameObject()
 {
-	
+	if ( rigid_body_ )
+	{
+		rigid_body_->setUserPointer( nullptr );
+	}
 }
 
 /**

@@ -47,6 +47,10 @@ private:
 	Color normal_color_;
 	Color selected_color_;
 
+	// マウス操作用
+	int last_mouse_x_ = -1;
+	int last_mouse_y_ = -1;
+
 public:
 	UIVerticalMenu();
 

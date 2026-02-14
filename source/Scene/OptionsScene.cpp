@@ -199,12 +199,11 @@ void OptionsScene::update()
 
 void OptionsScene::render()
 {
-	// 半透明の暗幕（全画面）
-	get_graphics_manager()->set_fade_color( Color( 0.f, 0.f, 0.f, 0.5f ) );
-	render_fader();
-
 	float_t screen_w = static_cast< float_t >( ui_renderer_.get_screen_width() );
 	float_t screen_h = static_cast< float_t >( ui_renderer_.get_screen_height() );
+
+	// 半透明の暗幕（全画面）— Fader は fade_==0 時に透明になるため draw_rect を使用
+	ui_renderer_.draw_rect( 0.f, 0.f, screen_w, screen_h, Color( 0.f, 0.f, 0.f, 0.5f ) );
 
 	// パネル背景
 	float_t panel_w = get_panel_width();
@@ -231,15 +230,15 @@ void OptionsScene::render()
 
 	if ( selected == volume_index_ || selected == mouse_sens_index_ || selected == fov_index_ )
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 60.f, "< > Adjust    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 60.f, "Arrow/AD Adjust    Enter/Click Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 	}
 	else if ( selected == mute_index_ || selected == fullscreen_index_ )
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 60.f, "Enter Toggle    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 60.f, "Enter/Click Toggle    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 	}
 	else
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 60.f, "Enter Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 60.f, "Enter/Click Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 	}
 }
 

@@ -24,9 +24,9 @@ private:
 	ui::UIRenderer ui_renderer_;
 	ui::UIVerticalMenu menu_;
 
-	// レイアウト
-	float_t get_panel_width() const { return 400.f; }
-	float_t get_content_width() const { return 350.f; }
+	// レイアウト (仮想座標 1920x1080 基準)
+	float_t get_panel_width() const { return 960.f; }
+	float_t get_content_width() const { return 840.f; }
 
 	void setup_menu();
 

@@ -4,6 +4,9 @@
 
 #include <blue_sky/ui/UIRenderer.h>
 #include <blue_sky/ui/UIVerticalMenu.h>
+#include <blue_sky/graphics/GraphicsManager.h>
+
+#include <vector>
 
 namespace blue_sky
 {
@@ -24,15 +27,9 @@ private:
 	ui::UIRenderer ui_renderer_;
 	ui::UIVerticalMenu menu_;
 
-	// 解像度選択肢
-	struct Resolution
-	{
-		int width;
-		int height;
-	};
-
-	static const Resolution resolutions_[];
-	static const int resolution_count_;
+	// 解像度選択肢 (DXGI から動的に取得)
+	using DisplayMode = graphics::GraphicsManager::DisplayMode;
+	std::vector< DisplayMode > resolutions_;
 
 	// メニュー項目インデックス
 	int resolution_index_ = -1;
@@ -63,9 +60,9 @@ private:
 	float_t get_min_sensitivity() const { return 0.1f; }
 	float_t get_max_sensitivity() const { return 3.f; }
 
-	// レイアウト
-	float_t get_panel_width() const { return 700.f; }
-	float_t get_content_width() const { return 600.f; }
+	// レイアウト (仮想座標 1920x1080 基準)
+	float_t get_panel_width() const { return 1680.f; }
+	float_t get_content_width() const { return 1440.f; }
 
 	void setup_menu();
 	void update_all_text();

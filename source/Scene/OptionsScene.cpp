@@ -14,20 +14,9 @@
 namespace blue_sky
 {
 
-const OptionsScene::Resolution OptionsScene::resolutions_[] =
-{
-	{  800,  600 },
-	{ 1024,  768 },
-	{ 1280,  720 },
-	{ 1366,  768 },
-	{ 1600,  900 },
-	{ 1920, 1080 },
-};
-
-const int OptionsScene::resolution_count_ = sizeof( resolutions_ ) / sizeof( resolutions_[ 0 ] );
-
 OptionsScene::OptionsScene()
 	: ui_renderer_( get_graphics_manager() )
+	, resolutions_( get_graphics_manager()->get_available_display_modes() )
 	, volume_( get_sound_manager()->get_volume() )
 	, is_mute_( get_sound_manager()->is_mute() )
 	, mouse_sensitivity_( get_config()->get( "input.mouse.x_sensitivity", 1.f ) )
@@ -48,7 +37,7 @@ int OptionsScene::find_current_resolution() const
 	int w = GameMain::get_app()->get_width();
 	int h = GameMain::get_app()->get_height();
 
-	for ( int i = 0; i < resolution_count_; i++ )
+	for ( int i = 0; i < static_cast< int >( resolutions_.size() ); i++ )
 	{
 		if ( resolutions_[ i ].width == w && resolutions_[ i ].height == h )
 		{
@@ -117,8 +106,8 @@ void OptionsScene::setup_menu()
 	float_t menu_w = get_content_width();
 
 	menu_.set_width( menu_w );
-	menu_.set_item_height( 55.f );
-	menu_.set_position( ( screen_w - menu_w ) * 0.5f, 100.f );
+	menu_.set_item_height( 100.f );
+	menu_.set_position( ( screen_w - menu_w ) * 0.5f, 200.f );
 	update_all_text();
 }
 
@@ -230,7 +219,7 @@ void OptionsScene::update()
 
 	if ( selected == resolution_index_ && ( is_left || is_right ) )
 	{
-		if ( is_right && current_resolution_ < resolution_count_ - 1 )
+		if ( is_right && current_resolution_ < static_cast< int >( resolutions_.size() ) - 1 )
 		{
 			current_resolution_++;
 		}
@@ -287,7 +276,7 @@ void OptionsScene::render()
 	float_t content_w = get_content_width();
 	float_t title_x = ( screen_w - content_w ) * 0.5f;
 	float_t title_y = screen_h * 0.08f;
-	ui_renderer_.draw_text( title_x, title_y, content_w, 60.f, "OPTIONS", Color( 1.f, 1.f, 1.f, 1.f ) );
+	ui_renderer_.draw_text( title_x, title_y, content_w, 120.f, "OPTIONS", Color( 1.f, 1.f, 1.f, 1.f ) );
 
 	// メニュー
 	menu_.render( ui_renderer_ );
@@ -300,19 +289,19 @@ void OptionsScene::render()
 
 	if ( selected == resolution_index_ )
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 50.f, "Arrow/AD Change    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Arrow/AD Change    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 	}
 	else if ( selected == volume_index_ || selected == mouse_sens_index_ || selected == fov_index_ )
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 50.f, "Arrow/AD Adjust    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Arrow/AD Adjust    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 	}
 	else if ( selected == mute_index_ || selected == fullscreen_index_ )
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 50.f, "Enter/Click Toggle    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Enter/Click Toggle    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 	}
 	else
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 50.f, "Enter/Click Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Enter/Click Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 	}
 }
 

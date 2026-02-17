@@ -36,9 +36,9 @@ public:
 	using Sprite			= core::graphics::Sprite;
 	using GraphicsManager	= blue_sky::graphics::GraphicsManager;
 
-	/// 仮想座標系の基準解像度
-	static constexpr float_t DESIGN_WIDTH  = 800.f;
-	static constexpr float_t DESIGN_HEIGHT = 600.f;
+	/// 仮想座標系の基準解像度 (Full HD)
+	static constexpr float_t DESIGN_WIDTH  = 1920.f;
+	static constexpr float_t DESIGN_HEIGHT = 1080.f;
 
 private:
 	GraphicsManager* gm_;

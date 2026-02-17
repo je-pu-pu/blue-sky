@@ -130,8 +130,17 @@ public:
 	GraphicsManager();
 	virtual ~GraphicsManager() override;
 
+	struct DisplayMode
+	{
+		int width;
+		int height;
+	};
+
 	virtual int get_screen_width() const = 0;		///< 画面の幅を返す
 	virtual int get_screen_height() const = 0;		///< 画面の高さを返す
+
+	/// システムが対応する表示解像度のリストを返す
+	virtual std::vector< DisplayMode > get_available_display_modes() const = 0;
 
 	void setup_shadow_map( uint_t, uint_t );
 	void unset_shadow_map();

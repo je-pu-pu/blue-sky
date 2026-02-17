@@ -78,6 +78,18 @@ int GraphicsManager::get_screen_height() const
 	return direct_3d_->get_height();
 }
 
+std::vector< GraphicsManager::DisplayMode > GraphicsManager::get_available_display_modes() const
+{
+	std::vector< DisplayMode > result;
+
+	for ( const auto& mode : direct_3d_->get_available_display_modes() )
+	{
+		result.push_back( { mode.width, mode.height } );
+	}
+
+	return result;
+}
+
 void GraphicsManager::set_default_viewport()
 {
 	direct_3d_->set_default_viewport();

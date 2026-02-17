@@ -6,6 +6,7 @@
 #include <d3d11.h>
 
 #include <unordered_map>
+#include <vector>
 #include <memory>
 
 class DirectWrite;
@@ -124,8 +125,17 @@ public:
 	void create_default_input_layout();
 	void create_input_layout( const char_t*, const char_t*, D3D11_INPUT_ELEMENT_DESC[], UINT );
 
+	struct DisplayMode
+	{
+		int width;
+		int height;
+	};
+
 	int get_width() const { return swap_chain_desc_.BufferDesc.Width; }
 	int get_height() const { return swap_chain_desc_.BufferDesc.Height; }
+
+	/// システムが対応する表示解像度のリストを返す (重複除去・ソート済み)
+	std::vector< DisplayMode > get_available_display_modes() const;
 
 	void set_size( int, int );
 	void set_full_screen( bool );

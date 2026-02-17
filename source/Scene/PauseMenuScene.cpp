@@ -47,7 +47,7 @@ void PauseMenuScene::setup_menu()
 	} );
 
 	menu_.set_width( get_content_width() );
-	menu_.set_item_height( 60.f );
+	menu_.set_item_height( 108.f );
 	menu_.center_on_screen( ui_renderer_ );
 }
 
@@ -55,13 +55,13 @@ void PauseMenuScene::update()
 {
 	Scene::update();
 
-	menu_.update( get_input() );
+	menu_.update( get_input(), ui_renderer_ );
 }
 
 void PauseMenuScene::render()
 {
-	float_t screen_w = static_cast< float_t >( ui_renderer_.get_screen_width() );
-	float_t screen_h = static_cast< float_t >( ui_renderer_.get_screen_height() );
+	float_t screen_w = ui_renderer_.get_screen_width();
+	float_t screen_h = ui_renderer_.get_screen_height();
 
 	// 半透明の暗幕（全画面）
 	ui_renderer_.draw_rect( 0.f, 0.f, screen_w, screen_h, Color( 0.f, 0.f, 0.f, 0.5f ) );
@@ -78,7 +78,7 @@ void PauseMenuScene::render()
 	float_t content_w = get_content_width();
 	float_t title_x = ( screen_w - content_w ) * 0.5f;
 	float_t title_y = screen_h * 0.28f;
-	ui_renderer_.draw_text( title_x, title_y, content_w, 70.f, "PAUSE", Color( 1.f, 1.f, 1.f, 1.f ) );
+	ui_renderer_.draw_text( title_x, title_y, content_w, 126.f, "PAUSE", Color( 1.f, 1.f, 1.f, 1.f ) );
 
 	// メニュー
 	menu_.render( ui_renderer_ );
@@ -86,7 +86,7 @@ void PauseMenuScene::render()
 	// 操作ヒント
 	float_t hint_y = screen_h * 0.65f;
 	float_t hint_x = ( screen_w - content_w ) * 0.5f;
-	ui_renderer_.draw_text( hint_x, hint_y, content_w, 50.f, "Enter/Click Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+	ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Enter/Click Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 }
 
 } // namespace blue_sky

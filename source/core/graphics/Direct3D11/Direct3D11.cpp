@@ -958,4 +958,51 @@ void Direct3D11::log_feature_level()
 	common::log( "log/d3d11.log", std::string( "created d3d11 device ( feature_level : " ) + feature_level_map[ device_->GetFeatureLevel() ] + " )" );
 }
 
+std::vector< Direct3D11::DisplayMode > Direct3D11::get_available_display_modes() const
+{
+	std::vector< DisplayMode > result;
+
+	IDXGIOutput* output = nullptr;
+
+	if ( FAILED( dxgi_adapter_->EnumOutputs( 0, & output ) ) || ! output )
+	{
+		return result;
+	}
+
+	UINT mode_count = 0;
+	output->GetDisplayModeList( swap_chain_desc_.BufferDesc.Format, 0, & mode_count, nullptr );
+
+	if ( mode_count > 0 )
+	{
+		std::vector< DXGI_MODE_DESC > modes( mode_count );
+		output->GetDisplayModeList( swap_chain_desc_.BufferDesc.Format, 0, & mode_count, modes.data() );
+
+		for ( const auto& mode : modes )
+		{
+			DisplayMode dm = { static_cast< int >( mode.Width ), static_cast< int >( mode.Height ) };
+
+			// 重複除去（同じ解像度でリフレッシュレート違いが複数返る）
+			bool is_duplicate = false;
+
+			for ( const auto& existing : result )
+			{
+				if ( existing.width == dm.width && existing.height == dm.height )
+				{
+					is_duplicate = true;
+					break;
+				}
+			}
+
+			if ( ! is_duplicate )
+			{
+				result.push_back( dm );
+			}
+		}
+	}
+
+	DIRECT_X_RELEASE( output );
+
+	return result;
+}
+
 } // namespace core::graphics::direct_3d_11

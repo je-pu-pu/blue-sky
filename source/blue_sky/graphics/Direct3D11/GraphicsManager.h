@@ -72,8 +72,9 @@ public:
 	explicit GraphicsManager( Direct3D* );
 	virtual ~GraphicsManager() override;
 
-	int get_screen_width() const override;		///< 画面の幅を返す
-	int get_screen_height() const override;		///< 画面の高さを返す
+	int get_screen_width() const override;
+	int get_screen_height() const override;
+	std::vector< DisplayMode > get_available_display_modes() const override;
 
 	// void update() override;
 

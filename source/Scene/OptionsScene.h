@@ -24,7 +24,18 @@ private:
 	ui::UIRenderer ui_renderer_;
 	ui::UIVerticalMenu menu_;
 
+	// 解像度選択肢
+	struct Resolution
+	{
+		int width;
+		int height;
+	};
+
+	static const Resolution resolutions_[];
+	static const int resolution_count_;
+
 	// メニュー項目インデックス
+	int resolution_index_ = -1;
 	int volume_index_ = -1;
 	int mute_index_ = -1;
 	int mouse_sens_index_ = -1;
@@ -33,11 +44,15 @@ private:
 	int back_index_ = -1;
 
 	// 設定値
+	int current_resolution_ = 0;
 	float_t volume_ = 1.f;
 	bool is_mute_ = false;
 	float_t mouse_sensitivity_ = 1.f;
 	float_t fov_ = 90.f;
 	bool is_fullscreen_ = false;
+
+	int find_current_resolution() const;
+	void apply_resolution();
 
 	// ステップ値・範囲
 	float_t get_volume_step() const { return 0.1f; }

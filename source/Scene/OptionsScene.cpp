@@ -3,6 +3,7 @@
 #include <blue_sky/GameMain.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/Input.h>
+#include <blue_sky/App.h>
 
 #include <core/sound/SoundManager.h>
 
@@ -13,6 +14,18 @@
 namespace blue_sky
 {
 
+const OptionsScene::Resolution OptionsScene::resolutions_[] =
+{
+	{  800,  600 },
+	{ 1024,  768 },
+	{ 1280,  720 },
+	{ 1366,  768 },
+	{ 1600,  900 },
+	{ 1920, 1080 },
+};
+
+const int OptionsScene::resolution_count_ = sizeof( resolutions_ ) / sizeof( resolutions_[ 0 ] );
+
 OptionsScene::OptionsScene()
 	: ui_renderer_( get_graphics_manager() )
 	, volume_( get_sound_manager()->get_volume() )
@@ -21,6 +34,7 @@ OptionsScene::OptionsScene()
 	, fov_( get_config()->get( "camera.fov", 90.f ) )
 	, is_fullscreen_( get_graphics_manager()->is_full_screen() )
 {
+	current_resolution_ = find_current_resolution();
 	setup_menu();
 }
 
@@ -29,9 +43,35 @@ OptionsScene::~OptionsScene()
 	save_settings();
 }
 
+int OptionsScene::find_current_resolution() const
+{
+	int w = GameMain::get_app()->get_width();
+	int h = GameMain::get_app()->get_height();
+
+	for ( int i = 0; i < resolution_count_; i++ )
+	{
+		if ( resolutions_[ i ].width == w && resolutions_[ i ].height == h )
+		{
+			return i;
+		}
+	}
+
+	return 0;
+}
+
+void OptionsScene::apply_resolution()
+{
+	const auto& res = resolutions_[ current_resolution_ ];
+	GameMain::get_app()->set_size( res.width, res.height );
+}
+
 void OptionsScene::setup_menu()
 {
 	int index = 0;
+
+	// Resolution
+	resolution_index_ = index++;
+	menu_.add_item( "", nullptr );
 
 	// Volume
 	volume_index_ = index++;
@@ -73,8 +113,12 @@ void OptionsScene::setup_menu()
 		play_sound( "ok" );
 	} );
 
-	menu_.set_width( 600.f );
-	menu_.center_on_screen( ui_renderer_ );
+	float_t screen_w = ui_renderer_.get_screen_width();
+	float_t menu_w = get_content_width();
+
+	menu_.set_width( menu_w );
+	menu_.set_item_height( 55.f );
+	menu_.set_position( ( screen_w - menu_w ) * 0.5f, 100.f );
 	update_all_text();
 }
 
@@ -101,6 +145,14 @@ string_t OptionsScene::make_bar( float_t value, float_t min_val, float_t max_val
 
 void OptionsScene::update_all_text()
 {
+	// Resolution
+	{
+		const auto& res = resolutions_[ current_resolution_ ];
+		std::stringstream ss;
+		ss << "Resolution    < " << res.width << " x " << res.height << " >";
+		menu_.set_item_text( resolution_index_, ss.str() );
+	}
+
 	// Volume
 	{
 		int percent = static_cast< int >( volume_ * 100.f + 0.5f );
@@ -152,6 +204,10 @@ void OptionsScene::adjust_value( float_t& value, float_t delta, float_t min_val,
 
 void OptionsScene::save_settings()
 {
+	const auto& res = resolutions_[ current_resolution_ ];
+	get_config()->set( "graphics.screen_width", res.width );
+	get_config()->set( "graphics.screen_height", res.height );
+
 	get_config()->set( "audio.volume", volume_ );
 	get_config()->set< int >( "audio.mute", is_mute_ ? 1 : 0 );
 	get_config()->set( "input.mouse.x_sensitivity", mouse_sensitivity_ );
@@ -168,11 +224,25 @@ void OptionsScene::update()
 
 	int selected = menu_.get_selected_index();
 
-	// 左右キーでスライダー項目を調整
+	// 左右キーでスライダー / 選択項目を調整
 	bool is_left = get_input()->push( Input::Button::LEFT );
 	bool is_right = get_input()->push( Input::Button::RIGHT );
 
-	if ( selected == volume_index_ && ( is_left || is_right ) )
+	if ( selected == resolution_index_ && ( is_left || is_right ) )
+	{
+		if ( is_right && current_resolution_ < resolution_count_ - 1 )
+		{
+			current_resolution_++;
+		}
+		else if ( is_left && current_resolution_ > 0 )
+		{
+			current_resolution_--;
+		}
+
+		apply_resolution();
+		update_all_text();
+	}
+	else if ( selected == volume_index_ && ( is_left || is_right ) )
 	{
 		float_t delta = is_right ? get_volume_step() : -get_volume_step();
 		adjust_value( volume_, delta, 0.f, 1.f );
@@ -194,13 +264,13 @@ void OptionsScene::update()
 		update_all_text();
 	}
 
-	menu_.update( get_input() );
+	menu_.update( get_input(), ui_renderer_ );
 }
 
 void OptionsScene::render()
 {
-	float_t screen_w = static_cast< float_t >( ui_renderer_.get_screen_width() );
-	float_t screen_h = static_cast< float_t >( ui_renderer_.get_screen_height() );
+	float_t screen_w = ui_renderer_.get_screen_width();
+	float_t screen_h = ui_renderer_.get_screen_height();
 
 	// 半透明の暗幕（全画面）— Fader は fade_==0 時に透明になるため draw_rect を使用
 	ui_renderer_.draw_rect( 0.f, 0.f, screen_w, screen_h, Color( 0.f, 0.f, 0.f, 0.5f ) );
@@ -208,37 +278,41 @@ void OptionsScene::render()
 	// パネル背景
 	float_t panel_w = get_panel_width();
 	float_t panel_x = ( screen_w - panel_w ) * 0.5f;
-	float_t panel_y = screen_h * 0.08f;
-	float_t panel_h = screen_h * 0.86f;
+	float_t panel_y = screen_h * 0.05f;
+	float_t panel_h = screen_h * 0.90f;
 
 	ui_renderer_.draw_rect( panel_x, panel_y, panel_w, panel_h, Color( 0.05f, 0.05f, 0.1f, 0.85f ) );
 
 	// タイトル
 	float_t content_w = get_content_width();
 	float_t title_x = ( screen_w - content_w ) * 0.5f;
-	float_t title_y = screen_h * 0.12f;
-	ui_renderer_.draw_text( title_x, title_y, content_w, 80.f, "OPTIONS", Color( 1.f, 1.f, 1.f, 1.f ) );
+	float_t title_y = screen_h * 0.08f;
+	ui_renderer_.draw_text( title_x, title_y, content_w, 60.f, "OPTIONS", Color( 1.f, 1.f, 1.f, 1.f ) );
 
 	// メニュー
 	menu_.render( ui_renderer_ );
 
 	// 操作ヒント
-	float_t hint_y = screen_h * 0.85f;
+	float_t hint_y = screen_h * 0.90f;
 	float_t hint_x = ( screen_w - content_w ) * 0.5f;
 
 	int selected = menu_.get_selected_index();
 
-	if ( selected == volume_index_ || selected == mouse_sens_index_ || selected == fov_index_ )
+	if ( selected == resolution_index_ )
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 60.f, "Arrow/AD Adjust    Enter/Click Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 50.f, "Arrow/AD Change    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+	}
+	else if ( selected == volume_index_ || selected == mouse_sens_index_ || selected == fov_index_ )
+	{
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 50.f, "Arrow/AD Adjust    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 	}
 	else if ( selected == mute_index_ || selected == fullscreen_index_ )
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 60.f, "Enter/Click Toggle    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 50.f, "Enter/Click Toggle    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 	}
 	else
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 60.f, "Enter/Click Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 50.f, "Enter/Click Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
 	}
 }
 

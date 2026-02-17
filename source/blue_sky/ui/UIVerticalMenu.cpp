@@ -57,11 +57,11 @@ void UIVerticalMenu::center_on_screen( const UIRenderer& renderer )
 {
 	float_t total_height = item_height_ * static_cast< float_t >( items_.size() );
 
-	x_ = ( static_cast< float_t >( renderer.get_screen_width() ) - width_ ) * 0.5f;
-	y_ = ( static_cast< float_t >( renderer.get_screen_height() ) - total_height ) * 0.5f;
+	x_ = ( renderer.get_screen_width() - width_ ) * 0.5f;
+	y_ = ( renderer.get_screen_height() - total_height ) * 0.5f;
 }
 
-void UIVerticalMenu::update( Input* input )
+void UIVerticalMenu::update( Input* input, const UIRenderer& renderer )
 {
 	if ( items_.empty() )
 	{
@@ -90,8 +90,9 @@ void UIVerticalMenu::update( Input* input )
 
 		if ( is_mouse_moved )
 		{
-			float_t fmx = static_cast< float_t >( mx );
-			float_t fmy = static_cast< float_t >( my );
+			// 物理ピクセル座標 → 仮想座標に変換
+			float_t fmx = renderer.physical_to_virtual_x( static_cast< float_t >( mx ) );
+			float_t fmy = renderer.physical_to_virtual_y( static_cast< float_t >( my ) );
 
 			for ( int i = 0; i < static_cast< int >( items_.size() ); i++ )
 			{

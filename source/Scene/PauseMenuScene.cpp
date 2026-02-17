@@ -55,13 +55,13 @@ void PauseMenuScene::update()
 {
 	Scene::update();
 
-	menu_.update( get_input() );
+	menu_.update( get_input(), ui_renderer_ );
 }
 
 void PauseMenuScene::render()
 {
-	float_t screen_w = static_cast< float_t >( ui_renderer_.get_screen_width() );
-	float_t screen_h = static_cast< float_t >( ui_renderer_.get_screen_height() );
+	float_t screen_w = ui_renderer_.get_screen_width();
+	float_t screen_h = ui_renderer_.get_screen_height();
 
 	// 半透明の暗幕（全画面）
 	ui_renderer_.draw_rect( 0.f, 0.f, screen_w, screen_h, Color( 0.f, 0.f, 0.f, 0.5f ) );

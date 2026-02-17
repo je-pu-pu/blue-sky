@@ -71,8 +71,8 @@ public:
 	/// 画面中央に配置する（UIRenderer から画面サイズを取得）
 	void center_on_screen( const UIRenderer& renderer );
 
-	/// 入力処理（上下キー / 決定ボタン）
-	void update( Input* input );
+	/// 入力処理（上下キー / 決定ボタン / マウス）
+	void update( Input* input, const UIRenderer& renderer );
 
 	/// 描画
 	void render( UIRenderer& renderer );

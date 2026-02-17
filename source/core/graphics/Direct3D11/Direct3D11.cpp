@@ -964,7 +964,7 @@ std::vector< Direct3D11::DisplayMode > Direct3D11::get_available_display_modes()
 
 	IDXGIOutput* output = nullptr;
 
-	if ( FAILED( const_cast< IDXGIAdapter1* >( dxgi_adapter_.Get() )->EnumOutputs( 0, & output ) ) || ! output )
+	if ( FAILED( const_cast< IDXGIAdapter1* >( dxgi_adapter_.get() )->EnumOutputs( 0, & output ) ) || ! output )
 	{
 		return result;
 	}

@@ -4,7 +4,7 @@
 #include "GlyphCache.h"
 #include "GlyphAtlas.h"
 #include <core/DirectX.h>
-#include <core/type.h>
+#include <core/graphics/TextStyle.h>
 #include <d3d11.h>
 #include <memory>
 #include <vector>
@@ -19,13 +19,6 @@ namespace core::graphics::direct_3d_11
 }
 
 namespace core::graphics {
-
-struct TextStyle {
-	Color text_color = Color::White;
-	Color outline_color = Color::Black;
-	float outline_width = 0.f;
-	float font_size = 32.f;
-};
 
 class MsdfTextRenderer {
 public:

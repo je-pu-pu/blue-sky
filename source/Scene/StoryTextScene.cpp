@@ -265,7 +265,7 @@ void StoryTextScene::render()
 	// text
 	{
 		auto text_str = common::convert_to_string( text_ );
-		get_graphics_manager()->draw_text_center( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_str.c_str(), text_color_, text_border_color_, 2.f );
+		get_graphics_manager()->draw_text_center( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_str.c_str(), core::graphics::TextStyle{ text_color_, text_border_color_, 2.f } );
 	}
 
 	get_graphics_manager()->begin_3d();

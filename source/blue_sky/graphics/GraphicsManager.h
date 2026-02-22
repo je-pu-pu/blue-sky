@@ -9,6 +9,7 @@
 
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/PrimitiveTopology.h>
+#include <core/graphics/TextStyle.h>
 #include <core/graphics/Mesh.h>
 
 #include <core/ecs/component/TransformComponent.h>
@@ -268,9 +269,9 @@ public:
 	void render_fader() const override;
 
 	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
-	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color&, const Color& outline_color, float_t outline_width ) const = 0;
+	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const = 0;
 	virtual void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
-	virtual void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const Color&, const Color& outline_color, float_t outline_width ) const = 0;
+	virtual void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const = 0;
 	virtual void draw_text_at_center( const char_t*, const Color& ) const = 0;
 
 	virtual float_t get_text_height( const char_t* text, float_t width, float_t height ) const = 0;

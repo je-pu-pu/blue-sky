@@ -1,6 +1,7 @@
 #pragma once
 
 #include <blue_sky/type.h>
+#include <core/graphics/TextStyle.h>
 
 namespace core::graphics
 {
@@ -64,11 +65,11 @@ public:
 
 	/// テキスト描画（矩形内に左寄せ）— 仮想座標
 	void draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color );
-	void draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color, const Color& outline_color, float_t outline_width );
+	void draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const core::graphics::TextStyle& style );
 
 	/// テキスト描画（矩形内に中央寄せ）— 仮想座標
 	void draw_text_center( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color );
-	void draw_text_center( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color, const Color& outline_color, float_t outline_width );
+	void draw_text_center( float_t x, float_t y, float_t w, float_t h, const char_t* text, const core::graphics::TextStyle& style );
 
 	/// 塗りつぶし矩形の描画 — 仮想座標
 	void draw_rect( float_t x, float_t y, float_t w, float_t h, const Color& color );

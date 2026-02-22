@@ -535,50 +535,22 @@ void GraphicsManager::render_background() const
  */
 void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color ) const
 {
-	if ( msdf_text_renderer_ && msdf_text_renderer_->is_ready() )
-	{
-		core::graphics::TextStyle style;
-		style.text_color = color;
-		style.font_size = default_font_size_;
-
-		msdf_text_renderer_->draw_text( left, top, text, style );
-		msdf_text_renderer_->flush();
-		return;
-	}
-
-	if ( ! direct_3d_->get_font() )
-	{
-		return;
-	}
-
-	{
-		direct_3d_->begin2D();
-		direct_3d_->get_font()->begin();
-
-		direct_3d_->get_font()->draw_text( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), color );
-
-		direct_3d_->get_font()->end();
-		direct_3d_->end2D();
-	}
-
-	{
-		direct_3d_->begin3D();
-		direct_3d_->renderText();
-		direct_3d_->end3D();
-	}
+	core::graphics::TextStyle style;
+	style.text_color = color;
+	draw_text( left, top, right, bottom, text, style );
 }
 
-void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color, const Color& outline_color, float_t outline_width ) const
+void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float bottom, const char_t* text, const core::graphics::TextStyle& style ) const
 {
 	if ( msdf_text_renderer_ && msdf_text_renderer_->is_ready() )
 	{
-		core::graphics::TextStyle style;
-		style.text_color = color;
-		style.outline_color = outline_color;
-		style.outline_width = outline_width;
-		style.font_size = default_font_size_;
+		core::graphics::TextStyle resolved = style;
+		if ( resolved.font_size == 0.f )
+		{
+			resolved.font_size = default_font_size_;
+		}
 
-		msdf_text_renderer_->draw_text( left, top, text, style );
+		msdf_text_renderer_->draw_text( left, top, text, resolved );
 		msdf_text_renderer_->flush();
 		return;
 	}
@@ -588,17 +560,28 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
 		return;
 	}
 
+	if ( style.outline_width > 0.f )
 	{
 		direct_3d_->begin2D();
 		direct_3d_->get_font()->begin();
 
 		auto wtext = common::convert_to_wstring( string_t( text ) );
 
-		direct_3d_->get_font()->draw_text( left - 1.f, top - 1.f, right, bottom, wtext.c_str(), outline_color );
-		direct_3d_->get_font()->draw_text( left + 1.f, top - 1.f, right, bottom, wtext.c_str(), outline_color );
-		direct_3d_->get_font()->draw_text( left - 1.f, top + 1.f, right, bottom, wtext.c_str(), outline_color );
-		direct_3d_->get_font()->draw_text( left + 1.f, top + 1.f, right, bottom, wtext.c_str(), outline_color );
-		direct_3d_->get_font()->draw_text( left, top, right, bottom, wtext.c_str(), color );
+		direct_3d_->get_font()->draw_text( left - 1.f, top - 1.f, right, bottom, wtext.c_str(), style.outline_color );
+		direct_3d_->get_font()->draw_text( left + 1.f, top - 1.f, right, bottom, wtext.c_str(), style.outline_color );
+		direct_3d_->get_font()->draw_text( left - 1.f, top + 1.f, right, bottom, wtext.c_str(), style.outline_color );
+		direct_3d_->get_font()->draw_text( left + 1.f, top + 1.f, right, bottom, wtext.c_str(), style.outline_color );
+		direct_3d_->get_font()->draw_text( left, top, right, bottom, wtext.c_str(), style.text_color );
+
+		direct_3d_->get_font()->end();
+		direct_3d_->end2D();
+	}
+	else
+	{
+		direct_3d_->begin2D();
+		direct_3d_->get_font()->begin();
+
+		direct_3d_->get_font()->draw_text( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), style.text_color );
 
 		direct_3d_->get_font()->end();
 		direct_3d_->end2D();
@@ -616,57 +599,27 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
  */
 void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color ) const
 {
-	if ( msdf_text_renderer_ && msdf_text_renderer_->is_ready() )
-	{
-		core::graphics::TextStyle style;
-		style.text_color = color;
-		style.font_size = default_font_size_;
-
-		float text_w = msdf_text_renderer_->measure_text_width( text, style.font_size );
-		float x = ( left + right ) * 0.5f - text_w * 0.5f;
-		msdf_text_renderer_->draw_text( x, top, text, style );
-		msdf_text_renderer_->flush();
-		return;
-	}
-
-	if ( ! direct_3d_->get_font() )
-	{
-		return;
-	}
-
-	{
-		direct_3d_->begin2D();
-		direct_3d_->get_font()->begin();
-
-		direct_3d_->get_font()->draw_text_center( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), color );
-
-		direct_3d_->get_font()->end();
-		direct_3d_->end2D();
-	}
-
-	{
-		direct_3d_->begin3D();
-		direct_3d_->renderText();
-		direct_3d_->end3D();
-	}
+	core::graphics::TextStyle style;
+	style.text_color = color;
+	draw_text_center( left, top, right, bottom, text, style );
 }
 
 /**
- * 矩形内に中央揃えで文字列をアウトライン付きで描画する
+ * 矩形内に中央揃えで文字列を TextStyle 指定で描画する
  */
-void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color, const Color& outline_color, float_t outline_width ) const
+void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right, float bottom, const char_t* text, const core::graphics::TextStyle& style ) const
 {
 	if ( msdf_text_renderer_ && msdf_text_renderer_->is_ready() )
 	{
-		core::graphics::TextStyle style;
-		style.text_color = color;
-		style.outline_color = outline_color;
-		style.outline_width = outline_width;
-		style.font_size = default_font_size_;
+		core::graphics::TextStyle resolved = style;
+		if ( resolved.font_size == 0.f )
+		{
+			resolved.font_size = default_font_size_;
+		}
 
-		float text_w = msdf_text_renderer_->measure_text_width( text, style.font_size );
+		float text_w = msdf_text_renderer_->measure_text_width( text, resolved.font_size );
 		float x = ( left + right ) * 0.5f - text_w * 0.5f;
-		msdf_text_renderer_->draw_text( x, top, text, style );
+		msdf_text_renderer_->draw_text( x, top, text, resolved );
 		msdf_text_renderer_->flush();
 		return;
 	}
@@ -676,18 +629,29 @@ void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right
 		return;
 	}
 
-	// DirectWrite フォールバック: 4方向オフセットでボーダーを再現
+	if ( style.outline_width > 0.f )
 	{
+		// DirectWrite フォールバック: 4方向オフセットでボーダーを再現
 		direct_3d_->begin2D();
 		direct_3d_->get_font()->begin();
 
 		auto wtext = common::convert_to_wstring( string_t( text ) );
 
-		direct_3d_->get_font()->draw_text_center( left - 1.f, top - 1.f, right, bottom, wtext.c_str(), outline_color );
-		direct_3d_->get_font()->draw_text_center( left + 1.f, top - 1.f, right, bottom, wtext.c_str(), outline_color );
-		direct_3d_->get_font()->draw_text_center( left - 1.f, top + 1.f, right, bottom, wtext.c_str(), outline_color );
-		direct_3d_->get_font()->draw_text_center( left + 1.f, top + 1.f, right, bottom, wtext.c_str(), outline_color );
-		direct_3d_->get_font()->draw_text_center( left, top, right, bottom, wtext.c_str(), color );
+		direct_3d_->get_font()->draw_text_center( left - 1.f, top - 1.f, right, bottom, wtext.c_str(), style.outline_color );
+		direct_3d_->get_font()->draw_text_center( left + 1.f, top - 1.f, right, bottom, wtext.c_str(), style.outline_color );
+		direct_3d_->get_font()->draw_text_center( left - 1.f, top + 1.f, right, bottom, wtext.c_str(), style.outline_color );
+		direct_3d_->get_font()->draw_text_center( left + 1.f, top + 1.f, right, bottom, wtext.c_str(), style.outline_color );
+		direct_3d_->get_font()->draw_text_center( left, top, right, bottom, wtext.c_str(), style.text_color );
+
+		direct_3d_->get_font()->end();
+		direct_3d_->end2D();
+	}
+	else
+	{
+		direct_3d_->begin2D();
+		direct_3d_->get_font()->begin();
+
+		direct_3d_->get_font()->draw_text_center( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), style.text_color );
 
 		direct_3d_->get_font()->end();
 		direct_3d_->end2D();

@@ -148,9 +148,9 @@ public:
 	void render_background() const override;
 
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
-	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color&, const Color& outline_color, float_t outline_width ) const override;
+	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const override;
 	void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
-	void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const Color&, const Color& outline_color, float_t outline_width ) const override;
+	void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;
 
 	float_t get_text_height( const char_t* text, float_t width, float_t height ) const override;

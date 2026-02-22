@@ -68,6 +68,10 @@
     <ClCompile Include="core\graphics\Direct3D11\Texture.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp" />
+    <ClCompile Include="core\graphics\Msdf\GlyphAtlas.cpp" />
+    <ClCompile Include="core\graphics\Msdf\GlyphCache.cpp" />
+    <ClCompile Include="core\graphics\Msdf\MsdfFont.cpp" />
+    <ClCompile Include="core\graphics\Msdf\MsdfTextRenderer.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp" />
     <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp" />
     <ClCompile Include="core\graphics\GraphicsManager.cpp" />

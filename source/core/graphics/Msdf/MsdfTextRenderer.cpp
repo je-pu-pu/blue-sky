@@ -4,6 +4,7 @@
 #include <core/graphics/Direct3D11/Effect.h>
 #include <core/graphics/Direct3D11/EffectTechnique.h>
 #include <core/graphics/Direct3D11/EffectPass.h>
+#include <common/string.h>
 #include <algorithm>
 
 namespace core::graphics {
@@ -175,18 +176,7 @@ void MsdfTextRenderer::draw_text( float x, float y, const wchar_t* text, const T
 
 void MsdfTextRenderer::draw_text( float x, float y, const char* text, const TextStyle& style )
 {
-	// UTF-8 → wchar_t 変換
-	int len = MultiByteToWideChar( CP_ACP, 0, text, -1, nullptr, 0 );
-
-	if ( len <= 0 )
-	{
-		return;
-	}
-
-	std::vector< wchar_t > wtext( len );
-	MultiByteToWideChar( CP_ACP, 0, text, -1, wtext.data(), len );
-
-	draw_text( x, y, wtext.data(), style );
+	draw_text( x, y, common::convert_to_wstring( text ).c_str(), style );
 }
 
 float MsdfTextRenderer::measure_text_width( const wchar_t* text, float font_size )
@@ -220,17 +210,34 @@ float MsdfTextRenderer::measure_text_width( const wchar_t* text, float font_size
 
 float MsdfTextRenderer::measure_text_width( const char* text, float font_size )
 {
-	int len = MultiByteToWideChar( CP_ACP, 0, text, -1, nullptr, 0 );
+	return measure_text_width( common::convert_to_wstring( text ).c_str(), font_size );
+}
 
-	if ( len <= 0 )
+float MsdfTextRenderer::measure_text_height( const wchar_t* text, float font_size )
+{
+	if ( ! font_->is_loaded() )
 	{
 		return 0.f;
 	}
 
-	std::vector< wchar_t > wtext( len );
-	MultiByteToWideChar( CP_ACP, 0, text, -1, wtext.data(), len );
+	const auto& fm = font_->get_font_metrics();
+	float line_height = font_size * static_cast< float >( fm.lineHeight / fm.emSize );
+	int line_count = 1;
 
-	return measure_text_width( wtext.data(), font_size );
+	for ( const wchar_t* p = text; *p; ++p )
+	{
+		if ( *p == '\n' )
+		{
+			line_count++;
+		}
+	}
+
+	return line_height * line_count;
+}
+
+float MsdfTextRenderer::measure_text_height( const char* text, float font_size )
+{
+	return measure_text_height( common::convert_to_wstring( text ).c_str(), font_size );
 }
 
 void MsdfTextRenderer::flush()

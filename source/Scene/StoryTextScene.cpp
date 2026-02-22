@@ -38,7 +38,7 @@ StoryTextScene::StoryTextScene( const char* file_name, const char* next_scene_na
 
 	load_story_text_file( file_name );
 
-	text_y_target_ = -get_graphics_manager()->get_text_height( common::convert_to_string( text_ ).c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) );
+	text_y_target_ = -get_graphics_manager()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) );
 	
 	sprite_texture_ = get_graphics_manager()->load_named_texture( "sprite", "media/image/title.png" );
 
@@ -239,6 +239,7 @@ void StoryTextScene::update()
 void StoryTextScene::render()
 {
 	get_graphics_manager()->clear_default_view();
+
 	auto* sprite = get_graphics_manager()->get_sprite();
 	sprite->begin();
 
@@ -264,11 +265,11 @@ void StoryTextScene::render()
 
 	// text
 	{
-		auto text_str = common::convert_to_string( text_ );
-		get_graphics_manager()->draw_text_center( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_str.c_str(), core::graphics::TextStyle{ text_color_, text_border_color_, 2.f } );
-	}
+		get_graphics_manager()->set_default_render_target( false );
+		get_graphics_manager()->set_default_viewport();
 
-	get_graphics_manager()->begin_3d();
+		get_graphics_manager()->draw_text_center( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), core::graphics::TextStyle{ text_color_, text_border_color_, 2.f } );
+	}
 
 	render_fader();
 
@@ -287,8 +288,6 @@ void StoryTextScene::render()
 
 		sprite->end();
 	}
-
-	get_graphics_manager()->end_3d();
 }
 
 } // namespace blue_sky

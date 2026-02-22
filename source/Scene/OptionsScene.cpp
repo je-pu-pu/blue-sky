@@ -276,7 +276,7 @@ void OptionsScene::render()
 	float_t content_w = get_content_width();
 	float_t title_x = ( screen_w - content_w ) * 0.5f;
 	float_t title_y = screen_h * 0.08f;
-	ui_renderer_.draw_text( title_x, title_y, content_w, 120.f, "OPTIONS", Color( 1.f, 1.f, 1.f, 1.f ) );
+	ui_renderer_.draw_text( title_x, title_y, content_w, 120.f, "OPTIONS", core::graphics::TextStyle{ Color( 1.f, 1.f, 1.f, 1.f ), Color::Black, 3.f } );
 
 	// メニュー
 	menu_.render( ui_renderer_ );
@@ -289,19 +289,19 @@ void OptionsScene::render()
 
 	if ( selected == resolution_index_ )
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Arrow/AD Change    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Arrow/AD Change    ESC Back", core::graphics::TextStyle{ Color( 0.5f, 0.5f, 0.5f, 1.f ), Color::Black, 3.f } );
 	}
 	else if ( selected == volume_index_ || selected == mouse_sens_index_ || selected == fov_index_ )
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Arrow/AD Adjust    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Arrow/AD Adjust    ESC Back", core::graphics::TextStyle{ Color( 0.5f, 0.5f, 0.5f, 1.f ), Color::Black, 3.f } );
 	}
 	else if ( selected == mute_index_ || selected == fullscreen_index_ )
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Enter/Click Toggle    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Enter/Click Toggle    ESC Back", core::graphics::TextStyle{ Color( 0.5f, 0.5f, 0.5f, 1.f ), Color::Black, 3.f } );
 	}
 	else
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Enter/Click Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Enter/Click Select    ESC Back", core::graphics::TextStyle{ Color( 0.5f, 0.5f, 0.5f, 1.f ), Color::Black, 3.f } );
 	}
 }
 

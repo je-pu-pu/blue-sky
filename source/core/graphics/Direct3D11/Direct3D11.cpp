@@ -11,8 +11,6 @@
 
 #include "WICTextureLoader.h"
 
-#include <core/graphics/DirectWrite/DirectWrite.h>
-
 #include <win/Rect.h>
 
 #include <common/exception.h>
@@ -21,7 +19,6 @@
 #include <common/log.h>
 
 #include <dxgi.h>
-#include <d3d10_1.h>
 
 #include <string>
 
@@ -29,7 +26,6 @@
 
 #pragma comment( lib, "dxgi.lib" )
 #pragma comment( lib, "d3d11.lib" )
-#pragma comment( lib, "d3d10_1.lib" )
 #pragma comment( lib, "d3dcompiler.lib" )
 
 namespace core::graphics::direct_3d_11
@@ -56,12 +52,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sam
 
 	, depth_stencil_texture_( 0 )
 	, depth_stencil_view_( 0 )
-
-	, device_10_( 0 )
-	, text_texture_( 0 )
-
-	, text_texture_mutex_11_( 0 )
-	, text_texture_mutex_10_( 0 )
 {
 	instance_ = this;
 
@@ -102,38 +92,12 @@ Direct3D11::~Direct3D11()
 
 	effect_.reset();
 	sprite_.reset();
-	font_.reset();
-
-	DIRECT_X_RELEASE( text_texture_mutex_10_ );
-	DIRECT_X_RELEASE( text_texture_mutex_11_ );
-
-	text_view_.reset();
-	DIRECT_X_RELEASE( text_texture_ );
 
 	if ( immediate_context_ )
 	{
 		immediate_context_->ClearState();
 		immediate_context_->Flush();
 	}
-
-	if ( device_10_ )
-	{
-		device_10_->ClearState();
-		device_10_->Flush();
-	}
-
-	if ( false )
-	// if ( device_10_ )
-	{
-		ID3D10Debug* debug_ = 0;
-
-		device_10_->QueryInterface( __uuidof( ID3D10Debug ), reinterpret_cast< void** >( &debug_ ) );
-		debug_->Validate();
-
-		DIRECT_X_RELEASE( debug_ );
-	}
-
-	DIRECT_X_RELEASE( device_10_ );
 
 	input_layout_list_.clear();
 
@@ -368,116 +332,6 @@ void Direct3D11::setup_default_viewport()
 	viewport_.Height = static_cast< float >( swap_chain_desc_.BufferDesc.Height );
 	viewport_.MinDepth = 0.f;
 	viewport_.MaxDepth = 1.f;
-}
-
-/**
- * フォントをセットアップする
- *
- */
-void Direct3D11::setup_font()
-{
-	if ( font_ )
-	{
-		return;
-	}
-
-	// Direct3D 10.1
-	{
-#ifdef _DEBUG
-		UINT d3d10_create_device_flags = D3D10_CREATE_DEVICE_BGRA_SUPPORT | D3D10_CREATE_DEVICE_DEBUG;
-#else
-		UINT d3d10_create_device_flags = D3D10_CREATE_DEVICE_BGRA_SUPPORT;
-#endif
-
-		D3D10_FEATURE_LEVEL1 d3d10_feature_levels[] =
-		{
-			D3D10_FEATURE_LEVEL_9_3,
-			D3D10_FEATURE_LEVEL_9_2,
-			D3D10_FEATURE_LEVEL_9_1,
-
-			// D3D10_FEATURE_LEVEL_10_1,
-			// D3D10_FEATURE_LEVEL_10_0,
-		};
-
-		const char* d3d10_feature_level_names[] =
-		{
-			"9.3",
-			"9.2",
-			"9.1",
-
-			// "10.1",
-			// "10.0",
-		};
-
-		for ( int n = 0; n < ARRAYSIZE( d3d10_feature_levels ); n++ )
-		{
-			if ( SUCCEEDED( D3D10CreateDevice1( dxgi_adapter_.get(), D3D10_DRIVER_TYPE_HARDWARE, 0, d3d10_create_device_flags, d3d10_feature_levels[ n ], D3D10_1_SDK_VERSION, & device_10_ ) ) )
-			{
-				common::log( "log/d3d11.log", std::string( "created d3d10 device ( feature_level : " ) + d3d10_feature_level_names[ n ] + " )" );
-				break;
-			}
-		}
-
-		if ( ! device_10_ )
-		{
-			COMMON_THROW_EXCEPTION_MESSAGE( "D3D10CreateDevice1() failed." );
-		}
-
-		// D2D のデバッグレイヤーメッセージを抑制
-		device_10_->IASetPrimitiveTopology( D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-	}
-
-	// create_text_texture()
-	{
-		D3D11_TEXTURE2D_DESC texture_desc = { 0 };
-
-		texture_desc.Width = swap_chain_desc_.BufferDesc.Width;
-		texture_desc.Height = swap_chain_desc_.BufferDesc.Height;
-		texture_desc.MipLevels = 1;
-		texture_desc.ArraySize = 1;
-		texture_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-		texture_desc.SampleDesc.Count = 1;
-		texture_desc.Usage = D3D11_USAGE_DEFAULT;
-		texture_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-		texture_desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX;
-
-		DIRECT_X_FAIL_CHECK( device_->CreateTexture2D( & texture_desc, 0, & text_texture_ ) );
-
-		// create_text_view()
-		{
-			D3D11_SHADER_RESOURCE_VIEW_DESC view_desc = { texture_desc.Format };
-
-			view_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-			view_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-			view_desc.Texture2D.MipLevels = texture_desc.MipLevels;
-			view_desc.Texture2D.MostDetailedMip = 0;
-
-			ID3D11ShaderResourceView* text_view = 0;
-			DIRECT_X_FAIL_CHECK( device_->CreateShaderResourceView( text_texture_, & view_desc, & text_view ) );
-
-			text_view_.reset( new Texture( this, text_view ) );
-		}
-	}
-
-	com_ptr< IDXGISurface1 > text_surface;
-
-	// create_text_texture_mutex()
-	{
-		HANDLE shared_handle = 0;
-		IDXGIResource* text_texture_resource_ = 0;
-
-		DIRECT_X_FAIL_CHECK( text_texture_->QueryInterface( __uuidof( IDXGIKeyedMutex ), reinterpret_cast< void** >( & text_texture_mutex_11_ ) ) );
-		DIRECT_X_FAIL_CHECK( text_texture_->QueryInterface( __uuidof( IDXGIResource ), reinterpret_cast< void** >( & text_texture_resource_ ) ) );
-		DIRECT_X_FAIL_CHECK( text_texture_resource_->GetSharedHandle( & shared_handle ) );
-
-		DIRECT_X_RELEASE( text_texture_resource_ );
-
-		DIRECT_X_FAIL_CHECK( device_10_->OpenSharedResource( shared_handle, __uuidof( IDXGISurface1 ), reinterpret_cast< void** >( & text_surface ) ) );
-		DIRECT_X_FAIL_CHECK( text_surface->QueryInterface( __uuidof( IDXGIKeyedMutex ), reinterpret_cast< void** >( & text_texture_mutex_10_ ) ) );
-	}
-
-	// Font
-	font_.reset( new Font( text_surface.get() ) );
 }
 
 /**
@@ -845,68 +699,9 @@ void Direct3D11::bind_texture_to_ps( uint_t slot, const Texture* texture )
 }
 
 
-void Direct3D11::begin2D()
-{
-	if ( ! text_texture_mutex_10_ )
-	{
-		return;
-	}
-
-	DIRECT_X_FAIL_CHECK( text_texture_mutex_10_->AcquireSync( text_texture_sync_key_, INFINITE ) );
-}
-
-void Direct3D11::end2D()
-{
-	if ( ! text_texture_mutex_10_ )
-	{
-		return;
-	}
-
-	text_texture_sync_key_++;
-
-	DIRECT_X_FAIL_CHECK( text_texture_mutex_10_->ReleaseSync( text_texture_sync_key_ ) );
-}
-
-void Direct3D11::begin3D()
-{
-	if ( ! text_texture_mutex_11_ )
-	{
-		return;
-	}
-
-	DIRECT_X_FAIL_CHECK( text_texture_mutex_11_->AcquireSync( text_texture_sync_key_, INFINITE ) );
-}
-
-void Direct3D11::end3D()
-{
-	if ( ! text_texture_mutex_11_ )
-	{
-		return;
-	}
-
-	text_texture_sync_key_++;
-
-	DIRECT_X_FAIL_CHECK( text_texture_mutex_11_->ReleaseSync( text_texture_sync_key_ ) );
-}
-
 void Direct3D11::present()
 {
 	DIRECT_X_FAIL_CHECK( swap_chain_->Present( 0, 0 ) );
-}
-
-void Direct3D11::renderText()
-{
-	if ( ! font_ )
-	{
-		return;
-	}
-
-	get_sprite()->begin();
-
-	Sprite::Rect dst_rect( 0, 0, get_width(), get_height() );
-	get_sprite()->draw( dst_rect, text_view_.get() );
-
-	get_sprite()->end();
 }
 
 /**

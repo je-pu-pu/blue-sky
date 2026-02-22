@@ -9,6 +9,7 @@
 
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/PrimitiveTopology.h>
+#include <core/graphics/TextStyle.h>
 #include <core/graphics/Mesh.h>
 
 #include <core/ecs/component/TransformComponent.h>
@@ -17,8 +18,6 @@
 #include <vector>
 #include <functional>
 
-
-class DirectWrite;
 
 namespace core
 {
@@ -220,13 +219,6 @@ public:
 
 	virtual void clear_default_view( const Color& = Color::Black ) = 0;
 	virtual void unset_render_target() = 0;
-	virtual DirectWrite* get_font() = 0;
-
-	virtual void begin_2d() = 0;
-	virtual void end_2d() = 0;
-	virtual void begin_3d() = 0;
-	virtual void end_3d() = 0;
-	virtual void render_text() = 0;
 
 	virtual bool is_full_screen() const = 0;
 	virtual void switch_full_screen() = 0;
@@ -268,8 +260,15 @@ public:
 	void render_fader() const override;
 
 	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
+	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const = 0;
+	virtual void draw_text( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const = 0;
 	virtual void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
+	virtual void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const = 0;
+	virtual void draw_text_center( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const = 0;
 	virtual void draw_text_at_center( const char_t*, const Color& ) const = 0;
+
+	virtual float_t get_text_height( const char_t* text, float_t width, float_t height ) const = 0;
+	virtual float_t get_text_height( const wchar_t* text, float_t width, float_t height ) const = 0;
 
 	void set_debug_axis_enabled( bool e ) { is_debug_axis_enabled_ = e; }
 

@@ -100,11 +100,6 @@ GameMain::GameMain()
 		}
 	} );
 
-	if ( get_config()->get( "graphics.font_enabled", 1 ) )
-	{
-		direct_3d_->setup_font();
-	}
-
 	ImGui::CreateContext();
 	ImGui_ImplWin32_Init( get_app()->GetWindowHandle() );
 	ImGui_ImplDX11_Init( direct_3d_->getDevice(), direct_3d_->getImmediateContext() );

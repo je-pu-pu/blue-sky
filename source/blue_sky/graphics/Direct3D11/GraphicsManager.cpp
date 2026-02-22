@@ -24,7 +24,7 @@
 #include <core/graphics/Direct3D11/EffectPass.h>
 #include <core/graphics/Direct3D11/ShadowMap.h>
 
-#include <core/graphics/DirectWrite/DirectWrite.h>
+#include <core/graphics/Msdf/MsdfTextRenderer.h>
 
 #include <common/string.h>
 
@@ -47,6 +47,8 @@ GraphicsManager::GraphicsManager( Direct3D* direct_3d )
 	create_named_shader< shader::BypassShader >( "bypass" );
 
 	direct_3d_->setup_sprite();
+
+	msdf_text_renderer_ = std::make_unique< core::graphics::MsdfTextRenderer >( direct_3d_, "media/font/rounded-mplus-1p-regular.ttf" );
 }
 
 /**
@@ -532,26 +534,43 @@ void GraphicsManager::render_background() const
  */
 void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color ) const
 {
-	if ( ! direct_3d_->get_font() )
+	core::graphics::TextStyle style;
+	style.text_color = color;
+	draw_text( left, top, right, bottom, text, style );
+}
+
+void GraphicsManager::draw_text( float_t left, float_t top, float_t, float, const char_t* text, const core::graphics::TextStyle& style ) const
+{
+	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
 	{
 		return;
 	}
 
+	core::graphics::TextStyle resolved = style;
+	if ( resolved.font_size == 0.f )
 	{
-		direct_3d_->begin2D();
-		direct_3d_->get_font()->begin();
-
-		direct_3d_->get_font()->draw_text( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), color );
-
-		direct_3d_->get_font()->end();
-		direct_3d_->end2D();
+		resolved.font_size = default_font_size_;
 	}
 
+	msdf_text_renderer_->draw_text( left, top, text, resolved );
+	msdf_text_renderer_->flush();
+}
+
+void GraphicsManager::draw_text( float_t left, float_t top, float_t, float, const wchar_t* text, const core::graphics::TextStyle& style ) const
+{
+	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
 	{
-		direct_3d_->begin3D();
-		direct_3d_->renderText();
-		direct_3d_->end3D();
+		return;
 	}
+
+	core::graphics::TextStyle resolved = style;
+	if ( resolved.font_size == 0.f )
+	{
+		resolved.font_size = default_font_size_;
+	}
+
+	msdf_text_renderer_->draw_text( left, top, text, resolved );
+	msdf_text_renderer_->flush();
 }
 
 /**
@@ -559,26 +578,78 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
  */
 void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color ) const
 {
-	if ( ! direct_3d_->get_font() )
+	core::graphics::TextStyle style;
+	style.text_color = color;
+	draw_text_center( left, top, right, bottom, text, style );
+}
+
+/**
+ * 矩形内に中央揃えで文字列を TextStyle 指定で描画する
+ */
+void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right, float, const char_t* text, const core::graphics::TextStyle& style ) const
+{
+	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
 	{
 		return;
 	}
 
+	core::graphics::TextStyle resolved = style;
+	if ( resolved.font_size == 0.f )
 	{
-		direct_3d_->begin2D();
-		direct_3d_->get_font()->begin();
-
-		direct_3d_->get_font()->draw_text_center( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), color );
-
-		direct_3d_->get_font()->end();
-		direct_3d_->end2D();
+		resolved.font_size = default_font_size_;
 	}
 
+	float text_w = msdf_text_renderer_->measure_text_width( text, resolved.font_size );
+	float x = ( left + right ) * 0.5f - text_w * 0.5f;
+	msdf_text_renderer_->draw_text( x, top, text, resolved );
+	msdf_text_renderer_->flush();
+}
+
+void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right, float, const wchar_t* text, const core::graphics::TextStyle& style ) const
+{
+	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
 	{
-		direct_3d_->begin3D();
-		direct_3d_->renderText();
-		direct_3d_->end3D();
+		return;
 	}
+
+	core::graphics::TextStyle resolved = style;
+	if ( resolved.font_size == 0.f )
+	{
+		resolved.font_size = default_font_size_;
+	}
+
+	float text_w = msdf_text_renderer_->measure_text_width( text, resolved.font_size );
+	float x = ( left + right ) * 0.5f - text_w * 0.5f;
+	msdf_text_renderer_->draw_text( x, top, text, resolved );
+	msdf_text_renderer_->flush();
+}
+
+/**
+ * テキストの描画高さを取得する
+ *
+ * @param text 文字列
+ * @param width 描画領域の幅
+ * @param height 描画領域の高さ
+ * @return テキストの描画高さ
+ */
+float_t GraphicsManager::get_text_height( const char_t* text, float_t, float_t ) const
+{
+	if ( msdf_text_renderer_ && msdf_text_renderer_->is_ready() )
+	{
+		return msdf_text_renderer_->measure_text_height( text, default_font_size_ );
+	}
+
+	return 0.f;
+}
+
+float_t GraphicsManager::get_text_height( const wchar_t* text, float_t, float_t ) const
+{
+	if ( msdf_text_renderer_ && msdf_text_renderer_->is_ready() )
+	{
+		return msdf_text_renderer_->measure_text_height( text, default_font_size_ );
+	}
+
+	return 0.f;
 }
 
 /**
@@ -590,27 +661,21 @@ void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right
  */
 void GraphicsManager::draw_text_at_center( const char_t* text, const Color& color ) const
 {
-	if ( ! direct_3d_->get_font() )
+	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
 	{
 		return;
 	}
 
-	direct_3d_->begin2D();
-	direct_3d_->get_font()->begin();
+	core::graphics::TextStyle style;
+	style.text_color = color;
+	style.font_size = default_font_size_;
 
-	float_t left = 0.f;
-	float_t top = ( direct_3d_->get_height() - direct_3d_->get_font()->get_font_height() ) / 2.f;
-	float_t right = static_cast< float_t >( direct_3d_->get_width() );
-	float_t bottom = top + direct_3d_->get_font()->get_font_height();
+	float text_w = msdf_text_renderer_->measure_text_width( text, style.font_size );
+	float_t x = static_cast< float_t >( direct_3d_->get_width() ) * 0.5f - text_w * 0.5f;
+	float_t y = static_cast< float_t >( direct_3d_->get_height() ) * 0.5f - style.font_size * 0.5f;
 
-	direct_3d_->get_font()->draw_text_center( left, top, right, bottom, common::convert_to_wstring( string_t( text ) ).c_str(), color );
-
-	direct_3d_->get_font()->end();
-	direct_3d_->end2D();
-
-	direct_3d_->begin3D();
-	direct_3d_->renderText();
-	direct_3d_->end3D();
+	msdf_text_renderer_->draw_text( x, y, text, style );
+	msdf_text_renderer_->flush();
 }
 
 /**
@@ -666,61 +731,6 @@ void GraphicsManager::clear_default_view( const Color& color )
 void GraphicsManager::unset_render_target()
 {
 	direct_3d_->unset_render_target();
-}
-
-/**
- * フォントオブジェクトを取得する
- *
- * @return フォントオブジェクト
- */
-DirectWrite* GraphicsManager::get_font()
-{
-	return direct_3d_->get_font();
-}
-
-/**
- * 2D 描画モードを開始する
- *
- */
-void GraphicsManager::begin_2d()
-{
-	direct_3d_->begin2D();
-}
-
-/**
- * 2D 描画モードを終了する
- *
- */
-void GraphicsManager::end_2d()
-{
-	direct_3d_->end2D();
-}
-
-/**
- * 3D 描画モードを開始する
- *
- */
-void GraphicsManager::begin_3d()
-{
-	direct_3d_->begin3D();
-}
-
-/**
- * 3D 描画モードを終了する
- *
- */
-void GraphicsManager::end_3d()
-{
-	direct_3d_->end3D();
-}
-
-/**
- * テキストをレンダリングする
- *
- */
-void GraphicsManager::render_text()
-{
-	direct_3d_->renderText();
 }
 
 /**

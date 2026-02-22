@@ -10,7 +10,6 @@
 #include <core/sound/Sound.h>
 
 #include <core/graphics/Sprite.h>
-#include <core/graphics/DirectWrite/DirectWrite.h>
 #include <core/graphics/BgSpriteLayer.h>
 
 #include <win/Rect.h>
@@ -39,11 +38,7 @@ StoryTextScene::StoryTextScene( const char* file_name, const char* next_scene_na
 
 	load_story_text_file( file_name );
 
-	/// @todo 整理
-	if ( get_graphics_manager()->get_font() )
-	{
-		text_y_target_ = static_cast< float >( -get_graphics_manager()->get_font()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) ) );
-	}
+	text_y_target_ = -get_graphics_manager()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) );
 	
 	sprite_texture_ = get_graphics_manager()->load_named_texture( "sprite", "media/image/title.png" );
 
@@ -244,6 +239,7 @@ void StoryTextScene::update()
 void StoryTextScene::render()
 {
 	get_graphics_manager()->clear_default_view();
+
 	auto* sprite = get_graphics_manager()->get_sprite();
 	sprite->begin();
 
@@ -268,23 +264,12 @@ void StoryTextScene::render()
 	sprite->end();
 
 	// text
-	/// @todo 整理
-	auto* font = get_graphics_manager()->get_font();
-	if ( font )
 	{
-		get_graphics_manager()->begin_2d();
-		font->begin();
-		font->draw_text_center( -1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-		font->draw_text_center( +1.f, text_y_ - 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-		font->draw_text_center( -1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-		font->draw_text_center( +1.f, text_y_ + 1.f, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_border_color_ );
-		font->draw_text_center( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_color_ );
-		font->end();
-		get_graphics_manager()->end_2d();
-	}
+		get_graphics_manager()->set_default_render_target( false );
+		get_graphics_manager()->set_default_viewport();
 
-	get_graphics_manager()->begin_3d();
-	get_graphics_manager()->render_text();
+		get_graphics_manager()->draw_text_center( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), core::graphics::TextStyle{ text_color_, text_border_color_, 2.f } );
+	}
 
 	render_fader();
 
@@ -303,8 +288,6 @@ void StoryTextScene::render()
 
 		sprite->end();
 	}
-
-	get_graphics_manager()->end_3d();
 }
 
 } // namespace blue_sky

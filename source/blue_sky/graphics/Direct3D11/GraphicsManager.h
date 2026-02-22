@@ -6,6 +6,11 @@
 
 #include <memory>
 
+namespace core::graphics
+{
+	class MsdfTextRenderer;
+}
+
 namespace core::graphics::direct_3d_11
 {
 	class Direct3D11;
@@ -42,6 +47,7 @@ private:
 	std::unique_ptr< Model >						ground_;
 	
 	std::unique_ptr< Axis >							debug_axis_;
+	std::unique_ptr< core::graphics::MsdfTextRenderer >	msdf_text_renderer_;
 
 	std::unique_ptr< GameConstantBuffer >			game_render_data_;
 	std::unique_ptr< FrameConstantBuffer >			frame_render_data_;
@@ -141,8 +147,12 @@ public:
 	void render_background() const override;
 
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
+	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color&, const Color& outline_color, float_t outline_width ) const override;
 	void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
+	void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const Color&, const Color& outline_color, float_t outline_width ) const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;
+
+	float_t get_text_height( const char_t* text, float_t width, float_t height ) const override;
 
 	void clear_debug_bullet() const override;
 	void render_debug_bullet() const override;

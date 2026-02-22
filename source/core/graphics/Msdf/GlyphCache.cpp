@@ -70,6 +70,9 @@ bool GlyphCache::generate_glyph( uint32_t codepoint, CachedGlyph& result )
 		return true;
 	}
 
+	// コンターの向きを正規化（内外判定に必要）
+	shape.normalize();
+
 	// エッジの色分け
 	msdfgen::edgeColoringSimple( shape, 3.0 );
 
@@ -105,7 +108,9 @@ bool GlyphCache::generate_glyph( uint32_t codepoint, CachedGlyph& result )
 
 	// MSDF 生成
 	msdfgen::Bitmap< float, 3 > msdf( msdf_size_, msdf_size_ );
-	msdfgen::generateMSDF( msdf, shape, msdfgen::Range( msdf_range_ ), frame_scale, frame_translate );
+	// Range はシェイプ空間の単位なので、ピクセル範囲をスケールで変換
+	// パディング全体（±msdf_range_ ピクセル）を有効に使うため 2 倍にする
+	msdfgen::generateMSDF( msdf, shape, msdfgen::Range( 2.0 * msdf_range_ / scale ), frame_scale, frame_translate );
 
 	// アトラスに配置
 	result.cell_index = atlas_->add_glyph( msdf, result.uv );

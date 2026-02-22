@@ -26,6 +26,12 @@
     <ProjectReference Include="blue-sky.vcxproj">
       <Project>{5db1fafc-e068-43a8-84d3-0da42d464be5}</Project>
     </ProjectReference>
+    <ProjectReference Include="extern\msdfgen\msdfgen.vcxproj">
+      <Project>{F02B8A43-AA04-4AAB-A1D8-7AF8C58B14A7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="extern\freetype\freetype.vcxproj">
+      <Project>{1C49BD11-CB0F-443D-993E-1A512F8BD10F}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

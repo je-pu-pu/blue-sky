@@ -16,13 +16,11 @@ cbuffer MsdfTextConstantBuffer : register( b3 )
 	float4 TextColor;
 	float4 OutlineColor;
 	float OutlineWidth;		// 0.0 ~ 0.5
-	float Smoothing;		// アンチエイリアス幅
+	float PxRange;			// MSDF 距離フィールド範囲 ( texel 単位 )
+	float AtlasTexelSize;	// 1.0 / アトラスサイズ
 };
 
-cbuffer SpriteConstantBuffer : register( b13 )
-{
-	row_major matrix Transform;
-};
+// sprite.hlsl で定義済みの SpriteConstantBuffer ( b13 ) の Transform を再利用
 
 struct MSDF_VS_INPUT
 {
@@ -43,6 +41,13 @@ float median( float r, float g, float b )
 	return max( min( r, g ), min( max( r, g ), b ) );
 }
 
+float calc_screen_px_range( float2 tex_coord )
+{
+	float2 unit_range = float2( PxRange * AtlasTexelSize, PxRange * AtlasTexelSize );
+	float2 screen_tex_size = float2( 1.0, 1.0 ) / fwidth( tex_coord );
+	return max( 0.5 * dot( unit_range, abs( screen_tex_size ) ), 1.0 );
+}
+
 MSDF_PS_INPUT vs_msdf( MSDF_VS_INPUT input )
 {
 	MSDF_PS_INPUT output;
@@ -59,14 +64,14 @@ float4 ps_msdf( MSDF_PS_INPUT input ) : SV_Target
 	float3 s = msdf_atlas.Sample( msdf_sampler, input.TexCoord ).rgb;
 	float dist = median( s.r, s.g, s.b );
 
-	// 本体
-	float body_alpha = smoothstep( 0.5 - Smoothing, 0.5 + Smoothing, dist );
+	float spr = calc_screen_px_range( input.TexCoord );
+	float screen_px_dist = spr * ( dist - 0.5 );
+	float body_alpha = clamp( screen_px_dist + 0.5, 0.0, 1.0 );
 
 	if ( OutlineWidth > 0.0 )
 	{
-		// 縁取り
-		float outline_edge = 0.5 - OutlineWidth;
-		float outline_alpha = smoothstep( outline_edge - Smoothing, outline_edge + Smoothing, dist );
+		float outline_screen_px_dist = spr * ( dist - ( 0.5 - OutlineWidth ) );
+		float outline_alpha = clamp( outline_screen_px_dist + 0.5, 0.0, 1.0 );
 
 		float4 color = lerp( OutlineColor, TextColor * input.Color, body_alpha );
 		color.a *= outline_alpha;

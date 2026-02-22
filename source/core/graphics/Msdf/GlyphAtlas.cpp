@@ -24,7 +24,14 @@ GlyphAtlas::GlyphAtlas( ID3D11Device* device, ID3D11DeviceContext* context, int 
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	desc.CPUAccessFlags = 0;
 
-	DIRECT_X_FAIL_CHECK( device_->CreateTexture2D( &desc, nullptr, &texture_ ) );
+	// ゼロクリアした初期データで作成（未使用セルからのサンプリング防止）
+	std::vector< uint8_t > zero_data( atlas_size_ * atlas_size_ * 4, 0 );
+
+	D3D11_SUBRESOURCE_DATA init_data{};
+	init_data.pSysMem = zero_data.data();
+	init_data.SysMemPitch = atlas_size_ * 4;
+
+	DIRECT_X_FAIL_CHECK( device_->CreateTexture2D( &desc, &init_data, &texture_ ) );
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC view_desc{};
 	view_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -103,11 +110,12 @@ void GlyphAtlas::replace_glyph( int cell_index, const msdfgen::Bitmap< float, 3 
 	int row = cell_index / cells_per_row_;
 
 	float inv = 1.f / static_cast< float >( atlas_size_ );
+	float half_texel = 0.5f * inv;
 
-	uv.u0 = col * cell_size_ * inv;
-	uv.v0 = row * cell_size_ * inv;
-	uv.u1 = ( col * cell_size_ + w ) * inv;
-	uv.v1 = ( row * cell_size_ + h ) * inv;
+	uv.u0 = col * cell_size_ * inv + half_texel;
+	uv.v0 = row * cell_size_ * inv + half_texel;
+	uv.u1 = ( col * cell_size_ + w ) * inv - half_texel;
+	uv.v1 = ( row * cell_size_ + h ) * inv - half_texel;
 }
 
 } // namespace core::graphics

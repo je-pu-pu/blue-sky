@@ -4,6 +4,7 @@
 #include <core/graphics/Direct3D11/Effect.h>
 #include <core/graphics/Direct3D11/EffectTechnique.h>
 #include <core/graphics/Direct3D11/EffectPass.h>
+#include <algorithm>
 
 namespace core::graphics {
 
@@ -117,6 +118,18 @@ void MsdfTextRenderer::draw_text( float x, float y, const wchar_t* text, const T
 	const auto& fm = font_->get_font_metrics();
 	float scale = style.font_size / static_cast< float >( fm.emSize );
 	float cursor_x = x;
+	float available = static_cast< float >( CELL_SIZE ) - 2.f * MSDF_RANGE;
+
+	// 定数バッファ更新（全グリフ共通）
+	MsdfConstantBufferData cb_data;
+	cb_data.text_color = style.text_color;
+	cb_data.outline_color = style.outline_color;
+	cb_data.outline_width = style.outline_width;
+	cb_data.px_range = 2.f * MSDF_RANGE;
+	cb_data.atlas_texel_size = 1.f / static_cast< float >( ATLAS_SIZE );
+	cb_data.padding_1 = 0.f;
+
+	msdf_constant_buffer_->update( &cb_data );
 
 	for ( const wchar_t* p = text; *p; ++p )
 	{
@@ -138,30 +151,22 @@ void MsdfTextRenderer::draw_text( float x, float y, const wchar_t* text, const T
 
 		if ( glyph->cell_index >= 0 )
 		{
-			// グリフのピクセル位置を計算
+			// グリフのスクリーンサイズを計算
 			float glyph_w = static_cast< float >( glyph->metrics.width ) * scale;
 			float glyph_h = static_cast< float >( glyph->metrics.height ) * scale;
 			float bearing_x = static_cast< float >( glyph->metrics.bearing_x ) * scale;
 			float bearing_y = static_cast< float >( glyph->metrics.bearing_y ) * scale;
 
-			// MSDF のパディングを考慮したサイズ
-			float cell_scale = style.font_size / static_cast< float >( CELL_SIZE );
-			float quad_size = static_cast< float >( CELL_SIZE ) * cell_scale;
+			// MSDF セル内でのスケールに基づく正しいクワッドサイズ
+			// MSDF 生成時: msdf_scale = available / max(width, height)
+			// 1 MSDF texel = scale / msdf_scale スクリーンピクセル
+			// CELL_SIZE texels = CELL_SIZE * scale / msdf_scale スクリーンピクセル
+			float max_dim = static_cast< float >( std::max( glyph->metrics.width, glyph->metrics.height ) );
+			float quad_size = static_cast< float >( CELL_SIZE ) * scale * max_dim / available;
 
 			// グリフの中心に合わせてオフセット
-			float offset_x = bearing_x * scale - ( quad_size - glyph_w ) * 0.5f;
-			float offset_y = ( static_cast< float >( fm.ascenderY ) * scale ) - bearing_y * scale - ( quad_size - glyph_h ) * 0.5f;
-
-			// 定数バッファ更新
-			MsdfConstantBufferData cb_data;
-			cb_data.text_color = style.text_color;
-			cb_data.outline_color = style.outline_color;
-			cb_data.outline_width = style.outline_width;
-			cb_data.smoothing = 1.f / ( style.font_size * 0.5f );
-			cb_data.padding_0 = 0.f;
-			cb_data.padding_1 = 0.f;
-
-			msdf_constant_buffer_->update( &cb_data );
+			float offset_x = bearing_x - ( quad_size - glyph_w ) * 0.5f;
+			float offset_y = ( static_cast< float >( fm.ascenderY ) * scale ) - bearing_y - ( quad_size - glyph_h ) * 0.5f;
 
 			append_quad( cursor_x + offset_x, y + offset_y, quad_size, quad_size, glyph->uv, style.text_color );
 		}
@@ -173,7 +178,7 @@ void MsdfTextRenderer::draw_text( float x, float y, const wchar_t* text, const T
 void MsdfTextRenderer::draw_text( float x, float y, const char* text, const TextStyle& style )
 {
 	// UTF-8 → wchar_t 変換
-	int len = MultiByteToWideChar( CP_UTF8, 0, text, -1, nullptr, 0 );
+	int len = MultiByteToWideChar( CP_ACP, 0, text, -1, nullptr, 0 );
 
 	if ( len <= 0 )
 	{
@@ -181,7 +186,7 @@ void MsdfTextRenderer::draw_text( float x, float y, const char* text, const Text
 	}
 
 	std::vector< wchar_t > wtext( len );
-	MultiByteToWideChar( CP_UTF8, 0, text, -1, wtext.data(), len );
+	MultiByteToWideChar( CP_ACP, 0, text, -1, wtext.data(), len );
 
 	draw_text( x, y, wtext.data(), style );
 }
@@ -223,12 +228,12 @@ void MsdfTextRenderer::flush()
 
 	direct_3d_->set_input_layout( input_layout_ );
 
-	auto* srv = atlas_->get_view();
-	context->PSSetShaderResources( 0, 1, &srv );
-
 	for ( const auto& pass : effect_technique_->get_pass_list() )
 	{
 		pass->apply();
+
+		auto* srv = atlas_->get_view();
+		context->PSSetShaderResources( 0, 1, &srv );
 
 		msdf_constant_buffer_->bind_to_ps();
 		transform_constant_buffer_->bind_to_vs();

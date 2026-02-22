@@ -39,8 +39,8 @@ public:
 		Color text_color;
 		Color outline_color;
 		float outline_width = 0.f;
-		float smoothing = 0.f;
-		float padding_0 = 0.f;
+		float px_range = 4.f;
+		float atlas_texel_size = 0.f;
 		float padding_1 = 0.f;
 	};
 
@@ -73,6 +73,7 @@ private:
 	static constexpr int MAX_CHARS = 1024;
 	static constexpr int ATLAS_SIZE = 2048;
 	static constexpr int CELL_SIZE = 48;
+	static constexpr float MSDF_RANGE = 4.f;
 
 	void create_vertex_buffer();
 	void create_index_buffer();
@@ -83,6 +84,8 @@ private:
 public:
 	MsdfTextRenderer( direct_3d_11::Direct3D11* direct_3d, const char* font_path );
 	~MsdfTextRenderer();
+
+	bool is_ready() const { return font_ && font_->is_loaded() && effect_technique_; }
 
 	void draw_text( float x, float y, const wchar_t* text, const TextStyle& style );
 	void draw_text( float x, float y, const char* text, const TextStyle& style );

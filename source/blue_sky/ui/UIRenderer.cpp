@@ -63,7 +63,7 @@ void UIRenderer::draw_text( float_t x, float_t y, float_t w, float_t h, const ch
 	float_t px = x * sx;
 	float_t py = y * sy;
 
-	gm_->draw_text( px, py, px + w * sx, py + h * sy, text, color, outline_color, outline_width );
+	gm_->draw_text( px, py, px + w * sx, py + h * sy, text, color, outline_color, outline_width * sy );
 }
 
 void UIRenderer::draw_text_center( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color )
@@ -85,7 +85,7 @@ void UIRenderer::draw_text_center( float_t x, float_t y, float_t w, float_t h, c
 	float_t px = x * sx;
 	float_t py = y * sy;
 
-	gm_->draw_text_center( px, py, px + w * sx, py + h * sy, text, color, outline_color, outline_width );
+	gm_->draw_text_center( px, py, px + w * sx, py + h * sy, text, color, outline_color, outline_width * sy );
 }
 
 void UIRenderer::draw_rect( float_t x, float_t y, float_t w, float_t h, const Color& color )

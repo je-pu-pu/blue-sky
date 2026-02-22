@@ -15,7 +15,7 @@ cbuffer MsdfTextConstantBuffer : register( b3 )
 {
 	float4 TextColor;
 	float4 OutlineColor;
-	float OutlineWidth;		// 0.0 ~ 0.5
+	float OutlineWidth;		// アウトライン幅 ( スクリーンピクセル単位, 0 = なし )
 	float PxRange;			// MSDF 距離フィールド範囲 ( texel 単位 )
 	float AtlasTexelSize;	// 1.0 / アトラスサイズ
 };
@@ -70,8 +70,13 @@ float4 ps_msdf( MSDF_PS_INPUT input ) : SV_Target
 
 	if ( OutlineWidth > 0.0 )
 	{
-		float outline_screen_px_dist = spr * ( dist - ( 0.5 - OutlineWidth ) );
-		float outline_alpha = clamp( outline_screen_px_dist + 0.5, 0.0, 1.0 );
+		// OutlineWidth はスクリーンピクセル単位
+		// screen_px_dist はグリフエッジからのスクリーンピクセル距離（外側が負）
+		float outline_alpha = clamp( screen_px_dist + OutlineWidth + 0.5, 0.0, 1.0 );
+
+		// SDF 範囲境界でのアーティファクト防止（dist=0 で alpha=0 に）
+		float boundary_mask = clamp( spr * dist, 0.0, 1.0 );
+		outline_alpha = min( outline_alpha, boundary_mask );
 
 		float4 color = lerp( OutlineColor, TextColor * input.Color, body_alpha );
 		color.a *= outline_alpha;

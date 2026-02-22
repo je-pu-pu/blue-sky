@@ -87,12 +87,11 @@ bool GlyphCache::generate_glyph( uint32_t codepoint, CachedGlyph& result )
 	double padding = msdf_range_;
 	double available = msdf_size_ - 2.0 * padding;
 
-	// グリフをセル内に収まるようにスケーリング
-	double scale = 1.0;
-	if ( glyph_width > 0 && glyph_height > 0 )
-	{
-		scale = available / std::max( glyph_width, glyph_height );
-	}
+	// 統一スケール: 全グリフで同じ texel-to-screen 比率を確保
+	// 1.0 EM = available texels（アウトラインの均一な太さのため）
+	// 1.0 EM を超えるグリフのみ個別にスケールダウン
+	double max_dim = std::max( glyph_width, glyph_height );
+	double scale = available / std::max( max_dim, 1.0 );
 
 	msdfgen::Vector2 frame_scale( scale, scale );
 	msdfgen::Vector2 frame_translate(

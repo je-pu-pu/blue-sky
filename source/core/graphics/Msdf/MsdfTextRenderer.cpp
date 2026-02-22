@@ -157,12 +157,10 @@ void MsdfTextRenderer::draw_text( float x, float y, const wchar_t* text, const T
 			float bearing_x = static_cast< float >( glyph->metrics.bearing_x ) * scale;
 			float bearing_y = static_cast< float >( glyph->metrics.bearing_y ) * scale;
 
-			// MSDF セル内でのスケールに基づく正しいクワッドサイズ
-			// MSDF 生成時: msdf_scale = available / max(width, height)
-			// 1 MSDF texel = scale / msdf_scale スクリーンピクセル
-			// CELL_SIZE texels = CELL_SIZE * scale / msdf_scale スクリーンピクセル
-			float max_dim = static_cast< float >( std::max( glyph->metrics.width, glyph->metrics.height ) );
-			float quad_size = static_cast< float >( CELL_SIZE ) * scale * max_dim / available;
+			// 統一クワッドサイズ: 全グリフで同じ texel-to-screen 比率
+			// GlyphCache 側で msdf_scale = available / max(max_dim, 1.0) としているため合わせる
+			float max_dim_capped = static_cast< float >( std::max( { glyph->metrics.width, glyph->metrics.height, 1.0 } ) );
+			float quad_size = static_cast< float >( CELL_SIZE ) * scale * max_dim_capped / available;
 
 			// グリフの中心に合わせてオフセット
 			float offset_x = bearing_x - ( quad_size - glyph_w ) * 0.5f;

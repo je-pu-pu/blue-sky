@@ -197,15 +197,6 @@
     <ClCompile Include="core\graphics\Direct3D11\BulletDebugDraw.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp">
-      <Filter>core\graphics\DirectWrite</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp">
-      <Filter>core\graphics\DirectWrite</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp">
-      <Filter>core\graphics\DirectWrite</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Sprite.cpp">
       <Filter>core\graphics</Filter>
     </ClCompile>
@@ -656,21 +647,6 @@
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\BulletDebugDraw.h">
       <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWrite.h">
-      <Filter>core\graphics\DirectWrite</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.h">
-      <Filter>core\graphics\DirectWrite</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileEnumerator.h">
-      <Filter>core\graphics\DirectWrite</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.h">
-      <Filter>core\graphics\DirectWrite</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h">
-      <Filter>core\graphics\DirectWrite</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Sprite.h">
       <Filter>core\graphics</Filter>
@@ -1178,9 +1154,6 @@
     </Filter>
     <Filter Include="core\animation">
       <UniqueIdentifier>{c4980cea-a104-47f5-a58c-22a39dc019bb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="core\graphics\DirectWrite">
-      <UniqueIdentifier>{1fe5994d-3867-407c-98a4-60a267fcc6b9}</UniqueIdentifier>
     </Filter>
     <Filter Include="core\graphics\Direct3D11\Texture">
       <UniqueIdentifier>{1587694f-e22c-4cf0-93f5-b16af1ddac1a}</UniqueIdentifier>

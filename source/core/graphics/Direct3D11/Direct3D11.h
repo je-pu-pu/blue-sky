@@ -9,8 +9,6 @@
 #include <vector>
 #include <memory>
 
-class DirectWrite;
-
 namespace core::graphics
 {
 	class Sprite;
@@ -48,8 +46,6 @@ public:
 
 	using Sprite			= core::graphics::Sprite;
 
-	using Font				= DirectWrite;
-
 	using Vector			= core::math::direct_x_math::Vector;
 	using Matrix			= core::math::direct_x_math::Matrix;
 	using Color				= core::math::direct_x_math::Color;
@@ -77,19 +73,6 @@ private:
 	InputLayoutList				input_layout_list_;
 
 	D3D11_VIEWPORT				viewport_;
-
-	// for Direct2D & DirectWrite
-	ID3D10Device1*				device_10_;
-
-	ID3D11Texture2D*			text_texture_;
-	std::unique_ptr< Texture >	text_view_;
-
-	IDXGISurface1*				text_surface_;
-	IDXGIKeyedMutex*			text_texture_mutex_11_;
-	IDXGIKeyedMutex*			text_texture_mutex_10_;
-	UINT64						text_texture_sync_key_ = 0;
-
-	std::unique_ptr< Font >		font_;
 
 	std::unique_ptr< Sprite >	sprite_;
 	std::unique_ptr< Effect >	effect_;
@@ -119,7 +102,6 @@ public:
 	ID3D11RenderTargetView* create_render_target_view( ID3D11Texture2D* );
 	ID3D11DepthStencilView* create_depth_stencil_view( ID3D11Texture2D* );
 
-	void setup_font();
 	void setup_sprite();
 
 	void create_default_input_layout();
@@ -175,20 +157,11 @@ public:
 	void bind_texture_to_ps( uint_t, const Texture* );
 
 
-	void begin2D();
-	void end2D();
-	void begin3D();
-	void end3D();
-
 	void present();
 
-	void renderText();
-
-	inline Font* get_font() { return font_.get(); }
 	inline Sprite* get_sprite() { return sprite_.get(); }
 	inline Effect* get_effect() { return effect_.get(); }
 
-	inline const Font* get_font() const { return font_.get(); }
 	inline const Sprite* get_sprite() const { return sprite_.get(); }
 	inline const Effect* get_effect() const { return effect_.get(); }
 

@@ -2,4 +2,12 @@ layer noise.jpg
 layer-scale 1.6 3 0.0001
 layer-rotate 0 180 0.1
 
-sound 0-0-intro
+text-color FFFFFFCC
+text-border-color 000000CC
+text
+ある日、少年は空を見上げた。
+
+青く広がる空の向こうに
+何かが待っている気がした。
+
+これは、その小さな冒険の物語。

@@ -67,13 +67,10 @@
     <ClCompile Include="core\graphics\Direct3D11\Sprite.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Texture.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp" />
-    <ClCompile Include="core\graphics\DirectWrite\DirectWrite.cpp" />
     <ClCompile Include="core\graphics\Msdf\GlyphAtlas.cpp" />
     <ClCompile Include="core\graphics\Msdf\GlyphCache.cpp" />
     <ClCompile Include="core\graphics\Msdf\MsdfFont.cpp" />
     <ClCompile Include="core\graphics\Msdf\MsdfTextRenderer.cpp" />
-    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.cpp" />
-    <ClCompile Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.cpp" />
     <ClCompile Include="core\graphics\GraphicsManager.cpp" />
     <ClCompile Include="core\graphics\OculusRift.cpp" />
     <ClCompile Include="core\graphics\Shader.cpp" />
@@ -243,11 +240,6 @@
     <ClInclude Include="core\graphics\Direct3D11\Texture.h" />
     <ClInclude Include="core\graphics\Direct3D11\VertexBuffer.h" />
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h" />
-    <ClInclude Include="core\graphics\DirectWrite\DirectWrite.h" />
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontCollectionLoader.h" />
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileEnumerator.h" />
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileLoader.h" />
-    <ClInclude Include="core\graphics\DirectWrite\DirectWriteFontFileStream.h" />
     <ClInclude Include="core\graphics\DynamicPointList.h" />
     <ClInclude Include="core\graphics\EffectPass.h" />
     <ClInclude Include="core\graphics\EffectTechnique.h" />

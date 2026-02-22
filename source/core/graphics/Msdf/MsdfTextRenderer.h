@@ -86,6 +86,9 @@ public:
 	float measure_text_width( const wchar_t* text, float font_size );
 	float measure_text_width( const char* text, float font_size );
 
+	float measure_text_height( const wchar_t* text, float font_size );
+	float measure_text_height( const char* text, float font_size );
+
 	void flush();
 };
 

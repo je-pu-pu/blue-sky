@@ -126,13 +126,6 @@ public:
 
 	void clear_default_view( const Color& = Color::Black ) override;
 	void unset_render_target() override;
-	DirectWrite* get_font() override;
-
-	void begin_2d() override;
-	void end_2d() override;
-	void begin_3d() override;
-	void end_3d() override;
-	void render_text() override;
 
 	bool is_full_screen() const override;
 	void switch_full_screen() override;
@@ -149,11 +142,14 @@ public:
 
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const override;
+	void draw_text( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const override;
 	void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
 	void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const override;
+	void draw_text_center( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;
 
 	float_t get_text_height( const char_t* text, float_t width, float_t height ) const override;
+	float_t get_text_height( const wchar_t* text, float_t width, float_t height ) const override;
 
 	void clear_debug_bullet() const override;
 	void render_debug_bullet() const override;

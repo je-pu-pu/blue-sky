@@ -623,6 +623,8 @@ void Direct3D11::on_resize( int w, int h )
 {
 	unset_render_target();
 
+	back_buffer_texture_.reset();
+
 	swap_chain_desc_.BufferDesc.Width = w;
 	swap_chain_desc_.BufferDesc.Height = h;
 
@@ -635,6 +637,14 @@ void Direct3D11::on_resize( int w, int h )
 	) );
 
 	create_back_buffer_texture();
+
+	DIRECT_X_RELEASE( depth_stencil_view_ );
+	DIRECT_X_RELEASE( depth_stencil_texture_ );
+
+	create_depth_stencil_view();
+	create_depth_texture();
+
+	setup_default_viewport();
 
 	/// @todo 全ての RenderTargetTexture を再作成する？ ( 必要があるか要調査 )
 }

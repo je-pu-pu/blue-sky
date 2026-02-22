@@ -48,6 +48,7 @@ private:
 	
 	std::unique_ptr< Axis >							debug_axis_;
 	std::unique_ptr< core::graphics::MsdfTextRenderer >	msdf_text_renderer_;
+	float_t											default_font_size_ = 64.f;
 
 	std::unique_ptr< GameConstantBuffer >			game_render_data_;
 	std::unique_ptr< FrameConstantBuffer >			frame_render_data_;

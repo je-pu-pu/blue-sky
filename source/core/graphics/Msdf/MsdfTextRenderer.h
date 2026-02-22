@@ -90,6 +90,9 @@ public:
 	void draw_text( float x, float y, const wchar_t* text, const TextStyle& style );
 	void draw_text( float x, float y, const char* text, const TextStyle& style );
 
+	float measure_text_width( const wchar_t* text, float font_size );
+	float measure_text_width( const char* text, float font_size );
+
 	void flush();
 };
 

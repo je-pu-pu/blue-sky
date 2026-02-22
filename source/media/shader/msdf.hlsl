@@ -78,14 +78,14 @@ float4 ps_msdf( MSDF_PS_INPUT input ) : SV_Target
 		float boundary_mask = clamp( spr * dist, 0.0, 1.0 );
 		outline_alpha = min( outline_alpha, boundary_mask );
 
-		float4 color = lerp( OutlineColor, TextColor * input.Color, body_alpha );
+		float4 color = lerp( OutlineColor, TextColor, body_alpha );
 		color.a *= outline_alpha;
 
 		return color;
 	}
 	else
 	{
-		float4 color = TextColor * input.Color;
+		float4 color = TextColor;
 		color.a *= body_alpha;
 
 		return color;

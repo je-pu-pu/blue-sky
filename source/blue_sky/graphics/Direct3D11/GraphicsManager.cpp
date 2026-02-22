@@ -539,7 +539,7 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
 	{
 		core::graphics::TextStyle style;
 		style.text_color = color;
-		style.font_size = 64.f;
+		style.font_size = default_font_size_;
 
 		msdf_text_renderer_->draw_text( left, top, text, style );
 		msdf_text_renderer_->flush();
@@ -576,7 +576,7 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
 		style.text_color = color;
 		style.outline_color = outline_color;
 		style.outline_width = outline_width;
-		style.font_size = 64.f;
+		style.font_size = default_font_size_;
 
 		msdf_text_renderer_->draw_text( left, top, text, style );
 		msdf_text_renderer_->flush();
@@ -620,11 +620,11 @@ void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right
 	{
 		core::graphics::TextStyle style;
 		style.text_color = color;
-		style.font_size = 64.f;
+		style.font_size = default_font_size_;
 
-		/// @todo 中央揃えの実装
-		float center_x = ( left + right ) * 0.5f;
-		msdf_text_renderer_->draw_text( center_x, top, text, style );
+		float text_w = msdf_text_renderer_->measure_text_width( text, style.font_size );
+		float x = ( left + right ) * 0.5f - text_w * 0.5f;
+		msdf_text_renderer_->draw_text( x, top, text, style );
 		msdf_text_renderer_->flush();
 		return;
 	}
@@ -662,11 +662,11 @@ void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right
 		style.text_color = color;
 		style.outline_color = outline_color;
 		style.outline_width = outline_width;
-		style.font_size = 64.f;
+		style.font_size = default_font_size_;
 
-		/// @todo 中央揃えの実装
-		float center_x = ( left + right ) * 0.5f;
-		msdf_text_renderer_->draw_text( center_x, top, text, style );
+		float text_w = msdf_text_renderer_->measure_text_width( text, style.font_size );
+		float x = ( left + right ) * 0.5f - text_w * 0.5f;
+		msdf_text_renderer_->draw_text( x, top, text, style );
 		msdf_text_renderer_->flush();
 		return;
 	}
@@ -732,13 +732,13 @@ void GraphicsManager::draw_text_at_center( const char_t* text, const Color& colo
 	{
 		core::graphics::TextStyle style;
 		style.text_color = color;
-		style.font_size = 64.f;
+		style.font_size = default_font_size_;
 
-		/// @todo 中央揃えの実装
-		float_t center_x = static_cast< float_t >( direct_3d_->get_width() ) * 0.5f;
-		float_t center_y = static_cast< float_t >( direct_3d_->get_height() ) * 0.5f - style.font_size * 0.5f;
+		float text_w = msdf_text_renderer_->measure_text_width( text, style.font_size );
+		float_t x = static_cast< float_t >( direct_3d_->get_width() ) * 0.5f - text_w * 0.5f;
+		float_t y = static_cast< float_t >( direct_3d_->get_height() ) * 0.5f - style.font_size * 0.5f;
 
-		msdf_text_renderer_->draw_text( center_x, center_y, text, style );
+		msdf_text_renderer_->draw_text( x, y, text, style );
 		msdf_text_renderer_->flush();
 		return;
 	}

@@ -166,7 +166,7 @@ void MsdfTextRenderer::draw_text( float x, float y, const wchar_t* text, const T
 			float offset_x = bearing_x - ( quad_size - glyph_w ) * 0.5f;
 			float offset_y = ( static_cast< float >( fm.ascenderY ) * scale ) - bearing_y - ( quad_size - glyph_h ) * 0.5f;
 
-			append_quad( cursor_x + offset_x, y + offset_y, quad_size, quad_size, glyph->uv, style.text_color );
+			append_quad( cursor_x + offset_x, y + offset_y, quad_size, quad_size, glyph->uv, Color::White );
 		}
 
 		cursor_x += static_cast< float >( glyph->metrics.advance ) * scale;
@@ -187,6 +187,50 @@ void MsdfTextRenderer::draw_text( float x, float y, const char* text, const Text
 	MultiByteToWideChar( CP_ACP, 0, text, -1, wtext.data(), len );
 
 	draw_text( x, y, wtext.data(), style );
+}
+
+float MsdfTextRenderer::measure_text_width( const wchar_t* text, float font_size )
+{
+	if ( ! font_->is_loaded() )
+	{
+		return 0.f;
+	}
+
+	const auto& fm = font_->get_font_metrics();
+	float scale = font_size / static_cast< float >( fm.emSize );
+	float width = 0.f;
+
+	for ( const wchar_t* p = text; *p; ++p )
+	{
+		if ( *p == '\n' )
+		{
+			break;
+		}
+
+		const CachedGlyph* glyph = cache_->get( static_cast< uint32_t >( *p ) );
+
+		if ( glyph )
+		{
+			width += static_cast< float >( glyph->metrics.advance ) * scale;
+		}
+	}
+
+	return width;
+}
+
+float MsdfTextRenderer::measure_text_width( const char* text, float font_size )
+{
+	int len = MultiByteToWideChar( CP_ACP, 0, text, -1, nullptr, 0 );
+
+	if ( len <= 0 )
+	{
+		return 0.f;
+	}
+
+	std::vector< wchar_t > wtext( len );
+	MultiByteToWideChar( CP_ACP, 0, text, -1, wtext.data(), len );
+
+	return measure_text_width( wtext.data(), font_size );
 }
 
 void MsdfTextRenderer::flush()

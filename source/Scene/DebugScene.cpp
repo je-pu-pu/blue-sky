@@ -227,7 +227,7 @@ void DebugScene::render()
 
 	ss << "tess : " << frame_render_data.tess_factor << '\n';
 
-	get_graphics_manager()->draw_text( 10.f, 10.f, get_width() - 10.f, get_height() - 10.f, ss.str().c_str(), Color::White, Color::Black, 5.f );
+	get_graphics_manager()->draw_text( 10.f, 10.f, get_width() - 10.f, get_height() - 10.f, ss.str().c_str(), Color::White, Color::Black, 2.f );
 }
 
 } // namespace blue_sky

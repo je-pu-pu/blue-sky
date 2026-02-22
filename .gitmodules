@@ -1,3 +1,9 @@
 [submodule "media"]
 	path = media
 	url = ssh://moon.je-pu-pu.jp:/var/git/blue-sky-media.git
+[submodule "source/extern/freetype"]
+	path = source/extern/freetype
+	url = https://github.com/freetype/freetype.git
+[submodule "source/extern/msdfgen"]
+	path = source/extern/msdfgen
+	url = https://github.com/Chlumsky/msdfgen.git

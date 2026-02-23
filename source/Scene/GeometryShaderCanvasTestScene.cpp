@@ -3,13 +3,13 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <core/ecs/component/TransformComponent.h>
-#include <core/ecs/component/TransformControlComponent.h>
+#include <blue_sky/ecs/component/TransformControlComponent.h>
 #include <core/ecs/component/CameraComponent.h>
 #include <core/ecs/component/ModelComponent.h>
 #include <core/ecs/component/RenderComponent.h>
 
 #include <core/ecs/system/RenderSystem.h>
-#include <core/ecs/system/TransformControlSystem.h>
+#include <blue_sky/ecs/system/TransformControlSystem.h>
 #include <core/ecs/EntityManager.h>
 
 #include <core/graphics/Mesh.h>
@@ -82,13 +82,13 @@ GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene()
 	// auto vertex_buffer = get_graphics_manager()->create_vertex_buffer( vs );
 	// get_graphics_manager()->set_vertex_buffer( vertex_buffer );
 
-	get_entity_manager()->add_system< core::ecs::TransformControlSystem >();
+	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >();
 
 	camera_transform_ = camera_->add_component< core::ecs::TransformComponent >();
 	camera_transform_->transform.set_identity();
 	camera_transform_->transform.set_position( Vector( 0.f, 0.f, -10.f ) );
 
-	camera_->add_component< core::ecs::TransformControlComponent >();
+	camera_->add_component< blue_sky::ecs::TransformControlComponent >();
 	camera_component_ = camera_->add_component< core::ecs::CameraComponent >();
 
 	get_graphics_manager()->set_main_camera_info( camera_transform_, camera_component_ );

@@ -3,7 +3,7 @@
 #include <core/Service.h>
 #include <core/physics/PhysicsManager.h>
 
-namespace core::ecs
+namespace blue_sky::ecs
 {
 
 void BalloonSystem::update()
@@ -39,7 +39,7 @@ void BalloonSystem::update()
 					auto* balloon = std::get< BalloonComponent* >( pair.second );
 
 					// 上向きのインパルスを適用
-					math::Vector impulse( 0.f, balloon->lift_force, 0.f );
+					core::math::Vector impulse( 0.f, balloon->lift_force, 0.f );
 					physics_manager->apply_impulse( player_rb->handle, impulse );
 					break;
 				}
@@ -48,4 +48,4 @@ void BalloonSystem::update()
 	);
 }
 
-} // namespace core::ecs
+} // namespace blue_sky::ecs

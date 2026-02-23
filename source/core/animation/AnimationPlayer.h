@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SkinningAnimationSet.h"
-#include <blue_sky/ConstantBuffers.h>
+#include <core/ConstantBuffers.h>
 
 namespace core
 {
@@ -14,8 +14,8 @@ class AnimationPlayer
 {
 public:
 	/// @todo 整理する
-	using BoneConstantBuffer = blue_sky::BoneConstantBuffer;
-	using BoneConstantBufferData = blue_sky::BoneConstantBufferData;
+	using BoneConstantBuffer = core::BoneConstantBuffer;
+	using BoneConstantBufferData = core::BoneConstantBufferData;
 
 	static const int MaxBones = BoneConstantBufferData::MaxBones;
 

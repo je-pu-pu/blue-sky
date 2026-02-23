@@ -5,7 +5,7 @@
 #include <common/math.h>
 #include <iostream>
 
-namespace core::ecs
+namespace blue_sky::ecs
 {
 
 void TransformControlSystem::update( ComponentTuple& component_tuple ) const
@@ -67,4 +67,4 @@ void TransformControlSystem::update( ComponentTuple& component_tuple ) const
 	transform->transform.get_rotation().set_yaw_pitch_roll( transform_control->yaw, transform_control->pitch, 0 );
 }
 
-} // namespace core::ecs
+} // namespace blue_sky::ecs

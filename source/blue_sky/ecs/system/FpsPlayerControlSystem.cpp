@@ -5,7 +5,7 @@
 #include <common/math.h>
 #include <cmath>
 
-namespace core::ecs
+namespace blue_sky::ecs
 {
 
 void FpsPlayerControlSystem::update( ComponentTuple& component_tuple ) const
@@ -118,4 +118,4 @@ void FpsPlayerControlSystem::update( ComponentTuple& component_tuple ) const
 	);
 }
 
-} // namespace core::ecs
+} // namespace blue_sky::ecs

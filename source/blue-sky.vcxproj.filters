@@ -275,8 +275,8 @@
     <ClCompile Include="Scene\TransformTestScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="core\ecs\system\TransformControlSystem.cpp">
-      <Filter>core\ecs\system</Filter>
+    <ClCompile Include="blue_sky\ecs\system\TransformControlSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
     <ClCompile Include="core\ecs\system\RenderSystem.cpp">
       <Filter>core\ecs\system</Filter>
@@ -339,8 +339,8 @@
     <ClCompile Include="core\ecs\system\PhysicsSystem.cpp">
       <Filter>core\ecs\system</Filter>
     </ClCompile>
-    <ClCompile Include="core\ecs\system\FpsPlayerControlSystem.cpp">
-      <Filter>core\ecs\system</Filter>
+    <ClCompile Include="blue_sky\ecs\system\FpsPlayerControlSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
     <ClCompile Include="core\physics\RigidBody.cpp">
       <Filter>core\physics</Filter>
@@ -354,8 +354,8 @@
     <ClCompile Include="Scene\MusicGamePrototypeScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="core\ecs\system\BalloonSystem.cpp">
-      <Filter>core\ecs\system</Filter>
+    <ClCompile Include="blue_sky\ecs\system\BalloonSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Msdf\GlyphAtlas.cpp">
       <Filter>core\graphics\Msdf</Filter>
@@ -717,6 +717,9 @@
     <ClInclude Include="blue_sky\ConstantBuffers.h">
       <Filter>blue_sky</Filter>
     </ClInclude>
+    <ClInclude Include="core\ConstantBuffers.h">
+      <Filter>core</Filter>
+    </ClInclude>
     <ClInclude Include="core\graphics\ConstantBuffer.h">
       <Filter>core\graphics</Filter>
     </ClInclude>
@@ -837,14 +840,14 @@
     <ClInclude Include="Scene\TransformTestScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="core\ecs\system\TransformControlSystem.h">
-      <Filter>core\ecs\system</Filter>
+    <ClInclude Include="blue_sky\ecs\system\TransformControlSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClInclude>
     <ClInclude Include="core\ecs\system\RenderSystem.h">
       <Filter>core\ecs\system</Filter>
     </ClInclude>
-    <ClInclude Include="core\ecs\component\TransformControlComponent.h">
-      <Filter>core\ecs\component</Filter>
+    <ClInclude Include="blue_sky\ecs\component\TransformControlComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
     </ClInclude>
     <ClInclude Include="core\ecs\component\RenderComponent.h">
       <Filter>core\ecs\component</Filter>
@@ -920,14 +923,14 @@
     <ClInclude Include="core\ecs\system\PhysicsSystem.h">
       <Filter>core\ecs\system</Filter>
     </ClInclude>
-    <ClInclude Include="core\ecs\system\FpsPlayerControlSystem.h">
-      <Filter>core\ecs\system</Filter>
+    <ClInclude Include="blue_sky\ecs\system\FpsPlayerControlSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClInclude>
     <ClInclude Include="core\ecs\component\RigidBodyComponent.h">
       <Filter>core\ecs\component</Filter>
     </ClInclude>
-    <ClInclude Include="core\ecs\component\FpsPlayerComponent.h">
-      <Filter>core\ecs\component</Filter>
+    <ClInclude Include="blue_sky\ecs\component\FpsPlayerComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
     </ClInclude>
     <ClInclude Include="core\physics\RigidBody.h">
       <Filter>core\physics</Filter>
@@ -944,11 +947,11 @@
     <ClInclude Include="blue_sky\graphics\shader\LitShader.h">
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
-    <ClInclude Include="core\ecs\system\BalloonSystem.h">
-      <Filter>core\ecs\system</Filter>
+    <ClInclude Include="blue_sky\ecs\system\BalloonSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClInclude>
-    <ClInclude Include="core\ecs\component\BalloonComponent.h">
-      <Filter>core\ecs\component</Filter>
+    <ClInclude Include="blue_sky\ecs\component\BalloonComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
     </ClInclude>
     <ClInclude Include="core\math\DirectXMath\Transform.h">
       <Filter>core\math\DirectXMath</Filter>
@@ -1202,6 +1205,15 @@
     </Filter>
     <Filter Include="blue_sky\graphics\FileLoader">
       <UniqueIdentifier>{3a0c4342-cd36-41d4-ab0e-68f5b559d1e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="blue_sky\ecs">
+      <UniqueIdentifier>{a1b2c3d4-e5f6-7890-abcd-ef1234567890}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="blue_sky\ecs\component">
+      <UniqueIdentifier>{b2c3d4e5-f6a7-8901-bcde-f12345678901}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="blue_sky\ecs\system">
+      <UniqueIdentifier>{c3d4e5f6-a7b8-9012-cdef-123456789012}</UniqueIdentifier>
     </Filter>
     <Filter Include="core\math">
       <UniqueIdentifier>{500c41b6-e75c-422f-b811-bbd9452141f0}</UniqueIdentifier>

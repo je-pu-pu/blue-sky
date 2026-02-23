@@ -1,11 +1,14 @@
 #pragma once
 
 #include <core/ecs/component/TransformComponent.h>
-#include <core/ecs/component/TransformControlComponent.h>
+#include <blue_sky/ecs/component/TransformControlComponent.h>
 #include <core/ecs/System.h>
 
-namespace core::ecs
+namespace blue_sky::ecs
 {
+
+using core::ecs::System;
+using core::ecs::TransformComponent;
 
 /**
  * 入力によって姿勢を更新するシステム
@@ -23,4 +26,4 @@ public:
 
 }; // class TransformControlSystem
 
-} // namespace core::ecs
+} // namespace blue_sky::ecs

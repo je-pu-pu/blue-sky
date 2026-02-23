@@ -2,7 +2,7 @@
 
 #include <core/ecs/Component.h>
 
-namespace core::ecs
+namespace blue_sky::ecs
 {
 
 /**
@@ -10,7 +10,7 @@ namespace core::ecs
  *
  * FPS スタイルの移動・視点制御に必要なデータを保持する。
  */
-struct FpsPlayerComponent : public Component
+struct FpsPlayerComponent : public core::ecs::Component
 {
 	/// 視点の Y 軸回転角度 (radian)
 	float yaw = 0.f;
@@ -35,4 +35,4 @@ struct FpsPlayerComponent : public Component
 
 }; // struct FpsPlayerComponent
 
-} // namespace core::ecs
+} // namespace blue_sky::ecs

@@ -12,3 +12,8 @@
 - アウトラインの太さがグリフサイズに依存していた問題: ピクセルレンジをスクリーンピクセル単位に変換して均一化
 - fbx-converter.vcxproj のビルドエラーは既存の問題 (C++17フラグ不足、FBX SDK パス不足) で、本体には影響しない
 - `common::convert_to_wstring` / `convert_to_string` が UTF-8 ベースに統一済み。新規コードでは直接 `MultiByteToWideChar` を呼ばず、この共通関数を使うこと
+
+## レイヤー移動 (名前空間変更)
+
+- コードを `core::ecs` → `blue_sky::ecs` に移動する際、名前空間が変わると基底クラス・型の非修飾参照が解決できなくなる。移動先の名前空間に `using core::ecs::Component;` 等の using 宣言を追加する必要がある
+- `.cpp` ファイルも名前空間を変更した場合、`.h` で using した型はスコープ内で使えるが、直接参照している別の名前空間の型 (例: `math::Vector` → `core::math::Vector`) は修飾が必要

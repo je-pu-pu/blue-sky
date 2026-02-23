@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="math">
+      <UniqueIdentifier>{a1b2c3d4-1111-2222-3333-444455556666}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ecs">
+      <UniqueIdentifier>{a1b2c3d4-1111-2222-3333-444455557777}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics">
+      <UniqueIdentifier>{a1b2c3d4-1111-2222-3333-444455558888}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="test\math\BulletTest.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="test\math\DirectXMathTest.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\EntityManagerTest.cpp">
+      <Filter>ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\graphics\MsdfFontTest.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="test\lib.cpp" />
+    <ClCompile Include="test\pch.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="test\pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>

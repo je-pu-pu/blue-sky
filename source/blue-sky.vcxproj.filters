@@ -242,10 +242,25 @@
     <ClCompile Include="blue_sky\Input.cpp">
       <Filter>blue_sky</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\ui\UIButton.cpp">
+      <Filter>blue_sky\ui</Filter>
+    </ClCompile>
     <ClCompile Include="blue_sky\ui\UIRenderer.cpp">
       <Filter>blue_sky\ui</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\ui\UISelectBox.cpp">
+      <Filter>blue_sky\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ui\UISlider.cpp">
+      <Filter>blue_sky\ui</Filter>
+    </ClCompile>
     <ClCompile Include="blue_sky\ui\UIVerticalMenu.cpp">
+      <Filter>blue_sky\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ui\UIWidget.cpp">
+      <Filter>blue_sky\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ui\UIWidgetContainer.cpp">
       <Filter>blue_sky\ui</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\OculusRift.cpp">
@@ -771,10 +786,25 @@
     <ClInclude Include="blue_sky\Input.h">
       <Filter>blue_sky</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\ui\UIButton.h">
+      <Filter>blue_sky\ui</Filter>
+    </ClInclude>
     <ClInclude Include="blue_sky\ui\UIRenderer.h">
       <Filter>blue_sky\ui</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\ui\UISelectBox.h">
+      <Filter>blue_sky\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ui\UISlider.h">
+      <Filter>blue_sky\ui</Filter>
+    </ClInclude>
     <ClInclude Include="blue_sky\ui\UIVerticalMenu.h">
+      <Filter>blue_sky\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ui\UIWidget.h">
+      <Filter>blue_sky\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ui\UIWidgetContainer.h">
       <Filter>blue_sky\ui</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\OculusRift.h">

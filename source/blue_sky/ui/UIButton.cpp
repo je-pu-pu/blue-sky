@@ -1,0 +1,50 @@
+#include "UIButton.h"
+#include "UIRenderer.h"
+
+#include <blue_sky/Input.h>
+
+namespace blue_sky::ui
+{
+
+void UIButton::update( Input* input, UIRenderer& )
+{
+	if ( ! focused_ )
+	{
+		state_ = WidgetState::NORMAL;
+		return;
+	}
+
+	// マウス左ボタンが押されている間は PRESSED
+	if ( input->press( Input::Button::A ) )
+	{
+		state_ = WidgetState::PRESSED;
+	}
+	else
+	{
+		state_ = WidgetState::FOCUSED;
+	}
+
+	// 決定
+	if ( input->push( Input::Button::A ) )
+	{
+		if ( on_click_ )
+		{
+			on_click_();
+		}
+	}
+}
+
+void UIButton::render( UIRenderer& renderer )
+{
+	// 背景矩形
+	const Color& bg = ( state_ == WidgetState::PRESSED ) ? color_pressed_
+	                 : ( state_ == WidgetState::FOCUSED ) ? color_focused_
+	                 : color_normal_;
+
+	renderer.draw_rect( x_, y_, width_, height_, bg );
+
+	// テキスト中央描画
+	renderer.draw_text_center( x_, y_, width_, height_, text_.c_str(), text_color_ );
+}
+
+} // namespace blue_sky::ui

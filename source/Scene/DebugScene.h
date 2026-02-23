@@ -2,6 +2,7 @@
 
 #include "Scene.h"
 #include <blue_sky/CityGenerator.h>
+#include <core/graphics/TextStyle.h>
 #include <memory>
 
 namespace core::graphics
@@ -27,6 +28,8 @@ protected:
 	CityGenerator city_generator_;
 
 	std::unique_ptr< core::graphics::RenderTargetTexture > render_result_texture_;
+
+	core::graphics::TextStyle debug_text_style_ = { Color::White, Color::Black, 2.f, 32.f };
 
 protected:
 

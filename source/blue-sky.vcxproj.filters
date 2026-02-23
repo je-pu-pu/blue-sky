@@ -342,6 +342,18 @@
     <ClCompile Include="core\ecs\system\BalloonSystem.cpp">
       <Filter>core\ecs\system</Filter>
     </ClCompile>
+    <ClCompile Include="core\graphics\Msdf\GlyphAtlas.cpp">
+      <Filter>core\graphics\Msdf</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Msdf\GlyphCache.cpp">
+      <Filter>core\graphics\Msdf</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Msdf\MsdfFont.cpp">
+      <Filter>core\graphics\Msdf</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Msdf\MsdfTextRenderer.cpp">
+      <Filter>core\graphics\Msdf</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -917,6 +929,21 @@
     <ClInclude Include="core\TimeManager.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="core\graphics\Msdf\GlyphAtlas.h">
+      <Filter>core\graphics\Msdf</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Msdf\GlyphCache.h">
+      <Filter>core\graphics\Msdf</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Msdf\MsdfFont.h">
+      <Filter>core\graphics\Msdf</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Msdf\MsdfTextRenderer.h">
+      <Filter>core\graphics\Msdf</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\TextStyle.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />
@@ -1087,6 +1114,9 @@
     <None Include="media\shader\post_effect\beat_pulse.hlsl">
       <Filter>media\shader\post_effect</Filter>
     </None>
+    <None Include="media\shader\msdf.hlsl">
+      <Filter>media\shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Scene">
@@ -1199,6 +1229,9 @@
     </Filter>
     <Filter Include="core\physics\Bullet">
       <UniqueIdentifier>{b0f122bc-1ef3-4d7f-9dca-f528879b0c06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\graphics\Msdf">
+      <UniqueIdentifier>{e4a1b2c3-d5e6-4f78-9a0b-c1d2e3f4a5b6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

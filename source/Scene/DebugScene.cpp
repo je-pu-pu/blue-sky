@@ -71,6 +71,7 @@ DebugScene::DebugScene()
 		camera_->set_fov( 120.f );
 	} );
 	*/
+
 }
 
 DebugScene::~DebugScene()
@@ -161,6 +162,14 @@ void DebugScene::update()
 	auto* hand_drawing_shader = get_graphics_manager()->get_shader< graphics::shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing" );
 	hand_drawing_shader->render_parameter_gui();
 
+	// テキストスタイル調整
+	ImGui::Begin( "Text Style" );
+	ImGui::ColorEdit4( "Text Color", &debug_text_style_.text_color.r() );
+	ImGui::ColorEdit4( "Border Color", &debug_text_style_.outline_color.r() );
+	ImGui::SliderFloat( "Border Width", &debug_text_style_.outline_width, 0.f, 10.f );
+	ImGui::SliderFloat( "Font Size", &debug_text_style_.font_size, 8.f, 128.f );
+	ImGui::End();
+
 	midi_sequencer->process();
 	// std::cout << midi_sequencer->get_ticks() << std::endl;
 
@@ -227,7 +236,7 @@ void DebugScene::render()
 
 	ss << "tess : " << frame_render_data.tess_factor << '\n';
 
-	get_graphics_manager()->draw_text( 10.f, 10.f, get_width() - 10.f, get_height() - 10.f, ss.str().c_str(), core::graphics::TextStyle{ Color::White, Color::Black, 2.f } );
+	get_graphics_manager()->draw_text( 10.f, 10.f, get_width() - 10.f, get_height() - 10.f, ss.str().c_str(), debug_text_style_ );
 }
 
 } // namespace blue_sky

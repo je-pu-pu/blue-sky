@@ -244,6 +244,11 @@
     <ClInclude Include="core\graphics\EffectPass.h" />
     <ClInclude Include="core\graphics\EffectTechnique.h" />
     <ClInclude Include="core\graphics\GraphicsManager.h" />
+    <ClInclude Include="core\graphics\Msdf\GlyphAtlas.h" />
+    <ClInclude Include="core\graphics\Msdf\GlyphCache.h" />
+    <ClInclude Include="core\graphics\Msdf\MsdfFont.h" />
+    <ClInclude Include="core\graphics\Msdf\MsdfTextRenderer.h" />
+    <ClInclude Include="core\graphics\TextStyle.h" />
     <ClInclude Include="core\graphics\InputLayout.h" />
     <ClInclude Include="core\graphics\Mesh.h" />
     <ClInclude Include="core\graphics\Model.h" />
@@ -533,6 +538,9 @@
       <FileType>Document</FileType>
     </None>
     <None Include="media\shader\lit_instanced.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="media\shader\msdf.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

@@ -262,9 +262,6 @@ public:
 	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
 	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const = 0;
 	virtual void draw_text( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const = 0;
-	virtual void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
-	virtual void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const = 0;
-	virtual void draw_text_center( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const = 0;
 	virtual void draw_text_at_center( const char_t*, const Color& ) const = 0;
 
 	virtual float_t get_text_height( const char_t* text, float_t width, float_t height ) const = 0;
@@ -317,6 +314,8 @@ public:
 	void clear_draw_count() const { draw_count_ = 0; }
 	void count_draw() const override { draw_count_++; }
 	uint_t get_draw_count() const { return draw_count_; }
+
+	virtual void reload_font( const char* font_path ) = 0;
 
 	void debug_print_resources() const;
 

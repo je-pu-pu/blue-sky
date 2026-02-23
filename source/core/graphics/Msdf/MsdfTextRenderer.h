@@ -196,6 +196,9 @@ public:
 	 *       apply() がシェーダーリソースのステートをリセットするため。
 	 */
 	void flush();
+
+	/** @brief フォントを再読み込みする（グリフキャッシュはクリアされる） */
+	void reload_font( const char* font_path );
 };
 
 } // namespace core::graphics

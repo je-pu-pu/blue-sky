@@ -109,22 +109,32 @@ void SelectBox::render( Renderer& renderer )
 	float_t content_x = x_ + label_w;
 	float_t content_w = width_ * ( 1.f - LABEL_RATIO );
 
-	// ラベル
-	renderer.draw_text( label_x, y_, label_w, height_, label_.c_str(), lbl_color );
+	core::graphics::TextStyle center_style;
+	center_style.h_align = core::graphics::HAlign::CENTER;
+	center_style.v_align = core::graphics::VAlign::CENTER;
+
+	// ラベル（左寄せ・垂直中央）
+	core::graphics::TextStyle label_style;
+	label_style.text_color = lbl_color;
+	label_style.v_align = core::graphics::VAlign::CENTER;
+	renderer.draw_text( label_x, y_, label_w, height_, label_.c_str(), label_style );
 
 	// 背景
 	renderer.draw_rect( content_x, y_, content_w, height_, bg_color_ );
 
 	// 左矢印
-	renderer.draw_text_center( content_x, y_, ARROW_WIDTH, height_, "<", arr_color );
+	center_style.text_color = arr_color;
+	renderer.draw_text( content_x, y_, ARROW_WIDTH, height_, "<", center_style );
 
 	// 値テキスト
 	float_t value_x = content_x + ARROW_WIDTH;
 	float_t value_w = content_w - ARROW_WIDTH * 2.f;
-	renderer.draw_text_center( value_x, y_, value_w, height_, get_selected_text().c_str(), value_color_ );
+	center_style.text_color = value_color_;
+	renderer.draw_text( value_x, y_, value_w, height_, get_selected_text().c_str(), center_style );
 
 	// 右矢印
-	renderer.draw_text_center( content_x + content_w - ARROW_WIDTH, y_, ARROW_WIDTH, height_, ">", arr_color );
+	center_style.text_color = arr_color;
+	renderer.draw_text( content_x + content_w - ARROW_WIDTH, y_, ARROW_WIDTH, height_, ">", center_style );
 }
 
 } // namespace blue_sky::ui

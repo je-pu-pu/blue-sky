@@ -131,7 +131,10 @@ void VerticalMenu::render( Renderer& renderer )
 
 		string_t display_text = is_selected ? ( cursor_text_ + items_[ i ].text ) : ( string_t( "  " ) + items_[ i ].text );
 
-		renderer.draw_text( x_, item_y, width_, item_height_, display_text.c_str(), color );
+		core::graphics::TextStyle style;
+		style.text_color = color;
+		style.v_align = core::graphics::VAlign::CENTER;
+		renderer.draw_text( x_, item_y, width_, item_height_, display_text.c_str(), style );
 	}
 }
 

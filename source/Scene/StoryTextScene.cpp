@@ -268,7 +268,9 @@ void StoryTextScene::render()
 		get_graphics_manager()->set_default_render_target( false );
 		get_graphics_manager()->set_default_viewport();
 
-		get_graphics_manager()->draw_text_center( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), core::graphics::TextStyle{ text_color_, text_border_color_, 2.f } );
+		core::graphics::TextStyle text_style{ text_color_, text_border_color_, 2.f };
+		text_style.h_align = core::graphics::HAlign::CENTER;
+		get_graphics_manager()->draw_text( 0.f, text_y_, static_cast< float >( get_width() ), static_cast< float >( get_height() ), text_.c_str(), text_style );
 	}
 
 	render_fader();

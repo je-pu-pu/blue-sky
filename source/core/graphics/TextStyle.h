@@ -4,11 +4,16 @@
 
 namespace core::graphics {
 
+enum class HAlign { LEFT, CENTER, RIGHT };
+enum class VAlign { TOP, CENTER, BOTTOM };
+
 struct TextStyle {
 	Color text_color = Color::White;
 	Color outline_color = Color::Black;
 	float outline_width = 0.f;  // スクリーンピクセル単位
 	float font_size = 0.f;      // 0.f = デフォルトサイズを使用
+	HAlign h_align = HAlign::LEFT;
+	VAlign v_align = VAlign::TOP;
 };
 
 } // namespace core::graphics

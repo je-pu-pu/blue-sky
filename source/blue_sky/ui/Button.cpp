@@ -44,7 +44,11 @@ void Button::render( Renderer& renderer )
 	renderer.draw_rect( x_, y_, width_, height_, bg );
 
 	// テキスト中央描画
-	renderer.draw_text_center( x_, y_, width_, height_, text_.c_str(), text_color_ );
+	core::graphics::TextStyle style;
+	style.text_color = text_color_;
+	style.h_align = core::graphics::HAlign::CENTER;
+	style.v_align = core::graphics::VAlign::CENTER;
+	renderer.draw_text( x_, y_, width_, height_, text_.c_str(), style );
 }
 
 } // namespace blue_sky::ui

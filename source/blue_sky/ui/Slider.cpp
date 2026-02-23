@@ -139,8 +139,11 @@ void Slider::render( Renderer& renderer )
 	float_t value_x = track_x + track_w;
 	float_t value_w = width_ * VALUE_RATIO;
 
-	// ラベル
-	renderer.draw_text( label_x, y_, label_w, height_, label_.c_str(), lbl_color );
+	// ラベル（左寄せ・垂直中央）
+	core::graphics::TextStyle label_style;
+	label_style.text_color = lbl_color;
+	label_style.v_align = core::graphics::VAlign::CENTER;
+	renderer.draw_text( label_x, y_, label_w, height_, label_.c_str(), label_style );
 
 	// トラック背景
 	float_t pad = height_ * TRACK_PADDING_Y;
@@ -151,8 +154,12 @@ void Slider::render( Renderer& renderer )
 	const Color& fill_color = focused_ ? track_fill_focused_ : track_fill_color_;
 	renderer.draw_rect( track_x, y_ + pad, track_w * ratio, height_ - pad * 2.f, fill_color );
 
-	// 値表示
-	renderer.draw_text_center( value_x, y_, value_w, height_, format_value().c_str(), value_color_ );
+	// 値表示（水平中央・垂直中央）
+	core::graphics::TextStyle value_style;
+	value_style.text_color = value_color_;
+	value_style.h_align = core::graphics::HAlign::CENTER;
+	value_style.v_align = core::graphics::VAlign::CENTER;
+	renderer.draw_text( value_x, y_, value_w, height_, format_value().c_str(), value_style );
 }
 
 } // namespace blue_sky::ui

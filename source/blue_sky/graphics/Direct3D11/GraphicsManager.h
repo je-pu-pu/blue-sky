@@ -94,6 +94,8 @@ public:
 	BackBufferTexture* get_back_buffer_texture() override;
 	void set_default_render_target( bool clear = true ) override;
 
+	std::unique_ptr< core::graphics::ConstantBuffer > create_constant_buffer( size_t size, int slot ) override;
+
 	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type ); }
 
 	// void unload_mesh( const char_t* ) override;

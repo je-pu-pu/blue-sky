@@ -1,7 +1,8 @@
 #pragma once
 
 #include "BaseShader.h"
-#include <core/graphics/Direct3D11/ConstantBuffer.h> /// @todo Direct3D11 を直接参照しない
+#include <core/graphics/ConstantBuffer.h>
+#include <core/Service.h>
 #include <common/enum_set.h>
 #include <map>
 #include <vector>
@@ -26,7 +27,7 @@ class Shader : public BaseShader
 public:
 	using InputLayout		= core::graphics::InputLayout;
 	using EffectTechnique	= core::graphics::EffectTechnique;
-	using ConstantBuffer	= core::graphics::direct_3d_11::ConstantBuffer< Slot >;
+	using ConstantBuffer	= core::graphics::ConstantBuffer;
 
 	/**
 	 * シェーダーステージ
@@ -173,7 +174,7 @@ public:
 
 		if ( n > 0 )
 		{
-			constant_buffer_ = std::make_unique< ConstantBuffer >( n );
+			constant_buffer_ = core::get_graphics_manager()->create_constant_buffer( n, Slot );
 		}
 	}
 
@@ -185,7 +186,7 @@ public:
 
 		if ( n > 0 )
 		{
-			constant_buffer_ = std::make_unique< ConstantBuffer >( n );
+			constant_buffer_ = core::get_graphics_manager()->create_constant_buffer( n, Slot );
 		}
 	}
 

@@ -23,6 +23,7 @@
 #include <core/graphics/Direct3D11/EffectTechnique.h>
 #include <core/graphics/Direct3D11/EffectPass.h>
 #include <core/graphics/Direct3D11/ShadowMap.h>
+#include <core/graphics/Direct3D11/DynamicSlotConstantBuffer.h>
 
 #include <core/graphics/Msdf/MsdfTextRenderer.h>
 
@@ -169,6 +170,11 @@ void GraphicsManager::unload_mesh_all()
 	direct_3d_->getMeshManager()->unload_all();
 }
 #endif
+
+std::unique_ptr< core::graphics::ConstantBuffer > GraphicsManager::create_constant_buffer( size_t size, int slot )
+{
+	return std::make_unique< core::graphics::direct_3d_11::DynamicSlotConstantBuffer >( size, slot );
+}
 
 GraphicsManager::ShadowMap* GraphicsManager::create_shadow_map( uint_t level, uint_t size ) const
 {

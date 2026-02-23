@@ -714,6 +714,9 @@
     <ClInclude Include="core\graphics\Direct3D11\ConstantBuffer.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\DynamicSlotConstantBuffer.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
     <ClInclude Include="blue_sky\ConstantBuffers.h">
       <Filter>blue_sky</Filter>
     </ClInclude>

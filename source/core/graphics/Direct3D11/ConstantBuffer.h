@@ -49,7 +49,7 @@ public:
 		DIRECT_X_RELEASE( constant_buffer_ );
 	}
 
-	virtual void update( const void* data ) const
+	void update( const void* data ) const override
 	{
 		/// @todo Map() と使い分ける
 		Direct3D11::get_instance()->getImmediateContext()->UpdateSubresource( constant_buffer_, 0, 0, data, 0, 0 );

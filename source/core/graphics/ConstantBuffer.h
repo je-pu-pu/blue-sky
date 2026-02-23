@@ -11,8 +11,11 @@ class ConstantBuffer
 {
 public:
 	ConstantBuffer() { }
+	virtual ~ConstantBuffer() = default;
 	ConstantBuffer( const ConstantBuffer& ) = delete;
 	ConstantBuffer& operator = ( const ConstantBuffer& ) = delete;
+
+	virtual void update( const void* data ) const = 0;
 
 	virtual void bind_to_vs() const = 0;
 	virtual void bind_to_hs() const = 0;

@@ -6,6 +6,7 @@
 #include <core/ResourceManager.h>
 #include <core/math/Vector.h>
 #include <functional>
+#include <memory>
 
 namespace core
 {
@@ -71,6 +72,8 @@ public:
 	Shader* clone_shader( const Shader* s ) { Shader* s2 = s->clone(); shader_manager_.add( s2 ); return s2; }
 
 	const ShaderManager::ResourceList& get_shader_list() const { return shader_manager_.get_resource_list(); }
+
+	virtual std::unique_ptr< ConstantBuffer > create_constant_buffer( size_t size, int slot ) = 0;
 
 	virtual Texture* load_texture( const char_t* ) = 0;
 

@@ -247,6 +247,7 @@
     <ClInclude Include="core\graphics\Direct3D11\PrimitiveTopology.h" />
     <ClInclude Include="core\graphics\Direct3D11\RenderTargetTexture.h" />
     <ClInclude Include="core\graphics\Direct3D11\ConstantBuffer.h" />
+    <ClInclude Include="core\graphics\Direct3D11\DynamicSlotConstantBuffer.h" />
     <ClInclude Include="core\graphics\Direct3D11\ShadowMap.h" />
     <ClInclude Include="core\graphics\Direct3D11\Sprite.h" />
     <ClInclude Include="core\graphics\Direct3D11\Texture.h" />

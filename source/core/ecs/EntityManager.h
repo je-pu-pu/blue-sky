@@ -139,8 +139,8 @@ public:
 	 *
 	 * 既にシステムが追加されている場合は、何もしない
 	 */
-	template< typename SystemType >
-	void add_system( int priority = 0 )
+	template< typename SystemType, typename ... Args >
+	void add_system( int priority = 0, Args&& ... args )
 	{
 		const auto id = typeid( SystemType ).hash_code();
 
@@ -149,7 +149,7 @@ public:
 			return;
 		}
 
-		auto system = new SystemType();
+		auto system = new SystemType( std::forward< Args >( args ) ... );
 		system->set_priority( priority );
 
 		system_map_.emplace( id, system );

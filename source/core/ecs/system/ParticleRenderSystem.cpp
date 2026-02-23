@@ -1,5 +1,4 @@
 #include "ParticleRenderSystem.h"
-#include <blue_sky/graphics/shader/PointSpriteShader.h> /// @todo core に移動
 #include <core/ConstantBuffers.h>
 #include <core/Service.h>
 #include <core/graphics/VertexBuffer.h>
@@ -15,11 +14,9 @@ using core::graphics::BufferType;
 using core::graphics::VertexBuffer;
 using core::graphics::direct_3d_11::Direct3D11;
 
-ParticleRenderSystem::ParticleRenderSystem()
-	: shader_( std::make_unique< blue_sky::graphics::shader::PointSpriteShader >() )
+ParticleRenderSystem::ParticleRenderSystem( std::unique_ptr< core::graphics::Shader > shader )
+	: shader_( std::move( shader ) )
 {
-	// shader_->set_texture_at( 0, get_graphics_manager()->load_texture( "media/texture/pen/white-grass-pen.png" ) );
-	shader_->set_texture_at( 0, get_graphics_manager()->load_texture( "media/texture/pen/circle.png" ) );
 }
 
 void ParticleRenderSystem::update()

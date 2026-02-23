@@ -1,5 +1,6 @@
 #include "GraphicsManager.h"
 
+#include <blue_sky/GameMain.h>
 #include <blue_sky/ActiveObjectManager.h>
 
 #include <blue_sky/graphics/Fader.h>

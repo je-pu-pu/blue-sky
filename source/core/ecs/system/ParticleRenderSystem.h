@@ -20,7 +20,7 @@ private:
 	std::unique_ptr< core::graphics::Shader > shader_;
 
 public:
-	ParticleRenderSystem();
+	explicit ParticleRenderSystem( std::unique_ptr< core::graphics::Shader > shader );
 	virtual ~ParticleRenderSystem() = default;
 
 	virtual void update() override;

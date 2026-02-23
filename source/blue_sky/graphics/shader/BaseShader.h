@@ -1,6 +1,6 @@
 #pragma once
 
-#include <blue_sky/GameMain.h>
+#include <core/Service.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
 
@@ -38,9 +38,9 @@ public:
 
 	public:
 		RenderSetting( const char_t* input_layout_name, const char_t* effect_technique_name )
-			: input_layout_( GameMain::get_instance()->get_graphics_manager()->get_input_layout( input_layout_name ) )
+			: input_layout_( core::get_graphics_manager()->get_input_layout( input_layout_name ) )
 			, effect_technique_name_( effect_technique_name )
-			, effect_technique_( GameMain::get_instance()->get_graphics_manager()->get_effect_technique( effect_technique_name ) )
+			, effect_technique_( core::get_graphics_manager()->get_effect_technique( effect_technique_name ) )
 		{
 			if ( ! input_layout_ )
 			{
@@ -55,7 +55,7 @@ public:
 
 		void reload()
 		{
-			effect_technique_ = GameMain::get_instance()->get_graphics_manager()->get_effect_technique( effect_technique_name_.c_str() );
+			effect_technique_ = core::get_graphics_manager()->get_effect_technique( effect_technique_name_.c_str() );
 		}
 
 		const InputLayout* get_input_layout() const { return input_layout_; }
@@ -63,7 +63,7 @@ public:
 	};
 
 protected:
-	GraphicsManager* get_graphics_manager() const { return GameMain::get_instance()->get_graphics_manager(); }
+	GraphicsManager* get_graphics_manager() const { return static_cast<GraphicsManager*>( core::get_graphics_manager() ); }
 
 	const ConstantBuffer* get_game_constant_buffer() const { return get_graphics_manager()->get_game_render_data(); }
 	const ConstantBuffer* get_frame_constant_buffer() const { return get_graphics_manager()->get_frame_render_data(); }

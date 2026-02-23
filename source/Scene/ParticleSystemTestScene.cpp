@@ -12,6 +12,7 @@
 #include <core/ecs/System/RenderSystem.h>
 #include <core/ecs/System/ParticleSystem.h>
 #include <core/ecs/System/ParticleRenderSystem.h>
+#include <blue_sky/graphics/shader/PointSpriteShader.h>
 #include <core/ecs/EntityManager.h>
 
 #include <game/MainLoop.h>
@@ -31,7 +32,9 @@ ParticleSystemTestScene::ParticleSystemTestScene()
 	get_graphics_manager()->load_paper_textures();
 
 	// System を追加する
-	get_entity_manager()->add_system< core::ecs::ParticleRenderSystem >( 1001 );
+	auto particle_shader = std::make_unique< blue_sky::graphics::shader::PointSpriteShader >();
+	particle_shader->set_texture_at( 0, get_graphics_manager()->load_texture( "media/texture/pen/circle.png" ) );
+	get_entity_manager()->add_system< core::ecs::ParticleRenderSystem >( 1001, std::move( particle_shader ) );
 	get_entity_manager()->add_system< core::ecs::ParticleSystem >( 0 );
 	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >();
 	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );

@@ -3,6 +3,7 @@
 #include "BaseShader.h"
 #include <core/graphics/Direct3D11/ConstantBuffer.h> /// @todo Direct3D11 を直接参照しない
 #include <common/enum_set.h>
+#include <map>
 #include <vector>
 #include <functional>
 

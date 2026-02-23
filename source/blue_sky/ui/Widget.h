@@ -11,7 +11,7 @@ namespace blue_sky
 
 namespace blue_sky::ui
 {
-	class UIRenderer;
+	class Renderer;
 
 enum class WidgetState
 {
@@ -25,7 +25,7 @@ enum class WidgetState
  *
  * ボタン・スライダー・セレクトボックスなどの共通インターフェースを定義する。
  */
-class UIWidget
+class Widget
 {
 protected:
 	float_t x_ = 0.f;
@@ -39,10 +39,10 @@ protected:
 	string_t hint_text_;
 
 public:
-	virtual ~UIWidget() = default;
+	virtual ~Widget() = default;
 
-	virtual void update( Input* input, UIRenderer& renderer ) = 0;
-	virtual void render( UIRenderer& renderer ) = 0;
+	virtual void update( Input* input, Renderer& renderer ) = 0;
+	virtual void render( Renderer& renderer ) = 0;
 
 	void set_position( float_t x, float_t y ) { x_ = x; y_ = y; }
 	void set_size( float_t w, float_t h ) { width_ = w; height_ = h; }
@@ -69,6 +69,6 @@ public:
 	void set_hint_text( const string_t& text ) { hint_text_ = text; }
 	const string_t& get_hint_text() const { return hint_text_; }
 
-}; // class UIWidget
+}; // class Widget
 
 } // namespace blue_sky::ui

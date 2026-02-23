@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UIWidget.h"
+#include "Widget.h"
 
 #include <functional>
 
@@ -13,7 +13,7 @@ namespace blue_sky::ui
  * [ラベル 30%] [トラック 50%] [値表示 20%] のレイアウト。
  * トラック: 背景矩形 + 充填矩形（値に比例した幅）。
  */
-class UISlider : public UIWidget
+class Slider : public Widget
 {
 public:
 	using Formatter = std::function< string_t( float_t ) >;
@@ -53,7 +53,7 @@ private:
 	string_t format_value() const;
 
 public:
-	UISlider() { set_hint_text( "Arrow/AD Adjust    ESC Back" ); }
+	Slider() { set_hint_text( "Arrow/AD Adjust    ESC Back" ); }
 
 	void set_label( const string_t& label ) { label_ = label; }
 	void set_range( float_t min_val, float_t max_val ) { min_ = min_val; max_ = max_val; }
@@ -64,9 +64,9 @@ public:
 	void set_on_change( std::function< void( float_t ) > callback ) { on_change_ = callback; }
 	void set_format( Formatter fmt ) { formatter_ = fmt; }
 
-	void update( Input* input, UIRenderer& renderer ) override;
-	void render( UIRenderer& renderer ) override;
+	void update( Input* input, Renderer& renderer ) override;
+	void render( Renderer& renderer ) override;
 
-}; // class UISlider
+}; // class Slider
 
 } // namespace blue_sky::ui

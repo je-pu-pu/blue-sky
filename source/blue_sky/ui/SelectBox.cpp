@@ -1,5 +1,5 @@
-#include "UISelectBox.h"
-#include "UIRenderer.h"
+#include "SelectBox.h"
+#include "Renderer.h"
 
 #include <blue_sky/Input.h>
 
@@ -8,7 +8,7 @@ namespace blue_sky::ui
 
 static const string_t EMPTY_STRING;
 
-void UISelectBox::set_selected( int index )
+void SelectBox::set_selected( int index )
 {
 	if ( options_.empty() )
 	{
@@ -22,13 +22,13 @@ void UISelectBox::set_selected( int index )
 	selected_ = index;
 }
 
-const string_t& UISelectBox::get_selected_text() const
+const string_t& SelectBox::get_selected_text() const
 {
 	if ( options_.empty() ) return EMPTY_STRING;
 	return options_[ selected_ ];
 }
 
-void UISelectBox::select_prev()
+void SelectBox::select_prev()
 {
 	if ( options_.empty() ) return;
 
@@ -40,7 +40,7 @@ void UISelectBox::select_prev()
 	}
 }
 
-void UISelectBox::select_next()
+void SelectBox::select_next()
 {
 	if ( options_.empty() ) return;
 
@@ -52,7 +52,7 @@ void UISelectBox::select_next()
 	}
 }
 
-void UISelectBox::update( Input* input, UIRenderer& renderer )
+void SelectBox::update( Input* input, Renderer& renderer )
 {
 	if ( ! focused_ )
 	{
@@ -98,7 +98,7 @@ void UISelectBox::update( Input* input, UIRenderer& renderer )
 	}
 }
 
-void UISelectBox::render( UIRenderer& renderer )
+void SelectBox::render( Renderer& renderer )
 {
 	const Color& lbl_color = focused_ ? label_focused_color_ : label_color_;
 	const Color& arr_color = focused_ ? arrow_focused_color_ : arrow_color_;

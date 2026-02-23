@@ -1,13 +1,13 @@
-#include "UIWidgetContainer.h"
-#include "UIWidget.h"
-#include "UIRenderer.h"
+#include "WidgetContainer.h"
+#include "Widget.h"
+#include "Renderer.h"
 
 #include <blue_sky/Input.h>
 
 namespace blue_sky::ui
 {
 
-void UIWidgetContainer::update_focus( int new_index )
+void WidgetContainer::update_focus( int new_index )
 {
 	if ( new_index < 0 || new_index >= static_cast< int >( widgets_.size() ) )
 	{
@@ -25,7 +25,7 @@ void UIWidgetContainer::update_focus( int new_index )
 	widgets_[ focused_index_ ]->set_focused( true );
 }
 
-void UIWidgetContainer::layout()
+void WidgetContainer::layout()
 {
 	for ( int i = 0; i < static_cast< int >( widgets_.size() ); i++ )
 	{
@@ -41,7 +41,7 @@ void UIWidgetContainer::layout()
 	}
 }
 
-void UIWidgetContainer::update( Input* input, UIRenderer& renderer )
+void WidgetContainer::update( Input* input, Renderer& renderer )
 {
 	if ( widgets_.empty() ) return;
 
@@ -92,7 +92,7 @@ void UIWidgetContainer::update( Input* input, UIRenderer& renderer )
 	}
 }
 
-void UIWidgetContainer::render( UIRenderer& renderer )
+void WidgetContainer::render( Renderer& renderer )
 {
 	for ( auto* widget : widgets_ )
 	{
@@ -100,7 +100,7 @@ void UIWidgetContainer::render( UIRenderer& renderer )
 	}
 }
 
-UIWidget* UIWidgetContainer::get_focused_widget() const
+Widget* WidgetContainer::get_focused_widget() const
 {
 	if ( focused_index_ >= 0 && focused_index_ < static_cast< int >( widgets_.size() ) )
 	{

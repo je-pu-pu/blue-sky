@@ -1,5 +1,5 @@
-#include "UISlider.h"
-#include "UIRenderer.h"
+#include "Slider.h"
+#include "Renderer.h"
 
 #include <blue_sky/Input.h>
 
@@ -9,7 +9,7 @@
 namespace blue_sky::ui
 {
 
-float_t UISlider::get_ratio() const
+float_t Slider::get_ratio() const
 {
 	if ( max_ <= min_ ) return 0.f;
 
@@ -19,13 +19,13 @@ float_t UISlider::get_ratio() const
 	return r;
 }
 
-void UISlider::clamp_value()
+void Slider::clamp_value()
 {
 	if ( value_ < min_ ) value_ = min_;
 	if ( value_ > max_ ) value_ = max_;
 }
 
-void UISlider::set_value_from_mouse( float_t mouse_vx )
+void Slider::set_value_from_mouse( float_t mouse_vx )
 {
 	float_t track_x = x_ + width_ * LABEL_RATIO;
 	float_t track_w = width_ * TRACK_RATIO;
@@ -56,7 +56,7 @@ void UISlider::set_value_from_mouse( float_t mouse_vx )
 	}
 }
 
-string_t UISlider::format_value() const
+string_t Slider::format_value() const
 {
 	if ( formatter_ )
 	{
@@ -69,7 +69,7 @@ string_t UISlider::format_value() const
 	return ss.str();
 }
 
-void UISlider::update( Input* input, UIRenderer& renderer )
+void Slider::update( Input* input, Renderer& renderer )
 {
 	if ( ! focused_ )
 	{
@@ -126,7 +126,7 @@ void UISlider::update( Input* input, UIRenderer& renderer )
 	}
 }
 
-void UISlider::render( UIRenderer& renderer )
+void Slider::render( Renderer& renderer )
 {
 	const Color& lbl_color = focused_ ? label_focused_color_ : label_color_;
 

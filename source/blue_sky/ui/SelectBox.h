@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UIWidget.h"
+#include "Widget.h"
 
 #include <vector>
 #include <functional>
@@ -13,7 +13,7 @@ namespace blue_sky::ui
  *
  * [ラベル 30%] [< 矢印] [値テキスト] [> 矢印] のレイアウト。
  */
-class UISelectBox : public UIWidget
+class SelectBox : public Widget
 {
 private:
 	string_t label_;
@@ -38,7 +38,7 @@ private:
 	void select_next();
 
 public:
-	UISelectBox() { set_hint_text( "Arrow/AD Change    ESC Back" ); }
+	SelectBox() { set_hint_text( "Arrow/AD Change    ESC Back" ); }
 
 	void set_label( const string_t& label ) { label_ = label; }
 
@@ -52,9 +52,9 @@ public:
 
 	void set_on_change( std::function< void( int ) > callback ) { on_change_ = callback; }
 
-	void update( Input* input, UIRenderer& renderer ) override;
-	void render( UIRenderer& renderer ) override;
+	void update( Input* input, Renderer& renderer ) override;
+	void render( Renderer& renderer ) override;
 
-}; // class UISelectBox
+}; // class SelectBox
 
 } // namespace blue_sky::ui

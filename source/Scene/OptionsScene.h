@@ -2,11 +2,11 @@
 
 #include "Scene.h"
 
-#include <blue_sky/ui/UIRenderer.h>
-#include <blue_sky/ui/UIWidgetContainer.h>
-#include <blue_sky/ui/UIButton.h>
-#include <blue_sky/ui/UISlider.h>
-#include <blue_sky/ui/UISelectBox.h>
+#include <blue_sky/ui/Renderer.h>
+#include <blue_sky/ui/WidgetContainer.h>
+#include <blue_sky/ui/Button.h>
+#include <blue_sky/ui/Slider.h>
+#include <blue_sky/ui/SelectBox.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <vector>
@@ -18,7 +18,7 @@ namespace blue_sky
  * オプション画面
  *
  * オーバーレイシーンとして表示される設定画面。
- * UIWidgetContainer + 個別ウィジェットで構成される ImGui 非依存の UI。
+ * WidgetContainer + 個別ウィジェットで構成される ImGui 非依存の UI。
  * 変更した設定はシーン終了時に Config へ保存する。
  */
 class OptionsScene : public Scene
@@ -27,17 +27,17 @@ public:
 	static constexpr auto name = "options";
 
 private:
-	ui::UIRenderer ui_renderer_;
-	ui::UIWidgetContainer container_;
+	ui::Renderer ui_renderer_;
+	ui::WidgetContainer container_;
 
 	// ウィジェット（メンバ変数として直接保持）
-	ui::UISelectBox resolution_select_;
-	ui::UISlider volume_slider_;
-	ui::UIButton mute_button_;
-	ui::UISlider mouse_sens_slider_;
-	ui::UISlider fov_slider_;
-	ui::UIButton fullscreen_button_;
-	ui::UIButton back_button_;
+	ui::SelectBox resolution_select_;
+	ui::Slider volume_slider_;
+	ui::Button mute_button_;
+	ui::Slider mouse_sens_slider_;
+	ui::Slider fov_slider_;
+	ui::Button fullscreen_button_;
+	ui::Button back_button_;
 
 	// 解像度選択肢 (DXGI から動的に取得)
 	using DisplayMode = graphics::GraphicsManager::DisplayMode;

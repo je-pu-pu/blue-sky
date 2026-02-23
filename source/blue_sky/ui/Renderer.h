@@ -30,7 +30,7 @@ namespace blue_sky::ui
  * テキスト描画は 1 回の呼び出しで完結する（内部で 2D/3D コンテキストの切り替えを行う）。
  * スプライト描画は begin_sprite() / end_sprite() で囲んでバッチ処理する。
  */
-class UIRenderer
+class Renderer
 {
 public:
 	using Texture			= core::graphics::Texture;
@@ -49,7 +49,7 @@ private:
 	float_t get_scale_y() const;
 
 public:
-	explicit UIRenderer( GraphicsManager* );
+	explicit Renderer( GraphicsManager* );
 
 	/// 仮想画面サイズ（常に基準解像度を返す）
 	float_t get_screen_width() const { return DESIGN_WIDTH; }
@@ -82,6 +82,6 @@ public:
 	GraphicsManager* get_graphics_manager() { return gm_; }
 	const GraphicsManager* get_graphics_manager() const { return gm_; }
 
-}; // class UIRenderer
+}; // class Renderer
 
 } // namespace blue_sky::ui

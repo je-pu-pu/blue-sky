@@ -1,12 +1,12 @@
-#include "UIButton.h"
-#include "UIRenderer.h"
+#include "Button.h"
+#include "Renderer.h"
 
 #include <blue_sky/Input.h>
 
 namespace blue_sky::ui
 {
 
-void UIButton::update( Input* input, UIRenderer& )
+void Button::update( Input* input, Renderer& )
 {
 	if ( ! focused_ )
 	{
@@ -34,7 +34,7 @@ void UIButton::update( Input* input, UIRenderer& )
 	}
 }
 
-void UIButton::render( UIRenderer& renderer )
+void Button::render( Renderer& renderer )
 {
 	// 背景矩形
 	const Color& bg = ( state_ == WidgetState::PRESSED ) ? color_pressed_

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UIWidget.h"
+#include "Widget.h"
 
 #include <functional>
 
@@ -13,7 +13,7 @@ namespace blue_sky::ui
  * 背景矩形 + テキストで構成される。
  * WidgetState に応じて背景色が 3 段階変化する。
  */
-class UIButton : public UIWidget
+class Button : public Widget
 {
 private:
 	string_t text_;
@@ -25,7 +25,7 @@ private:
 	Color text_color_     = Color( 1.f, 1.f, 1.f, 1.f );
 
 public:
-	UIButton() { set_hint_text( "Enter/Click Select    ESC Back" ); }
+	Button() { set_hint_text( "Enter/Click Select    ESC Back" ); }
 
 	void set_text( const string_t& text ) { text_ = text; }
 	const string_t& get_text() const { return text_; }
@@ -41,9 +41,9 @@ public:
 
 	void set_text_color( const Color& c ) { text_color_ = c; }
 
-	void update( Input* input, UIRenderer& renderer ) override;
-	void render( UIRenderer& renderer ) override;
+	void update( Input* input, Renderer& renderer ) override;
+	void render( Renderer& renderer ) override;
 
-}; // class UIButton
+}; // class Button
 
 } // namespace blue_sky::ui

@@ -1,4 +1,4 @@
-#include "UIRenderer.h"
+#include "Renderer.h"
 
 #include <blue_sky/graphics/GraphicsManager.h>
 
@@ -9,42 +9,42 @@
 namespace blue_sky::ui
 {
 
-UIRenderer::UIRenderer( GraphicsManager* gm )
+Renderer::Renderer( GraphicsManager* gm )
 	: gm_( gm )
 {
 }
 
-float_t UIRenderer::get_scale_x() const
+float_t Renderer::get_scale_x() const
 {
 	return static_cast< float_t >( gm_->get_screen_width() ) / DESIGN_WIDTH;
 }
 
-float_t UIRenderer::get_scale_y() const
+float_t Renderer::get_scale_y() const
 {
 	return static_cast< float_t >( gm_->get_screen_height() ) / DESIGN_HEIGHT;
 }
 
-int UIRenderer::get_physical_width() const
+int Renderer::get_physical_width() const
 {
 	return gm_->get_screen_width();
 }
 
-int UIRenderer::get_physical_height() const
+int Renderer::get_physical_height() const
 {
 	return gm_->get_screen_height();
 }
 
-float_t UIRenderer::physical_to_virtual_x( float_t px ) const
+float_t Renderer::physical_to_virtual_x( float_t px ) const
 {
 	return px / get_scale_x();
 }
 
-float_t UIRenderer::physical_to_virtual_y( float_t py ) const
+float_t Renderer::physical_to_virtual_y( float_t py ) const
 {
 	return py / get_scale_y();
 }
 
-void UIRenderer::draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color )
+void Renderer::draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color )
 {
 	float_t sx = get_scale_x();
 	float_t sy = get_scale_y();
@@ -55,7 +55,7 @@ void UIRenderer::draw_text( float_t x, float_t y, float_t w, float_t h, const ch
 	gm_->draw_text( px, py, px + w * sx, py + h * sy, text, color );
 }
 
-void UIRenderer::draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const core::graphics::TextStyle& style )
+void Renderer::draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const core::graphics::TextStyle& style )
 {
 	float_t sx = get_scale_x();
 	float_t sy = get_scale_y();
@@ -73,7 +73,7 @@ void UIRenderer::draw_text( float_t x, float_t y, float_t w, float_t h, const ch
 	gm_->draw_text( px, py, px + w * sx, py + h * sy, text, scaled );
 }
 
-void UIRenderer::draw_text_center( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color )
+void Renderer::draw_text_center( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color )
 {
 	float_t sx = get_scale_x();
 	float_t sy = get_scale_y();
@@ -84,7 +84,7 @@ void UIRenderer::draw_text_center( float_t x, float_t y, float_t w, float_t h, c
 	gm_->draw_text_center( px, py, px + w * sx, py + h * sy, text, color );
 }
 
-void UIRenderer::draw_text_center( float_t x, float_t y, float_t w, float_t h, const char_t* text, const core::graphics::TextStyle& style )
+void Renderer::draw_text_center( float_t x, float_t y, float_t w, float_t h, const char_t* text, const core::graphics::TextStyle& style )
 {
 	float_t sx = get_scale_x();
 	float_t sy = get_scale_y();
@@ -102,7 +102,7 @@ void UIRenderer::draw_text_center( float_t x, float_t y, float_t w, float_t h, c
 	gm_->draw_text_center( px, py, px + w * sx, py + h * sy, text, scaled );
 }
 
-void UIRenderer::draw_rect( float_t x, float_t y, float_t w, float_t h, const Color& color )
+void Renderer::draw_rect( float_t x, float_t y, float_t w, float_t h, const Color& color )
 {
 	float_t sx = get_scale_x();
 	float_t sy = get_scale_y();
@@ -114,14 +114,14 @@ void UIRenderer::draw_rect( float_t x, float_t y, float_t w, float_t h, const Co
 	sprite->end();
 }
 
-UIRenderer::Sprite* UIRenderer::begin_sprite()
+Renderer::Sprite* Renderer::begin_sprite()
 {
 	auto* sprite = gm_->get_sprite();
 	sprite->begin();
 	return sprite;
 }
 
-void UIRenderer::end_sprite()
+void Renderer::end_sprite()
 {
 	gm_->get_sprite()->end();
 }

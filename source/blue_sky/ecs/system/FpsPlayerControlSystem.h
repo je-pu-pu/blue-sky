@@ -2,12 +2,17 @@
 
 #include <core/ecs/component/TransformComponent.h>
 #include <core/ecs/component/RigidBodyComponent.h>
-#include <core/ecs/component/FpsPlayerComponent.h>
+#include <blue_sky/ecs/component/FpsPlayerComponent.h>
 #include <core/ecs/component/CameraComponent.h>
 #include <core/ecs/System.h>
 
-namespace core::ecs
+namespace blue_sky::ecs
 {
+
+using core::ecs::System;
+using core::ecs::RigidBodyComponent;
+using core::ecs::TransformComponent;
+using core::ecs::CameraComponent;
 
 /**
  * FPS プレイヤー制御システム
@@ -29,4 +34,4 @@ public:
 
 }; // class FpsPlayerControlSystem
 
-} // namespace core::ecs
+} // namespace blue_sky::ecs

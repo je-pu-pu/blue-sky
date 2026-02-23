@@ -1,10 +1,10 @@
 #include "WidgetContainer.h"
 #include "Widget.h"
-#include "Renderer.h"
+#include <core/ui/Renderer.h>
 
-#include <blue_sky/Input.h>
+#include <core/input/InputManager.h>
 
-namespace blue_sky::ui
+namespace core::ui
 {
 
 void WidgetContainer::update_focus( int new_index )
@@ -41,19 +41,19 @@ void WidgetContainer::layout()
 	}
 }
 
-void WidgetContainer::update( Input* input, Renderer& renderer )
+void WidgetContainer::update( core::input::InputManager* input, Renderer& renderer )
 {
 	if ( widgets_.empty() ) return;
 
 	// キーボード : 上下キーでフォーカス移動
-	if ( input->push( Input::Button::UP ) )
+	if ( input->push( core::input::Button::UP ) )
 	{
 		int next = focused_index_ - 1;
 		if ( next < 0 ) next = static_cast< int >( widgets_.size() ) - 1;
 		update_focus( next );
 	}
 
-	if ( input->push( Input::Button::DOWN ) )
+	if ( input->push( core::input::Button::DOWN ) )
 	{
 		int next = focused_index_ + 1;
 		if ( next >= static_cast< int >( widgets_.size() ) ) next = 0;
@@ -109,4 +109,4 @@ Widget* WidgetContainer::get_focused_widget() const
 	return nullptr;
 }
 
-} // namespace blue_sky::ui
+} // namespace core::ui

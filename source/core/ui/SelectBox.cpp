@@ -1,9 +1,9 @@
 #include "SelectBox.h"
-#include "Renderer.h"
+#include <core/ui/Renderer.h>
 
-#include <blue_sky/Input.h>
+#include <core/input/InputManager.h>
 
-namespace blue_sky::ui
+namespace core::ui
 {
 
 static const string_t EMPTY_STRING;
@@ -52,7 +52,7 @@ void SelectBox::select_next()
 	}
 }
 
-void SelectBox::update( Input* input, Renderer& renderer )
+void SelectBox::update( core::input::InputManager* input, Renderer& renderer )
 {
 	if ( ! focused_ )
 	{
@@ -63,18 +63,18 @@ void SelectBox::update( Input* input, Renderer& renderer )
 	state_ = WidgetState::FOCUSED;
 
 	// キーボード : 左右キーで選択切替
-	if ( input->push( Input::Button::LEFT ) )
+	if ( input->push( core::input::Button::LEFT ) )
 	{
 		select_prev();
 	}
 
-	if ( input->push( Input::Button::RIGHT ) )
+	if ( input->push( core::input::Button::RIGHT ) )
 	{
 		select_next();
 	}
 
 	// マウス : 矢印クリック
-	if ( input->push( Input::Button::A ) )
+	if ( input->push( core::input::Button::A ) )
 	{
 		float_t mx = renderer.physical_to_virtual_x( static_cast< float_t >( input->get_mouse_x() ) );
 		float_t my = renderer.physical_to_virtual_y( static_cast< float_t >( input->get_mouse_y() ) );
@@ -137,4 +137,4 @@ void SelectBox::render( Renderer& renderer )
 	renderer.draw_text( content_x + content_w - ARROW_WIDTH, y_, ARROW_WIDTH, height_, ">", center_style );
 }
 
-} // namespace blue_sky::ui
+} // namespace core::ui

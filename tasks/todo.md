@@ -9,9 +9,10 @@
 ## レイヤー分析 (記録済み、リファクタリングは保留)
 
 - [x] blue_sky / core レイヤー分析を実施 → `doc/レイヤー分析サマリー.md` に記録
-- [ ] core が必要とする CB (ObjectCB, BoneCB) を core 層に移動
-- [ ] ゲーム固有コンポーネント (FpsPlayer 等) を blue_sky に移動
+- [x] core が必要とする CB (ObjectCB, BoneCB) を core 層に移動
+- [x] ゲーム固有コンポーネント (FpsPlayer 等) を blue_sky に移動
 
 ## UI ウィジェット
 
 - [x] テキスト描画の垂直位置揃えを修正（draw_text / draw_text_center）
+- [x] UI ウィジェット群を core 層に移動（core::ui::Renderer 抽象基底 + Widget/Button/Slider/SelectBox/WidgetContainer/VerticalMenu）

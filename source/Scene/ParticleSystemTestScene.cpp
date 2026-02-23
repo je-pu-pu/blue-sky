@@ -6,9 +6,9 @@
 
 #include <core/ecs/Component/CameraComponent.h>
 #include <core/ecs/Component/TransformComponent.h>
-#include <core/ecs/Component/TransformControlComponent.h>
+#include <blue_sky/ecs/component/TransformControlComponent.h>
 #include <core/ecs/Component/ParticleSystemComponent.h>
-#include <core/ecs/System/TransformControlSystem.h>
+#include <blue_sky/ecs/system/TransformControlSystem.h>
 #include <core/ecs/System/RenderSystem.h>
 #include <core/ecs/System/ParticleSystem.h>
 #include <core/ecs/System/ParticleRenderSystem.h>
@@ -33,7 +33,7 @@ ParticleSystemTestScene::ParticleSystemTestScene()
 	// System を追加する
 	get_entity_manager()->add_system< core::ecs::ParticleRenderSystem >( 1001 );
 	get_entity_manager()->add_system< core::ecs::ParticleSystem >( 0 );
-	get_entity_manager()->add_system< core::ecs::TransformControlSystem >();
+	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >();
 	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
 
 	// Entity と Component を追加する
@@ -45,7 +45,7 @@ ParticleSystemTestScene::ParticleSystemTestScene()
 	camera_transform_component->transform.set_identity();
 	camera_transform_component->transform.set_position( Vector( 0.f, 1.5f, -10.f ) );
 
-	camera_->add_component< core::ecs::TransformControlComponent >();
+	camera_->add_component< blue_sky::ecs::TransformControlComponent >();
 	auto camera_component = camera_->add_component< core::ecs::CameraComponent >();
 
 	get_graphics_manager()->set_main_camera_info( camera_transform_component, camera_component );

@@ -1,12 +1,12 @@
 #include "Button.h"
-#include "Renderer.h"
+#include <core/ui/Renderer.h>
 
-#include <blue_sky/Input.h>
+#include <core/input/InputManager.h>
 
-namespace blue_sky::ui
+namespace core::ui
 {
 
-void Button::update( Input* input, Renderer& )
+void Button::update( core::input::InputManager* input, Renderer& )
 {
 	if ( ! focused_ )
 	{
@@ -15,7 +15,7 @@ void Button::update( Input* input, Renderer& )
 	}
 
 	// マウス左ボタンが押されている間は PRESSED
-	if ( input->press( Input::Button::A ) )
+	if ( input->press( core::input::Button::A ) )
 	{
 		state_ = WidgetState::PRESSED;
 	}
@@ -25,7 +25,7 @@ void Button::update( Input* input, Renderer& )
 	}
 
 	// 決定
-	if ( input->push( Input::Button::A ) )
+	if ( input->push( core::input::Button::A ) )
 	{
 		if ( on_click_ )
 		{
@@ -51,4 +51,4 @@ void Button::render( Renderer& renderer )
 	renderer.draw_text( x_, y_, width_, height_, text_.c_str(), style );
 }
 
-} // namespace blue_sky::ui
+} // namespace core::ui

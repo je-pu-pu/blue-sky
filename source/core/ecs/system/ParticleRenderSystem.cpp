@@ -1,6 +1,6 @@
 #include "ParticleRenderSystem.h"
 #include <blue_sky/graphics/shader/PointSpriteShader.h> /// @todo core に移動
-#include <blue_sky/ConstantBuffers.h> /// @todo core に移動
+#include <core/ConstantBuffers.h>
 #include <core/Service.h>
 #include <core/graphics/VertexBuffer.h>
 #include <core/graphics/GraphicsManager.h>
@@ -54,7 +54,7 @@ void ParticleRenderSystem::update()
 		vb.update( particle_system->particle_list );
 
 		// Constant Buffer
-		static blue_sky::ObjectConstantBufferWithData object_data;
+		static core::ObjectConstantBufferWithData object_data;
 		object_data.data().world.set_identity();
 		object_data.data().color = Color::White;
 		object_data.update();

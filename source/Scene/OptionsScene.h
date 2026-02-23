@@ -3,10 +3,10 @@
 #include "Scene.h"
 
 #include <blue_sky/ui/Renderer.h>
-#include <blue_sky/ui/WidgetContainer.h>
-#include <blue_sky/ui/Button.h>
-#include <blue_sky/ui/Slider.h>
-#include <blue_sky/ui/SelectBox.h>
+#include <core/ui/WidgetContainer.h>
+#include <core/ui/Button.h>
+#include <core/ui/Slider.h>
+#include <core/ui/SelectBox.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <vector>
@@ -28,16 +28,16 @@ public:
 
 private:
 	ui::Renderer ui_renderer_;
-	ui::WidgetContainer container_;
+	core::ui::WidgetContainer container_;
 
 	// ウィジェット（メンバ変数として直接保持）
-	ui::SelectBox resolution_select_;
-	ui::Slider volume_slider_;
-	ui::Button mute_button_;
-	ui::Slider mouse_sens_slider_;
-	ui::Slider fov_slider_;
-	ui::Button fullscreen_button_;
-	ui::Button back_button_;
+	core::ui::SelectBox resolution_select_;
+	core::ui::Slider volume_slider_;
+	core::ui::Button mute_button_;
+	core::ui::Slider mouse_sens_slider_;
+	core::ui::Slider fov_slider_;
+	core::ui::Button fullscreen_button_;
+	core::ui::Button back_button_;
 
 	// 解像度選択肢 (DXGI から動的に取得)
 	using DisplayMode = graphics::GraphicsManager::DisplayMode;

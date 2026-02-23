@@ -3,7 +3,7 @@
 #include "Scene.h"
 
 #include <blue_sky/ui/Renderer.h>
-#include <blue_sky/ui/VerticalMenu.h>
+#include <core/ui/VerticalMenu.h>
 
 namespace blue_sky
 {
@@ -22,7 +22,7 @@ public:
 
 private:
 	ui::Renderer ui_renderer_;
-	ui::VerticalMenu menu_;
+	core::ui::VerticalMenu menu_;
 
 	// レイアウト (仮想座標 1920x1080 基準)
 	float_t get_panel_width() const { return 960.f; }

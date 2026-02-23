@@ -1,7 +1,7 @@
 #pragma once
 
 #include <blue_sky/type.h>
-#include <core/graphics/Direct3D11/ConstantBufferWithData.h>
+#include <core/ConstantBuffers.h>
 
 namespace blue_sky
 {
@@ -25,16 +25,6 @@ struct FrameConstantBufferData
 	float_t beat_progress = 0.f; // ビート進行度 (1.0 → 0.0)
 };
 
-struct ObjectConstantBufferData
-{
-	Matrix world;
-	Color color;
-
-	ObjectConstantBufferData()
-		: color( 0.f, 0.f, 0.f, 0.f )
-	{ }
-};
-
 struct FrameDrawingConstantBufferData
 {
 	Color shadow_color;
@@ -52,26 +42,14 @@ struct FrameDrawingConstantBufferData
 	{ }
 };
 
-struct BoneConstantBufferData
-{
-	static const int MaxBones = 100;
-
-	Matrix bone_matrix[ MaxBones ];
-
-	void set_identity()
-	{
-		for ( int n = 0; n < MaxBones; ++n )
-		{
-			bone_matrix[ n ].set_identity();
-		}
-	}
-};
+using ObjectConstantBufferData		= core::ObjectConstantBufferData;
+using BoneConstantBufferData		= core::BoneConstantBufferData;
 
 using GameConstantBuffer			= core::graphics::direct_3d_11::ConstantBufferTyped< GameConstantBufferData, 0 >;
 using FrameConstantBuffer			= core::graphics::direct_3d_11::ConstantBufferWithData< FrameConstantBufferData, 1 >;
 using FrameDrawingConstantBuffer	= core::graphics::direct_3d_11::ConstantBufferWithData< FrameDrawingConstantBufferData, 4 >;
-using ObjectConstantBuffer			= core::graphics::direct_3d_11::ConstantBufferTyped< ObjectConstantBufferData, 2 >;
-using ObjectConstantBufferWithData	= core::graphics::direct_3d_11::ConstantBufferWithData< ObjectConstantBufferData, 2 >;
-using BoneConstantBuffer			= core::graphics::direct_3d_11::ConstantBufferTyped< BoneConstantBufferData, 5 >;
+using ObjectConstantBuffer			= core::ObjectConstantBuffer;
+using ObjectConstantBufferWithData	= core::ObjectConstantBufferWithData;
+using BoneConstantBuffer			= core::BoneConstantBuffer;
 
 } // namespace blue_sky

@@ -10,13 +10,13 @@
 #include <core/ecs/component/ModelComponent.h>
 #include <core/ecs/component/RigidBodyComponent.h>
 #include <core/ecs/component/RenderComponent.h>
-#include <core/ecs/component/FpsPlayerComponent.h>
-#include <core/ecs/component/BalloonComponent.h>
+#include <blue_sky/ecs/component/FpsPlayerComponent.h>
+#include <blue_sky/ecs/component/BalloonComponent.h>
 
 #include <core/ecs/system/RenderSystem.h>
 #include <core/ecs/system/PhysicsSystem.h>
-#include <core/ecs/system/FpsPlayerControlSystem.h>
-#include <core/ecs/system/BalloonSystem.h>
+#include <blue_sky/ecs/system/FpsPlayerControlSystem.h>
+#include <blue_sky/ecs/system/BalloonSystem.h>
 
 #include <core/ecs/EntityManager.h>
 #include <core/Service.h>
@@ -51,8 +51,8 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 
 	// System を追加する (順序が重要)
 	get_entity_manager()->add_system< core::ecs::PhysicsSystem >();
-	get_entity_manager()->add_system< core::ecs::FpsPlayerControlSystem >( 10 );
-	get_entity_manager()->add_system< core::ecs::BalloonSystem >( 20 );
+	get_entity_manager()->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10 );
+	get_entity_manager()->add_system< blue_sky::ecs::BalloonSystem >( 20 );
 	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
 
 	// プレイヤーを設定 (ビルの屋上に配置)
@@ -61,7 +61,7 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 	player_transform_->transform.set_position( Vector( 0.f, 102.f, 0.f ) );
 
 	// FPS プレイヤーコンポーネント
-	fps_player_ = player_->add_component< core::ecs::FpsPlayerComponent >();
+	fps_player_ = player_->add_component< blue_sky::ecs::FpsPlayerComponent >();
 	fps_player_->move_speed = 5.f;
 	fps_player_->eye_height = 0.8f;
 	fps_player_->jump_impulse = 350.f; // 70kg × 5m/s = 350 N·s
@@ -196,7 +196,7 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 					auto* bm = balloon_entity->add_component< core::ecs::ModelComponent >();
 					bm->model = balloon_model;
 
-					auto* bc = balloon_entity->add_component< core::ecs::BalloonComponent >();
+					auto* bc = balloon_entity->add_component< blue_sky::ecs::BalloonComponent >();
 					bc->lift_force = 400.f;
 
 					// 風船の RigidBody (静的な球)
@@ -231,7 +231,7 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 					auto* bm = balloon_entity->add_component< core::ecs::ModelComponent >();
 					bm->model = balloon_model;
 
-					auto* bc = balloon_entity->add_component< core::ecs::BalloonComponent >();
+					auto* bc = balloon_entity->add_component< blue_sky::ecs::BalloonComponent >();
 					bc->lift_force = 400.f;
 
 					// 風船の RigidBody (静的な球)

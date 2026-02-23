@@ -88,7 +88,7 @@ void AnimationPlayer::update_render_data() const
 {
 	if ( ! get_current_skinning_animation() )
 	{
-		blue_sky::BoneConstantBufferData data;
+		BoneConstantBufferData data;
 
 		for ( uint_t n = 0; n < get_skinning_animation_set()->get_bone_count(); ++n )
 		{
@@ -100,7 +100,7 @@ void AnimationPlayer::update_render_data() const
 		return;
 	}
 
-	blue_sky::BoneConstantBufferData data;
+	BoneConstantBufferData data;
 
 	calculate_bone_matrix_recursive( data, 0, Matrix::identity() );
 

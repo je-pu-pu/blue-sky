@@ -2,14 +2,14 @@
 
 #include <core/ecs/Component.h>
 
-namespace core::ecs
+namespace blue_sky::ecs
 {
 
 /**
  * 入力によって姿勢を更新する事をタグ付けするためのコンポーネント
  *
  */
-class TransformControlComponent : public Component
+class TransformControlComponent : public core::ecs::Component
 {
 public:
 	float yaw	= 0.f; /// 姿勢の Y 軸における回転角度 ( radian ) 
@@ -17,4 +17,4 @@ public:
 
 }; // class TransformControlComponent
 
-} // namespace core::ecs
+} // namespace blue_sky::ecs

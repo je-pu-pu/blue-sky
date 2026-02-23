@@ -1,11 +1,14 @@
 #pragma once
 
 #include <core/ecs/System.h>
-#include <core/ecs/component/BalloonComponent.h>
+#include <blue_sky/ecs/component/BalloonComponent.h>
 #include <core/ecs/component/RigidBodyComponent.h>
 
-namespace core::ecs
+namespace blue_sky::ecs
 {
+
+using core::ecs::System;
+using core::ecs::RigidBodyComponent;
 
 /**
  * 風船システム
@@ -22,4 +25,4 @@ public:
 	void update( ComponentTuple& ) const override {}  // 個別処理は行わない
 };
 
-} // namespace core::ecs
+} // namespace blue_sky::ecs

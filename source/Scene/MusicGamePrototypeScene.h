@@ -10,6 +10,10 @@ namespace core::ecs
 	class TransformComponent;
 	class ModelComponent;
 	class CameraComponent;
+}
+
+namespace blue_sky::ecs
+{
 	struct FpsPlayerComponent;
 }
 
@@ -33,7 +37,7 @@ public:
 	using TransformComponent = core::ecs::TransformComponent;
 	using ModelComponent = core::ecs::ModelComponent;
 	using CameraComponent = core::ecs::CameraComponent;
-	using FpsPlayerComponent = core::ecs::FpsPlayerComponent;
+	using FpsPlayerComponent = blue_sky::ecs::FpsPlayerComponent;
 	using Entity = core::ecs::Entity;
 
 protected:

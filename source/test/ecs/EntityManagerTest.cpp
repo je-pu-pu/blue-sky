@@ -3,7 +3,7 @@
 #include <core/ecs/EntityManager.h>
 #include <core/ecs/component/TransformComponent.h>
 #include <core/ecs/component/RigidBodyComponent.h>
-#include <core/ecs/component/BalloonComponent.h>
+#include <blue_sky/ecs/component/BalloonComponent.h>
 #include <core/ecs/component/ParticleSystemComponent.h>
 #include <core/ecs/system/ParticleSystem.h>
 #include <core/ecs/system/PhysicsSystem.h>
@@ -159,7 +159,7 @@ TEST( EcsTest, MultipleComponentTypes )
 	auto entity = em->create_entity();
 	auto tc = entity->add_component< core::ecs::TransformComponent >();
 	auto rb = entity->add_component< core::ecs::RigidBodyComponent >();
-	auto bc = entity->add_component< core::ecs::BalloonComponent >();
+	auto bc = entity->add_component< blue_sky::ecs::BalloonComponent >();
 
 	EXPECT_NE( nullptr, tc );
 	EXPECT_NE( nullptr, rb );
@@ -167,13 +167,13 @@ TEST( EcsTest, MultipleComponentTypes )
 
 	EXPECT_EQ( tc, entity->get_component< core::ecs::TransformComponent >() );
 	EXPECT_EQ( rb, entity->get_component< core::ecs::RigidBodyComponent >() );
-	EXPECT_EQ( bc, entity->get_component< core::ecs::BalloonComponent >() );
+	EXPECT_EQ( bc, entity->get_component< blue_sky::ecs::BalloonComponent >() );
 
 	// RigidBodyComponent だけ削除 → 他は残る
 	entity->remove_component< core::ecs::RigidBodyComponent >();
 	EXPECT_EQ( nullptr, entity->get_component< core::ecs::RigidBodyComponent >() );
 	EXPECT_EQ( tc, entity->get_component< core::ecs::TransformComponent >() );
-	EXPECT_EQ( bc, entity->get_component< core::ecs::BalloonComponent >() );
+	EXPECT_EQ( bc, entity->get_component< blue_sky::ecs::BalloonComponent >() );
 }
 
 // ---------------------------------------------------------------------------

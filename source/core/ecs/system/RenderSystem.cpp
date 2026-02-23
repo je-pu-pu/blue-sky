@@ -1,5 +1,5 @@
 #include "RenderSystem.h"
-#include <blue_sky/ConstantBuffers.h> /// @todo core から blue_sky を参照しているのは変なので、基本的な ConstantBuffer は core に移す
+#include <core/ConstantBuffers.h>
 #include <core/Service.h>
 #include <core/TimeManager.h>
 #include <core/graphics/GraphicsManager.h>
@@ -116,7 +116,7 @@ void RenderSystem::update()
 			// 通常描画 (1インスタンスずつ)
 			for ( const auto& world : matrices )
 			{
-				blue_sky::ObjectConstantBufferWithData shader_data;
+				core::ObjectConstantBufferWithData shader_data;
 				shader_data.data().world = world;
 				shader_data.update();
 

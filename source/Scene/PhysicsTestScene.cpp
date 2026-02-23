@@ -6,14 +6,14 @@
 #include <blue_sky/Input.h>
 
 #include <core/ecs/component/TransformComponent.h>
-#include <core/ecs/component/TransformControlComponent.h>
+#include <blue_sky/ecs/component/TransformControlComponent.h>
 #include <core/ecs/component/CameraComponent.h>
 #include <core/ecs/component/ModelComponent.h>
 #include <core/ecs/component/RigidBodyComponent.h>
 #include <core/ecs/component/RenderComponent.h>
 
 #include <core/ecs/system/RenderSystem.h>
-#include <core/ecs/system/TransformControlSystem.h>
+#include <blue_sky/ecs/system/TransformControlSystem.h>
 #include <core/ecs/system/PhysicsSystem.h>
 
 #include <core/ecs/EntityManager.h>
@@ -40,7 +40,7 @@ PhysicsTestScene::PhysicsTestScene()
 	core::get_physics_manager()->set_debug_drawer( GameMain::get_instance()->get_bullet_debug_draw() );
 
 	// System を追加する
-	get_entity_manager()->add_system< core::ecs::TransformControlSystem >();
+	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >();
 	get_entity_manager()->add_system< core::ecs::PhysicsSystem >();
 	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
 
@@ -81,7 +81,7 @@ PhysicsTestScene::PhysicsTestScene()
 	camera_transform_->transform.set_identity();
 	camera_transform_->transform.set_position( Vector( 0.f, 3.f, -10.f ) );
 
-	camera_->add_component< core::ecs::TransformControlComponent >();
+	camera_->add_component< blue_sky::ecs::TransformControlComponent >();
 	camera_component_ = camera_->add_component< core::ecs::CameraComponent >();
 
 	get_graphics_manager()->set_main_camera_info( camera_transform_, camera_component_ );

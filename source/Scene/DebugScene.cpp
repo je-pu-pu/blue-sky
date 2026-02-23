@@ -28,6 +28,7 @@
 #include <common/math.h>
 
 #include <imgui.h>
+#include <portable-file-dialogs.h>
 
 namespace blue_sky
 {
@@ -168,6 +169,20 @@ void DebugScene::update()
 	ImGui::ColorEdit4( "Border Color", &debug_text_style_.outline_color.r() );
 	ImGui::SliderFloat( "Border Width", &debug_text_style_.outline_width, 0.f, 10.f );
 	ImGui::SliderFloat( "Font Size", &debug_text_style_.font_size, 8.f, 128.f );
+
+	static char font_path[256] = "media/font/rounded-mplus-1p-regular.ttf";
+	ImGui::Text( "Font: %s", font_path );
+	if ( ImGui::Button( "Browse Font..." ) )
+	{
+		auto file = pfd::open_file( "Select Font", "./media/font/", { "Font files", "*.ttf *.otf" } );
+
+		if ( ! file.result().empty() )
+		{
+			strncpy( font_path, file.result()[0].c_str(), sizeof( font_path ) - 1 );
+			font_path[sizeof( font_path ) - 1] = '\0';
+			get_graphics_manager()->reload_font( font_path );
+		}
+	}
 	ImGui::End();
 
 	midi_sequencer->process();

@@ -1,9 +1,9 @@
 #include "VerticalMenu.h"
-#include "Renderer.h"
+#include <core/ui/Renderer.h>
 
-#include <blue_sky/Input.h>
+#include <core/input/InputManager.h>
 
-namespace blue_sky::ui
+namespace core::ui
 {
 
 VerticalMenu::VerticalMenu()
@@ -61,7 +61,7 @@ void VerticalMenu::center_on_screen( const Renderer& renderer )
 	y_ = ( renderer.get_screen_height() - total_height ) * 0.5f;
 }
 
-void VerticalMenu::update( Input* input, const Renderer& renderer )
+void VerticalMenu::update( core::input::InputManager* input, const Renderer& renderer )
 {
 	if ( items_.empty() )
 	{
@@ -69,12 +69,12 @@ void VerticalMenu::update( Input* input, const Renderer& renderer )
 	}
 
 	// キーボード / コントローラー : 上下キーで選択
-	if ( input->push( Input::Button::UP ) )
+	if ( input->push( core::input::Button::UP ) )
 	{
 		select_prev();
 	}
 
-	if ( input->push( Input::Button::DOWN ) )
+	if ( input->push( core::input::Button::DOWN ) )
 	{
 		select_next();
 	}
@@ -108,7 +108,7 @@ void VerticalMenu::update( Input* input, const Renderer& renderer )
 	}
 
 	// 決定 : Enter / マウス左クリック / コントローラーボタン
-	if ( input->push( Input::Button::A ) )
+	if ( input->push( core::input::Button::A ) )
 	{
 		if ( selected_index_ >= 0 && selected_index_ < static_cast< int >( items_.size() ) )
 		{
@@ -189,4 +189,4 @@ void VerticalMenu::select_prev()
 	}
 }
 
-} // namespace blue_sky::ui
+} // namespace core::ui

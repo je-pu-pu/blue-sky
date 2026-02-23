@@ -1,8 +1,8 @@
 #include "Widget.h"
 
-namespace blue_sky::ui
+namespace core::ui
 {
 
 // Widget の仮想デストラクタ定義（vtable アンカー）
 
-} // namespace blue_sky::ui
+} // namespace core::ui

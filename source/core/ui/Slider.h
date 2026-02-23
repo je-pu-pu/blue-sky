@@ -4,7 +4,7 @@
 
 #include <functional>
 
-namespace blue_sky::ui
+namespace core::ui
 {
 
 /**
@@ -64,9 +64,9 @@ public:
 	void set_on_change( std::function< void( float_t ) > callback ) { on_change_ = callback; }
 	void set_format( Formatter fmt ) { formatter_ = fmt; }
 
-	void update( Input* input, Renderer& renderer ) override;
+	void update( core::input::InputManager* input, Renderer& renderer ) override;
 	void render( Renderer& renderer ) override;
 
 }; // class Slider
 
-} // namespace blue_sky::ui
+} // namespace core::ui

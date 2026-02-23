@@ -4,7 +4,7 @@
 
 #include <functional>
 
-namespace blue_sky::ui
+namespace core::ui
 {
 
 /**
@@ -41,9 +41,9 @@ public:
 
 	void set_text_color( const Color& c ) { text_color_ = c; }
 
-	void update( Input* input, Renderer& renderer ) override;
+	void update( core::input::InputManager* input, Renderer& renderer ) override;
 	void render( Renderer& renderer ) override;
 
 }; // class Button
 
-} // namespace blue_sky::ui
+} // namespace core::ui

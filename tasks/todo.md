@@ -15,3 +15,4 @@
 ## UI ウィジェット
 
 - [x] テキスト描画の垂直位置揃えを修正（draw_text / draw_text_center）
+- [x] UI ウィジェット群を core 層に移動（core::ui::Renderer 抽象基底 + Widget/Button/Slider/SelectBox/WidgetContainer/VerticalMenu）

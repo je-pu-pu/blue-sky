@@ -5,7 +5,7 @@
 #include <vector>
 #include <functional>
 
-namespace blue_sky::ui
+namespace core::ui
 {
 
 /**
@@ -52,9 +52,9 @@ public:
 
 	void set_on_change( std::function< void( int ) > callback ) { on_change_ = callback; }
 
-	void update( Input* input, Renderer& renderer ) override;
+	void update( core::input::InputManager* input, Renderer& renderer ) override;
 	void render( Renderer& renderer ) override;
 
 }; // class SelectBox
 
-} // namespace blue_sky::ui
+} // namespace core::ui

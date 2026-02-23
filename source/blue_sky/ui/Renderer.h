@@ -1,7 +1,7 @@
 #pragma once
 
 #include <blue_sky/type.h>
-#include <core/graphics/TextStyle.h>
+#include <core/ui/Renderer.h>
 
 namespace core::graphics
 {
@@ -18,7 +18,7 @@ namespace blue_sky::ui
 {
 
 /**
- * 2D 描画 API（仮想座標系）
+ * 2D 描画 API（仮想座標系）— core::ui::Renderer の具象実装
  *
  * GraphicsManager の Sprite / DirectWrite を薄くラップし、
  * HUD やメニュー画面から共通で使えるシンプルなインターフェースを提供する。
@@ -30,7 +30,7 @@ namespace blue_sky::ui
  * テキスト描画は 1 回の呼び出しで完結する（内部で 2D/3D コンテキストの切り替えを行う）。
  * スプライト描画は begin_sprite() / end_sprite() で囲んでバッチ処理する。
  */
-class Renderer
+class Renderer : public core::ui::Renderer
 {
 public:
 	using Texture			= core::graphics::Texture;
@@ -52,16 +52,16 @@ public:
 	explicit Renderer( GraphicsManager* );
 
 	/// 仮想画面サイズ（常に基準解像度を返す）
-	float_t get_screen_width() const { return DESIGN_WIDTH; }
-	float_t get_screen_height() const { return DESIGN_HEIGHT; }
+	float_t get_screen_width() const override { return DESIGN_WIDTH; }
+	float_t get_screen_height() const override { return DESIGN_HEIGHT; }
 
 	/// 物理画面サイズ
 	int get_physical_width() const;
 	int get_physical_height() const;
 
 	/// 物理ピクセル座標 → 仮想座標への変換（マウス座標用）
-	float_t physical_to_virtual_x( float_t px ) const;
-	float_t physical_to_virtual_y( float_t py ) const;
+	float_t physical_to_virtual_x( float_t px ) const override;
+	float_t physical_to_virtual_y( float_t py ) const override;
 
 	/**
 	 * 矩形内にテキストを描画する — 仮想座標
@@ -74,11 +74,11 @@ public:
 	 * @param color テキスト色（配置はデフォルト LEFT+TOP）
 	 * @param style テキストスタイル（h_align / v_align で配置を指定可能）
 	 */
-	void draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color );
-	void draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const core::graphics::TextStyle& style );
+	void draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color ) override;
+	void draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const core::graphics::TextStyle& style ) override;
 
 	/// 塗りつぶし矩形の描画 — 仮想座標
-	void draw_rect( float_t x, float_t y, float_t w, float_t h, const Color& color );
+	void draw_rect( float_t x, float_t y, float_t w, float_t h, const Color& color ) override;
 
 	/// スプライトバッチの開始・終了
 	Sprite* begin_sprite();

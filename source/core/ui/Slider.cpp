@@ -1,12 +1,12 @@
 #include "Slider.h"
-#include "Renderer.h"
+#include <core/ui/Renderer.h>
 
-#include <blue_sky/Input.h>
+#include <core/input/InputManager.h>
 
 #include <sstream>
 #include <iomanip>
 
-namespace blue_sky::ui
+namespace core::ui
 {
 
 float_t Slider::get_ratio() const
@@ -69,7 +69,7 @@ string_t Slider::format_value() const
 	return ss.str();
 }
 
-void Slider::update( Input* input, Renderer& renderer )
+void Slider::update( core::input::InputManager* input, Renderer& renderer )
 {
 	if ( ! focused_ )
 	{
@@ -81,7 +81,7 @@ void Slider::update( Input* input, Renderer& renderer )
 	state_ = WidgetState::FOCUSED;
 
 	// キーボード : 左右キーでステップ調整
-	if ( input->push( Input::Button::LEFT ) )
+	if ( input->push( core::input::Button::LEFT ) )
 	{
 		value_ -= step_;
 		clamp_value();
@@ -89,7 +89,7 @@ void Slider::update( Input* input, Renderer& renderer )
 		if ( on_change_ ) on_change_( value_ );
 	}
 
-	if ( input->push( Input::Button::RIGHT ) )
+	if ( input->push( core::input::Button::RIGHT ) )
 	{
 		value_ += step_;
 		clamp_value();
@@ -100,7 +100,7 @@ void Slider::update( Input* input, Renderer& renderer )
 	// マウス : トラック領域のクリック/ドラッグ
 	float_t mx = renderer.physical_to_virtual_x( static_cast< float_t >( input->get_mouse_x() ) );
 
-	if ( input->push( Input::Button::A ) )
+	if ( input->push( core::input::Button::A ) )
 	{
 		float_t track_x = x_ + width_ * LABEL_RATIO;
 		float_t track_w = width_ * TRACK_RATIO;
@@ -114,7 +114,7 @@ void Slider::update( Input* input, Renderer& renderer )
 
 	if ( dragging_ )
 	{
-		if ( input->press( Input::Button::A ) )
+		if ( input->press( core::input::Button::A ) )
 		{
 			set_value_from_mouse( mx );
 			state_ = WidgetState::PRESSED;
@@ -162,4 +162,4 @@ void Slider::render( Renderer& renderer )
 	renderer.draw_text( value_x, y_, value_w, height_, format_value().c_str(), value_style );
 }
 
-} // namespace blue_sky::ui
+} // namespace core::ui

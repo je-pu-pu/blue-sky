@@ -259,12 +259,24 @@ public:
 
 	void render_fader() const override;
 
-	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
-	virtual void draw_text( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const = 0;
-	virtual void draw_text( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const = 0;
-	virtual void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const = 0;
-	virtual void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const = 0;
-	virtual void draw_text_center( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const = 0;
+	/**
+	 * 矩形内にテキストを描画する
+	 *
+	 * @param left   描画矩形の左端（ピクセル）
+	 * @param top    描画矩形の上端（ピクセル）
+	 * @param right  描画矩形の右端（ピクセル）
+	 * @param bottom 描画矩形の下端（ピクセル）
+	 * @param text   描画するテキスト
+	 * @param color  テキスト色（TextStyle 版では h_align / v_align で配置を指定可能）
+	 *
+	 * Color 版はデフォルト配置（LEFT+TOP）で描画する。
+	 * 配置を変えたい場合は TextStyle 版を使用すること。
+	 */
+	virtual void draw_text( float_t left, float_t top, float_t right, float_t bottom, const char_t* text, const Color& color ) const = 0;
+	virtual void draw_text( float_t left, float_t top, float_t right, float_t bottom, const char_t* text, const core::graphics::TextStyle& style ) const = 0;
+	virtual void draw_text( float_t left, float_t top, float_t right, float_t bottom, const wchar_t* text, const core::graphics::TextStyle& style ) const = 0;
+
+	/// 画面中央にテキストを描画する（ローディング表示等）
 	virtual void draw_text_at_center( const char_t*, const Color& ) const = 0;
 
 	virtual float_t get_text_height( const char_t* text, float_t width, float_t height ) const = 0;
@@ -317,6 +329,8 @@ public:
 	void clear_draw_count() const { draw_count_ = 0; }
 	void count_draw() const override { draw_count_++; }
 	uint_t get_draw_count() const { return draw_count_; }
+
+	virtual void reload_font( const char* font_path ) = 0;
 
 	void debug_print_resources() const;
 

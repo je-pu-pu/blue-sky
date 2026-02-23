@@ -6,10 +6,12 @@
 #include <blue_sky/App.h>
 
 #include <core/sound/SoundManager.h>
+#include <core/graphics/TextStyle.h>
 
 #include <game/Config.h>
 
 #include <sstream>
+#include <iomanip>
 
 namespace blue_sky
 {
@@ -17,14 +19,10 @@ namespace blue_sky
 OptionsScene::OptionsScene()
 	: ui_renderer_( get_graphics_manager() )
 	, resolutions_( get_graphics_manager()->get_available_display_modes() )
-	, volume_( get_sound_manager()->get_volume() )
 	, is_mute_( get_sound_manager()->is_mute() )
-	, mouse_sensitivity_( get_config()->get( "input.mouse.x_sensitivity", 1.f ) )
-	, fov_( get_config()->get( "camera.fov", 90.f ) )
 	, is_fullscreen_( get_graphics_manager()->is_full_screen() )
 {
-	current_resolution_ = find_current_resolution();
-	setup_menu();
+	setup_widgets();
 }
 
 OptionsScene::~OptionsScene()
@@ -48,160 +46,137 @@ int OptionsScene::find_current_resolution() const
 	return 0;
 }
 
-void OptionsScene::apply_resolution()
+void OptionsScene::apply_resolution( int index )
 {
-	const auto& res = resolutions_[ current_resolution_ ];
-	GameMain::get_app()->set_size( res.width, res.height );
+	if ( index >= 0 && index < static_cast< int >( resolutions_.size() ) )
+	{
+		const auto& res = resolutions_[ index ];
+		GameMain::get_app()->set_size( res.width, res.height );
+	}
 }
 
-void OptionsScene::setup_menu()
+void OptionsScene::setup_widgets()
 {
-	int index = 0;
-
 	// Resolution
-	resolution_index_ = index++;
-	menu_.add_item( "", nullptr );
+	resolution_select_.set_label( "Resolution" );
+
+	for ( const auto& res : resolutions_ )
+	{
+		std::stringstream ss;
+		ss << res.width << " x " << res.height;
+		resolution_select_.add_option( ss.str() );
+	}
+
+	resolution_select_.set_selected( find_current_resolution() );
+	resolution_select_.set_on_change( [this] ( int index )
+	{
+		apply_resolution( index );
+		play_sound( "ok" );
+	} );
 
 	// Volume
-	volume_index_ = index++;
-	menu_.add_item( "", nullptr );
+	float_t volume = get_sound_manager()->get_volume();
+	volume_slider_.set_label( "Volume" );
+	volume_slider_.set_range( 0.f, 1.f );
+	volume_slider_.set_step( 0.1f );
+	volume_slider_.set_value( volume );
+	volume_slider_.set_format( [] ( float_t v ) -> string_t
+	{
+		int percent = static_cast< int >( v * 100.f + 0.5f );
+		return std::to_string( percent ) + "%";
+	} );
+	volume_slider_.set_on_change( [this] ( float_t v )
+	{
+		get_sound_manager()->set_volume( v );
+	} );
 
 	// Mute
-	mute_index_ = index++;
-	menu_.add_item( "", [this] ()
+	mute_button_.set_text( is_mute_ ? "Mute : ON" : "Mute : OFF" );
+	mute_button_.set_hint_text( "Enter/Click Toggle    ESC Back" );
+	mute_button_.set_on_click( [this] ()
 	{
 		is_mute_ = ! is_mute_;
 		get_sound_manager()->set_mute( is_mute_ );
-		update_all_text();
+		mute_button_.set_text( is_mute_ ? "Mute : ON" : "Mute : OFF" );
 		play_sound( "ok" );
 	} );
 
 	// Mouse Sensitivity
-	mouse_sens_index_ = index++;
-	menu_.add_item( "", nullptr );
+	float_t sens = get_config()->get( "input.mouse.x_sensitivity", 1.f );
+	mouse_sens_slider_.set_label( "Mouse Sens." );
+	mouse_sens_slider_.set_range( 0.1f, 3.f );
+	mouse_sens_slider_.set_step( 0.1f );
+	mouse_sens_slider_.set_value( sens );
+	mouse_sens_slider_.set_on_change( [this] ( float_t v )
+	{
+		get_input()->set_mouse_x_sensitivity( v );
+		get_input()->set_mouse_y_sensitivity( v );
+	} );
 
 	// FOV
-	fov_index_ = index++;
-	menu_.add_item( "", nullptr );
+	float_t fov = get_config()->get( "camera.fov", 90.f );
+	fov_slider_.set_label( "FOV" );
+	fov_slider_.set_range( 50.f, 120.f );
+	fov_slider_.set_step( 5.f );
+	fov_slider_.set_value( fov );
+	fov_slider_.set_format( [] ( float_t v ) -> string_t
+	{
+		return std::to_string( static_cast< int >( v + 0.5f ) );
+	} );
 
 	// Fullscreen
-	fullscreen_index_ = index++;
-	menu_.add_item( "", [this] ()
+	fullscreen_button_.set_text( is_fullscreen_ ? "Fullscreen : ON" : "Fullscreen : OFF" );
+	fullscreen_button_.set_hint_text( "Enter/Click Toggle    ESC Back" );
+	fullscreen_button_.set_on_click( [this] ()
 	{
 		get_graphics_manager()->switch_full_screen();
 		is_fullscreen_ = get_graphics_manager()->is_full_screen();
-		update_all_text();
+		fullscreen_button_.set_text( is_fullscreen_ ? "Fullscreen : ON" : "Fullscreen : OFF" );
 		play_sound( "ok" );
 	} );
 
 	// Back
-	back_index_ = index++;
-	menu_.add_item( "Back", [this] ()
+	back_button_.set_text( "Back" );
+	back_button_.set_on_click( [this] ()
 	{
 		set_next_scene( "pop" );
 		play_sound( "ok" );
 	} );
 
+	// コンテナに登録
+	container_.add_widget( &resolution_select_ );
+	container_.add_widget( &volume_slider_ );
+	container_.add_widget( &mute_button_ );
+	container_.add_widget( &mouse_sens_slider_ );
+	container_.add_widget( &fov_slider_ );
+	container_.add_widget( &fullscreen_button_ );
+	container_.add_widget( &back_button_ );
+
 	float_t screen_w = ui_renderer_.get_screen_width();
-	float_t menu_w = get_content_width();
+	float_t content_w = get_content_width();
 
-	menu_.set_width( menu_w );
-	menu_.set_item_height( 100.f );
-	menu_.set_position( ( screen_w - menu_w ) * 0.5f, 200.f );
-	update_all_text();
-}
-
-string_t OptionsScene::make_bar( float_t value, float_t min_val, float_t max_val, int bar_width )
-{
-	float_t ratio = ( value - min_val ) / ( max_val - min_val );
-
-	if ( ratio < 0.f ) ratio = 0.f;
-	if ( ratio > 1.f ) ratio = 1.f;
-
-	int filled = static_cast< int >( ratio * bar_width + 0.5f );
-
-	string_t bar = "[";
-
-	for ( int i = 0; i < bar_width; i++ )
-	{
-		bar += ( i < filled ) ? "=" : " ";
-	}
-
-	bar += "]";
-
-	return bar;
-}
-
-void OptionsScene::update_all_text()
-{
-	// Resolution
-	{
-		const auto& res = resolutions_[ current_resolution_ ];
-		std::stringstream ss;
-		ss << "Resolution    < " << res.width << " x " << res.height << " >";
-		menu_.set_item_text( resolution_index_, ss.str() );
-	}
-
-	// Volume
-	{
-		int percent = static_cast< int >( volume_ * 100.f + 0.5f );
-		std::stringstream ss;
-		ss << "Volume        " << make_bar( volume_, 0.f, 1.f ) << " " << percent << "%";
-		menu_.set_item_text( volume_index_, ss.str() );
-	}
-
-	// Mute
-	{
-		std::stringstream ss;
-		ss << "Mute          " << ( is_mute_ ? "ON" : "OFF" );
-		menu_.set_item_text( mute_index_, ss.str() );
-	}
-
-	// Mouse Sensitivity
-	{
-		std::stringstream ss;
-		ss << "Mouse Sens.   " << make_bar( mouse_sensitivity_, get_min_sensitivity(), get_max_sensitivity() );
-		ss << " " << std::fixed;
-		ss.precision( 1 );
-		ss << mouse_sensitivity_;
-		menu_.set_item_text( mouse_sens_index_, ss.str() );
-	}
-
-	// FOV
-	{
-		int fov_int = static_cast< int >( fov_ + 0.5f );
-		std::stringstream ss;
-		ss << "FOV           " << make_bar( fov_, get_min_fov(), get_max_fov() ) << " " << fov_int;
-		menu_.set_item_text( fov_index_, ss.str() );
-	}
-
-	// Fullscreen
-	{
-		std::stringstream ss;
-		ss << "Fullscreen    " << ( is_fullscreen_ ? "ON" : "OFF" );
-		menu_.set_item_text( fullscreen_index_, ss.str() );
-	}
-}
-
-void OptionsScene::adjust_value( float_t& value, float_t delta, float_t min_val, float_t max_val )
-{
-	value += delta;
-
-	if ( value < min_val ) value = min_val;
-	if ( value > max_val ) value = max_val;
+	container_.set_position( ( screen_w - content_w ) * 0.5f, 200.f );
+	container_.set_width( content_w );
+	container_.set_item_height( 100.f );
+	container_.layout();
 }
 
 void OptionsScene::save_settings()
 {
-	const auto& res = resolutions_[ current_resolution_ ];
-	get_config()->set( "graphics.screen_width", res.width );
-	get_config()->set( "graphics.screen_height", res.height );
+	int res_index = resolution_select_.get_selected();
 
-	get_config()->set( "audio.volume", volume_ );
+	if ( res_index >= 0 && res_index < static_cast< int >( resolutions_.size() ) )
+	{
+		const auto& res = resolutions_[ res_index ];
+		get_config()->set( "graphics.screen_width", res.width );
+		get_config()->set( "graphics.screen_height", res.height );
+	}
+
+	get_config()->set( "audio.volume", volume_slider_.get_value() );
 	get_config()->set< int >( "audio.mute", is_mute_ ? 1 : 0 );
-	get_config()->set( "input.mouse.x_sensitivity", mouse_sensitivity_ );
-	get_config()->set( "input.mouse.y_sensitivity", mouse_sensitivity_ );
-	get_config()->set( "camera.fov", fov_ );
+	get_config()->set( "input.mouse.x_sensitivity", mouse_sens_slider_.get_value() );
+	get_config()->set( "input.mouse.y_sensitivity", mouse_sens_slider_.get_value() );
+	get_config()->set( "camera.fov", fov_slider_.get_value() );
 	get_config()->set< int >( "graphics.full_screen", is_fullscreen_ ? 1 : 0 );
 
 	get_config()->save_file( "blue-sky.config" );
@@ -211,49 +186,7 @@ void OptionsScene::update()
 {
 	Scene::update();
 
-	int selected = menu_.get_selected_index();
-
-	// 左右キーでスライダー / 選択項目を調整
-	bool is_left = get_input()->push( Input::Button::LEFT );
-	bool is_right = get_input()->push( Input::Button::RIGHT );
-
-	if ( selected == resolution_index_ && ( is_left || is_right ) )
-	{
-		if ( is_right && current_resolution_ < static_cast< int >( resolutions_.size() ) - 1 )
-		{
-			current_resolution_++;
-		}
-		else if ( is_left && current_resolution_ > 0 )
-		{
-			current_resolution_--;
-		}
-
-		apply_resolution();
-		update_all_text();
-	}
-	else if ( selected == volume_index_ && ( is_left || is_right ) )
-	{
-		float_t delta = is_right ? get_volume_step() : -get_volume_step();
-		adjust_value( volume_, delta, 0.f, 1.f );
-		get_sound_manager()->set_volume( volume_ );
-		update_all_text();
-	}
-	else if ( selected == mouse_sens_index_ && ( is_left || is_right ) )
-	{
-		float_t delta = is_right ? get_sensitivity_step() : -get_sensitivity_step();
-		adjust_value( mouse_sensitivity_, delta, get_min_sensitivity(), get_max_sensitivity() );
-		get_input()->set_mouse_x_sensitivity( mouse_sensitivity_ );
-		get_input()->set_mouse_y_sensitivity( mouse_sensitivity_ );
-		update_all_text();
-	}
-	else if ( selected == fov_index_ && ( is_left || is_right ) )
-	{
-		float_t delta = is_right ? get_fov_step() : -get_fov_step();
-		adjust_value( fov_, delta, get_min_fov(), get_max_fov() );
-		update_all_text();
-	}
-
-	menu_.update( get_input(), ui_renderer_ );
+	container_.update( get_input(), ui_renderer_ );
 }
 
 void OptionsScene::render()
@@ -261,7 +194,7 @@ void OptionsScene::render()
 	float_t screen_w = ui_renderer_.get_screen_width();
 	float_t screen_h = ui_renderer_.get_screen_height();
 
-	// 半透明の暗幕（全画面）— Fader は fade_==0 時に透明になるため draw_rect を使用
+	// 半透明の暗幕（全画面）
 	ui_renderer_.draw_rect( 0.f, 0.f, screen_w, screen_h, Color( 0.f, 0.f, 0.f, 0.5f ) );
 
 	// パネル背景
@@ -278,31 +211,22 @@ void OptionsScene::render()
 	float_t title_y = screen_h * 0.08f;
 	ui_renderer_.draw_text( title_x, title_y, content_w, 120.f, "OPTIONS", core::graphics::TextStyle{ Color( 1.f, 1.f, 1.f, 1.f ), Color::Black, 3.f } );
 
-	// メニュー
-	menu_.render( ui_renderer_ );
+	// ウィジェット描画
+	container_.render( ui_renderer_ );
 
 	// 操作ヒント
 	float_t hint_y = screen_h * 0.90f;
 	float_t hint_x = ( screen_w - content_w ) * 0.5f;
 
-	int selected = menu_.get_selected_index();
+	const auto* focused = container_.get_focused_widget();
+	const char_t* hint = "ESC Back";
 
-	if ( selected == resolution_index_ )
+	if ( focused && ! focused->get_hint_text().empty() )
 	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Arrow/AD Change    ESC Back", core::graphics::TextStyle{ Color( 0.5f, 0.5f, 0.5f, 1.f ), Color::Black, 3.f } );
+		hint = focused->get_hint_text().c_str();
 	}
-	else if ( selected == volume_index_ || selected == mouse_sens_index_ || selected == fov_index_ )
-	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Arrow/AD Adjust    ESC Back", core::graphics::TextStyle{ Color( 0.5f, 0.5f, 0.5f, 1.f ), Color::Black, 3.f } );
-	}
-	else if ( selected == mute_index_ || selected == fullscreen_index_ )
-	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Enter/Click Toggle    ESC Back", core::graphics::TextStyle{ Color( 0.5f, 0.5f, 0.5f, 1.f ), Color::Black, 3.f } );
-	}
-	else
-	{
-		ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Enter/Click Select    ESC Back", core::graphics::TextStyle{ Color( 0.5f, 0.5f, 0.5f, 1.f ), Color::Black, 3.f } );
-	}
+
+	ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, hint, core::graphics::TextStyle{ Color( 0.5f, 0.5f, 0.5f, 1.f ), Color::Black, 3.f } );
 }
 
 } // namespace blue_sky

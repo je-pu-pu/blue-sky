@@ -143,13 +143,12 @@ public:
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const override;
 	void draw_text( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const override;
-	void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
-	void draw_text_center( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const override;
-	void draw_text_center( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;
 
 	float_t get_text_height( const char_t* text, float_t width, float_t height ) const override;
 	float_t get_text_height( const wchar_t* text, float_t width, float_t height ) const override;
+
+	void reload_font( const char* font_path ) override;
 
 	void clear_debug_bullet() const override;
 	void render_debug_bullet() const override;

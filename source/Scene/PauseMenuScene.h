@@ -2,8 +2,8 @@
 
 #include "Scene.h"
 
-#include <blue_sky/ui/UIRenderer.h>
-#include <blue_sky/ui/UIVerticalMenu.h>
+#include <blue_sky/ui/Renderer.h>
+#include <blue_sky/ui/VerticalMenu.h>
 
 namespace blue_sky
 {
@@ -13,7 +13,7 @@ namespace blue_sky
  *
  * オーバーレイシーンとして、ゲームプレイ中に上に重ねて表示される。
  * ベースシーン ( GamePlayScene ) は更新を停止し、入力はこのシーンのみが受け取る。
- * UIVerticalMenu を使用した ImGui 非依存の UI。
+ * VerticalMenu を使用した ImGui 非依存の UI。
  */
 class PauseMenuScene : public Scene
 {
@@ -21,8 +21,8 @@ public:
 	static constexpr auto name = "pause_menu";
 
 private:
-	ui::UIRenderer ui_renderer_;
-	ui::UIVerticalMenu menu_;
+	ui::Renderer ui_renderer_;
+	ui::VerticalMenu menu_;
 
 	// レイアウト (仮想座標 1920x1080 基準)
 	float_t get_panel_width() const { return 960.f; }

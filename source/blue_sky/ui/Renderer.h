@@ -30,7 +30,7 @@ namespace blue_sky::ui
  * テキスト描画は 1 回の呼び出しで完結する（内部で 2D/3D コンテキストの切り替えを行う）。
  * スプライト描画は begin_sprite() / end_sprite() で囲んでバッチ処理する。
  */
-class UIRenderer
+class Renderer
 {
 public:
 	using Texture			= core::graphics::Texture;
@@ -49,7 +49,7 @@ private:
 	float_t get_scale_y() const;
 
 public:
-	explicit UIRenderer( GraphicsManager* );
+	explicit Renderer( GraphicsManager* );
 
 	/// 仮想画面サイズ（常に基準解像度を返す）
 	float_t get_screen_width() const { return DESIGN_WIDTH; }
@@ -63,13 +63,19 @@ public:
 	float_t physical_to_virtual_x( float_t px ) const;
 	float_t physical_to_virtual_y( float_t py ) const;
 
-	/// テキスト描画（矩形内に左寄せ）— 仮想座標
+	/**
+	 * 矩形内にテキストを描画する — 仮想座標
+	 *
+	 * @param x     矩形の左端（仮想座標）
+	 * @param y     矩形の上端（仮想座標）
+	 * @param w     矩形の幅（仮想座標）
+	 * @param h     矩形の高さ（仮想座標）
+	 * @param text  描画するテキスト
+	 * @param color テキスト色（配置はデフォルト LEFT+TOP）
+	 * @param style テキストスタイル（h_align / v_align で配置を指定可能）
+	 */
 	void draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color );
 	void draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const core::graphics::TextStyle& style );
-
-	/// テキスト描画（矩形内に中央寄せ）— 仮想座標
-	void draw_text_center( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color );
-	void draw_text_center( float_t x, float_t y, float_t w, float_t h, const char_t* text, const core::graphics::TextStyle& style );
 
 	/// 塗りつぶし矩形の描画 — 仮想座標
 	void draw_rect( float_t x, float_t y, float_t w, float_t h, const Color& color );
@@ -82,6 +88,6 @@ public:
 	GraphicsManager* get_graphics_manager() { return gm_; }
 	const GraphicsManager* get_graphics_manager() const { return gm_; }
 
-}; // class UIRenderer
+}; // class Renderer
 
 } // namespace blue_sky::ui

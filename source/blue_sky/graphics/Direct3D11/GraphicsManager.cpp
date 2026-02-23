@@ -28,6 +28,32 @@
 
 #include <common/string.h>
 
+namespace {
+
+/// 矩形 [left, right] 内でテキスト幅 text_w を水平配置した X 座標を返す
+float align_x( float left, float right, float text_w, core::graphics::HAlign align )
+{
+	switch ( align )
+	{
+	case core::graphics::HAlign::CENTER: return ( left + right ) * 0.5f - text_w * 0.5f;
+	case core::graphics::HAlign::RIGHT:  return right - text_w;
+	default:                             return left;
+	}
+}
+
+/// 矩形 [top, bottom] 内でテキスト高さ text_h を垂直配置した Y 座標を返す
+float align_y( float top, float bottom, float text_h, core::graphics::VAlign align )
+{
+	switch ( align )
+	{
+	case core::graphics::VAlign::CENTER: return top + ( bottom - top - text_h ) * 0.5f;
+	case core::graphics::VAlign::BOTTOM: return bottom - text_h;
+	default:                             return top;
+	}
+}
+
+} // namespace
+
 namespace blue_sky::graphics::direct_3d_11
 {
 
@@ -524,22 +550,16 @@ void GraphicsManager::render_background() const
 }
 
 /**
- * 画面に文字列を描画する
- *
- * @param x 
- * @param y
- * @param text 文字列
- * @param color 色
- * @todo 高速化する
+ * 矩形内に文字列を描画する（TextStyle の h_align / v_align に従う）
  */
-void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color ) const
+void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float_t bottom, const char_t* text, const Color& color ) const
 {
 	core::graphics::TextStyle style;
 	style.text_color = color;
 	draw_text( left, top, right, bottom, text, style );
 }
 
-void GraphicsManager::draw_text( float_t left, float_t top, float_t, float, const char_t* text, const core::graphics::TextStyle& style ) const
+void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float_t bottom, const char_t* text, const core::graphics::TextStyle& style ) const
 {
 	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
 	{
@@ -552,11 +572,16 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t, float, cons
 		resolved.font_size = default_font_size_;
 	}
 
-	msdf_text_renderer_->draw_text( left, top, text, resolved );
+	float_t text_w = msdf_text_renderer_->measure_text_width( text, resolved.font_size );
+	float_t text_h = msdf_text_renderer_->measure_text_height( text, resolved.font_size );
+	float_t x = align_x( left, right, text_w, resolved.h_align );
+	float_t y = align_y( top, bottom, text_h, resolved.v_align );
+
+	msdf_text_renderer_->draw_text( x, y, text, resolved );
 	msdf_text_renderer_->flush();
 }
 
-void GraphicsManager::draw_text( float_t left, float_t top, float_t, float, const wchar_t* text, const core::graphics::TextStyle& style ) const
+void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float_t bottom, const wchar_t* text, const core::graphics::TextStyle& style ) const
 {
 	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
 	{
@@ -569,58 +594,12 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t, float, cons
 		resolved.font_size = default_font_size_;
 	}
 
-	msdf_text_renderer_->draw_text( left, top, text, resolved );
-	msdf_text_renderer_->flush();
-}
+	float_t text_w = msdf_text_renderer_->measure_text_width( text, resolved.font_size );
+	float_t text_h = msdf_text_renderer_->measure_text_height( text, resolved.font_size );
+	float_t x = align_x( left, right, text_w, resolved.h_align );
+	float_t y = align_y( top, bottom, text_h, resolved.v_align );
 
-/**
- * 矩形内に中央揃えで文字列を描画する
- */
-void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right, float bottom, const char_t* text, const Color& color ) const
-{
-	core::graphics::TextStyle style;
-	style.text_color = color;
-	draw_text_center( left, top, right, bottom, text, style );
-}
-
-/**
- * 矩形内に中央揃えで文字列を TextStyle 指定で描画する
- */
-void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right, float, const char_t* text, const core::graphics::TextStyle& style ) const
-{
-	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
-	{
-		return;
-	}
-
-	core::graphics::TextStyle resolved = style;
-	if ( resolved.font_size == 0.f )
-	{
-		resolved.font_size = default_font_size_;
-	}
-
-	float text_w = msdf_text_renderer_->measure_text_width( text, resolved.font_size );
-	float x = ( left + right ) * 0.5f - text_w * 0.5f;
-	msdf_text_renderer_->draw_text( x, top, text, resolved );
-	msdf_text_renderer_->flush();
-}
-
-void GraphicsManager::draw_text_center( float_t left, float_t top, float_t right, float, const wchar_t* text, const core::graphics::TextStyle& style ) const
-{
-	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
-	{
-		return;
-	}
-
-	core::graphics::TextStyle resolved = style;
-	if ( resolved.font_size == 0.f )
-	{
-		resolved.font_size = default_font_size_;
-	}
-
-	float text_w = msdf_text_renderer_->measure_text_width( text, resolved.font_size );
-	float x = ( left + right ) * 0.5f - text_w * 0.5f;
-	msdf_text_renderer_->draw_text( x, top, text, resolved );
+	msdf_text_renderer_->draw_text( x, y, text, resolved );
 	msdf_text_renderer_->flush();
 }
 
@@ -676,6 +655,14 @@ void GraphicsManager::draw_text_at_center( const char_t* text, const Color& colo
 
 	msdf_text_renderer_->draw_text( x, y, text, style );
 	msdf_text_renderer_->flush();
+}
+
+void GraphicsManager::reload_font( const char* font_path )
+{
+	if ( msdf_text_renderer_ )
+	{
+		msdf_text_renderer_->reload_font( font_path );
+	}
 }
 
 /**

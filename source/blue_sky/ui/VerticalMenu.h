@@ -13,7 +13,7 @@ namespace blue_sky
 
 namespace blue_sky::ui
 {
-	class UIRenderer;
+	class Renderer;
 
 /**
  * 縦並びメニュー
@@ -21,7 +21,7 @@ namespace blue_sky::ui
  * キーボード / コントローラーで操作可能な縦並びのテキストメニュー。
  * オプション画面やポーズメニューなどのオーバーレイシーンで使用する。
  */
-class UIVerticalMenu
+class VerticalMenu
 {
 public:
 	struct Item
@@ -52,7 +52,7 @@ private:
 	int last_mouse_y_ = -1;
 
 public:
-	UIVerticalMenu();
+	VerticalMenu();
 
 	/// メニュー項目の追加・更新・クリア
 	void add_item( const string_t& text, std::function< void() > on_select );
@@ -68,14 +68,14 @@ public:
 	/// 色設定
 	void set_colors( const Color& normal, const Color& selected );
 
-	/// 画面中央に配置する（UIRenderer から画面サイズを取得）
-	void center_on_screen( const UIRenderer& renderer );
+	/// 画面中央に配置する（Renderer から画面サイズを取得）
+	void center_on_screen( const Renderer& renderer );
 
 	/// 入力処理（上下キー / 決定ボタン / マウス）
-	void update( Input* input, const UIRenderer& renderer );
+	void update( Input* input, const Renderer& renderer );
 
 	/// 描画
-	void render( UIRenderer& renderer );
+	void render( Renderer& renderer );
 
 	/// 選択状態
 	int get_selected_index() const { return selected_index_; }
@@ -86,6 +86,6 @@ public:
 
 	int get_item_count() const { return static_cast< int >( items_.size() ); }
 
-}; // class UIVerticalMenu
+}; // class VerticalMenu
 
 } // namespace blue_sky::ui

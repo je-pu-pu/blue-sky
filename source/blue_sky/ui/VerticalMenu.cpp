@@ -1,23 +1,23 @@
-#include "UIVerticalMenu.h"
-#include "UIRenderer.h"
+#include "VerticalMenu.h"
+#include "Renderer.h"
 
 #include <blue_sky/Input.h>
 
 namespace blue_sky::ui
 {
 
-UIVerticalMenu::UIVerticalMenu()
+VerticalMenu::VerticalMenu()
 	: normal_color_( 0.8f, 0.8f, 0.8f, 1.f )
 	, selected_color_( 1.f, 1.f, 0.5f, 1.f )
 {
 }
 
-void UIVerticalMenu::add_item( const string_t& text, std::function< void() > on_select )
+void VerticalMenu::add_item( const string_t& text, std::function< void() > on_select )
 {
 	items_.push_back( { text, on_select } );
 }
 
-void UIVerticalMenu::set_item_text( int index, const string_t& text )
+void VerticalMenu::set_item_text( int index, const string_t& text )
 {
 	if ( index >= 0 && index < static_cast< int >( items_.size() ) )
 	{
@@ -25,35 +25,35 @@ void UIVerticalMenu::set_item_text( int index, const string_t& text )
 	}
 }
 
-void UIVerticalMenu::clear_items()
+void VerticalMenu::clear_items()
 {
 	items_.clear();
 	selected_index_ = 0;
 }
 
-void UIVerticalMenu::set_position( float_t x, float_t y )
+void VerticalMenu::set_position( float_t x, float_t y )
 {
 	x_ = x;
 	y_ = y;
 }
 
-void UIVerticalMenu::set_width( float_t w )
+void VerticalMenu::set_width( float_t w )
 {
 	width_ = w;
 }
 
-void UIVerticalMenu::set_item_height( float_t h )
+void VerticalMenu::set_item_height( float_t h )
 {
 	item_height_ = h;
 }
 
-void UIVerticalMenu::set_colors( const Color& normal, const Color& selected )
+void VerticalMenu::set_colors( const Color& normal, const Color& selected )
 {
 	normal_color_ = normal;
 	selected_color_ = selected;
 }
 
-void UIVerticalMenu::center_on_screen( const UIRenderer& renderer )
+void VerticalMenu::center_on_screen( const Renderer& renderer )
 {
 	float_t total_height = item_height_ * static_cast< float_t >( items_.size() );
 
@@ -61,7 +61,7 @@ void UIVerticalMenu::center_on_screen( const UIRenderer& renderer )
 	y_ = ( renderer.get_screen_height() - total_height ) * 0.5f;
 }
 
-void UIVerticalMenu::update( Input* input, const UIRenderer& renderer )
+void VerticalMenu::update( Input* input, const Renderer& renderer )
 {
 	if ( items_.empty() )
 	{
@@ -120,7 +120,7 @@ void UIVerticalMenu::update( Input* input, const UIRenderer& renderer )
 	}
 }
 
-void UIVerticalMenu::render( UIRenderer& renderer )
+void VerticalMenu::render( Renderer& renderer )
 {
 	for ( int i = 0; i < static_cast< int >( items_.size() ); i++ )
 	{
@@ -131,11 +131,14 @@ void UIVerticalMenu::render( UIRenderer& renderer )
 
 		string_t display_text = is_selected ? ( cursor_text_ + items_[ i ].text ) : ( string_t( "  " ) + items_[ i ].text );
 
-		renderer.draw_text( x_, item_y, width_, item_height_, display_text.c_str(), color );
+		core::graphics::TextStyle style;
+		style.text_color = color;
+		style.v_align = core::graphics::VAlign::CENTER;
+		renderer.draw_text( x_, item_y, width_, item_height_, display_text.c_str(), style );
 	}
 }
 
-void UIVerticalMenu::set_selected_index( int index )
+void VerticalMenu::set_selected_index( int index )
 {
 	if ( items_.empty() )
 	{
@@ -156,7 +159,7 @@ void UIVerticalMenu::set_selected_index( int index )
 	}
 }
 
-void UIVerticalMenu::select_next()
+void VerticalMenu::select_next()
 {
 	if ( items_.empty() )
 	{
@@ -171,7 +174,7 @@ void UIVerticalMenu::select_next()
 	}
 }
 
-void UIVerticalMenu::select_prev()
+void VerticalMenu::select_prev()
 {
 	if ( items_.empty() )
 	{

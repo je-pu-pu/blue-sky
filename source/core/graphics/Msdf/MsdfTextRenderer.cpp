@@ -428,4 +428,11 @@ void MsdfTextRenderer::flush()
 	indices_.clear();
 }
 
+void MsdfTextRenderer::reload_font( const char* font_path )
+{
+	cache_->clear();
+	font_->unload();
+	font_->load( font_path );
+}
+
 } // namespace core::graphics

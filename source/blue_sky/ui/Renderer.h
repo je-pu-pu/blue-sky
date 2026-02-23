@@ -63,7 +63,17 @@ public:
 	float_t physical_to_virtual_x( float_t px ) const;
 	float_t physical_to_virtual_y( float_t py ) const;
 
-	/// テキスト描画（矩形内、TextStyle の h_align / v_align に従う）— 仮想座標
+	/**
+	 * 矩形内にテキストを描画する — 仮想座標
+	 *
+	 * @param x     矩形の左端（仮想座標）
+	 * @param y     矩形の上端（仮想座標）
+	 * @param w     矩形の幅（仮想座標）
+	 * @param h     矩形の高さ（仮想座標）
+	 * @param text  描画するテキスト
+	 * @param color テキスト色（配置はデフォルト LEFT+TOP）
+	 * @param style テキストスタイル（h_align / v_align で配置を指定可能）
+	 */
 	void draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color );
 	void draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const core::graphics::TextStyle& style );
 

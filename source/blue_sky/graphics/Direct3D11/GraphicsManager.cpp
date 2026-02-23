@@ -30,6 +30,7 @@
 
 namespace {
 
+/// 矩形 [left, right] 内でテキスト幅 text_w を水平配置した X 座標を返す
 float align_x( float left, float right, float text_w, core::graphics::HAlign align )
 {
 	switch ( align )
@@ -40,6 +41,7 @@ float align_x( float left, float right, float text_w, core::graphics::HAlign ali
 	}
 }
 
+/// 矩形 [top, bottom] 内でテキスト高さ text_h を垂直配置した Y 座標を返す
 float align_y( float top, float bottom, float text_h, core::graphics::VAlign align )
 {
 	switch ( align )

@@ -27,10 +27,8 @@
 - unload_texture() 時にオブザーバー通知 or weak_ptr 化が必要
 - [ ] 対応する
 
-### ウィンドウリサイズ時に RenderTargetTexture が再作成されない [難易度: 低]
-- `Direct3D11.cpp:503` — バックバッファは再作成するが RenderTarget は未対応
-- リサイズ後にシャドウマップやポストエフェクトが古いサイズのまま残る可能性
-- [ ] 調査して必要なら修正
+### ~~ウィンドウリサイズ時に RenderTargetTexture が再作成されない~~ [完了]
+- [x] 対応済み — 遅延再作成 (Lazy Resize) 方式で解決。画面サイズ依存 RTT は activate()/clear() 時にサイズ不一致を検出して自動再作成。固定サイズ RTT (シャドウマップ等) は対象外。
 
 ### スカイボックスのテクスチャ名が汎用的すぎる [難易度: 低]
 - `Direct3D11/GraphicsManager.cpp:259` — "front", "back" 等の名前で競合リスク

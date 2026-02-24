@@ -674,6 +674,7 @@ void GameMain::on_resize()
 	if ( direct_3d_ )
 	{
 		direct_3d_->on_resize( get_app()->get_width(), get_app()->get_height() );
+		update_render_data_for_game();
 	}
 }
 

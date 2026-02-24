@@ -500,7 +500,6 @@ void Direct3D11::on_resize( int w, int h )
 
 	setup_default_viewport();
 
-	/// @todo 全ての RenderTargetTexture を再作成する？ ( 必要があるか要調査 )
 }
 
 /**

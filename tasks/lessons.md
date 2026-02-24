@@ -17,3 +17,9 @@
 
 - コードを `core::ecs` → `blue_sky::ecs` に移動する際、名前空間が変わると基底クラス・型の非修飾参照が解決できなくなる。移動先の名前空間に `using core::ecs::Component;` 等の using 宣言を追加する必要がある
 - `.cpp` ファイルも名前空間を変更した場合、`.h` で using した型はスコープ内で使えるが、直接参照している別の名前空間の型 (例: `math::Vector` → `core::math::Vector`) は修飾が必要
+
+## 親子名前空間での型名の曖昧さ
+
+- `core::graphics::direct_3d_11::Texture` と `core::graphics::Texture` のように、子名前空間の型が親名前空間の同名型を隠す場合、基底クラス経由で親の型が優先されることがある
+- 具体例: `core::graphics::direct_3d_11::RenderTargetTexture` が `core::graphics::RenderTargetTexture` を継承しているため、クラス内で非修飾の `Texture` が `core::graphics::Texture` (基底クラスの名前空間) に解決された
+- 対策: ヘッダでは完全修飾名 (`core::graphics::direct_3d_11::Texture`) を使い、`.cpp` では `using D3D11Texture = core::graphics::direct_3d_11::Texture;` のようなエイリアスで簡潔に書く

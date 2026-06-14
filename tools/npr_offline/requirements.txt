@@ -1,0 +1,8 @@
+# Neural NPR オフライン検証ハーネスの依存
+# GPU を使う場合は torch / torchvision を https://pytorch.org の案内に従って
+# CUDA 対応版で入れること（下の指定は CPU でも動くが neural は非常に遅い）。
+torch>=2.0
+torchvision>=0.15
+opencv-python>=4.7
+numpy>=1.23
+pillow>=9.0

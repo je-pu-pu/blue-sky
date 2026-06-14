@@ -23,3 +23,16 @@
 - `core::graphics::direct_3d_11::Texture` と `core::graphics::Texture` のように、子名前空間の型が親名前空間の同名型を隠す場合、基底クラス経由で親の型が優先されることがある
 - 具体例: `core::graphics::direct_3d_11::RenderTargetTexture` が `core::graphics::RenderTargetTexture` を継承しているため、クラス内で非修飾の `Texture` が `core::graphics::Texture` (基底クラスの名前空間) に解決された
 - 対策: ヘッダでは完全修飾名 (`core::graphics::direct_3d_11::Texture`) を使い、`.cpp` では `using D3D11Texture = core::graphics::direct_3d_11::Texture;` のようなエイリアスで簡潔に書く
+
+## Python 検証ツールの環境構築 (tools/npr_offline)
+
+- システムの `python` は 3.14 で新しすぎ、torch/opencv 等の wheel が無くインストール失敗する。ツールごとに **uv で隔離 venv** を作る (`tools/<name>/.venv`, Python 3.12)。グローバル pip は汚さない
+- `uv` は PATH に乗らないことがある。**`python -m uv`** で叩けば動く
+- GPU (RTX 5070 Ti / Blackwell, sm_120) では torch は **cu128 wheel** が必要 (`--index-url https://download.pytorch.org/whl/cu128`)。**CUDA Toolkit の別途インストールは不要** — cu128 wheel が CUDA ランタイムを同梱するので、新しめの NVIDIA ドライバさえあれば `torch.cuda.is_available()` が True になる
+- 1080p フレームを 120 枚 float32 で全保持すると RAM が枯渇する (1枚23.7MiB × frames/naive/stable/comparison)。**読み込み時に最長辺をダウンスケール** (`--proc-size`, 既定720) して回避
+- Windows コンソールは cp932 で、非ASCII (Wikimedia のファイル名等) を `print` すると `UnicodeEncodeError`。スクリプト先頭で `sys.stdout.reconfigure(encoding="utf-8")` する
+
+## .gitignore のパターン精度
+
+- `/tools/npr_offline/out/` は **`out/` ディレクトリしかマッチしない**。`run_styles.sh` が作る `out_pencil/` `out_brush_starry_night/` 等の `out_*` は無視されず、誤ってコミット対象になる
+- 出力ディレクトリを接尾辞付きで量産する場合は **`out_*/` のようなワイルドカードパターン**で ignore すること

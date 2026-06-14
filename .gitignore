@@ -37,3 +37,17 @@
 
 /do_de_show/
 /.claude/settings.local.json
+
+# フレームダンプ出力（neural NPR オフライン検証）
+dump/
+
+# Python（tools/npr_offline 等）
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.pth
+*.onnx
+/tools/npr_offline/out/
+/tools/npr_offline/out_*/

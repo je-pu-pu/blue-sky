@@ -17,6 +17,30 @@
 
 ---
 
+## Neural NPR オフライン検証 (エピックB / 段階0a)
+
+実機統合前に「シンプルなレンダ結果を NPR 調へ変換したとき、時間的にちらつかず成立するか」を
+オフラインで検証する。Asana エピックB。ブランチ `feature/neural-npr-offline-validation`。
+
+### 完了
+- [x] エンジン側フレームダンパー実装 (`source/Scene/DebugScene.cpp` の `dump_texture_2d_to_png` + imgui パネル、`dump/color_%04d.png`)
+- [x] Python 検証ハーネス `tools/npr_offline/` 実装 (run_eval / io_utils / temporal / stylizers)
+- [x] 隔離環境を uv で構築 (Python 3.12 venv、torch 2.11+cu128、RTX 5070 Ti / CUDA 認識OK)
+- [x] スタイライザ: classic(セル調) / neural(VGG Gatys) / pencil(古典・ドッジ+XDoG) を実装
+- [x] 評価実行・結果取得 (120フレーム、source/dump):
+  - 安定化(reproject+EMA)は全スタイルで約40〜65%の時間誤差削減を確認
+  - 鉛筆(pencil古典)が最も時間安定 (naive 0.0054)、neural系は素のちらつきが大きい (0.06〜0.09)
+  - 参照画像版: 鉛筆=黒鉛デッサン(carmiencke) naive0.032→stable0.012(63%)、ペン画=Van Gogh葦ペン naive0.079→stable0.029(63%)
+
+### 次の判断・タスク
+- [ ] 各 `out_*/comparison.mp4` の naive vs stable を目視確認し、成立可否を最終判断
+- [ ] (案A) neural の naive を「前フレーム結果で最適化を初期化」して公平に再評価
+- [ ] (案B/段階0b) エンジンで法線+モーションベクトルもダンプし、warp を正確化して再評価
+- [ ] 成果(ハーネス+結果)のコミット ※ `DebugScene.cpp` に既存変更と混在 → 分離可否をユーザーに相談してから
+- [ ] (将来案④) 作例ベースのペア学習 (diffusion 教師/手描き作例) — Asana エピックB に起票済み
+
+---
+
 ## 重要度: 高 / バグリスク・アーキテクチャ違反
 
 ### ~~Shader.h が Direct3D11 ConstantBuffer を直接参照~~ [完了]

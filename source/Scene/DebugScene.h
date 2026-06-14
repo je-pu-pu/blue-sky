@@ -31,6 +31,12 @@ protected:
 
 	core::graphics::TextStyle debug_text_style_ = { Color::White, Color::Black, 2.f, 32.f };
 
+	// フレームダンプ ( neural NPR オフライン検証用 )
+	bool	frame_dumping_			= false;	///< ダンプ中か
+	int		frame_dump_total_		= 120;		///< ダンプするフレーム数
+	int		frame_dump_remaining_	= 0;		///< 残りフレーム数
+	int		frame_dump_index_		= 0;		///< 出力中のフレーム番号
+
 protected:
 
 	/// @todo Scenegraph に移動する

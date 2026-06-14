@@ -30,6 +30,150 @@
 #include <imgui.h>
 #include <portable-file-dialogs.h>
 
+#include <core/graphics/Direct3D11/Direct3D11.h>
+#include <core/graphics/Direct3D11/RenderTargetTexture.h>
+
+#include <wrl/client.h>
+#include <wincodec.h>
+
+#include <filesystem>
+#include <vector>
+#include <cstring>
+#include <cstdio>
+
+#pragma comment( lib, "windowscodecs.lib" )
+
+namespace
+{
+
+/**
+ * R8G8B8A8_UNORM のテクスチャを PNG として保存する ( neural NPR オフライン検証用の簡易ダンパー )
+ *
+ * DirectXTK に依存せず Windows 標準の WIC で完結させる。
+ */
+bool dump_texture_2d_to_png(
+	ID3D11Device* device,
+	ID3D11DeviceContext* context,
+	ID3D11Texture2D* source,
+	const wchar_t* file_name )
+{
+	using Microsoft::WRL::ComPtr;
+
+	if ( ! device || ! context || ! source )
+	{
+		return false;
+	}
+
+	D3D11_TEXTURE2D_DESC desc{};
+	source->GetDesc( & desc );
+
+	// MSAA なら非 MSAA テクスチャへ解決する
+	ComPtr< ID3D11Texture2D > resolved;
+	if ( desc.SampleDesc.Count > 1 )
+	{
+		D3D11_TEXTURE2D_DESC rd = desc;
+		rd.SampleDesc.Count = 1;
+		rd.SampleDesc.Quality = 0;
+		rd.Usage = D3D11_USAGE_DEFAULT;
+		rd.BindFlags = 0;
+		rd.CPUAccessFlags = 0;
+		rd.MiscFlags = 0;
+
+		if ( FAILED( device->CreateTexture2D( & rd, nullptr, resolved.GetAddressOf() ) ) )
+		{
+			return false;
+		}
+
+		context->ResolveSubresource( resolved.Get(), 0, source, 0, desc.Format );
+	}
+	else
+	{
+		resolved = source;
+	}
+
+	// CPU から読めるステージングテクスチャへコピー
+	D3D11_TEXTURE2D_DESC sd = desc;
+	sd.SampleDesc.Count = 1;
+	sd.SampleDesc.Quality = 0;
+	sd.Usage = D3D11_USAGE_STAGING;
+	sd.BindFlags = 0;
+	sd.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	sd.MiscFlags = 0;
+
+	ComPtr< ID3D11Texture2D > staging;
+	if ( FAILED( device->CreateTexture2D( & sd, nullptr, staging.GetAddressOf() ) ) )
+	{
+		return false;
+	}
+
+	context->CopyResource( staging.Get(), resolved.Get() );
+
+	D3D11_MAPPED_SUBRESOURCE mapped{};
+	if ( FAILED( context->Map( staging.Get(), 0, D3D11_MAP_READ, 0, & mapped ) ) )
+	{
+		return false;
+	}
+
+	// 行ピッチを詰めて連続バッファ化する
+	const UINT stride = desc.Width * 4;
+	std::vector< BYTE > pixels( static_cast< size_t >( stride ) * desc.Height );
+	const BYTE* src = static_cast< const BYTE* >( mapped.pData );
+	for ( UINT y = 0; y < desc.Height; ++y )
+	{
+		std::memcpy( pixels.data() + static_cast< size_t >( y ) * stride, src + static_cast< size_t >( y ) * mapped.RowPitch, stride );
+	}
+	context->Unmap( staging.Get(), 0 );
+
+	// WIC で PNG エンコード ( RGBA → エンコーダ形式へ自動変換 )
+	// COM は既に初期化済みの可能性があるため戻り値は無視する ( RPC_E_CHANGED_MODE でも WIC は利用可 )
+	( void ) CoInitializeEx( nullptr, COINIT_MULTITHREADED );
+
+	ComPtr< IWICImagingFactory > factory;
+	if ( FAILED( CoCreateInstance( CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS( factory.GetAddressOf() ) ) ) )
+	{
+		return false;
+	}
+
+	ComPtr< IWICBitmap > bitmap;
+	if ( FAILED( factory->CreateBitmapFromMemory( desc.Width, desc.Height, GUID_WICPixelFormat32bppRGBA, stride, static_cast< UINT >( pixels.size() ), pixels.data(), bitmap.GetAddressOf() ) ) )
+	{
+		return false;
+	}
+
+	ComPtr< IWICStream > stream;
+	if ( FAILED( factory->CreateStream( stream.GetAddressOf() ) ) || FAILED( stream->InitializeFromFilename( file_name, GENERIC_WRITE ) ) )
+	{
+		return false;
+	}
+
+	ComPtr< IWICBitmapEncoder > encoder;
+	if ( FAILED( factory->CreateEncoder( GUID_ContainerFormatPng, nullptr, encoder.GetAddressOf() ) ) )
+	{
+		return false;
+	}
+	encoder->Initialize( stream.Get(), WICBitmapEncoderNoCache );
+
+	ComPtr< IWICBitmapFrameEncode > frame;
+	encoder->CreateNewFrame( frame.GetAddressOf(), nullptr );
+	frame->Initialize( nullptr );
+	frame->SetSize( desc.Width, desc.Height );
+
+	WICPixelFormatGUID format = GUID_WICPixelFormat32bppBGRA;
+	frame->SetPixelFormat( & format );
+
+	if ( FAILED( frame->WriteSource( bitmap.Get(), nullptr ) ) )
+	{
+		return false;
+	}
+
+	frame->Commit();
+	encoder->Commit();
+
+	return true;
+}
+
+} // namespace
+
 namespace blue_sky
 {
 
@@ -185,6 +329,33 @@ void DebugScene::update()
 	}
 	ImGui::End();
 
+	// フレームダンプ ( neural NPR オフライン検証用 )
+	ImGui::Begin( "Frame Dump (Neural NPR)" );
+	ImGui::InputInt( "Frames", & frame_dump_total_ );
+	if ( frame_dump_total_ < 1 )
+	{
+		frame_dump_total_ = 1;
+	}
+	if ( ! frame_dumping_ )
+	{
+		if ( ImGui::Button( "Start Dump" ) )
+		{
+			frame_dumping_			= true;
+			frame_dump_remaining_	= frame_dump_total_;
+			frame_dump_index_		= 0;
+		}
+	}
+	else
+	{
+		ImGui::Text( "Dumping... %d / %d", frame_dump_index_, frame_dump_total_ );
+		if ( ImGui::Button( "Stop" ) )
+		{
+			frame_dumping_ = false;
+		}
+	}
+	ImGui::Text( "out: ./dump/color_%%04d.png" );
+	ImGui::End();
+
 	midi_sequencer->process();
 	// std::cout << midi_sequencer->get_ticks() << std::endl;
 
@@ -218,6 +389,39 @@ void DebugScene::render()
 
 	get_graphics_manager()->render_background();
 	get_graphics_manager()->render_active_objects( get_active_object_manager() );
+
+	// フレームダンプ ( ポストエフェクト前のクリーンなレンダ結果を連番 PNG 出力 )
+	if ( frame_dumping_ && frame_dump_remaining_ > 0 )
+	{
+		std::filesystem::create_directories( "dump" );
+
+		auto* d3d = core::graphics::direct_3d_11::Direct3D11::get_instance();
+		auto* rtt = static_cast< core::graphics::direct_3d_11::RenderTargetTexture* >( render_result_texture_.get() );
+
+		ID3D11Resource* resource = nullptr;
+		rtt->get_render_target_view()->GetResource( & resource );
+
+		ID3D11Texture2D* texture = nullptr;
+		if ( resource )
+		{
+			resource->QueryInterface( IID_PPV_ARGS( & texture ) );
+		}
+
+		wchar_t path[ 64 ];
+		swprintf_s( path, L"dump/color_%04d.png", frame_dump_index_ );
+		dump_texture_2d_to_png( d3d->getDevice(), d3d->getImmediateContext(), texture, path );
+
+		if ( texture )	texture->Release();
+		if ( resource )	resource->Release();
+
+		frame_dump_index_++;
+		frame_dump_remaining_--;
+
+		if ( frame_dump_remaining_ <= 0 )
+		{
+			frame_dumping_ = false;
+		}
+	}
 
 	get_graphics_manager()->render_post_effect( render_result_texture_.get() );
 

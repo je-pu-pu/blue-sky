@@ -28,6 +28,7 @@ protected:
 	CityGenerator city_generator_;
 
 	std::unique_ptr< core::graphics::RenderTargetTexture > render_result_texture_;
+	std::unique_ptr< core::graphics::RenderTargetTexture > velocity_texture_;	///< モーションベクトル ( 速度 ) G-buffer ( 案B / 段階0b )
 
 	core::graphics::TextStyle debug_text_style_ = { Color::White, Color::Black, 2.f, 32.f };
 
@@ -36,6 +37,12 @@ protected:
 	int		frame_dump_total_		= 120;		///< ダンプするフレーム数
 	int		frame_dump_remaining_	= 0;		///< 残りフレーム数
 	int		frame_dump_index_		= 0;		///< 出力中のフレーム番号
+	bool	frame_dump_gbuffer_		= false;	///< 深度+カメラ行列/モーションベクトルも併せてダンプするか ( 案B / 段階0b )
+
+	// モーションベクトル用の前フレームカメラ行列
+	Matrix	prev_view_;
+	Matrix	prev_projection_;
+	bool	prev_camera_valid_		= false;
 
 protected:
 

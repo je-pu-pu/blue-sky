@@ -50,6 +50,33 @@ python tools/npr_offline/run_eval.py --frames source/dump --stylizer neural --st
 | `--alpha` | 時間ブレンド係数（0..1, 既定 0.6） |
 | `--max-frames` | 先頭 N 枚だけ処理 |
 | `--steps` / `--max-size` | neural の反復数 / 処理解像度上限 |
+| `--warm-start` | neural: 前フレーム出力を現フレームへ warp して最適化の初期値にする（案A・時間連続化） |
+
+### ウォームスタート（案A）— neural を公平に評価する
+
+neural は既定では各フレームを独立に最適化するため、入力が滑らかでも出力がフレーム間でちらつく。これが「neural 固有の弱点」なのか「フレーム独立最適化が生む人工物」なのかを切り分けるのが案A。`--warm-start` を付けると、**前フレームの出力を光学フローで現フレームへ整列させてから最適化の初期値にする**ため、生成プロセス自体が時間連続化する（後処理の安定化とは独立）。
+
+```bash
+# cold(従来) と warm(案A) を同条件で比較し、naive のちらつきがどれだけ下がるか見る
+python tools/npr_offline/run_eval.py --frames source/dump --stylizer neural --style styles/brush_starry_night.jpg --out out_cold
+python tools/npr_offline/run_eval.py --frames source/dump --stylizer neural --style styles/brush_starry_night.jpg --warm-start --out out_warm
+```
+
+`metrics.json` の `warm_start` で区別。判断材料は **両者の `temporal_error_naive_mean`**（warm のほうが小さければ、ちらつきは独立最適化由来だった）。`run_styles.sh` も第4引数に `warm` を渡すと 3 スタイルを warm で一括評価する。
+
+### 正確なフロー：G-buffer モーションベクトル（案B / 段階0b）
+
+Farneback 推定フローはカメラ移動で新しい面が見える領域で外れ、warp が「ボケる(warm)／固まる(temporal)」破綻を起こす。これを根治するのがエンジン由来のモーションベクトル。
+
+1. **エンジン側でダンプ**: `blue-sky-exe.exe` → debug シーン → imgui「Frame Dump (Neural NPR)」の **「Dump depth + camera (G-buffer)」にチェック** → カメラを動かして Start Dump。`dump/` に `color_*.png` と併せて `motion_%04d.raw`（RG float32, NDC 速度）が出る（深度 `depth_*.raw`・カメラ `cam_*.txt` も。深度は MSAA を切った時のみ＝`graphics.multisample.count=1`）。
+2. **ハーネスで使用**: `--flow gbuffer` を付けると Farneback の代わりに `motion_*.raw` を warp/遮蔽に使う。
+
+```bash
+python tools/npr_offline/run_eval.py --frames source/dump --stylizer neural --style styles/brush_starry_night.jpg \
+    --temporal-weight 2000 --flow gbuffer --out out_gbuffer
+```
+
+`metrics.json` の `flow` で区別（farneback / gbuffer）。制約: 静的メッシュのみ（スキンメッシュは未対応、前フレームボーン姿勢が必要）。
 
 ## 4. 出力と合否の見方
 

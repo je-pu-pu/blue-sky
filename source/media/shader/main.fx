@@ -360,7 +360,59 @@ technique11 skin_with_shadow
 
 
 /**
- * 
+ * モーションベクトル ( 速度 ) パス ( 案B / 段階0b )
+ *
+ * 現フレームと前フレームの画面位置 ( NDC ) の差を RG へ出力する。
+ * 前フレーム行列 PrevWorld / PrevView / PrevProjection を使用。
+ */
+struct PS_VELOCITY_INPUT
+{
+	float4 Position : SV_POSITION;
+	float4 CurClip  : TEXCOORD0;
+	float4 PrevClip : TEXCOORD1;
+};
+
+PS_VELOCITY_INPUT vs_velocity( COMMON_POS_NORM_UV input )
+{
+	PS_VELOCITY_INPUT output;
+
+	float4 cur  = common_wvp_pos( input.Position );
+	float4 prev = mul( mul( mul( input.Position, PrevWorld ), PrevView ), PrevProjection );
+
+	output.Position = cur;
+	output.CurClip  = cur;
+	output.PrevClip = prev;
+
+	return output;
+}
+
+float2 ps_velocity( PS_VELOCITY_INPUT input ) : SV_Target
+{
+	float2 cur_ndc  = input.CurClip.xy  / input.CurClip.w;
+	float2 prev_ndc = input.PrevClip.xy / input.PrevClip.w;
+	return cur_ndc - prev_ndc;	// NDC 空間での速度 ( ハーネス側で画素へ変換 )
+}
+
+technique11 velocity
+{
+	pass main
+	{
+		SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( VelocityDepth, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_velocity() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps_velocity() ) );
+
+		RASTERIZERSTATE = Default;
+	}
+}
+
+
+/**
+ *
  *
  *
  */

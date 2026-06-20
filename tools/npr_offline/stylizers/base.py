@@ -16,10 +16,14 @@ class Stylizer(ABC):
     """
 
     @abstractmethod
-    def stylize(self, image: np.ndarray) -> np.ndarray:
+    def stylize(self, image: np.ndarray, init: np.ndarray = None,
+                temporal_target: np.ndarray = None, temporal_mask: np.ndarray = None) -> np.ndarray:
         """1 フレームをスタイル変換して返す。
 
         :param image: HxWx3 float32 RGB, [0, 1]
+        :param init:  最適化ベースのスタイライザ向けの初期値（HxWx3 float32 RGB）。
+                      前フレーム出力を現フレームへ warp したものを渡すと時間連続化する
+                      （ウォームスタート / 案A）。決定的なスタイライザは無視してよい。
         :return:      HxWx3 float32 RGB, [0, 1]
         """
         raise NotImplementedError

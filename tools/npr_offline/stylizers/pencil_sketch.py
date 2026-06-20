@@ -46,7 +46,8 @@ class PencilSketchStylizer(Stylizer):
         self.contrast = float(contrast)
         self.tint = np.array(tint, dtype=np.float32).reshape(1, 1, 3)
 
-    def stylize(self, image: np.ndarray) -> np.ndarray:
+    def stylize(self, image: np.ndarray, init: np.ndarray = None,
+                temporal_target: np.ndarray = None, temporal_mask: np.ndarray = None) -> np.ndarray:
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY).astype(np.float32)
 
         # --- 陰影（ドッジ合成）---

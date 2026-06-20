@@ -87,6 +87,13 @@ DepthStencilState NoDepthTest
 	DepthEnable = False;
 };
 
+// モーションベクトルパス用 ( シーン深度を再利用し最前面のみ・深度書き込みなし )
+DepthStencilState VelocityDepth
+{
+	DepthWriteMask = ZERO;
+	DepthFunc = LESS_EQUAL;
+};
+
 RasterizerState Default
 {
 	CullMode = BACK;

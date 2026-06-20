@@ -16,7 +16,8 @@ class ClassicNprStylizer(Stylizer):
         self.levels = max(2, levels)
         self.edge_strength = float(np.clip(edge_strength, 0.0, 1.0))
 
-    def stylize(self, image: np.ndarray) -> np.ndarray:
+    def stylize(self, image: np.ndarray, init: np.ndarray = None,
+                temporal_target: np.ndarray = None, temporal_mask: np.ndarray = None) -> np.ndarray:
         bgr = cv2.cvtColor((image * 255.0).astype(np.uint8), cv2.COLOR_RGB2BGR)
 
         # 平滑化して色を量子化（セル調）

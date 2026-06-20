@@ -241,6 +241,7 @@ public:
 	
 	virtual void render_shadow_map() const;
 	virtual void render_active_objects( const ActiveObjectManager* ) const;
+	virtual void render_active_objects_velocity( const ActiveObjectManager* ) const;	///< モーションベクトルパス ( 案B / 段階0b )
 
 	virtual void set_post_effect_shader( Shader* ) override;
 	virtual void render_post_effect( Texture* ) override;

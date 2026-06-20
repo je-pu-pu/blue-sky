@@ -31,13 +31,45 @@
   - 安定化(reproject+EMA)は全スタイルで約40〜65%の時間誤差削減を確認
   - 鉛筆(pencil古典)が最も時間安定 (naive 0.0054)、neural系は素のちらつきが大きい (0.06〜0.09)
   - 参照画像版: 鉛筆=黒鉛デッサン(carmiencke) naive0.032→stable0.012(63%)、ペン画=Van Gogh葦ペン naive0.079→stable0.029(63%)
+- [x] 成果のコミット完了:
+  - フレームダンパー (DebugScene) = `c6ba6e56`（BGM 変更とは分離してコミット）
+  - ハーネス一式 + CLAUDE.md 新規(MSBuild を vswhere でポータブル化) + todo/lessons/.gitignore = `6d580d90`
 
-### 次の判断・タスク
-- [ ] 各 `out_*/comparison.mp4` の naive vs stable を目視確認し、成立可否を最終判断
-- [ ] (案A) neural の naive を「前フレーム結果で最適化を初期化」して公平に再評価
-- [ ] (案B/段階0b) エンジンで法線+モーションベクトルもダンプし、warp を正確化して再評価
-- [ ] 成果(ハーネス+結果)のコミット ※ `DebugScene.cpp` に既存変更と混在 → 分離可否をユーザーに相談してから
+### ★方針転換と最終確定（2026-06）
+**美的目標が反転した**: 当初は「ちらつきを消す（時間安定）」前提だったが、ユーザー判断で目標は
+**手描きアニメの「ボイリング」＝画面全体が毎フレーム少し揺れる手描きの生命感**だと確定。
+ただし「ノイズ（粒状チラつき）」は不可で、「落ち着き＋なめらかな微動」が正解。
+
+確定までの探索（すべて brush_starry_night / sw=1e11 / 120f / 384px、目視で判断）:
+- ちらつきの正体は2成分: ①各フレーム独立最適化のチラつき(boil=0でも残る粒状ノイズ) ②boil(初期値への白色ノイズ)。①は安定化でしか消えない。
+- boil(白色ノイズ初期値)・極弱boilまで: どれも「粒状ノイズ」で不採用。質が手描きの揺れと違う。
+- post-boil(安定化後ワープ)・輪郭マスク合成: いずれも方向違い/ノイズ過多で不採用。
+- 残像問題: 安定化(warp+EMA, α高)で「画面が大きく変わる所に残像」。犯人はboilでなくwarp(新出領域で前フレームを引きずる)。`--warp-reject`(warp前後の食い違いが大きい画素を安定化から除外し今フレームで描き直す)+`--occ-feather`で解消。reject系のαソフト減衰/崖型はいずれも「部分的に動きすぎ」で不採用、warp-rejectのハードカット(boil=0前提)が正解。
+- **コヒーレント・ボイリング(`--coherent-boil`)が答え**: 最適化初期値に「空間/時間的になめらかな揺れ場」を注入。白色ノイズと違い筆致のかたまりがゆっくりウネる。時間的になめらかなのでwarpが追従でき、安定化を生き延びつつ残像にならない。
+
+**確定設定（brush_starry_night, 出力 `out_coh_wr0.07`）**:
+`--style-weight 1e11 --flow gbuffer --alpha 0.9 --warp-reject 0.07 --occ-feather 15 --coherent-boil 0.06 --coherent-space 3 --coherent-time 2`（boil=0）
+（warp-reject は 0.15→0.07 に強化して残像をさらに削減。0.05まで試したが 0.07 が残像消去と自然さのバランス最良）
+
+- [ ] 残タスク: ①他スタイルでも確認(スタイルは将来オリジナルに差し替える前提) ②この成果のコミット(TortoiseGit) ③実機(リアルタイム)統合の検討。なお味系パラメータ(style/content/tv/coherent/steps)はリアルタイム速度に無関係(順伝播ネット化で最適化ループが消えるため)。リアルタイムで効くのは解像度/ネット本体/フロー源(gbufferで対処済)。
+- [x] (旧探索の記録) warm-start=ボケ不採用 / temporal-loss(`--temporal-weight`)=固まり不採用 / tv正則化(`--tv-weight`)=高sw崩壊対策で実装済(今回は不使用)。詳細は上記。
+- [x] (案B/段階0b) エンジンのモーションベクトルで warp 正確化 — **実装完了・データ取得済・確定設定で使用中**。
+  - 当初の背景: temporal-loss(tw2000)で warp が「動くべき部分が固まる」破綻。原因は推定フロー(Farneback)の誤り→エンジンの正確なモーションベクトルで根治。最終的にこの gbuffer フローが安定化(warp-reject)の基盤になった。
+  - エンジン側実装(blue-sky.lib/exe ビルド通過):
+    - 定数バッファ末尾追記: ObjectCB に `prev_world`、FrameCB に `prev_view`/`prev_projection`（HLSL `common_cbuffer.hlsl` も）。既存オフセット不変。
+    - 前フレーム行列の保持: `ActiveObject::update_render_data`(prev_world)、`DebugScene::render`(prev_view/projection)。初回は cur=prev で速度0。
+    - 速度パス: `media/shader/main.fx` に technique `velocity`(VS が現/前クリップ位置→PS が NDC 速度を RG 出力)、`common_state.hlsl` に `VelocityDepth`(LESS_EQUAL/書込なし=シーン深度再利用)。`VelocityShader.h` 新規、`setup_default_shaders` で登録。`GraphicsManager::render_active_objects_velocity()`。
+    - ダンプ: `DebugScene` の imgui「Dump depth + camera (G-buffer)」ON で、`dump/motion_%04d.raw`(RG float32, NDC速度) を出力。MSAA 可(色フォーマットなので resolve)。深度+カメラ(`depth_*.raw`/`cam_*.txt`)も併記ダンプ(再投影クロスチェック用、MSAA 切れば有効)。
+    - 制約: 静的メッシュ(入力レイアウト"main")のみ。スキンメッシュ未対応(このシーンは静的なので可)。
+  - ハーネス側実装: `gbuffer.py`(motion_raw→cur→prev 画素フロー+遮蔽マスク, `feather`対応)、`temporal.py` に `temporal_errors_pre`/`stabilize_pre`(`reject_sigma`/`reject_power`/`warp_reject`/`post_boil`/`coherent_boil_fields`)、`run_eval.py` に `--flow gbuffer`/`--warp-reject`/`--occ-feather`/`--coherent-boil`等。
+  - データ取得済（カメラ前進ダンプ source/dump、color/motion/depth/cam 各120）。確定設定で gbuffer フロー使用中。
 - [ ] (将来案④) 作例ベースのペア学習 (diffusion 教師/手描き作例) — Asana エピックB に起票済み
+
+### 補足（このセッションの状態）
+- 作業ブランチ: `feature/neural-npr-offline-validation`（develop 未マージ）。マージは `--no-ff`、マージ後にブランチ削除。
+- 作業ツリーに残るのはユーザーの変更のみ（`media` / `source/Scene/DebugScene.cpp` の BGM 残り / `source/core/sound/PortAudio/SoundEngine.cpp`、未追跡の `doc/*.md`・`devlog/*.png` 等）。私のタスク対象外。
+- Git コミット運用: ユーザーが TortoiseGit で実行。Claude は `TortoiseGitProc.exe /command:commit /logmsgfile:<txt>` でメッセージ設定済みダイアログを出すまで（詳細は user スコープ `~/.claude/CLAUDE.md`）。
+- 保留: `asana-experimental` MCP の OAuth 認証（再起動 + /mcp）。
 
 ---
 

@@ -52,6 +52,20 @@
 （warp-reject は 0.15→0.07 に強化して残像をさらに削減。0.05まで試したが 0.07 が残像消去と自然さのバランス最良）
 
 - [ ] 残タスク: ①他スタイルでも確認(スタイルは将来オリジナルに差し替える前提) ②この成果のコミット(TortoiseGit) ③実機(リアルタイム)統合の検討。なお味系パラメータ(style/content/tv/coherent/steps)はリアルタイム速度に無関係(順伝播ネット化で最適化ループが消えるため)。リアルタイムで効くのは解像度/ネット本体/フロー源(gbufferで対処済)。
+
+### フェーズ1（リアルタイム化＝順伝播ネット）試行と中断（2026-06-21）
+**目的**: Gatys最適化(1フレーム数秒)を順伝播ネット(forward一発)に置換しリアルタイム化。新規コード:
+`transformer_net.py`(Johnson系 encoder-decoder+残差), `train_feedforward.py`(VGG知覚損失で学習・早期終了・ONNX書出), `infer_feedforward.py`(推論・速度計測)。学習データはCOCO val2017(5000枚, `data/`=gitignore)。モデルは`models/`(gitignore)。
+- **速度は完全クリア**: 720x405で約8ms/frame=**122fps**(RTX 5070 Ti)。リアルタイム余裕。容量増(残差5→8)でも9.4ms。
+- **重要な学び**:
+  - Gatysの重み比(style/content=1e11/1)は順伝播ネットに通用しない。Gatysは「content画像から最適化開始」で形をタダで得るが、順伝播はゼロから生成するためcontentをずっと強く効かせる必要(正規化Gram使用で style 1e10だとstyle項がcontentの約2000倍支配)。
+  - content層は浅いrelu2_2("8")が細部保持に有利(conv4_2は構図のみ)。
+  - **データ多様性が必須**: ダンプ120枚(似たフレーム)だと「入力無視で一定テクスチャを出す」過学習に陥り内容が出ない。COCOで解消。
+  - 512px学習は num_workers=0 だとデータ読込ボトルネックで1epoch>2.5h(事実上停止)。`--workers`並列化で384px=150s/epochに正常化。
+- **中断理由(ユーザー判断「全然だめ」)**: weight(1e5〜1e7収束)・容量(残差5/8)・解像度(256/384)のどのレバーでも、**Gatysの「渦巻く方向性の筆致」は出ず「点/星が散る質感」止まり**。これは「Gram統計を順伝播で学ぶ」方式の構造的限界(Gramは特徴の共起は測るが並び/方向は測らない)。
+- **次にやるなら③ GAN**: 識別器に「本物のスタイルらしさ(渦構造)」を判定させる。推論速度は据置(生成器のみ)だが学習実装が重い。今回は未着手で保留。
+- 暫定ベストモデル(渦は出ないが content保持+画風+122fps): `models/coco_sw3e6_conv.pth`(style3e6,relu2_2,5block,収束)。
+- 新規 .py 群(transformer_net/train_feedforward/infer_feedforward)と tools/npr_offline/.gitignore は**未コミット**。
 - [x] (旧探索の記録) warm-start=ボケ不採用 / temporal-loss(`--temporal-weight`)=固まり不採用 / tv正則化(`--tv-weight`)=高sw崩壊対策で実装済(今回は不使用)。詳細は上記。
 - [x] (案B/段階0b) エンジンのモーションベクトルで warp 正確化 — **実装完了・データ取得済・確定設定で使用中**。
   - 当初の背景: temporal-loss(tw2000)で warp が「動くべき部分が固まる」破綻。原因は推定フロー(Farneback)の誤り→エンジンの正確なモーションベクトルで根治。最終的にこの gbuffer フローが安定化(warp-reject)の基盤になった。

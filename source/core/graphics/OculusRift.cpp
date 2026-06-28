@@ -12,6 +12,8 @@
 
 const OculusRift::Matrix OculusRift::COORDINATE_SYSTEM_CONVERT_MATRIX = [] () { Matrix m; m.set_scaling( 1, 1, -1 ); return m; }();
 
+#ifdef OCULUS_RIFT_ENABLED
+
 OculusRift::OculusRift( Direct3D* d3d )
 	: direct_3d_( d3d )
 	, yaw_( 0.f )
@@ -297,3 +299,24 @@ OculusRift::Matrix OculusRift::get_projection_matrix( int eye_index, float near_
 
 	return COORDINATE_SYSTEM_CONVERT_MATRIX * m;
 }
+
+#else  // OCULUS_RIFT_ENABLED 未定義: VR を一旦無効化（ovr_ 呼び出し無し＝LibOVR 不要）
+
+OculusRift::OculusRift( Direct3D* d3d ) : direct_3d_( d3d ), yaw_( 0.f ), pitch_( 0.f ), roll_( 0.f ), last_yaw_( 0.f ), last_pitch_( 0.f ), last_roll_( 0.f ) {}
+OculusRift::~OculusRift() {}
+void OculusRift::create_render_target_texture_swap_chain( const ovrSizei& ) {}
+void OculusRift::create_depth_stencil_texture_swap_chain( const ovrSizei& ) {}
+void OculusRift::create_render_target_view() {}
+void OculusRift::create_depth_stencil_view() {}
+void OculusRift::create_layer( const ovrSizei&, const ovrSizei& ) {}
+void OculusRift::setup_default_viewport( int ) {}
+void OculusRift::update() {}
+void OculusRift::setup_rendering() {}
+void OculusRift::setup_rendering_for_left_eye() {}
+void OculusRift::setup_rendering_for_right_eye() {}
+void OculusRift::finish_rendering() {}
+OculusRift::Vector OculusRift::get_eye_position( int ) const { return Vector(); }
+OculusRift::Matrix OculusRift::get_eye_rotation( int ) const { return Matrix(); }
+OculusRift::Matrix OculusRift::get_projection_matrix( int, float, float ) const { return Matrix(); }
+
+#endif  // OCULUS_RIFT_ENABLED

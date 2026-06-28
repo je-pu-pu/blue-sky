@@ -1,6 +1,6 @@
 // #pragma comment ( lib, "imgui.lib" )
 
-#pragma comment( lib, "LibOVR.lib" )
+// #pragma comment( lib, "LibOVR.lib" )  // VR(Oculus)一旦無効化（x64化, OCULUS_RIFT_ENABLED 未定義）
 
 // #pragma comment ( lib, "libfbxsdk.lib" )
 // #ifdef _DEBUG

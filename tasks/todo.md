@@ -79,6 +79,18 @@
   - データ取得済（カメラ前進ダンプ source/dump、color/motion/depth/cam 各120）。確定設定で gbuffer フロー使用中。
 - [ ] (将来案④) 作例ベースのペア学習 (diffusion 教師/手描き作例) — Asana エピックB に起票済み
 
+### フェーズ2（リアルタイム・ボイリング達成＝確率的ネット）（2026-06-28〜29）
+**フェーズ1の「渦が出ない／ボイリングが出ない」を、確率的ネットで突破。リアルタイムで手描きの揺れを実現。**
+探索順（ユーザー指示 3→2→1）と結論は `lessons.md`「リアルタイム・ボイリング」節に集約。要点:
+- **決定論順伝播ネットは原理的にボイリング不可**（同入力→同出力）。入力への加算ノイズ＝ノイズが乗る／微小ワープ＝絵が泳ぐ、で両方却下。
+- **容量↑（5/32→8/48）は筆致をほぼ変えない**（Gram の壁）。速度半減（121→52fps）だけ。→ 小容量採用。
+- **Gatys はリアルタイム不可**（最速5.5fps）。ただし jitter init（style_scale 1.5, boil 0.15〜0.3）で**ボイリングの正解見本**を確定。
+- **確率的ネットで達成**: `transformer_net_stochastic.py`（残差特徴へ StyleGAN 流ノイズ注入）＋ `train_stochastic.py`（mode-seeking 多様性損失、**多様性は浅層 relu1_1 で測る**＝構造を壊さない、content_weight 10）。推論 `infer_stochastic.py`（空間白色・時間平滑ノイズ）。**107fps(5/32) でボイリング＋内容保持**。
+- **色保持**（`recolor_lab`）: Gram の全パレット混入（黒塊/黄/肌色）を後処理で除去。輝度転写＋Lab b 軸の青方向だけ増幅。確定 blue=3.0 yellow=0 a=0.5 dark=60。
+- 採用モデル: `models/starry_boil_small.pth/.onnx`（5/32, 107fps）。big(8/48)は筆致の向きが少し複雑だが差は小、small 許容。
+- **残**: ①別スタイルでの確認（次にやる。スタイルは将来オリジナルへ差し替え前提） ②実機統合（ONNX Runtime + DirectML、色保持は後処理/HLSL）。
+- 新規/変更ファイル（このフェーズ）: `transformer_net_stochastic.py` `train_stochastic.py` `infer_stochastic.py` `probe_*.py`、`infer_feedforward.py`(coherent_noise/boil/warp 追加)。検証成果は `out.old/` へ退避（gitignore）。
+
 ### 補足（このセッションの状態）
 - 作業ブランチ: `feature/neural-npr-offline-validation`（develop 未マージ）。マージは `--no-ff`、マージ後にブランチ削除。
 - 作業ツリーに残るのはユーザーの変更のみ（`media` / `source/Scene/DebugScene.cpp` の BGM 残り / `source/core/sound/PortAudio/SoundEngine.cpp`、未追跡の `doc/*.md`・`devlog/*.png` 等）。私のタスク対象外。

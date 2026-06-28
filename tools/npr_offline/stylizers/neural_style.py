@@ -39,6 +39,7 @@ class NeuralStyleStylizer(Stylizer):
         temporal_weight: float = 0.0,
         tv_weight: float = 0.0,
         max_size: int = 384,
+        style_scale: float = 1.0,
     ):
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.steps = steps
@@ -47,6 +48,9 @@ class NeuralStyleStylizer(Stylizer):
         self.temporal_weight = temporal_weight
         self.tv_weight = tv_weight
         self.max_size = max_size
+        # スタイル画像を VGG に通す解像度の倍率。<1 にすると渦などの大きな構造が
+        # VGG の受容野に収まり、Gram に大スケール構造の統計が乗る（筆致が大きくなる）。
+        self.style_scale = style_scale
 
         vgg = vgg19(weights=VGG19_Weights.DEFAULT).features.to(self.device).eval()
         for p in vgg.parameters():
@@ -82,7 +86,10 @@ class NeuralStyleStylizer(Stylizer):
     def _style_targets(self, hw: tuple) -> dict:
         if hw in self._style_cache:
             return self._style_cache[hw]
-        s = F.interpolate(self._style_img, size=hw, mode="bilinear", align_corners=False)
+        # Gram は CxC でサイズ非依存なので、スタイルは content と別解像度で通してよい。
+        sh = max(1, int(round(hw[0] * self.style_scale)))
+        sw = max(1, int(round(hw[1] * self.style_scale)))
+        s = F.interpolate(self._style_img, size=(sh, sw), mode="bilinear", align_corners=False)
         feats = self._features(s)
         grams = {l: self._gram(feats[l]).detach() for l in _STYLE_LAYERS}
         self._style_cache[hw] = grams

@@ -115,6 +115,9 @@ def main():
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--style-weight", type=float, default=1e10)
     ap.add_argument("--content-weight", type=float, default=1.0)
+    ap.add_argument("--style-scale", type=float, default=1.0,
+                    help="スタイルを VGG に通す解像度倍率（筆致の大きさ）。"
+                         "probe で train_size に対し 1.0〜1.5 が筆致大きめ。アスペクト比は保持")
     ap.add_argument("--workers", type=int, default=6, help="DataLoader の並列ワーカ数（データ読込のボトルネック解消）")
     ap.add_argument("--init-model", default=None, help="この .pth から重みを読み込んで継続学習（高解像度ファインチューン用）")
     ap.add_argument("--n-blocks", type=int, default=5, help="残差ブロック数（容量。多いほど複雑な画風を表現）")
@@ -147,10 +150,17 @@ def main():
     net = net.train()
     opt = torch.optim.Adam(net.parameters(), lr=args.lr)
 
-    # スタイル目標（Gram）を学習解像度で1回計算
+    # スタイル目標（Gram）を1回計算。Gram は CxC でサイズ非依存なので、content とは
+    # 別解像度・アスペクト比保持で通せる。train_size*style_scale を長辺に合わせる
+    # （正方形に潰すと筆致が歪み、縮小しすぎると渦が消える＝probe の知見）。
     s_img = np.asarray(Image.open(args.style).convert("RGB")).astype(np.float32) / 255.0
     s_t = torch.from_numpy(s_img).permute(2, 0, 1).unsqueeze(0).to(device)
-    s_t = F.interpolate(s_t, size=(args.train_size, args.train_size), mode="bilinear", align_corners=False)
+    _, _, sh, sw = s_t.shape
+    target_long = int(round(args.train_size * args.style_scale))
+    sc = target_long / max(sh, sw)
+    new_h, new_w = max(1, int(round(sh * sc))), max(1, int(round(sw * sc)))
+    s_t = F.interpolate(s_t, size=(new_h, new_w), mode="bilinear", align_corners=False)
+    print(f"style grams at {new_h}x{new_w}  (style_scale={args.style_scale}, train_size={args.train_size})")
     with torch.no_grad():
         s_feats = vgg(s_t)
         style_grams = {l: _gram(s_feats[l]).detach() for l in _STYLE_LAYERS}

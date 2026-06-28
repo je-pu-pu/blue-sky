@@ -51,3 +51,6 @@ venv/
 *.onnx
 /tools/npr_offline/out/
 /tools/npr_offline/out_*/
+/tools/npr_offline/out.old/
+# probe 出力画像（再生成可能）
+/tools/npr_offline/*.png

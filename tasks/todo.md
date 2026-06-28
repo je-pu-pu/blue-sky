@@ -31,10 +31,11 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 - [x] sln マッピング修正: common/game/win を x64→x64 + Build.0 に（Python で該当3 GUID のみ書換）
 - [x] common / game / win を x64 で個別ビルド成功（SolutionDir 明示。単体ビルドは SolutionDir 未定義で ExternalIncludePath が壊れる点に注意）
 - [x] **blue-sky 本体ソースの x64 コンパイルがクリーン（0 error、164MB の blue-sky.lib 生成）**＝コードは概ね 64bit クリーン（uint_t typedef のおかげ）。BuildProjectReferences=false で検証
-- [ ] freetype / msdfgen の vcxproj に x64 構成を追加 → sln マッピングも x64 に
-- [ ] Oculus 関連をコンパイルスイッチで無効化（GameMain / Direct3D11 / OculusRift / GamePlayScene / lib.cpp 等）
-- [ ] `source/lib.cpp` の #pragma comment(lib) を x64 用に調整（LibOVR 除外、Bullet 名 等）
-- [ ] x64 リンク（exe/test）→ 不足する third-party x64 lib の punch-list を取得
+- [x] freetype / msdfgen の vcxproj に x64 構成を追加（Win32 ブロックを複製）→ sln マッピングも x64 に。x64 ビルド成功（freetype.lib / msdfgen.lib）
+- [x] 全プロジェクト(common/game/win/blue-sky/exe/test)の x64 ItemDefinitionGroup を Win32 と同期（自動生成された x64 IDG が空/最小で RuntimeLibrary 未設定→ /MD 既定になり LNK2038 不一致。Win32 の中身をコピーして解消）
+- [x] x64 リンク試行で punch-list 取得: **コンパイルは全proj 0エラー**。リンクは LNK2038=0、残るは LNK1104(lib が開けない)のみ＝**third-party x64 lib 不足だけが課題**。リンカは最初の不足libで止まるので芋づる式に出る（まず LibOVR / libxml2-mt）
+- [ ] Oculus 関連をコンパイルスイッチで無効化（GameMain / Direct3D11 / OculusRift / GamePlayScene / lib.cpp の LibOVR pragma）
+- [ ] third-party x64 lib を揃える: x64 用 AdditionalLibraryDirectories の設定 + lib/x64 への配置（Bullet / vorbis / portaudio / Effects11 / boost / FBX SDK(libfbxsdk/libxml2/zlib)）
 - [ ] x64 で blue-sky.lib / exe / test がビルド・起動することを確認
 
 ### その後（②）

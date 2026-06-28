@@ -6,6 +6,43 @@
 2. 完了したら `[x]` にする
 3. セクションが全て完了したら、セクションごと削除してよい
 
+## blue-sky 64bit 化（x64 ポート）— NPR リアルタイム統合の前提
+
+ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）は **x64 公式バイナリのみ**。
+だが現状エンジンは **Win32(x86) 専用**（sln で x64→Win32 にされ、依存 lib も x86 のみ）。
+よって「64bit 化 → その上に ORT+DirectML」の順。作業ブランチ `feature/x64-port`。
+
+方針: **VR(Oculus) は一旦外す**（コンパイルスイッチで無効化。ベンダー依存を1つ減らす）。
+
+### 依存ライブラリの x64 化（source/lib/x64 へ配置）
+- [ ] Bullet (Collision/Dynamics/LinearMath) — OSS、ソースから x64 ビルド
+- [ ] libogg / libvorbis / libvorbisfile — OSS、x64 ビルド
+- [ ] PortAudio (portaudio_static) — OSS、x64 ビルド
+- [ ] Effects11 — OSS(FX11)、ソース取得して x64 ビルド（現状 prebuilt のみ）
+- [ ] boost 1.75 (chrono/filesystem/regex/timer) — b2 で x64 ビルド
+- [ ] imgui — ソース内蔵(`lib/src/imgui`)、x64 再コンパイル
+- [ ] libremidi / msdfgen / freetype — ソースから x64 再コンパイル
+- [ ] FBX SDK (libfbxsdk/zlib/libxml2) — **Autodesk から x64 SDK のインストールが必要（ユーザー操作）**。標準パスに未インストール
+- [x] lua — x64 版が既存（`lib/x64/common/lua.lib`）
+- [~] Oculus LibOVR — VR を外すので不要化
+
+### エンジン側
+- [x] x64 ビルド構成の調査: blue-sky/exe/test は既に x64→x64 マッピング済み。common/game/win は vcxproj に x64 構成あり（ExternalIncludePath も4構成OK）。freetype/msdfgen は x64 構成なし
+- [x] sln マッピング修正: common/game/win を x64→x64 + Build.0 に（Python で該当3 GUID のみ書換）
+- [x] common / game / win を x64 で個別ビルド成功（SolutionDir 明示。単体ビルドは SolutionDir 未定義で ExternalIncludePath が壊れる点に注意）
+- [x] **blue-sky 本体ソースの x64 コンパイルがクリーン（0 error、164MB の blue-sky.lib 生成）**＝コードは概ね 64bit クリーン（uint_t typedef のおかげ）。BuildProjectReferences=false で検証
+- [ ] freetype / msdfgen の vcxproj に x64 構成を追加 → sln マッピングも x64 に
+- [ ] Oculus 関連をコンパイルスイッチで無効化（GameMain / Direct3D11 / OculusRift / GamePlayScene / lib.cpp 等）
+- [ ] `source/lib.cpp` の #pragma comment(lib) を x64 用に調整（LibOVR 除外、Bullet 名 等）
+- [ ] x64 リンク（exe/test）→ 不足する third-party x64 lib の punch-list を取得
+- [ ] x64 で blue-sky.lib / exe / test がビルド・起動することを確認
+
+### その後（②）
+- [ ] ONNX Runtime + DirectML を導入し、`starry_boil_small.onnx` をポストエフェクトとして実機推論
+- [ ] 色保持(recolor_lab)を HLSL 後処理で実装、フレーム毎ノイズ供給
+
+---
+
 ## 完了済み
 
 - [x] blue_sky / core レイヤー分析を実施

@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#pragma comment( lib, "LibOVR.lib" )
+// #pragma comment( lib, "LibOVR.lib" )  // VR(Oculus)一旦無効化（x64化）
 
 #pragma comment ( lib, "libfbxsdk-mt.lib" )
 // #pragma comment ( lib, "libxml2-mt.lib" ) /// libxml2-mt.lib を #pragma comment でリンクすると blue-sky のテストが Visual Studio のテストエクスプローラーに表示されなくなる不具合を回避するため、プロジェクトの設定でリンクを行う。

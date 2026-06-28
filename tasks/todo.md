@@ -34,9 +34,13 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 - [x] freetype / msdfgen の vcxproj に x64 構成を追加（Win32 ブロックを複製）→ sln マッピングも x64 に。x64 ビルド成功（freetype.lib / msdfgen.lib）
 - [x] 全プロジェクト(common/game/win/blue-sky/exe/test)の x64 ItemDefinitionGroup を Win32 と同期（自動生成された x64 IDG が空/最小で RuntimeLibrary 未設定→ /MD 既定になり LNK2038 不一致。Win32 の中身をコピーして解消）
 - [x] x64 リンク試行で punch-list 取得: **コンパイルは全proj 0エラー**。リンクは LNK2038=0、残るは LNK1104(lib が開けない)のみ＝**third-party x64 lib 不足だけが課題**。リンカは最初の不足libで止まるので芋づる式に出る（まず LibOVR / libxml2-mt）
-- [ ] Oculus 関連をコンパイルスイッチで無効化（GameMain / Direct3D11 / OculusRift / GamePlayScene / lib.cpp の LibOVR pragma）
-- [ ] third-party x64 lib を揃える: x64 用 AdditionalLibraryDirectories の設定 + lib/x64 への配置（Bullet / vorbis / portaudio / Effects11 / boost / FBX SDK(libfbxsdk/libxml2/zlib)）
-- [ ] x64 で blue-sky.lib / exe / test がビルド・起動することを確認
+- [x] Oculus(VR) を一旦無効化: `OculusRift.cpp` を `#ifdef OCULUS_RIFT_ENABLED` で囲み未定義時はスタブ（ovr_呼び出し無し）/ `lib.cpp` の LibOVR pragma 無効化。結果 x64 で 0コンパイルエラー・未解決0・LibOVR参照0
+- [x] x64 ライブラリ検索パスは設定済みと判明: `lib\$(PlatformShortName)\$(Configuration)` = x64では `lib\x64\Debug`（vcxproj修正不要）。**`source/lib/x64/Debug` と `Release` に x64 lib を置くだけ**
+- [x] exe/test の x64 PropertyGroup に **LibraryPath が無かった**のを追加（VC++ Directories は IDG 同期対象外だった。これが「lib\x64\Debug を検索せず全 third-party lib が開けない」真因）。lib 検索パスは `lib\$(PlatformShortName)\$(Configuration)` = `lib\x64\Debug`
+- [x] test/lib.cpp にも LibOVR pragma があったので無効化（source/lib.cpp と別ファイル。見落としていた）
+- [x] FBX SDK 2020.3.9(VS2022) インストール → x64 lib(`libfbxsdk-mt`/`libxml2-mt`/`zlib-mt`)+`libfbxsdk.dll` を `source/lib/x64/{debug,release}` にコピー。**FBX リンク解決**（注: 2020.3.9 は x86 lib 非同梱。ヘッダは 2020.2 のままだが x64 リンクは通った。lib バイナリは gitignore 済）
+- [ ] 残り OSS lib を x64 ビルドして `source/lib/x64/{debug,release}` へ配置（**次の不足= libogg**, 以降 vorbis/vorbisfile, portaudio, Bullet, Effects11, boost1.75）。cmake は VS同梱(`...CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe`)。要バージョン: Bullet 3.25 / boost 1_75
+- [ ] x64 で blue-sky.lib / exe / test がビルド・起動することを確認（実行時 libfbxsdk.dll を exe 出力先へ）
 
 ### その後（②）
 - [ ] ONNX Runtime + DirectML を導入し、`starry_boil_small.onnx` をポストエフェクトとして実機推論

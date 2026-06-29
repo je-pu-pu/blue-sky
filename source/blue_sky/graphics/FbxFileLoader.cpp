@@ -13,7 +13,7 @@
 #include <common/timer.h>
 #include <common/exception.h>
 
-#include <boost/filesystem/convenience.hpp>
+#include <boost/filesystem.hpp>
 
 #include <unordered_map>
 

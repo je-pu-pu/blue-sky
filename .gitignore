@@ -41,6 +41,10 @@
 # フレームダンプ出力（neural NPR オフライン検証）
 dump/
 
+# vendored boost ヘッダ（巨大・再生成可能。lib バイナリと同様に非追跡）
+# セットアップは tools/x64-deps/ 参照
+/source/lib/include/boost/
+
 # Python（tools/npr_offline 等）
 __pycache__/
 *.pyc

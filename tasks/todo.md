@@ -39,8 +39,27 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 - [x] exe/test の x64 PropertyGroup に **LibraryPath が無かった**のを追加（VC++ Directories は IDG 同期対象外だった。これが「lib\x64\Debug を検索せず全 third-party lib が開けない」真因）。lib 検索パスは `lib\$(PlatformShortName)\$(Configuration)` = `lib\x64\Debug`
 - [x] test/lib.cpp にも LibOVR pragma があったので無効化（source/lib.cpp と別ファイル。見落としていた）
 - [x] FBX SDK 2020.3.9(VS2022) インストール → x64 lib(`libfbxsdk-mt`/`libxml2-mt`/`zlib-mt`)+`libfbxsdk.dll` を `source/lib/x64/{debug,release}` にコピー。**FBX リンク解決**（注: 2020.3.9 は x86 lib 非同梱。ヘッダは 2020.2 のままだが x64 リンクは通った。lib バイナリは gitignore 済）
-- [ ] 残り OSS lib を x64 ビルドして `source/lib/x64/{debug,release}` へ配置（**次の不足= libogg**, 以降 vorbis/vorbisfile, portaudio, Bullet, Effects11, boost1.75）。cmake は VS同梱(`...CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe`)。要バージョン: Bullet 3.25 / boost 1_75
-- [ ] x64 で blue-sky.lib / exe / test がビルド・起動することを確認（実行時 libfbxsdk.dll を exe 出力先へ）
+- [x] OSS lib の x64 ビルド＆配置（VS同梱 cmake、静的CRT /MTd・/MT、生成名をlib.cpp期待名へリネーム。cmake新しすぎ対策で `-DCMAKE_POLICY_VERSION_MINIMUM=3.5` 必須）:
+  - [x] libogg 1.3.5 → `libogg.lib`
+  - [x] libvorbis 1.3.7 → `libvorbis_static.lib` / `libvorbisfile_static.lib`（OGG_INCLUDE_DIR/OGG_LIBRARY 指定）
+  - [x] Bullet 3.25（USE_MSVC_RUNTIME_LIBRARY_DLL=OFF）→ `BulletCollision/Dynamics/LinearMath_vs2010_debug.lib`（Release は `_vs2010`）
+  - [x] PortAudio v19.7.0（PA_DLL_LINK_WITH_STATIC_RUNTIME=ON）→ `portaudio_static.lib`
+  - 作業ディレクトリ: scratchpad/osslibs
+- [x] **boost を 1.90 へ更新**（ユーザー判断 B）の lib ビルド完了: D:\osslibs\boost_1_90_0 ソースから **自作 CMakeLists**（D:\osslibs\boostbuild、署名済み cmake/MSBuild）で filesystem/chrono/timer/regex/atomic を x64 静的(/MTd・/MT)ビルド。生成: D:\osslibs\boostbuild\build\{Debug,Release}\boost_*.lib
+  - **重要な環境制約**: b2.exe は自前ビルド未署名 exe → **Device Guard がブロック**して実行不可。boost 公式 .7z ソースは CMakeLists 非同梱、prebuilt .exe は 7z 展開不可。→ 自作 CMake が唯一通った道（cl/link は署名済みで実行可）
+  - filesystem は `std::atomic_ref` 使用のため **C++20 必須**（CMAKE_CXX_STANDARD 20）
+  - boost 1.90 では system / regex は概ねヘッダオンリー（regex src は posix ラッパのみ）
+- [x] **boost ヘッダ 1.75→1.90 差し替え**（`source/lib/include/boost`、git追跡 約15,000ファイルの巨大diff）→ blue-sky 再コンパイルで API 差異を確認・修正。**差異は軽微**:
+  - `App.h`: `<functional>`/`<unordered_map>` を直接 include（boost 1.75 の推移的 include に依存していた箇所）
+  - `FbxFileLoader.cpp` / `FbxConverterMain.cpp`: 廃止された `boost/filesystem/convenience.hpp` → `boost/filesystem.hpp`
+  - 自動リンク名 = `libboost_<lib>-vc143-mt-sgd-x64-1_90.lib`（VS18→vc143 タグ）。ビルドした boost lib をこの名にリネーム配置
+- [x] Effects11(FX11) を x64 ビルド → `effects11d.lib`/`effects11.lib`
+- [x] portaudio を `PA_USE_WDMKS=OFF` で再ビルド（KSDATAFORMAT_SUBTYPE_MIDI 重複定義 LNK2005 回避）
+- [x] **CRT 不一致の解消**: 既存 x64 `lua.lib`(common) が /MD でビルドされ `__imp_` CRT 参照→未解決。**Lua 5.4.3**(ヘッダが5.4.3。CLAUDE.mdの5.3.4は古い)を静的CRT(/MTd・/MT)で再ビルドし `lib/x64/{debug,release}` に配置。ogg/vorbis も CMP0091=NEW で /MT 再ビルド
+- [x] **x64 で blue-sky.lib / exe / test がビルド成功（0エラー）**。`blue-sky-exe.exe` は x64(AMD64) 33MB。実行時用に `libfbxsdk.dll`(x64) を `.build/x64/Debug` へ配置
+- [x] **boost ヘッダを git 管理外に変更**（一貫性回復＋肥大化解消）: 従来 boost ヘッダ(約14,694ファイル)を追跡していたが、lib バイナリは非追跡で「ヘッダだけ追跡しても clone でビルド不可」＝非対称だった。`.gitignore` に `/source/lib/include/boost/` を追加し `git rm -r --cached` で追跡解除（ファイルは残置）。再現手順を **`tools/x64-deps/`（README + build_oss_libs.sh）** に整備
+- [ ] x64 exe の**起動確認**（実機実行。Device Guard は自前ビルド exe を通す実績あり）
+- [ ] ②へ: ONNX Runtime + DirectML 統合（starry_boil_small.onnx）
 
 ### その後（②）
 - [ ] ONNX Runtime + DirectML を導入し、`starry_boil_small.onnx` をポストエフェクトとして実機推論

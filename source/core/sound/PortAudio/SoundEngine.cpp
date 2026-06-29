@@ -28,7 +28,17 @@ SoundEngine::SoundEngine()
 		COMMON_THROW_EXCEPTION_MESSAGE( string_t( "Pa_Initialize() failed.\n" ) + Pa_GetErrorText( e ) );
 	}
 
-	auto info = Pa_GetDeviceInfo( Pa_GetDefaultOutputDevice() );
+	// WASAPI のホストAPI から既定出力デバイスを取得する。
+	// システム既定デバイス(Pa_GetDefaultOutputDevice)は MME/DirectSound 等
+	// 別ホストAPI のことがあり、その場合 WASAPI 用ストリーム情報と不整合になる。
+	const auto wasapi_api = Pa_HostApiTypeIdToHostApiIndex( paWASAPI );
+	if ( wasapi_api < 0 )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( "WASAPI host API is not available." );
+	}
+	const auto output_device = Pa_GetHostApiInfo( wasapi_api )->defaultOutputDevice;
+
+	auto info = Pa_GetDeviceInfo( output_device );
 
 	const auto channel_count = 2;
 	const auto sample_format = paFloat32;
@@ -40,7 +50,8 @@ SoundEngine::SoundEngine()
 		.bit_depth = 32
 	};
 
-	midi_synthesizer_.reset( new MidiSynthesizer( "media/music/SGM-V2.01.sf2", format_ ) );
+	// midi_synthesizer_.reset( new MidiSynthesizer( "media/music/SGM-V2.01.sf2", format_ ) );
+	midi_synthesizer_.reset( new MidiSynthesizer( "media/music/FluidR3_GM2-2.SF2", format_ ) );
 
 	auto wasapi_streawm_info = PaWasapiStreamInfo{
 		.size = sizeof( PaWasapiStreamInfo ),
@@ -50,7 +61,7 @@ SoundEngine::SoundEngine()
 	};
 
 	const auto output_params = PaStreamParameters{
-		.device = Pa_GetDefaultOutputDevice(),
+		.device = output_device,
 		.channelCount = channel_count,
 		.sampleFormat = sample_format,
 		.suggestedLatency = info->defaultLowOutputLatency,

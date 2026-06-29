@@ -8,6 +8,7 @@
 namespace core::graphics
 {
 	class RenderTargetTexture;
+	class NeuralStylizer;
 }
 
 namespace blue_sky
@@ -38,6 +39,11 @@ protected:
 	int		frame_dump_remaining_	= 0;		///< 残りフレーム数
 	int		frame_dump_index_		= 0;		///< 出力中のフレーム番号
 	bool	frame_dump_gbuffer_		= false;	///< 深度+カメラ行列/モーションベクトルも併せてダンプするか ( 案B / 段階0b )
+
+	// Neural NPR リアルタイム推論 ( ONNX Runtime + DirectML )
+	std::unique_ptr< core::graphics::NeuralStylizer > neural_stylizer_;
+	bool	neural_npr_enabled_		= false;	///< リアルタイム NPR を有効にするか
+	std::unique_ptr< core::graphics::RenderTargetTexture > neural_output_texture_;	///< 推論結果の表示用
 
 	// モーションベクトル用の前フレームカメラ行列
 	Matrix	prev_view_;

@@ -14,6 +14,10 @@
 
 #include <core/graphics/Sprite.h>
 #include <core/graphics/RenderTargetTexture.h>
+#include <core/graphics/NeuralStylizer.h>
+#include <filesystem>
+#include <system_error>
+#include <string>
 #include <core/graphics/Direct3D11/PixelFormat.h>
 
 #include <core/sound/SoundManager.h>
@@ -417,6 +421,28 @@ DebugScene::DebugScene()
 
 	get_graphics_manager()->load_named_texture( "2x2", "media/texture/rgby.png" );
 
+	// Neural NPR: モデルがあれば DirectML でロード（無ければ NPR 無効のまま続行）
+	{
+		const char* npr_model = "media/neural/starry_boil_small.onnx";
+		std::error_code npr_ec;
+		if ( std::filesystem::exists( npr_model, npr_ec ) )
+		{
+			try
+			{
+				neural_stylizer_ = std::make_unique< core::graphics::NeuralStylizer >( npr_model );
+				OutputDebugStringA( "[NeuralNPR] model loaded." );
+			}
+			catch ( const std::exception& e )
+			{
+				OutputDebugStringA( ( std::string( "[NeuralNPR] load failed: " ) + e.what() ).c_str() );
+			}
+		}
+		else
+		{
+			OutputDebugStringA( "[NeuralNPR] model file not found (CWD?): media/neural/starry_boil_small.onnx" );
+		}
+	}
+
 	filter = new core::sound::filter::BiquadFilter( get_sound_manager()->get_format().channels, static_cast< float >( get_sound_manager()->get_format().sampling_rate ), 800, 10, core::sound::filter::BiquadFilter::FilterType::Bandpass );
 	get_sound_manager()->add_sound_filter( filter );
 
@@ -569,6 +595,15 @@ void DebugScene::update()
 		}
 	}
 	ImGui::Checkbox( "Dump depth + camera (G-buffer)", & frame_dump_gbuffer_ );
+	ImGui::Separator();
+	if ( neural_stylizer_ )
+	{
+		ImGui::Checkbox( "Neural NPR (realtime, DirectML)", & neural_npr_enabled_ );
+	}
+	else
+	{
+		ImGui::TextColored( ImVec4( 1.f, 0.5f, 0.2f, 1.f ), "Neural NPR: model not loaded" );
+	}
 	ImGui::Text( "out: ./dump/color_%%04d.png" );
 	if ( frame_dump_gbuffer_ )
 	{

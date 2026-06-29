@@ -25,6 +25,9 @@ Ort::SessionOptions make_session_options()
 
 std::wstring to_wide( const char* s )
 {
+	// ONNX Runtime は Windows で wchar_t* パスを要求するため変換する。
+	// なお外部データ形式のモデル(weights が <model>.onnx.data 等の別ファイル)は、
+	// その .data ファイルを .onnx と同じディレクトリに置く必要がある。
 	return std::filesystem::path( s ).wstring();
 }
 

@@ -64,7 +64,16 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 
 - [x] Phase1: ONNX Runtime DirectML 1.24.4 + DirectML 1.15.4 を NuGet から取得（展開のみ＝Device Guard 安全）。headers→`lib/include/onnxruntime`(非追跡), `onnxruntime.lib`→`lib/x64`, dll(onnxruntime/providers_shared/DirectML)→`lib/x64`＋exe出力先。手順は `tools/x64-deps/README ③`
 - [x] Phase2: ORT+DirectML スモークテスト（`source/test/graphics/NeuralNprTest.cpp`）成功。**starry_boil_small.onnx を DirectML でロード・推論できることを実機確認。256x256 で 2.89ms/frame=346fps**（CPU往復込み）。`test/lib.cpp` に onnxruntime.lib pragma 追加
-- [ ] Phase3: 推論ラッパクラス化 → ポストエフェクト経路（`DebugScene` の `render_result_texture_`）に差し込み。テクスチャ→(staging)→CPU tensor→ORT→出力→アップロード→quad描画
+- [~] Phase3: 推論ラッパクラス化 → ポストエフェクト経路に差し込み。
+  - [x] `core::graphics::NeuralStylizer` 実装＆コミット済（53a7b15e）
+  - [x] 段階1: `DebugScene` に NeuralStylizer メンバ＋モデルロード(失敗時安全に無効化)＋imgui トグル `neural_npr_enabled_`。モデルは `media/neural/starry_boil_small.onnx`(gitignore)。**実機でモデルロード成功確認**（トグル表示）。トグルはまだ動作なし（段階2で実装）
+    - ⚠️ **教訓**: starry_boil_small.onnx は**外部データ形式**で重みが別ファイル `starry_boil_small.onnx.data`(6.7MB) にある。ORT は `.onnx` と同じディレクトリに `.onnx.data` が無いと `file_size` 系の `std::filesystem::filesystem_error` を投げる。`.onnx` だけでなく `.data` も配置すること（`*.onnx.data` も gitignore 済み）
+  - [ ] 段階2(本体・再開ポイント): `DebugScene::render` の `render_post_effect` 直前で neural 有効時に
+    ①`render_result_texture_` を staging 読み戻し(既存 `dump_texture_2d_to_png` の手法を流用)
+    ②RGBA8→NCHW float[0,1] 変換＋フレーム毎コヒーレントノイズ(infer_stochastic.py の「空間白色・時間平滑」を移植)
+    ③`neural_stylizer_->stylize()`
+    ④出力NCHW→RGBA8→動的テクスチャへアップロード→`render_post_effect(neural_output_texture_)` で表示
+    （`neural_output_texture_` メンバは宣言済だが未生成。CPU書込可能なテクスチャ生成方法を要検討）
 - [ ] Phase4: 色保持(recolor_lab 相当)を HLSL 後処理化 ＋ フレーム毎コヒーレントノイズ供給でボイリング
 - [ ] Phase5: 実機 720p での fps 計測・チューニング（必要なら D3D 共有でCPU往復削減）
 

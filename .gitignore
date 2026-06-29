@@ -56,6 +56,7 @@ __pycache__/
 venv/
 *.pth
 *.onnx
+*.onnx.data
 /tools/npr_offline/out/
 /tools/npr_offline/out_*/
 /tools/npr_offline/out.old/

@@ -60,6 +60,7 @@
     <ClCompile Include="core\ecs\system\RenderSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\TransformControlSystem.cpp" />
     <ClCompile Include="core\graphics\BgSpriteLayer.cpp" />
+    <ClCompile Include="core\graphics\NeuralStylizer.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Axis.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\BackBufferTexture.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\BulletDebugDraw.cpp" />
@@ -267,6 +268,7 @@
     <ClInclude Include="core\graphics\Model.h" />
     <ClInclude Include="core\graphics\NullTexture.h" />
     <ClInclude Include="core\graphics\OculusRift.h" />
+    <ClInclude Include="core\graphics\NeuralStylizer.h" />
     <ClInclude Include="core\graphics\PixelFormat.h" />
     <ClInclude Include="core\graphics\PrimitiveTopology.h" />
     <ClInclude Include="core\graphics\RenderTarget.h" />

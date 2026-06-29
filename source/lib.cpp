@@ -33,6 +33,8 @@
 
 #pragma comment( lib, "lua.lib" )
 
+#pragma comment( lib, "onnxruntime.lib" )  // NPR リアルタイム推論
+
 #pragma comment( lib, "common.lib" )
 #pragma comment( lib, "game.lib" )
 #pragma comment( lib, "win.lib" )

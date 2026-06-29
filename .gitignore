@@ -45,6 +45,9 @@ dump/
 # セットアップは tools/x64-deps/ 参照
 /source/lib/include/boost/
 
+# ONNX Runtime ヘッダ（NuGet 由来・再生成可能。lib/dll は lib/x64/* で無視済み）
+/source/lib/include/onnxruntime/
+
 # Python（tools/npr_offline 等）
 __pycache__/
 *.pyc

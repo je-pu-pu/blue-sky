@@ -58,8 +58,15 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 - [x] **CRT 不一致の解消**: 既存 x64 `lua.lib`(common) が /MD でビルドされ `__imp_` CRT 参照→未解決。**Lua 5.4.3**(ヘッダが5.4.3。CLAUDE.mdの5.3.4は古い)を静的CRT(/MTd・/MT)で再ビルドし `lib/x64/{debug,release}` に配置。ogg/vorbis も CMP0091=NEW で /MT 再ビルド
 - [x] **x64 で blue-sky.lib / exe / test がビルド成功（0エラー）**。`blue-sky-exe.exe` は x64(AMD64) 33MB。実行時用に `libfbxsdk.dll`(x64) を `.build/x64/Debug` へ配置
 - [x] **boost ヘッダを git 管理外に変更**（一貫性回復＋肥大化解消）: 従来 boost ヘッダ(約14,694ファイル)を追跡していたが、lib バイナリは非追跡で「ヘッダだけ追跡しても clone でビルド不可」＝非対称だった。`.gitignore` に `/source/lib/include/boost/` を追加し `git rm -r --cached` で追跡解除（ファイルは残置）。再現手順を **`tools/x64-deps/`（README + build_oss_libs.sh）** に整備
-- [ ] x64 exe の**起動確認**（実機実行。Device Guard は自前ビルド exe を通す実績あり）
-- [ ] ②へ: ONNX Runtime + DirectML 統合（starry_boil_small.onnx）
+- [x] **x64 exe 起動確認（実機・成功）**。Device Guard 通過、起動OK。
+  - 起動時に PortAudio エラー（`Pa_OpenStream`：Incompatible host API specific stream info）が出たが、これは x64 化の副作用ではなく `SoundEngine.cpp` の WASAPI コードの潜在バグ（`Pa_GetDefaultOutputDevice()`＝既定ホストAPI(MME/DS)のデバイスに WASAPI 用ストリーム情報を渡していた）。**WASAPI ホストAPI の既定出力デバイスを明示取得**するよう修正して解決（要コミット、SoundEngine.cpp はユーザーWIP）。
+## ② NPR リアルタイム統合（ONNX Runtime + DirectML）  ブランチ: feature/neural-npr-engine-integration
+
+- [x] Phase1: ONNX Runtime DirectML 1.24.4 + DirectML 1.15.4 を NuGet から取得（展開のみ＝Device Guard 安全）。headers→`lib/include/onnxruntime`(非追跡), `onnxruntime.lib`→`lib/x64`, dll(onnxruntime/providers_shared/DirectML)→`lib/x64`＋exe出力先。手順は `tools/x64-deps/README ③`
+- [x] Phase2: ORT+DirectML スモークテスト（`source/test/graphics/NeuralNprTest.cpp`）成功。**starry_boil_small.onnx を DirectML でロード・推論できることを実機確認。256x256 で 2.89ms/frame=346fps**（CPU往復込み）。`test/lib.cpp` に onnxruntime.lib pragma 追加
+- [ ] Phase3: 推論ラッパクラス化 → ポストエフェクト経路（`DebugScene` の `render_result_texture_`）に差し込み。テクスチャ→(staging)→CPU tensor→ORT→出力→アップロード→quad描画
+- [ ] Phase4: 色保持(recolor_lab 相当)を HLSL 後処理化 ＋ フレーム毎コヒーレントノイズ供給でボイリング
+- [ ] Phase5: 実機 720p での fps 計測・チューニング（必要なら D3D 共有でCPU往復削減）
 
 ### その後（②）
 - [ ] ONNX Runtime + DirectML を導入し、`starry_boil_small.onnx` をポストエフェクトとして実機推論

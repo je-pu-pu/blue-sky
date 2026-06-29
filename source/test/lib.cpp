@@ -23,6 +23,7 @@
 #pragma comment( lib, "portaudio_static.lib" )
 
 #pragma comment( lib, "lua.lib" )
+#pragma comment( lib, "onnxruntime.lib" )
 
 #pragma comment( lib, "common.lib" )
 #pragma comment( lib, "game.lib" )

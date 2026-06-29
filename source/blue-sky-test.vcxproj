@@ -163,6 +163,7 @@
     <ClCompile Include="test\math\DirectXMathTest.cpp" />
     <ClCompile Include="test\ecs\EntityManagerTest.cpp" />
     <ClCompile Include="test\graphics\MsdfFontTest.cpp" />
+    <ClCompile Include="test\graphics\NeuralNprTest.cpp" />
     <ClCompile Include="test\lib.cpp" />
     <ClCompile Include="test\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

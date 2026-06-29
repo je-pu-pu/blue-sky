@@ -59,6 +59,20 @@ bash tools/x64-deps/build_oss_libs.sh
 
 ※ 2020.3.9 は x86 lib を同梱しない。ヘッダは現状 2020.2 のままだが x64 リンクは通る。
 
+## ③ ONNX Runtime + DirectML（NPR リアルタイム推論用）
+
+NuGet パッケージ（.nupkg = zip）を**展開のみ**で取得（exe 実行しない＝Device Guard 安全）。
+
+1. **Microsoft.ML.OnnxRuntime.DirectML**（例 1.24.4）を取得・展開:
+   `https://api.nuget.org/v3-flatcontainer/microsoft.ml.onnxruntime.directml/1.24.4/microsoft.ml.onnxruntime.directml.1.24.4.nupkg`
+   - `build/native/include/*.h` → `source/lib/include/onnxruntime/`（git 非追跡）
+   - `runtimes/win-x64/native/onnxruntime.lib` → `source/lib/x64/{debug,release}/`
+   - `runtimes/win-x64/native/{onnxruntime.dll, onnxruntime_providers_shared.dll}` → 上記＋ exe 出力先
+2. **Microsoft.AI.DirectML**（例 1.15.4）を取得・展開し DirectML.dll を配置:
+   - `bin/x64-win/DirectML.dll` → `source/lib/x64/{debug,release}/` ＋ exe 出力先
+3. リンク: `onnxruntime.lib`、インクルード: `<onnxruntime/onnxruntime_cxx_api.h>`。
+   実行時に `onnxruntime.dll` / `onnxruntime_providers_shared.dll` / `DirectML.dll` を exe と同じ場所へ。
+
 ## ビルド
 
 ```powershell

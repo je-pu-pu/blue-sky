@@ -68,14 +68,11 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
   - [x] `core::graphics::NeuralStylizer` 実装＆コミット済（53a7b15e）
   - [x] 段階1: `DebugScene` に NeuralStylizer メンバ＋モデルロード(失敗時安全に無効化)＋imgui トグル `neural_npr_enabled_`。モデルは `media/neural/starry_boil_small.onnx`(gitignore)。**実機でモデルロード成功確認**（トグル表示）。トグルはまだ動作なし（段階2で実装）
     - ⚠️ **教訓**: starry_boil_small.onnx は**外部データ形式**で重みが別ファイル `starry_boil_small.onnx.data`(6.7MB) にある。ORT は `.onnx` と同じディレクトリに `.onnx.data` が無いと `file_size` 系の `std::filesystem::filesystem_error` を投げる。`.onnx` だけでなく `.data` も配置すること（`*.onnx.data` も gitignore 済み）
-  - [ ] 段階2(本体・再開ポイント): `DebugScene::render` の `render_post_effect` 直前で neural 有効時に
-    ①`render_result_texture_` を staging 読み戻し(既存 `dump_texture_2d_to_png` の手法を流用)
-    ②RGBA8→NCHW float[0,1] 変換＋フレーム毎コヒーレントノイズ(infer_stochastic.py の「空間白色・時間平滑」を移植)
-    ③`neural_stylizer_->stylize()`
-    ④出力NCHW→RGBA8→動的テクスチャへアップロード→`render_post_effect(neural_output_texture_)` で表示
-    （`neural_output_texture_` メンバは宣言済だが未生成。CPU書込可能なテクスチャ生成方法を要検討）
-- [ ] Phase4: 色保持(recolor_lab 相当)を HLSL 後処理化 ＋ フレーム毎コヒーレントノイズ供給でボイリング
-- [ ] Phase5: 実機 720p での fps 計測・チューニング（必要なら D3D 共有でCPU往復削減）
+  - [x] 段階2(CPU方式): `DebugScene::render` で neural 有効時に ①`render_result_texture_` を staging 読み戻し(`read_texture_2d_to_rgba8` ヘルパ) ②RGBA8→NCHW float[0,1]＋フレーム毎ノイズ(空間白色+時間EMA平滑→std≈1正規化) ③`stylize()` ④NCHW→RGBA8→`direct_3d_11::Texture` へ UpdateSubresource→`render_post_effect` で表示。**実機でスタイル化＋ボイリング動作確認**。ノイズ平滑は `neural_noise_temporal_`(0.35)
+    - ⚠️ **fps 60→6 に急落**（CPU 往復のコスト顕在化、予定どおり）。内訳推定: GPU→CPU 読み戻しの同期待ち＋フル解像度推論＋毎フレ全画素の CPU 処理(normal_distribution ノイズ生成・RGBA8↔NCHW 変換)
+- [ ] Phase4(高速化B・簡易): **処理解像度を下げる**（推論・ノイズ・変換を一括削減）。CPU方式のまま 20-30fps 目標。NPR は低解像度→拡大でも見栄え保てる(オフラインの --proc-size と同発想)。実装小
+- [ ] Phase5(高速化C・本命): **GPU 直結**（ORT IoBinding + D3D リソース）で読み戻し自体を消す。フル解像度でも高速。実装大
+- [ ] Phase6: 既存ポストエフェクト(手描きシェーダ)が neural 出力の上に二重掛けされる点の調整。色保持(recolor_lab 相当)の HLSL 化検討
 
 ### その後（②）
 - [ ] ONNX Runtime + DirectML を導入し、`starry_boil_small.onnx` をポストエフェクトとして実機推論

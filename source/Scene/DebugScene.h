@@ -4,11 +4,16 @@
 #include <blue_sky/CityGenerator.h>
 #include <core/graphics/TextStyle.h>
 #include <memory>
+#include <vector>
+#include <random>
+#include <cstdint>
 
 namespace core::graphics
 {
 	class RenderTargetTexture;
 	class NeuralStylizer;
+
+	namespace direct_3d_11 { class Texture; }
 }
 
 namespace blue_sky
@@ -43,7 +48,15 @@ protected:
 	// Neural NPR リアルタイム推論 ( ONNX Runtime + DirectML )
 	std::unique_ptr< core::graphics::NeuralStylizer > neural_stylizer_;
 	bool	neural_npr_enabled_		= false;	///< リアルタイム NPR を有効にするか
-	std::unique_ptr< core::graphics::RenderTargetTexture > neural_output_texture_;	///< 推論結果の表示用
+	std::unique_ptr< core::graphics::direct_3d_11::Texture > neural_output_texture_;	///< 推論結果の表示用(CPUからUpdateSubresourceで動的更新)
+	// Neural NPR 用 CPU バッファ＆ノイズ状態
+	std::vector< float >   neural_input_;            ///< 入力 NCHW float[0,1] (3*w*h)
+	std::vector< float >   neural_noise_;            ///< 推論に渡すノイズ (w*h)
+	std::vector< float >   neural_noise_prev_;       ///< 時間平滑(EMA)用の前フレーム状態 (w*h)
+	std::vector< float >   neural_output_;           ///< 出力 NCHW float (3*w*h)
+	std::vector< uint8_t > neural_rgba_;             ///< 出力 RGBA8 (4*w*h)
+	std::mt19937           neural_rng_{ 12345u };    ///< ノイズ生成器
+	float                  neural_noise_temporal_ = 0.35f;  ///< 時間平滑係数(EMA, 小さいほど滑らか=ボイリング弱)
 
 	// モーションベクトル用の前フレームカメラ行列
 	Matrix	prev_view_;

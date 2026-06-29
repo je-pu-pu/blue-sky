@@ -47,6 +47,7 @@
 #include <vector>
 #include <cstring>
 #include <cstdio>
+#include <cmath>
 
 #pragma comment( lib, "windowscodecs.lib" )
 
@@ -58,6 +59,52 @@ namespace
  *
  * DirectXTK に依存せず Windows 標準の WIC で完結させる。
  */
+// R8G8B8A8 テクスチャを CPU 側 RGBA8 連続バッファへ読み戻す（MSAA は解決）。
+// dump_texture_2d_to_png の読み戻し部分を推論入力用に切り出したもの。
+bool read_texture_2d_to_rgba8(
+	ID3D11Device* device, ID3D11DeviceContext* context, ID3D11Texture2D* source,
+	std::vector< BYTE >& out_pixels, UINT& out_width, UINT& out_height )
+{
+	using Microsoft::WRL::ComPtr;
+	if ( ! device || ! context || ! source ) return false;
+
+	D3D11_TEXTURE2D_DESC desc{};
+	source->GetDesc( & desc );
+
+	ComPtr< ID3D11Texture2D > resolved;
+	if ( desc.SampleDesc.Count > 1 )
+	{
+		D3D11_TEXTURE2D_DESC rd = desc;
+		rd.SampleDesc.Count = 1; rd.SampleDesc.Quality = 0;
+		rd.Usage = D3D11_USAGE_DEFAULT; rd.BindFlags = 0; rd.CPUAccessFlags = 0; rd.MiscFlags = 0;
+		if ( FAILED( device->CreateTexture2D( & rd, nullptr, resolved.GetAddressOf() ) ) ) return false;
+		context->ResolveSubresource( resolved.Get(), 0, source, 0, desc.Format );
+	}
+	else { resolved = source; }
+
+	D3D11_TEXTURE2D_DESC sd = desc;
+	sd.SampleDesc.Count = 1; sd.SampleDesc.Quality = 0;
+	sd.Usage = D3D11_USAGE_STAGING; sd.BindFlags = 0;
+	sd.CPUAccessFlags = D3D11_CPU_ACCESS_READ; sd.MiscFlags = 0;
+	ComPtr< ID3D11Texture2D > staging;
+	if ( FAILED( device->CreateTexture2D( & sd, nullptr, staging.GetAddressOf() ) ) ) return false;
+	context->CopyResource( staging.Get(), resolved.Get() );
+
+	D3D11_MAPPED_SUBRESOURCE mapped{};
+	if ( FAILED( context->Map( staging.Get(), 0, D3D11_MAP_READ, 0, & mapped ) ) ) return false;
+
+	const UINT stride = desc.Width * 4;
+	out_pixels.resize( static_cast< size_t >( stride ) * desc.Height );
+	const BYTE* src = static_cast< const BYTE* >( mapped.pData );
+	for ( UINT y = 0; y < desc.Height; ++y )
+		std::memcpy( out_pixels.data() + static_cast< size_t >( y ) * stride, src + static_cast< size_t >( y ) * mapped.RowPitch, stride );
+	context->Unmap( staging.Get(), 0 );
+
+	out_width = desc.Width; out_height = desc.Height;
+	return true;
+}
+
+
 bool dump_texture_2d_to_png(
 	ID3D11Device* device,
 	ID3D11DeviceContext* context,
@@ -740,7 +787,95 @@ void DebugScene::render()
 		}
 	}
 
-	get_graphics_manager()->render_post_effect( render_result_texture_.get() );
+	// --- Neural NPR ( リアルタイム推論。CPU 読み戻し方式 / 段階2 ) ---
+	if ( neural_npr_enabled_ && neural_stylizer_ )
+	{
+		auto* d3d = core::graphics::direct_3d_11::Direct3D11::get_instance();
+		auto* rtt = static_cast< core::graphics::direct_3d_11::RenderTargetTexture* >( render_result_texture_.get() );
+
+		ID3D11Resource* resource = nullptr;
+		rtt->get_render_target_view()->GetResource( & resource );
+		ID3D11Texture2D* texture = nullptr;
+		if ( resource ) resource->QueryInterface( IID_PPV_ARGS( & texture ) );
+
+		std::vector< BYTE > rgba;
+		UINT w = 0, h = 0;
+		const bool ok = texture && read_texture_2d_to_rgba8( d3d->getDevice(), d3d->getImmediateContext(), texture, rgba, w, h );
+
+		if ( ok )
+		{
+			const size_t n = static_cast< size_t >( w ) * h;
+			neural_input_.resize( 3 * n );
+			neural_output_.resize( 3 * n );
+			neural_rgba_.resize( 4 * n );
+
+			// RGBA8 -> NCHW float[0,1] ( プレーナ RGB )
+			for ( size_t i = 0; i < n; ++i )
+			{
+				neural_input_[ 0 * n + i ] = rgba[ 4 * i + 0 ] / 255.f;
+				neural_input_[ 1 * n + i ] = rgba[ 4 * i + 1 ] / 255.f;
+				neural_input_[ 2 * n + i ] = rgba[ 4 * i + 2 ] / 255.f;
+			}
+
+			// フレーム毎ノイズ: 空間白色 + 時間 EMA 平滑 -> std≈1 に正規化 ( infer_stochastic.py 相当 )
+			neural_noise_.resize( n );
+			if ( neural_noise_prev_.size() != n ) neural_noise_prev_.assign( n, 0.f );
+			{
+				std::normal_distribution< float > gauss( 0.f, 1.f );
+				const float a = neural_noise_temporal_;
+				double sum = 0.0, sqsum = 0.0;
+				for ( size_t i = 0; i < n; ++i )
+				{
+					const float white = gauss( neural_rng_ );
+					const float v = ( 1.f - a ) * neural_noise_prev_[ i ] + a * white;
+					neural_noise_prev_[ i ] = v;
+					neural_noise_[ i ] = v;
+					sum += v; sqsum += static_cast< double >( v ) * v;
+				}
+				const double mean = sum / static_cast< double >( n );
+				const double var = sqsum / static_cast< double >( n ) - mean * mean;
+				const float inv_std = static_cast< float >( 1.0 / ( std::sqrt( var > 0.0 ? var : 1e-12 ) + 1e-6 ) );
+				for ( size_t i = 0; i < n; ++i )
+					neural_noise_[ i ] = ( neural_noise_[ i ] - static_cast< float >( mean ) ) * inv_std;
+			}
+
+			neural_stylizer_->stylize( static_cast< int >( w ), static_cast< int >( h ),
+				neural_input_.data(), neural_noise_.data(), neural_output_.data() );
+
+			// NCHW float -> RGBA8
+			const auto to_u8 = []( float fv ) { const int x = static_cast< int >( fv * 255.f + 0.5f ); return static_cast< BYTE >( x < 0 ? 0 : ( x > 255 ? 255 : x ) ); };
+			for ( size_t i = 0; i < n; ++i )
+			{
+				neural_rgba_[ 4 * i + 0 ] = to_u8( neural_output_[ 0 * n + i ] );
+				neural_rgba_[ 4 * i + 1 ] = to_u8( neural_output_[ 1 * n + i ] );
+				neural_rgba_[ 4 * i + 2 ] = to_u8( neural_output_[ 2 * n + i ] );
+				neural_rgba_[ 4 * i + 3 ] = 255;
+			}
+
+			// 表示用テクスチャ ( 無し/サイズ違いなら作り直し ) に CPU からアップロード
+			if ( ! neural_output_texture_ || neural_output_texture_->get_width() != w || neural_output_texture_->get_height() != h )
+			{
+				neural_output_texture_ = std::make_unique< core::graphics::direct_3d_11::Texture >(
+					d3d, core::graphics::direct_3d_11::PixelFormat::R8G8B8A8_UNORM,
+					static_cast< int >( w ), static_cast< int >( h ), false );
+			}
+			d3d->getImmediateContext()->UpdateSubresource(
+				neural_output_texture_->get_texture_2d(), 0, nullptr, neural_rgba_.data(), w * 4, w * 4 * h );
+
+			get_graphics_manager()->render_post_effect( neural_output_texture_.get() );
+		}
+		else
+		{
+			get_graphics_manager()->render_post_effect( render_result_texture_.get() );
+		}
+
+		if ( texture ) texture->Release();
+		if ( resource ) resource->Release();
+	}
+	else
+	{
+		get_graphics_manager()->render_post_effect( render_result_texture_.get() );
+	}
 
 	get_graphics_manager()->render_fader();
 

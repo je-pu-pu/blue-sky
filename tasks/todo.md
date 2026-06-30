@@ -70,8 +70,10 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
     - ⚠️ **教訓**: starry_boil_small.onnx は**外部データ形式**で重みが別ファイル `starry_boil_small.onnx.data`(6.7MB) にある。ORT は `.onnx` と同じディレクトリに `.onnx.data` が無いと `file_size` 系の `std::filesystem::filesystem_error` を投げる。`.onnx` だけでなく `.data` も配置すること（`*.onnx.data` も gitignore 済み）
   - [x] 段階2(CPU方式): `DebugScene::render` で neural 有効時に ①`render_result_texture_` を staging 読み戻し(`read_texture_2d_to_rgba8` ヘルパ) ②RGBA8→NCHW float[0,1]＋フレーム毎ノイズ(空間白色+時間EMA平滑→std≈1正規化) ③`stylize()` ④NCHW→RGBA8→`direct_3d_11::Texture` へ UpdateSubresource→`render_post_effect` で表示。**実機でスタイル化＋ボイリング動作確認**。ノイズ平滑は `neural_noise_temporal_`(0.35)
     - ⚠️ **fps 60→6 に急落**（CPU 往復のコスト顕在化、予定どおり）。内訳推定: GPU→CPU 読み戻しの同期待ち＋フル解像度推論＋毎フレ全画素の CPU 処理(normal_distribution ノイズ生成・RGBA8↔NCHW 変換)
-- [ ] Phase4(高速化B・簡易): **処理解像度を下げる**（推論・ノイズ・変換を一括削減）。CPU方式のまま 20-30fps 目標。NPR は低解像度→拡大でも見栄え保てる(オフラインの --proc-size と同発想)。実装小
-- [ ] Phase5(高速化C・本命): **GPU 直結**（ORT IoBinding + D3D リソース）で読み戻し自体を消す。フル解像度でも高速。実装大
+- [x] Phase4(高速化B): **処理解像度を下げる**（長辺 `neural_proc_long_side_`、16の倍数にスナップ、imgui スライダ）。推論は小解像度・表示は GPU が拡大。推論を try/catch で保護。**6→16fps**（デバッガ有無は無関係）。スライダ `proc res` / `boil`
+    - 📌 **判明: 残るボトルネックは「フル解像度の GPU→CPU 読み戻し(`Map` 同期待ち)」**。proc res を下げても読み戻しは常にフル解像度なので頭打ち → Phase5(C) で解決すべき部分。
+    - 📌 **DirectML の `_com_error` は無害な first-chance 例外**（初回グラフコンパイル時に D3D12 内部で投げて自分で握りつぶす。スモークテストは全解像度で成功、推論は毎フレーム成功＝catch 未発動を実機ログで確認）。デバッガ下でのみ「投げられた瞬間」が見えるだけ。デバッグなし実行 or 例外設定で非表示にできる。
+- [ ] Phase5(高速化C・本命): **GPU 直結で読み戻しを消す**。本命は ORT IoBinding + D3D リソース（ただし engine=D3D11 / DirectML=D3D12 のクロスAPI共有が必要で実装大）。**軽い中間案**もあり: (a) 読み戻し前に GPU で proc 解像度へダウンスケール→小さいテクスチャを読み戻す（転送量↓） (b) ダブルバッファで前フレームを非同期読み戻し（1フレーム遅延で同期待ち回避）
 - [ ] Phase6: 既存ポストエフェクト(手描きシェーダ)が neural 出力の上に二重掛けされる点の調整。色保持(recolor_lab 相当)の HLSL 化検討
 
 ### その後（②）

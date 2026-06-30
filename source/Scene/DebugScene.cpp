@@ -646,6 +646,8 @@ void DebugScene::update()
 	if ( neural_stylizer_ )
 	{
 		ImGui::Checkbox( "Neural NPR (realtime, DirectML)", & neural_npr_enabled_ );
+		ImGui::SliderInt( "  proc res (long side)", & neural_proc_long_side_, 128, 1080 );
+		ImGui::SliderFloat( "  boil (noise temporal)", & neural_noise_temporal_, 0.05f, 1.0f );
 	}
 	else
 	{
@@ -804,17 +806,37 @@ void DebugScene::render()
 
 		if ( ok )
 		{
-			const size_t n = static_cast< size_t >( w ) * h;
+			// 処理解像度を下げる（長辺 = neural_proc_long_side_）。推論/ノイズ/変換を一括削減。
+			// 表示は小さいテクスチャを GPU が画面サイズへ拡大するので CPU 拡大は不要。
+			const int full_w = static_cast< int >( w ), full_h = static_cast< int >( h );
+			const int long_side = ( full_w > full_h ) ? full_w : full_h;
+			const int target = ( neural_proc_long_side_ > 0 ) ? neural_proc_long_side_ : long_side;
+			const float dscale = ( target < long_side ) ? static_cast< float >( target ) / long_side : 1.f;
+			// モデルは H/W が 16 の倍数であることを要求する（down サンプリング段数の都合。
+			// 非倍数だとスキップ接続サイズが食い違い DirectML が _com_error を投げる）。16 にスナップ。
+			const int align = 16;
+			const int pw_raw = ( dscale < 1.f ) ? static_cast< int >( full_w * dscale ) : full_w;
+			const int ph_raw = ( dscale < 1.f ) ? static_cast< int >( full_h * dscale ) : full_h;
+			const int pw = ( ( pw_raw / align ) * align >= align ) ? ( pw_raw / align ) * align : align;
+			const int ph = ( ( ph_raw / align ) * align >= align ) ? ( ph_raw / align ) * align : align;
+			const size_t n = static_cast< size_t >( pw ) * ph;
 			neural_input_.resize( 3 * n );
 			neural_output_.resize( 3 * n );
 			neural_rgba_.resize( 4 * n );
 
-			// RGBA8 -> NCHW float[0,1] ( プレーナ RGB )
-			for ( size_t i = 0; i < n; ++i )
+			// フル解像度 RGBA8 -> 処理解像度 NCHW float[0,1]（最近傍ダウンサンプル）
+			for ( int py = 0; py < ph; ++py )
 			{
-				neural_input_[ 0 * n + i ] = rgba[ 4 * i + 0 ] / 255.f;
-				neural_input_[ 1 * n + i ] = rgba[ 4 * i + 1 ] / 255.f;
-				neural_input_[ 2 * n + i ] = rgba[ 4 * i + 2 ] / 255.f;
+				const UINT sy = static_cast< UINT >( ( static_cast< size_t >( py ) * full_h ) / ph );
+				for ( int px = 0; px < pw; ++px )
+				{
+					const UINT sx = static_cast< UINT >( ( static_cast< size_t >( px ) * full_w ) / pw );
+					const size_t si = ( static_cast< size_t >( sy ) * full_w + sx ) * 4;
+					const size_t di = static_cast< size_t >( py ) * pw + px;
+					neural_input_[ 0 * n + di ] = rgba[ si + 0 ] / 255.f;
+					neural_input_[ 1 * n + di ] = rgba[ si + 1 ] / 255.f;
+					neural_input_[ 2 * n + di ] = rgba[ si + 2 ] / 255.f;
+				}
 			}
 
 			// フレーム毎ノイズ: 空間白色 + 時間 EMA 平滑 -> std≈1 に正規化 ( infer_stochastic.py 相当 )
@@ -839,7 +861,9 @@ void DebugScene::render()
 					neural_noise_[ i ] = ( neural_noise_[ i ] - static_cast< float >( mean ) ) * inv_std;
 			}
 
-			neural_stylizer_->stylize( static_cast< int >( w ), static_cast< int >( h ),
+			try
+			{
+			neural_stylizer_->stylize( pw, ph,
 				neural_input_.data(), neural_noise_.data(), neural_output_.data() );
 
 			// NCHW float -> RGBA8
@@ -853,16 +877,24 @@ void DebugScene::render()
 			}
 
 			// 表示用テクスチャ ( 無し/サイズ違いなら作り直し ) に CPU からアップロード
-			if ( ! neural_output_texture_ || neural_output_texture_->get_width() != w || neural_output_texture_->get_height() != h )
+			// 表示用テクスチャは処理解像度。表示時に GPU が画面サイズへ bilinear 拡大する。
+			if ( ! neural_output_texture_ || static_cast< int >( neural_output_texture_->get_width() ) != pw || static_cast< int >( neural_output_texture_->get_height() ) != ph )
 			{
 				neural_output_texture_ = std::make_unique< core::graphics::direct_3d_11::Texture >(
-					d3d, core::graphics::direct_3d_11::PixelFormat::R8G8B8A8_UNORM,
-					static_cast< int >( w ), static_cast< int >( h ), false );
+					d3d, core::graphics::direct_3d_11::PixelFormat::R8G8B8A8_UNORM, pw, ph, false );
 			}
 			d3d->getImmediateContext()->UpdateSubresource(
-				neural_output_texture_->get_texture_2d(), 0, nullptr, neural_rgba_.data(), w * 4, w * 4 * h );
+				neural_output_texture_->get_texture_2d(), 0, nullptr, neural_rgba_.data(),
+				static_cast< UINT >( pw ) * 4, static_cast< UINT >( pw ) * 4 * ph );
 
 			get_graphics_manager()->render_post_effect( neural_output_texture_.get() );
+			}
+			catch ( const std::exception& e )
+			{
+				neural_npr_enabled_ = false;
+				OutputDebugStringA( ( std::string( "[NeuralNPR] inference failed, disabling NPR: " ) + e.what() ).c_str() );
+				get_graphics_manager()->render_post_effect( render_result_texture_.get() );
+			}
 		}
 		else
 		{

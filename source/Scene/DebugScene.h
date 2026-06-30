@@ -57,6 +57,7 @@ protected:
 	std::vector< uint8_t > neural_rgba_;             ///< 出力 RGBA8 (4*w*h)
 	std::mt19937           neural_rng_{ 12345u };    ///< ノイズ生成器
 	float                  neural_noise_temporal_ = 0.35f;  ///< 時間平滑係数(EMA, 小さいほど滑らか=ボイリング弱)
+	int                    neural_proc_long_side_ = 384;    ///< 推論する処理解像度の長辺(px)。小さいほど高速・粗い。表示時にGPUで画面サイズへ拡大
 
 	// モーションベクトル用の前フレームカメラ行列
 	Matrix	prev_view_;

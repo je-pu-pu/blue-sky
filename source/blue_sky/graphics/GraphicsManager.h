@@ -244,6 +244,7 @@ public:
 	virtual void render_active_objects_velocity( const ActiveObjectManager* ) const;	///< モーションベクトルパス ( 案B / 段階0b )
 
 	virtual void set_post_effect_shader( Shader* ) override;
+	virtual Shader* get_post_effect_shader() const override;
 	virtual void render_post_effect( Texture* ) override;
 	virtual void render_post_effect( Texture*, RenderTarget* ) override;
 

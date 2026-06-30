@@ -102,6 +102,7 @@ public:
 	virtual void set_current_skinning_constant_buffer( const ConstantBuffer* ) const = 0;
 
 	virtual void set_post_effect_shader( Shader* ) = 0;
+	virtual Shader* get_post_effect_shader() const { return nullptr; }
 	virtual void render_post_effect( Texture* ) = 0;
 	virtual void render_post_effect( Texture*, RenderTarget* ) = 0;
 

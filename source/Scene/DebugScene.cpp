@@ -14,6 +14,7 @@
 
 #include <core/graphics/Sprite.h>
 #include <core/graphics/RenderTargetTexture.h>
+#include <core/graphics/Shader.h>
 #include <core/graphics/NeuralStylizer.h>
 #include <filesystem>
 #include <system_error>
@@ -457,6 +458,11 @@ DebugScene::DebugScene()
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
+	// 色保持リカラー／手描きポストのシェーダを取得（setup_default_shaders 後）
+	recolor_shader_ = get_graphics_manager()->get_shader( "post_effect_recolor" );
+	hand_drawing_shader_ = get_graphics_manager()->get_shader( "post_effect_hand_drawing" );
+	default_post_effect_shader_ = get_graphics_manager()->get_shader( "post_effect_default" );
+
 	camera_->position().set( 0.f, 1.5f, -10.f, 1.f );
 
 	auto* city = get_active_object_manager()->create_object( "static" );
@@ -650,6 +656,13 @@ void DebugScene::update()
 		ImGui::Checkbox( "  fp16 (off = fp32)", & neural_use_fp16_ );
 		ImGui::SliderInt( "  proc res (long side)", & neural_proc_long_side_, 128, 1080 );
 		ImGui::SliderFloat( "  boil (noise temporal)", & neural_noise_temporal_, 0.05f, 1.0f );
+		ImGui::Checkbox( "  color preserve (recolor)", & neural_color_preserve_ );
+		ImGui::Text( "  shaders: recolor=%s default=%s", recolor_shader_ ? "ok" : "NULL", default_post_effect_shader_ ? "ok" : "NULL" );
+		if ( neural_color_preserve_ )
+		{
+			ImGui::SliderFloat( "  blue", & neural_color_blue_, 0.f, 8.f );
+			ImGui::SliderFloat( "  dark clip", & neural_color_dark_, 0.f, 100.f );
+		}
 		ImGui::Text( "ms: read %.1f pre %.1f infer %.1f post %.1f / total %.1f", neural_ms_readback_, neural_ms_pre_, neural_ms_infer_, neural_ms_post_, neural_ms_total_ );
 	}
 	else
@@ -916,7 +929,23 @@ void DebugScene::render()
 				neural_output_texture_->get_texture_2d(), 0, nullptr, neural_rgba_.data(),
 				static_cast< UINT >( pw ) * 4, static_cast< UINT >( pw ) * 4 * ph );
 
+			// 表示の間だけポストエフェクトを差し替え、描画後に元へ戻す（非NPRシーンに影響させない）
+			core::graphics::Shader* prev_pe = get_graphics_manager()->get_post_effect_shader();
+			if ( neural_color_preserve_ && recolor_shader_ )
+			{
+				recolor_shader_->set_float( "blue", neural_color_blue_ );
+				recolor_shader_->set_float( "yellow", neural_color_yellow_ );
+				recolor_shader_->set_float( "a_spread", neural_color_a_ );
+				recolor_shader_->set_float( "dark_clip", neural_color_dark_ );
+				recolor_shader_->set_texture_at( 1, render_result_texture_.get() );  // 元シーン(色の基準)
+				get_graphics_manager()->set_post_effect_shader( recolor_shader_ );
+			}
+			else if ( default_post_effect_shader_ )
+			{
+				get_graphics_manager()->set_post_effect_shader( default_post_effect_shader_ );  // 素通し（うねり無し）
+			}
 			get_graphics_manager()->render_post_effect( neural_output_texture_.get() );
+			if ( prev_pe ) get_graphics_manager()->set_post_effect_shader( prev_pe );
 			const auto _nt4 = std::chrono::high_resolution_clock::now();
 			const auto msf = []( auto a, auto b ){ return static_cast< float >( std::chrono::duration< double, std::milli >( b - a ).count() ); };
 			neural_ms_readback_ = msf( _nt0, _nt1 );

@@ -79,8 +79,8 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 - [x] **Phase6(高速化・fp16): モデルを fp16 化**（`tools/npr_offline/to_fp16.py`、入出力 fp32 維持＝C++無改修・モデル差し替えのみ。重みインライン化で `.data` 不要、3.5MB）。**実機 infer 21.6→6.5ms（約3.3倍速）/ 768 で 33→57fps**（ほぼ60fps！）。画質ほぼ同等。imgui `fp16 (off=fp32)` トグルで切替（変化時のみ再ロード）。既定 fp16
     - 📌 fp16 で infer が小さくなり、now のボトルネックは **CPU オーバーヘッド(read+pre+post=10.3ms > infer 6.5ms)** に逆転。さらに速くするなら pre/post 最適化 or 完全 GPU 化が今度こそ効く（ただし 57fps で十分実用）
 - [ ] Phase7(任意・伸び小): pre/post の CPU パスを SIMD/並列化 or 完全 GPU 化。infer が小さくなった今は overhead 削減が効く（57fps→さらに上）
-- [ ] Phase7(任意): 既存ポストエフェクト(手描きシェーダ)が neural 出力に二重掛けされる点の調整、色保持(recolor_lab)の HLSL 化
-- [ ] Phase6: 既存ポストエフェクト(手描きシェーダ)が neural 出力の上に二重掛けされる点の調整。色保持(recolor_lab 相当)の HLSL 化検討
+- [x] **Phase8(色保持 HLSL化＋うねり解消)**: オフライン `recolor_lab` を HLSL 移植（`post_effect/recolor.hlsl`＋`RecolorShader`、Lab で L=暗化制限・a控えめ・b青増幅/黄カット、t0=ニューラル出力/t1=元シーン）。imgui トグル `color preserve`＋`blue`/`dark clip`。**手描きシェーダの二重掛けも解消**: neural 表示時のみ post-effect を recolor(色保持) or default(素通し)に一時差し替え→描画後 restore（非NPRシーンに影響させない）。既定値は blue=3/yellow=0/a=0.5/dark=60
+- [x] **CityGenerator クラッシュ修正**（NPR とは別件・既存バグ）: `road_node_list_`(vector<unique_ptr<RoadNode>>) の一括破棄で `~RoadNode`→`unlink()`が解放済み隣接を触る use-after-free。`~CityGenerator()` で破棄前に全ノードのリンクを null 化して回避。シーン遷移クラッシュ解消
 
 ### その後（②）
 - [ ] ONNX Runtime + DirectML を導入し、`starry_boil_small.onnx` をポストエフェクトとして実機推論

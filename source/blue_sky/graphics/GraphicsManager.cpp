@@ -23,6 +23,7 @@
 #include <blue_sky/graphics/shader/DebugShadowMapTextureShader.h>
 #include <blue_sky/graphics/shader/post_effect/DefaultShader.h>
 #include <blue_sky/graphics/shader/post_effect/HandDrawingShader.h>
+#include <blue_sky/graphics/shader/post_effect/RecolorShader.h>
 #include <blue_sky/graphics/shader/post_effect/NoiseShader.h>
 
 #include <Scene/Scene.h>
@@ -335,6 +336,7 @@ void GraphicsManager::setup_default_shaders()
 	auto post_effect_shader = create_named_shader< shader::post_effect::DefaultShader >( "post_effect_default" );
 	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_chromatic_aberration", "main", "post_effect_chromatic_aberration" );
 	create_named_shader< shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing", "main", "post_effect_hand_drawing" );
+	create_named_shader< shader::post_effect::RecolorShader >( "post_effect_recolor", "main", "post_effect_recolor" );
 
 	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_id_to_color", "main", "post_effect_id_to_color" );
 	create_named_shader< shader::post_effect::NoiseShader >( "post_effect_noise", "main", "post_effect_noise" );
@@ -633,6 +635,11 @@ void GraphicsManager::render_active_objects_velocity( const ActiveObjectManager*
 void GraphicsManager::set_post_effect_shader( Shader* shader )
 {
 	post_effect_rectangle_->set_shader_at( 0, shader );
+}
+
+core::graphics::Shader* GraphicsManager::get_post_effect_shader() const
+{
+	return post_effect_rectangle_->get_shader_at( 0 );
 }
 
 /**

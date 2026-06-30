@@ -76,7 +76,9 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 - [x] **計測で高速化の本丸を特定**（imgui に ms 表示を実装）。proc1080 の内訳: read 1.8 / pre 27.9 / infer 29.5 / post 8.2。
     - 📌 **読み戻しは 1.8ms = ボトルネックではない** → 当初想定の C(GPU直結/非同期読み戻し)は**不要**と確定（measure-first で無駄打ち回避）。infer はモデル計算コストで GPU 直結でも縮まない。
 - [x] Phase5(高速化・実施分): **ノイズ生成を高速化**（事前計算 N(0,1) テーブル＋1パス＋固定スケール。`normal_distribution` 毎画素呼び＋正規化2パスを廃止）。**pre 27.9→4.4ms**。既定 proc res を 768 に（画質≈1080・速度2倍の "ひざ"）。**768 で 33fps**（read1.6/pre4.4/infer21.6/post4.3）、1080 で 21fps
-- [ ] Phase6(任意・伸び小): pre/post の CPU パスを SIMD/並列化（768 で ~36fps 程度）。infer がボトルネックなので伸びは限定的
+- [x] **Phase6(高速化・fp16): モデルを fp16 化**（`tools/npr_offline/to_fp16.py`、入出力 fp32 維持＝C++無改修・モデル差し替えのみ。重みインライン化で `.data` 不要、3.5MB）。**実機 infer 21.6→6.5ms（約3.3倍速）/ 768 で 33→57fps**（ほぼ60fps！）。画質ほぼ同等。imgui `fp16 (off=fp32)` トグルで切替（変化時のみ再ロード）。既定 fp16
+    - 📌 fp16 で infer が小さくなり、now のボトルネックは **CPU オーバーヘッド(read+pre+post=10.3ms > infer 6.5ms)** に逆転。さらに速くするなら pre/post 最適化 or 完全 GPU 化が今度こそ効く（ただし 57fps で十分実用）
+- [ ] Phase7(任意・伸び小): pre/post の CPU パスを SIMD/並列化 or 完全 GPU 化。infer が小さくなった今は overhead 削減が効く（57fps→さらに上）
 - [ ] Phase7(任意): 既存ポストエフェクト(手描きシェーダ)が neural 出力に二重掛けされる点の調整、色保持(recolor_lab)の HLSL 化
 - [ ] Phase6: 既存ポストエフェクト(手描きシェーダ)が neural 出力の上に二重掛けされる点の調整。色保持(recolor_lab 相当)の HLSL 化検討
 

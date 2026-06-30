@@ -471,7 +471,7 @@ DebugScene::DebugScene()
 
 	// Neural NPR: モデルがあれば DirectML でロード（無ければ NPR 無効のまま続行）
 	{
-		const char* npr_model = "media/neural/starry_boil_small.onnx";
+		const char* npr_model = "media/neural/starry_boil_small_fp16.onnx";
 		std::error_code npr_ec;
 		if ( std::filesystem::exists( npr_model, npr_ec ) )
 		{
@@ -647,6 +647,7 @@ void DebugScene::update()
 	if ( neural_stylizer_ )
 	{
 		ImGui::Checkbox( "Neural NPR (realtime, DirectML)", & neural_npr_enabled_ );
+		ImGui::Checkbox( "  fp16 (off = fp32)", & neural_use_fp16_ );
 		ImGui::SliderInt( "  proc res (long side)", & neural_proc_long_side_, 128, 1080 );
 		ImGui::SliderFloat( "  boil (noise temporal)", & neural_noise_temporal_, 0.05f, 1.0f );
 		ImGui::Text( "ms: read %.1f pre %.1f infer %.1f post %.1f / total %.1f", neural_ms_readback_, neural_ms_pre_, neural_ms_infer_, neural_ms_post_, neural_ms_total_ );
@@ -791,6 +792,22 @@ void DebugScene::render()
 		}
 	}
 
+	// fp16/fp32 切り替え: トグル変化時のみモデル再ロード（セッション再生成は重い）
+	if ( neural_use_fp16_ != neural_loaded_fp16_ )
+	{
+		const char* m = neural_use_fp16_
+			? "media/neural/starry_boil_small_fp16.onnx"
+			: "media/neural/starry_boil_small.onnx";
+		try
+		{
+			neural_stylizer_ = std::make_unique< core::graphics::NeuralStylizer >( m );
+		}
+		catch ( const std::exception& e )
+		{
+			OutputDebugStringA( ( std::string( "[NeuralNPR] model reload failed: " ) + e.what() ).c_str() );
+		}
+		neural_loaded_fp16_ = neural_use_fp16_;  // 失敗してもループしないようフラグは合わせる
+	}
 	// --- Neural NPR ( リアルタイム推論。CPU 読み戻し方式 / 段階2 ) ---
 	if ( neural_npr_enabled_ && neural_stylizer_ )
 	{

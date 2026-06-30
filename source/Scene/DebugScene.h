@@ -48,6 +48,8 @@ protected:
 	// Neural NPR リアルタイム推論 ( ONNX Runtime + DirectML )
 	std::unique_ptr< core::graphics::NeuralStylizer > neural_stylizer_;
 	bool	neural_npr_enabled_		= false;	///< リアルタイム NPR を有効にするか
+	bool	neural_use_fp16_		= true;	///< 推論を fp16 で行うか(off=fp32)。約3倍速・画質ほぼ同等
+	bool	neural_loaded_fp16_		= true;	///< 現在ロード済みモデルが fp16 か(再ロード判定用)
 	std::unique_ptr< core::graphics::direct_3d_11::Texture > neural_output_texture_;	///< 推論結果の表示用(CPUからUpdateSubresourceで動的更新)
 	// Neural NPR 用 CPU バッファ＆ノイズ状態
 	std::vector< float >   neural_input_;            ///< 入力 NCHW float[0,1] (3*w*h)

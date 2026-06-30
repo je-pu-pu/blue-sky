@@ -48,6 +48,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cmath>
+#include <chrono>
 
 #pragma comment( lib, "windowscodecs.lib" )
 
@@ -648,6 +649,7 @@ void DebugScene::update()
 		ImGui::Checkbox( "Neural NPR (realtime, DirectML)", & neural_npr_enabled_ );
 		ImGui::SliderInt( "  proc res (long side)", & neural_proc_long_side_, 128, 1080 );
 		ImGui::SliderFloat( "  boil (noise temporal)", & neural_noise_temporal_, 0.05f, 1.0f );
+		ImGui::Text( "ms: read %.1f pre %.1f infer %.1f post %.1f / total %.1f", neural_ms_readback_, neural_ms_pre_, neural_ms_infer_, neural_ms_post_, neural_ms_total_ );
 	}
 	else
 	{
@@ -802,7 +804,9 @@ void DebugScene::render()
 
 		std::vector< BYTE > rgba;
 		UINT w = 0, h = 0;
+		const auto _nt0 = std::chrono::high_resolution_clock::now();
 		const bool ok = texture && read_texture_2d_to_rgba8( d3d->getDevice(), d3d->getImmediateContext(), texture, rgba, w, h );
+		const auto _nt1 = std::chrono::high_resolution_clock::now();
 
 		if ( ok )
 		{
@@ -843,28 +847,36 @@ void DebugScene::render()
 			neural_noise_.resize( n );
 			if ( neural_noise_prev_.size() != n ) neural_noise_prev_.assign( n, 0.f );
 			{
-				std::normal_distribution< float > gauss( 0.f, 1.f );
+				// 高速ノイズ: 事前計算した N(0,1) テーブルを毎フレーム別オフセットで読み、
+				// 時間 EMA 平滑 + 固定スケール(std≈1 復元)。normal_distribution の毎画素呼び出しと
+				// 正規化2パスを排して高速化。
+				constexpr size_t TBL = static_cast< size_t >( 1 ) << 21;  // 約209万 (≈8MB)
+				constexpr size_t MASK = TBL - 1;
+				if ( neural_gauss_table_.size() != TBL )
+				{
+					neural_gauss_table_.resize( TBL );
+					std::normal_distribution< float > g( 0.f, 1.f );
+					for ( size_t i = 0; i < TBL; ++i ) neural_gauss_table_[ i ] = g( neural_rng_ );
+				}
 				const float a = neural_noise_temporal_;
-				double sum = 0.0, sqsum = 0.0;
+				const float scale = std::sqrt( ( 2.f - a ) / a );  // EMA で減った分散を std≈1 に戻す固定係数
+				const size_t off = static_cast< size_t >( neural_rng_() ) & MASK;
+				const float* tbl = neural_gauss_table_.data();
 				for ( size_t i = 0; i < n; ++i )
 				{
-					const float white = gauss( neural_rng_ );
+					const float white = tbl[ ( off + i ) & MASK ];
 					const float v = ( 1.f - a ) * neural_noise_prev_[ i ] + a * white;
 					neural_noise_prev_[ i ] = v;
-					neural_noise_[ i ] = v;
-					sum += v; sqsum += static_cast< double >( v ) * v;
+					neural_noise_[ i ] = v * scale;
 				}
-				const double mean = sum / static_cast< double >( n );
-				const double var = sqsum / static_cast< double >( n ) - mean * mean;
-				const float inv_std = static_cast< float >( 1.0 / ( std::sqrt( var > 0.0 ? var : 1e-12 ) + 1e-6 ) );
-				for ( size_t i = 0; i < n; ++i )
-					neural_noise_[ i ] = ( neural_noise_[ i ] - static_cast< float >( mean ) ) * inv_std;
 			}
 
 			try
 			{
+			const auto _nt2 = std::chrono::high_resolution_clock::now();
 			neural_stylizer_->stylize( pw, ph,
 				neural_input_.data(), neural_noise_.data(), neural_output_.data() );
+			const auto _nt3 = std::chrono::high_resolution_clock::now();
 
 			// NCHW float -> RGBA8
 			const auto to_u8 = []( float fv ) { const int x = static_cast< int >( fv * 255.f + 0.5f ); return static_cast< BYTE >( x < 0 ? 0 : ( x > 255 ? 255 : x ) ); };
@@ -888,6 +900,13 @@ void DebugScene::render()
 				static_cast< UINT >( pw ) * 4, static_cast< UINT >( pw ) * 4 * ph );
 
 			get_graphics_manager()->render_post_effect( neural_output_texture_.get() );
+			const auto _nt4 = std::chrono::high_resolution_clock::now();
+			const auto msf = []( auto a, auto b ){ return static_cast< float >( std::chrono::duration< double, std::milli >( b - a ).count() ); };
+			neural_ms_readback_ = msf( _nt0, _nt1 );
+			neural_ms_pre_      = msf( _nt1, _nt2 );
+			neural_ms_infer_    = msf( _nt2, _nt3 );
+			neural_ms_post_     = msf( _nt3, _nt4 );
+			neural_ms_total_    = msf( _nt0, _nt4 );
 			}
 			catch ( const std::exception& e )
 			{

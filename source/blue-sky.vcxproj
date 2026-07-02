@@ -31,6 +31,7 @@
     <ClCompile Include="blue_sky\graphics\Fader.cpp" />
     <ClCompile Include="blue_sky\graphics\FbxFileLoader.cpp" />
     <ClCompile Include="blue_sky\graphics\GraphicsManager.cpp" />
+    <ClCompile Include="blue_sky\graphics\NeuralNprEffect.cpp" />
     <ClCompile Include="blue_sky\graphics\Ground.cpp" />
     <ClCompile Include="blue_sky\graphics\Line.cpp" />
     <ClCompile Include="blue_sky\graphics\Mesh.cpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="blue_sky\graphics\Fader.h" />
     <ClInclude Include="blue_sky\graphics\FbxFileLoader.h" />
     <ClInclude Include="blue_sky\graphics\GraphicsManager.h" />
+    <ClInclude Include="blue_sky\graphics\NeuralNprEffect.h" />
     <ClInclude Include="blue_sky\graphics\Ground.h" />
     <ClInclude Include="blue_sky\graphics\Line.h" />
     <ClInclude Include="blue_sky\graphics\Mesh.h" />

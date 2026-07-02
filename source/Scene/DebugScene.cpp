@@ -10,12 +10,11 @@
 #include <blue_sky/Input.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/NeuralNprEffect.h>
 #include <blue_sky/graphics/shader/post_effect/HandDrawingShader.h>
 
 #include <core/graphics/Sprite.h>
 #include <core/graphics/RenderTargetTexture.h>
-#include <core/graphics/Shader.h>
-#include <core/graphics/NeuralStylizer.h>
 #include <filesystem>
 #include <system_error>
 #include <string>
@@ -39,6 +38,7 @@
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/RenderTargetTexture.h>
 #include <core/graphics/Direct3D11/Texture.h>
+#include <core/graphics/Direct3D11/TextureReadback.h>
 
 #include <wrl/client.h>
 #include <wincodec.h>
@@ -61,51 +61,6 @@ namespace
  *
  * DirectXTK に依存せず Windows 標準の WIC で完結させる。
  */
-// R8G8B8A8 テクスチャを CPU 側 RGBA8 連続バッファへ読み戻す（MSAA は解決）。
-// dump_texture_2d_to_png の読み戻し部分を推論入力用に切り出したもの。
-bool read_texture_2d_to_rgba8(
-	ID3D11Device* device, ID3D11DeviceContext* context, ID3D11Texture2D* source,
-	std::vector< BYTE >& out_pixels, UINT& out_width, UINT& out_height )
-{
-	using Microsoft::WRL::ComPtr;
-	if ( ! device || ! context || ! source ) return false;
-
-	D3D11_TEXTURE2D_DESC desc{};
-	source->GetDesc( & desc );
-
-	ComPtr< ID3D11Texture2D > resolved;
-	if ( desc.SampleDesc.Count > 1 )
-	{
-		D3D11_TEXTURE2D_DESC rd = desc;
-		rd.SampleDesc.Count = 1; rd.SampleDesc.Quality = 0;
-		rd.Usage = D3D11_USAGE_DEFAULT; rd.BindFlags = 0; rd.CPUAccessFlags = 0; rd.MiscFlags = 0;
-		if ( FAILED( device->CreateTexture2D( & rd, nullptr, resolved.GetAddressOf() ) ) ) return false;
-		context->ResolveSubresource( resolved.Get(), 0, source, 0, desc.Format );
-	}
-	else { resolved = source; }
-
-	D3D11_TEXTURE2D_DESC sd = desc;
-	sd.SampleDesc.Count = 1; sd.SampleDesc.Quality = 0;
-	sd.Usage = D3D11_USAGE_STAGING; sd.BindFlags = 0;
-	sd.CPUAccessFlags = D3D11_CPU_ACCESS_READ; sd.MiscFlags = 0;
-	ComPtr< ID3D11Texture2D > staging;
-	if ( FAILED( device->CreateTexture2D( & sd, nullptr, staging.GetAddressOf() ) ) ) return false;
-	context->CopyResource( staging.Get(), resolved.Get() );
-
-	D3D11_MAPPED_SUBRESOURCE mapped{};
-	if ( FAILED( context->Map( staging.Get(), 0, D3D11_MAP_READ, 0, & mapped ) ) ) return false;
-
-	const UINT stride = desc.Width * 4;
-	out_pixels.resize( static_cast< size_t >( stride ) * desc.Height );
-	const BYTE* src = static_cast< const BYTE* >( mapped.pData );
-	for ( UINT y = 0; y < desc.Height; ++y )
-		std::memcpy( out_pixels.data() + static_cast< size_t >( y ) * stride, src + static_cast< size_t >( y ) * mapped.RowPitch, stride );
-	context->Unmap( staging.Get(), 0 );
-
-	out_width = desc.Width; out_height = desc.Height;
-	return true;
-}
-
 
 bool dump_texture_2d_to_png(
 	ID3D11Device* device,
@@ -120,65 +75,13 @@ bool dump_texture_2d_to_png(
 		return false;
 	}
 
-	D3D11_TEXTURE2D_DESC desc{};
-	source->GetDesc( & desc );
-
-	// MSAA なら非 MSAA テクスチャへ解決する
-	ComPtr< ID3D11Texture2D > resolved;
-	if ( desc.SampleDesc.Count > 1 )
-	{
-		D3D11_TEXTURE2D_DESC rd = desc;
-		rd.SampleDesc.Count = 1;
-		rd.SampleDesc.Quality = 0;
-		rd.Usage = D3D11_USAGE_DEFAULT;
-		rd.BindFlags = 0;
-		rd.CPUAccessFlags = 0;
-		rd.MiscFlags = 0;
-
-		if ( FAILED( device->CreateTexture2D( & rd, nullptr, resolved.GetAddressOf() ) ) )
-		{
-			return false;
-		}
-
-		context->ResolveSubresource( resolved.Get(), 0, source, 0, desc.Format );
-	}
-	else
-	{
-		resolved = source;
-	}
-
-	// CPU から読めるステージングテクスチャへコピー
-	D3D11_TEXTURE2D_DESC sd = desc;
-	sd.SampleDesc.Count = 1;
-	sd.SampleDesc.Quality = 0;
-	sd.Usage = D3D11_USAGE_STAGING;
-	sd.BindFlags = 0;
-	sd.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	sd.MiscFlags = 0;
-
-	ComPtr< ID3D11Texture2D > staging;
-	if ( FAILED( device->CreateTexture2D( & sd, nullptr, staging.GetAddressOf() ) ) )
+	std::vector< std::uint8_t > pixels;
+	UINT w = 0, h = 0;
+	if ( ! core::graphics::direct_3d_11::read_texture_2d_to_rgba8( device, context, source, pixels, w, h ) )
 	{
 		return false;
 	}
-
-	context->CopyResource( staging.Get(), resolved.Get() );
-
-	D3D11_MAPPED_SUBRESOURCE mapped{};
-	if ( FAILED( context->Map( staging.Get(), 0, D3D11_MAP_READ, 0, & mapped ) ) )
-	{
-		return false;
-	}
-
-	// 行ピッチを詰めて連続バッファ化する
-	const UINT stride = desc.Width * 4;
-	std::vector< BYTE > pixels( static_cast< size_t >( stride ) * desc.Height );
-	const BYTE* src = static_cast< const BYTE* >( mapped.pData );
-	for ( UINT y = 0; y < desc.Height; ++y )
-	{
-		std::memcpy( pixels.data() + static_cast< size_t >( y ) * stride, src + static_cast< size_t >( y ) * mapped.RowPitch, stride );
-	}
-	context->Unmap( staging.Get(), 0 );
+	const UINT stride = w * 4;
 
 	// WIC で PNG エンコード ( RGBA → エンコーダ形式へ自動変換 )
 	// COM は既に初期化済みの可能性があるため戻り値は無視する ( RPC_E_CHANGED_MODE でも WIC は利用可 )
@@ -191,7 +94,7 @@ bool dump_texture_2d_to_png(
 	}
 
 	ComPtr< IWICBitmap > bitmap;
-	if ( FAILED( factory->CreateBitmapFromMemory( desc.Width, desc.Height, GUID_WICPixelFormat32bppRGBA, stride, static_cast< UINT >( pixels.size() ), pixels.data(), bitmap.GetAddressOf() ) ) )
+	if ( FAILED( factory->CreateBitmapFromMemory( w, h, GUID_WICPixelFormat32bppRGBA, stride, static_cast< UINT >( pixels.size() ), pixels.data(), bitmap.GetAddressOf() ) ) )
 	{
 		return false;
 	}
@@ -212,7 +115,7 @@ bool dump_texture_2d_to_png(
 	ComPtr< IWICBitmapFrameEncode > frame;
 	encoder->CreateNewFrame( frame.GetAddressOf(), nullptr );
 	frame->Initialize( nullptr );
-	frame->SetSize( desc.Width, desc.Height );
+	frame->SetSize( w, h );
 
 	WICPixelFormatGUID format = GUID_WICPixelFormat32bppBGRA;
 	frame->SetPixelFormat( & format );
@@ -458,11 +361,6 @@ DebugScene::DebugScene()
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
-	// 色保持リカラー／手描きポストのシェーダを取得（setup_default_shaders 後）
-	recolor_shader_ = get_graphics_manager()->get_shader( "post_effect_recolor" );
-	hand_drawing_shader_ = get_graphics_manager()->get_shader( "post_effect_hand_drawing" );
-	default_post_effect_shader_ = get_graphics_manager()->get_shader( "post_effect_default" );
-
 	camera_->position().set( 0.f, 1.5f, -10.f, 1.f );
 
 	auto* city = get_active_object_manager()->create_object( "static" );
@@ -475,27 +373,8 @@ DebugScene::DebugScene()
 
 	get_graphics_manager()->load_named_texture( "2x2", "media/texture/rgby.png" );
 
-	// Neural NPR: モデルがあれば DirectML でロード（無ければ NPR 無効のまま続行）
-	{
-		const char* npr_model = "media/neural/starry_boil_small_fp16.onnx";
-		std::error_code npr_ec;
-		if ( std::filesystem::exists( npr_model, npr_ec ) )
-		{
-			try
-			{
-				neural_stylizer_ = std::make_unique< core::graphics::NeuralStylizer >( npr_model );
-				OutputDebugStringA( "[NeuralNPR] model loaded." );
-			}
-			catch ( const std::exception& e )
-			{
-				OutputDebugStringA( ( std::string( "[NeuralNPR] load failed: " ) + e.what() ).c_str() );
-			}
-		}
-		else
-		{
-			OutputDebugStringA( "[NeuralNPR] model file not found (CWD?): media/neural/starry_boil_small.onnx" );
-		}
-	}
+	// リアルタイム NPR ポストエフェクト（推論＋色保持リカラー）を用意
+	neural_npr_ = std::make_unique< graphics::NeuralNprEffect >( get_graphics_manager() );
 
 	filter = new core::sound::filter::BiquadFilter( get_sound_manager()->get_format().channels, static_cast< float >( get_sound_manager()->get_format().sampling_rate ), 800, 10, core::sound::filter::BiquadFilter::FilterType::Bandpass );
 	get_sound_manager()->add_sound_filter( filter );
@@ -649,26 +528,7 @@ void DebugScene::update()
 		}
 	}
 	ImGui::Checkbox( "Dump depth + camera (G-buffer)", & frame_dump_gbuffer_ );
-	ImGui::Separator();
-	if ( neural_stylizer_ )
-	{
-		ImGui::Checkbox( "Neural NPR (realtime, DirectML)", & neural_npr_enabled_ );
-		ImGui::Checkbox( "  fp16 (off = fp32)", & neural_use_fp16_ );
-		ImGui::SliderInt( "  proc res (long side)", & neural_proc_long_side_, 128, 1080 );
-		ImGui::SliderFloat( "  boil (noise temporal)", & neural_noise_temporal_, 0.05f, 1.0f );
-		ImGui::Checkbox( "  color preserve (recolor)", & neural_color_preserve_ );
-		ImGui::Text( "  shaders: recolor=%s default=%s", recolor_shader_ ? "ok" : "NULL", default_post_effect_shader_ ? "ok" : "NULL" );
-		if ( neural_color_preserve_ )
-		{
-			ImGui::SliderFloat( "  blue", & neural_color_blue_, 0.f, 8.f );
-			ImGui::SliderFloat( "  dark clip", & neural_color_dark_, 0.f, 100.f );
-		}
-		ImGui::Text( "ms: read %.1f pre %.1f infer %.1f post %.1f / total %.1f", neural_ms_readback_, neural_ms_pre_, neural_ms_infer_, neural_ms_post_, neural_ms_total_ );
-	}
-	else
-	{
-		ImGui::TextColored( ImVec4( 1.f, 0.5f, 0.2f, 1.f ), "Neural NPR: model not loaded" );
-	}
+	neural_npr_->render_imgui();
 	ImGui::Text( "out: ./dump/color_%%04d.png" );
 	if ( frame_dump_gbuffer_ )
 	{
@@ -805,171 +665,8 @@ void DebugScene::render()
 		}
 	}
 
-	// fp16/fp32 切り替え: トグル変化時のみモデル再ロード（セッション再生成は重い）
-	if ( neural_use_fp16_ != neural_loaded_fp16_ )
-	{
-		const char* m = neural_use_fp16_
-			? "media/neural/starry_boil_small_fp16.onnx"
-			: "media/neural/starry_boil_small.onnx";
-		try
-		{
-			neural_stylizer_ = std::make_unique< core::graphics::NeuralStylizer >( m );
-		}
-		catch ( const std::exception& e )
-		{
-			OutputDebugStringA( ( std::string( "[NeuralNPR] model reload failed: " ) + e.what() ).c_str() );
-		}
-		neural_loaded_fp16_ = neural_use_fp16_;  // 失敗してもループしないようフラグは合わせる
-	}
-	// --- Neural NPR ( リアルタイム推論。CPU 読み戻し方式 / 段階2 ) ---
-	if ( neural_npr_enabled_ && neural_stylizer_ )
-	{
-		auto* d3d = core::graphics::direct_3d_11::Direct3D11::get_instance();
-		auto* rtt = static_cast< core::graphics::direct_3d_11::RenderTargetTexture* >( render_result_texture_.get() );
-
-		ID3D11Resource* resource = nullptr;
-		rtt->get_render_target_view()->GetResource( & resource );
-		ID3D11Texture2D* texture = nullptr;
-		if ( resource ) resource->QueryInterface( IID_PPV_ARGS( & texture ) );
-
-		std::vector< BYTE > rgba;
-		UINT w = 0, h = 0;
-		const auto _nt0 = std::chrono::high_resolution_clock::now();
-		const bool ok = texture && read_texture_2d_to_rgba8( d3d->getDevice(), d3d->getImmediateContext(), texture, rgba, w, h );
-		const auto _nt1 = std::chrono::high_resolution_clock::now();
-
-		if ( ok )
-		{
-			// 処理解像度を下げる（長辺 = neural_proc_long_side_）。推論/ノイズ/変換を一括削減。
-			// 表示は小さいテクスチャを GPU が画面サイズへ拡大するので CPU 拡大は不要。
-			const int full_w = static_cast< int >( w ), full_h = static_cast< int >( h );
-			const int long_side = ( full_w > full_h ) ? full_w : full_h;
-			const int target = ( neural_proc_long_side_ > 0 ) ? neural_proc_long_side_ : long_side;
-			const float dscale = ( target < long_side ) ? static_cast< float >( target ) / long_side : 1.f;
-			// モデルは H/W が 16 の倍数であることを要求する（down サンプリング段数の都合。
-			// 非倍数だとスキップ接続サイズが食い違い DirectML が _com_error を投げる）。16 にスナップ。
-			const int align = 16;
-			const int pw_raw = ( dscale < 1.f ) ? static_cast< int >( full_w * dscale ) : full_w;
-			const int ph_raw = ( dscale < 1.f ) ? static_cast< int >( full_h * dscale ) : full_h;
-			const int pw = ( ( pw_raw / align ) * align >= align ) ? ( pw_raw / align ) * align : align;
-			const int ph = ( ( ph_raw / align ) * align >= align ) ? ( ph_raw / align ) * align : align;
-			const size_t n = static_cast< size_t >( pw ) * ph;
-			neural_input_.resize( 3 * n );
-			neural_output_.resize( 3 * n );
-			neural_rgba_.resize( 4 * n );
-
-			// フル解像度 RGBA8 -> 処理解像度 NCHW float[0,1]（最近傍ダウンサンプル）
-			for ( int py = 0; py < ph; ++py )
-			{
-				const UINT sy = static_cast< UINT >( ( static_cast< size_t >( py ) * full_h ) / ph );
-				for ( int px = 0; px < pw; ++px )
-				{
-					const UINT sx = static_cast< UINT >( ( static_cast< size_t >( px ) * full_w ) / pw );
-					const size_t si = ( static_cast< size_t >( sy ) * full_w + sx ) * 4;
-					const size_t di = static_cast< size_t >( py ) * pw + px;
-					neural_input_[ 0 * n + di ] = rgba[ si + 0 ] / 255.f;
-					neural_input_[ 1 * n + di ] = rgba[ si + 1 ] / 255.f;
-					neural_input_[ 2 * n + di ] = rgba[ si + 2 ] / 255.f;
-				}
-			}
-
-			// フレーム毎ノイズ: 空間白色 + 時間 EMA 平滑 -> std≈1 に正規化 ( infer_stochastic.py 相当 )
-			neural_noise_.resize( n );
-			if ( neural_noise_prev_.size() != n ) neural_noise_prev_.assign( n, 0.f );
-			{
-				// 高速ノイズ: 事前計算した N(0,1) テーブルを毎フレーム別オフセットで読み、
-				// 時間 EMA 平滑 + 固定スケール(std≈1 復元)。normal_distribution の毎画素呼び出しと
-				// 正規化2パスを排して高速化。
-				constexpr size_t TBL = static_cast< size_t >( 1 ) << 21;  // 約209万 (≈8MB)
-				constexpr size_t MASK = TBL - 1;
-				if ( neural_gauss_table_.size() != TBL )
-				{
-					neural_gauss_table_.resize( TBL );
-					std::normal_distribution< float > g( 0.f, 1.f );
-					for ( size_t i = 0; i < TBL; ++i ) neural_gauss_table_[ i ] = g( neural_rng_ );
-				}
-				const float a = neural_noise_temporal_;
-				const float scale = std::sqrt( ( 2.f - a ) / a );  // EMA で減った分散を std≈1 に戻す固定係数
-				const size_t off = static_cast< size_t >( neural_rng_() ) & MASK;
-				const float* tbl = neural_gauss_table_.data();
-				for ( size_t i = 0; i < n; ++i )
-				{
-					const float white = tbl[ ( off + i ) & MASK ];
-					const float v = ( 1.f - a ) * neural_noise_prev_[ i ] + a * white;
-					neural_noise_prev_[ i ] = v;
-					neural_noise_[ i ] = v * scale;
-				}
-			}
-
-			try
-			{
-			const auto _nt2 = std::chrono::high_resolution_clock::now();
-			neural_stylizer_->stylize( pw, ph,
-				neural_input_.data(), neural_noise_.data(), neural_output_.data() );
-			const auto _nt3 = std::chrono::high_resolution_clock::now();
-
-			// NCHW float -> RGBA8
-			const auto to_u8 = []( float fv ) { const int x = static_cast< int >( fv * 255.f + 0.5f ); return static_cast< BYTE >( x < 0 ? 0 : ( x > 255 ? 255 : x ) ); };
-			for ( size_t i = 0; i < n; ++i )
-			{
-				neural_rgba_[ 4 * i + 0 ] = to_u8( neural_output_[ 0 * n + i ] );
-				neural_rgba_[ 4 * i + 1 ] = to_u8( neural_output_[ 1 * n + i ] );
-				neural_rgba_[ 4 * i + 2 ] = to_u8( neural_output_[ 2 * n + i ] );
-				neural_rgba_[ 4 * i + 3 ] = 255;
-			}
-
-			// 表示用テクスチャ ( 無し/サイズ違いなら作り直し ) に CPU からアップロード
-			// 表示用テクスチャは処理解像度。表示時に GPU が画面サイズへ bilinear 拡大する。
-			if ( ! neural_output_texture_ || static_cast< int >( neural_output_texture_->get_width() ) != pw || static_cast< int >( neural_output_texture_->get_height() ) != ph )
-			{
-				neural_output_texture_ = std::make_unique< core::graphics::direct_3d_11::Texture >(
-					d3d, core::graphics::direct_3d_11::PixelFormat::R8G8B8A8_UNORM, pw, ph, false );
-			}
-			d3d->getImmediateContext()->UpdateSubresource(
-				neural_output_texture_->get_texture_2d(), 0, nullptr, neural_rgba_.data(),
-				static_cast< UINT >( pw ) * 4, static_cast< UINT >( pw ) * 4 * ph );
-
-			// 表示の間だけポストエフェクトを差し替え、描画後に元へ戻す（非NPRシーンに影響させない）
-			core::graphics::Shader* prev_pe = get_graphics_manager()->get_post_effect_shader();
-			if ( neural_color_preserve_ && recolor_shader_ )
-			{
-				recolor_shader_->set_float( "blue", neural_color_blue_ );
-				recolor_shader_->set_float( "yellow", neural_color_yellow_ );
-				recolor_shader_->set_float( "a_spread", neural_color_a_ );
-				recolor_shader_->set_float( "dark_clip", neural_color_dark_ );
-				recolor_shader_->set_texture_at( 1, render_result_texture_.get() );  // 元シーン(色の基準)
-				get_graphics_manager()->set_post_effect_shader( recolor_shader_ );
-			}
-			else if ( default_post_effect_shader_ )
-			{
-				get_graphics_manager()->set_post_effect_shader( default_post_effect_shader_ );  // 素通し（うねり無し）
-			}
-			get_graphics_manager()->render_post_effect( neural_output_texture_.get() );
-			if ( prev_pe ) get_graphics_manager()->set_post_effect_shader( prev_pe );
-			const auto _nt4 = std::chrono::high_resolution_clock::now();
-			const auto msf = []( auto a, auto b ){ return static_cast< float >( std::chrono::duration< double, std::milli >( b - a ).count() ); };
-			neural_ms_readback_ = msf( _nt0, _nt1 );
-			neural_ms_pre_      = msf( _nt1, _nt2 );
-			neural_ms_infer_    = msf( _nt2, _nt3 );
-			neural_ms_post_     = msf( _nt3, _nt4 );
-			neural_ms_total_    = msf( _nt0, _nt4 );
-			}
-			catch ( const std::exception& e )
-			{
-				neural_npr_enabled_ = false;
-				OutputDebugStringA( ( std::string( "[NeuralNPR] inference failed, disabling NPR: " ) + e.what() ).c_str() );
-				get_graphics_manager()->render_post_effect( render_result_texture_.get() );
-			}
-		}
-		else
-		{
-			get_graphics_manager()->render_post_effect( render_result_texture_.get() );
-		}
-
-		if ( texture ) texture->Release();
-		if ( resource ) resource->Release();
-	}
-	else
+	// リアルタイム NPR: 有効時はスタイル化して表示。表示しなければ通常のポストエフェクト。
+	if ( ! neural_npr_->apply( get_graphics_manager(), render_result_texture_.get() ) )
 	{
 		get_graphics_manager()->render_post_effect( render_result_texture_.get() );
 	}

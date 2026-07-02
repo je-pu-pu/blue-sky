@@ -293,3 +293,10 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 - `BackBufferTexture.h:17` — Texture と共通化
 - `core/graphics/Shader.h:18,38` — パラメータ設計
 - `core/graphics/GraphicsManager.h:32` — 太らせる
+
+## NPR コード品質改善（ブランチ refactor/npr-code-quality）
+- [x] ② テクスチャ読み戻しを `core/graphics/Direct3D11/TextureReadback` に共通化（dump と neural の重複解消）
+- [x] ③ 死にコード削除（DebugScene の未使用 hand_drawing_shader_）
+- [x] ①④⑤ NPR パイプラインを `blue_sky::graphics::NeuralNprEffect` に抽出（DebugScene から状態24+ロジック150行を撤去、定数化、診断は imgui 内 dev ツールとして維持）
+- [x] ⑥ ノイズ生成を `CoherentNoise.h` の `step_coherent_noise()` に自由関数化＋単体テスト（std≈1 検証、CoherentNoiseTest）
+- 補足: recolor は HLSL のため C++ 単体テスト対象外。読み戻しは D3D デバイス依存でスモークのみ

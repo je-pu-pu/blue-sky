@@ -31,6 +31,7 @@
     <ClCompile Include="blue_sky\graphics\Fader.cpp" />
     <ClCompile Include="blue_sky\graphics\FbxFileLoader.cpp" />
     <ClCompile Include="blue_sky\graphics\GraphicsManager.cpp" />
+    <ClCompile Include="blue_sky\graphics\NeuralNprEffect.cpp" />
     <ClCompile Include="blue_sky\graphics\Ground.cpp" />
     <ClCompile Include="blue_sky\graphics\Line.cpp" />
     <ClCompile Include="blue_sky\graphics\Mesh.cpp" />
@@ -72,6 +73,7 @@
     <ClCompile Include="core\graphics\Direct3D11\ShadowMap.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Sprite.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Texture.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\TextureReadback.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp" />
     <ClCompile Include="core\graphics\Msdf\GlyphAtlas.cpp" />
     <ClCompile Include="core\graphics\Msdf\GlyphCache.cpp" />
@@ -160,6 +162,7 @@
     <ClInclude Include="blue_sky\graphics\Fader.h" />
     <ClInclude Include="blue_sky\graphics\FbxFileLoader.h" />
     <ClInclude Include="blue_sky\graphics\GraphicsManager.h" />
+    <ClInclude Include="blue_sky\graphics\NeuralNprEffect.h" />
     <ClInclude Include="blue_sky\graphics\Ground.h" />
     <ClInclude Include="blue_sky\graphics\Line.h" />
     <ClInclude Include="blue_sky\graphics\Mesh.h" />
@@ -252,6 +255,7 @@
     <ClInclude Include="core\graphics\Direct3D11\ShadowMap.h" />
     <ClInclude Include="core\graphics\Direct3D11\Sprite.h" />
     <ClInclude Include="core\graphics\Direct3D11\Texture.h" />
+    <ClInclude Include="core\graphics\Direct3D11\TextureReadback.h" />
     <ClInclude Include="core\graphics\Direct3D11\VertexBuffer.h" />
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h" />
     <ClInclude Include="core\graphics\DynamicPointList.h" />

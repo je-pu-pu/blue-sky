@@ -1,5 +1,7 @@
 #include "NeuralNprEffect.h"
 
+#include "CoherentNoise.h"
+
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/NeuralStylizer.h>
 #include <core/graphics/Shader.h>
@@ -78,18 +80,9 @@ void NeuralNprEffect::generate_noise( int width, int height )
 		for ( size_t i = 0; i < GAUSS_TABLE_SIZE; ++i ) gauss_table_[ i ] = g( rng_ );
 	}
 
-	constexpr size_t MASK = GAUSS_TABLE_SIZE - 1;
-	const float a = noise_temporal_;
-	const float scale = std::sqrt( ( 2.f - a ) / a );  // EMA で減った分散を std≈1 に戻す固定係数
-	const size_t off = static_cast< size_t >( rng_() ) & MASK;
-	const float* tbl = gauss_table_.data();
-	for ( size_t i = 0; i < n; ++i )
-	{
-		const float white = tbl[ ( off + i ) & MASK ];
-		const float v = ( 1.f - a ) * noise_prev_[ i ] + a * white;
-		noise_prev_[ i ] = v;
-		noise_[ i ] = v * scale;
-	}
+	// EMA 平滑＋std≈1 正規化は自由関数へ（テスト可能 / CoherentNoiseTest 参照）
+	const size_t off = static_cast< size_t >( rng_() ) & ( GAUSS_TABLE_SIZE - 1 );
+	step_coherent_noise( gauss_table_, noise_prev_, noise_, off, noise_temporal_ );
 }
 
 bool NeuralNprEffect::apply( core::graphics::GraphicsManager* gm, core::graphics::RenderTargetTexture* scene )

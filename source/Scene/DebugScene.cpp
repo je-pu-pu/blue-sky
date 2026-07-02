@@ -39,6 +39,7 @@
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/RenderTargetTexture.h>
 #include <core/graphics/Direct3D11/Texture.h>
+#include <core/graphics/Direct3D11/TextureReadback.h>
 
 #include <wrl/client.h>
 #include <wincodec.h>
@@ -61,51 +62,6 @@ namespace
  *
  * DirectXTK に依存せず Windows 標準の WIC で完結させる。
  */
-// R8G8B8A8 テクスチャを CPU 側 RGBA8 連続バッファへ読み戻す（MSAA は解決）。
-// dump_texture_2d_to_png の読み戻し部分を推論入力用に切り出したもの。
-bool read_texture_2d_to_rgba8(
-	ID3D11Device* device, ID3D11DeviceContext* context, ID3D11Texture2D* source,
-	std::vector< BYTE >& out_pixels, UINT& out_width, UINT& out_height )
-{
-	using Microsoft::WRL::ComPtr;
-	if ( ! device || ! context || ! source ) return false;
-
-	D3D11_TEXTURE2D_DESC desc{};
-	source->GetDesc( & desc );
-
-	ComPtr< ID3D11Texture2D > resolved;
-	if ( desc.SampleDesc.Count > 1 )
-	{
-		D3D11_TEXTURE2D_DESC rd = desc;
-		rd.SampleDesc.Count = 1; rd.SampleDesc.Quality = 0;
-		rd.Usage = D3D11_USAGE_DEFAULT; rd.BindFlags = 0; rd.CPUAccessFlags = 0; rd.MiscFlags = 0;
-		if ( FAILED( device->CreateTexture2D( & rd, nullptr, resolved.GetAddressOf() ) ) ) return false;
-		context->ResolveSubresource( resolved.Get(), 0, source, 0, desc.Format );
-	}
-	else { resolved = source; }
-
-	D3D11_TEXTURE2D_DESC sd = desc;
-	sd.SampleDesc.Count = 1; sd.SampleDesc.Quality = 0;
-	sd.Usage = D3D11_USAGE_STAGING; sd.BindFlags = 0;
-	sd.CPUAccessFlags = D3D11_CPU_ACCESS_READ; sd.MiscFlags = 0;
-	ComPtr< ID3D11Texture2D > staging;
-	if ( FAILED( device->CreateTexture2D( & sd, nullptr, staging.GetAddressOf() ) ) ) return false;
-	context->CopyResource( staging.Get(), resolved.Get() );
-
-	D3D11_MAPPED_SUBRESOURCE mapped{};
-	if ( FAILED( context->Map( staging.Get(), 0, D3D11_MAP_READ, 0, & mapped ) ) ) return false;
-
-	const UINT stride = desc.Width * 4;
-	out_pixels.resize( static_cast< size_t >( stride ) * desc.Height );
-	const BYTE* src = static_cast< const BYTE* >( mapped.pData );
-	for ( UINT y = 0; y < desc.Height; ++y )
-		std::memcpy( out_pixels.data() + static_cast< size_t >( y ) * stride, src + static_cast< size_t >( y ) * mapped.RowPitch, stride );
-	context->Unmap( staging.Get(), 0 );
-
-	out_width = desc.Width; out_height = desc.Height;
-	return true;
-}
-
 
 bool dump_texture_2d_to_png(
 	ID3D11Device* device,
@@ -120,65 +76,13 @@ bool dump_texture_2d_to_png(
 		return false;
 	}
 
-	D3D11_TEXTURE2D_DESC desc{};
-	source->GetDesc( & desc );
-
-	// MSAA なら非 MSAA テクスチャへ解決する
-	ComPtr< ID3D11Texture2D > resolved;
-	if ( desc.SampleDesc.Count > 1 )
-	{
-		D3D11_TEXTURE2D_DESC rd = desc;
-		rd.SampleDesc.Count = 1;
-		rd.SampleDesc.Quality = 0;
-		rd.Usage = D3D11_USAGE_DEFAULT;
-		rd.BindFlags = 0;
-		rd.CPUAccessFlags = 0;
-		rd.MiscFlags = 0;
-
-		if ( FAILED( device->CreateTexture2D( & rd, nullptr, resolved.GetAddressOf() ) ) )
-		{
-			return false;
-		}
-
-		context->ResolveSubresource( resolved.Get(), 0, source, 0, desc.Format );
-	}
-	else
-	{
-		resolved = source;
-	}
-
-	// CPU から読めるステージングテクスチャへコピー
-	D3D11_TEXTURE2D_DESC sd = desc;
-	sd.SampleDesc.Count = 1;
-	sd.SampleDesc.Quality = 0;
-	sd.Usage = D3D11_USAGE_STAGING;
-	sd.BindFlags = 0;
-	sd.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	sd.MiscFlags = 0;
-
-	ComPtr< ID3D11Texture2D > staging;
-	if ( FAILED( device->CreateTexture2D( & sd, nullptr, staging.GetAddressOf() ) ) )
+	std::vector< std::uint8_t > pixels;
+	UINT w = 0, h = 0;
+	if ( ! core::graphics::direct_3d_11::read_texture_2d_to_rgba8( device, context, source, pixels, w, h ) )
 	{
 		return false;
 	}
-
-	context->CopyResource( staging.Get(), resolved.Get() );
-
-	D3D11_MAPPED_SUBRESOURCE mapped{};
-	if ( FAILED( context->Map( staging.Get(), 0, D3D11_MAP_READ, 0, & mapped ) ) )
-	{
-		return false;
-	}
-
-	// 行ピッチを詰めて連続バッファ化する
-	const UINT stride = desc.Width * 4;
-	std::vector< BYTE > pixels( static_cast< size_t >( stride ) * desc.Height );
-	const BYTE* src = static_cast< const BYTE* >( mapped.pData );
-	for ( UINT y = 0; y < desc.Height; ++y )
-	{
-		std::memcpy( pixels.data() + static_cast< size_t >( y ) * stride, src + static_cast< size_t >( y ) * mapped.RowPitch, stride );
-	}
-	context->Unmap( staging.Get(), 0 );
+	const UINT stride = w * 4;
 
 	// WIC で PNG エンコード ( RGBA → エンコーダ形式へ自動変換 )
 	// COM は既に初期化済みの可能性があるため戻り値は無視する ( RPC_E_CHANGED_MODE でも WIC は利用可 )
@@ -191,7 +95,7 @@ bool dump_texture_2d_to_png(
 	}
 
 	ComPtr< IWICBitmap > bitmap;
-	if ( FAILED( factory->CreateBitmapFromMemory( desc.Width, desc.Height, GUID_WICPixelFormat32bppRGBA, stride, static_cast< UINT >( pixels.size() ), pixels.data(), bitmap.GetAddressOf() ) ) )
+	if ( FAILED( factory->CreateBitmapFromMemory( w, h, GUID_WICPixelFormat32bppRGBA, stride, static_cast< UINT >( pixels.size() ), pixels.data(), bitmap.GetAddressOf() ) ) )
 	{
 		return false;
 	}
@@ -212,7 +116,7 @@ bool dump_texture_2d_to_png(
 	ComPtr< IWICBitmapFrameEncode > frame;
 	encoder->CreateNewFrame( frame.GetAddressOf(), nullptr );
 	frame->Initialize( nullptr );
-	frame->SetSize( desc.Width, desc.Height );
+	frame->SetSize( w, h );
 
 	WICPixelFormatGUID format = GUID_WICPixelFormat32bppBGRA;
 	frame->SetPixelFormat( & format );
@@ -460,7 +364,6 @@ DebugScene::DebugScene()
 
 	// 色保持リカラー／手描きポストのシェーダを取得（setup_default_shaders 後）
 	recolor_shader_ = get_graphics_manager()->get_shader( "post_effect_recolor" );
-	hand_drawing_shader_ = get_graphics_manager()->get_shader( "post_effect_hand_drawing" );
 	default_post_effect_shader_ = get_graphics_manager()->get_shader( "post_effect_default" );
 
 	camera_->position().set( 0.f, 1.5f, -10.f, 1.f );
@@ -832,10 +735,10 @@ void DebugScene::render()
 		ID3D11Texture2D* texture = nullptr;
 		if ( resource ) resource->QueryInterface( IID_PPV_ARGS( & texture ) );
 
-		std::vector< BYTE > rgba;
+		std::vector< std::uint8_t > rgba;
 		UINT w = 0, h = 0;
 		const auto _nt0 = std::chrono::high_resolution_clock::now();
-		const bool ok = texture && read_texture_2d_to_rgba8( d3d->getDevice(), d3d->getImmediateContext(), texture, rgba, w, h );
+		const bool ok = texture && core::graphics::direct_3d_11::read_texture_2d_to_rgba8( d3d->getDevice(), d3d->getImmediateContext(), texture, rgba, w, h );
 		const auto _nt1 = std::chrono::high_resolution_clock::now();
 
 		if ( ok )

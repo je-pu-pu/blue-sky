@@ -53,7 +53,6 @@ protected:
 	bool	neural_loaded_fp16_		= true;	///< 現在ロード済みモデルが fp16 か(再ロード判定用)
 	// 色保持リカラー（neural 出力＋元シーンを Lab で合成。手描き二重掛けも回避）
 	core::graphics::Shader* recolor_shader_ = nullptr;       ///< 色保持リカラー用
-	core::graphics::Shader* hand_drawing_shader_ = nullptr;  ///< 既定の手描きポスト
 	core::graphics::Shader* default_post_effect_shader_ = nullptr; ///< 素通し（neural時うねり回避）
 	bool   neural_color_preserve_ = true;   ///< 色保持を使うか(off=ニューラル出力そのまま)
 	float  neural_color_blue_  = 3.0f;   ///< 青方向の増幅

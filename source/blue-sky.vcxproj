@@ -72,6 +72,7 @@
     <ClCompile Include="core\graphics\Direct3D11\ShadowMap.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Sprite.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Texture.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\TextureReadback.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp" />
     <ClCompile Include="core\graphics\Msdf\GlyphAtlas.cpp" />
     <ClCompile Include="core\graphics\Msdf\GlyphCache.cpp" />
@@ -252,6 +253,7 @@
     <ClInclude Include="core\graphics\Direct3D11\ShadowMap.h" />
     <ClInclude Include="core\graphics\Direct3D11\Sprite.h" />
     <ClInclude Include="core\graphics\Direct3D11\Texture.h" />
+    <ClInclude Include="core\graphics\Direct3D11\TextureReadback.h" />
     <ClInclude Include="core\graphics\Direct3D11\VertexBuffer.h" />
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h" />
     <ClInclude Include="core\graphics\DynamicPointList.h" />

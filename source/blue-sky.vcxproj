@@ -55,6 +55,10 @@
     <ClCompile Include="core\ecs\System.cpp" />
     <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\FpsPlayerControlSystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\TargetRegistrySystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\PerceptionSystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\AlertSystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\PatrolSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\BalloonSystem.cpp" />
     <ClCompile Include="core\ecs\system\ParticleSystem.cpp" />
     <ClCompile Include="core\ecs\system\PhysicsSystem.cpp" />
@@ -216,6 +220,10 @@
     <ClInclude Include="core\ecs\Component.h" />
     <ClInclude Include="core\ecs\component\CameraComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\FpsPlayerComponent.h" />
+    <ClInclude Include="blue_sky\ecs\component\PerceivableComponent.h" />
+    <ClInclude Include="blue_sky\ecs\component\PerceptionComponent.h" />
+    <ClInclude Include="blue_sky\ecs\component\AlertComponent.h" />
+    <ClInclude Include="blue_sky\ecs\component\PatrolComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\BalloonComponent.h" />
     <ClInclude Include="core\ecs\component\ModelComponent.h" />
     <ClInclude Include="core\ecs\component\ParticleSystemComponent.h" />
@@ -226,6 +234,11 @@
     <ClInclude Include="core\ecs\Entity.h" />
     <ClInclude Include="core\ecs\System.h" />
     <ClInclude Include="blue_sky\ecs\system\FpsPlayerControlSystem.h" />
+    <ClInclude Include="blue_sky\ecs\system\TargetRegistrySystem.h" />
+    <ClInclude Include="blue_sky\ecs\system\PerceptionSystem.h" />
+    <ClInclude Include="blue_sky\ecs\system\AlertSystem.h" />
+    <ClInclude Include="blue_sky\ecs\system\PatrolSystem.h" />
+    <ClInclude Include="blue_sky\ai\EnemyPerception.h" />
     <ClInclude Include="blue_sky\ecs\system\BalloonSystem.h" />
     <ClInclude Include="core\ecs\system\ParticleRenderSystem.h" />
     <ClInclude Include="core\ecs\system\ParticleSystem.h" />

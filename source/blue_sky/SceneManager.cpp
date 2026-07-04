@@ -14,6 +14,7 @@
 
 #include <Scene/PhysicsTestScene.h>
 #include <Scene/MusicGamePrototypeScene.h>
+#include <Scene/EnemyAiTestScene.h>
 #include <Scene/PauseMenuScene.h>
 #include <Scene/OptionsScene.h>
 
@@ -48,6 +49,7 @@ void SceneManager::register_all_scene()
 
 	register_scene< PhysicsTestScene >();
 	register_scene< MusicGamePrototypeScene >();
+	register_scene< EnemyAiTestScene >();
 
 	register_scene< PauseMenuScene >();
 	register_scene< OptionsScene >();

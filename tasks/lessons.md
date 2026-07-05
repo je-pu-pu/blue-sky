@@ -68,3 +68,12 @@
   - L(明度)= ネット出力の筆致。`dark_clip`(L単位)で暗くなりすぎだけ防ぐ→**黒塊が消える**
   - 色(Lab a/b)= 入力の局所色を基準に、**b 軸の青方向(db<0)だけ増幅・黄方向(db>0)はゼロ**→「青の中で広くばらける／黄色は入らない」
   - 確定値: blue=3.0 yellow=0 a=0.5 dark=60
+
+## ECS 自動登録が x64 で全滅（型IDの 32bit 切り捨て）
+
+- **症状**: ECS を回すシーン（System 追加→Entity 生成→Component 付与）で、全 System の対象数が 0。プレイヤーも敵も無反応・描画されない。だが `draw_debug` 等の直接読みは動く。
+- **真因**: `core::ecs::ComponentTypeId = uint_t`(32bit) なのに、`Component::get_type_id()` は `std::size_t`(x64 で 64bit) を返す。`has_component_type(ComponentTypeId)` の引数渡しで**上位32bitが切り捨てられ、型一致判定が常に false**。→ `on_add_component`（System 追加後に Component を足す経路）の自動登録が全滅。**Win32 では size_t==32bit で偶然一致していたので x64 移植で顕在化**。
+- **なぜ一部だけ動いて見えたか**: `add_system` の既存 Entity スキャン経路は型比較を経ず `gather` を直接呼ぶので生きていた。「先に Entity+Component、後で System 追加」なら動くが「先に System、後で Entity」だと壊れる、という分かりにくい切り分けになった。
+- **対策**: `ComponentTypeId`/`SystemTypeId` を `std::size_t` に統一（これだけで直る）。回帰テスト `test/ecs/EnemyAiSceneEcsTest`。
+  - 当初 `get_type_id` の `constexpr`+`typeid` も疑ってアドレスID化・constexpr 除去を試したが、**テストで切り分けた結果 constexpr は無関係**（`typeid().hash_code()` は constexpr 評価されないので両辺とも実行時ハッシュで一致する）。型幅を揃えれば元の `constexpr`+`typeid` のままで通る。過剰修正しないこと。
+- **診断手法の学び**: GUI(exe) は Smart App Control に断続ブロックされて自動起動できないことがある。ECS の登録は **services 不要（update を呼ばず gather 結果の件数を見るだけ）で `blue-sky-test.exe` に再現テスト**を書けば、GUI 抜きで確定できる。型幅の不一致は「32/64bit 差で偶然動く」ため x64 移植の要注意ポイント。

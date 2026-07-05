@@ -6,6 +6,19 @@
 2. 完了したら `[x]` にする
 3. セクションが全て完了したら、セクションごと削除してよい
 
+## 敵AI（システミック）縦スライス  ブランチ: feature/enemy-ai-perception
+
+設計は `doc/システム階層スタック.md` / `doc/動詞とゲームシステム.md`。S2 知覚 + S3 警戒状態機械 + パトロールの最小実装。
+
+- [x] 判定の純関数化＋単体テスト（`blue_sky/ai/EnemyPerception.h`：視界錐内外・awareness・状態遷移、`test/ai/EnemyPerceptionTest` 12ケース）
+- [x] Component（Perceivable/Perception/Alert/Patrol）＋ System（TargetRegistry→Perception→Alert→Patrol）を ECS 実装
+- [x] 検証シーン `EnemyAiTestScene`（scene 名 `enemy_ai_test`）＋視界錐/経路/最終視認の Bullet デバッグ可視化。起動は `blue-sky.config` の `debug.start_scene` を `enemy_ai_test` に（ローカル）
+- [x] **ECS 自動登録バグ修正**（`ComponentTypeId` 32bit 切り捨てで x64 の on_add_component 経路が全滅していた）。回帰テスト `test/ecs/EnemyAiSceneEcsTest`。詳細は lessons.md
+- [ ] 実機で挙動確認・パラメータ調整（移動速度/視界角/awareness の増減/捜索時間）
+- [ ] navmesh 統合（Recast & Detour）でパトロール/追跡を経路化（現状は平面直線）
+- [ ] 聴覚（音イベント）・対空タイプの例外知覚
+- [ ] S4 プレイヤー動詞（隠れる/逃げる/隙を突く/道具）との接続、死体隠し・警報伝播
+
 ## blue-sky 64bit 化（x64 ポート）— NPR リアルタイム統合の前提
 
 ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）は **x64 公式バイナリのみ**。

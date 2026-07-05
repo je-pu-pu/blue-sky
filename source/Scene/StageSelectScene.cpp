@@ -307,7 +307,7 @@ void StageSelectScene::update_stage_list()
 		FindClose( find_handle );
 	}
 
-	stage_count_ = stage_name_list.size();
+	stage_count_ = static_cast< int >( stage_name_list.size() );
 
 	int n = 0;
 	string_t last_stage_name;

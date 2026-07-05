@@ -92,7 +92,7 @@ void TransformTestScene::update()
 	std::for_each( model_file_name_list_.begin(), model_file_name_list_.end(), [&] ( const auto& s ) { combo_items.push_back( s.c_str() ); } );
 
 	ImGui::Begin( "Model params" );
-	if ( ImGui::Combo( "Model", & model_index, & combo_items[ 0 ], combo_items.size() ) )
+	if ( ImGui::Combo( "Model", & model_index, & combo_items[ 0 ], static_cast< int >( combo_items.size() ) ) )
 	{
 		std::cout << "index : " << model_index << std::endl;
 		current_entity_model_->model = get_graphics_manager()->load_model( combo_items[ model_index ] );
@@ -112,7 +112,7 @@ void TransformTestScene::update()
 
 	for ( uint_t n = 0; n < current_entity_model_->model->get_shader_count(); n++ )
 	{
-		if ( ImGui::Combo( string_t( "Shader " + std::to_string( n ) ).c_str(), & shader_index_list[ n ], & shader_combo_items[ 0 ], shader_combo_items.size() ) )
+		if ( ImGui::Combo( string_t( "Shader " + std::to_string( n ) ).c_str(), & shader_index_list[ n ], & shader_combo_items[ 0 ], static_cast< int >( shader_combo_items.size() ) ) )
 		{
 			std::cout << "index : " << shader_index_list[ n ] << std::endl;
 			current_entity_model_->model->set_shader_at( n, get_graphics_manager()->get_shader_list()[ shader_index_list[ n ] ].get() );

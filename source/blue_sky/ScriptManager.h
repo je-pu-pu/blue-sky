@@ -216,7 +216,7 @@ inline void ScriptManager::exec( const string_t& script, bool add_history )
 	if ( add_history && ! command.empty() && ( command_history_.empty() || command_history_.back() != command ) )
 	{
 		command_history_.push_back( command );
-		command_history_index_ = command_history_.size() - 1;
+		command_history_index_ = static_cast< int >( command_history_.size() ) - 1;
 	}
 
 	if ( command_history_.size() > MAX_COMMAND_HISTORY_SIZE )
@@ -273,7 +273,7 @@ inline void ScriptManager::load_command_history( const string_t& file_path )
 	}
 
 	command_history_.push_back( "" );
-	command_history_index_ = command_history_.size() - 1;
+	command_history_index_ = static_cast< int >( command_history_.size() ) - 1;
 
 	truncate_command_history( MAX_COMMAND_HISTORY_SIZE );
 }
@@ -307,7 +307,7 @@ inline void ScriptManager::truncate_command_history( size_t size )
 
 	command_history_.erase( command_history_.begin(), command_history_.begin() + ( command_history_.size() - size ) );
 	
-	command_history_index_ = command_history_.size() - 1;
+	command_history_index_ = static_cast< int >( command_history_.size() ) - 1;
 }
 
 }

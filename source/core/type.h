@@ -10,7 +10,7 @@
 
 #include <type/type.h>
 
-#include <cstddef>
+#include <core/ecs/type.h>   // core::ecs::ComponentTypeId / SystemTypeId 等（定義はこちらに一本化）
 
 namespace core
 {
@@ -36,13 +36,5 @@ namespace core
 
 	using Transform			= math::direct_x_math::Transform;
 	using Quaternion		= math::direct_x_math::Quaternion;
-
-	namespace ecs
-	{
-		// 型 ID は Component::get_type_id() が返す std::size_t（x64 で 64bit）と一致させる。
-		// uint_t(32bit) だと x64 で切り捨てが起き、System の型一致判定が壊れる。
-		using ComponentTypeId = std::size_t;
-		using SystemTypeId = std::size_t;
-	}
 
 } // namespace core

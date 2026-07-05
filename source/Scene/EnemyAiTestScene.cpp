@@ -284,7 +284,8 @@ void EnemyAiTestScene::render()
 
 	std::stringstream ss;
 	ss << "Enemy AI Test  FPS: " << get_main_loop()->get_last_fps() << "\n";
-	ss << "WASD/arrows move, mouse look. Enter enemy cone to raise alert.\n";
+	ss << "WASD move, mouse look. Enter enemy cone to raise alert.\n";
+
 	for ( std::size_t i = 0; i < enemies_.size(); ++i )
 	{
 		auto* alert = enemies_[ i ]->get_component< blue_sky::ecs::AlertComponent >();

@@ -104,6 +104,10 @@ protected:
 	const ComponentList& get_component_list() const { return component_list_; }
 
 public:
+	/// この System が処理対象としている Entity 数（テスト・デバッグ用）
+	std::size_t debug_entity_count() const { return component_list_.size(); }
+
+public:
 	System() = default;
 	virtual ~System() = default;
 

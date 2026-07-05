@@ -10,6 +10,8 @@
 
 #include <type/type.h>
 
+#include <cstddef>
+
 namespace core
 {
 	namespace graphics
@@ -37,8 +39,10 @@ namespace core
 
 	namespace ecs
 	{
-		using ComponentTypeId = uint_t;
-		using SystemTypeId = uint_t;
+		// 型 ID は Component::get_type_id() が返す std::size_t（x64 で 64bit）と一致させる。
+		// uint_t(32bit) だと x64 で切り捨てが起き、System の型一致判定が壊れる。
+		using ComponentTypeId = std::size_t;
+		using SystemTypeId = std::size_t;
 	}
 
 } // namespace core

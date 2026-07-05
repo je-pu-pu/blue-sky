@@ -64,9 +64,9 @@ public:
 	const Line* get_line() const { return line_.get(); }
 	void set_line( Line* l ) { line_.reset( l ); }
 
-	Shader* get_shader_at( uint_t n ) override { return shader_list_[ n ]; }
-	const Shader* get_shader_at( uint_t n ) const override { return shader_list_[ n ]; }
-	void set_shader_at( uint_t n , Shader* s ) override
+	Shader* get_shader_at( size_t n ) override { return shader_list_[ n ]; }
+	const Shader* get_shader_at( size_t n ) const override { return shader_list_[ n ]; }
+	void set_shader_at( size_t n , Shader* s ) override
 	{
 		if ( n >= get_shader_count() )
 		{
@@ -76,7 +76,7 @@ public:
 		shader_list_[ n ] = s;
 	}
 	
-	uint_t get_shader_count() const override { return shader_list_.size(); }
+	size_t get_shader_count() const override { return shader_list_.size(); }
 
 	SkinningAnimationSet* get_skinning_animation_set() { return skinning_animation_set_; }
 	const SkinningAnimationSet* get_skinning_animation_set() const { return skinning_animation_set_; }

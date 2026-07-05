@@ -66,7 +66,7 @@ protected:
 		lua_.new_usertype< Model >(
 			"Model",
 			"mesh", sol::property( sol::resolve< Mesh* () >( & Model::get_mesh ), & Model::set_mesh ),
-			"get_shader_at", sol::resolve< Shader* ( uint_t ) >( & Model::get_shader_at ),
+			"get_shader_at", sol::resolve< Shader* ( size_t ) >( & Model::get_shader_at ),
 			"set_shader_at", & graphics::Model::set_shader_at
 		);
 
@@ -139,7 +139,7 @@ public:
 	void load_command_history( const string_t& );
 	void save_command_history( const string_t& );
 
-	void truncate_command_history( uint_t );
+	void truncate_command_history( size_t );
 
 	const string_t& get_output() const { return output_; }
 };
@@ -298,7 +298,7 @@ inline void ScriptManager::save_command_history( const string_t& file_path )
  *
  * @param size 長さ
  */
-inline void ScriptManager::truncate_command_history( uint_t size )
+inline void ScriptManager::truncate_command_history( size_t size )
 {
 	if ( command_history_.size() <= size )
 	{

@@ -29,14 +29,14 @@ public:
 	virtual ~Mesh() { }
 
 	virtual void add_vertex( const Vertex& ) = 0;
-	virtual uint_t get_vertex_count() const = 0;
+	virtual size_t get_vertex_count() const = 0;
 
 	virtual void add_vertex_weight( const VertexWeight& ) = 0;
 
 	virtual VertexGroup* create_vertex_group() = 0;
-	virtual VertexGroup* get_vertex_group_at( uint_t ) = 0;
-	
-	virtual uint_t get_rendering_vertex_group_count() const = 0;
+	virtual VertexGroup* get_vertex_group_at( size_t ) = 0;
+
+	virtual size_t get_rendering_vertex_group_count() const = 0;
 
 	virtual void invert_vertex_z() = 0;
 	virtual void flip_polygon() = 0;

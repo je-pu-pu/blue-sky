@@ -95,7 +95,7 @@ public:
 	 *
 	 * @return ボーンの数
 	 */
-	uint_t get_bone_count() const
+	size_t get_bone_count() const
 	{
 		return bone_offset_matrix_list_.size();
 	}
@@ -105,7 +105,7 @@ public:
 	 *
 	 * @param count ボーンの数
 	 */
-	void set_bone_count( uint_t count )
+	void set_bone_count( size_t count )
 	{
 		if ( ! bone_offset_matrix_list_.empty() )
 		{
@@ -156,7 +156,7 @@ public:
 	 *
 	 * @param bone_index ボーンのインデックス
 	 */
-	uint_t get_child_bone_count( uint_t bone_index ) const
+	size_t get_child_bone_count( uint_t bone_index ) const
 	{
 		if ( bone_index >= child_bone_index_list_.size() )
 		{

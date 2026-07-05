@@ -8,7 +8,7 @@
 
 #include <type/type.h>
 
-#include <boost/filesystem/convenience.hpp>
+#include <boost/filesystem.hpp>
 
 #include <windows.h>
 

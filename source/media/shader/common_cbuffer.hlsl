@@ -16,12 +16,15 @@ cbuffer FrameConstantBuffer : register( b1 )
 	uint TimeBeat;					// 現在の音楽の BPM ?
 	float TessFactor;				// テッセレーションの分割数
 	float BeatProgress;				// ビート進行度 (1.0 -> 0.0)
+	row_major matrix PrevView;			// 前フレームのビュー変換行列 ( モーションベクトル用 )
+	row_major matrix PrevProjection;	// 前フレームのプロジェクション変換行列 ( モーションベクトル用 )
 };
 
 cbuffer ObjectConstantBuffer : register( b2 )
 {
     row_major matrix World;			// ワールド変換行列
 	float4 ObjectColor;				// オブジェクトの色
+	row_major matrix PrevWorld;		// 前フレームのワールド変換行列 ( モーションベクトル用 )
 };
 
 cbuffer FrameDrawingConstantBuffer : register( b4 )

@@ -51,7 +51,7 @@ protected:
 
 	VertexList		vertex_list_;
 	IndexList		index_list_;
-	uint_t			index_size_;
+	size_t			index_size_;
 
 	virtual void create_vertex_buffer() = 0;
 	virtual void create_index_buffer() = 0;
@@ -67,7 +67,7 @@ public:
 	void render() const { render_part(); }
 	virtual void render_part( int part_count = 99999 ) const = 0;
 
-	int get_part_count() const { return index_size_ / 2; }
+	int get_part_count() const { return static_cast< int >( index_size_ / 2 ); }
 
 	const Color& get_color() const { return color_; }
 	void set_color( const Color& color ) { color_ = color; }

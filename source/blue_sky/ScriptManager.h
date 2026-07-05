@@ -66,7 +66,7 @@ protected:
 		lua_.new_usertype< Model >(
 			"Model",
 			"mesh", sol::property( sol::resolve< Mesh* () >( & Model::get_mesh ), & Model::set_mesh ),
-			"get_shader_at", sol::resolve< Shader* ( uint_t ) >( & Model::get_shader_at ),
+			"get_shader_at", sol::resolve< Shader* ( size_t ) >( & Model::get_shader_at ),
 			"set_shader_at", & graphics::Model::set_shader_at
 		);
 
@@ -139,7 +139,7 @@ public:
 	void load_command_history( const string_t& );
 	void save_command_history( const string_t& );
 
-	void truncate_command_history( uint_t );
+	void truncate_command_history( size_t );
 
 	const string_t& get_output() const { return output_; }
 };
@@ -216,7 +216,7 @@ inline void ScriptManager::exec( const string_t& script, bool add_history )
 	if ( add_history && ! command.empty() && ( command_history_.empty() || command_history_.back() != command ) )
 	{
 		command_history_.push_back( command );
-		command_history_index_ = command_history_.size() - 1;
+		command_history_index_ = static_cast< int >( command_history_.size() ) - 1;
 	}
 
 	if ( command_history_.size() > MAX_COMMAND_HISTORY_SIZE )
@@ -273,7 +273,7 @@ inline void ScriptManager::load_command_history( const string_t& file_path )
 	}
 
 	command_history_.push_back( "" );
-	command_history_index_ = command_history_.size() - 1;
+	command_history_index_ = static_cast< int >( command_history_.size() ) - 1;
 
 	truncate_command_history( MAX_COMMAND_HISTORY_SIZE );
 }
@@ -298,7 +298,7 @@ inline void ScriptManager::save_command_history( const string_t& file_path )
  *
  * @param size 長さ
  */
-inline void ScriptManager::truncate_command_history( uint_t size )
+inline void ScriptManager::truncate_command_history( size_t size )
 {
 	if ( command_history_.size() <= size )
 	{
@@ -307,7 +307,7 @@ inline void ScriptManager::truncate_command_history( uint_t size )
 
 	command_history_.erase( command_history_.begin(), command_history_.begin() + ( command_history_.size() - size ) );
 	
-	command_history_index_ = command_history_.size() - 1;
+	command_history_index_ = static_cast< int >( command_history_.size() ) - 1;
 }
 
 }

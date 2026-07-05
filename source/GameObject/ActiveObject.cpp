@@ -250,6 +250,11 @@ void ActiveObject::update_render_data() const
 	shader_data.world.set_rotation_quaternion( t.get_rotation() );
 	shader_data.world *= Matrix().set_translation( t.get_position().x(), t.get_position().y(), t.get_position().z() );
 
+	// 前フレームの world ( 初回は cur=prev で速度0 )
+	shader_data.prev_world = prev_world_valid_ ? prev_world_ : shader_data.world;
+	prev_world_ = shader_data.world;
+	prev_world_valid_ = true;
+
 	if ( get_model() && get_model()->get_line() )
 	{
 		shader_data.color = get_model()->get_line()->get_color();

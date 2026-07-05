@@ -23,6 +23,10 @@ struct FrameConstantBufferData
 	u32_t time_beat = 0;
 	float_t tess_factor = 1.f;
 	float_t beat_progress = 0.f; // ビート進行度 (1.0 → 0.0)
+
+	// モーションベクトル算出用の前フレーム行列 ( 末尾追記で既存オフセット不変 )
+	Matrix prev_view;
+	Matrix prev_projection;
 };
 
 struct FrameDrawingConstantBufferData

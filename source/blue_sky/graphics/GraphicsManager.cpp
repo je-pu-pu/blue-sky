@@ -19,9 +19,11 @@
 #include <blue_sky/graphics/shader/ShadowMapShader.h>
 #include <blue_sky/graphics/shader/TessellationMatcapShader.h>
 #include <blue_sky/graphics/shader/UnicolorShader.h>
+#include <blue_sky/graphics/shader/VelocityShader.h>
 #include <blue_sky/graphics/shader/DebugShadowMapTextureShader.h>
 #include <blue_sky/graphics/shader/post_effect/DefaultShader.h>
 #include <blue_sky/graphics/shader/post_effect/HandDrawingShader.h>
+#include <blue_sky/graphics/shader/post_effect/RecolorShader.h>
 #include <blue_sky/graphics/shader/post_effect/NoiseShader.h>
 
 #include <Scene/Scene.h>
@@ -329,10 +331,12 @@ void GraphicsManager::setup_default_shaders()
 	create_named_shader< shader::TessellationMatcapShader >( "tess_matcap" )->set_texture( matcap_texture );
 	create_named_shader< shader::SkinningTessellationMatcapShader >( "tess_matcap_skin" )->set_texture( matcap_texture );
 	create_named_shader< shader::UnicolorShader >( "unicolor", "main", "unicolor" );
+	create_named_shader< shader::VelocityShader >( "velocity", "main", "velocity" );	// モーションベクトル ( 案B / 段階0b )
 
 	auto post_effect_shader = create_named_shader< shader::post_effect::DefaultShader >( "post_effect_default" );
 	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_chromatic_aberration", "main", "post_effect_chromatic_aberration" );
 	create_named_shader< shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing", "main", "post_effect_hand_drawing" );
+	create_named_shader< shader::post_effect::RecolorShader >( "post_effect_recolor", "main", "post_effect_recolor" );
 
 	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_id_to_color", "main", "post_effect_id_to_color" );
 	create_named_shader< shader::post_effect::NoiseShader >( "post_effect_noise", "main", "post_effect_noise" );
@@ -593,6 +597,37 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 }
 
 /**
+ * 全 ActiveObject をモーションベクトル ( 速度 ) パスで描画する ( 案B / 段階0b )
+ *
+ * 呼び出し側で速度用レンダーターゲットをバインド・クリアしておくこと。
+ * シーン深度を再利用するため、メインパス ( render_active_objects ) の直後に呼ぶこと。
+ */
+void GraphicsManager::render_active_objects_velocity( const ActiveObjectManager* active_object_manager ) const
+{
+	auto* velocity_shader = const_cast< GraphicsManager* >( this )->get_shader< shader::VelocityShader >( "velocity" );
+
+	if ( ! velocity_shader )
+	{
+		return;
+	}
+
+	get_frame_render_data()->bind_to_all();
+
+	for ( const auto& active_object : active_object_manager->active_object_list() )
+	{
+		if ( ! active_object->get_model() )
+		{
+			continue;
+		}
+
+		set_current_object_constant_buffer( active_object->get_object_constant_buffer() );
+		set_current_skinning_constant_buffer( active_object->get_animation_player() ? active_object->get_animation_player()->get_constant_buffer() : nullptr );
+
+		velocity_shader->render_model( active_object->get_model() );
+	}
+}
+
+/**
  * ポストエフェクト用のシェーダを設定する
  *
  * @param shader ポストエフェクト用のシェーダー
@@ -600,6 +635,11 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 void GraphicsManager::set_post_effect_shader( Shader* shader )
 {
 	post_effect_rectangle_->set_shader_at( 0, shader );
+}
+
+core::graphics::Shader* GraphicsManager::get_post_effect_shader() const
+{
+	return post_effect_rectangle_->get_shader_at( 0 );
 }
 
 /**

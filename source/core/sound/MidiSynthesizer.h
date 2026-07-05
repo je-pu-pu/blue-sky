@@ -64,7 +64,7 @@ public:
 
 	void render( float* out, size_t frame_count )
 	{
-		tsf_render_float( sound_font_, out, frame_count );
+		tsf_render_float( sound_font_, out, static_cast< int >( frame_count ) );
 	}
 };
 

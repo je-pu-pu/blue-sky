@@ -14,5 +14,6 @@ namespace core::graphics::direct_3d_11
 		// R8G8B8A8_SNORM = DXGI_FORMAT_R8G8B8A8_SNORM,
 		// B8G8R8A8_UNORM = DXGI_FORMAT_B8G8R8A8_UNORM,
 		R8_UINT			= DXGI_FORMAT_R8_UINT,
+		R32G32_FLOAT	= DXGI_FORMAT_R32G32_FLOAT,	///< モーションベクトル (速度) G-buffer 用
 	};
 }

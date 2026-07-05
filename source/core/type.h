@@ -10,6 +10,8 @@
 
 #include <type/type.h>
 
+#include <core/ecs/type.h>   // core::ecs::ComponentTypeId / SystemTypeId 等（定義はこちらに一本化）
+
 namespace core
 {
 	namespace graphics
@@ -34,11 +36,5 @@ namespace core
 
 	using Transform			= math::direct_x_math::Transform;
 	using Quaternion		= math::direct_x_math::Quaternion;
-
-	namespace ecs
-	{
-		using ComponentTypeId = uint_t;
-		using SystemTypeId = uint_t;
-	}
 
 } // namespace core

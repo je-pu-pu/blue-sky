@@ -51,10 +51,10 @@ public:
 protected:
 	RenderSetting render_setting_;
 
-	std::map< string_t, int > int_index_map_;
-	std::map< string_t, int > float_index_map_;
-	std::map< string_t, int > vector_index_map_;
-	std::map< string_t, int > color_index_map_;
+	std::map< string_t, size_t > int_index_map_;
+	std::map< string_t, size_t > float_index_map_;
+	std::map< string_t, size_t > vector_index_map_;
+	std::map< string_t, size_t > color_index_map_;
 
 	std::vector< int_t* > int_address_list_;
 	std::vector< float_t* > float_address_list_;
@@ -361,7 +361,7 @@ public:
 		// テクスチャを必要なシェーダーにバインドする
 		for ( size_t n = 0; n < textures_.size(); n++ )
 		{
-			textures_[ n ]->bind_to_ps( n );
+			textures_[ n ]->bind_to_ps( static_cast< uint_t >( n ) );
 		}
 	}
 

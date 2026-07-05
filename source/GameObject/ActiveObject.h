@@ -55,6 +55,9 @@ private:
 	bool				is_mesh_visible_;	///< メッシュを描画するかどうか
 	bool				is_line_visible_;	///< ラインを描画するか
 
+	mutable Matrix		prev_world_;		///< 前フレームの world 行列 ( モーションベクトル用 )
+	mutable bool		prev_world_valid_ = false;	///< prev_world_ が有効か ( 初回は cur=prev で速度0 )
+
 protected:
 	void setup_animation_player();
 

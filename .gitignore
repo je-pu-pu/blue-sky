@@ -37,3 +37,28 @@
 
 /do_de_show/
 /.claude/settings.local.json
+
+# フレームダンプ出力（neural NPR オフライン検証）
+dump/
+
+# vendored boost ヘッダ（巨大・再生成可能。lib バイナリと同様に非追跡）
+# セットアップは tools/x64-deps/ 参照
+/source/lib/include/boost/
+
+# ONNX Runtime ヘッダ（NuGet 由来・再生成可能。lib/dll は lib/x64/* で無視済み）
+/source/lib/include/onnxruntime/
+
+# Python（tools/npr_offline 等）
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.pth
+*.onnx
+*.onnx.data
+/tools/npr_offline/out/
+/tools/npr_offline/out_*/
+/tools/npr_offline/out.old/
+# probe 出力画像（再生成可能）
+/tools/npr_offline/*.png

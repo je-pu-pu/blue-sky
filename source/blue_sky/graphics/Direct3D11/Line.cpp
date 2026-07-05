@@ -85,7 +85,7 @@ void Line::render_part( int part_count ) const
 	// ID3D11ShaderResourceView* text_view = direct_3d_->getTextView();
 	// direct_3d_->getImmediateContext()->PSSetShaderResources( 0, 1, & text_view );
 
-	direct_3d_->getImmediateContext()->DrawIndexed( std::min< int >( part_count * 2, index_size_ ), 0, 0 );
+	direct_3d_->getImmediateContext()->DrawIndexed( std::min< int >( part_count * 2, static_cast< int >( index_size_ ) ), 0, 0 );
 
 	GameMain::get_instance()->get_graphics_manager()->count_draw();
 }

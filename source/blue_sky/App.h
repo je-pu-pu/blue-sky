@@ -16,6 +16,8 @@
 #include <windows.h>
 
 #include <memory>
+#include <functional>
+#include <unordered_map>
 
 /**
  * アプリケーションとそれに対応するひとつのウィンドウを管理する

@@ -21,7 +21,7 @@ Mesh::VertexGroup* Mesh::create_vertex_group()
  * @param index 頂点グループのインデックス
  * @return 頂点グループ or 0
  */
-Mesh::VertexGroup* Mesh::get_vertex_group_at( uint_t index )
+Mesh::VertexGroup* Mesh::get_vertex_group_at( size_t index )
 {
 	while ( index >= vertex_group_list_.size() )
 	{

@@ -23,7 +23,7 @@ private:
 	float_t			length_;								///< アニメーションの長さ ( フレーム )
 
 public:
-	SkinningAnimation( uint_t size )
+	SkinningAnimation( size_t size )
 		: bone_animation_list_( size )
 		, length_( 0.f )
 	{
@@ -56,7 +56,7 @@ public:
 	 *
 	 * @return ボーン毎のアニメーションの一覧のサイズ
 	 */
-	uint_t get_bone_animation_list_size() const
+	size_t get_bone_animation_list_size() const
 	{
 		return bone_animation_list_.size();
 	}
@@ -66,7 +66,7 @@ public:
 	 *
 	 * @param size ボーン毎のアニメーションの一覧のサイズ
 	 */
-	void resize_bone_animation_list( uint_t size )
+	void resize_bone_animation_list( size_t size )
 	{
 		bone_animation_list_.resize( size );
 	}

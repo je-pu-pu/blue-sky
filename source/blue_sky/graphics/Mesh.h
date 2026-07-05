@@ -136,14 +136,14 @@ public:
 	virtual ~Mesh()	override { }
 
 	void add_vertex( const core::graphics::Vertex& v ) override { vertex_list_.push_back( static_cast< const Vertex& >( v ) ); }
-	uint_t get_vertex_count() const override { return vertex_list_.size(); }
+	size_t get_vertex_count() const override { return vertex_list_.size(); }
 
 	void add_vertex_weight( const VertexWeight& w ) override { vertex_weight_list_.push_back( w ); }
 
 	VertexGroup* create_vertex_group() override;
-	VertexGroup* get_vertex_group_at( uint_t ) override;
-	
-	uint_t get_rendering_vertex_group_count() const override { return index_count_list_.size(); }
+	VertexGroup* get_vertex_group_at( size_t ) override;
+
+	size_t get_rendering_vertex_group_count() const override { return index_count_list_.size(); }
 
 	void invert_vertex_z() override;
 	void flip_polygon() override;

@@ -16,6 +16,19 @@
 namespace blue_sky
 {
 
+// 一括破棄時の use-after-free 回避: vector が各 RoadNode を解放する前に全ノードの
+// リンクを切る（~RoadNode の unlink() が解放済み隣接ノードを触らないようにする）。
+CityGenerator::~CityGenerator()
+{
+	for ( auto& n : road_node_list_ )
+	{
+		n->front_node = nullptr;
+		n->back_node  = nullptr;
+		n->left_node  = nullptr;
+		n->right_node = nullptr;
+	}
+}
+
 CityGenerator::CityGenerator()
 	: model_( GameMain::get_instance()->get_graphics_manager()->create_named_model( "generated_city" ) )
 	, debug_model_( GameMain::get_instance()->get_graphics_manager()->create_named_model( "generated_city_debug" ) )

@@ -6,6 +6,101 @@
 2. 完了したら `[x]` にする
 3. セクションが全て完了したら、セクションごと削除してよい
 
+## 敵AI（システミック）縦スライス  ブランチ: feature/enemy-ai-perception
+
+設計は `doc/システム階層スタック.md` / `doc/動詞とゲームシステム.md`。S2 知覚 + S3 警戒状態機械 + パトロールの最小実装。
+
+- [x] 判定の純関数化＋単体テスト（`blue_sky/ai/EnemyPerception.h`：視界錐内外・awareness・状態遷移、`test/ai/EnemyPerceptionTest` 12ケース）
+- [x] Component（Perceivable/Perception/Alert/Patrol）＋ System（TargetRegistry→Perception→Alert→Patrol）を ECS 実装
+- [x] 検証シーン `EnemyAiTestScene`（scene 名 `enemy_ai_test`）＋視界錐/経路/最終視認の Bullet デバッグ可視化。起動は `blue-sky.config` の `debug.start_scene` を `enemy_ai_test` に（ローカル）
+- [x] **ECS 自動登録バグ修正**（`ComponentTypeId` 32bit 切り捨てで x64 の on_add_component 経路が全滅していた）。回帰テスト `test/ecs/EnemyAiSceneEcsTest`。詳細は lessons.md
+- [ ] 実機で挙動確認・パラメータ調整（移動速度/視界角/awareness の増減/捜索時間）
+- [ ] navmesh 統合（Recast & Detour）でパトロール/追跡を経路化（現状は平面直線）
+- [ ] 聴覚（音イベント）・対空タイプの例外知覚
+- [ ] S4 プレイヤー動詞（隠れる/逃げる/隙を突く/道具）との接続、死体隠し・警報伝播
+
+## blue-sky 64bit 化（x64 ポート）— NPR リアルタイム統合の前提
+
+ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）は **x64 公式バイナリのみ**。
+だが現状エンジンは **Win32(x86) 専用**（sln で x64→Win32 にされ、依存 lib も x86 のみ）。
+よって「64bit 化 → その上に ORT+DirectML」の順。作業ブランチ `feature/x64-port`。
+
+方針: **VR(Oculus) は一旦外す**（コンパイルスイッチで無効化。ベンダー依存を1つ減らす）。
+
+### 依存ライブラリの x64 化（source/lib/x64 へ配置）
+- [ ] Bullet (Collision/Dynamics/LinearMath) — OSS、ソースから x64 ビルド
+- [ ] libogg / libvorbis / libvorbisfile — OSS、x64 ビルド
+- [ ] PortAudio (portaudio_static) — OSS、x64 ビルド
+- [ ] Effects11 — OSS(FX11)、ソース取得して x64 ビルド（現状 prebuilt のみ）
+- [ ] boost 1.75 (chrono/filesystem/regex/timer) — b2 で x64 ビルド
+- [ ] imgui — ソース内蔵(`lib/src/imgui`)、x64 再コンパイル
+- [ ] libremidi / msdfgen / freetype — ソースから x64 再コンパイル
+- [ ] FBX SDK (libfbxsdk/zlib/libxml2) — **Autodesk から x64 SDK のインストールが必要（ユーザー操作）**。標準パスに未インストール
+- [x] lua — x64 版が既存（`lib/x64/common/lua.lib`）
+- [~] Oculus LibOVR — VR を外すので不要化
+
+### エンジン側
+- [x] x64 ビルド構成の調査: blue-sky/exe/test は既に x64→x64 マッピング済み。common/game/win は vcxproj に x64 構成あり（ExternalIncludePath も4構成OK）。freetype/msdfgen は x64 構成なし
+- [x] sln マッピング修正: common/game/win を x64→x64 + Build.0 に（Python で該当3 GUID のみ書換）
+- [x] common / game / win を x64 で個別ビルド成功（SolutionDir 明示。単体ビルドは SolutionDir 未定義で ExternalIncludePath が壊れる点に注意）
+- [x] **blue-sky 本体ソースの x64 コンパイルがクリーン（0 error、164MB の blue-sky.lib 生成）**＝コードは概ね 64bit クリーン（uint_t typedef のおかげ）。BuildProjectReferences=false で検証
+- [x] freetype / msdfgen の vcxproj に x64 構成を追加（Win32 ブロックを複製）→ sln マッピングも x64 に。x64 ビルド成功（freetype.lib / msdfgen.lib）
+- [x] 全プロジェクト(common/game/win/blue-sky/exe/test)の x64 ItemDefinitionGroup を Win32 と同期（自動生成された x64 IDG が空/最小で RuntimeLibrary 未設定→ /MD 既定になり LNK2038 不一致。Win32 の中身をコピーして解消）
+- [x] x64 リンク試行で punch-list 取得: **コンパイルは全proj 0エラー**。リンクは LNK2038=0、残るは LNK1104(lib が開けない)のみ＝**third-party x64 lib 不足だけが課題**。リンカは最初の不足libで止まるので芋づる式に出る（まず LibOVR / libxml2-mt）
+- [x] Oculus(VR) を一旦無効化: `OculusRift.cpp` を `#ifdef OCULUS_RIFT_ENABLED` で囲み未定義時はスタブ（ovr_呼び出し無し）/ `lib.cpp` の LibOVR pragma 無効化。結果 x64 で 0コンパイルエラー・未解決0・LibOVR参照0
+- [x] x64 ライブラリ検索パスは設定済みと判明: `lib\$(PlatformShortName)\$(Configuration)` = x64では `lib\x64\Debug`（vcxproj修正不要）。**`source/lib/x64/Debug` と `Release` に x64 lib を置くだけ**
+- [x] exe/test の x64 PropertyGroup に **LibraryPath が無かった**のを追加（VC++ Directories は IDG 同期対象外だった。これが「lib\x64\Debug を検索せず全 third-party lib が開けない」真因）。lib 検索パスは `lib\$(PlatformShortName)\$(Configuration)` = `lib\x64\Debug`
+- [x] test/lib.cpp にも LibOVR pragma があったので無効化（source/lib.cpp と別ファイル。見落としていた）
+- [x] FBX SDK 2020.3.9(VS2022) インストール → x64 lib(`libfbxsdk-mt`/`libxml2-mt`/`zlib-mt`)+`libfbxsdk.dll` を `source/lib/x64/{debug,release}` にコピー。**FBX リンク解決**（注: 2020.3.9 は x86 lib 非同梱。ヘッダは 2020.2 のままだが x64 リンクは通った。lib バイナリは gitignore 済）
+- [x] OSS lib の x64 ビルド＆配置（VS同梱 cmake、静的CRT /MTd・/MT、生成名をlib.cpp期待名へリネーム。cmake新しすぎ対策で `-DCMAKE_POLICY_VERSION_MINIMUM=3.5` 必須）:
+  - [x] libogg 1.3.5 → `libogg.lib`
+  - [x] libvorbis 1.3.7 → `libvorbis_static.lib` / `libvorbisfile_static.lib`（OGG_INCLUDE_DIR/OGG_LIBRARY 指定）
+  - [x] Bullet 3.25（USE_MSVC_RUNTIME_LIBRARY_DLL=OFF）→ `BulletCollision/Dynamics/LinearMath_vs2010_debug.lib`（Release は `_vs2010`）
+  - [x] PortAudio v19.7.0（PA_DLL_LINK_WITH_STATIC_RUNTIME=ON）→ `portaudio_static.lib`
+  - 作業ディレクトリ: scratchpad/osslibs
+- [x] **boost を 1.90 へ更新**（ユーザー判断 B）の lib ビルド完了: D:\osslibs\boost_1_90_0 ソースから **自作 CMakeLists**（D:\osslibs\boostbuild、署名済み cmake/MSBuild）で filesystem/chrono/timer/regex/atomic を x64 静的(/MTd・/MT)ビルド。生成: D:\osslibs\boostbuild\build\{Debug,Release}\boost_*.lib
+  - **重要な環境制約**: b2.exe は自前ビルド未署名 exe → **Device Guard がブロック**して実行不可。boost 公式 .7z ソースは CMakeLists 非同梱、prebuilt .exe は 7z 展開不可。→ 自作 CMake が唯一通った道（cl/link は署名済みで実行可）
+  - filesystem は `std::atomic_ref` 使用のため **C++20 必須**（CMAKE_CXX_STANDARD 20）
+  - boost 1.90 では system / regex は概ねヘッダオンリー（regex src は posix ラッパのみ）
+- [x] **boost ヘッダ 1.75→1.90 差し替え**（`source/lib/include/boost`、git追跡 約15,000ファイルの巨大diff）→ blue-sky 再コンパイルで API 差異を確認・修正。**差異は軽微**:
+  - `App.h`: `<functional>`/`<unordered_map>` を直接 include（boost 1.75 の推移的 include に依存していた箇所）
+  - `FbxFileLoader.cpp` / `FbxConverterMain.cpp`: 廃止された `boost/filesystem/convenience.hpp` → `boost/filesystem.hpp`
+  - 自動リンク名 = `libboost_<lib>-vc143-mt-sgd-x64-1_90.lib`（VS18→vc143 タグ）。ビルドした boost lib をこの名にリネーム配置
+- [x] Effects11(FX11) を x64 ビルド → `effects11d.lib`/`effects11.lib`
+- [x] portaudio を `PA_USE_WDMKS=OFF` で再ビルド（KSDATAFORMAT_SUBTYPE_MIDI 重複定義 LNK2005 回避）
+- [x] **CRT 不一致の解消**: 既存 x64 `lua.lib`(common) が /MD でビルドされ `__imp_` CRT 参照→未解決。**Lua 5.4.3**(ヘッダが5.4.3。CLAUDE.mdの5.3.4は古い)を静的CRT(/MTd・/MT)で再ビルドし `lib/x64/{debug,release}` に配置。ogg/vorbis も CMP0091=NEW で /MT 再ビルド
+- [x] **x64 で blue-sky.lib / exe / test がビルド成功（0エラー）**。`blue-sky-exe.exe` は x64(AMD64) 33MB。実行時用に `libfbxsdk.dll`(x64) を `.build/x64/Debug` へ配置
+- [x] **boost ヘッダを git 管理外に変更**（一貫性回復＋肥大化解消）: 従来 boost ヘッダ(約14,694ファイル)を追跡していたが、lib バイナリは非追跡で「ヘッダだけ追跡しても clone でビルド不可」＝非対称だった。`.gitignore` に `/source/lib/include/boost/` を追加し `git rm -r --cached` で追跡解除（ファイルは残置）。再現手順を **`tools/x64-deps/`（README + build_oss_libs.sh）** に整備
+- [x] **x64 exe 起動確認（実機・成功）**。Device Guard 通過、起動OK。
+  - 起動時に PortAudio エラー（`Pa_OpenStream`：Incompatible host API specific stream info）が出たが、これは x64 化の副作用ではなく `SoundEngine.cpp` の WASAPI コードの潜在バグ（`Pa_GetDefaultOutputDevice()`＝既定ホストAPI(MME/DS)のデバイスに WASAPI 用ストリーム情報を渡していた）。**WASAPI ホストAPI の既定出力デバイスを明示取得**するよう修正して解決（要コミット、SoundEngine.cpp はユーザーWIP）。
+## ② NPR リアルタイム統合（ONNX Runtime + DirectML）  ブランチ: feature/neural-npr-engine-integration
+
+- [x] Phase1: ONNX Runtime DirectML 1.24.4 + DirectML 1.15.4 を NuGet から取得（展開のみ＝Device Guard 安全）。headers→`lib/include/onnxruntime`(非追跡), `onnxruntime.lib`→`lib/x64`, dll(onnxruntime/providers_shared/DirectML)→`lib/x64`＋exe出力先。手順は `tools/x64-deps/README ③`
+- [x] Phase2: ORT+DirectML スモークテスト（`source/test/graphics/NeuralNprTest.cpp`）成功。**starry_boil_small.onnx を DirectML でロード・推論できることを実機確認。256x256 で 2.89ms/frame=346fps**（CPU往復込み）。`test/lib.cpp` に onnxruntime.lib pragma 追加
+- [~] Phase3: 推論ラッパクラス化 → ポストエフェクト経路に差し込み。
+  - [x] `core::graphics::NeuralStylizer` 実装＆コミット済（53a7b15e）
+  - [x] 段階1: `DebugScene` に NeuralStylizer メンバ＋モデルロード(失敗時安全に無効化)＋imgui トグル `neural_npr_enabled_`。モデルは `media/neural/starry_boil_small.onnx`(gitignore)。**実機でモデルロード成功確認**（トグル表示）。トグルはまだ動作なし（段階2で実装）
+    - ⚠️ **教訓**: starry_boil_small.onnx は**外部データ形式**で重みが別ファイル `starry_boil_small.onnx.data`(6.7MB) にある。ORT は `.onnx` と同じディレクトリに `.onnx.data` が無いと `file_size` 系の `std::filesystem::filesystem_error` を投げる。`.onnx` だけでなく `.data` も配置すること（`*.onnx.data` も gitignore 済み）
+  - [x] 段階2(CPU方式): `DebugScene::render` で neural 有効時に ①`render_result_texture_` を staging 読み戻し(`read_texture_2d_to_rgba8` ヘルパ) ②RGBA8→NCHW float[0,1]＋フレーム毎ノイズ(空間白色+時間EMA平滑→std≈1正規化) ③`stylize()` ④NCHW→RGBA8→`direct_3d_11::Texture` へ UpdateSubresource→`render_post_effect` で表示。**実機でスタイル化＋ボイリング動作確認**。ノイズ平滑は `neural_noise_temporal_`(0.35)
+    - ⚠️ **fps 60→6 に急落**（CPU 往復のコスト顕在化、予定どおり）。内訳推定: GPU→CPU 読み戻しの同期待ち＋フル解像度推論＋毎フレ全画素の CPU 処理(normal_distribution ノイズ生成・RGBA8↔NCHW 変換)
+- [x] Phase4(高速化B): **処理解像度を下げる**（長辺 `neural_proc_long_side_`、16の倍数にスナップ、imgui スライダ）。推論は小解像度・表示は GPU が拡大。推論を try/catch で保護。**6→16fps**（デバッガ有無は無関係）。スライダ `proc res` / `boil`
+    - 📌 **判明: 残るボトルネックは「フル解像度の GPU→CPU 読み戻し(`Map` 同期待ち)」**。proc res を下げても読み戻しは常にフル解像度なので頭打ち → Phase5(C) で解決すべき部分。
+    - 📌 **DirectML の `_com_error` は無害な first-chance 例外**（初回グラフコンパイル時に D3D12 内部で投げて自分で握りつぶす。スモークテストは全解像度で成功、推論は毎フレーム成功＝catch 未発動を実機ログで確認）。デバッガ下でのみ「投げられた瞬間」が見えるだけ。デバッグなし実行 or 例外設定で非表示にできる。
+- [x] **計測で高速化の本丸を特定**（imgui に ms 表示を実装）。proc1080 の内訳: read 1.8 / pre 27.9 / infer 29.5 / post 8.2。
+    - 📌 **読み戻しは 1.8ms = ボトルネックではない** → 当初想定の C(GPU直結/非同期読み戻し)は**不要**と確定（measure-first で無駄打ち回避）。infer はモデル計算コストで GPU 直結でも縮まない。
+- [x] Phase5(高速化・実施分): **ノイズ生成を高速化**（事前計算 N(0,1) テーブル＋1パス＋固定スケール。`normal_distribution` 毎画素呼び＋正規化2パスを廃止）。**pre 27.9→4.4ms**。既定 proc res を 768 に（画質≈1080・速度2倍の "ひざ"）。**768 で 33fps**（read1.6/pre4.4/infer21.6/post4.3）、1080 で 21fps
+- [x] **Phase6(高速化・fp16): モデルを fp16 化**（`tools/npr_offline/to_fp16.py`、入出力 fp32 維持＝C++無改修・モデル差し替えのみ。重みインライン化で `.data` 不要、3.5MB）。**実機 infer 21.6→6.5ms（約3.3倍速）/ 768 で 33→57fps**（ほぼ60fps！）。画質ほぼ同等。imgui `fp16 (off=fp32)` トグルで切替（変化時のみ再ロード）。既定 fp16
+    - 📌 fp16 で infer が小さくなり、now のボトルネックは **CPU オーバーヘッド(read+pre+post=10.3ms > infer 6.5ms)** に逆転。さらに速くするなら pre/post 最適化 or 完全 GPU 化が今度こそ効く（ただし 57fps で十分実用）
+- [ ] Phase7(任意・伸び小): pre/post の CPU パスを SIMD/並列化 or 完全 GPU 化。infer が小さくなった今は overhead 削減が効く（57fps→さらに上）
+- [x] **Phase8(色保持 HLSL化＋うねり解消)**: オフライン `recolor_lab` を HLSL 移植（`post_effect/recolor.hlsl`＋`RecolorShader`、Lab で L=暗化制限・a控えめ・b青増幅/黄カット、t0=ニューラル出力/t1=元シーン）。imgui トグル `color preserve`＋`blue`/`dark clip`。**手描きシェーダの二重掛けも解消**: neural 表示時のみ post-effect を recolor(色保持) or default(素通し)に一時差し替え→描画後 restore（非NPRシーンに影響させない）。既定値は blue=3/yellow=0/a=0.5/dark=60
+- [x] **CityGenerator クラッシュ修正**（NPR とは別件・既存バグ）: `road_node_list_`(vector<unique_ptr<RoadNode>>) の一括破棄で `~RoadNode`→`unlink()`が解放済み隣接を触る use-after-free。`~CityGenerator()` で破棄前に全ノードのリンクを null 化して回避。シーン遷移クラッシュ解消
+
+### その後（②）
+- [ ] ONNX Runtime + DirectML を導入し、`starry_boil_small.onnx` をポストエフェクトとして実機推論
+- [ ] 色保持(recolor_lab)を HLSL 後処理で実装、フレーム毎ノイズ供給
+
+---
+
 ## 完了済み
 
 - [x] blue_sky / core レイヤー分析を実施
@@ -14,6 +109,88 @@
 - [x] UI ウィジェット群を core 層に移動
 - [x] BaseShader → GameMain 依存を解消 (core::Service 経由に変更)
 - [x] ParticleRenderSystem → blue_sky 依存を解消 (シェーダーをコンストラクタ注入)
+
+---
+
+## Neural NPR オフライン検証 (エピックB / 段階0a)
+
+実機統合前に「シンプルなレンダ結果を NPR 調へ変換したとき、時間的にちらつかず成立するか」を
+オフラインで検証する。Asana エピックB。ブランチ `feature/neural-npr-offline-validation`。
+
+### 完了
+- [x] エンジン側フレームダンパー実装 (`source/Scene/DebugScene.cpp` の `dump_texture_2d_to_png` + imgui パネル、`dump/color_%04d.png`)
+- [x] Python 検証ハーネス `tools/npr_offline/` 実装 (run_eval / io_utils / temporal / stylizers)
+- [x] 隔離環境を uv で構築 (Python 3.12 venv、torch 2.11+cu128、RTX 5070 Ti / CUDA 認識OK)
+- [x] スタイライザ: classic(セル調) / neural(VGG Gatys) / pencil(古典・ドッジ+XDoG) を実装
+- [x] 評価実行・結果取得 (120フレーム、source/dump):
+  - 安定化(reproject+EMA)は全スタイルで約40〜65%の時間誤差削減を確認
+  - 鉛筆(pencil古典)が最も時間安定 (naive 0.0054)、neural系は素のちらつきが大きい (0.06〜0.09)
+  - 参照画像版: 鉛筆=黒鉛デッサン(carmiencke) naive0.032→stable0.012(63%)、ペン画=Van Gogh葦ペン naive0.079→stable0.029(63%)
+- [x] 成果のコミット完了:
+  - フレームダンパー (DebugScene) = `c6ba6e56`（BGM 変更とは分離してコミット）
+  - ハーネス一式 + CLAUDE.md 新規(MSBuild を vswhere でポータブル化) + todo/lessons/.gitignore = `6d580d90`
+
+### ★方針転換と最終確定（2026-06）
+**美的目標が反転した**: 当初は「ちらつきを消す（時間安定）」前提だったが、ユーザー判断で目標は
+**手描きアニメの「ボイリング」＝画面全体が毎フレーム少し揺れる手描きの生命感**だと確定。
+ただし「ノイズ（粒状チラつき）」は不可で、「落ち着き＋なめらかな微動」が正解。
+
+確定までの探索（すべて brush_starry_night / sw=1e11 / 120f / 384px、目視で判断）:
+- ちらつきの正体は2成分: ①各フレーム独立最適化のチラつき(boil=0でも残る粒状ノイズ) ②boil(初期値への白色ノイズ)。①は安定化でしか消えない。
+- boil(白色ノイズ初期値)・極弱boilまで: どれも「粒状ノイズ」で不採用。質が手描きの揺れと違う。
+- post-boil(安定化後ワープ)・輪郭マスク合成: いずれも方向違い/ノイズ過多で不採用。
+- 残像問題: 安定化(warp+EMA, α高)で「画面が大きく変わる所に残像」。犯人はboilでなくwarp(新出領域で前フレームを引きずる)。`--warp-reject`(warp前後の食い違いが大きい画素を安定化から除外し今フレームで描き直す)+`--occ-feather`で解消。reject系のαソフト減衰/崖型はいずれも「部分的に動きすぎ」で不採用、warp-rejectのハードカット(boil=0前提)が正解。
+- **コヒーレント・ボイリング(`--coherent-boil`)が答え**: 最適化初期値に「空間/時間的になめらかな揺れ場」を注入。白色ノイズと違い筆致のかたまりがゆっくりウネる。時間的になめらかなのでwarpが追従でき、安定化を生き延びつつ残像にならない。
+
+**確定設定（brush_starry_night, 出力 `out_coh_wr0.07`）**:
+`--style-weight 1e11 --flow gbuffer --alpha 0.9 --warp-reject 0.07 --occ-feather 15 --coherent-boil 0.06 --coherent-space 3 --coherent-time 2`（boil=0）
+（warp-reject は 0.15→0.07 に強化して残像をさらに削減。0.05まで試したが 0.07 が残像消去と自然さのバランス最良）
+
+- [ ] 残タスク: ①他スタイルでも確認(スタイルは将来オリジナルに差し替える前提) ②この成果のコミット(TortoiseGit) ③実機(リアルタイム)統合の検討。なお味系パラメータ(style/content/tv/coherent/steps)はリアルタイム速度に無関係(順伝播ネット化で最適化ループが消えるため)。リアルタイムで効くのは解像度/ネット本体/フロー源(gbufferで対処済)。
+
+### フェーズ1（リアルタイム化＝順伝播ネット）試行と中断（2026-06-21）
+**目的**: Gatys最適化(1フレーム数秒)を順伝播ネット(forward一発)に置換しリアルタイム化。新規コード:
+`transformer_net.py`(Johnson系 encoder-decoder+残差), `train_feedforward.py`(VGG知覚損失で学習・早期終了・ONNX書出), `infer_feedforward.py`(推論・速度計測)。学習データはCOCO val2017(5000枚, `data/`=gitignore)。モデルは`models/`(gitignore)。
+- **速度は完全クリア**: 720x405で約8ms/frame=**122fps**(RTX 5070 Ti)。リアルタイム余裕。容量増(残差5→8)でも9.4ms。
+- **重要な学び**:
+  - Gatysの重み比(style/content=1e11/1)は順伝播ネットに通用しない。Gatysは「content画像から最適化開始」で形をタダで得るが、順伝播はゼロから生成するためcontentをずっと強く効かせる必要(正規化Gram使用で style 1e10だとstyle項がcontentの約2000倍支配)。
+  - content層は浅いrelu2_2("8")が細部保持に有利(conv4_2は構図のみ)。
+  - **データ多様性が必須**: ダンプ120枚(似たフレーム)だと「入力無視で一定テクスチャを出す」過学習に陥り内容が出ない。COCOで解消。
+  - 512px学習は num_workers=0 だとデータ読込ボトルネックで1epoch>2.5h(事実上停止)。`--workers`並列化で384px=150s/epochに正常化。
+- **中断理由(ユーザー判断「全然だめ」)**: weight(1e5〜1e7収束)・容量(残差5/8)・解像度(256/384)のどのレバーでも、**Gatysの「渦巻く方向性の筆致」は出ず「点/星が散る質感」止まり**。これは「Gram統計を順伝播で学ぶ」方式の構造的限界(Gramは特徴の共起は測るが並び/方向は測らない)。
+- **次にやるなら③ GAN**: 識別器に「本物のスタイルらしさ(渦構造)」を判定させる。推論速度は据置(生成器のみ)だが学習実装が重い。今回は未着手で保留。
+- 暫定ベストモデル(渦は出ないが content保持+画風+122fps): `models/coco_sw3e6_conv.pth`(style3e6,relu2_2,5block,収束)。
+- 新規 .py 群(transformer_net/train_feedforward/infer_feedforward)と tools/npr_offline/.gitignore は**未コミット**。
+- [x] (旧探索の記録) warm-start=ボケ不採用 / temporal-loss(`--temporal-weight`)=固まり不採用 / tv正則化(`--tv-weight`)=高sw崩壊対策で実装済(今回は不使用)。詳細は上記。
+- [x] (案B/段階0b) エンジンのモーションベクトルで warp 正確化 — **実装完了・データ取得済・確定設定で使用中**。
+  - 当初の背景: temporal-loss(tw2000)で warp が「動くべき部分が固まる」破綻。原因は推定フロー(Farneback)の誤り→エンジンの正確なモーションベクトルで根治。最終的にこの gbuffer フローが安定化(warp-reject)の基盤になった。
+  - エンジン側実装(blue-sky.lib/exe ビルド通過):
+    - 定数バッファ末尾追記: ObjectCB に `prev_world`、FrameCB に `prev_view`/`prev_projection`（HLSL `common_cbuffer.hlsl` も）。既存オフセット不変。
+    - 前フレーム行列の保持: `ActiveObject::update_render_data`(prev_world)、`DebugScene::render`(prev_view/projection)。初回は cur=prev で速度0。
+    - 速度パス: `media/shader/main.fx` に technique `velocity`(VS が現/前クリップ位置→PS が NDC 速度を RG 出力)、`common_state.hlsl` に `VelocityDepth`(LESS_EQUAL/書込なし=シーン深度再利用)。`VelocityShader.h` 新規、`setup_default_shaders` で登録。`GraphicsManager::render_active_objects_velocity()`。
+    - ダンプ: `DebugScene` の imgui「Dump depth + camera (G-buffer)」ON で、`dump/motion_%04d.raw`(RG float32, NDC速度) を出力。MSAA 可(色フォーマットなので resolve)。深度+カメラ(`depth_*.raw`/`cam_*.txt`)も併記ダンプ(再投影クロスチェック用、MSAA 切れば有効)。
+    - 制約: 静的メッシュ(入力レイアウト"main")のみ。スキンメッシュ未対応(このシーンは静的なので可)。
+  - ハーネス側実装: `gbuffer.py`(motion_raw→cur→prev 画素フロー+遮蔽マスク, `feather`対応)、`temporal.py` に `temporal_errors_pre`/`stabilize_pre`(`reject_sigma`/`reject_power`/`warp_reject`/`post_boil`/`coherent_boil_fields`)、`run_eval.py` に `--flow gbuffer`/`--warp-reject`/`--occ-feather`/`--coherent-boil`等。
+  - データ取得済（カメラ前進ダンプ source/dump、color/motion/depth/cam 各120）。確定設定で gbuffer フロー使用中。
+- [ ] (将来案④) 作例ベースのペア学習 (diffusion 教師/手描き作例) — Asana エピックB に起票済み
+
+### フェーズ2（リアルタイム・ボイリング達成＝確率的ネット）（2026-06-28〜29）
+**フェーズ1の「渦が出ない／ボイリングが出ない」を、確率的ネットで突破。リアルタイムで手描きの揺れを実現。**
+探索順（ユーザー指示 3→2→1）と結論は `lessons.md`「リアルタイム・ボイリング」節に集約。要点:
+- **決定論順伝播ネットは原理的にボイリング不可**（同入力→同出力）。入力への加算ノイズ＝ノイズが乗る／微小ワープ＝絵が泳ぐ、で両方却下。
+- **容量↑（5/32→8/48）は筆致をほぼ変えない**（Gram の壁）。速度半減（121→52fps）だけ。→ 小容量採用。
+- **Gatys はリアルタイム不可**（最速5.5fps）。ただし jitter init（style_scale 1.5, boil 0.15〜0.3）で**ボイリングの正解見本**を確定。
+- **確率的ネットで達成**: `transformer_net_stochastic.py`（残差特徴へ StyleGAN 流ノイズ注入）＋ `train_stochastic.py`（mode-seeking 多様性損失、**多様性は浅層 relu1_1 で測る**＝構造を壊さない、content_weight 10）。推論 `infer_stochastic.py`（空間白色・時間平滑ノイズ）。**107fps(5/32) でボイリング＋内容保持**。
+- **色保持**（`recolor_lab`）: Gram の全パレット混入（黒塊/黄/肌色）を後処理で除去。輝度転写＋Lab b 軸の青方向だけ増幅。確定 blue=3.0 yellow=0 a=0.5 dark=60。
+- 採用モデル: `models/starry_boil_small.pth/.onnx`（5/32, 107fps）。big(8/48)は筆致の向きが少し複雑だが差は小、small 許容。
+- **残**: ①別スタイルでの確認（次にやる。スタイルは将来オリジナルへ差し替え前提） ②実機統合（ONNX Runtime + DirectML、色保持は後処理/HLSL）。
+- 新規/変更ファイル（このフェーズ）: `transformer_net_stochastic.py` `train_stochastic.py` `infer_stochastic.py` `probe_*.py`、`infer_feedforward.py`(coherent_noise/boil/warp 追加)。検証成果は `out.old/` へ退避（gitignore）。
+
+### 補足（このセッションの状態）
+- 作業ブランチ: `feature/neural-npr-offline-validation`（develop 未マージ）。マージは `--no-ff`、マージ後にブランチ削除。
+- 作業ツリーに残るのはユーザーの変更のみ（`media` / `source/Scene/DebugScene.cpp` の BGM 残り / `source/core/sound/PortAudio/SoundEngine.cpp`、未追跡の `doc/*.md`・`devlog/*.png` 等）。私のタスク対象外。
+- Git コミット運用: ユーザーが TortoiseGit で実行。Claude は `TortoiseGitProc.exe /command:commit /logmsgfile:<txt>` でメッセージ設定済みダイアログを出すまで（詳細は user スコープ `~/.claude/CLAUDE.md`）。
+- 保留: `asana-experimental` MCP の OAuth 認証（再起動 + /mcp）。
 
 ---
 
@@ -129,3 +306,10 @@
 - `BackBufferTexture.h:17` — Texture と共通化
 - `core/graphics/Shader.h:18,38` — パラメータ設計
 - `core/graphics/GraphicsManager.h:32` — 太らせる
+
+## NPR コード品質改善（ブランチ refactor/npr-code-quality）
+- [x] ② テクスチャ読み戻しを `core/graphics/Direct3D11/TextureReadback` に共通化（dump と neural の重複解消）
+- [x] ③ 死にコード削除（DebugScene の未使用 hand_drawing_shader_）
+- [x] ①④⑤ NPR パイプラインを `blue_sky::graphics::NeuralNprEffect` に抽出（DebugScene から状態24+ロジック150行を撤去、定数化、診断は imgui 内 dev ツールとして維持）
+- [x] ⑥ ノイズ生成を `CoherentNoise.h` の `step_coherent_noise()` に自由関数化＋単体テスト（std≈1 検証、CoherentNoiseTest）
+- 補足: recolor は HLSL のため C++ 単体テスト対象外。読み戻しは D3D デバイス依存でスモークのみ

@@ -31,6 +31,7 @@
     <ClCompile Include="blue_sky\graphics\Fader.cpp" />
     <ClCompile Include="blue_sky\graphics\FbxFileLoader.cpp" />
     <ClCompile Include="blue_sky\graphics\GraphicsManager.cpp" />
+    <ClCompile Include="blue_sky\graphics\NeuralNprEffect.cpp" />
     <ClCompile Include="blue_sky\graphics\Ground.cpp" />
     <ClCompile Include="blue_sky\graphics\Line.cpp" />
     <ClCompile Include="blue_sky\graphics\Mesh.cpp" />
@@ -54,12 +55,17 @@
     <ClCompile Include="core\ecs\System.cpp" />
     <ClCompile Include="core\ecs\system\ParticleRenderSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\FpsPlayerControlSystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\TargetRegistrySystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\PerceptionSystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\AlertSystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\PatrolSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\BalloonSystem.cpp" />
     <ClCompile Include="core\ecs\system\ParticleSystem.cpp" />
     <ClCompile Include="core\ecs\system\PhysicsSystem.cpp" />
     <ClCompile Include="core\ecs\system\RenderSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\TransformControlSystem.cpp" />
     <ClCompile Include="core\graphics\BgSpriteLayer.cpp" />
+    <ClCompile Include="core\graphics\NeuralStylizer.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Axis.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\BackBufferTexture.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\BulletDebugDraw.cpp" />
@@ -71,6 +77,7 @@
     <ClCompile Include="core\graphics\Direct3D11\ShadowMap.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Sprite.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\Texture.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\TextureReadback.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp" />
     <ClCompile Include="core\graphics\Msdf\GlyphAtlas.cpp" />
     <ClCompile Include="core\graphics\Msdf\GlyphCache.cpp" />
@@ -136,6 +143,7 @@
     <ClCompile Include="Scene\PauseMenuScene.cpp" />
     <ClCompile Include="Scene\GeometryShaderCanvasTestScene.cpp" />
     <ClCompile Include="Scene\MusicGamePrototypeScene.cpp" />
+    <ClCompile Include="Scene\EnemyAiTestScene.cpp" />
     <ClCompile Include="Scene\ParticleSystemTestScene.cpp" />
     <ClCompile Include="Scene\PhysicsTestScene.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
@@ -159,6 +167,7 @@
     <ClInclude Include="blue_sky\graphics\Fader.h" />
     <ClInclude Include="blue_sky\graphics\FbxFileLoader.h" />
     <ClInclude Include="blue_sky\graphics\GraphicsManager.h" />
+    <ClInclude Include="blue_sky\graphics\NeuralNprEffect.h" />
     <ClInclude Include="blue_sky\graphics\Ground.h" />
     <ClInclude Include="blue_sky\graphics\Line.h" />
     <ClInclude Include="blue_sky\graphics\Mesh.h" />
@@ -212,6 +221,10 @@
     <ClInclude Include="core\ecs\Component.h" />
     <ClInclude Include="core\ecs\component\CameraComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\FpsPlayerComponent.h" />
+    <ClInclude Include="blue_sky\ecs\component\PerceivableComponent.h" />
+    <ClInclude Include="blue_sky\ecs\component\PerceptionComponent.h" />
+    <ClInclude Include="blue_sky\ecs\component\AlertComponent.h" />
+    <ClInclude Include="blue_sky\ecs\component\PatrolComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\BalloonComponent.h" />
     <ClInclude Include="core\ecs\component\ModelComponent.h" />
     <ClInclude Include="core\ecs\component\ParticleSystemComponent.h" />
@@ -222,6 +235,11 @@
     <ClInclude Include="core\ecs\Entity.h" />
     <ClInclude Include="core\ecs\System.h" />
     <ClInclude Include="blue_sky\ecs\system\FpsPlayerControlSystem.h" />
+    <ClInclude Include="blue_sky\ecs\system\TargetRegistrySystem.h" />
+    <ClInclude Include="blue_sky\ecs\system\PerceptionSystem.h" />
+    <ClInclude Include="blue_sky\ecs\system\AlertSystem.h" />
+    <ClInclude Include="blue_sky\ecs\system\PatrolSystem.h" />
+    <ClInclude Include="blue_sky\ai\EnemyPerception.h" />
     <ClInclude Include="blue_sky\ecs\system\BalloonSystem.h" />
     <ClInclude Include="core\ecs\system\ParticleRenderSystem.h" />
     <ClInclude Include="core\ecs\system\ParticleSystem.h" />
@@ -251,6 +269,7 @@
     <ClInclude Include="core\graphics\Direct3D11\ShadowMap.h" />
     <ClInclude Include="core\graphics\Direct3D11\Sprite.h" />
     <ClInclude Include="core\graphics\Direct3D11\Texture.h" />
+    <ClInclude Include="core\graphics\Direct3D11\TextureReadback.h" />
     <ClInclude Include="core\graphics\Direct3D11\VertexBuffer.h" />
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h" />
     <ClInclude Include="core\graphics\DynamicPointList.h" />
@@ -267,6 +286,7 @@
     <ClInclude Include="core\graphics\Model.h" />
     <ClInclude Include="core\graphics\NullTexture.h" />
     <ClInclude Include="core\graphics\OculusRift.h" />
+    <ClInclude Include="core\graphics\NeuralStylizer.h" />
     <ClInclude Include="core\graphics\PixelFormat.h" />
     <ClInclude Include="core\graphics\PrimitiveTopology.h" />
     <ClInclude Include="core\graphics\RenderTarget.h" />
@@ -346,6 +366,7 @@
     <ClInclude Include="Scene\PauseMenuScene.h" />
     <ClInclude Include="Scene\GeometryShaderCanvasTestScene.h" />
     <ClInclude Include="Scene\MusicGamePrototypeScene.h" />
+    <ClInclude Include="Scene\EnemyAiTestScene.h" />
     <ClInclude Include="Scene\ParticleSystemTestScene.h" />
     <ClInclude Include="Scene\PhysicsTestScene.h" />
     <ClInclude Include="Scene\Scene.h" />
@@ -732,48 +753,87 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;BT_NO_SIMD_OPERATOR_OVERLOADS;WIN32;NOMINMAX;FBXSDK_NEW_API;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
+      <SDLCheck>
+      </SDLCheck>
+      <ForcedIncludeFiles>win\memory_leak_detection.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <AdditionalOptions>/utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <EnablePREfast>true</EnablePREfast>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <OmitFramePointers>false</OmitFramePointers>
+      <DisableAnalyzeExternal>true</DisableAnalyzeExternal>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
     <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkStatus>
+      </LinkStatus>
       <TreatLinkerWarningAsErrors>
       </TreatLinkerWarningAsErrors>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
-    <ClCompile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
-      <WarningLevel>Level4</WarningLevel>
-      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
-      <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NOMINMAX</PreprocessorDefinitions>
-      <OmitFramePointers>
-      </OmitFramePointers>
-      <DisableAnalyzeExternal>true</DisableAnalyzeExternal>
-      <SupportJustMyCode>true</SupportJustMyCode>
-    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Lib>
       <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Link>
-      <TreatLinkerWarningAsErrors>
-      </TreatLinkerWarningAsErrors>
-    </Link>
     <ClCompile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;BT_NO_SIMD_OPERATOR_OVERLOADS;WIN32;NOMINMAX;FBXSDK_NEW_API;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
+      <SDLCheck>
+      </SDLCheck>
+      <ForcedIncludeFiles>win\memory_leak_detection.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <AdditionalOptions>/utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <EnablePREfast>true</EnablePREfast>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <PreprocessorDefinitions>NOMINMAX</PreprocessorDefinitions>
       <DisableAnalyzeExternal>true</DisableAnalyzeExternal>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
       <OmitFramePointers>true</OmitFramePointers>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration />
+      <TreatLinkerWarningAsErrors>
+      </TreatLinkerWarningAsErrors>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Lib>
       <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
     </Lib>

@@ -10,10 +10,13 @@ struct ObjectConstantBufferData
 {
 	Matrix world;
 	Color color;
+	Matrix prev_world;	///< 前フレームの world ( モーションベクトル算出用 / 末尾追記で既存オフセット不変 )
 
 	ObjectConstantBufferData()
 		: color( 0.f, 0.f, 0.f, 0.f )
-	{ }
+	{
+		prev_world.set_identity();
+	}
 };
 
 struct BoneConstantBufferData

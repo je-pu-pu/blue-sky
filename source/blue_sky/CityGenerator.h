@@ -239,6 +239,7 @@ protected:
 
 public:
 	CityGenerator();
+	~CityGenerator();
 
 	void step();
 

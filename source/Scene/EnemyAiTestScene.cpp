@@ -231,38 +231,46 @@ void EnemyAiTestScene::draw_debug()
 			continue;
 		}
 
-		const Vector eye     = transform->transform.get_position() + Vector( 0.f, perception->eye_height, 0.f );
+		const Vector pos     = transform->transform.get_position();
 		const Vector forward = transform->transform.forward();
 		const btVector3 col  = state_color( alert->state );
 
-		// 視界錐（水平の扇＋弧）
-		const float base = std::atan2( forward.x(), forward.z() );
-		const float half = perception->cone.horizontal_half_fov;
-		const float dist = perception->cone.view_distance;
-		const int   N    = 10;
+		// 視界錐は「床に投影した扇」として描く。
+		// 目の高さの水平な扇だと、同じ目線高さの FPS 視点からは真横＝1本の線に見えて
+		// 三角形が判別できないため、地面すれすれに描いて見下ろす形で扇が見えるようにする。
+		const float floor_y = 0.05f; // 地面のわずか上（z-fighting 回避）
+		const Vector apex( pos.x(), floor_y, pos.z() );
+		const float  base = std::atan2( forward.x(), forward.z() );
+		const float  half = perception->cone.horizontal_half_fov;
+		const float  dist = perception->cone.view_distance;
+		const int    N    = 12;
 		Vector prev_end;
 		for ( int i = 0; i <= N; ++i )
 		{
 			const float a = base - half + ( 2.f * half ) * static_cast< float >( i ) / N;
 			const Vector dir( std::sin( a ), 0.f, std::cos( a ) );
-			const Vector end = eye + dir * dist;
+			const Vector end = apex + dir * dist;
 
-			dd->drawLine( eye, end, col );        // 稜線
+			dd->drawLine( apex, end, col );         // 稜線（床）
 			if ( i > 0 )
 			{
-				dd->drawLine( prev_end, end, col ); // 弧
+				dd->drawLine( prev_end, end, col ); // 弧（床）
 			}
 			prev_end = end;
 		}
+		// 敵の体と扇をつなぐ縦線（足元→目の高さ）。錐の原点が敵だと分かるように。
+		dd->drawLine( apex, pos + Vector( 0.f, perception->eye_height, 0.f ), col );
 
-		// パトロール経路（薄い青の折れ線）
+		// パトロール経路（薄い青の折れ線・床）
 		if ( patrol && patrol->waypoints.size() >= 2 )
 		{
 			const btVector3 path_col( 0.2f, 0.4f, 1.f );
 			for ( std::size_t i = 0; i < patrol->waypoints.size(); ++i )
 			{
-				const Vector& a = patrol->waypoints[ i ];
-				const Vector& b = patrol->waypoints[ ( i + 1 ) % patrol->waypoints.size() ];
+				Vector a = patrol->waypoints[ i ];
+				Vector b = patrol->waypoints[ ( i + 1 ) % patrol->waypoints.size() ];
+				a.set_y( floor_y );
+				b.set_y( floor_y );
 				dd->drawLine( a, b, path_col );
 			}
 		}

@@ -455,10 +455,16 @@ bool GameMain::update()
 			overlay_scene_stack_.back()->set_next_scene( "" );
 			push_overlay_scene( next.substr( push_prefix.size() ) );
 		}
-		else
+		else if ( SceneManager::get_instance()->is_scene_registered( next ) )
 		{
 			pop_overlay_scene();
 			push_overlay_scene( next );
+		}
+		else
+		{
+			// 未登録の名前に置き換えようとした : 今の画面を消さずに残す
+			debug_log( "[Scene] 未登録のシーンへの遷移を無視しました: " + next );
+			overlay_scene_stack_.back()->set_next_scene( "" );
 		}
 	}
 	else
@@ -820,7 +826,17 @@ void GameMain::check_scene_transition()
 {
 	if ( ! scene_->get_next_scene().empty() )
 	{
-		string_t next_scene = scene_->get_next_scene();
+		const string_t next_scene = scene_->get_next_scene();
+
+		// 遷移の要求は、成功しても失敗しても消費する
+		// （以前は未登録の名前だと要求が残り続け、毎フレーム遷移を試みてセーブファイルを書き続けた）
+		scene_->set_next_scene( "" );
+
+		if ( ! SceneManager::get_instance()->is_scene_registered( next_scene ) )
+		{
+			debug_log( "[Scene] 未登録のシーンへの遷移を無視しました: " + next_scene );
+			return;
+		}
 
 		set_stage_name( scene_->get_next_stage_name() );
 
@@ -840,7 +856,18 @@ void GameMain::setup_scene()
 	{
 		// set_stage_name( "0-1" );
 		// setup_scene( "game_play" );
-		setup_scene( get_config()->get< string_t >( "debug.start_scene", "debug" ) );
+		const string_t start_scene = get_config()->get< string_t >( "debug.start_scene", "debug" );
+
+		if ( SceneManager::get_instance()->is_scene_registered( start_scene ) )
+		{
+			setup_scene( start_scene );
+		}
+		else
+		{
+			// 打ち間違いなどで未登録なら、ベースシーンが無いまま進まないようタイトルにする
+			debug_log( "[Scene] debug.start_scene が未登録のシーンです。title で起動します: " + start_scene );
+			setup_scene( "title" );
+		}
 		// setup_scene( "canvas_test" );
 
 		// 開発用 : 起動時にオーバーレイ（例: options）を開く。UI の確認用
@@ -884,8 +911,8 @@ void GameMain::setup_scene( const string_t& scene_name )
 {
 	if ( ! SceneManager::get_instance()->is_scene_registered( scene_name ) )
 	{
-		// スクリプトの途中で例外が発生し、その後のスクリプトが実行されない問題に対処している？
-		// COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " ) + scene_name );
+		// 例外にすると、スクリプトから呼ばれたときに後続のスクリプトが実行されなくなるので、ログに出して無視する
+		debug_log( "[Scene] 未登録のシーンを開こうとしました: " + scene_name );
 		return;
 	}
 
@@ -923,6 +950,7 @@ void GameMain::push_overlay_scene( const string_t& scene_name )
 {
 	if ( ! SceneManager::get_instance()->is_scene_registered( scene_name ) )
 	{
+		debug_log( "[Scene] 未登録のオーバーレイを開こうとしました: " + scene_name );
 		return;
 	}
 

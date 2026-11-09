@@ -228,6 +228,14 @@ void OptionsScene::apply( bool close_after )
 	const bool display_changed = store.apply_deferred();
 
 	store.commit_immediate();
+
+	// 表示が変わったときは、維持が選ばれるまで表示系の項目は元の値で保存する
+	// （確認の途中で強制終了・クラッシュしても、次回は映っていた設定で起動する）
+	if ( display_changed )
+	{
+		store.begin_trial( snapshot, gs::get_display_keys() );
+	}
+
 	save();
 
 	if ( ! display_changed )
@@ -252,7 +260,16 @@ void OptionsScene::apply( bool close_after )
 	};
 	spec.buttons =
 	{
-		{ "options.keep", [this, close_after] { if ( close_after ) close(); } },
+		{ "options.keep", [this, close_after]
+			{
+				get_settings().end_trial();
+				save();
+
+				if ( close_after )
+				{
+					close();
+				}
+			} },
 		{ "options.revert", [this, snapshot]
 			{
 				get_settings().rollback( snapshot, gs::get_display_keys() );

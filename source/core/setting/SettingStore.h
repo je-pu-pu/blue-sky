@@ -73,6 +73,8 @@ private:
 	bool in_hook_ = false;
 	uint_t change_count_ = 0;
 
+	Snapshot trial_values_;		///< 試用中の項目と、保存に使う元の値
+
 	Entry* find( const string_t& key );
 	const Entry* find( const string_t& key ) const;
 
@@ -140,7 +142,18 @@ public:
 	void reset_to_defaults();			///< 保留値を既定値にする（IMMEDIATE は反映する。確定はしない）
 
 	Snapshot snapshot() const;			///< 確定値の写し
-	void rollback( const Snapshot&, const std::vector< string_t >& keys );	///< 指定キーの確定値・保留値を写しに戻して反映する
+	void rollback( const Snapshot&, const std::vector< string_t >& keys );	///< 指定キーの確定値・保留値を写しに戻して反映する（試用中なら試用も終える）
+
+	/**
+	 * 試用を始める（表示モードの変更のように、ユーザーが「維持」を選ぶまで確定しない変更）
+	 *
+	 * 試用中は、save() が keys について確定値ではなく before の値を書く。
+	 * 確認の途中で強制終了・クラッシュしても、設定ファイルには元の（映っていた）値が残る。
+	 * 維持なら end_trial()、取り消しなら rollback() で終える。
+	 */
+	void begin_trial( const Snapshot& before, const std::vector< string_t >& keys );
+	void end_trial() { trial_values_.clear(); }
+	bool in_trial() const { return ! trial_values_.empty(); }
 
 	/// 外部（ホットキー等）で変わった実際の値を、確定値・保留値の両方に取り込む。反映関数は呼ばない
 	void sync_from_runtime( const string_t& key, const Value& value );

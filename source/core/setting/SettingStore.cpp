@@ -407,6 +407,7 @@ void SettingStore::rollback( const Snapshot& snapshot, const std::vector< string
 		const bool differs = ! equals( e, e.pending, si->second ) || ! equals( e, e.committed, si->second );
 
 		e.committed = e.pending = si->second;
+		trial_values_.erase( key );
 
 		if ( differs )
 		{
@@ -415,6 +416,19 @@ void SettingStore::rollback( const Snapshot& snapshot, const std::vector< string
 	}
 
 	apply_changed( changed );
+}
+
+void SettingStore::begin_trial( const Snapshot& before, const std::vector< string_t >& keys )
+{
+	for ( const auto& key : keys )
+	{
+		auto si = before.find( key );
+
+		if ( si != before.end() && find( key ) )
+		{
+			trial_values_[ key ] = si->second;
+		}
+	}
 }
 
 void SettingStore::sync_from_runtime( const string_t& key, const Value& value )
@@ -503,7 +517,9 @@ void SettingStore::save( game::Config& config ) const
 {
 	for ( const auto& e : entries_ )
 	{
-		config.set< string_t >( e.key.c_str(), to_text( e.committed ) );
+		// 試用中の項目は、維持が選ばれるまで元の値を書く
+		auto t = trial_values_.find( e.key );
+		config.set< string_t >( e.key.c_str(), to_text( t != trial_values_.end() ? t->second : e.committed ) );
 	}
 }
 

@@ -175,6 +175,53 @@ TEST( SettingStoreTest, スナップショットでロールバックできる )
 	EXPECT_FALSE( s.has_pending_changes() );
 }
 
+TEST( SettingStoreTest, 試用中は維持するまで元の値を保存する )
+{
+	SettingStore s;
+	s.add_int( "graphics.screen_width", 1920, 320, 7680, ApplyMode::DEFERRED );
+	s.add_float( "audio.volume", 0.5f, 0.f, 1.f, 0.1f, ApplyMode::IMMEDIATE );
+
+	const auto snap = s.snapshot();
+	s.set( "graphics.screen_width", 1280 );
+	s.set( "audio.volume", 0.9f );
+	s.apply_deferred();
+	s.commit_immediate();
+	s.begin_trial( snap, { "graphics.screen_width" } );
+	EXPECT_TRUE( s.in_trial() );
+
+	// 確認待ちの間に保存（強制終了の直前など）: 表示は元の値、音量は新しい値
+	game::Config during;
+	s.save( during );
+	EXPECT_EQ( "1920", during.get< string_t >( "graphics.screen_width", "" ) );
+	EXPECT_EQ( "0.9", during.get< string_t >( "audio.volume", "" ) );
+
+	// 維持したら新しい値を保存する
+	s.end_trial();
+	EXPECT_FALSE( s.in_trial() );
+
+	game::Config after;
+	s.save( after );
+	EXPECT_EQ( "1280", after.get< string_t >( "graphics.screen_width", "" ) );
+}
+
+TEST( SettingStoreTest, 試用はロールバックでも終わる )
+{
+	SettingStore s;
+	s.add_int( "graphics.screen_width", 1920, 320, 7680, ApplyMode::DEFERRED );
+
+	const auto snap = s.snapshot();
+	s.set( "graphics.screen_width", 1280 );
+	s.apply_deferred();
+	s.begin_trial( snap, { "graphics.screen_width" } );
+
+	s.rollback( snap, { "graphics.screen_width" } );
+	EXPECT_FALSE( s.in_trial() );
+
+	game::Config out;
+	s.save( out );
+	EXPECT_EQ( "1920", out.get< string_t >( "graphics.screen_width", "" ) );
+}
+
 TEST( SettingStoreTest, on_setフックで他の項目を入れ替えられる )
 {
 	SettingStore s;

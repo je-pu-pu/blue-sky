@@ -55,7 +55,7 @@ void Choice::step( int delta, UIContext& ctx )
 	}
 
 	setter_( next );
-	ctx.screen.play( UISoundEvent::CHANGE );
+	ctx.screen.play( UISoundEvent::CHANGE, this );
 }
 
 bool Choice::on_nav( NavDir dir, UIContext& ctx )
@@ -122,6 +122,14 @@ void Choice::render( Renderer& renderer, const UIContext& ctx ) const
 void Choice::collect_hints( std::vector< Hint >& hints ) const
 {
 	hints.push_back( Hint{ HintAction::CHANGE, "hint.change" } );
+}
+
+AccessibleInfo Choice::describe( const UIContext& ctx ) const
+{
+	AccessibleInfo info = LabeledRow::describe( ctx );
+	info.role = "choice";
+	info.value = get_display_text( ctx );
+	return info;
 }
 
 } // namespace core::ui

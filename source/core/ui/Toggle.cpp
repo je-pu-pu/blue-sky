@@ -15,7 +15,7 @@ void Toggle::flip( UIContext& ctx )
 	}
 
 	setter_( ! get_value() );
-	ctx.screen.play( UISoundEvent::CHANGE );
+	ctx.screen.play( UISoundEvent::CHANGE, this );
 }
 
 bool Toggle::on_confirm( UIContext& ctx )
@@ -84,6 +84,14 @@ void Toggle::render( Renderer& renderer, const UIContext& ctx ) const
 void Toggle::collect_hints( std::vector< Hint >& hints ) const
 {
 	hints.push_back( Hint{ HintAction::CONFIRM, "hint.toggle" } );
+}
+
+AccessibleInfo Toggle::describe( const UIContext& ctx ) const
+{
+	AccessibleInfo info = LabeledRow::describe( ctx );
+	info.role = "toggle";
+	info.value = ctx.tr( get_value() ? "ui.on" : "ui.off" );
+	return info;
 }
 
 } // namespace core::ui

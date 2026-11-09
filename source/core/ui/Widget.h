@@ -30,6 +30,14 @@ namespace core::ui
 		string_t tr( const string_t& key ) const;
 	};
 
+	/// 部品の説明（読み上げ・自動テストの手がかり）
+	struct AccessibleInfo
+	{
+		string_t role;		///< 種類（"button"・"slider"・"toggle"・"choice"・"text_field"・"key_bind"・"tab"・"label" など。空なら説明なし）
+		string_t name;		///< 名前（翻訳済み。行のラベル・ボタンの文字など）
+		string_t value;		///< 今の値（表示どおりの文字。値の無い部品は空）
+	};
+
 	/// フォーカスが移った理由
 	enum class FocusReason
 	{
@@ -266,6 +274,9 @@ namespace core::ui
 
 		/// フォーカス中に使える操作
 		virtual void collect_hints( std::vector< Hint >& ) const { }
+
+		/// 部品の説明（種類・名前・値）。以前は外から取り出す方法が無く、読み上げの手がかりが無かった
+		virtual AccessibleInfo describe( const UIContext& ) const { return AccessibleInfo(); }
 
 	}; // class Widget
 

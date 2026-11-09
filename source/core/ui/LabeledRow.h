@@ -47,6 +47,7 @@ public:
 	/// ラベルを変える（空ならラベルなし）
 	void set_label( const string_t& label_key ) { label_key_ = label_key; }
 	bool has_label() const { return ! label_key_.empty(); }
+	AccessibleInfo describe( const UIContext& ctx ) const override;
 
 }; // class LabeledRow
 

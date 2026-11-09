@@ -45,6 +45,7 @@ public:
 	void set_formatter( Formatter f ) { formatter_ = std::move( f ); }
 
 	float_t get_value() const { return getter_ ? getter_() : min_; }
+	AccessibleInfo describe( const UIContext& ctx ) const override;
 	const Rect& get_track_rect() const { return track_rect_; }
 	bool is_dragging() const { return dragging_; }
 

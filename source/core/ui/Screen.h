@@ -41,7 +41,8 @@ namespace core::ui
 	class Screen
 	{
 	public:
-		using SoundHandler = std::function< void( UISoundEvent ) >;
+		/// 効果音のきっかけを受け取る（source は発生元の部品。部品ごとに音を変えたいときに使う。無ければ nullptr）
+		using SoundHandler = std::function< void( UISoundEvent, const Widget* source ) >;
 
 		/// フォーカスが移ったときに呼ばれる（読み上げ・効果などの差し込み口）
 		using FocusListener = std::function< void( Widget* focused, FocusReason reason ) >;
@@ -109,6 +110,9 @@ namespace core::ui
 		void handle_pointer( const UIInput&, UIContext& );
 		void handle_nav( NavDir, UIContext& );
 		void handle_cancel( UIContext& );
+
+		/// スクロールできる部品（表示範囲を持つもの）を探す
+		static Widget* find_scrollable( Widget* w );
 
 		/// アクションをフォーカス中の部品から親へ渡し、誰も使わなければ既定の処理をする。処理したら true
 		bool dispatch_action( ActionId action, UIContext& ctx );
@@ -198,9 +202,12 @@ namespace core::ui
 
 		/// フォーカスが移ったときに呼ぶ関数を設定する
 		void set_focus_listener( FocusListener l ) { focus_listener_ = std::move( l ); }
-		void play( UISoundEvent e ) const { if ( sound_handler_ ) sound_handler_( e ); }
+		void play( UISoundEvent e, const Widget* source = nullptr ) const { if ( sound_handler_ ) sound_handler_( e, source ); }
 
 		InputDevice get_last_device() const { return last_device_; }
+
+		/// フォーカス中の部品の説明（種類・名前・値。読み上げの手がかり）。フォーカスが無ければ空
+		AccessibleInfo describe_focused() const;
 
 		/// フォーカス中の部品の説明文（翻訳済み。無ければ空）
 		string_t get_description() const;

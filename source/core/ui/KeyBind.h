@@ -38,6 +38,7 @@ public:
 		: LabeledRow( label_key ), getter_( std::move( getter ) ), setter_( std::move( setter ) ), name_of_( std::move( name_of ) ) { }
 
 	bool is_waiting() const { return waiting_; }
+	AccessibleInfo describe( const UIContext& ctx ) const override;
 
 	bool on_confirm( UIContext& ctx ) override;
 	bool on_cancel( UIContext& ctx ) override;

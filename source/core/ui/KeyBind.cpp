@@ -16,7 +16,7 @@ void KeyBind::start( UIContext& ctx )
 
 	waiting_ = true;
 	ctx.screen.begin_key_capture( this );
-	ctx.screen.play( UISoundEvent::CONFIRM );
+	ctx.screen.play( UISoundEvent::CONFIRM, this );
 }
 
 bool KeyBind::on_confirm( UIContext& ctx )
@@ -34,7 +34,7 @@ bool KeyBind::on_cancel( UIContext& ctx )
 
 	waiting_ = false;
 	ctx.screen.end_key_capture();
-	ctx.screen.play( UISoundEvent::CANCEL );
+	ctx.screen.play( UISoundEvent::CANCEL, this );
 	return true;
 }
 
@@ -72,7 +72,7 @@ bool KeyBind::on_key_captured( int code, UIContext& ctx )
 		setter_( code );
 	}
 
-	ctx.screen.play( UISoundEvent::CHANGE );
+	ctx.screen.play( UISoundEvent::CHANGE, this );
 	return true;
 }
 
@@ -92,6 +92,14 @@ void KeyBind::render( Renderer& renderer, const UIContext& ctx ) const
 void KeyBind::collect_hints( std::vector< Hint >& hints ) const
 {
 	hints.push_back( Hint{ HintAction::CONFIRM, "hint.rebind" } );
+}
+
+AccessibleInfo KeyBind::describe( const UIContext& ctx ) const
+{
+	AccessibleInfo info = LabeledRow::describe( ctx );
+	info.role = "key_bind";
+	info.value = waiting_ ? ctx.tr( "ui.key_waiting" ) : ( name_of_ && getter_ ? name_of_( getter_() ) : string_t() );
+	return info;
 }
 
 } // namespace core::ui

@@ -53,6 +53,11 @@ void LabeledRow::render_row( Renderer& renderer, const UIContext& ctx ) const
 
 	draw_brush( renderer, rect_, focused_ ? t.row_focused : t.row );
 
+	if ( focused_ && is_enabled() )
+	{
+		draw_focus_marker( renderer, rect_, t );
+	}
+
 	if ( icon_.is_visible() )
 	{
 		draw_brush( renderer, icon_rect_, icon_ );
@@ -62,6 +67,11 @@ void LabeledRow::render_row( Renderer& renderer, const UIContext& ctx ) const
 	{
 		draw_text_fit( renderer, label_rect_, ctx.tr( label_key_ ), make_text_style( value_color( ctx ), t.font_size_normal ) );
 	}
+}
+
+AccessibleInfo LabeledRow::describe( const UIContext& ctx ) const
+{
+	return AccessibleInfo{ "row", has_label() ? ctx.tr( label_key_ ) : string_t(), string_t() };
 }
 
 } // namespace core::ui

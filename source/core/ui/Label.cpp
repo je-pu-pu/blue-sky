@@ -149,4 +149,9 @@ void Label::render( Renderer& renderer, const UIContext& ctx ) const
 	}
 }
 
+AccessibleInfo Label::describe( const UIContext& ctx ) const
+{
+	return AccessibleInfo{ "label", get_text( ctx ), string_t() };
+}
+
 } // namespace core::ui

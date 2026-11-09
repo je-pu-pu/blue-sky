@@ -43,6 +43,7 @@ public:
 	void set_text_provider( std::function< string_t() > f ) { provider_ = std::move( f ); }
 	void set_wrap( bool w ) { wrap_ = w; }
 	void set_align( core::graphics::HAlign a ) { align_ = a; }
+	AccessibleInfo describe( const UIContext& ctx ) const override;
 
 	float_t measure_height( float_t width, const UIContext& ctx ) const override;
 

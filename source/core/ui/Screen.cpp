@@ -700,7 +700,7 @@ bool Screen::dispatch_action( ActionId action, UIContext& ctx )
 	}
 }
 
-void Screen::handle_nav( NavDir dir, UIContext& )
+void Screen::handle_nav( NavDir dir, UIContext& ctx )
 {
 	Layer* layer = top_layer();
 	Widget* focused = layer->focused;
@@ -710,8 +710,47 @@ void Screen::handle_nav( NavDir dir, UIContext& )
 	if ( target && target != focused )
 	{
 		set_focus( target, FocusReason::NAV );
-		play( UISoundEvent::MOVE );
+		play( UISoundEvent::MOVE, target );
+		return;
 	}
+
+	// 移れる部品が無い : 上下ならスクロールできる部品を動かす（フォーカスできる部品の無い縦長の内容。クレジットなど）
+	if ( ! target && ( dir == NavDir::UP || dir == NavDir::DOWN ) )
+	{
+		if ( Widget* scrollable = find_scrollable( layer->root.get() ) )
+		{
+			scrollable->on_wheel( dir == NavDir::UP ? +1 : -1, ctx );
+		}
+	}
+}
+
+Widget* Screen::find_scrollable( Widget* w )
+{
+	if ( ! w || ! w->is_visible() )
+	{
+		return nullptr;
+	}
+
+	if ( w->get_view_clip() )
+	{
+		return w;
+	}
+
+	for ( size_t i = 0; i < w->child_count(); i++ )
+	{
+		if ( Widget* s = find_scrollable( w->child_at( i ) ) )
+		{
+			return s;
+		}
+	}
+
+	return nullptr;
+}
+
+AccessibleInfo Screen::describe_focused() const
+{
+	const Widget* f = get_focused();
+	return f ? f->describe( make_context() ) : AccessibleInfo();
 }
 
 void Screen::handle_cancel( UIContext& )
@@ -721,7 +760,7 @@ void Screen::handle_cancel( UIContext& )
 	if ( layer->on_cancel )
 	{
 		auto on_cancel = layer->on_cancel;	// 層が閉じられても安全なようにコピー
-		play( UISoundEvent::CANCEL );
+		play( UISoundEvent::CANCEL, layer->focused );
 		on_cancel();
 	}
 }

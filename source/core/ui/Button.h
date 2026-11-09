@@ -31,6 +31,7 @@ public:
 
 	void set_text( const string_t& key ) { text_key_ = key; }
 	const string_t& get_text() const { return text_key_; }
+	AccessibleInfo describe( const UIContext& ctx ) const override;
 	void set_on_click( std::function< void() > f ) { on_click_ = std::move( f ); }
 
 	bool is_focusable_type() const override { return true; }

@@ -12,11 +12,14 @@ namespace core::ui
 
 void show_dialog( Screen& screen, DialogSpec spec )
 {
+	const bool cancelable = spec.cancel_index >= 0;
+
 	auto dialog = std::make_unique< Dialog >( std::move( spec ) );
 	Dialog* raw = dialog.get();
 	raw->set_screen( & screen );
 
-	screen.push_layer( std::move( dialog ), [raw] { raw->press_cancel(); }, true );
+	// キャンセルできないダイアログでは、キャンセルの処理を登録しない（以前は何も起きないのにキャンセル音だけが鳴った）
+	screen.push_layer( std::move( dialog ), cancelable ? std::function< void() >( [raw] { raw->press_cancel(); } ) : nullptr, true );
 }
 
 Dialog::Dialog( DialogSpec spec )

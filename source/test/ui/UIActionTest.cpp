@@ -9,6 +9,7 @@
 #include <core/ui/Stack.h>
 #include <core/ui/TabView.h>
 #include <core/ui/TextField.h>
+#include <core/ui/Toggle.h>
 #include <core/ui/TextFit.h>
 
 #include <Scene/SceneRequest.h>
@@ -502,4 +503,66 @@ TEST( KeyLatchTest, 1フレーム内に押して離したキーはそのフレ�
 	now = {};
 	blue_sky::apply_latched_presses( now, prev, latched );
 	EXPECT_FALSE( now[ 'A' ] );
+}
+
+// ---- 効果音・アクセシビリティ・スクロール（3 章 C） ----
+
+TEST_F( ActionTest, キャンセルできないダイアログではキャンセル音が鳴らず効果音には発生元が付く )
+{
+	std::vector< std::pair< UISoundEvent, const Widget* > > sounds;
+	screen.set_sound_handler( [&] ( UISoundEvent e, const Widget* source ) { sounds.push_back( { e, source } ); } );
+
+	auto* first = root->add< Button >( "a", nullptr );
+	auto* second = root->add< Button >( "b", nullptr );
+	ready();
+
+	press_nav( NavDir::DOWN );
+	ASSERT_FALSE( sounds.empty() );
+	EXPECT_EQ( UISoundEvent::MOVE, sounds.back().first );
+	EXPECT_EQ( second, sounds.back().second );		// 移った先の部品
+	(void) first;
+
+	DialogSpec spec;
+	spec.message = "msg";
+	spec.buttons = { { "ok", nullptr } };
+	spec.cancel_index = -1;		// キャンセルできない
+	show_dialog( screen, std::move( spec ) );
+	step(); step();
+
+	sounds.clear();
+	UIInput cancel;
+	cancel.cancel = true;
+	step( cancel );
+
+	for ( const auto& s : sounds ) { EXPECT_NE( UISoundEvent::CANCEL, s.first ); }
+	EXPECT_EQ( 2u, screen.get_layer_count() );		// 閉じない
+}
+
+TEST_F( ActionTest, フォーカス中の部品の種類と名前と値を取り出せる )
+{
+	bool on = true;
+	root->add< Toggle >( "sound", [&] { return on; }, [&] ( bool v ) { on = v; } );
+	strings.set( "sound", "音" );
+	strings.set( "ui.on", "オン" );
+	ready();
+
+	const AccessibleInfo info = screen.describe_focused();
+	EXPECT_EQ( "toggle", info.role );
+	EXPECT_EQ( "音", info.name );
+	EXPECT_EQ( "オン", info.value );
+}
+
+TEST_F( ActionTest, フォーカスの印を色だけでなく形でも描く )
+{
+	root->add< Button >( "a", nullptr );
+	ready();
+
+	renderer.clear();
+	render();
+	const size_t with_marker = renderer.rects.size();
+
+	theme.focus_marker_width = 0.f;
+	renderer.clear();
+	render();
+	EXPECT_EQ( with_marker - 1, renderer.rects.size() );		// 印の帯が 1 つ多い
 }

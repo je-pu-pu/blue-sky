@@ -16,7 +16,7 @@ void Button::click( UIContext& ctx )
 		return;
 	}
 
-	ctx.screen.play( UISoundEvent::CONFIRM );
+	ctx.screen.play( UISoundEvent::CONFIRM, this );
 
 	// コールバックの中で自分が破棄されても安全なようにコピーしてから呼ぶ
 	auto f = on_click_;
@@ -78,12 +78,23 @@ void Button::render( Renderer& renderer, const UIContext& ctx ) const
 	const Color& fg = ! is_enabled() ? t.text_disabled : ( focused_ ? t.text_focused : t.text );
 
 	draw_brush( renderer, rect_, bg );
+
+	if ( focused_ && is_enabled() )
+	{
+		draw_focus_marker( renderer, rect_, t );
+	}
+
 	draw_text_fit( renderer, rect_, ctx.tr( text_key_ ), make_text_style( fg, t.font_size_normal, core::graphics::HAlign::CENTER ) );
 }
 
 void Button::collect_hints( std::vector< Hint >& hints ) const
 {
 	hints.push_back( Hint{ HintAction::CONFIRM, "hint.select" } );
+}
+
+AccessibleInfo Button::describe( const UIContext& ctx ) const
+{
+	return AccessibleInfo{ "button", ctx.tr( text_key_ ), string_t() };
 }
 
 } // namespace core::ui

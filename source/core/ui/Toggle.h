@@ -33,6 +33,7 @@ public:
 		: LabeledRow( label_key ), getter_( std::move( getter ) ), setter_( std::move( setter ) ) { }
 
 	bool get_value() const { return getter_ ? getter_() : false; }
+	AccessibleInfo describe( const UIContext& ctx ) const override;
 
 	bool on_confirm( UIContext& ctx ) override;
 	bool on_nav( NavDir dir, UIContext& ctx ) override;

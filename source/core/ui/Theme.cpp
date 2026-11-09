@@ -198,6 +198,7 @@ const FloatField FLOAT_FIELDS[] =
 	{ "row_icon_ratio", & Theme::row_icon_ratio, 0.f, 1.f, false },
 	{ "safe_area", & Theme::safe_area, 0.f, 0.2f, false },
 	{ "tab_badge_size", & Theme::tab_badge_size, 0.f, 64.f, false },
+	{ "focus_marker_width", & Theme::focus_marker_width, 0.f, 64.f, false },
 	{ "accent_bar_thickness", & Theme::accent_bar_thickness, 0.f, INF, false },
 	{ "toggle_mark_width", & Theme::toggle_mark_width, 0.f, INF, false },
 	{ "scrollbar_width", & Theme::scrollbar_width, 0.f, INF, false },

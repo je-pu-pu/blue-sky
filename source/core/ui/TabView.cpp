@@ -18,7 +18,7 @@ void TabView::select( size_t index, UIContext& ctx )
 
 	current_ = index;
 	ctx.screen.invalidate_layout();
-	ctx.screen.play( UISoundEvent::MOVE );
+	ctx.screen.play( UISoundEvent::MOVE, this );
 
 	// ページの入口へフォーカス（ページを覚えていればその位置）
 	Widget* page = children_[ current_ ].get();

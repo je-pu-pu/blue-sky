@@ -23,7 +23,7 @@ UIOverlayScene::UIOverlayScene()
 	, renderer_( get_graphics_manager() )
 	, screen_( services_.theme, services_.strings, renderer_ )
 {
-	screen_.set_sound_handler( [this] ( core::ui::UISoundEvent e )
+	screen_.set_sound_handler( [this] ( core::ui::UISoundEvent e, const core::ui::Widget* )
 	{
 		switch ( e )
 		{

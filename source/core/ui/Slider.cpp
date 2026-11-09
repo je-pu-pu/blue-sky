@@ -38,7 +38,7 @@ void Slider::set_value( float_t v, UIContext& ctx )
 	}
 
 	setter_( v );
-	ctx.screen.play( UISoundEvent::CHANGE );
+	ctx.screen.play( UISoundEvent::CHANGE, this );
 }
 
 float_t Slider::value_from_x( float_t x ) const
@@ -143,6 +143,14 @@ void Slider::render( Renderer& renderer, const UIContext& ctx ) const
 void Slider::collect_hints( std::vector< Hint >& hints ) const
 {
 	hints.push_back( Hint{ HintAction::CHANGE, "hint.adjust" } );
+}
+
+AccessibleInfo Slider::describe( const UIContext& ctx ) const
+{
+	AccessibleInfo info = LabeledRow::describe( ctx );
+	info.role = "slider";
+	info.value = format_value( get_value() );
+	return info;
 }
 
 } // namespace core::ui

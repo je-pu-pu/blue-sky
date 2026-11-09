@@ -39,6 +39,7 @@ public:
 	void set_on_submit( std::function< void() > f ) { on_submit_ = std::move( f ); }
 
 	string_t get_value() const { return getter_ ? getter_() : string_t(); }
+	AccessibleInfo describe( const UIContext& ctx ) const override;
 
 	bool wants_text_input() const override { return is_focused() && is_enabled(); }
 	bool on_text( const std::u32string& text, UIContext& ctx ) override;

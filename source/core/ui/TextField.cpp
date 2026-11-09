@@ -105,7 +105,7 @@ bool TextField::on_text( const std::u32string& text, UIContext& ctx )
 	{
 		setter_( value );
 		blink_time_ = 0.f;		// 入力した直後はカーソルを見せる
-		ctx.screen.play( UISoundEvent::CHANGE );
+		ctx.screen.play( UISoundEvent::CHANGE, this );
 	}
 
 	return true;
@@ -131,7 +131,7 @@ bool TextField::on_confirm( UIContext& ctx )
 {
 	if ( on_submit_ && is_enabled() )
 	{
-		ctx.screen.play( UISoundEvent::CONFIRM );
+		ctx.screen.play( UISoundEvent::CONFIRM, this );
 		auto f = on_submit_;	// コールバックの中で自分が破棄されても安全なようにコピー
 		f();
 	}
@@ -191,6 +191,14 @@ void TextField::collect_hints( std::vector< Hint >& hints ) const
 	{
 		hints.push_back( Hint{ HintAction::CONFIRM, "hint.select" } );
 	}
+}
+
+AccessibleInfo TextField::describe( const UIContext& ctx ) const
+{
+	AccessibleInfo info = LabeledRow::describe( ctx );
+	info.role = "text_field";
+	info.value = get_value();
+	return info;
 }
 
 } // namespace core::ui

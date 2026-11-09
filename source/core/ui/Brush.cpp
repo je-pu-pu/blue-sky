@@ -1,5 +1,6 @@
 #include "Brush.h"
 #include "Renderer.h"
+#include "Theme.h"
 
 #include <algorithm>
 #include <cmath>
@@ -303,6 +304,16 @@ bool can_draw( const Renderer& renderer, const Brush& brush )
 const Brush& pick_brush( const Renderer& renderer, const Brush& preferred, const Brush& fallback )
 {
 	return can_draw( renderer, preferred ) ? preferred : fallback;
+}
+
+void draw_focus_marker( Renderer& renderer, const Rect& rect, const Theme& theme )
+{
+	if ( theme.focus_marker_width <= 0.f )
+	{
+		return;
+	}
+
+	draw_brush( renderer, Rect( rect.x, rect.y, std::min( theme.focus_marker_width, rect.w ), rect.h ), theme.accent );
 }
 
 void draw_brush( Renderer& renderer, const Rect& dst, const Brush& brush, const Rect* clip )

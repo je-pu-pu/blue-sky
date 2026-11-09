@@ -278,6 +278,30 @@ protected:
 
 } // namespace
 
+TEST( ScrollKeyTest, フォーカスできる部品の無い縦長の内容は上下のキーでスクロールする )
+{
+	ui_test::ScreenFixture f;
+	auto box = std::make_unique< FixedHeight >( 300.f );
+	auto* scroll = box->add< ScrollView >();
+	auto* list = scroll->add< Stack >( Axis::VERTICAL );
+
+	for ( int i = 0; i < 30; i++ )
+	{
+		list->add< Label >( "line" + std::to_string( i ) );		// フォーカスできない（クレジットなど）
+	}
+
+	f.screen.set_root( std::move( box ), nullptr );
+	f.step();
+	ASSERT_GT( scroll->get_max_scroll(), 0.f );
+
+	f.press_nav( NavDir::DOWN );
+	EXPECT_GT( scroll->get_scroll(), 0.f );
+
+	const float_t after_down = scroll->get_scroll();
+	f.press_nav( NavDir::UP );
+	EXPECT_LT( scroll->get_scroll(), after_down );
+}
+
 TEST_F( ScrollFixture, 方向キーで画面外の行へ進むと自動でスクロールする )
 {
 	EXPECT_FLOAT_EQ( 0.f, scroll->get_scroll() );

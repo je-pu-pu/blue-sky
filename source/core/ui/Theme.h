@@ -78,6 +78,7 @@ struct Theme
 	float_t row_icon_ratio			= 0.6f;		///< 行のアイコンの大きさ（行の高さに対する比率）
 	float_t tab_badge_size			= 10.f;		///< タブの見出しの印（丸）の大きさ
 	float_t choice_arrow_width		= 0.25f;	///< 選択肢の左右の矢印の幅（値の欄に対する比率の上限）
+	float_t focus_marker_width		= 4.f;		///< フォーカス中の行・ボタンの左端の印の幅（色の違いだけに頼らない。0 で出さない）
 	float_t accent_bar_thickness	= 6.f;		///< 選択中のタブの下線・ダイアログ上端の帯の太さ
 	float_t toggle_mark_width		= 8.f;		///< オンのトグルの左端の帯の幅（toggle_on が未指定のとき）
 	float_t scrollbar_width			= 10.f;		///< スクロールバーの幅

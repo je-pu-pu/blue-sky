@@ -66,6 +66,7 @@ public:
 
 	/// 現在の表示文字列
 	string_t get_display_text( const UIContext& ctx ) const;
+	AccessibleInfo describe( const UIContext& ctx ) const override;
 
 }; // class Choice
 

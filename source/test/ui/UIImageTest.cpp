@@ -245,6 +245,7 @@ protected:
 	void SetUp() override
 	{
 		renderer.image_sizes[ "ui/logo.png" ] = { 400.f, 100.f };
+		theme.focus_marker_width = 0.f;		// 画像の描き方だけを数える（フォーカスの印は別のテスト）
 
 		auto r = std::make_unique< Stack >( Axis::VERTICAL );
 		root = r.get();

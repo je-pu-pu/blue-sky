@@ -86,6 +86,14 @@ struct Brush
  */
 void draw_brush( Renderer& renderer, const Rect& dst, const Brush& brush, const Rect* clip = nullptr );
 
+/**
+ * フォーカスの印（左端の帯）を描く
+ *
+ * フォーカスを背景の色の違いだけで示すと、色の見分けにくい人には分からない。形（帯）でも示す。
+ * 幅はテーマの focus_marker_width（0 なら描かない）、色は accent。
+ */
+void draw_focus_marker( Renderer& renderer, const Rect& rect, const struct Theme& theme );
+
 /// 実際に何かが描かれるか（画像が読める、または色が透明でない）。has_image() と違い、読めない画像は描けない扱い
 bool can_draw( const Renderer& renderer, const Brush& brush );
 

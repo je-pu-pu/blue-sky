@@ -56,7 +56,7 @@ public:
 	struct Vertex {
 		Vector3 position;	///< NDC 座標 (x, y, z=0)
 		Vector2 tex_coord;	///< アトラス UV 座標
-		Color color;		///< 頂点カラー（現在は White 固定、シェーダー側で text_color を使用）
+		Color color;		///< 文字の色（頂点ごと。色の違う文字列を 1 回の描画にまとめられる）
 	};
 
 	/**
@@ -102,6 +102,10 @@ private:
 	const direct_3d_11::EffectTechnique* effect_technique_;	///< "msdf_text" エフェクトテクニック
 
 	std::vector< Vertex > vertices_;	///< flush() まで蓄積される頂点データ
+
+	/// 蓄積中の頂点が使うアウトライン（定数バッファで渡すので、違うアウトラインの文字列が来たら先に描画する）
+	Color pending_outline_color_;
+	float pending_outline_width_ = 0.f;
 	std::vector< uint16_t > indices_;	///< flush() まで蓄積されるインデックスデータ
 
 	static constexpr int MAX_CHARS = 1024;		///< 1 回の flush() で描画可能な最大文字数

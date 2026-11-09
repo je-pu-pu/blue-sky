@@ -202,7 +202,21 @@ void MsdfTextRenderer::draw_text( float x, float y, const wchar_t* text, const T
 	// MSDF ビットマップ内でグリフ本体に使えるピクセル数（パディングを除く）
 	float available = static_cast< float >( CELL_SIZE ) - 2.f * MSDF_RANGE;
 
-	// MSDF シェーダー用の定数バッファを更新（全グリフ共通のパラメータ）
+	// アウトラインは定数バッファで渡すので、蓄積中の文字列と違えば先に描画する
+	// （以前は色もアウトラインも定数バッファで、flush 前に最後に呼んだ draw_text の見た目で全部が描かれていた）
+	const bool outline_differs =
+		style.outline_width != pending_outline_width_ ||
+		( style.outline_width > 0.f && ! ( style.outline_color == pending_outline_color_ ) );
+
+	if ( ! vertices_.empty() && outline_differs )
+	{
+		flush();
+	}
+
+	pending_outline_color_ = style.outline_color;
+	pending_outline_width_ = style.outline_width;
+
+	// MSDF シェーダー用の定数バッファを更新（アウトラインとアトラスのパラメータ。文字の色は頂点で渡す）
 	MsdfConstantBufferData cb_data;
 	cb_data.text_color = style.text_color;
 	cb_data.outline_color = style.outline_color;
@@ -252,7 +266,7 @@ void MsdfTextRenderer::draw_text( float x, float y, const wchar_t* text, const T
 			// offset_y: ascender ライン (y=0) からグリフ上端 (bearing_y) までの距離に、上パディングを加算
 			float offset_y = ( static_cast< float >( fm.ascenderY ) * scale ) - bearing_y - ( quad_size - glyph_h ) * 0.5f;
 
-			append_quad( cursor_x + offset_x, y + offset_y, quad_size, quad_size, glyph->uv, Color::White );
+			append_quad( cursor_x + offset_x, y + offset_y, quad_size, quad_size, glyph->uv, style.text_color );
 		}
 
 		// カーソルを advance 分進める（空白文字もここで処理される）

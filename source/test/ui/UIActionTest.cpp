@@ -13,6 +13,7 @@
 
 #include <Scene/SceneRequest.h>
 #include <Scene/InputRouting.h>
+#include <blue_sky/KeyLatch.h>
 
 using namespace core::ui;
 using ui_test::ScreenFixture;
@@ -478,4 +479,27 @@ TEST( InputRoutingTest, コンソールが受け取っているときはUIにも
 	EXPECT_EQ( InputOwner::CONSOLE, decide_input_owner( true, false ) );
 	EXPECT_EQ( InputOwner::OVERLAY, decide_input_owner( false, true ) );
 	EXPECT_EQ( InputOwner::BASE_SCENE, decide_input_owner( false, false ) );
+}
+
+TEST( KeyLatchTest, 1フレーム内に押して離したキーはそのフレームだけ押されたことにする )
+{
+	std::array< bool, 256 > now{}, prev{}, latched{};
+
+	// 'A' は押して離した（ポーリングでは押されていない）、'B' は押しっぱなし、'C' は前のフレームから押されている
+	latched[ 'A' ] = true;
+	latched[ 'B' ] = true;	now[ 'B' ] = true;
+	prev[ 'C' ] = true;		latched[ 'C' ] = true;
+
+	blue_sky::apply_latched_presses( now, prev, latched );
+
+	EXPECT_TRUE( now[ 'A' ] );		// 取りこぼさない
+	EXPECT_TRUE( now[ 'B' ] );
+	EXPECT_FALSE( now[ 'C' ] );		// 前のフレームから押されていたものは足さない（離したことになる）
+	EXPECT_FALSE( latched[ 'A' ] );	// 使ったら消す
+
+	// 次のフレーム : 溜めたものは消えているので、離したことになる
+	prev = now;
+	now = {};
+	blue_sky::apply_latched_presses( now, prev, latched );
+	EXPECT_FALSE( now[ 'A' ] );
 }

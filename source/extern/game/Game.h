@@ -30,6 +30,9 @@ public:
 	virtual void on_mouse_wheel( int ) = 0;
 	virtual void on_resize() = 0;
 
+	/// キーやマウスのボタンが押された（キーリピートは除く。ポーリングの取りこぼし対策）
+	virtual void on_raw_key_down( int /* vk */ ) { }
+
 	/// IME で変換中の文字が変わった（確定・取り消しで空）
 	virtual void on_ime_composition( const std::u32string& ) { }
 

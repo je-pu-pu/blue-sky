@@ -890,6 +890,11 @@ void GameMain::on_key_down( char_t c )
 	input_->push_char_byte( c );
 }
 
+void GameMain::on_raw_key_down( int vk )
+{
+	input_->latch_key_press( vk );
+}
+
 void GameMain::on_ime_composition( const std::u32string& text )
 {
 	input_->set_composition( text );

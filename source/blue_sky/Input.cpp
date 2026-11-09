@@ -11,6 +11,7 @@
 //**********************************************************
 
 #include "Input.h"
+#include "KeyLatch.h"
 #include "App.h"
 #include "KeyNames.h"
 #include <core/input/DirectInput/DirectInput.h>
@@ -277,6 +278,16 @@ void Input::update_raw_keys()
 		key_now_[ vk ] = foreground && ( GetAsyncKeyState( vk ) & 0x8000 ) != 0;
 	}
 
+	// 1 フレーム内に押して離した短いタップを取りこぼさない（前面でないときの押下は捨てる）
+	if ( foreground )
+	{
+		apply_latched_presses( key_now_, key_prev_, key_latched_ );
+	}
+	else
+	{
+		key_latched_.fill( false );
+	}
+
 	// 再アクティブになったフレーム（Alt+Tab で戻った直後など）は、押しっぱなしのキーを「押した瞬間」にしない
 	if ( foreground && ! was_foreground_ )
 	{
@@ -378,9 +389,11 @@ void Input::update_null()
  */
 void Input::update_state_by_key_for( uint_t button )
 {
+	// 生のキー状態（update_raw_keys で読んだもの。短いタップの取りこぼし対策を含む）から作る
+	// （以前は GetAsyncKeyState をもう一度読んでいて、ゲームの操作だけ短いタップを取りこぼしていた）
 	for ( int code : key_code_[ button ] )
 	{
-		if ( GetAsyncKeyState( code ) & 0x8000 )
+		if ( is_key_down( code ) )
 		{
 			state_[ button ] |= 1;
 		}
@@ -388,7 +401,7 @@ void Input::update_state_by_key_for( uint_t button )
 
 	for ( int code : fixed_key_code_[ button ] )
 	{
-		if ( GetAsyncKeyState( code ) & 0x8000 )
+		if ( is_key_down( code ) )
 		{
 			state_[ button ] |= 1;
 		}

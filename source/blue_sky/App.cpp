@@ -257,6 +257,11 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		const bool is_repeat = ( lp & ( 1 << 30 ) ) != 0;
 		const bool is_function_key = wp >= VK_F1 && wp <= VK_F24;
 
+		if ( App::get_instance()->game_ && ! is_repeat )
+		{
+			App::get_instance()->game_->on_raw_key_down( static_cast< int >( wp ) );
+		}
+
 		if ( App::get_instance()->game_ && ! ( is_repeat && is_function_key ) )
 		{
 			App::get_instance()->game_->on_special_key_down( static_cast< int >( wp ) );
@@ -264,8 +269,25 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 
 		break;
 	}
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	{
+		// 短いクリックを取りこぼさない（ボタンの状態は毎フレームのポーリングで読んでいるため）
+		if ( App::get_instance()->game_ )
+		{
+			App::get_instance()->game_->on_raw_key_down( msg == WM_LBUTTONDOWN ? VK_LBUTTON : msg == WM_RBUTTONDOWN ? VK_RBUTTON : VK_MBUTTON );
+		}
+
+		return DefWindowProc( hwnd, msg, wp, lp );
+	}
 	case WM_SYSKEYDOWN:
 	{
+		if ( App::get_instance()->game_ && ! ( lp & ( 1 << 30 ) ) )
+		{
+			App::get_instance()->game_->on_raw_key_down( static_cast< int >( wp ) );
+		}
+
 		// Alt+Enter : フルスクリーンの切り替え（DXGI の自動処理は止めてある）
 		if ( wp == VK_RETURN && ( lp & ( 1 << 29 ) ) && ! ( lp & ( 1 << 30 ) ) )
 		{

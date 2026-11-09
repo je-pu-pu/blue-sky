@@ -91,6 +91,7 @@ private:
 	// 生の入力状態（UI 用。ゲームのキー割り当てとは無関係）
 	std::array< bool, 256 > key_now_;						///< 仮想キーごとの今フレームの押下状態
 	std::array< bool, 256 > key_prev_;						///< 前フレームの押下状態
+	std::array< bool, 256 > key_latched_{};					///< ウィンドウメッセージで届いた押下（次の update で使って消す）
 	bool was_foreground_;									///< 前フレームでウィンドウがアクティブだったか
 	DWORD pad_buttons_now_;									///< パッドのボタン（ビット）
 	DWORD pad_buttons_prev_;
@@ -177,6 +178,9 @@ public:
 
 	/// ウィンドウメッセージ（WM_CHAR）の 1 バイトを受け取る。CP932 の 2 バイト文字は組み立ててから溜める
 	void push_char_byte( char_t byte );
+
+	/// キーやマウスのボタンが押された（WM_KEYDOWN / WM_LBUTTONDOWN など）。1 フレーム内に押して離しても取りこぼさない
+	void latch_key_press( int vk ) { if ( vk > 0 && vk < 256 ) key_latched_[ vk ] = true; }
 
 	/// 溜まった文字を取り出す（UI が 1 フレームに 1 回呼ぶ）
 	std::u32string take_text();

@@ -14,6 +14,8 @@
 #include <core/graphics/Direct3D11/PrimitiveTopology.h>
 #include <core/graphics/Direct3D11/TextureReadback.h>
 #include <core/graphics/Sprite.h>
+#include <core/AsyncLoader.h>
+#include <blue_sky/DebugLog.h>
 #include <core/graphics/Msdf/GlyphAtlas.h>
 #include <core/graphics/Direct3D11/Texture.h>
 #include <core/graphics/Direct3D11/RenderTargetTexture.h>
@@ -619,6 +621,67 @@ void GraphicsManager::queue_text( float_t left, float_t top, float_t right, floa
 	const float_t text_h = msdf_text_renderer_->measure_text_height( text, resolved.font_size );
 
 	msdf_text_renderer_->draw_text( align_x( left, right, text_w, resolved.h_align ), align_y( top, bottom, text_h, resolved.v_align ), text, resolved );
+}
+
+void GraphicsManager::start_texture_load_async( const string_t& file_path, std::function< void( Texture* ) > on_created )
+{
+	if ( ! async_loader_ )
+	{
+		async_loader_ = std::make_unique< core::AsyncLoader >();
+	}
+
+	using DecodedImage = core::graphics::direct_3d_11::Direct3D11::DecodedImage;
+
+	async_loader_->enqueue< std::shared_ptr< DecodedImage > >(
+		// 作業スレッド : ファイルの読み込みと展開（GPU に触れない）
+		[file_path] () -> std::shared_ptr< DecodedImage >
+		{
+			try
+			{
+				return std::make_shared< DecodedImage >( core::graphics::direct_3d_11::Direct3D11::decode_image_premultiplied( file_path.c_str() ) );
+			}
+			catch ( ... )
+			{
+				return nullptr;
+			}
+		},
+		// メインスレッド : テクスチャを作る
+		[this, file_path, on_created] ( std::shared_ptr< DecodedImage > image )
+		{
+			Texture* texture = nullptr;
+
+			if ( image )
+			{
+				try
+				{
+					texture = direct_3d_->create_texture_from_image( * image, file_path.c_str() );
+				}
+				catch ( ... )
+				{
+					texture = nullptr;
+				}
+			}
+
+			if ( ! texture )
+			{
+				debug_log( "[Graphics] 画像を別スレッドで読み込めませんでした: " + file_path );
+			}
+
+			on_created( texture );
+		} );
+}
+
+void GraphicsManager::dispatch_async_loads()
+{
+	if ( async_loader_ )
+	{
+		async_loader_->dispatch_completed();
+	}
+}
+
+size_t GraphicsManager::get_async_load_count() const
+{
+	return async_loader_ ? async_loader_->get_pending_count() : 0;
 }
 
 bool GraphicsManager::save_glyph_atlas( const wchar_t* file_name ) const

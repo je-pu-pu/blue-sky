@@ -724,6 +724,11 @@ Direct3D11::Texture* Direct3D11::load_texture( const char* file_path )
 
 Direct3D11::Texture* Direct3D11::load_texture_premultiplied( const char* file_path )
 {
+	return create_texture_from_image( decode_image_premultiplied( file_path ), file_path );
+}
+
+Direct3D11::DecodedImage Direct3D11::decode_image_premultiplied( const char* file_path )
+{
 	const std::wstring ws_file_name = common::convert_to_wstring( file_path );
 
 	const auto fail = [ file_path ] ( const char* step, HRESULT hr )
@@ -731,16 +736,10 @@ Direct3D11::Texture* Direct3D11::load_texture_premultiplied( const char* file_pa
 		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "UI texture load failed ( " ) + step + " : " + common::serialize( static_cast< unsigned long >( hr ) ) + " ). " + file_path );
 	};
 
-	// WIC のファクトリーは 1 つを使い回す（DirectXTK の WIC ローダーと同じく、COM はメインスレッドで使える前提）
-	// 解放はしない。static の ComPtr にすると、終了時に COM の終了処理の後で Release が走る恐れがあるため
-	static IWICImagingFactory* factory = nullptr;
-	HRESULT hr = S_OK;
-
-	if ( ! factory )
-	{
-		hr = CoCreateInstance( CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS( & factory ) );
-		if ( FAILED( hr ) ) { factory = nullptr; fail( "factory", hr ); }
-	}
+	// WIC のファクトリーは呼び出しごとに作る（作業スレッドからも呼べるように。以前はメインスレッド前提で使い回していた）
+	Microsoft::WRL::ComPtr< IWICImagingFactory > factory;
+	HRESULT hr = CoCreateInstance( CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS( factory.GetAddressOf() ) );
+	if ( FAILED( hr ) ) { fail( "factory", hr ); }
 
 	Microsoft::WRL::ComPtr< IWICBitmapDecoder > decoder;
 	hr = factory->CreateDecoderFromFilename( ws_file_name.c_str(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf() );
@@ -772,25 +771,39 @@ Direct3D11::Texture* Direct3D11::load_texture_premultiplied( const char* file_pa
 	hr = converter->Initialize( frame.Get(), GUID_WICPixelFormat32bppRGBA, WICBitmapDitherTypeNone, nullptr, 0.0, WICBitmapPaletteTypeCustom );
 	if ( FAILED( hr ) ) { fail( "convert", hr ); }
 
-	const UINT row_pitch = width * 4;
-	std::vector< uint8_t > pixels( static_cast< size_t >( row_pitch ) * height );
+	DecodedImage image;
+	image.width = width;
+	image.height = height;
 
-	hr = converter->CopyPixels( nullptr, row_pitch, static_cast< UINT >( pixels.size() ), pixels.data() );
+	const UINT row_pitch = width * 4;
+	image.pixels.resize( static_cast< size_t >( row_pitch ) * height );
+
+	hr = converter->CopyPixels( nullptr, row_pitch, static_cast< UINT >( image.pixels.size() ), image.pixels.data() );
 	if ( FAILED( hr ) ) { fail( "copy", hr ); }
 
-	for ( size_t i = 0; i < pixels.size(); i += 4 )
+	for ( size_t i = 0; i < image.pixels.size(); i += 4 )
 	{
-		const unsigned a = pixels[ i + 3 ];
+		const unsigned a = image.pixels[ i + 3 ];
 
 		for ( size_t c = 0; c < 3; c++ )
 		{
-			pixels[ i + c ] = static_cast< uint8_t >( ( pixels[ i + c ] * a + 127 ) / 255 );
+			image.pixels[ i + c ] = static_cast< uint8_t >( ( image.pixels[ i + c ] * a + 127 ) / 255 );
 		}
 	}
 
+	return image;
+}
+
+Direct3D11::Texture* Direct3D11::create_texture_from_image( const DecodedImage& image, const char* name_for_error )
+{
+	const auto fail = [ name_for_error ] ( const char* step, HRESULT hr )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "UI texture create failed ( " ) + step + " : " + common::serialize( static_cast< unsigned long >( hr ) ) + " ). " + ( name_for_error ? name_for_error : "" ) );
+	};
+
 	D3D11_TEXTURE2D_DESC desc = { };
-	desc.Width = width;
-	desc.Height = height;
+	desc.Width = image.width;
+	desc.Height = image.height;
 	desc.MipLevels = 1;
 	desc.ArraySize = 1;
 	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -799,11 +812,11 @@ Direct3D11::Texture* Direct3D11::load_texture_premultiplied( const char* file_pa
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
 	D3D11_SUBRESOURCE_DATA data = { };
-	data.pSysMem = pixels.data();
-	data.SysMemPitch = row_pitch;
+	data.pSysMem = image.pixels.data();
+	data.SysMemPitch = image.width * 4;
 
 	Microsoft::WRL::ComPtr< ID3D11Texture2D > texture;
-	hr = device_->CreateTexture2D( & desc, & data, texture.GetAddressOf() );
+	HRESULT hr = device_->CreateTexture2D( & desc, & data, texture.GetAddressOf() );
 	if ( FAILED( hr ) ) { fail( "texture", hr ); }
 
 	ID3D11ShaderResourceView* view = nullptr;

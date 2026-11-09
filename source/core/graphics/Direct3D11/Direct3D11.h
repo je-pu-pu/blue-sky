@@ -195,6 +195,25 @@ public:
 	 */
 	[[nodiscard]] Texture* load_texture_premultiplied( const char* );
 
+	/// 展開した画像（乗算済みアルファの RGBA8）
+	struct DecodedImage
+	{
+		unsigned int width = 0;
+		unsigned int height = 0;
+		std::vector< uint8_t > pixels;
+	};
+
+	/**
+	 * 画像ファイルを読み込み、乗算済みアルファの RGBA8 に展開する（失敗したら例外）
+	 *
+	 * GPU に触れないので、どのスレッドからでも呼べる（COM を初期化したスレッドであること）。
+	 * 別スレッドでの読み込み（AsyncLoader）では、これを作業スレッドで、create_texture_from_image をメインスレッドで呼ぶ。
+	 */
+	static DecodedImage decode_image_premultiplied( const char* file_path );
+
+	/// 展開した画像からテクスチャを作る（ミップなし・UNORM）
+	[[nodiscard]] Texture* create_texture_from_image( const DecodedImage& image, const char* name_for_error );
+
 	void bind_texture_to_ds( uint_t, const Texture* );
 	void bind_texture_to_ps( uint_t, const Texture* );
 

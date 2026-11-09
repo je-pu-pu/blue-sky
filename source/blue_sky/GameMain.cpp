@@ -499,6 +499,9 @@ bool GameMain::update()
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
+	// 別スレッドの読み込みが終わったものを、メインスレッドで処理する（テクスチャの作成など）
+	graphics_manager_->dispatch_async_loads();
+
 	// 入力を受け取る先を 1 か所で決める（コンソール → オーバーレイ → ベースシーン）。
 	// コンソールで打った文字やマウス操作で、UI やキャラクターが動かないように
 	const ImGuiIO& io = ImGui::GetIO();

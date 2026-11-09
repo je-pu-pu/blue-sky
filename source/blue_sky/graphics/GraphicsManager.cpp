@@ -270,6 +270,37 @@ GraphicsManager::Texture* GraphicsManager::load_named_texture( const char_t* nam
 	return t;
 }
 
+void GraphicsManager::load_named_texture_premultiplied_async( const char_t* name, const char_t* file_path, std::function< void( Texture* ) > on_loaded )
+{
+	if ( Texture* t = texture_manager_.get( name ) )
+	{
+		on_loaded( t );
+		return;
+	}
+
+	const string_t texture_name = name;
+
+	start_texture_load_async( file_path, [this, texture_name, on_loaded] ( Texture* created )
+	{
+		if ( ! created )
+		{
+			on_loaded( nullptr );
+			return;
+		}
+
+		// 読み込んでいる間に、同じ名前が同期の読み込みで登録されていたら、そちらを使う（作ったものは所有だけする）
+		if ( Texture* existing = texture_manager_.get( texture_name ) )
+		{
+			texture_manager_.add( created );
+			on_loaded( existing );
+			return;
+		}
+
+		texture_manager_.add_named( texture_name, created );
+		on_loaded( created );
+	} );
+}
+
 GraphicsManager::Texture* GraphicsManager::load_named_texture_premultiplied( const char_t* name, const char_t* file_path )
 {
 	if ( Texture* t = texture_manager_.get( name ) )

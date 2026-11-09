@@ -120,6 +120,13 @@ protected:
 	[[nodiscard]] virtual Texture* load_texture_file( const char_t* ) const = 0;
 	[[nodiscard]] virtual Texture* load_texture_file_premultiplied( const char_t* ) const = 0;
 
+	/**
+	 * 画像ファイルを別スレッドで展開し、メインスレッドでテクスチャを作って on_created を呼ぶ（失敗したら nullptr）
+	 *
+	 * 実装（D3D11）は AsyncLoader を使う。on_created は dispatch_async_loads の中で呼ばれる。
+	 */
+	virtual void start_texture_load_async( const string_t& file_path, std::function< void( Texture* ) > on_created ) = 0;
+
 	void update_constant_buffers() const;
 
 	void render_shadow_map( const BaseShadowMapShader* , bool ) const;
@@ -183,6 +190,20 @@ public:
 
 	/// UI 用の画像を名前付きで読み込む（乗算済みアルファ・ミップなし。詳細は Direct3D11::load_texture_premultiplied）。失敗すると例外
 	Texture* load_named_texture_premultiplied( const char_t* name, const char_t* file_name );
+
+	/**
+	 * load_named_texture_premultiplied の別スレッド版（設計上の問題 B23）
+	 *
+	 * 画像の展開は作業スレッドで行い、テクスチャの作成・登録と on_loaded の呼び出しはメインスレッド
+	 * （毎フレームの dispatch_async_loads の中）で行う。読み込み済みならすぐ on_loaded を呼ぶ。失敗したら nullptr を渡す。
+	 */
+	void load_named_texture_premultiplied_async( const char_t* name, const char_t* file_name, std::function< void( Texture* ) > on_loaded );
+
+	/// 別スレッドの読み込みが終わったものを処理する（GameMain が毎フレーム呼ぶ）
+	virtual void dispatch_async_loads() = 0;
+
+	/// 別スレッドの読み込みで、まだ終わっていないものの数
+	virtual size_t get_async_load_count() const = 0;
 	Texture* get_null_texture() { return null_texture_; }
 
 	void setup_default_shaders();

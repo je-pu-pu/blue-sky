@@ -18,6 +18,9 @@
     <ClCompile Include="test\ui\UIWidgetTest.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="test\ui\AsyncLoaderTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
     <ClCompile Include="test\ui\UILayoutTest.cpp">
       <Filter>ui</Filter>
     </ClCompile>

@@ -6,6 +6,11 @@
 
 #include <memory>
 
+namespace core
+{
+	class AsyncLoader;
+}
+
 namespace core::graphics
 {
 	class MsdfTextRenderer;
@@ -46,6 +51,7 @@ private:
 	
 	std::unique_ptr< Axis >							debug_axis_;
 	std::unique_ptr< core::graphics::MsdfTextRenderer >	msdf_text_renderer_;
+	std::unique_ptr< core::AsyncLoader >				async_loader_;		///< 別スレッドの読み込み
 	float_t											default_font_size_ = 64.f;
 
 	std::unique_ptr< GameConstantBuffer >			game_render_data_;
@@ -147,6 +153,10 @@ public:
 	void queue_text( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const override;
 	void flush_text() const override;
 	bool save_glyph_atlas( const wchar_t* file_name ) const override;
+
+	void start_texture_load_async( const string_t& file_path, std::function< void( Texture* ) > on_created ) override;
+	void dispatch_async_loads() override;
+	size_t get_async_load_count() const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;
 
 	float_t measure_text_width( const char_t*, float_t ) const override;

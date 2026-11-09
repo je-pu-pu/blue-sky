@@ -1,165 +1,135 @@
 #include "Slider.h"
-#include <core/ui/Renderer.h>
+#include "Renderer.h"
+#include "Screen.h"
+#include "Theme.h"
 
-#include <core/input/InputManager.h>
-
-#include <sstream>
+#include <algorithm>
+#include <cmath>
 #include <iomanip>
+#include <sstream>
 
 namespace core::ui
 {
 
-float_t Slider::get_ratio() const
+void Slider::arrange( const Rect& rect, const UIContext& ctx )
 {
-	if ( max_ <= min_ ) return 0.f;
+	LabeledRow::arrange( rect, ctx );
 
-	float_t r = ( value_ - min_ ) / ( max_ - min_ );
-	if ( r < 0.f ) r = 0.f;
-	if ( r > 1.f ) r = 1.f;
-	return r;
+	// 値エリアの左 75% が溝、右 25% が数値
+	const float_t track_w = value_rect_.w * 0.75f;
+	track_rect_ = Rect( value_rect_.x, value_rect_.y + value_rect_.h * 0.3f, track_w, value_rect_.h * 0.4f );
+	text_rect_ = Rect( value_rect_.x + track_w, value_rect_.y, value_rect_.w - track_w, value_rect_.h );
 }
 
-void Slider::clamp_value()
+void Slider::set_value( float_t v, UIContext& ctx )
 {
-	if ( value_ < min_ ) value_ = min_;
-	if ( value_ > max_ ) value_ = max_;
-}
-
-void Slider::set_value_from_mouse( float_t mouse_vx )
-{
-	float_t track_x = x_ + width_ * LABEL_RATIO;
-	float_t track_w = width_ * TRACK_RATIO;
-
-	float_t ratio = ( mouse_vx - track_x ) / track_w;
-	if ( ratio < 0.f ) ratio = 0.f;
-	if ( ratio > 1.f ) ratio = 1.f;
-
-	float_t new_value = min_ + ratio * ( max_ - min_ );
-
-	// ステップにスナップ
-	if ( step_ > 0.f )
+	if ( ! setter_ || ! is_enabled() )
 	{
-		new_value = min_ + static_cast< float_t >( static_cast< int >( ( new_value - min_ ) / step_ + 0.5f ) ) * step_;
-	}
-
-	clamp_value();
-
-	if ( new_value != value_ )
-	{
-		value_ = new_value;
-		clamp_value();
-
-		if ( on_change_ )
-		{
-			on_change_( value_ );
-		}
-	}
-}
-
-string_t Slider::format_value() const
-{
-	if ( formatter_ )
-	{
-		return formatter_( value_ );
-	}
-
-	// デフォルト: 小数第1位まで
-	std::stringstream ss;
-	ss << std::fixed << std::setprecision( 1 ) << value_;
-	return ss.str();
-}
-
-void Slider::update( core::input::InputManager* input, Renderer& renderer )
-{
-	if ( ! focused_ )
-	{
-		state_ = WidgetState::NORMAL;
-		dragging_ = false;
 		return;
 	}
 
-	state_ = WidgetState::FOCUSED;
+	v = std::clamp( v, min_, max_ );
 
-	// キーボード : 左右キーでステップ調整
-	if ( input->push( core::input::Button::LEFT ) )
+	if ( std::abs( v - get_value() ) < ( step_ > 0.f ? step_ * 0.5f : 1e-6f ) )
 	{
-		value_ -= step_;
-		clamp_value();
-
-		if ( on_change_ ) on_change_( value_ );
+		return;
 	}
 
-	if ( input->push( core::input::Button::RIGHT ) )
-	{
-		value_ += step_;
-		clamp_value();
-
-		if ( on_change_ ) on_change_( value_ );
-	}
-
-	// マウス : トラック領域のクリック/ドラッグ
-	float_t mx = renderer.physical_to_virtual_x( static_cast< float_t >( input->get_mouse_x() ) );
-
-	if ( input->push( core::input::Button::A ) )
-	{
-		float_t track_x = x_ + width_ * LABEL_RATIO;
-		float_t track_w = width_ * TRACK_RATIO;
-
-		if ( mx >= track_x && mx <= track_x + track_w )
-		{
-			dragging_ = true;
-			set_value_from_mouse( mx );
-		}
-	}
-
-	if ( dragging_ )
-	{
-		if ( input->press( core::input::Button::A ) )
-		{
-			set_value_from_mouse( mx );
-			state_ = WidgetState::PRESSED;
-		}
-		else
-		{
-			dragging_ = false;
-		}
-	}
+	setter_( v );
+	ctx.screen.play( UISoundEvent::CHANGE );
 }
 
-void Slider::render( Renderer& renderer )
+float_t Slider::value_from_x( float_t x ) const
 {
-	const Color& lbl_color = focused_ ? label_focused_color_ : label_color_;
+	if ( track_rect_.w <= 0.f || max_ <= min_ )
+	{
+		return min_;
+	}
 
-	float_t label_x = x_;
-	float_t label_w = width_ * LABEL_RATIO;
+	const float_t ratio = std::clamp( ( x - track_rect_.x ) / track_rect_.w, 0.f, 1.f );
+	float_t v = min_ + ratio * ( max_ - min_ );
 
-	float_t track_x = x_ + label_w;
-	float_t track_w = width_ * TRACK_RATIO;
+	if ( step_ > 0.f )
+	{
+		v = min_ + std::round( ( v - min_ ) / step_ ) * step_;
+	}
 
-	float_t value_x = track_x + track_w;
-	float_t value_w = width_ * VALUE_RATIO;
+	return std::clamp( v, min_, max_ );
+}
 
-	// ラベル（左寄せ・垂直中央）
-	core::graphics::TextStyle label_style;
-	label_style.text_color = lbl_color;
-	label_style.v_align = core::graphics::VAlign::CENTER;
-	renderer.draw_text( label_x, y_, label_w, height_, label_.c_str(), label_style );
+bool Slider::on_nav( NavDir dir, UIContext& ctx )
+{
+	if ( dir == NavDir::LEFT )
+	{
+		set_value( get_value() - step_, ctx );
+		return true;
+	}
 
-	// トラック背景
-	float_t pad = height_ * TRACK_PADDING_Y;
-	renderer.draw_rect( track_x, y_ + pad, track_w, height_ - pad * 2.f, track_bg_color_ );
+	if ( dir == NavDir::RIGHT )
+	{
+		set_value( get_value() + step_, ctx );
+		return true;
+	}
 
-	// トラック充填
-	float_t ratio = get_ratio();
-	const Color& fill_color = focused_ ? track_fill_focused_ : track_fill_color_;
-	renderer.draw_rect( track_x, y_ + pad, track_w * ratio, height_ - pad * 2.f, fill_color );
+	return false;
+}
 
-	// 値表示（水平中央・垂直中央）
-	core::graphics::TextStyle value_style;
-	value_style.text_color = value_color_;
-	value_style.h_align = core::graphics::HAlign::CENTER;
-	value_style.v_align = core::graphics::VAlign::CENTER;
-	renderer.draw_text( value_x, y_, value_w, height_, format_value().c_str(), value_style );
+bool Slider::on_pointer( const PointerEvent& e, UIContext& ctx )
+{
+	switch ( e.type )
+	{
+		case PointerEvent::Type::PRESS:
+			// 溝（上下に少し余裕を持たせる）の上で押したときだけドラッグを始める
+			if ( Rect( track_rect_.x, rect_.y, track_rect_.w, rect_.h ).contains( e.x, e.y ) )
+			{
+				dragging_ = true;
+				set_value( value_from_x( e.x ), ctx );
+			}
+			return true;
+
+		case PointerEvent::Type::DRAG:
+			if ( dragging_ )
+			{
+				set_value( value_from_x( e.x ), ctx );
+			}
+			return true;
+
+		case PointerEvent::Type::RELEASE:
+			dragging_ = false;
+			return true;
+	}
+
+	return false;
+}
+
+string_t Slider::format_value( float_t v ) const
+{
+	if ( formatter_ )
+	{
+		return formatter_( v );
+	}
+
+	std::ostringstream ss;
+	ss << std::fixed << std::setprecision( 1 ) << v;
+	return ss.str();
+}
+
+void Slider::render( Renderer& renderer, const UIContext& ctx ) const
+{
+	render_row( renderer, ctx );
+
+	const auto& t = ctx.theme;
+	const float_t v = get_value();
+	const float_t ratio = max_ > min_ ? std::clamp( ( v - min_ ) / ( max_ - min_ ), 0.f, 1.f ) : 0.f;
+
+	renderer.draw_rect( track_rect_, t.track );
+	renderer.draw_rect( Rect( track_rect_.x, track_rect_.y, track_rect_.w * ratio, track_rect_.h ), is_enabled() ? t.accent : t.text_disabled );
+	renderer.draw_text( text_rect_, format_value( v ).c_str(), make_text_style( value_color( ctx ), t.font_size_normal, core::graphics::HAlign::CENTER ) );
+}
+
+void Slider::collect_hints( std::vector< Hint >& hints ) const
+{
+	hints.push_back( Hint{ HintAction::CHANGE, "hint.adjust" } );
 }
 
 } // namespace core::ui

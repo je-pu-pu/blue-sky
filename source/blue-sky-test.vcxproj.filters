@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="ui">
+      <UniqueIdentifier>{71836842-e573-4126-8e5f-fbf78c578195}</UniqueIdentifier>
+    </Filter>
     <Filter Include="math">
       <UniqueIdentifier>{a1b2c3d4-1111-2222-3333-444455556666}</UniqueIdentifier>
     </Filter>
@@ -12,6 +15,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test\ui\UIWidgetTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\UIScreenTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\SettingStoreTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\KeyNamesTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\NavRepeaterTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\StringTableTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
     <ClCompile Include="test\math\BulletTest.cpp">
       <Filter>math</Filter>
     </ClCompile>
@@ -28,6 +49,9 @@
     <ClCompile Include="test\pch.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="test\ui\UITestHelper.h">
+      <Filter>ui</Filter>
+    </ClInclude>
     <ClInclude Include="test\pch.h" />
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Widget.h"
+#include <core/ui/Widget.h>
 
 #include <functional>
 
@@ -8,41 +8,37 @@ namespace core::ui
 {
 
 /**
- * ボタンウィジェット
+ * ボタン
  *
- * 背景矩形 + テキストで構成される。
- * WidgetState に応じて背景色が 3 段階変化する。
+ * 決定（Enter / パッド A）か、部品の上で押して部品の上で離したクリックで on_click を呼ぶ。
+ * 部品の外のクリックには反応しない。
  */
 class Button : public Widget
 {
 private:
-	string_t text_;
+	string_t text_key_;
 	std::function< void() > on_click_;
+	bool pressed_ = false;
 
-	Color color_normal_   = Color( 0.15f, 0.15f, 0.2f, 0.9f );
-	Color color_focused_  = Color( 0.25f, 0.25f, 0.35f, 0.9f );
-	Color color_pressed_  = Color( 0.4f, 0.4f, 0.55f, 0.9f );
-	Color text_color_     = Color( 1.f, 1.f, 1.f, 1.f );
+	void click( UIContext& ctx );
 
 public:
-	Button() { set_hint_text( "Enter/Click Select    ESC Back" ); }
+	Button( const string_t& text_key, std::function< void() > on_click )
+		: text_key_( text_key ), on_click_( std::move( on_click ) ) { }
 
-	void set_text( const string_t& text ) { text_ = text; }
-	const string_t& get_text() const { return text_; }
+	void set_text( const string_t& key ) { text_key_ = key; }
+	const string_t& get_text() const { return text_key_; }
+	void set_on_click( std::function< void() > f ) { on_click_ = std::move( f ); }
 
-	void set_on_click( std::function< void() > callback ) { on_click_ = callback; }
+	bool is_focusable_type() const override { return true; }
 
-	void set_colors( const Color& normal, const Color& focused, const Color& pressed )
-	{
-		color_normal_ = normal;
-		color_focused_ = focused;
-		color_pressed_ = pressed;
-	}
+	float_t measure_height( float_t width, const UIContext& ctx ) const override;
 
-	void set_text_color( const Color& c ) { text_color_ = c; }
+	bool on_confirm( UIContext& ctx ) override;
+	bool on_pointer( const PointerEvent& e, UIContext& ctx ) override;
 
-	void update( core::input::InputManager* input, Renderer& renderer ) override;
-	void render( Renderer& renderer ) override;
+	void render( Renderer& renderer, const UIContext& ctx ) const override;
+	void collect_hints( std::vector< Hint >& hints ) const override;
 
 }; // class Button
 

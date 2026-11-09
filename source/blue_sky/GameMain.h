@@ -41,6 +41,17 @@ namespace core
 		class Direct3D11;
 		class BulletDebugDraw;
 	}
+
+	namespace setting
+	{
+		class SettingStore;
+	}
+
+	namespace ui
+	{
+		class StringTable;
+		struct Theme;
+	}
 }
 
 namespace blue_sky
@@ -145,7 +156,15 @@ private:
 
 	bool									is_show_cursor_;		///< 現在カーソルを表示するかどうか
 
+	std::unique_ptr< core::setting::SettingStore >	settings_;		///< ゲーム設定（オプション画面が編集する）
+	std::unique_ptr< core::ui::StringTable >		ui_strings_;	///< UI の表示文字列
+	std::unique_ptr< core::ui::Theme >				ui_theme_;		///< UI の見た目
+	bool											is_display_change_requested_ = false;	///< 解像度・フルスクリーンの変更をフレーム末に行う
+	string_t										pending_start_overlay_;			///< 開発用 : 起動時に開くオーバーレイ（debug.start_overlay）
+	int												start_overlay_wait_frames_ = 0;
+
 	void setup_script_command();
+	void apply_display_settings();
 
 	void update_render_data_for_game() const;
 
@@ -200,6 +219,14 @@ public:
 	void set_stage_name( const std::string& stage_name ) { stage_name_ = stage_name; }
 
 	bool is_display_fps() const { return is_display_fps_; }
+	void set_display_fps( bool f ) { is_display_fps_ = f; }
+
+	core::setting::SettingStore* get_settings() const { return settings_.get(); }
+	const core::ui::StringTable& get_ui_strings() const { return *ui_strings_; }
+	const core::ui::Theme& get_ui_theme() const { return *ui_theme_; }
+
+	/// 解像度・フルスクリーンの変更を予約する（UI のコールバック中にウィンドウを変えないよう、update の最後に行う）
+	void request_display_change() { is_display_change_requested_ = true; }
 
 	inline static GameMain* get_instance() { static GameMain game_main; return & game_main; }
 	const Scene* get_current_scene() const { return scene_.get(); }

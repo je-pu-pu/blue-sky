@@ -284,6 +284,21 @@ public:
 	virtual float_t get_text_height( const char_t* text, float_t width, float_t height ) const = 0;
 	virtual float_t get_text_height( const wchar_t* text, float_t width, float_t height ) const = 0;
 
+	/**
+	 * テキストの描画幅を測る（ピクセル）
+	 *
+	 * @param text 文字列（UTF-8）。最初の改行までを測る
+	 * @param font_size フォントサイズ（ピクセル）。0 以下ならデフォルトサイズ
+	 * @return 描画幅。フォント未準備なら 0
+	 */
+	virtual float_t measure_text_width( const char_t* text, float_t font_size ) const = 0;
+
+	/// テキストの 1 行の高さ（ピクセル）。font_size が 0 以下ならデフォルトサイズ
+	virtual float_t measure_text_line_height( float_t font_size ) const = 0;
+
+	/// TextStyle::font_size が 0 のときに使われるフォントサイズ（ピクセル）
+	virtual float_t get_default_font_size() const = 0;
+
 	void set_debug_axis_enabled( bool e ) { is_debug_axis_enabled_ = e; }
 
 	void render_debug_axis( const ActiveObjectManager* ) const;

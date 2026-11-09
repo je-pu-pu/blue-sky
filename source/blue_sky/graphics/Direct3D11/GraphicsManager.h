@@ -147,6 +147,10 @@ public:
 	void draw_text( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;
 
+	float_t measure_text_width( const char_t*, float_t ) const override;
+	float_t measure_text_line_height( float_t ) const override;
+	float_t get_default_font_size() const override { return default_font_size_; }
+
 	float_t get_text_height( const char_t* text, float_t width, float_t height ) const override;
 	float_t get_text_height( const wchar_t* text, float_t width, float_t height ) const override;
 

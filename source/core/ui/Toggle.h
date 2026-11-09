@@ -1,0 +1,43 @@
+#pragma once
+
+#include <core/ui/LabeledRow.h>
+
+#include <functional>
+
+namespace core::ui
+{
+
+/**
+ * オン／オフの切替
+ *
+ * 決定・左右・行のクリックで反転する。値は getter / setter で外部（設定ストア等）と結びつく。
+ */
+class Toggle : public LabeledRow
+{
+public:
+	using Getter = std::function< bool() >;
+	using Setter = std::function< void( bool ) >;
+
+private:
+	Getter getter_;
+	Setter setter_;
+	bool pressed_ = false;
+
+	void flip( UIContext& ctx );
+
+public:
+	Toggle( const string_t& label_key, Getter getter, Setter setter )
+		: LabeledRow( label_key ), getter_( std::move( getter ) ), setter_( std::move( setter ) ) { }
+
+	bool get_value() const { return getter_ ? getter_() : false; }
+
+	bool on_confirm( UIContext& ctx ) override;
+	bool on_nav( NavDir dir, UIContext& ctx ) override;
+	bool on_pointer( const PointerEvent& e, UIContext& ctx ) override;
+
+	void render( Renderer& renderer, const UIContext& ctx ) const override;
+	void collect_hints( std::vector< Hint >& hints ) const override;
+
+}; // class Toggle
+
+} // namespace core::ui

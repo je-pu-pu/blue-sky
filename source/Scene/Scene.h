@@ -132,6 +132,9 @@ public:
 	/// オーバーレイシーンの場合、下のシーンを描画するかどうか
 	virtual bool is_transparent() const { return false; }
 
+	/// オーバーレイシーンが再び最前面に戻ったとき（上に積んだオーバーレイが閉じたとき）に呼ばれる
+	virtual void on_resume() { }
+
 	/// ポーズ状態にする
 	void set_paused( bool paused ) { is_paused_ = paused; }
 	bool is_paused() const { return is_paused_; }

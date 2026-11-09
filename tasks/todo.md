@@ -6,6 +6,24 @@
 2. 完了したら `[x]` にする
 3. セクションが全て完了したら、セクションごと削除してよい
 
+## UI ライブラリ（オプション画面の基盤）  ブランチ: feature/ui-library（develop から）
+
+設計書: `doc/UIライブラリ設計.md`（第 3 版。サブエージェントの厳格レビュー 2 回を反映）
+
+- [x] 現状調査・問題点の洗い出し（A1〜A9 / B1〜B11）・要件・設計
+- [x] 設計レビュー 2 回（指摘 25 件＋再レビュー 12 件）を設計書に反映
+- [x] core::setting::SettingStore（保留／確定／既定、IMMEDIATE / DEFERRED、グループ反映、snapshot/rollback、入れ替えフック、Config 入出力）
+- [x] core::ui 基盤: UIInput / NavRepeater / Theme / StringTable / Renderer（計測・fill_screen）/ Widget / Screen（層・post・入力抑止・階層ナビ・クリップを考慮したヒット判定・フォーカス修復・ヒント）
+- [x] 部品: Stack / Label（折り返し）/ Button / Toggle / Slider / Choice / KeyBind / ScrollView / TabView / Dialog / Panel
+- [x] blue_sky 側: Renderer（等方スケール）/ UIInputBuilder / Input の生キー API・キー割り当て API / KeyNames / GameSettings / UIOverlayScene
+- [x] OptionsScene（3 タブ・適用／既定値／戻る・解像度の確認とロールバック）/ PauseMenuScene 置換、旧 VerticalMenu / WidgetContainer / SelectBox 削除
+- [x] GameMain: オーバーレイを積む（push:）・ESC を UI に任せる・表示変更をフレーム末に・F2/F5/Alt+Enter の同期・終了時の保存をストア経由に
+- [x] テスト 75 件追加（62 → 137 件。136 成功、失敗 1 件は作業前から失敗していた NeuralNprTest.DmlInferenceSmoke）
+- [x] 実機確認（2026-11-08）: ポーズ→オプション→戻るでポーズへ／タブ／スクロール／キー割り当ての入れ替え／解像度の適用→15 秒でロールバック
+- [ ] 実機確認の残り: パッド操作、フルスクリーン切替（排他フルスクリーン中の解像度変更）、16:10・ウルトラワイドでの表示
+- [ ] 後続（設計書 2.2）: XInput、パッドのボタンアイコン、Alt+Enter の抑止（MakeWindowAssociation）、ResizeTarget、ハードウェアシザー、MSDF グリフキャッシュの O(1) 化、キー待ち中のホットキー抑止、HUD への適用
+- [ ] 既存の不具合（UI 作業とは無関係・未修正）: タイトルシーンがモデル `je-pu-pu` / `blue-sky` 不在で Model::render がヌル参照して落ちる（元のチェックアウトでも同じファイルが無い）
+
 ## 敵AI（システミック）縦スライス  ブランチ: feature/enemy-ai-perception
 
 設計は `doc/システム階層スタック.md` / `doc/動詞とゲームシステム.md`。S2 知覚 + S3 警戒状態機械 + パトロールの最小実装。

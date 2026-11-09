@@ -2,6 +2,8 @@
 #include "StageSelectScene.h"
 
 #include <blue_sky/GameMain.h>
+#include <blue_sky/GameSettings.h>
+#include <core/setting/SettingStore.h>
 
 /// @todo ActiveObjectManager へ移動
 #include <GameObject/Player.h>
@@ -85,7 +87,8 @@ GamePlayScene::GamePlayScene()
 	get_active_object_manager()->name_active_object( "goal", goal_ );
 
 	// Camera
-	camera_->set_fov_default( get_config()->get( "camera.fov", 90.f ) );
+	camera_->set_fov_default( GameMain::get_instance()->get_settings()->get< float_t >( game_settings::CAMERA_FOV ) );
+	settings_change_count_ = GameMain::get_instance()->get_settings()->get_change_count();
 	camera_->reset_fov();
 	camera_->set_aspect( static_cast< float >( get_width() ) / static_cast< float >( get_height() ) );
 
@@ -253,6 +256,13 @@ void GamePlayScene::load_sound_all( bool is_final_stage )
 void GamePlayScene::update()
 {
 	Scene::update();
+
+	// オプション画面で設定が変わっていたら、カメラの FOV を反映する（ズーム倍率は保つ）
+	if ( auto* settings = GameMain::get_instance()->get_settings(); settings && settings->get_change_count() != settings_change_count_ )
+	{
+		settings_change_count_ = settings->get_change_count();
+		camera_->change_fov_default_keep_zoom( settings->get< float_t >( game_settings::CAMERA_FOV ) );
+	}
 
 	if ( is_blackout_ )
 	{

@@ -637,6 +637,26 @@ float_t GraphicsManager::get_text_height( const wchar_t* text, float_t, float_t 
 	return 0.f;
 }
 
+float_t GraphicsManager::measure_text_width( const char_t* text, float_t font_size ) const
+{
+	if ( ! text || ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
+	{
+		return 0.f;
+	}
+
+	return msdf_text_renderer_->measure_text_width( text, font_size > 0.f ? font_size : default_font_size_ );
+}
+
+float_t GraphicsManager::measure_text_line_height( float_t font_size ) const
+{
+	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
+	{
+		return 0.f;
+	}
+
+	return msdf_text_renderer_->measure_text_height( "", font_size > 0.f ? font_size : default_font_size_ );
+}
+
 /**
  * 画面の中央に文字列を描画する
  *

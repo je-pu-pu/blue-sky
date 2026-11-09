@@ -1,232 +1,306 @@
 #include "OptionsScene.h"
 
 #include <blue_sky/GameMain.h>
-#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/GameSettings.h>
 #include <blue_sky/Input.h>
-#include <blue_sky/App.h>
+#include <blue_sky/KeyNames.h>
+#include <blue_sky/graphics/GraphicsManager.h>
 
-#include <core/sound/SoundManager.h>
-#include <core/graphics/TextStyle.h>
+#include <core/setting/SettingStore.h>
+#include <core/ui/Button.h>
+#include <core/ui/Choice.h>
+#include <core/ui/KeyBind.h>
+#include <core/ui/Label.h>
+#include <core/ui/Panel.h>
+#include <core/ui/ScrollView.h>
+#include <core/ui/Slider.h>
+#include <core/ui/Stack.h>
+#include <core/ui/StringTable.h>
+#include <core/ui/TabView.h>
+#include <core/ui/Toggle.h>
 
 #include <game/Config.h>
 
-#include <sstream>
-#include <iomanip>
+#include <algorithm>
+#include <cmath>
 
 namespace blue_sky
 {
 
+namespace gs = game_settings;
+using namespace core::ui;
+using core::setting::SettingStore;
+
+namespace
+{
+
+/// 縦の Stack を ScrollView に入れたページを作る
+Stack* add_scroll_page( TabView* tabs, const char_t* title_key )
+{
+	auto* scroll = tabs->add_page< ScrollView >( title_key );
+	return scroll->add< Stack >( Axis::VERTICAL );
+}
+
+/// 0..1 を「50%」の形に
+string_t format_percent( float_t v )
+{
+	return std::to_string( static_cast< int >( std::lround( v * 100.f ) ) ) + "%";
+}
+
+string_t format_int( float_t v )
+{
+	return std::to_string( static_cast< int >( std::lround( v ) ) );
+}
+
+string_t format_one_decimal( float_t v )
+{
+	const int tenth = static_cast< int >( std::lround( v * 10.f ) );
+	return std::to_string( tenth / 10 ) + "." + std::to_string( std::abs( tenth % 10 ) );
+}
+
+} // namespace
+
 OptionsScene::OptionsScene()
-	: ui_renderer_( get_graphics_manager() )
-	, resolutions_( get_graphics_manager()->get_available_display_modes() )
-	, is_mute_( get_sound_manager()->is_mute() )
-	, is_fullscreen_( get_graphics_manager()->is_full_screen() )
 {
-	setup_widgets();
-}
-
-OptionsScene::~OptionsScene()
-{
-	save_settings();
-}
-
-int OptionsScene::find_current_resolution() const
-{
-	int w = GameMain::get_app()->get_width();
-	int h = GameMain::get_app()->get_height();
-
-	for ( int i = 0; i < static_cast< int >( resolutions_.size() ); i++ )
+	// 解像度の選択肢（DXGI の一覧から重複を除く）
+	for ( const auto& m : get_graphics_manager()->get_available_display_modes() )
 	{
-		if ( resolutions_[ i ].width == w && resolutions_[ i ].height == h )
+		if ( find_resolution_index( m.width, m.height ) < 0 )
 		{
-			return i;
+			resolutions_.push_back( Resolution{ m.width, m.height } );
 		}
 	}
 
-	return 0;
+	auto panel = std::make_unique< Panel >( "options.title" );
+	auto* body = panel->add< Stack >( Axis::VERTICAL );
+	body->set_spacing( 24.f );
+
+	auto* tabs = body->add< TabView >();
+	build_graphics_page( add_scroll_page( tabs, "options.tab.graphics" ) );
+	build_audio_page( add_scroll_page( tabs, "options.tab.audio" ) );
+	build_controls_page( add_scroll_page( tabs, "options.tab.controls" ) );
+	body->set_flex( tabs );
+
+	// 下のボタン行
+	auto* buttons = body->add< Stack >( Axis::HORIZONTAL );
+	SettingStore* store = & get_settings();
+
+	auto* apply_button = buttons->add< Button >( "options.apply", [this] { apply( false ); } );
+	apply_button->set_enabled_if( [store] { return store->has_pending_deferred(); } );
+	apply_button->set_description_key( "options.apply.description" );
+
+	auto* defaults_button = buttons->add< Button >( "options.defaults", [this] { reset_to_defaults(); } );
+	defaults_button->set_description_key( "options.defaults.description" );
+
+	buttons->add< Button >( "options.back", [this] { back(); } );
+
+	screen_.set_root( std::move( panel ), [this] { back(); } );
 }
 
-void OptionsScene::apply_resolution( int index )
+int OptionsScene::find_resolution_index( int w, int h ) const
 {
-	if ( index >= 0 && index < static_cast< int >( resolutions_.size() ) )
+	for ( size_t i = 0; i < resolutions_.size(); i++ )
 	{
-		const auto& res = resolutions_[ index ];
-		GameMain::get_app()->set_size( res.width, res.height );
+		if ( resolutions_[ i ].width == w && resolutions_[ i ].height == h )
+		{
+			return static_cast< int >( i );
+		}
+	}
+
+	return -1;
+}
+
+void OptionsScene::build_graphics_page( Stack* page )
+{
+	SettingStore* store = & get_settings();
+
+	std::vector< string_t > options;
+
+	for ( const auto& r : resolutions_ )
+	{
+		options.push_back( std::to_string( r.width ) + " x " + std::to_string( r.height ) );
+	}
+
+	auto* resolution = page->add< Choice >( "options.resolution", options,
+		[this, store] { return find_resolution_index( store->get< int >( gs::SCREEN_WIDTH ), store->get< int >( gs::SCREEN_HEIGHT ) ); },
+		[this, store] ( int i )
+		{
+			store->set( gs::SCREEN_WIDTH, resolutions_[ i ].width );
+			store->set( gs::SCREEN_HEIGHT, resolutions_[ i ].height );
+		} );
+
+	// 現在の解像度が一覧に無いときの表示（勝手に一覧の値へ書き換えない）
+	resolution->set_custom_text( [store]
+	{
+		const auto& strings = GameMain::get_instance()->get_ui_strings();
+		return strings.format( "options.resolution.custom", { std::to_string( store->get< int >( gs::SCREEN_WIDTH ) ) + " x " + std::to_string( store->get< int >( gs::SCREEN_HEIGHT ) ) } );
+	} );
+	resolution->set_description_key( "options.resolution.description" );
+
+	page->add< Toggle >( "options.full_screen",
+		[store] { return store->get< bool >( gs::FULL_SCREEN ); },
+		[store] ( bool v ) { store->set( gs::FULL_SCREEN, v ); } )
+		->set_description_key( "options.full_screen.description" );
+
+	auto* fov = page->add< Slider >( "options.fov",
+		[store] { return store->get< float_t >( gs::CAMERA_FOV ); },
+		[store] ( float_t v ) { store->set( gs::CAMERA_FOV, v ); },
+		50.f, 120.f, 1.f );
+	fov->set_formatter( & format_int );
+	fov->set_description_key( "options.fov.description" );
+
+	page->add< Toggle >( "options.display_fps",
+		[store] { return store->get< bool >( gs::DISPLAY_FPS ); },
+		[store] ( bool v ) { store->set( gs::DISPLAY_FPS, v ); } )
+		->set_description_key( "options.display_fps.description" );
+}
+
+void OptionsScene::build_audio_page( Stack* page )
+{
+	SettingStore* store = & get_settings();
+
+	auto* volume = page->add< Slider >( "options.volume",
+		[store] { return store->get< float_t >( gs::AUDIO_VOLUME ); },
+		[store] ( float_t v ) { store->set( gs::AUDIO_VOLUME, v ); },
+		0.f, 1.f, 0.05f );
+	volume->set_formatter( & format_percent );
+	volume->set_description_key( "options.volume.description" );
+
+	page->add< Toggle >( "options.mute",
+		[store] { return store->get< bool >( gs::AUDIO_MUTE ); },
+		[store] ( bool v ) { store->set( gs::AUDIO_MUTE, v ); } )
+		->set_description_key( "options.mute.description" );
+}
+
+void OptionsScene::build_controls_page( Stack* page )
+{
+	SettingStore* store = & get_settings();
+
+	// 感度は X / Y を同じ値で設定する
+	auto* sensitivity = page->add< Slider >( "options.mouse_sensitivity",
+		[store] { return store->get< float_t >( gs::MOUSE_X_SENSITIVITY ); },
+		[store] ( float_t v ) { store->set( gs::MOUSE_X_SENSITIVITY, v ); store->set( gs::MOUSE_Y_SENSITIVITY, v ); },
+		0.1f, 3.f, 0.1f );
+	sensitivity->set_formatter( & format_one_decimal );
+	sensitivity->set_description_key( "options.mouse_sensitivity.description" );
+
+	page->add< Label >( "options.key_bindings", Label::Style::HEADER );
+
+	// キーの表示名 : 文字列テーブルの key.<名前> があればそれ、無ければ名前そのもの
+	auto key_display_name = [] ( int code ) -> string_t
+	{
+		const string_t name = key_names::name_from_code( code );
+		const auto& strings = GameMain::get_instance()->get_ui_strings();
+		const string_t table_key = "key." + name;
+		return strings.has( table_key ) ? strings.get( table_key ) : name;
+	};
+
+	for ( const auto& b : gs::get_bindable_buttons() )
+	{
+		const string_t key = Input::get_key_config_name( b.button );
+
+		page->add< KeyBind >( b.label_key,
+			[store, key] { return key_names::code_from_name( gs::get_primary_key( store->get< string_t >( key ) ) ); },
+			[store, key] ( int code ) { store->set( key, gs::replace_primary_key( store->get< string_t >( key ), key_names::name_from_code( code ) ) ); },
+			key_display_name )
+			->set_description_key( "options.key.description" );
 	}
 }
 
-void OptionsScene::setup_widgets()
+void OptionsScene::save()
 {
-	// Resolution
-	resolution_select_.set_label( "Resolution" );
-
-	for ( const auto& res : resolutions_ )
-	{
-		std::stringstream ss;
-		ss << res.width << " x " << res.height;
-		resolution_select_.add_option( ss.str() );
-	}
-
-	resolution_select_.set_selected( find_current_resolution() );
-	resolution_select_.set_on_change( [this] ( int index )
-	{
-		apply_resolution( index );
-		play_sound( "ok" );
-	} );
-
-	// Volume
-	float_t volume = get_sound_manager()->get_volume();
-	volume_slider_.set_label( "Volume" );
-	volume_slider_.set_range( 0.f, 1.f );
-	volume_slider_.set_step( 0.1f );
-	volume_slider_.set_value( volume );
-	volume_slider_.set_format( [] ( float_t v ) -> string_t
-	{
-		int percent = static_cast< int >( v * 100.f + 0.5f );
-		return std::to_string( percent ) + "%";
-	} );
-	volume_slider_.set_on_change( [this] ( float_t v )
-	{
-		get_sound_manager()->set_volume( v );
-	} );
-
-	// Mute
-	mute_button_.set_text( is_mute_ ? "Mute : ON" : "Mute : OFF" );
-	mute_button_.set_hint_text( "Enter/Click Toggle    ESC Back" );
-	mute_button_.set_on_click( [this] ()
-	{
-		is_mute_ = ! is_mute_;
-		get_sound_manager()->set_mute( is_mute_ );
-		mute_button_.set_text( is_mute_ ? "Mute : ON" : "Mute : OFF" );
-		play_sound( "ok" );
-	} );
-
-	// Mouse Sensitivity
-	float_t sens = get_config()->get( "input.mouse.x_sensitivity", 1.f );
-	mouse_sens_slider_.set_label( "Mouse Sens." );
-	mouse_sens_slider_.set_range( 0.1f, 3.f );
-	mouse_sens_slider_.set_step( 0.1f );
-	mouse_sens_slider_.set_value( sens );
-	mouse_sens_slider_.set_on_change( [this] ( float_t v )
-	{
-		get_input()->set_mouse_x_sensitivity( v );
-		get_input()->set_mouse_y_sensitivity( v );
-	} );
-
-	// FOV
-	float_t fov = get_config()->get( "camera.fov", 90.f );
-	fov_slider_.set_label( "FOV" );
-	fov_slider_.set_range( 50.f, 120.f );
-	fov_slider_.set_step( 5.f );
-	fov_slider_.set_value( fov );
-	fov_slider_.set_format( [] ( float_t v ) -> string_t
-	{
-		return std::to_string( static_cast< int >( v + 0.5f ) );
-	} );
-
-	// Fullscreen
-	fullscreen_button_.set_text( is_fullscreen_ ? "Fullscreen : ON" : "Fullscreen : OFF" );
-	fullscreen_button_.set_hint_text( "Enter/Click Toggle    ESC Back" );
-	fullscreen_button_.set_on_click( [this] ()
-	{
-		get_graphics_manager()->switch_full_screen();
-		is_fullscreen_ = get_graphics_manager()->is_full_screen();
-		fullscreen_button_.set_text( is_fullscreen_ ? "Fullscreen : ON" : "Fullscreen : OFF" );
-		play_sound( "ok" );
-	} );
-
-	// Back
-	back_button_.set_text( "Back" );
-	back_button_.set_on_click( [this] ()
-	{
-		set_next_scene( "pop" );
-		play_sound( "ok" );
-	} );
-
-	// コンテナに登録
-	container_.add_widget( &resolution_select_ );
-	container_.add_widget( &volume_slider_ );
-	container_.add_widget( &mute_button_ );
-	container_.add_widget( &mouse_sens_slider_ );
-	container_.add_widget( &fov_slider_ );
-	container_.add_widget( &fullscreen_button_ );
-	container_.add_widget( &back_button_ );
-
-	float_t screen_w = ui_renderer_.get_screen_width();
-	float_t content_w = get_content_width();
-
-	container_.set_position( ( screen_w - content_w ) * 0.5f, 200.f );
-	container_.set_width( content_w );
-	container_.set_item_height( 100.f );
-	container_.layout();
-}
-
-void OptionsScene::save_settings()
-{
-	int res_index = resolution_select_.get_selected();
-
-	if ( res_index >= 0 && res_index < static_cast< int >( resolutions_.size() ) )
-	{
-		const auto& res = resolutions_[ res_index ];
-		get_config()->set( "graphics.screen_width", res.width );
-		get_config()->set( "graphics.screen_height", res.height );
-	}
-
-	get_config()->set( "audio.volume", volume_slider_.get_value() );
-	get_config()->set< int >( "audio.mute", is_mute_ ? 1 : 0 );
-	get_config()->set( "input.mouse.x_sensitivity", mouse_sens_slider_.get_value() );
-	get_config()->set( "input.mouse.y_sensitivity", mouse_sens_slider_.get_value() );
-	get_config()->set( "camera.fov", fov_slider_.get_value() );
-	get_config()->set< int >( "graphics.full_screen", is_fullscreen_ ? 1 : 0 );
-
+	get_settings().save( * get_config() );
 	get_config()->save_file( "blue-sky.config" );
 }
 
-void OptionsScene::update()
+void OptionsScene::finish_and_close()
 {
-	Scene::update();
-
-	container_.update( get_input(), ui_renderer_ );
+	get_settings().commit_immediate();
+	save();
+	close();
 }
 
-void OptionsScene::render()
+void OptionsScene::apply( bool close_after )
 {
-	float_t screen_w = ui_renderer_.get_screen_width();
-	float_t screen_h = ui_renderer_.get_screen_height();
+	SettingStore& store = get_settings();
 
-	// 半透明の暗幕（全画面）
-	ui_renderer_.draw_rect( 0.f, 0.f, screen_w, screen_h, Color( 0.f, 0.f, 0.f, 0.5f ) );
+	const auto snapshot = store.snapshot();
+	const bool display_changed = store.apply_deferred();
 
-	// パネル背景
-	float_t panel_w = get_panel_width();
-	float_t panel_x = ( screen_w - panel_w ) * 0.5f;
-	float_t panel_y = screen_h * 0.05f;
-	float_t panel_h = screen_h * 0.90f;
+	store.commit_immediate();
+	save();
 
-	ui_renderer_.draw_rect( panel_x, panel_y, panel_w, panel_h, Color( 0.05f, 0.05f, 0.1f, 0.85f ) );
-
-	// タイトル
-	float_t content_w = get_content_width();
-	float_t title_x = ( screen_w - content_w ) * 0.5f;
-	float_t title_y = screen_h * 0.08f;
-	ui_renderer_.draw_text( title_x, title_y, content_w, 120.f, "OPTIONS", core::graphics::TextStyle{ Color( 1.f, 1.f, 1.f, 1.f ), Color::Black, 3.f } );
-
-	// ウィジェット描画
-	container_.render( ui_renderer_ );
-
-	// 操作ヒント
-	float_t hint_y = screen_h * 0.90f;
-	float_t hint_x = ( screen_w - content_w ) * 0.5f;
-
-	const auto* focused = container_.get_focused_widget();
-	const char_t* hint = "ESC Back";
-
-	if ( focused && ! focused->get_hint_text().empty() )
+	if ( ! display_changed )
 	{
-		hint = focused->get_hint_text().c_str();
+		if ( close_after )
+		{
+			close();
+		}
+
+		return;
 	}
 
-	ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, hint, core::graphics::TextStyle{ Color( 0.5f, 0.5f, 0.5f, 1.f ), Color::Black, 3.f } );
+	// 表示が変わった : 時間内に「維持」しなければ元に戻す（映らなくなっても自動で復旧する）
+	constexpr float_t TIMEOUT = 15.f;
+	const float_t start = get_total_elapsed_time();
+
+	DialogSpec spec;
+	spec.message_provider = [this, start]
+	{
+		const int remaining = std::max( 0, static_cast< int >( std::ceil( TIMEOUT - ( get_total_elapsed_time() - start ) ) ) );
+		return GameMain::get_instance()->get_ui_strings().format( "options.confirm_display", { std::to_string( remaining ) } );
+	};
+	spec.buttons =
+	{
+		{ "options.keep", [this, close_after] { if ( close_after ) close(); } },
+		{ "options.revert", [this, snapshot]
+			{
+				get_settings().rollback( snapshot, gs::get_display_keys() );
+				save();
+			} },
+	};
+	spec.cancel_index = 1;
+	spec.default_index = 0;
+	spec.timeout_sec = TIMEOUT;
+
+	screen_.show_dialog( std::move( spec ) );
+}
+
+void OptionsScene::back()
+{
+	if ( ! get_settings().has_pending_deferred() )
+	{
+		finish_and_close();
+		return;
+	}
+
+	DialogSpec spec;
+	spec.message = "options.confirm_unapplied";
+	spec.buttons =
+	{
+		{ "options.apply_and_back", [this] { apply( true ); } },
+		{ "options.discard_and_back", [this] { get_settings().revert_deferred(); finish_and_close(); } },
+		{ "common.cancel", nullptr },
+	};
+	spec.cancel_index = 2;
+	spec.default_index = 0;
+
+	screen_.show_dialog( std::move( spec ) );
+}
+
+void OptionsScene::reset_to_defaults()
+{
+	DialogSpec spec;
+	spec.message = "options.confirm_defaults";
+	spec.buttons =
+	{
+		{ "common.yes", [this] { get_settings().reset_to_defaults(); } },
+		{ "common.no", nullptr },
+	};
+	spec.cancel_index = 1;
+	spec.default_index = 1;
+
+	screen_.show_dialog( std::move( spec ) );
 }
 
 } // namespace blue_sky

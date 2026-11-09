@@ -19,6 +19,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Scene\UIOverlayScene.cpp" />
+    <ClCompile Include="blue_sky\GameSettings.cpp" />
+    <ClCompile Include="blue_sky\ui\UIInputBuilder.cpp" />
+    <ClCompile Include="core\ui\KeyBind.cpp" />
+    <ClCompile Include="core\ui\TabView.cpp" />
+    <ClCompile Include="core\ui\ScrollView.cpp" />
+    <ClCompile Include="core\ui\Panel.cpp" />
+    <ClCompile Include="core\ui\Dialog.cpp" />
+    <ClCompile Include="core\ui\Choice.cpp" />
+    <ClCompile Include="core\ui\Toggle.cpp" />
+    <ClCompile Include="core\ui\LabeledRow.cpp" />
+    <ClCompile Include="core\ui\Label.cpp" />
+    <ClCompile Include="core\ui\Stack.cpp" />
+    <ClCompile Include="core\ui\Screen.cpp" />
+    <ClCompile Include="core\setting\SettingStore.cpp" />
+    <ClCompile Include="blue_sky\KeyNames.cpp" />
+    <ClCompile Include="core\ui\StringTable.cpp" />
     <ClCompile Include="blue_sky\ActiveObjectManager.cpp" />
     <ClCompile Include="blue_sky\ActiveObjectPhysics.cpp" />
     <ClCompile Include="blue_sky\App.cpp" />
@@ -42,11 +59,8 @@
     <ClCompile Include="blue_sky\Input.cpp" />
     <ClCompile Include="blue_sky\ui\Renderer.cpp" />
     <ClCompile Include="core\ui\Button.cpp" />
-    <ClCompile Include="core\ui\SelectBox.cpp" />
     <ClCompile Include="core\ui\Slider.cpp" />
-    <ClCompile Include="core\ui\VerticalMenu.cpp" />
     <ClCompile Include="core\ui\Widget.cpp" />
-    <ClCompile Include="core\ui\WidgetContainer.cpp" />
     <ClCompile Include="blue_sky\SceneManager.cpp" />
     <ClCompile Include="blue_sky\ScriptManager.cpp" />
     <ClCompile Include="core\animation\AnimationPlayer.cpp" />
@@ -153,6 +167,27 @@
     <ClCompile Include="Scene\TransformTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\UIOverlayScene.h" />
+    <ClInclude Include="blue_sky\GameSettings.h" />
+    <ClInclude Include="blue_sky\ui\UIInputBuilder.h" />
+    <ClInclude Include="core\ui\KeyBind.h" />
+    <ClInclude Include="core\ui\TabView.h" />
+    <ClInclude Include="core\ui\ScrollView.h" />
+    <ClInclude Include="core\ui\Panel.h" />
+    <ClInclude Include="core\ui\Dialog.h" />
+    <ClInclude Include="core\ui\Choice.h" />
+    <ClInclude Include="core\ui\Toggle.h" />
+    <ClInclude Include="core\ui\LabeledRow.h" />
+    <ClInclude Include="core\ui\Label.h" />
+    <ClInclude Include="core\ui\Stack.h" />
+    <ClInclude Include="core\ui\Screen.h" />
+    <ClInclude Include="core\ui\Theme.h" />
+    <ClInclude Include="core\ui\UIInput.h" />
+    <ClInclude Include="core\setting\SettingStore.h" />
+    <ClInclude Include="blue_sky\KeyNames.h" />
+    <ClInclude Include="core\ui\Rect.h" />
+    <ClInclude Include="core\ui\NavRepeater.h" />
+    <ClInclude Include="core\ui\StringTable.h" />
     <ClInclude Include="blue_sky\ActiveObjectManager.h" />
     <ClInclude Include="blue_sky\ActiveObjectPhysics.h" />
     <ClInclude Include="blue_sky\App.h" />
@@ -200,11 +235,8 @@
     <ClInclude Include="blue_sky\ui\Renderer.h" />
     <ClInclude Include="core\ui\Button.h" />
     <ClInclude Include="core\ui\Renderer.h" />
-    <ClInclude Include="core\ui\SelectBox.h" />
     <ClInclude Include="core\ui\Slider.h" />
-    <ClInclude Include="core\ui\VerticalMenu.h" />
     <ClInclude Include="core\ui\Widget.h" />
-    <ClInclude Include="core\ui\WidgetContainer.h" />
     <ClInclude Include="blue_sky\SceneManager.h" />
     <ClInclude Include="blue_sky\ScriptManager.h" />
     <ClInclude Include="blue_sky\type.h" />

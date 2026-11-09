@@ -12,6 +12,7 @@
 
 #include "Input.h"
 #include "App.h"
+#include "KeyNames.h"
 #include <core/input/DirectInput/DirectInput.h>
 
 #include <game/Config.h>
@@ -41,6 +42,13 @@ Input::Input()
 	, mouse_wheel_( 0 )
 	, mouse_point_()
 	, joystick_code_()
+	, key_now_()
+	, key_prev_()
+	, was_foreground_( false )
+	, pad_buttons_now_( 0 )
+	, pad_buttons_prev_( 0 )
+	, pad_dir_now_( 0 )
+	, pad_dir_prev_( 0 )
 	, is_blocked_( false )
 {
 	joy_info_.dwSize = sizeof( JOYINFOEX );
@@ -54,10 +62,6 @@ Input::Input()
 		joyGetDevCaps( JOYSTICKID1, & jc, sizeof( JOYCAPS ) );
 		joystick_enabled_ &= jc.wNumAxes >= 4;
 	}
-
-	config_key_code_map_.insert( std::make_pair( "MOUSE_L", VK_LBUTTON  ) );
-	config_key_code_map_.insert( std::make_pair( "MOUSE_R", VK_RBUTTON ) );
-	config_key_code_map_.insert( std::make_pair( "SPACE", VK_SPACE ) );
 }
 
 Input::~Input()
@@ -65,15 +69,36 @@ Input::~Input()
 	
 }
 
+const char_t* Input::get_key_config_name( Button button )
+{
+	switch ( button )
+	{
+		case Button::LEFT:	return "input.key.left";
+		case Button::RIGHT:	return "input.key.right";
+		case Button::UP:	return "input.key.up";
+		case Button::DOWN:	return "input.key.down";
+		case Button::A:		return "input.key.a";
+		case Button::B:		return "input.key.b";
+		case Button::JUMP:	return "input.key.jump";
+		case Button::L:		return "input.key.l";
+		case Button::R:		return "input.key.r";
+		case Button::L2:	return "input.key.l2";
+		case Button::R2:	return "input.key.r2";
+		default:			return nullptr;
+	}
+}
+
 void Input::load_config( Config& config )
 {
-	key_code_[ static_cast< int >( Button::ESCAPE ) ].push_back( VK_ESCAPE );
+	// 何度呼ばれても割り当てが重複しないよう、毎回作り直す
+	for ( auto& codes : key_code_ ) codes.clear();
+	for ( auto& codes : fixed_key_code_ ) codes.clear();
 
 	load_key_code_config( config, Button::LEFT,  "input.key.left",  "A" );
 	load_key_code_config( config, Button::RIGHT, "input.key.right", "D" );
 	load_key_code_config( config, Button::UP,    "input.key.up",    "W" );
 	load_key_code_config( config, Button::DOWN,  "input.key.down",  "S" );
-	
+
 	load_key_code_config( config, Button::A,     "input.key.a",     "MOUSE_L" );
 	load_key_code_config( config, Button::B,     "input.key.b",     "MOUSE_R" );
 	load_key_code_config( config, Button::JUMP,   "input.key.jump", "SPACE"   );
@@ -83,12 +108,13 @@ void Input::load_config( Config& config )
 	load_key_code_config( config, Button::L2,    "input.key.l2",    "Z" );
 	load_key_code_config( config, Button::R2,    "input.key.r2",    "C" );
 
-	// 矢印キーと Enter を常に追加 (メニュー操作用)
-	key_code_[ static_cast< int >( Button::UP ) ].push_back( VK_UP );
-	key_code_[ static_cast< int >( Button::DOWN ) ].push_back( VK_DOWN );
-	key_code_[ static_cast< int >( Button::LEFT ) ].push_back( VK_LEFT );
-	key_code_[ static_cast< int >( Button::RIGHT ) ].push_back( VK_RIGHT );
-	key_code_[ static_cast< int >( Button::A ) ].push_back( VK_RETURN );
+	// 固定キー : ESC と、メニュー操作用の矢印キー・Enter（ユーザー割り当てを変えても常に有効）
+	fixed_key_code_[ static_cast< int >( Button::ESCAPE ) ].push_back( VK_ESCAPE );
+	fixed_key_code_[ static_cast< int >( Button::UP ) ].push_back( VK_UP );
+	fixed_key_code_[ static_cast< int >( Button::DOWN ) ].push_back( VK_DOWN );
+	fixed_key_code_[ static_cast< int >( Button::LEFT ) ].push_back( VK_LEFT );
+	fixed_key_code_[ static_cast< int >( Button::RIGHT ) ].push_back( VK_RIGHT );
+	fixed_key_code_[ static_cast< int >( Button::A ) ].push_back( VK_RETURN );
 
 	joystick_code_[ static_cast< int >( Button::A ) ] = 1 << ( config.get( "input.joystick.a", 1 ) - 1 );
 	joystick_code_[ static_cast< int >( Button::B ) ] = 1 << ( config.get( "input.joystick.b", 3 ) - 1 );
@@ -110,32 +136,111 @@ void Input::load_config( Config& config )
 
 void Input::load_key_code_config( Config& config, Button button, const char_t* name, const char_t* default_value )
 {
-	std::string values = config.get( name, std::string( default_value ) );
-	std::stringstream ss;
+	auto codes = parse_key_bindings_text( config.get( name, std::string( default_value ) ) );
 
-	ss << values;
-
-	while ( ss.good() )
+	// 1 つも解釈できなければ既定値を使う（設定ファイルが壊れていても操作不能にしない）
+	if ( codes.empty() )
 	{
-		std::string key_code;
+		codes = parse_key_bindings_text( default_value );
+	}
 
-		ss >> key_code;
+	key_code_[ static_cast< int >( button ) ] = codes;
+}
 
-		auto i = config_key_code_map_.find( key_code );
+std::vector< int > Input::parse_key_bindings_text( const string_t& text )
+{
+	std::vector< int > codes;
+	std::stringstream ss( text );
+	std::string name;
 
-		if ( i != config_key_code_map_.end() )
+	while ( ss >> name )
+	{
+		const int code = key_names::code_from_name( name );
+
+		if ( code != 0 && std::find( codes.begin(), codes.end(), code ) == codes.end() )
 		{
-			key_code_[ static_cast< int >( button ) ].push_back( i->second );
-		}
-		else if ( key_code.size() == 1 )
-		{
-			key_code_[ static_cast< int >( button ) ].push_back( key_code.at( 0 ) );
-		}
-		else
-		{
-
+			codes.push_back( code );
 		}
 	}
+
+	return codes;
+}
+
+string_t Input::get_key_bindings_text( Button button ) const
+{
+	string_t text;
+
+	for ( int code : key_code_[ static_cast< int >( button ) ] )
+	{
+		const string_t name = key_names::name_from_code( code );
+
+		if ( name.empty() )
+		{
+			continue;
+		}
+
+		if ( ! text.empty() )
+		{
+			text += ' ';
+		}
+
+		text += name;
+	}
+
+	return text;
+}
+
+int Input::get_pushed_bindable_key() const
+{
+	for ( int code : key_names::get_bindable_codes() )
+	{
+		if ( is_key_pushed( code ) )
+		{
+			return code;
+		}
+	}
+
+	return 0;
+}
+
+int Input::pad_dir_bit( Button dir )
+{
+	switch ( dir )
+	{
+		case Button::LEFT: return 1;
+		case Button::RIGHT: return 2;
+		case Button::UP: return 4;
+		case Button::DOWN: return 8;
+		default: return 0;
+	}
+}
+
+/**
+ * 生のキー状態（全仮想キー）を更新する
+ */
+void Input::update_raw_keys()
+{
+	const bool foreground = App::get_instance() && GetForegroundWindow() == App::get_instance()->GetWindowHandle();
+
+	key_prev_ = key_now_;
+
+	for ( int vk = 1; vk < 256; vk++ )
+	{
+		key_now_[ vk ] = foreground && ( GetAsyncKeyState( vk ) & 0x8000 ) != 0;
+	}
+
+	// 再アクティブになったフレーム（Alt+Tab で戻った直後など）は、押しっぱなしのキーを「押した瞬間」にしない
+	if ( foreground && ! was_foreground_ )
+	{
+		key_prev_ = key_now_;
+	}
+
+	was_foreground_ = foreground;
+
+	pad_buttons_prev_ = pad_buttons_now_;
+	pad_dir_prev_ = pad_dir_now_;
+	pad_buttons_now_ = 0;
+	pad_dir_now_ = 0;
 }
 
 /**
@@ -143,6 +248,8 @@ void Input::load_key_code_config( Config& config, Button button, const char_t* n
  */
 void Input::update()
 {
+	update_raw_keys();
+
 	for ( int n = 0; n < static_cast< int >( Button::MAX ); n++ )
 	{
 		state_[ n ] <<= 1;
@@ -175,6 +282,17 @@ void Input::update()
 		if ( joy_info_.dwButtons & joystick_code_[ static_cast< int >( Button::L ) ] ) state_[ static_cast< int >( Button::L ) ] |= 1;
 		if ( joy_info_.dwButtons & joystick_code_[ static_cast< int >( Button::R ) ] ) state_[ static_cast< int >( Button::R ) ] |= 1;
 
+		// 生の状態（UI 用）
+		if ( was_foreground_ )
+		{
+			pad_buttons_now_ = joy_info_.dwButtons;
+
+			if ( joy_info_.dwXpos <  0xFFFF / 4 * 1 ) pad_dir_now_ |= pad_dir_bit( Button::LEFT );
+			if ( joy_info_.dwXpos >= 0xFFFF / 4 * 3 ) pad_dir_now_ |= pad_dir_bit( Button::RIGHT );
+			if ( joy_info_.dwYpos <  0xFFFF / 4 * 1 ) pad_dir_now_ |= pad_dir_bit( Button::UP );
+			if ( joy_info_.dwYpos >= 0xFFFF / 4 * 3 ) pad_dir_now_ |= pad_dir_bit( Button::DOWN );
+		}
+
 		mouse_dx_ += get_rate_by_joystick_axis_pos( * joystick_x_axis_pos_ ) * 0.01f * joystick_x_sensitivity_;
 		mouse_dy_ += get_rate_by_joystick_axis_pos( * joystick_y_axis_pos_ ) * 0.01f * joystick_y_sensitivity_;
 	}
@@ -184,6 +302,15 @@ void Input::update()
 
 void Input::update_null()
 {
+	// 生の状態も「何も押されていない」に進める
+	key_prev_ = key_now_;
+	key_now_.fill( false );
+	was_foreground_ = false;
+	pad_buttons_prev_ = pad_buttons_now_;
+	pad_dir_prev_ = pad_dir_now_;
+	pad_buttons_now_ = 0;
+	pad_dir_now_ = 0;
+
 	for ( int n = 0; n < static_cast< int >( Button::MAX ); n++ )
 	{
 		state_[ n ] <<= 1;
@@ -226,9 +353,17 @@ void Input::update_common()
  */
 void Input::update_state_by_key_for( uint_t button )
 {
-	for ( auto i = key_code_[ button ].begin(); i != key_code_[ button ].end(); ++i )
+	for ( int code : key_code_[ button ] )
 	{
-		if ( GetAsyncKeyState( *i ) & 0x8000 )
+		if ( GetAsyncKeyState( code ) & 0x8000 )
+		{
+			state_[ button ] |= 1;
+		}
+	}
+
+	for ( int code : fixed_key_code_[ button ] )
+	{
+		if ( GetAsyncKeyState( code ) & 0x8000 )
 		{
 			state_[ button ] |= 1;
 		}

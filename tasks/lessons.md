@@ -77,3 +77,12 @@
 - **対策**: `ComponentTypeId`/`SystemTypeId` を `std::size_t` に統一（これだけで直る）。回帰テスト `test/ecs/EnemyAiSceneEcsTest`。
   - 当初 `get_type_id` の `constexpr`+`typeid` も疑ってアドレスID化・constexpr 除去を試したが、**テストで切り分けた結果 constexpr は無関係**（`typeid().hash_code()` は constexpr 評価されないので両辺とも実行時ハッシュで一致する）。型幅を揃えれば元の `constexpr`+`typeid` のままで通る。過剰修正しないこと。
 - **診断手法の学び**: GUI(exe) は Smart App Control に断続ブロックされて自動起動できないことがある。ECS の登録は **services 不要（update を呼ばず gather 結果の件数を見るだけ）で `blue-sky-test.exe` に再現テスト**を書けば、GUI 抜きで確定できる。型幅の不一致は「32/64bit 差で偶然動く」ため x64 移植の要注意ポイント。
+
+## UI ライブラリ作業（2026-11-08）で得た学び
+
+- **ワークツリーでビルドするときの依存**: `source/lib/include/*`・`source/lib/x64`・`source/packages`（NuGet の gtest）は未追跡なのでジャンクションで共有してよい。ただし **サブモジュール（`media` / `source/extern/freetype` / `source/extern/msdfgen`）をジャンクションにすると git が壊れる**（`not a git repository: .../modules/...`）。`git submodule update --init` で正式に取り込み、サブモジュール内の**未追跡の `msdfgen.vcxproj` / `msdfgen/` / `freetype.vcxproj` は元のチェックアウトからコピー**する。実行には `source/media` の未追跡アセット（SF2 など）と `.build/x64/Debug/*.dll` も必要。
+- **タイトルシーンは現状起動直後に落ちる**: モデル `je-pu-pu` / `blue-sky` がどこにも無く `Model::render` がヌル参照（0xC0000005）。UI の確認は `debug.start_scene enemy_ai_test` を使う。クラッシュ位置はイベントログ（ID 1000）のフォールトオフセットを dbghelp（`SymFromAddr`）で関数名・行に変換すると早い。
+- **起動直後に開いたオーバーレイの下は真っ黒**: 一度も update されていないベースシーンは描画の準備ができていない。開発用の `debug.start_overlay` は数フレーム後に開く。
+- **`game::Config::get` の非 const 版は既定値を書き込む**: 既定値が空文字列だと保存時に `key ` だけの行になり、次回の `read_line` が `value.erase( value.size() - 1 )` で壊れる。空の既定値で読むときは const 参照経由で読む。
+- **UI の自動操作（keybd_event）は最初のキーが落ちることがある**: `SetForegroundWindow` がフォアグラウンドロックで失敗し、別ウィンドウにキーが行く。`GetForegroundWindow()` で確認して再試行する（Alt を一瞬押すと解除できる）。ゲーム側の不具合と取り違えないよう、入力を一時ログに出して切り分けた。
+- **入力の「決定」と「クリック」を 1 ビットに混ぜない**: 旧 UI は `Button::A`（左クリック＋Enter＋パッド）で決定していたため、どこをクリックしても押される・Enter でスライダーがマウス位置へ飛ぶ等の不具合が出た。UI は生のキー状態から決定・クリックを別々に作る。

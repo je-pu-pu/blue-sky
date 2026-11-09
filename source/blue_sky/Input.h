@@ -85,10 +85,21 @@ private:
 
 	POINT mouse_point_;										///< マウス 座標
 
-	ButtonCodeMultiList key_code_;
+	ButtonCodeMultiList key_code_;							///< ユーザーが割り当てたキー（設定ファイル・キー割り当て画面で変更できる）
+	ButtonCodeMultiList fixed_key_code_;					///< 常に有効な固定キー（メニュー操作用の矢印・Enter、ESC）
 	ButtonCodeList joystick_code_;
 
-	ConfigKeyCodeMap config_key_code_map_;					///< コンフィグファイルのキー名 から GetAsyncKeyState() の引数に渡すキーへのマップ
+	// 生の入力状態（UI 用。ゲームのキー割り当てとは無関係）
+	std::array< bool, 256 > key_now_;						///< 仮想キーごとの今フレームの押下状態
+	std::array< bool, 256 > key_prev_;						///< 前フレームの押下状態
+	bool was_foreground_;									///< 前フレームでウィンドウがアクティブだったか
+	DWORD pad_buttons_now_;									///< パッドのボタン（ビット）
+	DWORD pad_buttons_prev_;
+	int pad_dir_now_;										///< パッドの方向（ビット : 左 1 / 右 2 / 上 4 / 下 8）
+	int pad_dir_prev_;
+
+	void update_raw_keys();
+	static int pad_dir_bit( Button );
 
 	bool is_blocked_;										///< 入力ブロックフラグ ( オーバーレイ UI がアクティブな時にゲーム入力をブロックする )
 
@@ -112,6 +123,48 @@ public:
 	bool is_blocked() const { return is_blocked_; }
 
 	void load_config( Config& );
+
+	/// 設定ファイルのキー名（`input.key.left` など）。割り当て対象外のボタンは nullptr
+	static const char_t* get_key_config_name( Button );
+
+	/// ユーザー割り当てのキー（仮想キーコード）一覧
+	const std::vector< int >& get_key_bindings( Button button ) const { return key_code_[ static_cast< int >( button ) ]; }
+
+	/// ユーザー割り当てのキーを差し替える（固定キーは変わらない）
+	void set_key_bindings( Button button, const std::vector< int >& codes ) { key_code_[ static_cast< int >( button ) ] = codes; }
+
+	/// ユーザー割り当てを設定ファイルの値の形式（`W UP` のような空白区切りのキー名）にする
+	string_t get_key_bindings_text( Button ) const;
+
+	/// 空白区切りのキー名をキーコード一覧にする（不明な名前は無視）
+	static std::vector< int > parse_key_bindings_text( const string_t& );
+
+	// ---- 生の入力状態（UI 用。is_blocked_ の影響を受けない） ----
+	// ウィンドウが非アクティブなときは全て false。再アクティブになったフレームは「押した瞬間」を出さない
+
+	bool is_key_down( int vk ) const { return vk > 0 && vk < 256 && key_now_[ vk ]; }
+	bool is_key_pushed( int vk ) const { return vk > 0 && vk < 256 && key_now_[ vk ] && ! key_prev_[ vk ]; }
+	bool is_key_released( int vk ) const { return vk > 0 && vk < 256 && ! key_now_[ vk ] && key_prev_[ vk ]; }
+
+	/// 設定ファイルで指定されたパッドのボタンのビット（A / B / L / R）
+	DWORD get_joystick_button_mask( Button b ) const { return joystick_code_[ static_cast< int >( b ) ]; }
+	bool is_pad_mask_pushed( DWORD mask ) const { return mask != 0 && ( pad_buttons_now_ & mask ) != 0 && ( pad_buttons_prev_ & mask ) == 0; }
+
+	/// パッドのボタン（0 始まり）
+	bool is_pad_button_down( int index ) const { return ( pad_buttons_now_ & ( 1u << index ) ) != 0; }
+	bool is_pad_button_pushed( int index ) const { return is_pad_button_down( index ) && ( pad_buttons_prev_ & ( 1u << index ) ) == 0; }
+
+	/// パッドの方向（LEFT / RIGHT / UP / DOWN）
+	bool is_pad_dir_down( Button dir ) const { return ( pad_dir_now_ & pad_dir_bit( dir ) ) != 0; }
+	bool is_pad_dir_pushed( Button dir ) const { return is_pad_dir_down( dir ) && ( pad_dir_prev_ & pad_dir_bit( dir ) ) == 0; }
+
+	/// パッドに何か入力があるか（最後に使ったデバイスの判定用）
+	bool is_pad_active() const { return pad_buttons_now_ != 0 || pad_dir_now_ != 0; }
+
+	/// 割り当て可能なキーのうち、このフレームに押された最初のもの（無ければ 0）
+	int get_pushed_bindable_key() const;
+
+	bool is_foreground() const { return was_foreground_; }
 
 	void update();
 	void update_null();

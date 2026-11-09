@@ -81,6 +81,7 @@ private:
 	// 所有リソース
 	std::unique_ptr< Config >			stage_config_;
 	std::unique_ptr< Camera >			camera_;
+	uint_t								settings_change_count_ = 0;	///< 設定の変更を検出するための前回値
 
 	bool								is_cleared_ = false;	///< ステージクリアフラグ
 	float_t								action_bgm_after_timer_;

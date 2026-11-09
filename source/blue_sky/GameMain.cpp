@@ -40,6 +40,11 @@
 #include <win/Clipboard.h>
 
 #include <game/Config.h>
+
+#include <blue_sky/GameSettings.h>
+#include <core/setting/SettingStore.h>
+#include <core/ui/StringTable.h>
+#include <core/ui/Theme.h>
 #include <game/MainLoop.h>
 
 #include <common/math.h>
@@ -137,9 +142,7 @@ GameMain::GameMain()
 	// sound_engine_.reset( new core::sound::direct_sound::SoundEngine( get_app()->GetWindowHandle() ) );
 	sound_engine_.reset( new core::sound::port_audio::SoundEngine() );
 	sound_manager_.reset( new SoundManager( sound_engine_.get() ) );
-	sound_manager_->set_mute( get_config()->get( "audio.mute", 0 ) != 0 );
-	sound_manager_->set_volume( get_config()->get( "audio.volume", 1.f ) );
-	
+
 	sound_manager_->load( "ok" );
 	sound_manager_->load( "cancel" );
 	sound_manager_->load( "click" );
@@ -160,7 +163,17 @@ GameMain::GameMain()
 	// MainLoop
 	main_loop_.reset( new MainLoop( 60 ) );
 
-	is_display_fps_ = get_config()->get( "graphics.display_fps", 0 ) != 0;
+	// ゲーム設定 : 設定ファイルから読み、表示系以外を反映する（表示系は App / Direct3D の初期化で反映済み）
+	settings_ = std::make_unique< core::setting::SettingStore >();
+	game_settings::register_all( * settings_, * this );
+	settings_->load( * get_config() );
+	settings_->sync_from_runtime( game_settings::FULL_SCREEN, get_graphics_manager()->is_full_screen() );
+	settings_->apply_all_individual();
+
+	// UI
+	ui_theme_ = std::make_unique< core::ui::Theme >();
+	ui_strings_ = std::make_unique< core::ui::StringTable >();
+	ui_strings_->load_file( "media/text/ja.txt" );
 
 	update_render_data_for_game();
 }
@@ -172,8 +185,10 @@ GameMain::~GameMain()
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-	get_config()->set< int >( "audio.mute", sound_manager_->is_mute() );
-	get_config()->set< int >( "graphics.full_screen", get_graphics_manager()->is_full_screen() );
+	// 実際の状態（F2 / F5 / Alt+Enter で変わり得る）を取り込んでから、設定を保存する
+	settings_->sync_from_runtime( game_settings::AUDIO_MUTE, sound_manager_->is_mute() );
+	settings_->sync_from_runtime( game_settings::FULL_SCREEN, get_graphics_manager()->is_full_screen() );
+	settings_->save( * get_config() );
 
 	get_config()->save_file( "blue-sky.config" );
 
@@ -337,15 +352,11 @@ bool GameMain::update()
 		const bool escape_pushed = input_->push( Input::Button::ESCAPE );
 		input_->set_blocked( escape_blocked );
 
-		if ( escape_pushed )
+		// オーバーレイ（UI 画面）が開いている間は、ESC は UI 側が「キャンセル」として処理する
+		// （キー割り当て待ちの中止・ダイアログを閉じる・未適用の変更の確認などを UI が判断するため）
+		if ( escape_pushed && ! has_overlay_scene() )
 		{
-			if ( has_overlay_scene() )
-			{
-				// オーバーレイが開いている場合は閉じる
-				pop_overlay_scene();
-				if ( auto* s = sound_manager_->get_sound( "cancel" ) ) { s->play( false ); }
-			}
-			else if ( scene_->get_name() == "title" )
+			if ( scene_->get_name() == "title" )
 			{
 				get_app()->close();
 			}
@@ -396,14 +407,35 @@ bool GameMain::update()
 
 	render();
 
+	// 開発用 : 起動時のオーバーレイ（数フレーム後に開く）
+	if ( ! pending_start_overlay_.empty() && ++start_overlay_wait_frames_ >= 10 )
+	{
+		push_overlay_scene( pending_start_overlay_ );
+		pending_start_overlay_.clear();
+	}
+
 	// オーバーレイシーンの遷移チェック
+	//   "pop"         : 最前面を閉じる（下のオーバーレイが最前面に戻る）
+	//   "push:<名前>" : 最前面を残したまま、その上に積む（ポーズ → オプション → 戻る でポーズに戻る）
+	//   "<名前>"      : 最前面を置き換える
 	if ( has_overlay_scene() && ! overlay_scene_stack_.back()->get_next_scene().empty() )
 	{
-		string_t next = overlay_scene_stack_.back()->get_next_scene();
+		const string_t next = overlay_scene_stack_.back()->get_next_scene();
+		const string_t push_prefix = "push:";
 
 		if ( next == "pop" )
 		{
 			pop_overlay_scene();
+
+			if ( has_overlay_scene() )
+			{
+				overlay_scene_stack_.back()->on_resume();
+			}
+		}
+		else if ( next.compare( 0, push_prefix.size(), push_prefix ) == 0 )
+		{
+			overlay_scene_stack_.back()->set_next_scene( "" );
+			push_overlay_scene( next.substr( push_prefix.size() ) );
 		}
 		else
 		{
@@ -416,7 +448,52 @@ bool GameMain::update()
 		check_scene_transition();
 	}
 
+	// 解像度・フルスクリーンの変更（UI のコールバック中ではなく、ここでまとめて行う）
+	if ( is_display_change_requested_ )
+	{
+		is_display_change_requested_ = false;
+		apply_display_settings();
+	}
+	else if ( std::get< bool >( settings_->get_committed( game_settings::FULL_SCREEN ) ) != get_graphics_manager()->is_full_screen() )
+	{
+		// Alt+Enter など、設定を経由しない切り替えを取り込む
+		settings_->sync_from_runtime( game_settings::FULL_SCREEN, get_graphics_manager()->is_full_screen() );
+	}
+
 	return true;
+}
+
+/**
+ * 設定ストアの確定値に合わせて、解像度・フルスクリーンを変更する
+ *
+ * フルスクリーン中にウィンドウサイズを変えても表示モードは変わらないため、
+ * サイズを変えるときはいったんウィンドウモードに戻してから変更し、必要ならフルスクリーンに戻す。
+ * （排他フルスクリーンの ResizeTarget 対応は後続課題）
+ */
+void GameMain::apply_display_settings()
+{
+	const int w = std::get< int >( settings_->get_committed( game_settings::SCREEN_WIDTH ) );
+	const int h = std::get< int >( settings_->get_committed( game_settings::SCREEN_HEIGHT ) );
+	const bool full_screen = std::get< bool >( settings_->get_committed( game_settings::FULL_SCREEN ) );
+
+	const bool size_changed = w != get_app()->get_width() || h != get_app()->get_height();
+
+	if ( size_changed && get_graphics_manager()->is_full_screen() )
+	{
+		get_graphics_manager()->switch_full_screen();
+	}
+
+	if ( size_changed )
+	{
+		get_app()->set_size( w, h );
+	}
+
+	if ( full_screen != get_graphics_manager()->is_full_screen() )
+	{
+		get_graphics_manager()->switch_full_screen();
+	}
+
+	get_app()->set_full_screen( get_graphics_manager()->is_full_screen() );
 }
 
 void GameMain::render()
@@ -647,6 +724,7 @@ void GameMain::on_special_key_down( int key )
 	else if ( key == KEY_F2 )
 	{
 		get_sound_manager()->set_mute( ! get_sound_manager()->is_mute() );
+		settings_->sync_from_runtime( game_settings::AUDIO_MUTE, get_sound_manager()->is_mute() );
 		game::Sound* bgm = get_sound_manager()->get_sound( "bgm" );
 
 		if ( bgm )
@@ -658,6 +736,7 @@ void GameMain::on_special_key_down( int key )
 	{
 		get_graphics_manager()->switch_full_screen();
 		get_app()->set_full_screen( get_graphics_manager()->is_full_screen() );
+		settings_->sync_from_runtime( game_settings::FULL_SCREEN, get_graphics_manager()->is_full_screen() );
 	}
 
 	/// @todo ちゃんとする
@@ -708,6 +787,11 @@ void GameMain::setup_scene()
 		// setup_scene( "game_play" );
 		setup_scene( get_config()->get< string_t >( "debug.start_scene", "debug" ) );
 		// setup_scene( "canvas_test" );
+
+		// 開発用 : 起動時にオーバーレイ（例: options）を開く。UI の確認用
+		// ベースシーンを数フレーム更新してから開く（一度も更新されていないシーンは描画の準備ができていないため）。
+		// const で読む（非 const の get は既定値の空文字列を設定に書き込み、保存すると壊れた行になるため）
+		pending_start_overlay_ = static_cast< const Config& >( * get_config() ).get< string_t >( "debug.start_overlay", "" );
 
 		return;
 	}

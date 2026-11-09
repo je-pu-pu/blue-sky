@@ -1,6 +1,57 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="Scene\UIOverlayScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\GameSettings.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ui\UIInputBuilder.cpp">
+      <Filter>blue_sky\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\KeyBind.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\TabView.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\ScrollView.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Panel.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Dialog.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Choice.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Toggle.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\LabeledRow.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Label.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Stack.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Screen.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\setting\SettingStore.cpp">
+      <Filter>core\setting</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\KeyNames.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\StringTable.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="GameObject\ActiveObject.cpp">
       <Filter>GameObject</Filter>
@@ -248,19 +299,10 @@
     <ClCompile Include="core\ui\Button.cpp">
       <Filter>core\ui</Filter>
     </ClCompile>
-    <ClCompile Include="core\ui\SelectBox.cpp">
-      <Filter>core\ui</Filter>
-    </ClCompile>
     <ClCompile Include="core\ui\Slider.cpp">
       <Filter>core\ui</Filter>
     </ClCompile>
-    <ClCompile Include="core\ui\VerticalMenu.cpp">
-      <Filter>core\ui</Filter>
-    </ClCompile>
     <ClCompile Include="core\ui\Widget.cpp">
-      <Filter>core\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="core\ui\WidgetContainer.cpp">
       <Filter>core\ui</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\OculusRift.cpp">
@@ -371,6 +413,69 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\UIOverlayScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\GameSettings.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ui\UIInputBuilder.h">
+      <Filter>blue_sky\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\KeyBind.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\TabView.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\ScrollView.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Panel.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Dialog.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Choice.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Toggle.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\LabeledRow.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Label.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Stack.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Screen.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Theme.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\UIInput.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\setting\SettingStore.h">
+      <Filter>core\setting</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\KeyNames.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Rect.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\NavRepeater.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\StringTable.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
     <ClInclude Include="resource.h" />
     <ClInclude Include="GameObject\ActiveObject.h">
       <Filter>GameObject</Filter>
@@ -801,19 +906,10 @@
     <ClInclude Include="core\ui\Renderer.h">
       <Filter>core\ui</Filter>
     </ClInclude>
-    <ClInclude Include="core\ui\SelectBox.h">
-      <Filter>core\ui</Filter>
-    </ClInclude>
     <ClInclude Include="core\ui\Slider.h">
       <Filter>core\ui</Filter>
     </ClInclude>
-    <ClInclude Include="core\ui\VerticalMenu.h">
-      <Filter>core\ui</Filter>
-    </ClInclude>
     <ClInclude Include="core\ui\Widget.h">
-      <Filter>core\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="core\ui\WidgetContainer.h">
       <Filter>core\ui</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\OculusRift.h">
@@ -1158,6 +1254,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="core\setting">
+      <UniqueIdentifier>{447a428b-d4fe-4895-9ac4-e406a3d439fb}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{1d357c30-a5d6-4fcb-a582-73566ac2eb55}</UniqueIdentifier>
     </Filter>

@@ -270,6 +270,19 @@ GraphicsManager::Texture* GraphicsManager::load_named_texture( const char_t* nam
 	return t;
 }
 
+GraphicsManager::Texture* GraphicsManager::load_named_texture_premultiplied( const char_t* name, const char_t* file_path )
+{
+	if ( Texture* t = texture_manager_.get( name ) )
+	{
+		return t;
+	}
+
+	Texture* t = load_texture_file_premultiplied( file_path );
+	texture_manager_.add_named( name, t );
+
+	return t;
+}
+
 /**
  * 名前を指定してテクスチャを取得する
  *

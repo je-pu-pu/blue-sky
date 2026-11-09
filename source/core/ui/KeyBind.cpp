@@ -82,7 +82,7 @@ void KeyBind::render( Renderer& renderer, const UIContext& ctx ) const
 	const auto& t = ctx.theme;
 	const Rect box = value_rect_.inset( 0.f, rect_.h * 0.15f );
 
-	renderer.draw_rect( box, waiting_ ? t.row_pressed : t.track );
+	draw_brush( renderer, box, waiting_ ? t.row_pressed : t.track );
 
 	const string_t text = waiting_ ? ctx.tr( "ui.key_waiting" ) : ( name_of_ && getter_ ? name_of_( getter_() ) : string_t() );
 	renderer.draw_text( box, text.c_str(), make_text_style( value_color( ctx ), t.font_size_normal, core::graphics::HAlign::CENTER ) );

@@ -122,8 +122,19 @@ void Slider::render( Renderer& renderer, const UIContext& ctx ) const
 	const float_t v = get_value();
 	const float_t ratio = max_ > min_ ? std::clamp( ( v - min_ ) / ( max_ - min_ ), 0.f, 1.f ) : 0.f;
 
-	renderer.draw_rect( track_rect_, t.track );
-	renderer.draw_rect( Rect( track_rect_.x, track_rect_.y, track_rect_.w * ratio, track_rect_.h ), is_enabled() ? t.accent : t.text_disabled );
+	draw_brush( renderer, track_rect_, t.track );
+	// 充填 : 溝と同じ形で描き、値の位置で切り取る（形を縮めると 9 分割の角が潰れるため）
+	const Brush& fill = is_enabled() ? pick_brush( renderer, t.slider_fill, t.accent ) : t.fill_disabled;
+	const Rect fill_clip( track_rect_.x, track_rect_.y, track_rect_.w * ratio, track_rect_.h );
+	draw_brush( renderer, track_rect_, fill, & fill_clip );
+
+	// つまみ（テーマで指定され、実際に描けるときだけ）。中心を値の位置に置き、高さは溝の 2 倍
+	if ( can_draw( renderer, t.slider_knob ) && t.slider_knob_width > 0.f )
+	{
+		const float_t knob_h = track_rect_.h * 2.f;
+		const float_t knob_x = track_rect_.x + track_rect_.w * ratio - t.slider_knob_width * 0.5f;
+		draw_brush( renderer, Rect( knob_x, track_rect_.center_y() - knob_h * 0.5f, t.slider_knob_width, knob_h ), t.slider_knob );
+	}
 	renderer.draw_text( text_rect_, format_value( v ).c_str(), make_text_style( value_color( ctx ), t.font_size_normal, core::graphics::HAlign::CENTER ) );
 }
 

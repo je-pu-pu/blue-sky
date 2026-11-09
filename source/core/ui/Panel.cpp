@@ -50,7 +50,7 @@ void Panel::render( Renderer& renderer, const UIContext& ctx ) const
 		renderer.fill_screen( t.screen_dim );
 	}
 
-	renderer.draw_rect( panel_rect_, t.panel );
+	draw_brush( renderer, panel_rect_, t.panel );
 	renderer.draw_text( title_rect_, ctx.tr( title_key_ ).c_str(), make_text_style( t.text, t.font_size_title ) );
 
 	render_children( renderer, ctx );

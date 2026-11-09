@@ -19,6 +19,8 @@
 #include <common/log.h>
 
 #include <dxgi.h>
+#include <wincodec.h>
+#include <wrl/client.h>
 
 #include <string>
 
@@ -669,6 +671,97 @@ Direct3D11::Texture* Direct3D11::load_texture( const char* file_path )
 	}
 
 	// immediate_context_->GenerateMips( view );
+
+	return new Texture( this, view );
+}
+
+Direct3D11::Texture* Direct3D11::load_texture_premultiplied( const char* file_path )
+{
+	const std::wstring ws_file_name = common::convert_to_wstring( file_path );
+
+	const auto fail = [ file_path ] ( const char* step, HRESULT hr )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "UI texture load failed ( " ) + step + " : " + common::serialize( static_cast< unsigned long >( hr ) ) + " ). " + file_path );
+	};
+
+	// WIC のファクトリーは 1 つを使い回す（DirectXTK の WIC ローダーと同じく、COM はメインスレッドで使える前提）
+	// 解放はしない。static の ComPtr にすると、終了時に COM の終了処理の後で Release が走る恐れがあるため
+	static IWICImagingFactory* factory = nullptr;
+	HRESULT hr = S_OK;
+
+	if ( ! factory )
+	{
+		hr = CoCreateInstance( CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS( & factory ) );
+		if ( FAILED( hr ) ) { factory = nullptr; fail( "factory", hr ); }
+	}
+
+	Microsoft::WRL::ComPtr< IWICBitmapDecoder > decoder;
+	hr = factory->CreateDecoderFromFilename( ws_file_name.c_str(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf() );
+	if ( FAILED( hr ) ) { fail( "open", hr ); }
+
+	Microsoft::WRL::ComPtr< IWICBitmapFrameDecode > frame;
+	hr = decoder->GetFrame( 0, frame.GetAddressOf() );
+	if ( FAILED( hr ) ) { fail( "frame", hr ); }
+
+	UINT width = 0;
+	UINT height = 0;
+	hr = frame->GetSize( & width, & height );
+	if ( FAILED( hr ) ) { fail( "size", hr ); }
+
+	// 機能レベル 10.x の上限（8192）に合わせる（UI の画像でそれより大きいものは想定しない）
+	constexpr UINT MAX_UI_TEXTURE_SIZE = 8192;
+
+	if ( width == 0 || height == 0 || width > MAX_UI_TEXTURE_SIZE || height > MAX_UI_TEXTURE_SIZE )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "UI texture load failed ( unsupported size " ) + std::to_string( width ) + "x" + std::to_string( height ) + ", max " + std::to_string( MAX_UI_TEXTURE_SIZE ) + " ). " + file_path );
+	}
+
+	// どの形式の画像でも 32bit RGBA（ストレート）に変換して取り出し、自前で乗算済みにする
+	// （WIC の 32bppPRGBA への変換は丸め方が実装依存なので使わない）
+	Microsoft::WRL::ComPtr< IWICFormatConverter > converter;
+	hr = factory->CreateFormatConverter( converter.GetAddressOf() );
+	if ( FAILED( hr ) ) { fail( "converter", hr ); }
+
+	hr = converter->Initialize( frame.Get(), GUID_WICPixelFormat32bppRGBA, WICBitmapDitherTypeNone, nullptr, 0.0, WICBitmapPaletteTypeCustom );
+	if ( FAILED( hr ) ) { fail( "convert", hr ); }
+
+	const UINT row_pitch = width * 4;
+	std::vector< uint8_t > pixels( static_cast< size_t >( row_pitch ) * height );
+
+	hr = converter->CopyPixels( nullptr, row_pitch, static_cast< UINT >( pixels.size() ), pixels.data() );
+	if ( FAILED( hr ) ) { fail( "copy", hr ); }
+
+	for ( size_t i = 0; i < pixels.size(); i += 4 )
+	{
+		const unsigned a = pixels[ i + 3 ];
+
+		for ( size_t c = 0; c < 3; c++ )
+		{
+			pixels[ i + c ] = static_cast< uint8_t >( ( pixels[ i + c ] * a + 127 ) / 255 );
+		}
+	}
+
+	D3D11_TEXTURE2D_DESC desc = { };
+	desc.Width = width;
+	desc.Height = height;
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.SampleDesc.Count = 1;
+	desc.Usage = D3D11_USAGE_IMMUTABLE;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+	D3D11_SUBRESOURCE_DATA data = { };
+	data.pSysMem = pixels.data();
+	data.SysMemPitch = row_pitch;
+
+	Microsoft::WRL::ComPtr< ID3D11Texture2D > texture;
+	hr = device_->CreateTexture2D( & desc, & data, texture.GetAddressOf() );
+	if ( FAILED( hr ) ) { fail( "texture", hr ); }
+
+	ID3D11ShaderResourceView* view = nullptr;
+	hr = device_->CreateShaderResourceView( texture.Get(), nullptr, & view );
+	if ( FAILED( hr ) ) { fail( "view", hr ); }
 
 	return new Texture( this, view );
 }

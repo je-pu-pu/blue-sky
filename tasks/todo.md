@@ -24,6 +24,19 @@
 - [ ] 後続（設計書 2.2）: XInput、パッドのボタンアイコン、Alt+Enter の抑止（MakeWindowAssociation）、ResizeTarget、ハードウェアシザー、MSDF グリフキャッシュの O(1) 化、キー待ち中のホットキー抑止、HUD への適用
 - [ ] 既存の不具合（UI 作業とは無関係・未修正）: タイトルシーンがモデル `je-pu-pu` / `blue-sky` 不在で Model::render がヌル参照して落ちる（元のチェックアウトでも同じファイルが無い）
 
+### 画像による装飾（2026-11-10）
+
+記録: `doc/UI画像対応と既存コードの修正.md`（何がまずくてどう直したか。レビュー指摘 19 件中 15 件を対応）
+
+- [x] Brush（単色／画像・9 分割・切り出し・切り取り・代用）、Image 部品、テーマの Brush 化と用途別の面、テーマファイル（専用パーサ）、先読み
+- [x] UI 用のテクスチャ読み込み（乗算済みアルファ・ミップなし・UNORM）と sprite_premultiplied technique
+- [x] 既存コードの修正: is_transparent を GameMain が無視していた／Sprite の整数の切り出し・null・重複・既定引数／sprite.hlsl の文字化け／矩形の丸め／9 分割の角の太さ
+- [x] 9 分割の辺・中央を並べて埋める（`edge` / `center` = stretch / repeat / round）。模様のある枠が引き伸ばしで崩れないように
+- [x] サンプルテーマ（`media/ui/sample_theme.txt`、設定 `ui.theme` で有効）と生成スクリプト `tools/ui_sample/make_ui_sample.py`。テスト 53 件追加（190 件中 189 成功）
+- [x] 再レビュー（12 件）を反映: Sprite の Map 前ガード、オーバーレイの描画範囲を純粋関数化（隠れた不透明も考慮・ベース非描画時のクリア）、丸め規則の共有（PixelSnap.h）、切り取りの物理ピクセル揃え、中央を描かない（center = none）ほか
+- [ ] 後続: Sprite のバッチ化と画像のハンドル化、UI テクスチャの寿命管理（世代付きハンドル）、シザーによるクリップ、部品別スタイル、@2x 素材
+- [ ] 調査: enemy_ai_test の操作タブで、キー欄の上に細い縦線が出る（テーマなしでも出る。シーン側の何かが UI の後に描かれている疑い）
+
 ## 敵AI（システミック）縦スライス  ブランチ: feature/enemy-ai-perception
 
 設計は `doc/システム階層スタック.md` / `doc/動詞とゲームシステム.md`。S2 知覚 + S3 警戒状態機械 + パトロールの最小実装。

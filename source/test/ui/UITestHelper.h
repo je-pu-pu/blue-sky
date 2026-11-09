@@ -1,12 +1,16 @@
 #pragma once
 
+#include <core/ui/PixelSnap.h>
 #include <core/ui/Renderer.h>
 #include <core/ui/Screen.h>
 #include <core/ui/StringTable.h>
 #include <core/ui/Theme.h>
 #include <core/ui/UIInput.h>
 
+#include <cmath>
+#include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace ui_test
@@ -26,9 +30,39 @@ public:
 		std::string text;
 	};
 
+	struct ImageCall
+	{
+		core::ui::Rect rect;
+		std::string image;
+		core::ui::Rect source;
+		core::Color tint;
+	};
+
 	std::vector< TextCall > texts;
 	std::vector< core::ui::Rect > rects;
+	std::vector< ImageCall > images;
 	int fill_count = 0;
+
+	/// 読める画像とその大きさ（ここに無い画像は「読めない」扱い）
+	std::map< std::string, std::pair< float, float > > image_sizes;
+
+	/// 仮想座標 1 あたりの物理ピクセルと、物理画面での原点のずれ（本物の Renderer の等方スケール・中央寄せに相当）
+	float pixel_scale = 1.f;
+	float offset_x = 0.f;
+	float offset_y = 0.f;
+
+	float get_pixel_scale() const override { return pixel_scale; }
+
+	core::ui::Rect snap_to_pixels( const core::ui::Rect& r ) const override
+	{
+		return core::ui::snap_rect_to_pixels( r, pixel_scale, offset_x, offset_y );
+	}
+
+	/// 本物の Renderer と同じ規則で物理ピクセルに写す
+	core::ui::PixelRect to_pixel( const core::ui::Rect& r ) const
+	{
+		return core::ui::to_pixel_rect( r, pixel_scale, offset_x, offset_y );
+	}
 
 	static size_t count_codepoints( const char* s )
 	{
@@ -44,6 +78,20 @@ public:
 	void draw_rect( const core::ui::Rect& r, const core::Color& ) override { rects.push_back( r ); }
 	void fill_screen( const core::Color& ) override { fill_count++; }
 
+	bool get_image_size( const std::string& image, float& w, float& h ) const override
+	{
+		auto i = image_sizes.find( image );
+		if ( i == image_sizes.end() ) return false;
+		w = i->second.first;
+		h = i->second.second;
+		return true;
+	}
+
+	void draw_image( const core::ui::Rect& r, const std::string& image, const core::ui::Rect& source, const core::Color& tint ) override
+	{
+		images.push_back( { r, image, source, tint } );
+	}
+
 	float measure_text_width( const char* text, float font_size ) const override
 	{
 		return static_cast< float >( count_codepoints( text ) ) * font_size * 0.5f;
@@ -51,7 +99,7 @@ public:
 
 	float measure_line_height( float font_size ) const override { return font_size * 1.25f; }
 
-	void clear() { texts.clear(); rects.clear(); fill_count = 0; }
+	void clear() { texts.clear(); rects.clear(); images.clear(); fill_count = 0; }
 
 	bool has_text( const std::string& t ) const
 	{

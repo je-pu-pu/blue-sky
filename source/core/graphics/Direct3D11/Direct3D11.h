@@ -153,6 +153,17 @@ public:
 
 	[[nodiscard]] Texture* load_texture( const char* );
 
+	/**
+	 * UI 用の画像を読み込む（失敗したら例外）
+	 *
+	 * - 乗算済みアルファ（RGB×A）に変換する。線形補間で透明部分の色が縁ににじまない
+	 * - ミップマップは作らない（縮小時に 1 段粗い画像と混ざってぼけたり、アトラスの隣の部品が混ざったりしない）
+	 * - 色空間のメタデータ（PNG の sRGB チャンクなど）は無視して常に UNORM で作る（書き出したツールで明るさが変わらない）
+	 *
+	 * 描画は乗算済みアルファ用の technique（sprite_premultiplied）で行うこと。
+	 */
+	[[nodiscard]] Texture* load_texture_premultiplied( const char* );
+
 	void bind_texture_to_ds( uint_t, const Texture* );
 	void bind_texture_to_ps( uint_t, const Texture* );
 

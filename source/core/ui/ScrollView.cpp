@@ -95,8 +95,8 @@ void ScrollView::render( Renderer& renderer, const UIContext& ctx ) const
 		const float_t thumb_h = std::max( 24.f, rect_.h * rect_.h / content_height_ );
 		const float_t thumb_y = rect_.y + ( rect_.h - thumb_h ) * ( scroll_ / max_scroll );
 
-		renderer.draw_rect( Rect( bar_x, rect_.y, scrollbar_width_, rect_.h ), ctx.theme.track );
-		renderer.draw_rect( Rect( bar_x, thumb_y, scrollbar_width_, thumb_h ), ctx.theme.accent );
+		draw_brush( renderer, Rect( bar_x, rect_.y, scrollbar_width_, rect_.h ), ctx.theme.track );
+		draw_brush( renderer, Rect( bar_x, thumb_y, scrollbar_width_, thumb_h ), pick_brush( renderer, ctx.theme.scroll_thumb, ctx.theme.accent ) );
 	}
 }
 

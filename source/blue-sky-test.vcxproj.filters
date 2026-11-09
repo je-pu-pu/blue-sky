@@ -18,6 +18,9 @@
     <ClCompile Include="test\ui\UIWidgetTest.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="test\ui\UIImageTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
     <ClCompile Include="test\ui\UIScreenTest.cpp">
       <Filter>ui</Filter>
     </ClCompile>

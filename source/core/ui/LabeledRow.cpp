@@ -31,7 +31,7 @@ void LabeledRow::render_row( Renderer& renderer, const UIContext& ctx ) const
 {
 	const auto& t = ctx.theme;
 
-	renderer.draw_rect( rect_, focused_ ? t.row_focused : t.row );
+	draw_brush( renderer, rect_, focused_ ? t.row_focused : t.row );
 	renderer.draw_text( label_rect_, ctx.tr( label_key_ ).c_str(), make_text_style( value_color( ctx ), t.font_size_normal ) );
 }
 

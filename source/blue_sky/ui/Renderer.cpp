@@ -1,13 +1,19 @@
 #include "Renderer.h"
 
+#include <blue_sky/DebugLog.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <core/graphics/Sprite.h>
+#include <core/graphics/Texture.h>
+#include <core/ui/PixelSnap.h>
+
+#include <common/exception.h>
 
 #include <win/Rect.h>
 
 #include <algorithm>
 #include <cmath>
+#include <exception>
 
 namespace blue_sky::ui
 {
@@ -67,17 +73,48 @@ void Renderer::draw_text( const Rect& rect, const char_t* text, const core::grap
 	gm_->draw_text( p.x, p.y, p.right(), p.bottom(), text, scaled );
 }
 
+win::Rect Renderer::to_pixel_rect( const Rect& r ) const
+{
+	// 丸めの規則は core::ui::to_pixel_rect（テスト用の Mock と共有）
+	const core::ui::PixelRect p = core::ui::to_pixel_rect( r, get_scale(), get_offset_x(), get_offset_y() );
+	return win::Rect( static_cast< LONG >( p.left ), static_cast< LONG >( p.top ), static_cast< LONG >( p.right ), static_cast< LONG >( p.bottom ) );
+}
+
+float_t Renderer::get_pixel_scale() const
+{
+	return get_scale();
+}
+
+Renderer::Rect Renderer::snap_to_pixels( const Rect& r ) const
+{
+	return core::ui::snap_rect_to_pixels( r, get_scale(), get_offset_x(), get_offset_y() );
+}
+
+string_t Renderer::normalize_image_name( const string_t& image )
+{
+	string_t name = image;
+
+	for ( auto& c : name )
+	{
+		if ( c == '\\' )
+		{
+			c = '/';
+		}
+	}
+
+	while ( name.size() >= 2 && name[ 0 ] == '.' && name[ 1 ] == '/' )
+	{
+		name.erase( 0, 2 );
+	}
+
+	return name;
+}
+
 void Renderer::draw_rect( const Rect& rect, const Color& color )
 {
-	const Rect p = to_physical( rect );
+	const win::Rect px = to_pixel_rect( rect );
 
-	// 端数で 1 ピクセルの隙間ができないよう、左上は切り捨て・右下は切り上げ
-	const LONG left = static_cast< LONG >( std::floor( p.x ) );
-	const LONG top = static_cast< LONG >( std::floor( p.y ) );
-	const LONG right = static_cast< LONG >( std::ceil( p.right() ) );
-	const LONG bottom = static_cast< LONG >( std::ceil( p.bottom() ) );
-
-	if ( right <= left || bottom <= top )
+	if ( px.right() <= px.left() || px.bottom() <= px.top() )
 	{
 		return;
 	}
@@ -85,7 +122,7 @@ void Renderer::draw_rect( const Rect& rect, const Color& color )
 	auto* sprite = gm_->get_sprite();
 
 	sprite->begin();
-	sprite->draw_color( win::Rect( left, top, right, bottom ), color );
+	sprite->draw_color( px, color );
 	sprite->end();
 }
 
@@ -95,6 +132,98 @@ void Renderer::fill_screen( const Color& color )
 
 	sprite->begin();
 	sprite->draw_color( win::Rect( 0, 0, gm_->get_screen_width(), gm_->get_screen_height() ), color );
+	sprite->end();
+}
+
+const core::graphics::Texture* Renderer::find_image( const string_t& image ) const
+{
+	if ( image.empty() )
+	{
+		return nullptr;
+	}
+
+	if ( auto i = images_.find( image ); i != images_.end() )
+	{
+		return i->second;
+	}
+
+	// 初回だけ読み込む。失敗も覚えておき、毎フレーム読み直さない
+	// 名前を正規化してからテクスチャの名前にする（"ui/a.png" と "./ui/a.png" を二重に読まない）
+	// UI 用の読み込み（乗算済みアルファ・ミップなし）を使う。描画も乗算済み用の technique で行う
+	const core::graphics::Texture* texture = nullptr;
+	const string_t name = normalize_image_name( image );
+	const string_t path = string_t( IMAGE_DIRECTORY ) + name;
+
+	try
+	{
+		texture = gm_->load_named_texture_premultiplied( ( string_t( "ui:" ) + name ).c_str(), path.c_str() );
+	}
+	catch ( const common::exception< std::string >& e )
+	{
+		debug_log( "[UI] 画像を読み込めません: " + path + " (" + e.data() + ")" );
+	}
+	catch ( const std::exception& e )
+	{
+		debug_log( "[UI] 画像を読み込めません: " + path + " (" + e.what() + ")" );
+	}
+	catch ( ... )
+	{
+		// 例外の型はエンジン内で統一されていない（DIRECT_X_FAIL_CHECK は別の型を投げる）。UI の画像 1 枚のために落とさない
+		debug_log( "[UI] 画像を読み込めません: " + path + " (不明な例外)" );
+	}
+
+	if ( texture && ( texture->get_width() == 0 || texture->get_height() == 0 ) )
+	{
+		texture = nullptr;
+	}
+
+	images_[ image ] = texture;
+	return texture;
+}
+
+bool Renderer::get_image_size( const string_t& image, float_t& width, float_t& height ) const
+{
+	const auto* texture = find_image( image );
+
+	if ( ! texture )
+	{
+		return false;
+	}
+
+	width = static_cast< float_t >( texture->get_width() );
+	height = static_cast< float_t >( texture->get_height() );
+	return true;
+}
+
+void Renderer::draw_image( const Rect& rect, const string_t& image, const Rect& source, const Color& tint )
+{
+	const auto* texture = find_image( image );
+
+	if ( ! texture )
+	{
+		return;
+	}
+
+	const win::Rect px = to_pixel_rect( rect );
+
+	if ( px.right() <= px.left() || px.bottom() <= px.top() )
+	{
+		return;
+	}
+
+	const float_t tw = static_cast< float_t >( texture->get_width() );
+	const float_t th = static_cast< float_t >( texture->get_height() );
+
+	core::graphics::Sprite::UVRect uv;
+	uv.u0 = source.x / tw;
+	uv.v0 = source.y / th;
+	uv.u1 = source.right() / tw;
+	uv.v1 = source.bottom() / th;
+
+	auto* sprite = gm_->get_sprite();
+
+	sprite->begin();
+	sprite->draw_uv( px, texture, uv, tint, core::graphics::Sprite::AlphaMode::PREMULTIPLIED );
 	sprite->end();
 }
 

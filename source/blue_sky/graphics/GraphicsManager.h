@@ -117,6 +117,7 @@ protected:
 	[[nodiscard]] virtual ShadowMap* create_shadow_map( uint_t, uint_t ) const = 0;
 	[[nodiscard]] virtual Line* create_line() const = 0;
 	[[nodiscard]] virtual Texture* load_texture_file( const char_t* ) const = 0;
+	[[nodiscard]] virtual Texture* load_texture_file_premultiplied( const char_t* ) const = 0;
 
 	void update_constant_buffers() const;
 
@@ -175,8 +176,12 @@ public:
 
 	// Texture
 	Texture* load_texture( const char_t* file_name ) override { return load_named_texture( file_name, file_name ); }
+	// 読み込みに失敗すると例外（common::exception< std::string >。std::exception ではない）を投げる。nullptr は返らない
 	Texture* load_named_texture( const char_t* name, const char_t* file_name );
 	Texture* get_texture( const char_t* name );
+
+	/// UI 用の画像を名前付きで読み込む（乗算済みアルファ・ミップなし。詳細は Direct3D11::load_texture_premultiplied）。失敗すると例外
+	Texture* load_named_texture_premultiplied( const char_t* name, const char_t* file_name );
 	Texture* get_null_texture() { return null_texture_; }
 
 	void setup_default_shaders();

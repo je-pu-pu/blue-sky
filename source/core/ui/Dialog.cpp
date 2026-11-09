@@ -122,8 +122,8 @@ void Dialog::update( float_t dt, UIContext& ctx )
 
 void Dialog::render( Renderer& renderer, const UIContext& ctx ) const
 {
-	renderer.draw_rect( rect_, ctx.theme.panel );
-	renderer.draw_rect( Rect( rect_.x, rect_.y, rect_.w, 6.f ), ctx.theme.accent );
+	draw_brush( renderer, rect_, ctx.theme.panel );
+	draw_brush( renderer, Rect( rect_.x, rect_.y, rect_.w, 6.f ), pick_brush( renderer, ctx.theme.dialog_header, ctx.theme.accent ) );
 	render_children( renderer, ctx );
 }
 

@@ -72,6 +72,7 @@ protected:
 	[[nodiscard]] ShadowMap* create_shadow_map( uint_t, uint_t ) const override;
 	[[nodiscard]] Line* create_line() const override;
 	[[nodiscard]] Texture* load_texture_file( const char_t* ) const override;
+	[[nodiscard]] Texture* load_texture_file_premultiplied( const char_t* ) const override;
 
 	void render_debug_axis_model() const override;
 

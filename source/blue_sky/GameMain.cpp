@@ -42,6 +42,8 @@
 #include <game/Config.h>
 
 #include <blue_sky/GameSettings.h>
+#include <blue_sky/DebugLog.h>
+#include "Scene/OverlayRenderRange.h"
 #include <core/setting/SettingStore.h>
 #include <core/ui/StringTable.h>
 #include <core/ui/Theme.h>
@@ -174,6 +176,23 @@ GameMain::GameMain()
 	ui_theme_ = std::make_unique< core::ui::Theme >();
 	ui_strings_ = std::make_unique< core::ui::StringTable >();
 	ui_strings_->load_file( "media/text/ja.txt" );
+
+	// 見た目の差し替え : 設定 ui.theme にテーマファイルが指定されていれば、既定のテーマを上書きする
+	// （const で読む。非 const の get は既定値を設定に書き込んでしまうため）
+	if ( const string_t theme_path = static_cast< const Config& >( * get_config() ).get< string_t >( "ui.theme", "" ); ! theme_path.empty() )
+	{
+		std::vector< string_t > errors;
+
+		if ( ! core::ui::load_theme_file( * ui_theme_, theme_path.c_str(), & errors ) )
+		{
+			debug_log( "[UI] テーマファイルを開けません: " + theme_path );
+		}
+
+		for ( const auto& e : errors )
+		{
+			debug_log( "[UI] テーマファイル " + theme_path + " の " + e );
+		}
+	}
 
 	update_render_data_for_game();
 }
@@ -498,13 +517,33 @@ void GameMain::apply_display_settings()
 
 void GameMain::render()
 {
-	// ベースシーンを常に描画
-	scene_->render();
+	// 描画する範囲を上から決める
+	// - 不透明なオーバーレイ（is_transparent() が false）より下は、ベースシーンも含めて描かない
+	// - 下のオーバーレイを隠すオーバーレイ（メニューなど）より下のオーバーレイは描かない（ベースシーンは描く）
+	std::vector< OverlayLayerInfo > layers;
+	layers.reserve( overlay_scene_stack_.size() );
 
-	// オーバーレイシーンを上から順に描画
-	for ( auto& overlay : overlay_scene_stack_ )
+	for ( const auto& overlay : overlay_scene_stack_ )
 	{
-		overlay->render();
+		layers.push_back( { overlay->is_transparent(), overlay->hides_overlays_below() } );
+	}
+
+	const OverlayRenderRange range = compute_overlay_render_range( layers );
+
+	if ( range.render_base )
+	{
+		scene_->render();
+	}
+	else
+	{
+		// 画面のクリアはベースシーンの render() の中で行っているので、描かないときはここでクリアする
+		get_graphics_manager()->clear_default_view();
+	}
+
+	// オーバーレイシーンを下から順に描画
+	for ( size_t i = range.first_overlay; i < overlay_scene_stack_.size(); i++ )
+	{
+		overlay_scene_stack_[ i ]->render();
 	}
 
 	if ( is_command_mode_ )

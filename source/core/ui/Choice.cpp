@@ -110,7 +110,7 @@ void Choice::render( Renderer& renderer, const UIContext& ctx ) const
 	const bool can_prev = wrap_ || index != 0;
 	const bool can_next = wrap_ || index < 0 || index < n - 1;
 
-	renderer.draw_rect( value_rect_.inset( 0.f, rect_.h * 0.15f ), t.track );
+	draw_brush( renderer, value_rect_.inset( 0.f, rect_.h * 0.15f ), t.track );
 	renderer.draw_text( left_arrow_rect_, "<", make_text_style( can_prev ? fg : t.text_disabled, t.font_size_normal, core::graphics::HAlign::CENTER ) );
 	renderer.draw_text( right_arrow_rect_, ">", make_text_style( can_next ? fg : t.text_disabled, t.font_size_normal, core::graphics::HAlign::CENTER ) );
 

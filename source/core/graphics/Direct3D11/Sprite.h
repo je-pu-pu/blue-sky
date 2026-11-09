@@ -58,6 +58,7 @@ protected:
 	const InputLayout*			input_layout_;
 	const EffectTechnique*		effect_technique_;
 	const EffectTechnique*		color_technique_;		///< テクスチャなし・頂点カラーのみ
+	const EffectTechnique*		premultiplied_technique_;	///< 乗算済みアルファのテクスチャ（UI 用）
 
 	float_t			ortho_offset_;		///< 立体視用
 
@@ -65,6 +66,10 @@ protected:
 	void create_index_buffer();
 
 	void draw( const Rect*, const Texture*, const Rect*, const Color* ) override;
+
+	void draw_uv_impl( const Rect& dst, const Texture* texture, const UVRect& uv, const Color& color, AlphaMode mode ) override;
+
+	void draw_quad( const Rect& dst, const UVRect& uv, const Color& color, const EffectTechnique* technique, const Texture* texture );
 
 public:
 	explicit Sprite( Direct3D* );

@@ -1,0 +1,57 @@
+# UI テーマのサンプル（画像による装飾の例）
+#
+# 使い方 : blue-sky.config に  ui.theme media/ui/sample_theme.txt  を書く。
+# 書いた項目だけが既定のテーマを上書きする。仕様は core/ui/Theme.h の load_theme() を参照。
+#
+# 面（panel / row / row_focused / row_pressed / row_disabled / track / accent / slider_fill / fill_disabled /
+#     slider_knob / toggle_on / tab_indicator / scroll_thumb / dialog_header）:
+#   用途別の面（row_disabled / slider_fill / tab_indicator / scroll_thumb / dialog_header）は、未指定なら共通の面（row / accent）で代用する
+#   <面>            単色（<面>.color の省略形）
+#   <面>.image       画像名（media/texture/ からの相対パス。\ は / に直す）
+#                    画像は読み込み時に乗算済みアルファにする。ミップマップは作らない
+#   <面>.slice       9 分割の枠幅（元画像のピクセル。1 つ = 四辺同じ / 4 つ = 左 上 右 下）
+#   <面>.slice_scale 枠幅の倍率
+#   <面>.source      切り出し範囲（x y 幅 高さ）。1 枚の画像に複数の部品を詰めるとき
+#   <面>.tint        画像に掛け合わせる色
+#   <面>.color       画像が無い・読めないときの単色
+# 色は #RRGGBB / #RRGGBBAA / r g b a（0〜1）のどれでも書ける。
+
+panel.image        = ui/sample/panel.png
+panel.slice        = 20
+panel.color        = #0C0F18F0
+
+# 模様のある枠の例（辺の飾りを引き伸ばさずに並べる）。試すときは上の 3 行の代わりに使う
+#   panel.image       = ui/sample/panel_ornate.png
+#   panel.slice       = 16
+#   panel.slice_scale = 2
+#   panel.edge        = round     # stretch（引き伸ばし）/ repeat（等倍で並べる）/ round（整数枚に合わせて並べる）
+#   panel.center      = stretch
+
+row.image          = ui/sample/row.png
+row.slice          = 14
+row_focused.image  = ui/sample/row_focused.png
+row_focused.slice  = 14
+row_pressed.image  = ui/sample/row_pressed.png
+row_pressed.slice  = 14
+
+track.image        = ui/sample/track.png
+track.slice        = 10
+
+# accent は細い帯（タブの下線・ダイアログ上端の帯・トグルの帯）にも使うので単色のままにし、
+# 太い面は用途別の面で画像にする（細い帯に 9 分割の画像を使うと角が潰れる）
+accent             = #5A9AFF
+slider_fill.image  = ui/sample/accent.png
+slider_fill.slice  = 10
+fill_disabled.image = ui/sample/accent.png
+fill_disabled.slice = 10
+fill_disabled.tint  = 0.5 0.5 0.5 1
+toggle_on.image    = ui/sample/accent.png
+toggle_on.slice    = 10
+scroll_thumb.image = ui/sample/accent.png
+scroll_thumb.slice = 6
+
+slider_knob.image  = ui/sample/knob.png
+slider_knob_width  = 24
+
+text_focused       = #FFFFFF
+header             = #8CC0FF

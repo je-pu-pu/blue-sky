@@ -46,6 +46,7 @@ public:
 
 	bool is_overlay() const override { return true; }
 	bool is_transparent() const override { return true; }
+	bool hides_overlays_below() const override { return true; }
 
 }; // class UIOverlayScene
 

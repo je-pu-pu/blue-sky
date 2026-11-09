@@ -113,11 +113,11 @@ void TabView::render( Renderer& renderer, const UIContext& ctx ) const
 	{
 		const bool selected = i == current_;
 
-		renderer.draw_rect( tab_rects_[ i ], selected ? t.row_focused : t.row );
+		draw_brush( renderer, tab_rects_[ i ], selected ? t.row_focused : t.row );
 
 		if ( selected )
 		{
-			renderer.draw_rect( Rect( tab_rects_[ i ].x, tab_rects_[ i ].bottom() - 6.f, tab_rects_[ i ].w, 6.f ), t.accent );
+			draw_brush( renderer, Rect( tab_rects_[ i ].x, tab_rects_[ i ].bottom() - 6.f, tab_rects_[ i ].w, 6.f ), pick_brush( renderer, t.tab_indicator, t.accent ) );
 		}
 
 		renderer.draw_text( tab_rects_[ i ], ctx.tr( titles_[ i ] ).c_str(), make_text_style( selected ? t.text_focused : t.text_dim, t.font_size_normal, core::graphics::HAlign::CENTER ) );

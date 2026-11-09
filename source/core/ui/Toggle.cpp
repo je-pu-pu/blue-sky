@@ -62,11 +62,19 @@ void Toggle::render( Renderer& renderer, const UIContext& ctx ) const
 
 	// 値エリア : 背景 + 「オン／オフ」
 	const Rect box = value_rect_.inset( 0.f, rect_.h * 0.15f );
-	renderer.draw_rect( box, t.track );
+	draw_brush( renderer, box, t.track );
 
 	if ( on )
 	{
-		renderer.draw_rect( Rect( box.x, box.y, 8.f, box.h ), t.accent );
+		// オンの見た目がテーマにあれば欄全体に重ねる。なければ左端に帯
+		if ( can_draw( renderer, t.toggle_on ) )
+		{
+			draw_brush( renderer, box, t.toggle_on );
+		}
+		else
+		{
+			draw_brush( renderer, Rect( box.x, box.y, 8.f, box.h ), t.accent );
+		}
 	}
 
 	renderer.draw_text( box, ctx.tr( on ? "ui.on" : "ui.off" ).c_str(), make_text_style( value_color( ctx ), t.font_size_normal, core::graphics::HAlign::CENTER ) );

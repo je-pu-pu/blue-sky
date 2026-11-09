@@ -202,6 +202,11 @@ GraphicsManager::Texture* GraphicsManager::load_texture_file( const char_t* file
 	return direct_3d_->load_texture( file_path );
 }
 
+GraphicsManager::Texture* GraphicsManager::load_texture_file_premultiplied( const char_t* file_path ) const
+{
+	return direct_3d_->load_texture_premultiplied( file_path );
+}
+
 #if 0
 /**
  * 指定した名前のテクスチャをアンロードする

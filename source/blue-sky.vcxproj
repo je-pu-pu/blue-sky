@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="core\ui\Image.cpp" />
+    <ClCompile Include="core\ui\Theme.cpp" />
+    <ClCompile Include="core\ui\Brush.cpp" />
     <ClCompile Include="Scene\UIOverlayScene.cpp" />
     <ClCompile Include="blue_sky\GameSettings.cpp" />
     <ClCompile Include="blue_sky\ui\UIInputBuilder.cpp" />
@@ -167,6 +170,11 @@
     <ClCompile Include="Scene\TransformTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\OverlayRenderRange.h" />
+    <ClInclude Include="core\ui\PixelSnap.h" />
+    <ClInclude Include="blue_sky\DebugLog.h" />
+    <ClInclude Include="core\ui\Image.h" />
+    <ClInclude Include="core\ui\Brush.h" />
     <ClInclude Include="Scene\UIOverlayScene.h" />
     <ClInclude Include="blue_sky\GameSettings.h" />
     <ClInclude Include="blue_sky\ui\UIInputBuilder.h" />

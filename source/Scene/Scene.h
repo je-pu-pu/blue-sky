@@ -129,8 +129,12 @@ public:
 	/// オーバーレイシーン ( ポーズメニューなど ) かどうか
 	virtual bool is_overlay() const { return false; }
 
-	/// オーバーレイシーンの場合、下のシーンを描画するかどうか
+	/// オーバーレイシーンの場合、下のシーンを描画するかどうか（false なら、これより下はベースシーンも含めて描かない）
 	virtual bool is_transparent() const { return false; }
+
+	/// オーバーレイシーンの場合、下に積まれたオーバーレイを隠すかどうか（ベースシーンは is_transparent() に従う）
+	/// メニューの上にメニューを重ねるとき（ポーズ → オプション）に、下のメニューが透けたり暗幕が二重になったりしないようにする
+	virtual bool hides_overlays_below() const { return false; }
 
 	/// オーバーレイシーンが再び最前面に戻ったとき（上に積んだオーバーレイが閉じたとき）に呼ばれる
 	virtual void on_resume() { }

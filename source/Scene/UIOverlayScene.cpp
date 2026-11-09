@@ -26,6 +26,9 @@ UIOverlayScene::UIOverlayScene()
 
 	input_builder_.reset( * get_input(), renderer_ );
 	screen_.suppress_input( 1 );
+
+	// テーマの画像を先に読む（最初の描画やレイアウトの途中で読み込みが走って引っかからないように）
+	core::ui::preload_theme_images( GameMain::get_instance()->get_ui_theme(), renderer_ );
 }
 
 UIOverlayScene::~UIOverlayScene() = default;

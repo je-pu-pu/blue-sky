@@ -64,10 +64,11 @@ bool Button::on_pointer( const PointerEvent& e, UIContext& ctx )
 void Button::render( Renderer& renderer, const UIContext& ctx ) const
 {
 	const auto& t = ctx.theme;
-	const Color& bg = pressed_ ? t.row_pressed : ( focused_ ? t.row_focused : t.row );
+	const Brush& bg = ! is_enabled() ? pick_brush( renderer, t.row_disabled, t.row )
+		: ( pressed_ ? t.row_pressed : ( focused_ ? t.row_focused : t.row ) );
 	const Color& fg = ! is_enabled() ? t.text_disabled : ( focused_ ? t.text_focused : t.text );
 
-	renderer.draw_rect( rect_, bg );
+	draw_brush( renderer, rect_, bg );
 	renderer.draw_text( rect_, ctx.tr( text_key_ ).c_str(), make_text_style( fg, t.font_size_normal, core::graphics::HAlign::CENTER ) );
 }
 

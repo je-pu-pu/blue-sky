@@ -4,6 +4,7 @@
 #include <core/ui/Button.h>
 #include <core/ui/Choice.h>
 #include <core/ui/Dialog.h>
+#include <core/ui/Grid.h>
 #include <core/ui/Stack.h>
 #include <core/ui/TextField.h>
 #include <core/ui/TextFit.h>
@@ -228,6 +229,68 @@ TEST( TextFieldTest, UTF8の文字数と末尾の1文字の削除 )
 	EXPECT_EQ( "", TextField::erase_last_codepoint( "" ) );
 	EXPECT_EQ( "𠮷", TextField::to_utf8( U'𠮷' ) );
 	EXPECT_EQ( "", TextField::to_utf8( 0xD800 ) );		// サロゲートは文字ではない
+}
+
+// ---- Grid と層の属性（設計上の問題 B8・B7） ----
+
+TEST_F( ActionTest, Gridは上下左右の隣のセルへ移り端では祖先へ抜ける )
+{
+	// 3 列 × 2 行（最後の行は 2 個）の下にボタン
+	auto* grid = root->add< Grid >( 3 );
+	std::vector< Button* > cells;
+
+	for ( int i = 0; i < 5; i++ )
+	{
+		cells.push_back( grid->add< Button >( "cell" + std::to_string( i ), nullptr ) );
+	}
+
+	auto* below = root->add< Button >( "below", nullptr );
+	ready();
+
+	ASSERT_TRUE( cells[ 0 ]->is_focused() );
+
+	press_nav( NavDir::RIGHT );
+	EXPECT_TRUE( cells[ 1 ]->is_focused() );
+
+	press_nav( NavDir::DOWN );
+	EXPECT_TRUE( cells[ 4 ]->is_focused() );
+
+	press_nav( NavDir::RIGHT );		// 行の端（右隣は無い）: 祖先（縦の Stack）は左右の軸ではないので動かない
+	EXPECT_TRUE( cells[ 4 ]->is_focused() );
+
+	press_nav( NavDir::UP );
+	EXPECT_TRUE( cells[ 1 ]->is_focused() );
+
+	press_nav( NavDir::RIGHT );
+	press_nav( NavDir::DOWN );		// 3 列目の下は空 : 下の行の最後のセルへ
+	EXPECT_TRUE( cells[ 4 ]->is_focused() );
+
+	press_nav( NavDir::DOWN );		// 最後の行の下 : Grid から抜けて下のボタンへ
+	EXPECT_TRUE( below->is_focused() );
+
+	// セルは等分の幅で並ぶ
+	EXPECT_FLOAT_EQ( cells[ 0 ]->rect().w, cells[ 2 ]->rect().w );
+	EXPECT_FLOAT_EQ( cells[ 0 ]->rect().y, cells[ 2 ]->rect().y );
+	EXPECT_LT( cells[ 0 ]->rect().y, cells[ 3 ]->rect().y );
+}
+
+TEST_F( ActionTest, 表示だけの層は入力を奪わない )
+{
+	bool pressed = false;
+	root->add< Button >( "ok", [&] { pressed = true; } );
+	ready();
+
+	// HUD のような表示だけの層を積む
+	auto hud = std::make_unique< Stack >( Axis::VERTICAL );
+	hud->add< Button >( "hud", nullptr );
+	screen.push_layer( std::move( hud ), nullptr, false, false );
+	step();
+
+	EXPECT_EQ( 2u, screen.get_layer_count() );
+
+	// 決定は下の層のボタンに届く
+	confirm();
+	EXPECT_TRUE( pressed );
 }
 
 // ---- 文字列キーと寸法（設計上の問題 B4・B12） ----

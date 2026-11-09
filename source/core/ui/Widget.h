@@ -158,6 +158,14 @@ namespace core::ui
 		virtual bool nav_wrap() const { return false; }
 
 		/**
+		 * コンテナ独自のフォーカス移動：子 index から dir の方向の次の子の番号（無ければ -1）
+		 *
+		 * 既定は -1（独自の移動なし。nav_axis に従う）。Grid が上下左右の隣を返す。
+		 * -1 を返すと、祖先のコンテナへ抜ける。
+		 */
+		virtual int nav_next_index( int /* index */, NavDir ) const { return -1; }
+
+		/**
 		 * 子孫を見せる範囲（ScrollView の表示範囲）。nullptr なら制限なし
 		 *
 		 * 範囲がある場合、範囲に完全に収まらない子孫は描画もヒット判定もしない

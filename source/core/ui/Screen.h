@@ -53,6 +53,7 @@ namespace core::ui
 			std::function< void() > on_cancel;
 			Widget* focused = nullptr;
 			bool dim = false;	///< 背面を暗くする
+			bool modal = true;	///< 入力を受け取る（false なら表示だけ。HUD・トーストなど、下の層の操作を妨げない）
 		};
 
 		const Theme& theme_;
@@ -81,8 +82,17 @@ namespace core::ui
 		UIContext make_context();
 		UIContext make_context() const;
 
-		Layer* top_layer() { return layers_.empty() ? nullptr : & layers_.back(); }
-		const Layer* top_layer() const { return layers_.empty() ? nullptr : & layers_.back(); }
+		/// 入力を受け取る層（上から見て最初のモーダルな層。表示だけの層は飛ばす）
+		Layer* top_layer()
+		{
+			for ( auto i = layers_.rbegin(); i != layers_.rend(); ++i )
+			{
+				if ( i->modal ) return & *i;
+			}
+			return layers_.empty() ? nullptr : & layers_.front();
+		}
+
+		const Layer* top_layer() const { return const_cast< Screen* >( this )->top_layer(); }
 
 		Widget* hit_test( Widget* w, float_t x, float_t y, const Rect* clip = nullptr ) const;
 		Widget* find_nav_target( Widget* from, NavDir dir ) const;
@@ -112,8 +122,14 @@ namespace core::ui
 		/// ルート層を設定する（初期化時に使う。即時）。on_cancel はルートでキャンセルされたとき（戻る）
 		Widget* set_root( std::unique_ptr< Widget > root, std::function< void() > on_cancel );
 
-		/// モーダル層を積む（post される）
-		void push_layer( std::unique_ptr< Widget > root, std::function< void() > on_cancel, bool dim = true );
+		/**
+		 * 層を積む（post される）
+		 *
+		 * @param dim 背面を暗くする
+		 * @param modal 入力を受け取る。false なら表示だけの層（HUD・トースト・ツールチップ）で、
+		 *              入力は下のモーダルな層が受け取り続ける（以前は層はすべて入力を奪うモーダルだった）
+		 */
+		void push_layer( std::unique_ptr< Widget > root, std::function< void() > on_cancel, bool dim = true, bool modal = true );
 
 		/// 指定した層を閉じる（post される。既に無ければ何もしない）
 		void close_layer( const Widget* root );

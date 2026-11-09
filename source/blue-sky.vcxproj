@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="core\ui\Grid.cpp" />
     <ClCompile Include="Scene\OptionsController.cpp" />
     <ClCompile Include="core\ui\TextFit.cpp" />
     <ClCompile Include="core\ui\TextField.cpp" />
@@ -173,6 +174,7 @@
     <ClCompile Include="Scene\TransformTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\ui\Grid.h" />
     <ClInclude Include="Scene\OptionsController.h" />
     <ClInclude Include="core\ui\TextFit.h" />
     <ClInclude Include="Scene\SceneRequest.h" />

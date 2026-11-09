@@ -111,17 +111,27 @@ Widget* Screen::set_root( std::unique_ptr< Widget > root, std::function< void() 
 	return raw;
 }
 
-void Screen::push_layer( std::unique_ptr< Widget > root, std::function< void() > on_cancel, bool dim )
+void Screen::push_layer( std::unique_ptr< Widget > root, std::function< void() > on_cancel, bool dim, bool modal )
 {
 	// std::function はコピー可能である必要があるので shared_ptr に包む
 	auto holder = std::make_shared< std::unique_ptr< Widget > >( std::move( root ) );
 
-	post( [this, holder, on_cancel, dim]
+	post( [this, holder, on_cancel, dim, modal]
 	{
 		Layer layer;
 		layer.root = std::move( *holder );
 		layer.on_cancel = on_cancel;
 		layer.dim = dim;
+		layer.modal = modal;
+
+		// 表示だけの層は、下の層の操作（押している・キー待ち）を妨げない
+		if ( ! modal )
+		{
+			layers_.push_back( std::move( layer ) );
+			layout_dirty_ = true;
+			layout();
+			return;
+		}
 
 		// 下の層の部品の「押している」「ドラッグ中」「キー待ち」を解除する
 		// （以前は Screen 側の捕捉を消すだけで、ボタンが押された見た目のまま残り、キー待ちも背面に残った）
@@ -470,9 +480,23 @@ Widget* Screen::find_nav_target( Widget* from, NavDir dir ) const
 	const Axis axis = axis_of( dir );
 	const int step = is_forward( dir ) ? 1 : -1;
 
-	// 祖先を遡り、同じ軸のコンテナの中で次の兄弟を探す
+	// 祖先を遡り、同じ軸のコンテナ（または独自の移動を持つコンテナ）の中で次の兄弟を探す
 	for ( Widget* child = from, * p = from->parent_; p; child = p, p = p->parent_ )
 	{
+		// 独自の移動（Grid など）: コンテナが次の子を決める。見つからなければ祖先へ抜ける
+		if ( const int index = p->index_of_child( child ); index >= 0 && p->nav_next_index( index, dir ) >= 0 )
+		{
+			for ( int i = p->nav_next_index( index, dir ); i >= 0; i = p->nav_next_index( i, dir ) )
+			{
+				if ( Widget* e = find_entry( p->child_at( static_cast< size_t >( i ) ), dir, from ) )
+				{
+					return e;
+				}
+			}
+
+			continue;
+		}
+
 		if ( p->nav_axis() != axis )
 		{
 			continue;

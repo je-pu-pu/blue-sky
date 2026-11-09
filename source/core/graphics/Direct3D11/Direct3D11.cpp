@@ -59,8 +59,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sam
 {
 	instance_ = this;
 
-	common::log( "log/d3d11.log", "init", false );
-
 	IDXGIFactory1* dxgi_factory = 0;
 	DIRECT_X_FAIL_CHECK( CreateDXGIFactory1( __uuidof( IDXGIFactory1 ), reinterpret_cast< void** >( & dxgi_factory ) ) );
 
@@ -944,7 +942,8 @@ void Direct3D11::log_adapter_desc( int index, const DXGI_ADAPTER_DESC1& adapter_
 		adapter_desc_string( AdapterLuid.HighPart ) + 
 		adapter_desc_string( Flags );
 
-	common::log( "log/adapter_info.log", text );
+	// ログの出口をそろえる（以前は log/adapter_info.log に別に書いていた）。std::cout は GameMain が debug_log へ流す
+	std::cout << "GPU の情報 :" << std::endl << common::convert_to_string( text ) << std::endl;
 }
 
 void Direct3D11::log_feature_level()
@@ -958,7 +957,7 @@ void Direct3D11::log_feature_level()
 	feature_level_map[ D3D_FEATURE_LEVEL_10_1 ] = "10.1";
 	feature_level_map[ D3D_FEATURE_LEVEL_11_0 ] = "11.0";
 
-	common::log( "log/d3d11.log", std::string( "created d3d11 device ( feature_level : " ) + feature_level_map[ device_->GetFeatureLevel() ] + " )" );
+	std::cout << "Direct3D 11 のデバイスを作りました（機能レベル : " << feature_level_map[ device_->GetFeatureLevel() ] << "）" << std::endl;
 }
 
 std::vector< Direct3D11::DisplayMode > Direct3D11::get_available_display_modes() const

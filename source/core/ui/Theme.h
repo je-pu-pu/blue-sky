@@ -79,6 +79,7 @@ struct Theme
 	float_t tab_badge_size			= 10.f;		///< タブの見出しの印（丸）の大きさ
 	float_t choice_arrow_width		= 0.25f;	///< 選択肢の左右の矢印の幅（値の欄に対する比率の上限）
 	float_t focus_marker_width		= 4.f;		///< フォーカス中の行・ボタンの左端の印の幅（色の違いだけに頼らない。0 で出さない）
+	float_t layer_open_duration		= 0.12f;	///< 層（ダイアログなど）を開くときに濃くしていく秒数（0 ですぐに出す）
 	float_t layer_close_duration	= 0.12f;	///< 層（ダイアログなど）を閉じるときに薄くしていく秒数（0 ですぐに消す）
 	float_t accent_bar_thickness	= 6.f;		///< 選択中のタブの下線・ダイアログ上端の帯の太さ
 	float_t toggle_mark_width		= 8.f;		///< オンのトグルの左端の帯の幅（toggle_on が未指定のとき）

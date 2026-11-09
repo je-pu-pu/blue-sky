@@ -2,6 +2,8 @@
 
 #include "CoherentNoise.h"
 
+#include <blue_sky/DebugLog.h>
+
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/NeuralStylizer.h>
 #include <core/graphics/Shader.h>
@@ -45,16 +47,16 @@ NeuralNprEffect::NeuralNprEffect( core::graphics::GraphicsManager* gm )
 		try
 		{
 			stylizer_ = std::make_unique< core::graphics::NeuralStylizer >( MODEL_FP16 );
-			OutputDebugStringA( "[NeuralNPR] model loaded.\n" );
+			debug_log( "[NeuralNPR] モデルを読み込みました" );
 		}
 		catch ( const std::exception& e )
 		{
-			OutputDebugStringA( ( std::string( "[NeuralNPR] load failed: " ) + e.what() ).c_str() );
+			debug_log( std::string( "[NeuralNPR] モデルを読み込めませんでした: " ) + e.what() );
 		}
 	}
 	else
 	{
-		OutputDebugStringA( "[NeuralNPR] model file not found (CWD?): media/neural/starry_boil_small_fp16.onnx\n" );
+		debug_log( "[NeuralNPR] モデルのファイルがありません（作業ディレクトリを確認）: media/neural/starry_boil_small_fp16.onnx" );
 	}
 }
 
@@ -100,7 +102,7 @@ bool NeuralNprEffect::apply( core::graphics::GraphicsManager* gm, core::graphics
 		}
 		catch ( const std::exception& e )
 		{
-			OutputDebugStringA( ( std::string( "[NeuralNPR] model reload failed: " ) + e.what() ).c_str() );
+			debug_log( std::string( "[NeuralNPR] モデルを読み直せませんでした: " ) + e.what() );
 		}
 		loaded_fp16_ = use_fp16_;  // 失敗してもループしないようフラグは合わせる
 	}
@@ -213,7 +215,7 @@ bool NeuralNprEffect::apply( core::graphics::GraphicsManager* gm, core::graphics
 		catch ( const std::exception& e )
 		{
 			enabled_ = false;
-			OutputDebugStringA( ( std::string( "[NeuralNPR] inference failed, disabling NPR: " ) + e.what() ).c_str() );
+			debug_log( std::string( "[NeuralNPR] 推論に失敗したので NPR を止めます: " ) + e.what() );
 		}
 	}
 

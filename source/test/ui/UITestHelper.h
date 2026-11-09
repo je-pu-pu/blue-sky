@@ -76,7 +76,8 @@ public:
 
 	void draw_text( const core::ui::Rect& r, const char* text, const core::graphics::TextStyle& ) override { texts.push_back( { r, text } ); }
 	void draw_rect( const core::ui::Rect& r, const core::Color& ) override { rects.push_back( r ); }
-	void fill_screen( const core::Color& ) override { fill_count++; }
+	void fill_screen( const core::Color& ) override { fill_count++; last_fill_opacity = get_opacity(); }
+	float last_fill_opacity = 1.f;		///< 最後に画面を塗ったときの不透明度（層を開く・閉じるアニメーションの確認）
 
 	bool get_image_size( const std::string& image, float& w, float& h ) const override
 	{

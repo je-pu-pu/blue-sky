@@ -50,6 +50,7 @@
 #include <cstdio>
 #include <cmath>
 #include <chrono>
+#include <blue_sky/DebugLog.h>
 
 #pragma comment( lib, "windowscodecs.lib" )
 
@@ -551,7 +552,7 @@ void DebugScene::render()
 			if ( ! depth_ok && frame_dump_index_ == 0 )
 			{
 				// 通常 MSAA 有効が原因。色は出るが深度が出ないので気付けるようにする。
-				OutputDebugStringW( L"[FrameDump] depth dump skipped (MSAA on?). Set graphics.multisample.count=1.\n" );
+				blue_sky::debug_log( "[FrameDump] 深度の保存を飛ばしました（MSAA が有効）。graphics.multisample.count を 1 にしてください" );
 			}
 
 			// モーションベクトルパス: シーン深度を再利用して速度 RT に描画し読み出す ( 真の動き / MSAA 可 )

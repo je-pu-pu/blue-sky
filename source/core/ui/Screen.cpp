@@ -124,6 +124,12 @@ void Screen::push_layer( std::unique_ptr< Widget > root, std::function< void() >
 		layer.dim = dim;
 		layer.modal = modal;
 
+		// 開くときに濃くしていく（最初の層は画面そのものなので、すぐに出す）
+		if ( theme_.layer_open_duration > 0.f && ! layers_.empty() )
+		{
+			layer.opening = 0.f;
+		}
+
 		// 表示だけの層は、下の層の操作（押している・キー待ち）を妨げない
 		if ( ! modal )
 		{
@@ -882,6 +888,16 @@ void Screen::update( const UIInput& input, float_t dt )
 	{
 		Layer& layer = layers_[ i ];
 
+		if ( layer.opening >= 0.f )
+		{
+			layer.opening += dt;
+
+			if ( layer.opening >= theme_.layer_open_duration )
+			{
+				layer.opening = -1.f;
+			}
+		}
+
 		if ( layer.closing >= 0.f )
 		{
 			layer.closing += dt;
@@ -931,6 +947,11 @@ void Screen::push_popup( std::unique_ptr< Widget > root, const Rect& anchor, flo
 		layer.on_cancel = on_cancel;
 		layer.dim = false;
 		layer.modal = true;
+
+		if ( theme_.layer_open_duration > 0.f && ! layers_.empty() )
+		{
+			layer.opening = 0.f;
+		}
 		layer.anchored = true;
 		layer.anchor = anchor;
 		layer.width = width;
@@ -1022,7 +1043,14 @@ void Screen::render( Renderer& renderer )
 	for ( const auto& layer : layers_ )
 	{
 		// 閉じている途中の層は、経過に合わせて薄くする（暗幕も一緒に）
-		const float_t opacity = layer.closing >= 0.f && theme_.layer_close_duration > 0.f ? 1.f - layer.closing / theme_.layer_close_duration : 1.f;
+		float_t opacity = layer.closing >= 0.f && theme_.layer_close_duration > 0.f ? 1.f - layer.closing / theme_.layer_close_duration : 1.f;
+
+		// 開いている途中の層は、経過に合わせて濃くする
+		if ( layer.opening >= 0.f && theme_.layer_open_duration > 0.f )
+		{
+			opacity = std::min( opacity, layer.opening / theme_.layer_open_duration );
+		}
+
 		renderer.set_opacity( opacity );
 
 		if ( layer.dim )

@@ -199,6 +199,7 @@ const FloatField FLOAT_FIELDS[] =
 	{ "safe_area", & Theme::safe_area, 0.f, 0.2f, false },
 	{ "tab_badge_size", & Theme::tab_badge_size, 0.f, 64.f, false },
 	{ "focus_marker_width", & Theme::focus_marker_width, 0.f, 64.f, false },
+	{ "layer_open_duration", & Theme::layer_open_duration, 0.f, 2.f, false },
 	{ "layer_close_duration", & Theme::layer_close_duration, 0.f, 2.f, false },
 	{ "accent_bar_thickness", & Theme::accent_bar_thickness, 0.f, INF, false },
 	{ "toggle_mark_width", & Theme::toggle_mark_width, 0.f, INF, false },

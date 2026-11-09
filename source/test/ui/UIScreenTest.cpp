@@ -384,3 +384,23 @@ TEST_F( DialogTest, 閉じる時間が0ならすぐに外れる )
 	screen.render( renderer );
 	EXPECT_EQ( 0, renderer.fill_count );
 }
+
+TEST_F( DialogTest, 開いたダイアログは濃くなりながら出て入力はすぐに受け取る )
+{
+	theme.layer_open_duration = 0.2f;
+	open();
+
+	// 開いた直後 : 薄い（暗幕も一緒に）。入力はもうダイアログが受け取る
+	screen.render( renderer );
+	EXPECT_LT( renderer.last_fill_opacity, 0.5f );
+	EXPECT_FLOAT_EQ( 1.f, renderer.get_opacity() );		// 描き終えたら元に戻す
+
+	// 時間が経てば濃くなりきる
+	step( core::ui::UIInput(), 0.25f );
+	screen.render( renderer );
+	EXPECT_FLOAT_EQ( 1.f, renderer.last_fill_opacity );
+
+	cancel();
+	ASSERT_EQ( 1u, pressed.size() );
+	EXPECT_EQ( 1, pressed[ 0 ] );
+}

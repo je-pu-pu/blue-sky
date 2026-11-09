@@ -176,6 +176,7 @@
     <ClCompile Include="Scene\TransformTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\InputRouting.h" />
     <ClInclude Include="blue_sky\CrashReport.h" />
     <ClInclude Include="core\ui\AnchorBox.h" />
     <ClInclude Include="core\ui\VirtualScreen.h" />

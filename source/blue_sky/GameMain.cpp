@@ -44,6 +44,7 @@
 #include <blue_sky/GameSettings.h>
 #include <blue_sky/DebugLog.h>
 #include "Scene/OverlayRenderRange.h"
+#include "Scene/InputRouting.h"
 #include <core/setting/SettingStore.h>
 #include <core/ui/StringTable.h>
 #include <core/ui/Theme.h>
@@ -491,26 +492,24 @@ bool GameMain::update()
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-	// オーバーレイシーンが存在する場合、ベースシーンの入力をブロック
-	input_->set_blocked( has_overlay_scene() );
+	// 入力を受け取る先を 1 か所で決める（コンソール → オーバーレイ → ベースシーン）。
+	// コンソールで打った文字やマウス操作で、UI やキャラクターが動かないように
+	const ImGuiIO& io = ImGui::GetIO();
+	const InputOwner input_owner = decide_input_owner( io.WantCaptureKeyboard || io.WantCaptureMouse, has_overlay_scene() );
 
 	if ( has_overlay_scene() )
 	{
-		// ベースシーンはポーズ中 (更新しない)
-		// オーバーレイシーンのトップのみ更新（入力を一時的に許可）
-		input_->set_blocked( false );
+		// ベースシーンはポーズ中 (更新しない)。オーバーレイシーンのトップのみ更新
+		input_->set_blocked( input_owner != InputOwner::OVERLAY );
 		overlay_scene_stack_.back()->update();
-		input_->set_blocked( true );
 	}
 	else
 	{
-		// 開発用のコンソール（ImGui）が入力を受け取っているときは、ゲームに入力を渡さない
-		// （コンソールで打った文字やマウス操作で、キャラクターが動かないように）
-		const ImGuiIO& io = ImGui::GetIO();
-		input_->set_blocked( io.WantCaptureKeyboard || io.WantCaptureMouse );
+		input_->set_blocked( input_owner != InputOwner::BASE_SCENE );
 		scene_->update();
-		input_->set_blocked( false );
 	}
+
+	input_->set_blocked( false );
 
 	render();
 

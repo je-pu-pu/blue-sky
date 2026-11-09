@@ -12,6 +12,7 @@
 #include <core/ui/TextFit.h>
 
 #include <Scene/SceneRequest.h>
+#include <Scene/InputRouting.h>
 
 using namespace core::ui;
 using ui_test::ScreenFixture;
@@ -464,4 +465,17 @@ TEST( SceneRequestTest, シーンが出す文字列を遷移の要求に変え�
 	EXPECT_EQ( ( SceneRequest{ SceneRequest::Type::REPLACE_BASE, "stage_select" } ), parse_scene_request( "base:stage_select", true ) );
 	EXPECT_EQ( ( SceneRequest{ SceneRequest::Type::REPLACE_OVERLAY, "options" } ), parse_scene_request( "options", true ) );
 	EXPECT_EQ( ( SceneRequest{ SceneRequest::Type::REPLACE_BASE, "title" } ), parse_scene_request( "title", false ) );
+}
+
+// ---- 入力を受け取る先（設計上の問題 B27） ----
+
+TEST( InputRoutingTest, コンソールが受け取っているときはUIにもゲームにも渡さずそれ以外は一番上へ渡す )
+{
+	using blue_sky::InputOwner;
+	using blue_sky::decide_input_owner;
+
+	EXPECT_EQ( InputOwner::CONSOLE, decide_input_owner( true, true ) );
+	EXPECT_EQ( InputOwner::CONSOLE, decide_input_owner( true, false ) );
+	EXPECT_EQ( InputOwner::OVERLAY, decide_input_owner( false, true ) );
+	EXPECT_EQ( InputOwner::BASE_SCENE, decide_input_owner( false, false ) );
 }

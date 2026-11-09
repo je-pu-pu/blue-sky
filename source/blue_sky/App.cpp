@@ -513,17 +513,18 @@ void App::set_size( int w, int h )
 	width_ = w;
 	height_ = h;
 
-	int sw = GetSystemMetrics( SM_CXSCREEN );
-	int sh = GetSystemMetrics( SM_CYSCREEN );
-
-	
 	RECT rect = { 0, 0, width_, height_ };
 	AdjustWindowRect( & rect, style_, false );
 
 	int ww = rect.right - rect.left;
 	int wh = rect.bottom - rect.top;
 
-	SetWindowPos( hWnd, HWND_NOTOPMOST, ( sw - ww ) / 2, ( sh - wh ) / 2, ww, wh, SWP_SHOWWINDOW );
+	// ウィンドウが今あるモニターの作業領域の中央に置く（以前はプライマリモニターの中央へ飛んだ）
+	MONITORINFO monitor = { sizeof( MONITORINFO ) };
+	GetMonitorInfo( MonitorFromWindow( hWnd, MONITOR_DEFAULTTONEAREST ), & monitor );
+	const RECT& work = monitor.rcWork;
+
+	SetWindowPos( hWnd, HWND_NOTOPMOST, work.left + ( ( work.right - work.left ) - ww ) / 2, work.top + ( ( work.bottom - work.top ) - wh ) / 2, ww, wh, SWP_SHOWWINDOW );
 
 	// PostMessage( hWnd, WM_EXITSIZEMOVE, 0, 0 );
 }

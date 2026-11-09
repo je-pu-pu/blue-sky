@@ -202,6 +202,13 @@ void register_all( SettingStore& store, GameMain& game_main )
 	} );
 	store.set_info( DISPLAY_FPS, "options.display_fps", "options.display_fps.description" );
 
+	// 垂直同期（以前は選べず、常に待たなかった。既定は以前と同じ「待たない」）
+	store.add_bool( VSYNC, false, ApplyMode::IMMEDIATE, [gm] ( const SettingStore::Value& v )
+	{
+		gm->set_vsync( std::get< bool >( v ) );
+	} );
+	store.set_info( VSYNC, "options.vsync", "options.vsync.description" );
+
 	// 文字の大きさ（アクセシビリティ）。行の高さは部品が文字に合わせて広げる
 	// ドラッグの途中で画面全体を配置し直すと重く、行が動いて操作しにくいので、離したときに反映する
 	store.add_float( UI_TEXT_SCALE, 1.f, 0.8f, 1.6f, 0.1f, ApplyMode::ON_RELEASE, [gm] ( const SettingStore::Value& v )

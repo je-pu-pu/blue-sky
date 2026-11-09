@@ -4,6 +4,8 @@
 #include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
+#include <streambuf>
 #include <string>
 
 #include <windows.h>
@@ -56,5 +58,78 @@ inline void debug_log( const std::string& utf8 )
 		out << stamp << ' ' << utf8 << '\n';
 	}
 }
+
+/**
+ * std::cout に書いたものを、1 行ずつ debug_log にも流す（元の出力先＝開発用のコンソールにもそのまま出す）
+ *
+ * 以前はログの出口が 4 系統あり（std::cout・debug_log・common::log・OutputDebugString）、
+ * std::cout（モデルの読み込みなど 100 か所以上）はコンソールを開いていないと何も残らなかった。
+ * 出口を debug_log（log/blue-sky.log とデバッガ）にそろえる。common::log はエラーなど特定のファイルに残す用途だけに使う。
+ */
+class DebugLogStreamBuf : public std::streambuf
+{
+private:
+	std::streambuf* original_;
+	std::string line_;
+
+protected:
+	int overflow( int c ) override
+	{
+		if ( c == traits_type::eof() )
+		{
+			return traits_type::not_eof( c );
+		}
+
+		if ( original_ )
+		{
+			original_->sputc( static_cast< char >( c ) );
+		}
+
+		if ( c == '\n' )
+		{
+			debug_log( line_ );
+			line_.clear();
+		}
+		else if ( c != '\r' )
+		{
+			line_ += static_cast< char >( c );
+		}
+
+		return c;
+	}
+
+	int sync() override
+	{
+		return original_ ? original_->pubsync() : 0;
+	}
+
+public:
+	explicit DebugLogStreamBuf( std::streambuf* original ) : original_( original ) { }
+
+	/// 改行で終わっていない残りを出す
+	void flush_line()
+	{
+		if ( ! line_.empty() )
+		{
+			debug_log( line_ );
+			line_.clear();
+		}
+	}
+};
+
+/// 生きている間、std::cout を debug_log にも流す
+class ScopedCoutToLog
+{
+private:
+	std::streambuf* original_;
+	DebugLogStreamBuf buffer_;
+
+public:
+	ScopedCoutToLog() : original_( std::cout.rdbuf() ), buffer_( original_ ) { std::cout.rdbuf( & buffer_ ); }
+	~ScopedCoutToLog() { buffer_.flush_line(); std::cout.rdbuf( original_ ); }
+
+	ScopedCoutToLog( const ScopedCoutToLog& ) = delete;
+	ScopedCoutToLog& operator = ( const ScopedCoutToLog& ) = delete;
+};
 
 } // namespace blue_sky

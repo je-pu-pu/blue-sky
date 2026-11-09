@@ -40,6 +40,7 @@ namespace game_settings
 	inline constexpr SettingKey< int >		SCREEN_HEIGHT		{ "graphics.screen_height" };
 	inline constexpr SettingKey< bool >		FULL_SCREEN			{ "graphics.full_screen" };
 	inline constexpr SettingKey< bool >		DISPLAY_FPS			{ "graphics.display_fps" };
+	inline constexpr SettingKey< bool >		VSYNC				{ "graphics.vsync" };		///< 垂直同期
 	inline constexpr SettingKey< float_t >	UI_TEXT_SCALE		{ "ui.text_scale" };	///< 文字の大きさ（アクセシビリティ）
 
 	/// 以前のユーザーの設定ファイル（作業ディレクトリ）。新しい置き場所に無いときだけ読んで引き継ぐ

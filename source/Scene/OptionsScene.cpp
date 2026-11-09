@@ -205,6 +205,7 @@ void OptionsScene::build_graphics_page( Stack* page )
 	add_setting_toggle( page, store, gs::FULL_SCREEN );
 	add_setting_slider( page, store, gs::CAMERA_FOV, & format_int );
 	add_setting_toggle( page, store, gs::DISPLAY_FPS );
+	add_setting_toggle( page, store, gs::VSYNC );
 	add_setting_slider( page, store, gs::UI_TEXT_SCALE, & format_percent );
 }
 

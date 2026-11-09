@@ -252,7 +252,9 @@ void Sprite::draw_uv_impl( const Rect& dst, const Texture* texture, const UVRect
 		return;
 	}
 
-	draw_quad( dst, uv, color, mode == AlphaMode::PREMULTIPLIED ? premultiplied_technique_ : effect_technique_, texture );
+	// 描き方はテクスチャ自身の属性で決める（乗算済みのテクスチャをストレートで描くと縁が暗くなる。指定は互換のために残す）
+	const bool premultiplied = texture->is_premultiplied() || mode == AlphaMode::PREMULTIPLIED;
+	draw_quad( dst, uv, color, premultiplied ? premultiplied_technique_ : effect_technique_, texture );
 }
 
 void Sprite::draw_color( const Rect& dst, const Color& color )

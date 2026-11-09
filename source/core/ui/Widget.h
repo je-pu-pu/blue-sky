@@ -182,7 +182,8 @@ namespace core::ui
 		virtual const Rect* get_view_clip() const { return nullptr; }
 
 		/// 子孫の矩形が見えるようにする（ScrollView が実装）
-		virtual void ensure_visible( const Rect& ) { }
+		/// 子孫の矩形が見えるようにする（ScrollView が実装）。スクロールが変わったら true
+		virtual bool ensure_visible( const Rect& ) { return false; }
 
 		/// フォーカスは受けないがポインタのイベントは受けたいか（TabView の見出し等）
 		virtual bool accepts_pointer() const { return false; }

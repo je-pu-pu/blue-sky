@@ -13,6 +13,7 @@
 #include <deque>
 #include <unordered_map>
 #include <vector>
+#include <blue_sky/DebugLog.h>
 
 class DirectWrite;
 
@@ -128,6 +129,7 @@ private:
 	std::unique_ptr< Direct3D >				direct_3d_;				///< Direct3D
 
 	std::unique_ptr< DirectInput >			direct_input_;			///< DirectInput
+	ScopedCoutToLog							cout_to_log_;			///< std::cout をログ（log/blue-sky.log）にも流す（ログの出口をそろえる）
 	std::unique_ptr< Input >				input_;					///< Game Input
 
 	std::unique_ptr< OculusRift >			oculus_rift_;			///< Oculus Rift
@@ -263,6 +265,9 @@ public:
 	void set_stage_name( const std::string& stage_name ) { stage_name_ = stage_name; }
 
 	bool is_display_fps() const { return is_display_fps_; }
+	/// 垂直同期を待って表示するか
+	void set_vsync( bool v );
+
 	void set_display_fps( bool f ) { is_display_fps_ = f; }
 
 	core::setting::SettingStore* get_settings() const { return settings_.get(); }

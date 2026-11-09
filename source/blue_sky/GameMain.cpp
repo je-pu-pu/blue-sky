@@ -917,6 +917,11 @@ void GameMain::on_key_down( char_t c )
 	input_->push_char_byte( c );
 }
 
+void GameMain::set_vsync( bool v )
+{
+	direct_3d_->set_vsync( v );
+}
+
 void GameMain::on_raw_key_down( int vk )
 {
 	input_->latch_key_press( vk );

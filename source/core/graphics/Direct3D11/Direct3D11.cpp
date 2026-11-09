@@ -461,16 +461,9 @@ void Direct3D11::set_full_screen( bool full_screen )
 
 void Direct3D11::set_size( int w, int h )
 {
-	swap_chain_desc_.BufferDesc.Width = w;
-	swap_chain_desc_.BufferDesc.Height = h;
-
-	DIRECT_X_FAIL_CHECK( swap_chain_->ResizeBuffers(
-		swap_chain_desc_.BufferCount,
-		swap_chain_desc_.BufferDesc.Width,
-		swap_chain_desc_.BufferDesc.Height,
-		swap_chain_desc_.BufferDesc.Format,
-		swap_chain_desc_.Flags
-	) );
+	// サイズ変更の経路は on_resize の 1 本だけにする
+	// （以前は ResizeBuffers だけを行う別の経路があり、バックバッファ・深度・ビューポートを作り直していなかった）
+	on_resize( w, h );
 }
 
 bool Direct3D11::is_full_screen() const
@@ -838,7 +831,9 @@ Direct3D11::Texture* Direct3D11::create_texture_from_image( const DecodedImage& 
 	hr = device_->CreateShaderResourceView( texture.Get(), nullptr, & view );
 	if ( FAILED( hr ) ) { fail( "view", hr ); }
 
-	return new Texture( this, view );
+	Texture* result = new Texture( this, view );
+	result->set_premultiplied( true );		// 展開のときに乗算済みにしている
+	return result;
 }
 
 /**
@@ -868,7 +863,7 @@ void Direct3D11::bind_texture_to_ps( uint_t slot, const Texture* texture )
 
 void Direct3D11::present()
 {
-	const HRESULT hr = swap_chain_->Present( 0, 0 );
+	const HRESULT hr = swap_chain_->Present( vsync_ ? 1 : 0, 0 );
 
 	// デバイスロスト（ドライバの更新・GPU のタイムアウト・GPU の切り替え）は専用の例外で知らせる。
 	// WinMain が受け取り、ゲームを起動し直して復旧する（GPU のリソースは各所が持っていて、その場では作り直せない）

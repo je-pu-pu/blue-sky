@@ -115,3 +115,6 @@ format.percent = {0}%
 
 # パッドのボタンの表示名（{0} がボタンの番号）
 key.pad = パッド {0}
+
+options.vsync = 垂直同期
+options.vsync.description = 画面の書き換えに合わせて表示し、映像のずれ（ティアリング）を防ぎます

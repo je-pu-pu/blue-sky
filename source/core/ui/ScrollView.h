@@ -30,7 +30,7 @@ public:
 	float_t get_max_scroll() const;
 
 	const Rect* get_view_clip() const override { return & rect_; }
-	void ensure_visible( const Rect& r ) override;
+	bool ensure_visible( const Rect& r ) override;
 
 	float_t measure_height( float_t width, const UIContext& ctx ) const override;
 	void arrange( const Rect& rect, const UIContext& ctx ) override;

@@ -273,12 +273,18 @@ void Screen::set_focus( Widget* w, FocusReason reason )
 	// ポインタ由来では自動スクロールしない（カーソルの下で内容が動いて暴れるため）
 	if ( reason != FocusReason::POINTER )
 	{
+		bool scrolled = false;
+
 		for ( Widget* p = w->parent_; p; p = p->parent_ )
 		{
-			p->ensure_visible( w->rect_ );
+			scrolled = p->ensure_visible( w->rect_ ) || scrolled;
 		}
 
-		layout_dirty_ = true;
+		// スクロールが変わったときだけ配置し直す（以前はフォーカスを移すたびに全部の層を配置し直していた）
+		if ( scrolled )
+		{
+			layout_dirty_ = true;
+		}
 	}
 }
 

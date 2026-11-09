@@ -18,8 +18,10 @@ void ScrollView::clamp_scroll()
 	scroll_ = std::clamp( scroll_, 0.f, get_max_scroll() );
 }
 
-void ScrollView::ensure_visible( const Rect& r )
+bool ScrollView::ensure_visible( const Rect& r )
 {
+	const float_t before = scroll_;
+
 	// r は現在の（スクロール済みの）座標。表示範囲からはみ出した分だけ動かす
 	if ( r.y < rect_.y )
 	{
@@ -31,6 +33,7 @@ void ScrollView::ensure_visible( const Rect& r )
 	}
 
 	clamp_scroll();
+	return scroll_ != before;
 }
 
 float_t ScrollView::measure_height( float_t width, const UIContext& ctx ) const

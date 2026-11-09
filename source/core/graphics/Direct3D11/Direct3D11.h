@@ -76,6 +76,7 @@ private:
 	D3D11_VIEWPORT				viewport_;
 
 	float_t						offset_2d_x_ = 0.f;		///< 2D 描画の立体視のずらし（Sprite と文字で共有する）
+	bool						vsync_ = false;			///< 垂直同期を待って表示する
 
 	std::unique_ptr< Sprite >	sprite_;
 	std::unique_ptr< Effect >	effect_;
@@ -135,6 +136,10 @@ public:
 	std::vector< DisplayMode > get_available_display_modes() const;
 
 	void set_size( int, int );
+
+	/// 垂直同期を待って表示するか（以前は選べず、常に待たなかった）
+	void set_vsync( bool v ) { vsync_ = v; }
+	bool is_vsync() const { return vsync_; }
 	void set_full_screen( bool );
 
 	bool is_full_screen() const;

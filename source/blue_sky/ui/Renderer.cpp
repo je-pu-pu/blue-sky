@@ -209,11 +209,7 @@ const core::graphics::Texture* Renderer::find_image( const string_t& image ) con
 	{
 		texture = gm_->load_named_texture_premultiplied( ( string_t( "ui:" ) + name ).c_str(), path.c_str() );
 	}
-	catch ( const common::exception< std::string >& e )
-	{
-		debug_log( "[UI] 画像を読み込めません: " + path + " (" + e.data() + ")" );
-	}
-	catch ( const std::exception& e )
+	catch ( const std::exception& e )		// エンジンの例外（common::exception_base）も std::exception として受け取れる
 	{
 		debug_log( "[UI] 画像を読み込めません: " + path + " (" + e.what() + ")" );
 	}

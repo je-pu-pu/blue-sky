@@ -71,6 +71,49 @@ TEST_F( WidthTest, 横のStackは決まった幅と内容の幅を先に取り�
 	EXPECT_FLOAT_EQ( 1920.f, fixed->rect().right() );
 }
 
+TEST_F( WidthTest, 縦のStackは決まった高さと内容の高さを先に取り残りを重みで分ける )
+{
+	auto column = std::make_unique< Stack >( Axis::VERTICAL );
+	column->set_spacing( 0.f );
+	Stack* stack = column.get();
+
+	auto* header = stack->add< Button >( "header", nullptr );		// 指定なし : 内容の高さ
+	auto* body1 = stack->add< Button >( "body1", nullptr );
+	auto* body2 = stack->add< Button >( "body2", nullptr );
+	auto* footer = stack->add< Button >( "footer", nullptr );
+
+	stack->set_size( body1, { Stack::SizeMode::FILL, 1.f } );
+	stack->set_size( body2, { Stack::SizeMode::FILL, 2.f } );
+	stack->set_size( footer, { Stack::SizeMode::FIXED, 60.f } );
+
+	screen.set_root( std::move( column ), [] { } );
+	step();
+
+	const float_t header_h = header->rect().h;
+	EXPECT_GT( header_h, 0.f );
+	EXPECT_FLOAT_EQ( 60.f, footer->rect().h );
+
+	const float_t remaining = 1080.f - header_h - 60.f;
+	EXPECT_FLOAT_EQ( remaining / 3.f, body1->rect().h );
+	EXPECT_FLOAT_EQ( remaining * 2.f / 3.f, body2->rect().h );
+	EXPECT_FLOAT_EQ( 1080.f, footer->rect().bottom() );		// 下端にぴったり
+}
+
+TEST_F( WidthTest, 縦のset_flexは以前と同じく残りの高さを1つの子に与える )
+{
+	auto column = std::make_unique< Stack >( Axis::VERTICAL );
+	column->set_spacing( 0.f );
+	auto* top = column->add< Button >( "top", nullptr );
+	auto* fill = column->add< Button >( "fill", nullptr );
+	auto* bottom = column->add< Button >( "bottom", nullptr );
+	column->set_flex( fill );
+	screen.set_root( std::move( column ), [] { } );
+	step();
+
+	EXPECT_FLOAT_EQ( 1080.f - top->rect().h - bottom->rect().h, fill->rect().h );
+	EXPECT_FLOAT_EQ( 1080.f, bottom->rect().bottom() );
+}
+
 TEST_F( WidthTest, 指定しなければ以前と同じく等分する )
 {
 	auto row = std::make_unique< Stack >( Axis::HORIZONTAL );

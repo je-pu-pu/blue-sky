@@ -48,7 +48,9 @@ float_t Stack::measure_height( float_t width, const UIContext& ctx ) const
 			continue;
 		}
 
-		total += c->measure_height( inner_w, ctx );
+		// 決まった高さの子はその高さ、それ以外は希望の高さ（FILL の子も、希望としては内容の高さ）
+		const Size s = get_size( c );
+		total += std::max( s.mode == SizeMode::FIXED ? s.value : c->measure_height( inner_w, ctx ), s.min );
 		visible++;
 	}
 
@@ -84,7 +86,63 @@ Stack::Size Stack::get_size( const Widget* child ) const
 		}
 	}
 
+	if ( axis_ == Axis::VERTICAL )
+	{
+		return child == flex_ ? Size{ SizeMode::FILL, 1.f } : Size{ SizeMode::CONTENT };
+	}
+
 	return Size();
+}
+
+std::vector< float_t > Stack::compute_heights( float_t inner_w, float_t inner_h, float_t spacing, const UIContext& ctx ) const
+{
+	std::vector< const Widget* > visible;
+
+	for ( size_t i = 0; i < child_count(); i++ )
+	{
+		if ( child_at( i )->is_visible() )
+		{
+			visible.push_back( child_at( i ) );
+		}
+	}
+
+	std::vector< float_t > heights( visible.size(), 0.f );
+
+	if ( visible.empty() )
+	{
+		return heights;
+	}
+
+	// 決まった高さ・内容の高さを先に取り、残りを FILL の子が重みで分ける
+	float_t remaining = inner_h - spacing * static_cast< float_t >( visible.size() - 1 );
+	float_t total_weight = 0.f;
+
+	for ( size_t i = 0; i < visible.size(); i++ )
+	{
+		const Size s = get_size( visible[ i ] );
+
+		if ( s.mode == SizeMode::FILL )
+		{
+			total_weight += std::max( s.value, 0.f );
+			continue;
+		}
+
+		heights[ i ] = std::max( s.mode == SizeMode::FIXED ? s.value : visible[ i ]->measure_height( inner_w, ctx ), s.min );
+		remaining -= heights[ i ];
+	}
+
+	for ( size_t i = 0; i < visible.size(); i++ )
+	{
+		const Size s = get_size( visible[ i ] );
+
+		if ( s.mode == SizeMode::FILL )
+		{
+			const float_t share = total_weight > 0.f ? std::max( 0.f, remaining ) * std::max( s.value, 0.f ) / total_weight : 0.f;
+			heights[ i ] = std::max( share, s.min );
+		}
+	}
+
+	return heights;
 }
 
 std::vector< float_t > Stack::compute_widths( float_t inner_w, float_t spacing, const UIContext& ctx ) const
@@ -175,26 +233,9 @@ void Stack::arrange( const Rect& rect, const UIContext& ctx )
 		return;
 	}
 
-	// 伸ばす子の高さ = 全体 - 他の子の高さ - 間隔
-	float_t flex_h = 0.f;
-
-	if ( flex_ && flex_->is_visible() && index_of_child( flex_ ) >= 0 )
-	{
-		float_t others = 0.f;
-		int visible = 0;
-
-		for ( size_t i = 0; i < child_count(); i++ )
-		{
-			const Widget* c = child_at( i );
-			if ( ! c->is_visible() ) continue;
-			visible++;
-			if ( c != flex_ ) others += c->measure_height( inner.w, ctx );
-		}
-
-		flex_h = std::max( 0.f, inner.h - others - spacing * static_cast< float_t >( std::max( 0, visible - 1 ) ) );
-	}
-
+	const std::vector< float_t > heights = compute_heights( inner.w, inner.h, spacing, ctx );
 	float_t y = inner.y;
+	size_t k = 0;
 
 	for ( size_t i = 0; i < child_count(); i++ )
 	{
@@ -205,9 +246,9 @@ void Stack::arrange( const Rect& rect, const UIContext& ctx )
 			continue;
 		}
 
-		const float_t h = c == flex_ ? flex_h : c->measure_height( inner.w, ctx );
-		c->arrange( Rect( inner.x, y, inner.w, h ), ctx );
-		y += h + spacing;
+		c->arrange( Rect( inner.x, y, inner.w, heights[ k ] ), ctx );
+		y += heights[ k ] + spacing;
+		k++;
 	}
 }
 

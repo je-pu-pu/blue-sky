@@ -589,6 +589,25 @@ void Direct3D11::set_default_viewport()
 	immediate_context_->RSSetViewports( 1, & viewport_ );
 }
 
+void Direct3D11::reset_render_state()
+{
+	immediate_context_->OMSetBlendState( nullptr, nullptr, 0xFFFFFFFF );
+	immediate_context_->OMSetDepthStencilState( nullptr, 0 );
+	immediate_context_->RSSetState( nullptr );
+
+	immediate_context_->GSSetShader( nullptr, nullptr, 0 );
+	immediate_context_->HSSetShader( nullptr, nullptr, 0 );
+	immediate_context_->DSSetShader( nullptr, nullptr, 0 );
+
+	// 描画先にしたテクスチャが読み込み側に残っていると、描画先に結び付けられない（D3D11 が黙って外す）
+	ID3D11ShaderResourceView* null_views[ D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT ] = { };
+	immediate_context_->VSSetShaderResources( 0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, null_views );
+	immediate_context_->PSSetShaderResources( 0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, null_views );
+
+	set_default_render_target();
+	set_default_viewport();
+}
+
 /**
  * レンダリング結果を書き込むテクスチャを設定する
  *

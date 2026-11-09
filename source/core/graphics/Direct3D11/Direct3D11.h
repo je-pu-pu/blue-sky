@@ -156,6 +156,16 @@ public:
 	void set_default_render_target( bool = true );
 	void set_default_viewport();
 
+	/**
+	 * 描画の状態を既定に戻す（設計上の問題 B18）
+	 *
+	 * ブレンド・深度・ラスタライザを既定に、ジオメトリ／ハル／ドメインシェーダーを外し、
+	 * シェーダーに結び付けたテクスチャを外し、描画先とビューポートを画面に戻す。
+	 * 以前はフレームの頭でも初期化せず、前の描画（前のフレームを含む）の状態に依存していた。
+	 * フレームの頭と、オーバーレイ（UI）を描く前に呼ぶ。
+	 */
+	void reset_render_state();
+
 	void set_render_target( RenderTargetTexture* );
 	void set_render_target( BackBufferTexture* );
 

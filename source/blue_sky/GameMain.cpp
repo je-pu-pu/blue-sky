@@ -603,6 +603,9 @@ void GameMain::render()
 
 	const OverlayRenderRange range = compute_overlay_render_range( layers );
 
+	// 前のフレームの描画状態を持ち越さない
+	direct_3d_->reset_render_state();
+
 	if ( range.render_base )
 	{
 		scene_->render();
@@ -616,6 +619,8 @@ void GameMain::render()
 	// オーバーレイシーンを下から順に描画
 	for ( size_t i = range.first_overlay; i < overlay_scene_stack_.size(); i++ )
 	{
+		// 下のシーン（ポストエフェクトなど）の状態を持ち越さない
+		direct_3d_->reset_render_state();
 		overlay_scene_stack_[ i ]->render();
 	}
 

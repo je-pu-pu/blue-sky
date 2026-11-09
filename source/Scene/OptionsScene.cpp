@@ -43,10 +43,12 @@ Stack* add_scroll_page( TabView* tabs, const char_t* title_key )
 	return scroll->add< Stack >( Axis::VERTICAL );
 }
 
-/// 0..1 を「50%」の形に
+/// 0..1 を「50%」の形に（書式は文字列テーブルの format.percent。言語によって「50 %」「%50」などと変えられる）
 string_t format_percent( float_t v )
 {
-	return std::to_string( static_cast< int >( std::lround( v * 100.f ) ) ) + "%";
+	const auto& strings = GameMain::get_instance()->get_ui_strings();
+	const string_t number = std::to_string( static_cast< int >( std::lround( v * 100.f ) ) );
+	return strings.has( "format.percent" ) ? strings.format( "format.percent", { number } ) : number + "%";
 }
 
 string_t format_int( float_t v )

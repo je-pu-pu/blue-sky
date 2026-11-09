@@ -123,3 +123,47 @@ TEST( MsdfFontTest, UnloadedFontReturnsFailure )
 	double kerning = 0;
 	EXPECT_FALSE( font.get_kerning( U'A', U'V', kerning ) );
 }
+
+TEST( MsdfFontTest, 主のフォントに無い文字は代わりのフォントから引く )
+{
+	const std::string uzura = ( std::filesystem::path( __FILE__ ).parent_path() / "../../media/font/uzura.ttf" ).lexically_normal().string();
+
+	// 片方にだけある文字を、2 つのフォントの組み合わせの両方向で探す（同梱の 2 つのフォントのどちらが広いかに依らない）
+	const std::string mplus = FONT_PATH;
+	const std::string paths[ 2 ] = { uzura, mplus };
+
+	uint32_t target = 0;
+	int primary_index = 0;
+
+	for ( int p = 0; p < 2 && target == 0; p++ )
+	{
+		core::graphics::MsdfFont a, b;
+		ASSERT_TRUE( a.load( paths[ p ].c_str() ) );
+		ASSERT_TRUE( b.load( paths[ 1 - p ].c_str() ) );
+
+		for ( uint32_t cp = 0x20; cp < 0xA000 && target == 0; cp++ )
+		{
+			if ( ! a.has_glyph( cp ) && b.has_glyph( cp ) )
+			{
+				target = cp;
+				primary_index = p;
+			}
+		}
+	}
+
+	ASSERT_NE( 0u, target ) << "どちらかのフォントにだけある文字が見つからない";
+
+	core::graphics::MsdfFont primary;
+	ASSERT_TRUE( primary.load( paths[ primary_index ].c_str() ) );
+
+	core::graphics::GlyphMetrics before;
+	EXPECT_FALSE( primary.has_glyph( target ) );
+
+	ASSERT_TRUE( primary.add_fallback( paths[ 1 - primary_index ].c_str() ) );
+	EXPECT_TRUE( primary.has_glyph( target ) );
+
+	core::graphics::GlyphMetrics after;
+	ASSERT_TRUE( primary.get_glyph_metrics( target, after ) );
+	EXPECT_GT( after.width, 0.0 );		// 代わりのフォントの輪郭が取れる
+	(void) before;
+}

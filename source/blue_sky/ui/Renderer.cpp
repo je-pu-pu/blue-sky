@@ -75,6 +75,7 @@ void Renderer::draw_text( const Rect& rect, const char_t* text, const core::grap
 	const Rect p = to_physical( rect );
 
 	core::graphics::TextStyle scaled = style;
+	scaled.h_align = core::graphics::resolve_halign( style.h_align, is_right_to_left() );
 	scaled.outline_width *= s;
 	scaled.font_size = ( style.font_size > 0.f ? style.font_size : gm_->get_default_font_size() ) * s;
 

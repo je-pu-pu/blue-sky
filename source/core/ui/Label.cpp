@@ -70,6 +70,51 @@ void Label::update( float_t dt, UIContext& ctx )
 	Widget::update( dt, ctx );
 }
 
+namespace
+{
+
+/// 行の始めに置かない文字（句読点・閉じ括弧・小書きの仮名・長音など）
+bool is_no_line_start( const string_t& ch )
+{
+	static const char_t* const LIST[] = {
+		"、", "。", "，", "．", "・", "：", "；", "？", "！", "ー", "）", "」", "』", "】", "〕", "〉", "》", "｝", "〟", "’", "”",
+		"ぁ", "ぃ", "ぅ", "ぇ", "ぉ", "っ", "ゃ", "ゅ", "ょ", "ゎ", "ァ", "ィ", "ゥ", "ェ", "ォ", "ッ", "ャ", "ュ", "ョ", "ヮ", "ヵ", "ヶ", "々", "…",
+		",", ".", "!", "?", ":", ";", ")", "]", "}",
+	};
+
+	for ( const char_t* c : LIST ) { if ( ch == c ) return true; }
+	return false;
+}
+
+/// 行の終わりに置かない文字（開き括弧）
+bool is_no_line_end( const string_t& ch )
+{
+	static const char_t* const LIST[] = { "（", "「", "『", "【", "〔", "〈", "《", "｛", "〝", "‘", "“", "(", "[", "{" };
+
+	for ( const char_t* c : LIST ) { if ( ch == c ) return true; }
+	return false;
+}
+
+/// UTF-8 の文字列の最後の 1 文字の始まりの位置
+size_t last_codepoint_start( const string_t& s )
+{
+	size_t i = s.size();
+
+	while ( i > 0 )
+	{
+		i--;
+
+		if ( ( static_cast< unsigned char >( s[ i ] ) & 0xC0 ) != 0x80 )
+		{
+			break;
+		}
+	}
+
+	return i;
+}
+
+} // namespace
+
 std::vector< string_t > Label::wrap_lines( const string_t& text, float_t width, float_t font_size, const Renderer& renderer )
 {
 	std::vector< string_t > lines;
@@ -91,8 +136,21 @@ std::vector< string_t > Label::wrap_lines( const string_t& text, float_t width, 
 
 		if ( ! line.empty() && width > 0.f && renderer.measure_text_width( candidate.c_str(), font_size ) > width )
 		{
-			lines.push_back( line );
-			line = ch;
+			// 禁則処理 : 行の始めに置けない文字（句読点など）や、行の終わりに置けない文字（開き括弧）が来たら、
+			// 前の行の最後の 1 文字を次の行へ送る（前の行が 1 文字だけなら送らない）。以前は禁則処理が無かった
+			const size_t last = last_codepoint_start( line );
+			const string_t last_ch = line.substr( last );
+
+			if ( last > 0 && ( is_no_line_start( ch ) || is_no_line_end( last_ch ) ) )
+			{
+				lines.push_back( line.substr( 0, last ) );
+				line = last_ch + ch;
+			}
+			else
+			{
+				lines.push_back( line );
+				line = ch;
+			}
 		}
 		else
 		{

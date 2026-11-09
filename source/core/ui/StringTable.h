@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <core/type.h>
 
 #include <initializer_list>
@@ -55,6 +56,17 @@ public:
 	 */
 	string_t get( const string_t& key ) const;
 
+	/// 右から左へ書く言語か（文字列テーブルの language.direction = rtl）
+	bool is_right_to_left() const;
+
+	/**
+	 * 数で言い方が変わる文字列（複数形）
+	 *
+	 * key.zero（0 のとき）・key.one（1 のとき）・key.other（それ以外）を、あるものから選ぶ。どれも無ければ key。
+	 * {0} は count、{1} 以降は args。以前は複数形の表現が無かった。
+	 */
+	string_t format_count( const string_t& key, long long count, const std::vector< string_t >& args = {} ) const;
+
 	/// 引かれたが未登録だったキー（翻訳漏れ。テストや開発中のログで確かめる）
 	const std::set< string_t >& get_missing_keys() const { return missing_; }
 
@@ -63,6 +75,7 @@ public:
 
 	/// 任意の書式文字列の `{0}` `{1}` … を置換する
 	static string_t format_text( const string_t& text, std::initializer_list< string_t > args );
+	static string_t format_text( const string_t& text, const std::vector< string_t >& args );
 
 	size_t size() const { return table_.size(); }
 	void clear() { table_.clear(); }

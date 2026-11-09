@@ -36,6 +36,9 @@ public:
 	/// 積んだ文字を描く
 	virtual void flush() = 0;
 
+	/// 代わりのフォントを足す（主のフォントに無い文字に使う。対応していなければ false）
+	virtual bool add_fallback_font( const char* ) { return false; }
+
 }; // class TextRenderer
 
 } // namespace core::graphics

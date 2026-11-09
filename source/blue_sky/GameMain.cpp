@@ -22,6 +22,7 @@
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 #include <core/graphics/Direct3D11/Effect.h>
 #include <core/graphics/Shader.h>
+#include <core/graphics/TextRenderer.h>
 #include <core/graphics/OculusRift.h>
 
 
@@ -164,6 +165,20 @@ GameMain::GameMain()
 
 	graphics_manager_.reset( new blue_sky::graphics::direct_3d_11::GraphicsManager( direct_3d_.get() ) );
 	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "graphics.debug_axis", 0 ) != 0 );
+
+	// 代わりのフォント（主のフォントに無い文字に使う。; 区切りで複数）
+	if ( auto* text = graphics_manager_->get_text_renderer() )
+	{
+		std::stringstream fallbacks( static_cast< const Config& >( * get_config() ).get< string_t >( "graphics.font_fallback", "" ) );
+
+		for ( string_t path; std::getline( fallbacks, path, ';' ); )
+		{
+			if ( ! path.empty() && ! text->add_fallback_font( path.c_str() ) )
+			{
+				debug_log( "[Graphics] 代わりのフォントを読み込めませんでした: " + path );
+			}
+		}
+	}
 	static_cast< graphics::direct_3d_11::GraphicsManager* >( graphics_manager_.get() )->set_bullet_debug_draw( bullet_debug_draw_.get() );
 
 	// sound_engine_.reset( new core::sound::direct_sound::SoundEngine( get_app()->GetWindowHandle() ) );

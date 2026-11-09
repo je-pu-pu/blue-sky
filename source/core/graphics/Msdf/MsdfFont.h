@@ -8,6 +8,7 @@
  */
 #pragma once
 
+#include <vector>
 #include <cstdint>
 
 #define MSDFGEN_PUBLIC
@@ -43,6 +44,10 @@ struct GlyphMetrics {
 class MsdfFont {
 	msdfgen::FreetypeHandle* ft_;			///< FreeType ライブラリハンドル
 	msdfgen::FontHandle* font_;				///< フォントファイルハンドル
+	std::vector< msdfgen::FontHandle* > fallbacks_;	///< 代わりのフォント
+
+	/// その文字を持つフォント（無ければ主のフォント）
+	msdfgen::FontHandle* font_for( uint32_t codepoint ) const;
 	msdfgen::FontMetrics font_metrics_;		///< フォント全体のメトリクス (emSize, lineHeight, ascenderY 等)
 
 public:
@@ -50,6 +55,16 @@ public:
 	~MsdfFont();
 
 	bool load(const char* font_path);
+
+	/**
+	 * 代わりのフォントを足す（主のフォントに無い文字を、足した順に探す）
+	 *
+	 * 以前はフォントが 1 種類だけで、その言語の文字が無いと豆腐になった。
+	 */
+	bool add_fallback(const char* font_path);
+
+	/// どれかのフォントにその文字があるか
+	bool has_glyph(uint32_t codepoint) const;
 	void unload();
 
 	bool get_glyph_shape(uint32_t codepoint, msdfgen::Shape& shape, double& advance) const;

@@ -109,3 +109,6 @@ key.UP = ↑
 key.DOWN = ↓
 key.LEFT = ←
 key.RIGHT = →
+
+# 数値の書式（{0} が数）
+format.percent = {0}%

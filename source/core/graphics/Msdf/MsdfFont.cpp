@@ -49,8 +49,60 @@ bool MsdfFont::load( const char* font_path )
 	return true;
 }
 
+bool MsdfFont::add_fallback( const char* font_path )
+{
+	if ( ! ft_ )
+	{
+		return false;
+	}
+
+	msdfgen::FontHandle* f = msdfgen::loadFont( ft_, font_path );
+
+	if ( ! f )
+	{
+		return false;
+	}
+
+	fallbacks_.push_back( f );
+	return true;
+}
+
+msdfgen::FontHandle* MsdfFont::font_for( uint32_t codepoint ) const
+{
+	msdfgen::GlyphIndex index;
+
+	if ( font_ && msdfgen::getGlyphIndex( index, font_, static_cast< msdfgen::unicode_t >( codepoint ) ) && index.getIndex() != 0 )
+	{
+		return font_;
+	}
+
+	for ( msdfgen::FontHandle* f : fallbacks_ )
+	{
+		if ( msdfgen::getGlyphIndex( index, f, static_cast< msdfgen::unicode_t >( codepoint ) ) && index.getIndex() != 0 )
+		{
+			return f;
+		}
+	}
+
+	return font_;
+}
+
+bool MsdfFont::has_glyph( uint32_t codepoint ) const
+{
+	msdfgen::FontHandle* f = font_for( codepoint );
+	msdfgen::GlyphIndex index;
+	return f && msdfgen::getGlyphIndex( index, f, static_cast< msdfgen::unicode_t >( codepoint ) ) && index.getIndex() != 0;
+}
+
 void MsdfFont::unload()
 {
+	for ( msdfgen::FontHandle* f : fallbacks_ )
+	{
+		msdfgen::destroyFont( f );
+	}
+
+	fallbacks_.clear();
+
 	if ( font_ )
 	{
 		msdfgen::destroyFont( font_ );
@@ -82,7 +134,7 @@ bool MsdfFont::get_glyph_shape( uint32_t codepoint, msdfgen::Shape& shape, doubl
 		return false;
 	}
 
-	return msdfgen::loadGlyph( shape, font_, static_cast< msdfgen::unicode_t >( codepoint ), msdfgen::FONT_SCALING_EM_NORMALIZED, &advance );
+	return msdfgen::loadGlyph( shape, font_for( codepoint ), static_cast< msdfgen::unicode_t >( codepoint ), msdfgen::FONT_SCALING_EM_NORMALIZED, &advance );
 }
 
 /**
@@ -105,7 +157,7 @@ bool MsdfFont::get_glyph_metrics( uint32_t codepoint, GlyphMetrics& metrics ) co
 	msdfgen::Shape shape;
 	double advance = 0;
 
-	if ( ! msdfgen::loadGlyph( shape, font_, static_cast< msdfgen::unicode_t >( codepoint ), msdfgen::FONT_SCALING_EM_NORMALIZED, &advance ) )
+	if ( ! msdfgen::loadGlyph( shape, font_for( codepoint ), static_cast< msdfgen::unicode_t >( codepoint ), msdfgen::FONT_SCALING_EM_NORMALIZED, &advance ) )
 	{
 		return false;
 	}

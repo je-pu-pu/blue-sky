@@ -16,6 +16,9 @@ namespace core::ui
  */
 class Renderer
 {
+private:
+	bool right_to_left_ = false;
+
 public:
 	virtual ~Renderer() = default;
 
@@ -60,6 +63,10 @@ public:
 
 	/// 仮想座標の 1 が物理ピクセルでいくつか（既定 1）。9 分割の枠幅を整数ピクセルにそろえるのに使う
 	virtual float_t get_pixel_scale() const { return 1.f; }
+
+	/// 右から左へ書く言語か（行の始まり・終わりの配置を左右のどちらにするか。Screen が文字列テーブルから設定する）
+	void set_right_to_left( bool rtl ) { right_to_left_ = rtl; }
+	bool is_right_to_left() const { return right_to_left_; }
 
 	/**
 	 * 積んである描画を描く（Screen::render の最後に呼ぶ）

@@ -44,6 +44,7 @@ float align_x( float left, float right, float text_w, core::graphics::HAlign ali
 	{
 	case core::graphics::HAlign::CENTER: return ( left + right ) * 0.5f - text_w * 0.5f;
 	case core::graphics::HAlign::RIGHT:  return right - text_w;
+	case core::graphics::HAlign::END:    return right - text_w;		// 書く向きが分からないときは左から右として扱う
 	default:                             return left;
 	}
 }

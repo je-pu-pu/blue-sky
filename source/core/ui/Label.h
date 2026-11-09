@@ -29,7 +29,7 @@ private:
 	string_t last_provided_;		///< 前のフレームに provider_ が返した文字列（変わったら配置し直す）
 	Style style_;
 	bool wrap_ = false;
-	core::graphics::HAlign align_ = core::graphics::HAlign::LEFT;
+	core::graphics::HAlign align_ = core::graphics::HAlign::START;
 
 	float_t get_font_size( const UIContext& ) const;
 	Color get_color( const UIContext& ) const;

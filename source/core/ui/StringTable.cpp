@@ -113,6 +113,35 @@ bool StringTable::load_file( const char_t* path )
 	return true;
 }
 
+bool StringTable::is_right_to_left() const
+{
+	return has( "language.direction" ) && get( "language.direction" ) == "rtl";
+}
+
+string_t StringTable::format_count( const string_t& key, long long count, const std::vector< string_t >& args ) const
+{
+	string_t chosen = key;
+
+	if ( count == 0 && has( key + ".zero" ) )
+	{
+		chosen = key + ".zero";
+	}
+	else if ( count == 1 && has( key + ".one" ) )
+	{
+		chosen = key + ".one";
+	}
+	else if ( has( key + ".other" ) )
+	{
+		chosen = key + ".other";
+	}
+
+	std::vector< string_t > all;
+	all.push_back( std::to_string( count ) );
+	all.insert( all.end(), args.begin(), args.end() );
+
+	return format_text( get( chosen ), all );
+}
+
 string_t StringTable::get( const string_t& key ) const
 {
 	auto i = table_.find( key );
@@ -137,7 +166,11 @@ string_t StringTable::format( const string_t& key, std::initializer_list< string
 
 string_t StringTable::format_text( const string_t& text, std::initializer_list< string_t > args )
 {
-	const std::vector< string_t > list( args );
+	return format_text( text, std::vector< string_t >( args ) );
+}
+
+string_t StringTable::format_text( const string_t& text, const std::vector< string_t >& list )
+{
 	string_t result;
 	result.reserve( text.size() );
 

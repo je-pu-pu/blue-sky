@@ -154,6 +154,9 @@ public:
 	/// 文字のアトラス（開発用 : 中身を PNG に保存して調べる）
 	const GlyphAtlas* get_atlas() const { return atlas_.get(); }
 
+	/// 代わりのフォントを足す（主のフォントに無い文字に使う）
+	bool add_fallback_font( const char* font_path ) override { return font_ && font_->add_fallback( font_path ); }
+
 	/**
 	 * @brief テキストを描画キューに追加する（wchar_t 版）
 	 *

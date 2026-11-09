@@ -142,11 +142,11 @@ bool load_theme_file( Theme& theme, const char_t* path, std::vector< string_t >*
 /// テーマが使う画像をすべて先に読み込む（初めて画面を開いたフレームで読み込みが走って引っかからないように）
 void preload_theme_images( const Theme& theme, const Renderer& renderer );
 
-/// テキストスタイルを作る補助（既定は左寄せ・垂直中央・縁取りなし）
+/// テキストスタイルを作る補助（既定は行の始まりに寄せる・垂直中央・縁取りなし）
 inline core::graphics::TextStyle make_text_style(
 	const Color& color,
 	float_t font_size,
-	core::graphics::HAlign h = core::graphics::HAlign::LEFT,
+	core::graphics::HAlign h = core::graphics::HAlign::START,
 	core::graphics::VAlign v = core::graphics::VAlign::CENTER )
 {
 	core::graphics::TextStyle style;

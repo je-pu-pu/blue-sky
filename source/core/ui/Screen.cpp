@@ -962,6 +962,9 @@ void Screen::render( Renderer& renderer )
 {
 	layout();
 
+	// 行の始まり・終わりの配置を、言語の書く向きに合わせる
+	renderer.set_right_to_left( strings_.is_right_to_left() );
+
 	const UIContext ctx = make_context();
 
 	// 積んだ描画は、関数を抜けるときに必ず描く（途中の return でも）

@@ -10,10 +10,23 @@ namespace core::graphics {
  * draw_text() に渡す矩形 (left, top, right, bottom) 内での水平位置を指定する。
  */
 enum class HAlign {
-	LEFT,    ///< 矩形の左端に揃える（デフォルト）
+	LEFT,    ///< 矩形の左端に揃える
 	CENTER,  ///< 矩形の水平中央に揃える
-	RIGHT    ///< 矩形の右端に揃える
+	RIGHT,   ///< 矩形の右端に揃える
+	START,   ///< 行の始まりに揃える（左から右へ書く言語では左、右から左へ書く言語では右）
+	END      ///< 行の終わりに揃える
 };
+
+/// 行の始まり・終わりを、書く向きに合わせて左・右にする（左・中央・右はそのまま）
+inline HAlign resolve_halign( HAlign align, bool right_to_left )
+{
+	switch ( align )
+	{
+		case HAlign::START:	return right_to_left ? HAlign::RIGHT : HAlign::LEFT;
+		case HAlign::END:	return right_to_left ? HAlign::LEFT : HAlign::RIGHT;
+		default:			return align;
+	}
+}
 
 /**
  * 垂直方向のテキスト配置

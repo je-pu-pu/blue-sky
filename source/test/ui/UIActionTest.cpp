@@ -10,6 +10,8 @@
 #include <core/ui/TabView.h>
 #include <core/ui/TextField.h>
 #include <core/ui/Toggle.h>
+#include <core/ui/Label.h>
+#include <core/ui/StringTable.h>
 #include <core/ui/TextFit.h>
 
 #include <Scene/SceneRequest.h>
@@ -565,4 +567,45 @@ TEST_F( ActionTest, フォーカスの印を色だけでなく形でも描く )
 	renderer.clear();
 	render();
 	EXPECT_EQ( with_marker - 1, renderer.rects.size() );		// 印の帯が 1 つ多い
+}
+
+// ---- ローカライズ（3 章 C） ----
+
+TEST( LocalizeTest, 数で言い方を変え書く向きで行の始まりと終わりを決める )
+{
+	StringTable s;
+	s.set( "items.zero", "何もありません" );
+	s.set( "items.one", "{0} 個のアイテム" );
+	s.set( "items.other", "{0} 個のアイテムたち（{1}）" );
+
+	EXPECT_EQ( "何もありません", s.format_count( "items", 0 ) );
+	EXPECT_EQ( "1 個のアイテム", s.format_count( "items", 1 ) );
+	EXPECT_EQ( "5 個のアイテムたち（箱）", s.format_count( "items", 5, { "箱" } ) );
+
+	EXPECT_FALSE( s.is_right_to_left() );
+	s.set( "language.direction", "rtl" );
+	EXPECT_TRUE( s.is_right_to_left() );
+
+	using core::graphics::HAlign;
+	EXPECT_EQ( HAlign::LEFT, core::graphics::resolve_halign( HAlign::START, false ) );
+	EXPECT_EQ( HAlign::RIGHT, core::graphics::resolve_halign( HAlign::START, true ) );
+	EXPECT_EQ( HAlign::LEFT, core::graphics::resolve_halign( HAlign::END, true ) );
+	EXPECT_EQ( HAlign::CENTER, core::graphics::resolve_halign( HAlign::CENTER, true ) );
+}
+
+TEST( LocalizeTest, 行の始めに句読点を置かず行の終わりに開き括弧を置かない )
+{
+	ui_test::MockRenderer r;		// 文字幅 = 文字数 × font_size × 0.5（font_size 10 なら 1 文字 5）
+
+	// 幅 15 = 3 文字。「あいう。」は「あい」「う。」に（句読点を行の始めに置かない）
+	auto lines = Label::wrap_lines( "あいう。", 15.f, 10.f, r );
+	ASSERT_EQ( 2u, lines.size() );
+	EXPECT_EQ( "あい", lines[ 0 ] );
+	EXPECT_EQ( "う。", lines[ 1 ] );
+
+	// 「あい「う」は「あい」「「う」に（開き括弧を行の終わりに置かない）
+	lines = Label::wrap_lines( "あい「う", 15.f, 10.f, r );
+	ASSERT_EQ( 2u, lines.size() );
+	EXPECT_EQ( "あい", lines[ 0 ] );
+	EXPECT_EQ( "「う", lines[ 1 ] );
 }

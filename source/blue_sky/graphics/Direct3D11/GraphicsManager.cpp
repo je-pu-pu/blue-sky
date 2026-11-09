@@ -13,6 +13,7 @@
 #include <core/graphics/Direct3D11/PixelFormat.h>
 #include <core/graphics/Direct3D11/PrimitiveTopology.h>
 #include <core/graphics/Direct3D11/TextureReadback.h>
+#include <core/graphics/Sprite.h>
 #include <core/graphics/Msdf/GlyphAtlas.h>
 #include <core/graphics/Direct3D11/Texture.h>
 #include <core/graphics/Direct3D11/RenderTargetTexture.h>
@@ -530,6 +531,9 @@ void GraphicsManager::render_technique( const char_t* technique_name, const std:
  */
 void GraphicsManager::render_technique( const EffectTechnique* technique, const std::function< void() >& function ) const
 {
+	// Sprite が溜めている四角形を先に描く（描く順番を保つ。中で Sprite を描く場合は、Sprite が自分の描き方で溜め直す）
+	get_sprite()->flush();
+
 	for ( const auto& pass : technique->get_pass_list() )
 	{
 		pass->apply();
@@ -591,12 +595,15 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
 	float_t x = align_x( left, right, text_w, resolved.h_align );
 	float_t y = align_y( top, bottom, text_h, resolved.v_align );
 
+	get_sprite()->flush();		// 先に描いた Sprite が文字の下になるように
 	msdf_text_renderer_->draw_text( x, y, text, resolved );
 	msdf_text_renderer_->flush();
 }
 
 void GraphicsManager::queue_text( float_t left, float_t top, float_t right, float_t bottom, const char_t* text, const core::graphics::TextStyle& style ) const
 {
+	get_sprite()->flush();		// 先に描いた Sprite が文字の下になるように
+
 	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
 	{
 		return;
@@ -650,6 +657,7 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
 	float_t x = align_x( left, right, text_w, resolved.h_align );
 	float_t y = align_y( top, bottom, text_h, resolved.v_align );
 
+	get_sprite()->flush();		// 先に描いた Sprite が文字の下になるように
 	msdf_text_renderer_->draw_text( x, y, text, resolved );
 	msdf_text_renderer_->flush();
 }
@@ -724,6 +732,7 @@ void GraphicsManager::draw_text_at_center( const char_t* text, const Color& colo
 	float_t x = static_cast< float_t >( direct_3d_->get_width() ) * 0.5f - text_w * 0.5f;
 	float_t y = static_cast< float_t >( direct_3d_->get_height() ) * 0.5f - style.font_size * 0.5f;
 
+	get_sprite()->flush();
 	msdf_text_renderer_->draw_text( x, y, text, style );
 	msdf_text_renderer_->flush();
 }

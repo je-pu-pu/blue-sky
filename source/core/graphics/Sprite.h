@@ -97,6 +97,15 @@ public:
 
 	virtual void end() = 0;
 
+	/**
+	 * 溜めている四角形を描く
+	 *
+	 * Sprite は同じテクスチャ・同じ描き方の四角形を溜めて 1 回で描く（設計上の問題 B15）。
+	 * Sprite 以外のもの（文字・3D）を begin と end の間に描く前には、順番が崩れないよう必ず呼ぶ
+	 * （GraphicsManager の文字の描画・render_technique は自分で呼ぶ）。
+	 */
+	virtual void flush() { }
+
 }; // class Sprite
 
 } // namespace core::graphics

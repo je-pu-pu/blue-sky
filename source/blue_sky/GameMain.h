@@ -294,6 +294,9 @@ public:
 	bool has_overlay_scene() const { return ! overlay_scene_stack_.empty(); }
 
 	void set_show_cursor( bool show_cursor ) { is_show_cursor_ = show_cursor; get_app()->show_cursor( is_show_cursor_ ); }
+
+	/// カーソルの表示と閉じ込めを、今の状態（コマンドモード・メニュー・シーンの要求）から決める
+	void update_cursor_state();
 	bool is_show_cursor() const override { return is_show_cursor_; }
 };
 

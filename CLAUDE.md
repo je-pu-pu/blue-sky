@@ -113,6 +113,12 @@ EntityManager::get_instance()->add_system<RenderSystem>();
 - **新しく書くロジック**は、依存を引数・コンストラクタで受け取る（例: `Scene/OptionsController`）。シングルトンに触れないのでテストで動かせる
 - テストで core のサービスを差し替えるときは `core::Service::Scope` を使う（破棄で元に戻る）
 
+### 失敗の扱い
+
+- **続けられない失敗**（デバイス・シェーダー・起動に必須のファイル）は例外を投げる。型は `common::exception_base`（`std::exception` の派生。`common::exception<T>` もこれを継承）を基にする。受け取る側は `const std::exception&` で受ければよい
+- **素材 1 つの失敗**（UI の画像・効果音など）は `nullptr`／`false` を返し、`debug_log` に理由を残す。黙って無視しない（未登録のシーン・未知の設定キー・保存の失敗も同じ）
+- ログは `debug_log`（`log/blue-sky.log` とデバッガ）に出す。`std::cout` も GameMain が生きている間は同じところへ流れる
+
 ### 名前空間規則
 
 - `core::` - エンジンコア

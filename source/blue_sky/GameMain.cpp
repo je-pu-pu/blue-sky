@@ -937,8 +937,7 @@ void GameMain::on_special_key_down( int key )
 	if ( key == KEY_F1 )
 	{
 		is_command_mode_ = ! is_command_mode_;
-		set_show_cursor( is_command_mode_ );
-		get_app()->clip_cursor( is_command_mode_ ? false : scene_->is_clip_cursor_required() );
+		update_cursor_state();
 	}
 	else if ( key == KEY_F2 )
 	{
@@ -1128,7 +1127,11 @@ void GameMain::replace_base_scene_with_loading_screen()
 	}
 
 	setup_scene( pending_base_request_.name );
-	save_data_->save_file( "save/blue-sky.save" );
+	// 保存の失敗を黙って無視しない（以前は結果を見ていなかった。進み具合が残らないと次回にやり直しになる）
+	if ( ! save_data_->save_file( "save/blue-sky.save" ) )
+	{
+		debug_log( "[Save] セーブデータを保存できませんでした: save/blue-sky.save" );
+	}
 
 	// 置き換えの後に残った要求（ベースの置き換えと同時に積まれたオーバーレイなど）を処理する
 	process_scene_requests();
@@ -1267,7 +1270,21 @@ void GameMain::setup_scene( const string_t& scene_name )
 	scene_->set_name( scene_name );
 	scene_->set_next_stage_name( get_stage_name() );
 
-	get_app()->clip_cursor( scene_->is_clip_cursor_required() );
+	update_cursor_state();
+}
+
+/**
+ * カーソルの表示と閉じ込めを、今の状態（コマンドモード・メニュー・シーンの要求）から決める
+ *
+ * 以前は 4 か所がそれぞれ決めていて、メニューを表示中にコマンドモードを抜けるとカーソルが消えた。
+ */
+void GameMain::update_cursor_state()
+{
+	const bool menu_open = ! overlay_scene_stack_.empty();
+	const bool show = is_command_mode_ || menu_open;
+
+	set_show_cursor( show );
+	get_app()->clip_cursor( ! show && scene_ && scene_->is_clip_cursor_required() );
 }
 
 /**
@@ -1306,8 +1323,7 @@ void GameMain::push_overlay_scene( const string_t& scene_name )
 	overlay_scene_stack_.push_back( std::move( overlay ) );
 
 	// カーソルを表示 (メニュー操作用)
-	set_show_cursor( true );
-	get_app()->clip_cursor( false );
+	update_cursor_state();
 }
 
 /**
@@ -1330,8 +1346,7 @@ void GameMain::pop_overlay_scene()
 		scene_->set_paused( false );
 		input_->set_blocked( false );
 
-		set_show_cursor( is_command_mode_ );
-		get_app()->clip_cursor( is_command_mode_ ? false : scene_->is_clip_cursor_required() );
+		update_cursor_state();
 	}
 }
 

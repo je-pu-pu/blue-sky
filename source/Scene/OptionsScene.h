@@ -1,7 +1,9 @@
 #pragma once
 
 #include "UIOverlayScene.h"
+#include "OptionsController.h"
 
+#include <memory>
 #include <vector>
 
 namespace core::ui
@@ -40,20 +42,8 @@ private:
 
 	int find_resolution_index( int w, int h ) const;
 
-	/// 設定ファイルへ保存する
-	void save();
-
-	/// 適用（DEFERRED の反映）。表示が変わったら確認ダイアログを出す。close_after なら最後に閉じる
-	void apply( bool close_after );
-
-	/// 戻る（未適用の変更があれば確認）
-	void back();
-
-	/// IMMEDIATE を確定・保存して閉じる
-	void finish_and_close();
-
-	/// 既定値に戻す（確認あり）
-	void reset_to_defaults();
+	/// 適用・確認・ロールバック・保存・戻る・既定値に戻すの流れ
+	std::unique_ptr< OptionsController > controller_;
 
 public:
 	OptionsScene();

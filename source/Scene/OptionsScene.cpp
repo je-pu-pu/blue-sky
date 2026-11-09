@@ -109,6 +109,20 @@ Toggle* add_setting_toggle( Stack* page, SettingStore* store, const core::settin
 
 OptionsScene::OptionsScene()
 {
+	// 適用・確認・ロールバック・保存の流れ（テストできるよう、依存を渡して切り離してある）
+	OptionsController::Dependencies deps;
+	deps.store = & get_settings();
+	deps.screen = & screen_;
+	deps.display_keys = gs::get_display_keys();
+	deps.save = [] { GameMain::get_instance()->save_settings(); };
+	deps.close = [this] { close(); };
+	deps.now = [this] { return get_total_elapsed_time(); };
+	deps.confirm_display_message = [] ( int remaining )
+	{
+		return GameMain::get_instance()->get_ui_strings().format( "options.confirm_display", { std::to_string( remaining ) } );
+	};
+	controller_ = std::make_unique< OptionsController >( std::move( deps ) );
+
 	// 解像度の選択肢（DXGI の一覧から重複を除く）
 	for ( const auto& m : get_graphics_manager()->get_available_display_modes() )
 	{
@@ -132,16 +146,16 @@ OptionsScene::OptionsScene()
 	auto* buttons = body->add< Stack >( Axis::HORIZONTAL );
 	SettingStore* store = & get_settings();
 
-	auto* apply_button = buttons->add< Button >( "options.apply", [this] { apply( false ); } );
+	auto* apply_button = buttons->add< Button >( "options.apply", [this] { controller_->apply( false ); } );
 	apply_button->set_enabled_if( [store] { return store->has_pending_deferred(); } );
 	apply_button->set_description_key( "options.apply.description" );
 
-	auto* defaults_button = buttons->add< Button >( "options.defaults", [this] { reset_to_defaults(); } );
+	auto* defaults_button = buttons->add< Button >( "options.defaults", [this] { controller_->reset_to_defaults(); } );
 	defaults_button->set_description_key( "options.defaults.description" );
 
-	buttons->add< Button >( "options.back", [this] { back(); } );
+	buttons->add< Button >( "options.back", [this] { controller_->back(); } );
 
-	screen_.set_root( std::move( panel ), [this] { back(); } );
+	screen_.set_root( std::move( panel ), [this] { controller_->back(); } );
 }
 
 int OptionsScene::find_resolution_index( int w, int h ) const
@@ -228,118 +242,6 @@ void OptionsScene::build_controls_page( Stack* page )
 			key_display_name )
 			->set_description_key( "options.key.description" );
 	}
-}
-
-void OptionsScene::save()
-{
-	GameMain::get_instance()->save_settings();
-}
-
-void OptionsScene::finish_and_close()
-{
-	get_settings().commit_immediate();
-	save();
-	close();
-}
-
-void OptionsScene::apply( bool close_after )
-{
-	SettingStore& store = get_settings();
-
-	const auto snapshot = store.snapshot();
-	const bool display_changed = store.apply_deferred();
-
-	store.commit_immediate();
-
-	// 表示が変わったときは、維持が選ばれるまで表示系の項目は元の値で保存する
-	// （確認の途中で強制終了・クラッシュしても、次回は映っていた設定で起動する）
-	if ( display_changed )
-	{
-		store.begin_trial( snapshot, gs::get_display_keys() );
-	}
-
-	save();
-
-	if ( ! display_changed )
-	{
-		if ( close_after )
-		{
-			close();
-		}
-
-		return;
-	}
-
-	// 表示が変わった : 時間内に「維持」しなければ元に戻す（映らなくなっても自動で復旧する）
-	constexpr float_t TIMEOUT = 15.f;
-	const float_t start = get_total_elapsed_time();
-
-	DialogSpec spec;
-	spec.message_provider = [this, start]
-	{
-		const int remaining = std::max( 0, static_cast< int >( std::ceil( TIMEOUT - ( get_total_elapsed_time() - start ) ) ) );
-		return GameMain::get_instance()->get_ui_strings().format( "options.confirm_display", { std::to_string( remaining ) } );
-	};
-	spec.buttons =
-	{
-		{ "options.keep", [this, close_after]
-			{
-				get_settings().end_trial();
-				save();
-
-				if ( close_after )
-				{
-					close();
-				}
-			} },
-		{ "options.revert", [this, snapshot]
-			{
-				get_settings().rollback( snapshot, gs::get_display_keys() );
-				save();
-			} },
-	};
-	spec.cancel_index = 1;
-	spec.default_index = 0;
-	spec.timeout_sec = TIMEOUT;
-
-	show_dialog( screen_, std::move( spec ) );
-}
-
-void OptionsScene::back()
-{
-	if ( ! get_settings().has_pending_deferred() )
-	{
-		finish_and_close();
-		return;
-	}
-
-	DialogSpec spec;
-	spec.message = "options.confirm_unapplied";
-	spec.buttons =
-	{
-		{ "options.apply_and_back", [this] { apply( true ); } },
-		{ "options.discard_and_back", [this] { get_settings().revert_deferred(); finish_and_close(); } },
-		{ "common.cancel", nullptr },
-	};
-	spec.cancel_index = 2;
-	spec.default_index = 0;
-
-	show_dialog( screen_, std::move( spec ) );
-}
-
-void OptionsScene::reset_to_defaults()
-{
-	DialogSpec spec;
-	spec.message = "options.confirm_defaults";
-	spec.buttons =
-	{
-		{ "common.yes", [this] { get_settings().reset_to_defaults(); } },
-		{ "common.no", nullptr },
-	};
-	spec.cancel_index = 1;
-	spec.default_index = 1;
-
-	show_dialog( screen_, std::move( spec ) );
 }
 
 } // namespace blue_sky

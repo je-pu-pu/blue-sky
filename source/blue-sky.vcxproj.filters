@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="Scene\OptionsController.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
     <ClCompile Include="core\ui\TextFit.cpp">
       <Filter>core\ui</Filter>
     </ClCompile>
@@ -428,6 +431,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\OptionsController.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
     <ClInclude Include="core\ui\TextFit.h">
       <Filter>core\ui</Filter>
     </ClInclude>

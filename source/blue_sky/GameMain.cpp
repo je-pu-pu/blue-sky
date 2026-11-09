@@ -962,6 +962,7 @@ void GameMain::handle_escape()
 	switch ( scene_->get_escape_behavior() )
 	{
 		case Scene::EscapeBehavior::QUIT:
+			debug_log( "[App] ESC で終了します（シーン : " + scene_->get_name() + "）" );
 			get_app()->close();
 			break;
 
@@ -1068,6 +1069,7 @@ void GameMain::process_scene_requests()
 				return;
 
 			case SceneRequest::Type::QUIT:
+				debug_log( "[App] シーンの要求で終了します" );
 				get_app()->close();
 				return;
 

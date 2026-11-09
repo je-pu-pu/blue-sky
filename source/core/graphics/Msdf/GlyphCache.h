@@ -5,8 +5,9 @@
  * キャッシュミス時に MsdfFont からグリフ輪郭を取得し、msdfgen で MSDF ビットマップを生成、
  * GlyphAtlas にアップロードしてキャッシュに登録する。
  *
- * キャッシュが上限 (MAX_CACHED_GLYPHS) に達すると、LRU (Least Recently Used) 方式で
- * 最も古いエントリを除去する。アトラスが満杯の場合はセルの上書き (replace_glyph) で対応する。
+ * アトラスのセルが尽きたら、最も長く使われていない（LRU）グリフを追い出し、そのセルを再利用する。
+ * （以前は追い出してもセルが空かず、アトラスが満杯になると新しい文字が描けなくなり、
+ *   表示できていた文字まで 1 つずつ消えていった）
  */
 #pragma once
 
@@ -14,6 +15,7 @@
 #include "GlyphAtlas.h"
 #include <unordered_map>
 #include <list>
+#include <vector>
 #include <cstdint>
 
 namespace core::graphics {
@@ -34,20 +36,28 @@ struct CachedGlyph {
  * MSDF グリフの LRU キャッシュ
  *
  * フォントとアトラスへの参照を保持し、コードポイント → CachedGlyph のマッピングを管理する。
- * LRU リストで使用順序を追跡し、上限超過時に最古のエントリを除去する。
+ *
+ * - 使用順は std::list で持ち、各エントリがリスト上の位置を覚える（使うたびの更新が O(1)）。
+ * - 追い出したグリフのセルは空きリストに戻し、次のグリフで再利用する。
+ * - 1 回の描画（flush）で使う文字の種類がセルの総数（既定 1764）を超えない限り、
+ *   同じ描画の途中で使用中のグリフが追い出されることはない（使ったグリフは使用順の先頭にあるため）。
  */
 class GlyphCache {
+	struct Entry
+	{
+		CachedGlyph glyph;
+		std::list< uint32_t >::iterator lru_position;	///< lru_ 上の位置
+	};
+
 	MsdfFont* font_;		///< グリフ輪郭の取得元フォント（外部所有）
 	GlyphAtlas* atlas_;		///< MSDF ビットマップのアップロード先アトラス（外部所有）
 
-	std::unordered_map< uint32_t, CachedGlyph > cache_;	///< コードポイント → キャッシュエントリ
-	std::list< uint32_t > lru_;								///< LRU 順序リスト（先頭が最新）
+	std::unordered_map< uint32_t, Entry > cache_;		///< コードポイント → キャッシュエントリ
+	std::list< uint32_t > lru_;							///< 使用順（先頭が最新）
+	std::vector< int > free_cells_;						///< 追い出しで空いたアトラスのセル
 
 	int msdf_size_;			///< MSDF ビットマップのピクセルサイズ（正方形、アトラスの cell_size と一致させる）
 	double msdf_range_;		///< MSDF の距離フィールド範囲（ピクセル単位、シェーダーの px_range と対応）
-
-	/// キャッシュに保持する最大グリフ数（超過分は LRU で除去）
-	static constexpr size_t MAX_CACHED_GLYPHS = 2048;
 
 	/**
 	 * 指定コードポイントの MSDF グリフを生成してアトラスに登録する
@@ -62,12 +72,16 @@ class GlyphCache {
 	bool generate_glyph( uint32_t codepoint, CachedGlyph& result );
 
 	/**
-	 * LRU リスト末尾（最古）のグリフをキャッシュから除去する
+	 * アトラスのセルを 1 つ確保してビットマップを書き込む
 	 *
-	 * キャッシュマップと LRU リストからエントリを削除する。
-	 * アトラスのセル自体は解放せず、後続の add_glyph / replace_glyph で上書きされる。
+	 * 空きセル → 未使用のセル → 最も古いグリフを追い出して得たセル、の順に使う。
+	 *
+	 * @return セル番号（確保できなければ -1）
 	 */
-	void evict_oldest();
+	int store_bitmap( const msdfgen::Bitmap< float, 3 >& bitmap, UVRect& uv );
+
+	/// 最も古いグリフを 1 つ追い出す。セルを持っていれば空きリストに戻す。追い出せなければ false
+	bool evict_oldest();
 
 public:
 	/**
@@ -81,16 +95,19 @@ public:
 	/**
 	 * 指定コードポイントのキャッシュ済みグリフを取得する
 	 *
-	 * キャッシュヒット時は LRU を更新して返す。
+	 * キャッシュヒット時は使用順を更新して返す。
 	 * キャッシュミス時は MSDF を生成・登録して返す。
 	 *
 	 * @param codepoint Unicode コードポイント
-	 * @return キャッシュ済みグリフへのポインタ（取得失敗時 nullptr）
+	 * @return キャッシュ済みグリフへのポインタ（取得失敗時 nullptr）。後続の get() で追い出されると無効になる
 	 */
 	const CachedGlyph* get( uint32_t codepoint );
 
-	/// キャッシュを全クリアする（フォント変更やリセット時に使用）
+	/// キャッシュを全クリアし、アトラスのセルもすべて未使用に戻す（フォント変更やリセット時に使用）
 	void clear();
+
+	/// キャッシュしているグリフの数（テスト用）
+	size_t size() const { return cache_.size(); }
 };
 
 } // namespace core::graphics

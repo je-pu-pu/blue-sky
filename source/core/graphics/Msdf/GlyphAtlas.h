@@ -92,6 +92,11 @@ public:
 	void replace_glyph( int cell_index, const msdfgen::Bitmap< float, 3 >& bitmap, UVRect& uv );
 
 	bool is_full() const { return next_cell_index_ >= total_cells_; }
+
+	/// すべてのセルを未使用に戻す（フォントを読み直すとき。テクスチャの中身は次の書き込みで上書きされる）
+	void reset() { next_cell_index_ = 0; }
+
+	int get_total_cells() const { return total_cells_; }
 	int get_cell_size() const { return cell_size_; }
 	int get_atlas_size() const { return atlas_size_; }
 

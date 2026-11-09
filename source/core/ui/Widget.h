@@ -187,6 +187,14 @@ namespace core::ui
 		/// 幅を与えたときの希望の高さ
 		virtual float_t measure_height( float_t width, const UIContext& ctx ) const;
 
+		/**
+		 * 内容に合わせた希望の幅（0 なら希望なし。親が決めた幅に従う）
+		 *
+		 * 横の Stack で「内容に合わせた幅（SizeMode::CONTENT）」の子に使う。
+		 * 以前はレイアウトが高さだけの 1 次元で、横は等分しかできなかった（設計上の問題 B3）。
+		 */
+		virtual float_t measure_width( const UIContext& ) const { return 0.f; }
+
 		/// 矩形を確定する（コンテナは子を配置する）
 		virtual void arrange( const Rect& rect, const UIContext& ctx );
 

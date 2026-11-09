@@ -21,15 +21,19 @@ float_t Stack::measure_height( float_t width, const UIContext& ctx ) const
 
 	if ( axis_ == Axis::HORIZONTAL )
 	{
-		int n = 0;
-		for ( size_t i = 0; i < child_count(); i++ ) if ( child_at( i )->is_visible() ) n++;
-
-		const float_t child_w = n > 0 ? ( inner_w - spacing * static_cast< float_t >( n - 1 ) ) / static_cast< float_t >( n ) : 0.f;
+		// 配置と同じ幅で高さを測る
+		const std::vector< float_t > widths = compute_widths( inner_w, spacing, ctx );
+		size_t k = 0;
 
 		for ( size_t i = 0; i < child_count(); i++ )
 		{
 			const Widget* c = child_at( i );
-			if ( c->is_visible() ) total = std::max( total, c->measure_height( child_w, ctx ) );
+
+			if ( c->is_visible() )
+			{
+				total = std::max( total, c->measure_height( widths[ k ], ctx ) );
+				k++;
+			}
 		}
 
 		return total + padding_ * 2.f;
@@ -56,6 +60,91 @@ float_t Stack::measure_height( float_t width, const UIContext& ctx ) const
 	return total + padding_ * 2.f;
 }
 
+void Stack::set_size( const Widget* child, Size size )
+{
+	for ( auto& s : sizes_ )
+	{
+		if ( s.first == child )
+		{
+			s.second = size;
+			return;
+		}
+	}
+
+	sizes_.emplace_back( child, size );
+}
+
+Stack::Size Stack::get_size( const Widget* child ) const
+{
+	for ( const auto& s : sizes_ )
+	{
+		if ( s.first == child )
+		{
+			return s.second;
+		}
+	}
+
+	return Size();
+}
+
+std::vector< float_t > Stack::compute_widths( float_t inner_w, float_t spacing, const UIContext& ctx ) const
+{
+	std::vector< const Widget* > visible;
+
+	for ( size_t i = 0; i < child_count(); i++ )
+	{
+		if ( child_at( i )->is_visible() )
+		{
+			visible.push_back( child_at( i ) );
+		}
+	}
+
+	std::vector< float_t > widths( visible.size(), 0.f );
+
+	if ( visible.empty() )
+	{
+		return widths;
+	}
+
+	// 決まった幅・内容に合わせた幅を先に取り、残りを重みで分ける
+	float_t remaining = inner_w - spacing * static_cast< float_t >( visible.size() - 1 );
+	float_t total_weight = 0.f;
+
+	for ( size_t i = 0; i < visible.size(); i++ )
+	{
+		const Size s = get_size( visible[ i ] );
+
+		if ( s.mode == SizeMode::FIXED )
+		{
+			widths[ i ] = std::max( s.value, s.min );
+		}
+		else if ( s.mode == SizeMode::CONTENT )
+		{
+			widths[ i ] = std::max( visible[ i ]->measure_width( ctx ), s.min );
+		}
+		else
+		{
+			total_weight += std::max( s.value, 0.f );
+			continue;
+		}
+
+		remaining -= widths[ i ];
+	}
+
+	for ( size_t i = 0; i < visible.size(); i++ )
+	{
+		const Size s = get_size( visible[ i ] );
+
+		if ( s.mode == SizeMode::FILL )
+		{
+			const float_t share = total_weight > 0.f ? std::max( 0.f, remaining ) * std::max( s.value, 0.f ) / total_weight : 0.f;
+			widths[ i ] = std::max( share, s.min );
+		}
+	}
+
+	return widths;
+}
+
 void Stack::arrange( const Rect& rect, const UIContext& ctx )
 {
 	rect_ = rect;
@@ -65,16 +154,9 @@ void Stack::arrange( const Rect& rect, const UIContext& ctx )
 
 	if ( axis_ == Axis::HORIZONTAL )
 	{
-		int n = 0;
-		for ( size_t i = 0; i < child_count(); i++ ) if ( child_at( i )->is_visible() ) n++;
-
-		if ( n == 0 )
-		{
-			return;
-		}
-
-		const float_t child_w = ( inner.w - spacing * static_cast< float_t >( n - 1 ) ) / static_cast< float_t >( n );
+		const std::vector< float_t > widths = compute_widths( inner.w, spacing, ctx );
 		float_t x = inner.x;
+		size_t k = 0;
 
 		for ( size_t i = 0; i < child_count(); i++ )
 		{
@@ -85,8 +167,9 @@ void Stack::arrange( const Rect& rect, const UIContext& ctx )
 				continue;
 			}
 
-			c->arrange( Rect( x, inner.y, child_w, inner.h ), ctx );
-			x += child_w + spacing;
+			c->arrange( Rect( x, inner.y, widths[ k ], inner.h ), ctx );
+			x += widths[ k ] + spacing;
+			k++;
 		}
 
 		return;

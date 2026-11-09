@@ -46,6 +46,9 @@ public:
 
 	float_t measure_height( float_t width, const UIContext& ctx ) const override;
 
+	/// 文字の幅（折り返す設定でも 1 行のときの幅）
+	float_t measure_width( const UIContext& ctx ) const override;
+
 	/// 関数で作る文字列が変わったときだけ配置し直す（行数が変わり得るため）
 	void update( float_t dt, UIContext& ctx ) override;
 	void render( Renderer& renderer, const UIContext& ctx ) const override;

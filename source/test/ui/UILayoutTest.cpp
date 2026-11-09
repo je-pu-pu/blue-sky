@@ -27,6 +27,63 @@ TEST( ServiceTest, Scopeで差し替えたサービスは破棄で元に戻る )
 	EXPECT_EQ( before, core::get_physics_manager() );
 }
 
+// ---- 横に並べるときの幅（設計上の問題 B3） ----
+
+namespace
+{
+
+class WidthTest : public ::testing::Test, public ui_test::ScreenFixture
+{
+};
+
+} // namespace
+
+TEST_F( WidthTest, 横のStackは決まった幅と内容の幅を先に取り残りを重みで分ける )
+{
+	auto row = std::make_unique< Stack >( Axis::HORIZONTAL );
+	row->set_spacing( 0.f );
+	Stack* stack = row.get();
+
+	auto* content = stack->add< Button >( "abcd", nullptr );		// MockRenderer : 文字幅 = 文字数 × font_size × 0.5
+	auto* fill1 = stack->add< Button >( "x", nullptr );
+	auto* fill2 = stack->add< Button >( "y", nullptr );
+	auto* fixed = stack->add< Button >( "z", nullptr );
+
+	stack->set_size( content, { Stack::SizeMode::CONTENT } );
+	stack->set_size( fill2, { Stack::SizeMode::FILL, 3.f } );
+	stack->set_size( fixed, { Stack::SizeMode::FIXED, 100.f } );
+
+	screen.set_root( std::move( row ), [] { } );
+	step();
+
+	const float_t content_w = 4.f * theme.font_size_normal * 0.5f + theme.row_padding_x * 2.f;
+	EXPECT_FLOAT_EQ( content_w, content->rect().w );
+	EXPECT_FLOAT_EQ( 100.f, fixed->rect().w );
+
+	// 残りを 1 : 3 で分ける
+	const float_t remaining = 1920.f - content_w - 100.f;
+	EXPECT_FLOAT_EQ( remaining * 0.25f, fill1->rect().w );
+	EXPECT_FLOAT_EQ( remaining * 0.75f, fill2->rect().w );
+
+	// 左から隙間なく並ぶ
+	EXPECT_FLOAT_EQ( content->rect().right(), fill1->rect().x );
+	EXPECT_FLOAT_EQ( fill2->rect().right(), fixed->rect().x );
+	EXPECT_FLOAT_EQ( 1920.f, fixed->rect().right() );
+}
+
+TEST_F( WidthTest, 指定しなければ以前と同じく等分する )
+{
+	auto row = std::make_unique< Stack >( Axis::HORIZONTAL );
+	row->set_spacing( 0.f );
+	auto* a = row->add< Button >( "a", nullptr );
+	auto* b = row->add< Button >( "bbbbbbbb", nullptr );
+	screen.set_root( std::move( row ), [] { } );
+	step();
+
+	EXPECT_FLOAT_EQ( 960.f, a->rect().w );
+	EXPECT_FLOAT_EQ( 960.f, b->rect().w );
+}
+
 // ---- 仮想画面（設計上の問題 B13） ----
 
 TEST( VirtualScreenTest, 16対9では設計の大きさのまま )

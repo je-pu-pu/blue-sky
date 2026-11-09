@@ -37,6 +37,9 @@ public:
 
 	float_t measure_height( float_t width, const UIContext& ctx ) const override;
 
+	/// 文字の幅＋左右の余白
+	float_t measure_width( const UIContext& ctx ) const override;
+
 	bool on_confirm( UIContext& ctx ) override;
 	bool on_pointer( const PointerEvent& e, UIContext& ctx ) override;
 

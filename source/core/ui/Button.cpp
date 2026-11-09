@@ -27,6 +27,11 @@ void Button::click( UIContext& ctx )
 	}
 }
 
+float_t Button::measure_width( const UIContext& ctx ) const
+{
+	return ctx.renderer.measure_text_width( ctx.tr( text_key_ ).c_str(), ctx.theme.font_size_normal ) + ctx.theme.row_padding_x * 2.f;
+}
+
 float_t Button::measure_height( float_t, const UIContext& ctx ) const
 {
 	// 文字を大きくしても行からはみ出さないよう、文字の行の高さ＋余白より小さくしない

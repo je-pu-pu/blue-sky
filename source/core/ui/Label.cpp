@@ -49,6 +49,11 @@ string_t Label::get_text( const UIContext& ctx ) const
 	return provider_ ? provider_() : ctx.tr( text_key_ );
 }
 
+float_t Label::measure_width( const UIContext& ctx ) const
+{
+	return ctx.renderer.measure_text_width( get_text( ctx ).c_str(), get_font_size( ctx ) );
+}
+
 void Label::update( float_t dt, UIContext& ctx )
 {
 	if ( provider_ )

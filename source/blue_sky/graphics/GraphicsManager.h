@@ -86,8 +86,9 @@ private:
 	BaseShadowMapShader*									shadow_map_shader_ = nullptr;
 	BaseShadowMapShader*									shadow_map_skin_shader_ = nullptr;
 
-	std::vector< Texture* >		paper_texture_list_;
-	Texture*					paper_texture_ = nullptr;
+	/// 紙テクスチャ（ハンドルで持つ。アンロードされたら描画で使わない。以前は生ポインタで、アンロード後に無効な参照になり得た）
+	std::vector< TextureManager::Handle >	paper_texture_list_;
+	TextureManager::Handle					paper_texture_;
 
 	ModelManager				model_manager_;
 	MeshManager					mesh_manager_;

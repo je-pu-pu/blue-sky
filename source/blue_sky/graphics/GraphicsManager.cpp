@@ -413,12 +413,12 @@ void GraphicsManager::load_paper_textures()
 {
 	paper_texture_list_.clear();
 
-	paper_texture_list_.push_back( load_named_texture( "paper-0", "media/texture/pencil-face-1.png" ) );
-	paper_texture_list_.push_back( load_named_texture( "paper-1", "media/texture/pen-face-1-loop.png" ) );
-	paper_texture_list_.push_back( load_named_texture( "paper-2", "media/texture/pen-face-2-loop.png" ) );
-	paper_texture_list_.push_back( load_named_texture( "paper-3", "media/texture/dot-face-1.png" ) );
-	paper_texture_list_.push_back( load_named_texture( "paper-4", "media/texture/brush-face-1.png" ) );
-	paper_texture_list_.push_back( load_named_texture( "paper-5", "media/texture/blank.png" ) );
+	paper_texture_list_.push_back( texture_manager_.handle_of( load_named_texture( "paper-0", "media/texture/pencil-face-1.png" ) ) );
+	paper_texture_list_.push_back( texture_manager_.handle_of( load_named_texture( "paper-1", "media/texture/pen-face-1-loop.png" ) ) );
+	paper_texture_list_.push_back( texture_manager_.handle_of( load_named_texture( "paper-2", "media/texture/pen-face-2-loop.png" ) ) );
+	paper_texture_list_.push_back( texture_manager_.handle_of( load_named_texture( "paper-3", "media/texture/dot-face-1.png" ) ) );
+	paper_texture_list_.push_back( texture_manager_.handle_of( load_named_texture( "paper-4", "media/texture/brush-face-1.png" ) ) );
+	paper_texture_list_.push_back( texture_manager_.handle_of( load_named_texture( "paper-5", "media/texture/blank.png" ) ) );
 
 	paper_texture_ = paper_texture_list_.back();
 }
@@ -437,20 +437,18 @@ void GraphicsManager::set_paper_texture_type( int_t type )
 	}
 	else
 	{
-		paper_texture_ = nullptr;
+		paper_texture_ = TextureManager::Handle();
 	}
 }
 
 /**
- * 紙テクスチャをシェーダーにバインドする
- *
- * @todo unload_texture(), unload_texture_all() でテクスチャがアンロードされた場合に正しく対応する
+ * 紙テクスチャをシェーダーにバインドする（アンロード済みなら何もしない）
  */
 void GraphicsManager::bind_paper_texture() const
 {
-	if ( paper_texture_ )
+	if ( Texture* t = texture_manager_.resolve( paper_texture_ ) )
 	{
-		paper_texture_->bind_to_ps( 2 );
+		t->bind_to_ps( 2 );
 	}
 }
 

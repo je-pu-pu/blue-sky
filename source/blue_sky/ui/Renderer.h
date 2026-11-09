@@ -2,6 +2,7 @@
 
 #include <blue_sky/type.h>
 #include <core/ui/Renderer.h>
+#include <core/ui/VirtualScreen.h>
 #include <win/Rect.h>
 
 #include <unordered_map>
@@ -22,9 +23,9 @@ namespace blue_sky::ui
 /**
  * core::ui::Renderer の具象実装（GraphicsManager の Sprite / MSDF テキストを使う）
  *
- * 仮想座標系は 1920x1080。物理画面へは**等方スケール**（縦横同じ倍率）で写し、
- * 余った左右・上下は中央寄せの余白にする（16:9 以外の解像度でも UI が歪まない）。
- * 余白も含めて塗りたいときは fill_screen() を使う。
+ * 仮想座標系は短い辺を 1920x1080 に合わせ、長い辺は画面に合わせて伸ばす（VirtualScreen）。
+ * 物理画面へは**等方スケール**（縦横同じ倍率）で写すので、16:9 以外の解像度でも UI が歪まず、
+ * 21:9 でも画面の端まで使える（以前は 16:9 の箱を中央に置き、余りを余白にしていた）。
  */
 class Renderer : public core::ui::Renderer
 {
@@ -45,9 +46,10 @@ private:
 	/// 画像名 → テクスチャ（読み込みに失敗した画像は nullptr を覚えておく）。テクスチャ自体は GraphicsManager が持つ
 	mutable std::unordered_map< string_t, const core::graphics::Texture* > images_;
 
+	/// 今の画面の大きさに対する仮想画面
+	core::ui::VirtualScreen get_virtual_screen() const;
+
 	float_t get_scale() const;
-	float_t get_offset_x() const;
-	float_t get_offset_y() const;
 
 	Rect to_physical( const Rect& ) const;
 
@@ -60,8 +62,8 @@ private:
 public:
 	explicit Renderer( GraphicsManager* );
 
-	float_t get_screen_width() const override { return DESIGN_WIDTH; }
-	float_t get_screen_height() const override { return DESIGN_HEIGHT; }
+	float_t get_screen_width() const override { return get_virtual_screen().width; }
+	float_t get_screen_height() const override { return get_virtual_screen().height; }
 
 	/// 物理ピクセル座標 → 仮想座標（マウス座標用。範囲外はクランプしない）
 	float_t physical_to_virtual_x( float_t px ) const;

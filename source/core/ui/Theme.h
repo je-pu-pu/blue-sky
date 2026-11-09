@@ -74,6 +74,7 @@ struct Theme
 	float_t value_box_inset			= 0.15f;	///< 値の欄の上下の余白（行の高さに対する比率。Toggle / Choice / KeyBind / TextField）
 	float_t slider_track_width		= 0.75f;	///< スライダーの溝の幅（値の欄に対する比率。残りは数値の表示）
 	float_t slider_track_height		= 0.4f;		///< スライダーの溝の高さ（値の欄に対する比率）
+	float_t safe_area				= 0.f;		///< セーフエリア : 画面の端から内側に空ける割合（各辺。テレビでは 0.05 など）
 	float_t row_icon_ratio			= 0.6f;		///< 行のアイコンの大きさ（行の高さに対する比率）
 	float_t tab_badge_size			= 10.f;		///< タブの見出しの印（丸）の大きさ
 	float_t choice_arrow_width		= 0.25f;	///< 選択肢の左右の矢印の幅（値の欄に対する比率の上限）

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="core\ui\AnchorBox.cpp" />
     <ClCompile Include="core\ui\Grid.cpp" />
     <ClCompile Include="Scene\OptionsController.cpp" />
     <ClCompile Include="core\ui\TextFit.cpp" />
@@ -174,6 +175,8 @@
     <ClCompile Include="Scene\TransformTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\ui\AnchorBox.h" />
+    <ClInclude Include="core\ui\VirtualScreen.h" />
     <ClInclude Include="core\graphics\DeviceLostException.h" />
     <ClInclude Include="core\graphics\Pixel2DSpace.h" />
     <ClInclude Include="core\ui\Grid.h" />

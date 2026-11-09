@@ -23,37 +23,30 @@ Renderer::Renderer( GraphicsManager* gm )
 {
 }
 
+core::ui::VirtualScreen Renderer::get_virtual_screen() const
+{
+	return core::ui::compute_virtual_screen( static_cast< float_t >( gm_->get_screen_width() ), static_cast< float_t >( gm_->get_screen_height() ), DESIGN_WIDTH, DESIGN_HEIGHT );
+}
+
 float_t Renderer::get_scale() const
 {
-	const float_t sx = static_cast< float_t >( gm_->get_screen_width() ) / DESIGN_WIDTH;
-	const float_t sy = static_cast< float_t >( gm_->get_screen_height() ) / DESIGN_HEIGHT;
-	return std::min( sx, sy );
-}
-
-float_t Renderer::get_offset_x() const
-{
-	return ( static_cast< float_t >( gm_->get_screen_width() ) - DESIGN_WIDTH * get_scale() ) * 0.5f;
-}
-
-float_t Renderer::get_offset_y() const
-{
-	return ( static_cast< float_t >( gm_->get_screen_height() ) - DESIGN_HEIGHT * get_scale() ) * 0.5f;
+	return get_virtual_screen().scale;
 }
 
 Renderer::Rect Renderer::to_physical( const Rect& r ) const
 {
 	const float_t s = get_scale();
-	return Rect( get_offset_x() + r.x * s, get_offset_y() + r.y * s, r.w * s, r.h * s );
+	return Rect( r.x * s, r.y * s, r.w * s, r.h * s );
 }
 
 float_t Renderer::physical_to_virtual_x( float_t px ) const
 {
-	return ( px - get_offset_x() ) / get_scale();
+	return px / get_scale();
 }
 
 float_t Renderer::physical_to_virtual_y( float_t py ) const
 {
-	return ( py - get_offset_y() ) / get_scale();
+	return py / get_scale();
 }
 
 void Renderer::draw_text( const Rect& rect, const char_t* text, const core::graphics::TextStyle& style )
@@ -76,7 +69,7 @@ void Renderer::draw_text( const Rect& rect, const char_t* text, const core::grap
 win::Rect Renderer::to_pixel_rect( const Rect& r ) const
 {
 	// 丸めの規則は core::ui::to_pixel_rect（テスト用の Mock と共有）
-	const core::ui::PixelRect p = core::ui::to_pixel_rect( r, get_scale(), get_offset_x(), get_offset_y() );
+	const core::ui::PixelRect p = core::ui::to_pixel_rect( r, get_scale(), 0.f, 0.f );
 	return win::Rect( static_cast< LONG >( p.left ), static_cast< LONG >( p.top ), static_cast< LONG >( p.right ), static_cast< LONG >( p.bottom ) );
 }
 
@@ -87,7 +80,7 @@ float_t Renderer::get_pixel_scale() const
 
 Renderer::Rect Renderer::snap_to_pixels( const Rect& r ) const
 {
-	return core::ui::snap_rect_to_pixels( r, get_scale(), get_offset_x(), get_offset_y() );
+	return core::ui::snap_rect_to_pixels( r, get_scale(), 0.f, 0.f );
 }
 
 string_t Renderer::normalize_image_name( const string_t& image )

@@ -150,6 +150,13 @@ namespace core::ui
 
 		void invalidate_layout() { layout_dirty_ = true; }
 
+		/**
+		 * 部品を置く範囲（仮想画面からテーマのセーフエリアを除いた矩形）
+		 *
+		 * 各層のルートはこの範囲に置かれる。背面を暗くする塗りは画面全体に掛かる。
+		 */
+		Rect get_safe_rect() const;
+
 		/// 見た目（テーマ）が変わったので配置し直す。フォーカス中の部品が見えるようにスクロールもする
 		void invalidate_appearance() { layout_dirty_ = true; reveal_focus_on_layout_ = true; }
 

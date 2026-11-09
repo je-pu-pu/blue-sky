@@ -813,6 +813,14 @@ void Screen::update( const UIInput& input, float_t dt )
 	repair_focus();
 }
 
+Rect Screen::get_safe_rect() const
+{
+	const float_t w = renderer_.get_screen_width();
+	const float_t h = renderer_.get_screen_height();
+
+	return Rect( 0.f, 0.f, w, h ).inset( w * theme_.safe_area, h * theme_.safe_area );
+}
+
 void Screen::layout()
 {
 	if ( ! layout_dirty_ )
@@ -823,7 +831,7 @@ void Screen::layout()
 	layout_dirty_ = false;
 
 	const UIContext ctx = make_context();
-	const Rect screen_rect( 0.f, 0.f, renderer_.get_screen_width(), renderer_.get_screen_height() );
+	const Rect screen_rect = get_safe_rect();
 
 	for ( auto& layer : layers_ )
 	{

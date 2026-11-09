@@ -818,6 +818,48 @@ void Screen::update( const UIInput& input, float_t dt )
 	repair_focus();
 }
 
+Rect Screen::place_popup( const Rect& anchor, float_t width, float_t height, const Rect& bounds )
+{
+	const float_t w = std::min( width > 0.f ? width : anchor.w, bounds.w );
+	const float_t h = std::min( height, bounds.h );
+
+	// 下に入らなければ上へ。上にも入らなければ、範囲の下端に合わせる
+	float_t y = anchor.bottom();
+
+	if ( y + h > bounds.bottom() )
+	{
+		y = anchor.y - h >= bounds.y ? anchor.y - h : bounds.bottom() - h;
+	}
+
+	const float_t x = std::clamp( anchor.x, bounds.x, bounds.right() - w );
+
+	return Rect( x, y, w, h );
+}
+
+void Screen::push_popup( std::unique_ptr< Widget > root, const Rect& anchor, float_t width, std::function< void() > on_cancel )
+{
+	auto holder = std::make_shared< std::unique_ptr< Widget > >( std::move( root ) );
+
+	post( [this, holder, anchor, width, on_cancel]
+	{
+		Layer layer;
+		layer.root = std::move( *holder );
+		layer.on_cancel = on_cancel;
+		layer.dim = false;
+		layer.modal = true;
+		layer.anchored = true;
+		layer.anchor = anchor;
+		layer.width = width;
+
+		release_captures();
+		layers_.push_back( std::move( layer ) );
+
+		layout_dirty_ = true;
+		layout();
+		focus_initial( layers_.back() );
+	} );
+}
+
 Rect Screen::get_safe_rect() const
 {
 	const float_t w = renderer_.get_screen_width();
@@ -838,9 +880,22 @@ void Screen::layout()
 	const UIContext ctx = make_context();
 	const Rect screen_rect = get_safe_rect();
 
+	auto arrange_layer = [&] ( Layer& layer )
+	{
+		if ( layer.anchored )
+		{
+			const float_t w = std::min( layer.width > 0.f ? layer.width : layer.anchor.w, screen_rect.w );
+			layer.root->arrange( place_popup( layer.anchor, w, layer.root->measure_height( w, ctx ), screen_rect ), ctx );
+		}
+		else
+		{
+			layer.root->arrange( screen_rect, ctx );
+		}
+	};
+
 	for ( auto& layer : layers_ )
 	{
-		layer.root->arrange( screen_rect, ctx );
+		arrange_layer( layer );
 	}
 
 	// 見た目が変わって配置し直したときは、フォーカス中の部品が見えるようにスクロールしてから、もう一度配置する
@@ -858,7 +913,7 @@ void Screen::layout()
 
 			for ( auto& layer : layers_ )
 			{
-				layer.root->arrange( screen_rect, ctx );
+				arrange_layer( layer );
 			}
 		}
 	}

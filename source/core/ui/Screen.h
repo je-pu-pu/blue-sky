@@ -54,6 +54,9 @@ namespace core::ui
 			Widget* focused = nullptr;
 			bool dim = false;	///< 背面を暗くする
 			bool modal = true;	///< 入力を受け取る（false なら表示だけ。HUD・トーストなど、下の層の操作を妨げない）
+			bool anchored = false;	///< 部品の近くに置く層（ドロップダウンなど）
+			Rect anchor;			///< 基準の矩形（この下、入らなければ上に置く）
+			float_t width = 0.f;	///< 幅（0 以下なら基準の矩形の幅）
 		};
 
 		const Theme& theme_;
@@ -130,6 +133,18 @@ namespace core::ui
 		 *              入力は下のモーダルな層が受け取り続ける（以前は層はすべて入力を奪うモーダルだった）
 		 */
 		void push_layer( std::unique_ptr< Widget > root, std::function< void() > on_cancel, bool dim = true, bool modal = true );
+
+		/**
+		 * 部品の近くに開く層を積む（ドロップダウン・ポップアップメニュー。post される）
+		 *
+		 * root は anchor の真下に、幅 width（0 以下なら anchor の幅）・高さは root の希望の高さで置く。
+		 * 下に入らなければ上に置き、左右は部品を置く範囲（セーフエリア）に収める。入力を受け取る（モーダル）。
+		 * 以前は層が全画面にしか置けず、部品から開くドロップダウンが作れなかった（設計上の問題 B7）。
+		 */
+		void push_popup( std::unique_ptr< Widget > root, const Rect& anchor, float_t width, std::function< void() > on_cancel );
+
+		/// 層の矩形を決める（全画面、または部品の近く）
+		static Rect place_popup( const Rect& anchor, float_t width, float_t height, const Rect& bounds );
 
 		/// 指定した層を閉じる（post される。既に無ければ何もしない）
 		void close_layer( const Widget* root );

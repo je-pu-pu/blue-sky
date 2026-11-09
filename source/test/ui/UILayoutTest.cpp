@@ -127,6 +127,46 @@ TEST_F( WidthTest, 指定しなければ以前と同じく等分する )
 	EXPECT_FLOAT_EQ( 960.f, b->rect().w );
 }
 
+// ---- 部品の近くに開く層（設計上の問題 B7） ----
+
+TEST( PopupTest, 基準の真下に置き下に入らなければ上に置き左右は範囲に収める )
+{
+	const Rect bounds( 0.f, 0.f, 1920.f, 1080.f );
+
+	const Rect below = Screen::place_popup( Rect( 100.f, 200.f, 300.f, 50.f ), 0.f, 400.f, bounds );
+	EXPECT_FLOAT_EQ( 100.f, below.x );
+	EXPECT_FLOAT_EQ( 250.f, below.y );		// 基準の下端
+	EXPECT_FLOAT_EQ( 300.f, below.w );		// 幅は基準と同じ
+
+	const Rect above = Screen::place_popup( Rect( 100.f, 900.f, 300.f, 50.f ), 0.f, 400.f, bounds );
+	EXPECT_FLOAT_EQ( 500.f, above.y );		// 下に入らないので上（900 - 400）
+
+	const Rect clamped = Screen::place_popup( Rect( 1800.f, 200.f, 100.f, 50.f ), 400.f, 100.f, bounds );
+	EXPECT_FLOAT_EQ( 1520.f, clamped.x );	// 右端に収める
+	EXPECT_FLOAT_EQ( 400.f, clamped.w );
+}
+
+TEST_F( WidthTest, ポップアップは基準の部品の下に開き入力を受け取る )
+{
+	auto root = std::make_unique< Stack >( Axis::VERTICAL );
+	auto* opener = root->add< Button >( "open", nullptr );
+	screen.set_root( std::move( root ), [] { } );
+	step();
+
+	bool chosen = false;
+	auto menu = std::make_unique< Stack >( Axis::VERTICAL );
+	auto* item = menu->add< Button >( "item", [&] { chosen = true; } );
+	screen.push_popup( std::move( menu ), opener->rect(), 0.f, nullptr );
+	step();
+
+	EXPECT_EQ( 2u, screen.get_layer_count() );
+	EXPECT_FLOAT_EQ( opener->rect().bottom(), item->rect().y );
+	EXPECT_FLOAT_EQ( opener->rect().x, item->rect().x );
+
+	confirm();
+	EXPECT_TRUE( chosen );
+}
+
 // ---- 仮想画面（設計上の問題 B13） ----
 
 TEST( VirtualScreenTest, 16対9では設計の大きさのまま )

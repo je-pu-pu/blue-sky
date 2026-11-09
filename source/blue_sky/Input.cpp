@@ -54,6 +54,11 @@ Input::Input()
 	joy_info_.dwSize = sizeof( JOYINFOEX );
 	joy_info_.dwFlags = JOY_RETURNALL;
 
+	detect_joystick();
+}
+
+void Input::detect_joystick()
+{
 	joystick_enabled_ = ( joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR );
 
 	if ( joystick_enabled_ )
@@ -62,6 +67,52 @@ Input::Input()
 		joyGetDevCaps( JOYSTICKID1, & jc, sizeof( JOYCAPS ) );
 		joystick_enabled_ &= jc.wNumAxes >= 4;
 	}
+}
+
+void Input::push_char_byte( char_t byte )
+{
+	const unsigned char b = static_cast< unsigned char >( byte );
+
+	// ウィンドウは ANSI 版なので、日本語は CP932 の 2 バイトに分かれて届く。先頭バイトなら次を待つ
+	if ( pending_lead_byte_ == 0 && IsDBCSLeadByte( b ) )
+	{
+		pending_lead_byte_ = b;
+		return;
+	}
+
+	char bytes[ 2 ];
+	int length = 0;
+
+	if ( pending_lead_byte_ != 0 )
+	{
+		bytes[ length++ ] = static_cast< char >( pending_lead_byte_ );
+		pending_lead_byte_ = 0;
+	}
+
+	bytes[ length++ ] = static_cast< char >( b );
+
+	wchar_t w[ 2 ] = { };
+	const int n = MultiByteToWideChar( CP_ACP, 0, bytes, length, w, 2 );
+
+	// 溜めすぎない（UI が読まない間に打たれた文字は古いものから捨てる）
+	constexpr size_t MAX_PENDING_TEXT = 64;
+
+	for ( int i = 0; i < n; i++ )
+	{
+		if ( pending_text_.size() >= MAX_PENDING_TEXT )
+		{
+			pending_text_.erase( pending_text_.begin() );
+		}
+
+		pending_text_.push_back( static_cast< char32_t >( w[ i ] ) );
+	}
+}
+
+std::u32string Input::take_text()
+{
+	std::u32string text;
+	text.swap( pending_text_ );
+	return text;
 }
 
 Input::~Input()
@@ -246,6 +297,13 @@ void Input::update_raw_keys()
 void Input::update()
 {
 	update_raw_keys();
+
+	// パッドは起動時の 1 回だけでなく、つながっていなければ約 2 秒ごとに探し直す（途中で挿しても使えるように）
+	if ( ! joystick_enabled_ && ++joystick_detect_wait_ >= 120 )
+	{
+		joystick_detect_wait_ = 0;
+		detect_joystick();
+	}
 
 	for ( int n = 0; n < static_cast< int >( Button::MAX ); n++ )
 	{

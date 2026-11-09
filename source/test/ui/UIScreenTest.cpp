@@ -210,7 +210,7 @@ protected:
 		spec.cancel_index = 1;
 		spec.default_index = 0;
 		spec.timeout_sec = timeout;
-		screen.show_dialog( std::move( spec ) );
+		show_dialog( screen, std::move( spec ) );
 		step();	// post されたコマンドで開く
 	}
 };
@@ -270,9 +270,9 @@ TEST_F( DialogTest, コールバックから次のダイアログを開ける )
 		DialogSpec second;
 		second.message = "second";
 		second.buttons = { { "ok", [this] { pressed.push_back( 2 ); } } };
-		screen.show_dialog( std::move( second ) );
+		show_dialog( screen, std::move( second ) );
 	} } };
-	screen.show_dialog( std::move( first ) );
+	show_dialog( screen, std::move( first ) );
 	step();
 
 	confirm();	// first を押す → second が開き、first は閉じる

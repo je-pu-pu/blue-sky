@@ -9,6 +9,7 @@
 #include <core/setting/SettingStore.h>
 #include <core/ui/Button.h>
 #include <core/ui/Choice.h>
+#include <core/ui/Dialog.h>
 #include <core/ui/KeyBind.h>
 #include <core/ui/Label.h>
 #include <core/ui/Panel.h>
@@ -298,7 +299,7 @@ void OptionsScene::apply( bool close_after )
 	spec.default_index = 0;
 	spec.timeout_sec = TIMEOUT;
 
-	screen_.show_dialog( std::move( spec ) );
+	show_dialog( screen_, std::move( spec ) );
 }
 
 void OptionsScene::back()
@@ -320,7 +321,7 @@ void OptionsScene::back()
 	spec.cancel_index = 2;
 	spec.default_index = 0;
 
-	screen_.show_dialog( std::move( spec ) );
+	show_dialog( screen_, std::move( spec ) );
 }
 
 void OptionsScene::reset_to_defaults()
@@ -335,7 +336,7 @@ void OptionsScene::reset_to_defaults()
 	spec.cancel_index = 1;
 	spec.default_index = 1;
 
-	screen_.show_dialog( std::move( spec ) );
+	show_dialog( screen_, std::move( spec ) );
 }
 
 } // namespace blue_sky

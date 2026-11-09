@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <deque>
 #include <array>
+#include <string>
 #include <vector>
 #include <algorithm>
 
@@ -101,6 +102,13 @@ private:
 
 	bool is_blocked_;										///< 入力ブロックフラグ ( オーバーレイ UI がアクティブな時にゲーム入力をブロックする )
 
+	unsigned char pending_lead_byte_ = 0;	///< 2 バイト文字の先頭バイト（次のバイトを待っている）
+	std::u32string pending_text_;			///< 入力された文字（UI が取り出すまで溜める）
+	int joystick_detect_wait_ = 0;			///< パッドを探し直すまでのフレーム数
+
+	/// パッドを探す（つながっていれば joystick_enabled_ を true にする）
+	void detect_joystick();
+
 	
 	void update_state_by_key_for( uint_t );
 
@@ -165,6 +173,12 @@ public:
 
 	void update();
 	void update_null();
+
+	/// ウィンドウメッセージ（WM_CHAR）の 1 バイトを受け取る。CP932 の 2 バイト文字は組み立ててから溜める
+	void push_char_byte( char_t byte );
+
+	/// 溜まった文字を取り出す（UI が 1 フレームに 1 回呼ぶ）
+	std::u32string take_text();
 
 	/**
 	 * ボタンが押されていない状態に更新する

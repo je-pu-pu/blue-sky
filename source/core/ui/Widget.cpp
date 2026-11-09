@@ -91,6 +91,22 @@ void Widget::arrange( const Rect& rect, const UIContext& )
 	rect_ = rect;
 }
 
+bool Widget::on_action( ActionId action, UIContext& ctx )
+{
+	switch ( action )
+	{
+		case ui_action::NAV_UP:		return on_nav( NavDir::UP, ctx );
+		case ui_action::NAV_DOWN:	return on_nav( NavDir::DOWN, ctx );
+		case ui_action::NAV_LEFT:	return on_nav( NavDir::LEFT, ctx );
+		case ui_action::NAV_RIGHT:	return on_nav( NavDir::RIGHT, ctx );
+		case ui_action::CONFIRM:	return on_confirm( ctx );
+		case ui_action::CANCEL:		return on_cancel( ctx );
+		case ui_action::TAB_PREV:	return on_tab( -1, ctx );
+		case ui_action::TAB_NEXT:	return on_tab( +1, ctx );
+		default:					return false;
+	}
+}
+
 void Widget::update( float_t dt, UIContext& ctx )
 {
 	for ( size_t i = 0; i < child_count(); i++ )

@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 namespace core::ui
@@ -21,23 +22,6 @@ namespace core::ui
 		CHANGE		///< 値の変更
 	};
 
-	/// ダイアログの定義
-	struct DialogSpec
-	{
-		struct ButtonSpec
-		{
-			string_t text_key;
-			std::function< void() > on_press;
-		};
-
-		string_t message;									///< 表示する文字列（翻訳済み or キー）
-		std::function< string_t() > message_provider;		///< 毎フレーム文字列を作る（残り秒数の表示等。任意）
-		std::vector< ButtonSpec > buttons;
-		int cancel_index = -1;								///< キャンセル・時間切れで押したことにするボタン（-1 = キャンセル不可）
-		int default_index = 0;								///< 最初にフォーカスするボタン
-		float_t timeout_sec = 0.f;							///< 0 = 時間切れなし
-	};
-
 	/**
 	 * UI 画面
 	 *
@@ -47,7 +31,9 @@ namespace core::ui
 	 *  1. 入力抑止中なら入力を捨てる
 	 *  2. キー待ち中なら キャンセル（中止）とキー入力だけを処理
 	 *  3. ポインタ（ホバー・押下・ドラッグ・離す）
-	 *  4. ホイール  5. タブ  6. 方向（部品 → 階層ナビゲーション）  7. 決定  8. キャンセル
+	 *  4. ホイール  5. 文字（文字を受け取る部品がフォーカス中なら）
+ *  6. アクション（タブ → 方向 → 決定 → キャンセル → 独自の操作）: フォーカス中の部品から親へ渡し、
+ *     誰も使わなければ既定の処理（方向 = 階層ナビゲーション、キャンセル = 層の on_cancel、タブ = 層の中のタブ）
 	 *  9. 部品の更新  10. post() されたコマンドの実行  11. フォーカスの修復・レイアウト
 	 *
 	 * 層やツリーの変更は post() 経由で行う（コールバック中にツリーが壊れないように）。
@@ -72,6 +58,8 @@ namespace core::ui
 
 		std::vector< Layer > layers_;
 		std::vector< std::function< void() > > commands_;
+
+		std::unordered_map< ActionId, string_t > action_names_;	///< 独自の操作の、操作ヒントの名前
 
 		int suppress_frames_ = 0;
 		Widget* key_capture_ = nullptr;
@@ -104,6 +92,12 @@ namespace core::ui
 		void handle_nav( NavDir, UIContext& );
 		void handle_cancel( UIContext& );
 
+		/// アクションをフォーカス中の部品から親へ渡し、誰も使わなければ既定の処理をする。処理したら true
+		bool dispatch_action( ActionId action, UIContext& ctx );
+
+		/// ポインタ・キーの捕捉を解除し、捕捉していた部品に知らせる
+		void release_captures();
+
 	public:
 		Screen( const Theme&, const StringTable&, const Renderer& );
 		~Screen();
@@ -118,9 +112,6 @@ namespace core::ui
 
 		/// 指定した層を閉じる（post される。既に無ければ何もしない）
 		void close_layer( const Widget* root );
-
-		/// ダイアログを開く（post される）
-		void show_dialog( DialogSpec spec );
 
 		size_t get_layer_count() const { return layers_.size(); }
 		Widget* get_root() const { return layers_.empty() ? nullptr : layers_.front().root.get(); }
@@ -153,6 +144,9 @@ namespace core::ui
 		bool is_capturing_key() const { return key_capture_ != nullptr; }
 
 		// ---- その他 ----
+
+		/// 独自の操作（ui_action::USER 以上）の操作ヒントの名前を登録する（hint.key.<名前> / hint.pad.<名前> を引く）
+		void register_action( ActionId action, const string_t& hint_name );
 
 		void set_sound_handler( SoundHandler h ) { sound_handler_ = std::move( h ); }
 		void play( UISoundEvent e ) const { if ( sound_handler_ ) sound_handler_( e ); }

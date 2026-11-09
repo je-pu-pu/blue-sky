@@ -10,6 +10,15 @@
 namespace core::ui
 {
 
+void show_dialog( Screen& screen, DialogSpec spec )
+{
+	auto dialog = std::make_unique< Dialog >( std::move( spec ) );
+	Dialog* raw = dialog.get();
+	raw->set_screen( & screen );
+
+	screen.push_layer( std::move( dialog ), [raw] { raw->press_cancel(); }, true );
+}
+
 Dialog::Dialog( DialogSpec spec )
 	: spec_( std::move( spec ) )
 	, remaining_( spec_.timeout_sec )

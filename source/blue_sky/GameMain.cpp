@@ -459,7 +459,8 @@ bool GameMain::update()
 
 		// オーバーレイ（UI 画面）が開いている間は、ESC は UI 側が「キャンセル」として処理する
 		// （キー割り当て待ちの中止・ダイアログを閉じる・未適用の変更の確認などを UI が判断するため）
-		if ( escape_pushed && ! has_overlay_scene() )
+		// 開発用のコンソール（ImGui）がキー入力を受け取っているときは、ESC はコンソールのもの
+		if ( escape_pushed && ! has_overlay_scene() && ! ImGui::GetIO().WantCaptureKeyboard )
 		{
 			if ( scene_->get_name() == "title" )
 			{
@@ -507,7 +508,12 @@ bool GameMain::update()
 	}
 	else
 	{
+		// 開発用のコンソール（ImGui）が入力を受け取っているときは、ゲームに入力を渡さない
+		// （コンソールで打った文字やマウス操作で、キャラクターが動かないように）
+		const ImGuiIO& io = ImGui::GetIO();
+		input_->set_blocked( io.WantCaptureKeyboard || io.WantCaptureMouse );
 		scene_->update();
+		input_->set_blocked( false );
 	}
 
 	render();
@@ -858,9 +864,10 @@ void GameMain::render_scene_list_window()
 	ImGui::End();
 }
 
-void GameMain::on_key_down( char_t )
+void GameMain::on_key_down( char_t c )
 {
-	
+	// 文字の入力（WM_CHAR）。UI の文字入力（TextField）が取り出す
+	input_->push_char_byte( c );
 }
 
 void GameMain::on_special_key_down( int key )

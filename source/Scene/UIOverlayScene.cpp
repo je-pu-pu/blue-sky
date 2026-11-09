@@ -7,6 +7,8 @@
 #include <core/ui/StringTable.h>
 #include <core/ui/Theme.h>
 
+#include <imgui.h>
+
 namespace blue_sky
 {
 
@@ -43,7 +45,31 @@ void UIOverlayScene::update()
 	Scene::update();
 
 	const float_t dt = get_elapsed_time();
-	const core::ui::UIInput input = input_builder_.build( * get_input(), renderer_, dt );
+	core::ui::UIInput input = input_builder_.build( * get_input(), renderer_, dt );
+
+	// 開発用のコンソール（ImGui）が入力を受け取っているときは、UI に渡さない
+	// （以前はコンソールで打った Enter・Esc・Q/E が UI にも届いていた）
+	const ImGuiIO& io = ImGui::GetIO();
+
+	if ( io.WantCaptureKeyboard )
+	{
+		const core::ui::UIInput keep_pointer = input;
+		input = core::ui::UIInput();
+		input.pointer_x = keep_pointer.pointer_x;
+		input.pointer_y = keep_pointer.pointer_y;
+		input.pointer_moved = keep_pointer.pointer_moved;
+		input.pointer_pressed = keep_pointer.pointer_pressed;
+		input.pointer_down = keep_pointer.pointer_down;
+		input.pointer_released = keep_pointer.pointer_released;
+		input.wheel = keep_pointer.wheel;
+		input.last_device = keep_pointer.last_device;
+	}
+
+	if ( io.WantCaptureMouse )
+	{
+		input.pointer_moved = input.pointer_pressed = input.pointer_down = input.pointer_released = false;
+		input.wheel = 0;
+	}
 
 	screen_.update( input, dt );
 }

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="core\ui\TextField.cpp" />
     <ClCompile Include="core\ui\Image.cpp" />
     <ClCompile Include="core\ui\Theme.cpp" />
     <ClCompile Include="core\ui\Brush.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="Scene\TransformTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\ui\TextField.h" />
     <ClInclude Include="core\setting\SettingKey.h" />
     <ClInclude Include="Scene\OverlayRenderRange.h" />
     <ClInclude Include="core\ui\PixelSnap.h" />

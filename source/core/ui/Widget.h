@@ -45,19 +45,19 @@ namespace core::ui
 		HORIZONTAL
 	};
 
-	/// 操作ヒントの種類
-	enum class HintAction
+	/// 操作ヒントのアクション（ui_action の別名。既存のコードの HintAction::CONFIRM などをそのまま使えるように）
+	struct HintAction
 	{
-		CONFIRM,	///< 決定
-		CHANGE,		///< 左右で変更
-		CANCEL,		///< 戻る
-		TAB			///< タブ切替
+		static constexpr ActionId CONFIRM	= ui_action::CONFIRM;		///< 決定
+		static constexpr ActionId CHANGE	= ui_action::HINT_CHANGE;	///< 左右で変更
+		static constexpr ActionId CANCEL	= ui_action::CANCEL;		///< 戻る
+		static constexpr ActionId TAB		= ui_action::HINT_TAB;		///< タブ切替
 	};
 
 	struct Hint
 	{
-		HintAction action;
-		string_t text_key;
+		ActionId action;		///< ヒントの記号（キーやボタン）を引くアクション
+		string_t text_key;		///< 何が起きるかの文字列キー
 	};
 
 	/// ポインタ（マウス左ボタン）のイベント
@@ -184,6 +184,30 @@ namespace core::ui
 		const Rect& rect() const { return rect_; }
 
 		// ---- 入力（消費したら true） ----
+
+		/**
+		 * 操作（アクション）を受け取る。フォーカス中の部品から親へ順に渡り、true を返したところで止まる
+		 *
+		 * 既定では組み込みのアクションを on_nav / on_confirm / on_cancel / on_tab に振り分ける。
+		 * 独自の操作を受けたい部品は、これを上書きする（使わない ID は基底に任せる）。
+		 */
+		virtual bool on_action( ActionId action, UIContext& ctx );
+
+		/// 文字の入力を受け取るか（true の部品がフォーカス中なら、文字はそちらへ渡り、Q / E のタブ切替は行わない）
+		virtual bool wants_text_input() const { return false; }
+
+		/// 文字を受け取る（wants_text_input() が true の部品にだけ届く）
+		virtual bool on_text( const std::u32string&, UIContext& ) { return false; }
+
+		/**
+		 * ポインタやキーの捕捉が外れた（層が積まれた・ルートが差し替わったなど）
+		 *
+		 * 「押している」「ドラッグ中」「キー待ち」の状態を解除する。解除しないと、押した見た目のまま残る。
+		 */
+		virtual void on_capture_lost() { }
+
+		/// 層を開いたときに最初にフォーカスする部品（nullptr なら先頭の部品）。Dialog が既定のボタンを返す
+		virtual Widget* get_initial_focus() { return nullptr; }
 
 		virtual bool on_nav( NavDir, UIContext& ) { return false; }
 		virtual bool on_confirm( UIContext& ) { return false; }

@@ -21,6 +21,9 @@ private:
 	bool pressed_ = false;
 
 public:
+	/// 捕捉が外れた（層が積まれたなど）: 押している・ドラッグ中の状態を解除する
+	void on_capture_lost() override { pressed_ = false; }
+
 	/// ページを追加する（ページの型と引数を指定。型付きポインタを返す）
 	template< typename T, typename ... Args >
 	T* add_page( const string_t& title_key, Args&& ... args )

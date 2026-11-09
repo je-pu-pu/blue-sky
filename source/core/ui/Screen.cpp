@@ -1,5 +1,4 @@
 #include "Screen.h"
-#include "Dialog.h"
 #include "Renderer.h"
 #include "StringTable.h"
 #include "Theme.h"
@@ -42,14 +41,16 @@ bool tree_contains( const Widget* root, const Widget* target, size_t ( *count )(
 	return false;
 }
 
-const char_t* hint_action_name( HintAction a )
+/// 組み込みのアクションの、操作ヒントの名前（hint.key.<名前> / hint.pad.<名前> を引く）
+const char_t* builtin_action_name( ActionId a )
 {
 	switch ( a )
 	{
-		case HintAction::CONFIRM: return "confirm";
-		case HintAction::CHANGE: return "change";
-		case HintAction::CANCEL: return "cancel";
-		default: return "tab";
+		case ui_action::CONFIRM:		return "confirm";
+		case ui_action::HINT_CHANGE:	return "change";
+		case ui_action::CANCEL:			return "cancel";
+		case ui_action::HINT_TAB:		return "tab";
+		default:						return nullptr;
 	}
 }
 
@@ -87,6 +88,9 @@ Widget* Screen::set_root( std::unique_ptr< Widget > root, std::function< void() 
 {
 	Widget* raw = root.get();
 
+	// 差し替える前に、捕捉していた部品に捕捉が外れたことを知らせる
+	release_captures();
+
 	Layer layer;
 	layer.root = std::move( root );
 	layer.on_cancel = std::move( on_cancel );
@@ -100,8 +104,6 @@ Widget* Screen::set_root( std::unique_ptr< Widget > root, std::function< void() 
 		layers_.front() = std::move( layer );
 	}
 
-	pointer_capture_ = nullptr;
-	key_capture_ = nullptr;
 	layout_dirty_ = true;
 	layout();
 	focus_initial( layers_.front() );
@@ -120,9 +122,13 @@ void Screen::push_layer( std::unique_ptr< Widget > root, std::function< void() >
 		layer.root = std::move( *holder );
 		layer.on_cancel = on_cancel;
 		layer.dim = dim;
+
+		// 下の層の部品の「押している」「ドラッグ中」「キー待ち」を解除する
+		// （以前は Screen 側の捕捉を消すだけで、ボタンが押された見た目のまま残り、キー待ちも背面に残った）
+		release_captures();
+
 		layers_.push_back( std::move( layer ) );
 
-		pointer_capture_ = nullptr;
 		layout_dirty_ = true;
 		layout();
 		focus_initial( layers_.back() );
@@ -145,13 +151,26 @@ void Screen::close_layer( const Widget* root )
 	} );
 }
 
-void Screen::show_dialog( DialogSpec spec )
+void Screen::release_captures()
 {
-	auto dialog = std::make_unique< Dialog >( std::move( spec ) );
-	Dialog* raw = dialog.get();
-	raw->set_screen( this );
+	if ( pointer_capture_ )
+	{
+		Widget* w = pointer_capture_;
+		pointer_capture_ = nullptr;
+		w->on_capture_lost();
+	}
 
-	push_layer( std::move( dialog ), [raw] { raw->press_cancel(); }, true );
+	if ( key_capture_ )
+	{
+		Widget* w = key_capture_;
+		key_capture_ = nullptr;
+		w->on_capture_lost();
+	}
+}
+
+void Screen::register_action( ActionId action, const string_t& hint_name )
+{
+	action_names_[ action ] = hint_name;
 }
 
 void Screen::post( std::function< void() > command )
@@ -279,12 +298,8 @@ Widget* Screen::find_first_focusable( Widget* w ) const
 
 void Screen::focus_initial( Layer& layer )
 {
-	Widget* target = nullptr;
-
-	if ( auto* dialog = dynamic_cast< Dialog* >( layer.root.get() ) )
-	{
-		target = dialog->get_default_button();
-	}
+	// 最初のフォーカス先は層の部品が決める（Dialog は既定のボタン）。Screen は具体的な部品の種類を知らない
+	Widget* target = layer.root->get_initial_focus();
 
 	if ( ! target || ! target->can_focus() )
 	{
@@ -613,15 +628,51 @@ void Screen::handle_pointer( const UIInput& in, UIContext& ctx )
 	}
 }
 
-void Screen::handle_nav( NavDir dir, UIContext& ctx )
+bool Screen::dispatch_action( ActionId action, UIContext& ctx )
+{
+	// フォーカス中の部品から親へ順に渡す（入れ子のメニューやリストが、子の使わなかった操作を受け取れる）
+	for ( Widget* w = get_focused(); w; w = w->parent_ )
+	{
+		if ( w->on_action( action, ctx ) )
+		{
+			return true;
+		}
+	}
+
+	// 誰も使わなかった操作の既定の処理
+	switch ( action )
+	{
+		case ui_action::NAV_UP:		handle_nav( NavDir::UP, ctx ); return true;
+		case ui_action::NAV_DOWN:	handle_nav( NavDir::DOWN, ctx ); return true;
+		case ui_action::NAV_LEFT:	handle_nav( NavDir::LEFT, ctx ); return true;
+		case ui_action::NAV_RIGHT:	handle_nav( NavDir::RIGHT, ctx ); return true;
+		case ui_action::CANCEL:		handle_cancel( ctx ); return true;
+
+		case ui_action::TAB_PREV:
+		case ui_action::TAB_NEXT:
+		{
+			// フォーカスの外にあるタブ（画面に 1 つだけのタブなど）にも届くよう、層の中を探す
+			const int d = action == ui_action::TAB_NEXT ? 1 : -1;
+
+			std::function< bool( Widget* ) > walk = [&] ( Widget* w ) -> bool
+			{
+				if ( w->on_tab( d, ctx ) ) return true;
+				for ( size_t i = 0; i < w->child_count(); i++ ) if ( walk( w->child_at( i ) ) ) return true;
+				return false;
+			};
+
+			return walk( top_layer()->root.get() );
+		}
+
+		default:
+			return false;
+	}
+}
+
+void Screen::handle_nav( NavDir dir, UIContext& )
 {
 	Layer* layer = top_layer();
 	Widget* focused = layer->focused;
-
-	if ( focused && focused->on_nav( dir, ctx ) )
-	{
-		return;
-	}
 
 	Widget* target = focused ? find_nav_target( focused, dir ) : find_first_focusable( layer->root.get() );
 
@@ -632,14 +683,9 @@ void Screen::handle_nav( NavDir dir, UIContext& ctx )
 	}
 }
 
-void Screen::handle_cancel( UIContext& ctx )
+void Screen::handle_cancel( UIContext& )
 {
 	Layer* layer = top_layer();
-
-	if ( layer->focused && layer->focused->on_cancel( ctx ) )
-	{
-		return;
-	}
 
 	if ( layer->on_cancel )
 	{
@@ -690,41 +736,36 @@ void Screen::update( const UIInput& input, float_t dt )
 		{
 			handle_pointer( input, ctx );
 
-			if ( input.tab_prev || input.tab_next )
+			// 文字を受け取る部品がフォーカス中なら、文字はそちらへ。同じキーによるタブ切替（Q / E）は行わない
+			Widget* focused = get_focused();
+			const bool text_mode = focused && focused->wants_text_input();
+
+			if ( text_mode && ! input.text.empty() )
 			{
-				const int d = input.tab_next ? 1 : -1;
-				bool used = false;
-
-				for ( Widget* w = get_focused(); w && ! used; w = w->parent_ ) used = w->on_tab( d, ctx );
-
-				if ( ! used )
-				{
-					std::function< bool( Widget* ) > walk = [&] ( Widget* w ) -> bool
-					{
-						if ( w->on_tab( d, ctx ) ) return true;
-						for ( size_t i = 0; i < w->child_count(); i++ ) if ( walk( w->child_at( i ) ) ) return true;
-						return false;
-					};
-					walk( top_layer()->root.get() );
-				}
+				focused->on_text( input.text, ctx );
 			}
 
-			for ( NavDir d : { NavDir::UP, NavDir::DOWN, NavDir::LEFT, NavDir::RIGHT } )
+			// 入力をアクションの列にして、順に処理する（タブ → 方向 → 決定 → キャンセル → 独自の操作）
+			std::vector< ActionId > actions;
+
+			if ( ! text_mode )
 			{
-				if ( input.nav( d ) )
-				{
-					handle_nav( d, ctx );
-				}
+				if ( input.tab_prev ) actions.push_back( ui_action::TAB_PREV );
+				if ( input.tab_next ) actions.push_back( ui_action::TAB_NEXT );
 			}
 
-			if ( input.confirm && get_focused() )
-			{
-				get_focused()->on_confirm( ctx );
-			}
+			if ( input.up ) actions.push_back( ui_action::NAV_UP );
+			if ( input.down ) actions.push_back( ui_action::NAV_DOWN );
+			if ( input.left ) actions.push_back( ui_action::NAV_LEFT );
+			if ( input.right ) actions.push_back( ui_action::NAV_RIGHT );
+			if ( input.confirm ) actions.push_back( ui_action::CONFIRM );
+			if ( input.cancel ) actions.push_back( ui_action::CANCEL );
 
-			if ( input.cancel )
+			actions.insert( actions.end(), input.actions.begin(), input.actions.end() );
+
+			for ( ActionId a : actions )
 			{
-				handle_cancel( ctx );
+				dispatch_action( a, ctx );
 			}
 		}
 	}
@@ -847,7 +888,7 @@ string_t Screen::build_hint_text() const
 
 	const string_t prefix = last_device_ == InputDevice::GAMEPAD ? "hint.pad." : "hint.key.";
 	string_t text;
-	std::vector< HintAction > used;
+	std::vector< ActionId > used;
 
 	for ( const auto& h : hints )
 	{
@@ -863,8 +904,23 @@ string_t Screen::build_hint_text() const
 			text += "    ";
 		}
 
-		text += strings_.get( prefix + hint_action_name( h.action ) );
-		text += " ";
+		// 記号の名前 : 組み込み → register_action() で登録した名前 → 無ければ記号なし
+		string_t name;
+
+		if ( const char_t* builtin = builtin_action_name( h.action ) )
+		{
+			name = builtin;
+		}
+		else if ( auto i = action_names_.find( h.action ); i != action_names_.end() )
+		{
+			name = i->second;
+		}
+
+		if ( ! name.empty() )
+		{
+			text += strings_.get( prefix + name );
+			text += " ";
+		}
 		text += strings_.get( h.text_key );
 	}
 

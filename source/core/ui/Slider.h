@@ -16,6 +16,9 @@ namespace core::ui
 class Slider : public LabeledRow
 {
 public:
+	/// 捕捉が外れた（層が積まれたなど）: 押している・ドラッグ中の状態を解除する
+	void on_capture_lost() override { dragging_ = false; }
+
 	using Getter = std::function< float_t() >;
 	using Setter = std::function< void( float_t ) >;
 	using Formatter = std::function< string_t( float_t ) >;

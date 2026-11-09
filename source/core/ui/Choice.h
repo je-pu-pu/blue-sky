@@ -17,6 +17,9 @@ namespace core::ui
 class Choice : public LabeledRow
 {
 public:
+	/// 捕捉が外れた（層が積まれたなど）: 押している・ドラッグ中の状態を解除する
+	void on_capture_lost() override { pressed_ = false; }
+
 	using Getter = std::function< int() >;
 	using Setter = std::function< void( int ) >;
 

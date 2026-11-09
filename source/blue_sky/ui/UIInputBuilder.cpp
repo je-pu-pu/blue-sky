@@ -52,6 +52,25 @@ core::ui::UIInput UIInputBuilder::build( Input& input, const Renderer& renderer,
 
 	in.pushed_key = input.get_pushed_bindable_key();
 
+	// 文字（WM_CHAR で届いたもの。TextField が使う）
+	in.text = input.take_text();
+
+	// 独自の操作
+	for ( const auto& b : bindings_ )
+	{
+		bool pushed = input.is_pad_mask_pushed( b.pad_mask );
+
+		for ( int key : b.keys )
+		{
+			pushed = pushed || input.is_key_pushed( key );
+		}
+
+		if ( pushed )
+		{
+			in.actions.push_back( b.action );
+		}
+	}
+
 	// 最後に使ったデバイス
 	if ( input.is_pad_active() )
 	{
@@ -67,8 +86,16 @@ core::ui::UIInput UIInputBuilder::build( Input& input, const Renderer& renderer,
 	return in;
 }
 
-void UIInputBuilder::reset( const Input& input, const Renderer& renderer )
+void UIInputBuilder::bind_action( core::ui::ActionId action, std::vector< int > keys, DWORD pad_mask )
 {
+	bindings_.push_back( ActionBinding{ action, std::move( keys ), pad_mask } );
+}
+
+void UIInputBuilder::reset( Input& input, const Renderer& renderer )
+{
+	// 画面を開く前に打たれた文字は捨てる
+	input.take_text();
+
 	for ( auto& r : repeat_ )
 	{
 		r.reset();

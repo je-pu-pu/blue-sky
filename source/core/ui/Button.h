@@ -23,6 +23,9 @@ private:
 	void click( UIContext& ctx );
 
 public:
+	/// 捕捉が外れた（層が積まれたなど）: 押している・ドラッグ中の状態を解除する
+	void on_capture_lost() override { pressed_ = false; }
+
 	Button( const string_t& text_key, std::function< void() > on_click )
 		: text_key_( text_key ), on_click_( std::move( on_click ) ) { }
 

@@ -10,6 +10,7 @@
 #include "EffectPass.h"
 
 #include "WICTextureLoader.h"
+#include <core/graphics/DeviceLostException.h>
 
 #include <win/Rect.h>
 
@@ -825,8 +826,8 @@ void Direct3D11::present()
 {
 	const HRESULT hr = swap_chain_->Present( 0, 0 );
 
-	// デバイスロスト（ドライバの更新・GPU のタイムアウト・GPU の切り替え）は、理由が分かる形で知らせる
-	// TODO: GPU リソースを作り直せる形で一か所に登録できたら、終了せずに復旧する（設計上の問題の洗い出し B20）
+	// デバイスロスト（ドライバの更新・GPU のタイムアウト・GPU の切り替え）は専用の例外で知らせる。
+	// WinMain が受け取り、ゲームを起動し直して復旧する（GPU のリソースは各所が持っていて、その場では作り直せない）
 	if ( hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET )
 	{
 		const HRESULT reason = device_->GetDeviceRemovedReason();
@@ -834,7 +835,7 @@ void Direct3D11::present()
 		char text[ 16 ];
 		sprintf_s( text, "0x%08lX", static_cast< unsigned long >( reason ) );
 
-		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "GPU のデバイスが失われました（ドライバの更新、GPU のタイムアウト、GPU の切り替えなど）。ゲームを終了します。理由: " ) + text );
+		throw DeviceLostException( __FILE__, __LINE__, std::string( "GPU のデバイスが失われました（ドライバの更新、GPU のタイムアウト、GPU の切り替えなど）。理由: " ) + text );
 	}
 
 	// DXGI_STATUS_OCCLUDED（最小化中など）は成功の扱い

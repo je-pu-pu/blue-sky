@@ -434,6 +434,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\graphics\DeviceLostException.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
     <ClInclude Include="core\graphics\Pixel2DSpace.h">
       <Filter>core\graphics</Filter>
     </ClInclude>

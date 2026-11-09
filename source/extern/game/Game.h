@@ -2,6 +2,8 @@
 
 #include <type/type.h>
 
+#include <string>
+
 namespace game
 {
 
@@ -27,6 +29,9 @@ public:
 	virtual void on_special_key_down( int ) = 0;
 	virtual void on_mouse_wheel( int ) = 0;
 	virtual void on_resize() = 0;
+
+	/// IME で変換中の文字が変わった（確定・取り消しで空）
+	virtual void on_ime_composition( const std::u32string& ) { }
 
 	/// フルスクリーンの切り替えの要求（Alt+Enter）
 	virtual void on_toggle_full_screen() { }

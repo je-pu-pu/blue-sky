@@ -11,6 +11,9 @@
 #include <common/string.h>
 
 #include <winnls32.h>
+#include <imm.h>
+
+#pragma comment( lib, "imm32.lib" )
 
 #include <boost/filesystem.hpp>
 #include <iostream>
@@ -282,6 +285,56 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		if ( ( wp & 0xFFF0 ) == SC_KEYMENU )
 		{
 			return 0;
+		}
+
+		return DefWindowProc( hwnd, msg, wp, lp );
+	}
+	case WM_IME_COMPOSITION:
+	{
+		// 変換中の文字を UI に見せる（確定した文字は DefWindowProc が WM_CHAR にして届ける）
+		if ( ( lp & GCS_COMPSTR ) && App::get_instance()->game_ )
+		{
+			std::u32string composition;
+
+			if ( HIMC imc = ImmGetContext( hwnd ) )
+			{
+				const LONG bytes = ImmGetCompositionStringW( imc, GCS_COMPSTR, nullptr, 0 );
+
+				if ( bytes > 0 )
+				{
+					std::wstring w( static_cast< size_t >( bytes ) / sizeof( wchar_t ), L'\0' );
+					ImmGetCompositionStringW( imc, GCS_COMPSTR, w.data(), bytes );
+
+					// UTF-16 → UTF-32（サロゲートペアを組み立てる）
+					for ( size_t i = 0; i < w.size(); i++ )
+					{
+						const char32_t c = w[ i ];
+
+						if ( c >= 0xD800 && c <= 0xDBFF && i + 1 < w.size() )
+						{
+							composition.push_back( 0x10000 + ( ( c - 0xD800 ) << 10 ) + ( static_cast< char32_t >( w[ i + 1 ] ) - 0xDC00 ) );
+							i++;
+						}
+						else
+						{
+							composition.push_back( c );
+						}
+					}
+				}
+
+				ImmReleaseContext( hwnd, imc );
+			}
+
+			App::get_instance()->game_->on_ime_composition( composition );
+		}
+
+		return DefWindowProc( hwnd, msg, wp, lp );
+	}
+	case WM_IME_ENDCOMPOSITION:
+	{
+		if ( App::get_instance()->game_ )
+		{
+			App::get_instance()->game_->on_ime_composition( std::u32string() );
 		}
 
 		return DefWindowProc( hwnd, msg, wp, lp );

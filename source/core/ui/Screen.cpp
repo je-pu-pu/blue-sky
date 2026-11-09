@@ -776,6 +776,11 @@ void Screen::update( const UIInput& input, float_t dt )
 				focused->on_text( input.text, ctx );
 			}
 
+			if ( text_mode )
+			{
+				focused->on_composition( input.composition, ctx );
+			}
+
 			// 入力をアクションの列にして、順に処理する（タブ → 方向 → 決定 → キャンセル → 独自の操作）
 			std::vector< ActionId > actions;
 

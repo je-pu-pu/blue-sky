@@ -54,6 +54,7 @@ core::ui::UIInput UIInputBuilder::build( Input& input, const Renderer& renderer,
 
 	// 文字（WM_CHAR で届いたもの。TextField が使う）
 	in.text = input.take_text();
+	in.composition = input.get_composition();
 
 	// 独自の操作
 	for ( const auto& b : bindings_ )

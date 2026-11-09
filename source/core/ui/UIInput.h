@@ -94,6 +94,9 @@ struct UIInput
 	 */
 	std::u32string text;
 
+	/// IME で変換中の文字（まだ確定していない。確定した文字は text に届く）。変換中でなければ空
+	std::u32string composition;
+
 	InputDevice last_device = InputDevice::KEYBOARD_MOUSE;
 
 	/// 方向入力を NavDir で取り出す

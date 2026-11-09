@@ -111,6 +111,22 @@ bool TextField::on_text( const std::u32string& text, UIContext& ctx )
 	return true;
 }
 
+void TextField::on_composition( const std::u32string& text, UIContext& )
+{
+	string_t utf8;
+
+	for ( char32_t c : text )
+	{
+		utf8 += to_utf8( c );
+	}
+
+	if ( utf8 != composition_ )
+	{
+		composition_ = std::move( utf8 );
+		blink_time_ = 0.f;
+	}
+}
+
 bool TextField::on_confirm( UIContext& ctx )
 {
 	if ( on_submit_ && is_enabled() )
@@ -126,6 +142,11 @@ bool TextField::on_confirm( UIContext& ctx )
 void TextField::update( float_t dt, UIContext& ctx )
 {
 	blink_time_ = is_focused() ? blink_time_ + dt : 0.f;
+
+	if ( ! is_focused() )
+	{
+		composition_.clear();		// フォーカスが外れたら変換中の表示も消す
+	}
 	LabeledRow::update( dt, ctx );
 }
 
@@ -137,15 +158,31 @@ void TextField::render( Renderer& renderer, const UIContext& ctx ) const
 	const Rect box = value_rect_.inset( 0.f, rect_.h * t.value_box_inset );
 	draw_brush( renderer, box, is_focused() ? t.row_pressed : t.track );
 
-	// 文字と、フォーカス中は末尾のカーソル（0.5 秒ごとに点滅）
-	string_t shown = get_value();
+	// 文字と、IME で変換中の文字と、フォーカス中は末尾のカーソル（0.5 秒ごとに点滅）
+	const string_t value = get_value();
+	string_t shown = value + composition_;
 
 	if ( is_focused() && std::fmod( blink_time_, 1.f ) < 0.5f )
 	{
 		shown += "|";
 	}
 
-	draw_text_fit( renderer, box.inset( t.row_padding_x, 0.f ), shown, make_text_style( value_color( ctx ), t.font_size_normal ) );
+	const Rect area = box.inset( t.row_padding_x, 0.f );
+	string_t fitted = shown;
+	auto style = make_text_style( value_color( ctx ), t.font_size_normal );
+	fit_text_to_width( renderer, area.w, fitted, style );
+	renderer.draw_text( area, fitted.c_str(), style );
+
+	// 変換中の文字に下線（省略されていないときだけ。位置がずれるため）
+	if ( ! composition_.empty() && fitted == shown )
+	{
+		const float_t x = area.x + renderer.measure_text_width( value.c_str(), style.font_size );
+		const float_t w = renderer.measure_text_width( composition_.c_str(), style.font_size );
+		const float_t line_h = renderer.measure_line_height( style.font_size );
+		const float_t y = area.y + ( area.h + line_h ) * 0.5f - t.accent_bar_thickness * 0.5f;
+
+		draw_brush( renderer, Rect( x, y, w, std::max( 1.f, t.accent_bar_thickness * 0.5f ) ), t.accent );
+	}
 }
 
 void TextField::collect_hints( std::vector< Hint >& hints ) const

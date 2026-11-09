@@ -104,6 +104,7 @@ private:
 
 	unsigned char pending_lead_byte_ = 0;	///< 2 バイト文字の先頭バイト（次のバイトを待っている）
 	std::u32string pending_text_;			///< 入力された文字（UI が取り出すまで溜める）
+	std::u32string composition_;			///< IME で変換中の文字
 	int joystick_detect_wait_ = 0;			///< パッドを探し直すまでのフレーム数
 
 	/// パッドを探す（つながっていれば joystick_enabled_ を true にする）
@@ -179,6 +180,12 @@ public:
 
 	/// 溜まった文字を取り出す（UI が 1 フレームに 1 回呼ぶ）
 	std::u32string take_text();
+
+	/// IME で変換中の文字を設定する（WM_IME_COMPOSITION。確定・取り消しで空にする）
+	void set_composition( std::u32string text ) { composition_ = std::move( text ); }
+
+	/// IME で変換中の文字
+	const std::u32string& get_composition() const { return composition_; }
 
 	/**
 	 * ボタンが押されていない状態に更新する

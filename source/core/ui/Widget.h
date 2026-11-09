@@ -208,6 +208,9 @@ namespace core::ui
 		/// 文字を受け取る（wants_text_input() が true の部品にだけ届く）
 		virtual bool on_text( const std::u32string&, UIContext& ) { return false; }
 
+		/// IME で変換中の文字（毎フレーム。変換中でなければ空）。wants_text_input() が true の部品にだけ届く
+		virtual void on_composition( const std::u32string&, UIContext& ) { }
+
 		/**
 		 * ポインタやキーの捕捉が外れた（層が積まれた・ルートが差し替わったなど）
 		 *

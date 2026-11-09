@@ -884,6 +884,11 @@ void GameMain::on_key_down( char_t c )
 	input_->push_char_byte( c );
 }
 
+void GameMain::on_ime_composition( const std::u32string& text )
+{
+	input_->set_composition( text );
+}
+
 void GameMain::on_special_key_down( int key )
 {
 	if ( key == KEY_F1 )

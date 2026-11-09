@@ -219,6 +219,9 @@ public:
 	void render();
 
 	void on_key_down( char_t ) override;
+
+	/// IME で変換中の文字が変わった（確定・取り消しで空）
+	void on_ime_composition( const std::u32string& text ) override;
 	void on_special_key_down( int ) override;
 	void on_mouse_wheel( int ) override;
 	void on_resize() override;

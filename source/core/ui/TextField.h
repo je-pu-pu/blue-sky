@@ -11,6 +11,7 @@ namespace core::ui
  * 1 行の文字入力（セーブデータの名前・プレイヤー名・検索など）
  *
  * - フォーカス中は文字を受け取る（UIInput::text）。IME で変換を確定した文字も届く
+ * - IME で変換中の文字は、値の後ろに下線付きで見せる（UIInput::composition。以前は確定するまで何も見えなかった）
  * - バックスペースで末尾の 1 文字（コードポイント）を消す。カーソルは常に末尾
  * - 値は持たず、getter / setter（UTF-8）で読み書きする（ほかの部品と同じ）
  * - 決定（Enter）で on_submit を呼ぶ（設定されていれば）
@@ -28,6 +29,7 @@ private:
 	std::function< void() > on_submit_;
 	size_t max_length_ = 32;		///< 最大の文字数（コードポイント）
 	float_t blink_time_ = 0.f;
+	string_t composition_;			///< IME で変換中の文字（UTF-8）
 
 public:
 	TextField( const string_t& label_key, Getter getter, Setter setter )
@@ -40,6 +42,9 @@ public:
 
 	bool wants_text_input() const override { return is_focused() && is_enabled(); }
 	bool on_text( const std::u32string& text, UIContext& ctx ) override;
+	void on_composition( const std::u32string& text, UIContext& ctx ) override;
+
+	const string_t& get_composition() const { return composition_; }
 	bool on_confirm( UIContext& ctx ) override;
 
 	void update( float_t dt, UIContext& ctx ) override;

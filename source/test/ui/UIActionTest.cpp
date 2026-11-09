@@ -164,6 +164,33 @@ TEST_F( ActionTest, 入力欄は最大の文字数を超えず制御文字を入
 	EXPECT_EQ( "日本語", value );
 }
 
+TEST_F( ActionTest, 入力欄はIMEで変換中の文字を値の後ろに見せ確定すると値になる )
+{
+	string_t value = "名前";
+	auto* field = root->add< TextField >( "name", [&] { return value; }, [&] ( const string_t& v ) { value = v; } );
+	ready();
+
+	// 変換中 : 値は変わらず、表示だけに出る
+	UIInput composing;
+	composing.composition = U"たろう";
+	step( composing );
+	EXPECT_EQ( "名前", value );
+	EXPECT_EQ( "たろう", field->get_composition() );
+
+	render();
+	bool shown = false;
+	for ( const auto& c : renderer.texts ) { if ( c.text.find( "名前たろう" ) == 0 ) shown = true; }
+	EXPECT_TRUE( shown );
+	EXPECT_FALSE( renderer.rects.empty() );		// 変換中の文字の下線
+
+	// 確定 : 文字が届き、変換中の表示は消える
+	UIInput committed;
+	committed.text = U"太郎";
+	step( committed );
+	EXPECT_EQ( "名前太郎", value );
+	EXPECT_EQ( "", field->get_composition() );
+}
+
 TEST_F( ActionTest, 入力欄がフォーカス中はQとEでタブを切り替えず文字になる )
 {
 	auto* catcher = root->add< ActionCatcher >( ui_action::TAB_NEXT );

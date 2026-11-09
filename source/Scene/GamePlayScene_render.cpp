@@ -1,6 +1,7 @@
 #include "GamePlayScene.h"
 
 #include <blue_sky/GameMain.h>
+#include <game/Config.h>
 
 #include <GameObject/Player.h>
 #include <GameObject/Camera.h>
@@ -363,7 +364,9 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
  */
 void GamePlayScene::render_debug_shadow_map_window() const
 {
-	if ( ! get_graphics_manager()->is_shadow_enabled() )
+	// 開発用の表示なので、設定（blue-sky.config の graphics.debug_shadow_map 1）で有効にしたときだけ出す
+	// （以前は影が有効なら常に画面の上に出ていて、プレイヤーにも見えていた）
+	if ( ! get_graphics_manager()->is_shadow_enabled() || static_cast< const game::Config& >( * GameMain::get_instance()->get_config() ).get< int >( "graphics.debug_shadow_map", 0 ) == 0 )
 	{
 		return;
 	}

@@ -1135,6 +1135,12 @@ void GameMain::setup_scene()
 			start_scene = scene;
 		}
 
+		// ステージも指定できる（game_play はステージ名が必要）
+		if ( char stage[ 64 ] = { }; GetEnvironmentVariableA( "BLUE_SKY_START_STAGE", stage, sizeof( stage ) ) )
+		{
+			set_stage_name( stage );
+		}
+
 		if ( SceneManager::get_instance()->is_scene_registered( start_scene ) )
 		{
 			setup_scene( start_scene );

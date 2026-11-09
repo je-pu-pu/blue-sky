@@ -114,12 +114,12 @@ OptionsScene::OptionsScene()
 	deps.store = & get_settings();
 	deps.screen = & screen_;
 	deps.display_keys = gs::get_display_keys();
-	deps.save = [] { GameMain::get_instance()->save_settings(); };
+	deps.save = services_.save_settings;
 	deps.close = [this] { close(); };
 	deps.now = [this] { return get_total_elapsed_time(); };
-	deps.confirm_display_message = [] ( int remaining )
+	deps.confirm_display_message = [this] ( int remaining )
 	{
-		return GameMain::get_instance()->get_ui_strings().format( "options.confirm_display", { std::to_string( remaining ) } );
+		return services_.strings.format( "options.confirm_display", { std::to_string( remaining ) } );
 	};
 	controller_ = std::make_unique< OptionsController >( std::move( deps ) );
 
@@ -134,7 +134,7 @@ OptionsScene::OptionsScene()
 
 	auto panel = std::make_unique< Panel >( "options.title" );
 	auto* body = panel->add< Stack >( Axis::VERTICAL );
-	body->set_spacing( GameMain::get_instance()->get_ui_theme().section_spacing );
+	body->set_spacing( services_.theme.section_spacing );
 
 	auto* tabs = body->add< TabView >();
 	build_graphics_page( add_scroll_page( tabs, "options.tab.graphics" ) );
@@ -191,9 +191,9 @@ void OptionsScene::build_graphics_page( Stack* page )
 		} );
 
 	// 現在の解像度が一覧に無いときの表示（勝手に一覧の値へ書き換えない）
-	resolution->set_custom_text( [store]
+	resolution->set_custom_text( [this, store]
 	{
-		const auto& strings = GameMain::get_instance()->get_ui_strings();
+		const auto& strings = services_.strings;
 		return strings.format( "options.resolution.custom", { std::to_string( store->get( gs::SCREEN_WIDTH ) ) + " x " + std::to_string( store->get( gs::SCREEN_HEIGHT ) ) } );
 	} );
 	resolution->set_options_literal( true );		// "1920 x 1080" はキーではない
@@ -224,10 +224,10 @@ void OptionsScene::build_controls_page( Stack* page )
 	page->add< Label >( "options.key_bindings", Label::Style::HEADER );
 
 	// キーの表示名 : 文字列テーブルの key.<名前> があればそれ、無ければ名前そのもの
-	auto key_display_name = [] ( int code ) -> string_t
+	auto key_display_name = [this] ( int code ) -> string_t
 	{
 		const string_t name = key_names::name_from_code( code );
-		const auto& strings = GameMain::get_instance()->get_ui_strings();
+		const auto& strings = services_.strings;
 		const string_t table_key = "key." + name;
 		return strings.has( table_key ) ? strings.get( table_key ) : name;
 	};

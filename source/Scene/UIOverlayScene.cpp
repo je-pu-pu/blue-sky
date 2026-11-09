@@ -12,9 +12,16 @@
 namespace blue_sky
 {
 
+UIServices UIServices::from_game_main()
+{
+	GameMain* gm = GameMain::get_instance();
+	return UIServices{ gm->get_ui_theme(), gm->get_ui_strings(), * gm->get_settings(), [gm] { gm->save_settings(); } };
+}
+
 UIOverlayScene::UIOverlayScene()
-	: renderer_( get_graphics_manager() )
-	, screen_( GameMain::get_instance()->get_ui_theme(), GameMain::get_instance()->get_ui_strings(), renderer_ )
+	: services_( UIServices::from_game_main() )
+	, renderer_( get_graphics_manager() )
+	, screen_( services_.theme, services_.strings, renderer_ )
 {
 	screen_.set_sound_handler( [this] ( core::ui::UISoundEvent e )
 	{
@@ -29,17 +36,17 @@ UIOverlayScene::UIOverlayScene()
 	input_builder_.reset( * get_input(), renderer_ );
 	screen_.suppress_input( 1 );
 
-	theme_revision_ = GameMain::get_instance()->get_ui_theme().revision;
+	theme_revision_ = services_.theme.revision;
 
 	// テーマの画像を先に読む（最初の描画やレイアウトの途中で読み込みが走って引っかからないように）
-	core::ui::preload_theme_images( GameMain::get_instance()->get_ui_theme(), renderer_ );
+	core::ui::preload_theme_images( services_.theme, renderer_ );
 }
 
 UIOverlayScene::~UIOverlayScene() = default;
 
 core::setting::SettingStore& UIOverlayScene::get_settings() const
 {
-	return * GameMain::get_instance()->get_settings();
+	return services_.settings;
 }
 
 void UIOverlayScene::update()
@@ -74,7 +81,7 @@ void UIOverlayScene::update()
 	}
 
 	// テーマが変わったら（文字の大きさの設定など）配置し直す
-	const uint_t theme_revision = GameMain::get_instance()->get_ui_theme().revision;
+	const uint_t theme_revision = services_.theme.revision;
 
 	if ( theme_revision != theme_revision_ )
 	{

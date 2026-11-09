@@ -6,13 +6,38 @@
 #include <blue_sky/ui/UIInputBuilder.h>
 #include <core/ui/Screen.h>
 
+#include <functional>
+
 namespace core::setting
 {
 	class SettingStore;
 }
 
+namespace core::ui
+{
+	struct Theme;
+	class StringTable;
+}
+
 namespace blue_sky
 {
+
+/**
+ * UI 画面が使うサービス（テーマ・文字列・設定・設定の保存）
+ *
+ * UI のシーンは GameMain のシングルトンを直接呼ばず、これを通して使う（設計上の問題 B28）。
+ * GameMain から集めるのは from_game_main の 1 か所だけ。
+ */
+struct UIServices
+{
+	const core::ui::Theme& theme;
+	const core::ui::StringTable& strings;
+	core::setting::SettingStore& settings;
+	std::function< void() > save_settings;
+
+	/// 組み立ての根（GameMain）から集める
+	static UIServices from_game_main();
+};
 
 /**
  * UI 画面（core::ui::Screen）を持つオーバーレイシーンの基底
@@ -27,6 +52,7 @@ namespace blue_sky
 class UIOverlayScene : public Scene
 {
 protected:
+	UIServices services_;			///< テーマ・文字列・設定（screen_ より先に初期化する）
 	ui::Renderer renderer_;
 	ui::UIInputBuilder input_builder_;
 	core::ui::Screen screen_;

@@ -22,8 +22,11 @@ namespace core
 		class EntityManager;
 	}
 
+	namespace setting { class SettingStore; }
+
 	namespace graphics
 	{
+		namespace direct_3d_11 { class BulletDebugDraw; }
 		class Texture;
 	}
 }
@@ -95,6 +98,15 @@ protected:
 
 	const App* get_app() const;
 	const GameMain* get_game_main() const;
+
+	/// ゲームの設定（シーンは GameMain を直接呼ばず、これらの近道を使う。設計上の問題 B28）
+	core::setting::SettingStore* get_setting_store() const;
+
+	/// 物理のデバッグ表示
+	core::graphics::direct_3d_11::BulletDebugDraw* get_bullet_debug_draw() const;
+
+	/// 名前からゲームのオブジェクトを作る
+	ActiveObject* create_object( const char_t* class_name ) const;
 
 	int get_width() const;
 	int get_height() const;

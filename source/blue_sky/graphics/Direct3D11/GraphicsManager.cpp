@@ -834,7 +834,7 @@ void GraphicsManager::render_debug_axis_model() const
  */
 void GraphicsManager::clear_debug_bullet() const
 {
-	GameMain::get_instance()->get_bullet_debug_draw()->clear();
+	if ( bullet_debug_draw_ ) { bullet_debug_draw_->clear(); }
 }
 
 /**
@@ -850,7 +850,7 @@ void GraphicsManager::render_debug_bullet() const
 		get_game_render_data()->bind_to_vs();
 		get_frame_render_data()->bind_to_vs();
 
-		GameMain::get_instance()->get_bullet_debug_draw()->render();
+		if ( bullet_debug_draw_ ) { bullet_debug_draw_->render(); }
 	} );
 }
 

@@ -25,6 +25,7 @@
 #include <algorithm>
 
 class DirectInput;
+class App;
 
 namespace game
 {
@@ -89,6 +90,7 @@ private:
 	ButtonCodeList joystick_code_;
 
 	// 生の入力状態（UI 用。ゲームのキー割り当てとは無関係）
+	const App* app_ = nullptr;								///< ウィンドウ
 	std::array< bool, 256 > key_now_;						///< 仮想キーごとの今フレームの押下状態
 	std::array< bool, 256 > key_prev_;						///< 前フレームの押下状態
 	std::array< bool, 256 > key_latched_{};					///< ウィンドウメッセージで届いた押下（次の update で使って消す）
@@ -118,7 +120,8 @@ private:
 	float get_rate_by_joystick_axis_pos( DWORD ) const;
 
 public:
-	Input();
+	/// ウィンドウ（前面かどうか・クライアント座標・大きさ）を受け取る（以前は App のシングルトンから引いていた）
+	explicit Input( const App* app );
 	~Input();
 
 	void set_direct_input( const DirectInput* i ) { direct_input_ = i; }
@@ -241,13 +244,6 @@ public:
 	{
 		if ( is_blocked_ ) return false;
 		return ( state_[ static_cast< int >( button ) ] & 1 ) == 0 && ( state_[ static_cast< int >( button ) ] & 2 ) > 0;
-	}
-
-	static const Input& get_null_input()
-	{
-		static Input null_input;
-
-		return null_input;
 	}
 
 	int get_mouse_x() const override { return mouse_point_.x; }

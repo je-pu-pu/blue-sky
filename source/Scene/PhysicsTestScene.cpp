@@ -37,7 +37,7 @@ PhysicsTestScene::PhysicsTestScene()
 	get_graphics_manager()->load_paper_textures();
 
 	// PhysicsManager にデバッグ描画を設定
-	core::get_physics_manager()->set_debug_drawer( GameMain::get_instance()->get_bullet_debug_draw() );
+	core::get_physics_manager()->set_debug_drawer( get_bullet_debug_draw() );
 
 	// System を追加する
 	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >();

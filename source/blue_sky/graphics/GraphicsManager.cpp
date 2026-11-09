@@ -77,9 +77,14 @@ void GraphicsManager::unset_shadow_map()
 	shadow_map_.reset();
 }
 
+GraphicsManager* get_graphics_manager()
+{
+	return static_cast< GraphicsManager* >( core::get_graphics_manager() );
+}
+
 const ActiveObjectManager* GraphicsManager::get_game_object_manager() const
 {
-	return GameMain::get_instance()->get_active_object_manager();
+	return active_object_manager_;
 }
 
 /**
@@ -522,7 +527,7 @@ void GraphicsManager::setup_rendering()
 	const auto at = eye + camera_transform.forward();
 	const auto up = camera_transform.up();
 
-	const auto aspect = static_cast< float >( GameMain::get_instance()->get_width() ) / static_cast< float >( GameMain::get_instance()->get_height() );
+	const auto aspect = static_cast< float >( get_screen_width() ) / static_cast< float >( get_screen_height() );
 
 	get_frame_render_data()->data().view = ( Matrix().set_look_at( eye, at, up ) );
 	get_frame_render_data()->data().projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_component->fov ), aspect, camera_component->near_clip, camera_component->far_clip );

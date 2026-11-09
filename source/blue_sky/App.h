@@ -83,7 +83,7 @@ public:
 	int			MessageLoop();			//メッセージループ
 
 	HINSTANCE	GetInstanceHandle(){ return hInst; }
-	HWND		GetWindowHandle(){ return hWnd; }
+	HWND		GetWindowHandle() const { return hWnd; }
 	
 	int get_width() const { return width_; }
 	int	get_height() const { return height_; }

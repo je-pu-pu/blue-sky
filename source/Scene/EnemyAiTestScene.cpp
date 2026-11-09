@@ -83,7 +83,7 @@ EnemyAiTestScene::EnemyAiTestScene()
 	get_graphics_manager()->load_paper_textures();
 
 	// Bullet デバッグ描画（LOS レイの遮蔽やコーン可視化に使う）
-	core::get_physics_manager()->set_debug_drawer( GameMain::get_instance()->get_bullet_debug_draw() );
+	core::get_physics_manager()->set_debug_drawer( get_bullet_debug_draw() );
 
 	// System を追加（実行順が重要: 対象収集 → 知覚 → 警戒 → 移動 → 物理 → 描画）
 	get_entity_manager()->add_system< core::ecs::PhysicsSystem >( 5 );
@@ -214,7 +214,7 @@ void EnemyAiTestScene::update()
 
 void EnemyAiTestScene::draw_debug()
 {
-	auto* dd = GameMain::get_instance()->get_bullet_debug_draw();
+	auto* dd = get_bullet_debug_draw();
 	if ( ! dd )
 	{
 		return;

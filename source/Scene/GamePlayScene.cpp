@@ -83,14 +83,14 @@ GamePlayScene::GamePlayScene()
 	get_active_object_manager()->name_active_object( "player", player_ );
 
 	// Goal
-	goal_ = static_cast< Goal* >( GameMain::get_instance()->create_object( "goal" ) );
+	goal_ = static_cast< Goal* >( create_object( "goal" ) );
 	get_active_object_manager()->name_active_object( "goal", goal_ );
 
 	// Camera
-	camera_->set_fov_default( GameMain::get_instance()->get_settings()->get( game_settings::CAMERA_FOV ) );
+	camera_->set_fov_default( get_setting_store()->get( game_settings::CAMERA_FOV ) );
 
 	// オプション画面で FOV が変わったら反映する（ズーム倍率は保つ）。購読はシーンと一緒に破棄される
-	fov_subscription_ = GameMain::get_instance()->get_settings()->subscribe( game_settings::CAMERA_FOV, [this] ( const core::setting::SettingStore::Value& v )
+	fov_subscription_ = get_setting_store()->subscribe( game_settings::CAMERA_FOV, [this] ( const core::setting::SettingStore::Value& v )
 	{
 		camera_->change_fov_default_keep_zoom( std::get< float_t >( v ) );
 	} );

@@ -22,7 +22,7 @@ Robot::Robot()
 	, mode_backup_( Mode::STAND )
 	, timer_( 0 )
 {
-	auto* gm = GameMain::get_instance()->get_graphics_manager();
+	auto* gm = graphics::get_graphics_manager();
 
 	texture_normal_ = gm->get_texture( "robot" );
 	texture_warn_ = gm->get_texture( "robot-warn" );
@@ -309,7 +309,7 @@ bool Robot::calculate_target_visible() const
 	ClosestNotMeAndHim ray_callback( from, to, get_rigid_body(), player_->get_rigid_body(), false );
 	ray_callback.m_closestHitFraction = 1.0;
 	
-	GameMain::get_instance()->get_active_object_physics()->get_dynamics_world()->rayTest( from, to, ray_callback );
+	get_dynamics_world()->rayTest( from, to, ray_callback );
 	
 	// ターゲットとの間に障害物がなければ目視できている
 	if ( ! ray_callback.hasHit() )

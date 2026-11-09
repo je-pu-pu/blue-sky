@@ -142,7 +142,7 @@ GameMain::GameMain()
 
 	direct_input_.reset( new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() ) );
 
-	input_.reset( new Input() );
+	input_.reset( new Input( get_app() ) );
 	input_->set_direct_input( direct_input_.get() );
 	input_->load_config( * get_config() );
 
@@ -164,6 +164,7 @@ GameMain::GameMain()
 
 	graphics_manager_.reset( new blue_sky::graphics::direct_3d_11::GraphicsManager( direct_3d_.get() ) );
 	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "graphics.debug_axis", 0 ) != 0 );
+	static_cast< graphics::direct_3d_11::GraphicsManager* >( graphics_manager_.get() )->set_bullet_debug_draw( bullet_debug_draw_.get() );
 
 	// sound_engine_.reset( new core::sound::direct_sound::SoundEngine( get_app()->GetWindowHandle() ) );
 	sound_engine_.reset( new core::sound::port_audio::SoundEngine() );
@@ -184,7 +185,8 @@ GameMain::GameMain()
 	script_manager_->load_command_history( "log/script.log" );
 	setup_script_command();
 
-	active_object_manager_.reset( new ActiveObjectManager() );
+	active_object_manager_.reset( new ActiveObjectManager( active_object_physics_.get(), graphics_manager_.get() ) );
+	graphics_manager_->set_active_object_manager( active_object_manager_.get() );
 
 	// MainLoop
 	main_loop_.reset( new MainLoop( 60 ) );

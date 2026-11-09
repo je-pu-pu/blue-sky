@@ -113,6 +113,21 @@ const GameMain* Scene::get_game_main() const
 	return GameMain::get_instance();
 }
 
+core::setting::SettingStore* Scene::get_setting_store() const
+{
+	return GameMain::get_instance()->get_settings();
+}
+
+core::graphics::direct_3d_11::BulletDebugDraw* Scene::get_bullet_debug_draw() const
+{
+	return GameMain::get_instance()->get_bullet_debug_draw();
+}
+
+ActiveObject* Scene::create_object( const char_t* class_name ) const
+{
+	return GameMain::get_instance()->create_object( class_name );
+}
+
 int Scene::get_width() const
 {
 	return get_game_main()->get_width();

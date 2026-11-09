@@ -36,7 +36,15 @@ StoryTextScene::StoryTextScene( const char* file_name, const char* next_scene_na
 {
 	get_sound_manager()->stop_all();
 
-	load_story_text_file( file_name );
+	// ファイル名の {stage} を今のステージ名にする（シーンの登録側が GameMain からステージ名を引かなくて済むように）
+	std::string path = file_name;
+
+	if ( const auto pos = path.find( "{stage}" ); pos != std::string::npos )
+	{
+		path.replace( pos, 7, get_stage_name() );
+	}
+
+	load_story_text_file( path.c_str() );
 
 	text_y_target_ = -get_graphics_manager()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) );
 	

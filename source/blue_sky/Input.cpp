@@ -25,8 +25,9 @@
 namespace blue_sky
 {
 
-Input::Input()
-	: direct_input_( nullptr )
+Input::Input( const App* app )
+	: app_( app )
+	, direct_input_( nullptr )
 	, state_()
 	, joystick_enabled_( false )
 	, joystick_axis_threshold_( 0.f )
@@ -269,7 +270,7 @@ int Input::pad_dir_bit( Button dir )
  */
 void Input::update_raw_keys()
 {
-	const bool foreground = App::get_instance() && GetForegroundWindow() == App::get_instance()->GetWindowHandle();
+	const bool foreground = app_ && GetForegroundWindow() == app_->GetWindowHandle();
 
 	key_prev_ = key_now_;
 
@@ -325,13 +326,13 @@ void Input::update()
 
 	POINT point;
 	GetCursorPos( & point );
-	ScreenToClient( App::get_instance()->GetWindowHandle(), & point );
+	ScreenToClient( app_->GetWindowHandle(), & point );
 
-	mouse_x_rate_ = math::clamp( point.x / static_cast< float >( App::get_instance()->get_width() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_x_sensitivity_;
-	mouse_y_rate_ = math::clamp( point.y / static_cast< float >( App::get_instance()->get_height() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_y_sensitivity_;
+	mouse_x_rate_ = math::clamp( point.x / static_cast< float >( app_->get_width() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_x_sensitivity_;
+	mouse_y_rate_ = math::clamp( point.y / static_cast< float >( app_->get_height() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_y_sensitivity_;
 
-	mouse_dx_ = static_cast< float >( direct_input_->get_mouse_state().lX ) / static_cast< float >( App::get_instance()->get_width() - 1 ) * 2.f * mouse_x_sensitivity_;
-	mouse_dy_ = static_cast< float >( direct_input_->get_mouse_state().lY ) / static_cast< float >( App::get_instance()->get_height() - 1 ) * 2.f * mouse_y_sensitivity_;
+	mouse_dx_ = static_cast< float >( direct_input_->get_mouse_state().lX ) / static_cast< float >( app_->get_width() - 1 ) * 2.f * mouse_x_sensitivity_;
+	mouse_dy_ = static_cast< float >( direct_input_->get_mouse_state().lY ) / static_cast< float >( app_->get_height() - 1 ) * 2.f * mouse_y_sensitivity_;
 
 	mouse_point_ = point;
 

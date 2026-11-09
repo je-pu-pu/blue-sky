@@ -25,7 +25,9 @@
 namespace blue_sky
 {
 
-ActiveObjectManager::ActiveObjectManager()
+ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager )
+	: physics_( physics )
+	, graphics_manager_( graphics_manager )
 {
 	object_creator_map_[ "girl"        ] = [] () -> ActiveObject* { return new Girl();         };
 	object_creator_map_[ "robot"       ] = [] () -> ActiveObject* { return new Robot();        };
@@ -190,11 +192,11 @@ ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss )
 
 	if ( object_name == "soda-can-1" )
 	{
-		object->set_rigid_body( GameMain::get_instance()->get_active_object_physics()->add_active_object_as_cylinder( object ) );
+		object->set_rigid_body( physics_->add_active_object_as_cylinder( object ) );
 	}
 	else
 	{
-		object->set_rigid_body( GameMain::get_instance()->get_active_object_physics()->add_active_object_as_box( object ) );
+		object->set_rigid_body( physics_->add_active_object_as_box( object ) );
 	}
 
 	object->set_mass( mass );
@@ -205,7 +207,7 @@ ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss )
 		object->set_friction( 10.f );
 	}
 
-	object->set_model( GameMain::get_instance()->get_graphics_manager()->load_model( object_name.c_str() ) );
+	object->set_model( graphics_manager_->load_model( object_name.c_str() ) );
 
 	return object;
 }

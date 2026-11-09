@@ -9,6 +9,9 @@
 namespace blue_sky
 {
 
+class ActiveObjectPhysics;
+namespace graphics { class GraphicsManager; }
+
 /**
  * 複数の ActiveObject を管理する Manager
  *
@@ -34,8 +37,11 @@ private:
 
 	std::unordered_map< string_t, CreateObjectFunction > object_creator_map_;
 
+	ActiveObjectPhysics* physics_;					///< 物理（GameMain が渡す。以前は GameMain のシングルトンから引いていた）
+	graphics::GraphicsManager* graphics_manager_;	///< 描画（同上）
+
 public:
-	ActiveObjectManager();
+	ActiveObjectManager( ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager );
 	~ActiveObjectManager();
 
 	void clear();

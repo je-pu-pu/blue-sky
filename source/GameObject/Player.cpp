@@ -458,7 +458,7 @@ void Player::update_facing_to_block()
 	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
 	WithoutMeContactResultCallback callback( this );
-	GameMain::get_instance()->get_active_object_physics()->get_dynamics_world()->contactTest( & collision_object, callback );
+	get_dynamics_world()->contactTest( & collision_object, callback );
 
 	is_facing_to_block_ = callback.is_hit();
 }
@@ -493,7 +493,7 @@ void Player::update_can_clamber()
 	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
 	WithoutMeContactResultCallback callback_low( this );
-	GameMain::get_instance()->get_active_object_physics()->get_dynamics_world()->contactTest( & collision_object, callback_low );
+	get_dynamics_world()->contactTest( & collision_object, callback_low );
 
 	if ( ! callback_low.is_hit() )
 	{
@@ -505,7 +505,7 @@ void Player::update_can_clamber()
 	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
 	WithoutMeContactResultCallback callback_high( this );
-	GameMain::get_instance()->get_active_object_physics()->get_dynamics_world()->contactTest( & collision_object, callback_high );
+	get_dynamics_world()->contactTest( & collision_object, callback_high );
 
 	can_clamber_ = ! callback_high.is_hit();
 }
@@ -534,7 +534,7 @@ void Player::update_can_peer_down()
 	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
 	WithoutMeContactResultCallback callback( this );
-	GameMain::get_instance()->get_active_object_physics()->get_dynamics_world()->contactTest( & collision_object, callback );
+	get_dynamics_world()->contactTest( & collision_object, callback );
 
 	can_peer_down_ = ! callback.is_hit();
 }
@@ -557,7 +557,7 @@ void Player::update_can_throw()
 	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
 	WithoutMeContactResultCallback callback( this );
-	GameMain::get_instance()->get_active_object_physics()->get_dynamics_world()->contactTest( & collision_object, callback );
+	get_dynamics_world()->contactTest( & collision_object, callback );
 
 	can_throw_ = ! callback.is_hit();
 }
@@ -657,7 +657,7 @@ bool Player::check_on_footing( const Vector& from, float_t ray_length, bool incl
 	ClosestNotMe ray_callback( from, to, get_rigid_body(), include_soft_footing );
 	ray_callback.m_closestHitFraction = 1.0;
 
-	GameMain::get_instance()->get_active_object_physics()->get_dynamics_world()->rayTest( from, to, ray_callback );
+	get_dynamics_world()->rayTest( from, to, ray_callback );
 
 	return ray_callback.hasHit();
 }
@@ -676,7 +676,7 @@ float_t Player::get_footing_height( const Vector& from, bool include_soft_footin
 	ClosestNotMe ray_callback( from, to, get_rigid_body(), include_soft_footing );
 	ray_callback.m_closestHitFraction = 1.0;
 
-	GameMain::get_instance()->get_active_object_physics()->get_dynamics_world()->rayTest( from, to, ray_callback );
+	get_dynamics_world()->rayTest( from, to, ray_callback );
 
 	if ( ray_callback.m_collisionObject && ray_callback.m_collisionObject->getUserPointer() )
 	{

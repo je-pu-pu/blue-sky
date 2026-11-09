@@ -6,6 +6,7 @@
 #include <functional>
 
 class btRigidBody;
+class btDynamicsWorld;
 
 namespace game
 {
@@ -59,6 +60,9 @@ private:
 protected:
 	float_t get_delta_time() const;
 	float_t get_scene_elapsed_time() const;
+
+	/// 物理のワールド（当たりの判定・レイの判定に使う。派生クラスは GameMain を直接呼ばずにこれを使う。設計上の問題 B28）
+	btDynamicsWorld* get_dynamics_world() const;
 
 	/// 1 秒あたりの数値から現在のフレームの数値を返す
 	inline float_t per_sec( float_t value ) const { return value * get_delta_time(); }

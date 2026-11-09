@@ -22,6 +22,7 @@ namespace core::graphics::direct_3d_11
 	class Axis;
 
 	class RenderTargetTexture;
+	class BulletDebugDraw;
 }
 
 namespace blue_sky::graphics
@@ -52,6 +53,7 @@ private:
 	std::unique_ptr< Axis >							debug_axis_;
 	std::unique_ptr< core::graphics::MsdfTextRenderer >	msdf_text_renderer_;
 	std::unique_ptr< core::AsyncLoader >				async_loader_;		///< 別スレッドの読み込み
+	core::graphics::direct_3d_11::BulletDebugDraw*		bullet_debug_draw_ = nullptr;	///< 物理のデバッグ表示（GameMain が渡す）
 	float_t											default_font_size_ = 64.f;
 
 	std::unique_ptr< GameConstantBuffer >			game_render_data_;
@@ -152,6 +154,9 @@ public:
 	void draw_text( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const override;
 	void queue_text( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const override;
 	void flush_text() const override;
+
+	/// 物理のデバッグ表示を渡す（GameMain が組み立てのときに呼ぶ）
+	void set_bullet_debug_draw( core::graphics::direct_3d_11::BulletDebugDraw* d ) { bullet_debug_draw_ = d; }
 	bool save_glyph_atlas( const wchar_t* file_name ) const override;
 
 	void start_texture_load_async( const string_t& file_path, std::function< void( Texture* ) > on_created ) override;

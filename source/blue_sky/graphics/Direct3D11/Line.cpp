@@ -1,6 +1,7 @@
 #include "Line.h"
 
-#include <blue_sky/GameMain.h>
+#include <core/graphics/GraphicsManager.h>
+#include <core/Service.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
 
@@ -58,9 +59,7 @@ void Line::create_index_buffer()
 
 void Line::create_texture()
 {
-	texture_ = blue_sky::GameMain::get_instance()->get_graphics_manager()->load_named_texture( "lines", "media/texture/lines.png" );
-	// texture_ = blue_sky::GameMain::get_instance()->get_graphics_manager()->load_named_texture( "lines", "media/texture/test.png" );
-	// texture_ = blue_sky::GameMain::get_instance()->get_graphics_manager()->load_named_texture( "lines", "media/model/building-roof-3.png" );
+	texture_ = blue_sky::graphics::get_graphics_manager()->load_named_texture( "lines", "media/texture/lines.png" );
 }
 
 void Line::render_part( int part_count ) const
@@ -87,7 +86,7 @@ void Line::render_part( int part_count ) const
 
 	direct_3d_->getImmediateContext()->DrawIndexed( std::min< int >( part_count * 2, static_cast< int >( index_size_ ) ), 0, 0 );
 
-	GameMain::get_instance()->get_graphics_manager()->count_draw();
+	core::get_graphics_manager()->count_draw();
 }
 
 } // namespace blue_sky::graphics::direct_3d_11

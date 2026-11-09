@@ -46,7 +46,7 @@ namespace blue_sky
  */
 ActiveObject* GamePlayScene::create_object_at_player_front( const char_t* class_name )
 {
-	ActiveObject* active_object = GameMain::get_instance()->create_object( class_name );
+	ActiveObject* active_object = create_object( class_name );
 
 	if ( ! active_object )
 	{
@@ -511,7 +511,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( command == "girl" || command == "robot" || command == "balloon" || command == "medal" || command == "ladder" || command == "rocket" || command == "umbrella" || command == "stone" || command == "switch" )
 		{
-			ActiveObject* active_object = GameMain::get_instance()->create_object( command.c_str() );
+			ActiveObject* active_object = create_object( command.c_str() );
 
 			float x = 0, y = 0, z = 0, r = 0;
 			ss >> x >> y >> z >> r;

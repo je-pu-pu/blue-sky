@@ -97,6 +97,9 @@ private:
 
 	Texture*					null_texture_ = nullptr;
 
+	/// GameMain が渡す依存（以前は GameMain のシングルトンから引いていた。設計上の問題 B28）
+	const ActiveObjectManager*	active_object_manager_ = nullptr;
+
 	mutable const ConstantBuffer* current_object_constant_buffer_ = nullptr;
 	mutable const ConstantBuffer* current_skinning_constant_buffer_ = nullptr;
 
@@ -198,6 +201,9 @@ public:
 	 * （毎フレームの dispatch_async_loads の中）で行う。読み込み済みならすぐ on_loaded を呼ぶ。失敗したら nullptr を渡す。
 	 */
 	void load_named_texture_premultiplied_async( const char_t* name, const char_t* file_name, std::function< void( Texture* ) > on_loaded );
+
+	/// ゲームのオブジェクトの管理を渡す（GameMain が組み立てのときに呼ぶ）
+	void set_active_object_manager( const ActiveObjectManager* m ) { active_object_manager_ = m; }
 
 	/// 今の描画先の大きさ（ビューポート。UI を描くときに、描画先に合わせて写すのに使う）
 	virtual float_t get_render_target_width() const = 0;
@@ -394,5 +400,13 @@ public:
 	// void update_frame_render_data( const Camera*, const Vector3& ) const;
 
 }; // class GraphicsManager
+
+/**
+ * 描画の部品（Model・Ground・SkyBox・Line・MeshBuffer など）が使う GraphicsManager
+ *
+ * core のサービス（core::Service）から得る（シェーダーの BaseShader と同じ）。描画の部品が GameMain に依存しないように
+ * （以前は GameMain のシングルトンから引いていた。設計上の問題 B28）。
+ */
+GraphicsManager* get_graphics_manager();
 
 } // namespace blue_sky::graphics

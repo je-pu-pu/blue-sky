@@ -32,7 +32,10 @@ struct MSDF_VS_INPUT
 struct MSDF_PS_INPUT
 {
 	float4 Position : SV_POSITION;
-	float2 TexCoord : TEXCOORD0;
+	// centroid : MSAA では、四角形の端の画素は中心が三角形の外でも塗られ、UV が三角形の外へ外挿される。
+	// するとアトラスの隣のセル（別のグリフ）の距離を読み、アウトラインがそれを増幅して、文字の端に 1 画素幅の縦線が出ていた。
+	// centroid にすると、覆っているサンプルの内側で補間されるので、UV がセルの外に出ない
+	centroid float2 TexCoord : TEXCOORD0;
 	float4 Color    : COLOR0;
 };
 

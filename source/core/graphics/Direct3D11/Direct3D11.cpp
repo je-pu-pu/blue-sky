@@ -205,7 +205,26 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 		swap_chain_desc_.SampleDesc.Quality = multi_sample_quality;
 	}
 		
-	DIRECT_X_FAIL_CHECK( dxgi_factory->CreateSwapChain( device_, & swap_chain_desc_, & swap_chain_ ) );
+	// スワップチェーン自体は MSAA なし・2 枚・FLIP_DISCARD にする（MSAA は BackBufferTexture が自前の描画先で行い、表示の前に解決する）
+	// 以前はバッファ 1 枚・DISCARD・MSAA 付きの古い構成で、フリップモデル（ウィンドウでの遅延が少ない・合成のコピーがない）を使えなかった。
+	// フリップモデルを作れない環境（古い Windows）では、以前の DISCARD に戻す
+	DXGI_SWAP_CHAIN_DESC desc = swap_chain_desc_;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.BufferCount = 2;
+	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+
+	if ( FAILED( dxgi_factory->CreateSwapChain( device_, & desc, & swap_chain_ ) ) )
+	{
+		desc.BufferCount = 1;
+		desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+		DIRECT_X_FAIL_CHECK( dxgi_factory->CreateSwapChain( device_, & desc, & swap_chain_ ) );
+	}
+
+	swap_chain_buffer_count_ = desc.BufferCount;
+
+	std::cout << "スワップチェーン : " << ( desc.SwapEffect == DXGI_SWAP_EFFECT_FLIP_DISCARD ? "FLIP_DISCARD" : "DISCARD" )
+		<< " バッファ " << desc.BufferCount << " 枚・MSAA " << swap_chain_desc_.SampleDesc.Count << '\n';
 
 	// Alt+Enter は DXGI に任せず、アプリ側で処理する
 	// （DXGI が勝手に切り替えると、ユーザーの操作かフォーカス喪失による解除かを区別できず、設定と実際の状態がずれる）
@@ -218,7 +237,7 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
  */
 void Direct3D11::create_back_buffer_texture()
 {
-	back_buffer_texture_.reset( new BackBufferTexture( this, swap_chain_ ) );
+	back_buffer_texture_.reset( new BackBufferTexture( this, swap_chain_, swap_chain_desc_.SampleDesc ) );
 }
 
 /**
@@ -491,7 +510,7 @@ void Direct3D11::on_resize( int w, int h )
 	swap_chain_desc_.BufferDesc.Height = h;
 
 	DIRECT_X_FAIL_CHECK( swap_chain_->ResizeBuffers(
-		swap_chain_desc_.BufferCount,
+		swap_chain_buffer_count_,
 		swap_chain_desc_.BufferDesc.Width,
 		swap_chain_desc_.BufferDesc.Height,
 		swap_chain_desc_.BufferDesc.Format,
@@ -601,17 +620,13 @@ Pixel2DSpace Direct3D11::get_2d_space() const
 
 bool Direct3D11::save_back_buffer_to_png( const wchar_t* file_name )
 {
-	ID3D11Texture2D* back_buffer = nullptr;
-
-	if ( FAILED( swap_chain_->GetBuffer( 0, IID_PPV_ARGS( & back_buffer ) ) ) )
+	// 描画先（MSAA なら解決してから）を保存する。フリップモデルのスワップチェーンのバッファは、表示の後は中身が決まらない
+	if ( ! back_buffer_texture_ )
 	{
 		return false;
 	}
 
-	const bool result = save_texture_2d_to_png( device_, immediate_context_, back_buffer, file_name );
-	back_buffer->Release();
-
-	return result;
+	return save_texture_2d_to_png( device_, immediate_context_, back_buffer_texture_->get_texture_2d(), file_name );
 }
 
 void Direct3D11::reset_render_state()
@@ -863,6 +878,12 @@ void Direct3D11::bind_texture_to_ps( uint_t slot, const Texture* texture )
 
 void Direct3D11::present()
 {
+	if ( back_buffer_texture_ )
+	{
+		back_buffer_texture_->resolve( immediate_context_ );
+	}
+
+	// フリップモデルでは表示のあと描画先が外れる。次のフレームの頭で reset_render_state が結び直す
 	const HRESULT hr = swap_chain_->Present( vsync_ ? 1 : 0, 0 );
 
 	// デバイスロスト（ドライバの更新・GPU のタイムアウト・GPU の切り替え）は専用の例外で知らせる。

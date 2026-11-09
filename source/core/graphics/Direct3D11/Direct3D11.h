@@ -63,7 +63,8 @@ private:
 	ID3D11DeviceContext*		immediate_context_;		///< Direct3D 11 Device Context
 	IDXGISwapChain*				swap_chain_;			///< Direct3D 11 Swap Chain
 
-	DXGI_SWAP_CHAIN_DESC		swap_chain_desc_;
+	DXGI_SWAP_CHAIN_DESC		swap_chain_desc_;		///< 画面の大きさ・形式と、画面への描画の MSAA（スワップチェーン自体は MSAA なし）
+	UINT						swap_chain_buffer_count_ = 1;	///< スワップチェーンのバッファの枚数
 
 	std::unique_ptr< BackBufferTexture >	back_buffer_texture_;		///< バックバッファへの描画用テクスチャ
 

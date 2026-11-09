@@ -160,6 +160,8 @@ private:
 	std::unique_ptr< core::ui::StringTable >		ui_strings_;	///< UI の表示文字列
 	std::unique_ptr< core::ui::Theme >				ui_theme_;		///< UI の見た目
 	bool											is_display_change_requested_ = false;	///< 解像度・フルスクリーンの変更をフレーム末に行う
+	bool											is_full_screen_toggle_requested_ = false;	///< ユーザーによるフルスクリーンの切り替え（Alt+Enter / F5）をフレーム末に行う
+	bool											is_display_restore_requested_ = false;	///< 再びアクティブになったとき、表示を設定に合わせ直す
 	string_t										pending_start_overlay_;			///< 開発用 : 起動時に開くオーバーレイ（debug.start_overlay）
 	int												start_overlay_wait_frames_ = 0;
 
@@ -191,6 +193,8 @@ public:
 	void on_special_key_down( int ) override;
 	void on_mouse_wheel( int ) override;
 	void on_resize() override;
+	void on_toggle_full_screen() override { is_full_screen_toggle_requested_ = true; }
+	void on_activated() override { is_display_restore_requested_ = true; }
 
 	Input* get_input() const { return input_.get(); }
 	

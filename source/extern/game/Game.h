@@ -28,6 +28,12 @@ public:
 	virtual void on_mouse_wheel( int ) = 0;
 	virtual void on_resize() = 0;
 
+	/// フルスクリーンの切り替えの要求（Alt+Enter）
+	virtual void on_toggle_full_screen() { }
+
+	/// アプリケーションが再びアクティブになった
+	virtual void on_activated() { }
+
 	virtual int get_width() const = 0;
 	virtual int get_height() const = 0;
 

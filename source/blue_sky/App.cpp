@@ -200,12 +200,41 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_KEYDOWN:
 	{
-		if ( App::get_instance()->game_ )
+		// 押し続けによるキーリピートは、ファンクションキー（ミュート・フルスクリーンなどの切り替え）には渡さない
+		const bool is_repeat = ( lp & ( 1 << 30 ) ) != 0;
+		const bool is_function_key = wp >= VK_F1 && wp <= VK_F24;
+
+		if ( App::get_instance()->game_ && ! ( is_repeat && is_function_key ) )
 		{
 			App::get_instance()->game_->on_special_key_down( static_cast< int >( wp ) );
 		}
 
 		break;
+	}
+	case WM_SYSKEYDOWN:
+	{
+		// Alt+Enter : フルスクリーンの切り替え（DXGI の自動処理は止めてある）
+		if ( wp == VK_RETURN && ( lp & ( 1 << 29 ) ) && ! ( lp & ( 1 << 30 ) ) )
+		{
+			if ( App::get_instance()->game_ )
+			{
+				App::get_instance()->game_->on_toggle_full_screen();
+			}
+
+			return 0;
+		}
+
+		return DefWindowProc( hwnd, msg, wp, lp );
+	}
+	case WM_SYSCOMMAND:
+	{
+		// Alt や F10 を単独で押したときに、ウィンドウメニューのモードに入ってゲームの入力が奪われないようにする
+		if ( ( wp & 0xFFF0 ) == SC_KEYMENU )
+		{
+			return 0;
+		}
+
+		return DefWindowProc( hwnd, msg, wp, lp );
 	}
 	case WM_CHAR:
 	{
@@ -253,6 +282,12 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		{
 			// アプリケーションがアクティブになった際、監視対象のディレクトリの変更をチェックする
 			App::get_instance()->check_directory_change();
+
+			// フォーカスを失って解除された排他フルスクリーンを、設定に合わせて戻す
+			if ( App::get_instance()->game_ )
+			{
+				App::get_instance()->game_->on_activated();
+			}
 		}
 
 		break;

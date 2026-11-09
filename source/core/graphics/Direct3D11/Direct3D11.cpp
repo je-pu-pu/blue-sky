@@ -204,6 +204,10 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 	}
 		
 	DIRECT_X_FAIL_CHECK( dxgi_factory->CreateSwapChain( device_, & swap_chain_desc_, & swap_chain_ ) );
+
+	// Alt+Enter は DXGI に任せず、アプリ側で処理する
+	// （DXGI が勝手に切り替えると、ユーザーの操作かフォーカス喪失による解除かを区別できず、設定と実際の状態がずれる）
+	DIRECT_X_FAIL_CHECK( dxgi_factory->MakeWindowAssociation( swap_chain_desc_.OutputWindow, DXGI_MWA_NO_ALT_ENTER ) );
 }
 
 /**

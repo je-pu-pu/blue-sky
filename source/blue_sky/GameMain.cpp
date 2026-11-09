@@ -204,9 +204,8 @@ GameMain::~GameMain()
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-	// 実際の状態（F2 / F5 / Alt+Enter で変わり得る）を取り込んでから、設定を保存する
-	settings_->sync_from_runtime( game_settings::AUDIO_MUTE, sound_manager_->is_mute() );
-	settings_->sync_from_runtime( game_settings::FULL_SCREEN, get_graphics_manager()->is_full_screen() );
+	// 設定を保存する。ユーザーの明示的な操作（F2 / F5 / Alt+Enter）はその場で設定に反映済み。
+	// 終了時の実際の状態（フォーカス喪失で解除されたフルスクリーンなど）は取り込まない
 	settings_->save( * get_config() );
 
 	get_config()->save_file( "blue-sky.config" );
@@ -467,16 +466,35 @@ bool GameMain::update()
 		check_scene_transition();
 	}
 
-	// 解像度・フルスクリーンの変更（UI のコールバック中ではなく、ここでまとめて行う）
+	// 表示の変更は、UI のコールバックやウィンドウメッセージの処理中ではなく、ここでまとめて行う
+	//
+	// 設定（ユーザーが選んだ値）と実際の状態は分けて扱う。設定を書き換えるのはユーザーの明示的な操作
+	// （オプション画面・Alt+Enter・F5）だけ。フォーカスを失って排他フルスクリーンが解除されたような
+	// 一時的な状態は設定に取り込まず、再びアクティブになったときに設定に合わせて戻す。
+	if ( is_full_screen_toggle_requested_ )
+	{
+		is_full_screen_toggle_requested_ = false;
+
+		get_graphics_manager()->switch_full_screen();
+		get_app()->set_full_screen( get_graphics_manager()->is_full_screen() );
+		settings_->sync_from_runtime( game_settings::FULL_SCREEN, get_graphics_manager()->is_full_screen() );
+	}
+
 	if ( is_display_change_requested_ )
 	{
 		is_display_change_requested_ = false;
+		is_display_restore_requested_ = false;
 		apply_display_settings();
 	}
-	else if ( std::get< bool >( settings_->get_committed( game_settings::FULL_SCREEN ) ) != get_graphics_manager()->is_full_screen() )
+	else if ( is_display_restore_requested_ )
 	{
-		// Alt+Enter など、設定を経由しない切り替えを取り込む
-		settings_->sync_from_runtime( game_settings::FULL_SCREEN, get_graphics_manager()->is_full_screen() );
+		is_display_restore_requested_ = false;
+
+		if ( std::get< bool >( settings_->get_committed( game_settings::FULL_SCREEN ) ) != get_graphics_manager()->is_full_screen() )
+		{
+			get_graphics_manager()->switch_full_screen();
+			get_app()->set_full_screen( get_graphics_manager()->is_full_screen() );
+		}
 	}
 
 	return true;
@@ -773,9 +791,7 @@ void GameMain::on_special_key_down( int key )
 	}
 	else if ( key == KEY_F5 )
 	{
-		get_graphics_manager()->switch_full_screen();
-		get_app()->set_full_screen( get_graphics_manager()->is_full_screen() );
-		settings_->sync_from_runtime( game_settings::FULL_SCREEN, get_graphics_manager()->is_full_screen() );
+		on_toggle_full_screen();
 	}
 
 	/// @todo ちゃんとする

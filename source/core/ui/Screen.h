@@ -58,6 +58,7 @@ namespace core::ui
 			bool anchored = false;	///< 部品の近くに置く層（ドロップダウンなど）
 			Rect anchor;			///< 基準の矩形（この下、入らなければ上に置く）
 			float_t width = 0.f;	///< 幅（0 以下なら基準の矩形の幅）
+			float_t closing = -1.f;	///< 閉じている途中の経過秒数（負なら閉じていない）。閉じている途中は入力を受け取らず、薄くしてから外す
 		};
 
 		const Theme& theme_;
@@ -153,7 +154,13 @@ namespace core::ui
 		/// 指定した層を閉じる（post される。既に無ければ何もしない）
 		void close_layer( const Widget* root );
 
-		size_t get_layer_count() const { return layers_.size(); }
+		/// 層の数（閉じている途中の層は数えない）
+		size_t get_layer_count() const
+		{
+			size_t n = 0;
+			for ( const auto& layer : layers_ ) { if ( layer.closing < 0.f ) n++; }
+			return n;
+		}
 		Widget* get_root() const { return layers_.empty() ? nullptr : layers_.front().root.get(); }
 
 		/// コールバック中に層・ツリーを変更するためのコマンドを積む。update の最後に実行される

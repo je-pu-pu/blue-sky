@@ -34,8 +34,7 @@ App::App()
 	, width_( DEFAULT_WIDTH )
 	, height_( DEFAULT_HEIGHT )
 	, is_active_( false )
-	, is_full_screen_( false )
-	, last_window_rect_{ 0, 0, 0, 0 }
+	, initial_full_screen_( false )
 	, is_mouse_in_window_( false )
 	, is_clip_cursor_enabled_( false )
 	, config_( new Config() )
@@ -144,7 +143,7 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		return false;
 	}
 	
-	set_full_screen( initial_full_screen );
+	initial_full_screen_ = initial_full_screen;
 
 	// ゲームを初期化する
 	game_ = blue_sky::GameMain::get_instance();
@@ -571,42 +570,9 @@ void App::show_error_message( const char_t* message ) const
 	MessageBoxW( hWnd, common::convert_to_wstring( message ).c_str(), L"エラー", MB_OK | MB_ICONERROR );
 }
 
-void App::set_full_screen( bool full_screen )
-{
-	/*
-	if ( full_screen )
-	{
-		if ( ! is_full_screen_ )
-		{
-			GetWindowRect( hWnd, & last_window_rect_ );
-			ShowCursor( FALSE );
-		}
-
-		SetWindowLong( hWnd, GWL_STYLE, get_window_style_full_scrren() );
-	}
-	else
-	{
-		SetWindowLong( hWnd, GWL_STYLE, get_window_style() );
-
-		if ( is_full_screen_ )
-		{
-			SetWindowPos(  hWnd, HWND_NOTOPMOST, last_window_rect_.left, last_window_rect_.top, last_window_rect_.right - last_window_rect_.left, last_window_rect_.bottom - last_window_rect_.top, SWP_SHOWWINDOW );
-			ShowCursor( TRUE );
-		}
-	}
-	*/
-
-	is_full_screen_ = full_screen;
-}
-
 DWORD App::get_window_style() const
 {
 	return WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE;
-}
-
-DWORD App::get_window_style_full_scrren() const
-{
-	return WS_POPUP;
 }
 
 /**

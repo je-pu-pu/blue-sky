@@ -77,6 +77,8 @@ void Renderer::draw_text( const Rect& rect, const char_t* text, const core::grap
 	core::graphics::TextStyle scaled = style;
 	scaled.h_align = core::graphics::resolve_halign( style.h_align, is_right_to_left() );
 	scaled.outline_width *= s;
+	scaled.text_color = apply_opacity( style.text_color );
+	scaled.outline_color = apply_opacity( style.outline_color );
 	scaled.font_size = ( style.font_size > 0.f ? style.font_size : gm_->get_default_font_size() ) * s;
 
 	begin_text_mode();
@@ -177,13 +179,13 @@ void Renderer::draw_rect( const Rect& rect, const Color& color )
 	}
 
 	begin_sprite_mode();
-	gm_->get_sprite()->draw_color( px, color );
+	gm_->get_sprite()->draw_color( px, apply_opacity( color ) );
 }
 
 void Renderer::fill_screen( const Color& color )
 {
 	begin_sprite_mode();
-	gm_->get_sprite()->draw_color( win::Rect( 0, 0, static_cast< LONG >( gm_->get_render_target_width() ), static_cast< LONG >( gm_->get_render_target_height() ) ), color );
+	gm_->get_sprite()->draw_color( win::Rect( 0, 0, static_cast< LONG >( gm_->get_render_target_width() ), static_cast< LONG >( gm_->get_render_target_height() ) ), apply_opacity( color ) );
 }
 
 const core::graphics::Texture* Renderer::find_image( const string_t& image ) const
@@ -268,7 +270,7 @@ void Renderer::draw_image( const Rect& rect, const string_t& image, const Rect& 
 	uv.v1 = source.bottom() / th;
 
 	begin_sprite_mode();
-	gm_->get_sprite()->draw_uv( px, texture, uv, tint, core::graphics::Sprite::AlphaMode::PREMULTIPLIED );
+	gm_->get_sprite()->draw_uv( px, texture, uv, apply_opacity( tint ), core::graphics::Sprite::AlphaMode::PREMULTIPLIED );
 }
 
 float_t Renderer::measure_text_width( const char_t* text, float_t font_size ) const

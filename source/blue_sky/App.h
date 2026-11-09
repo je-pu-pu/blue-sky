@@ -48,8 +48,7 @@ private:
 	int			height_;				///< ウィンドウ高さ
 
 	bool		is_active_;				///< アクティブフラグ
-	bool		is_full_screen_;		///< フルスクリーン
-	RECT		last_window_rect_;		///< 前回のウィンドウ位置とサイズ
+	bool		initial_full_screen_;	///< 起動時にフルスクリーンで始めるか（実際の状態はスワップチェーン、ユーザーの選択は設定が持つ）
 
 	bool		is_mouse_in_window_;
 
@@ -73,7 +72,6 @@ private:
 	static void on_resize( HWND );
 
 	DWORD get_window_style() const;
-	DWORD get_window_style_full_scrren() const;
 
 
 public:
@@ -101,8 +99,8 @@ public:
 
 	void show_error_message( const char_t* ) const;
 
-	bool is_full_screen() const { return is_full_screen_; }
-	void set_full_screen( bool );
+	/// 起動時にフルスクリーンで始めるか（Direct3D を作るときだけ使う）
+	bool is_initial_full_screen() const { return initial_full_screen_; }
 
 	void show_cursor( bool );
 	void clip_cursor( bool );

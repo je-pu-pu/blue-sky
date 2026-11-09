@@ -278,6 +278,7 @@ TEST_F( DialogTest, コールバックから次のダイアログを開ける )
 	confirm();	// first を押す → second が開き、first は閉じる
 	ASSERT_EQ( 2u, screen.get_layer_count() );
 
+	step( core::ui::UIInput(), theme.layer_close_duration + 0.05f );		// first が薄くなりきるまで待つ
 	render();
 	EXPECT_TRUE( renderer.has_text( "second" ) );
 	EXPECT_FALSE( renderer.has_text( "first" ) );
@@ -348,4 +349,38 @@ TEST_F( NavTest, 説明文はフォーカス中の部品のもの )
 	EXPECT_EQ( "", screen.get_description() );
 	press_nav( NavDir::DOWN );
 	EXPECT_EQ( "2 行目の説明", screen.get_description() );
+}
+
+TEST_F( DialogTest, 閉じたダイアログは薄くなりながら残り入力は背面へ渡る )
+{
+	theme.layer_close_duration = 0.2f;
+	open();
+	confirm();
+
+	// 閉じている途中 : 層としては数えず、入力は背面が受ける。描画はまだ続く（暗幕も）
+	EXPECT_EQ( 1u, screen.get_layer_count() );
+	cancel();
+	EXPECT_EQ( 1, back_count );
+
+	renderer.fill_count = 0;
+	screen.render( renderer );
+	EXPECT_EQ( 1, renderer.fill_count );
+	EXPECT_FLOAT_EQ( 1.f, renderer.get_opacity() );		// 描き終えたら元に戻す
+
+	// 時間が経てば外れる
+	step( core::ui::UIInput(), 0.25f );
+	renderer.fill_count = 0;
+	screen.render( renderer );
+	EXPECT_EQ( 0, renderer.fill_count );
+}
+
+TEST_F( DialogTest, 閉じる時間が0ならすぐに外れる )
+{
+	theme.layer_close_duration = 0.f;
+	open();
+	confirm();
+
+	renderer.fill_count = 0;
+	screen.render( renderer );
+	EXPECT_EQ( 0, renderer.fill_count );
 }

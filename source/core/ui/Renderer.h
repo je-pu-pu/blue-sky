@@ -18,6 +18,7 @@ class Renderer
 {
 private:
 	bool right_to_left_ = false;
+	float_t opacity_ = 1.f;
 
 public:
 	virtual ~Renderer() = default;
@@ -67,6 +68,13 @@ public:
 	/// 右から左へ書く言語か（行の始まり・終わりの配置を左右のどちらにするか。Screen が文字列テーブルから設定する）
 	void set_right_to_left( bool rtl ) { right_to_left_ = rtl; }
 	bool is_right_to_left() const { return right_to_left_; }
+
+	/// 以降の描画の不透明度（0 〜 1。閉じている途中の層を薄くするのに Screen が設定する）。実装は色の α に掛ける
+	void set_opacity( float_t opacity ) { opacity_ = opacity < 0.f ? 0.f : ( opacity > 1.f ? 1.f : opacity ); }
+	float_t get_opacity() const { return opacity_; }
+
+	/// 色に不透明度を掛ける（実装の描画関数で使う）
+	Color apply_opacity( Color c ) const { c.a() *= opacity_; return c; }
 
 	/**
 	 * 積んである描画を描く（Screen::render の最後に呼ぶ）

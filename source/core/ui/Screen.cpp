@@ -151,12 +151,31 @@ void Screen::close_layer( const Widget* root )
 	{
 		for ( size_t i = 0; i < layers_.size(); i++ )
 		{
-			if ( layers_[ i ].root.get() == root )
+			Layer& layer = layers_[ i ];
+
+			if ( layer.root.get() != root || layer.closing >= 0.f )
 			{
-				layers_.erase( layers_.begin() + static_cast< std::ptrdiff_t >( i ) );
-				layout_dirty_ = true;
+				continue;
+			}
+
+			// 閉じるときに薄くしていく（以前はすぐに消え、閉じるアニメーションを挟む状態がなかった）
+			// 閉じている途中は表示だけの層にして、入力は下の層へ渡す
+			if ( theme_.layer_close_duration > 0.f && i > 0 )
+			{
+				if ( layer.modal )
+				{
+					release_captures();
+				}
+
+				layer.closing = 0.f;
+				layer.modal = false;
+				layer.on_cancel = nullptr;
 				return;
 			}
+
+			layers_.erase( layers_.begin() + static_cast< std::ptrdiff_t >( i ) );
+			layout_dirty_ = true;
+			return;
 		}
 	} );
 }
@@ -858,6 +877,26 @@ void Screen::update( const UIInput& input, float_t dt )
 		layer.root->update( dt, ctx );
 	}
 
+	// 閉じている途中の層を進め、薄くなりきったら外す
+	for ( size_t i = 0; i < layers_.size(); )
+	{
+		Layer& layer = layers_[ i ];
+
+		if ( layer.closing >= 0.f )
+		{
+			layer.closing += dt;
+
+			if ( layer.closing >= theme_.layer_close_duration )
+			{
+				layers_.erase( layers_.begin() + static_cast< std::ptrdiff_t >( i ) );
+				layout_dirty_ = true;
+				continue;
+			}
+		}
+
+		i++;
+	}
+
 	run_commands();
 	layout();
 	repair_focus();
@@ -982,6 +1021,10 @@ void Screen::render( Renderer& renderer )
 
 	for ( const auto& layer : layers_ )
 	{
+		// 閉じている途中の層は、経過に合わせて薄くする（暗幕も一緒に）
+		const float_t opacity = layer.closing >= 0.f && theme_.layer_close_duration > 0.f ? 1.f - layer.closing / theme_.layer_close_duration : 1.f;
+		renderer.set_opacity( opacity );
+
 		if ( layer.dim )
 		{
 			renderer.fill_screen( theme_.dialog_dim );
@@ -989,6 +1032,8 @@ void Screen::render( Renderer& renderer )
 
 		layer.root->render( renderer, ctx );
 	}
+
+	renderer.set_opacity( 1.f );
 }
 
 // ---- キー割り当て待ち ----

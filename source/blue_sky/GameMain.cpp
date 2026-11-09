@@ -94,7 +94,7 @@ GameMain::GameMain()
 		get_app()->GetWindowHandle(),
 		get_app()->get_width(),
 		get_app()->get_height(),
-		get_app()->is_full_screen(),
+		get_app()->is_initial_full_screen(),
 		get_config()->get( "graphics.multisample.count", 4 ), 
 		get_config()->get( "graphics.multisample.quality", 2 )
 	) );
@@ -561,7 +561,6 @@ bool GameMain::update()
 		is_full_screen_toggle_requested_ = false;
 
 		get_graphics_manager()->switch_full_screen();
-		get_app()->set_full_screen( get_graphics_manager()->is_full_screen() );
 		settings_->sync_from_runtime( game_settings::FULL_SCREEN, get_graphics_manager()->is_full_screen() );
 	}
 
@@ -578,7 +577,6 @@ bool GameMain::update()
 		if ( settings_->get_committed( game_settings::FULL_SCREEN ) != get_graphics_manager()->is_full_screen() )
 		{
 			get_graphics_manager()->switch_full_screen();
-			get_app()->set_full_screen( get_graphics_manager()->is_full_screen() );
 		}
 	}
 
@@ -615,7 +613,9 @@ void GameMain::apply_display_settings()
 		get_graphics_manager()->switch_full_screen();
 	}
 
-	get_app()->set_full_screen( get_graphics_manager()->is_full_screen() );
+	// フルスクリーンの状態は、以前は 3 か所（App・スワップチェーン・設定）が持ち、毎回手で写していた。
+	// 今は役割を分ける : 実際の状態はスワップチェーンだけ、ユーザーの選択は設定だけ、App は起動時の要求だけ
+
 }
 
 /**

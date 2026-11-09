@@ -476,3 +476,54 @@ TEST( UserSettingsPathTest, ユーザーのフォルダに置き環境変数で�
 	EXPECT_EQ( std::filesystem::path( "C:/temp/bs-test" ) / "settings.config", std::filesystem::path( blue_sky::game_settings::user_settings_path() ) );
 	SetEnvironmentVariableW( L"BLUE_SKY_SETTINGS_DIR", nullptr );
 }
+
+TEST( SettingStoreTest, 値を整える関数は設定と読み込みと元に戻すと既定値に戻すの全部で呼ばれる )
+{
+	SettingStore s;
+	s.add_int( "graphics.screen_width", 1920, 640, 7680, ApplyMode::DEFERRED );
+	s.add_int( "volume", 5, 0, 10, ApplyMode::IMMEDIATE );
+
+	int calls = 0;
+	s.set_normalizer( [&] ( SettingStore& store )
+	{
+		calls++;
+		// 例 : 音量は奇数にしない（中で set しても入れ子では呼ばれない）
+		if ( store.get< int >( "volume" ) % 2 == 1 ) store.set( "volume", store.get< int >( "volume" ) + 1 );
+	} );
+
+	s.set( "volume", 3 );
+	EXPECT_EQ( 4, s.get< int >( "volume" ) );
+	EXPECT_EQ( 1, calls );
+
+	game::Config c;
+	c.set< string_t >( "volume", "7" );
+	s.load( c );
+	EXPECT_EQ( 8, s.get< int >( "volume" ) );		// 読み込みでも整える（以前は set のときしか検査しなかった）
+
+	const int before = calls;
+	s.revert();
+	s.revert_deferred();
+	s.reset_to_defaults();
+	EXPECT_EQ( 6, s.get< int >( "volume" ) );		// 既定値 5 も整える
+	s.rollback( s.snapshot(), { "volume" } );		// スナップショットは確定値（8）
+	EXPECT_EQ( before + 4, calls );
+}
+
+TEST( SettingStoreTest, 操作を終えたら反映する項目はapply_pendingか確定まで反映しない )
+{
+	SettingStore s;
+	float applied = 0.f;
+	s.add_float( "ui.text_scale", 1.f, 0.8f, 1.6f, 0.1f, ApplyMode::ON_RELEASE, [&] ( const SettingStore::Value& v ) { applied = std::get< float_t >( v ); } );
+
+	s.set( "ui.text_scale", 1.2f );
+	s.set( "ui.text_scale", 1.4f );		// ドラッグの途中
+	EXPECT_FLOAT_EQ( 0.f, applied );
+	EXPECT_FALSE( s.has_pending_deferred() );		// 「適用」の確認の対象ではない
+
+	s.apply_pending( "ui.text_scale" );		// 離した
+	EXPECT_FLOAT_EQ( 1.4f, applied );
+
+	s.set( "ui.text_scale", 1.6f );
+	s.commit_immediate();					// 反映せずに戻ろうとしても、反映してから確定する
+	EXPECT_FLOAT_EQ( 1.6f, applied );
+}

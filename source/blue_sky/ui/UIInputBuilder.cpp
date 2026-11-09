@@ -5,6 +5,8 @@
 
 #include <windows.h>
 
+#include <algorithm>
+
 namespace blue_sky::ui
 {
 
@@ -22,10 +24,13 @@ core::ui::UIInput UIInputBuilder::build( Input& input, const Renderer& renderer,
 	const bool down_left  = input.is_key_down( VK_LEFT )  || input.is_pad_dir_down( Button::LEFT );
 	const bool down_right = input.is_key_down( VK_RIGHT ) || input.is_pad_dir_down( Button::RIGHT );
 
-	in.up    = repeat_[ 0 ].update( down_up, dt );
-	in.down  = repeat_[ 1 ].update( down_down, dt );
-	in.left  = repeat_[ 2 ].update( down_left, dt );
-	in.right = repeat_[ 3 ].update( down_right, dt );
+	// 繰り返しの速さはスティックの傾きで変える（キーを押しているときは最大。以前は傾きを使えなかった）
+	const auto strength = [&input] ( int vk, float_t tilt ) { return input.is_key_down( vk ) ? 1.f : std::clamp( tilt, 0.f, 1.f ); };
+
+	in.up    = repeat_[ 0 ].update( down_up, dt, strength( VK_UP, input.get_stick_y() ) );
+	in.down  = repeat_[ 1 ].update( down_down, dt, strength( VK_DOWN, -input.get_stick_y() ) );
+	in.left  = repeat_[ 2 ].update( down_left, dt, strength( VK_LEFT, -input.get_stick_x() ) );
+	in.right = repeat_[ 3 ].update( down_right, dt, strength( VK_RIGHT, input.get_stick_x() ) );
 
 	// 決定・キャンセル・タブ
 	const DWORD pad_a = input.get_joystick_button_mask( Button::A );

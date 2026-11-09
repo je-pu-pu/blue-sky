@@ -109,6 +109,13 @@ int code_from_name( const string_t& name )
 {
 	const string_t upper = to_upper( name );
 
+	// パッドのボタン : PAD1 〜 PAD32
+	if ( upper.size() > 3 && upper.compare( 0, 3, "PAD" ) == 0 && upper.find_first_not_of( "0123456789", 3 ) == string_t::npos )
+	{
+		const int n = std::atoi( upper.c_str() + 3 );
+		return n >= 1 && n <= PAD_BUTTON_COUNT ? PAD_BUTTON_BASE + n - 1 : 0;
+	}
+
 	if ( upper.size() == 1 && is_alnum_code( upper[ 0 ] ) )
 	{
 		return upper[ 0 ];
@@ -127,6 +134,11 @@ int code_from_name( const string_t& name )
 
 string_t name_from_code( int code )
 {
+	if ( is_pad_code( code ) )
+	{
+		return "PAD" + std::to_string( pad_button_index( code ) + 1 );
+	}
+
 	if ( is_alnum_code( code ) )
 	{
 		return string_t( 1, static_cast< char_t >( code ) );
@@ -169,6 +181,12 @@ const std::vector< int >& get_bindable_codes()
 			{
 				v.push_back( e.code );
 			}
+		}
+
+		// パッドのボタン
+		for ( int i = 0; i < PAD_BUTTON_COUNT; i++ )
+		{
+			v.push_back( PAD_BUTTON_BASE + i );
 		}
 
 		return v;

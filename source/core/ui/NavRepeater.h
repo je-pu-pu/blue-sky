@@ -2,6 +2,8 @@
 
 #include <core/type.h>
 
+#include <algorithm>
+
 namespace core::ui
 {
 
@@ -36,8 +38,11 @@ public:
 	 * @param dt 前フレームからの経過秒数
 	 * @return このフレームで発火するなら true
 	 */
-	bool update( bool is_down, float_t dt )
+	bool update( bool is_down, float_t dt, float_t strength = 1.f )
 	{
+		// 強さ（スティックの傾き 0 〜 1）が小さいほど繰り返しをゆっくりにする（キーボードは 1 で以前と同じ）
+		const float_t interval = strength >= 1.f ? interval_ : interval_ * ( 1.f + ( 1.f - std::max( strength, 0.f ) ) * 2.f );
+
 		if ( ! is_down )
 		{
 			reset();
@@ -58,11 +63,11 @@ public:
 		{
 			// 通常は一定周期で発火する。
 			// 1 フレームが長く周期を飛び越えた場合は 1 回だけ発火し、取りこぼした分は捨てて今から interval 後を次回とする
-			next_fire_ += interval_;
+			next_fire_ += interval;
 
 			if ( next_fire_ <= held_time_ )
 			{
-				next_fire_ = held_time_ + interval_;
+				next_fire_ = held_time_ + interval;
 			}
 
 			return true;

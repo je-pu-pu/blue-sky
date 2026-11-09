@@ -20,6 +20,8 @@
 
 #include <common/math.h>
 
+#include <cmath>
+
 #include <windows.h>
 
 namespace blue_sky
@@ -244,7 +246,9 @@ int Input::get_pushed_bindable_key() const
 {
 	for ( int code : key_names::get_bindable_codes() )
 	{
-		if ( is_key_pushed( code ) )
+		const bool pushed = key_names::is_pad_code( code ) ? is_pad_button_pushed( key_names::pad_button_index( code ) ) : is_key_pushed( code );
+
+		if ( pushed )
 		{
 			return code;
 		}
@@ -317,6 +321,32 @@ void Input::update()
 		detect_joystick();
 	}
 
+	// パッドを先に読む（パッドのボタンの割り当てを、同じフレームのボタンの状態に入れるため）
+	const bool joy_ok = joystick_enabled_ && joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR;
+	stick_x_ = 0.f;
+	stick_y_ = 0.f;
+
+	if ( joy_ok && was_foreground_ )
+	{
+		pad_buttons_now_ = joy_info_.dwButtons;
+
+		if ( joy_info_.dwXpos <  0xFFFF / 4 * 1 ) pad_dir_now_ |= pad_dir_bit( Button::LEFT );
+		if ( joy_info_.dwXpos >= 0xFFFF / 4 * 3 ) pad_dir_now_ |= pad_dir_bit( Button::RIGHT );
+		if ( joy_info_.dwYpos <  0xFFFF / 4 * 1 ) pad_dir_now_ |= pad_dir_bit( Button::UP );
+		if ( joy_info_.dwYpos >= 0xFFFF / 4 * 3 ) pad_dir_now_ |= pad_dir_bit( Button::DOWN );
+
+		// スティックの傾き（-1 〜 +1。中央付近は 0）
+		const auto axis = [] ( DWORD pos )
+		{
+			const float_t v = static_cast< float_t >( pos ) / 32767.5f - 1.f;
+			constexpr float_t DEAD_ZONE = 0.2f;
+			return std::abs( v ) < DEAD_ZONE ? 0.f : ( v - std::copysign( DEAD_ZONE, v ) ) / ( 1.f - DEAD_ZONE );
+		};
+
+		stick_x_ = axis( joy_info_.dwXpos );
+		stick_y_ = -axis( joy_info_.dwYpos );		// 上を正にする
+	}
+
 	for ( int n = 0; n < static_cast< int >( Button::MAX ); n++ )
 	{
 		state_[ n ] <<= 1;
@@ -336,7 +366,7 @@ void Input::update()
 
 	mouse_point_ = point;
 
-	if ( joystick_enabled_ && joyGetPosEx( JOYSTICKID1, & joy_info_ ) == JOYERR_NOERROR )
+	if ( joy_ok )
 	{
 		if ( joy_info_.dwXpos <  0xFFFF / 4 * 1 ) state_[ static_cast< int >( Button::LEFT  ) ] |= 1;
 		if ( joy_info_.dwXpos >= 0xFFFF / 4 * 3 ) state_[ static_cast< int >( Button::RIGHT ) ] |= 1;
@@ -348,17 +378,6 @@ void Input::update()
 	
 		if ( joy_info_.dwButtons & joystick_code_[ static_cast< int >( Button::L ) ] ) state_[ static_cast< int >( Button::L ) ] |= 1;
 		if ( joy_info_.dwButtons & joystick_code_[ static_cast< int >( Button::R ) ] ) state_[ static_cast< int >( Button::R ) ] |= 1;
-
-		// 生の状態（UI 用）
-		if ( was_foreground_ )
-		{
-			pad_buttons_now_ = joy_info_.dwButtons;
-
-			if ( joy_info_.dwXpos <  0xFFFF / 4 * 1 ) pad_dir_now_ |= pad_dir_bit( Button::LEFT );
-			if ( joy_info_.dwXpos >= 0xFFFF / 4 * 3 ) pad_dir_now_ |= pad_dir_bit( Button::RIGHT );
-			if ( joy_info_.dwYpos <  0xFFFF / 4 * 1 ) pad_dir_now_ |= pad_dir_bit( Button::UP );
-			if ( joy_info_.dwYpos >= 0xFFFF / 4 * 3 ) pad_dir_now_ |= pad_dir_bit( Button::DOWN );
-		}
 
 		mouse_dx_ += get_rate_by_joystick_axis_pos( * joystick_x_axis_pos_ ) * 0.01f * joystick_x_sensitivity_;
 		mouse_dy_ += get_rate_by_joystick_axis_pos( * joystick_y_axis_pos_ ) * 0.01f * joystick_y_sensitivity_;
@@ -394,7 +413,10 @@ void Input::update_state_by_key_for( uint_t button )
 	// （以前は GetAsyncKeyState をもう一度読んでいて、ゲームの操作だけ短いタップを取りこぼしていた）
 	for ( int code : key_code_[ button ] )
 	{
-		if ( is_key_down( code ) )
+		// パッドのボタンも割り当てられる（以前はキーボードのキーだけだった）
+		const bool down = key_names::is_pad_code( code ) ? is_pad_button_down( key_names::pad_button_index( code ) ) : is_key_down( code );
+
+		if ( down )
 		{
 			state_[ button ] |= 1;
 		}

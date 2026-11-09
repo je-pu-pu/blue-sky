@@ -17,7 +17,7 @@ class Slider : public LabeledRow
 {
 public:
 	/// 捕捉が外れた（層が積まれたなど）: 押している・ドラッグ中の状態を解除する
-	void on_capture_lost() override { dragging_ = false; }
+	void on_capture_lost() override { if ( dragging_ ) { dragging_ = false; commit(); } }
 
 	using Getter = std::function< float_t() >;
 	using Setter = std::function< void( float_t ) >;
@@ -32,6 +32,10 @@ private:
 	Formatter formatter_;
 
 	bool dragging_ = false;
+	std::function< void() > on_commit_;
+
+	/// 操作を終えた（ドラッグを離した・キーで 1 段動かした）ことを知らせる
+	void commit() { if ( on_commit_ ) on_commit_(); }
 	Rect track_rect_;
 	Rect text_rect_;
 
@@ -48,6 +52,9 @@ public:
 	AccessibleInfo describe( const UIContext& ctx ) const override;
 	const Rect& get_track_rect() const { return track_rect_; }
 	bool is_dragging() const { return dragging_; }
+
+	/// 操作を終えたとき（ドラッグを離した・キーで 1 段動かした）に呼ぶ関数（設定の ON_RELEASE の反映に使う）
+	void set_on_commit( std::function< void() > f ) { on_commit_ = std::move( f ); }
 
 	void arrange( const Rect& rect, const UIContext& ctx ) override;
 

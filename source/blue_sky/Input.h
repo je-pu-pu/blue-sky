@@ -96,6 +96,8 @@ private:
 	std::array< bool, 256 > key_latched_{};					///< ウィンドウメッセージで届いた押下（次の update で使って消す）
 	bool was_foreground_;									///< 前フレームでウィンドウがアクティブだったか
 	DWORD pad_buttons_now_;									///< パッドのボタン（ビット）
+	float_t stick_x_ = 0.f;									///< スティックの傾き
+	float_t stick_y_ = 0.f;
 	DWORD pad_buttons_prev_;
 	int pad_dir_now_;										///< パッドの方向（ビット : 左 1 / 右 2 / 上 4 / 下 8）
 	int pad_dir_prev_;
@@ -170,6 +172,10 @@ public:
 
 	/// パッドに何か入力があるか（最後に使ったデバイスの判定用）
 	bool is_pad_active() const { return pad_buttons_now_ != 0 || pad_dir_now_ != 0; }
+
+	/// スティックの傾き（-1 〜 +1。右・上が正。中央付近は 0）
+	float_t get_stick_x() const { return stick_x_; }
+	float_t get_stick_y() const { return stick_y_; }
 
 	/// 割り当て可能なキーのうち、このフレームに押された最初のもの（無ければ 0）
 	int get_pushed_bindable_key() const;

@@ -23,7 +23,8 @@ namespace core::setting
 enum class ApplyMode
 {
 	IMMEDIATE,	///< 変更した瞬間に反映する（音量・感度など）。戻るときに自動で確定する
-	DEFERRED	///< 「適用」まで反映しない（解像度・フルスクリーンなど）
+	DEFERRED,	///< 「適用」まで反映しない（解像度・フルスクリーンなど）
+	ON_RELEASE	///< 操作を終えたら反映する（スライダーをドラッグし終えたら。apply_pending で反映）。確定の扱いは IMMEDIATE と同じ
 };
 
 /**
@@ -117,6 +118,7 @@ private:
 		ApplyMode mode = ApplyMode::IMMEDIATE;
 		ApplyFn apply;
 		OnSetHook on_set;
+		bool apply_dirty = false;		///< ON_RELEASE : set したがまだ反映していない
 		int group = -1;		///< 所属グループ（-1 = なし）
 		Info info;
 	};
@@ -132,6 +134,12 @@ private:
 	std::vector< Group > groups_;
 
 	bool in_hook_ = false;
+
+	std::function< void( SettingStore& ) > normalizer_;
+	bool in_normalizer_ = false;
+
+	/// 値を整える関数を呼ぶ（入れ子では呼ばない）
+	void run_normalizer();
 	uint_t change_count_ = 0;
 
 	Snapshot trial_values_;		///< 試用中の項目と、保存に使う元の値
@@ -186,6 +194,18 @@ public:
 
 	/// set() の直後に呼ばれるフック（関連する他の項目の調整用）。フック内の set() ではフックは呼ばれない
 	void set_on_set( const string_t& key, OnSetHook hook );
+
+	/**
+	 * 値を整える関数（不正な値・重複したキー割り当ての修正など）を登録する
+	 *
+	 * set・load・revert・revert_deferred・reset_to_defaults・rollback のあとに必ず呼ぶ。
+	 * 以前は set_on_set のフックが set() のときしか動かず、読み込み・元に戻すの経路では検査されなかった。
+	 * 中で set() を呼んでよい（入れ子では呼ばない）
+	 */
+	void set_normalizer( std::function< void( SettingStore& ) > normalizer ) { normalizer_ = std::move( normalizer ); }
+
+	/// 操作を終えたら反映する項目（ON_RELEASE）の、まだ反映していない値を反映する。それ以外の項目では何もしない
+	void apply_pending( const string_t& key );
 
 	/// 画面に出すための情報を付ける（ラベル・説明の文字列キー）
 	void set_info( const string_t& key, const string_t& label_key, const string_t& description_key );

@@ -64,12 +64,14 @@ bool Slider::on_nav( NavDir dir, UIContext& ctx )
 	if ( dir == NavDir::LEFT )
 	{
 		set_value( get_value() - step_, ctx );
+		commit();
 		return true;
 	}
 
 	if ( dir == NavDir::RIGHT )
 	{
 		set_value( get_value() + step_, ctx );
+		commit();
 		return true;
 	}
 
@@ -97,7 +99,11 @@ bool Slider::on_pointer( const PointerEvent& e, UIContext& ctx )
 			return true;
 
 		case PointerEvent::Type::RELEASE:
-			dragging_ = false;
+			if ( dragging_ )
+			{
+				dragging_ = false;
+				commit();
+			}
 			return true;
 	}
 

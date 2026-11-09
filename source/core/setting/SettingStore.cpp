@@ -326,6 +326,11 @@ void SettingStore::set( const string_t& key, const Value& value )
 
 	e->pending = new_value;
 
+	if ( e->mode == ApplyMode::ON_RELEASE )
+	{
+		e->apply_dirty = true;		// 反映は apply_pending（操作を終えたとき）
+	}
+
 	if ( e->mode == ApplyMode::IMMEDIATE )
 	{
 		if ( e->apply )
@@ -345,6 +350,39 @@ void SettingStore::set( const string_t& key, const Value& value )
 		hook( *this, key, old_value );
 		in_hook_ = false;
 	}
+
+	run_normalizer();
+}
+
+void SettingStore::run_normalizer()
+{
+	if ( normalizer_ && ! in_normalizer_ )
+	{
+		in_normalizer_ = true;
+		auto f = normalizer_;
+		f( *this );
+		in_normalizer_ = false;
+	}
+}
+
+void SettingStore::apply_pending( const string_t& key )
+{
+	Entry* e = find_or_report( key, "apply_pending" );
+
+	if ( ! e || e->mode != ApplyMode::ON_RELEASE || ! e->apply_dirty )
+	{
+		return;
+	}
+
+	e->apply_dirty = false;
+
+	if ( e->apply )
+	{
+		e->apply( e->pending );
+	}
+
+	notify( *e );
+	change_count_++;
 }
 
 bool SettingStore::is_pending( const string_t& key ) const
@@ -377,7 +415,12 @@ void SettingStore::commit_immediate()
 {
 	for ( auto& e : entries_ )
 	{
-		if ( e.mode == ApplyMode::IMMEDIATE )
+		if ( e.mode == ApplyMode::ON_RELEASE )
+		{
+			apply_pending( e.key );		// 操作の途中で確定するときも、反映してから確定する
+		}
+
+		if ( e.mode == ApplyMode::IMMEDIATE || e.mode == ApplyMode::ON_RELEASE )
 		{
 			e.committed = e.pending;
 		}
@@ -449,9 +492,10 @@ void SettingStore::revert()
 		if ( ! equals( e, e.pending, e.committed ) )
 		{
 			e.pending = e.committed;
+			e.apply_dirty = false;
 
-			// IMMEDIATE は既に反映済みなので、確定値で反映し直す
-			if ( e.mode == ApplyMode::IMMEDIATE )
+			// IMMEDIATE・ON_RELEASE は既に反映済みのことがあるので、確定値で反映し直す
+			if ( e.mode == ApplyMode::IMMEDIATE || e.mode == ApplyMode::ON_RELEASE )
 			{
 				reapply.push_back( i );
 			}
@@ -459,6 +503,7 @@ void SettingStore::revert()
 	}
 
 	apply_changed( reapply );
+	run_normalizer();
 }
 
 void SettingStore::revert_deferred()
@@ -470,6 +515,8 @@ void SettingStore::revert_deferred()
 			e.pending = e.committed;
 		}
 	}
+
+	run_normalizer();
 }
 
 void SettingStore::reset_to_defaults()
@@ -484,8 +531,9 @@ void SettingStore::reset_to_defaults()
 		if ( ! equals( e, e.pending, e.default_value ) )
 		{
 			e.pending = e.default_value;
+			e.apply_dirty = false;
 
-			if ( e.mode == ApplyMode::IMMEDIATE )
+			if ( e.mode == ApplyMode::IMMEDIATE || e.mode == ApplyMode::ON_RELEASE )
 			{
 				reapply.push_back( i );
 			}
@@ -493,6 +541,7 @@ void SettingStore::reset_to_defaults()
 	}
 
 	apply_changed( reapply );
+	run_normalizer();
 }
 
 SettingStore::Snapshot SettingStore::snapshot() const
@@ -534,6 +583,7 @@ void SettingStore::rollback( const Snapshot& snapshot, const std::vector< string
 	}
 
 	apply_changed( changed );
+	run_normalizer();
 }
 
 void SettingStore::begin_trial( const Snapshot& before, const std::vector< string_t >& keys )
@@ -630,6 +680,7 @@ void SettingStore::load( const game::Config& config )
 	}
 
 	change_count_++;
+	run_normalizer();
 }
 
 void SettingStore::save( game::Config& config, int version ) const

@@ -29,4 +29,11 @@ const std::vector< int >& get_bindable_codes();
 /// 割り当て可能なキーか
 bool is_bindable( int code );
 
+/// パッドのボタンを表すコード（キーボードの仮想キーと重ならない範囲。PAD1 〜 PAD32）
+inline constexpr int PAD_BUTTON_BASE = 0x1000;
+inline constexpr int PAD_BUTTON_COUNT = 32;
+
+inline bool is_pad_code( int code ) { return code >= PAD_BUTTON_BASE && code < PAD_BUTTON_BASE + PAD_BUTTON_COUNT; }
+inline int pad_button_index( int code ) { return code - PAD_BUTTON_BASE; }
+
 } // namespace blue_sky::key_names

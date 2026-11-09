@@ -61,3 +61,17 @@ TEST( KeyNamesTest, ESCは割り当てできない )
 	EXPECT_TRUE( key_names::is_bindable( 'Q' ) );
 	EXPECT_TRUE( key_names::is_bindable( VK_LBUTTON ) );
 }
+
+TEST( KeyNamesTest, パッドのボタンも名前とコードを行き来でき割り当てられる )
+{
+	using namespace blue_sky::key_names;
+
+	const int pad3 = code_from_name( "PAD3" );
+	EXPECT_TRUE( is_pad_code( pad3 ) );
+	EXPECT_EQ( 2, pad_button_index( pad3 ) );
+	EXPECT_EQ( "PAD3", name_from_code( pad3 ) );
+	EXPECT_TRUE( is_bindable( pad3 ) );
+
+	EXPECT_EQ( 0, code_from_name( "PAD0" ) );
+	EXPECT_EQ( 0, code_from_name( "PAD33" ) );
+}

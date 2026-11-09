@@ -16,6 +16,8 @@
 #pragma comment( lib, "shell32.lib" )
 #include <sstream>
 
+#include <algorithm>
+
 namespace blue_sky::game_settings
 {
 
@@ -186,6 +188,9 @@ void register_all( SettingStore& store, GameMain& game_main )
 		store.set_on_set( key, & swap_duplicate_key );
 	}
 
+	// どの経路（設定・読み込み・元に戻す・既定値に戻す）で変わっても、キー割り当てを整える
+	store.set_normalizer( [] ( SettingStore& s ) { normalize_key_bindings( s ); } );
+
 	// カメラ（反映はシーン側が change_count を見て行う）
 	store.add_float( CAMERA_FOV, 90.f, 50.f, 120.f, 1.f, ApplyMode::IMMEDIATE );
 	store.set_info( CAMERA_FOV, "options.fov", "options.fov.description" );
@@ -198,7 +203,8 @@ void register_all( SettingStore& store, GameMain& game_main )
 	store.set_info( DISPLAY_FPS, "options.display_fps", "options.display_fps.description" );
 
 	// 文字の大きさ（アクセシビリティ）。行の高さは部品が文字に合わせて広げる
-	store.add_float( UI_TEXT_SCALE, 1.f, 0.8f, 1.6f, 0.1f, ApplyMode::IMMEDIATE, [gm] ( const SettingStore::Value& v )
+	// ドラッグの途中で画面全体を配置し直すと重く、行が動いて操作しにくいので、離したときに反映する
+	store.add_float( UI_TEXT_SCALE, 1.f, 0.8f, 1.6f, 0.1f, ApplyMode::ON_RELEASE, [gm] ( const SettingStore::Value& v )
 	{
 		gm->set_ui_text_scale( std::get< float_t >( v ) );
 	} );
@@ -210,23 +216,38 @@ void register_all( SettingStore& store, GameMain& game_main )
 	store.add_apply_group( get_display_keys(), [gm] { gm->request_display_change(); } );
 }
 
-void fix_invalid_values( SettingStore& store )
+bool normalize_key_bindings( SettingStore& store )
 {
-	// キー割り当て : 解釈できない・割り当てできないキーは既定値に直す
+	// キー割り当て : 解釈できない・割り当てできない・空のキーは既定値に直す
 	// （以前は Input は既定値に戻すのにストアは壊れた文字列のまま保持し、画面は空欄・保存も壊れたままだった）
+	// 別の操作と同じキーなら、後の方を既定値に直す（読み込み・元に戻すの経路でも重複を残さない）
 	bool fixed = false;
+	std::vector< int > used;
 
 	for ( const auto& b : get_bindable_buttons() )
 	{
 		const string_t key = Input::get_key_config_name( b.button );
-		const int code = primary_code( store.get< string_t >( key ) );
+		int code = primary_code( store.get< string_t >( key ) );
 
-		if ( code == 0 || ! key_names::is_bindable( code ) )
+		const bool invalid = code == 0 || ! key_names::is_bindable( code );
+		const bool duplicate = ! invalid && std::find( used.begin(), used.end(), code ) != used.end();
+
+		if ( invalid || duplicate )
 		{
 			store.set( key, default_key( b.button ) );
+			code = primary_code( default_key( b.button ) );
 			fixed = true;
 		}
+
+		used.push_back( code );
 	}
+
+	return fixed;
+}
+
+void fix_invalid_values( SettingStore& store )
+{
+	const bool fixed = normalize_key_bindings( store );
 
 	if ( fixed )
 	{

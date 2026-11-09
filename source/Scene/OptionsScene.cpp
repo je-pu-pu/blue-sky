@@ -91,6 +91,7 @@ Slider* add_setting_slider( Stack* page, SettingStore* store, const core::settin
 
 	slider->set_formatter( std::move( formatter ) );
 	slider->set_description_key( info.description_key );
+	slider->set_on_commit( [store, key] { store->apply_pending( key ); } );		// ON_RELEASE の項目はここで反映
 	return slider;
 }
 
@@ -228,6 +229,11 @@ void OptionsScene::build_controls_page( Stack* page )
 	// キーの表示名 : 文字列テーブルの key.<名前> があればそれ、無ければ名前そのもの
 	auto key_display_name = [this] ( int code ) -> string_t
 	{
+		if ( key_names::is_pad_code( code ) )
+		{
+			return services_.strings.format( "key.pad", { std::to_string( key_names::pad_button_index( code ) + 1 ) } );
+		}
+
 		const string_t name = key_names::name_from_code( code );
 		const auto& strings = services_.strings;
 		const string_t table_key = "key." + name;

@@ -47,3 +47,19 @@ TEST( NavRepeaterTest, 離すとリセットされ次の押下で即発火する
 	EXPECT_TRUE( r.update( true, 0.0625f ) );
 	EXPECT_FALSE( r.update( true, 0.125f ) );
 }
+
+TEST( NavRepeaterTest, スティックの傾きが小さいほど繰り返しがゆっくりになる )
+{
+	auto count_fires = [] ( float_t strength )
+	{
+		core::ui::NavRepeater r( 0.35f, 0.08f );
+		int fires = 0;
+		for ( int i = 0; i < 120; i++ ) { if ( r.update( true, 1.f / 60.f, strength ) ) fires++; }		// 2 秒押し続ける
+		return fires;
+	};
+
+	const int full = count_fires( 1.f );
+	const int half = count_fires( 0.5f );
+	EXPECT_GT( full, half );
+	EXPECT_GT( half, 1 );
+}

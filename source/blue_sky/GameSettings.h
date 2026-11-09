@@ -93,6 +93,9 @@ namespace game_settings
 	/// 読み込んだ後に、解釈できない値（キー割り当てなど）を既定値に直して確定する
 	void fix_invalid_values( core::setting::SettingStore& store );
 
+	/// キー割り当ての不正な値・空・重複を直す（直したら true。確定はしない）
+	bool normalize_key_bindings( core::setting::SettingStore& store );
+
 	/**
 	 * キー割り当ての文字列（"W UP" など）の主キー（先頭）を差し替えた文字列を返す
 	 *

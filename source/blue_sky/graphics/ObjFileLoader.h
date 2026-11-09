@@ -13,8 +13,8 @@ namespace blue_sky::graphics
 class ObjFileLoader : public BaseFileLoader
 {
 public:
-	ObjFileLoader( Model* model, const char_t* name )
-		: BaseFileLoader( model, name )
+	ObjFileLoader( GraphicsManager* graphics_manager, Model* model, const char_t* name )
+		: BaseFileLoader( graphics_manager, model, name )
 	{ }
 
 	bool load( const char_t* ) override;

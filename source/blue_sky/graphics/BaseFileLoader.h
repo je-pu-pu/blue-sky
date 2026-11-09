@@ -18,6 +18,8 @@ namespace core
 
 namespace blue_sky::graphics
 {
+
+class GraphicsManager;
 	class Model;
 	class Mesh;
 
@@ -38,6 +40,7 @@ public:
 	using VertexIndexMap		= std::map< Mesh::Vertex, Mesh::Index >;
 
 private:
+	GraphicsManager* graphics_manager_;		///< 作ったものを登録する先（以前は GameMain のシングルトンから引いていた）
 	Model* model_;
 	string_t name_;
 
@@ -57,8 +60,9 @@ protected:
 	Texture* load_texture( const char_t* ) const;
 
 public:
-	BaseFileLoader( Model* model, const char_t* name )
-		: model_( model )
+	BaseFileLoader( GraphicsManager* graphics_manager, Model* model, const char_t* name )
+		: graphics_manager_( graphics_manager )
+		, model_( model )
 		, name_( name )
 	{
 

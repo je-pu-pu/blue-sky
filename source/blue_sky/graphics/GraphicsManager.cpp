@@ -114,14 +114,14 @@ bool_t GraphicsManager::load_mesh( Model* model, const char_t* name )
 	{
 		if ( ! boost::filesystem::exists( file_path + ".fbx" ) || boost::filesystem::last_write_time( file_path + ".fbx" ) < boost::filesystem::last_write_time( file_path + ".bin.fbx" ) )
 		{
-			FbxFileLoader loader( model, name );
+			FbxFileLoader loader( this, model, name );
 			mesh_loaded = loader.load( ( file_path + ".bin.fbx" ).c_str() );
 		}
 	}
 
 	if ( ! mesh_loaded && boost::filesystem::exists( file_path  + ".fbx" ) )
 	{
-		FbxFileLoader loader( model, name );
+		FbxFileLoader loader( this, model, name );
 		mesh_loaded = loader.load( ( file_path + ".fbx" ).c_str() );
 
 		/// Blender 5 系でエクスポートした FBX はもともとバイナリ形式なので変換しない
@@ -135,7 +135,7 @@ bool_t GraphicsManager::load_mesh( Model* model, const char_t* name )
 
 	if ( ! mesh_loaded && boost::filesystem::exists( file_path + ".obj" ) )
 	{
-		ObjFileLoader loader( model, name );
+		ObjFileLoader loader( this, model, name );
 		mesh_loaded = loader.load( ( file_path + ".obj" ).c_str() );
 	}
 

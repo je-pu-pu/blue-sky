@@ -223,8 +223,8 @@ void print_fbx_node_recursive( FbxNode* node )
 	}
 }
 
-FbxFileLoader::FbxFileLoader( Model* model, const char_t* name )
-	: BaseFileLoader( model, name )
+FbxFileLoader::FbxFileLoader( GraphicsManager* graphics_manager, Model* model, const char_t* name )
+	: BaseFileLoader( graphics_manager, model, name )
 	, fbx_manager_( FbxManager::Create() )
 	, fbx_scene_( nullptr )
 	, fbx_material_index_( 0 )

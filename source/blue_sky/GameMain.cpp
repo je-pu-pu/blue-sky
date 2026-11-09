@@ -304,9 +304,10 @@ void GameMain::setup_script_command()
 	get_script_manager()->exec( "function load( s ) dofile( 'media/script/' .. s ) end" );
 
 	// Scene
-	get_script_manager()->set_function( "scene", [this] ( const char_t* name ) { setup_scene( name ); } );
-	get_script_manager()->set_function( "push_overlay", [this] ( const char_t* name ) { push_overlay_scene( name ); } );
-	get_script_manager()->set_function( "pop_overlay", [this] () { pop_overlay_scene(); } );
+	// 遷移はその場で実行せず、要求として積む（スクリプトがシーンの更新中に呼ばれても、実行中のシーンを破棄しないように）
+	get_script_manager()->set_function( "scene", [this] ( const char_t* name ) { request_scene( SceneRequest{ SceneRequest::Type::REPLACE_BASE, name } ); } );
+	get_script_manager()->set_function( "push_overlay", [this] ( const char_t* name ) { request_scene( SceneRequest{ SceneRequest::Type::PUSH_OVERLAY, name } ); } );
+	get_script_manager()->set_function( "pop_overlay", [this] () { request_scene( SceneRequest{ SceneRequest::Type::POP_OVERLAY } ); } );
 
 	// Basic
 	get_script_manager()->set_function( "color", [this] ( float_t r, float_t g, float_t b, float_t a ) { return Color( r, g, b, a ); } );
@@ -427,6 +428,13 @@ bool GameMain::update()
 	//   待ち時間 0 の確認なので負荷はほぼない）
 	get_app()->check_directory_change();
 
+	// 前のフレームでベースシーンの置き換えが決まっていたら、「読み込み中」を表示してから置き換える
+	if ( is_loading_frame_ )
+	{
+		replace_base_scene_with_loading_screen();
+		return true;
+	}
+
 	/// @todo 別スレッド化
 	get_sound_manager()->update();
 	
@@ -450,46 +458,7 @@ bool GameMain::update()
 		oculus_rift_->update();
 	}
 
-	// ESC キーはオーバーレイの有無に関わらず検出する (ブロックをバイパス)
-	{
-		const bool escape_blocked = input_->is_blocked();
-		input_->set_blocked( false );
-		const bool escape_pushed = input_->push( Input::Button::ESCAPE );
-		input_->set_blocked( escape_blocked );
-
-		// オーバーレイ（UI 画面）が開いている間は、ESC は UI 側が「キャンセル」として処理する
-		// （キー割り当て待ちの中止・ダイアログを閉じる・未適用の変更の確認などを UI が判断するため）
-		// 開発用のコンソール（ImGui）がキー入力を受け取っているときは、ESC はコンソールのもの
-		if ( escape_pushed && ! has_overlay_scene() && ! ImGui::GetIO().WantCaptureKeyboard )
-		{
-			if ( scene_->get_name() == "title" )
-			{
-				get_app()->close();
-			}
-			else if ( scene_->get_name() == "game_play" )
-			{
-				// ゲームプレイ中はポーズメニューを開く
-				push_overlay_scene( "pause_menu" );
-				if ( auto* s = sound_manager_->get_sound( "ok" ) ) { s->play( false ); }
-			}
-			else
-			{
-				if (
-					get_save_data()->get< int >( "stage.0-0", 0 ) > 0 &&
-					get_save_data()->get< int >( "stage.0-1", 0 ) > 0 &&
-					get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
-				{
-					scene_->set_next_scene( "title" );
-				}
-				else
-				{
-					get_app()->close();
-				}
-
-				if ( auto* s = sound_manager_->get_sound( "cancel" ) ) { s->play( false ); }
-			}
-		}
-	}
+	handle_escape();
 
 	ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -521,49 +490,13 @@ bool GameMain::update()
 	// 開発用 : 起動時のオーバーレイ（数フレーム後に開く）
 	if ( ! pending_start_overlay_.empty() && ++start_overlay_wait_frames_ >= 10 )
 	{
-		push_overlay_scene( pending_start_overlay_ );
+		request_scene( SceneRequest{ SceneRequest::Type::PUSH_OVERLAY, pending_start_overlay_ } );
 		pending_start_overlay_.clear();
 	}
 
-	// オーバーレイシーンの遷移チェック
-	//   "pop"         : 最前面を閉じる（下のオーバーレイが最前面に戻る）
-	//   "push:<名前>" : 最前面を残したまま、その上に積む（ポーズ → オプション → 戻る でポーズに戻る）
-	//   "<名前>"      : 最前面を置き換える
-	if ( has_overlay_scene() && ! overlay_scene_stack_.back()->get_next_scene().empty() )
-	{
-		const string_t next = overlay_scene_stack_.back()->get_next_scene();
-		const string_t push_prefix = "push:";
-
-		if ( next == "pop" )
-		{
-			pop_overlay_scene();
-
-			if ( has_overlay_scene() )
-			{
-				overlay_scene_stack_.back()->on_resume();
-			}
-		}
-		else if ( next.compare( 0, push_prefix.size(), push_prefix ) == 0 )
-		{
-			overlay_scene_stack_.back()->set_next_scene( "" );
-			push_overlay_scene( next.substr( push_prefix.size() ) );
-		}
-		else if ( SceneManager::get_instance()->is_scene_registered( next ) )
-		{
-			pop_overlay_scene();
-			push_overlay_scene( next );
-		}
-		else
-		{
-			// 未登録の名前に置き換えようとした : 今の画面を消さずに残す
-			debug_log( "[Scene] 未登録のシーンへの遷移を無視しました: " + next );
-			overlay_scene_stack_.back()->set_next_scene( "" );
-		}
-	}
-	else
-	{
-		check_scene_transition();
-	}
+	// シーン遷移 : シーンが出した要求を集め、フレームの境目でまとめて実行する
+	collect_scene_requests();
+	process_scene_requests();
 
 	// 表示の変更は、UI のコールバックやウィンドウメッセージの処理中ではなく、ここでまとめて行う
 	//
@@ -912,32 +845,162 @@ void GameMain::on_resize()
 	}
 }
 
-/**
- * 次のシーンへの遷移をチェックする
- *
- */
-void GameMain::check_scene_transition()
+void GameMain::handle_escape()
 {
-	if ( ! scene_->get_next_scene().empty() )
-	{
-		const string_t next_scene = scene_->get_next_scene();
+	// ESC キーはオーバーレイの有無に関わらず検出する（ブロックをバイパス）
+	const bool escape_blocked = input_->is_blocked();
+	input_->set_blocked( false );
+	const bool escape_pushed = input_->push( Input::Button::ESCAPE );
+	input_->set_blocked( escape_blocked );
 
-		// 遷移の要求は、成功しても失敗しても消費する
-		// （以前は未登録の名前だと要求が残り続け、毎フレーム遷移を試みてセーブファイルを書き続けた）
+	// オーバーレイ（UI 画面）が開いている間は、ESC は UI 側が「キャンセル」として処理する
+	// （キー割り当て待ちの中止・ダイアログを閉じる・未適用の変更の確認などを UI が判断するため）
+	// 開発用のコンソール（ImGui）がキー入力を受け取っているときは、ESC はコンソールのもの
+	if ( ! escape_pushed || has_overlay_scene() || ImGui::GetIO().WantCaptureKeyboard )
+	{
+		return;
+	}
+
+	// 何をするかはシーンが申告する（以前はシーン名 "title" / "game_play" で分岐していた）
+	switch ( scene_->get_escape_behavior() )
+	{
+		case Scene::EscapeBehavior::QUIT:
+			get_app()->close();
+			break;
+
+		case Scene::EscapeBehavior::PAUSE_MENU:
+			request_scene( SceneRequest{ SceneRequest::Type::PUSH_OVERLAY, "pause_menu" } );
+			if ( auto* s = sound_manager_->get_sound( "ok" ) ) { s->play( false ); }
+			break;
+
+		case Scene::EscapeBehavior::DEFAULT:
+			if (
+				get_save_data()->get< int >( "stage.0-0", 0 ) > 0 &&
+				get_save_data()->get< int >( "stage.0-1", 0 ) > 0 &&
+				get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
+			{
+				request_scene( SceneRequest{ SceneRequest::Type::REPLACE_BASE, "title" } );
+			}
+			else
+			{
+				get_app()->close();
+			}
+
+			if ( auto* s = sound_manager_->get_sound( "cancel" ) ) { s->play( false ); }
+			break;
+
+		case Scene::EscapeBehavior::NONE:
+			break;
+	}
+}
+
+void GameMain::collect_scene_requests()
+{
+	// 最前面のオーバーレイ
+	if ( has_overlay_scene() )
+	{
+		Scene* overlay = overlay_scene_stack_.back().get();
+		const SceneRequest r = parse_scene_request( overlay->get_next_scene(), true );
+		overlay->set_next_scene( "" );		// 要求は必ず消費する
+
+		if ( r.type != SceneRequest::Type::NONE )
+		{
+			request_scene( r );
+		}
+	}
+
+	// ベースシーン（オーバーレイ中は更新されないので、要求も出ない）
+	if ( scene_ )
+	{
+		SceneRequest r = parse_scene_request( scene_->get_next_scene(), false );
 		scene_->set_next_scene( "" );
 
-		if ( ! SceneManager::get_instance()->is_scene_registered( next_scene ) )
+		if ( r.type != SceneRequest::Type::NONE )
 		{
-			debug_log( "[Scene] 未登録のシーンへの遷移を無視しました: " + next_scene );
-			return;
+			r.stage_name = scene_->get_next_stage_name();
+			request_scene( r );
+		}
+	}
+}
+
+void GameMain::process_scene_requests()
+{
+	while ( ! scene_requests_.empty() )
+	{
+		const SceneRequest r = scene_requests_.front();
+		scene_requests_.pop_front();
+
+		const bool registered = r.name.empty() || SceneManager::get_instance()->is_scene_registered( r.name );
+
+		if ( ! registered )
+		{
+			debug_log( "[Scene] 未登録のシーンへの遷移を無視しました: " + r.name );
+			continue;
 		}
 
-		set_stage_name( scene_->get_next_stage_name() );
+		switch ( r.type )
+		{
+			case SceneRequest::Type::PUSH_OVERLAY:
+				push_overlay_scene( r.name );
+				break;
 
-		setup_scene( next_scene );
+			case SceneRequest::Type::POP_OVERLAY:
+				pop_overlay_scene();
 
-		save_data_->save_file( "save/blue-sky.save" );
+				if ( has_overlay_scene() )
+				{
+					overlay_scene_stack_.back()->on_resume();
+				}
+				break;
+
+			case SceneRequest::Type::REPLACE_OVERLAY:
+				pop_overlay_scene();
+				push_overlay_scene( r.name );
+				break;
+
+			case SceneRequest::Type::REPLACE_BASE:
+				// 上のオーバーレイは古いベースのものなので、すべて閉じる
+				while ( has_overlay_scene() )
+				{
+					pop_overlay_scene();
+				}
+
+				// 置き換えは次のフレームで「読み込み中」を表示してから行う。残りの要求は置き換えの後で処理する
+				pending_base_request_ = r;
+				is_loading_frame_ = true;
+				return;
+
+			case SceneRequest::Type::QUIT:
+				get_app()->close();
+				return;
+
+			case SceneRequest::Type::NONE:
+				break;
+		}
 	}
+}
+
+void GameMain::replace_base_scene_with_loading_screen()
+{
+	is_loading_frame_ = false;
+
+	// 読み込みは同期で行うので、その前に「読み込み中」を 1 回表示しておく（止まって見えないように）
+	// TODO: 非同期読み込み（エンジン内の管理クラスがスレッドに対応してから）
+	get_graphics_manager()->set_default_render_target( true );
+	get_graphics_manager()->clear_default_view();
+	get_graphics_manager()->draw_text_at_center( get_ui_strings().get( "loading" ).c_str(), Color( 0.8f, 0.8f, 0.8f, 1.f ) );
+	direct_3d_->present();
+
+	if ( ! pending_base_request_.stage_name.empty() )
+	{
+		set_stage_name( pending_base_request_.stage_name );
+	}
+
+	setup_scene( pending_base_request_.name );
+	save_data_->save_file( "save/blue-sky.save" );
+
+	// 置き換えの後に残った要求（ベースの置き換えと同時に積まれたオーバーレイなど）を処理する
+	process_scene_requests();
 }
 
 /**
@@ -1023,7 +1086,26 @@ void GameMain::setup_scene( const string_t& scene_name )
 	}
 
 	// 新しいシーンを設定
-	scene_.reset( SceneManager::get_instance()->generate_scene( scene_name ) );
+	// 生成に失敗したら（モデルが無いなど）ログを出してタイトルへ戻す（以前はシーンが null のまま次のフレームで落ちた）
+	try
+	{
+		scene_.reset( SceneManager::get_instance()->generate_scene( scene_name ) );
+	}
+	catch ( const common::exception< std::string >& e )
+	{
+		debug_log( "[Scene] シーンを作れませんでした: " + scene_name + " : " + e.data() );
+	}
+
+	if ( ! scene_ )
+	{
+		if ( scene_name == "title" )
+		{
+			COMMON_THROW_EXCEPTION_MESSAGE( "title シーンを作れませんでした" );
+		}
+
+		setup_scene( "title" );
+		return;
+	}
 
 	/// @todo 各 Scene クラスが自分の名前を持ち、
 	scene_->set_name( scene_name );

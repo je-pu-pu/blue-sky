@@ -6,6 +6,8 @@
 #include <core/ui/Stack.h>
 #include <core/ui/TextField.h>
 
+#include <Scene/SceneRequest.h>
+
 using namespace core::ui;
 using ui_test::ScreenFixture;
 
@@ -224,4 +226,22 @@ TEST( TextFieldTest, UTF8の文字数と末尾の1文字の削除 )
 	EXPECT_EQ( "", TextField::erase_last_codepoint( "" ) );
 	EXPECT_EQ( "𠮷", TextField::to_utf8( U'𠮷' ) );
 	EXPECT_EQ( "", TextField::to_utf8( 0xD800 ) );		// サロゲートは文字ではない
+}
+
+// ---- シーン遷移の要求（設計上の問題 B22） ----
+
+TEST( SceneRequestTest, シーンが出す文字列を遷移の要求に変える )
+{
+	using blue_sky::SceneRequest;
+	using blue_sky::parse_scene_request;
+
+	EXPECT_EQ( SceneRequest::Type::NONE, parse_scene_request( "", true ).type );
+	EXPECT_EQ( SceneRequest::Type::POP_OVERLAY, parse_scene_request( "pop", true ).type );
+	EXPECT_EQ( SceneRequest::Type::NONE, parse_scene_request( "pop", false ).type );		// ベースは pop できない
+	EXPECT_EQ( SceneRequest::Type::QUIT, parse_scene_request( "quit", false ).type );
+
+	EXPECT_EQ( ( SceneRequest{ SceneRequest::Type::PUSH_OVERLAY, "options" } ), parse_scene_request( "push:options", true ) );
+	EXPECT_EQ( ( SceneRequest{ SceneRequest::Type::REPLACE_BASE, "stage_select" } ), parse_scene_request( "base:stage_select", true ) );
+	EXPECT_EQ( ( SceneRequest{ SceneRequest::Type::REPLACE_OVERLAY, "options" } ), parse_scene_request( "options", true ) );
+	EXPECT_EQ( ( SceneRequest{ SceneRequest::Type::REPLACE_BASE, "title" } ), parse_scene_request( "title", false ) );
 }

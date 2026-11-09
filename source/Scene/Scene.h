@@ -129,6 +129,18 @@ public:
 	/// オーバーレイシーン ( ポーズメニューなど ) かどうか
 	virtual bool is_overlay() const { return false; }
 
+	/// ESC を押したときにすること（オーバーレイが開いていないとき）
+	enum class EscapeBehavior
+	{
+		DEFAULT,		///< 既定（全ステージをクリア済みならタイトルへ、そうでなければ終了）
+		PAUSE_MENU,		///< ポーズメニューを開く（ゲームプレイ中）
+		QUIT,			///< 終了する（タイトル）
+		NONE,			///< 何もしない
+	};
+
+	/// ESC を押したときにすることを申告する（以前は GameMain がシーン名で分岐していた）
+	virtual EscapeBehavior get_escape_behavior() const { return EscapeBehavior::DEFAULT; }
+
 	/// オーバーレイシーンの場合、下のシーンを描画するかどうか（false なら、これより下はベースシーンも含めて描かない）
 	virtual bool is_transparent() const { return false; }
 

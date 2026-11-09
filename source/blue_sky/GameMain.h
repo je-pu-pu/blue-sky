@@ -8,6 +8,9 @@
 
 #include <type/type.h>
 
+#include <Scene/SceneRequest.h>
+
+#include <deque>
 #include <unordered_map>
 #include <vector>
 
@@ -164,6 +167,10 @@ private:
 	bool											is_display_restore_requested_ = false;	///< 再びアクティブになったとき、表示を設定に合わせ直す
 	bool											is_shut_down_ = false;					///< shutdown() 済み
 	string_t										pending_start_overlay_;			///< 開発用 : 起動時に開くオーバーレイ（debug.start_overlay）
+
+	std::deque< SceneRequest >						scene_requests_;				///< シーン遷移の要求（フレームの境目でまとめて実行する）
+	SceneRequest									pending_base_request_;			///< 次のフレームで行うベースシーンの置き換え
+	bool											is_loading_frame_ = false;		///< 次のフレームは「読み込み中」を表示してからベースを置き換える
 	int												start_overlay_wait_frames_ = 0;
 
 	void setup_script_command();
@@ -171,7 +178,18 @@ private:
 
 	void update_render_data_for_game() const;
 
-	void check_scene_transition();
+	/// シーンが出した遷移の文字列を要求にしてキューに積む
+	void collect_scene_requests();
+
+	/// キューの要求を順に実行する。ベースの置き換えは次のフレームに回す（「読み込み中」を表示するため）
+	void process_scene_requests();
+
+	/// 「読み込み中」を表示し、ベースシーンを置き換える
+	void replace_base_scene_with_loading_screen();
+
+	/// ESC を押したときの処理（オーバーレイが開いていないとき）
+	void handle_escape();
+
 	void setup_scene( const string_t& );
 
 	void render_console_window();
@@ -242,6 +260,9 @@ public:
 	const Scene* get_current_scene() const { return scene_.get(); }
 
 	/// オーバーレイシーンをスタックにプッシュする ( ベースシーンはポーズ状態になる )
+	/// シーン遷移を要求する（実行はフレームの境目）
+	void request_scene( const SceneRequest& request ) { scene_requests_.push_back( request ); }
+
 	void push_overlay_scene( const string_t& scene_name );
 	/// オーバーレイシーンをスタックからポップする ( ベースシーンのポーズが解除される )
 	void pop_overlay_scene();

@@ -425,6 +425,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\SceneRequest.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
     <ClInclude Include="core\ui\TextField.h">
       <Filter>core\ui</Filter>
     </ClInclude>

@@ -171,6 +171,7 @@
     <ClCompile Include="Scene\TransformTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\SceneRequest.h" />
     <ClInclude Include="core\ui\TextField.h" />
     <ClInclude Include="core\setting\SettingKey.h" />
     <ClInclude Include="Scene\OverlayRenderRange.h" />

@@ -23,16 +23,9 @@ PauseMenuScene::PauseMenuScene()
 
 	menu->add< Button >( "pause.resume", [this] { close(); } );
 	menu->add< Button >( "pause.options", [this] { set_next_scene( "push:options" ); } );
-	menu->add< Button >( "pause.stage_select", [this]
-	{
-		// ベースシーンの遷移先を設定してから閉じる
-		if ( auto* base = const_cast< Scene* >( GameMain::get_instance()->get_current_scene() ) )
-		{
-			base->set_next_scene( "stage_select" );
-		}
-
-		close();
-	} );
+	// ベースシーンをステージ選択に置き換える（オーバーレイは GameMain がすべて閉じる）
+	// 以前は const_cast でベースシーンを直接書き換えていた
+	menu->add< Button >( "pause.stage_select", [this] { set_next_scene( "base:stage_select" ); } );
 
 	// キャンセル（ESC / B）で再開
 	screen_.set_root( std::move( panel ), [this] { close(); } );

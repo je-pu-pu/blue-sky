@@ -9,6 +9,7 @@ common.cancel = キャンセル
 ui.on = オン
 ui.off = オフ
 ui.key_waiting = キーを押してください…
+loading = 読み込み中…
 
 # ---- 操作ヒント（キーボード・マウス） ----
 hint.key.confirm = Enter

@@ -44,6 +44,8 @@ public:
 	void update() override;				///< メインループ
 	void render() override;				///< 描画
 
+	EscapeBehavior get_escape_behavior() const override { return EscapeBehavior::QUIT; }
+
 }; // class TitleScene
 
 } // namespace blue_sky

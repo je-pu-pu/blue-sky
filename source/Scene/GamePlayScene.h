@@ -193,6 +193,7 @@ public:
 	void render() override;				///< 描画
 
 	bool is_clip_cursor_required() override { return true; }
+	EscapeBehavior get_escape_behavior() const override { return EscapeBehavior::PAUSE_MENU; }
 
 }; // class GamePlayScene
 

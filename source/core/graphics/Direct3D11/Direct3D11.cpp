@@ -10,6 +10,7 @@
 #include "EffectPass.h"
 
 #include "WICTextureLoader.h"
+#include "TextureReadback.h"
 #include <core/graphics/DeviceLostException.h>
 
 #include <win/Rect.h>
@@ -588,6 +589,21 @@ void Direct3D11::set_default_render_target( bool with_depth_stencil )
 void Direct3D11::set_default_viewport()
 {
 	immediate_context_->RSSetViewports( 1, & viewport_ );
+}
+
+bool Direct3D11::save_back_buffer_to_png( const wchar_t* file_name )
+{
+	ID3D11Texture2D* back_buffer = nullptr;
+
+	if ( FAILED( swap_chain_->GetBuffer( 0, IID_PPV_ARGS( & back_buffer ) ) ) )
+	{
+		return false;
+	}
+
+	const bool result = save_texture_2d_to_png( device_, immediate_context_, back_buffer, file_name );
+	back_buffer->Release();
+
+	return result;
 }
 
 void Direct3D11::reset_render_state()

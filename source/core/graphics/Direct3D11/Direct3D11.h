@@ -166,6 +166,9 @@ public:
 	 */
 	void reset_render_state();
 
+	/// バックバッファ（今のフレームの描画結果）を PNG に保存する（開発用。画面がロック中でも描画結果を確かめられる）
+	bool save_back_buffer_to_png( const wchar_t* file_name );
+
 	void set_render_target( RenderTargetTexture* );
 	void set_render_target( BackBufferTexture* );
 

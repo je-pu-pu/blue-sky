@@ -51,6 +51,10 @@
 
 #include <common/math.h>
 #include <common/log.h>
+#include <common/string.h>
+
+#include <algorithm>
+#include <sstream>
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -158,7 +162,7 @@ GameMain::GameMain()
 
 	graphics_manager_.reset( new blue_sky::graphics::direct_3d_11::GraphicsManager( direct_3d_.get() ) );
 	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "graphics.debug_axis", 0 ) != 0 );
-	
+
 	// sound_engine_.reset( new core::sound::direct_sound::SoundEngine( get_app()->GetWindowHandle() ) );
 	sound_engine_.reset( new core::sound::port_audio::SoundEngine() );
 	sound_manager_.reset( new SoundManager( sound_engine_.get() ) );
@@ -588,6 +592,55 @@ void GameMain::apply_display_settings()
 	get_app()->set_full_screen( get_graphics_manager()->is_full_screen() );
 }
 
+/**
+ * 開発用のフレームの保存を準備する
+ *
+ * 環境変数 BLUE_SKY_CAPTURE_FRAMES=60,120（保存するフレームの番号）と BLUE_SKY_CAPTURE_DIR（既定 dump）。
+ * 自動操作の確認で、画面がロック中（ウィンドウを撮影できない）でも描画結果を確かめるために使う。
+ */
+void GameMain::setup_frame_capture()
+{
+	char buffer[ 256 ] = { };
+
+	if ( GetEnvironmentVariableA( "BLUE_SKY_CAPTURE_FRAMES", buffer, sizeof( buffer ) ) == 0 )
+	{
+		return;
+	}
+
+	std::stringstream ss( buffer );
+	string_t item;
+
+	while ( std::getline( ss, item, ',' ) )
+	{
+		if ( ! item.empty() )
+		{
+			capture_frames_.push_back( std::atoi( item.c_str() ) );
+		}
+	}
+
+	char directory[ MAX_PATH ] = { };
+	capture_directory_ = GetEnvironmentVariableA( "BLUE_SKY_CAPTURE_DIR", directory, sizeof( directory ) ) ? directory : "dump";
+	CreateDirectoryA( capture_directory_.c_str(), nullptr );
+}
+
+void GameMain::capture_frame_if_requested()
+{
+	frame_count_++;
+
+	if ( std::find( capture_frames_.begin(), capture_frames_.end(), frame_count_ ) == capture_frames_.end() )
+	{
+		return;
+	}
+
+	wchar_t name[ 32 ];
+	swprintf_s( name, L"/capture_%04d.png", frame_count_ );	// 区切りは / （Windows でも使える）
+
+	const std::wstring path = common::convert_to_wstring( capture_directory_ ) + name;
+	const bool ok = direct_3d_->save_back_buffer_to_png( path.c_str() );
+
+	debug_log( string_t( ok ? "フレームを保存しました: " : "フレームを保存できませんでした: " ) + capture_directory_ + " / " + std::to_string( frame_count_ ) );
+}
+
 void GameMain::render()
 {
 	// 描画する範囲を上から決める
@@ -603,17 +656,15 @@ void GameMain::render()
 
 	const OverlayRenderRange range = compute_overlay_render_range( layers );
 
-	// 前のフレームの描画状態を持ち越さない
+	// 前のフレームの描画状態を持ち越さない。画面と深度もここで必ずクリアする
+	// （以前はクリアをベースシーンの render() に任せていて、クリアしないシーン（enemy_ai_test など）では
+	//   前のフレームの深度が残り、深度テストのある描画が消えたり、残像が出たりした）
 	direct_3d_->reset_render_state();
+	get_graphics_manager()->clear_default_view();
 
 	if ( range.render_base )
 	{
 		scene_->render();
-	}
-	else
-	{
-		// 画面のクリアはベースシーンの render() の中で行っているので、描かないときはここでクリアする
-		get_graphics_manager()->clear_default_view();
 	}
 
 	// オーバーレイシーンを下から順に描画
@@ -633,6 +684,8 @@ void GameMain::render()
 	ImGui::Render();
 	get_graphics_manager()->set_default_render_target( false );
     ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );
+
+	capture_frame_if_requested();
 
 	direct_3d_->present();
 }
@@ -1037,11 +1090,22 @@ void GameMain::replace_base_scene_with_loading_screen()
  */
 void GameMain::setup_scene()
 {
+	// 共通のシェーダーとフェーダーを準備する。以前は一部のシーン（debug・enemy_ai_test など）だけが呼んでいて、
+	// 呼ばないシーン（title など）から始めると、フェーダーにメッシュが無いまま描画して落ちた。
+	// シェーダーの生成は GameMain のシングルトンを使うので、GameMain の構築が終わったここで行う
+	graphics_manager_->setup_default_shaders();
+
 	if ( true )
 	{
 		// set_stage_name( "0-1" );
 		// setup_scene( "game_play" );
-		const string_t start_scene = get_config()->get< string_t >( "debug.start_scene", "debug" );
+		string_t start_scene = get_config()->get< string_t >( "debug.start_scene", "debug" );
+
+		// 環境変数でも指定できる（自動操作の確認で設定ファイルを書き換えずに済むように）
+		if ( char scene[ 64 ] = { }; GetEnvironmentVariableA( "BLUE_SKY_START_SCENE", scene, sizeof( scene ) ) )
+		{
+			start_scene = scene;
+		}
 
 		if ( SceneManager::get_instance()->is_scene_registered( start_scene ) )
 		{
@@ -1059,6 +1123,14 @@ void GameMain::setup_scene()
 		// ベースシーンを数フレーム更新してから開く（一度も更新されていないシーンは描画の準備ができていないため）。
 		// const で読む（非 const の get は既定値の空文字列を設定に書き込み、保存すると壊れた行になるため）
 		pending_start_overlay_ = static_cast< const Config& >( * get_config() ).get< string_t >( "debug.start_overlay", "" );
+
+		// 環境変数でも指定できる（自動操作の確認で設定ファイルを書き換えずに済むように）
+		if ( char overlay[ 64 ] = { }; GetEnvironmentVariableA( "BLUE_SKY_START_OVERLAY", overlay, sizeof( overlay ) ) )
+		{
+			pending_start_overlay_ = overlay;
+		}
+
+		setup_frame_capture();
 
 		return;
 	}

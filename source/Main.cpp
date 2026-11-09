@@ -1,5 +1,6 @@
 #include <blue_sky/App.h>
 #include <blue_sky/GameMain.h>
+#include <blue_sky/CrashReport.h>
 
 #include <core/graphics/DeviceLostException.h>
 
@@ -157,6 +158,9 @@ int WINAPI WinMain( _In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ i
 		bool initialized;
 		~ComScope() { if ( initialized ) { CoUninitialize(); } }
 	} com_scope { SUCCEEDED( com_result ) };
+
+	// 落ちたときに原因（例外の種類と呼び出し履歴）を log/crash.log に残す
+	blue_sky::install_crash_report();
 
 	wait_for_restart_parent();
 

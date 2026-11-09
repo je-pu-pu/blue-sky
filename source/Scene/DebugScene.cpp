@@ -57,81 +57,6 @@ namespace
 {
 
 /**
- * R8G8B8A8_UNORM のテクスチャを PNG として保存する ( neural NPR オフライン検証用の簡易ダンパー )
- *
- * DirectXTK に依存せず Windows 標準の WIC で完結させる。
- */
-
-bool dump_texture_2d_to_png(
-	ID3D11Device* device,
-	ID3D11DeviceContext* context,
-	ID3D11Texture2D* source,
-	const wchar_t* file_name )
-{
-	using Microsoft::WRL::ComPtr;
-
-	if ( ! device || ! context || ! source )
-	{
-		return false;
-	}
-
-	std::vector< std::uint8_t > pixels;
-	UINT w = 0, h = 0;
-	if ( ! core::graphics::direct_3d_11::read_texture_2d_to_rgba8( device, context, source, pixels, w, h ) )
-	{
-		return false;
-	}
-	const UINT stride = w * 4;
-
-	// WIC で PNG エンコード ( RGBA → エンコーダ形式へ自動変換 )
-	// COM は既に初期化済みの可能性があるため戻り値は無視する ( RPC_E_CHANGED_MODE でも WIC は利用可 )
-	( void ) CoInitializeEx( nullptr, COINIT_MULTITHREADED );
-
-	ComPtr< IWICImagingFactory > factory;
-	if ( FAILED( CoCreateInstance( CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS( factory.GetAddressOf() ) ) ) )
-	{
-		return false;
-	}
-
-	ComPtr< IWICBitmap > bitmap;
-	if ( FAILED( factory->CreateBitmapFromMemory( w, h, GUID_WICPixelFormat32bppRGBA, stride, static_cast< UINT >( pixels.size() ), pixels.data(), bitmap.GetAddressOf() ) ) )
-	{
-		return false;
-	}
-
-	ComPtr< IWICStream > stream;
-	if ( FAILED( factory->CreateStream( stream.GetAddressOf() ) ) || FAILED( stream->InitializeFromFilename( file_name, GENERIC_WRITE ) ) )
-	{
-		return false;
-	}
-
-	ComPtr< IWICBitmapEncoder > encoder;
-	if ( FAILED( factory->CreateEncoder( GUID_ContainerFormatPng, nullptr, encoder.GetAddressOf() ) ) )
-	{
-		return false;
-	}
-	encoder->Initialize( stream.Get(), WICBitmapEncoderNoCache );
-
-	ComPtr< IWICBitmapFrameEncode > frame;
-	encoder->CreateNewFrame( frame.GetAddressOf(), nullptr );
-	frame->Initialize( nullptr );
-	frame->SetSize( w, h );
-
-	WICPixelFormatGUID format = GUID_WICPixelFormat32bppBGRA;
-	frame->SetPixelFormat( & format );
-
-	if ( FAILED( frame->WriteSource( bitmap.Get(), nullptr ) ) )
-	{
-		return false;
-	}
-
-	frame->Commit();
-	encoder->Commit();
-
-	return true;
-}
-
-/**
  * 深度バッファ ( D32_FLOAT / R32_TYPELESS ) を 32bit float の生バイナリとして保存する ( 案B / 段階0b )
  *
  * Python ハーネス側が color PNG から W/H を知り、float32 little-endian の W*H 配列として読む。
@@ -599,7 +524,7 @@ void DebugScene::render()
 
 		wchar_t path[ 64 ];
 		swprintf_s( path, L"dump/color_%04d.png", frame_dump_index_ );
-		dump_texture_2d_to_png( d3d->getDevice(), d3d->getImmediateContext(), texture, path );
+		core::graphics::direct_3d_11::save_texture_2d_to_png( d3d->getDevice(), d3d->getImmediateContext(), texture, path );
 
 		// 案B / 段階0b: 深度 + カメラ行列も併せてダンプ ( 正確な warp / 遮蔽の元データ )
 		if ( frame_dump_gbuffer_ )

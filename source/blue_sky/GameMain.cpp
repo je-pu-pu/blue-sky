@@ -637,6 +637,13 @@ void GameMain::capture_frame_if_requested()
 	const std::wstring path = common::convert_to_wstring( capture_directory_ ) + name;
 	const bool ok = direct_3d_->save_back_buffer_to_png( path.c_str() );
 
+	// 文字のアトラスも保存する（BLUE_SKY_CAPTURE_GLYPH_ATLAS が設定されているとき。文字の描画の不具合を調べる）
+	if ( GetEnvironmentVariableA( "BLUE_SKY_CAPTURE_GLYPH_ATLAS", nullptr, 0 ) > 0 )
+	{
+		swprintf_s( name, L"/atlas_%04d.png", frame_count_ );
+		graphics_manager_->save_glyph_atlas( ( common::convert_to_wstring( capture_directory_ ) + name ).c_str() );
+	}
+
 	debug_log( string_t( ok ? "フレームを保存しました: " : "フレームを保存できませんでした: " ) + capture_directory_ + " / " + std::to_string( frame_count_ ) );
 }
 

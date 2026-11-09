@@ -150,6 +150,9 @@ public:
 	/** @brief フォント読み込みとシェーダーの準備が完了しているか */
 	bool is_ready() const { return font_ && font_->is_loaded() && effect_technique_; }
 
+	/// 文字のアトラス（開発用 : 中身を PNG に保存して調べる）
+	const GlyphAtlas* get_atlas() const { return atlas_.get(); }
+
 	/**
 	 * @brief テキストを描画キューに追加する（wchar_t 版）
 	 *

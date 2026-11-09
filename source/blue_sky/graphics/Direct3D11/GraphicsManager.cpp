@@ -12,6 +12,8 @@
 
 #include <core/graphics/Direct3D11/PixelFormat.h>
 #include <core/graphics/Direct3D11/PrimitiveTopology.h>
+#include <core/graphics/Direct3D11/TextureReadback.h>
+#include <core/graphics/Msdf/GlyphAtlas.h>
 #include <core/graphics/Direct3D11/Texture.h>
 #include <core/graphics/Direct3D11/RenderTargetTexture.h>
 #include <core/graphics/Direct3D11/BackBufferTexture.h>
@@ -610,6 +612,16 @@ void GraphicsManager::queue_text( float_t left, float_t top, float_t right, floa
 	const float_t text_h = msdf_text_renderer_->measure_text_height( text, resolved.font_size );
 
 	msdf_text_renderer_->draw_text( align_x( left, right, text_w, resolved.h_align ), align_y( top, bottom, text_h, resolved.v_align ), text, resolved );
+}
+
+bool GraphicsManager::save_glyph_atlas( const wchar_t* file_name ) const
+{
+	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->get_atlas() )
+	{
+		return false;
+	}
+
+	return core::graphics::direct_3d_11::save_texture_2d_to_png( direct_3d_->getDevice(), direct_3d_->getImmediateContext(), msdf_text_renderer_->get_atlas()->get_texture(), file_name );
 }
 
 void GraphicsManager::flush_text() const

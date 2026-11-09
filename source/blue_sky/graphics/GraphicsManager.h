@@ -290,6 +290,9 @@ public:
 	/// 積んだ文字を描く
 	virtual void flush_text() const = 0;
 
+	/// 開発用 : 文字のアトラス（MSDF）を PNG に保存する
+	virtual bool save_glyph_atlas( const wchar_t* /* file_name */ ) const { return false; }
+
 	/// 画面中央にテキストを描画する（ローディング表示等）
 	virtual void draw_text_at_center( const char_t*, const Color& ) const = 0;
 

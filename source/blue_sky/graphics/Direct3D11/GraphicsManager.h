@@ -146,6 +146,7 @@ public:
 	void draw_text( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const override;
 	void queue_text( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const override;
 	void flush_text() const override;
+	bool save_glyph_atlas( const wchar_t* file_name ) const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;
 
 	float_t measure_text_width( const char_t*, float_t ) const override;

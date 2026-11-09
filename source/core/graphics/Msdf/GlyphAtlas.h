@@ -101,6 +101,9 @@ public:
 	int get_atlas_size() const { return atlas_size_; }
 
 	ID3D11ShaderResourceView* get_view() const { return view_.get(); }
+
+	/// アトラスのテクスチャ（開発用の保存などに使う）
+	ID3D11Texture2D* get_texture() const { return texture_.get(); }
 };
 
 } // namespace core::graphics

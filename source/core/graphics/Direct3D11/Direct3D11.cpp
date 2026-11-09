@@ -440,7 +440,14 @@ void Direct3D11::create_input_layout( const char_t* input_layout_name, const cha
 		// input_layout_list_.erase( i );
 	}
 
-	auto* pass = static_cast< EffectPass* >( effect_->get_technique( teqhnique_name )->get_pass_list().front().get() );
+	const auto* technique = effect_->get_technique( teqhnique_name );
+
+	if ( ! technique || technique->get_pass_list().empty() )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "technique not found for input layout : " ) + teqhnique_name );
+	}
+
+	auto* pass = static_cast< EffectPass* >( technique->get_pass_list().front().get() );
 
 	input_layout_list_[ input_layout_name ] = std::make_unique< InputLayout >( pass->create_input_layout( layout, layout_array_size ) );
 }

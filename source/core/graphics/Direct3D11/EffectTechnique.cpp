@@ -9,6 +9,18 @@ namespace core::graphics::direct_3d_11
 
 EffectTechnique::EffectTechnique( Direct3D* direct_3d, ID3DX11EffectTechnique* t )
 {
+	rebind( direct_3d, t );
+}
+
+void EffectTechnique::rebind( Direct3D* direct_3d, ID3DX11EffectTechnique* t )
+{
+	pass_list_.clear();
+
+	if ( ! t || ! t->IsValid() )
+	{
+		return;
+	}
+
 	D3DX11_TECHNIQUE_DESC desc;
 
 	DIRECT_X_FAIL_CHECK( t->GetDesc( & desc ) );

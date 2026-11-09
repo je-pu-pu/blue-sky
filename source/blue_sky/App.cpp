@@ -280,9 +280,6 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 
 		if ( wp )
 		{
-			// アプリケーションがアクティブになった際、監視対象のディレクトリの変更をチェックする
-			App::get_instance()->check_directory_change();
-
 			// フォーカスを失って解除された排他フルスクリーンを、設定に合わせて戻す
 			if ( App::get_instance()->game_ )
 			{

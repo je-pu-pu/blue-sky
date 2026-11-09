@@ -68,7 +68,6 @@ private:
 	DWORD get_window_style() const;
 	DWORD get_window_style_full_scrren() const;
 
-	void check_directory_change() const;
 
 public:
 	virtual ~App();						///< デストラクタ
@@ -102,6 +101,7 @@ public:
 	void clip_cursor( bool );
 
 	void watch_directory_change( const char*, std::function<void()> );
+	void check_directory_change() const;	///< 監視しているディレクトリに変更があれば、登録した関数を呼ぶ（毎フレーム呼んでよい）
 
 	void close();
 

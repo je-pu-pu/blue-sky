@@ -96,9 +96,27 @@ GameMain::GameMain()
 
 	direct_3d_->create_default_input_layout();
 
-	/// @todo 各シェーダーの effect_technique_ が古いままなのを解消する
+	// シェーダーの読み直し（開発中に .hlsl を保存したとき）
+	// Effect は成功してから差し替え、取得済みの technique は中身だけ入れ替えるので、描画側のポインタはそのまま使える。
+	// コンパイルに失敗したら、ログを出して前のシェーダーのまま続ける。
 	get_app()->watch_directory_change( "media/shader/", [this] () {
-		direct_3d_->get_effect()->load( "media/shader/main.fx" );
+		debug_log( "[Shader] media/shader/ の変更を検出したので読み直します" );
+
+		try
+		{
+			direct_3d_->get_effect()->load( "media/shader/main.fx" );
+		}
+		catch ( const common::exception< std::string >& e )
+		{
+			debug_log( "[Shader] 読み直しに失敗しました（前のシェーダーのまま続けます）: " + e.data() );
+			return;
+		}
+		catch ( const common::exception< HRESULT >& e )
+		{
+			debug_log( "[Shader] 読み直しに失敗しました（前のシェーダーのまま続けます）: HRESULT " + std::to_string( static_cast< unsigned long >( e.data() ) ) );
+			return;
+		}
+
 		direct_3d_->create_default_input_layout();
 
 		if ( graphics_manager_ )
@@ -339,6 +357,11 @@ bool GameMain::update()
 	}
 
 	time_manager_.update( main_loop_->get_elapsed_sec() );
+
+	// 監視しているディレクトリ（シェーダーなど）の変更を毎フレーム確かめる
+	// （以前はウィンドウが再びアクティブになったときだけ確かめていたので、エディタと並べて作業していると読み直されなかった。
+	//   待ち時間 0 の確認なので負荷はほぼない）
+	get_app()->check_directory_change();
 
 	/// @todo 別スレッド化
 	get_sound_manager()->update();

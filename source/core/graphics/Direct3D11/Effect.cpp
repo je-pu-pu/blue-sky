@@ -30,12 +30,10 @@ Effect::~Effect()
 
 void Effect::load( const char* file_path )
 {
-	clear();
+	ID3D10Blob* shader = nullptr;
+	ID3D10Blob* error_messages = nullptr;
 
-	ID3D10Blob* shader = 0;
-	ID3D10Blob* error_messages = 0;
-
-	std::wstring ws_file_path = common::convert_to_wstring( file_path );
+	const std::wstring ws_file_path = common::convert_to_wstring( file_path );
 
 #ifdef _DEBUG
 	const UINT flags1 = D3DCOMPILE_DEBUG;
@@ -43,42 +41,42 @@ void Effect::load( const char* file_path )
 	const UINT flags1 = 0;
 #endif
 
-	HRESULT hr = D3DCompileFromFile( ws_file_path.c_str(), 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, "", "fx_5_0", flags1, 0, & shader, & error_messages );
+	const HRESULT hr = D3DCompileFromFile( ws_file_path.c_str(), 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, "", "fx_5_0", flags1, 0, & shader, & error_messages );
 
 	if ( FAILED( hr ) )
 	{
-		if ( error_messages )
+		// 失敗しても、それまでのエフェクトはそのまま残る
+		std::string message = error_messages ? static_cast< const char* >( error_messages->GetBufferPointer() ) : std::string();
+
+		DIRECT_X_RELEASE( shader );
+		DIRECT_X_RELEASE( error_messages );
+
+		if ( ! message.empty() )
 		{
-			COMMON_THROW_EXCEPTION_MESSAGE( static_cast< char* >( error_messages->GetBufferPointer() ) );
+			COMMON_THROW_EXCEPTION_MESSAGE( message );
 		}
-		else
-		{
-			DIRECT_X_FAIL_CHECK( hr );
-		}
+
+		DIRECT_X_FAIL_CHECK( hr );
 	}
 
-	DIRECT_X_FAIL_CHECK( D3DX11CreateEffectFromMemory( shader->GetBufferPointer(), shader->GetBufferSize(), 0, direct_3d_->getDevice(), & effect_ ) );
-	
-	/*
-	int n = shader->GetBufferSize();
+	DIRECT_X_RELEASE( error_messages );		// 警告だけのときも返ってくるので解放する（以前はリークしていた）
 
-	for ( int n = 0; ; ++n )
+	ID3DX11Effect* new_effect = nullptr;
+	const HRESULT create_hr = D3DX11CreateEffectFromMemory( shader->GetBufferPointer(), shader->GetBufferSize(), 0, direct_3d_->getDevice(), & new_effect );
+
+	DIRECT_X_RELEASE( shader );
+	DIRECT_X_FAIL_CHECK( create_hr );
+
+	// 成功したので差し替える。取得済みの technique は、オブジェクトを残したまま中身だけ入れ替える
+	ID3DX11Effect* old_effect = effect_;
+	effect_ = new_effect;
+
+	for ( auto& [ name, technique ] : technique_list_ )
 	{
-		D3DX11_EFFECT_VARIABLE_DESC evd;
-		DIRECT_X_FAIL_CHECK( effect_->GetVariableByIndex( n )->GetDesc( & evd ) );
-
-		const char* name = evd.Name;
+		technique->rebind( direct_3d_, effect_->GetTechniqueByName( name.c_str() ) );
 	}
 
-	bool a = effect_->IsValid();
-	bool b = effect_->GetVariableByName( "|vs_skin" )->IsValid();
-	bool c = effect_->GetVariableByName( "|vs_skin" )->AsShader()->IsValid();
-
-	ID3D11VertexShader* vs = 0;
-	effect_->GetVariableByName( "|vs_skin" )->AsShader()->GetVertexShader( 0, & vs );
-
-	vs = vs;
-	*/
+	DIRECT_X_RELEASE( old_effect );
 }
 
 /**
@@ -94,6 +92,11 @@ void Effect::clear()
 
 Effect::Technique* Effect::get_technique( const char* name )
 {
+	if ( ! effect_ || ! name )
+	{
+		return nullptr;
+	}
+
 	TechniqueList::iterator i = technique_list_.find( name );
 
 	if ( i != technique_list_.end() )

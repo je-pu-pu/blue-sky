@@ -22,10 +22,14 @@ Robot::Robot()
 	, mode_backup_( Mode::STAND )
 	, timer_( 0 )
 {
-	texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
+	auto* gm = GameMain::get_instance()->get_graphics_manager();
 
-	GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
-	GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-error" );
+	texture_normal_ = gm->get_texture( "robot" );
+	texture_warn_ = gm->get_texture( "robot-warn" );
+	texture_error_ = gm->get_texture( "robot-error" );
+	texture_tender_ = gm->get_texture( "robot-tender" );
+
+	texture_ = texture_normal_;
 
 }
 
@@ -40,7 +44,7 @@ void Robot::restart()
 	mode_ = Mode::STAND;
 	timer_ = 0;
 
-	texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
+	texture_ = texture_normal_;
 	play_animation( "Stand", false, true );
 
 	patrol_point_list_.clear();
@@ -81,11 +85,11 @@ void Robot::update()
 
 		if ( is_visible_in_blink( 2.f ) )
 		{
-			texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-error" );
+			texture_ = texture_error_;
 		}
 		else
 		{
-			texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
+			texture_ = texture_warn_;
 		}
 
 		timer_ += get_delta_time();
@@ -99,7 +103,7 @@ void Robot::update()
 				play_sound( "robot-shutdown" );
 				stop_sound( "robot-chase" );
 
-				texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
+				texture_ = texture_normal_;
 			}
 		}
 		else
@@ -125,7 +129,7 @@ void Robot::update()
 			timer_ = 0.f;
 
 			play_sound( "robot-found", false, false );
-			texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-warn" );
+			texture_ = texture_warn_;
 		}
 	}
 	else if ( mode_ == Mode::PATROL )
@@ -159,7 +163,7 @@ void Robot::update()
 			else
 			{
 				mode_ = mode_backup_;
-				texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
+				texture_ = texture_normal_;
 
 				timer_ = 0.f;
 				play_sound( "robot-shutdown" );
@@ -169,7 +173,7 @@ void Robot::update()
 	else if ( mode_ == Mode::SHUTDOWN )
 	{
 		set_velocity( get_velocity() * 0.5f );
-		texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot" );
+		texture_ = texture_normal_;
 
 		if ( get_animation_player()->get_current_frame() >= 60 )
 		{
@@ -184,7 +188,7 @@ void Robot::update()
 
 		get_animation_player()->set_speed( 0.25f );
 		play_animation( "Float", false, true );
-		texture_ = GameMain::get_instance()->get_graphics_manager()->get_texture( "robot-tender" );
+		texture_ = texture_tender_;
 	}
 
 	get_model()->get_shader_at( 0 )->set_texture_at( 0, texture_ );

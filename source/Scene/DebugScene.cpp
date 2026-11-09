@@ -276,7 +276,8 @@ core::sound::filter::BiquadFilter* filter = nullptr;
 std::unique_ptr< core::sound::MidiSequencer > midi_sequencer;
 
 DebugScene::DebugScene()
-	: camera_( new Camera() )
+	: city_generator_( get_graphics_manager() )
+	, camera_( new Camera() )
 	, render_result_texture_( get_graphics_manager()->create_render_target_texture() )
 	, velocity_texture_( get_graphics_manager()->create_render_target_texture( core::graphics::direct_3d_11::PixelFormat::R32G32_FLOAT ) )
 {

@@ -12,6 +12,7 @@ namespace blue_sky
 {
 	namespace graphics
 	{
+		class GraphicsManager;
 		class Model;
 		class Mesh;
 	}
@@ -238,7 +239,8 @@ protected:
 	VertexGroup* get_vertex_group_by_road_node( const RoadNode* );
 
 public:
-	CityGenerator();
+	/// 描画の管理を受け取る（以前は GameMain のシングルトンから 12 か所で引いていた）
+	explicit CityGenerator( graphics::GraphicsManager* graphics_manager );
 	~CityGenerator();
 
 	void step();

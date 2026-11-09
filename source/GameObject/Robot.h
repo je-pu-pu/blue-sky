@@ -34,7 +34,13 @@ public:
 
 private:
 	const Player*	player_;
-	Texture*		texture_;		///< テクスチャ
+	Texture*		texture_;		///< テクスチャ（今の状態のもの）
+
+	/// 状態ごとのテクスチャ（コンストラクタで 1 回だけ引く。以前は状態が変わるたびに GameMain から名前で引き直していた）
+	Texture*		texture_normal_ = nullptr;
+	Texture*		texture_warn_ = nullptr;
+	Texture*		texture_error_ = nullptr;
+	Texture*		texture_tender_ = nullptr;
 
 	Mode			mode_;			///< 現在の動作モード
 	Mode			mode_backup_;	///< 前回プレイヤーを発見した時の動作モード

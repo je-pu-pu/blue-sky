@@ -155,6 +155,8 @@ public:
 	void queue_text( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const override;
 	void flush_text() const override;
 
+	core::graphics::TextRenderer* get_text_renderer() const override;
+
 	/// 物理のデバッグ表示を渡す（GameMain が組み立てのときに呼ぶ）
 	void set_bullet_debug_draw( core::graphics::direct_3d_11::BulletDebugDraw* d ) { bullet_debug_draw_ = d; }
 	bool save_glyph_atlas( const wchar_t* file_name ) const override;

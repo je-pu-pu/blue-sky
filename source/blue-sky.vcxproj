@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="core\graphics\Direct3D11\MsdfTextRenderer.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\GlyphAtlas.cpp" />
+    <ClCompile Include="core\graphics\Direct3D11\OculusRift.cpp" />
     <ClCompile Include="core\AsyncLoader.cpp" />
     <ClCompile Include="blue_sky\CrashReport.cpp" />
     <ClCompile Include="core\ui\AnchorBox.cpp" />
@@ -103,12 +106,9 @@
     <ClCompile Include="core\graphics\Direct3D11\Texture.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\TextureReadback.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp" />
-    <ClCompile Include="core\graphics\Msdf\GlyphAtlas.cpp" />
     <ClCompile Include="core\graphics\Msdf\GlyphCache.cpp" />
     <ClCompile Include="core\graphics\Msdf\MsdfFont.cpp" />
-    <ClCompile Include="core\graphics\Msdf\MsdfTextRenderer.cpp" />
     <ClCompile Include="core\graphics\GraphicsManager.cpp" />
-    <ClCompile Include="core\graphics\OculusRift.cpp" />
     <ClCompile Include="core\graphics\Shader.cpp" />
     <ClCompile Include="core\graphics\Sprite.cpp" />
     <ClCompile Include="core\input\DirectInput\DirectInput.cpp" />
@@ -177,6 +177,12 @@
     <ClCompile Include="Scene\TransformTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\graphics\Msdf\GlyphAtlasStorage.h" />
+    <ClInclude Include="core\graphics\Direct3D11\MsdfTextRenderer.h" />
+    <ClInclude Include="core\graphics\Direct3D11\GlyphAtlas.h" />
+    <ClInclude Include="core\graphics\Direct3D11\OculusRift.h" />
+    <ClInclude Include="core\graphics\Direct3D11\DynamicPointList.h" />
+    <ClInclude Include="core\graphics\TextRenderer.h" />
     <ClInclude Include="core\AsyncLoader.h" />
     <ClInclude Include="blue_sky\KeyLatch.h" />
     <ClInclude Include="Scene\InputRouting.h" />
@@ -337,10 +343,8 @@
     <ClInclude Include="core\graphics\EffectPass.h" />
     <ClInclude Include="core\graphics\EffectTechnique.h" />
     <ClInclude Include="core\graphics\GraphicsManager.h" />
-    <ClInclude Include="core\graphics\Msdf\GlyphAtlas.h" />
     <ClInclude Include="core\graphics\Msdf\GlyphCache.h" />
     <ClInclude Include="core\graphics\Msdf\MsdfFont.h" />
-    <ClInclude Include="core\graphics\Msdf\MsdfTextRenderer.h" />
     <ClInclude Include="core\graphics\TextStyle.h" />
     <ClInclude Include="core\graphics\InputLayout.h" />
     <ClInclude Include="core\graphics\Mesh.h" />

@@ -12,7 +12,7 @@
 #pragma once
 
 #include "MsdfFont.h"
-#include "GlyphAtlas.h"
+#include "GlyphAtlasStorage.h"
 #include <unordered_map>
 #include <list>
 #include <vector>
@@ -50,7 +50,7 @@ class GlyphCache {
 	};
 
 	MsdfFont* font_;		///< グリフ輪郭の取得元フォント（外部所有）
-	GlyphAtlas* atlas_;		///< MSDF ビットマップのアップロード先アトラス（外部所有）
+	GlyphAtlasStorage* atlas_;		///< MSDF ビットマップのアップロード先アトラス（外部所有）
 
 	std::unordered_map< uint32_t, Entry > cache_;		///< コードポイント → キャッシュエントリ
 	std::list< uint32_t > lru_;							///< 使用順（先頭が最新）
@@ -90,7 +90,7 @@ public:
 	 * @param msdf_size MSDF ビットマップのピクセルサイズ（デフォルト: 48）
 	 * @param msdf_range MSDF の距離フィールド範囲（デフォルト: 4.0 ピクセル）
 	 */
-	GlyphCache( MsdfFont* font, GlyphAtlas* atlas, int msdf_size = 48, double msdf_range = 4.0 );
+	GlyphCache( MsdfFont* font, GlyphAtlasStorage* atlas, int msdf_size = 48, double msdf_range = 4.0 );
 
 	/**
 	 * 指定コードポイントのキャッシュ済みグリフを取得する

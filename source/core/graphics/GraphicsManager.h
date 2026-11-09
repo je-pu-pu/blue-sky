@@ -26,6 +26,7 @@ class ConstantBuffer;
 // enum class PrimitiveTopology;
 class InputLayout;
 class EffectTechnique;
+class TextRenderer;
 
 /**
  * グラフィック管理クラス
@@ -86,6 +87,9 @@ public:
 
 	virtual void setup_rendering() = 0;
 	virtual void render_background() const = 0;
+
+	/// 文字の描画（core 層から文字を描くときに使う。無ければ nullptr）
+	virtual TextRenderer* get_text_renderer() const { return nullptr; }
 
 	virtual const InputLayout* get_input_layout( const char_t* ) const = 0;
 	virtual EffectTechnique* get_effect_technique( const char_t* ) const = 0;

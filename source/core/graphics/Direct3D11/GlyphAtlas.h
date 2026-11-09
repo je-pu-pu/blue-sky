@@ -13,19 +13,9 @@
 #include <vector>
 #include <cstdint>
 
-#define MSDFGEN_PUBLIC
-#define MSDFGEN_EXT_PUBLIC
-#include <msdfgen/core/Bitmap.h>
+#include <core/graphics/Msdf/GlyphAtlasStorage.h>
 
 namespace core::graphics {
-
-/**
- * アトラス上のセルの UV 座標
- */
-struct UVRect {
-	float u0, v0;	///< 左上
-	float u1, v1;	///< 右下
-};
 
 /**
  * MSDF グリフアトラス
@@ -34,7 +24,7 @@ struct UVRect {
  * cell_size x cell_size ピクセルのセルに分割してグリフを管理する。
  * テクスチャは GPU 上に常駐し、UpdateSubresource で個別セルを更新する。
  */
-class GlyphAtlas {
+class GlyphAtlas : public GlyphAtlasStorage {
 	com_ptr< ID3D11Texture2D > texture_;		///< アトラステクスチャ
 	com_ptr< ID3D11ShaderResourceView > view_;	///< シェーダーリソースビュー
 
@@ -80,7 +70,7 @@ public:
 	 * @param uv [out] 割り当てられたセルの UV 座標
 	 * @return 割り当てられたセルインデックス（満杯の場合 -1）
 	 */
-	int add_glyph( const msdfgen::Bitmap< float, 3 >& bitmap, UVRect& uv );
+	int add_glyph( const msdfgen::Bitmap< float, 3 >& bitmap, UVRect& uv ) override;
 
 	/**
 	 * 既存セルのビットマップを上書きする（LRU 追い出し時に使用）
@@ -89,12 +79,12 @@ public:
 	 * @param bitmap msdfgen が生成した 3ch float ビットマップ
 	 * @param uv [out] セルの UV 座標
 	 */
-	void replace_glyph( int cell_index, const msdfgen::Bitmap< float, 3 >& bitmap, UVRect& uv );
+	void replace_glyph( int cell_index, const msdfgen::Bitmap< float, 3 >& bitmap, UVRect& uv ) override;
 
 	bool is_full() const { return next_cell_index_ >= total_cells_; }
 
 	/// すべてのセルを未使用に戻す（フォントを読み直すとき。テクスチャの中身は次の書き込みで上書きされる）
-	void reset() { next_cell_index_ = 0; }
+	void reset() override { next_cell_index_ = 0; }
 
 	int get_total_cells() const { return total_cells_; }
 	int get_cell_size() const { return cell_size_; }

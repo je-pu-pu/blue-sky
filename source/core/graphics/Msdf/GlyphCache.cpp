@@ -6,7 +6,7 @@ namespace core::graphics {
  * @note msdf_size はアトラスの cell_size と一致させる必要がある。
  *       不一致の場合、セル内のビットマップがクリップされるか余白が生じる。
  */
-GlyphCache::GlyphCache( MsdfFont* font, GlyphAtlas* atlas, int msdf_size, double msdf_range )
+GlyphCache::GlyphCache( MsdfFont* font, GlyphAtlasStorage* atlas, int msdf_size, double msdf_range )
 	: font_( font )
 	, atlas_( atlas )
 	, msdf_size_( msdf_size )

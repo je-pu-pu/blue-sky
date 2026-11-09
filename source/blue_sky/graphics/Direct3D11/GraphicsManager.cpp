@@ -16,7 +16,7 @@
 #include <core/graphics/Sprite.h>
 #include <core/AsyncLoader.h>
 #include <blue_sky/DebugLog.h>
-#include <core/graphics/Msdf/GlyphAtlas.h>
+#include <core/graphics/Direct3D11/GlyphAtlas.h>
 #include <core/graphics/Direct3D11/Texture.h>
 #include <core/graphics/Direct3D11/RenderTargetTexture.h>
 #include <core/graphics/Direct3D11/BackBufferTexture.h>
@@ -31,7 +31,7 @@
 #include <core/graphics/Direct3D11/ShadowMap.h>
 #include <core/graphics/Direct3D11/DynamicSlotConstantBuffer.h>
 
-#include <core/graphics/Msdf/MsdfTextRenderer.h>
+#include <core/graphics/Direct3D11/MsdfTextRenderer.h>
 
 #include <common/string.h>
 
@@ -702,6 +702,11 @@ bool GraphicsManager::save_glyph_atlas( const wchar_t* file_name ) const
 	}
 
 	return core::graphics::direct_3d_11::save_texture_2d_to_png( direct_3d_->getDevice(), direct_3d_->getImmediateContext(), msdf_text_renderer_->get_atlas()->get_texture(), file_name );
+}
+
+core::graphics::TextRenderer* GraphicsManager::get_text_renderer() const
+{
+	return msdf_text_renderer_.get();
 }
 
 void GraphicsManager::flush_text() const

@@ -1,6 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="core\graphics\Direct3D11\MsdfTextRenderer.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\GlyphAtlas.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\OculusRift.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
     <ClCompile Include="core\AsyncLoader.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -335,9 +344,6 @@
     <ClCompile Include="core\ui\Widget.cpp">
       <Filter>core\ui</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\OculusRift.cpp">
-      <Filter>core\graphics</Filter>
-    </ClCompile>
     <ClCompile Include="core\ecs\Entity.cpp">
       <Filter>core\ecs</Filter>
     </ClCompile>
@@ -429,20 +435,32 @@
     <ClCompile Include="blue_sky\ecs\system\BalloonSystem.cpp">
       <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Msdf\GlyphAtlas.cpp">
-      <Filter>core\graphics\Msdf</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Msdf\GlyphCache.cpp">
       <Filter>core\graphics\Msdf</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Msdf\MsdfFont.cpp">
       <Filter>core\graphics\Msdf</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Msdf\MsdfTextRenderer.cpp">
-      <Filter>core\graphics\Msdf</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\graphics\Msdf\GlyphAtlasStorage.h">
+      <Filter>core\graphics\Msdf</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\MsdfTextRenderer.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\GlyphAtlas.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\OculusRift.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\DynamicPointList.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\TextRenderer.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
     <ClInclude Include="core\AsyncLoader.h">
       <Filter>core</Filter>
     </ClInclude>
@@ -1151,16 +1169,10 @@
     <ClInclude Include="core\TimeManager.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\Msdf\GlyphAtlas.h">
-      <Filter>core\graphics\Msdf</Filter>
-    </ClInclude>
     <ClInclude Include="core\graphics\Msdf\GlyphCache.h">
       <Filter>core\graphics\Msdf</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Msdf\MsdfFont.h">
-      <Filter>core\graphics\Msdf</Filter>
-    </ClInclude>
-    <ClInclude Include="core\graphics\Msdf\MsdfTextRenderer.h">
       <Filter>core\graphics\Msdf</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\TextStyle.h">

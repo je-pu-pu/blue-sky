@@ -19,9 +19,10 @@
  */
 #pragma once
 
-#include "MsdfFont.h"
-#include "GlyphCache.h"
-#include "GlyphAtlas.h"
+#include <core/graphics/TextRenderer.h>
+#include <core/graphics/Msdf/MsdfFont.h>
+#include <core/graphics/Msdf/GlyphCache.h>
+#include <core/graphics/Direct3D11/GlyphAtlas.h>
 #include <core/DirectX.h>
 #include <core/graphics/TextStyle.h>
 #include <d3d11.h>
@@ -45,7 +46,7 @@ namespace core::graphics {
  * フォント読み込み、グリフキャッシュ、アトラス管理、バッチ描画を統括する。
  * draw_text() → flush() のパターンで使用する。
  */
-class MsdfTextRenderer {
+class MsdfTextRenderer : public TextRenderer {
 public:
 	/**
 	 * @brief テキスト描画用の頂点データ
@@ -148,7 +149,7 @@ public:
 	~MsdfTextRenderer();
 
 	/** @brief フォント読み込みとシェーダーの準備が完了しているか */
-	bool is_ready() const { return font_ && font_->is_loaded() && effect_technique_; }
+	bool is_ready() const override { return font_ && font_->is_loaded() && effect_technique_; }
 
 	/// 文字のアトラス（開発用 : 中身を PNG に保存して調べる）
 	const GlyphAtlas* get_atlas() const { return atlas_.get(); }
@@ -164,10 +165,10 @@ public:
 	 * @param text 描画するテキスト（null 終端）
 	 * @param style テキストスタイル（フォントサイズ、色、アウトライン等）
 	 */
-	void draw_text( float x, float y, const wchar_t* text, const TextStyle& style );
+	void draw_text( float x, float y, const wchar_t* text, const TextStyle& style ) override;
 
 	/** @brief テキストを描画キューに追加する（UTF-8 版、内部で wchar_t に変換） */
-	void draw_text( float x, float y, const char* text, const TextStyle& style );
+	void draw_text( float x, float y, const char* text, const TextStyle& style ) override;
 
 	/**
 	 * @brief テキストの描画幅を計算する（改行前の最初の行のみ）
@@ -176,10 +177,10 @@ public:
 	 * @param font_size フォントサイズ（ピクセル）
 	 * @return テキスト幅（ピクセル）
 	 */
-	float measure_text_width( const wchar_t* text, float font_size );
+	float measure_text_width( const wchar_t* text, float font_size ) override;
 
 	/** @brief テキストの描画幅を計算する（UTF-8 版） */
-	float measure_text_width( const char* text, float font_size );
+	float measure_text_width( const char* text, float font_size ) override;
 
 	/**
 	 * @brief テキストの描画高さを計算する（改行を含む全行）
@@ -188,10 +189,10 @@ public:
 	 * @param font_size フォントサイズ（ピクセル）
 	 * @return テキスト高さ（ピクセル）= lineHeight * 行数
 	 */
-	float measure_text_height( const wchar_t* text, float font_size );
+	float measure_text_height( const wchar_t* text, float font_size ) override;
 
 	/** @brief テキストの描画高さを計算する（UTF-8 版） */
-	float measure_text_height( const char* text, float font_size );
+	float measure_text_height( const char* text, float font_size ) override;
 
 	/**
 	 * @brief 蓄積した全クワッドを一括描画する
@@ -202,7 +203,7 @@ public:
 	 * @note pass->apply() の後にアトラステクスチャをバインドすること。
 	 *       apply() がシェーダーリソースのステートをリセットするため。
 	 */
-	void flush();
+	void flush() override;
 
 	/** @brief フォントを再読み込みする（グリフキャッシュはクリアされる） */
 	void reload_font( const char* font_path );

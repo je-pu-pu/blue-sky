@@ -44,7 +44,7 @@ public:
 		Color color;
 	};
 
-	using DynamicPointList = DynamicPointList< Vertex >;
+	using DynamicPointList = core::graphics::DynamicPointList< Vertex >;
 
 	using SkyBox = graphics::SkyBox;
 

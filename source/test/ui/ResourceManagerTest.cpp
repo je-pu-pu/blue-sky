@@ -17,7 +17,7 @@ struct Counted
 
 } // namespace
 
-TEST( ResourceManagerTest, 同じ名前で登録し直すと古いものを解放しハンドルは無効になる )
+TEST( ResourceManagerTest, 同じ名前で登録し直すと名前は新しいものを指し古いものは使い続けられる )
 {
 	Counted::alive = 0;
 	core::ResourceManager< Counted > m;
@@ -26,13 +26,13 @@ TEST( ResourceManagerTest, 同じ名前で登録し直すと古いものを解�
 	const auto ha = m.handle_of( a );
 	EXPECT_EQ( a, m.resolve( ha ) );
 
-	m.create_named( "a", 2 );		// 差し替え
+	m.create_named( "a", 2 );		// 差し替え（シーンごとにシェーダーを作り直すのと同じ）
 
-	EXPECT_EQ( 1, Counted::alive );					// 古いものは解放された（以前は残り続けた）
-	EXPECT_EQ( nullptr, m.resolve( ha ) );			// 古いハンドルは無効
+	EXPECT_EQ( 2, Counted::alive );					// 古いものは生ポインタで使われ得るので解放しない
+	EXPECT_EQ( 1, a->value );
+	EXPECT_EQ( a, m.resolve( ha ) );				// 古いハンドルも有効なまま
 	EXPECT_EQ( 2, m.get( "a" )->value );
 	EXPECT_EQ( 2, m.resolve( m.get_handle( "a" ) )->value );
-	EXPECT_EQ( 1u, m.get_resource_list().size() );
 }
 
 TEST( ResourceManagerTest, 別の名前でも指されているリソースは名前を消しても解放しない )

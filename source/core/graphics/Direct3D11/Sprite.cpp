@@ -62,17 +62,21 @@ void Sprite::create_index_buffer()
 	DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, & data, & index_buffer_ ) );
 }
 
-void Sprite::begin()
+void Sprite::bind_input_assembler()
 {
 	UINT stride = sizeof( Vertex );
-    UINT offset = 0;
+	UINT offset = 0;
 
 	direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, 1, & vertex_buffer_, & stride, & offset );
 	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_, IndexBufferFormat, 0 );
 	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
 
 	direct_3d_->set_input_layout( input_layout_ );
+}
 
+void Sprite::begin()
+{
+	bind_input_assembler();
 	set_transform( Matrix::identity() );
 }
 
@@ -147,6 +151,10 @@ void Sprite::draw_quad( const Rect& dst, const UVRect& uv, const Color& color, c
 	}
 
 	direct_3d_->getImmediateContext()->Unmap( vertex_buffer_, 0 );
+
+	// 入力アセンブラは描画ごとに結び直す（begin と end の間に文字などを描くと、別の頂点バッファに替わっているため。
+	// 以前は begin でだけ結んでいて、間に文字を描くと後の Sprite が文字の頂点バッファで描かれ得た）
+	bind_input_assembler();
 
 	for ( const auto& pass : technique->get_pass_list() )
 	{

@@ -865,6 +865,13 @@ void Screen::render( Renderer& renderer )
 
 	const UIContext ctx = make_context();
 
+	// 積んだ描画は、関数を抜けるときに必ず描く（途中の return でも）
+	struct FlushOnExit
+	{
+		Renderer& r;
+		~FlushOnExit() { r.flush(); }
+	} flush_on_exit { renderer };
+
 	for ( const auto& layer : layers_ )
 	{
 		if ( layer.dim )

@@ -43,6 +43,16 @@ public:
 private:
 	GraphicsManager* gm_;
 
+	/// 今まとめて描いている種類（同じ種類が続く間は準備と後始末を省く。順番は呼ばれたとおり）
+	enum class BatchMode { NONE, SPRITE, TEXT };
+	BatchMode mode_ = BatchMode::NONE;
+
+	/// Sprite を描く前に呼ぶ（文字を積んでいれば先に描く）
+	void begin_sprite_mode();
+
+	/// 文字を描く前に呼ぶ（Sprite を描いていれば後始末する）
+	void begin_text_mode();
+
 	/// 画像名 → テクスチャ（読み込みに失敗した画像は nullptr を覚えておく）。テクスチャ自体は GraphicsManager が持つ
 	mutable std::unordered_map< string_t, const core::graphics::Texture* > images_;
 
@@ -74,6 +84,8 @@ public:
 	void fill_screen( const Color& color ) override;
 
 	float_t get_pixel_scale() const override;
+
+	void flush() override;
 	Rect snap_to_pixels( const Rect& rect ) const override;
 
 	/// 画像名の正規化（\ → /、先頭の ./ を取る）。同じ画像を別名で二重に読まないように

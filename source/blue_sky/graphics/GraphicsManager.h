@@ -284,6 +284,12 @@ public:
 	virtual void draw_text( float_t left, float_t top, float_t right, float_t bottom, const char_t* text, const core::graphics::TextStyle& style ) const = 0;
 	virtual void draw_text( float_t left, float_t top, float_t right, float_t bottom, const wchar_t* text, const core::graphics::TextStyle& style ) const = 0;
 
+	/// 文字を積むだけで、まだ描かない（flush_text で描く）。続けて描く文字列を 1 回の描画にまとめる
+	virtual void queue_text( float_t left, float_t top, float_t right, float_t bottom, const char_t* text, const core::graphics::TextStyle& style ) const = 0;
+
+	/// 積んだ文字を描く
+	virtual void flush_text() const = 0;
+
 	/// 画面中央にテキストを描画する（ローディング表示等）
 	virtual void draw_text_at_center( const char_t*, const Color& ) const = 0;
 

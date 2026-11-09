@@ -592,6 +592,33 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
 	msdf_text_renderer_->flush();
 }
 
+void GraphicsManager::queue_text( float_t left, float_t top, float_t right, float_t bottom, const char_t* text, const core::graphics::TextStyle& style ) const
+{
+	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
+	{
+		return;
+	}
+
+	core::graphics::TextStyle resolved = style;
+	if ( resolved.font_size == 0.f )
+	{
+		resolved.font_size = default_font_size_;
+	}
+
+	const float_t text_w = msdf_text_renderer_->measure_text_width( text, resolved.font_size );
+	const float_t text_h = msdf_text_renderer_->measure_text_height( text, resolved.font_size );
+
+	msdf_text_renderer_->draw_text( align_x( left, right, text_w, resolved.h_align ), align_y( top, bottom, text_h, resolved.v_align ), text, resolved );
+}
+
+void GraphicsManager::flush_text() const
+{
+	if ( msdf_text_renderer_ )
+	{
+		msdf_text_renderer_->flush();
+	}
+}
+
 void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float_t bottom, const wchar_t* text, const core::graphics::TextStyle& style ) const
 {
 	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )

@@ -63,7 +63,53 @@ void Renderer::draw_text( const Rect& rect, const char_t* text, const core::grap
 	scaled.outline_width *= s;
 	scaled.font_size = ( style.font_size > 0.f ? style.font_size : gm_->get_default_font_size() ) * s;
 
-	gm_->draw_text( p.x, p.y, p.right(), p.bottom(), text, scaled );
+	begin_text_mode();
+	gm_->queue_text( p.x, p.y, p.right(), p.bottom(), text, scaled );
+}
+
+void Renderer::begin_sprite_mode()
+{
+	if ( mode_ == BatchMode::SPRITE )
+	{
+		return;
+	}
+
+	if ( mode_ == BatchMode::TEXT )
+	{
+		gm_->flush_text();		// 先に積んだ文字を描く（後から描く Sprite が上に重なるように）
+	}
+
+	gm_->get_sprite()->begin();
+	mode_ = BatchMode::SPRITE;
+}
+
+void Renderer::begin_text_mode()
+{
+	if ( mode_ == BatchMode::TEXT )
+	{
+		return;
+	}
+
+	if ( mode_ == BatchMode::SPRITE )
+	{
+		gm_->get_sprite()->end();
+	}
+
+	mode_ = BatchMode::TEXT;
+}
+
+void Renderer::flush()
+{
+	if ( mode_ == BatchMode::SPRITE )
+	{
+		gm_->get_sprite()->end();
+	}
+	else if ( mode_ == BatchMode::TEXT )
+	{
+		gm_->flush_text();
+	}
+
+	mode_ = BatchMode::NONE;
 }
 
 win::Rect Renderer::to_pixel_rect( const Rect& r ) const
@@ -112,20 +158,14 @@ void Renderer::draw_rect( const Rect& rect, const Color& color )
 		return;
 	}
 
-	auto* sprite = gm_->get_sprite();
-
-	sprite->begin();
-	sprite->draw_color( px, color );
-	sprite->end();
+	begin_sprite_mode();
+	gm_->get_sprite()->draw_color( px, color );
 }
 
 void Renderer::fill_screen( const Color& color )
 {
-	auto* sprite = gm_->get_sprite();
-
-	sprite->begin();
-	sprite->draw_color( win::Rect( 0, 0, gm_->get_screen_width(), gm_->get_screen_height() ), color );
-	sprite->end();
+	begin_sprite_mode();
+	gm_->get_sprite()->draw_color( win::Rect( 0, 0, gm_->get_screen_width(), gm_->get_screen_height() ), color );
 }
 
 const core::graphics::Texture* Renderer::find_image( const string_t& image ) const
@@ -213,11 +253,8 @@ void Renderer::draw_image( const Rect& rect, const string_t& image, const Rect& 
 	uv.u1 = source.right() / tw;
 	uv.v1 = source.bottom() / th;
 
-	auto* sprite = gm_->get_sprite();
-
-	sprite->begin();
-	sprite->draw_uv( px, texture, uv, tint, core::graphics::Sprite::AlphaMode::PREMULTIPLIED );
-	sprite->end();
+	begin_sprite_mode();
+	gm_->get_sprite()->draw_uv( px, texture, uv, tint, core::graphics::Sprite::AlphaMode::PREMULTIPLIED );
 }
 
 float_t Renderer::measure_text_width( const char_t* text, float_t font_size ) const

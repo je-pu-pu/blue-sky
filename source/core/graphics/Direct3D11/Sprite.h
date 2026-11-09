@@ -78,6 +78,12 @@ public:
 	/// 立体視のずらし（文字の描画と共有するため Direct3D11 に持たせる）
 	void set_ortho_offset( float_t ortho_offset ) override;
 
+private:
+	/// 頂点バッファ・インデックスバッファ・トポロジー・入力レイアウトを結ぶ
+	void bind_input_assembler();
+
+public:
+
 	void begin() override;
 	void draw_color( const Rect& dr, const Color& c ) override;
 	void end() override;

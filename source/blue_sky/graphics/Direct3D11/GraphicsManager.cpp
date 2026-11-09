@@ -671,6 +671,16 @@ void GraphicsManager::start_texture_load_async( const string_t& file_path, std::
 		} );
 }
 
+float_t GraphicsManager::get_render_target_width() const
+{
+	return direct_3d_->get_2d_space().width;
+}
+
+float_t GraphicsManager::get_render_target_height() const
+{
+	return direct_3d_->get_2d_space().height;
+}
+
 void GraphicsManager::dispatch_async_loads()
 {
 	if ( async_loader_ )

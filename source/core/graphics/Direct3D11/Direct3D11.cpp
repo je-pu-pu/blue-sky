@@ -591,6 +591,21 @@ void Direct3D11::set_default_viewport()
 	immediate_context_->RSSetViewports( 1, & viewport_ );
 }
 
+Pixel2DSpace Direct3D11::get_2d_space() const
+{
+	// 今の描画先の大きさ（ビューポート）。VR の目ごとの描画などで、画面と違う大きさの描画先に描くときに合わせる
+	UINT count = 1;
+	D3D11_VIEWPORT viewport = { };
+	immediate_context_->RSGetViewports( & count, & viewport );
+
+	if ( count >= 1 && viewport.Width > 0.f && viewport.Height > 0.f )
+	{
+		return Pixel2DSpace{ viewport.Width, viewport.Height, offset_2d_x_ };
+	}
+
+	return Pixel2DSpace{ static_cast< float_t >( get_width() ), static_cast< float_t >( get_height() ), offset_2d_x_ };
+}
+
 bool Direct3D11::save_back_buffer_to_png( const wchar_t* file_name )
 {
 	ID3D11Texture2D* back_buffer = nullptr;

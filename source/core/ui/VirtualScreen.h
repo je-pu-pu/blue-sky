@@ -38,4 +38,29 @@ inline VirtualScreen compute_virtual_screen( float_t physical_width, float_t phy
 	return VirtualScreen{ physical_width / scale, physical_height / scale, scale };
 }
 
+/// 描画先への写し方（仮想座標 x → 描画先のピクセル x * scale + offset_x）
+struct TargetMapping
+{
+	float_t scale = 1.f;
+	float_t offset_x = 0.f;
+	float_t offset_y = 0.f;
+};
+
+/**
+ * 仮想画面を、大きさの違う描画先（VR の目ごとのバッファなど）に等方スケールで収める（中央寄せ）
+ *
+ * 配置（update）は画面の仮想画面のまま行い、描画のときだけ描画先に合わせる（設計上の問題 B16）。
+ * 描画先が画面と同じ大きさなら、scale は仮想画面の scale と同じで、ずれは 0。
+ */
+inline TargetMapping fit_virtual_to_target( const VirtualScreen& v, float_t target_width, float_t target_height )
+{
+	if ( v.width <= 0.f || v.height <= 0.f || target_width <= 0.f || target_height <= 0.f )
+	{
+		return TargetMapping{ v.scale, 0.f, 0.f };
+	}
+
+	const float_t s = std::min( target_width / v.width, target_height / v.height );
+	return TargetMapping{ s, ( target_width - v.width * s ) * 0.5f, ( target_height - v.height * s ) * 0.5f };
+}
+
 } // namespace core::ui

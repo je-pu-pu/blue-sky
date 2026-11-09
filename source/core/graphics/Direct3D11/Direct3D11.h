@@ -123,13 +123,10 @@ public:
 	 * 2D 描画（Sprite・文字）の座標系
 	 *
 	 * Sprite と文字の描画は必ずここから座標系を得る（以前はそれぞれが同じ変換を書いていた）。
-	 * 大きさは今はスワップチェーンの大きさ。UI の配置もスワップチェーンの大きさを使っているため、
-	 * 描画先（ビューポート）の大きさに変えるときは UI の配置と一緒に変える（設計上の問題 B13・B16）。
+	 * 大きさは今の描画先（ビューポート）の大きさ（VR の目ごとのバッファなどにも正しく描ける。設計上の問題 B16）。
+	 * ビューポートが設定されていなければスワップチェーンの大きさ。
 	 */
-	Pixel2DSpace get_2d_space() const
-	{
-		return Pixel2DSpace{ static_cast< float_t >( get_width() ), static_cast< float_t >( get_height() ), offset_2d_x_ };
-	}
+	Pixel2DSpace get_2d_space() const;
 
 	/// 2D 描画の立体視のずらし（正射影の後の座標で）
 	void set_2d_offset_x( float_t x ) { offset_2d_x_ = x; }

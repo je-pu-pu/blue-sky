@@ -33,10 +33,25 @@ float_t Renderer::get_scale() const
 	return get_virtual_screen().scale;
 }
 
+core::ui::TargetMapping Renderer::get_draw_mapping() const
+{
+	const core::ui::VirtualScreen v = get_virtual_screen();
+	const float_t tw = gm_->get_render_target_width();
+	const float_t th = gm_->get_render_target_height();
+
+	// 描画先が画面そのもの（普段）なら、配置と同じ倍率をそのまま使う（計算の誤差で 1 画素ずれないように）
+	if ( tw == static_cast< float_t >( gm_->get_screen_width() ) && th == static_cast< float_t >( gm_->get_screen_height() ) )
+	{
+		return core::ui::TargetMapping{ v.scale, 0.f, 0.f };
+	}
+
+	return core::ui::fit_virtual_to_target( v, tw, th );
+}
+
 Renderer::Rect Renderer::to_physical( const Rect& r ) const
 {
-	const float_t s = get_scale();
-	return Rect( r.x * s, r.y * s, r.w * s, r.h * s );
+	const core::ui::TargetMapping m = get_draw_mapping();
+	return Rect( m.offset_x + r.x * m.scale, m.offset_y + r.y * m.scale, r.w * m.scale, r.h * m.scale );
 }
 
 float_t Renderer::physical_to_virtual_x( float_t px ) const
@@ -56,7 +71,7 @@ void Renderer::draw_text( const Rect& rect, const char_t* text, const core::grap
 		return;
 	}
 
-	const float_t s = get_scale();
+	const float_t s = get_draw_mapping().scale;
 	const Rect p = to_physical( rect );
 
 	core::graphics::TextStyle scaled = style;
@@ -115,18 +130,20 @@ void Renderer::flush()
 win::Rect Renderer::to_pixel_rect( const Rect& r ) const
 {
 	// 丸めの規則は core::ui::to_pixel_rect（テスト用の Mock と共有）
-	const core::ui::PixelRect p = core::ui::to_pixel_rect( r, get_scale(), 0.f, 0.f );
+	const core::ui::TargetMapping m = get_draw_mapping();
+	const core::ui::PixelRect p = core::ui::to_pixel_rect( r, m.scale, m.offset_x, m.offset_y );
 	return win::Rect( static_cast< LONG >( p.left ), static_cast< LONG >( p.top ), static_cast< LONG >( p.right ), static_cast< LONG >( p.bottom ) );
 }
 
 float_t Renderer::get_pixel_scale() const
 {
-	return get_scale();
+	return get_draw_mapping().scale;
 }
 
 Renderer::Rect Renderer::snap_to_pixels( const Rect& r ) const
 {
-	return core::ui::snap_rect_to_pixels( r, get_scale(), 0.f, 0.f );
+	const core::ui::TargetMapping m = get_draw_mapping();
+	return core::ui::snap_rect_to_pixels( r, m.scale, m.offset_x, m.offset_y );
 }
 
 string_t Renderer::normalize_image_name( const string_t& image )
@@ -165,7 +182,7 @@ void Renderer::draw_rect( const Rect& rect, const Color& color )
 void Renderer::fill_screen( const Color& color )
 {
 	begin_sprite_mode();
-	gm_->get_sprite()->draw_color( win::Rect( 0, 0, gm_->get_screen_width(), gm_->get_screen_height() ), color );
+	gm_->get_sprite()->draw_color( win::Rect( 0, 0, static_cast< LONG >( gm_->get_render_target_width() ), static_cast< LONG >( gm_->get_render_target_height() ) ), color );
 }
 
 const core::graphics::Texture* Renderer::find_image( const string_t& image ) const

@@ -156,6 +156,8 @@ public:
 
 	void start_texture_load_async( const string_t& file_path, std::function< void( Texture* ) > on_created ) override;
 	void dispatch_async_loads() override;
+	float_t get_render_target_width() const override;
+	float_t get_render_target_height() const override;
 	size_t get_async_load_count() const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;
 

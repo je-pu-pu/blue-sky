@@ -61,6 +61,9 @@ private:
 
 	float_t get_scale() const;
 
+	/// 描画のときの写し方（仮想座標 → 今の描画先のピクセル）。描画先が画面なら get_scale と同じでずれは 0
+	core::ui::TargetMapping get_draw_mapping() const;
+
 	Rect to_physical( const Rect& ) const;
 
 	/// 仮想座標の矩形 → 物理ピクセルの矩形（各辺を四捨五入）

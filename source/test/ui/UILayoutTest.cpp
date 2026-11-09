@@ -198,6 +198,23 @@ TEST( VirtualScreenTest, 横長の画面では高さを合わせて幅を伸ば�
 	EXPECT_FLOAT_EQ( 1.f, zero.scale );
 }
 
+TEST( VirtualScreenTest, 大きさの違う描画先には仮想画面を等方スケールで中央に収める )
+{
+	const VirtualScreen v = compute_virtual_screen( 1920.f, 1080.f, 1920.f, 1080.f );
+
+	// 画面と同じ大きさ : 倍率 1・ずれなし
+	const TargetMapping same = fit_virtual_to_target( v, 1920.f, 1080.f );
+	EXPECT_FLOAT_EQ( 1.f, same.scale );
+	EXPECT_FLOAT_EQ( 0.f, same.offset_x );
+	EXPECT_FLOAT_EQ( 0.f, same.offset_y );
+
+	// VR の目ごとのバッファ（正方形 1200x1200）: 幅に合わせて縮め、上下を中央に寄せる
+	const TargetMapping eye = fit_virtual_to_target( v, 1200.f, 1200.f );
+	EXPECT_FLOAT_EQ( 1200.f / 1920.f, eye.scale );
+	EXPECT_FLOAT_EQ( 0.f, eye.offset_x );
+	EXPECT_FLOAT_EQ( ( 1200.f - 1080.f * eye.scale ) * 0.5f, eye.offset_y );
+}
+
 // ---- 位置の基準（アンカー） ----
 
 TEST( AnchorBoxTest, 九つの基準で端や角から間隔を空けて置く )

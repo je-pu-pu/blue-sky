@@ -199,6 +199,10 @@ public:
 	 */
 	void load_named_texture_premultiplied_async( const char_t* name, const char_t* file_name, std::function< void( Texture* ) > on_loaded );
 
+	/// 今の描画先の大きさ（ビューポート。UI を描くときに、描画先に合わせて写すのに使う）
+	virtual float_t get_render_target_width() const = 0;
+	virtual float_t get_render_target_height() const = 0;
+
 	/// 別スレッドの読み込みが終わったものを処理する（GameMain が毎フレーム呼ぶ）
 	virtual void dispatch_async_loads() = 0;
 

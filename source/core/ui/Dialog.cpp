@@ -132,7 +132,7 @@ void Dialog::update( float_t dt, UIContext& ctx )
 void Dialog::render( Renderer& renderer, const UIContext& ctx ) const
 {
 	draw_brush( renderer, rect_, ctx.theme.panel );
-	draw_brush( renderer, Rect( rect_.x, rect_.y, rect_.w, 6.f ), pick_brush( renderer, ctx.theme.dialog_header, ctx.theme.accent ) );
+	draw_brush( renderer, Rect( rect_.x, rect_.y, rect_.w, ctx.theme.accent_bar_thickness ), pick_brush( renderer, ctx.theme.dialog_header, ctx.theme.accent ) );
 	render_children( renderer, ctx );
 }
 

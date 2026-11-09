@@ -192,6 +192,13 @@ void register_all( SettingStore& store, GameMain& game_main )
 	} );
 	store.set_info( DISPLAY_FPS, "options.display_fps", "options.display_fps.description" );
 
+	// 文字の大きさ（アクセシビリティ）。行の高さは部品が文字に合わせて広げる
+	store.add_float( UI_TEXT_SCALE, 1.f, 0.8f, 1.6f, 0.1f, ApplyMode::IMMEDIATE, [gm] ( const SettingStore::Value& v )
+	{
+		gm->set_ui_text_scale( std::get< float_t >( v ) );
+	} );
+	store.set_info( UI_TEXT_SCALE, "options.text_scale", "options.text_scale.description" );
+
 	register_display( store );
 
 	// 表示系はまとめて 1 回、フレームの最後に反映する

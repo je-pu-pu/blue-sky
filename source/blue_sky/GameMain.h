@@ -161,7 +161,9 @@ private:
 
 	std::unique_ptr< core::setting::SettingStore >	settings_;		///< ゲーム設定（オプション画面が編集する）
 	std::unique_ptr< core::ui::StringTable >		ui_strings_;	///< UI の表示文字列
-	std::unique_ptr< core::ui::Theme >				ui_theme_;		///< UI の見た目
+	std::unique_ptr< core::ui::Theme >				ui_theme_;		///< UI の見た目（文字の大きさの倍率を掛けたもの）
+	std::unique_ptr< core::ui::Theme >				ui_theme_base_;	///< 倍率を掛ける前の見た目（既定 ＋ テーマファイル）
+	float_t											ui_text_scale_ = 1.f;	///< 文字の大きさの倍率（設定 ui.text_scale）
 	bool											is_display_change_requested_ = false;	///< 解像度・フルスクリーンの変更をフレーム末に行う
 	bool											is_full_screen_toggle_requested_ = false;	///< ユーザーによるフルスクリーンの切り替え（Alt+Enter / F5）をフレーム末に行う
 	bool											is_display_restore_requested_ = false;	///< 再びアクティブになったとき、表示を設定に合わせ直す
@@ -255,6 +257,9 @@ public:
 
 	/// 解像度・フルスクリーンの変更を予約する（UI のコールバック中にウィンドウを変えないよう、update の最後に行う）
 	void request_display_change() { is_display_change_requested_ = true; }
+
+	/// 文字の大きさの倍率を UI のテーマに反映する（テーマファイルで決めた大きさに掛ける）
+	void set_ui_text_scale( float_t scale );
 
 	inline static GameMain* get_instance() { static GameMain game_main; return & game_main; }
 	const Scene* get_current_scene() const { return scene_.get(); }

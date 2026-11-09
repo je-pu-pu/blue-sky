@@ -26,7 +26,8 @@ namespace core::ui
 		Screen& screen;
 
 		/// 文字列キーを表示文字列にする（未登録ならキーそのもの）
-		const string_t& tr( const string_t& key ) const;
+		/// 文字列キーを表示文字列にする（値で返す）
+		string_t tr( const string_t& key ) const;
 	};
 
 	/// フォーカスが移った理由
@@ -97,7 +98,7 @@ namespace core::ui
 		string_t description_key_;
 
 		/// UIContext 経由で文字列を引くための補助
-		static const string_t& tr( const UIContext& ctx, const string_t& key ) { return ctx.tr( key ); }
+		static string_t tr( const UIContext& ctx, const string_t& key ) { return ctx.tr( key ); }
 
 	public:
 		virtual ~Widget();

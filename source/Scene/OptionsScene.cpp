@@ -16,6 +16,7 @@
 #include <core/ui/ScrollView.h>
 #include <core/ui/Slider.h>
 #include <core/ui/Stack.h>
+#include <core/ui/Theme.h>
 #include <core/ui/StringTable.h>
 #include <core/ui/TabView.h>
 #include <core/ui/Toggle.h>
@@ -119,7 +120,7 @@ OptionsScene::OptionsScene()
 
 	auto panel = std::make_unique< Panel >( "options.title" );
 	auto* body = panel->add< Stack >( Axis::VERTICAL );
-	body->set_spacing( 24.f );
+	body->set_spacing( GameMain::get_instance()->get_ui_theme().section_spacing );
 
 	auto* tabs = body->add< TabView >();
 	build_graphics_page( add_scroll_page( tabs, "options.tab.graphics" ) );
@@ -181,11 +182,13 @@ void OptionsScene::build_graphics_page( Stack* page )
 		const auto& strings = GameMain::get_instance()->get_ui_strings();
 		return strings.format( "options.resolution.custom", { std::to_string( store->get( gs::SCREEN_WIDTH ) ) + " x " + std::to_string( store->get( gs::SCREEN_HEIGHT ) ) } );
 	} );
+	resolution->set_options_literal( true );		// "1920 x 1080" はキーではない
 	resolution->set_description_key( "options.resolution.description" );
 
 	add_setting_toggle( page, store, gs::FULL_SCREEN );
 	add_setting_slider( page, store, gs::CAMERA_FOV, & format_int );
 	add_setting_toggle( page, store, gs::DISPLAY_FPS );
+	add_setting_slider( page, store, gs::UI_TEXT_SCALE, & format_percent );
 }
 
 void OptionsScene::build_audio_page( Stack* page )

@@ -190,6 +190,17 @@ const FloatField FLOAT_FIELDS[] =
 	{ "tab_height", & Theme::tab_height, 0.f, INF, true },
 	{ "dialog_width", & Theme::dialog_width, 0.f, INF, true },
 	{ "slider_knob_width", & Theme::slider_knob_width, 0.f, INF, false },
+	{ "value_box_inset", & Theme::value_box_inset, 0.f, 0.45f, false },
+	{ "slider_track_width", & Theme::slider_track_width, 0.f, 1.f, true },
+	{ "slider_track_height", & Theme::slider_track_height, 0.f, 1.f, true },
+	{ "choice_arrow_width", & Theme::choice_arrow_width, 0.f, 0.5f, false },
+	{ "accent_bar_thickness", & Theme::accent_bar_thickness, 0.f, INF, false },
+	{ "toggle_mark_width", & Theme::toggle_mark_width, 0.f, INF, false },
+	{ "scrollbar_width", & Theme::scrollbar_width, 0.f, INF, false },
+	{ "scrollbar_min_thumb", & Theme::scrollbar_min_thumb, 0.f, INF, false },
+	{ "menu_width", & Theme::menu_width, 0.f, INF, true },
+	{ "section_spacing", & Theme::section_spacing, 0.f, INF, false },
+	{ "row_text_padding", & Theme::row_text_padding, 0.f, INF, false },
 };
 
 Brush* find_brush( Theme& theme, const string_t& name )

@@ -1,4 +1,5 @@
 #include "Slider.h"
+#include "TextFit.h"
 #include "Renderer.h"
 #include "Screen.h"
 #include "Theme.h"
@@ -16,8 +17,9 @@ void Slider::arrange( const Rect& rect, const UIContext& ctx )
 	LabeledRow::arrange( rect, ctx );
 
 	// 値エリアの左 75% が溝、右 25% が数値
-	const float_t track_w = value_rect_.w * 0.75f;
-	track_rect_ = Rect( value_rect_.x, value_rect_.y + value_rect_.h * 0.3f, track_w, value_rect_.h * 0.4f );
+	const float_t track_w = value_rect_.w * ctx.theme.slider_track_width;
+	const float_t track_h = value_rect_.h * ctx.theme.slider_track_height;
+	track_rect_ = Rect( value_rect_.x, value_rect_.y + ( value_rect_.h - track_h ) * 0.5f, track_w, track_h );
 	text_rect_ = Rect( value_rect_.x + track_w, value_rect_.y, value_rect_.w - track_w, value_rect_.h );
 }
 
@@ -135,7 +137,7 @@ void Slider::render( Renderer& renderer, const UIContext& ctx ) const
 		const float_t knob_x = track_rect_.x + track_rect_.w * ratio - t.slider_knob_width * 0.5f;
 		draw_brush( renderer, Rect( knob_x, track_rect_.center_y() - knob_h * 0.5f, t.slider_knob_width, knob_h ), t.slider_knob );
 	}
-	renderer.draw_text( text_rect_, format_value( v ).c_str(), make_text_style( value_color( ctx ), t.font_size_normal, core::graphics::HAlign::CENTER ) );
+	draw_text_fit( renderer, text_rect_, format_value( v ), make_text_style( value_color( ctx ), t.font_size_normal, core::graphics::HAlign::CENTER ) );
 }
 
 void Slider::collect_hints( std::vector< Hint >& hints ) const

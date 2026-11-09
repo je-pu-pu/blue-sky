@@ -1,4 +1,5 @@
 #include "Toggle.h"
+#include "TextFit.h"
 #include "Renderer.h"
 #include "Screen.h"
 #include "Theme.h"
@@ -61,7 +62,7 @@ void Toggle::render( Renderer& renderer, const UIContext& ctx ) const
 	const bool on = get_value();
 
 	// 値エリア : 背景 + 「オン／オフ」
-	const Rect box = value_rect_.inset( 0.f, rect_.h * 0.15f );
+	const Rect box = value_rect_.inset( 0.f, rect_.h * t.value_box_inset );
 	draw_brush( renderer, box, t.track );
 
 	if ( on )
@@ -73,11 +74,11 @@ void Toggle::render( Renderer& renderer, const UIContext& ctx ) const
 		}
 		else
 		{
-			draw_brush( renderer, Rect( box.x, box.y, 8.f, box.h ), t.accent );
+			draw_brush( renderer, Rect( box.x, box.y, t.toggle_mark_width, box.h ), t.accent );
 		}
 	}
 
-	renderer.draw_text( box, ctx.tr( on ? "ui.on" : "ui.off" ).c_str(), make_text_style( value_color( ctx ), t.font_size_normal, core::graphics::HAlign::CENTER ) );
+	draw_text_fit( renderer, box, ctx.tr( on ? "ui.on" : "ui.off" ), make_text_style( value_color( ctx ), t.font_size_normal, core::graphics::HAlign::CENTER ) );
 }
 
 void Toggle::collect_hints( std::vector< Hint >& hints ) const

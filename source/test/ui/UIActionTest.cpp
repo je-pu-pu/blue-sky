@@ -2,9 +2,11 @@
 #include "UITestHelper.h"
 
 #include <core/ui/Button.h>
+#include <core/ui/Choice.h>
 #include <core/ui/Dialog.h>
 #include <core/ui/Stack.h>
 #include <core/ui/TextField.h>
+#include <core/ui/TextFit.h>
 
 #include <Scene/SceneRequest.h>
 
@@ -226,6 +228,88 @@ TEST( TextFieldTest, UTF8の文字数と末尾の1文字の削除 )
 	EXPECT_EQ( "", TextField::erase_last_codepoint( "" ) );
 	EXPECT_EQ( "𠮷", TextField::to_utf8( U'𠮷' ) );
 	EXPECT_EQ( "", TextField::to_utf8( 0xD800 ) );		// サロゲートは文字ではない
+}
+
+// ---- 文字列キーと寸法（設計上の問題 B4・B12） ----
+
+TEST( StringTableTest, 未登録のキーを記録し値で返す )
+{
+	StringTable strings;
+	strings.set( "ok", "OK" );
+
+	const auto& missing_value = strings.get( "no.such.key" );		// 値で返すので、受けた参照が壊れない
+	EXPECT_EQ( "no.such.key", missing_value );
+	EXPECT_EQ( "OK", strings.get( "ok" ) );
+
+	ASSERT_EQ( 1u, strings.get_missing_keys().size() );
+	EXPECT_EQ( "no.such.key", *strings.get_missing_keys().begin() );
+}
+
+TEST_F( ActionTest, そのまま表示する選択肢は翻訳しない )
+{
+	strings.set( "1920 x 1080", "翻訳されてしまった" );		// たまたま同じキーがあっても
+
+	int index = 0;
+	auto* choice = root->add< Choice >( "resolution", std::vector< string_t >{ "1920 x 1080" }, [&] { return index; }, [&] ( int i ) { index = i; } );
+	choice->set_options_literal( true );
+	ready();
+
+	render();
+	EXPECT_TRUE( renderer.has_text( "1920 x 1080" ) );
+	EXPECT_FALSE( renderer.has_text( "翻訳されてしまった" ) );
+}
+
+TEST_F( ActionTest, 文字を大きくすると行の高さも文字に合わせて広がる )
+{
+	auto* button = root->add< Button >( "ok", nullptr );
+	ready();
+	const float_t normal_height = button->rect().h;
+
+	// 文字を 2 倍に : 行の高さは「文字の行の高さ＋余白」より小さくならない
+	theme.font_size_normal *= 2.f;
+	screen.invalidate_layout();
+	step();
+
+	EXPECT_GT( button->rect().h, normal_height );
+	EXPECT_GE( button->rect().h, renderer.measure_line_height( theme.font_size_normal ) + theme.row_text_padding );
+}
+
+TEST( TextFitTest, 幅に収まらない文字は小さくしそれでも収まらなければ末尾を省略する )
+{
+	ui_test::MockRenderer r;		// 文字幅 = 文字数 × font_size × 0.5
+
+	// 収まる : そのまま
+	string_t text = "abcd";
+	core::graphics::TextStyle style;
+	style.font_size = 40.f;
+	fit_text_to_width( r, 100.f, text, style );
+	EXPECT_EQ( "abcd", text );
+	EXPECT_FLOAT_EQ( 40.f, style.font_size );
+
+	// 少しはみ出す（幅 100 に対して 120）: 小さくして収める
+	text = "abcdef";
+	style.font_size = 40.f;
+	fit_text_to_width( r, 100.f, text, style );
+	EXPECT_EQ( "abcdef", text );
+	EXPECT_LE( r.measure_text_width( text.c_str(), style.font_size ), 100.f + 1e-3f );
+
+	// 大きくはみ出す : 下限まで小さくして、末尾を省略する
+	text = "グラフィックスとオーディオの設定";
+	style.font_size = 40.f;
+	fit_text_to_width( r, 100.f, text, style );
+	EXPECT_FLOAT_EQ( 40.f * MIN_TEXT_FIT_SCALE, style.font_size );
+	EXPECT_LE( r.measure_text_width( text.c_str(), style.font_size ), 100.f + 1e-3f );
+	EXPECT_EQ( "…", text.substr( text.size() - string_t( "…" ).size() ) );
+}
+
+TEST( ThemeTest, 文字の大きさの倍率はフォントサイズだけに掛かる )
+{
+	Theme base;
+	const Theme scaled = scale_theme_text( base, 1.5f );
+
+	EXPECT_FLOAT_EQ( base.font_size_normal * 1.5f, scaled.font_size_normal );
+	EXPECT_FLOAT_EQ( base.font_size_title * 1.5f, scaled.font_size_title );
+	EXPECT_FLOAT_EQ( base.row_height, scaled.row_height );
 }
 
 // ---- シーン遷移の要求（設計上の問題 B22） ----

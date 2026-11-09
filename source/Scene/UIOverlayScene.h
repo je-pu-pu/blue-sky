@@ -30,6 +30,7 @@ protected:
 	ui::Renderer renderer_;
 	ui::UIInputBuilder input_builder_;
 	core::ui::Screen screen_;
+	uint_t theme_revision_ = 0;		///< 最後に配置したときのテーマの版（変わったら配置し直す）
 
 	core::setting::SettingStore& get_settings() const;
 

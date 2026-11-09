@@ -1,4 +1,5 @@
 #include "KeyBind.h"
+#include "TextFit.h"
 #include "Renderer.h"
 #include "Screen.h"
 #include "Theme.h"
@@ -80,12 +81,12 @@ void KeyBind::render( Renderer& renderer, const UIContext& ctx ) const
 	render_row( renderer, ctx );
 
 	const auto& t = ctx.theme;
-	const Rect box = value_rect_.inset( 0.f, rect_.h * 0.15f );
+	const Rect box = value_rect_.inset( 0.f, rect_.h * t.value_box_inset );
 
 	draw_brush( renderer, box, waiting_ ? t.row_pressed : t.track );
 
 	const string_t text = waiting_ ? ctx.tr( "ui.key_waiting" ) : ( name_of_ && getter_ ? name_of_( getter_() ) : string_t() );
-	renderer.draw_text( box, text.c_str(), make_text_style( value_color( ctx ), t.font_size_normal, core::graphics::HAlign::CENTER ) );
+	draw_text_fit( renderer, box, text, make_text_style( value_color( ctx ), t.font_size_normal, core::graphics::HAlign::CENTER ) );
 }
 
 void KeyBind::collect_hints( std::vector< Hint >& hints ) const

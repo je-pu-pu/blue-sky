@@ -798,6 +798,26 @@ void Screen::layout()
 	{
 		layer.root->arrange( screen_rect, ctx );
 	}
+
+	// 見た目が変わって配置し直したときは、フォーカス中の部品が見えるようにスクロールしてから、もう一度配置する
+	// （文字を大きくすると行が伸び、フォーカス中の行がスクロールの外に出ることがあるため）
+	if ( reveal_focus_on_layout_ )
+	{
+		reveal_focus_on_layout_ = false;
+
+		if ( Widget* f = get_focused() )
+		{
+			for ( Widget* p = f->parent_; p; p = p->parent_ )
+			{
+				p->ensure_visible( f->rect_ );
+			}
+
+			for ( auto& layer : layers_ )
+			{
+				layer.root->arrange( screen_rect, ctx );
+			}
+		}
+	}
 }
 
 void Screen::render( Renderer& renderer )

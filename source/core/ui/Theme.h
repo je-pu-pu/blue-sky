@@ -69,7 +69,39 @@ struct Theme
 	float_t dialog_width		= 1100.f;
 	float_t slider_knob_width	= 24.f;		///< スライダーのつまみの幅（高さは溝の高さの 2 倍）
 
+	// 部品の中の比率・寸法（以前は各部品のコードに直接書かれていて、テーマファイルで変えられなかった）
+	float_t value_box_inset			= 0.15f;	///< 値の欄の上下の余白（行の高さに対する比率。Toggle / Choice / KeyBind / TextField）
+	float_t slider_track_width		= 0.75f;	///< スライダーの溝の幅（値の欄に対する比率。残りは数値の表示）
+	float_t slider_track_height		= 0.4f;		///< スライダーの溝の高さ（値の欄に対する比率）
+	float_t choice_arrow_width		= 0.25f;	///< 選択肢の左右の矢印の幅（値の欄に対する比率の上限）
+	float_t accent_bar_thickness	= 6.f;		///< 選択中のタブの下線・ダイアログ上端の帯の太さ
+	float_t toggle_mark_width		= 8.f;		///< オンのトグルの左端の帯の幅（toggle_on が未指定のとき）
+	float_t scrollbar_width			= 10.f;		///< スクロールバーの幅
+	float_t scrollbar_min_thumb		= 24.f;		///< スクロールバーのつまみの最小の長さ
+	float_t menu_width				= 900.f;	///< 小さいメニュー（ポーズなど）のパネルの幅
+	float_t section_spacing			= 24.f;		///< パネルの中の大きな区切り（タブとボタン行の間など）
+
+	/// 行の高さを、文字の行の高さ（＋上下の余白）より小さくしない（文字を大きくしても行からはみ出さない）
+	float_t row_text_padding		= 16.f;
+
+	/// 内容が変わるたびに増える（開いている画面が配置し直すきっかけ。文字の大きさの変更など）
+	uint_t revision = 0;
+
 }; // struct Theme
+
+/**
+ * 文字の大きさの倍率を掛けたテーマを作る（アクセシビリティの「文字の大きさ」）
+ *
+ * フォントサイズだけを倍率で変える。行の高さは、部品が文字の行の高さに合わせて広げる。
+ */
+inline Theme scale_theme_text( const Theme& base, float_t text_scale )
+{
+	Theme t = base;
+	t.font_size_title = base.font_size_title * text_scale;
+	t.font_size_normal = base.font_size_normal * text_scale;
+	t.font_size_small = base.font_size_small * text_scale;
+	return t;
+}
 
 /**
  * テーマ定義（`キー = 値` の行）で Theme を上書きする

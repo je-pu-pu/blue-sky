@@ -5,6 +5,7 @@
 #include <core/ui/Button.h>
 #include <core/ui/Panel.h>
 #include <core/ui/Stack.h>
+#include <core/ui/Theme.h>
 
 namespace blue_sky
 {
@@ -14,7 +15,7 @@ PauseMenuScene::PauseMenuScene()
 	using namespace core::ui;
 
 	auto panel = std::make_unique< Panel >( "pause.title" );
-	panel->set_width( 900.f );
+	panel->set_width( GameMain::get_instance()->get_ui_theme().menu_width );
 	panel->set_fit_height( true );
 	panel->set_show_description( false );
 

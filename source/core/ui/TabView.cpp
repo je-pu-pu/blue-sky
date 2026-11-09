@@ -1,4 +1,5 @@
 #include "TabView.h"
+#include "TextFit.h"
 #include "Renderer.h"
 #include "Screen.h"
 #include "Theme.h"
@@ -28,7 +29,7 @@ void TabView::select( size_t index, UIContext& ctx )
 float_t TabView::measure_height( float_t width, const UIContext& ctx ) const
 {
 	const float_t page_h = children_.empty() ? 0.f : children_[ current_ ]->measure_height( width, ctx );
-	return ctx.theme.tab_height + ctx.theme.spacing * 2.f + page_h;
+	return text_row_height( ctx.renderer, ctx.theme.tab_height, ctx.theme.font_size_normal, ctx.theme.row_text_padding ) + ctx.theme.spacing * 2.f + page_h;
 }
 
 void TabView::arrange( const Rect& rect, const UIContext& ctx )
@@ -49,11 +50,11 @@ void TabView::arrange( const Rect& rect, const UIContext& ctx )
 
 	for ( size_t i = 0; i < n; i++ )
 	{
-		tab_rects_.emplace_back( rect.x + ( tab_w + t.spacing ) * static_cast< float_t >( i ), rect.y, tab_w, t.tab_height );
+		tab_rects_.emplace_back( rect.x + ( tab_w + t.spacing ) * static_cast< float_t >( i ), rect.y, tab_w, text_row_height( ctx.renderer, t.tab_height, t.font_size_normal, t.row_text_padding ) );
 	}
 
 	// 全ページを配置しておく（切り替え直後にフォーカス・スクロールが正しい矩形を使えるように）
-	const float_t top = rect.y + t.tab_height + t.spacing * 2.f;
+	const float_t top = rect.y + text_row_height( ctx.renderer, t.tab_height, t.font_size_normal, t.row_text_padding ) + t.spacing * 2.f;
 	const Rect page_rect( rect.x, top, rect.w, std::max( 0.f, rect.bottom() - top ) );
 
 	for ( auto& page : children_ )
@@ -117,10 +118,10 @@ void TabView::render( Renderer& renderer, const UIContext& ctx ) const
 
 		if ( selected )
 		{
-			draw_brush( renderer, Rect( tab_rects_[ i ].x, tab_rects_[ i ].bottom() - 6.f, tab_rects_[ i ].w, 6.f ), pick_brush( renderer, t.tab_indicator, t.accent ) );
+			draw_brush( renderer, Rect( tab_rects_[ i ].x, tab_rects_[ i ].bottom() - t.accent_bar_thickness, tab_rects_[ i ].w, t.accent_bar_thickness ), pick_brush( renderer, t.tab_indicator, t.accent ) );
 		}
 
-		renderer.draw_text( tab_rects_[ i ], ctx.tr( titles_[ i ] ).c_str(), make_text_style( selected ? t.text_focused : t.text_dim, t.font_size_normal, core::graphics::HAlign::CENTER ) );
+		draw_text_fit( renderer, tab_rects_[ i ], ctx.tr( titles_[ i ] ), make_text_style( selected ? t.text_focused : t.text_dim, t.font_size_normal, core::graphics::HAlign::CENTER ) );
 	}
 
 	render_children( renderer, ctx );

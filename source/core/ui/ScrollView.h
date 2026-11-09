@@ -20,7 +20,6 @@ private:
 	float_t scroll_ = 0.f;			///< 内容の先頭からのスクロール量
 	float_t content_height_ = 0.f;
 	float_t scroll_step_ = 0.f;		///< ホイール 1 ノッチの量（arrange で Theme から決める）
-	float_t scrollbar_width_ = 10.f;
 
 	Widget* get_content() const { return children_.empty() ? nullptr : children_.front().get(); }
 	void clamp_scroll();

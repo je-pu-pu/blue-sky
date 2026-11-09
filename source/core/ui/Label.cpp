@@ -1,4 +1,5 @@
 #include "Label.h"
+#include "TextFit.h"
 #include "Renderer.h"
 #include "Theme.h"
 
@@ -112,7 +113,7 @@ void Label::render( Renderer& renderer, const UIContext& ctx ) const
 
 	if ( ! wrap_ )
 	{
-		renderer.draw_text( rect_, text.c_str(), style );
+		draw_text_fit( renderer, rect_, text, style );
 		return;
 	}
 
@@ -121,7 +122,7 @@ void Label::render( Renderer& renderer, const UIContext& ctx ) const
 
 	for ( const auto& line : wrap_lines( text, rect_.w, font_size, renderer ) )
 	{
-		renderer.draw_text( Rect( rect_.x, y, rect_.w, line_h ), line.c_str(), style );
+		draw_text_fit( renderer, Rect( rect_.x, y, rect_.w, line_h ), line, style );
 		y += line_h;
 	}
 }

@@ -1,13 +1,17 @@
 #include "LabeledRow.h"
+#include "TextFit.h"
 #include "Renderer.h"
 #include "Theme.h"
+
+#include <algorithm>
 
 namespace core::ui
 {
 
 float_t LabeledRow::measure_height( float_t, const UIContext& ctx ) const
 {
-	return ctx.theme.row_height;
+	// 文字を大きくしても行からはみ出さないよう、文字の行の高さ＋余白より小さくしない
+	return std::max( ctx.theme.row_height, ctx.renderer.measure_line_height( ctx.theme.font_size_normal ) + ctx.theme.row_text_padding );
 }
 
 void LabeledRow::arrange( const Rect& rect, const UIContext& ctx )
@@ -32,7 +36,7 @@ void LabeledRow::render_row( Renderer& renderer, const UIContext& ctx ) const
 	const auto& t = ctx.theme;
 
 	draw_brush( renderer, rect_, focused_ ? t.row_focused : t.row );
-	renderer.draw_text( label_rect_, ctx.tr( label_key_ ).c_str(), make_text_style( value_color( ctx ), t.font_size_normal ) );
+	draw_text_fit( renderer, label_rect_, ctx.tr( label_key_ ), make_text_style( value_color( ctx ), t.font_size_normal ) );
 }
 
 } // namespace core::ui

@@ -113,12 +113,17 @@ bool StringTable::load_file( const char_t* path )
 	return true;
 }
 
-const string_t& StringTable::get( const string_t& key ) const
+string_t StringTable::get( const string_t& key ) const
 {
 	auto i = table_.find( key );
 
 	if ( i == table_.end() )
 	{
+		if ( ! key.empty() )
+		{
+			missing_.insert( key );
+		}
+
 		return key;
 	}
 

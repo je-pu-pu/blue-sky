@@ -29,6 +29,8 @@ UIOverlayScene::UIOverlayScene()
 	input_builder_.reset( * get_input(), renderer_ );
 	screen_.suppress_input( 1 );
 
+	theme_revision_ = GameMain::get_instance()->get_ui_theme().revision;
+
 	// テーマの画像を先に読む（最初の描画やレイアウトの途中で読み込みが走って引っかからないように）
 	core::ui::preload_theme_images( GameMain::get_instance()->get_ui_theme(), renderer_ );
 }
@@ -69,6 +71,15 @@ void UIOverlayScene::update()
 	{
 		input.pointer_moved = input.pointer_pressed = input.pointer_down = input.pointer_released = false;
 		input.wheel = 0;
+	}
+
+	// テーマが変わったら（文字の大きさの設定など）配置し直す
+	const uint_t theme_revision = GameMain::get_instance()->get_ui_theme().revision;
+
+	if ( theme_revision != theme_revision_ )
+	{
+		theme_revision_ = theme_revision;
+		screen_.invalidate_appearance();
 	}
 
 	screen_.update( input, dt );

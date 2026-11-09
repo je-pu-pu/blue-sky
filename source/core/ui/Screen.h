@@ -67,6 +67,7 @@ namespace core::ui
 		Widget* pointer_capture_ = nullptr;
 		bool hover_enabled_ = true;			///< ホイールで内容が動いたら、次にポインタが動くまでホバーしない
 		bool layout_dirty_ = true;
+		bool reveal_focus_on_layout_ = false;	///< 次の配置で、フォーカス中の部品が見えるようにする
 		float_t last_pointer_x_ = -1.f;
 		float_t last_pointer_y_ = -1.f;
 
@@ -128,6 +129,9 @@ namespace core::ui
 		void suppress_input( int frames ) { suppress_frames_ = frames; }
 
 		void invalidate_layout() { layout_dirty_ = true; }
+
+		/// 見た目（テーマ）が変わったので配置し直す。フォーカス中の部品が見えるようにスクロールもする
+		void invalidate_appearance() { layout_dirty_ = true; reveal_focus_on_layout_ = true; }
 
 		// ---- フォーカス ----
 

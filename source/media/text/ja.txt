@@ -52,6 +52,8 @@ options.fov = 視野角
 options.fov.description = カメラの視野角（度）
 options.display_fps = FPS 表示
 options.display_fps.description = 画面にフレームレートを表示します
+options.text_scale = 文字の大きさ
+options.text_scale.description = メニューの文字の大きさを変えます
 
 options.volume = 音量
 options.volume.description = 全体の音量

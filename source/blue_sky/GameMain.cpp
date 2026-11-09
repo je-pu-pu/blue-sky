@@ -241,6 +241,10 @@ GameMain::GameMain()
 		}
 	}
 
+	// 文字の大きさの設定は、テーマファイルで決めた大きさを基準に掛ける
+	ui_theme_base_ = std::make_unique< core::ui::Theme >( * ui_theme_ );
+	set_ui_text_scale( ui_text_scale_ );
+
 	update_render_data_for_game();
 }
 
@@ -268,6 +272,12 @@ void GameMain::shutdown()
 
 	is_shut_down_ = true;
 
+	// 翻訳漏れ（引かれたが文字列テーブルに無かったキー）をログに出す
+	for ( const auto& key : ui_strings_->get_missing_keys() )
+	{
+		debug_log( "[UI] 文字列テーブルに無いキー: " + key );
+	}
+
 	// 設定を保存する。ユーザーの明示的な操作（F2 / F5 / Alt+Enter）はその場で設定に反映済み。
 	// 終了時の実際の状態（フォーカス喪失で解除されたフルスクリーンなど）は取り込まない
 	save_settings();
@@ -283,6 +293,19 @@ void GameMain::shutdown()
 unsigned long GameMain::get_idle_wait_msec() const
 {
 	return main_loop_ ? main_loop_->get_wait_msec() : 0;
+}
+
+void GameMain::set_ui_text_scale( float_t scale )
+{
+	ui_text_scale_ = scale;
+
+	// 設定の反映はテーマを作る前にも呼ばれる（起動時）。テーマができたら apply_ui_text_scale() で反映する
+	if ( ui_theme_ && ui_theme_base_ )
+	{
+		const uint_t revision = ui_theme_->revision;
+		*ui_theme_ = core::ui::scale_theme_text( *ui_theme_base_, scale );
+		ui_theme_->revision = revision + 1;		// 開いている画面が配置し直すきっかけ
+	}
 }
 
 void GameMain::save_settings()

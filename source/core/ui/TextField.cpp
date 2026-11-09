@@ -1,4 +1,5 @@
 #include "TextField.h"
+#include "TextFit.h"
 #include "Brush.h"
 #include "Renderer.h"
 #include "Screen.h"
@@ -133,7 +134,7 @@ void TextField::render( Renderer& renderer, const UIContext& ctx ) const
 	render_row( renderer, ctx );
 
 	const auto& t = ctx.theme;
-	const Rect box = value_rect_.inset( 0.f, rect_.h * 0.15f );
+	const Rect box = value_rect_.inset( 0.f, rect_.h * t.value_box_inset );
 	draw_brush( renderer, box, is_focused() ? t.row_pressed : t.track );
 
 	// 文字と、フォーカス中は末尾のカーソル（0.5 秒ごとに点滅）
@@ -144,7 +145,7 @@ void TextField::render( Renderer& renderer, const UIContext& ctx ) const
 		shown += "|";
 	}
 
-	renderer.draw_text( box.inset( t.row_padding_x, 0.f ), shown.c_str(), make_text_style( value_color( ctx ), t.font_size_normal ) );
+	draw_text_fit( renderer, box.inset( t.row_padding_x, 0.f ), shown, make_text_style( value_color( ctx ), t.font_size_normal ) );
 }
 
 void TextField::collect_hints( std::vector< Hint >& hints ) const

@@ -36,7 +36,7 @@ void ScrollView::ensure_visible( const Rect& r )
 float_t ScrollView::measure_height( float_t width, const UIContext& ctx ) const
 {
 	// 中身の高さを希望する（親が小さい矩形を与えればスクロールする）
-	return get_content() ? get_content()->measure_height( width - scrollbar_width_ * 2.f, ctx ) : 0.f;
+	return get_content() ? get_content()->measure_height( width - ctx.theme.scrollbar_width * 2.f, ctx ) : 0.f;
 }
 
 void ScrollView::arrange( const Rect& rect, const UIContext& ctx )
@@ -53,7 +53,7 @@ void ScrollView::arrange( const Rect& rect, const UIContext& ctx )
 	}
 
 	// スクロールバーの分だけ右を空ける
-	const float_t content_w = rect.w - scrollbar_width_ * 2.f;
+	const float_t content_w = rect.w - ctx.theme.scrollbar_width * 2.f;
 	content_height_ = content->measure_height( content_w, ctx );
 	clamp_scroll();
 
@@ -91,12 +91,12 @@ void ScrollView::render( Renderer& renderer, const UIContext& ctx ) const
 
 	if ( max_scroll > 0.f && content_height_ > 0.f )
 	{
-		const float_t bar_x = rect_.right() - scrollbar_width_;
-		const float_t thumb_h = std::max( 24.f, rect_.h * rect_.h / content_height_ );
+		const float_t bar_x = rect_.right() - ctx.theme.scrollbar_width;
+		const float_t thumb_h = std::max( ctx.theme.scrollbar_min_thumb, rect_.h * rect_.h / content_height_ );
 		const float_t thumb_y = rect_.y + ( rect_.h - thumb_h ) * ( scroll_ / max_scroll );
 
-		draw_brush( renderer, Rect( bar_x, rect_.y, scrollbar_width_, rect_.h ), ctx.theme.track );
-		draw_brush( renderer, Rect( bar_x, thumb_y, scrollbar_width_, thumb_h ), pick_brush( renderer, ctx.theme.scroll_thumb, ctx.theme.accent ) );
+		draw_brush( renderer, Rect( bar_x, rect_.y, ctx.theme.scrollbar_width, rect_.h ), ctx.theme.track );
+		draw_brush( renderer, Rect( bar_x, thumb_y, ctx.theme.scrollbar_width, thumb_h ), pick_brush( renderer, ctx.theme.scroll_thumb, ctx.theme.accent ) );
 	}
 }
 

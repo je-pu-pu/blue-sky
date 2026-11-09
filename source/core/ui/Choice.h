@@ -27,6 +27,7 @@ private:
 	Getter getter_;
 	Setter setter_;
 	std::vector< string_t > option_keys_;
+	bool options_literal_ = false;		///< 選択肢をキーとして翻訳せず、そのまま表示する
 	std::function< string_t() > custom_text_;
 	bool wrap_ = false;
 	bool pressed_ = false;
@@ -41,6 +42,14 @@ public:
 		: LabeledRow( label_key ), getter_( std::move( getter ) ), setter_( std::move( setter ) ), option_keys_( std::move( option_keys ) ) { }
 
 	void set_options( std::vector< string_t > keys ) { option_keys_ = std::move( keys ); }
+
+	/**
+	 * 選択肢をそのまま表示する（翻訳しない）
+	 *
+	 * 解像度（"1920 x 1080"）のように、キーではない文字列を選択肢にするときに使う。
+	 * 以前はキーとして翻訳していたので、翻訳漏れと区別できず、既存のキーと同じ文字列なら置き換わった。
+	 */
+	void set_options_literal( bool literal ) { options_literal_ = literal; }
 	void set_custom_text( std::function< string_t() > f ) { custom_text_ = std::move( f ); }
 	void set_wrap( bool w ) { wrap_ = w; }
 

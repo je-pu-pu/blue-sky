@@ -4,7 +4,7 @@
 namespace core::ui
 {
 
-const string_t& UIContext::tr( const string_t& key ) const
+string_t UIContext::tr( const string_t& key ) const
 {
 	return strings.get( key );
 }

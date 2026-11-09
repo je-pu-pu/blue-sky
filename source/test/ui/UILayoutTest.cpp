@@ -5,8 +5,27 @@
 #include <core/ui/Button.h>
 #include <core/ui/Stack.h>
 #include <core/ui/VirtualScreen.h>
+#include <core/Service.h>
+
+#include <cstdint>
 
 using namespace core::ui;
+
+// ---- サービスの差し替え（設計上の問題 B28） ----
+
+TEST( ServiceTest, Scopeで差し替えたサービスは破棄で元に戻る )
+{
+	auto* const before = core::get_physics_manager();
+	auto* const fake = reinterpret_cast< core::physics::PhysicsManager* >( static_cast< std::uintptr_t >( 0x1000 ) );		// 参照はしない
+
+	{
+		core::Service::Scope scope;
+		scope.service().set_physics_manager( fake );
+		EXPECT_EQ( fake, core::get_physics_manager() );
+	}
+
+	EXPECT_EQ( before, core::get_physics_manager() );
+}
 
 // ---- 仮想画面（設計上の問題 B13） ----
 

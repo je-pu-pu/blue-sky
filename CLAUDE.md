@@ -106,6 +106,13 @@ EntityManager::get_instance()->add_system<RenderSystem>();
 - ゲーム固有グラフィックス: `source/blue_sky/graphics/Direct3D11/`
 - HLSL シェーダー: `source/blue_sky/graphics/shader/`
 
+### サービス（マネージャー）の探し方
+
+- **core 層**（`core::ecs` のシステム・`core::graphics` など）は `core::Service`（`core::get_graphics_manager()` など）から core の型で得る。core 層は GameMain を知らない
+- **blue_sky 層**は組み立ての根の `GameMain` から得る。`Scene::get_*_manager()` は GameMain への近道（`core::get_graphics_manager()` と名前が同じだが、blue_sky の型を返す）
+- **新しく書くロジック**は、依存を引数・コンストラクタで受け取る（例: `Scene/OptionsController`）。シングルトンに触れないのでテストで動かせる
+- テストで core のサービスを差し替えるときは `core::Service::Scope` を使う（破棄で元に戻る）
+
 ### 名前空間規則
 
 - `core::` - エンジンコア

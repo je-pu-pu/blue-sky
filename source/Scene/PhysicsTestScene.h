@@ -39,7 +39,7 @@ protected:
 	CameraComponent* camera_component_ = nullptr;
 
 public:
-	explicit PhysicsTestScene();
+	explicit PhysicsTestScene( GameMain& game_main );
 	~PhysicsTestScene() override = default;
 
 	void update() override;

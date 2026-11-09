@@ -26,7 +26,7 @@ namespace blue_sky
  * UI 画面が使うサービス（テーマ・文字列・設定・設定の保存）
  *
  * UI のシーンは GameMain のシングルトンを直接呼ばず、これを通して使う（設計上の問題 B28）。
- * GameMain から集めるのは from_game_main の 1 か所だけ。
+ * GameMain から集めるのは from_game_main の 1 か所だけ（GameMain はシーンが作られるときに受け取る）。
  */
 struct UIServices
 {
@@ -35,8 +35,8 @@ struct UIServices
 	core::setting::SettingStore& settings;
 	std::function< void() > save_settings;
 
-	/// 組み立ての根（GameMain）から集める
-	static UIServices from_game_main();
+	/// 組み立ての根（GameMain）から集める（シーンが受け取った GameMain を渡す）
+	static UIServices from_game_main( GameMain& game_main );
 };
 
 /**
@@ -64,7 +64,7 @@ protected:
 	void close() { set_next_scene( "pop" ); }
 
 public:
-	UIOverlayScene();
+	UIOverlayScene( GameMain& game_main );
 	~UIOverlayScene() override;
 
 	void update() override;

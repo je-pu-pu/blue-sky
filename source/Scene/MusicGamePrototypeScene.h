@@ -53,7 +53,7 @@ protected:
 	std::unique_ptr< core::sound::MidiSequencer > midi_sequencer_;
 
 public:
-	explicit MusicGamePrototypeScene();
+	explicit MusicGamePrototypeScene( GameMain& game_main );
 	~MusicGamePrototypeScene() override = default;
 
 	void update() override;

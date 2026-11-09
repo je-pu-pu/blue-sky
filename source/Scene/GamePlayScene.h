@@ -187,7 +187,7 @@ protected:
 	void render_debug_shadow_map_window() const;
 
 public:
-	explicit GamePlayScene();
+	explicit GamePlayScene( GameMain& game_main );
 	~GamePlayScene();
 
 	void update() override;				///< メインループ

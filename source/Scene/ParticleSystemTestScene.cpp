@@ -22,8 +22,9 @@
 namespace blue_sky
 {
 
-ParticleSystemTestScene::ParticleSystemTestScene()
-	: camera_( EntityManager::get_instance()->create_entity() )
+ParticleSystemTestScene::ParticleSystemTestScene( GameMain& game_main )
+	: Scene( game_main )
+	, camera_( EntityManager::get_instance()->create_entity() )
 {
 	// Physics
 	get_active_object_physics()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );

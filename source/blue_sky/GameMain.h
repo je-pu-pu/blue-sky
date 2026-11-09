@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <vector>
 #include <blue_sky/DebugLog.h>
+#include <GameObject/GameObjectContext.h>
 
 class DirectWrite;
 
@@ -146,6 +147,7 @@ private:
 
 	std::unique_ptr< MainLoop >				main_loop_;				///< ループ管理
 
+	GameObjectContext						game_object_context_;	///< ゲームのオブジェクトに渡すもの（物理の世界・音・経過時間）
 	std::unique_ptr< ActiveObjectManager >	active_object_manager_;	///< ActiveObjectManager
 
 	std::unique_ptr< BulletDebugDraw >		bullet_debug_draw_;

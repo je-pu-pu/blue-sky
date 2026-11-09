@@ -57,7 +57,7 @@ protected:
 
 	Texture* texture_;
 public:
-	explicit GeometryShaderCanvasTestScene();
+	explicit GeometryShaderCanvasTestScene( GameMain& game_main );
 	~GeometryShaderCanvasTestScene() override;
 
 	void update() override;

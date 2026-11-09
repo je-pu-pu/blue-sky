@@ -9,6 +9,7 @@ namespace blue_sky
 {
 
 class Scene;
+class GameMain;
 
 /**
  * 複数の Scene を管理する Manager
@@ -17,7 +18,7 @@ class Scene;
 class SceneManager : public common::Singleton< SceneManager >
 {
 public:
-	using SceneGenerator = std::function< Scene* () >;
+	using SceneGenerator = std::function< Scene* ( GameMain& ) >;	///< 組み立ての根（GameMain）を受け取ってシーンを作る
 	using SceneGeneratorMap = std::unordered_map< string_t, SceneGenerator >;
 
 	/**
@@ -33,7 +34,7 @@ public:
 	class SceneRegister
 	{
 	public:
-		SceneRegister( const string_t& scene_name = SceneType::name, SceneGenerator generator = [] { return new SceneType(); } )
+		SceneRegister( const string_t& scene_name = SceneType::name, SceneGenerator generator = [] ( GameMain& game_main ) { return new SceneType( game_main ); } )
 		{
 			SceneManager::get_instance()->register_scene< SceneType >( scene_name, generator );
 		}
@@ -55,7 +56,7 @@ public:
 	 * 指定した名前のシーンを登録する
 	 */
 	template< typename SceneType >
-	void register_scene( const string_t& scene_name = SceneType::name, SceneGenerator generator = [] { return new SceneType(); } )
+	void register_scene( const string_t& scene_name = SceneType::name, SceneGenerator generator = [] ( GameMain& game_main ) { return new SceneType( game_main ); } )
 	{
 		scene_generator_map_[ scene_name ] = generator;
 	}
@@ -71,7 +72,7 @@ public:
 	/**
 	 * 指定した名前のシーンを生成する
 	 */
-	Scene* generate_scene( const string_t& scene_name ) const
+	Scene* generate_scene( const string_t& scene_name, GameMain& game_main ) const
 	{
 		auto i = scene_generator_map_.find( scene_name );
 
@@ -80,7 +81,7 @@ public:
 			return nullptr;
 		}
 
-		return i->second();
+		return i->second( game_main );
 	}
 
 

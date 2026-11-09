@@ -28,8 +28,9 @@
 namespace blue_sky
 {
 
-GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene()
-	: mesh_( get_graphics_manager()->create_named_mesh( "line_cube", Mesh::Buffer::Type::DEFAULT ) )
+GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene( GameMain& game_main )
+	: Scene( game_main )
+	, mesh_( get_graphics_manager()->create_named_mesh( "line_cube", Mesh::Buffer::Type::DEFAULT ) )
 	// , input_layout_( get_graphics_manager()->create_named_input_layout( "pos_color", { } ) )
 	, input_layout_( get_graphics_manager()->get_input_layout( "pos_color" ) )
 

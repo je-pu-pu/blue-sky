@@ -1,9 +1,8 @@
 #include "GameObject.h"
 
 #include <blue_sky/ActiveObjectPhysics.h>
-#include <blue_sky/GameMain.h>
+#include <GameObject/GameObjectContext.h>
 
-#include <Scene/Scene.h>
 
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
@@ -259,12 +258,12 @@ float_t GameObject::get_delta_time() const
  */
 btDynamicsWorld* GameObject::get_dynamics_world() const
 {
-	return GameMain::get_instance()->get_active_object_physics()->get_dynamics_world();
+	return context_ && context_->dynamics_world ? context_->dynamics_world() : nullptr;
 }
 
 float_t GameObject::get_scene_elapsed_time() const
 {
-	return GameMain::get_instance()->get_current_scene()->get_total_elapsed_time();
+	return context_ && context_->scene_elapsed_time ? context_->scene_elapsed_time() : 0.f;
 }
 
 /**
@@ -337,7 +336,7 @@ bool_t GameObject::is_visible_in_blink( float_t blink_count ) const
 
 void GameObject::play_sound( const char* name, bool loop, bool force ) const
 {
-	Sound* sound = GameMain::get_instance()->get_sound_manager()->get_sound( name );
+	Sound* sound = context_ && context_->sound_manager ? context_->sound_manager->get_sound( name ) : nullptr;
 	
 	if ( sound )
 	{
@@ -352,7 +351,7 @@ void GameObject::play_sound( const char* name, bool loop, bool force ) const
 
 void GameObject::stop_sound( const char* name ) const
 {
-	Sound* sound = GameMain::get_instance()->get_sound_manager()->get_sound( name );
+	Sound* sound = context_ && context_->sound_manager ? context_->sound_manager->get_sound( name ) : nullptr;
 	
 	if ( sound )
 	{
@@ -362,7 +361,7 @@ void GameObject::stop_sound( const char* name ) const
 
 void GameObject::fade_out_sound( const char* name ) const
 {
-	Sound* sound = GameMain::get_instance()->get_sound_manager()->get_sound( name );
+	Sound* sound = context_ && context_->sound_manager ? context_->sound_manager->get_sound( name ) : nullptr;
 	
 	if ( sound )
 	{

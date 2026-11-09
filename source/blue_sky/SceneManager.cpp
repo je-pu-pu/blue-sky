@@ -36,8 +36,8 @@ void SceneManager::register_all_scene()
 	register_scene< StageSelectScene >();
 	register_scene< GamePlayScene >();
 
-	register_scene< StoryTextScene >( "stage_intro", [] () { return new StoryTextScene( "media/stage/{stage}.intro", "game_play" ); } );
-	register_scene< StoryTextScene >( "stage_outro", [] () { return new StoryTextScene( "media/stage/{stage}.outro", "stage_select" ); } );
+	register_scene< StoryTextScene >( "stage_intro", [] ( GameMain& game_main ) { return new StoryTextScene( game_main, "media/stage/{stage}.intro", "game_play" ); } );
+	register_scene< StoryTextScene >( "stage_outro", [] ( GameMain& game_main ) { return new StoryTextScene( game_main, "media/stage/{stage}.outro", "stage_select" ); } );
 
 	register_scene< EndingScene >();
 

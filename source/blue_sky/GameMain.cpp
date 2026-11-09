@@ -200,7 +200,12 @@ GameMain::GameMain()
 	script_manager_->load_command_history( "log/script.log" );
 	setup_script_command();
 
-	active_object_manager_.reset( new ActiveObjectManager( active_object_physics_.get(), graphics_manager_.get() ) );
+	// ゲームのオブジェクトに渡すもの（物理の世界・音・シーンの経過時間）。オブジェクトは GameMain のシングルトンを呼ばない
+	game_object_context_.dynamics_world = [this] { return active_object_physics_->get_dynamics_world(); };
+	game_object_context_.sound_manager = sound_manager_.get();
+	game_object_context_.scene_elapsed_time = [this] { return scene_ ? scene_->get_total_elapsed_time() : 0.f; };
+
+	active_object_manager_.reset( new ActiveObjectManager( active_object_physics_.get(), graphics_manager_.get(), & game_object_context_ ) );
 	graphics_manager_->set_active_object_manager( active_object_manager_.get() );
 
 	// MainLoop
@@ -1248,7 +1253,7 @@ void GameMain::setup_scene( const string_t& scene_name )
 	// 生成に失敗したら（モデルが無いなど）ログを出してタイトルへ戻す（以前はシーンが null のまま次のフレームで落ちた）
 	try
 	{
-		scene_.reset( SceneManager::get_instance()->generate_scene( scene_name ) );
+		scene_.reset( SceneManager::get_instance()->generate_scene( scene_name, * this ) );
 	}
 	catch ( const common::exception< std::string >& e )
 	{
@@ -1307,7 +1312,7 @@ void GameMain::push_overlay_scene( const string_t& scene_name )
 	scene_->set_paused( true );
 
 	// オーバーレイシーンを生成してスタックに追加
-	std::unique_ptr< Scene > overlay( SceneManager::get_instance()->generate_scene( scene_name ) );
+	std::unique_ptr< Scene > overlay( SceneManager::get_instance()->generate_scene( scene_name, * this ) );
 
 	// オーバーレイ用でないシーン（ゲーム本体など）は積まない（入力・描画の扱いがオーバーレイを前提にしていないため）
 	if ( ! overlay || ! overlay->is_overlay() )

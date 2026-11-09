@@ -38,7 +38,7 @@ private:
 	Sound* get_bgm() override { return bgm_; }
 
 public:
-	explicit TitleScene();
+	explicit TitleScene( GameMain& game_main );
 	~TitleScene();
 
 	void update() override;				///< メインループ

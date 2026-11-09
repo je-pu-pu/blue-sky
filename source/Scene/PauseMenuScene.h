@@ -16,7 +16,7 @@ class PauseMenuScene : public UIOverlayScene
 public:
 	static constexpr auto name = "pause_menu";
 
-	PauseMenuScene();
+	PauseMenuScene( GameMain& game_main );
 
 }; // class PauseMenuScene
 

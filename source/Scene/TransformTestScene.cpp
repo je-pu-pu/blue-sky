@@ -26,8 +26,9 @@
 namespace blue_sky
 {
 
-TransformTestScene::TransformTestScene()
-	: camera_( EntityManager::get_instance()->create_entity() )
+TransformTestScene::TransformTestScene( GameMain& game_main )
+	: Scene( game_main )
+	, camera_( EntityManager::get_instance()->create_entity() )
 {
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();

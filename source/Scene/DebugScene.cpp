@@ -276,8 +276,9 @@ namespace blue_sky
 core::sound::filter::BiquadFilter* filter = nullptr;
 std::unique_ptr< core::sound::MidiSequencer > midi_sequencer;
 
-DebugScene::DebugScene()
-	: city_generator_( get_graphics_manager() )
+DebugScene::DebugScene( GameMain& game_main )
+	: Scene( game_main )
+	, city_generator_( get_graphics_manager() )
 	, camera_( new Camera() )
 	, render_result_texture_( get_graphics_manager()->create_render_target_texture() )
 	, velocity_texture_( get_graphics_manager()->create_render_target_texture( core::graphics::direct_3d_11::PixelFormat::R32G32_FLOAT ) )

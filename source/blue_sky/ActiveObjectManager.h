@@ -10,6 +10,7 @@ namespace blue_sky
 {
 
 class ActiveObjectPhysics;
+struct GameObjectContext;
 namespace graphics { class GraphicsManager; }
 
 /**
@@ -39,9 +40,10 @@ private:
 
 	ActiveObjectPhysics* physics_;					///< 物理（GameMain が渡す。以前は GameMain のシングルトンから引いていた）
 	graphics::GraphicsManager* graphics_manager_;	///< 描画（同上）
+	const GameObjectContext* object_context_;		///< オブジェクトに渡すもの（物理の世界・音・経過時間。同上）
 
 public:
-	ActiveObjectManager( ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager );
+	ActiveObjectManager( ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, const GameObjectContext* object_context );
 	~ActiveObjectManager();
 
 	void clear();

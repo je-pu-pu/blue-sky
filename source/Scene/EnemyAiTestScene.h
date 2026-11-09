@@ -31,7 +31,7 @@ class EnemyAiTestScene : public Scene
 public:
 	static inline const char_t* name = "enemy_ai_test";
 
-	explicit EnemyAiTestScene();
+	explicit EnemyAiTestScene( GameMain& game_main );
 	~EnemyAiTestScene() override = default;
 
 	void update() override;

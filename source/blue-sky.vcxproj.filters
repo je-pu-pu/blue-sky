@@ -443,6 +443,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameObject\GameObjectContext.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
     <ClInclude Include="core\graphics\Msdf\GlyphAtlasStorage.h">
       <Filter>core\graphics\Msdf</Filter>
     </ClInclude>

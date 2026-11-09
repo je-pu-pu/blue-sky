@@ -57,7 +57,7 @@ private:
 protected:
 
 public:
-	explicit CanvasTestScene();
+	explicit CanvasTestScene( GameMain& game_main );
 	~CanvasTestScene();
 
 	void update() override;			///< メインループ

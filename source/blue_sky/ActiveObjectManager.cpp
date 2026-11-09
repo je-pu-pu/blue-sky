@@ -25,9 +25,10 @@
 namespace blue_sky
 {
 
-ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager )
+ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, const GameObjectContext* object_context )
 	: physics_( physics )
 	, graphics_manager_( graphics_manager )
+	, object_context_( object_context )
 {
 	object_creator_map_[ "girl"        ] = [] () -> ActiveObject* { return new Girl();         };
 	object_creator_map_[ "robot"       ] = [] () -> ActiveObject* { return new Robot();        };
@@ -79,6 +80,8 @@ void ActiveObjectManager::restart()
 
 void ActiveObjectManager::add_active_object( ActiveObject* active_object )
 {
+	active_object->set_context( object_context_ );
+
 	active_object_list_.insert( active_object );
 }
 
@@ -120,6 +123,7 @@ ActiveObject* ActiveObjectManager::create_object( const string_t& name )
 	}
 
 	ActiveObject* active_object = i->second();
+	active_object->set_context( object_context_ );		// 作った直後から使えるように（加える前に初期化で使うものがある）
 
 	add_active_object( active_object );
 

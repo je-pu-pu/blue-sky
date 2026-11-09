@@ -12,14 +12,15 @@
 namespace blue_sky
 {
 
-UIServices UIServices::from_game_main()
+UIServices UIServices::from_game_main( GameMain& game_main )
 {
-	GameMain* gm = GameMain::get_instance();
+	GameMain* gm = & game_main;
 	return UIServices{ gm->get_ui_theme(), gm->get_ui_strings(), * gm->get_settings(), [gm] { gm->save_settings(); } };
 }
 
-UIOverlayScene::UIOverlayScene()
-	: services_( UIServices::from_game_main() )
+UIOverlayScene::UIOverlayScene( GameMain& game_main )
+	: Scene( game_main )
+	, services_( UIServices::from_game_main( game_main ) )
 	, renderer_( get_graphics_manager() )
 	, screen_( services_.theme, services_.strings, renderer_ )
 {

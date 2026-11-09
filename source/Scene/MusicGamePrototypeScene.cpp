@@ -40,8 +40,9 @@ namespace blue_sky
 
 using RigidBodyShapeType = core::physics::RigidBodyShapeType;
 
-MusicGamePrototypeScene::MusicGamePrototypeScene()
-	: player_( EntityManager::get_instance()->create_entity() )
+MusicGamePrototypeScene::MusicGamePrototypeScene( GameMain& game_main )
+	: Scene( game_main )
+	, player_( EntityManager::get_instance()->create_entity() )
 {
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();

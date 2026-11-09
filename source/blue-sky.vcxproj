@@ -177,6 +177,7 @@
     <ClCompile Include="Scene\TransformTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameObject\GameObjectContext.h" />
     <ClInclude Include="core\graphics\Msdf\GlyphAtlasStorage.h" />
     <ClInclude Include="core\graphics\Direct3D11\MsdfTextRenderer.h" />
     <ClInclude Include="core\graphics\Direct3D11\GlyphAtlas.h" />

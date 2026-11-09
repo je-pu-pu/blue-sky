@@ -10,7 +10,8 @@
 namespace blue_sky
 {
 
-PauseMenuScene::PauseMenuScene()
+PauseMenuScene::PauseMenuScene( GameMain& game_main )
+	: UIOverlayScene( game_main )
 {
 	using namespace core::ui;
 

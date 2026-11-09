@@ -8,6 +8,8 @@
 class btRigidBody;
 class btDynamicsWorld;
 
+namespace blue_sky { struct GameObjectContext; }
+
 namespace game
 {
 
@@ -54,6 +56,7 @@ public:
 private:
 	Transform		transform_;		///< トランスフォーム情報
 	btRigidBody*	rigid_body_;	///< 剛体情報
+	const GameObjectContext* context_ = nullptr;	///< 物理の世界・音・経過時間
 
 	ComponentMap	component_map_;	///< GameObject が保有しているコンポーネントの一覧 ( コンポーネント ID から コンポーネントのポインタへのマップ )
 
@@ -84,6 +87,10 @@ protected:
 public:
 	GameObject();
 	GameObject( const GameObject& ) = default;
+
+	/// 物理の世界・音・経過時間（ActiveObjectManager が加えるときに渡す。以前は GameMain のシングルトンから取っていた）
+	void set_context( const GameObjectContext* context ) { context_ = context; }
+	const GameObjectContext* get_context() const { return context_; }
 
 	virtual ~GameObject();
 

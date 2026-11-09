@@ -68,6 +68,7 @@ public:
 	using SoundManager		= core::sound::SoundManager;
 
 private:
+	GameMain&		game_main_;		///< 組み立ての根（作ったものが渡す）
 	float_t total_elapsed_time_;		///< シーンが開始してからの総経過時間 ( 秒 )
 	bool is_paused_;					///< ポーズ中かどうか
 
@@ -127,7 +128,8 @@ protected:
 	virtual Sound* get_bgm() { return 0; };
 
 public:
-	explicit Scene();
+	/// 組み立ての根（GameMain）を受け取る。シーンは GameMain のシングルトンを呼ばない（設計上の問題 B28）
+	explicit Scene( GameMain& game_main );
 	virtual ~Scene();
 
 	void set_name( const std::string& name ) { name_ = name; }

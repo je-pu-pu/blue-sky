@@ -44,9 +44,8 @@ Stack* add_scroll_page( TabView* tabs, const char_t* title_key )
 }
 
 /// 0..1 を「50%」の形に（書式は文字列テーブルの format.percent。言語によって「50 %」「%50」などと変えられる）
-string_t format_percent( float_t v )
+string_t format_percent( const core::ui::StringTable& strings, float_t v )
 {
-	const auto& strings = GameMain::get_instance()->get_ui_strings();
 	const string_t number = std::to_string( static_cast< int >( std::lround( v * 100.f ) ) );
 	return strings.has( "format.percent" ) ? strings.format( "format.percent", { number } ) : number + "%";
 }
@@ -110,7 +109,8 @@ Toggle* add_setting_toggle( Stack* page, SettingStore* store, const core::settin
 
 } // namespace
 
-OptionsScene::OptionsScene()
+OptionsScene::OptionsScene( GameMain& game_main )
+	: UIOverlayScene( game_main )
 {
 	// 適用・確認・ロールバック・保存の流れ（テストできるよう、依存を渡して切り離してある）
 	OptionsController::Dependencies deps;
@@ -206,14 +206,14 @@ void OptionsScene::build_graphics_page( Stack* page )
 	add_setting_slider( page, store, gs::CAMERA_FOV, & format_int );
 	add_setting_toggle( page, store, gs::DISPLAY_FPS );
 	add_setting_toggle( page, store, gs::VSYNC );
-	add_setting_slider( page, store, gs::UI_TEXT_SCALE, & format_percent );
+	add_setting_slider( page, store, gs::UI_TEXT_SCALE, [this] ( float_t v ) { return format_percent( services_.strings, v ); } );
 }
 
 void OptionsScene::build_audio_page( Stack* page )
 {
 	SettingStore* store = & get_settings();
 
-	add_setting_slider( page, store, gs::AUDIO_VOLUME, & format_percent );
+	add_setting_slider( page, store, gs::AUDIO_VOLUME, [this] ( float_t v ) { return format_percent( services_.strings, v ); } );
 	add_setting_toggle( page, store, gs::AUDIO_MUTE );
 }
 

@@ -77,7 +77,8 @@ const char* state_name( ai::AlertState s )
 
 } // namespace
 
-EnemyAiTestScene::EnemyAiTestScene()
+EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
+	: Scene( game_main )
 {
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();

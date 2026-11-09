@@ -46,7 +46,7 @@ private:
 	std::unique_ptr< OptionsController > controller_;
 
 public:
-	OptionsScene();
+	OptionsScene( GameMain& game_main );
 
 }; // class OptionsScene
 

@@ -58,7 +58,7 @@ protected:
 	std::unique_ptr< Camera > camera_;
 
 public:
-	explicit DebugScene();
+	explicit DebugScene( GameMain& game_main );
 	~DebugScene() override;
 
 	void update() override;

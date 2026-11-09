@@ -208,6 +208,9 @@ public:
 	 */
 	void flush() override;
 
+	/// UTF-16 を Unicode のコードポイントの列にする（サロゲートペアを組み立てる）
+	static std::u32string decode_utf16( const wchar_t* text );
+
 	/** @brief フォントを再読み込みする（グリフキャッシュはクリアされる） */
 	void reload_font( const char* font_path );
 };

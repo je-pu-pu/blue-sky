@@ -1,4 +1,6 @@
 #include "pch.h"
+#include <core/graphics/Direct3D11/MsdfTextRenderer.h>
+#include <core/graphics/Msdf/GlyphCache.h>
 #include <core/graphics/Msdf/MsdfFont.h>
 #include <filesystem>
 
@@ -166,4 +168,52 @@ TEST( MsdfFontTest, 主のフォントに無い文字は代わりのフォント
 	ASSERT_TRUE( primary.get_glyph_metrics( target, after ) );
 	EXPECT_GT( after.width, 0.0 );		// 代わりのフォントの輪郭が取れる
 	(void) before;
+}
+
+namespace
+{
+
+/// アトラスへの転送を数える偽物
+class CountingAtlas : public core::graphics::GlyphAtlasStorage
+{
+public:
+	int added = 0;
+	int add_glyph( const msdfgen::Bitmap< float, 3 >&, core::graphics::UVRect& uv ) override { uv = { 0, 0, 1, 1 }; return added++; }
+	void replace_glyph( int, const msdfgen::Bitmap< float, 3 >&, core::graphics::UVRect& ) override { }
+	void reset() override { added = 0; }
+};
+
+} // namespace
+
+TEST( GlyphCacheTest, 文字幅を測るだけではMSDFを作らずアトラスへ転送しない )
+{
+	core::graphics::MsdfFont font;
+	ASSERT_TRUE( font.load( FONT_PATH ) );
+
+	CountingAtlas atlas;
+	core::graphics::GlyphCache cache( & font, & atlas, 48, 4.0 );
+
+	double advance = 0.0;
+	ASSERT_TRUE( cache.get_advance( U'A', advance ) );
+	EXPECT_GT( advance, 0.0 );
+	EXPECT_EQ( 0, atlas.added );		// 測るだけでは転送しない（以前は MSDF を作って転送していた）
+
+	ASSERT_NE( nullptr, cache.get( U'A' ) );
+	EXPECT_EQ( 1, atlas.added );		// 描くときに初めて作る
+
+	double kerning_font = 0.0;
+	font.get_kerning( U'A', U'V', kerning_font );
+	EXPECT_DOUBLE_EQ( kerning_font, cache.get_kerning( U'A', U'V' ) );
+}
+
+TEST( MsdfTextRendererTest, サロゲートペアを1文字にする )
+{
+	// 「𠮷」(U+20BB7) は UTF-16 で D842 DFB7
+	const wchar_t text[] = { L'a', 0xD842, 0xDFB7, L'b', 0 };
+	const std::u32string cps = core::graphics::MsdfTextRenderer::decode_utf16( text );
+
+	ASSERT_EQ( 3u, cps.size() );
+	EXPECT_EQ( static_cast< uint32_t >( U'a' ), static_cast< uint32_t >( cps[ 0 ] ) );
+	EXPECT_EQ( 0x20BB7u, static_cast< uint32_t >( cps[ 1 ] ) );
+	EXPECT_EQ( static_cast< uint32_t >( U'b' ), static_cast< uint32_t >( cps[ 2 ] ) );
 }

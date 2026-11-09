@@ -25,6 +25,52 @@ GlyphCache::GlyphCache( MsdfFont* font, GlyphAtlasStorage* atlas, int msdf_size,
  * @note 返されるポインタはキャッシュ内部のデータを指す。
  *       次の get() 呼び出しで追い出しが発生すると無効化される可能性がある。
  */
+bool GlyphCache::get_advance( uint32_t codepoint, double& advance )
+{
+	if ( auto it = cache_.find( codepoint ); it != cache_.end() )
+	{
+		advance = it->second.glyph.metrics.advance;
+		return true;
+	}
+
+	if ( auto it = advance_cache_.find( codepoint ); it != advance_cache_.end() )
+	{
+		advance = it->second;
+		return true;
+	}
+
+	GlyphMetrics metrics;
+
+	if ( ! font_->get_glyph_metrics( codepoint, metrics ) )
+	{
+		return false;
+	}
+
+	advance_cache_[ codepoint ] = metrics.advance;
+	advance = metrics.advance;
+	return true;
+}
+
+double GlyphCache::get_kerning( uint32_t left, uint32_t right )
+{
+	const uint64_t key = ( static_cast< uint64_t >( left ) << 32 ) | right;
+
+	if ( auto it = kerning_cache_.find( key ); it != kerning_cache_.end() )
+	{
+		return it->second;
+	}
+
+	double kerning = 0.0;
+
+	if ( ! font_->get_kerning( left, right, kerning ) )
+	{
+		kerning = 0.0;
+	}
+
+	kerning_cache_[ key ] = kerning;
+	return kerning;
+}
+
 const CachedGlyph* GlyphCache::get( uint32_t codepoint )
 {
 	auto it = cache_.find( codepoint );

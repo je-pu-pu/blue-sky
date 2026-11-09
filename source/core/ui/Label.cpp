@@ -115,10 +115,25 @@ size_t last_codepoint_start( const string_t& s )
 
 } // namespace
 
+const std::vector< string_t >& Label::cached_lines( const string_t& text, float_t width, float_t font_size, const Renderer& renderer ) const
+{
+	// 同じ文字列・幅・大きさなら前の結果を使う（測る・配置する・描くたびに毎フレーム折り返し直していた）
+	if ( text != wrap_cache_text_ || width != wrap_cache_width_ || font_size != wrap_cache_font_size_ )
+	{
+		wrap_cache_text_ = text;
+		wrap_cache_width_ = width;
+		wrap_cache_font_size_ = font_size;
+		wrap_cache_lines_ = wrap_lines( text, width, font_size, renderer );
+	}
+
+	return wrap_cache_lines_;
+}
+
 std::vector< string_t > Label::wrap_lines( const string_t& text, float_t width, float_t font_size, const Renderer& renderer )
 {
 	std::vector< string_t > lines;
 	string_t line;
+	float_t line_width = 0.f;		// 行の幅の見積もり（1 文字ずつの幅の和）
 
 	for ( size_t i = 0; i < text.size(); )
 	{
@@ -126,6 +141,7 @@ std::vector< string_t > Label::wrap_lines( const string_t& text, float_t width, 
 		{
 			lines.push_back( line );
 			line.clear();
+			line_width = 0.f;
 			i++;
 			continue;
 		}
@@ -133,8 +149,13 @@ std::vector< string_t > Label::wrap_lines( const string_t& text, float_t width, 
 		const size_t len = std::min( utf8_length( static_cast< unsigned char >( text[ i ] ) ), text.size() - i );
 		const string_t ch = text.substr( i, len );
 		const string_t candidate = line + ch;
+		const float_t ch_width = width > 0.f ? renderer.measure_text_width( ch.c_str(), font_size ) : 0.f;
 
-		if ( ! line.empty() && width > 0.f && renderer.measure_text_width( candidate.c_str(), font_size ) > width )
+		// 見積もりで超えそうなときだけ、行全体を測って確かめる（カーニングなどで 1 文字ずつの和とずれるため）
+		const bool overflow = ! line.empty() && width > 0.f && line_width + ch_width > width
+			&& renderer.measure_text_width( candidate.c_str(), font_size ) > width;
+
+		if ( overflow )
 		{
 			// 禁則処理 : 行の始めに置けない文字（句読点など）や、行の終わりに置けない文字（開き括弧）が来たら、
 			// 前の行の最後の 1 文字を次の行へ送る（前の行が 1 文字だけなら送らない）。以前は禁則処理が無かった
@@ -145,16 +166,19 @@ std::vector< string_t > Label::wrap_lines( const string_t& text, float_t width, 
 			{
 				lines.push_back( line.substr( 0, last ) );
 				line = last_ch + ch;
+				line_width = renderer.measure_text_width( line.c_str(), font_size );
 			}
 			else
 			{
 				lines.push_back( line );
 				line = ch;
+				line_width = ch_width;
 			}
 		}
 		else
 		{
 			line = candidate;
+			line_width += ch_width;
 		}
 
 		i += len;
@@ -175,7 +199,7 @@ float_t Label::measure_height( float_t width, const UIContext& ctx ) const
 
 	if ( wrap_ )
 	{
-		lines = wrap_lines( text, width, font_size, ctx.renderer ).size();
+		lines = cached_lines( text, width, font_size, ctx.renderer ).size();
 	}
 	else
 	{
@@ -200,7 +224,7 @@ void Label::render( Renderer& renderer, const UIContext& ctx ) const
 	const float_t line_h = renderer.measure_line_height( font_size );
 	float_t y = rect_.y;
 
-	for ( const auto& line : wrap_lines( text, rect_.w, font_size, renderer ) )
+	for ( const auto& line : cached_lines( text, rect_.w, font_size, renderer ) )
 	{
 		draw_text_fit( renderer, Rect( rect_.x, y, rect_.w, line_h ), line, style );
 		y += line_h;

@@ -62,6 +62,17 @@ public:
 	 */
 	static std::vector< string_t > wrap_lines( const string_t& text, float_t width, float_t font_size, const Renderer& renderer );
 
+private:
+	/// 折り返しの結果のキャッシュ（文字列・幅・大きさが同じなら使い回す）
+	mutable string_t wrap_cache_text_;
+	mutable float_t wrap_cache_width_ = -1.f;
+	mutable float_t wrap_cache_font_size_ = -1.f;
+	mutable std::vector< string_t > wrap_cache_lines_;
+
+	const std::vector< string_t >& cached_lines( const string_t& text, float_t width, float_t font_size, const Renderer& renderer ) const;
+
+public:
+
 }; // class Label
 
 } // namespace core::ui

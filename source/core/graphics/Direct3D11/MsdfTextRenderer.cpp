@@ -10,6 +10,33 @@
 namespace core::graphics {
 
 /**
+ * UTF-16 を Unicode のコードポイントの列にする（サロゲートペアを組み立てる）
+ *
+ * 以前は wchar_t を 1 文字として扱っていたので、「𠮷」や絵文字（サロゲートペア）が 2 つの壊れた文字になった。
+ */
+std::u32string MsdfTextRenderer::decode_utf16( const wchar_t* text )
+{
+	std::u32string out;
+
+	for ( const wchar_t* p = text; *p; ++p )
+	{
+		const char32_t c = static_cast< char32_t >( *p );
+
+		if ( c >= 0xD800 && c <= 0xDBFF && p[ 1 ] >= 0xDC00 && p[ 1 ] <= 0xDFFF )
+		{
+			out.push_back( 0x10000 + ( ( c - 0xD800 ) << 10 ) + ( static_cast< char32_t >( p[ 1 ] ) - 0xDC00 ) );
+			++p;
+		}
+		else
+		{
+			out.push_back( c );
+		}
+	}
+
+	return out;
+}
+
+/**
  * @brief コンストラクタ: MSDF テキスト描画に必要な全リソースを初期化する
  *
  * 初期化順序:
@@ -136,9 +163,10 @@ void MsdfTextRenderer::update_transform()
  */
 void MsdfTextRenderer::append_quad( float x, float y, float w, float h, const UVRect& uv, const Color& color )
 {
+	// 溜めきったら、ここまでを描いてから続ける（以前は 1024 文字を超えた分が黙って描かれなかった）
 	if ( vertices_.size() + 4 > MAX_CHARS * 4 )
 	{
-		return;
+		flush();
 	}
 
 	const Pixel2DSpace space = direct_3d_->get_2d_space();
@@ -231,17 +259,26 @@ void MsdfTextRenderer::draw_text( float x, float y, const wchar_t* text, const T
 
 	msdf_constant_buffer_->update( &cb_data );
 
-	for ( const wchar_t* p = text; *p; ++p )
-	{
-		uint32_t codepoint = static_cast< uint32_t >( *p );
+	uint32_t previous = 0;
 
+	for ( const uint32_t codepoint : decode_utf16( text ) )
+	{
 		if ( codepoint == '\n' )
 		{
 			// 改行: カーソルを次の行の先頭に移動
 			cursor_x = x;
 			y += style.font_size * static_cast< float >( fm.lineHeight / fm.emSize );
+			previous = 0;
 			continue;
 		}
+
+		// カーニング（以前は無く、「AV」などの間が空いた）
+		if ( previous != 0 )
+		{
+			cursor_x += static_cast< float >( cache_->get_kerning( previous, codepoint ) ) * scale;
+		}
+
+		previous = codepoint;
 
 		const CachedGlyph* glyph = cache_->get( codepoint );
 
@@ -308,19 +345,28 @@ float MsdfTextRenderer::measure_text_width( const wchar_t* text, float font_size
 	const auto& fm = font_->get_font_metrics();
 	float scale = font_size / static_cast< float >( fm.emSize );
 	float width = 0.f;
+	uint32_t previous = 0;
 
-	for ( const wchar_t* p = text; *p; ++p )
+	// 送り幅とカーニングだけを使う（MSDF の生成と GPU への転送はしない）
+	for ( const uint32_t codepoint : decode_utf16( text ) )
 	{
-		if ( *p == '\n' )
+		if ( codepoint == '\n' )
 		{
 			break;
 		}
 
-		const CachedGlyph* glyph = cache_->get( static_cast< uint32_t >( *p ) );
-
-		if ( glyph )
+		if ( previous != 0 )
 		{
-			width += static_cast< float >( glyph->metrics.advance ) * scale;
+			width += static_cast< float >( cache_->get_kerning( previous, codepoint ) ) * scale;
+		}
+
+		previous = codepoint;
+
+		double advance = 0.0;
+
+		if ( cache_->get_advance( codepoint, advance ) )
+		{
+			width += static_cast< float >( advance ) * scale;
 		}
 	}
 

@@ -593,8 +593,11 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
 		resolved.font_size = default_font_size_;
 	}
 
-	float_t text_w = msdf_text_renderer_->measure_text_width( text, resolved.font_size );
-	float_t text_h = msdf_text_renderer_->measure_text_height( text, resolved.font_size );
+	// 配置に要るときだけ測る（左寄せなら幅、上寄せなら高さは要らない。以前は描く前に必ず 2 回走査していた）
+	const bool need_w = resolved.h_align != core::graphics::HAlign::LEFT && resolved.h_align != core::graphics::HAlign::START;
+	const bool need_h = resolved.v_align != core::graphics::VAlign::TOP;
+	float_t text_w = need_w ? msdf_text_renderer_->measure_text_width( text, resolved.font_size ) : 0.f;
+	float_t text_h = need_h ? msdf_text_renderer_->measure_text_height( text, resolved.font_size ) : 0.f;
 	float_t x = align_x( left, right, text_w, resolved.h_align );
 	float_t y = align_y( top, bottom, text_h, resolved.v_align );
 
@@ -618,8 +621,10 @@ void GraphicsManager::queue_text( float_t left, float_t top, float_t right, floa
 		resolved.font_size = default_font_size_;
 	}
 
-	const float_t text_w = msdf_text_renderer_->measure_text_width( text, resolved.font_size );
-	const float_t text_h = msdf_text_renderer_->measure_text_height( text, resolved.font_size );
+	const bool need_w = resolved.h_align != core::graphics::HAlign::LEFT && resolved.h_align != core::graphics::HAlign::START;
+	const bool need_h = resolved.v_align != core::graphics::VAlign::TOP;
+	const float_t text_w = need_w ? msdf_text_renderer_->measure_text_width( text, resolved.font_size ) : 0.f;
+	const float_t text_h = need_h ? msdf_text_renderer_->measure_text_height( text, resolved.font_size ) : 0.f;
 
 	msdf_text_renderer_->draw_text( align_x( left, right, text_w, resolved.h_align ), align_y( top, bottom, text_h, resolved.v_align ), text, resolved );
 }
@@ -731,8 +736,11 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
 		resolved.font_size = default_font_size_;
 	}
 
-	float_t text_w = msdf_text_renderer_->measure_text_width( text, resolved.font_size );
-	float_t text_h = msdf_text_renderer_->measure_text_height( text, resolved.font_size );
+	// 配置に要るときだけ測る（左寄せなら幅、上寄せなら高さは要らない。以前は描く前に必ず 2 回走査していた）
+	const bool need_w = resolved.h_align != core::graphics::HAlign::LEFT && resolved.h_align != core::graphics::HAlign::START;
+	const bool need_h = resolved.v_align != core::graphics::VAlign::TOP;
+	float_t text_w = need_w ? msdf_text_renderer_->measure_text_width( text, resolved.font_size ) : 0.f;
+	float_t text_h = need_h ? msdf_text_renderer_->measure_text_height( text, resolved.font_size ) : 0.f;
 	float_t x = align_x( left, right, text_w, resolved.h_align );
 	float_t y = align_y( top, bottom, text_h, resolved.v_align );
 

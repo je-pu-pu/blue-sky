@@ -53,6 +53,8 @@ class GlyphCache {
 	GlyphAtlasStorage* atlas_;		///< MSDF ビットマップのアップロード先アトラス（外部所有）
 
 	std::unordered_map< uint32_t, Entry > cache_;		///< コードポイント → キャッシュエントリ
+	std::unordered_map< uint32_t, double > advance_cache_;		///< 計測用の送り幅（MSDF を作っていない文字も）
+	std::unordered_map< uint64_t, double > kerning_cache_;		///< カーニング
 	std::list< uint32_t > lru_;							///< 使用順（先頭が最新）
 	std::vector< int > free_cells_;						///< 追い出しで空いたアトラスのセル
 
@@ -102,6 +104,17 @@ public:
 	 * @return キャッシュ済みグリフへのポインタ（取得失敗時 nullptr）。後続の get() で追い出されると無効になる
 	 */
 	const CachedGlyph* get( uint32_t codepoint );
+
+	/**
+	 * 送り幅（EM 正規化）だけを得る。MSDF の生成と GPU への転送はしない（文字幅を測るため）
+	 *
+	 * 以前は文字幅を測るだけで、グリフの MSDF の生成とアトラスへの転送が走っていた。
+	 * 文字が無ければ false
+	 */
+	bool get_advance( uint32_t codepoint, double& advance );
+
+	/// 2 つの文字の間のカーニング（EM 正規化。無ければ 0）
+	double get_kerning( uint32_t left, uint32_t right );
 
 	/// キャッシュを全クリアし、アトラスのセルもすべて未使用に戻す（フォント変更やリセット時に使用）
 	void clear();

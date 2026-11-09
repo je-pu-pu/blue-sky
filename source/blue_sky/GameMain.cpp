@@ -183,12 +183,41 @@ GameMain::GameMain()
 	// MainLoop
 	main_loop_.reset( new MainLoop( 60 ) );
 
-	// ゲーム設定 : 設定ファイルから読み、表示系以外を反映する（表示系は App / Direct3D の初期化で反映済み）
+	// ゲーム設定 : ユーザーの設定ファイルから読み、表示系以外を反映する（表示系は App / Direct3D の初期化で、同じ登録を使って反映済み）
 	settings_ = std::make_unique< core::setting::SettingStore >();
+	settings_->set_error_handler( [] ( const string_t& message ) { debug_log( "[Setting] " + message ); } );
 	game_settings::register_all( * settings_, * this );
-	settings_->load( * get_config() );
-	settings_->sync_from_runtime( game_settings::FULL_SCREEN, get_graphics_manager()->is_full_screen() );
+	settings_->load( * get_app()->get_user_config() );
+	game_settings::fix_invalid_values( * settings_ );
 	settings_->apply_all_individual();
+
+	// ユーザーの設定は settings.config が正。2 つのファイルに同じ項目が二重に残らないようにする
+	// （どちらを編集すれば効くのか分からなくならないように）
+	// - 開発用の blue-sky.config に残っている、ストアの項目は消す（以前の版から引き継いだもの）
+	// - settings.config には、ストアの項目と版だけを残す（引き継ぎで写った開発用の項目は消す）
+	{
+		auto* user_config = get_app()->get_user_config();
+		std::vector< string_t > not_user_settings;
+
+		for ( const auto& [ name, value ] : user_config->get_values() )
+		{
+			if ( settings_->has( name ) )
+			{
+				get_config()->erase( name.c_str() );
+			}
+			else if ( name != core::setting::SettingStore::VERSION_KEY )
+			{
+				not_user_settings.push_back( name );
+			}
+		}
+
+		for ( const auto& name : not_user_settings )
+		{
+			user_config->erase( name.c_str() );
+		}
+	}
+
+	save_settings();
 
 	// UI
 	ui_theme_ = std::make_unique< core::ui::Theme >();
@@ -241,14 +270,24 @@ void GameMain::shutdown()
 
 	// 設定を保存する。ユーザーの明示的な操作（F2 / F5 / Alt+Enter）はその場で設定に反映済み。
 	// 終了時の実際の状態（フォーカス喪失で解除されたフルスクリーンなど）は取り込まない
-	settings_->save( * get_config() );
+	save_settings();
 
 	if ( ! get_config()->save_file( "blue-sky.config" ) )
 	{
-		debug_log( "[Config] 設定ファイルを保存できませんでした: blue-sky.config" );
+		debug_log( "[Config] 開発用の設定ファイルを保存できませんでした: blue-sky.config" );
 	}
 
 	get_script_manager()->save_command_history( "log/script.log" );
+}
+
+void GameMain::save_settings()
+{
+	settings_->save( * get_app()->get_user_config(), game_settings::USER_SETTINGS_VERSION );
+
+	if ( ! get_app()->get_user_config()->save_file( game_settings::USER_SETTINGS_PATH ) )
+	{
+		debug_log( string_t( "[Config] ユーザーの設定ファイルを保存できませんでした: " ) + game_settings::USER_SETTINGS_PATH );
+	}
 }
 
 /**
@@ -539,7 +578,7 @@ bool GameMain::update()
 	{
 		is_display_restore_requested_ = false;
 
-		if ( std::get< bool >( settings_->get_committed( game_settings::FULL_SCREEN ) ) != get_graphics_manager()->is_full_screen() )
+		if ( settings_->get_committed( game_settings::FULL_SCREEN ) != get_graphics_manager()->is_full_screen() )
 		{
 			get_graphics_manager()->switch_full_screen();
 			get_app()->set_full_screen( get_graphics_manager()->is_full_screen() );
@@ -558,9 +597,9 @@ bool GameMain::update()
  */
 void GameMain::apply_display_settings()
 {
-	const int w = std::get< int >( settings_->get_committed( game_settings::SCREEN_WIDTH ) );
-	const int h = std::get< int >( settings_->get_committed( game_settings::SCREEN_HEIGHT ) );
-	const bool full_screen = std::get< bool >( settings_->get_committed( game_settings::FULL_SCREEN ) );
+	const int w = settings_->get_committed( game_settings::SCREEN_WIDTH );
+	const int h = settings_->get_committed( game_settings::SCREEN_HEIGHT );
+	const bool full_screen = settings_->get_committed( game_settings::FULL_SCREEN );
 
 	const bool size_changed = w != get_app()->get_width() || h != get_app()->get_height();
 

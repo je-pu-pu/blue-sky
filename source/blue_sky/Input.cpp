@@ -88,25 +88,16 @@ const char_t* Input::get_key_config_name( Button button )
 	}
 }
 
-void Input::load_config( Config& config )
+/**
+ * 開発用・機器の設定（blue-sky.config）を読む
+ *
+ * キー割り当てとマウス感度はユーザーの設定なので、ここでは読まない（SettingStore が反映する）。
+ * 以前はここでも既定値付きで読んでいて、既定値と読み方が 2 か所にあった。
+ */
+void Input::load_config( const Config& config )
 {
 	// 何度呼ばれても割り当てが重複しないよう、毎回作り直す
-	for ( auto& codes : key_code_ ) codes.clear();
 	for ( auto& codes : fixed_key_code_ ) codes.clear();
-
-	load_key_code_config( config, Button::LEFT,  "input.key.left",  "A" );
-	load_key_code_config( config, Button::RIGHT, "input.key.right", "D" );
-	load_key_code_config( config, Button::UP,    "input.key.up",    "W" );
-	load_key_code_config( config, Button::DOWN,  "input.key.down",  "S" );
-
-	load_key_code_config( config, Button::A,     "input.key.a",     "MOUSE_L" );
-	load_key_code_config( config, Button::B,     "input.key.b",     "MOUSE_R" );
-	load_key_code_config( config, Button::JUMP,   "input.key.jump", "SPACE"   );
-
-	load_key_code_config( config, Button::L,     "input.key.l",     "Q" );
-	load_key_code_config( config, Button::R,     "input.key.r",     "E" );
-	load_key_code_config( config, Button::L2,    "input.key.l2",    "Z" );
-	load_key_code_config( config, Button::R2,    "input.key.r2",    "C" );
 
 	// 固定キー : ESC と、メニュー操作用の矢印キー・Enter（ユーザー割り当てを変えても常に有効）
 	fixed_key_code_[ static_cast< int >( Button::ESCAPE ) ].push_back( VK_ESCAPE );
@@ -148,24 +139,9 @@ void Input::load_config( Config& config )
 	joystick_x_axis_pos_ = get_joystick_axis_pos_pointer_by_index( axis_index( "input.joystick.axis.x", 3 ) );
 	joystick_y_axis_pos_ = get_joystick_axis_pos_pointer_by_index( axis_index( "input.joystick.axis.y", 2 ) );
 
-	mouse_x_sensitivity_ = config.get( "input.mouse.x_sensitivity", 1.f );
-	mouse_y_sensitivity_ = config.get( "input.mouse.y_sensitivity", 1.f );
 
 	joystick_x_sensitivity_ = config.get( "input.joystick.axis.x_sensitivity", 1.f );
 	joystick_y_sensitivity_ = config.get( "input.joystick.axis.y_sensitivity", 1.f );
-}
-
-void Input::load_key_code_config( Config& config, Button button, const char_t* name, const char_t* default_value )
-{
-	auto codes = parse_key_bindings_text( config.get( name, std::string( default_value ) ) );
-
-	// 1 つも解釈できなければ既定値を使う（設定ファイルが壊れていても操作不能にしない）
-	if ( codes.empty() )
-	{
-		codes = parse_key_bindings_text( default_value );
-	}
-
-	key_code_[ static_cast< int >( button ) ] = codes;
 }
 
 std::vector< int > Input::parse_key_bindings_text( const string_t& text )

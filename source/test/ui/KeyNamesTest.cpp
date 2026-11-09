@@ -55,6 +55,8 @@ TEST( KeyNamesTest, ESCは割り当てできない )
 	EXPECT_FALSE( key_names::is_bindable( VK_F5 ) );
 	EXPECT_TRUE( key_names::is_bindable( VK_F3 ) );
 	EXPECT_FALSE( key_names::is_bindable( VK_SHIFT ) ); // 左右別のコードで割り当てる
+	EXPECT_FALSE( key_names::is_bindable( VK_RETURN ) );	// 固定キー（決定）
+	EXPECT_FALSE( key_names::is_bindable( VK_UP ) );		// 固定キー（方向）
 	EXPECT_TRUE( key_names::is_bindable( VK_LSHIFT ) );
 	EXPECT_TRUE( key_names::is_bindable( 'Q' ) );
 	EXPECT_TRUE( key_names::is_bindable( VK_LBUTTON ) );

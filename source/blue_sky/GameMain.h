@@ -196,6 +196,9 @@ public:
 	void on_resize() override;
 	void on_toggle_full_screen() override { is_full_screen_toggle_requested_ = true; }
 	void shutdown() override;
+
+	/// ユーザーの設定（settings.config）を保存する
+	void save_settings();
 	void on_activated() override { is_display_restore_requested_ = true; }
 
 	Input* get_input() const { return input_.get(); }

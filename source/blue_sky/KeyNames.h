@@ -23,7 +23,7 @@ int code_from_name( const string_t& name );
 /// 仮想キーコードから名前を得る。不明なら空文字列
 string_t name_from_code( int code );
 
-/// キー割り当てに使えるキーの一覧（ESC = キャンセル、F1 / F2 / F5 = グローバルなホットキー は含まない）
+/// キー割り当てに使えるキーの一覧（ESC = キャンセル、F1 / F2 / F5 = グローバルなホットキー、矢印・Enter = 固定キー は含まない）
 const std::vector< int >& get_bindable_codes();
 
 /// 割り当て可能なキーか

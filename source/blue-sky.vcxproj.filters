@@ -422,6 +422,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\setting\SettingKey.h">
+      <Filter>core\setting</Filter>
+    </ClInclude>
     <ClInclude Include="Scene\OverlayRenderRange.h">
       <Filter>Scene</Filter>
     </ClInclude>

@@ -182,6 +182,10 @@ TEST( SettingStoreTest, 試用中は維持するまで元の値を保存する )
 	s.add_int( "graphics.screen_width", 1920, 320, 7680, ApplyMode::DEFERRED );
 	s.add_float( "audio.volume", 0.5f, 0.f, 1.f, 0.1f, ApplyMode::IMMEDIATE );
 
+	// 元の値は既定値以外にしておく（既定値は保存されないため）
+	s.set( "graphics.screen_width", 1600 );
+	s.apply_deferred();
+
 	const auto snap = s.snapshot();
 	s.set( "graphics.screen_width", 1280 );
 	s.set( "audio.volume", 0.9f );
@@ -193,7 +197,7 @@ TEST( SettingStoreTest, 試用中は維持するまで元の値を保存する )
 	// 確認待ちの間に保存（強制終了の直前など）: 表示は元の値、音量は新しい値
 	game::Config during;
 	s.save( during );
-	EXPECT_EQ( "1920", during.get< string_t >( "graphics.screen_width", "" ) );
+	EXPECT_EQ( "1600", during.get< string_t >( "graphics.screen_width", "" ) );
 	EXPECT_EQ( "0.9", during.get< string_t >( "audio.volume", "" ) );
 
 	// 維持したら新しい値を保存する
@@ -219,8 +223,70 @@ TEST( SettingStoreTest, 試用はロールバックでも終わる )
 	EXPECT_FALSE( s.in_trial() );
 
 	game::Config out;
+	out.set< string_t >( "graphics.screen_width", "1280" );		// 以前に保存されていた値
 	s.save( out );
-	EXPECT_EQ( "1920", out.get< string_t >( "graphics.screen_width", "" ) );
+	EXPECT_FALSE( out.has( "graphics.screen_width" ) );			// 既定値に戻ったので消える
+}
+
+TEST( SettingStoreTest, 保存は既定値と違う項目だけを書き版を付ける )
+{
+	SettingStore s;
+	s.add_float( "audio.volume", 0.5f, 0.f, 1.f, 0.1f, ApplyMode::IMMEDIATE );
+	s.add_bool( "audio.mute", false, ApplyMode::IMMEDIATE );
+
+	s.set( "audio.volume", 0.8f );
+	s.commit_immediate();
+
+	game::Config out;
+	out.set< string_t >( "audio.mute", "1" );		// 以前は既定値以外だった
+	s.save( out, 3 );
+
+	EXPECT_EQ( "0.8", out.get< string_t >( "audio.volume", "" ) );
+	EXPECT_FALSE( out.has( "audio.mute" ) );
+	EXPECT_EQ( 3, out.get< int >( SettingStore::VERSION_KEY, 0 ) );
+}
+
+TEST( SettingStoreTest, 型付きのキーで読み書きでき範囲と情報を引ける )
+{
+	constexpr core::setting::SettingKey< float_t > VOLUME { "audio.volume" };
+	constexpr core::setting::SettingKey< int > WIDTH { "graphics.screen_width" };
+
+	SettingStore s;
+	s.add_float( VOLUME, 0.5f, 0.f, 1.f, 0.05f, ApplyMode::IMMEDIATE );
+	s.add_int( WIDTH, 1920, 640, 7680, ApplyMode::DEFERRED );
+	s.set_info( VOLUME, "options.volume", "options.volume.description" );
+
+	s.set( VOLUME, 0.25 );		// double を渡しても項目の型（float）で受ける
+	EXPECT_FLOAT_EQ( 0.25f, s.get( VOLUME ) );
+
+	s.set( WIDTH, 1280 );
+	s.apply_deferred();
+	EXPECT_EQ( 1280, s.get_committed( WIDTH ) );
+
+	SettingStore::Range range;
+	ASSERT_TRUE( s.get_range( VOLUME, range ) );
+	EXPECT_FLOAT_EQ( 0.f, range.min );
+	EXPECT_FLOAT_EQ( 1.f, range.max );
+	EXPECT_FLOAT_EQ( 0.05f, range.step );
+
+	EXPECT_EQ( "options.volume", s.get_info( VOLUME ).label_key );
+	EXPECT_EQ( "options.volume.description", s.get_info( VOLUME ).description_key );
+}
+
+TEST( SettingStoreTest, 未登録のキーと型の違いは誤りとして知らせる )
+{
+	SettingStore s;
+	s.add_float( "audio.volume", 0.5f, 0.f, 1.f, 0.1f, ApplyMode::IMMEDIATE );
+
+	std::vector< string_t > errors;
+	s.set_error_handler( [&] ( const string_t& m ) { errors.push_back( m ); } );
+
+	s.get< float_t >( "audio.volum" );			// 打ち間違い
+	s.get< int >( "audio.volume" );				// 型の違い
+	s.set( "audio.volume", "loud" );			// 文字列と数値の取り違え
+
+	EXPECT_EQ( 3u, errors.size() );
+	EXPECT_FLOAT_EQ( 0.5f, s.get< float_t >( "audio.volume" ) );
 }
 
 TEST( SettingStoreTest, on_setフックで他の項目を入れ替えられる )

@@ -1,8 +1,10 @@
 #pragma once
 
 #include <core/type.h>
+#include <core/setting/SettingKey.h>
 
 #include <functional>
+#include <type_traits>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -43,6 +45,27 @@ public:
 	using OnSetHook = std::function< void( SettingStore&, const string_t& key, const Value& old_value ) >;
 	using Snapshot = std::unordered_map< string_t, Value >;
 
+	/// 使い方の誤り（未登録のキー・型の違い）を知らせる先。既定は何もしない（ログに出すのはアプリ側で設定する）
+	using ErrorHandler = std::function< void( const string_t& message ) >;
+
+	/// 範囲（int / float の項目）
+	struct Range
+	{
+		float_t min = 0.f;
+		float_t max = 0.f;
+		float_t step = 0.f;		///< 0 なら刻み無し
+	};
+
+	/// 画面に出すための情報（ラベル・説明の文字列キー）
+	struct Info
+	{
+		string_t label_key;
+		string_t description_key;
+	};
+
+	/// 保存するファイルの形式の版（項目の意味を変えたときに上げ、読み込み側で移行する）
+	static constexpr const char_t* VERSION_KEY = "settings.version";
+
 private:
 	struct Entry
 	{
@@ -58,6 +81,7 @@ private:
 		ApplyFn apply;
 		OnSetHook on_set;
 		int group = -1;		///< 所属グループ（-1 = なし）
+		Info info;
 	};
 
 	struct Group
@@ -74,6 +98,15 @@ private:
 	uint_t change_count_ = 0;
 
 	Snapshot trial_values_;		///< 試用中の項目と、保存に使う元の値
+
+	ErrorHandler error_handler_;
+
+	/// 使い方の誤りを知らせる
+	void report( const string_t& message ) const;
+
+	/// 項目を探す。無ければ（呼び出し元の名前付きで）誤りを知らせる
+	Entry* find_or_report( const string_t& key, const char_t* caller );
+	const Entry* find_or_report( const string_t& key, const char_t* caller ) const;
 
 	Entry* find( const string_t& key );
 	const Entry* find( const string_t& key ) const;
@@ -104,30 +137,62 @@ public:
 	/// set() の直後に呼ばれるフック（関連する他の項目の調整用）。フック内の set() ではフックは呼ばれない
 	void set_on_set( const string_t& key, OnSetHook hook );
 
+	/// 画面に出すための情報を付ける（ラベル・説明の文字列キー）
+	void set_info( const string_t& key, const string_t& label_key, const string_t& description_key );
+	Info get_info( const string_t& key ) const;
+
+	/// 範囲（int / float の項目）。範囲の無い項目なら false
+	bool get_range( const string_t& key, Range& range ) const;
+
 	bool has( const string_t& key ) const { return find( key ) != nullptr; }
 	size_t size() const { return entries_.size(); }
+
+	/// 使い方の誤り（未登録のキー・型の違い）を知らせる先を設定する
+	void set_error_handler( ErrorHandler handler ) { error_handler_ = std::move( handler ); }
 
 	// 値（保留値）
 	Value get_value( const string_t& key ) const;
 
+	/// 名前で読む。未登録のキー・型の違いは誤りを知らせて T() を返す。新しいコードは SettingKey 版を使う
 	template< typename T > T get( const string_t& key ) const
 	{
-		const Value v = get_value( key );
+		const Entry* e = find_or_report( key, "get" );
 
-		if ( const T* p = std::get_if< T >( & v ) )
+		if ( ! e )
+		{
+			return T();
+		}
+
+		if ( const T* p = std::get_if< T >( & e->pending ) )
 		{
 			return *p;
 		}
 
+		report( "設定 " + key + " を登録と違う型で読もうとしました" );
 		return T();
 	}
+
+	/// 型付きのキーで読む（型の書き間違いはコンパイル時に分かる）
+	template< typename T > T get( const SettingKey< T >& key ) const { return get< T >( key.str() ); }
+
+	/// 型付きのキーで書く（値の型はキーから決める。float の項目に 0.5 と書いても double と食い違わない）
+	template< typename T > void set( const SettingKey< T >& key, const std::type_identity_t< T >& value ) { set( key.str(), Value( value ) ); }
 
 	Value get_committed( const string_t& key ) const;
 	Value get_default( const string_t& key ) const;
 
+	/// 確定値を型付きのキーで読む
+	template< typename T > T get_committed( const SettingKey< T >& key ) const
+	{
+		const Value v = get_committed( key.str() );
+		const T* p = std::get_if< T >( & v );
+		return p ? *p : T();
+	}
+
 	/// 保留値を設定する。範囲・量子化を適用し、IMMEDIATE なら反映関数を呼ぶ
 	void set( const string_t& key, const Value& value );
 	void set( const string_t& key, const char_t* value ) { set( key, Value( string_t( value ) ) ); }
+	void set( const SettingKey< string_t >& key, const char_t* value ) { set( key.str(), Value( string_t( value ) ) ); }
 
 	// 状態
 	bool has_pending_changes() const;		///< 保留値と確定値が違う項目があるか
@@ -160,7 +225,14 @@ public:
 
 	// 永続化
 	void load( const game::Config& );	///< 読めない値・範囲外は既定値／クランプ
-	void save( game::Config& ) const;	///< 確定値を書く
+
+	/**
+	 * 確定値を書く
+	 *
+	 * 既定値と同じ項目は書かない（設定から消す）。コード側で既定値を変えたとき、既存のユーザーにも届くように。
+	 * 試用中の項目は元の値を書く。VERSION_KEY に version を書く。
+	 */
+	void save( game::Config&, int version = 1 ) const;
 
 	/// 起動時: グループに属さない項目の反映関数を確定値で呼ぶ
 	void apply_all_individual();

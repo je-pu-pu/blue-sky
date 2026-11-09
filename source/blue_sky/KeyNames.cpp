@@ -155,8 +155,11 @@ const std::vector< int >& get_bindable_codes()
 		for ( const auto& e : NAMED_KEYS )
 		{
 			// ESC はキャンセルに予約。F1 / F2 / F5 はグローバルなホットキー（コマンドモード・ミュート・フルスクリーン）。
+			// 矢印キーと Enter は固定キー（Input の fixed_key_code_ で方向と A に割り当て済み）なので、
+			// 別のボタンに割り当てると 1 回の押下で 2 つのボタンが入る（例: ジャンプを Enter にすると決定とジャンプが同時に入る）。
 			// 左右を区別しない SHIFT / CTRL / ALT は、走査では左右別のコードが拾えるので除外する
 			if ( e.code == VK_ESCAPE || e.code == VK_F1 || e.code == VK_F2 || e.code == VK_F5 ||
+				e.code == VK_RETURN || e.code == VK_UP || e.code == VK_DOWN || e.code == VK_LEFT || e.code == VK_RIGHT ||
 				e.code == VK_SHIFT || e.code == VK_CONTROL || e.code == VK_MENU )
 			{
 				continue;

@@ -57,7 +57,8 @@ private:
 	bool		is_clip_cursor_enabled_;
 
 	Game*		game_ = nullptr;
-	std::unique_ptr< Config >			config_;
+	std::unique_ptr< Config >			config_;		///< 開発用・エンジンの設定（blue-sky.config）
+	std::unique_ptr< Config >			user_config_;	///< ユーザーの設定（settings.config。SettingStore が読み書きする）
 
 	std::unordered_map< HANDLE, std::function< void() > > watch_directory_change_handler_list_;
 
@@ -112,4 +113,5 @@ public:
 	void close();
 
 	Config* get_config() { return config_.get(); }
+	Config* get_user_config() { return user_config_.get(); }
 };

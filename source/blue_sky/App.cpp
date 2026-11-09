@@ -1,5 +1,6 @@
 #include "App.h"
 #include "GameMain.h"
+#include "GameSettings.h"
 #include "resource.h"
 
 #include <win/Tablet.h>
@@ -32,6 +33,7 @@ App::App()
 	, is_mouse_in_window_( false )
 	, is_clip_cursor_enabled_( false )
 	, config_( new Config() )
+	, user_config_( new Config() )
 {
 	/*
 	TCHAR exe_path[ MAX_PATH ];
@@ -68,11 +70,14 @@ App::~App()
 //■初期化
 bool App::Init(HINSTANCE hi, int nCmdShow)
 {
-	// 設定を読み込む
+	// 設定を読み込む : 開発用・エンジンの設定と、ユーザーの設定（無ければ前者から引き継ぐ）
 	config_->load_file( "blue-sky.config" );
-	
-	width_ = get_config()->get( "graphics.screen_width", DEFAULT_WIDTH );
-	height_ = get_config()->get( "graphics.screen_height", DEFAULT_HEIGHT );
+	blue_sky::game_settings::load_user_settings_file( * user_config_, * config_ );
+
+	// 表示設定は、ゲーム中のストアと同じ登録（既定値・範囲）で読む
+	// （以前は App とストアがばらばらに読み、既定値が 800x600 と 1920x1080 の 2 つあり、範囲の検査も違った）
+	bool initial_full_screen = false;
+	blue_sky::game_settings::read_initial_display( * user_config_, width_, height_, initial_full_screen );
 
 	//インスタンスハンドルをコピー
 	hInst = hi;
@@ -132,7 +137,7 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		return false;
 	}
 	
-	set_full_screen( get_config()->get( "graphics.full_screen", 0 ) != 0 );
+	set_full_screen( initial_full_screen );
 
 	// ゲームを初期化する
 	game_ = blue_sky::GameMain::get_instance();

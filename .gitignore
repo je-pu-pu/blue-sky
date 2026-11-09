@@ -26,6 +26,9 @@
 
 /source/imgui.ini
 /source/blue-sky.config
+/source/settings.config
+/source/settings.config.tmp
+/source/blue-sky.config.tmp
 /source/save/*.save
 /source/log/*.log
 

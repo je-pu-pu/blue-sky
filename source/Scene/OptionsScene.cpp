@@ -58,6 +58,51 @@ string_t format_one_decimal( float_t v )
 	return std::to_string( tenth / 10 ) + "." + std::to_string( std::abs( tenth % 10 ) );
 }
 
+/**
+ * 設定の項目からスライダーを作る（範囲・刻み・ラベル・説明はストアの登録から取る）
+ *
+ * 以前は範囲を画面側にも書いていて、ストアの登録と食い違うおそれがあった。
+ *
+ * @param also 値を書いたあとに追加で行うこと（X / Y の感度をそろえるなど）
+ */
+Slider* add_setting_slider( Stack* page, SettingStore* store, const core::setting::SettingKey< float_t >& key,
+	std::function< string_t( float_t ) > formatter, std::function< void( float_t ) > also = {} )
+{
+	SettingStore::Range range;
+	store->get_range( key, range );
+	const auto info = store->get_info( key );
+
+	auto* slider = page->add< Slider >( info.label_key,
+		[store, key] { return store->get( key ); },
+		[store, key, also] ( float_t v )
+		{
+			store->set( key, v );
+
+			if ( also )
+			{
+				also( v );
+			}
+		},
+		range.min, range.max, range.step );
+
+	slider->set_formatter( std::move( formatter ) );
+	slider->set_description_key( info.description_key );
+	return slider;
+}
+
+/// 設定の項目からトグルを作る（ラベル・説明はストアの登録から取る）
+Toggle* add_setting_toggle( Stack* page, SettingStore* store, const core::setting::SettingKey< bool >& key )
+{
+	const auto info = store->get_info( key );
+
+	auto* toggle = page->add< Toggle >( info.label_key,
+		[store, key] { return store->get( key ); },
+		[store, key] ( bool v ) { store->set( key, v ); } );
+
+	toggle->set_description_key( info.description_key );
+	return toggle;
+}
+
 } // namespace
 
 OptionsScene::OptionsScene()
@@ -122,7 +167,7 @@ void OptionsScene::build_graphics_page( Stack* page )
 	}
 
 	auto* resolution = page->add< Choice >( "options.resolution", options,
-		[this, store] { return find_resolution_index( store->get< int >( gs::SCREEN_WIDTH ), store->get< int >( gs::SCREEN_HEIGHT ) ); },
+		[this, store] { return find_resolution_index( store->get( gs::SCREEN_WIDTH ), store->get( gs::SCREEN_HEIGHT ) ); },
 		[this, store] ( int i )
 		{
 			store->set( gs::SCREEN_WIDTH, resolutions_[ i ].width );
@@ -133,43 +178,21 @@ void OptionsScene::build_graphics_page( Stack* page )
 	resolution->set_custom_text( [store]
 	{
 		const auto& strings = GameMain::get_instance()->get_ui_strings();
-		return strings.format( "options.resolution.custom", { std::to_string( store->get< int >( gs::SCREEN_WIDTH ) ) + " x " + std::to_string( store->get< int >( gs::SCREEN_HEIGHT ) ) } );
+		return strings.format( "options.resolution.custom", { std::to_string( store->get( gs::SCREEN_WIDTH ) ) + " x " + std::to_string( store->get( gs::SCREEN_HEIGHT ) ) } );
 	} );
 	resolution->set_description_key( "options.resolution.description" );
 
-	page->add< Toggle >( "options.full_screen",
-		[store] { return store->get< bool >( gs::FULL_SCREEN ); },
-		[store] ( bool v ) { store->set( gs::FULL_SCREEN, v ); } )
-		->set_description_key( "options.full_screen.description" );
-
-	auto* fov = page->add< Slider >( "options.fov",
-		[store] { return store->get< float_t >( gs::CAMERA_FOV ); },
-		[store] ( float_t v ) { store->set( gs::CAMERA_FOV, v ); },
-		50.f, 120.f, 1.f );
-	fov->set_formatter( & format_int );
-	fov->set_description_key( "options.fov.description" );
-
-	page->add< Toggle >( "options.display_fps",
-		[store] { return store->get< bool >( gs::DISPLAY_FPS ); },
-		[store] ( bool v ) { store->set( gs::DISPLAY_FPS, v ); } )
-		->set_description_key( "options.display_fps.description" );
+	add_setting_toggle( page, store, gs::FULL_SCREEN );
+	add_setting_slider( page, store, gs::CAMERA_FOV, & format_int );
+	add_setting_toggle( page, store, gs::DISPLAY_FPS );
 }
 
 void OptionsScene::build_audio_page( Stack* page )
 {
 	SettingStore* store = & get_settings();
 
-	auto* volume = page->add< Slider >( "options.volume",
-		[store] { return store->get< float_t >( gs::AUDIO_VOLUME ); },
-		[store] ( float_t v ) { store->set( gs::AUDIO_VOLUME, v ); },
-		0.f, 1.f, 0.05f );
-	volume->set_formatter( & format_percent );
-	volume->set_description_key( "options.volume.description" );
-
-	page->add< Toggle >( "options.mute",
-		[store] { return store->get< bool >( gs::AUDIO_MUTE ); },
-		[store] ( bool v ) { store->set( gs::AUDIO_MUTE, v ); } )
-		->set_description_key( "options.mute.description" );
+	add_setting_slider( page, store, gs::AUDIO_VOLUME, & format_percent );
+	add_setting_toggle( page, store, gs::AUDIO_MUTE );
 }
 
 void OptionsScene::build_controls_page( Stack* page )
@@ -177,12 +200,8 @@ void OptionsScene::build_controls_page( Stack* page )
 	SettingStore* store = & get_settings();
 
 	// 感度は X / Y を同じ値で設定する
-	auto* sensitivity = page->add< Slider >( "options.mouse_sensitivity",
-		[store] { return store->get< float_t >( gs::MOUSE_X_SENSITIVITY ); },
-		[store] ( float_t v ) { store->set( gs::MOUSE_X_SENSITIVITY, v ); store->set( gs::MOUSE_Y_SENSITIVITY, v ); },
-		0.1f, 3.f, 0.1f );
-	sensitivity->set_formatter( & format_one_decimal );
-	sensitivity->set_description_key( "options.mouse_sensitivity.description" );
+	add_setting_slider( page, store, gs::MOUSE_X_SENSITIVITY, & format_one_decimal,
+		[store] ( float_t v ) { store->set( gs::MOUSE_Y_SENSITIVITY, v ); } );
 
 	page->add< Label >( "options.key_bindings", Label::Style::HEADER );
 
@@ -209,8 +228,7 @@ void OptionsScene::build_controls_page( Stack* page )
 
 void OptionsScene::save()
 {
-	get_settings().save( * get_config() );
-	get_config()->save_file( "blue-sky.config" );
+	GameMain::get_instance()->save_settings();
 }
 
 void OptionsScene::finish_and_close()

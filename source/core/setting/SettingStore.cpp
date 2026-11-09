@@ -24,6 +24,65 @@ float_t to_float( const SettingStore::Value& v )
 
 } // namespace
 
+void SettingStore::report( const string_t& message ) const
+{
+	if ( error_handler_ )
+	{
+		error_handler_( message );
+	}
+}
+
+SettingStore::Entry* SettingStore::find_or_report( const string_t& key, const char_t* caller )
+{
+	Entry* e = find( key );
+
+	if ( ! e )
+	{
+		report( string_t( caller ) + " : 未登録の設定 " + key );
+	}
+
+	return e;
+}
+
+const SettingStore::Entry* SettingStore::find_or_report( const string_t& key, const char_t* caller ) const
+{
+	const Entry* e = find( key );
+
+	if ( ! e )
+	{
+		report( string_t( caller ) + " : 未登録の設定 " + key );
+	}
+
+	return e;
+}
+
+void SettingStore::set_info( const string_t& key, const string_t& label_key, const string_t& description_key )
+{
+	if ( Entry* e = find_or_report( key, "set_info" ) )
+	{
+		e->info = Info{ label_key, description_key };
+	}
+}
+
+SettingStore::Info SettingStore::get_info( const string_t& key ) const
+{
+	const Entry* e = find_or_report( key, "get_info" );
+	return e ? e->info : Info();
+}
+
+bool SettingStore::get_range( const string_t& key, Range& range ) const
+{
+	const Entry* e = find_or_report( key, "get_range" );
+
+	if ( ! e || ! e->has_range )
+	{
+		return false;
+	}
+
+	range = Range{ e->min, e->max, e->step };
+	return true;
+}
+
 SettingStore::Entry* SettingStore::find( const string_t& key )
 {
 	auto i = index_.find( key );
@@ -176,7 +235,7 @@ bool SettingStore::equals( const Entry& e, const Value& a, const Value& b ) cons
 
 SettingStore::Value SettingStore::get_value( const string_t& key ) const
 {
-	const Entry* e = find( key );
+	const Entry* e = find_or_report( key, "get_value" );
 	return e ? e->pending : Value();
 }
 
@@ -194,10 +253,17 @@ SettingStore::Value SettingStore::get_default( const string_t& key ) const
 
 void SettingStore::set( const string_t& key, const Value& value )
 {
-	Entry* e = find( key );
+	Entry* e = find_or_report( key, "set" );
 
 	if ( ! e )
 	{
+		return;
+	}
+
+	// 文字列と数値の取り違えは誤り（数値どうしの int / float / bool の違いは登録した型に揃える）
+	if ( std::holds_alternative< string_t >( e->default_value ) != std::holds_alternative< string_t >( value ) )
+	{
+		report( "設定 " + key + " に登録と違う型（文字列と数値）の値を書こうとしました" );
 		return;
 	}
 
@@ -513,14 +579,26 @@ void SettingStore::load( const game::Config& config )
 	change_count_++;
 }
 
-void SettingStore::save( game::Config& config ) const
+void SettingStore::save( game::Config& config, int version ) const
 {
 	for ( const auto& e : entries_ )
 	{
 		// 試用中の項目は、維持が選ばれるまで元の値を書く
 		auto t = trial_values_.find( e.key );
-		config.set< string_t >( e.key.c_str(), to_text( t != trial_values_.end() ? t->second : e.committed ) );
+		const Value& value = t != trial_values_.end() ? t->second : e.committed;
+
+		// 既定値と同じなら書かない（コード側の既定値の変更が既存のユーザーにも届くように）
+		if ( equals( e, value, e.default_value ) )
+		{
+			config.erase( e.key.c_str() );
+		}
+		else
+		{
+			config.set< string_t >( e.key.c_str(), to_text( value ) );
+		}
 	}
+
+	config.set< int >( VERSION_KEY, version );
 }
 
 void SettingStore::apply_all_individual()

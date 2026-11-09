@@ -103,7 +103,6 @@ private:
 
 	bool is_blocked_;										///< 入力ブロックフラグ ( オーバーレイ UI がアクティブな時にゲーム入力をブロックする )
 
-	void load_key_code_config( Config&, Button, const char_t*, const char_t* );
 	
 	void update_state_by_key_for( uint_t );
 
@@ -122,7 +121,7 @@ public:
 	void set_blocked( bool blocked ) { is_blocked_ = blocked; }
 	bool is_blocked() const { return is_blocked_; }
 
-	void load_config( Config& );
+	void load_config( const Config& );
 
 	/// 設定ファイルのキー名（`input.key.left` など）。割り当て対象外のボタンは nullptr
 	static const char_t* get_key_config_name( Button );

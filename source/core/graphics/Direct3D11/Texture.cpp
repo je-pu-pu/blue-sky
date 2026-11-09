@@ -9,7 +9,7 @@ namespace core::graphics::direct_3d_11
 		texture_2d_desc_.Height = height;
 		texture_2d_desc_.MipLevels = 1;
 		texture_2d_desc_.ArraySize = 1;
-		texture_2d_desc_.Format = static_cast< DXGI_FORMAT >( format );
+		texture_2d_desc_.Format = to_dxgi_format( format );
 
 		if ( multi_sample )
 		{
@@ -34,7 +34,7 @@ namespace core::graphics::direct_3d_11
 	{
 		D3D11_SHADER_RESOURCE_VIEW_DESC view_desc = {};
 
-		view_desc.Format = static_cast< DXGI_FORMAT >( format );
+		view_desc.Format = to_dxgi_format( format );
 		view_desc.ViewDimension = texture_2d_desc_.SampleDesc.Count > 1 ? D3D11_SRV_DIMENSION_TEXTURE2DMS : D3D11_SRV_DIMENSION_TEXTURE2D;
 		view_desc.Texture2D.MipLevels = 1;
 		view_desc.Texture2D.MostDetailedMip = 0;

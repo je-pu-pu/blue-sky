@@ -16,8 +16,6 @@ namespace core::graphics::direct_3d_11
 	class Direct3D11;
 	class Axis;
 
-	enum class PixelFormat;
-
 	class RenderTargetTexture;
 }
 
@@ -37,7 +35,7 @@ class GraphicsManager : public blue_sky::graphics::GraphicsManager
 {
 public:
 	using Direct3D				= core::graphics::direct_3d_11::Direct3D11;
-	using PixelFormat			= core::graphics::direct_3d_11::PixelFormat;
+	using PixelFormat			= core::graphics::PixelFormat;
 	using Axis					= core::graphics::direct_3d_11::Axis;
 
 private:

@@ -11,6 +11,7 @@
 #include <blue_sky/graphics/Direct3D11/Line.h>
 
 #include <core/graphics/Direct3D11/PixelFormat.h>
+#include <core/graphics/Direct3D11/PrimitiveTopology.h>
 #include <core/graphics/Direct3D11/Texture.h>
 #include <core/graphics/Direct3D11/RenderTargetTexture.h>
 #include <core/graphics/Direct3D11/BackBufferTexture.h>
@@ -480,7 +481,7 @@ void GraphicsManager::set_input_layout( const InputLayout* input_layout ) const
  */
 void GraphicsManager::set_primitive_topology( PrimitiveTopology primitive_topology ) const
 {
-	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( static_cast< D3D_PRIMITIVE_TOPOLOGY >( primitive_topology ) );
+	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( core::graphics::direct_3d_11::to_d3d_primitive_topology( primitive_topology ) );
 }
 
 /**

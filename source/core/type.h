@@ -19,10 +19,10 @@ namespace core
 		namespace direct_3d_11
 		{
 			template< int > class ConstantBuffer;
-			enum class PixelFormat;
 		}
 
-		using PixelFormat	= direct_3d_11::PixelFormat;
+		/// ピクセルフォーマット（エンジン独自の型。定義は core/graphics/PixelFormat.h）
+		enum class PixelFormat;
 	}
 
 	template< int Slot >

@@ -16,6 +16,7 @@ class TabView : public Widget
 {
 private:
 	std::vector< string_t > titles_;
+	std::vector< bool > badges_;		///< 見出しに印（新しい項目がある・未適用の変更がある など）を付けるか
 	size_t current_ = 0;
 	std::vector< Rect > tab_rects_;
 	bool pressed_ = false;
@@ -29,8 +30,18 @@ public:
 	T* add_page( const string_t& title_key, Args&& ... args )
 	{
 		titles_.push_back( title_key );
+		badges_.push_back( false );
 		return add< T >( std::forward< Args >( args ) ... );
 	}
+
+	/**
+	 * 見出しに印を付ける・外す（以前は見出しが矩形の配列で、印を付けられなかった。設計上の問題 B9）
+	 */
+	void set_badge( size_t index, bool on ) { if ( index < badges_.size() ) badges_[ index ] = on; }
+	bool has_badge( size_t index ) const { return index < badges_.size() && badges_[ index ]; }
+
+	/// 見出しの矩形（配置の後）
+	const Rect* get_tab_rect( size_t index ) const { return index < tab_rects_.size() ? & tab_rects_[ index ] : nullptr; }
 
 	size_t get_page_count() const { return children_.size(); }
 	size_t get_current() const { return current_; }

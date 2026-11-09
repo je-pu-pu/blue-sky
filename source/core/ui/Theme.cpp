@@ -157,6 +157,7 @@ const BrushField BRUSH_FIELDS[] =
 	{ "slider_knob", & Theme::slider_knob },
 	{ "toggle_on", & Theme::toggle_on },
 	{ "tab_indicator", & Theme::tab_indicator },
+	{ "tab_badge", & Theme::tab_badge },
 	{ "scroll_thumb", & Theme::scroll_thumb },
 	{ "dialog_header", & Theme::dialog_header },
 };
@@ -194,6 +195,8 @@ const FloatField FLOAT_FIELDS[] =
 	{ "slider_track_width", & Theme::slider_track_width, 0.f, 1.f, true },
 	{ "slider_track_height", & Theme::slider_track_height, 0.f, 1.f, true },
 	{ "choice_arrow_width", & Theme::choice_arrow_width, 0.f, 0.5f, false },
+	{ "row_icon_ratio", & Theme::row_icon_ratio, 0.f, 1.f, false },
+	{ "tab_badge_size", & Theme::tab_badge_size, 0.f, 64.f, false },
 	{ "accent_bar_thickness", & Theme::accent_bar_thickness, 0.f, INF, false },
 	{ "toggle_mark_width", & Theme::toggle_mark_width, 0.f, INF, false },
 	{ "scrollbar_width", & Theme::scrollbar_width, 0.f, INF, false },

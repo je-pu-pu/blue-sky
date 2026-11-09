@@ -5,7 +5,9 @@
 #include <core/ui/Choice.h>
 #include <core/ui/Dialog.h>
 #include <core/ui/Grid.h>
+#include <core/ui/Slider.h>
 #include <core/ui/Stack.h>
+#include <core/ui/TabView.h>
 #include <core/ui/TextField.h>
 #include <core/ui/TextFit.h>
 
@@ -291,6 +293,50 @@ TEST_F( ActionTest, 表示だけの層は入力を奪わない )
 	// 決定は下の層のボタンに届く
 	confirm();
 	EXPECT_TRUE( pressed );
+}
+
+// ---- 行の組み立て（設計上の問題 B9） ----
+
+TEST_F( ActionTest, ラベルのない行は値の欄が幅いっぱいでアイコン付きの行はアイコンの分だけ右へずれる )
+{
+	float_t v = 0.5f;
+	auto* labeled = root->add< Slider >( "volume", [&] { return v; }, [&] ( float_t x ) { v = x; }, 0.f, 1.f, 0.1f );
+	auto* bare = root->add< Slider >( "", [&] { return v; }, [&] ( float_t x ) { v = x; }, 0.f, 1.f, 0.1f );
+	auto* with_icon = root->add< Slider >( "volume", [&] { return v; }, [&] ( float_t x ) { v = x; }, 0.f, 1.f, 0.1f );
+	with_icon->set_icon( Brush( core::Color( 1.f, 0.f, 0.f, 1.f ) ) );
+	ready();
+
+	EXPECT_FALSE( bare->has_label() );
+	EXPECT_FLOAT_EQ( 0.f, bare->get_label_rect().w );
+	EXPECT_GT( bare->get_value_rect().w, labeled->get_value_rect().w );
+
+	// アイコンは正方形で、ラベルはアイコンの右から始まる
+	const Rect& icon = with_icon->get_icon_rect();
+	EXPECT_GT( icon.w, 0.f );
+	EXPECT_FLOAT_EQ( icon.w, icon.h );
+	EXPECT_GE( with_icon->get_label_rect().x, icon.right() );
+	EXPECT_FLOAT_EQ( labeled->get_value_rect().right(), with_icon->get_value_rect().right() );
+	EXPECT_FLOAT_EQ( 0.f, labeled->get_icon_rect().w );
+}
+
+TEST_F( ActionTest, タブの見出しに印を付け外しできる )
+{
+	auto* tabs = root->add< TabView >();
+	tabs->add_page< Stack >( "a", Axis::VERTICAL )->add< Button >( "x", nullptr );
+	tabs->add_page< Stack >( "b", Axis::VERTICAL )->add< Button >( "y", nullptr );
+	ready();
+
+	EXPECT_FALSE( tabs->has_badge( 1 ) );
+	tabs->set_badge( 1, true );
+	EXPECT_TRUE( tabs->has_badge( 1 ) );
+	EXPECT_FALSE( tabs->has_badge( 5 ) );		// 範囲外は印なし（落ちない）
+	tabs->set_badge( 5, true );
+	ASSERT_NE( nullptr, tabs->get_tab_rect( 1 ) );
+	EXPECT_GT( tabs->get_tab_rect( 1 )->x, tabs->get_tab_rect( 0 )->x );
+
+	render();		// 印を描いても落ちない
+	tabs->set_badge( 1, false );
+	EXPECT_FALSE( tabs->has_badge( 1 ) );
 }
 
 // ---- 文字列キーと寸法（設計上の問題 B4・B12） ----

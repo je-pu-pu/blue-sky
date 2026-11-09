@@ -38,6 +38,7 @@ struct Theme
 	Brush fill_disabled		= Color( 0.4f, 0.4f, 0.44f, 1.f );		///< 無効なスライダーの充填
 	Brush slider_knob;										///< スライダーのつまみ（未指定なら描かない）
 	Brush toggle_on;										///< オンのトグルの値の欄（未指定なら左端に accent の帯）
+	Brush tab_badge;										///< タブの見出しの印（未指定なら accent。丸い画像を指定すると丸になる）
 	Brush tab_indicator;									///< 選択中のタブの下線（未指定なら accent）
 	Brush scroll_thumb;										///< スクロールバーのつまみ（未指定なら accent）
 	Brush dialog_header;									///< ダイアログ上端の帯（未指定なら accent）
@@ -73,6 +74,8 @@ struct Theme
 	float_t value_box_inset			= 0.15f;	///< 値の欄の上下の余白（行の高さに対する比率。Toggle / Choice / KeyBind / TextField）
 	float_t slider_track_width		= 0.75f;	///< スライダーの溝の幅（値の欄に対する比率。残りは数値の表示）
 	float_t slider_track_height		= 0.4f;		///< スライダーの溝の高さ（値の欄に対する比率）
+	float_t row_icon_ratio			= 0.6f;		///< 行のアイコンの大きさ（行の高さに対する比率）
+	float_t tab_badge_size			= 10.f;		///< タブの見出しの印（丸）の大きさ
 	float_t choice_arrow_width		= 0.25f;	///< 選択肢の左右の矢印の幅（値の欄に対する比率の上限）
 	float_t accent_bar_thickness	= 6.f;		///< 選択中のタブの下線・ダイアログ上端の帯の太さ
 	float_t toggle_mark_width		= 8.f;		///< オンのトグルの左端の帯の幅（toggle_on が未指定のとき）

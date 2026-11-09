@@ -4,8 +4,8 @@
 # 書いた項目だけが既定のテーマを上書きする。仕様は core/ui/Theme.h の load_theme() を参照。
 #
 # 面（panel / row / row_focused / row_pressed / row_disabled / track / accent / slider_fill / fill_disabled /
-#     slider_knob / toggle_on / tab_indicator / scroll_thumb / dialog_header）:
-#   用途別の面（row_disabled / slider_fill / tab_indicator / scroll_thumb / dialog_header）は、未指定なら共通の面（row / accent）で代用する
+#     slider_knob / toggle_on / tab_indicator / tab_badge / scroll_thumb / dialog_header）:
+#   用途別の面（row_disabled / slider_fill / tab_indicator / tab_badge / scroll_thumb / dialog_header）は、未指定なら共通の面（row / accent）で代用する
 #   <面>            単色（<面>.color の省略形）
 #   <面>.image       画像名（media/texture/ からの相対パス。\ は / に直す）
 #                    画像は読み込み時に乗算済みアルファにする。ミップマップは作らない

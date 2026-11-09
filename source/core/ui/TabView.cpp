@@ -122,6 +122,14 @@ void TabView::render( Renderer& renderer, const UIContext& ctx ) const
 		}
 
 		draw_text_fit( renderer, tab_rects_[ i ], ctx.tr( titles_[ i ] ), make_text_style( selected ? t.text_focused : t.text_dim, t.font_size_normal, core::graphics::HAlign::CENTER ) );
+
+		// 印 : 見出しの右上に丸
+		if ( has_badge( i ) )
+		{
+			const float_t s = t.tab_badge_size;
+			const Rect& r = tab_rects_[ i ];
+			draw_brush( renderer, Rect( r.right() - s * 1.5f, r.y + s * 0.5f, s, s ), pick_brush( renderer, t.tab_badge, t.accent ) );
+		}
 	}
 
 	render_children( renderer, ctx );

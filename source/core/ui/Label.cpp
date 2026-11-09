@@ -1,6 +1,7 @@
 #include "Label.h"
 #include "TextFit.h"
 #include "Renderer.h"
+#include "Screen.h"
 #include "Theme.h"
 
 #include <algorithm>
@@ -46,6 +47,22 @@ Color Label::get_color( const UIContext& ctx ) const
 string_t Label::get_text( const UIContext& ctx ) const
 {
 	return provider_ ? provider_() : ctx.tr( text_key_ );
+}
+
+void Label::update( float_t dt, UIContext& ctx )
+{
+	if ( provider_ )
+	{
+		string_t now = provider_();
+
+		if ( now != last_provided_ )
+		{
+			last_provided_ = std::move( now );
+			ctx.screen.invalidate_layout();
+		}
+	}
+
+	Widget::update( dt, ctx );
 }
 
 std::vector< string_t > Label::wrap_lines( const string_t& text, float_t width, float_t font_size, const Renderer& renderer )

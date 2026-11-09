@@ -3,6 +3,7 @@
 #include "Scene.h"
 
 #include <common/chase_value.h>
+#include <core/setting/SettingStore.h>
 
 #include <list>
 #include <memory>
@@ -81,7 +82,7 @@ private:
 	// 所有リソース
 	std::unique_ptr< Config >			stage_config_;
 	std::unique_ptr< Camera >			camera_;
-	uint_t								settings_change_count_ = 0;	///< 設定の変更を検出するための前回値
+	core::setting::SettingStore::Subscription	fov_subscription_;	///< 設定の FOV が変わったらカメラに反映する
 
 	bool								is_cleared_ = false;	///< ステージクリアフラグ
 	float_t								action_bgm_after_timer_;

@@ -228,6 +228,35 @@ TEST( SettingStoreTest, 試用はロールバックでも終わる )
 	EXPECT_FALSE( out.has( "graphics.screen_width" ) );			// 既定値に戻ったので消える
 }
 
+TEST( SettingStoreTest, 購読すると反映される値が変わったときだけ知らされ破棄で止まる )
+{
+	SettingStore s;
+	s.add_float( "camera.fov", 90.f, 50.f, 120.f, 1.f, ApplyMode::IMMEDIATE );
+	s.add_int( "graphics.screen_width", 1920, 640, 7680, ApplyMode::DEFERRED );
+
+	std::vector< float_t > fov;
+	std::vector< int > width;
+
+	{
+		auto fov_sub = s.subscribe( "camera.fov", [&] ( const SettingStore::Value& v ) { fov.push_back( std::get< float_t >( v ) ); } );
+		auto width_sub = s.subscribe( "graphics.screen_width", [&] ( const SettingStore::Value& v ) { width.push_back( std::get< int >( v ) ); } );
+
+		s.set( "camera.fov", 100.f );		// 即時反映 : すぐ届く
+		s.set( "camera.fov", 100.f );		// 変わらない : 届かない
+		s.set( "graphics.screen_width", 1280 );	// 適用まで反映しない : まだ届かない
+		EXPECT_TRUE( width.empty() );
+
+		s.apply_deferred();					// 反映 : 届く
+	}
+
+	s.set( "camera.fov", 110.f );			// 購読を破棄した後 : 届かない
+
+	ASSERT_EQ( 1u, fov.size() );
+	EXPECT_FLOAT_EQ( 100.f, fov[ 0 ] );
+	ASSERT_EQ( 1u, width.size() );
+	EXPECT_EQ( 1280, width[ 0 ] );
+}
+
 TEST( SettingStoreTest, 保存は既定値と違う項目だけを書き版を付ける )
 {
 	SettingStore s;

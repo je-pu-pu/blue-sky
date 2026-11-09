@@ -88,7 +88,12 @@ GamePlayScene::GamePlayScene()
 
 	// Camera
 	camera_->set_fov_default( GameMain::get_instance()->get_settings()->get( game_settings::CAMERA_FOV ) );
-	settings_change_count_ = GameMain::get_instance()->get_settings()->get_change_count();
+
+	// オプション画面で FOV が変わったら反映する（ズーム倍率は保つ）。購読はシーンと一緒に破棄される
+	fov_subscription_ = GameMain::get_instance()->get_settings()->subscribe( game_settings::CAMERA_FOV, [this] ( const core::setting::SettingStore::Value& v )
+	{
+		camera_->change_fov_default_keep_zoom( std::get< float_t >( v ) );
+	} );
 	camera_->reset_fov();
 	camera_->set_aspect( static_cast< float >( get_width() ) / static_cast< float >( get_height() ) );
 
@@ -256,13 +261,6 @@ void GamePlayScene::load_sound_all( bool is_final_stage )
 void GamePlayScene::update()
 {
 	Scene::update();
-
-	// オプション画面で設定が変わっていたら、カメラの FOV を反映する（ズーム倍率は保つ）
-	if ( auto* settings = GameMain::get_instance()->get_settings(); settings && settings->get_change_count() != settings_change_count_ )
-	{
-		settings_change_count_ = settings->get_change_count();
-		camera_->change_fov_default_keep_zoom( settings->get( game_settings::CAMERA_FOV ) );
-	}
 
 	if ( is_blackout_ )
 	{

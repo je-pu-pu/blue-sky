@@ -56,6 +56,55 @@ const SettingStore::Entry* SettingStore::find_or_report( const string_t& key, co
 	return e;
 }
 
+void SettingStore::Subscription::reset()
+{
+	if ( store_ )
+	{
+		store_->unsubscribe( id_ );
+		store_ = nullptr;
+	}
+}
+
+SettingStore::Subscription SettingStore::subscribe( const string_t& key, Listener listener )
+{
+	find_or_report( key, "subscribe" );
+
+	const uint_t id = next_listener_id_++;
+	listeners_.push_back( ListenerEntry{ id, key, std::move( listener ) } );
+	return Subscription( this, id );
+}
+
+void SettingStore::unsubscribe( uint_t id )
+{
+	for ( auto i = listeners_.begin(); i != listeners_.end(); ++i )
+	{
+		if ( i->id == id )
+		{
+			listeners_.erase( i );
+			return;
+		}
+	}
+}
+
+void SettingStore::notify( const Entry& e ) const
+{
+	// 呼び出し中に購読が増減しても安全なように写してから呼ぶ
+	std::vector< Listener > targets;
+
+	for ( const auto& l : listeners_ )
+	{
+		if ( l.key == e.key )
+		{
+			targets.push_back( l.listener );
+		}
+	}
+
+	for ( const auto& f : targets )
+	{
+		f( e.pending );
+	}
+}
+
 void SettingStore::set_info( const string_t& key, const string_t& label_key, const string_t& description_key )
 {
 	if ( Entry* e = find_or_report( key, "set_info" ) )
@@ -284,6 +333,7 @@ void SettingStore::set( const string_t& key, const Value& value )
 			e->apply( e->pending );
 		}
 
+		notify( *e );
 		change_count_++;
 	}
 
@@ -350,6 +400,8 @@ void SettingStore::apply_changed( const std::vector< size_t >& changed )
 		{
 			e.apply( e.pending );
 		}
+
+		notify( e );
 	}
 
 	for ( size_t g = 0; g < groups_.size(); g++ )
@@ -511,6 +563,7 @@ void SettingStore::sync_from_runtime( const string_t& key, const Value& value )
 	if ( ! equals( *e, e->committed, v ) || ! equals( *e, e->pending, v ) )
 	{
 		e->committed = e->pending = v;
+		notify( *e );
 		change_count_++;
 	}
 }

@@ -66,6 +66,43 @@ public:
 	/// 保存するファイルの形式の版（項目の意味を変えたときに上げ、読み込み側で移行する）
 	static constexpr const char_t* VERSION_KEY = "settings.version";
 
+	/// 値が変わったときに呼ばれる関数（引数は反映される値）
+	using Listener = std::function< void( const Value& ) >;
+
+	/**
+	 * 購読（subscribe の戻り値）。破棄すると購読をやめる
+	 *
+	 * シーンなどストアより先に破棄されるものがメンバーに持つ。ストアは購読より長生きすること。
+	 */
+	class Subscription
+	{
+		SettingStore* store_ = nullptr;
+		uint_t id_ = 0;
+
+	public:
+		Subscription() = default;
+		Subscription( SettingStore* store, uint_t id ) : store_( store ), id_( id ) { }
+		~Subscription() { reset(); }
+
+		Subscription( const Subscription& ) = delete;
+		Subscription& operator = ( const Subscription& ) = delete;
+
+		Subscription( Subscription&& o ) noexcept : store_( o.store_ ), id_( o.id_ ) { o.store_ = nullptr; }
+		Subscription& operator = ( Subscription&& o ) noexcept
+		{
+			if ( this != & o )
+			{
+				reset();
+				store_ = o.store_;
+				id_ = o.id_;
+				o.store_ = nullptr;
+			}
+			return *this;
+		}
+
+		void reset();
+	};
+
 private:
 	struct Entry
 	{
@@ -100,6 +137,19 @@ private:
 	Snapshot trial_values_;		///< 試用中の項目と、保存に使う元の値
 
 	ErrorHandler error_handler_;
+
+	struct ListenerEntry
+	{
+		uint_t id;
+		string_t key;
+		Listener listener;
+	};
+
+	std::vector< ListenerEntry > listeners_;
+	uint_t next_listener_id_ = 1;
+
+	/// 反映される値が変わった項目の購読者に知らせる
+	void notify( const Entry& e ) const;
 
 	/// 使い方の誤りを知らせる
 	void report( const string_t& message ) const;
@@ -149,6 +199,18 @@ public:
 
 	/// 使い方の誤り（未登録のキー・型の違い）を知らせる先を設定する
 	void set_error_handler( ErrorHandler handler ) { error_handler_ = std::move( handler ); }
+
+	/**
+	 * 項目の値が変わったら（反映されるとき）知らせてもらう
+	 *
+	 * 以前はシーンが全体の変更回数（get_change_count）を毎フレーム調べていて、
+	 * FOV を反映していたのは GamePlayScene だけだった。購読すれば、変わった項目だけが届く。
+	 * 戻り値を持っている間だけ有効。
+	 */
+	[[nodiscard]] Subscription subscribe( const string_t& key, Listener listener );
+
+	/// 購読をやめる（Subscription が自動で呼ぶ）
+	void unsubscribe( uint_t id );
 
 	// 値（保留値）
 	Value get_value( const string_t& key ) const;

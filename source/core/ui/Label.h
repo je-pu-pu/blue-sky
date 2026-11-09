@@ -26,6 +26,7 @@ public:
 private:
 	string_t text_key_;
 	std::function< string_t() > provider_;
+	string_t last_provided_;		///< 前のフレームに provider_ が返した文字列（変わったら配置し直す）
 	Style style_;
 	bool wrap_ = false;
 	core::graphics::HAlign align_ = core::graphics::HAlign::LEFT;
@@ -44,6 +45,9 @@ public:
 	void set_align( core::graphics::HAlign a ) { align_ = a; }
 
 	float_t measure_height( float_t width, const UIContext& ctx ) const override;
+
+	/// 関数で作る文字列が変わったときだけ配置し直す（行数が変わり得るため）
+	void update( float_t dt, UIContext& ctx ) override;
 	void render( Renderer& renderer, const UIContext& ctx ) const override;
 
 	/**

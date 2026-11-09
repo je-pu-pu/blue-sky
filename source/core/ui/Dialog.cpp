@@ -122,11 +122,7 @@ void Dialog::update( float_t dt, UIContext& ctx )
 		}
 	}
 
-	// メッセージの高さが変わるかもしれないので、文字列を毎フレーム作る場合はレイアウトし直す
-	if ( spec_.message_provider )
-	{
-		ctx.screen.invalidate_layout();
-	}
+	// メッセージの文字列が変わったときの配置し直しは Label が行う（以前は毎フレーム画面全体を配置し直していた）
 }
 
 void Dialog::render( Renderer& renderer, const UIContext& ctx ) const

@@ -210,6 +210,9 @@ namespace core::ui
 		/// 層を開いたときに最初にフォーカスする部品（nullptr なら先頭の部品）。Dialog が既定のボタンを返す
 		virtual Widget* get_initial_focus() { return nullptr; }
 
+		/// フォーカスを得た・失った（フォーカス枠の演出などに使う）
+		virtual void on_focus_changed( bool /* focused */, FocusReason ) { }
+
 		virtual bool on_nav( NavDir, UIContext& ) { return false; }
 		virtual bool on_confirm( UIContext& ) { return false; }
 		virtual bool on_cancel( UIContext& ) { return false; }

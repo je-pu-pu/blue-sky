@@ -242,10 +242,17 @@ void Screen::set_focus( Widget* w, FocusReason reason )
 	if ( layer->focused && tree_contains( layer->root.get(), layer->focused, & WidgetAccess::all_count, & WidgetAccess::all_at ) )
 	{
 		layer->focused->focused_ = false;
+		layer->focused->on_focus_changed( false, reason );
 	}
 
 	layer->focused = w;
 	w->focused_ = true;
+	w->on_focus_changed( true, reason );
+
+	if ( focus_listener_ )
+	{
+		focus_listener_( w, reason );
+	}
 
 	// 祖先に「最後にフォーカスした子」を記録する
 	for ( Widget* c = w, * p = w->parent_; p; c = p, p = p->parent_ )

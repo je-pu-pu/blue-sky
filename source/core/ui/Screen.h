@@ -43,6 +43,9 @@ namespace core::ui
 	public:
 		using SoundHandler = std::function< void( UISoundEvent ) >;
 
+		/// フォーカスが移ったときに呼ばれる（読み上げ・効果などの差し込み口）
+		using FocusListener = std::function< void( Widget* focused, FocusReason reason ) >;
+
 	private:
 		struct Layer
 		{
@@ -73,6 +76,7 @@ namespace core::ui
 
 		InputDevice last_device_ = InputDevice::KEYBOARD_MOUSE;
 		SoundHandler sound_handler_;
+		FocusListener focus_listener_;
 
 		UIContext make_context();
 		UIContext make_context() const;
@@ -153,6 +157,9 @@ namespace core::ui
 		void register_action( ActionId action, const string_t& hint_name );
 
 		void set_sound_handler( SoundHandler h ) { sound_handler_ = std::move( h ); }
+
+		/// フォーカスが移ったときに呼ぶ関数を設定する
+		void set_focus_listener( FocusListener l ) { focus_listener_ = std::move( l ); }
 		void play( UISoundEvent e ) const { if ( sound_handler_ ) sound_handler_( e ); }
 
 		InputDevice get_last_device() const { return last_device_; }

@@ -36,13 +36,10 @@ public:
 		create_constant_buffer( size );
 	}
 
-	ConstantBuffer( const ConstantBuffer& buffer )
-	{
-		D3D11_BUFFER_DESC desc;
-		constant_buffer_->GetDesc( & desc );
-
-		create_constant_buffer( desc.ByteWidth );
-	}
+	// GPU のバッファをコピーする意味はないので禁止する
+	// （以前のコピーコンストラクタは、コピー元ではなく初期化していない自分のポインタに GetDesc していた）
+	ConstantBuffer( const ConstantBuffer& ) = delete;
+	ConstantBuffer& operator = ( const ConstantBuffer& ) = delete;
 
 	~ConstantBuffer()
 	{

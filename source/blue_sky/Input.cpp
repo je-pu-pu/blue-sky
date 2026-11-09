@@ -116,16 +116,37 @@ void Input::load_config( Config& config )
 	fixed_key_code_[ static_cast< int >( Button::RIGHT ) ].push_back( VK_RIGHT );
 	fixed_key_code_[ static_cast< int >( Button::A ) ].push_back( VK_RETURN );
 
-	joystick_code_[ static_cast< int >( Button::A ) ] = 1 << ( config.get( "input.joystick.a", 1 ) - 1 );
-	joystick_code_[ static_cast< int >( Button::B ) ] = 1 << ( config.get( "input.joystick.b", 3 ) - 1 );
-	
-	joystick_code_[ static_cast< int >( Button::L ) ] = 1 << ( config.get( "input.joystick.l", 5 ) - 1 );
-	joystick_code_[ static_cast< int >( Button::R ) ] = 1 << ( config.get( "input.joystick.r", 6 ) - 1 );
+	// 設定ファイルの値は手で編集されることがあるので、範囲外なら既定値を使う
+	// （以前は範囲外のボタン番号でシフトが未定義動作に、範囲外の軸番号で例外になり、起動できなかった）
+	const auto button_mask = [ &config ] ( const char_t* key, int def )
+	{
+		int n = config.get( key, def );
 
-	joystick_axis_threshold_ = config.get( "input.joystick.axis.threshold", 0.25f );
+		if ( n < 1 || n > 32 )
+		{
+			n = def;
+		}
 
-	joystick_x_axis_pos_ = get_joystick_axis_pos_pointer_by_index( config.get( "input.joystick.axis.x", 3 ) );
-	joystick_y_axis_pos_ = get_joystick_axis_pos_pointer_by_index( config.get( "input.joystick.axis.y", 2 ) );
+		return 1u << ( n - 1 );
+	};
+
+	const auto axis_index = [ &config ] ( const char_t* key, int def )
+	{
+		const int n = config.get( key, def );
+		return ( n >= 0 && n <= 5 ) ? n : def;
+	};
+
+	joystick_code_[ static_cast< int >( Button::A ) ] = button_mask( "input.joystick.a", 1 );
+	joystick_code_[ static_cast< int >( Button::B ) ] = button_mask( "input.joystick.b", 3 );
+
+	joystick_code_[ static_cast< int >( Button::L ) ] = button_mask( "input.joystick.l", 5 );
+	joystick_code_[ static_cast< int >( Button::R ) ] = button_mask( "input.joystick.r", 6 );
+
+	// しきい値は ( 1 - しきい値 ) で割るので 1 未満に収める
+	joystick_axis_threshold_ = std::clamp( config.get( "input.joystick.axis.threshold", 0.25f ), 0.f, 0.95f );
+
+	joystick_x_axis_pos_ = get_joystick_axis_pos_pointer_by_index( axis_index( "input.joystick.axis.x", 3 ) );
+	joystick_y_axis_pos_ = get_joystick_axis_pos_pointer_by_index( axis_index( "input.joystick.axis.y", 2 ) );
 
 	mouse_x_sensitivity_ = config.get( "input.mouse.x_sensitivity", 1.f );
 	mouse_y_sensitivity_ = config.get( "input.mouse.y_sensitivity", 1.f );

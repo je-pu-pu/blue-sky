@@ -5,6 +5,9 @@
 #include <common/exception.h>
 #include <common/serialize.h>
 
+#include <exception>
+#include <string>
+
 #include <windows.h>
 
 /**
@@ -66,8 +69,22 @@ int WINAPI WinMain( _In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ i
 
 		return -1;
 	}
+	catch ( const std::exception& e )
+	{
+		// 標準ライブラリの例外（std::out_of_range など）も、内容を残して表示する
+		const std::string message = std::string( "exception : " ) + e.what();
+
+		common::log( "log/error.log", message );
+
+		if ( app )
+		{
+			app->show_error_message( message.c_str() );
+		}
+	}
 	catch ( ... )
 	{
+		common::log( "log/error.log", "unknown exception" );
+
 		if ( app )
 		{
 			app->show_error_message( "Unknown Error" );

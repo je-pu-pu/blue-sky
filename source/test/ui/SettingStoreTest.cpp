@@ -3,6 +3,7 @@
 #include <core/setting/SettingStore.h>
 #include <game/Config.h>
 
+#include <filesystem>
 using core::setting::SettingStore;
 using core::setting::ApplyMode;
 
@@ -295,6 +296,43 @@ TEST( SettingStoreTest, 設定ファイルの読み書き )
 	EXPECT_EQ( "0.3", out.get< string_t >( "audio.volume", "" ) );
 	EXPECT_EQ( "120", out.get< string_t >( "camera.fov", "" ) );
 	EXPECT_EQ( "W LEFT", out.get< string_t >( "input.key.left", "" ) );
+}
+
+TEST( ConfigTest, 値の無い行とコメントと余分な空白を読める )
+{
+	game::Config config;
+	config.read_line( "debug.start_overlay" );			// 値が無い（以前は例外で起動できなかった）
+	config.read_line( "# コメント" );
+	config.read_line( "" );
+	config.read_line( "   input.key.left   W    LEFT   " );
+
+	EXPECT_EQ( "", config.get< string_t >( "debug.start_overlay", "x" ) );
+	EXPECT_EQ( "W LEFT", config.get< string_t >( "input.key.left", "" ) );
+	EXPECT_EQ( "", static_cast< const game::Config& >( config ).get< string_t >( "#", "" ) );
+}
+
+TEST( ConfigTest, 保存は一時ファイル経由で置き換える )
+{
+	const std::filesystem::path dir = std::filesystem::temp_directory_path() / "blue-sky-config-test";
+	std::filesystem::create_directories( dir );
+	const std::filesystem::path file = dir / "test.config";
+	const std::string path = file.string();
+
+	game::Config a;
+	a.read_line( "audio.volume 0.3" );
+	ASSERT_TRUE( a.save_file( path.c_str() ) );
+
+	game::Config b;
+	b.read_line( "audio.volume 0.7" );
+	ASSERT_TRUE( b.save_file( path.c_str() ) );		// 既存のファイルを置き換える
+
+	EXPECT_FALSE( std::filesystem::exists( path + ".tmp" ) );
+
+	game::Config loaded;
+	ASSERT_TRUE( loaded.load_file( path.c_str() ) );
+	EXPECT_EQ( "0.7", loaded.get< string_t >( "audio.volume", "" ) );
+
+	std::filesystem::remove_all( dir );
 }
 
 TEST( SettingStoreTest, 壊れた値は既定値になる )

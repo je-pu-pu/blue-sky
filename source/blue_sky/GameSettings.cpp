@@ -9,6 +9,11 @@
 #include <game/Config.h>
 
 #include <filesystem>
+
+#include <windows.h>
+#include <shlobj.h>
+
+#pragma comment( lib, "shell32.lib" )
 #include <sstream>
 
 namespace blue_sky::game_settings
@@ -229,11 +234,49 @@ void fix_invalid_values( SettingStore& store )
 	}
 }
 
+string_t user_settings_path()
+{
+	std::filesystem::path dir;
+
+	if ( wchar_t env[ MAX_PATH ] = { }; GetEnvironmentVariableW( L"BLUE_SKY_SETTINGS_DIR", env, MAX_PATH ) > 0 )
+	{
+		dir = env;
+	}
+	else
+	{
+		PWSTR local_app_data = nullptr;
+
+		if ( SUCCEEDED( SHGetKnownFolderPath( FOLDERID_LocalAppData, 0, nullptr, & local_app_data ) ) )
+		{
+			dir = std::filesystem::path( local_app_data ) / L"blue-sky";
+		}
+
+		CoTaskMemFree( local_app_data );
+	}
+
+	if ( dir.empty() )
+	{
+		return LEGACY_USER_SETTINGS_PATH;		// ユーザーのフォルダが分からないときは、以前と同じ作業ディレクトリ
+	}
+
+	// Config のファイル操作は char のパス（ANSI）で行うので、ANSI に変換して返す
+	return ( dir / L"settings.config" ).string();
+}
+
 void load_user_settings_file( game::Config& user_config, const game::Config& legacy_config )
 {
-	if ( std::filesystem::exists( USER_SETTINGS_PATH ) )
+	const string_t path = user_settings_path();
+
+	if ( std::filesystem::exists( path ) )
 	{
-		user_config.load_file( USER_SETTINGS_PATH );
+		user_config.load_file( path.c_str() );
+		return;
+	}
+
+	// 新しい置き場所にまだ無い : 以前の置き場所（作業ディレクトリ）にあれば引き継ぐ。次の保存から新しい置き場所に書く
+	if ( std::filesystem::exists( LEGACY_USER_SETTINGS_PATH ) )
+	{
+		user_config.load_file( LEGACY_USER_SETTINGS_PATH );
 		return;
 	}
 

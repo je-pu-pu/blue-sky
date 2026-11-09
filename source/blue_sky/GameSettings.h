@@ -42,8 +42,16 @@ namespace game_settings
 	inline constexpr SettingKey< bool >		DISPLAY_FPS			{ "graphics.display_fps" };
 	inline constexpr SettingKey< float_t >	UI_TEXT_SCALE		{ "ui.text_scale" };	///< 文字の大きさ（アクセシビリティ）
 
-	/// ユーザーの設定ファイル（SettingStore が読み書きする）。開発用・エンジンの設定（blue-sky.config）とは分ける
-	inline constexpr const char_t* USER_SETTINGS_PATH = "settings.config";
+	/// 以前のユーザーの設定ファイル（作業ディレクトリ）。新しい置き場所に無いときだけ読んで引き継ぐ
+	inline constexpr const char_t* LEGACY_USER_SETTINGS_PATH = "settings.config";
+
+	/**
+	 * ユーザーの設定ファイルの置き場所（SettingStore が読み書きする）。開発用・エンジンの設定（blue-sky.config）とは分ける
+	 *
+	 * %LOCALAPPDATA%\blue-sky\settings.config。環境変数 BLUE_SKY_SETTINGS_DIR があればそのフォルダ（開発・テスト用）。
+	 * 以前は作業ディレクトリに置いていて、Program Files に入れると書けなかった（設計上の問題 B24）。
+	 */
+	string_t user_settings_path();
 
 	/// ユーザーの設定ファイルの形式の版
 	inline constexpr int USER_SETTINGS_VERSION = 1;

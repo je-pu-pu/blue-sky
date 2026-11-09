@@ -55,6 +55,7 @@
 #include <common/string.h>
 
 #include <algorithm>
+#include <filesystem>
 #include <sstream>
 
 #include <imgui.h>
@@ -317,9 +318,15 @@ void GameMain::save_settings()
 {
 	settings_->save( * get_app()->get_user_config(), game_settings::USER_SETTINGS_VERSION );
 
-	if ( ! get_app()->get_user_config()->save_file( game_settings::USER_SETTINGS_PATH ) )
+	const string_t user_settings_path = game_settings::user_settings_path();
+
+	// 置き場所のフォルダが無ければ作る（初回）
+	std::error_code ec;
+	std::filesystem::create_directories( std::filesystem::path( user_settings_path ).parent_path(), ec );
+
+	if ( ! get_app()->get_user_config()->save_file( user_settings_path.c_str() ) )
 	{
-		debug_log( string_t( "[Config] ユーザーの設定ファイルを保存できませんでした: " ) + game_settings::USER_SETTINGS_PATH );
+		debug_log( string_t( "[Config] ユーザーの設定ファイルを保存できませんでした: " ) + user_settings_path );
 	}
 }
 

@@ -2,6 +2,9 @@
 
 #include <core/setting/SettingStore.h>
 #include <game/Config.h>
+#include <blue_sky/GameSettings.h>
+
+#include <windows.h>
 
 #include <filesystem>
 using core::setting::SettingStore;
@@ -457,4 +460,19 @@ TEST( SettingStoreTest, 未登録キーと型違いの操作は無視する )
 	EXPECT_FALSE( s.has( "no.such.key" ) );
 	EXPECT_EQ( 0, s.get< int >( "no.such.key" ) );
 	EXPECT_EQ( 90, s.get< int >( "camera.fov" ) );
+}
+
+TEST( UserSettingsPathTest, ユーザーのフォルダに置き環境変数で置き場所を変えられる )
+{
+	// 既定 : %LOCALAPPDATA%/blue-sky/settings.config（作業ディレクトリではない）
+	SetEnvironmentVariableW( L"BLUE_SKY_SETTINGS_DIR", nullptr );
+	const std::filesystem::path def = blue_sky::game_settings::user_settings_path();
+	EXPECT_EQ( "settings.config", def.filename().string() );
+	EXPECT_EQ( "blue-sky", def.parent_path().filename().string() );
+	EXPECT_TRUE( def.is_absolute() );
+
+	// 環境変数で指定したフォルダ
+	SetEnvironmentVariableW( L"BLUE_SKY_SETTINGS_DIR", L"C:/temp/bs-test" );
+	EXPECT_EQ( std::filesystem::path( "C:/temp/bs-test" ) / "settings.config", std::filesystem::path( blue_sky::game_settings::user_settings_path() ) );
+	SetEnvironmentVariableW( L"BLUE_SKY_SETTINGS_DIR", nullptr );
 }

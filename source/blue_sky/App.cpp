@@ -15,7 +15,10 @@
 #include <boost/filesystem.hpp>
 #include <iostream>
 
+// デバッグ用のコンソール（std::cout の出力先）。リリースビルドでは開かない
+#ifdef _DEBUG
 #define ENABLE_DEBUG_CONSOLE
+#endif
 
 //□コンストラクタ
 App::App()
@@ -46,10 +49,11 @@ App::App()
 	setlocale( LC_CTYPE, "" );
 
 #ifdef ENABLE_DEBUG_CONSOLE
-	AllocConsole();
-	if ( freopen( "CONOUT$", "w", stdout ) == nullptr )
+	// コンソールを開けなくてもゲームは続ける（出力が見えないだけ）
+	if ( AllocConsole() )
 	{
-		COMMON_THROW_EXCEPTION_MESSAGE( "freopen() failed." );
+		FILE* out = nullptr;
+		freopen_s( & out, "CONOUT$", "w", stdout );
 	}
 #endif
 }
@@ -180,7 +184,14 @@ int App::MessageLoop()
 		{
 			if ( ! game_->update() )
 			{
-				Sleep( 0 );
+				// 次のフレームまで眠る（メッセージが来たらすぐ起きる）
+				// 以前は Sleep( 0 ) で回り続け、CPU のコアを 1 つ使い切っていた
+				const DWORD wait = game_->get_idle_wait_msec();
+
+				if ( wait > 0 )
+				{
+					MsgWaitForMultipleObjects( 0, nullptr, FALSE, wait, QS_ALLINPUT );
+				}
 			}
 		}
 	}

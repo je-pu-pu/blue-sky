@@ -37,8 +37,19 @@ public:
 	float get_current_sec() const { return get_current_time() / 1000.f; }
 	float get_current_sec_force() const { return get_current_time_force() / 1000.f; }
 
+	/// 1 フレームの経過時間の上限（ミリ秒）。ウィンドウのドラッグ中やブレークポイントで止まっていた分を、
+	/// 1 フレームで一度に進めない（物理・AI・UI のタイマーが跳ばないように）
+	static constexpr unsigned long MAX_ELAPSED_MSEC = 100;
+
 	float get_elapsed_sec() const { return get_elapsed_msec() / 1000.f; }
-	unsigned long get_elapsed_msec() const { return current_time_ - last_time_; }
+	unsigned long get_elapsed_msec() const
+	{
+		const unsigned long elapsed = current_time_ - last_time_;
+		return elapsed < MAX_ELAPSED_MSEC ? elapsed : MAX_ELAPSED_MSEC;
+	}
+
+	/// 次のフレームまでの待ち時間（ミリ秒）。待たずに次のフレームへ進めるなら 0
+	unsigned long get_wait_msec() const;
 	
 	unsigned long get_fps() const { return fps_; }
 	unsigned long get_last_fps() const { return last_fps_; }

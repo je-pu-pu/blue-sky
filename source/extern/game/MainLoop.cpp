@@ -80,6 +80,20 @@ bool MainLoop::loop()
 	return false;
 }
 
+unsigned long MainLoop::get_wait_msec() const
+{
+	if ( ! is_active_ )
+	{
+		return 0;
+	}
+
+	// loop() が true を返す条件「経過 >= 1000 * current_fps_ / fps_」を満たす時刻までの残り
+	const unsigned long elapsed = timeGetTime() - last_sec_time_;
+	const unsigned long next = 1000 * current_fps_ / fps_;
+
+	return elapsed >= next ? 0 : next - elapsed;
+}
+
 /**
  * 現在の時間を取得する
  *

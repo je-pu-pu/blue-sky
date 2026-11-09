@@ -196,6 +196,7 @@ public:
 	void on_resize() override;
 	void on_toggle_full_screen() override { is_full_screen_toggle_requested_ = true; }
 	void shutdown() override;
+	unsigned long get_idle_wait_msec() const override;
 
 	/// ユーザーの設定（settings.config）を保存する
 	void save_settings();

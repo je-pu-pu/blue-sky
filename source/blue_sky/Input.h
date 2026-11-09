@@ -50,7 +50,6 @@ public:
 
 	using Config				= game::Config;
 
-	using ButtonStack			= std::deque< Button >;
 	using ButtonCodeList		= std::array< unsigned int, static_cast< int >( Button::MAX ) >;
 	using ButtonCodeMultiList	= std::array< std::vector< int >, static_cast< int >( Button::MAX ) >;
 	using ConfigKeyCodeMap		= std::unordered_map< std::string, int >;
@@ -59,7 +58,6 @@ private:
 	const DirectInput* direct_input_;						///< DirectInput
 
 	unsigned int state_[ static_cast< int >( Button::MAX ) ];						///< 全てのボタンの状態
-	ButtonStack arrow_stack_;								///< 最優先の方向ボタン
 
 	bool joystick_enabled_;									///< ジョイスティック有効フラグ
 
@@ -167,18 +165,6 @@ public:
 
 	void update();
 	void update_null();
-	void update_common();
-
-	void arrow_push( Button button )
-	{
-		arrow_stack_.push_back( button );
-	}
-
-	void arrow_pop( Button button )
-	{
-		ButtonStack::iterator i = std::find( arrow_stack_.begin(), arrow_stack_.end(), button );
-		arrow_stack_.erase( i );
-	}
 
 	/**
 	 * ボタンが押されていない状態に更新する
@@ -230,23 +216,6 @@ public:
 	{
 		if ( is_blocked_ ) return false;
 		return ( state_[ static_cast< int >( button ) ] & 1 ) == 0 && ( state_[ static_cast< int >( button ) ] & 2 ) > 0;
-	}
-
-	/**
-	 * 現在最優先で押されている方向ボタンを取得する
-	 *
-	 * @return 現在最優先で押されている方向ボタン ( 方向ボタンが押されていない場合は NONE を返す )
-	 */
-	Button get_primary_arrow_button() const
-	{
-		if ( arrow_stack_.empty() ) return Button::NONE;
-
-		return arrow_stack_.back();
-	}
-
-	const ButtonStack& get_arrow_button_stack() const
-	{
-		return arrow_stack_;
 	}
 
 	static const Input& get_null_input()

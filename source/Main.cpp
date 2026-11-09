@@ -9,6 +9,7 @@
 #include <string>
 
 #include <windows.h>
+#include <objbase.h>
 
 /**
  * @brief メイン
@@ -21,6 +22,20 @@
 int WINAPI WinMain( _In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int nCmdShow )
 {
     _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+
+	// 画面の拡大率（DPI）をモニターごとに自分で扱うと宣言する。
+	// 宣言しないと、拡大率 150% などの環境でウィンドウを OS がビットマップで拡大し、画像も文字もぼける
+	SetProcessDpiAwarenessContext( DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 );
+
+	// COM を明示的に初期化する（WIC の画像読み込みなどが使う）。
+	// 以前はエンジンが初期化しておらず、どこか（音声の初期化など）が暗黙に初期化していたので動いていた
+	const HRESULT com_result = CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
+
+	struct ComScope
+	{
+		bool initialized;
+		~ComScope() { if ( initialized ) { CoUninitialize(); } }
+	} com_scope { SUCCEEDED( com_result ) };
 
 	App* app = 0;
 	

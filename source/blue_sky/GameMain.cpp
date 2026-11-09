@@ -280,6 +280,11 @@ void GameMain::shutdown()
 	get_script_manager()->save_command_history( "log/script.log" );
 }
 
+unsigned long GameMain::get_idle_wait_msec() const
+{
+	return main_loop_ ? main_loop_->get_wait_msec() : 0;
+}
+
 void GameMain::save_settings()
 {
 	settings_->save( * get_app()->get_user_config(), game_settings::USER_SETTINGS_VERSION );
@@ -1041,6 +1046,15 @@ void GameMain::push_overlay_scene( const string_t& scene_name )
 
 	// オーバーレイシーンを生成してスタックに追加
 	std::unique_ptr< Scene > overlay( SceneManager::get_instance()->generate_scene( scene_name ) );
+
+	// オーバーレイ用でないシーン（ゲーム本体など）は積まない（入力・描画の扱いがオーバーレイを前提にしていないため）
+	if ( ! overlay || ! overlay->is_overlay() )
+	{
+		debug_log( "[Scene] オーバーレイ用でないシーンを重ねようとしました: " + scene_name );
+		scene_->set_paused( false );
+		return;
+	}
+
 	overlay->set_name( scene_name );
 	overlay->set_next_stage_name( get_stage_name() );
 

@@ -37,6 +37,9 @@ public:
 	/// 正常終了の後片付け（設定の保存など）。メッセージループが正常に終わったときだけ呼ばれる
 	virtual void shutdown() { }
 
+	/// update() が次に処理を行うまでの待ち時間（ミリ秒）。メッセージループがこの間眠る
+	virtual unsigned long get_idle_wait_msec() const { return 0; }
+
 	virtual int get_width() const = 0;
 	virtual int get_height() const = 0;
 

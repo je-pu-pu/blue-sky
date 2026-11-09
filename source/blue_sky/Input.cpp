@@ -294,7 +294,6 @@ void Input::update()
 		mouse_dy_ += get_rate_by_joystick_axis_pos( * joystick_y_axis_pos_ ) * 0.01f * joystick_y_sensitivity_;
 	}
 
-	update_common();
 }
 
 void Input::update_null()
@@ -312,35 +311,6 @@ void Input::update_null()
 	{
 		state_[ n ] <<= 1;
 	}
-}
-
-/**
- * キーボード・ジョイスティック共通の更新処理を行う
- *
- * is_blocked_ に関わらず arrow_stack_ を正しく更新するため、
- * push/release の代わりに raw state を直接チェックする。
- */
-void Input::update_common()
-{
-	auto raw_push = [this]( Button b ) -> bool {
-		auto n = static_cast< int >( b );
-		return ( state_[ n ] & 1 ) > 0 && ( state_[ n ] & 2 ) == 0;
-	};
-
-	auto raw_release = [this]( Button b ) -> bool {
-		auto n = static_cast< int >( b );
-		return ( state_[ n ] & 1 ) == 0 && ( state_[ n ] & 2 ) > 0;
-	};
-
-	if ( raw_release( Button::DOWN  ) ) arrow_pop( Button::DOWN  );
-	if ( raw_release( Button::UP    ) ) arrow_pop( Button::UP    );
-	if ( raw_release( Button::RIGHT ) ) arrow_pop( Button::RIGHT );
-	if ( raw_release( Button::LEFT  ) ) arrow_pop( Button::LEFT  );
-
-	if ( raw_push( Button::DOWN  ) ) arrow_push( Button::DOWN  );
-	if ( raw_push( Button::UP    ) ) arrow_push( Button::UP    );
-	if ( raw_push( Button::RIGHT ) ) arrow_push( Button::RIGHT );
-	if ( raw_push( Button::LEFT  ) ) arrow_push( Button::LEFT  );
 }
 
 /**

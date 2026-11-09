@@ -7,6 +7,8 @@
 #include <win/Point.h>
 #include <win/LastError.h>
 
+#include <common/string.h>
+
 #include <winnls32.h>
 
 #include <boost/filesystem.hpp>
@@ -160,6 +162,14 @@ int App::MessageLoop()
 
 			TranslateMessage( & msg );
 			DispatchMessage( & msg );
+
+			// ウィンドウプロシージャの中で起きた例外は、ここで投げ直す（WinMain が受け止める）
+			if ( pending_exception_ )
+			{
+				std::exception_ptr e = pending_exception_;
+				pending_exception_ = nullptr;
+				std::rethrow_exception( e );
+			}
 		}
 		else
 		{
@@ -170,11 +180,35 @@ int App::MessageLoop()
 		}
 	}
 
+	// 正常に終わったときだけ、設定などを保存して後片付けする（例外で抜けたときは、壊れた状態を保存しない）
+	if ( game_ )
+	{
+		game_->shutdown();
+	}
+
 	return static_cast< int >( msg.wParam );
 }
 
-//□ウィンドウプロシージャ
+/**
+ * ウィンドウプロシージャ
+ *
+ * 例外を user32 の外へ出さない（x64 ではコールバックをまたぐ例外が握りつぶされることがある）。
+ * 中で起きた例外は預けておき、メッセージループに戻ってから投げ直す。
+ */
 LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
+{
+	try
+	{
+		return WinProcImpl( hwnd, msg, wp, lp );
+	}
+	catch ( ... )
+	{
+		App::get_instance()->pending_exception_ = std::current_exception();
+		return 0;
+	}
+}
+
+LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 {
 	extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -441,7 +475,8 @@ void App::set_title( const char_t* t )
  */
 void App::show_error_message( const char_t* message ) const
 {
-	MessageBox( hWnd, message, "ERROR", MB_OK );
+	// メッセージは UTF-8（ソースは /utf-8）。ANSI 版の MessageBox では日本語が化けるので UTF-16 にして出す
+	MessageBoxW( hWnd, common::convert_to_wstring( message ).c_str(), L"エラー", MB_OK | MB_ICONERROR );
 }
 
 void App::set_full_screen( bool full_screen )

@@ -34,6 +34,9 @@ public:
 	/// アプリケーションが再びアクティブになった
 	virtual void on_activated() { }
 
+	/// 正常終了の後片付け（設定の保存など）。メッセージループが正常に終わったときだけ呼ばれる
+	virtual void shutdown() { }
+
 	virtual int get_width() const = 0;
 	virtual int get_height() const = 0;
 

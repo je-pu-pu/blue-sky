@@ -222,11 +222,31 @@ GameMain::~GameMain()
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
+	// 設定の保存は shutdown() で行う（正常終了のときだけ）。デストラクタは例外で抜けた経路でも動くので、ここでは保存しない
+}
+
+/**
+ * 正常終了の後片付け（メッセージループが正常に終わったときだけ呼ばれる）
+ *
+ * 以前は static の破棄（WinMain が戻った後）で保存していたため、例外で抜けたときにも壊れた状態を保存し得た。
+ */
+void GameMain::shutdown()
+{
+	if ( is_shut_down_ )
+	{
+		return;
+	}
+
+	is_shut_down_ = true;
+
 	// 設定を保存する。ユーザーの明示的な操作（F2 / F5 / Alt+Enter）はその場で設定に反映済み。
 	// 終了時の実際の状態（フォーカス喪失で解除されたフルスクリーンなど）は取り込まない
 	settings_->save( * get_config() );
 
-	get_config()->save_file( "blue-sky.config" );
+	if ( ! get_config()->save_file( "blue-sky.config" ) )
+	{
+		debug_log( "[Config] 設定ファイルを保存できませんでした: blue-sky.config" );
+	}
 
 	get_script_manager()->save_command_history( "log/script.log" );
 }

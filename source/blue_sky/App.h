@@ -15,6 +15,7 @@
 
 #include <windows.h>
 
+#include <exception>
 #include <memory>
 #include <functional>
 #include <unordered_map>
@@ -60,9 +61,14 @@ private:
 
 	std::unordered_map< HANDLE, std::function< void() > > watch_directory_change_handler_list_;
 
+	/// ウィンドウプロシージャの中で起きた例外（メッセージループに戻ってから投げ直す）
+	std::exception_ptr	pending_exception_;
+
 	App();								//コンストラクタ
 
+	/// ウィンドウプロシージャ。例外を外（user32）へ出さず、pending_exception_ に預ける
 	static LRESULT CALLBACK WinProc(HWND, UINT, WPARAM, LPARAM);
+	static LRESULT WinProcImpl(HWND, UINT, WPARAM, LPARAM);
 	static void on_resize( HWND );
 
 	DWORD get_window_style() const;

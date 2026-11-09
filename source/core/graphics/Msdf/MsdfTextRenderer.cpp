@@ -104,11 +104,12 @@ void MsdfTextRenderer::create_index_buffer()
  */
 void MsdfTextRenderer::update_transform()
 {
+	// Sprite と同じ座標系（立体視のずらしも同じ。以前は文字にだけずらしが効かなかった）
+	const Pixel2DSpace space = direct_3d_->get_2d_space();
+
 	TransformConstantBufferData data;
-	data.transform = Matrix().set_orthographic(
-		2.f * static_cast< float >( direct_3d_->get_width() ) / static_cast< float >( direct_3d_->get_height() ),
-		2.f, -1.f, 1.f
-	);
+	data.transform = Matrix().set_orthographic( space.ortho_width(), space.ortho_height(), -1.f, 1.f );
+	data.transform *= Matrix().set_translation( space.offset_x, 0.f, 0.f );
 
 	transform_constant_buffer_->update( &data );
 }
@@ -140,15 +141,18 @@ void MsdfTextRenderer::append_quad( float x, float y, float w, float h, const UV
 		return;
 	}
 
-	const auto screen_width = direct_3d_->get_width();
-	const auto screen_height = direct_3d_->get_height();
-	const float ratio = static_cast< float >( screen_width ) / static_cast< float >( screen_height );
+	const Pixel2DSpace space = direct_3d_->get_2d_space();
 
-	// ピクセル座標 → NDC 座標に変換
-	float l = +( x * 2.f / static_cast< float >( screen_height ) - ratio );			// 左端
-	float r = +( ( x + w ) * 2.f / static_cast< float >( screen_height ) - ratio );	// 右端
-	float t = -( y * 2.f / static_cast< float >( screen_height ) - 1.f );				// 上端（Y 反転）
-	float b = -( ( y + h ) * 2.f / static_cast< float >( screen_height ) - 1.f );		// 下端（Y 反転）
+	if ( ! space.is_valid() )
+	{
+		return;		// 最小化中など（座標が無限大になる）
+	}
+
+	// ピクセル座標 → 描画用の座標（Sprite と共通の変換）
+	float l = space.to_view_x( x );			// 左端
+	float r = space.to_view_x( x + w );		// 右端
+	float t = space.to_view_y( y );			// 上端（Y 反転）
+	float b = space.to_view_y( y + h );		// 下端（Y 反転）
 
 	uint16_t base = static_cast< uint16_t >( vertices_.size() );
 

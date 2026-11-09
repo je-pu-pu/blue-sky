@@ -2,6 +2,7 @@
 
 #include <core/DirectX.h>
 #include <core/type.h>
+#include <core/graphics/Pixel2DSpace.h>
 
 #include <d3d11.h>
 
@@ -74,6 +75,8 @@ private:
 
 	D3D11_VIEWPORT				viewport_;
 
+	float_t						offset_2d_x_ = 0.f;		///< 2D 描画の立体視のずらし（Sprite と文字で共有する）
+
 	std::unique_ptr< Sprite >	sprite_;
 	std::unique_ptr< Effect >	effect_;
 
@@ -115,6 +118,21 @@ public:
 
 	int get_width() const { return swap_chain_desc_.BufferDesc.Width; }
 	int get_height() const { return swap_chain_desc_.BufferDesc.Height; }
+
+	/**
+	 * 2D 描画（Sprite・文字）の座標系
+	 *
+	 * Sprite と文字の描画は必ずここから座標系を得る（以前はそれぞれが同じ変換を書いていた）。
+	 * 大きさは今はスワップチェーンの大きさ。UI の配置もスワップチェーンの大きさを使っているため、
+	 * 描画先（ビューポート）の大きさに変えるときは UI の配置と一緒に変える（設計上の問題 B13・B16）。
+	 */
+	Pixel2DSpace get_2d_space() const
+	{
+		return Pixel2DSpace{ static_cast< float_t >( get_width() ), static_cast< float_t >( get_height() ), offset_2d_x_ };
+	}
+
+	/// 2D 描画の立体視のずらし（正射影の後の座標で）
+	void set_2d_offset_x( float_t x ) { offset_2d_x_ = x; }
 
 	/// システムが対応する表示解像度のリストを返す (重複除去・ソート済み)
 	std::vector< DisplayMode > get_available_display_modes() const;

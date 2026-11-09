@@ -434,6 +434,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\graphics\Pixel2DSpace.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
     <ClInclude Include="core\ui\Grid.h">
       <Filter>core\ui</Filter>
     </ClInclude>

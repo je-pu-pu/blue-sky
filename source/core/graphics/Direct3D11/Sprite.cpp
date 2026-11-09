@@ -21,7 +21,6 @@ Sprite::Sprite( Direct3D* direct_3d )
 	, effect_technique_( direct_3d_->get_effect()->get_technique( "sprite" ) )
 	, color_technique_( direct_3d_->get_effect()->get_technique( "sprite_color" ) )
 	, premultiplied_technique_( direct_3d_->get_effect()->get_technique( "sprite_premultiplied" ) )
-	, ortho_offset_( 0.f )
 {
 	constant_buffer_ = std::make_unique< ConstantBuffer >();
 	
@@ -82,17 +81,24 @@ void Sprite::end()
 	direct_3d_->bind_texture_to_ps( 0, nullptr );
 }
 
+void Sprite::set_ortho_offset( float_t ortho_offset )
+{
+	direct_3d_->set_2d_offset_x( ortho_offset );
+}
+
 void Sprite::set_transform( const Matrix& m )
 {
-	if ( direct_3d_->get_height() == 0 )
+	const Pixel2DSpace space = direct_3d_->get_2d_space();
+
+	if ( ! space.is_valid() )
 	{
 		return;		// 縦横比が求まらない（最小化中など）。draw_quad も描かない
 	}
 
 	ConstantBufferData constant_buffer_data;
 	constant_buffer_data.transform = m;
-	constant_buffer_data.transform *= Matrix().set_orthographic( 2.f * static_cast< float >( direct_3d_->get_width() ) / static_cast< float >( direct_3d_->get_height() ), 2.f, -1.f, 1.f );
-	constant_buffer_data.transform *= Matrix().set_translation( ortho_offset_, 0.f, 0.f );
+	constant_buffer_data.transform *= Matrix().set_orthographic( space.ortho_width(), space.ortho_height(), -1.f, 1.f );
+	constant_buffer_data.transform *= Matrix().set_translation( space.offset_x, 0.f, 0.f );
 	constant_buffer_->update( & constant_buffer_data );
 }
 
@@ -106,10 +112,10 @@ void Sprite::set_transform( const Matrix& m )
  */
 void Sprite::draw_quad( const Rect& dst, const UVRect& uv, const Color& color, const EffectTechnique* technique, const Texture* texture )
 {
-	const FLOAT screen_height = static_cast< FLOAT >( direct_3d_->get_height() );
+	const Pixel2DSpace space = direct_3d_->get_2d_space();
 
 	// 最小化中など。座標が無限大になるので描かない（Map する前に判定する。Map した後で抜けると Unmap されずに残る）
-	if ( screen_height <= 0.f )
+	if ( ! space.is_valid() )
 	{
 		return;
 	}
@@ -120,12 +126,10 @@ void Sprite::draw_quad( const Rect& dst, const UVRect& uv, const Color& color, c
 
 	Vertex* vertex_list = static_cast< Vertex* >( mapped_subresource.pData );
 
-	const FLOAT surface_ratio = static_cast< FLOAT >( direct_3d_->get_width() ) / screen_height;
-
-	const FLOAT l = +( static_cast< FLOAT >( dst.left()   ) * 2.f / screen_height - surface_ratio );
-	const FLOAT r = +( static_cast< FLOAT >( dst.right()  ) * 2.f / screen_height - surface_ratio );
-	const FLOAT t = -( static_cast< FLOAT >( dst.top()    ) * 2.f / screen_height - 1.f );
-	const FLOAT b = -( static_cast< FLOAT >( dst.bottom() ) * 2.f / screen_height - 1.f );
+	const FLOAT l = space.to_view_x( static_cast< FLOAT >( dst.left()   ) );
+	const FLOAT r = space.to_view_x( static_cast< FLOAT >( dst.right()  ) );
+	const FLOAT t = space.to_view_y( static_cast< FLOAT >( dst.top()    ) );
+	const FLOAT b = space.to_view_y( static_cast< FLOAT >( dst.bottom() ) );
 
 	vertex_list[ 0 ].Position = Vector3( l, t, 0 );
 	vertex_list[ 1 ].Position = Vector3( r, t, 0 );

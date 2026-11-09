@@ -60,7 +60,6 @@ protected:
 	const EffectTechnique*		color_technique_;		///< テクスチャなし・頂点カラーのみ
 	const EffectTechnique*		premultiplied_technique_;	///< 乗算済みアルファのテクスチャ（UI 用）
 
-	float_t			ortho_offset_;		///< 立体視用
 
 	void create_vertex_buffer();
 	void create_index_buffer();
@@ -76,7 +75,8 @@ public:
 	~Sprite();
 
 	void set_transform( const Matrix& ) override;
-	void set_ortho_offset( float_t ortho_offset ) override { ortho_offset_ = ortho_offset; }
+	/// 立体視のずらし（文字の描画と共有するため Direct3D11 に持たせる）
+	void set_ortho_offset( float_t ortho_offset ) override;
 
 	void begin() override;
 	void draw_color( const Rect& dr, const Color& c ) override;

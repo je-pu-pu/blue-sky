@@ -125,9 +125,6 @@
     <ClCompile Include="GameObject\Girl.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject\Ladder.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="GameObject\Robot.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
@@ -459,6 +456,9 @@
     <ClCompile Include="core\graphics\Msdf\MsdfFont.cpp">
       <Filter>core\graphics\Msdf</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\ContactCacheSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blue_sky\ecs\component\PhysicsBodyComponent.h">
@@ -661,9 +661,6 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\Girl.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Ladder.h">
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\Robot.h">
@@ -1276,6 +1273,12 @@
     </ClInclude>
     <ClInclude Include="core\graphics\TextStyle.h">
       <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\ContactCacheComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\ContactCacheSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

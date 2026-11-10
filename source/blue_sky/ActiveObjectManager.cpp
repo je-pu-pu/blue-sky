@@ -5,7 +5,6 @@
 #include <GameObject/Girl.h>
 #include <GameObject/Robot.h>
 #include <GameObject/Balloon.h>
-#include <GameObject/Ladder.h>
 #include <GameObject/Stone.h>
 #include <GameObject/Switch.h>
 #include <GameObject/AreaSwitch.h>
@@ -27,6 +26,8 @@
 #include <blue_sky/ecs/component/StaticObjectComponent.h>
 #include <blue_sky/ecs/component/PickupComponent.h>
 #include <blue_sky/ecs/system/SpinSystem.h>
+#include <blue_sky/ecs/system/ContactCacheSystem.h>
+#include <blue_sky/ecs/component/ContactCacheComponent.h>
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/ObjectBody.h>
 
@@ -44,11 +45,10 @@ ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics
 	object_creator_map_[ "girl"        ] = [] () -> ActiveObject* { return new Girl();         };
 	object_creator_map_[ "robot"       ] = [this] () -> ActiveObject* { return new Robot( graphics_manager_ ); };	// テクスチャを得る GraphicsManager を渡す
 	object_creator_map_[ "balloon"     ] = [] () -> ActiveObject* { return new Balloon();      };
-	object_creator_map_[ "ladder"      ] = [] () -> ActiveObject* { return new Ladder();       };
 	object_creator_map_[ "stone"       ] = [] () -> ActiveObject* { return new Stone();        };
 	object_creator_map_[ "switch"      ] = [] () -> ActiveObject* { return new Switch();       };
 
-	// "static"（動かない物）・"medal"・"umbrella"・"rocket"・"goal" は ECS だけの物体になり、ObjectFactory が作る（段階 4）
+	// "static"（動かない物）・"medal"・"umbrella"・"rocket"・"goal"・"ladder" は ECS だけの物体になり、ObjectFactory が作る（段階 4）
 
 }
 
@@ -160,6 +160,12 @@ void ActiveObjectManager::update()
 		system->update_translations( delta_time );
 	}
 
+	// 最近触れた物体の覚えを減らす（ECS だけの物体。以前は Ladder::update が物体の update の中で減らしていた）
+	if ( auto* system = entity_manager_->get_system< ecs::ContactCacheSystem >() )
+	{
+		system->update_caches( delta_time );
+	}
+
 	// 回る物（ECS だけの物体。以前は Medal::update）
 	if ( auto* system = entity_manager_->get_system< ecs::SpinSystem >() )
 	{
@@ -245,16 +251,16 @@ void ActiveObjectManager::on_collide( core::ecs::EntityId a, core::ecs::EntityId
 
 	if ( a0 || a1 )
 	{
-		const core::ecs::Entity* other = entity_manager_->find( a0 ? b : a );
+		core::ecs::Entity* other = entity_manager_->find( a0 ? b : a );
 
 		if ( other )
 		{
-			on_collide_with_entity_object( a0 ? * a0 : * a1, * other );
+			on_collide_with_entity_object( a0 ? * a0 : * a1, a0 ? a : b, * other, object_context_ ? object_context_->sound_manager : nullptr );
 		}
 	}
 }
 
-void ActiveObjectManager::on_collide_with_entity_object( GameObject& object, const core::ecs::Entity& entity )
+void ActiveObjectManager::on_collide_with_entity_object( GameObject& object, core::ecs::EntityId object_id, core::ecs::Entity& entity, core::sound::SoundManager* sound_manager )
 {
 	// 動かない物（以前の StaticObject）: 以前は StaticObject::on_collide_with( GameObject* ) が相手の on_collide_with( StaticObject* ) を呼び、
 	// 逆向き（相手 → StaticObject）は何もしなかった。1 組につき 1 回、相手に知らせる（プレイヤーはロケットを止める）
@@ -269,12 +275,31 @@ void ActiveObjectManager::on_collide_with_entity_object( GameObject& object, con
 	{
 		if ( object.on_pick_up( pickup->kind ) )
 		{
-			ecs::EntityObject picked( const_cast< core::ecs::Entity* >( & entity ) );
+			ecs::EntityObject picked( & entity );
 			picked.kill();
 
 			if ( pickup->disable_contact_on_pickup && picked.get_rigid_body() )
 			{
 				ecs::object_body::set_no_contact_response( * picked.get_rigid_body(), true );
+			}
+		}
+	}
+
+	// 梯子（以前の Ladder）: 以前は Ladder::on_collide_with( GameObject* ) が相手の on_collide_with( Ladder* ) を呼び、
+	// 相手がプレイヤーなら Ladder::on_collide_with( Player* ) が、最近（0.5 秒以内）触れていなければ梯子の位置で音を鳴らして覚えた。
+	// 今は相手が反応したか（プレイヤーだけが true を返す）で決める
+	if ( entity.get_component< ecs::LadderComponent >() )
+	{
+		if ( object.on_collide_with_ladder() )
+		{
+			if ( auto* cache = entity.get_component< ecs::ContactCacheComponent >() )
+			{
+				if ( ! cache->cache.is_cached( object_id ) )
+				{
+					ecs::EntityObject( & entity ).play_sound( sound_manager, "ladder-contact" );
+				}
+
+				cache->cache.cache( object_id, ecs::ContactCacheComponent::LifeTime );
 			}
 		}
 	}

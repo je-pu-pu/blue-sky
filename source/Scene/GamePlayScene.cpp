@@ -27,7 +27,6 @@
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/DebugLog.h>
 #include <GameObject/BaseSwitch.h>
-#include <GameObject/Ladder.h>
 #include <GameObject/Stone.h>
 #include <GameObject/Switch.h>
 #include <GameObject/Robot.h>
@@ -728,7 +727,7 @@ void GamePlayScene::debug_visit_objects()
 
 	add_first_entity( "メダル", "medal" );
 	add_first( "風船", [] ( const ActiveObject* o ) { return dynamic_cast< const Balloon* >( o ) != nullptr; } );
-	add_first( "梯子", [] ( const ActiveObject* o ) { return dynamic_cast< const Ladder* >( o ) != nullptr; } );
+	add_first_entity( "梯子", "ladder" );
 	add_first_entity( "ロケット", "rocket" );
 	targets.emplace_back( "ゴール", goal_.get_location() );
 

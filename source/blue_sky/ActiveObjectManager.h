@@ -15,6 +15,7 @@ namespace graphics { class GraphicsManager; }
 }
 
 namespace core::ecs { class EntityManager; class Entity; }
+namespace core::sound { class SoundManager; }
 
 namespace blue_sky
 {
@@ -95,10 +96,15 @@ public:
 	/**
 	 * ActiveObject と ECS だけの物体（ActiveObject を持たない Entity）が当たった
 	 *
-	 * ECS だけの物体の振る舞いは部品の組み合わせで決める（StaticObjectComponent なら object.on_collide_with_static_object）。
+	 * ECS だけの物体の振る舞いは部品の組み合わせで決める（StaticObjectComponent なら object.on_collide_with_static_object など）。
 	 * 相手（プレイヤーなど）はまだ ActiveObject なので、相手の振る舞いは GameObject の仮想関数で呼ぶ
+	 *
+	 * @param object 当たった ActiveObject
+	 * @param object_id object の Entity の番号（梯子が触れた物体を覚えるのに使う）
+	 * @param entity 当たった ECS だけの物体
+	 * @param sound_manager ECS だけの物体の位置で音を鳴らす先（nullptr なら鳴らさない。テスト）
 	 */
-	static void on_collide_with_entity_object( GameObject& object, const core::ecs::Entity& entity );
+	static void on_collide_with_entity_object( GameObject& object, core::ecs::EntityId object_id, core::ecs::Entity& entity, core::sound::SoundManager* sound_manager = nullptr );
 
 	// ECS だけの物体（ObjectFactory が作る）のうち、毎フレーム動く物（動く床・回る物）は update の中で System に頼む
 

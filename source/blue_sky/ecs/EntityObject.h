@@ -6,6 +6,8 @@
 
 class btRigidBody;
 
+namespace core::sound { class SoundManager; }
+
 namespace core::ecs
 {
 	class Entity;
@@ -78,6 +80,13 @@ public:
 
 	/// メッシュ・線を描くか（以前の ActiveObject::set_mesh_visible・set_line_visible）
 	void set_visible( bool mesh, bool line );
+
+	/**
+	 * 物体の位置で音を鳴らす（以前の GameObject::play_sound( name ) と同じ : 鳴っていても初めから鳴らし直し、繰り返さない）
+	 *
+	 * @param sound_manager 音を引く先（nullptr・音が無ければ何もしない）
+	 */
+	void play_sound( core::sound::SoundManager* sound_manager, const char_t* name ) const;
 
 	// TargetMover（MoveToTargetSystem が呼ぶ）
 	core::Vector get_target_mover_location() const override { return get_location(); }

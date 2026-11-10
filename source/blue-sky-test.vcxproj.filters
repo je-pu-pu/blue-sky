@@ -147,6 +147,9 @@
     <ClCompile Include="test\graphics\MsdfFontTest.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
+    <ClCompile Include="test\ecs\LadderStoneSwitchTest.cpp">
+      <Filter>test\ecs</Filter>
+    </ClCompile>
     <ClCompile Include="test\lib.cpp" />
     <ClCompile Include="test\pch.cpp" />
   </ItemGroup>

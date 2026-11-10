@@ -150,7 +150,6 @@
     <ClCompile Include="GameObject\Camera.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="GameObject\Girl.cpp" />
-    <ClCompile Include="GameObject\Ladder.cpp" />
     <ClCompile Include="GameObject\Player.cpp" />
     <ClCompile Include="GameObject\Robot.cpp" />
     <ClCompile Include="GameObject\Stone.cpp" />
@@ -181,6 +180,7 @@
     <ClCompile Include="Scene\StoryTextScene.cpp" />
     <ClCompile Include="Scene\TitleScene.cpp" />
     <ClCompile Include="Scene\TransformTestScene.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\ContactCacheSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\sound\SampleRateStepper.h" />
@@ -450,7 +450,6 @@
     <ClInclude Include="GameObject\Camera.h" />
     <ClInclude Include="GameObject\GameObject.h" />
     <ClInclude Include="GameObject\Girl.h" />
-    <ClInclude Include="GameObject\Ladder.h" />
     <ClInclude Include="GameObject\Player.h" />
     <ClInclude Include="GameObject\Robot.h" />
     <ClInclude Include="GameObject\Stone.h" />
@@ -472,6 +471,8 @@
     <ClInclude Include="Scene\StoryTextScene.h" />
     <ClInclude Include="Scene\TitleScene.h" />
     <ClInclude Include="Scene\TransformTestScene.h" />
+    <ClInclude Include="blue_sky\ecs\component\ContactCacheComponent.h" />
+    <ClInclude Include="blue_sky\ecs\system\ContactCacheSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="blue-sky.config">

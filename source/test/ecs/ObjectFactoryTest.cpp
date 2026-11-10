@@ -83,6 +83,9 @@ public:
 	void on_collide_with_static_object() override { static_object_count++; }
 };
 
+/// 偽の物体の Entity の番号（当たりの互換の層に渡す。梯子・スイッチが触れた物体を覚えるのに使う）
+constexpr core::ecs::EntityId FakeObjectId = 1000;
+
 bool is_near( const Vector& a, const Vector& b, float_t e = 0.0001f )
 {
 	return std::abs( a.x() - b.x() ) < e && std::abs( a.y() - b.y() ) < e && std::abs( a.z() - b.z() ) < e;
@@ -372,13 +375,13 @@ TEST( ObjectFactoryTest, 動かない物に当たると相手に一度だけ知�
 	FakeGameObject player;
 
 	const auto wall = f.create_from_line( "wall-3 0 0 0" );
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, * f.entity( wall ) );
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, FakeObjectId, * f.entity( wall ) );
 
 	EXPECT_EQ( player.static_object_count, 1 );
 
 	// 動かない物の印が無い Entity
 	auto* other = f.manager.create_entity();
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, * other );
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, FakeObjectId, * other );
 
 	EXPECT_EQ( player.static_object_count, 1 );
 }
@@ -444,12 +447,12 @@ TEST( ObjectFactoryTest, プレイヤーがメダルに当たると拾って_メ
 	// 拾わない物体（敵など）: 何も起きない（以前も Medal との当たりは Player だけが受け取っていた）
 	FakePicker robot;
 	robot.picks = false;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( robot, * f.entity( id ) );
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( robot, FakeObjectId, * f.entity( id ) );
 	EXPECT_FALSE( traits->is_dead );
 
 	// プレイヤー : 拾い、メダルは死んで描かれなくなる
 	FakePicker player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, * f.entity( id ) );
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, FakeObjectId, * f.entity( id ) );
 
 	ASSERT_EQ( player.picked.size(), 1u );
 	EXPECT_EQ( player.picked[ 0 ], blue_sky::ecs::PickupKind::MEDAL );
@@ -479,7 +482,7 @@ TEST( ObjectFactoryTest, ロケットは硬い拾う物で_拾われると当た
 	EXPECT_TRUE( is_near( e->get_component< blue_sky::ecs::SimpleObjectComponent >()->default_gravity, blue_sky::GameObject::GravityDefault ) );
 
 	FakePicker player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, * e );
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, FakeObjectId, * e );
 
 	ASSERT_EQ( player.picked.size(), 1u );
 	EXPECT_EQ( player.picked[ 0 ], blue_sky::ecs::PickupKind::ROCKET );
@@ -515,7 +518,7 @@ TEST( ObjectFactoryTest, ゴールは死なない足場で重力が無く_やり
 	EXPECT_NEAR( body->getGravity().length(), 0.f, 0.0001f );
 
 	FakePicker player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, * e );
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, FakeObjectId, * e );
 
 	EXPECT_TRUE( player.picked.empty() );
 	EXPECT_EQ( player.static_object_count, 0 );
@@ -537,7 +540,7 @@ TEST( ObjectFactoryTest, 傘は硬くない拾う物で_プレイヤーが触れ
 	EXPECT_FLOAT_EQ( e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->height_offset, 1.f );
 
 	FakePicker player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, * e );
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, FakeObjectId, * e );
 
 	EXPECT_TRUE( e->get_component< blue_sky::ecs::CollisionTraitsComponent >()->is_dead );
 }

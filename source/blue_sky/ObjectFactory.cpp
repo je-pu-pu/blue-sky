@@ -15,6 +15,7 @@
 #include <blue_sky/ecs/component/SimpleObjectComponent.h>
 #include <blue_sky/ecs/component/StaticObjectComponent.h>
 #include <blue_sky/ecs/component/PickupComponent.h>
+#include <blue_sky/ecs/component/ContactCacheComponent.h>
 #include <blue_sky/ecs/component/TargetMoverComponent.h>
 #include <blue_sky/ecs/system/CollisionEventSystem.h>
 #include <blue_sky/ecs/system/MoveToTargetSystem.h>
@@ -22,6 +23,7 @@
 #include <blue_sky/ecs/system/PhysicsSyncSystem.h>
 #include <blue_sky/ecs/system/TranslationSystem.h>
 #include <blue_sky/ecs/system/SpinSystem.h>
+#include <blue_sky/ecs/system/ContactCacheSystem.h>
 
 #include <GameObject/ActiveObject.h>
 
@@ -50,6 +52,7 @@ void ObjectFactory::setup_systems()
 	entity_manager_->add_system< ecs::PhysicsSyncSystem >( 0 );
 	entity_manager_->add_system< ecs::TranslationSystem >( 0 );
 	entity_manager_->add_system< ecs::SpinSystem >( 0 );
+	entity_manager_->add_system< ecs::ContactCacheSystem >( 0 );
 }
 
 std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const string_t& kind )
@@ -130,6 +133,27 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 
 		const EntityId id = create_entity_object( spec );
 		entity_manager_->find( id )->add_component< ecs::PickupComponent >()->kind = ecs::PickupKind::UMBRELLA;
+
+		return id;
+	}
+
+	if ( kind == "ladder" )
+	{
+		// 以前の Ladder : 0.4 x 5 x 0.2・硬くない（当たりの応答なし・重力 0・壁にならない）・作ったときの質量 1、やり直すと 0（動かない）。
+		// プレイヤーが触れると梯子につかまり、梯子は（最近触れていなければ）触れた音を鳴らす
+		ObjectSpec spec;
+		spec.kind = kind;
+		spec.size = Vector( 0.4f, 5.f, 0.2f );
+		spec.mass = 1.f;
+		spec.is_hard = false;
+		spec.is_block = false;
+		spec.restart_mass = 0.f;
+
+		const EntityId id = create_entity_object( spec );
+		core::ecs::Entity* entity = entity_manager_->find( id );
+
+		entity->add_component< ecs::LadderComponent >();
+		entity->add_component< ecs::ContactCacheComponent >();
 
 		return id;
 	}

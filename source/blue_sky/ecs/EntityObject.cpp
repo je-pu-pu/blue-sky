@@ -6,12 +6,15 @@
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
 #include <blue_sky/ecs/component/ObjectRenderComponent.h>
 #include <blue_sky/ecs/component/PickupComponent.h>
+#include <blue_sky/ecs/component/ContactCacheComponent.h>
 #include <blue_sky/ecs/system/PhysicsSyncSystem.h>
 
 #include <core/ecs/Entity.h>
 #include <core/ecs/EntityManager.h>
 #include <core/ecs/component/TransformComponent.h>
 #include <core/math/Quaternion.h>
+#include <core/sound/Sound.h>
+#include <core/sound/SoundManager.h>
 
 #include <common/math.h>
 
@@ -213,6 +216,12 @@ void EntityObject::restart()
 		}
 	}
 
+	// 最近触れた物体を忘れる（以前の Ladder::restart・BaseSwitch::restart）
+	if ( auto* cache = entity_->get_component< ContactCacheComponent >() )
+	{
+		cache->cache.clear();
+	}
+
 	set_visible( true, true );
 }
 
@@ -231,6 +240,24 @@ bool EntityObject::is_dead() const
 	const auto* traits = entity_->get_component< CollisionTraitsComponent >();
 
 	return traits && traits->is_dead;
+}
+
+void EntityObject::play_sound( core::sound::SoundManager* sound_manager, const char_t* name ) const
+{
+	core::Sound* sound = sound_manager ? sound_manager->get_sound( name ) : nullptr;
+
+	if ( ! sound )
+	{
+		return;
+	}
+
+	// 以前の GameObject::play_sound と同じ値を渡す（速度の 2 つ目に z を渡しているのも以前のまま）
+	const core::Vector location = get_location();
+	const core::Vector velocity = get_velocity();
+
+	sound->set_3d_position( location.x(), location.y(), location.z() );
+	sound->set_3d_velocity( velocity.x(), velocity.z(), velocity.z() );
+	sound->play( false );
 }
 
 void EntityObject::set_visible( bool mesh, bool line )

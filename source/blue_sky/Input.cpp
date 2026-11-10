@@ -199,7 +199,7 @@ void Input::load_config( const Config& config )
 	joystick_y_sensitivity_ = config.get( "input.joystick.axis.y_sensitivity", 1.f );
 }
 
-std::vector< int > Input::parse_key_bindings_text( const string_t& text )
+std::vector< int > Input::parse_key_bindings_text( const string_t& text, const std::function< void( const std::string& ) >& log )
 {
 	std::vector< int > codes;
 	std::stringstream ss( text );
@@ -209,7 +209,19 @@ std::vector< int > Input::parse_key_bindings_text( const string_t& text )
 	{
 		const int code = key_names::code_from_name( name );
 
-		if ( code != 0 && std::find( codes.begin(), codes.end(), code ) == codes.end() )
+		if ( code == 0 )
+		{
+			if ( log ) log( "[Input] キー割り当ての \"" + text + "\" にある \"" + name + "\" はキーの名前として解釈できないので飛ばします" );
+			continue;
+		}
+
+		if ( ! key_names::is_bindable( code ) )
+		{
+			if ( log ) log( "[Input] キー割り当ての \"" + text + "\" にある \"" + name + "\" は割り当てられないキー（固定キーなど）なので飛ばします" );
+			continue;
+		}
+
+		if ( std::find( codes.begin(), codes.end(), code ) == codes.end() )
 		{
 			codes.push_back( code );
 		}

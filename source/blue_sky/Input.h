@@ -13,6 +13,7 @@
 #pragma once
 
 #include <core/input/InputManager.h>
+#include <blue_sky/DebugLog.h>
 #include <type/type.h>
 
 #include <windows.h>
@@ -23,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 class DirectInput;
 class App;
@@ -150,8 +152,16 @@ public:
 	/// ユーザー割り当てを設定ファイルの値の形式（`W UP` のような空白区切りのキー名）にする
 	string_t get_key_bindings_text( Button ) const;
 
-	/// 空白区切りのキー名をキーコード一覧にする（不明な名前は無視）
-	static std::vector< int > parse_key_bindings_text( const string_t& );
+	/**
+	 * 空白区切りのキー名をキーコード一覧にする
+	 *
+	 * 解釈できない名前と、割り当てられないキー（Enter・矢印・Esc などの固定キー。UI と同じ key_names::is_bindable で判定）は
+	 * 飛ばし、理由を log に残す。設定ファイルを手で書いたときに 2 つ目以降のキーへ固定キーが入るのを防ぐ。
+	 * 同じキーが 2 回あれば 1 つにする。
+	 *
+	 * @param log 飛ばした理由の出し先（既定は debug_log。テストでは差し替える）
+	 */
+	static std::vector< int > parse_key_bindings_text( const string_t&, const std::function< void( const std::string& ) >& log = & debug_log );
 
 	// ---- 生の入力状態（UI 用。is_blocked_ の影響を受けない） ----
 	// ウィンドウが非アクティブなときは全て false。再アクティブになったフレームは「押した瞬間」を出さない

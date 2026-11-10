@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include <blue_sky/KeyNames.h>
+#include <blue_sky/Input.h>
 
 #include <windows.h>
 
@@ -74,4 +75,39 @@ TEST( KeyNamesTest, パッドのボタンも名前とコードを行き来でき
 
 	EXPECT_EQ( 0, code_from_name( "PAD0" ) );
 	EXPECT_EQ( 0, code_from_name( "PAD33" ) );
+}
+
+// ---- 設定ファイルのキー割り当ての解釈（Input::parse_key_bindings_text）----
+
+TEST( KeyBindingsTextTest, 2つ目以降に書いた固定キーは割り当てず理由をログに残す )
+{
+	std::vector< std::string > logs;
+	const auto codes = blue_sky::Input::parse_key_bindings_text( "SPACE RETURN UP", [&logs] ( const std::string& s ) { logs.push_back( s ); } );
+
+	ASSERT_EQ( 1u, codes.size() );
+	EXPECT_EQ( VK_SPACE, codes[ 0 ] );
+	ASSERT_EQ( 2u, logs.size() );
+	EXPECT_NE( std::string::npos, logs[ 0 ].find( "RETURN" ) );
+	EXPECT_NE( std::string::npos, logs[ 1 ].find( "UP" ) );
+}
+
+TEST( KeyBindingsTextTest, 解釈できない名前も飛ばしてログに残し重複は1つにする )
+{
+	std::vector< std::string > logs;
+	const auto codes = blue_sky::Input::parse_key_bindings_text( "W NO_SUCH_KEY W MOUSE_L", [&logs] ( const std::string& s ) { logs.push_back( s ); } );
+
+	ASSERT_EQ( 2u, codes.size() );
+	EXPECT_EQ( 'W', codes[ 0 ] );
+	EXPECT_EQ( VK_LBUTTON, codes[ 1 ] );
+	ASSERT_EQ( 1u, logs.size() );
+	EXPECT_NE( std::string::npos, logs[ 0 ].find( "NO_SUCH_KEY" ) );
+}
+
+TEST( KeyBindingsTextTest, 割り当てられるキーだけならログを出さない )
+{
+	std::vector< std::string > logs;
+	const auto codes = blue_sky::Input::parse_key_bindings_text( "A LSHIFT PAD3", [&logs] ( const std::string& s ) { logs.push_back( s ); } );
+
+	EXPECT_EQ( 3u, codes.size() );
+	EXPECT_TRUE( logs.empty() );
 }

@@ -719,3 +719,44 @@ TEST( EcsTest, RenderSystemRunsOnlyInRender )
 
 	em->clear();
 }
+
+/**
+ * 部品・System の型の番号が、型ごとに 1 つに決まり、型が違えば違うことを検証する
+ *
+ * 以前は typeid( T ).hash_code() で、呼ぶたびに計算していた（衝突もし得た）。const の有無は区別しない（以前の typeid と同じ）
+ */
+TEST( EcsTest, TypeIdsAreStableAndDistinct )
+{
+	using namespace core::ecs;
+
+	EXPECT_EQ( get_component_type_id< TransformComponent >(), get_component_type_id< TransformComponent >() );
+	EXPECT_EQ( get_component_type_id< TransformComponent >(), get_component_type_id< const TransformComponent >() );
+	EXPECT_NE( get_component_type_id< TransformComponent >(), get_component_type_id< RigidBodyComponent >() );
+	EXPECT_NE( get_component_type_id< RigidBodyComponent >(), get_component_type_id< ParticleSystemComponent >() );
+
+	EXPECT_EQ( get_system_type_id< CountSystem >(), get_system_type_id< CountSystem >() );
+	EXPECT_NE( get_system_type_id< CountSystem >(), get_system_type_id< DualCountSystem >() );
+}
+
+/**
+ * まだ一度も足していない型の部品を引いても nullptr が返り、その後に足せば引けることを検証する
+ *
+ * 以前は operator[] で、引くだけで未登録の型の空の一覧を作っていた
+ */
+TEST( EcsTest, GetComponentOfNeverAddedTypeReturnsNull )
+{
+	struct NeverAddedComponent : public core::ecs::Component { int value = 7; };
+
+	core::ecs::EntityManager entity_manager;
+	auto* e = entity_manager.create_entity();
+
+	EXPECT_EQ( nullptr, e->get_component< NeverAddedComponent >() );
+	EXPECT_EQ( nullptr, static_cast< const core::ecs::Entity* >( e )->get_component< NeverAddedComponent >() );
+
+	ASSERT_NE( nullptr, e->add_component< NeverAddedComponent >() );
+	ASSERT_NE( nullptr, e->get_component< NeverAddedComponent >() );
+	EXPECT_EQ( 7, e->get_component< NeverAddedComponent >()->value );
+
+	e->remove_component< NeverAddedComponent >();
+	EXPECT_EQ( nullptr, e->get_component< NeverAddedComponent >() );
+}

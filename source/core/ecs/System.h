@@ -24,19 +24,6 @@ private:
 	struct ComponentTypeList
 	{
 		/**
-		 * ComponentTypes に指定した Component の型が含まれているかを調べる
-		 */
-		static constexpr bool has_component_type( ComponentTypeId component_type_id )
-		{
-			if ( Head::template get_type_id< Head >() == component_type_id )
-			{
-				return true;
-			}
-
-			return ComponentTypeList< Tail ... >::has_component_type( component_type_id );
-		}
-
-		/**
 		 * Entity に ComponentTypes の Component が含まれているかを調べ、含まれていればそれを component_tuple に追加する
 		 * 
 		 * @return bool Entity に ComponentTypes の Component が全て含まれていれば true を、ひとつでも含まれていないものがあれば false を返す
@@ -61,11 +48,6 @@ private:
 	template< typename Head >
 	struct ComponentTypeList< Head >
 	{
-		static constexpr bool has_component_type( ComponentTypeId component_type_id )
-		{
-			return Head::template get_type_id< Head >() == component_type_id;
-		}
-
 		template< typename Manager >
 		static bool gather_entity_components( Manager& manager, const Entity* entity, ComponentTuple& component_tuple )
 		{
@@ -89,7 +71,7 @@ private:
 	 */
 	bool has_component_type( ComponentTypeId component_type_id ) const override
 	{
-		return ComponentTypeList< ComponentTypes ... >::has_component_type( component_type_id  );
+		return ( ( get_component_type_id< ComponentTypes >() == component_type_id ) || ... );
 	}
 
 	/**

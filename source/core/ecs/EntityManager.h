@@ -6,6 +6,7 @@
 #include "type.h"
 
 
+#include <deque>
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
@@ -32,8 +33,9 @@ private:
 	// Entity の一覧
 	std::unordered_map< EntityId, Entity > entity_list_;
 
-	// Component の一覧
-	std::unordered_map< ComponentTypeId, EntityComponentMap > component_list_;
+	// Component の一覧（添字は部品の型の番号 get_component_type_id。番号は 0 から詰めて振るので添字で引く）
+	// deque なのは、伸ばしても既にある一覧を動かさないため（MSVC の unordered_map は移動が noexcept でなく、vector では伸ばせない）
+	std::deque< EntityComponentMap > component_list_;
 
 	// ( SystemTypeId => System の実体 ) のマップ ( System の実体を保持する )
 	std::unordered_map< SystemTypeId, std::unique_ptr< BaseSystem > > system_map_;
@@ -85,7 +87,7 @@ public:
 
 		for ( auto& components : component_list_ )
 		{
-			components.second.erase( id );
+			components.erase( id );
 		}
 
 		entity_list_.erase( i );
@@ -127,21 +129,21 @@ public:
 	template< typename ComponentType >
 	ComponentType* add_component( const Entity* e )
 	{
-		const auto component_type_id = typeid( ComponentType ).hash_code();
-		auto i = component_list_.find( component_type_id );
+		const auto component_type_id = get_component_type_id< ComponentType >();
 
-		if ( i == component_list_.end() )
+		if ( component_type_id >= component_list_.size() )
 		{
-			i = component_list_.emplace( component_type_id, EntityComponentMap() ).first;
+			component_list_.resize( component_type_id + 1 );
 		}
 
-		auto i2 = i->second.find( e->get_id() );
+		auto& list = component_list_[ component_type_id ];
+		auto i2 = list.find( e->get_id() );
 
-		if ( i2 == i->second.end() )
+		if ( i2 == list.end() )
 		{
 			auto c = new ComponentType();
 
-			i->second.emplace( e->get_id(), c );
+			list.emplace( e->get_id(), c );
 
 			for ( auto& s : system_list_ )
 			{
@@ -154,11 +156,24 @@ public:
 		return nullptr;
 	}
 
+	/**
+	 * Entity の Component を得る
+	 *
+	 * 読むだけで何も作らない（以前は operator[] で、未登録の型の空の一覧を作っていた）
+	 *
+	 * @return Component（持っていなければ nullptr）
+	 */
 	template< typename ComponentType >
 	ComponentType* get_component( const Entity* e )
 	{
-		auto& list = component_list_[ typeid( ComponentType ).hash_code() ];
+		const auto component_type_id = get_component_type_id< ComponentType >();
 
+		if ( component_type_id >= component_list_.size() )
+		{
+			return nullptr;
+		}
+
+		const auto& list = component_list_[ component_type_id ];
 		auto i = list.find( e->get_id() );
 
 		if ( i == list.end() )
@@ -180,17 +195,17 @@ public:
 	template< typename ComponentType >
 	void remove_component( const Entity* e )
 	{
-		const auto component_type_id = typeid( ComponentType ).hash_code();
-		auto i = component_list_.find( component_type_id );
+		const auto component_type_id = get_component_type_id< ComponentType >();
 
-		if ( i == component_list_.end() )
+		if ( component_type_id >= component_list_.size() )
 		{
 			return;
 		}
 
-		auto i2 = i->second.find( e->get_id() );
+		auto& list = component_list_[ component_type_id ];
+		auto i2 = list.find( e->get_id() );
 
-		if ( i2 == i->second.end() )
+		if ( i2 == list.end() )
 		{
 			return;
 		}
@@ -200,7 +215,8 @@ public:
 			s->on_remove_component< ComponentType >( e );
 		}
 
-		i->second.erase( i2 );
+		// System に知らせている間に同じ部品が外され得るので、反復子ではなく id で消す
+		list.erase( e->get_id() );
 	}
 
 	/**
@@ -211,7 +227,7 @@ public:
 	template< typename SystemType, typename ... Args >
 	void add_system( int priority = 0, Args&& ... args )
 	{
-		const auto id = typeid( SystemType ).hash_code();
+		const auto id = get_system_type_id< SystemType >();
 
 		if ( system_map_.find( id ) != system_map_.end() )
 		{
@@ -242,7 +258,7 @@ public:
 	template< typename SystemType >
 	void remove_system()
 	{
-		const auto id = typeid( SystemType ).hash_code();
+		const auto id = get_system_type_id< SystemType >();
 
 		auto i = system_map_.find( id );
 
@@ -264,7 +280,7 @@ public:
 	template< typename SystemType >
 	SystemType* get_system()
 	{
-		const auto id = typeid( SystemType ).hash_code();
+		const auto id = get_system_type_id< SystemType >();
 
 		auto i = system_map_.find( id );
 

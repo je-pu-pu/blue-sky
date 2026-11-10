@@ -105,13 +105,14 @@ void ObjectFactory::setup_systems()
 	entity_manager_->add_system< ecs::PlayerInputSystem >( 0 );
 }
 
-std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const string_t& kind )
+std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const string_t& kind, const core::Vector& location )
 {
 	if ( kind == "static" )
 	{
 		// 以前の StaticObject()（大きさ 0・質量 0 の箱）。モデルは種類の名前で読む（以前と同じ。スクリプトが後で差し替える）
 		StaticObjectSpec spec;
 		spec.kind = kind;
+		spec.location = location;
 
 		return create_static_object( spec );
 	}
@@ -121,6 +122,7 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		// 以前の Medal : 2 x 2 x 2・硬くない（当たりの応答なし・重力 0）・足元と剛体の中心が同じ・1 秒に 90 度回る。プレイヤーが拾う
 		ObjectSpec spec;
 		spec.kind = kind;
+		spec.location = location;
 		spec.size = Vector( 2.f, 2.f, 2.f );
 		spec.mass = 1.f;
 		spec.is_hard = false;
@@ -142,6 +144,7 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		// 当たりでは何も起こさない（ゴールしたかはシーンがプレイヤーとの接触で調べる）。目標地点に着いたら止まる
 		ObjectSpec spec;
 		spec.kind = kind;
+		spec.location = location;
 		spec.size = Vector( 4.f, 2.f, 4.f );
 		spec.mass = 1.f;
 		spec.is_safe_footing = true;
@@ -158,6 +161,7 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		// プレイヤーが触れると持ち物が増え、ロケットは消えて当たりの応答も消える（やり直すと戻る）
 		ObjectSpec spec;
 		spec.kind = kind;
+		spec.location = location;
 		spec.size = Vector( 0.2f, 1.f, 0.2f );
 		spec.mass = 1.f;
 		spec.is_hard = true;
@@ -176,6 +180,7 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		// 以前の Umbrella : 2 x 2 x 2・硬くない（当たりの応答なし・重力 0）。プレイヤーが触れると消える（持ち物は増えない）
 		ObjectSpec spec;
 		spec.kind = kind;
+		spec.location = location;
 		spec.size = Vector( 2.f, 2.f, 2.f );
 		spec.mass = 1.f;
 		spec.is_hard = false;
@@ -193,6 +198,7 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		// プレイヤーが触れると拾われて消え、投げられると生き返る。敵・風船・スイッチに当たると相手が反応する
 		ObjectSpec spec;
 		spec.kind = kind;
+		spec.location = location;
 		spec.size = Vector( 0.2f, 0.2f, 0.2f );
 		spec.mass = 1.f;
 		spec.is_hard = true;
@@ -215,6 +221,7 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		// "Off" のアニメーション・回らない（回転のしやすさ 0）・摩擦 1.5・質量 100。プレイヤーと速く飛ぶ石で入・切が変わる
 		ObjectSpec spec;
 		spec.kind = kind;
+		spec.location = location;
 		spec.size = Vector( 0.6f, 0.9f, 0.6f );
 		spec.mass = 1.f;
 		spec.restart_mass = 100.f;
@@ -236,6 +243,7 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		// 始めの位置でふわふわと上下しながら回り、プレイヤーが触れるとつかまれて手元に付いて行く（BalloonHoldSystem）。石が当たると割れる
 		ObjectSpec spec;
 		spec.kind = kind;
+		spec.location = location;
 		spec.size = Vector( 1.5f, 1.5f, 1.5f );
 		spec.mass = 1.f;
 		spec.is_hard = false;
@@ -261,6 +269,7 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		// アクション "float" で浮き、浮く中心でふわふわと上下する（GirlSystem）。当たりでは何も起こさない
 		ObjectSpec spec;
 		spec.kind = kind;
+		spec.location = location;
 		spec.size = Vector( 0.5f, 1.5f, 0.5f );
 		spec.mass = 1.f;
 		spec.has_default_gravity = true;
@@ -283,6 +292,7 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		// 行動（立つ・回る・注目・追う・止まる・浮く）は RobotBehaviorComponent にまとめて持ち、RobotBehaviorSystem が動かす。追う相手は set_robot_target で渡す
 		ObjectSpec spec;
 		spec.kind = kind;
+		spec.location = location;
 		spec.size = Vector( 1.f, 2.f, 0.5f );
 		spec.mass = 1.f;
 		spec.restart_mass = 50.f;
@@ -310,6 +320,7 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		// プレイヤーが触れると梯子につかまり、梯子は（最近触れていなければ）触れた音を鳴らす
 		ObjectSpec spec;
 		spec.kind = kind;
+		spec.location = location;
 		spec.size = Vector( 0.4f, 5.f, 0.2f );
 		spec.mass = 1.f;
 		spec.is_hard = false;
@@ -414,6 +425,10 @@ ObjectFactory::EntityId ObjectFactory::create_entity_object( const ObjectSpec& s
 	// 位置の正（Transform の既定の回転は 0 なので、単位にしてから入れる）
 	auto* transform = entity->add_component< core::ecs::TransformComponent >();
 	transform->transform.set_identity();
+
+	// 始めの位置に置いてから剛体を作る（以前は原点に作り、やり直しで始めの位置へ動かしていた。
+	// 多く作ると、原点に重なった剛体どうしの組を広い判定が作るたびに全部調べ、1 万個で 7 秒かかった）
+	transform->transform.set_position( spec.location );
 
 	auto* state = entity->add_component< ecs::SimpleObjectComponent >();
 	state->kind = spec.kind;

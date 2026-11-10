@@ -97,11 +97,13 @@ public:
 	/**
 	 * 種類の名前から物体を作る（スクリプトの create_object。以前の GameMain::create_object）
 	 *
-	 * 剛体は当たりの大きさの箱、モデルは種類の名前で読む。位置・向きは作った後に設定する（やり直しはしない）
+	 * 剛体は当たりの大きさの箱、モデルは種類の名前で読む。向きは作った後に設定する（やり直しはしない）
 	 *
+	 * @param location 始めの位置（やり直したときの位置。物体と剛体もここに作る）。
+	 *                 作った後に set_start_location で決めてもよいが、多く作るなら渡す（原点に重なった剛体は、広い判定が作るたびに組を全部調べる）
 	 * @return 作った物体（知らない種類ならログを残して std::nullopt）
 	 */
-	std::optional< EntityId > create_object( const string_t& kind );
+	std::optional< EntityId > create_object( const string_t& kind, const core::Vector& location = core::Vector::Zero );
 
 	/**
 	 * ステージの object 行・game_object.create から動かない物を作る（以前の ActiveObjectManager::create_static_object）

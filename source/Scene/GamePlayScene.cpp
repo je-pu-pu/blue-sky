@@ -1046,11 +1046,7 @@ void GamePlayScene::debug_spawn_objects()
 		{
 			get_object_factory()->create_static_object( "wall-1", location, Vector::Zero );
 		}
-		else if ( auto id = get_object_factory()->create_object( kind ) )
-		{
-			get_object_factory()->get_ref( * id ).set_start_location( location.x(), location.y(), location.z() );
-		}
-		else
+		else if ( ! get_object_factory()->create_object( kind, location ) )	// 始めの位置で作る（原点に重ねて作ると、作るたびに重なった組を全部調べる）
 		{
 			break;	// 知らない種類（理由は create_object がログに出している）
 		}

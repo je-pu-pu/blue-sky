@@ -130,7 +130,6 @@
     <ClCompile Include="core\math\DirectXMath\Quaternion.cpp" />
     <ClCompile Include="core\math\DirectXMath\Color.cpp" />
     <ClCompile Include="core\math\DirectXMath\Vector.cpp" />
-    <ClCompile Include="core\physics\Bullet\BulletPhysics.cpp" />
     <ClCompile Include="core\physics\PhysicsManager.cpp" />
     <ClCompile Include="core\physics\RigidBody.cpp" />
     <ClCompile Include="core\sound\DirectSound\DirectSound.cpp" />
@@ -419,7 +418,6 @@
     <ClInclude Include="core\math\Quaternion.h" />
     <ClInclude Include="core\math\Transform.h" />
     <ClInclude Include="core\math\Vector.h" />
-    <ClInclude Include="core\physics\Bullet\BulletPhysics.h" />
     <ClInclude Include="core\physics\PhysicsManager.h" />
     <ClInclude Include="core\physics\RigidBody.h" />
     <ClInclude Include="core\ResourceHandle.h" />

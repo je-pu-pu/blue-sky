@@ -149,9 +149,6 @@
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
-    <ClCompile Include="core\physics\Bullet\BulletPhysics.cpp">
-      <Filter>core\physics\Bullet</Filter>
-    </ClCompile>
     <ClCompile Include="Scene\DebugScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -692,9 +689,6 @@
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h">
       <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\physics\Bullet\BulletPhysics.h">
-      <Filter>core\physics\Bullet</Filter>
     </ClInclude>
     <ClInclude Include="core\DirectX.h">
       <Filter>core</Filter>
@@ -1610,9 +1604,6 @@
     </Filter>
     <Filter Include="core\physics">
       <UniqueIdentifier>{6ee4d49b-143c-4437-9a3e-38f29ae8996c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="core\physics\Bullet">
-      <UniqueIdentifier>{b0f122bc-1ef3-4d7f-9dca-f528879b0c06}</UniqueIdentifier>
     </Filter>
     <Filter Include="core\graphics\Msdf">
       <UniqueIdentifier>{e4a1b2c3-d5e6-4f78-9a0b-c1d2e3f4a5b6}</UniqueIdentifier>

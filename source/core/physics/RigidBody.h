@@ -60,11 +60,10 @@ private:
 
 	friend class PhysicsManager;
 
-public:
-	/// Bullet の剛体（持っていなければ nullptr）。本編を PhysicsManager の窓口へ移し終えるまでの橋渡し（移し終えたら core/physics の中だけにする）
+	/// Bullet の剛体（core/physics の中だけで使う。持っていなければ nullptr。以前は public で、本編が Bullet の剛体を直接触っていた）
 	btRigidBody* get() const { return rigid_body_.get(); }
-	btRigidBody* operator -> () const { return rigid_body_.get(); }
 
+public:
 	RigidBody();
 
 	/**

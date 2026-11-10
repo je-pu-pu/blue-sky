@@ -1,8 +1,6 @@
 #include "PhysicsSystem.h"
 #include <core/physics/PhysicsManager.h>
-#include <core/physics/EntityTag.h>
 #include <core/math/Quaternion.h>
-#include <btBulletDynamicsCommon.h>
 
 namespace core::ecs
 {
@@ -46,10 +44,10 @@ void PhysicsSystem::initialize_rigid_body( EntityId id, RigidBodyComponent* rigi
 	if ( rigid_body->handle.is_valid() )
 	{
 		physics_manager->set_rigid_body_angular_factor( rigid_body->handle, rigid_body->angular_factor );
-		rigid_body->handle->setFriction( rigid_body->friction );
+		rigid_body->handle.set_friction( rigid_body->friction );
 
 		// userPointer に Entity の番号のタグを付ける（以前は RigidBodyComponent* を入れ、当たりで読む側がキャストしていた）
-		core::physics::set_entity_tag( rigid_body->handle.get(), id );
+		rigid_body->handle.set_entity_tag( id );
 	}
 }
 

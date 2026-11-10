@@ -80,7 +80,7 @@ TEST( EntityTagTest, PhysicsSystem_は剛体に_Entity_の番号のタグを付�
 	const auto& handle = e->get_component< core::ecs::RigidBodyComponent >()->handle;
 	ASSERT_TRUE( handle.is_valid() );
 
-	const auto tag = core::physics::get_entity_tag( handle.get() );
+	const auto tag = handle.get_entity_tag();
 	ASSERT_TRUE( tag.has_value() );
 	EXPECT_EQ( e->get_id(), * tag );
 }

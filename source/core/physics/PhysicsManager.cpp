@@ -332,7 +332,7 @@ void PhysicsManager::get_rigid_body_transform( const RigidBodyHandle& handle, Ve
 	}
 
 	btTransform bt_transform;
-	handle->getMotionState()->getWorldTransform( bt_transform );
+	handle.get()->getMotionState()->getWorldTransform( bt_transform );
 
 	const btVector3& origin = bt_transform.getOrigin();
 	position = Vector( origin.x(), origin.y(), origin.z() );
@@ -385,7 +385,7 @@ void PhysicsManager::set_rigid_body_linear_velocity( const RigidBodyHandle& hand
 		return;
 	}
 
-	handle->setLinearVelocity( btVector3( velocity.x(), velocity.y(), velocity.z() ) );
+	handle.get()->setLinearVelocity( btVector3( velocity.x(), velocity.y(), velocity.z() ) );
 }
 
 PhysicsManager::Vector PhysicsManager::get_rigid_body_linear_velocity( const RigidBodyHandle& handle ) const
@@ -395,7 +395,7 @@ PhysicsManager::Vector PhysicsManager::get_rigid_body_linear_velocity( const Rig
 		return Vector( 0.f, 0.f, 0.f );
 	}
 
-	const btVector3& v = handle->getLinearVelocity();
+	const btVector3& v = handle.get()->getLinearVelocity();
 	return Vector( v.x(), v.y(), v.z() );
 }
 
@@ -406,7 +406,7 @@ void PhysicsManager::set_rigid_body_angular_factor( const RigidBodyHandle& handl
 		return;
 	}
 
-	handle->setAngularFactor( btVector3( factor.x(), factor.y(), factor.z() ) );
+	handle.get()->setAngularFactor( btVector3( factor.x(), factor.y(), factor.z() ) );
 }
 
 void PhysicsManager::apply_impulse( const RigidBodyHandle& handle, const Vector& impulse )
@@ -416,7 +416,7 @@ void PhysicsManager::apply_impulse( const RigidBodyHandle& handle, const Vector&
 		return;
 	}
 
-	handle->applyCentralImpulse( btVector3( impulse.x(), impulse.y(), impulse.z() ) );
+	handle.get()->applyCentralImpulse( btVector3( impulse.x(), impulse.y(), impulse.z() ) );
 }
 
 void PhysicsManager::activate_rigid_body( const RigidBodyHandle& handle )
@@ -426,7 +426,7 @@ void PhysicsManager::activate_rigid_body( const RigidBodyHandle& handle )
 		return;
 	}
 
-	handle->activate( true );
+	handle.get()->activate( true );
 }
 
 bool PhysicsManager::ray_test( const Vector& from, const Vector& to ) const
@@ -450,7 +450,7 @@ bool PhysicsManager::ray_test_excluding( const Vector& from, const Vector& to, c
 	// 除外する剛体を設定
 	if ( exclude.is_valid() )
 	{
-		ray_callback.m_collisionFilterMask &= ~exclude->getBroadphaseProxy()->m_collisionFilterGroup;
+		ray_callback.m_collisionFilterMask &= ~exclude.get()->getBroadphaseProxy()->m_collisionFilterGroup;
 	}
 
 	impl_->dynamics_world->rayTest( bt_from, bt_to, ray_callback );

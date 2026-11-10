@@ -19,24 +19,24 @@ $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.e
 $msbuild = & $vswhere -latest -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe"
 ```
 
-構成は **x64**（Win32 は使わない）。出力は `source\.buildd\<Debug|Release>\`。
+構成は **x64**（Win32 は使わない）。出力は `source\.build\x64\<Debug|Release>\`。
 
 **ゲームとテストをビルド (Debug):** ソリューション全体ではなく、ゲーム（exe）とテストを別々にビルドする
 ```powershell
-& $msbuild sourcelue-sky.sln -t:blue-sky-exe -p:Configuration=Debug -p:Platform=x64 -v:minimal -nologo
-& $msbuild sourcelue-sky.sln -t:blue-sky-test -p:Configuration=Debug -p:Platform=x64 -v:minimal -nologo
+& $msbuild source\blue-sky.sln -t:blue-sky-exe -p:Configuration=Debug -p:Platform=x64 -v:minimal -nologo
+& $msbuild source\blue-sky.sln -t:blue-sky-test -p:Configuration=Debug -p:Platform=x64 -v:minimal -nologo
 ```
 
 **リビルド:** 古い .obj でリンクに失敗したら、そのプロジェクトだけ `-t:blue-sky:Rebuild` などで作り直す（ファイルを戻したときに更新時刻が古いままで作り直されないことがある）
 
 **テスト実行 (Google Test):**
 ```powershell
-& .\source\.buildd\Debuglue-sky-test.exe
+& .\source\.build\x64\Debug\blue-sky-test.exe
 # 既定では走らないベンチマーク（ECS の 1 万・10 万個など）
-& .\source\.buildd\Debuglue-sky-test.exe --gtest_also_run_disabled_tests --gtest_filter=EcsBenchmark.*
+& .\source\.build\x64\Debug\blue-sky-test.exe --gtest_also_run_disabled_tests --gtest_filter=EcsBenchmark.*
 ```
 
-PDB のエラー（C1041 など）が出たら、`mspdbsrv` を止めて `source\.buildd\Debuglue-sky.pdb` を消す。
+PDB のエラー（C1041 など）が出たら、`mspdbsrv` を止めて `source\.build\x64\Debug\blue-sky.pdb` を消す。
 
 ## プロジェクト構成
 

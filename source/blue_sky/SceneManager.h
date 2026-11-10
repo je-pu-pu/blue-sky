@@ -1,7 +1,6 @@
 #pragma once
 
 #include <blue_sky/type.h>
-#include <common/Singleton.h>
 #include <unordered_map>
 #include <functional>
 
@@ -15,30 +14,13 @@ class GameMain;
  * 複数の Scene を管理する Manager
  *
  */
-class SceneManager : public common::Singleton< SceneManager >
+/// シーンの作り方の一覧（組み立ての根の GameMain が持つ。以前はシングルトン）
+class SceneManager
 {
 public:
 	using SceneGenerator = std::function< Scene* ( GameMain& ) >;	///< 組み立ての根（GameMain）を受け取ってシーンを作る
 	using SceneGeneratorMap = std::unordered_map< string_t, SceneGenerator >;
 
-	/**
-	 * シーンを自動登録するためのヘルパークラス
-	 * 
-	 * 各シーンのソースファイル内で static なインスタンスを生成することで、シーンを自動登録できるようにする。
-	 * ただし、現状はコードの最適化により、インスタンス生成が削除されてしまうため、使用しない。代わりに SceneManager::register_all_scene() 内で手動登録している。
-	 * 
-	 * SceneRegister::SceneRegister< MyScene > scene_register; // MyScene::name と new MyScene() を使って登録する
-	 * SceneRegister::SceneRegister< MyScene > scene_register( "name", [] { new MyScene( 1, 2.f, "3" ) } ) ; // 指定した名前と関数を使って登録する
-	 */
-	template < typename SceneType >
-	class SceneRegister
-	{
-	public:
-		SceneRegister( const string_t& scene_name = SceneType::name, SceneGenerator generator = [] ( GameMain& game_main ) { return new SceneType( game_main ); } )
-		{
-			SceneManager::get_instance()->register_scene< SceneType >( scene_name, generator );
-		}
-	};
 
 private:
 	SceneGeneratorMap scene_generator_map_;

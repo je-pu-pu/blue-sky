@@ -16,6 +16,8 @@
 #include <blue_sky/DebugLog.h>
 #include <GameObject/GameObjectContext.h>
 
+namespace core::ecs { class EntityManager; }
+
 class DirectWrite;
 
 class DirectInput;
@@ -125,6 +127,7 @@ public:
 	};
 
 private:
+	App&									app_;					///< ウィンドウ（App が GameMain を作るときに渡す。以前は App のシングルトンから引いていた）
 	TimeManager								time_manager_;			///< 時間管理
 
 	std::unique_ptr< Direct3D >				direct_3d_;				///< Direct3D
@@ -152,6 +155,8 @@ private:
 
 	std::unique_ptr< BulletDebugDraw >		bullet_debug_draw_;
 
+	std::unique_ptr< SceneManager >			scene_manager_;			///< シーンの作り方の一覧（以前はシングルトン）
+	std::unique_ptr< core::ecs::EntityManager >	entity_manager_;	///< ECS の Entity・Component・System（以前はシングルトン。シーンより後に壊す）
 	std::unique_ptr< Scene >				scene_;					///< 現在のベースシーン
 	std::vector< std::unique_ptr< Scene > >	overlay_scene_stack_;	///< オーバーレイシーンのスタック
 	string_t								stage_name_;			///< 現在のステージ名
@@ -210,7 +215,7 @@ private:
 	void render_scene_list_window();
 
 public:
-	GameMain();
+	explicit GameMain( App& app );
 	virtual ~GameMain() override;
 
 	ActiveObject* create_object( const char_t* ) const;
@@ -254,7 +259,10 @@ public:
 
 	ActiveObjectManager* get_active_object_manager() const { return active_object_manager_.get(); }
 	
-	static App* get_app() { return App::get_instance(); }
+	App* get_app() const { return & app_; }
+
+	/// ECS の Entity・Component・System
+	core::ecs::EntityManager* get_entity_manager() const { return entity_manager_.get(); }
 
 	inline int get_width() const override { return get_app()->get_width(); }
 	inline int get_height() const override { return get_app()->get_height(); }
@@ -285,7 +293,6 @@ public:
 	/// 文字の大きさの倍率を UI のテーマに反映する（テーマファイルで決めた大きさに掛ける）
 	void set_ui_text_scale( float_t scale );
 
-	inline static GameMain* get_instance() { static GameMain game_main; return & game_main; }
 	const Scene* get_current_scene() const { return scene_.get(); }
 
 	/// オーバーレイシーンをスタックにプッシュする ( ベースシーンはポーズ状態になる )
@@ -307,4 +314,3 @@ public:
 
 } // namespace blue_sky
 
-inline game::Game* game::Game::get_instance() { return blue_sky::GameMain::get_instance(); }

@@ -164,12 +164,13 @@ int WINAPI WinMain( _In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ i
 
 	wait_for_restart_parent();
 
-	App* app = 0;
+	// アプリケーション（ウィンドウとゲーム）。WinMain が持ち、例外の表示にも使う（以前はシングルトン）
+	App app_instance;
+	App* app = & app_instance;
 	
 	try
 	{
 		// アプリケーションを初期化する
-		app = App::get_instance();
 		app->set_title( "blue-sky 2 ( update 1.0.4 )" );
 		app->set_class_name( "blue-sky-2" );
 		app->set_size( 800, 600 );

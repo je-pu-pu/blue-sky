@@ -5,19 +5,25 @@
 #include "BaseSystem.h"
 #include "type.h"
 
-#include <common/Singleton.h>
 
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
 
 #include <memory>
+#include <tuple>
 #include <algorithm>
 
 namespace core::ecs
 {
 
-class EntityManager : public common::Singleton< EntityManager >
+/**
+ * Entity・Component・System を持つ
+ *
+ * 組み立ての根（GameMain）が 1 つ持ち、シーンは Scene::get_entity_manager() で受け取る。テストは自分で作る。
+ * 以前はシングルトンで、テストどうしが同じものを共有していた
+ */
+class EntityManager
 {
 public:
 	using EntityComponentMap = std::unordered_map< EntityId, std::unique_ptr< Component > >;
@@ -39,12 +45,16 @@ private:
 	EntityId next_entity_id_ = 0;
 
 public:
+	EntityManager() = default;
+	EntityManager( const EntityManager& ) = delete;
+	EntityManager& operator = ( const EntityManager& ) = delete;
+
 	/**
 	 * Entity を生成する
 	 */
 	Entity* create_entity()
 	{
-		Entity* e = & entity_list_.emplace( next_entity_id_, next_entity_id_ ).first->second;
+		Entity* e = & entity_list_.emplace( std::piecewise_construct, std::forward_as_tuple( next_entity_id_ ), std::forward_as_tuple( next_entity_id_, this ) ).first->second;
 
 		next_entity_id_++;
 
@@ -151,6 +161,7 @@ public:
 
 		auto system = new SystemType( std::forward< Args >( args ) ... );
 		system->set_priority( priority );
+		system->set_entity_manager( this );
 
 		system_map_.emplace( id, system );
 
@@ -248,5 +259,25 @@ public:
 	}
 
 }; // EntityManager
+
+// ---- Entity の中身（自分を作った EntityManager に頼む） ----
+
+template< typename ComponentType >
+ComponentType* Entity::add_component() const
+{
+	return manager_->add_component< ComponentType >( this );
+}
+
+template< typename ComponentType >
+ComponentType* Entity::get_component() const
+{
+	return manager_->get_component< ComponentType >( this );
+}
+
+template< typename ComponentType >
+void Entity::remove_component()
+{
+	return manager_->remove_component< ComponentType >( this );
+}
 
 } // core::ecs

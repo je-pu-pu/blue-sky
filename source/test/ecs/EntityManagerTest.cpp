@@ -57,7 +57,8 @@ public:
  */
 TEST( EcsTest, EntityManagerTest )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	auto entity = em->create_entity();
@@ -85,7 +86,8 @@ TEST( EcsTest, EntityManagerTest )
  */
 TEST( EcsTest, EntityIdUniqueness )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	auto e1 = em->create_entity();
@@ -104,7 +106,8 @@ TEST( EcsTest, EntityIdUniqueness )
  */
 TEST( EcsTest, DestroyEntity )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	auto entity = em->create_entity();
@@ -130,7 +133,8 @@ TEST( EcsTest, DestroyEntity )
  */
 TEST( EcsTest, DuplicateComponentReturnsNull )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	auto entity = em->create_entity();
@@ -148,7 +152,8 @@ TEST( EcsTest, DuplicateComponentReturnsNull )
  */
 TEST( EcsTest, GetNonExistentComponent )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	auto entity = em->create_entity();
@@ -162,7 +167,8 @@ TEST( EcsTest, GetNonExistentComponent )
  */
 TEST( EcsTest, MultipleComponentTypes )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	auto entity = em->create_entity();
@@ -195,7 +201,8 @@ TEST( EcsTest, MultipleComponentTypes )
  */
 TEST( EcsTest, SystemTest )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< core::ecs::ParticleSystem >();
@@ -215,7 +222,8 @@ TEST( EcsTest, SystemTest )
  */
 TEST( EcsTest, GetSystem )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	EXPECT_EQ( nullptr, em->get_system< CountSystem >() );
@@ -235,7 +243,8 @@ TEST( EcsTest, GetSystem )
  */
 TEST( EcsTest, DuplicateAddSystemIsNoop )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< CountSystem >();
@@ -263,7 +272,8 @@ TEST( EcsTest, DuplicateAddSystemIsNoop )
  */
 TEST( EcsTest, AutoRegistration )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< CountSystem >();
@@ -288,7 +298,8 @@ TEST( EcsTest, AutoRegistration )
  */
 TEST( EcsTest, AutoRegistrationMultipleEntities )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< CountSystem >();
@@ -319,7 +330,8 @@ TEST( EcsTest, AutoRegistrationMultipleEntities )
  */
 TEST( EcsTest, AutoRegistrationRequiresAllComponents )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< DualCountSystem >();
@@ -350,7 +362,8 @@ TEST( EcsTest, AutoRegistrationRequiresAllComponents )
  */
 TEST( EcsTest, RemoveComponentUnregistersFromSystem )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< CountSystem >();
@@ -381,7 +394,8 @@ TEST( EcsTest, RemoveComponentUnregistersFromSystem )
  */
 TEST( EcsTest, LateSystemRegistration )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	// Entity + Component を先に作成
@@ -411,7 +425,8 @@ TEST( EcsTest, LateSystemRegistration )
  */
 TEST( EcsTest, Clear )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< CountSystem >();
@@ -435,7 +450,8 @@ TEST( EcsTest, Clear )
  */
 TEST( EcsTest, RenderSystemRunsOnlyInRender )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< CountSystem >();

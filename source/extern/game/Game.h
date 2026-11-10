@@ -19,7 +19,6 @@ protected:
 	Game() { }
 
 public:
-	static Game* get_instance();
 
 	virtual ~Game() { }
 

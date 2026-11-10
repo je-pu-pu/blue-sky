@@ -136,7 +136,7 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		nullptr,			//親ウィンドウのハンドル
 		nullptr,			//メニューのハンドル
 		hInst,				//インスタンスハンドル
-		nullptr				//ウィンドウ作成データ アドレス
+		this				//ウィンドウ作成データ アドレス（WM_NCCREATE で受け取り、ウィンドウに結び付ける）
 	);
 
 	if ( ! hWnd )
@@ -151,8 +151,9 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	blue_sky::debug_log( is_raw_input_enabled_ ? "[Input] Raw Input を登録しました（キーボード・マウス）" : "[Input] Raw Input を登録できませんでした。以前のやり方（ポーリング・WM_KEYDOWN・DirectInput）で読みます" );
 
 	// ゲームを初期化する
-	game_ = blue_sky::GameMain::get_instance();
-	blue_sky::GameMain::get_instance()->setup_scene();
+	game_main_ = std::make_unique< blue_sky::GameMain >( * this );
+	game_ = game_main_.get();
+	game_main_->setup_scene();
 	
 	ShowWindow( hWnd, nCmdShow );		//表示
 	UpdateWindow( hWnd );				//描画
@@ -220,13 +221,27 @@ int App::MessageLoop()
  */
 LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 {
+	// ウィンドウに結び付けた App（CreateWindowEx の最後の引数で渡し、WM_NCCREATE で覚える）。以前は App のシングルトンを使っていた
+	if ( msg == WM_NCCREATE )
+	{
+		const auto* create = reinterpret_cast< const CREATESTRUCT* >( lp );
+		SetWindowLongPtr( hwnd, GWLP_USERDATA, reinterpret_cast< LONG_PTR >( create->lpCreateParams ) );
+	}
+
+	App* app = reinterpret_cast< App* >( GetWindowLongPtr( hwnd, GWLP_USERDATA ) );
+
+	if ( ! app )
+	{
+		return DefWindowProc( hwnd, msg, wp, lp );
+	}
+
 	try
 	{
-		return WinProcImpl( hwnd, msg, wp, lp );
+		return app->WinProcImpl( hwnd, msg, wp, lp );
 	}
 	catch ( ... )
 	{
-		App::get_instance()->pending_exception_ = std::current_exception();
+		app->pending_exception_ = std::current_exception();
 		return 0;
 	}
 }
@@ -258,7 +273,7 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	case WM_INPUT:
 	{
 		// 入力の出来事（キー・マウスボタンの押す/離す・相対の移動量）。フレームの間に起きたことを順に渡す
-		App* app = App::get_instance();
+		App* app = this;
 		std::vector< blue_sky::raw_input::Event > events;
 
 		if ( app->game_ && blue_sky::raw_input::read( lp, app->raw_input_decoder_, events ) )
@@ -275,14 +290,14 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		const bool is_function_key = wp >= VK_F1 && wp <= VK_F24;
 
 		// 押下の記録は Raw Input が使えるならそちらで行う（二重に記録しない）
-		if ( App::get_instance()->game_ && ! is_repeat && ! App::get_instance()->is_raw_input_enabled_ )
+		if ( this->game_ && ! is_repeat && ! this->is_raw_input_enabled_ )
 		{
-			App::get_instance()->game_->on_raw_key_down( static_cast< int >( wp ) );
+			this->game_->on_raw_key_down( static_cast< int >( wp ) );
 		}
 
-		if ( App::get_instance()->game_ && ! ( is_repeat && is_function_key ) )
+		if ( this->game_ && ! ( is_repeat && is_function_key ) )
 		{
-			App::get_instance()->game_->on_special_key_down( static_cast< int >( wp ) );
+			this->game_->on_special_key_down( static_cast< int >( wp ) );
 		}
 
 		break;
@@ -292,26 +307,26 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	case WM_MBUTTONDOWN:
 	{
 		// 短いクリックを取りこぼさない（ボタンの状態は毎フレームのポーリングで読んでいるため）。Raw Input が使えるならそちらで記録する
-		if ( App::get_instance()->game_ && ! App::get_instance()->is_raw_input_enabled_ )
+		if ( this->game_ && ! this->is_raw_input_enabled_ )
 		{
-			App::get_instance()->game_->on_raw_key_down( msg == WM_LBUTTONDOWN ? VK_LBUTTON : msg == WM_RBUTTONDOWN ? VK_RBUTTON : VK_MBUTTON );
+			this->game_->on_raw_key_down( msg == WM_LBUTTONDOWN ? VK_LBUTTON : msg == WM_RBUTTONDOWN ? VK_RBUTTON : VK_MBUTTON );
 		}
 
 		return DefWindowProc( hwnd, msg, wp, lp );
 	}
 	case WM_SYSKEYDOWN:
 	{
-		if ( App::get_instance()->game_ && ! ( lp & ( 1 << 30 ) ) && ! App::get_instance()->is_raw_input_enabled_ )
+		if ( this->game_ && ! ( lp & ( 1 << 30 ) ) && ! this->is_raw_input_enabled_ )
 		{
-			App::get_instance()->game_->on_raw_key_down( static_cast< int >( wp ) );
+			this->game_->on_raw_key_down( static_cast< int >( wp ) );
 		}
 
 		// Alt+Enter : フルスクリーンの切り替え（DXGI の自動処理は止めてある）
 		if ( wp == VK_RETURN && ( lp & ( 1 << 29 ) ) && ! ( lp & ( 1 << 30 ) ) )
 		{
-			if ( App::get_instance()->game_ )
+			if ( this->game_ )
 			{
-				App::get_instance()->game_->on_toggle_full_screen();
+				this->game_->on_toggle_full_screen();
 			}
 
 			return 0;
@@ -332,7 +347,7 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	case WM_IME_COMPOSITION:
 	{
 		// 変換中の文字を UI に見せる（確定した文字は DefWindowProc が WM_CHAR にして届ける）
-		if ( ( lp & GCS_COMPSTR ) && App::get_instance()->game_ )
+		if ( ( lp & GCS_COMPSTR ) && this->game_ )
 		{
 			std::u32string composition;
 
@@ -365,35 +380,35 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 				ImmReleaseContext( hwnd, imc );
 			}
 
-			App::get_instance()->game_->on_ime_composition( composition );
+			this->game_->on_ime_composition( composition );
 		}
 
 		return DefWindowProc( hwnd, msg, wp, lp );
 	}
 	case WM_IME_ENDCOMPOSITION:
 	{
-		if ( App::get_instance()->game_ )
+		if ( this->game_ )
 		{
-			App::get_instance()->game_->on_ime_composition( std::u32string() );
+			this->game_->on_ime_composition( std::u32string() );
 		}
 
 		return DefWindowProc( hwnd, msg, wp, lp );
 	}
 	case WM_CHAR:
 	{
-		if ( App::get_instance()->game_ )
+		if ( this->game_ )
 		{
-			App::get_instance()->game_->on_key_down( static_cast< char_t >( wp ) );
+			this->game_->on_key_down( static_cast< char_t >( wp ) );
 		}
 
 		break;
 	}
 	case WM_MOUSEMOVE:
 	{
-		if ( ! App::get_instance()->is_mouse_in_window_ )
+		if ( ! this->is_mouse_in_window_ )
 		{
-			App::get_instance()->is_mouse_in_window_ = true;
-			App::get_instance()->show_cursor( App::get_instance()->game_->is_show_cursor() );
+			this->is_mouse_in_window_ = true;
+			this->show_cursor( this->game_->is_show_cursor() );
 
 			TRACKMOUSEEVENT track_mouse_event = { sizeof( TRACKMOUSEEVENT ), TME_LEAVE, hwnd };
 			TrackMouseEvent( & track_mouse_event );
@@ -403,33 +418,33 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_MOUSELEAVE:
 	{
-		App::get_instance()->is_mouse_in_window_ = false;
-		App::get_instance()->show_cursor( App::get_instance()->game_->is_show_cursor() );
+		this->is_mouse_in_window_ = false;
+		this->show_cursor( this->game_->is_show_cursor() );
 
 		break;
 	}
 	case WM_MOUSEWHEEL:
 	{
-		if ( App::get_instance()->game_ )
+		if ( this->game_ )
 		{
-			App::get_instance()->game_->on_mouse_wheel( GET_WHEEL_DELTA_WPARAM( wp ) );
+			this->game_->on_mouse_wheel( GET_WHEEL_DELTA_WPARAM( wp ) );
 		}
 
 		break;
 	}
 	case WM_ACTIVATEAPP:
 	{
-		App::get_instance()->set_active( LOWORD( wp ) != 0 );
+		this->set_active( LOWORD( wp ) != 0 );
 
 		// フォーカスを失うと離したことを受け取れないので、押している状態を忘れる
-		App::get_instance()->raw_input_decoder_.reset();
+		this->raw_input_decoder_.reset();
 
 		if ( wp )
 		{
 			// フォーカスを失って解除された排他フルスクリーンを、設定に合わせて戻す
-			if ( App::get_instance()->game_ )
+			if ( this->game_ )
 			{
-				App::get_instance()->game_->on_activated();
+				this->game_->on_activated();
 			}
 		}
 
@@ -469,22 +484,22 @@ void App::set_active( bool active )
 
 	if ( active )
 	{
-		App::get_instance()->clip_cursor( is_clip_cursor_enabled_ );
+		this->clip_cursor( is_clip_cursor_enabled_ );
 	}
 }
 
 void App::on_resize( HWND /* hwnd */ )
 {
-	if ( ! App::get_instance()->hWnd )
+	if ( ! this->hWnd )
 	{
 		return;
 	}
 
 	// App::GetInstance()->clip_cursor( App::GetInstance()->is_clip_cursor_enabled_ );
 	
-	if ( App::get_instance()->game_ )
+	if ( this->game_ )
 	{
-		App::get_instance()->game_->on_resize();
+		this->game_->on_resize();
 	}
 }
 

@@ -68,17 +68,19 @@ extern/common, game, win  ← 基盤層
 
 `source/core/ecs/` に配置:
 
-- **EntityManager** (`EntityManager.h`) - 全Entity、Component、Systemを管理するSingleton
+- **EntityManager** (`EntityManager.h`) - 全Entity、Component、Systemを管理する。GameMain が 1 つ持ち、シーンは `get_entity_manager()` で受け取る（テストは自分で作る）
 - **Entity** (`Entity.h`) - 一意のID保持
 - **Component** (`Component.h`) - データコンポーネントの基底クラス
 - **System<...ComponentTypes>** (`System.h`) - 特定のComponent群を操作するシステムの可変長テンプレート
 
 **使用例:**
 ```cpp
-auto* entity = EntityManager::get_instance()->create_entity();
-auto* transform = EntityManager::get_instance()->add_component<TransformComponent>(entity);
+// シーンの中（EntityManager は Scene::get_entity_manager() で受け取る）
+auto* entity = get_entity_manager()->create_entity();
+auto* transform = entity->add_component<TransformComponent>();
 // システムは必要なものをコンストラクタで受け取る（priority の後の引数が渡る。シーンの中なら近道で得る）
-EntityManager::get_instance()->add_system<RenderSystem>( 1000, get_graphics_manager(), get_time_manager() );
+get_entity_manager()->add_system<RenderSystem>( 1000, get_graphics_manager(), get_time_manager() );
+// 描く System（is_render_system）は update() ではなく、シーンの render() で get_entity_manager()->render() から動く
 ```
 
 **コンポーネント:** `source/core/ecs/component/` (TransformComponent, RigidBodyComponent, ModelComponent 等)
@@ -87,7 +89,7 @@ EntityManager::get_instance()->add_system<RenderSystem>( 1000, get_graphics_mana
 
 ### メインゲームループ
 
-- **App** (`blue_sky/App.h`) - ウィンドウ/アプリケーション管理のSingleton
+- **App** (`blue_sky/App.h`) - ウィンドウ/アプリケーション管理。WinMain が作り、GameMain を持つ（シングルトンではない）
 - **GameMain** (`blue_sky/GameMain.h`) - メインゲームクラス、全サブシステムを統括
 - エントリポイント: `source/Main.cpp` (WinMain)
 

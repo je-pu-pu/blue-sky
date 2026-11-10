@@ -41,7 +41,7 @@ using RigidBodyShapeType = core::physics::RigidBodyShapeType;
 
 MusicGamePrototypeScene::MusicGamePrototypeScene( GameMain& game_main )
 	: Scene( game_main )
-	, player_( EntityManager::get_instance()->create_entity() )
+	, player_( get_entity_manager()->create_entity() )
 {
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();

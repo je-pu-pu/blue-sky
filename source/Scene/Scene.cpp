@@ -51,7 +51,7 @@ float Scene::get_elapsed_time() const
 
 Scene::EntityManager* Scene::get_entity_manager() const
 {
-	return EntityManager::get_instance();
+	return game_main_.get_entity_manager();
 }
 
 ActiveObjectManager* Scene::get_active_object_manager() const

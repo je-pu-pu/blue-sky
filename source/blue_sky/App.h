@@ -25,10 +25,14 @@
  * アプリケーションとそれに対応するひとつのウィンドウを管理する
  *
  */
-class App : public common::Singleton< App >
+namespace blue_sky { class GameMain; }
+
+/**
+ * WinMain が 1 つ作り、ゲーム（GameMain）を持つ（以前はシングルトン）
+ */
+class App
 {
 public:
-	friend class common::Singleton< App >;
 
 	static const int DEFAULT_WIDTH = 800;
 	static const int DEFAULT_HEIGHT = 600;
@@ -59,6 +63,7 @@ private:
 	bool		is_show_cursor_enabled_ = true;
 	bool		is_clip_cursor_enabled_;
 
+	std::unique_ptr< blue_sky::GameMain >	game_main_;		///< ゲーム（以前はシングルトン）
 	Game*		game_ = nullptr;
 	std::unique_ptr< Config >			config_;		///< 開発用・エンジンの設定（blue-sky.config）
 	std::unique_ptr< Config >			user_config_;	///< ユーザーの設定（settings.config。SettingStore が読み書きする）
@@ -68,18 +73,20 @@ private:
 	/// ウィンドウプロシージャの中で起きた例外（メッセージループに戻ってから投げ直す）
 	std::exception_ptr	pending_exception_;
 
-	App();								//コンストラクタ
-
-	/// ウィンドウプロシージャ。例外を外（user32）へ出さず、pending_exception_ に預ける
+	/// ウィンドウプロシージャ。ウィンドウに結び付けた App（GWLP_USERDATA）に渡す。例外を外（user32）へ出さず、pending_exception_ に預ける
 	static LRESULT CALLBACK WinProc(HWND, UINT, WPARAM, LPARAM);
-	static LRESULT WinProcImpl(HWND, UINT, WPARAM, LPARAM);
-	static void on_resize( HWND );
+	LRESULT WinProcImpl(HWND, UINT, WPARAM, LPARAM);
+	void on_resize( HWND );
 
 	DWORD get_window_style() const;
 
 
 public:
+	App();								///< コンストラクタ（WinMain が作る）
 	virtual ~App();						///< デストラクタ
+
+	App( const App& ) = delete;
+	App& operator = ( const App& ) = delete;
 
 	bool		Init(HINSTANCE, int);	//初期化
 	int			MessageLoop();			//メッセージループ

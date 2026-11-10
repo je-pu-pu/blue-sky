@@ -7,6 +7,8 @@
 namespace core::ecs
 {
 
+class EntityManager;
+
 class Entity;
 class Component;
 
@@ -20,6 +22,9 @@ private:
 	/// システムの実行優先度 ( priority_ が小さい順に実行される )
 	int_t priority_ = 0;
 
+	/// 自分を持つ EntityManager（add_system が設定する。ほかの System を引くのに使う）
+	EntityManager* entity_manager_ = nullptr;
+
 protected:
 	virtual bool has_component_type( ComponentTypeId ) const = 0;
 	virtual void remove_entity_component( const Entity* ) = 0;
@@ -29,6 +34,9 @@ public:
 	virtual ~BaseSystem() = default;
 
 	virtual void update() = 0;
+
+	void set_entity_manager( EntityManager* m ) { entity_manager_ = m; }
+	EntityManager* get_entity_manager() const { return entity_manager_; }
 
 	/**
 	 * 描く System か（RenderSystem など）

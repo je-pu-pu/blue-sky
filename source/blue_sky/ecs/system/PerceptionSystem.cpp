@@ -20,7 +20,7 @@ void PerceptionSystem::update( ComponentTuple& tuple ) const
 
 	perception->target_visible = false;
 
-	auto* registry = core::ecs::EntityManager::get_instance()->get_system< TargetRegistrySystem >();
+	auto* registry = get_entity_manager()->get_system< TargetRegistrySystem >();
 	if ( ! registry )
 	{
 		return;

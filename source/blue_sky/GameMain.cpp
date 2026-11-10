@@ -70,8 +70,11 @@ namespace blue_sky
 {
 
 //■コンストラクタ
-GameMain::GameMain()
-	: is_display_fps_( false )
+GameMain::GameMain( App& app )
+	: app_( app )
+	, scene_manager_( std::make_unique< SceneManager >() )
+	, entity_manager_( std::make_unique< core::ecs::EntityManager >() )
+	, is_display_fps_( false )
 	, is_command_mode_( false )
 	, is_show_cursor_( false )
 	, user_command_( 1024, '\0' )
@@ -155,7 +158,7 @@ GameMain::GameMain()
 	bullet_debug_draw_.reset( new core::graphics::direct_3d_11::BulletDebugDraw( direct_3d_.get() ) );
 	bullet_debug_draw_->setDebugMode( get_config()->get< int >( "graphics.debug_bullet", 0 ) );
 
-	SceneManager::get_instance()->register_all_scene();
+	scene_manager_->register_all_scene();
 
 	active_object_physics_.reset( new ActiveObjectPhysics() );
 	active_object_physics_->setDebugDrawer( bullet_debug_draw_.get() );
@@ -889,7 +892,7 @@ void GameMain::render_scene_list_window()
 
 		int n = 0;
 
-        for ( const auto& scene: SceneManager::get_instance()->get_scene_generator_map() )
+        for ( const auto& scene: scene_manager_->get_scene_generator_map() )
         {
             ImGuiSelectableFlags flags = n == selected_item_index ? ImGuiSelectableFlags_Highlight : 0;
 
@@ -1065,7 +1068,7 @@ void GameMain::process_scene_requests()
 		const SceneRequest r = scene_requests_.front();
 		scene_requests_.pop_front();
 
-		const bool registered = r.name.empty() || SceneManager::get_instance()->is_scene_registered( r.name );
+		const bool registered = r.name.empty() || scene_manager_->is_scene_registered( r.name );
 
 		if ( ! registered )
 		{
@@ -1172,7 +1175,7 @@ void GameMain::setup_scene()
 			set_stage_name( stage );
 		}
 
-		if ( SceneManager::get_instance()->is_scene_registered( start_scene ) )
+		if ( scene_manager_->is_scene_registered( start_scene ) )
 		{
 			setup_scene( start_scene );
 		}
@@ -1231,7 +1234,7 @@ void GameMain::setup_scene()
  */
 void GameMain::setup_scene( const string_t& scene_name )
 {
-	if ( ! SceneManager::get_instance()->is_scene_registered( scene_name ) )
+	if ( ! scene_manager_->is_scene_registered( scene_name ) )
 	{
 		// 例外にすると、スクリプトから呼ばれたときに後続のスクリプトが実行されなくなるので、ログに出して無視する
 		debug_log( "[Scene] 未登録のシーンを開こうとしました: " + scene_name );
@@ -1246,7 +1249,7 @@ void GameMain::setup_scene( const string_t& scene_name )
 
 	// シーンによって設定されていたデータをクリア
 	{
-		core::ecs::EntityManager::get_instance()->clear();
+		entity_manager_->clear();
 		get_graphics_manager()->set_main_camera_info( nullptr, nullptr );
 	}
 
@@ -1254,7 +1257,7 @@ void GameMain::setup_scene( const string_t& scene_name )
 	// 生成に失敗したら（モデルが無いなど）ログを出してタイトルへ戻す（以前はシーンが null のまま次のフレームで落ちた）
 	try
 	{
-		scene_.reset( SceneManager::get_instance()->generate_scene( scene_name, * this ) );
+		scene_.reset( scene_manager_->generate_scene( scene_name, * this ) );
 	}
 	catch ( const common::exception< std::string >& e )
 	{
@@ -1303,7 +1306,7 @@ void GameMain::update_cursor_state()
  */
 void GameMain::push_overlay_scene( const string_t& scene_name )
 {
-	if ( ! SceneManager::get_instance()->is_scene_registered( scene_name ) )
+	if ( ! scene_manager_->is_scene_registered( scene_name ) )
 	{
 		debug_log( "[Scene] 未登録のオーバーレイを開こうとしました: " + scene_name );
 		return;
@@ -1313,7 +1316,7 @@ void GameMain::push_overlay_scene( const string_t& scene_name )
 	scene_->set_paused( true );
 
 	// オーバーレイシーンを生成してスタックに追加
-	std::unique_ptr< Scene > overlay( SceneManager::get_instance()->generate_scene( scene_name, * this ) );
+	std::unique_ptr< Scene > overlay( scene_manager_->generate_scene( scene_name, * this ) );
 
 	// オーバーレイ用でないシーン（ゲーム本体など）は積まない（入力・描画の扱いがオーバーレイを前提にしていないため）
 	if ( ! overlay || ! overlay->is_overlay() )

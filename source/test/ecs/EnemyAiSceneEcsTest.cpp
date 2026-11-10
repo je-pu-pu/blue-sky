@@ -27,7 +27,8 @@
 // 段階1: PhysicsSystem 単独。実体 Transform+RigidBody を後付け。
 TEST( EnemyAiSceneEcsTest, Stage1_PhysicsAloneRealClass )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 	em->add_system< core::ecs::PhysicsSystem >( 5, nullptr );
 	auto* e = em->create_entity();
@@ -40,7 +41,8 @@ TEST( EnemyAiSceneEcsTest, Stage1_PhysicsAloneRealClass )
 // 段階2: 自作 System 単独（PatrolSystem, 4要求）。
 TEST( EnemyAiSceneEcsTest, Stage2_PatrolAlone )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 	em->add_system< blue_sky::ecs::PatrolSystem >( 50, nullptr );
 	auto* e = em->create_entity();
@@ -55,7 +57,8 @@ TEST( EnemyAiSceneEcsTest, Stage2_PatrolAlone )
 // 段階3: TargetRegistrySystem 単独（update() をオーバーライドしている System）。
 TEST( EnemyAiSceneEcsTest, Stage3_TargetRegistryAlone )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 	em->add_system< blue_sky::ecs::TargetRegistrySystem >( 20 );
 	auto* e = em->create_entity();
@@ -68,7 +71,8 @@ TEST( EnemyAiSceneEcsTest, Stage3_TargetRegistryAlone )
 // 段階4: 全 System 追加後に実体生成（シーンと同じ）。
 TEST( EnemyAiSceneEcsTest, Stage4_AllSystems )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 	em->add_system< core::ecs::PhysicsSystem >( 5, nullptr );
 	em->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10, nullptr, nullptr );

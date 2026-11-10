@@ -34,7 +34,7 @@ GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene( GameMain& game_mai
 	// , input_layout_( get_graphics_manager()->create_named_input_layout( "pos_color", { } ) )
 	, input_layout_( get_graphics_manager()->get_input_layout( "pos_color" ) )
 
-	, camera_( EntityManager::get_instance()->create_entity() )
+	, camera_( get_entity_manager()->create_entity() )
 
 	, texture_( get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" ) )
 {

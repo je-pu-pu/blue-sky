@@ -84,6 +84,9 @@
     <ClCompile Include="test\physics\BulletPhysicsTest.cpp">
       <Filter>test\physics</Filter>
     </ClCompile>
+    <ClCompile Include="test\physics\PhysicsManagerTest.cpp">
+      <Filter>test\physics</Filter>
+    </ClCompile>
     <ClCompile Include="test\graphics\EffectParserTest.cpp">
       <Filter>test\graphics</Filter>
     </ClCompile>

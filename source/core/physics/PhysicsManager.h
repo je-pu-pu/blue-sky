@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <optional>
 
 class btDynamicsWorld;
 class btIDebugDraw;
@@ -17,17 +18,6 @@ class btMotionState;
 
 namespace core::physics
 {
-
-/**
- * 剛体の形状タイプ
- */
-enum class RigidBodyShapeType
-{
-	Box,
-	Capsule,
-	Cylinder,
-	Sphere,
-};
 
 /**
  * 衝突グループ (ビットフラグ)
@@ -48,14 +38,54 @@ struct RigidBodyCreateInfo
 	using Vector = math::Vector;
 	using Transform = math::Transform;
 
+	/// Bullet の剛体の摩擦の既定（btRigidBodyConstructionInfo の m_friction。本編の物体は以前からこの値）
+	static constexpr float BulletDefaultFriction = 0.5f;
+
 	RigidBodyShapeType shape_type = RigidBodyShapeType::Box;
-	Vector shape_size = Vector( 0.5f, 0.5f, 0.5f );
+	Vector shape_size = Vector( 0.5f, 0.5f, 0.5f );	///< 箱・円柱は半分の大きさ、カプセルは ( 半径, 円柱部の高さ, - )、球は ( 半径, -, - )
 	float mass = 1.f;
 	Transform transform;
+
+	/// 剛体の中心のずれ（transform に右から掛ける。本編の物体は足元から中心までの高さ。無ければ掛けない）
+	std::optional< Transform > offset;
+
+	float friction = 0.1f;		///< 摩擦（ECS のテストシーンの既定 0.1。本編の物体は BulletDefaultFriction）
+
+	/// 同じ種類・大きさの形を、ほかの剛体と共有する（本編の物体。形の持ち主は PhysicsManager で、clear で消える）。false ならこの剛体だけの形を作り、持ち主が持つ
+	bool share_shape = false;
+
+	/// 衝突グループとマスクを使わず、Bullet の既定（動く物は DefaultFilter・全部と当たる、動かない物は StaticFilter・動かない物とは当たらない）にする（本編の物体）
+	bool use_default_collision_filter = false;
 
 	short collision_group = CollisionGroup::Default;  // 自身の衝突グループ
 	short collision_mask = CollisionGroup::All;       // 衝突対象のマスク
 };
+
+/**
+ * レイの結果（ray_test_closest）
+ */
+struct RayHit
+{
+	bool hit = false;						///< 当たったか
+	float fraction = 1.f;					///< 当たった所の、始点から終点までの割合（当たらなければ 1）
+	math::Vector point;						///< 当たった所（世界）
+	math::Vector normal;					///< 当たった面の向き（世界）
+	std::optional< ecs::EntityId > entity;	///< 当たった剛体の Entity の番号のタグ（地面・ステージの当たりの形・タグの無い剛体は std::nullopt）
+};
+
+/**
+ * 剛体を数えるか決める関数（レイ・接触の判定）
+ *
+ * 剛体の Entity の番号のタグ（タグが無ければ std::nullopt）を受け取り、数えるなら true を返す
+ */
+using BodyFilter = std::function< bool( std::optional< ecs::EntityId > ) >;
+
+/**
+ * 接した組を受け取る関数（contact_test・for_each_penetrating_contact）
+ *
+ * 2 つの剛体の Entity の番号のタグ（タグが無ければ std::nullopt）を Bullet が返した順で受け取る
+ */
+using ContactCallback = std::function< void( std::optional< ecs::EntityId >, std::optional< ecs::EntityId > ) >;
 
 /**
  * 剛体ハンドル（= 剛体の持ち主 RigidBody。ムーブだけできる）
@@ -70,6 +100,14 @@ using RigidBodyHandle = RigidBody;
  *
  * 物理シミュレーションを管理する。
  * Bullet Physics の詳細を隠蔽し、抽象的なインターフェースを提供する。
+ *
+ * 剛体の持ち主 :
+ * - 物体の剛体（create_rigid_body）は、持ち主（RigidBody）を返す。受け取った側（物体の部品）が持ち、壊れるときに世界から外れる
+ * - 地面・ステージの当たりの形（add_ground・load_obj）と、共有する形（RigidBodyCreateInfo::share_shape）は、これが持つ（clear で消す）
+ * 持ち主はこれより先に壊れること。
+ *
+ * 以前は本編が別の世界（blue_sky::ActiveObjectPhysics。core の BulletPhysics を継承）を使い、Bullet の型（btRigidBody・
+ * btCollisionWorld のコールバック）を本編のコードが直接扱っていた。今は本編も ECS のテストシーンもこの窓口を使う
  */
 class PhysicsManager
 {
@@ -203,6 +241,68 @@ public:
 	 */
 	void for_each_contact( short group_a, short group_b,
 		const std::function< void( ecs::EntityId, ecs::EntityId ) >& callback ) const;
+
+	// ---- 本編のための機能（以前の BulletPhysics・blue_sky::ActiveObjectPhysics から移した） ----
+
+	/**
+	 * これが持つ剛体・形・制約を消す（シーンの終わり）
+	 *
+	 * 物体の剛体は持ち主（物体の部品）が消すので、先に物体を壊しておくこと。残っていたら世界から外すだけで消さない
+	 * （以前の BulletPhysics::clear と同じ）。重力は既定に戻す
+	 */
+	void clear();
+
+	/**
+	 * 地面（動かない箱）を足す（これが持つ。clear で消える。以前の BulletPhysics::add_ground_rigid_body）
+	 *
+	 * @param half_extents 箱の半分の大きさ。上の面が y = 0 になるように置く
+	 */
+	void add_ground( const Vector& half_extents );
+
+	/**
+	 * Wavefront OBJ ファイルの三角形を、動かない当たりの形として足す（これが持つ。clear で消える。以前の BulletPhysics::load_obj）
+	 *
+	 * 頂点は z を反転して読む（以前と同じ）。面は三角形だけを使う。
+	 *
+	 * @return ファイルを開けなければ false
+	 * @throw common::exception_base 三角形が 1 つも無い
+	 */
+	bool load_obj( const char_t* file_name );
+
+	/**
+	 * 線分の始点に一番近い当たりを調べる（以前の blue_sky::ClosestNotMe・ClosestNotMeAndHim の仕組み）
+	 *
+	 * @param exclude_a 通り抜ける剛体（自分。nullptr なら無し）
+	 * @param exclude_b 通り抜ける剛体（相手。nullptr なら無し）
+	 * @param filter 当たる剛体か決める（タグを受け取り、当たるなら true。空なら全部に当たる）。exclude_a・exclude_b には呼ばない
+	 */
+	RayHit ray_test_closest( const Vector& from, const Vector& to, const RigidBody* exclude_a = nullptr, const RigidBody* exclude_b = nullptr, const BodyFilter& filter = { } ) const;
+
+	/// 2 つの剛体が今接しているかを Bullet の接触の判定（contactPairTest）で調べる（以前の ActiveObjectPhysics::is_collision。どちらかが nullptr・空なら false）
+	bool contact_pair_test( const RigidBody* a, const RigidBody* b ) const;
+
+	/// 剛体 body と接している組を、見つけた順に callback に渡す（以前の ActiveObjectPhysics::collect_contacts_with。Bullet の contactTest）
+	void contact_test( const RigidBody& body, const ContactCallback& callback ) const;
+
+	/// 世界の中でめり込んでいる接点 1 つにつき 1 組を、callback に渡す（以前の ActiveObjectPhysics::collect_all_contacts。順も同じ）
+	void for_each_penetrating_contact( const ContactCallback& callback ) const;
+
+	/**
+	 * 世界に入れない箱を置いて、何かに触れるかを調べる（以前のプレイヤーの壁・よじ登りの判定）
+	 *
+	 * @param transform 箱を置く物体の位置と回転
+	 * @param offset_position 物体から見た箱の中心
+	 * @param half_extents 箱の半分の大きさ
+	 * @param exclude 数えない剛体（自分。nullptr なら無し）
+	 * @param filter 数える剛体か決める（タグを受け取り、数えるなら true。空なら全部数える）。接点の両方の剛体（置いた箱も、タグ無しとして）に呼び、両方とも数えるときだけ触れたとする
+	 */
+	bool box_contact_test( const Transform& transform, const Vector& offset_position, const Vector& half_extents, const RigidBody* exclude = nullptr, const BodyFilter& filter = { } ) const;
+
+	/// 箱の形の、余白を含めた半分の大きさ（Bullet の btBoxShape::getHalfExtentsWithMargin。プレイヤーの壁の判定の箱を置く高さに使う）
+	static Vector get_box_half_extents_with_margin( const Vector& half_extents );
+
+	/// これが持つ形の数（共有する形・ステージの当たりの形。テスト用）
+	std::size_t get_owned_shape_count() const;
 
 }; // class PhysicsManager
 

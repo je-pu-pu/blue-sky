@@ -127,6 +127,7 @@ get_entity_manager()->add_system< RenderSystem >( 1000, get_graphics_manager(), 
 - **組み立ての根**は `GameMain`（と `App`・`Main.cpp`）。マネージャーを作り、使う側に渡す
 - **シーン**は `Scene( GameMain& )` で受け取り、`Scene::get_*_manager()`・`get_input()`・`get_time_manager()` などの近道で GameMain から得る
 - **ECS のシステム**は必要なもの（物理・入力・時間・描画）をコンストラクタで受け取る。シーンが `add_system< T >( priority, get_physics_manager(), ... )` のように渡す（`add_system` は priority の後の引数をコンストラクタに渡す）
+- **描画を使うロジック**（ECS のシステム・ステージ・UI）は GraphicsManager の全体ではなく、使う分だけの小さな窓口で受け取る : `graphics::ResourceResolver`（ハンドルから引くだけ）・`ResourceLoader`（読む・作る）・`RenderSettings`（空・地面・色・線・紙）・`Canvas2D`（2D と文字）。GraphicsManager が全部実装する。テストの偽物は `test/graphics/FakeGraphics.h`（doc/描画の窓口の分割.md）
 - **描画の部品**は作り手の GraphicsManager から受け取る。シェーダーは `create_shader< T >( ... )` / `create_named_shader< T >( name, ... )` がコンストラクタの先頭に GraphicsManager を渡す（clone は引き継ぐ）。`Model::create_shader( GraphicsManager* )`・Line・MeshBuffer・Sprite も作り手が渡す
 - **ゲームの物体のシステム**は `GameObjectContext`（物理・音・経過時間・delta_time）を ObjectFactory・ObjectUpdater から受け取る
 - **新しく書くロジック**も、依存を引数・コンストラクタで受け取る（例: `Scene/OptionsController`）。シングルトンに触れないのでテストで動かせる

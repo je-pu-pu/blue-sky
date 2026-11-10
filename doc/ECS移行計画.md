@@ -164,10 +164,72 @@ blue-sky-test.exe --gtest_also_run_disabled_tests --gtest_filter=EcsBenchmark.* 
 
 ### 6.5 次にやること
 
-**部品の持ち方の作り替えを、段階 3（物理の同期と当たりのイベント）の前に行う。** 段階 3 以降は位置の正を TransformComponent に移し、物理・当たり・行動の System が毎フレーム全 Entity を回すので、先に土台を速くしておく。
+**部品の持ち方の作り替えを、段階 3（物理の同期と当たりのイベント）の前に行う。** → **完了**（6.6）。 段階 3 以降は位置の正を TransformComponent に移し、物理・当たり・行動の System が毎フレーム全 Entity を回すので、先に土台を速くしておく。
 
 - 部品を型ごとの密な配列で持つ（Entity の番号 → 添字 の表と、添字 → Entity の番号の逆引き。消すときは末尾と入れ替える）。部品は値で持ち、1 つずつ new しない。
 - System の対象は Entity の番号の密な配列にし、部品は型ごとの配列から添字で引く（または、いちばん数の少ない部品の配列を回して残りを引く）。
 - 1 体ごとの仮想関数をやめ、System が自分の対象をまとめて回す（update() の中のループ）形を基本にする。今の update( ComponentTuple& ) は互換として残すか、使う所を置き換える。
 - 指すときは今の Entity*・部品の生ポインタが配列の伸長で無効になるので、EntityId で持つ決まり（4 節）を徹底する。部品のポインタを持っている所（RenderTarget・System の tuple・ActiveObject）を洗い出す。
 - 前後の比べ方は 6.4 のベンチマーク（同じテスト・同じ構成で 3 回の中央値）。
+
+### 6.6 部品の持ち方の作り替え（完了、2026-11-10）
+
+| 段階 | 中身 | コミット | 足したテスト |
+|---|---|---|---|
+| ① | 置き場のクラス StablePool< T >（値をページに詰めて置く。場所は消すまで動かない）と、EntityId → 添字の表 SparseIndex（番号を 1024 個ごとのページに分けて配列で直に引く。空いたページは放す）。引き方を決める計測 | 72bb2ae5 | StablePoolTest・SparseIndexTest 8 件、EcsBenchmark.DISABLED_SparseIndexVsUnorderedMap |
+| ② | EntityManager が部品を型ごとの置き場 ComponentStorage< T >（中身は StablePool）に値で持ち、Entity も StablePool に置く（API はそのまま） | 3bc263d2 | ComponentPointersStayValidWhenOtherEntitiesComeAndGo |
+| ③ | System の対象の一覧を unordered_map から vector< pair< EntityId, tuple< T*... > > >＋SparseIndex に。外すときは末尾と入れ替える | d2542cb2 | SystemListStaysCorrectAfterSwapRemove |
+| ④ | 1 体ごとの仮想関数 update( ComponentTuple& ) をやめ、update() を System ごとに一度だけ呼ぶ。中は for_each（型の分かったループ）で、1 体ぶんは非仮想の update_entity | 1c3ab399 | （既存のテストを新しい形に替えた） |
+
+テストは 375 件 → 385 件（ほかに無効 3 件 = ベンチマーク）。
+
+#### 決めたこと
+
+- **sparse set の形（型ごとの置き場＋EntityId から引く表）にした。archetype にはしなかった。** 今の API（add_component・remove_component・get_component、System< T... > が部品の組を集めて付け外しの通知を受ける）をそのまま残せ、作り替えが小さいため。archetype は部品を付け外しするたびに Entity の全部品を別の表へ移すので、目標地点の部品（着いたら外す）のように付け外しの多い使い方と、下のポインタの安定性に合わない。
+- **置き場の部品の場所は、外すまで動かさない（StablePool）。** 指示の推奨は「消すときに末尾と入れ替える密な配列」だったが、洗い出すと部品のポインタを持ち続ける所が多かった:
+  - PhysicsSystem が剛体の userPointer に RigidBodyComponent* を入れ、BalloonSystem・PhysicsManager::for_each_contact が当たりからそれを読む（Bullet の中にあるので、場所が動いても知らせられない）
+  - GraphicsManager の main_camera_transform_component_・main_camera_component_（シーンが set_main_camera_info で渡す）
+  - シーンのメンバ（EnemyAiTestScene・MusicGamePrototypeScene・PhysicsTestScene・TransformTestScene・GeometryShaderCanvasTestScene の player_transform_・camera_component_ など）
+  - System の対象の組（tuple< T*... >）・ObjectRenderDataSystem の RenderTarget（render・transform・animation）
+  - ActiveObject は部品のポインタを持たない（EntityId で持ち、使うたびに引く。段階 1・2 の決まりどおり）ことを確かめた
+
+  場所が動く置き方では、これらのどれかを直し漏らすと「ほかの Entity を消したときにだけ」壊れ、見つけにくい。そこで部品は約 16 KB のページに詰めて置き、伸びるときもページを動かさず、消した場所は空きとして次に置くときに使い回す（以前の 1 つずつ new と同じ決まりのまま、確保をやめて連続に置く）。空きができても、System が回すのは置き場ではなく自分の対象の一覧（密な配列）なので、走査の速さにはほとんど効かない。ポインタを毎回引く・添字で持つ・動いたら知らせる、のどれにも作り替えずに済んだ。
+- **EntityId → 添字は SparseIndex（ページに分けた配列）。** 1 万・10 万個で unordered_map< EntityId, uint32_t > と比べた（3 回の中央値・1 個あたり、10 万個）: Release で 足す 1.7 / 41 ns、作った順に引く 0.4 / 2.8 ns、ばらばらに引く 0.4 / 6.1 ns、消す 0.9 / 23 ns（SparseIndex / unordered_map）。Debug は 引く 7.9 / 99 ns。EntityId は二度と使わない通し番号なので、生きている番号は最近の範囲に固まり、空いたページを放せば使う量も増え続けない（ページへのポインタの一覧だけが番号 1024 個につき 8 バイト残る）。なお EntityId は uint_t（32 bit）で、約 43 億個で一周する（今は考えない）。
+- **System の走査** : 対象の一覧（番号と部品のポインタの組の密な配列）をそのまま回す。部品のポインタは動かないので、回すときに引き直さない（「一番小さい置き場を回してほかを引く」形は、付け外しの通知・on_remove_entity・debug_entity_count の決まりを変えずに済むこちらにした）。対象の一覧を回している間に、その System の対象を増減してはいけない（以前の unordered_map でも同じだった）。
+- **仮想関数** : EntityManager が System ごとに update() を一度だけ呼ぶ（仮想関数）。中は for_each( f ) で回し、f は型が分かるのでインライン化できる。
+- **順番** : System の対象の一覧の並びは決まっていない（末尾と入れ替えるため）。作った順が要る ObjectRenderDataSystem・MoveToTargetSystem は、以前から「対象が増減したときだけ番号の順に並べ直す」ので変えていない。
+- **部品の基底クラス** : Component の仮想デストラクタは残した（部品は値で置き、壊すときは型の分かった std::destroy_at なので、仮想の呼び出しにはならない。部品 1 つにつき vptr の 8 バイトが残る）。add_component に「Component を継承すること」の static_assert を足した。unique_ptr を持つ部品（ObjectRenderComponent・AnimationComponent）・粒子の一覧が 2.4 MB ある ParticleSystemComponent（1 ページに 1 つ）も、作った場所から動かさないのでムーブすら要らない。
+
+#### 計測の前後
+
+6.4 と同じベンチマーク（blue-sky-test.exe --gtest_also_run_disabled_tests --gtest_filter=EcsBenchmark.DISABLED_Entities*）を 3 回走らせた中央値（ミリ秒）。x64・開発機。作り替える前は 96b12785（6.4 の「全部の後」と同じ中身。同じ日に取り直した）。
+
+| 構成 | 個数 | 項目 | 前（96b12785） | ②（3bc263d2） | ③（d2542cb2） | ④（1c3ab399） | 前 → ④ |
+|---|---|---|---|---|---|---|---|
+| Debug | 1 万 | 作る＋部品 3 つ | 48.96 | 15.87 | 9.332 | 8.713 | 5.6 倍速い |
+| Debug | 1 万 | 部品を引く | 4.204 | 0.562 | 0.583 | 0.573 | 7.3 倍 |
+| Debug | 1 万 | update（1 フレーム） | 0.257 | 0.221 | 0.077 | 0.065 | 4.0 倍 |
+| Debug | 1 万 | 消す | 17.43 | 9.166 | 3.606 | 3.848 | 4.5 倍 |
+| Debug | 10 万 | 作る＋部品 3 つ | 506.1 | 147.5 | 91.07 | 86.80 | 5.8 倍 |
+| Debug | 10 万 | 部品を引く | 54.86 | 5.669 | 5.825 | 5.644 | 9.7 倍 |
+| Debug | 10 万 | update（1 フレーム） | 4.311 | 2.533 | 0.786 | 0.650 | 6.6 倍 |
+| Debug | 10 万 | 消す | 208.0 | 108.6 | 36.01 | 40.19 | 5.2 倍 |
+| Release | 1 万 | 作る＋部品 3 つ | 4.737 | 2.130 | 1.296 | 1.300 | 3.6 倍 |
+| Release | 1 万 | 部品を引く | 0.263 | 0.070 | 0.070 | 0.070 | 3.8 倍 |
+| Release | 1 万 | update（1 フレーム） | 0.179 | 0.125 | 0.024 | 0.014 | 12.8 倍 |
+| Release | 1 万 | 消す | 2.100 | 0.949 | 0.306 | 0.268 | 7.8 倍 |
+| Release | 10 万 | 作る＋部品 3 つ | 48.52 | 21.22 | 11.86 | 11.59 | 4.2 倍 |
+| Release | 10 万 | 部品を引く | 3.413 | 0.723 | 0.747 | 0.763 | 4.5 倍 |
+| Release | 10 万 | update（1 フレーム） | 2.220 | 1.594 | 0.253 | 0.165 | 13.5 倍 |
+| Release | 10 万 | 消す | 32.35 | 10.12 | 2.981 | 2.987 | 10.8 倍 |
+
+読み方:
+
+- **Release の 10 万個の update は 2.22 ms → 0.165 ms**（1 個あたり 22 ns → 1.7 ns。1 フレーム 16.7 ms の 13% → 1%）。個数が 10 倍で時間も約 10〜12 倍と、ほぼ個数に比例するようになった。
+- 部品を引くのは ② から変わらない（③④ は引く所を触っていない。1 個 3 種類で 7.6 ns = SparseIndex を 3 回引く）。Debug の 10 万個の消すが ③ → ④ で 36 → 40 になったのは揺れと見ている（④ は消す所を触っていない）。
+- 残る手間 : 作るのは 1 個あたり約 116 ns（部品を付けるたびに全 System に知らせ、System が部品の組を集め直す）。消すのは約 30 ns（全 System に知らせ、全部の型の置き場から消す）。1 万を超えても 1 フレームで作る・消す数が数百なら問題にならない。
+
+#### 確かめたこと・残り
+
+- 起動して確かめた（Debug）: ステージ 1-1（スイッチ 2・動かします 3・着きました 2）、2-1（40 秒で 13・39・38）は基準と同じ。1-2（40 秒で 1・1・1。比べる基準の数は無い）・enemy_ai_test・physics_test・particle_system_test・music_game_prototype も落ちず、crash.log も出ない。1-2 と enemy_ai_test のフレーム 60 は作り替える前に撮った画面と同じ。
+- 残り（今回はしていない）: ObjectRenderDataSystem・MoveToTargetSystem の一覧は、対象が 1 つ増減するたびに全部を作り直して並べ替える（6.2 の「ついでに」）。毎フレーム物体が生まれ・消える状況では毎フレーム O(n log n)。番号は増える一方なので、足すときは末尾に足し、外すときだけ詰める形にできる。段階 3 で物体が増える前に直す。

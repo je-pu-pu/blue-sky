@@ -16,6 +16,24 @@ namespace blue_sky::ecs::flicker
  */
 
 /**
+ * ゆらぎの位相（0 以上 10 未満。種から決まる）
+ *
+ * 呼ぶたびに乱数（std::mt19937。作るときに 624 個の状態を埋める）を作るので重い。
+ * 毎フレーム使うなら、物体ごとに一度だけ求めて覚えておく（EntityObject は SimpleObjectComponent::flicker_phase に覚える）
+ */
+inline float_t phase( unsigned int seed )
+{
+	std::mt19937 engine( seed );
+	return std::uniform_real_distribution< float_t >( 0.f, 10.f )( engine );
+}
+
+/// 位相から、ゆらぎによる高さのずれを求める（height_offset と同じ値）
+inline float_t height_offset_at_phase( float_t phase, float_t scene_elapsed_time, float_t scale )
+{
+	return std::cos( phase + scene_elapsed_time ) * scale * 0.5f;
+}
+
+/**
  * ゆらぎによる高さのずれ
  *
  * 物体ごとに決まった位相を、物体ごとに決まった種（Entity の番号）から作る。
@@ -27,10 +45,7 @@ namespace blue_sky::ecs::flicker
  */
 inline float_t height_offset( unsigned int seed, float_t scene_elapsed_time, float_t scale )
 {
-	std::mt19937 engine( seed );
-	const float_t a = std::uniform_real_distribution< float_t >( 0.f, 10.f )( engine );
-
-	return std::cos( a + scene_elapsed_time ) * scale * 0.5f;
+	return height_offset_at_phase( phase( seed ), scene_elapsed_time, scale );
 }
 
 /**

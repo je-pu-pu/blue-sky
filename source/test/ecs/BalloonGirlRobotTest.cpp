@@ -135,6 +135,26 @@ TEST( BalloonGirlRobotTest, つかまれていない風船は始めの位置で�
 	EXPECT_FLOAT_EQ( f.factory.get_ref( id ).get_direction_degree(), 2.f );
 }
 
+TEST( BalloonGirlRobotTest, ゆらぎの位相は物体ごとに一度だけ求めて覚え_種から求めた値と同じ )
+{
+	Fixture f;
+
+	const auto id = f.create( "balloon" );
+	f.factory.restart();
+
+	const auto* state = f.entity( id )->get_component< blue_sky::ecs::SimpleObjectComponent >();
+	ASSERT_NE( state, nullptr );
+	EXPECT_LT( state->flicker_phase, 0.f );		// まだ求めていない
+
+	f.manager.get_system< blue_sky::ecs::BalloonHoldSystem >()->update_balloons( 1.f );
+
+	// 毎フレーム乱数を作り直さない（以前は 1 万個の風船で Release 約 11 ms）。値は種から求めたものと同じ
+	EXPECT_FLOAT_EQ( state->flicker_phase, blue_sky::ecs::flicker::phase( static_cast< unsigned int >( id ) ) );
+	EXPECT_GE( state->flicker_phase, 0.f );
+	EXPECT_LT( state->flicker_phase, 10.f );
+	EXPECT_FLOAT_EQ( blue_sky::ecs::flicker::height_offset_at_phase( state->flicker_phase, 2.5f, 0.5f ), blue_sky::ecs::flicker::height_offset( static_cast< unsigned int >( id ), 2.5f, 0.5f ) );
+}
+
 TEST( BalloonGirlRobotTest, 風船に触れると相手に知らせ_つかんだら手元に付いて行き_つかまれた風船は相手に知らせない )
 {
 	Fixture f;

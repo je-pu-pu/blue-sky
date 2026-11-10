@@ -22,6 +22,7 @@ struct SimpleObjectComponent : public core::ecs::Component
 	float_t			start_direction_degree = 0.f;			///< やり直したときの向き（Y 軸の度）
 
 	float_t			direction_degree = 0.f;					///< 今の向き（Y 軸の度。0 以上 360 以下）
+	float_t			flicker_phase = -1.f;					///< ゆらぎの位相（flicker::phase。負ならまだ求めていない。EntityObject が初めて使うときに求めて覚える）
 
 	core::Vector	default_gravity = core::Vector::Zero;	///< やり直したときの重力（硬い物は地球の重力、硬くない物は 0。以前の GameObject::get_default_gravity）
 	float_t			restart_mass = -1.f;					///< やり直したときに設定する質量（負なら変えない。以前の Goal::restart の set_mass( 100 )）

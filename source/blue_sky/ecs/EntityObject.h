@@ -82,6 +82,9 @@ public:
 	/// ゆらぎの位相を決める種（自分の Entity の番号。以前の ActiveObject::get_flicker_seed と同じ）
 	unsigned int get_flicker_seed() const;
 
+	/// ゆらぎの位相（種から一度だけ求めて SimpleObjectComponent に覚える。部品が無ければ毎回求める）
+	float_t get_flicker_phase() const;
+
 	/// 指定した位置にゆらぎの高さのずれを足して置く（以前の GameObject::update_location_by_flicker）
 	void update_location_by_flicker( const core::Vector& base_location, float_t scale, float_t scene_elapsed_time );
 	/// 指定した位置にゆらぎの高さのずれを足した所へ、上下の速度を向ける（以前の GameObject::update_velocity_by_flicker）

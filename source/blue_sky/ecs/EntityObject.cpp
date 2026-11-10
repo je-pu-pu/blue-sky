@@ -194,14 +194,30 @@ unsigned int EntityObject::get_flicker_seed() const
 	return static_cast< unsigned int >( entity_->get_id() );
 }
 
+float_t EntityObject::get_flicker_phase() const
+{
+	// 以前は使うたびに乱数を作り直していて（flicker::phase）、1 万個の風船で Release 約 11 ms かかっていた
+	if ( ! state_ )
+	{
+		return flicker::phase( get_flicker_seed() );
+	}
+
+	if ( state_->flicker_phase < 0.f )
+	{
+		state_->flicker_phase = flicker::phase( get_flicker_seed() );
+	}
+
+	return state_->flicker_phase;
+}
+
 void EntityObject::update_location_by_flicker( const core::Vector& base_location, float_t scale, float_t scene_elapsed_time )
 {
-	set_location( base_location + core::Vector( 0.f, flicker::height_offset( get_flicker_seed(), scene_elapsed_time, scale ), 0.f ) );
+	set_location( base_location + core::Vector( 0.f, flicker::height_offset_at_phase( get_flicker_phase(), scene_elapsed_time, scale ), 0.f ) );
 }
 
 void EntityObject::update_velocity_by_flicker( const core::Vector& base_location, float_t scale, float_t scene_elapsed_time )
 {
-	const core::Vector target_location = base_location + core::Vector( 0.f, flicker::height_offset( get_flicker_seed(), scene_elapsed_time, scale ), 0.f );
+	const core::Vector target_location = base_location + core::Vector( 0.f, flicker::height_offset_at_phase( get_flicker_phase(), scene_elapsed_time, scale ), 0.f );
 	const core::Vector relative_position = target_location - get_location();
 	const core::Vector velocity = get_velocity();
 

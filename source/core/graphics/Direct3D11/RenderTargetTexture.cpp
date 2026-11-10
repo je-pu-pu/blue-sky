@@ -60,6 +60,25 @@ void RenderTargetTexture::recreate_if_needed()
 	DIRECT_X_FAIL_CHECK( d3d->getDevice()->CreateRenderTargetView( texture_->get_texture_2d(), nullptr, & render_target_view_ ) );
 }
 
+core::graphics::Texture* RenderTargetTexture::resolve_for_sampling()
+{
+	if ( texture_->get_multi_sample_count() <= 1 )
+	{
+		return this;
+	}
+
+	auto* d3d = Direct3D11::get_instance();
+
+	if ( ! resolved_ || resolved_->get_width() != texture_->get_width() || resolved_->get_height() != texture_->get_height() )
+	{
+		resolved_ = std::make_unique< D3D11Texture >( d3d, format_, texture_->get_width(), texture_->get_height(), false );
+	}
+
+	d3d->getImmediateContext()->ResolveSubresource( resolved_->get_texture_2d(), 0, texture_->get_texture_2d(), 0, to_dxgi_format( format_ ) );
+
+	return resolved_.get();
+}
+
 void RenderTargetTexture::activate()
 {
 	recreate_if_needed();

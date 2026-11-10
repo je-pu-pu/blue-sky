@@ -701,9 +701,18 @@ void GraphicsManager::render_post_effect( Texture* texture )
  */
 void GraphicsManager::render_post_effect( Texture* texture, RenderTarget* render_target )
 {
+	// 描画結果を読む。MSAA の描画先は Texture2D として読めないので、MSAA なしへ解決してから使う
+	// （以前は解決しておらず、ECS のシーン（physics_test など）の画面が真っ黒になっていた）
+	Texture* source = texture;
+
+	if ( auto* render_target_texture = dynamic_cast< core::graphics::RenderTargetTexture* >( texture ) )
+	{
+		source = render_target_texture->resolve_for_sampling();
+	}
+
 	set_render_target( render_target );
 
-	post_effect_rectangle_->get_shader_at( 0 )->set_texture_at( 0, texture );
+	post_effect_rectangle_->get_shader_at( 0 )->set_texture_at( 0, source );
 	post_effect_rectangle_->render();
 }
 

@@ -298,6 +298,9 @@ void MusicGamePrototypeScene::update()
 
 void MusicGamePrototypeScene::render()
 {
+	// 描く System（RenderSystem など）を、画面のクリアの後に動かす
+	get_entity_manager()->render();
+
 	// デバッグ描画を行う
 	get_graphics_manager()->render_debug_bullet();
 

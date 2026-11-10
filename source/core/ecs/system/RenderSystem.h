@@ -41,6 +41,7 @@ public:
 	RenderSystem( core::graphics::GraphicsManager* graphics_manager, const core::TimeManager* time_manager );
 	~RenderSystem() = default;
 
+	bool is_render_system() const override { return true; }	///< 描画の段階（EntityManager::render）で動かす
 	void update() override;
 
 	void set_culling_distance( float distance ) { culling_distance_ = distance; }

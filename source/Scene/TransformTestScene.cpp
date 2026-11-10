@@ -148,6 +148,9 @@ void TransformTestScene::update()
 
 void TransformTestScene::render()
 {
+	// 描く System（RenderSystem など）を、画面のクリアの後に動かす
+	get_entity_manager()->render();
+
 	std::stringstream ss;
 	ss << "Time : " << get_total_elapsed_time() << '\n';
 	ss << "FPS : " << get_main_loop()->get_last_fps() << '\n';

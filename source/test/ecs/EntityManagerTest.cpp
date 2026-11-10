@@ -24,6 +24,15 @@ public:
 	void update( ComponentTuple& ) const override { update_count++; }
 };
 
+/// 描く System の代わり（is_render_system が true）
+class RenderCountSystem : public core::ecs::System< core::ecs::TransformComponent >
+{
+public:
+	mutable int update_count = 0;
+	bool is_render_system() const override { return true; }
+	void update( ComponentTuple& ) const override { update_count++; }
+};
+
 /**
  * 複数コンポーネントを要求するテスト用 System
  *
@@ -417,4 +426,31 @@ TEST( EcsTest, Clear )
 	// clear() 後も新規 Entity を作成可能
 	auto entity2 = em->create_entity();
 	EXPECT_NE( nullptr, entity2 );
+}
+
+/**
+ * 描く System は update() では動かず、render() で動くことを検証する
+ *
+ * 以前は描く System も update() で動き、フレームの頭の画面のクリアに描画を消されていた（ECS のシーンが真っ黒）
+ */
+TEST( EcsTest, RenderSystemRunsOnlyInRender )
+{
+	auto em = core::ecs::EntityManager::get_instance();
+	em->clear();
+
+	em->add_system< CountSystem >();
+	em->add_system< RenderCountSystem >();
+
+	auto* e = em->create_entity();
+	e->add_component< core::ecs::TransformComponent >();
+
+	em->update();
+	EXPECT_EQ( 1, em->get_system< CountSystem >()->update_count );
+	EXPECT_EQ( 0, em->get_system< RenderCountSystem >()->update_count );
+
+	em->render();
+	EXPECT_EQ( 1, em->get_system< CountSystem >()->update_count );
+	EXPECT_EQ( 1, em->get_system< RenderCountSystem >()->update_count );
+
+	em->clear();
 }

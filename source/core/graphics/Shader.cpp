@@ -88,8 +88,18 @@ void Shader::render_parameter_gui()
 		}
 	}
 
-	for ( int n = 0; const auto* t = get_texture_at( n ); n++ )
+	// 上限を付ける（テクスチャのスロットの数まで。以前は nullptr まで回していて、どの番号でも同じテクスチャを返すシェーダーで終わらなかった）
+	constexpr int MAX_TEXTURE_SLOTS = 16;
+
+	for ( int n = 0; n < MAX_TEXTURE_SLOTS; n++ )
 	{
+		const auto* t = get_texture_at( n );
+
+		if ( ! t )
+		{
+			break;
+		}
+
 		auto texture = dynamic_cast< const core::graphics::direct_3d_11::Texture* >( t );
 
 		if ( ! texture )

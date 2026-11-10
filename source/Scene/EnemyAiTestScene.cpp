@@ -288,6 +288,9 @@ void EnemyAiTestScene::draw_debug()
 
 void EnemyAiTestScene::render()
 {
+	// 描く System（RenderSystem など）を、画面のクリアの後に動かす
+	get_entity_manager()->render();
+
 	get_graphics_manager()->render_debug_bullet();
 
 	std::stringstream ss;

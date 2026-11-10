@@ -22,6 +22,7 @@ namespace core::graphics::direct_3d_11
 		PixelFormat format_;
 		bool is_screen_sized_;
 		std::unique_ptr< core::graphics::direct_3d_11::Texture > texture_;
+		std::unique_ptr< core::graphics::direct_3d_11::Texture > resolved_;		///< MSAA を解決した先（読むときに作る）
 		com_ptr< ID3D11RenderTargetView > render_target_view_;
 
 		void recreate_if_needed();
@@ -42,6 +43,8 @@ namespace core::graphics::direct_3d_11
 		uint_t get_multi_sample_quality() const override { return texture_->get_multi_sample_quality(); };
 
 		ID3D11RenderTargetView* get_render_target_view() { return render_target_view_.get(); }
+
+		core::graphics::Texture* resolve_for_sampling() override;
 
 		void activate() override;
 		void clear( const Color& ) override;

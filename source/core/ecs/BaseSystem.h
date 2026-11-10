@@ -31,6 +31,14 @@ public:
 	virtual void update() = 0;
 
 	/**
+	 * 描く System か（RenderSystem など）
+	 *
+	 * 描く System は EntityManager::update() では動かさず、EntityManager::render()（シーンの render() から呼ぶ）で動かす。
+	 * 以前は更新の中で描いていて、フレームの頭の画面のクリアに消され、ECS のシーンが真っ黒になっていた
+	 */
+	virtual bool is_render_system() const { return false; }
+
+	/**
 	 * このシステムの実行優先度を取得する
 	 *
 	 * @return システムの実行優先度 ( 数値が小さい順に実行される )

@@ -17,8 +17,8 @@ private:
 	RenderSetting render_setting_;
 
 protected:
-	Texture* get_texture_at( uint_t ) override { return texture_; }
-	const Texture* get_texture_at( uint_t ) const override { return texture_; }
+	Texture* get_texture_at( uint_t n ) override { return n == 0 ? texture_ : nullptr; }
+	const Texture* get_texture_at( uint_t n ) const override { return n == 0 ? texture_ : nullptr; }
 	void set_texture_at( uint_t, Texture* t ) override { texture_ = t; }
 
 public:

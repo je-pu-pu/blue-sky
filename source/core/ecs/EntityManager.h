@@ -210,11 +210,27 @@ public:
 	 * EntityManager に追加されている全ての System を実行する
 	 *
 	 */
+	/// 描く System 以外を、優先度の順に動かす（シーンの update() から呼ぶ）
 	void update()
 	{
 		for ( auto& s : system_list_ )
 		{
-			s->update();
+			if ( ! s->is_render_system() )
+			{
+				s->update();
+			}
+		}
+	}
+
+	/// 描く System（is_render_system）を、優先度の順に動かす（シーンの render() から呼ぶ。画面のクリアの後）
+	void render()
+	{
+		for ( auto& s : system_list_ )
+		{
+			if ( s->is_render_system() )
+			{
+				s->update();
+			}
 		}
 	}
 

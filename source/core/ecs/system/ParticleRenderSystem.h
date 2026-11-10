@@ -31,6 +31,7 @@ public:
 	ParticleRenderSystem( core::graphics::GraphicsManager* graphics_manager, std::unique_ptr< core::graphics::Shader > shader );
 	virtual ~ParticleRenderSystem() = default;
 
+	bool is_render_system() const override { return true; }	///< 描画の段階（EntityManager::render）で動かす
 	virtual void update() override;
 
 }; // class ParticleRenderSystem

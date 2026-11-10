@@ -1328,6 +1328,12 @@ void GameMain::setup_scene( const string_t& scene_name, const SceneArguments& ar
 	{
 		entity_manager_->clear();
 		get_graphics_manager()->set_main_camera_info( nullptr, nullptr );
+
+		// ECS の剛体は clear で PhysicsSystem が解放する（以前はシーンをまたいで溜まっていた）。残っていたら漏れなので知らせる
+		if ( const int count = physics_manager_->get_rigid_body_count() )
+		{
+			debug_log( "[Physics] シーンを片付けた後も ECS の物理の世界に剛体が残っています: " + std::to_string( count ) + " 個" );
+		}
 	}
 
 	// 新しいシーンを設定

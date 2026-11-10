@@ -27,13 +27,26 @@ public:
 public:
 	/// physics_manager : 物理の世界（作り手が渡す。nullptr なら何もしない。以前は core::Service から取っていた）
 	explicit PhysicsSystem( core::physics::PhysicsManager* physics_manager ) : physics_manager_( physics_manager ) { }
-	~PhysicsSystem() override = default;
+
+	/// 対象に残っている剛体をすべて解放する（remove_system・EntityManager::clear のとき。PhysicsManager はこれより長く生きること）
+	~PhysicsSystem() override;
 
 	void update() override;
 	void update( ComponentTuple& ) const override;
 
+protected:
+	/// 対象から外れる（RigidBody か Transform を外した・Entity を消した）とき、その剛体を解放する
+	void on_remove_entity( ComponentTuple& ) override;
+
 private:
 	core::physics::PhysicsManager* physics_manager_;
+
+	/**
+	 * RigidBodyComponent の剛体を物理の世界から外して解放する（無ければ何もしない）
+	 *
+	 * 以前は destroy_rigid_body を呼ぶ所が無く、Entity を消しても・シーンを替えても剛体が世界に残っていた
+	 */
+	void release_rigid_body( RigidBodyComponent* rigid_body );
 
 	/**
 	 * RigidBodyComponent を初期化する

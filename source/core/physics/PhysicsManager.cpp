@@ -180,6 +180,11 @@ void PhysicsManager::destroy_rigid_body( RigidBodyHandle& handle )
 	handle.collision_shape = nullptr;
 }
 
+int PhysicsManager::get_rigid_body_count() const
+{
+	return impl_->dynamics_world ? impl_->dynamics_world->getNumCollisionObjects() : 0;
+}
+
 void PhysicsManager::get_rigid_body_transform( const RigidBodyHandle& handle, Vector& position, math::Quaternion& rotation ) const
 {
 	if ( ! handle.is_valid() )

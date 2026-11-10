@@ -99,10 +99,27 @@ private:
 	 */
 	void remove_entity_component( const Entity* entity ) override
 	{
-		component_list_.erase( entity->get_id() );
+		auto i = component_list_.find( entity->get_id() );
+
+		if ( i == component_list_.end() )
+		{
+			return;
+		}
+
+		on_remove_entity( i->second );
+		component_list_.erase( i );
 	}
 
 protected:
+	/**
+	 * Entity がこの System の対象から外れる直前に呼ばれる（コンポーネントを外した・Entity を消した）
+	 *
+	 * コンポーネントはまだ生きている。System が作った物（剛体など）を片付けるのに使う。
+	 * ここで対象の一覧（get_component_list）を変えてはいけない。
+	 * System が壊れるとき（remove_system・clear）は呼ばれないので、派生のデストラクタで片付ける
+	 */
+	virtual void on_remove_entity( ComponentTuple& ) { }
+
 	ComponentList& get_component_list() { return component_list_; }
 	const ComponentList& get_component_list() const { return component_list_; }
 

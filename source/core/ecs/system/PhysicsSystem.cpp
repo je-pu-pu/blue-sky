@@ -53,6 +53,30 @@ void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, Trans
 	}
 }
 
+PhysicsSystem::~PhysicsSystem()
+{
+	for ( auto& pair : get_component_list() )
+	{
+		release_rigid_body( std::get< RigidBodyComponent* >( pair.second ) );
+	}
+}
+
+void PhysicsSystem::on_remove_entity( ComponentTuple& component_tuple )
+{
+	release_rigid_body( std::get< RigidBodyComponent* >( component_tuple ) );
+}
+
+void PhysicsSystem::release_rigid_body( RigidBodyComponent* rigid_body )
+{
+	if ( ! rigid_body || ! rigid_body->handle.is_valid() || ! physics_manager_ )
+	{
+		return;
+	}
+
+	physics_manager_->destroy_rigid_body( rigid_body->handle );
+	rigid_body->handle.user_pointer = nullptr;
+}
+
 void PhysicsSystem::update()
 {
 	auto* physics_manager = physics_manager_;

@@ -104,6 +104,11 @@ public:
 	void destroy_rigid_body( RigidBodyHandle& handle );
 
 	/**
+	 * ワールドにある剛体（衝突物）の数を返す（テスト・漏れの確認用）
+	 */
+	int get_rigid_body_count() const;
+
+	/**
 	 * 剛体の位置・回転を取得する
 	 */
 	void get_rigid_body_transform( const RigidBodyHandle& handle, Vector& position, math::Quaternion& rotation ) const;

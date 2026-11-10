@@ -570,6 +570,128 @@ TEST( EcsTest, Clear )
 	EXPECT_NE( nullptr, entity2 );
 }
 
+// ---------------------------------------------------------------------------
+// PhysicsSystem の剛体の解放
+//
+// 以前は PhysicsManager::destroy_rigid_body を呼ぶ所が無く、Entity を消しても・シーンを替えても
+// （EntityManager::clear）剛体が物理の世界に残っていた。
+// PhysicsManager は EntityManager より先に作る（後に壊れる）。GameMain も同じ順
+// ---------------------------------------------------------------------------
+
+namespace {
+
+/// Transform と RigidBody を持つ Entity を作る（PhysicsSystem の update で剛体ができる）
+core::ecs::Entity* create_physics_entity( core::ecs::EntityManager& em )
+{
+	auto* e = em.create_entity();
+	e->add_component< core::ecs::TransformComponent >();
+	e->add_component< core::ecs::RigidBodyComponent >();
+	return e;
+}
+
+} // namespace
+
+/**
+ * Entity を消すと、その剛体だけが解放されることを検証する
+ */
+TEST( EcsTest, DestroyEntityReleasesRigidBody )
+{
+	core::physics::PhysicsManager physics_manager;
+	core::ecs::EntityManager em;
+	em.add_system< core::ecs::PhysicsSystem >( 0, & physics_manager );
+
+	auto* e1 = create_physics_entity( em );
+	auto* e2 = create_physics_entity( em );
+	em.update();
+	ASSERT_EQ( 2, physics_manager.get_rigid_body_count() );
+
+	em.destroy_entity( e1->get_id() );
+	EXPECT_EQ( 1, physics_manager.get_rigid_body_count() );
+	EXPECT_EQ( 1u, em.get_system< core::ecs::PhysicsSystem >()->debug_entity_count() );
+
+	// 残った Entity の剛体はそのまま動く
+	EXPECT_TRUE( e2->get_component< core::ecs::RigidBodyComponent >()->handle.is_valid() );
+	em.update();
+	EXPECT_EQ( 1, physics_manager.get_rigid_body_count() );
+}
+
+/**
+ * RigidBodyComponent を外すと剛体が解放され、付け直すと作り直されることを検証する
+ */
+TEST( EcsTest, RemoveRigidBodyComponentReleasesRigidBody )
+{
+	core::physics::PhysicsManager physics_manager;
+	core::ecs::EntityManager em;
+	em.add_system< core::ecs::PhysicsSystem >( 0, & physics_manager );
+
+	auto* e = create_physics_entity( em );
+	em.update();
+	ASSERT_EQ( 1, physics_manager.get_rigid_body_count() );
+
+	e->remove_component< core::ecs::RigidBodyComponent >();
+	EXPECT_EQ( 0, physics_manager.get_rigid_body_count() );
+
+	e->add_component< core::ecs::RigidBodyComponent >();
+	em.update();
+	EXPECT_EQ( 1, physics_manager.get_rigid_body_count() );
+
+	// TransformComponent を外しても PhysicsSystem の対象から外れるので、剛体は解放される
+	e->remove_component< core::ecs::TransformComponent >();
+	EXPECT_EQ( 0, physics_manager.get_rigid_body_count() );
+	EXPECT_FALSE( e->get_component< core::ecs::RigidBodyComponent >()->handle.is_valid() );
+}
+
+/**
+ * clear()（シーンを替えるとき GameMain が呼ぶ）で剛体がすべて解放され、その後も同じ物理の世界を使えることを検証する
+ */
+TEST( EcsTest, ClearReleasesRigidBodies )
+{
+	core::physics::PhysicsManager physics_manager;
+	core::ecs::EntityManager em;
+
+	// 1 つ目のシーン
+	em.add_system< core::ecs::PhysicsSystem >( 0, & physics_manager );
+	create_physics_entity( em );
+	create_physics_entity( em );
+	em.update();
+	ASSERT_EQ( 2, physics_manager.get_rigid_body_count() );
+
+	em.clear();
+	EXPECT_EQ( 0, physics_manager.get_rigid_body_count() );
+
+	// 2 つ目のシーン
+	em.add_system< core::ecs::PhysicsSystem >( 0, & physics_manager );
+	create_physics_entity( em );
+	em.update();
+	EXPECT_EQ( 1, physics_manager.get_rigid_body_count() );
+}
+
+/**
+ * PhysicsSystem を取り除いたとき・EntityManager を壊したときにも剛体が解放されることを検証する
+ */
+TEST( EcsTest, RemoveSystemAndDestructorReleaseRigidBodies )
+{
+	core::physics::PhysicsManager physics_manager;
+
+	{
+		core::ecs::EntityManager em;
+		em.add_system< core::ecs::PhysicsSystem >( 0, & physics_manager );
+		auto* e = create_physics_entity( em );
+		em.update();
+		ASSERT_EQ( 1, physics_manager.get_rigid_body_count() );
+
+		em.remove_system< core::ecs::PhysicsSystem >();
+		EXPECT_EQ( 0, physics_manager.get_rigid_body_count() );
+		EXPECT_FALSE( e->get_component< core::ecs::RigidBodyComponent >()->handle.is_valid() );
+
+		em.add_system< core::ecs::PhysicsSystem >( 0, & physics_manager );
+		em.update();
+		ASSERT_EQ( 1, physics_manager.get_rigid_body_count() );
+	}
+
+	EXPECT_EQ( 0, physics_manager.get_rigid_body_count() );
+}
+
 /**
  * 描く System は update() では動かず、render() で動くことを検証する
  *

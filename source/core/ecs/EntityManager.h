@@ -46,6 +46,7 @@ private:
 
 public:
 	EntityManager() = default;
+	~EntityManager() { clear(); }	///< clear と同じ順で壊す（System が先）。System が使う物（PhysicsManager）はこれより長く生きること
 	EntityManager( const EntityManager& ) = delete;
 	EntityManager& operator = ( const EntityManager& ) = delete;
 
@@ -171,6 +172,9 @@ public:
 	/**
 	 * Entity から Component を取り除く
 	 *
+	 * 先に System に知らせ（コンポーネントはまだ生きている。PhysicsSystem が剛体を解放する）、その後でコンポーネントを壊す。
+	 * 以前は壊してから知らせていた
+	 *
 	 * @param e Entity
 	 */
 	template< typename ComponentType >
@@ -184,12 +188,19 @@ public:
 			return;
 		}
 
-		i->second.erase( e->get_id() );
+		auto i2 = i->second.find( e->get_id() );
+
+		if ( i2 == i->second.end() )
+		{
+			return;
+		}
 
 		for ( auto& s : system_list_ )
 		{
 			s->on_remove_component< ComponentType >( e );
 		}
+
+		i->second.erase( i2 );
 	}
 
 	/**
@@ -295,15 +306,17 @@ public:
 
 	/**
 	 * 全ての Entity, Component, System を削除する
+	 *
+	 * System を先に壊す（PhysicsSystem のデストラクタが、まだ生きている RigidBodyComponent の剛体を解放する）。
+	 * 以前はコンポーネントを先に壊し、剛体は解放されず物理の世界にシーンをまたいで溜まっていた。
+	 * EntityId は戻さない（is_alive で古い id が生き返らないように）
 	 */
 	void clear()
 	{
-		entity_list_.clear();
-		component_list_.clear();
-		system_map_.clear();
 		system_list_.clear();
-
-		// next_entity_id_ = 0;
+		system_map_.clear();
+		component_list_.clear();
+		entity_list_.clear();
 	}
 
 }; // EntityManager

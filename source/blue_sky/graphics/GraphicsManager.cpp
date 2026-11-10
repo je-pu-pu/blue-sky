@@ -570,6 +570,24 @@ void GraphicsManager::set_paper_texture_type( int_t type )
 	}
 }
 
+std::size_t GraphicsManager::flush_releases()
+{
+	// 描く対象のこのフレームのモデルを忘れる（次のフレームで引き直す。解放するモデルを指したまま持ち越さない）
+	if ( auto* system = get_object_render_data_system() )
+	{
+		system->forget_resolved_models();
+	}
+
+	// + でつなぐと呼ぶ順が決まらないので、1 つずつ呼ぶ
+	std::size_t count = model_manager_.flush_releases();
+	count += mesh_manager_.flush_releases();
+	count += get_shader_manager().flush_releases();
+	count += texture_manager_.flush_releases();
+	count += skinning_animation_set_manager_.flush_releases();
+
+	return count;
+}
+
 /**
  * 紙テクスチャをシェーダーにバインドする（アンロード済みなら何もしない）
  */
@@ -669,9 +687,11 @@ void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool
 			continue;
 		}
 
+		system->resolve_models();	// 1 フレームに 1 回だけ引く（段ごと・カスケードごとに引き直さない）
+
 		for ( const auto& target : system->get_render_targets() )
 		{
-			const Model* model = resolve_model( target.render->model );
+			const Model* model = target.model;
 
 			if ( ! model )
 			{
@@ -709,9 +729,11 @@ void GraphicsManager::render_objects() const
 
 	if ( system )
 	{
+		system->resolve_models();	// 1 フレームに 1 回だけ引く
+
 		for ( const auto& target : system->get_render_targets() )
 		{
-			const Model* model = resolve_model( target.render->model );
+			const Model* model = target.model;
 
 			if ( ! model )
 			{
@@ -740,7 +762,7 @@ void GraphicsManager::render_objects() const
 
 		for ( const auto& target : system->get_render_targets() )
 		{
-			if ( const Model* model = resolve_model( target.render->model ) )
+			if ( const Model* model = target.model )
 			{
 				render_object_line( * target.render, model );
 			}
@@ -772,9 +794,11 @@ void GraphicsManager::render_objects_velocity() const
 		return;
 	}
 
+	system->resolve_models();	// 1 フレームに 1 回だけ引く
+
 	for ( const auto& target : system->get_render_targets() )
 	{
-		const Model* model = resolve_model( target.render->model );
+		const Model* model = target.model;
 
 		if ( ! model )
 		{
@@ -922,6 +946,8 @@ void GraphicsManager::render_debug_axis() const
 
 	set_input_layout( "pos_color" );
 
+	system->resolve_models();	// 1 フレームに 1 回だけ引く
+
 	render_technique( "|simple_line", [ this, system ]
 	{
 		get_frame_render_data()->bind_to_all();
@@ -942,7 +968,7 @@ void GraphicsManager::render_debug_axis() const
 
 			if ( animation && animation->player && ( target.render->should_draw_mesh() || target.render->should_draw_line() ) )
 			{
-				render_debug_axis_for_bones( target.transform->transform, * animation->player, resolve_model( target.render->model ) );
+				render_debug_axis_for_bones( target.transform->transform, * animation->player, target.model );
 			}
 		}
 	} );

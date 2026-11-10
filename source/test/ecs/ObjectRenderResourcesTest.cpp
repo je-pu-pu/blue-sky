@@ -243,3 +243,41 @@ TEST( ObjectRenderResourcesTest, 敵は見た目ごとのテクスチャを名�
 	EXPECT_TRUE( robot->textures[ 2 ].is_null() );		// 読めなかったテクスチャは空のハンドル
 	EXPECT_FALSE( robot->textures[ 3 ].is_null() );
 }
+
+TEST( ObjectRenderResourcesTest, 描く対象のモデルは1フレームに1回だけ引きフレームの終わりに忘れる )
+{
+	RenderFixture f;
+	ObjectRenderComponent* render = nullptr;
+	f.create( "box", & render );
+	auto* ball = f.resources.add_model( "ball" );
+
+	f.system->update_render_data();				// 描く前に引く（GraphicsManager::update_constant_buffers）
+	ASSERT_TRUE( f.system->are_models_resolved() );
+	const auto& target = f.system->get_render_targets().front();
+	EXPECT_EQ( target.model, f.resources.models.get< blue_sky::graphics::Model >( "box" ) );
+
+	// フレームの途中でハンドルを替えても、このフレームの中では引き直さない（影・本体・線・速度の段で同じモデルを使う）
+	render->model = f.resources.get_model_handle( ball );
+	f.system->resolve_models();
+	EXPECT_EQ( target.model, f.resources.models.get< blue_sky::graphics::Model >( "box" ) );
+
+	f.system->forget_resolved_models();			// フレームの終わり（GraphicsManager::flush_releases）
+	EXPECT_FALSE( f.system->are_models_resolved() );
+
+	f.system->resolve_models();					// 次のフレーム
+	EXPECT_EQ( target.model, ball );
+}
+
+TEST( ObjectRenderResourcesTest, フレームの途中で入った描く対象も次に引くときにそのフレームのモデルを得る )
+{
+	RenderFixture f;
+	f.create( "box" );
+	f.system->resolve_models();
+
+	f.create( "ball" );							// 引いた後に入った（ハンドルは部品が揃った後で設定される）
+	EXPECT_FALSE( f.system->are_models_resolved() );
+
+	f.system->resolve_models();					// 描く段（render_objects など）が引く
+	ASSERT_EQ( f.system->get_render_targets().size(), 2u );
+	EXPECT_EQ( f.system->get_render_targets().back().model, f.resources.models.get< blue_sky::graphics::Model >( "ball" ) );
+}

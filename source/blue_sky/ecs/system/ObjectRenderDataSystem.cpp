@@ -34,6 +34,10 @@ void ObjectRenderDataSystem::add_entity_component_if_all_components_ready( const
 
 	render_target_list_.insert( { added.first, std::get< ObjectRenderComponent* >( added.second ), std::get< core::ecs::TransformComponent* >( added.second ), animation } );
 
+	// このフレームのモデルを引いた後に入ったら、次の resolve_models で全部を引き直す
+	// （ここでは引かない。部品のハンドルは、部品が揃った後で設定されることがある（ObjectFactory など））
+	models_resolved_ = false;
+
 	if ( animation )
 	{
 		animation_list_.insert( { added.first, animation } );
@@ -124,12 +128,42 @@ core::Matrix ObjectRenderDataSystem::advance_prev_world( ObjectRenderComponent& 
  * 描かない物体（is_visible が false）・定数バッファの無い物体・モデルの無い物体は書かない
  * （前フレームの world も進めない。以前と同じ）
  */
+void ObjectRenderDataSystem::resolve_models() const
+{
+	if ( models_resolved_ )
+	{
+		return;
+	}
+
+	for ( const auto& target : get_render_targets() )
+	{
+		// GraphicsManager はモデルを blue_sky のモデルとして入れている（ResourceResolver::resolve_model と同じ）
+		target.model = static_cast< const graphics::Model* >( target.render->model.get() );
+	}
+
+	models_resolved_ = true;
+}
+
+void ObjectRenderDataSystem::forget_resolved_models()
+{
+	models_resolved_ = false;
+
+#ifdef _DEBUG
+	for ( const auto& target : get_render_targets() )
+	{
+		target.model = nullptr;
+	}
+#endif
+}
+
 void ObjectRenderDataSystem::update_render_data()
 {
 	if ( ! resources_ )
 	{
 		return;
 	}
+
+	resolve_models();
 
 	for ( const auto& target : get_render_targets() )
 	{
@@ -140,7 +174,7 @@ void ObjectRenderDataSystem::update_render_data()
 			continue;
 		}
 
-		const graphics::Model* model = resources_->resolve_model( render.model );
+		const graphics::Model* model = target.model;
 
 		if ( ! model )
 		{

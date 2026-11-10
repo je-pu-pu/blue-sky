@@ -246,20 +246,10 @@ public:
 	/**
 	 * 解放・差し替えを頼まれたリソースをまとめて解放する（GameMain がフレームの終わり（Present の後）とシーンの切り替えで呼ぶ）
 	 *
-	 * モデルが先（メッシュ・シェーダー・テクスチャを使う側）。
+	 * モデルが先（メッシュ・シェーダー・テクスチャを使う側）。描く対象のこのフレームのモデル（ObjectRenderDataSystem）も忘れる。
 	 * @return 解放した数
 	 */
-	std::size_t flush_releases()
-	{
-		// + でつなぐと呼ぶ順が決まらないので、1 つずつ呼ぶ
-		std::size_t count = model_manager_.flush_releases();
-		count += mesh_manager_.flush_releases();
-		count += get_shader_manager().flush_releases();
-		count += texture_manager_.flush_releases();
-		count += skinning_animation_set_manager_.flush_releases();
-
-		return count;
-	}
+	std::size_t flush_releases();
 
 	/// Handle の数の説明（デバッグ表示用。種類ごとに「中身のある数 / 作った数」。doc/ハンドルの設計.md の 2 章）
 	string_t describe_handle_counts() const

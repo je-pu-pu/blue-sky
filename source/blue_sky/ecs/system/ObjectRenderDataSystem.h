@@ -7,7 +7,7 @@
 
 #include <vector>
 
-namespace blue_sky::graphics { class ResourceResolver; }
+namespace blue_sky::graphics { class ResourceResolver; class Model; }
 
 namespace blue_sky::ecs
 {
@@ -34,6 +34,10 @@ public:
 		ObjectRenderComponent*						render;
 		const core::ecs::TransformComponent*		transform;
 		const AnimationComponent*					animation;	///< アニメーション（持たなければ nullptr。対象に入るとき・アニメーションの付け外しのときだけ引く）
+
+		/// このフレームで引いたモデル（resolve_models で 1 フレームに 1 回だけ引く。空・解放済みなら nullptr）。
+		/// 描く流れ（本体・線・速度・影の段）は、段ごとにハンドルを引き直さずにこれを使う。次のフレームへは持ち越さない
+		mutable const graphics::Model*				model = nullptr;
 	};
 
 	using RenderTargetList = std::vector< RenderTarget >;
@@ -55,6 +59,8 @@ private:
 	/// 描く対象のうちアニメーションを持つもの（Entity の番号の順。描く対象と同じ決まりで足し・外す）
 	core::ecs::EntityIdOrderedList< AnimationTarget >	animation_list_;
 
+	mutable bool	models_resolved_ = false;	///< このフレームで描く対象のモデルを引いたか（フレームの終わりに forget_resolved_models で戻す）
+
 protected:
 	void on_remove_entity( core::ecs::EntityId id, ComponentTuple& ) override;
 
@@ -73,8 +79,22 @@ public:
 	/// アニメーションを 1 フレーム進める（ActiveObjectManager::update が、物体の update の後に呼ぶ）
 	void update_animations();
 
-	/// 描く前に定数バッファを書く（GraphicsManager::update_constant_buffers が呼ぶ）
+	/// 描く前に定数バッファを書く（GraphicsManager::update_constant_buffers が呼ぶ。描く対象のモデルもここで引く）
 	void update_render_data();
+
+	/**
+	 * 描く対象のモデルを引いて RenderTarget::model に入れる（このフレームでまだ引いていなければ。1 フレームに 1 回）
+	 *
+	 * 解放と差し替えはフレームの終わりにまとめているので、引いたポインタはこのフレームの間は使える（doc/ハンドルの設計.md）
+	 */
+	void resolve_models() const;
+
+	/// このフレームで引いたモデルを忘れる（フレームの終わり・シーンの切り替えで GraphicsManager::flush_releases が呼ぶ）。
+	/// Debug ビルドでは RenderTarget::model も nullptr に戻し、次のフレームへの持ち越しを見つけやすくする
+	void forget_resolved_models();
+
+	/// このフレームで描く対象のモデルを引いたか
+	bool are_models_resolved() const { return models_resolved_; }
 
 	/**
 	 * 描く対象の一覧（Entity の番号の順 = 作った順）

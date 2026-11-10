@@ -102,9 +102,9 @@ void GamePlayScene::render_to_display() const
  */
 void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 {
-	get_graphics_manager()->render_active_objects( get_active_object_manager() );
+	get_graphics_manager()->render_objects();
 
-	get_graphics_manager()->render_debug_axis( get_active_object_manager() );
+	get_graphics_manager()->render_debug_axis();
 	get_graphics_manager()->render_debug_bullet();
 
 	get_graphics_manager()->set_input_layout( "main" );

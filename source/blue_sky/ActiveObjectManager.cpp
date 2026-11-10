@@ -24,15 +24,18 @@
 #include <blue_sky/GameMain.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
-#include <core/animation/AnimationPlayer.h>
+#include <blue_sky/ecs/system/ObjectRenderDataSystem.h>
+
+#include <core/ecs/EntityManager.h>
 
 namespace blue_sky
 {
 
-ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, const GameObjectContext* object_context )
+ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, const GameObjectContext* object_context, core::ecs::EntityManager* entity_manager )
 	: physics_( physics )
 	, graphics_manager_( graphics_manager )
 	, object_context_( object_context )
+	, entity_manager_( entity_manager )
 {
 	object_creator_map_[ "girl"        ] = [] () -> ActiveObject* { return new Girl();         };
 	object_creator_map_[ "robot"       ] = [this] () -> ActiveObject* { return new Robot( graphics_manager_ ); };	// テクスチャを得る GraphicsManager を渡す
@@ -85,7 +88,12 @@ void ActiveObjectManager::restart()
 void ActiveObjectManager::add_active_object( ActiveObject* active_object )
 {
 	active_object->set_context( object_context_ );
-	active_object->setup_render_data( graphics_manager_ );	// 定数バッファを作る（以前は ActiveObject が自分で作り、中で Direct3D11 の get_instance() を使っていた）
+
+	// 描画のデータを更新する System（シーンの切り替えで EntityManager が片付けるので、無ければ足す。あれば何もしない）
+	entity_manager_->add_system< ecs::ObjectRenderDataSystem >( 0, graphics_manager_ );
+
+	// Entity を作り、描画の部品と定数バッファを用意する（以前は ActiveObject が定数バッファ・Model* を自分で持っていた）
+	active_object->attach_entity( entity_manager_, graphics_manager_ );
 
 	active_object_list_.insert( active_object );
 }
@@ -259,11 +267,12 @@ void ActiveObjectManager::update()
 		{
 			(*i)->update();
 		}
+	}
 
-		if ( ( *i )->get_animation_player() )
-		{
-			( *i )->get_animation_player()->update();
-		}
+	// アニメーションを進める（以前は物体ごとに update の直後に進めていた。物体のアニメーションは互いに独立なので、まとめて後で進めても同じ）
+	if ( auto* system = entity_manager_->get_system< ecs::ObjectRenderDataSystem >() )
+	{
+		system->update_animations();
 	}
 
 	const float_t delta_time = object_context_ && object_context_->delta_time ? object_context_->delta_time() : 0.f;
@@ -302,6 +311,14 @@ void ActiveObjectManager::update()
 	for ( auto i = target_direction_object_map_.begin(); i != target_direction_object_map_.end(); ++i )
 	{
 		i->first->chase_direction_to( std::get< 0 >( i->second )->get_location(), std::get< 1 >( i->second ) );
+	}
+}
+
+void ActiveObjectManager::sync_render_components() const
+{
+	for ( const auto* active_object : active_object_list_ )
+	{
+		active_object->sync_render_component();
 	}
 }
 

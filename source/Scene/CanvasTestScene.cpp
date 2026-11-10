@@ -293,8 +293,8 @@ void CanvasTestScene::render()
 		points_->render();
 	} );
 
-	// 物体は登録順に描く。半透明の物体を正しく重ねたいときは、render_active_objects で不透明 → 半透明（奥から）の順に並べ替える
-	get_graphics_manager()->render_active_objects( get_active_object_manager() );
+	// 物体は作った順（Entity の番号の順）に描く。半透明の物体を正しく重ねたいときは、render_objects で不透明 → 半透明（奥から）の順に並べ替える
+	get_graphics_manager()->render_objects();
 
 	{
 

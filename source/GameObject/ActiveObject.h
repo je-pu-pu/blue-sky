@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include <blue_sky/ConstantBuffers.h>
 #include <common/exception.h>
+#include <core/ecs/type.h>
 #include <memory>
 
 namespace core
@@ -15,6 +16,8 @@ namespace core
 		class Texture;
 		class ConstantBuffer;
 	}
+
+	namespace ecs { class EntityManager; }
 }
 
 namespace blue_sky
@@ -23,6 +26,12 @@ namespace blue_sky
 	{
 		class Model;
 		class GraphicsManager;
+	}
+
+	namespace ecs
+	{
+		struct ObjectRenderComponent;
+		struct AnimationComponent;
 	}
 
 /**
@@ -45,11 +54,16 @@ private:
 	Vector				start_rotation_;	///< スタート時の回転 ( Degree )
 	float_t				start_direction_degree_;	///< スタート時の向き ( Y Axis )
 
-	Model*				model_;				///< Model (GraphicsManager が所有)
-	graphics::GraphicsManager*						graphics_manager_ = nullptr;	///< 定数バッファを作る先（登録する ActiveObjectManager が渡す。以前は定数バッファが Direct3D11 の get_instance() を使っていた）
-	std::unique_ptr< const core::graphics::ConstantBuffer >	object_constant_buffer_;	///< 定数バッファ（setup_render_data() で作る）
-	std::unique_ptr< AnimationPlayer >				animation_player_;			///< アニメーション再生（ボーン行列の計算）
-	std::unique_ptr< const core::graphics::ConstantBuffer >	bone_constant_buffer_;	///< ボーン行列の定数バッファ（以前は AnimationPlayer が持っていた）
+	/**
+	 * 描画のデータ（モデル・定数バッファ・前フレームの world）とアニメーションは、Entity の部品が持つ
+	 * （ObjectRenderComponent・AnimationComponent。以前はここに Model* の生ポインタ・定数バッファ・AnimationPlayer があった）。
+	 * Entity は ActiveObjectManager に加えるとき（attach_entity）に作り、壊すときに消す
+	 */
+	core::ecs::EntityManager*	entity_manager_ = nullptr;		///< Entity を作った先（attach_entity で受け取る）
+	core::ecs::EntityId			entity_id_ = 0;					///< 自分の Entity（has_entity_ が true のときだけ有効）
+	bool						has_entity_ = false;
+	Model*						pending_model_ = nullptr;		///< Entity を作る前に set_model されたモデル（attach_entity で部品へ移す）
+	graphics::GraphicsManager*	graphics_manager_ = nullptr;	///< 定数バッファを作る先・モデルをハンドルから引く先（attach_entity で受け取る）
 
 	bool				is_dead_;			///< 死亡フラグ
 	float_t				flicker_scale_;		///< ゆらぎの大きさ
@@ -59,11 +73,11 @@ private:
 	bool				is_mesh_visible_;	///< メッシュを描画するかどうか
 	bool				is_line_visible_;	///< ラインを描画するか
 
-	mutable Matrix		prev_world_;		///< 前フレームの world 行列 ( モーションベクトル用 )
-	mutable bool		prev_world_valid_ = false;	///< prev_world_ が有効か ( 初回は cur=prev で速度0 )
-
 protected:
 	void setup_animation_player();
+
+	ecs::ObjectRenderComponent* get_render_component() const;
+	ecs::AnimationComponent* get_animation_component() const;
 
 	virtual void limit_velocity();
 
@@ -80,9 +94,9 @@ public:
 
 	virtual void update() override { }
 
-	virtual void set_model( Model* m ) { model_ = m; setup_animation_player(); }
-	Model* get_model() { return model_; }
-	const Model* get_model() const { return model_; }
+	virtual void set_model( Model* m );
+	Model* get_model();
+	const Model* get_model() const;
 
 	/**
 	 * モデルとシェーダーを、このオブジェクトだけのものにする（メッシュ・線・アニメーションは共有のまま）
@@ -100,8 +114,8 @@ public:
 	virtual void set_flicker_scale( float_t s ) { flicker_scale_ = s; }
 	virtual float_t get_flicker_scale() const { return flicker_scale_; }
 
-	AnimationPlayer* get_animation_player() { return animation_player_.get(); }
-	const AnimationPlayer* get_animation_player() const { return animation_player_.get(); }
+	AnimationPlayer* get_animation_player();
+	const AnimationPlayer* get_animation_player() const;
 
 	void set_start_location( float_t, float_t, float_t );
 	void set_start_rotation( float_t, float_t, float_t );
@@ -131,18 +145,28 @@ public:
 	void set_mesh_visible( bool v ) { is_mesh_visible_ = v; }
 	void set_line_visible( bool v ) { is_line_visible_ = v; }
 
-	/// 描画の準備をする（定数バッファを作る。作り直しはしない）。ActiveObjectManager に登録するときに呼ばれる
-	void setup_render_data( graphics::GraphicsManager* graphics_manager );
+	/**
+	 * 自分の Entity を作り、描画の部品（ObjectRenderComponent・TransformComponent）と定数バッファを用意する。
+	 * ActiveObjectManager に加えるときに呼ばれる。既に Entity があれば何もしない（作り直さない）
+	 *
+	 * @param entity_manager Entity を作る先
+	 * @param graphics_manager 定数バッファを作る先・モデルを引く先
+	 */
+	void attach_entity( core::ecs::EntityManager* entity_manager, graphics::GraphicsManager* graphics_manager );
 
-	const core::graphics::ConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_.get(); }
-	const core::graphics::ConstantBuffer* get_bone_constant_buffer() const { return bone_constant_buffer_.get(); }
+	/// 自分の Entity を消す（部品も消える）。デストラクタからも呼ばれる。Entity が無い・もう消えているなら何もしない
+	void detach_entity();
 
-	virtual void update_render_data() const;
-	[[deprecated]] virtual void bind_render_data() const;
+	bool has_entity() const { return has_entity_; }
+	core::ecs::EntityId get_entity_id() const { return entity_id_; }
 
-	virtual void render_mesh() const;
-	virtual void render_mesh( const Shader* ) const;
-	virtual void render_line() const;
+	/**
+	 * 位置と描くかどうかを部品へ写す（描く前に毎フレーム。ActiveObjectManager::sync_render_components が呼ぶ）
+	 *
+	 * 橋渡しの間は位置（GameObject の Transform）と描くかどうか（派生が is_mesh_visible などを上書きする）の正はこのクラスにある。
+	 * 段階 3 で位置の正を TransformComponent に移したら、位置は写さなくなる
+	 */
+	void sync_render_component() const;
 
 	void play_animation( const char_t* name, bool force, bool loop );
 

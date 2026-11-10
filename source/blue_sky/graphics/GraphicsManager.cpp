@@ -1,7 +1,8 @@
 #include "GraphicsManager.h"
 
 #include <blue_sky/GameMain.h>
-#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ecs/system/ObjectRenderDataSystem.h>
+#include <blue_sky/ecs/component/AnimationComponent.h>
 
 #include <blue_sky/graphics/Fader.h>
 #include <blue_sky/graphics/Rectangle.h>
@@ -23,6 +24,7 @@
 
 #include <core/ecs/component/TransformComponent.h>
 #include <core/ecs/component/CameraComponent.h>
+#include <core/ecs/EntityManager.h>
 #include <core/TimeManager.h>
 
 #include <common/timer.h>
@@ -62,9 +64,72 @@ void GraphicsManager::unset_shadow_map()
 	shadow_map_.reset();
 }
 
-const ActiveObjectManager* GraphicsManager::get_game_object_manager() const
+ecs::ObjectRenderDataSystem* GraphicsManager::get_object_render_data_system() const
 {
-	return active_object_manager_;
+	return entity_manager_ ? entity_manager_->get_system< ecs::ObjectRenderDataSystem >() : nullptr;
+}
+
+/**
+ * 物体の定数バッファ（world など）をシェーダーに設定する
+ */
+void GraphicsManager::bind_object_render_data( const ecs::ObjectRenderComponent& render ) const
+{
+	render.object_constant_buffer->bind_to_vs();
+	render.object_constant_buffer->bind_to_ds();
+	render.object_constant_buffer->bind_to_ps();
+}
+
+/**
+ * 物体のメッシュを描く（描かない物体・メッシュの無いモデルは何もしない）
+ */
+void GraphicsManager::render_object_mesh( const ecs::ObjectRenderComponent& render, const Model* model ) const
+{
+	if ( ! render.is_mesh_visible || ! model->get_mesh() )
+	{
+		return;
+	}
+
+	bind_object_render_data( render );
+
+	if ( render.bone_constant_buffer )
+	{
+		render.bone_constant_buffer->bind_to_vs();
+	}
+
+	model->render();
+}
+
+/**
+ * 物体のメッシュを、指定したシェーダーで描く（シャドウマップ用）
+ */
+void GraphicsManager::render_object_mesh( const ecs::ObjectRenderComponent& render, const Model* model, const Shader* shader ) const
+{
+	if ( ! render.is_mesh_visible || ! model->get_mesh() )
+	{
+		return;
+	}
+
+	if ( render.bone_constant_buffer )
+	{
+		render.bone_constant_buffer->bind_to_vs();
+	}
+
+	shader->render_model( model );
+}
+
+/**
+ * 物体の線を描く（描かない物体・線の無いモデルは何もしない）
+ */
+void GraphicsManager::render_object_line( const ecs::ObjectRenderComponent& render, const Model* model ) const
+{
+	if ( ! render.is_line_visible || ! model->get_line() )
+	{
+		return;
+	}
+
+	bind_object_render_data( render );
+
+	model->get_line()->render();
 }
 
 /**
@@ -465,19 +530,7 @@ void GraphicsManager::refresh_all_shaders()
 	// デフォルトのシェーダーを作成する
 	setup_default_shaders();
 
-	// 全ての GameObject のシェーダーを作成する
-	for ( auto* o: get_game_object_manager()->active_object_list() )
-	{
-		if ( ! o->get_model() )
-		{
-			continue;
-		}
-
-		for ( int n = 0; n < o->get_model()->get_shader_count(); n++ )
-		{
-			o->get_model()->set_shader_at( n, o->get_model()->create_shader( this ) );
-		}
-	}
+	// （以前はここで全ての GameObject のシェーダーを作り直していた）
 #endif
 }
 
@@ -537,14 +590,10 @@ void GraphicsManager::update_constant_buffers() const
 	// 描画のアクセントなどは毎フレーム変わりうるので毎回更新する（1 フレームに 1 回の小さな定数バッファ）
 	get_frame_drawing_render_data()->update();
 
-	for ( const auto& game_object : get_game_object_manager()->active_object_list() )
+	// ゲームの物体の定数（world・前フレームの world・線の色・ボーン行列）。以前は ActiveObject を回して ActiveObject::update_render_data を呼んでいた
+	if ( auto* system = get_object_render_data_system() )
 	{
-		if ( ! game_object->get_model() )
-		{
-			continue;
-		}
-
-		game_object->update_render_data();
+		system->update_render_data();
 	}
 }
 
@@ -613,23 +662,32 @@ void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool
 
 		get_frame_drawing_render_data()->bind_to_gs(); // for line
 
-		for ( const auto* active_object : get_game_object_manager()->active_object_list() )
+		const auto* system = get_object_render_data_system();
+
+		if ( ! system )
 		{
-			if ( ! active_object->get_model() )
+			continue;
+		}
+
+		for ( const auto& target : system->get_render_targets() )
+		{
+			const Model* model = resolve_model( target.render->model );
+
+			if ( ! model )
 			{
 				continue;
 			}
 
-			if ( active_object->get_model()->is_skin_mesh() == is_skin_mesh )
+			if ( model->is_skin_mesh() == is_skin_mesh )
 			{
-				set_current_object_constant_buffer( active_object->get_object_constant_buffer() );
-				set_current_skinning_constant_buffer( active_object->get_bone_constant_buffer() );
+				set_current_object_constant_buffer( target.render->object_constant_buffer.get() );
+				set_current_skinning_constant_buffer( target.render->bone_constant_buffer.get() );
 
-				active_object->render_mesh( shader );
+				render_object_mesh( * target.render, model, shader );
 
-				if ( active_object->get_model()->get_line() && active_object->get_model()->get_line()->is_cast_shadow() )
+				if ( model->get_line() && model->get_line()->is_cast_shadow() )
 				{
-					active_object->render_line();
+					render_object_line( * target.render, model );
 				}
 			}
 		}
@@ -637,45 +695,55 @@ void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool
 }
 
 /**
- * 全ての ActiveObject を描画する
+ * 全てのゲームの物体を描画する（描く対象は ecs::ObjectRenderDataSystem の一覧。以前は ActiveObjectManager の一覧）
  *
  */
-void GraphicsManager::render_active_objects( const ActiveObjectManager* active_object_manager ) const
+void GraphicsManager::render_objects() const
 {
 	if ( shadow_map_ )
 	{
 		shadow_map_->ready_to_render_scene();
 	}
 
-	for ( const auto& active_object : active_object_manager->active_object_list() )
+	const auto* system = get_object_render_data_system();
+
+	if ( system )
 	{
-		if ( ! active_object->get_model() )
+		for ( const auto& target : system->get_render_targets() )
 		{
-			continue;
+			const Model* model = resolve_model( target.render->model );
+
+			if ( ! model )
+			{
+				continue;
+			}
+
+			set_current_object_constant_buffer( target.render->object_constant_buffer.get() );
+			set_current_skinning_constant_buffer( target.render->bone_constant_buffer.get() );
+
+			render_object_mesh( * target.render, model );
 		}
-
-		set_current_object_constant_buffer( active_object->get_object_constant_buffer() );
-		set_current_skinning_constant_buffer( active_object->get_bone_constant_buffer() );
-
-		active_object->render_mesh();
 	}
 
 	set_input_layout( "pos_color" );
 
-	render_technique( "|drawing_line", [ this, active_object_manager ]
+	render_technique( "|drawing_line", [ this, system ]
 	{
 		get_game_render_data()->bind_to_all();
 		get_frame_render_data()->bind_to_all();
 		get_frame_drawing_render_data()->bind_to_all();
 
-		for ( const auto* active_object : active_object_manager->active_object_list() )
+		if ( ! system )
 		{
-			if ( ! active_object->get_model() )
-			{
-				continue;
-			}
+			return;
+		}
 
-			active_object->render_line();
+		for ( const auto& target : system->get_render_targets() )
+		{
+			if ( const Model* model = resolve_model( target.render->model ) )
+			{
+				render_object_line( * target.render, model );
+			}
 		}
 	} );
 }
@@ -686,7 +754,7 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
  * 呼び出し側で速度用レンダーターゲットをバインド・クリアしておくこと。
  * シーン深度を再利用するため、メインパス ( render_active_objects ) の直後に呼ぶこと。
  */
-void GraphicsManager::render_active_objects_velocity( const ActiveObjectManager* active_object_manager ) const
+void GraphicsManager::render_objects_velocity() const
 {
 	auto* velocity_shader = const_cast< GraphicsManager* >( this )->get_shader< shader::VelocityShader >( "velocity" );
 
@@ -697,17 +765,26 @@ void GraphicsManager::render_active_objects_velocity( const ActiveObjectManager*
 
 	get_frame_render_data()->bind_to_all();
 
-	for ( const auto& active_object : active_object_manager->active_object_list() )
+	const auto* system = get_object_render_data_system();
+
+	if ( ! system )
 	{
-		if ( ! active_object->get_model() )
+		return;
+	}
+
+	for ( const auto& target : system->get_render_targets() )
+	{
+		const Model* model = resolve_model( target.render->model );
+
+		if ( ! model )
 		{
 			continue;
 		}
 
-		set_current_object_constant_buffer( active_object->get_object_constant_buffer() );
-		set_current_skinning_constant_buffer( active_object->get_bone_constant_buffer() );
+		set_current_object_constant_buffer( target.render->object_constant_buffer.get() );
+		set_current_skinning_constant_buffer( target.render->bone_constant_buffer.get() );
 
-		velocity_shader->render_model( active_object->get_model() );
+		velocity_shader->render_model( model );
 	}
 }
 
@@ -829,59 +906,65 @@ void GraphicsManager::render_fader() const
  * デバッグ用の軸を表示する
  *
  */
-void GraphicsManager::render_debug_axis( const ActiveObjectManager* active_object_manager ) const
+void GraphicsManager::render_debug_axis() const
 {
 	if ( ! is_debug_axis_enabled_ )
 	{
 		return;
 	}
 
+	const auto* system = get_object_render_data_system();
+
+	if ( ! system )
+	{
+		return;
+	}
+
 	set_input_layout( "pos_color" );
 
-	render_technique( "|simple_line", [ this, active_object_manager ]
+	render_technique( "|simple_line", [ this, system ]
 	{
 		get_frame_render_data()->bind_to_all();
 
-		for ( const auto* active_object : active_object_manager->active_object_list() )
+		for ( const auto& target : system->get_render_targets() )
 		{
-			active_object->bind_render_data();
+			if ( ! target.render->object_constant_buffer )
+			{
+				continue;
+			}
+
+			bind_object_render_data( * target.render );
 
 			render_debug_axis_model();
 
-			render_debug_axis_for_bones( active_object );
+			// ボーンの軸は描いている物体だけ（以前は死んでいない物体。死ぬと描かなくなるので、ほぼ同じ）
+			const auto* animation = system->get_animation( target.id );
+
+			if ( animation && animation->player && ( target.render->is_mesh_visible || target.render->is_line_visible ) )
+			{
+				render_debug_axis_for_bones( target.transform->transform, * animation->player, resolve_model( target.render->model ) );
+			}
 		}
 	} );
 }
 
 /**
- * ActiveObject の全ボーンに対してデバッグ用の軸を表示する
+ * 物体の全ボーンに対してデバッグ用の軸を表示する
  *
  */
-void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_object ) const
+void GraphicsManager::render_debug_axis_for_bones( const core::Transform& t, const core::AnimationPlayer& animation_player, const Model* model ) const
 {
-	if ( active_object->is_dead() )
-	{
-		return;
-	}
-
-	if ( ! active_object->get_animation_player() )
-	{
-		return;
-	}
-	
 	get_shared_object_render_data()->bind_to_vs();
 	get_shared_object_render_data()->bind_to_ps();
 
 	core::BoneConstantBufferData bone_constant_buffer_data;
-	active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix::identity() );
+	animation_player.calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix::identity() );
 
-	for ( uint_t n = 0; n < active_object->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )
+	for ( uint_t n = 0; n < animation_player.get_skinning_animation_set()->get_bone_count(); ++n )
 	{
-		const Matrix& bone_offset_matrix = active_object->get_animation_player()->get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( n );
+		const Matrix& bone_offset_matrix = animation_player.get_skinning_animation_set()->get_bone_offset_matrix_by_bone_index( n );
 		const Matrix& bone_matrix = bone_offset_matrix * bone_constant_buffer_data.bone_matrix[ n ];
 		// const Matrix& bone_matrix = bone_offset_matrix;
-
-		const core::Transform& t = active_object->get_transform();
 
 		ObjectConstantBufferData shader_data;
 
@@ -890,9 +973,9 @@ void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_ob
 		shader_data.world *= Matrix().set_rotation_quaternion( t.get_rotation() );
 		shader_data.world *= Matrix().set_translation( t.get_position().x(), t.get_position().y(), t.get_position().z() );
 
-		if ( active_object->get_model()->get_line() )
+		if ( model && model->get_line() )
 		{
-			shader_data.color = active_object->get_model()->get_line()->get_color();
+			shader_data.color = model->get_line()->get_color();
 		}
 
 		get_shared_object_render_data()->update( & shader_data );

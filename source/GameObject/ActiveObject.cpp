@@ -7,6 +7,12 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
+#include <blue_sky/ecs/component/ObjectRenderComponent.h>
+#include <blue_sky/ecs/component/AnimationComponent.h>
+#include <blue_sky/DebugLog.h>
+
+#include <core/ecs/EntityManager.h>
+#include <core/ecs/component/TransformComponent.h>
 
 #include <core/math/Quaternion.h>
 #include <core/sound/Sound.h>
@@ -29,8 +35,6 @@ ActiveObject::ActiveObject()
 	, start_rotation_( Vector::Zero )
 	, start_direction_degree_( 0 )
 
-	, model_( nullptr )
-	, animation_player_( nullptr )
 	, is_dead_( false )
 	, flicker_scale_( 1.f )
 
@@ -51,9 +55,7 @@ ActiveObject::ActiveObject( const ActiveObject& o )
 	, start_rotation_( o.start_rotation_ )
 	, start_direction_degree_( o.start_direction_degree_ )
 
-	, model_( o.model_ )
-	, graphics_manager_( o.graphics_manager_ )
-	, animation_player_( nullptr )
+	, pending_model_( const_cast< Model* >( o.get_model() ) )		// Entity は作らない（ActiveObjectManager::clone_object が加えるときに作る）。モデルは共有する
 	, is_dead_( o.is_dead_ )
 	, flicker_scale_( o.flicker_scale_ )
 
@@ -62,67 +64,208 @@ ActiveObject::ActiveObject( const ActiveObject& o )
 	, is_mesh_visible_( o.is_mesh_visible_ )
 	, is_line_visible_( o.is_line_visible_ )
 {
-	if ( graphics_manager_ )
-	{
-		setup_render_data( graphics_manager_ );
-	}
+
 }
 
-ActiveObject::~ActiveObject() = default;
+ActiveObject::~ActiveObject()
+{
+	detach_entity();
+}
+
+/**
+ * 描画の部品（無ければ nullptr。Entity を作る前・EntityManager が片付けた後）
+ *
+ * 部品のポインタは持ち続けない（EntityManager がシーンの切り替えで片付けると無効になる）。使うたびに Entity から引く
+ */
+ecs::ObjectRenderComponent* ActiveObject::get_render_component() const
+{
+	if ( ! has_entity_ )
+	{
+		return nullptr;
+	}
+
+	core::ecs::Entity* entity = entity_manager_->find( entity_id_ );
+
+	return entity ? entity->get_component< ecs::ObjectRenderComponent >() : nullptr;
+}
+
+/// アニメーションの部品（無ければ nullptr。アニメーションの無いモデル・Entity を作る前）
+ecs::AnimationComponent* ActiveObject::get_animation_component() const
+{
+	if ( ! has_entity_ )
+	{
+		return nullptr;
+	}
+
+	core::ecs::Entity* entity = entity_manager_->find( entity_id_ );
+
+	return entity ? entity->get_component< ecs::AnimationComponent >() : nullptr;
+}
+
+void ActiveObject::set_model( Model* m )
+{
+	auto* render = get_render_component();
+
+	if ( ! render )
+	{
+		// Entity を作る前（ActiveObjectManager に加える前）は預かっておき、attach_entity で部品へ移す
+		pending_model_ = m;
+		return;
+	}
+
+	render->model = graphics_manager_->get_model_handle( m );
+
+	if ( m && render->model.is_null() )
+	{
+		// GraphicsManager が管理していないモデルはハンドルにできず、描けない
+		debug_log( "[Object] GraphicsManager が管理していないモデルは使えません（描きません）" );
+	}
+
+	setup_animation_player();
+}
+
+ActiveObject::Model* ActiveObject::get_model()
+{
+	return const_cast< Model* >( static_cast< const ActiveObject* >( this )->get_model() );
+}
+
+const ActiveObject::Model* ActiveObject::get_model() const
+{
+	if ( const auto* render = get_render_component() )
+	{
+		return graphics_manager_->resolve_model( render->model );	// 解放されたモデルなら nullptr
+	}
+
+	return pending_model_;
+}
+
+ActiveObject::AnimationPlayer* ActiveObject::get_animation_player()
+{
+	auto* animation = get_animation_component();
+	return animation ? animation->player.get() : nullptr;
+}
+
+const ActiveObject::AnimationPlayer* ActiveObject::get_animation_player() const
+{
+	const auto* animation = get_animation_component();
+	return animation ? animation->player.get() : nullptr;
+}
 
 /**
  * アニメーション再生をセットアップする
  *
+ * モデルにアニメーションがあれば、アニメーションの部品とボーン行列の定数バッファを作る。既にあれば作り直さない（以前と同じ）
  */
 void ActiveObject::setup_animation_player()
 {
-	if ( animation_player_ )
-	{
-		return;
-	}
+	// 部品がまだ無い（ActiveObjectManager に加える前）ときは、加えるときの attach_entity() で作る
+	auto* render = get_render_component();
 
-	// 定数バッファを作る先がまだ無い（ActiveObjectManager に登録する前）ときは、登録時の setup_render_data() で作る
-	if ( ! graphics_manager_ )
+	if ( ! render || get_animation_player() )
 	{
 		return;
 	}
 
 	if ( get_model() && get_model()->get_skinning_animation_set() )
 	{
-		animation_player_ = std::make_unique< AnimationPlayer >( get_model()->get_skinning_animation_set() );
-		bone_constant_buffer_ = graphics_manager_->create_constant_buffer( sizeof( core::BoneConstantBufferData ), core::BoneConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC );	// 毎フレーム書き換える
+		core::ecs::Entity* entity = entity_manager_->find( entity_id_ );
+
+		auto* animation = entity->get_component< ecs::AnimationComponent >();
+
+		if ( ! animation )
+		{
+			animation = entity->add_component< ecs::AnimationComponent >();
+		}
+
+		animation->player = std::make_unique< AnimationPlayer >( get_model()->get_skinning_animation_set() );
+		render->bone_constant_buffer = graphics_manager_->create_constant_buffer( sizeof( core::BoneConstantBufferData ), core::BoneConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC );	// 毎フレーム書き換える
+	}
+}
+
+void ActiveObject::attach_entity( core::ecs::EntityManager* entity_manager, graphics::GraphicsManager* graphics_manager )
+{
+	graphics_manager_ = graphics_manager;
+
+	if ( has_entity_ && entity_manager_->is_alive( entity_id_ ) )
+	{
+		return;
+	}
+
+	entity_manager_ = entity_manager;
+
+	core::ecs::Entity* entity = entity_manager_->create_entity();
+	entity_id_ = entity->get_id();
+	has_entity_ = true;
+
+	entity->add_component< core::ecs::TransformComponent >()->transform = get_transform();
+
+	auto* render = entity->add_component< ecs::ObjectRenderComponent >();
+
+	// 毎フレーム書き換える（world・前フレームの world）ので DYNAMIC にする
+	render->object_constant_buffer = graphics_manager_->create_constant_buffer( sizeof( ObjectConstantBufferData ), ObjectConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC );
+
+	Model* model = pending_model_;
+	pending_model_ = nullptr;
+
+	ActiveObject::set_model( model );		// ハンドルにして部品へ移し、アニメーションを用意する（派生の set_model は預かったときに済んでいるので、もう一度は呼ばない）
+	sync_render_component();
+}
+
+void ActiveObject::detach_entity()
+{
+	if ( ! has_entity_ )
+	{
+		return;
+	}
+
+	// 部品が消える前に、モデルを預かり直す（clone 元・もう一度加えるときのため）
+	pending_model_ = get_model();
+
+	entity_manager_->destroy_entity( entity_id_ );	// もう消えている（EntityManager が片付けた）なら何もしない
+	has_entity_ = false;
+}
+
+void ActiveObject::sync_render_component() const
+{
+	if ( ! has_entity_ )
+	{
+		return;
+	}
+
+	core::ecs::Entity* entity = entity_manager_->find( entity_id_ );
+
+	if ( ! entity )
+	{
+		return;
+	}
+
+	if ( auto* transform = entity->get_component< core::ecs::TransformComponent >() )
+	{
+		transform->transform = get_transform();
+	}
+
+	if ( auto* render = entity->get_component< ecs::ObjectRenderComponent >() )
+	{
+		render->is_visible = is_visible();
+		render->is_mesh_visible = is_mesh_visible();
+		render->is_line_visible = is_line_visible();
 	}
 }
 
 /**
- * 描画の準備をする
+ * モデルとシェーダーを、このオブジェクトだけのものにする
  *
- * 定数バッファ（world とボーン行列）を graphics_manager に作ってもらう。既に作ってあれば作り直さない
- *
- * @param graphics_manager 定数バッファを作る先
+ * 複製したモデルも GraphicsManager が持つ（このオブジェクトは持たない）。部品のハンドルを複製のハンドルに差し替える
+ * （replace_model で中身を替えると、同じモデルを共有するほかの物体まで変わってしまう）
  */
-void ActiveObject::setup_render_data( graphics::GraphicsManager* graphics_manager )
-{
-	graphics_manager_ = graphics_manager;
-
-	if ( ! object_constant_buffer_ )
-	{
-		// 毎フレーム書き換える（world・前フレームの world）ので DYNAMIC にする
-		object_constant_buffer_ = graphics_manager_->create_constant_buffer( sizeof( ObjectConstantBufferData ), ObjectConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC );
-	}
-
-	setup_animation_player();
-}
-
 bool ActiveObject::make_model_unique()
 {
-	if ( ! graphics_manager_ || ! model_ )
+	if ( ! get_render_component() || ! get_model() )
 	{
 		return false;
 	}
 
-	// 複製したモデルも GraphicsManager が持つ（このオブジェクトは持たない。model_ のほかの使い方と同じ）
-	set_model( graphics_manager_->clone_model_with_shaders( model_ ) );
+	set_model( graphics_manager_->clone_model_with_shaders( get_model() ) );
 
 	return true;
 }
@@ -273,128 +416,6 @@ void ActiveObject::kill()
 
 	is_mesh_visible_ = false;
 	is_line_visible_ = false;
-}
-
-/**
- * 描画用の定数バッファを更新する
- *
- */
-void ActiveObject::update_render_data() const
-{
-	if ( ! is_visible() || ! get_object_constant_buffer() )
-	{
-		return;
-	}
-
-	const Transform& t = get_transform();
-
-	ObjectConstantBufferData shader_data;
-
-	shader_data.world.set_rotation_quaternion( t.get_rotation() );
-	shader_data.world *= Matrix().set_translation( t.get_position().x(), t.get_position().y(), t.get_position().z() );
-
-	// 前フレームの world ( 初回は cur=prev で速度0 )
-	shader_data.prev_world = prev_world_valid_ ? prev_world_ : shader_data.world;
-	prev_world_ = shader_data.world;
-	prev_world_valid_ = true;
-
-	if ( get_model() && get_model()->get_line() )
-	{
-		shader_data.color = get_model()->get_line()->get_color();
-	}
-
-	get_object_constant_buffer()->update( & shader_data );
-
-	if ( get_animation_player() && bone_constant_buffer_ )
-	{
-		core::BoneConstantBufferData bone_data;
-		get_animation_player()->calculate_bone_matrices( bone_data );
-		bone_constant_buffer_->update( & bone_data );
-	}
-}
-
-/**
- * 描画用の定数バッファをシェーダーに設定する
- *
- */
-void ActiveObject::bind_render_data() const
-{
-	get_object_constant_buffer()->bind_to_vs();
-	get_object_constant_buffer()->bind_to_ds();
-	// get_object_constant_buffer()->bind_to_gs();
-	get_object_constant_buffer()->bind_to_ps(); // 必要？
-}
-
-/**
- * メッシュを描画する
- *
- */
-void ActiveObject::render_mesh() const
-{
-	if ( ! is_mesh_visible() )
-	{
-		return;
-	}
-
-	if ( ! get_model() || ! get_model()->get_mesh() )
-	{
-		return;
-	}
-
-	bind_render_data();
-	
-	if ( bone_constant_buffer_ )
-	{
-		bone_constant_buffer_->bind_to_vs();
-	}
-
-	get_model()->render();
-}
-
-/**
- * 指定したシェーダーでメッシュを描画する
- *
- */
-void ActiveObject::render_mesh( const Shader* shader ) const
-{
-	if ( ! is_mesh_visible() )
-	{
-		return;
-	}
-
-	if ( ! get_model() || ! get_model()->get_mesh() )
-	{
-		return;
-	}
-
-	if ( bone_constant_buffer_ )
-	{
-		bone_constant_buffer_->bind_to_vs();
-	}
-
-	shader->render_model( get_model() );
-}
-
-
-/**
- * 線を描画する
- *
- */
-void ActiveObject::render_line() const
-{
-	if ( ! is_line_visible() )
-	{
-		return;
-	}
-
-	if ( ! get_model() || ! get_model()->get_line() )
-	{
-		return;
-	}
-
-	bind_render_data();
-
-	get_model()->get_line()->render();
 }
 
 void ActiveObject::play_animation( const char_t* name, bool force, bool loop )

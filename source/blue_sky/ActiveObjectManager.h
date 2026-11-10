@@ -12,6 +12,12 @@ namespace blue_sky
 class ActiveObjectPhysics;
 struct GameObjectContext;
 namespace graphics { class GraphicsManager; }
+}
+
+namespace core::ecs { class EntityManager; }
+
+namespace blue_sky
+{
 
 /**
  * 複数の ActiveObject を管理する Manager
@@ -39,9 +45,10 @@ private:
 	ActiveObjectPhysics* physics_;					///< 物理（GameMain が渡す。以前は GameMain のシングルトンから引いていた）
 	graphics::GraphicsManager* graphics_manager_;	///< 描画（同上）
 	const GameObjectContext* object_context_;		///< オブジェクトに渡すもの（物理の世界・音・経過時間。同上）
+	core::ecs::EntityManager* entity_manager_;		///< オブジェクトの Entity（描画の部品）を作る先（同上。描画のデータは ecs::ObjectRenderComponent が持つ）
 
 public:
-	ActiveObjectManager( ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, const GameObjectContext* object_context );
+	ActiveObjectManager( ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, const GameObjectContext* object_context, core::ecs::EntityManager* entity_manager );
 	~ActiveObjectManager();
 
 	void clear();
@@ -62,6 +69,9 @@ public:
 	ActiveObject* clone_object( const ActiveObject* );
 
 	void update();
+
+	/// 全オブジェクトの位置と描くかどうかを描画の部品へ写す（描く前に毎フレーム。GameMain がシーンを描く前に呼ぶ）
+	void sync_render_components() const;
 
 	/// 目標の位置に着いたか（残りが 0.1 未満か、このフレームで進める距離 speed × delta_time 以内）
 	static bool is_target_location_reached( float_t distance, float_t speed, float_t delta_time );

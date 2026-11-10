@@ -23,6 +23,9 @@
 namespace core
 {
 	class TimeManager;
+	class AnimationPlayer;
+
+	namespace ecs { class EntityManager; }
 
 	namespace graphics
 	{
@@ -39,10 +42,10 @@ namespace core
 
 }
 
-namespace blue_sky
+namespace blue_sky::ecs
 {
-	class ActiveObject;
-	class ActiveObjectManager;
+	struct ObjectRenderComponent;
+	class ObjectRenderDataSystem;
 }
 
 namespace blue_sky::graphics
@@ -111,7 +114,7 @@ private:
 	Texture*					null_texture_ = nullptr;
 
 	/// GameMain が渡す依存（以前は GameMain のシングルトンから引いていた。設計上の問題 B28）
-	const ActiveObjectManager*	active_object_manager_ = nullptr;
+	core::ecs::EntityManager*	entity_manager_ = nullptr;		///< ゲームの物体の描画の部品を持つ（以前は ActiveObjectManager を持ち、その一覧を回していた）
 	const core::TimeManager*	time_manager_ = nullptr;		///< シェーダーに渡す経過時間（以前は core::Service から取っていた）
 
 	mutable const ConstantBuffer* current_object_constant_buffer_ = nullptr;
@@ -130,7 +133,14 @@ private:
 	mutable uint_t				draw_count_ = 0;
 
 protected:
-	const ActiveObjectManager* get_game_object_manager() const;
+	/// ゲームの物体の描画のデータを持つ System（物体がまだ無い・EntityManager が無いなら nullptr）
+	ecs::ObjectRenderDataSystem* get_object_render_data_system() const;
+
+	// 物体 1 つを描く（以前の ActiveObject::render_mesh・render_line・bind_render_data と同じ中身）
+	void bind_object_render_data( const ecs::ObjectRenderComponent& ) const;
+	void render_object_mesh( const ecs::ObjectRenderComponent&, const Model* ) const;
+	void render_object_mesh( const ecs::ObjectRenderComponent&, const Model*, const Shader* ) const;
+	void render_object_line( const ecs::ObjectRenderComponent&, const Model* ) const;
 
 	bool_t load_mesh( Model*, const char_t* name );
 	bool_t load_line( Model*, const char_t* nmae );
@@ -158,7 +168,7 @@ protected:
 
 	void render_shadow_map( const BaseShadowMapShader* , bool ) const;
 
-	void render_debug_axis_for_bones( const ActiveObject* ) const;
+	void render_debug_axis_for_bones( const core::Transform&, const core::AnimationPlayer&, const Model* ) const;
 	virtual void render_debug_axis_model() const = 0;
 
 public:
@@ -269,8 +279,8 @@ public:
 	 */
 	void load_named_texture_premultiplied_async( const char_t* name, const char_t* file_name, std::function< void( Texture* ) > on_loaded );
 
-	/// ゲームのオブジェクトの管理を渡す（GameMain が組み立てのときに呼ぶ）
-	void set_active_object_manager( const ActiveObjectManager* m ) { active_object_manager_ = m; }
+	/// ゲームの物体の描画の部品を持つ EntityManager を渡す（GameMain が組み立てのときに呼ぶ）
+	void set_entity_manager( core::ecs::EntityManager* m ) { entity_manager_ = m; }
 
 	/// 時間の管理を渡す（GameMain が組み立てのときに呼ぶ）
 	void set_time_manager( const core::TimeManager* m ) { time_manager_ = m; }
@@ -370,8 +380,9 @@ public:
 	virtual void setup_rendering() override;
 	
 	virtual void render_shadow_map() const;
-	virtual void render_active_objects( const ActiveObjectManager* ) const;
-	virtual void render_active_objects_velocity( const ActiveObjectManager* ) const;	///< モーションベクトルパス ( 案B / 段階0b )
+	/// ゲームの物体を描く（メッシュ → 線。描く対象は ecs::ObjectRenderDataSystem::get_render_targets の順）
+	virtual void render_objects() const;
+	virtual void render_objects_velocity() const;	///< モーションベクトルパス ( 案B / 段階0b )
 
 	virtual void set_post_effect_shader( Shader* ) override;
 	virtual Shader* get_post_effect_shader() const override;
@@ -440,7 +451,7 @@ public:
 
 	void set_debug_axis_enabled( bool e ) { is_debug_axis_enabled_ = e; }
 
-	void render_debug_axis( const ActiveObjectManager* ) const;
+	void render_debug_axis() const;
 
 	/**
 	 * メインカメラの情報を設定する

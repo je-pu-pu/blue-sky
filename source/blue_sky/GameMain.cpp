@@ -231,8 +231,10 @@ GameMain::GameMain( App& app )
 	game_object_context_.scene_elapsed_time = [this] { return scene_ ? scene_->get_total_elapsed_time() : 0.f; };
 	game_object_context_.delta_time = [this] { return time_manager_.get_delta_time(); };
 
-	active_object_manager_.reset( new ActiveObjectManager( active_object_physics_.get(), graphics_manager_.get(), & game_object_context_ ) );
-	graphics_manager_->set_active_object_manager( active_object_manager_.get() );
+	active_object_manager_.reset( new ActiveObjectManager( active_object_physics_.get(), graphics_manager_.get(), & game_object_context_, entity_manager_.get() ) );
+
+	// GraphicsManager はゲームの物体を、EntityManager の描画の部品（ecs::ObjectRenderDataSystem の描く対象）から描く（以前は ActiveObjectManager を直接回していた）
+	graphics_manager_->set_entity_manager( entity_manager_.get() );
 
 	// MainLoop
 	main_loop_.reset( new MainLoop( 60 ) );
@@ -310,6 +312,12 @@ GameMain::~GameMain()
 	// （以前はゲーム本編を開いたまま閉じると、GamePlayScene が壊れた SettingStore から購読を外そうとして毎回落ちていた）
 	overlay_scene_stack_.clear();
 	scene_.reset();
+
+	// ゲームの物体を EntityManager より先に壊す（物体は壊れるときに自分の Entity を消す。entity_manager_ は active_object_manager_ より後に宣言され、先に壊れる）
+	if ( active_object_manager_ )
+	{
+		active_object_manager_->clear();
+	}
 
 	ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
@@ -755,6 +763,9 @@ void GameMain::render()
 	//   前のフレームの深度が残り、深度テストのある描画が消えたり、残像が出たりした）
 	direct_3d_->reset_render_state();
 	get_graphics_manager()->clear_default_view();
+
+	// ゲームの物体の位置と描くかどうかを描画の部品へ写す（物理・カメラの更新の後、描く前。橋渡しの間だけ）
+	active_object_manager_->sync_render_components();
 
 	if ( range.render_base )
 	{

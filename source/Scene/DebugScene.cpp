@@ -502,7 +502,7 @@ void DebugScene::render()
 	get_graphics_manager()->set_render_target( render_result_texture_.get() );
 
 	get_graphics_manager()->render_background();
-	get_graphics_manager()->render_active_objects( get_active_object_manager() );
+	get_graphics_manager()->render_objects();
 
 	// フレームダンプ ( ポストエフェクト前のクリーンなレンダ結果を連番 PNG 出力 )
 	if ( frame_dumping_ && frame_dump_remaining_ > 0 )
@@ -555,7 +555,7 @@ void DebugScene::render()
 			// モーションベクトルパス: シーン深度を再利用して速度 RT に描画し読み出す ( 真の動き / MSAA 可 )
 			velocity_texture_->clear( Color( 0.f, 0.f, 0.f, 0.f ) );
 			get_graphics_manager()->set_render_target( velocity_texture_.get() );
-			get_graphics_manager()->render_active_objects_velocity( get_active_object_manager() );
+			get_graphics_manager()->render_objects_velocity();
 
 			auto* vrtt = static_cast< core::graphics::direct_3d_11::RenderTargetTexture* >( velocity_texture_.get() );
 			ID3D11Resource* vres = nullptr;
@@ -597,7 +597,7 @@ void DebugScene::render()
 
 	get_graphics_manager()->render_fader();
 
-	get_graphics_manager()->render_debug_axis( get_active_object_manager() );
+	get_graphics_manager()->render_debug_axis();
 	get_graphics_manager()->render_debug_bullet();
 
 	if ( get_input()->press( Input::Button::B ) )

@@ -20,9 +20,11 @@
 - [x] GameMain: オーバーレイを積む（push:）・ESC を UI に任せる・表示変更をフレーム末に・F2/F5/Alt+Enter の同期・終了時の保存をストア経由に
 - [x] テスト 75 件追加（62 → 137 件。136 成功、失敗 1 件は作業前から失敗していた NeuralNprTest.DmlInferenceSmoke）
 - [x] 実機確認（2026-11-08）: ポーズ→オプション→戻るでポーズへ／タブ／スクロール／キー割り当ての入れ替え／解像度の適用→15 秒でロールバック
-- [ ] 実機確認の残り: パッド操作、フルスクリーン切替（排他フルスクリーン中の解像度変更）、16:10・ウルトラワイドでの表示
-- [ ] 後続（設計書 2.2）: XInput、パッドのボタンアイコン、Alt+Enter の抑止（MakeWindowAssociation）、ResizeTarget、ハードウェアシザー、MSDF グリフキャッシュの O(1) 化、キー待ち中のホットキー抑止、HUD への適用
-- [ ] 既存の不具合（UI 作業とは無関係・未修正）: タイトルシーンがモデル `je-pu-pu` / `blue-sky` 不在で Model::render がヌル参照して落ちる（元のチェックアウトでも同じファイルが無い）
+- [x] 16:10（1680x1050）・ウルトラワイド（2560x1080）での表示 : BLUE_SKY_SETTINGS_DIR で解像度を変えて起動し、オプション画面が画面に収まり正しく並ぶことを描画結果で確かめた（2026-11-10）
+- [ ] 実機（機器）が要る確認 : パッド操作（開発機にパッドが無い）、排他フルスクリーン中の解像度変更（画面のロックを外した状態で）
+- [x] 設計書 2.2 の後続のうち対応したもの : Alt+Enter の抑止（MakeWindowAssociation、86ed6344）、MSDF グリフキャッシュの O(1) 化（f404201f）、キー待ち中のホットキー抑止（34541b28）
+- [ ] 機能の追加（設計上の問題ではない後続）: XInput、パッドのボタンアイコン、排他フルスクリーンの ResizeTarget、ハードウェアシザー、HUD への適用
+- [x] タイトルシーンが起動直後に落ちる不具合 : 67dca1c5 で直した。全 15 シーンを起動して落ちないことを 2026-11-10 に確かめた
 
 ### 設計上の問題の洗い出し（2026-11-10）
 
@@ -34,8 +36,8 @@
 - [x] B（構造の問題 28 件）: すべて対応、A9 の復旧も。B19 は d686edf3（抽象層に D3D11 の型なし）と 1bba4f84（Effects11 をやめて自前で読む）。B3 の 2 次元の計測は 4cad6f57、B27 の Raw Input は a0a074bf・9f2521ec。B28 は 7a418118・12888db6・60d9b151・be50ed76・87abd1c4 で core::Service・Direct3D11::get_instance・すべてのシングルトンを削除
 - [x] C（品質の改善）: すべて対応（c3fbbd9d・a259d986・dcb91898・8f1df39f・aeac9c46・5331914b・d5b11a22・89074b8d・797a1683）。項目ごとの根拠は一覧の「3 章の各項目と、対応した根拠」
 - [x] 一覧の外で見つけた不具合 : ECS のシーンの 3D が真っ黒（95aee6ab）、canvas_test が落ちる（87abd1c4）
-- テストは 284 件が通る。全 15 シーンを起動して落ちない（2026-11-10 11:06 時点）
-- [ ] 画面のロックを外した状態で、Raw Input で実際のキー・マウスが届くこと（enemy_ai_test でマウスで視点が回る、log/blue-sky.log に「Raw Input で最初の出来事を受け取りました」）を見る（作業中は画面がロック中で確かめられなかった）
+- テストは 284 件が通る。全 15 シーンを起動して落ちない。Effects11 の置き換えの前後を全 15 シーンで画素ごとに比べて違いなし（2026-11-10）
+- [x] Raw Input で OS の入力が届くこと : 開発用の BLUE_SKY_RAW_INPUT_SINK（2a2dc0ec）で背面でも受け取るようにし、SendInput のマウスの移動と F24 のキーが WM_INPUT → ゲームまで届くことをログで確かめた（2026-11-10。画面のロック中のため前面での確認の代わり）
 - [x] 画面で確かめる: 文字の色（9ed89881）、文字の大きさ 160%（b9f40890）、横長画面（76fda1fc）。描画結果の PNG 保存（BLUE_SKY_CAPTURE_FRAMES）で、画面がロック中でも確認した
 - [x] アウトライン付きの文字の端の 1 画素幅の縦線 : MSAA で UV が外挿されていた。centroid で直した（1945a242）
 - 確認の手順（画面がロック中でも使える）: 環境変数 BLUE_SKY_START_SCENE / BLUE_SKY_START_OVERLAY / BLUE_SKY_CAPTURE_FRAMES / BLUE_SKY_CAPTURE_DIR を付けて起動すると、指定フレームの描画結果が PNG になる。落ちたら log/crash.log に呼び出し履歴
@@ -50,8 +52,9 @@
 - [x] 9 分割の辺・中央を並べて埋める（`edge` / `center` = stretch / repeat / round）。模様のある枠が引き伸ばしで崩れないように
 - [x] サンプルテーマ（`media/ui/sample_theme.txt`、設定 `ui.theme` で有効）と生成スクリプト `tools/ui_sample/make_ui_sample.py`。テスト 53 件追加（190 件中 189 成功）
 - [x] 再レビュー（12 件）を反映: Sprite の Map 前ガード、オーバーレイの描画範囲を純粋関数化（隠れた不透明も考慮・ベース非描画時のクリア）、丸め規則の共有（PixelSnap.h）、切り取りの物理ピクセル揃え、中央を描かない（center = none）ほか
-- [ ] 後続: Sprite のバッチ化と画像のハンドル化、UI テクスチャの寿命管理（世代付きハンドル）、シザーによるクリップ、部品別スタイル、@2x 素材
-- [ ] 調査: enemy_ai_test の操作タブで、キー欄の上に細い縦線が出る（テーマなしでも出る。シーン側の何かが UI の後に描かれている疑い）
+- [x] 後続のうち対応したもの : Sprite のバッチ化（c1f1d86c）、画像のハンドル化・寿命管理（ResourceManager のハンドル、979b2c32）
+- [ ] 機能の追加（設計上の問題ではない後続）: シザーによるクリップ、部品別スタイル、@2x 素材
+- [x] 調査: enemy_ai_test の操作タブのキー欄の上の細い縦線 : 操作タブを描画結果で撮り、画素で探して出ていないことを確かめた（2026-11-10）。MSAA で文字の UV が外挿されていた件（1945a242）と同じ原因だった
 
 ## 敵AI（システミック）縦スライス  ブランチ: feature/enemy-ai-perception
 
@@ -75,14 +78,9 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 方針: **VR(Oculus) は一旦外す**（コンパイルスイッチで無効化。ベンダー依存を1つ減らす）。
 
 ### 依存ライブラリの x64 化（source/lib/x64 へ配置）
-- [ ] Bullet (Collision/Dynamics/LinearMath) — OSS、ソースから x64 ビルド
-- [ ] libogg / libvorbis / libvorbisfile — OSS、x64 ビルド
-- [ ] PortAudio (portaudio_static) — OSS、x64 ビルド
-- [ ] Effects11 — OSS(FX11)、ソース取得して x64 ビルド（現状 prebuilt のみ）
-- [ ] boost 1.75 (chrono/filesystem/regex/timer) — b2 で x64 ビルド
-- [ ] imgui — ソース内蔵(`lib/src/imgui`)、x64 再コンパイル
-- [ ] libremidi / msdfgen / freetype — ソースから x64 再コンパイル
-- [ ] FBX SDK (libfbxsdk/zlib/libxml2) — **Autodesk から x64 SDK のインストールが必要（ユーザー操作）**。標準パスに未インストール
+- [x] Bullet・libogg / libvorbis / libvorbisfile・PortAudio・boost（1.90）・FBX SDK（libfbxsdk / zlib / libxml2）・Recast / Detour・ONNX Runtime : source/lib/x64/debug にある（2026-11-10 に確認。x64 Debug でビルドと全シーンの起動ができている）
+- [x] imgui・libremidi / msdfgen / freetype : ソースから x64 でビルドしている
+- [x] Effects11 : 不要になった（1bba4f84 で自前の実装に置き換えた）
 - [x] lua — x64 版が既存（`lib/x64/common/lua.lib`）
 - [~] Oculus LibOVR — VR を外すので不要化
 

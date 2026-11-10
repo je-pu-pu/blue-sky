@@ -128,9 +128,6 @@
     <ClCompile Include="GameObject\Ladder.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject\Missile.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="GameObject\Robot.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
@@ -667,9 +664,6 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\Ladder.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Missile.h">
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\Robot.h">

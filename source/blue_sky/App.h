@@ -53,7 +53,7 @@ private:
 	int			height_;				///< ウィンドウ高さ
 
 	bool		is_active_;				///< アクティブフラグ
-	bool		initial_full_screen_;	///< 起動時にフルスクリーンで始めるか（実際の状態はスワップチェーン、ユーザーの選択は設定が持つ）
+	bool		is_full_screen_ = false;	///< ボーダーレスのフルスクリーン（画面いっぱいの縁なしウィンドウ）か。実際の状態はここ、ユーザーの選択は設定が持つ
 
 	bool		is_mouse_in_window_;
 
@@ -117,8 +117,18 @@ public:
 
 	void show_error_message( const char_t* ) const;
 
-	/// 起動時にフルスクリーンで始めるか（Direct3D を作るときだけ使う）
-	bool is_initial_full_screen() const { return initial_full_screen_; }
+	/**
+	 * フルスクリーンにする・やめる
+	 *
+	 * 表示モードを変える排他フルスクリーンではなく、ウィンドウを縁なしにして今いるモニターいっぱいに広げる（ボーダーレス）。
+	 * 描画の解像度（get_width() / get_height()）は変えず、表示のときに画面の大きさへ拡大される。
+	 * （以前は排他フルスクリーンで、4K モニターが複数ある環境では切り替え 1 回に 17〜18 秒かかり、抜けるときに止まることがあった）
+	 */
+	void set_full_screen( bool );
+	bool is_full_screen() const { return is_full_screen_; }
+
+	/// クライアント領域の座標（マウスなど）を、描画の解像度の座標に直す（フルスクリーンではクライアント領域が描画より大きい）
+	POINT client_to_render( POINT ) const;
 
 	void show_cursor( bool );
 	void clip_cursor( bool );

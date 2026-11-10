@@ -83,7 +83,7 @@ private:
 
 	void create_device();
 	
-	void create_swap_chain( IDXGIFactory1*, HWND, uint_t, uint_t, bool, int, int );
+	void create_swap_chain( IDXGIFactory1*, HWND, uint_t, uint_t, int, int );
 	
 	void create_back_buffer_texture();
 
@@ -97,7 +97,7 @@ private:
 	void log_feature_level();
 
 public:
-	Direct3D11( HWND, int, int, bool, int = 0, int = 0 );
+	Direct3D11( HWND, int, int, int = 0, int = 0 );
 	~Direct3D11();
 
 	// 以前あった get_instance()（隠れた大域アクセス）は削除した。使う側は作り手から Direct3D11* を受け取る
@@ -144,10 +144,6 @@ public:
 	/// 垂直同期を待って表示するか（以前は選べず、常に待たなかった）
 	void set_vsync( bool v ) { vsync_ = v; }
 	bool is_vsync() const { return vsync_; }
-	void set_full_screen( bool );
-
-	bool is_full_screen() const;
-	void switch_full_screen();
 
 	void on_resize( int, int );
 

@@ -357,6 +357,7 @@ void Input::update()
 	POINT point;
 	GetCursorPos( & point );
 	ScreenToClient( app_->GetWindowHandle(), & point );
+	point = app_->client_to_render( point );	// フルスクリーン（ボーダーレス）ではウィンドウが描画より大きい
 
 	mouse_x_rate_ = math::clamp( point.x / static_cast< float >( app_->get_width() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_x_sensitivity_;
 	mouse_y_rate_ = math::clamp( point.y / static_cast< float >( app_->get_height() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_y_sensitivity_;

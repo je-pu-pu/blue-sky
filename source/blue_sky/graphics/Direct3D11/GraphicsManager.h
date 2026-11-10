@@ -139,8 +139,6 @@ public:
 	void clear_default_view( const Color& = Color::Black ) override;
 	void unset_render_target() override;
 
-	bool is_full_screen() const override;
-	void switch_full_screen() override;
 
 	GameConstantBuffer* get_game_render_data() const override { return game_render_data_.get(); }
 	FrameConstantBuffer* get_frame_render_data() const override { return frame_render_data_.get(); }

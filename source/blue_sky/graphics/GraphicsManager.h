@@ -318,8 +318,6 @@ public:
 	virtual void clear_default_view( const Color& = Color::Black ) = 0;
 	virtual void unset_render_target() = 0;
 
-	virtual bool is_full_screen() const = 0;
-	virtual void switch_full_screen() = 0;
 
 	virtual GameConstantBuffer* get_game_render_data() const = 0;
 	virtual FrameConstantBuffer* get_frame_render_data() const = 0;

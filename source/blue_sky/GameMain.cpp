@@ -119,7 +119,6 @@ GameMain::GameMain( App& app )
 		get_app()->GetWindowHandle(),
 		get_app()->get_width(),
 		get_app()->get_height(),
-		get_app()->is_initial_full_screen(),
 		get_config()->get( "graphics.multisample.count", 4 ), 
 		get_config()->get( "graphics.multisample.quality", 2 )
 	) );
@@ -550,6 +549,21 @@ bool GameMain::update()
 
 	ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
+
+	// imgui は描画の解像度で描くので、大きさとマウスの位置を描画の座標に直す（フルスクリーン（ボーダーレス）ではウィンドウが描画より大きい）
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		io.DisplaySize = ImVec2( static_cast< float >( get_app()->get_width() ), static_cast< float >( get_app()->get_height() ) );
+
+		POINT cursor;
+
+		if ( get_app()->is_full_screen() && GetCursorPos( & cursor ) && ScreenToClient( get_app()->GetWindowHandle(), & cursor ) )
+		{
+			cursor = get_app()->client_to_render( cursor );
+			io.AddMousePosEvent( static_cast< float >( cursor.x ), static_cast< float >( cursor.y ) );
+		}
+	}
+
     ImGui::NewFrame();
 
 	// 別スレッドの読み込みが終わったものを、メインスレッドで処理する（テクスチャの作成など）
@@ -589,31 +603,20 @@ bool GameMain::update()
 
 	// 表示の変更は、UI のコールバックやウィンドウメッセージの処理中ではなく、ここでまとめて行う
 	//
-	// 設定（ユーザーが選んだ値）と実際の状態は分けて扱う。設定を書き換えるのはユーザーの明示的な操作
-	// （オプション画面・Alt+Enter・F5）だけ。フォーカスを失って排他フルスクリーンが解除されたような
-	// 一時的な状態は設定に取り込まず、再びアクティブになったときに設定に合わせて戻す。
+	// 設定（ユーザーが選んだ値）を書き換えるのはユーザーの明示的な操作（オプション画面・Alt+Enter・F5）だけ。
+	// フルスクリーンはボーダーレスなので、フォーカスを失っても解除されない（以前の排他フルスクリーンは解除され、戻す処理が要った）
 	if ( is_full_screen_toggle_requested_ )
 	{
 		is_full_screen_toggle_requested_ = false;
 
-		get_graphics_manager()->switch_full_screen();
-		settings_->sync_from_runtime( game_settings::FULL_SCREEN, get_graphics_manager()->is_full_screen() );
+		get_app()->set_full_screen( ! get_app()->is_full_screen() );
+		settings_->sync_from_runtime( game_settings::FULL_SCREEN, get_app()->is_full_screen() );
 	}
 
 	if ( is_display_change_requested_ )
 	{
 		is_display_change_requested_ = false;
-		is_display_restore_requested_ = false;
 		apply_display_settings();
-	}
-	else if ( is_display_restore_requested_ )
-	{
-		is_display_restore_requested_ = false;
-
-		if ( settings_->get_committed( game_settings::FULL_SCREEN ) != get_graphics_manager()->is_full_screen() )
-		{
-			get_graphics_manager()->switch_full_screen();
-		}
 	}
 
 	return true;
@@ -622,9 +625,8 @@ bool GameMain::update()
 /**
  * 設定ストアの確定値に合わせて、解像度・フルスクリーンを変更する
  *
- * フルスクリーン中にウィンドウサイズを変えても表示モードは変わらないため、
- * サイズを変えるときはいったんウィンドウモードに戻してから変更し、必要ならフルスクリーンに戻す。
- * （排他フルスクリーンの ResizeTarget 対応は後続課題）
+ * フルスクリーンはボーダーレス（画面いっぱいの縁なしウィンドウ）なので、解像度はフルスクリーンのままでも変えられる
+ * （描画の解像度が変わり、表示のときに画面の大きさへ拡大される。以前の排他フルスクリーンは、いったんウィンドウに戻す必要があった）
  */
 void GameMain::apply_display_settings()
 {
@@ -632,26 +634,19 @@ void GameMain::apply_display_settings()
 	const int h = settings_->get_committed( game_settings::SCREEN_HEIGHT );
 	const bool full_screen = settings_->get_committed( game_settings::FULL_SCREEN );
 
-	const bool size_changed = w != get_app()->get_width() || h != get_app()->get_height();
-
-	if ( size_changed && get_graphics_manager()->is_full_screen() )
-	{
-		get_graphics_manager()->switch_full_screen();
-	}
-
-	if ( size_changed )
+	if ( w != get_app()->get_width() || h != get_app()->get_height() )
 	{
 		get_app()->set_size( w, h );
 	}
 
-	if ( full_screen != get_graphics_manager()->is_full_screen() )
-	{
-		get_graphics_manager()->switch_full_screen();
-	}
+	get_app()->set_full_screen( full_screen );
 
 	// フルスクリーンの状態は、以前は 3 か所（App・スワップチェーン・設定）が持ち、毎回手で写していた。
-	// 今は役割を分ける : 実際の状態はスワップチェーンだけ、ユーザーの選択は設定だけ、App は起動時の要求だけ
+	// 今は役割を分ける : 実際の状態は App（ウィンドウ）だけ、ユーザーの選択は設定だけ
 
+	debug_log( "[Display] 表示の設定を適用しました : " + std::to_string( get_app()->get_width() ) + "x" + std::to_string( get_app()->get_height() )
+		+ "・描画先 " + std::to_string( direct_3d_->get_width() ) + "x" + std::to_string( direct_3d_->get_height() )
+		+ "・フルスクリーン " + ( get_app()->is_full_screen() ? "はい" : "いいえ" ) );
 }
 
 /**
@@ -688,6 +683,22 @@ void GameMain::setup_frame_capture()
 void GameMain::capture_frame_if_requested()
 {
 	frame_count_++;
+
+	// 開発用 : BLUE_SKY_DEBUG_DISPLAY_CHANGE（"幅x高さ"）を設定すると、120 フレーム目に解像度を変えて「適用」する
+	// （排他フルスクリーン中の解像度の変更を、オプション画面を操作せずに確かめるため。設定ファイルを汚さないよう BLUE_SKY_SETTINGS_DIR と一緒に使う）
+	if ( frame_count_ == 120 )
+	{
+		char size[ 32 ] = { };
+		int w = 0, h = 0;
+
+		if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_DISPLAY_CHANGE", size, sizeof( size ) ) > 0 && sscanf_s( size, "%dx%d", & w, & h ) == 2 )
+		{
+			debug_log( "[Debug] 解像度を変えて適用します : " + std::to_string( w ) + "x" + std::to_string( h ) );
+			settings_->set( game_settings::SCREEN_WIDTH, w );
+			settings_->set( game_settings::SCREEN_HEIGHT, h );
+			settings_->apply_deferred();
+		}
+	}
 
 	if ( std::find( capture_frames_.begin(), capture_frames_.end(), frame_count_ ) == capture_frames_.end() )
 	{

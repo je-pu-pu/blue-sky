@@ -899,23 +899,4 @@ void GraphicsManager::unset_render_target()
 	direct_3d_->unset_render_target();
 }
 
-/**
- * フルスクリーン状態を取得する
- *
- * @return フルスクリーンの場合 true
- */
-bool GraphicsManager::is_full_screen() const
-{
-	return direct_3d_->is_full_screen();
-}
-
-/**
- * フルスクリーン/ウィンドウモードを切り替える
- *
- */
-void GraphicsManager::switch_full_screen()
-{
-	direct_3d_->switch_full_screen();
-}
-
 } // namespace blue_sky::graphics::direct_3d_11

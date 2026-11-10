@@ -43,11 +43,10 @@ const Direct3D11::Color Direct3D11::DEFAULT_CLEAR_COLOR = Direct3D11::Color::Bla
  * @param hwnd					ウィンドウハンドル
  * @param w						バックバッファの幅
  * @param h						バックバッファの高さ
- * @param full_screen			フルスクリーンフラグ
  * @param multi_sample_count	マルチサンプリングのサンプル数
  * @param multi_sample_quality	マルチサンプリングのクオリティ
  */
-Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sample_count, int multi_sample_quality )
+Direct3D11::Direct3D11( HWND hwnd, int w, int h, int multi_sample_count, int multi_sample_quality )
 {
 	com_ptr< IDXGIFactory1 > dxgi_factory;
 	DIRECT_X_FAIL_CHECK( CreateDXGIFactory1( __uuidof( IDXGIFactory1 ), reinterpret_cast< void** >( & dxgi_factory ) ) );
@@ -60,7 +59,7 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sam
 
 	log_feature_level();
 
-	create_swap_chain( dxgi_factory.get(), hwnd, w, h, full_screen, multi_sample_count, multi_sample_quality );
+	create_swap_chain( dxgi_factory.get(), hwnd, w, h, multi_sample_count, multi_sample_quality );
 
 	dxgi_factory.reset();
 
@@ -80,8 +79,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sam
  */
 Direct3D11::~Direct3D11()
 {
-	set_full_screen( false );
-
 	effect_.reset();
 	sprite_.reset();
 
@@ -139,7 +136,7 @@ void Direct3D11::create_device()
 	DIRECT_X_FAIL_CHECK( D3D11CreateDevice( dxgi_adapter_.get(), D3D_DRIVER_TYPE_UNKNOWN, 0, d3d11_create_device_flags, feature_levels, ARRAYSIZE( feature_levels ), D3D11_SDK_VERSION, & device_, & feature_level, & immediate_context_ ) );
 }
 
-void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint_t w, uint_t h, bool full_screen, int multi_sample_count, int multi_sample_quality )
+void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint_t w, uint_t h, int multi_sample_count, int multi_sample_quality )
 {
 	ZeroMemory( & swap_chain_desc_, sizeof( swap_chain_desc_ ) );
 	swap_chain_desc_.BufferCount = 1;
@@ -152,8 +149,9 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 	swap_chain_desc_.OutputWindow = hwnd;
 	swap_chain_desc_.SampleDesc.Count = multi_sample_count;
 	swap_chain_desc_.SampleDesc.Quality = multi_sample_quality;
-	swap_chain_desc_.Windowed = ! full_screen;
-	swap_chain_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	// フルスクリーンはウィンドウ側（App）が縁なしで画面いっぱいに広げて行う（ボーダーレス）。スワップチェーンは常にウィンドウで、表示モードを変えない
+	swap_chain_desc_.Windowed = TRUE;
+	swap_chain_desc_.Flags = 0;
 
 	// check_multi_sample()
 	{
@@ -458,31 +456,11 @@ void Direct3D11::create_input_layout( const char_t* input_layout_name, const cha
 	input_layout_list_[ input_layout_name ] = std::make_unique< InputLayout >( pass->create_input_layout( layout, layout_array_size ) );
 }
 
-void Direct3D11::set_full_screen( bool full_screen )
-{
-	DIRECT_X_FAIL_CHECK( swap_chain_->SetFullscreenState( full_screen, 0 ) );
-}
-
 void Direct3D11::set_size( int w, int h )
 {
 	// サイズ変更の経路は on_resize の 1 本だけにする
 	// （以前は ResizeBuffers だけを行う別の経路があり、バックバッファ・深度・ビューポートを作り直していなかった）
 	on_resize( w, h );
-}
-
-bool Direct3D11::is_full_screen() const
-{
-	BOOL full_screen;
-
-	DIRECT_X_FAIL_CHECK( swap_chain_.get()->GetFullscreenState( & full_screen, 0 ) );
-
-	return full_screen == TRUE;
-}
-
-void Direct3D11::switch_full_screen()
-{
-	DIRECT_X_FAIL_CHECK( swap_chain_->ResizeTarget( & swap_chain_desc_.BufferDesc ) );
-	DIRECT_X_FAIL_CHECK( swap_chain_->SetFullscreenState( ! is_full_screen(), 0 ) );
 }
 
 void Direct3D11::on_resize( int w, int h )

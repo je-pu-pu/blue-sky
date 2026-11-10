@@ -35,7 +35,6 @@ App::App()
 	, width_( DEFAULT_WIDTH )
 	, height_( DEFAULT_HEIGHT )
 	, is_active_( false )
-	, initial_full_screen_( false )
 	, is_mouse_in_window_( false )
 	, is_clip_cursor_enabled_( false )
 	, config_( new Config() )
@@ -144,7 +143,10 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		return false;
 	}
 	
-	initial_full_screen_ = initial_full_screen;
+	if ( initial_full_screen )
+	{
+		set_full_screen( true );
+	}
 
 	// 入力の出来事を Raw Input（WM_INPUT）で受け取る。登録できなければ以前のやり方（ポーリング・WM_KEYDOWN・DirectInput）を使う
 	is_raw_input_enabled_ = blue_sky::raw_input::register_devices( hWnd );
@@ -559,6 +561,17 @@ void App::set_size( int w, int h )
 	width_ = w;
 	height_ = h;
 
+	// フルスクリーンではウィンドウはモニターいっぱいのまま、描画の解像度だけ変える（ウィンドウの大きさが変わらないので WM_SIZE は来ない）
+	if ( is_full_screen_ )
+	{
+		if ( this->game_ )
+		{
+			this->game_->on_resize();
+		}
+
+		return;
+	}
+
 	RECT rect = { 0, 0, width_, height_ };
 	AdjustWindowRect( & rect, style_, false );
 
@@ -570,9 +583,57 @@ void App::set_size( int w, int h )
 	GetMonitorInfo( MonitorFromWindow( hWnd, MONITOR_DEFAULTTONEAREST ), & monitor );
 	const RECT& work = monitor.rcWork;
 
-	SetWindowPos( hWnd, HWND_NOTOPMOST, work.left + ( ( work.right - work.left ) - ww ) / 2, work.top + ( ( work.bottom - work.top ) - wh ) / 2, ww, wh, SWP_SHOWWINDOW );
+	SetWindowPos( hWnd, HWND_NOTOPMOST, work.left + ( ( work.right - work.left ) - ww ) / 2, work.top + ( ( work.bottom - work.top ) - wh ) / 2, ww, wh, SWP_SHOWWINDOW | SWP_FRAMECHANGED );
+}
 
-	// PostMessage( hWnd, WM_EXITSIZEMOVE, 0, 0 );
+void App::set_full_screen( bool full_screen )
+{
+	if ( full_screen == is_full_screen_ )
+	{
+		return;
+	}
+
+	is_full_screen_ = full_screen;
+
+	if ( full_screen )
+	{
+		// 縁なしにして、今いるモニター全体（タスクバーも覆う）に広げる
+		MONITORINFO monitor = { sizeof( MONITORINFO ) };
+		GetMonitorInfo( MonitorFromWindow( hWnd, MONITOR_DEFAULTTONEAREST ), & monitor );
+		const RECT& r = monitor.rcMonitor;
+
+		SetWindowLongPtr( hWnd, GWL_STYLE, WS_POPUP | WS_VISIBLE );
+		SetWindowPos( hWnd, HWND_TOP, r.left, r.top, r.right - r.left, r.bottom - r.top, SWP_SHOWWINDOW | SWP_FRAMECHANGED );
+	}
+	else
+	{
+		// ウィンドウの縁を戻し、描画の解像度の大きさにして作業領域の中央に置く
+		SetWindowLongPtr( hWnd, GWL_STYLE, style_ );
+		set_size( width_, height_ );
+	}
+
+	// カーソルの閉じ込めはクライアント領域で決まるので、広さが変わったら決め直す
+	if ( is_active_ )
+	{
+		clip_cursor( is_clip_cursor_enabled_ );
+	}
+
+	blue_sky::debug_log( is_full_screen_ ? "[Display] フルスクリーン（ボーダーレス）にしました" : "[Display] ウィンドウに戻しました" );
+}
+
+POINT App::client_to_render( POINT point ) const
+{
+	RECT client;
+
+	if ( ! GetClientRect( hWnd, & client ) || client.right <= 0 || client.bottom <= 0 )
+	{
+		return point;
+	}
+
+	point.x = MulDiv( point.x, width_, client.right );
+	point.y = MulDiv( point.y, height_, client.bottom );
+
+	return point;
 }
 
 /**

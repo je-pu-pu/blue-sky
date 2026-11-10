@@ -14,6 +14,8 @@
 #include <blue_sky/ecs/component/ObjectRenderComponent.h>
 #include <blue_sky/ecs/component/SimpleObjectComponent.h>
 #include <blue_sky/ecs/system/MoveToTargetSystem.h>
+#include <blue_sky/ecs/system/SwitchSystem.h>
+#include <blue_sky/ecs/component/SwitchComponent.h>
 
 #include <core/animation/AnimationPlayer.h>
 #include <core/ecs/EntityManager.h>
@@ -94,6 +96,18 @@ void GameObjectRef::set_location( const core::Vector& location )
 	{
 		object.set_location( location );
 	}
+}
+
+float_t GameObjectRef::get_direction_degree() const
+{
+	if ( const ActiveObject* o = get_active_object() )
+	{
+		return o->get_direction_degree();
+	}
+
+	ecs::EntityObject object( find_entity() );
+
+	return object.is_valid() ? object.get_direction_degree() : 0.f;
 }
 
 void GameObjectRef::set_direction_degree( float_t degree )
@@ -339,6 +353,31 @@ void GameObjectRef::action( const string_t& action )
 		return;
 	}
 
+	// スイッチ（以前の BaseSwitch::action。この 3 つだけを受け付け、イベントは呼ばない）
+	if ( entity->get_component< ecs::SwitchComponent >() )
+	{
+		auto* system = entity_manager_->get_system< ecs::SwitchSystem >();
+
+		if ( system && action == "turn-on" )
+		{
+			system->turn_on( id_ );
+		}
+		else if ( system && action == "turn-off" )
+		{
+			system->turn_off( id_ );
+		}
+		else if ( system && action == "break" )
+		{
+			system->do_break( id_ );
+		}
+		else
+		{
+			log_unsupported( ( "アクション \"" + action + "\"" ).c_str() );
+		}
+
+		return;
+	}
+
 	// 以前の ActiveObject::action と同じ中身
 	auto* animation = entity->get_component< ecs::AnimationComponent >();
 
@@ -473,6 +512,12 @@ void GameObjectRef::add_event_handler( const char_t* name, const EventHandler& h
 	if ( ActiveObject* o = get_active_object() )
 	{
 		o->add_event_handler( name, handler );
+		return;
+	}
+
+	// スイッチ（以前の BaseSwitch::add_event_handler）
+	if ( auto* system = entity_manager_ ? entity_manager_->get_system< ecs::SwitchSystem >() : nullptr; system && system->add_event_handler( id_, name, handler ) )
+	{
 		return;
 	}
 

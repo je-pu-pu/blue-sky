@@ -233,7 +233,7 @@ GameMain::GameMain( App& app )
 	game_object_context_.delta_time = [this] { return time_manager_.get_delta_time(); };
 
 	active_object_manager_.reset( new ActiveObjectManager( active_object_physics_.get(), graphics_manager_.get(), & game_object_context_, entity_manager_.get() ) );
-	object_factory_ = std::make_unique< ObjectFactory >( entity_manager_.get(), active_object_manager_.get(), active_object_physics_.get(), graphics_manager_.get() );
+	object_factory_ = std::make_unique< ObjectFactory >( entity_manager_.get(), active_object_manager_.get(), active_object_physics_.get(), graphics_manager_.get(), sound_manager_.get() );
 
 	// GraphicsManager はゲームの物体を、EntityManager の描画の部品（ecs::ObjectRenderDataSystem の描く対象）から描く（以前は ActiveObjectManager を直接回していた）
 	graphics_manager_->set_entity_manager( entity_manager_.get() );

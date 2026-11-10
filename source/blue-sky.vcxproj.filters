@@ -110,13 +110,7 @@
     <ClCompile Include="GameObject\ActiveObject.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject\AreaSwitch.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="GameObject\Balloon.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\BaseSwitch.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="GameObject\GameObject.cpp">
@@ -126,9 +120,6 @@
       <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="GameObject\Robot.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\Switch.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="Scene\CanvasTestScene.cpp">
@@ -456,6 +447,9 @@
     <ClCompile Include="blue_sky\ecs\system\ContactCacheSystem.cpp">
       <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\SwitchSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blue_sky\ecs\component\PhysicsBodyComponent.h">
@@ -645,13 +639,7 @@
     <ClInclude Include="GameObject\ActiveObject.h">
       <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="GameObject\AreaSwitch.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
     <ClInclude Include="GameObject\Balloon.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\BaseSwitch.h">
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\GameObject.h">
@@ -661,9 +649,6 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\Robot.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Switch.h">
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Scene\CanvasTestScene.h">
@@ -1272,6 +1257,12 @@
       <Filter>blue_sky\ecs\component</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\ecs\system\ContactCacheSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\SwitchComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\SwitchSystem.h">
       <Filter>blue_sky\ecs\system</Filter>
     </ClInclude>
   </ItemGroup>

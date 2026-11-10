@@ -7,6 +7,9 @@
 #include <blue_sky/ecs/component/ObjectRenderComponent.h>
 #include <blue_sky/ecs/component/PickupComponent.h>
 #include <blue_sky/ecs/component/ContactCacheComponent.h>
+#include <blue_sky/ecs/component/SwitchComponent.h>
+#include <blue_sky/ecs/component/AnimationComponent.h>
+#include <core/animation/AnimationPlayer.h>
 #include <blue_sky/ecs/system/PhysicsSyncSystem.h>
 
 #include <core/ecs/Entity.h>
@@ -207,7 +210,17 @@ void EntityObject::restart()
 		// 種類ごとのやり直し（以前は派生クラスの restart）
 		if ( state_ && state_->restart_mass >= 0.f )
 		{
-			object_body::set_mass( * body, state_->restart_mass );		// 以前の Goal::restart
+			object_body::set_mass( * body, state_->restart_mass );		// 以前の Goal::restart・Switch::restart
+		}
+
+		if ( state_ && state_->restart_angular_factor >= 0.f )
+		{
+			object_body::set_angular_factor( * body, state_->restart_angular_factor );	// 以前の Switch::restart
+		}
+
+		if ( state_ && state_->restart_friction >= 0.f )
+		{
+			object_body::set_friction( * body, state_->restart_friction );	// 以前の Switch::restart
 		}
 
 		if ( const auto* pickup = entity_->get_component< PickupComponent >(); pickup && pickup->disable_contact_on_pickup )
@@ -220,6 +233,17 @@ void EntityObject::restart()
 			// 以前の Stone::restart（石が薄い壁を貫通しないようにする。Bullet の連続衝突判定）
 			body->setCcdSweptSphereRadius( throwable->ccd_swept_sphere_radius );
 			body->setCcdMotionThreshold( throwable->ccd_motion_threshold );
+		}
+	}
+
+	// スイッチは 切 に戻る（以前の BaseSwitch::restart）。通常のスイッチは "Off" のアニメーションにする（以前の Switch::restart）
+	if ( auto* s = entity_->get_component< SwitchComponent >() )
+	{
+		s->state = SwitchComponent::State::OFF;
+
+		if ( auto* animation = entity_->get_component< AnimationComponent >(); s->has_feedback && animation && animation->player )
+		{
+			animation->player->play( "Off", false, false );
 		}
 	}
 

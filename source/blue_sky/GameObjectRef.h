@@ -72,6 +72,8 @@ public:
 	void set_location( const core::Vector& location );
 	void set_location( float_t x, float_t y, float_t z ) { set_location( core::Vector( x, y, z ) ); }
 
+	/// 向き（Y 軸の度。消えた物体なら 0）
+	float_t get_direction_degree() const;
 	void set_direction_degree( float_t degree );
 
 	/// 速度（剛体が無い・消えた物体なら 0）

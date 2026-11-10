@@ -106,6 +106,14 @@ public:
 	 */
 	static void on_collide_with_entity_object( GameObject& object, core::ecs::EntityId object_id, core::ecs::Entity& entity, core::sound::SoundManager* sound_manager = nullptr );
 
+	/**
+	 * ECS だけの物体どうしが当たった
+	 *
+	 * 部品の組み合わせで決める。今は 石（ThrowableComponent）とスイッチ（SwitchComponent）だけ : 石の速さでスイッチの入・切が変わる
+	 * （以前の BaseSwitch::on_collide_with( Stone* )。空間スイッチは石では変わらない）。それ以外の組は何もしない（以前と同じ）
+	 */
+	static void on_collide_entity_objects( core::ecs::Entity& a, core::ecs::Entity& b );
+
 	// ECS だけの物体（ObjectFactory が作る）のうち、毎フレーム動く物（動く床・回る物）は update の中で System に頼む
 
 	/// 全オブジェクトの位置と描くかどうかを描画の部品へ写す（描く前に毎フレーム。GameMain がシーンを描く前に呼ぶ）

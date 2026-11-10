@@ -16,6 +16,7 @@
 #include <blue_sky/ecs/component/StaticObjectComponent.h>
 #include <blue_sky/ecs/component/PickupComponent.h>
 #include <blue_sky/ecs/component/ContactCacheComponent.h>
+#include <blue_sky/ecs/component/SwitchComponent.h>
 #include <blue_sky/ecs/component/TargetMoverComponent.h>
 #include <blue_sky/ecs/system/CollisionEventSystem.h>
 #include <blue_sky/ecs/system/MoveToTargetSystem.h>
@@ -24,6 +25,7 @@
 #include <blue_sky/ecs/system/TranslationSystem.h>
 #include <blue_sky/ecs/system/SpinSystem.h>
 #include <blue_sky/ecs/system/ContactCacheSystem.h>
+#include <blue_sky/ecs/system/SwitchSystem.h>
 
 #include <GameObject/ActiveObject.h>
 
@@ -34,11 +36,12 @@
 namespace blue_sky
 {
 
-ObjectFactory::ObjectFactory( core::ecs::EntityManager* entity_manager, ActiveObjectManager* active_object_manager, ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager )
+ObjectFactory::ObjectFactory( core::ecs::EntityManager* entity_manager, ActiveObjectManager* active_object_manager, ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager )
 	: entity_manager_( entity_manager )
 	, active_object_manager_( active_object_manager )
 	, physics_( physics )
 	, graphics_manager_( graphics_manager )
+	, sound_manager_( sound_manager )
 {
 
 }
@@ -53,6 +56,7 @@ void ObjectFactory::setup_systems()
 	entity_manager_->add_system< ecs::TranslationSystem >( 0 );
 	entity_manager_->add_system< ecs::SpinSystem >( 0 );
 	entity_manager_->add_system< ecs::ContactCacheSystem >( 0 );
+	entity_manager_->add_system< ecs::SwitchSystem >( 0, sound_manager_ );
 }
 
 std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const string_t& kind )
@@ -155,6 +159,27 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 
 		entity->add_component< ecs::ThrowableComponent >();
 		entity->add_component< ecs::SpinComponent >()->degree_per_frame = 1.f;
+
+		return id;
+	}
+
+	if ( kind == "switch" )
+	{
+		// 以前の Switch : 0.6 x 0.9 x 0.6・硬い・壁になる・地球の重力・作ったときの質量 1。やり直すと 切 に戻り、
+		// "Off" のアニメーション・回らない（回転のしやすさ 0）・摩擦 1.5・質量 100。プレイヤーと速く飛ぶ石で入・切が変わる
+		ObjectSpec spec;
+		spec.kind = kind;
+		spec.size = Vector( 0.6f, 0.9f, 0.6f );
+		spec.mass = 1.f;
+		spec.restart_mass = 100.f;
+		spec.restart_friction = 1.5f;
+		spec.restart_angular_factor = 0.f;
+
+		const EntityId id = create_entity_object( spec );
+		core::ecs::Entity* entity = entity_manager_->find( id );
+
+		entity->add_component< ecs::SwitchComponent >();
+		entity->add_component< ecs::ContactCacheComponent >();
 
 		return id;
 	}
@@ -301,6 +326,8 @@ ObjectFactory::EntityId ObjectFactory::create_entity_object( const ObjectSpec& s
 	// やり直したときの重力（以前の GameObject::get_default_gravity : 硬い物は地球の重力、硬くない物は 0。種類によって上書き）
 	state->default_gravity = spec.has_default_gravity ? spec.gravity : ( spec.is_hard ? GameObject::GravityDefault : Vector::Zero );
 	state->restart_mass = spec.restart_mass;
+	state->restart_friction = spec.restart_friction;
+	state->restart_angular_factor = spec.restart_angular_factor;
 
 	{
 		ecs::EntityObject object( entity );
@@ -353,6 +380,7 @@ ObjectFactory::EntityId ObjectFactory::create_entity_object( const ObjectSpec& s
 		traits->is_hard = spec.is_hard;
 		traits->is_block = spec.is_block;
 		traits->is_safe_footing = spec.is_safe_footing;
+		traits->is_ghost = spec.is_ghost;
 	}
 
 	if ( spec.is_static_object )
@@ -392,6 +420,30 @@ ObjectFactory::EntityId ObjectFactory::create_translation_object( const core::Ve
 	translation->height = height;
 	translation->depth = depth;
 	translation->speed = speed;
+
+	return id;
+}
+
+ObjectFactory::EntityId ObjectFactory::create_area_switch( float_t w, float_t h, float_t d )
+{
+	ObjectSpec spec;
+	spec.kind = "area-switch";
+	spec.size = Vector( w, h, d );
+	spec.mass = 1.f;
+	spec.is_hard = false;
+	spec.is_block = false;
+	spec.is_ghost = true;
+	spec.height_offset = 0.f;
+	spec.load_model = false;		// 以前もモデルを設定していなかった（描かない）
+
+	const EntityId id = create_entity_object( spec );
+	core::ecs::Entity* entity = entity_manager_->find( id );
+
+	auto* s = entity->add_component< ecs::SwitchComponent >();
+	s->is_switched_by_stone = false;
+	s->has_feedback = false;
+
+	entity->add_component< ecs::ContactCacheComponent >();
 
 	return id;
 }

@@ -6,8 +6,6 @@
 #include <GameObject/Robot.h>
 #include <GameObject/Balloon.h>
 #include <blue_sky/GameObjectRef.h>
-#include <GameObject/Switch.h>
-#include <GameObject/AreaSwitch.h>
 
 #include <GameObject/ActiveObject.h>
 #include <GameObject/GameObjectContext.h>
@@ -28,6 +26,8 @@
 #include <blue_sky/ecs/system/SpinSystem.h>
 #include <blue_sky/ecs/system/ContactCacheSystem.h>
 #include <blue_sky/ecs/component/ContactCacheComponent.h>
+#include <blue_sky/ecs/component/SwitchComponent.h>
+#include <blue_sky/ecs/system/SwitchSystem.h>
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/ObjectBody.h>
 
@@ -45,9 +45,8 @@ ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics
 	object_creator_map_[ "girl"        ] = [] () -> ActiveObject* { return new Girl();         };
 	object_creator_map_[ "robot"       ] = [this] () -> ActiveObject* { return new Robot( graphics_manager_ ); };	// テクスチャを得る GraphicsManager を渡す
 	object_creator_map_[ "balloon"     ] = [] () -> ActiveObject* { return new Balloon();      };
-	object_creator_map_[ "switch"      ] = [] () -> ActiveObject* { return new Switch();       };
 
-	// "static"（動かない物）・"medal"・"umbrella"・"rocket"・"goal"・"ladder"・"stone" は ECS だけの物体になり、ObjectFactory が作る（段階 4）
+	// "static"（動かない物）・"medal"・"umbrella"・"rocket"・"goal"・"ladder"・"stone"・"switch"（と空間スイッチ）は ECS だけの物体になり、ObjectFactory が作る（段階 4）
 
 }
 
@@ -234,7 +233,7 @@ void ActiveObjectManager::on_collide_with_ground( core::ecs::EntityId id )
  *
  * - 両方とも ActiveObject : 今の二重ディスパッチ（同じ順に両方へ知らせる）
  * - 片方だけ ActiveObject : もう片方（ECS だけの物体）の部品の組み合わせで決める（on_collide_with_entity_object）
- * - 両方とも ECS だけの物体 : 何もしない（以前も、動かない物どうしの当たりは何も起こさなかった）
+ * - 両方とも ECS だけの物体 : 部品の組み合わせで決める（on_collide_entity_objects。石とスイッチだけ。ほかの組は以前も何も起こさなかった）
  */
 void ActiveObjectManager::on_collide( core::ecs::EntityId a, core::ecs::EntityId b )
 {
@@ -256,6 +255,16 @@ void ActiveObjectManager::on_collide( core::ecs::EntityId a, core::ecs::EntityId
 		{
 			on_collide_with_entity_object( a0 ? * a0 : * a1, a0 ? a : b, * other, object_context_ ? object_context_->sound_manager : nullptr );
 		}
+
+		return;
+	}
+
+	core::ecs::Entity* e0 = entity_manager_->find( a );
+	core::ecs::Entity* e1 = entity_manager_->find( b );
+
+	if ( e0 && e1 )
+	{
+		on_collide_entity_objects( * e0, * e1 );
 	}
 }
 
@@ -295,6 +304,16 @@ void ActiveObjectManager::on_collide_with_entity_object( GameObject& object, cor
 		}
 	}
 
+	// スイッチ（以前の BaseSwitch）: 以前は相手がプレイヤーなら BaseSwitch::on_collide_with( Player* ) が、プレイヤーの速さで入・切を変えた
+	// （逆向き（スイッチ → 相手）の on_collide_with( BaseSwitch* ) を受け取る物体は無かった）。今は押せる物体か（プレイヤーだけ）で決める
+	if ( entity.get_component< ecs::SwitchComponent >() && object.can_press_switch() )
+	{
+		if ( auto* system = entity.get_entity_manager()->get_system< ecs::SwitchSystem >() )
+		{
+			system->on_touch( static_cast< core::ecs::EntityId >( entity.get_id() ), object_id, object.get_velocity() );
+		}
+	}
+
 	// 梯子（以前の Ladder）: 以前は Ladder::on_collide_with( GameObject* ) が相手の on_collide_with( Ladder* ) を呼び、
 	// 相手がプレイヤーなら Ladder::on_collide_with( Player* ) が、最近（0.5 秒以内）触れていなければ梯子の位置で音を鳴らして覚えた。
 	// 今は相手が反応したか（プレイヤーだけが true を返す）で決める
@@ -312,6 +331,33 @@ void ActiveObjectManager::on_collide_with_entity_object( GameObject& object, cor
 				cache->cache.cache( object_id, ecs::ContactCacheComponent::LifeTime );
 			}
 		}
+	}
+}
+
+void ActiveObjectManager::on_collide_entity_objects( core::ecs::Entity& a, core::ecs::Entity& b )
+{
+	// 以前は Stone::on_collide_with( GameObject* ) がスイッチの on_collide_with( Stone* ) を呼び（1 組につき 1 回）、
+	// スイッチ → 石（on_collide_with( BaseSwitch* )）は何もしなかった
+	auto press_by_stone = [] ( core::ecs::Entity& s, core::ecs::Entity& stone )
+	{
+		const auto* switch_component = s.get_component< ecs::SwitchComponent >();
+
+		if ( ! switch_component || ! switch_component->is_switched_by_stone || ! stone.get_component< ecs::ThrowableComponent >() )
+		{
+			return false;
+		}
+
+		if ( auto* system = s.get_entity_manager()->get_system< ecs::SwitchSystem >() )
+		{
+			system->on_touch( static_cast< core::ecs::EntityId >( s.get_id() ), static_cast< core::ecs::EntityId >( stone.get_id() ), ecs::EntityObject( & stone ).get_velocity() );
+		}
+
+		return true;
+	};
+
+	if ( ! press_by_stone( a, b ) )
+	{
+		press_by_stone( b, a );
 	}
 }
 

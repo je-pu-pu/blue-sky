@@ -25,6 +25,8 @@ struct SimpleObjectComponent : public core::ecs::Component
 
 	core::Vector	default_gravity = core::Vector::Zero;	///< やり直したときの重力（硬い物は地球の重力、硬くない物は 0。以前の GameObject::get_default_gravity）
 	float_t			restart_mass = -1.f;					///< やり直したときに設定する質量（負なら変えない。以前の Goal::restart の set_mass( 100 )）
+	float_t			restart_friction = -1.f;				///< やり直したときに設定する摩擦（負なら変えない。以前の Switch::restart の set_friction( 1.5 )）
+	float_t			restart_angular_factor = -1.f;			///< やり直したときに設定する回転のしやすさ（負なら変えない。以前の Switch::restart の set_angular_factor( 0 )）
 };
 
 } // namespace blue_sky::ecs

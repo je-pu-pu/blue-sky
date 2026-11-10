@@ -10,6 +10,7 @@
 #include <vector>
 
 namespace core::ecs { class EntityManager; }
+namespace core::sound { class SoundManager; }
 
 namespace blue_sky
 {
@@ -69,11 +70,14 @@ public:
 		bool			is_hard = true;					///< 硬い（硬くない物は当たりの応答を消す。以前の is_hard）
 		bool			is_block = true;				///< 壁になる（以前の is_block）
 		bool			is_safe_footing = false;		///< 着地しても死なない足場（以前の is_safe_footing）
+		bool			is_ghost = false;				///< すり抜ける（レイが当たらない。以前の is_ghost。空間スイッチ）
 		bool			is_static_object = false;		///< 動かない物の印（StaticObjectComponent）を付けるか
 		float_t			height_offset = -1.f;			///< 足元から剛体の中心までの高さ（負なら当たりの高さの半分。以前の get_height_offset）
 		bool			has_default_gravity = false;	///< やり直したときの重力を gravity にするか（false なら 硬い物は地球の重力、硬くない物は 0）
 		core::Vector	gravity = core::Vector::Zero;
 		float_t			restart_mass = -1.f;			///< やり直したときに設定する質量（負なら変えない。以前の Goal::restart）
+		float_t			restart_friction = -1.f;		///< やり直したときに設定する摩擦（負なら変えない。以前の Switch::restart）
+		float_t			restart_angular_factor = -1.f;	///< やり直したときに設定する回転のしやすさ（負なら変えない。以前の Switch::restart）
 	};
 
 	/// 動かない物の決まり（ステージの object 行など）
@@ -84,6 +88,7 @@ private:
 	ActiveObjectManager*		active_object_manager_;		///< まだ ActiveObject の種類を作る先（nullptr ならその種類は作れない。テスト）
 	ActiveObjectPhysics*		physics_;					///< 剛体を作る世界（nullptr なら剛体を作らない。テスト）
 	graphics::GraphicsManager*	graphics_manager_;			///< モデル・定数バッファを作る先（nullptr ならモデル・定数バッファを用意しない。テスト）
+	core::sound::SoundManager*	sound_manager_;				///< ECS だけの物体の位置で音を鳴らす先（スイッチ。nullptr なら鳴らさない。テスト）
 
 	std::vector< EntityId >							entity_object_list_;	///< ここが作った ECS だけの物体（作った順）
 	std::unordered_map< string_t, EntityId >		named_object_map_;		///< 名前 → 物体
@@ -92,7 +97,7 @@ private:
 	void setup_systems();
 
 public:
-	ObjectFactory( core::ecs::EntityManager* entity_manager, ActiveObjectManager* active_object_manager, ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager );
+	ObjectFactory( core::ecs::EntityManager* entity_manager, ActiveObjectManager* active_object_manager, ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager = nullptr );
 
 	/**
 	 * 種類の名前から物体を作る（スクリプトの create_object。以前の GameMain::create_object）
@@ -127,6 +132,14 @@ public:
 
 	/// ステージの translation-object 行から動く床を作る（以前の TranslationObject。5 x 5 x 5 の箱・モデルは box-5x5x5）
 	EntityId create_translation_object( const core::Vector& location, float_t width, float_t height, float_t depth, float_t speed );
+
+	/**
+	 * ステージの area-switch 行から空間スイッチを作る（以前の AreaSwitch）
+	 *
+	 * 大きさ w x h x d のすり抜ける箱（当たりの応答なし・重力 0・足元と剛体の中心が同じ）。モデルは無い（描かない）。
+	 * プレイヤーが触れると入・切が変わる（石では変わらない）。位置・向きは作った後に設定する
+	 */
+	EntityId create_area_switch( float_t w, float_t h, float_t d );
 
 	/// 剛体を持たない、描くだけの動かない物を作る（DebugScene の町並み。以前は ActiveObjectManager::create_object( "static" ) で剛体なし）
 	EntityId create_model_object( Model* model );

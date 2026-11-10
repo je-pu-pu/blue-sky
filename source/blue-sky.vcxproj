@@ -144,15 +144,12 @@
     <ClCompile Include="core\sound\StreamingSound.cpp" />
     <ClCompile Include="core\ecs\EntityManager.cpp" />
     <ClCompile Include="GameObject\ActiveObject.cpp" />
-    <ClCompile Include="GameObject\AreaSwitch.cpp" />
     <ClCompile Include="GameObject\Balloon.cpp" />
-    <ClCompile Include="GameObject\BaseSwitch.cpp" />
     <ClCompile Include="GameObject\Camera.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="GameObject\Girl.cpp" />
     <ClCompile Include="GameObject\Player.cpp" />
     <ClCompile Include="GameObject\Robot.cpp" />
-    <ClCompile Include="GameObject\Switch.cpp" />
     <ClCompile Include="lib\src\imgui\imgui.cpp" />
     <ClCompile Include="lib\src\imgui\imgui_draw.cpp" />
     <ClCompile Include="lib\src\imgui\imgui_impl_dx11.cpp" />
@@ -180,6 +177,7 @@
     <ClCompile Include="Scene\TitleScene.cpp" />
     <ClCompile Include="Scene\TransformTestScene.cpp" />
     <ClCompile Include="blue_sky\ecs\system\ContactCacheSystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\SwitchSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\sound\SampleRateStepper.h" />
@@ -443,15 +441,12 @@
     <ClInclude Include="core\ecs\SparseIndex.h" />
     <ClInclude Include="core\ecs\StablePool.h" />
     <ClInclude Include="GameObject\ActiveObject.h" />
-    <ClInclude Include="GameObject\AreaSwitch.h" />
     <ClInclude Include="GameObject\Balloon.h" />
-    <ClInclude Include="GameObject\BaseSwitch.h" />
     <ClInclude Include="GameObject\Camera.h" />
     <ClInclude Include="GameObject\GameObject.h" />
     <ClInclude Include="GameObject\Girl.h" />
     <ClInclude Include="GameObject\Player.h" />
     <ClInclude Include="GameObject\Robot.h" />
-    <ClInclude Include="GameObject\Switch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene\CanvasTestScene.h" />
     <ClInclude Include="Scene\DebugScene.h" />
@@ -471,6 +466,8 @@
     <ClInclude Include="Scene\TransformTestScene.h" />
     <ClInclude Include="blue_sky\ecs\component\ContactCacheComponent.h" />
     <ClInclude Include="blue_sky\ecs\system\ContactCacheSystem.h" />
+    <ClInclude Include="blue_sky\ecs\component\SwitchComponent.h" />
+    <ClInclude Include="blue_sky\ecs\system\SwitchSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="blue-sky.config">

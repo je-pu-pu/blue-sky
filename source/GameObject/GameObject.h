@@ -23,7 +23,6 @@ namespace blue_sky
 class Player;
 class ActiveObjectPhysics;
 class Balloon;
-class BaseSwitch;
 class Robot;
 class DynamicObject;
 class GameObjectRef;
@@ -162,7 +161,9 @@ public:
 	 * 拾ったら true を返す（石が死ぬ。以前は Stone::on_collide_with( Player* ) が自分を kill していた）。既定は何もしない
 	 */
 	virtual bool on_collide_with_stone( const GameObjectRef& ) { return false; }
-	virtual void on_collide_with( BaseSwitch* ) { }
+
+	/// スイッチ（ECS だけの物体。ecs::SwitchComponent を持つ）を押せる物体か（プレイヤーだけ。以前は BaseSwitch::on_collide_with( Player* ) だけがあった）
+	virtual bool can_press_switch() const { return false; }
 	virtual void on_collide_with( Robot* ) { }
 	/**
 	 * 拾う物（ECS だけの物体。ecs::PickupComponent を持つ）に当たった

@@ -172,6 +172,7 @@ protected:
 	void on_collide_with( Robot* ) override;
 	bool on_collide_with_ladder() override;
 	bool on_collide_with_stone( const GameObjectRef& ) override;
+	bool can_press_switch() const override { return true; }
 	void on_collide_with_static_object() override;
 	bool on_pick_up( ecs::PickupKind kind ) override;
 	void on_collide_with( DynamicObject* ) override;

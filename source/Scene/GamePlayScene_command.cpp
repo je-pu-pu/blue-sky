@@ -7,7 +7,6 @@
 #include <GameObject/Girl.h>
 #include <GameObject/Robot.h>
 #include <GameObject/Balloon.h>
-#include <GameObject/AreaSwitch.h>
 #include <GameObject/Camera.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -552,14 +551,12 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			ss >> x >> y >> z >> w >> h >> d >> r;
 
-			AreaSwitch* s = new AreaSwitch( w, h, d );
-			s->set_rigid_body( get_active_object_physics()->add_active_object_as_box( s ) );
-			s->set_start_location( x, y, z );
-			s->set_start_direction_degree( r );
+			// 空間スイッチ（ECS だけの物体。以前は AreaSwitch を作って ActiveObjectManager に加えていた）
+			GameObjectRef object = get_object_factory()->get_ref( get_object_factory()->create_area_switch( w, h, d ) );
+			object.set_start_location( x, y, z );
+			object.set_start_direction_degree( r );
 
-			get_active_object_manager()->add_active_object( s );
-
-			last_object = get_object_factory()->get_ref( s->get_entity_id() );
+			last_object = object;
 		}
 		else if ( command == "event" || command == "exec" )
 		{

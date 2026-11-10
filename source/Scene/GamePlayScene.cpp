@@ -26,9 +26,9 @@
 #include <blue_sky/ActiveObjectManager.h>
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/DebugLog.h>
-#include <GameObject/BaseSwitch.h>
-#include <GameObject/Switch.h>
 #include <GameObject/Robot.h>
+#include <blue_sky/ecs/system/SwitchSystem.h>
+#include <core/ecs/EntityManager.h>
 
 #include <core/graphics/OculusRift.h>
 
@@ -297,14 +297,16 @@ void GamePlayScene::update()
 	{
 		debug_press_switches_frame_ = -1;
 
-		// 加えた順（ステージに書いた順）に押す。スイッチのイベントで物体が作られる（一覧に加わる）ことがあるので、添字で回す
-		const auto& objects = get_active_object_manager()->active_object_list();
+		// 作った順（ステージに書いた順）に押す。スイッチのイベントで物体が作られる（一覧に加わる）ことがあるので、添字で回す
+		// （スイッチは ECS だけの物体。以前は ActiveObject の一覧から dynamic_cast< BaseSwitch* > で探していた）
+		const auto& objects = get_object_factory()->get_entity_object_list();
+		auto* switches = get_entity_manager()->get_system< ecs::SwitchSystem >();
 
-		for ( size_t i = 0; i < objects.size(); ++i )
+		for ( size_t i = 0; switches && i < objects.size(); ++i )
 		{
-			if ( auto* s = dynamic_cast< BaseSwitch* >( objects[ i ] ) )
+			if ( switches->get_state( objects[ i ] ) )
 			{
-				const bool switched = s->do_switch();
+				const bool switched = switches->do_switch( objects[ i ] );
 				debug_log( string_t( "[Debug] スイッチを押しました : " ) + ( switched ? "入った" : "入らなかった" ) );
 			}
 		}
@@ -768,7 +770,7 @@ void GamePlayScene::debug_visit_objects()
  * 石を拾う・投げる・石がスイッチや敵や風船に当たる、を遊ばずに確かめるため（石とスイッチを ECS だけの物体にするときの見比べ）。
  * 始まってから 60 フレーム後から 10 フレームごとに、次の石の位置へプレイヤーを置く（触れると拾う）。
  * 拾い終えたら、行き先（最初のスイッチ・全部の敵・最初の風船。あるものだけ）ごとに 60 フレームずつ使う :
- * 0 フレーム目に行き先の 2.5 m 後ろ（向きを持たない物は -z の側）へ置いて行き先を向かせ、5 フレーム目に行き先へ投げ、45 フレーム目に結果を出す
+ * 0 フレーム目に行き先の 2.5 m 後ろ（行き先の向きの反対側）へ置いて行き先を向かせ、5 フレーム目に行き先へ投げ、45 フレーム目に結果を出す
  */
 void GamePlayScene::debug_throw_stones()
 {
@@ -844,7 +846,7 @@ void GamePlayScene::debug_throw_stones()
 		}
 	};
 
-	add_first( "スイッチ", find_objects( "switch", [] ( const ActiveObject* o ) { return dynamic_cast< const Switch* >( o ) != nullptr; } ) );
+	add_first( "スイッチ", find_objects( "switch", [] ( const ActiveObject* ) { return false; } ) );
 	// 敵は全部（向きや周りの壁で投げられない・見つかる敵がいるので）
 	for ( const auto& robot : find_objects( "robot", [] ( const ActiveObject* o ) { return dynamic_cast< const Robot* >( o ) != nullptr; } ) )
 	{
@@ -868,13 +870,13 @@ void GamePlayScene::debug_throw_stones()
 
 	if ( phase == 0 )
 	{
-		// 行き先の後ろ（敵に見つからないように。向きを持たない物は -z の側）に置き、行き先を向かせる
-		Vector back( 0.f, 0.f, -1.f );
+		// 行き先の後ろ（敵に見つからないように）に置き、行き先を向かせる。
+		// 後ろは行き先の向きから決める（ActiveObject::set_direction_degree の前の向きと同じ計算。ECS だけの物体も同じ所に置くため）
+		Matrix m;
+		m.set_rotation_xyz( 0.f, math::degree_to_radian( target.get_direction_degree() ), 0.f );
 
-		if ( const ActiveObject* o = target.get_active_object() )
-		{
-			back = -o->get_front();
-		}
+		Vector back = -( Vector::Forward * m );
+		back.normalize();
 
 		const Vector from = target.get_location() + back * distance;
 		const Vector to = target.get_location() - from;
@@ -897,9 +899,11 @@ void GamePlayScene::debug_throw_stones()
 	{
 		string_t result = "不明";
 
-		if ( const auto* s = dynamic_cast< const BaseSwitch* >( target.get_active_object() ) )
+		auto* switches = get_entity_manager()->get_system< ecs::SwitchSystem >();
+
+		if ( const auto state = switches ? switches->get_state( target.get_entity_id() ) : std::nullopt )
 		{
-			result = s->get_state() == BaseSwitch::State::ON ? "入" : s->get_state() == BaseSwitch::State::OFF ? "切" : "壊れた";
+			result = * state == ecs::SwitchComponent::State::ON ? "入" : * state == ecs::SwitchComponent::State::OFF ? "切" : "壊れた";
 		}
 		else if ( const auto* r = dynamic_cast< const Robot* >( target.get_active_object() ) )
 		{

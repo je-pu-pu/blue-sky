@@ -56,6 +56,10 @@ App::App()
 	{
 		FILE* out = nullptr;
 		freopen_s( & out, "CONOUT$", "w", stdout );
+
+		// 出す文字は UTF-8（/utf-8 でコンパイルしている）。新しく作ったコンソールはシステムの既定（日本語の Windows では Shift-JIS の 932）で
+		// 表示するので、UTF-8 として表示させる（以前は日本語が化けていた）
+		SetConsoleOutputCP( CP_UTF8 );
 	}
 #endif
 }

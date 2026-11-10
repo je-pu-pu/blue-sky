@@ -1,7 +1,7 @@
 #include "Renderer.h"
 
 #include <blue_sky/DebugLog.h>
-#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/Canvas2D.h>
 
 #include <core/graphics/Sprite.h>
 #include <core/graphics/Texture.h>
@@ -18,14 +18,14 @@
 namespace blue_sky::ui
 {
 
-Renderer::Renderer( GraphicsManager* gm )
-	: gm_( gm )
+Renderer::Renderer( graphics::Canvas2D* canvas )
+	: canvas_( canvas )
 {
 }
 
 core::ui::VirtualScreen Renderer::get_virtual_screen() const
 {
-	return core::ui::compute_virtual_screen( static_cast< float_t >( gm_->get_screen_width() ), static_cast< float_t >( gm_->get_screen_height() ), DESIGN_WIDTH, DESIGN_HEIGHT );
+	return core::ui::compute_virtual_screen( static_cast< float_t >( canvas_->get_screen_width() ), static_cast< float_t >( canvas_->get_screen_height() ), DESIGN_WIDTH, DESIGN_HEIGHT );
 }
 
 float_t Renderer::get_scale() const
@@ -36,11 +36,11 @@ float_t Renderer::get_scale() const
 core::ui::TargetMapping Renderer::get_draw_mapping() const
 {
 	const core::ui::VirtualScreen v = get_virtual_screen();
-	const float_t tw = gm_->get_render_target_width();
-	const float_t th = gm_->get_render_target_height();
+	const float_t tw = canvas_->get_render_target_width();
+	const float_t th = canvas_->get_render_target_height();
 
 	// 描画先が画面そのもの（普段）なら、配置と同じ倍率をそのまま使う（計算の誤差で 1 画素ずれないように）
-	if ( tw == static_cast< float_t >( gm_->get_screen_width() ) && th == static_cast< float_t >( gm_->get_screen_height() ) )
+	if ( tw == static_cast< float_t >( canvas_->get_screen_width() ) && th == static_cast< float_t >( canvas_->get_screen_height() ) )
 	{
 		return core::ui::TargetMapping{ v.scale, 0.f, 0.f };
 	}
@@ -79,10 +79,10 @@ void Renderer::draw_text( const Rect& rect, const char_t* text, const core::grap
 	scaled.outline_width *= s;
 	scaled.text_color = apply_opacity( style.text_color );
 	scaled.outline_color = apply_opacity( style.outline_color );
-	scaled.font_size = ( style.font_size > 0.f ? style.font_size : gm_->get_default_font_size() ) * s;
+	scaled.font_size = ( style.font_size > 0.f ? style.font_size : canvas_->get_default_font_size() ) * s;
 
 	begin_text_mode();
-	gm_->queue_text( p.x, p.y, p.right(), p.bottom(), text, scaled );
+	canvas_->queue_text( p.x, p.y, p.right(), p.bottom(), text, scaled );
 }
 
 void Renderer::begin_sprite_mode()
@@ -94,10 +94,10 @@ void Renderer::begin_sprite_mode()
 
 	if ( mode_ == BatchMode::TEXT )
 	{
-		gm_->flush_text();		// 先に積んだ文字を描く（後から描く Sprite が上に重なるように）
+		canvas_->flush_text();		// 先に積んだ文字を描く（後から描く Sprite が上に重なるように）
 	}
 
-	gm_->get_sprite()->begin();
+	canvas_->get_sprite()->begin();
 	mode_ = BatchMode::SPRITE;
 }
 
@@ -110,7 +110,7 @@ void Renderer::begin_text_mode()
 
 	if ( mode_ == BatchMode::SPRITE )
 	{
-		gm_->get_sprite()->end();
+		canvas_->get_sprite()->end();
 	}
 
 	mode_ = BatchMode::TEXT;
@@ -120,11 +120,11 @@ void Renderer::flush()
 {
 	if ( mode_ == BatchMode::SPRITE )
 	{
-		gm_->get_sprite()->end();
+		canvas_->get_sprite()->end();
 	}
 	else if ( mode_ == BatchMode::TEXT )
 	{
-		gm_->flush_text();
+		canvas_->flush_text();
 	}
 
 	mode_ = BatchMode::NONE;
@@ -179,13 +179,13 @@ void Renderer::draw_rect( const Rect& rect, const Color& color )
 	}
 
 	begin_sprite_mode();
-	gm_->get_sprite()->draw_color( px, apply_opacity( color ) );
+	canvas_->get_sprite()->draw_color( px, apply_opacity( color ) );
 }
 
 void Renderer::fill_screen( const Color& color )
 {
 	begin_sprite_mode();
-	gm_->get_sprite()->draw_color( win::Rect( 0, 0, static_cast< LONG >( gm_->get_render_target_width() ), static_cast< LONG >( gm_->get_render_target_height() ) ), apply_opacity( color ) );
+	canvas_->get_sprite()->draw_color( win::Rect( 0, 0, static_cast< LONG >( canvas_->get_render_target_width() ), static_cast< LONG >( canvas_->get_render_target_height() ) ), apply_opacity( color ) );
 }
 
 const core::graphics::Texture* Renderer::find_image( const string_t& image ) const
@@ -209,7 +209,7 @@ const core::graphics::Texture* Renderer::find_image( const string_t& image ) con
 
 	try
 	{
-		texture = gm_->load_named_texture_premultiplied( ( string_t( "ui:" ) + name ).c_str(), path.c_str() );
+		texture = canvas_->load_named_texture_premultiplied( ( string_t( "ui:" ) + name ).c_str(), path.c_str() );
 	}
 	catch ( const std::exception& e )		// エンジンの例外（common::exception_base）も std::exception として受け取れる
 	{
@@ -270,7 +270,7 @@ void Renderer::draw_image( const Rect& rect, const string_t& image, const Rect& 
 	uv.v1 = source.bottom() / th;
 
 	begin_sprite_mode();
-	gm_->get_sprite()->draw_uv( px, texture, uv, apply_opacity( tint ), core::graphics::Sprite::AlphaMode::PREMULTIPLIED );
+	canvas_->get_sprite()->draw_uv( px, texture, uv, apply_opacity( tint ), core::graphics::Sprite::AlphaMode::PREMULTIPLIED );
 }
 
 float_t Renderer::measure_text_width( const char_t* text, float_t font_size ) const
@@ -283,8 +283,8 @@ float_t Renderer::measure_text_width( const char_t* text, float_t font_size ) co
 		return 0.f;
 	}
 
-	const float_t size = ( font_size > 0.f ? font_size : gm_->get_default_font_size() ) * s;
-	return gm_->measure_text_width( text, size ) / s;
+	const float_t size = ( font_size > 0.f ? font_size : canvas_->get_default_font_size() ) * s;
+	return canvas_->measure_text_width( text, size ) / s;
 }
 
 float_t Renderer::measure_line_height( float_t font_size ) const
@@ -296,8 +296,8 @@ float_t Renderer::measure_line_height( float_t font_size ) const
 		return 0.f;
 	}
 
-	const float_t size = ( font_size > 0.f ? font_size : gm_->get_default_font_size() ) * s;
-	return gm_->measure_text_line_height( size ) / s;
+	const float_t size = ( font_size > 0.f ? font_size : canvas_->get_default_font_size() ) * s;
+	return canvas_->measure_text_line_height( size ) / s;
 }
 
 } // namespace blue_sky::ui

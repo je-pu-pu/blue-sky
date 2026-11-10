@@ -186,6 +186,7 @@
     <ClCompile Include="test\ui\ResourceManagerTest.cpp" />
     <ClCompile Include="test\ui\Pixel2DSpaceTest.cpp" />
     <ClCompile Include="test\ui\OptionsControllerTest.cpp" />
+    <ClCompile Include="test\ui\UIRendererTest.cpp" />
     <ClCompile Include="test\ui\UIActionTest.cpp" />
     <ClCompile Include="test\ui\UIImageTest.cpp" />
     <ClCompile Include="test\ui\UIScreenTest.cpp" />

@@ -1,6 +1,7 @@
 #include "UIOverlayScene.h"
 
 #include <blue_sky/GameMain.h>
+#include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/Input.h>
 
 #include <core/setting/SettingStore.h>

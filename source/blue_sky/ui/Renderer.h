@@ -9,7 +9,7 @@
 
 namespace blue_sky::graphics
 {
-	class GraphicsManager;
+	class Canvas2D;
 }
 
 namespace core::graphics
@@ -21,7 +21,7 @@ namespace blue_sky::ui
 {
 
 /**
- * core::ui::Renderer の具象実装（GraphicsManager の Sprite / MSDF テキストを使う）
+ * core::ui::Renderer の具象実装（2D を描く窓口 graphics::Canvas2D の Sprite・文字を使う。GraphicsManager が実装する）
  *
  * 仮想座標系は短い辺を 1920x1080 に合わせ、長い辺は画面に合わせて伸ばす（VirtualScreen）。
  * 物理画面へは**等方スケール**（縦横同じ倍率）で写すので、16:9 以外の解像度でも UI が歪まず、
@@ -30,7 +30,6 @@ namespace blue_sky::ui
 class Renderer : public core::ui::Renderer
 {
 public:
-	using GraphicsManager = blue_sky::graphics::GraphicsManager;
 	using Rect = core::ui::Rect;
 
 	/// 仮想座標系の基準解像度
@@ -41,7 +40,7 @@ public:
 	static constexpr const char_t* IMAGE_DIRECTORY = "media/texture/";
 
 private:
-	GraphicsManager* gm_;
+	graphics::Canvas2D* canvas_;		///< 描く先（作り手が渡す。以前は GraphicsManager の全体を受け取っていた）
 
 	/// 今まとめて描いている種類（同じ種類が続く間は準備と後始末を省く。順番は呼ばれたとおり）
 	enum class BatchMode { NONE, SPRITE, TEXT };
@@ -53,7 +52,7 @@ private:
 	/// 文字を描く前に呼ぶ（Sprite を描いていれば後始末する）
 	void begin_text_mode();
 
-	/// 画像名 → テクスチャ（読み込みに失敗した画像は nullptr を覚えておく）。テクスチャ自体は GraphicsManager が持つ
+	/// 画像名 → テクスチャ（読み込みに失敗した画像は nullptr を覚えておく）。テクスチャ自体は描く先（GraphicsManager）が持つ
 	mutable std::unordered_map< string_t, const core::graphics::Texture* > images_;
 
 	/// 今の画面の大きさに対する仮想画面
@@ -73,7 +72,7 @@ private:
 	const core::graphics::Texture* find_image( const string_t& image ) const;
 
 public:
-	explicit Renderer( GraphicsManager* );
+	explicit Renderer( graphics::Canvas2D* canvas );
 
 	float_t get_screen_width() const override { return get_virtual_screen().width; }
 	float_t get_screen_height() const override { return get_virtual_screen().height; }

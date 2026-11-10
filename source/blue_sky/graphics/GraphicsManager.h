@@ -5,6 +5,7 @@
 #include <blue_sky/graphics/Mesh.h>
 #include <blue_sky/graphics/RenderSettings.h>
 #include <blue_sky/graphics/ResourceLoader.h>
+#include <blue_sky/graphics/Canvas2D.h>
 #include <blue_sky/type.h>
 
 #include <core/animation/SkinningAnimationSet.h>
@@ -67,9 +68,9 @@ namespace blue_sky::graphics
  * このクラスが実体化される事はない。
  * 実際にはこのクラスを継承した blue_sky::graphics::direct_3d_11::GraphicsManager が実体化される。
  *
- * 使う側ごとの小さな窓口（RenderSettings・ResourceLoader など）も実装する。使う側は全体ではなく窓口だけを受け取る（doc/描画の窓口の分割.md）
+ * 使う側ごとの小さな窓口（ResourceLoader・RenderSettings・Canvas2D）も実装する。使う側は全体ではなく窓口だけを受け取る（doc/描画の窓口の分割.md）
  */
-class GraphicsManager : public core::graphics::GraphicsManager, public ResourceLoader, public RenderSettings
+class GraphicsManager : public core::graphics::GraphicsManager, public ResourceLoader, public RenderSettings, public Canvas2D
 {
 public:
 	using Model							= Model;
@@ -197,8 +198,8 @@ public:
 		int height;
 	};
 
-	virtual int get_screen_width() const = 0;		///< 画面の幅を返す
-	virtual int get_screen_height() const = 0;		///< 画面の高さを返す
+	int get_screen_width() const override = 0;		///< 画面の幅を返す
+	int get_screen_height() const override = 0;		///< 画面の高さを返す
 
 	/// システムが対応する表示解像度のリストを返す
 	virtual std::vector< DisplayMode > get_available_display_modes() const = 0;
@@ -271,7 +272,7 @@ public:
 	Texture* resolve_texture( TextureHandle h ) const override { return texture_manager_.resolve( h ); }
 
 	/// UI 用の画像を名前付きで読み込む（乗算済みアルファ・ミップなし。詳細は Direct3D11::load_texture_premultiplied）。失敗すると例外
-	Texture* load_named_texture_premultiplied( const char_t* name, const char_t* file_name );
+	Texture* load_named_texture_premultiplied( const char_t* name, const char_t* file_name ) override;
 
 	/**
 	 * load_named_texture_premultiplied の別スレッド版（設計上の問題 B23）
@@ -299,8 +300,8 @@ public:
 	template< typename Type, typename ... Args > Type* create_named_shader( const char_t* name, Args ... args ) { return get_shader_manager().create_named< Type >( name, this, args ... ); }
 
 	/// 今の描画先の大きさ（ビューポート。UI を描くときに、描画先に合わせて写すのに使う）
-	virtual float_t get_render_target_width() const = 0;
-	virtual float_t get_render_target_height() const = 0;
+	float_t get_render_target_width() const override = 0;
+	float_t get_render_target_height() const override = 0;
 
 	/// 別スレッドの読み込みが終わったものを処理する（GameMain が毎フレーム呼ぶ）
 	virtual void dispatch_async_loads() = 0;
@@ -355,7 +356,7 @@ public:
 
 	virtual void resolve_depth_texture() const = 0;
 	virtual Texture* get_depth_texture() const = 0;
-	virtual Sprite* get_sprite() const = 0;
+	Sprite* get_sprite() const override = 0;
 
 	virtual void clear_default_view( const Color& = Color::Black ) = 0;
 	virtual void unset_render_target() = 0;
@@ -418,10 +419,10 @@ public:
 	virtual void draw_text( float_t left, float_t top, float_t right, float_t bottom, const wchar_t* text, const core::graphics::TextStyle& style ) const = 0;
 
 	/// 文字を積むだけで、まだ描かない（flush_text で描く）。続けて描く文字列を 1 回の描画にまとめる
-	virtual void queue_text( float_t left, float_t top, float_t right, float_t bottom, const char_t* text, const core::graphics::TextStyle& style ) const = 0;
+	void queue_text( float_t left, float_t top, float_t right, float_t bottom, const char_t* text, const core::graphics::TextStyle& style ) const override = 0;
 
 	/// 積んだ文字を描く
-	virtual void flush_text() const = 0;
+	void flush_text() const override = 0;
 
 	/// 開発用 : 文字のアトラス（MSDF）を PNG に保存する
 	virtual bool save_glyph_atlas( const wchar_t* /* file_name */ ) const { return false; }
@@ -439,13 +440,13 @@ public:
 	 * @param font_size フォントサイズ（ピクセル）。0 以下ならデフォルトサイズ
 	 * @return 描画幅。フォント未準備なら 0
 	 */
-	virtual float_t measure_text_width( const char_t* text, float_t font_size ) const = 0;
+	float_t measure_text_width( const char_t* text, float_t font_size ) const override = 0;
 
 	/// テキストの 1 行の高さ（ピクセル）。font_size が 0 以下ならデフォルトサイズ
-	virtual float_t measure_text_line_height( float_t font_size ) const = 0;
+	float_t measure_text_line_height( float_t font_size ) const override = 0;
 
 	/// TextStyle::font_size が 0 のときに使われるフォントサイズ（ピクセル）
-	virtual float_t get_default_font_size() const = 0;
+	float_t get_default_font_size() const override = 0;
 
 	void set_debug_axis_enabled( bool e ) { is_debug_axis_enabled_ = e; }
 

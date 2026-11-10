@@ -2,6 +2,7 @@
 
 #include "GameObject.h"
 #include <blue_sky/ConstantBuffers.h>
+#include <blue_sky/ecs/component/TargetMoverComponent.h>
 #include <common/exception.h>
 #include <core/ecs/type.h>
 #include <memory>
@@ -37,8 +38,10 @@ namespace blue_sky
 /**
  * 行動するオブジェクト
  *
+ * ecs::TargetMover は、目標地点・向きへの移動（ecs::MoveToTargetSystem）が位置を読み・速度を向け・着いたことを知らせる窓口。
+ * 位置の正と剛体はまだこのクラスにあるので、ここで実装する（外からは使わせないので private で継承する）
  */
-class alignas( 16 ) ActiveObject : public GameObject
+class alignas( 16 ) ActiveObject : public GameObject, private ecs::TargetMover
 {
 public:
 	using Model				= graphics::Model;
@@ -72,6 +75,14 @@ private:
 
 	bool				is_mesh_visible_;	///< メッシュを描画するかどうか
 	bool				is_line_visible_;	///< ラインを描画するか
+
+	// ecs::TargetMover（MoveToTargetSystem が呼ぶ。以前 ActiveObjectManager::update が直接呼んでいたものへつなぐ）
+	Vector get_target_mover_location() const override { return get_location(); }
+	void move_toward_target_location( const Vector& target_location, float_t speed ) override { update_velocity_by_target_location( target_location, speed ); }
+	void stop_at_target_location( const Vector& target_location ) override;
+	void notify_arrive_at_target_location() override { on_arrive_at_target_location(); }
+	void chase_target_direction_degree( float_t degree, float_t speed ) override { chase_direction_degree( degree, speed ); }
+	void chase_target_direction_to( const Vector& location, float_t speed ) override { chase_direction_to( location, speed ); }
 
 protected:
 	void setup_animation_player();

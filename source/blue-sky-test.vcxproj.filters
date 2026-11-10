@@ -48,7 +48,7 @@
     <ClCompile Include="test\math\SkinningAnimationSetTest.cpp">
       <Filter>test\math</Filter>
     </ClCompile>
-    <ClCompile Include="test\ecs\TargetLocationTest.cpp">
+    <ClCompile Include="test\ecs\MoveToTargetSystemTest.cpp">
       <Filter>test\ecs</Filter>
     </ClCompile>
     <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp">

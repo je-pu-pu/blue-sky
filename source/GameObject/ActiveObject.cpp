@@ -199,6 +199,9 @@ void ActiveObject::attach_entity( core::ecs::EntityManager* entity_manager, grap
 
 	entity->add_component< core::ecs::TransformComponent >()->transform = get_transform();
 
+	// 目標地点・向きへ動かす窓口（MoveToTargetSystem が自分を位置・速度の窓口として呼ぶ）
+	entity->add_component< ecs::TargetMoverComponent >()->mover = this;
+
 	auto* render = entity->add_component< ecs::ObjectRenderComponent >();
 
 	// 毎フレーム書き換える（world・前フレームの world）ので DYNAMIC にする
@@ -250,6 +253,17 @@ void ActiveObject::sync_render_component() const
 		render->is_mesh_visible = is_mesh_visible();
 		render->is_line_visible = is_line_visible();
 	}
+}
+
+/**
+ * 目標地点に置いて止める（MoveToTargetSystem が着いたときに呼ぶ）
+ *
+ * 剛体の速度は ActiveObject を通して触る（剛体の持ち主は ActiveObjectPhysics のまま。set_velocity は同じ速度なら何もせず、変えるときは剛体を起こす）
+ */
+void ActiveObject::stop_at_target_location( const Vector& target_location )
+{
+	set_location( target_location );
+	set_velocity( Vector::Zero );
 }
 
 /**

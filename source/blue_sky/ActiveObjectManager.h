@@ -2,7 +2,6 @@
 
 #include <GameObject/ActiveObject.h>
 #include <sstream>
-#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -29,18 +28,15 @@ public:
 	/// （以前は unordered_set< ActiveObject* > で、アドレスの順になり起動ごとに変わっていた）
 	using ActiveObjectList			= std::vector< ActiveObject* >;
 	using ActiveObjectMap			= std::unordered_map< string_t, ActiveObject* >;
-	using TargetLocationMap			= std::unordered_map< ActiveObject*, std::tuple< Vector, float_t > >;
-	using TargetDirectionMap		= std::unordered_map< ActiveObject*, std::tuple< float_t, float_t > >;
-	using TargetDirectionObjectMap	= std::unordered_map< ActiveObject*, std::tuple< const ActiveObject*, float_t > >;
 
 	using CreateObjectFunction		= std::function< ActiveObject* () >;
 
 private:
 	ActiveObjectList active_object_list_;
 	ActiveObjectMap named_active_object_map_;
-	TargetLocationMap target_location_map_;
-	TargetDirectionMap target_direction_map_;
-	TargetDirectionObjectMap target_direction_object_map_;
+
+	// 目標地点・向きは Entity の部品（ecs::TargetLocationComponent・TargetDirectionComponent）が持ち、ecs::MoveToTargetSystem が動かす
+	// （以前はここに ActiveObject* を鍵にした 3 つの unordered_map があった）
 
 	std::unordered_map< string_t, CreateObjectFunction > object_creator_map_;
 
@@ -59,8 +55,12 @@ public:
 
 	void add_active_object( ActiveObject* active_object );
 	void name_active_object( const string_t& name, ActiveObject* active_object );
+
+	/// 目標地点へ動かす（ステージのコマンドの窓口。中身は ecs::MoveToTargetSystem に頼む。着いたら on_arrive_at_target_location が呼ばれる）
 	void set_target_location( ActiveObject* active_object, const Vector& target_location, float_t speed );
+	/// 決まった向きを追わせる（同上）
 	void set_target_direction( ActiveObject* active_object, float_t, float_t speed );
+	/// ほかの物体の方向を追わせる（同上）
 	void set_target_direction_object( ActiveObject* active_object, const ActiveObject* target_active_object, float_t speed );
 
 	ActiveObject* create_object( const string_t& );
@@ -74,9 +74,6 @@ public:
 
 	/// 全オブジェクトの位置と描くかどうかを描画の部品へ写す（描く前に毎フレーム。GameMain がシーンを描く前に呼ぶ）
 	void sync_render_components() const;
-
-	/// 目標の位置に着いたか（残りが 0.1 未満か、このフレームで進める距離 speed × delta_time 以内）
-	static bool is_target_location_reached( float_t distance, float_t speed, float_t delta_time );
 
 	ActiveObjectList& active_object_list() { return active_object_list_; }
 	const ActiveObjectList& active_object_list() const { return active_object_list_; }

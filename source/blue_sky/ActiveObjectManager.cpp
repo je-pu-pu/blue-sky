@@ -25,6 +25,7 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <blue_sky/ecs/system/ObjectRenderDataSystem.h>
+#include <blue_sky/ecs/system/MoveToTargetSystem.h>
 
 #include <core/ecs/EntityManager.h>
 
@@ -66,11 +67,9 @@ void ActiveObjectManager::clear()
 		delete *i;
 	}
 
+	// 目標（部品）は、物体を壊すときに Entity ごと消える
 	active_object_list_.clear();
 	named_active_object_map_.clear();
-	target_location_map_.clear();
-	target_direction_map_.clear();
-	target_direction_object_map_.clear();
 }
 
 void ActiveObjectManager::restart()
@@ -80,9 +79,10 @@ void ActiveObjectManager::restart()
 		( *i )->restart();
 	}
 
-	target_location_map_.clear();
-	target_direction_map_.clear();
-	target_direction_object_map_.clear();
+	if ( auto* system = entity_manager_->get_system< ecs::MoveToTargetSystem >() )
+	{
+		system->clear_targets();
+	}
 }
 
 void ActiveObjectManager::add_active_object( ActiveObject* active_object )
@@ -91,6 +91,9 @@ void ActiveObjectManager::add_active_object( ActiveObject* active_object )
 
 	// 描画のデータを更新する System（シーンの切り替えで EntityManager が片付けるので、無ければ足す。あれば何もしない）
 	entity_manager_->add_system< ecs::ObjectRenderDataSystem >( 0, graphics_manager_ );
+
+	// 目標地点・向きへ動かす System（同上）
+	entity_manager_->add_system< ecs::MoveToTargetSystem >( 0 );
 
 	// Entity を作り、描画の部品と定数バッファを用意する（以前は ActiveObject が定数バッファ・Model* を自分で持っていた）
 	active_object->attach_entity( entity_manager_, graphics_manager_ );
@@ -105,7 +108,13 @@ void ActiveObjectManager::name_active_object( const string_t& name, ActiveObject
 
 void ActiveObjectManager::set_target_location( ActiveObject* active_object, const Vector& target_location, float_t speed )
 {
-	target_location_map_[ active_object ] = std::make_tuple( target_location, speed );
+	auto* system = entity_manager_->get_system< ecs::MoveToTargetSystem >();
+
+	if ( ! system || ! active_object->has_entity() || ! system->set_target_location( active_object->get_entity_id(), target_location, speed ) )
+	{
+		debug_log( "[Object] 目標地点を設定できません（物体の Entity が無い。ActiveObjectManager に加えていない・片付けた後）" );
+		return;
+	}
 
 	const Vector& from = active_object->get_location();
 	debug_log( "[Object] 目標地点へ動かします ( " + std::to_string( from.x() ) + ", " + std::to_string( from.y() ) + ", " + std::to_string( from.z() ) + " ) → ( "
@@ -114,14 +123,23 @@ void ActiveObjectManager::set_target_location( ActiveObject* active_object, cons
 
 void ActiveObjectManager::set_target_direction( ActiveObject* active_object, float_t target_direction, float_t speed )
 {
-	target_direction_map_[ active_object ] = std::make_tuple( target_direction, speed );
-	target_direction_object_map_.erase( active_object );
+	auto* system = entity_manager_->get_system< ecs::MoveToTargetSystem >();
+
+	if ( ! system || ! active_object->has_entity() || ! system->set_target_direction( active_object->get_entity_id(), target_direction, speed ) )
+	{
+		debug_log( "[Object] 目標の向きを設定できません（物体の Entity が無い）" );
+	}
 }
 
 void ActiveObjectManager::set_target_direction_object( ActiveObject* active_object, const ActiveObject* target_active_object, float_t speed )
 {
-	target_direction_object_map_[ active_object ] = std::make_tuple( target_active_object, speed );
-	target_direction_map_.erase( active_object );
+	auto* system = entity_manager_->get_system< ecs::MoveToTargetSystem >();
+
+	if ( ! system || ! active_object->has_entity() || ! target_active_object->has_entity()
+		|| ! system->set_target_direction_entity( active_object->get_entity_id(), target_active_object->get_entity_id(), speed ) )
+	{
+		debug_log( "[Object] 向く先の物体を設定できません（物体の Entity が無い）" );
+	}
 }
 
 /**
@@ -254,11 +272,6 @@ ActiveObject* ActiveObjectManager::clone_object( const ActiveObject* o )
 	return o2;
 }
 
-bool ActiveObjectManager::is_target_location_reached( float_t distance, float_t speed, float_t delta_time )
-{
-	return distance < ( std::max )( 0.1f, speed * delta_time );
-}
-
 void ActiveObjectManager::update()
 {
 	// 加えた順に更新する。更新の中で物体が加えられても一覧の参照が壊れないように添字で回し、
@@ -276,42 +289,12 @@ void ActiveObjectManager::update()
 		system->update_animations();
 	}
 
-	const float_t delta_time = object_context_ && object_context_->delta_time ? object_context_->delta_time() : 0.f;
-
-	for ( auto i = target_location_map_.begin(); i != target_location_map_.end(); )
+	// 目標地点・向きへ動かす（以前はここで 3 つの unordered_map を回していた。今は部品を Entity の番号の順に回す）
+	if ( auto* system = entity_manager_->get_system< ecs::MoveToTargetSystem >() )
 	{
-		const Vector target_location = std::get< 0 >( i->second );
-		const float_t speed = std::get< 1 >( i->second );
+		const float_t delta_time = object_context_ && object_context_->delta_time ? object_context_->delta_time() : 0.f;
 
-		if ( is_target_location_reached( ( target_location - i->first->get_location() ).length(), speed, delta_time ) )
-		{
-			// 目標の位置に合わせて止める
-			// （以前は 0.1 未満に入ったときだけ着いたことにしていて、速いとき・フレームが長いときは目標の周りを行ったり来たりして着かないことがあった。
-			// 着いた後も最後の速度が残り、着いたときの処理を持たない物体（壁・プレイヤー）は動き続けていた）
-			i->first->set_location( target_location );
-			i->first->set_velocity( Vector::Zero );
-			i->first->on_arrive_at_target_location();
-
-			debug_log( "[Object] 目標地点に着きました ( " + std::to_string( target_location.x() ) + ", " + std::to_string( target_location.y() ) + ", " + std::to_string( target_location.z() ) + " )" );
-
-			i = target_location_map_.erase( i );
-		}
-		else
-		{
-			i->first->update_velocity_by_target_location( target_location, speed );
-
-			++i;
-		}
-	}
-
-	for ( auto i = target_direction_map_.begin(); i != target_direction_map_.end(); ++i )
-	{
-		i->first->chase_direction_degree( std::get< 0 >( i->second ), std::get< 1 >( i->second ) );
-	}
-
-	for ( auto i = target_direction_object_map_.begin(); i != target_direction_object_map_.end(); ++i )
-	{
-		i->first->chase_direction_to( std::get< 0 >( i->second )->get_location(), std::get< 1 >( i->second ) );
+		system->update_targets( delta_time );
 	}
 }
 

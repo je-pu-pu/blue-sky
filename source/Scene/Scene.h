@@ -2,7 +2,11 @@
 
 #include <blue_sky/type.h>
 #include <Scene/SceneRequest.h>
+#include <core/graphics/Model.h>
+#include <core/graphics/Texture.h>
 #include <functional>
+#include <set>
+#include <string>
 
 class App;
 class OculusRift;
@@ -17,6 +21,9 @@ namespace core
 {
 	class TimeManager;
 	class Sound;
+
+	/// 音を指すハンドル（core/sound/SoundManager.h と同じ型。シーンのヘッダが SoundManager を含まずに持てるように、ここでも宣言する）
+	using SoundHandle = core::ResourceHandle< Sound >;
 
 	namespace sound { class SoundManager; }
 	namespace physics { class PhysicsManager; }
@@ -62,6 +69,10 @@ public:
 	using Texture			= core::graphics::Texture;
 
 	using Sound				= core::Sound;
+
+	using TextureHandle		= core::graphics::TextureHandle;
+	using ModelHandle		= core::graphics::ModelHandle;
+	using SoundHandle		= core::SoundHandle;
 	using Config			= game::Config;
 	using MainLoop			= game::MainLoop;
 
@@ -79,6 +90,11 @@ private:
 	std::string next_scene_;
 	std::string next_stage_name_;
 	SceneArguments arguments_;		///< 遷移の要求で渡された引数（作られたときに GameMain から受け取る）
+
+	mutable std::set< std::string > lost_resource_logged_;	///< 引けなかったことをログに出した名前（毎フレーム出さない）
+
+	/// ハンドルから引けなかったことを、名前ごとに 1 回だけログに出す
+	void log_lost_resource( const char_t* what ) const;
 
 protected:
 	void update_total_elapsed_time();
@@ -131,6 +147,24 @@ protected:
 	void render_fader() const;
 
 	virtual Sound* get_bgm() { return 0; };
+
+	/**
+	 * ハンドルから引く（リソースは生ポインタで持ち続けず、ハンドルで持って使うたびに引く）
+	 *
+	 * 空・解放済みなら nullptr を返す（使う側は描かない・鳴らさない）。空でないのに引けなければ、理由を what ごとに 1 回だけログに出す
+	 */
+	Texture* resolve( TextureHandle, const char_t* what ) const;
+	Model* resolve( ModelHandle, const char_t* what ) const;
+	Sound* resolve( SoundHandle, const char_t* what ) const;
+
+	/// 画像を名前付きで読み、そのハンドルを返す（読めなければ load_named_texture と同じく例外）
+	TextureHandle load_named_texture_handle( const char_t* name, const char_t* file_name ) const;
+
+	/// モデルを読み、そのハンドルを返す（読めなければ空のハンドル）
+	ModelHandle load_model_handle( const char_t* name ) const;
+
+	/// ハンドルの音を鳴らす（引けなければ鳴らさない）
+	void play( SoundHandle, const char_t* what, bool loop = false ) const;
 
 public:
 	/// 組み立ての根（GameMain）を受け取る。シーンは GameMain のシングルトンを呼ばない（設計上の問題 B28）

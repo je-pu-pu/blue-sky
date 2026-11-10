@@ -36,16 +36,20 @@ private:
 	std::string		next_scene_name_;
 	std::string		next_stage_name_;
 
-	Texture*		sprite_texture_;
+	// リソースはハンドルで持ち、使うたびに引く（以前は生ポインタで、解放・差し替えの後に古いものを指し得た）
+	TextureHandle	sprite_texture_;
 	
 	BgSpriteLayerList	bg_sprite_layer_list_;
 
-	Sound*			bgm_;
-	Sound*			sound_;
+	SoundHandle		bgm_;		///< 空なら BGM の指定が無い
+	SoundHandle		sound_;		///< 空なら音声の指定が無い
 
 	bool			is_skipped_;
 
 	void load_story_text_file( const char* );
+
+	/// 背景の画像を読み、レイヤーを作る
+	std::unique_ptr< BgSpriteLayer > create_bg_sprite_layer( const char_t* layer_name, const char_t* texture_name, const char_t* file_name ) const;
 
 public:
 	StoryTextScene( GameMain& game_main, const char*, const char* );

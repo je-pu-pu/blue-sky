@@ -4,6 +4,7 @@
 #include <blue_sky/ObjectUpdater.h>
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/DebugLog.h>
 
 #include <core/ecs/EntityManager.h>
 #include <core/sound/SoundManager.h>
@@ -26,6 +27,68 @@ Scene::Scene( GameMain& game_main )
 Scene::~Scene()
 {
 
+}
+
+void Scene::log_lost_resource( const char_t* what ) const
+{
+	if ( lost_resource_logged_.insert( what ).second )
+	{
+		debug_log( "[" + get_name() + "] " + what + " を引けません（解放された）。使わずに続けます" );
+	}
+}
+
+Scene::Texture* Scene::resolve( TextureHandle h, const char_t* what ) const
+{
+	Texture* t = get_graphics_manager()->resolve_texture( h );
+
+	if ( ! t && ! h.is_null() )
+	{
+		log_lost_resource( what );
+	}
+
+	return t;
+}
+
+Scene::Model* Scene::resolve( ModelHandle h, const char_t* what ) const
+{
+	Model* m = get_graphics_manager()->resolve_model( h );
+
+	if ( ! m && ! h.is_null() )
+	{
+		log_lost_resource( what );
+	}
+
+	return m;
+}
+
+Scene::Sound* Scene::resolve( SoundHandle h, const char_t* what ) const
+{
+	Sound* s = get_sound_manager()->resolve( h );
+
+	if ( ! s && ! h.is_null() )
+	{
+		log_lost_resource( what );
+	}
+
+	return s;
+}
+
+Scene::TextureHandle Scene::load_named_texture_handle( const char_t* name, const char_t* file_name ) const
+{
+	return get_graphics_manager()->get_texture_handle_of( get_graphics_manager()->load_named_texture( name, file_name ) );
+}
+
+Scene::ModelHandle Scene::load_model_handle( const char_t* name ) const
+{
+	return get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( name ) );
+}
+
+void Scene::play( SoundHandle h, const char_t* what, bool loop ) const
+{
+	if ( Sound* s = resolve( h, what ) )
+	{
+		s->play( loop );
+	}
 }
 
 void Scene::update()
@@ -189,7 +252,8 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 	}
 
 	{
-		get_graphics_manager()->set_drawing_accent( get_bgm()->get_current_peak_level() * drawing_accent_scale );
+		const Sound* bgm = get_bgm();	// BGM が無い・引けないなら、線の強調は 0
+		get_graphics_manager()->set_drawing_accent( ( bgm ? bgm->get_current_peak_level() : 0.f ) * drawing_accent_scale );
 		get_graphics_manager()->set_drawing_line_type( line_type );
 
 		get_graphics_manager()->get_frame_drawing_render_data()->update();

@@ -32,21 +32,24 @@ EndingScene::EndingScene( GameMain& game_main )
 {
 	load_sequence_file();
 	current_drawing_model_index_ = 0;
-	current_drawing_model_ = drawing_model_list_[ current_drawing_model_index_ ];
 	drawing_model_elapsed_time_ = 0.f;
 	drawing_model_stop_time_ = 0.f;
 	drawing_model_offset_ = 0.f;
 
-	bgm_ = get_sound_manager()->load_music( "opening-of-the-day" );
-	switch_sound_ = get_sound_manager()->load( "switch-on" );
-	click_sound_ = get_sound_manager()->load( "click" );
+	get_sound_manager()->load_music( "opening-of-the-day" );
+	get_sound_manager()->load( "switch-on" );
+	get_sound_manager()->load( "click" );
 
-	bg_texture_ = get_graphics_manager()->load_named_texture( "cloth", "media/texture/cloth.png" );
+	bgm_ = get_sound_manager()->get_sound_handle( "opening-of-the-day" );
+	switch_sound_ = get_sound_manager()->get_sound_handle( "switch-on" );
+	click_sound_ = get_sound_manager()->get_sound_handle( "click" );
+
+	bg_texture_ = load_named_texture_handle( "cloth", "media/texture/cloth.png" );
 
 	get_graphics_manager()->get_fader()->full_in();
 
 	elapsed_timer_->reset();
-	bgm_->play( false );
+	play( bgm_, "opening-of-the-day" );
 }
 
 EndingScene::~EndingScene()
@@ -80,7 +83,7 @@ void EndingScene::load_sequence_file()
 			COMMON_THROW_EXCEPTION_MESSAGE( string_t( "load model file failed. ( " ) + model_file_name + " )" );
 		}
 
-		drawing_model_list_.push_back( model );
+		drawing_model_list_.push_back( get_graphics_manager()->get_model_handle( model ) );
 	}
 
 	if ( drawing_model_list_.empty() )
@@ -103,7 +106,11 @@ void EndingScene::update()
 	bool is_last = current_drawing_model_index_ == drawing_model_list_.size() - 1;
 	bool is_end = false;
 
-	if ( get_visible_drawing_line_part_count() > current_drawing_model_->get_line()->get_part_count() )
+	// モデルが引けなければ（解放された）、描き終えたものとして進める
+	const Model* current_drawing_model = get_current_drawing_model();
+	const int current_part_count = current_drawing_model ? current_drawing_model->get_line()->get_part_count() : 0;
+
+	if ( get_visible_drawing_line_part_count() > current_part_count )
 	{
 		drawing_model_stop_time_ += elapsed_timer_->get_elapsed_sec();
 		
@@ -123,7 +130,6 @@ void EndingScene::update()
 				drawing_model_offset_ = 0.f;
 				
 				current_drawing_model_index_++;
-				current_drawing_model_ = drawing_model_list_[ current_drawing_model_index_ ];
 			}
 		}
 	}
@@ -143,7 +149,7 @@ void EndingScene::update()
 				line_type_ = 0;
 			}
 
-			switch_sound_->play( false );
+			play( switch_sound_, "switch-on" );
 		}
 	}
 	
@@ -164,7 +170,7 @@ void EndingScene::update()
 
 	if ( drawing_accent_scale_ != last_drawing_accent_scale_ )
 	{
-		click_sound_->play( false );
+		play( click_sound_, "click" );
 	}
 
 	if ( in_fade_out_ )
@@ -203,7 +209,7 @@ void EndingScene::render_bg()
 	{
 		win::Rect dst_rect( 0, 0, get_width(), get_height() );
 
-		sprite->draw( dst_rect, bg_texture_ );
+		sprite->draw( dst_rect, resolve( bg_texture_, "cloth" ) );	// 引けなければ Sprite は描かない
 	} );
 
 	sprite->end();
@@ -226,7 +232,10 @@ void EndingScene::render_drawing_line()
 
 		bind_all_render_data();
 
-		current_drawing_model_->get_line()->render_part( get_visible_drawing_line_part_count() );
+		if ( const Model* model = get_current_drawing_model() )
+		{
+			model->get_line()->render_part( get_visible_drawing_line_part_count() );
+		}
 	} );
 
 	render_fader();

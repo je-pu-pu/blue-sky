@@ -22,20 +22,20 @@ public:
 	};
 
 private:
-	Texture* title_texture_;
-	Texture* title_bg_texture_;
-	Texture* cloth_texture_;
+	// リソースはハンドルで持ち、使うたびに引く（以前は生ポインタで、解放・差し替えの後に古いものを指し得た）
+	TextureHandle title_bg_texture_;
+	TextureHandle cloth_texture_;
 
-	Model* brand_logo_model_;
-	Model* title_logo_model_;
+	ModelHandle brand_logo_model_;
+	ModelHandle title_logo_model_;
 
-	Sound* ok_;
-	Sound* bgm_;
+	SoundHandle ok_;
+	SoundHandle bgm_;
 
 	int_t sequence_;
 	float_t sequence_elapsed_time_;
 
-	Sound* get_bgm() override { return bgm_; }
+	Sound* get_bgm() override { return resolve( bgm_, "bgm" ); }
 
 public:
 	explicit TitleScene( GameMain& game_main );

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/type.h>
+#include <core/graphics/Texture.h>
 
 #include <win/Rect.h>
 
@@ -9,11 +10,6 @@
 
 namespace core
 {
-
-	namespace graphics
-	{
-		class Texture;
-	}
 
 /**
  * 背景レイヤー
@@ -24,10 +20,11 @@ class BgSpriteLayer
 {
 public:
 	using Texture = core::graphics::Texture;
+	using TextureHandle = core::graphics::TextureHandle;
 
 private:
 	const string_t name_;
-	const Texture* texture_;
+	TextureHandle texture_;		///< 背景の画像（ハンドルで持ち、描く側が引く。以前は生ポインタで、解放の後に古いものを指し得た）
 
 	win::Rect src_rect_;
 	win::Rect dst_rect_;
@@ -40,11 +37,12 @@ private:
 	BgSpriteLayer& operator = ( const BgSpriteLayer& ) { }
 
 public:
-	BgSpriteLayer( const char_t*, const Texture* );
+	/// texture は大きさを読むだけで持たない。持つのは handle（同じテクスチャのハンドル）
+	BgSpriteLayer( const char_t* name, const Texture* texture, TextureHandle handle );
 	~BgSpriteLayer();
 
 	const string_t& get_name() const { return name_; }
-	const Texture* get_texture() const { return texture_; }
+	TextureHandle get_texture_handle() const { return texture_; }
 
 	win::Rect& get_src_rect() { return src_rect_; }
 	win::Rect& get_dst_rect() { return dst_rect_; }

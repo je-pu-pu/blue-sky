@@ -23,7 +23,7 @@ public:
 	{
 	public:
 		string_t name;
-		Texture* texture = nullptr;
+		TextureHandle texture;		///< ステージの絵（ハンドルで持ち、描くたびに引く）
 		win::Rect rect;
 		bool cleared = false;
 		bool completed = false;
@@ -48,11 +48,12 @@ private:
 
 	StageList stage_list_;
 
-	Texture* sprite_texture_;
-	Texture* bg_texture_;
+	// リソースはハンドルで持ち、使うたびに引く（以前は生ポインタで、解放・差し替えの後に古いものを指し得た）
+	TextureHandle sprite_texture_;
+	TextureHandle bg_texture_;
 
-	Sound* ok_;
-	Sound* click_;
+	SoundHandle ok_;
+	SoundHandle click_;
 
 	win::Rect cursor_src_rect_;
 	win::Rect left_arrow_src_rect_;

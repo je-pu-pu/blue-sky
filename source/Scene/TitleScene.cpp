@@ -22,28 +22,21 @@ namespace blue_sky
 
 TitleScene::TitleScene( GameMain& game_main )
 	: Scene( game_main )
-	, title_texture_( 0 )
-	, title_bg_texture_( 0 )
-	, cloth_texture_( 0 )
-	, brand_logo_model_( 0 )
-	, title_logo_model_( 0 )
-	, ok_( 0 )
-	, bgm_( 0 )
 	, sequence_( 0 )
 	, sequence_elapsed_time_( 0.f )
 {
-	ok_ = get_sound_manager()->get_sound( "ok" );
-	bgm_ = get_sound_manager()->load_music( "bgm", "ending" );
-	
-	// title_texture_ = get_graphics_manager()->load_named_texture( "sprite", "media/texture/title.png" );
-	title_bg_texture_ = get_graphics_manager()->load_named_texture( "title-bg", "media/image/cloud-3.jpg" );
-	cloth_texture_ = get_graphics_manager()->load_named_texture( "cloth", "media/texture/cloth.png" );
+	ok_ = get_sound_manager()->get_sound_handle( "ok" );
+	get_sound_manager()->load_music( "bgm", "ending" );
+	bgm_ = get_sound_manager()->get_sound_handle( "bgm" );
 
-	brand_logo_model_ = get_graphics_manager()->load_model( "je-pu-pu" );
-	title_logo_model_ = get_graphics_manager()->load_model( "blue-sky" );
+	title_bg_texture_ = load_named_texture_handle( "title-bg", "media/image/cloud-3.jpg" );
+	cloth_texture_ = load_named_texture_handle( "cloth", "media/texture/cloth.png" );
+
+	brand_logo_model_ = load_model_handle( "je-pu-pu" );
+	title_logo_model_ = load_model_handle( "blue-sky" );
 
 	reset_total_elapsed_time();
-	bgm_->play( false );
+	play( bgm_, "bgm" );
 
 	get_graphics_manager()->get_fader()->full_out();
 }
@@ -68,19 +61,23 @@ void TitleScene::update()
 	{
 		if ( sequence_ == SEQUENCE_TITLE_FIX )
 		{
-			ok_->play( false );
+			play( ok_, "ok" );
 			set_next_scene( "stage_select" );
 		}
 		else if ( ! is_first_game_play() )
 		{
-			ok_->play( false );
+			play( ok_, "ok" );
 			sequence_ = SEQUENCE_TITLE_FIX;
 			sequence_elapsed_time_ = 0.f;
 			get_graphics_manager()->get_fader()->full_out();
 		}
 	}
 
-	if ( bgm_->get_current_position() >= 8.25f )
+	// BGM が引けなければ、時間でロゴを進めない（ボタンでは進められる）
+	const Sound* bgm = get_bgm();
+	const float_t bgm_position = bgm ? bgm->get_current_position() : 0.f;
+
+	if ( bgm_position >= 8.25f )
 	{
 		if ( sequence_ < SEQUENCE_TITLE_FIX )
 		{
@@ -89,7 +86,7 @@ void TitleScene::update()
 			get_graphics_manager()->get_fader()->full_out();
 		}
 	}
-	else if ( bgm_->get_current_position() >= 4.25f )
+	else if ( bgm_position >= 4.25f )
 	{
 		if ( sequence_ < SEQUENCE_TITLE_LOGO )
 		{
@@ -123,12 +120,12 @@ void TitleScene::render()
 			if ( sequence_ >= SEQUENCE_TITLE_FIX )
 			{
 				// render_bg()
-				sprite->draw( dst_rect, title_bg_texture_ );
+				sprite->draw( dst_rect, resolve( title_bg_texture_, "title-bg" ) );	// 引けなければ Sprite は描かない
 			}
 			else
 			{
 				// render_bg()
-				sprite->draw( dst_rect, cloth_texture_, Color( 1.f, 1.f, 1.f, 0.5f ) );
+				sprite->draw( dst_rect, resolve( cloth_texture_, "cloth" ), Color( 1.f, 1.f, 1.f, 0.5f ) );
 			}
 		} );
 	}
@@ -143,11 +140,15 @@ void TitleScene::render()
 		{
 			bind_all_render_data();
 
+			// モデルは引けなければ描かない
 			if ( sequence_ == SEQUENCE_LOGO )
 			{
-				brand_logo_model_->get_line()->render_part( static_cast< int >( sequence_elapsed_time_ * 25 ) );
+				if ( const Model* brand_logo = resolve( brand_logo_model_, "je-pu-pu" ) )
+				{
+					brand_logo->get_line()->render_part( static_cast< int >( sequence_elapsed_time_ * 25 ) );
+				}
 			}
-			else if ( sequence_ >= SEQUENCE_TITLE_LOGO )
+			else if ( const Model* title_logo = resolve( title_logo_model_, "blue-sky" ); title_logo && sequence_ >= SEQUENCE_TITLE_LOGO )
 			{
 				if ( sequence_ >= SEQUENCE_TITLE_FIX )
 				{
@@ -160,7 +161,7 @@ void TitleScene::render()
 						get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data );
 					}
 
-					title_logo_model_->get_line()->render();
+					title_logo->get_line()->render();
 
 					{
 						ObjectConstantBufferData object_constant_buffer_data;
@@ -171,11 +172,11 @@ void TitleScene::render()
 						get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data );
 					}
 
-					title_logo_model_->get_line()->render();
+					title_logo->get_line()->render();
 				}
 				else
 				{
-					title_logo_model_->get_line()->render_part( static_cast< int >( sequence_elapsed_time_ * 25 ) );
+					title_logo->get_line()->render_part( static_cast< int >( sequence_elapsed_time_ * 25 ) );
 				}
 			}
 		} );

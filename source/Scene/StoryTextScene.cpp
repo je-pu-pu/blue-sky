@@ -30,9 +30,6 @@ StoryTextScene::StoryTextScene( GameMain& game_main, const char* file_name, cons
 	, text_color_( Color::from_256( 255, 255, 255, 127 ) )
 	, text_border_color_( Color::from_256( 0, 0, 0, 127 ) )
 	, next_scene_name_( next_scene_name )
-	, sprite_texture_( 0 )
-	, bgm_( 0 )
-	, sound_( 0 )
 	, is_skipped_( false )
 {
 	get_sound_manager()->stop_all();
@@ -49,11 +46,11 @@ StoryTextScene::StoryTextScene( GameMain& game_main, const char* file_name, cons
 
 	text_y_target_ = -get_graphics_manager()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) );
 	
-	sprite_texture_ = get_graphics_manager()->load_named_texture( "sprite", "media/image/title.png" );
+	sprite_texture_ = load_named_texture_handle( "sprite", "media/image/title.png" );
 
 	if ( bg_sprite_layer_list_.empty() )
 	{
-		bg_sprite_layer_list_.push_back( std::make_unique< BgSpriteLayer >( "bg", get_graphics_manager()->load_named_texture( "story-bg-default", "media/image/story-bg-default.jpg" ) ) );
+		bg_sprite_layer_list_.push_back( create_bg_sprite_layer( "bg", "story-bg-default", "media/image/story-bg-default.jpg" ) );
 	}
 
 	get_graphics_manager()->get_fader()->full_out();
@@ -96,7 +93,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 			string_t layer_name;
 			ss >> layer_name;
 
-			auto layer = std::make_unique< BgSpriteLayer >( layer_name.c_str(), get_graphics_manager()->load_named_texture( layer_name.c_str(), ( std::string( "media/image/" + layer_name ) ).c_str() ) );
+			auto layer = create_bg_sprite_layer( layer_name.c_str(), layer_name.c_str(), ( std::string( "media/image/" + layer_name ) ).c_str() );
 			current_layer = layer.get();
 
 			ss >> current_layer->get_src_rect().left() >> current_layer->get_src_rect().top();
@@ -131,9 +128,14 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 
 			ss >> bgm_name >> volume;
 
-			bgm_ = get_sound_manager()->load_music( "bgm", bgm_name.c_str() );
-			bgm_->set_volume( volume );
-			bgm_->play( false );
+			get_sound_manager()->load_music( "bgm", bgm_name.c_str() );
+			bgm_ = get_sound_manager()->get_sound_handle( "bgm" );
+
+			if ( Sound* bgm = resolve( bgm_, "bgm" ) )
+			{
+				bgm->set_volume( volume );
+				bgm->play( false );
+			}
 		}
 		else if ( command == "text-color" )
 		{
@@ -159,8 +161,9 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 		{
 			std::string sound_name;
 			ss >> sound_name;
-			sound_ = get_sound_manager()->load( "sound", sound_name.c_str() );
-			sound_->play( false );
+			get_sound_manager()->load( "sound", sound_name.c_str() );
+			sound_ = get_sound_manager()->get_sound_handle( "sound" );
+			play( sound_, "sound" );
 		}
 		else if ( command == "next-scene" )
 		{
@@ -199,28 +202,35 @@ void StoryTextScene::update()
 			set_next_scene( next_scene_name_ );
 		}
 	}
-	else if ( sound_ )
+	else if ( ! sound_.is_null() )
 	{
+		// 音が引けなければ（解放された）、鳴り終わったものとして進める
+		Sound* sound = resolve( sound_, "sound" );
+		Sound* bgm = resolve( bgm_, "bgm" );
+
 		if ( ! is_skipped_ )
 		{
-			if ( get_input()->push( Input::Button::A ) || ! sound_->is_playing() )
+			if ( get_input()->push( Input::Button::A ) || ! sound || ! sound->is_playing() )
 			{
 				is_skipped_ = true;
 			}
 		}
 		else
 		{
-			sound_->fade_out( Sound::VOLUME_FADE_SPEED_FAST );
-
-			if ( bgm_ )
+			if ( sound )
 			{
-				bgm_->fade_out();
+				sound->fade_out( Sound::VOLUME_FADE_SPEED_FAST );
+			}
+
+			if ( bgm )
+			{
+				bgm->fade_out();
 			}
 
 			get_graphics_manager()->get_fader()->fade_out();
 		}
 
-		if ( sound_->is_fade_full_out() && ( ! bgm_ || bgm_->is_fade_full_out() ) && get_graphics_manager()->get_fader()->is_full_out() )
+		if ( ( ! sound || sound->is_fade_full_out() ) && ( ! bgm || bgm->is_fade_full_out() ) && get_graphics_manager()->get_fader()->is_full_out() )
 		{
 			set_next_scene( next_scene_name_ );
 
@@ -240,6 +250,13 @@ void StoryTextScene::update()
 	{
 		( *i )->update();
 	}
+}
+
+std::unique_ptr< StoryTextScene::BgSpriteLayer > StoryTextScene::create_bg_sprite_layer( const char_t* layer_name, const char_t* texture_name, const char_t* file_name ) const
+{
+	// レイヤーは画像をハンドルで持つ（大きさを読むためにだけ、読んだ画像を渡す）
+	const Texture* texture = get_graphics_manager()->load_named_texture( texture_name, file_name );
+	return std::make_unique< BgSpriteLayer >( layer_name, texture, get_graphics_manager()->get_texture_handle_of( texture ) );
 }
 
 /**
@@ -265,7 +282,7 @@ void StoryTextScene::render()
 				t.set_translation( ( *j )->get_translation().value().x(), ( *j )->get_translation().value().y(), 0.f );
 
 				sprite->set_transform( r * s * t );
-				sprite->draw( ( *j )->get_texture(), ( *j )->get_src_rect(), ( *j )->get_color().value() );
+				sprite->draw( resolve( ( *j )->get_texture_handle(), ( *j )->get_name().c_str() ), ( *j )->get_src_rect(), ( *j )->get_color().value() );	// 引けなければ Sprite は描かない
 			}
 		} );
 	}
@@ -294,7 +311,7 @@ void StoryTextScene::render()
 			win::Rect src_rect = win::Rect::Size( 512, 0, 272, 128 );
 			win::Point dst_point( get_width() - src_rect.width(), get_height() - src_rect.height() );
 
-			sprite->draw( dst_point, sprite_texture_, src_rect );
+			sprite->draw( dst_point, resolve( sprite_texture_, "sprite" ), src_rect );
 		} );
 
 		sprite->end();

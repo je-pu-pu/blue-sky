@@ -5,9 +5,9 @@
 namespace core
 {
 
-BgSpriteLayer::BgSpriteLayer( const char_t* name, const Texture* texture )
+BgSpriteLayer::BgSpriteLayer( const char_t* name, const Texture* texture, TextureHandle handle )
 	: name_( name )
-	, texture_( texture )
+	, texture_( handle )
 	, src_rect_( 0, 0, texture->get_width(), texture->get_height() )
 	, dst_rect_( 0, 0, texture->get_width(), texture->get_height() )
 	, translation_( Vector3( 0.f, 0.f, 0.f ), Vector3( 0.f, 0.f, 0.f ), Vector3( 0.f, 0.f, 0.f ) )

@@ -89,9 +89,8 @@ void ActiveObject::setup_animation_player()
 
 	if ( get_model() && get_model()->get_skinning_animation_set() )
 	{
-		animation_player_ = std::make_unique< AnimationPlayer >(
-			get_model()->get_skinning_animation_set(),
-			graphics_manager_->create_constant_buffer( sizeof( core::BoneConstantBufferData ), core::BoneConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC ) );	// 毎フレーム書き換える
+		animation_player_ = std::make_unique< AnimationPlayer >( get_model()->get_skinning_animation_set() );
+		bone_constant_buffer_ = graphics_manager_->create_constant_buffer( sizeof( core::BoneConstantBufferData ), core::BoneConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC );	// 毎フレーム書き換える
 	}
 }
 
@@ -306,9 +305,11 @@ void ActiveObject::update_render_data() const
 
 	get_object_constant_buffer()->update( & shader_data );
 
-	if ( get_animation_player() )
+	if ( get_animation_player() && bone_constant_buffer_ )
 	{
-		get_animation_player()->update_render_data();
+		core::BoneConstantBufferData bone_data;
+		get_animation_player()->calculate_bone_matrices( bone_data );
+		bone_constant_buffer_->update( & bone_data );
 	}
 }
 
@@ -342,9 +343,9 @@ void ActiveObject::render_mesh() const
 
 	bind_render_data();
 	
-	if ( get_animation_player() )
+	if ( bone_constant_buffer_ )
 	{
-		get_animation_player()->bind_render_data();
+		bone_constant_buffer_->bind_to_vs();
 	}
 
 	get_model()->render();
@@ -366,9 +367,9 @@ void ActiveObject::render_mesh( const Shader* shader ) const
 		return;
 	}
 
-	if ( get_animation_player() )
+	if ( bone_constant_buffer_ )
 	{
-		get_animation_player()->bind_render_data();
+		bone_constant_buffer_->bind_to_vs();
 	}
 
 	shader->render_model( get_model() );

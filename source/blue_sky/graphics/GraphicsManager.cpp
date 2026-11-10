@@ -625,7 +625,7 @@ void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool
 			if ( active_object->get_model()->is_skin_mesh() == is_skin_mesh )
 			{
 				set_current_object_constant_buffer( active_object->get_object_constant_buffer() );
-				set_current_skinning_constant_buffer( active_object->get_animation_player() ? active_object->get_animation_player()->get_constant_buffer() : nullptr );
+				set_current_skinning_constant_buffer( active_object->get_bone_constant_buffer() );
 
 				active_object->render_mesh( shader );
 
@@ -657,7 +657,7 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 		}
 
 		set_current_object_constant_buffer( active_object->get_object_constant_buffer() );
-		set_current_skinning_constant_buffer( active_object->get_animation_player() ? active_object->get_animation_player()->get_constant_buffer() : nullptr );
+		set_current_skinning_constant_buffer( active_object->get_bone_constant_buffer() );
 
 		active_object->render_mesh();
 	}
@@ -708,7 +708,7 @@ void GraphicsManager::render_active_objects_velocity( const ActiveObjectManager*
 		}
 
 		set_current_object_constant_buffer( active_object->get_object_constant_buffer() );
-		set_current_skinning_constant_buffer( active_object->get_animation_player() ? active_object->get_animation_player()->get_constant_buffer() : nullptr );
+		set_current_skinning_constant_buffer( active_object->get_bone_constant_buffer() );
 
 		velocity_shader->render_model( active_object->get_model() );
 	}
@@ -875,7 +875,7 @@ void GraphicsManager::render_debug_axis_for_bones( const ActiveObject* active_ob
 	get_shared_object_render_data()->bind_to_vs();
 	get_shared_object_render_data()->bind_to_ps();
 
-	core::AnimationPlayer::BoneConstantBufferData bone_constant_buffer_data;
+	core::BoneConstantBufferData bone_constant_buffer_data;
 	active_object->get_animation_player()->calculate_bone_matrix_recursive( bone_constant_buffer_data, 0, Matrix::identity() );
 
 	for ( uint_t n = 0; n < active_object->get_animation_player()->get_skinning_animation_set()->get_bone_count(); ++n )

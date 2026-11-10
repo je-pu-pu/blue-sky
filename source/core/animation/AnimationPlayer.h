@@ -2,8 +2,6 @@
 
 #include "SkinningAnimationSet.h"
 #include <core/ConstantBuffers.h>
-#include <core/graphics/ConstantBuffer.h>
-#include <memory>
 
 namespace core
 {
@@ -25,8 +23,6 @@ private:
 	bool is_looping_;										///< ループ再生中フラグ
 	bool is_broken_;										///< 破壊フラグ
 
-	/// @todo 移動する
-	std::unique_ptr< const core::graphics::ConstantBuffer > constant_buffer_;	///< ボーン行列の定数バッファ（作り手が渡す。以前は自分で作り、中で Direct3D11 の get_instance() を使っていた）
 
 	Matrix get_bone_local_matrix( uint_t ) const;
 
@@ -35,8 +31,11 @@ private:
 	AnimationPlayer& operator = ( const AnimationPlayer& ) = delete;
 
 public:
-	/// constant_buffer は BoneConstantBufferData の大きさで BoneConstantBuffer::SLOT に作ったもの
-	AnimationPlayer( const SkinningAnimationSet*, std::unique_ptr< const core::graphics::ConstantBuffer > constant_buffer );
+	/**
+	 * ボーン行列の計算だけを受け持つ。GPU の定数バッファ（作る・書く・結び付ける）は描画の持ち主（ActiveObject）が持つ
+	 * （以前はこのクラスが定数バッファも持ち、計算と GPU への書き込みが混ざっていた）
+	 */
+	explicit AnimationPlayer( const SkinningAnimationSet* );
 	~AnimationPlayer() { }
 
 	void set_speed( float_t speed ) { speed_ = speed; }
@@ -55,10 +54,8 @@ public:
 
 	void calculate_bone_matrix_recursive( BoneConstantBufferData&, uint_t, const Matrix& ) const;
 
-	void update_render_data() const;
-	void bind_render_data() const;
-
-	const core::graphics::ConstantBuffer* get_constant_buffer() const { return constant_buffer_.get(); }
+	/// 今のフレームのボーン行列を計算する（アニメーションが無ければ単位行列）
+	void calculate_bone_matrices( BoneConstantBufferData& data ) const;
 
 	bool is_broken() const { return is_broken_; }
 	void set_broken( bool b ) { is_broken_ = b; }

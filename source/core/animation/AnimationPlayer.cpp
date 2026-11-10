@@ -8,14 +8,13 @@ namespace core
  * コンストラクタ
  *
  */
-AnimationPlayer::AnimationPlayer( const SkinningAnimationSet* skinning_animation_set, std::unique_ptr< const core::graphics::ConstantBuffer > constant_buffer )
+AnimationPlayer::AnimationPlayer( const SkinningAnimationSet* skinning_animation_set )
 	: skinning_animation_set_( skinning_animation_set )
 	, current_skinning_animation_( nullptr )
 	, speed_( 1.f )
 	, current_frame_( 0.f )
 	, is_looping_( false )
 	, is_broken_( false )
-	, constant_buffer_( std::move( constant_buffer ) )
 {
 
 }
@@ -84,27 +83,19 @@ void AnimationPlayer::update()
  *
  * @todo 必要最低限のボーン行列だけ更新するようにする
  */
-void AnimationPlayer::update_render_data() const
+void AnimationPlayer::calculate_bone_matrices( BoneConstantBufferData& data ) const
 {
 	if ( ! get_current_skinning_animation() )
 	{
-		BoneConstantBufferData data;
-
 		for ( uint_t n = 0; n < get_skinning_animation_set()->get_bone_count(); ++n )
 		{
 			data.bone_matrix[ n ].identity();
 		}
 
-		constant_buffer_->update( & data );
-
 		return;
 	}
 
-	BoneConstantBufferData data;
-
 	calculate_bone_matrix_recursive( data, 0, Matrix::identity() );
-
-	constant_buffer_->update( & data );
 }
 
 /**
@@ -168,13 +159,5 @@ Matrix AnimationPlayer::get_bone_local_matrix( uint_t bone_index ) const
 	return /* s * */ rt;
 }
 
-/**
- * 描画用のデータをシェーダーにバインドする
- *
- */
-void AnimationPlayer::bind_render_data() const
-{
-	constant_buffer_->bind_to_vs();
-}
 
 } // namespace core

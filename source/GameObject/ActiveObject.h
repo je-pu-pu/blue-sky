@@ -48,7 +48,8 @@ private:
 	Model*				model_;				///< Model (GraphicsManager が所有)
 	graphics::GraphicsManager*						graphics_manager_ = nullptr;	///< 定数バッファを作る先（登録する ActiveObjectManager が渡す。以前は定数バッファが Direct3D11 の get_instance() を使っていた）
 	std::unique_ptr< const core::graphics::ConstantBuffer >	object_constant_buffer_;	///< 定数バッファ（setup_render_data() で作る）
-	std::unique_ptr< AnimationPlayer >				animation_player_;			///< アニメーション再生
+	std::unique_ptr< AnimationPlayer >				animation_player_;			///< アニメーション再生（ボーン行列の計算）
+	std::unique_ptr< const core::graphics::ConstantBuffer >	bone_constant_buffer_;	///< ボーン行列の定数バッファ（以前は AnimationPlayer が持っていた）
 
 	bool				is_dead_;			///< 死亡フラグ
 	float_t				flicker_scale_;		///< ゆらぎの大きさ
@@ -134,6 +135,7 @@ public:
 	void setup_render_data( graphics::GraphicsManager* graphics_manager );
 
 	const core::graphics::ConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_.get(); }
+	const core::graphics::ConstantBuffer* get_bone_constant_buffer() const { return bone_constant_buffer_.get(); }
 
 	virtual void update_render_data() const;
 	[[deprecated]] virtual void bind_render_data() const;

@@ -152,10 +152,16 @@ get_entity_manager()->add_system< RenderSystem >( 1000, get_graphics_manager(), 
 
 - Direct3D 11, DirectInput, DirectSound (Windows)
 - Bullet Physics 3.25
-- Lua 5.3.4 + Sol2 3.2.3 (スクリプティング)
+- Lua 5.4.3 + Sol2 3.2.3 (スクリプティング。今は主に開発用のコマンド入力)
+- toml++ 3.4.0 (ステージの TOML)
 - imgui 1.91.0 (デバッグUI)
-- FBX SDK 2020.2 (モデルインポート)
-- Oculus SDK 1.43.0 (VRサポート)
+- FBX SDK（ヘッダ 2020.2・lib 2020.3.9。モデルインポート）
+- PortAudio・libogg・libvorbis・TinySoundFont・libremidi (音)
+- FreeType 2.14.1・msdfgen 1.13.0 (文字の描画)
+- ONNX Runtime 1.24 + DirectML (Neural NPR。exe と一緒に DLL を配る)
+- Oculus SDK 1.43.0 (VR。今は `OCULUS_RIFT_ENABLED` が未定義で、リンクしていない)
+
+ライブラリと素材のライセンス・配布のときにすることは `doc/ライセンス.md`、配布物に同梱する表示は `THIRD_PARTY_NOTICES.txt`。**ライブラリや素材を足したら、両方を更新する**。
 
 ## ゲームを自動で起動して確かめるとき
 

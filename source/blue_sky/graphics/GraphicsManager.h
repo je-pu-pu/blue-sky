@@ -32,6 +32,8 @@ namespace core
 		class Shader;
 		class Texture;
 		class BackBufferTexture;
+
+		namespace direct_3d_11 { class Direct3D11; }
 	}
 
 }
@@ -124,6 +126,7 @@ protected:
 	[[nodiscard]] virtual ShadowMap* create_shadow_map( uint_t, uint_t ) const = 0;
 	[[nodiscard]] virtual Line* create_line() = 0;	///< Line はテクスチャを読み込むので const ではない（自分を Line に渡す）
 	[[nodiscard]] virtual Texture* load_texture_file( const char_t* ) const = 0;
+
 	[[nodiscard]] virtual Texture* load_texture_file_premultiplied( const char_t* ) const = 0;
 
 	/**
@@ -141,6 +144,9 @@ protected:
 	virtual void render_debug_axis_model() const = 0;
 
 public:
+	/// Direct3D 11 の実装に直接触る所（頂点バッファ・Draw など）向け。抽象層（core::graphics::GraphicsManager）には置かない（B19）
+	virtual core::graphics::direct_3d_11::Direct3D11* get_direct_3d() const = 0;
+
 	GraphicsManager();
 	virtual ~GraphicsManager() override;
 

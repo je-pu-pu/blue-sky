@@ -27,7 +27,8 @@ private:
 	bool changed_;
 
 public:
-	DynamicPointList( Direct3D* direct_3d = Direct3D::get_instance() )
+	/// direct_3d は作り手が渡す（以前は既定の引数で Direct3D11 の get_instance() から取っていた）
+	explicit DynamicPointList( Direct3D* direct_3d )
 		: direct_3d_( direct_3d )
 		, changed_( false )
 	{

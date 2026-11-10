@@ -19,8 +19,8 @@ private:
 	}
 
 public:
-	ConstantBufferTyped( )
-		: ConstantBuffer< Slot >( sizeof( DataType ) )
+	explicit ConstantBufferTyped( Direct3D11* direct_3d )
+		: ConstantBuffer< Slot >( direct_3d, sizeof( DataType ) )
 	{
 
 	}

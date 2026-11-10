@@ -8,14 +8,14 @@ namespace core
  * コンストラクタ
  *
  */
-AnimationPlayer::AnimationPlayer( const SkinningAnimationSet* skinning_animation_set )
+AnimationPlayer::AnimationPlayer( const SkinningAnimationSet* skinning_animation_set, std::unique_ptr< const core::graphics::ConstantBuffer > constant_buffer )
 	: skinning_animation_set_( skinning_animation_set )
 	, current_skinning_animation_( nullptr )
 	, speed_( 1.f )
 	, current_frame_( 0.f )
 	, is_looping_( false )
 	, is_broken_( false )
-	, constant_buffer_()
+	, constant_buffer_( std::move( constant_buffer ) )
 {
 
 }
@@ -95,7 +95,7 @@ void AnimationPlayer::update_render_data() const
 			data.bone_matrix[ n ].identity();
 		}
 
-		constant_buffer_.update( & data );
+		constant_buffer_->update( & data );
 
 		return;
 	}
@@ -104,7 +104,7 @@ void AnimationPlayer::update_render_data() const
 
 	calculate_bone_matrix_recursive( data, 0, Matrix::identity() );
 
-	constant_buffer_.update( & data );
+	constant_buffer_->update( & data );
 }
 
 /**
@@ -174,7 +174,7 @@ Matrix AnimationPlayer::get_bone_local_matrix( uint_t bone_index ) const
  */
 void AnimationPlayer::bind_render_data() const
 {
-	constant_buffer_.bind_to_vs();
+	constant_buffer_->bind_to_vs();
 }
 
 } // namespace core

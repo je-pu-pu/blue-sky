@@ -28,7 +28,7 @@ CanvasTestScene::CanvasTestScene( GameMain& game_main )
 	: Scene( game_main )
 	, tablet_( Tablet::get_instance( get_game_main()->get_app()->GetWindowHandle() ) )
 	, pen_color_( 0.f, 0.f, 0.f, 1.f )
-	, points_( new DynamicPointList() )
+	, points_( new DynamicPointList( get_graphics_manager()->get_direct_3d() ) )
 {
 	texture_ = get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" );
 	get_graphics_manager()->set_sky_box( "sky-box-sky" );

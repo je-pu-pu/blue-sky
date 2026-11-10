@@ -37,8 +37,6 @@ namespace core::graphics::direct_3d_11
 
 const Direct3D11::Color Direct3D11::DEFAULT_CLEAR_COLOR = Direct3D11::Color::Black;
 
-Direct3D11* Direct3D11::instance_ = nullptr;
-
 /**
  * コンストラクタ
  *
@@ -57,8 +55,6 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sam
 	, depth_stencil_texture_( 0 )
 	, depth_stencil_view_( 0 )
 {
-	instance_ = this;
-
 	IDXGIFactory1* dxgi_factory = 0;
 	DIRECT_X_FAIL_CHECK( CreateDXGIFactory1( __uuidof( IDXGIFactory1 ), reinterpret_cast< void** >( & dxgi_factory ) ) );
 

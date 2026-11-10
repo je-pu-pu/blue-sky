@@ -136,7 +136,8 @@ void GeometryShaderCanvasTestScene::render()
 	get_graphics_manager()->set_primitive_topology( GraphicsManager::PrimitiveTopology::LINE_LIST );
 	get_graphics_manager()->set_input_layout( input_layout_ );
 
-	blue_sky::ObjectConstantBufferWithData shader_data;
+	// 定数バッファは GraphicsManager の共有のものを使う（以前はローカル変数で作り、中で Direct3D11 の get_instance() を使っていた）
+	ObjectConstantBufferData shader_data;
 
 	static const int bpm = 120;
 	static int last_step = 0;
@@ -161,13 +162,13 @@ void GeometryShaderCanvasTestScene::render()
 	}
 	
 
-	shader_data.data().world.set_identity();
-	shader_data.data().world *= Matrix().set_rotation_y( aa );
-	shader_data.data().world *= Matrix().set_scaling( scale, scale, scale );
+	shader_data.world.set_identity();
+	shader_data.world *= Matrix().set_rotation_y( aa );
+	shader_data.world *= Matrix().set_scaling( scale, scale, scale );
 
-	shader_data.update();
+	get_graphics_manager()->get_shared_object_render_data()->update( & shader_data );
 
-	get_graphics_manager()->set_current_object_constant_buffer( & shader_data );
+	get_graphics_manager()->set_current_object_constant_buffer( get_graphics_manager()->get_shared_object_render_data() );
 	get_graphics_manager()->set_current_skinning_constant_buffer( nullptr );
 
 	render_technique( "|line_cube", [ this ]

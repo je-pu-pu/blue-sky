@@ -102,6 +102,8 @@ public:
 	void set_default_render_target( bool clear = true ) override;
 
 	std::unique_ptr< core::graphics::ConstantBuffer > create_constant_buffer( size_t size, int slot ) override;
+	std::unique_ptr< core::graphics::InstanceBuffer > create_instance_buffer() override;
+	Direct3D* get_direct_3d() const override { return direct_3d_; }
 
 	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type, this ); }
 

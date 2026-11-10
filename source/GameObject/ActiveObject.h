@@ -13,6 +13,7 @@ namespace core
 	{
 		class Shader;
 		class Texture;
+		class ConstantBuffer;
 	}
 }
 
@@ -21,6 +22,7 @@ namespace blue_sky
 	namespace graphics
 	{
 		class Model;
+		class GraphicsManager;
 	}
 
 /**
@@ -44,7 +46,8 @@ private:
 	float_t				start_direction_degree_;	///< スタート時の向き ( Y Axis )
 
 	Model*				model_;				///< Model (GraphicsManager が所有)
-	std::unique_ptr< const ObjectConstantBuffer >	object_constant_buffer_;	///< 定数バッファ
+	graphics::GraphicsManager*						graphics_manager_ = nullptr;	///< 定数バッファを作る先（登録する ActiveObjectManager が渡す。以前は定数バッファが Direct3D11 の get_instance() を使っていた）
+	std::unique_ptr< const core::graphics::ConstantBuffer >	object_constant_buffer_;	///< 定数バッファ（setup_render_data() で作る）
 	std::unique_ptr< AnimationPlayer >				animation_player_;			///< アニメーション再生
 
 	bool				is_dead_;			///< 死亡フラグ
@@ -116,7 +119,10 @@ public:
 	void set_mesh_visible( bool v ) { is_mesh_visible_ = v; }
 	void set_line_visible( bool v ) { is_line_visible_ = v; }
 
-	const ObjectConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_.get(); }
+	/// 描画の準備をする（定数バッファを作る。作り直しはしない）。ActiveObjectManager に登録するときに呼ばれる
+	void setup_render_data( graphics::GraphicsManager* graphics_manager );
+
+	const core::graphics::ConstantBuffer* get_object_constant_buffer() const { return object_constant_buffer_.get(); }
 
 	virtual void update_render_data() const;
 	[[deprecated]] virtual void bind_render_data() const;

@@ -22,16 +22,19 @@ class VertexBuffer
 public:
 
 private:
+	Direct3D11* direct_3d_;		///< バッファを作る・更新する先（作り手が渡す。以前は Direct3D11 の get_instance() から取っていた）
 	com_ptr< ID3D11Buffer > buffer_;
 	D3D11_BUFFER_DESC buffer_desc_ = { 0 };
 
 public:
 	/**
 	 * @brief コンテナを使用して頂点バッファを作成する
+	 * @param direct_3d 頂点バッファを作る先
 	 * @param container 頂点バッファに設定するデータの入ったコンテナ
 	 * @param type 作成する頂点バッファの種類
 	 */
-	VertexBuffer( const ContainerType& container, BufferType type = BufferType::DEFAULT )
+	VertexBuffer( Direct3D11* direct_3d, const ContainerType& container, BufferType type = BufferType::DEFAULT )
+		: direct_3d_( direct_3d )
 	{
 		buffer_desc_.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		buffer_desc_.Usage = ( type == BufferType::UPDATABLE ) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
@@ -41,7 +44,7 @@ public:
 		D3D11_SUBRESOURCE_DATA data = { nullptr };
 		data.pSysMem = & container[ 0 ];
 
-		DIRECT_X_FAIL_CHECK( Direct3D11::get_instance()->getDevice()->CreateBuffer( & buffer_desc_, & data, & buffer_ ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc_, & data, & buffer_ ) );
 	}
 
 	/**
@@ -56,11 +59,11 @@ public:
 
 		D3D11_MAPPED_SUBRESOURCE mapped_subresource;
 
-		DIRECT_X_FAIL_CHECK( Direct3D11::get_instance()->getImmediateContext()->Map( buffer_.get(), 0, D3D11_MAP_WRITE_DISCARD, 0, & mapped_subresource ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getImmediateContext()->Map( buffer_.get(), 0, D3D11_MAP_WRITE_DISCARD, 0, & mapped_subresource ) );
 
 		memcpy( mapped_subresource.pData, & container[ 0 ], sizeof( ContainerType::value_type ) * container.size() );
 
-		Direct3D11::get_instance()->getImmediateContext()->Unmap( buffer_.get(), 0 );
+		direct_3d_->getImmediateContext()->Unmap( buffer_.get(), 0 );
 	}
 
 	/**
@@ -72,7 +75,7 @@ public:
 		UINT stride = sizeof( ContainerType::value_type );
 		UINT offset = 0;
 
-		Direct3D11::get_instance()->getImmediateContext()->IASetVertexBuffers( 0, 1, & buffer_, & stride, & offset );
+		direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, 1, & buffer_, & stride, & offset );
 	}
 
 }; // class VertexBuffer

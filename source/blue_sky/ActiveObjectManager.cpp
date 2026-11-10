@@ -81,6 +81,7 @@ void ActiveObjectManager::restart()
 void ActiveObjectManager::add_active_object( ActiveObject* active_object )
 {
 	active_object->set_context( object_context_ );
+	active_object->setup_render_data( graphics_manager_ );	// 定数バッファを作る（以前は ActiveObject が自分で作り、中で Direct3D11 の get_instance() を使っていた）
 
 	active_object_list_.insert( active_object );
 }

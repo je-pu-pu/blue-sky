@@ -55,8 +55,6 @@ public:
 private:
 	static const Color DEFAULT_CLEAR_COLOR;
 
-	static Direct3D11* instance_;
-
 	com_ptr< IDXGIAdapter1 >	dxgi_adapter_;
 
 	/// @todo スマートポインタ ( com_ptr ) 化する？
@@ -102,8 +100,8 @@ public:
 	Direct3D11( HWND, int, int, bool, int = 0, int = 0 );
 	~Direct3D11();
 
-	inline static Direct3D11* get_instance() { return instance_; }
-	
+	// 以前あった get_instance()（隠れた大域アクセス）は削除した。使う側は作り手から Direct3D11* を受け取る
+
 	/// OculusRift で使用
 	ID3D11RenderTargetView* create_render_target_view( ID3D11Texture2D* );
 	ID3D11DepthStencilView* create_depth_stencil_view( ID3D11Texture2D* );

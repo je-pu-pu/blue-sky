@@ -109,8 +109,8 @@ bool NeuralNprEffect::apply( core::graphics::GraphicsManager* gm, core::graphics
 
 	if ( ! enabled_ || ! stylizer_ ) return false;
 
-	auto* d3d = core::graphics::direct_3d_11::Direct3D11::get_instance();
 	auto* rtt = static_cast< core::graphics::direct_3d_11::RenderTargetTexture* >( scene );
+	auto* d3d = rtt->get_direct_3d();	// 読み戻しに使うデバイス・コンテキストはテクスチャを作った Direct3D11 から得る（以前は Direct3D11 の get_instance()）
 
 	ID3D11Resource* resource = nullptr;
 	rtt->get_render_target_view()->GetResource( & resource );

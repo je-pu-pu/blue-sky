@@ -19,6 +19,13 @@ protected:
 	DataType data_;
 
 public:
+	/// direct_3d はバッファを作る先（作り手が渡す。以前は Direct3D11 の get_instance() から取っていた）
+	explicit ConstantBufferWithData( Direct3D11* direct_3d )
+		: ConstantBufferTyped( direct_3d )
+	{
+
+	}
+
 	DataType& data() { return data_; }
 	const DataType& data() const { return data_; }
 

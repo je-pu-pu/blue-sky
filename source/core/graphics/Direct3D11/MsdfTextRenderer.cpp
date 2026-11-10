@@ -68,8 +68,8 @@ MsdfTextRenderer::MsdfTextRenderer( direct_3d_11::Direct3D11* direct_3d, const c
 
 	cache_ = std::make_unique< GlyphCache >( font_.get(), atlas_.get(), CELL_SIZE );
 
-	msdf_constant_buffer_ = std::make_unique< MsdfConstantBuffer >();
-	transform_constant_buffer_ = std::make_unique< TransformConstantBuffer >();
+	msdf_constant_buffer_ = std::make_unique< MsdfConstantBuffer >( direct_3d_ );
+	transform_constant_buffer_ = std::make_unique< TransformConstantBuffer >( direct_3d_ );
 
 	create_vertex_buffer();
 	create_index_buffer();

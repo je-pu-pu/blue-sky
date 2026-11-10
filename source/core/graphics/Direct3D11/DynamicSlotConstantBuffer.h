@@ -15,12 +15,14 @@ namespace core::graphics::direct_3d_11
 class DynamicSlotConstantBuffer : public core::graphics::ConstantBuffer
 {
 private:
+	Direct3D11* direct_3d_;		///< バッファを作る・更新する先（作り手が渡す。以前は Direct3D11 の get_instance() から取っていた）
 	ID3D11Buffer* constant_buffer_;
 	int slot_;
 
 public:
-	DynamicSlotConstantBuffer( size_t size, int slot )
-		: constant_buffer_( nullptr )
+	DynamicSlotConstantBuffer( Direct3D11* direct_3d, size_t size, int slot )
+		: direct_3d_( direct_3d )
+		, constant_buffer_( nullptr )
 		, slot_( slot )
 	{
 		D3D11_BUFFER_DESC buffer_desc = { 0 };
@@ -29,7 +31,7 @@ public:
 		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
 		buffer_desc.ByteWidth = size + ( size % 16 == 0 ? 0 : 16 - size % 16 );
 
-		DIRECT_X_FAIL_CHECK( Direct3D11::get_instance()->getDevice()->CreateBuffer( & buffer_desc, 0, & constant_buffer_ ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, 0, & constant_buffer_ ) );
 	}
 
 	~DynamicSlotConstantBuffer()
@@ -39,37 +41,37 @@ public:
 
 	void update( const void* data ) const override
 	{
-		Direct3D11::get_instance()->getImmediateContext()->UpdateSubresource( constant_buffer_, 0, 0, data, 0, 0 );
+		direct_3d_->getImmediateContext()->UpdateSubresource( constant_buffer_, 0, 0, data, 0, 0 );
 	}
 
 	void bind_to_vs() const override
 	{
-		Direct3D11::get_instance()->getImmediateContext()->VSSetConstantBuffers( slot_, 1, & constant_buffer_ );
+		direct_3d_->getImmediateContext()->VSSetConstantBuffers( slot_, 1, & constant_buffer_ );
 	}
 
 	void bind_to_hs() const override
 	{
-		Direct3D11::get_instance()->getImmediateContext()->HSSetConstantBuffers( slot_, 1, & constant_buffer_ );
+		direct_3d_->getImmediateContext()->HSSetConstantBuffers( slot_, 1, & constant_buffer_ );
 	}
 
 	void bind_to_ds() const override
 	{
-		Direct3D11::get_instance()->getImmediateContext()->DSSetConstantBuffers( slot_, 1, & constant_buffer_ );
+		direct_3d_->getImmediateContext()->DSSetConstantBuffers( slot_, 1, & constant_buffer_ );
 	}
 
 	void bind_to_cs() const override
 	{
-		Direct3D11::get_instance()->getImmediateContext()->CSSetConstantBuffers( slot_, 1, & constant_buffer_ );
+		direct_3d_->getImmediateContext()->CSSetConstantBuffers( slot_, 1, & constant_buffer_ );
 	}
 
 	void bind_to_gs() const override
 	{
-		Direct3D11::get_instance()->getImmediateContext()->GSSetConstantBuffers( slot_, 1, & constant_buffer_ );
+		direct_3d_->getImmediateContext()->GSSetConstantBuffers( slot_, 1, & constant_buffer_ );
 	}
 
 	void bind_to_ps() const override
 	{
-		Direct3D11::get_instance()->getImmediateContext()->PSSetConstantBuffers( slot_, 1, & constant_buffer_ );
+		direct_3d_->getImmediateContext()->PSSetConstantBuffers( slot_, 1, & constant_buffer_ );
 	}
 
 }; // class DynamicSlotConstantBuffer

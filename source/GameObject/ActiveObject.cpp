@@ -4,6 +4,7 @@
 
 #include <blue_sky/ConstantBuffers.h>
 
+#include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
 
@@ -29,7 +30,6 @@ ActiveObject::ActiveObject()
 	, start_direction_degree_( 0 )
 
 	, model_( nullptr )
-	, object_constant_buffer_( std::make_unique< ObjectConstantBuffer >() )
 	, animation_player_( nullptr )
 	, is_dead_( false )
 	, flicker_scale_( 1.f )
@@ -52,7 +52,7 @@ ActiveObject::ActiveObject( const ActiveObject& o )
 	, start_direction_degree_( o.start_direction_degree_ )
 
 	, model_( o.model_ )
-	, object_constant_buffer_( std::make_unique< ObjectConstantBuffer >() )
+	, graphics_manager_( o.graphics_manager_ )
 	, animation_player_( nullptr )
 	, is_dead_( o.is_dead_ )
 	, flicker_scale_( o.flicker_scale_ )
@@ -62,7 +62,10 @@ ActiveObject::ActiveObject( const ActiveObject& o )
 	, is_mesh_visible_( o.is_mesh_visible_ )
 	, is_line_visible_( o.is_line_visible_ )
 {
-	setup_animation_player();
+	if ( graphics_manager_ )
+	{
+		setup_render_data( graphics_manager_ );
+	}
 }
 
 ActiveObject::~ActiveObject() = default;
@@ -78,10 +81,37 @@ void ActiveObject::setup_animation_player()
 		return;
 	}
 
+	// 定数バッファを作る先がまだ無い（ActiveObjectManager に登録する前）ときは、登録時の setup_render_data() で作る
+	if ( ! graphics_manager_ )
+	{
+		return;
+	}
+
 	if ( get_model() && get_model()->get_skinning_animation_set() )
 	{
-		animation_player_ = std::make_unique< AnimationPlayer >( get_model()->get_skinning_animation_set() );
+		animation_player_ = std::make_unique< AnimationPlayer >(
+			get_model()->get_skinning_animation_set(),
+			graphics_manager_->create_constant_buffer( sizeof( core::BoneConstantBufferData ), core::BoneConstantBuffer::SLOT ) );
 	}
+}
+
+/**
+ * 描画の準備をする
+ *
+ * 定数バッファ（world とボーン行列）を graphics_manager に作ってもらう。既に作ってあれば作り直さない
+ *
+ * @param graphics_manager 定数バッファを作る先
+ */
+void ActiveObject::setup_render_data( graphics::GraphicsManager* graphics_manager )
+{
+	graphics_manager_ = graphics_manager;
+
+	if ( ! object_constant_buffer_ )
+	{
+		object_constant_buffer_ = graphics_manager_->create_constant_buffer( sizeof( ObjectConstantBufferData ), ObjectConstantBuffer::SLOT );
+	}
+
+	setup_animation_player();
 }
 
 void ActiveObject::restart()
@@ -238,7 +268,7 @@ void ActiveObject::kill()
  */
 void ActiveObject::update_render_data() const
 {
-	if ( ! is_visible() )
+	if ( ! is_visible() || ! get_object_constant_buffer() )
 	{
 		return;
 	}

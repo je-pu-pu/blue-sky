@@ -19,7 +19,8 @@ RenderSystem::RenderSystem( core::graphics::GraphicsManager* graphics_manager, c
 	// , render_result_texture_1_( get_graphics_manager()->create_render_target_texture( core::graphics::PixelFormat::R8_UINT ) )
 	, render_result_texture_1_( get_graphics_manager()->create_render_target_texture() )
 	, render_result_texture_2_( get_graphics_manager()->create_render_target_texture() )
-	, instance_buffer_( std::make_unique< core::graphics::direct_3d_11::InstanceBuffer >() )
+	, instance_buffer_( get_graphics_manager()->create_instance_buffer() )
+	, object_constant_buffer_( get_graphics_manager()->create_constant_buffer( sizeof( core::ObjectConstantBufferData ), core::ObjectConstantBuffer::SLOT ) )
 {
 	//
 }
@@ -117,11 +118,11 @@ void RenderSystem::update()
 			// 通常描画 (1インスタンスずつ)
 			for ( const auto& world : matrices )
 			{
-				core::ObjectConstantBufferWithData shader_data;
-				shader_data.data().world = world;
-				shader_data.update();
+				core::ObjectConstantBufferData shader_data;
+				shader_data.world = world;
+				object_constant_buffer_->update( & shader_data );
 
-				get_graphics_manager()->set_current_object_constant_buffer( & shader_data );
+				get_graphics_manager()->set_current_object_constant_buffer( object_constant_buffer_.get() );
 				get_graphics_manager()->set_current_skinning_constant_buffer( nullptr );
 				model->render();
 			}

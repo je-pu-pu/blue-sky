@@ -22,6 +22,7 @@ class RenderTarget;
 class RenderTargetTexture;
 class BackBufferTexture;
 class ConstantBuffer;
+class InstanceBuffer;
 
 // enum class PrimitiveTopology;
 class InputLayout;
@@ -75,6 +76,8 @@ public:
 	const ShaderManager::ResourceList& get_shader_list() const { return shader_manager_.get_resource_list(); }
 
 	virtual std::unique_ptr< ConstantBuffer > create_constant_buffer( size_t size, int slot ) = 0;
+	virtual std::unique_ptr< InstanceBuffer > create_instance_buffer() = 0;
+
 
 	virtual Texture* load_texture( const char_t* ) = 0;
 

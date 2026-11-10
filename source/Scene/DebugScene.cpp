@@ -370,10 +370,6 @@ void DebugScene::update()
 	if ( get_input()->push( Input::Button::A ) )
 	{
 		city_generator_.step();
-
-		// GameObject* o = get_active_object_manager()->get_nearest_object( GameObject::Vector3( camera_->position().x(), camera_->position().y(), camera_->position().z() ) );
-		// o->get_component< 
-
 	}
 
 	// filter->setCutoff( camera_->position().xz().length() * 300.f );

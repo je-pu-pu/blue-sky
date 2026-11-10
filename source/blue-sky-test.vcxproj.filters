@@ -120,6 +120,9 @@
     <ClCompile Include="test\ecs\EntityManagerTest.cpp">
       <Filter>ecs</Filter>
     </ClCompile>
+    <ClCompile Include="test\ecs\EcsBenchmarkTest.cpp">
+      <Filter>ecs</Filter>
+    </ClCompile>
     <ClCompile Include="test\ecs\ObjectRenderDataSystemTest.cpp">
       <Filter>ecs</Filter>
     </ClCompile>

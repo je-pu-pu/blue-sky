@@ -1,5 +1,7 @@
 #include "RawInput.h"
 
+#include <game/Game.h>
+
 namespace blue_sky::raw_input
 {
 
@@ -66,6 +68,33 @@ void Decoder::decode( const RAWINPUT& raw, std::vector< Event >& out )
 		if ( m.usButtonFlags & RI_MOUSE_WHEEL )
 		{
 			out.push_back( Event{ Event::Type::MOUSE_WHEEL, 0, 0, static_cast< SHORT >( m.usButtonData ) } );
+		}
+	}
+}
+
+void dispatch( const std::vector< Event >& events, game::Game& game, const std::function< void( const std::string& ) >& log )
+{
+	static bool logged_key = false;
+	static bool logged_mouse = false;
+
+	for ( const auto& e : events )
+	{
+		const bool is_mouse = e.type == Event::Type::MOUSE_MOVE || e.type == Event::Type::MOUSE_WHEEL || e.code == VK_LBUTTON || e.code == VK_RBUTTON || e.code == VK_MBUTTON;
+		bool& logged = is_mouse ? logged_mouse : logged_key;
+
+		if ( log && ! logged )
+		{
+			logged = true;
+			log( std::string( "[Input] Raw Input で最初の出来事を受け取りました : " ) + ( is_mouse ? "マウス" : "キー" ) + "（コード " + std::to_string( e.code ) + "・移動量 " + std::to_string( e.dx ) + ", " + std::to_string( e.dy ) + "）" );
+		}
+
+		if ( e.type == Event::Type::KEY_DOWN )
+		{
+			game.on_raw_key_down( e.code );
+		}
+		else if ( e.type == Event::Type::MOUSE_MOVE )
+		{
+			game.on_raw_mouse_move( e.dx, e.dy );
 		}
 	}
 }

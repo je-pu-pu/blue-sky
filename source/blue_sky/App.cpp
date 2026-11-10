@@ -1,4 +1,5 @@
 #include "App.h"
+#include <blue_sky/DebugLog.h>
 #include "GameMain.h"
 #include "GameSettings.h"
 #include "resource.h"
@@ -147,6 +148,7 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 
 	// 入力の出来事を Raw Input（WM_INPUT）で受け取る。登録できなければ以前のやり方（ポーリング・WM_KEYDOWN・DirectInput）を使う
 	is_raw_input_enabled_ = blue_sky::raw_input::register_devices( hWnd );
+	blue_sky::debug_log( is_raw_input_enabled_ ? "[Input] Raw Input を登録しました（キーボード・マウス）" : "[Input] Raw Input を登録できませんでした。以前のやり方（ポーリング・WM_KEYDOWN・DirectInput）で読みます" );
 
 	// ゲームを初期化する
 	game_ = blue_sky::GameMain::get_instance();
@@ -261,18 +263,7 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 
 		if ( app->game_ && blue_sky::raw_input::read( lp, app->raw_input_decoder_, events ) )
 		{
-			for ( const auto& e : events )
-			{
-				if ( e.type == blue_sky::raw_input::Event::Type::KEY_DOWN )
-				{
-					app->game_->on_raw_key_down( e.code );
-				}
-				else if ( e.type == blue_sky::raw_input::Event::Type::MOUSE_MOVE )
-				{
-					app->game_->on_raw_mouse_move( e.dx, e.dy );
-				}
-				// ホイールは WM_MOUSEWHEEL で受け取っている（二重に数えない）
-			}
+			blue_sky::raw_input::dispatch( events, * app->game_, & blue_sky::debug_log );
 		}
 
 		return DefWindowProc( hwnd, msg, wp, lp );		// WM_INPUT は DefWindowProc で後始末する

@@ -1,9 +1,13 @@
 #pragma once
 
 #include <array>
+#include <functional>
+#include <string>
 #include <vector>
 
 #include <windows.h>
+
+namespace game { class Game; }
 
 namespace blue_sky::raw_input
 {
@@ -47,6 +51,14 @@ public:
 	/// 押している状態を忘れる（フォーカスを失ったとき。離したことを受け取れないため）
 	void reset() { key_down_.fill( false ); }
 };
+
+/**
+ * 出来事をゲームへ順に渡す（押した → on_raw_key_down、マウスの移動 → on_raw_mouse_move）
+ *
+ * 離した・ホイールは渡さない（離したことはポーリングで読み、ホイールは WM_MOUSEWHEEL で受け取っている。二重に数えない）。
+ * log を渡すと、キーとマウスのそれぞれ最初の出来事を 1 回だけ記録する（動いていることをログで確かめられるように）
+ */
+void dispatch( const std::vector< Event >& events, game::Game& game, const std::function< void( const std::string& ) >& log = {} );
 
 /// マウスとキーボードの Raw Input をウィンドウに登録する（失敗したら false。呼び出し側は以前のやり方を使う）
 bool register_devices( HWND hwnd );

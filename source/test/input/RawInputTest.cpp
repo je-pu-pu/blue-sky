@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include <blue_sky/RawInput.h>
+#include <game/Game.h>
 
 using blue_sky::raw_input::Decoder;
 using blue_sky::raw_input::Event;
@@ -96,4 +97,55 @@ TEST( RawInputTest, フォーカスを失ったら押している状態を忘れ
 
 	ASSERT_EQ( 2u, events.size() );
 	EXPECT_EQ( Event::Type::KEY_DOWN, events[ 1 ].type );
+}
+
+namespace
+{
+
+/// 受け取ったものを記録するゲーム（App がゲームへ渡す経路の確認用）
+class RecordingGame : public game::Game
+{
+public:
+	std::vector< int > pressed;
+	long move_x = 0;
+	long move_y = 0;
+
+	bool update() override { return true; }
+	void on_key_down( char_t ) override { }
+	void on_special_key_down( int ) override { }
+	void on_mouse_wheel( int ) override { }
+	void on_resize() override { }
+	int get_width() const override { return 0; }
+	int get_height() const override { return 0; }
+	bool is_show_cursor() const override { return false; }
+
+	void on_raw_key_down( int vk ) override { pressed.push_back( vk ); }
+	void on_raw_mouse_move( long dx, long dy ) override { move_x += dx; move_y += dy; }
+};
+
+} // namespace
+
+TEST( RawInputTest, RAWINPUTからゲームまで押下と移動量が順に届く )
+{
+	Decoder decoder;
+	std::vector< Event > events;
+
+	// 1 フレームの間に届いた RAWINPUT（押して離したクリック・キー・移動 2 回・ホイール）
+	decoder.decode( make_mouse( 0, 0, RI_MOUSE_LEFT_BUTTON_DOWN ), events );
+	decoder.decode( make_mouse( 0, 0, RI_MOUSE_LEFT_BUTTON_UP ), events );
+	decoder.decode( make_key( 'W', false ), events );
+	decoder.decode( make_key( 'W', false ), events );		// 押し続け
+	decoder.decode( make_mouse( 7, 1 ), events );
+	decoder.decode( make_mouse( 3, -4 ), events );
+	decoder.decode( make_mouse( 0, 0, RI_MOUSE_WHEEL, 120 ), events );
+
+	RecordingGame game;
+	std::vector< std::string > logs;
+	blue_sky::raw_input::dispatch( events, game, [&] ( const std::string& s ) { logs.push_back( s ); } );
+
+	ASSERT_EQ( 2u, game.pressed.size() );
+	EXPECT_EQ( VK_LBUTTON, game.pressed[ 0 ] );		// 離す前に押したことが届く（短いクリックを取りこぼさない）
+	EXPECT_EQ( 'W', game.pressed[ 1 ] );			// 押し続けは 1 回
+	EXPECT_EQ( 10, game.move_x );					// 移動量は合計で届く
+	EXPECT_EQ( -3, game.move_y );
 }

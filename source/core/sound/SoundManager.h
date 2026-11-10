@@ -2,11 +2,13 @@
 
 
 #include <core/type.h>
+#include <core/ResourceManager.h>
 #include <atomic>
 #include <memory>
 #include <mutex>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <windows.h>
@@ -23,6 +25,9 @@ namespace core
 
 class Sound;
 
+/// 音を指すハンドル（解放の後は nullptr、差し替え（reload など）の後は新しい音を引ける。引くときは SoundManager::resolve）
+using SoundHandle = core::ResourceHandle< Sound >;
+
 }
 
 namespace core::sound
@@ -37,20 +42,25 @@ class SoundFilter;
  *
  * 以前は game 層の game::SoundManager を継承していて、同じ名前のクラスが 2 つの層に並んでいた。
  * 実装はこのクラスだけなので、基底の中身（名前で引く・グループ・ミュート・音量）を取り込んで 1 つにした
+ *
+ * 音は ResourceManager で持ち、名前でもハンドル（SoundHandle）でも引ける。同じ名前で別のファイルを読む・reload すると、
+ * ハンドルの番号はそのままで中身だけ差し替え、古い音は解放する（以前は名前の表に生ポインタで持ち、外すときに生で delete していた）。
+ * 長く持つ側は生ポインタではなくハンドルを持つ（解放・差し替えの後に古い音を指したままにならない）
  */
 class SoundManager
 {
 public:
 	using SoundFormat		= game::SoundFormat;
 	using Sound				= core::Sound;
-	using SoundMap			= std::unordered_map< string_t, Sound* >;
-	using GroupedSoundMap	= std::unordered_map< string_t, SoundMap >;
+	using SoundHandle		= core::SoundHandle;
+	using SoundResources	= core::ResourceManager< Sound >;
+	using GroupedSoundMap	= std::unordered_map< string_t, std::unordered_set< string_t > >;	///< グループ名 → そのグループで読んだ音の名前
 
 private:
 	SoundEngine* sound_engine_;
 	std::vector< std::unique_ptr< SoundFilter > > sound_filter_list_;
 
-	SoundMap sound_map_;
+	SoundResources sounds_;
 	string_t group_name_;
 	GroupedSoundMap grouped_sound_map_;
 	bool is_mute_ = false;
@@ -63,8 +73,13 @@ private:
 	std::thread update_thread_;
 	std::atomic< bool > update_thread_running_ { false };
 
-	/// ファイルの場所を決めた後の読み込み（同じ名前で同じファイルなら使い回す）
-	Sound* load_from_path( const char* name, const string_t& file_path, bool is_3d );
+	/**
+	 * ファイルの場所を決めた後の読み込み
+	 *
+	 * 同じ名前で同じファイルなら使い回す（force_reload なら読み直す）。同じ名前で別のファイル・読み直しなら、
+	 * ハンドルの番号を変えずに中身を差し替え、古い音を解放する
+	 */
+	Sound* load_from_path( const char* name, const string_t& file_path, bool is_3d, bool force_reload = false );
 
 public:
 	SoundManager( SoundEngine* );
@@ -84,12 +99,23 @@ public:
 
 	Sound* load( const char*, const char* = 0 );
 	Sound* load_3d_sound( const char*, const char* = 0 );
+	/// replace なら、読み込み済みでも読み直す（ハンドルの番号はそのまま。古い音は解放する）
 	Sound* load_music( const char* name, const char* file_name = 0, bool replace = false );
 
+	/// load と同じ場所から読み直す（読み込み済みなら、ハンドルの番号を変えずに中身を差し替え、古い音を解放する）
+	Sound* reload( const char* name, const char* file_name = 0 );
+
+	/// 名前の音を外して解放する（ハンドルは nullptr を返すようになる）
 	void unload( const char* name );
 	void unload_all();
 
 	Sound* get_sound( const char* name ) const;
+
+	/// 名前の音のハンドル（無ければ空のハンドル）
+	SoundHandle get_sound_handle( const char* name ) const;
+
+	/// ハンドルから音を得る（解放済み・空なら nullptr）
+	Sound* resolve( SoundHandle ) const;
 
 	/// フェード・ストリーミングの補充を進める（更新スレッドを動かしているときは、そのスレッドが呼ぶ）
 	void update();

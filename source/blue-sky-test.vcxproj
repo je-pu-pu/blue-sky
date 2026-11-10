@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClCompile Include="test\sound\PlaybackRateTest.cpp" />
     <ClCompile Include="test\sound\SampleRateStepperTest.cpp" />
+    <ClCompile Include="test\sound\SoundManagerTest.cpp" />
     <ClCompile Include="test\math\SkinningAnimationSetTest.cpp" />
     <ClCompile Include="test\ecs\TargetLocationTest.cpp" />
     <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp" />

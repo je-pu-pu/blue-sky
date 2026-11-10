@@ -64,42 +64,49 @@ SoundManager::Sound* SoundManager::load_3d_sound( const char* name, const char* 
 
 SoundManager::Sound* SoundManager::load_music( const char* name, const char* file_name, bool replace )
 {
-	if ( replace )
-	{
-		unload( name );
-	}
-
-	return load_from_path( name, std::string( "media/music/" ) + ( file_name ? file_name : name ) + ".ogg", false );
+	return load_from_path( name, std::string( "media/music/" ) + ( file_name ? file_name : name ) + ".ogg", false, replace );
 }
 
-SoundManager::Sound* SoundManager::load_from_path( const char* name, const string_t& file_path, bool is_3d )
+SoundManager::Sound* SoundManager::reload( const char* name, const char* file_name )
+{
+	return load_from_path( name, std::string( "media/sound/" ) + ( file_name ? file_name : name ) + ".ogg", false, true );
+}
+
+SoundManager::Sound* SoundManager::load_from_path( const char* name, const string_t& file_path, bool is_3d, bool force_reload )
 {
 	std::lock_guard< std::recursive_mutex > lock( mutex_ );
-	auto i = sound_map_.find( name );
+	const SoundHandle handle = sounds_.get_handle( name );
+	Sound* current = sounds_.resolve( handle );
 
-	if ( i != sound_map_.end() )
+	if ( current && ! force_reload && std::string( current->get_file_name() ) == file_path && current->is_3d_sound() == is_3d )
 	{
-		if ( std::string( i->second->get_file_name() ) == file_path && i->second->is_3d_sound() == is_3d )
-		{
-			return i->second;
-		}
-
-		unload( name );
+		return current;
 	}
 
 	// 小さいファイルは全部読み込み、大きいファイルは少しずつ読む
 	auto file = Sound::SoundFile( file_path.c_str() );
-	Sound* sound = file.size() <= StreamingSound::get_buffer_size() ? new Sound( sound_engine_ ) : new StreamingSound( sound_engine_ );
+	std::unique_ptr< Sound > sound( file.size() <= StreamingSound::get_buffer_size() ? new Sound( sound_engine_ ) : new StreamingSound( sound_engine_ ) );
 
 	sound->set_3d_sound( is_3d );
 	sound->load( file_path.c_str() );
 	sound->set_name( name );
 	sound->set_file_name( file_path.c_str() );
 
-	sound_map_[ name ] = sound;
-	grouped_sound_map_[ group_name_ ][ name ] = sound;
+	Sound* loaded = sound.get();
 
-	return sound;
+	if ( current )
+	{
+		// 番号はそのまま、中身を差し替えて古い音を解放する（以前は先に古い音を消してから作り直し、ハンドルの番号も変わった）
+		sounds_.replace( handle, std::move( sound ) );
+	}
+	else
+	{
+		sounds_.add_named( name, sound.release() );
+	}
+
+	grouped_sound_map_[ group_name_ ].insert( name );
+
+	return loaded;
 }
 
 void SoundManager::push_group( const char_t* group_name )
@@ -124,9 +131,9 @@ void SoundManager::pop_group()
 		return;
 	}
 
-	for ( const auto& [ name, sound ] : i->second )
+	for ( const auto& name : i->second )
 	{
-		unload( name.c_str() );		// sound は外し済みのことがあるので名前で外す
+		unload( name.c_str() );		// 外し済みのこともある（そのときは何もしない）
 	}
 
 	grouped_sound_map_.erase( i );
@@ -135,49 +142,49 @@ void SoundManager::pop_group()
 void SoundManager::unload( const char* name )
 {
 	std::lock_guard< std::recursive_mutex > lock( mutex_ );
-	auto i = sound_map_.find( name );
-
-	if ( i != sound_map_.end() )
-	{
-		delete i->second;
-		sound_map_.erase( i );
-	}
+	sounds_.remove_named( name );		// 音は名前 1 つにだけ付けるので、ここで解放される
 }
 
 void SoundManager::unload_all()
 {
 	std::lock_guard< std::recursive_mutex > lock( mutex_ );
-	for ( auto& [ name, sound ] : sound_map_ )
-	{
-		delete sound;
-	}
-
-	sound_map_.clear();
+	sounds_.clear_all();
 	grouped_sound_map_.clear();
 }
 
 SoundManager::Sound* SoundManager::get_sound( const char* name ) const
 {
 	std::lock_guard< std::recursive_mutex > lock( mutex_ );
-	auto i = sound_map_.find( name );
-	return i == sound_map_.end() ? nullptr : i->second;
+	return sounds_.resolve( sounds_.get_handle( name ) );
+}
+
+SoundManager::SoundHandle SoundManager::get_sound_handle( const char* name ) const
+{
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
+	return sounds_.get_handle( name );
+}
+
+SoundManager::Sound* SoundManager::resolve( SoundHandle handle ) const
+{
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
+	return sounds_.resolve( handle );
 }
 
 void SoundManager::update()
 {
 	std::lock_guard< std::recursive_mutex > lock( mutex_ );
-	for ( auto i = sound_map_.begin(); i != sound_map_.end(); ++i )
+	for ( const auto& sound : sounds_.get_resource_list() )
 	{
-		i->second->update();
+		sound->update();
 	}
 }
 
 void SoundManager::stop_all()
 {
 	std::lock_guard< std::recursive_mutex > lock( mutex_ );
-	for ( auto i = sound_map_.begin(); i != sound_map_.end(); ++i )
+	for ( const auto& sound : sounds_.get_resource_list() )
 	{
-		i->second->stop();
+		sound->stop();
 	}
 }
 

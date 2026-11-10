@@ -177,12 +177,18 @@ void GamePlayScene::setup_command()
 		bool replace = false;
 		ss >> sound_name >> sound_file_name >> replace;
 
-		if ( replace && get_sound_manager()->load( sound_name.c_str() ) )
-		{
-			get_sound_manager()->unload( sound_name.c_str() );
-		}
+		const string_t& file_name = sound_file_name.empty() ? sound_name : sound_file_name;
 
-		get_sound_manager()->load( sound_name.c_str(), ( sound_file_name.empty() ? sound_name : sound_file_name ).c_str() );
+		// replace なら読み込み済みでも読み直す（番号を変えずに中身を差し替える）。
+		// 以前は「名前と同じファイルを読む → 外す → 読む」で、名前と同じファイルを余計に読み、作り直しでハンドルの番号も変わった
+		if ( replace )
+		{
+			get_sound_manager()->reload( sound_name.c_str(), file_name.c_str() );
+		}
+		else
+		{
+			get_sound_manager()->load( sound_name.c_str(), file_name.c_str() );
+		}
 	};
 	command_map_[ "play_sound" ] = [this] ( const string_t& s )
 	{

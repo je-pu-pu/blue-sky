@@ -101,6 +101,7 @@ TEST( SoundManagerTest, 同じ名前で別のファイルを読むとハンド�
 	EXPECT_EQ( 1, FakeSoundBuffer::alive );
 
 	core::Sound* b = m.load( "se", "fall" );		// 同じ名前で別のファイル（ステージの load_sound と同じ）
+	m.flush_releases();								// 古い音の解放はフレームの終わり
 	EXPECT_EQ( h, m.get_sound_handle( "se" ) );		// 番号は変わらない
 	EXPECT_EQ( b, m.resolve( h ) );
 	EXPECT_EQ( b, m.get_sound( "se" ) );
@@ -108,6 +109,8 @@ TEST( SoundManagerTest, 同じ名前で別のファイルを読むとハンド�
 	EXPECT_EQ( 1, FakeSoundBuffer::alive );			// 古い音は解放された
 
 	m.unload( "se" );
+	EXPECT_EQ( b, m.resolve( h ) );					// フレームの終わりまでは引ける
+	m.flush_releases();
 	EXPECT_EQ( nullptr, m.resolve( h ) );			// 外した後は nullptr
 	EXPECT_EQ( nullptr, m.get_sound( "se" ) );
 	EXPECT_EQ( 0, FakeSoundBuffer::alive );
@@ -126,6 +129,7 @@ TEST( SoundManagerTest, 読み直すと同じファイルでも作り直しハ�
 
 	const int created = FakeSoundBuffer::created;
 	core::Sound* second = m.reload( "fin", "silence" );	// load_sound fin silence 1（replace）と同じ
+	m.flush_releases();									// 古い音の解放はフレームの終わり
 
 	EXPECT_EQ( created + 1, FakeSoundBuffer::created );	// 作り直した
 	EXPECT_EQ( 1, FakeSoundBuffer::alive );				// 古い音は解放された
@@ -151,6 +155,7 @@ TEST( SoundManagerTest, グループを外すとそのグループで読んだ�
 	m.load( "stage-se", "silence" );
 	const core::SoundHandle stage = m.get_sound_handle( "stage-se" );
 	m.pop_group();
+	m.flush_releases();
 
 	EXPECT_EQ( nullptr, m.resolve( stage ) );
 	EXPECT_NE( nullptr, m.resolve( keep ) );

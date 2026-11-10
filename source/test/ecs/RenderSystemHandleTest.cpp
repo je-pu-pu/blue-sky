@@ -152,6 +152,7 @@ TEST( RenderSystemHandleTest, 解放したモデルの物体は描かず落ち�
 	f.entity_manager.render();
 
 	f.graphics.models.remove_named( "box" );	// 解放する（以前の生ポインタはここで無効なアドレスを指した）
+	f.graphics.models.flush_releases();		// 解放はフレームの終わり
 	f.entity_manager.render();					// 落ちない
 
 	EXPECT_EQ( ball->render_count, 2 );			// 残っているモデルは描き続ける

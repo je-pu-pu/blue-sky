@@ -146,6 +146,7 @@ TEST( ObjectRenderResourcesTest, モデルが解放された物は書かない )
 	FakeConstantBuffer* buffer = f.create( "temporary" );
 
 	f.resources.models.remove_named( "temporary" );		// ハンドルは nullptr を返すようになる
+	f.resources.models.flush_releases();				// （フレームの終わりの後）
 	f.system->update_render_data();
 
 	EXPECT_EQ( buffer->update_count, 0 );

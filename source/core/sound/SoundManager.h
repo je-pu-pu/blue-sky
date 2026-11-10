@@ -105,9 +105,12 @@ public:
 	/// load と同じ場所から読み直す（読み込み済みなら、ハンドルの番号を変えずに中身を差し替え、古い音を解放する）
 	Sound* reload( const char* name, const char* file_name = 0 );
 
-	/// 名前の音を外して解放する（ハンドルは nullptr を返すようになる）
+	/// 名前の音を外して解放する（解放するのは flush_releases。その後ハンドルは nullptr を返す）
 	void unload( const char* name );
 	void unload_all();
+
+	/// 外した・差し替えた古い音をまとめて解放する（フレームの終わりとシーンの切り替えで呼ぶ。それまではハンドルで引ける）
+	std::size_t flush_releases();
 
 	Sound* get_sound( const char* name ) const;
 

@@ -236,12 +236,30 @@ public:
 	ModelHandle get_model_handle( const core::graphics::Model* m ) const override { return model_manager_.handle_of( m ); }	///< 管理しているモデル（clone_model の結果など）
 	Model* resolve_model( ModelHandle h ) const override { return static_cast< Model* >( model_manager_.resolve( h ) ); }
 
-	/// 名前で作ったモデル・メッシュを外す（どの名前からも指されなくなれば解放する。ハンドルは nullptr を返すようになる）。作った側が、使い終わったときに呼ぶ
+	/// 名前で作ったモデル・メッシュを外す（どの名前からも指されなくなれば解放する。解放はフレームの終わりの flush_releases で、その後ハンドルは nullptr を返す）。作った側が、使い終わったときに呼ぶ
 	void unload_named_model( const char_t* name ) { model_manager_.remove_named( name ); }
 	void unload_named_mesh( const char_t* name ) { mesh_manager_.remove_named( name ); }
 
-	/// create_shader で作ったシェーダーを解放する（作った側が、使い終わったときに呼ぶ）
+	/// create_shader で作ったシェーダーを解放する（作った側が、使い終わったときに呼ぶ。解放はフレームの終わり）
 	void destroy_shader( Shader* shader ) { get_shader_manager().release( shader ); }
+
+	/**
+	 * 解放・差し替えを頼まれたリソースをまとめて解放する（GameMain がフレームの終わり（Present の後）とシーンの切り替えで呼ぶ）
+	 *
+	 * モデルが先（メッシュ・シェーダー・テクスチャを使う側）。
+	 * @return 解放した数
+	 */
+	std::size_t flush_releases()
+	{
+		// + でつなぐと呼ぶ順が決まらないので、1 つずつ呼ぶ
+		std::size_t count = model_manager_.flush_releases();
+		count += mesh_manager_.flush_releases();
+		count += get_shader_manager().flush_releases();
+		count += texture_manager_.flush_releases();
+		count += skinning_animation_set_manager_.flush_releases();
+
+		return count;
+	}
 	
 	// Mesh
 	template< typename Type=Mesh > Type* create_named_mesh( const char_t* name, Mesh::Buffer::Type type )

@@ -27,6 +27,10 @@ namespace core
  * - 解放されたリソースのハンドルは resolve で nullptr になる。解放があり得るリソースを長く持つ側はハンドルを持つ
  * - replace はハンドルの番号を変えずに中身を差し替え、古い中身を解放する（名前も新しい中身を指す）。
  *   差し替えたいものを長く持つ側は、生ポインタではなくハンドルを持つ（生ポインタは古い中身を指したまま壊れる）
+ * - 解放（release・remove_named）と差し替え（replace）で手放す古いリソースは、すぐには解放せず、
+ *   フレームの終わり（Present の後）とシーンの切り替えで呼ぶ flush_releases でまとめて解放する。
+ *   1 フレームの中では、引いたポインタを使い回してよい（次のフレームへは持ち越さない）。
+ *   解放を頼んだリソースのハンドルは、flush_releases までは引ける（差し替えたハンドルは、すぐに新しい中身を引く）
  * - 基底の型で管理し、派生の型のリソースを入れてもよい（例 : core::graphics::Model で管理し blue_sky のモデルを入れる）。
  *   基底の型のデストラクタは virtual にすること
  */
@@ -47,6 +51,15 @@ private:
 	std::unordered_map< std::uint64_t, Resource* > by_id_;			///< ハンドルの番号 → リソース
 	std::uint64_t next_id_ = 1;
 
+	/// 解放を頼まれたリソース（フレームの終わりの flush_releases まで生かしておく。ハンドルもその時まで引ける）
+	struct PendingRelease
+	{
+		std::unique_ptr< Resource >	resource;
+		std::uint64_t				id;
+	};
+
+	std::vector< PendingRelease > pending_releases_;
+
 	/// 所有しているか
 	bool owns( const Resource* resource ) const { return id_of_.find( resource ) != id_of_.end(); }
 
@@ -56,7 +69,7 @@ private:
 		return std::any_of( resource_map_.begin(), resource_map_.end(), [resource] ( const auto& x ) { return x.second == resource; } );
 	}
 
-	/// 解放する（ハンドルは無効になる）
+	/// 解放を頼む（所有を外し、フレームの終わりの flush_releases で解放する。ハンドルはその時に無効になる）
 	void destroy( Resource* resource )
 	{
 		auto id = id_of_.find( resource );
@@ -66,13 +79,14 @@ private:
 			return;
 		}
 
-		by_id_.erase( id->second );
+		const std::uint64_t handle_id = id->second;
 		id_of_.erase( id );
 
 		auto i = std::find_if( resource_list_.begin(), resource_list_.end(), [resource] ( const auto& x ) { return x.get() == resource; } );
 
 		if ( i != resource_list_.end() )
 		{
+			pending_releases_.push_back( { std::move( *i ), handle_id } );
 			resource_list_.erase( i );
 		}
 	}
@@ -153,7 +167,7 @@ public:
 	}
 
 	/**
-	 * リソースを解放する（それを指す名前も外す。ハンドルは無効になる）
+	 * リソースを解放する（それを指す名前はすぐに外す。解放とハンドルが無効になるのはフレームの終わりの flush_releases）
 	 *
 	 * 作った側が、使い終わったリソースを手放すときに使う（他から生ポインタで使われていないことは呼ぶ側が保証する）
 	 */
@@ -168,7 +182,7 @@ public:
 	}
 
 	/**
-	 * 名前を削除する。どの名前からも指されなくなったリソースは解放する
+	 * 名前を削除する。どの名前からも指されなくなったリソースは解放する（フレームの終わりの flush_releases で）
 	 */
 	void remove_named( const string_t& name )
 	{
@@ -232,7 +246,7 @@ public:
 	 * ハンドルの番号を変えずに中身を差し替え、古い中身を解放する
 	 *
 	 * 古い中身を指していた名前は新しい中身を指す。同じハンドルを持つ側は、次の resolve から新しい中身を得る。
-	 * 古い中身の生ポインタは無効になる（差し替えたいものはハンドルで持つ）。
+	 * 古い中身の生ポインタは、フレームの終わり（flush_releases）で無効になる（差し替えたいものはハンドルで持つ）。
 	 *
 	 * @param handle 差し替えるハンドル
 	 * @param resource 新しい中身（所有を引き取る）
@@ -243,7 +257,8 @@ public:
 	{
 		auto i = by_id_.find( handle.id );
 
-		if ( i == by_id_.end() || ! resource )
+		// 解放を頼まれた（フレームの終わりを待っている）ハンドルは、解放済みと同じに扱う
+		if ( i == by_id_.end() || ! owns( i->second ) || ! resource )
 		{
 			return false;
 		}
@@ -271,10 +286,39 @@ public:
 		i->second = new_resource;
 
 		auto owned = std::find_if( resource_list_.begin(), resource_list_.end(), [old_resource] ( const auto& x ) { return x.get() == old_resource; } );
-		owned->reset( resource.release() );		// 古い中身はここで解放する
+		pending_releases_.push_back( { std::move( *owned ), handle.id } );	// 古い中身はフレームの終わりに解放する
+		owned->reset( resource.release() );
 
 		return true;
 	}
+
+	/**
+	 * 解放を頼まれたリソースをまとめて解放する（フレームの終わり（Present の後）とシーンの切り替えで呼ぶ）
+	 *
+	 * @return 解放した数
+	 */
+	std::size_t flush_releases()
+	{
+		const std::size_t count = pending_releases_.size();
+
+		for ( const auto& pending : pending_releases_ )
+		{
+			auto i = by_id_.find( pending.id );
+
+			// 差し替えたハンドルは新しい中身を指しているので、そのまま
+			if ( i != by_id_.end() && i->second == pending.resource.get() )
+			{
+				by_id_.erase( i );
+			}
+		}
+
+		pending_releases_.clear();
+
+		return count;
+	}
+
+	/// 解放を頼まれていて、まだ解放していない数
+	std::size_t get_pending_release_count() const { return pending_releases_.size(); }
 
 	/**
 	 * リソースの一覧を取得する
@@ -285,10 +329,11 @@ public:
 	}
 
 	/**
-	 * 全てのリソースを削除する（全てのハンドルは無効になる）
+	 * 全てのリソースをすぐに削除する（全てのハンドルは無効になる。終わりの片付け用）
 	 */
 	void clear_all()
 	{
+		pending_releases_.clear();
 		resource_list_.clear();
 		resource_map_.clear();
 		id_of_.clear();

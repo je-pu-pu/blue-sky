@@ -810,6 +810,16 @@ void GameMain::render()
 	record_frame_time();
 
 	direct_3d_->present();
+
+	// フレームの途中で解放・差し替えを頼まれたリソースを、ここでまとめて解放する（フレームの中では引いたポインタを使い回せる。doc/ハンドルの設計.md）
+	flush_resource_releases();
+}
+
+/// 解放・差し替えを頼まれたリソースをまとめて解放する（フレームの終わりとシーンの切り替えで呼ぶ）
+void GameMain::flush_resource_releases()
+{
+	graphics_manager_->flush_releases();
+	sound_manager_->flush_releases();
 }
 
 /**
@@ -1479,6 +1489,9 @@ void GameMain::setup_scene( const string_t& scene_name, const SceneArguments& ar
 		{
 			debug_log( "[Physics] シーンを片付けた後も物理の世界に物体の剛体が残っています: " + std::to_string( count ) + " 個" );
 		}
+
+		// 前のシーンが解放を頼んだリソースを、次のシーンを読む前に解放する（同時に持つメモリを増やさない）
+		flush_resource_releases();
 	}
 
 	// 新しいシーンを設定

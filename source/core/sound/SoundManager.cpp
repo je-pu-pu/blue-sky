@@ -152,6 +152,12 @@ void SoundManager::unload_all()
 	grouped_sound_map_.clear();
 }
 
+std::size_t SoundManager::flush_releases()
+{
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
+	return sounds_.flush_releases();
+}
+
 SoundManager::Sound* SoundManager::get_sound( const char* name ) const
 {
 	std::lock_guard< std::recursive_mutex > lock( mutex_ );

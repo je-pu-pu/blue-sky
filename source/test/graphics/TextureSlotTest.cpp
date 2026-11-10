@@ -30,6 +30,7 @@ TEST( TextureSlotTest, 解放したテクスチャは引けず落ちない )
 
 	TextureSlot slot( loader, t );
 	loader.textures.remove_named( "a" );	// 解放する（以前の生ポインタはここで無効なアドレスを指した）
+	loader.textures.flush_releases();		// 解放はフレームの終わり
 
 	EXPECT_EQ( slot.get( loader ), nullptr );
 	EXPECT_TRUE( slot.is_lost( loader ) );

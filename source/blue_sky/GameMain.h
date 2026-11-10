@@ -180,6 +180,8 @@ private:
 	void setup_frame_time_measurement();
 	void record_frame_time();
 
+	void flush_resource_releases();
+
 	void setup_script_command();
 	void apply_display_settings();
 

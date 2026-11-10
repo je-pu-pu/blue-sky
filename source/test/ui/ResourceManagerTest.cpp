@@ -75,3 +75,22 @@ TEST( ResourceManagerTest, 全部消すとハンドルはすべて無効で番�
 	EXPECT_TRUE( core::ResourceManager< Counted >::Handle().is_null() );
 	EXPECT_EQ( nullptr, m.resolve( core::ResourceManager< Counted >::Handle() ) );
 }
+
+TEST( ResourceManagerTest, 作った側が手放すとそれを指す名前も外れて解放される )
+{
+	Counted::alive = 0;
+	core::ResourceManager< Counted > m;
+
+	Counted* a = m.create_named( "a", 1 );
+	m.add_named( "a2", a );
+	const auto ha = m.handle_of( a );
+	Counted* b = m.create( 2 );
+
+	m.release( a );		// 作った側（CityGenerator など）が使い終わった
+
+	EXPECT_EQ( 1, Counted::alive );
+	EXPECT_EQ( nullptr, m.get( "a" ) );
+	EXPECT_EQ( nullptr, m.get( "a2" ) );
+	EXPECT_EQ( nullptr, m.resolve( ha ) );			// ハンドルも無効になる
+	EXPECT_EQ( 2, b->value );						// ほかのリソースはそのまま
+}

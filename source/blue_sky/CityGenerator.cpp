@@ -27,10 +27,25 @@ CityGenerator::~CityGenerator()
 		n->left_node  = nullptr;
 		n->right_node = nullptr;
 	}
+
+	// 作ったものを外す（以前は外さず、DebugScene に入るたびにモデル・メッシュ・シェーダーが溜まった）
+	for ( Model* m : { model_, debug_model_ } )
+	{
+		for ( uint_t n = 0; n < m->get_shader_count(); n++ )
+		{
+			graphics_manager_->destroy_shader( m->get_shader_at( n ) );
+		}
+	}
+
+	graphics_manager_->unload_named_model( "generated_city" );
+	graphics_manager_->unload_named_model( "generated_city_debug" );
+	graphics_manager_->unload_named_mesh( "generated_city" );
+	graphics_manager_->unload_named_mesh( "generated_city_debug" );
 }
 
 CityGenerator::CityGenerator( graphics::GraphicsManager* gm )
-	: model_( gm->create_named_model( "generated_city" ) )
+	: graphics_manager_( gm )
+	, model_( gm->create_named_model( "generated_city" ) )
 	, debug_model_( gm->create_named_model( "generated_city_debug" ) )
 {
 	model_->set_mesh( gm->create_named_mesh( "generated_city", Mesh::Buffer::Type::UPDATABLE ) );

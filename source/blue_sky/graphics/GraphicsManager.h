@@ -193,6 +193,13 @@ public:
 	Model* clone_model_with_shaders( const Model* );
 	
 	template< typename Type=Model > Type* get_model( const char_t* name ) { return model_manager_.get< Type >( name ); }
+
+	/// 名前で作ったモデル・メッシュを外す（どの名前からも指されなくなれば解放する）。作った側が、使い終わったときに呼ぶ
+	void unload_named_model( const char_t* name ) { model_manager_.remove_named( name ); }
+	void unload_named_mesh( const char_t* name ) { mesh_manager_.remove_named( name ); }
+
+	/// create_shader で作ったシェーダーを解放する（作った側が、使い終わったときに呼ぶ）
+	void destroy_shader( Shader* shader ) { get_shader_manager().release( shader ); }
 	
 	// Mesh
 	template< typename Type=Mesh > Type* create_named_mesh( const char_t* name, Mesh::Buffer::Type type )

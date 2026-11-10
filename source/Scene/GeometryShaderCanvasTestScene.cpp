@@ -97,7 +97,8 @@ GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene( GameMain& game_mai
 
 GeometryShaderCanvasTestScene::~GeometryShaderCanvasTestScene()
 {
-
+	// 作ったメッシュを外す（以前は外さず、このシーンに入るたびに溜まった）
+	get_graphics_manager()->unload_named_mesh( "line_cube" );
 }
 
 void GeometryShaderCanvasTestScene::update()

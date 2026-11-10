@@ -215,6 +215,7 @@ public:
 	using RoadControlPointList = std::list< RoadControlPoint >;
 
 private:
+	graphics::GraphicsManager* graphics_manager_;	///< モデル・メッシュ・シェーダーを作った先（破棄で外す）
 	Model* model_; // 街のモデル
 	Model* debug_model_; // デバッグ用のモデル
 

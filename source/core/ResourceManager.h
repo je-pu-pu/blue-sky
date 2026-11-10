@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -158,6 +159,21 @@ public:
 		add( resource );
 
 		resource_map_[ name ] = resource;
+	}
+
+	/**
+	 * リソースを解放する（それを指す名前も外す。ハンドルは無効になる）
+	 *
+	 * 作った側が、使い終わったリソースを手放すときに使う（他から生ポインタで使われていないことは呼ぶ側が保証する）
+	 */
+	void release( Resource* resource )
+	{
+		for ( auto i = resource_map_.begin(); i != resource_map_.end(); )
+		{
+			i = i->second == resource ? resource_map_.erase( i ) : std::next( i );
+		}
+
+		destroy( resource );
 	}
 
 	/**

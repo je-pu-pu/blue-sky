@@ -3,6 +3,7 @@
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/Flicker.h>
 #include <blue_sky/ecs/component/ObjectRenderComponent.h>
+#include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
 
 #include <core/ecs/EntityManager.h>
 
@@ -45,18 +46,21 @@ void BalloonHoldSystem::update_balloon( core::ecs::EntityId id, float_t scene_el
 		return;
 	}
 
-	// つかんだ物体（消えていれば、持たれていないのと同じ扱いで割れる）
-	const BalloonHolder* holder = balloon->holder_id && get_entity_manager()->is_alive( * balloon->holder_id ) ? balloon->holder : nullptr;
+	// つかんだプレイヤー（消えていれば、持たれていないのと同じ扱いで割れる）
+	core::ecs::Entity* holder_entity = balloon->holder_id ? get_entity_manager()->find( * balloon->holder_id ) : nullptr;
+	const PlayerBehaviorComponent* holder = holder_entity ? holder_entity->get_component< PlayerBehaviorComponent >() : nullptr;
 
 	if ( balloon->is_held() )
 	{
-		if ( holder && holder->is_holding_balloon( id ) )
+		// 今持っている風船がこれか（後から別の風船をつかむと、前の風船は持たれていない）
+		if ( holder && holder->balloon == id )
 		{
 			object.set_velocity( core::Vector( 0, 0, 0 ) );
-			object.set_location( holder->get_balloon_hold_location() );
+			object.set_location( PlayerBehaviorSystem::get_balloon_hold_location( * holder_entity ) );
 			object.set_direction_degree( 0 );
 
-			if ( ! holder->is_in_balloon_action() )
+			// 風船の動作が終わると割れる
+			if ( holder->action_mode != PlayerBehaviorComponent::ActionMode::BALLOON )
 			{
 				object.kill();
 			}
@@ -75,12 +79,12 @@ void BalloonHoldSystem::update_balloon( core::ecs::EntityId id, float_t scene_el
 	// つかんだ物体の風船の動作が終わりかけの間は点滅する（以前の Balloon::is_visible_with_player。以前は描く前に毎回決めていた）
 	if ( auto* render = entity->get_component< ObjectRenderComponent >() )
 	{
-		const bool is_visible_with_holder = ! holder || ! holder->is_balloon_action_pre_finish() || flicker::is_visible_in_blink( scene_elapsed_time, BalloonHoldComponent::BlinkCount );
+		const bool is_visible_with_holder = ! holder || ! holder->is_action_pre_finish || flicker::is_visible_in_blink( scene_elapsed_time, BalloonHoldComponent::BlinkCount );
 		render->is_hidden = ! is_visible_with_holder;
 	}
 }
 
-bool BalloonHoldSystem::grab( core::ecs::EntityId balloon_id, core::ecs::EntityId holder_id, BalloonHolder* holder )
+bool BalloonHoldSystem::grab( core::ecs::EntityId balloon_id, core::ecs::EntityId holder_id )
 {
 	core::ecs::Entity* entity = get_entity_manager()->find( balloon_id );
 	auto* balloon = entity ? entity->get_component< BalloonHoldComponent >() : nullptr;
@@ -91,7 +95,6 @@ bool BalloonHoldSystem::grab( core::ecs::EntityId balloon_id, core::ecs::EntityI
 	}
 
 	balloon->holder_id = holder_id;
-	balloon->holder = holder;
 
 	return true;
 }

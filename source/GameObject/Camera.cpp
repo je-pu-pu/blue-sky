@@ -1,6 +1,5 @@
 #include "Camera.h"
 
-#include <GameObject/Player.h>
 
 #include <common/math.h>
 
@@ -59,27 +58,15 @@ void Camera::update()
 	fov_ = math::clamp( fov_, 2.f, 100.f );
 }
 
-void Camera::update_with_player( const Player* player )
+void Camera::update_with_player( const Vector& location, const Vector& front, float_t eye_height, float_t eye_depth, bool is_dead )
 {
-	if ( false )
-	{
-		// debug
-		position_.set_x( player->get_transform().get_position().x() + player->get_front().x() * player->get_eye_depth() ); // * player->get_collision_depth() * 0.5f;
-		position_.set_y( player->get_transform().get_position().y() + player->get_eye_height() + 5.f );
-		position_.set_z( player->get_transform().get_position().z() + player->get_front().z() * player->get_eye_depth() ); // * player->get_collision_depth() * 0.5f;
+	position_.set_x( location.x() + front.x() * eye_depth );
+	position_.set_y( location.y() + eye_height );
+	position_.set_z( location.z() + front.z() * eye_depth );
 
-		position_ += Vector( player->get_front().x(), 0.f, player->get_front().x(), 0.f ) * -2.f;
-	}
-	else
+	if ( is_dead )
 	{
-		position_.set_x( player->get_transform().get_position().x() + player->get_front().x() * player->get_eye_depth() ); // * player->get_collision_depth() * 0.5f;
-		position_.set_y( player->get_transform().get_position().y() + player->get_eye_height() );
-		position_.set_z( player->get_transform().get_position().z() + player->get_front().z() * player->get_eye_depth() ); // * player->get_collision_depth() * 0.5f;
-	}
-
-	if ( player->is_dead() )
-	{
-		rotate_degree_target().set_z( ( 1.5f - player->get_eye_height() ) / 1.5f * -90.f );
+		rotate_degree_target().set_z( ( 1.5f - eye_height ) / 1.5f * -90.f );
 	}
 }
 

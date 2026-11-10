@@ -163,6 +163,12 @@ void ActiveObjectPhysics::collect_contacts_with( ActiveObject* a, ecs::Collision
 	dynamics_world_->contactTest( a->get_rigid_body(), callback );
 }
 
+void ActiveObjectPhysics::collect_contacts_with( btCollisionObject* a, ecs::CollisionEventSystem& events )
+{
+	CollectContactResultCallback callback( events );
+	dynamics_world_->contactTest( a, callback );
+}
+
 void ActiveObjectPhysics::collect_all_contacts( ecs::CollisionEventSystem& events )
 {
 	int numManifolds = dynamics_world_->getDispatcher()->getNumManifolds();

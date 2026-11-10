@@ -55,6 +55,9 @@ public:
 	const core::Vector& get_location() const;
 	void set_location( const core::Vector& location );
 
+	/// 位置と回転（位置の正。足元の位置）
+	const core::Transform& get_transform() const;
+
 	/// 速度（剛体が無ければ 0）
 	core::Vector get_velocity() const;
 	/// 速度を設定する（剛体が無ければ何もしない）

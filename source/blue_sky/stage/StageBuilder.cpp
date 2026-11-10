@@ -5,7 +5,6 @@
 #include <blue_sky/DebugLog.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
-#include <GameObject/Player.h>
 #include <GameObject/Camera.h>
 
 #include <core/sound/SoundManager.h>
@@ -104,7 +103,7 @@ StageBuilder::Result StageBuilder::build( const StageData& data, const Context& 
 				// 敵（ECS だけの物体）に追う相手を渡す（以前の Robot::set_player）
 				if ( context.player )
 				{
-					factory->set_robot_target( id, context.player->get_entity_id(), context.player );
+					factory->set_robot_target( id, * context.player );
 				}
 			}
 		}
@@ -124,12 +123,10 @@ StageBuilder::Result StageBuilder::build( const StageData& data, const Context& 
 	{
 		const auto& p = data.player->position;
 
-		context.player->set_start_location( static_cast< float_t >( p[ 0 ] ), static_cast< float_t >( p[ 1 ] ), static_cast< float_t >( p[ 2 ] ) );
+		factory->get_ref( * context.player ).set_start_location( static_cast< float_t >( p[ 0 ] ), static_cast< float_t >( p[ 1 ] ), static_cast< float_t >( p[ 2 ] ) );
 
-		if ( context.physics )
-		{
-			context.player->set_rigid_body( context.physics->add_active_object_as_capsule( context.player ) );
-		}
+		// 剛体は始めの位置に作る（以前の ActiveObjectPhysics::add_active_object_as_capsule）
+		factory->add_player_rigid_body( * context.player );
 
 		if ( data.player->camera_direction && context.camera )
 		{

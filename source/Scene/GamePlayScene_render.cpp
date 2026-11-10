@@ -3,7 +3,8 @@
 #include <blue_sky/GameMain.h>
 #include <game/Config.h>
 
-#include <GameObject/Player.h>
+#include <blue_sky/ecs/EntityObject.h>
+#include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
 #include <GameObject/Camera.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -130,21 +131,23 @@ void GamePlayScene::render_text() const
 	{
 		ss << "FPS : " << get_main_loop()->get_last_fps() << '\n';
 		ss << "BPM : " << get_bpm() << '\n';
-		ss << "POS : " << player_->get_transform().get_position().x() << ", " << player_->get_transform().get_position().y() << ", " << player_->get_transform().get_position().z() << '\n';
-		ss << "step speed : " << player_->get_step_speed() << '\n';
-		ss << "last footing height : " << player_->get_last_footing_height() << '\n';
-		ss << "DX : " << player_->get_velocity().x() << '\n';
-		ss << "DY : " << player_->get_velocity().y() << '\n';
-		ss << "DZ : " << player_->get_velocity().z() << '\n';
-		ss << "VELOCITY : " << player_->get_velocity().length() << '\n';
+		const ecs::EntityObject player = get_player_object();
+
+		ss << "POS : " << player.get_location().x() << ", " << player.get_location().y() << ", " << player.get_location().z() << '\n';
+		ss << "step speed : " << get_player().step_speed << '\n';
+		ss << "last footing height : " << get_player().last_footing_height << '\n';
+		ss << "DX : " << player.get_velocity().x() << '\n';
+		ss << "DY : " << player.get_velocity().y() << '\n';
+		ss << "DZ : " << player.get_velocity().z() << '\n';
+		ss << "VELOCITY : " << player.get_velocity().length() << '\n';
 		ss << "Objects : " << get_active_object_manager()->active_object_list().size() << " + ECS " << get_object_factory()->get_entity_object_list().size() << '\n';
 
 		ss << "mouse.dx : " << get_input()->get_mouse_dx() << '\n';
 		ss << "mouse.dy : " << get_input()->get_mouse_dy() << '\n';
 
-		ss << "IS LOCATED ON DIE : " << player_->is_located_on_die() << '\n';
-		ss << "IS LOCATED ON SAFE : " << player_->is_located_on_safe() << '\n';
-		ss << "IS FALLING TO DIE : " << player_->is_falling_to_die() << '\n';
+		ss << "IS LOCATED ON DIE : " << get_player().is_located_on_die << '\n';
+		ss << "IS LOCATED ON SAFE : " << get_player().is_located_on_safe << '\n';
+		ss << "IS FALLING TO DIE : " << get_player_system()->is_falling_to_die( player_id_ ) << '\n';
 
 		ss << "TESS FACTOR : " << get_graphics_manager()->get_frame_render_data()->data().tess_factor << '\n';
 
@@ -266,7 +269,7 @@ void GamePlayScene::render_far_billboards() const
  */
 void GamePlayScene::render_sprite( float_t ortho_offset ) const
 {
-	if ( player_->get_action_mode() == Player::ActionMode::SCOPE )
+	if ( get_player().action_mode == ecs::PlayerBehaviorComponent::ActionMode::SCOPE )
 	{
 		get_graphics_manager()->set_input_layout( "main" );
 
@@ -291,9 +294,9 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 
 	render_technique( "|sprite", [this, sprite]
 	{
-		if ( player_->get_selected_item_type() == Player::ItemType::ROCKET )
+		if ( get_player().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::ROCKET )
 		{
-			for ( int n = 0; n < player_->get_item_count( Player::ItemType::ROCKET ); n++ )
+			for ( int n = 0; n < get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::ROCKET ); n++ )
 			{
 				const int offset = n * 20;
 
@@ -303,9 +306,9 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				sprite->draw( dst_point, ui_texture_, src_rect.get_rect() );
 			}
 		}
-		else if ( player_->get_selected_item_type() == Player::ItemType::UMBRELLA )
+		else if ( get_player().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::UMBRELLA )
 		{
-			for ( int n = 0; n < player_->get_item_count( Player::ItemType::UMBRELLA ); n++ )
+			for ( int n = 0; n < get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::UMBRELLA ); n++ )
 			{
 				const float offset = n * 50.f;
 
@@ -318,9 +321,9 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				sprite->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 			}
 		}
-		else if ( player_->get_selected_item_type() == Player::ItemType::STONE )
+		else if ( get_player().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::STONE )
 		{
-			for ( int n = player_->get_item_count( Player::ItemType::STONE ) - 1; n >= 0; --n )
+			for ( int n = get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) - 1; n >= 0; --n )
 			{
 				const int offset = n * 50;
 
@@ -330,7 +333,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				sprite->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 			}
 		}
-		else if ( player_->get_selected_item_type() == Player::ItemType::SCOPE )
+		else if ( get_player().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::SCOPE )
 		{
 			win::Rect src_rect = win::Rect::Size( 256, 256, 192, 140 );
 			win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - 5 );
@@ -338,7 +341,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 			sprite->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 		}
 
-		if ( player_->get_selected_item_type() == Player::ItemType::ROCKET || ( player_->get_selected_item_type() == Player::ItemType::STONE && player_->can_throw() ) )
+		if ( get_player().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::ROCKET || ( get_player().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::STONE && get_player().can_throw ) )
 		{
 			// aim
 			win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );
@@ -347,7 +350,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 			sprite->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.5f ) );
 		}
 
-		if ( player_->has_medal() )
+		if ( get_player().has_medal )
 		{
 			win::Rect src_rect = win::Rect::Size( 384, 0, 64, 64 );
 			win::Point dst_point( 5, get_height() - src_rect.height() - 5 );

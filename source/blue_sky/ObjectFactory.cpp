@@ -34,6 +34,10 @@
 #include <blue_sky/ecs/system/RobotBehaviorSystem.h>
 #include <blue_sky/ecs/component/RobotBehaviorComponent.h>
 #include <blue_sky/ecs/component/PatrolComponent.h>
+#include <blue_sky/ecs/component/PlayerBehaviorComponent.h>
+#include <blue_sky/ecs/component/PlayerInputComponent.h>
+#include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
+#include <blue_sky/ecs/system/PlayerInputSystem.h>
 #include <blue_sky/graphics/Line.h>
 
 #include <GameObject/ActiveObject.h>
@@ -74,6 +78,8 @@ void ObjectFactory::setup_systems()
 	entity_manager_->add_system< ecs::BalloonHoldSystem >( 0, sound_manager_ );
 	entity_manager_->add_system< ecs::GirlSystem >( 0 );
 	entity_manager_->add_system< ecs::RobotBehaviorSystem >( 0, physics_, graphics_manager_, sound_manager_ );
+	entity_manager_->add_system< ecs::PlayerBehaviorSystem >( 0, physics_, graphics_manager_, sound_manager_ );
+	entity_manager_->add_system< ecs::PlayerInputSystem >( 0 );
 }
 
 std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const string_t& kind )
@@ -592,12 +598,69 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::find_first_of_kind( cons
 	return std::nullopt;
 }
 
-void ObjectFactory::set_robot_target( EntityId robot, EntityId target_id, const ecs::ChaseTarget* target )
+void ObjectFactory::set_robot_target( EntityId robot, EntityId target_id )
 {
 	if ( auto* system = entity_manager_->get_system< ecs::RobotBehaviorSystem >() )
 	{
-		system->set_target( robot, target_id, target );
+		system->set_target( robot, target_id );
 	}
+}
+
+ObjectFactory::EntityId ObjectFactory::create_player()
+{
+	// 以前の Player : 0.5 x 1.75 x 0.5・硬い・壁になる・地球の重力・作ったときの質量 1（やり直すと 50・回らない・摩擦 0。PlayerBehaviorSystem::restart）
+	ObjectSpec spec;
+	spec.kind = "player";
+	spec.size = Vector( ecs::PlayerBehaviorComponent::CollisionWidth, ecs::PlayerBehaviorComponent::CollisionHeight, ecs::PlayerBehaviorComponent::CollisionDepth );
+	spec.mass = 1.f;
+	spec.shape = Shape::NONE;		// 剛体はステージを読むときに作る（add_player_rigid_body）
+
+	const EntityId id = create_entity_object( spec );
+	core::ecs::Entity* entity = entity_manager_->find( id );
+
+	entity->add_component< ecs::PlayerBehaviorComponent >();
+	entity->add_component< ecs::PlayerInputComponent >();
+	entity->add_component< ecs::FlickerComponent >();
+
+	return id;
+}
+
+void ObjectFactory::add_player_rigid_body( EntityId player )
+{
+	core::ecs::Entity* entity = entity_manager_->find( player );
+
+	if ( ! physics_ || ! entity || ! entity->get_component< ecs::PlayerBehaviorComponent >() )
+	{
+		return;
+	}
+
+	const float_t w = ecs::PlayerBehaviorComponent::CollisionWidth;
+	const float_t h = ecs::PlayerBehaviorComponent::CollisionHeight;
+	const float_t d = ecs::PlayerBehaviorComponent::CollisionDepth;
+
+	const float_t radius = std::max( w, d ) / 2.f;
+	const float_t height = h - ( radius * 2.f );
+
+	Transform offset;
+	offset.set_identity();
+	offset.set_position( Vector( 0, h / 2, 0 ) );
+
+	auto* transform = entity->get_component< core::ecs::TransformComponent >();
+	core::physics::RigidBody owner = physics_->add_capsule_rigid_body( transform->transform, offset, radius, height, 1.f );
+	btRigidBody* body = owner.get();
+
+	auto* body_component = entity->get_component< ecs::PhysicsBodyComponent >();
+
+	if ( ! body_component )
+	{
+		body_component = entity->add_component< ecs::PhysicsBodyComponent >();
+	}
+
+	body_component->owner = std::move( owner );		// 前の剛体があれば、ここで世界から外れて消える
+	body_component->body = body;
+	body_component->height_offset = h * 0.5f;
+
+	core::physics::set_entity_tag( body, player );
 }
 
 void ObjectFactory::name( const string_t& name, EntityId id )

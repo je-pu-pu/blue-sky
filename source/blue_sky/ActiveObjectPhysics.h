@@ -41,6 +41,9 @@ public:
 	/// a と接している組を集める（以前の check_collision_with。その場で on_collide_with を呼ばず、集めた組は events が振り分けて渡す）
 	void collect_contacts_with( ActiveObject* a, ecs::CollisionEventSystem& events );
 
+	/// 剛体 a と接している組を集める（ECS だけの物体の剛体。プレイヤー）
+	void collect_contacts_with( btCollisionObject* a, ecs::CollisionEventSystem& events );
+
 	/// 世界の中で接している組を全部集める（以前の check_collision_all。めり込んでいる接点 1 つにつき 1 組。順は以前と同じ）
 	void collect_all_contacts( ecs::CollisionEventSystem& events );
 

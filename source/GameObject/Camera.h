@@ -6,8 +6,6 @@
 namespace blue_sky
 {
 
-class Player;
-
 /**
  * カメラ
  *
@@ -89,7 +87,12 @@ public:
 	void set_rotate_chase_speed( float s ) { rotate_chase_speed_ = s; }
 	void reset_rotate_chase_speed() { rotate_chase_speed_ = 0.2f; }
 
-	void update_with_player( const Player* );
+	/**
+	 * プレイヤーの目の位置にカメラを置く（死んでいれば、目の高さに応じて横に倒れる）
+	 *
+	 * 以前は Player* を受け取っていた。プレイヤーを ECS だけの物体にしたので、使う値だけを受け取る
+	 */
+	void update_with_player( const Vector& location, const Vector& front, float_t eye_height, float_t eye_depth, bool is_dead );
 	void update();
 
 	void set_aspect( float a ) { aspect_ = a; }

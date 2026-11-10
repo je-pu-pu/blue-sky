@@ -9,7 +9,7 @@
 class btRigidBody;
 
 namespace blue_sky { struct GameObjectContext; }
-namespace blue_sky::ecs { enum class PickupKind; class BalloonHolder; }
+namespace blue_sky::ecs { enum class PickupKind; }
 
 namespace core
 {
@@ -155,10 +155,10 @@ public:
 	/**
 	 * 風船（ECS だけの物体。ecs::BalloonHoldComponent を持つ）に触れた（以前の on_collide_with( Balloon* )）
 	 *
-	 * ほかの物体につかまれている風船には呼ばれない。つかんだら、風船が手元に付いて行くときに読む窓口を返す（プレイヤーだけ）。
-	 * つかまない物体は nullptr（既定）
+	 * ほかの物体につかまれている風船には呼ばれない。つかんだら true（風船は手元に付いて行く。手元はプレイヤーの部品から決まるので、
+	 * 本編でつかむのは ECS だけの物体のプレイヤーだけ。ActiveObjectManager::on_collide_with_player）。つかまない物体は false（既定）
 	 */
-	virtual ecs::BalloonHolder* on_collide_with_balloon( core::ecs::EntityId /* balloon */ ) { return nullptr; }
+	virtual bool on_collide_with_balloon( core::ecs::EntityId /* balloon */ ) { return false; }
 	/**
 	 * 石に当たった（以前の on_collide_with( Stone* )）
 	 *

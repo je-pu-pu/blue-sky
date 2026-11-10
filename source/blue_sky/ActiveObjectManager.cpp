@@ -30,6 +30,8 @@
 #include <blue_sky/ecs/system/RobotBehaviorSystem.h>
 #include <blue_sky/ecs/component/RobotBehaviorComponent.h>
 #include <blue_sky/ecs/component/BalloonHoldComponent.h>
+#include <blue_sky/ecs/component/PlayerBehaviorComponent.h>
+#include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/ObjectBody.h>
 
@@ -146,6 +148,12 @@ void ActiveObjectManager::update()
 
 	const float_t scene_elapsed_time = object_context_ && object_context_->scene_elapsed_time ? object_context_->scene_elapsed_time() : 0.f;
 
+	// プレイヤー（ECS だけの物体。以前は ActiveObject の一覧の先頭の Player::update。ほかの物体より先に）
+	if ( auto* system = entity_manager_->get_system< ecs::PlayerBehaviorSystem >() )
+	{
+		system->update_players( object_context_ && object_context_->delta_time ? object_context_->delta_time() : 0.f, scene_elapsed_time );
+	}
+
 	// 風船（ECS だけの物体。以前は Balloon::update が物体の update の中で動かしていた。アニメーションより前に）
 	if ( auto* system = entity_manager_->get_system< ecs::BalloonHoldSystem >() )
 	{
@@ -228,6 +236,21 @@ void ActiveObjectManager::check_collision_with( ActiveObject* a )
 	events->dispatch( * this );
 }
 
+void ActiveObjectManager::check_collision_with( core::ecs::EntityId id )
+{
+	auto* events = entity_manager_->get_system< ecs::CollisionEventSystem >();
+	core::ecs::Entity* entity = entity_manager_->find( id );
+	btRigidBody* body = entity ? ecs::EntityObject( entity ).get_rigid_body() : nullptr;
+
+	if ( ! events || ! body )
+	{
+		return;
+	}
+
+	physics_->collect_contacts_with( body, * events );
+	events->dispatch( * this );
+}
+
 void ActiveObjectManager::check_collision_all()
 {
 	auto* events = entity_manager_->get_system< ecs::CollisionEventSystem >();
@@ -294,7 +317,102 @@ void ActiveObjectManager::on_collide( core::ecs::EntityId a, core::ecs::EntityId
 
 	if ( e0 && e1 )
 	{
-		on_collide_entity_objects( * e0, * e1 );
+		on_collide_entity_objects( * e0, * e1, object_context_ ? object_context_->sound_manager : nullptr );
+	}
+}
+
+void ActiveObjectManager::on_collide_with_player( core::ecs::Entity& player, core::ecs::Entity& entity, core::sound::SoundManager* sound_manager )
+{
+	auto* behavior = player.get_entity_manager()->get_system< ecs::PlayerBehaviorSystem >();
+
+	if ( ! behavior )
+	{
+		return;
+	}
+
+	const auto player_id = static_cast< core::ecs::EntityId >( player.get_id() );
+
+	// 動かない物（以前の StaticObject）: 1 組につき 1 回、プレイヤーに知らせる（ロケットで飛んでいれば止まる）
+	if ( entity.get_component< ecs::StaticObjectComponent >() )
+	{
+		behavior->on_touch_static_object( player_id );
+	}
+
+	// 拾う物（以前の Medal・Rocket・Umbrella）: プレイヤーが拾ったら、この物体を死なせる（ロケットは当たりの応答も消す）
+	if ( const auto* pickup = entity.get_component< ecs::PickupComponent >() )
+	{
+		if ( behavior->on_touch_pickup( player_id, pickup->kind ) )
+		{
+			ecs::EntityObject picked( & entity );
+			picked.kill();
+
+			if ( pickup->disable_contact_on_pickup && picked.get_rigid_body() )
+			{
+				ecs::object_body::set_no_contact_response( * picked.get_rigid_body(), true );
+			}
+		}
+	}
+
+	// 石（以前の Stone）: プレイヤーが拾ったら石を死なせる（プレイヤーは窓口を持っておいて投げる）
+	if ( entity.get_component< ecs::ThrowableComponent >() )
+	{
+		if ( behavior->on_touch_stone( player_id, GameObjectRef( entity.get_entity_manager(), nullptr, static_cast< core::ecs::EntityId >( entity.get_id() ) ) ) )
+		{
+			ecs::EntityObject( & entity ).kill();
+		}
+	}
+
+	// スイッチ（以前の BaseSwitch）: プレイヤーの速さで入・切が変わる
+	if ( entity.get_component< ecs::SwitchComponent >() )
+	{
+		if ( auto* system = entity.get_entity_manager()->get_system< ecs::SwitchSystem >() )
+		{
+			system->on_touch( static_cast< core::ecs::EntityId >( entity.get_id() ), player_id, ecs::EntityObject( & player ).get_velocity() );
+		}
+	}
+
+	// 風船（以前の Balloon）: つかまれていない風船だけ知らせ、プレイヤーがつかんだら風船をつかませる
+	if ( const auto* balloon = entity.get_component< ecs::BalloonHoldComponent >(); balloon && ! balloon->is_held() )
+	{
+		const auto balloon_id = static_cast< core::ecs::EntityId >( entity.get_id() );
+
+		if ( behavior->on_touch_balloon( player_id, balloon_id ) )
+		{
+			if ( auto* system = entity.get_entity_manager()->get_system< ecs::BalloonHoldSystem >() )
+			{
+				system->grab( balloon_id, player_id );
+			}
+		}
+	}
+
+	// 敵（以前の Robot）: プレイヤーに「追っているか」を知らせ（追う敵に当たると傷つく）、敵は立つ・回る間なら止まる
+	if ( entity.get_component< ecs::RobotBehaviorComponent >() )
+	{
+		const auto robot_id = static_cast< core::ecs::EntityId >( entity.get_id() );
+		auto* system = entity.get_entity_manager()->get_system< ecs::RobotBehaviorSystem >();
+		const bool is_chasing = system && system->get_mode( robot_id ) == ecs::RobotBehaviorComponent::Mode::CHASE;
+
+		if ( behavior->on_touch_robot( player_id, is_chasing ) && system )
+		{
+			system->on_touched_by_target( robot_id );
+		}
+	}
+
+	// 梯子（以前の Ladder）: プレイヤーが梯子につかまり、梯子は最近（0.5 秒以内）触れていなければ音を鳴らして覚える
+	if ( entity.get_component< ecs::LadderComponent >() )
+	{
+		if ( behavior->on_touch_ladder( player_id ) )
+		{
+			if ( auto* cache = entity.get_component< ecs::ContactCacheComponent >() )
+			{
+				if ( ! cache->cache.is_cached( player_id ) )
+				{
+					ecs::EntityObject( & entity ).play_sound( sound_manager, "ladder-contact" );
+				}
+
+				cache->cache.cache( player_id, ecs::ContactCacheComponent::LifeTime );
+			}
+		}
 	}
 }
 
@@ -351,11 +469,11 @@ void ActiveObjectManager::on_collide_with_entity_object( GameObject& object, cor
 	{
 		const auto balloon_id = static_cast< core::ecs::EntityId >( entity.get_id() );
 
-		if ( ecs::BalloonHolder* holder = object.on_collide_with_balloon( balloon_id ) )
+		if ( object.on_collide_with_balloon( balloon_id ) )
 		{
 			if ( auto* system = entity.get_entity_manager()->get_system< ecs::BalloonHoldSystem >() )
 			{
-				system->grab( balloon_id, object_id, holder );
+				system->grab( balloon_id, object_id );
 			}
 		}
 	}
@@ -395,8 +513,21 @@ void ActiveObjectManager::on_collide_with_entity_object( GameObject& object, cor
 	}
 }
 
-void ActiveObjectManager::on_collide_entity_objects( core::ecs::Entity& a, core::ecs::Entity& b )
+void ActiveObjectManager::on_collide_entity_objects( core::ecs::Entity& a, core::ecs::Entity& b, core::sound::SoundManager* sound_manager )
 {
+	// プレイヤーと物体 : 物体の部品の組み合わせで、プレイヤーの System に知らせる（1 組につき 1 回。以前はプレイヤーが ActiveObject で、on_collide_with_entity_object だった）
+	if ( a.get_component< ecs::PlayerBehaviorComponent >() )
+	{
+		on_collide_with_player( a, b, sound_manager );
+		return;
+	}
+
+	if ( b.get_component< ecs::PlayerBehaviorComponent >() )
+	{
+		on_collide_with_player( b, a, sound_manager );
+		return;
+	}
+
 	// 石と風船 : 以前は Stone::on_collide_with( GameObject* ) が風船の on_collide_with( Stone* )（今の on_collide_with_stone）を呼び、
 	// 風船は割れて音を鳴らした（石は拾わない）。1 組につき 1 回
 	auto burst_by_stone = [] ( core::ecs::Entity& balloon, core::ecs::Entity& stone )

@@ -5,7 +5,6 @@
 #include <blue_sky/GameSettings.h>
 #include <core/setting/SettingStore.h>
 
-#include <GameObject/Player.h>
 #include <GameObject/Camera.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -29,6 +28,8 @@
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/component/BalloonHoldComponent.h>
 #include <blue_sky/ecs/system/RobotBehaviorSystem.h>
+#include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
+#include <blue_sky/ecs/system/PlayerInputSystem.h>
 #include <core/ecs/EntityManager.h>
 
 #include <core/graphics/OculusRift.h>
@@ -82,10 +83,9 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 
 
 	// Player
-	player_ = new Player();
-	player_->set_model( get_graphics_manager()->load_model( "player" ) );
-	get_active_object_manager()->add_active_object( player_ );
-	get_object_factory()->name( "player", player_->get_entity_id() );
+	// ECS だけの物体（以前は new Player() して ActiveObjectManager に加えていた）。剛体はステージを読むときに作る
+	player_id_ = get_object_factory()->create_player();
+	get_object_factory()->name( "player", player_id_ );
 
 	// Goal
 	if ( auto id = get_object_factory()->create_object( "goal" ) )
@@ -179,6 +179,30 @@ GamePlayScene::~GamePlayScene()
 	clear_delayed_command();
 
 	get_graphics_manager()->get_sprite()->set_ortho_offset( 0.f );
+}
+
+ecs::PlayerBehaviorSystem* GamePlayScene::get_player_system() const
+{
+	return get_entity_manager()->get_system< ecs::PlayerBehaviorSystem >();
+}
+
+ecs::PlayerBehaviorComponent& GamePlayScene::get_player() const
+{
+	static ecs::PlayerBehaviorComponent empty;		// プレイヤーがいない（作れなかった）ときの空の部品
+
+	ecs::PlayerBehaviorComponent* p = get_player_system() ? get_player_system()->find_player( player_id_ ) : nullptr;
+
+	return p ? * p : empty;
+}
+
+ecs::EntityObject GamePlayScene::get_player_object() const
+{
+	return ecs::EntityObject( get_entity_manager()->find( player_id_ ) );
+}
+
+GameObjectRef GamePlayScene::get_player_ref() const
+{
+	return get_object_factory()->get_ref( player_id_ );
 }
 
 void GamePlayScene::clear_delayed_command()
@@ -342,14 +366,17 @@ void GamePlayScene::update()
 		get_active_object_manager()->update_transforms();
 	}
 
-	camera_->update_with_player( player_ );
+	{
+		const ecs::EntityObject player = get_player_object();
+		camera_->update_with_player( player.get_location(), player.get_front(), get_player().eye_height, get_player().eye_depth, get_player_system()->is_dead( player_id_ ) );
+	}
 	camera_->update();
 
 
 	// collision_check（当たった組を ecs::CollisionEventSystem に集め、互換の層が二重ディスパッチを呼ぶ。調べる順は以前と同じ : プレイヤー → ゴール → 全部）
-	get_active_object_manager()->check_collision_with( player_ );
+	get_active_object_manager()->check_collision_with( player_id_ );
 
-	if ( get_active_object_physics()->is_collision( player_->get_rigid_body(), goal_.get_rigid_body() ) )
+	if ( get_active_object_physics()->is_collision( get_player_ref().get_rigid_body(), goal_.get_rigid_body() ) )
 	{
 		on_goal();
 	}
@@ -394,155 +421,56 @@ void GamePlayScene::update_main()
 {
 	read_player_input();
 
-	const ecs::PlayerInputComponent& input = player_input_;
+	const ecs::PlayerInputComponent* input = get_entity_manager()->get_system< ecs::PlayerInputSystem >() ? get_entity_manager()->get_system< ecs::PlayerInputSystem >()->find_input( player_id_ ) : nullptr;
+
+	if ( ! input )
+	{
+		return;
+	}
 
 	const float_t rotation_speed_rate = camera_->fov() / camera_->get_fov_default();
 
 	if ( ! get_oculus_rift() )
 	{
-		camera_->rotate_degree_target() += Vector( input.mouse_dy * get_mouse_rotation_speed() * rotation_speed_rate, 0.f, 0.f, 0.f );
+		camera_->rotate_degree_target() += Vector( input->mouse_dy * get_mouse_rotation_speed() * rotation_speed_rate, 0.f, 0.f, 0.f );
 		camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -get_mouse_rotation_speed(), +get_mouse_rotation_speed() ) );
 	}
 
-	player_->set_pitch( -camera_->rotate_degree_target().x() / get_mouse_rotation_speed() );
+	// プレイヤーの操作（ecs::PlayerInputSystem。以前はここでプレイヤーの関数を直接呼んでいた）。カメラの動きはプレイヤーの操作の結果を変えないので、操作の後にまとめる
+	ecs::PlayerInputSystem::View view;
+	view.camera_rotate_x = camera_->rotate_degree_target().x();
+	view.camera_front = camera_->front();
+	view.rotation_speed_rate = rotation_speed_rate;
+	view.mouse_rotation_speed = get_mouse_rotation_speed();
+	view.is_mouse_look = ! get_oculus_rift();
 
-	float eye_depth_add = 0.f;
+	const ecs::PlayerInputSystem::Result result = get_entity_manager()->get_system< ecs::PlayerInputSystem >()->update_player( player_id_, view );
 
-	if ( player_->is_on_ladder() )
+	if ( ! result.is_dead )
 	{
-		eye_depth_add = -0.05f;
-	}
-	else if ( camera_->rotate_degree_target().x() > 0.f )
-	{
-		if ( ! get_oculus_rift() )
+		if ( result.scope_started )
 		{
-			eye_depth_add = input.mouse_dy;
-		}
-	}
-
-	player_->add_eye_depth( eye_depth_add );
-
-	if ( ! player_->is_dead() )
-	{
-		bool is_moving = false;
-
-		if ( ! player_->is_ladder_step_only() )
-		{
-			if ( input.left )
-			{
-				player_->side_step( -1.f );
-				is_moving = true;
-			}
-			if ( input.right )
-			{
-				player_->side_step( +1.f );
-				is_moving = true;
-			}
-			if ( input.up )
-			{
-				player_->step( +1.f );
-				is_moving = true;
-			}
-			if ( input.down )
-			{
-				player_->step( -1.f );
-				is_moving = true;
-			}
+			camera_->set_fov_target( camera_->get_fov_default() * get_scope_zoom_factor() );
+			camera_->set_fov( camera_->get_fov_default() * get_scope_zoom_factor() );
 		}
 
-		bool is_moving_on_ladder = false;
-
-		if ( player_->is_on_ladder() )
+		if ( result.scope_wheel > 0 )
 		{
-			if ( input.up )
-			{
-				player_->ladder_step( +1.f );
-				is_moving_on_ladder = true;
-			}
-			if ( input.down )
-			{
-				player_->ladder_step( -1.f );
-				is_moving_on_ladder = true;
-			}
+			camera_->set_fov_target( std::max( camera_->get_fov_target() * get_scope_zoom_factor(), get_min_scope_fov() ) );
+		}
+		else if ( result.scope_wheel < 0 )
+		{
+			camera_->set_fov_target( std::min( camera_->get_fov_target() / get_scope_zoom_factor(), camera_->get_fov_default() * get_scope_zoom_factor() ) );
 		}
 
-		if ( ! is_moving )
+		if ( result.reset_fov )
 		{
-			player_->stop();
-		}
-
-		if ( ! is_moving_on_ladder )
-		{
-			player_->stop_ladder_step();
-		}
-
-		if ( input.a_pushed )
-		{
-			switch ( player_->get_selected_item_type() )
-			{
-				case Player::ItemType::NONE: player_->jump(); break;
-				case Player::ItemType::ROCKET: player_->rocket( camera_->front() ); break;
-				case Player::ItemType::STONE: player_->throw_stone( camera_->front() ); break;
-					case Player::ItemType::SCOPE:
-				{
-					player_->switch_scope_mode();
-
-					if ( player_->get_action_mode() == Player::ActionMode::SCOPE )
-					{
-						camera_->set_fov_target( camera_->get_fov_default() * get_scope_zoom_factor() );
-						camera_->set_fov( camera_->get_fov_default() * get_scope_zoom_factor() );
-					}
-					break;
-				}
-			}
-		}
-		else if ( input.jump_pushed )
-		{
-			player_->jump();
-		}
-		else if ( input.a || input.jump )
-		{
-			player_->clamber();
-		}
-		else
-		{
-			player_->stop_clamber();
-		}
-
-		const int wheel = input.wheel;
-
-		if ( player_->get_action_mode() == Player::ActionMode::SCOPE )
-		{
-			if ( wheel > 0 )
-			{
-				camera_->set_fov_target( std::max( camera_->get_fov_target() * get_scope_zoom_factor(), get_min_scope_fov() ) );
-			}
-			else if ( wheel < 0 )
-			{
-				camera_->set_fov_target( std::min( camera_->get_fov_target() / get_scope_zoom_factor(), camera_->get_fov_default() * get_scope_zoom_factor() ) );
-			}
-		}
-		else
-		{
-			if ( wheel > 0 )
-			{
-				player_->select_next_item();
-			}
-			else if ( wheel < 0 )
-			{
-				player_->select_prev_item();
-			}
-
 			camera_->reset_fov();
 		}
 
-		float_t add_direction_degree_by_mouse = input.mouse_dx * get_mouse_rotation_speed() * rotation_speed_rate;
-		float_t add_direction_degree_by_hmd   = input.hmd_delta_yaw_degree;
+		camera_->rotate_degree_target().set_y( get_player_object().get_direction_degree() );
 
-		player_->add_direction_degree( add_direction_degree_by_mouse + add_direction_degree_by_hmd );
-		camera_->rotate_degree_target().set_y( player_->get_direction_degree() );
-
-		if ( player_->is_falling_to_die() )
+		if ( get_player_system()->is_falling_to_die( player_id_ ) )
 		{
 			// 落ちて死のうとしている場合は白くフェードアウトする
 
@@ -556,7 +484,7 @@ void GamePlayScene::update_main()
 	}
 	else
 	{
-		if ( input.a_pushed )
+		if ( result.restart_requested )
 		{
 			restart();
 		}
@@ -569,13 +497,21 @@ void GamePlayScene::update_main()
 }
 
 /**
- * 入力（Input）を、このフレームのプレイヤーへの入力（player_input_）に書く
+ * 入力（Input）を、このフレームのプレイヤーへの入力（プレイヤーの ecs::PlayerInputComponent）に書く
  *
  * 開発用の BLUE_SKY_DEBUG_PLAYER_SCRIPT を設定したときは、Input を読まず、決まった入力の並び（debug_player_script_input）を書く
  */
 void GamePlayScene::read_player_input()
 {
-	ecs::PlayerInputComponent& input = player_input_;
+	auto* system = get_entity_manager()->get_system< ecs::PlayerInputSystem >();
+	ecs::PlayerInputComponent* found = system ? system->find_input( player_id_ ) : nullptr;
+
+	if ( ! found )
+	{
+		return;
+	}
+
+	ecs::PlayerInputComponent& input = * found;
 	input.clear();
 
 	if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_PLAYER_SCRIPT", nullptr, 0 ) > 0 )
@@ -597,7 +533,7 @@ void GamePlayScene::read_player_input()
 	input.hmd_delta_yaw_degree = get_oculus_rift() ? math::radian_to_degree( get_oculus_rift()->get_delta_yaw() ) : 0.f;
 
 	// ホイールは、プレイヤーが生きている間だけ取り出す（以前と同じ。死んでいる間に回した分は、やり直した後に効く）
-	if ( ! player_->is_dead() )
+	if ( ! get_player_system()->is_dead( player_id_ ) )
 	{
 		input.wheel = get_input()->pop_mouse_wheel_queue();
 	}
@@ -657,8 +593,8 @@ void GamePlayScene::debug_player_script()
 		{
 			const Vector to = get_object_factory()->get_ref( * id ).get_location();
 
-			player_->set_location( to );
-			player_->set_velocity( Vector::Zero );
+			get_player_ref().set_location( to );
+			get_player_ref().set_velocity( Vector::Zero );
 
 			debug_log( string_t( "[Debug] プレイヤーを" ) + label + "の所へ置きました" );
 		}
@@ -685,17 +621,19 @@ string_t GamePlayScene::describe_player_state() const
 {
 	static const char_t* const action_modes[] = { "NONE", "BALLOON", "ROCKET", "UMBRELLA", "SCOPE" };
 
-	const Vector& l = player_->get_location();
-	const Vector& v = player_->get_velocity();
+	const ecs::EntityObject player = get_player_object();
+	const ecs::PlayerBehaviorComponent& p = get_player();
+	const Vector l = player.get_location();
+	const Vector v = player.get_velocity();
 
 	char buffer[ 512 ];
 	std::snprintf( buffer, sizeof( buffer ),
 		"位置 ( %.2f, %.2f, %.2f ) 速度 ( %.2f, %.2f, %.2f ) 向き %.1f 足場 %d 跳ぶ %d 跳べる %d 梯子 %d 壁 %d よじ登り %d/%d 覗く %d 投げる %d 動作 %s 終わりかけ %d 歩く速さ %.3f 目 %.2f/%.2f 選択 %d 石 %d ロケット %d メダル %d 死 %d 落ちて死ぬ %d HP %d 視野 %.1f カメラ ( %.1f, %.1f, %.1f )",
-		l.x(), l.y(), l.z(), v.x(), v.y(), v.z(), player_->get_direction_degree(),
-		player_->is_on_footing(), player_->is_jumping(), player_->is_jumpable(), player_->is_on_ladder(), player_->is_facing_to_block(), player_->can_clamber(), player_->is_clambering(), player_->can_peer_down(), player_->can_throw(),
-		action_modes[ static_cast< int >( player_->get_action_mode() ) ], player_->is_action_pre_finish(), player_->get_step_speed(), player_->get_eye_height(), player_->get_eye_depth(),
-		static_cast< int >( player_->get_selected_item_type() ), player_->get_item_count( Player::ItemType::STONE ), player_->get_item_count( Player::ItemType::ROCKET ), player_->has_medal(),
-		player_->is_dead(), player_->is_falling_to_die(), player_->get_hp(), camera_->fov(), camera_->position().x(), camera_->position().y(), camera_->position().z() );
+		l.x(), l.y(), l.z(), v.x(), v.y(), v.z(), player.get_direction_degree(),
+		p.is_on_footing, p.is_jumping, p.is_jumpable, p.is_on_ladder, p.is_facing_to_block, p.can_clamber, p.is_clambering, p.can_peer_down, p.can_throw,
+		action_modes[ static_cast< int >( p.action_mode ) ], p.is_action_pre_finish, p.step_speed, p.eye_height, p.eye_depth,
+		static_cast< int >( p.selected_item_type ), p.get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ), p.get_item_count( ecs::PlayerBehaviorComponent::ItemType::ROCKET ), p.has_medal,
+		get_player_system()->is_dead( player_id_ ), get_player_system()->is_falling_to_die( player_id_ ), p.hp, camera_->fov(), camera_->position().x(), camera_->position().y(), camera_->position().z() );
 
 	return buffer;
 }
@@ -735,7 +673,7 @@ void GamePlayScene::update_delayed_command()
 
 void GamePlayScene::update_balloon_sound()
 {
-	int_t balloon_sound_request = player_->pop_balloon_sound_request();
+	int_t balloon_sound_request = get_player().pop_balloon_sound_request();
 
 	if ( balloon_sound_request >= 1 )
 	{
@@ -764,7 +702,7 @@ void GamePlayScene::update_balloon_sound()
 		}
 	}
 
-	if ( player_->get_action_mode() == Player::ActionMode::BALLOON && ( balloon_sound_type_ == BalloonSoundType::SOLO || balloon_sound_type_ == BalloonSoundType::SCALE ) )
+	if ( get_player().action_mode == ecs::PlayerBehaviorComponent::ActionMode::BALLOON && ( balloon_sound_type_ == BalloonSoundType::SOLO || balloon_sound_type_ == BalloonSoundType::SCALE ) )
 	{
 		action_bgm_after_timer_ = get_action_bgm_fade_delay();
 	}
@@ -790,7 +728,7 @@ void GamePlayScene::update_balloon_sound()
 
 	// プレイヤーの位置が決まった後で、持っている風船を手元に合わせ直す
 	// （物体の更新の中だけだと、プレイヤーより先に更新されたときに 1 フレーム遅れてぶれる。以前は const_cast で呼んでいた）
-	if ( const auto balloon = player_->get_balloon() )
+	if ( const auto balloon = get_player().balloon )
 	{
 		get_active_object_manager()->update_balloon( * balloon );
 	}
@@ -891,11 +829,11 @@ void GamePlayScene::debug_visit_objects()
 		if ( step < targets.size() )
 		{
 			debug_log( string_t( "[Debug] 物体の所へ動かした結果 : " ) + targets[ step ].first
-				+ " / メダル " + ( player_->has_medal() ? "持っている" : "持っていない" )
-				+ " / 風船 " + ( player_->get_action_mode() == Player::ActionMode::BALLOON ? "つかまっている" : "つかまっていない" )
-				+ " / 梯子 " + ( player_->is_on_ladder() ? "触れている" : "触れていない" )
+				+ " / メダル " + ( get_player().has_medal ? "持っている" : "持っていない" )
+				+ " / 風船 " + ( get_player().action_mode == ecs::PlayerBehaviorComponent::ActionMode::BALLOON ? "つかまっている" : "つかまっていない" )
+				+ " / 梯子 " + ( get_player().is_on_ladder ? "触れている" : "触れていない" )
 				+ " / ゴール " + ( is_cleared_ ? "した" : "していない" )
-				+ " / ロケット " + std::to_string( player_->get_item_count( Player::ItemType::ROCKET ) ) + " 個" );
+				+ " / ロケット " + std::to_string( get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::ROCKET ) ) + " 個" );
 		}
 
 		return;
@@ -909,8 +847,8 @@ void GamePlayScene::debug_visit_objects()
 
 	const Vector to = targets[ step ].second;
 
-	player_->set_location( to );
-	player_->set_velocity( Vector::Zero );
+	get_player_ref().set_location( to );
+	get_player_ref().set_velocity( Vector::Zero );
 
 	debug_log( "[Debug] プレイヤーを" + targets[ step ].first + "の所へ動かしました ( " + std::to_string( to.x() ) + ", " + std::to_string( to.y() ) + ", " + std::to_string( to.z() ) + " )" );
 }
@@ -973,8 +911,8 @@ void GamePlayScene::debug_throw_stones()
 	{
 		if ( ( frame - start_frame ) % pick_interval == 0 )
 		{
-			player_->set_location( stones[ ( frame - start_frame ) / pick_interval ].get_location() );
-			player_->set_velocity( Vector::Zero );
+			get_player_ref().set_location( stones[ ( frame - start_frame ) / pick_interval ].get_location() );
+			get_player_ref().set_velocity( Vector::Zero );
 		}
 
 		return;
@@ -984,7 +922,7 @@ void GamePlayScene::debug_throw_stones()
 
 	if ( frame == throw_start_frame )
 	{
-		debug_log( "[Debug] 石を拾いました : " + std::to_string( player_->get_item_count( Player::ItemType::STONE ) ) + " 個（ステージの石 " + std::to_string( stones.size() ) + " 個）" );
+		debug_log( "[Debug] 石を拾いました : " + std::to_string( get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) ) + " 個（ステージの石 " + std::to_string( stones.size() ) + " 個）" );
 	}
 
 	// 行き先（種類ごとに最初の 1 つ）
@@ -1033,19 +971,19 @@ void GamePlayScene::debug_throw_stones()
 		const Vector from = target.get_location() + back * distance;
 		const Vector to = target.get_location() - from;
 
-		player_->set_location( from );
-		player_->set_velocity( Vector::Zero );
-		player_->set_direction_degree( math::radian_to_degree( std::atan2( to.x(), to.z() ) ) );
+		get_player_ref().set_location( from );
+		get_player_ref().set_velocity( Vector::Zero );
+		get_player_system()->set_direction_degree( player_id_, math::radian_to_degree( std::atan2( to.x(), to.z() ) ) );
 	}
 	else if ( phase == throw_frame )
 	{
-		Vector direction = ( target.get_location() + Vector( 0.f, 0.5f, 0.f ) ) - ( player_->get_location() + Vector( 0.f, player_->get_eye_height(), 0.f ) );
+		Vector direction = ( target.get_location() + Vector( 0.f, 0.5f, 0.f ) ) - ( get_player_object().get_location() + Vector( 0.f, get_player().eye_height, 0.f ) );
 		direction.normalize();
 
-		const int count = player_->get_item_count( Player::ItemType::STONE );
-		player_->throw_stone( direction );
+		const int count = get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE );
+		get_player_system()->throw_stone( player_id_, direction );
 
-		debug_log( "[Debug] 石を" + name + "へ" + ( player_->get_item_count( Player::ItemType::STONE ) < count ? "投げました" : "投げられませんでした" ) + "（残り " + std::to_string( player_->get_item_count( Player::ItemType::STONE ) ) + " 個）" );
+		debug_log( "[Debug] 石を" + name + "へ" + ( get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) < count ? "投げました" : "投げられませんでした" ) + "（残り " + std::to_string( get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) ) + " 個）" );
 	}
 	else if ( phase == result_frame )
 	{
@@ -1066,7 +1004,7 @@ void GamePlayScene::debug_throw_stones()
 			result = ecs::EntityObject( entity ).is_dead() ? "割れた" : "割れていない";
 		}
 
-		debug_log( "[Debug] 石を投げた結果 : " + name + " / " + result + "（持っている石 " + std::to_string( player_->get_item_count( Player::ItemType::STONE ) ) + " 個）" );
+		debug_log( "[Debug] 石を投げた結果 : " + name + " / " + result + "（持っている石 " + std::to_string( get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) ) + " 個）" );
 	}
 }
 
@@ -1135,10 +1073,10 @@ void GamePlayScene::update_clear()
 	Vector target_position = goal_.get_location();
 	target_position.set_z( target_position.z() - get_goal_camera_z_offset() + get_sound_manager()->get_sound( "fin" )->get_current_position() * get_goal_camera_z_speed() );
 
-	player_->set_location( player_->get_location() * ( 1.f - get_goal_position_lerp() ) + target_position * get_goal_position_lerp() );
-	player_->set_direction_degree( 0.f );
+	get_player_ref().set_location( get_player_object().get_location() * ( 1.f - get_goal_position_lerp() ) + target_position * get_goal_position_lerp() );
+	get_player_system()->set_direction_degree( player_id_, 0.f );
 
-	camera_->rotate_degree_target().set( 0.f, player_->get_direction_degree(), 0.f, 0.f );
+	camera_->rotate_degree_target().set( 0.f, get_player_object().get_direction_degree(), 0.f, 0.f );
 	camera_->set_rotate_chase_speed( get_camera_chase_speed_on_clear() );
 
 	get_graphics_manager()->fade_out( get_fade_speed_clear() );
@@ -1166,7 +1104,7 @@ void GamePlayScene::go_to_next_scene()
 {
 	std::string save_param_name = StageSelectScene::get_stage_prefix_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + "." + get_stage_name();
 
-	get_save_data()->set( save_param_name.c_str(), std::max( player_->has_medal() ? 2 : 1, get_save_data()->get( save_param_name.c_str(), 0 ) ) );
+	get_save_data()->set( save_param_name.c_str(), std::max( get_player().has_medal ? 2 : 1, get_save_data()->get( save_param_name.c_str(), 0 ) ) );
 
 	if ( get_stage_name() == "2-3" )
 	{

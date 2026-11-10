@@ -41,11 +41,11 @@ public:
 	void update_balloon( core::ecs::EntityId id, float_t scene_elapsed_time );
 
 	/**
-	 * 風船をつかませる
+	 * 風船をプレイヤーにつかませる
 	 *
 	 * @return つかませたら true。風船でない・既にほかの物体につかまれているなら false
 	 */
-	bool grab( core::ecs::EntityId balloon, core::ecs::EntityId holder_id, BalloonHolder* holder );
+	bool grab( core::ecs::EntityId balloon, core::ecs::EntityId holder_id );
 
 	/// 石が当たった : 割れて音を鳴らす（以前の Balloon::on_collide_with_stone。石は拾わない）
 	void burst( core::ecs::EntityId id );

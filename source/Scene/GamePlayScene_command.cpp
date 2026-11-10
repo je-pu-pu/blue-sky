@@ -3,7 +3,8 @@
 
 #include <blue_sky/GameMain.h>
 
-#include <GameObject/Player.h>
+#include <blue_sky/ecs/EntityObject.h>
+#include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
 #include <GameObject/Camera.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -51,7 +52,8 @@ std::optional< GameObjectRef > GamePlayScene::create_object_at_player_front( con
 
 	GameObjectRef o = get_object_factory()->get_ref( * id );
 
-	o.set_start_location( player_->get_location().x(), player_->get_location().y(), player_->get_location().z() + 3.f );
+	const Vector player_location = get_player_object().get_location();
+	o.set_start_location( player_location.x(), player_location.y(), player_location.z() + 3.f );
 	o.set_start_direction_degree( 0.f );
 
 	o.restart();
@@ -284,7 +286,7 @@ void GamePlayScene::run_action( const stage::Action& a )
 		}
 		case ActionType::START_FLICKERING:
 		{
-			player_->start_flickering();
+			get_player_system()->start_flickering( player_id_ );
 			break;
 		}
 		case ActionType::PLAY_ANIMATION:
@@ -357,7 +359,7 @@ void GamePlayScene::load_stage_file( const char* base_name )
 	context.physics = get_active_object_physics();
 	context.graphics_manager = get_graphics_manager();
 	context.sound_manager = get_sound_manager();
-	context.player = player_;
+	context.player = player_id_;
 	context.camera = camera_.get();
 	context.goal = goal_;
 	context.stage_dir = StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) );

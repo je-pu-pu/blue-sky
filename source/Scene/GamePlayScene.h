@@ -26,7 +26,6 @@ namespace core::graphics
 
 namespace blue_sky
 {
-	class Player;
 	class ActiveObject;
 	class Camera;
 	class DelayedCommand;
@@ -41,6 +40,13 @@ namespace blue_sky
 	namespace stage
 	{
 		struct Action;
+	}
+
+	namespace ecs
+	{
+		class EntityObject;
+		class PlayerBehaviorSystem;
+		struct PlayerBehaviorComponent;
 	}
 
 /**
@@ -92,9 +98,7 @@ private:
 	void debug_player_script_input( ecs::PlayerInputComponent& ) const;
 	string_t describe_player_state() const;
 
-	ecs::PlayerInputComponent			player_input_;		///< このフレームのプレイヤーへの入力（read_player_input が Input から書く）
-
-	/// 入力（Input）を player_input_ に書く
+	/// 入力（Input）を、プレイヤーの入力の部品（ecs::PlayerInputComponent）に書く
 	void read_player_input();
 	// 非所有参照 (各 Manager が所有)
 	Texture*							ui_texture_ = nullptr;			///< UI テクスチャ (GraphicsManager)
@@ -104,8 +108,7 @@ private:
 	Model*								rectangle_ = nullptr;			///< 矩形モデル (GraphicsManager)
 	Sound*								bgm_ = nullptr;					///< BGM (SoundManager)
 
-	// 非所有参照 (ActiveObjectManager が所有)
-	Player*								player_ = nullptr;
+	core::ecs::EntityId					player_id_ = 0;	///< プレイヤー（ECS だけの物体。ObjectFactory が持つ。以前は Player*）
 	GameObjectRef						goal_;		///< ゴール（ECS だけの物体。ObjectFactory が持つ）
 
 	// 所有リソース
@@ -170,6 +173,12 @@ protected:
 	std::optional< GameObjectRef > create_object_at_player_front( const char_t* );
 
 	void restart();
+
+	/// プレイヤーの行動の System・部品・位置の窓口（部品はプレイヤーがいなければ空の部品）
+	ecs::PlayerBehaviorSystem* get_player_system() const;
+	ecs::PlayerBehaviorComponent& get_player() const;
+	ecs::EntityObject get_player_object() const;
+	GameObjectRef get_player_ref() const;
 
 	void on_goal();
 

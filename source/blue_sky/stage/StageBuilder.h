@@ -4,6 +4,7 @@
 #include <blue_sky/GameObjectRef.h>
 
 #include <functional>
+#include <optional>
 #include <vector>
 
 namespace core::sound { class SoundManager; }
@@ -13,7 +14,6 @@ namespace blue_sky
 
 class ObjectFactory;
 class ActiveObjectPhysics;
-class Player;
 class Camera;
 
 namespace graphics
@@ -43,7 +43,7 @@ public:
 		ActiveObjectPhysics*			physics = nullptr;			///< 当たりの形・プレイヤーの剛体を加える世界
 		graphics::GraphicsManager*		graphics_manager = nullptr;	///< 地面
 		core::sound::SoundManager*		sound_manager = nullptr;	///< 読み込むときの BGM
-		Player*							player = nullptr;
+		std::optional< core::ecs::EntityId >	player;					///< プレイヤー（ECS だけの物体。ObjectFactory::create_player で作った物）
 		Camera*							camera = nullptr;			///< プレイヤーのカメラの向き
 		GameObjectRef					goal;
 		string_t						stage_dir;					///< 当たりの形の .obj を探す所（"media/stage/" など）

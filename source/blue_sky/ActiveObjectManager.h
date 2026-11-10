@@ -90,6 +90,9 @@ public:
 	 */
 	void check_collision_with( ActiveObject* a );
 
+	/// 物体（Entity の番号）と接している物体との当たりを起こす（プレイヤー。剛体が無ければ何もしない）
+	void check_collision_with( core::ecs::EntityId id );
+
 	/// 世界の中で接している物体どうしの当たりを全部起こす（以前の ActiveObjectPhysics::check_collision_all）
 	void check_collision_all();
 
@@ -121,7 +124,18 @@ public:
 	 * - 敵（RobotBehaviorComponent）: 立つ・回る間に、こちらへ飛んでくる石なら止まる（以前の Robot::on_collide_with_stone）
 	 * - スイッチ（SwitchComponent）: 石の速さで入・切が変わる（以前の BaseSwitch::on_collide_with( Stone* )。空間スイッチは石では変わらない）
 	 */
-	static void on_collide_entity_objects( core::ecs::Entity& a, core::ecs::Entity& b );
+	static void on_collide_entity_objects( core::ecs::Entity& a, core::ecs::Entity& b, core::sound::SoundManager* sound_manager = nullptr );
+
+	/**
+	 * プレイヤー（PlayerBehaviorComponent を持つ ECS だけの物体）と物体が当たった
+	 *
+	 * 物体の部品の組み合わせで、プレイヤーの System（PlayerBehaviorSystem の on_touch_*）に知らせる。順と回数は、以前プレイヤーが ActiveObject だったときの
+	 * on_collide_with_entity_object と同じ（動かない物 → 拾う物 → 石 → スイッチ → 風船 → 敵 → 梯子。1 組につき 1 回）。
+	 * 以前は GameObject の仮想関数（on_pick_up・on_collide_with_balloon など）をプレイヤーが実装していた
+	 *
+	 * @param sound_manager 梯子が触れた音を鳴らす先（nullptr なら鳴らさない。テスト）
+	 */
+	static void on_collide_with_player( core::ecs::Entity& player, core::ecs::Entity& entity, core::sound::SoundManager* sound_manager = nullptr );
 
 	// ECS だけの物体（ObjectFactory が作る）のうち、毎フレーム動く物（動く床・回る物）は update の中で System に頼む
 

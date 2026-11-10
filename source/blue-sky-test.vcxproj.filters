@@ -162,6 +162,9 @@
     <ClCompile Include="test\ecs\BalloonGirlRobotTest.cpp">
       <Filter>test\ecs</Filter>
     </ClCompile>
+    <ClCompile Include="test\ecs\PlayerTest.cpp">
+      <Filter>test\ecs</Filter>
+    </ClCompile>
     <ClCompile Include="test\lib.cpp" />
     <ClCompile Include="test\pch.cpp" />
   </ItemGroup>

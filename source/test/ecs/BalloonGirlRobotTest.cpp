@@ -20,6 +20,8 @@
 #include <blue_sky/ecs/component/RobotBehaviorComponent.h>
 #include <blue_sky/ecs/component/PatrolComponent.h>
 #include <blue_sky/ecs/system/RobotBehaviorSystem.h>
+#include <blue_sky/ecs/component/PlayerBehaviorComponent.h>
+#include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
 
 #include <core/ecs/EntityManager.h>
 
@@ -72,47 +74,18 @@ bool is_near( const Vector& a, const Vector& b, float_t e = 0.0001f )
 	return std::abs( a.x() - b.x() ) < e && std::abs( a.y() - b.y() ) < e && std::abs( a.z() - b.z() ) < e;
 }
 
-/// 当たりを受け取る偽の物体（ActiveObject の代わり）
-class FakeObject : public blue_sky::GameObject
+/// プレイヤー（ECS だけの物体。剛体なし）を作って (1, 2, 3) に置く。段階 6 までは窓口（BalloonHolder・ChaseTarget）を実装した偽物を使っていた
+EntityId create_player( Fixture& f )
 {
-public:
-	void restart() override { }
-	void update() override { }
-	float_t get_collision_width() const override { return 1.f; }
-	float_t get_collision_height() const override { return 1.f; }
-	float_t get_collision_depth() const override { return 1.f; }
-};
+	const EntityId id = f.factory.create_player();
+	f.factory.get_ref( id ).set_location( Vector( 1.f, 2.f, 3.f ) );
+	return id;
+}
 
-/// 風船をつかむ偽のプレイヤー（grabs が false ならつかまない = 揺らぎ中のプレイヤー・ほかの物体）
-class FakeHolder : public FakeObject, public blue_sky::ecs::BalloonHolder
+blue_sky::ecs::PlayerBehaviorComponent& player_of( Fixture& f, EntityId id )
 {
-public:
-	bool grabs = true;
-	int touch_count = 0;
-
-	std::optional< EntityId > balloon;
-	bool in_action = true;
-	bool pre_finish = false;
-	Vector hand = Vector( 1.f, 2.f, 3.f );
-
-	blue_sky::ecs::BalloonHolder* on_collide_with_balloon( EntityId id ) override
-	{
-		touch_count++;
-
-		if ( ! grabs )
-		{
-			return nullptr;
-		}
-
-		balloon = id;
-		return this;
-	}
-
-	bool is_holding_balloon( EntityId id ) const override { return balloon == id; }
-	bool is_in_balloon_action() const override { return in_action; }
-	bool is_balloon_action_pre_finish() const override { return pre_finish; }
-	Vector get_balloon_hold_location() const override { return hand; }
-};
+	return * f.entity( id )->get_component< blue_sky::ecs::PlayerBehaviorComponent >();
+}
 
 } // namespace
 
@@ -170,32 +143,34 @@ TEST( BalloonGirlRobotTest, 風船に触れると相手に知らせ_つかんだ
 	const auto id = f.create( "balloon" );
 	f.factory.restart();
 
-	const EntityId holder_id = f.manager.create_entity()->get_id();
+	const EntityId holder_id = create_player( f );
+	auto& player = player_of( f, holder_id );
 
-	// つかまない物体（揺らぎ中のプレイヤー）: 知らせるが、つかまれない
-	FakeHolder other;
-	other.grabs = false;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( other, 100, * f.entity( id ) );
+	// 揺らぎ中のプレイヤー : つかまない
+	player.is_flickering = true;
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( holder_id ), * f.entity( id ) );
 
-	EXPECT_EQ( other.touch_count, 1 );
+	EXPECT_EQ( player.balloon_sequence_count, 0 );
 	EXPECT_FALSE( f.entity( id )->get_component< blue_sky::ecs::BalloonHoldComponent >()->is_held() );
 
-	// プレイヤー : つかむ
-	FakeHolder player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, holder_id, * f.entity( id ) );
+	// プレイヤー : つかむ（組の向きによらない）
+	player.is_flickering = false;
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( id ), * f.entity( holder_id ) );
 
-	EXPECT_EQ( player.touch_count, 1 );
+	EXPECT_EQ( player.balloon_sequence_count, 1 );
+	EXPECT_EQ( player.balloon, id );
+	EXPECT_EQ( player.action_mode, blue_sky::ecs::PlayerBehaviorComponent::ActionMode::BALLOON );
 	EXPECT_TRUE( f.entity( id )->get_component< blue_sky::ecs::BalloonHoldComponent >()->is_held() );
 
 	// つかまれた風船は、もう知らせない（以前は Player::on_collide_with( Balloon* ) が balloon->get_player() を見て戻っていた）
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, holder_id, * f.entity( id ) );
-	EXPECT_EQ( player.touch_count, 1 );
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( holder_id ), * f.entity( id ) );
+	EXPECT_EQ( player.balloon_sequence_count, 1 );
 
-	// 手元に置かれ、向きは 0
+	// 手元（プレイヤーの位置 + 前 0.5 - 右 0.25 + 上 1.75。向き 0 なら前は +Z・右は +X）に置かれ、向きは 0
 	f.factory.get_ref( id ).set_direction_degree( 30.f );
 	f.manager.get_system< blue_sky::ecs::BalloonHoldSystem >()->update_balloon( id, 1.f );
 
-	EXPECT_TRUE( is_near( f.factory.get_ref( id ).get_location(), player.hand ) );
+	EXPECT_TRUE( is_near( f.factory.get_ref( id ).get_location(), Vector( 0.75f, 3.75f, 3.5f ), 0.001f ) );
 	EXPECT_FLOAT_EQ( f.factory.get_ref( id ).get_direction_degree(), 0.f );
 	EXPECT_FALSE( blue_sky::ecs::EntityObject( f.entity( id ) ).is_dead() );
 }
@@ -208,12 +183,11 @@ TEST( BalloonGirlRobotTest, つかんだ物体が別の風船を持つか_風船
 	const auto second = f.create( "balloon" );
 	f.factory.restart();
 
-	const EntityId holder_id = f.manager.create_entity()->get_id();
+	const EntityId holder_id = create_player( f );
 	auto* system = f.manager.get_system< blue_sky::ecs::BalloonHoldSystem >();
 
-	FakeHolder player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, holder_id, * f.entity( first ) );
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, holder_id, * f.entity( second ) );
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( holder_id ), * f.entity( first ) );
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( holder_id ), * f.entity( second ) );
 
 	system->update_balloons( 1.f );
 
@@ -223,7 +197,7 @@ TEST( BalloonGirlRobotTest, つかんだ物体が別の風船を持つか_風船
 	EXPECT_FALSE( blue_sky::ecs::EntityObject( f.entity( second ) ).is_dead() );
 
 	// 動作が終わると、今の風船も割れる
-	player.in_action = false;
+	player_of( f, holder_id ).action_mode = blue_sky::ecs::PlayerBehaviorComponent::ActionMode::NONE;
 	system->update_balloons( 1.1f );
 
 	EXPECT_TRUE( blue_sky::ecs::EntityObject( f.entity( second ) ).is_dead() );
@@ -244,19 +218,18 @@ TEST( BalloonGirlRobotTest, 風船の動作が終わりかけの間は_つかま
 	const auto id = f.create( "balloon" );
 	f.factory.restart();
 
-	const EntityId holder_id = f.manager.create_entity()->get_id();
+	const EntityId holder_id = create_player( f );
 	auto* system = f.manager.get_system< blue_sky::ecs::BalloonHoldSystem >();
 	const auto* render = f.entity( id )->get_component< blue_sky::ecs::ObjectRenderComponent >();
 
-	FakeHolder player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, holder_id, * f.entity( id ) );
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( holder_id ), * f.entity( id ) );
 
 	// 終わりかけでなければ隠さない
 	system->update_balloon( id, 0.1f );
 	EXPECT_FALSE( render->is_hidden );
 
 	// 終わりかけ : 1/6 秒ごとの前半は見え、後半は隠れる（以前の is_visible_in_blink( 6 )）
-	player.pre_finish = true;
+	player_of( f, holder_id ).is_action_pre_finish = true;
 
 	system->update_balloon( id, 1.f / 6.f * 3.f + 0.01f );
 	EXPECT_FALSE( render->is_hidden );
@@ -277,10 +250,10 @@ TEST( BalloonGirlRobotTest, つかんだ物体が消えると風船は割れる 
 	const auto id = f.create( "balloon" );
 	f.factory.restart();
 
-	const EntityId holder_id = f.manager.create_entity()->get_id();
+	const EntityId holder_id = create_player( f );
 
-	FakeHolder player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, holder_id, * f.entity( id ) );
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( holder_id ), * f.entity( id ) );
+	ASSERT_TRUE( f.entity( id )->get_component< blue_sky::ecs::BalloonHoldComponent >()->is_held() );
 
 	f.manager.destroy_entity( holder_id );
 	f.manager.get_system< blue_sky::ecs::BalloonHoldSystem >()->update_balloon( id, 1.f );
@@ -420,11 +393,13 @@ TEST( BalloonGirlRobotTest, 少女への当たりは何も起こさない )
 	const auto stone = f.create( "stone" );
 	f.factory.restart();
 
-	FakeHolder player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, 100, * f.entity( girl ) );
+	const EntityId player = create_player( f );
+	f.factory.restart();
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( player ), * f.entity( girl ) );
 	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( stone ), * f.entity( girl ) );
 
-	EXPECT_EQ( player.touch_count, 0 );
+	EXPECT_EQ( player_of( f, player ).hp, 1 );
+	EXPECT_EQ( player_of( f, player ).action_mode, blue_sky::ecs::PlayerBehaviorComponent::ActionMode::NONE );
 	EXPECT_FALSE( blue_sky::ecs::EntityObject( f.entity( girl ) ).is_dead() );
 	EXPECT_FALSE( blue_sky::ecs::EntityObject( f.entity( stone ) ).is_dead() );
 }
@@ -434,44 +409,14 @@ TEST( BalloonGirlRobotTest, 少女への当たりは何も起こさない )
 namespace
 {
 
-/// 敵が追う偽のプレイヤー（剛体なし）。当たりの互換の層から呼ばれた回数も数える
-class FakeTarget : public FakeObject, public blue_sky::ecs::ChaseTarget
-{
-public:
-	Vector location = Vector( 0.f, 0.f, 5.f );
-	Vector velocity = Vector::Zero;
-	Vector front = Vector( 0.f, 0.f, 1.f );
-
-	int robot_touch_count = 0;
-	int chased_touch_count = 0;
-
-	Vector get_chase_target_location() const override { return location; }
-	Vector get_chase_target_velocity() const override { return velocity; }
-	Vector get_chase_target_front() const override { return front; }
-	const btRigidBody* get_chase_target_rigid_body() const override { return nullptr; }
-
-	bool on_collide_with_robot( bool is_chasing ) override
-	{
-		robot_touch_count++;
-
-		if ( is_chasing )
-		{
-			chased_touch_count++;
-		}
-
-		return true;
-	}
-};
-
 using RobotMode = blue_sky::ecs::RobotBehaviorComponent::Mode;
 using RobotLook = blue_sky::ecs::RobotBehaviorComponent::Look;
 
-/// 原点で前（+Z）を向いた敵と、追う相手
+/// 原点で前（+Z）を向いた敵と、追う相手（プレイヤー。剛体なし = 速度 0。位置は部品から読まれる）
 struct RobotFixture : public Fixture
 {
 	EntityId robot = 0;
 	EntityId target_id = 0;
-	FakeTarget target;
 
 	blue_sky::ecs::RobotBehaviorSystem* system = nullptr;
 
@@ -480,11 +425,15 @@ struct RobotFixture : public Fixture
 		robot = create( "robot" );
 		factory.restart();
 
-		target_id = manager.create_entity()->get_id();
+		target_id = factory.create_player();
+		set_target_location( Vector( 0.f, 0.f, 5.f ) );
 
 		system = manager.get_system< blue_sky::ecs::RobotBehaviorSystem >();
-		system->set_target( robot, target_id, & target );
+		system->set_target( robot, target_id );
 	}
+
+	void set_target_location( const Vector& location ) { factory.get_ref( target_id ).set_location( location ); }
+	blue_sky::ecs::PlayerBehaviorComponent& target() { return * entity( target_id )->get_component< blue_sky::ecs::PlayerBehaviorComponent >(); }
 
 	blue_sky::ecs::RobotBehaviorComponent* component() { return entity( robot )->get_component< blue_sky::ecs::RobotBehaviorComponent >(); }
 	RobotMode mode() { return component()->mode; }
@@ -552,7 +501,7 @@ TEST( BalloonGirlRobotTest, 敵の視野は距離_3_10_20_m_で広さが変わ�
 
 	auto visible_at = [ & ] ( const Vector& location )
 	{
-		f.target.location = location;
+		f.set_target_location( location );
 		return f.system->is_target_visible( f.robot );
 	};
 
@@ -580,12 +529,12 @@ TEST( BalloonGirlRobotTest, 立つ敵は相手が見えると注目し_3_秒後�
 	RobotFixture f;
 
 	// 見えない所にいる間は立ったまま（速度 0）
-	f.target.location = Vector( 0.f, 0.f, -10.f );
+	f.set_target_location( Vector( 0.f, 0.f, -10.f ) );
 	f.update( 1 );
 	EXPECT_EQ( f.mode(), RobotMode::STAND );
 
 	// 見えると注目（警戒の見た目）
-	f.target.location = Vector( 0.f, 0.f, 5.f );
+	f.set_target_location( Vector( 0.f, 0.f, 5.f ) );
 	f.update( 1 );
 	EXPECT_EQ( f.mode(), RobotMode::ATTENTION );
 	EXPECT_EQ( f.component()->look, RobotLook::WARNING );
@@ -611,13 +560,13 @@ TEST( BalloonGirlRobotTest, 注目の後に見えなくなっていれば元の�
 
 	f.factory.get_ref( f.robot ).action( "rotation" );
 
-	f.target.location = Vector( 0.f, 0.f, 5.f );
+	f.set_target_location( Vector( 0.f, 0.f, 5.f ) );
 	f.update( 1 );
 	ASSERT_EQ( f.mode(), RobotMode::ATTENTION );
 	EXPECT_EQ( f.component()->mode_backup, RobotMode::ROTATION );
 
 	// 見えない所へ（20 m より遠く）: 3 秒後に元の 回る へ（ふだんの見た目）
-	f.target.location = Vector( 0.f, 0.f, -30.f );
+	f.set_target_location( Vector( 0.f, 0.f, -30.f ) );
 	f.update( 31 );
 	EXPECT_EQ( f.mode(), RobotMode::ROTATION );
 	EXPECT_EQ( f.component()->look, RobotLook::NORMAL );
@@ -638,7 +587,7 @@ TEST( BalloonGirlRobotTest, 回る敵は_1_フレームに_0_25_度回り_追う
 {
 	RobotFixture f;
 
-	f.target.location = Vector( 0.f, 0.f, -30.f );
+	f.set_target_location( Vector( 0.f, 0.f, -30.f ) );
 	f.factory.get_ref( f.robot ).action( "rotation" );
 	f.update( 4 );
 
@@ -658,25 +607,28 @@ TEST( BalloonGirlRobotTest, 立つ_回る敵は相手に当たると止まり_�
 {
 	RobotFixture f;
 
-	// 追っている敵 : 相手に知らせ（傷つく）、敵は止まらない
-	f.component()->mode = RobotMode::CHASE;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( f.target, f.target_id, * f.entity( f.robot ) );
+	f.target().hp = 2;
 
-	EXPECT_EQ( f.target.robot_touch_count, 1 );
-	EXPECT_EQ( f.target.chased_touch_count, 1 );
+	// 追っている敵 : 相手は傷つき（HP が減り、押し返されて少しの間 操作できない）、敵は止まらない
+	f.component()->mode = RobotMode::CHASE;
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( f.target_id ), * f.entity( f.robot ) );
+
+	EXPECT_EQ( f.target().hp, 1 );
+	EXPECT_TRUE( f.target().is_uncontrollable() );
 	EXPECT_EQ( f.mode(), RobotMode::CHASE );
 
-	// 注目している敵 : 止まらない
+	// 注目している敵 : 止まらない。相手も傷つかない
 	f.component()->mode = RobotMode::ATTENTION;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( f.target, f.target_id, * f.entity( f.robot ) );
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( f.robot ), * f.entity( f.target_id ) );
 	EXPECT_EQ( f.mode(), RobotMode::ATTENTION );
+	EXPECT_EQ( f.target().hp, 1 );
 
 	// 回っている敵 : 止まる。止まった敵の速度は毎フレーム半分になる
 	f.component()->mode = RobotMode::ROTATION;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( f.target, f.target_id, * f.entity( f.robot ) );
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( f.target_id ), * f.entity( f.robot ) );
 
 	EXPECT_EQ( f.mode(), RobotMode::SHUTDOWN );
-	EXPECT_EQ( f.target.chased_touch_count, 1 );
+	EXPECT_EQ( f.target().hp, 1 );
 
 	f.factory.get_ref( f.robot ).set_velocity( Vector( 4.f, 0.f, 0.f ) );
 	f.update( 1 );
@@ -690,7 +642,7 @@ TEST( BalloonGirlRobotTest, 立つ敵はこちらへ飛んでくる石に当た�
 
 	const auto stone = f.create( "stone" );
 	f.factory.restart();
-	f.target.location = Vector( 0.f, 0.f, -30.f );
+	f.set_target_location( Vector( 0.f, 0.f, -30.f ) );
 
 	GameObjectRef s = f.factory.get_ref( stone );
 	s.set_location( Vector( 0.f, 1.f, 2.f ) );
@@ -717,7 +669,7 @@ TEST( BalloonGirlRobotTest, 浮く敵は始めの位置でゆらぎ_やさしい
 	robot.action( "float" );
 	robot.set_flicker_scale( 10.f );
 
-	f.target.location = Vector( 10.f, 0.f, 0.f );
+	f.set_target_location( Vector( 10.f, 0.f, 0.f ) );
 	f.system->update_robot( f.robot, 0.1f, 2.f );
 
 	EXPECT_EQ( f.mode(), RobotMode::FLOAT );

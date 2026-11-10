@@ -13,26 +13,6 @@ namespace blue_sky::ecs
 {
 
 /**
- * 敵が追う相手（プレイヤー）の窓口（RobotBehaviorSystem が、見えるか・どこへ向かうかを決めるときに読む）
- *
- * プレイヤーはまだ ActiveObject なので、プレイヤーがこれを実装する（前の向きはプレイヤーが持つ）。
- * 段階 6 でプレイヤーを ECS にしたら、部品から読む形に替える。テストでは偽物を実装して、剛体なしで確かめる
- */
-class ChaseTarget
-{
-public:
-	virtual core::Vector get_chase_target_location() const = 0;
-	virtual core::Vector get_chase_target_velocity() const = 0;
-	virtual core::Vector get_chase_target_front() const = 0;
-
-	/// 見えるかのレイで通り抜ける剛体（相手自身。無ければ nullptr）
-	virtual const btRigidBody* get_chase_target_rigid_body() const = 0;
-
-protected:
-	~ChaseTarget() = default;	///< これを通して壊さない（持ち主は ActiveObjectManager）
-};
-
-/**
  * 敵の行動をまとめて持つ部品（以前の Robot クラス。段階 5 の決定 2 : 行動はまず 1 つの部品にまとめて ECS の中で動かし、1 つずつ切り出す）
  *
  * 状態の移り変わり（RobotBehaviorSystem）:
@@ -77,8 +57,9 @@ struct RobotBehaviorComponent : public core::ecs::Component
 	Look			look = Look::NORMAL;
 	core::graphics::TextureHandle	textures[ static_cast< int >( Look::MAX ) ];	///< 見た目ごとのテクスチャ（作るときに名前で引く。以前は Texture* を 4 つ持っていた）
 
-	std::optional< core::ecs::EntityId >	target_id;			///< 追う相手（いなければ無い）
-	const ChaseTarget*						target = nullptr;	///< 追う相手の窓口（持ち主ではない。target_id の Entity が生きている間だけ使う）
+	/// 追う相手（いなければ無い）。相手の位置・速度・前・剛体は、相手の部品（Transform・PhysicsBody・SimpleObject）から読む
+	/// （以前はプレイヤーが実装する窓口 ChaseTarget を持っていた。段階 6 でプレイヤーを ECS だけの物体にしたので部品を読む）
+	std::optional< core::ecs::EntityId >	target_id;
 
 	static constexpr float_t PatrolSpeed = 0.1f;			///< 巡回の速さ（以前の Robot::update_patrol）
 	static constexpr float_t PatrolForwardDistance = 5.f;	///< やり直したときの 2 つ目の巡回の地点の前への距離

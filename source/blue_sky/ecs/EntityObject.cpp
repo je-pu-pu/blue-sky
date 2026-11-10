@@ -6,6 +6,7 @@
 #include <blue_sky/ecs/component/FlickerComponent.h>
 #include <blue_sky/ecs/component/GirlComponent.h>
 #include <blue_sky/ecs/system/RobotBehaviorSystem.h>
+#include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
 #include <blue_sky/ecs/component/PhysicsBodyComponent.h>
 #include <blue_sky/ecs/component/SimpleObjectComponent.h>
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
@@ -64,6 +65,11 @@ void EntityObject::set_location( const core::Vector& location )
 {
 	transform_->transform.set_position( location );
 	commit_transform();
+}
+
+const core::Transform& EntityObject::get_transform() const
+{
+	return transform_->transform;
 }
 
 core::Vector EntityObject::get_velocity() const
@@ -318,7 +324,6 @@ void EntityObject::restart()
 	if ( auto* balloon = entity_->get_component< BalloonHoldComponent >() )
 	{
 		balloon->holder_id.reset();
-		balloon->holder = nullptr;
 	}
 
 	// ゆらぎの大きさを戻す（以前の ActiveObject::restart）
@@ -344,10 +349,29 @@ void EntityObject::restart()
 	{
 		render->is_hidden = false;
 	}
+
+	// プレイヤーの状態を戻し、回らない・摩擦 0・質量 50 にする（以前の Player::restart の、ActiveObject::restart の後の所）
+	if ( entity_->get_component< PlayerBehaviorComponent >() )
+	{
+		if ( auto* system = entity_->get_entity_manager()->get_system< PlayerBehaviorSystem >() )
+		{
+			system->restart( static_cast< core::ecs::EntityId >( entity_->get_id() ) );
+		}
+	}
 }
 
 void EntityObject::kill()
 {
+	// プレイヤーは、音を止めて鳴らし、倒れるようにする（以前の Player::kill。スクリプトの kill も同じ）
+	if ( entity_->get_component< PlayerBehaviorComponent >() )
+	{
+		if ( auto* system = entity_->get_entity_manager()->get_system< PlayerBehaviorSystem >() )
+		{
+			system->kill( static_cast< core::ecs::EntityId >( entity_->get_id() ) );
+			return;
+		}
+	}
+
 	if ( auto* traits = entity_->get_component< CollisionTraitsComponent >() )
 	{
 		traits->is_dead = true;

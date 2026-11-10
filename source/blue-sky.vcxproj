@@ -150,7 +150,6 @@
     <ClCompile Include="GameObject\ActiveObject.cpp" />
     <ClCompile Include="GameObject\Camera.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
-    <ClCompile Include="GameObject\Player.cpp" />
     <ClCompile Include="lib\src\imgui\imgui.cpp" />
     <ClCompile Include="lib\src\imgui\imgui_draw.cpp" />
     <ClCompile Include="lib\src\imgui\imgui_impl_dx11.cpp" />
@@ -182,6 +181,8 @@
     <ClCompile Include="blue_sky\ecs\system\BalloonHoldSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\GirlSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\RobotBehaviorSystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\PlayerBehaviorSystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\PlayerInputSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\sound\SampleRateStepper.h" />
@@ -451,7 +452,6 @@
     <ClInclude Include="GameObject\ActiveObject.h" />
     <ClInclude Include="GameObject\Camera.h" />
     <ClInclude Include="GameObject\GameObject.h" />
-    <ClInclude Include="GameObject\Player.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene\CanvasTestScene.h" />
     <ClInclude Include="Scene\DebugScene.h" />
@@ -482,6 +482,9 @@
     <ClInclude Include="blue_sky\ecs\component\RobotBehaviorComponent.h" />
     <ClInclude Include="blue_sky\ecs\system\RobotBehaviorSystem.h" />
     <ClInclude Include="blue_sky\ecs\component\PlayerInputComponent.h" />
+    <ClInclude Include="blue_sky\ecs\component\PlayerBehaviorComponent.h" />
+    <ClInclude Include="blue_sky\ecs\system\PlayerBehaviorSystem.h" />
+    <ClInclude Include="blue_sky\ecs\system\PlayerInputSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="blue-sky.config">

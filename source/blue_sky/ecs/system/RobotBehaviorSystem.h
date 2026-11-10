@@ -3,6 +3,7 @@
 #include <core/ecs/System.h>
 #include <core/ecs/component/TransformComponent.h>
 #include <blue_sky/ecs/component/RobotBehaviorComponent.h>
+#include <blue_sky/ecs/EntityObject.h>
 
 #include <optional>
 #include <vector>
@@ -48,8 +49,8 @@ private:
 
 	RobotBehaviorComponent* find_robot( core::ecs::EntityId id ) const;
 
-	/// 追う相手の窓口（いない・消えたなら nullptr）
-	const ChaseTarget* find_target( const RobotBehaviorComponent& robot ) const;
+	/// 追う相手（いない・消えた・位置を持たないなら無い）。位置・速度・前・剛体は相手の部品から読む（以前はプレイヤーが実装する窓口 ChaseTarget）
+	std::optional< EntityObject > find_target( const RobotBehaviorComponent& robot ) const;
 
 	/// 今の見た目のテクスチャをモデルのシェーダーに設定する（以前の Robot::update の最後。モデルは敵どうしで共有しているので、最後に動かした敵の見た目になる。以前と同じ）
 	void apply_look( core::ecs::Entity& entity, const RobotBehaviorComponent& robot ) const;
@@ -68,8 +69,8 @@ public:
 	/// 見た目ごとのテクスチャを名前で引いて持たせる（"robot"・"robot-warn"・"robot-error"・"robot-tender"。以前の Robot のコンストラクタ）
 	void load_textures( core::ecs::EntityId id );
 
-	/// 追う相手を決める（以前の Robot::set_player）
-	void set_target( core::ecs::EntityId id, core::ecs::EntityId target_id, const ChaseTarget* target );
+	/// 追う相手を決める（以前の Robot::set_player。相手は位置・向き・剛体の部品を持つ物体。プレイヤー）
+	void set_target( core::ecs::EntityId id, core::ecs::EntityId target_id );
 
 	/// やり直す（以前の Robot::restart の、ActiveObject::restart の後の所。EntityObject::restart が呼ぶ）
 	static void restart( core::ecs::Entity& entity );

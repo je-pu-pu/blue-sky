@@ -48,9 +48,18 @@ RobotBehaviorComponent* RobotBehaviorSystem::find_robot( core::ecs::EntityId id 
 	return entity ? entity->get_component< RobotBehaviorComponent >() : nullptr;
 }
 
-const ChaseTarget* RobotBehaviorSystem::find_target( const RobotBehaviorComponent& robot ) const
+std::optional< EntityObject > RobotBehaviorSystem::find_target( const RobotBehaviorComponent& robot ) const
 {
-	return robot.target_id && get_entity_manager()->is_alive( * robot.target_id ) ? robot.target : nullptr;
+	core::ecs::Entity* entity = robot.target_id ? get_entity_manager()->find( * robot.target_id ) : nullptr;
+
+	if ( ! entity )
+	{
+		return std::nullopt;
+	}
+
+	EntityObject target( entity );
+
+	return target.is_valid() ? std::optional< EntityObject >( target ) : std::nullopt;
 }
 
 void RobotBehaviorSystem::load_textures( core::ecs::EntityId id )
@@ -70,12 +79,11 @@ void RobotBehaviorSystem::load_textures( core::ecs::EntityId id )
 	}
 }
 
-void RobotBehaviorSystem::set_target( core::ecs::EntityId id, core::ecs::EntityId target_id, const ChaseTarget* target )
+void RobotBehaviorSystem::set_target( core::ecs::EntityId id, core::ecs::EntityId target_id )
 {
 	if ( RobotBehaviorComponent* robot = find_robot( id ) )
 	{
 		robot->target_id = target_id;
-		robot->target = target;
 	}
 }
 
@@ -146,25 +154,25 @@ void RobotBehaviorSystem::update_robot( core::ecs::EntityId id, float_t delta_ti
 		body->setActivationState( true );
 	}
 
-	const ChaseTarget* target = find_target( * robot );
+	const std::optional< EntityObject > target = find_target( * robot );
 
 	if ( robot->mode == Mode::CHASE )
 	{
 		if ( target )
 		{
 			// ターゲットの方を向く ( 表示上の向き )
-			object.chase_direction_to( target->get_chase_target_location(), 2.f );
+			object.chase_direction_to( target->get_location(), 2.f );
 
 			// ターゲットとの距離が遠い場合は、ターゲットの進行方向を予測して進む
-			core::Vector relative_position = target->get_chase_target_location() - object.get_location();
+			core::Vector relative_position = target->get_location() - object.get_location();
 			relative_position.set_y( 0 );
 
-			core::Vector target_xz_velocity = target->get_chase_target_velocity();
+			core::Vector target_xz_velocity = target->get_velocity();
 			target_xz_velocity.set_y( 0 );
 
 			if ( relative_position.length() > 3.f && target_xz_velocity.length() > 1.f )
 			{
-				relative_position = ( target->get_chase_target_location() + target->get_chase_target_front() * 3.f ) - object.get_location();
+				relative_position = ( target->get_location() + target->get_front() * 3.f ) - object.get_location();
 				relative_position.set_y( 0 );
 			}
 
@@ -236,7 +244,7 @@ void RobotBehaviorSystem::update_robot( core::ecs::EntityId id, float_t delta_ti
 		if ( target )
 		{
 			// ターゲットの方を向く
-			core::Vector relative_position = target->get_chase_target_location() - object.get_location();
+			core::Vector relative_position = target->get_location() - object.get_location();
 			relative_position.set_y( 0 );
 
 			// 表示上の向きを設定
@@ -287,7 +295,7 @@ void RobotBehaviorSystem::update_robot( core::ecs::EntityId id, float_t delta_ti
 
 		if ( target )
 		{
-			object.chase_direction_to( target->get_chase_target_location(), 0.5f );
+			object.chase_direction_to( target->get_location(), 0.5f );
 		}
 
 		if ( core::AnimationPlayer* animation = object.get_animation_player() )
@@ -417,7 +425,7 @@ bool RobotBehaviorSystem::is_target_visible( core::ecs::EntityId id ) const
 {
 	core::ecs::Entity* entity = get_entity_manager()->find( id );
 	const RobotBehaviorComponent* robot = entity ? entity->get_component< RobotBehaviorComponent >() : nullptr;
-	const ChaseTarget* target = robot ? find_target( * robot ) : nullptr;
+	const std::optional< EntityObject > target = robot ? find_target( * robot ) : std::nullopt;
 
 	if ( ! target )
 	{
@@ -426,7 +434,7 @@ bool RobotBehaviorSystem::is_target_visible( core::ecs::EntityId id ) const
 
 	EntityObject object( entity );
 
-	const core::Vector target_location = target->get_chase_target_location();
+	const core::Vector target_location = target->get_location();
 	const core::Vector relative_position = target_location - object.get_location();
 
 	const auto relative_length = relative_position.length(); // ターゲットとの距離
@@ -481,7 +489,7 @@ bool RobotBehaviorSystem::is_target_visible( core::ecs::EntityId id ) const
 	}
 
 	// 障害物判定（自分と相手を通り抜ける）
-	ClosestNotMeAndHim ray_callback( from, to, object.get_rigid_body(), target->get_chase_target_rigid_body(), false, get_entity_manager() );
+	ClosestNotMeAndHim ray_callback( from, to, object.get_rigid_body(), target->get_rigid_body(), false, get_entity_manager() );
 	ray_callback.m_closestHitFraction = 1.0;
 
 	physics_->ray_test( from, to, ray_callback );

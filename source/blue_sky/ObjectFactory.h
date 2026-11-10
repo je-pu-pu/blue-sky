@@ -11,7 +11,6 @@
 
 namespace core::ecs { class EntityManager; }
 namespace core::sound { class SoundManager; }
-namespace blue_sky::ecs { class ChaseTarget; }
 
 namespace blue_sky
 {
@@ -148,8 +147,20 @@ public:
 	/// 剛体を持たない、描くだけの動かない物を作る（DebugScene の町並み。以前は ActiveObjectManager::create_object( "static" ) で剛体なし）
 	EntityId create_model_object( Model* model );
 
-	/// 敵（"robot"）に追う相手を渡す（以前の Robot::set_player。敵でなければ何もしない）
-	void set_robot_target( EntityId robot, EntityId target_id, const ecs::ChaseTarget* target );
+	/// 敵（"robot"）に追う相手を渡す（以前の Robot::set_player。敵でなければ何もしない。相手の位置・速度・向き・剛体は相手の部品から読む）
+	void set_robot_target( EntityId robot, EntityId target_id );
+
+	/**
+	 * プレイヤーを作る（以前の GamePlayScene が new Player() して ActiveObjectManager に加えていた）
+	 *
+	 * ECS だけの物体で、部品は ほかの物体と同じもの（Transform・SimpleObject・TargetMover・CollisionTraits・ObjectRender）と、
+	 * PlayerBehavior（行動）・PlayerInput（入力）・Flicker（ゆらぎの大きさ）。モデルは "player"。
+	 * 剛体はステージを読むとき（始めの位置が決まってから）に add_player_rigid_body で作る（以前と同じ）
+	 */
+	EntityId create_player();
+
+	/// プレイヤーの剛体を今の位置に作る（以前の ActiveObjectPhysics::add_active_object_as_capsule : 半径 0.25・高さ 1.75 のカプセル・質量 1）
+	void add_player_rigid_body( EntityId player );
 
 	/// 名前を付ける（同じ名前は後の物体に付け替わる。以前と同じ）
 	void name( const string_t& name, EntityId id );

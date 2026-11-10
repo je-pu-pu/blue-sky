@@ -146,9 +146,6 @@
     <ClCompile Include="Scene\TitleScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject\Player.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
@@ -462,6 +459,12 @@
     <ClCompile Include="blue_sky\ecs\system\RobotBehaviorSystem.cpp">
       <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\PlayerBehaviorSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\PlayerInputSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blue_sky\ecs\component\PhysicsBodyComponent.h">
@@ -686,9 +689,6 @@
     </ClInclude>
     <ClInclude Include="core\math.h">
       <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Player.h">
-      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h">
       <Filter>core\graphics\Direct3D11</Filter>
@@ -1306,6 +1306,15 @@
     </ClInclude>
     <ClInclude Include="blue_sky\ecs\component\PlayerInputComponent.h">
       <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\PlayerBehaviorComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\PlayerBehaviorSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\PlayerInputSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

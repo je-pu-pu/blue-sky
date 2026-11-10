@@ -140,11 +140,6 @@ public:
 	void set_debug_drawer( btIDebugDraw* drawer );
 
 	/**
-	 * dynamics_world を取得する (内部用)
-	 */
-	btDynamicsWorld* get_dynamics_world();
-
-	/**
 	 * 剛体の線形速度を設定する
 	 */
 	void set_rigid_body_linear_velocity( const RigidBodyHandle& handle, const Vector& velocity );

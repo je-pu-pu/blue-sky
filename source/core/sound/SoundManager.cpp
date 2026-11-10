@@ -7,6 +7,8 @@
 
 #include <common/exception.h>
 
+#include <cassert>
+#include <chrono>
 #include <string>
 
 namespace core::sound
@@ -20,6 +22,7 @@ SoundManager::SoundManager( SoundEngine* sound_engine )
 
 SoundManager::~SoundManager()
 {
+	stop_update_thread();
 	unload_all();
 
 	sound_engine_->clear_sound_filter_list();
@@ -27,7 +30,7 @@ SoundManager::~SoundManager()
 
 void SoundManager::set_mute( bool mute )
 {
-	game::SoundManager::set_mute( mute );
+	is_mute_ = mute;
 
 	if ( is_mute() )
 	{
@@ -41,7 +44,7 @@ void SoundManager::set_mute( bool mute )
 
 void SoundManager::set_volume( float v )
 {
-	game::SoundManager::set_volume( v );
+	volume_ = v;
 
 	if ( ! is_mute() )
 	{
@@ -49,64 +52,121 @@ void SoundManager::set_volume( float v )
 	}
 }
 
-game::Sound* SoundManager::load( const char* name, const char* file_name )
+SoundManager::Sound* SoundManager::load( const char* name, const char* file_name )
 {
-	if ( file_name )
-	{
-		return game::SoundManager::load( name, ( std::string( "media/sound/" ) + file_name + ".ogg" ).c_str() );
-	}
-
-	return game::SoundManager::load( name, ( std::string( "media/sound/" ) + name + ".ogg" ).c_str() );
+	return load_from_path( name, std::string( "media/sound/" ) + ( file_name ? file_name : name ) + ".ogg", false );
 }
 
-game::Sound* SoundManager::load_3d_sound( const char* name, const char* file_name )
+SoundManager::Sound* SoundManager::load_3d_sound( const char* name, const char* file_name )
 {
-	if ( file_name )
-	{
-		return game::SoundManager::load_3d_sound( name, ( std::string( "media/sound/" ) + file_name + ".ogg" ).c_str() );
-	}
-
-	return game::SoundManager::load_3d_sound( name, ( std::string( "media/sound/" ) + name + ".ogg" ).c_str() );
+	return load_from_path( name, std::string( "media/sound/" ) + ( file_name ? file_name : name ) + ".ogg", true );
 }
 
-game::Sound* SoundManager::load_music( const char* name, const char* file_name, bool replace )
+SoundManager::Sound* SoundManager::load_music( const char* name, const char* file_name, bool replace )
 {
 	if ( replace )
 	{
 		unload( name );
 	}
 
-	if ( file_name )
-	{
-		return game::SoundManager::load( name, ( std::string( "media/music/" ) + file_name + ".ogg" ).c_str() );
-	}
-
-	return game::SoundManager::load( name, ( std::string( "media/music/" ) + name + ".ogg" ).c_str() );
+	return load_from_path( name, std::string( "media/music/" ) + ( file_name ? file_name : name ) + ".ogg", false );
 }
 
-game::Sound* SoundManager::create_sound( const char* file_name, bool is_3d )
+SoundManager::Sound* SoundManager::load_from_path( const char* name, const string_t& file_path, bool is_3d )
 {
-	auto file = Sound::SoundFile( file_name );
-	Sound* sound = nullptr;
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
+	auto i = sound_map_.find( name );
 
-	if ( file.size() <= StreamingSound::get_buffer_size() )
+	if ( i != sound_map_.end() )
 	{
-		sound = new Sound( sound_engine_ );
+		if ( std::string( i->second->get_file_name() ) == file_path && i->second->is_3d_sound() == is_3d )
+		{
+			return i->second;
+		}
+
+		unload( name );
 	}
-	else
-	{
-		sound = new StreamingSound( sound_engine_ );
-	}
+
+	// 小さいファイルは全部読み込み、大きいファイルは少しずつ読む
+	auto file = Sound::SoundFile( file_path.c_str() );
+	Sound* sound = file.size() <= StreamingSound::get_buffer_size() ? new Sound( sound_engine_ ) : new StreamingSound( sound_engine_ );
 
 	sound->set_3d_sound( is_3d );
-	sound->load( file_name );
+	sound->load( file_path.c_str() );
+	sound->set_name( name );
+	sound->set_file_name( file_path.c_str() );
+
+	sound_map_[ name ] = sound;
+	grouped_sound_map_[ group_name_ ][ name ] = sound;
 
 	return sound;
 }
 
+void SoundManager::push_group( const char_t* group_name )
+{
+	assert( group_name_.empty() );
+	group_name_ = group_name;
+}
+
+void SoundManager::pop_group()
+{
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
+	if ( group_name_.empty() )
+	{
+		return;
+	}
+
+	auto i = grouped_sound_map_.find( group_name_ );
+	group_name_.clear();
+
+	if ( i == grouped_sound_map_.end() )
+	{
+		return;
+	}
+
+	for ( const auto& [ name, sound ] : i->second )
+	{
+		unload( name.c_str() );		// sound は外し済みのことがあるので名前で外す
+	}
+
+	grouped_sound_map_.erase( i );
+}
+
+void SoundManager::unload( const char* name )
+{
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
+	auto i = sound_map_.find( name );
+
+	if ( i != sound_map_.end() )
+	{
+		delete i->second;
+		sound_map_.erase( i );
+	}
+}
+
+void SoundManager::unload_all()
+{
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
+	for ( auto& [ name, sound ] : sound_map_ )
+	{
+		delete sound;
+	}
+
+	sound_map_.clear();
+	grouped_sound_map_.clear();
+}
+
+SoundManager::Sound* SoundManager::get_sound( const char* name ) const
+{
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
+	auto i = sound_map_.find( name );
+	return i == sound_map_.end() ? nullptr : i->second;
+}
+
 void SoundManager::update()
 {
-	for( SoundMap::iterator i = sound_map().begin(); i != sound_map().end(); ++i )
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
+	for ( auto i = sound_map_.begin(); i != sound_map_.end(); ++i )
 	{
 		i->second->update();
 	}
@@ -114,9 +174,38 @@ void SoundManager::update()
 
 void SoundManager::stop_all()
 {
-	for ( SoundMap::iterator i = sound_map().begin(); i != sound_map().end(); ++i )
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
+	for ( auto i = sound_map_.begin(); i != sound_map_.end(); ++i )
 	{
 		i->second->stop();
+	}
+}
+
+void SoundManager::start_update_thread( unsigned int interval_msec )
+{
+	if ( update_thread_running_ )
+	{
+		return;
+	}
+
+	update_thread_running_ = true;
+	update_thread_ = std::thread( [this, interval_msec]
+	{
+		while ( update_thread_running_ )
+		{
+			update();
+			std::this_thread::sleep_for( std::chrono::milliseconds( interval_msec ) );
+		}
+	} );
+}
+
+void SoundManager::stop_update_thread()
+{
+	update_thread_running_ = false;
+
+	if ( update_thread_.joinable() )
+	{
+		update_thread_.join();
 	}
 }
 

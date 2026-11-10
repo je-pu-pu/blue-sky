@@ -41,9 +41,11 @@ private:
 		 * 
 		 * @return bool Entity に ComponentTypes の Component が全て含まれていれば true を、ひとつでも含まれていないものがあれば false を返す
 		 */
-		static constexpr bool gather_entity_components( const Entity* entity, ComponentTuple& component_tuple )
+		/// コンポーネントは持ち主の EntityManager から得る（System は書き換えるので非 const。Entity は const の目印として受け取る）
+		template< typename Manager >
+		static bool gather_entity_components( Manager& manager, const Entity* entity, ComponentTuple& component_tuple )
 		{
-			auto component = entity->get_component< Head >();
+			auto component = manager.template get_component< Head >( entity );
 
 			std::get< std::add_pointer_t< Head > >( component_tuple ) = component;
 
@@ -52,7 +54,7 @@ private:
 				return false;
 			}			
 
-			return ComponentTypeList< Tail ... >::gather_entity_components( entity, component_tuple );
+			return ComponentTypeList< Tail ... >::gather_entity_components( manager, entity, component_tuple );
 		}
 	};
 
@@ -64,9 +66,10 @@ private:
 			return Head::template get_type_id< Head >() == component_type_id;
 		}
 
-		static constexpr bool gather_entity_components( const Entity* entity, ComponentTuple& component_tuple )
+		template< typename Manager >
+		static bool gather_entity_components( Manager& manager, const Entity* entity, ComponentTuple& component_tuple )
 		{
-			auto component = entity->get_component< Head >();
+			auto component = manager.template get_component< Head >( entity );
 
 			std::get< std::add_pointer_t< Head > >( component_tuple ) = component;
 
@@ -120,7 +123,7 @@ public:
 	{
 		ComponentTuple component_tuple;
 
-		if ( ComponentTypeList< ComponentTypes ... >::gather_entity_components( entity, component_tuple ) )
+		if ( ComponentTypeList< ComponentTypes ... >::gather_entity_components( * get_entity_manager(), entity, component_tuple ) )
 		{
 			component_list_.emplace( entity->get_id(), component_tuple );
 		}

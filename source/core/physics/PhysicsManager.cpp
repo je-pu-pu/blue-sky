@@ -237,11 +237,6 @@ void PhysicsManager::set_debug_drawer( btIDebugDraw* drawer )
 	impl_->dynamics_world->setDebugDrawer( drawer );
 }
 
-btDynamicsWorld* PhysicsManager::get_dynamics_world()
-{
-	return impl_->dynamics_world;
-}
-
 void PhysicsManager::set_rigid_body_linear_velocity( const RigidBodyHandle& handle, const Vector& velocity )
 {
 	if ( ! handle.is_valid() )

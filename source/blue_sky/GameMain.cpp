@@ -186,6 +186,7 @@ GameMain::GameMain( App& app )
 	// sound_engine_.reset( new core::sound::direct_sound::SoundEngine( get_app()->GetWindowHandle() ) );
 	sound_engine_.reset( new core::sound::port_audio::SoundEngine() );
 	sound_manager_.reset( new SoundManager( sound_engine_.get() ) );
+	sound_manager_->start_update_thread();
 
 	sound_manager_->load( "ok" );
 	sound_manager_->load( "cancel" );
@@ -199,7 +200,7 @@ GameMain::GameMain( App& app )
 	setup_script_command();
 
 	// ゲームのオブジェクトに渡すもの（物理の世界・音・シーンの経過時間）。オブジェクトは GameMain のシングルトンを呼ばない
-	game_object_context_.dynamics_world = [this] { return active_object_physics_->get_dynamics_world(); };
+	game_object_context_.physics = active_object_physics_.get();
 	game_object_context_.sound_manager = sound_manager_.get();
 	game_object_context_.scene_elapsed_time = [this] { return scene_ ? scene_->get_total_elapsed_time() : 0.f; };
 	game_object_context_.delta_time = [this] { return time_manager_.get_delta_time(); };
@@ -492,7 +493,11 @@ bool GameMain::update()
 	}
 
 	/// @todo 別スレッド化
-	get_sound_manager()->update();
+	// サウンドの更新は SoundManager の更新スレッドが行う（メインスレッドが止まっても BGM が途切れないように）
+	if ( ! get_sound_manager()->is_update_thread_running() )
+	{
+		get_sound_manager()->update();
+	}
 	
 	if ( get_app()->is_active() )
 	{
@@ -958,7 +963,7 @@ void GameMain::on_special_key_down( int key )
 	{
 		get_sound_manager()->set_mute( ! get_sound_manager()->is_mute() );
 		settings_->sync_from_runtime( game_settings::AUDIO_MUTE, get_sound_manager()->is_mute() );
-		game::Sound* bgm = get_sound_manager()->get_sound( "bgm" );
+		core::Sound* bgm = get_sound_manager()->get_sound( "bgm" );
 
 		if ( bgm )
 		{

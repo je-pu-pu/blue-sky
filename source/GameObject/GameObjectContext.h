@@ -4,12 +4,13 @@
 
 #include <functional>
 
-class btDynamicsWorld;
 
 namespace core::sound { class SoundManager; }
 
 namespace blue_sky
 {
+
+class ActiveObjectPhysics;
 
 /**
  * ゲームのオブジェクトが使うもの（物理の世界・音・シーンの経過時間）
@@ -19,7 +20,7 @@ namespace blue_sky
  */
 struct GameObjectContext
 {
-	std::function< btDynamicsWorld*() >		dynamics_world;			///< 物理の世界
+	const ActiveObjectPhysics*				physics = nullptr;		///< 物理（当たりの問い合わせに使う。以前は Bullet の世界そのものを渡していた）
 	core::sound::SoundManager*				sound_manager = nullptr;	///< 音
 	std::function< float_t() >				scene_elapsed_time;		///< 今のシーンが始まってからの秒数
 	std::function< float_t() >				delta_time;				///< 前のフレームからの秒数（以前は core::Service の TimeManager から取っていた）

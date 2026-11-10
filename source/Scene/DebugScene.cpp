@@ -28,7 +28,7 @@
 
 #include <game/MainLoop.h>
 #include <game/SoundFormat.h>
-#include <game/Sound.h>
+#include <core/sound/Sound.h>
 
 #include <common/math.h>
 

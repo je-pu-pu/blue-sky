@@ -9,7 +9,7 @@
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
 
-#include <game/Sound.h>
+#include <core/sound/Sound.h>
 #include <game/Config.h>
 
 #include <win/Rect.h>

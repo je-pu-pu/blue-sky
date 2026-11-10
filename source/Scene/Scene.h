@@ -8,7 +8,6 @@ class OculusRift;
 
 namespace game
 {
-	class Sound;
 	class Config;
 	class MainLoop;
 }
@@ -16,6 +15,7 @@ namespace game
 namespace core
 {
 	class TimeManager;
+	class Sound;
 
 	namespace sound { class SoundManager; }
 	namespace physics { class PhysicsManager; }
@@ -61,7 +61,7 @@ public:
 	using Mesh				= graphics::Mesh;
 	using Texture			= core::graphics::Texture;
 
-	using Sound				= game::Sound;
+	using Sound				= core::Sound;
 	using Config			= game::Config;
 	using MainLoop			= game::MainLoop;
 

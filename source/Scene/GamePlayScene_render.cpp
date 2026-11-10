@@ -23,7 +23,7 @@
 
 #include <core/math.h>
 
-#include <game/Sound.h>
+#include <core/sound/Sound.h>
 #include <game/MainLoop.h>
 
 #include <common/math.h>

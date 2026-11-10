@@ -25,21 +25,19 @@ public:
 	{ }
 
 	// 中身は EntityManager の定義の後（EntityManager.h の末尾）にある（EntityManager の完全な型が要るため）
+	// const の正しさ : 足す・外すは非 const。const の Entity からは const のコンポーネントだけを得る
+	// （以前は const のメソッドが非 const のコンポーネントを返し、足すのも const だった）
 	template< typename ComponentType >
-	ComponentType* add_component() const;
+	ComponentType* add_component();
 
-	/// @todo 非 const ComponentType を返して良いか？
 	template< typename ComponentType >
-	ComponentType* get_component() const;
+	ComponentType* get_component();
+
+	template< typename ComponentType >
+	const ComponentType* get_component() const;
 
 	template< typename ComponentType >
 	void remove_component();
-
-	/*
-	const ComponentList& get_component_list()
-	{
-	}
-	*/
 
 
 	~Entity() = default;

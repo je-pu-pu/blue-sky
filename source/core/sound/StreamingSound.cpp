@@ -1,4 +1,6 @@
 #include "StreamingSound.h"
+
+#include <mutex>
 #include "SoundEngine.h"
 #include "SoundBuffer.h"
 #include "OggVorbisFile.h"
@@ -26,6 +28,7 @@ StreamingSound::~StreamingSound()
 
 bool StreamingSound::load( const char* file_name )
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	if ( sound_buffer_ )
 	{
 		COMMON_THROW_EXCEPTION_MESSAGE( "sound_buffer_ is not null." );
@@ -49,6 +52,7 @@ bool StreamingSound::load( const char* file_name )
 
 bool StreamingSound::play( bool loop, bool force )
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	volume_fade_ = 0.f;
 
 	if ( ! force && is_playing() )
@@ -73,6 +77,7 @@ bool StreamingSound::play( bool loop, bool force )
 
 void StreamingSound::update()
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	Sound::update();
 
 	// 再生終了チェック
@@ -137,6 +142,7 @@ void StreamingSound::stream_half( bool first_half )
 
 float StreamingSound::get_current_position() const
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	auto play_pos = sound_buffer_->get_current_position();
 
 	return current_position_offset_ + static_cast< float >( play_pos ) / static_cast< float >( sound_file_->size_per_sec() );
@@ -144,6 +150,7 @@ float StreamingSound::get_current_position() const
 
 float StreamingSound::get_current_peak_level() const
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	auto play_pos = sound_buffer_->get_current_position();
 
 	const float sample_sec = 1.f / 20.f;

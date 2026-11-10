@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="test\physics">
+      <UniqueIdentifier>{3fd0d7bd-fdc0-4ed6-af39-d36c90897a19}</UniqueIdentifier>
+    </Filter>
     <Filter Include="test\graphics">
       <UniqueIdentifier>{e51d9bc2-1427-4747-936a-6540f7abc6b2}</UniqueIdentifier>
     </Filter>
@@ -21,6 +24,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test\graphics\RenderSettingsTest.cpp">
+      <Filter>test\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="test\physics\BulletPhysicsTest.cpp">
+      <Filter>test\physics</Filter>
+    </ClCompile>
     <ClCompile Include="test\graphics\EffectParserTest.cpp">
       <Filter>test\graphics</Filter>
     </ClCompile>

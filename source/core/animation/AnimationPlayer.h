@@ -15,11 +15,7 @@ namespace core
 class AnimationPlayer
 {
 public:
-	/// @todo 整理する
-	using BoneConstantBuffer = core::BoneConstantBuffer;
-	using BoneConstantBufferData = core::BoneConstantBufferData;
-
-	static const int MaxBones = BoneConstantBufferData::MaxBones;
+	using BoneConstantBufferData = core::BoneConstantBufferData;	///< ボーン行列（使われていなかった別名・定数を整理した）
 
 private:
 	const SkinningAnimationSet* skinning_animation_set_;	///< スキニングアニメーションのセット
@@ -34,7 +30,9 @@ private:
 
 	Matrix get_bone_local_matrix( uint_t ) const;
 
-	AnimationPlayer& operator = ( const AnimationPlayer& ) { }
+	// コピーしない（以前は代入演算子が値を返さず、使うと未定義動作だった）
+	AnimationPlayer( const AnimationPlayer& ) = delete;
+	AnimationPlayer& operator = ( const AnimationPlayer& ) = delete;
 
 public:
 	/// constant_buffer は BoneConstantBufferData の大きさで BoneConstantBuffer::SLOT に作ったもの

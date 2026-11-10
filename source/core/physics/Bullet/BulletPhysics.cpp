@@ -69,6 +69,7 @@ void BulletPhysics::clear()
 	}
 
 	collision_shape_list_.clear();
+	shape_cache_.clear();
 	mesh_list_.clear();
 }
 
@@ -101,8 +102,7 @@ btRigidBody* BulletPhysics::add_ground_rigid_body( const Vector& box )
  */
 btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, const Transform& offset, const Vector& box, btScalar mass )
 {
-	btBoxShape* shape = new btBoxShape( box );
-	collision_shape_list_.push_back( shape );
+	btCollisionShape* shape = find_or_create_shape( ShapeKey( 0, box.x(), box.y(), box.z() ), [&] { return new btBoxShape( box ); } );
 
 	return create_rigid_body( shape, transform, offset, mass );
 }
@@ -119,8 +119,7 @@ btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, cons
  */
 btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, const Transform& offset, float_t radius, float_t height, btScalar mass )
 {
-	btCapsuleShape* shape = new btCapsuleShape( radius, height );
-	collision_shape_list_.push_back( shape );
+	btCollisionShape* shape = find_or_create_shape( ShapeKey( 1, radius, height, 0.f ), [&] { return new btCapsuleShape( radius, height ); } );
 
 	return create_rigid_body( shape, transform, offset, mass );
 }
@@ -137,10 +136,25 @@ btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, 
  */
 btRigidBody* BulletPhysics::add_cylinder_rigid_body( const Transform& transform, const Transform& offset, const Vector& box, btScalar mass )
 {
-	btCylinderShape* shape = new btCylinderShape( box );
-	collision_shape_list_.push_back( shape );
+	btCollisionShape* shape = find_or_create_shape( ShapeKey( 2, box.x(), box.y(), box.z() ), [&] { return new btCylinderShape( box ); } );
 
 	return create_rigid_body( shape, transform, offset, mass );
+}
+
+btCollisionShape* BulletPhysics::find_or_create_shape( const ShapeKey& key, const std::function< btCollisionShape*() >& make )
+{
+	auto i = shape_cache_.find( key );
+
+	if ( i != shape_cache_.end() )
+	{
+		return i->second;
+	}
+
+	btCollisionShape* shape = make();
+	collision_shape_list_.push_back( shape );
+	shape_cache_.emplace( key, shape );
+
+	return shape;
 }
 
 /**

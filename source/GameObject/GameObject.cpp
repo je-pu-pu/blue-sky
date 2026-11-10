@@ -254,9 +254,9 @@ float_t GameObject::get_delta_time() const
  *
  * @return 現在のシーンが開始してからの経過秒
  */
-btDynamicsWorld* GameObject::get_dynamics_world() const
+const ActiveObjectPhysics* GameObject::get_physics() const
 {
-	return context_ && context_->dynamics_world ? context_->dynamics_world() : nullptr;
+	return context_ ? context_->physics : nullptr;
 }
 
 float_t GameObject::get_scene_elapsed_time() const

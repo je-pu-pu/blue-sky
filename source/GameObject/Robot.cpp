@@ -309,7 +309,7 @@ bool Robot::calculate_target_visible() const
 	ClosestNotMeAndHim ray_callback( from, to, get_rigid_body(), player_->get_rigid_body(), false );
 	ray_callback.m_closestHitFraction = 1.0;
 	
-	get_dynamics_world()->rayTest( from, to, ray_callback );
+	get_physics()->ray_test( from, to, ray_callback );
 	
 	// ターゲットとの間に障害物がなければ目視できている
 	if ( ! ray_callback.hasHit() )

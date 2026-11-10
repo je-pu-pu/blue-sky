@@ -6,21 +6,21 @@
 #include <functional>
 
 class btRigidBody;
-class btDynamicsWorld;
 
 namespace blue_sky { struct GameObjectContext; }
 
-namespace game
+namespace core
 {
 
 class Sound;
 
-} // namespace game
+} // namespace core
 
 namespace blue_sky
 {
 
 class Player;
+class ActiveObjectPhysics;
 class Balloon;
 class Rocket;
 class Umbrella;
@@ -46,7 +46,7 @@ class Component;
 class GameObject
 {
 public:
-	using Sound			= game::Sound;
+	using Sound			= core::Sound;
 	using EventHandler	= std::function< void() >;
 
 	using ComponentMap	= std::unordered_map< core::ecs::ComponentTypeId, Component* >;
@@ -65,7 +65,8 @@ protected:
 	float_t get_scene_elapsed_time() const;
 
 	/// 物理のワールド（当たりの判定・レイの判定に使う。派生クラスは GameMain を直接呼ばずにこれを使う。設計上の問題 B28）
-	btDynamicsWorld* get_dynamics_world() const;
+	/// 物理（ray_test・contact_test で当たりを調べる）
+	const ActiveObjectPhysics* get_physics() const;
 
 	/// 1 秒あたりの数値から現在のフレームの数値を返す
 	inline float_t per_sec( float_t value ) const { return value * get_delta_time(); }

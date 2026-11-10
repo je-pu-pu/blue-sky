@@ -5,7 +5,9 @@
 #include <common/math.h>
 #include <common/exception.h>
 
-namespace game
+#include <mutex>
+
+namespace core
 {
 
 const Sound::T Sound::VOLUME_MIN = 0.f;
@@ -37,6 +39,7 @@ Sound::~Sound()
 
 bool Sound::load( const char* file_name )
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	if ( sound_buffer_ )
 	{
 		COMMON_THROW_EXCEPTION;
@@ -70,21 +73,25 @@ bool Sound::load( const char* file_name )
 
 void Sound::set_3d_position( T x, T y, T z )
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	sound_buffer_->set_3d_position( Vector3( x, y, z ) );
 }
 
 void Sound::set_3d_velocity( T x, T y, T z )
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	sound_buffer_->set_3d_velocity( Vector3( x, y, z ) );
 }
 
 Sound::T Sound::get_volume() const
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	return sound_buffer_->get_volume();
 }
 
 void Sound::set_volume( T v )
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	v = ::math::clamp( v, VOLUME_MIN, get_max_volume() );
 
 	sound_buffer_->set_volume( v );
@@ -92,16 +99,19 @@ void Sound::set_volume( T v )
 
 Sound::T Sound::get_speed() const
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	return sound_buffer_->get_speed();
 }
 
 void Sound::set_speed( Sound::T s )
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	sound_buffer_->set_speed( s );
 }
 
 bool Sound::play( bool loop, bool force )
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	volume_fade_ = 0.f;
 
 	if ( ! force && is_playing() )
@@ -116,11 +126,13 @@ bool Sound::play( bool loop, bool force )
 
 bool Sound::is_playing() const
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	return sound_buffer_->is_playing();
 }
 
 bool Sound::stop()
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	sound_buffer_->stop();
 
 	return true;
@@ -128,31 +140,37 @@ bool Sound::stop()
 
 void Sound::fade_in( T speed )
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	volume_fade_ = speed;
 }
 
 void Sound::fade_out( T speed )
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	volume_fade_ = -speed;
 }
 
 bool Sound::is_fade_full_in() const
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	return get_volume() == get_max_volume();
 }
 
 bool Sound::is_fade_full_out() const
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	return get_volume() == VOLUME_MIN;
 }
 
 float Sound::get_current_position() const
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	return static_cast< float >( sound_buffer_->get_current_position() ) / static_cast< float >( sound_file_->size_per_sec() );
 }
 
 void Sound::update()
 {
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
 	if ( volume_fade_ )
 	{
 		set_volume( get_volume() + volume_fade_ );

@@ -159,6 +159,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test\graphics\RenderSettingsTest.cpp" />
+    <ClCompile Include="test\physics\BulletPhysicsTest.cpp" />
     <ClCompile Include="test\graphics\EffectParserTest.cpp" />
     <ClCompile Include="test\input\RawInputTest.cpp" />
     <ClCompile Include="test\ui\UIWidgetTest.cpp" />

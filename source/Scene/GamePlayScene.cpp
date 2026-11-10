@@ -34,7 +34,7 @@
 
 #include <core/math.h>
 
-#include <game/Sound.h>
+#include <core/sound/Sound.h>
 #include <game/Config.h>
 
 #include <common/exception.h>

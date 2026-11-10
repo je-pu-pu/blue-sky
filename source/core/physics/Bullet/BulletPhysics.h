@@ -4,7 +4,10 @@
 #include <core/math/Vector.h>
 #include <type/type.h>
 #include <btBulletDynamicsCommon.h>
+#include <functional>
 #include <list>
+#include <map>
+#include <tuple>
 
 /**
  * Bullet のラッパークラス
@@ -30,6 +33,13 @@ protected:
 	CollisionShapeArray						collision_shape_list_;
 	MeshList								mesh_list_;
 
+	/// 形の種類と大きさ → 共有する形（持ち主は collision_shape_list_）
+	using ShapeKey = std::tuple< int, btScalar, btScalar, btScalar >;
+	std::map< ShapeKey, btCollisionShape* >	shape_cache_;
+
+	/// 同じ種類・大きさの形があれば返し、無ければ make で作って登録する
+	btCollisionShape* find_or_create_shape( const ShapeKey& key, const std::function< btCollisionShape*() >& make );
+
 	btRigidBody* create_rigid_body( btCollisionShape*, const Transform&, const Transform&, float_t );
 
 	BulletPhysics( const BulletPhysics& ) = delete;
@@ -50,8 +60,11 @@ public:
 
 	void update( float = 1.f / 60.f );
 	
-	/// @todo 削除する
-	btDynamicsWorld* get_dynamics_world() { return dynamics_world_; }
+	/// 線分で当たりを調べる（以前は get_dynamics_world で世界そのものを出していた）
+	void ray_test( const btVector3& from, const btVector3& to, btCollisionWorld::RayResultCallback& callback ) const { dynamics_world_->rayTest( from, to, callback ); }
+
+	/// 物体と接しているものを調べる
+	void contact_test( btCollisionObject* object, btCollisionWorld::ContactResultCallback& callback ) const { dynamics_world_->contactTest( object, callback ); }
 
 	// for debug
 	void setDebugDrawer( btIDebugDraw* );

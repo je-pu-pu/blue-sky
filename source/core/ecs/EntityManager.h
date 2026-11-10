@@ -263,13 +263,19 @@ public:
 // ---- Entity の中身（自分を作った EntityManager に頼む） ----
 
 template< typename ComponentType >
-ComponentType* Entity::add_component() const
+ComponentType* Entity::add_component()
 {
 	return manager_->add_component< ComponentType >( this );
 }
 
 template< typename ComponentType >
-ComponentType* Entity::get_component() const
+ComponentType* Entity::get_component()
+{
+	return manager_->get_component< ComponentType >( this );
+}
+
+template< typename ComponentType >
+const ComponentType* Entity::get_component() const
 {
 	return manager_->get_component< ComponentType >( this );
 }

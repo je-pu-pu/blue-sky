@@ -943,6 +943,12 @@ void GameMain::on_ime_composition( const std::u32string& text )
 
 void GameMain::on_special_key_down( int key )
 {
+	// キー割り当てで押されたキーを待っている間は、切り替えを動かさない（以前は F2 でミュート・F5 でフルスクリーンが切り替わった）
+	if ( ! overlay_scene_stack_.empty() && overlay_scene_stack_.back()->is_capturing_key() )
+	{
+		return;
+	}
+
 	if ( key == KEY_F1 )
 	{
 		is_command_mode_ = ! is_command_mode_;

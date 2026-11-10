@@ -148,6 +148,9 @@ public:
 	/// オーバーレイシーン ( ポーズメニューなど ) かどうか
 	virtual bool is_overlay() const { return false; }
 
+	/// キー割り当てで、押されたキーを待っているか（待っている間は、ファンクションキーの切り替えを動かさない）
+	virtual bool is_capturing_key() const { return false; }
+
 	/// ESC を押したときにすること（オーバーレイが開いていないとき）
 	enum class EscapeBehavior
 	{

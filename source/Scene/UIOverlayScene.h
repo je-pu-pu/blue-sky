@@ -72,6 +72,7 @@ public:
 	void on_resume() override;
 
 	bool is_overlay() const override { return true; }
+	bool is_capturing_key() const override { return screen_.is_capturing_key(); }
 	bool is_transparent() const override { return true; }
 	bool hides_overlays_below() const override { return true; }
 

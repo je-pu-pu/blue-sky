@@ -94,3 +94,50 @@ TEST( ResourceManagerTest, 作った側が手放すとそれを指す名前も�
 	EXPECT_EQ( nullptr, m.resolve( ha ) );			// ハンドルも無効になる
 	EXPECT_EQ( 2, b->value );						// ほかのリソースはそのまま
 }
+
+TEST( ResourceManagerTest, 差し替えると同じハンドルで新しい中身が引け古い中身は解放される )
+{
+	Counted::alive = 0;
+	core::ResourceManager< Counted > m;
+
+	Counted* a = m.create_named( "a", 1 );
+	m.add_named( "a2", a );
+	const auto h = m.get_handle( "a" );
+
+	EXPECT_TRUE( m.replace( h, std::make_unique< Counted >( 2 ) ) );
+
+	EXPECT_EQ( 1, Counted::alive );					// 古い中身は解放された
+	EXPECT_EQ( 2, m.resolve( h )->value );			// 番号は変わらず、新しい中身を指す
+	EXPECT_EQ( h, m.get_handle( "a" ) );
+	EXPECT_EQ( 2, m.get( "a" )->value );			// 名前も新しい中身を指す
+	EXPECT_EQ( 2, m.get( "a2" )->value );
+	EXPECT_EQ( h, m.handle_of( m.resolve( h ) ) );
+	EXPECT_EQ( 1u, m.get_resource_list().size() );
+
+	m.remove_named( "a" );
+	m.remove_named( "a2" );
+	EXPECT_EQ( 0, Counted::alive );
+	EXPECT_EQ( nullptr, m.resolve( h ) );			// 解放後は nullptr
+}
+
+TEST( ResourceManagerTest, 無効なハンドルへの差し替えは失敗し新しい中身は解放される )
+{
+	Counted::alive = 0;
+	core::ResourceManager< Counted > m;
+
+	EXPECT_FALSE( m.replace( core::ResourceManager< Counted >::Handle(), std::make_unique< Counted >( 1 ) ) );
+	EXPECT_EQ( 0, Counted::alive );
+
+	const auto h = m.handle_of( m.create_named( "a", 1 ) );
+	m.remove_named( "a" );
+	EXPECT_FALSE( m.replace( h, std::make_unique< Counted >( 2 ) ) );	// 解放済み
+	EXPECT_EQ( 0, Counted::alive );
+	EXPECT_EQ( nullptr, m.resolve( h ) );
+
+	Counted* b = m.create( 3 );
+	const auto hb = m.handle_of( b );
+	EXPECT_FALSE( m.replace( hb, nullptr ) );
+	EXPECT_FALSE( m.replace( hb, std::unique_ptr< Counted >( b ) ) );	// すでに管理しているものは引き取らない（二重に解放しない）
+	EXPECT_EQ( 1, Counted::alive );
+	EXPECT_EQ( b, m.resolve( hb ) );
+}

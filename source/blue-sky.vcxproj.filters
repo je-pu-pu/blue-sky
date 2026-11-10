@@ -936,6 +936,9 @@
     <ClInclude Include="blue_sky\graphics\shader\post_effect\DefaultShader.h">
       <Filter>blue_sky\graphics\shader\post_effect</Filter>
     </ClInclude>
+    <ClInclude Include="core\ResourceHandle.h">
+      <Filter>core</Filter>
+    </ClInclude>
     <ClInclude Include="core\ResourceManager.h">
       <Filter>core</Filter>
     </ClInclude>

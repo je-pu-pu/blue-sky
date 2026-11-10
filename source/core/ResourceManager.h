@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/ResourceHandle.h>
 #include <type/type.h>
 
 #include <algorithm>
@@ -14,23 +15,6 @@ namespace core
 {
 
 /**
- * リソースを指すハンドル
- *
- * 一度使った番号は二度と使わないので、リソースが解放された後のハンドルは確実に「無効」と分かる
- * （生ポインタは解放後も同じ値のまま残り、使うと壊れる。設計上の問題 B20）。
- * 解放・差し替えがあり得るリソースを長く持つ側は、生ポインタではなくハンドルを持ち、使うたびに resolve する。
- */
-template< typename ResourceType >
-struct ResourceHandle
-{
-	std::uint64_t id = 0;
-
-	bool is_null() const { return id == 0; }
-	bool operator == ( const ResourceHandle& o ) const { return id == o.id; }
-	bool operator != ( const ResourceHandle& o ) const { return id != o.id; }
-};
-
-/**
  * リソース管理テンプレートクラス
  *
  * このクラスは複数のリソースを所有し、名前を付けて検索できるようにする（スクリプトからのアクセスを容易にする）。
@@ -41,6 +25,10 @@ struct ResourceHandle
  *     古いシェーダーはモデルが使い続けている。解放すると落ちる）
  * - 名前を削除したとき、別の名前でも同じリソースを指していれば解放しない（以前は解放して、別の名前が無効なポインタを指した）
  * - 解放されたリソースのハンドルは resolve で nullptr になる。解放があり得るリソースを長く持つ側はハンドルを持つ
+ * - replace はハンドルの番号を変えずに中身を差し替え、古い中身を解放する（名前も新しい中身を指す）。
+ *   差し替えたいものを長く持つ側は、生ポインタではなくハンドルを持つ（生ポインタは古い中身を指したまま壊れる）
+ * - 基底の型で管理し、派生の型のリソースを入れてもよい（例 : core::graphics::Model で管理し blue_sky のモデルを入れる）。
+ *   基底の型のデストラクタは virtual にすること
  */
 template< typename ResourceType >
 class ResourceManager
@@ -238,6 +226,54 @@ public:
 	{
 		auto i = by_id_.find( handle.id );
 		return i == by_id_.end() ? nullptr : i->second;
+	}
+
+	/**
+	 * ハンドルの番号を変えずに中身を差し替え、古い中身を解放する
+	 *
+	 * 古い中身を指していた名前は新しい中身を指す。同じハンドルを持つ側は、次の resolve から新しい中身を得る。
+	 * 古い中身の生ポインタは無効になる（差し替えたいものはハンドルで持つ）。
+	 *
+	 * @param handle 差し替えるハンドル
+	 * @param resource 新しい中身（所有を引き取る）
+	 * @return 差し替えたら true。ハンドルが無効（空・解放済み）・新しい中身が nullptr・すでに管理しているリソースなら false
+	 *         （false のとき、新しい中身は、すでに管理しているものでなければ解放する）
+	 */
+	bool replace( Handle handle, std::unique_ptr< Resource > resource )
+	{
+		auto i = by_id_.find( handle.id );
+
+		if ( i == by_id_.end() || ! resource )
+		{
+			return false;
+		}
+
+		if ( owns( resource.get() ) )
+		{
+			// 別のハンドルの中身（または今の中身）を渡された。二重に持つと二重に解放するので引き取らない
+			resource.release();
+			return false;
+		}
+
+		Resource* old_resource = i->second;
+		Resource* new_resource = resource.get();
+
+		for ( auto& named : resource_map_ )
+		{
+			if ( named.second == old_resource )
+			{
+				named.second = new_resource;
+			}
+		}
+
+		id_of_.erase( old_resource );
+		id_of_[ new_resource ] = handle.id;
+		i->second = new_resource;
+
+		auto owned = std::find_if( resource_list_.begin(), resource_list_.end(), [old_resource] ( const auto& x ) { return x.get() == old_resource; } );
+		owned->reset( resource.release() );		// 古い中身はここで解放する
+
+		return true;
 	}
 
 	/**

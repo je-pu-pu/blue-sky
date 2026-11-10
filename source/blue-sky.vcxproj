@@ -395,6 +395,7 @@
     <ClInclude Include="core\physics\Bullet\BulletPhysics.h" />
     <ClInclude Include="core\physics\PhysicsManager.h" />
     <ClInclude Include="core\physics\RigidBody.h" />
+    <ClInclude Include="core\ResourceHandle.h" />
     <ClInclude Include="core\ResourceManager.h" />
     <ClInclude Include="core\sound\DirectSound\DirectSound.h" />
     <ClInclude Include="core\sound\DirectSound\DirectSoundBuffer.h" />

@@ -3,6 +3,7 @@
 
 #include <core/ui/Button.h>
 #include <core/ui/Choice.h>
+#include <core/ui/ClickTracker.h>
 #include <core/ui/KeyBind.h>
 #include <core/ui/Label.h>
 #include <core/ui/ScrollView.h>
@@ -454,4 +455,75 @@ TEST( LabelTest, 改行文字で必ず改行する )
 	ASSERT_EQ( 2u, lines.size() );
 	EXPECT_EQ( "一行目", lines[ 0 ] );
 	EXPECT_EQ( "二行目", lines[ 1 ] );
+}
+
+// ---- クリック判定（ClickTracker）----
+
+namespace
+{
+
+PointerEvent pointer( PointerEvent::Type type, bool inside )
+{
+	return PointerEvent{ type, 0.f, 0.f, inside };
+}
+
+} // namespace
+
+TEST( ClickTrackerTest, 押して中で離すとクリックが確定する )
+{
+	ClickTracker c;
+
+	EXPECT_FALSE( c.feed( pointer( PointerEvent::Type::PRESS, true ) ) );
+	EXPECT_TRUE( c.is_pressed() );
+	EXPECT_FALSE( c.feed( pointer( PointerEvent::Type::DRAG, true ) ) );
+	EXPECT_TRUE( c.is_pressed() );
+	EXPECT_TRUE( c.feed( pointer( PointerEvent::Type::RELEASE, true ) ) );
+	EXPECT_FALSE( c.is_pressed() );
+}
+
+TEST( ClickTrackerTest, 外で離すとクリックにならず押下も解ける )
+{
+	ClickTracker c;
+
+	c.feed( pointer( PointerEvent::Type::PRESS, true ) );
+	c.feed( pointer( PointerEvent::Type::DRAG, false ) );
+	EXPECT_FALSE( c.feed( pointer( PointerEvent::Type::RELEASE, false ) ) );
+	EXPECT_FALSE( c.is_pressed() );
+}
+
+TEST( ClickTrackerTest, 押していないのに離してもクリックにならない )
+{
+	ClickTracker c;
+
+	EXPECT_FALSE( c.feed( pointer( PointerEvent::Type::RELEASE, true ) ) );
+}
+
+TEST( ClickTrackerTest, 取り消した後の離しはクリックにならない )
+{
+	ClickTracker c;
+
+	c.feed( pointer( PointerEvent::Type::PRESS, true ) );
+	c.cancel();
+	EXPECT_FALSE( c.is_pressed() );
+	EXPECT_FALSE( c.feed( pointer( PointerEvent::Type::RELEASE, true ) ) );
+}
+
+TEST_F( WidgetTest, 捕捉が外れたボタンは押した見た目が解け次の離しでクリックしない )
+{
+	int clicks = 0;
+	auto* button = root->add< Button >( "button", [&clicks] { clicks++; } );
+	ready();
+
+	UIContext c { theme, strings, renderer, screen };
+	const PointerEvent press { PointerEvent::Type::PRESS, button->rect().center_x(), button->rect().center_y(), true };
+	const PointerEvent release { PointerEvent::Type::RELEASE, button->rect().center_x(), button->rect().center_y(), true };
+
+	button->on_pointer( press, c );
+	button->on_capture_lost();
+	button->on_pointer( release, c );
+	EXPECT_EQ( 0, clicks );
+
+	button->on_pointer( press, c );
+	button->on_pointer( release, c );
+	EXPECT_EQ( 1, clicks );
 }

@@ -67,20 +67,11 @@ bool Choice::on_nav( NavDir dir, UIContext& ctx )
 
 bool Choice::on_pointer( const PointerEvent& e, UIContext& ctx )
 {
-	if ( e.type == PointerEvent::Type::PRESS )
+	if ( click_.feed( e ) )
 	{
-		pressed_ = true;
-	}
-	else if ( e.type == PointerEvent::Type::RELEASE )
-	{
-		if ( pressed_ && e.inside )
-		{
-			if ( left_arrow_rect_.contains( e.x, e.y ) ) step( -1, ctx );
-			else if ( right_arrow_rect_.contains( e.x, e.y ) ) step( +1, ctx );
-			else if ( value_rect_.contains( e.x, e.y ) ) step( +1, ctx );
-		}
-
-		pressed_ = false;
+		if ( left_arrow_rect_.contains( e.x, e.y ) ) step( -1, ctx );
+		else if ( right_arrow_rect_.contains( e.x, e.y ) ) step( +1, ctx );
+		else if ( value_rect_.contains( e.x, e.y ) ) step( +1, ctx );
 	}
 
 	return true;

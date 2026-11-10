@@ -79,28 +79,16 @@ bool TabView::on_tab( int direction, UIContext& ctx )
 
 bool TabView::on_pointer( const PointerEvent& e, UIContext& ctx )
 {
-	if ( e.type == PointerEvent::Type::PRESS )
+	if ( click_.feed( e ) )
 	{
-		pressed_ = true;
-		return true;
-	}
-
-	if ( e.type == PointerEvent::Type::RELEASE )
-	{
-		if ( pressed_ && e.inside )
+		for ( size_t i = 0; i < tab_rects_.size(); i++ )
 		{
-			for ( size_t i = 0; i < tab_rects_.size(); i++ )
+			if ( tab_rects_[ i ].contains( e.x, e.y ) )
 			{
-				if ( tab_rects_[ i ].contains( e.x, e.y ) )
-				{
-					select( i, ctx );
-					break;
-				}
+				select( i, ctx );
+				break;
 			}
 		}
-
-		pressed_ = false;
-		return true;
 	}
 
 	return true;

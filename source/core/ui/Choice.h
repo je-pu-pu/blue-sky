@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/ui/LabeledRow.h>
+#include <core/ui/ClickTracker.h>
 
 #include <functional>
 #include <vector>
@@ -18,7 +19,7 @@ class Choice : public LabeledRow
 {
 public:
 	/// 捕捉が外れた（層が積まれたなど）: 押している・ドラッグ中の状態を解除する
-	void on_capture_lost() override { pressed_ = false; }
+	void on_capture_lost() override { click_.cancel(); }
 
 	using Getter = std::function< int() >;
 	using Setter = std::function< void( int ) >;
@@ -30,7 +31,7 @@ private:
 	bool options_literal_ = false;		///< 選択肢をキーとして翻訳せず、そのまま表示する
 	std::function< string_t() > custom_text_;
 	bool wrap_ = false;
-	bool pressed_ = false;
+	ClickTracker click_;
 
 	Rect left_arrow_rect_;
 	Rect right_arrow_rect_;

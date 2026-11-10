@@ -37,18 +37,9 @@ bool Toggle::on_nav( NavDir dir, UIContext& ctx )
 
 bool Toggle::on_pointer( const PointerEvent& e, UIContext& ctx )
 {
-	if ( e.type == PointerEvent::Type::PRESS )
+	if ( click_.feed( e ) )
 	{
-		pressed_ = true;
-	}
-	else if ( e.type == PointerEvent::Type::RELEASE )
-	{
-		if ( pressed_ && e.inside )
-		{
-			flip( ctx );
-		}
-
-		pressed_ = false;
+		flip( ctx );
 	}
 
 	return true;

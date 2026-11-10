@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/ui/Widget.h>
+#include <core/ui/ClickTracker.h>
 
 namespace core::ui
 {
@@ -19,11 +20,11 @@ private:
 	std::vector< bool > badges_;		///< 見出しに印（新しい項目がある・未適用の変更がある など）を付けるか
 	size_t current_ = 0;
 	std::vector< Rect > tab_rects_;
-	bool pressed_ = false;
+	ClickTracker click_;
 
 public:
 	/// 捕捉が外れた（層が積まれたなど）: 押している・ドラッグ中の状態を解除する
-	void on_capture_lost() override { pressed_ = false; }
+	void on_capture_lost() override { click_.cancel(); }
 
 	/// ページを追加する（ページの型と引数を指定。型付きポインタを返す）
 	template< typename T, typename ... Args >

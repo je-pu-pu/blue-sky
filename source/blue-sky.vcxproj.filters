@@ -611,6 +611,9 @@
     <ClInclude Include="core\ui\NavRepeater.h">
       <Filter>core\ui</Filter>
     </ClInclude>
+    <ClInclude Include="core\ui\ClickTracker.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
     <ClInclude Include="core\ui\StringTable.h">
       <Filter>core\ui</Filter>
     </ClInclude>

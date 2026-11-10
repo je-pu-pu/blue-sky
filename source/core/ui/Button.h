@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/ui/Widget.h>
+#include <core/ui/ClickTracker.h>
 
 #include <functional>
 
@@ -18,13 +19,13 @@ class Button : public Widget
 private:
 	string_t text_key_;
 	std::function< void() > on_click_;
-	bool pressed_ = false;
+	ClickTracker click_;
 
 	void click( UIContext& ctx );
 
 public:
 	/// 捕捉が外れた（層が積まれたなど）: 押している・ドラッグ中の状態を解除する
-	void on_capture_lost() override { pressed_ = false; }
+	void on_capture_lost() override { click_.cancel(); }
 
 	Button( const string_t& text_key, std::function< void() > on_click )
 		: text_key_( text_key ), on_click_( std::move( on_click ) ) { }

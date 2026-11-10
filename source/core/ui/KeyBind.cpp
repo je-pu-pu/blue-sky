@@ -40,18 +40,9 @@ bool KeyBind::on_cancel( UIContext& ctx )
 
 bool KeyBind::on_pointer( const PointerEvent& e, UIContext& ctx )
 {
-	if ( e.type == PointerEvent::Type::PRESS )
+	if ( click_.feed( e ) )
 	{
-		pressed_ = true;
-	}
-	else if ( e.type == PointerEvent::Type::RELEASE )
-	{
-		if ( pressed_ && e.inside )
-		{
-			start( ctx );
-		}
-
-		pressed_ = false;
+		start( ctx );
 	}
 
 	return true;

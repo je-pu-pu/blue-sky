@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/ui/LabeledRow.h>
+#include <core/ui/ClickTracker.h>
 
 #include <functional>
 
@@ -18,7 +19,7 @@ class KeyBind : public LabeledRow
 {
 public:
 	/// 捕捉が外れた（層が積まれたなど）: 押している・ドラッグ中の状態を解除する
-	void on_capture_lost() override { pressed_ = false; waiting_ = false; }
+	void on_capture_lost() override { click_.cancel(); waiting_ = false; }
 
 	using Getter = std::function< int() >;
 	using Setter = std::function< void( int ) >;
@@ -29,7 +30,7 @@ private:
 	Setter setter_;
 	NameOf name_of_;
 	bool waiting_ = false;
-	bool pressed_ = false;
+	ClickTracker click_;
 
 	void start( UIContext& ctx );
 

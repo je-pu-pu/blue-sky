@@ -46,35 +46,19 @@ bool Button::on_confirm( UIContext& ctx )
 
 bool Button::on_pointer( const PointerEvent& e, UIContext& ctx )
 {
-	switch ( e.type )
+	if ( click_.feed( e ) )
 	{
-		case PointerEvent::Type::PRESS:
-			pressed_ = true;
-			return true;
-
-		case PointerEvent::Type::RELEASE:
-		{
-			const bool was_pressed = pressed_;
-			pressed_ = false;
-
-			if ( was_pressed && e.inside )
-			{
-				click( ctx );
-			}
-
-			return true;
-		}
-
-		default:
-			return true;
+		click( ctx );
 	}
+
+	return true;
 }
 
 void Button::render( Renderer& renderer, const UIContext& ctx ) const
 {
 	const auto& t = ctx.theme;
 	const Brush& bg = ! is_enabled() ? pick_brush( renderer, t.row_disabled, t.row )
-		: ( pressed_ ? t.row_pressed : ( focused_ ? t.row_focused : t.row ) );
+		: ( click_.is_pressed() ? t.row_pressed : ( focused_ ? t.row_focused : t.row ) );
 	const Color& fg = ! is_enabled() ? t.text_disabled : ( focused_ ? t.text_focused : t.text );
 
 	draw_brush( renderer, rect_, bg );

@@ -233,6 +233,7 @@
     <ClInclude Include="blue_sky\KeyNames.h" />
     <ClInclude Include="core\ui\Rect.h" />
     <ClInclude Include="core\ui\NavRepeater.h" />
+    <ClInclude Include="core\ui\ClickTracker.h" />
     <ClInclude Include="core\ui\StringTable.h" />
     <ClInclude Include="blue_sky\ActiveObjectManager.h" />
     <ClInclude Include="blue_sky\ActiveObjectPhysics.h" />

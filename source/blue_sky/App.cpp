@@ -48,7 +48,8 @@ App::App()
 	boost::filesystem::current_path( dir_path.parent_path() );
 	*/
 
-	setlocale( LC_CTYPE, "" );
+	// C ランタイムの文字の扱いも UTF-8 にする（中の文字列は UTF-8。以前は "" で、日本語の Windows では Shift-JIS になっていた）
+	setlocale( LC_CTYPE, ".UTF8" );
 
 #ifdef ENABLE_DEBUG_CONSOLE
 	// コンソールを開けなくてもゲームは続ける（出力が見えないだけ）
@@ -155,6 +156,9 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	}
 
 	// 入力の出来事を Raw Input（WM_INPUT）で受け取る。登録できなければ以前のやり方（ポーリング・WM_KEYDOWN・DirectInput）を使う
+	// プロセスの文字コード（blue-sky-exe.utf8.manifest で UTF-8 にしている。Windows 10 1903 より前では効かず、システムの既定になる）
+	blue_sky::debug_log( "[文字コード] プロセスの文字コード : " + std::to_string( GetACP() ) + ( GetACP() == CP_UTF8 ? "（UTF-8）" : "（UTF-8 ではない。日本語などを含むパス・タイトルが化けることがある）" ) );
+
 	is_raw_input_enabled_ = blue_sky::raw_input::register_devices( hWnd );
 	blue_sky::debug_log( is_raw_input_enabled_ ? "[Input] Raw Input を登録しました（キーボード・マウス）" : "[Input] Raw Input を登録できませんでした。以前のやり方（ポーリング・WM_KEYDOWN・DirectInput）で読みます" );
 

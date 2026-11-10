@@ -287,7 +287,8 @@ string_t user_settings_path()
 		return LEGACY_USER_SETTINGS_PATH;		// ユーザーのフォルダが分からないときは、以前と同じ作業ディレクトリ
 	}
 
-	// Config のファイル操作は char のパス（ANSI）で行うので、ANSI に変換して返す
+	// Config のファイル操作は char のパスで行う。プロセスの文字コードは UTF-8（blue-sky-exe.utf8.manifest）なので、UTF-8 で返す
+	// （以前は ANSI（日本語の Windows では Shift-JIS）で、その文字コードで表せない文字がユーザー名にあると、パスを表せなかった）
 	return ( dir / L"settings.config" ).string();
 }
 

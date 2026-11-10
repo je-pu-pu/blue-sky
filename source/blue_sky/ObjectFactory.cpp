@@ -83,6 +83,22 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		return id;
 	}
 
+	if ( kind == "umbrella" )
+	{
+		// 以前の Umbrella : 2 x 2 x 2・硬くない（当たりの応答なし・重力 0）。プレイヤーが触れると消える（持ち物は増えない）
+		ObjectSpec spec;
+		spec.kind = kind;
+		spec.size = Vector( 2.f, 2.f, 2.f );
+		spec.mass = 1.f;
+		spec.is_hard = false;
+		spec.is_block = false;
+
+		const EntityId id = create_entity_object( spec );
+		entity_manager_->find( id )->add_component< ecs::PickupComponent >()->kind = ecs::PickupKind::UMBRELLA;
+
+		return id;
+	}
+
 	ActiveObject* active_object = create_active_object( kind );
 
 	if ( ! active_object )

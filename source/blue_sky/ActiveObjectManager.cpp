@@ -8,7 +8,6 @@
 #include <GameObject/Balloon.h>
 #include <GameObject/Ladder.h>
 #include <GameObject/Rocket.h>
-#include <GameObject/Umbrella.h>
 #include <GameObject/Stone.h>
 #include <GameObject/Switch.h>
 #include <GameObject/AreaSwitch.h>
@@ -50,11 +49,10 @@ ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics
 	object_creator_map_[ "balloon"     ] = [] () -> ActiveObject* { return new Balloon();      };
 	object_creator_map_[ "ladder"      ] = [] () -> ActiveObject* { return new Ladder();       };
 	object_creator_map_[ "rocket"      ] = [] () -> ActiveObject* { return new Rocket();       };
-	object_creator_map_[ "umbrella"    ] = [] () -> ActiveObject* { return new Umbrella();     };
 	object_creator_map_[ "stone"       ] = [] () -> ActiveObject* { return new Stone();        };
 	object_creator_map_[ "switch"      ] = [] () -> ActiveObject* { return new Switch();       };
 
-	// "static"（動かない物）・"medal" は ECS だけの物体になり、ObjectFactory が作る（段階 4）
+	// "static"（動かない物）・"medal"・"umbrella" は ECS だけの物体になり、ObjectFactory が作る（段階 4）
 
 }
 

@@ -143,9 +143,6 @@
     <ClCompile Include="GameObject\Switch.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject\Umbrella.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="Scene\CanvasTestScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -691,9 +688,6 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\Switch.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Umbrella.h">
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Scene\CanvasTestScene.h">

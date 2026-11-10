@@ -1067,6 +1067,10 @@ bool Player::on_pick_up( ecs::PickupKind kind )
 		play_sound( "medal-get" );
 		break;
 
+	case ecs::PickupKind::UMBRELLA:
+		// 以前は Umbrella::on_collide_with( Player* ) が傘を消すだけで、プレイヤーは何もしなかった
+		break;
+
 	default:
 		break;
 	}

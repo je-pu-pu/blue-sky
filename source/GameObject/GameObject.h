@@ -24,7 +24,6 @@ class Player;
 class ActiveObjectPhysics;
 class Balloon;
 class Rocket;
-class Umbrella;
 class Stone;
 class BaseSwitch;
 class Robot;
@@ -159,7 +158,6 @@ public:
 	virtual void on_collide_with( Player* ) { }
 	virtual void on_collide_with( Balloon* ) { }
 	virtual void on_collide_with( Rocket* ) { }
-	virtual void on_collide_with( Umbrella* ) { }
 	virtual void on_collide_with( Stone* ) { }
 	virtual void on_collide_with( BaseSwitch* ) { }
 	virtual void on_collide_with( Robot* ) { }

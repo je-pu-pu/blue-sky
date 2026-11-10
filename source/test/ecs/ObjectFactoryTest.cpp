@@ -460,3 +460,23 @@ TEST( ObjectFactoryTest, プレイヤーがメダルに当たると拾って_メ
 	f.factory.restart();
 	EXPECT_FALSE( traits->is_dead );
 }
+
+TEST( ObjectFactoryTest, 傘は硬くない拾う物で_プレイヤーが触れると消える )
+{
+	FactoryFixture f;
+
+	const auto id = f.factory.create_object( "umbrella" );
+	ASSERT_TRUE( id.has_value() );
+
+	auto* e = f.entity( * id );
+	ASSERT_NE( e->get_component< blue_sky::ecs::PickupComponent >(), nullptr );
+	EXPECT_EQ( e->get_component< blue_sky::ecs::PickupComponent >()->kind, blue_sky::ecs::PickupKind::UMBRELLA );
+	EXPECT_EQ( e->get_component< blue_sky::ecs::SpinComponent >(), nullptr );
+	EXPECT_FALSE( e->get_component< blue_sky::ecs::CollisionTraitsComponent >()->is_hard );
+	EXPECT_FLOAT_EQ( e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->height_offset, 1.f );
+
+	FakePicker player;
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, * e );
+
+	EXPECT_TRUE( e->get_component< blue_sky::ecs::CollisionTraitsComponent >()->is_dead );
+}

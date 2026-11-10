@@ -48,9 +48,9 @@ private:
 	void release_rigid_body( RigidBodyComponent* rigid_body );
 
 	/**
-	 * RigidBodyComponent を初期化する
+	 * RigidBodyComponent を初期化する（剛体を作り、userPointer に id のタグを付ける）
 	 */
-	void initialize_rigid_body( RigidBodyComponent* rigid_body, TransformComponent* transform );
+	void initialize_rigid_body( EntityId id, RigidBodyComponent* rigid_body, TransformComponent* transform );
 
 }; // class PhysicsSystem
 

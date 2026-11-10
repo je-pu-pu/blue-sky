@@ -1,4 +1,5 @@
 #include "PhysicsManager.h"
+#include "EntityTag.h"
 #include <core/math/Quaternion.h>
 #include <btBulletDynamicsCommon.h>
 
@@ -303,7 +304,7 @@ bool PhysicsManager::check_contact( const RigidBodyHandle& a, const RigidBodyHan
 }
 
 void PhysicsManager::for_each_contact( short group_a, short group_b,
-	const std::function< void( void*, void* ) >& callback ) const
+	const std::function< void( ecs::EntityId, ecs::EntityId ) >& callback ) const
 {
 	const int num_manifolds = impl_->dynamics_world->getDispatcher()->getNumManifolds();
 
@@ -323,27 +324,31 @@ void PhysicsManager::for_each_contact( short group_a, short group_b,
 		const short group1 = static_cast< short >( body1->getBroadphaseHandle()->m_collisionFilterGroup );
 
 		// group_a と group_b のペアかどうかを確認
-		void* ptr_a = nullptr;
-		void* ptr_b = nullptr;
+		const btCollisionObject* object_a = nullptr;
+		const btCollisionObject* object_b = nullptr;
 
 		if ( ( group0 & group_a ) && ( group1 & group_b ) )
 		{
-			ptr_a = body0->getUserPointer();
-			ptr_b = body1->getUserPointer();
+			object_a = body0;
+			object_b = body1;
 		}
 		else if ( ( group0 & group_b ) && ( group1 & group_a ) )
 		{
-			ptr_a = body1->getUserPointer();
-			ptr_b = body0->getUserPointer();
+			object_a = body1;
+			object_b = body0;
 		}
 		else
 		{
 			continue;
 		}
 
-		if ( ptr_a && ptr_b )
+		// 両方に Entity の番号のタグがある組だけ（以前は userPointer が両方 nullptr でないかを見ていた）
+		const auto id_a = get_entity_tag( object_a );
+		const auto id_b = get_entity_tag( object_b );
+
+		if ( id_a && id_b )
 		{
-			callback( ptr_a, ptr_b );
+			callback( * id_a, * id_b );
 		}
 	}
 }

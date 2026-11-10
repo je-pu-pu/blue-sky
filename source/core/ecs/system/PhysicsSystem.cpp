@@ -1,5 +1,6 @@
 #include "PhysicsSystem.h"
 #include <core/physics/PhysicsManager.h>
+#include <core/physics/EntityTag.h>
 #include <core/math/Quaternion.h>
 #include <btBulletDynamicsCommon.h>
 
@@ -11,7 +12,7 @@ using RigidBodyCreateInfo = core::physics::RigidBodyCreateInfo;
 using Quaternion = core::math::Quaternion;
 using Vector = core::math::Vector;
 
-void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, TransformComponent* transform )
+void PhysicsSystem::initialize_rigid_body( EntityId id, RigidBodyComponent* rigid_body, TransformComponent* transform )
 {
 	if ( rigid_body->handle.is_valid() )
 	{
@@ -47,8 +48,8 @@ void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, Trans
 		physics_manager->set_rigid_body_angular_factor( rigid_body->handle, rigid_body->angular_factor );
 		rigid_body->handle->setFriction( rigid_body->friction );
 
-		// user_pointer に RigidBodyComponent へのポインタを設定
-		rigid_body->handle->setUserPointer( rigid_body );
+		// userPointer に Entity の番号のタグを付ける（以前は RigidBodyComponent* を入れ、当たりで読む側がキャストしていた）
+		core::physics::set_entity_tag( rigid_body->handle.get(), id );
 	}
 }
 
@@ -98,7 +99,7 @@ void PhysicsSystem::update()
 		// 未初期化の RigidBody を初期化
 		if ( ! rigid_body->handle.is_valid() )
 		{
-			initialize_rigid_body( rigid_body, transform );
+			initialize_rigid_body( pair.first, rigid_body, transform );
 		}
 
 		// 物理演算の結果を TransformComponent に反映

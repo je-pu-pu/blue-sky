@@ -14,35 +14,35 @@ void BalloonSystem::update()
 		return;
 	}
 
-	// Balloon と Player の衝突を一括処理
+	auto* entity_manager = get_entity_manager();
+
+	// Balloon と Player の衝突を一括処理（剛体の Entity の番号のタグから、部品を直接引く）
+	// 以前は userPointer の RigidBodyComponent* を受け取り、風船の部品を対象の一覧から 1 つずつ探していた（当たり 1 つにつき O(n)）
 	physics_manager->for_each_contact(
 		core::physics::CollisionGroup::Balloon,
 		core::physics::CollisionGroup::Player,
-		[ physics_manager, this ]( void* balloon_ptr, void* player_ptr )
+		[ physics_manager, entity_manager ]( core::ecs::EntityId balloon_id, core::ecs::EntityId player_id )
 		{
-			auto* balloon_rb = static_cast< RigidBodyComponent* >( balloon_ptr );
-			auto* player_rb = static_cast< RigidBodyComponent* >( player_ptr );
+			core::ecs::Entity* balloon_entity = entity_manager->find( balloon_id );
+			core::ecs::Entity* player_entity = entity_manager->find( player_id );
 
-			if ( ! balloon_rb || ! player_rb )
+			if ( ! balloon_entity || ! player_entity )
+			{
+				return;	// どちらかが消えた
+			}
+
+			// この System の対象（風船の部品と剛体を持つ）だけ
+			auto* balloon = balloon_entity->get_component< BalloonComponent >();
+			auto* player_rb = player_entity->get_component< RigidBodyComponent >();
+
+			if ( ! balloon || ! balloon_entity->get_component< RigidBodyComponent >() || ! player_rb )
 			{
 				return;
 			}
 
-			// balloon_rb から BalloonComponent を探す
-			for ( auto& pair : get_component_list() )
-			{
-				auto* bc_rigid_body = std::get< RigidBodyComponent* >( pair.second );
-
-				if ( bc_rigid_body == balloon_rb )
-				{
-					auto* balloon = std::get< BalloonComponent* >( pair.second );
-
-					// 上向きのインパルスを適用
-					core::math::Vector impulse( 0.f, balloon->lift_force, 0.f );
-					physics_manager->apply_impulse( player_rb->handle, impulse );
-					break;
-				}
-			}
+			// 上向きのインパルスを適用
+			core::math::Vector impulse( 0.f, balloon->lift_force, 0.f );
+			physics_manager->apply_impulse( player_rb->handle, impulse );
 		}
 	);
 }

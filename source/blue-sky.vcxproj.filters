@@ -458,6 +458,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\physics\EntityTag.h">
+      <Filter>core\physics</Filter>
+    </ClInclude>
     <ClInclude Include="core\sound\SampleRateStepper.h">
       <Filter>core\sound</Filter>
     </ClInclude>

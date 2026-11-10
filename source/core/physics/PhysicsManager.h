@@ -4,6 +4,7 @@
 #include <core/math/Transform.h>
 #include <core/math/Quaternion.h>
 #include <core/physics/RigidBody.h>
+#include <core/ecs/type.h>
 #include <memory>
 #include <vector>
 #include <functional>
@@ -196,10 +197,12 @@ public:
 	 * 指定した衝突グループ間の全ての衝突を処理する
 	 * @param group_a 衝突グループA
 	 * @param group_b 衝突グループB
-	 * @param callback 衝突時に呼ばれるコールバック (user_pointer_a, user_pointer_b)
+	 * @param callback 衝突時に呼ばれるコールバック (group_a 側の Entity の番号, group_b 側の Entity の番号)。
+	 *                 両方の剛体に Entity の番号のタグ（EntityTag.h）が付いている組だけを呼ぶ。
+	 *                 以前は userPointer（RigidBodyComponent*）をそのまま渡し、受け取る側がキャストしていた
 	 */
 	void for_each_contact( short group_a, short group_b,
-		const std::function< void( void*, void* ) >& callback ) const;
+		const std::function< void( ecs::EntityId, ecs::EntityId ) >& callback ) const;
 
 }; // class PhysicsManager
 

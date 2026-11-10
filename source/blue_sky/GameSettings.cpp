@@ -152,7 +152,8 @@ void register_all( SettingStore& store, GameMain& game_main )
 
 	store.add_bool( AUDIO_MUTE, false, ApplyMode::IMMEDIATE, [gm] ( const SettingStore::Value& v )
 	{
-		gm->get_sound_manager()->set_mute( std::get< bool >( v ) );
+		// 開発用に裏で動かすとき（BLUE_SKY_BACKGROUND）は、設定にかかわらず音を出さない（使っている人の作業を邪魔しない）
+		gm->get_sound_manager()->set_mute( std::get< bool >( v ) || gm->get_app()->is_background() );
 	} );
 	store.set_info( AUDIO_MUTE, "options.mute", "options.mute.description" );
 

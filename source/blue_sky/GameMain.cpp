@@ -249,6 +249,11 @@ GameMain::GameMain( App& app )
 	game_settings::fix_invalid_values( * settings_ );
 	settings_->apply_all_individual();
 
+	if ( get_app()->is_background() )
+	{
+		debug_log( string_t( "[開発用] 裏で動かすので音を出しません（消音 : " ) + ( get_sound_manager()->is_mute() ? "はい" : "いいえ" ) + "）" );
+	}
+
 	// ユーザーの設定は settings.config が正。2 つのファイルに同じ項目が二重に残らないようにする
 	// （どちらを編集すれば効くのか分からなくならないように）
 	// - 開発用の blue-sky.config に残っている、ストアの項目は消す（以前の版から引き継いだもの）
@@ -1048,7 +1053,7 @@ void GameMain::on_special_key_down( int key )
 	}
 	else if ( key == VK_F2 )
 	{
-		get_sound_manager()->set_mute( ! get_sound_manager()->is_mute() );
+		get_sound_manager()->set_mute( ! get_sound_manager()->is_mute() || get_app()->is_background() );	// 裏で動かすときは鳴らさない
 		settings_->sync_from_runtime( game_settings::AUDIO_MUTE, get_sound_manager()->is_mute() );
 		core::Sound* bgm = get_sound_manager()->get_sound( "bgm" );
 

@@ -145,6 +145,15 @@ get_entity_manager()->add_system<RenderSystem>( 1000, get_graphics_manager(), ge
 - FBX SDK 2020.2 (モデルインポート)
 - Oculus SDK 1.43.0 (VRサポート)
 
+## ゲームを自動で起動して確かめるとき
+
+自動の確かめ（スクリプト・エージェント）でゲームを起動するときは、**必ず環境変数 `BLUE_SKY_BACKGROUND=1` を付ける**。使っている人のほかの作業を邪魔しないため（2026-11-11、利用者の指示）。
+
+- 付けると : 窓を前面に出さずフォーカスも取らない（一番後ろに置く）・カーソルを隠さず閉じ込めない・入力を受け取らない・音を出さない・開発用のコンソールを開かない。描画とフレームの保存（`BLUE_SKY_CAPTURE_FRAMES`）は続く
+- 確かめのスクリプトで、ゲームの窓を前面に出す処理（`SetForegroundWindow`・`AttachThreadInput`・Alt キーの送信など）を使わない
+- ゲームは二重に起動できない（ミューテックス）。利用者が手でゲームを使っている間は自動の起動を止める
+- 閉じるときは `CloseMainWindow` で閉じる（ログは `source/log/blue-sky.log`、落ちたときは `source/log/crash.log`）
+
 ## Python ツール / 検証ハーネス (tools/)
 
 C++ 本体とは別に、検証用 Python ツールが `tools/` 配下にある。**環境は隔離必須**（システムの pip を汚さない）。

@@ -51,9 +51,14 @@ App::App()
 	// C ランタイムの文字の扱いも UTF-8 にする（中の文字列は UTF-8。以前は "" で、日本語の Windows では Shift-JIS になっていた）
 	setlocale( LC_CTYPE, ".UTF8" );
 
+	// 開発用 : BLUE_SKY_BACKGROUND を設定すると裏で動かす（窓を前面に出さず、フォーカスを取らず、カーソルを隠さず・閉じ込めない）。
+	// 自動の確かめでゲームを何度も起動しても、使っている人のほかの作業を邪魔しないため
+	is_background_ = GetEnvironmentVariableA( "BLUE_SKY_BACKGROUND", nullptr, 0 ) > 0;
+
 #ifdef ENABLE_DEBUG_CONSOLE
 	// コンソールを開けなくてもゲームは続ける（出力が見えないだけ）
-	if ( AllocConsole() )
+	// 裏で動かすときは開かない（新しいコンソールの窓が前面に出てしまい、閉じる操作もそちらに届いて強制終了になるため。出力は log/blue-sky.log にある）
+	if ( ! is_background_ && AllocConsole() )
 	{
 		FILE* out = nullptr;
 		freopen_s( & out, "CONOUT$", "w", stdout );
@@ -131,10 +136,10 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 
 	//ウインドウ作成
 	hWnd = CreateWindowEx(
-		0 /* WS_EX_TOPMOST */,		//手前に表示
+		is_background_ ? WS_EX_NOACTIVATE : 0,		// 裏で動かすときは、クリックされても前面に出ず・フォーカスを取らない
 		class_name_.c_str(),	//クラス名
 		title_.c_str(),		//タイトル
-		style_,				//スタイル
+		is_background_ ? ( style_ & ~WS_VISIBLE ) : style_,	// 裏で動かすときは、作った瞬間に表示して前面に出ないよう、後で前面に出さずに表示する
 		x,					//表示座標
 		y,					//
 		w,					//サイズ
@@ -167,7 +172,18 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	game_ = game_main_.get();
 	game_main_->setup_scene();
 	
-	ShowWindow( hWnd, nCmdShow );		//表示
+	if ( is_background_ )
+	{
+		// 前面に出さずに表示し、一番後ろに置く（描画とフレームの保存は続く）
+		ShowWindow( hWnd, SW_SHOWNOACTIVATE );
+		SetWindowPos( hWnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE );
+		blue_sky::debug_log( "[開発用] 裏で動かします（BLUE_SKY_BACKGROUND）: 前面に出ず、カーソルを隠さず・閉じ込めず、入力を受け取りません" );
+	}
+	else
+	{
+		ShowWindow( hWnd, nCmdShow );		//表示
+	}
+
 	UpdateWindow( hWnd );				//描画
 
 	// WINNLSEnableIME(hWnd, FALSE);	//IME非表示
@@ -504,10 +520,9 @@ void App::set_active( bool active )
 {
 	is_active_ = active;
 
-	if ( active )
-	{
-		this->clip_cursor( is_clip_cursor_enabled_ );
-	}
+	// 閉じ込めはアクティブなときだけ効かせ、ほかの窓に切り替えたら外す
+	// （以前は外さず、ほかのアプリで作業していてもカーソルがゲームの窓に閉じ込められることがあった）
+	this->clip_cursor( is_clip_cursor_enabled_ );
 }
 
 void App::on_resize( HWND /* hwnd */ )
@@ -532,6 +547,12 @@ void App::on_resize( HWND /* hwnd */ )
  */
 void App::show_cursor( bool show )
 {
+	// 裏で動かすときは、使っている人のカーソルを隠さない
+	if ( is_background_ )
+	{
+		return;
+	}
+
 	if ( show != is_show_cursor_enabled_ )
 	{
 		is_show_cursor_enabled_ = show;
@@ -545,8 +566,12 @@ void App::clip_cursor( bool clip )
 {
 	is_clip_cursor_enabled_ = clip;
 
-	if ( is_clip_cursor_enabled_ )
+	// ClipCursor はパソコン全体に効くので、閉じ込めるのはこの窓がアクティブなときだけ（裏で動かすときは閉じ込めない）。
+	// 外すのは自分が閉じ込めていたときだけ（ほかのアプリの閉じ込めを壊さない）
+	if ( is_clip_cursor_enabled_ && is_active_ && ! is_background_ )
 	{
+		is_cursor_clipped_ = true;
+
 		RECT rect;
 		GetClientRect( hWnd, & rect );
 
@@ -560,8 +585,9 @@ void App::clip_cursor( bool clip )
 
 		ClipCursor( & rect );
 	}
-	else
+	else if ( is_cursor_clipped_ )
 	{
+		is_cursor_clipped_ = false;
 		ClipCursor( nullptr );
 	}
 }
@@ -593,7 +619,9 @@ void App::set_size( int w, int h )
 	GetMonitorInfo( MonitorFromWindow( hWnd, MONITOR_DEFAULTTONEAREST ), & monitor );
 	const RECT& work = monitor.rcWork;
 
-	SetWindowPos( hWnd, HWND_NOTOPMOST, work.left + ( ( work.right - work.left ) - ww ) / 2, work.top + ( ( work.bottom - work.top ) - wh ) / 2, ww, wh, SWP_SHOWWINDOW | SWP_FRAMECHANGED );
+	// 裏で動かすときは、重なりの順を変えず前面に出さない
+	SetWindowPos( hWnd, HWND_NOTOPMOST, work.left + ( ( work.right - work.left ) - ww ) / 2, work.top + ( ( work.bottom - work.top ) - wh ) / 2, ww, wh,
+		SWP_SHOWWINDOW | SWP_FRAMECHANGED | ( is_background_ ? ( SWP_NOZORDER | SWP_NOACTIVATE ) : 0 ) );
 }
 
 void App::set_full_screen( bool full_screen )
@@ -613,7 +641,8 @@ void App::set_full_screen( bool full_screen )
 		const RECT& r = monitor.rcMonitor;
 
 		SetWindowLongPtr( hWnd, GWL_STYLE, WS_POPUP | WS_VISIBLE );
-		SetWindowPos( hWnd, HWND_TOP, r.left, r.top, r.right - r.left, r.bottom - r.top, SWP_SHOWWINDOW | SWP_FRAMECHANGED );
+		SetWindowPos( hWnd, HWND_TOP, r.left, r.top, r.right - r.left, r.bottom - r.top,
+			SWP_SHOWWINDOW | SWP_FRAMECHANGED | ( is_background_ ? ( SWP_NOZORDER | SWP_NOACTIVATE ) : 0 ) );
 	}
 	else
 	{
@@ -622,11 +651,8 @@ void App::set_full_screen( bool full_screen )
 		set_size( width_, height_ );
 	}
 
-	// カーソルの閉じ込めはクライアント領域で決まるので、広さが変わったら決め直す
-	if ( is_active_ )
-	{
-		clip_cursor( is_clip_cursor_enabled_ );
-	}
+	// カーソルの閉じ込めはクライアント領域で決まるので、広さが変わったら決め直す（アクティブでなければ閉じ込めない）
+	clip_cursor( is_clip_cursor_enabled_ );
 
 	blue_sky::debug_log( is_full_screen_ ? "[Display] フルスクリーン（ボーダーレス）にしました" : "[Display] ウィンドウに戻しました" );
 }

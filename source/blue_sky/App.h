@@ -61,7 +61,9 @@ private:
 	bool		is_raw_input_enabled_ = false;	///< Raw Input を使えるか（使えなければ、以前のポーリングとメッセージで読む）
 
 	bool		is_show_cursor_enabled_ = true;
-	bool		is_clip_cursor_enabled_;
+	bool		is_clip_cursor_enabled_;	///< カーソルを閉じ込めたいか（シーンの要求。実際に閉じ込めるのはアクティブなときだけ）
+	bool		is_cursor_clipped_ = false;	///< 今カーソルを閉じ込めているか（外すときに、ほかのアプリの閉じ込めを壊さないため）
+	bool		is_background_ = false;		///< 開発用 : 裏で動かす（BLUE_SKY_BACKGROUND）。前面に出ず、カーソルを隠さず・閉じ込めない
 
 	std::unique_ptr< blue_sky::GameMain >	game_main_;		///< ゲーム（以前はシングルトン）
 	std::unique_ptr< win::Tablet >			tablet_;		///< ペンタブレット（初めて使うときに開く。以前はシングルトン）
@@ -132,6 +134,9 @@ public:
 
 	void show_cursor( bool );
 	void clip_cursor( bool );
+
+	/// 開発用 : 裏で動かしているか（BLUE_SKY_BACKGROUND。自動の確かめで、使っている人の作業を邪魔しないため）
+	bool is_background() const { return is_background_; }
 
 	void watch_directory_change( const char*, std::function<void()> );
 	void check_directory_change() const;	///< 監視しているディレクトリに変更があれば、登録した関数を呼ぶ（毎フレーム呼んでよい）

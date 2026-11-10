@@ -8,6 +8,7 @@
 
 #include <common/math.h>
 
+#include <iostream>
 #include <unordered_map>
 
 namespace core::ecs
@@ -21,18 +22,48 @@ RenderSystem::RenderSystem( core::graphics::GraphicsManager* graphics_manager, c
 	, render_result_texture_2_( get_graphics_manager()->create_render_target_texture() )
 	, instance_buffer_( get_graphics_manager()->create_instance_buffer() )
 	, object_constant_buffer_( get_graphics_manager()->create_constant_buffer( sizeof( core::ObjectConstantBufferData ), core::ObjectConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC ) )	// 描画ごとに書き換える
+	, noise_shader_( get_graphics_manager()->get_shader( "post_effect_noise" ) )
+	, instanced_shader_( get_graphics_manager()->get_shader( "lit_instanced" ) )
+	, beat_pulse_shader_( get_graphics_manager()->get_shader( "post_effect_beat_pulse" ) )
 {
-	//
+	if ( ! noise_shader_ || ! beat_pulse_shader_ )
+	{
+		// 以前は毎フレーム引いて、無ければ落ちていた。今は無いものを使わずに描く
+		std::cout << "[RenderSystem] ポストエフェクトのシェーダーがありません（setup_default_shaders の前に作った）。ポストエフェクトを使わずに描きます" << std::endl;	// core は debug_log を知らない。GameMain が debug_log へ流す
+	}
+}
+
+/**
+ * 前のフレームの world 行列を消す（容量は残す）
+ *
+ * 前のフレームで使わなかったモデルは map から外す（解放されたモデルのアドレスが溜まり続けないように）
+ */
+void RenderSystem::clear_model_instances()
+{
+	for ( auto i = model_instances_.begin(); i != model_instances_.end(); )
+	{
+		if ( i->second.empty() )
+		{
+			i = model_instances_.erase( i );
+		}
+		else
+		{
+			i->second.clear();
+			++i;
+		}
+	}
 }
 
 void RenderSystem::update()
 {
-	auto noise_shader = get_graphics_manager()->get_shader( "post_effect_noise" );
-	noise_shader->set_float( "offset", time_manager_->get_total_elapsed_time() );
+	if ( noise_shader_ )
+	{
+		noise_shader_->set_float( "offset", time_manager_->get_total_elapsed_time() );
+	}
 
 	get_graphics_manager()->setup_rendering();
 
-	const auto is_post_effect_enabled = true;
+	const auto is_post_effect_enabled = beat_pulse_shader_ != nullptr;	// 無ければ画面へ直に描く（テクスチャに描いて出さない、にならないように）
 
 	if ( is_post_effect_enabled )
 	{
@@ -49,8 +80,7 @@ void RenderSystem::update()
 	const float culling_distance_sq = culling_distance_ * culling_distance_;
 
 	// モデルごとにインスタンスをグループ化
-	using ModelType = core::graphics::Model;
-	std::unordered_map< ModelType*, std::vector< Matrix > > model_instances;
+	clear_model_instances();
 
 	for ( auto& i : get_component_list() )
 	{
@@ -81,14 +111,13 @@ void RenderSystem::update()
 		world *= Matrix().set_translation( transform->transform.get_position() );
 
 		// モデルごとにグループ化
-		model_instances[ model_component->model ].push_back( world );
+		model_instances_[ model_component->model ].push_back( world );
 	}
 
-	// インスタンシングシェーダーを取得
-	auto* instanced_shader = get_graphics_manager()->get_shader( "lit_instanced" );
+	auto* instanced_shader = instanced_shader_;
 
 	// 各モデルグループを描画
-	for ( auto& [ model, matrices ] : model_instances )
+	for ( auto& [ model, matrices ] : model_instances_ )
 	{
 		if ( matrices.empty() ) continue;
 
@@ -133,7 +162,7 @@ void RenderSystem::update()
 
 	if ( is_post_effect_enabled )
 	{
-		beat_pulse_shader = get_graphics_manager()->get_shader( "post_effect_beat_pulse" );
+		beat_pulse_shader = beat_pulse_shader_;
 
 		get_graphics_manager()->set_post_effect_shader( beat_pulse_shader );
 		get_graphics_manager()->render_post_effect( render_result_texture_1_.get() ); // 直接バックバッファへ
@@ -159,9 +188,12 @@ void RenderSystem::update()
 	// get_graphics_manager()->render_debug_bullet();
 	
 	// ImGUI によるシェーダーパラメター変更用 UI の自動描画
-	noise_shader->render_parameter_gui();
+	if ( noise_shader_ )
+	{
+		noise_shader_->render_parameter_gui();
+	}
 
-	if ( is_post_effect_enabled )
+	if ( beat_pulse_shader )
 	{
 		beat_pulse_shader->render_parameter_gui();
 	}

@@ -112,6 +112,23 @@ void GameObjectRef::set_direction_degree( float_t degree )
 	}
 }
 
+core::Vector GameObjectRef::get_velocity() const
+{
+	if ( const ActiveObject* o = get_active_object() )
+	{
+		return o->get_velocity();
+	}
+
+	ecs::EntityObject object( find_entity() );
+
+	return object.is_valid() ? object.get_velocity() : core::Vector::Zero;
+}
+
+bool GameObjectRef::is_moving_to( const core::Vector& location ) const
+{
+	return GameObject::is_moving_to( get_location(), get_velocity(), location );
+}
+
 void GameObjectRef::set_velocity( const core::Vector& velocity )
 {
 	if ( ActiveObject* o = get_active_object() )

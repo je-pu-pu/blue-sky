@@ -13,6 +13,7 @@
 #include <blue_sky/ecs/component/ActiveObjectLinkComponent.h>
 #include <blue_sky/ecs/component/PhysicsBodyComponent.h>
 #include <blue_sky/DebugLog.h>
+#include <blue_sky/GameObjectRef.h>
 
 #include <core/physics/EntityTag.h>
 
@@ -75,6 +76,16 @@ ActiveObject::ActiveObject( const ActiveObject& o )
 ActiveObject::~ActiveObject()
 {
 	detach_entity();
+}
+
+GameObjectRef ActiveObject::get_ref() const
+{
+	if ( ! has_entity_ )
+	{
+		return GameObjectRef();
+	}
+
+	return GameObjectRef( entity_manager_, graphics_manager_, entity_id_ );
 }
 
 /**

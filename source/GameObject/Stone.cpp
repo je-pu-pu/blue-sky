@@ -1,4 +1,5 @@
 #include "Stone.h"
+#include <blue_sky/GameObjectRef.h>
 #include <btBulletDynamicsCommon.h>
 
 namespace blue_sky
@@ -27,6 +28,11 @@ void Stone::restart()
 void Stone::update()
 {
 	set_direction_degree( get_direction_degree() + 1.f );
+}
+
+void Stone::on_collide_with( GameObject* o )
+{
+	o->on_collide_with_stone( get_ref() );
 }
 
 void Stone::on_collide_with( Player* )

@@ -22,7 +22,8 @@ private:
 	static Vector GravityDefault;
 	const Vector& get_default_gravity() const override { return GravityDefault; }
 
-	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
+	/// 相手には自分を EntityId で渡す（相手は石の型を知らない）
+	void on_collide_with( GameObject* o ) override;
 	void on_collide_with( Player* ) override;
 
 public:

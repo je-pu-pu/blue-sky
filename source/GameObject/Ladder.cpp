@@ -19,12 +19,12 @@ void Ladder::update()
 
 void Ladder::on_collide_with( Player* p )
 {
-	if ( ! contact_object_cache_.is_cached( p ) ) 
+	if ( ! contact_object_cache_.is_cached( p->get_entity_id() ) )
 	{
 		play_sound( "ladder-contact" );
 	}
 
-	contact_object_cache_.cache( p, 0.5f );
+	contact_object_cache_.cache( p->get_entity_id(), 0.5f );
 }
 
 } // namespace blue_sky

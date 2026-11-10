@@ -73,7 +73,13 @@ public:
 	void set_location( float_t x, float_t y, float_t z ) { set_location( core::Vector( x, y, z ) ); }
 
 	void set_direction_degree( float_t degree );
+
+	/// 速度（剛体が無い・消えた物体なら 0）
+	core::Vector get_velocity() const;
 	void set_velocity( const core::Vector& velocity );
+
+	/// 今の速度で location に近づいているか（以前の GameObject::is_moving_to。敵が石に当たったときに使う）
+	bool is_moving_to( const core::Vector& location ) const;
 
 	void set_start_location( float_t x, float_t y, float_t z );
 	void set_start_rotation( float_t x, float_t y, float_t z );

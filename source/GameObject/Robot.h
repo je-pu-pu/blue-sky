@@ -53,13 +53,13 @@ private:
 
 	void on_collide_with( GameObject* o ) { o->on_collide_with( this ); }
 	void on_collide_with( Player* );
-	void on_collide_with( Stone* );
+	bool on_collide_with_stone( const GameObjectRef& ) override;
 
 protected:
 	bool calculate_target_visible() const;
 	bool calculate_target_lost() const;
 
-	bool calculate_collide_object_to_switch_off( const GameObject* );
+	bool calculate_collide_object_to_switch_off() const;
 
 	void update_patrol();
 

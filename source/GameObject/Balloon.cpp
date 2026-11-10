@@ -100,10 +100,17 @@ bool Balloon::is_visible_with_player() const
 	return ( ! player_ || ! player_->is_action_pre_finish() || is_visible_in_blink( 6.f / 1.f ) );
 }
 
-void Balloon::on_collide_with( Stone* )
+/**
+ * 石に当たった : 割れる
+ *
+ * @return 拾わない（false）
+ */
+bool Balloon::on_collide_with_stone( const GameObjectRef& )
 {
 	kill();
 	play_sound( "balloon-burst" );
+
+	return false;
 }
 
 } // namespace blue_sky

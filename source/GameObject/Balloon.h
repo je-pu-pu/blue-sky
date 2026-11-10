@@ -23,7 +23,7 @@ private:
 	float_t get_height_offset() const override { return 0.f; }
 
 	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
-	void on_collide_with( Stone* ) override;
+	bool on_collide_with_stone( const GameObjectRef& ) override;
 
 	bool is_hard() const override { return false; }
 	bool is_safe_footing() const override { return true; }

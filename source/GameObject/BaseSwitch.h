@@ -19,7 +19,7 @@ public:
 	using EventHandlerList	= std::list< EventHandler >;
 	using EventHandlerMap	= std::unordered_map< string_t, EventHandlerList >;
 
-	using CntactObjectCache	= game::TimedCache< const GameObject* >;
+	using CntactObjectCache	= game::TimedCache< core::ecs::EntityId >;	///< 触れた物体（Entity の番号。以前は GameObject* だった）
 private:
 	State state_;
 	CntactObjectCache contact_object_cache_; ///< 最近スイッチに接触したオブジェクトのキャッシュ
@@ -28,9 +28,9 @@ private:
 
 	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
 	void on_collide_with( Player* ) override;
-	void on_collide_with( Stone* ) override;
+	bool on_collide_with_stone( const GameObjectRef& ) override;
 	
-	bool_t can_game_object_switch( const GameObject* ) const;
+	bool_t can_game_object_switch( core::ecs::EntityId ) const;
 
 	virtual void on_turn_on() { }
 	virtual void on_turn_off() { }

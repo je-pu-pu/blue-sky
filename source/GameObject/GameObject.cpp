@@ -191,12 +191,17 @@ void GameObject::set_velocity( const Vector& v )
 
 bool GameObject::is_moving_to( const GameObject* o ) const
 {
-	Vector v = get_velocity();
+	return is_moving_to( get_location(), get_velocity(), o->get_location() );
+}
+
+bool GameObject::is_moving_to( const Vector& location, const Vector& velocity, const Vector& target_location )
+{
+	Vector v = velocity;
 	v.normalize();
 	v *= 0.01f;
 
-	float_t current_length = ( o->get_location() - get_location() ).length();
-	float_t next_length = ( o->get_location() - ( get_location() + v ) ).length();
+	float_t current_length = ( target_location - location ).length();
+	float_t next_length = ( target_location - ( location + v ) ).length();
 
 	return next_length < current_length;
 }

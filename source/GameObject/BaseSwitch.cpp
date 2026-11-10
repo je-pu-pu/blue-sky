@@ -1,6 +1,6 @@
 #include "BaseSwitch.h"
 #include "Player.h"
-#include "Stone.h"
+#include <blue_sky/GameObjectRef.h>
 
 namespace blue_sky
 {
@@ -46,22 +46,29 @@ void BaseSwitch::action( const string_t& action )
 
 void BaseSwitch::on_collide_with( Player* player )
 {
-	if ( player->get_velocity().length() >= 0.5f && can_game_object_switch( player ) )
+	if ( player->get_velocity().length() >= 0.5f && can_game_object_switch( player->get_entity_id() ) )
 	{
 		do_switch();
 	}
 
-	contact_object_cache_.cache( player, 0.5f );
+	contact_object_cache_.cache( player->get_entity_id(), 0.5f );
 }
 
-void BaseSwitch::on_collide_with( Stone* stone )
+/**
+ * 石に当たった : 速く動いている石で、最近触れていなければ入・切を切り替える
+ *
+ * @return 拾わない（false）
+ */
+bool BaseSwitch::on_collide_with_stone( const GameObjectRef& stone )
 {
-	if ( stone->get_velocity().length() >= 0.5f && can_game_object_switch( stone ) )
+	if ( stone.get_velocity().length() >= 0.5f && can_game_object_switch( stone.get_entity_id() ) )
 	{
 		do_switch();		
 	}
 
-	contact_object_cache_.cache( stone, 0.5f );
+	contact_object_cache_.cache( stone.get_entity_id(), 0.5f );
+
+	return false;
 }
 
 bool_t BaseSwitch::do_switch()
@@ -138,9 +145,9 @@ void BaseSwitch::add_event_handler( const char_t* name, const EventHandler& hand
 	event_handler_map_[ name ].push_back( handler );
 }
 
-bool_t BaseSwitch::can_game_object_switch( const GameObject* o ) const
+bool_t BaseSwitch::can_game_object_switch( core::ecs::EntityId id ) const
 {
-	return ! contact_object_cache_.is_cached( o );
+	return ! contact_object_cache_.is_cached( id );
 }
 
 } // namespace blue_sky

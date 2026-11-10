@@ -23,11 +23,10 @@ namespace blue_sky
 class Player;
 class ActiveObjectPhysics;
 class Balloon;
-class Stone;
 class BaseSwitch;
 class Robot;
 class DynamicObject;
-class Ladder;
+class GameObjectRef;
 
 /**
  * ゲーム上に存在する全てのオブジェクトの基底クラス
@@ -156,7 +155,13 @@ public:
 
 	virtual void on_collide_with( Player* ) { }
 	virtual void on_collide_with( Balloon* ) { }
-	virtual void on_collide_with( Stone* ) { }
+	/**
+	 * 石に当たった（以前の on_collide_with( Stone* )）
+	 *
+	 * 石は GameObjectRef（EntityId を包む）で受け取る（石を ECS だけの物体にしても、受け取る側を変えずに済むように）。
+	 * 拾ったら true を返す（石が死ぬ。以前は Stone::on_collide_with( Player* ) が自分を kill していた）。既定は何もしない
+	 */
+	virtual bool on_collide_with_stone( const GameObjectRef& ) { return false; }
 	virtual void on_collide_with( BaseSwitch* ) { }
 	virtual void on_collide_with( Robot* ) { }
 	/**
@@ -170,7 +175,13 @@ public:
 	/// 動かない物（ECS だけの物体。StaticObjectComponent を持つ）に当たった。以前の on_collide_with( StaticObject* )（StaticObject クラスは消した）
 	virtual void on_collide_with_static_object() { }
 	virtual void on_collide_with( DynamicObject* ) { }
-	virtual void on_collide_with( Ladder* ) { }
+
+	/**
+	 * 梯子に触れた（以前の on_collide_with( Ladder* )。梯子そのものは使わないので受け取らない）
+	 *
+	 * 梯子に反応したら true を返す（梯子が触れた音を鳴らす。以前は Ladder::on_collide_with( Player* )）。既定は反応しない
+	 */
+	virtual bool on_collide_with_ladder() { return false; }
 
 	virtual void on_collide_with_ground() { }
 
@@ -197,6 +208,9 @@ public:
 	void set_velocity( const Vector& );
 
 	bool is_moving_to( const GameObject* ) const;
+
+	/// location にあって velocity で動く物が、target_location に近づいているか（GameObjectRef も同じ決まりで使う）
+	static bool is_moving_to( const Vector& location, const Vector& velocity, const Vector& target_location );
 
 	virtual void add_event_handler( const char_t*, const EventHandler& ) { }
 

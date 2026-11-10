@@ -1,10 +1,8 @@
 #include "Player.h"
 
-#include "Ladder.h"
 #include "Balloon.h"
 #include <blue_sky/ecs/component/PickupComponent.h>
 #include "Robot.h"
-#include "Stone.h"
 
 #include <blue_sky/GameMain.h>
 #include <blue_sky/ActiveObjectPhysics.h>
@@ -45,7 +43,6 @@ Player::Player()
 	, has_medal_( false )
 	, selected_item_type_( ItemType::NONE )
 	, last_footing_height_( 0.f )
-	, ladder_( nullptr )
 	, balloon_( nullptr )
 	, hp_( 1 )
 {
@@ -101,7 +98,6 @@ void Player::restart()
 
 	selected_item_type_ = ItemType::NONE;
 
-	ladder_ = nullptr;
 	balloon_ = nullptr;
 	stone_list_.clear();
 
@@ -768,10 +764,6 @@ void Player::ladder_step( float_t s )
 	play_sound( "ladder-step", true, false );
 }
 
-void Player::release_ladder()
-{
-	ladder_ = nullptr;
-}
 
 
 /**
@@ -928,7 +920,7 @@ void Player::throw_stone( const Vector& direction )
 		return;
 	}
 	
-	Stone* stone = stone_list_.back();
+	GameObjectRef stone = stone_list_.back();
 	stone_list_.pop_back();
 	item_count_[ static_cast< int >( ItemType::STONE ) ]--;
 
@@ -937,9 +929,9 @@ void Player::throw_stone( const Vector& direction )
 		selected_item_type_ = ItemType::NONE;
 	}
 
-	stone->restart();
-	stone->set_location( get_location() + ( get_front() * get_collision_depth() ) + Vector( 0.f, get_eye_height(), 0.f ) );
-	stone->set_velocity( direction * get_stone_throw_speed() );
+	stone.restart();
+	stone.set_location( get_location() + ( get_front() * get_collision_depth() ) + Vector( 0.f, get_eye_height(), 0.f ) );
+	stone.set_velocity( direction * get_stone_throw_speed() );
 
 	play_sound( "stone-throw" );
 }
@@ -1033,7 +1025,12 @@ void Player::on_collide_with( Balloon* balloon )
 	balloon_sound_request_ = balloon_sequence_count_;
 }
 
-void Player::on_collide_with( Stone* stone )
+/**
+ * 石に当たった : 拾う（拾った石は死ぬ。以前は Stone::on_collide_with( Player* ) が自分を kill していた）
+ *
+ * @return いつも拾う（true）
+ */
+bool Player::on_collide_with_stone( const GameObjectRef& stone )
 {
 	item_count_[ static_cast< int >( ItemType::STONE ) ]++;
 	selected_item_type_ = ItemType::STONE;
@@ -1041,6 +1038,8 @@ void Player::on_collide_with( Stone* stone )
 	stone_list_.push_back( stone );
 
 	play_sound( "stone-get" );
+
+	return true;
 }
 
 /**
@@ -1101,10 +1100,14 @@ void Player::on_collide_with( Robot* robot )
 	damage( v );
 }
 
-void Player::on_collide_with( Ladder* l )
+/**
+ * 梯子に触れた（以前は触れた梯子を ladder_ に覚えていたが、どこでも使っていなかったので持たない）
+ *
+ * @return いつも反応する（true。梯子が触れた音を鳴らす）
+ */
+bool Player::on_collide_with_ladder()
 {
 	is_on_ladder_ = true;
-	ladder_ = l;
 
 	if ( is_rocketing() )
 	{
@@ -1112,6 +1115,8 @@ void Player::on_collide_with( Ladder* l )
 	}
 
 	set_last_footing_height_to_current_height();
+
+	return true;
 }
 
 void Player::on_collide_with_static_object()

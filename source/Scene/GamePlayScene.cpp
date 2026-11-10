@@ -445,10 +445,6 @@ void GamePlayScene::update_main()
 				is_moving_on_ladder = true;
 			}
 		}
-		else
-		{
-			player_->release_ladder();
-		}
 
 		if ( ! is_moving )
 		{

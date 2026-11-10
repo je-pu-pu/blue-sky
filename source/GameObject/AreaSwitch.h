@@ -28,7 +28,7 @@ private:
 
 	float_t get_height_offset() const override { return 0.f; }
 
-	void on_collide_with( Stone* ) override { }
+	bool on_collide_with_stone( const GameObjectRef& ) override { return false; }	///< 石では入らない
 
 public:
 	AreaSwitch( float_t, float_t, float_t );

@@ -196,6 +196,9 @@ public:
 	bool has_entity() const { return has_entity_; }
 	core::ecs::EntityId get_entity_id() const { return entity_id_; }
 
+	/// 自分を指す窓口（Entity が無ければ何も指さない窓口。当たりの相手に自分を EntityId で渡すときに使う）
+	GameObjectRef get_ref() const;
+
 	/**
 	 * 描くかどうかを部品へ写す（描く前に毎フレーム。ActiveObjectManager::sync_render_components が呼ぶ）
 	 *

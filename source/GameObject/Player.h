@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ActiveObject.h"
+#include <blue_sky/GameObjectRef.h>
 #include <common/math.h>
 #include <list>
 
@@ -33,7 +34,7 @@ public:
 		MAX
 	};
 
-	using StoneList = std::list< Stone* >;
+	using StoneList = std::list< GameObjectRef >;	///< 持っている石（EntityId を包む窓口。以前は Stone* だった）
 
 private:
 	bool		is_on_footing_;			///< 現在足場上フラグ
@@ -76,7 +77,6 @@ private:
 
 	float		last_footing_height_;	///< 前回の足場の高さ ( バルーン含む )
 
-	Ladder*		ladder_;				///< 現在接触している梯子
 	Balloon*	balloon_;				///< 現在持っている風船
 	StoneList	stone_list_;			///< 現在持っている石のリスト
 
@@ -170,8 +170,8 @@ protected:
 	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
 	void on_collide_with( Balloon* ) override;
 	void on_collide_with( Robot* ) override;
-	void on_collide_with( Ladder* ) override;
-	void on_collide_with( Stone* ) override;
+	bool on_collide_with_ladder() override;
+	bool on_collide_with_stone( const GameObjectRef& ) override;
 	void on_collide_with_static_object() override;
 	bool on_pick_up( ecs::PickupKind kind ) override;
 	void on_collide_with( DynamicObject* ) override;
@@ -197,8 +197,6 @@ public:
 	void step( float_t );
 	void side_step( float_t );
 	void ladder_step( float_t );
-
-	void release_ladder();
 
 	/// ジャンプ処理
 	void jump();

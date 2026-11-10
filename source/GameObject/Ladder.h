@@ -13,14 +13,14 @@ namespace blue_sky
 class Ladder : public ActiveObject
 {
 public:
-	using CntactObjectCache = game::TimedCache< const GameObject* >;
+	using CntactObjectCache = game::TimedCache< core::ecs::EntityId >;	///< 触れた物体（Entity の番号。以前は GameObject* だった）
 
 private:
 	CntactObjectCache contact_object_cache_;
 
 	bool is_hard() const override { return false; }
 
-	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
+	void on_collide_with( GameObject* o ) override { o->on_collide_with_ladder(); }
 	void on_collide_with( Player* ) override;
 
 public:

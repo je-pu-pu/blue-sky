@@ -1,6 +1,6 @@
 #include "Robot.h"
 #include "Player.h"
-#include "Stone.h"
+#include <blue_sky/GameObjectRef.h>
 
 #include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/GameMain.h>
@@ -320,7 +320,7 @@ bool Robot::calculate_target_visible() const
 	return false;
 }
 
-bool Robot::calculate_collide_object_to_switch_off( const GameObject* )
+bool Robot::calculate_collide_object_to_switch_off() const
 {
 	return true;
 }
@@ -344,14 +344,14 @@ void Robot::start_floating()
 	mode_ = Mode::FLOAT;
 }
 
-void Robot::on_collide_with( Player* player )
+void Robot::on_collide_with( Player* )
 {
 	if ( mode_ != Mode::STAND && mode_ != Mode::ROTATION )
 	{
 		return;
 	}
 
-	if ( ! calculate_collide_object_to_switch_off( player ) )
+	if ( ! calculate_collide_object_to_switch_off() )
 	{
 		return;
 	}
@@ -360,23 +360,30 @@ void Robot::on_collide_with( Player* player )
 	play_sound( "switch-off", false, false );
 }
 
-void Robot::on_collide_with( Stone* stone )
+/**
+ * 石に当たった : 立っている・回っているときに、こちらへ飛んでくる石なら止まる
+ *
+ * @return 拾わない（false）
+ */
+bool Robot::on_collide_with_stone( const GameObjectRef& stone )
 {
 	if ( mode_ != Mode::STAND && mode_ != Mode::ROTATION )
 	{
-		return;
+		return false;
 	}
 
-	if ( ! calculate_collide_object_to_switch_off( stone ) )
+	if ( ! calculate_collide_object_to_switch_off() )
 	{
-		return;
+		return false;
 	}
 
-	if ( stone->is_moving_to( this ) )
+	if ( stone.is_moving_to( get_location() ) )
 	{
 		shutdown();
 		play_sound( "switch-off", false, false );
 	}
+
+	return false;
 }
 
 /**

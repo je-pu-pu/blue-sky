@@ -122,6 +122,9 @@ public:
 	/// 種類の名前の物体のうち、最初に作ったもの（開発用の確かめ。無ければ std::nullopt）
 	std::optional< EntityId > find_first_of_kind( const string_t& kind ) const;
 
+	/// 種類の名前の物体を全部（作った順。開発用の確かめ）
+	std::vector< EntityId > find_all_of_kind( const string_t& kind ) const;
+
 	/// ステージの translation-object 行から動く床を作る（以前の TranslationObject。5 x 5 x 5 の箱・モデルは box-5x5x5）
 	EntityId create_translation_object( const core::Vector& location, float_t width, float_t height, float_t depth, float_t speed );
 

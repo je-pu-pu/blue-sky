@@ -68,6 +68,8 @@ public:
 	bool_t turn_on();
 	bool_t turn_off();
 
+	State get_state() const { return state_; }
+
 	void add_event_handler( const char_t*, const EventHandler& ) override;
 	
 }; // class Switch

@@ -72,6 +72,11 @@ private:
 
 	/// 開発用 : BLUE_SKY_DEBUG_VISIT_OBJECTS を設定すると、プレイヤーをメダル・風船・梯子・ゴールの所へ順に動かし、当たった結果をログに出す
 	void debug_visit_objects();
+
+	int debug_throw_stones_frame_ = 0;			///< 開発用 : BLUE_SKY_DEBUG_THROW_STONES で石を拾って投げるフレームを数える（-1 で終わり）
+
+	/// 開発用 : BLUE_SKY_DEBUG_THROW_STONES を設定すると、ステージの石を全部拾い、スイッチ・敵・風船に向けて順に投げて、当たった結果をログに出す
+	void debug_throw_stones();
 	// 非所有参照 (各 Manager が所有)
 	Texture*							ui_texture_ = nullptr;			///< UI テクスチャ (GraphicsManager)
 	Shader*								debug_texture_shader_ = nullptr;///< デバッグシェーダー (GraphicsManager)

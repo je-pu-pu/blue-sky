@@ -364,6 +364,24 @@ ObjectFactory::EntityId ObjectFactory::create_model_object( Model* model )
 	return id;
 }
 
+std::vector< ObjectFactory::EntityId > ObjectFactory::find_all_of_kind( const string_t& kind ) const
+{
+	std::vector< EntityId > result;
+
+	for ( const EntityId id : entity_object_list_ )
+	{
+		const core::ecs::Entity* entity = entity_manager_->find( id );
+		const auto* state = entity ? entity->get_component< ecs::SimpleObjectComponent >() : nullptr;
+
+		if ( state && state->kind == kind )
+		{
+			result.push_back( id );
+		}
+	}
+
+	return result;
+}
+
 std::optional< ObjectFactory::EntityId > ObjectFactory::find_first_of_kind( const string_t& kind ) const
 {
 	for ( const EntityId id : entity_object_list_ )

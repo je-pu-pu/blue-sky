@@ -28,6 +28,9 @@
 #include <blue_sky/DebugLog.h>
 #include <GameObject/BaseSwitch.h>
 #include <GameObject/Ladder.h>
+#include <GameObject/Stone.h>
+#include <GameObject/Switch.h>
+#include <GameObject/Robot.h>
 
 #include <core/graphics/OculusRift.h>
 
@@ -310,6 +313,7 @@ void GamePlayScene::update()
 	}
 
 	debug_visit_objects();
+	debug_throw_stones();
 
 	get_active_object_manager()->update();
 
@@ -761,6 +765,159 @@ void GamePlayScene::debug_visit_objects()
 	player_->set_velocity( Vector::Zero );
 
 	debug_log( "[Debug] プレイヤーを" + targets[ step ].first + "の所へ動かしました ( " + std::to_string( to.x() ) + ", " + std::to_string( to.y() ) + ", " + std::to_string( to.z() ) + " )" );
+}
+
+/**
+ * 開発用 : ステージの石を全部拾い、スイッチ・敵・風船に向けて順に投げて、当たった結果をログに出す
+ *
+ * 環境変数 BLUE_SKY_DEBUG_THROW_STONES を設定したときだけ動く（本編の動きは変えない）。
+ * 石を拾う・投げる・石がスイッチや敵や風船に当たる、を遊ばずに確かめるため（石とスイッチを ECS だけの物体にするときの見比べ）。
+ * 始まってから 60 フレーム後から 10 フレームごとに、次の石の位置へプレイヤーを置く（触れると拾う）。
+ * 拾い終えたら、行き先（最初のスイッチ・全部の敵・最初の風船。あるものだけ）ごとに 60 フレームずつ使う :
+ * 0 フレーム目に行き先の 2.5 m 後ろ（向きを持たない物は -z の側）へ置いて行き先を向かせ、5 フレーム目に行き先へ投げ、45 フレーム目に結果を出す
+ */
+void GamePlayScene::debug_throw_stones()
+{
+	if ( debug_throw_stones_frame_ < 0 || GetEnvironmentVariableA( "BLUE_SKY_DEBUG_THROW_STONES", nullptr, 0 ) == 0 )
+	{
+		return;
+	}
+
+	constexpr int start_frame = 60;
+	constexpr int pick_interval = 10;
+	constexpr int throw_interval = 60;
+	constexpr int throw_frame = 5;
+	constexpr int result_frame = 45;
+	constexpr float_t distance = 2.5f;
+
+	const int frame = debug_throw_stones_frame_++;
+
+	if ( frame < start_frame )
+	{
+		return;
+	}
+
+	// 種類の物体を作った順に集める（まだ ActiveObject の種類は型で、ECS だけの物体は種類の名前で探す）
+	auto find_objects = [ & ] ( const char_t* kind, auto is_kind )
+	{
+		std::vector< GameObjectRef > result;
+
+		for ( const auto* o : get_active_object_manager()->active_object_list() )
+		{
+			if ( is_kind( o ) )
+			{
+				result.push_back( get_object_factory()->get_ref( o->get_entity_id() ) );
+			}
+		}
+
+		for ( const auto id : get_object_factory()->find_all_of_kind( kind ) )
+		{
+			result.push_back( get_object_factory()->get_ref( id ) );
+		}
+
+		return result;
+	};
+
+	const auto stones = find_objects( "stone", [] ( const ActiveObject* o ) { return dynamic_cast< const Stone* >( o ) != nullptr; } );
+
+	// 石を拾う
+	if ( frame < start_frame + pick_interval * static_cast< int >( stones.size() ) )
+	{
+		if ( ( frame - start_frame ) % pick_interval == 0 )
+		{
+			player_->set_location( stones[ ( frame - start_frame ) / pick_interval ].get_location() );
+			player_->set_velocity( Vector::Zero );
+		}
+
+		return;
+	}
+
+	const int throw_start_frame = start_frame + pick_interval * static_cast< int >( stones.size() );
+
+	if ( frame == throw_start_frame )
+	{
+		debug_log( "[Debug] 石を拾いました : " + std::to_string( player_->get_item_count( Player::ItemType::STONE ) ) + " 個（ステージの石 " + std::to_string( stones.size() ) + " 個）" );
+	}
+
+	// 行き先（種類ごとに最初の 1 つ）
+	std::vector< std::pair< string_t, GameObjectRef > > targets;
+
+	auto add_first = [ & ] ( const char_t* name, const std::vector< GameObjectRef >& list )
+	{
+		if ( ! list.empty() )
+		{
+			targets.emplace_back( name, list.front() );
+		}
+	};
+
+	add_first( "スイッチ", find_objects( "switch", [] ( const ActiveObject* o ) { return dynamic_cast< const Switch* >( o ) != nullptr; } ) );
+	// 敵は全部（向きや周りの壁で投げられない・見つかる敵がいるので）
+	for ( const auto& robot : find_objects( "robot", [] ( const ActiveObject* o ) { return dynamic_cast< const Robot* >( o ) != nullptr; } ) )
+	{
+		targets.emplace_back( "敵 " + std::to_string( targets.size() ), robot );
+	}
+
+	add_first( "風船", find_objects( "balloon", [] ( const ActiveObject* o ) { return dynamic_cast< const Balloon* >( o ) != nullptr; } ) );
+
+	const size_t step = static_cast< size_t >( ( frame - throw_start_frame ) / throw_interval );
+	const int phase = ( frame - throw_start_frame ) % throw_interval;
+
+	if ( step >= targets.size() )
+	{
+		debug_log( "[Debug] 石を投げ終えました" );
+		debug_throw_stones_frame_ = -1;
+		return;
+	}
+
+	const string_t& name = targets[ step ].first;
+	const GameObjectRef& target = targets[ step ].second;
+
+	if ( phase == 0 )
+	{
+		// 行き先の後ろ（敵に見つからないように。向きを持たない物は -z の側）に置き、行き先を向かせる
+		Vector back( 0.f, 0.f, -1.f );
+
+		if ( const ActiveObject* o = target.get_active_object() )
+		{
+			back = -o->get_front();
+		}
+
+		const Vector from = target.get_location() + back * distance;
+		const Vector to = target.get_location() - from;
+
+		player_->set_location( from );
+		player_->set_velocity( Vector::Zero );
+		player_->set_direction_degree( math::radian_to_degree( std::atan2( to.x(), to.z() ) ) );
+	}
+	else if ( phase == throw_frame )
+	{
+		Vector direction = ( target.get_location() + Vector( 0.f, 0.5f, 0.f ) ) - ( player_->get_location() + Vector( 0.f, player_->get_eye_height(), 0.f ) );
+		direction.normalize();
+
+		const int count = player_->get_item_count( Player::ItemType::STONE );
+		player_->throw_stone( direction );
+
+		debug_log( "[Debug] 石を" + name + "へ" + ( player_->get_item_count( Player::ItemType::STONE ) < count ? "投げました" : "投げられませんでした" ) + "（残り " + std::to_string( player_->get_item_count( Player::ItemType::STONE ) ) + " 個）" );
+	}
+	else if ( phase == result_frame )
+	{
+		string_t result = "不明";
+
+		if ( const auto* s = dynamic_cast< const BaseSwitch* >( target.get_active_object() ) )
+		{
+			result = s->get_state() == BaseSwitch::State::ON ? "入" : s->get_state() == BaseSwitch::State::OFF ? "切" : "壊れた";
+		}
+		else if ( const auto* r = dynamic_cast< const Robot* >( target.get_active_object() ) )
+		{
+			result = r->get_mode() == Robot::Mode::SHUTDOWN ? "止まった" : "止まっていない";
+		}
+		else if ( const auto* b = dynamic_cast< const Balloon* >( target.get_active_object() ) )
+		{
+			result = b->is_dead() ? "割れた" : "割れていない";
+		}
+
+		debug_log( "[Debug] 石を投げた結果 : " + name + " / " + result + "（持っている石 " + std::to_string( player_->get_item_count( Player::ItemType::STONE ) ) + " 個）" );
+	}
 }
 
 void GamePlayScene::update_clear()

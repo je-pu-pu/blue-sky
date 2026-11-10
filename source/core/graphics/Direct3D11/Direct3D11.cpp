@@ -20,7 +20,7 @@
 #include <common/string.h>
 #include <common/log.h>
 
-#include <dxgi.h>
+#include <dxgi1_6.h>
 #include <wincodec.h>
 #include <wrl/client.h>
 
@@ -51,9 +51,8 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, int multi_sample_count, int mul
 	com_ptr< IDXGIFactory1 > dxgi_factory;
 	DIRECT_X_FAIL_CHECK( CreateDXGIFactory1( __uuidof( IDXGIFactory1 ), reinterpret_cast< void** >( & dxgi_factory ) ) );
 
+	select_adapter( dxgi_factory.get() );
 	log_all_adapter_desc( dxgi_factory.get() );
-
-	DIRECT_X_FAIL_CHECK( dxgi_factory->EnumAdapters1( 0, & dxgi_adapter_ ) );
 
 	create_device();
 
@@ -876,8 +875,37 @@ void Direct3D11::resolve_depth_texture()
 #endif
 }
 
+/**
+ * 描画に使う GPU を選ぶ
+ *
+ * 高性能な GPU（外付けのビデオカード）を優先する。CPU 内蔵の GPU と外付けの GPU が両方ある PC で、内蔵の方を選ばないため
+ * （以前は一覧の 0 番目を使っていた。多くの場合は画面をつないだ GPU だが、そうとは限らない）。
+ * 高性能を優先する選び方（IDXGIFactory6・Windows 10 1803 以降）が無ければ、以前と同じ 0 番目を使う
+ */
+void Direct3D11::select_adapter( IDXGIFactory1* dxgi_factory )
+{
+	Microsoft::WRL::ComPtr< IDXGIFactory6 > factory_6;
+
+	if ( SUCCEEDED( dxgi_factory->QueryInterface( IID_PPV_ARGS( & factory_6 ) ) ) &&
+		SUCCEEDED( factory_6->EnumAdapterByGpuPreference( 0, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, __uuidof( IDXGIAdapter1 ), reinterpret_cast< void** >( & dxgi_adapter_ ) ) ) )
+	{
+		return;
+	}
+
+	DIRECT_X_FAIL_CHECK( dxgi_factory->EnumAdapters1( 0, & dxgi_adapter_ ) );
+}
+
+/**
+ * PC にある GPU を 1 行ずつログに出し、描画に使うものに印を付ける
+ *
+ * CPU 内蔵の GPU（例 : Ryzen の Radeon Graphics）や、ソフトウェアの描画（Microsoft Basic Render Driver）も一覧には出る。
+ * （以前は「GPU の情報 :」を GPU ごとに細かく出していて、どれを使っているのか分からなかった）
+ */
 void Direct3D11::log_all_adapter_desc( IDXGIFactory1* dxgi_factory )
 {
+	DXGI_ADAPTER_DESC1 selected = { };
+	DIRECT_X_FAIL_CHECK( dxgi_adapter_->GetDesc1( & selected ) );
+
 	IDXGIAdapter1* dxgi_adapter;
 
 	for ( int n = 0; dxgi_factory->EnumAdapters1( n, & dxgi_adapter ) != DXGI_ERROR_NOT_FOUND; n++ )
@@ -885,30 +913,22 @@ void Direct3D11::log_all_adapter_desc( IDXGIFactory1* dxgi_factory )
 		DXGI_ADAPTER_DESC1 adapter_desc;
 		DIRECT_X_FAIL_CHECK( dxgi_adapter->GetDesc1( & adapter_desc ) );
 
-		log_adapter_desc( n, adapter_desc );
+		const bool is_selected = adapter_desc.AdapterLuid.LowPart == selected.AdapterLuid.LowPart && adapter_desc.AdapterLuid.HighPart == selected.AdapterLuid.HighPart;
+		log_adapter_desc( n, adapter_desc, is_selected );
 
 		DIRECT_X_RELEASE( dxgi_adapter );
 	}
 }
 
-void Direct3D11::log_adapter_desc( int index, const DXGI_ADAPTER_DESC1& adapter_desc )
+void Direct3D11::log_adapter_desc( int index, const DXGI_ADAPTER_DESC1& adapter_desc, bool is_selected )
 {
-	#define adapter_desc_string( name ) std::wstring( L"\t" ) + L# name + L" : " + common::w_serialize( adapter_desc.name ) + L"\n"
-
-	std::wstring text = common::w_serialize( index ) + L" : " + adapter_desc.Description + L"\n" +
-		adapter_desc_string( VendorId ) +
-		adapter_desc_string( DeviceId ) +
-		adapter_desc_string( SubSysId ) +
-		adapter_desc_string( Revision ) +
-		adapter_desc_string( DedicatedVideoMemory ) +
-		adapter_desc_string( DedicatedSystemMemory ) +
-		adapter_desc_string( SharedSystemMemory ) +
-		adapter_desc_string( AdapterLuid.LowPart ) + 
-		adapter_desc_string( AdapterLuid.HighPart ) + 
-		adapter_desc_string( Flags );
+	const auto mb = []( SIZE_T bytes ) { return std::to_string( bytes / ( 1024 * 1024 ) ); };
 
 	// ログの出口をそろえる（以前は log/adapter_info.log に別に書いていた）。std::cout は GameMain が debug_log へ流す
-	std::cout << "GPU の情報 :" << std::endl << common::convert_to_string( text ) << std::endl;
+	std::cout << "GPU " << index << " : " << common::convert_to_string( adapter_desc.Description )
+		<< "（専用メモリ " << mb( adapter_desc.DedicatedVideoMemory ) << " MB"
+		<< ( ( adapter_desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE ) ? "・ソフトウェア" : "" ) << "）"
+		<< ( is_selected ? " ← 描画に使う" : "" ) << std::endl;
 }
 
 void Direct3D11::log_feature_level()

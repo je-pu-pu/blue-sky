@@ -92,8 +92,9 @@ private:
 
 	void setup_default_viewport();
 
+	void select_adapter( IDXGIFactory1* );
 	void log_all_adapter_desc( IDXGIFactory1* );
-	void log_adapter_desc( int, const DXGI_ADAPTER_DESC1& );
+	void log_adapter_desc( int, const DXGI_ADAPTER_DESC1&, bool );
 	void log_feature_level();
 
 public:

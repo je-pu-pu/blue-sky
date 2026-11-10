@@ -305,6 +305,94 @@ TEST( MoveToTargetSystemTest, 消した_Entity_の目標は捨てる )
 	EXPECT_FALSE( system->set_target_location( id, Vector( 0.f, 0.f, 0.f ), 1.f ) );
 }
 
+// ---- 毎フレーム回すのは目標を持つ物体だけ ----
+
+TEST( MoveToTargetSystemTest, 目標を持たない物体は回さない )
+{
+	EntityManager manager;
+	auto* system = add_system( manager );
+
+	std::vector< FakeMover > movers( 5 );
+	std::vector< core::ecs::EntityId > ids;
+
+	for ( auto& m : movers )
+	{
+		ids.push_back( create_mover_entity( manager, m ) );
+	}
+
+	EXPECT_EQ( system->debug_entity_count(), 5u );
+	EXPECT_EQ( system->debug_target_count(), 0u );
+
+	ASSERT_TRUE( system->set_target_location( ids[ 3 ], Vector( 10.f, 0.f, 0.f ), 1.f ) );
+	ASSERT_TRUE( system->set_target_direction( ids[ 1 ], 90.f, 1.f ) );
+
+	EXPECT_EQ( system->debug_target_count(), 2u );
+
+	system->update_targets( 1.f / 60.f );
+
+	EXPECT_EQ( movers[ 3 ].move_count, 1 );
+	EXPECT_EQ( movers[ 1 ].chase_degree_count, 1 );
+}
+
+TEST( MoveToTargetSystemTest, 着いて目標が無くなったら回す一覧から外れる_向きが残れば残る )
+{
+	EntityManager manager;
+	auto* system = add_system( manager );
+
+	FakeMover mover;
+	FakeMover other;
+	const auto id = create_mover_entity( manager, mover );
+	const auto other_id = create_mover_entity( manager, other );
+
+	// 地点だけ : 着いたら外れる
+	ASSERT_TRUE( system->set_target_location( id, Vector( 0.f, 0.f, 0.f ), 1.f ) );
+	// 地点と向き : 着いても向きが残るので外れない
+	ASSERT_TRUE( system->set_target_location( other_id, Vector( 0.f, 0.f, 0.f ), 1.f ) );
+	ASSERT_TRUE( system->set_target_direction( other_id, 90.f, 1.f ) );
+
+	EXPECT_EQ( system->debug_target_count(), 2u );
+
+	system->update_targets( 1.f / 60.f );
+
+	EXPECT_EQ( mover.arrive_count, 1 );
+	EXPECT_EQ( other.arrive_count, 1 );
+	EXPECT_EQ( system->debug_target_count(), 1u );
+
+	// 次のフレームは向きだけ回る
+	system->update_targets( 1.f / 60.f );
+
+	EXPECT_EQ( other.chase_degree_count, 2 );
+	EXPECT_EQ( mover.move_count, 0 );
+
+	// 目標を捨てれば何も回らない
+	system->clear_targets();
+	EXPECT_EQ( system->debug_target_count(), 0u );
+}
+
+TEST( MoveToTargetSystemTest, 目標を先に付けてから窓口を付けても回す )
+{
+	EntityManager manager;
+	auto* system = add_system( manager );
+
+	FakeMover mover;
+	auto* entity = manager.create_entity();
+	entity->add_component< TargetLocationComponent >()->location = Vector( 10.f, 0.f, 0.f );
+
+	EXPECT_EQ( system->debug_target_count(), 0u );		// 窓口が無いうちは対象ではない
+
+	entity->get_component< TargetLocationComponent >()->speed = 1.f;
+	entity->add_component< TargetMoverComponent >()->mover = &mover;
+
+	EXPECT_EQ( system->debug_target_count(), 1u );
+
+	system->update_targets( 1.f / 60.f );
+	EXPECT_EQ( mover.move_count, 1 );
+
+	// 窓口を外すと対象から外れる
+	entity->remove_component< TargetMoverComponent >();
+	EXPECT_EQ( system->debug_target_count(), 0u );
+}
+
 TEST( MoveToTargetSystemTest, 窓口の無い_Entity_には目標を設定できない )
 {
 	EntityManager manager;

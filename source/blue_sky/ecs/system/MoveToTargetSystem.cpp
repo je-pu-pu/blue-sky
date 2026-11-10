@@ -14,14 +14,46 @@ namespace blue_sky::ecs
 
 void MoveToTargetSystem::add_entity_component_if_all_components_ready( const core::ecs::Entity* entity )
 {
-	const auto count = debug_entity_count();
-
 	System::add_entity_component_if_all_components_ready( entity );
 
-	// 対象に入ったら、対象の一覧（System）の末尾が今入った Entity。番号は増える一方なので、たいていは末尾に足すだけ
-	if ( debug_entity_count() != count )
+	// 目標を先に付けてから窓口を付けた Entity・System を後から足したときの Entity も、目標を持っていれば回す
+	add_to_target_list_if_has_target( entity );
+}
+
+void MoveToTargetSystem::add_to_target_list_if_has_target( const core::ecs::Entity* entity )
+{
+	const auto id = static_cast< core::ecs::EntityId >( entity->get_id() );
+
+	if ( ! entity->get_component< TargetMoverComponent >() )
 	{
-		entity_id_list_.insert( get_component_list().back().first );
+		return;
+	}
+
+	if ( entity->get_component< TargetLocationComponent >() || entity->get_component< TargetDirectionComponent >() )
+	{
+		target_id_list_.insert( id );		// 番号は増える一方なので、たいていは末尾に足すだけ。既にあれば何もしない
+	}
+}
+
+bool MoveToTargetSystem::is_watched_component_type( core::ecs::ComponentTypeId type_id ) const
+{
+	return type_id == core::ecs::get_component_type_id< TargetLocationComponent >() || type_id == core::ecs::get_component_type_id< TargetDirectionComponent >();
+}
+
+void MoveToTargetSystem::on_watched_component_changed( const core::ecs::Entity* entity, bool is_added )
+{
+	if ( is_added )
+	{
+		add_to_target_list_if_has_target( entity );
+		return;
+	}
+
+	// 外れる部品はまだ付いている（どちらが外れるかは分からない）。目標の部品が 1 つしか無ければ、それが外れて目標が無くなる
+	const int target_count = ( entity->get_component< TargetLocationComponent >() ? 1 : 0 ) + ( entity->get_component< TargetDirectionComponent >() ? 1 : 0 );
+
+	if ( target_count <= 1 )
+	{
+		target_id_list_.erase( static_cast< core::ecs::EntityId >( entity->get_id() ) );
 	}
 }
 
@@ -45,8 +77,14 @@ bool MoveToTargetSystem::is_target_location_reached( float_t distance, float_t s
 
 void MoveToTargetSystem::update_targets( float_t delta_time )
 {
-	// 知らせた先で物体が加わる・消えることがあるので、番号の一覧を写してから回し、部品は 1 つずつ引き直す
-	const std::vector< core::ecs::EntityId > ids = get_entity_ids();
+	// 目標を持つものだけを回す。知らせた先で物体が加わる・消える・目標が付け外しされることがあるので、
+	// 番号の一覧を写してから回し、部品は 1 つずつ引き直す
+	if ( target_id_list_.size() == 0 )
+	{
+		return;
+	}
+
+	const std::vector< core::ecs::EntityId > ids = get_target_ids();
 
 	// 以前と同じ順に、目標地点 → 向き の順で回す
 	for ( const auto id : ids )
@@ -188,7 +226,7 @@ bool MoveToTargetSystem::set_target_direction_entity( core::ecs::EntityId id, co
 
 void MoveToTargetSystem::clear_targets()
 {
-	for ( const auto id : std::vector< core::ecs::EntityId >( get_entity_ids() ) )
+	for ( const auto id : std::vector< core::ecs::EntityId >( get_target_ids() ) )
 	{
 		if ( core::ecs::Entity* entity = get_entity_manager()->find( id ) )
 		{

@@ -349,3 +349,70 @@ TEST( EcsBenchmark, DISABLED_OrderedListAddRemove )
 	run_ordered_list_benchmark( 10000 );
 	run_ordered_list_benchmark( 100000 );
 }
+
+namespace {
+
+/**
+ * 目標地点・向きの更新（MoveToTargetSystem::update_targets）の 1 フレームの手間を測る
+ *
+ * 物体は全部が窓口（TargetMoverComponent）を持ち、目標を持つのは target_count 個だけ（本編ではスイッチで動く壁など、ごく一部）。
+ * 以前は目標を持たない物体も含めて全部を回していた（1 万個で Debug 1.1 ms）
+ */
+void run_move_to_target_benchmark( std::size_t n, std::size_t target_count )
+{
+	constexpr int frames = 200;
+
+	/// 何もしない窓口（測るのは System の手間だけ）
+	class NullMover : public blue_sky::ecs::TargetMover
+	{
+	public:
+		core::Vector get_target_mover_location() const override { return core::Vector( 0.f, 0.f, 0.f ); }
+		void move_toward_target_location( const core::Vector&, float_t ) override { }
+		void stop_at_target_location( const core::Vector& ) override { }
+		void notify_arrive_at_target_location() override { }
+		void chase_target_direction_degree( float_t, float_t ) override { }
+		void chase_target_direction_to( const core::Vector&, float_t ) override { }
+	};
+
+	NullMover mover;
+
+	core::ecs::EntityManager entity_manager;
+	entity_manager.add_system< blue_sky::ecs::MoveToTargetSystem >( 0 );
+	auto* move_system = entity_manager.get_system< blue_sky::ecs::MoveToTargetSystem >();
+
+	for ( std::size_t i = 0; i < n; i++ )
+	{
+		auto* e = entity_manager.create_entity();
+		e->add_component< blue_sky::ecs::TargetMoverComponent >()->mover = &mover;
+
+		// 目標は遠くに置いて着かないようにし、毎フレーム同じ数を回す
+		if ( i % ( n / target_count ) == 0 )
+		{
+			move_system->set_target_location( e->get_id(), core::Vector( 1000.f, 0.f, 0.f ), 1.f );
+		}
+	}
+
+	move_system->update_targets( 1.f / 60.f );	// 最初の 1 回は測らない
+
+	const auto begin = Clock::now();
+
+	for ( int f = 0; f < frames; f++ )
+	{
+		move_system->update_targets( 1.f / 60.f );
+	}
+
+	const double ms = elapsed_ms( begin ) / frames;
+
+	EXPECT_EQ( move_system->debug_target_count(), target_count );
+
+	std::printf( "[ECS 計測] 目標地点の更新 Entity %zu 個のうち目標を持つもの %zu 個 : 1 フレーム %8.4f ミリ秒（%d フレームの平均）\n", n, target_count, ms, frames );
+	std::fflush( stdout );
+}
+
+} // namespace
+
+TEST( EcsBenchmark, DISABLED_MoveToTargetFewTargets )
+{
+	run_move_to_target_benchmark( 10000, 10 );
+	run_move_to_target_benchmark( 100000, 10 );
+}

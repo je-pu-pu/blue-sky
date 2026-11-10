@@ -14,7 +14,7 @@ namespace blue_sky::ecs
  *
  * 以前は ActiveObjectManager::update が 3 つの unordered_map（ActiveObject* が鍵）を回していた。
  * 今は目標を Entity の部品（TargetLocationComponent・TargetDirectionComponent）に持ち、ここが Entity の番号の順（作った順）に回す。
- * 対象は TargetMoverComponent を持つ Entity（ActiveObject は加えるときに付ける）。
+ * 対象は TargetMoverComponent を持つ Entity（ActiveObject は加えるときに付ける）。毎フレーム回すのは、そのうち目標を持つものだけ。
  *
  * EntityManager::update() では動かさない（本編のシーンは EntityManager::update を呼ばず、呼ぶシーンで二重に進めないため。
  * ObjectRenderDataSystem と同じ）。ActiveObjectManager::update が、物体の update とアニメーションの後に update_targets を呼ぶ
@@ -23,26 +23,41 @@ namespace blue_sky::ecs
 class MoveToTargetSystem : public core::ecs::System< TargetMoverComponent >
 {
 private:
-	/// 対象の Entity の番号（小さい順）。足すときは末尾に足し、外すときは印を付けて次に読むときにまとめて詰める
-	/// （以前は対象が 1 つ増減するたびに全部を作り直して並べ替えていた。O(n log n)）
-	core::ecs::EntityIdOrderedList< core::ecs::EntityId >	entity_id_list_;
+	/**
+	 * 目標（地点か向き）を持つ対象の Entity の番号（小さい順 = 作った順）
+	 *
+	 * 毎フレーム回すのはこの一覧だけ。以前は目標を持たない物体も含めて対象を全部回し、1 つずつ部品を引いていた
+	 * （1 万個で Debug 1.1 ms。目標を持つのはスイッチで動く壁などごく一部）。
+	 * 目標の部品（TargetLocationComponent・TargetDirectionComponent）の付け外しを知らせてもらい（is_watched_component_type）、
+	 * 付いたら足し、両方とも無くなったら外す。足すときはたいてい末尾に足すだけ、外すときは印を付けて次に読むときにまとめて詰める
+	 */
+	core::ecs::EntityIdOrderedList< core::ecs::EntityId >	target_id_list_;
 
-	const std::vector< core::ecs::EntityId >& get_entity_ids() const { return entity_id_list_.get(); }
+	const std::vector< core::ecs::EntityId >& get_target_ids() const { return target_id_list_.get(); }
 
 	/// id の Entity の部品（無い・消えた後なら nullptr）
 	template< typename ComponentType >
 	ComponentType* find_component( core::ecs::EntityId id ) const;
 
+	/// entity が目標の部品（地点か向き）を持っていれば、目標を持つ一覧に足す（対象でなければ足さない）
+	void add_to_target_list_if_has_target( const core::ecs::Entity* entity );
+
 	void update_target_location( core::ecs::EntityId id, float_t delta_time );
 	void update_target_direction( core::ecs::EntityId id );
 
 protected:
-	void on_remove_entity( core::ecs::EntityId id, ComponentTuple& ) override { entity_id_list_.erase( id ); }
+	void on_remove_entity( core::ecs::EntityId id, ComponentTuple& ) override { target_id_list_.erase( id ); }
+
+	bool is_watched_component_type( core::ecs::ComponentTypeId type_id ) const override;
+	void on_watched_component_changed( const core::ecs::Entity* entity, bool is_added ) override;
 
 public:
 	MoveToTargetSystem() = default;
 
 	void add_entity_component_if_all_components_ready( const core::ecs::Entity* entity ) override;
+
+	/// 目標（地点か向き）を持つ対象の数（毎フレーム回す数。テスト用）
+	std::size_t debug_target_count() const { return target_id_list_.size(); }
 
 	void update() override { }						///< 何もしない（上の説明のとおり、呼ぶ所が決まっている）
 

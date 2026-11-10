@@ -760,3 +760,43 @@ TEST( EcsTest, GetComponentOfNeverAddedTypeReturnsNull )
 	e->remove_component< NeverAddedComponent >();
 	EXPECT_EQ( nullptr, e->get_component< NeverAddedComponent >() );
 }
+/**
+ * remove_system が、足していない System では何もせず、足した System だけを外し、ほかの System は動き続けることを検証する
+ *
+ * 以前は 1 引数の erase( remove( ... ) ) で、一覧に無いと end() を消す未定義動作になり得た
+ */
+TEST( EcsTest, RemoveSystem )
+{
+	core::ecs::EntityManager entity_manager;
+
+	// 何も足していないときに外しても何も起きない
+	entity_manager.remove_system< CountSystem >();
+	EXPECT_EQ( nullptr, entity_manager.get_system< CountSystem >() );
+
+	entity_manager.add_system< CountSystem >( 0 );
+	entity_manager.add_system< RenderCountSystem >( 1 );
+
+	// 足していない System を外しても、足した System はそのまま
+	entity_manager.remove_system< DualCountSystem >();
+	ASSERT_NE( nullptr, entity_manager.get_system< CountSystem >() );
+	ASSERT_NE( nullptr, entity_manager.get_system< RenderCountSystem >() );
+
+	auto* e = entity_manager.create_entity();
+	e->add_component< core::ecs::TransformComponent >();
+
+	entity_manager.remove_system< CountSystem >();
+	EXPECT_EQ( nullptr, entity_manager.get_system< CountSystem >() );
+
+	// 残った System は動き続ける
+	entity_manager.update();
+	entity_manager.render();
+	ASSERT_NE( nullptr, entity_manager.get_system< RenderCountSystem >() );
+	EXPECT_EQ( 1, entity_manager.get_system< RenderCountSystem >()->update_count );
+
+	// 二度外しても何も起きない。外した後に足し直せる
+	entity_manager.remove_system< CountSystem >();
+	entity_manager.add_system< CountSystem >( 0 );
+	entity_manager.update();
+	ASSERT_NE( nullptr, entity_manager.get_system< CountSystem >() );
+	EXPECT_EQ( 1, entity_manager.get_system< CountSystem >()->update_count );
+}

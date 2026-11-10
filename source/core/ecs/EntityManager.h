@@ -267,7 +267,8 @@ public:
 			return;
 		}
 
-		system_list_.erase( std::remove( system_list_.begin(), system_list_.end(), i->second.get() ) );
+		// 2 引数の erase（remove の返す位置から末尾まで）。以前は 1 引数で、一覧に無ければ end() を消す未定義動作だった
+		system_list_.erase( std::remove( system_list_.begin(), system_list_.end(), i->second.get() ), system_list_.end() );
 
 		system_map_.erase( i );
 	}

@@ -26,7 +26,7 @@ static int pen_mode_ = 0;
 
 CanvasTestScene::CanvasTestScene( GameMain& game_main )
 	: Scene( game_main )
-	, tablet_( Tablet::get_instance( get_game_main()->get_app()->GetWindowHandle() ) )
+	, tablet_( get_game_main()->get_app()->get_tablet() )		// App が持つペンタブレット（以前はシングルトン）
 	, pen_color_( 0.f, 0.f, 0.f, 1.f )
 	, points_( new DynamicPointList( get_graphics_manager()->get_direct_3d() ) )
 {
@@ -265,14 +265,19 @@ void CanvasTestScene::update()
 	}
 
 	// プレーンオブジェクトの色を変更する
+	// 案内の板はスクリプトが作る。無いとき（スクリプトが読めない・まだ作られていない）は飛ばす（以前は null を使って落ちていた）
 	auto* plane = get_active_object_manager()->get_active_object( "paint_guide_plane" );
-	auto plane_color = plane->get_model()->get_shader_at( 0 )->get_color( "color" );
 
-	float plane_color2[ 4 ] = { plane_color.r(), plane_color.g(), plane_color.b(), plane_color.a() };
-
-	if ( ImGui::ColorEdit4( "Plane Color", plane_color2 ) )
+	if ( plane && plane->get_model() )
 	{
-		plane->get_model()->get_shader_at( 0 )->set_color( "color", Color( plane_color2[ 0 ], plane_color2[ 1 ], plane_color2[ 2 ], plane_color2[ 3 ] ) );
+		auto plane_color = plane->get_model()->get_shader_at( 0 )->get_color( "color" );
+
+		float plane_color2[ 4 ] = { plane_color.r(), plane_color.g(), plane_color.b(), plane_color.a() };
+
+		if ( ImGui::ColorEdit4( "Plane Color", plane_color2 ) )
+		{
+			plane->get_model()->get_shader_at( 0 )->set_color( "color", Color( plane_color2[ 0 ], plane_color2[ 1 ], plane_color2[ 2 ], plane_color2[ 3 ] ) );
+		}
 	}
 
 	ImGui::End();

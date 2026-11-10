@@ -459,7 +459,7 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	{
 		if ( win::Tablet::is_enabled() )
 		{
-			win::Tablet::get_instance( hwnd )->on_activate( wp, lp );
+			get_tablet()->on_activate( wp, lp );
 		}
 		break;
 	}
@@ -467,7 +467,7 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	{
 		if ( win::Tablet::is_enabled() )
 		{
-			win::Tablet::get_instance( hwnd )->on_packet( wp, lp );
+			get_tablet()->on_packet( wp, lp );
 		}
 		break;
 	}
@@ -476,6 +476,16 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 
 	return	0;
+}
+
+win::Tablet* App::get_tablet()
+{
+	if ( ! tablet_ )
+	{
+		tablet_ = std::make_unique< win::Tablet >( hWnd );
+	}
+
+	return tablet_.get();
 }
 
 void App::set_active( bool active )

@@ -9,7 +9,6 @@
 #include <game/Game.h>
 #include <game/Config.h>
 
-#include <common/Singleton.h>
 
 #include <type/type.h>
 
@@ -26,6 +25,7 @@
  *
  */
 namespace blue_sky { class GameMain; }
+namespace win { class Tablet; }
 
 /**
  * WinMain が 1 つ作り、ゲーム（GameMain）を持つ（以前はシングルトン）
@@ -64,6 +64,7 @@ private:
 	bool		is_clip_cursor_enabled_;
 
 	std::unique_ptr< blue_sky::GameMain >	game_main_;		///< ゲーム（以前はシングルトン）
+	std::unique_ptr< win::Tablet >			tablet_;		///< ペンタブレット（初めて使うときに開く。以前はシングルトン）
 	Game*		game_ = nullptr;
 	std::unique_ptr< Config >			config_;		///< 開発用・エンジンの設定（blue-sky.config）
 	std::unique_ptr< Config >			user_config_;	///< ユーザーの設定（settings.config。SettingStore が読み書きする）
@@ -101,6 +102,9 @@ public:
 
 	void set_active( bool );
 	bool is_active() const { return is_active_; }
+
+	/// このウィンドウのペンタブレット（初めて呼ばれたときに開く）
+	win::Tablet* get_tablet();
 
 	/// Raw Input（WM_INPUT）で入力の出来事を受け取っているか
 	bool is_raw_input_enabled() const { return is_raw_input_enabled_; }

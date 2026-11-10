@@ -43,7 +43,7 @@ $msbuild = & $vswhere -latest -requires Microsoft.Component.MSBuild -find "MSBui
 
 ソリューションは6つのプロジェクトで構成:
 
-- **common** (`extern/common/`) - 基本ユーティリティ (Singleton, ログ, 例外)
+- **common** (`extern/common/`) - 基本ユーティリティ (ログ, 例外。シングルトンはやめた : 依存は作り手・組み立ての根から渡す)
 - **game** (`extern/game/`) - 抽象ゲームフレームワーク → common に依存
 - **win** (`extern/win/`) - Windows ユーティリティ → common に依存
 - **blue-sky** (`source/blue-sky.vcxproj`) - メインエンジンライブラリ → common, game, win に依存

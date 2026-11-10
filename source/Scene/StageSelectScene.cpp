@@ -282,11 +282,11 @@ void StageSelectScene::update_stage_list()
 	
 	if ( page_ < get_max_story_page() )
 	{
-		file_pattern = get_stage_dir_name_by_page( page_ ) + common::serialize( page_ ) + "-*.stage";
+		file_pattern = get_stage_dir_name_by_page( page_ ) + common::serialize( page_ ) + "-*.stage.toml";
 	}
 	else
 	{
-		file_pattern = get_stage_dir_name_by_page( page_ ) + "*.stage";
+		file_pattern = get_stage_dir_name_by_page( page_ ) + "*.stage.toml";
 	}
 	
 	HANDLE find_handle = FindFirstFile( file_pattern.c_str(), & find_data );

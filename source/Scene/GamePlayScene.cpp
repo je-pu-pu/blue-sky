@@ -114,7 +114,7 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 	}
 
 	std::string stage_dir_name = StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) );
-	load_stage_file( ( stage_dir_name + get_stage_name() + ".stage" ).c_str() );
+	load_stage_file( ( stage_dir_name + get_stage_name() ).c_str() );
 
 	if ( ! get_graphics_manager()->is_sky_box_set() )
 	{

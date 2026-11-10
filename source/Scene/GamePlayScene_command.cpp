@@ -22,6 +22,8 @@
 
 #include <blue_sky/DelayedCommand.h>
 #include <blue_sky/stage/LegacyStageParser.h>
+#include <blue_sky/stage/TomlStageParser.h>
+#include <blue_sky/DebugLog.h>
 #include <blue_sky/stage/StageBuilder.h>
 
 #include <core/sound/Sound.h>
@@ -347,19 +349,36 @@ void GamePlayScene::save_stage_file( const char* ) const
 /**
  * ステージファイルを読み込む
  *
- * @param file_name ステージファイル名
+ * @param base_name ステージのファイル名から .stage.toml を除いたもの（"media/stage/2-1" など）
  */
-void GamePlayScene::load_stage_file( const char* file_name )
+void GamePlayScene::load_stage_file( const char* base_name )
 {
-	std::ifstream in( file_name );
+	// 読む（ファイル → StageData）。<名前>.stage.toml を読む。
+	// 開発用 : 環境変数 BLUE_SKY_STAGE_FORMAT=legacy なら古い形式の <名前>.stage を読む（移す前と後を比べるため。段階 5 で消す）
+	char format[ 16 ] = { };
+	GetEnvironmentVariableA( "BLUE_SKY_STAGE_FORMAT", format, sizeof( format ) );
 
-	if ( ! in.good() )
+	const string_t toml_file_name = string_t( base_name ) + ".stage.toml";
+	const string_t legacy_file_name = string_t( base_name ) + ".stage";
+
+	stage::StageData data;
+
+	if ( string_t( format ) == "legacy" )
 	{
-		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "load stage file \"" ) + file_name + "\" failed." );
-	}
+		std::ifstream in( legacy_file_name );
 
-	// 読む（ファイル → StageData）
-	const stage::StageData data = stage::LegacyStageParser::parse( in, file_name );
+		if ( ! in.good() )
+		{
+			COMMON_THROW_EXCEPTION_MESSAGE( "load stage file \"" + legacy_file_name + "\" failed." );
+		}
+
+		debug_log( "[Stage] 古い形式のステージを読みます : " + legacy_file_name );
+		data = stage::LegacyStageParser::parse( in, legacy_file_name );
+	}
+	else
+	{
+		data = stage::TomlStageParser::parse_file( toml_file_name );
+	}
 
 	// 当てる（StageData → ゲーム）
 	stage::StageBuilder::Context context;

@@ -144,6 +144,9 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 
 	get_graphics_manager()->load_paper_textures();
 
+	// 開発用 : やり直し（restart）の前に作り、やり直しで始めの位置に置かれるようにする
+	debug_spawn_objects();
+
 	restart();
 
 	// 開発用 : BLUE_SKY_DEBUG_DUMP_STAGE を設定すると、ステージから作った物体の一覧をログに出す
@@ -987,6 +990,82 @@ void GamePlayScene::debug_throw_stones()
 
 		debug_log( "[Debug] 石を投げた結果 : " + name + " / " + result + "（持っている石 " + std::to_string( get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) ) + " 個）" );
 	}
+}
+
+/**
+ * 開発用 : ステージを読んだ後に、物体を格子状に大量に作る
+ *
+ * 環境変数 BLUE_SKY_DEBUG_SPAWN_OBJECTS="数[,種類]"（例 "10000,medal"）を設定したときだけ動く（本編の動きは変えない）。
+ * 本編のステージの物体は数十個しかないので、1 万を超える物体でのフレームの時間（BLUE_SKY_DEBUG_FRAME_TIME）を測るために使う。
+ *
+ * 種類は描画・物理・System の負荷が違うものを選ぶ :
+ *   - static  : 動かない壁（wall-1。質量 0 の剛体・StaticObjectComponent）
+ *   - medal   : 回るメダル（重力 0・当たりの応答なしの動く剛体・SpinSystem）。省略したときはこれ
+ *   - balloon : ゆらぐ風船（重力 0・当たりの応答なしの動く剛体・BalloonHoldSystem・影を落とす線）
+ *   - そのほか ObjectFactory::create_object が知っている種類（stone・switch など）
+ *
+ * 置く場所は乱数を使わず、プレイヤーの始めの位置を中心にした 3 m 間隔の正方形の格子（プレイヤーに触れないよう 4 m 上）。
+ * 作った物体はやり直し（restart）で始めの位置に置かれる
+ */
+void GamePlayScene::debug_spawn_objects()
+{
+	char buffer[ 64 ] = { };
+
+	if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_SPAWN_OBJECTS", buffer, sizeof( buffer ) ) == 0 )
+	{
+		return;
+	}
+
+	int count = 0;
+	char kind_buffer[ 32 ] = "medal";
+
+	if ( sscanf_s( buffer, "%d,%31s", & count, kind_buffer, static_cast< unsigned >( sizeof( kind_buffer ) ) ) < 1 || count <= 0 )
+	{
+		debug_log( string_t( "[DebugSpawn] BLUE_SKY_DEBUG_SPAWN_OBJECTS の値が読めません（\"数[,種類]\" で書く）: " ) + buffer );
+		return;
+	}
+
+	const string_t kind = kind_buffer;
+	const float_t spacing = 3.f;
+	const float_t height = 4.f;
+	const int columns = static_cast< int >( std::ceil( std::sqrt( static_cast< double >( count ) ) ) );
+	const Vector center = get_player_object().get_start_location();
+
+	LARGE_INTEGER start, end, frequency;
+	QueryPerformanceCounter( & start );
+
+	int created = 0;
+
+	for ( int n = 0; n < count; ++n )
+	{
+		const float_t x = center.x() + ( static_cast< float_t >( n % columns ) - static_cast< float_t >( columns - 1 ) * 0.5f ) * spacing;
+		const float_t z = center.z() + ( static_cast< float_t >( n / columns ) - static_cast< float_t >( columns - 1 ) * 0.5f ) * spacing;
+		const Vector location( x, center.y() + height, z );
+
+		if ( kind == "static" )
+		{
+			get_object_factory()->create_static_object( "wall-1", location, Vector::Zero );
+		}
+		else if ( auto id = get_object_factory()->create_object( kind ) )
+		{
+			get_object_factory()->get_ref( * id ).set_start_location( location.x(), location.y(), location.z() );
+		}
+		else
+		{
+			break;	// 知らない種類（理由は create_object がログに出している）
+		}
+
+		++created;
+	}
+
+	QueryPerformanceCounter( & end );
+	QueryPerformanceFrequency( & frequency );
+
+	char text[ 256 ];
+	sprintf_s( text, "[DebugSpawn] 物体を %d 個作りました（種類 %s・%d 列の格子・%.0f ms）。ステージの物体と合わせて %zu 個",
+		created, kind.c_str(), columns, static_cast< double >( end.QuadPart - start.QuadPart ) * 1000.0 / static_cast< double >( frequency.QuadPart ),
+		get_object_factory()->get_entity_object_list().size() );
+	debug_log( text );
 }
 
 /**

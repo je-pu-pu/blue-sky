@@ -100,6 +100,9 @@ private:
 	void debug_player_script_input( ecs::PlayerInputComponent& ) const;
 	string_t describe_player_state() const;
 
+	/// 開発用 : BLUE_SKY_DEBUG_SPAWN_OBJECTS="数[,種類]" を設定すると、ステージを読んだ後に、物体を格子状に大量に作る（大量の物体でのフレームの時間を測るため）
+	void debug_spawn_objects();
+
 	/// 入力（Input）を、プレイヤーの入力の部品（ecs::PlayerInputComponent）に書く
 	void read_player_input();
 	// 各 Manager が持つリソース。ハンドルで持ち、使うたびに引く（以前は生ポインタで、解放・差し替えの後に古いものを指し得た。

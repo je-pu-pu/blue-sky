@@ -1343,6 +1343,14 @@ void GameMain::setup_scene( const string_t& scene_name, const SceneArguments& ar
 
 	// シーンによって設定されていたデータをクリア
 	{
+		// ゲームの物体を EntityManager より先に壊す（物体の位置の正・剛体の持ち主は、物体の Entity の部品にある。
+		// 本編のシーンは自分で壊すが、CanvasTestScene などはスクリプトで作った物体を残したまま終わり、
+		// 以前は Entity を失った物体が次のシーンへ残っていた）
+		if ( active_object_manager_ )
+		{
+			active_object_manager_->clear();
+		}
+
 		entity_manager_->clear();
 		get_graphics_manager()->set_main_camera_info( nullptr, nullptr );
 

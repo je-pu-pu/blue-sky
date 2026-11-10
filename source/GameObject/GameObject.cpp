@@ -1,6 +1,7 @@
 #include "GameObject.h"
 
 #include <blue_sky/ActiveObjectPhysics.h>
+#include <blue_sky/ecs/system/PhysicsSyncSystem.h>
 #include <GameObject/GameObjectContext.h>
 
 
@@ -19,7 +20,32 @@ Vector GameObject::GravityDefault( 0.f, -9.8f, 0.f, 0.f ); // 地球
 GameObject::GameObject()
 	: rigid_body_( 0 )
 {
-	transform_.set_identity();
+	own_transform_.set_identity();
+}
+
+GameObject::GameObject( const GameObject& o )
+	: own_transform_( o.get_transform() )
+	, transform_( & own_transform_ )
+	, rigid_body_( o.rigid_body_ )
+	, context_( o.context_ )
+{
+
+}
+
+void GameObject::bind_transform( Transform* transform )
+{
+	* transform = get_transform();
+	transform_ = transform;
+}
+
+void GameObject::unbind_transform( bool keep_current )
+{
+	if ( keep_current )
+	{
+		own_transform_ = get_transform();
+	}
+
+	transform_ = & own_transform_;
 }
 
 GameObject::~GameObject()
@@ -39,19 +65,7 @@ void GameObject::update_transform()
 		return;
 	}
 
-	auto t = rigid_body_->getWorldTransform();
-
-	Transform offset;
-	offset.set_identity();
-	offset.set_position( Vector( 0, -get_height_offset(), 0 ) );
-
-	t *= offset;
-
-	// btVector3 と Vector はメモリレイアウトが同一のため reinterpret_cast で変換
-	transform_.set_position( reinterpret_cast< const Vector& >( t.getOrigin() ) );
-
-	auto q = t.getRotation();
-	transform_.set_rotation( reinterpret_cast< const Quaternion& >( q ) );
+	get_transform() = ecs::PhysicsSyncSystem::read_body( * rigid_body_, get_height_offset() );
 }
 
 /**
@@ -65,14 +79,7 @@ void GameObject::commit_transform()
 		return;
 	}
 
-	btTransform offset;
-	offset.setIdentity();
-	offset.setOrigin( btVector3( 0, get_height_offset(), 0 ) );
-
-
-	btTransform t = btTransform( transform_ ) * offset;
-	rigid_body_->setWorldTransform( t );
-	rigid_body_->setInterpolationWorldTransform( t );
+	ecs::PhysicsSyncSystem::write_body( * rigid_body_, get_height_offset(), get_transform() );
 }
 
 void GameObject::set_mass( float_t mass )
@@ -178,12 +185,12 @@ void GameObject::set_angular_factor( const Vector& v )
 
 Transform& GameObject::get_transform()
 {
-	return transform_;
+	return * transform_;
 }
 
 const Transform& GameObject::get_transform() const
 {
-	return transform_;
+	return * transform_;
 }
 
 /**

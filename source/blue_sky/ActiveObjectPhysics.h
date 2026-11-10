@@ -26,9 +26,10 @@ public:
 	ActiveObjectPhysics();
 	~ActiveObjectPhysics();
 
-	RigidBody* add_active_object_as_box( ActiveObject* );
-	RigidBody* add_active_object_as_capsule( ActiveObject* );
-	RigidBody* add_active_object_as_cylinder( ActiveObject* );
+	/// 物体の大きさの剛体を作って世界に入れ、持ち主を返す（物体の ActiveObject::set_rigid_body に渡す。以前は生ポインタを返し、世界が持っていた）
+	RigidBodyOwner add_active_object_as_box( ActiveObject* );
+	RigidBodyOwner add_active_object_as_capsule( ActiveObject* );
+	RigidBodyOwner add_active_object_as_cylinder( ActiveObject* );
 
 	void set_active_object_info_to_rigid_body( RigidBody*, ActiveObject* );
 

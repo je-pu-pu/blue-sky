@@ -77,6 +77,13 @@ public:
 	void update();
 
 	/**
+	 * 物理を進めた後に、全部の剛体の位置と回転を位置の正（TransformComponent）へ写す（ecs::PhysicsSyncSystem に頼む）
+	 *
+	 * 以前は GamePlayScene が全物体の GameObject::update_transform を呼んでいた
+	 */
+	void update_transforms();
+
+	/**
 	 * a と接している物体との当たりを起こす（以前の ActiveObjectPhysics::check_collision_with）
 	 *
 	 * 接した組を ecs::CollisionEventSystem に集め、振り分けて、互換の層（下の on_collide_*）が on_collide_with を呼ぶ

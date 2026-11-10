@@ -24,10 +24,10 @@ TEST( BulletPhysicsTest, 同じ形と大きさの剛体は形を共有し大き�
 {
 	BulletPhysics physics;
 
-	btRigidBody* a = physics.add_box_rigid_body( identity(), identity(), core::math::Vector( 1.f, 2.f, 3.f ), 1.f );
-	btRigidBody* b = physics.add_box_rigid_body( identity(), identity(), core::math::Vector( 1.f, 2.f, 3.f ), 1.f );
-	btRigidBody* c = physics.add_box_rigid_body( identity(), identity(), core::math::Vector( 1.f, 2.f, 4.f ), 1.f );
-	btRigidBody* d = physics.add_cylinder_rigid_body( identity(), identity(), core::math::Vector( 1.f, 2.f, 3.f ), 1.f );
+	auto a = physics.add_box_rigid_body( identity(), identity(), core::math::Vector( 1.f, 2.f, 3.f ), 1.f );
+	auto b = physics.add_box_rigid_body( identity(), identity(), core::math::Vector( 1.f, 2.f, 3.f ), 1.f );
+	auto c = physics.add_box_rigid_body( identity(), identity(), core::math::Vector( 1.f, 2.f, 4.f ), 1.f );
+	auto d = physics.add_cylinder_rigid_body( identity(), identity(), core::math::Vector( 1.f, 2.f, 3.f ), 1.f );
 
 	// 以前は剛体ごとに形を作っていた（同じ大きさでもメモリが重複していた）
 	EXPECT_EQ( a->getCollisionShape(), b->getCollisionShape() );
@@ -38,7 +38,7 @@ TEST( BulletPhysicsTest, 同じ形と大きさの剛体は形を共有し大き�
 TEST( BulletPhysicsTest, 線分の問い合わせで剛体に当たる )
 {
 	BulletPhysics physics;
-	physics.add_box_rigid_body( identity(), identity(), core::math::Vector( 1.f, 1.f, 1.f ), 0.f );
+	auto box = physics.add_box_rigid_body( identity(), identity(), core::math::Vector( 1.f, 1.f, 1.f ), 0.f );	// 持ち主を捨てると世界から外れる
 
 	// 世界そのもの（btDynamicsWorld）を出さず、問い合わせだけで調べられる
 	btCollisionWorld::ClosestRayResultCallback hit( btVector3( 0.f, 10.f, 0.f ), btVector3( 0.f, -10.f, 0.f ) );

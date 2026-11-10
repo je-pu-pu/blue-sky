@@ -51,11 +51,29 @@ public:
 	static Vector GravityDefault;
 
 private:
-	Transform		transform_;		///< トランスフォーム情報
-	btRigidBody*	rigid_body_;	///< 剛体情報
+	Transform		own_transform_;					///< 自分で持つトランスフォーム（位置の正を部品へ移す前・移した後に戻したとき）
+	Transform*		transform_ = & own_transform_;	///< 位置の正（自分の own_transform_ か、ActiveObject の Entity の TransformComponent）
+	btRigidBody*	rigid_body_;	///< 剛体情報（持ち主ではない。本編の剛体の持ち主は ActiveObject の Entity の部品 ecs::PhysicsBodyComponent）
 	const GameObjectContext* context_ = nullptr;	///< 物理の世界・音・経過時間
 
 protected:
+	/**
+	 * 位置の正を transform にする（ActiveObject が、自分の Entity の TransformComponent を渡す）
+	 *
+	 * 今の位置を transform へ写してから切り替える。transform は unbind_transform を呼ぶまで生きていること
+	 */
+	void bind_transform( Transform* transform );
+
+	/**
+	 * 位置の正を自分で持つ形に戻す（Entity を消す前に呼ぶ）
+	 *
+	 * @param keep_current 今の位置を写してから戻すか（bind_transform で渡した先がもう無いときは false）
+	 */
+	void unbind_transform( bool keep_current = true );
+
+	/// 剛体を指す（持ち主ではない）
+	void set_rigid_body_view( btRigidBody* rigid_body ) { rigid_body_ = rigid_body; }
+
 	float_t get_delta_time() const;
 	float_t get_scene_elapsed_time() const;
 
@@ -82,7 +100,10 @@ protected:
 
 public:
 	GameObject();
-	GameObject( const GameObject& ) = default;
+
+	/// 位置は値で写す（位置の正は自分の own_transform_ に戻す。複製の Entity は加えるときに作る）。剛体は共有する（以前と同じ）
+	GameObject( const GameObject& );
+	GameObject& operator = ( const GameObject& ) = delete;
 
 	/// 物理の世界・音・経過時間（ActiveObjectManager が加えるときに渡す。以前は GameMain のシングルトンから取っていた）
 	void set_context( const GameObjectContext* context ) { context_ = context; }
@@ -95,8 +116,12 @@ public:
 
 	/// 更新
 	virtual void update() = 0;
-	virtual void update_transform();
-	virtual void commit_transform();
+
+	/// 剛体の位置と回転を位置の正へ写す（本編の物体は ecs::PhysicsSyncSystem::update_transforms がまとめて行う）
+	void update_transform();
+
+	/// 位置の正を剛体へ送る（計算は ecs::PhysicsSyncSystem::write_body）
+	void commit_transform();
 	
 	virtual void update_velocity_by_target_location( const Vector& target_location, float_t speed );
 
@@ -153,8 +178,6 @@ public:
 	
 	inline btRigidBody* get_rigid_body() { return rigid_body_; }
 	inline const btRigidBody* get_rigid_body() const { return rigid_body_; }
-	/// 剛体を設定する（ActiveObject は上書きして、剛体に自分の Entity の番号のタグを付ける）
-	virtual void set_rigid_body( btRigidBody* rigid_body ) { rigid_body_ = rigid_body; }
 
 	const Vector& get_location() const { return get_transform().get_position(); }
 	void set_location( const Vector& );

@@ -259,12 +259,18 @@ TEST( CollisionEventSystemTest, レイは自分_死んだ物体_すり抜ける�
 	const core::math::Vector box( 1.f, 0.1f, 1.f );
 
 	// 上から順に : 自分 → 死んだ物体 → すり抜ける物体 → 柔らかい物体（風船など）→ 消えた物体 → 地面（タグ無し）
-	btRigidBody* me = physics.add_box_rigid_body( at_height( 50.f ), identity, box, 0.f );
-	btRigidBody* dead = physics.add_box_rigid_body( at_height( 40.f ), identity, box, 0.f );
-	btRigidBody* ghost = physics.add_box_rigid_body( at_height( 30.f ), identity, box, 0.f );
-	btRigidBody* soft = physics.add_box_rigid_body( at_height( 20.f ), identity, box, 0.f );
-	btRigidBody* vanished = physics.add_box_rigid_body( at_height( 10.f ), identity, box, 0.f );
-	btRigidBody* ground = physics.add_box_rigid_body( at_height( 0.f ), identity, box, 0.f );
+	auto me_owner = physics.add_box_rigid_body( at_height( 50.f ), identity, box, 0.f );
+	btRigidBody* me = me_owner.get();
+	auto dead_owner = physics.add_box_rigid_body( at_height( 40.f ), identity, box, 0.f );
+	btRigidBody* dead = dead_owner.get();
+	auto ghost_owner = physics.add_box_rigid_body( at_height( 30.f ), identity, box, 0.f );
+	btRigidBody* ghost = ghost_owner.get();
+	auto soft_owner = physics.add_box_rigid_body( at_height( 20.f ), identity, box, 0.f );
+	btRigidBody* soft = soft_owner.get();
+	auto vanished_owner = physics.add_box_rigid_body( at_height( 10.f ), identity, box, 0.f );
+	btRigidBody* vanished = vanished_owner.get();
+	auto ground_owner = physics.add_box_rigid_body( at_height( 0.f ), identity, box, 0.f );
+	btRigidBody* ground = ground_owner.get();
 
 	const auto me_id = create_object( manager );
 	const auto dead_id = create_object( manager );

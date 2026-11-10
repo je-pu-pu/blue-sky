@@ -27,6 +27,7 @@
 #include <blue_sky/ecs/system/ObjectRenderDataSystem.h>
 #include <blue_sky/ecs/system/MoveToTargetSystem.h>
 #include <blue_sky/ecs/system/CollisionEventSystem.h>
+#include <blue_sky/ecs/system/PhysicsSyncSystem.h>
 #include <blue_sky/ecs/component/ActiveObjectLinkComponent.h>
 
 #include <core/ecs/EntityManager.h>
@@ -99,6 +100,9 @@ void ActiveObjectManager::add_active_object( ActiveObject* active_object )
 
 	// 当たった組を集めて振り分ける System（同上）
 	entity_manager_->add_system< ecs::CollisionEventSystem >( 0 );
+
+	// 剛体の位置を位置の正（TransformComponent）へ写す System（同上）
+	entity_manager_->add_system< ecs::PhysicsSyncSystem >( 0 );
 
 	// Entity を作り、描画の部品と定数バッファを用意する（以前は ActiveObject が定数バッファ・Model* を自分で持っていた）
 	active_object->attach_entity( entity_manager_, graphics_manager_ );
@@ -300,6 +304,14 @@ void ActiveObjectManager::update()
 		const float_t delta_time = object_context_ && object_context_->delta_time ? object_context_->delta_time() : 0.f;
 
 		system->update_targets( delta_time );
+	}
+}
+
+void ActiveObjectManager::update_transforms()
+{
+	if ( auto* system = entity_manager_->get_system< ecs::PhysicsSyncSystem >() )
+	{
+		system->update_transforms();
 	}
 }
 

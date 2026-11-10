@@ -2,6 +2,7 @@
 #include <common/exception.h>
 
 #include <vector>
+#include <utility>
 #include <fstream>
 #include <sstream>
 
@@ -34,19 +35,14 @@ void BulletPhysics::clear()
 		delete constraint;
 	}
 
+	// これが持つ剛体（地面・ステージの当たりの形）を消す（持ち主が世界から外す）
+	owned_rigid_body_list_.clear();
+
+	// 残っているのは物体の部品が持つ剛体。消すと持ち主が後で二重に消すので、世界から外すだけにする
+	// （本編のシーンは物体を先に壊すので、残らない。以前は世界に残った剛体を全部ここで消していた）
 	for ( int n = dynamics_world_->getNumCollisionObjects() - 1; n >= 0; n-- )
 	{
-		btCollisionObject* object = dynamics_world_->getCollisionObjectArray()[ n ];
-		btRigidBody* rigid_body = btRigidBody::upcast( object );
-
-		if ( rigid_body && rigid_body->getMotionState() )
-		{
-			delete rigid_body->getMotionState();
-		}
-		
-		dynamics_world_->removeCollisionObject( object );
-
-		delete object;
+		dynamics_world_->removeCollisionObject( dynamics_world_->getCollisionObjectArray()[ n ] );
 	}
 
 	for ( int n = 0; n < collision_shape_list_.size(); n++ )
@@ -65,7 +61,7 @@ void BulletPhysics::clear()
 }
 
 /**
- * 地面用の剛体を追加する
+ * 地面用の剛体を追加する（これが持つ。clear で消える）
  *
  * @param box 地面の形状
  * @return 追加された剛体
@@ -79,19 +75,21 @@ btRigidBody* BulletPhysics::add_ground_rigid_body( const Vector& box )
 	Transform offset;
 	offset.set_identity();
 
-	return add_box_rigid_body( transform, offset, box, 0 );
+	owned_rigid_body_list_.push_back( add_box_rigid_body( transform, offset, box, 0 ) );
+
+	return owned_rigid_body_list_.back().get();
 }
 
 /**
  * 立方体形状の剛体を追加する
- * 
+ *
  * @param transform 座標変換
  * @param offset 剛体の中心点のオフセット
  * @param box 立方体の形状
  * @param mass 質量
- * @return 追加された剛体
+ * @return 追加された剛体の持ち主（捨てると、すぐに世界から外れて消える）
  */
-btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, const Transform& offset, const Vector& box, btScalar mass )
+BulletPhysics::RigidBodyOwner BulletPhysics::add_box_rigid_body( const Transform& transform, const Transform& offset, const Vector& box, btScalar mass )
 {
 	btCollisionShape* shape = find_or_create_shape( ShapeKey( 0, box.x(), box.y(), box.z() ), [&] { return new btBoxShape( box ); } );
 
@@ -106,9 +104,9 @@ btRigidBody* BulletPhysics::add_box_rigid_body( const Transform& transform, cons
  * @param radius シリンダー部の上下に付加される半球の半径
  * @param height シリンダー部の高さ
  * @param mass 質量
- * @return 追加された剛体
+ * @return 追加された剛体の持ち主
  */
-btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, const Transform& offset, float_t radius, float_t height, btScalar mass )
+BulletPhysics::RigidBodyOwner BulletPhysics::add_capsule_rigid_body( const Transform& transform, const Transform& offset, float_t radius, float_t height, btScalar mass )
 {
 	btCollisionShape* shape = find_or_create_shape( ShapeKey( 1, radius, height, 0.f ), [&] { return new btCapsuleShape( radius, height ); } );
 
@@ -123,9 +121,9 @@ btRigidBody* BulletPhysics::add_capsule_rigid_body( const Transform& transform, 
  * @param radius シリンダー部の上下に付加される半球の半径
  * @param height シリンダー部の高さ
  * @param mass 質量
- * @return 追加された剛体
+ * @return 追加された剛体の持ち主
  */
-btRigidBody* BulletPhysics::add_cylinder_rigid_body( const Transform& transform, const Transform& offset, const Vector& box, btScalar mass )
+BulletPhysics::RigidBodyOwner BulletPhysics::add_cylinder_rigid_body( const Transform& transform, const Transform& offset, const Vector& box, btScalar mass )
 {
 	btCollisionShape* shape = find_or_create_shape( ShapeKey( 2, box.x(), box.y(), box.z() ), [&] { return new btCylinderShape( box ); } );
 
@@ -151,13 +149,13 @@ btCollisionShape* BulletPhysics::find_or_create_shape( const ShapeKey& key, cons
 /**
  * 剛体を生成し世界に追加する
  *
- * @param shape 形状
+ * @param shape 形状（共有する。持ち主は collision_shape_list_）
  * @param transform 座標変換
  * @param offset 剛体の中心点のオフセット
  * @param mass 質量
- * @return 追加された剛体
+ * @return 追加された剛体の持ち主（以前は生の new のまま返し、世界が持っていた）
  */
-btRigidBody* BulletPhysics::create_rigid_body( btCollisionShape* shape, const Transform& transform, const Transform& offset, btScalar mass )
+BulletPhysics::RigidBodyOwner BulletPhysics::create_rigid_body( btCollisionShape* shape, const Transform& transform, const Transform& offset, btScalar mass )
 {
 	btVector3 local_inertia( 0, 0, 0 );
 	shape->calculateLocalInertia( mass, local_inertia );
@@ -166,13 +164,13 @@ btRigidBody* BulletPhysics::create_rigid_body( btCollisionShape* shape, const Tr
 		return btTransform( t.get_rotation(), t.get_position() );
 	};
 
-	btDefaultMotionState* motion_state = new btDefaultMotionState( t_to_btt( transform ) * t_to_btt( offset ) );
-	btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state, shape, local_inertia );
-	
-	btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
-	dynamics_world_->addRigidBody( rigid_body );
+	auto motion_state = std::make_unique< btDefaultMotionState >( t_to_btt( transform ) * t_to_btt( offset ) );
+	btRigidBody::btRigidBodyConstructionInfo rigid_body_info( mass, motion_state.get(), shape, local_inertia );
 
-	return rigid_body;
+	auto rigid_body = std::make_unique< btRigidBody >( rigid_body_info );
+	dynamics_world_->addRigidBody( rigid_body.get() );
+
+	return RigidBodyOwner( dynamics_world_.get(), std::move( rigid_body ), std::move( motion_state ) );
 }
 
 /**
@@ -259,11 +257,14 @@ bool BulletPhysics::load_obj( const char_t* file_name )
 
 		// shape->calculateLocalInertia( mass, local_inertia ); /// 静的な剛体なので慣性は不要
 
-		btDefaultMotionState* motion_state = new btDefaultMotionState( transform );
-		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( 0.f, motion_state, shape, local_inertia );
-	
-		btRigidBody* rigid_body = new btRigidBody( rigid_body_info );
-		dynamics_world_->addRigidBody( rigid_body );
+		auto motion_state = std::make_unique< btDefaultMotionState >( transform );
+		btRigidBody::btRigidBodyConstructionInfo rigid_body_info( 0.f, motion_state.get(), shape, local_inertia );
+
+		auto rigid_body = std::make_unique< btRigidBody >( rigid_body_info );
+		dynamics_world_->addRigidBody( rigid_body.get() );
+
+		// ステージの当たりの形はこれが持つ（clear で消える。形とメッシュは collision_shape_list_・mesh_list_ が持つ）
+		owned_rigid_body_list_.emplace_back( dynamics_world_.get(), std::move( rigid_body ), std::move( motion_state ) );
 	}
 
 	return true;

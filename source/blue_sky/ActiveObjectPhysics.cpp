@@ -22,7 +22,7 @@ ActiveObjectPhysics::~ActiveObjectPhysics()
  *
  * @param active_object ActiveObject 
  */
-ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_box( ActiveObject* active_object )
+ActiveObjectPhysics::RigidBodyOwner ActiveObjectPhysics::add_active_object_as_box( ActiveObject* active_object )
 {
 	Vector box( active_object->get_collision_width() / 2.f, active_object->get_collision_height() / 2.f, active_object->get_collision_depth() / 2.f );
 	
@@ -30,8 +30,8 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_box( A
 	offset.set_identity();
 	offset.set_position( Vector( 0, active_object->get_collision_height() / 2, 0 ) );
 
-	RigidBody* rigid_body = add_box_rigid_body( active_object->get_transform(), offset, box, active_object->get_default_mass() );
-	set_active_object_info_to_rigid_body( rigid_body, active_object );
+	RigidBodyOwner rigid_body = add_box_rigid_body( active_object->get_transform(), offset, box, active_object->get_default_mass() );
+	set_active_object_info_to_rigid_body( rigid_body.get(), active_object );
 
 	return rigid_body;
 }
@@ -41,7 +41,7 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_box( A
  *
  * @param active_object ActiveObject 
  */
-ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_capsule( ActiveObject* active_object )
+ActiveObjectPhysics::RigidBodyOwner ActiveObjectPhysics::add_active_object_as_capsule( ActiveObject* active_object )
 {
 	float_t radius = std::max( active_object->get_collision_width(), active_object->get_collision_depth() ) / 2.f;
 	float_t height = active_object->get_collision_height() - ( radius * 2.f );
@@ -50,8 +50,8 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_capsul
 	offset.set_identity();
 	offset.set_position( Vector( 0, active_object->get_collision_height() / 2, 0 ) );
 
-	RigidBody* rigid_body = add_capsule_rigid_body( active_object->get_transform(), offset, radius, height, active_object->get_default_mass() );
-	set_active_object_info_to_rigid_body( rigid_body, active_object );
+	RigidBodyOwner rigid_body = add_capsule_rigid_body( active_object->get_transform(), offset, radius, height, active_object->get_default_mass() );
+	set_active_object_info_to_rigid_body( rigid_body.get(), active_object );
 
 	return rigid_body;
 }
@@ -61,7 +61,7 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_capsul
  *
  * @param active_object ActiveObject 
  */
-ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_cylinder( ActiveObject* active_object )
+ActiveObjectPhysics::RigidBodyOwner ActiveObjectPhysics::add_active_object_as_cylinder( ActiveObject* active_object )
 {
 	Vector box( active_object->get_collision_width() / 2.f, active_object->get_collision_height() / 2.f, active_object->get_collision_depth() / 2.f );
 
@@ -69,8 +69,8 @@ ActiveObjectPhysics::RigidBody* ActiveObjectPhysics::add_active_object_as_cylind
 	offset.set_identity();
 	offset.set_position( Vector( 0, active_object->get_collision_height() / 2, 0 ) );
 
-	RigidBody* rigid_body = add_cylinder_rigid_body( active_object->get_transform(), offset, box, active_object->get_default_mass() );
-	set_active_object_info_to_rigid_body( rigid_body, active_object );
+	RigidBodyOwner rigid_body = add_cylinder_rigid_body( active_object->get_transform(), offset, box, active_object->get_default_mass() );
+	set_active_object_info_to_rigid_body( rigid_body.get(), active_object );
 
 	return rigid_body;
 }

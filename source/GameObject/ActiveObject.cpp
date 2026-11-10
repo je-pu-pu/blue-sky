@@ -11,6 +11,7 @@
 #include <blue_sky/ecs/component/AnimationComponent.h>
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
 #include <blue_sky/ecs/component/ActiveObjectLinkComponent.h>
+#include <blue_sky/ecs/component/PhysicsBodyComponent.h>
 #include <blue_sky/DebugLog.h>
 
 #include <core/physics/EntityTag.h>
@@ -195,13 +196,31 @@ void ActiveObject::attach_entity( core::ecs::EntityManager* entity_manager, grap
 		return;
 	}
 
+	if ( has_entity_ )
+	{
+		// Entity が外から消された（EntityManager が片付けた）。位置の正だった部品はもう無いので、写さずに戻す
+		// （GameMain::setup_scene は EntityManager を片付ける前に物体を壊すので、本編では起きない）
+		unbind_transform( false );
+		has_entity_ = false;
+	}
+
 	entity_manager_ = entity_manager;
 
 	core::ecs::Entity* entity = entity_manager_->create_entity();
 	entity_id_ = entity->get_id();
 	has_entity_ = true;
 
-	entity->add_component< core::ecs::TransformComponent >()->transform = get_transform();
+	// 位置の正を TransformComponent にする（以前は GameObject の Transform が正で、描く前に毎フレーム部品へ写していた）
+	bind_transform( & entity->add_component< core::ecs::TransformComponent >()->transform );
+
+	// 剛体（先に設定されていれば、預かっていた持ち主を部品へ移す。複製は元の物体と剛体を共有するので、持ち主を持たず剛体だけを指す）
+	if ( get_rigid_body() )
+	{
+		auto* body = entity->add_component< ecs::PhysicsBodyComponent >();
+		body->owner = std::move( pending_rigid_body_ );
+		body->body = get_rigid_body();
+		body->height_offset = get_height_offset();
+	}
 
 	// 目標地点・向きへ動かす窓口（MoveToTargetSystem が自分を位置・速度の窓口として呼ぶ）
 	entity->add_component< ecs::TargetMoverComponent >()->mover = this;
@@ -240,8 +259,24 @@ void ActiveObject::detach_entity()
 		return;
 	}
 
-	// 部品が消える前に、モデルを預かり直す（clone 元・もう一度加えるときのため）
+	core::ecs::Entity* entity = entity_manager_->find( entity_id_ );
+
+	if ( ! entity )
+	{
+		// もう消えている（EntityManager が片付けた）。部品は無いので、写さずに戻す
+		unbind_transform( false );
+		has_entity_ = false;
+		return;
+	}
+
+	// 部品が消える前に、モデル・位置・剛体の持ち主を預かり直す（clone 元・もう一度加えるときのため。剛体は物体が壊れるときに消える）
 	pending_model_ = get_model();
+	unbind_transform();
+
+	if ( auto* body = entity->get_component< ecs::PhysicsBodyComponent >() )
+	{
+		pending_rigid_body_ = std::move( body->owner );
+	}
 
 	// 剛体のタグを外す（以前は GameObject のデストラクタが userPointer を消していた。外した剛体は地面と同じ扱いになる）
 	if ( is_rigid_body_owner_ && get_rigid_body() )
@@ -249,15 +284,37 @@ void ActiveObject::detach_entity()
 		core::physics::clear_entity_tag( get_rigid_body() );
 	}
 
-	entity_manager_->destroy_entity( entity_id_ );	// もう消えている（EntityManager が片付けた）なら何もしない
+	entity_manager_->destroy_entity( entity_id_ );
 	has_entity_ = false;
 }
 
-void ActiveObject::set_rigid_body( btRigidBody* rigid_body )
+void ActiveObject::set_rigid_body( core::physics::RigidBody&& rigid_body )
 {
-	GameObject::set_rigid_body( rigid_body );
+	btRigidBody* raw = rigid_body.get();
 
-	is_rigid_body_owner_ = rigid_body != nullptr;
+	set_rigid_body_view( raw );
+	is_rigid_body_owner_ = raw != nullptr;
+
+	core::ecs::Entity* entity = has_entity_ ? entity_manager_->find( entity_id_ ) : nullptr;
+
+	if ( entity )
+	{
+		auto* body = entity->get_component< ecs::PhysicsBodyComponent >();
+
+		if ( ! body )
+		{
+			body = entity->add_component< ecs::PhysicsBodyComponent >();
+		}
+
+		body->owner = std::move( rigid_body );		// 前の剛体があれば、ここで世界から外れて消える（以前は世界に残った）
+		body->body = raw;
+		body->height_offset = get_height_offset();
+	}
+	else
+	{
+		pending_rigid_body_ = std::move( rigid_body );
+	}
+
 	apply_rigid_body_tag();
 }
 
@@ -300,10 +357,7 @@ void ActiveObject::sync_render_component() const
 		return;
 	}
 
-	if ( auto* transform = entity->get_component< core::ecs::TransformComponent >() )
-	{
-		transform->transform = get_transform();
-	}
+	// 位置は写さない（位置の正が TransformComponent になった。以前はここで GameObject の Transform を写していた）
 
 	if ( auto* render = entity->get_component< ecs::ObjectRenderComponent >() )
 	{

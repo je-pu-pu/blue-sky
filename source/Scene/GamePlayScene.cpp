@@ -307,10 +307,8 @@ void GamePlayScene::update()
 		get_graphics_manager()->clear_debug_bullet();
 		get_active_object_physics()->update( get_elapsed_time() );
 
-		for ( auto* o : get_active_object_manager()->active_object_list() )
-		{
-			o->update_transform();
-		}
+		// 剛体の位置を位置の正（TransformComponent）へ写す（ecs::PhysicsSyncSystem。以前は物体ごとに update_transform を呼んでいた）
+		get_active_object_manager()->update_transforms();
 	}
 
 	camera_->update_with_player( player_ );

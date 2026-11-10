@@ -5,6 +5,7 @@
 #include <blue_sky/ecs/component/TargetMoverComponent.h>
 #include <common/exception.h>
 #include <core/ecs/type.h>
+#include <core/physics/RigidBody.h>
 #include <memory>
 
 namespace core
@@ -66,6 +67,7 @@ private:
 	core::ecs::EntityId			entity_id_ = 0;					///< 自分の Entity（has_entity_ が true のときだけ有効）
 	bool						has_entity_ = false;
 	bool						is_rigid_body_owner_ = false;	///< 剛体を自分で設定した（set_rigid_body）か。複製（clone）は剛体を共有するだけなので false（タグを付け替えない）
+	core::physics::RigidBody	pending_rigid_body_;			///< Entity が無い間の剛体の持ち主（Entity を作る前に設定された・Entity を消した後。attach_entity で部品へ移す）
 	Model*						pending_model_ = nullptr;		///< Entity を作る前に set_model されたモデル（attach_entity で部品へ移す）
 	graphics::GraphicsManager*	graphics_manager_ = nullptr;	///< 定数バッファを作る先・モデルをハンドルから引く先（attach_entity で受け取る）
 
@@ -115,8 +117,14 @@ public:
 
 	virtual void update() override { }
 
-	/// 剛体を設定し、Entity があれば userPointer に Entity の番号のタグを付ける（以前は ActiveObjectPhysics が ActiveObject* を入れていた）
-	void set_rigid_body( btRigidBody* rigid_body ) override;
+	/**
+	 * 剛体の持ち主を受け取る（以前は生ポインタを受け取り、剛体は物理の世界が持っていた）
+	 *
+	 * Entity があれば部品（ecs::PhysicsBodyComponent）へ、無ければ預かって attach_entity で部品へ移す。
+	 * 前の剛体があれば世界から外れて消える。Entity があれば userPointer に Entity の番号のタグを付ける
+	 * （以前は ActiveObjectPhysics が ActiveObject* を入れていた）
+	 */
+	void set_rigid_body( core::physics::RigidBody&& rigid_body );
 
 	virtual void set_model( Model* m );
 	Model* get_model();
@@ -186,10 +194,10 @@ public:
 	core::ecs::EntityId get_entity_id() const { return entity_id_; }
 
 	/**
-	 * 位置と描くかどうかを部品へ写す（描く前に毎フレーム。ActiveObjectManager::sync_render_components が呼ぶ）
+	 * 描くかどうかを部品へ写す（描く前に毎フレーム。ActiveObjectManager::sync_render_components が呼ぶ）
 	 *
-	 * 橋渡しの間は位置（GameObject の Transform）と描くかどうか（派生が is_mesh_visible などを上書きする）の正はこのクラスにある。
-	 * 段階 3 で位置の正を TransformComponent に移したら、位置は写さなくなる
+	 * 描くかどうかの正は、派生が is_mesh_visible などを上書きするので、まだこのクラスにある。
+	 * 位置は段階 3 で正を TransformComponent に移した（GameObject::get_transform が部品を指す）ので、もう写さない
 	 */
 	void sync_render_component() const;
 

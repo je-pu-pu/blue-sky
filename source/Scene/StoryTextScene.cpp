@@ -53,7 +53,7 @@ StoryTextScene::StoryTextScene( GameMain& game_main, const char* file_name, cons
 
 	if ( bg_sprite_layer_list_.empty() )
 	{
-		bg_sprite_layer_list_.push_back( std::make_unique< BgSpriteLayer >( "bg", get_graphics_manager()->load_named_texture( "bg", "media/image/story-bg-default.jpg" ) ) );
+		bg_sprite_layer_list_.push_back( std::make_unique< BgSpriteLayer >( "bg", get_graphics_manager()->load_named_texture( "story-bg-default", "media/image/story-bg-default.jpg" ) ) );
 	}
 
 	get_graphics_manager()->get_fader()->full_out();

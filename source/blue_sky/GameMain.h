@@ -104,28 +104,6 @@ public:
 	using Direct3D					= core::graphics::direct_3d_11::Direct3D11;
 	using BulletDebugDraw			= core::graphics::direct_3d_11::BulletDebugDraw;
 
-	// @todo Input クラスにあるべきでは？
-	enum Key
-	{
-		KEY_LEFT  = VK_LEFT,
-		KEY_RIGHT = VK_RIGHT,
-		KEY_UP    = VK_UP,
-		KEY_DOWN  = VK_DOWN,
-
-		KEY_F1  = VK_F1,
-		KEY_F2  = VK_F2,
-		KEY_F3  = VK_F3,
-		KEY_F4  = VK_F4,
-		KEY_F5  = VK_F5,
-		KEY_F6  = VK_F6,
-		KEY_F7  = VK_F7,
-		KEY_F8  = VK_F8,
-		KEY_F9  = VK_F9,
-		KEY_F10 = VK_F10,
-		KEY_F11 = VK_F11,
-		KEY_F12 = VK_F12,
-	};
-
 private:
 	App&									app_;					///< ウィンドウ（App が GameMain を作るときに渡す。以前は App のシングルトンから引いていた）
 	TimeManager								time_manager_;			///< 時間管理

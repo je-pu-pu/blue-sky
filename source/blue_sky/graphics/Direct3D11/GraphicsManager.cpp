@@ -815,7 +815,6 @@ float_t GraphicsManager::measure_text_line_height( float_t font_size ) const
  *
  * @param text 文字列
  * @param color 色
- * @todo 高速化する
  */
 void GraphicsManager::draw_text_at_center( const char_t* text, const Color& color ) const
 {

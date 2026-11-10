@@ -33,8 +33,6 @@ class TextRenderer;
 
 /**
  * グラフィック管理クラス
- *
- * @todo 太らせる
  */
 class GraphicsManager
 {

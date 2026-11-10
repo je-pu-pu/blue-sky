@@ -29,7 +29,6 @@ public:
 
 	void bind() const override
 	{
-		/// @todo 必要なものだけをバインドするようにする
 		get_game_constant_buffer()->bind_to_all();
 		get_frame_constant_buffer()->bind_to_all();
 		get_frame_drawing_constant_buffer()->bind_to_all();

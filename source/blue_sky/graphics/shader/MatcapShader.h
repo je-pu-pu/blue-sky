@@ -39,14 +39,13 @@ public:
 
 	void bind() const override
 	{
-		/// @todo 必要なものだけをバインドするようにする
 		get_game_constant_buffer()->bind_to_all();
 		get_frame_constant_buffer()->bind_to_all();
 		get_frame_drawing_constant_buffer()->bind_to_all();
 		
 		get_object_constant_buffer()->bind_to_vs();
 
-		/// @todo SkinningMatcapShader として分ける
+		// スキニング用の定数バッファは、スキンメッシュ（バッファがあるとき）だけ結ぶ
 		if ( get_skining_constant_buffer() )
 		{
 			get_skining_constant_buffer()->bind_to_vs();

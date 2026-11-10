@@ -117,17 +117,12 @@ int SoundEngine::callback( const void*, void* output, unsigned long frame_count,
 				continue;
 			}
 			
-			if ( sb->get_format().channels == 2 )
-			{
-				l_value += sb->read();
-				r_value += sb->read();
-			}
-			else if ( sb->get_format().channels == 1 )
-			{
-				const auto value = sb->read();
-				l_value += value;
-				r_value += value;
-			}
+			float l = 0.f;
+			float r = 0.f;
+			sb->read_frame( l, r );
+
+			l_value += l;
+			r_value += r;
 		}
 
 		*out++ = l_value * sound_engine->volume_;

@@ -609,7 +609,7 @@ void DebugScene::render()
 		get_graphics_manager()->unset_depth_stencil();
 		get_graphics_manager()->resolve_depth_texture();
 
-		/// @todo sprite_ms での描画に対応する
+		// MSAA のときは深度テクスチャがマルチサンプルなので Sprite では描けない（描くにはマルチサンプルのテクスチャを読む Sprite のシェーダーを足す）
 		get_graphics_manager()->get_sprite()->begin();
 		get_graphics_manager()->get_sprite()->draw( win::Rect( get_width() / 4, get_height() / 4, get_width() / 4 * 3, get_height() / 4 * 3 ), get_graphics_manager()->get_depth_texture() );
 		// get_graphics_manager()->get_sprite()->draw( win::Rect( get_width() / 4.f, get_height() / 4.f, get_width() / 4.f * 3.f, get_height() / 4.f * 3.f ), get_graphics_manager()->get_texture( "2x2" ) );

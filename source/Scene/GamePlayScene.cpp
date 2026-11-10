@@ -5,7 +5,6 @@
 #include <blue_sky/GameSettings.h>
 #include <core/setting/SettingStore.h>
 
-/// @todo ActiveObjectManager へ移動
 #include <GameObject/Player.h>
 #include <GameObject/Goal.h>
 #include <GameObject/Balloon.h>
@@ -19,8 +18,7 @@
 
 #include <core/sound/SoundManager.h>
 
-/// @todo 抽象化する
-#include <core/graphics/Direct3D11/Sprite.h>
+#include <core/graphics/Sprite.h>
 
 #include <blue_sky/ActiveObjectPhysics.h>
 
@@ -113,13 +111,18 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 		get_graphics_manager()->set_sky_box( "sky-box-3" );
 	}
 
-	/// @todo 直す
-	// far_billboards_ = get_graphics_manager()->load_model( ( get_stage_name() + "-far-billboards" ).c_str() );
+	// 既定の遠景。ステージファイルの far_billboards コマンドで差し替える
 	far_billboards_ = get_graphics_manager()->load_model( "far-billboards-1" );
 
-	/// @todo 直す
-	rectangle_ = get_graphics_manager()->create_named_model( "rectangle" );
-	rectangle_->set_mesh( get_graphics_manager()->create_named_mesh< Rectangle >( "rectangle", Rectangle::Buffer::Type::DEFAULT ) );
+	// シャドウマップのデバッグ表示に使う矩形。メッシュは GraphicsManager が作った画面全体の矩形を使い回す
+	// （以前は入るたびに同じ名前のモデルとメッシュを作り直していて、古いものが解放されずに溜まり、GraphicsManager の矩形の名前も奪っていた）
+	rectangle_ = get_graphics_manager()->get_model( "rectangle" );
+
+	if ( ! rectangle_ )
+	{
+		rectangle_ = get_graphics_manager()->create_named_model( "rectangle" );
+		rectangle_->set_mesh( get_graphics_manager()->get_mesh( "rectangle" ) );
+	}
 
 	scope_mesh_ = get_graphics_manager()->load_model( "scope" );
 
@@ -603,11 +606,11 @@ void GamePlayScene::update_balloon_sound()
 		}
 	}
 
-	/// @todo 整理する
-	// ぶれるのでここでやる。
-	if ( player_->get_balloon() )
+	// プレイヤーの位置が決まった後で、持っている風船を手元に合わせ直す
+	// （物体の更新の中だけだと、プレイヤーより先に更新されたときに 1 フレーム遅れてぶれる。以前は const_cast で呼んでいた）
+	if ( auto* balloon = player_->get_balloon() )
 	{
-		const_cast< Balloon* >( player_->get_balloon() )->update();
+		balloon->update();
 	}
 }
 

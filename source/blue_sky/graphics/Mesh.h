@@ -18,7 +18,7 @@ namespace blue_sky::graphics
 /**
  * blue-sky 頂点情報
  * 
- * @todo 柔軟な頂点構造に対応する
+ * 頂点の形は位置・法線・UV に固定（スキニングの重みは別のバッファ）。ほかの形が要るときは、頂点の型ごとに Mesh を分ける
  */
 struct Vertex : public core::graphics::Vertex
 {
@@ -106,11 +106,10 @@ public:
 		void set_mesh( Mesh* m ) { mesh_ = m; }
 		Type get_type() const { return type_; }
 
+		// 形が変わったときは create_vertex_buffer() / create_index_buffer() で作り直す（CityGenerator）。
+		// 以前は中身が空の update_vertex_buffer() / update_index_buffer() があり、呼んでも何も起きなかった
 		virtual void create_vertex_buffer() = 0;
 		virtual void create_index_buffer() = 0;
-
-		virtual void update_vertex_buffer() = 0;
-		virtual void update_index_buffer() = 0;
 
 		virtual void bind() const = 0;
 		virtual void render( uint_t ) const = 0;

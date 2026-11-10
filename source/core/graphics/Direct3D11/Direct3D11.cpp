@@ -48,17 +48,11 @@ const Direct3D11::Color Direct3D11::DEFAULT_CLEAR_COLOR = Direct3D11::Color::Bla
  * @param multi_sample_quality	マルチサンプリングのクオリティ
  */
 Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sample_count, int multi_sample_quality )
-	: device_( 0 )
-	, immediate_context_( 0 )
-	, swap_chain_( 0 )
-
-	, depth_stencil_texture_( 0 )
-	, depth_stencil_view_( 0 )
 {
-	IDXGIFactory1* dxgi_factory = 0;
+	com_ptr< IDXGIFactory1 > dxgi_factory;
 	DIRECT_X_FAIL_CHECK( CreateDXGIFactory1( __uuidof( IDXGIFactory1 ), reinterpret_cast< void** >( & dxgi_factory ) ) );
 
-	log_all_adapter_desc( dxgi_factory );
+	log_all_adapter_desc( dxgi_factory.get() );
 
 	DIRECT_X_FAIL_CHECK( dxgi_factory->EnumAdapters1( 0, & dxgi_adapter_ ) );
 
@@ -66,9 +60,9 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sam
 
 	log_feature_level();
 
-	create_swap_chain( dxgi_factory, hwnd, w, h, full_screen, multi_sample_count, multi_sample_quality );
+	create_swap_chain( dxgi_factory.get(), hwnd, w, h, full_screen, multi_sample_count, multi_sample_quality );
 
-	DIRECT_X_RELEASE( dxgi_factory );
+	dxgi_factory.reset();
 
 	create_back_buffer_texture();
 
@@ -91,7 +85,7 @@ Direct3D11::~Direct3D11()
 	effect_.reset();
 	sprite_.reset();
 
-	if ( immediate_context_ )
+	if ( immediate_context_.get() )
 	{
 		immediate_context_->ClearState();
 		immediate_context_->Flush();
@@ -101,12 +95,12 @@ Direct3D11::~Direct3D11()
 
 	depth_texture_.reset();
 
-	DIRECT_X_RELEASE( depth_stencil_view_ );
-	DIRECT_X_RELEASE( depth_stencil_texture_ );
+	depth_stencil_view_.reset();
+	depth_stencil_texture_.reset();
 
 	back_buffer_texture_.reset();
 
-	DIRECT_X_RELEASE( swap_chain_ );
+	swap_chain_.reset();
 
 	if ( false )
 	{
@@ -118,8 +112,8 @@ Direct3D11::~Direct3D11()
 		DIRECT_X_RELEASE( debug_ );
 	}
 
-	DIRECT_X_RELEASE( immediate_context_ );
-	DIRECT_X_RELEASE( device_ );
+	immediate_context_.reset();
+	device_.reset();
 }
 
 /**
@@ -208,11 +202,11 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 	desc.BufferCount = 2;
 	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
-	if ( FAILED( dxgi_factory->CreateSwapChain( device_, & desc, & swap_chain_ ) ) )
+	if ( FAILED( dxgi_factory->CreateSwapChain( device_.get(), & desc, & swap_chain_ ) ) )
 	{
 		desc.BufferCount = 1;
 		desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-		DIRECT_X_FAIL_CHECK( dxgi_factory->CreateSwapChain( device_, & desc, & swap_chain_ ) );
+		DIRECT_X_FAIL_CHECK( dxgi_factory->CreateSwapChain( device_.get(), & desc, & swap_chain_ ) );
 	}
 
 	swap_chain_buffer_count_ = desc.BufferCount;
@@ -231,7 +225,7 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
  */
 void Direct3D11::create_back_buffer_texture()
 {
-	back_buffer_texture_.reset( new BackBufferTexture( this, swap_chain_, swap_chain_desc_.SampleDesc ) );
+	back_buffer_texture_.reset( new BackBufferTexture( this, swap_chain_.get(), swap_chain_desc_.SampleDesc ) );
 }
 
 /**
@@ -257,7 +251,7 @@ void Direct3D11::create_depth_stencil_view()
 
 	DIRECT_X_FAIL_CHECK( device_->CreateTexture2D( & texture_desc, 0, & depth_stencil_texture_ ) );
 
-	depth_stencil_view_ = create_depth_stencil_view( depth_stencil_texture_ );
+	depth_stencil_view_.reset( create_depth_stencil_view( depth_stencil_texture_.get() ) );
 }
 
 /**
@@ -338,7 +332,7 @@ void Direct3D11::create_depth_texture()
 		view_desc.Texture2D.MostDetailedMip = 0;
 
 		ID3D11ShaderResourceView* view = 0;
-		DIRECT_X_FAIL_CHECK( device_->CreateShaderResourceView( depth_stencil_texture_, & view_desc, & view ) );
+		DIRECT_X_FAIL_CHECK( device_->CreateShaderResourceView( depth_stencil_texture_.get(), & view_desc, & view ) );
 
 		depth_texture_.reset( new Texture( this, view ) );
 	}
@@ -480,7 +474,7 @@ bool Direct3D11::is_full_screen() const
 {
 	BOOL full_screen;
 
-	DIRECT_X_FAIL_CHECK( swap_chain_->GetFullscreenState( & full_screen, 0 ) );
+	DIRECT_X_FAIL_CHECK( swap_chain_.get()->GetFullscreenState( & full_screen, 0 ) );
 
 	return full_screen == TRUE;
 }
@@ -510,8 +504,8 @@ void Direct3D11::on_resize( int w, int h )
 
 	create_back_buffer_texture();
 
-	DIRECT_X_RELEASE( depth_stencil_view_ );
-	DIRECT_X_RELEASE( depth_stencil_texture_ );
+	depth_stencil_view_.reset();
+	depth_stencil_texture_.reset();
 
 	create_depth_stencil_view();
 	create_depth_texture();
@@ -550,7 +544,7 @@ void Direct3D11::clear_back_buffer_view( const Color& color )
  */
 void Direct3D11::clear_depth_stencil_view()
 {
-	clear_depth_stencil_view( depth_stencil_view_ );
+	clear_depth_stencil_view( depth_stencil_view_.get() );
 }
 
 /**
@@ -582,7 +576,7 @@ void Direct3D11::clear_depth_stencil_view( ID3D11DepthStencilView* view )
 void Direct3D11::set_default_render_target( bool with_depth_stencil )
 {
 	ID3D11RenderTargetView* views[] = { back_buffer_texture_->get_render_target_view() };
-	immediate_context_->OMSetRenderTargets( 1, views, with_depth_stencil ? depth_stencil_view_ : nullptr );
+	immediate_context_->OMSetRenderTargets( 1, views, with_depth_stencil ? depth_stencil_view_.get() : nullptr );
 }
 
 /**
@@ -599,7 +593,7 @@ Pixel2DSpace Direct3D11::get_2d_space() const
 	// 今の描画先の大きさ（ビューポート）。VR の目ごとの描画などで、画面と違う大きさの描画先に描くときに合わせる
 	UINT count = 1;
 	D3D11_VIEWPORT viewport = { };
-	immediate_context_->RSGetViewports( & count, & viewport );
+	immediate_context_.get()->RSGetViewports( & count, & viewport );
 
 	if ( count >= 1 && viewport.Width > 0.f && viewport.Height > 0.f )
 	{
@@ -617,7 +611,7 @@ bool Direct3D11::save_back_buffer_to_png( const wchar_t* file_name )
 		return false;
 	}
 
-	return save_texture_2d_to_png( device_, immediate_context_, back_buffer_texture_->get_texture_2d(), file_name );
+	return save_texture_2d_to_png( device_.get(), immediate_context_.get(), back_buffer_texture_->get_texture_2d(), file_name );
 }
 
 void Direct3D11::reset_render_state()
@@ -647,13 +641,13 @@ void Direct3D11::reset_render_state()
 void Direct3D11::set_render_target( RenderTargetTexture* texture )
 {
 	ID3D11RenderTargetView* views[] = { texture->get_render_target_view() };
-	immediate_context_->OMSetRenderTargets( 1, views, depth_stencil_view_ );
+	immediate_context_->OMSetRenderTargets( 1, views, depth_stencil_view_.get() );
 }
 
 void Direct3D11::set_render_target( BackBufferTexture* texture )
 {
 	ID3D11RenderTargetView* views[] = { texture->get_render_target_view() };
-	immediate_context_->OMSetRenderTargets( 1, views, depth_stencil_view_ );
+	immediate_context_->OMSetRenderTargets( 1, views, depth_stencil_view_.get() );
 }
 
 /**
@@ -726,7 +720,7 @@ Direct3D11::Texture* Direct3D11::load_texture( const char* file_path )
 
 	std::wstring ws_file_name = common::convert_to_wstring( file_path );
 	
-	if ( FAILED( DirectX::CreateWICTextureFromFileEx( device_, immediate_context_, ws_file_name.c_str(), 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, false, nullptr, & view ) ) )
+	if ( FAILED( DirectX::CreateWICTextureFromFileEx( device_.get(), immediate_context_.get(), ws_file_name.c_str(), 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, false, nullptr, & view ) ) )
 	{
 		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "file open failed. " ) + file_path );
 	}
@@ -871,7 +865,7 @@ void Direct3D11::present()
 {
 	if ( back_buffer_texture_ )
 	{
-		back_buffer_texture_->resolve( immediate_context_ );
+		back_buffer_texture_->resolve( immediate_context_.get() );
 	}
 
 	// フリップモデルでは表示のあと描画先が外れる。次のフレームの頭で reset_render_state が結び直す
@@ -900,7 +894,7 @@ void Direct3D11::present()
 void Direct3D11::resolve_depth_texture()
 {
 #if 0
-	immediate_context_->ResolveSubresource( depth_texture_->get_texture_2d(), 0, depth_stencil_texture_, 0, DXGI_FORMAT_R32_FLOAT );
+	immediate_context_->ResolveSubresource( depth_texture_->get_texture_2d(), 0, depth_stencil_texture_.get(), 0, DXGI_FORMAT_R32_FLOAT );
 #endif
 }
 

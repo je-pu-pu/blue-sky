@@ -8,7 +8,6 @@ cbuffer GameConstantBuffer : register( b0 )
 
 cbuffer FrameConstantBuffer : register( b1 )
 {
-	/// @todo ViewProjection としてまとめる？
     row_major matrix View;			// ビュー変換行列
     row_major matrix Projection;	// プロジェクション変換行列
 	float4 Light;					// 光源の向き ( 正規化済み ) 

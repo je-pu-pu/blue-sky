@@ -30,8 +30,8 @@ class GraphicsManager;
 class BaseFileLoader
 {
 public:
-	using Model					= blue_sky::graphics::Model;	///< @todo 抽象化する
-	using Mesh					= blue_sky::graphics::Mesh;		///< @todo 抽象化する
+	using Model					= blue_sky::graphics::Model;
+	using Mesh					= blue_sky::graphics::Mesh;
 	using SkinningAnimationSet	= core::SkinningAnimationSet;
 	using Shader				= core::graphics::Shader;
 	using Texture				= core::graphics::Texture;

@@ -179,8 +179,6 @@ void Scene::stop_sound( const char* name ) const
 
 /***
  * スプライト描画のための定数バッファを更新する
- *
- * @todo GraphicsManager に移行する
  */
 void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t drawing_accent_scale )
 {

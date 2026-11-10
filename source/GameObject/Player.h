@@ -274,6 +274,7 @@ public:
 
 	int_t pop_balloon_sound_request() { int_t r = balloon_sound_request_; balloon_sound_request_ = 0; return r; }
 
+	Balloon* get_balloon() { return balloon_; }
 	const Balloon* get_balloon() const { return balloon_; }
 
 	int get_hp() const { return hp_; }

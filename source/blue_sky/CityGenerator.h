@@ -73,6 +73,12 @@ public:
 			unlink();
 		}
 
+		/// 位置がこの道路のどちら側にあるか（負 : 右・正 : 左・0 : 正面）。ぶつかってきた道路の向きを決めるのに使う
+		float_t get_side_of( const Vector& p ) const
+		{
+			return start_front.xz().cross( ( p - position ).xz() );
+		}
+
 		void unlink()
 		{
 			if ( front_node )

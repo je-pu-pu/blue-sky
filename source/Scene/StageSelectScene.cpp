@@ -53,7 +53,9 @@ StageSelectScene::StageSelectScene( GameMain& game_main )
 	face_src_rect_list_.push_back( win::Rect::Size( 768, 384, 64, 64 ) );
 
 	sprite_texture_ = get_graphics_manager()->load_named_texture( "sprite", "media/image/title.png" );
-	bg_texture_ = get_graphics_manager()->load_named_texture( "bg", "media/texture/cloth.png" );
+	// テクスチャの名前はファイルごとに付ける（以前はステージ選択・エンディングの cloth.png とストーリーの背景が同じ名前 "bg" で、
+	// 先に読んだシーンの画像が後のシーンの背景に使われていた）
+	bg_texture_ = get_graphics_manager()->load_named_texture( "cloth", "media/texture/cloth.png" );
 
 	ok_ = get_sound_manager()->get_sound( "ok" );
 	click_ = get_sound_manager()->get_sound( "click" );
@@ -66,12 +68,8 @@ StageSelectScene::StageSelectScene( GameMain& game_main )
 
 StageSelectScene::~StageSelectScene()
 {
-	/// @todo 直す
-#if false
-	// get_graphics_manager()->unload_texture( "sprite" );
-	get_graphics_manager()->unload_texture( "bg" );
-#endif
-
+	// テクスチャは解放しない（GraphicsManager が持ち続け、ほかのシーン・次に入ったときに使い回す。
+	// 名前の登録を消しても、ほかが生ポインタで持っていると解放できないため）
 	clear_stage_list();
 }
 

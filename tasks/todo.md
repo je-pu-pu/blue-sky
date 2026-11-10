@@ -312,23 +312,34 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 ### ~~サウンド更新の別スレッド化~~ [完了]
 - [x] 対応済み（cbae6686）— SoundManager::start_update_thread（16ms ごと）。一覧は SoundManager の、音の操作は音ごとのロックで守る。メインスレッドが止まっても BGM の補充が続く
 
-### その他の細かい整理
-- `GameMain.cpp:253` — ActiveObject に color を持たせるか検討
-- `GameMain.cpp:262` — create_object() の引数整理
-- `GameMain.cpp:268` — 例外化してスクリプト側でキャッチ
-- `GameMain.cpp:663,767` — 各所の雑多な整理
-- `GraphicsManager.cpp:313` — スクリプトからシェーダー生成
-- `GraphicsManager.cpp:446,487` — 定数バッファ更新頻度、時間データの場所
-- `GraphicsManager.cpp:498,578` — シャドウマップ高速化、バインド最適化
-- `Direct3D11/GraphicsManager.cpp:639` — draw_text_at_center 高速化
-- `SkinningAnimationSet.h:89` — 整理
-- `Shader.h:21` — テクスチャごとのシェーダーステージ設定
-- `FlatShader.h:43,50` / `MatcapShader.h:41,48` / `LitShader.h:42,49` — バインド最適化、スキニング分離
-- `UnicolorShader.h:32` / `TessellationMatcapShader.h:57,84` / `post_effect/DefaultShader.h:42` — バインド最適化
-- `Scene/*.cpp` 各所 — GraphicsManager への移行、整理
-- `BackBufferTexture.h:17` — Texture と共通化
-- `core/graphics/Shader.h:18,38` — パラメータ設計
-- `core/graphics/GraphicsManager.h:32` — 太らせる
+### ~~その他の細かい整理~~ [完了]
+エンジン本体（source/blue_sky・core・Scene・GameObject・Main.cpp・media/shader）の `@todo` / `TODO` 86 個を一つずつ判断し、すべて片付けた（残り 0 個。案として残すものは、何をすれば良いかの説明に書き換えた）。
+
+- [x] GameMain の ActiveObject の色 — 解決済み。色はシェーダーの color パラメータで変え、1 つだけ変えたいときは make_model_unique で自分だけのモデルにする
+- [x] GameMain の create_object() の引数・例外化 — 解決済み（42b42f8e で知らない名前は nil とログ）。さらに対応済み : スクリプトから nil を渡すと落ちていた関数（set_loc・clone_object・clone_model・set_post_effect_shader など 14 個）は、スクリプトのエラー（ScriptError）にする。C++ の関数が投げた例外は sol2 が Lua のエラーに変え、exec が ScriptError として投げることを確かめた（テスト ScriptManagerTest）
+- [x] GameMain の雑多な整理 — 解決済み（該当の @todo はもう無い）。ファンクションキーの別名 enum Key は削除し VK_* を直接使う
+- 案 : スクリプトからシェーダーを作る（GraphicsManager::create_default_shaders に、やり方を書いた）
+- [x] 定数バッファの更新頻度・時間の置き場所 — 解決済み（1 フレーム 1 回の小さな更新。理由をコメントに書いた）
+- 案（最適化。全シーンで FPS 60 が出ているので今は不要）: シャドウマップの描画の高速化、定数バッファを必要なステージだけに結ぶ（FlatShader・MatcapShader・LitShader・UnicolorShader・TessellationMatcapShader・post_effect::DefaultShader・GraphicsManager の線の描画）、Model::render をシェーダーごとにまとめる、AnimationPlayer で必要なボーン行列だけ計算する。方針は blue_sky/graphics/shader/Shader.h の説明に 1 つにまとめた
+- [x] draw_text_at_center の高速化 — 解決済み（使うのは「読み込み中」の 1 回だけ）
+- [x] SkinningAnimationSet の整理 — 対応済み : オフセット行列を new したポインタで持ち、コピーすると二重に解放する形だった。値で持つ（テスト SkinningAnimationSetTest）
+- 案 : テクスチャごとのシェーダーステージ。テクスチャはピクセルシェーダーに結び、ほかのステージで使うものは各シェーダーの bind() で結ぶ（Shader.h に説明）
+- 案 : スキニングの有無でシェーダーの型を分ける。今はスキニングの定数バッファがあるときだけ結ぶ（各シェーダーに説明）
+- [x] Scene の各所 — 対応済み : CanvasTestScene のファイル static 変数（回転・拡大・ペンの状態がシーンを出ても残った）をメンバに。GamePlayScene の風船の const_cast をやめた。GamePlayScene に入るたびに "rectangle" のモデルとメッシュを作り直して溜め、GraphicsManager の画面の矩形の名前も奪っていたのを、使い回しに。ステージ選択・エンディングの cloth.png とストーリーの背景が同じテクスチャ名 "bg" で、先に読んだ画像が後のシーンに出ていたのを、名前を分けた。MusicGamePrototypeScene が入るたびにシェーダーの複製を溜めていたのを直した。GamePlayScene が Direct3D11/Sprite.h を直接使っていたのを抽象の Sprite.h に
+- 案 : Scene の描画の GraphicsManager への移行。ほかのシーンでも同じ描画が要るようになったら移す（GamePlayScene.h に説明）
+- 案 : BackBufferTexture と Texture の共通化。スワップチェーンへの解決があるので別にしている（BackBufferTexture.h に説明）
+- 案 : core::graphics::Shader のパラメータ。名前で設定・取得する形はできている。既定値は数だけで、VECTOR・COLOR の既定値が要るときに型ごとに持たせる
+- [x] core::graphics::GraphicsManager を太らせる — コメントを削除（作り手から受け取る今の形で困っていない）
+- [x] そのほか @todo で見つかった不具合 — 対応済み :
+  - ShadowMap の光の位置・行列が static で、作り直したゲーム（デバイスロストからの復旧）とも共有されていた → メンバに
+  - Direct3D11・ShadowMap のデバイス・スワップチェーン・深度ステンシルが生ポインタで、コンストラクタの途中で例外が出るとリークした → com_ptr に
+  - 法線の変換がワールド行列をそのまま掛けていて、拡大縮小で法線が傾き長さも変わった → 余因子行列で変換して長さを 1 に（common.hlsl）
+  - PortAudio の出力（44100 Hz）で 22050 Hz の音楽 5 曲（road・semi・tokyo-shojo・tokyo-shojo-vocal・washer）が倍の速さで鳴っていた → 読み出しで周波数を合わせる（SampleRateStepper。テスト SampleRateStepperTest）。**耳での確認はまだ**
+  - 目標の位置への移動（ステージの set_target_location）が、速いときに目標の周りを行ったり来たりして着かないことがあり、着いた後も最後の速度が残っていた → このフレームで届くなら着いたことにし、目標の位置に合わせて止める（テスト TargetLocationTest）
+  - .obj の読み込みで、範囲外の番号でそのまま配列を読み、UV の無い "1//3" を誤読していた → ファイル名と行番号付きの例外、UV が無ければ ( 0, 0 )、多角形は三角形に分ける（テスト ObjFaceVertexTest）
+  - MeshBuffer の中身が空の update_vertex_buffer / update_index_buffer（呼んでも何も起きない）を削除
+  - CityGenerator の道路の左右の判定の重複を RoadNode::get_side_of に
+- 残り（@todo には無かったが、同じ種類の問題）: CityGenerator・GeometryShaderCanvasTestScene も、作るたびに同じ名前のモデル・メッシュを作り直して古いものを溜める
 
 ## NPR コード品質改善（ブランチ refactor/npr-code-quality）
 - [x] ② テクスチャ読み戻しを `core/graphics/Direct3D11/TextureReadback` に共通化（dump と neural の重複解消）

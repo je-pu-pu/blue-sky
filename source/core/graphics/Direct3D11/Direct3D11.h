@@ -57,18 +57,18 @@ private:
 
 	com_ptr< IDXGIAdapter1 >	dxgi_adapter_;
 
-	/// @todo スマートポインタ ( com_ptr ) 化する？
-	ID3D11Device*				device_;				///< Direct3D 11 Device
-	ID3D11DeviceContext*		immediate_context_;		///< Direct3D 11 Device Context
-	IDXGISwapChain*				swap_chain_;			///< Direct3D 11 Swap Chain
+	// 以前は生ポインタで、コンストラクタの途中で例外が出る（スワップチェーンを作れない など）とデバイスがリークしていた
+	com_ptr< ID3D11Device >			device_;				///< Direct3D 11 Device
+	com_ptr< ID3D11DeviceContext >	immediate_context_;		///< Direct3D 11 Device Context
+	com_ptr< IDXGISwapChain >		swap_chain_;			///< Direct3D 11 Swap Chain
 
 	DXGI_SWAP_CHAIN_DESC		swap_chain_desc_;		///< 画面の大きさ・形式と、画面への描画の MSAA（スワップチェーン自体は MSAA なし）
 	UINT						swap_chain_buffer_count_ = 1;	///< スワップチェーンのバッファの枚数
 
 	std::unique_ptr< BackBufferTexture >	back_buffer_texture_;		///< バックバッファへの描画用テクスチャ
 
-	ID3D11Texture2D*			depth_stencil_texture_;
-	ID3D11DepthStencilView*		depth_stencil_view_;
+	com_ptr< ID3D11Texture2D >			depth_stencil_texture_;
+	com_ptr< ID3D11DepthStencilView >	depth_stencil_view_;
 	std::unique_ptr< Texture >	depth_texture_;
 
 	InputLayoutList				input_layout_list_;
@@ -238,8 +238,8 @@ public:
 	Texture* get_depth_texture() { return depth_texture_.get(); }
 
 	/** BAD functions */
-	inline ID3D11Device* getDevice() const { return device_; }
-	inline ID3D11DeviceContext* getImmediateContext() const { return immediate_context_; }
+	inline ID3D11Device* getDevice() const { return device_.get(); }
+	inline ID3D11DeviceContext* getImmediateContext() const { return immediate_context_.get(); }
 
 }; // class Direct3D11
 

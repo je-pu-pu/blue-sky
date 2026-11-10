@@ -12,7 +12,7 @@
 
 #include <core/graphics/ShadowMap.h>
 
-#include <core/graphics/Direct3D11/Sprite.h>
+#include <core/graphics/Sprite.h>
 
 #include <blue_sky/Input.h>
 #include <blue_sky/ActiveObjectManager.h>

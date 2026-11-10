@@ -80,8 +80,6 @@ void AnimationPlayer::update()
 
 /**
  * 描画用のデータを更新する
- *
- * @todo 必要最低限のボーン行列だけ更新するようにする
  */
 void AnimationPlayer::calculate_bone_matrices( BoneConstantBufferData& data ) const
 {

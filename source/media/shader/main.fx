@@ -250,7 +250,7 @@ float4 ps_with_shadow_debug_simple( PS_SHADOW_INPUT input ) : SV_Target
 
 
 /**
- * @todo 以下の命名規則にまとめる
+ * テクニックの名前を以下の規則に揃えたいときは、C++ とスクリプトで使っている名前も合わせて変える
  *
  * 1. 陰影を付ける場合は "shade", 付けない場合は "flat"
  * 2. スキニングを行う場合は"_skin" を付加
@@ -259,7 +259,6 @@ float4 ps_with_shadow_debug_simple( PS_SHADOW_INPUT input ) : SV_Target
  */
 
 // シェーディングあり・スキニングなし
-/// @todo technique11 shade 
 technique11 main
 {
 	pass main
@@ -278,7 +277,6 @@ technique11 main
 }
 
 // シェーディングあり・スキニングあり
-/// @todo technique11 shade_skin
 technique11 skin
 {
 	pass main
@@ -316,7 +314,6 @@ technique11 flat_skin
 }
 
 // シェーディングあり・スキニングなし・シャドウあり
-/// @todo technique11 shade_shadow
 technique11 main_with_shadow
 {
 	
@@ -338,7 +335,6 @@ technique11 main_with_shadow
 }
 
 // シェーディングあり・スキニングあり・シャドウあり
-/// @todo technique11 shade_skin_shadow
 technique11 skin_with_shadow
 {
 	pass main

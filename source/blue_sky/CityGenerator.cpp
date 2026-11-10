@@ -229,8 +229,7 @@ bool CityGenerator::check_collision( RoadControlPoint& cp ) const
 			{
 				node->type = RoadNode::Type::T_INTERSECTION;
 
-				// @todo 共通化する
-				const float cross = node->start_front.xz().cross( ( cp.position - node->position ).xz() );
+				const float cross = node->get_side_of( cp.position );
 
 				if ( cross < 0.f )
 				{
@@ -407,7 +406,7 @@ void CityGenerator::RoadNode::update_vertex_pos()
 	// 終端の処理
 	if ( is_end && front_node )
 	{
-		const float cross = front_node->start_front.xz().cross( ( position - front_node->position ).xz() );
+		const float cross = front_node->get_side_of( position );
 
 		if ( cross < 0.f )
 		{

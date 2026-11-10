@@ -18,7 +18,8 @@ namespace blue_sky::graphics::shader
  *		テクニック
  *		シェーダー固有の名前付きパラメータ
  * 
- * @todo 各テクスチャごとに、そのテクスチャを必要とするシェーダーステージを設定できるようにする
+ * 定数バッファは使うかどうかに関わらず全ステージに結ぶ（必要なステージだけに結ぶと呼び出しは減るが、全シーンで FPS 60 が出ているので今は単純さを取る）。
+ * テクスチャはピクセルシェーダーに結ぶ。ほかのステージで使うテクスチャは、各シェーダーの bind() で結ぶ（TessellationMatcapShader）
  */
 template< typename ShaderType, int Slot = 0 >
 class Shader : public BaseShader

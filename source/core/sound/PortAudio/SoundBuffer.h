@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/sound/SoundBuffer.h>
+#include <core/sound/SampleRateStepper.h>
 #include <game/SoundFormat.h>
 #include <vector>
 
@@ -25,7 +26,10 @@ private:
 	float volume_ = 1.f;
 	bool is_playing_ = false;
 	bool is_looping_ = false;
-	size_t current_position_ = 0;
+	size_t current_position_ = 0;		///< 次に読むバイトの位置（フレームの境目）
+	SampleRateStepper rate_stepper_;	///< この音の周波数と出力の周波数の違いを吸収する
+
+	float sample_at( size_t ) const;
 
 public:
 	SoundBuffer( SoundEngine&, const SoundFormat&, size_t );
@@ -52,7 +56,8 @@ public:
 	size_t get_size() const override;
 	size_t get_current_position() const override;
 
-	float read();
+	/// 出力の 1 フレーム分（左右）を読み、出力の周波数に合わせて読む位置を進める（モノラルは左右に同じ値）
+	void read_frame( float& left, float& right );
 	const SoundFormat& get_format() const { return format_; }
 
 }; // class SoundBuffer

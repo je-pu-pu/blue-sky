@@ -39,9 +39,6 @@ protected:
 	void create_vertex_buffer() override;
 	void create_index_buffer() override;
 
-	void update_vertex_buffer() override;
-	void update_index_buffer() override;
-
 public:
 	MeshBuffer( Direct3D* d3d, Type type, const core::graphics::GraphicsManager* graphics_manager )
 		: Buffer( type )

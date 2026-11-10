@@ -36,7 +36,7 @@ public:
 
 private:
 	Mesh*					mesh_;
-	std::shared_ptr< Line >	line_; ///< 複製したモデル同士で共有する（線の形は同じ。以前は unique_ptr で、複製すると線が無くなっていた） @todo Mesh にまとめる？
+	std::shared_ptr< Line >	line_; ///< 複製したモデル同士で共有する（線の形は同じ。以前は unique_ptr で、複製すると線が無くなっていた）
 	ShaderList				shader_list_;
 	SkinningAnimationSet*	skinning_animation_set_;
 
@@ -60,7 +60,6 @@ public:
 	const Mesh* get_mesh() const override { return mesh_; };
 	void set_mesh( core::graphics::Mesh* m ) override { mesh_ = static_cast< Mesh* >( m ); }
 
-	/// @todo Mesh にまとめる
 	Line* get_line() { return line_.get(); }
 	const Line* get_line() const { return line_.get(); }
 	void set_line( Line* l ) { line_.reset( l ); }

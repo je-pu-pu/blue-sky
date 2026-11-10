@@ -89,7 +89,6 @@ private:
 
 	float_t								bpm_;
 
-	/// @todo GraphicsManager に移行する
 	float_t								drawing_accent_scale_;	///< ( 0 : アクセントを完全に無効化 ) .. ( 2 : アクセント 2 倍 ) ..
 	
 	common::chase_value< Vector3, float_t >		light_position_;
@@ -162,7 +161,7 @@ protected:
 	
 	void exec_command( const string_t& );
 
-	/** @todo 移動する */
+	// フレームの定数の更新と描画の手順（GamePlayScene_render.cpp）。ほかのシーンでも同じ描画が要るようになったら GraphicsManager に移す
 	void update_render_data_for_frame() const;
 	void update_render_data_for_frame_drawing() const;
 	void update_render_data_for_frame_for_eye( int ) const;
@@ -176,14 +175,12 @@ protected:
 
 	void render_text() const;
 
-	/// @todo GraphicsManager に移行する
 	void render_far_billboards() const;
 	
 	void render_sprite( float_t rotho_offset = 0.f ) const;
 
 	void render_debug_axis_for_bones( const ActiveObject* ) const;
 
-	/// @todo GraphicsManager に移行する
 	void render_debug_shadow_map_window() const;
 
 public:

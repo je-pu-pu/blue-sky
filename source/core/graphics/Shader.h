@@ -15,7 +15,7 @@ namespace core::graphics
 /**
  * 抽象シェーダークラス
  *
- * @todo scalar, vector, color, texture に名前を付けて設定、名前を指定して取得できるようにする
+ * パラメータ（int・float・vector・color）は名前で設定・取得する。テクスチャは番号（スロット）で設定・取得する
  */
 class Shader
 {
@@ -35,7 +35,7 @@ public:
 		COLOR,
 	};
 
-	/// @todo float 以外のデフォルト値に対応する？
+	/// 既定値は数（INT・FLOAT）だけ持つ。VECTOR・COLOR の既定値が要るときは default_value を型ごとに持たせる
 	/// 各パラメータの情報
 	struct ParameterInfo
 	{

@@ -16,7 +16,7 @@ namespace core::graphics::direct_3d_11
 	class BackBufferTexture : public core::graphics::BackBufferTexture
 	{
 	private:
-		// @todo Texture と共通化する
+		// テクスチャ・描画先のビューを持つところは Texture / RenderTargetTexture と似ているが、スワップチェーンへの解決があるので別にしている
 		Direct3D11*							direct_3d_;
 		com_ptr< ID3D11Texture2D >			texture_2d_;				///< 描画先（MSAA のときは自前のテクスチャ、それ以外はスワップチェーンのバッファ）
 		com_ptr< ID3D11Texture2D >			swap_chain_buffer_;			///< スワップチェーンのバッファ

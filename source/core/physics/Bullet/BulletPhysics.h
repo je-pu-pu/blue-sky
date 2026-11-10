@@ -12,7 +12,7 @@
 /**
  * Bullet のラッパークラス
  *
- * @todo 複数の RigidBody で同じ CollisionShape を共有できるようにする
+ * 同じ種類・大きさの CollisionShape は複数の RigidBody で共有する（shape_cache_）
  */
 class BulletPhysics
 {

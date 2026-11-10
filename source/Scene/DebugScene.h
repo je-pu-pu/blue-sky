@@ -54,7 +54,6 @@ protected:
 
 protected:
 
-	/// @todo Scenegraph に移動する
 	std::unique_ptr< Camera > camera_;
 
 public:

@@ -41,7 +41,7 @@ EndingScene::EndingScene( GameMain& game_main )
 	switch_sound_ = get_sound_manager()->load( "switch-on" );
 	click_sound_ = get_sound_manager()->load( "click" );
 
-	bg_texture_ = get_graphics_manager()->load_named_texture( "bg", "media/texture/cloth.png" );
+	bg_texture_ = get_graphics_manager()->load_named_texture( "cloth", "media/texture/cloth.png" );
 
 	get_graphics_manager()->get_fader()->full_in();
 
@@ -215,7 +215,6 @@ void EndingScene::render_drawing_line()
 
 	render_technique( "|drawing_line", [this]
 	{
-		/// @todo 整理する
 		{
 			ObjectConstantBufferData object_constant_buffer_data;
 

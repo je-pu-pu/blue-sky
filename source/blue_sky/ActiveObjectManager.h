@@ -15,8 +15,6 @@ namespace graphics { class GraphicsManager; }
 
 /**
  * 複数の ActiveObject を管理する Manager
- *
- * @todo GameObjectManager とする
  */
 class ActiveObjectManager
 {
@@ -64,6 +62,9 @@ public:
 	ActiveObject* clone_object( const ActiveObject* );
 
 	void update();
+
+	/// 目標の位置に着いたか（残りが 0.1 未満か、このフレームで進める距離 speed × delta_time 以内）
+	static bool is_target_location_reached( float_t distance, float_t speed, float_t delta_time );
 
 	ActiveObjectList& active_object_list() { return active_object_list_; }
 	const ActiveObjectList& active_object_list() const { return active_object_list_; }

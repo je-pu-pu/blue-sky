@@ -84,7 +84,6 @@ struct COMMON_POS_COLOR
 };
 
 
-/// @todo 名前を整理する
 struct VS_SKIN_INPUT
 {
 	float4 Position : POSITION;
@@ -94,7 +93,6 @@ struct VS_SKIN_INPUT
 	float4 Weight   : WEIGHT;
 };
 
-/// @todo 名前を整理する
 struct PS_INPUT
 {
 	float4 Position : SV_POSITION;
@@ -103,7 +101,6 @@ struct PS_INPUT
 	float4 Color    : COLOR0;
 };
 
-/// @todo 名前を整理する
 struct PS_SHADOW_INPUT
 {
 	float4 Position : SV_POSITION;
@@ -145,11 +142,22 @@ float4 common_vp_pos( float4 input )
 /**
  * 法線をワールド座標系へ変換する
  *
- * @todo ワールド変換行列に非同一性スケールが入っている場合の対応 ( 逆行列転置行列を使う )
+ * ワールド行列の逆行列の転置（の定数倍である余因子行列）で変換し、長さを 1 にする
+ * （以前はワールド行列をそのまま掛けていて、拡大縮小の入ったワールド行列では法線が傾き、長さも変わっていた）
  */
 float3 common_w_norm( float3 input )
 {
-	return mul( input, ( float3x3 ) World );
+	const float3 r0 = World[ 0 ].xyz;
+	const float3 r1 = World[ 1 ].xyz;
+	const float3 r2 = World[ 2 ].xyz;
+
+	const float3x3 cofactor = float3x3( cross( r1, r2 ), cross( r2, r0 ), cross( r0, r1 ) );
+
+	// 鏡に映す行列（行列式が負）では余因子行列の向きが逆になるので戻す
+	const float3 n = mul( input, cofactor ) * ( dot( r0, cofactor[ 0 ] ) < 0.f ? -1.f : 1.f );
+	const float len = length( n );
+
+	return len > 0.f ? n / len : n;
 }
 
 float3 common_v_norm( float3 input )
@@ -159,7 +167,7 @@ float3 common_v_norm( float3 input )
 
 float3 common_wv_norm( float3 input )
 {
-	return mul( mul( input, ( float3x3 ) World ), ( float3x3 ) View );
+	return mul( common_w_norm( input ), ( float3x3 ) View );
 }
 
 /**
@@ -168,7 +176,7 @@ float3 common_wv_norm( float3 input )
  * モデルのローカル座標系での頂点座標を引数に取り、指定されたカスケードレベルのシャドウマップのテクスチャ座標を返す
  * ( 光源をカメラと見立てたときの座標に変換し、最終的に UV 座標系に変換する )
  *
- * @todo 頂点シェーダーで UV 座標にまで変換してしまうと、ピクセルシェーダーでの補間誤差が大きくなり結果が不正確になる可能性があるため、ここでの変換は「光源をカメラと見立てたときの座標への変換」に留め、UV 座標への変換はピクセルシェーダーで行うようにする
+ * 頂点シェーダーで UV まで変換する（補間の誤差で影がずれるようなら、光の空間の座標までにして UV への変換をピクセルシェーダーで行う）
  * 
  * @param pos ローカル座標系での頂点座標
  * @param csm_level カスケードレベル
@@ -361,7 +369,7 @@ float4 ps_common_sample_matcap_pos_norm( COMMON_POS_NORM input ) : SV_Target
 
 float4 ps_common_sample_matcap_pos_norm_uv( COMMON_POS_NORM_UV input ) : SV_Target
 {
-	/// @todo 修正する
+	// 法線マップを使うときは、法線マップの値をビュー空間の法線に足してから matcap を引く（今は使っていない）
 	// return common_sample_matcap( common_v_norm( input.Normal + normal_texture.Sample( texture_sampler, input.TexCoord ) ) );
 	return common_sample_matcap( input.Normal );
 }

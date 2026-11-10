@@ -142,10 +142,7 @@ RigidBodyHandle PhysicsManager::create_rigid_body( const RigidBodyCreateInfo& in
 		local_inertia
 	);
 
-	/// @todo 摩擦係数などをコントロールできるようにする
-	// rigid_body_info.m_friction = 0.01f;
-	// rigid_body_info.m_restitution = 0.5f;
-
+	// 摩擦は全物体で 0.1、反発は Bullet の既定。物体ごとに変えたいときは RigidBodyComponent に摩擦・反発を足し、ここで rigid_body_info に渡す
 	handle.rigid_body = new btRigidBody( rigid_body_info );
 	handle.rigid_body->setFriction( 0.1f );
 	// handle.rigid_body->setActivationState( DISABLE_DEACTIVATION );

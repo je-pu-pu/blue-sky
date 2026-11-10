@@ -27,8 +27,6 @@ namespace blue_sky
  * 全てのシーンを登録する
  * 
  * 新しいシーンを追加した場合は、ここに登録コードを追加する必要がある
- * 
- * @todo シーンの自動登録機能を実装する
  */
 void SceneManager::register_all_scene()
 {

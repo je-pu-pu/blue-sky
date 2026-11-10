@@ -10,8 +10,7 @@ namespace blue_sky::graphics
 /**
  * このモデル用のシェーダーを作成する
  * 
- * @todo より柔軟にする。
- * @todo どのシェーダーを使うかはモデルによって異なるため、
+ * 影の有無とスキニングの有無でシェーダーを選ぶ（モデルごとに別のシェーダーを使いたいときは、読み込んだ後で set_shader_at で差し替える）
  */
 Model::Shader* Model::create_shader( GraphicsManager* graphics_manager ) const
 {
@@ -73,7 +72,6 @@ void Model::render() const
 
 	for ( uint_t n = 0; n < get_shader_count(); n++ )
 	{
-		/// @todo Shader 毎にレンダリングする。モデルの描画毎に update(), bind() しない
 		get_shader_at( n )->update();
 		get_shader_at( n )->bind();
 

@@ -388,7 +388,7 @@ void GraphicsManager::setup_default_shaders()
 /**
  * 既定の名前付きシェーダーを作る
  *
- * @todo スクリプトから行えるようにする ( C++ のシェーダークラスに名前を付けておき、スクリプトからシェーダークラス名, InputLayout 名, テクニック名を指定してシェーダーオブジェクトを new できないか？ )
+ * スクリプトから作れるようにしたいときは、シェーダーの型に名前を付けて登録し、型名・入力レイアウト名・テクニック名を受け取って作る関数をスクリプトに渡す
  */
 void GraphicsManager::create_default_shaders()
 {
@@ -534,7 +534,7 @@ void GraphicsManager::bind_paper_texture() const
  */
 void GraphicsManager::update_constant_buffers() const
 {
-	/// @todo 毎フレーム行う必要があるか？
+	// 描画のアクセントなどは毎フレーム変わりうるので毎回更新する（1 フレームに 1 回の小さな定数バッファ）
 	get_frame_drawing_render_data()->update();
 
 	for ( const auto& game_object : get_game_object_manager()->active_object_list() )
@@ -575,7 +575,7 @@ void GraphicsManager::setup_rendering()
 	// 光の向きはシーンが set_light_direction で変えられる（既定は以前の固定値と同じ）
 	get_frame_render_data()->data().light = light_direction_.get_normalized();
 
-	/// @todo ここでやるべき？
+	// 経過時間（シェーダーの揺らぎに使う）も、カメラと同じフレームの定数に入れる
 	get_frame_render_data()->data().time = time_manager_ ? time_manager_->get_total_elapsed_time() : 0.f;
 
 	get_frame_render_data()->update();
@@ -585,8 +585,6 @@ void GraphicsManager::setup_rendering()
 
 /**
  * シャドウマップを描画する
- *
- * @todo 最適化・高速化
  */
 void GraphicsManager::render_shadow_map() const
 {
@@ -666,7 +664,6 @@ void GraphicsManager::render_active_objects( const ActiveObjectManager* active_o
 
 	render_technique( "|drawing_line", [ this, active_object_manager ]
 	{
-		/// @todo 必要な定数バッファを必要なシェーダーにだけバインドするようにする
 		get_game_render_data()->bind_to_all();
 		get_frame_render_data()->bind_to_all();
 		get_frame_drawing_render_data()->bind_to_all();

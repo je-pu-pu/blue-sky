@@ -3,6 +3,7 @@
 #include <blue_sky/SceneManager.h>
 #include <blue_sky/GameMain.h>
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/shader/LitShader.h>
 #include <blue_sky/Input.h>
 
 #include <core/ecs/component/TransformComponent.h>
@@ -105,12 +106,17 @@ MusicGamePrototypeScene::MusicGamePrototypeScene( GameMain& game_main )
 		get_graphics_manager()->load_model( "building-white" ),
 	};
 
-	/// @todo もっとスマートにやる
-	// シェーダーを設定 ( flat から lit に変更 )
+	// シェーダーを設定 ( flat から lit に変更 )。モデルはこのシーン専用で、GraphicsManager が持ち続ける
+	// すでに lit にしたもの（このシーンに入り直したとき）はそのまま使う（以前は入るたびに複製を作り、古い複製が溜まっていた）
 	for ( auto* m : models )
 	{
 		for ( size_t n = 0; n < m->get_shader_count(); n++ )
 		{
+			if ( dynamic_cast< const graphics::shader::LitShader* >( m->get_shader_at( n ) ) )
+			{
+				continue;
+			}
+
 			auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit" ) );
 			shader->set_texture_at( 0, m->get_shader_at( n )->get_texture_at( 0 ) );
 

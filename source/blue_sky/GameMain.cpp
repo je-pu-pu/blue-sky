@@ -66,8 +66,31 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 
+#include <stdexcept>
+
 namespace blue_sky
 {
+
+namespace
+{
+
+/**
+ * スクリプトから渡されたオブジェクトが nil なら、落ちずにスクリプトのエラーにする（ScriptManager::exec が ScriptError として投げる）
+ *
+ * 以前は nil のまま使って落ちていた（set_loc( nil, … ) など）
+ */
+template< typename Type >
+Type* require_not_nil( Type* p, const char* function_name )
+{
+	if ( ! p )
+	{
+		throw std::invalid_argument( std::string( function_name ) + " : 引数が nil" );
+	}
+
+	return p;
+}
+
+} // namespace
 
 //■コンストラクタ
 GameMain::GameMain( App& app )
@@ -378,17 +401,17 @@ void GameMain::setup_script_command()
 	// ActiveObject
 	// 知らない名前なら nil を返す（以前は null に restart を呼んで落ちた）
 	get_script_manager()->set_function( "create_object", [this] ( const char_t* name ) { auto* o = create_object( name ); if ( o ) { o->restart(); } return o; } );
-	get_script_manager()->set_function( "clone_object", [this] ( ActiveObject* o ) { auto* o2 = clone_object( o ); o2->restart(); return o2; } );
+	get_script_manager()->set_function( "clone_object", [this] ( ActiveObject* o ) { auto* o2 = clone_object( require_not_nil( o, "clone_object" ) ); o2->restart(); return o2; } );
 	get_script_manager()->set_function( "get_object", [this] ( const char_t* name ) { return get_active_object_manager()->get_active_object( name ); } );
-	get_script_manager()->set_function( "set_name", [this] ( ActiveObject* o, const char_t* name ) { get_active_object_manager()->name_active_object( name, o ); } );
-	get_script_manager()->set_function( "set_loc", [] ( ActiveObject* o, float_t x, float_t y, float_t z ) { o->set_location( x, y, z ); } );
-	get_script_manager()->set_function( "set_dir", [] ( ActiveObject* o, float_t r ) { o->set_direction_degree( r ); } );
-	get_script_manager()->set_function( "set_vel", [] ( ActiveObject* o, float_t x, float_t y, float_t z ) { o->set_velocity( Vector( x, y, z ) ); } );
-	get_script_manager()->set_function( "set_start_loc", [] ( ActiveObject* o, float_t  x, float_t  y, float_t  z ) { o->set_start_location( x, y, z ); } );
-	get_script_manager()->set_function( "set_start_rot", [] ( ActiveObject* o, float_t rx, float_t ry, float_t rz ) { o->set_start_rotation( rx, ry, rz ); } );
-	get_script_manager()->set_function( "set_start_dir", [] ( ActiveObject* o, float_t r ) { o->set_start_direction_degree( r ); } );
-	get_script_manager()->set_function( "set_mass", [] ( ActiveObject* o, float_t mass ) { o->set_mass( mass ); } );
-	get_script_manager()->set_function( "make_model_unique", [] ( ActiveObject* o ) { return o->make_model_unique(); } );
+	get_script_manager()->set_function( "set_name", [this] ( ActiveObject* o, const char_t* name ) { get_active_object_manager()->name_active_object( name, require_not_nil( o, "set_name" ) ); } );
+	get_script_manager()->set_function( "set_loc", [] ( ActiveObject* o, float_t x, float_t y, float_t z ) { require_not_nil( o, "set_loc" )->set_location( x, y, z ); } );
+	get_script_manager()->set_function( "set_dir", [] ( ActiveObject* o, float_t r ) { require_not_nil( o, "set_dir" )->set_direction_degree( r ); } );
+	get_script_manager()->set_function( "set_vel", [] ( ActiveObject* o, float_t x, float_t y, float_t z ) { require_not_nil( o, "set_vel" )->set_velocity( Vector( x, y, z ) ); } );
+	get_script_manager()->set_function( "set_start_loc", [] ( ActiveObject* o, float_t  x, float_t  y, float_t  z ) { require_not_nil( o, "set_start_loc" )->set_start_location( x, y, z ); } );
+	get_script_manager()->set_function( "set_start_rot", [] ( ActiveObject* o, float_t rx, float_t ry, float_t rz ) { require_not_nil( o, "set_start_rot" )->set_start_rotation( rx, ry, rz ); } );
+	get_script_manager()->set_function( "set_start_dir", [] ( ActiveObject* o, float_t r ) { require_not_nil( o, "set_start_dir" )->set_start_direction_degree( r ); } );
+	get_script_manager()->set_function( "set_mass", [] ( ActiveObject* o, float_t mass ) { require_not_nil( o, "set_mass" )->set_mass( mass ); } );
+	get_script_manager()->set_function( "make_model_unique", [] ( ActiveObject* o ) { return require_not_nil( o, "make_model_unique" )->make_model_unique(); } );
 
 	// GrahpicsManager
 	get_script_manager()->set_function( "setup_shadow_map", [this] ( uint_t level = 3, uint_t size = 1024 ) { get_graphics_manager()->setup_shadow_map( level, size ); } );
@@ -405,14 +428,14 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "set_drawing_line_type", [this] ( int_t type ) { get_graphics_manager()->set_drawing_line_type( type ); } );
 	get_script_manager()->set_function( "set_light_direction", [this] ( float_t x, float_t y, float_t z ) { return get_graphics_manager()->set_light_direction( Vector( x, y, z, 0.f ) ); } );
 
-	get_script_manager()->set_function( "set_post_effect_shader", [this] ( core::graphics::Shader* s ) { get_graphics_manager()->set_post_effect_shader( s ); } );
+	get_script_manager()->set_function( "set_post_effect_shader", [this] ( core::graphics::Shader* s ) { get_graphics_manager()->set_post_effect_shader( require_not_nil( s, "set_post_effect_shader" ) ); } );
 
 	get_script_manager()->set_function( "load_model", [this] ( const char_t* name ) { return get_graphics_manager()->load_model( name ); } );
-	get_script_manager()->set_function( "clone_model", [this] ( graphics::Model* m ) { auto* m2 = get_graphics_manager()->clone_model( m ); return m2; } );
-	get_script_manager()->set_function( "clone_model_with_shaders", [this] ( graphics::Model* m ) { return get_graphics_manager()->clone_model_with_shaders( m ); } );
+	get_script_manager()->set_function( "clone_model", [this] ( graphics::Model* m ) { auto* m2 = get_graphics_manager()->clone_model( require_not_nil( m, "clone_model" ) ); return m2; } );
+	get_script_manager()->set_function( "clone_model_with_shaders", [this] ( graphics::Model* m ) { return get_graphics_manager()->clone_model_with_shaders( require_not_nil( m, "clone_model_with_shaders" ) ); } );
 
 	get_script_manager()->set_function( "get_shader", [this] ( const char_t* name ) { return get_graphics_manager()->get_shader( name ); } );
-	get_script_manager()->set_function( "clone_shader", [this] ( const core::graphics::Shader* s ) { return get_graphics_manager()->clone_shader( s ); } );
+	get_script_manager()->set_function( "clone_shader", [this] ( const core::graphics::Shader* s ) { return get_graphics_manager()->clone_shader( require_not_nil( s, "clone_shader" ) ); } );
 
 	get_script_manager()->set_function( "load_texture", [this] ( const char_t* file_path ) { return get_graphics_manager()->load_texture( file_path ); } );
 	// get_script_manager()->set_function( "load_named_texture", [this] ( const char_t* name, const char_t* file_path ) { return get_graphics_manager()->load_texture( name, file_path ); } );
@@ -958,12 +981,12 @@ void GameMain::on_special_key_down( int key )
 		return;
 	}
 
-	if ( key == KEY_F1 )
+	if ( key == VK_F1 )
 	{
 		is_command_mode_ = ! is_command_mode_;
 		update_cursor_state();
 	}
-	else if ( key == KEY_F2 )
+	else if ( key == VK_F2 )
 	{
 		get_sound_manager()->set_mute( ! get_sound_manager()->is_mute() );
 		settings_->sync_from_runtime( game_settings::AUDIO_MUTE, get_sound_manager()->is_mute() );
@@ -974,15 +997,15 @@ void GameMain::on_special_key_down( int key )
 			bgm->play( true );
 		}
 	}
-	else if ( key == KEY_F5 )
+	else if ( key == VK_F5 )
 	{
 		on_toggle_full_screen();
 	}
 
 	// F1〜F12 だけを番号（1〜12）にしてシーンに渡す（以前はどのキーも key - F1 + 1 にして渡し、文字のキーでも呼ばれていた）
-	if ( key >= KEY_F1 && key <= KEY_F12 )
+	if ( key >= VK_F1 && key <= VK_F12 )
 	{
-		scene_->on_function_key_down( key - KEY_F1 + 1 );
+		scene_->on_function_key_down( key - VK_F1 + 1 );
 	}
 }
 
@@ -1142,7 +1165,7 @@ void GameMain::replace_base_scene_with_loading_screen()
 	is_loading_frame_ = false;
 
 	// 読み込みは同期で行うので、その前に「読み込み中」を 1 回表示しておく（止まって見えないように）
-	// TODO: 非同期読み込み（エンジン内の管理クラスがスレッドに対応してから）
+	// シーンの読み込みを別スレッドにしたいときは、テクスチャと同じく AsyncLoader を使う（今は同期で、この 1 回の表示で待たせる）
 	get_graphics_manager()->set_default_render_target( true );
 	get_graphics_manager()->clear_default_view();
 	get_graphics_manager()->draw_text_at_center( get_ui_strings().get( "loading" ).c_str(), Color( 0.8f, 0.8f, 0.8f, 1.f ) );

@@ -16,6 +16,9 @@
 
 #include <GameObject/ActiveObject.h>
 #include <GameObject/StaticObject.h>
+#include <GameObject/GameObjectContext.h>
+
+#include <algorithm>
 
 #include <blue_sky/GameMain.h>
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -238,6 +241,11 @@ ActiveObject* ActiveObjectManager::clone_object( const ActiveObject* o )
 	return o2;
 }
 
+bool ActiveObjectManager::is_target_location_reached( float_t distance, float_t speed, float_t delta_time )
+{
+	return distance < ( std::max )( 0.1f, speed * delta_time );
+}
+
 void ActiveObjectManager::update()
 {
 	for ( auto i = active_object_list_.begin(); i != active_object_list_.end(); ++i )
@@ -253,20 +261,28 @@ void ActiveObjectManager::update()
 		}
 	}
 
+	const float_t delta_time = object_context_ && object_context_->delta_time ? object_context_->delta_time() : 0.f;
+
 	for ( auto i = target_location_map_.begin(); i != target_location_map_.end(); )
 	{
-		i->first->update_velocity_by_target_location( std::get< 0 >( i->second ), std::get< 1 >( i->second ) );
-		// i->first->set_location( std::get< 0 >( i->second ) );
+		const Vector target_location = std::get< 0 >( i->second );
+		const float_t speed = std::get< 1 >( i->second );
 
-		/// @todo 目的座標に到達したかの判定をもう少し正確にする
-		if ( ( std::get< 0 >( i->second ) - i->first->get_location() ).length() < 0.1f )
+		if ( is_target_location_reached( ( target_location - i->first->get_location() ).length(), speed, delta_time ) )
 		{
+			// 目標の位置に合わせて止める
+			// （以前は 0.1 未満に入ったときだけ着いたことにしていて、速いとき・フレームが長いときは目標の周りを行ったり来たりして着かないことがあった。
+			// 着いた後も最後の速度が残り、着いたときの処理を持たない物体（壁・プレイヤー）は動き続けていた）
+			i->first->set_location( target_location );
+			i->first->set_velocity( Vector::Zero );
 			i->first->on_arrive_at_target_location();
 
 			i = target_location_map_.erase( i );
 		}
 		else
 		{
+			i->first->update_velocity_by_target_location( target_location, speed );
+
 			++i;
 		}
 	}

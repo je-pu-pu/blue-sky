@@ -43,16 +43,16 @@ private:
 
 	int							cascade_levels_;			///< CSM のレベル数
 
-	ID3D11Texture2D*			depth_stencil_texture_;
-	ID3D11DepthStencilView*		depth_stencil_view_;
+	com_ptr< ID3D11Texture2D >			depth_stencil_texture_;
+	com_ptr< ID3D11DepthStencilView >	depth_stencil_view_;
 
 	ViewportList				viewport_list_;
 
-	/// @todo static をやめる
-	static Vector				light_position_;			///< ( 0, 0, 0 ) を向く sun
+	// 以前は static で、全インスタンス（作り直したゲームのものも含む）が光の位置と行列を共有していた
+	Vector						light_position_;			///< ( 0, 0, 0 ) を向く sun
 
-	static Matrix				view_matrix_;
-	static MatrixList			projection_matrix_list_;
+	Matrix						view_matrix_;
+	MatrixList					projection_matrix_list_;
 
 	void update_projection();
 

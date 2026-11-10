@@ -85,7 +85,6 @@ void TransformTestScene::update()
 	get_entity_manager()->update();
 
 	
-	/// @todo Component の値を GUI で変更する仕組みを整理する
 	
 	// GUI によってモデルを変更する
 	static int model_index = 0;

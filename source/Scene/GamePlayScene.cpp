@@ -287,9 +287,12 @@ void GamePlayScene::update()
 	{
 		debug_press_switches_frame_ = -1;
 
-		for ( auto* o : get_active_object_manager()->active_object_list() )
+		// 加えた順（ステージに書いた順）に押す。スイッチのイベントで物体が作られる（一覧に加わる）ことがあるので、添字で回す
+		const auto& objects = get_active_object_manager()->active_object_list();
+
+		for ( size_t i = 0; i < objects.size(); ++i )
 		{
-			if ( auto* s = dynamic_cast< BaseSwitch* >( o ) )
+			if ( auto* s = dynamic_cast< BaseSwitch* >( objects[ i ] ) )
 			{
 				const bool switched = s->do_switch();
 				debug_log( string_t( "[Debug] スイッチを押しました : " ) + ( switched ? "入った" : "入らなかった" ) );
@@ -304,9 +307,9 @@ void GamePlayScene::update()
 		get_graphics_manager()->clear_debug_bullet();
 		get_active_object_physics()->update( get_elapsed_time() );
 
-		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
+		for ( auto* o : get_active_object_manager()->active_object_list() )
 		{
-			( *i )->update_transform();
+			o->update_transform();
 		}
 	}
 

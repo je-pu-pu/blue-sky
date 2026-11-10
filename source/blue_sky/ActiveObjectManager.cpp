@@ -95,7 +95,7 @@ void ActiveObjectManager::add_active_object( ActiveObject* active_object )
 	// Entity を作り、描画の部品と定数バッファを用意する（以前は ActiveObject が定数バッファ・Model* を自分で持っていた）
 	active_object->attach_entity( entity_manager_, graphics_manager_ );
 
-	active_object_list_.insert( active_object );
+	active_object_list_.push_back( active_object );
 }
 
 void ActiveObjectManager::name_active_object( const string_t& name, ActiveObject* active_object )
@@ -261,12 +261,13 @@ bool ActiveObjectManager::is_target_location_reached( float_t distance, float_t 
 
 void ActiveObjectManager::update()
 {
-	for ( auto i = active_object_list_.begin(); i != active_object_list_.end(); ++i )
+	// 加えた順に更新する。更新の中で物体が加えられても一覧の参照が壊れないように添字で回し、
+	// 加えられた物体は次のフレームから更新する（始めの数までで止める）
+	const size_t object_count = active_object_list_.size();
+
+	for ( size_t i = 0; i < object_count; ++i )
 	{
-		// if ( ! (*i)->is_dead() )
-		{
-			(*i)->update();
-		}
+		active_object_list_[ i ]->update();
 	}
 
 	// アニメーションを進める（以前は物体ごとに update の直後に進めていた。物体のアニメーションは互いに独立なので、まとめて後で進めても同じ）

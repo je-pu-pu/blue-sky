@@ -3,8 +3,8 @@
 #include <GameObject/ActiveObject.h>
 #include <sstream>
 #include <tuple>
-#include <unordered_set>
 #include <unordered_map>
+#include <vector>
 
 namespace blue_sky
 {
@@ -25,7 +25,9 @@ namespace blue_sky
 class ActiveObjectManager
 {
 public:
-	using ActiveObjectList			= std::unordered_set< ActiveObject* >;
+	/// 加えた順（作った順）に並ぶ一覧。更新・スイッチの処理の順が起動ごとに変わらないように
+	/// （以前は unordered_set< ActiveObject* > で、アドレスの順になり起動ごとに変わっていた）
+	using ActiveObjectList			= std::vector< ActiveObject* >;
 	using ActiveObjectMap			= std::unordered_map< string_t, ActiveObject* >;
 	using TargetLocationMap			= std::unordered_map< ActiveObject*, std::tuple< Vector, float_t > >;
 	using TargetDirectionMap		= std::unordered_map< ActiveObject*, std::tuple< float_t, float_t > >;

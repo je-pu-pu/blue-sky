@@ -19,25 +19,24 @@ $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.e
 $msbuild = & $vswhere -latest -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe"
 ```
 
-**ソリューション全体をビルド (Debug):**
+構成は **x64**（Win32 は使わない）。出力は `source\.buildd\<Debug|Release>\`。
+
+**ゲームとテストをビルド (Debug):** ソリューション全体ではなく、ゲーム（exe）とテストを別々にビルドする
 ```powershell
-& $msbuild source\blue-sky.sln -p:Configuration=Debug -p:Platform=Win32 -v:minimal
+& $msbuild sourcelue-sky.sln -t:blue-sky-exe -p:Configuration=Debug -p:Platform=x64 -v:minimal -nologo
+& $msbuild sourcelue-sky.sln -t:blue-sky-test -p:Configuration=Debug -p:Platform=x64 -v:minimal -nologo
 ```
 
-**ライブラリのみビルド:**
-```powershell
-& $msbuild source\blue-sky.vcxproj -p:Configuration=Debug -p:Platform=Win32 -v:minimal
-```
-
-**リビルド:**
-```powershell
-& $msbuild source\blue-sky.sln -p:Configuration=Debug -p:Platform=Win32 -v:minimal -t:Rebuild
-```
+**リビルド:** 古い .obj でリンクに失敗したら、そのプロジェクトだけ `-t:blue-sky:Rebuild` などで作り直す（ファイルを戻したときに更新時刻が古いままで作り直されないことがある）
 
 **テスト実行 (Google Test):**
 ```powershell
-& .\source\x64\Debug\blue-sky-test.exe
+& .\source\.buildd\Debuglue-sky-test.exe
+# 既定では走らないベンチマーク（ECS の 1 万・10 万個など）
+& .\source\.buildd\Debuglue-sky-test.exe --gtest_also_run_disabled_tests --gtest_filter=EcsBenchmark.*
 ```
+
+PDB のエラー（C1041 など）が出たら、`mspdbsrv` を止めて `source\.buildd\Debuglue-sky.pdb` を消す。
 
 ## プロジェクト構成
 
@@ -62,30 +61,42 @@ core (エンジン)           ← エンジン層
 extern/common, game, win  ← 基盤層
 ```
 
-**注意:** core層はblue_sky層に依存すべきではない（現在TODOコメント付きで違反箇所あり）
+**注意:** core 層は blue_sky 層に依存しない（core から blue_sky への include は 0。新しく足さない）
 
 ### ECS (Entity Component System)
 
-`source/core/ecs/` に配置:
+**ゲームの物体はすべて ECS で作る。** 以前の継承の仕組み（`ActiveObject`・`ActiveObjectManager`・`GameObject` と Player・Robot などの派生クラス）は 2026-11 に無くした。新しい物体も「部品（Component）の組み合わせ＋システム（System）」で書き、物の種類を継承の木で表さない。経緯と決めたことは `doc/ECS移行計画.md`。
 
-- **EntityManager** (`EntityManager.h`) - 全Entity、Component、Systemを管理する。GameMain が 1 つ持ち、シーンは `get_entity_manager()` で受け取る（テストは自分で作る）
-- **Entity** (`Entity.h`) - 一意のID保持
-- **Component** (`Component.h`) - データコンポーネントの基底クラス
-- **System<...ComponentTypes>** (`System.h`) - 特定のComponent群を操作するシステムの可変長テンプレート
+- 土台は `source/core/ecs/`:
+  - **EntityManager** (`EntityManager.h`) - 全 Entity・Component・System を管理する。GameMain が 1 つ持ち、シーンは `get_entity_manager()` で受け取る（テストは自分で作る）
+  - **Entity** (`Entity.h`) - 一意の `EntityId`（二度と使わない通し番号）。ほかの Entity を指すときは `Entity*` を持ち続けず `EntityId` で持ち、`is_alive( id )`・`find( id )` で引く
+  - **Component** (`Component.h`) - データの部品の基底。部品は型ごとの置き場（`StablePool`）に値で置かれ、外すまで場所が動かない
+  - **System<...ComponentTypes>** (`System.h`) - その部品の組を持つ Entity を密な配列で回す。`update()` は System ごとに 1 回、中は `update_entity` を非仮想で回す
+- 規模の前提 : Entity は最終的に **1 万を超える**想定で設計する（効率の点検と計測は `doc/ECS移行計画.md` の 6 章。ベンチマークは `test/ecs`）
+- 本編の物体の部品とシステムは `source/blue_sky/ecs/component/`・`system/`（プレイヤー・敵・風船・スイッチ・目標地点への移動・当たり・描画のデータなど）。core 側は `source/core/ecs/component/`・`system/`
+- **物体を作る** : `blue_sky/ObjectFactory.h`（種類名から作る `create_object( "medal" )`・名前で引く・種類で探す）。Lua とステージからは `GameObjectRef`（EntityId を包む値）で触る
+- **本編の更新の順** : `blue_sky/ObjectUpdater.h` が本編のシステムを決まった順で動かす（`EntityManager::update()` では動かさないシステムがある。理由は計画書の段階 1・2）。当たりの決まりは `blue_sky/ecs/ContactRules.h`
 
 **使用例:**
 ```cpp
 // シーンの中（EntityManager は Scene::get_entity_manager() で受け取る）
 auto* entity = get_entity_manager()->create_entity();
-auto* transform = entity->add_component<TransformComponent>();
+auto* transform = entity->add_component< TransformComponent >();
 // システムは必要なものをコンストラクタで受け取る（priority の後の引数が渡る。シーンの中なら近道で得る）
-get_entity_manager()->add_system<RenderSystem>( 1000, get_graphics_manager(), get_time_manager() );
+get_entity_manager()->add_system< RenderSystem >( 1000, get_graphics_manager(), get_time_manager() );
 // 描く System（is_render_system）は update() ではなく、シーンの render() で get_entity_manager()->render() から動く
 ```
 
-**コンポーネント:** `source/core/ecs/component/` (TransformComponent, RigidBodyComponent, ModelComponent 等)
+### ステージ
 
-**システム:** `source/core/ecs/system/` (RenderSystem, PhysicsSystem, ParticleSystem)
+- ステージは **TOML**（`source/media/stage/*.stage.toml`・`media/stage_ext/`）。物体は `[[object]] type = "…"`、スイッチの動きはスイッチの中に `on_turn_on = [ { do = "…", … } ]`、場所と関係ない条件は `[[event]] when = …`。書き方は `doc/ステージ形式の設計.md`
+- 読む所 `blue_sky/stage/TomlStageParser`（ファイル → `StageData`、書き間違いは「ファイル:行」付きでログ）、当てる所 `StageBuilder`、動きは型付きの `Action`
+- 以前の独自形式（`.stage`）は無い。古いファイルは `tools/stage_convert/convert_stage.py` で変換できる
+
+### リソースと物理
+
+- **リソースはハンドルで持つ** : モデル・メッシュ・テクスチャ・音は `core::ResourceHandle`（`ModelHandle`・`TextureHandle`・`SoundHandle` など）で持ち、使うたびに `resolve_*` で引く（解放済みなら nullptr）。生ポインタを持ち続けない。持ち主が 1 つのもの（剛体・定数バッファなど）は `unique_ptr`／RAII
+- **物理は `core::physics::PhysicsManager` 1 つ**（Bullet を隠している）。Bullet の型を core/physics の外に出さない。剛体は RAII の `core::physics::RigidBody` を部品が持つ。物理エンジンが物体を指す印は `core/physics/EntityTag.h`（EntityId のタグ）
 
 ### メインゲームループ
 
@@ -98,8 +109,8 @@ get_entity_manager()->add_system<RenderSystem>( 1000, get_graphics_manager(), ge
 | マネージャー | 場所 | 役割 |
 |-------------|------|------|
 | GraphicsManager | `blue_sky/graphics/GraphicsManager.h` | モデル読み込み、描画 |
-| PhysicsManager | `core/physics/PhysicsManager.h` | Bullet Physics ラッパー |
-| SoundManager | `core/SoundManager.h` | 音声リソース管理 |
+| PhysicsManager | `core/physics/PhysicsManager.h` | 物理の世界（Bullet を隠す。本編も ECS のシーンも同じ 1 つ） |
+| SoundManager | `core/sound/SoundManager.h` | 音声リソース管理（ハンドルで引ける） |
 | SceneManager | `blue_sky/SceneManager.h` | シーン遷移 |
 | ScriptManager | `blue_sky/ScriptManager.h` | Lua スクリプティング (Sol2) |
 
@@ -107,7 +118,7 @@ get_entity_manager()->add_system<RenderSystem>( 1000, get_graphics_manager(), ge
 
 - **Direct3D11** ラッパー: `source/core/graphics/Direct3D11/`
 - ゲーム固有グラフィックス: `source/blue_sky/graphics/Direct3D11/`
-- HLSL シェーダー: `source/blue_sky/graphics/shader/`
+- HLSL シェーダー: `source/blue_sky/graphics/shader/`（読み込むのは `source/media/shader/*.fx`。Effects11 はやめ、自前の EffectParser で読む）
 
 ### サービス（マネージャー）の探し方
 
@@ -117,7 +128,7 @@ get_entity_manager()->add_system<RenderSystem>( 1000, get_graphics_manager(), ge
 - **シーン**は `Scene( GameMain& )` で受け取り、`Scene::get_*_manager()`・`get_input()`・`get_time_manager()` などの近道で GameMain から得る
 - **ECS のシステム**は必要なもの（物理・入力・時間・描画）をコンストラクタで受け取る。シーンが `add_system< T >( priority, get_physics_manager(), ... )` のように渡す（`add_system` は priority の後の引数をコンストラクタに渡す）
 - **描画の部品**は作り手の GraphicsManager から受け取る。シェーダーは `create_shader< T >( ... )` / `create_named_shader< T >( name, ... )` がコンストラクタの先頭に GraphicsManager を渡す（clone は引き継ぐ）。`Model::create_shader( GraphicsManager* )`・Line・MeshBuffer・Sprite も作り手が渡す
-- **ゲームのオブジェクト**は `GameObjectContext`（物理の世界・音・経過時間・delta_time）を ActiveObjectManager から受け取る
+- **ゲームの物体のシステム**は `GameObjectContext`（物理・音・経過時間・delta_time）を ObjectFactory・ObjectUpdater から受け取る
 - **新しく書くロジック**も、依存を引数・コンストラクタで受け取る（例: `Scene/OptionsController`）。シングルトンに触れないのでテストで動かせる
 - テストでは偽物を引数で渡す。update を呼ばないなら nullptr でよい（例: `test/ecs/EnemyAiSceneEcsTest.cpp`）
 

@@ -102,17 +102,6 @@ void GamePlayScene::run_action( const stage::Action& a )
 		return v ? Vector( static_cast< float_t >( ( * v )[ 0 ] ), static_cast< float_t >( ( * v )[ 1 ] ), static_cast< float_t >( ( * v )[ 2 ] ) ) : Vector::Zero;
 	};
 
-	// 色は書いた成分だけ変える（以前の ss >> r >> g >> b >> a は、読めなかった所から後を前の値のままにした）
-	auto set_components = [] ( Color& color, const std::vector< double >& v )
-	{
-		float_t* c[] = { & color.r(), & color.g(), & color.b(), & color.a() };
-
-		for ( size_t i = 0; i < v.size() && i < 4; ++i )
-		{
-			* c[ i ] = static_cast< float_t >( v[ i ] );
-		}
-	};
-
 	auto number = [ & ] ( const char* key, double default_value ) { return static_cast< float_t >( a.number( key, default_value ) ); };
 
 	// 名前で引いた物体（見つからなければ何もしない。以前と同じ）
@@ -122,17 +111,8 @@ void GamePlayScene::run_action( const stage::Action& a )
 	{
 		case ActionType::SET:
 		{
-			if ( a.has( "sky_box" ) )
-			{
-				if ( a.text( "sky_box" ) == "none" )
-				{
-					get_graphics_manager()->unset_sky_box();
-				}
-				else
-				{
-					get_graphics_manager()->set_sky_box( ( "sky-box-" + a.text( "sky_box" ) ).c_str() );
-				}
-			}
+			// 見た目（空・線・紙・色・光の位置・線の揺れ）はステージの見た目が行う
+			look_.apply( a, * get_graphics_manager() );
 
 			if ( a.has( "bgm" ) )
 			{
@@ -145,51 +125,14 @@ void GamePlayScene::run_action( const stage::Action& a )
 				set_bpm( number( "bpm", 120.0 ) * number( "beat", 1.0 ) );
 			}
 
-			if ( a.has( "line_type" ) ) { get_graphics_manager()->set_drawing_line_type( static_cast< int >( a.number( "line_type", 0.0 ) ) ); }
-			if ( a.has( "paper_type" ) ) { get_graphics_manager()->set_paper_texture_type( static_cast< int >( a.number( "paper_type", 0.0 ) ) ); }
-			if ( a.has( "drawing_accent_scale" ) ) { drawing_accent_scale_ = number( "drawing_accent_scale", 0.0 ); }
-			if ( a.has( "shading_enabled" ) ) { shading_enabled_ = a.flag( "shading_enabled", true ); }
 			if ( a.has( "balloon_sound_type" ) ) { balloon_sound_type_ = static_cast< BalloonSoundType >( static_cast< int_t >( a.number( "balloon_sound_type", 0.0 ) ) ); }
-
-			if ( auto v = a.numbers( "ambient_color" ) ) { set_components( ambient_color_.target_value(), * v ); ambient_color_.chase_full(); }
-			if ( auto v = a.numbers( "shadow_color" ) ) { set_components( shadow_color_.target_value(), * v ); shadow_color_.chase_full(); }
-			if ( auto v = a.numbers( "shadow_paper_color" ) ) { set_components( shadow_paper_color_.target_value(), * v ); shadow_paper_color_.chase_full(); }
-
-			if ( auto v = a.numbers( "light_position" ) )
-			{
-				const Vector p = to_vector( v );
-				light_position_.target_value().set( p.x(), p.y(), p.z() );
-				light_position_.value() = light_position_.target_value();
-			}
 
 			break;
 		}
 		case ActionType::FADE:
 		{
-			// 速さは書いたときだけ変える（以前の set_*_color_target の 5 つ目の数）
-			auto fade = [ & ] ( const char* key, common::chase_value< Color, float_t >& color )
-			{
-				if ( auto v = a.numbers( key ) )
-				{
-					set_components( color.target_value(), * v );
-
-					if ( a.has( "speed" ) )
-					{
-						color.speed() = number( "speed", 0.0 );
-					}
-				}
-			};
-
-			fade( "ambient_color", ambient_color_ );
-			fade( "shadow_color", shadow_color_ );
-			fade( "shadow_paper_color", shadow_paper_color_ );
-
-			if ( auto v = a.numbers( "light_position" ) )
-			{
-				const Vector p = to_vector( v );
-				light_position_.target_value().set( p.x(), p.y(), p.z() );
-			}
-
+			// 色・光の位置を少しずつ変える（ステージの見た目が行う）
+			look_.apply( a, * get_graphics_manager() );
 			break;
 		}
 		case ActionType::PLAY_SOUND:
@@ -355,7 +298,7 @@ void GamePlayScene::load_stage_file( const char* base_name )
 	stage::StageBuilder::Context context;
 	context.object_factory = get_object_factory();
 	context.physics = get_physics_manager();
-	context.graphics_manager = get_graphics_manager();
+	context.render_settings = get_graphics_manager();
 	context.sound_manager = get_sound_manager();
 	context.player = player_id_;
 	context.camera = camera_.get();

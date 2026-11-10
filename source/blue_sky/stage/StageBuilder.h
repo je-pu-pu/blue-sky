@@ -18,7 +18,7 @@ class Camera;
 
 namespace graphics
 {
-	class GraphicsManager;
+	class RenderSettings;
 }
 
 namespace stage
@@ -41,7 +41,7 @@ public:
 	{
 		ObjectFactory*					object_factory = nullptr;
 		core::physics::PhysicsManager*	physics = nullptr;			///< 当たりの形を加える世界
-		graphics::GraphicsManager*		graphics_manager = nullptr;	///< 地面
+		graphics::RenderSettings*		render_settings = nullptr;	///< 地面を設定する先（描画の設定の窓口）
 		core::sound::SoundManager*		sound_manager = nullptr;	///< 読み込むときの BGM
 		std::optional< core::ecs::EntityId >	player;					///< プレイヤー（ECS だけの物体。ObjectFactory::create_player で作った物）
 		Camera*							camera = nullptr;			///< プレイヤーのカメラの向き

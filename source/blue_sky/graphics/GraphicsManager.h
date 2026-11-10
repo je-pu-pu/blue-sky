@@ -3,6 +3,7 @@
 #include <blue_sky/ConstantBuffers.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Mesh.h>
+#include <blue_sky/graphics/RenderSettings.h>
 #include <blue_sky/type.h>
 
 #include <core/animation/SkinningAnimationSet.h>
@@ -64,8 +65,10 @@ namespace blue_sky::graphics
  *
  * このクラスが実体化される事はない。
  * 実際にはこのクラスを継承した blue_sky::graphics::direct_3d_11::GraphicsManager が実体化される。
+ *
+ * 使う側ごとの小さな窓口（RenderSettings など）も実装する。使う側は全体ではなく窓口だけを受け取る（doc/描画の窓口の分割.md）
  */
-class GraphicsManager : public core::graphics::GraphicsManager
+class GraphicsManager : public core::graphics::GraphicsManager, public RenderSettings
 {
 public:
 	using Model							= Model;
@@ -313,22 +316,23 @@ public:
 
 	// virtual void unload_texture_all() = 0;
 
-	void set_paper_texture_type( int_t );
+	void set_paper_texture_type( int_t ) override;
 	void bind_paper_texture() const;
 
-	virtual void set_sky_box( const char_t* ) = 0;
-	virtual void unset_sky_box() = 0;
+	// RenderSettings
+	void set_sky_box( const char_t* ) override = 0;
+	void unset_sky_box() override = 0;
 	virtual bool is_sky_box_set() const = 0;
 
-	virtual void set_ground( const char_t* ) = 0;
+	void set_ground( const char_t* ) override = 0;
 	virtual void unset_ground() = 0;
 	// virtual bool is_ground_set() const = 0;
 
-	virtual void set_ambient_color( const Color& ) = 0;
-	virtual void set_shadow_color( const Color& ) = 0;
-	virtual void set_shadow_paper_color( const Color& ) = 0;
-	virtual void set_drawing_accent( float_t ) = 0;
-	virtual void set_drawing_line_type( int_t ) = 0;
+	void set_ambient_color( const Color& ) override = 0;
+	void set_shadow_color( const Color& ) override = 0;
+	void set_shadow_paper_color( const Color& ) override = 0;
+	void set_drawing_accent( float_t ) override = 0;
+	void set_drawing_line_type( int_t ) override = 0;
 
 	virtual void set_eye_position( const Vector& ) = 0;
 

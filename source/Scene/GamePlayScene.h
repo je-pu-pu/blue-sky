@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include <blue_sky/GameObjectRef.h>
 #include <blue_sky/ecs/component/PlayerInputComponent.h>
+#include <blue_sky/stage/StageLook.h>
 
 #include <common/chase_value.h>
 #include <core/setting/SettingStore.h>
@@ -121,13 +122,7 @@ private:
 
 	float_t								bpm_;
 
-	float_t								drawing_accent_scale_;	///< ( 0 : アクセントを完全に無効化 ) .. ( 2 : アクセント 2 倍 ) ..
-	
-	common::chase_value< Vector3, float_t >		light_position_;
-	common::chase_value< Color, float_t >		ambient_color_;
-	common::chase_value< Color, float_t >		shadow_color_;
-	common::chase_value< Color, float_t >		shadow_paper_color_;
-	bool										shading_enabled_;
+	stage::StageLook					look_;					///< ステージの見た目（光の位置・色・線の揺れ。ステージの set・fade が変える）
 
 	BalloonSoundType					balloon_sound_type_;
 

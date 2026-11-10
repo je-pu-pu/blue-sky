@@ -3,7 +3,7 @@
 #include <blue_sky/ObjectFactory.h>
 #include <core/physics/PhysicsManager.h>
 #include <blue_sky/DebugLog.h>
-#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/RenderSettings.h>
 
 #include <GameObject/Camera.h>
 
@@ -49,9 +49,9 @@ StageBuilder::Result StageBuilder::build( const StageData& data, const Context& 
 		context.physics->load_obj( ( context.stage_dir + data.collision ).c_str() );
 	}
 
-	if ( ! data.ground.empty() && context.graphics_manager )
+	if ( ! data.ground.empty() && context.render_settings )
 	{
-		context.graphics_manager->set_ground( data.ground.c_str() );
+		context.render_settings->set_ground( data.ground.c_str() );
 	}
 
 	ObjectFactory* factory = context.object_factory;

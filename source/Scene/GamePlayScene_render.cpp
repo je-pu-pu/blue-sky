@@ -223,7 +223,8 @@ void GamePlayScene::update_render_data_for_frame_for_eye( int eye_index ) const
  */
 void GamePlayScene::update_frame_constant_buffer_data_sub( FrameConstantBufferData& frame_constant_buffer_data ) const
 {
-	frame_constant_buffer_data.light = -Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z(), 1.f );
+	const Vector3 light_position = look_.get_light_position();
+	frame_constant_buffer_data.light = -Vector( light_position.x(), light_position.y(), light_position.z(), 1.f );
 	frame_constant_buffer_data.light.normalize();
 	frame_constant_buffer_data.time = get_total_elapsed_time();
 	frame_constant_buffer_data.time_beat = static_cast< uint_t >( get_total_elapsed_time() * ( get_bpm() / 60.f ) );
@@ -234,9 +235,7 @@ void GamePlayScene::update_frame_constant_buffer_data_sub( FrameConstantBufferDa
  */
 void GamePlayScene::update_render_data_for_frame_drawing() const
 {
-	get_graphics_manager()->set_shadow_color( shadow_color_.value() );
-	get_graphics_manager()->set_shadow_paper_color( shadow_paper_color_.value() );
-	get_graphics_manager()->set_drawing_accent( bgm_ ? bgm_->get_current_peak_level() * drawing_accent_scale_ : 0.f );
+	look_.apply_shadow_and_accent( * get_graphics_manager(), bgm_ ? bgm_->get_current_peak_level() : 0.f );
 
 	get_graphics_manager()->get_frame_drawing_render_data()->update();
 }

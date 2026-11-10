@@ -56,12 +56,6 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 	, camera_( new Camera() )
 	, action_bgm_after_timer_( 0.f )
 	, bpm_( 120.f )
-	, drawing_accent_scale_( 0.f )
-	, light_position_( Vector3( 0.25f, 1.f, -1.f ), 0.1f )
-	, ambient_color_( Color( 1.f, 1.f, 1.f, 1.f ), 0.02f )
-	, shadow_color_( Color( 0.f, 0.f, 0.f, 1.f ), 0.02f )
-	, shadow_paper_color_( Color( 0.9f, 0.9f, 0.9f, 1.f ), 0.02f )
-	, shading_enabled_( true )
 	, balloon_sound_type_( BalloonSoundType::MIX )
 	, is_blackout_( false )
 	, blackout_timer_( 0.f )
@@ -401,12 +395,8 @@ void GamePlayScene::update()
 	update_balloon_sound();
 	update_shadow();
 
-	light_position_.chase();
-	ambient_color_.chase();
-	shadow_color_.chase();
-	shadow_paper_color_.chase();
-
-	get_graphics_manager()->set_ambient_color( ambient_color_.value() );
+	look_.chase();
+	look_.apply_ambient_color( * get_graphics_manager() );
 
 	// tess test
 	{
@@ -753,7 +743,8 @@ void GamePlayScene::update_shadow()
 {
 	if ( get_graphics_manager()->is_shadow_enabled() )
 	{
-		get_graphics_manager()->get_shadow_map()->set_light_position( Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z(), 1.f ) );
+		const Vector3 light_position = look_.get_light_position();
+		get_graphics_manager()->get_shadow_map()->set_light_position( Vector( light_position.x(), light_position.y(), light_position.z(), 1.f ) );
 		get_graphics_manager()->get_shadow_map()->set_eye_position( camera_->position() );
 	}
 }

@@ -290,6 +290,9 @@
     <ClCompile Include="blue_sky\stage\StageBuilder.cpp">
       <Filter>blue_sky\stage</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\stage\StageLook.cpp">
+      <Filter>blue_sky\stage</Filter>
+    </ClCompile>
     <ClCompile Include="blue_sky\stage\TomlStageParser.cpp">
       <Filter>blue_sky\stage</Filter>
     </ClCompile>
@@ -744,6 +747,9 @@
     <ClInclude Include="blue_sky\graphics\GraphicsManager.h">
       <Filter>blue_sky\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\graphics\RenderSettings.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
     <ClInclude Include="blue_sky\graphics\shader\BaseShader.h">
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
@@ -1006,6 +1012,9 @@
       <Filter>blue_sky\stage</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\stage\StageBuilder.h">
+      <Filter>blue_sky\stage</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\stage\StageLook.h">
       <Filter>blue_sky\stage</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\stage\TomlStageParser.h">

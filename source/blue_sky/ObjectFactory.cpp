@@ -83,6 +83,22 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		return id;
 	}
 
+	if ( kind == "goal" )
+	{
+		// 以前の Goal : 4 x 2 x 4・硬い・着地しても死なない足場・重力 0・やり直すと質量 100（作ったときは 1）。
+		// 当たりでは何も起こさない（ゴールしたかはシーンがプレイヤーとの接触で調べる）。目標地点に着いたら止まる
+		ObjectSpec spec;
+		spec.kind = kind;
+		spec.size = Vector( 4.f, 2.f, 4.f );
+		spec.mass = 1.f;
+		spec.is_safe_footing = true;
+		spec.has_default_gravity = true;
+		spec.gravity = Vector::Zero;
+		spec.restart_mass = 100.f;
+
+		return create_entity_object( spec );
+	}
+
 	if ( kind == "rocket" )
 	{
 		// 以前の Rocket : 0.2 x 1 x 0.2・硬い（ぶつかる）が壁にはならない・地球の重力。

@@ -5,7 +5,6 @@
 
 #include <GameObject/Player.h>
 #include <GameObject/Girl.h>
-#include <GameObject/Goal.h>
 #include <GameObject/Robot.h>
 #include <GameObject/Balloon.h>
 #include <GameObject/AreaSwitch.h>
@@ -485,7 +484,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			float_t x = 0, y = 0, z = 0;
 			ss >> x >> y >> z;
 
-			goal_->set_start_location( x, y, z );
+			goal_.set_start_location( x, y, z );
 		}
 		else if ( command == "ground" )
 		{

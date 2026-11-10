@@ -5,6 +5,8 @@
 
 #include <functional>
 
+class btRigidBody;
+
 namespace core::ecs
 {
 	class EntityManager;
@@ -62,6 +64,9 @@ public:
 
 	/// ActiveObject を持つ物体ならその ActiveObject（ECS だけの物体・消えた物体なら nullptr）
 	ActiveObject* get_active_object() const;
+
+	/// 剛体（無ければ nullptr。持ち主ではない）
+	btRigidBody* get_rigid_body() const;
 
 	core::Vector get_location() const;
 	void set_location( const core::Vector& location );

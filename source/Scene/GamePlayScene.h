@@ -27,7 +27,6 @@ namespace blue_sky
 {
 	class Player;
 	class Girl;
-	class Goal;
 	class ActiveObject;
 	class Camera;
 	class DelayedCommand;
@@ -84,7 +83,7 @@ private:
 	// 非所有参照 (ActiveObjectManager が所有)
 	Player*								player_ = nullptr;
 	Girl*								girl_ = nullptr;
-	Goal*								goal_ = nullptr;
+	GameObjectRef						goal_;		///< ゴール（ECS だけの物体。ObjectFactory が持つ）
 
 	// 所有リソース
 	std::unique_ptr< Config >			stage_config_;

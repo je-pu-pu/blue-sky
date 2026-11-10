@@ -6,7 +6,6 @@
 #include <core/setting/SettingStore.h>
 
 #include <GameObject/Player.h>
-#include <GameObject/Goal.h>
 #include <GameObject/Balloon.h>
 #include <GameObject/Camera.h>
 
@@ -86,8 +85,15 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 	get_object_factory()->name( "player", player_->get_entity_id() );
 
 	// Goal
-	goal_ = static_cast< Goal* >( create_object( "goal" ) );
-	get_object_factory()->name( "goal", goal_->get_entity_id() );
+	if ( auto id = get_object_factory()->create_object( "goal" ) )
+	{
+		goal_ = get_object_factory()->get_ref( * id );
+		get_object_factory()->name( "goal", * id );
+	}
+	else
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( "create goal failed." );
+	}
 
 	// Camera
 	camera_->set_fov_default( get_setting_store()->get( game_settings::CAMERA_FOV ) );
@@ -323,7 +329,7 @@ void GamePlayScene::update()
 	// collision_check（当たった組を ecs::CollisionEventSystem に集め、互換の層が二重ディスパッチを呼ぶ。調べる順は以前と同じ : プレイヤー → ゴール → 全部）
 	get_active_object_manager()->check_collision_with( player_ );
 
-	if ( get_active_object_physics()->is_collision( player_, goal_ ) )
+	if ( get_active_object_physics()->is_collision( player_->get_rigid_body(), goal_.get_rigid_body() ) )
 	{
 		on_goal();
 	}
@@ -724,7 +730,7 @@ void GamePlayScene::debug_visit_objects()
 	add_first( "風船", [] ( const ActiveObject* o ) { return dynamic_cast< const Balloon* >( o ) != nullptr; } );
 	add_first( "梯子", [] ( const ActiveObject* o ) { return dynamic_cast< const Ladder* >( o ) != nullptr; } );
 	add_first_entity( "ロケット", "rocket" );
-	targets.emplace_back( "ゴール", goal_->get_location() );
+	targets.emplace_back( "ゴール", goal_.get_location() );
 
 	const size_t step = static_cast< size_t >( ( frame - start_frame ) / interval );
 
@@ -759,7 +765,7 @@ void GamePlayScene::debug_visit_objects()
 
 void GamePlayScene::update_clear()
 {
-	Vector target_position = goal_->get_location();
+	Vector target_position = goal_.get_location();
 	target_position.set_z( target_position.z() - get_goal_camera_z_offset() + get_sound_manager()->get_sound( "fin" )->get_current_position() * get_goal_camera_z_speed() );
 
 	player_->set_location( player_->get_location() * ( 1.f - get_goal_position_lerp() ) + target_position * get_goal_position_lerp() );

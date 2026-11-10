@@ -144,6 +144,19 @@ bool ActiveObjectPhysics::is_collision( ActiveObject* a, ActiveObject* b )
 	return callback.is_hit();
 }
 
+bool ActiveObjectPhysics::is_collision( btCollisionObject* a, btCollisionObject* b )
+{
+	if ( ! a || ! b )
+	{
+		return false;
+	}
+
+	ContactResultCallback callback;
+	dynamics_world_->contactPairTest( a, b, callback );
+
+	return callback.is_hit();
+}
+
 void ActiveObjectPhysics::collect_contacts_with( ActiveObject* a, ecs::CollisionEventSystem& events )
 {
 	CollectContactResultCallback callback( events );

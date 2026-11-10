@@ -150,7 +150,6 @@
     <ClCompile Include="GameObject\Camera.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="GameObject\Girl.cpp" />
-    <ClCompile Include="GameObject\Goal.cpp" />
     <ClCompile Include="GameObject\Ladder.cpp" />
     <ClCompile Include="GameObject\Missile.cpp" />
     <ClCompile Include="GameObject\Player.cpp" />
@@ -452,7 +451,6 @@
     <ClInclude Include="GameObject\Camera.h" />
     <ClInclude Include="GameObject\GameObject.h" />
     <ClInclude Include="GameObject\Girl.h" />
-    <ClInclude Include="GameObject\Goal.h" />
     <ClInclude Include="GameObject\Ladder.h" />
     <ClInclude Include="GameObject\Missile.h" />
     <ClInclude Include="GameObject\Player.h" />

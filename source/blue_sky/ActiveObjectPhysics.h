@@ -35,6 +35,9 @@ public:
 
 	bool is_collision( ActiveObject*, ActiveObject* );
 
+	/// 2 つの剛体が接しているか（ECS だけの物体の剛体も渡せる。どちらかが nullptr なら false）
+	bool is_collision( btCollisionObject* a, btCollisionObject* b );
+
 	/// a と接している組を集める（以前の check_collision_with。その場で on_collide_with を呼ばず、集めた組は events が振り分けて渡す）
 	void collect_contacts_with( ActiveObject* a, ecs::CollisionEventSystem& events );
 

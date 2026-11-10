@@ -58,6 +58,16 @@ void GameObjectRef::log_unsupported( const char* operation ) const
 	debug_log( string_t( "[Object] この物体では " ) + operation + " はできません（種類 : " + ( state ? state->kind : string_t( "不明" ) ) + "）" );
 }
 
+btRigidBody* GameObjectRef::get_rigid_body() const
+{
+	if ( ActiveObject* o = get_active_object() )
+	{
+		return o->get_rigid_body();
+	}
+
+	return ecs::EntityObject( find_entity() ).get_rigid_body();
+}
+
 core::Vector GameObjectRef::get_location() const
 {
 	if ( const ActiveObject* o = get_active_object() )

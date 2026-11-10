@@ -492,6 +492,36 @@ TEST( ObjectFactoryTest, ロケットは硬い拾う物で_拾われると当た
 	EXPECT_EQ( body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
 }
 
+TEST( ObjectFactoryTest, ゴールは死なない足場で重力が無く_やり直すと質量が_100_になり_当たりでは何も起こさない )
+{
+	FactoryFixture f;
+
+	const auto id = f.factory.create_object( "goal" );
+	ASSERT_TRUE( id.has_value() );
+
+	auto* e = f.entity( * id );
+	const auto* traits = e->get_component< blue_sky::ecs::CollisionTraitsComponent >();
+	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body;
+
+	EXPECT_TRUE( traits->is_hard );
+	EXPECT_TRUE( traits->is_safe_footing );
+	EXPECT_EQ( e->get_component< blue_sky::ecs::PickupComponent >(), nullptr );
+	EXPECT_EQ( e->get_component< blue_sky::ecs::StaticObjectComponent >(), nullptr );
+	EXPECT_FLOAT_EQ( body->getInvMass(), 1.f );		// 作ったときは 1（以前と同じ）
+
+	f.factory.restart();
+
+	EXPECT_FLOAT_EQ( body->getInvMass(), 1.f / 100.f );
+	EXPECT_NEAR( body->getGravity().length(), 0.f, 0.0001f );
+
+	FakePicker player;
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, * e );
+
+	EXPECT_TRUE( player.picked.empty() );
+	EXPECT_EQ( player.static_object_count, 0 );
+	EXPECT_FALSE( traits->is_dead );
+}
+
 TEST( ObjectFactoryTest, 傘は硬くない拾う物で_プレイヤーが触れると消える )
 {
 	FactoryFixture f;

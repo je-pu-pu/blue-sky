@@ -39,7 +39,7 @@ void Scene::log_lost_resource( const char_t* what ) const
 
 Scene::Texture* Scene::resolve( TextureHandle h, const char_t* what ) const
 {
-	Texture* t = get_graphics_manager()->resolve_texture( h );
+	Texture* t = h.get();
 
 	if ( ! t && ! h.is_null() )
 	{
@@ -51,7 +51,7 @@ Scene::Texture* Scene::resolve( TextureHandle h, const char_t* what ) const
 
 Scene::Model* Scene::resolve( ModelHandle h, const char_t* what ) const
 {
-	Model* m = get_graphics_manager()->resolve_model( h );
+	Model* m = static_cast< Model* >( h.get() );	// GraphicsManager は blue_sky のモデルだけを入れる
 
 	if ( ! m && ! h.is_null() )
 	{
@@ -63,7 +63,7 @@ Scene::Model* Scene::resolve( ModelHandle h, const char_t* what ) const
 
 Scene::Sound* Scene::resolve( SoundHandle h, const char_t* what ) const
 {
-	Sound* s = get_sound_manager()->resolve( h );
+	Sound* s = h.get();
 
 	if ( ! s && ! h.is_null() )
 	{

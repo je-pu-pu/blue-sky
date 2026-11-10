@@ -50,9 +50,9 @@ private:
 	core::graphics::ShaderHandle instanced_shader_;
 	core::graphics::ShaderHandle beat_pulse_shader_;
 
-	/// モデルのハンドルの番号ごとの world 行列（メンバにして中身だけ消し、容量を使い回す。以前は毎フレーム map と vector を作り直していた）。
+	/// モデルのハンドルごとの world 行列（メンバにして中身だけ消し、容量を使い回す。以前は毎フレーム map と vector を作り直していた）。
 	/// モデルは描くときにハンドルから引く（以前はモデルの生ポインタを鍵にしていた）
-	std::unordered_map< std::uint64_t, std::vector< Matrix > > model_instances_;
+	std::unordered_map< core::graphics::ModelHandle, std::vector< Matrix > > model_instances_;
 
 	bool shader_lost_logged_ = false;	///< 解放されたシェーダーのログを出したか（毎フレーム出さない）
 	bool model_lost_logged_ = false;	///< 解放されたモデルのログを出したか（同上）

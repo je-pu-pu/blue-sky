@@ -2,6 +2,8 @@
 
 #include <core/ResourceManager.h>
 
+#include <type_traits>
+
 namespace
 {
 
@@ -73,8 +75,8 @@ TEST( ResourceManagerTest, 全部消すとハンドルはすべて無効で番�
 	const auto h2 = m.handle_of( m.create< Counted >( 2 ) );
 	EXPECT_NE( h1, h2 );					// 同じ番号を使い回さない（古いハンドルが新しいものを指さない）
 	EXPECT_EQ( nullptr, m.resolve( h1 ) );
-	EXPECT_TRUE( core::ResourceManager< Counted >::Handle().is_null() );
-	EXPECT_EQ( nullptr, m.resolve( core::ResourceManager< Counted >::Handle() ) );
+	EXPECT_TRUE( core::ResourceManager< Counted >::WeakHandle().is_null() );
+	EXPECT_EQ( nullptr, m.resolve( core::ResourceManager< Counted >::WeakHandle() ) );
 }
 
 TEST( ResourceManagerTest, 作った側が手放すとそれを指す名前も外れて解放される )
@@ -129,7 +131,7 @@ TEST( ResourceManagerTest, 無効なハンドルへの差し替えは失敗し�
 	Counted::alive = 0;
 	core::ResourceManager< Counted > m;
 
-	EXPECT_FALSE( m.replace( core::ResourceManager< Counted >::Handle(), std::make_unique< Counted >( 1 ) ) );
+	EXPECT_FALSE( m.replace( core::ResourceManager< Counted >::WeakHandle(), std::make_unique< Counted >( 1 ) ) );
 	EXPECT_EQ( 0, Counted::alive );
 
 	const auto h = m.handle_of( m.create_named( "a", 1 ) );
@@ -260,4 +262,139 @@ TEST( ResourceManagerTest, 作った側が手放してもそのフレームで�
 	m.flush_releases();
 	EXPECT_EQ( nullptr, m.resolve( h ) );
 	EXPECT_EQ( 0, Counted::alive );
+}
+
+// Handle（持ち主の印）は ResourceManager だけが作れる。ほかの所では作れず、コピー・ムーブもできない（作ったら動かさない）。
+// これはコンパイルで守る : core::Handle< Counted > h; と書くとコンパイルできない（コンストラクタが ResourceManager にだけ見える）。
+static_assert( ! std::is_default_constructible_v< core::Handle< Counted > >, "Handle は ResourceManager の外で作れない" );
+static_assert( ! std::is_copy_constructible_v< core::Handle< Counted > >, "Handle はコピーできない" );
+static_assert( ! std::is_move_constructible_v< core::Handle< Counted > >, "Handle は動かせない" );
+static_assert( sizeof( core::Handle< Counted > ) == sizeof( void* ), "Handle はリソースへのポインタだけ（8 バイト）" );
+static_assert( sizeof( core::WeakHandle< Counted > ) == sizeof( void* ), "WeakHandle は Handle へのポインタだけ（8 バイト）" );
+static_assert( std::is_copy_constructible_v< core::WeakHandle< Counted > >, "WeakHandle は誰でも持てる・コピーできる" );
+
+TEST( ResourceManagerTest, 解放した名前を読み直すと同じHandleを使い古いWeakHandleが新しい中身を引く )
+{
+	Counted::alive = 0;
+	core::ResourceManager< Counted > m;
+
+	m.create_named( "stage-bgm", 1 );
+	const auto h = m.get_handle( "stage-bgm" );
+	const auto handle_count = m.get_handle_count();
+
+	m.remove_named( "stage-bgm" );				// シーンの片付け（pop_group・unload_named_model など）
+	m.flush_releases();
+	EXPECT_EQ( nullptr, h.get() );
+	EXPECT_TRUE( h.expired() );
+	EXPECT_FALSE( h.is_null() );				// 空ではない（解放済み）
+
+	m.create_named( "stage-bgm", 2 );			// 次のシーンで同じ名前を読む
+
+	EXPECT_EQ( h, m.get_handle( "stage-bgm" ) );	// 同じ Handle
+	EXPECT_EQ( 2, h.get()->value );				// 古い WeakHandle がそのまま新しい中身を引く
+	EXPECT_EQ( handle_count, m.get_handle_count() );	// Handle は増えない
+}
+
+TEST( ResourceManagerTest, 同じフレームで解放して読み直しても新しい中身を引き古い中身はフレームの終わりに解放される )
+{
+	Counted::alive = 0;
+	core::ResourceManager< Counted > m;
+
+	Counted* old_resource = m.create_named( "generated_city", 1 );
+	const auto h = m.get_handle( "generated_city" );
+
+	m.remove_named( "generated_city" );			// CityGenerator : 外して、すぐに作り直す
+	m.create_named( "generated_city", 2 );
+
+	EXPECT_EQ( 2, h.get()->value );
+	EXPECT_EQ( 1, old_resource->value );		// 古い中身はこのフレームでは生きている
+	EXPECT_EQ( 2, Counted::alive );
+
+	m.flush_releases();
+
+	EXPECT_EQ( 2, h.get()->value );				// 読み直した中身は解放されない
+	EXPECT_EQ( 1, Counted::alive );
+}
+
+TEST( ResourceManagerTest, 名前を2つ持つリソースを手放して片方だけ読み直してももう片方は別のHandleになる )
+{
+	Counted::alive = 0;
+	core::ResourceManager< Counted > m;
+
+	Counted* a = m.create_named( "a", 1 );
+	m.add_named( "a2", a );
+	const auto h = m.get_handle( "a" );
+
+	m.release( a );
+	m.flush_releases();
+
+	m.create_named( "a", 2 );					// a の Handle を使い回す
+	m.create_named( "a2", 3 );					// 同じ Handle は a が使っているので、新しい Handle
+
+	EXPECT_EQ( h, m.get_handle( "a" ) );
+	EXPECT_NE( h, m.get_handle( "a2" ) );
+	EXPECT_EQ( 2, m.get( "a" )->value );		// a2 を読んでも a は上書きされない
+	EXPECT_EQ( 3, m.get( "a2" )->value );
+	EXPECT_EQ( 2, h.get()->value );
+}
+
+TEST( ResourceManagerTest, Handleを足してページが増えても前のHandleの場所は動かない )
+{
+	Counted::alive = 0;
+	core::ResourceManager< Counted > m;
+
+	Counted* first = m.create_named( "first", 1 );
+	const auto h = m.get_handle( "first" );
+	const void* place = h.key();
+
+	std::vector< core::ResourceManager< Counted >::WeakHandle > others;
+
+	for ( int n = 0; n < static_cast< int >( core::ResourceManager< Counted >::HANDLE_PAGE_SIZE ) * 4; n++ )
+	{
+		others.push_back( m.handle_of( m.create( n ) ) );		// 名前の無いもの（clone_model など）を作り続ける
+	}
+
+	EXPECT_EQ( place, m.get_handle( "first" ).key() );			// 場所は動かない
+	EXPECT_EQ( first, h.get() );
+	EXPECT_EQ( 5u, m.get_handle_memory_size() / ( core::ResourceManager< Counted >::HANDLE_PAGE_SIZE * sizeof( void* ) ) );	// ページは 5 枚
+
+	for ( int n = 0; n < static_cast< int >( others.size() ); n++ )
+	{
+		ASSERT_EQ( n, others[ n ].get()->value );
+	}
+
+	EXPECT_EQ( others.size() + 1, m.get_handle_count() );
+	EXPECT_EQ( others.size() + 1, m.get_live_handle_count() );
+}
+
+TEST( ResourceManagerTest, 名前の無いリソースのHandleは解放しても使い回さない )
+{
+	Counted::alive = 0;
+	core::ResourceManager< Counted > m;
+
+	Counted* a = m.create( 1 );
+	const auto ha = m.handle_of( a );
+
+	m.release( a );
+	m.flush_releases();
+
+	const auto hb = m.handle_of( m.create( 2 ) );
+
+	EXPECT_NE( ha, hb );						// 古い WeakHandle が別のものを指さない
+	EXPECT_EQ( nullptr, ha.get() );
+	EXPECT_EQ( 2u, m.get_handle_count() );		// Handle は解放しても減らない
+	EXPECT_EQ( 1u, m.get_live_handle_count() );
+}
+
+TEST( ResourceManagerTest, 別のResourceManagerのハンドルでは差し替えられない )
+{
+	Counted::alive = 0;
+	core::ResourceManager< Counted > m1;
+	core::ResourceManager< Counted > m2;
+
+	const auto h = m1.handle_of( m1.create( 1 ) );
+
+	EXPECT_FALSE( m2.replace( h, std::make_unique< Counted >( 2 ) ) );
+	EXPECT_EQ( 1, h.get()->value );
+	EXPECT_EQ( 1, Counted::alive );
 }

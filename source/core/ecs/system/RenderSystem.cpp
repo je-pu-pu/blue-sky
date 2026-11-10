@@ -127,22 +127,22 @@ void RenderSystem::update()
 		world *= Matrix().set_translation( transform->transform.get_position() );
 
 		// モデルごとにグループ化
-		model_instances_[ model_component->model.id ].push_back( world );
+		model_instances_[ model_component->model ].push_back( world );
 	}
 
 	auto* instanced_shader = resolve_shader( instanced_shader_ );
 
 	// 各モデルグループを描画
-	for ( auto& [ model_id, matrices ] : model_instances_ )
+	for ( auto& [ model_handle, matrices ] : model_instances_ )
 	{
 		if ( matrices.empty() ) continue;
 
-		// モデルはハンドルから引く（空・解放済みなら描かない）
-		core::graphics::Model* model = get_graphics_manager()->resolve_model( core::graphics::ModelHandle{ model_id } );
+		// モデルはハンドルから引く（空・解放済みなら描かない。モデルごとに 1 回）
+		core::graphics::Model* model = model_handle.get();
 
 		if ( ! model )
 		{
-			if ( model_id != 0 && ! model_lost_logged_ )
+			if ( ! model_handle.is_null() && ! model_lost_logged_ )
 			{
 				model_lost_logged_ = true;
 				std::cout << "[RenderSystem] 描くモデルが解放されました。そのモデルの物体は描きません" << std::endl;

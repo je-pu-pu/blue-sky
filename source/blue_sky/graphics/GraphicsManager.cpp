@@ -566,7 +566,7 @@ void GraphicsManager::set_paper_texture_type( int_t type )
 	}
 	else
 	{
-		paper_texture_ = TextureManager::Handle();
+		paper_texture_ = TextureManager::WeakHandle();
 	}
 }
 
@@ -575,7 +575,7 @@ void GraphicsManager::set_paper_texture_type( int_t type )
  */
 void GraphicsManager::bind_paper_texture() const
 {
-	if ( Texture* t = texture_manager_.resolve( paper_texture_ ) )
+	if ( Texture* t = paper_texture_.get() )
 	{
 		t->bind_to_ps( 2 );
 	}

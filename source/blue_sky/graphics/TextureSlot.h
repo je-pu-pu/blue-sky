@@ -36,16 +36,16 @@ public:
 		unmanaged_ = handle_.is_null() ? t : nullptr;
 	}
 
-	/// テクスチャを引く（空・解放済みなら nullptr）
-	Texture* get( const ResourceResolver& resolver ) const
+	/// テクスチャを引く（空・解放済みなら nullptr。ハンドルは Handle をたどるだけなので、resolver は引かない）
+	Texture* get( const ResourceResolver& ) const
 	{
-		return handle_.is_null() ? unmanaged_ : resolver.resolve_texture( handle_ );
+		return handle_.is_null() ? unmanaged_ : handle_.get();
 	}
 
 	/// 設定したテクスチャが解放された（ハンドルで持っていて、もう引けない）
-	bool is_lost( const ResourceResolver& resolver ) const
+	bool is_lost( const ResourceResolver& ) const
 	{
-		return ! handle_.is_null() && ! resolver.resolve_texture( handle_ );
+		return ! handle_.is_null() && handle_.expired();
 	}
 
 	/// ハンドルで持っているか（管理しているテクスチャか）

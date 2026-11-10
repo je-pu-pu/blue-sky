@@ -112,6 +112,10 @@ public:
 	/// 外した・差し替えた古い音をまとめて解放する（フレームの終わりとシーンの切り替えで呼ぶ。それまではハンドルで引ける）
 	std::size_t flush_releases();
 
+	/// Handle の数（デバッグ表示用。中身のある数・作った数）
+	std::size_t get_live_handle_count() const;
+	std::size_t get_handle_count() const;
+
 	Sound* get_sound( const char* name ) const;
 
 	/// 名前の音のハンドル（無ければ空のハンドル）

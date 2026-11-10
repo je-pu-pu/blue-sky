@@ -106,8 +106,8 @@ private:
 	BaseShadowMapShader*									shadow_map_skin_shader_ = nullptr;
 
 	/// 紙テクスチャ（ハンドルで持つ。アンロードされたら描画で使わない。以前は生ポインタで、アンロード後に無効な参照になり得た）
-	std::vector< TextureManager::Handle >	paper_texture_list_;
-	TextureManager::Handle					paper_texture_;
+	std::vector< TextureManager::WeakHandle >	paper_texture_list_;
+	TextureManager::WeakHandle					paper_texture_;
 
 	ModelManager				model_manager_;
 	MeshManager					mesh_manager_;
@@ -234,7 +234,7 @@ public:
 	 * 解放（unload_named_model）の後は nullptr を返す
 	 */
 	ModelHandle get_model_handle( const core::graphics::Model* m ) const override { return model_manager_.handle_of( m ); }	///< 管理しているモデル（clone_model の結果など）
-	Model* resolve_model( ModelHandle h ) const override { return static_cast< Model* >( model_manager_.resolve( h ) ); }
+	Model* resolve_model( ModelHandle h ) const override { return static_cast< Model* >( h.get() ); }
 
 	/// 名前で作ったモデル・メッシュを外す（どの名前からも指されなくなれば解放する。解放はフレームの終わりの flush_releases で、その後ハンドルは nullptr を返す）。作った側が、使い終わったときに呼ぶ
 	void unload_named_model( const char_t* name ) { model_manager_.remove_named( name ); }
@@ -259,6 +259,18 @@ public:
 		count += skinning_animation_set_manager_.flush_releases();
 
 		return count;
+	}
+
+	/// Handle の数の説明（デバッグ表示用。種類ごとに「中身のある数 / 作った数」。doc/ハンドルの設計.md の 2 章）
+	string_t describe_handle_counts() const
+	{
+		auto describe = [] ( const char_t* name, const auto& manager )
+		{
+			return string_t( name ) + " " + std::to_string( manager.get_live_handle_count() ) + "/" + std::to_string( manager.get_handle_count() );
+		};
+
+		return describe( "モデル", model_manager_ ) + "・" + describe( "メッシュ", mesh_manager_ ) + "・" + describe( "シェーダー", get_shader_manager() )
+			+ "・" + describe( "テクスチャ", texture_manager_ ) + "・" + describe( "スキニング", skinning_animation_set_manager_ );
 	}
 	
 	// Mesh
@@ -288,7 +300,7 @@ public:
 	/// 名前のテクスチャのハンドル（無ければ空）・ハンドルから引く（解放済みなら nullptr）
 	TextureHandle get_texture_handle( const char_t* name ) const override { return texture_manager_.get_handle( name ); }
 	TextureHandle get_texture_handle_of( const Texture* t ) const override { return texture_manager_.handle_of( t ); }
-	Texture* resolve_texture( TextureHandle h ) const override { return texture_manager_.resolve( h ); }
+	Texture* resolve_texture( TextureHandle h ) const override { return h.get(); }
 
 	/// UI 用の画像を名前付きで読み込む（乗算済みアルファ・ミップなし。詳細は Direct3D11::load_texture_premultiplied）。失敗すると例外
 	Texture* load_named_texture_premultiplied( const char_t* name, const char_t* file_name ) override;

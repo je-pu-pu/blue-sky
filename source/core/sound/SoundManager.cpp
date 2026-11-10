@@ -158,6 +158,18 @@ std::size_t SoundManager::flush_releases()
 	return sounds_.flush_releases();
 }
 
+std::size_t SoundManager::get_live_handle_count() const
+{
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
+	return sounds_.get_live_handle_count();
+}
+
+std::size_t SoundManager::get_handle_count() const
+{
+	std::lock_guard< std::recursive_mutex > lock( mutex_ );
+	return sounds_.get_handle_count();
+}
+
 SoundManager::Sound* SoundManager::get_sound( const char* name ) const
 {
 	std::lock_guard< std::recursive_mutex > lock( mutex_ );
@@ -172,8 +184,7 @@ SoundManager::SoundHandle SoundManager::get_sound_handle( const char* name ) con
 
 SoundManager::Sound* SoundManager::resolve( SoundHandle handle ) const
 {
-	std::lock_guard< std::recursive_mutex > lock( mutex_ );
-	return sounds_.resolve( handle );
+	return handle.get();	// Handle をたどるだけ（Handle を書き換えるのはメインスレッドだけなので、ロックは要らない）
 }
 
 void SoundManager::update()

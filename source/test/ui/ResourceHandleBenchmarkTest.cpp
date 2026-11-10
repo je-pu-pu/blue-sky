@@ -85,7 +85,7 @@ void run_benchmark( std::size_t count )
 	Manager manager;
 	IdTable table;
 	std::vector< Payload* > raw;
-	std::vector< Manager::Handle > handles;
+	std::vector< Manager::WeakHandle > handles;
 	std::vector< std::uint64_t > ids;
 
 	for ( std::size_t i = 0; i < count; i++ )
@@ -108,7 +108,7 @@ void run_benchmark( std::size_t count )
 		}
 
 		std::vector< Payload* > raw_in_order;
-		std::vector< Manager::Handle > handles_in_order;
+		std::vector< Manager::WeakHandle > handles_in_order;
 		std::vector< std::uint64_t > ids_in_order;
 
 		for ( std::size_t i : order )

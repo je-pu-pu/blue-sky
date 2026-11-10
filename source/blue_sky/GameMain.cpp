@@ -1492,6 +1492,10 @@ void GameMain::setup_scene( const string_t& scene_name, const SceneArguments& ar
 
 		// 前のシーンが解放を頼んだリソースを、次のシーンを読む前に解放する（同時に持つメモリを増やさない）
 		flush_resource_releases();
+
+		// Handle の数（中身のある数/作った数）。解放しても減らないので、増え方をここで見る（doc/ハンドルの設計.md の 2 章）
+		debug_log( "[Resource] 前のシーンを片付けた後の Handle の数 : " + get_graphics_manager()->describe_handle_counts()
+			+ "・音 " + std::to_string( sound_manager_->get_live_handle_count() ) + "/" + std::to_string( sound_manager_->get_handle_count() ) );
 	}
 
 	// 新しいシーンを設定

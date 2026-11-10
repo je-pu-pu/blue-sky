@@ -105,6 +105,7 @@ public:
 	core::graphics::ModelHandle get_model_handle( const core::graphics::Model* m ) const override { return models.handle_of( m ); }
 	Texture* resolve_texture( core::graphics::TextureHandle h ) const override { return textures.resolve( h ); }
 	core::graphics::TextureHandle get_texture_handle( const char_t* name ) const override { return textures.get_handle( name ); }
+	core::graphics::TextureHandle get_texture_handle_of( const Texture* t ) const override { return textures.handle_of( t ); }
 
 	Model* load_model( const char_t* name ) override
 	{

@@ -269,6 +269,7 @@ public:
 
 	/// 名前のテクスチャのハンドル（無ければ空）・ハンドルから引く（解放済みなら nullptr）
 	TextureHandle get_texture_handle( const char_t* name ) const override { return texture_manager_.get_handle( name ); }
+	TextureHandle get_texture_handle_of( const Texture* t ) const override { return texture_manager_.handle_of( t ); }
 	Texture* resolve_texture( TextureHandle h ) const override { return texture_manager_.resolve( h ); }
 
 	/// UI 用の画像を名前付きで読み込む（乗算済みアルファ・ミップなし。詳細は Direct3D11::load_texture_premultiplied）。失敗すると例外

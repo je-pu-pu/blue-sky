@@ -12,13 +12,13 @@ namespace blue_sky::graphics::shader
 class Flat2DShader : public BaseShader
 {
 private:
-	Texture* texture_ = 0;
+	TextureSlot texture_;	///< 管理しているテクスチャはハンドルで持ち、描くたびに引く（TextureSlot）
 	RenderSetting render_setting_;
 
 protected:
-	Texture* get_texture_at( uint_t n ) override { return n == 0 ? texture_ : nullptr; }
-	const Texture* get_texture_at( uint_t n ) const override { return n == 0 ? texture_ : nullptr; }
-	void set_texture_at( uint_t, Texture* t ) override { texture_ = t; }
+	Texture* get_texture_at( uint_t n ) override { return n == 0 ? resolve_texture( texture_ ) : nullptr; }
+	const Texture* get_texture_at( uint_t n ) const override { return n == 0 ? resolve_texture( texture_ ) : nullptr; }
+	void set_texture_at( uint_t, Texture* t ) override { set_texture( t ); }
 
 public:
 	Flat2DShader( GraphicsManager* graphics_manager, const char_t* input_layout_name = "2d", const char_t* effect_technique_name = "main2d" )
@@ -30,16 +30,21 @@ public:
 
 	Flat2DShader* clone() const override { return new Flat2DShader( *this ); }
 
-	void set_texture( Texture* t ) { texture_ = t; }
+	void set_texture( Texture* t ) override { texture_.set( * get_graphics_manager(), t ); }
 
 	void bind() const override
 	{
 		get_object_constant_buffer()->bind_to_vs();
-		texture_->bind_to_ps( 0 );
+		bind_texture_to_ps( texture_, 0 );
 	}
 
 	void render( const Mesh* mesh, uint_t n ) const override
 	{
+		if ( is_texture_lost( texture_ ) )
+		{
+			return;
+		}
+
 		get_graphics_manager()->set_input_layout( render_setting_.get_input_layout() );
 		get_graphics_manager()->set_primitive_topology( PrimitiveTopology::TRIANGLE_LIST );
 		get_graphics_manager()->render_technique( render_setting_.get_effect_technique(), [=] { bind(); mesh->render( n ); } );

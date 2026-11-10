@@ -64,7 +64,7 @@ protected:
 	uint8_t* buffer_ = nullptr;
 	std::unique_ptr< ConstantBuffer > constant_buffer_;
 
-	std::vector< Texture* > textures_;
+	std::vector< TextureSlot > textures_;	///< 管理しているテクスチャはハンドルで持ち、描くたびに引く（TextureSlot）
 
 	ShaderStageSet shader_stage_set_;
 
@@ -315,22 +315,22 @@ public:
 
 	Texture* get_texture_at( uint_t n ) override
 	{
-		return  n < textures_.size() ? textures_[ n ] : nullptr;
+		return  n < textures_.size() ? resolve_texture( textures_[ n ] ) : nullptr;
 	}
 	
 	const Texture* get_texture_at( uint_t n ) const override
 	{
-		return  n < textures_.size() ? textures_[ n ] : nullptr;
+		return  n < textures_.size() ? resolve_texture( textures_[ n ] ) : nullptr;
 	}
 
 	void set_texture_at( uint_t n , Texture* t ) override
 	{
 		if ( n >= textures_.size() )
 		{
-			textures_.resize( n + 1, nullptr );
+			textures_.resize( n + 1 );
 		}
 
-		textures_[ n ] = t;
+		textures_[ n ].set( * get_graphics_manager(), t );
 	}
 
 	/**
@@ -364,7 +364,7 @@ public:
 		// テクスチャを必要なシェーダーにバインドする
 		for ( size_t n = 0; n < textures_.size(); n++ )
 		{
-			textures_[ n ]->bind_to_ps( static_cast< uint_t >( n ) );
+			bind_texture_to_ps( textures_[ n ], static_cast< uint_t >( n ) );
 		}
 	}
 
@@ -373,6 +373,14 @@ public:
 	 */
 	void render( const Mesh* mesh, uint_t n ) const override
 	{
+		for ( const auto& t : textures_ )
+		{
+			if ( is_texture_lost( t ) )
+			{
+				return;
+			}
+		}
+
 		get_graphics_manager()->set_input_layout( render_setting_.get_input_layout() );
 		get_graphics_manager()->set_primitive_topology( PrimitiveTopology::TRIANGLE_LIST );
 		get_graphics_manager()->render_technique( render_setting_.get_effect_technique(), [=] { bind(); mesh->render( n ); } );

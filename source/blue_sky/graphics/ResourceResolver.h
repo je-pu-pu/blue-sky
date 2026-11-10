@@ -30,6 +30,9 @@ public:
 
 	/// 名前のテクスチャのハンドル（無ければ空のハンドル）
 	virtual core::graphics::TextureHandle get_texture_handle( const char_t* name ) const = 0;
+
+	/// 管理しているテクスチャのハンドル（管理していない（描画先など）・nullptr なら空のハンドル）
+	virtual core::graphics::TextureHandle get_texture_handle_of( const core::graphics::Texture* ) const = 0;
 };
 
 } // namespace blue_sky::graphics

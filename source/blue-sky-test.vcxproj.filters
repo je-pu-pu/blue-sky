@@ -84,6 +84,9 @@
     <ClCompile Include="test\graphics\RenderSettingsTest.cpp">
       <Filter>test\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="test\graphics\TextureSlotTest.cpp">
+      <Filter>test\graphics</Filter>
+    </ClCompile>
     <ClCompile Include="test\physics\RigidBodyTest.cpp">
       <Filter>test\physics</Filter>
     </ClCompile>

@@ -203,6 +203,51 @@ TEST( EcsTest, DestroyEntityRemovesComponentsAndKeepsOthers )
 	EXPECT_EQ( 1u, em->get_system< CountSystem >()->debug_entity_count() );
 }
 
+/**
+ * is_alive() と find() で、EntityId から生きている Entity を引けることを検証する
+ *
+ * 消した後・作っていない id では false / nullptr。clear の後も古い id は生き返らない（番号を二度と使わない）
+ */
+TEST( EcsTest, IsAliveAndFind )
+{
+	core::ecs::EntityManager entity_manager;
+	auto em = & entity_manager;
+
+	auto* e1 = em->create_entity();
+	auto* e2 = em->create_entity();
+	const auto id1 = e1->get_id();
+	const auto id2 = e2->get_id();
+
+	EXPECT_TRUE( em->is_alive( id1 ) );
+	EXPECT_EQ( e1, em->find( id1 ) );
+	EXPECT_EQ( e2, em->find( id2 ) );
+
+	// 作っていない id
+	EXPECT_FALSE( em->is_alive( id2 + 100 ) );
+	EXPECT_EQ( nullptr, em->find( id2 + 100 ) );
+
+	// 消した後
+	em->destroy_entity( id1 );
+	EXPECT_FALSE( em->is_alive( id1 ) );
+	EXPECT_EQ( nullptr, em->find( id1 ) );
+	EXPECT_TRUE( em->is_alive( id2 ) );
+	EXPECT_EQ( e2, em->find( id2 ) );
+
+	// const からも引ける
+	const auto& const_em = entity_manager;
+	EXPECT_EQ( e2, const_em.find( id2 ) );
+
+	// clear の後、新しい Entity が古い id を使うことは無い
+	em->clear();
+	EXPECT_FALSE( em->is_alive( id2 ) );
+	auto* e3 = em->create_entity();
+	EXPECT_NE( id1, e3->get_id() );
+	EXPECT_NE( id2, e3->get_id() );
+	EXPECT_FALSE( em->is_alive( id1 ) );
+	EXPECT_FALSE( em->is_alive( id2 ) );
+	EXPECT_EQ( e3, em->find( e3->get_id() ) );
+}
+
 // ---------------------------------------------------------------------------
 // Component 操作
 // ---------------------------------------------------------------------------

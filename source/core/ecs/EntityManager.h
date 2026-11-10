@@ -91,6 +91,33 @@ public:
 	}
 
 	/**
+	 * 指定した id の Entity が生きているか
+	 *
+	 * EntityId は二度と使わない番号（clear でも戻さない）なので、消した Entity の id で別の Entity を指すことは無い（世代は要らない）
+	 */
+	bool is_alive( EntityId id ) const
+	{
+		return entity_list_.find( id ) != entity_list_.end();
+	}
+
+	/**
+	 * 指定した id の Entity を探す
+	 *
+	 * @return Entity（無い・消した後なら nullptr）。ポインタはその Entity を消すまで有効なので、持ち続けるなら id で持つ
+	 */
+	Entity* find( EntityId id )
+	{
+		auto i = entity_list_.find( id );
+		return i == entity_list_.end() ? nullptr : & i->second;
+	}
+
+	const Entity* find( EntityId id ) const
+	{
+		auto i = entity_list_.find( id );
+		return i == entity_list_.end() ? nullptr : & i->second;
+	}
+
+	/**
 	 * Entity に Component を追加する
 	 *
 	 * @param e Entity

@@ -13,7 +13,6 @@
 #include <core/animation/AnimationPlayer.h>
 #include <core/sound/SoundManager.h>
 
-#include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/ScriptManager.h>
 
@@ -355,7 +354,7 @@ void GamePlayScene::load_stage_file( const char* base_name )
 	// 当てる（StageData → ゲーム）
 	stage::StageBuilder::Context context;
 	context.object_factory = get_object_factory();
-	context.physics = get_active_object_physics();
+	context.physics = get_physics_manager();
 	context.graphics_manager = get_graphics_manager();
 	context.sound_manager = get_sound_manager();
 	context.player = player_id_;

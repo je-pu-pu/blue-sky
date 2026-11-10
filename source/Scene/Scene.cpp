@@ -3,7 +3,6 @@
 #include <blue_sky/GameMain.h>
 #include <blue_sky/ObjectUpdater.h>
 #include <blue_sky/ObjectFactory.h>
-#include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <core/ecs/EntityManager.h>
@@ -64,11 +63,6 @@ ObjectUpdater* Scene::get_object_updater() const
 ObjectFactory* Scene::get_object_factory() const
 {
 	return get_game_main()->get_object_factory();
-}
-
-ActiveObjectPhysics* Scene::get_active_object_physics() const
-{
-	return get_game_main()->get_active_object_physics();
 }
 
 core::physics::PhysicsManager* Scene::get_physics_manager() const

@@ -1,5 +1,5 @@
 #include "ObjectUpdater.h"
-#include "ActiveObjectPhysics.h"
+#include <core/physics/PhysicsManager.h>
 
 #include <GameObject/GameObjectContext.h>
 
@@ -21,7 +21,7 @@
 namespace blue_sky
 {
 
-ObjectUpdater::ObjectUpdater( ActiveObjectPhysics* physics, const GameObjectContext* object_context, core::ecs::EntityManager* entity_manager )
+ObjectUpdater::ObjectUpdater( const core::physics::PhysicsManager* physics, const GameObjectContext* object_context, core::ecs::EntityManager* entity_manager )
 	: physics_( physics )
 	, object_context_( object_context )
 	, entity_manager_( entity_manager )
@@ -119,14 +119,15 @@ void ObjectUpdater::check_collision_with( core::ecs::EntityId id )
 {
 	auto* events = entity_manager_->get_system< ecs::CollisionEventSystem >();
 	core::ecs::Entity* entity = entity_manager_->find( id );
-	btRigidBody* body = entity ? ecs::EntityObject( entity ).get_rigid_body() : nullptr;
+	const core::physics::RigidBody* body = entity ? ecs::EntityObject( entity ).get_rigid_body() : nullptr;
 
 	if ( ! events || ! body || ! physics_ )
 	{
 		return;
 	}
 
-	physics_->collect_contacts_with( body, * events );
+	// 接している組を集める（以前の ActiveObjectPhysics::collect_contacts_with。その場で振り分けず、集めた組は events が渡す）
+	physics_->contact_test( * body, [ events ] ( std::optional< core::ecs::EntityId > a, std::optional< core::ecs::EntityId > b ) { events->add_contact( a, b ); } );
 	events->dispatch( * this );
 }
 
@@ -139,7 +140,8 @@ void ObjectUpdater::check_collision_all()
 		return;
 	}
 
-	physics_->collect_all_contacts( * events );
+	// めり込んでいる接点 1 つにつき 1 組を集める（以前の ActiveObjectPhysics::collect_all_contacts。順も同じ）
+	physics_->for_each_penetrating_contact( [ events ] ( std::optional< core::ecs::EntityId > a, std::optional< core::ecs::EntityId > b ) { events->add_contact( a, b ); } );
 	events->dispatch( * this );
 }
 

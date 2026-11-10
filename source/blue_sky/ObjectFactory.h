@@ -11,11 +11,10 @@
 
 namespace core::ecs { class EntityManager; }
 namespace core::sound { class SoundManager; }
+namespace core::physics { class PhysicsManager; }
 
 namespace blue_sky
 {
-
-class ActiveObjectPhysics;
 
 namespace graphics
 {
@@ -82,7 +81,7 @@ public:
 
 private:
 	core::ecs::EntityManager*	entity_manager_;
-	ActiveObjectPhysics*		physics_;					///< 剛体を作る世界（nullptr なら剛体を作らない。テスト）
+	core::physics::PhysicsManager*	physics_;				///< 剛体を作る世界（nullptr なら剛体を作らない。テスト）
 	graphics::GraphicsManager*	graphics_manager_;			///< モデル・定数バッファを作る先（nullptr ならモデル・定数バッファを用意しない。テスト）
 	core::sound::SoundManager*	sound_manager_;				///< ECS だけの物体の位置で音を鳴らす先（スイッチ。nullptr なら鳴らさない。テスト）
 
@@ -93,7 +92,7 @@ private:
 	void setup_systems();
 
 public:
-	ObjectFactory( core::ecs::EntityManager* entity_manager, ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager = nullptr );
+	ObjectFactory( core::ecs::EntityManager* entity_manager, core::physics::PhysicsManager* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager = nullptr );
 
 	/**
 	 * 種類の名前から物体を作る（スクリプトの create_object。以前の GameMain::create_object）

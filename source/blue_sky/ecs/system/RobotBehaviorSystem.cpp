@@ -1,6 +1,5 @@
 #include "RobotBehaviorSystem.h"
 
-#include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Model.h>
 
@@ -10,6 +9,7 @@
 #include <blue_sky/ecs/component/FlickerComponent.h>
 #include <blue_sky/ecs/component/ObjectRenderComponent.h>
 #include <blue_sky/ecs/component/PatrolComponent.h>
+#include <blue_sky/ecs/system/CollisionEventSystem.h>
 
 #include <core/animation/AnimationPlayer.h>
 #include <core/ecs/EntityManager.h>
@@ -17,7 +17,7 @@
 
 #include <common/math.h>
 
-#include <btBulletDynamicsCommon.h>
+#include <core/physics/PhysicsManager.h>
 
 #include <algorithm>
 #include <cmath>
@@ -33,7 +33,7 @@ constexpr const char_t* TextureNames[] = { "robot", "robot-warn", "robot-error",
 
 } // namespace
 
-RobotBehaviorSystem::RobotBehaviorSystem( const ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager )
+RobotBehaviorSystem::RobotBehaviorSystem( const core::physics::PhysicsManager* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager )
 	: physics_( physics )
 	, graphics_manager_( graphics_manager )
 	, sound_manager_( sound_manager )
@@ -149,9 +149,9 @@ void RobotBehaviorSystem::update_robot( core::ecs::EntityId id, float_t delta_ti
 		return;
 	}
 
-	if ( btRigidBody* body = object.get_rigid_body() )
+	if ( core::physics::RigidBody* body = object.get_rigid_body() )
 	{
-		body->setActivationState( true );
+		body->set_activation_state_active();
 	}
 
 	const std::optional< EntityObject > target = find_target( * robot );
@@ -282,7 +282,7 @@ void RobotBehaviorSystem::update_robot( core::ecs::EntityId id, float_t delta_ti
 		if ( const core::AnimationPlayer* animation = object.get_animation_player(); animation && animation->get_current_frame() >= 60 )
 		{
 			// 倒れた敵に引っかからないようにする（やり直しても戻さない。以前と同じ）
-			if ( btRigidBody* body = object.get_rigid_body() )
+			if ( core::physics::RigidBody* body = object.get_rigid_body() )
 			{
 				object_body::set_no_contact_response( * body, true );
 			}
@@ -489,13 +489,11 @@ bool RobotBehaviorSystem::is_target_visible( core::ecs::EntityId id ) const
 	}
 
 	// 障害物判定（自分と相手を通り抜ける）
-	ClosestNotMeAndHim ray_callback( from, to, object.get_rigid_body(), target->get_rigid_body(), false, get_entity_manager() );
-	ray_callback.m_closestHitFraction = 1.0;
-
-	physics_->ray_test( from, to, ray_callback );
+	const core::ecs::EntityManager* entity_manager = get_entity_manager();
+	const auto hit = physics_->ray_test_closest( from, to, object.get_rigid_body(), target->get_rigid_body(), [ entity_manager ] ( std::optional< core::ecs::EntityId > tag ) { return CollisionEventSystem::is_ray_target( entity_manager, tag, false ); } );
 
 	// ターゲットとの間に障害物がなければ目視できている
-	return ! ray_callback.hasHit();
+	return ! hit.hit;
 }
 
 } // namespace blue_sky::ecs

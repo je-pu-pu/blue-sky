@@ -8,10 +8,10 @@
 #include <vector>
 
 namespace core::sound { class SoundManager; }
+namespace core::physics { class PhysicsManager; }
 
 namespace blue_sky
 {
-	class ActiveObjectPhysics;
 	class GameObjectRef;
 	namespace graphics { class GraphicsManager; }
 }
@@ -32,7 +32,7 @@ enum class PickupKind;
  * - 持ち物は PlayerInventoryComponent・PlayerInventorySystem に切り出した（ロケット・石を使う・走れるか・望遠鏡をやめるときにここから読み書きする）
  *
  * 位置・速度・向きは EntityObject を通して部品（TransformComponent・PhysicsBodyComponent・SimpleObjectComponent）を読み書きする。
- * 足場・壁を調べるレイと箱は本編の物理の世界（ActiveObjectPhysics）で飛ばす（nullptr なら調べない。テスト）。
+ * 足場・壁を調べるレイと箱は物理の世界（core::physics::PhysicsManager。以前は本編だけの ActiveObjectPhysics）で飛ばす（nullptr なら調べない。テスト）。
  *
  * EntityManager::update() では動かさない（本編のシーンは呼ばない）。ObjectUpdater::update が、ほかの物体より先に update_players を呼ぶ
  * （以前は ActiveObject の一覧の先頭のプレイヤーの update が最初に呼ばれていた）
@@ -46,7 +46,7 @@ public:
 private:
 	struct Self;	///< 1 人のプレイヤーを動かすときに使う部品と窓口（.cpp だけで定義する）
 
-	const ActiveObjectPhysics*			physics_;			///< 足場・壁を調べる世界（nullptr なら調べない。テスト）
+	const core::physics::PhysicsManager*	physics_;			///< 足場・壁を調べる世界（nullptr なら調べない。テスト）
 	graphics::GraphicsManager*			graphics_manager_;	///< 線の色を変えるモデルを引く先（nullptr なら変えない。テスト）
 	core::sound::SoundManager*			sound_manager_;		///< 音を鳴らす先（nullptr なら鳴らさない。テスト）
 	std::vector< core::ecs::EntityId >	id_list_;			///< 作った順に回すための作業用の一覧（毎フレーム作り直す。中身は使い回す）
@@ -84,7 +84,7 @@ private:
 	void kill( Self& );
 
 public:
-	PlayerBehaviorSystem( const ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager );
+	PlayerBehaviorSystem( const core::physics::PhysicsManager* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager );
 
 	void update() override { }		///< 何もしない（上の説明のとおり）
 

@@ -4,7 +4,7 @@
 #include <blue_sky/GameObjectRef.h>
 #include <blue_sky/ecs/ContactRules.h>
 #include <blue_sky/ecs/component/PlayerBehaviorComponent.h>
-#include <blue_sky/ActiveObjectPhysics.h>
+#include <core/physics/PhysicsManager.h>
 
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
@@ -22,7 +22,6 @@
 #include <core/ecs/EntityManager.h>
 #include <core/physics/RigidBody.h>
 
-#include <btBulletDynamicsCommon.h>
 
 #include <cmath>
 #include <optional>
@@ -32,7 +31,7 @@
 /**
  * 段階 4 の後半 : 梯子・石・スイッチを ECS だけの物体にしたときの、部品と当たりの振る舞いのテスト
  *
- * 描画（GraphicsManager）・音は無しで作る。物理の世界は本物（ActiveObjectPhysics）を使う
+ * 描画（GraphicsManager）・音は無しで作る。物理の世界は本物（core::physics::PhysicsManager。以前は本編だけの ActiveObjectPhysics）を使う
  */
 
 using blue_sky::ObjectFactory;
@@ -47,7 +46,7 @@ namespace
 /// 描画なしで工場を作る
 struct Fixture
 {
-	blue_sky::ActiveObjectPhysics physics;
+	core::physics::PhysicsManager physics;
 	EntityManager manager;
 	ObjectFactory factory{ & manager, & physics, nullptr };
 
@@ -108,13 +107,13 @@ TEST( LadderStoneSwitchTest, 梯子は硬くない印付きの物体で_重力�
 
 	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >();
 	EXPECT_FLOAT_EQ( body->height_offset, 2.5f );
-	EXPECT_NE( body->body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
-	EXPECT_FLOAT_EQ( body->body->getInvMass(), 1.f );
+	EXPECT_FALSE( body->get()->has_contact_response() );
+	EXPECT_FLOAT_EQ( body->get()->get_inv_mass(), 1.f );
 	EXPECT_TRUE( is_near( e->get_component< blue_sky::ecs::SimpleObjectComponent >()->default_gravity, Vector::Zero ) );
 
 	f.factory.restart();
 
-	EXPECT_FLOAT_EQ( body->body->getInvMass(), 0.f );
+	EXPECT_FLOAT_EQ( body->get()->get_inv_mass(), 0.f );
 }
 
 TEST( LadderStoneSwitchTest, 梯子に触れると相手に知らせ_反応した物体を_0_5_秒覚え_やり直すと忘れる )
@@ -173,15 +172,15 @@ TEST( LadderStoneSwitchTest, 石は硬いが壁にならない投げられる物
 	EXPECT_TRUE( traits->is_hard );
 	EXPECT_FALSE( traits->is_block );
 
-	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body;
-	EXPECT_EQ( body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
-	EXPECT_FLOAT_EQ( body->getInvMass(), 1.f );
+	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->get();
+	EXPECT_TRUE( body->has_contact_response() );
+	EXPECT_FLOAT_EQ( body->get_inv_mass(), 1.f );
 
 	f.factory.restart();
 
-	EXPECT_TRUE( is_near( Vector( body->getGravity() ), Vector( 0.f, -8.f, 0.f ) ) );
-	EXPECT_FLOAT_EQ( body->getCcdSweptSphereRadius(), 0.2f );
-	EXPECT_FLOAT_EQ( body->getCcdMotionThreshold(), 0.2f );
+	EXPECT_TRUE( is_near( Vector( body->get_gravity() ), Vector( 0.f, -8.f, 0.f ) ) );
+	EXPECT_FLOAT_EQ( body->get_ccd_swept_sphere_radius(), 0.2f );
+	EXPECT_FLOAT_EQ( body->get_ccd_motion_threshold(), 0.2f );
 }
 
 TEST( LadderStoneSwitchTest, 石は毎フレーム_1_度ずつ回る )
@@ -276,16 +275,16 @@ TEST( LadderStoneSwitchTest, スイッチは硬い箱で_やり直すと切に�
 	EXPECT_TRUE( traits->is_block );
 	EXPECT_FALSE( traits->is_ghost );
 
-	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body;
-	EXPECT_FLOAT_EQ( body->getInvMass(), 1.f );		// 作ったときは 1（以前と同じ）
+	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->get();
+	EXPECT_FLOAT_EQ( body->get_inv_mass(), 1.f );		// 作ったときは 1（以前と同じ）
 
 	e->get_component< blue_sky::ecs::SwitchComponent >()->state = blue_sky::ecs::SwitchComponent::State::BROKEN;
 	f.factory.restart();
 
 	EXPECT_EQ( state_of( f, id ), blue_sky::ecs::SwitchComponent::State::OFF );
-	EXPECT_FLOAT_EQ( body->getInvMass(), 1.f / 100.f );
-	EXPECT_FLOAT_EQ( body->getFriction(), 1.5f );
-	EXPECT_TRUE( is_near( Vector( body->getAngularFactor() ), Vector::Zero ) );
+	EXPECT_FLOAT_EQ( body->get_inv_mass(), 1.f / 100.f );
+	EXPECT_FLOAT_EQ( body->get_friction(), 1.5f );
+	EXPECT_TRUE( is_near( Vector( body->get_angular_factor() ), Vector::Zero ) );
 }
 
 TEST( LadderStoneSwitchTest, 空間スイッチはすり抜ける箱で_足元と剛体の中心が同じ_重力が無い )
@@ -307,7 +306,7 @@ TEST( LadderStoneSwitchTest, 空間スイッチはすり抜ける箱で_足元�
 
 	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >();
 	EXPECT_FLOAT_EQ( body->height_offset, 0.f );
-	EXPECT_NE( body->body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
+	EXPECT_FALSE( body->get()->has_contact_response() );
 	EXPECT_TRUE( is_near( e->get_component< blue_sky::ecs::SimpleObjectComponent >()->default_gravity, Vector::Zero ) );
 }
 

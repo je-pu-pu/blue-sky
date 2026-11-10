@@ -3,7 +3,7 @@
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/GameObjectRef.h>
 #include <blue_sky/ecs/ContactRules.h>
-#include <blue_sky/ActiveObjectPhysics.h>
+#include <core/physics/PhysicsManager.h>
 
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/Flicker.h>
@@ -25,7 +25,6 @@
 
 #include <core/ecs/EntityManager.h>
 
-#include <btBulletDynamicsCommon.h>
 
 #include <cmath>
 #include <optional>
@@ -33,7 +32,7 @@
 /**
  * 段階 5 : 風船・少女・敵を ECS だけの物体にしたときの、部品と振る舞いと当たりのテスト
  *
- * 描画（GraphicsManager）・音は無しで作る。物理の世界は本物（ActiveObjectPhysics）を使う
+ * 描画（GraphicsManager）・音は無しで作る。物理の世界は本物（core::physics::PhysicsManager。以前は本編だけの ActiveObjectPhysics）を使う
  */
 
 using blue_sky::ObjectFactory;
@@ -48,7 +47,7 @@ namespace
 /// 描画なし・ActiveObject なしで工場を作る
 struct Fixture
 {
-	blue_sky::ActiveObjectPhysics physics;
+	core::physics::PhysicsManager physics;
 	EntityManager manager;
 	ObjectFactory factory{ & manager, & physics, nullptr };
 
@@ -109,11 +108,11 @@ TEST( BalloonGirlRobotTest, 風船は硬くない着地しても死なない足�
 
 	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >();
 	EXPECT_FLOAT_EQ( body->height_offset, 0.f );
-	EXPECT_NE( body->body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
-	EXPECT_FLOAT_EQ( body->body->getInvMass(), 1.f );
+	EXPECT_FALSE( body->get()->has_contact_response() );
+	EXPECT_FLOAT_EQ( body->get()->get_inv_mass(), 1.f );
 
 	f.factory.restart();
-	EXPECT_TRUE( is_near( Vector( body->body->getGravity() ), Vector::Zero ) );
+	EXPECT_TRUE( is_near( Vector( body->get()->get_gravity() ), Vector::Zero ) );
 }
 
 TEST( BalloonGirlRobotTest, つかまれていない風船は始めの位置でゆらぎ_1_フレームに_1_度回る )
@@ -315,7 +314,7 @@ TEST( BalloonGirlRobotTest, 少女は硬い物で_重力が無く_やり直す�
 
 	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >();
 	EXPECT_FLOAT_EQ( body->height_offset, 0.75f );
-	EXPECT_EQ( body->body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
+	EXPECT_TRUE( body->get()->has_contact_response() );
 
 	e->get_component< blue_sky::ecs::GirlComponent >()->mode = blue_sky::ecs::GirlComponent::Mode::FLOAT;
 	f.factory.get_ref( id ).set_flicker_scale( 10.f );
@@ -323,9 +322,9 @@ TEST( BalloonGirlRobotTest, 少女は硬い物で_重力が無く_やり直す�
 
 	f.factory.restart();
 
-	EXPECT_TRUE( is_near( Vector( body->body->getGravity() ), Vector::Zero ) );
-	EXPECT_TRUE( is_near( Vector( body->body->getAngularFactor() ), Vector::Zero ) );
-	EXPECT_FLOAT_EQ( body->body->getFriction(), 0.f );
+	EXPECT_TRUE( is_near( Vector( body->get()->get_gravity() ), Vector::Zero ) );
+	EXPECT_TRUE( is_near( Vector( body->get()->get_angular_factor() ), Vector::Zero ) );
+	EXPECT_FLOAT_EQ( body->get()->get_friction(), 0.f );
 
 	EXPECT_EQ( e->get_component< blue_sky::ecs::GirlComponent >()->mode, blue_sky::ecs::GirlComponent::Mode::STAND );
 	EXPECT_TRUE( is_near( e->get_component< blue_sky::ecs::GirlComponent >()->float_base_location, Vector( 1.f, 2.f, 3.f ) ) );
@@ -468,7 +467,7 @@ TEST( BalloonGirlRobotTest, 敵は硬い物で_やり直すと質量_50_回ら�
 
 	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >();
 	EXPECT_FLOAT_EQ( body->height_offset, 1.f );
-	EXPECT_FLOAT_EQ( body->body->getInvMass(), 1.f );
+	EXPECT_FLOAT_EQ( body->get()->get_inv_mass(), 1.f );
 
 	GameObjectRef robot = f.factory.get_ref( id );
 	robot.set_start_location( 1.f, 2.f, 3.f );
@@ -477,10 +476,10 @@ TEST( BalloonGirlRobotTest, 敵は硬い物で_やり直すと質量_50_回ら�
 
 	f.factory.restart();
 
-	EXPECT_FLOAT_EQ( body->body->getInvMass(), 1.f / 50.f );
-	EXPECT_TRUE( is_near( Vector( body->body->getAngularFactor() ), Vector::Zero ) );
-	EXPECT_FLOAT_EQ( body->body->getFriction(), 0.f );
-	EXPECT_TRUE( is_near( Vector( body->body->getGravity() ), Vector( 0.f, -9.8f, 0.f ) ) );
+	EXPECT_FLOAT_EQ( body->get()->get_inv_mass(), 1.f / 50.f );
+	EXPECT_TRUE( is_near( Vector( body->get()->get_angular_factor() ), Vector::Zero ) );
+	EXPECT_FLOAT_EQ( body->get()->get_friction(), 0.f );
+	EXPECT_TRUE( is_near( Vector( body->get()->get_gravity() ), Vector( 0.f, -9.8f, 0.f ) ) );
 
 	const auto* robot_component = e->get_component< blue_sky::ecs::RobotBehaviorComponent >();
 	EXPECT_EQ( robot_component->mode, RobotMode::STAND );

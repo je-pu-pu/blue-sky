@@ -304,6 +304,9 @@ public:
 	/// これが持つ形の数（共有する形・ステージの当たりの形。テスト用）
 	std::size_t get_owned_shape_count() const;
 
+	/// これが持つ剛体の数（地面・ステージの当たりの形。シーンを片付けた後の漏れの確かめ用）
+	std::size_t get_owned_rigid_body_count() const;
+
 }; // class PhysicsManager
 
 } // namespace core::physics

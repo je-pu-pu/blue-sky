@@ -9,10 +9,10 @@
 #include <vector>
 
 namespace core::sound { class SoundManager; }
+namespace core::physics { class PhysicsManager; }
 
 namespace blue_sky
 {
-	class ActiveObjectPhysics;
 	namespace graphics { class GraphicsManager; }
 }
 
@@ -28,10 +28,10 @@ namespace blue_sky::ecs
  * 見え方・警戒・動かし方は使わない（ここにまとめて持つ）。理由 :
  * - 見え方 : 本編の敵は距離 3・10・20 m の 3 段で視野の広さが変わり（真後ろも見える近さがある）、目の高さは 1.5 m。
  *   PerceptionComponent の視界錐（距離 1 つ・水平の半画角・上の制限）では同じ判定にならない。遮るもののレイも本編の物理の世界
- *   （ActiveObjectPhysics。相手と自分を通り抜ける・死んだ物と通り抜けられる物を通り抜ける）で飛ばす必要がある
+ *   （core::physics::PhysicsManager::ray_test_closest。相手と自分を通り抜ける・死んだ物と通り抜けられる物を通り抜ける）で飛ばす必要がある
  * - 警戒 : 本編は「見えたら 3 秒注目 → 追う → 10 秒で諦める」の時間で決まる状態で、AlertComponent の発見度（上がり下がりする値）とは振る舞いが違う
  * - 動かし方 : PatrolSystem は位置（Transform）を直接動かす。本編の敵は剛体の速度で動く（重力・壁に当たる）
- * 物理の世界を 1 つにする（決定 1）ときに、見え方のレイと動かし方を寄せ直す。
+ * 物理の世界は 1 つにした（決定 1。本編も PhysicsManager）が、見え方・警戒・動かし方の違いは残るので寄せていない。
  *
  * EntityManager::update() では動かさない（本編のシーンは呼ばない）。ActiveObjectManager::update が物体の update の直後に update_robots を呼ぶ
  */
@@ -42,7 +42,7 @@ public:
 	using Look = RobotBehaviorComponent::Look;
 
 private:
-	const ActiveObjectPhysics*			physics_;			///< 見えるかのレイを飛ばす世界（nullptr ならレイを飛ばさず、遮るものは無いとみなす。テスト）
+	const core::physics::PhysicsManager*	physics_;			///< 見えるかのレイを飛ばす世界（nullptr ならレイを飛ばさず、遮るものは無いとみなす。テスト）
 	graphics::GraphicsManager*			graphics_manager_;	///< モデル・テクスチャを引く先（nullptr ならテクスチャを設定しない。テスト）
 	core::sound::SoundManager*			sound_manager_;		///< 音を鳴らす先（nullptr なら鳴らさない。テスト）
 	std::vector< core::ecs::EntityId >	id_list_;			///< 作った順に回すための作業用の一覧（毎フレーム作り直す。中身は使い回す）
@@ -56,7 +56,7 @@ private:
 	void apply_look( core::ecs::Entity& entity, const RobotBehaviorComponent& robot ) const;
 
 public:
-	RobotBehaviorSystem( const ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager );
+	RobotBehaviorSystem( const core::physics::PhysicsManager* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager );
 
 	void update() override { }		///< 何もしない（上の説明のとおり）
 

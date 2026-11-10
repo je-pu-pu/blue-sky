@@ -11,7 +11,6 @@
 
 #include "Input.h"
 
-#include "ActiveObjectPhysics.h"
 
 #include "ScriptManager.h"
 
@@ -187,10 +186,9 @@ GameMain::GameMain( App& app )
 
 	scene_manager_->register_all_scene();
 
-	active_object_physics_.reset( new ActiveObjectPhysics() );
-	active_object_physics_->setDebugDrawer( bullet_debug_draw_.get() );
-
-	physics_manager_.reset( new core::physics::PhysicsManager() );
+	// 物理の世界は本編と ECS のテストシーンで 1 つ（決定 1。以前は本編だけの ActiveObjectPhysics があり、デバッグ描画はそちらに設定していた）
+	physics_manager_ = std::make_unique< core::physics::PhysicsManager >();
+	physics_manager_->set_debug_drawer( bullet_debug_draw_.get() );
 
 	graphics_manager_.reset( new blue_sky::graphics::direct_3d_11::GraphicsManager( direct_3d_.get() ) );
 	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "graphics.debug_axis", 0 ) != 0 );
@@ -227,13 +225,13 @@ GameMain::GameMain( App& app )
 	setup_script_command();
 
 	// ゲームのオブジェクトに渡すもの（物理の世界・音・シーンの経過時間）。オブジェクトは GameMain のシングルトンを呼ばない
-	game_object_context_.physics = active_object_physics_.get();
+	game_object_context_.physics = physics_manager_.get();
 	game_object_context_.sound_manager = sound_manager_.get();
 	game_object_context_.scene_elapsed_time = [this] { return scene_ ? scene_->get_total_elapsed_time() : 0.f; };
 	game_object_context_.delta_time = [this] { return time_manager_.get_delta_time(); };
 
-	object_updater_ = std::make_unique< ObjectUpdater >( active_object_physics_.get(), & game_object_context_, entity_manager_.get() );
-	object_factory_ = std::make_unique< ObjectFactory >( entity_manager_.get(), active_object_physics_.get(), graphics_manager_.get(), sound_manager_.get() );
+	object_updater_ = std::make_unique< ObjectUpdater >( physics_manager_.get(), & game_object_context_, entity_manager_.get() );
+	object_factory_ = std::make_unique< ObjectFactory >( entity_manager_.get(), physics_manager_.get(), graphics_manager_.get(), sound_manager_.get() );
 
 	// GraphicsManager はゲームの物体を、EntityManager の描画の部品（ecs::ObjectRenderDataSystem の描く対象）から描く（以前は ActiveObjectManager を直接回していた）
 	graphics_manager_->set_entity_manager( entity_manager_.get() );
@@ -1355,10 +1353,17 @@ void GameMain::setup_scene( const string_t& scene_name, const SceneArguments& ar
 		entity_manager_->clear();
 		get_graphics_manager()->set_main_camera_info( nullptr, nullptr );
 
-		// ECS の剛体は clear で PhysicsSystem が解放する（以前はシーンをまたいで溜まっていた）。残っていたら漏れなので知らせる
-		if ( const int count = physics_manager_->get_rigid_body_count() )
+		// 物体の剛体は部品が持ち、ECS の剛体は clear で PhysicsSystem が解放する（以前はシーンをまたいで溜まっていた）。
+		// 世界が持つ地面・ステージの当たりの形・共有する形はここで消す（以前の本編の世界は GamePlayScene だけが消し、
+		// DebugScene・ParticleSystemTestScene が足した地面は残っていた。世界を 1 つにしたので、どのシーンの後も消す）
+		const int count = physics_manager_->get_rigid_body_count() - static_cast< int >( physics_manager_->get_owned_rigid_body_count() );
+
+		physics_manager_->clear();
+
+		// 残っていたら漏れなので知らせる
+		if ( count > 0 )
 		{
-			debug_log( "[Physics] シーンを片付けた後も ECS の物理の世界に剛体が残っています: " + std::to_string( count ) + " 個" );
+			debug_log( "[Physics] シーンを片付けた後も物理の世界に物体の剛体が残っています: " + std::to_string( count ) + " 個" );
 		}
 	}
 

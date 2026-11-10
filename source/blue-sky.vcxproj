@@ -64,7 +64,6 @@
     <ClCompile Include="blue_sky\ecs\EntityObject.cpp" />
     <ClCompile Include="blue_sky\ecs\system\TranslationSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\SpinSystem.cpp" />
-    <ClCompile Include="blue_sky\ActiveObjectPhysics.cpp" />
     <ClCompile Include="blue_sky\App.cpp" />
     <ClCompile Include="blue_sky\CityGenerator.cpp" />
     <ClCompile Include="blue_sky\GameMain.cpp" />
@@ -258,7 +257,6 @@
     <ClInclude Include="blue_sky\ecs\component\PickupComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\SimpleObjectComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\StaticObjectComponent.h" />
-    <ClInclude Include="blue_sky\ActiveObjectPhysics.h" />
     <ClInclude Include="blue_sky\App.h" />
     <ClInclude Include="blue_sky\CityGenerator.h" />
     <ClInclude Include="blue_sky\DelayedCommand.h" />

@@ -5,7 +5,7 @@
 
 #include <functional>
 
-class btRigidBody;
+namespace core::physics { class RigidBody; }
 
 namespace core::ecs
 {
@@ -59,7 +59,7 @@ public:
 	bool is_alive() const;
 
 	/// 剛体（無ければ nullptr。持ち主ではない）
-	btRigidBody* get_rigid_body() const;
+	core::physics::RigidBody* get_rigid_body() const;
 
 	core::Vector get_location() const;
 	void set_location( const core::Vector& location );

@@ -1,7 +1,7 @@
 #include "StageBuilder.h"
 
 #include <blue_sky/ObjectFactory.h>
-#include <blue_sky/ActiveObjectPhysics.h>
+#include <core/physics/PhysicsManager.h>
 #include <blue_sky/DebugLog.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
@@ -125,7 +125,7 @@ StageBuilder::Result StageBuilder::build( const StageData& data, const Context& 
 
 		factory->get_ref( * context.player ).set_start_location( static_cast< float_t >( p[ 0 ] ), static_cast< float_t >( p[ 1 ] ), static_cast< float_t >( p[ 2 ] ) );
 
-		// 剛体は始めの位置に作る（以前の ActiveObjectPhysics::add_active_object_as_capsule）
+		// 剛体は始めの位置に作る（以前の ActiveObjectPhysics::add_active_object_as_capsule。今は ObjectFactory が PhysicsManager で作る）
 		factory->add_player_rigid_body( * context.player );
 
 		if ( data.player->camera_direction && context.camera )

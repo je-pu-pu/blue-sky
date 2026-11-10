@@ -4,7 +4,7 @@
 #include <core/ecs/type.h>
 #include <core/type.h>
 
-class btRigidBody;
+namespace core::physics { class RigidBody; }
 
 namespace core::sound { class SoundManager; }
 namespace core { class AnimationPlayer; }
@@ -50,7 +50,7 @@ public:
 	bool is_valid() const { return transform_ != nullptr; }
 
 	core::ecs::Entity* get_entity() const { return entity_; }
-	btRigidBody* get_rigid_body() const;
+	core::physics::RigidBody* get_rigid_body() const;
 
 	const core::Vector& get_location() const;
 	void set_location( const core::Vector& location );

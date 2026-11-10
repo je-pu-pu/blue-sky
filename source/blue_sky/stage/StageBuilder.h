@@ -8,12 +8,12 @@
 #include <vector>
 
 namespace core::sound { class SoundManager; }
+namespace core::physics { class PhysicsManager; }
 
 namespace blue_sky
 {
 
 class ObjectFactory;
-class ActiveObjectPhysics;
 class Camera;
 
 namespace graphics
@@ -40,7 +40,7 @@ public:
 	struct Context
 	{
 		ObjectFactory*					object_factory = nullptr;
-		ActiveObjectPhysics*			physics = nullptr;			///< 当たりの形・プレイヤーの剛体を加える世界
+		core::physics::PhysicsManager*	physics = nullptr;			///< 当たりの形を加える世界
 		graphics::GraphicsManager*		graphics_manager = nullptr;	///< 地面
 		core::sound::SoundManager*		sound_manager = nullptr;	///< 読み込むときの BGM
 		std::optional< core::ecs::EntityId >	player;					///< プレイヤー（ECS だけの物体。ObjectFactory::create_player で作った物）

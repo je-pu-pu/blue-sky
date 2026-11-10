@@ -50,15 +50,15 @@ namespace
 {
 
 /// 警戒状態ごとの色（白/灰＝無警戒, 黄＝不審, 橙＝捜索, 赤＝警報）
-btVector3 state_color( ai::AlertState s )
+core::Vector state_color( ai::AlertState s )
 {
 	switch ( s )
 	{
-	case ai::AlertState::Suspicious: return btVector3( 1.f, 1.f, 0.f );
-	case ai::AlertState::Searching:  return btVector3( 1.f, 0.5f, 0.f );
-	case ai::AlertState::Alarmed:    return btVector3( 1.f, 0.f, 0.f );
+	case ai::AlertState::Suspicious: return core::Vector( 1.f, 1.f, 0.f );
+	case ai::AlertState::Searching:  return core::Vector( 1.f, 0.5f, 0.f );
+	case ai::AlertState::Alarmed:    return core::Vector( 1.f, 0.f, 0.f );
 	case ai::AlertState::Unaware:
-	default:                         return btVector3( 0.5f, 0.5f, 0.5f );
+	default:                         return core::Vector( 0.5f, 0.5f, 0.5f );
 	}
 }
 
@@ -233,7 +233,7 @@ void EnemyAiTestScene::draw_debug()
 
 		const Vector pos     = transform->transform.get_position();
 		const Vector forward = transform->transform.forward();
-		const btVector3 col  = state_color( alert->state );
+		const core::Vector col = state_color( alert->state );
 
 		// 視界錐は「床に投影した扇」として描く。
 		// 目の高さの水平な扇だと、同じ目線高さの FPS 視点からは真横＝1本の線に見えて
@@ -264,7 +264,7 @@ void EnemyAiTestScene::draw_debug()
 		// パトロール経路（薄い青の折れ線・床）
 		if ( patrol && patrol->waypoints.size() >= 2 )
 		{
-			const btVector3 path_col( 0.2f, 0.4f, 1.f );
+			const core::Vector path_col( 0.2f, 0.4f, 1.f );
 			for ( std::size_t i = 0; i < patrol->waypoints.size(); ++i )
 			{
 				Vector a = patrol->waypoints[ i ];

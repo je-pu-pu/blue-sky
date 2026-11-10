@@ -3,7 +3,7 @@
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/GameObjectRef.h>
 #include <blue_sky/ecs/ContactRules.h>
-#include <blue_sky/ActiveObjectPhysics.h>
+#include <core/physics/PhysicsManager.h>
 
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
@@ -20,16 +20,14 @@
 #include <blue_sky/ecs/system/PlayerInventorySystem.h>
 
 #include <core/ecs/EntityManager.h>
-#include <core/physics/EntityTag.h>
 
-#include <btBulletDynamicsCommon.h>
 
 #include <cmath>
 
 /**
  * 段階 6 : プレイヤーを ECS だけの物体（行動をまとめた部品 PlayerBehaviorComponent・入力の部品 PlayerInputComponent）にしたときのテスト
  *
- * 描画（GraphicsManager）・音は無しで作る。物理の世界は本物（ActiveObjectPhysics）を使うが、地面は置かない（足場のレイは何にも当たらない）。
+ * 描画（GraphicsManager）・音は無しで作る。物理の世界は本物（core::physics::PhysicsManager。以前は本編だけの ActiveObjectPhysics）を使うが、地面は置かない（足場のレイは何にも当たらない）。
  * 入力は偽の入力（PlayerInputComponent に直接書く）
  */
 
@@ -51,7 +49,7 @@ using ItemType = PlayerBehaviorComponent::ItemType;
 /// 描画なしで工場を作り、プレイヤーを (0, 10, 0) に置いて剛体を作り、やり直す
 struct Fixture
 {
-	blue_sky::ActiveObjectPhysics physics;
+	core::physics::PhysicsManager physics;
 	EntityManager manager;
 	ObjectFactory factory{ & manager, & physics, nullptr };
 	EntityId player = 0;
@@ -77,7 +75,7 @@ struct Fixture
 	PlayerInputComponent& input() { return * entity( player )->get_component< PlayerInputComponent >(); }
 	blue_sky::ecs::PlayerBehaviorSystem* behavior() { return manager.get_system< blue_sky::ecs::PlayerBehaviorSystem >(); }
 	PlayerInputSystem* input_system() { return manager.get_system< PlayerInputSystem >(); }
-	btRigidBody* body() { return entity( player )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body; }
+	core::physics::RigidBody* body() { return entity( player )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->get(); }
 	Vector velocity() { return factory.get_ref( player ).get_velocity(); }
 
 	/// 偽の入力を書いて 1 フレームぶん操作する
@@ -120,13 +118,13 @@ TEST( PlayerTest, プレイヤーは硬い物で_剛体はカプセル_やり直
 	// 以前の add_active_object_as_capsule : 足元から剛体の中心まで 0.875・Entity の番号のタグ
 	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >();
 	EXPECT_FLOAT_EQ( body->height_offset, 0.875f );
-	EXPECT_EQ( core::physics::get_entity_tag( body->body ), std::optional< EntityId >( f.player ) );
+	EXPECT_EQ( body->get()->get_entity_tag(), std::optional< EntityId >( f.player ) );
 
 	// 以前の Player::restart
-	EXPECT_FLOAT_EQ( body->body->getInvMass(), 1.f / 50.f );
-	EXPECT_FLOAT_EQ( body->body->getFriction(), 0.f );
-	EXPECT_TRUE( is_near( Vector( body->body->getAngularFactor() ), Vector::Zero ) );
-	EXPECT_TRUE( is_near( Vector( body->body->getGravity() ), Vector( 0.f, -9.8f, 0.f ) ) );
+	EXPECT_FLOAT_EQ( body->get()->get_inv_mass(), 1.f / 50.f );
+	EXPECT_FLOAT_EQ( body->get()->get_friction(), 0.f );
+	EXPECT_TRUE( is_near( Vector( body->get()->get_angular_factor() ), Vector::Zero ) );
+	EXPECT_TRUE( is_near( Vector( body->get()->get_gravity() ), Vector( 0.f, -9.8f, 0.f ) ) );
 
 	EXPECT_EQ( f.inv().get_item_count( ItemType::SCOPE ), 1 );
 	EXPECT_EQ( f.inv().selected_item_type, ItemType::NONE );
@@ -163,7 +161,7 @@ TEST( PlayerTest, 前を押すと前へ歩く速さぶん速度が増え_離す�
 	EXPECT_FLOAT_EQ( f.p().step_speed, 0.125f );
 
 	// 横歩きは右へ 0.25
-	f.body()->setLinearVelocity( btVector3( 0, 0, 0 ) );
+	f.body()->set_linear_velocity( Vector( 0, 0, 0 ) );
 	in = PlayerInputComponent();
 	in.right = true;
 	f.operate( in );
@@ -186,7 +184,7 @@ TEST( PlayerTest, マウスの横の移動で向きが変わり_ロケットで�
 
 	f.p().action_mode = ActionMode::ROCKET;
 	in.up = true;
-	f.body()->setLinearVelocity( btVector3( 0, 0, 0 ) );
+	f.body()->set_linear_velocity( Vector( 0, 0, 0 ) );
 	f.operate( in, view );
 
 	EXPECT_FLOAT_EQ( f.factory.get_ref( f.player ).get_direction_degree(), 4.5f );
@@ -303,8 +301,8 @@ TEST( PlayerTest, 死ぬと描かず当たりも起こさず倒れるように�
 	EXPECT_TRUE( f.behavior()->is_dead( f.player ) );
 	EXPECT_TRUE( f.entity( f.player )->get_component< blue_sky::ecs::CollisionTraitsComponent >()->is_dead );
 	EXPECT_FALSE( f.entity( f.player )->get_component< blue_sky::ecs::ObjectRenderComponent >()->is_visible );
-	EXPECT_TRUE( is_near( Vector( f.body()->getAngularFactor() ), Vector( 1.f, 1.f, 1.f ) ) );
-	EXPECT_FLOAT_EQ( f.body()->getFriction(), 1.f );
+	EXPECT_TRUE( is_near( Vector( f.body()->get_angular_factor() ), Vector( 1.f, 1.f, 1.f ) ) );
+	EXPECT_FLOAT_EQ( f.body()->get_friction(), 1.f );
 
 	// やり直すと生き返る
 	f.factory.restart();
@@ -379,12 +377,12 @@ TEST( PlayerTest, 梯子に触れると梯子につかまり重力が無くな�
 	EXPECT_TRUE( f.p().is_on_ladder );
 
 	f.behavior()->update_player( f.player, 0.1f, 1.f );
-	EXPECT_TRUE( is_near( Vector( f.body()->getGravity() ), Vector::Zero ) );
+	EXPECT_TRUE( is_near( Vector( f.body()->get_gravity() ), Vector::Zero ) );
 	EXPECT_FALSE( f.p().is_on_ladder );
 
 	// 次のフレームに触れていなければ重力が戻る
 	f.behavior()->update_player( f.player, 0.1f, 1.f );
-	EXPECT_TRUE( is_near( Vector( f.body()->getGravity() ), Vector( 0.f, -9.8f, 0.f ) ) );
+	EXPECT_TRUE( is_near( Vector( f.body()->get_gravity() ), Vector( 0.f, -9.8f, 0.f ) ) );
 
 	// ロケットで飛んでいるときに動かない物に当たると止まる（跳んでいる扱い）
 	f.p().action_mode = ActionMode::ROCKET;
@@ -412,7 +410,7 @@ TEST( PlayerTest, 風船の動作では上へ秒速_3_まで上がり_5_m_上が
 	// 上がる速さは 0 から 0.25 ずつ 3 まで（以前の Player::update の風船）
 	f.behavior()->update_player( f.player, 0.1f, 1.f );
 	EXPECT_NEAR( f.velocity().y(), 0.25f, 0.0001f );
-	EXPECT_TRUE( is_near( Vector( f.body()->getGravity() ), Vector::Zero ) );
+	EXPECT_TRUE( is_near( Vector( f.body()->get_gravity() ), Vector::Zero ) );
 
 	// 4 m（0.75）上がると終わりかけ、5 m 上がると終わって跳ぶ
 	f.factory.get_ref( f.player ).set_location( Vector( 0.f, 14.f, 0.f ) );
@@ -477,7 +475,7 @@ TEST( PlayerTest, 石を_3_個以上持つと走れない )
 	f.p().step_count = PlayerBehaviorComponent::StepCountToRun + 10;
 	f.p().step_speed = PlayerBehaviorComponent::MaxWalkStepSpeed;
 	f.inv().item_count[ static_cast< int >( ItemType::STONE ) ] = 3;
-	f.body()->setLinearVelocity( btVector3( 0.f, 0.f, 2.f ) );
+	f.body()->set_linear_velocity( Vector( 0.f, 0.f, 2.f ) );
 
 	PlayerInputComponent in;
 	in.up = true;

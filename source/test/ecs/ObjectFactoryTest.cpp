@@ -5,7 +5,7 @@
 #include <blue_sky/ecs/ContactRules.h>
 #include <blue_sky/ecs/ObjectBody.h>
 #include <blue_sky/ecs/component/PlayerBehaviorComponent.h>
-#include <blue_sky/ActiveObjectPhysics.h>
+#include <core/physics/PhysicsManager.h>
 
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
@@ -22,11 +22,9 @@
 
 #include <core/ecs/EntityManager.h>
 #include <core/ecs/component/TransformComponent.h>
-#include <core/physics/EntityTag.h>
 
 #include <common/math.h>
 
-#include <btBulletDynamicsCommon.h>
 
 #include <cmath>
 #include <sstream>
@@ -34,7 +32,7 @@
 /**
  * 段階 4 : 物体を種類の名前から作る ObjectFactory と、ECS だけの物体（動かない物・動く床）のテスト
  *
- * 描画（GraphicsManager）は無しで作る（モデル・定数バッファは用意しない）。物理の世界は本物（ActiveObjectPhysics）を使う
+ * 描画（GraphicsManager）は無しで作る（モデル・定数バッファは用意しない）。物理の世界は本物（core::physics::PhysicsManager。以前は本編だけの ActiveObjectPhysics）を使う
  */
 
 using blue_sky::ObjectFactory;
@@ -48,7 +46,7 @@ namespace
 /// 描画なしで工場を作る
 struct FactoryFixture
 {
-	blue_sky::ActiveObjectPhysics physics;
+	core::physics::PhysicsManager physics;
 	EntityManager manager;
 	ObjectFactory factory{ & manager, & physics, nullptr };
 
@@ -133,20 +131,20 @@ TEST( ObjectFactoryTest, 種類ごとの大きさ_質量_向き_形はステー�
 	EXPECT_TRUE( is_near( wall_state->start_location, Vector( 1.f, 2.f, 3.f ) ) );
 	EXPECT_FLOAT_EQ( wall_state->start_direction_degree, 90.f );
 	EXPECT_FLOAT_EQ( wall_body->height_offset, 1.25f );
-	EXPECT_FLOAT_EQ( wall_body->body->getInvMass(), 1.f / 100.f );
-	EXPECT_EQ( wall_body->body->getCollisionShape()->getShapeType(), BOX_SHAPE_PROXYTYPE );
+	EXPECT_FLOAT_EQ( wall_body->get()->get_inv_mass(), 1.f / 100.f );
+	EXPECT_EQ( wall_body->get()->get_shape_type(), core::physics::RigidBodyShapeType::Box );
 
 	// soda-can-1 だけ円柱
 	const auto can = f.create_from_line( "soda-can-1 0 0 0" );
-	EXPECT_EQ( f.entity( can )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body->getCollisionShape()->getShapeType(), CYLINDER_SHAPE_PROXYTYPE );
+	EXPECT_EQ( f.entity( can )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->get()->get_shape_type(), core::physics::RigidBodyShapeType::Cylinder );
 
 	// box-2x2x2 は摩擦 10
 	const auto box = f.create_from_line( "box-2x2x2 0 0 0" );
-	EXPECT_FLOAT_EQ( f.entity( box )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body->getFriction(), 10.f );
+	EXPECT_FLOAT_EQ( f.entity( box )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->get()->get_friction(), 10.f );
 
 	// 知らない種類は大きさ 0・質量 0（動かない）
 	const auto tree = f.create_from_line( "tree-1 0 0 0" );
-	EXPECT_FLOAT_EQ( f.entity( tree )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body->getInvMass(), 0.f );
+	EXPECT_FLOAT_EQ( f.entity( tree )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->get()->get_inv_mass(), 0.f );
 }
 
 TEST( ObjectFactoryTest, 剛体には_Entity_の番号のタグが付き_足元から高さの半分上に置かれる )
@@ -154,12 +152,12 @@ TEST( ObjectFactoryTest, 剛体には_Entity_の番号のタグが付き_足元�
 	FactoryFixture f;
 
 	const auto id = f.create_from_line( "wall-3 1 2 3" );
-	const auto* body = f.entity( id )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body;
+	const auto* body = f.entity( id )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->get();
 
-	ASSERT_TRUE( core::physics::get_entity_tag( body ).has_value() );
-	EXPECT_EQ( * core::physics::get_entity_tag( body ), id );
+	ASSERT_TRUE( body->get_entity_tag().has_value() );
+	EXPECT_EQ( * body->get_entity_tag(), id );
 
-	const btVector3& origin = body->getWorldTransform().getOrigin();
+	const Vector origin = body->get_world_transform( Vector::Zero ).get_position();
 	EXPECT_NEAR( origin.x(), 1.f, 0.0001f );
 	EXPECT_NEAR( origin.y(), 2.f + 1.25f, 0.0001f );
 	EXPECT_NEAR( origin.z(), 3.f, 0.0001f );
@@ -244,13 +242,14 @@ TEST( ObjectFactoryTest, やり直すと始めの位置と向きに戻り_剛体
 
 	EXPECT_TRUE( is_near( o.get_location(), Vector( 1.f, 2.f, 3.f ) ) );
 
-	const auto* body = f.entity( id )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body;
-	EXPECT_NEAR( body->getLinearVelocity().length(), 0.f, 0.0001f );
+	const auto* body = f.entity( id )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->get();
+	EXPECT_NEAR( body->get_linear_velocity().length(), 0.f, 0.0001f );
 
 	// 向き（Y 軸 90 度）が剛体にも送られている
-	const btQuaternion q = body->getWorldTransform().getRotation();
-	EXPECT_NEAR( std::abs( q.getAngle() ), math::degree_to_radian( 90.f ), 0.001f );
-	EXPECT_NEAR( body->getWorldTransform().getOrigin().y(), 2.f + 1.25f, 0.0001f );
+	const core::Transform t = body->get_world_transform( Vector::Zero );
+	EXPECT_NEAR( std::abs( t.forward().x() ), 1.f, 0.001f );		// 前が X 軸を向く
+	EXPECT_NEAR( t.forward().z(), 0.f, 0.001f );
+	EXPECT_NEAR( t.get_position().y(), 2.f + 1.25f, 0.0001f );
 }
 
 TEST( ObjectFactoryTest, 死なせると当たりを起こさず描かれず_やり直すと戻る )
@@ -299,11 +298,11 @@ TEST( ObjectFactoryTest, ECS_だけの物体も目標地点へ動き_着いた�
 	ASSERT_NE( system, nullptr );
 	EXPECT_EQ( system->debug_target_count(), 1u );
 
-	const auto* body = f.entity( id )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body;
+	const auto* body = f.entity( id )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->get();
 
 	// まだ遠い : 目標へ向けて速さ 1 の速度を設定する
 	system->update_targets( 1.f / 60.f );
-	EXPECT_NEAR( body->getLinearVelocity().y(), 1.f, 0.0001f );
+	EXPECT_NEAR( body->get_linear_velocity().y(), 1.f, 0.0001f );
 	EXPECT_NE( f.entity( id )->get_component< blue_sky::ecs::TargetLocationComponent >(), nullptr );
 
 	// 目標の近くに置くと、次のフレームで目標に置いて止め、目標を外す
@@ -311,7 +310,7 @@ TEST( ObjectFactoryTest, ECS_だけの物体も目標地点へ動き_着いた�
 	system->update_targets( 1.f / 60.f );
 
 	EXPECT_TRUE( is_near( o.get_location(), Vector( 0.f, 4.f, 0.f ) ) );
-	EXPECT_NEAR( body->getLinearVelocity().length(), 0.f, 0.0001f );
+	EXPECT_NEAR( body->get_linear_velocity().length(), 0.f, 0.0001f );
 	EXPECT_EQ( f.entity( id )->get_component< blue_sky::ecs::TargetLocationComponent >(), nullptr );
 	EXPECT_EQ( system->debug_target_count(), 0u );
 }
@@ -395,7 +394,7 @@ TEST( ObjectFactoryTest, メダルは拾う物で回り_硬くなく当たりの
 	EXPECT_FALSE( e->get_component< blue_sky::ecs::CollisionTraitsComponent >()->is_hard );
 	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >();
 	EXPECT_FLOAT_EQ( body->height_offset, 0.f );
-	EXPECT_NE( body->body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
+	EXPECT_FALSE( body->get()->has_contact_response() );
 	EXPECT_TRUE( is_near( e->get_component< blue_sky::ecs::SimpleObjectComponent >()->default_gravity, Vector::Zero ) );
 
 	// 1 秒に 90 度回る
@@ -438,12 +437,12 @@ TEST( ObjectFactoryTest, ロケットは硬い拾う物で_拾われると当た
 
 	auto* e = f.entity( * id );
 	const auto* traits = e->get_component< blue_sky::ecs::CollisionTraitsComponent >();
-	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body;
+	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->get();
 
 	EXPECT_EQ( e->get_component< blue_sky::ecs::PickupComponent >()->kind, blue_sky::ecs::PickupKind::ROCKET );
 	EXPECT_TRUE( traits->is_hard );
 	EXPECT_FALSE( traits->is_block );
-	EXPECT_EQ( body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
+	EXPECT_TRUE( body->has_contact_response() );
 	EXPECT_TRUE( is_near( e->get_component< blue_sky::ecs::SimpleObjectComponent >()->default_gravity, blue_sky::ecs::object_body::GravityDefault ) );
 
 	const auto player = f.create_player();
@@ -451,12 +450,12 @@ TEST( ObjectFactoryTest, ロケットは硬い拾う物で_拾われると当た
 
 	EXPECT_EQ( f.inventory_of( player ).get_item_count( blue_sky::ecs::PlayerBehaviorComponent::ItemType::ROCKET ), 1 );
 	EXPECT_TRUE( traits->is_dead );
-	EXPECT_NE( body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
+	EXPECT_FALSE( body->has_contact_response() );
 
 	f.factory.restart();
 
 	EXPECT_FALSE( traits->is_dead );
-	EXPECT_EQ( body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
+	EXPECT_TRUE( body->has_contact_response() );
 }
 
 TEST( ObjectFactoryTest, ゴールは死なない足場で重力が無く_やり直すと質量が_100_になり_当たりでは何も起こさない )
@@ -468,18 +467,18 @@ TEST( ObjectFactoryTest, ゴールは死なない足場で重力が無く_やり
 
 	auto* e = f.entity( * id );
 	const auto* traits = e->get_component< blue_sky::ecs::CollisionTraitsComponent >();
-	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body;
+	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->get();
 
 	EXPECT_TRUE( traits->is_hard );
 	EXPECT_TRUE( traits->is_safe_footing );
 	EXPECT_EQ( e->get_component< blue_sky::ecs::PickupComponent >(), nullptr );
 	EXPECT_EQ( e->get_component< blue_sky::ecs::StaticObjectComponent >(), nullptr );
-	EXPECT_FLOAT_EQ( body->getInvMass(), 1.f );		// 作ったときは 1（以前と同じ）
+	EXPECT_FLOAT_EQ( body->get_inv_mass(), 1.f );		// 作ったときは 1（以前と同じ）
 
 	f.factory.restart();
 
-	EXPECT_FLOAT_EQ( body->getInvMass(), 1.f / 100.f );
-	EXPECT_NEAR( body->getGravity().length(), 0.f, 0.0001f );
+	EXPECT_FLOAT_EQ( body->get_inv_mass(), 1.f / 100.f );
+	EXPECT_NEAR( body->get_gravity().length(), 0.f, 0.0001f );
 
 	// プレイヤーが当たっても何も起こさない（拾わない・ロケットも止めない。ゴールしたかはシーンがプレイヤーとの接触で調べる）
 	const auto player = f.create_player();

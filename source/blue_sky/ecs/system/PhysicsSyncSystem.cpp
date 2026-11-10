@@ -1,9 +1,5 @@
 #include "PhysicsSyncSystem.h"
 
-#include <core/math/Quaternion.h>
-
-#include <btBulletDynamicsCommon.h>
-
 namespace blue_sky::ecs
 {
 
@@ -13,44 +9,24 @@ void PhysicsSyncSystem::update_transforms()
 	{
 		const auto* body = std::get< PhysicsBodyComponent* >( t );
 
-		if ( ! body->body )
+		if ( ! body->get() )
 		{
 			return;
 		}
 
-		std::get< core::ecs::TransformComponent* >( t )->transform = read_body( * body->body, body->height_offset );
+		std::get< core::ecs::TransformComponent* >( t )->transform = read_body( * body->get(), body->height_offset );
 	} );
 }
 
-core::Transform PhysicsSyncSystem::read_body( const btRigidBody& body, float_t height_offset )
+core::Transform PhysicsSyncSystem::read_body( const core::physics::RigidBody& body, float_t height_offset )
 {
-	auto t = body.getWorldTransform();
-
-	core::Transform offset;
-	offset.set_identity();
-	offset.set_position( core::Vector( 0, -height_offset, 0 ) );
-
-	t *= offset;
-
-	// btVector3 と Vector はメモリレイアウトが同一のため reinterpret_cast で変換
-	core::Transform transform;
-	transform.set_position( reinterpret_cast< const core::Vector& >( t.getOrigin() ) );
-
-	auto q = t.getRotation();
-	transform.set_rotation( reinterpret_cast< const core::Quaternion& >( q ) );
-
-	return transform;
+	// 剛体の中心から足元へ戻す（計算は以前と同じ Bullet の掛け算。core::physics::RigidBody の中へ移した）
+	return body.get_world_transform( core::Vector( 0, -height_offset, 0 ) );
 }
 
-void PhysicsSyncSystem::write_body( btRigidBody& body, float_t height_offset, const core::Transform& transform )
+void PhysicsSyncSystem::write_body( core::physics::RigidBody& body, float_t height_offset, const core::Transform& transform )
 {
-	btTransform offset;
-	offset.setIdentity();
-	offset.setOrigin( btVector3( 0, height_offset, 0 ) );
-
-	btTransform t = btTransform( transform ) * offset;
-	body.setWorldTransform( t );
-	body.setInterpolationWorldTransform( t );
+	body.set_world_transform( transform, core::Vector( 0, height_offset, 0 ) );
 }
 
 } // namespace blue_sky::ecs

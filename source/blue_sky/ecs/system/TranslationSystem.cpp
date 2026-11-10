@@ -5,7 +5,7 @@
 
 #include <core/ecs/EntityManager.h>
 
-#include <btBulletDynamicsCommon.h>
+#include <core/physics/RigidBody.h>
 
 #include <cmath>
 #include <utility>
@@ -32,7 +32,7 @@ void TranslationSystem::update_translations( float_t delta_time )
 
 		if ( auto* body = object.get_rigid_body() )
 		{
-			body->setActivationState( true );
+			body->set_activation_state_active();
 		}
 
 		translation->angle += delta_time * translation->speed;

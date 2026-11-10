@@ -65,8 +65,6 @@ namespace blue_sky
 {
 	class Input;
 
-	class ActiveObjectPhysics;
-
 	class ObjectUpdater;
 	class ObjectFactory;
 
@@ -117,8 +115,7 @@ private:
 
 	std::unique_ptr< SoundEngine >			sound_engine_;			///< SoundEngine
 
-	std::unique_ptr< ActiveObjectPhysics >	active_object_physics_;	///< ActiveObjectPhysics (レガシー)
-	std::unique_ptr< PhysicsManager >		physics_manager_;		///< PhysicsManager
+	std::unique_ptr< PhysicsManager >		physics_manager_;		///< 物理の世界（本編と ECS のテストシーンで 1 つ。シーンを替えるときに clear する。以前は本編だけの ActiveObjectPhysics と 2 つあった）
 	std::unique_ptr< GraphicsManager >		graphics_manager_;		///< GraphicsManager
 	std::unique_ptr< SoundManager >			sound_manager_;			///< SoundManager
 	std::unique_ptr< ScriptManager >		script_manager_;		///< ScriptManager
@@ -225,8 +222,7 @@ public:
 	
 	OculusRift* get_oculus_rift() const { return oculus_rift_.get(); }
 
-	ActiveObjectPhysics* get_active_object_physics() const { return active_object_physics_.get(); }
-	PhysicsManager* get_physics_manager() const { return physics_manager_.get(); }	///< ECS の物理（以前は core::Service から取っていた）
+	PhysicsManager* get_physics_manager() const { return physics_manager_.get(); }	///< 物理の世界（本編も ECS のテストシーンも。以前は core::Service から取っていた）
 	const TimeManager* get_time_manager() const { return & time_manager_; }		///< 時間の管理（以前は core::Service から取っていた）
 	GraphicsManager* get_graphics_manager() const { return graphics_manager_.get(); }
 	SoundManager* get_sound_manager() const { return sound_manager_.get(); }

@@ -1,6 +1,5 @@
 #include "PlayerBehaviorSystem.h"
 
-#include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/GameObjectRef.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Model.h>
@@ -21,7 +20,7 @@
 
 #include <common/math.h>
 
-#include <btBulletDynamicsCommon.h>
+#include <core/physics/PhysicsManager.h>
 
 #include <algorithm>
 #include <cmath>
@@ -36,7 +35,7 @@ struct PlayerBehaviorSystem::Self
 	PlayerBehaviorComponent*	p = nullptr;
 	PlayerInventoryComponent*	inventory = nullptr;	///< 持ち物（無ければ nullptr）
 	EntityObject				object{ nullptr };
-	btRigidBody*				body = nullptr;		///< 剛体（無ければ nullptr。ステージを読む前）
+	core::physics::RigidBody*	body = nullptr;		///< 剛体（無ければ nullptr。ステージを読む前）
 	float_t						delta_time = 0.f;
 	float_t						scene_elapsed_time = 0.f;
 
@@ -51,63 +50,18 @@ namespace
 
 using core::Vector;
 
-/**
- * 自分以外の、壁・障害物になる物に触れたかを調べる（以前の Player.cpp の WithoutMeContactResultCallback と同じ）
- *
- * 当たった剛体の性質は、userPointer の Entity の番号のタグから引く（ecs::CollisionTraitsComponent）。
- * 自分は剛体で見分ける。タグの無い剛体（地面・ステージの当たりの形）は壁として当たる。タグはあるが Entity が消えた剛体は当たらない
- */
-class WithoutMeContactResultCallback : public btCollisionWorld::ContactResultCallback
+/// 足場のレイが当たる物か（以前の ClosestNotMe と同じ決まり。自分は ray_test_closest が除く）
+core::physics::BodyFilter make_ray_filter( const core::ecs::EntityManager* entity_manager, bool include_soft_footing )
 {
-private:
-	const btCollisionObject* me_;
-	const core::ecs::EntityManager* entity_manager_;
-	bool is_hit_ = false;
-
-	/// 壁・障害物として数えない物か
-	bool is_ignored( const btCollisionObject* object ) const
+	return [ entity_manager, include_soft_footing ] ( std::optional< core::ecs::EntityId > tag )
 	{
-		if ( object == me_ )
-		{
-			return true;
-		}
-
-		if ( CollisionEventSystem::is_vanished( entity_manager_, object ) )
-		{
-			return true;
-		}
-
-		const auto* traits = CollisionEventSystem::find_traits( entity_manager_, object );
-
-		return traits && ! traits->is_block;
-	}
-
-public:
-	WithoutMeContactResultCallback( const btCollisionObject* me, const core::ecs::EntityManager* entity_manager )
-		: me_( me )
-		, entity_manager_( entity_manager )
-	{
-
-	}
-
-	btScalar addSingleResult( btManifoldPoint& /* cp */, const btCollisionObjectWrapper* o1, int /* partId0 */, int /* index0 */, const btCollisionObjectWrapper* o2, int /* partId1 */, int /* index1 */ ) override
-	{
-		if ( is_ignored( o1->getCollisionObject() ) || is_ignored( o2->getCollisionObject() ) )
-		{
-			return 1.f;
-		}
-
-		is_hit_ = true;
-
-		return 1.f;
-	}
-
-	bool is_hit() const { return is_hit_; }
-};
+		return CollisionEventSystem::is_ray_target( entity_manager, tag, include_soft_footing );
+	};
+}
 
 } // namespace
 
-PlayerBehaviorSystem::PlayerBehaviorSystem( const ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager )
+PlayerBehaviorSystem::PlayerBehaviorSystem( const core::physics::PhysicsManager* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager )
 	: physics_( physics )
 	, graphics_manager_( graphics_manager )
 	, sound_manager_( sound_manager )
@@ -243,7 +197,7 @@ void PlayerBehaviorSystem::update_player( core::ecs::EntityId id, float_t delta_
 
 	PlayerBehaviorComponent& p = * self.p;
 
-	self.body->setActivationState( true );
+	self.body->set_activation_state_active();
 
 	update_on_footing( self );
 	update_jumpable( self );
@@ -311,7 +265,7 @@ void PlayerBehaviorSystem::update_player( core::ecs::EntityId id, float_t delta_
 	{
 		if ( line ) { line->set_color( core::Color( 1.f, 0.f, 0.f, 0.f ) ); }
 
-		if ( ! self.object.is_dead() && ! p.is_on_footing && ! p.is_on_ladder && self.body->getLinearVelocity().y() < PlayerBehaviorComponent::FallSoundVelocity && self.location().y() > 10.f && self.location().y() < 30.f && p.action_mode == ActionMode::NONE )
+		if ( ! self.object.is_dead() && ! p.is_on_footing && ! p.is_on_ladder && self.body->get_linear_velocity().y() < PlayerBehaviorComponent::FallSoundVelocity && self.location().y() > 10.f && self.location().y() < 30.f && p.action_mode == ActionMode::NONE )
 		{
 			play_sound( self, "fall", false, false );
 		}
@@ -377,7 +331,7 @@ void PlayerBehaviorSystem::limit_velocity( Self& self )
 	// 横（x・z）の速さを ±20 に収める（以前の ActiveObject::limit_velocity）
 	auto limit_max_speed = [ & ]
 	{
-		Vector v( self.body->getLinearVelocity() );
+		Vector v( self.body->get_linear_velocity() );
 
 		v.set_x( math::clamp( v.x(), -PlayerBehaviorComponent::MaxSpeed, PlayerBehaviorComponent::MaxSpeed ) );
 		v.set_z( math::clamp( v.z(), -PlayerBehaviorComponent::MaxSpeed, PlayerBehaviorComponent::MaxSpeed ) );
@@ -453,13 +407,12 @@ void PlayerBehaviorSystem::update_jumpable( Self& self )
 
 void PlayerBehaviorSystem::update_on_footing( Self& self )
 {
-	const btVector3& c = self.body->getCenterOfMassPosition();
+	const Vector center = self.body->get_center_of_mass_position();
 	const float_t ray_length = PlayerBehaviorComponent::CollisionHeight * 0.5f + 0.05f;
 
 	const float_t margin = 0.05f;
 	const Vector front = self.front() * ( PlayerBehaviorComponent::CollisionDepth * 0.5f - margin );
 	const Vector right = self.right() * ( PlayerBehaviorComponent::CollisionWidth * 0.5f - margin );
-	const Vector center = Vector( c.x(), c.y(), c.z() );
 
 	// 中心 + 四隅 + 四点 の設置を調べる
 	self.p->is_on_footing =
@@ -492,12 +445,11 @@ void PlayerBehaviorSystem::update_located_to_die( Self& self )
 {
 	PlayerBehaviorComponent& p = * self.p;
 
-	const btVector3& c = self.body->getCenterOfMassPosition();
+	const Vector center = self.body->get_center_of_mass_position();
 
 	const float_t margin = 0.05f;
 	const Vector front = self.front() * ( PlayerBehaviorComponent::CollisionDepth * 0.5f - margin );
 	const Vector right = self.right() * ( PlayerBehaviorComponent::CollisionWidth * 0.5f - margin );
-	const Vector center = Vector( c.x(), c.y(), c.z() );
 
 	p.is_located_on_safe = false;
 
@@ -528,20 +480,10 @@ bool PlayerBehaviorSystem::is_box_touching_block( const Self& self, const Vector
 		return false;
 	}
 
-	btBoxShape shape( btVector3( half.x(), half.y(), half.z() ) );
+	// 自分以外の、壁・障害物になる物に触れたか（以前の Player.cpp の WithoutMeContactResultCallback と同じ決まり。CollisionEventSystem::is_block）
+	const core::ecs::EntityManager* entity_manager = get_entity_manager();
 
-	btTransform offset;
-	offset.setIdentity();
-	offset.setOrigin( btVector3( offset_position.x(), offset_position.y(), offset_position.z() ) );
-
-	btCollisionObject collision_object;
-	collision_object.setCollisionShape( & shape );
-	collision_object.setWorldTransform( btTransform( self.object.get_transform() ) * offset );
-
-	WithoutMeContactResultCallback callback( self.body, get_entity_manager() );
-	physics_->contact_test( & collision_object, callback );
-
-	return callback.is_hit();
+	return physics_->box_contact_test( self.object.get_transform(), offset_position, half, self.body, [ entity_manager ] ( std::optional< core::ecs::EntityId > tag ) { return CollisionEventSystem::is_block( entity_manager, tag ); } );
 }
 
 /// 障害物に直面しているかのフラグを更新する
@@ -552,7 +494,7 @@ void PlayerBehaviorSystem::update_facing_to_block( Self& self )
 	p.is_facing_to_block = false;
 
 	const Vector half( 0.05f, 0.05f, 0.05f );
-	const float_t half_y_with_margin = btBoxShape( btVector3( half.x(), half.y(), half.z() ) ).getHalfExtentsWithMargin().y();
+	const float_t half_y_with_margin = core::physics::PhysicsManager::get_box_half_extents_with_margin( half ).y();
 
 	p.is_facing_to_block = is_box_touching_block( self, half, Vector( 0.f, p.is_clambering ? -0.1f : half_y_with_margin + 0.25f, PlayerBehaviorComponent::CollisionDepth * 0.5f ) );
 }
@@ -678,12 +620,12 @@ void PlayerBehaviorSystem::update_gravity( Self& self )
 
 	if ( p.action_mode == ActionMode::BALLOON || p.action_mode == ActionMode::ROCKET || ( p.is_on_ladder && ! p.is_jumping ) )
 	{
-		self.body->setGravity( Vector::Zero );
+		self.body->set_gravity( Vector::Zero );
 	}
 	else
 	{
 		const auto* state = self.entity->get_component< SimpleObjectComponent >();
-		self.body->setGravity( state ? state->default_gravity : Vector::Zero );
+		self.body->set_gravity( state ? state->default_gravity : Vector::Zero );
 	}
 }
 
@@ -702,12 +644,7 @@ bool PlayerBehaviorSystem::check_on_footing( const Self& self, const Vector& fro
 
 	Vector to = from + Vector( 0, -ray_length, 0 );
 
-	ClosestNotMe ray_callback( from, to, self.body, include_soft_footing, get_entity_manager() );
-	ray_callback.m_closestHitFraction = 1.0;
-
-	physics_->ray_test( from, to, ray_callback );
-
-	return ray_callback.hasHit();
+	return physics_->ray_test_closest( from, to, self.body, nullptr, make_ray_filter( get_entity_manager(), include_soft_footing ) ).hit;
 }
 
 /**
@@ -726,13 +663,10 @@ float_t PlayerBehaviorSystem::get_footing_height( Self& self, const Vector& from
 	Vector to = from;
 	to.set_y( 0.f );
 
-	ClosestNotMe ray_callback( from, to, self.body, include_soft_footing, get_entity_manager() );
-	ray_callback.m_closestHitFraction = 1.0;
-
-	physics_->ray_test( from, to, ray_callback );
+	const auto hit = physics_->ray_test_closest( from, to, self.body, nullptr, make_ray_filter( get_entity_manager(), include_soft_footing ) );
 
 	// 当たった物の性質は、剛体の Entity の番号のタグから引く
-	if ( const auto* traits = CollisionEventSystem::find_traits( get_entity_manager(), ray_callback.m_collisionObject ) )
+	if ( const auto* traits = CollisionEventSystem::find_traits( get_entity_manager(), hit.entity ) )
 	{
 		if ( traits->is_safe_footing )
 		{
@@ -740,12 +674,12 @@ float_t PlayerBehaviorSystem::get_footing_height( Self& self, const Vector& from
 		}
 	}
 
-	return ( 1.f - ray_callback.m_closestHitFraction ) * from.y();
+	return ( 1.f - hit.fraction ) * from.y();
 }
 
 bool PlayerBehaviorSystem::is_falling( const Self& self ) const
 {
-	return self.body && self.body->getLinearVelocity().y() < PlayerBehaviorComponent::FallingVelocityThreshold;
+	return self.body && self.body->get_linear_velocity().y() < PlayerBehaviorComponent::FallingVelocityThreshold;
 }
 
 void PlayerBehaviorSystem::set_action_mode( Self& self, ActionMode action_mode )
@@ -810,7 +744,7 @@ void PlayerBehaviorSystem::kill( Self& self )
 
 	if ( self.body )
 	{
-		self.body->setActivationState( true );
+		self.body->set_activation_state_active();
 		object_body::set_angular_factor( * self.body, 1.f );
 		object_body::set_friction( * self.body, 1.f );
 	}

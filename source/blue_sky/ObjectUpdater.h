@@ -4,11 +4,11 @@
 #include <core/ecs/type.h>
 
 namespace core::ecs { class EntityManager; }
+namespace core::physics { class PhysicsManager; }
 
 namespace blue_sky
 {
 
-class ActiveObjectPhysics;
 struct GameObjectContext;
 
 /**
@@ -25,7 +25,7 @@ struct GameObjectContext;
 class ObjectUpdater : public ecs::CollisionEventHandler
 {
 private:
-	ActiveObjectPhysics* physics_;					///< 当たりを集める世界（GameMain が渡す）
+	const core::physics::PhysicsManager* physics_;	///< 当たりを集める世界（GameMain が渡す）
 	const GameObjectContext* object_context_;		///< 経過時間・音（同上）
 	core::ecs::EntityManager* entity_manager_;		///< 物体の Entity（同上）
 
@@ -33,7 +33,7 @@ private:
 	float_t get_scene_elapsed_time() const;
 
 public:
-	ObjectUpdater( ActiveObjectPhysics* physics, const GameObjectContext* object_context, core::ecs::EntityManager* entity_manager );
+	ObjectUpdater( const core::physics::PhysicsManager* physics, const GameObjectContext* object_context, core::ecs::EntityManager* entity_manager );
 
 	/// 物体の System を決まった順に動かす（物理を進める前。上の説明の順）
 	void update();

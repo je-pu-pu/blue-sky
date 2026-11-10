@@ -1,79 +1,62 @@
 #include "ObjectBody.h"
 
-#include <btBulletDynamicsCommon.h>
+#include <core/physics/RigidBody.h>
 
 namespace blue_sky::ecs::object_body
 {
 
-const core::Vector& get_velocity( const btRigidBody& body )
+core::Vector get_velocity( const core::physics::RigidBody& body )
 {
-	// btVector3 と Vector はメモリレイアウトが同一
-	return reinterpret_cast< const core::Vector& >( body.getLinearVelocity() );
+	return body.get_linear_velocity();
 }
 
-void set_velocity( btRigidBody& body, const core::Vector& v )
+void set_velocity( core::physics::RigidBody& body, const core::Vector& v )
 {
 	if ( v == get_velocity( body ) )
 	{
 		return;
 	}
 
-	body.setLinearVelocity( v );
-	body.setInterpolationLinearVelocity( v );
+	body.set_linear_velocity( v );
+	body.set_interpolation_linear_velocity( v );
 
 	body.activate( true );
-	body.setActivationState( true );
+	body.set_activation_state_active();
 }
 
-void set_mass( btRigidBody& body, float_t mass )
+void set_mass( core::physics::RigidBody& body, float_t mass )
 {
-	btVector3 local_inertia( 0, 0, 0 );
-	body.getCollisionShape()->calculateLocalInertia( mass, local_inertia );
-	body.setMassProps( mass, local_inertia );
+	body.set_mass( mass );
 }
 
-void set_gravity( btRigidBody& body, const core::Vector& gravity )
+void set_gravity( core::physics::RigidBody& body, const core::Vector& gravity )
 {
-	body.setGravity( gravity );
+	body.set_gravity( gravity );
 }
 
-void set_friction( btRigidBody& body, float_t friction )
+void set_friction( core::physics::RigidBody& body, float_t friction )
 {
-	body.setFriction( friction );
+	body.set_friction( friction );
 }
 
-void set_angular_factor( btRigidBody& body, float_t factor )
+void set_angular_factor( core::physics::RigidBody& body, float_t factor )
 {
-	body.setAngularFactor( factor );
+	body.set_angular_factor( factor );
 }
 
-void set_angular_factor( btRigidBody& body, const core::Vector& factor )
+void set_angular_factor( core::physics::RigidBody& body, const core::Vector& factor )
 {
-	body.setAngularFactor( factor );
+	body.set_angular_factor( factor );
 }
 
-void set_kinematic( btRigidBody& body, bool is_kinematic )
+void set_kinematic( core::physics::RigidBody& body, bool is_kinematic )
 {
-	if ( is_kinematic )
-	{
-		body.setCollisionFlags( body.getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT );
-	}
-	else
-	{
-		body.setCollisionFlags( body.getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT );
-	}
+	body.set_kinematic( is_kinematic );
 }
 
-void set_no_contact_response( btRigidBody& body, bool is_no_contact_response )
+void set_no_contact_response( core::physics::RigidBody& body, bool is_no_contact_response )
 {
-	if ( is_no_contact_response )
-	{
-		body.setCollisionFlags( body.getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
-	}
-	else
-	{
-		body.setCollisionFlags( body.getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE );
-	}
+	body.set_no_contact_response( is_no_contact_response );
 }
 
 // const core::Vector GravityDefault( 0.f, -3.711f, 0.f, 0.f ); // 火星

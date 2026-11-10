@@ -17,7 +17,7 @@
 
 #include <core/graphics/Sprite.h>
 
-#include <blue_sky/ActiveObjectPhysics.h>
+#include <core/physics/PhysicsManager.h>
 
 #include <blue_sky/Input.h>
 
@@ -73,7 +73,7 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 	}
 
 	// Physics
-	get_active_object_physics()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
+	get_physics_manager()->add_ground( Vector( 1000, 1, 1000 ) );
 
 	// Texture
 	ui_texture_ = get_graphics_manager()->load_named_texture( "ui", "media/image/item.png" );
@@ -174,7 +174,7 @@ GamePlayScene::~GamePlayScene()
 	get_graphics_manager()->unset_ground();
 	get_graphics_manager()->unset_shadow_map();
 
-	get_active_object_physics()->clear();
+	get_physics_manager()->clear();
 
 	clear_delayed_command();
 
@@ -370,7 +370,7 @@ void GamePlayScene::update()
 	if ( ! is_cleared_ )
 	{
 		get_graphics_manager()->clear_debug_bullet();
-		get_active_object_physics()->update( get_elapsed_time() );
+		get_physics_manager()->step_simulation( get_elapsed_time() );
 
 		// 剛体の位置を位置の正（TransformComponent）へ写す（ecs::PhysicsSyncSystem。以前は物体ごとに update_transform を呼んでいた）
 		get_object_updater()->update_transforms();
@@ -386,7 +386,7 @@ void GamePlayScene::update()
 	// collision_check（当たった組を ecs::CollisionEventSystem に集め、互換の層が二重ディスパッチを呼ぶ。調べる順は以前と同じ : プレイヤー → ゴール → 全部）
 	get_object_updater()->check_collision_with( player_id_ );
 
-	if ( get_active_object_physics()->is_collision( get_player_ref().get_rigid_body(), goal_.get_rigid_body() ) )
+	if ( get_physics_manager()->contact_pair_test( get_player_ref().get_rigid_body(), goal_.get_rigid_body() ) )
 	{
 		on_goal();
 	}

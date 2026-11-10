@@ -52,7 +52,7 @@ void GameObjectRef::log_unsupported( const char* operation ) const
 	debug_log( string_t( "[Object] この物体では " ) + operation + " はできません（種類 : " + ( state ? state->kind : string_t( "不明" ) ) + "）" );
 }
 
-btRigidBody* GameObjectRef::get_rigid_body() const
+core::physics::RigidBody* GameObjectRef::get_rigid_body() const
 {
 	return ecs::EntityObject( find_entity() ).get_rigid_body();
 }
@@ -147,7 +147,7 @@ namespace
 {
 
 /// ECS だけの物体の剛体（無ければ nullptr）
-btRigidBody* find_rigid_body( core::ecs::Entity* entity )
+core::physics::RigidBody* find_rigid_body( core::ecs::Entity* entity )
 {
 	return ecs::EntityObject( entity ).get_rigid_body();
 }
@@ -156,7 +156,7 @@ btRigidBody* find_rigid_body( core::ecs::Entity* entity )
 
 void GameObjectRef::set_mass( float_t mass )
 {
-	if ( btRigidBody* body = find_rigid_body( find_entity() ) )
+	if ( core::physics::RigidBody* body = find_rigid_body( find_entity() ) )
 	{
 		ecs::object_body::set_mass( * body, mass );
 	}
@@ -164,7 +164,7 @@ void GameObjectRef::set_mass( float_t mass )
 
 void GameObjectRef::set_gravity( const core::Vector& gravity )
 {
-	if ( btRigidBody* body = find_rigid_body( find_entity() ) )
+	if ( core::physics::RigidBody* body = find_rigid_body( find_entity() ) )
 	{
 		ecs::object_body::set_gravity( * body, gravity );
 	}
@@ -172,7 +172,7 @@ void GameObjectRef::set_gravity( const core::Vector& gravity )
 
 void GameObjectRef::set_friction( float_t friction )
 {
-	if ( btRigidBody* body = find_rigid_body( find_entity() ) )
+	if ( core::physics::RigidBody* body = find_rigid_body( find_entity() ) )
 	{
 		ecs::object_body::set_friction( * body, friction );
 	}
@@ -180,7 +180,7 @@ void GameObjectRef::set_friction( float_t friction )
 
 void GameObjectRef::set_angular_factor( const core::Vector& factor )
 {
-	if ( btRigidBody* body = find_rigid_body( find_entity() ) )
+	if ( core::physics::RigidBody* body = find_rigid_body( find_entity() ) )
 	{
 		ecs::object_body::set_angular_factor( * body, factor );
 	}
@@ -188,7 +188,7 @@ void GameObjectRef::set_angular_factor( const core::Vector& factor )
 
 void GameObjectRef::set_kinematic( bool is_kinematic )
 {
-	if ( btRigidBody* body = find_rigid_body( find_entity() ) )
+	if ( core::physics::RigidBody* body = find_rigid_body( find_entity() ) )
 	{
 		ecs::object_body::set_kinematic( * body, is_kinematic );
 	}
@@ -196,7 +196,7 @@ void GameObjectRef::set_kinematic( bool is_kinematic )
 
 void GameObjectRef::set_no_contact_response( bool is_no_contact_response )
 {
-	if ( btRigidBody* body = find_rigid_body( find_entity() ) )
+	if ( core::physics::RigidBody* body = find_rigid_body( find_entity() ) )
 	{
 		ecs::object_body::set_no_contact_response( * body, is_no_contact_response );
 	}

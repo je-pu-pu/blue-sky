@@ -1,6 +1,6 @@
 #include "ObjectFactory.h"
 
-#include <blue_sky/ActiveObjectPhysics.h>
+#include <core/physics/PhysicsManager.h>
 #include <blue_sky/ConstantBuffers.h>
 #include <blue_sky/DebugLog.h>
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -42,7 +42,6 @@
 
 #include <core/ecs/EntityManager.h>
 #include <core/ecs/component/TransformComponent.h>
-#include <core/physics/EntityTag.h>
 
 #include <cstdio>
 #include <map>
@@ -52,7 +51,33 @@
 namespace blue_sky
 {
 
-ObjectFactory::ObjectFactory( core::ecs::EntityManager* entity_manager, ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager )
+namespace
+{
+
+/**
+ * 本編の物体の剛体の作り方（以前の BulletPhysics::add_box_rigid_body・add_cylinder_rigid_body・add_capsule_rigid_body と同じ）
+ *
+ * 同じ種類・大きさの形を共有し、摩擦は Bullet の既定（0.5）、当たりの振り分けは Bullet の既定（動く物は全部と、動かない物は動く物とだけ当たる）。
+ * 位置は transform に offset（足元から剛体の中心まで）を右から掛けたもの
+ */
+core::physics::RigidBodyCreateInfo make_body_info( core::physics::RigidBodyShapeType shape_type, const core::Vector& size, float_t mass, const core::Transform& transform, const core::Transform& offset )
+{
+	core::physics::RigidBodyCreateInfo info;
+	info.shape_type = shape_type;
+	info.shape_size = size;
+	info.mass = mass;
+	info.transform = transform;
+	info.offset = offset;
+	info.friction = core::physics::RigidBodyCreateInfo::BulletDefaultFriction;
+	info.share_shape = true;
+	info.use_default_collision_filter = true;
+
+	return info;
+}
+
+} // namespace
+
+ObjectFactory::ObjectFactory( core::ecs::EntityManager* entity_manager, core::physics::PhysicsManager* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager )
 	: entity_manager_( entity_manager )
 	, physics_( physics )
 	, graphics_manager_( graphics_manager )
@@ -416,28 +441,23 @@ ObjectFactory::EntityId ObjectFactory::create_entity_object( const ObjectSpec& s
 
 		const Vector half( w / 2.f, h / 2.f, d / 2.f );
 
-		core::physics::RigidBody owner = spec.shape == Shape::CYLINDER
-			? physics_->add_cylinder_rigid_body( transform->transform, offset, half, spec.mass )
-			: physics_->add_box_rigid_body( transform->transform, offset, half, spec.mass );
-
-		btRigidBody* body = owner.get();
+		core::physics::RigidBody owner = physics_->create_rigid_body( make_body_info( spec.shape == Shape::CYLINDER ? core::physics::RigidBodyShapeType::Cylinder : core::physics::RigidBodyShapeType::Box, half, spec.mass, transform->transform, offset ) );
 
 		if ( ! spec.is_hard )
 		{
-			ecs::object_body::set_no_contact_response( * body, true );	// 以前の ActiveObjectPhysics::set_active_object_info_to_rigid_body
+			ecs::object_body::set_no_contact_response( owner, true );	// 以前の ActiveObjectPhysics::set_active_object_info_to_rigid_body
 		}
 
 		if ( spec.is_static_object )
 		{
-			ecs::object_body::set_mass( * body, spec.mass );			// 以前の create_static_object は作った後にもう一度設定していた（同じ値）
+			ecs::object_body::set_mass( owner, spec.mass );			// 以前の create_static_object は作った後にもう一度設定していた（同じ値）
 		}
+
+		owner.set_entity_tag( id );
 
 		auto* body_component = entity->add_component< ecs::PhysicsBodyComponent >();
 		body_component->owner = std::move( owner );
-		body_component->body = body;
 		body_component->height_offset = spec.height_offset >= 0.f ? spec.height_offset : h * 0.5f;	// 以前の GameObject::get_height_offset（既定は当たりの高さの半分）
-
-		core::physics::set_entity_tag( body, id );
 	}
 
 	// 目標地点・向きへ動かす（ActiveObject を持たないので、MoveToTargetSystem が部品を直接動かす）
@@ -614,8 +634,8 @@ void ObjectFactory::add_player_rigid_body( EntityId player )
 	offset.set_position( Vector( 0, h / 2, 0 ) );
 
 	auto* transform = entity->get_component< core::ecs::TransformComponent >();
-	core::physics::RigidBody owner = physics_->add_capsule_rigid_body( transform->transform, offset, radius, height, 1.f );
-	btRigidBody* body = owner.get();
+	core::physics::RigidBody owner = physics_->create_rigid_body( make_body_info( core::physics::RigidBodyShapeType::Capsule, Vector( radius, height, 0.f ), 1.f, transform->transform, offset ) );
+	owner.set_entity_tag( player );
 
 	auto* body_component = entity->get_component< ecs::PhysicsBodyComponent >();
 
@@ -625,10 +645,7 @@ void ObjectFactory::add_player_rigid_body( EntityId player )
 	}
 
 	body_component->owner = std::move( owner );		// 前の剛体があれば、ここで世界から外れて消える
-	body_component->body = body;
 	body_component->height_offset = h * 0.5f;
-
-	core::physics::set_entity_tag( body, player );
 }
 
 void ObjectFactory::name( const string_t& name, EntityId id )

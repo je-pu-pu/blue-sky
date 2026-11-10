@@ -2,19 +2,16 @@
 
 #include <blue_sky/ecs/system/CollisionEventSystem.h>
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
-#include <blue_sky/ActiveObjectPhysics.h>
 
 #include <core/ecs/EntityManager.h>
-#include <core/physics/EntityTag.h>
-
-#include <btBulletDynamicsCommon.h>
+#include <core/physics/PhysicsManager.h>
 
 #include <functional>
 #include <string>
 #include <vector>
 
 /**
- * 当たりの振り分け（ecs::CollisionEventSystem）と、剛体の Entity の番号のタグから性質を引くレイの判定（ClosestNotMe）のテスト
+ * 当たりの振り分け（ecs::CollisionEventSystem）と、剛体の Entity の番号のタグから性質を引くレイ・壁の判定の決まりのテスト
  *
  * 以前は userPointer の ActiveObject* をキャストして、その場で振り分けていた（ActiveObjectPhysics.cpp の on_collide）。
  * 振り分けの決まりは以前と同じ : 片方が地面なら、もう片方（生きていれば）が地面に当たる。両方が物体なら、両方とも生きていれば当たる
@@ -201,29 +198,28 @@ TEST( CollisionEventSystemTest, 剛体のタグから集め_性質を引く )
 	auto* system = add_system( manager );
 	const auto id = create_object( manager );
 
-	btCollisionObject tagged;
-	btCollisionObject ground;
-	core::physics::set_entity_tag( & tagged, id );
+	// PhysicsManager の接触の判定が渡すタグ（地面はタグ無し）
+	const std::optional< EntityId > tagged = id;
+	const std::optional< EntityId > ground;
 
-	system->add_contact( & ground, & tagged );
+	system->add_contact( ground, tagged );
 
 	RecordingHandler handler;
 	system->dispatch( handler );
 	ASSERT_EQ( 1u, handler.log.size() );
 	EXPECT_EQ( "ground " + std::to_string( id ), handler.log[ 0 ] );
 
-	EXPECT_EQ( traits_of( manager, id ), CollisionEventSystem::find_traits( & manager, & tagged ) );
-	EXPECT_EQ( nullptr, CollisionEventSystem::find_traits( & manager, & ground ) );
-	EXPECT_EQ( nullptr, CollisionEventSystem::find_traits( nullptr, & tagged ) );
-	EXPECT_FALSE( CollisionEventSystem::is_vanished( & manager, & tagged ) );
-	EXPECT_FALSE( CollisionEventSystem::is_vanished( & manager, & ground ) );
+	EXPECT_EQ( traits_of( manager, id ), CollisionEventSystem::find_traits( & manager, tagged ) );
+	EXPECT_EQ( nullptr, CollisionEventSystem::find_traits( & manager, ground ) );
+	EXPECT_EQ( nullptr, CollisionEventSystem::find_traits( nullptr, tagged ) );
+	EXPECT_FALSE( CollisionEventSystem::is_vanished( & manager, tagged ) );
+	EXPECT_FALSE( CollisionEventSystem::is_vanished( & manager, ground ) );
 
 	manager.destroy_entity( id );
-	EXPECT_EQ( nullptr, CollisionEventSystem::find_traits( & manager, & tagged ) );
-	EXPECT_TRUE( CollisionEventSystem::is_vanished( & manager, & tagged ) );
+	EXPECT_EQ( nullptr, CollisionEventSystem::find_traits( & manager, tagged ) );
+	EXPECT_TRUE( CollisionEventSystem::is_vanished( & manager, tagged ) );
 }
-
-// ---- レイの判定（ClosestNotMe） ----
+// ---- レイの判定（以前の ClosestNotMe。今は PhysicsManager::ray_test_closest と CollisionEventSystem::is_ray_target） ----
 
 namespace
 {
@@ -236,16 +232,26 @@ core::math::Transform at_height( float_t y )
 	return t;
 }
 
-/// 上から下へレイを飛ばし、最初に当たった剛体を返す（当たらなければ nullptr）
-const btCollisionObject* cast_down( const blue_sky::ActiveObjectPhysics& physics, const EntityManager& manager, const btRigidBody* me, bool include_soft_footing )
+/// 本編の物体と同じ作り方の、動かない薄い箱
+core::physics::RigidBody make_plate( core::physics::PhysicsManager& physics, float_t y )
 {
-	const btVector3 from( 0.f, 100.f, 0.f );
-	const btVector3 to( 0.f, -100.f, 0.f );
+	core::physics::RigidBodyCreateInfo info;
+	info.shape_size = core::math::Vector( 1.f, 0.1f, 1.f );
+	info.mass = 0.f;
+	info.transform = at_height( y );
+	info.offset = at_height( 0.f );
+	info.friction = core::physics::RigidBodyCreateInfo::BulletDefaultFriction;
+	info.share_shape = true;
+	info.use_default_collision_filter = true;
 
-	blue_sky::ClosestNotMe callback( from, to, me, include_soft_footing, & manager );
-	physics.ray_test( from, to, callback );
+	return physics.create_rigid_body( info );
+}
 
-	return callback.hasHit() ? callback.m_collisionObject : nullptr;
+/// 上から下へレイを飛ばし、最初に当たった所を返す（本編のプレイヤーの足場のレイと同じ決まり）
+core::physics::RayHit cast_down( const core::physics::PhysicsManager& physics, const EntityManager& manager, const core::physics::RigidBody* me, bool include_soft_footing )
+{
+	return physics.ray_test_closest( core::math::Vector( 0.f, 100.f, 0.f ), core::math::Vector( 0.f, -100.f, 0.f ), me, nullptr,
+		[ & manager, include_soft_footing ] ( std::optional< EntityId > tag ) { return CollisionEventSystem::is_ray_target( & manager, tag, include_soft_footing ); } );
 }
 
 } // namespace
@@ -253,24 +259,15 @@ const btCollisionObject* cast_down( const blue_sky::ActiveObjectPhysics& physics
 TEST( CollisionEventSystemTest, レイは自分_死んだ物体_すり抜ける物体_柔らかい物体_消えた物体を通り抜け_地面に当たる )
 {
 	EntityManager manager;
-	blue_sky::ActiveObjectPhysics physics;
-
-	const core::math::Transform identity = at_height( 0.f );
-	const core::math::Vector box( 1.f, 0.1f, 1.f );
+	core::physics::PhysicsManager physics;
 
 	// 上から順に : 自分 → 死んだ物体 → すり抜ける物体 → 柔らかい物体（風船など）→ 消えた物体 → 地面（タグ無し）
-	auto me_owner = physics.add_box_rigid_body( at_height( 50.f ), identity, box, 0.f );
-	btRigidBody* me = me_owner.get();
-	auto dead_owner = physics.add_box_rigid_body( at_height( 40.f ), identity, box, 0.f );
-	btRigidBody* dead = dead_owner.get();
-	auto ghost_owner = physics.add_box_rigid_body( at_height( 30.f ), identity, box, 0.f );
-	btRigidBody* ghost = ghost_owner.get();
-	auto soft_owner = physics.add_box_rigid_body( at_height( 20.f ), identity, box, 0.f );
-	btRigidBody* soft = soft_owner.get();
-	auto vanished_owner = physics.add_box_rigid_body( at_height( 10.f ), identity, box, 0.f );
-	btRigidBody* vanished = vanished_owner.get();
-	auto ground_owner = physics.add_box_rigid_body( at_height( 0.f ), identity, box, 0.f );
-	btRigidBody* ground = ground_owner.get();
+	auto me = make_plate( physics, 50.f );
+	auto dead = make_plate( physics, 40.f );
+	auto ghost = make_plate( physics, 30.f );
+	auto soft = make_plate( physics, 20.f );
+	auto vanished = make_plate( physics, 10.f );
+	auto ground = make_plate( physics, 0.f );
 
 	const auto me_id = create_object( manager );
 	const auto dead_id = create_object( manager );
@@ -282,19 +279,42 @@ TEST( CollisionEventSystemTest, レイは自分_死んだ物体_すり抜ける�
 	traits_of( manager, ghost_id )->is_ghost = true;
 	traits_of( manager, soft_id )->is_hard = false;
 
-	core::physics::set_entity_tag( me, me_id );
-	core::physics::set_entity_tag( dead, dead_id );
-	core::physics::set_entity_tag( ghost, ghost_id );
-	core::physics::set_entity_tag( soft, soft_id );
-	core::physics::set_entity_tag( vanished, vanished_id );
+	me.set_entity_tag( me_id );
+	dead.set_entity_tag( dead_id );
+	ghost.set_entity_tag( ghost_id );
+	soft.set_entity_tag( soft_id );
+	vanished.set_entity_tag( vanished_id );
 	manager.destroy_entity( vanished_id );
 
 	// 柔らかい物体を足場に含めないなら、地面まで届く
-	EXPECT_EQ( ground, cast_down( physics, manager, me, false ) );
+	const auto to_ground = cast_down( physics, manager, & me, false );
+	ASSERT_TRUE( to_ground.hit );
+	EXPECT_FALSE( to_ground.entity.has_value() );
+	EXPECT_NEAR( 0.1f, to_ground.point.y(), 1e-4f );
 
 	// 足場に含めるなら、柔らかい物体に当たる
-	EXPECT_EQ( soft, cast_down( physics, manager, me, true ) );
+	EXPECT_EQ( std::optional< EntityId >( soft_id ), cast_down( physics, manager, & me, true ).entity );
 
 	// 自分でなければ、自分（の位置にある物体）に当たる
-	EXPECT_EQ( me, cast_down( physics, manager, nullptr, false ) );
+	EXPECT_EQ( std::optional< EntityId >( me_id ), cast_down( physics, manager, nullptr, false ).entity );
+}
+
+TEST( CollisionEventSystemTest, 壁の判定は消えた物体と塞がない物体を数えず_地面と塞ぐ物体を数える )
+{
+	EntityManager manager;
+
+	const auto block_id = create_object( manager );
+	const auto open_id = create_object( manager );
+	const auto vanished_id = create_object( manager );
+
+	traits_of( manager, block_id )->is_block = true;
+	traits_of( manager, open_id )->is_block = false;
+	manager.destroy_entity( vanished_id );
+
+	// 以前のプレイヤーの WithoutMeContactResultCallback と同じ決まり
+	EXPECT_TRUE( CollisionEventSystem::is_block( & manager, std::nullopt ) );					// 地面・ステージの当たりの形
+	EXPECT_TRUE( CollisionEventSystem::is_block( & manager, block_id ) );
+	EXPECT_FALSE( CollisionEventSystem::is_block( & manager, open_id ) );
+	EXPECT_FALSE( CollisionEventSystem::is_block( & manager, vanished_id ) );
+	EXPECT_TRUE( CollisionEventSystem::is_block( & manager, manager.create_entity()->get_id() ) );	// 性質を持たない Entity は数える
 }

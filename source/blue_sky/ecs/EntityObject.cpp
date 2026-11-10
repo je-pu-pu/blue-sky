@@ -28,7 +28,7 @@
 
 #include <common/math.h>
 
-#include <btBulletDynamicsCommon.h>
+#include <core/physics/RigidBody.h>
 
 #include <cmath>
 
@@ -44,9 +44,9 @@ EntityObject::EntityObject( core::ecs::Entity* entity )
 
 }
 
-btRigidBody* EntityObject::get_rigid_body() const
+core::physics::RigidBody* EntityObject::get_rigid_body() const
 {
-	return body_ ? body_->body : nullptr;
+	return body_ ? body_->get() : nullptr;
 }
 
 void EntityObject::commit_transform()
@@ -246,7 +246,7 @@ void EntityObject::restart()
 		traits->is_dead = false;
 	}
 
-	if ( btRigidBody* body = get_rigid_body() )
+	if ( core::physics::RigidBody* body = get_rigid_body() )
 	{
 		const core::Vector start_location = state_ ? state_->start_location : get_location();
 		const core::Vector start_rotation = state_ ? state_->start_rotation : core::Vector::Zero;
@@ -258,20 +258,19 @@ void EntityObject::restart()
 
 		// 以前の ActiveObject::restart と同じ順・同じ値（動きの状態・世界の位置には足元の位置を入れ、最後に向きを変えるときに高さのずれを足して送り直す）
 		body->activate( true );
-		body->getMotionState()->setWorldTransform( transform );
+		body->set_motion_state_transform( transform );
 
-		body->setWorldTransform( transform );
-		body->setInterpolationWorldTransform( transform );
+		body->set_world_transform( transform );
 
-		body->setLinearVelocity( btVector3( 0.f, 0.f, 0.f ) );
-		body->setInterpolationLinearVelocity( btVector3( 0.f, 0.f, 0.f ) );
+		body->set_linear_velocity( core::Vector::Zero );
+		body->set_interpolation_linear_velocity( core::Vector::Zero );
 
-		body->setAngularVelocity( btVector3( 0.f, 0.f, 0.f ) );
-		body->setInterpolationAngularVelocity( btVector3( 0.f, 0.f, 0.f ) );
+		body->set_angular_velocity( core::Vector::Zero );
+		body->set_interpolation_angular_velocity( core::Vector::Zero );
 
-		body->setGravity( state_ ? state_->default_gravity : core::Vector::Zero );
+		body->set_gravity( state_ ? state_->default_gravity : core::Vector::Zero );
 
-		body->clearForces();
+		body->clear_forces();
 
 		set_direction_degree( state_ ? state_->start_direction_degree : 0.f );
 
@@ -299,8 +298,7 @@ void EntityObject::restart()
 		if ( const auto* throwable = entity_->get_component< ThrowableComponent >() )
 		{
 			// 以前の Stone::restart（石が薄い壁を貫通しないようにする。Bullet の連続衝突判定）
-			body->setCcdSweptSphereRadius( throwable->ccd_swept_sphere_radius );
-			body->setCcdMotionThreshold( throwable->ccd_motion_threshold );
+			body->set_ccd( throwable->ccd_swept_sphere_radius, throwable->ccd_motion_threshold );
 		}
 	}
 

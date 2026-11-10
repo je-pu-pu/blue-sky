@@ -1,17 +1,11 @@
 #include "CollisionEventSystem.h"
 
 #include <core/ecs/EntityManager.h>
-#include <core/physics/EntityTag.h>
 
 #include <utility>
 
 namespace blue_sky::ecs
 {
-
-void CollisionEventSystem::add_contact( const btCollisionObject* o0, const btCollisionObject* o1 )
-{
-	contact_list_.push_back( { core::physics::get_entity_tag( o0 ), core::physics::get_entity_tag( o1 ) } );
-}
 
 const CollisionTraitsComponent* CollisionEventSystem::find_traits( core::ecs::EntityId id ) const
 {
@@ -89,9 +83,8 @@ void CollisionEventSystem::dispatch( CollisionEventHandler& handler )
 	}
 }
 
-const CollisionTraitsComponent* CollisionEventSystem::find_traits( const core::ecs::EntityManager* entity_manager, const btCollisionObject* object )
+const CollisionTraitsComponent* CollisionEventSystem::find_traits( const core::ecs::EntityManager* entity_manager, std::optional< core::ecs::EntityId > id )
 {
-	const auto id = core::physics::get_entity_tag( object );
 
 	if ( ! id || ! entity_manager )
 	{
@@ -103,16 +96,51 @@ const CollisionTraitsComponent* CollisionEventSystem::find_traits( const core::e
 	return entity ? entity->get_component< CollisionTraitsComponent >() : nullptr;
 }
 
-bool CollisionEventSystem::is_vanished( const core::ecs::EntityManager* entity_manager, const btCollisionObject* object )
+bool CollisionEventSystem::is_vanished( const core::ecs::EntityManager* entity_manager, std::optional< core::ecs::EntityId > id )
 {
-	const auto id = core::physics::get_entity_tag( object );
-
 	if ( ! id )
 	{
 		return false;
 	}
 
 	return ! entity_manager || ! entity_manager->is_alive( * id );
+}
+
+bool CollisionEventSystem::is_ray_target( const core::ecs::EntityManager* entity_manager, std::optional< core::ecs::EntityId > tag, bool include_soft_footing )
+{
+	// 以前の ClosestNotMe::addSingleResult と同じ順・同じ決まり（自分は PhysicsManager::ray_test_closest が除く）
+	if ( is_vanished( entity_manager, tag ) )
+	{
+		return false;
+	}
+
+	if ( const auto* traits = find_traits( entity_manager, tag ) )
+	{
+		if ( traits->is_dead || traits->is_ghost )
+		{
+			return false;
+		}
+
+		if ( ! include_soft_footing && ! traits->is_hard )
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool CollisionEventSystem::is_block( const core::ecs::EntityManager* entity_manager, std::optional< core::ecs::EntityId > tag )
+{
+	// 以前の WithoutMeContactResultCallback::is_ignored の逆（自分は PhysicsManager::box_contact_test が除く）
+	if ( is_vanished( entity_manager, tag ) )
+	{
+		return false;
+	}
+
+	const auto* traits = find_traits( entity_manager, tag );
+
+	return ! traits || traits->is_block;
 }
 
 } // namespace blue_sky::ecs

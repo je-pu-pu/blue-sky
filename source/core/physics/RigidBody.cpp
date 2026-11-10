@@ -118,7 +118,10 @@ void RigidBody::set_motion_state_transform( const Transform& transform )
 
 RigidBody::Vector RigidBody::get_center_of_mass_position() const
 {
-	return to_vector( rigid_body_->getCenterOfMassPosition() );
+	// 以前のプレイヤーの足場の判定と同じく x・y・z から作る（4 つ目の値は持ち込まない）
+	const btVector3& c = rigid_body_->getCenterOfMassPosition();
+
+	return Vector( c.x(), c.y(), c.z() );
 }
 
 RigidBody::Vector RigidBody::get_linear_velocity() const

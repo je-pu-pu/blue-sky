@@ -7,8 +7,6 @@
 
 #include <optional>
 
-class btRigidBody;
-
 namespace blue_sky::ecs
 {
 

@@ -8,7 +8,7 @@ namespace blue_sky::ecs
 /**
  * 物体の当たりの性質（すり抜ける・硬い・壁になる・足場になる）と、死んでいるか
  *
- * 当たりの振り分け（CollisionEventSystem）・レイの判定（ClosestNotMe）・プレイヤーの壁の判定が、
+ * 当たりの振り分け（CollisionEventSystem）・レイの判定（CollisionEventSystem::is_ray_target。以前の ClosestNotMe）・プレイヤーの壁の判定（is_block）が、
  * 剛体の Entity の番号のタグからこれを引く。以前は userPointer の ActiveObject* の仮想関数
  * （is_ghost・is_hard・is_block・is_safe_footing・is_dead）を呼んでいた。
  *

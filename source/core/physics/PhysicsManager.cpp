@@ -751,4 +751,9 @@ std::size_t PhysicsManager::get_owned_shape_count() const
 	return impl_->shared_shape_map.size() + impl_->mesh_shape_list.size();
 }
 
+std::size_t PhysicsManager::get_owned_rigid_body_count() const
+{
+	return impl_->owned_rigid_body_list.size();
+}
+
 } // namespace core::physics

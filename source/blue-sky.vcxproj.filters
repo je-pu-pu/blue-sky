@@ -311,9 +311,6 @@
     <ClCompile Include="blue_sky\ecs\system\SpinSystem.cpp">
       <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
-    <ClCompile Include="blue_sky\ActiveObjectPhysics.cpp">
-      <Filter>blue_sky</Filter>
-    </ClCompile>
     <ClCompile Include="blue_sky\App.cpp">
       <Filter>blue_sky</Filter>
     </ClCompile>
@@ -1043,9 +1040,6 @@
     </ClInclude>
     <ClInclude Include="blue_sky\ecs\component\StaticObjectComponent.h">
       <Filter>blue_sky\ecs\component</Filter>
-    </ClInclude>
-    <ClInclude Include="blue_sky\ActiveObjectPhysics.h">
-      <Filter>blue_sky</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\App.h">
       <Filter>blue_sky</Filter>

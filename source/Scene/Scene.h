@@ -38,7 +38,6 @@ namespace core
 namespace blue_sky
 {
 	class GameMain;
-	class ActiveObjectPhysics;
 	class ObjectUpdater;
 	class ObjectFactory;
 	class ScriptManager;
@@ -68,7 +67,7 @@ public:
 
 	using EntityManager		= core::ecs::EntityManager;
 	using GraphicsManager	= graphics::GraphicsManager;
-	using PhysicsManager	= ActiveObjectPhysics;
+	using PhysicsManager	= core::physics::PhysicsManager;
 	using SoundManager		= core::sound::SoundManager;
 
 private:
@@ -92,8 +91,7 @@ protected:
 	/// 物体を種類の名前から作り、名前で引く（ECS だけの物体を含む。物体の片付け・やり直しの入口）
 	ObjectFactory* get_object_factory() const;
 
-	ActiveObjectPhysics* get_active_object_physics() const;
-	core::physics::PhysicsManager* get_physics_manager() const;	///< ECS の物理（ECS のシステムに渡す。以前システムは core::Service から取っていた）
+	core::physics::PhysicsManager* get_physics_manager() const;	///< 物理の世界（本編も ECS のテストシーンも。以前本編は get_active_object_physics の別の世界だった）
 	const core::TimeManager* get_time_manager() const;			///< 時間の管理（ECS のシステムに渡す）
 	GraphicsManager* get_graphics_manager() const;
 	SoundManager* get_sound_manager() const;

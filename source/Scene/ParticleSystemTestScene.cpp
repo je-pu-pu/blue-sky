@@ -1,7 +1,7 @@
 #include "ParticleSystemTestScene.h"
 
 #include <blue_sky/graphics/GraphicsManager.h>
-#include <blue_sky/ActiveObjectPhysics.h>
+#include <core/physics/PhysicsManager.h>
 #include <blue_sky/Input.h>
 
 #include <core/ecs/Component/CameraComponent.h>
@@ -27,7 +27,7 @@ ParticleSystemTestScene::ParticleSystemTestScene( GameMain& game_main )
 	, camera_( get_entity_manager()->create_entity() )
 {
 	// Physics
-	get_active_object_physics()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
+	get_physics_manager()->add_ground( Vector( 1000, 1, 1000 ) );
 
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
@@ -68,7 +68,7 @@ void ParticleSystemTestScene::update()
 	get_graphics_manager()->update();
 
 	get_graphics_manager()->clear_debug_bullet();
-	get_active_object_physics()->update( get_elapsed_time() );
+	get_physics_manager()->step_simulation( get_elapsed_time() );
 }
 
 void ParticleSystemTestScene::render()

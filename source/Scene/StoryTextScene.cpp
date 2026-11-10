@@ -103,7 +103,11 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 			apply_chase( layer->get_translation(), * desc.translation, [] ( Vector3& v, const std::array< double, 2 >& a ) { v.x() = static_cast< float >( a[ 0 ] ); v.y() = static_cast< float >( a[ 1 ] ); } );
 		}
 
-		// 回転（rotation）はまだ当てない（以前の読み方と同じ見た目にするため。次の変更で当てる）
+		// 回転（度。左上を中心に回る）。以前の形式では layer-rotate と書いてあり、読む側の名前（layer-rotation）と違って黙って無視されていた
+		if ( desc.rotation )
+		{
+			apply_chase( layer->get_rotation(), * desc.rotation, [] ( float_t& v, const std::array< double, 1 >& a ) { v = static_cast< float_t >( a[ 0 ] ); } );
+		}
 
 		if ( desc.scale )
 		{

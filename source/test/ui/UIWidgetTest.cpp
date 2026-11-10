@@ -426,6 +426,22 @@ TEST_F( TabTest, 端のタブから反対端へ回り見出しクリックでも
 	EXPECT_EQ( 0u, tabs->get_current() );
 }
 
+TEST( TabInitialPageTest, 最初に表示するページを決めるとそのページにフォーカスが入る )
+{
+	ScreenFixture f;
+	auto root = std::make_unique< Stack >( Axis::VERTICAL );
+	auto* tabs = root->add< TabView >();
+	tabs->add_page< Stack >( "tab.a", Axis::VERTICAL )->add< Button >( "a0", nullptr );
+	auto* b0 = tabs->add_page< Stack >( "tab.b", Axis::VERTICAL )->add< Button >( "b0", nullptr );
+
+	tabs->set_initial_page( 1 );
+	tabs->set_initial_page( 5 );		// 範囲外は無視する
+	f.screen.set_root( std::move( root ), nullptr );
+
+	EXPECT_EQ( 1u, tabs->get_current() );
+	EXPECT_EQ( b0, f.screen.get_focused() );
+}
+
 TEST_F( TabTest, 操作ヒントにタブ切替が出る )
 {
 	strings.set( "hint.key.tab", "Q / E" );

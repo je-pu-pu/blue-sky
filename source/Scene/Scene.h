@@ -1,6 +1,7 @@
 #pragma once
 
 #include <blue_sky/type.h>
+#include <Scene/SceneRequest.h>
 #include <functional>
 
 class App;
@@ -78,6 +79,7 @@ private:
 	std::string name_;
 	std::string next_scene_;
 	std::string next_stage_name_;
+	SceneArguments arguments_;		///< 遷移の要求で渡された引数（作られたときに GameMain から受け取る）
 
 protected:
 	void update_total_elapsed_time();
@@ -184,6 +186,13 @@ public:
 	void set_next_scene( const std::string& next_scene ) { next_scene_ = next_scene; }
 
 	const std::string& get_stage_name() const;
+
+	/// 遷移の要求で渡された引数（"push:options?tab=controls" の tab）。無ければ default_value。コンストラクタの中でも読める
+	string_t get_argument( const string_t& key, const string_t& default_value = string_t() ) const
+	{
+		const auto i = arguments_.find( key );
+		return i != arguments_.end() ? i->second : default_value;
+	}
 	
 	const std::string& get_next_stage_name() const { return next_stage_name_; }
 	void set_next_stage_name( const std::string& next_stage_name ) { next_stage_name_ = next_stage_name; }

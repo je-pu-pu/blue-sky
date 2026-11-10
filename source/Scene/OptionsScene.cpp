@@ -145,6 +145,22 @@ OptionsScene::OptionsScene( GameMain& game_main )
 	build_controls_page( add_scroll_page( tabs, "options.tab.controls" ) );
 	body->set_flex( tabs );
 
+	// 開くときにタブを選べる（"push:options?tab=controls" のように遷移の要求に引数を付ける）
+	if ( const string_t tab = get_argument( "tab" ); ! tab.empty() )
+	{
+		const char_t* tab_names[] = { "graphics", "audio", "controls" };
+		const auto i = std::find( std::begin( tab_names ), std::end( tab_names ), tab );
+
+		if ( i != std::end( tab_names ) )
+		{
+			tabs->set_initial_page( static_cast< size_t >( i - std::begin( tab_names ) ) );
+		}
+		else
+		{
+			debug_log( "[Options] 知らないタブの名前なので最初のタブで開きます: " + tab );
+		}
+	}
+
 	// 下のボタン行
 	auto* buttons = body->add< Stack >( Axis::HORIZONTAL );
 	SettingStore* store = & get_settings();

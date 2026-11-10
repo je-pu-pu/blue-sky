@@ -471,6 +471,21 @@ TEST( SceneRequestTest, シーンが出す文字列を遷移の要求に変え�
 	EXPECT_EQ( ( SceneRequest{ SceneRequest::Type::REPLACE_BASE, "title" } ), parse_scene_request( "title", false ) );
 }
 
+TEST( SceneRequestTest, 名前の後の引数を要求に持たせる )
+{
+	using blue_sky::SceneRequest;
+	using blue_sky::SceneArguments;
+	using blue_sky::parse_scene_request;
+
+	EXPECT_EQ( ( SceneRequest{ SceneRequest::Type::PUSH_OVERLAY, "options", "", SceneArguments{ { "tab", "controls" } } } ), parse_scene_request( "push:options?tab=controls", false ) );
+	EXPECT_EQ( ( SceneRequest{ SceneRequest::Type::REPLACE_BASE, "stage_select", "", SceneArguments{ { "page", "2" }, { "fast", "" } } } ), parse_scene_request( "base:stage_select?page=2&fast", true ) );
+	EXPECT_EQ( ( SceneRequest{ SceneRequest::Type::REPLACE_OVERLAY, "options", "", SceneArguments{ { "tab", "audio" } } } ), parse_scene_request( "options?tab=audio", true ) );
+
+	// ? の後が空・& が続いても壊れない
+	EXPECT_EQ( ( SceneRequest{ SceneRequest::Type::PUSH_OVERLAY, "options" } ), parse_scene_request( "push:options?", false ) );
+	EXPECT_EQ( ( SceneRequest{ SceneRequest::Type::PUSH_OVERLAY, "options", "", SceneArguments{ { "a", "1" } } } ), parse_scene_request( "push:options?&a=1&", false ) );
+}
+
 // ---- 入力を受け取る先（設計上の問題 B27） ----
 
 TEST( InputRoutingTest, コンソールが受け取っているときはUIにもゲームにも渡さずそれ以外は一番上へ渡す )

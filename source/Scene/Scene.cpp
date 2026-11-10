@@ -18,6 +18,7 @@ Scene::Scene( GameMain& game_main )
 	: game_main_( game_main )
 	, total_elapsed_time_( 0.f )
 	, is_paused_( false )
+	, arguments_( game_main.get_next_scene_arguments() )
 {
 
 }

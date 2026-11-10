@@ -51,6 +51,9 @@ public:
 	/// ページを切り替える（フォーカスはそのページの入口へ移る）
 	void select( size_t index, UIContext& ctx );
 
+	/// 最初に表示するページを決める（組み立てのとき、Screen に渡す前に使う。音は鳴らさず、フォーカスは Screen が入れるときにこのページへ入る）
+	void set_initial_page( size_t index ) { if ( index < children_.size() ) current_ = index; }
+
 	size_t child_count() const override { return children_.empty() ? 0 : 1; }
 	Widget* child_at( size_t ) const override { return children_[ current_ ].get(); }
 

@@ -388,8 +388,9 @@ void GameMain::setup_script_command()
 
 	// Scene
 	// 遷移はその場で実行せず、要求として積む（スクリプトがシーンの更新中に呼ばれても、実行中のシーンを破棄しないように）
-	get_script_manager()->set_function( "scene", [this] ( const char_t* name ) { request_scene( SceneRequest{ SceneRequest::Type::REPLACE_BASE, name } ); } );
-	get_script_manager()->set_function( "push_overlay", [this] ( const char_t* name ) { request_scene( SceneRequest{ SceneRequest::Type::PUSH_OVERLAY, name } ); } );
+	// 名前の後に "?キー=値" で引数を付けられる（例 : push_overlay( "options?tab=controls" )）
+	get_script_manager()->set_function( "scene", [this] ( const char_t* name ) { SceneRequest r { SceneRequest::Type::REPLACE_BASE }; split_scene_name( name, r.name, r.args ); request_scene( r ); } );
+	get_script_manager()->set_function( "push_overlay", [this] ( const char_t* name ) { SceneRequest r { SceneRequest::Type::PUSH_OVERLAY }; split_scene_name( name, r.name, r.args ); request_scene( r ); } );
 	get_script_manager()->set_function( "pop_overlay", [this] () { request_scene( SceneRequest{ SceneRequest::Type::POP_OVERLAY } ); } );
 
 	// Basic
@@ -597,7 +598,10 @@ bool GameMain::update()
 	// 開発用 : 起動時のオーバーレイ（数フレーム後に開く）
 	if ( ! pending_start_overlay_.empty() && ++start_overlay_wait_frames_ >= 10 )
 	{
-		request_scene( SceneRequest{ SceneRequest::Type::PUSH_OVERLAY, pending_start_overlay_ } );
+		// "options?tab=controls" のように引数も付けられる
+		SceneRequest r { SceneRequest::Type::PUSH_OVERLAY };
+		split_scene_name( pending_start_overlay_, r.name, r.args );
+		request_scene( r );
 		pending_start_overlay_.clear();
 	}
 
@@ -1135,7 +1139,7 @@ void GameMain::process_scene_requests()
 		switch ( r.type )
 		{
 			case SceneRequest::Type::PUSH_OVERLAY:
-				push_overlay_scene( r.name );
+				push_overlay_scene( r.name, r.args );
 				break;
 
 			case SceneRequest::Type::POP_OVERLAY:
@@ -1149,7 +1153,7 @@ void GameMain::process_scene_requests()
 
 			case SceneRequest::Type::REPLACE_OVERLAY:
 				pop_overlay_scene();
-				push_overlay_scene( r.name );
+				push_overlay_scene( r.name, r.args );
 				break;
 
 			case SceneRequest::Type::REPLACE_BASE:
@@ -1191,7 +1195,7 @@ void GameMain::replace_base_scene_with_loading_screen()
 		set_stage_name( pending_base_request_.stage_name );
 	}
 
-	setup_scene( pending_base_request_.name );
+	setup_scene( pending_base_request_.name, pending_base_request_.args );
 	// 保存の失敗を黙って無視しない（以前は結果を見ていなかった。進み具合が残らないと次回にやり直しになる）
 	if ( ! save_data_->save_file( "save/blue-sky.save" ) )
 	{
@@ -1288,7 +1292,24 @@ void GameMain::setup_scene()
  *
  * @param scene_name シーン名
  */
-void GameMain::setup_scene( const string_t& scene_name )
+Scene* GameMain::generate_scene( const string_t& scene_name, const SceneArguments& args )
+{
+	next_scene_arguments_ = args;
+
+	try
+	{
+		Scene* scene = scene_manager_->generate_scene( scene_name, * this );
+		next_scene_arguments_.clear();
+		return scene;
+	}
+	catch ( ... )
+	{
+		next_scene_arguments_.clear();
+		throw;
+	}
+}
+
+void GameMain::setup_scene( const string_t& scene_name, const SceneArguments& args )
 {
 	if ( ! scene_manager_->is_scene_registered( scene_name ) )
 	{
@@ -1313,7 +1334,7 @@ void GameMain::setup_scene( const string_t& scene_name )
 	// 生成に失敗したら（モデルが無いなど）ログを出してタイトルへ戻す（以前はシーンが null のまま次のフレームで落ちた）
 	try
 	{
-		scene_.reset( scene_manager_->generate_scene( scene_name, * this ) );
+		scene_.reset( generate_scene( scene_name, args ) );
 	}
 	catch ( const common::exception< std::string >& e )
 	{
@@ -1360,7 +1381,7 @@ void GameMain::update_cursor_state()
  *
  * @param scene_name シーン名
  */
-void GameMain::push_overlay_scene( const string_t& scene_name )
+void GameMain::push_overlay_scene( const string_t& scene_name, const SceneArguments& args )
 {
 	if ( ! scene_manager_->is_scene_registered( scene_name ) )
 	{
@@ -1372,7 +1393,7 @@ void GameMain::push_overlay_scene( const string_t& scene_name )
 	scene_->set_paused( true );
 
 	// オーバーレイシーンを生成してスタックに追加
-	std::unique_ptr< Scene > overlay( scene_manager_->generate_scene( scene_name, * this ) );
+	std::unique_ptr< Scene > overlay( generate_scene( scene_name, args ) );
 
 	// オーバーレイ用でないシーン（ゲーム本体など）は積まない（入力・描画の扱いがオーバーレイを前提にしていないため）
 	if ( ! overlay || ! overlay->is_overlay() )

@@ -158,6 +158,7 @@ private:
 
 	std::deque< SceneRequest >						scene_requests_;				///< シーン遷移の要求（フレームの境目でまとめて実行する）
 	SceneRequest									pending_base_request_;			///< 次のフレームで行うベースシーンの置き換え
+	SceneArguments									next_scene_arguments_;			///< 今作っているシーンに渡す引数（作り終えたら空にする）
 	bool											is_loading_frame_ = false;		///< 次のフレームは「読み込み中」を表示してからベースを置き換える
 	int												start_overlay_wait_frames_ = 0;
 
@@ -186,7 +187,8 @@ private:
 	/// ESC を押したときの処理（オーバーレイが開いていないとき）
 	void handle_escape();
 
-	void setup_scene( const string_t& );
+	/// ベースシーンを作り直す（args は作るシーンに渡す引数）
+	void setup_scene( const string_t&, const SceneArguments& args = SceneArguments() );
 
 	void render_console_window();
 	void render_scene_list_window();
@@ -275,7 +277,13 @@ public:
 	/// シーン遷移を要求する（実行はフレームの境目）
 	void request_scene( const SceneRequest& request ) { scene_requests_.push_back( request ); }
 
-	void push_overlay_scene( const string_t& scene_name );
+	void push_overlay_scene( const string_t& scene_name, const SceneArguments& args = SceneArguments() );
+
+	/// 今作っているシーンに渡す引数（Scene のコンストラクタが受け取る。作っている間だけ中身がある）
+	const SceneArguments& get_next_scene_arguments() const { return next_scene_arguments_; }
+
+	/// シーンを作る（作っている間だけ引数を get_next_scene_arguments で見せる）
+	Scene* generate_scene( const string_t& scene_name, const SceneArguments& args );
 	/// オーバーレイシーンをスタックからポップする ( ベースシーンのポーズが解除される )
 	void pop_overlay_scene();
 	/// オーバーレイシーンが存在するか

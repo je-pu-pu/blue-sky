@@ -78,6 +78,27 @@ Player 1170+284・Robot 392+92・BaseSwitch 146+75（Switch 50+39・AreaSwitch 2
 - **Entity への参照** : EntityId。番号を二度と使わない（EntityManager.h:45、clear でも戻さない）ので、is_alive で確かめれば世代は要らない。Entity* はシーンの中の一時的な使用に限る。
 - 順番 : H1 を先か 0 と並行に（段階 1 で生まれる ObjectRenderComponent が最初から Handle<Model> を持つように）。テクスチャとシェーダーのハンドル化（シェーダーが持つ Texture* など）は範囲が広いので別の流れで後から。
 
+### 4.1 結果 : 残っていた生ポインタのメンバの整理（2026-11-11）
+
+2026-11-11 に `^\s+(const\s+)?(…::)?(Texture|Model|Mesh|Shader|Sound)\s*\*\s*\w+_\s*(=|;|\[)` で数えた 52 件と、探す途中で見つかったもの（容器・名前に _ の無いメンバ・ファイルの外の変数）を分けた。
+
+- **ハンドルにした（44 件）**
+  - シェーダーが持つテクスチャ 10 件（Flat・Flat2D・Lit・LitInstanced・Matcap・TessellationMatcap・SkyBox・Ground・DebugShadowMapTexture・post_effect の Default）と、Shader< … > の `std::vector< Texture* >` : `graphics::TextureSlot`（GraphicsManager が管理するテクスチャはハンドル、管理していない描画先などはポインタ）。描くたびに引き、設定したテクスチャが解放されていれば描かない（シェーダーごとに 1 回ログ）。a0e274c8
+  - RenderSystem のシェーダー 3 件・NeuralNprEffect のシェーダー 2 件 : `core::graphics::ShaderHandle`（GraphicsManager の get_shader_handle・resolve_shader を足した）。81283ce6
+  - 見つかったもの : core の `ModelComponent::model`（ModelHandle に。RenderSystem はハンドルの番号ごとに集めて描くときに引く）・PhysicsTestScene のファイルの外の `Model* models[]`（シーンのメンバのハンドルに）。81283ce6
+  - タイトル 7 件（使っていない title_texture_ は消した）・ステージ選択 4 件・ストーリー 3 件・エンディング 5 件（current_drawing_model_ は番号から引く関数にした）・背景レイヤー BgSpriteLayer 1 件。見つかったもの : ステージ選択の `Stage::texture`・エンディングの `std::vector< Model* >`。Scene の基底に resolve（画像・モデル・音。引けなければ名前ごとに 1 回ログ）・load_named_texture_handle・load_model_handle・play を足した。288a7686
+  - 本編（GamePlayScene）6 件・CanvasTestScene 1 件・GeometryShaderCanvasTestScene の画像 1 件・線（Line）の画像 1 件。4c99b299
+- **unique_ptr／RAII にした（0 件）** : 該当なし。持ち主が 1 つのもの（下の CityGenerator・GeometryShaderCanvasTestScene の作ったもの）は、作り手が ResourceManager に名前で入れ、自分のデストラクタで外している（RAII と同じ寿命）。描く側が名前・ハンドルで引けるよう ResourceManager に置いたままにした
+- **そのまま（8 件）**
+  - `CityGenerator::model_`・`debug_model_`、`GeometryShaderCanvasTestScene::mesh_` : 作り手＝持ち主。自分のデストラクタで外す（unload_named_*）まで、ほかに解放する所が無い
+  - `blue_sky::graphics::Model::mesh_` : モデルの中のつながり（読み込みでモデルと一緒に作る）。メッシュだけを外すのは上の作り手が自分のモデルに対してだけ。ハンドルにするには Model が引く窓口を持つ必要があり、範囲が大きい
+  - `Mesh::Buffer::mesh_` : 持ち主（Mesh）への逆向きの参照。Buffer は Mesh が持つので寿命が同じ
+  - `BaseFileLoader::model_` : 読み込みの間だけ生きる一時的な読み手
+  - `Sprite::pending_texture_` : 1 フレームの中だけ溜める（begin〜end の間）。flush の前にテクスチャは解放されない
+  - `GraphicsManager::null_texture_` : 持ち主（GraphicsManager）自身が作り、自分のデストラクタまで解放しない
+- **残り（後続）** : `blue_sky::graphics::Model::shader_list_`（`std::vector< Shader* >`。ポストエフェクトのシェーダーもここ）・`GraphicsManager::shadow_map_shader_`（自分で選び直す）。シェーダーを個別に解放するのは CityGenerator が自分のシェーダーに対してだけなので、今は壊れないが、モデルが引く窓口を持つときに一緒に移す
+- テスト : TextureSlotTest（5 件）・RenderSystemHandleTest（3 件。core の描画の窓口の偽物）。535 → 543 件。シーンを替えて戻る確かめのため、開発用の BLUE_SKY_DEBUG_SCENE_SEQUENCE を足した。19628109
+
 ## 5. 決めること
 
 1. 最後に残す物理の世界（推奨 : core::physics::PhysicsManager に統一）

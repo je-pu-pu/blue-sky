@@ -96,6 +96,9 @@ get_entity_manager()->add_system< RenderSystem >( 1000, get_graphics_manager(), 
 ### リソースと物理
 
 - **リソースはハンドルで持つ** : モデル・メッシュ・テクスチャ・音は `core::ResourceHandle`（`ModelHandle`・`TextureHandle`・`SoundHandle` など）で持ち、使うたびに `resolve_*` で引く（解放済みなら nullptr）。生ポインタを持ち続けない。持ち主が 1 つのもの（剛体・定数バッファなど）は `unique_ptr`／RAII
+  - シェーダーは `core::graphics::ShaderHandle`（`get_shader_handle`・`resolve_shader`）。シェーダーが参照するテクスチャは `graphics::TextureSlot`（管理しているものはハンドル、描画先などはポインタ）
+  - シーンは `Scene::resolve( ハンドル, 名前 )`・`load_named_texture_handle`・`load_model_handle`・`play` を使う。引けなければ描かない・鳴らさない（理由は名前ごとに 1 回だけログ）
+  - 残した生ポインタと理由は doc/ECS移行計画.md の 4.1
 - **物理は `core::physics::PhysicsManager` 1 つ**（Bullet を隠している）。Bullet の型を core/physics の外に出さない。剛体は RAII の `core::physics::RigidBody` を部品が持つ。物理エンジンが物体を指す印は `core/physics/EntityTag.h`（EntityId のタグ）
 
 ### メインゲームループ
@@ -171,6 +174,7 @@ get_entity_manager()->add_system< RenderSystem >( 1000, get_graphics_manager(), 
 - 確かめのスクリプトで、ゲームの窓を前面に出す処理（`SetForegroundWindow`・`AttachThreadInput`・Alt キーの送信など）を使わない
 - ゲームは二重に起動できない（ミューテックス）。利用者が手でゲームを使っている間は自動の起動を止める
 - 閉じるときは `CloseMainWindow` で閉じる（ログは `source/log/blue-sky.log`、落ちたときは `source/log/crash.log`）
+- シーンを替えて戻る確かめ : `BLUE_SKY_DEBUG_SCENE_SEQUENCE=stage_select,game_play:1-1,title` のように「シーン[:ステージ]」を並べると、150 フレームごとに順にベースシーンを置き換える
 
 ## Python ツール / 検証ハーネス (tools/)
 

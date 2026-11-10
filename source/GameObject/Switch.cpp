@@ -1,6 +1,5 @@
 #include "Switch.h"
 #include "Player.h"
-#include "Stone.h"
 
 namespace blue_sky
 {

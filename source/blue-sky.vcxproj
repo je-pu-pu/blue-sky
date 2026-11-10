@@ -152,7 +152,6 @@
     <ClCompile Include="GameObject\Girl.cpp" />
     <ClCompile Include="GameObject\Player.cpp" />
     <ClCompile Include="GameObject\Robot.cpp" />
-    <ClCompile Include="GameObject\Stone.cpp" />
     <ClCompile Include="GameObject\Switch.cpp" />
     <ClCompile Include="lib\src\imgui\imgui.cpp" />
     <ClCompile Include="lib\src\imgui\imgui_draw.cpp" />
@@ -452,7 +451,6 @@
     <ClInclude Include="GameObject\Girl.h" />
     <ClInclude Include="GameObject\Player.h" />
     <ClInclude Include="GameObject\Robot.h" />
-    <ClInclude Include="GameObject\Stone.h" />
     <ClInclude Include="GameObject\Switch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene\CanvasTestScene.h" />

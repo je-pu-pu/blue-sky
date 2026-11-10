@@ -27,7 +27,6 @@
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/DebugLog.h>
 #include <GameObject/BaseSwitch.h>
-#include <GameObject/Stone.h>
 #include <GameObject/Switch.h>
 #include <GameObject/Robot.h>
 
@@ -813,7 +812,7 @@ void GamePlayScene::debug_throw_stones()
 		return result;
 	};
 
-	const auto stones = find_objects( "stone", [] ( const ActiveObject* o ) { return dynamic_cast< const Stone* >( o ) != nullptr; } );
+	const auto stones = find_objects( "stone", [] ( const ActiveObject* ) { return false; } );
 
 	// 石を拾う
 	if ( frame < start_frame + pick_interval * static_cast< int >( stones.size() ) )

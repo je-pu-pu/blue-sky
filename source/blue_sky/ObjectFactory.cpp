@@ -137,6 +137,28 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		return id;
 	}
 
+	if ( kind == "stone" )
+	{
+		// 以前の Stone : 0.2 x 0.2 x 0.2・硬い（ぶつかる）が壁にはならない・重力 ( 0, -8, 0 )・質量 1・1 フレームに 1 度回る。
+		// プレイヤーが触れると拾われて消え、投げられると生き返る。敵・風船・スイッチに当たると相手が反応する
+		ObjectSpec spec;
+		spec.kind = kind;
+		spec.size = Vector( 0.2f, 0.2f, 0.2f );
+		spec.mass = 1.f;
+		spec.is_hard = true;
+		spec.is_block = false;
+		spec.has_default_gravity = true;
+		spec.gravity = Vector( 0.f, -8.f, 0.f );
+
+		const EntityId id = create_entity_object( spec );
+		core::ecs::Entity* entity = entity_manager_->find( id );
+
+		entity->add_component< ecs::ThrowableComponent >();
+		entity->add_component< ecs::SpinComponent >()->degree_per_frame = 1.f;
+
+		return id;
+	}
+
 	if ( kind == "ladder" )
 	{
 		// 以前の Ladder : 0.4 x 5 x 0.2・硬くない（当たりの応答なし・重力 0・壁にならない）・作ったときの質量 1、やり直すと 0（動かない）。

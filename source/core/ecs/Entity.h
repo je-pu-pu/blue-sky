@@ -44,6 +44,9 @@ public:
 
 	std::size_t get_id() const { return id_; }
 
+	/// 自分を作った EntityManager（部品の組み合わせで振る舞いを決める所が、相手の System を引くのに使う）
+	EntityManager* get_entity_manager() const { return manager_; }
+
 }; // class Entity
 
 } // namespace core::ecs

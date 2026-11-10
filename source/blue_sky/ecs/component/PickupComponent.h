@@ -31,11 +31,26 @@ struct PickupComponent : public core::ecs::Component
 /**
  * 一定の速さで向きを変え続ける（Y 軸）
  *
- * 以前の Medal::update（1 秒に 90 度）。SpinSystem が毎フレーム回す
+ * 以前の Medal::update（1 秒に 90 度）・Stone::update（1 フレームに 1 度。経った時間によらない）。SpinSystem が毎フレーム回す
  */
 struct SpinComponent : public core::ecs::Component
 {
 	float degree_per_second = 0.f;
+	float degree_per_frame = 0.f;
+};
+
+/**
+ * 投げられる物（石）の印
+ *
+ * 以前の Stone クラスの代わり。当たりの互換の層（ActiveObjectManager::on_collide_with_entity_object）が、
+ * これを持つ Entity に当たった物体の GameObject::on_collide_with_stone に石の窓口（GameObjectRef）を渡し、
+ * 拾われたら（true なら）石を死なせる。スイッチ（ECS だけの物体）との当たりは on_collide_entity_objects。
+ * やり直すと（投げるときも）、薄い壁を貫通しないように連続衝突判定を設定する（以前の Stone::restart）
+ */
+struct ThrowableComponent : public core::ecs::Component
+{
+	float ccd_swept_sphere_radius = 0.2f;
+	float ccd_motion_threshold = 0.2f;
 };
 
 } // namespace blue_sky::ecs

@@ -14,12 +14,14 @@
 #include <blue_sky/ecs/component/StaticObjectComponent.h>
 #include <blue_sky/ecs/component/PickupComponent.h>
 #include <blue_sky/ecs/system/ContactCacheSystem.h>
+#include <blue_sky/ecs/system/SpinSystem.h>
 
 #include <core/ecs/EntityManager.h>
 
 #include <btBulletDynamicsCommon.h>
 
 #include <cmath>
+#include <vector>
 
 /**
  * 段階 4 の後半 : 梯子・石・スイッチを ECS だけの物体にしたときの、部品と当たりの振る舞いのテスト
@@ -153,4 +155,120 @@ TEST( LadderStoneSwitchTest, 梯子に触れると相手に知らせ_反応し�
 
 	f.factory.restart();
 	EXPECT_FALSE( cache->cache.is_cached( 200 ) );
+}
+
+// ---- 石 ----
+
+namespace
+{
+
+/// 石を受け取る偽の物体（プレイヤー・敵・風船の代わり）。picks が true なら拾う（プレイヤー）
+class FakeStoneReceiver : public FakeObject
+{
+public:
+	bool picks = false;
+	std::vector< GameObjectRef > stones;
+
+	bool on_collide_with_stone( const GameObjectRef& stone ) override
+	{
+		stones.push_back( stone );
+		return picks;
+	}
+};
+
+} // namespace
+
+TEST( LadderStoneSwitchTest, 石は硬いが壁にならない投げられる物で_重力は_8_やり直すと貫通を防ぐ設定になる )
+{
+	Fixture f;
+
+	const auto id = f.create( "stone" );
+	auto* e = f.entity( id );
+
+	ASSERT_NE( e->get_component< blue_sky::ecs::ThrowableComponent >(), nullptr );
+	ASSERT_NE( e->get_component< blue_sky::ecs::SpinComponent >(), nullptr );
+	EXPECT_EQ( e->get_component< blue_sky::ecs::PickupComponent >(), nullptr );
+
+	// 以前の Stone : 0.2 x 0.2 x 0.2・硬い・壁にならない・重力 ( 0, -8, 0 )・質量 1
+	const auto* traits = e->get_component< blue_sky::ecs::CollisionTraitsComponent >();
+	EXPECT_TRUE( traits->is_hard );
+	EXPECT_FALSE( traits->is_block );
+
+	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body;
+	EXPECT_EQ( body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
+	EXPECT_FLOAT_EQ( body->getInvMass(), 1.f );
+
+	f.factory.restart();
+
+	EXPECT_TRUE( is_near( Vector( body->getGravity() ), Vector( 0.f, -8.f, 0.f ) ) );
+	EXPECT_FLOAT_EQ( body->getCcdSweptSphereRadius(), 0.2f );
+	EXPECT_FLOAT_EQ( body->getCcdMotionThreshold(), 0.2f );
+}
+
+TEST( LadderStoneSwitchTest, 石は毎フレーム_1_度ずつ回る )
+{
+	Fixture f;
+
+	const auto id = f.create( "stone" );
+	f.factory.restart();
+
+	auto* system = f.manager.get_system< blue_sky::ecs::SpinSystem >();
+	ASSERT_NE( system, nullptr );
+
+	// 以前の Stone::update : set_direction_degree( get_direction_degree() + 1.f )（経った時間によらない）
+	system->update_spins( 0.5f );
+	system->update_spins( 0.001f );
+
+	EXPECT_FLOAT_EQ( f.entity( id )->get_component< blue_sky::ecs::SimpleObjectComponent >()->direction_degree, 2.f );
+}
+
+TEST( LadderStoneSwitchTest, 石に当たると相手に石の窓口を渡し_拾われたら石は死ぬ_拾わない相手なら生きたまま )
+{
+	Fixture f;
+
+	const auto id = f.create( "stone" );
+	const auto* traits = f.entity( id )->get_component< blue_sky::ecs::CollisionTraitsComponent >();
+
+	// 拾わない物体（敵・風船・スイッチ）: 石を受け取るが、石は生きたまま
+	FakeStoneReceiver robot;
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( robot, 100, * f.entity( id ) );
+
+	ASSERT_EQ( robot.stones.size(), 1u );
+	EXPECT_EQ( robot.stones[ 0 ].get_entity_id(), id );
+	EXPECT_FALSE( traits->is_dead );
+
+	// プレイヤー : 拾い、石は死んで描かれない
+	FakeStoneReceiver player;
+	player.picks = true;
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, 200, * f.entity( id ) );
+
+	ASSERT_EQ( player.stones.size(), 1u );
+	EXPECT_TRUE( traits->is_dead );
+	EXPECT_FALSE( f.entity( id )->get_component< blue_sky::ecs::ObjectRenderComponent >()->is_visible );
+}
+
+TEST( LadderStoneSwitchTest, 拾った石を窓口で投げると生き返り_置いた位置から投げた速度で飛ぶ )
+{
+	Fixture f;
+
+	const auto id = f.create( "stone" );
+	f.factory.restart();
+
+	FakeStoneReceiver player;
+	player.picks = true;
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, 200, * f.entity( id ) );
+
+	// 以前の Player::throw_stone と同じ手順（やり直す → 置く → 速度を設定する）
+	GameObjectRef stone = player.stones.front();
+	stone.restart();
+	stone.set_location( Vector( 1.f, 2.f, 3.f ) );
+	stone.set_velocity( Vector( 0.f, 0.f, 8.f ) );
+
+	EXPECT_FALSE( f.entity( id )->get_component< blue_sky::ecs::CollisionTraitsComponent >()->is_dead );
+	EXPECT_TRUE( is_near( stone.get_location(), Vector( 1.f, 2.f, 3.f ) ) );
+	EXPECT_TRUE( is_near( stone.get_velocity(), Vector( 0.f, 0.f, 8.f ) ) );
+
+	// 敵が使う「こちらへ飛んでくるか」
+	EXPECT_TRUE( stone.is_moving_to( Vector( 1.f, 2.f, 10.f ) ) );
+	EXPECT_FALSE( stone.is_moving_to( Vector( 1.f, 2.f, -10.f ) ) );
 }

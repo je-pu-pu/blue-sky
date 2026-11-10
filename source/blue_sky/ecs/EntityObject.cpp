@@ -214,6 +214,13 @@ void EntityObject::restart()
 		{
 			object_body::set_no_contact_response( * body, false );		// 以前の Rocket::restart（拾われたときに消した当たりの応答を戻す）
 		}
+
+		if ( const auto* throwable = entity_->get_component< ThrowableComponent >() )
+		{
+			// 以前の Stone::restart（石が薄い壁を貫通しないようにする。Bullet の連続衝突判定）
+			body->setCcdSweptSphereRadius( throwable->ccd_swept_sphere_radius );
+			body->setCcdMotionThreshold( throwable->ccd_motion_threshold );
+		}
 	}
 
 	// 最近触れた物体を忘れる（以前の Ladder::restart・BaseSwitch::restart）

@@ -5,7 +5,7 @@
 #include <GameObject/Girl.h>
 #include <GameObject/Robot.h>
 #include <GameObject/Balloon.h>
-#include <GameObject/Stone.h>
+#include <blue_sky/GameObjectRef.h>
 #include <GameObject/Switch.h>
 #include <GameObject/AreaSwitch.h>
 
@@ -45,10 +45,9 @@ ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics
 	object_creator_map_[ "girl"        ] = [] () -> ActiveObject* { return new Girl();         };
 	object_creator_map_[ "robot"       ] = [this] () -> ActiveObject* { return new Robot( graphics_manager_ ); };	// テクスチャを得る GraphicsManager を渡す
 	object_creator_map_[ "balloon"     ] = [] () -> ActiveObject* { return new Balloon();      };
-	object_creator_map_[ "stone"       ] = [] () -> ActiveObject* { return new Stone();        };
 	object_creator_map_[ "switch"      ] = [] () -> ActiveObject* { return new Switch();       };
 
-	// "static"（動かない物）・"medal"・"umbrella"・"rocket"・"goal"・"ladder" は ECS だけの物体になり、ObjectFactory が作る（段階 4）
+	// "static"（動かない物）・"medal"・"umbrella"・"rocket"・"goal"・"ladder"・"stone" は ECS だけの物体になり、ObjectFactory が作る（段階 4）
 
 }
 
@@ -282,6 +281,17 @@ void ActiveObjectManager::on_collide_with_entity_object( GameObject& object, cor
 			{
 				ecs::object_body::set_no_contact_response( * picked.get_rigid_body(), true );
 			}
+		}
+	}
+
+	// 石（以前の Stone）: 以前は Stone::on_collide_with( GameObject* ) が相手の on_collide_with( Stone* )（今は on_collide_with_stone）を呼び、
+	// 相手がプレイヤーなら Stone::on_collide_with( Player* ) が石を kill していた。今は相手が拾ったか（プレイヤーだけが true を返す）で決める。
+	// 相手には石の窓口を渡す（プレイヤーは持っておいて投げる。敵は石の速度で「こちらへ飛んでくるか」を見る）
+	if ( entity.get_component< ecs::ThrowableComponent >() )
+	{
+		if ( object.on_collide_with_stone( GameObjectRef( entity.get_entity_manager(), nullptr, static_cast< core::ecs::EntityId >( entity.get_id() ) ) ) )
+		{
+			ecs::EntityObject( & entity ).kill();
 		}
 	}
 

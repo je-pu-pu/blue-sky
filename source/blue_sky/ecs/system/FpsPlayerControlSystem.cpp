@@ -7,7 +7,12 @@
 namespace blue_sky::ecs
 {
 
-void FpsPlayerControlSystem::update( ComponentTuple& component_tuple ) const
+void FpsPlayerControlSystem::update()
+{
+	for_each( [ this ] ( ComponentTuple& t ) { update_entity( t ); } );
+}
+
+void FpsPlayerControlSystem::update_entity( ComponentTuple& component_tuple ) const
 {
 	using Vector = core::math::Vector;
 	using Button = core::input::Button;

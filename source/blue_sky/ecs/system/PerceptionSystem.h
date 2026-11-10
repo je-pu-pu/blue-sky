@@ -31,7 +31,6 @@ public:
 
 	/// 対象の一覧（TargetRegistrySystem）を頭で一度だけ引き、敵ごとに判定する（以前は敵ごとに引いていた）
 	void update() override;
-	void update( ComponentTuple& ) const override;
 
 private:
 	core::physics::PhysicsManager* physics_manager_;

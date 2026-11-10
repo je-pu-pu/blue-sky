@@ -21,11 +21,6 @@ void PerceptionSystem::update()
 	}
 }
 
-void PerceptionSystem::update( ComponentTuple& tuple ) const
-{
-	perceive( tuple, get_entity_manager()->get_system< TargetRegistrySystem >() );
-}
-
 void PerceptionSystem::perceive( ComponentTuple& tuple, const TargetRegistrySystem* registry ) const
 {
 	using core::math::Vector;

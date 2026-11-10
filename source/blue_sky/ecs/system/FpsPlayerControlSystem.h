@@ -37,7 +37,11 @@ public:
 	{ }
 	~FpsPlayerControlSystem() = default;
 
-	void update( ComponentTuple& ) const override;
+	void update() override;
+
+private:
+	/// 対象 1 つぶん（update() が対象ごとに呼ぶ。仮想関数ではないので、ループの中にインライン化できる）
+	void update_entity( ComponentTuple& ) const;
 
 private:
 	const core::input::InputManager* input_;

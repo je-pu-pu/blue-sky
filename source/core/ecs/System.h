@@ -171,17 +171,31 @@ public:
 		}
 	}
 
-	virtual void update() override
+	// update() は派生が必ず書く（BaseSystem の純粋仮想）。対象は for_each か get_component_list() で回す。
+	// 以前は System::update() が対象ごとに仮想関数 update( ComponentTuple& ) を呼んでいて、
+	// 1 体ごとに仮想関数の呼び出しの手間がかかり、中身が小さい System ではインライン化もできなかった
+
+	/**
+	 * 対象を 1 つずつ f( ComponentTuple& ) に渡す（派生の update() の中で使う）
+	 *
+	 * f は型が分かっているので、ループの中にインライン化できる。回している間に、この System の対象を増減してはいけない
+	 */
+	template< typename F >
+	void for_each( F&& f )
 	{
-		for ( auto& i : get_component_list() )
+		for ( auto& i : component_list_ )
 		{
-			update( i.second );
+			f( i.second );
 		}
 	}
 
-	virtual void update( ComponentTuple& ) const
+	template< typename F >
+	void for_each( F&& f ) const
 	{
-
+		for ( const auto& i : component_list_ )
+		{
+			f( i.second );
+		}
 	}
 
 }; // class System

@@ -51,7 +51,12 @@ void face_toward( TransformComponent* transform, const Vector& goal, float turn_
 
 } // namespace
 
-void PatrolSystem::update( ComponentTuple& tuple ) const
+void PatrolSystem::update()
+{
+	for_each( [ this ] ( ComponentTuple& t ) { update_entity( t ); } );
+}
+
+void PatrolSystem::update_entity( ComponentTuple& tuple ) const
 {
 	auto* transform  = std::get< TransformComponent* >( tuple );
 	auto* patrol     = std::get< PatrolComponent* >( tuple );

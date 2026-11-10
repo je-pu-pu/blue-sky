@@ -21,7 +21,7 @@ class CountSystem : public core::ecs::System< core::ecs::TransformComponent >
 {
 public:
 	mutable int update_count = 0;
-	void update( ComponentTuple& ) const override { update_count++; }
+	void update() override { for_each( [ this ] ( ComponentTuple& ) { update_count++; } ); }
 };
 
 /// 描く System の代わり（is_render_system が true）
@@ -30,7 +30,7 @@ class RenderCountSystem : public core::ecs::System< core::ecs::TransformComponen
 public:
 	mutable int update_count = 0;
 	bool is_render_system() const override { return true; }
-	void update( ComponentTuple& ) const override { update_count++; }
+	void update() override { for_each( [ this ] ( ComponentTuple& ) { update_count++; } ); }
 };
 
 /**
@@ -43,7 +43,7 @@ class DualCountSystem : public core::ecs::System< core::ecs::TransformComponent,
 {
 public:
 	mutable int update_count = 0;
-	void update( ComponentTuple& ) const override { update_count++; }
+	void update() override { for_each( [ this ] ( ComponentTuple& ) { update_count++; } ); }
 };
 
 } // namespace
@@ -395,7 +395,7 @@ TEST( EcsTest, DuplicateAddSystemIsNoop )
  *
  * CountSystem は TransformComponent を要求する。
  * TransformComponent を持つ Entity を作成して update() を呼ぶと、
- * CountSystem::update(ComponentTuple&) が 1 回呼ばれる。
+ * CountSystem が対象 1 つぶん数える（update_count が 1 増える）。
  */
 TEST( EcsTest, AutoRegistration )
 {

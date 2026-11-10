@@ -7,7 +7,12 @@
 namespace blue_sky::ecs
 {
 
-void TransformControlSystem::update( ComponentTuple& component_tuple ) const
+void TransformControlSystem::update()
+{
+	for_each( [ this ] ( ComponentTuple& t ) { update_entity( t ); } );
+}
+
+void TransformControlSystem::update_entity( ComponentTuple& component_tuple ) const
 {
 	using Button = core::input::Button;
 

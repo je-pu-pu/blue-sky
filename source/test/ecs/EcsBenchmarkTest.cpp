@@ -55,13 +55,16 @@ struct BenchHealth : public core::ecs::Component
 class BenchMoveSystem : public core::ecs::System< BenchPosition, BenchVelocity >
 {
 public:
-	void update( ComponentTuple& t ) const override
+	void update() override
 	{
-		auto* p = std::get< BenchPosition* >( t );
-		const auto* v = std::get< BenchVelocity* >( t );
-		p->x += v->x * 0.016f;
-		p->y += v->y * 0.016f;
-		p->z += v->z * 0.016f;
+		for_each( [] ( ComponentTuple& t )
+		{
+			auto* p = std::get< BenchPosition* >( t );
+			const auto* v = std::get< BenchVelocity* >( t );
+			p->x += v->x * 0.016f;
+			p->y += v->y * 0.016f;
+			p->z += v->z * 0.016f;
+		} );
 	}
 };
 
@@ -69,12 +72,15 @@ public:
 class BenchHealthSystem : public core::ecs::System< BenchPosition, BenchVelocity, BenchHealth >
 {
 public:
-	void update( ComponentTuple& t ) const override
+	void update() override
 	{
-		const auto* p = std::get< BenchPosition* >( t );
-		const auto* v = std::get< BenchVelocity* >( t );
-		auto* h = std::get< BenchHealth* >( t );
-		h->value += h->regen * 0.016f + ( p->x - v->x ) * 0.0f;
+		for_each( [] ( ComponentTuple& t )
+		{
+			const auto* p = std::get< BenchPosition* >( t );
+			const auto* v = std::get< BenchVelocity* >( t );
+			auto* h = std::get< BenchHealth* >( t );
+			h->value += h->regen * 0.016f + ( p->x - v->x ) * 0.0f;
+		} );
 	}
 };
 

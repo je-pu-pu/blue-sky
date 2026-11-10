@@ -32,7 +32,6 @@ public:
 	~PhysicsSystem() override;
 
 	void update() override;
-	void update( ComponentTuple& ) const override;
 
 protected:
 	/// 対象から外れる（RigidBody か Transform を外した・Entity を消した）とき、その剛体を解放する

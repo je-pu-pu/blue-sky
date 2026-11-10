@@ -60,7 +60,6 @@ public:
 	void add_entity_component_if_all_components_ready( const core::ecs::Entity* entity ) override;
 
 	void update() override { }						///< 何もしない（上の説明のとおり、呼ぶ所が決まっている）
-	void update( ComponentTuple& ) const override { }
 
 	/// アニメーションを 1 フレーム進める（ActiveObjectManager::update が、物体の update の後に呼ぶ）
 	void update_animations();

@@ -9,7 +9,12 @@
 namespace blue_sky::ecs
 {
 
-void AlertSystem::update( ComponentTuple& tuple ) const
+void AlertSystem::update()
+{
+	for_each( [ this ] ( ComponentTuple& t ) { update_entity( t ); } );
+}
+
+void AlertSystem::update_entity( ComponentTuple& tuple ) const
 {
 	auto* perception = std::get< PerceptionComponent* >( tuple );
 	auto* alert      = std::get< AlertComponent* >( tuple );

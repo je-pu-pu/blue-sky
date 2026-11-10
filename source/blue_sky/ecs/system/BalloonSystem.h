@@ -27,7 +27,6 @@ public:
 	explicit BalloonSystem( core::physics::PhysicsManager* physics_manager ) : physics_manager_( physics_manager ) { }
 
 	void update() override;
-	void update( ComponentTuple& ) const override {}  // 個別処理は行わない
 
 private:
 	core::physics::PhysicsManager* physics_manager_;

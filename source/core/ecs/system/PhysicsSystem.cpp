@@ -119,9 +119,4 @@ void PhysicsSystem::update()
 	}
 }
 
-void PhysicsSystem::update( ComponentTuple& ) const
-{
-	// update() でまとめて処理するため、ここでは何もしない
-}
-
 } // namespace core::ecs

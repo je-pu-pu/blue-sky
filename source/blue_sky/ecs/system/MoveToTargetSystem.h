@@ -43,7 +43,6 @@ public:
 	void add_entity_component_if_all_components_ready( const core::ecs::Entity* entity ) override;
 
 	void update() override { }						///< 何もしない（上の説明のとおり、呼ぶ所が決まっている）
-	void update( ComponentTuple& ) const override { }
 
 	/**
 	 * 目標地点へ動かすか、着いたら止めて知らせる。決まった向き・物体の方向へ向きを近づける（毎フレーム）

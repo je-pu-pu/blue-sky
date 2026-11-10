@@ -42,7 +42,7 @@ COMMON_POS_UV_COLOR vs_lit_instanced( VS_INSTANCED_INPUT input )
 
 	// 法線をワールド座標系に変換してライティング計算
 	float3 worldNormal = mul( input.Normal, ( float3x3 ) instanceWorld );
-	output.Color = dot( -Light, worldNormal ) * 0.5f + 1.f;
+	output.Color = dot( -Light.xyz, worldNormal ) * 0.5f + 1.f;
 
 	return output;
 }

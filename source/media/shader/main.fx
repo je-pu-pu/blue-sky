@@ -544,7 +544,7 @@ void gs_line_cube( line COMMON_POS_COLOR input[2], inout TriangleStream<COMMON_P
 		// 線の方向が初期の方向からズレ過ぎたら正しい向きに直す
 		if ( dot( normalize( dp_original ), normalize( dp ) ) < 1.f - ( max_random_degree / 90.f ) )
 		{
-			dp = ( input[ 1 ].Position - v.Position ) / ( MaxPointCount - n );
+			dp = ( ( input[ 1 ].Position - v.Position ) / ( MaxPointCount - n ) ).xyz;	// float4 → float3（以前は暗黙の切り捨てで警告が出ていた）
 		}
 
 		power *= 1.f + ( random( random_seed * primitive_id + n ) - 0.5f ) * power_randomize_factor;

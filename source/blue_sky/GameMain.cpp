@@ -376,7 +376,8 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "start_fade_out", [this] ( float_t speed ) { get_graphics_manager()->start_fade_out( speed ); } );
 
 	// ActiveObject
-	get_script_manager()->set_function( "create_object", [this] ( const char_t* name ) { auto* o = create_object( name ); o->restart(); return o; } );
+	// 知らない名前なら nil を返す（以前は null に restart を呼んで落ちた）
+	get_script_manager()->set_function( "create_object", [this] ( const char_t* name ) { auto* o = create_object( name ); if ( o ) { o->restart(); } return o; } );
 	get_script_manager()->set_function( "clone_object", [this] ( ActiveObject* o ) { auto* o2 = clone_object( o ); o2->restart(); return o2; } );
 	get_script_manager()->set_function( "get_object", [this] ( const char_t* name ) { return get_active_object_manager()->get_active_object( name ); } );
 	get_script_manager()->set_function( "set_name", [this] ( ActiveObject* o, const char_t* name ) { get_active_object_manager()->name_active_object( name, o ); } );
@@ -426,25 +427,25 @@ void GameMain::setup_script_command()
 
 	get_script_manager()->set_function( "debug_print_resources", [this] () { get_graphics_manager()->debug_print_resources(); } );
 
-	/// @todo ActiveObject に color を持たせる？
-	// get_script_manager()->set_function( "set_object_object", [this] ( ActiveObject* o, const Color& c ) { o->set_co } );
 }
 
 /**
  * オブジェクトを生成する
  *
+ * 位置・向きは作った後に設定する（スクリプトでは set_location など）。決まった形の静的なオブジェクトは ActiveObjectManager::create_static_object で作る
+ *
  * @param class_name  クラス名
- * @return 生成したオブジェクト
- * @todo 整理する。 loc, rot の指定をどうするか？ StaticObject の生成をどうするか？ Scenegraph に移動？
+ * @return 生成したオブジェクト（知らないクラス名なら nullptr。スクリプトには nil が返る）
  */
 ActiveObject* GameMain::create_object( const char_t* class_name ) const
 {
 	ActiveObject* active_object = get_active_object_manager()->create_object( class_name );
 
-	/// @todo 例外にしてスクリプト呼び出し側でキャッチできるようにする
+	// 失敗を黙って無視しない（CLAUDE.md の「失敗の扱い」）
 	if ( ! active_object )
 	{
-		return 0;
+		debug_log( string_t( "[Object] 知らないクラス名のオブジェクトは作れません: " ) + class_name );
+		return nullptr;
 	}
 
 	active_object->set_rigid_body( get_active_object_physics()->add_active_object_as_box( active_object ) );
@@ -496,7 +497,6 @@ bool GameMain::update()
 		return true;
 	}
 
-	/// @todo 別スレッド化
 	// サウンドの更新は SoundManager の更新スレッドが行う（メインスレッドが止まっても BGM が途切れないように）
 	if ( ! get_sound_manager()->is_update_thread_running() )
 	{
@@ -979,8 +979,11 @@ void GameMain::on_special_key_down( int key )
 		on_toggle_full_screen();
 	}
 
-	/// @todo ちゃんとする
-	scene_->on_function_key_down( key -  KEY_F1 + 1 );
+	// F1〜F12 だけを番号（1〜12）にしてシーンに渡す（以前はどのキーも key - F1 + 1 にして渡し、文字のキーでも呼ばれていた）
+	if ( key >= KEY_F1 && key <= KEY_F12 )
+	{
+		scene_->on_function_key_down( key - KEY_F1 + 1 );
+	}
 }
 
 void GameMain::on_mouse_wheel( int wheel )
@@ -1290,7 +1293,7 @@ void GameMain::setup_scene( const string_t& scene_name )
 		return;
 	}
 
-	/// @todo 各 Scene クラスが自分の名前を持ち、
+	// 登録した名前（stage_intro など、同じクラスに別の名前を付けたもの）をシーンに覚えさせる
 	scene_->set_name( scene_name );
 	scene_->set_next_stage_name( get_stage_name() );
 

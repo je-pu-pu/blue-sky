@@ -257,19 +257,15 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 
 ## 重要度: 中 / 設計改善・拡張性
 
-### extern/game の Sound/SoundManager を core に統合 [難易度: 中]
-- `extern/game/SoundManager.h:14`, `extern/game/Sound.h:10`
-- game 層と core 層に同名クラスが並存している
-- [ ] 対応する
+### ~~extern/game の Sound/SoundManager を core に統合~~ [完了]
+- [x] 対応済み（cbae6686）— 実装は core だけだったので、game::Sound・game::SoundManager の中身を core::Sound・core::sound::SoundManager に取り込み、extern/game から削除
 
 ### ~~ライト方向がハードコード~~ [完了]
 - [x] 対応済み — GraphicsManager::set_light_direction / get_light_direction / reset_light_direction（core::graphics::LightDirection）。既定は以前と同じ。Lua は set_light_direction( x, y, z )
 - 残り: シーンが変えた向きは次のシーンへ持ち越す（Scene の切り替えで reset するかは未決）。DebugScene・GamePlayScene は今も定数バッファに自前で光を書いている
 
-### シェーダーホットリロード後に effect_technique が古いまま [難易度: 中]
-- `GameMain.cpp:92` — reload 時にキャッシュ無効化が不完全
-- 開発中にちらつきやクラッシュのリスク
-- [ ] 対応する
+### ~~シェーダーホットリロード後に effect_technique が古いまま~~ [完了]
+- [x] 対応済み — 277ce0c4（読み直しの後に refresh_all_shaders で全シェーダーの technique を取り直す）と 1bba4f84（自前の Effect は取得済みの technique のオブジェクトを残して中身を入れ替える）。読み直しの成功・失敗を実機で確かめた
 
 ### ~~同種 ActiveObject 間でシェーダーを個別保持できない~~ [完了]
 - [x] 対応済み — 原因は load_model が名前でモデルを使い回し、モデルのシェーダー一覧も共有していたこと。GraphicsManager::clone_model_with_shaders と ActiveObject::make_model_unique（Lua: make_model_unique( o )）で、そのオブジェクトだけのモデル・シェーダーにできる。Model の複製で線が消えていたのも直した（線は shared_ptr で共有）
@@ -295,21 +291,17 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 - [x] 対応済み — 入力レイアウト "2d"（位置・UV。メッシュの頂点から法線を読み飛ばす）を main2d の頂点シェーダーから作り、フェーダー・ポストエフェクト・Flat2D・シャドウマップのデバッグ表示で使う。HLSL は COMMON_2D_INPUT
 - 残り: 頂点バッファ自体は法線入りのまま（2D 専用の矩形メッシュは作っていない）
 
-### Entity::get_component() の const 正確性 [難易度: 低]
-- `Entity.h:43` — const メソッドが非 const ポインタを返す
-- [ ] 対応する
+### ~~Entity::get_component() の const 正確性~~ [完了]
+- [x] 対応済み（cbae6686）— 足す・外すは非 const、const の Entity からは const のコンポーネント。System は持ち主の EntityManager から得る
 
-### BulletPhysics::get_dynamics_world() を削除 [難易度: 低]
-- `BulletPhysics.h:53` — Bullet 内部 API の露出
-- [ ] 呼び出し元を確認して削除
+### ~~BulletPhysics::get_dynamics_world() を削除~~ [完了]
+- [x] 対応済み（cbae6686）— 世界そのものを出さず ray_test・contact_test の問い合わせだけを出す。PhysicsManager の同名の関数（呼び出し元なし）も削除。テスト BulletPhysicsTest
 
-### CollisionShape の共有 [難易度: 中]
-- `BulletPhysics.h:12` — 同一形状の RigidBody でメモリ重複
-- [ ] 対応する
+### ~~CollisionShape の共有~~ [完了]
+- [x] 対応済み（cbae6686）— 種類と大きさで形をキャッシュして共有する。テスト BulletPhysicsTest
 
-### AnimationPlayer の整理 [難易度: 低]
-- `AnimationPlayer.h:16,30` — 不要な type alias、定数バッファの責務分離
-- [ ] 対応する
+### ~~AnimationPlayer の整理~~ [完了]
+- [x] 対応済み（cbae6686・22bb672c）— 不要な別名・定数を削除、値を返さない代入演算子をコピー禁止に。定数バッファは ActiveObject が持ち、AnimationPlayer はボーン行列の計算（calculate_bone_matrices）だけ
 
 ### ~~シャドウマップカスケード幅の動的設定~~ [完了]
 - [x] 対応済み — core::graphics::ShadowMap::set_cascade_width（既定 10 / 50 / 150 / 9999）
@@ -317,9 +309,8 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 ### ~~RenderTargetTexture の MipLevels/SampleDesc 可変化~~ [完了]
 - [x] 対応済み — create_render_target_texture( format, RenderTargetTextureOptions )。既定はミップ 1 段・画面と同じ MSAA。ミップ 2 段以上は resolve_for_sampling でミップを作る
 
-### サウンド更新の別スレッド化 [難易度: 高]
-- `GameMain.cpp:310` — 現在メインスレッドで実行
-- [ ] 対応する
+### ~~サウンド更新の別スレッド化~~ [完了]
+- [x] 対応済み（cbae6686）— SoundManager::start_update_thread（16ms ごと）。一覧は SoundManager の、音の操作は音ごとのロックで守る。メインスレッドが止まっても BGM の補充が続く
 
 ### その他の細かい整理
 - `GameMain.cpp:253` — ActiveObject に color を持たせるか検討

@@ -89,3 +89,85 @@ Player 1170+284・Robot 392+92・BaseSwitch 146+75（Switch 50+39・AreaSwitch 2
 1. 物理 : core::physics::PhysicsManager に統一する（Bullet を隠す）。足りない機能（OBJ の当たりの形の読み込み・地面・自分を除くレイ判定）は BulletPhysics から移す。移し終えるまで本編は今の世界のまま橋渡しで進める
 2. 行動 : 折衷。単純な種類はデータとシステムに分け切る。Player・Robot は当面、行動をまとめて持つ部品（BehaviorComponent）で ECS の中で動かし、1 つずつ切り出す
 3. ハンドル : 今の ResourceHandle（型付き・二度と使わない通し番号と表引き）を広げ、replace（番号を変えずに中身の差し替え）を足す。遅さが測れたら中身だけ添字＋世代に替える
+
+## 6. 効率の点検（2026-11-10）
+
+### 6.1 前提
+
+利用者の指示（2026-11-10）: Entity の数は最終的に **1 万を超える**想定で設計する。今の本編は 1 ステージ 60 個程度だが、それを理由に「効かないから直さない」とはしない。
+
+### 6.2 見つかったこと
+
+小さな直し・不具合の芽（すべて 6.3 で直した。5 は推測が外れた）:
+
+| # | 場所 | 中身 |
+|---|---|---|
+| 1 | core/ecs の EntityManager・Component・System・BaseSystem | 部品と System の型の番号が typeid( T ).hash_code()。MSVC では呼ぶたびに装飾名を走査して計算する（constexpr と書いてあったが実行時）。理屈の上では衝突もし得る。get_component が operator[] で、読むだけで未登録の型の空の一覧を作る |
+| 2 | blue_sky/ecs/system/ObjectRenderDataSystem | アニメーションの無い物体も含め、毎フレーム 2 か所（アニメーションを進める・定数を書く）で find と get_component< AnimationComponent > |
+| 3 | core/ecs/system/RenderSystem | 毎フレーム unordered_map< Model*, vector< Matrix > > を作り直し、シェーダーを名前で 3 回引く |
+| 4 | blue_sky/ecs/system/PerceptionSystem | 敵ごとに get_system< TargetRegistrySystem >()。視界錐に入った対象すべてにレイを飛ばしてから距離で捨てる |
+| 5 | core/ecs/system/ParticleRenderSystem | 頂点バッファが 1 つで最初の Entity で作る → 粒子の Entity が 2 つ以上で壊れる（推測）。**確かめた結果、壊れない** : 粒子の一覧は std::array で大きさが型で決まり、Entity ごとに WRITE_DISCARD で書いてすぐ描く。粒子の Entity を一時的に 2 つにして起動し、描いたパスが 2 → 3 に増え、落ちず assert も出ないことを見た |
+| 6 | core/ecs/Component.h | get_type_id() const が typeid( this )（Component* の型）で、どの部品でも同じ値。呼ぶ所は無い |
+| 7 | EntityManager::remove_system | 1 引数の erase( remove( ... ) )。一覧に無ければ end() を消す未定義動作（今は system_map_ と揃っているので起きない） |
+
+今は直さなかった構造の問題（1 万を超えると効く。次の作り替えで直す）:
+
+- **部品を 1 つずつ new し、Entity ごとの unordered_map で持つ**（EntityManager::component_list_ は 型 → unordered_map< EntityId, unique_ptr< Component > >）。作る・消すたびに確保と解放、引くたびにハッシュ表を引き、部品はヒープに散らばる。
+- **System の対象が unordered_map< EntityId, tuple< T*... > >**（System::component_list_）。走査がハッシュ表の節を飛び飛びにたどり、さらに各ポインタの先（散らばった部品）へ飛ぶ。
+- **1 体ごとに仮想関数で update( ComponentTuple& ) を呼ぶ**。中身が小さい System では呼び出しの手間が目立ち、インライン化もできない。
+- （ついでに）ObjectRenderDataSystem の描く対象の一覧は、対象が 1 つ増減するたびに全部を作り直して並べ替える。毎フレーム物体が生まれ・消える状況では毎フレーム O(n log n) になる。
+
+### 6.3 直したもの
+
+| # | 中身 | コミット | 足したテスト |
+|---|---|---|---|
+| 8 | ベンチマーク（1 万・10 万個で 作る＋部品 3 つ付ける・部品を引く・System 2 つの update・消す。既定では走らない） | 54290822 | EcsBenchmark.DISABLED_Entities10k / 100k |
+| 1 | 型の番号を型ごとの通し番号（get_component_type_id< T >・get_system_type_id< T >。初めて引いたときに一度だけ振る。全部が 1 つの exe に静的にリンクされ DLL をまたがない）にし、部品の一覧を番号を添字に引く deque にした（MSVC の unordered_map は移動が noexcept でなく vector では伸ばせない）。get_component は find | 039b39e7 | TypeIdsAreStableAndDistinct・GetComponentOfNeverAddedTypeReturnsNull |
+| 6 | Component::get_type_id() const を消した | b956c756 | （呼ぶ所が無い） |
+| 7 | remove_system を erase( remove( ... ), end() ) に | 01cfeefa | RemoveSystem |
+| 2 | BaseSystem に「対象ではないが付け外しを知りたい部品」（is_watched_component_type・on_watched_component_changed）を足し、ObjectRenderDataSystem はアニメーションの付け外しで一覧を作り直す印を立てる。作り直すときに RenderTarget::animation を一度だけ引き、アニメーションを持つものだけの一覧を回す | 9c0ecc9b | 描く対象はアニメーションを持ち_付け外しで一覧が作り直される・System_を後から足してもアニメーションを引ける |
+| 3 | RenderSystem の map をメンバにして中身だけ消す（前のフレームで使わなかったモデルは外す）。シェーダーはコンストラクタで一度だけ引く（無ければログを残してポストエフェクトなしで描く） | d5e71fd2 | （Direct3D が要るので起動して確かめた） |
+| 4 | PerceptionSystem は update の頭で TargetRegistrySystem を一度だけ引く。dist >= best_dist ならレイを飛ばさない（採る対象は以前と同じ） | 722df99f | PerceptionSystemTest 4 件 |
+| 5 | 動きは変えず、「粒子の一覧は大きさが型で決まる配列」という前提を static_assert で守り、可変長にするときの直し方を書いた | e4c0289c | （同上） |
+
+テストは 366 件 → 375 件（ほかに無効 2 件 = ベンチマーク）。
+
+### 6.4 計測の結果
+
+blue-sky-test.exe --gtest_also_run_disabled_tests --gtest_filter=EcsBenchmark.* を 3 回走らせた中央値（ミリ秒）。部品は 3 種類（位置・速度・体力、各 12〜16 バイト）、System は 2 つ（部品 2 種類・3 種類）で、中身はほぼ空（ECS の仕組みの手間だけを測る）。「部品を引く」は全 Entity について 3 種類を引く 1 回ぶん（10 回の平均）、「update」は全 System の update 1 回 = 1 フレーム相当（30 フレームの平均）。x64・開発機。
+
+| 構成 | 個数 | 項目 | 直す前（54290822） | 1 の後（039b39e7） | 全部の後（e4c0289c） |
+|---|---|---|---|---|---|
+| Debug | 1 万 | 作る＋部品 3 つ | 63.58 | 45.95 | 47.26 |
+| Debug | 1 万 | 部品を引く | 5.70 | 3.98 | 3.99 |
+| Debug | 1 万 | update（1 フレーム） | 0.251 | 0.248 | 0.239 |
+| Debug | 1 万 | 消す | 16.55 | 16.33 | 16.29 |
+| Debug | 10 万 | 作る＋部品 3 つ | 640.4 | 470.4 | 516.1 |
+| Debug | 10 万 | 部品を引く | 72.8 | 45.4 | 47.5 |
+| Debug | 10 万 | update（1 フレーム） | 3.94 | 3.92 | 3.71 |
+| Debug | 10 万 | 消す | 197.3 | 201.8 | 199.5 |
+| Release | 1 万 | 作る＋部品 3 つ | 9.98 | 4.42 | 4.39 |
+| Release | 1 万 | 部品を引く | 1.049 | 0.246 | 0.249 |
+| Release | 1 万 | update（1 フレーム） | 0.166 | 0.169 | 0.174 |
+| Release | 1 万 | 消す | 1.915 | 1.924 | 1.950 |
+| Release | 10 万 | 作る＋部品 3 つ | 99.5 | 46.2 | 44.7 |
+| Release | 10 万 | 部品を引く | 10.70 | 2.66 | 2.68 |
+| Release | 10 万 | update（1 フレーム） | 2.14 | 2.06 | 2.01 |
+| Release | 10 万 | 消す | 25.97 | 20.87 | 20.55 |
+
+読み方:
+
+- 1（型の番号）で、部品を引く手間が Release で約 4 分の 1（1 個 3 種類で 105 ns → 25 ns）、作る手間が約半分になった。2〜7 はベンチマークの範囲の外（本編の System の中）なので、この表では変わらない。
+- **update は直していない**（構造の問題のまま）。Release で 1 個あたり約 20 ns（System 2 つ・中身はほぼ空）で、10 万個だと中身の無い System 2 つだけで 1 フレーム（16.7 ms）の約 12% を使う。個数が 10 倍で時間は約 12 倍と、個数より速く増える（ハッシュ表の節と散らばった部品をたどるキャッシュミス）。
+- 消すのは Release で 1 個 約 200 ns（全 System に知らせる・全部の型の一覧から消す・delete）。
+- Debug は Release の 2〜8 倍。Debug でも 1 万個の update は 0.25 ms で、遊べる範囲。
+
+### 6.5 次にやること
+
+**部品の持ち方の作り替えを、段階 3（物理の同期と当たりのイベント）の前に行う。** 段階 3 以降は位置の正を TransformComponent に移し、物理・当たり・行動の System が毎フレーム全 Entity を回すので、先に土台を速くしておく。
+
+- 部品を型ごとの密な配列で持つ（Entity の番号 → 添字 の表と、添字 → Entity の番号の逆引き。消すときは末尾と入れ替える）。部品は値で持ち、1 つずつ new しない。
+- System の対象は Entity の番号の密な配列にし、部品は型ごとの配列から添字で引く（または、いちばん数の少ない部品の配列を回して残りを引く）。
+- 1 体ごとの仮想関数をやめ、System が自分の対象をまとめて回す（update() の中のループ）形を基本にする。今の update( ComponentTuple& ) は互換として残すか、使う所を置き換える。
+- 指すときは今の Entity*・部品の生ポインタが配列の伸長で無効になるので、EntityId で持つ決まり（4 節）を徹底する。部品のポインタを持っている所（RenderTarget・System の tuple・ActiveObject）を洗い出す。
+- 前後の比べ方は 6.4 のベンチマーク（同じテスト・同じ構成で 3 回の中央値）。

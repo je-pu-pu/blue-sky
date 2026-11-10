@@ -2,7 +2,6 @@
 #include "ActiveObjectPhysics.h"
 #include "DebugLog.h"
 
-#include <GameObject/Girl.h>
 #include <GameObject/Robot.h>
 #include <blue_sky/GameObjectRef.h>
 
@@ -28,6 +27,7 @@
 #include <blue_sky/ecs/component/SwitchComponent.h>
 #include <blue_sky/ecs/system/SwitchSystem.h>
 #include <blue_sky/ecs/system/BalloonHoldSystem.h>
+#include <blue_sky/ecs/system/GirlSystem.h>
 #include <blue_sky/ecs/component/BalloonHoldComponent.h>
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/ObjectBody.h>
@@ -43,11 +43,10 @@ ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics
 	, object_context_( object_context )
 	, entity_manager_( entity_manager )
 {
-	object_creator_map_[ "girl"        ] = [] () -> ActiveObject* { return new Girl();         };
 	object_creator_map_[ "robot"       ] = [this] () -> ActiveObject* { return new Robot( graphics_manager_ ); };	// テクスチャを得る GraphicsManager を渡す
 
 	// "static"（動かない物）・"medal"・"umbrella"・"rocket"・"goal"・"ladder"・"stone"・"switch"（と空間スイッチ）は ECS だけの物体になり、ObjectFactory が作る（段階 4）。
-	// "balloon" も ECS だけの物体（段階 5）
+	// "balloon"・"girl" も ECS だけの物体（段階 5）
 
 }
 
@@ -151,6 +150,12 @@ void ActiveObjectManager::update()
 	if ( auto* system = entity_manager_->get_system< ecs::BalloonHoldSystem >() )
 	{
 		system->update_balloons( scene_elapsed_time );
+	}
+
+	// 少女（ECS だけの物体。以前は Girl::update）
+	if ( auto* system = entity_manager_->get_system< ecs::GirlSystem >() )
+	{
+		system->update_girls( scene_elapsed_time );
 	}
 
 	// アニメーションを進める（以前は物体ごとに update の直後に進めていた。物体のアニメーションは互いに独立なので、まとめて後で進めても同じ）

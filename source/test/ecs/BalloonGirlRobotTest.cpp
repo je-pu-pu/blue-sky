@@ -14,6 +14,9 @@
 #include <blue_sky/ecs/component/SimpleObjectComponent.h>
 #include <blue_sky/ecs/component/PickupComponent.h>
 #include <blue_sky/ecs/system/BalloonHoldSystem.h>
+#include <blue_sky/ecs/component/GirlComponent.h>
+#include <blue_sky/ecs/component/FlickerComponent.h>
+#include <blue_sky/ecs/system/GirlSystem.h>
 
 #include <core/ecs/EntityManager.h>
 
@@ -314,4 +317,111 @@ TEST( BalloonGirlRobotTest, 風船を殺すと下へ退く_スクリプトの_ki
 	f.factory.get_ref( id ).kill();
 
 	EXPECT_TRUE( is_near( f.factory.get_ref( id ).get_location(), Vector( 0.f, -100.f, 0.f ) ) );
+}
+
+// ---- 少女 ----
+
+TEST( BalloonGirlRobotTest, 少女は硬い物で_重力が無く_やり直すと回らず摩擦も無く立つ )
+{
+	Fixture f;
+
+	const auto id = f.create( "girl" );
+	auto* e = f.entity( id );
+
+	ASSERT_NE( e->get_component< blue_sky::ecs::GirlComponent >(), nullptr );
+	ASSERT_NE( e->get_component< blue_sky::ecs::FlickerComponent >(), nullptr );
+
+	// 以前の Girl : 0.5 x 1.5 x 0.5・硬い・重力 0・質量 1。やり直すと回らない（回転のしやすさ 0）・摩擦 0
+	const auto* traits = e->get_component< blue_sky::ecs::CollisionTraitsComponent >();
+	EXPECT_TRUE( traits->is_hard );
+	EXPECT_TRUE( traits->is_block );
+	EXPECT_FALSE( traits->is_safe_footing );
+
+	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >();
+	EXPECT_FLOAT_EQ( body->height_offset, 0.75f );
+	EXPECT_EQ( body->body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
+
+	e->get_component< blue_sky::ecs::GirlComponent >()->mode = blue_sky::ecs::GirlComponent::Mode::FLOAT;
+	f.factory.get_ref( id ).set_flicker_scale( 10.f );
+	f.factory.get_ref( id ).set_start_location( 1.f, 2.f, 3.f );
+
+	f.factory.restart();
+
+	EXPECT_TRUE( is_near( Vector( body->body->getGravity() ), Vector::Zero ) );
+	EXPECT_TRUE( is_near( Vector( body->body->getAngularFactor() ), Vector::Zero ) );
+	EXPECT_FLOAT_EQ( body->body->getFriction(), 0.f );
+
+	EXPECT_EQ( e->get_component< blue_sky::ecs::GirlComponent >()->mode, blue_sky::ecs::GirlComponent::Mode::STAND );
+	EXPECT_TRUE( is_near( e->get_component< blue_sky::ecs::GirlComponent >()->float_base_location, Vector( 1.f, 2.f, 3.f ) ) );
+	EXPECT_FLOAT_EQ( e->get_component< blue_sky::ecs::FlickerComponent >()->scale, 1.f );
+}
+
+TEST( BalloonGirlRobotTest, 少女はアクション_float_で浮き_浮く中心へゆらぎの大きさで上下の速度を向ける )
+{
+	Fixture f;
+
+	const auto id = f.create( "girl" );
+	f.factory.get_ref( id ).set_start_location( 1.f, 2.f, 3.f );
+	f.factory.restart();
+
+	auto* system = f.manager.get_system< blue_sky::ecs::GirlSystem >();
+	ASSERT_NE( system, nullptr );
+
+	GameObjectRef girl = f.factory.get_ref( id );
+
+	// 立っている間は動かさない
+	girl.set_velocity( Vector( 1.f, 1.f, 1.f ) );
+	system->update_girls( 2.f );
+	EXPECT_TRUE( is_near( girl.get_velocity(), Vector( 1.f, 1.f, 1.f ) ) );
+
+	// "float" で浮く（ステージの set_mode。以前の Girl::action）
+	girl.action( "float" );
+	EXPECT_EQ( f.entity( id )->get_component< blue_sky::ecs::GirlComponent >()->mode, blue_sky::ecs::GirlComponent::Mode::FLOAT );
+
+	girl.set_flicker_scale( 10.f );
+	system->update_girls( 2.f );
+
+	// 以前の Girl::update : 速度を 0 にしてから update_velocity_by_flicker( 浮く中心, ゆらぎの大きさ )
+	const float_t offset = blue_sky::ecs::flicker::height_offset( static_cast< unsigned int >( id ), 2.f, 10.f );
+	EXPECT_TRUE( is_near( girl.get_velocity(), Vector( 0.f, 2.f + offset - girl.get_location().y(), 0.f ), 0.001f ) );
+
+	// 知らないアクションはログを残すだけ（状態は変えない）
+	girl.action( "rotation" );
+	EXPECT_EQ( f.entity( id )->get_component< blue_sky::ecs::GirlComponent >()->mode, blue_sky::ecs::GirlComponent::Mode::FLOAT );
+}
+
+TEST( BalloonGirlRobotTest, 少女が目標地点に着くと止まり_そこが浮く中心になる )
+{
+	Fixture f;
+
+	const auto id = f.create( "girl" );
+	f.factory.restart();
+
+	GameObjectRef girl = f.factory.get_ref( id );
+	girl.set_velocity( Vector( 0.f, 5.f, 0.f ) );
+
+	// 以前の Girl::on_arrive_at_target_location : 速度 0・浮く中心 = 今の位置
+	blue_sky::ecs::EntityObject object( f.entity( id ) );
+	object.stop_at_target_location( Vector( -5.f, 45.f, 25.f ) );
+	object.notify_arrive_at_target_location();
+
+	EXPECT_TRUE( is_near( girl.get_velocity(), Vector::Zero ) );
+	EXPECT_TRUE( is_near( f.entity( id )->get_component< blue_sky::ecs::GirlComponent >()->float_base_location, Vector( -5.f, 45.f, 25.f ) ) );
+}
+
+TEST( BalloonGirlRobotTest, 少女への当たりは何も起こさない )
+{
+	Fixture f;
+
+	const auto girl = f.create( "girl" );
+	const auto stone = f.create( "stone" );
+	f.factory.restart();
+
+	FakeHolder player;
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, 100, * f.entity( girl ) );
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( stone ), * f.entity( girl ) );
+
+	EXPECT_EQ( player.touch_count, 0 );
+	EXPECT_FALSE( blue_sky::ecs::EntityObject( f.entity( girl ) ).is_dead() );
+	EXPECT_FALSE( blue_sky::ecs::EntityObject( f.entity( stone ) ).is_dead() );
 }

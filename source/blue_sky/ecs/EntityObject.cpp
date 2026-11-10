@@ -3,6 +3,8 @@
 #include <blue_sky/ecs/ObjectBody.h>
 #include <blue_sky/ecs/Flicker.h>
 #include <blue_sky/ecs/component/BalloonHoldComponent.h>
+#include <blue_sky/ecs/component/FlickerComponent.h>
+#include <blue_sky/ecs/component/GirlComponent.h>
 #include <blue_sky/ecs/component/PhysicsBodyComponent.h>
 #include <blue_sky/ecs/component/SimpleObjectComponent.h>
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
@@ -92,6 +94,15 @@ void EntityObject::stop_at_target_location( const core::Vector& target_location 
 {
 	set_location( target_location );
 	set_velocity( core::Vector::Zero );
+}
+
+void EntityObject::notify_arrive_at_target_location()
+{
+	if ( auto* girl = entity_->get_component< GirlComponent >() )
+	{
+		set_velocity( core::Vector::Zero );
+		girl->float_base_location = get_location();
+	}
 }
 
 float_t EntityObject::get_direction_degree() const
@@ -307,6 +318,20 @@ void EntityObject::restart()
 	{
 		balloon->holder_id.reset();
 		balloon->holder = nullptr;
+	}
+
+	// ゆらぎの大きさを戻す（以前の ActiveObject::restart）
+	if ( auto* flicker = entity_->get_component< FlickerComponent >() )
+	{
+		flicker->scale = 1.f;
+	}
+
+	// 少女は立ち、浮く中心は始めの位置（以前の Girl::restart）
+	if ( auto* girl = entity_->get_component< GirlComponent >() )
+	{
+		girl->mode = GirlComponent::Mode::STAND;
+		play_animation( "Stand", true, true );
+		girl->float_base_location = get_start_location();
 	}
 
 	set_visible( true, true );

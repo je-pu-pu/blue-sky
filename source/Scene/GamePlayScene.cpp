@@ -26,7 +26,6 @@
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/DebugLog.h>
 #include <GameObject/Robot.h>
-#include <GameObject/Girl.h>
 #include <blue_sky/ecs/system/SwitchSystem.h>
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/component/BalloonHoldComponent.h>
@@ -958,10 +957,11 @@ void GamePlayScene::debug_log_actors()
 		{
 			actors[ o->get_entity_id() ] = { "robot", robot_modes[ static_cast< int >( r->get_mode() ) ] };
 		}
-		else if ( dynamic_cast< const Girl* >( o ) )
-		{
-			actors[ o->get_entity_id() ] = { "girl", "" };
-		}
+	}
+
+	for ( const auto id : get_object_factory()->find_all_of_kind( "girl" ) )
+	{
+		actors[ id ] = { "girl", "" };
 	}
 
 	for ( const auto id : get_object_factory()->find_all_of_kind( "balloon" ) )

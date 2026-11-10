@@ -6,7 +6,6 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <GameObject/Player.h>
-#include <GameObject/Girl.h>
 #include <GameObject/Robot.h>
 #include <GameObject/Camera.h>
 
@@ -98,8 +97,7 @@ StageBuilder::Result StageBuilder::build( const StageData& data, const Context& 
 
 			if ( o.type == "girl" )
 			{
-				result.girl = static_cast< Girl* >( object.get_active_object() );
-				result.girl->set_player( context.player );
+				// 少女は ECS だけの物体（以前は Girl* を結果で返し、プレイヤーを渡していたが、どちらも使っていなかった）。名前 "girl" で引く
 				factory->name( "girl", id );
 			}
 			else if ( o.type == "robot" )

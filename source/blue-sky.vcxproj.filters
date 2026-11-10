@@ -113,9 +113,6 @@
     <ClCompile Include="GameObject\GameObject.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject\Girl.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="GameObject\Robot.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
@@ -462,6 +459,9 @@
     <ClCompile Include="blue_sky\ecs\system\BalloonHoldSystem.cpp">
       <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\GirlSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blue_sky\ecs\component\PhysicsBodyComponent.h">
@@ -652,9 +652,6 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\GameObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Girl.h">
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\Robot.h">
@@ -1293,6 +1290,15 @@
       <Filter>blue_sky\ecs\component</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\ecs\system\BalloonHoldSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\FlickerComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\GirlComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\GirlSystem.h">
       <Filter>blue_sky\ecs\system</Filter>
     </ClInclude>
   </ItemGroup>

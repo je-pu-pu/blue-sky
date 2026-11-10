@@ -120,7 +120,7 @@ public:
 	core::Vector get_target_mover_location() const override { return get_location(); }
 	void move_toward_target_location( const core::Vector& target_location, float_t speed ) override { update_velocity_by_target_location( target_location, speed ); }
 	void stop_at_target_location( const core::Vector& target_location ) override;
-	void notify_arrive_at_target_location() override { }		///< 着いたときにすることは無い（動かない物。以前の StaticObject と同じ）
+	void notify_arrive_at_target_location() override;		///< 少女は止まり、そこが浮く中心になる（以前の Girl::on_arrive_at_target_location）。ほかの種類はすることが無い
 	void chase_target_direction_degree( float_t degree, float_t speed ) override { chase_direction_degree( degree, speed ); }
 	void chase_target_direction_to( const core::Vector& location, float_t speed ) override { chase_direction_to( location, speed ); }
 };

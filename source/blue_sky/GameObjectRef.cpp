@@ -16,6 +16,8 @@
 #include <blue_sky/ecs/system/MoveToTargetSystem.h>
 #include <blue_sky/ecs/system/SwitchSystem.h>
 #include <blue_sky/ecs/component/SwitchComponent.h>
+#include <blue_sky/ecs/component/FlickerComponent.h>
+#include <blue_sky/ecs/system/GirlSystem.h>
 
 #include <core/animation/AnimationPlayer.h>
 #include <core/ecs/EntityManager.h>
@@ -298,7 +300,15 @@ void GameObjectRef::set_flicker_scale( float_t scale )
 		return;
 	}
 
-	// ゆらぐのはプレイヤー・少女・敵・風船（ActiveObject）だけ
+	// ECS だけの物体は、ゆらぎの大きさの部品を持つもの（少女・敵）だけ
+	core::ecs::Entity* entity = find_entity();
+
+	if ( auto* flicker = entity ? entity->get_component< ecs::FlickerComponent >() : nullptr )
+	{
+		flicker->scale = scale;
+		return;
+	}
+
 	log_unsupported( "ゆらぎの大きさの設定" );
 }
 
@@ -375,6 +385,12 @@ void GameObjectRef::action( const string_t& action )
 			log_unsupported( ( "アクション \"" + action + "\"" ).c_str() );
 		}
 
+		return;
+	}
+
+	// 種類ごとのアクション（以前の Girl::action の "float"）
+	if ( auto* system = entity_manager_->get_system< ecs::GirlSystem >(); system && system->action( id_, action ) )
+	{
 		return;
 	}
 

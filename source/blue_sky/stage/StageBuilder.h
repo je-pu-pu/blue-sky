@@ -14,7 +14,6 @@ namespace blue_sky
 class ObjectFactory;
 class ActiveObjectPhysics;
 class Player;
-class Girl;
 class Camera;
 
 namespace graphics
@@ -55,7 +54,6 @@ public:
 	/// 当てた結果（シーンが持つもの）
 	struct Result
 	{
-		Girl*					girl = nullptr;		///< 少女（いなければ nullptr）
 		std::vector< Call >		start_calls;		///< 始めるたび（やり直すたび）に呼ぶ（書いた順）
 		bool					bgm_loop = true;	///< BGM を繰り返すか
 	};

@@ -4,7 +4,6 @@
 #include <blue_sky/GameMain.h>
 
 #include <GameObject/Player.h>
-#include <GameObject/Girl.h>
 #include <GameObject/Robot.h>
 #include <GameObject/Camera.h>
 
@@ -370,11 +369,6 @@ void GamePlayScene::load_stage_file( const char* base_name )
 	};
 
 	const auto result = stage::StageBuilder::build( data, context );
-
-	if ( result.girl )
-	{
-		girl_ = result.girl;
-	}
 
 	stage_setup_command_call_list_.assign( result.start_calls.begin(), result.start_calls.end() );
 	bgm_loop_ = result.bgm_loop;

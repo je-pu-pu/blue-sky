@@ -26,7 +26,6 @@ namespace core::graphics
 namespace blue_sky
 {
 	class Player;
-	class Girl;
 	class ActiveObject;
 	class Camera;
 	class DelayedCommand;
@@ -94,7 +93,6 @@ private:
 
 	// 非所有参照 (ActiveObjectManager が所有)
 	Player*								player_ = nullptr;
-	Girl*								girl_ = nullptr;
 	GameObjectRef						goal_;		///< ゴール（ECS だけの物体。ObjectFactory が持つ）
 
 	// 所有リソース

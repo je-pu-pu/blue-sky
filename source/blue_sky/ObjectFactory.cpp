@@ -28,6 +28,9 @@
 #include <blue_sky/ecs/system/SwitchSystem.h>
 #include <blue_sky/ecs/system/BalloonHoldSystem.h>
 #include <blue_sky/ecs/component/BalloonHoldComponent.h>
+#include <blue_sky/ecs/system/GirlSystem.h>
+#include <blue_sky/ecs/component/GirlComponent.h>
+#include <blue_sky/ecs/component/FlickerComponent.h>
 #include <blue_sky/graphics/Line.h>
 
 #include <GameObject/ActiveObject.h>
@@ -66,6 +69,7 @@ void ObjectFactory::setup_systems()
 	entity_manager_->add_system< ecs::ContactCacheSystem >( 0 );
 	entity_manager_->add_system< ecs::SwitchSystem >( 0, sound_manager_ );
 	entity_manager_->add_system< ecs::BalloonHoldSystem >( 0, sound_manager_ );
+	entity_manager_->add_system< ecs::GirlSystem >( 0 );
 }
 
 std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const string_t& kind )
@@ -214,6 +218,28 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		{
 			model->get_line()->set_cast_shadow( true );
 		}
+
+		return id;
+	}
+
+	if ( kind == "girl" )
+	{
+		// 以前の Girl : 0.5 x 1.5 x 0.5・硬い・重力 0・質量 1。やり直すと回らない（回転のしやすさ 0）・摩擦 0 で立つ。
+		// アクション "float" で浮き、浮く中心でふわふわと上下する（GirlSystem）。当たりでは何も起こさない
+		ObjectSpec spec;
+		spec.kind = kind;
+		spec.size = Vector( 0.5f, 1.5f, 0.5f );
+		spec.mass = 1.f;
+		spec.has_default_gravity = true;
+		spec.gravity = Vector::Zero;
+		spec.restart_angular_factor = 0.f;
+		spec.restart_friction = 0.f;
+
+		const EntityId id = create_entity_object( spec );
+		core::ecs::Entity* entity = entity_manager_->find( id );
+
+		entity->add_component< ecs::GirlComponent >();
+		entity->add_component< ecs::FlickerComponent >();
 
 		return id;
 	}

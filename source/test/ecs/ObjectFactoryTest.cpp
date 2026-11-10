@@ -187,7 +187,7 @@ TEST( ObjectFactoryTest, 種類の名前から作る_static_は_ECS_だけの物
 	EXPECT_NE( f.entity( * id )->get_component< blue_sky::ecs::StaticObjectComponent >(), nullptr );
 
 	// まだ ActiveObject の種類は ActiveObjectManager が作る（このテストでは無いので作れない）
-	EXPECT_FALSE( f.factory.create_object( "girl" ).has_value() );
+	EXPECT_FALSE( f.factory.create_object( "robot" ).has_value() );
 	EXPECT_FALSE( f.factory.create_object( "no-such-kind" ).has_value() );
 }
 

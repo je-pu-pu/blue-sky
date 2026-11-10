@@ -839,3 +839,87 @@ TEST( EcsTest, ComponentPointersStayValidWhenOtherEntitiesComeAndGo )
 	EXPECT_EQ( 2.f, keeper_transform->transform.get_position().y() );
 	EXPECT_EQ( 1u + 1500u + 3000u, entity_manager.debug_entity_count() );
 }
+
+
+namespace {
+
+/// 回した対象の番号と、組に持っている部品のポインタが本物と同じかを記録する System
+class VisitRecordSystem : public core::ecs::System< core::ecs::TransformComponent, CountedComponent >
+{
+public:
+	std::vector< core::ecs::EntityId > visited;
+	int mismatch_count = 0;
+
+	void update() override
+	{
+		visited.clear();
+
+		for ( auto& [ id, tuple ] : get_component_list() )
+		{
+			visited.push_back( id );
+
+			const auto* entity = get_entity_manager()->find( id );
+
+			if ( ! entity
+				|| std::get< core::ecs::TransformComponent* >( tuple ) != entity->get_component< core::ecs::TransformComponent >()
+				|| std::get< CountedComponent* >( tuple ) != entity->get_component< CountedComponent >() )
+			{
+				mismatch_count++;
+			}
+		}
+
+		std::sort( visited.begin(), visited.end() );
+	}
+};
+
+} // namespace
+
+/**
+ * System の対象の一覧は、途中の Entity を外しても（末尾と入れ替えても）、残りを一度ずつ・正しい部品で回す。
+ * 入れ替えで動いた Entity も、後から正しく外せる
+ */
+TEST( EcsTest, SystemListStaysCorrectAfterSwapRemove )
+{
+	core::ecs::EntityManager entity_manager;
+	entity_manager.add_system< VisitRecordSystem >();
+	auto* system = entity_manager.get_system< VisitRecordSystem >();
+
+	std::vector< core::ecs::Entity* > entities;
+
+	for ( int i = 0; i < 6; i++ )
+	{
+		auto* e = entity_manager.create_entity();
+		e->add_component< core::ecs::TransformComponent >();
+		e->add_component< CountedComponent >();
+		entities.push_back( e );
+	}
+
+	const auto id = [ & ] ( int i ) { return static_cast< core::ecs::EntityId >( entities[ i ]->get_id() ); };
+
+	// 先頭・途中を外す（末尾の Entity が前に動く）
+	entity_manager.destroy_entity( id( 0 ) );
+	entities[ 2 ]->remove_component< CountedComponent >();
+
+	entity_manager.update();
+	EXPECT_EQ( ( std::vector< core::ecs::EntityId >{ id( 1 ), id( 3 ), id( 4 ), id( 5 ) } ), system->visited );
+	EXPECT_EQ( 0, system->mismatch_count );
+
+	// 前に動いた末尾の Entity（5）を外し、外した部品を足し直す
+	entity_manager.destroy_entity( id( 5 ) );
+	entities[ 2 ]->add_component< CountedComponent >();
+
+	entity_manager.update();
+	EXPECT_EQ( ( std::vector< core::ecs::EntityId >{ id( 1 ), id( 2 ), id( 3 ), id( 4 ) } ), system->visited );
+	EXPECT_EQ( 0, system->mismatch_count );
+	EXPECT_EQ( 4u, system->debug_entity_count() );
+
+	// 全部外すと空になる
+	for ( int i : { 1, 2, 3, 4 } )
+	{
+		entity_manager.destroy_entity( id( i ) );
+	}
+
+	entity_manager.update();
+	EXPECT_TRUE( system->visited.empty() );
+	EXPECT_EQ( 0u, system->debug_entity_count() );
+}

@@ -48,7 +48,7 @@ struct PlayerDesc
 };
 
 /**
- * ステージ 1 つを読んだ結果（ファイルの形式によらない。読む = LegacyStageParser・TomlStageParser、当てる = StageBuilder）
+ * ステージ 1 つを読んだ結果（ファイルの形式によらない。読む = TomlStageParser、当てる = StageBuilder）
  */
 struct StageData
 {

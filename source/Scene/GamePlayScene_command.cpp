@@ -21,9 +21,7 @@
 #include <blue_sky/ScriptManager.h>
 
 #include <blue_sky/DelayedCommand.h>
-#include <blue_sky/stage/LegacyStageParser.h>
 #include <blue_sky/stage/TomlStageParser.h>
-#include <blue_sky/DebugLog.h>
 #include <blue_sky/stage/StageBuilder.h>
 
 #include <core/sound/Sound.h>
@@ -353,32 +351,8 @@ void GamePlayScene::save_stage_file( const char* ) const
  */
 void GamePlayScene::load_stage_file( const char* base_name )
 {
-	// 読む（ファイル → StageData）。<名前>.stage.toml を読む。
-	// 開発用 : 環境変数 BLUE_SKY_STAGE_FORMAT=legacy なら古い形式の <名前>.stage を読む（移す前と後を比べるため。段階 5 で消す）
-	char format[ 16 ] = { };
-	GetEnvironmentVariableA( "BLUE_SKY_STAGE_FORMAT", format, sizeof( format ) );
-
-	const string_t toml_file_name = string_t( base_name ) + ".stage.toml";
-	const string_t legacy_file_name = string_t( base_name ) + ".stage";
-
-	stage::StageData data;
-
-	if ( string_t( format ) == "legacy" )
-	{
-		std::ifstream in( legacy_file_name );
-
-		if ( ! in.good() )
-		{
-			COMMON_THROW_EXCEPTION_MESSAGE( "load stage file \"" + legacy_file_name + "\" failed." );
-		}
-
-		debug_log( "[Stage] 古い形式のステージを読みます : " + legacy_file_name );
-		data = stage::LegacyStageParser::parse( in, legacy_file_name );
-	}
-	else
-	{
-		data = stage::TomlStageParser::parse_file( toml_file_name );
-	}
+	// 読む（ファイル → StageData）。以前の独自の形式（.stage）は 2026-11-10 に TOML へ移して消した（変換ツールは tools/stage_convert）
+	const stage::StageData data = stage::TomlStageParser::parse_file( string_t( base_name ) + ".stage.toml" );
 
 	// 当てる（StageData → ゲーム）
 	stage::StageBuilder::Context context;

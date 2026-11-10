@@ -168,9 +168,8 @@
     <ClCompile Include="test\math\SkinningAnimationSetTest.cpp" />
     <ClCompile Include="test\ecs\MoveToTargetSystemTest.cpp" />
     <ClCompile Include="test\ecs\ObjectFactoryTest.cpp" />
-    <ClCompile Include="test\stage\LegacyStageParserTest.cpp" />
     <ClCompile Include="test\stage\TomlStageParserTest.cpp" />
-    <ClCompile Include="test\stage\StageFormatCompareTest.cpp" />
+    <ClCompile Include="test\stage\StageFilesTest.cpp" />
     <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp" />
     <ClCompile Include="test\script\ScriptManagerTest.cpp" />
     <ClCompile Include="test\graphics\RenderSettingsTest.cpp" />

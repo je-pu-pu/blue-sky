@@ -57,7 +57,7 @@ using ActionValue = std::variant< bool, double, string_t, std::vector< double > 
 /**
  * 動き 1 つ（種類と型の付いた引数）
  *
- * 読むとき（LegacyStageParser・TomlStageParser）に作り、遊んでいる最中に文字列を解釈し直さない。
+ * 読むとき（TomlStageParser）に作り、遊んでいる最中に文字列を解釈し直さない。
  * 書いていない引数は、行う側（GamePlayScene::run_action）が今までと同じ既定の値を使う
  */
 struct Action

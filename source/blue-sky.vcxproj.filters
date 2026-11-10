@@ -311,9 +311,6 @@
     <ClCompile Include="blue_sky\stage\Action.cpp">
       <Filter>blue_sky\stage</Filter>
     </ClCompile>
-    <ClCompile Include="blue_sky\stage\LegacyStageParser.cpp">
-      <Filter>blue_sky\stage</Filter>
-    </ClCompile>
     <ClCompile Include="blue_sky\stage\StageBuilder.cpp">
       <Filter>blue_sky\stage</Filter>
     </ClCompile>
@@ -1036,9 +1033,6 @@
       <Filter>blue_sky\stage</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\stage\Action.h">
-      <Filter>blue_sky\stage</Filter>
-    </ClInclude>
-    <ClInclude Include="blue_sky\stage\LegacyStageParser.h">
       <Filter>blue_sky\stage</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\stage\StageBuilder.h">

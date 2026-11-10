@@ -66,13 +66,10 @@
     <ClCompile Include="test\ecs\ObjectFactoryTest.cpp">
       <Filter>test\ecs</Filter>
     </ClCompile>
-    <ClCompile Include="test\stage\LegacyStageParserTest.cpp">
-      <Filter>test\stage</Filter>
-    </ClCompile>
     <ClCompile Include="test\stage\TomlStageParserTest.cpp">
       <Filter>test\stage</Filter>
     </ClCompile>
-    <ClCompile Include="test\stage\StageFormatCompareTest.cpp">
+    <ClCompile Include="test\stage\StageFilesTest.cpp">
       <Filter>test\stage</Filter>
     </ClCompile>
     <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp">

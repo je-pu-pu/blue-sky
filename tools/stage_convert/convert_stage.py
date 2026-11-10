@@ -15,8 +15,9 @@
     - 捨てた物（どこも読まない行・余った数・name の 2 語目・見つからない名前を指す動き）は、
       TOML にコメントで残し、報告に出す
 
-ゲームの読み方（source/blue_sky/stage の LegacyStageParser と TomlStageParser）と同じ結果になるように変える。
-「古い読み方の結果 == TOML の読み方の結果」は C++ のテスト（StageFormatCompareTest）で確かめる。
+古い形式の読み方（以前の LegacyStageParser）と同じ結果になるように変える。同梱の 16 個は 2026-11-10 に変換し、
+「古い読み方の結果 == TOML の読み方の結果」を C++ のテストで確かめてから古い形式を消した（doc/ステージ形式の設計.md 6 章）。
+同梱の .stage はもう無い。古い形式のステージを手に入れたときに使う。
 """
 
 import json

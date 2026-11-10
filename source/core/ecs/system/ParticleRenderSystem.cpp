@@ -49,6 +49,13 @@ void ParticleRenderSystem::update()
 		// std::cout << "p0 pos, vel : " << p.position << ", " <<  p.velocity << std::endl;
 
 		// 頂点バッファは Direct3D11 を GraphicsManager から受け取って作る（以前は関数内の static で、中で Direct3D11 の get_instance() を使っていた）
+		//
+		// 頂点バッファは 1 つで、全 Entity が使い回す。粒子の一覧の大きさが型で決まっている（std::array）ので、
+		// 最初の Entity で作った大きさが全 Entity に合う。Entity ごとに WRITE_DISCARD で書いてすぐ描く（render_technique は
+		// その場で呼ぶ）ので、粒子の Entity が 2 つ以上でも前の Entity の描画は壊れない（2026-11-10 に確かめた）。
+		// 一覧を可変長（vector など）にするなら、頂点バッファを Entity ごとにするか、最大数に合わせて作り直すこと
+		static_assert( std::tuple_size< ParticleSystemComponent::ParticleList >::value > 0, "粒子の一覧は大きさが型で決まる配列であること（上の説明）" );
+
 		if ( ! vertex_buffer_ )
 		{
 			vertex_buffer_ = std::make_unique< VertexBuffer< ParticleSystemComponent::ParticleList > >( direct_3d_, particle_system->particle_list, BufferType::UPDATABLE );

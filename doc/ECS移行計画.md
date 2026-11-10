@@ -32,7 +32,7 @@ GameObject
 | Lua | ScriptManager.h:58-64 | ActiveObject を Lua の型 "GameObject" として登録（model・play_animation・kill） |
 | 当たり | GameObject.h:131-145、ActiveObjectPhysics.cpp:124-158 | 型ごとの多重定義による二重ディスパッチ |
 
-使われていない古い橋渡し : GameObject.h の ComponentMap（blue_sky::Component は定義が無い）。
+使われていない古い橋渡し : GameObject.h の ComponentMap（blue_sky::Component は定義が無い）。段階 0 で消した（f3a810ca）。
 
 ### 1.3 派生クラスの大きさ（.cpp + .h の行数）
 
@@ -41,7 +41,7 @@ Player 1170+284・Robot 392+92・BaseSwitch 146+75（Switch 50+39・AreaSwitch 2
 ### 1.4 ECS 側にあるもの・足りないもの
 
 - ある : core の Transform・RigidBody・Model（core::graphics::Model* の生ポインタ）・Render・Camera・ParticleSystem、PhysicsSystem・RenderSystem・Particle 系。blue_sky/ecs の Alert・Patrol・Perception・Perceivable・FpsPlayer・Balloon・TransformControl。
-- **土台の欠陥** : ① EntityManager::destroy_entity が Entity だけを消し、コンポーネントが残り、システムが指したままになる（EntityManager.h:67-70）。② PhysicsManager::destroy_rigid_body を呼ぶ所が無く、ECS の剛体が溜まる（シーンをまたいで残るかは推測）。
+- **土台の欠陥**（段階 0 で直した） : ① EntityManager::destroy_entity が Entity だけを消し、コンポーネントが残り、システムが指したままになる（EntityManager.h:67-70）。② PhysicsManager::destroy_rigid_body を呼ぶ所が無く、ECS の剛体が溜まる（シーンをまたいで残ることをテストで確かめた）。
 - 足りない : アニメーションとボーン行列、本編の描画（影・手描きの線・速度パス）、本編の物理の世界への対応、当たりのイベント、目標地点への移動、ステージからの生成と名前で引く仕組み、Lua から Entity を指す方法、プレイヤーの入力、物体の性質（すり抜け・硬さ・足場）のデータ。
 - EnemyAiTestScene は手本になる（依存をコンストラクタで受け取る・型を知らずに印で探す・テストがある）。ただし敵に剛体が無く、描画・物理が本編と別の仕組み。
 
@@ -58,7 +58,7 @@ Player 1170+284・Robot 392+92・BaseSwitch 146+75（Switch 50+39・AreaSwitch 2
 
 | 段階 | 中身 | 確かめ方・危ないところ |
 |---|---|---|
-| **0 土台の修理** | destroy_entity がコンポーネントを外してシステムに知らせる。is_alive・find(EntityId)。PhysicsSystem が外れたとき・clear のときに剛体を解放する。ComponentMap を消す | EntityManagerTest に「消した後の対象数 0」「剛体の解放」。clear の順番（GameMain.cpp:1325-1329） |
+| **0 土台の修理** | destroy_entity がコンポーネントを外してシステムに知らせる。is_alive・find(EntityId)。PhysicsSystem が外れたとき・clear のときに剛体を解放する。ComponentMap を消す | EntityManagerTest に「消した後の対象数 0」「剛体の解放」。clear の順番（GameMain.cpp:1325-1329）。**完了（794d545a・dc031ebf・16826f67・f3a810ca）**。剛体はシーンをまたいで溜まっていた（修正前にテストで確かめた）。clear は System を先に壊す順に変えた |
 | **H1 ハンドルの土台**（0 と並行可） | ResourceManager に replace（番号を変えずに中身を差し替え）。モデル・メッシュ・テクスチャ・音をハンドルで引けるようにする。ModelComponent（core::graphics::Model）と ResourceManager（blue_sky::graphics::Model）の型の食い違いを解く | 単体テスト（解放後は nullptr・replace 後も同じハンドルで新しい中身）。音は SoundManager が生で delete している（SoundManager.cpp:135-145） |
 | **1 描画データをコンポーネントへ**（最初の目に見える段階） | ObjectRenderComponent（Handle<Model>・定数バッファ・前フレームの world）・AnimationComponent・ObjectRenderDataSystem。GraphicsManager は ActiveObjectManager ではなく描く対象の一覧を回す（依存を外す） | 画面の見比べ。clone() で Entity とバッファを作り直す。make_model_unique はハンドルの差し替えに。描く順の変化（推測） |
 | **2 目標地点・向きへの移動** | TargetLocation／TargetDirection コンポーネント・MoveToTargetSystem・着いたときのイベント。set_target_* は窓口として残す | スイッチのログが移す前と同じ数・同じ座標 |
@@ -84,3 +84,8 @@ Player 1170+284・Robot 392+92・BaseSwitch 146+75（Switch 50+39・AreaSwitch 2
 3. ハンドルの中身（推奨 : 今の ResourceHandle（通し番号と map）を型付きのまま広め、replace を足す。添字＋世代への変更は遅さが測れてから）
 
 決めた結果は、この節に日付付きで書き足す。
+
+### 決定（2026-11-10、利用者）
+1. 物理 : core::physics::PhysicsManager に統一する（Bullet を隠す）。足りない機能（OBJ の当たりの形の読み込み・地面・自分を除くレイ判定）は BulletPhysics から移す。移し終えるまで本編は今の世界のまま橋渡しで進める
+2. 行動 : 折衷。単純な種類はデータとシステムに分け切る。Player・Robot は当面、行動をまとめて持つ部品（BehaviorComponent）で ECS の中で動かし、1 つずつ切り出す
+3. ハンドル : 今の ResourceHandle（型付き・二度と使わない通し番号と表引き）を広げ、replace（番号を変えずに中身の差し替え）を足す。遅さが測れたら中身だけ添字＋世代に替える

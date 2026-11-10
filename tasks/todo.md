@@ -265,6 +265,7 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 
 - [ ] 設定ファイルの形式（2026-11-10 検討）: 今の「キー 値」形式のままにする。UI のテーマ・キーの複数割り当て・セーブデータなど、まとまったデータを扱い始めるときに TOML（toml++）を入れ、新しいデータから使う
 - [ ] 次の段階の課題 D1〜D5（doc/設計上の問題の洗い出し.md の 6 章）: D1 ゲームの物体を ECS に寄せる・D4 ハンドルの導入（どちらも利用者が決定・希望）。移行計画を立ててから進める
+  - [x] ECS 移行の段階 0「土台の修理」完了（2026-11-10、doc/ECS移行計画.md の 3 章）: destroy_entity がシステムの対象から外してコンポーネントも外す（794d545a）・is_alive / find( EntityId )（dc031ebf）・PhysicsSystem が対象から外れたとき・remove_system・clear で剛体を解放（16826f67。以前はシーンをまたいで物理の世界に溜まっていたのをテストで確かめた）・GameObject の ComponentMap を削除（f3a810ca）。テスト 339 件。残り: シーンをまたぐ確かめは単体テストだけ（実機でシーンを替えての確認はしていない）
 
 ### ~~extern/game の Sound/SoundManager を core に統合~~ [完了]
 - [x] 対応済み（cbae6686）— 実装は core だけだったので、game::Sound・game::SoundManager の中身を core::Sound・core::sound::SoundManager に取り込み、extern/game から削除

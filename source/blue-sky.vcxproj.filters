@@ -444,6 +444,9 @@
     <ClCompile Include="blue_sky\ecs\system\BalloonSystem.cpp">
       <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\ObjectRenderDataSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
     <ClCompile Include="core\graphics\Msdf\GlyphCache.cpp">
       <Filter>core\graphics\Msdf</Filter>
     </ClCompile>
@@ -1195,6 +1198,15 @@
     </ClInclude>
     <ClInclude Include="blue_sky\ecs\component\BalloonComponent.h">
       <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\ObjectRenderComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\AnimationComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\ObjectRenderDataSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClInclude>
     <ClInclude Include="core\math\DirectXMath\Transform.h">
       <Filter>core\math\DirectXMath</Filter>

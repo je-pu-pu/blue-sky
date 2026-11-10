@@ -20,7 +20,7 @@ RenderSystem::RenderSystem( core::graphics::GraphicsManager* graphics_manager, c
 	, render_result_texture_1_( get_graphics_manager()->create_render_target_texture() )
 	, render_result_texture_2_( get_graphics_manager()->create_render_target_texture() )
 	, instance_buffer_( get_graphics_manager()->create_instance_buffer() )
-	, object_constant_buffer_( get_graphics_manager()->create_constant_buffer( sizeof( core::ObjectConstantBufferData ), core::ObjectConstantBuffer::SLOT ) )
+	, object_constant_buffer_( get_graphics_manager()->create_constant_buffer( sizeof( core::ObjectConstantBufferData ), core::ObjectConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC ) )	// 描画ごとに書き換える
 {
 	//
 }

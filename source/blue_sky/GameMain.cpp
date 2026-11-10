@@ -387,6 +387,7 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "set_start_rot", [] ( ActiveObject* o, float_t rx, float_t ry, float_t rz ) { o->set_start_rotation( rx, ry, rz ); } );
 	get_script_manager()->set_function( "set_start_dir", [] ( ActiveObject* o, float_t r ) { o->set_start_direction_degree( r ); } );
 	get_script_manager()->set_function( "set_mass", [] ( ActiveObject* o, float_t mass ) { o->set_mass( mass ); } );
+	get_script_manager()->set_function( "make_model_unique", [] ( ActiveObject* o ) { return o->make_model_unique(); } );
 
 	// GrahpicsManager
 	get_script_manager()->set_function( "setup_shadow_map", [this] ( uint_t level = 3, uint_t size = 1024 ) { get_graphics_manager()->setup_shadow_map( level, size ); } );
@@ -401,11 +402,13 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "set_shadow_paper_color", [this] ( const Color& color ) { get_graphics_manager()->set_shadow_paper_color( color ); } );
 	get_script_manager()->set_function( "set_drawing_accent", [this] ( float_t accent ) { get_graphics_manager()->set_drawing_accent( accent ); } );
 	get_script_manager()->set_function( "set_drawing_line_type", [this] ( int_t type ) { get_graphics_manager()->set_drawing_line_type( type ); } );
+	get_script_manager()->set_function( "set_light_direction", [this] ( float_t x, float_t y, float_t z ) { return get_graphics_manager()->set_light_direction( Vector( x, y, z, 0.f ) ); } );
 
 	get_script_manager()->set_function( "set_post_effect_shader", [this] ( core::graphics::Shader* s ) { get_graphics_manager()->set_post_effect_shader( s ); } );
 
 	get_script_manager()->set_function( "load_model", [this] ( const char_t* name ) { return get_graphics_manager()->load_model( name ); } );
 	get_script_manager()->set_function( "clone_model", [this] ( graphics::Model* m ) { auto* m2 = get_graphics_manager()->clone_model( m ); return m2; } );
+	get_script_manager()->set_function( "clone_model_with_shaders", [this] ( graphics::Model* m ) { return get_graphics_manager()->clone_model_with_shaders( m ); } );
 
 	get_script_manager()->set_function( "get_shader", [this] ( const char_t* name ) { return get_graphics_manager()->get_shader( name ); } );
 	get_script_manager()->set_function( "clone_shader", [this] ( const core::graphics::Shader* s ) { return get_graphics_manager()->clone_shader( s ); } );
@@ -447,7 +450,8 @@ ActiveObject* GameMain::create_object( const char_t* class_name ) const
 	active_object->set_rigid_body( get_active_object_physics()->add_active_object_as_box( active_object ) );
 	active_object->set_model( get_graphics_manager()->load_model( class_name ) );
 
-	/// @todo 同じ種類の複数の ActiveObject が、Shader を共有せず、個別に保持できるようにする
+	// モデルとシェーダーは同じ種類のオブジェクトで共有する（load_model が名前で使い回す）。
+	// 1 つだけシェーダーを変えたいときは、そのオブジェクトの make_model_unique()（スクリプトでは make_model_unique( o )）で自分だけのものにする
 
 	return active_object;
 }

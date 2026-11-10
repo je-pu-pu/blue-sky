@@ -24,7 +24,7 @@ protected:
 public:
 	DebugShadowMapTextureShader( GraphicsManager* graphics_manager )
 		: BaseShader( graphics_manager )
-		, render_setting_( graphics_manager, "main", "debug_shadow_map_texture" )
+		, render_setting_( graphics_manager, "2d", "debug_shadow_map_texture" )
 	{
 
 	}

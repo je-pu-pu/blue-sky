@@ -54,8 +54,12 @@ private:
 	static Matrix				view_matrix_;
 	static MatrixList			projection_matrix_list_;
 
+	void update_projection();
+
 protected:
 	const Matrix get_view_projection_matrix( uint_t level ) const { return view_matrix_ * projection_matrix_list_[ level ]; }
+
+	void on_projection_changed() override { update_projection(); }
 
 public:
 	ShadowMap( Direct3D11*, uint_t, size_t );

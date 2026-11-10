@@ -36,6 +36,11 @@
 
 #include <common/string.h>
 
+#include <cstddef>
+
+// 入力レイアウト "2d" は、メッシュの頂点の中の UV の位置を決め打ちで読む（法線を読み飛ばす）。頂点の形が変わったら気づけるようにする
+static_assert( offsetof( blue_sky::graphics::Vertex, TexCoord ) == core::graphics::direct_3d_11::Direct3D11::mesh_vertex_tex_coord_offset, "入力レイアウト 2d の UV の位置がメッシュの頂点と合わない" );
+
 namespace {
 
 /// 矩形 [left, right] 内でテキスト幅 text_w を水平配置した X 座標を返す
@@ -74,9 +79,9 @@ namespace blue_sky::graphics::direct_3d_11
 GraphicsManager::GraphicsManager( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
 	, game_render_data_( new GameConstantBuffer( direct_3d ) )
-	, frame_render_data_( new FrameConstantBuffer( direct_3d ) )
-	, frame_drawing_render_data_( new FrameDrawingConstantBuffer( direct_3d ) )
-	, shared_object_render_data_( new ObjectConstantBuffer( direct_3d ) )
+	, frame_render_data_( new FrameConstantBuffer( direct_3d, core::graphics::ConstantBufferUsage::DYNAMIC ) )				// 毎フレーム書き換える
+	, frame_drawing_render_data_( new FrameDrawingConstantBuffer( direct_3d, core::graphics::ConstantBufferUsage::DYNAMIC ) )	// 毎フレーム書き換える
+	, shared_object_render_data_( new ObjectConstantBuffer( direct_3d, core::graphics::ConstantBufferUsage::DYNAMIC ) )		// 描画ごとに書き換える
 	, debug_axis_( new core::graphics::direct_3d_11::Axis( direct_3d ) )
 {
 	create_named_shader< shader::BypassShader >( "bypass" );
@@ -147,6 +152,11 @@ GraphicsManager::RenderTargetTexture* GraphicsManager::create_render_target_text
 	return new core::graphics::direct_3d_11::RenderTargetTexture( direct_3d_, format );
 }
 
+GraphicsManager::RenderTargetTexture* GraphicsManager::create_render_target_texture( PixelFormat format, const RenderTargetTextureOptions& options )
+{
+	return new core::graphics::direct_3d_11::RenderTargetTexture( direct_3d_, format, options );
+}
+
 GraphicsManager::BackBufferTexture* GraphicsManager::get_back_buffer_texture()
 {
 	return direct_3d_->get_back_buffer_texture();
@@ -179,9 +189,9 @@ void GraphicsManager::unload_mesh_all()
 }
 #endif
 
-std::unique_ptr< core::graphics::ConstantBuffer > GraphicsManager::create_constant_buffer( size_t size, int slot )
+std::unique_ptr< core::graphics::ConstantBuffer > GraphicsManager::create_constant_buffer( size_t size, int slot, ConstantBufferUsage usage )
 {
-	return std::make_unique< core::graphics::direct_3d_11::DynamicSlotConstantBuffer >( direct_3d_, size, slot );
+	return std::make_unique< core::graphics::direct_3d_11::DynamicSlotConstantBuffer >( direct_3d_, size, slot, usage );
 }
 
 std::unique_ptr< core::graphics::InstanceBuffer > GraphicsManager::create_instance_buffer()
@@ -279,14 +289,11 @@ void GraphicsManager::set_sky_box( const char_t* name )
 		sky_box_render_data_->data().color = Color::White;
 	}
 
-	// スカイボックスが使用しているテクスチャをクリアする
-	/// @todo スカイボックスが使用するテクスチャ名をユニークにする
-	unload_named_texture( "front" );
-	unload_named_texture( "back" );
-	unload_named_texture( "top" );
-	unload_named_texture( "bottom" );
-	unload_named_texture( "left" );
-	unload_named_texture( "right" );
+	// スカイボックスが使用しているテクスチャをクリアする（"skybox/front" のように接頭辞付きの名前で登録している）
+	for ( const auto* face_name : SkyBox::face_name_list )
+	{
+		unload_named_texture( SkyBox::get_texture_resource_name_of( face_name ).c_str() );
+	}
 
 	sky_box_.reset( new SkyBox( name ) );
 	load_mesh( sky_box_.get(), "sky-box" );

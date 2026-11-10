@@ -22,7 +22,7 @@ public:
 	};
 
 public:
-	NoiseShader( GraphicsManager* graphics_manager, const char_t* input_layout_name = "main", const char_t* effect_technique_name = "post_effect_noise" )
+	NoiseShader( GraphicsManager* graphics_manager, const char_t* input_layout_name = "2d", const char_t* effect_technique_name = "post_effect_noise" )
 		: Shader( graphics_manager, input_layout_name, effect_technique_name, { ShaderStage::PS } )
 	{
 

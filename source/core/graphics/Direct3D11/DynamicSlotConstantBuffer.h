@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/graphics/ConstantBuffer.h>
+#include <core/graphics/Direct3D11/ConstantBuffer.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
 
 namespace core::graphics::direct_3d_11
@@ -18,20 +19,18 @@ private:
 	Direct3D11* direct_3d_;		///< バッファを作る・更新する先（作り手が渡す。以前は Direct3D11 の get_instance() から取っていた）
 	ID3D11Buffer* constant_buffer_;
 	int slot_;
+	size_t size_;				///< データの大きさ（DYNAMIC で書き込むときに使う）
 
 public:
-	DynamicSlotConstantBuffer( Direct3D11* direct_3d, size_t size, int slot )
-		: direct_3d_( direct_3d )
-		, constant_buffer_( nullptr )
+	/// usage : 毎フレーム・毎描画で書き換えるものは DYNAMIC にする（既定は DEFAULT）
+	DynamicSlotConstantBuffer( Direct3D11* direct_3d, size_t size, int slot, Usage usage = Usage::DEFAULT )
+		: core::graphics::ConstantBuffer( usage )
+		, direct_3d_( direct_3d )
+		, constant_buffer_( create_d3d11_constant_buffer( direct_3d, size, usage ) )
 		, slot_( slot )
+		, size_( size )
 	{
-		D3D11_BUFFER_DESC buffer_desc = { 0 };
 
-		buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
-		buffer_desc.ByteWidth = size + ( size % 16 == 0 ? 0 : 16 - size % 16 );
-
-		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, 0, & constant_buffer_ ) );
 	}
 
 	~DynamicSlotConstantBuffer()
@@ -41,7 +40,7 @@ public:
 
 	void update( const void* data ) const override
 	{
-		direct_3d_->getImmediateContext()->UpdateSubresource( constant_buffer_, 0, 0, data, 0, 0 );
+		update_d3d11_constant_buffer( direct_3d_, constant_buffer_, data, size_, get_usage() );
 	}
 
 	void bind_to_vs() const override

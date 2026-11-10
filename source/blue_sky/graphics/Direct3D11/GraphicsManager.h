@@ -97,11 +97,12 @@ public:
 
 	RenderTargetTexture* create_render_target_texture() override;
 	RenderTargetTexture* create_render_target_texture( PixelFormat ) override;
+	RenderTargetTexture* create_render_target_texture( PixelFormat, const RenderTargetTextureOptions& ) override;
 
 	BackBufferTexture* get_back_buffer_texture() override;
 	void set_default_render_target( bool clear = true ) override;
 
-	std::unique_ptr< core::graphics::ConstantBuffer > create_constant_buffer( size_t size, int slot ) override;
+	std::unique_ptr< core::graphics::ConstantBuffer > create_constant_buffer( size_t size, int slot, ConstantBufferUsage usage = ConstantBufferUsage::DEFAULT ) override;
 	std::unique_ptr< core::graphics::InstanceBuffer > create_instance_buffer() override;
 	Direct3D* get_direct_3d() const override { return direct_3d_; }
 

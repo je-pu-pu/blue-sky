@@ -21,11 +21,14 @@ protected:
 
 protected:
 	void create_texture_2d( PixelFormat, int, int, bool );
+	void create_texture_2d( PixelFormat, int width, int height, UINT sample_count, UINT sample_quality, UINT mip_levels );
 	void create_shader_resource_view( PixelFormat );
 
 public:
 	/**
-	 * 新規にテクスチャを作成する
+	 * 新規にテクスチャを作成する（描画先にもできる。ミップ 1 段）
+	 *
+	 * @param multi_sample true なら画面（バックバッファ）と同じ MSAA、false なら MSAA なし
 	 */
 	Texture( Direct3D11* direct_3d, PixelFormat format, int width, int height, bool multi_sample )
 		: direct_3d_( direct_3d )
@@ -33,6 +36,29 @@ public:
 		create_texture_2d( format, width, height, multi_sample );
 		create_shader_resource_view( format );
 	}
+
+	/**
+	 * MSAA のサンプル数・品質とミップの段数を指定して、新規にテクスチャを作成する（描画先にもできる）
+	 *
+	 * ミップが 2 段以上なら generate_mips() でミップを作れる。MSAA のテクスチャはミップを持てない（呼ぶ側で 1 段にしておく）
+	 */
+	Texture( Direct3D11* direct_3d, PixelFormat format, int width, int height, UINT sample_count, UINT sample_quality, UINT mip_levels )
+		: direct_3d_( direct_3d )
+	{
+		create_texture_2d( format, width, height, sample_count, sample_quality, mip_levels );
+		create_shader_resource_view( format );
+	}
+
+	/// ミップが 2 段以上のとき、最も細かい段から残りの段を作る
+	void generate_mips() const
+	{
+		if ( texture_2d_desc_.MipLevels > 1 )
+		{
+			direct_3d_->getImmediateContext()->GenerateMips( shader_resource_view_.get() );
+		}
+	}
+
+	uint_t get_mip_levels() const { return texture_2d_desc_.MipLevels; }
 
 	/**
 	 * 既に存在する ShaderResourceView を設定してテクスチャオブジェクトを構築する ( 画像からテクスチャを読み込んだ場合などに使用 )

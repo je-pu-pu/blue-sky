@@ -244,18 +244,14 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 ### ~~Shader.h が Direct3D11 ConstantBuffer を直接参照~~ [完了]
 - [x] 対応済み — 抽象 ConstantBuffer に update() 追加、DynamicSlotConstantBuffer 新設、ファクトリ経由に切り替え
 
-### テクスチャアンロード後の dangling pointer [難易度: 中]
-- `GraphicsManager.cpp:430` — `paper_texture_` がアンロード後に無効参照になる可能性
-- unload_texture() 時にオブザーバー通知 or weak_ptr 化が必要
-- [ ] 対応する
+### ~~テクスチャアンロード後の dangling pointer~~ [完了]
+- [x] 対応済み（979b2c32）— 紙テクスチャを ResourceManager のハンドルで持ち、bind_paper_texture は resolve して無ければ使わない
 
 ### ~~ウィンドウリサイズ時に RenderTargetTexture が再作成されない~~ [完了]
 - [x] 対応済み — 遅延再作成 (Lazy Resize) 方式で解決。画面サイズ依存 RTT は activate()/clear() 時にサイズ不一致を検出して自動再作成。固定サイズ RTT (シャドウマップ等) は対象外。
 
-### スカイボックスのテクスチャ名が汎用的すぎる [難易度: 低]
-- `Direct3D11/GraphicsManager.cpp:259` — "front", "back" 等の名前で競合リスク
-- プレフィックス付き ("skybox/front" 等) に変更
-- [ ] 対応する
+### ~~スカイボックスのテクスチャ名が汎用的すぎる~~ [完了]
+- [x] 対応済み — Model::get_texture_resource_name で登録名を決め、SkyBox は "skybox/front" のように接頭辞を付ける（読み込み・set_sky_box のアンロードとも）
 
 ---
 
@@ -266,45 +262,38 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 - game 層と core 層に同名クラスが並存している
 - [ ] 対応する
 
-### ライト方向がハードコード [難易度: 中]
-- `GraphicsManager.cpp:484` — `Vector(-1, -2, 0.5, 0)` 固定
-- ECS のコンポーネント化、またはシーンごとの設定を可能にする
-- [ ] 対応する
+### ~~ライト方向がハードコード~~ [完了]
+- [x] 対応済み — GraphicsManager::set_light_direction / get_light_direction / reset_light_direction（core::graphics::LightDirection）。既定は以前と同じ。Lua は set_light_direction( x, y, z )
+- 残り: シーンが変えた向きは次のシーンへ持ち越す（Scene の切り替えで reset するかは未決）。DebugScene・GamePlayScene は今も定数バッファに自前で光を書いている
 
 ### シェーダーホットリロード後に effect_technique が古いまま [難易度: 中]
 - `GameMain.cpp:92` — reload 時にキャッシュ無効化が不完全
 - 開発中にちらつきやクラッシュのリスク
 - [ ] 対応する
 
-### 同種 ActiveObject 間でシェーダーを個別保持できない [難易度: 高]
-- `GameMain.cpp:277` — シェーダー共有のため個別パラメータ設定不可
-- clone / per-instance パラメータの仕組みが必要
-- [ ] 対応する
+### ~~同種 ActiveObject 間でシェーダーを個別保持できない~~ [完了]
+- [x] 対応済み — 原因は load_model が名前でモデルを使い回し、モデルのシェーダー一覧も共有していたこと。GraphicsManager::clone_model_with_shaders と ActiveObject::make_model_unique（Lua: make_model_unique( o )）で、そのオブジェクトだけのモデル・シェーダーにできる。Model の複製で線が消えていたのも直した（線は shared_ptr で共有）
+- 残り: 複製したモデル・シェーダーは GraphicsManager が持ったまま（シーンを出ても解放しない）
 
-### ConstantBuffer の Usage/更新方式の使い分け [難易度: 中]
-- `ConstantBuffer.h:26,54` — 全て DEFAULT + UpdateSubresource 固定
-- 頻繁更新の CB は DYNAMIC + Map の方が効率的
-- [ ] 対応する
+### ~~ConstantBuffer の Usage/更新方式の使い分け~~ [完了]
+- [x] 対応済み — 作るときに ConstantBufferUsage::DYNAMIC（Map(WRITE_DISCARD)）を選べる。既定は DEFAULT。フレーム・フレーム描画・共有オブジェクト・ActiveObject の world とボーン・ECS の RenderSystem / ParticleRenderSystem を DYNAMIC にした
 
-### シャドウマップの far clip が固定値 [難易度: 低]
-- `ShadowMap.cpp:109` — far=500 固定、地面が範囲外になる可能性
-- [ ] 対応する
+### ~~シャドウマップの far clip が固定値~~ [完了]
+- [x] 対応済み — core::graphics::ShadowMap::set_clip / set_far_clip（既定 1〜500）。setup_shadow_map で作り直すと既定に戻る
 
 ---
 
 ## 重要度: 低 / コード整理・最適化
 
-### GraphicsManager.cpp のシェーダー include を別ファイルに分離 [難易度: 低]
-- `GraphicsManager.cpp:12` — 12個のシェーダーヘッダ include
-- [ ] 対応する
+### ~~GraphicsManager.cpp のシェーダー include を別ファイルに分離~~ [完了]
+- [x] 対応済み — blue_sky/graphics/shader/AllShaders.h
 
-### setup_default_shaders() の関数名と責務分割 [難易度: 低]
-- `GraphicsManager.cpp:314` — 3つの処理が混在
-- [ ] 対応する
+### ~~setup_default_shaders() の関数名と責務分割~~ [完了]
+- [x] 対応済み — create_default_shaders / select_shadow_map_shaders / setup_screen_rectangles に分け、setup_default_shaders はこの順に呼ぶだけ
 
-### 2D 描画に法線を使っている [難易度: 低]
-- `Direct3D11.cpp:410`, `GraphicsManager.cpp:683` — 2D 用 InputLayout が未整備
-- [ ] 対応する
+### ~~2D 描画に法線を使っている~~ [完了]
+- [x] 対応済み — 入力レイアウト "2d"（位置・UV。メッシュの頂点から法線を読み飛ばす）を main2d の頂点シェーダーから作り、フェーダー・ポストエフェクト・Flat2D・シャドウマップのデバッグ表示で使う。HLSL は COMMON_2D_INPUT
+- 残り: 頂点バッファ自体は法線入りのまま（2D 専用の矩形メッシュは作っていない）
 
 ### Entity::get_component() の const 正確性 [難易度: 低]
 - `Entity.h:43` — const メソッドが非 const ポインタを返す
@@ -322,13 +311,11 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 - `AnimationPlayer.h:16,30` — 不要な type alias、定数バッファの責務分離
 - [ ] 対応する
 
-### シャドウマップカスケード幅の動的設定 [難易度: 低]
-- `ShadowMap.cpp:103` — 固定値をメンバ変数 + setter に変更
-- [ ] 対応する
+### ~~シャドウマップカスケード幅の動的設定~~ [完了]
+- [x] 対応済み — core::graphics::ShadowMap::set_cascade_width（既定 10 / 50 / 150 / 9999）
 
-### RenderTargetTexture の MipLevels/SampleDesc 可変化 [難易度: 低]
-- `RenderTargetTexture.cpp:11,30` — コンストラクタ引数追加
-- [ ] 対応する
+### ~~RenderTargetTexture の MipLevels/SampleDesc 可変化~~ [完了]
+- [x] 対応済み — create_render_target_texture( format, RenderTargetTextureOptions )。既定はミップ 1 段・画面と同じ MSAA。ミップ 2 段以上は resolve_for_sampling でミップを作る
 
 ### サウンド更新の別スレッド化 [難易度: 高]
 - `GameMain.cpp:310` — 現在メインスレッドで実行

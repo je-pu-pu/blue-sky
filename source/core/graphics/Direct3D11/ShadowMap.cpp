@@ -100,15 +100,22 @@ void ShadowMap::set_light_position( const Vector& pos )
 	light_position_ = pos;
 	light_position_ *= 100.f / light_position_.y(); /// 高さが 100.f になるように調整
 
-	/// @todo 動的に変更できるようにする
-	float_t width[ MaxCascadeLevels ] = { 10.f, 50.f, 150.f, 9999.f };
-	// float_t depth[ MaxCascadeLevels + 1 ] = { 0.1f, 5.f, 50.f, 150.f, 300.f };
+	update_projection();
+}
 
+/**
+ * 光から見た投影行列を、今の設定（near / far clip・カスケードの幅）で作り直す
+ *
+ * 設定は抽象 ShadowMap の set_clip / set_cascade_width で変えられる（以前はここに固定値で書かれていた）
+ */
+void ShadowMap::update_projection()
+{
 	for ( int n = 0; n < MaxCascadeLevels; n++ )
 	{
-		/// @todo 地面より手前に far clip がこないようにする
-		projection_matrix_list_[ n ].set_orthographic( width[ n ], width[ n ], 1.f, 500.f );
-		shader_resource_->data().view_depth_per_cascade_level[ n ] = width[ n ] * 0.3f;
+		const float_t width = get_cascade_width( n );
+
+		projection_matrix_list_[ n ].set_orthographic( width, width, get_near_clip(), get_far_clip() );
+		shader_resource_->data().view_depth_per_cascade_level[ n ] = get_view_depth_for_cascade( n );
 	}
 }
 

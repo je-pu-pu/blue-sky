@@ -36,7 +36,7 @@ public:
 
 private:
 	Mesh*					mesh_;
-	std::unique_ptr< Line >	line_; ///< @todo Mesh にまとめる？
+	std::shared_ptr< Line >	line_; ///< 複製したモデル同士で共有する（線の形は同じ。以前は unique_ptr で、複製すると線が無くなっていた） @todo Mesh にまとめる？
 	ShaderList				shader_list_;
 	SkinningAnimationSet*	skinning_animation_set_;
 
@@ -49,7 +49,7 @@ public:
 
 	Model( const Model& m )
 		: mesh_( m.mesh_ )
-		, line_() /// @todo 実装する
+		, line_( m.line_ )
 		, shader_list_( m.shader_list_ )
 		, skinning_animation_set_( m.skinning_animation_set_ )
 	{ }
@@ -88,6 +88,9 @@ public:
 	/// このモデル用のシェーダーを作る（作る先の GraphicsManager は呼ぶ側が渡す。以前は core::Service から取っていた）
 	virtual Shader* create_shader( GraphicsManager* graphics_manager ) const;
 	virtual string_t get_texture_file_path_by_texture_name( const char* ) const;
+
+	/// テクスチャを登録する名前（既定はテクスチャ名そのまま。"front" のような汎用的な名前が他と衝突するモデルは接頭辞を付ける）
+	virtual string_t get_texture_resource_name( const char* texture_name ) const { return texture_name; }
 
 	void render() const override;
 };

@@ -17,7 +17,7 @@ ParticleRenderSystem::ParticleRenderSystem( core::graphics::GraphicsManager* gra
 	: graphics_manager_( graphics_manager )
 	, direct_3d_( direct_3d )
 	, shader_( std::move( shader ) )
-	, object_constant_buffer_( graphics_manager->create_constant_buffer( sizeof( core::ObjectConstantBufferData ), core::ObjectConstantBuffer::SLOT ) )
+	, object_constant_buffer_( graphics_manager->create_constant_buffer( sizeof( core::ObjectConstantBufferData ), core::ObjectConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC ) )	// 描画ごとに書き換える
 {
 }
 

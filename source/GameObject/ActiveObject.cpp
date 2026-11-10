@@ -91,7 +91,7 @@ void ActiveObject::setup_animation_player()
 	{
 		animation_player_ = std::make_unique< AnimationPlayer >(
 			get_model()->get_skinning_animation_set(),
-			graphics_manager_->create_constant_buffer( sizeof( core::BoneConstantBufferData ), core::BoneConstantBuffer::SLOT ) );
+			graphics_manager_->create_constant_buffer( sizeof( core::BoneConstantBufferData ), core::BoneConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC ) );	// 毎フレーム書き換える
 	}
 }
 
@@ -108,10 +108,24 @@ void ActiveObject::setup_render_data( graphics::GraphicsManager* graphics_manage
 
 	if ( ! object_constant_buffer_ )
 	{
-		object_constant_buffer_ = graphics_manager_->create_constant_buffer( sizeof( ObjectConstantBufferData ), ObjectConstantBuffer::SLOT );
+		// 毎フレーム書き換える（world・前フレームの world）ので DYNAMIC にする
+		object_constant_buffer_ = graphics_manager_->create_constant_buffer( sizeof( ObjectConstantBufferData ), ObjectConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC );
 	}
 
 	setup_animation_player();
+}
+
+bool ActiveObject::make_model_unique()
+{
+	if ( ! graphics_manager_ || ! model_ )
+	{
+		return false;
+	}
+
+	// 複製したモデルも GraphicsManager が持つ（このオブジェクトは持たない。model_ のほかの使い方と同じ）
+	set_model( graphics_manager_->clone_model_with_shaders( model_ ) );
+
+	return true;
 }
 
 void ActiveObject::restart()

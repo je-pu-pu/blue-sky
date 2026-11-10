@@ -83,6 +83,17 @@ public:
 	Model* get_model() { return model_; }
 	const Model* get_model() const { return model_; }
 
+	/**
+	 * モデルとシェーダーを、このオブジェクトだけのものにする（メッシュ・線・アニメーションは共有のまま）
+	 *
+	 * create_object で作ったオブジェクトは、同じ種類のオブジェクトとモデル・シェーダーを共有している。
+	 * このオブジェクトだけシェーダーのテクスチャやパラメータを変えたいときに、先に呼ぶ。
+	 * まだ ActiveObjectManager に登録していない（複製する先が無い）ときやモデルが無いときは何もしない
+	 *
+	 * @return 自分だけのものにしたら true
+	 */
+	bool make_model_unique();
+
 	virtual void action( const string_t& );
 
 	virtual void set_flicker_scale( float_t s ) { flicker_scale_ = s; }

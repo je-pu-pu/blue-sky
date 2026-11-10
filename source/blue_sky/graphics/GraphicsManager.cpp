@@ -9,22 +9,7 @@
 #include <blue_sky/graphics/FbxFileLoader.h>
 #include <blue_sky/graphics/Line.h>
 
-/// @todo 別 cpp に移動
-#include <blue_sky/graphics/shader/NullShader.h>
-#include <blue_sky/graphics/shader/FlatShader.h>
-#include <blue_sky/graphics/shader/LitShader.h>
-#include <blue_sky/graphics/shader/LitInstancedShader.h>
-#include <blue_sky/graphics/shader/FaderShader.h>
-#include <blue_sky/graphics/shader/MatcapShader.h>
-#include <blue_sky/graphics/shader/ShadowMapShader.h>
-#include <blue_sky/graphics/shader/TessellationMatcapShader.h>
-#include <blue_sky/graphics/shader/UnicolorShader.h>
-#include <blue_sky/graphics/shader/VelocityShader.h>
-#include <blue_sky/graphics/shader/DebugShadowMapTextureShader.h>
-#include <blue_sky/graphics/shader/post_effect/DefaultShader.h>
-#include <blue_sky/graphics/shader/post_effect/HandDrawingShader.h>
-#include <blue_sky/graphics/shader/post_effect/RecolorShader.h>
-#include <blue_sky/graphics/shader/post_effect/NoiseShader.h>
+#include <blue_sky/graphics/shader/AllShaders.h>
 
 #include <Scene/Scene.h>
 
@@ -45,6 +30,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include <algorithm>
 #include <iostream>
 
 namespace blue_sky::graphics
@@ -240,6 +226,40 @@ GraphicsManager::Model* GraphicsManager::clone_model( const Model* m )
 }
 
 /**
+ * モデルとシェーダーを複製する（メッシュ・線・アニメーションは共有する）
+ *
+ * 同じシェーダーが複数の頂点グループに割り当てられていれば、複製したものも 1 つを共有する（同じ割り当てのまま複製する）
+ */
+GraphicsManager::Model* GraphicsManager::clone_model_with_shaders( const Model* m )
+{
+	Model* model = clone_model( m );
+
+	std::vector< std::pair< const Shader*, Shader* > > cloned;
+
+	for ( size_t n = 0; n < model->get_shader_count(); n++ )
+	{
+		const Shader* original = model->get_shader_at( n );
+
+		if ( ! original )
+		{
+			continue;
+		}
+
+		auto i = std::find_if( cloned.begin(), cloned.end(), [original] ( const auto& p ) { return p.first == original; } );
+
+		if ( i == cloned.end() )
+		{
+			cloned.emplace_back( original, clone_shader( original ) );
+			i = std::prev( cloned.end() );
+		}
+
+		model->set_shader_at( n, i->second );
+	}
+
+	return model;
+}
+
+/**
  * 名前とファイル名を指定してテクスチャをファイルから読み込む
  *
  * 指定された名前のテクスチャがすでに管理されている場合は、テクスチャをファイルから読み込まず管理されているテクスチャを返す
@@ -353,12 +373,24 @@ void GraphicsManager::unload_named_texture( const char_t* name )
 }
 
 /**
- * デフォルトのシェーダーを準備する
+ * 既定の描画の準備をする
  *
- * @todo スクリプトから行えるようにする ( C++ のシェーダークラスに名前を付けておき、スクリプトからシェーダークラス名, InputLayout 名, テクニック名を指定してシェーダーオブジェクトを new できないか？ )
- * @todo 関数名直す
+ * 以前はこの関数に 3 つの処理（シェーダーを作る・シャドウマップ用のシェーダーを選ぶ・画面全体の矩形を作る）が混ざっていた。
+ * 呼ぶ順に意味がある（後の 2 つは、名前付きのシェーダーが作られていることを前提にする）
  */
 void GraphicsManager::setup_default_shaders()
+{
+	create_default_shaders();
+	select_shadow_map_shaders();
+	setup_screen_rectangles();
+}
+
+/**
+ * 既定の名前付きシェーダーを作る
+ *
+ * @todo スクリプトから行えるようにする ( C++ のシェーダークラスに名前を付けておき、スクリプトからシェーダークラス名, InputLayout 名, テクニック名を指定してシェーダーオブジェクトを new できないか？ )
+ */
+void GraphicsManager::create_default_shaders()
 {
 	auto* matcap_texture = load_named_texture( "matcap", "media/texture/matcap/skin.png" );
 
@@ -376,28 +408,42 @@ void GraphicsManager::setup_default_shaders()
 	create_named_shader< shader::UnicolorShader >( "unicolor", "main", "unicolor" );
 	create_named_shader< shader::VelocityShader >( "velocity", "main", "velocity" );	// モーションベクトル ( 案B / 段階0b )
 
-	auto post_effect_shader = create_named_shader< shader::post_effect::DefaultShader >( "post_effect_default" );
-	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_chromatic_aberration", "main", "post_effect_chromatic_aberration" );
-	create_named_shader< shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing", "main", "post_effect_hand_drawing" );
-	create_named_shader< shader::post_effect::RecolorShader >( "post_effect_recolor", "main", "post_effect_recolor" );
+	// ポストエフェクトは 2D の入力レイアウト（法線なし）で描く
+	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_default" );
+	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_chromatic_aberration", "2d", "post_effect_chromatic_aberration" );
+	create_named_shader< shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing", "2d", "post_effect_hand_drawing" );
+	create_named_shader< shader::post_effect::RecolorShader >( "post_effect_recolor", "2d", "post_effect_recolor" );
 
-	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_id_to_color", "main", "post_effect_id_to_color" );
-	create_named_shader< shader::post_effect::NoiseShader >( "post_effect_noise", "main", "post_effect_noise" );
-	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_beat_pulse", "main", "post_effect_beat_pulse" );
-	// auto noise_shader = create_named_shader< shader::post_effect::NoiseShader >( "post_effect_noise", "main", "post_effect_noise" );
+	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_id_to_color", "2d", "post_effect_id_to_color" );
+	create_named_shader< shader::post_effect::NoiseShader >( "post_effect_noise", "2d", "post_effect_noise" );
+	create_named_shader< shader::post_effect::DefaultShader >( "post_effect_beat_pulse", "2d", "post_effect_beat_pulse" );
 
 	create_named_shader< shader::DebugShadowMapTextureShader >( "debug_shadow_map_texture" );
 
+	create_named_shader< shader::FaderShader >( "fader" );
+}
+
+/**
+ * シャドウマップを描くシェーダーを選ぶ（create_default_shaders で作ったものから）
+ */
+void GraphicsManager::select_shadow_map_shaders()
+{
 	shadow_map_shader_ = get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map" );
 	shadow_map_skin_shader_ = get_shader< graphics::shader::BaseShadowMapShader >( "shadow_map_skin" );
+}
 
+/**
+ * 画面全体を覆う矩形（フェーダーとポストエフェクト用）を作り、シェーダーを割り当てる
+ */
+void GraphicsManager::setup_screen_rectangles()
+{
 	auto rectangle = create_named_mesh< Rectangle >( "rectangle", Mesh::Buffer::Type::DEFAULT );
 
 	fader_->set_mesh( rectangle );
-	fader_->set_shader_at( 0, create_named_shader< shader::FaderShader >( "fader" ) );
+	fader_->set_shader_at( 0, get_shader( "fader" ) );
 
 	post_effect_rectangle_->set_mesh( rectangle );
-	set_post_effect_shader( post_effect_shader );
+	set_post_effect_shader( get_shader( "post_effect_default" ) );
 }
 
 /**
@@ -526,8 +572,8 @@ void GraphicsManager::setup_rendering()
 	get_frame_render_data()->data().view = ( Matrix().set_look_at( eye, at, up ) );
 	get_frame_render_data()->data().projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_component->fov ), aspect, camera_component->near_clip, camera_component->far_clip );
 	
-	/// @todo ちゃんとやる ( ECS 化？ set_light_info() ? )
-	get_frame_render_data()->data().light = Vector( -1.f, -2.f, 0.5f, 0.f ).normalize();
+	// 光の向きはシーンが set_light_direction で変えられる（既定は以前の固定値と同じ）
+	get_frame_render_data()->data().light = light_direction_.get_normalized();
 
 	/// @todo ここでやるべき？
 	get_frame_render_data()->data().time = time_manager_ ? time_manager_->get_total_elapsed_time() : 0.f;
@@ -770,8 +816,7 @@ void GraphicsManager::render_fader() const
 	
 	get_shared_object_render_data()->update( & buffer_data );
 
-	/// @todo 2D の描画に法線を使っているのは無駄なのでなんとかする
-	set_input_layout( "main" );
+	set_input_layout( "2d" );
 
 	render_technique( "|main2d", [this]
 	{

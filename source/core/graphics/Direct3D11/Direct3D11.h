@@ -109,6 +109,9 @@ public:
 	/// スプライトを作る。graphics_manager は描画回数を数える先（作り手の GraphicsManager が自分を渡す）
 	void setup_sprite( const core::graphics::GraphicsManager* graphics_manager );
 
+	/// メッシュの頂点（位置 float3・法線 float3・UV float2）の中の UV の位置（バイト）。入力レイアウト "2d" が法線を読み飛ばすのに使う
+	static constexpr UINT mesh_vertex_tex_coord_offset = sizeof( float ) * 6;
+
 	void create_default_input_layout();
 	void create_input_layout( const char_t*, const char_t*, D3D11_INPUT_ELEMENT_DESC[], UINT );
 

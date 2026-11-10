@@ -19,8 +19,9 @@ private:
 	}
 
 public:
-	explicit ConstantBufferTyped( Direct3D11* direct_3d )
-		: ConstantBuffer< Slot >( direct_3d, sizeof( DataType ) )
+	/// usage : 毎フレーム・毎描画で書き換えるものは DYNAMIC にする（既定は DEFAULT）
+	explicit ConstantBufferTyped( Direct3D11* direct_3d, core::graphics::ConstantBufferUsage usage = core::graphics::ConstantBufferUsage::DEFAULT )
+		: ConstantBuffer< Slot >( direct_3d, sizeof( DataType ), usage )
 	{
 
 	}

@@ -3,6 +3,8 @@
 #include <core/graphics/Shader.h>
 #include <core/graphics/PixelFormat.h>
 #include <core/graphics/PrimitiveTopology.h>
+#include <core/graphics/ConstantBuffer.h>
+#include <core/graphics/RenderTargetTextureOptions.h>
 #include <core/ResourceManager.h>
 #include <core/math/Vector.h>
 #include <functional>
@@ -45,6 +47,8 @@ public:
 	using BackBufferTexture				= core::graphics::BackBufferTexture;
 
 	using ConstantBuffer				= core::graphics::ConstantBuffer;
+	using ConstantBufferUsage			= core::graphics::ConstantBufferUsage;
+	using RenderTargetTextureOptions	= core::graphics::RenderTargetTextureOptions;
 
 	using SkinningAnimationSet			= core::SkinningAnimationSet;
 
@@ -75,7 +79,12 @@ public:
 
 	const ShaderManager::ResourceList& get_shader_list() const { return shader_manager_.get_resource_list(); }
 
-	virtual std::unique_ptr< ConstantBuffer > create_constant_buffer( size_t size, int slot ) = 0;
+	/**
+	 * 定数バッファを作る
+	 *
+	 * @param usage 毎フレーム・毎描画で書き換えるもの（オブジェクトごとの world など）は DYNAMIC にする。既定は DEFAULT（以前と同じ）
+	 */
+	virtual std::unique_ptr< ConstantBuffer > create_constant_buffer( size_t size, int slot, ConstantBufferUsage usage = ConstantBufferUsage::DEFAULT ) = 0;
 	virtual std::unique_ptr< InstanceBuffer > create_instance_buffer() = 0;
 
 
@@ -83,6 +92,9 @@ public:
 
 	virtual RenderTargetTexture* create_render_target_texture() = 0;
 	virtual RenderTargetTexture* create_render_target_texture( PixelFormat ) = 0;
+
+	/// ミップの段数・MSAA を指定して、描画先にできるテクスチャ（画面の大きさ）を作る
+	virtual RenderTargetTexture* create_render_target_texture( PixelFormat, const RenderTargetTextureOptions& ) = 0;
 
 	virtual BackBufferTexture* get_back_buffer_texture() = 0;
 	virtual void set_render_target( RenderTarget* );

@@ -180,6 +180,9 @@
     <ClCompile Include="Scene\TransformTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="blue_sky\graphics\shader\AllShaders.h" />
+    <ClInclude Include="core\graphics\RenderTargetTextureOptions.h" />
+    <ClInclude Include="core\graphics\LightDirection.h" />
     <ClInclude Include="core\graphics\Direct3D11\EffectStateDesc.h" />
     <ClInclude Include="core\graphics\EffectParser.h" />
     <ClInclude Include="blue_sky\RawInput.h" />

@@ -53,6 +53,17 @@ struct COMMON_POS_UV
 };
 
 /**
+ * 2D 描画（画面全体の矩形・フェーダー・ポストエフェクト）の頂点入力
+ *
+ * 入力レイアウト "2d" に対応する。法線は使わないので読まない（以前は COMMON_POS_NORM_UV で法線も受け取っていた）
+ */
+struct COMMON_2D_INPUT
+{
+	float4 Position : SV_POSITION;
+	float2 TexCoord : TEXCOORD0;
+};
+
+/**
  * 座標とテクスチャ UV 座標と色を持つ共通頂点構造
  *
  */

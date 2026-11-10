@@ -452,6 +452,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="blue_sky\graphics\shader\AllShaders.h">
+      <Filter>blue_sky\graphics\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\RenderTargetTextureOptions.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\LightDirection.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\EffectStateDesc.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>

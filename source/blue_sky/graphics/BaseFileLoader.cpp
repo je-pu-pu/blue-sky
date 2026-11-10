@@ -35,7 +35,9 @@ BaseFileLoader::Texture* BaseFileLoader::load_texture( const char_t* name ) cons
 {
 	const string_t file_path = get_model()->get_texture_file_path_by_texture_name( name );
 
-	return graphics_manager_->load_named_texture( name, file_path.c_str() );
+	const string_t resource_name = get_model()->get_texture_resource_name( name );
+
+	return graphics_manager_->load_named_texture( resource_name.c_str(), file_path.c_str() );
 }
 
 } // namespace blue_sky::graphics

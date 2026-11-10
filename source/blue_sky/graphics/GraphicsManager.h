@@ -11,6 +11,7 @@
 #include <core/graphics/PrimitiveTopology.h>
 #include <core/graphics/TextStyle.h>
 #include <core/graphics/Mesh.h>
+#include <core/graphics/LightDirection.h>
 
 #include <core/ecs/component/TransformComponent.h>
 #include <core/ecs/component/CameraComponent.h>
@@ -112,6 +113,9 @@ private:
 	const TransformComponent*	main_camera_transform_component_ = nullptr;
 	const CameraComponent*		main_camera_component_ = nullptr;
 
+	/// 平行光源の向き（以前は setup_rendering に直接書かれていた。シーンから set_light_direction で変えられる）
+	core::graphics::LightDirection	light_direction_;
+
 	bool						is_debug_axis_enabled_ = true;
 
 	mutable uint_t				pass_count_ = 0;
@@ -135,6 +139,11 @@ protected:
 	 * 実装（D3D11）は AsyncLoader を使う。on_created は dispatch_async_loads の中で呼ばれる。
 	 */
 	virtual void start_texture_load_async( const string_t& file_path, std::function< void( Texture* ) > on_created ) = 0;
+
+	// setup_default_shaders の中身（この順に呼ぶ）
+	void create_default_shaders();
+	void select_shadow_map_shaders();
+	void setup_screen_rectangles();
 
 	void update_constant_buffers() const;
 
@@ -174,6 +183,14 @@ public:
 	template< typename Type=Model > Type* create_named_model( const char_t* name ) { return model_manager_.create_named< Type >( name ); }
 	Model* load_model( const char_t* name );
 	Model* clone_model( const Model* );
+
+	/**
+	 * モデルとシェーダーを複製する（メッシュ・線・アニメーションは共有する）
+	 *
+	 * load_model が返すモデルとそのシェーダーは、同じ種類の ActiveObject すべてで共有されている。
+	 * 1 つの ActiveObject だけシェーダーのテクスチャやパラメータを変えたいときは、これで複製したモデルを持たせる
+	 */
+	Model* clone_model_with_shaders( const Model* );
 	
 	template< typename Type=Model > Type* get_model( const char_t* name ) { return model_manager_.get< Type >( name ); }
 	
@@ -237,6 +254,7 @@ public:
 	virtual size_t get_async_load_count() const = 0;
 	Texture* get_null_texture() { return null_texture_; }
 
+	/// 既定のシェーダー・シャドウマップ用シェーダー・画面全体の矩形を準備する
 	void setup_default_shaders();
 	virtual void refresh_all_shaders();
 
@@ -266,6 +284,21 @@ public:
 	virtual void set_drawing_line_type( int_t ) = 0;
 
 	virtual void set_eye_position( const Vector& ) = 0;
+
+	/**
+	 * 平行光源の向き（光が進む向き）を設定する。次の setup_rendering から使う
+	 *
+	 * 長さは問わない（正規化して使う）。長さ 0 の向きは無視する。既定は ( -1, -2, 0.5 )
+	 *
+	 * @return 設定したら true
+	 */
+	bool set_light_direction( const Vector& direction ) { return light_direction_.set( direction ); }
+
+	/// 平行光源の向き（設定した値。正規化していない）
+	const Vector& get_light_direction() const { return light_direction_.get(); }
+
+	/// 平行光源の向きを既定に戻す（シーンが変えた向きを次のシーンへ持ち越さないときに使う）
+	void reset_light_direction() { light_direction_.reset(); }
 
 	bool_t is_shadow_enabled() const { return static_cast< bool_t >( shadow_map_ ); }
 	ShadowMap* get_shadow_map() { return shadow_map_.get(); }

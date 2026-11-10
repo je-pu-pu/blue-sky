@@ -83,6 +83,25 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		return id;
 	}
 
+	if ( kind == "rocket" )
+	{
+		// 以前の Rocket : 0.2 x 1 x 0.2・硬い（ぶつかる）が壁にはならない・地球の重力。
+		// プレイヤーが触れると持ち物が増え、ロケットは消えて当たりの応答も消える（やり直すと戻る）
+		ObjectSpec spec;
+		spec.kind = kind;
+		spec.size = Vector( 0.2f, 1.f, 0.2f );
+		spec.mass = 1.f;
+		spec.is_hard = true;
+		spec.is_block = false;
+
+		const EntityId id = create_entity_object( spec );
+		auto* pickup = entity_manager_->find( id )->add_component< ecs::PickupComponent >();
+		pickup->kind = ecs::PickupKind::ROCKET;
+		pickup->disable_contact_on_pickup = true;
+
+		return id;
+	}
+
 	if ( kind == "umbrella" )
 	{
 		// 以前の Umbrella : 2 x 2 x 2・硬くない（当たりの応答なし・重力 0）。プレイヤーが触れると消える（持ち物は増えない）

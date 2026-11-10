@@ -169,7 +169,6 @@ protected:
 
 	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
 	void on_collide_with( Balloon* ) override;
-	void on_collide_with( Rocket* ) override;
 	void on_collide_with( Robot* ) override;
 	void on_collide_with( Ladder* ) override;
 	void on_collide_with( Stone* ) override;

@@ -2,7 +2,6 @@
 
 #include "Ladder.h"
 #include "Balloon.h"
-#include "Rocket.h"
 #include <blue_sky/ecs/component/PickupComponent.h>
 #include "Robot.h"
 #include "Stone.h"
@@ -1034,14 +1033,6 @@ void Player::on_collide_with( Balloon* balloon )
 	balloon_sound_request_ = balloon_sequence_count_;
 }
 
-void Player::on_collide_with( Rocket* /* rocket */ )
-{
-	item_count_[ static_cast< int >( ItemType::ROCKET ) ]++;
-	selected_item_type_ = ItemType::ROCKET;
-
-	play_sound( "rocket-get" );
-}
-
 void Player::on_collide_with( Stone* stone )
 {
 	item_count_[ static_cast< int >( ItemType::STONE ) ]++;
@@ -1065,6 +1056,13 @@ bool Player::on_pick_up( ecs::PickupKind kind )
 		// 以前の on_collide_with( Medal* )（medal->kill() は互換の層がする）
 		has_medal_ = true;
 		play_sound( "medal-get" );
+		break;
+
+	case ecs::PickupKind::ROCKET:
+		// 以前の on_collide_with( Rocket* )（ロケットを消して当たりの応答を消すのは互換の層がする。以前は Rocket::on_collide_with( Player* )）
+		item_count_[ static_cast< int >( ItemType::ROCKET ) ]++;
+		selected_item_type_ = ItemType::ROCKET;
+		play_sound( "rocket-get" );
 		break;
 
 	case ecs::PickupKind::UMBRELLA:

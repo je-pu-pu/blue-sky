@@ -461,6 +461,37 @@ TEST( ObjectFactoryTest, プレイヤーがメダルに当たると拾って_メ
 	EXPECT_FALSE( traits->is_dead );
 }
 
+TEST( ObjectFactoryTest, ロケットは硬い拾う物で_拾われると当たりの応答が消え_やり直すと戻る )
+{
+	FactoryFixture f;
+
+	const auto id = f.factory.create_object( "rocket" );
+	ASSERT_TRUE( id.has_value() );
+
+	auto* e = f.entity( * id );
+	const auto* traits = e->get_component< blue_sky::ecs::CollisionTraitsComponent >();
+	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->body;
+
+	EXPECT_EQ( e->get_component< blue_sky::ecs::PickupComponent >()->kind, blue_sky::ecs::PickupKind::ROCKET );
+	EXPECT_TRUE( traits->is_hard );
+	EXPECT_FALSE( traits->is_block );
+	EXPECT_EQ( body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
+	EXPECT_TRUE( is_near( e->get_component< blue_sky::ecs::SimpleObjectComponent >()->default_gravity, blue_sky::GameObject::GravityDefault ) );
+
+	FakePicker player;
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, * e );
+
+	ASSERT_EQ( player.picked.size(), 1u );
+	EXPECT_EQ( player.picked[ 0 ], blue_sky::ecs::PickupKind::ROCKET );
+	EXPECT_TRUE( traits->is_dead );
+	EXPECT_NE( body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
+
+	f.factory.restart();
+
+	EXPECT_FALSE( traits->is_dead );
+	EXPECT_EQ( body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
+}
+
 TEST( ObjectFactoryTest, 傘は硬くない拾う物で_プレイヤーが触れると消える )
 {
 	FactoryFixture f;

@@ -671,7 +671,7 @@ void GamePlayScene::on_goal()
 /**
  * 開発用 : プレイヤーをメダル・風船・梯子・ゴールの所へ順に動かし、当たった結果をログに出す
  *
- * 環境変数 BLUE_SKY_DEBUG_VISIT_OBJECTS を設定したときだけ動く（本編の動きは変えない）。
+ * 環境変数 BLUE_SKY_DEBUG_VISIT_OBJECTS を設定したときだけ動く（本編の動きは変えない）。行き先はメダル・風船・梯子・ロケット・ゴールの順（あるものだけ）。
  * 当たりのイベント（ecs::CollisionEventSystem と互換の層）が、遊ばずに起きることを確かめるため。
  * 始まってから 60 フレーム後から 40 フレームごとに、次の物体の位置へプレイヤーを置いて速度を 0 にする。
  * 置いてから 3 フレーム後に、その結果（メダルを持っているか・風船につかまっているか・梯子に触れているか・ゴールしたか）を出す。
@@ -723,6 +723,7 @@ void GamePlayScene::debug_visit_objects()
 	add_first_entity( "メダル", "medal" );
 	add_first( "風船", [] ( const ActiveObject* o ) { return dynamic_cast< const Balloon* >( o ) != nullptr; } );
 	add_first( "梯子", [] ( const ActiveObject* o ) { return dynamic_cast< const Ladder* >( o ) != nullptr; } );
+	add_first_entity( "ロケット", "rocket" );
 	targets.emplace_back( "ゴール", goal_->get_location() );
 
 	const size_t step = static_cast< size_t >( ( frame - start_frame ) / interval );
@@ -735,7 +736,8 @@ void GamePlayScene::debug_visit_objects()
 				+ " / メダル " + ( player_->has_medal() ? "持っている" : "持っていない" )
 				+ " / 風船 " + ( player_->get_action_mode() == Player::ActionMode::BALLOON ? "つかまっている" : "つかまっていない" )
 				+ " / 梯子 " + ( player_->is_on_ladder() ? "触れている" : "触れていない" )
-				+ " / ゴール " + ( is_cleared_ ? "した" : "していない" ) );
+				+ " / ゴール " + ( is_cleared_ ? "した" : "していない" )
+				+ " / ロケット " + std::to_string( player_->get_item_count( Player::ItemType::ROCKET ) ) + " 個" );
 		}
 
 		return;

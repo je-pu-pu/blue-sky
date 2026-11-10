@@ -179,9 +179,6 @@
     <ClCompile Include="GameObject\Player.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject\Rocket.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
@@ -724,9 +721,6 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\Player.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Rocket.h">
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h">

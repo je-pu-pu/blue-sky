@@ -155,7 +155,6 @@
     <ClCompile Include="GameObject\Missile.cpp" />
     <ClCompile Include="GameObject\Player.cpp" />
     <ClCompile Include="GameObject\Robot.cpp" />
-    <ClCompile Include="GameObject\Rocket.cpp" />
     <ClCompile Include="GameObject\Stone.cpp" />
     <ClCompile Include="GameObject\Switch.cpp" />
     <ClCompile Include="lib\src\imgui\imgui.cpp" />
@@ -458,7 +457,6 @@
     <ClInclude Include="GameObject\Missile.h" />
     <ClInclude Include="GameObject\Player.h" />
     <ClInclude Include="GameObject\Robot.h" />
-    <ClInclude Include="GameObject\Rocket.h" />
     <ClInclude Include="GameObject\Stone.h" />
     <ClInclude Include="GameObject\Switch.h" />
     <ClInclude Include="resource.h" />

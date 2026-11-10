@@ -2,9 +2,14 @@
 
 #include <core/ecs/EntityManager.h>
 #include <core/ecs/System.h>
+#include <core/ecs/SparseIndex.h>
 
+#include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <cstdio>
+#include <random>
+#include <unordered_map>
 #include <vector>
 
 /**
@@ -162,4 +167,73 @@ TEST( EcsBenchmark, DISABLED_Entities10k )
 TEST( EcsBenchmark, DISABLED_Entities100k )
 {
 	run_benchmark( 100000 );
+}
+
+namespace {
+
+/**
+ * EntityId から添字を引く表の比べ（SparseIndex と unordered_map）
+ *
+ * 部品の置き場の引き方を決めるために測る。番号は作った順の通し番号（今の EntityId と同じ）で、
+ * 足す・作った順に引く・ばらばらの順に引く・消す の時間を出す
+ */
+template< typename Table, typename Set, typename Find, typename Erase >
+void measure_table( const char* name, std::size_t n, Set set, Find find, Erase erase )
+{
+	constexpr int find_repeat = 10;
+
+	Table table;
+
+	std::vector< core::ecs::EntityId > shuffled( n );
+	for ( std::size_t i = 0; i < n; i++ ) { shuffled[ i ] = static_cast< core::ecs::EntityId >( i ); }
+	std::shuffle( shuffled.begin(), shuffled.end(), std::mt19937( 1234 ) );
+
+	auto begin = Clock::now();
+	for ( std::size_t i = 0; i < n; i++ ) { set( table, static_cast< core::ecs::EntityId >( i ), static_cast< std::uint32_t >( i ) ); }
+	const double set_ms = elapsed_ms( begin );
+
+	std::uint64_t sum = 0;
+	begin = Clock::now();
+	for ( int r = 0; r < find_repeat; r++ ) { for ( std::size_t i = 0; i < n; i++ ) { sum += find( table, static_cast< core::ecs::EntityId >( i ) ); } }
+	const double find_seq_ms = elapsed_ms( begin ) / find_repeat;
+
+	begin = Clock::now();
+	for ( int r = 0; r < find_repeat; r++ ) { for ( auto id : shuffled ) { sum += find( table, id ); } }
+	const double find_rand_ms = elapsed_ms( begin ) / find_repeat;
+
+	begin = Clock::now();
+	for ( auto id : shuffled ) { erase( table, id ); }
+	const double erase_ms = elapsed_ms( begin );
+
+	EXPECT_GT( sum, 0u );
+
+	const double per = 1000000.0 / static_cast< double >( n );
+	std::printf( "  %-14s : 足す %7.1f ns / 作った順に引く %6.1f ns / ばらばらに引く %6.1f ns / 消す %7.1f ns（1 個あたり）\n", name, set_ms * per, find_seq_ms * per, find_rand_ms * per, erase_ms * per );
+}
+
+void run_table_benchmark( std::size_t n )
+{
+	using Map = std::unordered_map< core::ecs::EntityId, std::uint32_t >;
+
+	std::printf( "[ECS 計測] 番号 → 添字 の表 %zu 個\n", n );
+
+	measure_table< core::ecs::SparseIndex >( "SparseIndex", n,
+		[] ( core::ecs::SparseIndex& t, core::ecs::EntityId id, std::uint32_t v ) { t.set( id, v ); },
+		[] ( const core::ecs::SparseIndex& t, core::ecs::EntityId id ) { return t.find( id ); },
+		[] ( core::ecs::SparseIndex& t, core::ecs::EntityId id ) { t.erase( id ); } );
+
+	measure_table< Map >( "unordered_map", n,
+		[] ( Map& t, core::ecs::EntityId id, std::uint32_t v ) { t.emplace( id, v ); },
+		[] ( const Map& t, core::ecs::EntityId id ) { auto i = t.find( id ); return i == t.end() ? 0u : i->second; },
+		[] ( Map& t, core::ecs::EntityId id ) { t.erase( id ); } );
+
+	std::fflush( stdout );
+}
+
+} // namespace
+
+TEST( EcsBenchmark, DISABLED_SparseIndexVsUnorderedMap )
+{
+	run_table_benchmark( 10000 );
+	run_table_benchmark( 100000 );
 }

@@ -1071,6 +1071,12 @@
     <ClInclude Include="core\ecs\EntityManager.h">
       <Filter>core\ecs</Filter>
     </ClInclude>
+    <ClInclude Include="core\ecs\SparseIndex.h">
+      <Filter>core\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\StablePool.h">
+      <Filter>core\ecs</Filter>
+    </ClInclude>
     <ClInclude Include="core\graphics\BackBufferTexture.h">
       <Filter>core\graphics</Filter>
     </ClInclude>

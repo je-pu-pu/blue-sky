@@ -263,6 +263,9 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 
 ## 重要度: 中 / 設計改善・拡張性
 
+- [ ] 設定ファイルの形式（2026-11-10 検討）: 今の「キー 値」形式のままにする。UI のテーマ・キーの複数割り当て・セーブデータなど、まとまったデータを扱い始めるときに TOML（toml++）を入れ、新しいデータから使う
+- [ ] 次の段階の課題 D1〜D5（doc/設計上の問題の洗い出し.md の 6 章）: D1 ゲームの物体を ECS に寄せる・D4 ハンドルの導入（どちらも利用者が決定・希望）。移行計画を立ててから進める
+
 ### ~~extern/game の Sound/SoundManager を core に統合~~ [完了]
 - [x] 対応済み（cbae6686）— 実装は core だけだったので、game::Sound・game::SoundManager の中身を core::Sound・core::sound::SoundManager に取り込み、extern/game から削除
 

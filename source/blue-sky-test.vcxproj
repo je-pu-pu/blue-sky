@@ -187,6 +187,7 @@
     <ClCompile Include="test\ui\AsyncLoaderTest.cpp" />
     <ClCompile Include="test\ui\UILayoutTest.cpp" />
     <ClCompile Include="test\ui\ResourceManagerTest.cpp" />
+    <ClCompile Include="test\ui\ResourceHandleBenchmarkTest.cpp" />
     <ClCompile Include="test\ui\Pixel2DSpaceTest.cpp" />
     <ClCompile Include="test\ui\OptionsControllerTest.cpp" />
     <ClCompile Include="test\ui\UIRendererTest.cpp" />

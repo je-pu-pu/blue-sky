@@ -528,6 +528,14 @@ bool GameMain::update()
 
 	time_manager_.update( main_loop_->get_elapsed_sec() );
 
+	if ( frame_time_last_ > 0 )
+	{
+		LARGE_INTEGER now;
+		QueryPerformanceCounter( & now );
+		frame_time_previous_start_ = frame_time_start_;
+		frame_time_start_ = now.QuadPart;
+	}
+
 	// 監視しているディレクトリ（シェーダーなど）の変更を毎フレーム確かめる
 	// （以前はウィンドウが再びアクティブになったときだけ確かめていたので、エディタと並べて作業していると読み直されなかった。
 	//   待ち時間 0 の確認なので負荷はほぼない）
@@ -799,8 +807,82 @@ void GameMain::render()
     ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );
 
 	capture_frame_if_requested();
+	record_frame_time();
 
 	direct_3d_->present();
+}
+
+/**
+ * 開発用のフレームの時間の計測を準備する
+ *
+ * 環境変数 BLUE_SKY_DEBUG_FRAME_TIME="最初のフレーム,最後のフレーム"（例 "300,1500"）。
+ * その間のフレームについて、update の始まりから present の前まで（CPU の仕事の時間。垂直同期の待ちを含まない）と、
+ * フレームの間隔を測り、最後のフレームで中央値などを debug_log に出す（ハンドルの作り替えの前後を比べるため。doc/ハンドルの設計.md）。
+ */
+void GameMain::setup_frame_time_measurement()
+{
+	char buffer[ 64 ] = { };
+
+	if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_FRAME_TIME", buffer, sizeof( buffer ) ) == 0 || sscanf_s( buffer, "%d,%d", & frame_time_first_, & frame_time_last_ ) != 2 || frame_time_last_ < frame_time_first_ )
+	{
+		frame_time_first_ = frame_time_last_ = 0;
+		return;
+	}
+
+	frame_time_work_ms_.reserve( frame_time_last_ - frame_time_first_ + 1 );
+	frame_time_interval_ms_.reserve( frame_time_last_ - frame_time_first_ + 1 );
+}
+
+void GameMain::record_frame_time()
+{
+	if ( frame_time_last_ <= 0 || frame_count_ < frame_time_first_ || frame_count_ > frame_time_last_ || frame_time_start_ == 0 )
+	{
+		return;
+	}
+
+	LARGE_INTEGER now, frequency;
+	QueryPerformanceCounter( & now );
+	QueryPerformanceFrequency( & frequency );
+
+	const double to_ms = 1000.0 / static_cast< double >( frequency.QuadPart );
+	frame_time_work_ms_.push_back( static_cast< double >( now.QuadPart - frame_time_start_ ) * to_ms );
+
+	if ( frame_time_previous_start_ != 0 )
+	{
+		frame_time_interval_ms_.push_back( static_cast< double >( frame_time_start_ - frame_time_previous_start_ ) * to_ms );
+	}
+
+	if ( frame_count_ != frame_time_last_ )
+	{
+		return;
+	}
+
+	// 中央値・平均・95 パーセンタイル・最小・最大
+	auto summary = [] ( std::vector< double > v )
+	{
+		if ( v.empty() )
+		{
+			return string_t( "なし" );
+		}
+
+		std::sort( v.begin(), v.end() );
+		double sum = 0.0;
+
+		for ( double x : v )
+		{
+			sum += x;
+		}
+
+		char text[ 160 ];
+		sprintf_s( text, "中央値 %.3f ms / 平均 %.3f ms / 95%% %.3f ms / 最小 %.3f ms / 最大 %.3f ms",
+			v[ v.size() / 2 ], sum / v.size(), v[ std::min( v.size() - 1, v.size() * 95 / 100 ) ], v.front(), v.back() );
+		return string_t( text );
+	};
+
+	debug_log( "[FrameTime] フレーム " + std::to_string( frame_time_first_ ) + "〜" + std::to_string( frame_time_last_ ) + "（" + std::to_string( frame_time_work_ms_.size() ) + " 枚）"
+		+ " シーン " + ( scene_ ? scene_->get_name() : string_t( "なし" ) ) );
+	debug_log( "[FrameTime] 仕事の時間（update の始まり〜present の前） : " + summary( frame_time_work_ms_ ) );
+	debug_log( "[FrameTime] フレームの間隔 : " + summary( frame_time_interval_ms_ ) );
 }
 
 /**
@@ -1306,6 +1388,7 @@ void GameMain::setup_scene()
 		}
 
 		setup_frame_capture();
+		setup_frame_time_measurement();
 
 		return;
 	}

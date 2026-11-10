@@ -169,6 +169,17 @@ private:
 	void setup_frame_capture();
 	void capture_frame_if_requested();
 
+	/// 開発用 : フレームの時間を測って debug_log に出す（環境変数 BLUE_SKY_DEBUG_FRAME_TIME="最初のフレーム,最後のフレーム"）
+	int												frame_time_first_ = 0;
+	int												frame_time_last_ = 0;
+	long long										frame_time_start_ = 0;				///< このフレームの update の始まり（QueryPerformanceCounter）
+	long long										frame_time_previous_start_ = 0;		///< 前のフレームの update の始まり
+	std::vector< double >							frame_time_work_ms_;				///< update の始まりから present の前まで（ms）
+	std::vector< double >							frame_time_interval_ms_;			///< 前のフレームの始まりからの間隔（ms）
+
+	void setup_frame_time_measurement();
+	void record_frame_time();
+
 	void setup_script_command();
 	void apply_display_settings();
 

@@ -120,6 +120,9 @@
     <ClCompile Include="test\ui\ResourceManagerTest.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="test\ui\ResourceHandleBenchmarkTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
     <ClCompile Include="test\ui\Pixel2DSpaceTest.cpp">
       <Filter>ui</Filter>
     </ClCompile>

@@ -84,6 +84,13 @@ protected:
 	/// 1 秒あたりの数値から現在のフレームの数値を返す
 	inline float_t per_sec( float_t value ) const { return value * get_delta_time(); }
 
+	/**
+	 * ゆらぎの位相を決める種（物体ごとに決まった値。起動ごとに変わらないこと）
+	 *
+	 * ActiveObject は自分の Entity の番号を返す（ステージの物体は書いた順に作るので、番号は起動ごとに同じ）
+	 */
+	virtual unsigned int get_flicker_seed() const { return 0; }
+
 	float_t get_flicker_height_offset( float_t scale = 1.f ) const;
 	void update_location_by_flicker( const Vector& base_location, float_t scale = 1.f );
 	void update_velocity_by_flicker( const Vector& base_location, float_t scale = 1.f );

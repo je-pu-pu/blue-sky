@@ -94,6 +94,9 @@ private:
 	void sync_dead_to_collision_traits();
 
 protected:
+	/// ゆらぎの種は自分の Entity の番号（以前は物体のアドレスで、起動ごとに変わった）
+	unsigned int get_flicker_seed() const override { return static_cast< unsigned int >( entity_id_ ); }
+
 	void setup_animation_player();
 
 	ecs::ObjectRenderComponent* get_render_component() const;

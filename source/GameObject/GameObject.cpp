@@ -9,7 +9,7 @@
 #include <core/sound/Sound.h>
 
 #include <common/math.h>
-#include <common/random.h>
+#include <random>
 
 namespace blue_sky
 {
@@ -277,8 +277,11 @@ float_t GameObject::get_scene_elapsed_time() const
  */
 float_t GameObject::get_flicker_height_offset( float_t scale ) const
 {
-	common::random_set_seed( reinterpret_cast< int >( this ) );
-	float_t a = common::random( 0.f, 10.f );
+	// 物体ごとに決まった位相を、物体ごとに決まった種（get_flicker_seed）から作る。
+	// 以前は物体のアドレスを種にしていて起動ごとに画面が変わり、さらに共有の乱数（common::random_engine）の種を毎回入れ直していた。
+	// 自分だけの乱数を使い、共有の乱数には触らない（分布は以前と同じ。同じ種なら同じ値）
+	std::mt19937 engine( get_flicker_seed() );
+	const float_t a = std::uniform_real_distribution< float_t >( 0.f, 10.f )( engine );
 
 	return std::cos( a + get_scene_elapsed_time() ) * scale * 0.5f;
 }

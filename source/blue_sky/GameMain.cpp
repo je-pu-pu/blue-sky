@@ -305,6 +305,12 @@ GameMain::GameMain( App& app )
 //■デストラクタ
 GameMain::~GameMain()
 {
+	// シーンを最初に壊す。シーンは設定（購読）・文字列表・テーマ・ECS など GameMain の持ち物を使うが、
+	// メンバは宣言と逆の順に壊れ、settings_ などは scene_ より後に宣言されているので、先に壊れてしまう
+	// （以前はゲーム本編を開いたまま閉じると、GamePlayScene が壊れた SettingStore から購読を外そうとして毎回落ちていた）
+	overlay_scene_stack_.clear();
+	scene_.reset();
+
 	ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();

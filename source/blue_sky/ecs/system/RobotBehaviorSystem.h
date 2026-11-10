@@ -13,7 +13,7 @@ namespace core::physics { class PhysicsManager; }
 
 namespace blue_sky
 {
-	namespace graphics { class GraphicsManager; }
+	namespace graphics { class ResourceLoader; }
 }
 
 namespace blue_sky::ecs
@@ -43,7 +43,7 @@ public:
 
 private:
 	const core::physics::PhysicsManager*	physics_;			///< 見えるかのレイを飛ばす世界（nullptr ならレイを飛ばさず、遮るものは無いとみなす。テスト）
-	graphics::GraphicsManager*			graphics_manager_;	///< モデル・テクスチャを引く先（nullptr ならテクスチャを設定しない。テスト）
+	graphics::ResourceLoader*			resources_;			///< 見た目のテクスチャを読む・モデルとテクスチャを引く先（nullptr ならテクスチャを設定しない。テスト）
 	core::sound::SoundManager*			sound_manager_;		///< 音を鳴らす先（nullptr なら鳴らさない。テスト）
 	std::vector< core::ecs::EntityId >	id_list_;			///< 作った順に回すための作業用の一覧（毎フレーム作り直す。中身は使い回す）
 
@@ -56,7 +56,7 @@ private:
 	void apply_look( core::ecs::Entity& entity, const RobotBehaviorComponent& robot ) const;
 
 public:
-	RobotBehaviorSystem( const core::physics::PhysicsManager* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager );
+	RobotBehaviorSystem( const core::physics::PhysicsManager* physics, graphics::ResourceLoader* resources, core::sound::SoundManager* sound_manager );
 
 	void update() override { }		///< 何もしない（上の説明のとおり）
 

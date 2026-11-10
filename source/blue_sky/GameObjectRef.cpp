@@ -2,7 +2,7 @@
 
 #include <blue_sky/ConstantBuffers.h>
 #include <blue_sky/DebugLog.h>
-#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/ResourceLoader.h>
 #include <blue_sky/graphics/Model.h>
 
 #include <blue_sky/ecs/EntityObject.h>
@@ -26,9 +26,9 @@
 namespace blue_sky
 {
 
-GameObjectRef::GameObjectRef( EntityManager* entity_manager, graphics::GraphicsManager* graphics_manager, EntityId id )
+GameObjectRef::GameObjectRef( EntityManager* entity_manager, graphics::ResourceLoader* resources, EntityId id )
 	: entity_manager_( entity_manager )
-	, graphics_manager_( graphics_manager )
+	, resources_( resources )
 	, id_( id )
 {
 
@@ -337,7 +337,7 @@ GameObjectRef::Model* GameObjectRef::get_model() const
 	core::ecs::Entity* entity = find_entity();
 	const auto* render = entity ? entity->get_component< ecs::ObjectRenderComponent >() : nullptr;
 
-	return render && graphics_manager_ ? graphics_manager_->resolve_model( render->model ) : nullptr;
+	return render && resources_ ? resources_->resolve_model( render->model ) : nullptr;
 }
 
 void GameObjectRef::set_model( Model* model )
@@ -345,14 +345,14 @@ void GameObjectRef::set_model( Model* model )
 	core::ecs::Entity* entity = find_entity();
 	auto* render = entity ? entity->get_component< ecs::ObjectRenderComponent >() : nullptr;
 
-	if ( ! render || ! graphics_manager_ )
+	if ( ! render || ! resources_ )
 	{
 		log_unsupported( "モデルの設定" );
 		return;
 	}
 
 	// 以前の ActiveObject::set_model・setup_animation_player と同じ中身
-	render->model = graphics_manager_->get_model_handle( model );
+	render->model = resources_->get_model_handle( model );
 
 	if ( model && render->model.is_null() )
 	{
@@ -364,7 +364,7 @@ void GameObjectRef::set_model( Model* model )
 	{
 		auto* animation = entity->add_component< ecs::AnimationComponent >();
 		animation->player = std::make_unique< core::AnimationPlayer >( model->get_skinning_animation_set() );
-		render->bone_constant_buffer = graphics_manager_->create_constant_buffer( sizeof( core::BoneConstantBufferData ), core::BoneConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC );	// 毎フレーム書き換える
+		render->bone_constant_buffer = resources_->create_constant_buffer( sizeof( core::BoneConstantBufferData ), core::BoneConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC );	// 毎フレーム書き換える
 	}
 }
 
@@ -372,12 +372,12 @@ bool GameObjectRef::make_model_unique()
 {
 	Model* model = get_model();
 
-	if ( ! model || ! graphics_manager_ )
+	if ( ! model || ! resources_ )
 	{
 		return false;
 	}
 
-	set_model( graphics_manager_->clone_model_with_shaders( model ) );
+	set_model( resources_->clone_model_with_shaders( model ) );
 
 	return true;
 }

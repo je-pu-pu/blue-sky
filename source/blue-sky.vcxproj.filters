@@ -750,6 +750,12 @@
     <ClInclude Include="blue_sky\graphics\RenderSettings.h">
       <Filter>blue_sky\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\graphics\ResourceResolver.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\ResourceLoader.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
     <ClInclude Include="blue_sky\graphics\shader\BaseShader.h">
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>

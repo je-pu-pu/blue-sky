@@ -4,6 +4,7 @@
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Mesh.h>
 #include <blue_sky/graphics/RenderSettings.h>
+#include <blue_sky/graphics/ResourceLoader.h>
 #include <blue_sky/type.h>
 
 #include <core/animation/SkinningAnimationSet.h>
@@ -66,9 +67,9 @@ namespace blue_sky::graphics
  * このクラスが実体化される事はない。
  * 実際にはこのクラスを継承した blue_sky::graphics::direct_3d_11::GraphicsManager が実体化される。
  *
- * 使う側ごとの小さな窓口（RenderSettings など）も実装する。使う側は全体ではなく窓口だけを受け取る（doc/描画の窓口の分割.md）
+ * 使う側ごとの小さな窓口（RenderSettings・ResourceLoader など）も実装する。使う側は全体ではなく窓口だけを受け取る（doc/描画の窓口の分割.md）
  */
-class GraphicsManager : public core::graphics::GraphicsManager, public RenderSettings
+class GraphicsManager : public core::graphics::GraphicsManager, public ResourceLoader, public RenderSettings
 {
 public:
 	using Model							= Model;
@@ -212,7 +213,7 @@ public:
 
 	// Model
 	template< typename Type=Model > Type* create_named_model( const char_t* name ) { return model_manager_.create_named< Type >( name ); }
-	Model* load_model( const char_t* name );
+	Model* load_model( const char_t* name ) override;
 	Model* clone_model( const Model* );
 
 	/**
@@ -221,7 +222,7 @@ public:
 	 * load_model が返すモデルとそのシェーダーは、同じ種類の ActiveObject すべてで共有されている。
 	 * 1 つの ActiveObject だけシェーダーのテクスチャやパラメータを変えたいときは、これで複製したモデルを持たせる
 	 */
-	Model* clone_model_with_shaders( const Model* );
+	Model* clone_model_with_shaders( const Model* ) override;
 	
 	template< typename Type=Model > Type* get_model( const char_t* name ) { return model_manager_.get< Type >( name ); }
 
@@ -231,7 +232,7 @@ public:
 	 * 長く持つ側（段階 1 からのコンポーネント）は生ポインタではなくハンドルを持ち、使うたびに resolve_model で引く。
 	 * 解放（unload_named_model）の後は nullptr を返す
 	 */
-	ModelHandle get_model_handle( const core::graphics::Model* m ) const { return model_manager_.handle_of( m ); }	///< 管理しているモデル（clone_model の結果など）
+	ModelHandle get_model_handle( const core::graphics::Model* m ) const override { return model_manager_.handle_of( m ); }	///< 管理しているモデル（clone_model の結果など）
 	Model* resolve_model( ModelHandle h ) const override { return static_cast< Model* >( model_manager_.resolve( h ) ); }
 
 	/// 名前で作ったモデル・メッシュを外す（どの名前からも指されなくなれば解放する。ハンドルは nullptr を返すようになる）。作った側が、使い終わったときに呼ぶ
@@ -253,6 +254,9 @@ public:
 
 	Mesh* get_mesh( const char_t* name ) { return mesh_manager_.get< Mesh >( name ); }
 
+	/// 定数バッファを作る（core::graphics::GraphicsManager と ResourceLoader の両方の関数。両方から同じ名前を受け継ぐので、ここで宣言し直して 1 つにする）
+	std::unique_ptr< ConstantBuffer > create_constant_buffer( size_t size, int slot, ConstantBufferUsage usage = ConstantBufferUsage::DEFAULT ) override = 0;
+
 	// SkinningAnimationSet
 	SkinningAnimationSet* create_skinning_animation_set() { return skinning_animation_set_manager_.create(); }
 
@@ -260,11 +264,11 @@ public:
 	Texture* load_texture( const char_t* file_name ) override { return load_named_texture( file_name, file_name ); }
 	// 読み込みに失敗すると例外（common::exception< std::string >。std::exception ではない）を投げる。nullptr は返らない
 	Texture* load_named_texture( const char_t* name, const char_t* file_name );
-	Texture* get_texture( const char_t* name );
+	Texture* get_texture( const char_t* name ) override;
 
 	/// 名前のテクスチャのハンドル（無ければ空）・ハンドルから引く（解放済みなら nullptr）
-	TextureHandle get_texture_handle( const char_t* name ) const { return texture_manager_.get_handle( name ); }
-	Texture* resolve_texture( TextureHandle h ) const { return texture_manager_.resolve( h ); }
+	TextureHandle get_texture_handle( const char_t* name ) const override { return texture_manager_.get_handle( name ); }
+	Texture* resolve_texture( TextureHandle h ) const override { return texture_manager_.resolve( h ); }
 
 	/// UI 用の画像を名前付きで読み込む（乗算済みアルファ・ミップなし。詳細は Direct3D11::load_texture_premultiplied）。失敗すると例外
 	Texture* load_named_texture_premultiplied( const char_t* name, const char_t* file_name );

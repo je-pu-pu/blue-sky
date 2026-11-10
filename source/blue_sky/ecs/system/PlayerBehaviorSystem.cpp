@@ -1,7 +1,7 @@
 #include "PlayerBehaviorSystem.h"
 
 #include <blue_sky/GameObjectRef.h>
-#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/ResourceResolver.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
 
@@ -61,9 +61,9 @@ core::physics::BodyFilter make_ray_filter( const core::ecs::EntityManager* entit
 
 } // namespace
 
-PlayerBehaviorSystem::PlayerBehaviorSystem( const core::physics::PhysicsManager* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager )
+PlayerBehaviorSystem::PlayerBehaviorSystem( const core::physics::PhysicsManager* physics, const graphics::ResourceResolver* resources, core::sound::SoundManager* sound_manager )
 	: physics_( physics )
-	, graphics_manager_( graphics_manager )
+	, resources_( resources )
 	, sound_manager_( sound_manager )
 {
 
@@ -254,7 +254,7 @@ void PlayerBehaviorSystem::update_player( core::ecs::EntityId id, float_t delta_
 
 	// 線の色（モデルはプレイヤーだけのもの。描画が無ければ変えない）
 	const auto* render = self.entity->get_component< ObjectRenderComponent >();
-	graphics::Model* model = render && graphics_manager_ ? graphics_manager_->resolve_model( render->model ) : nullptr;
+	graphics::Model* model = render && resources_ ? resources_->resolve_model( render->model ) : nullptr;
 	graphics::Line* line = model ? model->get_line() : nullptr;
 
 	if ( p.is_located_on_safe )

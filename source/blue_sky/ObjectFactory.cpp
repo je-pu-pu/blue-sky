@@ -3,7 +3,7 @@
 #include <core/physics/PhysicsManager.h>
 #include <blue_sky/ConstantBuffers.h>
 #include <blue_sky/DebugLog.h>
-#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/ResourceLoader.h>
 #include <blue_sky/graphics/Model.h>
 
 #include <blue_sky/ecs/EntityObject.h>
@@ -77,10 +77,10 @@ core::physics::RigidBodyCreateInfo make_body_info( core::physics::RigidBodyShape
 
 } // namespace
 
-ObjectFactory::ObjectFactory( core::ecs::EntityManager* entity_manager, core::physics::PhysicsManager* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager )
+ObjectFactory::ObjectFactory( core::ecs::EntityManager* entity_manager, core::physics::PhysicsManager* physics, graphics::ResourceLoader* resources, core::sound::SoundManager* sound_manager )
 	: entity_manager_( entity_manager )
 	, physics_( physics )
-	, graphics_manager_( graphics_manager )
+	, resources_( resources )
 	, sound_manager_( sound_manager )
 {
 
@@ -89,7 +89,7 @@ ObjectFactory::ObjectFactory( core::ecs::EntityManager* entity_manager, core::ph
 void ObjectFactory::setup_systems()
 {
 	// 物体を扱う System（描く・目標へ動かす・当たり・剛体の位置の同期・種類ごとの振る舞い）
-	entity_manager_->add_system< ecs::ObjectRenderDataSystem >( 0, graphics_manager_ );
+	entity_manager_->add_system< ecs::ObjectRenderDataSystem >( 0, resources_ );
 	entity_manager_->add_system< ecs::MoveToTargetSystem >( 0 );
 	entity_manager_->add_system< ecs::CollisionEventSystem >( 0 );
 	entity_manager_->add_system< ecs::PhysicsSyncSystem >( 0 );
@@ -99,8 +99,8 @@ void ObjectFactory::setup_systems()
 	entity_manager_->add_system< ecs::SwitchSystem >( 0, sound_manager_ );
 	entity_manager_->add_system< ecs::BalloonHoldSystem >( 0, sound_manager_ );
 	entity_manager_->add_system< ecs::GirlSystem >( 0 );
-	entity_manager_->add_system< ecs::RobotBehaviorSystem >( 0, physics_, graphics_manager_, sound_manager_ );
-	entity_manager_->add_system< ecs::PlayerBehaviorSystem >( 0, physics_, graphics_manager_, sound_manager_ );
+	entity_manager_->add_system< ecs::RobotBehaviorSystem >( 0, physics_, resources_, sound_manager_ );
+	entity_manager_->add_system< ecs::PlayerBehaviorSystem >( 0, physics_, resources_, sound_manager_ );
 	entity_manager_->add_system< ecs::PlayerInventorySystem >( 0, sound_manager_ );
 	entity_manager_->add_system< ecs::PlayerInputSystem >( 0 );
 }
@@ -479,17 +479,17 @@ ObjectFactory::EntityId ObjectFactory::create_entity_object( const ObjectSpec& s
 
 	auto* render = entity->add_component< ecs::ObjectRenderComponent >();
 
-	if ( graphics_manager_ )
+	if ( resources_ )
 	{
 		// 毎フレーム書き換える（world・前フレームの world）ので DYNAMIC にする
-		render->object_constant_buffer = graphics_manager_->create_constant_buffer( sizeof( ObjectConstantBufferData ), ObjectConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC );
+		render->object_constant_buffer = resources_->create_constant_buffer( sizeof( ObjectConstantBufferData ), ObjectConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC );
 	}
 
 	entity_object_list_.push_back( id );
 
-	if ( graphics_manager_ && spec.load_model )
+	if ( resources_ && spec.load_model )
 	{
-		get_ref( id ).set_model( graphics_manager_->load_model( spec.kind.c_str() ) );
+		get_ref( id ).set_model( resources_->load_model( spec.kind.c_str() ) );
 	}
 
 	return id;
@@ -667,7 +667,7 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::find( const string_t& na
 
 GameObjectRef ObjectFactory::get_ref( EntityId id ) const
 {
-	return GameObjectRef( entity_manager_, graphics_manager_, id );
+	return GameObjectRef( entity_manager_, resources_, id );
 }
 
 std::optional< GameObjectRef > ObjectFactory::find_ref( const string_t& name ) const

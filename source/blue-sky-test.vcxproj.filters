@@ -159,6 +159,9 @@
     <ClCompile Include="test\ecs\ObjectRenderDataSystemTest.cpp">
       <Filter>ecs</Filter>
     </ClCompile>
+    <ClCompile Include="test\ecs\ObjectRenderResourcesTest.cpp">
+      <Filter>ecs</Filter>
+    </ClCompile>
     <ClCompile Include="test\graphics\MsdfFontTest.cpp">
       <Filter>graphics</Filter>
     </ClCompile>

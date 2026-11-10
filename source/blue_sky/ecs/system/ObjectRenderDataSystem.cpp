@@ -1,7 +1,7 @@
 #include "ObjectRenderDataSystem.h"
 
 #include <blue_sky/ecs/component/AnimationComponent.h>
-#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/ResourceResolver.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
 #include <blue_sky/ConstantBuffers.h>
@@ -126,7 +126,7 @@ core::Matrix ObjectRenderDataSystem::advance_prev_world( ObjectRenderComponent& 
  */
 void ObjectRenderDataSystem::update_render_data()
 {
-	if ( ! graphics_manager_ )
+	if ( ! resources_ )
 	{
 		return;
 	}
@@ -140,7 +140,7 @@ void ObjectRenderDataSystem::update_render_data()
 			continue;
 		}
 
-		const graphics::Model* model = graphics_manager_->resolve_model( render.model );
+		const graphics::Model* model = resources_->resolve_model( render.model );
 
 		if ( ! model )
 		{

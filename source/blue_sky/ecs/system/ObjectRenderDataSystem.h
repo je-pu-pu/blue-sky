@@ -7,7 +7,7 @@
 
 #include <vector>
 
-namespace blue_sky::graphics { class GraphicsManager; }
+namespace blue_sky::graphics { class ResourceResolver; }
 
 namespace blue_sky::ecs
 {
@@ -46,7 +46,7 @@ private:
 		const AnimationComponent*					animation;
 	};
 
-	const graphics::GraphicsManager*	graphics_manager_;		///< モデルをハンドルから引く先（作り手が渡す）
+	const graphics::ResourceResolver*	resources_;				///< モデルをハンドルから引く先（作り手が渡す。引くだけの窓口）
 
 	/// 描く対象（Entity の番号の順）。足すときは末尾に足し、外すときは印を付けて次に読むときにまとめて詰める
 	/// （以前は対象が 1 つ増減するたびに全部を作り直して並べ替えていた。O(n log n)）
@@ -63,8 +63,8 @@ protected:
 	void on_watched_component_changed( const core::ecs::Entity* entity, bool is_added ) override;
 
 public:
-	/// graphics_manager : モデルをハンドルから引く先。nullptr なら定数を書かない（テスト用）
-	explicit ObjectRenderDataSystem( const graphics::GraphicsManager* graphics_manager ) : graphics_manager_( graphics_manager ) { }
+	/// resources : モデルをハンドルから引く先。nullptr なら定数を書かない（テスト用）
+	explicit ObjectRenderDataSystem( const graphics::ResourceResolver* resources ) : resources_( resources ) { }
 
 	void add_entity_component_if_all_components_ready( const core::ecs::Entity* entity ) override;
 

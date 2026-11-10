@@ -13,7 +13,7 @@ namespace core::physics { class PhysicsManager; }
 namespace blue_sky
 {
 	class GameObjectRef;
-	namespace graphics { class GraphicsManager; }
+	namespace graphics { class ResourceResolver; }
 }
 
 namespace blue_sky::ecs
@@ -47,7 +47,7 @@ private:
 	struct Self;	///< 1 人のプレイヤーを動かすときに使う部品と窓口（.cpp だけで定義する）
 
 	const core::physics::PhysicsManager*	physics_;			///< 足場・壁を調べる世界（nullptr なら調べない。テスト）
-	graphics::GraphicsManager*			graphics_manager_;	///< 線の色を変えるモデルを引く先（nullptr なら変えない。テスト）
+	const graphics::ResourceResolver*	resources_;			///< 線の色を変えるモデルを引く先（nullptr なら変えない。テスト）
 	core::sound::SoundManager*			sound_manager_;		///< 音を鳴らす先（nullptr なら鳴らさない。テスト）
 	std::vector< core::ecs::EntityId >	id_list_;			///< 作った順に回すための作業用の一覧（毎フレーム作り直す。中身は使い回す）
 
@@ -84,7 +84,7 @@ private:
 	void kill( Self& );
 
 public:
-	PlayerBehaviorSystem( const core::physics::PhysicsManager* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager );
+	PlayerBehaviorSystem( const core::physics::PhysicsManager* physics, const graphics::ResourceResolver* resources, core::sound::SoundManager* sound_manager );
 
 	void update() override { }		///< 何もしない（上の説明のとおり）
 

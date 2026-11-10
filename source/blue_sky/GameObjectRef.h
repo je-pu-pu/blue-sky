@@ -18,7 +18,7 @@ namespace blue_sky
 
 namespace graphics
 {
-	class GraphicsManager;
+	class ResourceLoader;
 	class Model;
 }
 
@@ -41,7 +41,7 @@ public:
 
 private:
 	EntityManager*				entity_manager_ = nullptr;
-	graphics::GraphicsManager*	graphics_manager_ = nullptr;	///< モデルをハンドルにする・引く先（無ければモデルを扱わない。テスト）
+	graphics::ResourceLoader*	resources_ = nullptr;			///< モデルをハンドルにする・引く・複製する先（無ければモデルを扱わない。テスト）
 	EntityId					id_ = 0;
 
 	core::ecs::Entity* find_entity() const;
@@ -51,7 +51,7 @@ private:
 
 public:
 	GameObjectRef() = default;
-	GameObjectRef( EntityManager* entity_manager, graphics::GraphicsManager* graphics_manager, EntityId id );
+	GameObjectRef( EntityManager* entity_manager, graphics::ResourceLoader* resources, EntityId id );
 
 	EntityId get_entity_id() const { return id_; }
 

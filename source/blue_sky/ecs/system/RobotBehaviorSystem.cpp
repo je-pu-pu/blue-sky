@@ -1,6 +1,6 @@
 #include "RobotBehaviorSystem.h"
 
-#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/ResourceLoader.h>
 #include <blue_sky/graphics/Model.h>
 
 #include <blue_sky/ecs/EntityObject.h>
@@ -33,9 +33,9 @@ constexpr const char_t* TextureNames[] = { "robot", "robot-warn", "robot-error",
 
 } // namespace
 
-RobotBehaviorSystem::RobotBehaviorSystem( const core::physics::PhysicsManager* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager )
+RobotBehaviorSystem::RobotBehaviorSystem( const core::physics::PhysicsManager* physics, graphics::ResourceLoader* resources, core::sound::SoundManager* sound_manager )
 	: physics_( physics )
-	, graphics_manager_( graphics_manager )
+	, resources_( resources )
 	, sound_manager_( sound_manager )
 {
 
@@ -66,16 +66,16 @@ void RobotBehaviorSystem::load_textures( core::ecs::EntityId id )
 {
 	RobotBehaviorComponent* robot = find_robot( id );
 
-	if ( ! robot || ! graphics_manager_ )
+	if ( ! robot || ! resources_ )
 	{
 		return;
 	}
 
 	for ( int i = 0; i < static_cast< int >( Look::MAX ); i++ )
 	{
-		// 名前のテクスチャが無ければ media/model/<名前>.png を読んで登録する（以前の GraphicsManager::get_texture と同じ）。無ければ空のハンドル
-		graphics_manager_->get_texture( TextureNames[ i ] );
-		robot->textures[ i ] = graphics_manager_->get_texture_handle( TextureNames[ i ] );
+		// 名前のテクスチャが無ければ media/model/<名前>.png を読んで登録する（ResourceLoader::get_texture）。無ければ空のハンドル
+		resources_->get_texture( TextureNames[ i ] );
+		robot->textures[ i ] = resources_->get_texture_handle( TextureNames[ i ] );
 	}
 }
 
@@ -312,13 +312,13 @@ void RobotBehaviorSystem::update_robot( core::ecs::EntityId id, float_t delta_ti
 
 void RobotBehaviorSystem::apply_look( core::ecs::Entity& entity, const RobotBehaviorComponent& robot ) const
 {
-	if ( ! graphics_manager_ )
+	if ( ! resources_ )
 	{
 		return;
 	}
 
 	const auto* render = entity.get_component< ObjectRenderComponent >();
-	graphics::Model* model = render ? graphics_manager_->resolve_model( render->model ) : nullptr;
+	graphics::Model* model = render ? resources_->resolve_model( render->model ) : nullptr;
 
 	if ( ! model || ! model->get_shader_at( 0 ) )
 	{
@@ -326,7 +326,7 @@ void RobotBehaviorSystem::apply_look( core::ecs::Entity& entity, const RobotBeha
 	}
 
 	// 解放されたテクスチャ・読めなかったテクスチャなら nullptr を設定する（以前も読めなければ nullptr だった）
-	model->get_shader_at( 0 )->set_texture_at( 0, graphics_manager_->resolve_texture( robot.textures[ static_cast< int >( robot.look ) ] ) );
+	model->get_shader_at( 0 )->set_texture_at( 0, resources_->resolve_texture( robot.textures[ static_cast< int >( robot.look ) ] ) );
 }
 
 bool RobotBehaviorSystem::action( core::ecs::EntityId id, const string_t& action )

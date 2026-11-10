@@ -17,6 +17,10 @@ namespace core
  * - GPU のリソースの作成・シーンの組み立てなど、メインスレッドでしかできないことは「終わったときの処理」に書く
  * - 作業スレッドは COM（MTA）を初期化してから仕事をする（WIC の画像の展開が使う）
  * - 破棄すると、残りの仕事を捨てて作業スレッドを止める（実行中の 1 件は終わるまで待つ）
+ *
+ * まだ使う側が無い : これを使うのは GraphicsManager の start_texture_load_async（テクスチャの別スレッド読み込み）だけで、
+ * それを呼ぶ load_named_texture_premultiplied_async もまだどこからも呼ばれていない。シーンの読み込みは同期のまま
+ * （「読み込み中」を 1 回描いてから読む）。非同期の読み込みを使うのは後続の作業。仕組みはテスト（AsyncLoaderTest）付きで残す。
  */
 class AsyncLoader
 {

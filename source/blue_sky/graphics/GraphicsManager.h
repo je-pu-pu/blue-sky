@@ -137,6 +137,7 @@ protected:
 	 * 画像ファイルを別スレッドで展開し、メインスレッドでテクスチャを作って on_created を呼ぶ（失敗したら nullptr）
 	 *
 	 * 実装（D3D11）は AsyncLoader を使う。on_created は dispatch_async_loads の中で呼ばれる。
+	 * 今これを呼ぶのは load_named_texture_premultiplied_async だけで、それを使う側はまだ無い。
 	 */
 	virtual void start_texture_load_async( const string_t& file_path, std::function< void( Texture* ) > on_created ) = 0;
 
@@ -232,6 +233,8 @@ public:
 	 *
 	 * 画像の展開は作業スレッドで行い、テクスチャの作成・登録と on_loaded の呼び出しはメインスレッド
 	 * （毎フレームの dispatch_async_loads の中）で行う。読み込み済みならすぐ on_loaded を呼ぶ。失敗したら nullptr を渡す。
+	 *
+	 * まだ使う側が無い（呼んでいる所は無い）。シーンの読み込みを非同期にする後続の作業で使う。
 	 */
 	void load_named_texture_premultiplied_async( const char_t* name, const char_t* file_name, std::function< void( Texture* ) > on_loaded );
 

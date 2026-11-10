@@ -204,3 +204,10 @@
 - **確かめの撮影の間にテストを走らせない**: blue-sky-test もゲームと同じ source/log/blue-sky.log に書くので、撮影中のゲームのログにテストのログが混ざった
 - **多重継承した窓口の同じ名前の関数**: core の GraphicsManager と ResourceLoader の両方に create_constant_buffer があると、blue_sky の GraphicsManager* から呼ぶときに曖昧になる。blue_sky の GraphicsManager で `override = 0` と宣言し直すと 1 つになる（実装の 1 つの関数が両方を上書きする）。窓口の中に `using Color = …` のような型の別名を置くと、同じく曖昧になり得るので置かない
 - **前方宣言だけでは窓口（基底）へ変換できない**: UIOverlayScene は GraphicsManager を前方宣言でしか知らず、ui::Renderer( Canvas2D* ) に渡せなかった。渡す所で GraphicsManager.h を include する
+
+## 大量の物体（1 万個）で見つかったこと（2026-11-11）
+
+- 剛体を原点に作ってから後で動かすと、作るたびに Bullet の広い判定が原点に重なった今までの全部の剛体と組を作り、全体で O(n²) になる（1 万個で 7 秒）。剛体は始めの位置で作る（ObjectFactory::create_object( 種類, 位置 )）
+- 毎フレーム呼ぶ所で std::mt19937 を種から作らない（作るときに 624 個の状態を埋める。1 個 約 1 μs）。種から決まる値は一度だけ求めて部品に覚える（flicker::phase）
+- 数十個では見えない手間は、BLUE_SKY_DEBUG_SPAWN_OBJECTS で数を増やし、BLUE_SKY_DEBUG_FRAME_STAGES で段階ごとに測ると見つかる
+- PowerShell の変数名は大文字小文字を区別しない（$kinds と $Kinds は同じ変数）。計測の台本で引数を上書きして、別の条件を測っていた

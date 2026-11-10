@@ -35,6 +35,36 @@
 namespace core::graphics::direct_3d_11
 {
 
+namespace
+{
+
+/**
+ * DXGI の結果がデバイスロストなら、理由付きの DeviceLostException を投げる
+ *
+ * デバイスロスト（ドライバの更新・GPU のタイムアウト・GPU の切り替え）は、Present だけでなく ResizeBuffers でも返る。
+ * どちらも WinMain が受け取り、ゲームを起動し直して復旧する（GPU のリソースは各所が持っていて、その場では作り直せない）。
+ *
+ * @param hr 調べる結果
+ * @param device 失われた理由を問い合わせるデバイス
+ * @param where どの呼び出しで起きたか（メッセージに入れる）
+ */
+void throw_if_device_lost( HRESULT hr, ID3D11Device* device, const char* where, const char* file, int line )
+{
+	if ( hr != DXGI_ERROR_DEVICE_REMOVED && hr != DXGI_ERROR_DEVICE_RESET )
+	{
+		return;
+	}
+
+	const HRESULT reason = device->GetDeviceRemovedReason();
+
+	char text[ 16 ];
+	sprintf_s( text, "0x%08lX", static_cast< unsigned long >( reason ) );
+
+	throw DeviceLostException( file, line, std::string( "GPU のデバイスが失われました（ドライバの更新、GPU のタイムアウト、GPU の切り替えなど）。場所: " ) + where + "。理由: " + text );
+}
+
+} // namespace
+
 const Direct3D11::Color Direct3D11::DEFAULT_CLEAR_COLOR = Direct3D11::Color::Black;
 
 /**
@@ -471,13 +501,17 @@ void Direct3D11::on_resize( int w, int h )
 	swap_chain_desc_.BufferDesc.Width = w;
 	swap_chain_desc_.BufferDesc.Height = h;
 
-	DIRECT_X_FAIL_CHECK( swap_chain_->ResizeBuffers(
+	const HRESULT hr = swap_chain_->ResizeBuffers(
 		swap_chain_buffer_count_,
 		swap_chain_desc_.BufferDesc.Width,
 		swap_chain_desc_.BufferDesc.Height,
 		swap_chain_desc_.BufferDesc.Format,
 		swap_chain_desc_.Flags
-	) );
+	);
+
+	// デバイスロストは Present と同じく専用の例外にする（以前は普通の例外で終了し、復旧されなかった）
+	throw_if_device_lost( hr, device_.get(), "ResizeBuffers", __FILE__, __LINE__ );
+	DIRECT_X_FAIL_CHECK( hr );
 
 	create_back_buffer_texture();
 
@@ -848,17 +882,8 @@ void Direct3D11::present()
 	// フリップモデルでは表示のあと描画先が外れる。次のフレームの頭で reset_render_state が結び直す
 	const HRESULT hr = swap_chain_->Present( vsync_ ? 1 : 0, 0 );
 
-	// デバイスロスト（ドライバの更新・GPU のタイムアウト・GPU の切り替え）は専用の例外で知らせる。
-	// WinMain が受け取り、ゲームを起動し直して復旧する（GPU のリソースは各所が持っていて、その場では作り直せない）
-	if ( hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET )
-	{
-		const HRESULT reason = device_->GetDeviceRemovedReason();
-
-		char text[ 16 ];
-		sprintf_s( text, "0x%08lX", static_cast< unsigned long >( reason ) );
-
-		throw DeviceLostException( __FILE__, __LINE__, std::string( "GPU のデバイスが失われました（ドライバの更新、GPU のタイムアウト、GPU の切り替えなど）。理由: " ) + text );
-	}
+	// デバイスロストは専用の例外で知らせる（WinMain が受け取り、ゲームを起動し直して復旧する）
+	throw_if_device_lost( hr, device_.get(), "Present", __FILE__, __LINE__ );
 
 	// DXGI_STATUS_OCCLUDED（最小化中など）は成功の扱い
 	DIRECT_X_FAIL_CHECK( hr );

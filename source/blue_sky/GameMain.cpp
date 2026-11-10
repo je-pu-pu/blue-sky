@@ -621,6 +621,15 @@ bool GameMain::update()
 		pending_start_overlay_.clear();
 	}
 
+	// 開発用 : BLUE_SKY_DEBUG_SCENE_SEQUENCE の順に、150 フレームごとにベースシーンを置き換える
+	if ( ! debug_scene_sequence_.empty() && ! is_loading_frame_ && ++debug_scene_sequence_frames_ >= 150 )
+	{
+		debug_scene_sequence_frames_ = 0;
+		debug_log( "[Scene] 開発用の順でベースシーンを置き換えます: " + debug_scene_sequence_.front().name + ( debug_scene_sequence_.front().stage_name.empty() ? "" : " " + debug_scene_sequence_.front().stage_name ) );
+		request_scene( debug_scene_sequence_.front() );
+		debug_scene_sequence_.pop_front();
+	}
+
 	// シーン遷移 : シーンが出した要求を集め、フレームの境目でまとめて実行する
 	collect_scene_requests();
 	process_scene_requests();
@@ -1272,6 +1281,28 @@ void GameMain::setup_scene()
 		if ( char overlay[ 64 ] = { }; GetEnvironmentVariableA( "BLUE_SKY_START_OVERLAY", overlay, sizeof( overlay ) ) )
 		{
 			pending_start_overlay_ = overlay;
+		}
+
+		// 開発用 : BLUE_SKY_DEBUG_SCENE_SEQUENCE（"stage_select,game_play:1-1,title" のように「シーン[:ステージ]」を , で並べる）を設定すると、
+		// 150 フレームごとに順にベースシーンを置き換える。シーンを替えて戻ったときにリソースが正しく引けるかを、入力を送らずに確かめるため
+		if ( char sequence[ 256 ] = { }; GetEnvironmentVariableA( "BLUE_SKY_DEBUG_SCENE_SEQUENCE", sequence, sizeof( sequence ) ) )
+		{
+			std::stringstream ss( sequence );
+			string_t item;
+
+			while ( std::getline( ss, item, ',' ) )
+			{
+				if ( item.empty() )
+				{
+					continue;
+				}
+
+				SceneRequest r { SceneRequest::Type::REPLACE_BASE };
+				const auto colon = item.find( ':' );
+				r.name = item.substr( 0, colon );
+				r.stage_name = colon == string_t::npos ? string_t() : item.substr( colon + 1 );
+				debug_scene_sequence_.push_back( r );
+			}
 		}
 
 		setup_frame_capture();

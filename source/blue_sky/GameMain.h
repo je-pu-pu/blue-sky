@@ -158,6 +158,8 @@ private:
 	SceneArguments									next_scene_arguments_;			///< 今作っているシーンに渡す引数（作り終えたら空にする）
 	bool											is_loading_frame_ = false;		///< 次のフレームは「読み込み中」を表示してからベースを置き換える
 	int												start_overlay_wait_frames_ = 0;
+	std::deque< SceneRequest >						debug_scene_sequence_;			///< 開発用 : 順に置き換えるベースシーン（BLUE_SKY_DEBUG_SCENE_SEQUENCE）
+	int												debug_scene_sequence_frames_ = 0;	///< 開発用 : 前の置き換えからのフレーム数
 
 	/// 開発用 : 決まったフレームの描画結果を PNG に保存する（環境変数 BLUE_SKY_CAPTURE_FRAMES。画面がロック中でも確かめられる）
 	std::vector< int >								capture_frames_;

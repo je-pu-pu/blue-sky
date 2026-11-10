@@ -424,6 +424,7 @@
     <ClInclude Include="core\sound\StreamingSound.h" />
     <ClInclude Include="core\type.h" />
     <ClInclude Include="core\ecs\EntityManager.h" />
+    <ClInclude Include="core\ecs\EntityIdOrderedList.h" />
     <ClInclude Include="core\ecs\SparseIndex.h" />
     <ClInclude Include="core\ecs\StablePool.h" />
     <ClInclude Include="GameObject\ActiveObject.h" />

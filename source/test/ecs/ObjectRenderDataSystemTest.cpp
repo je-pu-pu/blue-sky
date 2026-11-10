@@ -104,6 +104,73 @@ TEST( ObjectRenderDataSystemTest, Entity_を消すと描く対象から外れる
 	EXPECT_EQ( b_id, system->get_render_targets()[ 0 ].id );
 }
 
+TEST( ObjectRenderDataSystemTest, 消したり付け直したりしても作った順に並ぶ )
+{
+	// 一覧は、足すときは末尾に足し、外すときは印を付けて次に読むときにまとめて詰める（以前は増減のたびに並べ替えていた）
+	EntityManager manager;
+	manager.add_system< ObjectRenderDataSystem >( 0, nullptr );
+	auto* system = manager.get_system< ObjectRenderDataSystem >();
+
+	std::vector< core::ecs::Entity* > entities;
+
+	for ( int n = 0; n < 6; n++ )
+	{
+		entities.push_back( create_render_entity( manager ) );
+	}
+
+	ASSERT_EQ( 6u, system->get_render_targets().size() );
+
+	entities[ 4 ]->add_component< AnimationComponent >();
+
+	manager.destroy_entity( entities[ 1 ]->get_id() );
+	manager.destroy_entity( entities[ 4 ]->get_id() );			// アニメーションを持つものを消す
+	entities[ 2 ]->remove_component< ObjectRenderComponent >();	// 外して付け直す（番号は元のまま）
+	entities[ 2 ]->add_component< ObjectRenderComponent >();
+	auto* added = create_render_entity( manager );
+
+	const auto& targets = system->get_render_targets();
+	const std::vector< std::size_t > expected = { entities[ 0 ]->get_id(), entities[ 2 ]->get_id(), entities[ 3 ]->get_id(), entities[ 5 ]->get_id(), added->get_id() };
+
+	ASSERT_EQ( expected.size(), targets.size() );
+
+	for ( size_t n = 0; n < expected.size(); n++ )
+	{
+		EXPECT_EQ( expected[ n ], targets[ n ].id );
+		EXPECT_EQ( manager.find( static_cast< core::ecs::EntityId >( expected[ n ] ) )->get_component< ObjectRenderComponent >(), targets[ n ].render );
+		EXPECT_EQ( nullptr, targets[ n ].animation );
+	}
+
+	system->update_animations();	// 消した物体のアニメーションを回さない（落ちない）
+}
+
+TEST( ObjectRenderDataSystemTest, System_を後から足すと番号の順に並べる )
+{
+	// add_system は既にある Entity を置き場の順に渡すので、番号の順とは限らない（空いた場所の使い回し）
+	EntityManager manager;
+	std::vector< core::ecs::EntityId > ids;
+
+	for ( int n = 0; n < 5; n++ )
+	{
+		ids.push_back( create_render_entity( manager )->get_id() );
+	}
+
+	manager.destroy_entity( ids[ 0 ] );
+	manager.destroy_entity( ids[ 2 ] );
+	ids.push_back( create_render_entity( manager )->get_id() );	// 空いた場所を使い回す
+	ids.push_back( create_render_entity( manager )->get_id() );
+
+	manager.add_system< ObjectRenderDataSystem >( 0, nullptr );
+	const auto& targets = manager.get_system< ObjectRenderDataSystem >()->get_render_targets();
+
+	const std::vector< core::ecs::EntityId > expected = { ids[ 1 ], ids[ 3 ], ids[ 4 ], ids[ 5 ], ids[ 6 ] };
+	ASSERT_EQ( expected.size(), targets.size() );
+
+	for ( size_t n = 0; n < expected.size(); n++ )
+	{
+		EXPECT_EQ( expected[ n ], targets[ n ].id );
+	}
+}
+
 TEST( ObjectRenderDataSystemTest, 部品を外すと描く対象から外れる )
 {
 	EntityManager manager;

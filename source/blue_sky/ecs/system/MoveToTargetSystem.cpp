@@ -14,29 +14,15 @@ namespace blue_sky::ecs
 
 void MoveToTargetSystem::add_entity_component_if_all_components_ready( const core::ecs::Entity* entity )
 {
+	const auto count = debug_entity_count();
+
 	System::add_entity_component_if_all_components_ready( entity );
 
-	is_entity_id_list_dirty_ = true;
-}
-
-const std::vector< core::ecs::EntityId >& MoveToTargetSystem::get_entity_ids() const
-{
-	if ( is_entity_id_list_dirty_ )
+	// 対象に入ったら、対象の一覧（System）の末尾が今入った Entity。番号は増える一方なので、たいていは末尾に足すだけ
+	if ( debug_entity_count() != count )
 	{
-		entity_id_list_.clear();
-		entity_id_list_.reserve( get_component_list().size() );
-
-		for ( const auto& i : get_component_list() )
-		{
-			entity_id_list_.push_back( i.first );
-		}
-
-		std::sort( entity_id_list_.begin(), entity_id_list_.end() );
-
-		is_entity_id_list_dirty_ = false;
+		entity_id_list_.insert( get_component_list().back().first );
 	}
-
-	return entity_id_list_;
 }
 
 template< typename ComponentType >

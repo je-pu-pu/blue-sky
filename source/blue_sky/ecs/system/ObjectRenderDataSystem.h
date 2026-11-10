@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/ecs/System.h>
+#include <core/ecs/EntityIdOrderedList.h>
 #include <core/ecs/component/TransformComponent.h>
 #include <blue_sky/ecs/component/ObjectRenderComponent.h>
 
@@ -32,26 +33,34 @@ public:
 		core::ecs::EntityId							id;
 		ObjectRenderComponent*						render;
 		const core::ecs::TransformComponent*		transform;
-		const AnimationComponent*					animation;	///< アニメーション（持たなければ nullptr。一覧を作り直すときに一度だけ引く）
+		const AnimationComponent*					animation;	///< アニメーション（持たなければ nullptr。対象に入るとき・アニメーションの付け外しのときだけ引く）
 	};
 
 	using RenderTargetList = std::vector< RenderTarget >;
 
 private:
+	/// アニメーションを持つ描く対象 1 つ
+	struct AnimationTarget
+	{
+		core::ecs::EntityId							id;
+		const AnimationComponent*					animation;
+	};
+
 	const graphics::GraphicsManager*	graphics_manager_;		///< モデルをハンドルから引く先（作り手が渡す）
 
-	mutable RenderTargetList					render_target_list_;		///< 描く対象（対象の増減・アニメーションの付け外しで作り直す）
-	mutable std::vector< const AnimationComponent* >	animation_list_;	///< 描く対象のうちアニメーションを持つもの（Entity の番号の順）
-	mutable bool								is_render_target_list_dirty_ = true;
+	/// 描く対象（Entity の番号の順）。足すときは末尾に足し、外すときは印を付けて次に読むときにまとめて詰める
+	/// （以前は対象が 1 つ増減するたびに全部を作り直して並べ替えていた。O(n log n)）
+	core::ecs::EntityIdOrderedList< RenderTarget >		render_target_list_;
 
-	void rebuild_render_targets_if_dirty() const;
+	/// 描く対象のうちアニメーションを持つもの（Entity の番号の順。描く対象と同じ決まりで足し・外す）
+	core::ecs::EntityIdOrderedList< AnimationTarget >	animation_list_;
 
 protected:
-	void on_remove_entity( ComponentTuple& ) override { is_render_target_list_dirty_ = true; }
+	void on_remove_entity( core::ecs::EntityId id, ComponentTuple& ) override;
 
 	/// アニメーションの部品の付け外しを知る（以前は毎フレーム、描く対象ごとに 2 か所で Entity と部品を引いていた）
 	bool is_watched_component_type( core::ecs::ComponentTypeId id ) const override;
-	void on_watched_component_changed( const core::ecs::Entity* ) override { is_render_target_list_dirty_ = true; }
+	void on_watched_component_changed( const core::ecs::Entity* entity, bool is_added ) override;
 
 public:
 	/// graphics_manager : モデルをハンドルから引く先。nullptr なら定数を書かない（テスト用）

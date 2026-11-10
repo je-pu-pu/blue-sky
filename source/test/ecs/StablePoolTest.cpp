@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include <core/ecs/EntityIdOrderedList.h>
 #include <core/ecs/SparseIndex.h>
 #include <core/ecs/StablePool.h>
 
@@ -250,4 +251,112 @@ TEST( StablePoolTest, MoveOnlyAndHugeTypes )
 	EXPECT_EQ( 11, huge.find( 1 )->value );
 	EXPECT_EQ( 0, huge.find( 2 )->value );
 	EXPECT_EQ( 2u, huge.debug_slot_count() );
+}
+
+// ---- EntityIdOrderedList（作った順の一覧） ----
+
+namespace {
+
+struct OrderedItem
+{
+	EntityId id;
+	int value;
+};
+
+/// 一覧の番号を並べる
+template< typename List >
+std::vector< EntityId > ids_of( const List& list )
+{
+	std::vector< EntityId > ids;
+
+	for ( const auto& item : list.get() )
+	{
+		ids.push_back( item.id );
+	}
+
+	return ids;
+}
+
+} // namespace
+
+TEST( EntityIdOrderedListTest, 増える番号は末尾に足され_小さい番号は途中に入る )
+{
+	core::ecs::EntityIdOrderedList< OrderedItem > list;
+
+	list.insert( { 3, 30 } );
+	list.insert( { 5, 50 } );
+	list.insert( { 9, 90 } );
+	list.insert( { 1, 10 } );	// System を後から足したときなど、今までの最大より小さい番号
+	list.insert( { 7, 70 } );
+
+	EXPECT_EQ( ( std::vector< EntityId >{ 1, 3, 5, 7, 9 } ), ids_of( list ) );
+	EXPECT_EQ( 5u, list.size() );
+	ASSERT_NE( nullptr, list.find( 7 ) );
+	EXPECT_EQ( 70, list.find( 7 )->value );
+	EXPECT_EQ( nullptr, list.find( 4 ) );
+}
+
+TEST( EntityIdOrderedListTest, 消すと印が付き_読むときにまとめて詰めて順を保つ )
+{
+	core::ecs::EntityIdOrderedList< OrderedItem > list;
+
+	for ( EntityId id = 0; id < 10; id++ )
+	{
+		list.insert( { id, static_cast< int >( id ) } );
+	}
+
+	EXPECT_TRUE( list.erase( 2 ) );
+	EXPECT_TRUE( list.erase( 5 ) );
+	EXPECT_TRUE( list.erase( 9 ) );
+	EXPECT_FALSE( list.erase( 5 ) );	// 2 度目は何もしない
+	EXPECT_FALSE( list.erase( 42 ) );	// 無い番号
+
+	// 詰める前でも、消したものは引けず、数は減っている
+	EXPECT_EQ( nullptr, list.find( 5 ) );
+	EXPECT_EQ( 7u, list.size() );
+
+	EXPECT_EQ( ( std::vector< EntityId >{ 0, 1, 3, 4, 6, 7, 8 } ), ids_of( list ) );
+	EXPECT_EQ( 6, list.find( 6 )->value );
+
+	// 詰めた後も末尾に足せる
+	list.insert( { 10, 100 } );
+	EXPECT_EQ( ( std::vector< EntityId >{ 0, 1, 3, 4, 6, 7, 8, 10 } ), ids_of( list ) );
+}
+
+TEST( EntityIdOrderedListTest, 消した印の付いた番号を足し直すと同じ場所で生き返る )
+{
+	// 部品を外してすぐ付け直した（同じフレームで、詰める前に対象に戻った）とき
+	core::ecs::EntityIdOrderedList< OrderedItem > list;
+
+	list.insert( { 1, 10 } );
+	list.insert( { 2, 20 } );
+	list.insert( { 3, 30 } );
+
+	list.erase( 2 );
+	list.insert( { 2, 21 } );
+
+	EXPECT_EQ( 3u, list.size() );
+	EXPECT_EQ( ( std::vector< EntityId >{ 1, 2, 3 } ), ids_of( list ) );
+	EXPECT_EQ( 21, list.find( 2 )->value );
+
+	// 同じ番号を足すと中身を置き換える（増えない）
+	list.insert( { 3, 31 } );
+	EXPECT_EQ( 3u, list.size() );
+	EXPECT_EQ( 31, list.find( 3 )->value );
+}
+
+TEST( EntityIdOrderedListTest, 番号そのものの一覧にも使える )
+{
+	core::ecs::EntityIdOrderedList< EntityId > list;
+
+	list.insert( 4 );
+	list.insert( 8 );
+	list.insert( 6 );
+	list.erase( 4 );
+
+	EXPECT_EQ( ( std::vector< EntityId >{ 6, 8 } ), list.get() );
+
+	list.clear();
+	EXPECT_EQ( 0u, list.size() );
+	EXPECT_TRUE( list.get().empty() );
 }

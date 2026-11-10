@@ -35,7 +35,7 @@ public:
 
 protected:
 	/// 対象から外れる（RigidBody か Transform を外した・Entity を消した）とき、その剛体を解放する
-	void on_remove_entity( ComponentTuple& ) override;
+	void on_remove_entity( EntityId, ComponentTuple& ) override;
 
 private:
 	core::physics::PhysicsManager* physics_manager_;

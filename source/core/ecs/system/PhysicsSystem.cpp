@@ -61,7 +61,7 @@ PhysicsSystem::~PhysicsSystem()
 	}
 }
 
-void PhysicsSystem::on_remove_entity( ComponentTuple& component_tuple )
+void PhysicsSystem::on_remove_entity( EntityId, ComponentTuple& component_tuple )
 {
 	release_rigid_body( std::get< RigidBodyComponent* >( component_tuple ) );
 }

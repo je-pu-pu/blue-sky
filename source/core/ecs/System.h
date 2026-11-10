@@ -103,7 +103,7 @@ private:
 			return;
 		}
 
-		on_remove_entity( component_list_[ component_index_.find( id ) ].second );
+		on_remove_entity( id, component_list_[ component_index_.find( id ) ].second );
 
 		// 知らせた先で一覧が変わっていないことは決まり（on_remove_entity の説明）だが、添字は引き直す
 		const auto index = component_index_.find( id );
@@ -134,8 +134,10 @@ protected:
 	 * ここで対象の一覧（get_component_list）を変えてはいけない（部品を足す・外す・Entity を消すことも含む）。
 	 * 同じく、対象の一覧を回している間に、この System の対象が増減する操作をしてはいけない（配列の反復子が無効になる）。
 	 * System が壊れるとき（remove_system・clear）は呼ばれないので、派生のデストラクタで片付ける
+	 *
+	 * @param id 外れる Entity の番号（自分で番号の順の一覧を持つ System が、その一覧から外すのに使う）
 	 */
-	virtual void on_remove_entity( ComponentTuple& ) { }
+	virtual void on_remove_entity( EntityId /* id */, ComponentTuple& ) { }
 
 	ComponentList& get_component_list() { return component_list_; }
 	const ComponentList& get_component_list() const { return component_list_; }

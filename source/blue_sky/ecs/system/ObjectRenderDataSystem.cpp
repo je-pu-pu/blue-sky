@@ -9,16 +9,41 @@
 #include <core/ecs/EntityManager.h>
 #include <core/animation/AnimationPlayer.h>
 
-#include <algorithm>
-
 namespace blue_sky::ecs
 {
 
+/**
+ * 対象に入ったら、描く対象の一覧に足す（番号は増える一方なので、たいていは末尾に足すだけ）
+ *
+ * アニメーションはここで一度だけ引く（後から付け外しされたら on_watched_component_changed で直す）
+ */
 void ObjectRenderDataSystem::add_entity_component_if_all_components_ready( const core::ecs::Entity* entity )
 {
+	const auto count = debug_entity_count();
+
 	System::add_entity_component_if_all_components_ready( entity );
 
-	is_render_target_list_dirty_ = true;
+	if ( debug_entity_count() == count )
+	{
+		return;	// 対象に入らなかった（部品が揃っていない・既に対象）
+	}
+
+	// 対象の一覧（System）の末尾が今入った Entity
+	const auto& added = get_component_list().back();
+	const AnimationComponent* animation = entity->get_component< AnimationComponent >();
+
+	render_target_list_.insert( { added.first, std::get< ObjectRenderComponent* >( added.second ), std::get< core::ecs::TransformComponent* >( added.second ), animation } );
+
+	if ( animation )
+	{
+		animation_list_.insert( { added.first, animation } );
+	}
+}
+
+void ObjectRenderDataSystem::on_remove_entity( core::ecs::EntityId id, ComponentTuple& )
+{
+	render_target_list_.erase( id );
+	animation_list_.erase( id );
 }
 
 bool ObjectRenderDataSystem::is_watched_component_type( core::ecs::ComponentTypeId id ) const
@@ -26,67 +51,49 @@ bool ObjectRenderDataSystem::is_watched_component_type( core::ecs::ComponentType
 	return id == core::ecs::get_component_type_id< AnimationComponent >();
 }
 
-/**
- * 描く対象の一覧とアニメーションを持つものの一覧を作り直す（対象の増減・アニメーションの部品の付け外しの後だけ）
- */
-void ObjectRenderDataSystem::rebuild_render_targets_if_dirty() const
+/// アニメーションの部品が付いた・外れる。描く対象なら、その 1 つだけを直す（外れるときは部品がまだ生きているので、is_added で見分ける）
+void ObjectRenderDataSystem::on_watched_component_changed( const core::ecs::Entity* entity, bool is_added )
 {
-	if ( ! is_render_target_list_dirty_ )
+	const auto id = static_cast< core::ecs::EntityId >( entity->get_id() );
+	RenderTarget* target = render_target_list_.find( id );
+
+	if ( ! target )
 	{
-		return;
+		return;	// 描く対象でない（後で対象に入るときに引く）
 	}
 
-	render_target_list_.clear();
-	render_target_list_.reserve( get_component_list().size() );
-
-	for ( const auto& i : get_component_list() )
+	if ( is_added )
 	{
-		const core::ecs::Entity* entity = get_entity_manager() ? get_entity_manager()->find( i.first ) : nullptr;
-		const AnimationComponent* animation = entity ? entity->get_component< AnimationComponent >() : nullptr;
-
-		render_target_list_.push_back( { i.first, std::get< ObjectRenderComponent* >( i.second ), std::get< core::ecs::TransformComponent* >( i.second ), animation } );
+		target->animation = entity->get_component< AnimationComponent >();
+		animation_list_.insert( { id, target->animation } );
 	}
-
-	std::sort( render_target_list_.begin(), render_target_list_.end(), [] ( const RenderTarget& a, const RenderTarget& b ) { return a.id < b.id; } );
-
-	animation_list_.clear();
-
-	for ( const auto& target : render_target_list_ )
+	else
 	{
-		if ( target.animation )
-		{
-			animation_list_.push_back( target.animation );
-		}
+		target->animation = nullptr;
+		animation_list_.erase( id );
 	}
-
-	is_render_target_list_dirty_ = false;
 }
 
 const ObjectRenderDataSystem::RenderTargetList& ObjectRenderDataSystem::get_render_targets() const
 {
-	rebuild_render_targets_if_dirty();
-
-	return render_target_list_;
+	return render_target_list_.get();
 }
 
 const AnimationComponent* ObjectRenderDataSystem::get_animation( core::ecs::EntityId id ) const
 {
-	const auto& targets = get_render_targets();
-	auto i = std::lower_bound( targets.begin(), targets.end(), id, [] ( const RenderTarget& t, core::ecs::EntityId id ) { return t.id < id; } );
+	const RenderTarget* target = render_target_list_.find( id );
 
-	return ( i != targets.end() && i->id == id ) ? i->animation : nullptr;
+	return target ? target->animation : nullptr;
 }
 
 /// アニメーションを持つ物体だけを回す（以前は描く対象すべてについて、Entity とアニメーションの部品を引いていた）
 void ObjectRenderDataSystem::update_animations()
 {
-	rebuild_render_targets_if_dirty();
-
-	for ( const auto* animation : animation_list_ )
+	for ( const auto& target : animation_list_.get() )
 	{
-		if ( animation->player )
+		if ( target.animation->player )
 		{
-			animation->player->update();
+			target.animation->player->update();
 		}
 	}
 }

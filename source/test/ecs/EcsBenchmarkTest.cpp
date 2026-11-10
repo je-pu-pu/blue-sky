@@ -3,6 +3,12 @@
 #include <core/ecs/EntityManager.h>
 #include <core/ecs/System.h>
 #include <core/ecs/SparseIndex.h>
+#include <core/ecs/component/TransformComponent.h>
+
+#include <blue_sky/ecs/system/ObjectRenderDataSystem.h>
+#include <blue_sky/ecs/system/MoveToTargetSystem.h>
+#include <blue_sky/ecs/component/ObjectRenderComponent.h>
+#include <blue_sky/ecs/component/TargetMoverComponent.h>
 
 #include <algorithm>
 #include <chrono>
@@ -242,4 +248,104 @@ TEST( EcsBenchmark, DISABLED_SparseIndexVsUnorderedMap )
 {
 	run_table_benchmark( 10000 );
 	run_table_benchmark( 100000 );
+}
+
+namespace {
+
+/**
+ * 作った順の一覧を持つ System（ObjectRenderDataSystem・MoveToTargetSystem）で、
+ * 物体が 1 つ生まれる・消えるフレームの手間を測る
+ *
+ * 以前は対象が 1 つ増減するたびに一覧を全部作り直して並べ替えていた（O(n log n)）。
+ * N 個ある所で「何も増減しない」「1 つ足す」「1 つ消す」フレームを繰り返し、1 フレームあたりの
+ * 描く対象の一覧を読む（get_render_targets）・目標の更新（update_targets）の時間を出す
+ */
+void run_ordered_list_benchmark( std::size_t n )
+{
+	constexpr int frames = 200;
+
+	core::ecs::EntityManager entity_manager;
+	entity_manager.add_system< blue_sky::ecs::ObjectRenderDataSystem >( 0, nullptr );
+	entity_manager.add_system< blue_sky::ecs::MoveToTargetSystem >( 1 );
+
+	auto* render_system = entity_manager.get_system< blue_sky::ecs::ObjectRenderDataSystem >();
+	auto* move_system = entity_manager.get_system< blue_sky::ecs::MoveToTargetSystem >();
+
+	std::vector< core::ecs::EntityId > ids;
+
+	auto create = [ & ] ()
+	{
+		auto* e = entity_manager.create_entity();
+		e->add_component< core::ecs::TransformComponent >();
+		e->add_component< blue_sky::ecs::ObjectRenderComponent >();
+		e->add_component< blue_sky::ecs::TargetMoverComponent >();
+		ids.push_back( e->get_id() );
+	};
+
+	for ( std::size_t i = 0; i < n; i++ )
+	{
+		create();
+	}
+
+	std::size_t sum = 0;
+
+	// 1 フレームぶん : 描く対象の一覧を読む・目標を更新する
+	auto frame = [ & ] ( double& render_ms, double& move_ms )
+	{
+		auto begin = Clock::now();
+		sum += render_system->get_render_targets().size();
+		render_ms += elapsed_ms( begin );
+
+		begin = Clock::now();
+		move_system->update_targets( 1.f / 60.f );
+		move_ms += elapsed_ms( begin );
+	};
+
+	double still_render = 0.0, still_move = 0.0;
+	double add_render = 0.0, add_move = 0.0;
+	double remove_render = 0.0, remove_move = 0.0;
+
+	frame( still_render, still_move );	// 最初の一覧を作る（測らない）
+	still_render = still_move = 0.0;
+
+	for ( int f = 0; f < frames; f++ )
+	{
+		frame( still_render, still_move );
+	}
+
+	for ( int f = 0; f < frames; f++ )
+	{
+		create();
+		frame( add_render, add_move );
+	}
+
+	std::mt19937 random( 1234 );
+
+	for ( int f = 0; f < frames; f++ )
+	{
+		// 途中の 1 つを消す
+		const std::size_t index = std::uniform_int_distribution< std::size_t >( 0, ids.size() - 1 )( random );
+		entity_manager.destroy_entity( ids[ index ] );
+		ids.erase( ids.begin() + static_cast< std::ptrdiff_t >( index ) );
+
+		frame( remove_render, remove_move );
+	}
+
+	EXPECT_GT( sum, 0u );
+	EXPECT_EQ( ids.size(), render_system->get_render_targets().size() );
+	EXPECT_EQ( ids.size(), move_system->debug_entity_count() );
+
+	std::printf( "[ECS 計測] 作った順の一覧 Entity %zu 個（1 フレームあたり・%d フレームの平均、ミリ秒）\n", n, frames );
+	std::printf( "  増減なし   : 描く対象の一覧 %8.4f / 目標の更新 %8.4f\n", still_render / frames, still_move / frames );
+	std::printf( "  1 つ足す   : 描く対象の一覧 %8.4f / 目標の更新 %8.4f\n", add_render / frames, add_move / frames );
+	std::printf( "  1 つ消す   : 描く対象の一覧 %8.4f / 目標の更新 %8.4f\n", remove_render / frames, remove_move / frames );
+	std::fflush( stdout );
+}
+
+} // namespace
+
+TEST( EcsBenchmark, DISABLED_OrderedListAddRemove )
+{
+	run_ordered_list_benchmark( 10000 );
+	run_ordered_list_benchmark( 100000 );
 }

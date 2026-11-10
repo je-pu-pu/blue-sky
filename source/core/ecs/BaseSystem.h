@@ -40,9 +40,12 @@ protected:
 	/**
 	 * 付け外しを知りたい部品（is_watched_component_type）が entity に付いた・外れる
 	 *
-	 * 外れるときは、部品がまだ生きているうちに呼ぶ。entity がこの System の対象かは問わない
+	 * 外れるときは、部品がまだ生きているうちに呼ぶ（なので、部品を引いても付いたか外れるかは分からない。is_added で知る）。
+	 * entity がこの System の対象かは問わない
+	 *
+	 * @param is_added 付いたなら true、外れるなら false
 	 */
-	virtual void on_watched_component_changed( const Entity* ) { }
+	virtual void on_watched_component_changed( const Entity*, bool /* is_added */ ) { }
 
 public:
 	BaseSystem() = default;
@@ -95,7 +98,7 @@ public:
 		{
 			if ( is_watched_component_type( component_type_id ) )
 			{
-				on_watched_component_changed( entity );
+				on_watched_component_changed( entity, true );
 			}
 
 			return;
@@ -120,7 +123,7 @@ public:
 		{
 			if ( is_watched_component_type( component_type_id ) )
 			{
-				on_watched_component_changed( entity );
+				on_watched_component_changed( entity, false );
 			}
 
 			return;

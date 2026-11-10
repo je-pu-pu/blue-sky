@@ -245,6 +245,42 @@ TEST( MoveToTargetSystemTest, 同じフレームに着いた物体は作った�
 	EXPECT_EQ( order, ( std::vector< int >{ 0, 1, 2, 3, 4 } ) );
 }
 
+TEST( MoveToTargetSystemTest, 消したり付け直したりしても作った順に知らせる )
+{
+	// 対象の一覧は、足すときは末尾に足し、外すときは印を付けて後でまとめて詰める（以前は増減のたびに並べ替えていた）
+	EntityManager manager;
+	auto* system = add_system( manager );
+
+	std::vector< int > order;
+	FakeMover movers[ 6 ];
+	std::vector< core::ecs::EntityId > ids;
+
+	for ( int n = 0; n < 5; n++ )
+	{
+		movers[ n ].name = n;
+		movers[ n ].arrive_order = &order;
+		ids.push_back( create_mover_entity( manager, movers[ n ] ) );
+	}
+
+	manager.destroy_entity( ids[ 1 ] );									// 消す
+	manager.find( ids[ 3 ] )->remove_component< TargetMoverComponent >();	// 外して付け直す（番号は元のまま）
+	manager.find( ids[ 3 ] )->add_component< TargetMoverComponent >()->mover = & movers[ 3 ];
+
+	movers[ 5 ].name = 5;
+	movers[ 5 ].arrive_order = &order;
+	ids.push_back( create_mover_entity( manager, movers[ 5 ] ) );		// 後から作る
+
+	for ( int n = 5; n >= 0; n-- )
+	{
+		system->set_target_location( ids[ n ], Vector( 0.f, 0.f, 0.f ), 1.f );
+	}
+
+	system->update_targets( 1.f / 60.f );
+
+	EXPECT_EQ( order, ( std::vector< int >{ 0, 2, 3, 4, 5 } ) );
+	EXPECT_EQ( system->debug_entity_count(), 5u );
+}
+
 TEST( MoveToTargetSystemTest, 消した_Entity_の目標は捨てる )
 {
 	EntityManager manager;

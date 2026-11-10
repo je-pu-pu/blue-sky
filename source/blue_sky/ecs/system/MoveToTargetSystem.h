@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/ecs/System.h>
+#include <core/ecs/EntityIdOrderedList.h>
 #include <blue_sky/ecs/component/TargetMoverComponent.h>
 
 #include <vector>
@@ -22,10 +23,11 @@ namespace blue_sky::ecs
 class MoveToTargetSystem : public core::ecs::System< TargetMoverComponent >
 {
 private:
-	mutable std::vector< core::ecs::EntityId >	entity_id_list_;			///< 対象の Entity の番号（小さい順。対象が増減したら作り直す）
-	mutable bool								is_entity_id_list_dirty_ = true;
+	/// 対象の Entity の番号（小さい順）。足すときは末尾に足し、外すときは印を付けて次に読むときにまとめて詰める
+	/// （以前は対象が 1 つ増減するたびに全部を作り直して並べ替えていた。O(n log n)）
+	core::ecs::EntityIdOrderedList< core::ecs::EntityId >	entity_id_list_;
 
-	const std::vector< core::ecs::EntityId >& get_entity_ids() const;
+	const std::vector< core::ecs::EntityId >& get_entity_ids() const { return entity_id_list_.get(); }
 
 	/// id の Entity の部品（無い・消えた後なら nullptr）
 	template< typename ComponentType >
@@ -35,7 +37,7 @@ private:
 	void update_target_direction( core::ecs::EntityId id );
 
 protected:
-	void on_remove_entity( ComponentTuple& ) override { is_entity_id_list_dirty_ = true; }
+	void on_remove_entity( core::ecs::EntityId id, ComponentTuple& ) override { entity_id_list_.erase( id ); }
 
 public:
 	MoveToTargetSystem() = default;

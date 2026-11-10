@@ -148,7 +148,6 @@
     <ClCompile Include="core\sound\StreamingSound.cpp" />
     <ClCompile Include="core\ecs\EntityManager.cpp" />
     <ClCompile Include="GameObject\ActiveObject.cpp" />
-    <ClCompile Include="GameObject\Balloon.cpp" />
     <ClCompile Include="GameObject\Camera.cpp" />
     <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="GameObject\Girl.cpp" />
@@ -182,6 +181,7 @@
     <ClCompile Include="Scene\TransformTestScene.cpp" />
     <ClCompile Include="blue_sky\ecs\system\ContactCacheSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\SwitchSystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\BalloonHoldSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\sound\SampleRateStepper.h" />
@@ -449,7 +449,6 @@
     <ClInclude Include="core\ecs\SparseIndex.h" />
     <ClInclude Include="core\ecs\StablePool.h" />
     <ClInclude Include="GameObject\ActiveObject.h" />
-    <ClInclude Include="GameObject\Balloon.h" />
     <ClInclude Include="GameObject\Camera.h" />
     <ClInclude Include="GameObject\GameObject.h" />
     <ClInclude Include="GameObject\Girl.h" />
@@ -476,6 +475,9 @@
     <ClInclude Include="blue_sky\ecs\system\ContactCacheSystem.h" />
     <ClInclude Include="blue_sky\ecs\component\SwitchComponent.h" />
     <ClInclude Include="blue_sky\ecs\system\SwitchSystem.h" />
+    <ClInclude Include="blue_sky\ecs\Flicker.h" />
+    <ClInclude Include="blue_sky\ecs\component\BalloonHoldComponent.h" />
+    <ClInclude Include="blue_sky\ecs\system\BalloonHoldSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="blue-sky.config">

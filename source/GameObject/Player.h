@@ -2,6 +2,8 @@
 
 #include "ActiveObject.h"
 #include <blue_sky/GameObjectRef.h>
+#include <blue_sky/ecs/component/BalloonHoldComponent.h>
+#include <optional>
 #include <common/math.h>
 #include <list>
 
@@ -11,8 +13,9 @@ namespace blue_sky
 /**
  * プレイヤー
  *
+ * ecs::BalloonHolder は、つかんだ風船（ECS だけの物体）が手元に付いて行くときに読む窓口（ecs::BalloonHoldSystem が呼ぶ）
  */
-class Player : public ActiveObject
+class Player : public ActiveObject, private ecs::BalloonHolder
 {
 public:
 	enum class ActionMode
@@ -77,7 +80,7 @@ private:
 
 	float		last_footing_height_;	///< 前回の足場の高さ ( バルーン含む )
 
-	Balloon*	balloon_;				///< 現在持っている風船
+	std::optional< core::ecs::EntityId >	balloon_;	///< 現在持っている風船（ECS だけの物体。以前は Balloon*。風船の動作が終わっても、次の風船をつかむかやり直すまで覚えている）
 	StoneList	stone_list_;			///< 現在持っている石のリスト
 
 	int			hp_;					///< HP
@@ -168,7 +171,7 @@ protected:
 	bool is_uncontrollable() const { return uncontrollable_timer_ > 0.f; }
 
 	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
-	void on_collide_with( Balloon* ) override;
+	ecs::BalloonHolder* on_collide_with_balloon( core::ecs::EntityId balloon ) override;
 	void on_collide_with( Robot* ) override;
 	bool on_collide_with_ladder() override;
 	bool on_collide_with_stone( const GameObjectRef& ) override;
@@ -272,10 +275,17 @@ public:
 
 	int_t pop_balloon_sound_request() { int_t r = balloon_sound_request_; balloon_sound_request_ = 0; return r; }
 
-	Balloon* get_balloon() { return balloon_; }
-	const Balloon* get_balloon() const { return balloon_; }
+	/// 今持っている風船（持っていなければ無い）
+	std::optional< core::ecs::EntityId > get_balloon() const { return balloon_; }
 
 	int get_hp() const { return hp_; }
+
+private:
+	// ecs::BalloonHolder（つかんだ風船が手元に付いて行く）
+	bool is_holding_balloon( core::ecs::EntityId balloon ) const override { return balloon_ == balloon; }
+	bool is_in_balloon_action() const override { return action_mode_ == ActionMode::BALLOON; }
+	bool is_balloon_action_pre_finish() const override { return is_action_pre_finish_; }
+	Vector get_balloon_hold_location() const override { return get_location() + get_front() * 0.5f - get_right() * 0.25f + Vector( 0, 1.75f, 0 ); }
 
 }; // class Player
 

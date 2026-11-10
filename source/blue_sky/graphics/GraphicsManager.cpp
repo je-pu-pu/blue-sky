@@ -84,7 +84,7 @@ void GraphicsManager::bind_object_render_data( const ecs::ObjectRenderComponent&
  */
 void GraphicsManager::render_object_mesh( const ecs::ObjectRenderComponent& render, const Model* model ) const
 {
-	if ( ! render.is_mesh_visible || ! model->get_mesh() )
+	if ( ! render.should_draw_mesh() || ! model->get_mesh() )
 	{
 		return;
 	}
@@ -104,7 +104,7 @@ void GraphicsManager::render_object_mesh( const ecs::ObjectRenderComponent& rend
  */
 void GraphicsManager::render_object_mesh( const ecs::ObjectRenderComponent& render, const Model* model, const Shader* shader ) const
 {
-	if ( ! render.is_mesh_visible || ! model->get_mesh() )
+	if ( ! render.should_draw_mesh() || ! model->get_mesh() )
 	{
 		return;
 	}
@@ -122,7 +122,7 @@ void GraphicsManager::render_object_mesh( const ecs::ObjectRenderComponent& rend
  */
 void GraphicsManager::render_object_line( const ecs::ObjectRenderComponent& render, const Model* model ) const
 {
-	if ( ! render.is_line_visible || ! model->get_line() )
+	if ( ! render.should_draw_line() || ! model->get_line() )
 	{
 		return;
 	}
@@ -940,7 +940,7 @@ void GraphicsManager::render_debug_axis() const
 			// ボーンの軸は描いている物体だけ（以前は死んでいない物体。死ぬと描かなくなるので、ほぼ同じ）
 			const auto* animation = target.animation;
 
-			if ( animation && animation->player && ( target.render->is_mesh_visible || target.render->is_line_visible ) )
+			if ( animation && animation->player && ( target.render->should_draw_mesh() || target.render->should_draw_line() ) )
 			{
 				render_debug_axis_for_bones( target.transform->transform, * animation->player, resolve_model( target.render->model ) );
 			}

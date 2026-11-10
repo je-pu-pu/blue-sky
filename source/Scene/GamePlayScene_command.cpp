@@ -6,7 +6,6 @@
 #include <GameObject/Player.h>
 #include <GameObject/Girl.h>
 #include <GameObject/Robot.h>
-#include <GameObject/Balloon.h>
 #include <GameObject/Camera.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>

@@ -26,6 +26,9 @@
 #include <blue_sky/ecs/system/SpinSystem.h>
 #include <blue_sky/ecs/system/ContactCacheSystem.h>
 #include <blue_sky/ecs/system/SwitchSystem.h>
+#include <blue_sky/ecs/system/BalloonHoldSystem.h>
+#include <blue_sky/ecs/component/BalloonHoldComponent.h>
+#include <blue_sky/graphics/Line.h>
 
 #include <GameObject/ActiveObject.h>
 
@@ -62,6 +65,7 @@ void ObjectFactory::setup_systems()
 	entity_manager_->add_system< ecs::SpinSystem >( 0 );
 	entity_manager_->add_system< ecs::ContactCacheSystem >( 0 );
 	entity_manager_->add_system< ecs::SwitchSystem >( 0, sound_manager_ );
+	entity_manager_->add_system< ecs::BalloonHoldSystem >( 0, sound_manager_ );
 }
 
 std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const string_t& kind )
@@ -185,6 +189,31 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 
 		entity->add_component< ecs::SwitchComponent >();
 		entity->add_component< ecs::ContactCacheComponent >();
+
+		return id;
+	}
+
+	if ( kind == "balloon" )
+	{
+		// 以前の Balloon : 1.5 x 1.5 x 1.5・硬くない（当たりの応答なし・重力 0・壁にならない）・着地しても死なない足場・足元と剛体の中心が同じ・質量 1。
+		// 始めの位置でふわふわと上下しながら回り、プレイヤーが触れるとつかまれて手元に付いて行く（BalloonHoldSystem）。石が当たると割れる
+		ObjectSpec spec;
+		spec.kind = kind;
+		spec.size = Vector( 1.5f, 1.5f, 1.5f );
+		spec.mass = 1.f;
+		spec.is_hard = false;
+		spec.is_block = false;
+		spec.is_safe_footing = true;
+		spec.height_offset = 0.f;
+
+		const EntityId id = create_entity_object( spec );
+		entity_manager_->find( id )->add_component< ecs::BalloonHoldComponent >();
+
+		// 線に影を落とさせる（以前の Balloon::set_model。モデルは風船どうしで共有している）
+		if ( Model* model = get_ref( id ).get_model(); model && model->get_line() )
+		{
+			model->get_line()->set_cast_shadow( true );
+		}
 
 		return id;
 	}

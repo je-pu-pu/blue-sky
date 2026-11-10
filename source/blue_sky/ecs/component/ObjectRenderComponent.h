@@ -33,6 +33,18 @@ struct ObjectRenderComponent : public core::ecs::Component
 	bool			is_visible = true;			///< 定数を書くか（ActiveObject::is_visible() を写す）
 	bool			is_mesh_visible = true;		///< メッシュを描くか（ActiveObject::is_mesh_visible() を写す。派生が条件を足すので、写した後の値を使う）
 	bool			is_line_visible = true;		///< 線を描くか（同上）
+
+	/// 種類の決まりで今だけ隠す（風船がプレイヤーに持たれて点滅しているとき。is_* の値を変えずに隠す。毎フレーム決め直す）
+	bool			is_hidden = false;
+
+	/// 定数を書くか（隠していないときの is_visible）
+	bool should_write_constants() const { return is_visible && ! is_hidden; }
+
+	/// メッシュを描くか（隠していないときの is_mesh_visible）
+	bool should_draw_mesh() const { return is_mesh_visible && ! is_hidden; }
+
+	/// 線を描くか（隠していないときの is_line_visible）
+	bool should_draw_line() const { return is_line_visible && ! is_hidden; }
 };
 
 } // namespace blue_sky::ecs

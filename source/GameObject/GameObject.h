@@ -1,6 +1,7 @@
 #pragma once
 
 #include <blue_sky/type.h>
+#include <core/ecs/type.h>
 #include <core/math/Transform.h>
 
 #include <functional>
@@ -8,7 +9,7 @@
 class btRigidBody;
 
 namespace blue_sky { struct GameObjectContext; }
-namespace blue_sky::ecs { enum class PickupKind; }
+namespace blue_sky::ecs { enum class PickupKind; class BalloonHolder; }
 
 namespace core
 {
@@ -22,7 +23,6 @@ namespace blue_sky
 
 class Player;
 class ActiveObjectPhysics;
-class Balloon;
 class Robot;
 class DynamicObject;
 class GameObjectRef;
@@ -153,7 +153,13 @@ public:
 	virtual void on_collide_with( GameObject* );
 
 	virtual void on_collide_with( Player* ) { }
-	virtual void on_collide_with( Balloon* ) { }
+	/**
+	 * 風船（ECS だけの物体。ecs::BalloonHoldComponent を持つ）に触れた（以前の on_collide_with( Balloon* )）
+	 *
+	 * ほかの物体につかまれている風船には呼ばれない。つかんだら、風船が手元に付いて行くときに読む窓口を返す（プレイヤーだけ）。
+	 * つかまない物体は nullptr（既定）
+	 */
+	virtual ecs::BalloonHolder* on_collide_with_balloon( core::ecs::EntityId /* balloon */ ) { return nullptr; }
 	/**
 	 * 石に当たった（以前の on_collide_with( Stone* )）
 	 *

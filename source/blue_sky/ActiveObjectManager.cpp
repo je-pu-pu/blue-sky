@@ -4,7 +4,6 @@
 
 #include <GameObject/Girl.h>
 #include <GameObject/Robot.h>
-#include <GameObject/Balloon.h>
 #include <blue_sky/GameObjectRef.h>
 
 #include <GameObject/ActiveObject.h>
@@ -28,6 +27,8 @@
 #include <blue_sky/ecs/component/ContactCacheComponent.h>
 #include <blue_sky/ecs/component/SwitchComponent.h>
 #include <blue_sky/ecs/system/SwitchSystem.h>
+#include <blue_sky/ecs/system/BalloonHoldSystem.h>
+#include <blue_sky/ecs/component/BalloonHoldComponent.h>
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/ObjectBody.h>
 
@@ -44,9 +45,9 @@ ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics
 {
 	object_creator_map_[ "girl"        ] = [] () -> ActiveObject* { return new Girl();         };
 	object_creator_map_[ "robot"       ] = [this] () -> ActiveObject* { return new Robot( graphics_manager_ ); };	// テクスチャを得る GraphicsManager を渡す
-	object_creator_map_[ "balloon"     ] = [] () -> ActiveObject* { return new Balloon();      };
 
-	// "static"（動かない物）・"medal"・"umbrella"・"rocket"・"goal"・"ladder"・"stone"・"switch"（と空間スイッチ）は ECS だけの物体になり、ObjectFactory が作る（段階 4）
+	// "static"（動かない物）・"medal"・"umbrella"・"rocket"・"goal"・"ladder"・"stone"・"switch"（と空間スイッチ）は ECS だけの物体になり、ObjectFactory が作る（段階 4）。
+	// "balloon" も ECS だけの物体（段階 5）
 
 }
 
@@ -144,6 +145,14 @@ void ActiveObjectManager::update()
 		active_object_list_[ i ]->update();
 	}
 
+	const float_t scene_elapsed_time = object_context_ && object_context_->scene_elapsed_time ? object_context_->scene_elapsed_time() : 0.f;
+
+	// 風船（ECS だけの物体。以前は Balloon::update が物体の update の中で動かしていた。アニメーションより前に）
+	if ( auto* system = entity_manager_->get_system< ecs::BalloonHoldSystem >() )
+	{
+		system->update_balloons( scene_elapsed_time );
+	}
+
 	// アニメーションを進める（以前は物体ごとに update の直後に進めていた。物体のアニメーションは互いに独立なので、まとめて後で進めても同じ）
 	if ( auto* system = entity_manager_->get_system< ecs::ObjectRenderDataSystem >() )
 	{
@@ -174,6 +183,16 @@ void ActiveObjectManager::update()
 	if ( auto* system = entity_manager_->get_system< ecs::MoveToTargetSystem >() )
 	{
 		system->update_targets( delta_time );
+	}
+}
+
+void ActiveObjectManager::update_balloon( core::ecs::EntityId id )
+{
+	const float_t scene_elapsed_time = object_context_ && object_context_->scene_elapsed_time ? object_context_->scene_elapsed_time() : 0.f;
+
+	if ( auto* system = entity_manager_->get_system< ecs::BalloonHoldSystem >() )
+	{
+		system->update_balloon( id, scene_elapsed_time );
 	}
 }
 
@@ -314,6 +333,22 @@ void ActiveObjectManager::on_collide_with_entity_object( GameObject& object, cor
 		}
 	}
 
+	// 風船（以前の Balloon）: 以前は Balloon::on_collide_with( GameObject* ) が相手の on_collide_with( Balloon* ) を呼び、
+	// 相手がプレイヤーなら、ほかの物体につかまれていない風船をつかんだ（逆向き（相手 → 風船）の on_collide_with( Player* ) などは何もしなかった）。
+	// 今はつかまれていない風船だけ相手に知らせ、相手がつかんだら（プレイヤーだけが窓口を返す）、風船をつかませる
+	if ( const auto* balloon = entity.get_component< ecs::BalloonHoldComponent >(); balloon && ! balloon->is_held() )
+	{
+		const auto balloon_id = static_cast< core::ecs::EntityId >( entity.get_id() );
+
+		if ( ecs::BalloonHolder* holder = object.on_collide_with_balloon( balloon_id ) )
+		{
+			if ( auto* system = entity.get_entity_manager()->get_system< ecs::BalloonHoldSystem >() )
+			{
+				system->grab( balloon_id, object_id, holder );
+			}
+		}
+	}
+
 	// 梯子（以前の Ladder）: 以前は Ladder::on_collide_with( GameObject* ) が相手の on_collide_with( Ladder* ) を呼び、
 	// 相手がプレイヤーなら Ladder::on_collide_with( Player* ) が、最近（0.5 秒以内）触れていなければ梯子の位置で音を鳴らして覚えた。
 	// 今は相手が反応したか（プレイヤーだけが true を返す）で決める
@@ -336,6 +371,28 @@ void ActiveObjectManager::on_collide_with_entity_object( GameObject& object, cor
 
 void ActiveObjectManager::on_collide_entity_objects( core::ecs::Entity& a, core::ecs::Entity& b )
 {
+	// 石と風船 : 以前は Stone::on_collide_with( GameObject* ) が風船の on_collide_with( Stone* )（今の on_collide_with_stone）を呼び、
+	// 風船は割れて音を鳴らした（石は拾わない）。1 組につき 1 回
+	auto burst_by_stone = [] ( core::ecs::Entity& balloon, core::ecs::Entity& stone )
+	{
+		if ( ! balloon.get_component< ecs::BalloonHoldComponent >() || ! stone.get_component< ecs::ThrowableComponent >() )
+		{
+			return false;
+		}
+
+		if ( auto* system = balloon.get_entity_manager()->get_system< ecs::BalloonHoldSystem >() )
+		{
+			system->burst( static_cast< core::ecs::EntityId >( balloon.get_id() ) );
+		}
+
+		return true;
+	};
+
+	if ( burst_by_stone( a, b ) || burst_by_stone( b, a ) )
+	{
+		return;
+	}
+
 	// 以前は Stone::on_collide_with( GameObject* ) がスイッチの on_collide_with( Stone* ) を呼び（1 組につき 1 回）、
 	// スイッチ → 石（on_collide_with( BaseSwitch* )）は何もしなかった
 	auto press_by_stone = [] ( core::ecs::Entity& s, core::ecs::Entity& stone )

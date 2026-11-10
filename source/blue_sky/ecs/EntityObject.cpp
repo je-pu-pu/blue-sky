@@ -1,6 +1,8 @@
 #include "EntityObject.h"
 
 #include <blue_sky/ecs/ObjectBody.h>
+#include <blue_sky/ecs/Flicker.h>
+#include <blue_sky/ecs/component/BalloonHoldComponent.h>
 #include <blue_sky/ecs/component/PhysicsBodyComponent.h>
 #include <blue_sky/ecs/component/SimpleObjectComponent.h>
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
@@ -140,6 +142,53 @@ void EntityObject::chase_direction_to( const core::Vector& location, float_t spe
 	chase_direction_degree( math::radian_to_degree( std::atan2( relative_position.x(), relative_position.z() ) ), speed );
 }
 
+core::Vector EntityObject::get_front() const
+{
+	// 以前の ActiveObject::set_direction_degree と同じ計算（Y 軸の回転行列で前を回して正規化する）
+	core::Matrix m;
+	m.set_rotation_xyz( 0, math::degree_to_radian( get_direction_degree() ), 0 );
+
+	core::Vector front = core::Vector::Forward * m;
+	front.normalize();
+
+	return front;
+}
+
+core::Vector EntityObject::get_right() const
+{
+	core::Matrix m;
+	m.set_rotation_xyz( 0, math::degree_to_radian( get_direction_degree() ), 0 );
+
+	core::Vector right = core::Vector::Right * m;
+	right.normalize();
+
+	return right;
+}
+
+core::Vector EntityObject::get_start_location() const
+{
+	return state_ ? state_->start_location : get_location();
+}
+
+unsigned int EntityObject::get_flicker_seed() const
+{
+	return static_cast< unsigned int >( entity_->get_id() );
+}
+
+void EntityObject::update_location_by_flicker( const core::Vector& base_location, float_t scale, float_t scene_elapsed_time )
+{
+	set_location( base_location + core::Vector( 0.f, flicker::height_offset( get_flicker_seed(), scene_elapsed_time, scale ), 0.f ) );
+}
+
+void EntityObject::update_velocity_by_flicker( const core::Vector& base_location, float_t scale, float_t scene_elapsed_time )
+{
+	const core::Vector target_location = base_location + core::Vector( 0.f, flicker::height_offset( get_flicker_seed(), scene_elapsed_time, scale ), 0.f );
+	const core::Vector relative_position = target_location - get_location();
+	const core::Vector velocity = get_velocity();
+
+	set_velocity( core::Vector( velocity.x(), relative_position.y(), velocity.z() ) );
+}
+
 void EntityObject::set_start_location( const core::Vector& location )
 {
 	if ( state_ )
@@ -253,7 +302,19 @@ void EntityObject::restart()
 		cache->cache.clear();
 	}
 
+	// 風船はつかまれていない状態に戻る（以前の Balloon::restart）
+	if ( auto* balloon = entity_->get_component< BalloonHoldComponent >() )
+	{
+		balloon->holder_id.reset();
+		balloon->holder = nullptr;
+	}
+
 	set_visible( true, true );
+
+	if ( auto* render = entity_->get_component< ObjectRenderComponent >() )
+	{
+		render->is_hidden = false;
+	}
 }
 
 void EntityObject::kill()
@@ -264,6 +325,12 @@ void EntityObject::kill()
 	}
 
 	set_visible( false, false );
+
+	// 風船は影響の無い所へ退く（以前の Balloon::kill）
+	if ( entity_->get_component< BalloonHoldComponent >() && is_valid() )
+	{
+		set_location( core::Vector( 0.f, -100.f, 0.f ) );
+	}
 }
 
 bool EntityObject::is_dead() const
@@ -273,11 +340,16 @@ bool EntityObject::is_dead() const
 	return traits && traits->is_dead;
 }
 
-void EntityObject::play_sound( core::sound::SoundManager* sound_manager, const char_t* name ) const
+void EntityObject::play_sound( core::sound::SoundManager* sound_manager, const char_t* name, bool loop, bool force ) const
 {
 	core::Sound* sound = sound_manager ? sound_manager->get_sound( name ) : nullptr;
 
 	if ( ! sound )
+	{
+		return;
+	}
+
+	if ( ! force && sound->is_playing() )
 	{
 		return;
 	}
@@ -288,7 +360,30 @@ void EntityObject::play_sound( core::sound::SoundManager* sound_manager, const c
 
 	sound->set_3d_position( location.x(), location.y(), location.z() );
 	sound->set_3d_velocity( velocity.x(), velocity.z(), velocity.z() );
-	sound->play( false );
+	sound->play( loop );
+}
+
+void EntityObject::stop_sound( core::sound::SoundManager* sound_manager, const char_t* name )
+{
+	if ( core::Sound* sound = sound_manager ? sound_manager->get_sound( name ) : nullptr )
+	{
+		sound->stop();
+	}
+}
+
+void EntityObject::play_animation( const char_t* name, bool force, bool loop )
+{
+	if ( core::AnimationPlayer* player = get_animation_player() )
+	{
+		player->play( name, force, loop );
+	}
+}
+
+core::AnimationPlayer* EntityObject::get_animation_player() const
+{
+	auto* animation = entity_->get_component< AnimationComponent >();
+
+	return animation ? animation->player.get() : nullptr;
 }
 
 void EntityObject::set_visible( bool mesh, bool line )

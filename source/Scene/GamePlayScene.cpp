@@ -6,7 +6,6 @@
 #include <core/setting/SettingStore.h>
 
 #include <GameObject/Player.h>
-#include <GameObject/Balloon.h>
 #include <GameObject/Camera.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -27,7 +26,10 @@
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/DebugLog.h>
 #include <GameObject/Robot.h>
+#include <GameObject/Girl.h>
 #include <blue_sky/ecs/system/SwitchSystem.h>
+#include <blue_sky/ecs/EntityObject.h>
+#include <blue_sky/ecs/component/BalloonHoldComponent.h>
 #include <core/ecs/EntityManager.h>
 
 #include <core/graphics/OculusRift.h>
@@ -42,6 +44,8 @@
 #include <common/exception.h>
 #include <common/serialize.h>
 #include <common/math.h>
+
+#include <map>
 
 namespace blue_sky
 {
@@ -325,6 +329,7 @@ void GamePlayScene::update()
 
 	debug_visit_objects();
 	debug_throw_stones();
+	debug_log_actors();
 
 	get_active_object_manager()->update();
 
@@ -649,9 +654,9 @@ void GamePlayScene::update_balloon_sound()
 
 	// プレイヤーの位置が決まった後で、持っている風船を手元に合わせ直す
 	// （物体の更新の中だけだと、プレイヤーより先に更新されたときに 1 フレーム遅れてぶれる。以前は const_cast で呼んでいた）
-	if ( auto* balloon = player_->get_balloon() )
+	if ( const auto balloon = player_->get_balloon() )
 	{
-		balloon->update();
+		get_active_object_manager()->update_balloon( * balloon );
 	}
 }
 
@@ -738,7 +743,7 @@ void GamePlayScene::debug_visit_objects()
 	};
 
 	add_first_entity( "メダル", "medal" );
-	add_first( "風船", [] ( const ActiveObject* o ) { return dynamic_cast< const Balloon* >( o ) != nullptr; } );
+	add_first_entity( "風船", "balloon" );
 	add_first_entity( "梯子", "ladder" );
 	add_first_entity( "ロケット", "rocket" );
 	targets.emplace_back( "ゴール", goal_.get_location() );
@@ -864,7 +869,7 @@ void GamePlayScene::debug_throw_stones()
 		targets.emplace_back( "敵 " + std::to_string( targets.size() ), robot );
 	}
 
-	add_first( "風船", find_objects( "balloon", [] ( const ActiveObject* o ) { return dynamic_cast< const Balloon* >( o ) != nullptr; } ) );
+	add_first( "風船", find_objects( "balloon", [] ( const ActiveObject* ) { return false; } ) );
 
 	const size_t step = static_cast< size_t >( ( frame - throw_start_frame ) / throw_interval );
 	const int phase = ( frame - throw_start_frame ) % throw_interval;
@@ -920,12 +925,63 @@ void GamePlayScene::debug_throw_stones()
 		{
 			result = r->get_mode() == Robot::Mode::SHUTDOWN ? "止まった" : "止まっていない";
 		}
-		else if ( const auto* b = dynamic_cast< const Balloon* >( target.get_active_object() ) )
+		else if ( auto* entity = get_entity_manager()->find( target.get_entity_id() ); entity && entity->get_component< ecs::BalloonHoldComponent >() )
 		{
-			result = b->is_dead() ? "割れた" : "割れていない";
+			result = ecs::EntityObject( entity ).is_dead() ? "割れた" : "割れていない";
 		}
 
 		debug_log( "[Debug] 石を投げた結果 : " + name + " / " + result + "（持っている石 " + std::to_string( player_->get_item_count( Player::ItemType::STONE ) ) + " 個）" );
+	}
+}
+
+/**
+ * 開発用 : 30 フレームごとに、風船・少女・敵の位置・向き・状態をログに出す
+ *
+ * 環境変数 BLUE_SKY_DEBUG_LOG_ACTORS を設定したときだけ動く（本編の動きは変えない）。
+ * 風船・少女・敵を ECS だけの物体に移す前と後で、動き（ゆらぎ・回る・追う・止まる）が同じかを比べるため
+ */
+void GamePlayScene::debug_log_actors()
+{
+	if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_LOG_ACTORS", nullptr, 0 ) == 0 || debug_log_actors_frame_++ % 30 != 0 )
+	{
+		return;
+	}
+
+	static const char_t* const robot_modes[] = { "立つ", "回る", "巡回", "注目", "発見", "追う", "止まった", "浮く" };
+
+	// 番号 → 種類と状態（作った順 = 番号の順に出す。まだ ActiveObject の種類と ECS だけの物体を混ぜて並べる）
+	std::map< core::ecs::EntityId, std::pair< string_t, string_t > > actors;
+
+	for ( const auto* o : get_active_object_manager()->active_object_list() )
+	{
+		if ( const auto* r = dynamic_cast< const Robot* >( o ) )
+		{
+			actors[ o->get_entity_id() ] = { "robot", robot_modes[ static_cast< int >( r->get_mode() ) ] };
+		}
+		else if ( dynamic_cast< const Girl* >( o ) )
+		{
+			actors[ o->get_entity_id() ] = { "girl", "" };
+		}
+	}
+
+	for ( const auto id : get_object_factory()->find_all_of_kind( "balloon" ) )
+	{
+		auto* entity = get_entity_manager()->find( id );
+		const auto* balloon = entity ? entity->get_component< ecs::BalloonHoldComponent >() : nullptr;
+
+		if ( balloon )
+		{
+			actors[ id ] = { "balloon", string_t( ecs::EntityObject( entity ).is_dead() ? "割れた" : "割れていない" ) + ( balloon->is_held() ? " つかまれている" : "" ) };
+		}
+	}
+
+	for ( const auto& [ id, actor ] : actors )
+	{
+		const GameObjectRef o = get_object_factory()->get_ref( id );
+
+		char buffer[ 256 ];
+		std::snprintf( buffer, sizeof( buffer ), "[Debug] 物体の様子 %d #%u %s 位置 ( %.2f, %.2f, %.2f ) 向き %.1f %s", debug_log_actors_frame_ - 1, static_cast< unsigned >( id ), actor.first.c_str(), o.get_location().x(), o.get_location().y(), o.get_location().z(), o.get_direction_degree(), actor.second.c_str() );
+		debug_log( buffer );
 	}
 }
 

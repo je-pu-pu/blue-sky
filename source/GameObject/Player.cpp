@@ -1,6 +1,5 @@
 #include "Player.h"
 
-#include "Balloon.h"
 #include <blue_sky/ecs/component/PickupComponent.h>
 #include "Robot.h"
 
@@ -43,7 +42,6 @@ Player::Player()
 	, has_medal_( false )
 	, selected_item_type_( ItemType::NONE )
 	, last_footing_height_( 0.f )
-	, balloon_( nullptr )
 	, hp_( 1 )
 {
 }
@@ -98,7 +96,7 @@ void Player::restart()
 
 	selected_item_type_ = ItemType::NONE;
 
-	balloon_ = nullptr;
+	balloon_.reset();
 	stone_list_.clear();
 
 	hp_ = 1;
@@ -997,19 +995,20 @@ bool Player::is_falling() const
 	return get_rigid_body()->getLinearVelocity().y() < get_falling_velocity_threshold();
 }
 
-void Player::on_collide_with( Balloon* balloon )
+/**
+ * 風船（ECS だけの物体）に触れた : つかむ（以前の on_collide_with( Balloon* )）
+ *
+ * ほかの物体につかまれている風船には呼ばれない（当たりの互換の層が確かめる。以前はここで balloon->get_player() を見ていた）
+ *
+ * @return つかんだら自分の窓口（風船が手元に付いて行く）。揺らぎ中はつかまない（nullptr）
+ */
+ecs::BalloonHolder* Player::on_collide_with_balloon( core::ecs::EntityId balloon )
 {
 	if ( is_flickering_ )
 	{
-		return;
+		return nullptr;
 	}
 
-	if ( balloon->get_player() )
-	{
-		return;
-	}
-
-	balloon->set_player( this );
 	this->balloon_ = balloon;
 
 	is_jumping_ = false;
@@ -1023,6 +1022,8 @@ void Player::on_collide_with( Balloon* balloon )
 
 	balloon_sequence_count_ += 1;
 	balloon_sound_request_ = balloon_sequence_count_;
+
+	return this;
 }
 
 /**

@@ -135,7 +135,7 @@ void ObjectRenderDataSystem::update_render_data()
 	{
 		ObjectRenderComponent& render = * target.render;
 
-		if ( ! render.is_visible || ! render.object_constant_buffer )
+		if ( ! render.should_write_constants() || ! render.object_constant_buffer )
 		{
 			continue;
 		}

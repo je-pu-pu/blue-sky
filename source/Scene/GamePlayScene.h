@@ -79,6 +79,11 @@ private:
 
 	/// 開発用 : BLUE_SKY_DEBUG_THROW_STONES を設定すると、ステージの石を全部拾い、スイッチ・敵・風船に向けて順に投げて、当たった結果をログに出す
 	void debug_throw_stones();
+
+	int debug_log_actors_frame_ = 0;			///< 開発用 : BLUE_SKY_DEBUG_LOG_ACTORS で風船・少女・敵の様子を出すフレームを数える
+
+	/// 開発用 : BLUE_SKY_DEBUG_LOG_ACTORS を設定すると、30 フレームごとに風船・少女・敵の位置・向き・状態をログに出す
+	void debug_log_actors();
 	// 非所有参照 (各 Manager が所有)
 	Texture*							ui_texture_ = nullptr;			///< UI テクスチャ (GraphicsManager)
 	Shader*								debug_texture_shader_ = nullptr;///< デバッグシェーダー (GraphicsManager)

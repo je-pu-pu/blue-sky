@@ -70,6 +70,13 @@ public:
 	void update();
 
 	/**
+	 * 1 つの風船（ECS だけの物体）を動かす（ecs::BalloonHoldSystem に頼む）
+	 *
+	 * GamePlayScene が物理を進めた後に、プレイヤーの持っている風船を手元に合わせ直すのに使う（以前は Balloon::update を呼んでいた）
+	 */
+	void update_balloon( core::ecs::EntityId id );
+
+	/**
 	 * 物理を進めた後に、全部の剛体の位置と回転を位置の正（TransformComponent）へ写す（ecs::PhysicsSyncSystem に頼む）
 	 *
 	 * 以前は GamePlayScene が全物体の GameObject::update_transform を呼んでいた
@@ -109,8 +116,9 @@ public:
 	/**
 	 * ECS だけの物体どうしが当たった
 	 *
-	 * 部品の組み合わせで決める。今は 石（ThrowableComponent）とスイッチ（SwitchComponent）だけ : 石の速さでスイッチの入・切が変わる
-	 * （以前の BaseSwitch::on_collide_with( Stone* )。空間スイッチは石では変わらない）。それ以外の組は何もしない（以前と同じ）
+	 * 部品の組み合わせで決める。今は 石（ThrowableComponent）と次の組だけ（それ以外の組は何もしない。以前と同じ）:
+	 * - 風船（BalloonHoldComponent）: 割れる（以前の Balloon::on_collide_with_stone）
+	 * - スイッチ（SwitchComponent）: 石の速さで入・切が変わる（以前の BaseSwitch::on_collide_with( Stone* )。空間スイッチは石では変わらない）
 	 */
 	static void on_collide_entity_objects( core::ecs::Entity& a, core::ecs::Entity& b );
 

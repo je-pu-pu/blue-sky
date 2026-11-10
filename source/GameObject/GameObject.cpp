@@ -3,6 +3,7 @@
 #include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/ecs/system/PhysicsSyncSystem.h>
 #include <blue_sky/ecs/ObjectBody.h>
+#include <blue_sky/ecs/Flicker.h>
 #include <GameObject/GameObjectContext.h>
 
 
@@ -10,7 +11,6 @@
 #include <core/sound/Sound.h>
 
 #include <common/math.h>
-#include <random>
 
 namespace blue_sky
 {
@@ -244,13 +244,8 @@ float_t GameObject::get_scene_elapsed_time() const
  */
 float_t GameObject::get_flicker_height_offset( float_t scale ) const
 {
-	// 物体ごとに決まった位相を、物体ごとに決まった種（get_flicker_seed）から作る。
-	// 以前は物体のアドレスを種にしていて起動ごとに画面が変わり、さらに共有の乱数（common::random_engine）の種を毎回入れ直していた。
-	// 自分だけの乱数を使い、共有の乱数には触らない（分布は以前と同じ。同じ種なら同じ値）
-	std::mt19937 engine( get_flicker_seed() );
-	const float_t a = std::uniform_real_distribution< float_t >( 0.f, 10.f )( engine );
-
-	return std::cos( a + get_scene_elapsed_time() ) * scale * 0.5f;
+	// 物体ごとに決まった位相を、物体ごとに決まった種（get_flicker_seed）から作る（計算は ecs::flicker。ECS だけの物体と同じ中身）
+	return ecs::flicker::height_offset( get_flicker_seed(), get_scene_elapsed_time(), scale );
 }
 
 /**
@@ -304,7 +299,7 @@ void GameObject::update_velocity_by_target_location( const Vector& target_locati
  */
 bool_t GameObject::is_visible_in_blink( float_t blink_count ) const
 {
-	return std::fmodf( get_scene_elapsed_time(), 1.f / blink_count ) < ( 0.5f / blink_count );
+	return ecs::flicker::is_visible_in_blink( get_scene_elapsed_time(), blink_count );
 }
 
 void GameObject::play_sound( const char* name, bool loop, bool force ) const

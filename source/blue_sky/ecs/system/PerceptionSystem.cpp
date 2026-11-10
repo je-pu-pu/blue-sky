@@ -11,7 +11,22 @@
 namespace blue_sky::ecs
 {
 
+void PerceptionSystem::update()
+{
+	const auto* registry = get_entity_manager()->get_system< TargetRegistrySystem >();
+
+	for ( auto& i : get_component_list() )
+	{
+		perceive( i.second, registry );
+	}
+}
+
 void PerceptionSystem::update( ComponentTuple& tuple ) const
+{
+	perceive( tuple, get_entity_manager()->get_system< TargetRegistrySystem >() );
+}
+
+void PerceptionSystem::perceive( ComponentTuple& tuple, const TargetRegistrySystem* registry ) const
 {
 	using core::math::Vector;
 
@@ -20,7 +35,6 @@ void PerceptionSystem::update( ComponentTuple& tuple ) const
 
 	perception->target_visible = false;
 
-	auto* registry = get_entity_manager()->get_system< TargetRegistrySystem >();
 	if ( ! registry )
 	{
 		return;
@@ -43,6 +57,12 @@ void PerceptionSystem::update( ComponentTuple& tuple ) const
 		Vector to = target - eye;
 		const float dist = to.length();
 		if ( dist < 1e-4f )
+		{
+			continue;
+		}
+
+		// 既に見えている対象より近くなければ採らないので、レイを飛ばさない（以前は飛ばしてから距離で捨てていた）
+		if ( dist >= best_dist )
 		{
 			continue;
 		}

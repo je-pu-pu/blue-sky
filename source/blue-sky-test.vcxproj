@@ -188,6 +188,7 @@
     <ClCompile Include="test\math\DirectXMathTest.cpp" />
     <ClCompile Include="test\ecs\EntityManagerTest.cpp" />
     <ClCompile Include="test\ecs\EcsBenchmarkTest.cpp" />
+    <ClCompile Include="test\ecs\PerceptionSystemTest.cpp" />
     <ClCompile Include="test\ecs\ObjectRenderDataSystemTest.cpp" />
     <ClCompile Include="test\ecs\EnemyAiSceneEcsTest.cpp" />
     <ClCompile Include="test\graphics\MsdfFontTest.cpp" />

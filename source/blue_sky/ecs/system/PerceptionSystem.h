@@ -12,6 +12,8 @@ namespace blue_sky::ecs
 using core::ecs::System;
 using core::ecs::TransformComponent;
 
+class TargetRegistrySystem;
+
 /**
  * 知覚 System（S2 知覚）。
  *
@@ -27,10 +29,15 @@ public:
 	/// physics_manager : 遮蔽のレイを飛ばす物理の世界（作り手が渡す。以前は core::Service から取っていた）
 	explicit PerceptionSystem( core::physics::PhysicsManager* physics_manager ) : physics_manager_( physics_manager ) { }
 
+	/// 対象の一覧（TargetRegistrySystem）を頭で一度だけ引き、敵ごとに判定する（以前は敵ごとに引いていた）
+	void update() override;
 	void update( ComponentTuple& ) const override;
 
 private:
 	core::physics::PhysicsManager* physics_manager_;
+
+	/// 敵 1 体ぶんの判定（registry が nullptr なら見えないとする）
+	void perceive( ComponentTuple&, const TargetRegistrySystem* registry ) const;
 
 }; // class PerceptionSystem
 

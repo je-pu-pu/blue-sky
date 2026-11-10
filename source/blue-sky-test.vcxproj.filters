@@ -123,6 +123,9 @@
     <ClCompile Include="test\ecs\EcsBenchmarkTest.cpp">
       <Filter>ecs</Filter>
     </ClCompile>
+    <ClCompile Include="test\ecs\PerceptionSystemTest.cpp">
+      <Filter>ecs</Filter>
+    </ClCompile>
     <ClCompile Include="test\ecs\ObjectRenderDataSystemTest.cpp">
       <Filter>ecs</Filter>
     </ClCompile>

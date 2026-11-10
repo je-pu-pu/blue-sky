@@ -16,6 +16,8 @@
 #include <blue_sky/ecs/component/TargetLocationComponent.h>
 #include <blue_sky/ecs/system/MoveToTargetSystem.h>
 #include <blue_sky/ecs/system/TranslationSystem.h>
+#include <blue_sky/ecs/system/SpinSystem.h>
+#include <blue_sky/ecs/component/PickupComponent.h>
 
 #include <core/ecs/EntityManager.h>
 #include <core/ecs/component/TransformComponent.h>
@@ -182,7 +184,7 @@ TEST( ObjectFactoryTest, 種類の名前から作る_static_は_ECS_だけの物
 	EXPECT_NE( f.entity( * id )->get_component< blue_sky::ecs::StaticObjectComponent >(), nullptr );
 
 	// まだ ActiveObject の種類は ActiveObjectManager が作る（このテストでは無いので作れない）
-	EXPECT_FALSE( f.factory.create_object( "medal" ).has_value() );
+	EXPECT_FALSE( f.factory.create_object( "girl" ).has_value() );
 	EXPECT_FALSE( f.factory.create_object( "no-such-kind" ).has_value() );
 }
 
@@ -379,4 +381,82 @@ TEST( ObjectFactoryTest, 動かない物に当たると相手に一度だけ知�
 	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, * other );
 
 	EXPECT_EQ( player.static_object_count, 1 );
+}
+
+// ---- 拾う物（段階 4 ②） ----
+
+namespace
+{
+
+/// 拾う物を拾う偽のプレイヤー（拾った種類を記録する）。picks が false なら拾わない物体（敵など）
+class FakePicker : public FakeGameObject
+{
+public:
+	bool picks = true;
+	std::vector< blue_sky::ecs::PickupKind > picked;
+
+	bool on_pick_up( blue_sky::ecs::PickupKind kind ) override
+	{
+		if ( picks )
+		{
+			picked.push_back( kind );
+		}
+
+		return picks;
+	}
+};
+
+} // namespace
+
+TEST( ObjectFactoryTest, メダルは拾う物で回り_硬くなく当たりの応答を持たない )
+{
+	FactoryFixture f;
+
+	const auto id = f.factory.create_object( "medal" );
+	ASSERT_TRUE( id.has_value() );
+
+	auto* e = f.entity( * id );
+	ASSERT_NE( e->get_component< blue_sky::ecs::PickupComponent >(), nullptr );
+	EXPECT_EQ( e->get_component< blue_sky::ecs::PickupComponent >()->kind, blue_sky::ecs::PickupKind::MEDAL );
+	ASSERT_NE( e->get_component< blue_sky::ecs::SpinComponent >(), nullptr );
+	EXPECT_EQ( e->get_component< blue_sky::ecs::StaticObjectComponent >(), nullptr );
+
+	// 以前の Medal : 硬くない・足元と剛体の中心が同じ・重力 0・当たりの応答なし
+	EXPECT_FALSE( e->get_component< blue_sky::ecs::CollisionTraitsComponent >()->is_hard );
+	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >();
+	EXPECT_FLOAT_EQ( body->height_offset, 0.f );
+	EXPECT_NE( body->body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
+	EXPECT_TRUE( is_near( e->get_component< blue_sky::ecs::SimpleObjectComponent >()->default_gravity, Vector::Zero ) );
+
+	// 1 秒に 90 度回る
+	f.factory.restart();
+	f.manager.get_system< blue_sky::ecs::SpinSystem >()->update_spins( 0.5f );
+	EXPECT_FLOAT_EQ( e->get_component< blue_sky::ecs::SimpleObjectComponent >()->direction_degree, 45.f );
+}
+
+TEST( ObjectFactoryTest, プレイヤーがメダルに当たると拾って_メダルは死ぬ_拾わない物体なら何も起きない )
+{
+	FactoryFixture f;
+
+	const auto id = * f.factory.create_object( "medal" );
+	const auto* traits = f.entity( id )->get_component< blue_sky::ecs::CollisionTraitsComponent >();
+
+	// 拾わない物体（敵など）: 何も起きない（以前も Medal との当たりは Player だけが受け取っていた）
+	FakePicker robot;
+	robot.picks = false;
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( robot, * f.entity( id ) );
+	EXPECT_FALSE( traits->is_dead );
+
+	// プレイヤー : 拾い、メダルは死んで描かれなくなる
+	FakePicker player;
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, * f.entity( id ) );
+
+	ASSERT_EQ( player.picked.size(), 1u );
+	EXPECT_EQ( player.picked[ 0 ], blue_sky::ecs::PickupKind::MEDAL );
+	EXPECT_TRUE( traits->is_dead );
+	EXPECT_FALSE( f.entity( id )->get_component< blue_sky::ecs::ObjectRenderComponent >()->is_visible );
+
+	// やり直すと戻る
+	f.factory.restart();
+	EXPECT_FALSE( traits->is_dead );
 }

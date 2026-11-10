@@ -8,6 +8,7 @@
 class btRigidBody;
 
 namespace blue_sky { struct GameObjectContext; }
+namespace blue_sky::ecs { enum class PickupKind; }
 
 namespace core
 {
@@ -26,7 +27,6 @@ class Rocket;
 class Umbrella;
 class Stone;
 class BaseSwitch;
-class Medal;
 class Robot;
 class DynamicObject;
 class Ladder;
@@ -163,7 +163,14 @@ public:
 	virtual void on_collide_with( Stone* ) { }
 	virtual void on_collide_with( BaseSwitch* ) { }
 	virtual void on_collide_with( Robot* ) { }
-	virtual void on_collide_with( Medal* ) { }
+	/**
+	 * 拾う物（ECS だけの物体。ecs::PickupComponent を持つ）に当たった
+	 *
+	 * 拾ったら true を返す（当たりの互換の層が、拾われた物を死なせる）。拾わない物体は false（既定）。
+	 * 以前の on_collide_with( Medal* )・on_collide_with( Rocket* )（Medal・Rocket・Umbrella クラスは消していく）
+	 */
+	virtual bool on_pick_up( ecs::PickupKind ) { return false; }
+
 	/// 動かない物（ECS だけの物体。StaticObjectComponent を持つ）に当たった。以前の on_collide_with( StaticObject* )（StaticObject クラスは消した）
 	virtual void on_collide_with_static_object() { }
 	virtual void on_collide_with( DynamicObject* ) { }

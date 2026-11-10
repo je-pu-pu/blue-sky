@@ -100,6 +100,8 @@ public:
 	 */
 	static void on_collide_with_entity_object( GameObject& object, const core::ecs::Entity& entity );
 
+	// ECS だけの物体（ObjectFactory が作る）のうち、毎フレーム動く物（動く床・回る物）は update の中で System に頼む
+
 	/// 全オブジェクトの位置と描くかどうかを描画の部品へ写す（描く前に毎フレーム。GameMain がシーンを描く前に呼ぶ）
 	void sync_render_components() const;
 

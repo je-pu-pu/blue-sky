@@ -131,9 +131,6 @@
     <ClCompile Include="GameObject\Ladder.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject\Medal.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="GameObject\Missile.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
@@ -345,6 +342,9 @@
       <Filter>blue_sky\ecs</Filter>
     </ClCompile>
     <ClCompile Include="blue_sky\ecs\system\TranslationSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\SpinSystem.cpp">
       <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
     <ClCompile Include="blue_sky\ActiveObjectPhysics.cpp">
@@ -679,9 +679,6 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\Ladder.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Medal.h">
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\Missile.h">
@@ -1079,6 +1076,12 @@
     </ClInclude>
     <ClInclude Include="blue_sky\ecs\system\TranslationSystem.h">
       <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\SpinSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\PickupComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\ecs\component\SimpleObjectComponent.h">
       <Filter>blue_sky\ecs\component</Filter>

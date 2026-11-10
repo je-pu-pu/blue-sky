@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Scene.h"
+#include <blue_sky/GameObjectRef.h>
 
 #include <common/chase_value.h>
 #include <core/setting/SettingStore.h>
@@ -9,6 +10,7 @@
 #include <memory>
 #include <unordered_map>
 #include <functional>
+#include <optional>
 
 namespace game
 {
@@ -144,7 +146,7 @@ protected:
 	void setup_command();
 	
 	// commands
-	ActiveObject* create_object_at_player_front( const char_t* );
+	std::optional< GameObjectRef > create_object_at_player_front( const char_t* );
 
 	void restart();
 

@@ -60,6 +60,7 @@
     <ClCompile Include="blue_sky\ecs\ObjectBody.cpp" />
     <ClCompile Include="blue_sky\ecs\EntityObject.cpp" />
     <ClCompile Include="blue_sky\ecs\system\TranslationSystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\SpinSystem.cpp" />
     <ClCompile Include="blue_sky\ActiveObjectPhysics.cpp" />
     <ClCompile Include="blue_sky\App.cpp" />
     <ClCompile Include="blue_sky\CityGenerator.cpp" />
@@ -151,7 +152,6 @@
     <ClCompile Include="GameObject\Girl.cpp" />
     <ClCompile Include="GameObject\Goal.cpp" />
     <ClCompile Include="GameObject\Ladder.cpp" />
-    <ClCompile Include="GameObject\Medal.cpp" />
     <ClCompile Include="GameObject\Missile.cpp" />
     <ClCompile Include="GameObject\Player.cpp" />
     <ClCompile Include="GameObject\Robot.cpp" />
@@ -254,6 +254,8 @@
     <ClInclude Include="blue_sky\ecs\ObjectBody.h" />
     <ClInclude Include="blue_sky\ecs\EntityObject.h" />
     <ClInclude Include="blue_sky\ecs\system\TranslationSystem.h" />
+    <ClInclude Include="blue_sky\ecs\system\SpinSystem.h" />
+    <ClInclude Include="blue_sky\ecs\component\PickupComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\SimpleObjectComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\StaticObjectComponent.h" />
     <ClInclude Include="blue_sky\ActiveObjectPhysics.h" />
@@ -454,7 +456,6 @@
     <ClInclude Include="GameObject\Girl.h" />
     <ClInclude Include="GameObject\Goal.h" />
     <ClInclude Include="GameObject\Ladder.h" />
-    <ClInclude Include="GameObject\Medal.h" />
     <ClInclude Include="GameObject\Missile.h" />
     <ClInclude Include="GameObject\Player.h" />
     <ClInclude Include="GameObject\Robot.h" />

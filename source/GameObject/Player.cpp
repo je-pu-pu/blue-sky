@@ -3,7 +3,7 @@
 #include "Ladder.h"
 #include "Balloon.h"
 #include "Rocket.h"
-#include "Medal.h"
+#include <blue_sky/ecs/component/PickupComponent.h>
 #include "Robot.h"
 #include "Stone.h"
 
@@ -1052,13 +1052,26 @@ void Player::on_collide_with( Stone* stone )
 	play_sound( "stone-get" );
 }
 
-void Player::on_collide_with( Medal* medal )
+/**
+ * 拾う物に当たった（拾われた物は、当たりの互換の層が死なせる）
+ *
+ * @return いつも拾う（true）
+ */
+bool Player::on_pick_up( ecs::PickupKind kind )
 {
-	has_medal_ = true;
-	
-	medal->kill();
+	switch ( kind )
+	{
+	case ecs::PickupKind::MEDAL:
+		// 以前の on_collide_with( Medal* )（medal->kill() は互換の層がする）
+		has_medal_ = true;
+		play_sound( "medal-get" );
+		break;
 
-	play_sound( "medal-get" );
+	default:
+		break;
+	}
+
+	return true;
 }
 
 void Player::on_collide_with( Robot* robot )

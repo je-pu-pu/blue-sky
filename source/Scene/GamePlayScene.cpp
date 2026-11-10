@@ -28,7 +28,6 @@
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/DebugLog.h>
 #include <GameObject/BaseSwitch.h>
-#include <GameObject/Medal.h>
 #include <GameObject/Ladder.h>
 
 #include <core/graphics/OculusRift.h>
@@ -698,7 +697,7 @@ void GamePlayScene::debug_visit_objects()
 	}
 
 	// 行き先（種類ごとに最初の 1 つ。加えた順 = ステージに書いた順）
-	std::vector< std::pair< string_t, const ActiveObject* > > targets;
+	std::vector< std::pair< string_t, Vector > > targets;
 
 	auto add_first = [ & ] ( const char_t* name, auto is_kind )
 	{
@@ -706,16 +705,25 @@ void GamePlayScene::debug_visit_objects()
 		{
 			if ( is_kind( o ) )
 			{
-				targets.emplace_back( name, o );
+				targets.emplace_back( name, o->get_location() );
 				return;
 			}
 		}
 	};
 
-	add_first( "メダル", [] ( const ActiveObject* o ) { return dynamic_cast< const Medal* >( o ) != nullptr; } );
+	// ECS だけの物体になった種類は、工場が作った物体から種類の名前で探す
+	auto add_first_entity = [ & ] ( const char_t* name, const char_t* kind )
+	{
+		if ( auto id = get_object_factory()->find_first_of_kind( kind ) )
+		{
+			targets.emplace_back( name, get_object_factory()->get_ref( * id ).get_location() );
+		}
+	};
+
+	add_first_entity( "メダル", "medal" );
 	add_first( "風船", [] ( const ActiveObject* o ) { return dynamic_cast< const Balloon* >( o ) != nullptr; } );
 	add_first( "梯子", [] ( const ActiveObject* o ) { return dynamic_cast< const Ladder* >( o ) != nullptr; } );
-	targets.emplace_back( "ゴール", goal_ );
+	targets.emplace_back( "ゴール", goal_->get_location() );
 
 	const size_t step = static_cast< size_t >( ( frame - start_frame ) / interval );
 
@@ -739,7 +747,7 @@ void GamePlayScene::debug_visit_objects()
 		return;
 	}
 
-	const Vector to = targets[ step ].second->get_location();
+	const Vector to = targets[ step ].second;
 
 	player_->set_location( to );
 	player_->set_velocity( Vector::Zero );

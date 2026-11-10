@@ -170,11 +170,11 @@ protected:
 	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
 	void on_collide_with( Balloon* ) override;
 	void on_collide_with( Rocket* ) override;
-	void on_collide_with( Medal* ) override;
 	void on_collide_with( Robot* ) override;
 	void on_collide_with( Ladder* ) override;
 	void on_collide_with( Stone* ) override;
 	void on_collide_with_static_object() override;
+	bool on_pick_up( ecs::PickupKind kind ) override;
 	void on_collide_with( DynamicObject* ) override;
 
 public:

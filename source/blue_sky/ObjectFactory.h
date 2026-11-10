@@ -54,18 +54,30 @@ public:
 		CYLINDER,
 	};
 
-	/// 動かない物を作るときの決まり
-	struct StaticObjectSpec
+	/// ECS だけの物体を作るときの決まり（以前は種類ごとのクラスの仮想関数が返していた値）
+	struct ObjectSpec
 	{
 		string_t		kind;							///< 種類の名前（モデルの名前にも使う）
-		core::Vector	size = core::Vector::Zero;		///< 当たりの大きさ（幅・高さ・奥行き）
-		float_t			mass = 0.f;						///< 質量（0 なら動かない）
+		core::Vector	size = core::Vector::Zero;		///< 当たりの大きさ（幅・高さ・奥行き。以前の get_collision_width など）
+		float_t			mass = 0.f;						///< 質量（0 なら動かない。以前の get_default_mass）
 		Shape			shape = Shape::BOX;
 		core::Vector	location = core::Vector::Zero;	///< やり直したときの位置
 		core::Vector	rotation = core::Vector::Zero;	///< やり直したときの回転（度）
 		float_t			direction_degree = 0.f;			///< やり直したときの向き（度）
 		bool			load_model = true;				///< 種類の名前のモデルを読むか（後で別のモデルを設定するなら false）
+
+		bool			is_hard = true;					///< 硬い（硬くない物は当たりの応答を消す。以前の is_hard）
+		bool			is_block = true;				///< 壁になる（以前の is_block）
+		bool			is_safe_footing = false;		///< 着地しても死なない足場（以前の is_safe_footing）
+		bool			is_static_object = false;		///< 動かない物の印（StaticObjectComponent）を付けるか
+		float_t			height_offset = -1.f;			///< 足元から剛体の中心までの高さ（負なら当たりの高さの半分。以前の get_height_offset）
+		bool			has_default_gravity = false;	///< やり直したときの重力を gravity にするか（false なら 硬い物は地球の重力、硬くない物は 0）
+		core::Vector	gravity = core::Vector::Zero;
+		float_t			restart_mass = -1.f;			///< やり直したときに設定する質量（負なら変えない。以前の Goal::restart）
 	};
+
+	/// 動かない物の決まり（ステージの object 行など）
+	using StaticObjectSpec = ObjectSpec;
 
 private:
 	core::ecs::EntityManager*	entity_manager_;
@@ -101,8 +113,14 @@ public:
 	 */
 	EntityId create_static_object( std::stringstream& ss );
 
-	/// 決まりに従って動かない物を作る（create_static_object の中身。テストでも使う）
+	/// 決まりに従って動かない物を作る（動かない物の印を付けて create_entity_object を呼ぶ）
 	EntityId create_static_object( const StaticObjectSpec& spec );
+
+	/// 決まりに従って ECS だけの物体を作る（部品 : Transform・SimpleObject・PhysicsBody（形があれば）・TargetMover（mover は nullptr）・CollisionTraits・ObjectRender）
+	EntityId create_entity_object( const ObjectSpec& spec );
+
+	/// 種類の名前の物体のうち、最初に作ったもの（開発用の確かめ。無ければ std::nullopt）
+	std::optional< EntityId > find_first_of_kind( const string_t& kind ) const;
 
 	/// ステージの translation-object 行から動く床を作る（以前の TranslationObject。5 x 5 x 5 の箱・モデルは box-5x5x5）
 	EntityId create_translation_object( const core::Vector& location, float_t width, float_t height, float_t depth, float_t speed );

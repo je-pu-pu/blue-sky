@@ -14,12 +14,14 @@
 #include <blue_sky/ecs/component/PhysicsBodyComponent.h>
 #include <blue_sky/ecs/component/SimpleObjectComponent.h>
 #include <blue_sky/ecs/component/StaticObjectComponent.h>
+#include <blue_sky/ecs/component/PickupComponent.h>
 #include <blue_sky/ecs/component/TargetMoverComponent.h>
 #include <blue_sky/ecs/system/CollisionEventSystem.h>
 #include <blue_sky/ecs/system/MoveToTargetSystem.h>
 #include <blue_sky/ecs/system/ObjectRenderDataSystem.h>
 #include <blue_sky/ecs/system/PhysicsSyncSystem.h>
 #include <blue_sky/ecs/system/TranslationSystem.h>
+#include <blue_sky/ecs/system/SpinSystem.h>
 
 #include <GameObject/ActiveObject.h>
 
@@ -47,6 +49,7 @@ void ObjectFactory::setup_systems()
 	entity_manager_->add_system< ecs::CollisionEventSystem >( 0 );
 	entity_manager_->add_system< ecs::PhysicsSyncSystem >( 0 );
 	entity_manager_->add_system< ecs::TranslationSystem >( 0 );
+	entity_manager_->add_system< ecs::SpinSystem >( 0 );
 }
 
 std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const string_t& kind )
@@ -58,6 +61,26 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		spec.kind = kind;
 
 		return create_static_object( spec );
+	}
+
+	if ( kind == "medal" )
+	{
+		// 以前の Medal : 2 x 2 x 2・硬くない（当たりの応答なし・重力 0）・足元と剛体の中心が同じ・1 秒に 90 度回る。プレイヤーが拾う
+		ObjectSpec spec;
+		spec.kind = kind;
+		spec.size = Vector( 2.f, 2.f, 2.f );
+		spec.mass = 1.f;
+		spec.is_hard = false;
+		spec.is_block = false;
+		spec.height_offset = 0.f;
+
+		const EntityId id = create_entity_object( spec );
+		core::ecs::Entity* entity = entity_manager_->find( id );
+
+		entity->add_component< ecs::PickupComponent >()->kind = ecs::PickupKind::MEDAL;
+		entity->add_component< ecs::SpinComponent >()->degree_per_second = 90.f;
+
+		return id;
 	}
 
 	ActiveObject* active_object = create_active_object( kind );
@@ -159,6 +182,14 @@ ObjectFactory::EntityId ObjectFactory::create_static_object( std::stringstream& 
 
 ObjectFactory::EntityId ObjectFactory::create_static_object( const StaticObjectSpec& spec )
 {
+	ObjectSpec s = spec;
+	s.is_static_object = true;
+
+	return create_entity_object( s );
+}
+
+ObjectFactory::EntityId ObjectFactory::create_entity_object( const ObjectSpec& spec )
+{
 	setup_systems();
 
 	core::ecs::Entity* entity = entity_manager_->create_entity();
@@ -170,7 +201,9 @@ ObjectFactory::EntityId ObjectFactory::create_static_object( const StaticObjectS
 
 	auto* state = entity->add_component< ecs::SimpleObjectComponent >();
 	state->kind = spec.kind;
-	state->default_gravity = GameObject::GravityDefault;		// 動かない物は硬い（以前の GameObject::get_default_gravity）
+	// やり直したときの重力（以前の GameObject::get_default_gravity : 硬い物は地球の重力、硬くない物は 0。種類によって上書き）
+	state->default_gravity = spec.has_default_gravity ? spec.gravity : ( spec.is_hard ? GameObject::GravityDefault : Vector::Zero );
+	state->restart_mass = spec.restart_mass;
 
 	{
 		ecs::EntityObject object( entity );
@@ -179,7 +212,7 @@ ObjectFactory::EntityId ObjectFactory::create_static_object( const StaticObjectS
 		object.set_start_direction_degree( spec.direction_degree );
 	}
 
-	// 剛体（以前の ActiveObjectPhysics::add_active_object_as_box・cylinder と同じ大きさ・ずれ。硬いので当たりの応答を消さない）
+	// 剛体（以前の ActiveObjectPhysics::add_active_object_as_box・cylinder と同じ大きさ・ずれ。硬くない物は当たりの応答を消す）
 	if ( physics_ && spec.shape != Shape::NONE )
 	{
 		const float_t w = spec.size.x(), h = spec.size.y(), d = spec.size.z();
@@ -195,12 +228,21 @@ ObjectFactory::EntityId ObjectFactory::create_static_object( const StaticObjectS
 			: physics_->add_box_rigid_body( transform->transform, offset, half, spec.mass );
 
 		btRigidBody* body = owner.get();
-		ecs::object_body::set_mass( * body, spec.mass );
+
+		if ( ! spec.is_hard )
+		{
+			ecs::object_body::set_no_contact_response( * body, true );	// 以前の ActiveObjectPhysics::set_active_object_info_to_rigid_body
+		}
+
+		if ( spec.is_static_object )
+		{
+			ecs::object_body::set_mass( * body, spec.mass );			// 以前の create_static_object は作った後にもう一度設定していた（同じ値）
+		}
 
 		auto* body_component = entity->add_component< ecs::PhysicsBodyComponent >();
 		body_component->owner = std::move( owner );
 		body_component->body = body;
-		body_component->height_offset = h * 0.5f;	// 以前の GameObject::get_height_offset（当たりの高さの半分）
+		body_component->height_offset = spec.height_offset >= 0.f ? spec.height_offset : h * 0.5f;	// 以前の GameObject::get_height_offset（既定は当たりの高さの半分）
 
 		core::physics::set_entity_tag( body, id );
 	}
@@ -208,9 +250,18 @@ ObjectFactory::EntityId ObjectFactory::create_static_object( const StaticObjectS
 	// 目標地点・向きへ動かす（ActiveObject を持たないので、MoveToTargetSystem が部品を直接動かす）
 	entity->add_component< ecs::TargetMoverComponent >();
 
-	// 当たりの性質（動かない物は硬く、壁になる。以前の GameObject の既定値）と、動かない物の印
-	entity->add_component< ecs::CollisionTraitsComponent >();
-	entity->add_component< ecs::StaticObjectComponent >();
+	// 当たりの性質（以前は種類ごとのクラスの仮想関数）と、動かない物の印
+	{
+		auto* traits = entity->add_component< ecs::CollisionTraitsComponent >();
+		traits->is_hard = spec.is_hard;
+		traits->is_block = spec.is_block;
+		traits->is_safe_footing = spec.is_safe_footing;
+	}
+
+	if ( spec.is_static_object )
+	{
+		entity->add_component< ecs::StaticObjectComponent >();
+	}
 
 	auto* render = entity->add_component< ecs::ObjectRenderComponent >();
 
@@ -260,6 +311,22 @@ ObjectFactory::EntityId ObjectFactory::create_model_object( Model* model )
 	get_ref( id ).set_model( model );
 
 	return id;
+}
+
+std::optional< ObjectFactory::EntityId > ObjectFactory::find_first_of_kind( const string_t& kind ) const
+{
+	for ( const EntityId id : entity_object_list_ )
+	{
+		const core::ecs::Entity* entity = entity_manager_->find( id );
+		const auto* state = entity ? entity->get_component< ecs::SimpleObjectComponent >() : nullptr;
+
+		if ( state && state->kind == kind )
+		{
+			return id;
+		}
+	}
+
+	return std::nullopt;
 }
 
 void ObjectFactory::name( const string_t& name, EntityId id )

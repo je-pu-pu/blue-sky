@@ -38,27 +38,28 @@ namespace blue_sky
 {
 
 /**
- * オブジェクトを生成する
+ * プレイヤーの前方にオブジェクトを生成する（スクリプトの create_object_at_player_front）
  *
- * @param class_name クラス名
- * @return 生成したオブジェクト
- * プレイヤーの前方にオブジェクトを生成する
+ * @param class_name 種類の名前
+ * @return 生成したオブジェクト（知らない種類なら std::nullopt。スクリプトには nil）
  */
-ActiveObject* GamePlayScene::create_object_at_player_front( const char_t* class_name )
+std::optional< GameObjectRef > GamePlayScene::create_object_at_player_front( const char_t* class_name )
 {
-	ActiveObject* active_object = create_object( class_name );
+	auto id = get_object_factory()->create_object( class_name );
 
-	if ( ! active_object )
+	if ( ! id )
 	{
-		return 0;
+		return std::nullopt;
 	}
 
-	active_object->set_start_location( player_->get_location().x(), player_->get_location().y(), player_->get_location().z() + 3.f );
-	active_object->set_start_direction_degree( 0.f );
+	GameObjectRef o = get_object_factory()->get_ref( * id );
 
-	active_object->restart();
+	o.set_start_location( player_->get_location().x(), player_->get_location().y(), player_->get_location().z() + 3.f );
+	o.set_start_direction_degree( 0.f );
 
-	return active_object;
+	o.restart();
+
+	return o;
 }
 
 /**
@@ -100,7 +101,15 @@ void GamePlayScene::setup_command()
 	};
 
 	// --- スクリプト ---
-	get_script_manager()->set_function( "create_object_at_player_front", [this] ( const char_t* class_name ) { return create_object_at_player_front( class_name ); } );
+	get_script_manager()->set_function( "create_object_at_player_front", [this] ( const char_t* class_name ) -> sol::optional< GameObjectRef >
+	{
+		if ( auto o = create_object_at_player_front( class_name ) )
+		{
+			return * o;
+		}
+
+		return sol::nullopt;
+	} );
 
 	// --- 描画設定 ---
 	command_map_[ "set_line_type" ] = [this] ( const string_t& s ) { get_graphics_manager()->set_drawing_line_type( common::deserialize< int >( s ) ); };
@@ -506,27 +515,35 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( command == "girl" || command == "robot" || command == "balloon" || command == "medal" || command == "ladder" || command == "rocket" || command == "umbrella" || command == "stone" || command == "switch" )
 		{
-			ActiveObject* active_object = create_object( command.c_str() );
+			// 種類の名前から作る（ECS だけの物体になった種類も、まだ ActiveObject の種類も同じ入口）
+			auto id = get_object_factory()->create_object( command );
+
+			if ( ! id )
+			{
+				COMMON_THROW_EXCEPTION_MESSAGE( "create object failed. ( " + command + " )" );
+			}
+
+			GameObjectRef object = get_object_factory()->get_ref( * id );
 
 			float x = 0, y = 0, z = 0, r = 0;
 			ss >> x >> y >> z >> r;
 
-			active_object->set_start_location( x, y, z );
-			active_object->set_start_direction_degree( r );
+			object.set_start_location( x, y, z );
+			object.set_start_direction_degree( r );
 
 			if ( command == "girl" )
 			{
-				girl_ = static_cast< Girl* >( active_object );
+				girl_ = static_cast< Girl* >( object.get_active_object() );
 				girl_->set_player( player_ );
-				get_object_factory()->name( "girl", girl_->get_entity_id() );
+				get_object_factory()->name( "girl", * id );
 			}
 			else if ( command == "robot" )
 			{
-				Robot* robot = static_cast< Robot* >( active_object );
+				Robot* robot = static_cast< Robot* >( object.get_active_object() );
 				robot->set_player( player_ );
 			}
 
-			last_object = get_object_factory()->get_ref( active_object->get_entity_id() );
+			last_object = object;
 		}
 		else if ( command == "area-switch" )
 		{

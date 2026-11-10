@@ -5,6 +5,7 @@
 #include <blue_sky/ecs/component/SimpleObjectComponent.h>
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
 #include <blue_sky/ecs/component/ObjectRenderComponent.h>
+#include <blue_sky/ecs/component/PickupComponent.h>
 #include <blue_sky/ecs/system/PhysicsSyncSystem.h>
 
 #include <core/ecs/Entity.h>
@@ -199,6 +200,17 @@ void EntityObject::restart()
 		body->clearForces();
 
 		set_direction_degree( state_ ? state_->start_direction_degree : 0.f );
+
+		// 種類ごとのやり直し（以前は派生クラスの restart）
+		if ( state_ && state_->restart_mass >= 0.f )
+		{
+			object_body::set_mass( * body, state_->restart_mass );		// 以前の Goal::restart
+		}
+
+		if ( const auto* pickup = entity_->get_component< PickupComponent >(); pickup && pickup->disable_contact_on_pickup )
+		{
+			object_body::set_no_contact_response( * body, false );		// 以前の Rocket::restart（拾われたときに消した当たりの応答を戻す）
+		}
 	}
 
 	set_visible( true, true );

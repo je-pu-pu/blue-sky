@@ -6,7 +6,6 @@
 #include <GameObject/Robot.h>
 #include <GameObject/Goal.h>
 #include <GameObject/Balloon.h>
-#include <GameObject/Medal.h>
 #include <GameObject/Ladder.h>
 #include <GameObject/Rocket.h>
 #include <GameObject/Umbrella.h>
@@ -29,6 +28,10 @@
 #include <blue_sky/ecs/system/TranslationSystem.h>
 #include <blue_sky/ecs/component/ActiveObjectLinkComponent.h>
 #include <blue_sky/ecs/component/StaticObjectComponent.h>
+#include <blue_sky/ecs/component/PickupComponent.h>
+#include <blue_sky/ecs/system/SpinSystem.h>
+#include <blue_sky/ecs/EntityObject.h>
+#include <blue_sky/ecs/ObjectBody.h>
 
 #include <core/ecs/EntityManager.h>
 
@@ -45,14 +48,13 @@ ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics
 	object_creator_map_[ "robot"       ] = [this] () -> ActiveObject* { return new Robot( graphics_manager_ ); };	// テクスチャを得る GraphicsManager を渡す
 	object_creator_map_[ "goal"        ] = [] () -> ActiveObject* { return new Goal();         };
 	object_creator_map_[ "balloon"     ] = [] () -> ActiveObject* { return new Balloon();      };
-	object_creator_map_[ "medal"       ] = [] () -> ActiveObject* { return new Medal();        };
 	object_creator_map_[ "ladder"      ] = [] () -> ActiveObject* { return new Ladder();       };
 	object_creator_map_[ "rocket"      ] = [] () -> ActiveObject* { return new Rocket();       };
 	object_creator_map_[ "umbrella"    ] = [] () -> ActiveObject* { return new Umbrella();     };
 	object_creator_map_[ "stone"       ] = [] () -> ActiveObject* { return new Stone();        };
 	object_creator_map_[ "switch"      ] = [] () -> ActiveObject* { return new Switch();       };
 
-	// "static"（動かない物）は ECS だけの物体になり、ObjectFactory が作る（段階 4）
+	// "static"（動かない物）・"medal" は ECS だけの物体になり、ObjectFactory が作る（段階 4）
 
 }
 
@@ -164,6 +166,12 @@ void ActiveObjectManager::update()
 		system->update_translations( delta_time );
 	}
 
+	// 回る物（ECS だけの物体。以前は Medal::update）
+	if ( auto* system = entity_manager_->get_system< ecs::SpinSystem >() )
+	{
+		system->update_spins( delta_time );
+	}
+
 	// 目標地点・向きへ動かす（以前はここで 3 つの unordered_map を回していた。今は目標を持つ物体を Entity の番号の順に回す）
 	if ( auto* system = entity_manager_->get_system< ecs::MoveToTargetSystem >() )
 	{
@@ -259,6 +267,22 @@ void ActiveObjectManager::on_collide_with_entity_object( GameObject& object, con
 	if ( entity.get_component< ecs::StaticObjectComponent >() )
 	{
 		object.on_collide_with_static_object();
+	}
+
+	// 拾う物（以前の Medal・Rocket・Umbrella）: 相手が拾ったら（プレイヤーだけが true を返す）、この物体を死なせる。
+	// 以前は Medal なら Player::on_collide_with( Medal* ) が medal->kill() を呼び、Rocket・Umbrella は自分の on_collide_with( Player* ) で kill していた
+	if ( const auto* pickup = entity.get_component< ecs::PickupComponent >() )
+	{
+		if ( object.on_pick_up( pickup->kind ) )
+		{
+			ecs::EntityObject picked( const_cast< core::ecs::Entity* >( & entity ) );
+			picked.kill();
+
+			if ( pickup->disable_contact_on_pickup && picked.get_rigid_body() )
+			{
+				ecs::object_body::set_no_contact_response( * picked.get_rigid_body(), true );
+			}
+		}
 	}
 }
 

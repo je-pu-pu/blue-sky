@@ -309,7 +309,16 @@ TEST( StoryTextFilesTest, 同梱のファイルの中身が古い形式から変
 		EXPECT_TRUE( data.text.empty() );
 	}
 
-	// ほかの 22 個 : 雑音の画像を 1 枚、大きさ 1.6 → 3、回転 0 → 180（以前は layer-rotate と書いて無視されていた）、音声はファイルと同じ名前
+	// 0-0.intro の重なり : ほかと同じく回転を付けない（下の 22 個と同じ理由）
+	{
+		const StoryTextData data = StoryTextParser::parse_file( media_path( "stage/0-0.intro.toml" ).string() );
+
+		ASSERT_EQ( data.layers.size(), 1u );
+		EXPECT_FALSE( data.layers[ 0 ].rotation.has_value() );
+	}
+
+	// ほかの 22 個 : 雑音の画像を 1 枚、大きさ 1.6 → 3、音声はファイルと同じ名前。
+	// 回転は付けない（以前は layer-rotate と名前違いで書かれて 2013-08 から回っていなかった。その見た目を保つ。2026-11-11 利用者の決定）
 	for ( const char* stage : { "0-0", "0-1", "0-2", "0-3", "1-0", "1-1", "1-2", "1-3", "2-0", "2-1", "2-2", "2-3" } )
 	{
 		for ( const char* kind : { "intro", "outro" } )
@@ -335,10 +344,7 @@ TEST( StoryTextFilesTest, 同梱のファイルの中身が古い形式から変
 			EXPECT_DOUBLE_EQ( ( * layer.scale->from )[ 0 ], 1.6 );
 			EXPECT_DOUBLE_EQ( ( * layer.scale->to )[ 0 ], 3.0 );
 			EXPECT_DOUBLE_EQ( ( * layer.scale->speed )[ 0 ], 0.0001 );
-			ASSERT_TRUE( layer.rotation.has_value() );
-			EXPECT_DOUBLE_EQ( ( * layer.rotation->from )[ 0 ], 0.0 );
-			EXPECT_DOUBLE_EQ( ( * layer.rotation->to )[ 0 ], 180.0 );
-			EXPECT_DOUBLE_EQ( ( * layer.rotation->speed )[ 0 ], 0.1 );
+			EXPECT_FALSE( layer.rotation.has_value() );
 		}
 	}
 }

@@ -103,7 +103,7 @@ void StoryTextScene::load_story_text_file( const char* file_name )
 			apply_chase( layer->get_translation(), * desc.translation, [] ( Vector3& v, const std::array< double, 2 >& a ) { v.x() = static_cast< float >( a[ 0 ] ); v.y() = static_cast< float >( a[ 1 ] ); } );
 		}
 
-		// 回転（度。左上を中心に回る）。以前の形式では layer-rotate と書いてあり、読む側の名前（layer-rotation）と違って黙って無視されていた
+		// 回転（度。画面の中心で回る : 重なりは画面の中央に置かれ、描画用の座標は画面の中心が原点。render() を参照）。以前の形式では layer-rotate と書いてあり、読む側の名前（layer-rotation）と違って黙って無視されていた
 		if ( desc.rotation )
 		{
 			apply_chase( layer->get_rotation(), * desc.rotation, [] ( float_t& v, const std::array< double, 1 >& a ) { v = static_cast< float_t >( a[ 0 ] ); } );
@@ -263,6 +263,8 @@ void StoryTextScene::render()
 			for ( auto j = bg_sprite_layer_list_.begin(); j != bg_sprite_layer_list_.end(); ++j )
 			{
 
+				// 重なりは描く先を渡さないので、Sprite が画面の中央に置く。描画用の座標（Pixel2DSpace）は画面の中心が原点なので、
+				// 回転・拡大は画面の中心（＝重なりの中心）を軸にかかり、その後で translation だけ動く
 				Matrix r, s, t;
 
 				r.set_rotation_z( math::degree_to_radian( ( *j )->get_rotation().value() ) );

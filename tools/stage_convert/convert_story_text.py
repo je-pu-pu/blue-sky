@@ -10,8 +10,10 @@
     - 標準ライブラリだけで動く（Python 3.11 以上。tomllib で読み直して確かめる）
     - 文字コードは UTF-8（BOM があれば外す）で読み、読めなければ CP932 で読む。書き出すのは UTF-8
     - コメント（# で始まる行）は写す。数は書いてある文字列のまま写す（convert_stage.py の Num）
-    - layer-rotate は回転（rotation）として写す。以前の読み方は layer-rotation という名前しか読まず、
-      同梱の全ファイルにある layer-rotate を黙って無視していた（不具合。報告に出す）
+    - layer-rotate は回転（rotation）に写さず、コメントで残して報告に出す。以前の読み方は layer-rotation という
+      名前しか読まず、同梱の全ファイルにある layer-rotate を黙って無視していた（2013-08 から一度も回っていない）。
+      利用者の決定（2026-11-11）で、回っていなかった見た目を保つ。写すと、古い .intro を変換し直したときにまた回ってしまう。
+      回したい場面は TOML に rotation を書けば回る（layer-rotation と書いた行は rotation に写す）
     - 以前の読み方が読まなかった行・余った語は、TOML の値に書かずコメントで残し、報告に出す
     - 本文（text 行より後）は、以前の読み方が作った文字列と同じになるように写す
       （以前は 1 行ごとに改行を足し、ファイルが改行で終わると最後にもう 1 つ改行を足していた）
@@ -37,7 +39,6 @@ LAYER_DEFAULTS = {
 LAYER_COMMANDS = {
     "layer-translation": "translation",
     "layer-rotation": "rotation",
-    "layer-rotate": "rotation",
     "layer-scale": "scale",
     "layer-color": "color",
 }
@@ -129,14 +130,21 @@ def convert(path):
                 layer["src_rect"] = [int(float(n)) for n in nums]
             layer["after"] += extra(1 + len(nums))
             layers.append(layer)
+        elif command == "layer-rotate":
+            # 以前の読み方は知らない行として読まなかった（名前違い）。写さずにコメントで残す（上の決まり）
+            note(line_no, f"layer-rotate {' '.join(args)} を写さずコメントにした（以前の読み方は layer-rotation しか読まず、回っていなかった。その見た目を保つ）")
+            comment = f"# 回転は付けない : 以前の layer-rotate {' '.join(args)} は名前違いで 2013-08 から回っていなかった。その見た目を保つ（2026-11-11 利用者の決定）"
+            if layers:
+                layers[-1]["comments"] += take_pending()
+                layers[-1]["after"].append(comment)
+            else:
+                pending.append(comment)  # layer の前なら、次に置く所のコメントにする（以前も落ちずに無視していた）
         elif command in LAYER_COMMANDS:
             if not layers:
                 raise SystemExit(f"{path}:{line_no}: layer の前の {command} 行（以前の読み方では落ちる）")
             key = LAYER_COMMANDS[command]
             width = WIDTH[key]
             nums = leading_numbers(args[: width * 3])
-            if command == "layer-rotate":
-                note(line_no, "layer-rotate を回転（rotation）として写した（以前の読み方は layer-rotation しか読まず、黙って無視していた）")
             if command == "layer-color":
                 note(line_no, "layer-color : 以前の読み方は目標の透明度を今の透明度に入れていた（不具合）。書いた意図どおり from・to・speed に写した")
             if len(nums) % width:

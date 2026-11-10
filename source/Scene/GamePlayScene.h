@@ -26,7 +26,6 @@ namespace core::graphics
 
 namespace blue_sky
 {
-	class ActiveObject;
 	class Camera;
 	class DelayedCommand;
 
@@ -216,8 +215,6 @@ protected:
 	void render_far_billboards() const;
 	
 	void render_sprite( float_t rotho_offset = 0.f ) const;
-
-	void render_debug_axis_for_bones( const ActiveObject* ) const;
 
 	void render_debug_shadow_map_window() const;
 

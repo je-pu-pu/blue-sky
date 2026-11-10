@@ -1,7 +1,7 @@
 #include "Scene.h"
 
 #include <blue_sky/GameMain.h>
-#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ObjectUpdater.h>
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -56,9 +56,9 @@ Scene::EntityManager* Scene::get_entity_manager() const
 	return game_main_.get_entity_manager();
 }
 
-ActiveObjectManager* Scene::get_active_object_manager() const
+ObjectUpdater* Scene::get_object_updater() const
 {
-	return get_game_main()->get_active_object_manager();
+	return get_game_main()->get_object_updater();
 }
 
 ObjectFactory* Scene::get_object_factory() const
@@ -139,11 +139,6 @@ core::setting::SettingStore* Scene::get_setting_store() const
 core::graphics::direct_3d_11::BulletDebugDraw* Scene::get_bullet_debug_draw() const
 {
 	return game_main_.get_bullet_debug_draw();
-}
-
-ActiveObject* Scene::create_object( const char_t* class_name ) const
-{
-	return game_main_.create_object( class_name );
 }
 
 int Scene::get_width() const

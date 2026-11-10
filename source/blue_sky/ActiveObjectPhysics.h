@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GameObject/ActiveObject.h>
 #include <core/physics/Bullet/BulletPhysics.h>
 #include <blue_sky/ecs/system/CollisionEventSystem.h>
 
@@ -9,13 +8,13 @@ namespace core::ecs { class EntityManager; }
 namespace blue_sky
 {
 
-class ActiveObject;
-
 /**
- * ActiveObject 対応 BulletPhysics
+ * 本編の物理の世界（BulletPhysics。ステージの当たりの形・地面・物体の剛体）
  *
- * 剛体の userPointer には物体の Entity の番号のタグ（core/physics/EntityTag.h）が入る（ActiveObject が付ける。
- * 以前は ActiveObject* を入れ、当たりの判定でキャストしてその場で on_collide_with を呼んでいた）
+ * 剛体の userPointer には物体の Entity の番号のタグ（core/physics/EntityTag.h）が入る（ObjectFactory が付ける。
+ * 以前は ActiveObject* を入れ、当たりの判定でキャストしてその場で on_collide_with を呼んでいた）。
+ * 名前は以前のまま（ActiveObject は段階 6 で消した）。core::physics::PhysicsManager への統一（決定 1）は別の作業で、
+ * そのときにこのクラスごと消す（OBJ の当たりの形・地面・自分を除くレイ判定を PhysicsManager へ移すのが先）
  */
 class ActiveObjectPhysics : public BulletPhysics
 {
@@ -26,22 +25,10 @@ public:
 	ActiveObjectPhysics();
 	~ActiveObjectPhysics();
 
-	/// 物体の大きさの剛体を作って世界に入れ、持ち主を返す（物体の ActiveObject::set_rigid_body に渡す。以前は生ポインタを返し、世界が持っていた）
-	RigidBodyOwner add_active_object_as_box( ActiveObject* );
-	RigidBodyOwner add_active_object_as_capsule( ActiveObject* );
-	RigidBodyOwner add_active_object_as_cylinder( ActiveObject* );
-
-	void set_active_object_info_to_rigid_body( RigidBody*, ActiveObject* );
-
-	bool is_collision( ActiveObject*, ActiveObject* );
-
 	/// 2 つの剛体が接しているか（ECS だけの物体の剛体も渡せる。どちらかが nullptr なら false）
 	bool is_collision( btCollisionObject* a, btCollisionObject* b );
 
-	/// a と接している組を集める（以前の check_collision_with。その場で on_collide_with を呼ばず、集めた組は events が振り分けて渡す）
-	void collect_contacts_with( ActiveObject* a, ecs::CollisionEventSystem& events );
-
-	/// 剛体 a と接している組を集める（ECS だけの物体の剛体。プレイヤー）
+	/// 剛体 a と接している組を集める（以前の check_collision_with。その場で on_collide_with を呼ばず、集めた組は events が振り分けて渡す）
 	void collect_contacts_with( btCollisionObject* a, ecs::CollisionEventSystem& events );
 
 	/// 世界の中で接している組を全部集める（以前の check_collision_all。めり込んでいる接点 1 つにつき 1 組。順は以前と同じ）

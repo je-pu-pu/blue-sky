@@ -2,7 +2,8 @@
 
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/GameObjectRef.h>
-#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ecs/ContactRules.h>
+#include <blue_sky/ecs/component/PlayerBehaviorComponent.h>
 #include <blue_sky/ActiveObjectPhysics.h>
 
 #include <blue_sky/ecs/EntityObject.h>
@@ -43,12 +44,22 @@ using core::Vector;
 namespace
 {
 
-/// 描画なし・ActiveObject なしで工場を作る
+/// 描画なしで工場を作る
 struct Fixture
 {
 	blue_sky::ActiveObjectPhysics physics;
 	EntityManager manager;
-	ObjectFactory factory{ & manager, nullptr, & physics, nullptr };
+	ObjectFactory factory{ & manager, & physics, nullptr };
+
+	/// プレイヤー（ECS だけの物体）を作り、剛体も作る（段階 6 までは GameObject の仮想関数を実装した偽物を使っていた）
+	EntityId create_player()
+	{
+		const EntityId id = factory.create_player();
+		factory.add_player_rigid_body( id );
+		return id;
+	}
+
+	blue_sky::ecs::PlayerBehaviorComponent& player_of( EntityId id ) { return * entity( id )->get_component< blue_sky::ecs::PlayerBehaviorComponent >(); }
 
 	~Fixture()
 	{
@@ -65,23 +76,6 @@ struct Fixture
 		EXPECT_TRUE( id.has_value() );
 		return * id;
 	}
-};
-
-/// 当たりを受け取る偽の物体（ActiveObject の代わり。GameObject の仮想関数が呼ばれた回数を数える）
-class FakeObject : public blue_sky::GameObject
-{
-public:
-	bool reacts = true;			///< 梯子に反応する・石を拾う（プレイヤー）か
-
-	int ladder_count = 0;
-
-	void restart() override { }
-	void update() override { }
-	float_t get_collision_width() const override { return 1.f; }
-	float_t get_collision_height() const override { return 1.f; }
-	float_t get_collision_depth() const override { return 1.f; }
-
-	bool on_collide_with_ladder() override { ladder_count++; return reacts; }
 };
 
 bool is_near( const Vector& a, const Vector& b, float_t e = 0.0001f )
@@ -129,59 +123,38 @@ TEST( LadderStoneSwitchTest, 梯子に触れると相手に知らせ_反応し�
 	const auto id = f.create( "ladder" );
 	auto* cache = f.entity( id )->get_component< blue_sky::ecs::ContactCacheComponent >();
 
-	// 反応しない物体（敵など）: 知らせるが、覚えない（以前も梯子は Player との当たりでだけ音を鳴らした）
-	FakeObject robot;
-	robot.reacts = false;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( robot, 100, * f.entity( id ) );
+	// プレイヤーでない物体（敵）: 覚えない（以前も梯子は Player との当たりでだけ音を鳴らした）
+	const auto robot = f.create( "robot" );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( robot ), * f.entity( id ) );
 
-	EXPECT_EQ( robot.ladder_count, 1 );
-	EXPECT_FALSE( cache->cache.is_cached( 100 ) );
+	EXPECT_FALSE( cache->cache.is_cached( robot ) );
 
-	// プレイヤー : 知らせて、覚える
-	FakeObject player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, 200, * f.entity( id ) );
+	// プレイヤー : 梯子につかまり、梯子は覚える
+	const auto player = f.create_player();
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * f.entity( id ) );
 
-	EXPECT_EQ( player.ladder_count, 1 );
-	EXPECT_TRUE( cache->cache.is_cached( 200 ) );
+	EXPECT_TRUE( f.player_of( player ).is_on_ladder );
+	EXPECT_TRUE( cache->cache.is_cached( player ) );
 
 	// 0.5 秒で忘れる（ContactCacheSystem が減らす）
 	auto* system = f.manager.get_system< blue_sky::ecs::ContactCacheSystem >();
 	ASSERT_NE( system, nullptr );
 
 	system->update_caches( 0.3f );
-	EXPECT_TRUE( cache->cache.is_cached( 200 ) );
+	EXPECT_TRUE( cache->cache.is_cached( player ) );
 
 	system->update_caches( 0.3f );
-	EXPECT_FALSE( cache->cache.is_cached( 200 ) );
+	EXPECT_FALSE( cache->cache.is_cached( player ) );
 
 	// やり直すと忘れる
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, 200, * f.entity( id ) );
-	EXPECT_TRUE( cache->cache.is_cached( 200 ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( id ), * f.entity( player ) );
+	EXPECT_TRUE( cache->cache.is_cached( player ) );
 
 	f.factory.restart();
-	EXPECT_FALSE( cache->cache.is_cached( 200 ) );
+	EXPECT_FALSE( cache->cache.is_cached( player ) );
 }
 
 // ---- 石 ----
-
-namespace
-{
-
-/// 石を受け取る偽の物体（プレイヤー・敵・風船の代わり）。picks が true なら拾う（プレイヤー）
-class FakeStoneReceiver : public FakeObject
-{
-public:
-	bool picks = false;
-	std::vector< GameObjectRef > stones;
-
-	bool on_collide_with_stone( const GameObjectRef& stone ) override
-	{
-		stones.push_back( stone );
-		return picks;
-	}
-};
-
-} // namespace
 
 TEST( LadderStoneSwitchTest, 石は硬いが壁にならない投げられる物で_重力は_8_やり直すと貫通を防ぐ設定になる )
 {
@@ -227,27 +200,25 @@ TEST( LadderStoneSwitchTest, 石は毎フレーム_1_度ずつ回る )
 	EXPECT_FLOAT_EQ( f.entity( id )->get_component< blue_sky::ecs::SimpleObjectComponent >()->direction_degree, 2.f );
 }
 
-TEST( LadderStoneSwitchTest, 石に当たると相手に石の窓口を渡し_拾われたら石は死ぬ_拾わない相手なら生きたまま )
+TEST( LadderStoneSwitchTest, プレイヤーが石に当たると石の窓口を持って拾い_石は死ぬ_拾わない物なら生きたまま )
 {
 	Fixture f;
 
 	const auto id = f.create( "stone" );
 	const auto* traits = f.entity( id )->get_component< blue_sky::ecs::CollisionTraitsComponent >();
 
-	// 拾わない物体（敵・風船・スイッチ）: 石を受け取るが、石は生きたまま
-	FakeStoneReceiver robot;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( robot, 100, * f.entity( id ) );
+	// 拾わない物体（動かない物）: 石は生きたまま
+	const auto wall = f.create( "static" );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( wall ), * f.entity( id ) );
 
-	ASSERT_EQ( robot.stones.size(), 1u );
-	EXPECT_EQ( robot.stones[ 0 ].get_entity_id(), id );
 	EXPECT_FALSE( traits->is_dead );
 
-	// プレイヤー : 拾い、石は死んで描かれない
-	FakeStoneReceiver player;
-	player.picks = true;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, 200, * f.entity( id ) );
+	// プレイヤー : 拾い（石の窓口を持つ）、石は死んで描かれない
+	const auto player = f.create_player();
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * f.entity( id ) );
 
-	ASSERT_EQ( player.stones.size(), 1u );
+	ASSERT_EQ( f.player_of( player ).stone_list.size(), 1u );
+	EXPECT_EQ( f.player_of( player ).stone_list.front().get_entity_id(), id );
 	EXPECT_TRUE( traits->is_dead );
 	EXPECT_FALSE( f.entity( id )->get_component< blue_sky::ecs::ObjectRenderComponent >()->is_visible );
 }
@@ -259,12 +230,11 @@ TEST( LadderStoneSwitchTest, 拾った石を窓口で投げると生き返り_�
 	const auto id = f.create( "stone" );
 	f.factory.restart();
 
-	FakeStoneReceiver player;
-	player.picks = true;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, 200, * f.entity( id ) );
+	const auto player = f.create_player();
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( id ), * f.entity( player ) );
 
 	// 以前の Player::throw_stone と同じ手順（やり直す → 置く → 速度を設定する）
-	GameObjectRef stone = player.stones.front();
+	GameObjectRef stone = f.player_of( player ).stone_list.front();
 	stone.restart();
 	stone.set_location( Vector( 1.f, 2.f, 3.f ) );
 	stone.set_velocity( Vector( 0.f, 0.f, 8.f ) );
@@ -282,29 +252,6 @@ TEST( LadderStoneSwitchTest, 拾った石を窓口で投げると生き返り_�
 
 namespace
 {
-
-/// スイッチを押す偽のプレイヤー（剛体を持ち、速度を設定できる）
-class FakePresser : public FakeObject
-{
-	core::physics::RigidBody body_;
-
-public:
-	explicit FakePresser( blue_sky::ActiveObjectPhysics& physics )
-	{
-		blue_sky::Transform t;
-		t.set_identity();
-		blue_sky::Transform offset;
-		offset.set_identity();
-
-		body_ = physics.add_box_rigid_body( t, offset, Vector( 0.5f, 0.5f, 0.5f ), 1.f );
-		set_rigid_body_view( body_.get() );
-	}
-
-	~FakePresser() { set_rigid_body_view( nullptr ); }
-
-	bool presses = true;
-	bool can_press_switch() const override { return presses; }
-};
 
 blue_sky::ecs::SwitchComponent::State state_of( Fixture& f, EntityId id )
 {
@@ -437,28 +384,29 @@ TEST( LadderStoneSwitchTest, プレイヤーが速く触れると切り替わり
 	const auto id = f.create( "switch" );
 	f.factory.restart();
 
-	FakePresser player( f.physics );
+	const auto player = f.create_player();
+	GameObjectRef p = f.factory.get_ref( player );
 
 	// 遅い（0.5 未満）: 切り替わらないが、覚える
-	player.set_velocity( Vector( 0.4f, 0.f, 0.f ) );
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, 200, * f.entity( id ) );
+	p.set_velocity( Vector( 0.4f, 0.f, 0.f ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * f.entity( id ) );
 	EXPECT_EQ( state_of( f, id ), blue_sky::ecs::SwitchComponent::State::OFF );
 
 	// 速くても、覚えている間は切り替わらない
-	player.set_velocity( Vector( 1.f, 0.f, 0.f ) );
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, 200, * f.entity( id ) );
+	p.set_velocity( Vector( 1.f, 0.f, 0.f ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( id ), * f.entity( player ) );
 	EXPECT_EQ( state_of( f, id ), blue_sky::ecs::SwitchComponent::State::OFF );
 
 	// 触れ続けると覚え直すので、0.5 秒触れずにいてから
 	f.manager.get_system< blue_sky::ecs::ContactCacheSystem >()->update_caches( 0.6f );
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, 200, * f.entity( id ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * f.entity( id ) );
 	EXPECT_EQ( state_of( f, id ), blue_sky::ecs::SwitchComponent::State::ON );
 
-	// 押せない物体（敵など）は速くても切り替えない
-	FakePresser robot( f.physics );
-	robot.presses = false;
-	robot.set_velocity( Vector( 1.f, 0.f, 0.f ) );
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( robot, 300, * f.entity( id ) );
+	// プレイヤーでない物体（敵）は速くても切り替えない
+	const auto robot = f.create( "robot" );
+	f.factory.get_ref( robot ).set_velocity( Vector( 1.f, 0.f, 0.f ) );
+	f.manager.get_system< blue_sky::ecs::ContactCacheSystem >()->update_caches( 0.6f );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( robot ), * f.entity( id ) );
 	EXPECT_EQ( state_of( f, id ), blue_sky::ecs::SwitchComponent::State::ON );
 }
 
@@ -473,20 +421,20 @@ TEST( LadderStoneSwitchTest, 速く飛ぶ石はスイッチを切り替え_空�
 
 	// 遅い石では変わらない
 	f.factory.get_ref( stone ).set_velocity( Vector( 0.f, 0.f, 0.1f ) );
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( stone ), * f.entity( s ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( stone ), * f.entity( s ) );
 	EXPECT_EQ( state_of( f, s ), blue_sky::ecs::SwitchComponent::State::OFF );
 
 	// 速い石（どちらの順で渡しても同じ。覚えている間は変わらないので、忘れてから）
 	f.manager.get_system< blue_sky::ecs::ContactCacheSystem >()->update_caches( 0.6f );
 	f.factory.get_ref( stone ).set_velocity( Vector( 0.f, 0.f, 8.f ) );
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( s ), * f.entity( stone ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( s ), * f.entity( stone ) );
 	EXPECT_EQ( state_of( f, s ), blue_sky::ecs::SwitchComponent::State::ON );
 
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( stone ), * f.entity( area ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( stone ), * f.entity( area ) );
 	EXPECT_EQ( state_of( f, area ), blue_sky::ecs::SwitchComponent::State::OFF );
 
 	// 石でない物体どうしは何もしない
 	const auto wall = f.create( "static" );
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( wall ), * f.entity( s ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( wall ), * f.entity( s ) );
 	EXPECT_EQ( state_of( f, s ), blue_sky::ecs::SwitchComponent::State::ON );
 }

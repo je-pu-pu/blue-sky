@@ -2,11 +2,12 @@
 
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/GameObjectRef.h>
-#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ecs/ContactRules.h>
+#include <blue_sky/ecs/ObjectBody.h>
+#include <blue_sky/ecs/component/PlayerBehaviorComponent.h>
 #include <blue_sky/ActiveObjectPhysics.h>
 
 #include <blue_sky/ecs/EntityObject.h>
-#include <blue_sky/ecs/component/ActiveObjectLinkComponent.h>
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
 #include <blue_sky/ecs/component/ObjectRenderComponent.h>
 #include <blue_sky/ecs/component/PhysicsBodyComponent.h>
@@ -44,12 +45,16 @@ using core::Vector;
 namespace
 {
 
-/// 描画なし・ActiveObject なしで工場を作る
+/// 描画なしで工場を作る
 struct FactoryFixture
 {
 	blue_sky::ActiveObjectPhysics physics;
 	EntityManager manager;
-	ObjectFactory factory{ & manager, nullptr, & physics, nullptr };
+	ObjectFactory factory{ & manager, & physics, nullptr };
+
+	/// プレイヤー（ECS だけの物体。剛体なし）を作る（段階 6 までは GameObject の仮想関数を実装した偽物を使っていた）
+	core::ecs::EntityId create_player() { return factory.create_player(); }
+	blue_sky::ecs::PlayerBehaviorComponent& player_of( core::ecs::EntityId id ) { return * entity( id )->get_component< blue_sky::ecs::PlayerBehaviorComponent >(); }
 
 	~FactoryFixture()
 	{
@@ -68,24 +73,6 @@ struct FactoryFixture
 	}
 };
 
-/// 当たりを受け取る偽の物体（ActiveObject の代わり。GameObject の仮想関数が呼ばれた回数を数える）
-class FakeGameObject : public blue_sky::GameObject
-{
-public:
-	int static_object_count = 0;
-
-	void restart() override { }
-	void update() override { }
-	float_t get_collision_width() const override { return 1.f; }
-	float_t get_collision_height() const override { return 1.f; }
-	float_t get_collision_depth() const override { return 1.f; }
-
-	void on_collide_with_static_object() override { static_object_count++; }
-};
-
-/// 偽の物体の Entity の番号（当たりの互換の層に渡す。梯子・スイッチが触れた物体を覚えるのに使う）
-constexpr core::ecs::EntityId FakeObjectId = 1000;
-
 bool is_near( const Vector& a, const Vector& b, float_t e = 0.0001f )
 {
 	return std::abs( a.x() - b.x() ) < e && std::abs( a.y() - b.y() ) < e && std::abs( a.z() - b.z() ) < e;
@@ -95,7 +82,7 @@ bool is_near( const Vector& a, const Vector& b, float_t e = 0.0001f )
 
 // ---- 作った Entity が持つ部品 ----
 
-TEST( ObjectFactoryTest, 動かない物は_ActiveObject_を持たず部品だけで作られる )
+TEST( ObjectFactoryTest, 動かない物は部品だけで作られる )
 {
 	FactoryFixture f;
 
@@ -111,13 +98,12 @@ TEST( ObjectFactoryTest, 動かない物は_ActiveObject_を持たず部品だ�
 	EXPECT_NE( e->get_component< blue_sky::ecs::ObjectRenderComponent >(), nullptr );
 	EXPECT_EQ( e->get_component< blue_sky::ecs::TranslationComponent >(), nullptr );
 
-	// ActiveObject を持たない（互換の層の印が無い・目標へ動かす窓口は部品を直接動かす印の nullptr）
-	EXPECT_EQ( e->get_component< blue_sky::ecs::ActiveObjectLinkComponent >(), nullptr );
+	// 目標へ動かす窓口は部品を直接動かす印の nullptr
 	ASSERT_NE( e->get_component< blue_sky::ecs::TargetMoverComponent >(), nullptr );
 	EXPECT_EQ( e->get_component< blue_sky::ecs::TargetMoverComponent >()->mover, nullptr );
 
 	EXPECT_EQ( f.factory.get_entity_object_list().size(), 1u );
-	EXPECT_EQ( f.factory.get_ref( id ).get_active_object(), nullptr );
+	EXPECT_TRUE( f.factory.get_ref( id ).is_alive() );
 }
 
 TEST( ObjectFactoryTest, 動かない物の性質は以前の_StaticObject_と同じ_硬く壁になり足場では死ぬ )
@@ -186,7 +172,7 @@ TEST( ObjectFactoryTest, 種類の名前から作る_static_は_ECS_だけの物
 	ASSERT_TRUE( id.has_value() );
 	EXPECT_NE( f.entity( * id )->get_component< blue_sky::ecs::StaticObjectComponent >(), nullptr );
 
-	// プレイヤー（まだ ActiveObject）はシーンが作り、工場では作らない
+	// プレイヤーは create_player で作り、種類の名前からは作らない（以前もシーンが作っていた）
 	EXPECT_FALSE( f.factory.create_object( "player" ).has_value() );
 	EXPECT_FALSE( f.factory.create_object( "no-such-kind" ).has_value() );
 }
@@ -367,49 +353,29 @@ TEST( ObjectFactoryTest, 動く床は始めの位置を中心に_sin_cos_で動�
 	EXPECT_TRUE( is_near( f.factory.get_ref( id ).get_location(), expected ) );
 }
 
-// ---- 当たり（ActiveObject と ECS だけの物体の組。部品の組み合わせで決める） ----
+// ---- 当たり（部品の組み合わせで決める） ----
 
-TEST( ObjectFactoryTest, 動かない物に当たると相手に一度だけ知らせる_印の無い物には何もしない )
+TEST( ObjectFactoryTest, 動かない物に当たるとプレイヤーに知らせ_ロケットで飛んでいれば止まる_印の無い物には何もしない )
 {
 	FactoryFixture f;
-	FakeGameObject player;
+	const auto player = f.create_player();
 
 	const auto wall = f.create_from_line( "wall-3 0 0 0" );
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, FakeObjectId, * f.entity( wall ) );
 
-	EXPECT_EQ( player.static_object_count, 1 );
+	f.player_of( player ).action_mode = blue_sky::ecs::PlayerBehaviorComponent::ActionMode::ROCKET;
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * f.entity( wall ) );
+
+	EXPECT_EQ( f.player_of( player ).action_mode, blue_sky::ecs::PlayerBehaviorComponent::ActionMode::NONE );
 
 	// 動かない物の印が無い Entity
+	f.player_of( player ).action_mode = blue_sky::ecs::PlayerBehaviorComponent::ActionMode::ROCKET;
 	auto* other = f.manager.create_entity();
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, FakeObjectId, * other );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * other );
 
-	EXPECT_EQ( player.static_object_count, 1 );
+	EXPECT_EQ( f.player_of( player ).action_mode, blue_sky::ecs::PlayerBehaviorComponent::ActionMode::ROCKET );
 }
 
 // ---- 拾う物（段階 4 ②） ----
-
-namespace
-{
-
-/// 拾う物を拾う偽のプレイヤー（拾った種類を記録する）。picks が false なら拾わない物体（敵など）
-class FakePicker : public FakeGameObject
-{
-public:
-	bool picks = true;
-	std::vector< blue_sky::ecs::PickupKind > picked;
-
-	bool on_pick_up( blue_sky::ecs::PickupKind kind ) override
-	{
-		if ( picks )
-		{
-			picked.push_back( kind );
-		}
-
-		return picks;
-	}
-};
-
-} // namespace
 
 TEST( ObjectFactoryTest, メダルは拾う物で回り_硬くなく当たりの応答を持たない )
 {
@@ -444,18 +410,16 @@ TEST( ObjectFactoryTest, プレイヤーがメダルに当たると拾って_メ
 	const auto id = * f.factory.create_object( "medal" );
 	const auto* traits = f.entity( id )->get_component< blue_sky::ecs::CollisionTraitsComponent >();
 
-	// 拾わない物体（敵など）: 何も起きない（以前も Medal との当たりは Player だけが受け取っていた）
-	FakePicker robot;
-	robot.picks = false;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( robot, FakeObjectId, * f.entity( id ) );
+	// プレイヤーでない物体（敵）: 何も起きない（以前も Medal との当たりは Player だけが受け取っていた）
+	const auto robot = * f.factory.create_object( "robot" );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( robot ), * f.entity( id ) );
 	EXPECT_FALSE( traits->is_dead );
 
 	// プレイヤー : 拾い、メダルは死んで描かれなくなる
-	FakePicker player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, FakeObjectId, * f.entity( id ) );
+	const auto player = f.create_player();
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * f.entity( id ) );
 
-	ASSERT_EQ( player.picked.size(), 1u );
-	EXPECT_EQ( player.picked[ 0 ], blue_sky::ecs::PickupKind::MEDAL );
+	EXPECT_TRUE( f.player_of( player ).has_medal );
 	EXPECT_TRUE( traits->is_dead );
 	EXPECT_FALSE( f.entity( id )->get_component< blue_sky::ecs::ObjectRenderComponent >()->is_visible );
 
@@ -479,13 +443,12 @@ TEST( ObjectFactoryTest, ロケットは硬い拾う物で_拾われると当た
 	EXPECT_TRUE( traits->is_hard );
 	EXPECT_FALSE( traits->is_block );
 	EXPECT_EQ( body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
-	EXPECT_TRUE( is_near( e->get_component< blue_sky::ecs::SimpleObjectComponent >()->default_gravity, blue_sky::GameObject::GravityDefault ) );
+	EXPECT_TRUE( is_near( e->get_component< blue_sky::ecs::SimpleObjectComponent >()->default_gravity, blue_sky::ecs::object_body::GravityDefault ) );
 
-	FakePicker player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, FakeObjectId, * e );
+	const auto player = f.create_player();
+	blue_sky::ecs::contact_rules::on_collide( * e, * f.entity( player ) );
 
-	ASSERT_EQ( player.picked.size(), 1u );
-	EXPECT_EQ( player.picked[ 0 ], blue_sky::ecs::PickupKind::ROCKET );
+	EXPECT_EQ( f.player_of( player ).get_item_count( blue_sky::ecs::PlayerBehaviorComponent::ItemType::ROCKET ), 1 );
 	EXPECT_TRUE( traits->is_dead );
 	EXPECT_NE( body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
 
@@ -517,11 +480,13 @@ TEST( ObjectFactoryTest, ゴールは死なない足場で重力が無く_やり
 	EXPECT_FLOAT_EQ( body->getInvMass(), 1.f / 100.f );
 	EXPECT_NEAR( body->getGravity().length(), 0.f, 0.0001f );
 
-	FakePicker player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, FakeObjectId, * e );
+	// プレイヤーが当たっても何も起こさない（拾わない・ロケットも止めない。ゴールしたかはシーンがプレイヤーとの接触で調べる）
+	const auto player = f.create_player();
+	f.player_of( player ).action_mode = blue_sky::ecs::PlayerBehaviorComponent::ActionMode::ROCKET;
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * e );
 
-	EXPECT_TRUE( player.picked.empty() );
-	EXPECT_EQ( player.static_object_count, 0 );
+	EXPECT_EQ( f.player_of( player ).action_mode, blue_sky::ecs::PlayerBehaviorComponent::ActionMode::ROCKET );
+	EXPECT_FALSE( f.player_of( player ).has_medal );
 	EXPECT_FALSE( traits->is_dead );
 }
 
@@ -539,8 +504,10 @@ TEST( ObjectFactoryTest, 傘は硬くない拾う物で_プレイヤーが触れ
 	EXPECT_FALSE( e->get_component< blue_sky::ecs::CollisionTraitsComponent >()->is_hard );
 	EXPECT_FLOAT_EQ( e->get_component< blue_sky::ecs::PhysicsBodyComponent >()->height_offset, 1.f );
 
-	FakePicker player;
-	blue_sky::ActiveObjectManager::on_collide_with_entity_object( player, FakeObjectId, * e );
+	// 以前から、プレイヤーの持ち物は増えない
+	const auto player = f.create_player();
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * e );
 
 	EXPECT_TRUE( e->get_component< blue_sky::ecs::CollisionTraitsComponent >()->is_dead );
+	EXPECT_EQ( f.player_of( player ).get_item_count( blue_sky::ecs::PlayerBehaviorComponent::ItemType::UMBRELLA ), 0 );
 }

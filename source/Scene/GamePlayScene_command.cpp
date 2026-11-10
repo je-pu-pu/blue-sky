@@ -14,7 +14,6 @@
 #include <core/sound/SoundManager.h>
 
 #include <blue_sky/ActiveObjectPhysics.h>
-#include <blue_sky/ActiveObjectManager.h>
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/ScriptManager.h>
 

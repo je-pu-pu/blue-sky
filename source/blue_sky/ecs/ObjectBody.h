@@ -14,6 +14,12 @@ namespace blue_sky::ecs::object_body
  * GameObject の同じ名前の関数は、これを呼ぶ
  */
 
+/// 硬い物のやり直したときの重力（地球。以前の GameObject::GravityDefault）
+extern const core::Vector GravityDefault;
+
+/// location にあって velocity で動く物が、target_location に近づいているか（以前の GameObject::is_moving_to。敵が石に当たったときに使う）
+bool is_moving_to( const core::Vector& location, const core::Vector& velocity, const core::Vector& target_location );
+
 /// 速度（剛体の線形速度）
 const core::Vector& get_velocity( const btRigidBody& body );
 

@@ -15,8 +15,6 @@ namespace core::sound { class SoundManager; }
 namespace blue_sky
 {
 
-class ActiveObject;
-class ActiveObjectManager;
 class ActiveObjectPhysics;
 
 namespace graphics
@@ -28,18 +26,17 @@ namespace graphics
 /**
  * ゲームの物体を種類の名前から作り、名前で引けるようにする（作った物体は EntityId で指す）
  *
- * 以前はばらばらにあった「名前 → 作り方」をここへ集めていく（段階 4。移した種類から）:
- *   - ActiveObjectManager の object_creator_map_（"static" をここへ移した。ほかの種類はまだ ActiveObjectManager が作る）
- *   - GameMain::create_object（スクリプトの create_object。剛体は箱・モデルは種類の名前で読む）
+ * 以前はばらばらにあった「名前 → 作り方」をここへ集めた（段階 4〜6）:
+ *   - ActiveObjectManager の object_creator_map_（種類ごとのクラスを作っていた）
+ *   - GameMain::create_object（スクリプトの create_object）
  *   - ステージの object・static-object・dynamic-object・translation-object 行と game_object.create（ActiveObjectManager::create_static_object・TranslationObject）
  *   - 物体の名前の表（以前は ActiveObjectManager の named_active_object_map_ が ActiveObject* を持っていた。今は EntityId を持つ）
+ *   - プレイヤー（以前は GamePlayScene が new Player() していた。create_player）
  *
- * 動かない物（"static"・ステージの object 行）と動く床（translation-object）は、ActiveObject を持たない ECS だけの物体として作る
- * （部品 : Transform・PhysicsBody・TargetMover（mover は nullptr）・CollisionTraits・StaticObject・SimpleObject・ObjectRender。動く床は Translation も）。
- * まだ ActiveObject の種類は ActiveObjectManager が作り、ここは EntityId を返す。
+ * 物体はすべて ECS だけの物体（部品 : Transform・SimpleObject・PhysicsBody・TargetMover（mover は nullptr）・CollisionTraits・ObjectRender と、
+ * 種類ごとの部品）。段階 6 で ActiveObject の種類が無くなり、ActiveObjectManager を消した（毎フレームの System の順は ObjectUpdater）。
  *
- * ECS だけの物体の寿命は、ここが持つ（clear で Entity を消す。剛体の持ち主も部品なので一緒に消える）。
- * clear は ActiveObjectManager::clear も呼ぶ（物体の片付けの入口を 1 つにする）
+ * 物体の寿命は、ここが持つ（clear で Entity を消す。剛体の持ち主も部品なので一緒に消える）
  */
 class ObjectFactory
 {
@@ -85,7 +82,6 @@ public:
 
 private:
 	core::ecs::EntityManager*	entity_manager_;
-	ActiveObjectManager*		active_object_manager_;		///< まだ ActiveObject の種類を作る先（nullptr ならその種類は作れない。テスト）
 	ActiveObjectPhysics*		physics_;					///< 剛体を作る世界（nullptr なら剛体を作らない。テスト）
 	graphics::GraphicsManager*	graphics_manager_;			///< モデル・定数バッファを作る先（nullptr ならモデル・定数バッファを用意しない。テスト）
 	core::sound::SoundManager*	sound_manager_;				///< ECS だけの物体の位置で音を鳴らす先（スイッチ。nullptr なら鳴らさない。テスト）
@@ -97,7 +93,7 @@ private:
 	void setup_systems();
 
 public:
-	ObjectFactory( core::ecs::EntityManager* entity_manager, ActiveObjectManager* active_object_manager, ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager = nullptr );
+	ObjectFactory( core::ecs::EntityManager* entity_manager, ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager = nullptr );
 
 	/**
 	 * 種類の名前から物体を作る（スクリプトの create_object。以前の GameMain::create_object）
@@ -107,9 +103,6 @@ public:
 	 * @return 作った物体（知らない種類ならログを残して std::nullopt）
 	 */
 	std::optional< EntityId > create_object( const string_t& kind );
-
-	/// まだ ActiveObject の種類を作る（create_object の中身。GameMain::create_object・シーンが ActiveObject* を必要とする所が使う）
-	ActiveObject* create_active_object( const string_t& kind );
 
 	/**
 	 * ステージの object 行・game_object.create から動かない物を作る（以前の ActiveObjectManager::create_static_object）
@@ -174,10 +167,10 @@ public:
 	/// 名前で引いて窓口を作る（無ければ std::nullopt）
 	std::optional< GameObjectRef > find_ref( const string_t& name ) const;
 
-	/// 全部の物体をやり直す（ActiveObject → ECS だけの物体の順。以前の ActiveObjectManager::restart）
+	/// 全部の物体を作った順にやり直し、目標地点・向きを捨てる（以前の ActiveObjectManager::restart）
 	void restart();
 
-	/// 全部の物体を片付ける（ActiveObject と ECS だけの物体を壊し、名前を忘れる）。物理の世界を片付ける前に呼ぶこと
+	/// 全部の物体を片付ける（Entity を消し、名前を忘れる）。物理の世界を片付ける前に呼ぶこと
 	void clear();
 
 	/// ここが作った ECS だけの物体（作った順）
@@ -186,7 +179,7 @@ public:
 	/**
 	 * 開発用 : 作った物体の一覧を 1 行ずつ返す（BLUE_SKY_DEBUG_DUMP_STAGE。ステージの読み方を変える前と後で比べるため）
 	 *
-	 * ActiveObject と ECS だけの物体を EntityId の順に並べ、番号・種類・位置・向き・名前・スイッチのイベントの数を書く
+	 * 物体を EntityId の順に並べ、番号・種類・位置・向き・名前・スイッチのイベントの数を書く
 	 */
 	std::vector< string_t > describe_objects() const;
 };

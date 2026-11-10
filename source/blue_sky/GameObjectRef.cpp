@@ -1,7 +1,5 @@
 #include "GameObjectRef.h"
 
-#include <GameObject/ActiveObject.h>
-
 #include <blue_sky/ConstantBuffers.h>
 #include <blue_sky/DebugLog.h>
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -9,7 +7,6 @@
 
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/ObjectBody.h>
-#include <blue_sky/ecs/component/ActiveObjectLinkComponent.h>
 #include <blue_sky/ecs/component/AnimationComponent.h>
 #include <blue_sky/ecs/component/ObjectRenderComponent.h>
 #include <blue_sky/ecs/component/SimpleObjectComponent.h>
@@ -47,14 +44,6 @@ bool GameObjectRef::is_alive() const
 	return find_entity() != nullptr;
 }
 
-ActiveObject* GameObjectRef::get_active_object() const
-{
-	core::ecs::Entity* entity = find_entity();
-	const auto* link = entity ? entity->get_component< ecs::ActiveObjectLinkComponent >() : nullptr;
-
-	return link ? link->object : nullptr;
-}
-
 void GameObjectRef::log_unsupported( const char* operation ) const
 {
 	const core::ecs::Entity* entity = find_entity();
@@ -65,21 +54,11 @@ void GameObjectRef::log_unsupported( const char* operation ) const
 
 btRigidBody* GameObjectRef::get_rigid_body() const
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		return o->get_rigid_body();
-	}
-
 	return ecs::EntityObject( find_entity() ).get_rigid_body();
 }
 
 core::Vector GameObjectRef::get_location() const
 {
-	if ( const ActiveObject* o = get_active_object() )
-	{
-		return o->get_location();
-	}
-
 	ecs::EntityObject object( find_entity() );
 
 	return object.is_valid() ? object.get_location() : core::Vector::Zero;
@@ -87,12 +66,6 @@ core::Vector GameObjectRef::get_location() const
 
 void GameObjectRef::set_location( const core::Vector& location )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_location( location );
-		return;
-	}
-
 	ecs::EntityObject object( find_entity() );
 
 	if ( object.is_valid() )
@@ -103,11 +76,6 @@ void GameObjectRef::set_location( const core::Vector& location )
 
 float_t GameObjectRef::get_direction_degree() const
 {
-	if ( const ActiveObject* o = get_active_object() )
-	{
-		return o->get_direction_degree();
-	}
-
 	ecs::EntityObject object( find_entity() );
 
 	return object.is_valid() ? object.get_direction_degree() : 0.f;
@@ -115,12 +83,6 @@ float_t GameObjectRef::get_direction_degree() const
 
 void GameObjectRef::set_direction_degree( float_t degree )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_direction_degree( degree );
-		return;
-	}
-
 	ecs::EntityObject object( find_entity() );
 
 	if ( object.is_valid() )
@@ -131,11 +93,6 @@ void GameObjectRef::set_direction_degree( float_t degree )
 
 core::Vector GameObjectRef::get_velocity() const
 {
-	if ( const ActiveObject* o = get_active_object() )
-	{
-		return o->get_velocity();
-	}
-
 	ecs::EntityObject object( find_entity() );
 
 	return object.is_valid() ? object.get_velocity() : core::Vector::Zero;
@@ -143,17 +100,11 @@ core::Vector GameObjectRef::get_velocity() const
 
 bool GameObjectRef::is_moving_to( const core::Vector& location ) const
 {
-	return GameObject::is_moving_to( get_location(), get_velocity(), location );
+	return ecs::object_body::is_moving_to( get_location(), get_velocity(), location );
 }
 
 void GameObjectRef::set_velocity( const core::Vector& velocity )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_velocity( velocity );
-		return;
-	}
-
 	ecs::EntityObject object( find_entity() );
 
 	if ( object.is_valid() )
@@ -164,12 +115,6 @@ void GameObjectRef::set_velocity( const core::Vector& velocity )
 
 void GameObjectRef::set_start_location( float_t x, float_t y, float_t z )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_start_location( x, y, z );
-		return;
-	}
-
 	ecs::EntityObject object( find_entity() );
 
 	if ( object.is_valid() )
@@ -180,12 +125,6 @@ void GameObjectRef::set_start_location( float_t x, float_t y, float_t z )
 
 void GameObjectRef::set_start_rotation( float_t x, float_t y, float_t z )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_start_rotation( x, y, z );
-		return;
-	}
-
 	ecs::EntityObject object( find_entity() );
 
 	if ( object.is_valid() )
@@ -196,12 +135,6 @@ void GameObjectRef::set_start_rotation( float_t x, float_t y, float_t z )
 
 void GameObjectRef::set_start_direction_degree( float_t degree )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_start_direction_degree( degree );
-		return;
-	}
-
 	ecs::EntityObject object( find_entity() );
 
 	if ( object.is_valid() )
@@ -223,11 +156,7 @@ btRigidBody* find_rigid_body( core::ecs::Entity* entity )
 
 void GameObjectRef::set_mass( float_t mass )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_mass( mass );
-	}
-	else if ( btRigidBody* body = find_rigid_body( find_entity() ) )
+	if ( btRigidBody* body = find_rigid_body( find_entity() ) )
 	{
 		ecs::object_body::set_mass( * body, mass );
 	}
@@ -235,11 +164,7 @@ void GameObjectRef::set_mass( float_t mass )
 
 void GameObjectRef::set_gravity( const core::Vector& gravity )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_gravity( gravity );
-	}
-	else if ( btRigidBody* body = find_rigid_body( find_entity() ) )
+	if ( btRigidBody* body = find_rigid_body( find_entity() ) )
 	{
 		ecs::object_body::set_gravity( * body, gravity );
 	}
@@ -247,11 +172,7 @@ void GameObjectRef::set_gravity( const core::Vector& gravity )
 
 void GameObjectRef::set_friction( float_t friction )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_friction( friction );
-	}
-	else if ( btRigidBody* body = find_rigid_body( find_entity() ) )
+	if ( btRigidBody* body = find_rigid_body( find_entity() ) )
 	{
 		ecs::object_body::set_friction( * body, friction );
 	}
@@ -259,11 +180,7 @@ void GameObjectRef::set_friction( float_t friction )
 
 void GameObjectRef::set_angular_factor( const core::Vector& factor )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_angular_factor( factor );
-	}
-	else if ( btRigidBody* body = find_rigid_body( find_entity() ) )
+	if ( btRigidBody* body = find_rigid_body( find_entity() ) )
 	{
 		ecs::object_body::set_angular_factor( * body, factor );
 	}
@@ -271,11 +188,7 @@ void GameObjectRef::set_angular_factor( const core::Vector& factor )
 
 void GameObjectRef::set_kinematic( bool is_kinematic )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_kinematic( is_kinematic );
-	}
-	else if ( btRigidBody* body = find_rigid_body( find_entity() ) )
+	if ( btRigidBody* body = find_rigid_body( find_entity() ) )
 	{
 		ecs::object_body::set_kinematic( * body, is_kinematic );
 	}
@@ -283,11 +196,7 @@ void GameObjectRef::set_kinematic( bool is_kinematic )
 
 void GameObjectRef::set_no_contact_response( bool is_no_contact_response )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_no_contact_response( is_no_contact_response );
-	}
-	else if ( btRigidBody* body = find_rigid_body( find_entity() ) )
+	if ( btRigidBody* body = find_rigid_body( find_entity() ) )
 	{
 		ecs::object_body::set_no_contact_response( * body, is_no_contact_response );
 	}
@@ -295,12 +204,6 @@ void GameObjectRef::set_no_contact_response( bool is_no_contact_response )
 
 void GameObjectRef::set_flicker_scale( float_t scale )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_flicker_scale( scale );
-		return;
-	}
-
 	// ECS だけの物体は、ゆらぎの大きさの部品を持つもの（少女・敵）だけ
 	core::ecs::Entity* entity = find_entity();
 
@@ -315,12 +218,6 @@ void GameObjectRef::set_flicker_scale( float_t scale )
 
 void GameObjectRef::play_animation( const char_t* name, bool force, bool loop )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->play_animation( name, force, loop );
-		return;
-	}
-
 	core::ecs::Entity* entity = find_entity();
 
 	if ( auto* animation = entity ? entity->get_component< ecs::AnimationComponent >() : nullptr )
@@ -331,16 +228,6 @@ void GameObjectRef::play_animation( const char_t* name, bool force, bool loop )
 
 void GameObjectRef::set_animation_speed( float_t speed )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		if ( o->get_animation_player() )
-		{
-			o->get_animation_player()->set_speed( speed );
-		}
-
-		return;
-	}
-
 	core::ecs::Entity* entity = find_entity();
 
 	if ( auto* animation = entity ? entity->get_component< ecs::AnimationComponent >() : nullptr )
@@ -351,12 +238,6 @@ void GameObjectRef::set_animation_speed( float_t speed )
 
 void GameObjectRef::action( const string_t& action )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->action( action );
-		return;
-	}
-
 	core::ecs::Entity* entity = find_entity();
 
 	if ( ! entity )
@@ -435,12 +316,6 @@ void GameObjectRef::action( const string_t& action )
 
 void GameObjectRef::kill()
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->kill();
-		return;
-	}
-
 	if ( core::ecs::Entity* entity = find_entity() )
 	{
 		ecs::EntityObject( entity ).kill();
@@ -449,12 +324,6 @@ void GameObjectRef::kill()
 
 void GameObjectRef::restart()
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->restart();
-		return;
-	}
-
 	ecs::EntityObject object( find_entity() );
 
 	if ( object.is_valid() )
@@ -465,11 +334,6 @@ void GameObjectRef::restart()
 
 GameObjectRef::Model* GameObjectRef::get_model() const
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		return o->get_model();
-	}
-
 	core::ecs::Entity* entity = find_entity();
 	const auto* render = entity ? entity->get_component< ecs::ObjectRenderComponent >() : nullptr;
 
@@ -478,12 +342,6 @@ GameObjectRef::Model* GameObjectRef::get_model() const
 
 void GameObjectRef::set_model( Model* model )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->set_model( model );
-		return;
-	}
-
 	core::ecs::Entity* entity = find_entity();
 	auto* render = entity ? entity->get_component< ecs::ObjectRenderComponent >() : nullptr;
 
@@ -512,11 +370,6 @@ void GameObjectRef::set_model( Model* model )
 
 bool GameObjectRef::make_model_unique()
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		return o->make_model_unique();
-	}
-
 	Model* model = get_model();
 
 	if ( ! model || ! graphics_manager_ )
@@ -531,12 +384,6 @@ bool GameObjectRef::make_model_unique()
 
 void GameObjectRef::add_event_handler( const char_t* name, const EventHandler& handler )
 {
-	if ( ActiveObject* o = get_active_object() )
-	{
-		o->add_event_handler( name, handler );
-		return;
-	}
-
 	// スイッチ（以前の BaseSwitch::add_event_handler）
 	if ( auto* system = entity_manager_ ? entity_manager_->get_system< ecs::SwitchSystem >() : nullptr; system && system->add_event_handler( id_, name, handler ) )
 	{
@@ -552,7 +399,7 @@ void GameObjectRef::set_target_location( const core::Vector& location, float_t s
 
 	if ( ! system || ! is_alive() || ! system->set_target_location( id_, location, speed ) )
 	{
-		debug_log( "[Object] 目標地点を設定できません（物体の Entity が無い。ActiveObjectManager に加えていない・片付けた後）" );
+		debug_log( "[Object] 目標地点を設定できません（物体の Entity が無い。片付けた後）" );
 		return;
 	}
 

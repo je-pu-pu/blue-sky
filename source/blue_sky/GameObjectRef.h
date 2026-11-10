@@ -16,8 +16,6 @@ namespace core::ecs
 namespace blue_sky
 {
 
-class ActiveObject;
-
 namespace graphics
 {
 	class GraphicsManager;
@@ -28,10 +26,8 @@ namespace graphics
  * ゲームの物体を EntityId で指す（Lua の "GameObject" 型・ステージのコマンドが物体を操作する窓口）
  *
  * 以前は ActiveObject* そのものを Lua に渡し、ステージのコマンドも名前で引いた ActiveObject* を操作していた。
- * ECS だけの物体（ActiveObject を持たない物体。段階 4 で移した種類）も同じように触れるよう、EntityId を包む。
- *
- * - ActiveObject を持つ物体（ActiveObjectLinkComponent がある）は、その ActiveObject のメンバ関数を呼ぶ（互換の層）
- * - 持たない物体は、部品を通して同じ決まりで動かす（ecs::EntityObject）
+ * 今はゲームの物体がすべて ECS だけの物体なので、EntityId を包み、部品を通して同じ決まりで動かす（ecs::EntityObject）。
+ * 段階 6 でプレイヤーも ECS だけの物体にし、ActiveObject を持つ物体への互換の分岐は消した
  *
  * 値で持ってよい（Entity が消えたら何もしない。is_alive で確かめられる）。EntityId は二度と使わない番号なので、別の物体を指すことは無い
  */
@@ -61,9 +57,6 @@ public:
 
 	/// 指している Entity がまだあるか
 	bool is_alive() const;
-
-	/// ActiveObject を持つ物体ならその ActiveObject（ECS だけの物体・消えた物体なら nullptr）
-	ActiveObject* get_active_object() const;
 
 	/// 剛体（無ければ nullptr。持ち主ではない）
 	btRigidBody* get_rigid_body() const;

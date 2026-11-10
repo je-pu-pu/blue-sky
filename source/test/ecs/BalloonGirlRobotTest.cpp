@@ -2,7 +2,7 @@
 
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/GameObjectRef.h>
-#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ecs/ContactRules.h>
 #include <blue_sky/ActiveObjectPhysics.h>
 
 #include <blue_sky/ecs/EntityObject.h>
@@ -50,7 +50,7 @@ struct Fixture
 {
 	blue_sky::ActiveObjectPhysics physics;
 	EntityManager manager;
-	ObjectFactory factory{ & manager, nullptr, & physics, nullptr };
+	ObjectFactory factory{ & manager, & physics, nullptr };
 
 	~Fixture()
 	{
@@ -148,14 +148,14 @@ TEST( BalloonGirlRobotTest, 風船に触れると相手に知らせ_つかんだ
 
 	// 揺らぎ中のプレイヤー : つかまない
 	player.is_flickering = true;
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( holder_id ), * f.entity( id ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( holder_id ), * f.entity( id ) );
 
 	EXPECT_EQ( player.balloon_sequence_count, 0 );
 	EXPECT_FALSE( f.entity( id )->get_component< blue_sky::ecs::BalloonHoldComponent >()->is_held() );
 
 	// プレイヤー : つかむ（組の向きによらない）
 	player.is_flickering = false;
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( id ), * f.entity( holder_id ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( id ), * f.entity( holder_id ) );
 
 	EXPECT_EQ( player.balloon_sequence_count, 1 );
 	EXPECT_EQ( player.balloon, id );
@@ -163,7 +163,7 @@ TEST( BalloonGirlRobotTest, 風船に触れると相手に知らせ_つかんだ
 	EXPECT_TRUE( f.entity( id )->get_component< blue_sky::ecs::BalloonHoldComponent >()->is_held() );
 
 	// つかまれた風船は、もう知らせない（以前は Player::on_collide_with( Balloon* ) が balloon->get_player() を見て戻っていた）
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( holder_id ), * f.entity( id ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( holder_id ), * f.entity( id ) );
 	EXPECT_EQ( player.balloon_sequence_count, 1 );
 
 	// 手元（プレイヤーの位置 + 前 0.5 - 右 0.25 + 上 1.75。向き 0 なら前は +Z・右は +X）に置かれ、向きは 0
@@ -186,8 +186,8 @@ TEST( BalloonGirlRobotTest, つかんだ物体が別の風船を持つか_風船
 	const EntityId holder_id = create_player( f );
 	auto* system = f.manager.get_system< blue_sky::ecs::BalloonHoldSystem >();
 
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( holder_id ), * f.entity( first ) );
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( holder_id ), * f.entity( second ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( holder_id ), * f.entity( first ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( holder_id ), * f.entity( second ) );
 
 	system->update_balloons( 1.f );
 
@@ -222,7 +222,7 @@ TEST( BalloonGirlRobotTest, 風船の動作が終わりかけの間は_つかま
 	auto* system = f.manager.get_system< blue_sky::ecs::BalloonHoldSystem >();
 	const auto* render = f.entity( id )->get_component< blue_sky::ecs::ObjectRenderComponent >();
 
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( holder_id ), * f.entity( id ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( holder_id ), * f.entity( id ) );
 
 	// 終わりかけでなければ隠さない
 	system->update_balloon( id, 0.1f );
@@ -252,7 +252,7 @@ TEST( BalloonGirlRobotTest, つかんだ物体が消えると風船は割れる 
 
 	const EntityId holder_id = create_player( f );
 
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( holder_id ), * f.entity( id ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( holder_id ), * f.entity( id ) );
 	ASSERT_TRUE( f.entity( id )->get_component< blue_sky::ecs::BalloonHoldComponent >()->is_held() );
 
 	f.manager.destroy_entity( holder_id );
@@ -270,14 +270,14 @@ TEST( BalloonGirlRobotTest, 石が当たると風船は割れ_石は拾われず
 	f.factory.restart();
 
 	// 以前は Stone::on_collide_with( GameObject* ) → Balloon::on_collide_with_stone（割れて音を鳴らし、石は拾わない）。組の向きによらない
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( stone ), * f.entity( balloon ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( stone ), * f.entity( balloon ) );
 
 	EXPECT_TRUE( blue_sky::ecs::EntityObject( f.entity( balloon ) ).is_dead() );
 	EXPECT_TRUE( is_near( f.factory.get_ref( balloon ).get_location(), Vector( 0.f, -100.f, 0.f ) ) );
 	EXPECT_FALSE( blue_sky::ecs::EntityObject( f.entity( stone ) ).is_dead() );
 
 	f.factory.restart();
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( balloon ), * f.entity( stone ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( balloon ), * f.entity( stone ) );
 
 	EXPECT_TRUE( blue_sky::ecs::EntityObject( f.entity( balloon ) ).is_dead() );
 }
@@ -395,8 +395,8 @@ TEST( BalloonGirlRobotTest, 少女への当たりは何も起こさない )
 
 	const EntityId player = create_player( f );
 	f.factory.restart();
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( player ), * f.entity( girl ) );
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( stone ), * f.entity( girl ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * f.entity( girl ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( stone ), * f.entity( girl ) );
 
 	EXPECT_EQ( player_of( f, player ).hp, 1 );
 	EXPECT_EQ( player_of( f, player ).action_mode, blue_sky::ecs::PlayerBehaviorComponent::ActionMode::NONE );
@@ -611,7 +611,7 @@ TEST( BalloonGirlRobotTest, 立つ_回る敵は相手に当たると止まり_�
 
 	// 追っている敵 : 相手は傷つき（HP が減り、押し返されて少しの間 操作できない）、敵は止まらない
 	f.component()->mode = RobotMode::CHASE;
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( f.target_id ), * f.entity( f.robot ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( f.target_id ), * f.entity( f.robot ) );
 
 	EXPECT_EQ( f.target().hp, 1 );
 	EXPECT_TRUE( f.target().is_uncontrollable() );
@@ -619,13 +619,13 @@ TEST( BalloonGirlRobotTest, 立つ_回る敵は相手に当たると止まり_�
 
 	// 注目している敵 : 止まらない。相手も傷つかない
 	f.component()->mode = RobotMode::ATTENTION;
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( f.robot ), * f.entity( f.target_id ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( f.robot ), * f.entity( f.target_id ) );
 	EXPECT_EQ( f.mode(), RobotMode::ATTENTION );
 	EXPECT_EQ( f.target().hp, 1 );
 
 	// 回っている敵 : 止まる。止まった敵の速度は毎フレーム半分になる
 	f.component()->mode = RobotMode::ROTATION;
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( f.target_id ), * f.entity( f.robot ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( f.target_id ), * f.entity( f.robot ) );
 
 	EXPECT_EQ( f.mode(), RobotMode::SHUTDOWN );
 	EXPECT_EQ( f.target().hp, 1 );
@@ -649,14 +649,14 @@ TEST( BalloonGirlRobotTest, 立つ敵はこちらへ飛んでくる石に当た�
 
 	// 離れていく（+Z へ飛ぶ）石 : 止まらない。石は拾われない
 	s.set_velocity( Vector( 0.f, 0.f, 8.f ) );
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( stone ), * f.entity( f.robot ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( stone ), * f.entity( f.robot ) );
 
 	EXPECT_EQ( f.mode(), RobotMode::STAND );
 	EXPECT_FALSE( blue_sky::ecs::EntityObject( f.entity( stone ) ).is_dead() );
 
 	// こちらへ飛んでくる石 : 止まる（組の向きによらない）
 	s.set_velocity( Vector( 0.f, 0.f, -8.f ) );
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( f.robot ), * f.entity( stone ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( f.robot ), * f.entity( stone ) );
 
 	EXPECT_EQ( f.mode(), RobotMode::SHUTDOWN );
 }

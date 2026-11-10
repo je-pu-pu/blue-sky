@@ -107,12 +107,6 @@
       <Filter>core\ui</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="GameObject\ActiveObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\GameObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="Scene\CanvasTestScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -285,9 +279,6 @@
       <Filter>blue_sky</Filter>
     </ClCompile>
     <ClCompile Include="blue_sky\GameMain.cpp">
-      <Filter>blue_sky</Filter>
-    </ClCompile>
-    <ClCompile Include="blue_sky\ActiveObjectManager.cpp">
       <Filter>blue_sky</Filter>
     </ClCompile>
     <ClCompile Include="blue_sky\ObjectFactory.cpp">
@@ -465,6 +456,12 @@
     <ClCompile Include="blue_sky\ecs\system\PlayerInputSystem.cpp">
       <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\ObjectUpdater.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\ContactRules.cpp">
+      <Filter>blue_sky\ecs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blue_sky\ecs\component\PhysicsBodyComponent.h">
@@ -472,9 +469,6 @@
     </ClInclude>
     <ClInclude Include="blue_sky\ecs\system\PhysicsSyncSystem.h">
       <Filter>blue_sky\ecs\system</Filter>
-    </ClInclude>
-    <ClInclude Include="blue_sky\ecs\component\ActiveObjectLinkComponent.h">
-      <Filter>blue_sky\ecs\component</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\ecs\component\CollisionTraitsComponent.h">
       <Filter>blue_sky\ecs\component</Filter>
@@ -651,12 +645,6 @@
       <Filter>core\ui</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="GameObject\ActiveObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\GameObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
     <ClInclude Include="Scene\CanvasTestScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -1014,9 +1002,6 @@
     <ClInclude Include="blue_sky\GameMain.h">
       <Filter>blue_sky</Filter>
     </ClInclude>
-    <ClInclude Include="blue_sky\ActiveObjectManager.h">
-      <Filter>blue_sky</Filter>
-    </ClInclude>
     <ClInclude Include="blue_sky\ObjectFactory.h">
       <Filter>blue_sky</Filter>
     </ClInclude>
@@ -1315,6 +1300,12 @@
     </ClInclude>
     <ClInclude Include="blue_sky\ecs\system\PlayerInputSystem.h">
       <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ObjectUpdater.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\ContactRules.h">
+      <Filter>blue_sky\ecs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -15,8 +15,9 @@ class ActiveObjectPhysics;
 /**
  * ゲームのオブジェクトが使うもの（物理の世界・音・シーンの経過時間）
  *
- * 組み立ての根（GameMain）が作り、ActiveObjectManager がオブジェクトを加えるときに渡す。
+ * 組み立ての根（GameMain）が作り、ObjectUpdater に渡す（System に経過時間・音を渡すのに使う）。
  * 以前は GameObject が GameMain のシングルトンから直接取っていて、テストで差し替えられなかった（設計上の問題 B28）。
+ * 段階 6 で GameObject・ActiveObject・ActiveObjectManager を消した。ActiveObject を知らない（物理の世界の型を前方宣言するだけ）
  */
 struct GameObjectContext
 {

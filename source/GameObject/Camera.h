@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GameObject/GameObject.h>
 #include <blue_sky/type.h>
 
 namespace blue_sky
@@ -10,7 +9,7 @@ namespace blue_sky
  * カメラ
  *
  */
-class Camera : public GameObject
+class Camera
 {
 public:
 
@@ -32,11 +31,6 @@ private:
 	float_t aspect_;					///< アスペクト比
 
 	float_t rotate_chase_speed_;		///< 回転速度
-
-protected:
-	float_t get_collision_width() const override { return 0.f; }
-	float_t get_collision_height() const override { return 0.f; }
-	float_t get_collision_depth() const override { return 0.f; }
 
 public:
 	Camera();

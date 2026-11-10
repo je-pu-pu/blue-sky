@@ -2,7 +2,7 @@
 
 #include <blue_sky/GameMain.h>
 #include <blue_sky/Input.h>
-#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ObjectUpdater.h>
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/GraphicsManager.h>

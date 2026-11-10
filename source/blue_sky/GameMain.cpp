@@ -4,7 +4,7 @@
 #include "SceneManager.h"
 #include "Scene/Scene.h"
 
-#include "ActiveObjectManager.h"
+#include "ObjectUpdater.h"
 #include "ObjectFactory.h"
 
 // #include "ConstantBuffer.h"
@@ -232,8 +232,8 @@ GameMain::GameMain( App& app )
 	game_object_context_.scene_elapsed_time = [this] { return scene_ ? scene_->get_total_elapsed_time() : 0.f; };
 	game_object_context_.delta_time = [this] { return time_manager_.get_delta_time(); };
 
-	active_object_manager_.reset( new ActiveObjectManager( active_object_physics_.get(), graphics_manager_.get(), & game_object_context_, entity_manager_.get() ) );
-	object_factory_ = std::make_unique< ObjectFactory >( entity_manager_.get(), active_object_manager_.get(), active_object_physics_.get(), graphics_manager_.get(), sound_manager_.get() );
+	object_updater_ = std::make_unique< ObjectUpdater >( active_object_physics_.get(), & game_object_context_, entity_manager_.get() );
+	object_factory_ = std::make_unique< ObjectFactory >( entity_manager_.get(), active_object_physics_.get(), graphics_manager_.get(), sound_manager_.get() );
 
 	// GraphicsManager はゲームの物体を、EntityManager の描画の部品（ecs::ObjectRenderDataSystem の描く対象）から描く（以前は ActiveObjectManager を直接回していた）
 	graphics_manager_->set_entity_manager( entity_manager_.get() );
@@ -320,7 +320,7 @@ GameMain::~GameMain()
 	overlay_scene_stack_.clear();
 	scene_.reset();
 
-	// ゲームの物体を EntityManager より先に壊す（物体は壊れるときに自分の Entity を消す。entity_manager_ は active_object_manager_ より後に宣言され、先に壊れる）。
+	// ゲームの物体を EntityManager より先に壊す（物体は壊れるときに自分の Entity を消す。entity_manager_ は object_factory_ より後に宣言され、先に壊れる）。
 	// ECS だけの物体（ObjectFactory が作った）も一緒に消す
 	if ( object_factory_ )
 	{
@@ -442,19 +442,12 @@ void GameMain::setup_script_command()
 	} );
 	get_script_manager()->set_function( "clone_object", [this] ( const GameObjectRef* o ) -> sol::optional< GameObjectRef >
 	{
-		ActiveObject* active_object = require_not_nil( o, "clone_object" )->get_active_object();
+		// 以前は ActiveObject の種類だけ複製できた（段階 6 で最後の種類のプレイヤーも ECS だけの物体になり、複製できる物体は無くなった）。
+		// ECS だけの物体は create_object で作り直す。黙って無視しない
+		require_not_nil( o, "clone_object" );
+		debug_log( "[Object] clone_object : 物体は複製できません（create_object で作り直してください）" );
 
-		if ( ! active_object )
-		{
-			// 複製できるのは ActiveObject の種類だけ（ECS だけの物体は、作り直す）
-			debug_log( "[Object] clone_object : この物体は複製できません（ActiveObject ではない・消えた物体）" );
-			return sol::nullopt;
-		}
-
-		ActiveObject* o2 = clone_object( active_object );
-		o2->restart();
-
-		return get_object_factory()->get_ref( o2->get_entity_id() );
+		return sol::nullopt;
 	} );
 	get_script_manager()->set_function( "get_object", [this] ( const char_t* name ) -> sol::optional< GameObjectRef >
 	{
@@ -512,24 +505,6 @@ void GameMain::setup_script_command()
 
 	get_script_manager()->set_function( "debug_print_resources", [this] () { get_graphics_manager()->debug_print_resources(); } );
 
-}
-
-/**
- * まだ ActiveObject の種類のオブジェクトを生成する（中身は ObjectFactory::create_active_object）
- *
- * 位置・向きは作った後に設定する。ECS だけの物体（"static" など）は ObjectFactory::create_object で作る
- *
- * @param class_name  クラス名
- * @return 生成したオブジェクト（知らないクラス名なら nullptr）
- */
-ActiveObject* GameMain::create_object( const char_t* class_name ) const
-{
-	return get_object_factory()->create_active_object( class_name );
-}
-
-ActiveObject* GameMain::clone_object( const ActiveObject* o ) const
-{
-	return get_active_object_manager()->clone_object( o );
 }
 
 /**
@@ -792,9 +767,6 @@ void GameMain::render()
 	//   前のフレームの深度が残り、深度テストのある描画が消えたり、残像が出たりした）
 	direct_3d_->reset_render_state();
 	get_graphics_manager()->clear_default_view();
-
-	// ゲームの物体の位置と描くかどうかを描画の部品へ写す（物理・カメラの更新の後、描く前。橋渡しの間だけ）
-	active_object_manager_->sync_render_components();
 
 	if ( range.render_base )
 	{

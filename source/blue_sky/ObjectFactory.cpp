@@ -1,6 +1,5 @@
 #include "ObjectFactory.h"
 
-#include <blue_sky/ActiveObjectManager.h>
 #include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/ConstantBuffers.h>
 #include <blue_sky/DebugLog.h>
@@ -40,8 +39,6 @@
 #include <blue_sky/ecs/system/PlayerInputSystem.h>
 #include <blue_sky/graphics/Line.h>
 
-#include <GameObject/ActiveObject.h>
-
 #include <core/ecs/EntityManager.h>
 #include <core/ecs/component/TransformComponent.h>
 #include <core/physics/EntityTag.h>
@@ -54,9 +51,8 @@
 namespace blue_sky
 {
 
-ObjectFactory::ObjectFactory( core::ecs::EntityManager* entity_manager, ActiveObjectManager* active_object_manager, ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager )
+ObjectFactory::ObjectFactory( core::ecs::EntityManager* entity_manager, ActiveObjectPhysics* physics, graphics::GraphicsManager* graphics_manager, core::sound::SoundManager* sound_manager )
 	: entity_manager_( entity_manager )
-	, active_object_manager_( active_object_manager )
 	, physics_( physics )
 	, graphics_manager_( graphics_manager )
 	, sound_manager_( sound_manager )
@@ -66,7 +62,7 @@ ObjectFactory::ObjectFactory( core::ecs::EntityManager* entity_manager, ActiveOb
 
 void ObjectFactory::setup_systems()
 {
-	// ActiveObjectManager::add_active_object と同じ System（ECS だけの物体も、描く・目標へ動かす・当たり・剛体の位置の同期は同じ System で扱う）
+	// 物体を扱う System（描く・目標へ動かす・当たり・剛体の位置の同期・種類ごとの振る舞い）
 	entity_manager_->add_system< ecs::ObjectRenderDataSystem >( 0, graphics_manager_ );
 	entity_manager_->add_system< ecs::MoveToTargetSystem >( 0 );
 	entity_manager_->add_system< ecs::CollisionEventSystem >( 0 );
@@ -302,41 +298,10 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		return id;
 	}
 
-	ActiveObject* active_object = create_active_object( kind );
+	// 失敗を黙って無視しない（CLAUDE.md の「失敗の扱い」）。プレイヤーは create_player で作る（名前からは作らない。以前もシーンが作っていた）
+	debug_log( "[Object] 知らないクラス名のオブジェクトは作れません: " + kind );
 
-	if ( ! active_object )
-	{
-		return std::nullopt;
-	}
-
-	return active_object->get_entity_id();
-}
-
-ActiveObject* ObjectFactory::create_active_object( const string_t& kind )
-{
-	ActiveObject* active_object = active_object_manager_ ? active_object_manager_->create_object( kind ) : nullptr;
-
-	// 失敗を黙って無視しない（CLAUDE.md の「失敗の扱い」）
-	if ( ! active_object )
-	{
-		debug_log( "[Object] 知らないクラス名のオブジェクトは作れません: " + kind );
-		return nullptr;
-	}
-
-	if ( physics_ )
-	{
-		active_object->set_rigid_body( physics_->add_active_object_as_box( active_object ) );
-	}
-
-	if ( graphics_manager_ )
-	{
-		active_object->set_model( graphics_manager_->load_model( kind.c_str() ) );
-	}
-
-	// モデルとシェーダーは同じ種類のオブジェクトで共有する（load_model が名前で使い回す）。
-	// 1 つだけシェーダーを変えたいときは、そのオブジェクトの make_model_unique()（スクリプトでは make_model_unique( o )）で自分だけのものにする
-
-	return active_object;
+	return std::nullopt;
 }
 
 ObjectFactory::EntityId ObjectFactory::create_static_object( std::stringstream& ss )
@@ -426,7 +391,7 @@ ObjectFactory::EntityId ObjectFactory::create_entity_object( const ObjectSpec& s
 	auto* state = entity->add_component< ecs::SimpleObjectComponent >();
 	state->kind = spec.kind;
 	// やり直したときの重力（以前の GameObject::get_default_gravity : 硬い物は地球の重力、硬くない物は 0。種類によって上書き）
-	state->default_gravity = spec.has_default_gravity ? spec.gravity : ( spec.is_hard ? GameObject::GravityDefault : Vector::Zero );
+	state->default_gravity = spec.has_default_gravity ? spec.gravity : ( spec.is_hard ? ecs::object_body::GravityDefault : Vector::Zero );
 	state->restart_mass = spec.restart_mass;
 	state->restart_friction = spec.restart_friction;
 	state->restart_angular_factor = spec.restart_angular_factor;
@@ -697,16 +662,8 @@ std::optional< GameObjectRef > ObjectFactory::find_ref( const string_t& name ) c
 
 std::vector< string_t > ObjectFactory::describe_objects() const
 {
-	// 番号 → 種類（ActiveObject は型の名前、ECS だけの物体は作った種類の名前）
+	// 番号 → 種類（作った種類の名前。段階 6 まではプレイヤーが ActiveObject で、型の名前 "class blue_sky::Player" だった）
 	std::map< EntityId, string_t > kinds;
-
-	if ( active_object_manager_ )
-	{
-		for ( const ActiveObject* o : active_object_manager_->active_object_list() )
-		{
-			kinds[ o->get_entity_id() ] = typeid( * o ).name();
-		}
-	}
 
 	for ( const EntityId id : entity_object_list_ )
 	{
@@ -777,9 +734,10 @@ std::vector< string_t > ObjectFactory::describe_objects() const
 
 void ObjectFactory::restart()
 {
-	if ( active_object_manager_ )
+	// 目標地点・向きを全部捨てる（以前の ActiveObjectManager::restart）
+	if ( auto* system = entity_manager_->get_system< ecs::MoveToTargetSystem >() )
 	{
-		active_object_manager_->restart();
+		system->clear_targets();
 	}
 
 	for ( const EntityId id : entity_object_list_ )
@@ -805,11 +763,6 @@ void ObjectFactory::clear()
 
 	entity_object_list_.clear();
 	named_object_map_.clear();
-
-	if ( active_object_manager_ )
-	{
-		active_object_manager_->clear();
-	}
 }
 
 } // namespace blue_sky

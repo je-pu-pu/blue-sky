@@ -4,7 +4,7 @@
 #include <GameObject/Camera.h>
 
 #include <blue_sky/SceneManager.h>
-#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ObjectUpdater.h>
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/ScriptManager.h>
@@ -393,7 +393,7 @@ void DebugScene::update()
 
 	camera_->update();
 
-	get_active_object_manager()->update();
+	get_object_updater()->update();
 
 	get_graphics_manager()->update();
 	get_graphics_manager()->set_eye_position( camera_->position() );

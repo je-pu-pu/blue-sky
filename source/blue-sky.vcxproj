@@ -54,7 +54,6 @@
     <ClCompile Include="core\setting\SettingStore.cpp" />
     <ClCompile Include="blue_sky\KeyNames.cpp" />
     <ClCompile Include="core\ui\StringTable.cpp" />
-    <ClCompile Include="blue_sky\ActiveObjectManager.cpp" />
     <ClCompile Include="blue_sky\ObjectFactory.cpp" />
     <ClCompile Include="blue_sky\stage\StageData.cpp" />
     <ClCompile Include="blue_sky\stage\Action.cpp" />
@@ -147,9 +146,7 @@
     <ClCompile Include="core\sound\SoundManager.cpp" />
     <ClCompile Include="core\sound\StreamingSound.cpp" />
     <ClCompile Include="core\ecs\EntityManager.cpp" />
-    <ClCompile Include="GameObject\ActiveObject.cpp" />
     <ClCompile Include="GameObject\Camera.cpp" />
-    <ClCompile Include="GameObject\GameObject.cpp" />
     <ClCompile Include="lib\src\imgui\imgui.cpp" />
     <ClCompile Include="lib\src\imgui\imgui_draw.cpp" />
     <ClCompile Include="lib\src\imgui\imgui_impl_dx11.cpp" />
@@ -183,12 +180,13 @@
     <ClCompile Include="blue_sky\ecs\system\RobotBehaviorSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\PlayerBehaviorSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\PlayerInputSystem.cpp" />
+    <ClCompile Include="blue_sky\ObjectUpdater.cpp" />
+    <ClCompile Include="blue_sky\ecs\ContactRules.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\sound\SampleRateStepper.h" />
     <ClInclude Include="blue_sky\ecs\component\PhysicsBodyComponent.h" />
     <ClInclude Include="blue_sky\ecs\system\PhysicsSyncSystem.h" />
-    <ClInclude Include="blue_sky\ecs\component\ActiveObjectLinkComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\CollisionTraitsComponent.h" />
     <ClInclude Include="blue_sky\ecs\system\CollisionEventSystem.h" />
     <ClInclude Include="core\physics\EntityTag.h" />
@@ -246,7 +244,6 @@
     <ClInclude Include="core\ui\NavRepeater.h" />
     <ClInclude Include="core\ui\ClickTracker.h" />
     <ClInclude Include="core\ui\StringTable.h" />
-    <ClInclude Include="blue_sky\ActiveObjectManager.h" />
     <ClInclude Include="blue_sky\ObjectFactory.h" />
     <ClInclude Include="blue_sky\stage\StageData.h" />
     <ClInclude Include="blue_sky\stage\Action.h" />
@@ -449,9 +446,7 @@
     <ClInclude Include="core\ecs\EntityIdOrderedList.h" />
     <ClInclude Include="core\ecs\SparseIndex.h" />
     <ClInclude Include="core\ecs\StablePool.h" />
-    <ClInclude Include="GameObject\ActiveObject.h" />
     <ClInclude Include="GameObject\Camera.h" />
-    <ClInclude Include="GameObject\GameObject.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene\CanvasTestScene.h" />
     <ClInclude Include="Scene\DebugScene.h" />
@@ -485,6 +480,8 @@
     <ClInclude Include="blue_sky\ecs\component\PlayerBehaviorComponent.h" />
     <ClInclude Include="blue_sky\ecs\system\PlayerBehaviorSystem.h" />
     <ClInclude Include="blue_sky\ecs\system\PlayerInputSystem.h" />
+    <ClInclude Include="blue_sky\ObjectUpdater.h" />
+    <ClInclude Include="blue_sky\ecs\ContactRules.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="blue-sky.config">

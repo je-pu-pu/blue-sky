@@ -76,4 +76,19 @@ void set_no_contact_response( btRigidBody& body, bool is_no_contact_response )
 	}
 }
 
+// const core::Vector GravityDefault( 0.f, -3.711f, 0.f, 0.f ); // 火星
+const core::Vector GravityDefault( 0.f, -9.8f, 0.f, 0.f ); // 地球
+
+bool is_moving_to( const core::Vector& location, const core::Vector& velocity, const core::Vector& target_location )
+{
+	core::Vector v = velocity;
+	v.normalize();
+	v *= 0.01f;
+
+	const float_t current_length = ( target_location - location ).length();
+	const float_t next_length = ( target_location - ( location + v ) ).length();
+
+	return next_length < current_length;
+}
+
 } // namespace blue_sky::ecs::object_body

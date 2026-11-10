@@ -38,9 +38,8 @@ namespace core
 namespace blue_sky
 {
 	class GameMain;
-	class ActiveObject;
 	class ActiveObjectPhysics;
-	class ActiveObjectManager;
+	class ObjectUpdater;
 	class ObjectFactory;
 	class ScriptManager;
 	class Input;
@@ -88,7 +87,7 @@ protected:
 
 	EntityManager* get_entity_manager() const;
 
-	ActiveObjectManager* get_active_object_manager() const;
+	ObjectUpdater* get_object_updater() const;
 
 	/// 物体を種類の名前から作り、名前で引く（ECS だけの物体を含む。物体の片付け・やり直しの入口）
 	ObjectFactory* get_object_factory() const;
@@ -116,9 +115,6 @@ protected:
 
 	/// 物理のデバッグ表示
 	core::graphics::direct_3d_11::BulletDebugDraw* get_bullet_debug_draw() const;
-
-	/// 名前からゲームのオブジェクトを作る
-	ActiveObject* create_object( const char_t* class_name ) const;
 
 	int get_width() const;
 	int get_height() const;

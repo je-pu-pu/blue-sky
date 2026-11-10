@@ -67,14 +67,12 @@ namespace blue_sky
 
 	class ActiveObjectPhysics;
 
-	class ActiveObject;
-	class ActiveObjectManager;
+	class ObjectUpdater;
 	class ObjectFactory;
 
 	class SceneManager;
 	class ScriptManager;
 
-	class Player;
 	class Camera;
 
 	class Scene;
@@ -130,8 +128,8 @@ private:
 	std::unique_ptr< MainLoop >				main_loop_;				///< ループ管理
 
 	GameObjectContext						game_object_context_;	///< ゲームのオブジェクトに渡すもの（物理の世界・音・経過時間）
-	std::unique_ptr< ActiveObjectManager >	active_object_manager_;	///< ActiveObjectManager
-	std::unique_ptr< ObjectFactory >		object_factory_;		///< 物体を種類の名前から作り、名前で引く（active_object_manager_ より後に宣言し、先に壊れる）
+	std::unique_ptr< ObjectUpdater >		object_updater_;		///< 本編の物体の System を決まった順に動かす（以前の ActiveObjectManager の残り）
+	std::unique_ptr< ObjectFactory >		object_factory_;		///< 物体を種類の名前から作り、名前で引く・やり直す・片付ける
 
 	std::unique_ptr< BulletDebugDraw >		bullet_debug_draw_;
 
@@ -199,9 +197,6 @@ public:
 	explicit GameMain( App& app );
 	virtual ~GameMain() override;
 
-	ActiveObject* create_object( const char_t* ) const;
-	ActiveObject* clone_object( const ActiveObject* ) const;
-
 	void setup_scene();
 
 	bool update() override;
@@ -237,7 +232,7 @@ public:
 	SoundManager* get_sound_manager() const { return sound_manager_.get(); }
 	ScriptManager* get_script_manager() const { return script_manager_.get(); }
 
-	ActiveObjectManager* get_active_object_manager() const { return active_object_manager_.get(); }
+	ObjectUpdater* get_object_updater() const { return object_updater_.get(); }
 	ObjectFactory* get_object_factory() const { return object_factory_.get(); }
 	
 	App* get_app() const { return & app_; }

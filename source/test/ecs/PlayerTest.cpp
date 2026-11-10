@@ -2,7 +2,7 @@
 
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/GameObjectRef.h>
-#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ecs/ContactRules.h>
 #include <blue_sky/ActiveObjectPhysics.h>
 
 #include <blue_sky/ecs/EntityObject.h>
@@ -51,7 +51,7 @@ struct Fixture
 {
 	blue_sky::ActiveObjectPhysics physics;
 	EntityManager manager;
-	ObjectFactory factory{ & manager, nullptr, & physics, nullptr };
+	ObjectFactory factory{ & manager, & physics, nullptr };
 	EntityId player = 0;
 
 	Fixture()
@@ -318,8 +318,8 @@ TEST( PlayerTest, メダル・ロケット・石に触れると拾い_拾われ�
 	const auto stone = f.create( "stone" );
 	f.factory.restart();
 
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( medal ), * f.entity( f.player ) );
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( f.player ), * f.entity( rocket ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( medal ), * f.entity( f.player ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( f.player ), * f.entity( rocket ) );
 
 	EXPECT_TRUE( f.p().has_medal );
 	EXPECT_TRUE( blue_sky::ecs::EntityObject( f.entity( medal ) ).is_dead() );
@@ -327,7 +327,7 @@ TEST( PlayerTest, メダル・ロケット・石に触れると拾い_拾われ�
 	EXPECT_EQ( f.p().selected_item_type, ItemType::ROCKET );
 	EXPECT_TRUE( blue_sky::ecs::EntityObject( f.entity( rocket ) ).is_dead() );
 
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( stone ), * f.entity( f.player ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( stone ), * f.entity( f.player ) );
 
 	EXPECT_EQ( f.p().get_item_count( ItemType::STONE ), 1 );
 	EXPECT_EQ( f.p().selected_item_type, ItemType::STONE );
@@ -343,7 +343,7 @@ TEST( PlayerTest, 石を投げると石は生き返り_目の高さの前から�
 	const auto stone = f.create( "stone" );
 	f.factory.restart();
 
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( f.player ), * f.entity( stone ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( f.player ), * f.entity( stone ) );
 	ASSERT_EQ( f.p().get_item_count( ItemType::STONE ), 1 );
 
 	// 前に壁があると投げられない
@@ -372,7 +372,7 @@ TEST( PlayerTest, 梯子に触れると梯子につかまり重力が無くな�
 	const auto wall = f.create( "static" );
 	f.factory.restart();
 
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( ladder ), * f.entity( f.player ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( ladder ), * f.entity( f.player ) );
 	EXPECT_TRUE( f.p().is_on_ladder );
 
 	f.behavior()->update_player( f.player, 0.1f, 1.f );
@@ -385,12 +385,12 @@ TEST( PlayerTest, 梯子に触れると梯子につかまり重力が無くな�
 
 	// ロケットで飛んでいるときに動かない物に当たると止まる（跳んでいる扱い）
 	f.p().action_mode = ActionMode::ROCKET;
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( f.player ), * f.entity( wall ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( f.player ), * f.entity( wall ) );
 	EXPECT_EQ( f.p().action_mode, ActionMode::NONE );
 	EXPECT_TRUE( f.p().is_jumping );
 
 	f.p().action_mode = ActionMode::ROCKET;
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( f.player ), * f.entity( ladder ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( f.player ), * f.entity( ladder ) );
 	EXPECT_EQ( f.p().action_mode, ActionMode::NONE );
 }
 
@@ -401,7 +401,7 @@ TEST( PlayerTest, 風船の動作では上へ秒速_3_まで上がり_5_m_上が
 	const auto balloon = f.create( "balloon" );
 	f.factory.restart();
 
-	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( f.player ), * f.entity( balloon ) );
+	blue_sky::ecs::contact_rules::on_collide( * f.entity( f.player ), * f.entity( balloon ) );
 	ASSERT_EQ( f.p().action_mode, ActionMode::BALLOON );
 	EXPECT_EQ( f.p().pop_balloon_sound_request(), 1 );
 	EXPECT_EQ( f.p().pop_balloon_sound_request(), 0 );

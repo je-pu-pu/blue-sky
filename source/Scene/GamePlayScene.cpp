@@ -21,7 +21,7 @@
 
 #include <blue_sky/Input.h>
 
-#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ObjectUpdater.h>
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/DebugLog.h>
 #include <blue_sky/ecs/system/SwitchSystem.h>
@@ -167,7 +167,7 @@ GamePlayScene::~GamePlayScene()
 {
 	get_graphics_manager()->unset_render_target();
 
-	// 物体（ActiveObject と ECS だけの物体）を、物理の世界を片付ける前に壊す
+	// 物体（ECS だけの物体）を、物理の世界を片付ける前に壊す
 	get_object_factory()->clear();
 
 	get_graphics_manager()->unset_sky_box();
@@ -355,7 +355,7 @@ void GamePlayScene::update()
 	debug_player_script();
 	debug_log_actors();
 
-	get_active_object_manager()->update();
+	get_object_updater()->update();
 
 	if ( ! is_cleared_ )
 	{
@@ -363,7 +363,7 @@ void GamePlayScene::update()
 		get_active_object_physics()->update( get_elapsed_time() );
 
 		// 剛体の位置を位置の正（TransformComponent）へ写す（ecs::PhysicsSyncSystem。以前は物体ごとに update_transform を呼んでいた）
-		get_active_object_manager()->update_transforms();
+		get_object_updater()->update_transforms();
 	}
 
 	{
@@ -374,14 +374,14 @@ void GamePlayScene::update()
 
 
 	// collision_check（当たった組を ecs::CollisionEventSystem に集め、互換の層が二重ディスパッチを呼ぶ。調べる順は以前と同じ : プレイヤー → ゴール → 全部）
-	get_active_object_manager()->check_collision_with( player_id_ );
+	get_object_updater()->check_collision_with( player_id_ );
 
 	if ( get_active_object_physics()->is_collision( get_player_ref().get_rigid_body(), goal_.get_rigid_body() ) )
 	{
 		on_goal();
 	}
 
-	get_active_object_manager()->check_collision_all();
+	get_object_updater()->check_collision_all();
 
 	get_sound_manager()->set_listener_position( camera_->position().xyz() );
 	get_sound_manager()->set_listener_orientation( camera_->front().xyz(), camera_->up().xyz() );
@@ -730,7 +730,7 @@ void GamePlayScene::update_balloon_sound()
 	// （物体の更新の中だけだと、プレイヤーより先に更新されたときに 1 フレーム遅れてぶれる。以前は const_cast で呼んでいた）
 	if ( const auto balloon = get_player().balloon )
 	{
-		get_active_object_manager()->update_balloon( * balloon );
+		get_object_updater()->update_balloon( * balloon );
 	}
 }
 
@@ -795,19 +795,7 @@ void GamePlayScene::debug_visit_objects()
 	// 行き先（種類ごとに最初の 1 つ。加えた順 = ステージに書いた順）
 	std::vector< std::pair< string_t, Vector > > targets;
 
-	auto add_first = [ & ] ( const char_t* name, auto is_kind )
-	{
-		for ( const auto* o : get_active_object_manager()->active_object_list() )
-		{
-			if ( is_kind( o ) )
-			{
-				targets.emplace_back( name, o->get_location() );
-				return;
-			}
-		}
-	};
-
-	// ECS だけの物体になった種類は、工場が作った物体から種類の名前で探す
+	// 工場が作った物体から種類の名前で探す
 	auto add_first_entity = [ & ] ( const char_t* name, const char_t* kind )
 	{
 		if ( auto id = get_object_factory()->find_first_of_kind( kind ) )
@@ -883,18 +871,10 @@ void GamePlayScene::debug_throw_stones()
 		return;
 	}
 
-	// 種類の物体を作った順に集める（まだ ActiveObject の種類は型で、ECS だけの物体は種類の名前で探す）
-	auto find_objects = [ & ] ( const char_t* kind, auto is_kind )
+	// 種類の物体を作った順に集める（工場が作った物体から種類の名前で探す）
+	auto find_objects = [ & ] ( const char_t* kind )
 	{
 		std::vector< GameObjectRef > result;
-
-		for ( const auto* o : get_active_object_manager()->active_object_list() )
-		{
-			if ( is_kind( o ) )
-			{
-				result.push_back( get_object_factory()->get_ref( o->get_entity_id() ) );
-			}
-		}
 
 		for ( const auto id : get_object_factory()->find_all_of_kind( kind ) )
 		{
@@ -904,7 +884,7 @@ void GamePlayScene::debug_throw_stones()
 		return result;
 	};
 
-	const auto stones = find_objects( "stone", [] ( const ActiveObject* ) { return false; } );
+	const auto stones = find_objects( "stone" );
 
 	// 石を拾う
 	if ( frame < start_frame + pick_interval * static_cast< int >( stones.size() ) )
@@ -936,14 +916,14 @@ void GamePlayScene::debug_throw_stones()
 		}
 	};
 
-	add_first( "スイッチ", find_objects( "switch", [] ( const ActiveObject* ) { return false; } ) );
+	add_first( "スイッチ", find_objects( "switch" ) );
 	// 敵は全部（向きや周りの壁で投げられない・見つかる敵がいるので）
-	for ( const auto& robot : find_objects( "robot", [] ( const ActiveObject* ) { return false; } ) )
+	for ( const auto& robot : find_objects( "robot" ) )
 	{
 		targets.emplace_back( "敵 " + std::to_string( targets.size() ), robot );
 	}
 
-	add_first( "風船", find_objects( "balloon", [] ( const ActiveObject* ) { return false; } ) );
+	add_first( "風船", find_objects( "balloon" ) );
 
 	const size_t step = static_cast< size_t >( ( frame - throw_start_frame ) / throw_interval );
 	const int phase = ( frame - throw_start_frame ) % throw_interval;
@@ -1023,7 +1003,7 @@ void GamePlayScene::debug_log_actors()
 
 	static const char_t* const robot_modes[] = { "立つ", "回る", "巡回", "注目", "発見", "追う", "止まった", "浮く" };
 
-	// 番号 → 種類と状態（作った順 = 番号の順に出す。まだ ActiveObject の種類と ECS だけの物体を混ぜて並べる）
+	// 番号 → 種類と状態（作った順 = 番号の順に出す）
 	std::map< core::ecs::EntityId, std::pair< string_t, string_t > > actors;
 
 	if ( auto* robots = get_entity_manager()->get_system< ecs::RobotBehaviorSystem >() )

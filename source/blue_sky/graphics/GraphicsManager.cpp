@@ -175,8 +175,8 @@ bool_t GraphicsManager::load_line( Model* model, const char_t* name )
  */
 GraphicsManager::Model* GraphicsManager::load_model( const char_t* name )
 {
-	Model* model = model_manager_.get( name );
-	
+	Model* model = model_manager_.get< Model >( name );
+
 	if ( model )
 	{
 		return model;
@@ -222,7 +222,7 @@ GraphicsManager::Model* GraphicsManager::load_model( const char_t* name )
  */
 GraphicsManager::Model* GraphicsManager::clone_model( const Model* m )
 {
-	return model_manager_.create( *m );
+	return model_manager_.create< Model >( *m );
 }
 
 /**

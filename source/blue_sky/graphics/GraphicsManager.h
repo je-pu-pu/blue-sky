@@ -69,9 +69,17 @@ public:
 	using Mesh							= Mesh;
 	using Line							= Line;
 	
-	using ModelManager					= core::ResourceManager< Model >;
-	using MeshManager					= core::ResourceManager< Mesh >;
-	
+	/**
+	 * モデル・メッシュは core の型で管理し、中身は blue_sky の Model・Mesh（それ以外は入れない）
+	 *
+	 * ハンドル（core::graphics::ModelHandle）を core 層の ModelComponent などがそのまま持てるようにするため。
+	 * 名前・ハンドルで引く関数（get_model・resolve_model など）は blue_sky の型に戻して返す
+	 */
+	using ModelManager					= core::ResourceManager< core::graphics::Model >;
+	using MeshManager					= core::ResourceManager< core::graphics::Mesh >;
+
+	using MeshHandle					= core::graphics::MeshHandle;
+
 	using ShadowMap						= core::graphics::ShadowMap;
 	using Sprite						= core::graphics::Sprite;
 
@@ -195,7 +203,21 @@ public:
 	
 	template< typename Type=Model > Type* get_model( const char_t* name ) { return model_manager_.get< Type >( name ); }
 
-	/// 名前で作ったモデル・メッシュを外す（どの名前からも指されなくなれば解放する）。作った側が、使い終わったときに呼ぶ
+	/**
+	 * モデルのハンドル
+	 *
+	 * 長く持つ側（段階 1 からのコンポーネント）は生ポインタではなくハンドルを持ち、使うたびに resolve_model で引く。
+	 * 解放（unload_named_model）の後は nullptr、差し替え（replace_model）の後は新しいモデルが引ける
+	 */
+	ModelHandle load_model_handle( const char_t* name ) { return model_manager_.handle_of( load_model( name ) ); }	///< load_model と同じ（読めなければ空のハンドル）
+	ModelHandle get_model_handle( const char_t* name ) const { return model_manager_.get_handle( name ); }			///< 名前のモデル（無ければ空のハンドル）
+	ModelHandle get_model_handle( const core::graphics::Model* m ) const { return model_manager_.handle_of( m ); }	///< 管理しているモデル（clone_model の結果など）
+	Model* resolve_model( ModelHandle h ) const override { return static_cast< Model* >( model_manager_.resolve( h ) ); }
+
+	/// ハンドルの番号を変えずにモデルを差し替え、古いモデルを解放する（名前も新しいモデルを指す）。無効なハンドルなら false
+	bool replace_model( ModelHandle h, std::unique_ptr< Model > m ) { return model_manager_.replace( h, std::move( m ) ); }
+
+	/// 名前で作ったモデル・メッシュを外す（どの名前からも指されなくなれば解放する。ハンドルは nullptr を返すようになる）。作った側が、使い終わったときに呼ぶ
 	void unload_named_model( const char_t* name ) { model_manager_.remove_named( name ); }
 	void unload_named_mesh( const char_t* name ) { mesh_manager_.remove_named( name ); }
 
@@ -212,7 +234,11 @@ public:
 		return m;
 	}
 
-	Mesh* get_mesh( const char_t* name ) { return mesh_manager_.get( name ); }
+	Mesh* get_mesh( const char_t* name ) { return mesh_manager_.get< Mesh >( name ); }
+
+	/// メッシュのハンドル（名前のメッシュ。無ければ空のハンドル）と、ハンドルから引く（解放済みなら nullptr）
+	MeshHandle get_mesh_handle( const char_t* name ) const { return mesh_manager_.get_handle( name ); }
+	Mesh* resolve_mesh( MeshHandle h ) const { return static_cast< Mesh* >( mesh_manager_.resolve( h ) ); }
 
 	virtual Mesh::Buffer* create_mesh_buffer( Mesh::Buffer::Type ) const = 0;
 
@@ -224,6 +250,11 @@ public:
 	// 読み込みに失敗すると例外（common::exception< std::string >。std::exception ではない）を投げる。nullptr は返らない
 	Texture* load_named_texture( const char_t* name, const char_t* file_name );
 	Texture* get_texture( const char_t* name );
+
+	/// テクスチャのハンドル（load_named_texture と同じく読む。失敗すると例外）・名前のテクスチャのハンドル（無ければ空）・ハンドルから引く（解放済みなら nullptr）
+	TextureHandle load_named_texture_handle( const char_t* name, const char_t* file_name ) { return texture_manager_.handle_of( load_named_texture( name, file_name ) ); }
+	TextureHandle get_texture_handle( const char_t* name ) const { return texture_manager_.get_handle( name ); }
+	Texture* resolve_texture( TextureHandle h ) const { return texture_manager_.resolve( h ); }
 
 	/// UI 用の画像を名前付きで読み込む（乗算済みアルファ・ミップなし。詳細は Direct3D11::load_texture_premultiplied）。失敗すると例外
 	Texture* load_named_texture_premultiplied( const char_t* name, const char_t* file_name );

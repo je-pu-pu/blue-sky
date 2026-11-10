@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/ResourceHandle.h>
 #include <type/type.h>
 #include <vector>
 
@@ -10,6 +11,10 @@ class Vertex { };
 class VertexWeight;
 class VertexGroup;
 class Material;
+class Mesh;
+
+/// メッシュを指すハンドル（ModelHandle と同じく core の型。引くときは blue_sky の GraphicsManager::resolve_mesh）
+using MeshHandle = core::ResourceHandle< Mesh >;
 
 /**
  * 抽象メッシュクラス

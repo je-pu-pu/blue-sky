@@ -1,9 +1,15 @@
 #pragma once
 
 #include "ShaderResource.h"
+#include <core/ResourceHandle.h>
 
 namespace core::graphics
 {
+
+class Texture;
+
+/// テクスチャを指すハンドル（引くときは blue_sky の GraphicsManager::resolve_texture）
+using TextureHandle = core::ResourceHandle< Texture >;
 
 /**
  * 抽象テクスチャクラス

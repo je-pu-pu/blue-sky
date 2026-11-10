@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/graphics/Shader.h>
+#include <core/graphics/Model.h>
 #include <core/graphics/PixelFormat.h>
 #include <core/graphics/PrimitiveTopology.h>
 #include <core/graphics/ConstantBuffer.h>
@@ -50,6 +51,9 @@ public:
 
 	using SkinningAnimationSet			= core::SkinningAnimationSet;
 
+	using ModelHandle					= core::graphics::ModelHandle;
+	using TextureHandle					= core::ResourceHandle< Texture >;	///< Texture.h の core::graphics::TextureHandle と同じ型
+
 	using ShaderManager					= core::ResourceManager< Shader >;
 	using TextureManager				= core::ResourceManager< Texture >;
 	using SkinningAnimationSetManager	= core::ResourceManager< SkinningAnimationSet >;
@@ -87,6 +91,14 @@ public:
 
 
 	virtual Texture* load_texture( const char_t* ) = 0;
+
+	/**
+	 * モデルのハンドルからモデルを得る（解放済み・空なら nullptr）
+	 *
+	 * モデルを管理するのは blue_sky の GraphicsManager。core 層（ModelComponent を描くシステムなど）が
+	 * blue_sky 層を知らずにハンドルを引けるよう、ここに置く
+	 */
+	virtual core::graphics::Model* resolve_model( ModelHandle ) const = 0;
 
 	virtual RenderTargetTexture* create_render_target_texture() = 0;
 	virtual RenderTargetTexture* create_render_target_texture( PixelFormat ) = 0;

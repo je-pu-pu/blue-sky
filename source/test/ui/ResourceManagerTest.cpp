@@ -141,3 +141,51 @@ TEST( ResourceManagerTest, 無効なハンドルへの差し替えは失敗し�
 	EXPECT_EQ( 1, Counted::alive );
 	EXPECT_EQ( b, m.resolve( hb ) );
 }
+
+namespace
+{
+
+/// core のモデル（基底）の代わり
+struct BaseModel
+{
+	static inline int alive = 0;
+	BaseModel() { alive++; }
+	BaseModel( const BaseModel& ) { alive++; }		// 複製（create は引数を値で受けるので、途中の複製も数える）
+	virtual ~BaseModel() { alive--; }
+	virtual int kind() const = 0;
+};
+
+/// blue_sky のモデル（派生）の代わり
+struct GameModel : public BaseModel
+{
+	int value;
+	explicit GameModel( int v ) : value( v ) { }
+	int kind() const override { return 1; }
+};
+
+} // namespace
+
+TEST( ResourceManagerTest, 基底の型で管理し派生の型を入れると基底の型のハンドルで引け差し替えられる )
+{
+	// blue_sky の GraphicsManager は core::graphics::Model で管理し、中身は blue_sky のモデル。
+	// ハンドルが core の型なので、core 層のコンポーネントが blue_sky 層を知らずに持てる
+	BaseModel::alive = 0;
+	core::ResourceManager< BaseModel > m;
+
+	GameModel* a = m.create_named< GameModel >( "robot", 1 );
+	const core::ResourceHandle< BaseModel > h = m.get_handle( "robot" );
+	EXPECT_EQ( a, m.get< GameModel >( "robot" ) );
+	EXPECT_EQ( 1, static_cast< GameModel* >( m.resolve( h ) )->value );
+
+	GameModel* c = m.create< GameModel >( *a );		// clone_model と同じ（名前は付けない）
+	EXPECT_EQ( c, m.resolve( m.handle_of( c ) ) );
+
+	EXPECT_TRUE( m.replace( h, std::make_unique< GameModel >( 2 ) ) );
+	EXPECT_EQ( 2, BaseModel::alive );									// 古い中身は基底の型のデストラクタで解放された
+	EXPECT_EQ( 2, static_cast< GameModel* >( m.resolve( h ) )->value );
+	EXPECT_EQ( 2, m.get< GameModel >( "robot" )->value );
+
+	m.remove_named( "robot" );		// unload_named_model と同じ
+	EXPECT_EQ( nullptr, m.resolve( h ) );
+	EXPECT_EQ( 1, BaseModel::alive );									// 複製はそのまま
+}

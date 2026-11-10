@@ -25,6 +25,8 @@
 #include <blue_sky/Input.h>
 
 #include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/DebugLog.h>
+#include <GameObject/BaseSwitch.h>
 
 #include <core/graphics/OculusRift.h>
 
@@ -277,6 +279,22 @@ void GamePlayScene::update()
 	else
 	{
 		update_main();
+	}
+
+	// 開発用 : BLUE_SKY_DEBUG_PRESS_SWITCHES を設定すると、始まってから 30 フレーム後にステージのスイッチを全部押す
+	// （スイッチで壁やゴールが動くイベントを、遊ばずに確かめるため。動いた物体が目標に着くと log/blue-sky.log に出る）
+	if ( debug_press_switches_frame_ >= 0 && GetEnvironmentVariableA( "BLUE_SKY_DEBUG_PRESS_SWITCHES", nullptr, 0 ) > 0 && ++debug_press_switches_frame_ == 30 )
+	{
+		debug_press_switches_frame_ = -1;
+
+		for ( auto* o : get_active_object_manager()->active_object_list() )
+		{
+			if ( auto* s = dynamic_cast< BaseSwitch* >( o ) )
+			{
+				const bool switched = s->do_switch();
+				debug_log( string_t( "[Debug] スイッチを押しました : " ) + ( switched ? "入った" : "入らなかった" ) );
+			}
+		}
 	}
 
 	get_active_object_manager()->update();

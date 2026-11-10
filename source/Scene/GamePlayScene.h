@@ -66,6 +66,7 @@ public:
 	};
 
 private:
+	int debug_press_switches_frame_ = 0;		///< 開発用 : BLUE_SKY_DEBUG_PRESS_SWITCHES でスイッチを押すまでのフレーム数を数える
 	// 非所有参照 (各 Manager が所有)
 	Texture*							ui_texture_ = nullptr;			///< UI テクスチャ (GraphicsManager)
 	Shader*								debug_texture_shader_ = nullptr;///< デバッグシェーダー (GraphicsManager)

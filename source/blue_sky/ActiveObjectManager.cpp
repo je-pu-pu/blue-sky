@@ -1,5 +1,6 @@
 #include "ActiveObjectManager.h"
 #include "ActiveObjectPhysics.h"
+#include "DebugLog.h"
 
 #include <GameObject/Girl.h>
 #include <GameObject/Robot.h>
@@ -97,6 +98,10 @@ void ActiveObjectManager::name_active_object( const string_t& name, ActiveObject
 void ActiveObjectManager::set_target_location( ActiveObject* active_object, const Vector& target_location, float_t speed )
 {
 	target_location_map_[ active_object ] = std::make_tuple( target_location, speed );
+
+	const Vector& from = active_object->get_location();
+	debug_log( "[Object] 目標地点へ動かします ( " + std::to_string( from.x() ) + ", " + std::to_string( from.y() ) + ", " + std::to_string( from.z() ) + " ) → ( "
+		+ std::to_string( target_location.x() ) + ", " + std::to_string( target_location.y() ) + ", " + std::to_string( target_location.z() ) + " ) 速さ " + std::to_string( speed ) );
 }
 
 void ActiveObjectManager::set_target_direction( ActiveObject* active_object, float_t target_direction, float_t speed )
@@ -276,6 +281,8 @@ void ActiveObjectManager::update()
 			i->first->set_location( target_location );
 			i->first->set_velocity( Vector::Zero );
 			i->first->on_arrive_at_target_location();
+
+			debug_log( "[Object] 目標地点に着きました ( " + std::to_string( target_location.x() ) + ", " + std::to_string( target_location.y() ) + ", " + std::to_string( target_location.z() ) + " )" );
 
 			i = target_location_map_.erase( i );
 		}

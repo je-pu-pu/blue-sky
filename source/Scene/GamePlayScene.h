@@ -67,6 +67,10 @@ public:
 
 private:
 	int debug_press_switches_frame_ = 0;		///< 開発用 : BLUE_SKY_DEBUG_PRESS_SWITCHES でスイッチを押すまでのフレーム数を数える
+	int debug_visit_objects_frame_ = 0;			///< 開発用 : BLUE_SKY_DEBUG_VISIT_OBJECTS でプレイヤーを物体の所へ動かすフレームを数える（-1 で終わり）
+
+	/// 開発用 : BLUE_SKY_DEBUG_VISIT_OBJECTS を設定すると、プレイヤーをメダル・風船・梯子・ゴールの所へ順に動かし、当たった結果をログに出す
+	void debug_visit_objects();
 	// 非所有参照 (各 Manager が所有)
 	Texture*							ui_texture_ = nullptr;			///< UI テクスチャ (GraphicsManager)
 	Shader*								debug_texture_shader_ = nullptr;///< デバッグシェーダー (GraphicsManager)

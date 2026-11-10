@@ -27,6 +27,8 @@
 #include <blue_sky/ActiveObjectManager.h>
 #include <blue_sky/DebugLog.h>
 #include <GameObject/BaseSwitch.h>
+#include <GameObject/Medal.h>
+#include <GameObject/Ladder.h>
 
 #include <core/graphics/OculusRift.h>
 
@@ -299,6 +301,8 @@ void GamePlayScene::update()
 			}
 		}
 	}
+
+	debug_visit_objects();
 
 	get_active_object_manager()->update();
 
@@ -661,6 +665,84 @@ void GamePlayScene::on_goal()
 	{
 		fin->play( false );
 	}
+}
+
+/**
+ * 開発用 : プレイヤーをメダル・風船・梯子・ゴールの所へ順に動かし、当たった結果をログに出す
+ *
+ * 環境変数 BLUE_SKY_DEBUG_VISIT_OBJECTS を設定したときだけ動く（本編の動きは変えない）。
+ * 当たりのイベント（ecs::CollisionEventSystem と互換の層）が、遊ばずに起きることを確かめるため。
+ * 始まってから 60 フレーム後から 40 フレームごとに、次の物体の位置へプレイヤーを置いて速度を 0 にする。
+ * 置いてから 3 フレーム後に、その結果（メダルを持っているか・風船につかまっているか・梯子に触れているか・ゴールしたか）を出す。
+ * ゴールに着くとステージが終わるので、ゴールは最後にする
+ */
+void GamePlayScene::debug_visit_objects()
+{
+	if ( debug_visit_objects_frame_ < 0 || GetEnvironmentVariableA( "BLUE_SKY_DEBUG_VISIT_OBJECTS", nullptr, 0 ) == 0 )
+	{
+		return;
+	}
+
+	constexpr int start_frame = 60;
+	constexpr int interval = 40;
+	constexpr int result_frame = 3;		///< 置いてから結果を出すまでのフレーム数（当たりは物理を進めた後に調べるので、置いた次のフレームから効く）
+
+	const int frame = debug_visit_objects_frame_++;
+	const int phase = ( frame - start_frame ) % interval;
+
+	if ( frame < start_frame || ( phase != 0 && phase != result_frame ) )
+	{
+		return;
+	}
+
+	// 行き先（種類ごとに最初の 1 つ。加えた順 = ステージに書いた順）
+	std::vector< std::pair< string_t, const ActiveObject* > > targets;
+
+	auto add_first = [ & ] ( const char_t* name, auto is_kind )
+	{
+		for ( const auto* o : get_active_object_manager()->active_object_list() )
+		{
+			if ( is_kind( o ) )
+			{
+				targets.emplace_back( name, o );
+				return;
+			}
+		}
+	};
+
+	add_first( "メダル", [] ( const ActiveObject* o ) { return dynamic_cast< const Medal* >( o ) != nullptr; } );
+	add_first( "風船", [] ( const ActiveObject* o ) { return dynamic_cast< const Balloon* >( o ) != nullptr; } );
+	add_first( "梯子", [] ( const ActiveObject* o ) { return dynamic_cast< const Ladder* >( o ) != nullptr; } );
+	targets.emplace_back( "ゴール", goal_ );
+
+	const size_t step = static_cast< size_t >( ( frame - start_frame ) / interval );
+
+	if ( phase == result_frame )
+	{
+		if ( step < targets.size() )
+		{
+			debug_log( string_t( "[Debug] 物体の所へ動かした結果 : " ) + targets[ step ].first
+				+ " / メダル " + ( player_->has_medal() ? "持っている" : "持っていない" )
+				+ " / 風船 " + ( player_->get_action_mode() == Player::ActionMode::BALLOON ? "つかまっている" : "つかまっていない" )
+				+ " / 梯子 " + ( player_->is_on_ladder() ? "触れている" : "触れていない" )
+				+ " / ゴール " + ( is_cleared_ ? "した" : "していない" ) );
+		}
+
+		return;
+	}
+
+	if ( step >= targets.size() || is_cleared_ )
+	{
+		debug_visit_objects_frame_ = -1;
+		return;
+	}
+
+	const Vector to = targets[ step ].second->get_location();
+
+	player_->set_location( to );
+	player_->set_velocity( Vector::Zero );
+
+	debug_log( "[Debug] プレイヤーを" + targets[ step ].first + "の所へ動かしました ( " + std::to_string( to.x() ) + ", " + std::to_string( to.y() ) + ", " + std::to_string( to.z() ) + " )" );
 }
 
 void GamePlayScene::update_clear()

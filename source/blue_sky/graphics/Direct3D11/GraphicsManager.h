@@ -82,6 +82,8 @@ protected:
 
 	void render_debug_axis_model() const override;
 
+	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type, this ); }
+
 public:
 	explicit GraphicsManager( Direct3D* );
 	virtual ~GraphicsManager() override;
@@ -105,8 +107,6 @@ public:
 	std::unique_ptr< core::graphics::ConstantBuffer > create_constant_buffer( size_t size, int slot, ConstantBufferUsage usage = ConstantBufferUsage::DEFAULT ) override;
 	std::unique_ptr< core::graphics::InstanceBuffer > create_instance_buffer() override;
 	Direct3D* get_direct_3d() const override { return direct_3d_; }
-
-	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type, this ); }
 
 	// void unload_mesh( const char_t* ) override;
 	// void unload_mesh_all() override;

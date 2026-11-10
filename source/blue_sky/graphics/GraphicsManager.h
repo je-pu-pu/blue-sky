@@ -81,8 +81,6 @@ public:
 	using ModelManager					= core::ResourceManager< core::graphics::Model >;
 	using MeshManager					= core::ResourceManager< core::graphics::Mesh >;
 
-	using MeshHandle					= core::graphics::MeshHandle;
-
 	using ShadowMap						= core::graphics::ShadowMap;
 	using Sprite						= core::graphics::Sprite;
 
@@ -171,6 +169,17 @@ protected:
 	void render_debug_axis_for_bones( const core::Transform&, const core::AnimationPlayer&, const Model* ) const;
 	virtual void render_debug_axis_model() const = 0;
 
+	/// メッシュの頂点バッファを作る（create_named_mesh が使う）
+	virtual Mesh::Buffer* create_mesh_buffer( Mesh::Buffer::Type ) const = 0;
+
+	/// 名前のテクスチャを外す（空を外すときに使う）
+	void unload_named_texture( const char_t* );
+
+	// 描画の回数（実装がフレームの初め・パスごと・描くごとに数える。読むのは get_pass_count・get_draw_count）
+	void clear_pass_count() const { pass_count_ = 0; }
+	void count_pass() const { pass_count_++; }
+	void clear_draw_count() const { draw_count_ = 0; }
+
 public:
 	/// Direct3D 11 の実装に直接触る所（頂点バッファ・Draw など）向け。抽象層（core::graphics::GraphicsManager）には置かない（B19）
 	virtual core::graphics::direct_3d_11::Direct3D11* get_direct_3d() const = 0;
@@ -217,15 +226,10 @@ public:
 	 * モデルのハンドル
 	 *
 	 * 長く持つ側（段階 1 からのコンポーネント）は生ポインタではなくハンドルを持ち、使うたびに resolve_model で引く。
-	 * 解放（unload_named_model）の後は nullptr、差し替え（replace_model）の後は新しいモデルが引ける
+	 * 解放（unload_named_model）の後は nullptr を返す
 	 */
-	ModelHandle load_model_handle( const char_t* name ) { return model_manager_.handle_of( load_model( name ) ); }	///< load_model と同じ（読めなければ空のハンドル）
-	ModelHandle get_model_handle( const char_t* name ) const { return model_manager_.get_handle( name ); }			///< 名前のモデル（無ければ空のハンドル）
 	ModelHandle get_model_handle( const core::graphics::Model* m ) const { return model_manager_.handle_of( m ); }	///< 管理しているモデル（clone_model の結果など）
 	Model* resolve_model( ModelHandle h ) const override { return static_cast< Model* >( model_manager_.resolve( h ) ); }
-
-	/// ハンドルの番号を変えずにモデルを差し替え、古いモデルを解放する（名前も新しいモデルを指す）。無効なハンドルなら false
-	bool replace_model( ModelHandle h, std::unique_ptr< Model > m ) { return model_manager_.replace( h, std::move( m ) ); }
 
 	/// 名前で作ったモデル・メッシュを外す（どの名前からも指されなくなれば解放する。ハンドルは nullptr を返すようになる）。作った側が、使い終わったときに呼ぶ
 	void unload_named_model( const char_t* name ) { model_manager_.remove_named( name ); }
@@ -246,12 +250,6 @@ public:
 
 	Mesh* get_mesh( const char_t* name ) { return mesh_manager_.get< Mesh >( name ); }
 
-	/// メッシュのハンドル（名前のメッシュ。無ければ空のハンドル）と、ハンドルから引く（解放済みなら nullptr）
-	MeshHandle get_mesh_handle( const char_t* name ) const { return mesh_manager_.get_handle( name ); }
-	Mesh* resolve_mesh( MeshHandle h ) const { return static_cast< Mesh* >( mesh_manager_.resolve( h ) ); }
-
-	virtual Mesh::Buffer* create_mesh_buffer( Mesh::Buffer::Type ) const = 0;
-
 	// SkinningAnimationSet
 	SkinningAnimationSet* create_skinning_animation_set() { return skinning_animation_set_manager_.create(); }
 
@@ -261,8 +259,7 @@ public:
 	Texture* load_named_texture( const char_t* name, const char_t* file_name );
 	Texture* get_texture( const char_t* name );
 
-	/// テクスチャのハンドル（load_named_texture と同じく読む。失敗すると例外）・名前のテクスチャのハンドル（無ければ空）・ハンドルから引く（解放済みなら nullptr）
-	TextureHandle load_named_texture_handle( const char_t* name, const char_t* file_name ) { return texture_manager_.handle_of( load_named_texture( name, file_name ) ); }
+	/// 名前のテクスチャのハンドル（無ければ空）・ハンドルから引く（解放済みなら nullptr）
 	TextureHandle get_texture_handle( const char_t* name ) const { return texture_manager_.get_handle( name ); }
 	Texture* resolve_texture( TextureHandle h ) const { return texture_manager_.resolve( h ); }
 
@@ -314,7 +311,6 @@ public:
 	// virtual void unload_mesh( const char_t* ) = 0;
 	// virtual void unload_mesh_all() = 0;
 
-	virtual void unload_named_texture( const char_t* );
 	// virtual void unload_texture_all() = 0;
 
 	void set_paper_texture_type( int_t );
@@ -344,12 +340,6 @@ public:
 	 * @return 設定したら true
 	 */
 	bool set_light_direction( const Vector& direction ) { return light_direction_.set( direction ); }
-
-	/// 平行光源の向き（設定した値。正規化していない）
-	const Vector& get_light_direction() const { return light_direction_.get(); }
-
-	/// 平行光源の向きを既定に戻す（シーンが変えた向きを次のシーンへ持ち越さないときに使う）
-	void reset_light_direction() { light_direction_.reset(); }
 
 	bool_t is_shadow_enabled() const { return static_cast< bool_t >( shadow_map_ ); }
 	ShadowMap* get_shadow_map() { return shadow_map_.get(); }
@@ -489,11 +479,8 @@ public:
 		return Vector( 0.f, 0.f, 1.f );
 	}
 
-	void clear_pass_count() const { pass_count_ = 0; }
-	void count_pass() const { pass_count_++; }
 	uint_t get_pass_count() const { return pass_count_; }
 
-	void clear_draw_count() const { draw_count_ = 0; }
 	void count_draw() const override { draw_count_++; }
 	uint_t get_draw_count() const { return draw_count_; }
 

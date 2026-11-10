@@ -2,6 +2,7 @@
 
 #include "Scene.h"
 #include <blue_sky/GameObjectRef.h>
+#include <blue_sky/ecs/component/PlayerInputComponent.h>
 
 #include <common/chase_value.h>
 #include <core/setting/SettingStore.h>
@@ -81,8 +82,20 @@ private:
 
 	int debug_log_actors_frame_ = 0;			///< 開発用 : BLUE_SKY_DEBUG_LOG_ACTORS で風船・少女・敵の様子を出すフレームを数える
 
-	/// 開発用 : BLUE_SKY_DEBUG_LOG_ACTORS を設定すると、30 フレームごとに風船・少女・敵の位置・向き・状態をログに出す
+	/// 開発用 : BLUE_SKY_DEBUG_LOG_ACTORS を設定すると、30 フレームごとに風船・少女・敵・プレイヤーの位置・向き・状態をログに出す
 	void debug_log_actors();
+
+	int debug_player_script_frame_ = 0;			///< 開発用 : BLUE_SKY_DEBUG_PLAYER_SCRIPT で決まった入力を流すフレームを数える（-1 で終わり）
+
+	/// 開発用 : BLUE_SKY_DEBUG_PLAYER_SCRIPT を設定すると、決まった入力の並びを流し、プレイヤーを物体の所へ置き、5 フレームごとにプレイヤーの様子をログに出す
+	void debug_player_script();
+	void debug_player_script_input( ecs::PlayerInputComponent& ) const;
+	string_t describe_player_state() const;
+
+	ecs::PlayerInputComponent			player_input_;		///< このフレームのプレイヤーへの入力（read_player_input が Input から書く）
+
+	/// 入力（Input）を player_input_ に書く
+	void read_player_input();
 	// 非所有参照 (各 Manager が所有)
 	Texture*							ui_texture_ = nullptr;			///< UI テクスチャ (GraphicsManager)
 	Shader*								debug_texture_shader_ = nullptr;///< デバッグシェーダー (GraphicsManager)

@@ -481,6 +481,7 @@
     <ClInclude Include="blue_sky\ecs\system\GirlSystem.h" />
     <ClInclude Include="blue_sky\ecs\component\RobotBehaviorComponent.h" />
     <ClInclude Include="blue_sky\ecs\system\RobotBehaviorSystem.h" />
+    <ClInclude Include="blue_sky\ecs\component\PlayerInputComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="blue-sky.config">

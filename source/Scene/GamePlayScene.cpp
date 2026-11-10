@@ -328,6 +328,7 @@ void GamePlayScene::update()
 
 	debug_visit_objects();
 	debug_throw_stones();
+	debug_player_script();
 	debug_log_actors();
 
 	get_active_object_manager()->update();
@@ -391,11 +392,15 @@ void GamePlayScene::update()
  */
 void GamePlayScene::update_main()
 {
+	read_player_input();
+
+	const ecs::PlayerInputComponent& input = player_input_;
+
 	const float_t rotation_speed_rate = camera_->fov() / camera_->get_fov_default();
 
 	if ( ! get_oculus_rift() )
 	{
-		camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * get_mouse_rotation_speed() * rotation_speed_rate, 0.f, 0.f, 0.f );
+		camera_->rotate_degree_target() += Vector( input.mouse_dy * get_mouse_rotation_speed() * rotation_speed_rate, 0.f, 0.f, 0.f );
 		camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -get_mouse_rotation_speed(), +get_mouse_rotation_speed() ) );
 	}
 
@@ -411,7 +416,7 @@ void GamePlayScene::update_main()
 	{
 		if ( ! get_oculus_rift() )
 		{
-			eye_depth_add = get_input()->get_mouse_dy();
+			eye_depth_add = input.mouse_dy;
 		}
 	}
 
@@ -423,22 +428,22 @@ void GamePlayScene::update_main()
 
 		if ( ! player_->is_ladder_step_only() )
 		{
-			if ( get_input()->press( Input::Button::LEFT ) )
+			if ( input.left )
 			{
 				player_->side_step( -1.f );
 				is_moving = true;
 			}
-			if ( get_input()->press( Input::Button::RIGHT ) )
+			if ( input.right )
 			{
 				player_->side_step( +1.f );
 				is_moving = true;
 			}
-			if ( get_input()->press( Input::Button::UP ) )
+			if ( input.up )
 			{
 				player_->step( +1.f );
 				is_moving = true;
 			}
-			if ( get_input()->press( Input::Button::DOWN ) )
+			if ( input.down )
 			{
 				player_->step( -1.f );
 				is_moving = true;
@@ -449,12 +454,12 @@ void GamePlayScene::update_main()
 
 		if ( player_->is_on_ladder() )
 		{
-			if ( get_input()->press( Input::Button::UP ) )
+			if ( input.up )
 			{
 				player_->ladder_step( +1.f );
 				is_moving_on_ladder = true;
 			}
-			if ( get_input()->press( Input::Button::DOWN ) )
+			if ( input.down )
 			{
 				player_->ladder_step( -1.f );
 				is_moving_on_ladder = true;
@@ -471,7 +476,7 @@ void GamePlayScene::update_main()
 			player_->stop_ladder_step();
 		}
 
-		if ( get_input()->push( Input::Button::A ) )
+		if ( input.a_pushed )
 		{
 			switch ( player_->get_selected_item_type() )
 			{
@@ -491,11 +496,11 @@ void GamePlayScene::update_main()
 				}
 			}
 		}
-		else if ( get_input()->push( Input::Button::JUMP ) )
+		else if ( input.jump_pushed )
 		{
 			player_->jump();
 		}
-		else if ( get_input()->press( Input::Button::A ) || get_input()->press( Input::Button::JUMP ) )
+		else if ( input.a || input.jump )
 		{
 			player_->clamber();
 		}
@@ -504,7 +509,7 @@ void GamePlayScene::update_main()
 			player_->stop_clamber();
 		}
 
-		int wheel = get_input()->pop_mouse_wheel_queue();
+		const int wheel = input.wheel;
 
 		if ( player_->get_action_mode() == Player::ActionMode::SCOPE )
 		{
@@ -531,8 +536,8 @@ void GamePlayScene::update_main()
 			camera_->reset_fov();
 		}
 
-		float_t add_direction_degree_by_mouse = get_input()->get_mouse_dx() * get_mouse_rotation_speed() * rotation_speed_rate;
-		float_t add_direction_degree_by_hmd   = get_oculus_rift() ? math::radian_to_degree( get_oculus_rift()->get_delta_yaw() ) : 0.f;
+		float_t add_direction_degree_by_mouse = input.mouse_dx * get_mouse_rotation_speed() * rotation_speed_rate;
+		float_t add_direction_degree_by_hmd   = input.hmd_delta_yaw_degree;
 
 		player_->add_direction_degree( add_direction_degree_by_mouse + add_direction_degree_by_hmd );
 		camera_->rotate_degree_target().set_y( player_->get_direction_degree() );
@@ -551,7 +556,7 @@ void GamePlayScene::update_main()
 	}
 	else
 	{
-		if ( get_input()->push( Input::Button::A ) )
+		if ( input.a_pushed )
 		{
 			restart();
 		}
@@ -561,6 +566,138 @@ void GamePlayScene::update_main()
 			get_graphics_manager()->fade_out( get_fade_speed_dead() );
 		}
 	}
+}
+
+/**
+ * 入力（Input）を、このフレームのプレイヤーへの入力（player_input_）に書く
+ *
+ * 開発用の BLUE_SKY_DEBUG_PLAYER_SCRIPT を設定したときは、Input を読まず、決まった入力の並び（debug_player_script_input）を書く
+ */
+void GamePlayScene::read_player_input()
+{
+	ecs::PlayerInputComponent& input = player_input_;
+	input.clear();
+
+	if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_PLAYER_SCRIPT", nullptr, 0 ) > 0 )
+	{
+		debug_player_script_input( input );
+		return;
+	}
+
+	input.left = get_input()->press( Input::Button::LEFT );
+	input.right = get_input()->press( Input::Button::RIGHT );
+	input.up = get_input()->press( Input::Button::UP );
+	input.down = get_input()->press( Input::Button::DOWN );
+	input.a = get_input()->press( Input::Button::A );
+	input.jump = get_input()->press( Input::Button::JUMP );
+	input.a_pushed = get_input()->push( Input::Button::A );
+	input.jump_pushed = get_input()->push( Input::Button::JUMP );
+	input.mouse_dx = get_input()->get_mouse_dx();
+	input.mouse_dy = get_input()->get_mouse_dy();
+	input.hmd_delta_yaw_degree = get_oculus_rift() ? math::radian_to_degree( get_oculus_rift()->get_delta_yaw() ) : 0.f;
+
+	// ホイールは、プレイヤーが生きている間だけ取り出す（以前と同じ。死んでいる間に回した分は、やり直した後に効く）
+	if ( ! player_->is_dead() )
+	{
+		input.wheel = get_input()->pop_mouse_wheel_queue();
+	}
+}
+
+/**
+ * 開発用 : 決まった入力の並び（フレームごと）を書く（BLUE_SKY_DEBUG_PLAYER_SCRIPT）
+ *
+ * 歩く → 跳ぶ・よじ登る → 歩きながら向きを変える → 横歩き・後ろ歩き → 見下ろす・見上げる → 走る → 跳ぶ → 望遠鏡 →
+ * （梯子があれば）梯子を上って跳び降りる →（ロケットがあれば）ロケットで飛ぶ → 1520 フレーム目に A（死んでいればやり直す）。
+ * 物体の所へ置く（梯子・風船・ロケット）のは debug_player_script が行う
+ */
+void GamePlayScene::debug_player_script_input( ecs::PlayerInputComponent& input ) const
+{
+	const int f = debug_player_script_frame_;
+
+	if ( f < 60 ) { }
+	else if ( f < 150 ) { input.up = true; }
+	else if ( f == 150 ) { input.jump = true; input.jump_pushed = true; }
+	else if ( f < 160 ) { input.jump = true; }
+	else if ( f < 220 ) { input.up = true; input.mouse_dx = 0.02f; }
+	else if ( f < 260 ) { input.left = true; }
+	else if ( f < 300 ) { input.right = true; input.down = true; }
+	else if ( f < 330 ) { input.mouse_dy = 0.02f; }
+	else if ( f < 360 ) { input.mouse_dy = -0.02f; }
+	else if ( f < 540 ) { input.up = true; }
+	else if ( f == 540 ) { input.jump = true; input.jump_pushed = true; }
+	else if ( f == 600 ) { input.wheel = +1; }
+	else if ( f == 610 ) { input.a = true; input.a_pushed = true; }
+	else if ( f == 620 ) { input.wheel = +1; }
+	else if ( f == 640 ) { input.a = true; input.a_pushed = true; }
+	else if ( f >= 705 && f < 715 ) { input.up = true; input.mouse_dy = -0.04f; }
+	else if ( f >= 715 && f < 765 ) { input.up = true; }
+	else if ( f == 770 ) { input.jump = true; input.jump_pushed = true; }
+	else if ( f == 1020 ) { input.a = true; input.a_pushed = true; }
+	else if ( f == 1520 ) { input.a = true; input.a_pushed = true; }
+}
+
+/**
+ * 開発用 : 決まった入力の並びに合わせて、プレイヤーを物体の所へ置き、5 フレームごとにプレイヤーの様子をログに出す（BLUE_SKY_DEBUG_PLAYER_SCRIPT）
+ *
+ * プレイヤーを ECS へ移す前と後で、歩く・跳ぶ・梯子・風船・ロケット・望遠鏡・視点が同じに動くかを比べるため（本編の動きは変えない）。
+ * 700 フレーム目に最初の梯子、820 フレーム目に最初の風船、1000 フレーム目に最初のロケットの所へ置く（あるものだけ）。1540 フレーム目で終わる
+ */
+void GamePlayScene::debug_player_script()
+{
+	if ( debug_player_script_frame_ < 0 || GetEnvironmentVariableA( "BLUE_SKY_DEBUG_PLAYER_SCRIPT", nullptr, 0 ) == 0 )
+	{
+		return;
+	}
+
+	const int f = debug_player_script_frame_++;
+
+	auto put_at_first = [ & ] ( const char_t* label, const char_t* kind )
+	{
+		if ( auto id = get_object_factory()->find_first_of_kind( kind ) )
+		{
+			const Vector to = get_object_factory()->get_ref( * id ).get_location();
+
+			player_->set_location( to );
+			player_->set_velocity( Vector::Zero );
+
+			debug_log( string_t( "[Debug] プレイヤーを" ) + label + "の所へ置きました" );
+		}
+	};
+
+	if ( f == 700 ) { put_at_first( "梯子", "ladder" ); }
+	if ( f == 820 ) { put_at_first( "風船", "balloon" ); }
+	if ( f == 1000 ) { put_at_first( "ロケット", "rocket" ); }
+
+	if ( f >= 60 && f % 5 == 0 )
+	{
+		debug_log( "[Debug] プレイヤーの様子 " + std::to_string( f ) + " " + describe_player_state() );
+	}
+
+	if ( f >= 1540 )
+	{
+		debug_log( "[Debug] プレイヤーの入力の並びを終えました" );
+		debug_player_script_frame_ = -1;
+	}
+}
+
+/// 開発用 : プレイヤーの様子（位置・速度・向き・状態）を 1 行にする（BLUE_SKY_DEBUG_PLAYER_SCRIPT・BLUE_SKY_DEBUG_LOG_ACTORS）
+string_t GamePlayScene::describe_player_state() const
+{
+	static const char_t* const action_modes[] = { "NONE", "BALLOON", "ROCKET", "UMBRELLA", "SCOPE" };
+
+	const Vector& l = player_->get_location();
+	const Vector& v = player_->get_velocity();
+
+	char buffer[ 512 ];
+	std::snprintf( buffer, sizeof( buffer ),
+		"位置 ( %.2f, %.2f, %.2f ) 速度 ( %.2f, %.2f, %.2f ) 向き %.1f 足場 %d 跳ぶ %d 跳べる %d 梯子 %d 壁 %d よじ登り %d/%d 覗く %d 投げる %d 動作 %s 終わりかけ %d 歩く速さ %.3f 目 %.2f/%.2f 選択 %d 石 %d ロケット %d メダル %d 死 %d 落ちて死ぬ %d HP %d 視野 %.1f カメラ ( %.1f, %.1f, %.1f )",
+		l.x(), l.y(), l.z(), v.x(), v.y(), v.z(), player_->get_direction_degree(),
+		player_->is_on_footing(), player_->is_jumping(), player_->is_jumpable(), player_->is_on_ladder(), player_->is_facing_to_block(), player_->can_clamber(), player_->is_clambering(), player_->can_peer_down(), player_->can_throw(),
+		action_modes[ static_cast< int >( player_->get_action_mode() ) ], player_->is_action_pre_finish(), player_->get_step_speed(), player_->get_eye_height(), player_->get_eye_depth(),
+		static_cast< int >( player_->get_selected_item_type() ), player_->get_item_count( Player::ItemType::STONE ), player_->get_item_count( Player::ItemType::ROCKET ), player_->has_medal(),
+		player_->is_dead(), player_->is_falling_to_die(), player_->get_hp(), camera_->fov(), camera_->position().x(), camera_->position().y(), camera_->position().z() );
+
+	return buffer;
 }
 
 void GamePlayScene::update_blackout()
@@ -965,6 +1102,11 @@ void GamePlayScene::debug_log_actors()
 	for ( const auto id : get_object_factory()->find_all_of_kind( "girl" ) )
 	{
 		actors[ id ] = { "girl", "" };
+	}
+
+	if ( auto id = get_object_factory()->find( "player" ) )
+	{
+		actors[ * id ] = { "player", describe_player_state() };
 	}
 
 	for ( const auto id : get_object_factory()->find_all_of_kind( "balloon" ) )

@@ -1304,6 +1304,9 @@
     <ClInclude Include="blue_sky\ecs\system\RobotBehaviorSystem.h">
       <Filter>blue_sky\ecs\system</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\PlayerInputComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="blue-sky.rc" />

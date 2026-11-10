@@ -800,3 +800,42 @@ TEST( EcsTest, RemoveSystem )
 	ASSERT_NE( nullptr, entity_manager.get_system< CountSystem >() );
 	EXPECT_EQ( 1, entity_manager.get_system< CountSystem >()->update_count );
 }
+
+/**
+ * 部品のポインタは、ほかの Entity が作られ・消えても動かない（部品を型ごとの置き場に値で持つようにした後も）
+ *
+ * 剛体の userPointer の RigidBodyComponent*・GraphicsManager のカメラの部品・シーンのメンバが、部品のポインタを持ち続けるため
+ */
+TEST( EcsTest, ComponentPointersStayValidWhenOtherEntitiesComeAndGo )
+{
+	core::ecs::EntityManager entity_manager;
+
+	auto* keeper = entity_manager.create_entity();
+	auto* keeper_transform = keeper->add_component< core::ecs::TransformComponent >();
+	keeper_transform->transform.get_position().set( 1.f, 2.f, 3.f );
+
+	// 置き場のページを何枚も使うほど作り、半分を消し、また作る
+	std::vector< core::ecs::EntityId > others;
+
+	for ( int i = 0; i < 3000; i++ )
+	{
+		auto* e = entity_manager.create_entity();
+		e->add_component< core::ecs::TransformComponent >();
+		others.push_back( static_cast< core::ecs::EntityId >( e->get_id() ) );
+	}
+
+	for ( std::size_t i = 0; i < others.size(); i += 2 )
+	{
+		entity_manager.destroy_entity( others[ i ] );
+	}
+
+	for ( int i = 0; i < 3000; i++ )
+	{
+		entity_manager.create_entity()->add_component< core::ecs::TransformComponent >();
+	}
+
+	EXPECT_EQ( keeper, entity_manager.find( static_cast< core::ecs::EntityId >( keeper->get_id() ) ) );
+	EXPECT_EQ( keeper_transform, keeper->get_component< core::ecs::TransformComponent >() );
+	EXPECT_EQ( 2.f, keeper_transform->transform.get_position().y() );
+	EXPECT_EQ( 1u + 1500u + 3000u, entity_manager.debug_entity_count() );
+}

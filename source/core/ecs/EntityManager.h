@@ -3,12 +3,11 @@
 #include "Entity.h"
 #include "Component.h"
 #include "BaseSystem.h"
+#include "StablePool.h"
 #include "type.h"
 
 
-#include <deque>
 #include <vector>
-#include <unordered_set>
 #include <unordered_map>
 
 #include <memory>
@@ -26,16 +25,48 @@ namespace core::ecs
  */
 class EntityManager
 {
-public:
-	using EntityComponentMap = std::unordered_map< EntityId, std::unique_ptr< Component > >;
-
 private:
-	// Entity の一覧
-	std::unordered_map< EntityId, Entity > entity_list_;
+	/// 部品の型ごとの置き場（型を消して持つための基底）
+	class BaseComponentStorage
+	{
+	public:
+		virtual ~BaseComponentStorage() = default;
 
-	// Component の一覧（添字は部品の型の番号 get_component_type_id。番号は 0 から詰めて振るので添字で引く）
-	// deque なのは、伸ばしても既にある一覧を動かさないため（MSVC の unordered_map は移動が noexcept でなく、vector では伸ばせない）
-	std::deque< EntityComponentMap > component_list_;
+		/// id の部品を壊す（無ければ何もしない）
+		virtual void erase( EntityId id ) = 0;
+	};
+
+	/// 型 T の部品の置き場。部品は値で持ち、1 つずつ new しない。場所は外すまで動かない（StablePool）
+	template< typename ComponentType >
+	class ComponentStorage : public BaseComponentStorage
+	{
+	public:
+		StablePool< ComponentType > pool;
+
+		void erase( EntityId id ) override { pool.erase( id ); }
+	};
+
+	// Entity の一覧（Entity* は消すまで動かない）
+	// 以前は unordered_map< EntityId, Entity > で、作る・消す・find のたびにハッシュ表を引いていた
+	StablePool< Entity > entity_list_;
+
+	// 部品の置き場（添字は部品の型の番号 get_component_type_id。番号は 0 から詰めて振るので添字で引く。まだ使っていない型は nullptr）
+	// 以前は型ごとの unordered_map< EntityId, unique_ptr< Component > > で、部品を 1 つずつ new していた
+	std::vector< std::unique_ptr< BaseComponentStorage > > component_list_;
+
+	/// 型 T の部品の置き場（まだ無ければ nullptr）
+	template< typename ComponentType >
+	ComponentStorage< ComponentType >* find_storage() const
+	{
+		const auto component_type_id = get_component_type_id< ComponentType >();
+
+		if ( component_type_id >= component_list_.size() )
+		{
+			return nullptr;
+		}
+
+		return static_cast< ComponentStorage< ComponentType >* >( component_list_[ component_type_id ].get() );
+	}
 
 	// ( SystemTypeId => System の実体 ) のマップ ( System の実体を保持する )
 	std::unordered_map< SystemTypeId, std::unique_ptr< BaseSystem > > system_map_;
@@ -57,7 +88,7 @@ public:
 	 */
 	Entity* create_entity()
 	{
-		Entity* e = & entity_list_.emplace( std::piecewise_construct, std::forward_as_tuple( next_entity_id_ ), std::forward_as_tuple( next_entity_id_, this ) ).first->second;
+		Entity* e = entity_list_.emplace( next_entity_id_, next_entity_id_, this );
 
 		next_entity_id_++;
 
@@ -73,24 +104,27 @@ public:
 	 */
 	void destroy_entity( EntityId id )
 	{
-		auto i = entity_list_.find( id );
+		Entity* entity = entity_list_.find( id );
 
-		if ( i == entity_list_.end() )
+		if ( ! entity )
 		{
 			return;
 		}
 
 		for ( auto& s : system_list_ )
 		{
-			s->on_destroy_entity( & i->second );
+			s->on_destroy_entity( entity );
 		}
 
-		for ( auto& components : component_list_ )
+		for ( auto& storage : component_list_ )
 		{
-			components.erase( id );
+			if ( storage )
+			{
+				storage->erase( id );
+			}
 		}
 
-		entity_list_.erase( i );
+		entity_list_.erase( id );
 	}
 
 	/**
@@ -100,7 +134,7 @@ public:
 	 */
 	bool is_alive( EntityId id ) const
 	{
-		return entity_list_.find( id ) != entity_list_.end();
+		return entity_list_.contains( id );
 	}
 
 	/**
@@ -110,25 +144,30 @@ public:
 	 */
 	Entity* find( EntityId id )
 	{
-		auto i = entity_list_.find( id );
-		return i == entity_list_.end() ? nullptr : & i->second;
+		return entity_list_.find( id );
 	}
 
 	const Entity* find( EntityId id ) const
 	{
-		auto i = entity_list_.find( id );
-		return i == entity_list_.end() ? nullptr : & i->second;
+		return entity_list_.find( id );
 	}
+
+	/// 生きている Entity の数（テスト・デバッグ用）
+	std::size_t debug_entity_count() const { return entity_list_.size(); }
 
 	/**
 	 * Entity に Component を追加する
 	 *
+	 * 部品は型ごとの置き場に値で置く。返すポインタは、その部品を外す（Entity を消す）まで動かない
+	 *
 	 * @param e Entity
-	 * @return 追加した Component
+	 * @return 追加した Component（既に持っていれば何もせず nullptr）
 	 */
 	template< typename ComponentType >
 	ComponentType* add_component( const Entity* e )
 	{
+		static_assert( std::is_base_of_v< Component, ComponentType >, "部品は core::ecs::Component を継承すること" );
+
 		const auto component_type_id = get_component_type_id< ComponentType >();
 
 		if ( component_type_id >= component_list_.size() )
@@ -136,24 +175,26 @@ public:
 			component_list_.resize( component_type_id + 1 );
 		}
 
-		auto& list = component_list_[ component_type_id ];
-		auto i2 = list.find( e->get_id() );
+		auto& storage = component_list_[ component_type_id ];
 
-		if ( i2 == list.end() )
+		if ( ! storage )
 		{
-			auto c = new ComponentType();
-
-			list.emplace( e->get_id(), c );
-
-			for ( auto& s : system_list_ )
-			{
-				s->on_add_component< ComponentType >( e );
-			}
-
-			return c;
+			storage = std::make_unique< ComponentStorage< ComponentType > >();
 		}
 
-		return nullptr;
+		auto* c = static_cast< ComponentStorage< ComponentType >* >( storage.get() )->pool.emplace( static_cast< EntityId >( e->get_id() ) );
+
+		if ( ! c )
+		{
+			return nullptr;
+		}
+
+		for ( auto& s : system_list_ )
+		{
+			s->on_add_component< ComponentType >( e );
+		}
+
+		return c;
 	}
 
 	/**
@@ -166,22 +207,9 @@ public:
 	template< typename ComponentType >
 	ComponentType* get_component( const Entity* e )
 	{
-		const auto component_type_id = get_component_type_id< ComponentType >();
+		auto* storage = find_storage< ComponentType >();
 
-		if ( component_type_id >= component_list_.size() )
-		{
-			return nullptr;
-		}
-
-		const auto& list = component_list_[ component_type_id ];
-		auto i = list.find( e->get_id() );
-
-		if ( i == list.end() )
-		{
-			return nullptr;
-		}
-
-		return static_cast< ComponentType* >( i->second.get() );
+		return storage ? storage->pool.find( static_cast< EntityId >( e->get_id() ) ) : nullptr;
 	}
 
 	/**
@@ -195,17 +223,10 @@ public:
 	template< typename ComponentType >
 	void remove_component( const Entity* e )
 	{
-		const auto component_type_id = get_component_type_id< ComponentType >();
+		auto* storage = find_storage< ComponentType >();
+		const auto id = static_cast< EntityId >( e->get_id() );
 
-		if ( component_type_id >= component_list_.size() )
-		{
-			return;
-		}
-
-		auto& list = component_list_[ component_type_id ];
-		auto i2 = list.find( e->get_id() );
-
-		if ( i2 == list.end() )
+		if ( ! storage || ! storage->pool.contains( id ) )
 		{
 			return;
 		}
@@ -215,8 +236,8 @@ public:
 			s->on_remove_component< ComponentType >( e );
 		}
 
-		// System に知らせている間に同じ部品が外され得るので、反復子ではなく id で消す
-		list.erase( e->get_id() );
+		// System に知らせている間に同じ部品が外され得るので、もう一度 id で引いて消す（無ければ何もしない）
+		storage->pool.erase( id );
 	}
 
 	/**
@@ -244,10 +265,10 @@ public:
 		std::sort( system_list_.begin(), system_list_.end(), [] ( const BaseSystem* a, const BaseSystem* b ) { return a->get_priority() < b->get_priority(); } );
 
 		// 既存の全 Entity に対して走査を行い、 Entity が System の操作対象となる Component を全て持っていた場合、System に Component への参照を追加する
-		for ( auto& entity : entity_list_ )
+		entity_list_.for_each( [ system ] ( EntityId, Entity& entity )
 		{
-			system->add_entity_component_if_all_components_ready( & entity.second );
-		}
+			system->add_entity_component_if_all_components_ready( & entity );
+		} );
 	}
 
 	/**

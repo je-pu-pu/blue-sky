@@ -1,0 +1,8 @@
+# 1-1 のステージの後の文と背景（tools/stage_convert/convert_story_text.py で 1-1.outro から変換した）
+format = 1
+sound = "1-1-outro"
+
+[[layer]]
+image = "noise.jpg"
+rotation = { from = 0, to = 180, speed = 0.1 }
+scale = { from = 1.6, to = 3, speed = 0.0001 }

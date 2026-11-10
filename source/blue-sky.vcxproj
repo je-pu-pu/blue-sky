@@ -60,6 +60,7 @@
     <ClCompile Include="blue_sky\stage\StageBuilder.cpp" />
     <ClCompile Include="blue_sky\stage\StageLook.cpp" />
     <ClCompile Include="blue_sky\stage\TomlStageParser.cpp" />
+    <ClCompile Include="blue_sky\stage\StoryTextParser.cpp" />
     <ClCompile Include="blue_sky\GameObjectRef.cpp" />
     <ClCompile Include="blue_sky\ecs\ObjectBody.cpp" />
     <ClCompile Include="blue_sky\ecs\EntityObject.cpp" />
@@ -250,6 +251,7 @@
     <ClInclude Include="blue_sky\stage\StageBuilder.h" />
     <ClInclude Include="blue_sky\stage\StageLook.h" />
     <ClInclude Include="blue_sky\stage\TomlStageParser.h" />
+    <ClInclude Include="blue_sky\stage\StoryTextParser.h" />
     <ClInclude Include="blue_sky\GameObjectRef.h" />
     <ClInclude Include="blue_sky\ecs\ObjectBody.h" />
     <ClInclude Include="blue_sky\ecs\EntityObject.h" />

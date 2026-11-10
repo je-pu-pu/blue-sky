@@ -296,6 +296,9 @@
     <ClCompile Include="blue_sky\stage\TomlStageParser.cpp">
       <Filter>blue_sky\stage</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\stage\StoryTextParser.cpp">
+      <Filter>blue_sky\stage</Filter>
+    </ClCompile>
     <ClCompile Include="blue_sky\GameObjectRef.cpp">
       <Filter>blue_sky</Filter>
     </ClCompile>
@@ -1030,6 +1033,9 @@
       <Filter>blue_sky\stage</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\stage\TomlStageParser.h">
+      <Filter>blue_sky\stage</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\stage\StoryTextParser.h">
       <Filter>blue_sky\stage</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\GameObjectRef.h">

@@ -170,6 +170,7 @@
     <ClCompile Include="test\ecs\ObjectFactoryTest.cpp" />
     <ClCompile Include="test\stage\TomlStageParserTest.cpp" />
     <ClCompile Include="test\stage\StageFilesTest.cpp" />
+    <ClCompile Include="test\stage\StoryTextParserTest.cpp" />
     <ClCompile Include="test\stage\StageLookTest.cpp" />
     <ClCompile Include="test\ecs\ObjectRenderResourcesTest.cpp" />
     <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp" />

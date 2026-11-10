@@ -2,7 +2,7 @@
 
 #include <common/exception.h>
 
-// toml++（ヘッダだけのライブラリ。source/lib/include/toml++。MIT）を読むのはこのファイルだけ
+// toml++（ヘッダだけのライブラリ。source/lib/include/toml++。MIT）を読むのはこのファイルと StoryTextParser.cpp（ステージの前後の文）だけ
 #include <toml++/toml.hpp>
 
 #include <fstream>

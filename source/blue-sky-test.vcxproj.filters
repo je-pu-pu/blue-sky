@@ -75,6 +75,9 @@
     <ClCompile Include="test\stage\StageFilesTest.cpp">
       <Filter>test\stage</Filter>
     </ClCompile>
+    <ClCompile Include="test\stage\StoryTextParserTest.cpp">
+      <Filter>test\stage</Filter>
+    </ClCompile>
     <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp">
       <Filter>test\graphics</Filter>
     </ClCompile>

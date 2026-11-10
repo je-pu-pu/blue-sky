@@ -97,7 +97,7 @@ void StageSelectScene::update()
 
 			set_next_stage_name( stage->name );
 
-			if ( boost::filesystem::exists( string_t( "media/stage/" ) + stage->name + ".intro" ) )
+			if ( boost::filesystem::exists( string_t( "media/stage/" ) + stage->name + ".intro.toml" ) )
 			{
 				set_next_scene( "stage_intro" );
 			}

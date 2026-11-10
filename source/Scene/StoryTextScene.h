@@ -51,6 +51,15 @@ private:
 	/// 背景の画像を読み、レイヤーを作る
 	std::unique_ptr< BgSpriteLayer > create_bg_sprite_layer( const char_t* layer_name, const char_t* texture_name, const char_t* file_name ) const;
 
+	/// 読んだ「始め・目標・速さ」を重なりの動きに当てる（書いていない所は重なりの既定の値のまま）
+	template< typename T, typename Desc, typename Set >
+	static void apply_chase( common::chase_value< T >& chase, const Desc& desc, Set set )
+	{
+		if ( desc.from ) { set( chase.value(), * desc.from ); }
+		if ( desc.to ) { set( chase.target_value(), * desc.to ); }
+		if ( desc.speed ) { set( chase.speed(), * desc.speed ); }
+	}
+
 public:
 	StoryTextScene( GameMain& game_main, const char*, const char* );
 	~StoryTextScene();

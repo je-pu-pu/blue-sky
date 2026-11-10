@@ -16,8 +16,10 @@
 
 #include <common/string.h>
 
-#include <fstream>
-#include <sstream>
+#include <blue_sky/DebugLog.h>
+#include <blue_sky/stage/StoryTextParser.h>
+
+#include <filesystem>
 
 namespace blue_sky
 {
@@ -60,119 +62,101 @@ StoryTextScene::~StoryTextScene() = default;
 
 void StoryTextScene::load_story_text_file( const char* file_name )
 {
-	std::ifstream in( file_name );
-	
-	if ( ! in.good() )
+	// ファイルが無いステージ（おまけのステージの outro など）は、この場面を飛ばす
+	if ( ! std::filesystem::exists( file_name ) )
 	{
+		debug_log( string_t( "[StoryText] " ) + file_name + " が無いので、この場面を飛ばします" );
 		set_next_scene( next_scene_name_ );
 		return;
 	}
 
-	bool in_text = false;
-	BgSpriteLayer* current_layer = nullptr;
+	stage::StoryTextData data;
 
-	while ( in.good() )
+	try
 	{
-		std::string line;
-		std::getline( in, line );
+		data = stage::StoryTextParser::parse_file( file_name );
+	}
+	catch ( const std::exception& e )
+	{
+		// 文法の誤り・読めない版 : 理由を残して、この場面を飛ばす（ゲームは続ける）
+		debug_log( string_t( "[StoryText] " ) + e.what() + "（この場面を飛ばします）" );
+		set_next_scene( next_scene_name_ );
+		return;
+	}
 
-		if ( in_text )
+	for ( const auto& warning : data.warnings )
+	{
+		debug_log( "[StoryText] " + warning );
+	}
+
+	for ( const auto& desc : data.layers )
+	{
+		auto layer = create_bg_sprite_layer( desc.image.c_str(), desc.image.c_str(), ( "media/image/" + desc.image ).c_str() );
+
+		if ( desc.src_rect )
 		{
-			text_ += common::convert_to_wstring( line ) + L"\n";
-			continue;
+			layer->get_src_rect() = win::Rect( ( * desc.src_rect )[ 0 ], ( * desc.src_rect )[ 1 ], ( * desc.src_rect )[ 2 ], ( * desc.src_rect )[ 3 ] );
 		}
 
-		std::stringstream ss;
-		std::string command;
-
-		ss << line;
-		ss >> command;
-
-		if ( command == "layer" )
+		if ( desc.translation )
 		{
-			string_t layer_name;
-			ss >> layer_name;
+			apply_chase( layer->get_translation(), * desc.translation, [] ( Vector3& v, const std::array< double, 2 >& a ) { v.x() = static_cast< float >( a[ 0 ] ); v.y() = static_cast< float >( a[ 1 ] ); } );
+		}
 
-			auto layer = create_bg_sprite_layer( layer_name.c_str(), layer_name.c_str(), ( std::string( "media/image/" + layer_name ) ).c_str() );
-			current_layer = layer.get();
+		// 回転（rotation）はまだ当てない（以前の読み方と同じ見た目にするため。次の変更で当てる）
 
-			ss >> current_layer->get_src_rect().left() >> current_layer->get_src_rect().top();
-			ss >> current_layer->get_src_rect().right() >> current_layer->get_src_rect().bottom();
+		if ( desc.scale )
+		{
+			apply_chase( layer->get_scale(), * desc.scale, [] ( float_t& v, const std::array< double, 1 >& a ) { v = static_cast< float_t >( a[ 0 ] ); } );
+		}
 
-			bg_sprite_layer_list_.push_back( std::move( layer ) );
-		}
-		else if ( command == "layer-translation" )
+		if ( desc.color )
 		{
-			ss >> current_layer->get_translation().value().x() >> current_layer->get_translation().value().y();
-			ss >> current_layer->get_translation().target_value().x() >> current_layer->get_translation().target_value().y();
-			ss >> current_layer->get_translation().speed().x() >> current_layer->get_translation().speed().y();
+			apply_chase( layer->get_color(), * desc.color, [] ( Color& v, const std::array< double, 4 >& a ) { v = Color( static_cast< float >( a[ 0 ] ), static_cast< float >( a[ 1 ] ), static_cast< float >( a[ 2 ] ), static_cast< float >( a[ 3 ] ) ); } );
 		}
-		else if ( command == "layer-rotation" )
-		{
-			ss >> current_layer->get_rotation().value() >> current_layer->get_rotation().target_value() >> current_layer->get_rotation().speed();
-		}
-		else if ( command == "layer-scale" )
-		{
-			ss >> current_layer->get_scale().value() >> current_layer->get_scale().target_value() >> current_layer->get_scale().speed();
-		}
-		else if ( command == "layer-color" )
-		{
-			ss >> current_layer->get_color().value().r() >> current_layer->get_color().value().g() >> current_layer->get_color().value().b() >> current_layer->get_color().value().a();
-			ss >> current_layer->get_color().target_value().r() >> current_layer->get_color().target_value().g() >> current_layer->get_color().target_value().b() >> current_layer->get_color().value().a();
-			ss >> current_layer->get_color().speed().r() >> current_layer->get_color().speed().g() >> current_layer->get_color().speed().b() >> current_layer->get_color().speed().a();
-		}
-		else if ( command == "bgm" )
-		{
-			std::string bgm_name;
-			float_t volume = 1.f;
 
-			ss >> bgm_name >> volume;
+		bg_sprite_layer_list_.push_back( std::move( layer ) );
+	}
 
-			get_sound_manager()->load_music( "bgm", bgm_name.c_str() );
-			bgm_ = get_sound_manager()->get_sound_handle( "bgm" );
+	if ( data.bgm )
+	{
+		get_sound_manager()->load_music( "bgm", data.bgm->file.c_str() );
+		bgm_ = get_sound_manager()->get_sound_handle( "bgm" );
 
-			if ( Sound* bgm = resolve( bgm_, "bgm" ) )
-			{
-				bgm->set_volume( volume );
-				bgm->play( false );
-			}
-		}
-		else if ( command == "text-color" )
+		if ( Sound* bgm = resolve( bgm_, "bgm" ) )
 		{
-			uint_t hex;
+			bgm->set_volume( static_cast< float_t >( data.bgm->volume ) );
+			bgm->play( false );
+		}
+	}
 
-			ss >> std::hex >> hex;
+	if ( data.text_color )
+	{
+		text_color_ = Color::from_hex( * data.text_color );
+	}
 
-			text_color_ = Color::from_hex( hex );
-		}
-		else if( command == "text-border-color" )
-		{
-			uint_t hex;
+	if ( data.text_border_color )
+	{
+		text_border_color_ = Color::from_hex( * data.text_border_color );
+	}
 
-			ss >> std::hex >> hex;
+	text_ = common::convert_to_wstring( data.text );
 
-			text_border_color_ = Color::from_hex( hex );
-		}
-		else if ( command == "text" )
-		{
-			in_text = true;
-		}
-		else if ( command == "sound" )
-		{
-			std::string sound_name;
-			ss >> sound_name;
-			get_sound_manager()->load( "sound", sound_name.c_str() );
-			sound_ = get_sound_manager()->get_sound_handle( "sound" );
-			play( sound_, "sound" );
-		}
-		else if ( command == "next-scene" )
-		{
-			ss >> next_scene_name_;
-		}
-		else if ( command == "next-stage-name" )
-		{
-			ss >> next_stage_name_;
-		}
+	if ( data.sound )
+	{
+		get_sound_manager()->load( "sound", data.sound->c_str() );
+		sound_ = get_sound_manager()->get_sound_handle( "sound" );
+		play( sound_, "sound" );
+	}
+
+	if ( data.next_scene )
+	{
+		next_scene_name_ = * data.next_scene;
+	}
+
+	if ( data.next_stage )
+	{
+		next_stage_name_ = * data.next_stage;
 	}
 }
 

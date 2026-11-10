@@ -33,6 +33,11 @@
 #include <core/ecs/component/TransformComponent.h>
 #include <core/physics/EntityTag.h>
 
+#include <cstdio>
+#include <map>
+#include <set>
+#include <typeinfo>
+
 namespace blue_sky
 {
 
@@ -526,6 +531,86 @@ std::optional< GameObjectRef > ObjectFactory::find_ref( const string_t& name ) c
 	}
 
 	return std::nullopt;
+}
+
+std::vector< string_t > ObjectFactory::describe_objects() const
+{
+	// 番号 → 種類（ActiveObject は型の名前、ECS だけの物体は作った種類の名前）
+	std::map< EntityId, string_t > kinds;
+
+	if ( active_object_manager_ )
+	{
+		for ( const ActiveObject* o : active_object_manager_->active_object_list() )
+		{
+			kinds[ o->get_entity_id() ] = typeid( * o ).name();
+		}
+	}
+
+	for ( const EntityId id : entity_object_list_ )
+	{
+		const core::ecs::Entity* entity = entity_manager_->find( id );
+		const auto* state = entity ? entity->get_component< ecs::SimpleObjectComponent >() : nullptr;
+
+		if ( state )
+		{
+			kinds[ id ] = state->kind;
+		}
+	}
+
+	// 番号 → 名前（名前の順）
+	std::map< EntityId, std::set< string_t > > names;
+
+	for ( const auto& [ name, id ] : named_object_map_ )
+	{
+		names[ id ].insert( name );
+	}
+
+	std::vector< string_t > lines;
+
+	for ( const auto& [ id, kind ] : kinds )
+	{
+		const GameObjectRef o = get_ref( id );
+		const Vector l = o.get_location();
+
+		char buffer[ 256 ];
+		std::snprintf( buffer, sizeof( buffer ), "#%u %s 位置 ( %.3f, %.3f, %.3f ) 向き %.3f", static_cast< unsigned >( id ), kind.c_str(), l.x(), l.y(), l.z(), o.get_direction_degree() );
+
+		string_t line = buffer;
+
+		if ( auto i = names.find( id ); i != names.end() )
+		{
+			line += " 名前";
+
+			for ( const auto& name : i->second )
+			{
+				line += " " + name;
+			}
+		}
+
+		const core::ecs::Entity* entity = entity_manager_->find( id );
+
+		if ( const auto* s = entity ? entity->get_component< ecs::SwitchComponent >() : nullptr )
+		{
+			// イベントの名前の順に、受け取り手の数
+			std::map< string_t, size_t > counts;
+
+			for ( const auto& [ event_name, handlers ] : s->event_handler_map )
+			{
+				counts[ event_name ] = handlers.size();
+			}
+
+			line += " スイッチ";
+
+			for ( const auto& [ event_name, count ] : counts )
+			{
+				line += " " + event_name + "=" + std::to_string( count );
+			}
+		}
+
+		lines.push_back( line );
+	}
+
+	return lines;
 }
 
 void ObjectFactory::restart()

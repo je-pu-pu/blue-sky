@@ -147,6 +147,18 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 	get_graphics_manager()->load_paper_textures();
 
 	restart();
+
+	// 開発用 : BLUE_SKY_DEBUG_DUMP_STAGE を設定すると、ステージから作った物体の一覧をログに出す
+	// （ステージの読み方を変える前と後で、作られる物体が同じかを比べるため。設計 doc/ステージ形式の設計.md 3.2）
+	if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_DUMP_STAGE", nullptr, 0 ) > 0 )
+	{
+		debug_log( "[StageDump] ステージ " + get_stage_name() + " : 物体 " + std::to_string( get_object_factory()->describe_objects().size() ) + " 個・始めの動き " + std::to_string( stage_setup_command_call_list_.size() ) + " 個" );
+
+		for ( const auto& line : get_object_factory()->describe_objects() )
+		{
+			debug_log( "[StageDump] " + line );
+		}
+	}
 }
 
 GamePlayScene::~GamePlayScene()

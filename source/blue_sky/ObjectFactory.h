@@ -164,6 +164,13 @@ public:
 
 	/// ここが作った ECS だけの物体（作った順）
 	const std::vector< EntityId >& get_entity_object_list() const { return entity_object_list_; }
+
+	/**
+	 * 開発用 : 作った物体の一覧を 1 行ずつ返す（BLUE_SKY_DEBUG_DUMP_STAGE。ステージの読み方を変える前と後で比べるため）
+	 *
+	 * ActiveObject と ECS だけの物体を EntityId の順に並べ、番号・種類・位置・向き・名前・スイッチのイベントの数を書く
+	 */
+	std::vector< string_t > describe_objects() const;
 };
 
 } // namespace blue_sky

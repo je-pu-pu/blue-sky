@@ -1,0 +1,163 @@
+# 2-0 のステージ（tools/stage_convert/convert_stage.py で 2-0.stage から変換した）
+format = 1
+
+[stage]
+collision = "2-0.obj"
+ground = "ground"
+bgm_loop = false
+
+[player]
+position = [4.0, 53.0, -185.0]
+camera_direction = 60
+
+[goal]
+position = [3.0, 80.0, 15.0]
+
+[[object]]
+type = "static"
+model = "stage-2-0"
+position = [0, 0, 0]
+
+[[event]]
+when = "start"
+then = [
+  { do = "set", bgm = "hsm" },
+  { do = "set", bpm = 130, beat = 4 },
+  { do = "set", sky_box = "3" },
+  { do = "set", drawing_accent_scale = 1 },
+  { do = "set", line_type = 1 },
+  { do = "set", paper_type = 1 },
+  { do = "set", shadow_color = [0, 0, 0, 1] },
+
+  { do = "load_sound", name = "fin", file = "today-and-tomorrow-b", replace = true },
+]
+
+[[object]]
+type = "ladder"
+position = [-2.0, 55.400001525878906, -35.0]
+direction = 270
+
+[[object]]
+type = "rocket"
+position = [4.0, 60.0, -77.0]
+direction = 0
+
+[[object]]
+type = "rocket"
+position = [4.0, 51.0, -106.0]
+direction = 0
+
+[[object]]
+type = "ladder"
+position = [9.0, 55.0, -2.0]
+direction = 270
+
+[[object]]
+type = "ladder"
+position = [9.0, 49.400001525878906, -2.0]
+direction = 270
+
+[[object]]
+type = "stone"
+positions = [
+  [-12.08486557006836, 51.292320251464844, -3.803762435913086],
+  [-13.064841270446777, 51.292320251464844, -4.168404579162598],
+  [-11.218840599060059, 51.292320251464844, -4.282355308532715],
+  [-10.330025672912598, 51.292320251464844, -4.327935695648193],
+  [-10.603507041931152, 51.292320251464844, -5.900454521179199],
+  [-11.401161193847656, 51.292320251464844, -5.262331008911133],
+  [-12.176025390625, 51.292320251464844, -5.6269731521606445],
+  [-12.791358947753906, 51.292320251464844, -5.285120964050293],
+  [-12.15323543548584, 51.292320251464844, -4.5558366775512695],
+]
+direction = 0
+
+[[object]]
+type = "ladder"
+position = [-3.0, 49.400001525878906, 2.0]
+direction = 270
+
+[[object]]
+type = "ladder"
+position = [-3.0, 55.0, 2.0]
+direction = 270
+
+[[object]]
+type = "ladder"
+position = [-16.0, 45.29999923706055, -52.0]
+direction = 180
+
+[[object]]
+type = "medal"
+position = [15.0, 44.0, -35.0]
+direction = 0
+
+[[object]]
+type = "rocket"
+position = [-4.0, 51.0, -31.0]
+direction = 0
+
+[[object]]
+type = "ladder"
+position = [4.0, 55.0, -83.0]
+direction = 180
+
+[[object]]
+type = "ladder"
+position = [-2.0, 49.400001525878906, -35.0]
+direction = 270
+
+[[object]]
+type = "ladder"
+position = [10.0, 49.400001525878906, -35.0]
+direction = 270
+
+[[object]]
+type = "rocket"
+position = [-15.5, 45.0, -53.5]
+direction = 0
+
+[[object]]
+type = "balloon"
+position = [3.0, 60.0, 6.0]
+direction = 0
+
+[[object]]
+type = "ladder"
+position = [10.0, 55.0, -35.0]
+direction = 270
+
+[[object]]
+type = "stone"
+position = [-0.505730390548706, 62.0, 0.8106375932693481]
+direction = 0
+
+[[object]]
+type = "switch"
+name = "switch"
+position = [14.0, 40.0, -2.0]
+direction = 270
+on_turn_on = [
+  { do = "move_to", target = "goal", position = [3, 60, 15], speed = 2 },
+  { do = "play_sound", sound = "machine-translation" },
+]
+
+[[object]]
+type = "static"
+model = "robot-dead-body"
+position = [4, 70, -182]
+
+[[object]]
+type = "static"
+model = "robot-dead-body"
+position = [5, 71, -182]
+
+[[object]]
+type = "static"
+model = "robot-dead-body"
+position = [4, 80, -182]
+
+[[object]]
+type = "static"
+model = "robot-dead-body"
+position = [5, 81, -182]

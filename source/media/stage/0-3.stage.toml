@@ -1,0 +1,49 @@
+# 0-3 のステージ（tools/stage_convert/convert_stage.py で 0-3.stage から変換した）
+format = 1
+
+[stage]
+ground = "ground"
+
+[player]
+position = [0, 500.0, 0]
+
+[goal]
+position = [0, 15, 10.0]
+
+[[event]]
+when = "start"
+then = [
+  { do = "set", bgm = "bad-dream" },
+  { do = "set", sky_box = "3" },
+]
+
+[[event]]
+when = "start"
+then = [
+  { do = "set", drawing_accent_scale = 0 },
+  { do = "play_sound", sound = "fall" },
+  { do = "set", ambient_color = [1, 1, 1] },
+
+  { do = "load_sound", name = "fin", file = "my-failed-takeoff-2" },
+]
+
+[[object]]
+type = "medal"
+position = [0, 100, 13]
+direction = 0
+
+[[object]]
+type = "area-switch"
+position = [0, 400, 0]
+size = [100, 1, 100]
+on_turn_on = [
+  { do = "fade", ambient_color = [0, 0, 0, 0.01] },
+]
+
+[[object]]
+type = "area-switch"
+position = [0, 300, 0]
+size = [100, 1, 100]
+on_turn_on = [
+  { do = "fade", ambient_color = [0, 0, 0, 0.01] },
+]

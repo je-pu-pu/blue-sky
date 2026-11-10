@@ -72,6 +72,9 @@
     <ClCompile Include="test\stage\TomlStageParserTest.cpp">
       <Filter>test\stage</Filter>
     </ClCompile>
+    <ClCompile Include="test\stage\StageFormatCompareTest.cpp">
+      <Filter>test\stage</Filter>
+    </ClCompile>
     <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp">
       <Filter>test\graphics</Filter>
     </ClCompile>

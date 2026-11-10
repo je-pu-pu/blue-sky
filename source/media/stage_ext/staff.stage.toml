@@ -1,0 +1,56 @@
+# staff のステージ（tools/stage_convert/convert_stage.py で staff.stage から変換した）
+format = 1
+
+[stage]
+collision = "staff.obj"
+ground = "ground"
+
+[player]
+position = [0.0, 41.0, -48.29999923706055]
+camera_direction = 60
+
+[goal]
+position = [0.0, 40.0, 60.0]
+
+[[object]]
+type = "static"
+model = "stage-staff"
+position = [0, 0, 0]
+
+[[event]]
+when = "start"
+then = [
+  { do = "set", bgm = "road" },
+  { do = "set", sky_box = "3" },
+  { do = "set", balloon_sound_type = 3 },
+]
+
+# 変換で捨てた行（どこも読まない）: sky-box sky-box-3
+[[object]]
+type = "rocket"
+position = [0.0, 40.0, -45.0]
+direction = 0
+
+[[object]]
+type = "balloon"
+positions = [
+  [0.0, 40.0, -15.0],
+  [0.0, 40.0, 35.0],
+  [0.0, 40.0, 50.0],
+  [0.0, 40.0, 45.0],
+  [0.0, 40.0, 40.0],
+  [0.0, 40.0, 20.0],
+  [0.0, 40.0, 25.0],
+  [0.0, 40.0, 30.0],
+  [0.0, 40.0, -20.0],
+  [0.0, 40.0, -5.0],
+  [0.0, 40.0, -10.0],
+  [0.0, 40.0, -25.0],
+  [0.0, 40.0, -30.0],
+]
+direction = 0
+
+[[object]]
+type = "rocket"
+position = [0.0, 40.0, 5.0]
+direction = 0

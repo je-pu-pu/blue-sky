@@ -24,6 +24,9 @@
     <ClCompile Include="test\ui\UILayoutTest.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="test\ui\UIMeasureTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
     <ClCompile Include="test\ui\ResourceManagerTest.cpp">
       <Filter>ui</Filter>
     </ClCompile>

@@ -204,6 +204,16 @@ namespace core::ui
 		 */
 		virtual float_t measure_width( const UIContext& ) const { return 0.f; }
 
+		/**
+		 * 使える大きさを与えたときの希望の大きさ（2 次元の計測）
+		 *
+		 * 既定 : 幅は内容に合わせた幅（measure_width）。希望が無いか、使える幅より大きければ使える幅。
+		 * 高さはその幅での measure_height。コンテナは子を測って自分の大きさを決める（Stack は縦横とも内容から）。
+		 * 親はこれで子の大きさを決める（横の Stack の CONTENT の子・AnchorBox の子）。
+		 * 以前はレイアウトが高さだけの 1 次元で、入れ子のコンテナは内容に合わせた幅を持てなかった（設計上の問題 B3）。
+		 */
+		virtual Extent measure( const Extent& available, const UIContext& ctx ) const;
+
 		/// 矩形を確定する（コンテナは子を配置する）
 		virtual void arrange( const Rect& rect, const UIContext& ctx );
 

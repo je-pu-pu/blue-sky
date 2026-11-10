@@ -70,6 +70,10 @@ public:
 	bool nav_wrap() const override { return wrap_; }
 
 	float_t measure_height( float_t width, const UIContext& ctx ) const override;
+
+	/// 内容に合わせた幅（横 : 子の幅と間隔の合計、縦 : 最も広い子の幅。どちらも余白込み。希望の無い子は 0 として数える）
+	float_t measure_width( const UIContext& ctx ) const override;
+
 	void arrange( const Rect& rect, const UIContext& ctx ) override;
 
 }; // class Stack

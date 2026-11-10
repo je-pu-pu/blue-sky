@@ -1,6 +1,7 @@
 #include "AnchorBox.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace core::ui
 {
@@ -33,8 +34,9 @@ float_t AnchorBox::measure_height( float_t width, const UIContext& ctx ) const
 		return 0.f;
 	}
 
-	const float_t w = width_ > 0.f ? std::min( width_, width ) : width;
-	return children_.front()->measure_height( w, ctx ) + margin_ * 2.f;
+	const Widget* child = children_.front().get();
+	const float_t w = width_ > 0.f ? std::min( width_, width ) : child->measure( Extent( std::max( 0.f, width - margin_ * 2.f ), INFINITY ), ctx ).w;
+	return child->measure_height( w, ctx ) + margin_ * 2.f;
 }
 
 void AnchorBox::arrange( const Rect& rect, const UIContext& ctx )
@@ -48,7 +50,9 @@ void AnchorBox::arrange( const Rect& rect, const UIContext& ctx )
 
 	Widget* child = children_.front().get();
 
-	const float_t w = width_ > 0.f ? width_ : rect.w - margin_ * 2.f;
+	// 幅の指定が無ければ、子の希望の大きさ（2 次元の計測）で置く。希望の幅の無い子は、以前と同じく使える幅いっぱい
+	const Extent available( std::max( 0.f, rect.w - margin_ * 2.f ), std::max( 0.f, rect.h - margin_ * 2.f ) );
+	const float_t w = width_ > 0.f ? width_ : child->measure( available, ctx ).w;
 	const float_t h = child->measure_height( std::min( w, rect.w ), ctx );
 
 	child->arrange( place( rect, w, h, anchor_, margin_ ), ctx );

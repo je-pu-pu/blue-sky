@@ -6,6 +6,18 @@ namespace core::ui
 {
 
 /**
+ * 大きさ（幅と高さ）。Widget::measure の「使える大きさ」と「希望の大きさ」に使う
+ */
+struct Extent
+{
+	float_t w = 0.f;
+	float_t h = 0.f;
+
+	Extent() = default;
+	Extent( float_t w_, float_t h_ ) : w( w_ ), h( h_ ) { }
+};
+
+/**
  * 仮想座標系（1920x1080 基準）の矩形
  */
 struct Rect

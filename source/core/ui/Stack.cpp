@@ -2,6 +2,7 @@
 #include "Theme.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace core::ui
 {
@@ -55,6 +56,42 @@ float_t Stack::measure_height( float_t width, const UIContext& ctx ) const
 	}
 
 	if ( visible > 1 )
+	{
+		total += spacing * static_cast< float_t >( visible - 1 );
+	}
+
+	return total + padding_ * 2.f;
+}
+
+float_t Stack::measure_width( const UIContext& ctx ) const
+{
+	const float_t spacing = get_spacing( ctx );
+
+	float_t total = 0.f;
+	int visible = 0;
+
+	for ( size_t i = 0; i < child_count(); i++ )
+	{
+		const Widget* c = child_at( i );
+
+		if ( ! c->is_visible() )
+		{
+			continue;
+		}
+
+		const Size s = get_size( c );
+		const float_t w = axis_ == Axis::HORIZONTAL && s.mode == SizeMode::FIXED ? s.value : c->measure_width( ctx );
+
+		total = axis_ == Axis::HORIZONTAL ? total + std::max( w, s.min ) : std::max( total, w );
+		visible++;
+	}
+
+	if ( visible == 0 || total <= 0.f )
+	{
+		return 0.f;
+	}
+
+	if ( axis_ == Axis::HORIZONTAL && visible > 1 )
 	{
 		total += spacing * static_cast< float_t >( visible - 1 );
 	}
@@ -178,7 +215,8 @@ std::vector< float_t > Stack::compute_widths( float_t inner_w, float_t spacing, 
 		}
 		else if ( s.mode == SizeMode::CONTENT )
 		{
-			widths[ i ] = std::max( visible[ i ]->measure_width( ctx ), s.min );
+			// 子に使える幅を渡して測る（2 次元の計測。入れ子のコンテナや、幅で折り返す子も内容に合わせられる）
+			widths[ i ] = std::max( visible[ i ]->measure( Extent( std::max( 0.f, remaining ), INFINITY ), ctx ).w, s.min );
 		}
 		else
 		{

@@ -1,6 +1,8 @@
 #include "Widget.h"
 #include "StringTable.h"
 
+#include <algorithm>
+
 namespace core::ui
 {
 
@@ -79,6 +81,14 @@ bool Widget::can_focus() const
 	}
 
 	return true;
+}
+
+Extent Widget::measure( const Extent& available, const UIContext& ctx ) const
+{
+	const float_t preferred = measure_width( ctx );
+	const float_t w = preferred > 0.f ? std::min( preferred, available.w ) : available.w;
+
+	return Extent( w, measure_height( w, ctx ) );
 }
 
 float_t Widget::measure_height( float_t, const UIContext& ) const

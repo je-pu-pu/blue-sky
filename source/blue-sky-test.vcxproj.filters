@@ -36,6 +36,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test\sound\PlaybackRateTest.cpp">
+      <Filter>test\sound</Filter>
+    </ClCompile>
     <ClCompile Include="test\sound\SampleRateStepperTest.cpp">
       <Filter>test\sound</Filter>
     </ClCompile>

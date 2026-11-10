@@ -62,6 +62,15 @@
 - [ ] 機能の追加（設計上の問題ではない後続）: シザーによるクリップ、部品別スタイル、@2x 素材
 - [x] 調査: enemy_ai_test の操作タブのキー欄の上の細い縦線 : 操作タブを描画結果で撮り、画素で探して出ていないことを確かめた（2026-11-10）。MSAA で文字の UV が外挿されていた件（1945a242）と同じ原因だった
 
+## ライセンスの表示（配布の前に）
+
+一覧: `doc/ライセンス.md`（配布物に入る／入らない・要確認の点）。同梱するファイル: リポジトリの直下の `THIRD_PARTY_NOTICES.txt`
+
+- [x] 使っているライブラリ・素材の洗い出しと、手元の原文からの THIRD_PARTY_NOTICES.txt の作成（2026-11-11）
+- [ ] 配布の前に: THIRD_PARTY_NOTICES.txt を配布物に同梱する。「【要確認】」（19 か所: ogg・vorbis・Boost・libxml2・ONNX Runtime・DirectML などの原文、版）を配布元で確かめて埋める
+- [ ] 配布の前に: FBX SDK の表示の文を利用規約か About・クレジットの画面にも入れる（または FBX SDK を exe から外す）。ONNX Runtime の ThirdPartyNotices.txt を同梱し、DirectML.dll の再配布の条件を確かめる
+- [ ] 配布の前に: 素材を確かめる。`FluidR3_GM2-2.SF2` に「DO NOT REDISTRIBUTE」の注記あり。`takarajima.mid`・`SGM-V2.01.sf2`・`uzura.ttf` は外す。Rounded M+ のライセンスを確かめる
+
 ## 敵AI（システミック）縦スライス  ブランチ: feature/enemy-ai-perception
 
 設計は `doc/システム階層スタック.md` / `doc/動詞とゲームシステム.md`。S2 知覚 + S3 警戒状態機械 + パトロールの最小実装。

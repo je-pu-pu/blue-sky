@@ -118,6 +118,7 @@ public:
 	 *
 	 * 部品の組み合わせで決める。今は 石（ThrowableComponent）と次の組だけ（それ以外の組は何もしない。以前と同じ）:
 	 * - 風船（BalloonHoldComponent）: 割れる（以前の Balloon::on_collide_with_stone）
+	 * - 敵（RobotBehaviorComponent）: 立つ・回る間に、こちらへ飛んでくる石なら止まる（以前の Robot::on_collide_with_stone）
 	 * - スイッチ（SwitchComponent）: 石の速さで入・切が変わる（以前の BaseSwitch::on_collide_with( Stone* )。空間スイッチは石では変わらない）
 	 */
 	static void on_collide_entity_objects( core::ecs::Entity& a, core::ecs::Entity& b );

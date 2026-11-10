@@ -17,6 +17,9 @@
 #include <blue_sky/ecs/component/GirlComponent.h>
 #include <blue_sky/ecs/component/FlickerComponent.h>
 #include <blue_sky/ecs/system/GirlSystem.h>
+#include <blue_sky/ecs/component/RobotBehaviorComponent.h>
+#include <blue_sky/ecs/component/PatrolComponent.h>
+#include <blue_sky/ecs/system/RobotBehaviorSystem.h>
 
 #include <core/ecs/EntityManager.h>
 
@@ -424,4 +427,308 @@ TEST( BalloonGirlRobotTest, 少女への当たりは何も起こさない )
 	EXPECT_EQ( player.touch_count, 0 );
 	EXPECT_FALSE( blue_sky::ecs::EntityObject( f.entity( girl ) ).is_dead() );
 	EXPECT_FALSE( blue_sky::ecs::EntityObject( f.entity( stone ) ).is_dead() );
+}
+
+// ---- 敵 ----
+
+namespace
+{
+
+/// 敵が追う偽のプレイヤー（剛体なし）。当たりの互換の層から呼ばれた回数も数える
+class FakeTarget : public FakeObject, public blue_sky::ecs::ChaseTarget
+{
+public:
+	Vector location = Vector( 0.f, 0.f, 5.f );
+	Vector velocity = Vector::Zero;
+	Vector front = Vector( 0.f, 0.f, 1.f );
+
+	int robot_touch_count = 0;
+	int chased_touch_count = 0;
+
+	Vector get_chase_target_location() const override { return location; }
+	Vector get_chase_target_velocity() const override { return velocity; }
+	Vector get_chase_target_front() const override { return front; }
+	const btRigidBody* get_chase_target_rigid_body() const override { return nullptr; }
+
+	bool on_collide_with_robot( bool is_chasing ) override
+	{
+		robot_touch_count++;
+
+		if ( is_chasing )
+		{
+			chased_touch_count++;
+		}
+
+		return true;
+	}
+};
+
+using RobotMode = blue_sky::ecs::RobotBehaviorComponent::Mode;
+using RobotLook = blue_sky::ecs::RobotBehaviorComponent::Look;
+
+/// 原点で前（+Z）を向いた敵と、追う相手
+struct RobotFixture : public Fixture
+{
+	EntityId robot = 0;
+	EntityId target_id = 0;
+	FakeTarget target;
+
+	blue_sky::ecs::RobotBehaviorSystem* system = nullptr;
+
+	RobotFixture()
+	{
+		robot = create( "robot" );
+		factory.restart();
+
+		target_id = manager.create_entity()->get_id();
+
+		system = manager.get_system< blue_sky::ecs::RobotBehaviorSystem >();
+		system->set_target( robot, target_id, & target );
+	}
+
+	blue_sky::ecs::RobotBehaviorComponent* component() { return entity( robot )->get_component< blue_sky::ecs::RobotBehaviorComponent >(); }
+	RobotMode mode() { return component()->mode; }
+
+	/// dt 秒ずつ count 回動かす
+	void update( int count, float_t dt = 0.1f, float_t elapsed = 1.f )
+	{
+		for ( int i = 0; i < count; i++ )
+		{
+			system->update_robot( robot, dt, elapsed );
+		}
+	}
+};
+
+} // namespace
+
+TEST( BalloonGirlRobotTest, 敵は硬い物で_やり直すと質量_50_回らず摩擦も無く立ち_始めの位置と_5_m_前を巡回の地点にする )
+{
+	Fixture f;
+
+	const auto id = f.create( "robot" );
+	auto* e = f.entity( id );
+
+	ASSERT_NE( e->get_component< blue_sky::ecs::RobotBehaviorComponent >(), nullptr );
+	ASSERT_NE( e->get_component< blue_sky::ecs::PatrolComponent >(), nullptr );
+	ASSERT_NE( e->get_component< blue_sky::ecs::FlickerComponent >(), nullptr );
+
+	// 以前の Robot : 1 x 2 x 0.5・硬い・地球の重力・作ったときの質量 1
+	const auto* traits = e->get_component< blue_sky::ecs::CollisionTraitsComponent >();
+	EXPECT_TRUE( traits->is_hard );
+	EXPECT_TRUE( traits->is_block );
+
+	const auto* body = e->get_component< blue_sky::ecs::PhysicsBodyComponent >();
+	EXPECT_FLOAT_EQ( body->height_offset, 1.f );
+	EXPECT_FLOAT_EQ( body->body->getInvMass(), 1.f );
+
+	GameObjectRef robot = f.factory.get_ref( id );
+	robot.set_start_location( 1.f, 2.f, 3.f );
+	robot.set_start_direction_degree( 90.f );
+	robot.action( "rotation" );
+
+	f.factory.restart();
+
+	EXPECT_FLOAT_EQ( body->body->getInvMass(), 1.f / 50.f );
+	EXPECT_TRUE( is_near( Vector( body->body->getAngularFactor() ), Vector::Zero ) );
+	EXPECT_FLOAT_EQ( body->body->getFriction(), 0.f );
+	EXPECT_TRUE( is_near( Vector( body->body->getGravity() ), Vector( 0.f, -9.8f, 0.f ) ) );
+
+	const auto* robot_component = e->get_component< blue_sky::ecs::RobotBehaviorComponent >();
+	EXPECT_EQ( robot_component->mode, RobotMode::STAND );
+	EXPECT_EQ( robot_component->look, RobotLook::NORMAL );
+
+	// 巡回の地点（以前の Robot::restart）: 始めの位置と、向き 90 度の前（+X）へ 5 m
+	const auto* patrol = e->get_component< blue_sky::ecs::PatrolComponent >();
+	ASSERT_EQ( patrol->waypoints.size(), 2u );
+	EXPECT_TRUE( is_near( patrol->waypoints[ 0 ], Vector( 1.f, 2.f, 3.f ) ) );
+	EXPECT_TRUE( is_near( patrol->waypoints[ 1 ], Vector( 6.f, 2.f, 3.f ), 0.001f ) );
+	EXPECT_EQ( patrol->current, 0u );
+	EXPECT_FLOAT_EQ( patrol->move_speed, 0.1f );
+}
+
+TEST( BalloonGirlRobotTest, 敵の視野は距離_3_10_20_m_で広さが変わり_20_m_より遠くは見えない )
+{
+	RobotFixture f;
+
+	auto visible_at = [ & ] ( const Vector& location )
+	{
+		f.target.location = location;
+		return f.system->is_target_visible( f.robot );
+	};
+
+	// 3 m 以内 : 真横は見え、真後ろは見えない（視野角 -0.25）
+	EXPECT_TRUE( visible_at( Vector( 2.f, 0.f, 0.f ) ) );
+	EXPECT_FALSE( visible_at( Vector( 0.f, 0.f, -2.f ) ) );
+
+	// 3〜10 m : 正面は見え、真横は見えない（0.25）
+	EXPECT_TRUE( visible_at( Vector( 0.f, 0.f, 5.f ) ) );
+	EXPECT_FALSE( visible_at( Vector( 5.f, 0.f, 0.f ) ) );
+
+	// 10〜20 m : 正面から 45 度は見えない（0.75 > cos 45°）
+	EXPECT_TRUE( visible_at( Vector( 0.f, 0.f, 15.f ) ) );
+	EXPECT_FALSE( visible_at( Vector( 10.f, 0.f, 10.f ) ) );
+
+	// 20 m より遠く・相手がいない
+	EXPECT_FALSE( visible_at( Vector( 0.f, 0.f, 25.f ) ) );
+
+	f.manager.destroy_entity( f.target_id );
+	EXPECT_FALSE( visible_at( Vector( 0.f, 0.f, 5.f ) ) );
+}
+
+TEST( BalloonGirlRobotTest, 立つ敵は相手が見えると注目し_3_秒後も見えていれば追い_相手の方へ秒速_3_で向かう )
+{
+	RobotFixture f;
+
+	// 見えない所にいる間は立ったまま（速度 0）
+	f.target.location = Vector( 0.f, 0.f, -10.f );
+	f.update( 1 );
+	EXPECT_EQ( f.mode(), RobotMode::STAND );
+
+	// 見えると注目（警戒の見た目）
+	f.target.location = Vector( 0.f, 0.f, 5.f );
+	f.update( 1 );
+	EXPECT_EQ( f.mode(), RobotMode::ATTENTION );
+	EXPECT_EQ( f.component()->look, RobotLook::WARNING );
+	EXPECT_EQ( f.component()->mode_backup, RobotMode::STAND );
+
+	// 3 秒たつまでは注目のまま
+	f.update( 29 );
+	EXPECT_EQ( f.mode(), RobotMode::ATTENTION );
+
+	f.update( 2 );
+	EXPECT_EQ( f.mode(), RobotMode::CHASE );
+
+	// 追う : 相手の方（+Z）へ秒速 3
+	f.update( 1 );
+	const Vector v = f.factory.get_ref( f.robot ).get_velocity();
+	EXPECT_NEAR( v.x(), 0.f, 0.001f );
+	EXPECT_NEAR( v.z(), 3.f, 0.001f );
+}
+
+TEST( BalloonGirlRobotTest, 注目の後に見えなくなっていれば元の状態へ戻り_追って_10_秒たって見えなければ回る )
+{
+	RobotFixture f;
+
+	f.factory.get_ref( f.robot ).action( "rotation" );
+
+	f.target.location = Vector( 0.f, 0.f, 5.f );
+	f.update( 1 );
+	ASSERT_EQ( f.mode(), RobotMode::ATTENTION );
+	EXPECT_EQ( f.component()->mode_backup, RobotMode::ROTATION );
+
+	// 見えない所へ（20 m より遠く）: 3 秒後に元の 回る へ（ふだんの見た目）
+	f.target.location = Vector( 0.f, 0.f, -30.f );
+	f.update( 31 );
+	EXPECT_EQ( f.mode(), RobotMode::ROTATION );
+	EXPECT_EQ( f.component()->look, RobotLook::NORMAL );
+
+	// 追っている間は 10 秒たつまで追い続け、見えなければ 回る へ
+	f.component()->mode = RobotMode::CHASE;
+	f.component()->timer = 0.f;
+
+	f.update( 99 );
+	EXPECT_EQ( f.mode(), RobotMode::CHASE );
+
+	f.update( 2 );
+	EXPECT_EQ( f.mode(), RobotMode::ROTATION );
+	EXPECT_EQ( f.component()->look, RobotLook::NORMAL );
+}
+
+TEST( BalloonGirlRobotTest, 回る敵は_1_フレームに_0_25_度回り_追う間の見た目は_1_秒に_2_回点滅する )
+{
+	RobotFixture f;
+
+	f.target.location = Vector( 0.f, 0.f, -30.f );
+	f.factory.get_ref( f.robot ).action( "rotation" );
+	f.update( 4 );
+
+	EXPECT_FLOAT_EQ( f.factory.get_ref( f.robot ).get_direction_degree(), 1.f );
+
+	// 追う間 : 0.25 秒ごとに警報と警戒（以前の is_visible_in_blink( 2 )）
+	f.component()->mode = RobotMode::CHASE;
+
+	f.system->update_robot( f.robot, 0.01f, 1.1f );
+	EXPECT_EQ( f.component()->look, RobotLook::ALARM );
+
+	f.system->update_robot( f.robot, 0.01f, 1.3f );
+	EXPECT_EQ( f.component()->look, RobotLook::WARNING );
+}
+
+TEST( BalloonGirlRobotTest, 立つ_回る敵は相手に当たると止まり_追う敵に当たった相手は傷つく )
+{
+	RobotFixture f;
+
+	// 追っている敵 : 相手に知らせ（傷つく）、敵は止まらない
+	f.component()->mode = RobotMode::CHASE;
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( f.target, f.target_id, * f.entity( f.robot ) );
+
+	EXPECT_EQ( f.target.robot_touch_count, 1 );
+	EXPECT_EQ( f.target.chased_touch_count, 1 );
+	EXPECT_EQ( f.mode(), RobotMode::CHASE );
+
+	// 注目している敵 : 止まらない
+	f.component()->mode = RobotMode::ATTENTION;
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( f.target, f.target_id, * f.entity( f.robot ) );
+	EXPECT_EQ( f.mode(), RobotMode::ATTENTION );
+
+	// 回っている敵 : 止まる。止まった敵の速度は毎フレーム半分になる
+	f.component()->mode = RobotMode::ROTATION;
+	blue_sky::ActiveObjectManager::on_collide_with_entity_object( f.target, f.target_id, * f.entity( f.robot ) );
+
+	EXPECT_EQ( f.mode(), RobotMode::SHUTDOWN );
+	EXPECT_EQ( f.target.chased_touch_count, 1 );
+
+	f.factory.get_ref( f.robot ).set_velocity( Vector( 4.f, 0.f, 0.f ) );
+	f.update( 1 );
+	EXPECT_NEAR( f.factory.get_ref( f.robot ).get_velocity().x(), 2.f, 0.001f );
+	EXPECT_EQ( f.mode(), RobotMode::SHUTDOWN );
+}
+
+TEST( BalloonGirlRobotTest, 立つ敵はこちらへ飛んでくる石に当たると止まり_離れていく石では止まらない )
+{
+	RobotFixture f;
+
+	const auto stone = f.create( "stone" );
+	f.factory.restart();
+	f.target.location = Vector( 0.f, 0.f, -30.f );
+
+	GameObjectRef s = f.factory.get_ref( stone );
+	s.set_location( Vector( 0.f, 1.f, 2.f ) );
+
+	// 離れていく（+Z へ飛ぶ）石 : 止まらない。石は拾われない
+	s.set_velocity( Vector( 0.f, 0.f, 8.f ) );
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( stone ), * f.entity( f.robot ) );
+
+	EXPECT_EQ( f.mode(), RobotMode::STAND );
+	EXPECT_FALSE( blue_sky::ecs::EntityObject( f.entity( stone ) ).is_dead() );
+
+	// こちらへ飛んでくる石 : 止まる（組の向きによらない）
+	s.set_velocity( Vector( 0.f, 0.f, -8.f ) );
+	blue_sky::ActiveObjectManager::on_collide_entity_objects( * f.entity( f.robot ), * f.entity( stone ) );
+
+	EXPECT_EQ( f.mode(), RobotMode::SHUTDOWN );
+}
+
+TEST( BalloonGirlRobotTest, 浮く敵は始めの位置でゆらぎ_やさしい見た目になり_相手の方を向く )
+{
+	RobotFixture f;
+
+	GameObjectRef robot = f.factory.get_ref( f.robot );
+	robot.action( "float" );
+	robot.set_flicker_scale( 10.f );
+
+	f.target.location = Vector( 10.f, 0.f, 0.f );
+	f.system->update_robot( f.robot, 0.1f, 2.f );
+
+	EXPECT_EQ( f.mode(), RobotMode::FLOAT );
+	EXPECT_EQ( f.component()->look, RobotLook::TENDER );
+
+	// 以前の Robot::update（浮く）: update_velocity_by_flicker( 始めの位置, ゆらぎの大きさ )・chase_direction_to( 相手, 0.5 )
+	const float_t offset = blue_sky::ecs::flicker::height_offset( static_cast< unsigned int >( f.robot ), 2.f, 10.f );
+	EXPECT_NEAR( robot.get_velocity().y(), offset, 0.001f );
+	EXPECT_FLOAT_EQ( robot.get_direction_degree(), 0.5f );
+
+	// 知らないアクションは状態を変えない
+	robot.action( "unknown" );
+	EXPECT_EQ( f.mode(), RobotMode::FLOAT );
 }

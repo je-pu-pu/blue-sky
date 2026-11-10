@@ -25,10 +25,10 @@
 #include <blue_sky/ActiveObjectManager.h>
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/DebugLog.h>
-#include <GameObject/Robot.h>
 #include <blue_sky/ecs/system/SwitchSystem.h>
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/component/BalloonHoldComponent.h>
+#include <blue_sky/ecs/system/RobotBehaviorSystem.h>
 #include <core/ecs/EntityManager.h>
 
 #include <core/graphics/OculusRift.h>
@@ -863,7 +863,7 @@ void GamePlayScene::debug_throw_stones()
 
 	add_first( "スイッチ", find_objects( "switch", [] ( const ActiveObject* ) { return false; } ) );
 	// 敵は全部（向きや周りの壁で投げられない・見つかる敵がいるので）
-	for ( const auto& robot : find_objects( "robot", [] ( const ActiveObject* o ) { return dynamic_cast< const Robot* >( o ) != nullptr; } ) )
+	for ( const auto& robot : find_objects( "robot", [] ( const ActiveObject* ) { return false; } ) )
 	{
 		targets.emplace_back( "敵 " + std::to_string( targets.size() ), robot );
 	}
@@ -920,9 +920,9 @@ void GamePlayScene::debug_throw_stones()
 		{
 			result = * state == ecs::SwitchComponent::State::ON ? "入" : * state == ecs::SwitchComponent::State::OFF ? "切" : "壊れた";
 		}
-		else if ( const auto* r = dynamic_cast< const Robot* >( target.get_active_object() ) )
+		else if ( const auto mode = get_entity_manager()->get_system< ecs::RobotBehaviorSystem >() ? get_entity_manager()->get_system< ecs::RobotBehaviorSystem >()->get_mode( target.get_entity_id() ) : std::nullopt )
 		{
-			result = r->get_mode() == Robot::Mode::SHUTDOWN ? "止まった" : "止まっていない";
+			result = * mode == ecs::RobotBehaviorComponent::Mode::SHUTDOWN ? "止まった" : "止まっていない";
 		}
 		else if ( auto* entity = get_entity_manager()->find( target.get_entity_id() ); entity && entity->get_component< ecs::BalloonHoldComponent >() )
 		{
@@ -951,11 +951,14 @@ void GamePlayScene::debug_log_actors()
 	// 番号 → 種類と状態（作った順 = 番号の順に出す。まだ ActiveObject の種類と ECS だけの物体を混ぜて並べる）
 	std::map< core::ecs::EntityId, std::pair< string_t, string_t > > actors;
 
-	for ( const auto* o : get_active_object_manager()->active_object_list() )
+	if ( auto* robots = get_entity_manager()->get_system< ecs::RobotBehaviorSystem >() )
 	{
-		if ( const auto* r = dynamic_cast< const Robot* >( o ) )
+		for ( const auto id : get_object_factory()->find_all_of_kind( "robot" ) )
 		{
-			actors[ o->get_entity_id() ] = { "robot", robot_modes[ static_cast< int >( r->get_mode() ) ] };
+			if ( const auto mode = robots->get_mode( id ) )
+			{
+				actors[ id ] = { "robot", robot_modes[ static_cast< int >( * mode ) ] };
+			}
 		}
 	}
 

@@ -2,7 +2,6 @@
 #include "ActiveObjectPhysics.h"
 #include "DebugLog.h"
 
-#include <GameObject/Robot.h>
 #include <blue_sky/GameObjectRef.h>
 
 #include <GameObject/ActiveObject.h>
@@ -28,6 +27,8 @@
 #include <blue_sky/ecs/system/SwitchSystem.h>
 #include <blue_sky/ecs/system/BalloonHoldSystem.h>
 #include <blue_sky/ecs/system/GirlSystem.h>
+#include <blue_sky/ecs/system/RobotBehaviorSystem.h>
+#include <blue_sky/ecs/component/RobotBehaviorComponent.h>
 #include <blue_sky/ecs/component/BalloonHoldComponent.h>
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/ObjectBody.h>
@@ -43,10 +44,9 @@ ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics
 	, object_context_( object_context )
 	, entity_manager_( entity_manager )
 {
-	object_creator_map_[ "robot"       ] = [this] () -> ActiveObject* { return new Robot( graphics_manager_ ); };	// テクスチャを得る GraphicsManager を渡す
 
 	// "static"（動かない物）・"medal"・"umbrella"・"rocket"・"goal"・"ladder"・"stone"・"switch"（と空間スイッチ）は ECS だけの物体になり、ObjectFactory が作る（段階 4）。
-	// "balloon"・"girl" も ECS だけの物体（段階 5）
+	// "balloon"・"girl"・"robot" も ECS だけの物体（段階 5）。名前から作る ActiveObject の種類は今は無い（プレイヤーはシーンが作る）
 
 }
 
@@ -156,6 +156,12 @@ void ActiveObjectManager::update()
 	if ( auto* system = entity_manager_->get_system< ecs::GirlSystem >() )
 	{
 		system->update_girls( scene_elapsed_time );
+	}
+
+	// 敵（ECS だけの物体。以前は Robot::update。アニメーションを変えるので、アニメーションを進める前に）
+	if ( auto* system = entity_manager_->get_system< ecs::RobotBehaviorSystem >() )
+	{
+		system->update_robots( object_context_ && object_context_->delta_time ? object_context_->delta_time() : 0.f, scene_elapsed_time );
 	}
 
 	// アニメーションを進める（以前は物体ごとに update の直後に進めていた。物体のアニメーションは互いに独立なので、まとめて後で進めても同じ）
@@ -354,6 +360,21 @@ void ActiveObjectManager::on_collide_with_entity_object( GameObject& object, cor
 		}
 	}
 
+	// 敵（以前の Robot）: 以前は Robot と相手が互いに on_collide_with を呼び、相手がプレイヤーなら、
+	// プレイヤーは追っている敵に当たると傷つき（Player::on_collide_with( Robot* )）、敵は立つ・回る間なら止まった（Robot::on_collide_with( Player* )）。
+	// 2 つは別の状態でだけ起きるので、呼ぶ順によらない。今は相手に「追っているか」を知らせ、止められる相手（プレイヤーだけ true）なら敵に知らせる
+	if ( entity.get_component< ecs::RobotBehaviorComponent >() )
+	{
+		const auto robot_id = static_cast< core::ecs::EntityId >( entity.get_id() );
+		auto* system = entity.get_entity_manager()->get_system< ecs::RobotBehaviorSystem >();
+		const bool is_chasing = system && system->get_mode( robot_id ) == ecs::RobotBehaviorComponent::Mode::CHASE;
+
+		if ( object.on_collide_with_robot( is_chasing ) && system )
+		{
+			system->on_touched_by_target( robot_id );
+		}
+	}
+
 	// 梯子（以前の Ladder）: 以前は Ladder::on_collide_with( GameObject* ) が相手の on_collide_with( Ladder* ) を呼び、
 	// 相手がプレイヤーなら Ladder::on_collide_with( Player* ) が、最近（0.5 秒以内）触れていなければ梯子の位置で音を鳴らして覚えた。
 	// 今は相手が反応したか（プレイヤーだけが true を返す）で決める
@@ -394,6 +415,31 @@ void ActiveObjectManager::on_collide_entity_objects( core::ecs::Entity& a, core:
 	};
 
 	if ( burst_by_stone( a, b ) || burst_by_stone( b, a ) )
+	{
+		return;
+	}
+
+	// 石と敵 : 以前は Stone::on_collide_with( GameObject* ) が敵の on_collide_with_stone を呼び、
+	// 敵は立つ・回る間に、こちらへ飛んでくる石なら止まった（石は拾わない）。1 組につき 1 回
+	auto stop_by_stone = [] ( core::ecs::Entity& robot, core::ecs::Entity& stone )
+	{
+		if ( ! robot.get_component< ecs::RobotBehaviorComponent >() || ! stone.get_component< ecs::ThrowableComponent >() )
+		{
+			return false;
+		}
+
+		if ( auto* system = robot.get_entity_manager()->get_system< ecs::RobotBehaviorSystem >() )
+		{
+			const ecs::EntityObject s( & stone );
+			const ecs::EntityObject r( & robot );
+
+			system->on_hit_by_stone( static_cast< core::ecs::EntityId >( robot.get_id() ), GameObject::is_moving_to( s.get_location(), s.get_velocity(), r.get_location() ) );
+		}
+
+		return true;
+	};
+
+	if ( stop_by_stone( a, b ) || stop_by_stone( b, a ) )
 	{
 		return;
 	}

@@ -1,7 +1,6 @@
 #include "Player.h"
 
 #include <blue_sky/ecs/component/PickupComponent.h>
-#include "Robot.h"
 
 #include <blue_sky/GameMain.h>
 #include <blue_sky/ActiveObjectPhysics.h>
@@ -1076,11 +1075,16 @@ bool Player::on_pick_up( ecs::PickupKind kind )
 	return true;
 }
 
-void Player::on_collide_with( Robot* robot )
+/**
+ * 敵（ECS だけの物体）に当たった : 追っている敵なら傷つく（以前の on_collide_with( Robot* )）
+ *
+ * @return いつも true（敵は立つ・回る間なら止まる。以前の Robot::on_collide_with( Player* )）
+ */
+bool Player::on_collide_with_robot( bool is_chasing )
 {
-	if ( robot->get_mode() != Robot::Mode::CHASE )
+	if ( ! is_chasing )
 	{
-		return;
+		return true;
 	}
 
 	if ( ! is_uncontrollable() )
@@ -1092,13 +1096,15 @@ void Player::on_collide_with( Robot* robot )
 	{
 		kill();
 
-		return;
+		return true;
 	}
 
 	Vector v = -get_front() * get_knockback_speed();
 	v.set_y( get_knockback_y_velocity() );
 
 	damage( v );
+
+	return true;
 }
 
 /**

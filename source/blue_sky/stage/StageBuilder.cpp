@@ -6,7 +6,6 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <GameObject/Player.h>
-#include <GameObject/Robot.h>
 #include <GameObject/Camera.h>
 
 #include <core/sound/SoundManager.h>
@@ -102,7 +101,11 @@ StageBuilder::Result StageBuilder::build( const StageData& data, const Context& 
 			}
 			else if ( o.type == "robot" )
 			{
-				static_cast< Robot* >( object.get_active_object() )->set_player( context.player );
+				// 敵（ECS だけの物体）に追う相手を渡す（以前の Robot::set_player）
+				if ( context.player )
+				{
+					factory->set_robot_target( id, context.player->get_entity_id(), context.player );
+				}
 			}
 		}
 

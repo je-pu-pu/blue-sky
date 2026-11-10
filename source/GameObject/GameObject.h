@@ -23,7 +23,6 @@ namespace blue_sky
 
 class Player;
 class ActiveObjectPhysics;
-class Robot;
 class DynamicObject;
 class GameObjectRef;
 
@@ -170,7 +169,13 @@ public:
 
 	/// スイッチ（ECS だけの物体。ecs::SwitchComponent を持つ）を押せる物体か（プレイヤーだけ。以前は BaseSwitch::on_collide_with( Player* ) だけがあった）
 	virtual bool can_press_switch() const { return false; }
-	virtual void on_collide_with( Robot* ) { }
+	/**
+	 * 敵（ECS だけの物体。ecs::RobotBehaviorComponent を持つ）に当たった（以前の on_collide_with( Robot* ) と、敵の on_collide_with( Player* )）
+	 *
+	 * @param is_chasing 敵が追っている最中か（プレイヤーは傷つく）
+	 * @return 敵を止められる物体なら true（プレイヤーだけ。敵は立つ・回る間なら止まる）。既定は false
+	 */
+	virtual bool on_collide_with_robot( bool /* is_chasing */ ) { return false; }
 	/**
 	 * 拾う物（ECS だけの物体。ecs::PickupComponent を持つ）に当たった
 	 *

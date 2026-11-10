@@ -11,6 +11,7 @@
 
 namespace core::ecs { class EntityManager; }
 namespace core::sound { class SoundManager; }
+namespace blue_sky::ecs { class ChaseTarget; }
 
 namespace blue_sky
 {
@@ -146,6 +147,9 @@ public:
 
 	/// 剛体を持たない、描くだけの動かない物を作る（DebugScene の町並み。以前は ActiveObjectManager::create_object( "static" ) で剛体なし）
 	EntityId create_model_object( Model* model );
+
+	/// 敵（"robot"）に追う相手を渡す（以前の Robot::set_player。敵でなければ何もしない）
+	void set_robot_target( EntityId robot, EntityId target_id, const ecs::ChaseTarget* target );
 
 	/// 名前を付ける（同じ名前は後の物体に付け替わる。以前と同じ）
 	void name( const string_t& name, EntityId id );

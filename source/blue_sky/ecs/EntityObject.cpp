@@ -5,6 +5,7 @@
 #include <blue_sky/ecs/component/BalloonHoldComponent.h>
 #include <blue_sky/ecs/component/FlickerComponent.h>
 #include <blue_sky/ecs/component/GirlComponent.h>
+#include <blue_sky/ecs/system/RobotBehaviorSystem.h>
 #include <blue_sky/ecs/component/PhysicsBodyComponent.h>
 #include <blue_sky/ecs/component/SimpleObjectComponent.h>
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
@@ -333,6 +334,9 @@ void EntityObject::restart()
 		play_animation( "Stand", true, true );
 		girl->float_base_location = get_start_location();
 	}
+
+	// 敵は立ち、巡回の地点を作り直す（以前の Robot::restart）
+	RobotBehaviorSystem::restart( * entity_ );
 
 	set_visible( true, true );
 

@@ -3,6 +3,7 @@
 #include "ActiveObject.h"
 #include <blue_sky/GameObjectRef.h>
 #include <blue_sky/ecs/component/BalloonHoldComponent.h>
+#include <blue_sky/ecs/component/RobotBehaviorComponent.h>
 #include <optional>
 #include <common/math.h>
 #include <list>
@@ -13,9 +14,10 @@ namespace blue_sky
 /**
  * プレイヤー
  *
- * ecs::BalloonHolder は、つかんだ風船（ECS だけの物体）が手元に付いて行くときに読む窓口（ecs::BalloonHoldSystem が呼ぶ）
+ * ecs::BalloonHolder は、つかんだ風船（ECS だけの物体）が手元に付いて行くときに読む窓口（ecs::BalloonHoldSystem が呼ぶ）。
+ * ecs::ChaseTarget は、敵（ECS だけの物体）が見えるか・どこへ向かうかを決めるときに読む窓口（ecs::RobotBehaviorSystem が呼ぶ。ステージを作るときに敵へ渡す）
  */
-class Player : public ActiveObject, private ecs::BalloonHolder
+class Player : public ActiveObject, private ecs::BalloonHolder, public ecs::ChaseTarget
 {
 public:
 	enum class ActionMode
@@ -172,7 +174,7 @@ protected:
 
 	void on_collide_with( GameObject* o ) override { o->on_collide_with( this ); }
 	ecs::BalloonHolder* on_collide_with_balloon( core::ecs::EntityId balloon ) override;
-	void on_collide_with( Robot* ) override;
+	bool on_collide_with_robot( bool is_chasing ) override;
 	bool on_collide_with_ladder() override;
 	bool on_collide_with_stone( const GameObjectRef& ) override;
 	bool can_press_switch() const override { return true; }
@@ -286,6 +288,13 @@ private:
 	bool is_in_balloon_action() const override { return action_mode_ == ActionMode::BALLOON; }
 	bool is_balloon_action_pre_finish() const override { return is_action_pre_finish_; }
 	Vector get_balloon_hold_location() const override { return get_location() + get_front() * 0.5f - get_right() * 0.25f + Vector( 0, 1.75f, 0 ); }
+
+public:
+	// ecs::ChaseTarget（敵が追う）
+	Vector get_chase_target_location() const override { return get_location(); }
+	Vector get_chase_target_velocity() const override { return get_velocity(); }
+	Vector get_chase_target_front() const override { return get_front(); }
+	const btRigidBody* get_chase_target_rigid_body() const override { return get_rigid_body(); }
 
 }; // class Player
 

@@ -18,6 +18,7 @@
 #include <blue_sky/ecs/component/SwitchComponent.h>
 #include <blue_sky/ecs/component/FlickerComponent.h>
 #include <blue_sky/ecs/system/GirlSystem.h>
+#include <blue_sky/ecs/system/RobotBehaviorSystem.h>
 
 #include <core/animation/AnimationPlayer.h>
 #include <core/ecs/EntityManager.h>
@@ -388,8 +389,13 @@ void GameObjectRef::action( const string_t& action )
 		return;
 	}
 
-	// 種類ごとのアクション（以前の Girl::action の "float"）
+	// 種類ごとのアクション（以前の Girl::action の "float"、Robot::action の "rotation"・"patrol"・"float"）
 	if ( auto* system = entity_manager_->get_system< ecs::GirlSystem >(); system && system->action( id_, action ) )
+	{
+		return;
+	}
+
+	if ( auto* system = entity_manager_->get_system< ecs::RobotBehaviorSystem >(); system && system->action( id_, action ) )
 	{
 		return;
 	}

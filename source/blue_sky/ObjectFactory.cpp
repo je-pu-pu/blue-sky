@@ -31,6 +31,9 @@
 #include <blue_sky/ecs/system/GirlSystem.h>
 #include <blue_sky/ecs/component/GirlComponent.h>
 #include <blue_sky/ecs/component/FlickerComponent.h>
+#include <blue_sky/ecs/system/RobotBehaviorSystem.h>
+#include <blue_sky/ecs/component/RobotBehaviorComponent.h>
+#include <blue_sky/ecs/component/PatrolComponent.h>
 #include <blue_sky/graphics/Line.h>
 
 #include <GameObject/ActiveObject.h>
@@ -70,6 +73,7 @@ void ObjectFactory::setup_systems()
 	entity_manager_->add_system< ecs::SwitchSystem >( 0, sound_manager_ );
 	entity_manager_->add_system< ecs::BalloonHoldSystem >( 0, sound_manager_ );
 	entity_manager_->add_system< ecs::GirlSystem >( 0 );
+	entity_manager_->add_system< ecs::RobotBehaviorSystem >( 0, physics_, graphics_manager_, sound_manager_ );
 }
 
 std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const string_t& kind )
@@ -240,6 +244,33 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 
 		entity->add_component< ecs::GirlComponent >();
 		entity->add_component< ecs::FlickerComponent >();
+
+		return id;
+	}
+
+	if ( kind == "robot" )
+	{
+		// 以前の Robot : 1 x 2 x 0.5・硬い・地球の重力・作ったときの質量 1。やり直すと質量 50・回らない・摩擦 0 で立つ。
+		// 行動（立つ・回る・注目・追う・止まる・浮く）は RobotBehaviorComponent にまとめて持ち、RobotBehaviorSystem が動かす。追う相手は set_robot_target で渡す
+		ObjectSpec spec;
+		spec.kind = kind;
+		spec.size = Vector( 1.f, 2.f, 0.5f );
+		spec.mass = 1.f;
+		spec.restart_mass = 50.f;
+		spec.restart_angular_factor = 0.f;
+		spec.restart_friction = 0.f;
+
+		const EntityId id = create_entity_object( spec );
+		core::ecs::Entity* entity = entity_manager_->find( id );
+
+		entity->add_component< ecs::RobotBehaviorComponent >();
+		entity->add_component< ecs::PatrolComponent >()->move_speed = ecs::RobotBehaviorComponent::PatrolSpeed;
+		entity->add_component< ecs::FlickerComponent >();
+
+		if ( auto* system = entity_manager_->get_system< ecs::RobotBehaviorSystem >() )
+		{
+			system->load_textures( id );
+		}
 
 		return id;
 	}
@@ -559,6 +590,14 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::find_first_of_kind( cons
 	}
 
 	return std::nullopt;
+}
+
+void ObjectFactory::set_robot_target( EntityId robot, EntityId target_id, const ecs::ChaseTarget* target )
+{
+	if ( auto* system = entity_manager_->get_system< ecs::RobotBehaviorSystem >() )
+	{
+		system->set_target( robot, target_id, target );
+	}
 }
 
 void ObjectFactory::name( const string_t& name, EntityId id )

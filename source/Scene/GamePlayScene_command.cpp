@@ -4,7 +4,6 @@
 #include <blue_sky/GameMain.h>
 
 #include <GameObject/Player.h>
-#include <GameObject/Robot.h>
 #include <GameObject/Camera.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>

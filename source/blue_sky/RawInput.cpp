@@ -111,6 +111,14 @@ bool register_devices( HWND hwnd )
 	devices[ 1 ].usUsage = 0x06;
 	devices[ 1 ].hwndTarget = hwnd;
 
+	// 開発用 : BLUE_SKY_RAW_INPUT_SINK を設定すると、ウィンドウが前面でなくても受け取る（自動の動作確認で、前面にできない環境でも出来事が届くかを確かめるため）。
+	// 通常のプレイでは付けない（背面にあるときに操作を受け取ってしまうため）
+	if ( GetEnvironmentVariableA( "BLUE_SKY_RAW_INPUT_SINK", nullptr, 0 ) > 0 )
+	{
+		devices[ 0 ].dwFlags = RIDEV_INPUTSINK;
+		devices[ 1 ].dwFlags = RIDEV_INPUTSINK;
+	}
+
 	return RegisterRawInputDevices( devices, 2, sizeof( RAWINPUTDEVICE ) ) != FALSE;
 }
 

@@ -675,6 +675,13 @@ void SettingStore::load( const game::Config& config )
 		}
 		else
 		{
+			// 書いてあるのに読めない値は、どこの行かを付けて知らせる（黙って既定値にしない）
+			if ( ! text.empty() )
+			{
+				const std::string origin = config.get_origin( e.key.c_str() );
+				report( ( origin.empty() ? string_t() : origin + " : " ) + e.key + " の値 \"" + text + "\" を読めないので既定値を使います" );
+			}
+
 			e.committed = e.pending = e.default_value;
 		}
 	}

@@ -112,6 +112,7 @@ GameMain::GameMain( App& app )
 	// get_app()->clip_cursor( true );
 
 	save_data_.reset( new Config() );
+	save_data_->set_log_handler( & debug_log );
 	save_data_->load_file( "save/blue-sky.save" );
 
 	// Direct3D

@@ -26,13 +26,37 @@ bool Config::load_file( const char* file_name )
 	}
 
 	std::string line;
+	int line_number = 0;
 
 	while ( std::getline( in, line ) )
 	{
-		read_line( line );
+		line_number++;
+		read_line( line, std::string( file_name ) + ":" + std::to_string( line_number ) );
 	}
 
 	return true;
+}
+
+void Config::read_line( const std::string& line )
+{
+	read_line( line, std::string() );
+}
+
+std::string Config::get_origin( const char* name ) const
+{
+	const auto i = origin_.find( name );
+	return i != origin_.end() ? i->second : std::string();
+}
+
+void Config::report_unreadable_value( const char* name, const std::string& value ) const
+{
+	if ( ! log_ || ! reported_.insert( name ).second )
+	{
+		return;
+	}
+
+	const std::string origin = get_origin( name );
+	log_( "[Config] " + ( origin.empty() ? std::string() : origin + " : " ) + name + " の値 \"" + value + "\" を読めないので既定値を使います" );
 }
 
 /**
@@ -41,8 +65,11 @@ bool Config::load_file( const char* file_name )
  * - 値は空白で区切られた語を 1 つの空白でつないだもの。値が無い行は空文字列として読む
  *   （以前は空の値で例外になり、行末の空白をエディタが消しただけで起動できなかった）
  * - 空行と、# で始まる行は読み飛ばす
+ * - 値の無い行は、どこの行かを付けてログに知らせる（黙って空にしない）
+ *
+ * @param origin どこの行か（"ファイル名:行番号"。ファイルから読むのでなければ空）
  */
-void Config::read_line( const std::string& line )
+void Config::read_line( const std::string& line, const std::string& origin )
 {
 	std::istringstream ss( line );
 
@@ -66,7 +93,22 @@ void Config::read_line( const std::string& line )
 		value += word;
 	}
 
+	if ( value.empty() && log_ )
+	{
+		log_( "[Config] " + ( origin.empty() ? std::string() : origin + " : " ) + name + " に値がありません（空の値として読みます）" );
+	}
+
 	value_[ name ] = value;
+	reported_.erase( name );
+
+	if ( origin.empty() )
+	{
+		origin_.erase( name );
+	}
+	else
+	{
+		origin_[ name ] = origin;
+	}
 }
 
 /**

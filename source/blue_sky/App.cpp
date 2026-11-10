@@ -77,6 +77,8 @@ App::~App()
 bool App::Init(HINSTANCE hi, int nCmdShow)
 {
 	// 設定を読み込む : 開発用・エンジンの設定と、ユーザーの設定（無ければ前者から引き継ぐ）
+	config_->set_log_handler( & blue_sky::debug_log );
+	user_config_->set_log_handler( & blue_sky::debug_log );
 	config_->load_file( "blue-sky.config" );
 	blue_sky::game_settings::load_user_settings_file( * user_config_, * config_ );
 

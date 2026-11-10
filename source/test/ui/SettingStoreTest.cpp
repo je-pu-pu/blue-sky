@@ -7,6 +7,7 @@
 #include <windows.h>
 
 #include <filesystem>
+#include <fstream>
 using core::setting::SettingStore;
 using core::setting::ApplyMode;
 
@@ -447,6 +448,78 @@ TEST( SettingStoreTest, 壊れた値は既定値になる )
 
 	EXPECT_NEAR( 0.5f, s.get< float_t >( "audio.volume" ), 1e-5f );
 	EXPECT_FALSE( s.get< bool >( "audio.mute" ) );
+}
+
+namespace
+{
+
+/// 中身を書いた設定ファイルを一時フォルダに作り、テストの終わりに消す
+struct TempConfigFile
+{
+	std::filesystem::path dir = std::filesystem::temp_directory_path() / "blue-sky-config-log-test";
+	std::string path;
+
+	explicit TempConfigFile( const std::string& text )
+	{
+		std::filesystem::create_directories( dir );
+		path = ( dir / "test.config" ).string();
+		std::ofstream( path, std::ios::binary ) << text;
+	}
+
+	~TempConfigFile() { std::error_code ec; std::filesystem::remove_all( dir, ec ); }
+};
+
+bool contains( const std::string& s, const std::string& part ) { return s.find( part ) != std::string::npos; }
+
+} // namespace
+
+TEST( ConfigTest, 値の無い行と読めない値をファイル名と行番号付きでログに出す )
+{
+	TempConfigFile file( "# コメント\ngraphics.multisample.count 4\ndebug.start_overlay\ninput.joystick.a abc\n" );
+
+	std::vector< std::string > logs;
+	game::Config config;
+	config.set_log_handler( [&logs] ( const std::string& s ) { logs.push_back( s ); } );
+	ASSERT_TRUE( config.load_file( file.path.c_str() ) );
+
+	// 値の無い行（3 行目）は読んだときに知らせる
+	ASSERT_EQ( 1u, logs.size() );
+	EXPECT_TRUE( contains( logs[ 0 ], file.path + ":3" ) );
+	EXPECT_TRUE( contains( logs[ 0 ], "debug.start_overlay" ) );
+
+	// 読めない値（4 行目）は、読もうとしたときに 1 回だけ知らせて既定値を返す
+	const game::Config& c = config;
+	EXPECT_EQ( 1, c.get< int >( "input.joystick.a", 1 ) );
+	EXPECT_EQ( 1, c.get< int >( "input.joystick.a", 1 ) );
+	ASSERT_EQ( 2u, logs.size() );
+	EXPECT_TRUE( contains( logs[ 1 ], file.path + ":4" ) );
+	EXPECT_TRUE( contains( logs[ 1 ], "abc" ) );
+
+	// 読める値は知らせない
+	EXPECT_EQ( 4, c.get< int >( "graphics.multisample.count", 1 ) );
+	EXPECT_EQ( 2u, logs.size() );
+	EXPECT_EQ( file.path + ":2", config.get_origin( "graphics.multisample.count" ) );
+}
+
+TEST( SettingStoreTest, 設定ファイルの読めない値はどこの行かを付けて知らせる )
+{
+	TempConfigFile file( "audio.volume 0.3\naudio.mute 1x\n" );
+
+	game::Config config;
+	ASSERT_TRUE( config.load_file( file.path.c_str() ) );
+
+	std::vector< string_t > errors;
+	SettingStore s;
+	s.set_error_handler( [&errors] ( const string_t& m ) { errors.push_back( m ); } );
+	s.add_float( "audio.volume", 0.5f, 0.f, 1.f, 0.1f, ApplyMode::IMMEDIATE );
+	s.add_bool( "audio.mute", false, ApplyMode::IMMEDIATE );
+	s.load( config );
+
+	EXPECT_NEAR( 0.3f, s.get< float_t >( "audio.volume" ), 1e-5f );
+	EXPECT_FALSE( s.get< bool >( "audio.mute" ) );
+	ASSERT_EQ( 1u, errors.size() );
+	EXPECT_TRUE( contains( errors[ 0 ], file.path + ":2" ) );
+	EXPECT_TRUE( contains( errors[ 0 ], "audio.mute" ) );
 }
 
 TEST( SettingStoreTest, 未登録キーと型違いの操作は無視する )

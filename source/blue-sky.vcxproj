@@ -57,8 +57,10 @@
     <ClCompile Include="blue_sky\ActiveObjectManager.cpp" />
     <ClCompile Include="blue_sky\ObjectFactory.cpp" />
     <ClCompile Include="blue_sky\stage\StageData.cpp" />
+    <ClCompile Include="blue_sky\stage\Action.cpp" />
     <ClCompile Include="blue_sky\stage\LegacyStageParser.cpp" />
     <ClCompile Include="blue_sky\stage\StageBuilder.cpp" />
+    <ClCompile Include="blue_sky\stage\TomlStageParser.cpp" />
     <ClCompile Include="blue_sky\GameObjectRef.cpp" />
     <ClCompile Include="blue_sky\ecs\ObjectBody.cpp" />
     <ClCompile Include="blue_sky\ecs\EntityObject.cpp" />
@@ -247,8 +249,10 @@
     <ClInclude Include="blue_sky\ActiveObjectManager.h" />
     <ClInclude Include="blue_sky\ObjectFactory.h" />
     <ClInclude Include="blue_sky\stage\StageData.h" />
+    <ClInclude Include="blue_sky\stage\Action.h" />
     <ClInclude Include="blue_sky\stage\LegacyStageParser.h" />
     <ClInclude Include="blue_sky\stage\StageBuilder.h" />
+    <ClInclude Include="blue_sky\stage\TomlStageParser.h" />
     <ClInclude Include="blue_sky\GameObjectRef.h" />
     <ClInclude Include="blue_sky\ecs\ObjectBody.h" />
     <ClInclude Include="blue_sky\ecs\EntityObject.h" />

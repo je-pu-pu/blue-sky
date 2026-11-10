@@ -1,6 +1,6 @@
 #pragma once
 
-#include <type/type.h>
+#include <blue_sky/stage/Action.h>
 
 #include <array>
 #include <optional>
@@ -9,30 +9,7 @@
 namespace blue_sky::stage
 {
 
-/// ステージのファイルの中の場所（ログに出す。読んだ結果を比べるときは見ない）
-struct SourceLocation
-{
-	string_t	file;
-	int			line = 0;		///< 1 から（0 は分からない）
-	int			column = 0;		///< 1 から（0 は分からない）
-
-	/// "ファイル:行:列"（分からない所は省く）
-	string_t to_string() const;
-};
-
 using Vector3d = std::array< double, 3 >;
-
-/**
- * 動き（スイッチのイベント・始めの動き）
- *
- * 段階 1 : 今の形式のコマンドの名前と、引数を空白でつないだ文字列のまま持つ（段階 2 で種類と型の付いた引数にする）
- */
-struct Action
-{
-	string_t		name;		///< コマンドの名前（set_shadow_color など）
-	string_t		params;		///< 引数（空白区切り）
-	SourceLocation	where;
-};
 
 /// 物体のイベントの受け取り手（スイッチの turn-on など）
 struct EventHandlerDesc
@@ -71,7 +48,7 @@ struct PlayerDesc
 };
 
 /**
- * ステージ 1 つを読んだ結果（ファイルの形式によらない。読む = LegacyStageParser、当てる = StageBuilder）
+ * ステージ 1 つを読んだ結果（ファイルの形式によらない。読む = LegacyStageParser・TomlStageParser、当てる = StageBuilder）
  */
 struct StageData
 {

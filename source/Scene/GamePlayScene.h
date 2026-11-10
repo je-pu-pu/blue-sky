@@ -38,6 +38,11 @@ namespace blue_sky
 		class Rectangle;
 	}
 
+	namespace stage
+	{
+		struct Action;
+	}
+
 /**
  * ゲームプレイ中の処理を管理する
  *
@@ -51,9 +56,6 @@ public:
 	using Shader				= core::graphics::Shader;
 	using Rectangle				= graphics::Rectangle;
 	
-	using Command				= std::function< void( string_t ) >;
-	using CommandMap			= std::unordered_map< string_t, Command >;
-
 	using CommandCall			= std::function< void() >;
 	using CommandCallList		= std::list< CommandCall >;
 	using DelayedCommandList	= std::list< std::unique_ptr< DelayedCommand > >;
@@ -110,7 +112,6 @@ private:
 
 	BalloonSoundType					balloon_sound_type_;
 
-	CommandMap							command_map_;
 	CommandCallList						stage_setup_command_call_list_;
 	DelayedCommandList					delayed_command_list_;
 
@@ -170,7 +171,8 @@ protected:
 	void update_balloon_sound();
 	void update_shadow();
 	
-	void exec_command( const string_t& );
+	/// ステージの動きを 1 つ行う（時間を置く動きは delayed_command_list_ に預ける）
+	void run_action( const stage::Action& );
 
 	// フレームの定数の更新と描画の手順（GamePlayScene_render.cpp）。ほかのシーンでも同じ描画が要るようになったら GraphicsManager に移す
 	void update_render_data_for_frame() const;

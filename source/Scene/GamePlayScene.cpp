@@ -578,7 +578,7 @@ void GamePlayScene::update_delayed_command()
 	{
 		if ( ( *i )->update( get_elapsed_time() ) )
 		{
-			exec_command( ( *i )->get_command() );
+			run_action( ( *i )->get_action() );
 		}
 
 		if ( ( *i )->is_over() )

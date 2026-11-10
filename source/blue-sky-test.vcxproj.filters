@@ -69,6 +69,9 @@
     <ClCompile Include="test\stage\LegacyStageParserTest.cpp">
       <Filter>test\stage</Filter>
     </ClCompile>
+    <ClCompile Include="test\stage\TomlStageParserTest.cpp">
+      <Filter>test\stage</Filter>
+    </ClCompile>
     <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp">
       <Filter>test\graphics</Filter>
     </ClCompile>

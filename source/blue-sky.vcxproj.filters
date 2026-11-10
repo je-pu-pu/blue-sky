@@ -308,10 +308,16 @@
     <ClCompile Include="blue_sky\stage\StageData.cpp">
       <Filter>blue_sky\stage</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\stage\Action.cpp">
+      <Filter>blue_sky\stage</Filter>
+    </ClCompile>
     <ClCompile Include="blue_sky\stage\LegacyStageParser.cpp">
       <Filter>blue_sky\stage</Filter>
     </ClCompile>
     <ClCompile Include="blue_sky\stage\StageBuilder.cpp">
+      <Filter>blue_sky\stage</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\stage\TomlStageParser.cpp">
       <Filter>blue_sky\stage</Filter>
     </ClCompile>
     <ClCompile Include="blue_sky\GameObjectRef.cpp">
@@ -1029,10 +1035,16 @@
     <ClInclude Include="blue_sky\stage\StageData.h">
       <Filter>blue_sky\stage</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\stage\Action.h">
+      <Filter>blue_sky\stage</Filter>
+    </ClInclude>
     <ClInclude Include="blue_sky\stage\LegacyStageParser.h">
       <Filter>blue_sky\stage</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\stage\StageBuilder.h">
+      <Filter>blue_sky\stage</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\stage\TomlStageParser.h">
       <Filter>blue_sky\stage</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\GameObjectRef.h">

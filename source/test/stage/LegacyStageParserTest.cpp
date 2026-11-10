@@ -57,7 +57,7 @@ const StageExpectation expectations[] =
 	{ "stage/1-2.stage", 19, "medal=1 robot=10 static=2 stone=5 switch=1", "2", 3, 7 },
 	{ "stage/1-3.stage", 8, "area-switch=1 ladder=4 medal=1 static=1 switch=1", "11,1", 1, 11 },
 	{ "stage/2-0.stage", 32, "balloon=1 ladder=10 medal=1 rocket=4 static=5 stone=10 switch=1", "2", 1, 8 },
-	{ "stage/2-1.stage", 24, "area-switch=1 girl=1 medal=1 static=1 stone=8 switch=12", "3,3,5,5,4,4,2,4,3,3,9,3,33", 14, 7 },
+	{ "stage/2-1.stage", 24, "area-switch=1 girl=1 medal=1 static=1 stone=8 switch=12", "3,3,5,5,4,4,2,4,3,3,9,3,32", 14, 7 },	// switch-m の 33 個のうち、無い switch-j を壊す 1 つは捨てる
 	{ "stage/2-2.stage", 6, "area-switch=2 medal=1 static=3", "2,1", 0, 3 },
 	{ "stage/2-3.stage", 51, "balloon=48 girl=1 medal=1 robot=1", "", 1, 13 },
 	{ "stage_ext/ext-0.stage", 33, "balloon=18 robot=6 rocket=8 static=1", "", 8, 22 },
@@ -134,12 +134,83 @@ TEST( LegacyStageParserTest, ステージ2_1の中身 )
 	ASSERT_NE( e, data.objects.end() );
 	ASSERT_EQ( e->events.size(), 4u );
 	EXPECT_EQ( e->events[ 3 ].event, "turn-on" );
-	EXPECT_EQ( e->events[ 3 ].action.name, "game_object.set_target_location" );
-	EXPECT_EQ( e->events[ 3 ].action.params, "player 8.0 115.0 -89.0 10" );
-	EXPECT_EQ( e->events[ 3 ].action.where.line, 93 );
+	const auto& move = e->events[ 3 ].action;
+	EXPECT_EQ( move.type, blue_sky::stage::ActionType::MOVE_TO );
+	EXPECT_EQ( move.text( "target" ), "player" );
+	ASSERT_NE( move.numbers( "position" ), nullptr );
+	EXPECT_EQ( * move.numbers( "position" ), ( std::vector< double >{ 8, 115, -89 } ) );
+	EXPECT_DOUBLE_EQ( move.number( "speed", 0 ), 10.0 );
+	EXPECT_EQ( move.where.line, 93 );
 
-	// 読まない行は無い（警告 0）
-	EXPECT_TRUE( data.warnings.empty() );
+	// 警告は、存在しない switch-j を壊す動きを捨てた 1 つだけ（以前も何もしなかった）
+	ASSERT_EQ( data.warnings.size(), 1u );
+	EXPECT_NE( data.warnings[ 0 ].find( "switch-j" ), string_t::npos );
+	EXPECT_EQ( data.objects.back().events.size(), 32u );
+}
+
+TEST( LegacyStageParserTest, コマンドを種類と型の付いた動きにする )
+{
+	using blue_sky::stage::ActionType;
+
+	const StageData data = LegacyStageParser::parse_text(
+		"girl 0 0 0\n"
+		"exec set_ambient_color 0 0 0\n"
+		"exec set_shadow_color_target 1 0 0 1 0.001\n"
+		"exec set_light_position_target 100 100\n"
+		"exec change_bpm 80 2\n"
+		"exec timer 5 1 change_sky_box 3\n"
+		"exec timer 1 99999 game_object.set_target_location girl 0 99 -45 10\n"
+		"exec game_object.action girl set_visible 0 0\n"
+		"exec game_object.action girl float\n"
+		"exec game_object.set_no_contact_response girl 1\n"
+		"exec game_object.set_target_direction_object girl player 1\n"
+		"exec game_object.set_mass nobody 1\n"
+		"exec game_object.action girl dance\n", "t.stage" );
+
+	ASSERT_EQ( data.start_actions.size(), 10u );
+
+	const auto& a = data.start_actions;
+
+	EXPECT_EQ( a[ 0 ].type, ActionType::SET );
+	EXPECT_EQ( * a[ 0 ].numbers( "ambient_color" ), ( std::vector< double >{ 0, 0, 0 } ) );	// 書いた成分だけ（残りは前の値のまま）
+
+	EXPECT_EQ( a[ 1 ].type, ActionType::FADE );
+	EXPECT_DOUBLE_EQ( a[ 1 ].number( "speed", 0 ), 0.001 );
+
+	EXPECT_EQ( * a[ 2 ].numbers( "light_position" ), ( std::vector< double >{ 100, 100, 0 } ) );	// 足りない数は 0（以前と同じ）
+
+	EXPECT_DOUBLE_EQ( a[ 3 ].number( "bpm", 0 ), 80.0 );
+	EXPECT_DOUBLE_EQ( a[ 3 ].number( "beat", 0 ), 2.0 );
+
+	EXPECT_TRUE( a[ 4 ].is_timed );
+	EXPECT_DOUBLE_EQ( a[ 4 ].interval, 5.0 );
+	EXPECT_EQ( a[ 4 ].count, 1 );
+	EXPECT_EQ( a[ 4 ].text( "sky_box" ), "3" );
+
+	EXPECT_EQ( a[ 5 ].type, ActionType::MOVE_TO );
+	EXPECT_EQ( a[ 5 ].count, 99999 );
+
+	EXPECT_EQ( a[ 6 ].type, ActionType::SET_VISIBLE );
+	EXPECT_FALSE( a[ 6 ].flag( "model", true ) );
+	EXPECT_FALSE( a[ 6 ].flag( "line", true ) );
+
+	EXPECT_EQ( a[ 7 ].type, ActionType::SET_MODE );
+	EXPECT_EQ( a[ 7 ].text( "mode" ), "float" );
+
+	EXPECT_EQ( a[ 8 ].type, ActionType::SET_BODY );
+	EXPECT_FALSE( a[ 8 ].flag( "contact_response", true ) );
+
+	EXPECT_EQ( a[ 9 ].type, ActionType::TURN_TO );
+	EXPECT_EQ( a[ 9 ].text( "face" ), "player" );
+
+	// 見つからない名前（nobody）と知らない物体の動き（dance）は警告にして捨てる
+	ASSERT_EQ( data.warnings.size(), 2u );
+}
+
+TEST( LegacyStageParserTest, 知らないコマンドは以前と同じく例外 )
+{
+	EXPECT_THROW( LegacyStageParser::parse_text( "exec explode\n", "t.stage" ), std::exception );
+	EXPECT_THROW( LegacyStageParser::parse_text( "exec game_object.explode a\n", "t.stage" ), std::exception );
 }
 
 TEST( LegacyStageParserTest, 足りない数は0_余った数は捨てて警告 )
@@ -183,12 +254,12 @@ TEST( LegacyStageParserTest, nameは1語目だけ_eventとnameは直前の物体
 
 	// player 行は物体ではないので、event は前のスイッチに付く（以前と同じ）
 	ASSERT_EQ( data.objects[ 0 ].events.size(), 1u );
-	EXPECT_EQ( data.objects[ 0 ].events[ 0 ].action.name, "play_sound" );
-	EXPECT_EQ( data.objects[ 0 ].events[ 0 ].action.params, "a" );
+	EXPECT_EQ( data.objects[ 0 ].events[ 0 ].action.type, blue_sky::stage::ActionType::PLAY_SOUND );
+	EXPECT_EQ( data.objects[ 0 ].events[ 0 ].action.text( "sound" ), "a" );
 
 	ASSERT_EQ( data.start_actions.size(), 1u );
-	EXPECT_EQ( data.start_actions[ 0 ].name, "change_bgm" );
-	EXPECT_EQ( data.start_actions[ 0 ].params, "road" );
+	EXPECT_EQ( data.start_actions[ 0 ].type, blue_sky::stage::ActionType::SET );
+	EXPECT_EQ( data.start_actions[ 0 ].text( "bgm" ), "road" );
 
 	// カメラの向きを書いていないプレイヤー
 	ASSERT_TRUE( data.player.has_value() );

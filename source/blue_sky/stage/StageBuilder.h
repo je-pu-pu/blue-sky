@@ -48,7 +48,7 @@ public:
 		Camera*							camera = nullptr;			///< プレイヤーのカメラの向き
 		GameObjectRef					goal;
 		string_t						stage_dir;					///< 当たりの形の .obj を探す所（"media/stage/" など）
-		MakeCall						make_call;					///< 動きを呼び出しにする（知らない動きなら例外。以前と同じ）
+		MakeCall						make_call;					///< 動きを呼び出しにする（シーンの run_action を呼ぶ）
 		std::function< void( float_t ) >	set_bpm;				///< 読み込むときの BGM の BPM
 	};
 

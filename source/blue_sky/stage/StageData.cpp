@@ -5,23 +5,6 @@
 namespace blue_sky::stage
 {
 
-string_t SourceLocation::to_string() const
-{
-	string_t s = file;
-
-	if ( line > 0 )
-	{
-		s += ":" + std::to_string( line );
-
-		if ( column > 0 )
-		{
-			s += ":" + std::to_string( column );
-		}
-	}
-
-	return s;
-}
-
 namespace
 {
 
@@ -40,7 +23,7 @@ string_t numbers( const Vector3d& v )
 
 string_t describe_action( const Action& a )
 {
-	return a.name + " (" + a.params + ")";
+	return describe( a );
 }
 
 } // namespace

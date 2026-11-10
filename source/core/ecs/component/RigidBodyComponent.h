@@ -43,7 +43,8 @@ struct RigidBodyComponent : public Component
 	/// 衝突マスク (衝突対象のグループ)
 	short collision_mask = core::physics::CollisionGroup::All;
 
-	/// 剛体ハンドル (PhysicsSystem によって設定される)
+	/// 剛体の持ち主 (PhysicsSystem によって設定される。ムーブだけできる RAII で、部品が壊れると世界から外れて消える。
+	/// 以前は生ポインタの組をコピーして持ち、PhysicsSystem が destroy_rigid_body を呼ばないと世界に残った)
 	RigidBodyHandle handle;
 
 }; // struct RigidBodyComponent

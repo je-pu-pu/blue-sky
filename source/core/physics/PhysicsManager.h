@@ -3,6 +3,8 @@
 #include <core/math/Vector.h>
 #include <core/math/Transform.h>
 #include <core/math/Quaternion.h>
+#include <core/physics/RigidBody.h>
+#include <memory>
 #include <vector>
 #include <functional>
 
@@ -55,19 +57,12 @@ struct RigidBodyCreateInfo
 };
 
 /**
- * 剛体ハンドル
+ * 剛体ハンドル（= 剛体の持ち主 RigidBody。ムーブだけできる）
  *
- * 物理マネージャーが管理する剛体への参照
+ * 以前は生ポインタ 3 つ（剛体・形・動きの状態）と user_pointer の組をコピーして持ち、destroy_rigid_body で消していた。
+ * 今は持ち主が壊れる（部品が外れる・Entity が消える）と、世界から外して消える。PhysicsManager はこれより長く生きること
  */
-struct RigidBodyHandle
-{
-	btRigidBody* rigid_body = nullptr;
-	btCollisionShape* collision_shape = nullptr;
-	btMotionState* motion_state = nullptr;
-	void* user_pointer = nullptr;  // Entity へのポインタなど
-
-	bool is_valid() const { return rigid_body != nullptr; }
-};
+using RigidBodyHandle = RigidBody;
 
 /**
  * 物理マネージャー
@@ -83,7 +78,7 @@ public:
 
 private:
 	class Impl;
-	Impl* impl_ = nullptr;
+	std::unique_ptr< Impl > impl_;		///< 以前は生の new / delete
 
 public:
 	PhysicsManager();
@@ -95,11 +90,13 @@ public:
 
 	/**
 	 * 剛体を生成してワールドに追加する
+	 *
+	 * @return 剛体の持ち主（捨てると、すぐに世界から外れて消える）
 	 */
 	RigidBodyHandle create_rigid_body( const RigidBodyCreateInfo& info );
 
 	/**
-	 * 剛体をワールドから削除して破棄する
+	 * 剛体をワールドから削除して破棄する（handle.reset() と同じ。無効なら何もしない）
 	 */
 	void destroy_rigid_body( RigidBodyHandle& handle );
 

@@ -11,113 +11,75 @@ namespace core::physics
 class PhysicsManager::Impl
 {
 public:
-	btDefaultCollisionConfiguration* collision_configuration = nullptr;
-	btCollisionDispatcher* collision_dispatcher = nullptr;
-	btBroadphaseInterface* broadphase_interface = nullptr;
-	btSequentialImpulseConstraintSolver* constraint_solver = nullptr;
-	btDiscreteDynamicsWorld* dynamics_world = nullptr;
+	// 以前は生の new / delete。宣言の逆の順に壊れる（世界 → 解く物 → 広い判定 → 振り分け → 設定。以前の delete と同じ順）
+	std::unique_ptr< btDefaultCollisionConfiguration > collision_configuration;
+	std::unique_ptr< btCollisionDispatcher > collision_dispatcher;
+	std::unique_ptr< btBroadphaseInterface > broadphase_interface;
+	std::unique_ptr< btSequentialImpulseConstraintSolver > constraint_solver;
+	std::unique_ptr< btDiscreteDynamicsWorld > dynamics_world;
 
 	float time_step = 1.f / 60.f;
 	math::Vector gravity = math::Vector( 0.f, -9.8f, 0.f );
 
 	Impl()
 	{
-		collision_configuration = new btDefaultCollisionConfiguration();
-		collision_dispatcher = new btCollisionDispatcher( collision_configuration );
-		broadphase_interface = new btDbvtBroadphase();
-		constraint_solver = new btSequentialImpulseConstraintSolver();
-		dynamics_world = new btDiscreteDynamicsWorld(
-			collision_dispatcher,
-			broadphase_interface,
-			constraint_solver,
-			collision_configuration
+		collision_configuration = std::make_unique< btDefaultCollisionConfiguration >();
+		collision_dispatcher = std::make_unique< btCollisionDispatcher >( collision_configuration.get() );
+		broadphase_interface = std::make_unique< btDbvtBroadphase >();
+		constraint_solver = std::make_unique< btSequentialImpulseConstraintSolver >();
+		dynamics_world = std::make_unique< btDiscreteDynamicsWorld >(
+			collision_dispatcher.get(),
+			broadphase_interface.get(),
+			constraint_solver.get(),
+			collision_configuration.get()
 		);
 
 		dynamics_world->setGravity( btVector3( gravity.x(), gravity.y(), gravity.z() ) );
 	}
 
-	~Impl()
-	{
-		// dynamics_world に残っている剛体を全て削除する
-		if ( dynamics_world )
-		{
-			for ( int i = dynamics_world->getNumCollisionObjects() - 1; i >= 0; i-- )
-			{
-				btCollisionObject* obj = dynamics_world->getCollisionObjectArray()[ i ];
-				btRigidBody* body = btRigidBody::upcast( obj );
-
-				if ( body )
-				{
-					// MotionState を削除
-					if ( body->getMotionState() )
-					{
-						delete body->getMotionState();
-					}
-
-					// CollisionShape を削除
-					if ( body->getCollisionShape() )
-					{
-						delete body->getCollisionShape();
-					}
-
-					// ワールドから削除
-					dynamics_world->removeRigidBody( body );
-				}
-				else
-				{
-					dynamics_world->removeCollisionObject( obj );
-				}
-
-				// オブジェクトを削除
-				delete obj;
-			}
-		}
-
-		delete dynamics_world;
-		delete constraint_solver;
-		delete broadphase_interface;
-		delete collision_dispatcher;
-		delete collision_configuration;
-	}
+	/**
+	 * 世界を壊す（unique_ptr が宣言の逆の順に壊す）
+	 *
+	 * 剛体は持ち主（RigidBody。部品が持つ）が壊れるときに世界から外して消すので、ここでは消さない。
+	 * 以前はここで世界に残った剛体・形・動きの状態を全部消していた（今は持ち主がこれより先に壊れる決まり。
+	 * 残っていると、持ち主が後で壊れるときに消えた世界から外そうとする）
+	 */
+	~Impl() = default;
 };
 
 PhysicsManager::PhysicsManager()
-	: impl_( new Impl() )
+	: impl_( std::make_unique< Impl >() )
 {
 }
 
-PhysicsManager::~PhysicsManager()
-{
-	delete impl_;
-}
+PhysicsManager::~PhysicsManager() = default;
 
 RigidBodyHandle PhysicsManager::create_rigid_body( const RigidBodyCreateInfo& info )
 {
-	RigidBodyHandle handle;
-
-	// CollisionShape を生成
+	// CollisionShape を生成（この剛体だけの形。持ち主が一緒に消す）
 	const auto& size = info.shape_size;
+	std::unique_ptr< btCollisionShape > collision_shape;
 
 	switch ( info.shape_type )
 	{
 	case RigidBodyShapeType::Box:
-		handle.collision_shape = new btBoxShape( btVector3( size.x(), size.y(), size.z() ) );
+		collision_shape = std::make_unique< btBoxShape >( btVector3( size.x(), size.y(), size.z() ) );
 		break;
 
 	case RigidBodyShapeType::Capsule:
-		handle.collision_shape = new btCapsuleShape( size.x(), size.y() );
+		collision_shape = std::make_unique< btCapsuleShape >( size.x(), size.y() );
 		break;
 
 	case RigidBodyShapeType::Cylinder:
-		handle.collision_shape = new btCylinderShape( btVector3( size.x(), size.y(), size.z() ) );
+		collision_shape = std::make_unique< btCylinderShape >( btVector3( size.x(), size.y(), size.z() ) );
 		break;
 
 	case RigidBodyShapeType::Sphere:
-		handle.collision_shape = new btSphereShape( size.x() );
+		collision_shape = std::make_unique< btSphereShape >( size.x() );
 		break;
 
 	default:
-		handle.collision_shape = new btBoxShape( btVector3( size.x(), size.y(), size.z() ) );
+		collision_shape = std::make_unique< btBoxShape >( btVector3( size.x(), size.y(), size.z() ) );
 		break;
 	}
 
@@ -125,59 +87,41 @@ RigidBodyHandle PhysicsManager::create_rigid_body( const RigidBodyCreateInfo& in
 	btVector3 local_inertia( 0, 0, 0 );
 	if ( info.mass > 0.f )
 	{
-		handle.collision_shape->calculateLocalInertia( info.mass, local_inertia );
+		collision_shape->calculateLocalInertia( info.mass, local_inertia );
 	}
 
 	// Transform を btTransform に変換
 	btTransform bt_transform = info.transform;
 
 	// MotionState を生成
-	handle.motion_state = new btDefaultMotionState( bt_transform );
+	auto motion_state = std::make_unique< btDefaultMotionState >( bt_transform );
 
 	// RigidBody を生成
 	btRigidBody::btRigidBodyConstructionInfo rigid_body_info(
 		info.mass,
-		handle.motion_state,
-		handle.collision_shape,
+		motion_state.get(),
+		collision_shape.get(),
 		local_inertia
 	);
 
 	// 摩擦は全物体で 0.1、反発は Bullet の既定。物体ごとに変えたいときは RigidBodyComponent に摩擦・反発を足し、ここで rigid_body_info に渡す
-	handle.rigid_body = new btRigidBody( rigid_body_info );
-	handle.rigid_body->setFriction( 0.1f );
-	// handle.rigid_body->setActivationState( DISABLE_DEACTIVATION );
+	auto rigid_body = std::make_unique< btRigidBody >( rigid_body_info );
+	rigid_body->setFriction( 0.1f );
+	// rigid_body->setActivationState( DISABLE_DEACTIVATION );
 
-	// user_pointer を設定
-	handle.rigid_body->setUserPointer( nullptr );
+	// user_pointer は付けない（Entity の番号のタグは使う側が付ける。core/physics/EntityTag.h）
+	rigid_body->setUserPointer( nullptr );
 
 	// dynamics_world に登録 (衝突グループ/マスク付き)
-	impl_->dynamics_world->addRigidBody( handle.rigid_body, info.collision_group, info.collision_mask );
+	impl_->dynamics_world->addRigidBody( rigid_body.get(), info.collision_group, info.collision_mask );
 
-	return handle;
+	return RigidBodyHandle( impl_->dynamics_world.get(), std::move( rigid_body ), std::move( motion_state ), std::move( collision_shape ) );
 }
 
 void PhysicsManager::destroy_rigid_body( RigidBodyHandle& handle )
 {
-	if ( ! handle.is_valid() )
-	{
-		return;
-	}
-
-	// dynamics_world から削除
-	if ( impl_->dynamics_world && handle.rigid_body )
-	{
-		impl_->dynamics_world->removeRigidBody( handle.rigid_body );
-	}
-
-	// リソースを解放
-	delete handle.rigid_body;
-	handle.rigid_body = nullptr;
-
-	delete handle.motion_state;
-	handle.motion_state = nullptr;
-
-	delete handle.collision_shape;
-	handle.collision_shape = nullptr;
+	// 世界から外して、剛体・動きの状態・形を消す（以前はここで 3 つを delete していた）
+	handle.reset();
 }
 
 int PhysicsManager::get_rigid_body_count() const
@@ -193,7 +137,7 @@ void PhysicsManager::get_rigid_body_transform( const RigidBodyHandle& handle, Ve
 	}
 
 	btTransform bt_transform;
-	handle.rigid_body->getMotionState()->getWorldTransform( bt_transform );
+	handle->getMotionState()->getWorldTransform( bt_transform );
 
 	const btVector3& origin = bt_transform.getOrigin();
 	position = Vector( origin.x(), origin.y(), origin.z() );
@@ -246,7 +190,7 @@ void PhysicsManager::set_rigid_body_linear_velocity( const RigidBodyHandle& hand
 		return;
 	}
 
-	handle.rigid_body->setLinearVelocity( btVector3( velocity.x(), velocity.y(), velocity.z() ) );
+	handle->setLinearVelocity( btVector3( velocity.x(), velocity.y(), velocity.z() ) );
 }
 
 PhysicsManager::Vector PhysicsManager::get_rigid_body_linear_velocity( const RigidBodyHandle& handle ) const
@@ -256,7 +200,7 @@ PhysicsManager::Vector PhysicsManager::get_rigid_body_linear_velocity( const Rig
 		return Vector( 0.f, 0.f, 0.f );
 	}
 
-	const btVector3& v = handle.rigid_body->getLinearVelocity();
+	const btVector3& v = handle->getLinearVelocity();
 	return Vector( v.x(), v.y(), v.z() );
 }
 
@@ -267,7 +211,7 @@ void PhysicsManager::set_rigid_body_angular_factor( const RigidBodyHandle& handl
 		return;
 	}
 
-	handle.rigid_body->setAngularFactor( btVector3( factor.x(), factor.y(), factor.z() ) );
+	handle->setAngularFactor( btVector3( factor.x(), factor.y(), factor.z() ) );
 }
 
 void PhysicsManager::apply_impulse( const RigidBodyHandle& handle, const Vector& impulse )
@@ -277,7 +221,7 @@ void PhysicsManager::apply_impulse( const RigidBodyHandle& handle, const Vector&
 		return;
 	}
 
-	handle.rigid_body->applyCentralImpulse( btVector3( impulse.x(), impulse.y(), impulse.z() ) );
+	handle->applyCentralImpulse( btVector3( impulse.x(), impulse.y(), impulse.z() ) );
 }
 
 void PhysicsManager::activate_rigid_body( const RigidBodyHandle& handle )
@@ -287,7 +231,7 @@ void PhysicsManager::activate_rigid_body( const RigidBodyHandle& handle )
 		return;
 	}
 
-	handle.rigid_body->activate( true );
+	handle->activate( true );
 }
 
 bool PhysicsManager::ray_test( const Vector& from, const Vector& to ) const
@@ -311,7 +255,7 @@ bool PhysicsManager::ray_test_excluding( const Vector& from, const Vector& to, c
 	// 除外する剛体を設定
 	if ( exclude.is_valid() )
 	{
-		ray_callback.m_collisionFilterMask &= ~exclude.rigid_body->getBroadphaseProxy()->m_collisionFilterGroup;
+		ray_callback.m_collisionFilterMask &= ~exclude->getBroadphaseProxy()->m_collisionFilterGroup;
 	}
 
 	impl_->dynamics_world->rayTest( bt_from, bt_to, ray_callback );
@@ -319,7 +263,7 @@ bool PhysicsManager::ray_test_excluding( const Vector& from, const Vector& to, c
 	// ヒットしたオブジェクトが除外対象でないか確認
 	if ( ray_callback.hasHit() && exclude.is_valid() )
 	{
-		if ( ray_callback.m_collisionObject == exclude.rigid_body )
+		if ( ray_callback.m_collisionObject == exclude.get() )
 		{
 			return false;
 		}
@@ -346,8 +290,8 @@ bool PhysicsManager::check_contact( const RigidBodyHandle& a, const RigidBodyHan
 		const btCollisionObject* body1 = manifold->getBody1();
 
 		// a と b のペアかどうかを確認
-		bool is_pair = ( body0 == a.rigid_body && body1 == b.rigid_body ) ||
-		               ( body0 == b.rigid_body && body1 == a.rigid_body );
+		bool is_pair = ( body0 == a.get() && body1 == b.get() ) ||
+		               ( body0 == b.get() && body1 == a.get() );
 
 		if ( is_pair && manifold->getNumContacts() > 0 )
 		{

@@ -45,11 +45,10 @@ void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, Trans
 	if ( rigid_body->handle.is_valid() )
 	{
 		physics_manager->set_rigid_body_angular_factor( rigid_body->handle, rigid_body->angular_factor );
-		rigid_body->handle.rigid_body->setFriction( rigid_body->friction );
+		rigid_body->handle->setFriction( rigid_body->friction );
 
 		// user_pointer に RigidBodyComponent へのポインタを設定
-		rigid_body->handle.user_pointer = rigid_body;
-		rigid_body->handle.rigid_body->setUserPointer( rigid_body );
+		rigid_body->handle->setUserPointer( rigid_body );
 	}
 }
 
@@ -74,7 +73,6 @@ void PhysicsSystem::release_rigid_body( RigidBodyComponent* rigid_body )
 	}
 
 	physics_manager_->destroy_rigid_body( rigid_body->handle );
-	rigid_body->handle.user_pointer = nullptr;
 }
 
 void PhysicsSystem::update()

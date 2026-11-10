@@ -6,30 +6,21 @@
 #include <sstream>
 
 BulletPhysics::BulletPhysics()
-	: collision_configuration_( 0 )
-	, collision_dispatcher_( 0 )
-	, broadphase_interface_( 0 )
-	, constraint_solver_( 0 )
-	, dynamics_world_( 0 )
 {
-	collision_configuration_ = new btDefaultCollisionConfiguration();
-	collision_dispatcher_ = new btCollisionDispatcher( collision_configuration_ );
-	broadphase_interface_ = new btDbvtBroadphase();
-	constraint_solver_ = new btSequentialImpulseConstraintSolver();
-	dynamics_world_ = new btDiscreteDynamicsWorld( collision_dispatcher_, broadphase_interface_, constraint_solver_, collision_configuration_ );
+	collision_configuration_ = std::make_unique< btDefaultCollisionConfiguration >();
+	collision_dispatcher_ = std::make_unique< btCollisionDispatcher >( collision_configuration_.get() );
+	broadphase_interface_ = std::make_unique< btDbvtBroadphase >();
+	constraint_solver_ = std::make_unique< btSequentialImpulseConstraintSolver >();
+	dynamics_world_ = std::make_unique< btDiscreteDynamicsWorld >( collision_dispatcher_.get(), broadphase_interface_.get(), constraint_solver_.get(), collision_configuration_.get() );
 
 	dynamics_world_->setGravity( btVector3( 0, -9.8f, 0 ) );
- }
+}
 
 BulletPhysics::~BulletPhysics()
 {
 	clear();
 
-	delete dynamics_world_;
-	delete constraint_solver_;
-	delete broadphase_interface_;
-	delete collision_dispatcher_;
-	delete collision_configuration_;
+	// 世界などは unique_ptr が宣言の逆の順に壊す
 }
 
 void BulletPhysics::clear()

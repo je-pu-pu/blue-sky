@@ -7,6 +7,7 @@
 #include <functional>
 #include <list>
 #include <map>
+#include <memory>
 #include <tuple>
 
 /**
@@ -24,11 +25,12 @@ public:
 	using MeshList				= std::list< btStridingMeshInterface* >;
 
 protected:
-	btDefaultCollisionConfiguration*		collision_configuration_;
-	btCollisionDispatcher*					collision_dispatcher_;
-	btBroadphaseInterface*					broadphase_interface_;
-	btSequentialImpulseConstraintSolver*	constraint_solver_;
-	btDiscreteDynamicsWorld*				dynamics_world_;
+	// 以前は生の new / delete。宣言の逆の順に壊れる（世界 → 解く物 → 広い判定 → 振り分け → 設定。以前の delete と同じ順）
+	std::unique_ptr< btDefaultCollisionConfiguration >		collision_configuration_;
+	std::unique_ptr< btCollisionDispatcher >				collision_dispatcher_;
+	std::unique_ptr< btBroadphaseInterface >				broadphase_interface_;
+	std::unique_ptr< btSequentialImpulseConstraintSolver >	constraint_solver_;
+	std::unique_ptr< btDiscreteDynamicsWorld >				dynamics_world_;
 
 	CollisionShapeArray						collision_shape_list_;
 	MeshList								mesh_list_;

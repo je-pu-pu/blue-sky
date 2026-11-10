@@ -146,9 +146,6 @@
     <ClCompile Include="GameObject\Switch.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject\TranslationObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="GameObject\Umbrella.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
@@ -189,9 +186,6 @@
       <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="GameObject\Rocket.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\StaticeObject.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp">
@@ -337,6 +331,21 @@
     </ClCompile>
     <ClCompile Include="blue_sky\ActiveObjectManager.cpp">
       <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ObjectFactory.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\GameObjectRef.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\ObjectBody.cpp">
+      <Filter>blue_sky\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\EntityObject.cpp">
+      <Filter>blue_sky\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\TranslationSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
     <ClCompile Include="blue_sky\ActiveObjectPhysics.cpp">
       <Filter>blue_sky</Filter>
@@ -687,9 +696,6 @@
     <ClInclude Include="GameObject\Switch.h">
       <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="GameObject\TranslationObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
     <ClInclude Include="GameObject\Umbrella.h">
       <Filter>GameObject</Filter>
     </ClInclude>
@@ -730,9 +736,6 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\Rocket.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\StaticObject.h">
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h">
@@ -1061,6 +1064,27 @@
     </ClInclude>
     <ClInclude Include="blue_sky\ActiveObjectManager.h">
       <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ObjectFactory.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\GameObjectRef.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\ObjectBody.h">
+      <Filter>blue_sky\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\EntityObject.h">
+      <Filter>blue_sky\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\TranslationSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\SimpleObjectComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\StaticObjectComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\ActiveObjectPhysics.h">
       <Filter>blue_sky</Filter>

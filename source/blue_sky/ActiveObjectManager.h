@@ -14,7 +14,7 @@ struct GameObjectContext;
 namespace graphics { class GraphicsManager; }
 }
 
-namespace core::ecs { class EntityManager; }
+namespace core::ecs { class EntityManager; class Entity; }
 
 namespace blue_sky
 {
@@ -31,13 +31,13 @@ public:
 	/// 加えた順（作った順）に並ぶ一覧。更新・スイッチの処理の順が起動ごとに変わらないように
 	/// （以前は unordered_set< ActiveObject* > で、アドレスの順になり起動ごとに変わっていた）
 	using ActiveObjectList			= std::vector< ActiveObject* >;
-	using ActiveObjectMap			= std::unordered_map< string_t, ActiveObject* >;
 
 	using CreateObjectFunction		= std::function< ActiveObject* () >;
 
 private:
 	ActiveObjectList active_object_list_;
-	ActiveObjectMap named_active_object_map_;
+
+	// 物体の名前の表は ObjectFactory が持つ（EntityId で引く。以前はここに名前 → ActiveObject* の表があった）
 
 	// 目標地点・向きは Entity の部品（ecs::TargetLocationComponent・TargetDirectionComponent）が持ち、ecs::MoveToTargetSystem が動かす
 	// （以前はここに ActiveObject* を鍵にした 3 つの unordered_map があった）
@@ -58,19 +58,11 @@ public:
 	void restart();
 
 	void add_active_object( ActiveObject* active_object );
-	void name_active_object( const string_t& name, ActiveObject* active_object );
 
-	/// 目標地点へ動かす（ステージのコマンドの窓口。中身は ecs::MoveToTargetSystem に頼む。着いたら on_arrive_at_target_location が呼ばれる）
-	void set_target_location( ActiveObject* active_object, const Vector& target_location, float_t speed );
-	/// 決まった向きを追わせる（同上）
-	void set_target_direction( ActiveObject* active_object, float_t, float_t speed );
-	/// ほかの物体の方向を追わせる（同上）
-	void set_target_direction_object( ActiveObject* active_object, const ActiveObject* target_active_object, float_t speed );
+	// 目標地点・向きへ動かすのは GameObjectRef::set_target_location など（ecs::MoveToTargetSystem に頼む。以前はここに窓口があった）
 
+	/// まだ ActiveObject の種類を名前から作る（ObjectFactory::create_active_object が呼ぶ。知らない種類なら nullptr）
 	ActiveObject* create_object( const string_t& );
-	ActiveObject* create_static_object( std::stringstream& );
-	ActiveObject* get_active_object( const string_t& name );
-	GameObject* get_nearest_object( const Vector& );
 
 	ActiveObject* clone_object( const ActiveObject* );
 
@@ -99,6 +91,14 @@ public:
 	// ecs::CollisionEventHandler（互換の層）
 	void on_collide_with_ground( core::ecs::EntityId id ) override;
 	void on_collide( core::ecs::EntityId a, core::ecs::EntityId b ) override;
+
+	/**
+	 * ActiveObject と ECS だけの物体（ActiveObject を持たない Entity）が当たった
+	 *
+	 * ECS だけの物体の振る舞いは部品の組み合わせで決める（StaticObjectComponent なら object.on_collide_with_static_object）。
+	 * 相手（プレイヤーなど）はまだ ActiveObject なので、相手の振る舞いは GameObject の仮想関数で呼ぶ
+	 */
+	static void on_collide_with_entity_object( GameObject& object, const core::ecs::Entity& entity );
 
 	/// 全オブジェクトの位置と描くかどうかを描画の部品へ写す（描く前に毎フレーム。GameMain がシーンを描く前に呼ぶ）
 	void sync_render_components() const;

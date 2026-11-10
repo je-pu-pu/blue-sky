@@ -55,6 +55,11 @@
     <ClCompile Include="blue_sky\KeyNames.cpp" />
     <ClCompile Include="core\ui\StringTable.cpp" />
     <ClCompile Include="blue_sky\ActiveObjectManager.cpp" />
+    <ClCompile Include="blue_sky\ObjectFactory.cpp" />
+    <ClCompile Include="blue_sky\GameObjectRef.cpp" />
+    <ClCompile Include="blue_sky\ecs\ObjectBody.cpp" />
+    <ClCompile Include="blue_sky\ecs\EntityObject.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\TranslationSystem.cpp" />
     <ClCompile Include="blue_sky\ActiveObjectPhysics.cpp" />
     <ClCompile Include="blue_sky\App.cpp" />
     <ClCompile Include="blue_sky\CityGenerator.cpp" />
@@ -151,10 +156,8 @@
     <ClCompile Include="GameObject\Player.cpp" />
     <ClCompile Include="GameObject\Robot.cpp" />
     <ClCompile Include="GameObject\Rocket.cpp" />
-    <ClCompile Include="GameObject\StaticeObject.cpp" />
     <ClCompile Include="GameObject\Stone.cpp" />
     <ClCompile Include="GameObject\Switch.cpp" />
-    <ClCompile Include="GameObject\TranslationObject.cpp" />
     <ClCompile Include="GameObject\Umbrella.cpp" />
     <ClCompile Include="lib\src\imgui\imgui.cpp" />
     <ClCompile Include="lib\src\imgui\imgui_draw.cpp" />
@@ -246,6 +249,13 @@
     <ClInclude Include="core\ui\ClickTracker.h" />
     <ClInclude Include="core\ui\StringTable.h" />
     <ClInclude Include="blue_sky\ActiveObjectManager.h" />
+    <ClInclude Include="blue_sky\ObjectFactory.h" />
+    <ClInclude Include="blue_sky\GameObjectRef.h" />
+    <ClInclude Include="blue_sky\ecs\ObjectBody.h" />
+    <ClInclude Include="blue_sky\ecs\EntityObject.h" />
+    <ClInclude Include="blue_sky\ecs\system\TranslationSystem.h" />
+    <ClInclude Include="blue_sky\ecs\component\SimpleObjectComponent.h" />
+    <ClInclude Include="blue_sky\ecs\component\StaticObjectComponent.h" />
     <ClInclude Include="blue_sky\ActiveObjectPhysics.h" />
     <ClInclude Include="blue_sky\App.h" />
     <ClInclude Include="blue_sky\CityGenerator.h" />
@@ -449,10 +459,8 @@
     <ClInclude Include="GameObject\Player.h" />
     <ClInclude Include="GameObject\Robot.h" />
     <ClInclude Include="GameObject\Rocket.h" />
-    <ClInclude Include="GameObject\StaticObject.h" />
     <ClInclude Include="GameObject\Stone.h" />
     <ClInclude Include="GameObject\Switch.h" />
-    <ClInclude Include="GameObject\TranslationObject.h" />
     <ClInclude Include="GameObject\Umbrella.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene\CanvasTestScene.h" />

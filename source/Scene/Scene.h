@@ -41,6 +41,7 @@ namespace blue_sky
 	class ActiveObject;
 	class ActiveObjectPhysics;
 	class ActiveObjectManager;
+	class ObjectFactory;
 	class ScriptManager;
 	class Input;
 
@@ -88,6 +89,9 @@ protected:
 	EntityManager* get_entity_manager() const;
 
 	ActiveObjectManager* get_active_object_manager() const;
+
+	/// 物体を種類の名前から作り、名前で引く（ECS だけの物体を含む。物体の片付け・やり直しの入口）
+	ObjectFactory* get_object_factory() const;
 
 	ActiveObjectPhysics* get_active_object_physics() const;
 	core::physics::PhysicsManager* get_physics_manager() const;	///< ECS の物理（ECS のシステムに渡す。以前システムは core::Service から取っていた）

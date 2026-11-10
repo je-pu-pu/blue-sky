@@ -3,7 +3,9 @@
 #include <core/ecs/System.h>
 #include <core/ecs/EntityIdOrderedList.h>
 #include <blue_sky/ecs/component/TargetMoverComponent.h>
+#include <blue_sky/ecs/EntityObject.h>
 
+#include <optional>
 #include <vector>
 
 namespace blue_sky::ecs
@@ -14,7 +16,8 @@ namespace blue_sky::ecs
  *
  * 以前は ActiveObjectManager::update が 3 つの unordered_map（ActiveObject* が鍵）を回していた。
  * 今は目標を Entity の部品（TargetLocationComponent・TargetDirectionComponent）に持ち、ここが Entity の番号の順（作った順）に回す。
- * 対象は TargetMoverComponent を持つ Entity（ActiveObject は加えるときに付ける）。毎フレーム回すのは、そのうち目標を持つものだけ。
+ * 対象は TargetMoverComponent を持つ Entity（ActiveObject は加えるときに付ける。ECS だけの物体は mover を nullptr にして付け、
+ * ここが部品を直接動かす = EntityObject）。毎フレーム回すのは、そのうち目標を持つものだけ。
  *
  * EntityManager::update() では動かさない（本編のシーンは EntityManager::update を呼ばず、呼ぶシーンで二重に進めないため。
  * ObjectRenderDataSystem と同じ）。ActiveObjectManager::update が、物体の update とアニメーションの後に update_targets を呼ぶ
@@ -38,6 +41,14 @@ private:
 	/// id の Entity の部品（無い・消えた後なら nullptr）
 	template< typename ComponentType >
 	ComponentType* find_component( core::ecs::EntityId id ) const;
+
+	/**
+	 * id の物体を動かす窓口（無ければ nullptr）
+	 *
+	 * ActiveObject を持つ物体は TargetMoverComponent::mover（ActiveObject）。持たない物体（mover が nullptr）は、
+	 * 部品を直接動かす EntityObject を storage に作って返す（位置の正 TransformComponent が無ければ nullptr）
+	 */
+	TargetMover* resolve_mover( core::ecs::EntityId id, std::optional< EntityObject >& storage ) const;
 
 	/// entity が目標の部品（地点か向き）を持っていれば、目標を持つ一覧に足す（対象でなければ足さない）
 	void add_to_target_list_if_has_target( const core::ecs::Entity* entity );

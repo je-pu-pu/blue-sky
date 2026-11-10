@@ -13,10 +13,8 @@
 #include <GameObject/Stone.h>
 #include <GameObject/Switch.h>
 #include <GameObject/AreaSwitch.h>
-#include <GameObject/TranslationObject.h>
 
 #include <GameObject/ActiveObject.h>
-#include <GameObject/StaticObject.h>
 #include <GameObject/GameObjectContext.h>
 
 #include <algorithm>
@@ -28,7 +26,9 @@
 #include <blue_sky/ecs/system/MoveToTargetSystem.h>
 #include <blue_sky/ecs/system/CollisionEventSystem.h>
 #include <blue_sky/ecs/system/PhysicsSyncSystem.h>
+#include <blue_sky/ecs/system/TranslationSystem.h>
 #include <blue_sky/ecs/component/ActiveObjectLinkComponent.h>
+#include <blue_sky/ecs/component/StaticObjectComponent.h>
 
 #include <core/ecs/EntityManager.h>
 
@@ -51,11 +51,9 @@ ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics
 	object_creator_map_[ "umbrella"    ] = [] () -> ActiveObject* { return new Umbrella();     };
 	object_creator_map_[ "stone"       ] = [] () -> ActiveObject* { return new Stone();        };
 	object_creator_map_[ "switch"      ] = [] () -> ActiveObject* { return new Switch();       };
-	object_creator_map_[ "static"      ] = [] () -> ActiveObject* { return new StaticObject(); };
 
-	// object_creator_map_[ "area-switch"        ] = [] () -> ActiveObject* { return 0; };
-	// object_creator_map_[ "translation-object" ] = [] () -> ActiveObject* { return 0; };
-	
+	// "static"（動かない物）は ECS だけの物体になり、ObjectFactory が作る（段階 4）
+
 }
 
 ActiveObjectManager::~ActiveObjectManager()
@@ -70,9 +68,8 @@ void ActiveObjectManager::clear()
 		delete *i;
 	}
 
-	// 目標（部品）は、物体を壊すときに Entity ごと消える
+	// 目標（部品）は、物体を壊すときに Entity ごと消える。名前の表は ObjectFactory が持つ
 	active_object_list_.clear();
-	named_active_object_map_.clear();
 }
 
 void ActiveObjectManager::restart()
@@ -110,47 +107,6 @@ void ActiveObjectManager::add_active_object( ActiveObject* active_object )
 	active_object_list_.push_back( active_object );
 }
 
-void ActiveObjectManager::name_active_object( const string_t& name, ActiveObject* active_object )
-{
-	named_active_object_map_[ name ] = active_object;
-}
-
-void ActiveObjectManager::set_target_location( ActiveObject* active_object, const Vector& target_location, float_t speed )
-{
-	auto* system = entity_manager_->get_system< ecs::MoveToTargetSystem >();
-
-	if ( ! system || ! active_object->has_entity() || ! system->set_target_location( active_object->get_entity_id(), target_location, speed ) )
-	{
-		debug_log( "[Object] 目標地点を設定できません（物体の Entity が無い。ActiveObjectManager に加えていない・片付けた後）" );
-		return;
-	}
-
-	const Vector& from = active_object->get_location();
-	debug_log( "[Object] 目標地点へ動かします ( " + std::to_string( from.x() ) + ", " + std::to_string( from.y() ) + ", " + std::to_string( from.z() ) + " ) → ( "
-		+ std::to_string( target_location.x() ) + ", " + std::to_string( target_location.y() ) + ", " + std::to_string( target_location.z() ) + " ) 速さ " + std::to_string( speed ) );
-}
-
-void ActiveObjectManager::set_target_direction( ActiveObject* active_object, float_t target_direction, float_t speed )
-{
-	auto* system = entity_manager_->get_system< ecs::MoveToTargetSystem >();
-
-	if ( ! system || ! active_object->has_entity() || ! system->set_target_direction( active_object->get_entity_id(), target_direction, speed ) )
-	{
-		debug_log( "[Object] 目標の向きを設定できません（物体の Entity が無い）" );
-	}
-}
-
-void ActiveObjectManager::set_target_direction_object( ActiveObject* active_object, const ActiveObject* target_active_object, float_t speed )
-{
-	auto* system = entity_manager_->get_system< ecs::MoveToTargetSystem >();
-
-	if ( ! system || ! active_object->has_entity() || ! target_active_object->has_entity()
-		|| ! system->set_target_direction_entity( active_object->get_entity_id(), target_active_object->get_entity_id(), speed ) )
-	{
-		debug_log( "[Object] 向く先の物体を設定できません（物体の Entity が無い）" );
-	}
-}
-
 /**
  * 指定した名前のオブジェクトを生成する
  *
@@ -172,104 +128,6 @@ ActiveObject* ActiveObjectManager::create_object( const string_t& name )
 	add_active_object( active_object );
 
 	return active_object;
-}
-
-/**
- * 文字列によりオブジェクトを生成する
- *
- * @param ss オブジェクトを生成するためのパラメータ
- * @return 生成したオブジェクト
- */
-ActiveObject* ActiveObjectManager::create_static_object( std::stringstream& ss )
-{
-	string_t object_name;
-	float_t x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0;
-
-	ss >> object_name >> x >> y >> z >> rx >> ry >> rz;
-
-	std::unordered_map< string_t, Vector > size_map;
-	size_map[ "soda-can-1"   ] = Vector(  0.07f, 0.12f, 0.07f );
-	size_map[ "wall-1"       ] = Vector(  4.f,   1.75f, 0.2f  );
-	size_map[ "wall-2"       ] = Vector(  8.f,   2.5f,  0.2f  );
-	size_map[ "wall-3"       ] = Vector(  4.f,   2.5f,  0.2f  );
-	size_map[ "outdoor-unit" ] = Vector(  0.7f,  0.6f,  0.24f );
-	size_map[ "building-20"  ] = Vector( 10.f,  20.f,  10.f   );
-	size_map[ "building-200" ] = Vector( 80.f, 200.f,  60.f   );
-	size_map[ "board-1"      ] = Vector(  4.f,   0.2f,  0.8f  );
-
-	size_map[ "box-5x5x5"    ] = Vector(  5.f,  5.f,  5.f );
-	size_map[ "box-2x2x2"    ] = Vector(  2.f,  2.f,  2.f );
-
-	size_map[ "robot-dead-body" ] = Vector( 0.8f, 2.f, 0.5f );
-
-	std::unordered_map< string_t, float_t > mass_map;
-	mass_map[ "soda-can-1"   ] = 50.f;
-	mass_map[ "board-1"      ] = 20.f;
-	mass_map[ "box-5x5x5"    ] = 1.f;
-	mass_map[ "box-2x2x2"    ] = 100.f;
-	mass_map[ "robot-dead-body" ] = 10.f;
-	mass_map[ "wall-3"       ] = 100.f;
-
-
-	float w = 0.f, h = 0.f, d = 0.f, mass = 0.f;
-			
-	{
-		auto i = size_map.find( object_name );
-
-		if ( i != size_map.end() )
-		{
-			w = i->second.x();
-			h = i->second.y();
-			d = i->second.z();
-		}
-	}
-
-	{
-		auto i = mass_map.find( object_name );
-
-		if ( i != mass_map.end() )
-		{
-			mass = i->second;
-		}
-	}
-
-	ActiveObject* object = new StaticObject( w, h, d, mass );
-	object->set_start_location( x, y, z );
-	object->set_start_rotation( rx, ry, rz );
-	object->set_start_direction_degree( rx );
-
-	if ( object_name == "soda-can-1" )
-	{
-		object->set_rigid_body( physics_->add_active_object_as_cylinder( object ) );
-	}
-	else
-	{
-		object->set_rigid_body( physics_->add_active_object_as_box( object ) );
-	}
-
-	object->set_mass( mass );
-	add_active_object( object );
-
-	if ( object_name == "box-2x2x2" )
-	{
-		object->set_friction( 10.f );
-	}
-
-	object->set_model( graphics_manager_->load_model( object_name.c_str() ) );
-
-	return object;
-}
-
-ActiveObject* ActiveObjectManager::get_active_object( const string_t& name )
-{
-	auto i = named_active_object_map_.find( name );
-
-	if ( i == named_active_object_map_.end() )
-	{
-		return 0;
-	}
-
-	return i->second;
 }
 
 ActiveObject* ActiveObjectManager::clone_object( const ActiveObject* o )
@@ -298,11 +156,17 @@ void ActiveObjectManager::update()
 		system->update_animations();
 	}
 
-	// 目標地点・向きへ動かす（以前はここで 3 つの unordered_map を回していた。今は部品を Entity の番号の順に回す）
+	const float_t delta_time = object_context_ && object_context_->delta_time ? object_context_->delta_time() : 0.f;
+
+	// 動く床（ECS だけの物体。以前は TranslationObject::update が物体の update の中で動かしていた）
+	if ( auto* system = entity_manager_->get_system< ecs::TranslationSystem >() )
+	{
+		system->update_translations( delta_time );
+	}
+
+	// 目標地点・向きへ動かす（以前はここで 3 つの unordered_map を回していた。今は目標を持つ物体を Entity の番号の順に回す）
 	if ( auto* system = entity_manager_->get_system< ecs::MoveToTargetSystem >() )
 	{
-		const float_t delta_time = object_context_ && object_context_->delta_time ? object_context_->delta_time() : 0.f;
-
 		system->update_targets( delta_time );
 	}
 }
@@ -358,19 +222,44 @@ void ActiveObjectManager::on_collide_with_ground( core::ecs::EntityId id )
 	}
 }
 
-/// 以前の ActiveObjectContactResultCallback::on_collide の「両方が物体」の所（同じ順に両方へ知らせる）
+/**
+ * 以前の ActiveObjectContactResultCallback::on_collide の「両方が物体」の所
+ *
+ * - 両方とも ActiveObject : 今の二重ディスパッチ（同じ順に両方へ知らせる）
+ * - 片方だけ ActiveObject : もう片方（ECS だけの物体）の部品の組み合わせで決める（on_collide_with_entity_object）
+ * - 両方とも ECS だけの物体 : 何もしない（以前も、動かない物どうしの当たりは何も起こさなかった）
+ */
 void ActiveObjectManager::on_collide( core::ecs::EntityId a, core::ecs::EntityId b )
 {
 	ActiveObject* a0 = find_active_object( a );
 	ActiveObject* a1 = find_active_object( b );
 
-	if ( ! a0 || ! a1 )
+	if ( a0 && a1 )
 	{
+		a0->on_collide_with( a1 );
+		a1->on_collide_with( a0 );
 		return;
 	}
 
-	a0->on_collide_with( a1 );
-	a1->on_collide_with( a0 );
+	if ( a0 || a1 )
+	{
+		const core::ecs::Entity* other = entity_manager_->find( a0 ? b : a );
+
+		if ( other )
+		{
+			on_collide_with_entity_object( a0 ? * a0 : * a1, * other );
+		}
+	}
+}
+
+void ActiveObjectManager::on_collide_with_entity_object( GameObject& object, const core::ecs::Entity& entity )
+{
+	// 動かない物（以前の StaticObject）: 以前は StaticObject::on_collide_with( GameObject* ) が相手の on_collide_with( StaticObject* ) を呼び、
+	// 逆向き（相手 → StaticObject）は何もしなかった。1 組につき 1 回、相手に知らせる（プレイヤーはロケットを止める）
+	if ( entity.get_component< ecs::StaticObjectComponent >() )
+	{
+		object.on_collide_with_static_object();
+	}
 }
 
 void ActiveObjectManager::sync_render_components() const

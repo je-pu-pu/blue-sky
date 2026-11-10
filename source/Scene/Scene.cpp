@@ -2,6 +2,7 @@
 
 #include <blue_sky/GameMain.h>
 #include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ObjectFactory.h>
 #include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
@@ -58,6 +59,11 @@ Scene::EntityManager* Scene::get_entity_manager() const
 ActiveObjectManager* Scene::get_active_object_manager() const
 {
 	return get_game_main()->get_active_object_manager();
+}
+
+ObjectFactory* Scene::get_object_factory() const
+{
+	return get_game_main()->get_object_factory();
 }
 
 ActiveObjectPhysics* Scene::get_active_object_physics() const

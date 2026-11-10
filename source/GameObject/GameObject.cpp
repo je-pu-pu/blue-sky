@@ -2,6 +2,7 @@
 
 #include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/ecs/system/PhysicsSyncSystem.h>
+#include <blue_sky/ecs/ObjectBody.h>
 #include <GameObject/GameObjectContext.h>
 
 
@@ -84,57 +85,33 @@ void GameObject::commit_transform()
 
 void GameObject::set_mass( float_t mass )
 {
-	if ( ! get_rigid_body() )
+	if ( get_rigid_body() )
 	{
-		return;
+		ecs::object_body::set_mass( * get_rigid_body(), mass );
 	}
-
-	btVector3 local_inertia( 0, 0, 0 );
-	get_rigid_body()->getCollisionShape()->calculateLocalInertia( mass, local_inertia );
-	get_rigid_body()->setMassProps( mass, local_inertia );
 }
 
 void GameObject::set_gravity( const Vector& gravity )
 {
-	if ( ! get_rigid_body() )
+	if ( get_rigid_body() )
 	{
-		return;
+		ecs::object_body::set_gravity( * get_rigid_body(), gravity );
 	}
-
-	get_rigid_body()->setGravity( gravity );
 }
 
 void GameObject::set_kinematic( bool is_kinematic )
 {
-	if ( ! get_rigid_body() )
+	if ( get_rigid_body() )
 	{
-		return;
-	}
-
-	if ( is_kinematic )
-	{
-		get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT );
-	}
-	else
-	{
-		get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT );
+		ecs::object_body::set_kinematic( * get_rigid_body(), is_kinematic );
 	}
 }
 
 void GameObject::set_no_contact_response( bool is_no_contact_response )
 {
-	if ( ! get_rigid_body() )
+	if ( get_rigid_body() )
 	{
-		return;
-	}
-
-	if ( is_no_contact_response )
-	{
-		get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
-	}
-	else
-	{
-		get_rigid_body()->setCollisionFlags( get_rigid_body()->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE );
+		ecs::object_body::set_no_contact_response( * get_rigid_body(), is_no_contact_response );
 	}
 }
 
@@ -145,12 +122,10 @@ void GameObject::set_no_contact_response( bool is_no_contact_response )
  */
 void GameObject::set_friction( float_t v )
 {
-	if ( ! get_rigid_body() )
+	if ( get_rigid_body() )
 	{
-		return;
+		ecs::object_body::set_friction( * get_rigid_body(), v );
 	}
-
-	get_rigid_body()->setFriction( v );
 }
 
 /**
@@ -160,12 +135,10 @@ void GameObject::set_friction( float_t v )
  */
 void GameObject::set_angular_factor( float_t v )
 {
-	if ( ! get_rigid_body() )
+	if ( get_rigid_body() )
 	{
-		return;
+		ecs::object_body::set_angular_factor( * get_rigid_body(), v );
 	}
-
-	get_rigid_body()->setAngularFactor( v );
 }
 
 /**
@@ -175,12 +148,10 @@ void GameObject::set_angular_factor( float_t v )
  */
 void GameObject::set_angular_factor( const Vector& v )
 {
-	if ( ! get_rigid_body() )
+	if ( get_rigid_body() )
 	{
-		return;
+		ecs::object_body::set_angular_factor( * get_rigid_body(), v );
 	}
-
-	get_rigid_body()->setAngularFactor( v );
 }
 
 Transform& GameObject::get_transform()
@@ -210,21 +181,12 @@ void GameObject::set_location( float_t x, float_t y, float_t z )
 
 const Vector& GameObject::get_velocity() const
 {
-	return reinterpret_cast< const Vector& >( get_rigid_body()->getLinearVelocity() );
+	return ecs::object_body::get_velocity( * get_rigid_body() );
 }
 
 void GameObject::set_velocity( const Vector& v )
 {
-	if ( v == get_velocity() )
-	{
-		return;
-	}
-
-	get_rigid_body()->setLinearVelocity( v );
-	get_rigid_body()->setInterpolationLinearVelocity( v );
-
-	get_rigid_body()->activate( true );
-	get_rigid_body()->setActivationState( true );
+	ecs::object_body::set_velocity( * get_rigid_body(), v );
 }
 
 bool GameObject::is_moving_to( const GameObject* o ) const

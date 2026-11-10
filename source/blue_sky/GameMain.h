@@ -69,6 +69,7 @@ namespace blue_sky
 
 	class ActiveObject;
 	class ActiveObjectManager;
+	class ObjectFactory;
 
 	class SceneManager;
 	class ScriptManager;
@@ -130,6 +131,7 @@ private:
 
 	GameObjectContext						game_object_context_;	///< ゲームのオブジェクトに渡すもの（物理の世界・音・経過時間）
 	std::unique_ptr< ActiveObjectManager >	active_object_manager_;	///< ActiveObjectManager
+	std::unique_ptr< ObjectFactory >		object_factory_;		///< 物体を種類の名前から作り、名前で引く（active_object_manager_ より後に宣言し、先に壊れる）
 
 	std::unique_ptr< BulletDebugDraw >		bullet_debug_draw_;
 
@@ -236,6 +238,7 @@ public:
 	ScriptManager* get_script_manager() const { return script_manager_.get(); }
 
 	ActiveObjectManager* get_active_object_manager() const { return active_object_manager_.get(); }
+	ObjectFactory* get_object_factory() const { return object_factory_.get(); }
 	
 	App* get_app() const { return & app_; }
 

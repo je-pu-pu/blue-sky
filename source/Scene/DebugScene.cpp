@@ -5,6 +5,7 @@
 
 #include <blue_sky/SceneManager.h>
 #include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ObjectFactory.h>
 #include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/ScriptManager.h>
 #include <blue_sky/Input.h>
@@ -291,11 +292,9 @@ DebugScene::DebugScene( GameMain& game_main )
 
 	camera_->position().set( 0.f, 1.5f, -10.f, 1.f );
 
-	auto* city = get_active_object_manager()->create_object( "static" );
-	city->set_model( city_generator_.get_model() );
-
-	auto* city_debug = get_active_object_manager()->create_object( "static" );
-	city_debug->set_model( city_generator_.get_debug_model() );
+	// 町並み（剛体を持たない、描くだけの動かない物。ECS だけの物体）
+	get_object_factory()->create_model_object( city_generator_.get_model() );
+	get_object_factory()->create_model_object( city_generator_.get_debug_model() );
 
 	get_script_manager()->exec( "load( \"test/init.lua\" )" );
 
@@ -323,7 +322,7 @@ DebugScene::DebugScene( GameMain& game_main )
 
 DebugScene::~DebugScene()
 {
-	get_active_object_manager()->clear();
+	get_object_factory()->clear();
 }
 
 void DebugScene::update()

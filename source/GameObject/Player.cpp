@@ -1099,7 +1099,7 @@ void Player::on_collide_with( Ladder* l )
 	set_last_footing_height_to_current_height();
 }
 
-void Player::on_collide_with( StaticObject* )
+void Player::on_collide_with_static_object()
 {
 	if ( is_rocketing() )
 	{

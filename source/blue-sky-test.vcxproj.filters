@@ -60,6 +60,9 @@
     <ClCompile Include="test\ecs\MoveToTargetSystemTest.cpp">
       <Filter>test\ecs</Filter>
     </ClCompile>
+    <ClCompile Include="test\ecs\ObjectFactoryTest.cpp">
+      <Filter>test\ecs</Filter>
+    </ClCompile>
     <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp">
       <Filter>test\graphics</Filter>
     </ClCompile>

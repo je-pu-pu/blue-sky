@@ -9,7 +9,6 @@
 #include <GameObject/Robot.h>
 #include <GameObject/Balloon.h>
 #include <GameObject/AreaSwitch.h>
-#include <GameObject/TranslationObject.h>
 #include <GameObject/Camera.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -20,6 +19,7 @@
 
 #include <blue_sky/ActiveObjectPhysics.h>
 #include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ObjectFactory.h>
 #include <blue_sky/ScriptManager.h>
 
 #include <blue_sky/DelayedCommand.h>
@@ -67,6 +67,7 @@ ActiveObject* GamePlayScene::create_object_at_player_front( const char_t* class_
 void GamePlayScene::setup_command()
 {
 	// 名前付きオブジェクトを取得して操作するコマンド登録ヘルパー
+	// （物体は EntityId を包んだ GameObjectRef で触る。ActiveObject を持たない ECS だけの物体も同じように動かせる）
 	auto obj_command = [this] ( const string_t& name, auto action )
 	{
 		command_map_[ name ] = [this, action] ( const string_t& s )
@@ -77,11 +78,9 @@ void GamePlayScene::setup_command()
 			string_t object_name;
 			ss >> object_name;
 
-			auto* o = get_active_object_manager()->get_active_object( object_name );
-
-			if ( o )
+			if ( auto o = get_object_factory()->find_ref( object_name ) )
 			{
-				action( o, ss );
+				action( * o, ss );
 			}
 		};
 	};
@@ -218,59 +217,59 @@ void GamePlayScene::setup_command()
 	{
 		std::stringstream ss;
 		ss << s;
-		get_active_object_manager()->create_static_object( ss );
+		get_object_factory()->create_static_object( ss );
 	};
 
 	// --- オブジェクト属性変更 ---
-	obj_command( "game_object.set_mass", [] ( ActiveObject* o, std::stringstream& ss )
+	obj_command( "game_object.set_mass", [] ( GameObjectRef& o, std::stringstream& ss )
 	{
 		float_t mass = 0.f;
 		ss >> mass;
-		o->set_mass( mass );
+		o.set_mass( mass );
 	} );
-	obj_command( "game_object.set_gravity", [] ( ActiveObject* o, std::stringstream& ss )
+	obj_command( "game_object.set_gravity", [] ( GameObjectRef& o, std::stringstream& ss )
 	{
 		float_t x = 0.f, y = 0.f, z = 0.f;
 		ss >> x >> y >> z;
-		o->set_gravity( Vector( x, y, z ) );
+		o.set_gravity( Vector( x, y, z ) );
 	} );
-	obj_command( "game_object.set_angular_factor", [] ( ActiveObject* o, std::stringstream& ss )
+	obj_command( "game_object.set_angular_factor", [] ( GameObjectRef& o, std::stringstream& ss )
 	{
 		float_t x = 0.f, y = 0.f, z = 0.f;
 		ss >> x >> y >> z;
-		o->set_angular_factor( Vector( x, y, z ) );
+		o.set_angular_factor( Vector( x, y, z ) );
 	} );
-	obj_command( "game_object.set_kinematic", [] ( ActiveObject* o, std::stringstream& ss )
+	obj_command( "game_object.set_kinematic", [] ( GameObjectRef& o, std::stringstream& ss )
 	{
 		bool is_kinematic = false;
 		ss >> is_kinematic;
-		o->set_kinematic( is_kinematic );
+		o.set_kinematic( is_kinematic );
 	} );
-	obj_command( "game_object.set_no_contact_response", [] ( ActiveObject* o, std::stringstream& ss )
+	obj_command( "game_object.set_no_contact_response", [] ( GameObjectRef& o, std::stringstream& ss )
 	{
 		bool v = false;
 		ss >> v;
-		o->set_no_contact_response( v );
+		o.set_no_contact_response( v );
 	} );
-	obj_command( "game_object.set_flicker_scale", [] ( ActiveObject* o, std::stringstream& ss )
+	obj_command( "game_object.set_flicker_scale", [] ( GameObjectRef& o, std::stringstream& ss )
 	{
 		float_t scale = 1.f;
 		ss >> scale;
-		o->set_flicker_scale( scale );
+		o.set_flicker_scale( scale );
 	} );
 
 	// --- オブジェクト移動・方向 ---
-	obj_command( "game_object.set_target_location", [this] ( ActiveObject* o, std::stringstream& ss )
+	obj_command( "game_object.set_target_location", [] ( GameObjectRef& o, std::stringstream& ss )
 	{
 		float_t x = 0.f, y = 0.f, z = 0.f, speed = 0.f;
 		ss >> x >> y >> z >> speed;
-		get_active_object_manager()->set_target_location( o, Vector( x, y, z ), speed );
+		o.set_target_location( Vector( x, y, z ), speed );
 	} );
-	obj_command( "game_object.set_target_direction", [this] ( ActiveObject* o, std::stringstream& ss )
+	obj_command( "game_object.set_target_direction", [] ( GameObjectRef& o, std::stringstream& ss )
 	{
 		float_t r = 0.f, speed = 0.f;
 		ss >> r >> speed;
-		get_active_object_manager()->set_target_direction( o, r, speed );
+		o.set_target_direction( r, speed );
 	} );
 	command_map_[ "game_object.set_target_direction_object" ] = [this] ( const string_t& s )
 	{
@@ -281,30 +280,30 @@ void GamePlayScene::setup_command()
 		float_t speed = 0.f;
 		ss >> object_name >> target_object_name >> speed;
 
-		ActiveObject* o = get_active_object_manager()->get_active_object( object_name );
-		ActiveObject* to = get_active_object_manager()->get_active_object( target_object_name );
+		auto o = get_object_factory()->find_ref( object_name );
+		auto to = get_object_factory()->find_ref( target_object_name );
 
 		if ( o && to )
 		{
-			get_active_object_manager()->set_target_direction_object( o, to, speed );
+			o->set_target_direction_to( * to, speed );
 		}
 	};
 
 	// --- オブジェクトアニメーション ---
-	obj_command( "game_object.play_animation", [] ( ActiveObject* o, std::stringstream& ss )
+	obj_command( "game_object.play_animation", [] ( GameObjectRef& o, std::stringstream& ss )
 	{
 		string_t animation_name;
 		bool force = true, loop = false;
 		ss >> animation_name >> force >> loop;
-		o->play_animation( animation_name.c_str(), force, loop );
+		o.play_animation( animation_name.c_str(), force, loop );
 	} );
-	obj_command( "game_object.set_animation_speed", [] ( ActiveObject* o, std::stringstream& ss )
+	obj_command( "game_object.set_animation_speed", [] ( GameObjectRef& o, std::stringstream& ss )
 	{
-		float_t speed;
+		float_t speed = 1.f;
 		ss >> speed;
-		if ( o->get_animation_player() ) { o->get_animation_player()->set_speed( speed ); }
+		o.set_animation_speed( speed );
 	} );
-	obj_command( "game_object.action", [] ( ActiveObject* o, std::stringstream& ss )
+	obj_command( "game_object.action", [] ( GameObjectRef& o, std::stringstream& ss )
 	{
 		string_t action;
 		while ( ss.good() )
@@ -314,7 +313,7 @@ void GamePlayScene::setup_command()
 			if ( ! action.empty() ) { action += " "; }
 			action += p;
 		}
-		o->action( action );
+		o.action( action );
 	} );
 
 	// --- プレイヤー ---
@@ -408,7 +407,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "load stage file \"" ) + file_name + "\" failed." );
 	}
 
-	ActiveObject* last_object = 0;
+	std::optional< GameObjectRef > last_object;		///< 直前に作った物体（event・name 行の対象）
 
 	while ( in.good() )
 	{
@@ -496,24 +495,14 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		}
 		else if ( command == "object" || command == "static-object" || command == "dynamic-object" )
 		{
-			last_object = get_active_object_manager()->create_static_object( ss );
+			last_object = get_object_factory()->get_ref( get_object_factory()->create_static_object( ss ) );
 		}
 		else if ( command == "translation-object" )
 		{
 			float_t x = 0, y = 0, z = 0, tw = 0, th = 0, td = 0, s = 0.01f;
 			ss >> x >> y >> z >> tw >> th >> td >> s;
 
-			TranslationObject* object = new TranslationObject( 5, 5, 5, tw, th, td, s );
-
-			Model* model = get_graphics_manager()->load_model( "box-5x5x5" );
-
-			object->set_model( model );
-			object->set_rigid_body( get_active_object_physics()->add_active_object_as_box( object ) );
-			object->set_start_location( x, y, z );
-
-			get_active_object_manager()->add_active_object( object );
-
-			last_object = object;
+			last_object = get_object_factory()->get_ref( get_object_factory()->create_translation_object( Vector( x, y, z ), tw, th, td, s ) );
 		}
 		else if ( command == "girl" || command == "robot" || command == "balloon" || command == "medal" || command == "ladder" || command == "rocket" || command == "umbrella" || command == "stone" || command == "switch" )
 		{
@@ -529,7 +518,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			{
 				girl_ = static_cast< Girl* >( active_object );
 				girl_->set_player( player_ );
-				get_active_object_manager()->name_active_object( "girl", girl_ );
+				get_object_factory()->name( "girl", girl_->get_entity_id() );
 			}
 			else if ( command == "robot" )
 			{
@@ -537,7 +526,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 				robot->set_player( player_ );
 			}
 
-			last_object = active_object;
+			last_object = get_object_factory()->get_ref( active_object->get_entity_id() );
 		}
 		else if ( command == "area-switch" )
 		{
@@ -554,7 +543,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			get_active_object_manager()->add_active_object( s );
 
-			last_object = s;
+			last_object = get_object_factory()->get_ref( s->get_entity_id() );
 		}
 		else if ( command == "event" || command == "exec" )
 		{
@@ -593,6 +582,11 @@ void GamePlayScene::load_stage_file( const char* file_name )
 
 			if ( command == "event" )
 			{
+				if ( ! last_object )
+				{
+					COMMON_THROW_EXCEPTION_MESSAGE( "event object not found." );
+				}
+
 				last_object->add_event_handler( event_name.c_str(), command_call );
 			}
 			else
@@ -610,7 +604,7 @@ void GamePlayScene::load_stage_file( const char* file_name )
 			string_t object_name;
 
 			ss >> object_name;
-			get_active_object_manager()->name_active_object( object_name, last_object );
+			get_object_factory()->name( object_name, last_object->get_entity_id() );
 		}
 		else
 		{

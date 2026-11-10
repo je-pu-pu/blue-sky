@@ -46,7 +46,9 @@ protected:
  */
 struct TargetMoverComponent : public core::ecs::Component
 {
-	TargetMover* mover = nullptr;	///< 動かす物体（持ち主ではない。物体を壊すときに Entity ごと消える）
+	/// 動かす物体（持ち主ではない。物体を壊すときに Entity ごと消える）。
+	/// nullptr は ActiveObject を持たない物体の印で、MoveToTargetSystem が部品（TransformComponent・PhysicsBodyComponent）を直接動かす（ecs::EntityObject）
+	TargetMover* mover = nullptr;
 };
 
 } // namespace blue_sky::ecs

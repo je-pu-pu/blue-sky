@@ -28,7 +28,6 @@ class Stone;
 class BaseSwitch;
 class Medal;
 class Robot;
-class StaticObject;
 class DynamicObject;
 class Ladder;
 
@@ -165,7 +164,8 @@ public:
 	virtual void on_collide_with( BaseSwitch* ) { }
 	virtual void on_collide_with( Robot* ) { }
 	virtual void on_collide_with( Medal* ) { }
-	virtual void on_collide_with( StaticObject* ) { }
+	/// 動かない物（ECS だけの物体。StaticObjectComponent を持つ）に当たった。以前の on_collide_with( StaticObject* )（StaticObject クラスは消した）
+	virtual void on_collide_with_static_object() { }
 	virtual void on_collide_with( DynamicObject* ) { }
 	virtual void on_collide_with( Ladder* ) { }
 

@@ -2,11 +2,13 @@
 
 #include <blue_sky/ecs/component/TargetLocationComponent.h>
 #include <blue_sky/ecs/component/TargetDirectionComponent.h>
+#include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/DebugLog.h>
 
 #include <core/ecs/EntityManager.h>
 
 #include <algorithm>
+#include <optional>
 #include <string>
 
 namespace blue_sky::ecs
@@ -70,6 +72,26 @@ ComponentType* MoveToTargetSystem::find_component( core::ecs::EntityId id ) cons
 	return entity ? entity->get_component< ComponentType >() : nullptr;
 }
 
+TargetMover* MoveToTargetSystem::resolve_mover( core::ecs::EntityId id, std::optional< EntityObject >& storage ) const
+{
+	auto* mover_component = find_component< TargetMoverComponent >( id );
+
+	if ( ! mover_component )
+	{
+		return nullptr;
+	}
+
+	if ( mover_component->mover )
+	{
+		return mover_component->mover;
+	}
+
+	// ActiveObject を持たない物体は、部品を直接動かす（位置の正が無ければ動かせない）
+	storage.emplace( get_entity_manager()->find( id ) );
+
+	return storage->is_valid() ? & * storage : nullptr;
+}
+
 bool MoveToTargetSystem::is_target_location_reached( float_t distance, float_t speed, float_t delta_time )
 {
 	return distance < ( std::max )( 0.1f, speed * delta_time );
@@ -101,14 +123,20 @@ void MoveToTargetSystem::update_targets( float_t delta_time )
 void MoveToTargetSystem::update_target_location( core::ecs::EntityId id, float_t delta_time )
 {
 	auto* target = find_component< TargetLocationComponent >( id );
-	auto* mover_component = find_component< TargetMoverComponent >( id );
 
-	if ( ! target || ! mover_component || ! mover_component->mover )
+	if ( ! target )
 	{
 		return;
 	}
 
-	TargetMover* mover = mover_component->mover;
+	std::optional< EntityObject > entity_object;
+	TargetMover* mover = resolve_mover( id, entity_object );
+
+	if ( ! mover )
+	{
+		return;
+	}
+
 	const core::Vector location = target->location;
 	const float_t speed = target->speed;
 
@@ -134,29 +162,37 @@ void MoveToTargetSystem::update_target_location( core::ecs::EntityId id, float_t
 void MoveToTargetSystem::update_target_direction( core::ecs::EntityId id )
 {
 	auto* direction = find_component< TargetDirectionComponent >( id );
-	auto* mover_component = find_component< TargetMoverComponent >( id );
 
-	if ( ! direction || ! mover_component || ! mover_component->mover )
+	if ( ! direction )
+	{
+		return;
+	}
+
+	std::optional< EntityObject > entity_object;
+	TargetMover* mover = resolve_mover( id, entity_object );
+
+	if ( ! mover )
 	{
 		return;
 	}
 
 	if ( ! direction->is_entity_target )
 	{
-		mover_component->mover->chase_target_direction_degree( direction->degree, direction->speed );
+		mover->chase_target_direction_degree( direction->degree, direction->speed );
 		return;
 	}
 
-	auto* target_mover_component = find_component< TargetMoverComponent >( direction->target_entity );
+	std::optional< EntityObject > target_entity_object;
+	TargetMover* target_mover = resolve_mover( direction->target_entity, target_entity_object );
 
-	if ( ! target_mover_component || ! target_mover_component->mover )
+	if ( ! target_mover )
 	{
 		// 向く先の物体が消えた。目標を捨てる（以前は消えた物体を指したままになり得た）
 		get_entity_manager()->remove_component< TargetDirectionComponent >( get_entity_manager()->find( id ) );
 		return;
 	}
 
-	mover_component->mover->chase_target_direction_to( target_mover_component->mover->get_target_mover_location(), direction->speed );
+	mover->chase_target_direction_to( target_mover->get_target_mover_location(), direction->speed );
 }
 
 bool MoveToTargetSystem::set_target_location( core::ecs::EntityId id, const core::Vector& location, float_t speed )

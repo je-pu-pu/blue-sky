@@ -25,6 +25,7 @@
 #include <blue_sky/Input.h>
 
 #include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ObjectFactory.h>
 #include <blue_sky/DebugLog.h>
 #include <GameObject/BaseSwitch.h>
 #include <GameObject/Medal.h>
@@ -83,11 +84,11 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 	player_ = new Player();
 	player_->set_model( get_graphics_manager()->load_model( "player" ) );
 	get_active_object_manager()->add_active_object( player_ );
-	get_active_object_manager()->name_active_object( "player", player_ );
+	get_object_factory()->name( "player", player_->get_entity_id() );
 
 	// Goal
 	goal_ = static_cast< Goal* >( create_object( "goal" ) );
-	get_active_object_manager()->name_active_object( "goal", goal_ );
+	get_object_factory()->name( "goal", goal_->get_entity_id() );
 
 	// Camera
 	camera_->set_fov_default( get_setting_store()->get( game_settings::CAMERA_FOV ) );
@@ -146,7 +147,8 @@ GamePlayScene::~GamePlayScene()
 {
 	get_graphics_manager()->unset_render_target();
 
-	get_active_object_manager()->clear();
+	// 物体（ActiveObject と ECS だけの物体）を、物理の世界を片付ける前に壊す
+	get_object_factory()->clear();
 
 	get_graphics_manager()->unset_sky_box();
 	get_graphics_manager()->unset_ground();
@@ -188,7 +190,7 @@ void GamePlayScene::restart()
 
 	camera_->restart();
 
-	get_active_object_manager()->restart();
+	get_object_factory()->restart();
 
 	clear_delayed_command();
 	setup_stage();

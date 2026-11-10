@@ -16,6 +16,7 @@
 
 #include <blue_sky/Input.h>
 #include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ObjectFactory.h>
 
 #include <blue_sky/ConstantBuffers.h>
 
@@ -136,7 +137,7 @@ void GamePlayScene::render_text() const
 		ss << "DY : " << player_->get_velocity().y() << '\n';
 		ss << "DZ : " << player_->get_velocity().z() << '\n';
 		ss << "VELOCITY : " << player_->get_velocity().length() << '\n';
-		ss << "Objects : " << get_active_object_manager()->active_object_list().size() << '\n';
+		ss << "Objects : " << get_active_object_manager()->active_object_list().size() << " + ECS " << get_object_factory()->get_entity_object_list().size() << '\n';
 
 		ss << "mouse.dx : " << get_input()->get_mouse_dx() << '\n';
 		ss << "mouse.dy : " << get_input()->get_mouse_dy() << '\n';

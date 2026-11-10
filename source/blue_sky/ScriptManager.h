@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GameObject/ActiveObject.h>
+#include <blue_sky/GameObjectRef.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Mesh.h>
 
@@ -55,13 +55,14 @@ private:
 protected:
 	void setup_user_types()
 	{
-		lua_.new_usertype< ActiveObject >(
+		// ゲームの物体は EntityId を包んだ型（以前は ActiveObject* そのもの。ECS だけの物体も触れるように）
+		lua_.new_usertype< GameObjectRef >(
 			"GameObject",
-			"model", sol::property( sol::resolve< Model* () >( & ActiveObject::get_model ), & ActiveObject::set_model ),
-			"play_animation", & ActiveObject::play_animation,
+			"model", sol::property( & GameObjectRef::get_model, & GameObjectRef::set_model ),
+			"play_animation", & GameObjectRef::play_animation,
 
-			"kill", & ActiveObject::kill
-        );
+			"kill", & GameObjectRef::kill
+		);
 
 		lua_.new_usertype< Model >(
 			"Model",

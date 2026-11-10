@@ -3,6 +3,8 @@
 #include <blue_sky/GameMain.h>
 #include <blue_sky/Input.h>
 #include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ObjectFactory.h>
+#include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <game/MainLoop.h>
@@ -140,11 +142,9 @@ void CanvasTestScene::update()
 			pen_color_.g() -= 0.005f;
 			pen_color_.b() -= 0.005f;
 
-			auto* o = get_active_object_manager()->get_active_object( "paint_guide_plane" );
-
-			if ( o )
+			if ( auto o = get_object_factory()->find_ref( "paint_guide_plane" ) )
 			{
-				o->get_transform().set_position( o->get_transform().get_position() + Vector( 0.f, 0.f, 0.01f ) );
+				o->set_location( o->get_location() + Vector( 0.f, 0.f, 0.01f ) );
 			}
 		}
 		if ( get_input()->press( Input::Button::R2 ) )
@@ -153,11 +153,9 @@ void CanvasTestScene::update()
 			pen_color_.g() += 0.005f;
 			pen_color_.b() += 0.005f;
 
-			auto* o = get_active_object_manager()->get_active_object( "paint_guide_plane" );
-
-			if ( o )
+			if ( auto o = get_object_factory()->find_ref( "paint_guide_plane" ) )
 			{
-				o->get_transform().set_position( o->get_transform().get_position() - Vector( 0.f, 0.f, 0.01f ) );
+				o->set_location( o->get_location() - Vector( 0.f, 0.f, 0.01f ) );
 			}
 		}
 	}
@@ -250,7 +248,7 @@ void CanvasTestScene::update()
 
 	// プレーンオブジェクトの色を変更する
 	// 案内の板はスクリプトが作る。無いとき（スクリプトが読めない・まだ作られていない）は飛ばす（以前は null を使って落ちていた）
-	auto* plane = get_active_object_manager()->get_active_object( "paint_guide_plane" );
+	auto plane = get_object_factory()->find_ref( "paint_guide_plane" );
 
 	if ( plane && plane->get_model() )
 	{

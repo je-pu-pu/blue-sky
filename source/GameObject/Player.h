@@ -174,7 +174,7 @@ protected:
 	void on_collide_with( Robot* ) override;
 	void on_collide_with( Ladder* ) override;
 	void on_collide_with( Stone* ) override;
-	void on_collide_with( StaticObject* ) override;
+	void on_collide_with_static_object() override;
 	void on_collide_with( DynamicObject* ) override;
 
 public:

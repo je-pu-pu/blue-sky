@@ -5,6 +5,7 @@
 #include "Scene/Scene.h"
 
 #include "ActiveObjectManager.h"
+#include "ObjectFactory.h"
 
 // #include "ConstantBuffer.h"
 
@@ -232,6 +233,7 @@ GameMain::GameMain( App& app )
 	game_object_context_.delta_time = [this] { return time_manager_.get_delta_time(); };
 
 	active_object_manager_.reset( new ActiveObjectManager( active_object_physics_.get(), graphics_manager_.get(), & game_object_context_, entity_manager_.get() ) );
+	object_factory_ = std::make_unique< ObjectFactory >( entity_manager_.get(), active_object_manager_.get(), active_object_physics_.get(), graphics_manager_.get() );
 
 	// GraphicsManager はゲームの物体を、EntityManager の描画の部品（ecs::ObjectRenderDataSystem の描く対象）から描く（以前は ActiveObjectManager を直接回していた）
 	graphics_manager_->set_entity_manager( entity_manager_.get() );
@@ -313,10 +315,11 @@ GameMain::~GameMain()
 	overlay_scene_stack_.clear();
 	scene_.reset();
 
-	// ゲームの物体を EntityManager より先に壊す（物体は壊れるときに自分の Entity を消す。entity_manager_ は active_object_manager_ より後に宣言され、先に壊れる）
-	if ( active_object_manager_ )
+	// ゲームの物体を EntityManager より先に壊す（物体は壊れるときに自分の Entity を消す。entity_manager_ は active_object_manager_ より後に宣言され、先に壊れる）。
+	// ECS だけの物体（ObjectFactory が作った）も一緒に消す
+	if ( object_factory_ )
 	{
-		active_object_manager_->clear();
+		object_factory_->clear();
 	}
 
 	ImGui_ImplDX11_Shutdown();
@@ -416,20 +419,56 @@ void GameMain::setup_script_command()
 	get_script_manager()->set_function( "start_fade_in", [this] ( float_t speed ) { get_graphics_manager()->start_fade_in( speed ); } );
 	get_script_manager()->set_function( "start_fade_out", [this] ( float_t speed ) { get_graphics_manager()->start_fade_out( speed ); } );
 
-	// ActiveObject
+	// ゲームの物体（Lua の "GameObject" は EntityId を包んだ GameObjectRef。ActiveObject を持たない ECS だけの物体も同じように触れる）
 	// 知らない名前なら nil を返す（以前は null に restart を呼んで落ちた）
-	get_script_manager()->set_function( "create_object", [this] ( const char_t* name ) { auto* o = create_object( name ); if ( o ) { o->restart(); } return o; } );
-	get_script_manager()->set_function( "clone_object", [this] ( ActiveObject* o ) { auto* o2 = clone_object( require_not_nil( o, "clone_object" ) ); o2->restart(); return o2; } );
-	get_script_manager()->set_function( "get_object", [this] ( const char_t* name ) { return get_active_object_manager()->get_active_object( name ); } );
-	get_script_manager()->set_function( "set_name", [this] ( ActiveObject* o, const char_t* name ) { get_active_object_manager()->name_active_object( name, require_not_nil( o, "set_name" ) ); } );
-	get_script_manager()->set_function( "set_loc", [] ( ActiveObject* o, float_t x, float_t y, float_t z ) { require_not_nil( o, "set_loc" )->set_location( x, y, z ); } );
-	get_script_manager()->set_function( "set_dir", [] ( ActiveObject* o, float_t r ) { require_not_nil( o, "set_dir" )->set_direction_degree( r ); } );
-	get_script_manager()->set_function( "set_vel", [] ( ActiveObject* o, float_t x, float_t y, float_t z ) { require_not_nil( o, "set_vel" )->set_velocity( Vector( x, y, z ) ); } );
-	get_script_manager()->set_function( "set_start_loc", [] ( ActiveObject* o, float_t  x, float_t  y, float_t  z ) { require_not_nil( o, "set_start_loc" )->set_start_location( x, y, z ); } );
-	get_script_manager()->set_function( "set_start_rot", [] ( ActiveObject* o, float_t rx, float_t ry, float_t rz ) { require_not_nil( o, "set_start_rot" )->set_start_rotation( rx, ry, rz ); } );
-	get_script_manager()->set_function( "set_start_dir", [] ( ActiveObject* o, float_t r ) { require_not_nil( o, "set_start_dir" )->set_start_direction_degree( r ); } );
-	get_script_manager()->set_function( "set_mass", [] ( ActiveObject* o, float_t mass ) { require_not_nil( o, "set_mass" )->set_mass( mass ); } );
-	get_script_manager()->set_function( "make_model_unique", [] ( ActiveObject* o ) { return require_not_nil( o, "make_model_unique" )->make_model_unique(); } );
+	get_script_manager()->set_function( "create_object", [this] ( const char_t* name ) -> sol::optional< GameObjectRef >
+	{
+		auto id = get_object_factory()->create_object( name );
+
+		if ( ! id )
+		{
+			return sol::nullopt;
+		}
+
+		GameObjectRef o = get_object_factory()->get_ref( * id );
+		o.restart();
+
+		return o;
+	} );
+	get_script_manager()->set_function( "clone_object", [this] ( const GameObjectRef* o ) -> sol::optional< GameObjectRef >
+	{
+		ActiveObject* active_object = require_not_nil( o, "clone_object" )->get_active_object();
+
+		if ( ! active_object )
+		{
+			// 複製できるのは ActiveObject の種類だけ（ECS だけの物体は、作り直す）
+			debug_log( "[Object] clone_object : この物体は複製できません（ActiveObject ではない・消えた物体）" );
+			return sol::nullopt;
+		}
+
+		ActiveObject* o2 = clone_object( active_object );
+		o2->restart();
+
+		return get_object_factory()->get_ref( o2->get_entity_id() );
+	} );
+	get_script_manager()->set_function( "get_object", [this] ( const char_t* name ) -> sol::optional< GameObjectRef >
+	{
+		if ( auto o = get_object_factory()->find_ref( name ) )
+		{
+			return * o;
+		}
+
+		return sol::nullopt;
+	} );
+	get_script_manager()->set_function( "set_name", [this] ( const GameObjectRef* o, const char_t* name ) { get_object_factory()->name( name, require_not_nil( o, "set_name" )->get_entity_id() ); } );
+	get_script_manager()->set_function( "set_loc", [] ( GameObjectRef* o, float_t x, float_t y, float_t z ) { require_not_nil( o, "set_loc" )->set_location( x, y, z ); } );
+	get_script_manager()->set_function( "set_dir", [] ( GameObjectRef* o, float_t r ) { require_not_nil( o, "set_dir" )->set_direction_degree( r ); } );
+	get_script_manager()->set_function( "set_vel", [] ( GameObjectRef* o, float_t x, float_t y, float_t z ) { require_not_nil( o, "set_vel" )->set_velocity( Vector( x, y, z ) ); } );
+	get_script_manager()->set_function( "set_start_loc", [] ( GameObjectRef* o, float_t  x, float_t  y, float_t  z ) { require_not_nil( o, "set_start_loc" )->set_start_location( x, y, z ); } );
+	get_script_manager()->set_function( "set_start_rot", [] ( GameObjectRef* o, float_t rx, float_t ry, float_t rz ) { require_not_nil( o, "set_start_rot" )->set_start_rotation( rx, ry, rz ); } );
+	get_script_manager()->set_function( "set_start_dir", [] ( GameObjectRef* o, float_t r ) { require_not_nil( o, "set_start_dir" )->set_start_direction_degree( r ); } );
+	get_script_manager()->set_function( "set_mass", [] ( GameObjectRef* o, float_t mass ) { require_not_nil( o, "set_mass" )->set_mass( mass ); } );
+	get_script_manager()->set_function( "make_model_unique", [] ( GameObjectRef* o ) { return require_not_nil( o, "make_model_unique" )->make_model_unique(); } );
 
 	// GrahpicsManager
 	get_script_manager()->set_function( "setup_shadow_map", [this] ( uint_t level = 3, uint_t size = 1024 ) { get_graphics_manager()->setup_shadow_map( level, size ); } );
@@ -471,31 +510,16 @@ void GameMain::setup_script_command()
 }
 
 /**
- * オブジェクトを生成する
+ * まだ ActiveObject の種類のオブジェクトを生成する（中身は ObjectFactory::create_active_object）
  *
- * 位置・向きは作った後に設定する（スクリプトでは set_location など）。決まった形の静的なオブジェクトは ActiveObjectManager::create_static_object で作る
+ * 位置・向きは作った後に設定する。ECS だけの物体（"static" など）は ObjectFactory::create_object で作る
  *
  * @param class_name  クラス名
- * @return 生成したオブジェクト（知らないクラス名なら nullptr。スクリプトには nil が返る）
+ * @return 生成したオブジェクト（知らないクラス名なら nullptr）
  */
 ActiveObject* GameMain::create_object( const char_t* class_name ) const
 {
-	ActiveObject* active_object = get_active_object_manager()->create_object( class_name );
-
-	// 失敗を黙って無視しない（CLAUDE.md の「失敗の扱い」）
-	if ( ! active_object )
-	{
-		debug_log( string_t( "[Object] 知らないクラス名のオブジェクトは作れません: " ) + class_name );
-		return nullptr;
-	}
-
-	active_object->set_rigid_body( get_active_object_physics()->add_active_object_as_box( active_object ) );
-	active_object->set_model( get_graphics_manager()->load_model( class_name ) );
-
-	// モデルとシェーダーは同じ種類のオブジェクトで共有する（load_model が名前で使い回す）。
-	// 1 つだけシェーダーを変えたいときは、そのオブジェクトの make_model_unique()（スクリプトでは make_model_unique( o )）で自分だけのものにする
-
-	return active_object;
+	return get_object_factory()->create_active_object( class_name );
 }
 
 ActiveObject* GameMain::clone_object( const ActiveObject* o ) const
@@ -1346,9 +1370,9 @@ void GameMain::setup_scene( const string_t& scene_name, const SceneArguments& ar
 		// ゲームの物体を EntityManager より先に壊す（物体の位置の正・剛体の持ち主は、物体の Entity の部品にある。
 		// 本編のシーンは自分で壊すが、CanvasTestScene などはスクリプトで作った物体を残したまま終わり、
 		// 以前は Entity を失った物体が次のシーンへ残っていた）
-		if ( active_object_manager_ )
+		if ( object_factory_ )
 		{
-			active_object_manager_->clear();
+			object_factory_->clear();
 		}
 
 		entity_manager_->clear();

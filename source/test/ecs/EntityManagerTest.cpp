@@ -121,6 +121,88 @@ TEST( EcsTest, DestroyEntity )
 	EXPECT_NE( id, entity2->get_id() );
 }
 
+/**
+ * destroy_entity() で、その Entity が System の対象から外れることを検証する
+ *
+ * 以前は Entity だけを消していて、System は消えた Entity のコンポーネントを指したまま update していた
+ */
+TEST( EcsTest, DestroyEntityRemovesFromSystems )
+{
+	core::ecs::EntityManager entity_manager;
+	auto em = & entity_manager;
+
+	em->add_system< CountSystem >();
+	em->add_system< DualCountSystem >();
+
+	auto* e = em->create_entity();
+	e->add_component< core::ecs::TransformComponent >();
+	e->add_component< core::ecs::RigidBodyComponent >();
+
+	EXPECT_EQ( 1u, em->get_system< CountSystem >()->debug_entity_count() );
+	EXPECT_EQ( 1u, em->get_system< DualCountSystem >()->debug_entity_count() );
+
+	em->destroy_entity( e->get_id() );	// e はここで無効になる
+
+	EXPECT_EQ( 0u, em->get_system< CountSystem >()->debug_entity_count() );
+	EXPECT_EQ( 0u, em->get_system< DualCountSystem >()->debug_entity_count() );
+
+	em->update();
+	EXPECT_EQ( 0, em->get_system< CountSystem >()->update_count );
+	EXPECT_EQ( 0, em->get_system< DualCountSystem >()->update_count );
+}
+
+namespace {
+
+/// 壊された数を数えるコンポーネント（destroy_entity がコンポーネントを外すかを確かめる）
+struct CountedComponent : public core::ecs::Component
+{
+	static int destroyed_count;
+	~CountedComponent() override { destroyed_count++; }
+};
+
+int CountedComponent::destroyed_count = 0;
+
+} // namespace
+
+/**
+ * destroy_entity() で、その Entity のコンポーネントが外れ（壊され）、残った Entity は影響を受けないことを検証する
+ */
+TEST( EcsTest, DestroyEntityRemovesComponentsAndKeepsOthers )
+{
+	core::ecs::EntityManager entity_manager;
+	auto em = & entity_manager;
+
+	em->add_system< CountSystem >();
+
+	auto* doomed = em->create_entity();
+	doomed->add_component< core::ecs::TransformComponent >();
+	doomed->add_component< CountedComponent >();
+
+	auto* survivor = em->create_entity();
+	auto* survivor_transform = survivor->add_component< core::ecs::TransformComponent >();
+	auto* survivor_counted = survivor->add_component< CountedComponent >();
+
+	const auto doomed_id = doomed->get_id();
+	CountedComponent::destroyed_count = 0;
+	em->destroy_entity( doomed_id );
+
+	// 消した Entity のコンポーネントだけが壊される
+	EXPECT_EQ( 1, CountedComponent::destroyed_count );
+
+	// 残った Entity のコンポーネントはそのまま・System の対象のまま
+	EXPECT_EQ( survivor_transform, survivor->get_component< core::ecs::TransformComponent >() );
+	EXPECT_EQ( survivor_counted, survivor->get_component< CountedComponent >() );
+	EXPECT_EQ( 1u, em->get_system< CountSystem >()->debug_entity_count() );
+
+	em->update();
+	EXPECT_EQ( 1, em->get_system< CountSystem >()->update_count );
+
+	// 同じ id をもう一度消しても何もしない
+	em->destroy_entity( doomed_id );
+	EXPECT_EQ( 1, CountedComponent::destroyed_count );
+	EXPECT_EQ( 1u, em->get_system< CountSystem >()->debug_entity_count() );
+}
+
 // ---------------------------------------------------------------------------
 // Component 操作
 // ---------------------------------------------------------------------------

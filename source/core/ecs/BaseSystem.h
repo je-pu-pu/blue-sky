@@ -101,6 +101,16 @@ public:
 		remove_entity_component( entity );
 	}
 
+	/**
+	 * Entity が破棄される時の処理（EntityManager::destroy_entity が、コンポーネントを外す前に呼ぶ）
+	 *
+	 * @param entity 破棄される Entity（この System の対象でなければ何もしない）
+	 */
+	void on_destroy_entity( const Entity* entity )
+	{
+		remove_entity_component( entity );
+	}
+
 	virtual void add_entity_component_if_all_components_ready( const Entity* ) = 0;
 
 }; // class System

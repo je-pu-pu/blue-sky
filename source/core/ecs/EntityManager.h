@@ -63,10 +63,31 @@ public:
 
 	/**
 	 * 指定した Entity を破棄する
+	 *
+	 * 先に全 System の対象から外し（コンポーネントはまだ生きている）、次に全コンポーネントを外し、最後に Entity を消す。
+	 * 以前は Entity だけを消していて、コンポーネントが残り、System は消えた Entity のコンポーネントを指したままだった。
+	 * 無い id（消した後・作っていない）なら何もしない
 	 */
 	void destroy_entity( EntityId id )
 	{
-		entity_list_.erase( id );
+		auto i = entity_list_.find( id );
+
+		if ( i == entity_list_.end() )
+		{
+			return;
+		}
+
+		for ( auto& s : system_list_ )
+		{
+			s->on_destroy_entity( & i->second );
+		}
+
+		for ( auto& components : component_list_ )
+		{
+			components.second.erase( id );
+		}
+
+		entity_list_.erase( i );
 	}
 
 	/**

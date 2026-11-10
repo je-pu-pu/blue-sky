@@ -22,6 +22,7 @@ struct GameObjectContext
 	std::function< btDynamicsWorld*() >		dynamics_world;			///< 物理の世界
 	core::sound::SoundManager*				sound_manager = nullptr;	///< 音
 	std::function< float_t() >				scene_elapsed_time;		///< 今のシーンが始まってからの秒数
+	std::function< float_t() >				delta_time;				///< 前のフレームからの秒数（以前は core::Service の TimeManager から取っていた）
 };
 
 } // namespace blue_sky

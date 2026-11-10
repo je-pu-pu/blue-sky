@@ -4,7 +4,6 @@
 #include "EffectPass.h"
 #include "Direct3D11.h"
 #include "ConstantBufferTyped.h"
-#include <core/Service.h>
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Texture.h>
 #include <win/Rect.h>
@@ -14,7 +13,7 @@
 namespace core::graphics::direct_3d_11
 {
 
-Sprite::Sprite( Direct3D* direct_3d )
+Sprite::Sprite( Direct3D* direct_3d, const core::graphics::GraphicsManager* graphics_manager )
 	: direct_3d_( direct_3d )
 	, constant_buffer_( nullptr )
 	, vertex_buffer_( nullptr )
@@ -23,6 +22,7 @@ Sprite::Sprite( Direct3D* direct_3d )
 	, effect_technique_( direct_3d_->get_effect()->get_technique( "sprite" ) )
 	, color_technique_( direct_3d_->get_effect()->get_technique( "sprite_color" ) )
 	, premultiplied_technique_( direct_3d_->get_effect()->get_technique( "sprite_premultiplied" ) )
+	, graphics_manager_( graphics_manager )
 {
 	constant_buffer_ = std::make_unique< ConstantBuffer >();
 	
@@ -129,7 +129,10 @@ void Sprite::flush()
 		direct_3d_->getImmediateContext()->DrawIndexed( index_count, 0, 0 );
 	}
 
-	core::get_graphics_manager()->count_draw();
+	if ( graphics_manager_ )
+	{
+		graphics_manager_->count_draw();
+	}
 
 	pending_vertices_.clear();
 	pending_technique_ = nullptr;

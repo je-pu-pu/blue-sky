@@ -22,8 +22,9 @@ protected:
 	void set_texture_at( uint_t, Texture* t ) override { texture_ = t; }
 
 public:
-	SkyBoxShader()
-		: render_setting_( "main", "sky_box" )
+	SkyBoxShader( GraphicsManager* graphics_manager )
+		: BaseShader( graphics_manager )
+		, render_setting_( graphics_manager, "main", "sky_box" )
 	{
 
 	}

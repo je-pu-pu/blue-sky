@@ -19,7 +19,6 @@
 #include <blue_sky/ecs/system/BalloonSystem.h>
 
 #include <core/ecs/EntityManager.h>
-#include <core/Service.h>
 #include <core/physics/PhysicsManager.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 
@@ -48,13 +47,13 @@ MusicGamePrototypeScene::MusicGamePrototypeScene( GameMain& game_main )
 	get_graphics_manager()->load_paper_textures();
 
 	// PhysicsManager にデバッグ描画を設定
-	core::get_physics_manager()->set_debug_drawer( get_bullet_debug_draw() );
+	get_physics_manager()->set_debug_drawer( get_bullet_debug_draw() );
 
 	// System を追加する (順序が重要)
-	get_entity_manager()->add_system< core::ecs::PhysicsSystem >();
-	get_entity_manager()->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10 );
-	get_entity_manager()->add_system< blue_sky::ecs::BalloonSystem >( 20 );
-	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
+	get_entity_manager()->add_system< core::ecs::PhysicsSystem >( 0, get_physics_manager() );
+	get_entity_manager()->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10, get_input(), get_physics_manager() );
+	get_entity_manager()->add_system< blue_sky::ecs::BalloonSystem >( 20, get_physics_manager() );
+	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000, get_graphics_manager(), get_time_manager() );
 
 	// プレイヤーを設定 (ビルの屋上に配置)
 	player_transform_ = player_->add_component< core::ecs::TransformComponent >();

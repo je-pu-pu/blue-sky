@@ -246,6 +246,8 @@ public:
 	OculusRift* get_oculus_rift() const { return oculus_rift_.get(); }
 
 	ActiveObjectPhysics* get_active_object_physics() const { return active_object_physics_.get(); }
+	PhysicsManager* get_physics_manager() const { return physics_manager_.get(); }	///< ECS の物理（以前は core::Service から取っていた）
+	const TimeManager* get_time_manager() const { return & time_manager_; }		///< 時間の管理（以前は core::Service から取っていた）
 	GraphicsManager* get_graphics_manager() const { return graphics_manager_.get(); }
 	SoundManager* get_sound_manager() const { return sound_manager_.get(); }
 	ScriptManager* get_script_manager() const { return script_manager_.get(); }

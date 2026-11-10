@@ -7,9 +7,6 @@
 #include <core/graphics/Direct3D11/Texture.h>
 #include <portable-file-dialogs.h>
 
-#include <core/Service.h>
-#include <core/graphics/GraphicsManager.h>
-
 namespace core::graphics
 {
 
@@ -106,7 +103,7 @@ void Shader::render_parameter_gui()
 
 			 for ( auto const &name : file.result() )
 			 {
-				 auto* new_texture = core::get_graphics_manager()->load_texture( name.c_str() );
+				 auto* new_texture = load_texture_from_file( name.c_str() );
 
 				 if ( ! new_texture )
 				 {

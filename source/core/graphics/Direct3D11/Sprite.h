@@ -12,6 +12,11 @@ namespace direct_x_math
 	class Color;
 }
 
+namespace core::graphics
+{
+	class GraphicsManager;
+}
+
 namespace core::graphics::direct_3d_11
 {
 	template< typename, int > class ConstantBufferTyped;
@@ -79,8 +84,11 @@ protected:
 
 	void draw_quad( const Rect& dst, const UVRect& uv, const Color& color, const EffectTechnique* technique, const Texture* texture );
 
+	/// 描画回数を数える先（作り手が渡す。nullptr なら数えない。以前は core::Service から取っていた）
+	const core::graphics::GraphicsManager*	graphics_manager_;
+
 public:
-	explicit Sprite( Direct3D* );
+	Sprite( Direct3D*, const core::graphics::GraphicsManager* graphics_manager );
 	~Sprite();
 
 	void set_transform( const Matrix& ) override;

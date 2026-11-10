@@ -28,7 +28,6 @@
 
 #include <blue_sky/ai/EnemyPerception.h>
 
-#include <core/Service.h>
 #include <core/physics/PhysicsManager.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 
@@ -84,16 +83,16 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 	get_graphics_manager()->load_paper_textures();
 
 	// Bullet デバッグ描画（LOS レイの遮蔽やコーン可視化に使う）
-	core::get_physics_manager()->set_debug_drawer( get_bullet_debug_draw() );
+	get_physics_manager()->set_debug_drawer( get_bullet_debug_draw() );
 
 	// System を追加（実行順が重要: 対象収集 → 知覚 → 警戒 → 移動 → 物理 → 描画）
-	get_entity_manager()->add_system< core::ecs::PhysicsSystem >( 5 );
-	get_entity_manager()->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10 );
+	get_entity_manager()->add_system< core::ecs::PhysicsSystem >( 5, get_physics_manager() );
+	get_entity_manager()->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10, get_input(), get_physics_manager() );
 	get_entity_manager()->add_system< blue_sky::ecs::TargetRegistrySystem >( 20 );
-	get_entity_manager()->add_system< blue_sky::ecs::PerceptionSystem >( 30 );
-	get_entity_manager()->add_system< blue_sky::ecs::AlertSystem >( 40 );
-	get_entity_manager()->add_system< blue_sky::ecs::PatrolSystem >( 50 );
-	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
+	get_entity_manager()->add_system< blue_sky::ecs::PerceptionSystem >( 30, get_physics_manager() );
+	get_entity_manager()->add_system< blue_sky::ecs::AlertSystem >( 40, get_time_manager() );
+	get_entity_manager()->add_system< blue_sky::ecs::PatrolSystem >( 50, get_time_manager() );
+	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000, get_graphics_manager(), get_time_manager() );
 
 	// --- プレイヤー（侵入者） ---
 	player_ = get_entity_manager()->create_entity();

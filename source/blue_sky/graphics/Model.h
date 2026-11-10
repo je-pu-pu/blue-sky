@@ -19,6 +19,7 @@ namespace blue_sky::graphics
 {
 	class Mesh;
 	class Line;
+	class GraphicsManager;
 
 /**
  * blue_sky モデルクラス
@@ -84,7 +85,8 @@ public:
 
 	bool is_skin_mesh() const { return skinning_animation_set_; }
 
-	virtual Shader* create_shader() const;
+	/// このモデル用のシェーダーを作る（作る先の GraphicsManager は呼ぶ側が渡す。以前は core::Service から取っていた）
+	virtual Shader* create_shader( GraphicsManager* graphics_manager ) const;
 	virtual string_t get_texture_file_path_by_texture_name( const char* ) const;
 
 	void render() const override;

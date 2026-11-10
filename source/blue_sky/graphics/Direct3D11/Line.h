@@ -13,6 +13,11 @@ namespace core::graphics::direct_3d_11
 	class Direct3D11;
 }
 
+namespace blue_sky::graphics
+{
+	class GraphicsManager;
+}
+
 namespace blue_sky::graphics::direct_3d_11
 {
 
@@ -30,6 +35,7 @@ public:
 
 protected:
 	Direct3D*		direct_3d_;
+	blue_sky::graphics::GraphicsManager*	graphics_manager_;	///< テクスチャの読み込み先・描画回数を数える先（作り手が渡す。以前は core::Service から取っていた）
 
 	ID3D11Buffer*	vertex_buffer_;
 	ID3D11Buffer*	index_buffer_;
@@ -42,7 +48,7 @@ protected:
 	void create_texture() override;
 
 public:
-	explicit Line( Direct3D* );
+	Line( Direct3D*, blue_sky::graphics::GraphicsManager* );
 	virtual ~Line() override;
 
 	void render_part( int part_count = 99999 ) const;

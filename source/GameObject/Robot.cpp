@@ -15,14 +15,14 @@
 namespace blue_sky
 {
 
-Robot::Robot()
+Robot::Robot( graphics::GraphicsManager* graphics_manager )
 	: player_( 0 )
 	, texture_( 0 )
 	, mode_( Mode::STAND )
 	, mode_backup_( Mode::STAND )
 	, timer_( 0 )
 {
-	auto* gm = graphics::get_graphics_manager();
+	auto* gm = graphics_manager;
 
 	texture_normal_ = gm->get_texture( "robot" );
 	texture_warn_ = gm->get_texture( "robot-warn" );

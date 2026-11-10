@@ -2,7 +2,6 @@
 #include <blue_sky/graphics/shader/SkyBoxShader.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <core/graphics/GraphicsManager.h>
-#include <core/Service.h>
 
 namespace blue_sky::graphics
 {
@@ -18,9 +17,9 @@ SkyBox::~SkyBox()
 
 }
 
-SkyBox::Shader* SkyBox::create_shader() const
+SkyBox::Shader* SkyBox::create_shader( GraphicsManager* graphics_manager ) const
 {
-	return graphics::get_graphics_manager()->create_shader< shader::SkyBoxShader >();
+	return graphics_manager->create_shader< shader::SkyBoxShader >();
 }
 
 string_t SkyBox::get_texture_file_path_by_texture_name( const char* texture_name ) const

@@ -22,8 +22,9 @@ protected:
 	void set_texture_at( uint_t, Texture* t ) override { texture_ = t; }
 
 public:
-	DebugShadowMapTextureShader()
-		: render_setting_( "main", "debug_shadow_map_texture" )
+	DebugShadowMapTextureShader( GraphicsManager* graphics_manager )
+		: BaseShader( graphics_manager )
+		, render_setting_( graphics_manager, "main", "debug_shadow_map_texture" )
 	{
 
 	}

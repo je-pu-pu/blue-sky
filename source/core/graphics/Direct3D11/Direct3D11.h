@@ -13,6 +13,7 @@
 namespace core::graphics
 {
 	class Sprite;
+	class GraphicsManager;
 }
 
 namespace core::graphics::direct_3d_11
@@ -107,7 +108,8 @@ public:
 	ID3D11RenderTargetView* create_render_target_view( ID3D11Texture2D* );
 	ID3D11DepthStencilView* create_depth_stencil_view( ID3D11Texture2D* );
 
-	void setup_sprite();
+	/// スプライトを作る。graphics_manager は描画回数を数える先（作り手の GraphicsManager が自分を渡す）
+	void setup_sprite( const core::graphics::GraphicsManager* graphics_manager );
 
 	void create_default_input_layout();
 	void create_input_layout( const char_t*, const char_t*, D3D11_INPUT_ELEMENT_DESC[], UINT );

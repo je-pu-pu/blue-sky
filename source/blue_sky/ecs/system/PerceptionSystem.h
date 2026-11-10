@@ -4,6 +4,8 @@
 #include <blue_sky/ecs/component/PerceptionComponent.h>
 #include <core/ecs/System.h>
 
+namespace core::physics { class PhysicsManager; }
+
 namespace blue_sky::ecs
 {
 
@@ -22,7 +24,13 @@ using core::ecs::TransformComponent;
 class PerceptionSystem : public System< TransformComponent, PerceptionComponent >
 {
 public:
+	/// physics_manager : 遮蔽のレイを飛ばす物理の世界（作り手が渡す。以前は core::Service から取っていた）
+	explicit PerceptionSystem( core::physics::PhysicsManager* physics_manager ) : physics_manager_( physics_manager ) { }
+
 	void update( ComponentTuple& ) const override;
+
+private:
+	core::physics::PhysicsManager* physics_manager_;
 
 }; // class PerceptionSystem
 

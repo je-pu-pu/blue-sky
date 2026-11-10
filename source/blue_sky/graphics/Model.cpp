@@ -1,7 +1,6 @@
 #include "Model.h"
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <core/graphics/GraphicsManager.h>
-#include <core/Service.h>
 #include <blue_sky/graphics/shader/FlatShader.h>
 #include <boost/filesystem.hpp>
 
@@ -14,28 +13,28 @@ namespace blue_sky::graphics
  * @todo より柔軟にする。
  * @todo どのシェーダーを使うかはモデルによって異なるため、
  */
-Model::Shader* Model::create_shader() const
+Model::Shader* Model::create_shader( GraphicsManager* graphics_manager ) const
 {
-	if ( graphics::get_graphics_manager()->is_shadow_enabled() )
+	if ( graphics_manager->is_shadow_enabled() )
 	{
 		if ( is_skin_mesh() )
 		{
-			return graphics::get_graphics_manager()->create_shader< shader::FlatShadowShader >( "skin", "skin_with_shadow" );
+			return graphics_manager->create_shader< shader::FlatShadowShader >( "skin", "skin_with_shadow" );
 		}
 		else
 		{
-			return graphics::get_graphics_manager()->create_shader< shader::FlatShadowShader >( "main", "main_with_shadow" );
+			return graphics_manager->create_shader< shader::FlatShadowShader >( "main", "main_with_shadow" );
 		}
 	}
 	else
 	{
 		if ( is_skin_mesh() )
 		{
-			return graphics::get_graphics_manager()->create_shader< shader::FlatShader >( "skin", "flat_skin" );
+			return graphics_manager->create_shader< shader::FlatShader >( "skin", "flat_skin" );
 		}
 		else
 		{
-			return graphics::get_graphics_manager()->create_shader< shader::FlatShader >( "main", "flat" );
+			return graphics_manager->create_shader< shader::FlatShader >( "main", "flat" );
 		}
 	}
 }

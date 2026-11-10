@@ -23,8 +23,9 @@ protected:
 	void set_texture_at( uint_t, Texture* t ) override { texture_ = t; }
 
 public:
-	BaseTessellationMatcapShader()
-		: render_setting_( Traits::input_layout_name, Traits::effect_technique_name )
+	BaseTessellationMatcapShader( GraphicsManager* graphics_manager )
+		: BaseShader( graphics_manager )
+		, render_setting_( graphics_manager, Traits::input_layout_name, Traits::effect_technique_name )
 	{
 
 	}
@@ -50,6 +51,8 @@ struct SkinningTesselationMatcapTraits { static constexpr const char* input_layo
 class TessellationMatcapShader : public BaseTessellationMatcapShader< StaticTesselationMatcapTraits >
 {
 public:
+	using BaseTessellationMatcapShader::BaseTessellationMatcapShader;
+
 	TessellationMatcapShader* clone() const override { return new TessellationMatcapShader( *this ); }
 
 	void bind() const override
@@ -77,6 +80,8 @@ public:
 class SkinningTessellationMatcapShader : public BaseTessellationMatcapShader< SkinningTesselationMatcapTraits >
 {
 public:
+	using BaseTessellationMatcapShader::BaseTessellationMatcapShader;
+
 	SkinningTessellationMatcapShader* clone() const override { return new SkinningTessellationMatcapShader( *this ); }
 
 	void bind() const override

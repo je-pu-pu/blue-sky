@@ -23,9 +23,10 @@ protected:
 	void set_texture_at( uint_t, Texture* t ) override { texture_ = t; }
 
 public:
-	LitInstancedShader( const char_t* input_layout_name = "main", const char_t* effect_technique_name = "lit_instanced" )
-		: texture_( get_graphics_manager()->get_null_texture() )
-		, render_setting_( input_layout_name, effect_technique_name )
+	LitInstancedShader( GraphicsManager* graphics_manager, const char_t* input_layout_name = "main", const char_t* effect_technique_name = "lit_instanced" )
+		: BaseShader( graphics_manager )
+		, texture_( get_graphics_manager()->get_null_texture() )
+		, render_setting_( graphics_manager, input_layout_name, effect_technique_name )
 	{
 
 	}

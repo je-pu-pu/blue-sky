@@ -6,8 +6,14 @@
 #include <core/ecs/System.h>
 #include <core/graphics/Direct3D11/InstanceBuffer.h>
 
+namespace core
+{
+	class TimeManager;
+}
+
 namespace core::graphics
 {
+	class GraphicsManager;
 	class RenderTargetTexture;
 }
 
@@ -21,6 +27,9 @@ namespace core::ecs
 class RenderSystem : public System< TransformComponent, ModelComponent, RenderComponent >
 {
 private:
+	core::graphics::GraphicsManager* graphics_manager_;	///< 描画先（作り手が渡す。以前は core::Service から取っていた）
+	const core::TimeManager* time_manager_;			///< ノイズの経過時間（同上）
+
 	std::unique_ptr< core::graphics::RenderTargetTexture > render_result_texture_1_;
 	std::unique_ptr< core::graphics::RenderTargetTexture > render_result_texture_2_;
 	std::unique_ptr< core::graphics::direct_3d_11::InstanceBuffer > instance_buffer_;
@@ -29,13 +38,16 @@ private:
 	bool instancing_enabled_ = true;  ///< インスタンシングを有効にするかどうか
 
 public:
-	RenderSystem();
+	RenderSystem( core::graphics::GraphicsManager* graphics_manager, const core::TimeManager* time_manager );
 	~RenderSystem() = default;
 
 	void update() override;
 
 	void set_culling_distance( float distance ) { culling_distance_ = distance; }
 	float get_culling_distance() const { return culling_distance_; }
+
+private:
+	core::graphics::GraphicsManager* get_graphics_manager() const { return graphics_manager_; }
 
 }; // class RenderSystem
 

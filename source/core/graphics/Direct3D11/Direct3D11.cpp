@@ -364,9 +364,9 @@ void Direct3D11::setup_default_viewport()
  *
  * この関数は、インプットレイアウトを作成した後、エフェクトファイルを読み込んだ後に呼び出す必要がある
  */
-void Direct3D11::setup_sprite()
+void Direct3D11::setup_sprite( const core::graphics::GraphicsManager* graphics_manager )
 {
-	sprite_.reset( new core::graphics::direct_3d_11::Sprite( this ) );
+	sprite_.reset( new core::graphics::direct_3d_11::Sprite( this, graphics_manager ) );
 }
 
 // ???

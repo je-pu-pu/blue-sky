@@ -21,6 +21,8 @@
 
 namespace core
 {
+	class TimeManager;
+
 	namespace graphics
 	{
 		class InputLayout;
@@ -99,6 +101,7 @@ private:
 
 	/// GameMain が渡す依存（以前は GameMain のシングルトンから引いていた。設計上の問題 B28）
 	const ActiveObjectManager*	active_object_manager_ = nullptr;
+	const core::TimeManager*	time_manager_ = nullptr;		///< シェーダーに渡す経過時間（以前は core::Service から取っていた）
 
 	mutable const ConstantBuffer* current_object_constant_buffer_ = nullptr;
 	mutable const ConstantBuffer* current_skinning_constant_buffer_ = nullptr;
@@ -119,7 +122,7 @@ protected:
 	bool_t load_line( Model*, const char_t* nmae );
 
 	[[nodiscard]] virtual ShadowMap* create_shadow_map( uint_t, uint_t ) const = 0;
-	[[nodiscard]] virtual Line* create_line() const = 0;
+	[[nodiscard]] virtual Line* create_line() = 0;	///< Line はテクスチャを読み込むので const ではない（自分を Line に渡す）
 	[[nodiscard]] virtual Texture* load_texture_file( const char_t* ) const = 0;
 	[[nodiscard]] virtual Texture* load_texture_file_premultiplied( const char_t* ) const = 0;
 
@@ -204,6 +207,18 @@ public:
 
 	/// ゲームのオブジェクトの管理を渡す（GameMain が組み立てのときに呼ぶ）
 	void set_active_object_manager( const ActiveObjectManager* m ) { active_object_manager_ = m; }
+
+	/// 時間の管理を渡す（GameMain が組み立てのときに呼ぶ）
+	void set_time_manager( const core::TimeManager* m ) { time_manager_ = m; }
+
+	/**
+	 * シェーダーを作る（シェーダーのコンストラクタの先頭に自分を渡す）
+	 *
+	 * core::graphics::GraphicsManager の同名の関数を隠し、blue_sky の GraphicsManager として渡す
+	 * （シェーダーは blue_sky の機能を使う。以前は core::Service から取っていた。設計上の問題 B28）
+	 */
+	template< typename Type, typename ... Args > Type* create_shader( Args ... args ) { return get_shader_manager().create< Type >( this, args ... ); }
+	template< typename Type, typename ... Args > Type* create_named_shader( const char_t* name, Args ... args ) { return get_shader_manager().create_named< Type >( name, this, args ... ); }
 
 	/// 今の描画先の大きさ（ビューポート。UI を描くときに、描画先に合わせて写すのに使う）
 	virtual float_t get_render_target_width() const = 0;
@@ -400,13 +415,5 @@ public:
 	// void update_frame_render_data( const Camera*, const Vector3& ) const;
 
 }; // class GraphicsManager
-
-/**
- * 描画の部品（Model・Ground・SkyBox・Line・MeshBuffer など）が使う GraphicsManager
- *
- * core のサービス（core::Service）から得る（シェーダーの BaseShader と同じ）。描画の部品が GameMain に依存しないように
- * （以前は GameMain のシングルトンから引いていた。設計上の問題 B28）。
- */
-GraphicsManager* get_graphics_manager();
 
 } // namespace blue_sky::graphics

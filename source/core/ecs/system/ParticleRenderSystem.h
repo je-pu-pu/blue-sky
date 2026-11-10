@@ -5,6 +5,11 @@
 #include <core/ecs/System.h>
 #include <core/graphics/Shader.h>
 
+namespace core::graphics
+{
+	class GraphicsManager;
+}
+
 namespace core::ecs
 {
 
@@ -17,10 +22,13 @@ class ParticleRenderSystem : public System< TransformComponent, ParticleSystemCo
 public:
 
 private:
+	core::graphics::GraphicsManager* graphics_manager_;	///< 描画先（作り手が渡す。以前は core::Service から取っていた）
 	std::unique_ptr< core::graphics::Shader > shader_;
 
+	core::graphics::GraphicsManager* get_graphics_manager() const { return graphics_manager_; }
+
 public:
-	explicit ParticleRenderSystem( std::unique_ptr< core::graphics::Shader > shader );
+	ParticleRenderSystem( core::graphics::GraphicsManager* graphics_manager, std::unique_ptr< core::graphics::Shader > shader );
 	virtual ~ParticleRenderSystem() = default;
 
 	virtual void update() override;

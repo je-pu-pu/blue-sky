@@ -4,6 +4,8 @@
 #include <blue_sky/ecs/component/TransformControlComponent.h>
 #include <core/ecs/System.h>
 
+namespace core::input { class InputManager; }
+
 namespace blue_sky::ecs
 {
 
@@ -19,10 +21,14 @@ class TransformControlSystem : public System< TransformComponent, TransformContr
 public:
 
 public:
-	TransformControlSystem() = default;
+	/// input : 入力（作り手が渡す。以前は core::Service から取っていた）
+	explicit TransformControlSystem( const core::input::InputManager* input ) : input_( input ) { }
 	~TransformControlSystem() = default;
 
 	void update( ComponentTuple& ) const override;
+
+private:
+	const core::input::InputManager* input_;
 
 }; // class TransformControlSystem
 

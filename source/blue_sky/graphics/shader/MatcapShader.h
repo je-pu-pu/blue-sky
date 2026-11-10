@@ -21,8 +21,9 @@ protected:
 	void set_texture_at( uint_t, Texture* t ) override { texture_ = t; }
 
 public:
-	MatcapShader( const char_t* input_layout_name = "main", const char_t* effect_technique_name = "matcap" )
-		: render_setting_( input_layout_name, effect_technique_name )
+	MatcapShader( GraphicsManager* graphics_manager, const char_t* input_layout_name = "main", const char_t* effect_technique_name = "matcap" )
+		: BaseShader( graphics_manager )
+		, render_setting_( graphics_manager, input_layout_name, effect_technique_name )
 	{
 
 	}

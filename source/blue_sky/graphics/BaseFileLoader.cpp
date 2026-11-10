@@ -23,7 +23,7 @@ BaseFileLoader::Mesh* BaseFileLoader::create_mesh() const
 
 BaseFileLoader::Shader* BaseFileLoader::create_shader() const
 {
-	return get_model()->create_shader();
+	return get_model()->create_shader( graphics_manager_ );
 }
 
 BaseFileLoader::SkinningAnimationSet* BaseFileLoader::create_skinning_animation_set() const

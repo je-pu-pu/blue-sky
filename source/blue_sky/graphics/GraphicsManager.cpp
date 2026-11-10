@@ -38,7 +38,6 @@
 
 #include <core/ecs/component/TransformComponent.h>
 #include <core/ecs/component/CameraComponent.h>
-#include <core/Service.h>
 #include <core/TimeManager.h>
 
 #include <common/timer.h>
@@ -75,11 +74,6 @@ void GraphicsManager::setup_shadow_map( uint_t levels, uint_t size )
 void GraphicsManager::unset_shadow_map()
 {
 	shadow_map_.reset();
-}
-
-GraphicsManager* get_graphics_manager()
-{
-	return static_cast< GraphicsManager* >( core::get_graphics_manager() );
 }
 
 const ActiveObjectManager* GraphicsManager::get_game_object_manager() const
@@ -435,7 +429,7 @@ void GraphicsManager::refresh_all_shaders()
 
 		for ( int n = 0; n < o->get_model()->get_shader_count(); n++ )
 		{
-			o->get_model()->set_shader_at( n, o->get_model()->create_shader() );
+			o->get_model()->set_shader_at( n, o->get_model()->create_shader( this ) );
 		}
 	}
 #endif
@@ -536,7 +530,7 @@ void GraphicsManager::setup_rendering()
 	get_frame_render_data()->data().light = Vector( -1.f, -2.f, 0.5f, 0.f ).normalize();
 
 	/// @todo ここでやるべき？
-	get_frame_render_data()->data().time = core::get_time_manager()->get_total_elapsed_time();
+	get_frame_render_data()->data().time = time_manager_ ? time_manager_->get_total_elapsed_time() : 0.f;
 
 	get_frame_render_data()->update();
 

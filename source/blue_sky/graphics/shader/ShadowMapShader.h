@@ -24,8 +24,9 @@ protected:
 	const ConstantBuffer* get_constant_buffer() const { return constant_buffer_; }
 
 public:
-	BaseShadowMapShader( const char_t* input_layout_name, const char_t* effect_technique_name )
-		: render_setting_( input_layout_name, effect_technique_name )
+	BaseShadowMapShader( GraphicsManager* graphics_manager, const char_t* input_layout_name, const char_t* effect_technique_name )
+		: BaseShader( graphics_manager )
+		, render_setting_( graphics_manager, input_layout_name, effect_technique_name )
 	{
 
 	}
@@ -51,8 +52,8 @@ struct SkinningShadowMapShaderTraits { static constexpr const char* input_layout
 class ShadowMapShader : public BaseShadowMapShader // < ShadowMapShaderTraits >
 {
 public:
-	ShadowMapShader()
-		: BaseShadowMapShader( "main", "shadow_map" )
+	ShadowMapShader( GraphicsManager* graphics_manager )
+		: BaseShadowMapShader( graphics_manager, "main", "shadow_map" )
 	{ }
 
 	ShadowMapShader* clone() const override { return new ShadowMapShader( *this ); }
@@ -71,8 +72,8 @@ public:
 class SkinningShadowMapShader : public BaseShadowMapShader // < SkinningShadowMapShaderTraits >
 {
 public:
-	SkinningShadowMapShader()
-		: BaseShadowMapShader( "skin", "shadow_map_skin" )
+	SkinningShadowMapShader( GraphicsManager* graphics_manager )
+		: BaseShadowMapShader( graphics_manager, "skin", "shadow_map_skin" )
 	{ }
 
 	SkinningShadowMapShader* clone() const override { return new SkinningShadowMapShader( *this ); }

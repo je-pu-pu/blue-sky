@@ -1,5 +1,4 @@
 #include "TransformControlSystem.h"
-#include <core/Service.h>
 #include <core/input/InputManager.h>
 
 #include <common/math.h>
@@ -12,7 +11,7 @@ void TransformControlSystem::update( ComponentTuple& component_tuple ) const
 {
 	using Button = core::input::Button;
 
-	const auto* input = core::get_input_manager();
+	const auto* input = input_;
 
 	auto* transform = std::get< TransformComponent* >( component_tuple );
 	auto* transform_control = std::get< TransformControlComponent* >( component_tuple );

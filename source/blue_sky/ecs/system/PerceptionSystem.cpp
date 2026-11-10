@@ -4,7 +4,6 @@
 #include <blue_sky/ai/EnemyPerception.h>
 
 #include <core/ecs/EntityManager.h>
-#include <core/Service.h>
 #include <core/physics/PhysicsManager.h>
 
 #include <cfloat>
@@ -29,7 +28,7 @@ void PerceptionSystem::update( ComponentTuple& tuple ) const
 
 	const Vector eye     = transform->transform.get_position() + Vector( 0.f, perception->eye_height, 0.f );
 	const Vector forward = transform->transform.forward();
-	auto* physics = core::get_physics_manager();
+	auto* physics = physics_manager_;
 
 	float best_dist = FLT_MAX;
 

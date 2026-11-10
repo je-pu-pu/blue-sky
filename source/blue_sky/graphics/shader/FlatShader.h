@@ -22,9 +22,10 @@ protected:
 	void set_texture_at( uint_t, Texture* t ) override { texture_ = t; }
 
 public:
-	FlatShader( const char_t* input_layout_name = "main", const char_t* effect_technique_name = "flat" )
-		: texture_( get_graphics_manager()->get_null_texture() )
-		, render_setting_( input_layout_name, effect_technique_name )
+	FlatShader( GraphicsManager* graphics_manager, const char_t* input_layout_name = "main", const char_t* effect_technique_name = "flat" )
+		: BaseShader( graphics_manager )
+		, texture_( get_graphics_manager()->get_null_texture() )
+		, render_setting_( graphics_manager, input_layout_name, effect_technique_name )
 	{
 
 	}
@@ -73,8 +74,8 @@ public:
 class FlatShadowShader : public FlatShader
 {
 public:
-	FlatShadowShader( const char_t* input_layout_name = "main", const char_t* effect_technique_name = "flat" )
-		: FlatShader( input_layout_name, effect_technique_name )
+	FlatShadowShader( GraphicsManager* graphics_manager, const char_t* input_layout_name = "main", const char_t* effect_technique_name = "flat" )
+		: FlatShader( graphics_manager, input_layout_name, effect_technique_name )
 	{ }
 
 	FlatShadowShader* clone() const override { return new FlatShadowShader( *this ); }

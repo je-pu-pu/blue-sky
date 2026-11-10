@@ -2,7 +2,6 @@
 
 #include "BaseShader.h"
 #include <core/graphics/ConstantBuffer.h>
-#include <core/Service.h>
 #include <common/enum_set.h>
 #include <map>
 #include <vector>
@@ -166,27 +165,30 @@ protected:
 	}
 
 public:
-	Shader( const char_t* input_layout_name, const char_t* effect_technique_name, ShaderStageSet sss )
-		: render_setting_( input_layout_name, effect_technique_name )
+	Shader( GraphicsManager* graphics_manager, const char_t* input_layout_name, const char_t* effect_technique_name, ShaderStageSet sss )
+		: BaseShader( graphics_manager )
+		, render_setting_( graphics_manager, input_layout_name, effect_technique_name )
 		, shader_stage_set_( sss )
 	{
 		auto n = setup_parameters();
 
 		if ( n > 0 )
 		{
-			constant_buffer_ = core::get_graphics_manager()->create_constant_buffer( n, Slot );
+			constant_buffer_ = get_graphics_manager()->create_constant_buffer( n, Slot );
 		}
 	}
 
+	/// コピーは GraphicsManager を引き継ぐ
 	Shader( const Shader& s )
-		: render_setting_( s.render_setting_ )
+		: BaseShader( s )
+		, render_setting_( s.render_setting_ )
 		, shader_stage_set_( s.shader_stage_set_ )
 	{
 		auto n = setup_parameters();
 
 		if ( n > 0 )
 		{
-			constant_buffer_ = core::get_graphics_manager()->create_constant_buffer( n, Slot );
+			constant_buffer_ = get_graphics_manager()->create_constant_buffer( n, Slot );
 		}
 	}
 

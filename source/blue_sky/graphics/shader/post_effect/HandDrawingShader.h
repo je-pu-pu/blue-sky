@@ -22,8 +22,8 @@ public:
 	};
 
 public:
-	HandDrawingShader( const char_t* input_layout_name = "main", const char_t* effect_technique_name = "post_effect_hand_drawing" )
-		: Shader( input_layout_name, effect_technique_name, { ShaderStage::PS } )
+	HandDrawingShader( GraphicsManager* graphics_manager, const char_t* input_layout_name = "main", const char_t* effect_technique_name = "post_effect_hand_drawing" )
+		: Shader( graphics_manager, input_layout_name, effect_technique_name, { ShaderStage::PS } )
 	{
 
 	}

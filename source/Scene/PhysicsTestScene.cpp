@@ -17,7 +17,6 @@
 #include <core/ecs/system/PhysicsSystem.h>
 
 #include <core/ecs/EntityManager.h>
-#include <core/Service.h>
 #include <core/physics/PhysicsManager.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 
@@ -38,12 +37,12 @@ PhysicsTestScene::PhysicsTestScene( GameMain& game_main )
 	get_graphics_manager()->load_paper_textures();
 
 	// PhysicsManager にデバッグ描画を設定
-	core::get_physics_manager()->set_debug_drawer( get_bullet_debug_draw() );
+	get_physics_manager()->set_debug_drawer( get_bullet_debug_draw() );
 
 	// System を追加する
-	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >();
-	get_entity_manager()->add_system< core::ecs::PhysicsSystem >();
-	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
+	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >( 0, get_input() );
+	get_entity_manager()->add_system< core::ecs::PhysicsSystem >( 0, get_physics_manager() );
+	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000, get_graphics_manager(), get_time_manager() );
 
 	// 地面を作成 (静的な Box、質量 0)
 	{

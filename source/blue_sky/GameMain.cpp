@@ -17,7 +17,6 @@
 #include <blue_sky/graphics/Direct3D11/GraphicsManager.h>
 
 #include <core/ecs/EntityManager.h>
-#include <core/Service.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 #include <core/graphics/Direct3D11/Effect.h>
@@ -189,12 +188,8 @@ GameMain::GameMain()
 	sound_manager_->load( "cancel" );
 	sound_manager_->load( "click" );
 
-	// Service に登録
-	core::Service::get_instance()->set_graphics_manager( graphics_manager_.get() );
-	core::Service::get_instance()->set_sound_manager( sound_manager_.get() );
-	core::Service::get_instance()->set_input_manager( input_.get() );
-	core::Service::get_instance()->set_physics_manager( physics_manager_.get() );
-	core::Service::get_instance()->set_time_manager( &time_manager_ );
+	// 描画のフレームの定数に入れる経過時間（以前は core::Service に登録し、各所がそこから取っていた。設計上の問題 B28）
+	graphics_manager_->set_time_manager( & time_manager_ );
 
 	script_manager_.reset( new ScriptManager() );
 	script_manager_->load_command_history( "log/script.log" );
@@ -204,6 +199,7 @@ GameMain::GameMain()
 	game_object_context_.dynamics_world = [this] { return active_object_physics_->get_dynamics_world(); };
 	game_object_context_.sound_manager = sound_manager_.get();
 	game_object_context_.scene_elapsed_time = [this] { return scene_ ? scene_->get_total_elapsed_time() : 0.f; };
+	game_object_context_.delta_time = [this] { return time_manager_.get_delta_time(); };
 
 	active_object_manager_.reset( new ActiveObjectManager( active_object_physics_.get(), graphics_manager_.get(), & game_object_context_ ) );
 	graphics_manager_->set_active_object_manager( active_object_manager_.get() );
@@ -928,13 +924,13 @@ void GameMain::set_vsync( bool v )
 }
 
 void GameMain::on_raw_key_down( int vk )
+{
+	input_->latch_key_press( vk );
+}
+
 void GameMain::on_raw_mouse_move( long dx, long dy )
 {
 	input_->add_raw_mouse_move( dx, dy );
-}
-
-{
-	input_->latch_key_press( vk );
 }
 
 void GameMain::on_ime_composition( const std::u32string& text )

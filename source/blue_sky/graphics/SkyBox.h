@@ -17,7 +17,7 @@ private:
 	const char* name_;
 
 protected:
-	Shader* create_shader() const override;
+	Shader* create_shader( GraphicsManager* graphics_manager ) const override;
 	string_t get_texture_file_path_by_texture_name( const char* ) const override;
 
 public:

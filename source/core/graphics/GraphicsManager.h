@@ -66,9 +66,9 @@ public:
 	GraphicsManager() { }
 	virtual ~GraphicsManager() { }
 
-	// Shader
-	template< typename Type, typename ... Args > Type* create_shader( Args ... args ) { return shader_manager_.create< Type >( args ... ); }
-	template< typename Type, typename ... Args > Type* create_named_shader( const char_t* name, Args ... args ) { return shader_manager_.create_named< Type >( name, args ... ); }
+	// Shader（シェーダーのコンストラクタの先頭に自分を渡す。以前シェーダーは core::Service から取っていた）
+	template< typename Type, typename ... Args > Type* create_shader( Args ... args ) { return shader_manager_.create< Type >( this, args ... ); }
+	template< typename Type, typename ... Args > Type* create_named_shader( const char_t* name, Args ... args ) { return shader_manager_.create_named< Type >( name, this, args ... ); }
 	template< typename Type=Shader > Type* get_shader( const char_t* name ) { return shader_manager_.get< Type >( name ); }
 	Shader* clone_shader( const Shader* s ) { Shader* s2 = s->clone(); shader_manager_.add( s2 ); return s2; }
 

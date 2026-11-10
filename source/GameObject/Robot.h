@@ -10,6 +10,8 @@ namespace blue_sky
 
 class Player;
 
+namespace graphics { class GraphicsManager; }
+
 /**
  * 敵
  *
@@ -62,7 +64,7 @@ protected:
 	void update_patrol();
 
 public:
-	Robot();
+	explicit Robot( graphics::GraphicsManager* graphics_manager );	///< テクスチャを得る先（作り手が渡す。以前は core::Service から取っていた）
 	~Robot() { }
 
 	void set_player( const Player* p ) { player_ = p; }

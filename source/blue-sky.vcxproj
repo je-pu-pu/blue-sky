@@ -285,7 +285,6 @@
     <ClInclude Include="core\animation\SkinningAnimation.h" />
     <ClInclude Include="core\animation\SkinningAnimationSet.h" />
     <ClInclude Include="core\DirectX.h" />
-    <ClInclude Include="core\Service.h" />
     <ClInclude Include="core\TimeManager.h" />
     <ClInclude Include="core\ecs\BaseSystem.h" />
     <ClInclude Include="core\ecs\Component.h" />

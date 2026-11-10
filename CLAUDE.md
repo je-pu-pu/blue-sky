@@ -77,7 +77,8 @@ extern/common, game, win  ← 基盤層
 ```cpp
 auto* entity = EntityManager::get_instance()->create_entity();
 auto* transform = EntityManager::get_instance()->add_component<TransformComponent>(entity);
-EntityManager::get_instance()->add_system<RenderSystem>();
+// システムは必要なものをコンストラクタで受け取る（priority の後の引数が渡る。シーンの中なら近道で得る）
+EntityManager::get_instance()->add_system<RenderSystem>( 1000, get_graphics_manager(), get_time_manager() );
 ```
 
 **コンポーネント:** `source/core/ecs/component/` (TransformComponent, RigidBodyComponent, ModelComponent 等)
@@ -108,10 +109,15 @@ EntityManager::get_instance()->add_system<RenderSystem>();
 
 ### サービス（マネージャー）の探し方
 
-- **core 層**（`core::ecs` のシステム・`core::graphics` など）は `core::Service`（`core::get_graphics_manager()` など）から core の型で得る。core 層は GameMain を知らない
-- **blue_sky 層**は組み立ての根の `GameMain` から得る。`Scene::get_*_manager()` は GameMain への近道（`core::get_graphics_manager()` と名前が同じだが、blue_sky の型を返す）
-- **新しく書くロジック**は、依存を引数・コンストラクタで受け取る（例: `Scene/OptionsController`）。シングルトンに触れないのでテストで動かせる
-- テストで core のサービスを差し替えるときは `core::Service::Scope` を使う（破棄で元に戻る）
+依存は**作り手・組み立ての根から受け取る**。サービスロケーター（以前の `core::Service`）は無い。core 層は GameMain を知らない。
+
+- **組み立ての根**は `GameMain`（と `App`・`Main.cpp`）。マネージャーを作り、使う側に渡す
+- **シーン**は `Scene( GameMain& )` で受け取り、`Scene::get_*_manager()`・`get_input()`・`get_time_manager()` などの近道で GameMain から得る
+- **ECS のシステム**は必要なもの（物理・入力・時間・描画）をコンストラクタで受け取る。シーンが `add_system< T >( priority, get_physics_manager(), ... )` のように渡す（`add_system` は priority の後の引数をコンストラクタに渡す）
+- **描画の部品**は作り手の GraphicsManager から受け取る。シェーダーは `create_shader< T >( ... )` / `create_named_shader< T >( name, ... )` がコンストラクタの先頭に GraphicsManager を渡す（clone は引き継ぐ）。`Model::create_shader( GraphicsManager* )`・Line・MeshBuffer・Sprite も作り手が渡す
+- **ゲームのオブジェクト**は `GameObjectContext`（物理の世界・音・経過時間・delta_time）を ActiveObjectManager から受け取る
+- **新しく書くロジック**も、依存を引数・コンストラクタで受け取る（例: `Scene/OptionsController`）。シングルトンに触れないのでテストで動かせる
+- テストでは偽物を引数で渡す。update を呼ばないなら nullptr でよい（例: `test/ecs/EnemyAiSceneEcsTest.cpp`）
 
 ### 失敗の扱い
 

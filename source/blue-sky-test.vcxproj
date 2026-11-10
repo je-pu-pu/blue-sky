@@ -161,8 +161,8 @@
   <ItemGroup>
     <ClCompile Include="test\input\RawInputTest.cpp" />
     <ClCompile Include="test\ui\UIWidgetTest.cpp" />
-    <ClCompile Include="test\ui\AsyncLoaderTest.cpp" />
     <ClCompile Include="test\ui\UIMeasureTest.cpp" />
+    <ClCompile Include="test\ui\AsyncLoaderTest.cpp" />
     <ClCompile Include="test\ui\UILayoutTest.cpp" />
     <ClCompile Include="test\ui\ResourceManagerTest.cpp" />
     <ClCompile Include="test\ui\Pixel2DSpaceTest.cpp" />

@@ -1,6 +1,7 @@
 #include "pch.h"
 
 // EnemyAiTestScene の ECS 自動登録が実機で全滅する問題を、段階的に切り分ける。
+// System の update は呼ばないので、物理・入力・時間には nullptr を渡す。
 
 #include <core/ecs/EntityManager.h>
 
@@ -28,7 +29,7 @@ TEST( EnemyAiSceneEcsTest, Stage1_PhysicsAloneRealClass )
 {
 	auto em = core::ecs::EntityManager::get_instance();
 	em->clear();
-	em->add_system< core::ecs::PhysicsSystem >( 5 );
+	em->add_system< core::ecs::PhysicsSystem >( 5, nullptr );
 	auto* e = em->create_entity();
 	e->add_component< core::ecs::TransformComponent >();
 	e->add_component< core::ecs::RigidBodyComponent >();
@@ -41,7 +42,7 @@ TEST( EnemyAiSceneEcsTest, Stage2_PatrolAlone )
 {
 	auto em = core::ecs::EntityManager::get_instance();
 	em->clear();
-	em->add_system< blue_sky::ecs::PatrolSystem >( 50 );
+	em->add_system< blue_sky::ecs::PatrolSystem >( 50, nullptr );
 	auto* e = em->create_entity();
 	e->add_component< core::ecs::TransformComponent >();
 	e->add_component< blue_sky::ecs::PerceptionComponent >();
@@ -69,12 +70,12 @@ TEST( EnemyAiSceneEcsTest, Stage4_AllSystems )
 {
 	auto em = core::ecs::EntityManager::get_instance();
 	em->clear();
-	em->add_system< core::ecs::PhysicsSystem >( 5 );
-	em->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10 );
+	em->add_system< core::ecs::PhysicsSystem >( 5, nullptr );
+	em->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10, nullptr, nullptr );
 	em->add_system< blue_sky::ecs::TargetRegistrySystem >( 20 );
-	em->add_system< blue_sky::ecs::PerceptionSystem >( 30 );
-	em->add_system< blue_sky::ecs::AlertSystem >( 40 );
-	em->add_system< blue_sky::ecs::PatrolSystem >( 50 );
+	em->add_system< blue_sky::ecs::PerceptionSystem >( 30, nullptr );
+	em->add_system< blue_sky::ecs::AlertSystem >( 40, nullptr );
+	em->add_system< blue_sky::ecs::PatrolSystem >( 50, nullptr );
 
 	auto* enemy = em->create_entity();
 	enemy->add_component< core::ecs::TransformComponent >();

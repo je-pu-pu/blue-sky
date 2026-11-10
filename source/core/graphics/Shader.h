@@ -106,6 +106,10 @@ public:
 
 	virtual void render_parameter_gui();
 
+protected:
+	/// パラメーターの GUI で選んだ画像を読み込む（読み込めないシェーダーは nullptr。以前は core::Service の GraphicsManager から読んでいた）
+	virtual Texture* load_texture_from_file( const char_t* ) { return nullptr; }
+
 }; // Shader
 
 } // namespace core::graphics

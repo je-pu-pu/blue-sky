@@ -64,6 +64,16 @@ ActiveObjectPhysics* Scene::get_active_object_physics() const
 	return get_game_main()->get_active_object_physics();
 }
 
+core::physics::PhysicsManager* Scene::get_physics_manager() const
+{
+	return game_main_.get_physics_manager();
+}
+
+const core::TimeManager* Scene::get_time_manager() const
+{
+	return game_main_.get_time_manager();
+}
+
 GraphicsManager* Scene::get_graphics_manager() const
 {
 	return get_game_main()->get_graphics_manager();

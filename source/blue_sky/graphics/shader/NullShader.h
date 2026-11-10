@@ -12,6 +12,8 @@ namespace blue_sky::graphics::shader
 class NullShader : public BaseShader
 {
 public:
+	using BaseShader::BaseShader;
+
 	void reload() override { }
 
 	NullShader* clone() const override { return new NullShader( *this ); }

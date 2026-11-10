@@ -1,6 +1,5 @@
 #include "RenderSystem.h"
 #include <core/ConstantBuffers.h>
-#include <core/Service.h>
 #include <core/TimeManager.h>
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Model.h>
@@ -14,9 +13,11 @@
 namespace core::ecs
 {
 
-RenderSystem::RenderSystem()
-	// : render_result_texture_1_( get_graphics_manager()->create_render_target_texture( core::graphics::PixelFormat::R8_UINT ) )
-	: render_result_texture_1_( get_graphics_manager()->create_render_target_texture() )
+RenderSystem::RenderSystem( core::graphics::GraphicsManager* graphics_manager, const core::TimeManager* time_manager )
+	: graphics_manager_( graphics_manager )
+	, time_manager_( time_manager )
+	// , render_result_texture_1_( get_graphics_manager()->create_render_target_texture( core::graphics::PixelFormat::R8_UINT ) )
+	, render_result_texture_1_( get_graphics_manager()->create_render_target_texture() )
 	, render_result_texture_2_( get_graphics_manager()->create_render_target_texture() )
 	, instance_buffer_( std::make_unique< core::graphics::direct_3d_11::InstanceBuffer >() )
 {
@@ -26,7 +27,7 @@ RenderSystem::RenderSystem()
 void RenderSystem::update()
 {
 	auto noise_shader = get_graphics_manager()->get_shader( "post_effect_noise" );
-	noise_shader->set_float( "offset", core::get_time_manager()->get_total_elapsed_time() );
+	noise_shader->set_float( "offset", time_manager_->get_total_elapsed_time() );
 
 	get_graphics_manager()->setup_rendering();
 

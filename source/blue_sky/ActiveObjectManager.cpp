@@ -31,7 +31,7 @@ ActiveObjectManager::ActiveObjectManager( ActiveObjectPhysics* physics, graphics
 	, object_context_( object_context )
 {
 	object_creator_map_[ "girl"        ] = [] () -> ActiveObject* { return new Girl();         };
-	object_creator_map_[ "robot"       ] = [] () -> ActiveObject* { return new Robot();        };
+	object_creator_map_[ "robot"       ] = [this] () -> ActiveObject* { return new Robot( graphics_manager_ ); };	// テクスチャを得る GraphicsManager を渡す
 	object_creator_map_[ "goal"        ] = [] () -> ActiveObject* { return new Goal();         };
 	object_creator_map_[ "balloon"     ] = [] () -> ActiveObject* { return new Balloon();      };
 	object_creator_map_[ "medal"       ] = [] () -> ActiveObject* { return new Medal();        };

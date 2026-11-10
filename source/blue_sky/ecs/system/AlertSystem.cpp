@@ -2,7 +2,6 @@
 
 #include <blue_sky/ai/EnemyPerception.h>
 
-#include <core/Service.h>
 #include <core/TimeManager.h>
 
 #include <algorithm>
@@ -15,7 +14,7 @@ void AlertSystem::update( ComponentTuple& tuple ) const
 	auto* perception = std::get< PerceptionComponent* >( tuple );
 	auto* alert      = std::get< AlertComponent* >( tuple );
 
-	const float dt = core::get_time_manager()->get_delta_time();
+	const float dt = time_manager_->get_delta_time();
 
 	// awareness を更新（視認で上昇・非視認で減衰）
 	alert->awareness = ai::step_awareness(

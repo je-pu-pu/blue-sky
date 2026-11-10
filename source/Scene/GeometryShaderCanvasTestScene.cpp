@@ -83,7 +83,7 @@ GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene( GameMain& game_mai
 	// auto vertex_buffer = get_graphics_manager()->create_vertex_buffer( vs );
 	// get_graphics_manager()->set_vertex_buffer( vertex_buffer );
 
-	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >();
+	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >( 0, get_input() );
 
 	camera_transform_ = camera_->add_component< core::ecs::TransformComponent >();
 	camera_transform_->transform.set_identity();

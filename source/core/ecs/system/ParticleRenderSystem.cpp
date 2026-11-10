@@ -1,6 +1,5 @@
 #include "ParticleRenderSystem.h"
 #include <core/ConstantBuffers.h>
-#include <core/Service.h>
 #include <core/graphics/VertexBuffer.h>
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
@@ -14,8 +13,9 @@ using core::graphics::BufferType;
 using core::graphics::VertexBuffer;
 using core::graphics::direct_3d_11::Direct3D11;
 
-ParticleRenderSystem::ParticleRenderSystem( std::unique_ptr< core::graphics::Shader > shader )
-	: shader_( std::move( shader ) )
+ParticleRenderSystem::ParticleRenderSystem( core::graphics::GraphicsManager* graphics_manager, std::unique_ptr< core::graphics::Shader > shader )
+	: graphics_manager_( graphics_manager )
+	, shader_( std::move( shader ) )
 {
 }
 

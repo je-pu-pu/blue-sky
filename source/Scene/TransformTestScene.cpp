@@ -1,6 +1,7 @@
 #include "TransformTestScene.h"
 
 #include <blue_sky/SceneManager.h>
+#include <blue_sky/Input.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <core/ecs/component/TransformComponent.h>
@@ -34,8 +35,8 @@ TransformTestScene::TransformTestScene( GameMain& game_main )
 	get_graphics_manager()->load_paper_textures();
 
 	// System を追加する
-	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >();
-	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
+	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >( 0, get_input() );
+	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000, get_graphics_manager(), get_time_manager() );
 
 	// Entity と Component を追加する
 	current_entity_ = get_entity_manager()->create_entity();

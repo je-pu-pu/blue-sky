@@ -76,7 +76,7 @@ protected:
 	void unset_depth_stencil() const override;
 
 	[[nodiscard]] ShadowMap* create_shadow_map( uint_t, uint_t ) const override;
-	[[nodiscard]] Line* create_line() const override;
+	[[nodiscard]] Line* create_line() override;
 	[[nodiscard]] Texture* load_texture_file( const char_t* ) const override;
 	[[nodiscard]] Texture* load_texture_file_premultiplied( const char_t* ) const override;
 
@@ -103,7 +103,7 @@ public:
 
 	std::unique_ptr< core::graphics::ConstantBuffer > create_constant_buffer( size_t size, int slot ) override;
 
-	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type ); }
+	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type, this ); }
 
 	// void unload_mesh( const char_t* ) override;
 	// void unload_mesh_all() override;

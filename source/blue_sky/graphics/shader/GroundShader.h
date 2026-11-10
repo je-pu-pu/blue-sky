@@ -22,8 +22,9 @@ protected:
 	void set_texture_at( uint_t, Texture* t ) override { texture_ = t; }
 
 public:
-	GroundShader()
-		: render_setting_( "main", "ground" )
+	GroundShader( GraphicsManager* graphics_manager )
+		: BaseShader( graphics_manager )
+		, render_setting_( graphics_manager, "main", "ground" )
 	{
 
 	}

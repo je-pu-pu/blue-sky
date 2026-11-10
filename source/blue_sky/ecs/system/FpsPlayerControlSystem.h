@@ -6,6 +6,9 @@
 #include <core/ecs/component/CameraComponent.h>
 #include <core/ecs/System.h>
 
+namespace core::input { class InputManager; }
+namespace core::physics { class PhysicsManager; }
+
 namespace blue_sky::ecs
 {
 
@@ -27,10 +30,18 @@ class FpsPlayerControlSystem : public System<
 	CameraComponent >
 {
 public:
-	FpsPlayerControlSystem() = default;
+	/// 入力と物理は作り手が渡す（以前は core::Service から取っていた）
+	FpsPlayerControlSystem( const core::input::InputManager* input, core::physics::PhysicsManager* physics_manager )
+		: input_( input )
+		, physics_manager_( physics_manager )
+	{ }
 	~FpsPlayerControlSystem() = default;
 
 	void update( ComponentTuple& ) const override;
+
+private:
+	const core::input::InputManager* input_;
+	core::physics::PhysicsManager* physics_manager_;
 
 }; // class FpsPlayerControlSystem
 

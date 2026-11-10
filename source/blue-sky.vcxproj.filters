@@ -1169,9 +1169,6 @@
     <ClInclude Include="core\math\DirectXMath\Transform.h">
       <Filter>core\math\DirectXMath</Filter>
     </ClInclude>
-    <ClInclude Include="core\Service.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="blue_sky\TimeManager.h">
       <Filter>blue_sky</Filter>
     </ClInclude>

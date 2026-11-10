@@ -19,8 +19,8 @@ public:
 protected:
 
 public:
-	UnicolorShader( const char_t* input_layout_name = "main", const char_t* effect_technique_name = "flat" )
-		: Shader( input_layout_name, effect_technique_name, { ShaderStage::VS, ShaderStage::PS } )
+	UnicolorShader( GraphicsManager* graphics_manager, const char_t* input_layout_name = "main", const char_t* effect_technique_name = "flat" )
+		: Shader( graphics_manager, input_layout_name, effect_technique_name, { ShaderStage::VS, ShaderStage::PS } )
 	{
 
 	}

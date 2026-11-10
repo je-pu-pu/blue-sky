@@ -80,7 +80,7 @@ GraphicsManager::GraphicsManager( Direct3D* direct_3d )
 {
 	create_named_shader< shader::BypassShader >( "bypass" );
 
-	direct_3d_->setup_sprite();
+	direct_3d_->setup_sprite( this );
 
 	msdf_text_renderer_ = std::make_unique< core::graphics::MsdfTextRenderer >( direct_3d_, "media/font/rounded-mplus-1p-regular.ttf" );
 }
@@ -193,9 +193,9 @@ GraphicsManager::ShadowMap* GraphicsManager::create_shadow_map( uint_t level, ui
  *
  * @return Line
  */
-GraphicsManager::Line* GraphicsManager::create_line() const
+GraphicsManager::Line* GraphicsManager::create_line()
 {
-	return new direct_3d_11::Line( direct_3d_ );
+	return new direct_3d_11::Line( direct_3d_, this );
 }
 
 /**
@@ -239,14 +239,14 @@ void GraphicsManager::refresh_all_shaders()
 {
 	blue_sky::graphics::GraphicsManager::refresh_all_shaders();
 
-	direct_3d_->setup_sprite();
+	direct_3d_->setup_sprite( this );
 
 #if 0
 	if ( sky_box_ )
 	{
 		for ( int n = 0; n < sky_box_->get_shader_count(); n++ )
 		{
-			sky_box_->set_shader_at( n, sky_box_->create_shader() );
+			sky_box_->set_shader_at( n, sky_box_->create_shader( this ) );
 		}
 	}
 
@@ -254,7 +254,7 @@ void GraphicsManager::refresh_all_shaders()
 	{
 		for ( int n = 0; n < ground_->get_shader_count(); n++ )
 		{
-			ground_->set_shader_at( n, ground_->create_shader() );
+			ground_->set_shader_at( n, ground_->create_shader( this ) );
 		}
 	}
 #endif

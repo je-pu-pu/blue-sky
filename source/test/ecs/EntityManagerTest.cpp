@@ -190,7 +190,7 @@ TEST( EcsTest, SystemTest )
 	em->clear();
 
 	em->add_system< core::ecs::ParticleSystem >();
-	em->add_system< core::ecs::PhysicsSystem >();
+	em->add_system< core::ecs::PhysicsSystem >( 0, nullptr );	// update を呼ばないので物理は渡さない
 
 	auto entity = em->create_entity();
 	EXPECT_NE( nullptr, entity );

@@ -6,8 +6,6 @@
 
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
-#include <core/Service.h>
-#include <core/TimeManager.h>
 
 #include <common/math.h>
 #include <common/random.h>
@@ -248,7 +246,7 @@ void GameObject::on_collide_with( GameObject* o )
  */
 float_t GameObject::get_delta_time() const
 {
-	return core::get_time_manager()->get_delta_time();
+	return context_ && context_->delta_time ? context_->delta_time() : 0.f;
 }
 
 /**

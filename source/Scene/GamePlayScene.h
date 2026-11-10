@@ -7,6 +7,7 @@
 
 #include <common/chase_value.h>
 #include <core/setting/SettingStore.h>
+#include <core/graphics/Shader.h>
 
 #include <list>
 #include <memory>
@@ -101,13 +102,14 @@ private:
 
 	/// 入力（Input）を、プレイヤーの入力の部品（ecs::PlayerInputComponent）に書く
 	void read_player_input();
-	// 非所有参照 (各 Manager が所有)
-	Texture*							ui_texture_ = nullptr;			///< UI テクスチャ (GraphicsManager)
-	Shader*								debug_texture_shader_ = nullptr;///< デバッグシェーダー (GraphicsManager)
-	Model*								far_billboards_ = nullptr;		///< 遠景ビルボード (GraphicsManager)
-	Model*								scope_mesh_ = nullptr;			///< 双眼鏡 (GraphicsManager)
-	Model*								rectangle_ = nullptr;			///< 矩形モデル (GraphicsManager)
-	Sound*								bgm_ = nullptr;					///< BGM (SoundManager)
+	// 各 Manager が持つリソース。ハンドルで持ち、使うたびに引く（以前は生ポインタで、解放・差し替えの後に古いものを指し得た。
+	// BGM はステージの bgm で同じ名前の中身が差し替わる）
+	TextureHandle						ui_texture_;			///< UI テクスチャ (GraphicsManager)
+	core::graphics::ShaderHandle		debug_texture_shader_;	///< デバッグシェーダー (GraphicsManager)
+	ModelHandle							far_billboards_;		///< 遠景ビルボード (GraphicsManager)
+	ModelHandle							scope_mesh_;			///< 双眼鏡 (GraphicsManager)
+	ModelHandle							rectangle_;				///< 矩形モデル (GraphicsManager)
+	SoundHandle							bgm_;					///< BGM (SoundManager)
 
 	core::ecs::EntityId					player_id_ = 0;	///< プレイヤー（ECS だけの物体。ObjectFactory が持つ。以前は Player*）
 	GameObjectRef						goal_;		///< ゴール（ECS だけの物体。ObjectFactory が持つ）

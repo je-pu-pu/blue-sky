@@ -36,7 +36,7 @@ GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene( GameMain& game_mai
 
 	, camera_( get_entity_manager()->create_entity() )
 
-	, texture_( get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" ) )
+	, texture_( get_graphics_manager()->get_texture_handle_of( get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" ) ) )
 {
 
 	// 色
@@ -123,7 +123,7 @@ void GeometryShaderCanvasTestScene::update()
 		static int i = 0;
 		i = ( i + 1 ) % texture_names.size();
 
-		texture_ = get_graphics_manager()->load_texture( texture_names[ i ] );
+		texture_ = get_graphics_manager()->get_texture_handle_of( get_graphics_manager()->load_texture( texture_names[ i ] ) );
 	}
 }
 
@@ -179,7 +179,10 @@ void GeometryShaderCanvasTestScene::render()
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_all();
 		get_graphics_manager()->get_current_object_constant_buffer()->bind_to_all();
 
-		texture_->bind_to_ps( 1 );
+		if ( const Texture* texture = resolve( texture_, "pen" ) )
+		{
+			texture->bind_to_ps( 1 );
+		}
 
 		mesh_->bind();
 		mesh_->render( 0 );

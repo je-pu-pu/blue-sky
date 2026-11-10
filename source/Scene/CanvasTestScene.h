@@ -53,7 +53,7 @@ private:
 	Tablet*								tablet_;
 	Color								pen_color_;
 	std::unique_ptr< DynamicPointList >	points_;
-	Texture*							texture_;
+	TextureHandle						texture_;		///< ペンの画像（ハンドルで持ち、描くたびに引く）
 
 	// 以前はファイルの static 変数で、シーンを出て入り直しても前の回転・拡大・ペンの状態が残っていた
 	ObjectConstantBufferData			object_constant_buffer_data_;	///< 点の描画に使う物体の定数

@@ -1,12 +1,8 @@
 #pragma once
 
 #include <blue_sky/graphics/Line.h>
+#include <core/graphics/Texture.h>
 #include <d3d11.h>
-
-namespace core::graphics
-{
-	class Texture;
-}
 
 namespace core::graphics::direct_3d_11
 {
@@ -40,7 +36,8 @@ protected:
 	ID3D11Buffer*	vertex_buffer_;
 	ID3D11Buffer*	index_buffer_;
 	
-	Texture*		texture_;
+	core::graphics::TextureHandle	texture_;		///< 線の画像（ハンドルで持ち、描くたびに引く。以前は生ポインタで、解放の後に古いものを指し得た）
+	mutable bool	texture_lost_logged_ = false;	///< 画像が引けなかったログを出したか（毎フレーム出さない）
 
 	void create_vertex_buffer() override;
 	void create_index_buffer() override;

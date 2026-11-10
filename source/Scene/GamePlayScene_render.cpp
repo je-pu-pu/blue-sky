@@ -235,7 +235,8 @@ void GamePlayScene::update_frame_constant_buffer_data_sub( FrameConstantBufferDa
  */
 void GamePlayScene::update_render_data_for_frame_drawing() const
 {
-	look_.apply_shadow_and_accent( * get_graphics_manager(), bgm_ ? bgm_->get_current_peak_level() : 0.f );
+	const Sound* bgm = resolve( bgm_, "bgm" );
+	look_.apply_shadow_and_accent( * get_graphics_manager(), bgm ? bgm->get_current_peak_level() : 0.f );
 
 	get_graphics_manager()->get_frame_drawing_render_data()->update();
 }
@@ -246,7 +247,9 @@ void GamePlayScene::update_render_data_for_frame_drawing() const
  */
 void GamePlayScene::render_far_billboards() const
 {
-	if ( ! far_billboards_ )
+	const Model* far_billboards = resolve( far_billboards_, "far-billboards" );
+
+	if ( ! far_billboards )
 	{
 		return;
 	}
@@ -258,7 +261,7 @@ void GamePlayScene::render_far_billboards() const
 	get_graphics_manager()->get_shared_object_render_data()->update( & buffer );
 
 	get_graphics_manager()->set_current_object_constant_buffer( get_graphics_manager()->get_shared_object_render_data() );
-	far_billboards_->render();
+	far_billboards->render();
 }
 
 /**
@@ -281,7 +284,10 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 		{
 			bind_shared_object_render_data();
 
-			scope_mesh_->render();
+			if ( const Model* scope = resolve( scope_mesh_, "scope" ) )
+			{
+				scope->render();
+			}
 		} );
 	}
 
@@ -290,7 +296,10 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 
 	sprite->begin();
 
-	render_technique( "|sprite", [this, sprite]
+	// UI の画像はハンドルから引く（引けなければ Sprite は描かない）
+	const Texture* ui_texture = resolve( ui_texture_, "ui" );
+
+	render_technique( "|sprite", [this, sprite, ui_texture]
 	{
 		if ( get_player_inventory().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::ROCKET )
 		{
@@ -301,7 +310,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				win::Rect src_rect = win::Rect::Size( 0, 0, 202, 200 );
 				win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - offset - 5 );
 
-				sprite->draw( dst_point, ui_texture_, src_rect.get_rect() );
+				sprite->draw( dst_point, ui_texture, src_rect.get_rect() );
 			}
 		}
 		else if ( get_player_inventory().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::UMBRELLA )
@@ -316,7 +325,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				t.set_translation( get_width() - src_rect.width() * 0.5f, get_height() - src_rect.height() * 0.5f - offset, 0.f );
 
 				sprite->set_transform( t );
-				sprite->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+				sprite->draw( ui_texture, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 			}
 		}
 		else if ( get_player_inventory().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::STONE )
@@ -328,7 +337,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				win::Rect src_rect = win::Rect::Size( 256, 96, 128, 96 );
 				win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - 5 - offset );
 
-				sprite->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+				sprite->draw( dst_point, ui_texture, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 			}
 		}
 		else if ( get_player_inventory().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::SCOPE )
@@ -336,7 +345,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 			win::Rect src_rect = win::Rect::Size( 256, 256, 192, 140 );
 			win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - 5 );
 
-			sprite->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+			sprite->draw( dst_point, ui_texture, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 		}
 
 		if ( get_player_inventory().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::ROCKET || ( get_player_inventory().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::STONE && get_player().can_throw ) )
@@ -345,7 +354,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 			win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );
 			win::Point dst_point( ( get_width() - src_rect.width() ) / 2, ( get_height() - src_rect.height() ) / 2 );
 
-			sprite->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.5f ) );
+			sprite->draw( ui_texture, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.5f ) );
 		}
 
 		if ( get_player_inventory().has_medal )
@@ -353,7 +362,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 			win::Rect src_rect = win::Rect::Size( 384, 0, 64, 64 );
 			win::Point dst_point( 5, get_height() - src_rect.height() - 5 );
 
-			sprite->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
+			sprite->draw( dst_point, ui_texture, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 		}
 	} );
 
@@ -375,8 +384,15 @@ void GamePlayScene::render_debug_shadow_map_window() const
 
 	get_graphics_manager()->set_viewport( 0.f, 0, get_width() / 4.f * get_graphics_manager()->get_shadow_map()->get_cascade_levels(), get_height() / 4.f );
 
-	debug_texture_shader_->set_texture_at( 0, get_graphics_manager()->get_shadow_map()->get_texture() );
-	debug_texture_shader_->render_model( rectangle_ );
+	// シェーダー・矩形はハンドルから引く（引けなければ描かない）
+	auto* debug_texture_shader = get_graphics_manager()->resolve_shader( debug_texture_shader_ );
+	const Model* rectangle = resolve( rectangle_, "rectangle" );
+
+	if ( debug_texture_shader && rectangle )
+	{
+		debug_texture_shader->set_texture_at( 0, get_graphics_manager()->get_shadow_map()->get_texture() );
+		debug_texture_shader->render_model( rectangle );
+	}
 
 	get_graphics_manager()->set_default_viewport();
 

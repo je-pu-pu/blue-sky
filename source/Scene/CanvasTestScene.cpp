@@ -25,7 +25,7 @@ CanvasTestScene::CanvasTestScene( GameMain& game_main )
 	, pen_color_( 0.f, 0.f, 0.f, 1.f )
 	, points_( new DynamicPointList( get_graphics_manager()->get_direct_3d() ) )
 {
-	texture_ = get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" );
+	texture_ = get_graphics_manager()->get_texture_handle_of( get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" ) );
 	get_graphics_manager()->set_sky_box( "sky-box-sky" );
 
 	// 描画性能を調べるために、デフォルトで大量の点を追加する
@@ -287,7 +287,10 @@ void CanvasTestScene::render()
 		
 		get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data_ );
 
-		texture_->bind_to_ps( 1 );
+		if ( const Texture* texture = resolve( texture_, "pen" ) )
+		{
+			texture->bind_to_ps( 1 );
+		}
 		points_->render();
 	} );
 
@@ -334,7 +337,7 @@ void CanvasTestScene::on_function_key_down( int key )
 
 		pen_texture_index_ = ( pen_texture_index_ + 1 ) % texture_names.size();
 
-		texture_ = get_graphics_manager()->load_texture( texture_names[ pen_texture_index_ ] );
+		texture_ = get_graphics_manager()->get_texture_handle_of( get_graphics_manager()->load_texture( texture_names[ pen_texture_index_ ] ) );
 	}
 
 	if ( key == 6 )

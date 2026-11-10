@@ -116,8 +116,14 @@ void GamePlayScene::run_action( const stage::Action& a )
 
 			if ( a.has( "bgm" ) )
 			{
-				bgm_ = get_sound_manager()->load_music( "bgm", a.text( "bgm" ).c_str(), true );
-				bgm_->play( bgm_loop_ );
+				// 同じ名前で読み直す（ハンドルの番号はそのまま、中身が差し替わる）
+				get_sound_manager()->load_music( "bgm", a.text( "bgm" ).c_str(), true );
+				bgm_ = get_sound_manager()->get_sound_handle( "bgm" );
+
+				if ( Sound* bgm = resolve( bgm_, "bgm" ) )
+				{
+					bgm->play( bgm_loop_ );
+				}
 			}
 
 			if ( a.has( "bpm" ) )
@@ -265,7 +271,7 @@ void GamePlayScene::run_action( const stage::Action& a )
 		}
 		case ActionType::END_STAGE:
 		{
-			if ( bgm_ ) { bgm_->stop(); }
+			if ( Sound* bgm = resolve( bgm_, "bgm" ) ) { bgm->stop(); }
 			get_sound_manager()->stop_all();
 
 			if ( Sound* sound = get_sound_manager()->get_sound( "switch-off" ) )

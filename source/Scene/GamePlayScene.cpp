@@ -52,7 +52,7 @@ namespace blue_sky
 
 GamePlayScene::GamePlayScene( GameMain& game_main )
 	: Scene( game_main )
-	, debug_texture_shader_( get_graphics_manager()->get_shader( "debug_shadow_map_texture" ) )
+	, debug_texture_shader_( get_graphics_manager()->get_shader_handle( "debug_shadow_map_texture" ) )
 	, camera_( new Camera() )
 	, action_bgm_after_timer_( 0.f )
 	, bpm_( 120.f )
@@ -70,7 +70,7 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 	get_physics_manager()->add_ground( Vector( 1000, 1, 1000 ) );
 
 	// Texture
-	ui_texture_ = get_graphics_manager()->load_named_texture( "ui", "media/image/item.png" );
+	ui_texture_ = load_named_texture_handle( "ui", "media/image/item.png" );
 
 	// Sound
 	load_sound_all( get_stage_name() == "2-3" );
@@ -119,25 +119,27 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 	}
 
 	// 既定の遠景。ステージファイルの far_billboards コマンドで差し替える
-	far_billboards_ = get_graphics_manager()->load_model( "far-billboards-1" );
+	far_billboards_ = load_model_handle( "far-billboards-1" );
 
 	// シャドウマップのデバッグ表示に使う矩形。メッシュは GraphicsManager が作った画面全体の矩形を使い回す
 	// （以前は入るたびに同じ名前のモデルとメッシュを作り直していて、古いものが解放されずに溜まり、GraphicsManager の矩形の名前も奪っていた）
-	rectangle_ = get_graphics_manager()->get_model( "rectangle" );
+	Model* rectangle = get_graphics_manager()->get_model( "rectangle" );
 
-	if ( ! rectangle_ )
+	if ( ! rectangle )
 	{
-		rectangle_ = get_graphics_manager()->create_named_model( "rectangle" );
-		rectangle_->set_mesh( get_graphics_manager()->get_mesh( "rectangle" ) );
+		rectangle = get_graphics_manager()->create_named_model( "rectangle" );
+		rectangle->set_mesh( get_graphics_manager()->get_mesh( "rectangle" ) );
 	}
 
-	scope_mesh_ = get_graphics_manager()->load_model( "scope" );
+	rectangle_ = get_graphics_manager()->get_model_handle( rectangle );
 
-	bgm_ = get_sound_manager()->get_sound( "bgm" );
+	scope_mesh_ = load_model_handle( "scope" );
 
-	if ( bgm_ )
+	bgm_ = get_sound_manager()->get_sound_handle( "bgm" );	// 無ければ空（ステージの bgm で読む）
+
+	if ( Sound* bgm = resolve( bgm_, "bgm" ) )
 	{
-		bgm_->play( bgm_loop_ );
+		bgm->play( bgm_loop_ );
 	}
 
 	get_graphics_manager()->load_paper_textures();
@@ -712,18 +714,15 @@ void GamePlayScene::update_balloon_sound()
 		action_bgm_after_timer_ -= get_elapsed_time();
 	}
 
-	if ( action_bgm_after_timer_ > 0.f )
+	if ( Sound* bgm = resolve( bgm_, "bgm" ) )
 	{
-		if ( bgm_ )
+		if ( action_bgm_after_timer_ > 0.f )
 		{
-			bgm_->fade_out();
+			bgm->fade_out();
 		}
-	}
-	else
-	{
-		if ( bgm_ )
+		else
 		{
-			bgm_->fade_in();
+			bgm->fade_in();
 		}
 	}
 

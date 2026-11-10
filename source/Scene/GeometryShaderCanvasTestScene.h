@@ -55,7 +55,7 @@ protected:
 	TransformComponent* camera_transform_ = nullptr;
 	CameraComponent* camera_component_ = nullptr;
 
-	Texture* texture_;
+	TextureHandle texture_;		///< ペンの画像（ハンドルで持ち、描くたびに引く）
 public:
 	explicit GeometryShaderCanvasTestScene( GameMain& game_main );
 	~GeometryShaderCanvasTestScene() override;

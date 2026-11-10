@@ -8,6 +8,7 @@
 #include <common/math.h>
 
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
 namespace blue_sky::graphics::direct_3d_11
@@ -18,7 +19,6 @@ Line::Line( Direct3D* direct_3d, blue_sky::graphics::GraphicsManager* graphics_m
 	, graphics_manager_( graphics_manager )
 	, vertex_buffer_( nullptr )
 	, index_buffer_( nullptr )
-	, texture_( nullptr )
 {
 
 }
@@ -59,13 +59,27 @@ void Line::create_index_buffer()
 
 void Line::create_texture()
 {
-	texture_ = graphics_manager_->load_named_texture( "lines", "media/texture/lines.png" );
+	texture_ = graphics_manager_->get_texture_handle_of( graphics_manager_->load_named_texture( "lines", "media/texture/lines.png" ) );
 }
 
 void Line::render_part( int part_count ) const
 {
 	if ( part_count < 1 )
 	{
+		return;
+	}
+
+	// 画像はハンドルから引く。解放されていれば描かない（理由は 1 回だけログに出す）
+	const Texture* texture = graphics_manager_->resolve_texture( texture_ );
+
+	if ( ! texture )
+	{
+		if ( ! texture_lost_logged_ )
+		{
+			texture_lost_logged_ = true;
+			std::cout << "[Line] 線の画像（lines）を引けません。線を描きません" << std::endl;
+		}
+
 		return;
 	}
 
@@ -77,7 +91,7 @@ void Line::render_part( int part_count ) const
 
 	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
 
-	texture_->bind_to_ps( 0 );
+	texture->bind_to_ps( 0 );
 	// direct_3d_->bind_texture_to_ps( 0, texture_ );
 
 	// debug !!!

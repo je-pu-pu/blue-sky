@@ -226,6 +226,7 @@ public:
 
 	/// キーやマウスのボタンが押された（短いタップを取りこぼさないよう Input に溜める）
 	void on_raw_key_down( int vk ) override;
+	void on_raw_mouse_move( long dx, long dy ) override;
 
 	/// IME で変換中の文字が変わった（確定・取り消しで空）
 	void on_ime_composition( const std::u32string& text ) override;

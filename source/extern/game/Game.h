@@ -33,6 +33,9 @@ public:
 	/// キーやマウスのボタンが押された（キーリピートは除く。ポーリングの取りこぼし対策）
 	virtual void on_raw_key_down( int /* vk */ ) { }
 
+	/// マウスが動いた（Raw Input の相対の移動量。フレームの間の移動を取りこぼさない）
+	virtual void on_raw_mouse_move( long /* dx */, long /* dy */ ) { }
+
 	/// IME で変換中の文字が変わった（確定・取り消しで空）
 	virtual void on_ime_composition( const std::u32string& ) { }
 

@@ -145,6 +145,9 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 	
 	initial_full_screen_ = initial_full_screen;
 
+	// 入力の出来事を Raw Input（WM_INPUT）で受け取る。登録できなければ以前のやり方（ポーリング・WM_KEYDOWN・DirectInput）を使う
+	is_raw_input_enabled_ = blue_sky::raw_input::register_devices( hWnd );
+
 	// ゲームを初期化する
 	game_ = blue_sky::GameMain::get_instance();
 	blue_sky::GameMain::get_instance()->setup_scene();
@@ -250,13 +253,38 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		on_resize( hwnd );
 		break;
 	}
+	case WM_INPUT:
+	{
+		// 入力の出来事（キー・マウスボタンの押す/離す・相対の移動量）。フレームの間に起きたことを順に渡す
+		App* app = App::get_instance();
+		std::vector< blue_sky::raw_input::Event > events;
+
+		if ( app->game_ && blue_sky::raw_input::read( lp, app->raw_input_decoder_, events ) )
+		{
+			for ( const auto& e : events )
+			{
+				if ( e.type == blue_sky::raw_input::Event::Type::KEY_DOWN )
+				{
+					app->game_->on_raw_key_down( e.code );
+				}
+				else if ( e.type == blue_sky::raw_input::Event::Type::MOUSE_MOVE )
+				{
+					app->game_->on_raw_mouse_move( e.dx, e.dy );
+				}
+				// ホイールは WM_MOUSEWHEEL で受け取っている（二重に数えない）
+			}
+		}
+
+		return DefWindowProc( hwnd, msg, wp, lp );		// WM_INPUT は DefWindowProc で後始末する
+	}
 	case WM_KEYDOWN:
 	{
 		// 押し続けによるキーリピートは、ファンクションキー（ミュート・フルスクリーンなどの切り替え）には渡さない
 		const bool is_repeat = ( lp & ( 1 << 30 ) ) != 0;
 		const bool is_function_key = wp >= VK_F1 && wp <= VK_F24;
 
-		if ( App::get_instance()->game_ && ! is_repeat )
+		// 押下の記録は Raw Input が使えるならそちらで行う（二重に記録しない）
+		if ( App::get_instance()->game_ && ! is_repeat && ! App::get_instance()->is_raw_input_enabled_ )
 		{
 			App::get_instance()->game_->on_raw_key_down( static_cast< int >( wp ) );
 		}
@@ -272,8 +300,8 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	case WM_RBUTTONDOWN:
 	case WM_MBUTTONDOWN:
 	{
-		// 短いクリックを取りこぼさない（ボタンの状態は毎フレームのポーリングで読んでいるため）
-		if ( App::get_instance()->game_ )
+		// 短いクリックを取りこぼさない（ボタンの状態は毎フレームのポーリングで読んでいるため）。Raw Input が使えるならそちらで記録する
+		if ( App::get_instance()->game_ && ! App::get_instance()->is_raw_input_enabled_ )
 		{
 			App::get_instance()->game_->on_raw_key_down( msg == WM_LBUTTONDOWN ? VK_LBUTTON : msg == WM_RBUTTONDOWN ? VK_RBUTTON : VK_MBUTTON );
 		}
@@ -282,7 +310,7 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_SYSKEYDOWN:
 	{
-		if ( App::get_instance()->game_ && ! ( lp & ( 1 << 30 ) ) )
+		if ( App::get_instance()->game_ && ! ( lp & ( 1 << 30 ) ) && ! App::get_instance()->is_raw_input_enabled_ )
 		{
 			App::get_instance()->game_->on_raw_key_down( static_cast< int >( wp ) );
 		}
@@ -401,6 +429,9 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	case WM_ACTIVATEAPP:
 	{
 		App::get_instance()->set_active( LOWORD( wp ) != 0 );
+
+		// フォーカスを失うと離したことを受け取れないので、押している状態を忘れる
+		App::get_instance()->raw_input_decoder_.reset();
 
 		if ( wp )
 		{

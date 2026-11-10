@@ -361,8 +361,15 @@ void Input::update()
 	mouse_x_rate_ = math::clamp( point.x / static_cast< float >( app_->get_width() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_x_sensitivity_;
 	mouse_y_rate_ = math::clamp( point.y / static_cast< float >( app_->get_height() - 1 ) * 2.f - 1.f, -1.f, +1.f ) * mouse_y_sensitivity_;
 
-	mouse_dx_ = static_cast< float >( direct_input_->get_mouse_state().lX ) / static_cast< float >( app_->get_width() - 1 ) * 2.f * mouse_x_sensitivity_;
-	mouse_dy_ = static_cast< float >( direct_input_->get_mouse_state().lY ) / static_cast< float >( app_->get_height() - 1 ) * 2.f * mouse_y_sensitivity_;
+	// マウスの移動量 : Raw Input が使えるなら、フレームの間に受け取った相対の移動量の合計を使う（DirectInput のマウスは古い API）
+	const bool raw = app_->is_raw_input_enabled();
+	const float_t move_x = raw ? static_cast< float_t >( raw_mouse_dx_ ) : static_cast< float_t >( direct_input_->get_mouse_state().lX );
+	const float_t move_y = raw ? static_cast< float_t >( raw_mouse_dy_ ) : static_cast< float_t >( direct_input_->get_mouse_state().lY );
+	raw_mouse_dx_ = 0;
+	raw_mouse_dy_ = 0;
+
+	mouse_dx_ = move_x / static_cast< float >( app_->get_width() - 1 ) * 2.f * mouse_x_sensitivity_;
+	mouse_dy_ = move_y / static_cast< float >( app_->get_height() - 1 ) * 2.f * mouse_y_sensitivity_;
 
 	mouse_point_ = point;
 

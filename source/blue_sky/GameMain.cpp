@@ -928,6 +928,11 @@ void GameMain::set_vsync( bool v )
 }
 
 void GameMain::on_raw_key_down( int vk )
+void GameMain::on_raw_mouse_move( long dx, long dy )
+{
+	input_->add_raw_mouse_move( dx, dy );
+}
+
 {
 	input_->latch_key_press( vk );
 }

@@ -19,6 +19,7 @@
 #include <memory>
 #include <functional>
 #include <unordered_map>
+#include <blue_sky/RawInput.h>
 
 /**
  * アプリケーションとそれに対応するひとつのウィンドウを管理する
@@ -51,6 +52,9 @@ private:
 	bool		initial_full_screen_;	///< 起動時にフルスクリーンで始めるか（実際の状態はスワップチェーン、ユーザーの選択は設定が持つ）
 
 	bool		is_mouse_in_window_;
+
+	blue_sky::raw_input::Decoder	raw_input_decoder_;			///< Raw Input の出来事の読み取り
+	bool		is_raw_input_enabled_ = false;	///< Raw Input を使えるか（使えなければ、以前のポーリングとメッセージで読む）
 
 	bool		is_show_cursor_enabled_ = true;
 	bool		is_clip_cursor_enabled_;
@@ -90,6 +94,9 @@ public:
 
 	void set_active( bool );
 	bool is_active() const { return is_active_; }
+
+	/// Raw Input（WM_INPUT）で入力の出来事を受け取っているか
+	bool is_raw_input_enabled() const { return is_raw_input_enabled_; }
 
 	const char_t* get_title();
 	void set_title( const char_t* );

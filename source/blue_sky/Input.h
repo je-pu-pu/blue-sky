@@ -79,6 +79,8 @@ private:
 	float mouse_y_rate_;									///< マウス Y 座標 ( -1.f .. 1.f )
 	
 	float mouse_dx_;										///< マウス X 移動量
+	long raw_mouse_dx_ = 0;									///< Raw Input で受け取った、このフレームのマウスの移動量
+	long raw_mouse_dy_ = 0;
 	float mouse_dy_;
 
 	int mouse_wheel_;										///< マウスホイール ( + : front / - : back )
@@ -191,6 +193,9 @@ public:
 	/// キーやマウスのボタンが押された（WM_KEYDOWN / WM_LBUTTONDOWN など）。1 フレーム内に押して離しても取りこぼさない
 	void latch_key_press( int vk ) { if ( vk > 0 && vk < 256 ) key_latched_[ vk ] = true; }
 
+	/// Raw Input のマウスの相対の移動量を足す（次の update でそのフレームの移動量になる）
+	void add_raw_mouse_move( long dx, long dy ) { raw_mouse_dx_ += dx; raw_mouse_dy_ += dy; }
+
 	/// 溜まった文字を取り出す（UI が 1 フレームに 1 回呼ぶ）
 	std::u32string take_text();
 
@@ -264,6 +269,8 @@ public:
 	void clear_mouse_move() override
 	{
 		mouse_dx_ = 0.f;
+		raw_mouse_dx_ = 0;
+		raw_mouse_dy_ = 0;
 		mouse_dy_ = 0.f;
 	}
 

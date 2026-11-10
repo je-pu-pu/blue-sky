@@ -22,21 +22,34 @@ RenderSystem::RenderSystem( core::graphics::GraphicsManager* graphics_manager, c
 	, render_result_texture_2_( get_graphics_manager()->create_render_target_texture() )
 	, instance_buffer_( get_graphics_manager()->create_instance_buffer() )
 	, object_constant_buffer_( get_graphics_manager()->create_constant_buffer( sizeof( core::ObjectConstantBufferData ), core::ObjectConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC ) )	// 描画ごとに書き換える
-	, noise_shader_( get_graphics_manager()->get_shader( "post_effect_noise" ) )
-	, instanced_shader_( get_graphics_manager()->get_shader( "lit_instanced" ) )
-	, beat_pulse_shader_( get_graphics_manager()->get_shader( "post_effect_beat_pulse" ) )
+	, noise_shader_( get_graphics_manager()->get_shader_handle( "post_effect_noise" ) )
+	, instanced_shader_( get_graphics_manager()->get_shader_handle( "lit_instanced" ) )
+	, beat_pulse_shader_( get_graphics_manager()->get_shader_handle( "post_effect_beat_pulse" ) )
 {
-	if ( ! noise_shader_ || ! beat_pulse_shader_ )
+	if ( noise_shader_.is_null() || beat_pulse_shader_.is_null() )
 	{
 		// 以前は毎フレーム引いて、無ければ落ちていた。今は無いものを使わずに描く
 		std::cout << "[RenderSystem] ポストエフェクトのシェーダーがありません（setup_default_shaders の前に作った）。ポストエフェクトを使わずに描きます" << std::endl;	// core は debug_log を知らない。GameMain が debug_log へ流す
 	}
 }
 
+core::graphics::Shader* RenderSystem::resolve_shader( core::graphics::ShaderHandle h )
+{
+	auto* shader = get_graphics_manager()->resolve_shader( h );
+
+	if ( ! shader && ! h.is_null() && ! shader_lost_logged_ )
+	{
+		shader_lost_logged_ = true;
+		std::cout << "[RenderSystem] 使うシェーダーが解放されました。そのシェーダーを使わずに描きます" << std::endl;	// core は debug_log を知らない。GameMain が debug_log へ流す
+	}
+
+	return shader;
+}
+
 /**
  * 前のフレームの world 行列を消す（容量は残す）
  *
- * 前のフレームで使わなかったモデルは map から外す（解放されたモデルのアドレスが溜まり続けないように）
+ * 前のフレームで使わなかったモデルは map から外す（使わなくなったモデルの番号が溜まり続けないように）
  */
 void RenderSystem::clear_model_instances()
 {
@@ -56,14 +69,17 @@ void RenderSystem::clear_model_instances()
 
 void RenderSystem::update()
 {
-	if ( noise_shader_ )
+	auto* noise_shader = resolve_shader( noise_shader_ );
+
+	if ( noise_shader )
 	{
-		noise_shader_->set_float( "offset", time_manager_->get_total_elapsed_time() );
+		noise_shader->set_float( "offset", time_manager_->get_total_elapsed_time() );
 	}
 
 	get_graphics_manager()->setup_rendering();
 
-	const auto is_post_effect_enabled = beat_pulse_shader_ != nullptr;	// 無ければ画面へ直に描く（テクスチャに描いて出さない、にならないように）
+	core::graphics::Shader* beat_pulse_shader = resolve_shader( beat_pulse_shader_ );
+	const auto is_post_effect_enabled = beat_pulse_shader != nullptr;	// 無ければ画面へ直に描く（テクスチャに描いて出さない、にならないように）
 
 	if ( is_post_effect_enabled )
 	{
@@ -111,15 +127,29 @@ void RenderSystem::update()
 		world *= Matrix().set_translation( transform->transform.get_position() );
 
 		// モデルごとにグループ化
-		model_instances_[ model_component->model ].push_back( world );
+		model_instances_[ model_component->model.id ].push_back( world );
 	}
 
-	auto* instanced_shader = instanced_shader_;
+	auto* instanced_shader = resolve_shader( instanced_shader_ );
 
 	// 各モデルグループを描画
-	for ( auto& [ model, matrices ] : model_instances_ )
+	for ( auto& [ model_id, matrices ] : model_instances_ )
 	{
 		if ( matrices.empty() ) continue;
+
+		// モデルはハンドルから引く（空・解放済みなら描かない）
+		core::graphics::Model* model = get_graphics_manager()->resolve_model( core::graphics::ModelHandle{ model_id } );
+
+		if ( ! model )
+		{
+			if ( model_id != 0 && ! model_lost_logged_ )
+			{
+				model_lost_logged_ = true;
+				std::cout << "[RenderSystem] 描くモデルが解放されました。そのモデルの物体は描きません" << std::endl;
+			}
+
+			continue;
+		}
 
 		const size_t instance_count = matrices.size();
 
@@ -158,12 +188,8 @@ void RenderSystem::update()
 		}
 	}
 
-	core::graphics::Shader* beat_pulse_shader = nullptr;
-
 	if ( is_post_effect_enabled )
 	{
-		beat_pulse_shader = beat_pulse_shader_;
-
 		get_graphics_manager()->set_post_effect_shader( beat_pulse_shader );
 		get_graphics_manager()->render_post_effect( render_result_texture_1_.get() ); // 直接バックバッファへ
 
@@ -188,9 +214,9 @@ void RenderSystem::update()
 	// get_graphics_manager()->render_debug_bullet();
 	
 	// ImGUI によるシェーダーパラメター変更用 UI の自動描画
-	if ( noise_shader_ )
+	if ( noise_shader )
 	{
-		noise_shader_->render_parameter_gui();
+		noise_shader->render_parameter_gui();
 	}
 
 	if ( beat_pulse_shader )

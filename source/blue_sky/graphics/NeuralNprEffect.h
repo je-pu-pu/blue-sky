@@ -1,5 +1,7 @@
 #pragma once
 
+#include <core/ResourceHandle.h>
+
 #include <memory>
 #include <vector>
 #include <random>
@@ -54,8 +56,9 @@ private:
 
 	std::unique_ptr< core::graphics::NeuralStylizer >        stylizer_;
 	std::unique_ptr< core::graphics::direct_3d_11::Texture > output_texture_;  ///< 推論結果の表示用（CPU から動的更新）
-	core::graphics::Shader* recolor_shader_ = nullptr;  ///< 色保持リカラー用
-	core::graphics::Shader* default_shader_ = nullptr;  ///< 素通し（うねり回避）
+	/// 使うシェーダー（ハンドルで持ち、使うたびに引く。以前は生ポインタで、シェーダーが解放されると壊れ得た）
+	core::ResourceHandle< core::graphics::Shader > recolor_shader_;  ///< 色保持リカラー用
+	core::ResourceHandle< core::graphics::Shader > default_shader_;  ///< 素通し（うねり回避）
 
 	// パラメータ
 	bool  enabled_        = false;  ///< リアルタイム NPR を有効にするか

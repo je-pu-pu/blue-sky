@@ -45,7 +45,7 @@ TransformTestScene::TransformTestScene( GameMain& game_main )
 	current_entity_->add_component< core::ecs::RenderComponent >();
 	current_entity_model_ = current_entity_->add_component< core::ecs::ModelComponent >();
 
-	current_entity_model_->model = get_graphics_manager()->load_model( "goal" );
+	current_entity_model_->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "goal" ) );
 
 	camera_transform_ = camera_->add_component< core::ecs::TransformComponent >();
 	camera_transform_->transform.set_identity();
@@ -96,7 +96,7 @@ void TransformTestScene::update()
 	if ( ImGui::Combo( "Model", & model_index, & combo_items[ 0 ], static_cast< int >( combo_items.size() ) ) )
 	{
 		std::cout << "index : " << model_index << std::endl;
-		current_entity_model_->model = get_graphics_manager()->load_model( combo_items[ model_index ] );
+		current_entity_model_->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( combo_items[ model_index ] ) );
 	}
 
 	static std::vector< int > shader_index_list;
@@ -109,14 +109,18 @@ void TransformTestScene::update()
 		shader_combo_items.push_back( s->get_name() );
 	}
 
-	shader_index_list.resize( current_entity_model_->model->get_shader_count() );
+	// モデルはハンドルから引く（読めなかった・解放されたなら、シェーダーの選択は出さない）
+	auto* current_model = get_graphics_manager()->resolve_model( current_entity_model_->model );
+	const uint_t shader_count = current_model ? current_model->get_shader_count() : 0;
 
-	for ( uint_t n = 0; n < current_entity_model_->model->get_shader_count(); n++ )
+	shader_index_list.resize( shader_count );
+
+	for ( uint_t n = 0; n < shader_count; n++ )
 	{
 		if ( ImGui::Combo( string_t( "Shader " + std::to_string( n ) ).c_str(), & shader_index_list[ n ], & shader_combo_items[ 0 ], static_cast< int >( shader_combo_items.size() ) ) )
 		{
 			std::cout << "index : " << shader_index_list[ n ] << std::endl;
-			current_entity_model_->model->set_shader_at( n, get_graphics_manager()->get_shader_list()[ shader_index_list[ n ] ].get() );
+			current_model->set_shader_at( n, get_graphics_manager()->get_shader_list()[ shader_index_list[ n ] ].get() );
 		}
 	}
 

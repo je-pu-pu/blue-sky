@@ -37,8 +37,8 @@ namespace
 NeuralNprEffect::NeuralNprEffect( core::graphics::GraphicsManager* gm )
 {
 	// 色保持リカラー／素通しシェーダを取得（setup_default_shaders 済み前提）
-	recolor_shader_ = gm->get_shader( "post_effect_recolor" );
-	default_shader_ = gm->get_shader( "post_effect_default" );
+	recolor_shader_ = gm->get_shader_handle( "post_effect_recolor" );
+	default_shader_ = gm->get_shader_handle( "post_effect_default" );
 
 	// モデルがあれば DirectML でロード（無ければ NPR 無効のまま続行）
 	std::error_code ec;
@@ -187,18 +187,20 @@ bool NeuralNprEffect::apply( core::graphics::GraphicsManager* gm, core::graphics
 
 			// 表示の間だけポストエフェクトを差し替え、描画後に元へ戻す（非NPRシーンに影響させない）
 			core::graphics::Shader* prev_pe = gm->get_post_effect_shader();
-			if ( color_preserve_ && recolor_shader_ )
+			core::graphics::Shader* recolor_shader = gm->resolve_shader( recolor_shader_ );	// 解放されていれば nullptr（使わない）
+			core::graphics::Shader* default_shader = gm->resolve_shader( default_shader_ );
+			if ( color_preserve_ && recolor_shader )
 			{
-				recolor_shader_->set_float( "blue", color_blue_ );
-				recolor_shader_->set_float( "yellow", color_yellow_ );
-				recolor_shader_->set_float( "a_spread", color_a_ );
-				recolor_shader_->set_float( "dark_clip", color_dark_ );
-				recolor_shader_->set_texture_at( 1, scene );  // 元シーン(色の基準)
-				gm->set_post_effect_shader( recolor_shader_ );
+				recolor_shader->set_float( "blue", color_blue_ );
+				recolor_shader->set_float( "yellow", color_yellow_ );
+				recolor_shader->set_float( "a_spread", color_a_ );
+				recolor_shader->set_float( "dark_clip", color_dark_ );
+				recolor_shader->set_texture_at( 1, scene );  // 元シーン(色の基準)
+				gm->set_post_effect_shader( recolor_shader );
 			}
-			else if ( default_shader_ )
+			else if ( default_shader )
 			{
-				gm->set_post_effect_shader( default_shader_ );  // 素通し（うねり無し）
+				gm->set_post_effect_shader( default_shader );  // 素通し（うねり無し）
 			}
 			gm->render_post_effect( output_texture_.get() );
 			if ( prev_pe ) gm->set_post_effect_shader( prev_pe );
@@ -234,7 +236,7 @@ void NeuralNprEffect::render_imgui()
 		ImGui::SliderInt( "  proc res (long side)", & proc_long_side_, 128, 1080 );
 		ImGui::SliderFloat( "  boil (noise temporal)", & noise_temporal_, 0.05f, 1.0f );
 		ImGui::Checkbox( "  color preserve (recolor)", & color_preserve_ );
-		ImGui::Text( "  shaders: recolor=%s default=%s", recolor_shader_ ? "ok" : "NULL", default_shader_ ? "ok" : "NULL" );
+		ImGui::Text( "  shaders: recolor=%s default=%s", ! recolor_shader_.is_null() ? "ok" : "NULL", ! default_shader_.is_null() ? "ok" : "NULL" );
 		if ( color_preserve_ )
 		{
 			ImGui::SliderFloat( "  blue", & color_blue_, 0.f, 8.f );

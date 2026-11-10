@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/type.h>
+#include <core/ResourceHandle.h>
 #include <vector>
 #include <optional>
 #include <limits>
@@ -11,6 +12,10 @@ namespace core::graphics
 	class Mesh;
 	class Texture;
 	class InstanceBuffer;
+	class Shader;
+
+/// シェーダーを指すハンドル（解放の後は nullptr。引くときは GraphicsManager::resolve_shader）
+using ShaderHandle = core::ResourceHandle< Shader >;
 
 /**
  * 抽象シェーダークラス

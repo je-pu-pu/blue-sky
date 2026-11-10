@@ -77,6 +77,10 @@ public:
 	template< typename Type, typename ... Args > Type* create_shader( Args ... args ) { return shader_manager_.create< Type >( this, args ... ); }
 	template< typename Type, typename ... Args > Type* create_named_shader( const char_t* name, Args ... args ) { return shader_manager_.create_named< Type >( name, this, args ... ); }
 	template< typename Type=Shader > Type* get_shader( const char_t* name ) { return shader_manager_.get< Type >( name ); }
+
+	/// 名前のシェーダーのハンドル（無ければ空）・ハンドルから引く（解放済み・空なら nullptr）。シェーダーを長く持つ側はハンドルを持つ
+	ShaderHandle get_shader_handle( const char_t* name ) const { return shader_manager_.get_handle( name ); }
+	Shader* resolve_shader( ShaderHandle h ) const { return shader_manager_.resolve( h ); }
 	Shader* clone_shader( const Shader* s ) { Shader* s2 = s->clone(); shader_manager_.add( s2 ); return s2; }
 
 	const ShaderManager::ResourceList& get_shader_list() const { return shader_manager_.get_resource_list(); }

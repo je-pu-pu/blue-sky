@@ -91,7 +91,7 @@ MusicGamePrototypeScene::MusicGamePrototypeScene( GameMain& game_main )
 		t->transform.set_identity();
 		e->add_component< core::ecs::RenderComponent >();
 		auto* m = e->add_component< core::ecs::ModelComponent>();
-		m->model = get_graphics_manager()->load_model( "ground" );
+		m->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "ground" ) );
 
 		// 地面の RigidBody (静的)
 		auto* ground_rigid_body = e->add_component< core::ecs::RigidBodyComponent >();
@@ -156,7 +156,7 @@ MusicGamePrototypeScene::MusicGamePrototypeScene( GameMain& game_main )
 
 			e->add_component< core::ecs::RenderComponent >();
 			auto* m = e->add_component< core::ecs::ModelComponent>();
-			m->model = models[ common::random( 0, 1 ) ];
+			m->model = get_graphics_manager()->get_model_handle( models[ common::random( 0, 1 ) ] );
 
 			auto* building_rigid_body = e->add_component< core::ecs::RigidBodyComponent >();
 			building_rigid_body->shape_type = RigidBodyShapeType::Box;
@@ -167,7 +167,7 @@ MusicGamePrototypeScene::MusicGamePrototypeScene( GameMain& game_main )
 	}
 
 	// 風船モデルを読み込み
-	auto* balloon_model = get_graphics_manager()->load_model( "balloon" );
+	const auto balloon_model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "balloon" ) );
 
 	// 隣接するビル間に風船の連なりを配置
 	for ( int z = 0; z < 30; z++ )
@@ -273,7 +273,7 @@ void MusicGamePrototypeScene::update()
 
 		e->add_component< core::ecs::RenderComponent >();
 		auto* m = e->add_component< core::ecs::ModelComponent >();
-		m->model = get_graphics_manager()->load_model( "box-1x1x1" );
+		m->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "box-1x1x1" ) );
 
 		auto* rigid_body = e->add_component< core::ecs::RigidBodyComponent >();
 		rigid_body->shape_type = RigidBodyShapeType::Box;

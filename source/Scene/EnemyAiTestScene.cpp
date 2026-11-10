@@ -128,7 +128,7 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 		t->transform.set_identity();
 		e->add_component< RenderComponent >();
 		auto* m = e->add_component< ModelComponent >();
-		m->model = get_graphics_manager()->load_model( "ground" );
+		m->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "ground" ) );
 
 		auto* rb = e->add_component< RigidBodyComponent >();
 		rb->shape_type = RigidBodyShapeType::Box;
@@ -143,7 +143,7 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 		Vector( -6.f, 0.f, 8.f ),
 		Vector(  0.f, 0.f, 14.f ),
 	};
-	auto* box_model = get_graphics_manager()->load_model( "box-1x1x1" );
+	const auto box_model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "box-1x1x1" ) );
 	for ( const auto& p : building_positions )
 	{
 		auto* e = get_entity_manager()->create_entity();
@@ -182,7 +182,7 @@ void EnemyAiTestScene::spawn_enemy( const Vector& start, const std::vector< Vect
 	// 見た目（プレースホルダの箱＝ロボット）
 	e->add_component< RenderComponent >();
 	auto* m = e->add_component< ModelComponent >();
-	m->model = get_graphics_manager()->load_model( "box-1x1x1" );
+	m->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "box-1x1x1" ) );
 
 	auto* perception = e->add_component< blue_sky::ecs::PerceptionComponent >();
 	perception->eye_height = 1.0f;

@@ -27,8 +27,6 @@ namespace blue_sky
 
 using RigidBodyShapeType = core::physics::RigidBodyShapeType;
 
-core::graphics::Model* models[] = { nullptr, nullptr, nullptr };
-
 PhysicsTestScene::PhysicsTestScene( GameMain& game_main )
 	: Scene( game_main )
 	, camera_( get_entity_manager()->create_entity() )
@@ -67,7 +65,7 @@ PhysicsTestScene::PhysicsTestScene( GameMain& game_main )
 
 		ground->add_component< core::ecs::RenderComponent >();
 		auto* ground_model = ground->add_component< core::ecs::ModelComponent >();
-		ground_model->model = get_graphics_manager()->load_model( "wall-1" );
+		ground_model->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "wall-1" ) );
 
 		auto* ground_rigid_body = ground->add_component< core::ecs::RigidBodyComponent >();
 		ground_rigid_body->shape_type = RigidBodyShapeType::Box;
@@ -97,13 +95,12 @@ PhysicsTestScene::PhysicsTestScene( GameMain& game_main )
 	shaders[ 1 ]->set_texture_at( 0, get_graphics_manager()->load_named_texture( "matcap-b", "media/texture/matcap/test/mc13.jpg" ) );
 	shaders[ 2 ]->set_texture_at( 0, get_graphics_manager()->load_named_texture( "matcap-c", "media/texture/matcap/test/mc11.jpg" ) );
 
-	models[ 0 ] = get_graphics_manager()->clone_model( get_graphics_manager()->load_model( "sphere" ) );
-	models[ 1 ] = get_graphics_manager()->clone_model( get_graphics_manager()->load_model( "sphere" ) );
-	models[ 2 ] = get_graphics_manager()->clone_model( get_graphics_manager()->load_model( "sphere" ) );
-
-	models[ 0 ]->set_shader_at( 0, shaders[ 0 ] );
-	models[ 1 ]->set_shader_at( 0, shaders[ 1 ] );
-	models[ 2 ]->set_shader_at( 0, shaders[ 2 ] );
+	for ( size_t n = 0; n < sphere_models_.size(); n++ )
+	{
+		auto* model = get_graphics_manager()->clone_model( get_graphics_manager()->load_model( "sphere" ) );
+		model->set_shader_at( 0, shaders[ n ] );
+		sphere_models_[ n ] = get_graphics_manager()->get_model_handle( model );
+	}
 }
 
 void PhysicsTestScene::update()
@@ -120,7 +117,7 @@ void PhysicsTestScene::update()
 
 		e->add_component< core::ecs::RenderComponent >();
 		auto* m = e->add_component< core::ecs::ModelComponent >();
-		m->model = models[ common::random( 0, 2 ) ];
+		m->model = sphere_models_[ common::random( 0, 2 ) ];
 
 		auto* physics_component = e->add_component< core::ecs::RigidBodyComponent >();
 		physics_component->shape_type = RigidBodyShapeType::Sphere;

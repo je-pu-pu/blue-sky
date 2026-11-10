@@ -131,6 +131,8 @@ GameMain::GameMain( App& app )
 	// シェーダーの読み直し（開発中に .hlsl を保存したとき）
 	// Effect は成功してから差し替え、取得済みの technique は中身だけ入れ替えるので、描画側のポインタはそのまま使える。
 	// コンパイルに失敗したら、ログを出して前のシェーダーのまま続ける。
+	// 監視は開発ビルド（_DEBUG）だけで行う。配布版ではシェーダーを書き換えないので、フォルダの監視と読み直しの経路を持たない
+#ifdef _DEBUG
 	get_app()->watch_directory_change( "media/shader/", [this] () {
 		debug_log( "[Shader] media/shader/ の変更を検出したので読み直します" );
 
@@ -156,6 +158,7 @@ GameMain::GameMain( App& app )
 			graphics_manager_->refresh_all_shaders();
 		}
 	} );
+#endif
 
 	ImGui::CreateContext();
 	ImGui_ImplWin32_Init( get_app()->GetWindowHandle() );

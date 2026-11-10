@@ -145,6 +145,53 @@ TEST( ObjectRenderDataSystemTest, アニメーションの部品は後から足�
 	EXPECT_EQ( nullptr, system->get_animation( entity->get_id() ) );
 }
 
+TEST( ObjectRenderDataSystemTest, 描く対象はアニメーションを持ち_付け外しで一覧が作り直される )
+{
+	// 以前は毎フレーム、描く対象ごとに Entity とアニメーションの部品を引いていた。今は付け外しを知って一覧を作り直す
+	EntityManager manager;
+	manager.add_system< ObjectRenderDataSystem >( 0, nullptr );
+	auto* system = manager.get_system< ObjectRenderDataSystem >();
+
+	auto* plain = create_render_entity( manager );
+	auto* animated = create_render_entity( manager );
+
+	ASSERT_EQ( 2u, system->get_render_targets().size() );
+	EXPECT_EQ( nullptr, system->get_render_targets()[ 0 ].animation );
+	EXPECT_EQ( nullptr, system->get_render_targets()[ 1 ].animation );
+
+	auto* animation = animated->add_component< AnimationComponent >();
+
+	ASSERT_EQ( 2u, system->get_render_targets().size() );
+	EXPECT_EQ( plain->get_id(), system->get_render_targets()[ 0 ].id );
+	EXPECT_EQ( nullptr, system->get_render_targets()[ 0 ].animation );
+	EXPECT_EQ( animated->get_id(), system->get_render_targets()[ 1 ].id );
+	EXPECT_EQ( animation, system->get_render_targets()[ 1 ].animation );
+
+	system->update_animations();	// 再生器（player）の無いアニメーションの部品でも落ちない
+
+	animated->remove_component< AnimationComponent >();
+
+	ASSERT_EQ( 2u, system->get_render_targets().size() );
+	EXPECT_EQ( nullptr, system->get_render_targets()[ 1 ].animation );
+	EXPECT_EQ( nullptr, system->get_animation( animated->get_id() ) );
+
+	system->update_animations();
+}
+
+TEST( ObjectRenderDataSystemTest, System_を後から足してもアニメーションを引ける )
+{
+	EntityManager manager;
+	auto* entity = create_render_entity( manager );
+	auto* animation = entity->add_component< AnimationComponent >();
+
+	manager.add_system< ObjectRenderDataSystem >( 0, nullptr );
+	auto* system = manager.get_system< ObjectRenderDataSystem >();
+
+	ASSERT_EQ( 1u, system->get_render_targets().size() );
+	EXPECT_EQ( animation, system->get_render_targets()[ 0 ].animation );
+	EXPECT_EQ( animation, system->get_animation( entity->get_id() ) );
+}
+
 TEST( ObjectRenderDataSystemTest, GraphicsManager_が無ければ定数を書かず前フレームの_world_も進めない )
 {
 	EntityManager manager;

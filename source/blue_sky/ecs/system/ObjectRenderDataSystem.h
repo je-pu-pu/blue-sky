@@ -32,6 +32,7 @@ public:
 		core::ecs::EntityId							id;
 		ObjectRenderComponent*						render;
 		const core::ecs::TransformComponent*		transform;
+		const AnimationComponent*					animation;	///< アニメーション（持たなければ nullptr。一覧を作り直すときに一度だけ引く）
 	};
 
 	using RenderTargetList = std::vector< RenderTarget >;
@@ -39,11 +40,18 @@ public:
 private:
 	const graphics::GraphicsManager*	graphics_manager_;		///< モデルをハンドルから引く先（作り手が渡す）
 
-	mutable RenderTargetList			render_target_list_;	///< 描く対象（対象が増減したら作り直す）
-	mutable bool						is_render_target_list_dirty_ = true;
+	mutable RenderTargetList					render_target_list_;		///< 描く対象（対象の増減・アニメーションの付け外しで作り直す）
+	mutable std::vector< const AnimationComponent* >	animation_list_;	///< 描く対象のうちアニメーションを持つもの（Entity の番号の順）
+	mutable bool								is_render_target_list_dirty_ = true;
+
+	void rebuild_render_targets_if_dirty() const;
 
 protected:
 	void on_remove_entity( ComponentTuple& ) override { is_render_target_list_dirty_ = true; }
+
+	/// アニメーションの部品の付け外しを知る（以前は毎フレーム、描く対象ごとに 2 か所で Entity と部品を引いていた）
+	bool is_watched_component_type( core::ecs::ComponentTypeId id ) const override;
+	void on_watched_component_changed( const core::ecs::Entity* ) override { is_render_target_list_dirty_ = true; }
 
 public:
 	/// graphics_manager : モデルをハンドルから引く先。nullptr なら定数を書かない（テスト用）
@@ -68,7 +76,7 @@ public:
 	 */
 	const RenderTargetList& get_render_targets() const;
 
-	/// 物体のアニメーション（無ければ nullptr）
+	/// 物体のアニメーション（描く対象でない・持たなければ nullptr。描く対象を回すときは RenderTarget::animation を使う）
 	const AnimationComponent* get_animation( core::ecs::EntityId id ) const;
 
 	/// 位置と回転から world 行列を作る（拡大縮小は使わない。以前の ActiveObject::update_render_data と同じ）

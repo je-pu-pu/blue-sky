@@ -29,6 +29,21 @@ protected:
 	virtual bool has_component_type( ComponentTypeId ) const = 0;
 	virtual void remove_entity_component( const Entity* ) = 0;
 
+	/**
+	 * 対象の部品（System< ... > の型）ではないが、付け外しを知りたい部品の型か
+	 *
+	 * 持っていても持っていなくても対象になる部品（例 : 描く物体のうちアニメーションを持つものだけが持つ部品）を、
+	 * 毎フレーム引き直さずに済ませるために使う。既定は無し
+	 */
+	virtual bool is_watched_component_type( ComponentTypeId ) const { return false; }
+
+	/**
+	 * 付け外しを知りたい部品（is_watched_component_type）が entity に付いた・外れる
+	 *
+	 * 外れるときは、部品がまだ生きているうちに呼ぶ。entity がこの System の対象かは問わない
+	 */
+	virtual void on_watched_component_changed( const Entity* ) { }
+
 public:
 	BaseSystem() = default;
 	virtual ~BaseSystem() = default;
@@ -74,8 +89,15 @@ public:
 	void on_add_component( const Entity* entity )
 	{
 		// entity に追加された component が自身の System の操作対象に含まれているか調べ、含まれていなければ何もしない
-		if ( ! has_component_type( get_component_type_id< ComponentType >() ) )
+		const auto component_type_id = get_component_type_id< ComponentType >();
+
+		if ( ! has_component_type( component_type_id ) )
 		{
+			if ( is_watched_component_type( component_type_id ) )
+			{
+				on_watched_component_changed( entity );
+			}
+
 			return;
 		}
 
@@ -92,8 +114,15 @@ public:
 	void on_remove_component( const Entity* entity )
 	{
 		// entity から取り除かれた Component が自身の System の操作対象に含まれているか調べ、含まれていなければ何もしない
-		if ( ! has_component_type( get_component_type_id< ComponentType >() ) )
+		const auto component_type_id = get_component_type_id< ComponentType >();
+
+		if ( ! has_component_type( component_type_id ) )
 		{
+			if ( is_watched_component_type( component_type_id ) )
+			{
+				on_watched_component_changed( entity );
+			}
+
 			return;
 		}
 

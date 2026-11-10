@@ -21,48 +21,72 @@ void ObjectRenderDataSystem::add_entity_component_if_all_components_ready( const
 	is_render_target_list_dirty_ = true;
 }
 
+bool ObjectRenderDataSystem::is_watched_component_type( core::ecs::ComponentTypeId id ) const
+{
+	return id == core::ecs::get_component_type_id< AnimationComponent >();
+}
+
+/**
+ * 描く対象の一覧とアニメーションを持つものの一覧を作り直す（対象の増減・アニメーションの部品の付け外しの後だけ）
+ */
+void ObjectRenderDataSystem::rebuild_render_targets_if_dirty() const
+{
+	if ( ! is_render_target_list_dirty_ )
+	{
+		return;
+	}
+
+	render_target_list_.clear();
+	render_target_list_.reserve( get_component_list().size() );
+
+	for ( const auto& i : get_component_list() )
+	{
+		const core::ecs::Entity* entity = get_entity_manager() ? get_entity_manager()->find( i.first ) : nullptr;
+		const AnimationComponent* animation = entity ? entity->get_component< AnimationComponent >() : nullptr;
+
+		render_target_list_.push_back( { i.first, std::get< ObjectRenderComponent* >( i.second ), std::get< core::ecs::TransformComponent* >( i.second ), animation } );
+	}
+
+	std::sort( render_target_list_.begin(), render_target_list_.end(), [] ( const RenderTarget& a, const RenderTarget& b ) { return a.id < b.id; } );
+
+	animation_list_.clear();
+
+	for ( const auto& target : render_target_list_ )
+	{
+		if ( target.animation )
+		{
+			animation_list_.push_back( target.animation );
+		}
+	}
+
+	is_render_target_list_dirty_ = false;
+}
+
 const ObjectRenderDataSystem::RenderTargetList& ObjectRenderDataSystem::get_render_targets() const
 {
-	if ( is_render_target_list_dirty_ )
-	{
-		render_target_list_.clear();
-		render_target_list_.reserve( get_component_list().size() );
-
-		for ( const auto& i : get_component_list() )
-		{
-			render_target_list_.push_back( { i.first, std::get< ObjectRenderComponent* >( i.second ), std::get< core::ecs::TransformComponent* >( i.second ) } );
-		}
-
-		std::sort( render_target_list_.begin(), render_target_list_.end(), [] ( const RenderTarget& a, const RenderTarget& b ) { return a.id < b.id; } );
-
-		is_render_target_list_dirty_ = false;
-	}
+	rebuild_render_targets_if_dirty();
 
 	return render_target_list_;
 }
 
 const AnimationComponent* ObjectRenderDataSystem::get_animation( core::ecs::EntityId id ) const
 {
-	if ( ! get_entity_manager() )
-	{
-		return nullptr;
-	}
+	const auto& targets = get_render_targets();
+	auto i = std::lower_bound( targets.begin(), targets.end(), id, [] ( const RenderTarget& t, core::ecs::EntityId id ) { return t.id < id; } );
 
-	const core::ecs::Entity* entity = get_entity_manager()->find( id );
-
-	return entity ? entity->get_component< AnimationComponent >() : nullptr;
+	return ( i != targets.end() && i->id == id ) ? i->animation : nullptr;
 }
 
+/// アニメーションを持つ物体だけを回す（以前は描く対象すべてについて、Entity とアニメーションの部品を引いていた）
 void ObjectRenderDataSystem::update_animations()
 {
-	for ( const auto& target : get_render_targets() )
+	rebuild_render_targets_if_dirty();
+
+	for ( const auto* animation : animation_list_ )
 	{
-		if ( const auto* animation = get_animation( target.id ) )
+		if ( animation->player )
 		{
-			if ( animation->player )
-			{
-				animation->player->update();
-			}
+			animation->player->update();
 		}
 	}
 }
@@ -128,7 +152,7 @@ void ObjectRenderDataSystem::update_render_data()
 
 		render.object_constant_buffer->update( & shader_data );
 
-		const auto* animation = get_animation( target.id );
+		const auto* animation = target.animation;
 
 		if ( animation && animation->player && render.bone_constant_buffer )
 		{

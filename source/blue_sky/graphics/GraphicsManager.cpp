@@ -938,7 +938,7 @@ void GraphicsManager::render_debug_axis() const
 			render_debug_axis_model();
 
 			// ボーンの軸は描いている物体だけ（以前は死んでいない物体。死ぬと描かなくなるので、ほぼ同じ）
-			const auto* animation = system->get_animation( target.id );
+			const auto* animation = target.animation;
 
 			if ( animation && animation->player && ( target.render->is_mesh_visible || target.render->is_line_visible ) )
 			{

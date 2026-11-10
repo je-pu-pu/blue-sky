@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="test\sound">
+      <UniqueIdentifier>{18cdc58c-a880-496f-b2ad-df5aa8f366ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\math">
+      <UniqueIdentifier>{159d35dc-b7bc-491c-b80c-c0c38cf53bbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\ecs">
+      <UniqueIdentifier>{1f2ef7ea-5a0a-4a38-a9b8-4b97b9e954e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\script">
+      <UniqueIdentifier>{0957b6f1-29cf-46fd-83ed-837ad8401f2a}</UniqueIdentifier>
+    </Filter>
     <Filter Include="test\physics">
       <UniqueIdentifier>{3fd0d7bd-fdc0-4ed6-af39-d36c90897a19}</UniqueIdentifier>
     </Filter>
@@ -24,6 +36,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test\sound\SampleRateStepperTest.cpp">
+      <Filter>test\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="test\math\SkinningAnimationSetTest.cpp">
+      <Filter>test\math</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\TargetLocationTest.cpp">
+      <Filter>test\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp">
+      <Filter>test\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="test\script\ScriptManagerTest.cpp">
+      <Filter>test\script</Filter>
+    </ClCompile>
     <ClCompile Include="test\graphics\RenderSettingsTest.cpp">
       <Filter>test\graphics</Filter>
     </ClCompile>

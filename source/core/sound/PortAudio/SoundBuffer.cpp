@@ -9,6 +9,7 @@ SoundBuffer::SoundBuffer( SoundEngine& sound_engine, const SoundFormat& format, 
 	: sound_engine_( sound_engine )
 	, format_( format )
 	, data_( size )
+	, rate_stepper_( format.sampling_rate, sound_engine.get_format().sampling_rate )
 {
 
 }
@@ -30,15 +31,8 @@ void* SoundBuffer::lock( size_t offset, size_t )
 
 void SoundBuffer::unlock()
 {
-	/// @todo 効率化する
-
-	// auto old_data = data_;
-
-	// data_.reserve( data_.size() * 2 );
-
-	/// 変換後・変換前の周波数の比と型から dst のサイズを求める
-	
-	/// 変換を行う
+	// 書き込まれたデータはそのまま持つ。出力と周波数が違う音は read_frame() が読む速さで合わせる
+	// （以前はここで変換する予定のまま何もしておらず、22050 Hz の音楽が 44100 Hz の出力で倍の速さで鳴っていた）
 }
 
 void SoundBuffer::set_3d_position( const Vector3& )
@@ -74,6 +68,7 @@ void SoundBuffer::set_speed( float )
 void SoundBuffer::play( bool loop )
 {
 	current_position_ = 0;
+	rate_stepper_.reset();
 	is_playing_ = true;
 	is_looping_ = loop;
 }
@@ -98,25 +93,40 @@ size_t SoundBuffer::get_current_position() const
 	return current_position_;
 }
 
-float SoundBuffer::read()
+float SoundBuffer::sample_at( size_t position ) const
 {
-	float value = static_cast< float >( * reinterpret_cast< s16_t* >( & data_[ current_position_ ] ) ) / std::numeric_limits< s16_t >::max();
-
-	current_position_ += 2;
-
-	if ( current_position_ >= data_.size() )
+	if ( position + sizeof( s16_t ) > data_.size() )
 	{
-		if ( is_looping_ )
-		{
-			current_position_ = 0;
-		}
-		else
-		{
-			is_playing_ = false;
-		}
+		return 0.f;
 	}
 
-	return value;
+	return static_cast< float >( * reinterpret_cast< const s16_t* >( & data_[ position ] ) ) / std::numeric_limits< s16_t >::max();
+}
+
+void SoundBuffer::read_frame( float& left, float& right )
+{
+	const size_t channels = format_.channels == 2 ? 2 : 1;
+	const size_t frame_bytes = sizeof( s16_t ) * channels;
+
+	left = sample_at( current_position_ );
+	right = channels == 2 ? sample_at( current_position_ + sizeof( s16_t ) ) : left;
+
+	for ( size_t n = rate_stepper_.step(); n > 0 && is_playing_; n-- )
+	{
+		current_position_ += frame_bytes;
+
+		if ( current_position_ >= data_.size() )
+		{
+			if ( is_looping_ )
+			{
+				current_position_ = 0;
+			}
+			else
+			{
+				is_playing_ = false;
+			}
+		}
+	}
 }
 
 } // namespace core::sound::port_audio

@@ -180,6 +180,7 @@
     <ClCompile Include="Scene\TransformTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\sound\SampleRateStepper.h" />
     <ClInclude Include="blue_sky\graphics\shader\AllShaders.h" />
     <ClInclude Include="core\graphics\RenderTargetTextureOptions.h" />
     <ClInclude Include="core\graphics\LightDirection.h" />

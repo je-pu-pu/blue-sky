@@ -452,6 +452,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\sound\SampleRateStepper.h">
+      <Filter>core\sound</Filter>
+    </ClInclude>
     <ClInclude Include="blue_sky\graphics\shader\AllShaders.h">
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>

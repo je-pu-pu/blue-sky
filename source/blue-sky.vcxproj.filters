@@ -305,6 +305,15 @@
     <ClCompile Include="blue_sky\ObjectFactory.cpp">
       <Filter>blue_sky</Filter>
     </ClCompile>
+    <ClCompile Include="blue_sky\stage\StageData.cpp">
+      <Filter>blue_sky\stage</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\stage\LegacyStageParser.cpp">
+      <Filter>blue_sky\stage</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\stage\StageBuilder.cpp">
+      <Filter>blue_sky\stage</Filter>
+    </ClCompile>
     <ClCompile Include="blue_sky\GameObjectRef.cpp">
       <Filter>blue_sky</Filter>
     </ClCompile>
@@ -1017,6 +1026,15 @@
     <ClInclude Include="blue_sky\ObjectFactory.h">
       <Filter>blue_sky</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\stage\StageData.h">
+      <Filter>blue_sky\stage</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\stage\LegacyStageParser.h">
+      <Filter>blue_sky\stage</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\stage\StageBuilder.h">
+      <Filter>blue_sky\stage</Filter>
+    </ClInclude>
     <ClInclude Include="blue_sky\GameObjectRef.h">
       <Filter>blue_sky</Filter>
     </ClInclude>
@@ -1440,6 +1458,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="blue_sky\stage">
+      <UniqueIdentifier>{c4bcdf4f-eca7-45b2-9b1f-1865b14e4a82}</UniqueIdentifier>
+    </Filter>
     <Filter Include="core\setting">
       <UniqueIdentifier>{447a428b-d4fe-4895-9ac4-e406a3d439fb}</UniqueIdentifier>
     </Filter>

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="test\stage">
+      <UniqueIdentifier>{8b53b4a8-622b-4f23-880d-988d608def6b}</UniqueIdentifier>
+    </Filter>
     <Filter Include="test\sound">
       <UniqueIdentifier>{18cdc58c-a880-496f-b2ad-df5aa8f366ab}</UniqueIdentifier>
     </Filter>
@@ -62,6 +65,9 @@
     </ClCompile>
     <ClCompile Include="test\ecs\ObjectFactoryTest.cpp">
       <Filter>test\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\stage\LegacyStageParserTest.cpp">
+      <Filter>test\stage</Filter>
     </ClCompile>
     <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp">
       <Filter>test\graphics</Filter>

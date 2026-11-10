@@ -254,6 +254,11 @@ ObjectFactory::EntityId ObjectFactory::create_static_object( std::stringstream& 
 
 	ss >> object_name >> x >> y >> z >> rx >> ry >> rz;
 
+	return create_static_object( object_name, Vector( x, y, z ), Vector( rx, ry, rz ) );
+}
+
+ObjectFactory::EntityId ObjectFactory::create_static_object( const string_t& object_name, const Vector& location, const Vector& rotation )
+{
 	// 種類ごとの大きさと質量（以前の ActiveObjectManager::create_static_object と同じ。無い種類は大きさ 0・質量 0）
 	static const std::unordered_map< string_t, Vector > size_map =
 	{
@@ -283,9 +288,9 @@ ObjectFactory::EntityId ObjectFactory::create_static_object( std::stringstream& 
 	StaticObjectSpec spec;
 	spec.kind = object_name;
 	spec.shape = object_name == "soda-can-1" ? Shape::CYLINDER : Shape::BOX;
-	spec.location = Vector( x, y, z );
-	spec.rotation = Vector( rx, ry, rz );
-	spec.direction_degree = rx;		// 以前と同じ（4 つ目の数が向きになる）
+	spec.location = location;
+	spec.rotation = rotation;
+	spec.direction_degree = rotation.x();		// 以前と同じ（4 つ目の数が向きになる）
 
 	if ( auto i = size_map.find( object_name ); i != size_map.end() )
 	{

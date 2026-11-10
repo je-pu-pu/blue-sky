@@ -1,0 +1,68 @@
+#pragma once
+
+#include <blue_sky/stage/StageData.h>
+#include <blue_sky/GameObjectRef.h>
+
+#include <functional>
+#include <vector>
+
+namespace core::sound { class SoundManager; }
+
+namespace blue_sky
+{
+
+class ObjectFactory;
+class ActiveObjectPhysics;
+class Player;
+class Girl;
+class Camera;
+
+namespace graphics
+{
+	class GraphicsManager;
+}
+
+namespace stage
+{
+
+/**
+ * 読んだステージ（StageData）をゲームに当てる
+ *
+ * 当てる順 : BGM → 当たりの形 → 地面 → 物体（書いた順。名前とイベントも）→ プレイヤー → ゴール。
+ * 動きを行うのはシーン（GamePlayScene）で、ここは動きをシーンの呼び出しに変える関数（make_call）を受け取る
+ */
+class StageBuilder
+{
+public:
+	using Call		= std::function< void() >;
+	using MakeCall	= std::function< Call( const Action& ) >;
+
+	/// 当てる先（どれも作り手 = シーンが渡す。nullptr の物は使わない）
+	struct Context
+	{
+		ObjectFactory*					object_factory = nullptr;
+		ActiveObjectPhysics*			physics = nullptr;			///< 当たりの形・プレイヤーの剛体を加える世界
+		graphics::GraphicsManager*		graphics_manager = nullptr;	///< 地面
+		core::sound::SoundManager*		sound_manager = nullptr;	///< 読み込むときの BGM
+		Player*							player = nullptr;
+		Camera*							camera = nullptr;			///< プレイヤーのカメラの向き
+		GameObjectRef					goal;
+		string_t						stage_dir;					///< 当たりの形の .obj を探す所（"media/stage/" など）
+		MakeCall						make_call;					///< 動きを呼び出しにする（知らない動きなら例外。以前と同じ）
+		std::function< void( float_t ) >	set_bpm;				///< 読み込むときの BGM の BPM
+	};
+
+	/// 当てた結果（シーンが持つもの）
+	struct Result
+	{
+		Girl*					girl = nullptr;		///< 少女（いなければ nullptr）
+		std::vector< Call >		start_calls;		///< 始めるたび（やり直すたび）に呼ぶ（書いた順）
+		bool					bgm_loop = true;	///< BGM を繰り返すか
+	};
+
+	static Result build( const StageData& data, const Context& context );
+};
+
+} // namespace stage
+
+} // namespace blue_sky

@@ -118,6 +118,9 @@ public:
 	 */
 	EntityId create_static_object( std::stringstream& ss );
 
+	/// ステージの動かない物を作る（create_static_object( ss ) の中身。回転の x は向きにもなる。以前と同じ）
+	EntityId create_static_object( const string_t& kind, const core::Vector& location, const core::Vector& rotation );
+
 	/// 決まりに従って動かない物を作る（動かない物の印を付けて create_entity_object を呼ぶ）
 	EntityId create_static_object( const StaticObjectSpec& spec );
 

@@ -21,6 +21,8 @@
 #include <blue_sky/ScriptManager.h>
 
 #include <blue_sky/DelayedCommand.h>
+#include <blue_sky/stage/LegacyStageParser.h>
+#include <blue_sky/stage/StageBuilder.h>
 
 #include <core/sound/Sound.h>
 #include <game/Config.h>
@@ -163,7 +165,7 @@ void GamePlayScene::setup_command()
 	command_map_[ "change_bgm" ] = [this] ( const string_t& s )
 	{
 		bgm_ = get_sound_manager()->load_music( "bgm", s.c_str(), true );
-		bgm_->play( stage_config_->get( "bgm.loop", true ) );
+		bgm_->play( bgm_loop_ );
 	};
 	command_map_[ "change_bpm" ] = [this] ( const string_t& s )
 	{
@@ -414,217 +416,41 @@ void GamePlayScene::load_stage_file( const char* file_name )
 		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "load stage file \"" ) + file_name + "\" failed." );
 	}
 
-	std::optional< GameObjectRef > last_object;		///< 直前に作った物体（event・name 行の対象）
+	// 読む（ファイル → StageData）
+	const stage::StageData data = stage::LegacyStageParser::parse( in, file_name );
 
-	while ( in.good() )
+	// 当てる（StageData → ゲーム）
+	stage::StageBuilder::Context context;
+	context.object_factory = get_object_factory();
+	context.physics = get_active_object_physics();
+	context.graphics_manager = get_graphics_manager();
+	context.sound_manager = get_sound_manager();
+	context.player = player_;
+	context.camera = camera_.get();
+	context.goal = goal_;
+	context.stage_dir = StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) );
+	context.set_bpm = [this] ( float_t bpm ) { set_bpm( bpm ); };
+	context.make_call = [this] ( const stage::Action& action ) -> stage::StageBuilder::Call
 	{
-		std::string line;
-		std::getline( in, line );
+		auto i = command_map_.find( action.name );
 
-		std::stringstream ss;
-		std::string command;
-
-		ss << line;
-		ss >> command;
-
-		if ( command == "#" )
+		if ( i == command_map_.end() )
 		{
-			//
+			COMMON_THROW_EXCEPTION_MESSAGE( action.where.to_string() + ": event handler not found. ( " + action.name + " )" );
 		}
-		else if ( command == "bgm" )
-		{
-			std::string bgm_name;
-			bool loop = true;
 
-			ss >> bgm_name;
-			ss >> loop;
+		return [ i, params = action.params ] { i->second( params ); };
+	};
 
+	const auto result = stage::StageBuilder::build( data, context );
 
-			get_sound_manager()->load_music( "bgm", bgm_name.c_str() );
-
-			if ( ss.good() )
-			{
-				float_t bpm = get_bpm();
-
-				ss >> bpm;
-
-				set_bpm( bpm );
-			}
-		}
-		else if ( command == "collision" )
-		{
-			std::string collision_file_name;
-
-			ss >> collision_file_name;
-
-			get_active_object_physics()->load_obj( ( StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + collision_file_name ).c_str() );
-		}
-		else if ( command == "player" )
-		{
-			float_t x = 0, y = 0, z = 0;
-
-			ss >> x >> y >> z;
-
-			player_->set_start_location( x, y, z );
-			player_->set_rigid_body( get_active_object_physics()->add_active_object_as_capsule( player_ ) );
-
-			if ( ! ss.eof() )
-			{
-				float r = 0.f;
-
-				ss >> r;
-
-				camera_->rotate_degree_target().set_x( r );
-				camera_->rotate_degree().set_x( r );
-			}
-		}
-		else if ( command == "goal" )
-		{
-			float_t x = 0, y = 0, z = 0;
-			ss >> x >> y >> z;
-
-			goal_.set_start_location( x, y, z );
-		}
-		else if ( command == "ground" )
-		{
-			string_t ground_name;
-			ss >> ground_name;
-
-			get_graphics_manager()->set_ground( ground_name.c_str() );
-		}
-		else if ( command == "far-billboards" )
-		{
-			std::string far_billboards_name;
-
-			ss >> far_billboards_name;
-
-			far_billboards_ = get_graphics_manager()->load_model( far_billboards_name.c_str() );
-		}
-		else if ( command == "object" || command == "static-object" || command == "dynamic-object" )
-		{
-			last_object = get_object_factory()->get_ref( get_object_factory()->create_static_object( ss ) );
-		}
-		else if ( command == "translation-object" )
-		{
-			float_t x = 0, y = 0, z = 0, tw = 0, th = 0, td = 0, s = 0.01f;
-			ss >> x >> y >> z >> tw >> th >> td >> s;
-
-			last_object = get_object_factory()->get_ref( get_object_factory()->create_translation_object( Vector( x, y, z ), tw, th, td, s ) );
-		}
-		else if ( command == "girl" || command == "robot" || command == "balloon" || command == "medal" || command == "ladder" || command == "rocket" || command == "umbrella" || command == "stone" || command == "switch" )
-		{
-			// 種類の名前から作る（ECS だけの物体になった種類も、まだ ActiveObject の種類も同じ入口）
-			auto id = get_object_factory()->create_object( command );
-
-			if ( ! id )
-			{
-				COMMON_THROW_EXCEPTION_MESSAGE( "create object failed. ( " + command + " )" );
-			}
-
-			GameObjectRef object = get_object_factory()->get_ref( * id );
-
-			float x = 0, y = 0, z = 0, r = 0;
-			ss >> x >> y >> z >> r;
-
-			object.set_start_location( x, y, z );
-			object.set_start_direction_degree( r );
-
-			if ( command == "girl" )
-			{
-				girl_ = static_cast< Girl* >( object.get_active_object() );
-				girl_->set_player( player_ );
-				get_object_factory()->name( "girl", * id );
-			}
-			else if ( command == "robot" )
-			{
-				Robot* robot = static_cast< Robot* >( object.get_active_object() );
-				robot->set_player( player_ );
-			}
-
-			last_object = object;
-		}
-		else if ( command == "area-switch" )
-		{
-			float_t x = 0.f, y = 0.f, z = 0.f;
-			float_t w = 0.f, h = 0.f, d = 0.f;
-			float_t r = 0.f;
-
-			ss >> x >> y >> z >> w >> h >> d >> r;
-
-			// 空間スイッチ（ECS だけの物体。以前は AreaSwitch を作って ActiveObjectManager に加えていた）
-			GameObjectRef object = get_object_factory()->get_ref( get_object_factory()->create_area_switch( w, h, d ) );
-			object.set_start_location( x, y, z );
-			object.set_start_direction_degree( r );
-
-			last_object = object;
-		}
-		else if ( command == "event" || command == "exec" )
-		{
-			string_t event_name;
-			string_t event_handler_name;
-			string_t event_handler_params;
-
-			if ( command == "event" )
-			{
-				ss >> event_name;
-			}
-
-			ss >> event_handler_name;
-
-			while ( ss.good() )
-			{
-				string_t s;
-				ss >> s;
-
-				if ( ! event_handler_params.empty() )
-				{
-					event_handler_params += " ";
-				}
-
-				event_handler_params += s;
-			}
-
-			auto i = command_map_.find( event_handler_name );
-
-			if ( i == command_map_.end() )
-			{
-				COMMON_THROW_EXCEPTION_MESSAGE( ( "event handler not found. ( " ) + event_handler_name + " )" );
-			}
-
-			auto command_call = [ = ] { i->second( event_handler_params ); };
-
-			if ( command == "event" )
-			{
-				if ( ! last_object )
-				{
-					COMMON_THROW_EXCEPTION_MESSAGE( "event object not found." );
-				}
-
-				last_object->add_event_handler( event_name.c_str(), command_call );
-			}
-			else
-			{
-				stage_setup_command_call_list_.push_back( command_call );
-			}
-		}
-		else if ( command == "name" )
-		{
-			if ( ! last_object )
-			{
-				COMMON_THROW_EXCEPTION_MESSAGE( "naming object not found." );
-			}
-
-			string_t object_name;
-
-			ss >> object_name;
-			get_object_factory()->name( object_name, last_object->get_entity_id() );
-		}
-		else
-		{
-			// 未知のコマンドはステージ設定として読み込む
-			stage_config_->read_line( line );
-		}
+	if ( result.girl )
+	{
+		girl_ = result.girl;
 	}
+
+	stage_setup_command_call_list_.assign( result.start_calls.begin(), result.start_calls.end() );
+	bgm_loop_ = result.bgm_loop;
 }
 
 } // namespace blue_sky

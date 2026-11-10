@@ -91,11 +91,11 @@ private:
 	GameObjectRef						goal_;		///< ゴール（ECS だけの物体。ObjectFactory が持つ）
 
 	// 所有リソース
-	std::unique_ptr< Config >			stage_config_;
 	std::unique_ptr< Camera >			camera_;
 	core::setting::SettingStore::Subscription	fov_subscription_;	///< 設定の FOV が変わったらカメラに反映する
 
 	bool								is_cleared_ = false;	///< ステージクリアフラグ
+	bool								bgm_loop_ = true;		///< BGM を繰り返すか（ステージの bgm.loop。以前はステージの設定 stage_config_ から読んでいた）
 	float_t								action_bgm_after_timer_;
 
 	float_t								bpm_;

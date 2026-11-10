@@ -48,7 +48,6 @@ namespace blue_sky
 
 GamePlayScene::GamePlayScene( GameMain& game_main )
 	: Scene( game_main )
-	, stage_config_( new Config() )
 	, debug_texture_shader_( get_graphics_manager()->get_shader( "debug_shadow_map_texture" ) )
 	, camera_( new Camera() )
 	, action_bgm_after_timer_( 0.f )
@@ -63,8 +62,8 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 	, is_blackout_( false )
 	, blackout_timer_( 0.f )
 {
-	// ShadowMap
-	if ( get_config()->get( "graphics.shadow-map-enabled", 1 ) != 0 && stage_config_->get( "graphics.shadow-map-enabled", true ) )
+	// ShadowMap（以前はステージの設定 graphics.shadow-map-enabled も見ていたが、ステージを読む前に見ていたので常に既定の true だった）
+	if ( get_config()->get( "graphics.shadow-map-enabled", 1 ) != 0 )
 	{
 		get_graphics_manager()->setup_shadow_map( get_config()->get( "graphics.shadow-map-cascade-levels", 3 ), get_config()->get( "graphics.shadow-map-size", 1024 ) );
 	}
@@ -141,7 +140,7 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 
 	if ( bgm_ )
 	{
-		bgm_->play( stage_config_->get( "bgm.loop", true ) );
+		bgm_->play( bgm_loop_ );
 	}
 
 	get_graphics_manager()->load_paper_textures();

@@ -60,6 +60,7 @@ struct Fixture
 	}
 
 	blue_sky::ecs::PlayerBehaviorComponent& player_of( EntityId id ) { return * entity( id )->get_component< blue_sky::ecs::PlayerBehaviorComponent >(); }
+	blue_sky::ecs::PlayerInventoryComponent& inventory_of( EntityId id ) { return * entity( id )->get_component< blue_sky::ecs::PlayerInventoryComponent >(); }
 
 	~Fixture()
 	{
@@ -217,8 +218,8 @@ TEST( LadderStoneSwitchTest, プレイヤーが石に当たると石の窓口を
 	const auto player = f.create_player();
 	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * f.entity( id ) );
 
-	ASSERT_EQ( f.player_of( player ).stone_list.size(), 1u );
-	EXPECT_EQ( f.player_of( player ).stone_list.front().get_entity_id(), id );
+	ASSERT_EQ( f.inventory_of( player ).stone_list.size(), 1u );
+	EXPECT_EQ( f.inventory_of( player ).stone_list.front().get_entity_id(), id );
 	EXPECT_TRUE( traits->is_dead );
 	EXPECT_FALSE( f.entity( id )->get_component< blue_sky::ecs::ObjectRenderComponent >()->is_visible );
 }
@@ -234,7 +235,7 @@ TEST( LadderStoneSwitchTest, 拾った石を窓口で投げると生き返り_�
 	blue_sky::ecs::contact_rules::on_collide( * f.entity( id ), * f.entity( player ) );
 
 	// 以前の Player::throw_stone と同じ手順（やり直す → 置く → 速度を設定する）
-	GameObjectRef stone = f.player_of( player ).stone_list.front();
+	GameObjectRef stone = f.inventory_of( player ).stone_list.front();
 	stone.restart();
 	stone.set_location( Vector( 1.f, 2.f, 3.f ) );
 	stone.set_velocity( Vector( 0.f, 0.f, 8.f ) );

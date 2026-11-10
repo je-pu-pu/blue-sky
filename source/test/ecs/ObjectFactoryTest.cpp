@@ -55,6 +55,7 @@ struct FactoryFixture
 	/// プレイヤー（ECS だけの物体。剛体なし）を作る（段階 6 までは GameObject の仮想関数を実装した偽物を使っていた）
 	core::ecs::EntityId create_player() { return factory.create_player(); }
 	blue_sky::ecs::PlayerBehaviorComponent& player_of( core::ecs::EntityId id ) { return * entity( id )->get_component< blue_sky::ecs::PlayerBehaviorComponent >(); }
+	blue_sky::ecs::PlayerInventoryComponent& inventory_of( core::ecs::EntityId id ) { return * entity( id )->get_component< blue_sky::ecs::PlayerInventoryComponent >(); }
 
 	~FactoryFixture()
 	{
@@ -419,7 +420,7 @@ TEST( ObjectFactoryTest, プレイヤーがメダルに当たると拾って_メ
 	const auto player = f.create_player();
 	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * f.entity( id ) );
 
-	EXPECT_TRUE( f.player_of( player ).has_medal );
+	EXPECT_TRUE( f.inventory_of( player ).has_medal );
 	EXPECT_TRUE( traits->is_dead );
 	EXPECT_FALSE( f.entity( id )->get_component< blue_sky::ecs::ObjectRenderComponent >()->is_visible );
 
@@ -448,7 +449,7 @@ TEST( ObjectFactoryTest, ロケットは硬い拾う物で_拾われると当た
 	const auto player = f.create_player();
 	blue_sky::ecs::contact_rules::on_collide( * e, * f.entity( player ) );
 
-	EXPECT_EQ( f.player_of( player ).get_item_count( blue_sky::ecs::PlayerBehaviorComponent::ItemType::ROCKET ), 1 );
+	EXPECT_EQ( f.inventory_of( player ).get_item_count( blue_sky::ecs::PlayerBehaviorComponent::ItemType::ROCKET ), 1 );
 	EXPECT_TRUE( traits->is_dead );
 	EXPECT_NE( body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE, 0 );
 
@@ -486,7 +487,7 @@ TEST( ObjectFactoryTest, ゴールは死なない足場で重力が無く_やり
 	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * e );
 
 	EXPECT_EQ( f.player_of( player ).action_mode, blue_sky::ecs::PlayerBehaviorComponent::ActionMode::ROCKET );
-	EXPECT_FALSE( f.player_of( player ).has_medal );
+	EXPECT_FALSE( f.inventory_of( player ).has_medal );
 	EXPECT_FALSE( traits->is_dead );
 }
 
@@ -509,5 +510,5 @@ TEST( ObjectFactoryTest, 傘は硬くない拾う物で_プレイヤーが触れ
 	blue_sky::ecs::contact_rules::on_collide( * f.entity( player ), * e );
 
 	EXPECT_TRUE( e->get_component< blue_sky::ecs::CollisionTraitsComponent >()->is_dead );
-	EXPECT_EQ( f.player_of( player ).get_item_count( blue_sky::ecs::PlayerBehaviorComponent::ItemType::UMBRELLA ), 0 );
+	EXPECT_EQ( f.inventory_of( player ).get_item_count( blue_sky::ecs::PlayerBehaviorComponent::ItemType::UMBRELLA ), 0 );
 }

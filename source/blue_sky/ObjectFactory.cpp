@@ -36,6 +36,7 @@
 #include <blue_sky/ecs/component/PlayerBehaviorComponent.h>
 #include <blue_sky/ecs/component/PlayerInputComponent.h>
 #include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
+#include <blue_sky/ecs/system/PlayerInventorySystem.h>
 #include <blue_sky/ecs/system/PlayerInputSystem.h>
 #include <blue_sky/graphics/Line.h>
 
@@ -75,6 +76,7 @@ void ObjectFactory::setup_systems()
 	entity_manager_->add_system< ecs::GirlSystem >( 0 );
 	entity_manager_->add_system< ecs::RobotBehaviorSystem >( 0, physics_, graphics_manager_, sound_manager_ );
 	entity_manager_->add_system< ecs::PlayerBehaviorSystem >( 0, physics_, graphics_manager_, sound_manager_ );
+	entity_manager_->add_system< ecs::PlayerInventorySystem >( 0, sound_manager_ );
 	entity_manager_->add_system< ecs::PlayerInputSystem >( 0 );
 }
 
@@ -584,6 +586,7 @@ ObjectFactory::EntityId ObjectFactory::create_player()
 	core::ecs::Entity* entity = entity_manager_->find( id );
 
 	entity->add_component< ecs::PlayerBehaviorComponent >();
+	entity->add_component< ecs::PlayerInventoryComponent >();
 	entity->add_component< ecs::PlayerInputComponent >();
 	entity->add_component< ecs::FlickerComponent >();
 

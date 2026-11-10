@@ -27,13 +27,14 @@ enum class PickupKind;
  * - 毎フレームの更新（update_players。以前の Player::update）: 足場・跳べるか・前の壁・よじ登れるか・のぞき込めるか・投げられるかを調べ、
  *   風船・ロケットの動作を進め、線の色・落ちる音・着地・死・速さの上限・重力を決める
  * - 操作（step・jump・rocket・throw_stone など）: PlayerInputSystem が入力から呼ぶ
- * - 当たり（on_touch_*）: 当たりの互換の層（ActiveObjectManager::on_collide_entity_objects）が、相手の部品の組み合わせで呼ぶ
- *   （以前は GameObject の仮想関数 on_collide_with_balloon・on_pick_up など。プレイヤーだけが実装していた）
+ * - 当たり（on_touch_*）: 当たりの決まり（ecs::contact_rules）が、相手の部品の組み合わせで呼ぶ
+ *   （以前は GameObject の仮想関数 on_collide_with_balloon・on_pick_up など。プレイヤーだけが実装していた）。石・拾う物は持ち物の System（PlayerInventorySystem）
+ * - 持ち物は PlayerInventoryComponent・PlayerInventorySystem に切り出した（ロケット・石を使う・走れるか・望遠鏡をやめるときにここから読み書きする）
  *
  * 位置・速度・向きは EntityObject を通して部品（TransformComponent・PhysicsBodyComponent・SimpleObjectComponent）を読み書きする。
  * 足場・壁を調べるレイと箱は本編の物理の世界（ActiveObjectPhysics）で飛ばす（nullptr なら調べない。テスト）。
  *
- * EntityManager::update() では動かさない（本編のシーンは呼ばない）。ActiveObjectManager::update が、ほかの物体より先に update_players を呼ぶ
+ * EntityManager::update() では動かさない（本編のシーンは呼ばない）。ObjectUpdater::update が、ほかの物体より先に update_players を呼ぶ
  * （以前は ActiveObject の一覧の先頭のプレイヤーの update が最初に呼ばれていた）
  */
 class PlayerBehaviorSystem : public core::ecs::System< PlayerBehaviorComponent, core::ecs::TransformComponent >
@@ -115,10 +116,10 @@ public:
 
 	void set_pitch( core::ecs::EntityId id, float_t pitch );
 	void add_eye_depth( core::ecs::EntityId id, float_t d );
+	/// ロケットで飛ぶ（持ち物のロケットを 1 つ使う。PlayerInventorySystem）
 	void rocket( core::ecs::EntityId id, const core::Vector& direction );
+	/// 石を投げる（前に壁が無いときだけ。持ち物の石を 1 つ使う。PlayerInventorySystem）
 	void throw_stone( core::ecs::EntityId id, const core::Vector& direction );
-	void select_prev_item( core::ecs::EntityId id );
-	void select_next_item( core::ecs::EntityId id );
 	void switch_scope_mode( core::ecs::EntityId id );
 
 	/// 揺らぎ始める（ステージの start_flickering。以前の Player::start_flickering）
@@ -131,12 +132,6 @@ public:
 
 	/// 風船に触れた : つかむ（揺らぎ中はつかまない）。つかんだら true
 	bool on_touch_balloon( core::ecs::EntityId id, core::ecs::EntityId balloon );
-
-	/// 石に当たった : 拾う（いつも true。拾われた石は互換の層が死なせる）
-	bool on_touch_stone( core::ecs::EntityId id, const GameObjectRef& stone );
-
-	/// 拾う物に当たった : メダル・ロケットを持つ（いつも true。拾われた物は互換の層が死なせる）
-	bool on_touch_pickup( core::ecs::EntityId id, PickupKind kind );
 
 	/// 敵に当たった : 追っている敵なら傷つく（いつも true = 敵は立つ・回る間なら止まる）
 	bool on_touch_robot( core::ecs::EntityId id, bool is_chasing );

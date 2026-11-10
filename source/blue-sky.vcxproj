@@ -182,6 +182,7 @@
     <ClCompile Include="blue_sky\ecs\system\PlayerInputSystem.cpp" />
     <ClCompile Include="blue_sky\ObjectUpdater.cpp" />
     <ClCompile Include="blue_sky\ecs\ContactRules.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\PlayerInventorySystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\sound\SampleRateStepper.h" />
@@ -482,6 +483,8 @@
     <ClInclude Include="blue_sky\ecs\system\PlayerInputSystem.h" />
     <ClInclude Include="blue_sky\ObjectUpdater.h" />
     <ClInclude Include="blue_sky\ecs\ContactRules.h" />
+    <ClInclude Include="blue_sky\ecs\component\PlayerInventoryComponent.h" />
+    <ClInclude Include="blue_sky\ecs\system\PlayerInventorySystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="blue-sky.config">

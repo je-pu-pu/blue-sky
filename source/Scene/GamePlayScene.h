@@ -46,6 +46,7 @@ namespace blue_sky
 		class EntityObject;
 		class PlayerBehaviorSystem;
 		struct PlayerBehaviorComponent;
+		struct PlayerInventoryComponent;
 	}
 
 /**
@@ -176,6 +177,7 @@ protected:
 	/// プレイヤーの行動の System・部品・位置の窓口（部品はプレイヤーがいなければ空の部品）
 	ecs::PlayerBehaviorSystem* get_player_system() const;
 	ecs::PlayerBehaviorComponent& get_player() const;
+	ecs::PlayerInventoryComponent& get_player_inventory() const;
 	ecs::EntityObject get_player_object() const;
 	GameObjectRef get_player_ref() const;
 

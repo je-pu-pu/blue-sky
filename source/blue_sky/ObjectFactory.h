@@ -147,7 +147,7 @@ public:
 	 * プレイヤーを作る（以前の GamePlayScene が new Player() して ActiveObjectManager に加えていた）
 	 *
 	 * ECS だけの物体で、部品は ほかの物体と同じもの（Transform・SimpleObject・TargetMover・CollisionTraits・ObjectRender）と、
-	 * PlayerBehavior（行動）・PlayerInput（入力）・Flicker（ゆらぎの大きさ）。モデルは "player"。
+	 * PlayerBehavior（行動）・PlayerInventory（持ち物）・PlayerInput（入力）・Flicker（ゆらぎの大きさ）。モデルは "player"。
 	 * 剛体はステージを読むとき（始めの位置が決まってから）に add_player_rigid_body で作る（以前と同じ）
 	 */
 	EntityId create_player();

@@ -293,9 +293,9 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 
 	render_technique( "|sprite", [this, sprite]
 	{
-		if ( get_player().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::ROCKET )
+		if ( get_player_inventory().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::ROCKET )
 		{
-			for ( int n = 0; n < get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::ROCKET ); n++ )
+			for ( int n = 0; n < get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::ROCKET ); n++ )
 			{
 				const int offset = n * 20;
 
@@ -305,9 +305,9 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				sprite->draw( dst_point, ui_texture_, src_rect.get_rect() );
 			}
 		}
-		else if ( get_player().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::UMBRELLA )
+		else if ( get_player_inventory().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::UMBRELLA )
 		{
-			for ( int n = 0; n < get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::UMBRELLA ); n++ )
+			for ( int n = 0; n < get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::UMBRELLA ); n++ )
 			{
 				const float offset = n * 50.f;
 
@@ -320,9 +320,9 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				sprite->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 			}
 		}
-		else if ( get_player().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::STONE )
+		else if ( get_player_inventory().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::STONE )
 		{
-			for ( int n = get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) - 1; n >= 0; --n )
+			for ( int n = get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) - 1; n >= 0; --n )
 			{
 				const int offset = n * 50;
 
@@ -332,7 +332,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 				sprite->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 			}
 		}
-		else if ( get_player().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::SCOPE )
+		else if ( get_player_inventory().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::SCOPE )
 		{
 			win::Rect src_rect = win::Rect::Size( 256, 256, 192, 140 );
 			win::Point dst_point( get_width() - src_rect.width() - 5, get_height() - src_rect.height() - 5 );
@@ -340,7 +340,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 			sprite->draw( dst_point, ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.75f ) );
 		}
 
-		if ( get_player().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::ROCKET || ( get_player().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::STONE && get_player().can_throw ) )
+		if ( get_player_inventory().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::ROCKET || ( get_player_inventory().selected_item_type == ecs::PlayerBehaviorComponent::ItemType::STONE && get_player().can_throw ) )
 		{
 			// aim
 			win::Rect src_rect = win::Rect::Size( 256, 0, 76, 80 );
@@ -349,7 +349,7 @@ void GamePlayScene::render_sprite( float_t ortho_offset ) const
 			sprite->draw( ui_texture_, src_rect.get_rect(), Color( 1.f, 1.f, 1.f, 0.5f ) );
 		}
 
-		if ( get_player().has_medal )
+		if ( get_player_inventory().has_medal )
 		{
 			win::Rect src_rect = win::Rect::Size( 384, 0, 64, 64 );
 			win::Point dst_point( 5, get_height() - src_rect.height() - 5 );

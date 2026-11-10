@@ -195,6 +195,16 @@ ecs::PlayerBehaviorComponent& GamePlayScene::get_player() const
 	return p ? * p : empty;
 }
 
+ecs::PlayerInventoryComponent& GamePlayScene::get_player_inventory() const
+{
+	static ecs::PlayerInventoryComponent empty;		// プレイヤーがいない（作れなかった）ときの空の部品
+
+	core::ecs::Entity* entity = get_entity_manager()->find( player_id_ );
+	ecs::PlayerInventoryComponent* inventory = entity ? entity->get_component< ecs::PlayerInventoryComponent >() : nullptr;
+
+	return inventory ? * inventory : empty;
+}
+
 ecs::EntityObject GamePlayScene::get_player_object() const
 {
 	return ecs::EntityObject( get_entity_manager()->find( player_id_ ) );
@@ -623,6 +633,7 @@ string_t GamePlayScene::describe_player_state() const
 
 	const ecs::EntityObject player = get_player_object();
 	const ecs::PlayerBehaviorComponent& p = get_player();
+	const ecs::PlayerInventoryComponent& items = get_player_inventory();
 	const Vector l = player.get_location();
 	const Vector v = player.get_velocity();
 
@@ -632,7 +643,7 @@ string_t GamePlayScene::describe_player_state() const
 		l.x(), l.y(), l.z(), v.x(), v.y(), v.z(), player.get_direction_degree(),
 		p.is_on_footing, p.is_jumping, p.is_jumpable, p.is_on_ladder, p.is_facing_to_block, p.can_clamber, p.is_clambering, p.can_peer_down, p.can_throw,
 		action_modes[ static_cast< int >( p.action_mode ) ], p.is_action_pre_finish, p.step_speed, p.eye_height, p.eye_depth,
-		static_cast< int >( p.selected_item_type ), p.get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ), p.get_item_count( ecs::PlayerBehaviorComponent::ItemType::ROCKET ), p.has_medal,
+		static_cast< int >( items.selected_item_type ), items.get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ), items.get_item_count( ecs::PlayerBehaviorComponent::ItemType::ROCKET ), items.has_medal,
 		get_player_system()->is_dead( player_id_ ), get_player_system()->is_falling_to_die( player_id_ ), p.hp, camera_->fov(), camera_->position().x(), camera_->position().y(), camera_->position().z() );
 
 	return buffer;
@@ -817,11 +828,11 @@ void GamePlayScene::debug_visit_objects()
 		if ( step < targets.size() )
 		{
 			debug_log( string_t( "[Debug] 物体の所へ動かした結果 : " ) + targets[ step ].first
-				+ " / メダル " + ( get_player().has_medal ? "持っている" : "持っていない" )
+				+ " / メダル " + ( get_player_inventory().has_medal ? "持っている" : "持っていない" )
 				+ " / 風船 " + ( get_player().action_mode == ecs::PlayerBehaviorComponent::ActionMode::BALLOON ? "つかまっている" : "つかまっていない" )
 				+ " / 梯子 " + ( get_player().is_on_ladder ? "触れている" : "触れていない" )
 				+ " / ゴール " + ( is_cleared_ ? "した" : "していない" )
-				+ " / ロケット " + std::to_string( get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::ROCKET ) ) + " 個" );
+				+ " / ロケット " + std::to_string( get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::ROCKET ) ) + " 個" );
 		}
 
 		return;
@@ -902,7 +913,7 @@ void GamePlayScene::debug_throw_stones()
 
 	if ( frame == throw_start_frame )
 	{
-		debug_log( "[Debug] 石を拾いました : " + std::to_string( get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) ) + " 個（ステージの石 " + std::to_string( stones.size() ) + " 個）" );
+		debug_log( "[Debug] 石を拾いました : " + std::to_string( get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) ) + " 個（ステージの石 " + std::to_string( stones.size() ) + " 個）" );
 	}
 
 	// 行き先（種類ごとに最初の 1 つ）
@@ -960,10 +971,10 @@ void GamePlayScene::debug_throw_stones()
 		Vector direction = ( target.get_location() + Vector( 0.f, 0.5f, 0.f ) ) - ( get_player_object().get_location() + Vector( 0.f, get_player().eye_height, 0.f ) );
 		direction.normalize();
 
-		const int count = get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE );
+		const int count = get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE );
 		get_player_system()->throw_stone( player_id_, direction );
 
-		debug_log( "[Debug] 石を" + name + "へ" + ( get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) < count ? "投げました" : "投げられませんでした" ) + "（残り " + std::to_string( get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) ) + " 個）" );
+		debug_log( "[Debug] 石を" + name + "へ" + ( get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) < count ? "投げました" : "投げられませんでした" ) + "（残り " + std::to_string( get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) ) + " 個）" );
 	}
 	else if ( phase == result_frame )
 	{
@@ -984,7 +995,7 @@ void GamePlayScene::debug_throw_stones()
 			result = ecs::EntityObject( entity ).is_dead() ? "割れた" : "割れていない";
 		}
 
-		debug_log( "[Debug] 石を投げた結果 : " + name + " / " + result + "（持っている石 " + std::to_string( get_player().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) ) + " 個）" );
+		debug_log( "[Debug] 石を投げた結果 : " + name + " / " + result + "（持っている石 " + std::to_string( get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) ) + " 個）" );
 	}
 }
 
@@ -1084,7 +1095,7 @@ void GamePlayScene::go_to_next_scene()
 {
 	std::string save_param_name = StageSelectScene::get_stage_prefix_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + "." + get_stage_name();
 
-	get_save_data()->set( save_param_name.c_str(), std::max( get_player().has_medal ? 2 : 1, get_save_data()->get( save_param_name.c_str(), 0 ) ) );
+	get_save_data()->set( save_param_name.c_str(), std::max( get_player_inventory().has_medal ? 2 : 1, get_save_data()->get( save_param_name.c_str(), 0 ) ) );
 
 	if ( get_stage_name() == "2-3" )
 	{

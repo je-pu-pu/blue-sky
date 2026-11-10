@@ -14,6 +14,7 @@
 #include <blue_sky/ecs/system/BalloonHoldSystem.h>
 #include <blue_sky/ecs/system/RobotBehaviorSystem.h>
 #include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
+#include <blue_sky/ecs/system/PlayerInventorySystem.h>
 
 #include <core/ecs/EntityManager.h>
 
@@ -23,6 +24,7 @@ namespace blue_sky::ecs::contact_rules
 void on_collide_with_player( core::ecs::Entity& player, core::ecs::Entity& entity, core::sound::SoundManager* sound_manager )
 {
 	auto* behavior = player.get_entity_manager()->get_system< PlayerBehaviorSystem >();
+	auto* inventory = player.get_entity_manager()->get_system< PlayerInventorySystem >();	// 持ち物（石・拾う物）
 
 	if ( ! behavior )
 	{
@@ -40,7 +42,7 @@ void on_collide_with_player( core::ecs::Entity& player, core::ecs::Entity& entit
 	// 拾う物（以前の Medal・Rocket・Umbrella）: プレイヤーが拾ったら、この物体を死なせる（ロケットは当たりの応答も消す）
 	if ( const auto* pickup = entity.get_component< PickupComponent >() )
 	{
-		if ( behavior->on_touch_pickup( player_id, pickup->kind ) )
+		if ( inventory && inventory->pick_up( player_id, pickup->kind ) )
 		{
 			EntityObject picked( & entity );
 			picked.kill();
@@ -55,7 +57,7 @@ void on_collide_with_player( core::ecs::Entity& player, core::ecs::Entity& entit
 	// 石（以前の Stone）: プレイヤーが拾ったら石を死なせる（プレイヤーは窓口を持っておいて投げる）
 	if ( entity.get_component< ThrowableComponent >() )
 	{
-		if ( behavior->on_touch_stone( player_id, GameObjectRef( entity.get_entity_manager(), nullptr, static_cast< core::ecs::EntityId >( entity.get_id() ) ) ) )
+		if ( inventory && inventory->pick_stone( player_id, GameObjectRef( entity.get_entity_manager(), nullptr, static_cast< core::ecs::EntityId >( entity.get_id() ) ) ) )
 		{
 			EntityObject( & entity ).kill();
 		}

@@ -13,9 +13,11 @@
 #include <blue_sky/ecs/component/FlickerComponent.h>
 #include <blue_sky/ecs/component/PickupComponent.h>
 #include <blue_sky/ecs/component/PlayerBehaviorComponent.h>
+#include <blue_sky/ecs/component/PlayerInventoryComponent.h>
 #include <blue_sky/ecs/component/PlayerInputComponent.h>
 #include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
 #include <blue_sky/ecs/system/PlayerInputSystem.h>
+#include <blue_sky/ecs/system/PlayerInventorySystem.h>
 
 #include <core/ecs/EntityManager.h>
 #include <core/physics/EntityTag.h>
@@ -71,6 +73,7 @@ struct Fixture
 
 	core::ecs::Entity* entity( EntityId id ) { return manager.find( id ); }
 	PlayerBehaviorComponent& p() { return * entity( player )->get_component< PlayerBehaviorComponent >(); }
+	blue_sky::ecs::PlayerInventoryComponent& inv() { return * entity( player )->get_component< blue_sky::ecs::PlayerInventoryComponent >(); }
 	PlayerInputComponent& input() { return * entity( player )->get_component< PlayerInputComponent >(); }
 	blue_sky::ecs::PlayerBehaviorSystem* behavior() { return manager.get_system< blue_sky::ecs::PlayerBehaviorSystem >(); }
 	PlayerInputSystem* input_system() { return manager.get_system< PlayerInputSystem >(); }
@@ -125,20 +128,20 @@ TEST( PlayerTest, プレイヤーは硬い物で_剛体はカプセル_やり直
 	EXPECT_TRUE( is_near( Vector( body->body->getAngularFactor() ), Vector::Zero ) );
 	EXPECT_TRUE( is_near( Vector( body->body->getGravity() ), Vector( 0.f, -9.8f, 0.f ) ) );
 
-	EXPECT_EQ( f.p().get_item_count( ItemType::SCOPE ), 1 );
-	EXPECT_EQ( f.p().selected_item_type, ItemType::NONE );
+	EXPECT_EQ( f.inv().get_item_count( ItemType::SCOPE ), 1 );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::NONE );
 	EXPECT_EQ( f.p().hp, 1 );
 	EXPECT_FLOAT_EQ( f.p().eye_height, 1.5f );
 	EXPECT_FLOAT_EQ( f.p().last_footing_height, 10.f );
 
 	// 持ち物・状態はやり直すと戻る
-	f.p().has_medal = true;
-	f.p().item_count[ static_cast< int >( ItemType::STONE ) ] = 2;
+	f.inv().has_medal = true;
+	f.inv().item_count[ static_cast< int >( ItemType::STONE ) ] = 2;
 	f.p().action_mode = ActionMode::BALLOON;
 	f.factory.restart();
 
-	EXPECT_FALSE( f.p().has_medal );
-	EXPECT_EQ( f.p().get_item_count( ItemType::STONE ), 0 );
+	EXPECT_FALSE( f.inv().has_medal );
+	EXPECT_EQ( f.inv().get_item_count( ItemType::STONE ), 0 );
 	EXPECT_EQ( f.p().action_mode, ActionMode::NONE );
 }
 
@@ -208,7 +211,7 @@ TEST( PlayerTest, A_を押すと選んだ持ち物で跳ぶ_望遠鏡をのぞ�
 	EXPECT_NEAR( f.velocity().y(), 4.f, 0.0001f );
 
 	// 望遠鏡 : のぞき始め、ホイールは視野を変える。もう一度 A でやめる（選ぶのも戻る）
-	f.p().selected_item_type = ItemType::SCOPE;
+	f.inv().selected_item_type = ItemType::SCOPE;
 	auto result = f.operate( push_a );
 	EXPECT_TRUE( result.scope_started );
 	EXPECT_FALSE( result.reset_fov );
@@ -218,17 +221,17 @@ TEST( PlayerTest, A_を押すと選んだ持ち物で跳ぶ_望遠鏡をのぞ�
 	wheel.wheel = 1;
 	result = f.operate( wheel );
 	EXPECT_EQ( result.scope_wheel, 1 );
-	EXPECT_EQ( f.p().selected_item_type, ItemType::SCOPE );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::SCOPE );
 
 	result = f.operate( push_a );
 	EXPECT_FALSE( result.scope_started );
 	EXPECT_TRUE( result.reset_fov );
 	EXPECT_EQ( f.p().action_mode, ActionMode::NONE );
-	EXPECT_EQ( f.p().selected_item_type, ItemType::NONE );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::NONE );
 
 	// ロケット : カメラの前へ秒速 10 で飛び、持ち物が減る（無くなると選ぶのも戻る）
-	f.p().item_count[ static_cast< int >( ItemType::ROCKET ) ] = 1;
-	f.p().selected_item_type = ItemType::ROCKET;
+	f.inv().item_count[ static_cast< int >( ItemType::ROCKET ) ] = 1;
+	f.inv().selected_item_type = ItemType::ROCKET;
 
 	PlayerInputSystem::View view;
 	view.camera_front = Vector( 1.f, 0.f, 0.f );
@@ -236,15 +239,15 @@ TEST( PlayerTest, A_を押すと選んだ持ち物で跳ぶ_望遠鏡をのぞ�
 
 	EXPECT_EQ( f.p().action_mode, ActionMode::ROCKET );
 	EXPECT_TRUE( is_near( f.velocity(), Vector( 10.f, 0.f, 0.f ) ) );
-	EXPECT_EQ( f.p().get_item_count( ItemType::ROCKET ), 0 );
-	EXPECT_EQ( f.p().selected_item_type, ItemType::NONE );
+	EXPECT_EQ( f.inv().get_item_count( ItemType::ROCKET ), 0 );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::NONE );
 }
 
 TEST( PlayerTest, ホイールで持っている物を順に選ぶ )
 {
 	Fixture f;
 
-	f.p().item_count[ static_cast< int >( ItemType::STONE ) ] = 1;
+	f.inv().item_count[ static_cast< int >( ItemType::STONE ) ] = 1;
 
 	PlayerInputComponent next;
 	next.wheel = 1;
@@ -253,16 +256,16 @@ TEST( PlayerTest, ホイールで持っている物を順に選ぶ )
 
 	// 持っていない物（ロケット・傘）は飛ばす
 	f.operate( next );
-	EXPECT_EQ( f.p().selected_item_type, ItemType::STONE );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::STONE );
 	f.operate( next );
-	EXPECT_EQ( f.p().selected_item_type, ItemType::SCOPE );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::SCOPE );
 	f.operate( next );
-	EXPECT_EQ( f.p().selected_item_type, ItemType::SCOPE );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::SCOPE );
 
 	f.operate( prev );
-	EXPECT_EQ( f.p().selected_item_type, ItemType::STONE );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::STONE );
 	f.operate( prev );
-	EXPECT_EQ( f.p().selected_item_type, ItemType::NONE );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::NONE );
 }
 
 TEST( PlayerTest, 見下ろす角度が上下の向きになり_死んでいる間は操作せず_A_でやり直しを頼む )
@@ -321,18 +324,18 @@ TEST( PlayerTest, メダル・ロケット・石に触れると拾い_拾われ�
 	blue_sky::ecs::contact_rules::on_collide( * f.entity( medal ), * f.entity( f.player ) );
 	blue_sky::ecs::contact_rules::on_collide( * f.entity( f.player ), * f.entity( rocket ) );
 
-	EXPECT_TRUE( f.p().has_medal );
+	EXPECT_TRUE( f.inv().has_medal );
 	EXPECT_TRUE( blue_sky::ecs::EntityObject( f.entity( medal ) ).is_dead() );
-	EXPECT_EQ( f.p().get_item_count( ItemType::ROCKET ), 1 );
-	EXPECT_EQ( f.p().selected_item_type, ItemType::ROCKET );
+	EXPECT_EQ( f.inv().get_item_count( ItemType::ROCKET ), 1 );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::ROCKET );
 	EXPECT_TRUE( blue_sky::ecs::EntityObject( f.entity( rocket ) ).is_dead() );
 
 	blue_sky::ecs::contact_rules::on_collide( * f.entity( stone ), * f.entity( f.player ) );
 
-	EXPECT_EQ( f.p().get_item_count( ItemType::STONE ), 1 );
-	EXPECT_EQ( f.p().selected_item_type, ItemType::STONE );
-	ASSERT_EQ( f.p().stone_list.size(), 1u );
-	EXPECT_EQ( f.p().stone_list.front().get_entity_id(), stone );
+	EXPECT_EQ( f.inv().get_item_count( ItemType::STONE ), 1 );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::STONE );
+	ASSERT_EQ( f.inv().stone_list.size(), 1u );
+	EXPECT_EQ( f.inv().stone_list.front().get_entity_id(), stone );
 	EXPECT_TRUE( blue_sky::ecs::EntityObject( f.entity( stone ) ).is_dead() );
 }
 
@@ -344,19 +347,19 @@ TEST( PlayerTest, 石を投げると石は生き返り_目の高さの前から�
 	f.factory.restart();
 
 	blue_sky::ecs::contact_rules::on_collide( * f.entity( f.player ), * f.entity( stone ) );
-	ASSERT_EQ( f.p().get_item_count( ItemType::STONE ), 1 );
+	ASSERT_EQ( f.inv().get_item_count( ItemType::STONE ), 1 );
 
 	// 前に壁があると投げられない
 	f.p().can_throw = false;
 	f.behavior()->throw_stone( f.player, Vector( 0.f, 0.f, 1.f ) );
-	EXPECT_EQ( f.p().get_item_count( ItemType::STONE ), 1 );
+	EXPECT_EQ( f.inv().get_item_count( ItemType::STONE ), 1 );
 
 	f.p().can_throw = true;
 	f.behavior()->throw_stone( f.player, Vector( 0.f, 0.f, 1.f ) );
 
-	EXPECT_EQ( f.p().get_item_count( ItemType::STONE ), 0 );
-	EXPECT_EQ( f.p().selected_item_type, ItemType::NONE );
-	EXPECT_TRUE( f.p().stone_list.empty() );
+	EXPECT_EQ( f.inv().get_item_count( ItemType::STONE ), 0 );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::NONE );
+	EXPECT_TRUE( f.inv().stone_list.empty() );
 
 	const GameObjectRef s = f.factory.get_ref( stone );
 	EXPECT_FALSE( blue_sky::ecs::EntityObject( f.entity( stone ) ).is_dead() );
@@ -421,4 +424,68 @@ TEST( PlayerTest, 風船の動作では上へ秒速_3_まで上がり_5_m_上が
 	EXPECT_EQ( f.p().action_mode, ActionMode::NONE );
 	EXPECT_TRUE( f.p().is_jumping );
 	EXPECT_FALSE( f.p().is_action_pre_finish );
+}
+
+TEST( PlayerTest, 持ち物は拾うと増えて選ばれ_使うと最後に拾った石から減り_無くなると選ぶのを戻す )
+{
+	Fixture f;
+
+	auto* inventory = f.manager.get_system< blue_sky::ecs::PlayerInventorySystem >();
+	ASSERT_NE( inventory, nullptr );
+
+	const auto first = f.create( "stone" );
+	const auto second = f.create( "stone" );
+
+	inventory->pick_stone( f.player, f.factory.get_ref( first ) );
+	inventory->pick_stone( f.player, f.factory.get_ref( second ) );
+	inventory->pick_up( f.player, blue_sky::ecs::PickupKind::ROCKET );
+
+	EXPECT_EQ( f.inv().get_item_count( ItemType::STONE ), 2 );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::ROCKET );
+
+	// ロケット : 1 つ使うと無くなり、選ぶのが戻る。無ければ使えない
+	EXPECT_TRUE( inventory->use_rocket( f.player ) );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::NONE );
+	EXPECT_FALSE( inventory->use_rocket( f.player ) );
+
+	// 石 : 最後に拾った石から使う
+	f.inv().selected_item_type = ItemType::STONE;
+	auto stone = inventory->use_stone( f.player );
+	ASSERT_TRUE( stone.has_value() );
+	EXPECT_EQ( stone->get_entity_id(), second );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::STONE );
+
+	stone = inventory->use_stone( f.player );
+	ASSERT_TRUE( stone.has_value() );
+	EXPECT_EQ( stone->get_entity_id(), first );
+	EXPECT_EQ( f.inv().selected_item_type, ItemType::NONE );
+	EXPECT_FALSE( inventory->use_stone( f.player ).has_value() );
+
+	// やり直すと空になり、望遠鏡を 1 つ持つ
+	inventory->pick_up( f.player, blue_sky::ecs::PickupKind::MEDAL );
+	f.factory.restart();
+	EXPECT_FALSE( f.inv().has_medal );
+	EXPECT_EQ( f.inv().get_item_count( ItemType::SCOPE ), 1 );
+	EXPECT_EQ( f.inv().get_item_count( ItemType::STONE ), 0 );
+}
+
+TEST( PlayerTest, 石を_3_個以上持つと走れない )
+{
+	Fixture f;
+
+	// 歩数が走り出す数を超えても、石が 3 個あると歩く速さのまま（以前の Player::can_running）
+	f.p().step_count = PlayerBehaviorComponent::StepCountToRun + 10;
+	f.p().step_speed = PlayerBehaviorComponent::MaxWalkStepSpeed;
+	f.inv().item_count[ static_cast< int >( ItemType::STONE ) ] = 3;
+	f.body()->setLinearVelocity( btVector3( 0.f, 0.f, 2.f ) );
+
+	PlayerInputComponent in;
+	in.up = true;
+	f.operate( in );
+	EXPECT_FLOAT_EQ( f.p().step_speed, PlayerBehaviorComponent::MaxWalkStepSpeed );
+
+	// 2 個なら走り始める（歩く速さから走る速さへ少しずつ近づく）
+	f.inv().item_count[ static_cast< int >( ItemType::STONE ) ] = 2;
+	f.operate( in );
+	EXPECT_GT( f.p().step_speed, PlayerBehaviorComponent::MaxWalkStepSpeed );
 }

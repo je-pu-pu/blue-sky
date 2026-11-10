@@ -7,6 +7,7 @@
 #include <blue_sky/ecs/component/GirlComponent.h>
 #include <blue_sky/ecs/system/RobotBehaviorSystem.h>
 #include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
+#include <blue_sky/ecs/system/PlayerInventorySystem.h>
 #include <blue_sky/ecs/component/PhysicsBodyComponent.h>
 #include <blue_sky/ecs/component/SimpleObjectComponent.h>
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
@@ -354,6 +355,15 @@ void EntityObject::restart()
 	if ( entity_->get_component< PlayerBehaviorComponent >() )
 	{
 		if ( auto* system = entity_->get_entity_manager()->get_system< PlayerBehaviorSystem >() )
+		{
+			system->restart( static_cast< core::ecs::EntityId >( entity_->get_id() ) );
+		}
+	}
+
+	// プレイヤーの持ち物を空にし、望遠鏡を 1 つ持つ（以前の Player::restart の持ち物の所）
+	if ( entity_->get_component< PlayerInventoryComponent >() )
+	{
+		if ( auto* system = entity_->get_entity_manager()->get_system< PlayerInventorySystem >() )
 		{
 			system->restart( static_cast< core::ecs::EntityId >( entity_->get_id() ) );
 		}

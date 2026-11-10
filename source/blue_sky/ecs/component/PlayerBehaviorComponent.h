@@ -1,11 +1,10 @@
 #pragma once
 
-#include <blue_sky/GameObjectRef.h>
+#include <blue_sky/ecs/component/PlayerInventoryComponent.h>
 #include <core/ecs/Component.h>
 #include <core/ecs/type.h>
 #include <core/type.h>
 
-#include <list>
 #include <optional>
 
 namespace blue_sky::ecs
@@ -17,6 +16,7 @@ namespace blue_sky::ecs
  * 決定（doc/ECS移行計画.md 5 章の 2）のとおり、プレイヤーは当面、行動をまとめて持つこの部品で ECS の中で動かし、1 つずつ切り出す。
  * 振る舞いは PlayerBehaviorSystem（以前の Player のメンバ関数と同じ値・順）、入力からの操作は PlayerInputSystem。
  * 位置の正は TransformComponent、剛体は PhysicsBodyComponent、向き・やり直しの位置は SimpleObjectComponent（ほかの物体と同じ）。
+ * 切り出したもの : 持ち物（PlayerInventoryComponent・PlayerInventorySystem）。
  *
  * 風船（BalloonHoldSystem）・敵（RobotBehaviorSystem）は、以前はプレイヤーが実装する窓口（BalloonHolder・ChaseTarget）を通して読んでいた。
  * 今はこの部品と、位置・向き・剛体の部品を読む
@@ -32,17 +32,7 @@ struct PlayerBehaviorComponent : public core::ecs::Component
 		SCOPE,
 	};
 
-	enum class ItemType
-	{
-		NONE = -1,
-		ROCKET = 0,
-		UMBRELLA,
-		STONE,
-		SCOPE,
-		MAX
-	};
-
-	using StoneList = std::list< GameObjectRef >;	///< 持っている石（EntityId を包む窓口）
+	using ItemType = PlayerInventoryComponent::ItemType;	///< 持ち物の種類（持ち物は PlayerInventoryComponent に切り出した）
 
 	bool		is_on_footing = false;			///< 現在足場上フラグ
 	bool		is_jumping = false;				///< 現在ジャンプ中フラグ
@@ -77,15 +67,9 @@ struct PlayerBehaviorComponent : public core::ecs::Component
 	float_t		eye_height = 1.5f;				///< 目の高さ
 	float_t		eye_depth = 0.f;				///< 目の奥行きオフセット ( m ) ( 身を乗り出した時に増える ) ( 0.f .. 1.f )
 
-	bool		has_medal = false;				///< メダル保持フラグ
-
-	int			item_count[ static_cast< int >( ItemType::MAX ) ] = { 0 };	///< 各アイテムの個数
-	ItemType	selected_item_type = ItemType::NONE;	///< 現在選択中のアイテム
-
 	float_t		last_footing_height = 0.f;		///< 前回の足場の高さ ( バルーン含む )
 
 	std::optional< core::ecs::EntityId >	balloon;	///< 現在持っている風船（風船の動作が終わっても、次の風船をつかむかやり直すまで覚えている）
-	StoneList	stone_list;						///< 現在持っている石のリスト
 
 	int			hp = 1;							///< HP
 
@@ -157,14 +141,6 @@ struct PlayerBehaviorComponent : public core::ecs::Component
 	bool is_uncontrollable() const { return uncontrollable_timer > 0.f; }
 	bool is_rocketing() const { return action_mode == ActionMode::ROCKET; }
 	bool is_ladder_step_only() const { return is_on_ladder && ! is_on_footing; }
-
-	int get_item_count( ItemType type ) const
-	{
-		if ( type <= ItemType::NONE ) return 0;
-		if ( type >= ItemType::MAX ) return 0;
-
-		return item_count[ static_cast< int >( type ) ];
-	}
 
 	/// 風船の音の番号を取り出す（取り出すと 0 に戻る。以前の Player::pop_balloon_sound_request）
 	int_t pop_balloon_sound_request() { const int_t r = balloon_sound_request; balloon_sound_request = 0; return r; }

@@ -11,7 +11,7 @@
 #include <blue_sky/ecs/component/CollisionTraitsComponent.h>
 #include <blue_sky/ecs/component/FlickerComponent.h>
 #include <blue_sky/ecs/component/ObjectRenderComponent.h>
-#include <blue_sky/ecs/component/PickupComponent.h>
+#include <blue_sky/ecs/system/PlayerInventorySystem.h>
 #include <blue_sky/ecs/component/SimpleObjectComponent.h>
 #include <blue_sky/ecs/system/CollisionEventSystem.h>
 
@@ -34,6 +34,7 @@ struct PlayerBehaviorSystem::Self
 {
 	core::ecs::Entity*			entity = nullptr;
 	PlayerBehaviorComponent*	p = nullptr;
+	PlayerInventoryComponent*	inventory = nullptr;	///< 持ち物（無ければ nullptr）
 	EntityObject				object{ nullptr };
 	btRigidBody*				body = nullptr;		///< 剛体（無ければ nullptr。ステージを読む前）
 	float_t						delta_time = 0.f;
@@ -131,6 +132,7 @@ bool PlayerBehaviorSystem::find_self( core::ecs::EntityId id, Self& self ) const
 		return false;
 	}
 
+	self.inventory = self.entity->get_component< PlayerInventoryComponent >();
 	self.object = EntityObject( self.entity );
 	self.body = self.object.get_rigid_body();
 
@@ -201,19 +203,9 @@ void PlayerBehaviorSystem::restart( core::ecs::EntityId id )
 	p.eye_height = PlayerBehaviorComponent::DefaultEyeHeight;
 	p.eye_depth = 0.f;
 
-	p.has_medal = false;
-
-	for ( int n = 0; n < static_cast< int >( ItemType::MAX ); n++ )
-	{
-		p.item_count[ n ] = 0;
-	}
-
-	p.item_count[ static_cast< int >( ItemType::SCOPE ) ] = 1;
-
-	p.selected_item_type = ItemType::NONE;
+	// 持ち物は PlayerInventorySystem::restart が戻す（EntityObject::restart が呼ぶ）
 
 	p.balloon.reset();
-	p.stone_list.clear();
 
 	p.hp = 1;
 
@@ -674,7 +666,9 @@ void PlayerBehaviorSystem::update_step_speed( Self& self )
 /// 走ることができるかを調べる
 bool PlayerBehaviorSystem::can_running( const Self& self ) const
 {
-	return self.velocity().length() > PlayerBehaviorComponent::MinVelocityForRun && self.p->item_count[ static_cast< int >( ItemType::STONE ) ] < PlayerBehaviorComponent::MaxStonesForRunning;
+	const int stones = self.inventory ? self.inventory->get_item_count( ItemType::STONE ) : 0;
+
+	return self.velocity().length() > PlayerBehaviorComponent::MinVelocityForRun && stones < PlayerBehaviorComponent::MaxStonesForRunning;
 }
 
 /// 重力を更新する
@@ -1051,7 +1045,7 @@ void PlayerBehaviorSystem::rocket( core::ecs::EntityId id, const Vector& directi
 
 	PlayerBehaviorComponent& p = * self.p;
 
-	if ( p.get_item_count( ItemType::ROCKET ) <= 0 )
+	if ( ! self.inventory || self.inventory->get_item_count( ItemType::ROCKET ) <= 0 )
 	{
 		return;
 	}
@@ -1064,11 +1058,9 @@ void PlayerBehaviorSystem::rocket( core::ecs::EntityId id, const Vector& directi
 
 	self.object.set_velocity( direction * PlayerBehaviorComponent::RocketInitialVelocity );
 
-	p.item_count[ static_cast< int >( ItemType::ROCKET ) ]--;
-
-	if ( p.item_count[ static_cast< int >( ItemType::ROCKET ) ] <= 0 )
+	if ( auto* inventory = get_entity_manager()->get_system< PlayerInventorySystem >() )
 	{
-		p.selected_item_type = ItemType::NONE;
+		inventory->use_rocket( id );
 	}
 
 	play_sound( self, "rocket" );
@@ -1085,7 +1077,7 @@ void PlayerBehaviorSystem::throw_stone( core::ecs::EntityId id, const Vector& di
 
 	PlayerBehaviorComponent& p = * self.p;
 
-	if ( p.get_item_count( ItemType::STONE ) <= 0 )
+	if ( ! self.inventory || self.inventory->get_item_count( ItemType::STONE ) <= 0 )
 	{
 		return;
 	}
@@ -1095,64 +1087,21 @@ void PlayerBehaviorSystem::throw_stone( core::ecs::EntityId id, const Vector& di
 		return;
 	}
 
-	GameObjectRef stone = p.stone_list.back();
-	p.stone_list.pop_back();
-	p.item_count[ static_cast< int >( ItemType::STONE ) ]--;
+	auto* inventory = get_entity_manager()->get_system< PlayerInventorySystem >();
+	std::optional< GameObjectRef > used = inventory ? inventory->use_stone( id ) : std::nullopt;
 
-	if ( p.item_count[ static_cast< int >( ItemType::STONE ) ] <= 0 )
+	if ( ! used )
 	{
-		p.selected_item_type = ItemType::NONE;
+		return;
 	}
+
+	GameObjectRef stone = * used;
 
 	stone.restart();
 	stone.set_location( self.location() + ( self.front() * PlayerBehaviorComponent::CollisionDepth ) + Vector( 0.f, p.eye_height, 0.f ) );
 	stone.set_velocity( direction * PlayerBehaviorComponent::StoneThrowSpeed );
 
 	play_sound( self, "stone-throw" );
-}
-
-void PlayerBehaviorSystem::select_prev_item( core::ecs::EntityId id )
-{
-	Self self;
-
-	if ( ! find_self( id, self ) )
-	{
-		return;
-	}
-
-	PlayerBehaviorComponent& p = * self.p;
-
-	for ( int type = static_cast< int >( p.selected_item_type ) - 1; type >= static_cast< int >( ItemType::NONE ); type-- )
-	{
-		if ( type == static_cast< int >( ItemType::NONE ) || p.item_count[ type ] )
-		{
-			p.selected_item_type = static_cast< ItemType >( type );
-			play_sound( self, "click" );
-			break;
-		}
-	}
-}
-
-void PlayerBehaviorSystem::select_next_item( core::ecs::EntityId id )
-{
-	Self self;
-
-	if ( ! find_self( id, self ) )
-	{
-		return;
-	}
-
-	PlayerBehaviorComponent& p = * self.p;
-
-	for ( int type = static_cast< int >( p.selected_item_type ) + 1; type < static_cast< int >( ItemType::MAX ); type++ )
-	{
-		if ( p.item_count[ type ] )
-		{
-			p.selected_item_type = static_cast< ItemType >( type );
-			play_sound( self, "click" );
-			break;
-		}
-	}
 }
 
 /// 望遠鏡モードを切り替える
@@ -1170,7 +1119,11 @@ void PlayerBehaviorSystem::switch_scope_mode( core::ecs::EntityId id )
 	if ( p.action_mode == ActionMode::SCOPE )
 	{
 		set_action_mode( self, ActionMode::NONE );
-		p.selected_item_type = ItemType::NONE;
+
+		if ( self.inventory )
+		{
+			self.inventory->selected_item_type = ItemType::NONE;
+		}
 	}
 	else
 	{
@@ -1232,62 +1185,6 @@ bool PlayerBehaviorSystem::on_touch_balloon( core::ecs::EntityId id, core::ecs::
 
 	p.balloon_sequence_count += 1;
 	p.balloon_sound_request = p.balloon_sequence_count;
-
-	return true;
-}
-
-bool PlayerBehaviorSystem::on_touch_stone( core::ecs::EntityId id, const GameObjectRef& stone )
-{
-	Self self;
-
-	if ( ! find_self( id, self ) )
-	{
-		return false;
-	}
-
-	PlayerBehaviorComponent& p = * self.p;
-
-	p.item_count[ static_cast< int >( ItemType::STONE ) ]++;
-	p.selected_item_type = ItemType::STONE;
-
-	p.stone_list.push_back( stone );
-
-	play_sound( self, "stone-get" );
-
-	return true;
-}
-
-bool PlayerBehaviorSystem::on_touch_pickup( core::ecs::EntityId id, PickupKind kind )
-{
-	Self self;
-
-	if ( ! find_self( id, self ) )
-	{
-		return false;
-	}
-
-	PlayerBehaviorComponent& p = * self.p;
-
-	switch ( kind )
-	{
-	case PickupKind::MEDAL:
-		p.has_medal = true;
-		play_sound( self, "medal-get" );
-		break;
-
-	case PickupKind::ROCKET:
-		p.item_count[ static_cast< int >( ItemType::ROCKET ) ]++;
-		p.selected_item_type = ItemType::ROCKET;
-		play_sound( self, "rocket-get" );
-		break;
-
-	case PickupKind::UMBRELLA:
-		// 以前から、傘を拾ってもプレイヤーは何もしない（傘は消える）
-		break;
-
-	default:
-		break;
-	}
 
 	return true;
 }

@@ -1,5 +1,6 @@
 #include "PlayerInputSystem.h"
 #include "PlayerBehaviorSystem.h"
+#include "PlayerInventorySystem.h"
 
 #include <core/ecs/EntityManager.h>
 
@@ -23,10 +24,12 @@ PlayerInputSystem::Result PlayerInputSystem::update_player( core::ecs::EntityId 
 	Result result;
 
 	PlayerBehaviorSystem* behavior = find_behavior();
+	PlayerInventorySystem* inventory = get_entity_manager()->get_system< PlayerInventorySystem >();
 	const PlayerInputComponent* input = find_input( id );
 	const PlayerBehaviorComponent* p = behavior ? behavior->find_player( id ) : nullptr;
+	const PlayerInventoryComponent* items = inventory ? inventory->find_inventory( id ) : nullptr;
 
-	if ( ! behavior || ! input || ! p )
+	if ( ! behavior || ! input || ! p || ! items )
 	{
 		return result;
 	}
@@ -116,7 +119,7 @@ PlayerInputSystem::Result PlayerInputSystem::update_player( core::ecs::EntityId 
 
 	if ( input->a_pushed )
 	{
-		switch ( p->selected_item_type )
+		switch ( items->selected_item_type )
 		{
 			case ItemType::NONE: behavior->jump( id ); break;
 			case ItemType::ROCKET: behavior->rocket( id, view.camera_front ); break;
@@ -155,11 +158,11 @@ PlayerInputSystem::Result PlayerInputSystem::update_player( core::ecs::EntityId 
 	{
 		if ( input->wheel > 0 )
 		{
-			behavior->select_next_item( id );
+			inventory->select_next_item( id );
 		}
 		else if ( input->wheel < 0 )
 		{
-			behavior->select_prev_item( id );
+			inventory->select_prev_item( id );
 		}
 
 		result.reset_fov = true;

@@ -147,6 +147,12 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 	// 開発用 : やり直し（restart）の前に作り、やり直しで始めの位置に置かれるようにする
 	debug_spawn_objects();
 
+	// 開発用 : 段階ごとの時間を測るなら、System ごとの時間も測る（BLUE_SKY_DEBUG_FRAME_STAGES）
+	if ( stage_timer_.is_enabled() )
+	{
+		get_object_updater()->set_stage_timer( & stage_timer_ );
+	}
+
 	restart();
 
 	// 開発用 : BLUE_SKY_DEBUG_DUMP_STAGE を設定すると、ステージから作った物体の一覧をログに出す
@@ -164,6 +170,8 @@ GamePlayScene::GamePlayScene( GameMain& game_main )
 
 GamePlayScene::~GamePlayScene()
 {
+	get_object_updater()->set_stage_timer( nullptr );	// 開発用の測る先（このシーンが持つ）を外す
+
 	get_graphics_manager()->unset_render_target();
 
 	// 物体（ECS だけの物体）を、物理の世界を片付ける前に壊す
@@ -323,6 +331,8 @@ void GamePlayScene::load_sound_all( bool is_final_stage )
  */
 void GamePlayScene::update()
 {
+	stage_timer_.begin_frame();
+
 	Scene::update();
 
 	if ( is_blackout_ )
@@ -364,6 +374,8 @@ void GamePlayScene::update()
 	debug_player_script();
 	debug_log_actors();
 
+	stage_timer_.mark( "シーン・プレイヤーの入力" );
+
 	get_object_updater()->update();
 
 	if ( ! is_cleared_ )
@@ -371,8 +383,12 @@ void GamePlayScene::update()
 		get_graphics_manager()->clear_debug_bullet();
 		get_physics_manager()->step_simulation( get_elapsed_time() );
 
+		stage_timer_.mark( "物理（Bullet の step_simulation）" );
+
 		// 剛体の位置を位置の正（TransformComponent）へ写す（ecs::PhysicsSyncSystem。以前は物体ごとに update_transform を呼んでいた）
 		get_object_updater()->update_transforms();
+
+		stage_timer_.mark( "剛体の位置を写す（update_transforms）" );
 	}
 
 	{
@@ -391,6 +407,8 @@ void GamePlayScene::update()
 	}
 
 	get_object_updater()->check_collision_all();
+
+	stage_timer_.mark( "当たり（check_collision）" );
 
 	get_sound_manager()->set_listener_position( camera_->position().xyz() );
 	get_sound_manager()->set_listener_orientation( camera_->front().xyz(), camera_->up().xyz() );
@@ -416,6 +434,8 @@ void GamePlayScene::update()
 
 		get_graphics_manager()->get_frame_render_data()->data().tess_factor = math::clamp( get_graphics_manager()->get_frame_render_data()->data().tess_factor, 1.f, 8.f );
 	}
+
+	stage_timer_.mark( "そのほかの update（音・影の設定など）" );
 }
 
 /**

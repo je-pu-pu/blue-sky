@@ -575,6 +575,9 @@
     <ClInclude Include="blue_sky\DebugLog.h">
       <Filter>blue_sky</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\FrameStageTimer.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
     <ClInclude Include="core\ui\Image.h">
       <Filter>core\ui</Filter>
     </ClInclude>

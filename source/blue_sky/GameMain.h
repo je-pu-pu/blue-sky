@@ -176,6 +176,7 @@ private:
 	long long										frame_time_previous_start_ = 0;		///< 前のフレームの update の始まり
 	std::vector< double >							frame_time_work_ms_;				///< update の始まりから present の前まで（ms）
 	std::vector< double >							frame_time_interval_ms_;			///< 前のフレームの始まりからの間隔（ms）
+	std::vector< double >							frame_time_present_ms_;				///< present にかかった時間（ms。GPU が追いつかないと、ここで待つ）
 
 	void setup_frame_time_measurement();
 	void record_frame_time();

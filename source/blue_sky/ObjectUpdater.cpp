@@ -17,6 +17,7 @@
 #include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
 
 #include <core/ecs/EntityManager.h>
+#include <blue_sky/FrameStageTimer.h>
 
 namespace blue_sky
 {
@@ -39,6 +40,14 @@ float_t ObjectUpdater::get_scene_elapsed_time() const
 	return object_context_ && object_context_->scene_elapsed_time ? object_context_->scene_elapsed_time() : 0.f;
 }
 
+void ObjectUpdater::mark_stage( const char* name ) const
+{
+	if ( stage_timer_ )
+	{
+		stage_timer_->mark( name );
+	}
+}
+
 void ObjectUpdater::update()
 {
 	const float_t delta_time = get_delta_time();
@@ -50,11 +59,15 @@ void ObjectUpdater::update()
 		system->update_players( delta_time, scene_elapsed_time );
 	}
 
+	mark_stage( "System : プレイヤー" );
+
 	// 風船（以前は Balloon::update。アニメーションより前に）
 	if ( auto* system = entity_manager_->get_system< ecs::BalloonHoldSystem >() )
 	{
 		system->update_balloons( scene_elapsed_time );
 	}
+
+	mark_stage( "System : 風船" );
 
 	// 少女（以前は Girl::update）
 	if ( auto* system = entity_manager_->get_system< ecs::GirlSystem >() )
@@ -62,11 +75,15 @@ void ObjectUpdater::update()
 		system->update_girls( scene_elapsed_time );
 	}
 
+	mark_stage( "System : 少女" );
+
 	// 敵（以前は Robot::update。アニメーションを変えるので、アニメーションを進める前に）
 	if ( auto* system = entity_manager_->get_system< ecs::RobotBehaviorSystem >() )
 	{
 		system->update_robots( delta_time, scene_elapsed_time );
 	}
+
+	mark_stage( "System : 敵" );
 
 	// アニメーションを進める（物体のアニメーションは互いに独立なので、まとめて後で進めても同じ）
 	if ( auto* system = entity_manager_->get_system< ecs::ObjectRenderDataSystem >() )
@@ -74,11 +91,15 @@ void ObjectUpdater::update()
 		system->update_animations();
 	}
 
+	mark_stage( "System : アニメーション" );
+
 	// 動く床（以前は TranslationObject::update）
 	if ( auto* system = entity_manager_->get_system< ecs::TranslationSystem >() )
 	{
 		system->update_translations( delta_time );
 	}
+
+	mark_stage( "System : 動く床" );
 
 	// 最近触れた物体の覚えを減らす（以前は Ladder::update など）
 	if ( auto* system = entity_manager_->get_system< ecs::ContactCacheSystem >() )
@@ -86,17 +107,23 @@ void ObjectUpdater::update()
 		system->update_caches( delta_time );
 	}
 
+	mark_stage( "System : 触れた物の覚え" );
+
 	// 回る物（以前は Medal::update など）
 	if ( auto* system = entity_manager_->get_system< ecs::SpinSystem >() )
 	{
 		system->update_spins( delta_time );
 	}
 
+	mark_stage( "System : 回る物" );
+
 	// 目標地点・向きへ動かす（目標を持つ物体を Entity の番号の順に回す）
 	if ( auto* system = entity_manager_->get_system< ecs::MoveToTargetSystem >() )
 	{
 		system->update_targets( delta_time );
 	}
+
+	mark_stage( "System : 目標地点へ動かす" );
 }
 
 void ObjectUpdater::update_balloon( core::ecs::EntityId id )

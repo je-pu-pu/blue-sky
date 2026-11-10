@@ -720,6 +720,13 @@ void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool
  */
 void GraphicsManager::render_objects() const
 {
+	render_object_meshes();
+	render_object_lines();
+}
+
+/// 物体のメッシュを描く（render_objects の前半）
+void GraphicsManager::render_object_meshes() const
+{
 	if ( shadow_map_ )
 	{
 		shadow_map_->ready_to_render_scene();
@@ -727,25 +734,33 @@ void GraphicsManager::render_objects() const
 
 	const auto* system = get_object_render_data_system();
 
-	if ( system )
+	if ( ! system )
 	{
-		system->resolve_models();	// 1 フレームに 1 回だけ引く
-
-		for ( const auto& target : system->get_render_targets() )
-		{
-			const Model* model = target.model;
-
-			if ( ! model )
-			{
-				continue;
-			}
-
-			set_current_object_constant_buffer( target.render->object_constant_buffer.get() );
-			set_current_skinning_constant_buffer( target.render->bone_constant_buffer.get() );
-
-			render_object_mesh( * target.render, model );
-		}
+		return;
 	}
+
+	system->resolve_models();	// 1 フレームに 1 回だけ引く
+
+	for ( const auto& target : system->get_render_targets() )
+	{
+		const Model* model = target.model;
+
+		if ( ! model )
+		{
+			continue;
+		}
+
+		set_current_object_constant_buffer( target.render->object_constant_buffer.get() );
+		set_current_skinning_constant_buffer( target.render->bone_constant_buffer.get() );
+
+		render_object_mesh( * target.render, model );
+	}
+}
+
+/// 物体の線を描く（render_objects の後半）
+void GraphicsManager::render_object_lines() const
+{
+	const auto* system = get_object_render_data_system();
 
 	set_input_layout( "pos_color" );
 
@@ -759,6 +774,8 @@ void GraphicsManager::render_objects() const
 		{
 			return;
 		}
+
+		system->resolve_models();	// 1 フレームに 1 回だけ引く（引いた後なら何もしない）
 
 		for ( const auto& target : system->get_render_targets() )
 		{

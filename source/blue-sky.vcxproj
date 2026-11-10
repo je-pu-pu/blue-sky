@@ -221,6 +221,7 @@
     <ClInclude Include="Scene\OverlayRenderRange.h" />
     <ClInclude Include="core\ui\PixelSnap.h" />
     <ClInclude Include="blue_sky\DebugLog.h" />
+    <ClInclude Include="blue_sky\FrameStageTimer.h" />
     <ClInclude Include="core\ui\Image.h" />
     <ClInclude Include="core\ui\Brush.h" />
     <ClInclude Include="Scene\UIOverlayScene.h" />

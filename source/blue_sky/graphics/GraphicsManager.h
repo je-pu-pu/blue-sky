@@ -402,6 +402,8 @@ public:
 	virtual void render_shadow_map() const;
 	/// ゲームの物体を描く（メッシュ → 線。描く対象は ecs::ObjectRenderDataSystem::get_render_targets の順）
 	virtual void render_objects() const;
+	void render_object_meshes() const;	///< render_objects の前半 : 物体のメッシュ（段ごとの時間を測るため分けた）
+	void render_object_lines() const;	///< render_objects の後半 : 物体の線
 	virtual void render_objects_velocity() const;	///< モーションベクトルパス ( 案B / 段階0b )
 
 	virtual void set_post_effect_shader( Shader* ) override;

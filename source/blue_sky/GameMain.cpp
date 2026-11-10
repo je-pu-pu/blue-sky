@@ -809,7 +809,24 @@ void GameMain::render()
 	capture_frame_if_requested();
 	record_frame_time();
 
+	// 開発用 : present にかかった時間も測る（BLUE_SKY_DEBUG_FRAME_TIME の範囲。最後のフレームの分はログの後なので入らない）
+	const bool measure_present = frame_time_last_ > 0 && frame_count_ >= frame_time_first_ && frame_count_ < frame_time_last_;
+	LARGE_INTEGER present_start = { }, present_end = { };
+
+	if ( measure_present )
+	{
+		QueryPerformanceCounter( & present_start );
+	}
+
 	direct_3d_->present();
+
+	if ( measure_present )
+	{
+		LARGE_INTEGER frequency;
+		QueryPerformanceCounter( & present_end );
+		QueryPerformanceFrequency( & frequency );
+		frame_time_present_ms_.push_back( static_cast< double >( present_end.QuadPart - present_start.QuadPart ) * 1000.0 / static_cast< double >( frequency.QuadPart ) );
+	}
 
 	// フレームの途中で解放・差し替えを頼まれたリソースを、ここでまとめて解放する（フレームの中では引いたポインタを使い回せる。doc/ハンドルの設計.md）
 	flush_resource_releases();
@@ -841,6 +858,7 @@ void GameMain::setup_frame_time_measurement()
 
 	frame_time_work_ms_.reserve( frame_time_last_ - frame_time_first_ + 1 );
 	frame_time_interval_ms_.reserve( frame_time_last_ - frame_time_first_ + 1 );
+	frame_time_present_ms_.reserve( frame_time_last_ - frame_time_first_ + 1 );
 }
 
 void GameMain::record_frame_time()
@@ -893,6 +911,7 @@ void GameMain::record_frame_time()
 		+ " シーン " + ( scene_ ? scene_->get_name() : string_t( "なし" ) ) );
 	debug_log( "[FrameTime] 仕事の時間（update の始まり〜present の前） : " + summary( frame_time_work_ms_ ) );
 	debug_log( "[FrameTime] フレームの間隔 : " + summary( frame_time_interval_ms_ ) );
+	debug_log( "[FrameTime] present の時間 : " + summary( frame_time_present_ms_ ) );
 }
 
 /**

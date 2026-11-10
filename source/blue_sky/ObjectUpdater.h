@@ -10,6 +10,7 @@ namespace blue_sky
 {
 
 struct GameObjectContext;
+class FrameStageTimer;
 
 /**
  * 本編のゲームの物体（ECS だけの物体）の System を、決まった順に動かす
@@ -28,15 +29,20 @@ private:
 	const core::physics::PhysicsManager* physics_;	///< 当たりを集める世界（GameMain が渡す）
 	const GameObjectContext* object_context_;		///< 経過時間・音（同上）
 	core::ecs::EntityManager* entity_manager_;		///< 物体の Entity（同上）
+	FrameStageTimer* stage_timer_ = nullptr;		///< 開発用 : System ごとの時間を測る先（nullptr なら測らない。BLUE_SKY_DEBUG_FRAME_STAGES）
 
 	float_t get_delta_time() const;
 	float_t get_scene_elapsed_time() const;
+	void mark_stage( const char* name ) const;	///< 開発用 : 測る先があれば、前の段階の終わりに印を付ける
 
 public:
 	ObjectUpdater( const core::physics::PhysicsManager* physics, const GameObjectContext* object_context, core::ecs::EntityManager* entity_manager );
 
 	/// 物体の System を決まった順に動かす（物理を進める前。上の説明の順）
 	void update();
+
+	/// 開発用 : update の System ごとの時間を測る先を渡す（nullptr で測らない。GamePlayScene が BLUE_SKY_DEBUG_FRAME_STAGES のときに渡す）
+	void set_stage_timer( FrameStageTimer* timer ) { stage_timer_ = timer; }
 
 	/**
 	 * 1 つの風船を動かす（ecs::BalloonHoldSystem に頼む）

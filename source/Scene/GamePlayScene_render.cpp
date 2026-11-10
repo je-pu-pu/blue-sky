@@ -40,12 +40,19 @@ namespace blue_sky
  */
 void GamePlayScene::render()
 {
+	stage_timer_.mark( "update と render の間（GameMain）" );
+
 	get_graphics_manager()->setup_rendering();
+
+	stage_timer_.mark( "描く準備・物体の定数の更新（setup_rendering）" );
 
 	render_to_oculus_vr();
 	render_to_display();
 
 	render_text();
+
+	stage_timer_.mark( "文字" );
+	stage_timer_.end_frame( get_graphics_manager()->get_draw_count() );
 }
 
 /**
@@ -87,7 +94,11 @@ void GamePlayScene::render_to_display() const
 	update_render_data_for_frame();
 	update_render_data_for_frame_drawing();
 
+	stage_timer_.mark( "フレームの定数" );
+
 	get_graphics_manager()->render_shadow_map();
+
+	stage_timer_.mark( "影（シャドウマップ）" );
 
 	get_graphics_manager()->clear_default_view();
 
@@ -103,7 +114,14 @@ void GamePlayScene::render_to_display() const
  */
 void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 {
-	get_graphics_manager()->render_objects();
+	// メッシュと線を分けて呼ぶ（render_objects と同じ。段階ごとの時間を測るため）
+	get_graphics_manager()->render_object_meshes();
+
+	stage_timer_.mark( "物体のメッシュ" );
+
+	get_graphics_manager()->render_object_lines();
+
+	stage_timer_.mark( "物体の線" );
 
 	get_graphics_manager()->render_debug_axis();
 	get_graphics_manager()->render_debug_bullet();
@@ -119,6 +137,8 @@ void GamePlayScene::render_for_eye( float_t ortho_offset ) const
 	render_fader();
 
 	render_debug_shadow_map_window();
+
+	stage_timer_.mark( "遠景・背景・UI" );
 }
 
 void GamePlayScene::render_text() const

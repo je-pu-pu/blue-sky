@@ -98,6 +98,7 @@ Player 1170+284・Robot 392+92・BaseSwitch 146+75（Switch 50+39・AreaSwitch 2
   - `GraphicsManager::null_texture_` : 持ち主（GraphicsManager）自身が作り、自分のデストラクタまで解放しない
 - **残り（後続）** : `blue_sky::graphics::Model::shader_list_`（`std::vector< Shader* >`。ポストエフェクトのシェーダーもここ）・`GraphicsManager::shadow_map_shader_`（自分で選び直す）。シェーダーを個別に解放するのは CityGenerator が自分のシェーダーに対してだけなので、今は壊れないが、モデルが引く窓口を持つときに一緒に移す
 - テスト : TextureSlotTest（5 件）・RenderSystemHandleTest（3 件。core の描画の窓口の偽物）。535 → 543 件。シーンを替えて戻る確かめのため、開発用の BLUE_SKY_DEBUG_SCENE_SEQUENCE を足した。19628109
+- **ハンドルの中身の作り替え（2026-11-11、doc/ハンドルの設計.md）** : 上のハンドル（番号＋ハッシュの表）を、Handle（ResourceManager の置き場にある、リソースへのポインタだけの持ち主の印）と WeakHandle（Handle へのポインタだけ、8 バイト）にした。`ResourceHandle` は WeakHandle の別名なので、上で書き換えた使う側（ModelHandle・TextureHandle・ShaderHandle・SoundHandle・TextureSlot・Scene::resolve）はそのまま `get()` で引く。引く手間は Release で 5〜12 ns → 0.4〜1.3 ns、Debug で 106〜120 ns → 2.5〜4.0 ns。解放と差し替えはフレームの終わり（Present の後）とシーンの切り替えにまとめ、1 フレームの中では引いたポインタを使い回せるようにした（描く流れは描く対象のモデルを 1 フレームに 1 回だけ引く）。上の「残り」（Model のシェーダーの一覧・shadow_map_shader_）も、フレームの中では解放されなくなった。955a8cb8・788a9551・88b378de・79c3bc70
 
 ## 5. 決めること
 

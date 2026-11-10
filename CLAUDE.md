@@ -34,6 +34,8 @@ $msbuild = & $vswhere -latest -requires Microsoft.Component.MSBuild -find "MSBui
 & .\source\.build\x64\Debug\blue-sky-test.exe
 # 既定では走らないベンチマーク（ECS の 1 万・10 万個など）
 & .\source\.build\x64\Debug\blue-sky-test.exe --gtest_also_run_disabled_tests --gtest_filter=EcsBenchmark.*
+# ハンドルを引く手間（生ポインタ・作り替える前の番号＋ハッシュの表・今の WeakHandle）
+& .\source\.build\x64\Debug\blue-sky-test.exe --gtest_also_run_disabled_tests --gtest_filter=ResourceHandleBenchmark.*
 ```
 
 PDB のエラー（C1041 など）が出たら、`mspdbsrv` を止めて `source\.build\x64\Debug\blue-sky.pdb` を消す。
@@ -96,7 +98,9 @@ get_entity_manager()->add_system< RenderSystem >( 1000, get_graphics_manager(), 
 
 ### リソースと物理
 
-- **リソースはハンドルで持つ** : モデル・メッシュ・テクスチャ・音は `core::ResourceHandle`（`ModelHandle`・`TextureHandle`・`SoundHandle` など）で持ち、使うたびに `resolve_*` で引く（解放済みなら nullptr）。生ポインタを持ち続けない。持ち主が 1 つのもの（剛体・定数バッファなど）は `unique_ptr`／RAII
+- **リソースはハンドルで持つ** : モデル・メッシュ・テクスチャ・音は `core::ResourceHandle`（`ModelHandle`・`TextureHandle`・`SoundHandle` など）で持ち、使うたびに `get()`（または `resolve_*`）で引く（解放済みなら nullptr）。生ポインタを持ち続けない。持ち主が 1 つのもの（剛体・定数バッファなど）は `unique_ptr`／RAII
+  - ハンドルの中身（doc/ハンドルの設計.md）: 持ち主の印 `core::Handle` は ResourceManager だけが作って持つ（ページに置き、動かさない・解放しない）。ほかは `core::WeakHandle`（= `ResourceHandle`。Handle へのポインタ、8 バイト）を持つ。同じ名前を読み直すと同じ Handle を使う。WeakHandle を static・グローバルに置かない
+  - 解放（`unload_named_*`・`destroy_shader`・音の `unload`）と差し替え（`replace`・音の読み直し）は、フレームの終わり（Present の後）とシーンの切り替えの `flush_releases` でまとめて行う。1 フレームの中では引いたポインタを使い回してよい（次のフレームへ持ち越さない）。描く流れは描く対象のモデルを `ObjectRenderDataSystem::resolve_models` で 1 フレームに 1 回だけ引く
   - シェーダーは `core::graphics::ShaderHandle`（`get_shader_handle`・`resolve_shader`）。シェーダーが参照するテクスチャは `graphics::TextureSlot`（管理しているものはハンドル、描画先などはポインタ）
   - シーンは `Scene::resolve( ハンドル, 名前 )`・`load_named_texture_handle`・`load_model_handle`・`play` を使う。引けなければ描かない・鳴らさない（理由は名前ごとに 1 回だけログ）
   - 残した生ポインタと理由は doc/ECS移行計画.md の 4.1
@@ -176,6 +180,7 @@ get_entity_manager()->add_system< RenderSystem >( 1000, get_graphics_manager(), 
 - ゲームは二重に起動できない（ミューテックス）。利用者が手でゲームを使っている間は自動の起動を止める
 - 閉じるときは `CloseMainWindow` で閉じる（ログは `source/log/blue-sky.log`、落ちたときは `source/log/crash.log`）
 - シーンを替えて戻る確かめ : `BLUE_SKY_DEBUG_SCENE_SEQUENCE=stage_select,game_play:1-1,title` のように「シーン[:ステージ]」を並べると、150 フレームごとに順にベースシーンを置き換える
+- フレームの時間 : `BLUE_SKY_DEBUG_FRAME_TIME=300,1500` のように「最初,最後」のフレームを渡すと、その間の仕事の時間（update の始まり〜present の前）とフレームの間隔の中央値・平均・95%・最小・最大を最後のフレームで `[FrameTime]` として debug_log に出す（本編は `BLUE_SKY_START_SCENE=game_play`・`BLUE_SKY_START_STAGE=1-2` などと一緒に。ハンドルの作り替えの前後の数字は doc/ハンドルの設計.md の 5 章）
 
 ## Python ツール / 検証ハーネス (tools/)
 

@@ -9,7 +9,11 @@
 #include <blue_sky/graphics/Line.h>
 #include <blue_sky/ecs/component/ObjectRenderComponent.h>
 #include <blue_sky/ecs/component/AnimationComponent.h>
+#include <blue_sky/ecs/component/CollisionTraitsComponent.h>
+#include <blue_sky/ecs/component/ActiveObjectLinkComponent.h>
 #include <blue_sky/DebugLog.h>
+
+#include <core/physics/EntityTag.h>
 
 #include <core/ecs/EntityManager.h>
 #include <core/ecs/component/TransformComponent.h>
@@ -202,6 +206,21 @@ void ActiveObject::attach_entity( core::ecs::EntityManager* entity_manager, grap
 	// 目標地点・向きへ動かす窓口（MoveToTargetSystem が自分を位置・速度の窓口として呼ぶ）
 	entity->add_component< ecs::TargetMoverComponent >()->mover = this;
 
+	// 当たりの性質（種類ごとに決まった定数なので、ここで一度だけ写す）と、当たりのイベントから自分を引く印（互換の層）
+	{
+		auto* traits = entity->add_component< ecs::CollisionTraitsComponent >();
+		traits->is_ghost = is_ghost();
+		traits->is_hard = is_hard();
+		traits->is_block = is_block();
+		traits->is_safe_footing = is_safe_footing();
+		traits->is_dead = is_dead_;
+
+		entity->add_component< ecs::ActiveObjectLinkComponent >()->object = this;
+	}
+
+	// 剛体が先に設定されていれば、ここでタグを付ける（剛体が後なら set_rigid_body で付ける）
+	apply_rigid_body_tag();
+
 	auto* render = entity->add_component< ecs::ObjectRenderComponent >();
 
 	// 毎フレーム書き換える（world・前フレームの world）ので DYNAMIC にする
@@ -224,8 +243,47 @@ void ActiveObject::detach_entity()
 	// 部品が消える前に、モデルを預かり直す（clone 元・もう一度加えるときのため）
 	pending_model_ = get_model();
 
+	// 剛体のタグを外す（以前は GameObject のデストラクタが userPointer を消していた。外した剛体は地面と同じ扱いになる）
+	if ( is_rigid_body_owner_ && get_rigid_body() )
+	{
+		core::physics::clear_entity_tag( get_rigid_body() );
+	}
+
 	entity_manager_->destroy_entity( entity_id_ );	// もう消えている（EntityManager が片付けた）なら何もしない
 	has_entity_ = false;
+}
+
+void ActiveObject::set_rigid_body( btRigidBody* rigid_body )
+{
+	GameObject::set_rigid_body( rigid_body );
+
+	is_rigid_body_owner_ = rigid_body != nullptr;
+	apply_rigid_body_tag();
+}
+
+void ActiveObject::apply_rigid_body_tag()
+{
+	if ( ! has_entity_ || ! is_rigid_body_owner_ || ! get_rigid_body() )
+	{
+		return;
+	}
+
+	core::physics::set_entity_tag( get_rigid_body(), entity_id_ );
+}
+
+void ActiveObject::sync_dead_to_collision_traits()
+{
+	if ( ! has_entity_ )
+	{
+		return;
+	}
+
+	core::ecs::Entity* entity = entity_manager_->find( entity_id_ );
+
+	if ( auto* traits = entity ? entity->get_component< ecs::CollisionTraitsComponent >() : nullptr )
+	{
+		traits->is_dead = is_dead_;
+	}
 }
 
 void ActiveObject::sync_render_component() const
@@ -287,6 +345,7 @@ bool ActiveObject::make_model_unique()
 void ActiveObject::restart()
 {
 	is_dead_ = false;
+	sync_dead_to_collision_traits();
 	flicker_scale_ = 1.f;
 	
 	if ( get_rigid_body() )
@@ -427,6 +486,7 @@ void ActiveObject::chase_direction_degree( float_t d, float_t speed )
 void ActiveObject::kill()
 {
 	is_dead_ = true;
+	sync_dead_to_collision_traits();	// 当たり・レイの判定は部品の値を見る
 
 	is_mesh_visible_ = false;
 	is_line_visible_ = false;

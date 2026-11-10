@@ -24,10 +24,8 @@ GameObject::GameObject()
 
 GameObject::~GameObject()
 {
-	if ( rigid_body_ )
-	{
-		rigid_body_->setUserPointer( nullptr );
-	}
+	// 剛体の userPointer（Entity の番号のタグ）は、付けた ActiveObject が外す（ActiveObject::detach_entity）。
+	// 以前はここで userPointer（自分へのポインタ）を消していた。複製（clone）は剛体を共有するだけで持ち主ではないので触らない
 }
 
 /**

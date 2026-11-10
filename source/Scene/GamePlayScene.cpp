@@ -317,15 +317,15 @@ void GamePlayScene::update()
 	camera_->update();
 
 
-	// collision_check
-	get_active_object_physics()->check_collision_with( player_ );
+	// collision_check（当たった組を ecs::CollisionEventSystem に集め、互換の層が二重ディスパッチを呼ぶ。調べる順は以前と同じ : プレイヤー → ゴール → 全部）
+	get_active_object_manager()->check_collision_with( player_ );
 
 	if ( get_active_object_physics()->is_collision( player_, goal_ ) )
 	{
 		on_goal();
 	}
 
-	get_active_object_physics()->check_collision_all();
+	get_active_object_manager()->check_collision_all();
 
 	get_sound_manager()->set_listener_position( camera_->position().xyz() );
 	get_sound_manager()->set_listener_orientation( camera_->front().xyz(), camera_->up().xyz() );

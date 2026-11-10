@@ -65,6 +65,7 @@ private:
 	core::ecs::EntityManager*	entity_manager_ = nullptr;		///< Entity を作った先（attach_entity で受け取る）
 	core::ecs::EntityId			entity_id_ = 0;					///< 自分の Entity（has_entity_ が true のときだけ有効）
 	bool						has_entity_ = false;
+	bool						is_rigid_body_owner_ = false;	///< 剛体を自分で設定した（set_rigid_body）か。複製（clone）は剛体を共有するだけなので false（タグを付け替えない）
 	Model*						pending_model_ = nullptr;		///< Entity を作る前に set_model されたモデル（attach_entity で部品へ移す）
 	graphics::GraphicsManager*	graphics_manager_ = nullptr;	///< 定数バッファを作る先・モデルをハンドルから引く先（attach_entity で受け取る）
 
@@ -84,11 +85,20 @@ private:
 	void chase_target_direction_degree( float_t degree, float_t speed ) override { chase_direction_degree( degree, speed ); }
 	void chase_target_direction_to( const Vector& location, float_t speed ) override { chase_direction_to( location, speed ); }
 
+	/// 剛体に自分の Entity の番号のタグを付ける（剛体と Entity の両方が揃い、剛体を自分で設定したときだけ）
+	void apply_rigid_body_tag();
+
+	/// 当たりの性質の部品の「死んでいる」を is_dead_ にそろえる
+	void sync_dead_to_collision_traits();
+
 protected:
 	void setup_animation_player();
 
 	ecs::ObjectRenderComponent* get_render_component() const;
 	ecs::AnimationComponent* get_animation_component() const;
+
+	/// 自分の Entity を作った EntityManager（Entity が無ければ nullptr）。レイの判定で、当たった剛体の性質を引くのに使う
+	const core::ecs::EntityManager* get_entity_manager() const { return has_entity_ ? entity_manager_ : nullptr; }
 
 	virtual void limit_velocity();
 
@@ -104,6 +114,9 @@ public:
 	virtual void restart();
 
 	virtual void update() override { }
+
+	/// 剛体を設定し、Entity があれば userPointer に Entity の番号のタグを付ける（以前は ActiveObjectPhysics が ActiveObject* を入れていた）
+	void set_rigid_body( btRigidBody* rigid_body ) override;
 
 	virtual void set_model( Model* m );
 	Model* get_model();
@@ -157,7 +170,8 @@ public:
 	void set_line_visible( bool v ) { is_line_visible_ = v; }
 
 	/**
-	 * 自分の Entity を作り、描画の部品（ObjectRenderComponent・TransformComponent）と定数バッファを用意する。
+	 * 自分の Entity を作り、描画の部品（ObjectRenderComponent・TransformComponent）と定数バッファ、
+	 * 当たりの部品（CollisionTraitsComponent・ActiveObjectLinkComponent）を用意し、剛体にタグを付ける。
 	 * ActiveObjectManager に加えるときに呼ばれる。既に Entity があれば何もしない（作り直さない）
 	 *
 	 * @param entity_manager Entity を作る先

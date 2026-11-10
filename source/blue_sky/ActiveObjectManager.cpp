@@ -26,6 +26,8 @@
 
 #include <blue_sky/ecs/system/ObjectRenderDataSystem.h>
 #include <blue_sky/ecs/system/MoveToTargetSystem.h>
+#include <blue_sky/ecs/system/CollisionEventSystem.h>
+#include <blue_sky/ecs/component/ActiveObjectLinkComponent.h>
 
 #include <core/ecs/EntityManager.h>
 
@@ -94,6 +96,9 @@ void ActiveObjectManager::add_active_object( ActiveObject* active_object )
 
 	// 目標地点・向きへ動かす System（同上）
 	entity_manager_->add_system< ecs::MoveToTargetSystem >( 0 );
+
+	// 当たった組を集めて振り分ける System（同上）
+	entity_manager_->add_system< ecs::CollisionEventSystem >( 0 );
 
 	// Entity を作り、描画の部品と定数バッファを用意する（以前は ActiveObject が定数バッファ・Model* を自分で持っていた）
 	active_object->attach_entity( entity_manager_, graphics_manager_ );
@@ -296,6 +301,64 @@ void ActiveObjectManager::update()
 
 		system->update_targets( delta_time );
 	}
+}
+
+void ActiveObjectManager::check_collision_with( ActiveObject* a )
+{
+	auto* events = entity_manager_->get_system< ecs::CollisionEventSystem >();
+
+	if ( ! events || ! a || ! a->get_rigid_body() )
+	{
+		return;
+	}
+
+	physics_->collect_contacts_with( a, * events );
+	events->dispatch( * this );
+}
+
+void ActiveObjectManager::check_collision_all()
+{
+	auto* events = entity_manager_->get_system< ecs::CollisionEventSystem >();
+
+	if ( ! events )
+	{
+		return;
+	}
+
+	physics_->collect_all_contacts( * events );
+	events->dispatch( * this );
+}
+
+ActiveObject* ActiveObjectManager::find_active_object( core::ecs::EntityId id ) const
+{
+	core::ecs::Entity* entity = entity_manager_->find( id );
+	const auto* link = entity ? entity->get_component< ecs::ActiveObjectLinkComponent >() : nullptr;
+
+	return link ? link->object : nullptr;
+}
+
+/// 以前の ActiveObjectContactResultCallback::on_collide の「片方が地面」の所
+void ActiveObjectManager::on_collide_with_ground( core::ecs::EntityId id )
+{
+	if ( ActiveObject* a = find_active_object( id ) )
+	{
+		a->on_collide_with_ground();
+	}
+}
+
+/// 以前の ActiveObjectContactResultCallback::on_collide の「両方が物体」の所（同じ順に両方へ知らせる）
+void ActiveObjectManager::on_collide( core::ecs::EntityId a, core::ecs::EntityId b )
+{
+	ActiveObject* a0 = find_active_object( a );
+	ActiveObject* a1 = find_active_object( b );
+
+	if ( ! a0 || ! a1 )
+	{
+		return;
+	}
+
+	a0->on_collide_with( a1 );
+	a1->on_collide_with( a0 );
 }
 
 void ActiveObjectManager::sync_render_components() const

@@ -153,7 +153,8 @@ public:
 	
 	inline btRigidBody* get_rigid_body() { return rigid_body_; }
 	inline const btRigidBody* get_rigid_body() const { return rigid_body_; }
-	inline void set_rigid_body( btRigidBody* rigid_body ) { rigid_body_ = rigid_body; }
+	/// 剛体を設定する（ActiveObject は上書きして、剛体に自分の Entity の番号のタグを付ける）
+	virtual void set_rigid_body( btRigidBody* rigid_body ) { rigid_body_ = rigid_body; }
 
 	const Vector& get_location() const { return get_transform().get_position(); }
 	void set_location( const Vector& );

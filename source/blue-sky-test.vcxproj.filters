@@ -36,6 +36,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test\ecs\CollisionEventSystemTest.cpp">
+      <Filter>test\ecs</Filter>
+    </ClCompile>
     <ClCompile Include="test\physics\EntityTagTest.cpp">
       <Filter>test\physics</Filter>
     </ClCompile>

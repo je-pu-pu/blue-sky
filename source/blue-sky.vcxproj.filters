@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="blue_sky\ecs\system\CollisionEventSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\EffectStateDesc.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
@@ -458,6 +461,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="blue_sky\ecs\component\ActiveObjectLinkComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\CollisionTraitsComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\CollisionEventSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
     <ClInclude Include="core\physics\EntityTag.h">
       <Filter>core\physics</Filter>
     </ClInclude>

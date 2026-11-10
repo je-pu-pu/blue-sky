@@ -391,15 +391,43 @@ void Player::update_located_to_die()
 	}
 }
 
+/**
+ * 自分以外の、壁・障害物になる物に触れたかを調べる
+ *
+ * 当たった剛体の性質は、userPointer の Entity の番号のタグから引く（ecs::CollisionTraitsComponent）。
+ * 以前は userPointer を GameObject* にキャストし、自分のポインタと比べ、is_block() を呼んでいた。
+ * 自分は剛体で見分ける（自分の剛体には自分の番号のタグが付いているので、以前と同じ物を除く）。
+ * タグの無い剛体（地面・ステージの当たりの形）は壁として当たる。タグはあるが Entity が消えた剛体は当たらない
+ */
 class WithoutMeContactResultCallback : public btCollisionWorld::ContactResultCallback
 {
 private:
-	GameObject* me_;
+	const btCollisionObject* me_;
+	const core::ecs::EntityManager* entity_manager_;
 	bool is_hit_;
 
+	/// 壁・障害物として数えない物か
+	bool is_ignored( const btCollisionObject* object ) const
+	{
+		if ( object == me_ )
+		{
+			return true;
+		}
+
+		if ( ecs::CollisionEventSystem::is_vanished( entity_manager_, object ) )
+		{
+			return true;
+		}
+
+		const auto* traits = ecs::CollisionEventSystem::find_traits( entity_manager_, object );
+
+		return traits && ! traits->is_block;
+	}
+
 public:
-	explicit WithoutMeContactResultCallback( GameObject* me )
+	WithoutMeContactResultCallback( const btCollisionObject* me, const core::ecs::EntityManager* entity_manager )
 		: me_( me )
+		, entity_manager_( entity_manager )
 		, is_hit_( false )
 	{
 
@@ -407,27 +435,12 @@ public:
 
 	virtual	btScalar addSingleResult( btManifoldPoint& /* cp */, const btCollisionObjectWrapper* o1,int /* partId0 */, int /* index0 */, const btCollisionObjectWrapper* o2, int /* partId1 */, int /* index1 */ )
 	{
-		GameObject* go1 = static_cast< GameObject* >( o1->getCollisionObject()->getUserPointer() );
-		GameObject* go2 = static_cast< GameObject* >( o2->getCollisionObject()->getUserPointer() );
-
-		if ( go1 == me_ || go2 == me_ )
-		{
-			return 1.f;
-		}
-
-		if ( go1 && ! go1->is_block() )
-		{
-			return 1.f;
-		}
-
-		if ( go2 && ! go2->is_block() )
+		if ( is_ignored( o1->getCollisionObject() ) || is_ignored( o2->getCollisionObject() ) )
 		{
 			return 1.f;
 		}
 
 		is_hit_ = true;
-
-		btQuaternion q1 = o1->getWorldTransform().getRotation();
 
 		return 1.f;
 	}
@@ -457,7 +470,7 @@ void Player::update_facing_to_block()
 	collision_object.setCollisionShape( & shape );
 	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
-	WithoutMeContactResultCallback callback( this );
+	WithoutMeContactResultCallback callback( get_rigid_body(), get_entity_manager() );
 	get_physics()->contact_test( & collision_object, callback );
 
 	is_facing_to_block_ = callback.is_hit();
@@ -492,7 +505,7 @@ void Player::update_can_clamber()
 	collision_object.setCollisionShape( & shape );
 	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
-	WithoutMeContactResultCallback callback_low( this );
+	WithoutMeContactResultCallback callback_low( get_rigid_body(), get_entity_manager() );
 	get_physics()->contact_test( & collision_object, callback_low );
 
 	if ( ! callback_low.is_hit() )
@@ -504,7 +517,7 @@ void Player::update_can_clamber()
 	offset.setOrigin( btVector3( 0.f, get_collision_height() * 0.5f + 1.5f, get_collision_depth() ) );
 	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
-	WithoutMeContactResultCallback callback_high( this );
+	WithoutMeContactResultCallback callback_high( get_rigid_body(), get_entity_manager() );
 	get_physics()->contact_test( & collision_object, callback_high );
 
 	can_clamber_ = ! callback_high.is_hit();
@@ -533,7 +546,7 @@ void Player::update_can_peer_down()
 	collision_object.setCollisionShape( & shape );
 	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
-	WithoutMeContactResultCallback callback( this );
+	WithoutMeContactResultCallback callback( get_rigid_body(), get_entity_manager() );
 	get_physics()->contact_test( & collision_object, callback );
 
 	can_peer_down_ = ! callback.is_hit();
@@ -556,7 +569,7 @@ void Player::update_can_throw()
 	collision_object.setCollisionShape( & shape );
 	collision_object.setWorldTransform( btTransform( get_transform() ) * offset );
 
-	WithoutMeContactResultCallback callback( this );
+	WithoutMeContactResultCallback callback( get_rigid_body(), get_entity_manager() );
 	get_physics()->contact_test( & collision_object, callback );
 
 	can_throw_ = ! callback.is_hit();
@@ -654,7 +667,7 @@ bool Player::check_on_footing( const Vector& from, float_t ray_length, bool incl
 {
 	Vector to = from + Vector( 0, -ray_length, 0 );
 	
-	ClosestNotMe ray_callback( from, to, get_rigid_body(), include_soft_footing );
+	ClosestNotMe ray_callback( from, to, get_rigid_body(), include_soft_footing, get_entity_manager() );
 	ray_callback.m_closestHitFraction = 1.0;
 
 	get_physics()->ray_test( from, to, ray_callback );
@@ -673,16 +686,15 @@ float_t Player::get_footing_height( const Vector& from, bool include_soft_footin
 	Vector to = from;
 	to.set_y( 0.f );
 
-	ClosestNotMe ray_callback( from, to, get_rigid_body(), include_soft_footing );
+	ClosestNotMe ray_callback( from, to, get_rigid_body(), include_soft_footing, get_entity_manager() );
 	ray_callback.m_closestHitFraction = 1.0;
 
 	get_physics()->ray_test( from, to, ray_callback );
 
-	if ( ray_callback.m_collisionObject && ray_callback.m_collisionObject->getUserPointer() )
+	// 当たった物の性質は、剛体の Entity の番号のタグから引く（以前は userPointer を ActiveObject* にキャストしていた）
+	if ( const auto* traits = ecs::CollisionEventSystem::find_traits( get_entity_manager(), ray_callback.m_collisionObject ) )
 	{
-		const ActiveObject* a = reinterpret_cast< const ActiveObject* >( ray_callback.m_collisionObject->getUserPointer() );
-		
-		if ( a->is_safe_footing() )
+		if ( traits->is_safe_footing )
 		{
 			// !!!
 			const_cast< Player* >( this )->is_located_on_safe_ = true;

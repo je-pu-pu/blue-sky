@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\graphics\Direct3D11\EffectStateDesc.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\CollisionEventSystem.cpp" />
     <ClCompile Include="core\graphics\EffectParser.cpp" />
     <ClCompile Include="blue_sky\RawInput.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\MsdfTextRenderer.cpp" />
@@ -183,6 +184,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\sound\SampleRateStepper.h" />
+    <ClInclude Include="blue_sky\ecs\component\ActiveObjectLinkComponent.h" />
+    <ClInclude Include="blue_sky\ecs\component\CollisionTraitsComponent.h" />
+    <ClInclude Include="blue_sky\ecs\system\CollisionEventSystem.h" />
     <ClInclude Include="core\physics\EntityTag.h" />
     <ClInclude Include="blue_sky\graphics\shader\AllShaders.h" />
     <ClInclude Include="core\graphics\RenderTargetTextureOptions.h" />

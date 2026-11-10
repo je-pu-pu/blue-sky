@@ -306,7 +306,7 @@ bool Robot::calculate_target_visible() const
 	}
 
 	// 障害物判定
-	ClosestNotMeAndHim ray_callback( from, to, get_rigid_body(), player_->get_rigid_body(), false );
+	ClosestNotMeAndHim ray_callback( from, to, get_rigid_body(), player_->get_rigid_body(), false, get_entity_manager() );
 	ray_callback.m_closestHitFraction = 1.0;
 	
 	get_physics()->ray_test( from, to, ray_callback );

@@ -46,7 +46,8 @@ private:
 
 	bool			is_skipped_;
 
-	void load_story_text_file( const char* );
+	/// ステージのファイルの表 1 つ（[intro]・[outro]）を読んで当てる。無い・読めないときは、この場面を飛ばす
+	void load_story_text( const string_t& file_name, const string_t& table_name );
 
 	/// 背景の画像を読み、レイヤーを作る
 	std::unique_ptr< BgSpriteLayer > create_bg_sprite_layer( const char_t* layer_name, const char_t* texture_name, const char_t* file_name ) const;
@@ -61,7 +62,8 @@ private:
 	}
 
 public:
-	StoryTextScene( GameMain& game_main, const char*, const char* );
+	/// @param table_name 今のステージの .stage.toml の中の読む表（"intro"・"outro"）
+	StoryTextScene( GameMain& game_main, const char* table_name, const char* next_scene_name );
 	~StoryTextScene();
 
 	void update() override;				///< メインループ

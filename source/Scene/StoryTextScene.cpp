@@ -19,12 +19,12 @@
 #include <blue_sky/DebugLog.h>
 #include <blue_sky/stage/StoryTextParser.h>
 
-#include <filesystem>
+#include <Scene/StageSelectScene.h>
 
 namespace blue_sky
 {
 
-StoryTextScene::StoryTextScene( GameMain& game_main, const char* file_name, const char* next_scene_name )
+StoryTextScene::StoryTextScene( GameMain& game_main, const char* table_name, const char* next_scene_name )
 	: Scene( game_main )
 	, text_y_( static_cast< float >( get_height() ) )
 	, text_y_target_( 0.f )
@@ -36,15 +36,8 @@ StoryTextScene::StoryTextScene( GameMain& game_main, const char* file_name, cons
 {
 	get_sound_manager()->stop_all();
 
-	// ファイル名の {stage} を今のステージ名にする（シーンの登録側が GameMain からステージ名を引かなくて済むように）
-	std::string path = file_name;
-
-	if ( const auto pos = path.find( "{stage}" ); pos != std::string::npos )
-	{
-		path.replace( pos, 7, get_stage_name() );
-	}
-
-	load_story_text_file( path.c_str() );
+	// 今のステージのファイル（GamePlayScene と同じ場所。おまけのステージは media/stage_ext）の [intro]・[outro] を読む
+	load_story_text( StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + get_stage_name() + ".stage.toml", table_name );
 
 	text_y_target_ = -get_graphics_manager()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) );
 	
@@ -60,29 +53,31 @@ StoryTextScene::StoryTextScene( GameMain& game_main, const char* file_name, cons
 
 StoryTextScene::~StoryTextScene() = default;
 
-void StoryTextScene::load_story_text_file( const char* file_name )
+void StoryTextScene::load_story_text( const string_t& file_name, const string_t& table_name )
 {
-	// ファイルが無いステージ（おまけのステージの outro など）は、この場面を飛ばす
-	if ( ! std::filesystem::exists( file_name ) )
-	{
-		debug_log( string_t( "[StoryText] " ) + file_name + " が無いので、この場面を飛ばします" );
-		set_next_scene( next_scene_name_ );
-		return;
-	}
-
-	stage::StoryTextData data;
+	std::optional< stage::StoryTextData > story;
 
 	try
 	{
-		data = stage::StoryTextParser::parse_file( file_name );
+		story = stage::StoryTextParser::parse_file( file_name, table_name );
 	}
 	catch ( const std::exception& e )
 	{
-		// 文法の誤り・読めない版 : 理由を残して、この場面を飛ばす（ゲームは続ける）
+		// ファイルが無い・文法の誤り : 理由を残して、この場面を飛ばす（ゲームは続ける）
 		debug_log( string_t( "[StoryText] " ) + e.what() + "（この場面を飛ばします）" );
 		set_next_scene( next_scene_name_ );
 		return;
 	}
+
+	// 表の無いステージ（おまけのステージの outro など）は、この場面を飛ばす
+	if ( ! story )
+	{
+		debug_log( "[StoryText] " + file_name + " に [" + table_name + "] が無いので、この場面を飛ばします" );
+		set_next_scene( next_scene_name_ );
+		return;
+	}
+
+	const stage::StoryTextData& data = * story;
 
 	for ( const auto& warning : data.warnings )
 	{

@@ -161,3 +161,21 @@ position = [4, 80, -182]
 type = "static"
 model = "robot-dead-body"
 position = [5, 81, -182]
+
+# ステージの前の文と背景（doc/ステージ形式の設計.md 7 章。tools/stage_convert/convert_story_text.py で 2-0.intro から変換した）
+[intro]
+sound = "2-0-intro"
+
+[[intro.layer]]
+image = "noise.jpg"
+scale = { from = 1.6, to = 3, speed = 0.0001 }
+# 回転は付けない : 以前の layer-rotate 0 180 0.1 は名前違いで 2013-08 から回っていなかった。その見た目を保つ（2026-11-11 利用者の決定）
+
+# ステージの後の文と背景（doc/ステージ形式の設計.md 7 章。tools/stage_convert/convert_story_text.py で 2-0.outro から変換した）
+[outro]
+sound = "2-0-outro"
+
+[[outro.layer]]
+image = "noise.jpg"
+scale = { from = 1.6, to = 3, speed = 0.0001 }
+# 回転は付けない : 以前の layer-rotate 0 180 0.1 は名前違いで 2013-08 から回っていなかった。その見た目を保つ（2026-11-11 利用者の決定）

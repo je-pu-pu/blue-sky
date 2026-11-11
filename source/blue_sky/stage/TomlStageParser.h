@@ -15,6 +15,7 @@ namespace blue_sky::stage
  *   - 名前の参照が見つからない : 読み終わったときにまとめて警告に出す（動きは残す。遊んでいる最中は何もしない）
  *   - 同じ名前が 2 つ : 警告に残し、後の物体に付け替える（以前と同じ）
  * 警告は StageData::warnings に入れる（StageBuilder がログに出す）
+ * [intro]・[outro]（ステージの前後の文と背景）は読まない（StoryTextParser が読む）
  */
 class TomlStageParser
 {

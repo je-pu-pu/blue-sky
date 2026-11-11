@@ -81,3 +81,33 @@ direction = 0
 type = "medal"
 position = [26.000000, 28.0, 62.0]
 direction = 0
+
+# ステージの前の文と背景（doc/ステージ形式の設計.md 7 章。tools/stage_convert/convert_story_text.py で 0-0.intro から変換した）
+[intro]
+
+[[intro.layer]]
+image = "noise.jpg"
+scale = { from = 1.6, to = 3, speed = 0.0001 }
+# 回転は付けない : 以前の layer-rotate 0 180 0.1 は名前違いで 2013-08 から回っていなかった。その見た目を保つ（2026-11-11 利用者の決定）
+
+[intro.text]
+color = 0xFFFFFFCC
+border_color = 0x000000CC
+body = """
+ある日、少年は空を見上げた。
+
+青く広がる空の向こうに
+何かが待っている気がした。
+
+これは、その小さな冒険の物語。
+
+"""
+
+# ステージの後の文と背景（doc/ステージ形式の設計.md 7 章。tools/stage_convert/convert_story_text.py で 0-0.outro から変換した）
+[outro]
+sound = "0-0-outro"
+
+[[outro.layer]]
+image = "noise.jpg"
+scale = { from = 1.6, to = 3, speed = 0.0001 }
+# 回転は付けない : 以前の layer-rotate 0 180 0.1 は名前違いで 2013-08 から回っていなかった。その見た目を保つ（2026-11-11 利用者の決定）

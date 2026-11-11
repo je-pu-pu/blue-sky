@@ -43,7 +43,7 @@ struct StoryBgmDesc
 };
 
 /**
- * ステージの前後の文と背景（.intro.toml・.outro.toml）を読んだ結果（doc/ステージ形式の設計.md 7 章）
+ * ステージの前後の文と背景（.stage.toml の [intro]・[outro]）を読んだ結果（doc/ステージ形式の設計.md 7 章）
  */
 struct StoryTextData
 {
@@ -60,33 +60,37 @@ struct StoryTextData
 };
 
 /**
- * ステージの前後の文と背景の TOML（.intro.toml・.outro.toml）を読む
+ * ステージの TOML（.stage.toml）の中の表 1 つ（[intro] か [outro]）を、ステージの前後の文と背景として読む
+ *
+ * ステージの残り（物体・動き）は読まない（それは TomlStageParser。[intro]・[outro] は TomlStageParser が読み飛ばす）。
+ * 形式の版（format）もステージの読む所が見る。
  *
  * 失敗の扱い（CLAUDE.md「失敗の扱い」。どれも "ファイル:行:列" 付き）:
- *   - ファイルが無い・文法の誤り・読めない版（format） : 例外（呼ぶ側がログに残し、この場面を飛ばす）
+ *   - 表が無い : 空を返す（その場面が無いステージ。おまけのステージなど）
+ *   - ファイルが無い・文法の誤り・表でない : 例外（呼ぶ側がログに残し、この場面を飛ばす）
  *   - 知らないキー・型の違い : 警告に残し、そのキーだけ飛ばして続ける（画像の無い重なりは重なりごと飛ばす）
  */
 class StoryTextParser
 {
 public:
-	/// 今の形式の版（format の値）
-	static constexpr int FORMAT_VERSION = 1;
-
 	/**
 	 * 文字列から読む
 	 *
-	 * @param text TOML
+	 * @param text ステージの TOML
 	 * @param file_name ファイル名（警告と例外に付ける）
-	 * @throw common::exception 文法の誤り・読めない版
+	 * @param table_name 読む表の名前（"intro"・"outro"）
+	 * @return 表が無ければ空
+	 * @throw common::exception 文法の誤り・表でない
 	 */
-	static StoryTextData parse_text( const string_t& text, const string_t& file_name );
+	static std::optional< StoryTextData > parse_text( const string_t& text, const string_t& file_name, const string_t& table_name );
 
 	/**
 	 * ファイルから読む
 	 *
-	 * @throw common::exception ファイルが無い・文法の誤り・読めない版
+	 * @return 表が無ければ空
+	 * @throw common::exception ファイルが無い・文法の誤り・表でない
 	 */
-	static StoryTextData parse_file( const string_t& file_name );
+	static std::optional< StoryTextData > parse_file( const string_t& file_name, const string_t& table_name );
 };
 
 } // namespace blue_sky::stage

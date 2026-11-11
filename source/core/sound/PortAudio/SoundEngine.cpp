@@ -51,7 +51,8 @@ SoundEngine::SoundEngine()
 	};
 
 	// midi_synthesizer_.reset( new MidiSynthesizer( "media/music/SGM-V2.01.sf2", format_ ) );
-	midi_synthesizer_.reset( new MidiSynthesizer( "media/music/FluidR3_GM2-2.SF2", format_ ) );
+	// 音色は再配布できる Fluid R3 GM（MIT）。git には入れず tools/soundfont/fetch_soundfont.py で入手する（doc/ライセンス.md）
+	midi_synthesizer_.reset( new MidiSynthesizer( "media/music/FluidR3_GM.sf2", format_ ) );
 
 	auto wasapi_streawm_info = PaWasapiStreamInfo{
 		.size = sizeof( PaWasapiStreamInfo ),

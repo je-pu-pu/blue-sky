@@ -69,7 +69,8 @@
 - [x] 使っているライブラリ・素材の洗い出しと、手元の原文からの THIRD_PARTY_NOTICES.txt の作成（2026-11-11）
 - [ ] 配布の前に: THIRD_PARTY_NOTICES.txt を配布物に同梱する。「【要確認】」（19 か所: ogg・vorbis・Boost・libxml2・ONNX Runtime・DirectML などの原文、版）を配布元で確かめて埋める
 - [ ] 配布の前に: FBX SDK の表示の文を利用規約か About・クレジットの画面にも入れる（または FBX SDK を exe から外す）。ONNX Runtime の ThirdPartyNotices.txt を同梱し、DirectML.dll の再配布の条件を確かめる
-- [ ] 配布の前に: 素材を確かめる。`FluidR3_GM2-2.SF2` に「DO NOT REDISTRIBUTE」の注記あり。`takarajima.mid`・`SGM-V2.01.sf2`・`uzura.ttf` は外す。Rounded M+ のライセンスを確かめる
+- [x] MIDI の音源を再配布できるものに替えた（2026-11-11）: `FluidR3_GM2-2.SF2`（「DO NOT REDISTRIBUTE」の注記）をやめ、Debian の fluid-soundfont-gm 3.1-6 の `FluidR3_GM.sf2`（MIT、同じ Fluid R3）を読む。約 142 MB なので管理外にし `tools/soundfont/fetch_soundfont.py` で入手（SHA-256 を確かめる）。doc/ライセンス.md の 4.7・THIRD_PARTY_NOTICES.txt の 20
+- [ ] 配布の前に: 素材を確かめる。`takarajima.mid`・`SGM-V2.01.sf2`・`FluidR3_GM2-2.SF2`・`uzura.ttf` は外す。`FluidR3_GM.sf2` を入手して入れる。Rounded M+ のライセンスを確かめる
 
 ## 敵AI（システミック）縦スライス  ブランチ: feature/enemy-ai-perception
 

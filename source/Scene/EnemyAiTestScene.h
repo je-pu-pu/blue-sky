@@ -50,6 +50,20 @@ private:
 
 	std::vector< core::ecs::Entity* > enemies_;
 
+	core::math::Vector player_spawn_;   ///< プレイヤーの初期位置（捕捉時に戻す先）
+	float caught_flash_ = 0.f;          ///< 捕捉演出（"CAUGHT" 表示）の残り時間 (s)
+
+	core::ecs::Entity* firework_ = nullptr; ///< 花火（陽動の音源）。使い回す（生成/破棄しない）
+	float firework_timer_ = 0.f;            ///< 花火が発音している残り時間 (s)
+
+	core::ecs::Entity* smoke_ = nullptr;    ///< 煙玉（視線を遮る球）。使い回す
+	float smoke_timer_ = 0.f;               ///< 煙が有効な残り時間 (s)
+
+	void check_caught();                ///< 警戒中の敵に接近されたらスポーンへ戻す
+	void teleport_player( const core::math::Vector& feet ); ///< プレイヤーを剛体ごと足元 feet へ瞬間移動する（速度は消す）
+	void update_firework();             ///< 花火の投擲入力と発音タイマを処理
+	void update_smoke();                ///< 煙玉の投擲入力と有効タイマを処理
+
 }; // class EnemyAiTestScene
 
 } // namespace blue_sky

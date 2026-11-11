@@ -13,6 +13,14 @@ namespace blue_sky::ecs
 using core::ecs::System;
 using core::ecs::TransformComponent;
 
+/// 知覚され得る対象1体分の情報（位置＋今フレームの発音状態）。
+struct PerceptibleTarget
+{
+	core::math::Vector position;
+	bool  emitting_noise = false;
+	float noise_loudness = 0.f;
+};
+
 /**
  * 知覚対象レジストリ System。
  *
@@ -25,13 +33,13 @@ using core::ecs::TransformComponent;
 class TargetRegistrySystem : public System< TransformComponent, PerceivableComponent >
 {
 public:
-	/// 収集した対象位置（ワールド座標）。知覚 System が読む。
-	const std::vector< core::math::Vector >& targets() const { return targets_; }
+	/// 収集した対象（位置＋発音）。知覚 System が読む。
+	const std::vector< PerceptibleTarget >& targets() const { return targets_; }
 
 	void update() override;
 
 private:
-	std::vector< core::math::Vector > targets_;
+	std::vector< PerceptibleTarget > targets_;
 
 }; // class TargetRegistrySystem
 

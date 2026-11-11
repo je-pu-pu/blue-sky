@@ -13,12 +13,14 @@ using core::ecs::System;
 using core::ecs::TransformComponent;
 
 class TargetRegistrySystem;
+class SmokeRegistrySystem;
 
 /**
  * 知覚 System（S2 知覚）。
  *
  * PerceptionComponent を持つ敵ごとに、TargetRegistrySystem が集めた対象位置に対して
- * 「視界錐の内側か（幾何）」＋「遮蔽が無いか（物理レイ LOS）」を判定し、結果を
+ * 「視界錐の内側か（幾何）」＋「遮蔽が無いか（物理レイ LOS・煙の球）」、または
+ * 「対象の音が届くか（聴覚・全方位）」を判定し、結果を
  * PerceptionComponent に書き込む。判定の幾何本体は blue_sky::ai の純関数。
  *
  * TargetRegistrySystem より後、AlertSystem より前に走らせる。
@@ -35,8 +37,8 @@ public:
 private:
 	core::physics::PhysicsManager* physics_manager_;
 
-	/// 敵 1 体ぶんの判定（registry が nullptr なら見えないとする）
-	void perceive( ComponentTuple&, const TargetRegistrySystem* registry ) const;
+	/// 敵 1 体ぶんの判定（registry が nullptr なら見えないとする。smoke_registry が nullptr なら煙は無いとする）
+	void perceive( ComponentTuple&, const TargetRegistrySystem* registry, const SmokeRegistrySystem* smoke_registry ) const;
 
 }; // class PerceptionSystem
 

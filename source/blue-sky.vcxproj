@@ -106,6 +106,8 @@
     <ClCompile Include="blue_sky\ecs\system\PerceptionSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\AlertSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\PatrolSystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\AlarmPropagationSystem.cpp" />
+    <ClCompile Include="blue_sky\ecs\system\SmokeRegistrySystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\BalloonSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\ObjectRenderDataSystem.cpp" />
     <ClCompile Include="blue_sky\ecs\system\MoveToTargetSystem.cpp" />
@@ -345,6 +347,7 @@
     <ClInclude Include="blue_sky\ecs\component\PerceptionComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\AlertComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\PatrolComponent.h" />
+    <ClInclude Include="blue_sky\ecs\component\SmokeComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\BalloonComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\ObjectRenderComponent.h" />
     <ClInclude Include="blue_sky\ecs\component\AnimationComponent.h" />
@@ -364,6 +367,8 @@
     <ClInclude Include="blue_sky\ecs\system\PerceptionSystem.h" />
     <ClInclude Include="blue_sky\ecs\system\AlertSystem.h" />
     <ClInclude Include="blue_sky\ecs\system\PatrolSystem.h" />
+    <ClInclude Include="blue_sky\ecs\system\AlarmPropagationSystem.h" />
+    <ClInclude Include="blue_sky\ecs\system\SmokeRegistrySystem.h" />
     <ClInclude Include="blue_sky\ai\EnemyPerception.h" />
     <ClInclude Include="blue_sky\ecs\system\BalloonSystem.h" />
     <ClInclude Include="blue_sky\ecs\system\ObjectRenderDataSystem.h" />

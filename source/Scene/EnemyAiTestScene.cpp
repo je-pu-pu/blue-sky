@@ -17,6 +17,7 @@
 #include <blue_sky/ecs/component/PerceptionComponent.h>
 #include <blue_sky/ecs/component/AlertComponent.h>
 #include <blue_sky/ecs/component/PatrolComponent.h>
+#include <blue_sky/ecs/component/SmokeComponent.h>
 
 #include <core/ecs/system/RenderSystem.h>
 #include <core/ecs/system/PhysicsSystem.h>
@@ -25,13 +26,20 @@
 #include <blue_sky/ecs/system/PerceptionSystem.h>
 #include <blue_sky/ecs/system/AlertSystem.h>
 #include <blue_sky/ecs/system/PatrolSystem.h>
+#include <blue_sky/ecs/system/AlarmPropagationSystem.h>
+#include <blue_sky/ecs/system/SmokeRegistrySystem.h>
 
 #include <blue_sky/ai/EnemyPerception.h>
 
+#include <core/TimeManager.h>
+#include <core/input/InputManager.h>
 #include <core/physics/PhysicsManager.h>
+#include <core/math/Quaternion.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 
 #include <game/MainLoop.h>
+
+#include <imgui.h>
 
 #include <sstream>
 #include <cmath>
@@ -89,8 +97,10 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 	get_entity_manager()->add_system< core::ecs::PhysicsSystem >( 5, get_physics_manager() );
 	get_entity_manager()->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10, get_input(), get_physics_manager() );
 	get_entity_manager()->add_system< blue_sky::ecs::TargetRegistrySystem >( 20 );
+	get_entity_manager()->add_system< blue_sky::ecs::SmokeRegistrySystem >( 25 );
 	get_entity_manager()->add_system< blue_sky::ecs::PerceptionSystem >( 30, get_physics_manager() );
 	get_entity_manager()->add_system< blue_sky::ecs::AlertSystem >( 40, get_time_manager() );
+	get_entity_manager()->add_system< blue_sky::ecs::AlarmPropagationSystem >( 45 );
 	get_entity_manager()->add_system< blue_sky::ecs::PatrolSystem >( 50, get_time_manager() );
 	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000, get_graphics_manager(), get_time_manager() );
 
@@ -99,6 +109,7 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 	player_transform_ = player_->add_component< TransformComponent >();
 	player_transform_->transform.set_identity();
 	player_transform_->transform.set_position( Vector( 0.f, 2.f, -10.f ) );
+	player_spawn_ = Vector( 0.f, 2.f, -10.f );
 
 	fps_player_ = player_->add_component< blue_sky::ecs::FpsPlayerComponent >();
 	fps_player_->move_speed = 5.f;
@@ -169,6 +180,29 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 	spawn_enemy(
 		Vector( 6.f, 0.5f, 16.f ),
 		{ Vector( 6.f, 0.5f, 16.f ), Vector( 6.f, 0.5f, 2.f ), Vector( -6.f, 0.5f, 2.f ) } );
+
+	// 花火（陽動の音源）。生成/破棄はせず使い回す。普段は地下へ退避し無音。
+	firework_ = get_entity_manager()->create_entity();
+	{
+		auto* t = firework_->add_component< TransformComponent >();
+		t->transform.set_identity();
+		t->transform.set_position( Vector( 0.f, -1000.f, 0.f ) );
+
+		auto* pv = firework_->add_component< blue_sky::ecs::PerceivableComponent >();
+		pv->emitting_noise = false;
+		pv->noise_loudness = 2.5f; // 花火は大音量（広く引きつける）
+	}
+
+	// 煙玉（視線を遮る球）。使い回す。普段は地下へ退避。
+	smoke_ = get_entity_manager()->create_entity();
+	{
+		auto* t = smoke_->add_component< TransformComponent >();
+		t->transform.set_identity();
+		t->transform.set_position( Vector( 0.f, -1000.f, 0.f ) );
+
+		auto* sm = smoke_->add_component< blue_sky::ecs::SmokeComponent >();
+		sm->radius = 3.5f;
+	}
 }
 
 void EnemyAiTestScene::spawn_enemy( const Vector& start, const std::vector< Vector >& waypoints )
@@ -206,10 +240,157 @@ void EnemyAiTestScene::update()
 	get_graphics_manager()->update();
 	get_graphics_manager()->clear_debug_bullet();
 
+	// プレイヤーの発音（R2/ダッシュ＝走行音）。敵は聴覚で拾う。
+	if ( auto* pv = player_->get_component< blue_sky::ecs::PerceivableComponent >() )
+	{
+		pv->emitting_noise = get_input()->press( core::input::Button::R2 );
+		pv->noise_loudness = 1.5f;
+	}
+
+	update_firework();
+	update_smoke();
+
 	get_entity_manager()->update();
+
+	// 警戒中の敵に接近されたら捕捉 → スポーンへ戻す
+	check_caught();
+	if ( caught_flash_ > 0.f )
+	{
+		caught_flash_ -= get_time_manager()->get_delta_time();
+	}
 
 	// clear の後・render_debug_bullet の前にコーン等を積む
 	draw_debug();
+}
+
+void EnemyAiTestScene::check_caught()
+{
+	const Vector ppos = player_transform_->transform.get_position();
+	constexpr float catch_radius = 1.8f;
+
+	bool caught = false;
+	for ( auto* e : enemies_ )
+	{
+		auto* alert = e->get_component< blue_sky::ecs::AlertComponent >();
+		auto* et    = e->get_component< TransformComponent >();
+		if ( ! alert || ! et || alert->state != ai::AlertState::Alarmed )
+		{
+			continue;
+		}
+
+		Vector d = et->transform.get_position() - ppos;
+		d.set_y( 0.f );
+		if ( d.length() <= catch_radius )
+		{
+			caught = true;
+			break;
+		}
+	}
+
+	if ( ! caught )
+	{
+		return;
+	}
+
+	// プレイヤーを物理ボディごとスポーンへ戻す（剛体原点は offset ぶん上）
+	teleport_player( player_spawn_ );
+
+	// 敵の警戒を解く（全員 無警戒へ）
+	for ( auto* e : enemies_ )
+	{
+		if ( auto* alert = e->get_component< blue_sky::ecs::AlertComponent >() )
+		{
+			alert->awareness    = 0.f;
+			alert->state        = ai::AlertState::Unaware;
+			alert->search_timer = 0.f;
+		}
+	}
+
+	caught_flash_ = 2.0f;
+}
+
+void EnemyAiTestScene::teleport_player( const Vector& feet )
+{
+	// 剛体の原点は足元から offset ぶん上。速度・力は消して起こす（瞬間移動・リスポーン用）
+	if ( auto* rb = player_->get_component< RigidBodyComponent >(); rb && rb->handle.is_valid() )
+	{
+		core::math::Transform t;
+		t.set_identity();
+		t.set_position( feet + rb->offset );
+
+		rb->handle.set_world_transform( t );
+		rb->handle.set_motion_state_transform( t );
+		rb->handle.set_linear_velocity( Vector( 0.f, 0.f, 0.f ) );
+		rb->handle.set_angular_velocity( Vector( 0.f, 0.f, 0.f ) );
+		rb->handle.clear_forces();
+		rb->handle.activate( true );
+	}
+
+	player_transform_->transform.set_position( feet );
+}
+
+void EnemyAiTestScene::update_firework()
+{
+	auto* t  = firework_->get_component< TransformComponent >();
+	auto* pv = firework_->get_component< blue_sky::ecs::PerceivableComponent >();
+	if ( ! t || ! pv )
+	{
+		return;
+	}
+
+	// 投擲（Q）: プレイヤーの水平前方 8m 地点に花火を出して発音させる
+	if ( get_input()->push( core::input::Button::L ) )
+	{
+		const float  yaw = fps_player_ ? fps_player_->yaw : 0.f;
+		const Vector fwd( std::sin( yaw ), 0.f, std::cos( yaw ) );
+		Vector land = player_transform_->transform.get_position() + fwd * 8.f;
+		land.set_y( 0.2f );
+
+		t->transform.set_position( land );
+		pv->emitting_noise = true;
+		firework_timer_    = 3.0f;
+	}
+
+	// 発音タイマ。尽きたら無音にして地下へ退避（視界にも入らないように）。
+	if ( firework_timer_ > 0.f )
+	{
+		firework_timer_ -= get_time_manager()->get_delta_time();
+		if ( firework_timer_ <= 0.f )
+		{
+			pv->emitting_noise = false;
+			t->transform.set_position( Vector( 0.f, -1000.f, 0.f ) );
+		}
+	}
+}
+
+void EnemyAiTestScene::update_smoke()
+{
+	auto* t = smoke_->get_component< TransformComponent >();
+	if ( ! t )
+	{
+		return;
+	}
+
+	// 投擲（E）: プレイヤーの水平前方 8m に煙玉を出す
+	if ( get_input()->push( core::input::Button::R ) )
+	{
+		const float  yaw = fps_player_ ? fps_player_->yaw : 0.f;
+		const Vector fwd( std::sin( yaw ), 0.f, std::cos( yaw ) );
+		Vector land = player_transform_->transform.get_position() + fwd * 8.f;
+		land.set_y( 1.2f ); // 目の高さ付近を覆う
+		t->transform.set_position( land );
+		smoke_timer_ = 5.0f;
+	}
+
+	// 有効タイマ。尽きたら地下へ退避（視線を遮らないように）。
+	if ( smoke_timer_ > 0.f )
+	{
+		smoke_timer_ -= get_time_manager()->get_delta_time();
+		if ( smoke_timer_ <= 0.f )
+		{
+			t->transform.set_position( Vector( 0.f, -1000.f, 0.f ) );
+		}
+	}
 }
 
 void EnemyAiTestScene::draw_debug()
@@ -233,7 +414,7 @@ void EnemyAiTestScene::draw_debug()
 
 		const Vector pos     = transform->transform.get_position();
 		const Vector forward = transform->transform.forward();
-		const core::Vector col = state_color( alert->state );
+		const core::Vector col  = state_color( alert->state );
 
 		// 視界錐は「床に投影した扇」として描く。
 		// 目の高さの水平な扇だと、同じ目線高さの FPS 視点からは真横＝1本の線に見えて
@@ -261,6 +442,24 @@ void EnemyAiTestScene::draw_debug()
 		// 敵の体と扇をつなぐ縦線（足元→目の高さ）。錐の原点が敵だと分かるように。
 		dd->drawLine( apex, pos + Vector( 0.f, perception->eye_height, 0.f ), col );
 
+		// 可聴半径（薄い円・床）。聴覚の届く範囲。
+		{
+			const core::Vector hear_col( 0.30f, 0.30f, 0.38f );
+			const float hr = perception->hearing_radius;
+			const int   M  = 24;
+			Vector prev_h;
+			for ( int i = 0; i <= M; ++i )
+			{
+				const float a = 6.28318531f * static_cast< float >( i ) / M;
+				const Vector p( pos.x() + std::sin( a ) * hr, floor_y, pos.z() + std::cos( a ) * hr );
+				if ( i > 0 )
+				{
+					dd->drawLine( prev_h, p, hear_col );
+				}
+				prev_h = p;
+			}
+		}
+
 		// パトロール経路（薄い青の折れ線・床）
 		if ( patrol && patrol->waypoints.size() >= 2 )
 		{
@@ -284,6 +483,44 @@ void EnemyAiTestScene::draw_debug()
 			dd->drawLine( p, p + Vector( 0.f, 2.f, 0.f ), col );
 		}
 	}
+
+	// 花火（陽動）の音源マーカー（オレンジ）
+	if ( firework_timer_ > 0.f )
+	{
+		if ( auto* t = firework_->get_component< TransformComponent >() )
+		{
+			const Vector p = t->transform.get_position();
+			const core::Vector fw_col( 1.f, 0.6f, 0.f );
+			dd->drawLine( p - Vector( 0.6f, 0.f, 0.f ), p + Vector( 0.6f, 0.f, 0.f ), fw_col );
+			dd->drawLine( p - Vector( 0.f, 0.f, 0.6f ), p + Vector( 0.f, 0.f, 0.6f ), fw_col );
+			dd->drawLine( p, p + Vector( 0.f, 1.5f, 0.f ), fw_col );
+		}
+	}
+
+	// 煙玉（視線を遮る球）を薄いグレーの円で描画
+	if ( smoke_timer_ > 0.f )
+	{
+		auto* t  = smoke_->get_component< TransformComponent >();
+		auto* sm = smoke_->get_component< blue_sky::ecs::SmokeComponent >();
+		if ( t && sm )
+		{
+			const Vector c = t->transform.get_position();
+			const float  r = sm->radius;
+			const core::Vector sm_col( 0.70f, 0.70f, 0.75f );
+			const int M = 20;
+			Vector prev_s;
+			for ( int i = 0; i <= M; ++i )
+			{
+				const float a = 6.28318531f * static_cast< float >( i ) / M;
+				const Vector p( c.x() + std::sin( a ) * r, c.y(), c.z() + std::cos( a ) * r );
+				if ( i > 0 )
+				{
+					dd->drawLine( prev_s, p, sm_col );
+				}
+				prev_s = p;
+			}
+		}
+	}
 }
 
 void EnemyAiTestScene::render()
@@ -291,11 +528,23 @@ void EnemyAiTestScene::render()
 	// 描く System（RenderSystem など）を、画面のクリアの後に動かす
 	get_entity_manager()->render();
 
+	// 描く System（RenderSystem など）を、画面のクリアの後に動かす
+	get_entity_manager()->render();
+
 	get_graphics_manager()->render_debug_bullet();
 
 	std::stringstream ss;
 	ss << "Enemy AI Test  FPS: " << get_main_loop()->get_last_fps() << "\n";
-	ss << "WASD move, mouse look. Enter enemy cone to raise alert.\n";
+	if ( caught_flash_ > 0.f )
+	{
+		ss << "*** CAUGHT! sent back to start ***\n";
+	}
+	ss << "WASD move, mouse look, C: run (noise), Q: firework (distract), E: smoke (block sight).\n";
+
+	if ( auto* pv = player_->get_component< blue_sky::ecs::PerceivableComponent >() )
+	{
+		ss << "player noise: " << ( pv->emitting_noise ? "ON (running)" : "off" ) << "\n";
+	}
 
 	for ( std::size_t i = 0; i < enemies_.size(); ++i )
 	{
@@ -306,6 +555,15 @@ void EnemyAiTestScene::render()
 	}
 
 	get_graphics_manager()->draw_text( 10.f, 10.f, 480.f, 200.f, ss.str().c_str(), Color::White );
+
+	// 警報伝播の切替（簡単に ON/OFF できるように）
+	ImGui::Begin( "Enemy AI" );
+	if ( auto* s = get_entity_manager()->get_system< blue_sky::ecs::AlarmPropagationSystem >() )
+	{
+		ImGui::Checkbox( "alarm propagation", & s->enabled );
+		ImGui::SliderFloat( "propagation radius", & s->radius, 2.f, 30.f );
+	}
+	ImGui::End();
 }
 
 } // namespace blue_sky

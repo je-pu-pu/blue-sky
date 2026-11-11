@@ -21,6 +21,9 @@ struct PerceptionComponent : public core::ecs::Component
 	/// 目の高さ（Transform 原点からのオフセット, m）。視点位置＝position + (0, eye_height, 0)
 	float eye_height = 1.4f;
 
+	/// 聴覚の基本可聴半径 (m)。全方位・遮蔽無視で、対象の noise_loudness で伸縮する。
+	float hearing_radius = 10.f;
+
 	// --- 出力（知覚 System が毎フレーム書き込む） ---
 
 	/// このフレーム、対象が見えているか（錐内かつ遮蔽なし）

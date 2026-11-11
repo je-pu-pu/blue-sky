@@ -40,6 +40,9 @@ void ObjectRenderDataSystem::add_entity_component_if_all_components_ready( const
 	// （ここでは引かない。部品のハンドルは、部品が揃った後で設定されることがある（ObjectFactory など））
 	models_resolved_ = false;
 
+	// 描く対象の並びが変わったので、このフレームのまとめは使わない（このフレームの残りは 1 個ずつ描く）
+	instances_ready_ = false;
+
 	if ( animation )
 	{
 		animation_list_.insert( { added.first, animation } );
@@ -50,6 +53,9 @@ void ObjectRenderDataSystem::on_remove_entity( core::ecs::EntityId id, Component
 {
 	render_target_list_.erase( id );
 	animation_list_.erase( id );
+
+	// 描く対象の並びが変わる（次に読むときに詰める）ので、このフレームのまとめは使わない
+	instances_ready_ = false;
 }
 
 bool ObjectRenderDataSystem::is_watched_component_type( core::ecs::ComponentTypeId id ) const
@@ -154,6 +160,14 @@ void ObjectRenderDataSystem::forget_resolved_models()
 	culling_requested_ = false;
 	culling_applied_ = false;
 
+	// まとめもこのフレームだけ（次のフレームの update_render_data で作り直す）
+	instances_ready_ = false;
+
+	for ( auto& list : draw_lists_ )
+	{
+		list.built = false;
+	}
+
 #ifdef _DEBUG
 	for ( const auto& target : get_render_targets() )
 	{
@@ -223,10 +237,18 @@ void ObjectRenderDataSystem::update_render_data()
 		culling_stats_ = CullingStats();
 	}
 
+	instances_.clear();
+
+	for ( auto& list : draw_lists_ )
+	{
+		list.built = false;
+	}
+
 	for ( const auto& target : get_render_targets() )
 	{
 		// 先に全部の段に入れておく（下で書かない物も、前のフレームの結果を持ち越さない）
 		target.visibility = VisibleAll;
+		target.instance = NoInstance;
 
 		ObjectRenderComponent& render = * target.render;
 
@@ -266,6 +288,13 @@ void ObjectRenderDataSystem::update_render_data()
 
 		render.object_constant_buffer->update( & shader_data );
 
+		// まとめて描くときに、インスタンスの入れ物へ写す（同じ中身）
+		if ( instancing_enabled_ )
+		{
+			target.instance = static_cast< std::uint32_t >( instances_.size() );
+			instances_.push_back( shader_data );
+		}
+
 		const auto* animation = target.animation;
 
 		if ( animation && animation->player && render.bone_constant_buffer )
@@ -277,6 +306,165 @@ void ObjectRenderDataSystem::update_render_data()
 	}
 
 	culling_applied_ = culling_requested_;
+	instances_ready_ = instancing_enabled_;
+}
+
+bool ObjectRenderDataSystem::is_drawn_in_pass( const RenderTarget& target, int pass ) const
+{
+	const graphics::Model* model = target.model;
+
+	// 定数を求めていない物（描かない・範囲の外・モデルが無い）は、どの段にも描かない
+	if ( ! model || target.instance == NoInstance )
+	{
+		return false;
+	}
+
+	const ObjectRenderComponent& render = * target.render;
+
+	if ( pass == MeshPass )
+	{
+		return is_visible( target, VisibleInCamera ) && render.should_draw_mesh() && model->get_mesh();
+	}
+
+	if ( pass == LinePass )
+	{
+		return is_visible( target, VisibleInCamera ) && render.should_draw_line() && model->get_line();
+	}
+
+	// 影の段（スキンメッシュは別に、今までどおり 1 個ずつ描く）
+	if ( model->is_skin_mesh() )
+	{
+		return false;
+	}
+
+	if ( pass >= shadow_mesh_pass( 0 ) && pass < shadow_mesh_pass( MaxShadowCascades ) )
+	{
+		const int level = pass - shadow_mesh_pass( 0 );
+
+		return is_visible( target, visible_in_shadow_cascade( level ) ) && render.should_draw_mesh() && model->get_mesh();
+	}
+
+	if ( pass >= shadow_line_pass( 0 ) && pass < shadow_line_pass( MaxShadowCascades ) )
+	{
+		const int level = pass - shadow_line_pass( 0 );
+
+		return is_visible( target, visible_in_shadow_cascade( level ) ) && render.should_draw_line() && model->get_line() && model->get_line()->is_cast_shadow();
+	}
+
+	return false;
+}
+
+bool ObjectRenderDataSystem::can_batch_in_pass( const RenderTarget& target, int pass )
+{
+	if ( pass == MeshPass )
+	{
+		// ボーンの定数（アニメーション）は物体ごとに違うので、まとめない。シェーダーがまとめて描けないモデルもまとめない
+		return ! target.render->bone_constant_buffer && target.model->can_render_object_instances();
+	}
+
+	// 線・影の段（スキンメッシュでない物）は、どれもまとめる
+	return true;
+}
+
+void ObjectRenderDataSystem::build_draw_list( int pass, DrawList& list ) const
+{
+	list.items.clear();
+	list.batches.clear();
+	list.instance_indices.clear();
+
+	// まとめごとに、入る物の定数の位置を、並びの順に集める（まとめ・定数の位置。後でまとめごとに並べ直す）
+	auto& members = scratch_members_;
+	members.clear();
+
+	// モデル → まとめ（モデルの種類は少ないので並びで持つ）。同じモデルが続くことが多いので、直前のモデルを先に見る
+	auto& batch_of_model = scratch_batch_of_model_;
+	batch_of_model.clear();
+
+	const graphics::Model* last_model = nullptr;
+	std::uint32_t last_batch = NoBatch;
+
+	const auto& targets = get_render_targets();
+
+	for ( std::uint32_t n = 0; n < targets.size(); n++ )
+	{
+		const RenderTarget& target = targets[ n ];
+
+		if ( ! is_drawn_in_pass( target, pass ) )
+		{
+			continue;
+		}
+
+		if ( ! can_batch_in_pass( target, pass ) )
+		{
+			list.items.push_back( { n, NoBatch } );
+			continue;
+		}
+
+		std::uint32_t batch = NoBatch;
+
+		if ( target.model == last_model )
+		{
+			batch = last_batch;
+		}
+		else
+		{
+			for ( const auto& [ model, b ] : batch_of_model )
+			{
+				if ( model == target.model )
+				{
+					batch = b;
+					break;
+				}
+			}
+
+			if ( batch == NoBatch )
+			{
+				// 初めて出てきたモデル : この位置でまとめて描く
+				batch = static_cast< std::uint32_t >( list.batches.size() );
+				list.batches.push_back( { target.model, 0, 0 } );
+				list.items.push_back( { n, batch } );
+				batch_of_model.emplace_back( target.model, batch );
+			}
+
+			last_model = target.model;
+			last_batch = batch;
+		}
+
+		list.batches[ batch ].count++;
+		members.emplace_back( batch, target.instance );
+	}
+
+	// まとめごとの先頭を決め、入る物の定数の位置を、まとめの中は並びの順に詰める
+	std::uint32_t first = 0;
+
+	for ( auto& batch : list.batches )
+	{
+		batch.first = first;
+		first += batch.count;
+		batch.count = 0;
+	}
+
+	list.instance_indices.resize( first );
+
+	for ( const auto& [ b, instance ] : members )
+	{
+		InstanceBatch& batch = list.batches[ b ];
+		list.instance_indices[ batch.first + batch.count++ ] = instance;
+	}
+
+	list.built = true;
+}
+
+const ObjectRenderDataSystem::DrawList& ObjectRenderDataSystem::get_draw_list( int pass ) const
+{
+	DrawList& list = draw_lists_[ pass ];
+
+	if ( ! list.built )
+	{
+		build_draw_list( pass, list );
+	}
+
+	return list;
 }
 
 } // namespace blue_sky::ecs

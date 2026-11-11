@@ -15,6 +15,7 @@
 #include <core/graphics/TextStyle.h>
 #include <core/graphics/Mesh.h>
 #include <core/graphics/LightDirection.h>
+#include <core/graphics/ObjectInstanceBuffer.h>
 
 #include <core/ecs/component/TransformComponent.h>
 #include <core/ecs/component/CameraComponent.h>
@@ -135,6 +136,10 @@ private:
 	mutable uint_t				pass_count_ = 0;
 	mutable uint_t				draw_count_ = 0;
 
+	/// 同じモデルの物体をまとめて描くときの、物体ごとの定数の入れ物（初めて使うときに create_object_instance_buffer で作る。作れなければ 1 個ずつ描く）
+	mutable std::unique_ptr< core::graphics::ObjectInstanceBuffer >	object_instance_buffer_;
+	mutable bool												object_instance_buffer_created_ = false;
+
 protected:
 	/// ゲームの物体の描画のデータを持つ System（物体がまだ無い・EntityManager が無いなら nullptr）
 	ecs::ObjectRenderDataSystem* get_object_render_data_system() const;
@@ -176,6 +181,12 @@ protected:
 
 	/// メッシュの頂点バッファを作る（create_named_mesh が使う）
 	virtual Mesh::Buffer* create_mesh_buffer( Mesh::Buffer::Type ) const = 0;
+
+	/// 物体ごとの定数の入れ物を作る（まとめて描かないなら nullptr。開発用の BLUE_SKY_DEBUG_NO_INSTANCING=1 のときなど）
+	[[nodiscard]] virtual std::unique_ptr< core::graphics::ObjectInstanceBuffer > create_object_instance_buffer() const = 0;
+
+	/// まとめて描く準備ができていれば、物体ごとの定数の入れ物を返す（できていなければ nullptr。1 個ずつ描く）
+	const core::graphics::ObjectInstanceBuffer* get_ready_object_instance_buffer( const ecs::ObjectRenderDataSystem* ) const;
 
 	/// 名前のテクスチャを外す（空を外すときに使う）
 	void unload_named_texture( const char_t* );

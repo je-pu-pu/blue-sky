@@ -491,6 +491,12 @@
     <ClInclude Include="core\graphics\RenderTargetTextureOptions.h">
       <Filter>core\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="core\graphics\ObjectInstanceBuffer.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\ObjectInstanceBuffer.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
     <ClInclude Include="core\graphics\LightDirection.h">
       <Filter>core\graphics</Filter>
     </ClInclude>

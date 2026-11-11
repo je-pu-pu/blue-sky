@@ -103,6 +103,20 @@ public:
 	virtual string_t get_texture_resource_name( const char* texture_name ) const { return texture_name; }
 
 	void render() const override;
+
+	/**
+	 * 同じモデルの物体をまとめて 1 回で描けるか（インスタンス描画）
+	 *
+	 * メッシュがあり、スキンメッシュでなく、シェーダーが 1 つ以上あってどれもまとめて描ける（Shader::can_render_object_instances）なら true
+	 */
+	bool can_render_object_instances() const;
+
+	/**
+	 * このモデルを instance_count 個まとめて描く（render の、まとめて描く版。物体ごとの定数は呼ぶ側が結んでおく）
+	 *
+	 * can_render_object_instances が true のモデルだけに使う
+	 */
+	void render_object_instances( uint_t instance_count ) const;
 };
 
 } // namespace blue_sky::graphics

@@ -615,8 +615,27 @@ void GraphicsManager::update_constant_buffers() const
 	// ゲームの物体の定数（world・前フレームの world・線の色・ボーン行列）。以前は ActiveObject を回して ActiveObject::update_render_data を呼んでいた
 	if ( auto* system = get_object_render_data_system() )
 	{
+		// 同じモデルの物体をまとめて描く（入れ物を作れたときだけ。作れなければ今までどおり 1 個ずつ描く）
+		if ( ! object_instance_buffer_created_ )
+		{
+			object_instance_buffer_ = create_object_instance_buffer();
+			object_instance_buffer_created_ = true;
+		}
+
+		system->set_instancing_enabled( static_cast< bool >( object_instance_buffer_ ) );
 		system->update_render_data();
+
+		// 物体ごとの定数を、まとめて描くときの入れ物に写す（1 フレームに 1 回。どの物を描くかの番号は、描く段ごとに写す）
+		if ( system->is_instancing_ready() )
+		{
+			object_instance_buffer_->update_instances( system->get_instances().data(), system->get_instances().size() );
+		}
 	}
+}
+
+const core::graphics::ObjectInstanceBuffer* GraphicsManager::get_ready_object_instance_buffer( const ecs::ObjectRenderDataSystem* system ) const
+{
+	return system && system->is_instancing_ready() ? object_instance_buffer_.get() : nullptr;
 }
 
 /**

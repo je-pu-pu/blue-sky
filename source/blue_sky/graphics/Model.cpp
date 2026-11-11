@@ -118,4 +118,36 @@ void Model::render() const
 	}
 }
 
+bool Model::can_render_object_instances() const
+{
+	if ( ! mesh_ || is_skin_mesh() || shader_list_.empty() )
+	{
+		return false;
+	}
+
+	for ( const auto* shader : shader_list_ )
+	{
+		if ( ! shader || ! shader->can_render_object_instances() )
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * render と同じ順にシェーダーを回し、まとめて描く
+ */
+void Model::render_object_instances( uint_t instance_count ) const
+{
+	get_mesh()->bind();
+
+	for ( uint_t n = 0; n < get_shader_count(); n++ )
+	{
+		get_shader_at( n )->update();
+		get_shader_at( n )->render_object_instances( get_mesh(), n, instance_count );
+	}
+}
+
 } // namespace blue_sky::graphics

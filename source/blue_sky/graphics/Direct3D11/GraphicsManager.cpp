@@ -31,12 +31,15 @@
 #include <core/graphics/Direct3D11/ShadowMap.h>
 #include <core/graphics/Direct3D11/DynamicSlotConstantBuffer.h>
 #include <core/graphics/Direct3D11/InstanceBuffer.h>
+#include <core/graphics/Direct3D11/ObjectInstanceBuffer.h>
 
 #include <core/graphics/Direct3D11/MsdfTextRenderer.h>
 
 #include <common/string.h>
 
 #include <cstddef>
+#include <cstring>
+#include <iostream>
 
 // 入力レイアウト "2d" は、メッシュの頂点の中の UV の位置を決め打ちで読む（法線を読み飛ばす）。頂点の形が変わったら気づけるようにする
 static_assert( offsetof( blue_sky::graphics::Vertex, TexCoord ) == core::graphics::direct_3d_11::Direct3D11::mesh_vertex_tex_coord_offset, "入力レイアウト 2d の UV の位置がメッシュの頂点と合わない" );
@@ -197,6 +200,24 @@ std::unique_ptr< core::graphics::ConstantBuffer > GraphicsManager::create_consta
 std::unique_ptr< core::graphics::InstanceBuffer > GraphicsManager::create_instance_buffer()
 {
 	return std::make_unique< core::graphics::direct_3d_11::InstanceBuffer >( direct_3d_ );
+}
+
+/**
+ * 物体ごとの定数の入れ物を作る（同じモデルの物体をまとめて描くため）
+ *
+ * 開発用 : 環境変数 BLUE_SKY_DEBUG_NO_INSTANCING=1 なら作らない（今までどおり 1 個ずつ描く。見た目・時間を比べるため）
+ */
+std::unique_ptr< core::graphics::ObjectInstanceBuffer > GraphicsManager::create_object_instance_buffer() const
+{
+	char buffer[ 16 ] = { };
+
+	if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_NO_INSTANCING", buffer, sizeof( buffer ) ) > 0 && std::strcmp( buffer, "1" ) == 0 )
+	{
+		std::cout << "[Instancing] BLUE_SKY_DEBUG_NO_INSTANCING=1 なので、物体を 1 個ずつ描きます" << std::endl;
+		return nullptr;
+	}
+
+	return std::make_unique< core::graphics::direct_3d_11::ObjectInstanceBuffer >( direct_3d_ );
 }
 
 GraphicsManager::ShadowMap* GraphicsManager::create_shadow_map( uint_t level, uint_t size ) const

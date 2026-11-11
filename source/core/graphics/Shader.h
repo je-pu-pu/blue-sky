@@ -109,6 +109,16 @@ public:
 	virtual void set_texture( Texture* t ) { set_texture_at( 0, t ); }
 	virtual void render_instanced( const Mesh*, uint_t, uint_t, const InstanceBuffer* ) const { }
 
+	/**
+	 * 同じモデルの物体をまとめて描けるか（物体ごとの定数を、呼ぶ側が結んだ ObjectInstanceBuffer から読む。既定はできない）
+	 *
+	 * できるシェーダーは render_object_instances を実装し、render と同じ見た目を、物体ごとの定数を入れ物から読んで描く
+	 */
+	virtual bool can_render_object_instances() const { return false; }
+
+	/// mesh の頂点のまとまり n を instance_count 個まとめて描く（物体ごとの定数は呼ぶ側が ObjectInstanceBuffer で結んでおく）
+	virtual void render_object_instances( const Mesh*, uint_t, uint_t ) const { }
+
 	virtual void render_parameter_gui();
 
 protected:

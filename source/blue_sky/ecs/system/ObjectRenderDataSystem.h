@@ -5,6 +5,7 @@
 #include <core/ecs/component/TransformComponent.h>
 #include <blue_sky/ecs/component/ObjectRenderComponent.h>
 #include <core/graphics/Frustum.h>
+#include <core/ConstantBuffers.h>
 
 #include <cstdint>
 #include <vector>
@@ -44,6 +45,9 @@ public:
 		/// このフレームで、どの描く段に入るか（VisibleInCamera・visible_in_shadow_cascade の和。update_render_data が決める）。
 		/// 読むときは is_visible を使う（カリングしなかったフレームは全部の段に入る）
 		mutable std::uint8_t						visibility = VisibleAll;
+
+		/// このフレームの物体の定数の、get_instances の中の位置（update_render_data が定数を求めた物だけ。求めていなければ NoInstance）
+		mutable std::uint32_t						instance = NoInstance;
 	};
 
 	using RenderTargetList = std::vector< RenderTarget >;
@@ -56,6 +60,48 @@ public:
 
 	/// 影のカスケードの数の上限（core::graphics::ShadowMap::MaxCascadeLevels と同じ）
 	static constexpr int MaxShadowCascades = 4;
+
+	static constexpr std::uint32_t NoInstance = 0xFFFFFFFF;
+
+	// ---- インスタンス描画（同じモデルの物をまとめて 1 回で描く。doc/ECS移行計画.md の 6.7 の案 B） ----
+
+	/// 描く段（本体・線・影の段ごとの本体と線）。get_draw_list に渡す番号
+	static constexpr int MeshPass = 0;		///< カメラ : 物体のメッシュ
+	static constexpr int LinePass = 1;		///< カメラ : 物体の線
+	static constexpr int shadow_mesh_pass( int level ) { return 2 + level; }						///< 影の段 level : スキンメッシュでない物のメッシュ
+	static constexpr int shadow_line_pass( int level ) { return 2 + MaxShadowCascades + level; }	///< 影の段 level : スキンメッシュでない物の、影を落とす線
+	static constexpr int DrawPassCount = 2 + MaxShadowCascades * 2;
+
+	static constexpr std::uint32_t NoBatch = 0xFFFFFFFF;
+
+	/// まとめ 1 つ（同じモデルの物を 1 回で描く）
+	struct InstanceBatch
+	{
+		const graphics::Model*	model;		///< 描くモデル
+		std::uint32_t			first;		///< DrawList::instance_indices の中の先頭
+		std::uint32_t			count;		///< 描く物の数
+	};
+
+	/// 描く物 1 つ（描く順に並ぶ）
+	struct DrawItem
+	{
+		std::uint32_t			target;		///< get_render_targets の中の位置（まとめなら、まとめの最初の物）
+		std::uint32_t			batch;		///< DrawList::batches の中の位置（NoBatch なら target を今までどおり 1 個ずつ描く）
+	};
+
+	/**
+	 * 1 つの描く段で描く物の並び
+	 *
+	 * 同じモデルの物は、最初に出てきた物の位置でまとめて描く（まとめの中は Entity の番号の順）。
+	 * まとめられない物は、今までどおりの位置で 1 個ずつ描く
+	 */
+	struct DrawList
+	{
+		std::vector< DrawItem >			items;
+		std::vector< InstanceBatch >	batches;
+		std::vector< std::uint32_t >	instance_indices;	///< まとめごとの、物体の定数（get_instances）の位置の並び
+		bool							built = false;		///< このフレームで作ったか
+	};
 
 	/// カリングの結果の数（開発用。最後に update_render_data を呼んだフレームの数）
 	struct CullingStats
@@ -92,6 +138,25 @@ private:
 	core::graphics::Frustum			shadow_frustums_[ MaxShadowCascades ];
 	int								shadow_cascade_count_ = 0;
 	CullingStats					culling_stats_;
+
+	// ---- インスタンス描画 ----
+	bool										instancing_enabled_ = false;	///< まとめて描くか（GraphicsManager が、インスタンスの入れ物を持つときに有効にする）
+	bool										instances_ready_ = false;		///< このフレームの物体の定数を求め、その後に描く対象が増減していない（フレームの終わりに戻す）
+	std::vector< core::ObjectConstantBufferData >	instances_;					///< このフレームの物体の定数（定数を求めた物だけ。RenderTarget::instance の位置）
+	mutable DrawList							draw_lists_[ DrawPassCount ];
+
+	// build_draw_list の作業用（毎回確保し直さない）
+	mutable std::vector< std::pair< std::uint32_t, std::uint32_t > >			scratch_members_;			///< まとめ・物体の定数の位置
+	mutable std::vector< std::pair< const graphics::Model*, std::uint32_t > >	scratch_batch_of_model_;	///< モデル・まとめ
+
+	/// 段 pass に、描く対象 target を描くか
+	bool is_drawn_in_pass( const RenderTarget& target, int pass ) const;
+
+	/// 段 pass で、描く対象 target をほかの同じモデルの物とまとめて描けるか（is_drawn_in_pass が true の物について）
+	static bool can_batch_in_pass( const RenderTarget& target, int pass );
+
+	/// 段 pass の描く物の並びを作る
+	void build_draw_list( int pass, DrawList& list ) const;
 
 	/// 描く対象 1 つが、どの段に入るか（world はこのフレームの world 行列）
 	std::uint8_t calculate_visibility( const RenderTarget& target, const core::Matrix& world );
@@ -137,6 +202,32 @@ public:
 
 	/// 最後に範囲を使ったフレームのカリングの結果の数（開発用）
 	const CullingStats& get_culling_stats() const { return culling_stats_; }
+
+	/// 同じモデルの物をまとめて描くかを決める（GraphicsManager がインスタンスの入れ物を持つときに有効にする。既定は無効）
+	void set_instancing_enabled( bool enabled ) { instancing_enabled_ = enabled; }
+	bool is_instancing_enabled() const { return instancing_enabled_; }
+
+	/**
+	 * このフレームで、まとめて描く準備ができているか
+	 *
+	 * 有効にしていて、このフレームの update_render_data で物体の定数を求め、その後に描く対象が増減していなければ true。
+	 * false のときは、描く流れは今までどおり 1 個ずつ描く
+	 */
+	bool is_instancing_ready() const { return instancing_enabled_ && instances_ready_; }
+
+	/// このフレームの物体の定数（update_render_data が定数を求めた物だけ。RenderTarget::instance の位置。インスタンスの入れ物に写す）
+	const std::vector< core::ObjectConstantBufferData >& get_instances() const { return instances_; }
+
+	/**
+	 * 段 pass で描く物の並び（このフレームで初めて求められたときに作る。is_instancing_ready のときだけ使う）
+	 *
+	 * まとめる条件（can_batch_in_pass）:
+	 * - 本体 : スキンメッシュでない・ボーンの定数を持たない・モデルのシェーダーがどれもまとめて描ける（Model::can_render_object_instances）
+	 * - 影の段 : スキンメッシュでない物はどれも（スキンメッシュは今までどおり、別に 1 個ずつ描く）
+	 * - 線 : どれも（線のシェーダーは物体の world と色しか使わない）
+	 * 「同じモデル」はモデルのポインタが同じこと（メッシュ・シェーダー・テクスチャが同じ）。make_model_unique した物はほかとまとまらない
+	 */
+	const DrawList& get_draw_list( int pass ) const;
 
 	/**
 	 * 描く対象のモデルを引いて RenderTarget::model に入れる（このフレームでまだ引いていなければ。1 フレームに 1 回）

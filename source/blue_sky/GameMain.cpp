@@ -239,6 +239,19 @@ GameMain::GameMain( App& app )
 	// MainLoop
 	main_loop_.reset( new MainLoop( 60 ) );
 
+	// 開発用 : BLUE_SKY_DEBUG_FIXED_STEP_MSEC="ミリ秒" を設定すると、1 フレームの経過時間をいつもその値にする
+	// （本当の時間によらず、物理・紙の模様・線の揺れがフレームの数だけで決まる。画面を撮り比べるときに、exe の速さの違いで揺れないように）
+	{
+		char buffer[ 32 ] = { };
+		unsigned long msec = 0;
+
+		if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_FIXED_STEP_MSEC", buffer, sizeof( buffer ) ) > 0 && sscanf_s( buffer, "%lu", & msec ) == 1 && msec > 0 )
+		{
+			main_loop_->set_fixed_elapsed_msec( msec );
+			debug_log( "[Debug] BLUE_SKY_DEBUG_FIXED_STEP_MSEC : 1 フレームの経過時間をいつも " + std::to_string( msec ) + " ミリ秒にします" );
+		}
+	}
+
 	// ゲーム設定 : ユーザーの設定ファイルから読み、表示系以外を反映する（表示系は App / Direct3D の初期化で、同じ登録を使って反映済み）
 	settings_ = std::make_unique< core::setting::SettingStore >();
 	settings_->set_error_handler( [] ( const string_t& message ) { debug_log( "[Setting] " + message ); } );

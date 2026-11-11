@@ -72,7 +72,7 @@ bool MainLoop::loop()
 		
 		//
 		last_time_ = current_time_;
-		current_time_ = time;
+		current_time_ = fixed_elapsed_msec_ ? current_time_ + fixed_elapsed_msec_ : time;
 
 		return true;
 	}

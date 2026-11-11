@@ -21,6 +21,8 @@ private:
 	unsigned long current_time_;	// 現在のフレームの時間
 	unsigned long last_sec_time_;	// 前の 1 秒の時間
 
+	unsigned long fixed_elapsed_msec_ = 0;	// 開発用 : 0 でなければ、1 フレームの経過時間をいつもこの値にする（set_fixed_elapsed_msec）
+
 public:
 	explicit MainLoop( unsigned long );
 	~MainLoop();
@@ -51,6 +53,16 @@ public:
 	/// 次のフレームまでの待ち時間（ミリ秒）。待たずに次のフレームへ進めるなら 0
 	unsigned long get_wait_msec() const;
 	
+	/**
+	 * 開発用 : 1 フレームの経過時間を、本当の時間によらずいつも msec ミリ秒にする（0 で元に戻す）
+	 *
+	 * 経過時間（get_elapsed_msec）と、フレームの時刻（get_current_time）が、フレームごとに msec ずつ進む。
+	 * 画面の撮り比べで、起動の速さ・フレームの時間の揺れによる違い（物理・紙の模様・線の揺れ）を無くすために使う。
+	 * フレームを回す速さ（loop が true を返す間隔）は変えない
+	 */
+	void set_fixed_elapsed_msec( unsigned long msec ) { fixed_elapsed_msec_ = msec; }
+	unsigned long get_fixed_elapsed_msec() const { return fixed_elapsed_msec_; }
+
 	unsigned long get_fps() const { return fps_; }
 	unsigned long get_last_fps() const { return last_fps_; }
 

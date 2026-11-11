@@ -475,6 +475,7 @@ void GraphicsManager::create_default_shaders()
 	create_named_shader< shader::TessellationMatcapShader >( "tess_matcap" )->set_texture( matcap_texture );
 	create_named_shader< shader::SkinningTessellationMatcapShader >( "tess_matcap_skin" )->set_texture( matcap_texture );
 	create_named_shader< shader::UnicolorShader >( "unicolor", "main", "unicolor" );
+	create_named_shader< shader::UnicolorShader >( "lit_unicolor", "main", "lit_unicolor" );	// 単色＋面陰影
 	create_named_shader< shader::VelocityShader >( "velocity", "main", "velocity" );	// モーションベクトル ( 案B / 段階0b )
 
 	// ポストエフェクトは 2D の入力レイアウト（法線なし）で描く

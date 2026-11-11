@@ -9,6 +9,16 @@ class dtNavMeshQuery;
 namespace core::nav
 {
 
+/// オフメッシュ接続（階段/ジャンプ等で navmesh の別々の島を橋渡しする Detour のリンク）。
+/// start/end はそれぞれ既存の歩行面の近くに置くこと（Detour が最寄りポリゴンへ接続する）。
+struct OffMeshLink
+{
+	core::math::Vector start;             ///< 一方の端点（例: 階段下の地面）
+	core::math::Vector end;               ///< もう一方の端点（例: 屋上の縁）
+	float              radius = 0.6f;     ///< 接続半径 (m)
+	bool               bidirectional = true; ///< 双方向に通れるか
+};
+
 /// navmesh ベイクのパラメータ（Recast）。
 struct NavMeshBuildConfig
 {
@@ -52,12 +62,28 @@ public:
 	 */
 	bool build( const float* verts, int nverts, const int* tris, int ntris, const NavMeshBuildConfig& cfg );
 
+	/// 次回の build() で焼き込むオフメッシュ接続を設定する（build より前に呼ぶ）。
+	void set_off_mesh_links( const std::vector< OffMeshLink >& links ) { off_mesh_links_ = links; }
+
 	/**
 	 * start→end の経路（歩行面上の折れ線）を out に得る。
+	 * @param out_flags 非 null なら各点の Detour straight-path フラグを返す
+	 *                  （DT_STRAIGHTPATH_OFFMESH_CONNECTION 等。オフメッシュ区間の判定に使う）
 	 * @return 経路が得られたら true（out は始点側から並ぶ）
 	 */
 	bool find_path( const core::math::Vector& start, const core::math::Vector& end,
-		std::vector< core::math::Vector >& out ) const;
+		std::vector< core::math::Vector >& out,
+		std::vector< unsigned char >* out_flags = nullptr ) const;
+
+	/// 経路点フラグに立つ「この点はオフメッシュ接続の入口」を表すビット。
+	static unsigned char off_mesh_connection_flag();
+
+	/**
+	 * pos の XZ 位置で足元の歩行面の高さを得る（縦方向は pos.y 近傍を探す）。
+	 * 敵をキネマティックに面へ張り付かせる（空中を滑らせない）用途。
+	 * @return 歩行面が見つかれば true（out_y に面の高さ）
+	 */
+	bool sample_height( const core::math::Vector& pos, float& out_y ) const;
 
 	bool is_built() const { return nav_mesh_ != nullptr; }
 
@@ -69,6 +95,8 @@ private:
 
 	dtNavMesh*      nav_mesh_  = nullptr;
 	dtNavMeshQuery* nav_query_ = nullptr;
+
+	std::vector< OffMeshLink > off_mesh_links_;   ///< build() で焼き込むオフメッシュ接続
 
 }; // class NavMesh
 

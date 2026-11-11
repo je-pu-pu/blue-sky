@@ -33,6 +33,14 @@ struct FpsPlayerComponent : public core::ecs::Component
 	/// 接地フラグ (ジャンプ判定用)
 	bool is_grounded = false;
 
+	// --- ジェット（滞空・飛ぶ動詞の第一歩）。fly_enabled のときだけ有効 ---
+	bool  fly_enabled   = false;  ///< 空中で JUMP 長押しの上昇を許可するか
+	float fly_speed     = 4.f;    ///< 上昇速度 (m/s)
+	float fly_fuel      = 1.f;    ///< 燃料 [0,1]
+	float fly_fuel_max  = 1.f;    ///< 燃料上限
+	float fly_burn_rate = 0.5f;   ///< 上昇中の消費 (/s)。0.5 で満タン 2 秒
+	float fly_regen_rate = 0.4f;  ///< 接地時の回復 (/s)
+
 }; // struct FpsPlayerComponent
 
 } // namespace blue_sky::ecs

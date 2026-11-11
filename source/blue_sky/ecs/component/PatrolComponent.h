@@ -40,7 +40,8 @@ struct PatrolComponent : public core::ecs::Component
 	float wait_timer = 0.f;
 
 	// --- navmesh 経路追従のキャッシュ（PatrolSystem が管理） ---
-	std::vector< core::math::Vector > path;         ///< 現在たどっている navmesh 経路
+	std::vector< core::math::Vector >  path;        ///< 現在たどっている navmesh 経路
+	std::vector< unsigned char >       path_flags;  ///< 各点の Detour straight-path フラグ（オフメッシュ判定用）
 	std::size_t current_path_point = 0;             ///< path 内の次の目標点の添字
 	core::math::Vector path_goal;                   ///< この path を計算したときの最終ゴール
 

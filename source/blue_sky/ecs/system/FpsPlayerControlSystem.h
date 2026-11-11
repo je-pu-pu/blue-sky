@@ -8,6 +8,7 @@
 
 namespace core::input { class InputManager; }
 namespace core::physics { class PhysicsManager; }
+namespace core { class TimeManager; }
 
 namespace blue_sky::ecs
 {
@@ -31,9 +32,11 @@ class FpsPlayerControlSystem : public System<
 {
 public:
 	/// 入力と物理は作り手が渡す（以前は core::Service から取っていた）
-	FpsPlayerControlSystem( const core::input::InputManager* input, core::physics::PhysicsManager* physics_manager )
+	/// time_manager : ジェットの燃料の増減に使う経過時間（nullptr なら燃料は増減しない）
+	FpsPlayerControlSystem( const core::input::InputManager* input, core::physics::PhysicsManager* physics_manager, const core::TimeManager* time_manager = nullptr )
 		: input_( input )
 		, physics_manager_( physics_manager )
+		, time_manager_( time_manager )
 	{ }
 	~FpsPlayerControlSystem() = default;
 
@@ -46,6 +49,7 @@ private:
 private:
 	const core::input::InputManager* input_;
 	core::physics::PhysicsManager* physics_manager_;
+	const core::TimeManager* time_manager_;
 
 }; // class FpsPlayerControlSystem
 

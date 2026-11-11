@@ -114,15 +114,29 @@ void PatrolSystem::update_entity( ComponentTuple& tuple ) const
 
 	// --- 経路の決定（navmesh があれば経路追従、無ければ直線） ---
 	Vector move_target = goal;   // 直線移動時はゴールへ直行
+	bool   on_link     = false;  // オフメッシュ接続（階段/ジャンプ）を横断中か
 
 	if ( navmesh_ && navmesh_->is_built() )
 	{
-		// ゴールが大きく動いた or 経路が無ければ張り直す
+		// いまリンク横断中（直前の経路点がオフメッシュ入口）か。
+		// 橋/階段リンクの上は navmesh 外なので、そこで find_path すると最寄りポリゴンが
+		// 見つからず失敗し、非リンク分岐で歩行面が無く縁停止して動けなくなる。
+		// → 横断中はゴールが変わっても経路を張り直さず、渡り切ってから再探索する。
+		bool mid_link = false;
+		if ( ! patrol->path.empty() && patrol->current_path_point >= 1
+		     && patrol->current_path_point < patrol->path.size()
+		     && ( patrol->current_path_point - 1 ) < patrol->path_flags.size() )
+		{
+			mid_link = ( patrol->path_flags[ patrol->current_path_point - 1 ]
+			             & core::nav::NavMesh::off_mesh_connection_flag() ) != 0;
+		}
+
+		// ゴールが大きく動いた or 経路が無ければ張り直す（リンク横断中を除く）
 		Vector goal_delta = goal - patrol->path_goal;
 		goal_delta.set_y( 0.f );
-		if ( patrol->path.empty() || goal_delta.length() > 1.0f )
+		if ( ! mid_link && ( patrol->path.empty() || goal_delta.length() > 1.0f ) )
 		{
-			navmesh_->find_path( pos, goal, patrol->path );
+			navmesh_->find_path( pos, goal, patrol->path, & patrol->path_flags );
 			patrol->current_path_point = 0;
 			patrol->path_goal = goal;
 		}
@@ -138,6 +152,13 @@ void PatrolSystem::update_entity( ComponentTuple& tuple ) const
 		if ( patrol->current_path_point < patrol->path.size() )
 		{
 			move_target = patrol->path[ patrol->current_path_point ];
+
+			// 直前の経路点がオフメッシュ入口フラグを持つなら、今の区間はリンク横断。
+			const std::size_t prev = patrol->current_path_point - 1;
+			if ( patrol->current_path_point >= 1 && prev < patrol->path_flags.size() )
+			{
+				on_link = ( patrol->path_flags[ prev ] & core::nav::NavMesh::off_mesh_connection_flag() ) != 0;
+			}
 		}
 	}
 
@@ -159,7 +180,24 @@ void PatrolSystem::update_entity( ComponentTuple& tuple ) const
 		return;
 	}
 
-	// --- move_target へ XZ 平面移動 ---
+	if ( on_link )
+	{
+		// --- リンク横断（階段/ジャンプ）: 歩行面スナップせず move_target へ 3D 直進 ---
+		// リンクの下には地面 navmesh があるため、スナップすると地面に張り付いて登れない。
+		// 入口→出口を 3D で直進し、階段を上る/下りるように高さも変える。
+		const Vector to3 = move_target - pos;
+		const float  d3  = to3.length();
+		if ( d3 > 1e-3f )
+		{
+			const Vector new_pos = pos + ( to3 / d3 ) * std::min( patrol->move_speed * dt, d3 );
+			transform->transform.set_position( new_pos );
+			face_toward( transform, move_target, patrol->turn_speed, dt );
+		}
+		return;
+	}
+
+	// --- move_target へ XZ 移動し、y は足元の歩行面へスナップする ---
+	// キネマティック（重力なし）だが常に歩行面へ張り付くので、空中を滑降できない。
 	Vector to = move_target - pos;
 	to.set_y( 0.f );
 	const float dist = to.length();
@@ -167,10 +205,25 @@ void PatrolSystem::update_entity( ComponentTuple& tuple ) const
 	{
 		const Vector dir  = to / dist;
 		const float  step = patrol->move_speed * dt;
-
 		Vector new_pos = pos + dir * std::min( step, dist );
-		new_pos.set_y( pos.y() ); // 高さ維持
-		transform->transform.set_position( new_pos );
+
+		if ( navmesh_ && navmesh_->is_built() )
+		{
+			// 進む先に歩行面があるときだけ移動し、その高さへスナップする。
+			// 面が無い＝崖/縁（例: 追跡でプレイヤーが navmesh 外にいて経路が張れず直進する場合）。
+			// 踏み外して空中を滑空しないよう、縁では止まる（向きだけ合わせる）。
+			float ground_y = pos.y();
+			if ( navmesh_->sample_height( new_pos, ground_y ) )
+			{
+				new_pos.set_y( ground_y );
+				transform->transform.set_position( new_pos );
+			}
+		}
+		else
+		{
+			new_pos.set_y( pos.y() );   // navmesh 無し（平面）: そのまま移動
+			transform->transform.set_position( new_pos );
+		}
 
 		face_toward( transform, move_target, patrol->turn_speed, dt );
 	}

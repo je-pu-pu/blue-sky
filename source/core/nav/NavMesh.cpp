@@ -165,6 +165,37 @@ bool NavMesh::build( const float* verts, int nverts, const int* tris, int ntris,
 	params.walkableHeight   = c.agent_height;
 	params.walkableRadius   = c.agent_radius;
 	params.walkableClimb    = c.agent_max_climb;
+
+	// オフメッシュ接続（島同士を橋渡し）。Detour 用の平坦配列に詰める。
+	// これらは dtCreateNavMeshData 呼び出しまで生存している必要がある（同一スコープ）。
+	std::vector< float >          om_verts;   // 6 floats/link (start xyz, end xyz)
+	std::vector< float >          om_rad;
+	std::vector< unsigned char >  om_areas;
+	std::vector< unsigned short > om_flags;
+	std::vector< unsigned char >  om_dir;
+	std::vector< unsigned int >   om_id;
+	for ( size_t i = 0; i < off_mesh_links_.size(); ++i )
+	{
+		const OffMeshLink& lk = off_mesh_links_[ i ];
+		om_verts.push_back( lk.start.x() ); om_verts.push_back( lk.start.y() ); om_verts.push_back( lk.start.z() );
+		om_verts.push_back( lk.end.x() );   om_verts.push_back( lk.end.y() );   om_verts.push_back( lk.end.z() );
+		om_rad.push_back( lk.radius );
+		om_areas.push_back( RC_WALKABLE_AREA );
+		om_flags.push_back( POLY_FLAG_WALK );
+		om_dir.push_back( lk.bidirectional ? DT_OFFMESH_CON_BIDIR : 0 );
+		om_id.push_back( static_cast< unsigned int >( 0x1000 + i ) );
+	}
+	if ( ! off_mesh_links_.empty() )
+	{
+		params.offMeshConVerts  = om_verts.data();
+		params.offMeshConRad    = om_rad.data();
+		params.offMeshConAreas  = om_areas.data();
+		params.offMeshConFlags  = om_flags.data();
+		params.offMeshConDir    = om_dir.data();
+		params.offMeshConUserID = om_id.data();
+		params.offMeshConCount  = static_cast< int >( off_mesh_links_.size() );
+	}
+
 	rcVcopy( params.bmin, pmesh->bmin );
 	rcVcopy( params.bmax, pmesh->bmax );
 	params.cs               = cfg.cs;
@@ -202,10 +233,17 @@ bool NavMesh::build( const float* verts, int nverts, const int* tris, int ntris,
 	return true;
 }
 
+unsigned char NavMesh::off_mesh_connection_flag()
+{
+	return DT_STRAIGHTPATH_OFFMESH_CONNECTION;
+}
+
 bool NavMesh::find_path( const core::math::Vector& start, const core::math::Vector& end,
-	std::vector< core::math::Vector >& out ) const
+	std::vector< core::math::Vector >& out,
+	std::vector< unsigned char >* out_flags ) const
 {
 	out.clear();
+	if ( out_flags ) { out_flags->clear(); }
 
 	if ( ! nav_mesh_ || ! nav_query_ )
 	{
@@ -240,21 +278,58 @@ bool NavMesh::find_path( const core::math::Vector& start, const core::math::Vect
 		return false;
 	}
 
-	// 折れ線（string-pulling）
-	float straight[ MAX_POLYS * 3 ];
+	// 折れ線（string-pulling）。フラグも取得（オフメッシュ接続の入口判定に使う）。
+	float         straight[ MAX_POLYS * 3 ];
+	unsigned char straight_flags[ MAX_POLYS ];
 	int straight_count = 0;
 	if ( dtStatusFailed( nav_query_->findStraightPath( start_nearest, end_nearest, path, path_count,
-		straight, nullptr, nullptr, & straight_count, MAX_POLYS ) ) )
+		straight, straight_flags, nullptr, & straight_count, MAX_POLYS ) ) )
 	{
 		return false;
 	}
 
 	out.reserve( straight_count );
+	if ( out_flags ) { out_flags->reserve( straight_count ); }
 	for ( int i = 0; i < straight_count; ++i )
 	{
 		out.emplace_back( straight[ i * 3 + 0 ], straight[ i * 3 + 1 ], straight[ i * 3 + 2 ] );
+		if ( out_flags ) { out_flags->push_back( straight_flags[ i ] ); }
 	}
 	return ! out.empty();
+}
+
+bool NavMesh::sample_height( const core::math::Vector& pos, float& out_y ) const
+{
+	if ( ! nav_mesh_ || ! nav_query_ )
+	{
+		return false;
+	}
+
+	dtQueryFilter filter;
+	filter.setIncludeFlags( POLY_FLAG_WALK );
+	filter.setExcludeFlags( 0 );
+
+	const float p[ 3 ] = { pos.x(), pos.y(), pos.z() };
+	// XZ は狭く・縦はやや広く探して「今いる段（レベル）」の足元面を拾う。
+	// 縦を広げすぎると地面の上にある屋上を誤って拾うので 2m に抑える。
+	const float extents[ 3 ] = { 1.f, 2.f, 1.f };
+
+	dtPolyRef ref = 0;
+	float nearest[ 3 ];
+	nav_query_->findNearestPoly( p, extents, & filter, & ref, nearest );
+	if ( ! ref )
+	{
+		return false;
+	}
+
+	float h = 0.f;
+	if ( dtStatusFailed( nav_query_->getPolyHeight( ref, nearest, & h ) ) )
+	{
+		out_y = nearest[ 1 ];   // フォールバック: 最近ポリゴン上の点の高さ
+		return true;
+	}
+	out_y = h;
+	return true;
 }
 
 void NavMesh::debug_get_poly_edges( std::vector< core::math::Vector >& out ) const

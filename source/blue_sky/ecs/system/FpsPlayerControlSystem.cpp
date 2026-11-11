@@ -1,7 +1,9 @@
 #include "FpsPlayerControlSystem.h"
 #include <core/input/InputManager.h>
 #include <core/physics/PhysicsManager.h>
+#include <core/TimeManager.h>
 #include <common/math.h>
+#include <algorithm>
 #include <cmath>
 
 namespace blue_sky::ecs
@@ -110,6 +112,29 @@ void FpsPlayerControlSystem::update_entity( ComponentTuple& component_tuple ) co
 		{
 			Vector jump_impulse( 0.f, fps_player->jump_impulse, 0.f );
 			physics_manager->apply_impulse( rigid_body->handle, jump_impulse );
+		}
+
+		// --- 6.5 ジェット（JUMP 長押し＝上昇/滞空。燃料制） ---
+		// 接地・空中どちらからでも離陸できる（!is_grounded 条件だと屋上等で小ジャンプでは
+		// 空中に出られず離陸できなかった。長押しで上向き速度を保つ動詞に統一）。
+		if ( fps_player->fly_enabled )
+		{
+			const float dt = time_manager_ ? time_manager_->get_delta_time() : 0.f;
+
+			if ( input->press( Button::JUMP ) && fps_player->fly_fuel > 0.f )
+			{
+				// 上向き速度を一定に保つ（長押しで上昇・タップで滞空、離すと落下）
+				Vector v = physics_manager->get_rigid_body_linear_velocity( rigid_body->handle );
+				v.set_y( fps_player->fly_speed );
+				physics_manager->set_rigid_body_linear_velocity( rigid_body->handle, v );
+
+				fps_player->fly_fuel = ( std::max )( 0.f, fps_player->fly_fuel - fps_player->fly_burn_rate * dt );
+			}
+			else if ( fps_player->is_grounded )
+			{
+				// 上昇していない接地時に燃料回復（屋上・階段・橋の上でも回復する）
+				fps_player->fly_fuel = ( std::min )( fps_player->fly_fuel_max, fps_player->fly_fuel + fps_player->fly_regen_rate * dt );
+			}
 		}
 	}
 

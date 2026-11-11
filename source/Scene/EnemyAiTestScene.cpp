@@ -95,7 +95,7 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 
 	// System を追加（実行順が重要: 対象収集 → 知覚 → 警戒 → 移動 → 物理 → 描画）
 	get_entity_manager()->add_system< core::ecs::PhysicsSystem >( 5, get_physics_manager() );
-	get_entity_manager()->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10, get_input(), get_physics_manager() );
+	get_entity_manager()->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10, get_input(), get_physics_manager(), get_time_manager() );
 	get_entity_manager()->add_system< blue_sky::ecs::TargetRegistrySystem >( 20 );
 	get_entity_manager()->add_system< blue_sky::ecs::SmokeRegistrySystem >( 25 );
 	get_entity_manager()->add_system< blue_sky::ecs::PerceptionSystem >( 30, get_physics_manager() );
@@ -113,6 +113,7 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 
 	fps_player_ = player_->add_component< blue_sky::ecs::FpsPlayerComponent >();
 	fps_player_->move_speed = 5.f;
+	fps_player_->fly_enabled = true;  // ジェット（滞空）を有効化。空中で Space 長押しで上昇/滞空
 
 	auto* player_rb = player_->add_component< RigidBodyComponent >();
 	player_rb->shape_type = RigidBodyShapeType::Capsule;
@@ -148,39 +149,74 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 		rb->mass = 0.f;
 	}
 
-	// --- 遮蔽ビル（LOS を切る静的な障害物） ---
-	// 見た目・当たり判定・navmesh の穴を一致させる: 接地した 4×4×高さ5 のボックス。
-	// 見た目はワイヤーフレーム箱で描く（draw_debug）ので描画モデルは持たせない。
-	const Vector building_positions[] = {
-		Vector(  6.f, 0.f, 4.f ),
-		Vector( -6.f, 0.f, 8.f ),
-		Vector(  0.f, 0.f, 14.f ),
+	// --- ステージ: 合成ビル（複数箱の組み合わせ）＋コネクタ（階段/橋） ---
+	// center.y = half.y で底面を地面(y=0)に接地。描画・当たり・navmesh の穴が一致する。
+	const Color wall_color( 0.62f, 0.62f, 0.66f, 1.f );  // ビル本体（冷たいグレー）
+	const Color walk_color( 0.72f, 0.68f, 0.56f, 1.f );  // 通路（階段/橋・温かいグレー）
+
+	// 合成ビルは階層の箱の「間に隙間」を空けて置く → コネクタ（階段/橋）は隙間だけを跨ぎ、
+	// 屋上には乗り上げない。屋上は各箱の上面（別々の島）で、通行はオフメッシュ接続が担う。
+	obstacles_ = {
+		// 合成ビルA（西）: 2F 屋上 y3 x[-13,-9] ／ 隙間 x[-9,-7] ／ 3F 屋上 y5 x[-7,-3]
+		{ Vector( -11.f, 1.5f, 12.f ), Vector( 2.0f, 1.5f, 2.0f ) },  // A-2F
+		{ Vector(  -5.f, 2.5f, 12.f ), Vector( 2.0f, 2.5f, 2.0f ) },  // A-3F
+		// 合成ビルB（東）: 3F 屋上 y5 x[3,7] ／ 隙間 x[7,9] ／ 2F 屋上 y3 x[9,13]
+		{ Vector(   5.f, 2.5f, 12.f ), Vector( 2.0f, 2.5f, 2.0f ) },  // B-3F（西・橋側）
+		{ Vector(  11.f, 1.5f, 12.f ), Vector( 2.0f, 1.5f, 2.0f ) },  // B-2F（東）
+		// 遮蔽ビル（単箱・複数の高さ）
+		{ Vector(  -8.f, 3.0f,  4.f ), Vector( 2.0f, 3.0f, 2.0f ) },  // h6
+		{ Vector(   8.f, 2.5f,  4.f ), Vector( 2.0f, 2.5f, 2.0f ) },  // h5
+		{ Vector(   0.f, 1.5f, 17.f ), Vector( 3.0f, 1.5f, 2.0f ) },  // h3（低い横長）
+		{ Vector(   4.f, 1.0f, -2.f ), Vector( 1.5f, 1.0f, 1.5f ) },  // h2（低い遮蔽）
 	};
-	for ( const auto& p : building_positions )
+	for ( const auto& o : obstacles_ )
 	{
-		building_footprints_.push_back( p );
-
-		auto* e = get_entity_manager()->create_entity();
-		auto* t = e->add_component< TransformComponent >();
-		t->transform.set_identity();
-		t->transform.set_position( p );
-
-		// 当たり判定: 地面(y=0)から y=5 まで、footprint ±2（navmesh の障害と一致）
-		auto* rb = e->add_component< RigidBodyComponent >();
-		rb->shape_type = RigidBodyShapeType::Box;
-		rb->shape_size = Vector( 2.f, 2.5f, 2.f );  // 半径。4×5×4
-		rb->offset = Vector( 0.f, 2.5f, 0.f );       // 底面が y=0 に来る
-		rb->mass = 0.f;
+		spawn_solid_box( o.center, o.half, wall_color );
 	}
+
+	// コネクタ（見た目の階段/橋 ＝ 縁と縁の隙間だけ）＋ オフメッシュ接続（端点は屋上の内側へ inset）。
+	// 複数ルート: 屋上ネットワークへは 西(A-2F) と 東(B-2F) の2入口＝ループ。h6 遮蔽は見張り台。
+	add_stairs( Vector( -11.f, 0.f, 18.f ), Vector( -11.f, 3.f, 14.f ), 2.5f, walk_color ); // 地上→A-2F（北）
+	add_stairs( Vector(  -9.f, 3.f, 12.f ), Vector(  -7.f, 5.f, 12.f ), 2.0f, walk_color ); // A-2F→A-3F（隙間）
+	add_bridge( Vector(  -3.f, 5.f, 12.f ), Vector(   3.f, 5.f, 12.f ), 2.0f, walk_color ); // A-3F→B-3F（橋）
+	add_stairs( Vector(   7.f, 5.f, 12.f ), Vector(   9.f, 3.f, 12.f ), 2.0f, walk_color ); // B-3F→B-2F（隙間）
+	add_stairs( Vector(  11.f, 0.f, 18.f ), Vector(  11.f, 3.f, 14.f ), 2.5f, walk_color ); // 地上→B-2F（北・2つ目の入口＝ループ）
+	add_stairs( Vector(  -8.f, 0.f, -4.f ), Vector(  -8.f, 6.f,  2.f ), 2.5f, walk_color ); // 地上→h6 遮蔽の屋上（見張り台）
+
+	// 屋上の遮蔽物（腰高の壁/箱＝敵の視線を遮るカバー。当たり＋LOS 遮蔽。navmesh には焼かない）。
+	// リンク端点（z12）を避けて縁寄りに置く。敵はキネマティックなので素通りするが、プレイヤーの
+	// 遮蔽・隠れ場所になり、屋上での見つかりにくさを作る。
+	const Color cover_color( 0.48f, 0.50f, 0.52f, 1.f );
+	auto cover = [&]( float cx, float roof, float cz, float hx, float hz, float h )
+	{
+		spawn_solid_box( Vector( cx, roof + h * 0.5f, cz ), Vector( hx, h * 0.5f, hz ), cover_color );
+	};
+	cover(  -5.f, 5.f, 13.4f, 1.6f, 0.2f, 1.0f ); // A-3F 北縁の壁
+	cover( -6.2f, 5.f, 10.6f, 0.5f, 0.5f, 1.2f ); // A-3F 南西の箱
+	cover(   5.f, 5.f, 10.6f, 1.6f, 0.2f, 1.0f ); // B-3F 南縁の壁
+	cover(  6.2f, 5.f, 13.4f, 0.5f, 0.5f, 1.2f ); // B-3F 北東の箱
+	cover( -11.f, 3.f, 11.0f, 1.6f, 0.2f, 1.0f ); // A-2F の壁
+	cover(  11.f, 3.f, 13.0f, 1.6f, 0.2f, 1.0f ); // B-2F の壁
+	cover(  -9.f, 6.f,  5.0f, 0.5f, 0.5f, 1.0f ); // h6 見張り台の箱
 
 	// --- 敵（ウェイポイント巡回） ---
 	spawn_enemy(
-		Vector( 0.f, 0.5f, 6.f ),
-		{ Vector( -8.f, 0.5f, 6.f ), Vector( 8.f, 0.5f, 6.f ) } );
+		Vector( 0.f, 0.f, 8.f ),
+		{ Vector( -1.f, 0.f, 8.f ), Vector( 1.f, 0.f, 8.f ) } );
 
 	spawn_enemy(
-		Vector( 6.f, 0.5f, 16.f ),
-		{ Vector( 6.f, 0.5f, 16.f ), Vector( 6.f, 0.5f, 2.f ), Vector( -6.f, 0.5f, 2.f ) } );
+		Vector( 0.f, 0.f, 0.f ),
+		{ Vector( 0.f, 0.f, 0.f ), Vector( 0.f, 0.f, 8.f ), Vector( 1.f, 0.f, 8.f ), Vector( 1.f, 0.f, 0.f ) } );
+
+	// 地上→A-2F→A-3F を階段で上って屋上へ向かう敵（階層間コネクタの実証）
+	spawn_enemy(
+		Vector( -11.f, 0.f, 20.f ),
+		{ Vector( -11.f, 0.f, 20.f ), Vector( -5.f, 5.f, 12.f ) } );
+
+	// A-3F ↔ B-3F を橋で往復する敵（ビル間コネクタの実証）
+	spawn_enemy(
+		Vector( -5.f, 5.f, 12.f ),
+		{ Vector( -5.f, 5.f, 12.f ), Vector( 5.f, 5.f, 12.f ) } );
 
 	// 花火（陽動の音源）。生成/破棄はせず使い回す。普段は地下へ退避し無音。
 	firework_ = get_entity_manager()->create_entity();
@@ -205,7 +241,95 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 		sm->radius = 3.5f;
 	}
 
+	// --- 目標収集ゲーム: 要所（地上/各屋上/橋）に黄色い小立方体。取ると +1 で次へ。連続30でクリア ---
+	// 位置は「拾う立方体の中心」。屋上/橋は面より少し上、地上は浮かせて視認しやすくする。
+	target_points_ = {
+		Vector( -14.f, 0.6f,  0.f ),   // 地上（南西）
+		Vector(  -5.f, 5.6f, 12.f ),   // A-3F 屋上
+		Vector(  14.f, 0.6f, 20.f ),   // 地上（北東）
+		Vector(   0.f, 5.6f, 12.f ),   // 橋の上
+		Vector(   5.f, 5.6f, 12.f ),   // B-3F 屋上
+		Vector( -11.f, 3.6f, 12.f ),   // A-2F 屋上
+		Vector(   0.f, 0.6f, -4.f ),   // 地上（南）
+		Vector(  11.f, 3.6f, 12.f ),   // B-2F 屋上
+		Vector(  -8.f, 6.6f,  4.f ),   // 遮蔽 h6 屋上
+		Vector(   0.f, 3.6f, 17.f ),   // 遮蔽 h3 屋上
+		Vector( -14.f, 0.6f, 20.f ),   // 地上（北西）
+		Vector(   8.f, 5.6f,  4.f ),   // 遮蔽 h5 屋上
+	};
+	target_ = get_entity_manager()->create_entity();
+	{
+		auto* t = target_->add_component< TransformComponent >();
+		t->transform.set_identity();
+		t->scale = Vector( 0.5f, 0.5f, 0.5f );   // 0.5m の小立方体
+
+		target_->add_component< RenderComponent >();
+		auto* m = target_->add_component< ModelComponent >();
+		auto* model  = get_graphics_manager()->clone_model( get_graphics_manager()->load_model( "box-1x1x1" ) );
+		auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit_unicolor" ) ); // 単色＋面陰影（ビルと同じ）
+		shader->set_color( "color", Color( 1.f, 0.85f, 0.1f, 1.f ) ); // 黄色
+		model->set_shader_at( 0, shader );
+		m->model = get_graphics_manager()->get_model_handle( model );
+	}
+	place_target();
+
 	build_navmesh();
+}
+
+void EnemyAiTestScene::place_target()
+{
+	if ( ! target_ || target_points_.empty() )
+	{
+		return;
+	}
+	const Vector p = target_points_[ current_target_ % target_points_.size() ];
+	// box-1x1x1 は底面原点。scale 0.5 で高さ 0.5 なので、中心を p に合わせるには底を 0.25 下げる。
+	if ( auto* t = target_->get_component< TransformComponent >() )
+	{
+		t->transform.set_position( Vector( p.x(), p.y() - 0.25f, p.z() ) );
+	}
+}
+
+void EnemyAiTestScene::update_target()
+{
+	if ( ! target_ || target_points_.empty() )
+	{
+		return;
+	}
+	const float dt = get_time_manager()->get_delta_time();
+
+	// 視認性のためゆっくり回転（クリア後も回し続けてよいが、位置は地下へ退避済み）
+	target_spin_ += dt * 1.5f;
+	if ( auto* t = target_->get_component< TransformComponent >() )
+	{
+		core::math::Quaternion q;
+		q.set_yaw_pitch_roll( target_spin_, 0.f, 0.f );
+		t->transform.set_rotation( q );
+	}
+
+	if ( cleared_ )
+	{
+		return;
+	}
+
+	// 収集判定: プレイヤーが目標の中心へ十分近づいたら +1 して次の要所へ
+	const Vector ppos = player_transform_->transform.get_position();
+	const Vector tp   = target_points_[ current_target_ % target_points_.size() ];
+	if ( ( tp - ppos ).length() <= 1.6f )
+	{
+		++score_;
+		if ( score_ >= 30 )
+		{
+			cleared_ = true;
+			if ( auto* t = target_->get_component< TransformComponent >() )
+			{
+				t->transform.set_position( Vector( 0.f, -1000.f, 0.f ) ); // クリア: 目標を隠す
+			}
+			return;
+		}
+		current_target_ = ( current_target_ + 1 ) % target_points_.size();
+		place_target();
+	}
 }
 
 void EnemyAiTestScene::spawn_enemy( const Vector& start, const std::vector< Vector >& waypoints )
@@ -234,6 +358,112 @@ void EnemyAiTestScene::spawn_enemy( const Vector& start, const std::vector< Vect
 	patrol->move_speed = 2.5f;
 
 	enemies_.push_back( e );
+}
+
+core::ecs::Entity* EnemyAiTestScene::spawn_solid_box( const Vector& center, const Vector& half, const Color& color )
+{
+	auto* e = get_entity_manager()->create_entity();
+
+	auto* t = e->add_component< TransformComponent >();
+	t->transform.set_identity();
+	// box-1x1x1 は底面が原点(y∈[0,1])。中心が center に来るよう底を下げて置く。
+	t->transform.set_position( Vector( center.x(), center.y() - half.y(), center.z() ) );
+	t->scale = half * 2.f; // box-1x1x1（1辺1）を 2*half に拡大 → 直方体
+
+	e->add_component< RenderComponent >();
+	auto* m = e->add_component< ModelComponent >();
+	auto* model  = get_graphics_manager()->clone_model( get_graphics_manager()->load_model( "box-1x1x1" ) );
+	auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit_unicolor" ) ); // 単色＋面陰影
+	shader->set_color( "color", color );
+	model->set_shader_at( 0, shader );
+	m->model = get_graphics_manager()->get_model_handle( model );
+
+	// 静的コリジョン。transform を底へ下げたぶん offset で中心を center に戻す。
+	auto* rb = e->add_component< RigidBodyComponent >();
+	rb->shape_type = RigidBodyShapeType::Box;
+	rb->shape_size = half;
+	rb->offset = Vector( 0.f, half.y(), 0.f );
+	rb->mass = 0.f;
+
+	return e;
+}
+
+void EnemyAiTestScene::add_stairs( const Vector& low, const Vector& high, float width, const Color& color )
+{
+	// 見た目/当たり: 低い側→高い側を段状のソリッドボックスで敷く（各段は下端から踏み面まで）。
+	// 上り/下りどちらの向きで呼ばれても正しく積むため、y で低い方(lo)・高い方(hi)に並べ替える。
+	// （並べ替えないと下り呼び出しで段の高さが負になり、箱が反転＝法線裏返りして表示が壊れる）
+	const Vector& lo = ( low.y() <= high.y() ) ? low : high;
+	const Vector& hi = ( low.y() <= high.y() ) ? high : low;
+
+	const float dx = hi.x() - lo.x();
+	const float dz = hi.z() - lo.z();
+	const float H  = hi.y() - lo.y();                 // 常に >= 0
+	const bool  along_x = std::abs( dx ) >= std::abs( dz );
+	const float L   = along_x ? std::abs( dx ) : std::abs( dz );
+	const float sgn = along_x ? ( dx >= 0.f ? 1.f : -1.f ) : ( dz >= 0.f ? 1.f : -1.f );
+	const int   N   = std::max( 4, static_cast< int >( std::round( H / 0.25f ) ) );  // 蹴上げ ~0.25m
+
+	for ( int i = 0; i < N; ++i )
+	{
+		const float tread_h = lo.y() + H * static_cast< float >( i + 1 ) / N;   // その段の踏み面高さ
+		const float t       = ( static_cast< float >( i ) + 0.5f ) / N;         // run 上の中心
+		float cx = lo.x(), cz = lo.z(), hx, hz;
+		if ( along_x ) { cx = lo.x() + sgn * L * t; hx = L / ( 2.f * N ); hz = width * 0.5f; }
+		else           { cz = lo.z() + sgn * L * t; hz = L / ( 2.f * N ); hx = width * 0.5f; }
+		// 底を下端より少し下へ埋めて、屋上/地面の上面との Z ファイティングを避ける。
+		const float bottom = lo.y() - 0.06f;
+		const float cy = ( bottom + tread_h ) * 0.5f;
+		const float hy = ( tread_h - bottom ) * 0.5f;   // 常に > 0（反転しない）
+		spawn_solid_box( Vector( cx, cy, cz ), Vector( hx, hy, hz ), color );
+	}
+
+	// 見た目の階段は lo→hi（縁と縁＝gap）だけを占める。オフメッシュ接続の端点は
+	// その外側（各歩行面の内側）へ inset して置く＝屋上に乗り上げず連結だけ確保する。
+	const float hlen = std::sqrt( dx * dx + dz * dz );
+	const Vector dir = ( hlen > 1e-4f ) ? Vector( dx / hlen, 0.f, dz / hlen ) : Vector( 0.f, 0.f, 1.f );
+	const float inset = 1.0f;
+	const Vector link_lo( lo.x() - dir.x() * inset, lo.y(), lo.z() - dir.z() * inset );
+	const Vector link_hi( hi.x() + dir.x() * inset, hi.y(), hi.z() + dir.z() * inset );
+	nav_links_.push_back( { link_lo, link_hi, 0.8f, true } );
+}
+
+void EnemyAiTestScene::add_bridge( const Vector& a, const Vector& b, float width, const Color& color )
+{
+	// 見た目/当たり: a→b（屋上の縁と縁＝gap）だけを跨ぐ薄い水平スラブ。屋上には乗せない。
+	const float dx = b.x() - a.x();
+	const float dz = b.z() - a.z();
+	const bool  along_x = std::abs( dx ) >= std::abs( dz );
+	const float L  = along_x ? std::abs( dx ) : std::abs( dz );
+	const float cx = ( a.x() + b.x() ) * 0.5f;
+	const float cz = ( a.z() + b.z() ) * 0.5f;
+	const float hy = 0.15f;
+	const float hx = along_x ? L * 0.5f : width * 0.5f;
+	const float hz = along_x ? width * 0.5f : L * 0.5f;
+	// 上面を屋上より少し上（+0.04）にして Z ファイティングを避ける。
+	const float top = a.y() + 0.04f;
+	spawn_solid_box( Vector( cx, top - hy, cz ), Vector( hx, hy, hz ), color );
+
+	// 手すり（両脇の低い壁）。橋の縁に沿って立て、落下防止＋視線を部分的に遮る（当たり＋LOS 遮蔽）。
+	const float rail_h = 0.5f, rail_t = 0.07f;
+	if ( along_x )
+	{
+		spawn_solid_box( Vector( cx, a.y() + rail_h * 0.5f, cz + width * 0.5f ), Vector( hx, rail_h * 0.5f, rail_t ), color );
+		spawn_solid_box( Vector( cx, a.y() + rail_h * 0.5f, cz - width * 0.5f ), Vector( hx, rail_h * 0.5f, rail_t ), color );
+	}
+	else
+	{
+		spawn_solid_box( Vector( cx + width * 0.5f, a.y() + rail_h * 0.5f, cz ), Vector( rail_t, rail_h * 0.5f, hz ), color );
+		spawn_solid_box( Vector( cx - width * 0.5f, a.y() + rail_h * 0.5f, cz ), Vector( rail_t, rail_h * 0.5f, hz ), color );
+	}
+
+	// オフメッシュ接続の端点は縁の外側（各屋上の内側）へ inset して置く＝屋上に乗せず連結を確保。
+	const float hlen = std::sqrt( dx * dx + dz * dz );
+	const Vector dir = ( hlen > 1e-4f ) ? Vector( dx / hlen, 0.f, dz / hlen ) : Vector( 1.f, 0.f, 0.f );
+	const float inset = 1.0f;
+	const Vector link_a( a.x() - dir.x() * inset, a.y(), a.z() - dir.z() * inset );
+	const Vector link_b( b.x() + dir.x() * inset, b.y(), b.z() + dir.z() * inset );
+	nav_links_.push_back( { link_a, link_b, 0.9f, true } );
 }
 
 void EnemyAiTestScene::build_navmesh()
@@ -275,12 +505,19 @@ void EnemyAiTestScene::build_navmesh()
 		add_tri( b3, t3, t0 ); add_tri( b3, t0, b0 );  // 側面 -X
 		add_tri( t0, t2, t1 ); add_tri( t0, t3, t2 );  // 上面 +Y
 	};
-	for ( const auto& p : building_footprints_ )
+	for ( const auto& o : obstacles_ )
 	{
-		add_box( p.x(), p.z(), 2.f, 2.f, 5.f );
+		add_box( o.center.x(), o.center.z(), o.half.x(), o.half.z(), o.center.y() + o.half.y() );
 	}
 
 	navmesh_ = std::make_unique< core::nav::NavMesh >();
+
+	// コネクタ（階段/橋）のオフメッシュ接続で島（地上・各屋上）を橋渡しする。nav_links_ は
+	// add_stairs / add_bridge が ctor で格納済み。傾斜面を navmesh に焼くとエロージョン/二重床で
+	// 分断されるため、Detour のオフメッシュ接続（島を繋ぐ標準機能）で確実に連結する。
+	// リンク端点はエロージョン後の歩行可能面の内側に置くこと（屋上端に置くと降下時に届かない）。
+	navmesh_->set_off_mesh_links( nav_links_ );
+
 	core::nav::NavMeshBuildConfig cfg;
 	cfg.agent_radius = 0.5f;
 	navmesh_->build( verts.data(), static_cast< int >( verts.size() / 3 ), tris.data(), static_cast< int >( tris.size() / 3 ), cfg );
@@ -312,6 +549,7 @@ void EnemyAiTestScene::update()
 	update_firework();
 	update_smoke();
 	try_neutralize();
+	update_target();
 
 	get_entity_manager()->update();
 
@@ -371,6 +609,14 @@ void EnemyAiTestScene::check_caught()
 	}
 
 	caught_flash_ = 2.0f;
+
+	// 捕まると連続ポイントはリセットし、最初の要所からやり直し（クリア後は据え置き）
+	if ( ! cleared_ )
+	{
+		score_ = 0;
+		current_target_ = 0;
+		place_target();
+	}
 }
 
 void EnemyAiTestScene::teleport_player( const Vector& feet )
@@ -639,6 +885,18 @@ void EnemyAiTestScene::draw_debug()
 		// 敵の体と扇をつなぐ縦線（足元→目の高さ）。錐の原点が敵だと分かるように。
 		dd->drawLine( apex, pos + Vector( 0.f, perception->eye_height, 0.f ), col );
 
+		// 正面マーカ（白い矢印＝鼻）。箱のどちらが前かを一目で分かるように前方へ突き出す。
+		// 状態色（黄/橙/赤/灰）と区別するため固定の白にする。
+		{
+			const core::Vector nose_col( 1.f, 1.f, 1.f );
+			const Vector chest = pos + Vector( 0.f, 0.6f, 0.f );  // 箱の胸の高さ
+			const Vector tip   = chest + forward * 1.2f;          // 前方へ伸ばす
+			const Vector side( forward.z(), 0.f, -forward.x() );  // forward の水平右手
+			dd->drawLine( chest, tip, nose_col );
+			dd->drawLine( tip, tip - forward * 0.35f + side * 0.28f, nose_col );  // 矢じり
+			dd->drawLine( tip, tip - forward * 0.35f - side * 0.28f, nose_col );
+		}
+
 		// 可聴半径（薄い円・床）。聴覚の届く範囲。
 		{
 			const core::Vector hear_col( 0.30f, 0.30f, 0.38f );
@@ -738,20 +996,19 @@ void EnemyAiTestScene::draw_debug()
 		}
 	}
 
-	// 障害物ビルのワイヤーフレーム（グレー）＝当たり判定・navmesh の穴と一致
+	// オフメッシュ接続（水色）＝地上↔屋上の橋渡し。敵はここを 3D で渡って登る。
 	{
-		const core::Vector wall_col( 0.6f, 0.6f, 0.65f );
-		const float hx = 2.f, hz = 2.f, y0 = 0.05f, y1 = 5.f;
-		for ( const auto& c : building_footprints_ )
+		const core::Vector link_col( 0.2f, 0.8f, 1.0f );
+		for ( const auto& lk : nav_links_ )
 		{
-			const float x0 = c.x() - hx, x1 = c.x() + hx, z0 = c.z() - hz, z1 = c.z() + hz;
-			const Vector b00( x0, y0, z0 ), b10( x1, y0, z0 ), b11( x1, y0, z1 ), b01( x0, y0, z1 );
-			const Vector t00( x0, y1, z0 ), t10( x1, y1, z0 ), t11( x1, y1, z1 ), t01( x0, y1, z1 );
-			dd->drawLine( b00, b10, wall_col ); dd->drawLine( b10, b11, wall_col ); dd->drawLine( b11, b01, wall_col ); dd->drawLine( b01, b00, wall_col ); // 底
-			dd->drawLine( t00, t10, wall_col ); dd->drawLine( t10, t11, wall_col ); dd->drawLine( t11, t01, wall_col ); dd->drawLine( t01, t00, wall_col ); // 天
-			dd->drawLine( b00, t00, wall_col ); dd->drawLine( b10, t10, wall_col ); dd->drawLine( b11, t11, wall_col ); dd->drawLine( b01, t01, wall_col ); // 柱
+			const core::Vector a( lk.start.x(), lk.start.y(), lk.start.z() );
+			const core::Vector b( lk.end.x(),   lk.end.y(),   lk.end.z() );
+			dd->drawLine( a, b, link_col );
+			dd->drawLine( a, a + core::Vector( 0, 0.5f, 0 ), link_col );  // 端点マーカ
+			dd->drawLine( b, b + core::Vector( 0, 0.5f, 0 ), link_col );
 		}
 	}
+
 }
 
 void EnemyAiTestScene::render()
@@ -763,11 +1020,23 @@ void EnemyAiTestScene::render()
 
 	std::stringstream ss;
 	ss << "Enemy AI Test  FPS: " << get_main_loop()->get_last_fps() << "\n";
+	if ( cleared_ )
+	{
+		ss << "*** GAME CLEAR! 30 collected in a row ***\n";
+	}
+	else
+	{
+		ss << "SCORE: " << score_ << " / 30   (get the spinning yellow cube; caught = reset)\n";
+	}
 	if ( caught_flash_ > 0.f )
 	{
-		ss << "*** CAUGHT! sent back to start ***\n";
+		ss << "*** CAUGHT! streak reset, sent back to start ***\n";
 	}
-	ss << "WASD move, C: run, Q: firework, E: smoke, Z: neutralize / pick up body / drop.\n";
+	ss << "WASD move, C: run, Space: jump / hold in air to fly, Q: firework, E: smoke, Z: neutralize/carry.\n";
+	if ( fps_player_ )
+	{
+		ss << "jet fuel: " << static_cast< int >( fps_player_->fly_fuel * 100.f ) << "%\n";
+	}
 	if ( carried_ )
 	{
 		ss << "*** carrying a body (Z to drop) ***\n";

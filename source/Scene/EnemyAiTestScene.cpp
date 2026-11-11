@@ -37,8 +37,10 @@
 #include <core/physics/PhysicsManager.h>
 #include <core/math/Quaternion.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
+#include <core/sound/SoundManager.h>
 
 #include <game/MainLoop.h>
+#include <core/sound/Sound.h>
 
 #include <imgui.h>
 
@@ -93,6 +95,31 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main, StageKind kind )
 
 	// Bullet デバッグ描画（LOS レイの遮蔽やコーン可視化に使う）
 	get_physics_manager()->set_debug_drawer( get_bullet_debug_draw() );
+
+	// --- サウンド（仮）: 既存の media/sound, media/music から流用して割り当てる。
+	// 現バックエンド(PortAudio)は 3D/ピッチ/パンが no-op なので、すべて位置なしで鳴らす。
+	// load は事前ロード（play_sound は既ロード名を鳴らすだけ）。name!=file 形式で意味名に読み替える。
+	{
+		auto* sm = get_sound_manager();
+		sm->load( "jump" );                       // ジャンプ
+		sm->load( "land" );                       // 着地
+		sm->load( "hit",        "damage-1" );     // 被弾・落下ダメージ
+		sm->load( "down",       "dead" );         // やられ/捕捉
+		sm->load_3d_sound( "detected", "robot-found" ); // 発見（見つけた敵の位置＝方向が分かる）
+		sm->load( "umbrella",   "umbrella-get" ); // 傘を開く
+		// 位置のある音は 3D（方向＋距離）でロード。リスナー＝プレイヤーの目。
+		sm->load_3d_sound( "firework",   "rocket-burst" ); // 花火（陽動・投擲地点）
+		sm->load_3d_sound( "smoke",      "balloon-burst" );// 煙玉（投擲地点）
+		sm->load_3d_sound( "neutralize", "switch-off" );   // 無力化（対象の敵の位置）
+		sm->load( "pickup",     "medal-get" );    // 目標収集
+		sm->load( "clear",      "fin" );          // クリア
+		sm->load_3d_sound( "beacon", "balloon" ); // 3D 確認用ビーコン（ループ）
+		// BGM（雨＝静かな潜入アンビエンス）をループ再生
+		if ( auto* bgm = sm->load_music( "bgm", "rain" ) )
+		{
+			bgm->play( true );
+		}
+	}
 
 	// System を追加（実行順が重要: 対象収集 → 知覚 → 警戒 → 移動 → 物理 → 描画）
 	get_entity_manager()->add_system< core::ecs::PhysicsSystem >( 5, get_physics_manager() );
@@ -479,12 +506,14 @@ void EnemyAiTestScene::update_target()
 	if ( ( tp - ppos ).length() <= 1.6f )
 	{
 		++score_;
+		play_sound( "pickup" );   // 目標収集
 
 		// 拾い物で消費アイテムを補給（doc/動詞とゲームシステム.md 7章「安全な探索＝補給」）
 		umbrella_count_ = ( std::min )( umbrella_max_, umbrella_count_ + 1 );
 		if ( score_ >= 30 )
 		{
 			cleared_ = true;
+			play_sound( "clear" );   // クリア
 			if ( auto* t = target_->get_component< TransformComponent >() )
 			{
 				t->transform.set_position( Vector( 0.f, -1000.f, 0.f ) ); // クリア: 目標を隠す
@@ -740,11 +769,29 @@ void EnemyAiTestScene::update()
 	get_graphics_manager()->update();
 	get_graphics_manager()->clear_debug_bullet();
 
+	// 3D サウンドのリスナー＝プレイヤーの目。位置・向きを毎フレーム更新して commit。
+	if ( player_transform_ && player_camera_ )
+	{
+		const Vector eye = player_transform_->transform.get_position() + player_camera_->eye_offset;
+		const Vector fwd = player_transform_->transform.forward();
+		const Vector up  = player_transform_->transform.up();
+		auto* sm = get_sound_manager();
+		sm->set_listener_position( core::Vector3( eye.x(), eye.y(), eye.z() ) );
+		sm->set_listener_orientation( core::Vector3( fwd.x(), fwd.y(), fwd.z() ), core::Vector3( up.x(), up.y(), up.z() ) );
+		sm->commit();
+	}
+
 	// プレイヤーの発音（R2/ダッシュ＝走行音）。敵は聴覚で拾う。
 	if ( auto* pv = player_->get_component< blue_sky::ecs::PerceivableComponent >() )
 	{
 		pv->emitting_noise = get_input()->press( core::input::Button::R2 );
 		pv->noise_loudness = 1.5f;
+	}
+
+	// ジャンプ音（接地中に JUMP が押された瞬間。is_grounded は前フレーム値で十分）
+	if ( fps_player_ && fps_player_->is_grounded && get_input()->push( core::input::Button::JUMP ) )
+	{
+		play_sound( "jump" );
 	}
 
 	update_firework();
@@ -820,6 +867,9 @@ void EnemyAiTestScene::respawn_player()
 	}
 	umbrella_count_ = umbrella_start_;
 	fall_flash_     = 0.f;
+	any_alarmed_prev_ = false;   // 復帰後に再度発見されたらまたスティングが鳴るように
+
+	play_sound( "down" );        // やられ/捕捉
 
 	// 敵の警戒を解く（全員 無警戒へ）
 	for ( auto* e : enemies_ )
@@ -849,6 +899,31 @@ void EnemyAiTestScene::update_combat()
 	const Vector ppos = player_transform_->transform.get_position();
 
 	enemy_fire_cd_.resize( enemies_.size(), 0.f );
+
+	// 発見スティング: 誰も警報でない状態から誰かが Alarmed になった瞬間に一度だけ、
+	// その敵の位置から鳴らす（＝どっちから見つかったか方向で分かる）。
+	{
+		core::ecs::Entity* alarmer = nullptr;
+		for ( auto* e : enemies_ )
+		{
+			auto* a = e->get_component< blue_sky::ecs::AlertComponent >();
+			if ( a && a->state == ai::AlertState::Alarmed ) { alarmer = e; break; }
+		}
+		const bool any_alarmed = ( alarmer != nullptr );
+		if ( any_alarmed && ! any_alarmed_prev_ )
+		{
+			auto* at = alarmer->get_component< TransformComponent >();
+			if ( at )
+			{
+				play_sound_3d( "detected", at->transform.get_position() + Vector( 0.f, 1.0f, 0.f ) );
+			}
+			else
+			{
+				play_sound( "detected" );
+			}
+		}
+		any_alarmed_prev_ = any_alarmed;
+	}
 
 	// 現在プレイヤーを視認している警戒中(Alarmed)かつ射程内の敵が、一定間隔で射撃する。
 	// 狙っている間はレーザー線を描き、発砲の瞬間に被弾（複数体で加算）。
@@ -886,6 +961,7 @@ void EnemyAiTestScene::update_combat()
 			enemy_fire_cd_[ i ] = combat_fire_interval_;
 			player_hp_ = ( std::max )( 0.f, player_hp_ - combat_shot_damage_ );
 			hit_flash_ = 0.35f;
+			play_sound( "hit" );   // 被弾
 			if ( player_hp_ <= 0.f )
 			{
 				respawn_player();   // やられ → スポーンへ
@@ -929,6 +1005,7 @@ void EnemyAiTestScene::update_umbrella()
 		{
 			--umbrella_count_;
 			fps_player_->umbrella_open = true;
+			play_sound( "umbrella" );   // 傘を開く
 		}
 	}
 	else
@@ -949,8 +1026,15 @@ void EnemyAiTestScene::update_fall_damage()
 		fall_flash_ -= get_time_manager()->get_delta_time();
 	}
 
-	// 傘を開いていれば終端速度（3m/s）で着地するので、必ず無傷側に入る。
 	const float impact = fps_player_->landing_impact;
+
+	// 着地音: 実際に落ちてからの着地だけ（階段の小さな段差では鳴らさないよう閾値）。
+	if ( impact > 3.f )
+	{
+		play_sound( "land" );
+	}
+
+	// 傘を開いていれば終端速度（3m/s）で着地するので、必ず無傷側に入る。
 	if ( impact <= fall_safe_speed_ )
 	{
 		return;
@@ -960,10 +1044,22 @@ void EnemyAiTestScene::update_fall_damage()
 	const float t = ( impact - fall_safe_speed_ ) / ( std::max )( 0.01f, fall_lethal_speed_ - fall_safe_speed_ );
 	player_hp_  = ( std::max )( 0.f, player_hp_ - player_hp_max_ * ( std::min )( t, 1.f ) );
 	fall_flash_ = 0.5f;
+	play_sound( "hit" );   // 落下ダメージ
 
 	if ( player_hp_ <= 0.f )
 	{
-		respawn_player();
+		respawn_player();   // ここで "down" が鳴る
+	}
+}
+
+void EnemyAiTestScene::play_sound_3d( const char* sound_name, const Vector& pos )
+{
+	// 事前ロード済みの 3D 音を、ワールド座標を与えてワンショット再生（方向＋距離）。
+	// ハンドルから引き、引けなければ鳴らさない（理由は Scene::resolve が名前ごとに 1 回だけログに出す）
+	if ( auto* s = resolve( get_sound_manager()->get_sound_handle( sound_name ), sound_name ) )
+	{
+		s->set_3d_position( pos.x(), pos.y(), pos.z() );
+		s->play( false );
 	}
 }
 
@@ -1007,6 +1103,7 @@ void EnemyAiTestScene::update_firework()
 		t->transform.set_position( land );
 		pv->emitting_noise = true;
 		firework_timer_    = 3.0f;
+		play_sound_3d( "firework", land );   // 花火（陽動・投擲地点で鳴る）
 	}
 
 	// 発音タイマ。尽きたら無音にして地下へ退避（視界にも入らないように）。
@@ -1038,6 +1135,7 @@ void EnemyAiTestScene::update_smoke()
 		land.set_y( 1.2f ); // 目の高さ付近を覆う
 		t->transform.set_position( land );
 		smoke_timer_ = 5.0f;
+		play_sound_3d( "smoke", land );   // 煙玉（投擲地点で鳴る）
 	}
 
 	// 有効タイマ。尽きたら地下へ退避（視線を遮らないように）。
@@ -1159,6 +1257,10 @@ void EnemyAiTestScene::try_neutralize()
 	auto* perc  = best->get_component< blue_sky::ecs::PerceptionComponent >();
 	auto* alert = best->get_component< blue_sky::ecs::AlertComponent >();
 	perc->downed = true;
+	if ( auto* bt = best->get_component< TransformComponent >() )
+	{
+		play_sound_3d( "neutralize", bt->transform.get_position() );   // 無力化（対象の敵の位置で鳴る）
+	}
 	if ( alert )
 	{
 		alert->awareness = 0.f;
@@ -1596,6 +1698,31 @@ void EnemyAiTestScene::render()
 	{
 		ImGui::Checkbox( "alarm propagation", & s->enabled );
 		ImGui::SliderFloat( "propagation radius", & s->radius, 2.f, 30.f );
+	}
+
+	// 3D サウンド確認: ON で今の位置にループ音のビーコンを固定。離れて左右に回ると
+	// 左右のパンと距離減衰が体感できる（正面固定のワンショットでは分かりづらいため）。
+	if ( ImGui::Checkbox( "3D sound beacon (loop) @ me", & beacon_on_ ) )
+	{
+		if ( auto* s = resolve( get_sound_manager()->get_sound_handle( "beacon" ), "beacon" ) )
+		{
+			if ( beacon_on_ )
+			{
+				beacon_pos_ = player_transform_->transform.get_position();
+				s->set_3d_position( beacon_pos_.x(), beacon_pos_.y(), beacon_pos_.z() );
+				s->play( true );   // ループ
+			}
+			else
+			{
+				s->stop();
+			}
+		}
+	}
+	if ( beacon_on_ )
+	{
+		ImGui::Text( "beacon @ (%.1f, %.1f, %.1f)  dist=%.1f m",
+			beacon_pos_.x(), beacon_pos_.y(), beacon_pos_.z(),
+			( beacon_pos_ - player_transform_->transform.get_position() ).length() );
 	}
 	ImGui::End();
 }

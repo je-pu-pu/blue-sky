@@ -168,6 +168,7 @@
     <ClCompile Include="test\ecs\CollisionEventSystemTest.cpp" />
     <ClCompile Include="test\physics\EntityTagTest.cpp" />
     <ClCompile Include="test\sound\SampleRateStepperTest.cpp" />
+    <ClCompile Include="test\sound\Spatial3dGainTest.cpp" />
     <ClCompile Include="test\sound\SoundManagerTest.cpp" />
     <ClCompile Include="test\math\SkinningAnimationSetTest.cpp" />
     <ClCompile Include="test\ecs\MoveToTargetSystemTest.cpp" />

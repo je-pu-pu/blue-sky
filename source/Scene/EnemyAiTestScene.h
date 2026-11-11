@@ -116,6 +116,7 @@ private:
 	float hit_flash_          = 0.f;    ///< 被弾演出の残り (s)
 	std::vector< float >              enemy_fire_cd_;  ///< 各敵の発砲クールダウン（enemies_ と同順）
 	std::vector< core::math::Vector > combat_tracers_; ///< 狙ってくる敵の目の位置（レーザー線描画用）
+	bool  any_alarmed_prev_ = false;    ///< 前フレームに Alarmed の敵がいたか（発見スティングの立ち上がり検出）
 	void  respawn_player();             ///< スポーンへ戻す＋HP/警戒/スコアをリセット
 	void  update_combat();              ///< 視認中の Alarmed 敵が一定間隔で射撃、HP 0 でやられ
 
@@ -130,6 +131,13 @@ private:
 	int   umbrella_max_      = 5;       ///< 所持上限（拾い物で補給）
 	void  update_umbrella();            ///< 傘の開閉入力と所持数を処理
 	void  update_fall_damage();         ///< 着地衝撃 (landing_impact) を HP ダメージへ変換
+
+	/// 事前ロード済みの 3D 音を、ワールド座標を与えてワンショット再生（方向＋距離）。
+	void play_sound_3d( const char* sound_name, const core::math::Vector& pos );
+
+	// --- 3D サウンド確認用ビーコン: 自分の位置にループ音を落とし、離れて回ると左右/距離が分かる ---
+	bool               beacon_on_ = false;
+	core::math::Vector beacon_pos_;
 
 	void update_firework();             ///< 花火の投擲入力と発音タイマを処理
 	void update_smoke();                ///< 煙玉の投擲入力と有効タイマを処理

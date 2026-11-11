@@ -1,8 +1,9 @@
-"""ステージの前後の文と背景の古い形式（.intro・.outro）を TOML（.intro.toml・.outro.toml）に変える
+"""ステージの前後の文と背景の古い形式（.intro・.outro）を、ステージの TOML（.stage.toml）の [intro]・[outro] に変える
 
 使い方:
     python tools/stage_convert/convert_story_text.py <.intro・.outro のファイル か フォルダ>...
-    （フォルダなら中の *.intro・*.outro を全部。書き出すのは同じ場所の <名前>.toml）
+    （フォルダなら中の *.intro・*.outro を全部。書き足すのは同じ場所の <ステージ>.stage.toml の終わり。
+      古い .stage は先に convert_stage.py で .stage.toml にしておく。もう [intro]・[outro] があるファイルには書かない）
 
     --check   書き出さずに、変換と読み直しの確かめだけをする
 
@@ -224,10 +225,11 @@ def render_body(body):
 
 
 def render_file(path, head, head_comments, layers, text_table, text_comments, tail_comments):
-    kind = "前" if path.suffix == ".intro" else "後"
-    stem = path.stem
-    out = [f"# {stem} のステージの{kind}の文と背景（tools/stage_convert/convert_story_text.py で {path.name} から変換した）",
-           "format = 1"]
+    """ステージの TOML に書き足す [intro]・[outro] の表（table は intro か outro）"""
+    table = path.suffix[1:]
+    kind = "前" if table == "intro" else "後"
+    out = [f"# ステージの{kind}の文と背景（doc/ステージ形式の設計.md 7 章。tools/stage_convert/convert_story_text.py で {path.name} から変換した）",
+           f"[{table}]"]
     out += head_comments
     for key in ("sound", "bgm", "next_scene", "next_stage"):
         if key in head:
@@ -237,7 +239,7 @@ def render_file(path, head, head_comments, layers, text_table, text_comments, ta
     for layer in layers:
         out.append("")
         out += layer["comments"]
-        out.append("[[layer]]")
+        out.append(f"[[{table}.layer]]")
         out.append(f"image = {render(layer['image'])}")
         if "src_rect" in layer:
             out.append(f"src_rect = {render(layer['src_rect'])}")
@@ -249,7 +251,7 @@ def render_file(path, head, head_comments, layers, text_table, text_comments, ta
     if text_table or text_comments:
         out.append("")
         out += text_comments
-        out.append("[text]")
+        out.append(f"[{table}.text]")
         for key in ("color", "border_color"):
             if key in text_table:
                 out.append(f"{key} = 0x{text_table[key]:08X}")
@@ -279,15 +281,17 @@ def as_plain(x):
     return x
 
 
-def check(path, toml, content):
-    doc = tomllib.loads(toml)
-    got = {
-        "head": {k: doc[k] for k in ("sound", "bgm", "next_scene", "next_stage") if k in doc},
-        "layers": doc.get("layer", []),
-        "text": doc.get("text", {}),
-    }
+def check(path, stage_toml, content):
+    """書き足した後のステージの TOML を読み直し、[intro]・[outro] が変換した中身と同じか確かめる"""
+    doc = tomllib.loads(stage_toml)
     if doc.get("format") != 1:
-        raise SystemExit(f"{path}: format が 1 でない")
+        raise SystemExit(f"{path}: 書き足す先のステージの format が 1 でない")
+    table = doc[path.suffix[1:]]
+    got = {
+        "head": {k: table[k] for k in ("sound", "bgm", "next_scene", "next_stage") if k in table},
+        "layers": table.get("layer", []),
+        "text": table.get("text", {}),
+    }
     a = json.dumps(as_plain(content), ensure_ascii=False, sort_keys=True)
     b = json.dumps(as_plain(got), ensure_ascii=False, sort_keys=True)
     if a != b:
@@ -308,15 +312,25 @@ def main(argv):
         p = pathlib.Path(t)
         files.extend(sorted(list(p.glob("*.intro")) + list(p.glob("*.outro"))) if p.is_dir() else [p])
 
+    stages = {}  # 書き足す先のステージの TOML（intro と outro を同じファイルに順に足す）
     all_report = []
     for f in files:
         toml, report, content, encoding = convert(f)
-        layers, body = check(f, toml, content)
-        out = f.with_name(f.name + ".toml")
-        if not only_check:
-            out.write_bytes(toml.encode("utf-8"))
-        print(f"{f.name}（{encoding}）→ {out.name} : 重なり {layers}・本文 {body} 文字・報告 {len(report)}" + ("（確かめだけ）" if only_check else ""))
+        out = f.with_name(f.stem + ".stage.toml")
+        if out not in stages:
+            if not out.exists():
+                raise SystemExit(f"{f}: 書き足す先の {out.name} が無い（古い .stage は先に convert_stage.py で変換する）")
+            stages[out] = out.read_bytes().decode("utf-8-sig").replace("\r\n", "\n")
+        if f.suffix[1:] in tomllib.loads(stages[out]):
+            raise SystemExit(f"{f}: {out.name} にはもう [{f.suffix[1:]}] がある（書き足さない）")
+        stages[out] = stages[out].rstrip("\n") + "\n\n" + toml
+        layers, body = check(f, stages[out], content)
+        print(f"{f.name}（{encoding}）→ {out.name} の [{f.suffix[1:]}] : 重なり {layers}・本文 {body} 文字・報告 {len(report)}" + ("（確かめだけ）" if only_check else ""))
         all_report.extend(report)
+
+    if not only_check:
+        for out, text in stages.items():
+            out.write_bytes(text.encode("utf-8"))
 
     if all_report:
         print()

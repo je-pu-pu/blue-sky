@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="blue_sky\dev\DevOptions.cpp">
+      <Filter>blue_sky\dev</Filter>
+    </ClCompile>
     <ClCompile Include="blue_sky\ecs\system\PhysicsSyncSystem.cpp">
       <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
@@ -467,6 +470,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="blue_sky\dev\DevOptions.h">
+      <Filter>blue_sky\dev</Filter>
+    </ClInclude>
     <ClInclude Include="blue_sky\ecs\component\PhysicsBodyComponent.h">
       <Filter>blue_sky\ecs\component</Filter>
     </ClInclude>
@@ -1521,6 +1527,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="blue_sky\dev">
+      <UniqueIdentifier>{83d0482a-65cc-4d38-bd04-c4bf1f8f08d3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="blue_sky\stage">
       <UniqueIdentifier>{c4bcdf4f-eca7-45b2-9b1f-1865b14e4a82}</UniqueIdentifier>
     </Filter>

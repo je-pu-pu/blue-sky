@@ -95,6 +95,7 @@ Type* require_not_nil( Type* p, const char* function_name )
 //■コンストラクタ
 GameMain::GameMain( App& app )
 	: app_( app )
+	, dev_options_( dev::DevOptions::read_from_environment() )
 	, scene_manager_( std::make_unique< SceneManager >() )
 	, entity_manager_( std::make_unique< core::ecs::EntityManager >() )
 	, is_display_fps_( false )
@@ -241,15 +242,10 @@ GameMain::GameMain( App& app )
 
 	// 開発用 : BLUE_SKY_DEBUG_FIXED_STEP_MSEC="ミリ秒" を設定すると、1 フレームの経過時間をいつもその値にする
 	// （本当の時間によらず、物理・紙の模様・線の揺れがフレームの数だけで決まる。画面を撮り比べるときに、exe の速さの違いで揺れないように）
+	if ( const unsigned long msec = dev_options_.fixed_step_msec; msec > 0 )
 	{
-		char buffer[ 32 ] = { };
-		unsigned long msec = 0;
-
-		if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_FIXED_STEP_MSEC", buffer, sizeof( buffer ) ) > 0 && sscanf_s( buffer, "%lu", & msec ) == 1 && msec > 0 )
-		{
-			main_loop_->set_fixed_elapsed_msec( msec );
-			debug_log( "[Debug] BLUE_SKY_DEBUG_FIXED_STEP_MSEC : 1 フレームの経過時間をいつも " + std::to_string( msec ) + " ミリ秒にします" );
-		}
+		main_loop_->set_fixed_elapsed_msec( msec );
+		debug_log( "[Debug] BLUE_SKY_DEBUG_FIXED_STEP_MSEC : 1 フレームの経過時間をいつも " + std::to_string( msec ) + " ミリ秒にします" );
 	}
 
 	// ゲーム設定 : ユーザーの設定ファイルから読み、表示系以外を反映する（表示系は App / Direct3D の初期化で、同じ登録を使って反映済み）
@@ -711,26 +707,13 @@ void GameMain::apply_display_settings()
  */
 void GameMain::setup_frame_capture()
 {
-	char buffer[ 256 ] = { };
-
-	if ( GetEnvironmentVariableA( "BLUE_SKY_CAPTURE_FRAMES", buffer, sizeof( buffer ) ) == 0 )
+	if ( dev_options_.capture_frames.empty() )
 	{
 		return;
 	}
 
-	std::stringstream ss( buffer );
-	string_t item;
-
-	while ( std::getline( ss, item, ',' ) )
-	{
-		if ( ! item.empty() )
-		{
-			capture_frames_.push_back( std::atoi( item.c_str() ) );
-		}
-	}
-
-	char directory[ MAX_PATH ] = { };
-	capture_directory_ = GetEnvironmentVariableA( "BLUE_SKY_CAPTURE_DIR", directory, sizeof( directory ) ) ? directory : "dump";
+	capture_frames_ = dev_options_.capture_frames;
+	capture_directory_ = dev_options_.capture_directory;
 	CreateDirectoryA( capture_directory_.c_str(), nullptr );
 }
 
@@ -740,18 +723,14 @@ void GameMain::capture_frame_if_requested()
 
 	// 開発用 : BLUE_SKY_DEBUG_DISPLAY_CHANGE（"幅x高さ"）を設定すると、120 フレーム目に解像度を変えて「適用」する
 	// （排他フルスクリーン中の解像度の変更を、オプション画面を操作せずに確かめるため。設定ファイルを汚さないよう BLUE_SKY_SETTINGS_DIR と一緒に使う）
-	if ( frame_count_ == 120 )
+	if ( frame_count_ == 120 && dev_options_.display_change_width > 0 && dev_options_.display_change_height > 0 )
 	{
-		char size[ 32 ] = { };
-		int w = 0, h = 0;
+		const int w = dev_options_.display_change_width, h = dev_options_.display_change_height;
 
-		if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_DISPLAY_CHANGE", size, sizeof( size ) ) > 0 && sscanf_s( size, "%dx%d", & w, & h ) == 2 )
-		{
-			debug_log( "[Debug] 解像度を変えて適用します : " + std::to_string( w ) + "x" + std::to_string( h ) );
-			settings_->set( game_settings::SCREEN_WIDTH, w );
-			settings_->set( game_settings::SCREEN_HEIGHT, h );
-			settings_->apply_deferred();
-		}
+		debug_log( "[Debug] 解像度を変えて適用します : " + std::to_string( w ) + "x" + std::to_string( h ) );
+		settings_->set( game_settings::SCREEN_WIDTH, w );
+		settings_->set( game_settings::SCREEN_HEIGHT, h );
+		settings_->apply_deferred();
 	}
 
 	if ( std::find( capture_frames_.begin(), capture_frames_.end(), frame_count_ ) == capture_frames_.end() )
@@ -766,7 +745,7 @@ void GameMain::capture_frame_if_requested()
 	const bool ok = direct_3d_->save_back_buffer_to_png( path.c_str() );
 
 	// 文字のアトラスも保存する（BLUE_SKY_CAPTURE_GLYPH_ATLAS が設定されているとき。文字の描画の不具合を調べる）
-	if ( GetEnvironmentVariableA( "BLUE_SKY_CAPTURE_GLYPH_ATLAS", nullptr, 0 ) > 0 )
+	if ( dev_options_.capture_glyph_atlas )
 	{
 		swprintf_s( name, L"/atlas_%04d.png", frame_count_ );
 		graphics_manager_->save_glyph_atlas( ( common::convert_to_wstring( capture_directory_ ) + name ).c_str() );
@@ -861,11 +840,11 @@ void GameMain::flush_resource_releases()
  */
 void GameMain::setup_frame_time_measurement()
 {
-	char buffer[ 64 ] = { };
+	frame_time_first_ = dev_options_.frame_time_first;
+	frame_time_last_ = dev_options_.frame_time_last;
 
-	if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_FRAME_TIME", buffer, sizeof( buffer ) ) == 0 || sscanf_s( buffer, "%d,%d", & frame_time_first_, & frame_time_last_ ) != 2 || frame_time_last_ < frame_time_first_ )
+	if ( frame_time_last_ <= 0 )
 	{
-		frame_time_first_ = frame_time_last_ = 0;
 		return;
 	}
 
@@ -1373,15 +1352,15 @@ void GameMain::setup_scene()
 		string_t start_scene = get_config()->get< string_t >( "debug.start_scene", "debug" );
 
 		// 環境変数でも指定できる（自動操作の確認で設定ファイルを書き換えずに済むように）
-		if ( char scene[ 64 ] = { }; GetEnvironmentVariableA( "BLUE_SKY_START_SCENE", scene, sizeof( scene ) ) )
+		if ( dev_options_.start_scene )
 		{
-			start_scene = scene;
+			start_scene = * dev_options_.start_scene;
 		}
 
 		// ステージも指定できる（game_play はステージ名が必要）
-		if ( char stage[ 64 ] = { }; GetEnvironmentVariableA( "BLUE_SKY_START_STAGE", stage, sizeof( stage ) ) )
+		if ( dev_options_.start_stage )
 		{
-			set_stage_name( stage );
+			set_stage_name( * dev_options_.start_stage );
 		}
 
 		if ( scene_manager_->is_scene_registered( start_scene ) )
@@ -1402,32 +1381,14 @@ void GameMain::setup_scene()
 		pending_start_overlay_ = static_cast< const Config& >( * get_config() ).get< string_t >( "debug.start_overlay", "" );
 
 		// 環境変数でも指定できる（自動操作の確認で設定ファイルを書き換えずに済むように）
-		if ( char overlay[ 64 ] = { }; GetEnvironmentVariableA( "BLUE_SKY_START_OVERLAY", overlay, sizeof( overlay ) ) )
+		if ( dev_options_.start_overlay )
 		{
-			pending_start_overlay_ = overlay;
+			pending_start_overlay_ = * dev_options_.start_overlay;
 		}
 
 		// 開発用 : BLUE_SKY_DEBUG_SCENE_SEQUENCE（"stage_select,game_play:1-1,title" のように「シーン[:ステージ]」を , で並べる）を設定すると、
 		// 150 フレームごとに順にベースシーンを置き換える。シーンを替えて戻ったときにリソースが正しく引けるかを、入力を送らずに確かめるため
-		if ( char sequence[ 256 ] = { }; GetEnvironmentVariableA( "BLUE_SKY_DEBUG_SCENE_SEQUENCE", sequence, sizeof( sequence ) ) )
-		{
-			std::stringstream ss( sequence );
-			string_t item;
-
-			while ( std::getline( ss, item, ',' ) )
-			{
-				if ( item.empty() )
-				{
-					continue;
-				}
-
-				SceneRequest r { SceneRequest::Type::REPLACE_BASE };
-				const auto colon = item.find( ':' );
-				r.name = item.substr( 0, colon );
-				r.stage_name = colon == string_t::npos ? string_t() : item.substr( colon + 1 );
-				debug_scene_sequence_.push_back( r );
-			}
-		}
+		debug_scene_sequence_.assign( dev_options_.scene_sequence.begin(), dev_options_.scene_sequence.end() );
 
 		setup_frame_capture();
 		setup_frame_time_measurement();

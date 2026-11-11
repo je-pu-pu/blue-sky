@@ -159,6 +159,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test\dev\DevOptionsTest.cpp" />
     <ClCompile Include="test\sound\PlaybackRateTest.cpp" />
     <ClCompile Include="test\ecs\PhysicsSyncSystemTest.cpp" />
     <ClCompile Include="test\ecs\CollisionEventSystemTest.cpp" />

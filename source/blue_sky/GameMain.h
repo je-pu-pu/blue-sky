@@ -9,6 +9,7 @@
 #include <type/type.h>
 
 #include <Scene/SceneRequest.h>
+#include <blue_sky/dev/DevOptions.h>
 
 #include <deque>
 #include <unordered_map>
@@ -103,6 +104,7 @@ public:
 
 private:
 	App&									app_;					///< ウィンドウ（App が GameMain を作るときに渡す。以前は App のシングルトンから引いていた）
+	const dev::DevOptions					dev_options_;			///< 開発用の環境変数（起動時に 1 回だけ読む。以前は各所でその場で読んでいた）
 	TimeManager								time_manager_;			///< 時間管理
 
 	std::unique_ptr< Direct3D >				direct_3d_;				///< Direct3D

@@ -109,7 +109,10 @@ get_entity_manager()->add_system< RenderSystem >( 1000, get_graphics_manager(), 
 ### メインゲームループ
 
 - **App** (`blue_sky/App.h`) - ウィンドウ/アプリケーション管理。WinMain が作り、GameMain を持つ（シングルトンではない）
-- **GameMain** (`blue_sky/GameMain.h`) - メインゲームクラス、全サブシステムを統括
+- **GameMain** (`blue_sky/GameMain.h`) - メインゲームクラス、全サブシステムを統括。窓口のまま、中の手順は持ち物の部品に任せる（部品を外に見せる窓口は作らない。doc/GameMainの分割.md）
+  - **SceneStack** (`blue_sky/SceneStack.h`) - ベースとオーバーレイ・切り替えの要求をフレームの区切りで実行（読み込み中の画面・ESC・起動時のオーバーレイ・ステージ名）
+  - **ScriptBindings** (`blue_sky/ScriptBindings.h`) - ゲーム全体の Lua の関数を登録する
+  - **DevOptions**・**DevTools**・**DebugConsole** (`blue_sky/dev/`) - 開発用の環境変数（起動時に 1 回読む）・開発用の機能（フレームの保存・フレームの時間・シーンを順に替える・経過時間の固定）・imgui の窓（F1）
 - エントリポイント: `source/Main.cpp` (WinMain)
 
 ### サブシステムマネージャー
@@ -133,6 +136,7 @@ get_entity_manager()->add_system< RenderSystem >( 1000, get_graphics_manager(), 
 依存は**作り手・組み立ての根から受け取る**。サービスロケーター（以前の `core::Service`）は無い。core 層は GameMain を知らない。
 
 - **組み立ての根**は `GameMain`（と `App`・`Main.cpp`）。マネージャーを作り、使う側に渡す
+- **GameMain の部品**（SceneStack・DevTools）は GameMain の仕事（シーンを作る・片付ける・保存する など）を `Hooks`（std::function の入れ物）で受け取り、GameMain を知らない。テストでは偽物を渡す（例: `test/scene/SceneStackTest.cpp` は Scene のテスト用のコンストラクタで偽のシーンを作る）
 - **シーン**は `Scene( GameMain& )` で受け取り、`Scene::get_*_manager()`・`get_input()`・`get_time_manager()` などの近道で GameMain から得る
 - **ECS のシステム**は必要なもの（物理・入力・時間・描画）をコンストラクタで受け取る。シーンが `add_system< T >( priority, get_physics_manager(), ... )` のように渡す（`add_system` は priority の後の引数をコンストラクタに渡す）
 - **描画を使うロジック**（ECS のシステム・ステージ・UI）は GraphicsManager の全体ではなく、使う分だけの小さな窓口で受け取る : `graphics::ResourceResolver`（ハンドルから引くだけ）・`ResourceLoader`（読む・作る）・`RenderSettings`（空・地面・色・線・紙）・`Canvas2D`（2D と文字）。GraphicsManager が全部実装する。テストの偽物は `test/graphics/FakeGraphics.h`（doc/描画の窓口の分割.md）

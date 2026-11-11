@@ -81,6 +81,7 @@ public:
 	/// 名前のシェーダーのハンドル（無ければ空）・ハンドルから引く（解放済み・空なら nullptr）。シェーダーを長く持つ側はハンドルを持つ
 	ShaderHandle get_shader_handle( const char_t* name ) const { return shader_manager_.get_handle( name ); }
 	Shader* resolve_shader( ShaderHandle h ) const { return h.get(); }
+	ShaderHandle get_shader_handle_of( const Shader* s ) const { return shader_manager_.handle_of( s ); }	///< 管理しているシェーダー（clone_shader の結果など）のハンドル
 	Shader* clone_shader( const Shader* s ) { Shader* s2 = s->clone(); shader_manager_.add( s2 ); return s2; }
 
 	const ShaderManager::ResourceList& get_shader_list() const { return shader_manager_.get_resource_list(); }

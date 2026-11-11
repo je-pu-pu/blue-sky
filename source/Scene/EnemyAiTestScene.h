@@ -3,6 +3,8 @@
 #include "Scene.h"
 #include <core/math/Vector.h>
 #include <core/nav/NavMesh.h>
+#include <core/graphics/Model.h>
+#include <core/graphics/Shader.h>
 #include <memory>
 #include <vector>
 
@@ -41,7 +43,7 @@ public:
 	};
 
 	explicit EnemyAiTestScene( GameMain& game_main, StageKind kind = StageKind::Compact );
-	~EnemyAiTestScene() override = default;
+	~EnemyAiTestScene() override;
 
 	void update() override;
 	void render() override;
@@ -103,6 +105,11 @@ private:
 	void build_navmesh();               ///< 地面＋建物＋コネクタ(nav_links_)から navmesh を焼く
 
 	core::ecs::Entity* carried_ = nullptr;  ///< 運搬中の死体（ダウン敵）。null なら運搬なし
+
+	// 色・外壁違いの箱のために複製したモデルとシェーダー（シーンを壊すときに解放する）
+	std::vector< core::graphics::ModelHandle >  cloned_models_;
+	std::vector< core::graphics::ShaderHandle > cloned_shaders_;
+	void remember_clone( core::graphics::Model* model, core::graphics::Shader* shader );
 
 	void check_caught();                ///< 警戒中の敵に接近されたらスポーンへ戻す
 	void teleport_player( const core::math::Vector& feet ); ///< プレイヤーを剛体ごと足元 feet へ瞬間移動する（速度は消す）

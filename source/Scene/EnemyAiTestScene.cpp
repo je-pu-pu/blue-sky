@@ -213,6 +213,7 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main, StageKind kind )
 		auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit_unicolor" ) ); // 単色＋面陰影（ビルと同じ）
 		shader->set_color( "color", Color( 1.f, 0.85f, 0.1f, 1.f ) ); // 黄色
 		model->set_shader_at( 0, shader );
+		remember_clone( model, shader );
 		m->model = get_graphics_manager()->get_model_handle( model );
 	}
 
@@ -464,6 +465,33 @@ void EnemyAiTestScene::build_stage_large()
 	};
 }
 
+EnemyAiTestScene::~EnemyAiTestScene()
+{
+	// 複製したモデルとシェーダーを解放する（解放はシーンの切り替えの flush_releases。
+	// 以前（元のブランチ）は解放せず、このシーンに入るたびにモデル・シェーダーが約 100 ずつ溜まった）
+	for ( auto h : cloned_shaders_ )
+	{
+		if ( auto* s = get_graphics_manager()->resolve_shader( h ) )
+		{
+			get_graphics_manager()->destroy_shader( s );
+		}
+	}
+
+	for ( auto h : cloned_models_ )
+	{
+		if ( auto* m = get_graphics_manager()->resolve_model( h ) )
+		{
+			get_graphics_manager()->release_model( m );
+		}
+	}
+}
+
+void EnemyAiTestScene::remember_clone( core::graphics::Model* model, core::graphics::Shader* shader )
+{
+	cloned_models_.push_back( get_graphics_manager()->get_model_handle( model ) );
+	cloned_shaders_.push_back( get_graphics_manager()->get_shader_handle_of( shader ) );
+}
+
 void EnemyAiTestScene::place_target()
 {
 	if ( ! target_ || target_points_.empty() )
@@ -544,6 +572,7 @@ void EnemyAiTestScene::spawn_enemy( const Vector& start, const std::vector< Vect
 		auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit_unicolor" ) );
 		shader->set_color( "color", Color( 0.15f, 0.65f, 0.78f, 1.f ) );
 		model->set_shader_at( 0, shader );
+		remember_clone( model, shader );
 		m->model = get_graphics_manager()->get_model_handle( model );
 	}
 	else
@@ -598,12 +627,14 @@ core::ecs::Entity* EnemyAiTestScene::spawn_solid_box( const Vector& center, cons
 		auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit" ) );
 		shader->set_texture_at( 0, get_graphics_manager()->load_texture( texture_path ) );
 		model->set_shader_at( 0, shader );
+		remember_clone( model, shader );
 	}
 	else
 	{
 		auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit_unicolor" ) ); // 単色＋面陰影
 		shader->set_color( "color", color );
 		model->set_shader_at( 0, shader );
+		remember_clone( model, shader );
 	}
 	m->model = get_graphics_manager()->get_model_handle( model );
 

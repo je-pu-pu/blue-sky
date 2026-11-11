@@ -252,6 +252,9 @@ public:
 	void unload_named_model( const char_t* name ) { model_manager_.remove_named( name ); }
 	void unload_named_mesh( const char_t* name ) { mesh_manager_.remove_named( name ); }
 
+	/// clone_model で複製したモデルを解放する（作った側が、使い終わったときに呼ぶ。シェーダーは解放しないので、複製したシェーダーは destroy_shader で別に解放する。解放はフレームの終わり）
+	void release_model( Model* model ) { model_manager_.release( model ); }
+
 	/// create_shader で作ったシェーダーを解放する（作った側が、使い終わったときに呼ぶ。解放はフレームの終わり）
 	void destroy_shader( Shader* shader ) { get_shader_manager().release( shader ); }
 

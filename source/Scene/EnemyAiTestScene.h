@@ -2,6 +2,8 @@
 
 #include "Scene.h"
 #include <core/math/Vector.h>
+#include <core/nav/NavMesh.h>
+#include <memory>
 #include <vector>
 
 namespace core::ecs
@@ -59,10 +61,19 @@ private:
 	core::ecs::Entity* smoke_ = nullptr;    ///< 煙玉（視線を遮る球）。使い回す
 	float smoke_timer_ = 0.f;               ///< 煙が有効な残り時間 (s)
 
+	std::unique_ptr< core::nav::NavMesh > navmesh_;              ///< パトロール/追跡用 navmesh
+	std::vector< core::math::Vector > building_footprints_;     ///< 建物の接地位置(x,z)。navmesh の障害物に使う
+	std::vector< core::math::Vector > nav_edges_;               ///< navmesh のポリゴン辺（描画用キャッシュ）
+
+	void build_navmesh();               ///< 地面＋建物から navmesh を焼く
+
+	core::ecs::Entity* carried_ = nullptr;  ///< 運搬中の死体（ダウン敵）。null なら運搬なし
+
 	void check_caught();                ///< 警戒中の敵に接近されたらスポーンへ戻す
 	void teleport_player( const core::math::Vector& feet ); ///< プレイヤーを剛体ごと足元 feet へ瞬間移動する（速度は消す）
 	void update_firework();             ///< 花火の投擲入力と発音タイマを処理
 	void update_smoke();                ///< 煙玉の投擲入力と有効タイマを処理
+	void try_neutralize();              ///< 背後・近接の敵を無力化（ダウン）する
 
 }; // class EnemyAiTestScene
 

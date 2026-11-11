@@ -24,6 +24,10 @@ struct PerceptionComponent : public core::ecs::Component
 	/// 聴覚の基本可聴半径 (m)。全方位・遮蔽無視で、対象の noise_loudness で伸縮する。
 	float hearing_radius = 10.f;
 
+	/// 無力化されて停止しているか。true の間は知覚・警戒・移動を停止する
+	/// （＝各 System はこの敵をスキップ）。他の敵からは「発見すべき対象」になる。
+	bool downed = false;
+
 	// --- 出力（知覚 System が毎フレーム書き込む） ---
 
 	/// このフレーム、対象が見えているか（錐内かつ遮蔽なし）

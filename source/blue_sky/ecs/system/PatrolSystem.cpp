@@ -4,6 +4,7 @@
 
 #include <core/TimeManager.h>
 #include <core/math/Quaternion.h>
+#include <core/nav/NavMesh.h>
 
 #include <algorithm>
 #include <cmath>
@@ -63,6 +64,11 @@ void PatrolSystem::update_entity( ComponentTuple& tuple ) const
 	auto* alert      = std::get< AlertComponent* >( tuple );
 	auto* perception = std::get< PerceptionComponent* >( tuple );
 
+	if ( perception->downed )
+	{
+		return; // 無力化中は動かない
+	}
+
 	const float dt  = time_manager_->get_delta_time();
 	const Vector pos = transform->transform.get_position();
 
@@ -106,13 +112,39 @@ void PatrolSystem::update_entity( ComponentTuple& tuple ) const
 		return;
 	}
 
-	// --- XZ 平面での移動 ---
-	Vector to = goal - pos;
-	to.set_y( 0.f );
-	const float dist = to.length();
+	// --- 経路の決定（navmesh があれば経路追従、無ければ直線） ---
+	Vector move_target = goal;   // 直線移動時はゴールへ直行
 
-	// 巡回時のウェイポイント到達 → 待機 → 次へ
-	if ( alert->state == ai::AlertState::Unaware && dist <= patrol->arrive_radius )
+	if ( navmesh_ && navmesh_->is_built() )
+	{
+		// ゴールが大きく動いた or 経路が無ければ張り直す
+		Vector goal_delta = goal - patrol->path_goal;
+		goal_delta.set_y( 0.f );
+		if ( patrol->path.empty() || goal_delta.length() > 1.0f )
+		{
+			navmesh_->find_path( pos, goal, patrol->path );
+			patrol->current_path_point = 0;
+			patrol->path_goal = goal;
+		}
+
+		// 到達した経路点をスキップして、次の点を目標にする
+		while ( patrol->current_path_point < patrol->path.size() )
+		{
+			Vector d = patrol->path[ patrol->current_path_point ] - pos;
+			d.set_y( 0.f );
+			if ( d.length() <= 0.6f ) { ++patrol->current_path_point; }
+			else { break; }
+		}
+		if ( patrol->current_path_point < patrol->path.size() )
+		{
+			move_target = patrol->path[ patrol->current_path_point ];
+		}
+	}
+
+	// --- 最終ゴールへの到達判定（巡回時のウェイポイント送り） ---
+	Vector to_goal = goal - pos;
+	to_goal.set_y( 0.f );
+	if ( alert->state == ai::AlertState::Unaware && to_goal.length() <= patrol->arrive_radius )
 	{
 		if ( ! patrol->waypoints.empty() )
 		{
@@ -121,11 +153,16 @@ void PatrolSystem::update_entity( ComponentTuple& tuple ) const
 			{
 				patrol->current    = ( patrol->current + 1 ) % patrol->waypoints.size();
 				patrol->wait_timer = patrol->wait_time;
+				patrol->path.clear();   // 次のウェイポイントへ経路を張り直す
 			}
 		}
 		return;
 	}
 
+	// --- move_target へ XZ 平面移動 ---
+	Vector to = move_target - pos;
+	to.set_y( 0.f );
+	const float dist = to.length();
 	if ( dist > 1e-3f )
 	{
 		const Vector dir  = to / dist;
@@ -135,7 +172,7 @@ void PatrolSystem::update_entity( ComponentTuple& tuple ) const
 		new_pos.set_y( pos.y() ); // 高さ維持
 		transform->transform.set_position( new_pos );
 
-		face_toward( transform, goal, patrol->turn_speed, dt );
+		face_toward( transform, move_target, patrol->turn_speed, dt );
 	}
 }
 

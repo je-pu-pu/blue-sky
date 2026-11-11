@@ -39,6 +39,11 @@ struct PatrolComponent : public core::ecs::Component
 	/// 待機の残り時間 (s)
 	float wait_timer = 0.f;
 
+	// --- navmesh 経路追従のキャッシュ（PatrolSystem が管理） ---
+	std::vector< core::math::Vector > path;         ///< 現在たどっている navmesh 経路
+	std::size_t current_path_point = 0;             ///< path 内の次の目標点の添字
+	core::math::Vector path_goal;                   ///< この path を計算したときの最終ゴール
+
 }; // struct PatrolComponent
 
 } // namespace blue_sky::ecs

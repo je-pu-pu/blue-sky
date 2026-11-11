@@ -7,6 +7,7 @@
 #include <core/ecs/System.h>
 
 namespace core { class TimeManager; }
+namespace core::nav { class NavMesh; }
 
 namespace blue_sky::ecs
 {
@@ -22,7 +23,7 @@ using core::ecs::TransformComponent;
  *  - 不審  : その場で最終視認方向を向く（移動しない）
  *  - 捜索/警報: 最終視認地点へ向かって移動する
  *
- * navmesh は未対応で、現状は XZ 平面の直線移動。高さは維持する。
+ * navmesh を渡されていれば経路（Detour）をたどり、無ければ XZ 平面の直線移動。高さは維持する。
  * AlertSystem より後に走らせる。
  */
 class PatrolSystem : public System< TransformComponent, PatrolComponent, AlertComponent, PerceptionComponent >
@@ -33,12 +34,16 @@ public:
 
 	void update() override;
 
+	/// パトロール/追跡に使う navmesh を設定する（nullptr なら直線移動にフォールバック）。
+	void set_navmesh( const core::nav::NavMesh* navmesh ) { navmesh_ = navmesh; }
+
 private:
 	/// 対象 1 つぶん（update() が対象ごとに呼ぶ。仮想関数ではないので、ループの中にインライン化できる）
 	void update_entity( ComponentTuple& ) const;
 
 private:
 	const core::TimeManager* time_manager_;
+	const core::nav::NavMesh* navmesh_ = nullptr;
 
 }; // class PatrolSystem
 

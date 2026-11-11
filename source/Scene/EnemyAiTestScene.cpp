@@ -148,27 +148,28 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 		rb->mass = 0.f;
 	}
 
-	// --- 遮蔽ビル（LOS を切るための静的ボックス） ---
+	// --- 遮蔽ビル（LOS を切る静的な障害物） ---
+	// 見た目・当たり判定・navmesh の穴を一致させる: 接地した 4×4×高さ5 のボックス。
+	// 見た目はワイヤーフレーム箱で描く（draw_debug）ので描画モデルは持たせない。
 	const Vector building_positions[] = {
 		Vector(  6.f, 0.f, 4.f ),
 		Vector( -6.f, 0.f, 8.f ),
 		Vector(  0.f, 0.f, 14.f ),
 	};
-	const auto box_model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "box-1x1x1" ) );
 	for ( const auto& p : building_positions )
 	{
+		building_footprints_.push_back( p );
+
 		auto* e = get_entity_manager()->create_entity();
 		auto* t = e->add_component< TransformComponent >();
 		t->transform.set_identity();
-		t->transform.set_position( p + Vector( 0.f, 2.f, 0.f ) );
-		e->add_component< RenderComponent >();
-		auto* m = e->add_component< ModelComponent >();
-		m->model = box_model; // 見た目は 1x1x1（当たりは下記 Box）
+		t->transform.set_position( p );
 
+		// 当たり判定: 地面(y=0)から y=5 まで、footprint ±2（navmesh の障害と一致）
 		auto* rb = e->add_component< RigidBodyComponent >();
 		rb->shape_type = RigidBodyShapeType::Box;
-		rb->shape_size = Vector( 2.f, 3.f, 2.f );
-		rb->offset = Vector( 0.f, 2.f, 0.f );
+		rb->shape_size = Vector( 2.f, 2.5f, 2.f );  // 半径。4×5×4
+		rb->offset = Vector( 0.f, 2.5f, 0.f );       // 底面が y=0 に来る
 		rb->mass = 0.f;
 	}
 
@@ -203,6 +204,8 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 		auto* sm = smoke_->add_component< blue_sky::ecs::SmokeComponent >();
 		sm->radius = 3.5f;
 	}
+
+	build_navmesh();
 }
 
 void EnemyAiTestScene::spawn_enemy( const Vector& start, const std::vector< Vector >& waypoints )
@@ -233,6 +236,65 @@ void EnemyAiTestScene::spawn_enemy( const Vector& start, const std::vector< Vect
 	enemies_.push_back( e );
 }
 
+void EnemyAiTestScene::build_navmesh()
+{
+	// 歩行ジオメトリを三角形で組む: 地面の広い矩形 ＋ 建物ボックス（障害物）
+	std::vector< float > verts;
+	std::vector< int >   tris;
+
+	auto add_vertex = [&]( float x, float y, float z ) -> int
+	{
+		const int idx = static_cast< int >( verts.size() / 3 );
+		verts.push_back( x ); verts.push_back( y ); verts.push_back( z );
+		return idx;
+	};
+	auto add_tri = [&]( int a, int b, int c )
+	{
+		tris.push_back( a ); tris.push_back( b ); tris.push_back( c );
+	};
+
+	// 地面（-25..25, y=0）。上向き法線になる巻き順。
+	{
+		const int v0 = add_vertex( -25.f, 0.f, -25.f );
+		const int v1 = add_vertex(  25.f, 0.f, -25.f );
+		const int v2 = add_vertex(  25.f, 0.f,  25.f );
+		const int v3 = add_vertex( -25.f, 0.f,  25.f );
+		add_tri( v0, v2, v1 );
+		add_tri( v0, v3, v2 );
+	}
+
+	// 建物（障害物）: 各接地位置に 4×5×4 のボックスを地面から立てる → 足元が navmesh の穴になる
+	auto add_box = [&]( float cx, float cz, float hx, float hz, float top )
+	{
+		const float x0 = cx - hx, x1 = cx + hx, z0 = cz - hz, z1 = cz + hz, y0 = 0.05f, y1 = top;
+		const int b0 = add_vertex( x0, y0, z0 ), b1 = add_vertex( x1, y0, z0 ), b2 = add_vertex( x1, y0, z1 ), b3 = add_vertex( x0, y0, z1 );
+		const int t0 = add_vertex( x0, y1, z0 ), t1 = add_vertex( x1, y1, z0 ), t2 = add_vertex( x1, y1, z1 ), t3 = add_vertex( x0, y1, z1 );
+		add_tri( b0, t0, t1 ); add_tri( b0, t1, b1 );  // 側面 -Z
+		add_tri( b1, t1, t2 ); add_tri( b1, t2, b2 );  // 側面 +X
+		add_tri( b2, t2, t3 ); add_tri( b2, t3, b3 );  // 側面 +Z
+		add_tri( b3, t3, t0 ); add_tri( b3, t0, b0 );  // 側面 -X
+		add_tri( t0, t2, t1 ); add_tri( t0, t3, t2 );  // 上面 +Y
+	};
+	for ( const auto& p : building_footprints_ )
+	{
+		add_box( p.x(), p.z(), 2.f, 2.f, 5.f );
+	}
+
+	navmesh_ = std::make_unique< core::nav::NavMesh >();
+	core::nav::NavMeshBuildConfig cfg;
+	cfg.agent_radius = 0.5f;
+	navmesh_->build( verts.data(), static_cast< int >( verts.size() / 3 ), tris.data(), static_cast< int >( tris.size() / 3 ), cfg );
+
+	// 描画用にポリゴン辺をキャッシュ
+	navmesh_->debug_get_poly_edges( nav_edges_ );
+
+	// パトロール System に navmesh を渡す（以降は経路追従になる）
+	if ( auto* ps = get_entity_manager()->get_system< blue_sky::ecs::PatrolSystem >() )
+	{
+		ps->set_navmesh( navmesh_.get() );
+	}
+}
+
 void EnemyAiTestScene::update()
 {
 	Scene::update();
@@ -249,6 +311,7 @@ void EnemyAiTestScene::update()
 
 	update_firework();
 	update_smoke();
+	try_neutralize();
 
 	get_entity_manager()->update();
 
@@ -294,6 +357,7 @@ void EnemyAiTestScene::check_caught()
 
 	// プレイヤーを物理ボディごとスポーンへ戻す（剛体原点は offset ぶん上）
 	teleport_player( player_spawn_ );
+	carried_ = nullptr; // 捕まったら運搬中の死体は落とす
 
 	// 敵の警戒を解く（全員 無警戒へ）
 	for ( auto* e : enemies_ )
@@ -393,6 +457,129 @@ void EnemyAiTestScene::update_smoke()
 	}
 }
 
+void EnemyAiTestScene::try_neutralize()
+{
+	auto* input = get_input();
+
+	// 運搬中の死体はプレイヤーの前方に追従（毎フレーム・引きずる高さ）
+	if ( carried_ )
+	{
+		if ( auto* ct = carried_->get_component< TransformComponent >() )
+		{
+			const float  yaw = fps_player_ ? fps_player_->yaw : 0.f;
+			const Vector fwd( std::sin( yaw ), 0.f, std::cos( yaw ) );
+			Vector p = player_transform_->transform.get_position() + fwd * 1.2f;
+			p.set_y( 0.3f );
+			ct->transform.set_position( p );
+		}
+	}
+
+	if ( ! input->push( core::input::Button::L2 ) )
+	{
+		return; // Z が押された瞬間だけアクション
+	}
+
+	// 運搬中なら Z でその場にドロップ
+	if ( carried_ )
+	{
+		carried_ = nullptr;
+		return;
+	}
+
+	const Vector ppos = player_transform_->transform.get_position();
+
+	// 近くのダウン敵がいれば拾って運搬開始（＝死体隠しの移動手段）
+	{
+		constexpr float pickup_reach = 2.0f;
+		core::ecs::Entity* pick = nullptr;
+		float best_pick = pickup_reach;
+		for ( auto* e : enemies_ )
+		{
+			auto* perc = e->get_component< blue_sky::ecs::PerceptionComponent >();
+			auto* et   = e->get_component< TransformComponent >();
+			if ( ! perc || ! et || ! perc->downed )
+			{
+				continue;
+			}
+			Vector d = et->transform.get_position() - ppos;
+			d.set_y( 0.f );
+			if ( d.length() < best_pick ) { best_pick = d.length(); pick = e; }
+		}
+		if ( pick )
+		{
+			carried_ = pick;
+			return;
+		}
+	}
+
+	// 背後・近接の生きた敵を無力化
+	constexpr float reach = 2.5f;
+	core::ecs::Entity* best = nullptr;
+	float best_dist = reach;
+
+	for ( auto* e : enemies_ )
+	{
+		auto* perc = e->get_component< blue_sky::ecs::PerceptionComponent >();
+		auto* et   = e->get_component< TransformComponent >();
+		if ( ! perc || ! et || perc->downed )
+		{
+			continue;
+		}
+
+		const Vector epos = et->transform.get_position();
+		Vector to_player = ppos - epos;
+		to_player.set_y( 0.f );
+		const float d = to_player.length();
+		if ( d > reach || d < 1e-3f )
+		{
+			continue;
+		}
+
+		// プレイヤーが敵の背後にいるか（敵前方と 敵→プレイヤー が逆向き）
+		Vector fwd = et->transform.forward();
+		fwd.set_y( 0.f );
+		const float flen = fwd.length();
+		if ( flen < 1e-3f )
+		{
+			continue;
+		}
+		const float along = fwd.dot( to_player ) / ( flen * d ); // -1(真後ろ)..1(正面)
+		if ( along > -0.2f )
+		{
+			continue; // 背後ではない
+		}
+
+		if ( d < best_dist )
+		{
+			best_dist = d;
+			best = e;
+		}
+	}
+
+	if ( ! best )
+	{
+		return;
+	}
+
+	// ダウンさせる: 停止・知覚停止し、他の敵に「発見される対象」になる
+	auto* perc  = best->get_component< blue_sky::ecs::PerceptionComponent >();
+	auto* alert = best->get_component< blue_sky::ecs::AlertComponent >();
+	perc->downed = true;
+	if ( alert )
+	{
+		alert->awareness = 0.f;
+		alert->state     = ai::AlertState::Unaware;
+	}
+
+	// Perceivable を付与（音は出さない＝視認でのみ発見される）。既にあれば何もしない。
+	if ( ! best->get_component< blue_sky::ecs::PerceivableComponent >() )
+	{
+		auto* pv = best->add_component< blue_sky::ecs::PerceivableComponent >();
+		pv->emitting_noise = false;
+		pv->noise_loudness = 0.f;
+	}
+}
+
 void EnemyAiTestScene::draw_debug()
 {
 	auto* dd = get_bullet_debug_draw();
@@ -409,6 +596,16 @@ void EnemyAiTestScene::draw_debug()
 		auto* patrol     = e->get_component< blue_sky::ecs::PatrolComponent >();
 		if ( ! transform || ! perception || ! alert )
 		{
+			continue;
+		}
+
+		// 無力化された敵は錐を描かず、ダウン表示（青い X）のみ
+		if ( perception->downed )
+		{
+			const Vector dp = transform->transform.get_position();
+			const core::Vector down_col( 0.2f, 0.5f, 1.f );
+			dd->drawLine( dp + Vector( -0.6f, 0.1f, -0.6f ), dp + Vector( 0.6f, 0.1f, 0.6f ), down_col );
+			dd->drawLine( dp + Vector( -0.6f, 0.1f,  0.6f ), dp + Vector( 0.6f, 0.1f, -0.6f ), down_col );
 			continue;
 		}
 
@@ -474,6 +671,16 @@ void EnemyAiTestScene::draw_debug()
 			}
 		}
 
+		// 現在たどっている navmesh 経路（マゼンタ）
+		if ( patrol && patrol->path.size() >= 2 )
+		{
+			const core::Vector nav_path_col( 1.f, 0.2f, 0.9f );
+			for ( std::size_t i = 0; i + 1 < patrol->path.size(); ++i )
+			{
+				dd->drawLine( patrol->path[ i ], patrol->path[ i + 1 ], nav_path_col );
+			}
+		}
+
 		// 最終視認地点（警戒中のみ、状態色の縦十字）
 		if ( perception->has_last_seen && alert->state != ai::AlertState::Unaware )
 		{
@@ -521,13 +728,34 @@ void EnemyAiTestScene::draw_debug()
 			}
 		}
 	}
+
+	// navmesh のポリゴン辺（緑）＝敵が歩ける領域
+	{
+		const core::Vector nav_col( 0.2f, 0.85f, 0.35f );
+		for ( std::size_t i = 0; i + 1 < nav_edges_.size(); i += 2 )
+		{
+			dd->drawLine( nav_edges_[ i ], nav_edges_[ i + 1 ], nav_col );
+		}
+	}
+
+	// 障害物ビルのワイヤーフレーム（グレー）＝当たり判定・navmesh の穴と一致
+	{
+		const core::Vector wall_col( 0.6f, 0.6f, 0.65f );
+		const float hx = 2.f, hz = 2.f, y0 = 0.05f, y1 = 5.f;
+		for ( const auto& c : building_footprints_ )
+		{
+			const float x0 = c.x() - hx, x1 = c.x() + hx, z0 = c.z() - hz, z1 = c.z() + hz;
+			const Vector b00( x0, y0, z0 ), b10( x1, y0, z0 ), b11( x1, y0, z1 ), b01( x0, y0, z1 );
+			const Vector t00( x0, y1, z0 ), t10( x1, y1, z0 ), t11( x1, y1, z1 ), t01( x0, y1, z1 );
+			dd->drawLine( b00, b10, wall_col ); dd->drawLine( b10, b11, wall_col ); dd->drawLine( b11, b01, wall_col ); dd->drawLine( b01, b00, wall_col ); // 底
+			dd->drawLine( t00, t10, wall_col ); dd->drawLine( t10, t11, wall_col ); dd->drawLine( t11, t01, wall_col ); dd->drawLine( t01, t00, wall_col ); // 天
+			dd->drawLine( b00, t00, wall_col ); dd->drawLine( b10, t10, wall_col ); dd->drawLine( b11, t11, wall_col ); dd->drawLine( b01, t01, wall_col ); // 柱
+		}
+	}
 }
 
 void EnemyAiTestScene::render()
 {
-	// 描く System（RenderSystem など）を、画面のクリアの後に動かす
-	get_entity_manager()->render();
-
 	// 描く System（RenderSystem など）を、画面のクリアの後に動かす
 	get_entity_manager()->render();
 
@@ -539,7 +767,11 @@ void EnemyAiTestScene::render()
 	{
 		ss << "*** CAUGHT! sent back to start ***\n";
 	}
-	ss << "WASD move, mouse look, C: run (noise), Q: firework (distract), E: smoke (block sight).\n";
+	ss << "WASD move, C: run, Q: firework, E: smoke, Z: neutralize / pick up body / drop.\n";
+	if ( carried_ )
+	{
+		ss << "*** carrying a body (Z to drop) ***\n";
+	}
 
 	if ( auto* pv = player_->get_component< blue_sky::ecs::PerceivableComponent >() )
 	{
@@ -549,7 +781,13 @@ void EnemyAiTestScene::render()
 	for ( std::size_t i = 0; i < enemies_.size(); ++i )
 	{
 		auto* alert = enemies_[ i ]->get_component< blue_sky::ecs::AlertComponent >();
+		auto* perc  = enemies_[ i ]->get_component< blue_sky::ecs::PerceptionComponent >();
 		if ( ! alert ) { continue; }
+		if ( perc && perc->downed )
+		{
+			ss << "enemy[" << i << "] DOWNED\n";
+			continue;
+		}
 		ss << "enemy[" << i << "] " << state_name( alert->state )
 		   << "  awareness=" << alert->awareness << "\n";
 	}

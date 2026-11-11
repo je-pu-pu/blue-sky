@@ -34,6 +34,11 @@ void PerceptionSystem::perceive( ComponentTuple& tuple, const TargetRegistrySyst
 
 	perception->target_visible = false;
 
+	if ( perception->downed )
+	{
+		return; // 無力化中は何も知覚しない
+	}
+
 	if ( ! registry )
 	{
 		return;

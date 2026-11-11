@@ -257,4 +257,41 @@ bool NavMesh::find_path( const core::math::Vector& start, const core::math::Vect
 	return ! out.empty();
 }
 
+void NavMesh::debug_get_poly_edges( std::vector< core::math::Vector >& out ) const
+{
+	out.clear();
+	if ( ! nav_mesh_ )
+	{
+		return;
+	}
+
+	const dtNavMesh* nav = nav_mesh_;   // const 版 getTile()（public）を呼ぶため
+	for ( int t = 0; t < nav->getMaxTiles(); ++t )
+	{
+		const dtMeshTile* tile = nav->getTile( t );
+		if ( ! tile || ! tile->header )
+		{
+			continue;
+		}
+
+		for ( int i = 0; i < tile->header->polyCount; ++i )
+		{
+			const dtPoly& poly = tile->polys[ i ];
+			if ( poly.getType() == DT_POLYTYPE_OFFMESH_CONNECTION )
+			{
+				continue;
+			}
+
+			const int nv = poly.vertCount;
+			for ( int j = 0; j < nv; ++j )
+			{
+				const float* va = & tile->verts[ poly.verts[ j ] * 3 ];
+				const float* vb = & tile->verts[ poly.verts[ ( j + 1 ) % nv ] * 3 ];
+				out.emplace_back( va[ 0 ], va[ 1 ], va[ 2 ] );
+				out.emplace_back( vb[ 0 ], vb[ 1 ], vb[ 2 ] );
+			}
+		}
+	}
+}
+
 } // namespace core::nav

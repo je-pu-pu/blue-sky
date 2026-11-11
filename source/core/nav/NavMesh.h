@@ -61,6 +61,9 @@ public:
 
 	bool is_built() const { return nav_mesh_ != nullptr; }
 
+	/// デバッグ描画用に navmesh のポリゴン辺を線分ペア（a0,b0, a1,b1, ...）で得る。
+	void debug_get_poly_edges( std::vector< core::math::Vector >& out_lines ) const;
+
 private:
 	void release();
 

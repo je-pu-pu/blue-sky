@@ -10,6 +10,7 @@
 
 #include <Scene/SceneRequest.h>
 #include <blue_sky/dev/DevOptions.h>
+#include <blue_sky/SceneStack.h>
 
 #include <deque>
 #include <unordered_map>
@@ -134,9 +135,6 @@ private:
 
 	std::unique_ptr< SceneManager >			scene_manager_;			///< シーンの作り方の一覧（以前はシングルトン）
 	std::unique_ptr< core::ecs::EntityManager >	entity_manager_;	///< ECS の Entity・Component・System（以前はシングルトン。シーンより後に壊す）
-	std::unique_ptr< Scene >				scene_;					///< 現在のベースシーン
-	std::vector< std::unique_ptr< Scene > >	overlay_scene_stack_;	///< オーバーレイシーンのスタック
-	string_t								stage_name_;			///< 現在のステージ名
 
 	bool									is_display_fps_;		///< FPS 表示フラグ
 
@@ -153,13 +151,6 @@ private:
 	bool											is_display_change_requested_ = false;	///< 解像度・フルスクリーンの変更をフレーム末に行う
 	bool											is_full_screen_toggle_requested_ = false;	///< ユーザーによるフルスクリーンの切り替え（Alt+Enter / F5）をフレーム末に行う
 	bool											is_shut_down_ = false;					///< shutdown() 済み
-	string_t										pending_start_overlay_;			///< 開発用 : 起動時に開くオーバーレイ（debug.start_overlay）
-
-	std::deque< SceneRequest >						scene_requests_;				///< シーン遷移の要求（フレームの境目でまとめて実行する）
-	SceneRequest									pending_base_request_;			///< 次のフレームで行うベースシーンの置き換え
-	SceneArguments									next_scene_arguments_;			///< 今作っているシーンに渡す引数（作り終えたら空にする）
-	bool											is_loading_frame_ = false;		///< 次のフレームは「読み込み中」を表示してからベースを置き換える
-	int												start_overlay_wait_frames_ = 0;
 	std::deque< SceneRequest >						debug_scene_sequence_;			///< 開発用 : 順に置き換えるベースシーン（BLUE_SKY_DEBUG_SCENE_SEQUENCE）
 	int												debug_scene_sequence_frames_ = 0;	///< 開発用 : 前の置き換えからのフレーム数
 
@@ -183,6 +174,10 @@ private:
 	void setup_frame_time_measurement();
 	void record_frame_time();
 
+	/// ベースのシーンとオーバーレイ・切り替えの要求（外には見せない）。
+	/// シーンは設定（購読）・文字列表・テーマ・ECS など GameMain の持ち物を使うので、最後に宣言して最初に壊す（デストラクタでも最初に壊す）
+	std::unique_ptr< SceneStack >					scene_stack_;
+
 	void flush_resource_releases();
 
 	void setup_script_command();
@@ -190,20 +185,14 @@ private:
 
 	void update_render_data_for_game() const;
 
-	/// シーンが出した遷移の文字列を要求にしてキューに積む
-	void collect_scene_requests();
-
-	/// キューの要求を順に実行する。ベースの置き換えは次のフレームに回す（「読み込み中」を表示するため）
-	void process_scene_requests();
-
-	/// 「読み込み中」を表示し、ベースシーンを置き換える
-	void replace_base_scene_with_loading_screen();
-
-	/// ESC を押したときの処理（オーバーレイが開いていないとき）
+	/// ESC を押したときの処理（オーバーレイが開いていないとき。何をするかは SceneStack が決める）
 	void handle_escape();
 
-	/// ベースシーンを作り直す（args は作るシーンに渡す引数）
-	void setup_scene( const string_t&, const SceneArguments& args = SceneArguments() );
+	/// ベースを壊した後、次のシーンを作る前の片付け（物体・ECS・物理の世界・解放を頼まれたリソース）
+	void clear_for_next_scene();
+
+	/// シーンの持ち物（SceneStack）を作る。シーンを作る・片付ける・画面に出す仕事を渡す
+	void create_scene_stack();
 
 	void render_console_window();
 	void render_scene_list_window();
@@ -264,8 +253,8 @@ public:
 
 	BulletDebugDraw* get_bullet_debug_draw() const { return bullet_debug_draw_.get(); }
 
-	const std::string& get_stage_name() const { return stage_name_; }
-	void set_stage_name( const std::string& stage_name ) { stage_name_ = stage_name; }
+	const std::string& get_stage_name() const { return scene_stack_->get_stage_name(); }
+	void set_stage_name( const std::string& stage_name ) { scene_stack_->set_stage_name( stage_name ); }
 
 	bool is_display_fps() const { return is_display_fps_; }
 	/// 垂直同期を待って表示するか
@@ -283,23 +272,16 @@ public:
 	/// 文字の大きさの倍率を UI のテーマに反映する（テーマファイルで決めた大きさに掛ける）
 	void set_ui_text_scale( float_t scale );
 
-	const Scene* get_current_scene() const { return scene_.get(); }
+	const Scene* get_current_scene() const { return scene_stack_->get_base_scene(); }
 
-	/// オーバーレイシーンをスタックにプッシュする ( ベースシーンはポーズ状態になる )
 	/// シーン遷移を要求する（実行はフレームの境目）
-	void request_scene( const SceneRequest& request ) { scene_requests_.push_back( request ); }
-
-	void push_overlay_scene( const string_t& scene_name, const SceneArguments& args = SceneArguments() );
+	void request_scene( const SceneRequest& request ) { scene_stack_->request( request ); }
 
 	/// 今作っているシーンに渡す引数（Scene のコンストラクタが受け取る。作っている間だけ中身がある）
-	const SceneArguments& get_next_scene_arguments() const { return next_scene_arguments_; }
+	const SceneArguments& get_next_scene_arguments() const { return scene_stack_->get_next_scene_arguments(); }
 
-	/// シーンを作る（作っている間だけ引数を get_next_scene_arguments で見せる）
-	Scene* generate_scene( const string_t& scene_name, const SceneArguments& args );
-	/// オーバーレイシーンをスタックからポップする ( ベースシーンのポーズが解除される )
-	void pop_overlay_scene();
 	/// オーバーレイシーンが存在するか
-	bool has_overlay_scene() const { return ! overlay_scene_stack_.empty(); }
+	bool has_overlay_scene() const { return scene_stack_->has_overlay(); }
 
 	void set_show_cursor( bool show_cursor ) { is_show_cursor_ = show_cursor; get_app()->show_cursor( is_show_cursor_ ); }
 

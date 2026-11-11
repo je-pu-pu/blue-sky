@@ -16,10 +16,19 @@ namespace blue_sky
 {
 
 Scene::Scene( GameMain& game_main )
-	: game_main_( game_main )
+	: game_main_( & game_main )
 	, total_elapsed_time_( 0.f )
 	, is_paused_( false )
 	, arguments_( game_main.get_next_scene_arguments() )
+{
+
+}
+
+Scene::Scene( const SceneArguments& arguments )
+	: game_main_( nullptr )
+	, total_elapsed_time_( 0.f )
+	, is_paused_( false )
+	, arguments_( arguments )
 {
 
 }
@@ -115,7 +124,7 @@ float Scene::get_elapsed_time() const
 
 Scene::EntityManager* Scene::get_entity_manager() const
 {
-	return game_main_.get_entity_manager();
+	return game_main_->get_entity_manager();
 }
 
 ObjectUpdater* Scene::get_object_updater() const
@@ -130,12 +139,12 @@ ObjectFactory* Scene::get_object_factory() const
 
 core::physics::PhysicsManager* Scene::get_physics_manager() const
 {
-	return game_main_.get_physics_manager();
+	return game_main_->get_physics_manager();
 }
 
 const core::TimeManager* Scene::get_time_manager() const
 {
-	return game_main_.get_time_manager();
+	return game_main_->get_time_manager();
 }
 
 GraphicsManager* Scene::get_graphics_manager() const
@@ -185,17 +194,17 @@ const App* Scene::get_app() const
 
 const GameMain* Scene::get_game_main() const
 {
-	return & game_main_;
+	return game_main_;
 }
 
 core::setting::SettingStore* Scene::get_setting_store() const
 {
-	return game_main_.get_settings();
+	return game_main_->get_settings();
 }
 
 core::graphics::direct_3d_11::BulletDebugDraw* Scene::get_bullet_debug_draw() const
 {
-	return game_main_.get_bullet_debug_draw();
+	return game_main_->get_bullet_debug_draw();
 }
 
 int Scene::get_width() const

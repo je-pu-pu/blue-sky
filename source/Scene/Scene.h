@@ -82,7 +82,7 @@ public:
 	using SoundManager		= core::sound::SoundManager;
 
 private:
-	GameMain&		game_main_;		///< 組み立ての根（作ったものが渡す）
+	GameMain*		game_main_;		///< 組み立ての根（作ったものが渡す。テスト用のコンストラクタでは nullptr）
 	float_t total_elapsed_time_;		///< シーンが開始してからの総経過時間 ( 秒 )
 	bool is_paused_;					///< ポーズ中かどうか
 
@@ -165,6 +165,9 @@ protected:
 
 	/// ハンドルの音を鳴らす（引けなければ鳴らさない）
 	void play( SoundHandle, const char_t* what, bool loop = false ) const;
+
+	/// テスト用 : GameMain なしで作る（シーンの切り替えを偽のシーンで確かめるため。近道・update() は使えない）
+	explicit Scene( const SceneArguments& arguments );
 
 public:
 	/// 組み立ての根（GameMain）を受け取る。シーンは GameMain のシングルトンを呼ばない（設計上の問題 B28）

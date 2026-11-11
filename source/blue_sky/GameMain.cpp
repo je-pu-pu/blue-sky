@@ -2,6 +2,7 @@
 #include "App.h"
 
 #include "SceneManager.h"
+#include "SceneStack.h"
 #include "Scene/Scene.h"
 
 #include "ObjectUpdater.h"
@@ -111,6 +112,8 @@ GameMain::GameMain( App& app )
 	version.log( "log/windows_version.log" );
 
 	// get_app()->clip_cursor( true );
+
+	create_scene_stack();
 
 	save_data_.reset( new Config() );
 	save_data_->set_log_handler( & debug_log );
@@ -228,7 +231,7 @@ GameMain::GameMain( App& app )
 	// ゲームのオブジェクトに渡すもの（物理の世界・音・シーンの経過時間）。オブジェクトは GameMain のシングルトンを呼ばない
 	game_object_context_.physics = physics_manager_.get();
 	game_object_context_.sound_manager = sound_manager_.get();
-	game_object_context_.scene_elapsed_time = [this] { return scene_ ? scene_->get_total_elapsed_time() : 0.f; };
+	game_object_context_.scene_elapsed_time = [this] { const Scene* s = scene_stack_ ? scene_stack_->get_base_scene() : nullptr; return s ? s->get_total_elapsed_time() : 0.f; };
 	game_object_context_.delta_time = [this] { return time_manager_.get_delta_time(); };
 
 	object_updater_ = std::make_unique< ObjectUpdater >( physics_manager_.get(), & game_object_context_, entity_manager_.get() );
@@ -321,11 +324,10 @@ GameMain::GameMain( App& app )
 //■デストラクタ
 GameMain::~GameMain()
 {
-	// シーンを最初に壊す。シーンは設定（購読）・文字列表・テーマ・ECS など GameMain の持ち物を使うが、
-	// メンバは宣言と逆の順に壊れ、settings_ などは scene_ より後に宣言されているので、先に壊れてしまう
+	// シーン（SceneStack）を最初に壊す。シーンは設定（購読）・文字列表・テーマ・ECS など GameMain の持ち物を使う。
+	// scene_stack_ は最後に宣言しているので放っておいても最初に壊れるが、決まりとしてここで壊す
 	// （以前はゲーム本編を開いたまま閉じると、GamePlayScene が壊れた SettingStore から購読を外そうとして毎回落ちていた）
-	overlay_scene_stack_.clear();
-	scene_.reset();
+	scene_stack_.reset();
 
 	// ゲームの物体を EntityManager より先に壊す（物体は壊れるときに自分の Entity を消す。entity_manager_ は object_factory_ より後に宣言され、先に壊れる）。
 	// ECS だけの物体（ObjectFactory が作った）も一緒に消す
@@ -551,9 +553,9 @@ bool GameMain::update()
 	get_app()->check_directory_change();
 
 	// 前のフレームでベースシーンの置き換えが決まっていたら、「読み込み中」を表示してから置き換える
-	if ( is_loading_frame_ )
+	if ( scene_stack_->is_loading_frame() )
 	{
-		replace_base_scene_with_loading_screen();
+		scene_stack_->replace_base_with_loading_screen();
 		return true;
 	}
 
@@ -616,12 +618,12 @@ bool GameMain::update()
 	{
 		// ベースシーンはポーズ中 (更新しない)。オーバーレイシーンのトップのみ更新
 		input_->set_blocked( input_owner != InputOwner::OVERLAY );
-		overlay_scene_stack_.back()->update();
+		scene_stack_->get_top_overlay()->update();
 	}
 	else
 	{
 		input_->set_blocked( input_owner != InputOwner::BASE_SCENE );
-		scene_->update();
+		scene_stack_->get_base_scene()->update();
 	}
 
 	input_->set_blocked( false );
@@ -629,17 +631,10 @@ bool GameMain::update()
 	render();
 
 	// 開発用 : 起動時のオーバーレイ（数フレーム後に開く）
-	if ( ! pending_start_overlay_.empty() && ++start_overlay_wait_frames_ >= 10 )
-	{
-		// "options?tab=controls" のように引数も付けられる
-		SceneRequest r { SceneRequest::Type::PUSH_OVERLAY };
-		split_scene_name( pending_start_overlay_, r.name, r.args );
-		request_scene( r );
-		pending_start_overlay_.clear();
-	}
+	scene_stack_->update_start_overlay();
 
 	// 開発用 : BLUE_SKY_DEBUG_SCENE_SEQUENCE の順に、150 フレームごとにベースシーンを置き換える
-	if ( ! debug_scene_sequence_.empty() && ! is_loading_frame_ && ++debug_scene_sequence_frames_ >= 150 )
+	if ( ! debug_scene_sequence_.empty() && ! scene_stack_->is_loading_frame() && ++debug_scene_sequence_frames_ >= 150 )
 	{
 		debug_scene_sequence_frames_ = 0;
 		debug_log( "[Scene] 開発用の順でベースシーンを置き換えます: " + debug_scene_sequence_.front().name + ( debug_scene_sequence_.front().stage_name.empty() ? "" : " " + debug_scene_sequence_.front().stage_name ) );
@@ -648,8 +643,8 @@ bool GameMain::update()
 	}
 
 	// シーン遷移 : シーンが出した要求を集め、フレームの境目でまとめて実行する
-	collect_scene_requests();
-	process_scene_requests();
+	scene_stack_->collect_requests();
+	scene_stack_->process_requests();
 
 	// 表示の変更は、UI のコールバックやウィンドウメッセージの処理中ではなく、ここでまとめて行う
 	//
@@ -759,10 +754,11 @@ void GameMain::render()
 	// 描画する範囲を上から決める
 	// - 不透明なオーバーレイ（is_transparent() が false）より下は、ベースシーンも含めて描かない
 	// - 下のオーバーレイを隠すオーバーレイ（メニューなど）より下のオーバーレイは描かない（ベースシーンは描く）
+	const auto& overlays = scene_stack_->get_overlays();
 	std::vector< OverlayLayerInfo > layers;
-	layers.reserve( overlay_scene_stack_.size() );
+	layers.reserve( overlays.size() );
 
-	for ( const auto& overlay : overlay_scene_stack_ )
+	for ( const auto& overlay : overlays )
 	{
 		layers.push_back( { overlay->is_transparent(), overlay->hides_overlays_below() } );
 	}
@@ -777,15 +773,15 @@ void GameMain::render()
 
 	if ( range.render_base )
 	{
-		scene_->render();
+		scene_stack_->get_base_scene()->render();
 	}
 
 	// オーバーレイシーンを下から順に描画
-	for ( size_t i = range.first_overlay; i < overlay_scene_stack_.size(); i++ )
+	for ( size_t i = range.first_overlay; i < overlays.size(); i++ )
 	{
 		// 下のシーン（ポストエフェクトなど）の状態を持ち越さない
 		direct_3d_->reset_render_state();
-		overlay_scene_stack_[ i ]->render();
+		overlays[ i ]->render();
 	}
 
 	if ( is_command_mode_ )
@@ -900,7 +896,7 @@ void GameMain::record_frame_time()
 	};
 
 	debug_log( "[FrameTime] フレーム " + std::to_string( frame_time_first_ ) + "〜" + std::to_string( frame_time_last_ ) + "（" + std::to_string( frame_time_work_ms_.size() ) + " 枚）"
-		+ " シーン " + ( scene_ ? scene_->get_name() : string_t( "なし" ) ) );
+		+ " シーン " + ( get_current_scene() ? get_current_scene()->get_name() : string_t( "なし" ) ) );
 	debug_log( "[FrameTime] 仕事の時間（update の始まり〜present の前） : " + summary( frame_time_work_ms_ ) );
 	debug_log( "[FrameTime] フレームの間隔 : " + summary( frame_time_interval_ms_ ) );
 	debug_log( "[FrameTime] present の時間 : " + summary( frame_time_present_ms_ ) );
@@ -1082,7 +1078,7 @@ void GameMain::render_scene_list_window()
 
 			if ( ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked( 0 ) )
 			{
-				setup_scene( scene.first );
+				scene_stack_->setup_base_scene( scene.first );
 			}
 
 			n++;
@@ -1123,7 +1119,7 @@ void GameMain::on_ime_composition( const std::u32string& text )
 void GameMain::on_special_key_down( int key )
 {
 	// キー割り当てで押されたキーを待っている間は、切り替えを動かさない（以前は F2 でミュート・F5 でフルスクリーンが切り替わった）
-	if ( ! overlay_scene_stack_.empty() && overlay_scene_stack_.back()->is_capturing_key() )
+	if ( const Scene* top = scene_stack_->get_top_overlay(); top && top->is_capturing_key() )
 	{
 		return;
 	}
@@ -1152,7 +1148,7 @@ void GameMain::on_special_key_down( int key )
 	// F1〜F12 だけを番号（1〜12）にしてシーンに渡す（以前はどのキーも key - F1 + 1 にして渡し、文字のキーでも呼ばれていた）
 	if ( key >= VK_F1 && key <= VK_F12 )
 	{
-		scene_->on_function_key_down( key - VK_F1 + 1 );
+		scene_stack_->get_base_scene()->on_function_key_down( key - VK_F1 + 1 );
 	}
 }
 
@@ -1178,160 +1174,77 @@ void GameMain::handle_escape()
 	const bool escape_pushed = input_->push( Input::Button::ESCAPE );
 	input_->set_blocked( escape_blocked );
 
-	// オーバーレイ（UI 画面）が開いている間は、ESC は UI 側が「キャンセル」として処理する
-	// （キー割り当て待ちの中止・ダイアログを閉じる・未適用の変更の確認などを UI が判断するため）
-	// 開発用のコンソール（ImGui）がキー入力を受け取っているときは、ESC はコンソールのもの
-	if ( ! escape_pushed || has_overlay_scene() || ImGui::GetIO().WantCaptureKeyboard )
-	{
-		return;
-	}
-
-	// 何をするかはシーンが申告する（以前はシーン名 "title" / "game_play" で分岐していた）
-	switch ( scene_->get_escape_behavior() )
-	{
-		case Scene::EscapeBehavior::QUIT:
-			debug_log( "[App] ESC で終了します（シーン : " + scene_->get_name() + "）" );
-			get_app()->close();
-			break;
-
-		case Scene::EscapeBehavior::PAUSE_MENU:
-			request_scene( SceneRequest{ SceneRequest::Type::PUSH_OVERLAY, "pause_menu" } );
-			if ( auto* s = sound_manager_->get_sound( "ok" ) ) { s->play( false ); }
-			break;
-
-		case Scene::EscapeBehavior::DEFAULT:
-			if (
-				get_save_data()->get< int >( "stage.0-0", 0 ) > 0 &&
-				get_save_data()->get< int >( "stage.0-1", 0 ) > 0 &&
-				get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
-			{
-				request_scene( SceneRequest{ SceneRequest::Type::REPLACE_BASE, "title" } );
-			}
-			else
-			{
-				get_app()->close();
-			}
-
-			if ( auto* s = sound_manager_->get_sound( "cancel" ) ) { s->play( false ); }
-			break;
-
-		case Scene::EscapeBehavior::NONE:
-			break;
-	}
+	// 開発用のコンソール（ImGui）がキー入力を受け取っているときは、ESC はコンソールのもの。
+	// 何をするか（オーバーレイが開いていれば UI に任せる・終了・ポーズメニュー・タイトルへ）は SceneStack が決める
+	scene_stack_->handle_escape( escape_pushed && ! ImGui::GetIO().WantCaptureKeyboard );
 }
 
-void GameMain::collect_scene_requests()
+/**
+ * シーンの持ち物（SceneStack）を作る
+ *
+ * シーンを作る・片付ける・画面に出すなどの GameMain の仕事を渡す（SceneStack は GameMain を知らない。テストでは偽物を渡す）
+ */
+void GameMain::create_scene_stack()
 {
-	// 最前面のオーバーレイ
-	if ( has_overlay_scene() )
-	{
-		Scene* overlay = overlay_scene_stack_.back().get();
-		const SceneRequest r = parse_scene_request( overlay->get_next_scene(), true );
-		overlay->set_next_scene( "" );		// 要求は必ず消費する
+	SceneStack::Hooks hooks;
 
-		if ( r.type != SceneRequest::Type::NONE )
+	hooks.is_registered = [this] ( const string_t& name ) { return scene_manager_->is_scene_registered( name ); };
+
+	// 引数はシーンのコンストラクタが get_next_scene_arguments（SceneStack が作っている間だけ見せる）から受け取る
+	hooks.create_scene = [this] ( const string_t& name, const SceneArguments& ) { return std::unique_ptr< Scene >( scene_manager_->generate_scene( name, * this ) ); };
+
+	hooks.before_base_destroyed = [this] ( const string_t& name )
+	{
+		sound_manager_->pop_group();
+		sound_manager_->push_group( name.c_str() );
+	};
+
+	hooks.after_base_destroyed = [this] { clear_for_next_scene(); };
+
+	hooks.show_loading_screen = [this]
+	{
+		get_graphics_manager()->set_default_render_target( true );
+		get_graphics_manager()->clear_default_view();
+		get_graphics_manager()->draw_text_at_center( get_ui_strings().get( "loading" ).c_str(), Color( 0.8f, 0.8f, 0.8f, 1.f ) );
+		direct_3d_->present();
+	};
+
+	hooks.after_base_replaced = [this]
+	{
+		// 保存の失敗を黙って無視しない（以前は結果を見ていなかった。進み具合が残らないと次回にやり直しになる）
+		if ( ! save_data_->save_file( "save/blue-sky.save" ) )
 		{
-			request_scene( r );
+			debug_log( "[Save] セーブデータを保存できませんでした: save/blue-sky.save" );
 		}
-	}
+	};
 
-	// ベースシーン（オーバーレイ中は更新されないので、要求も出ない）
-	if ( scene_ )
+	hooks.update_cursor = [this] { update_cursor_state(); };
+
+	hooks.on_all_overlays_closed = [this]
 	{
-		SceneRequest r = parse_scene_request( scene_->get_next_scene(), false );
-		scene_->set_next_scene( "" );
+		input_->set_blocked( false );
+		update_cursor_state();
+	};
 
-		if ( r.type != SceneRequest::Type::NONE )
+	hooks.quit = [this] { get_app()->close(); };
+
+	hooks.play_sound = [this] ( const char_t* name )
+	{
+		if ( auto* s = sound_manager_->get_sound( name ) )
 		{
-			r.stage_name = scene_->get_next_stage_name();
-			request_scene( r );
+			s->play( false );
 		}
-	}
-}
+	};
 
-void GameMain::process_scene_requests()
-{
-	while ( ! scene_requests_.empty() )
+	hooks.can_return_to_title = [this]
 	{
-		const SceneRequest r = scene_requests_.front();
-		scene_requests_.pop_front();
+		return
+			get_save_data()->get< int >( "stage.0-0", 0 ) > 0 &&
+			get_save_data()->get< int >( "stage.0-1", 0 ) > 0 &&
+			get_save_data()->get< int >( "stage.0-2", 0 ) > 0;
+	};
 
-		const bool registered = r.name.empty() || scene_manager_->is_scene_registered( r.name );
-
-		if ( ! registered )
-		{
-			debug_log( "[Scene] 未登録のシーンへの遷移を無視しました: " + r.name );
-			continue;
-		}
-
-		switch ( r.type )
-		{
-			case SceneRequest::Type::PUSH_OVERLAY:
-				push_overlay_scene( r.name, r.args );
-				break;
-
-			case SceneRequest::Type::POP_OVERLAY:
-				pop_overlay_scene();
-
-				if ( has_overlay_scene() )
-				{
-					overlay_scene_stack_.back()->on_resume();
-				}
-				break;
-
-			case SceneRequest::Type::REPLACE_OVERLAY:
-				pop_overlay_scene();
-				push_overlay_scene( r.name, r.args );
-				break;
-
-			case SceneRequest::Type::REPLACE_BASE:
-				// 上のオーバーレイは古いベースのものなので、すべて閉じる
-				while ( has_overlay_scene() )
-				{
-					pop_overlay_scene();
-				}
-
-				// 置き換えは次のフレームで「読み込み中」を表示してから行う。残りの要求は置き換えの後で処理する
-				pending_base_request_ = r;
-				is_loading_frame_ = true;
-				return;
-
-			case SceneRequest::Type::QUIT:
-				debug_log( "[App] シーンの要求で終了します" );
-				get_app()->close();
-				return;
-
-			case SceneRequest::Type::NONE:
-				break;
-		}
-	}
-}
-
-void GameMain::replace_base_scene_with_loading_screen()
-{
-	is_loading_frame_ = false;
-
-	// 読み込みは同期で行うので、その前に「読み込み中」を 1 回表示しておく（止まって見えないように）
-	// シーンの読み込みを別スレッドにしたいときは、テクスチャと同じく AsyncLoader を使う（今は同期で、この 1 回の表示で待たせる）
-	get_graphics_manager()->set_default_render_target( true );
-	get_graphics_manager()->clear_default_view();
-	get_graphics_manager()->draw_text_at_center( get_ui_strings().get( "loading" ).c_str(), Color( 0.8f, 0.8f, 0.8f, 1.f ) );
-	direct_3d_->present();
-
-	if ( ! pending_base_request_.stage_name.empty() )
-	{
-		set_stage_name( pending_base_request_.stage_name );
-	}
-
-	setup_scene( pending_base_request_.name, pending_base_request_.args );
-	// 保存の失敗を黙って無視しない（以前は結果を見ていなかった。進み具合が残らないと次回にやり直しになる）
-	if ( ! save_data_->save_file( "save/blue-sky.save" ) )
-	{
-		debug_log( "[Save] セーブデータを保存できませんでした: save/blue-sky.save" );
-	}
-
-	// 置き換えの後に残った要求（ベースの置き換えと同時に積まれたオーバーレイなど）を処理する
-	process_scene_requests();
+	scene_stack_ = std::make_unique< SceneStack >( std::move( hooks ) );
 }
 
 /**
@@ -1363,28 +1276,22 @@ void GameMain::setup_scene()
 			set_stage_name( * dev_options_.start_stage );
 		}
 
-		if ( scene_manager_->is_scene_registered( start_scene ) )
-		{
-			setup_scene( start_scene );
-		}
-		else
-		{
-			// 打ち間違いなどで未登録なら、ベースシーンが無いまま進まないようタイトルにする
-			debug_log( "[Scene] debug.start_scene が未登録のシーンです。title で起動します: " + start_scene );
-			setup_scene( "title" );
-		}
+		// 打ち間違いなどで未登録なら、ベースシーンが無いまま進まないようタイトルにする
+		scene_stack_->start( start_scene );
 		// setup_scene( "canvas_test" );
 
 		// 開発用 : 起動時にオーバーレイ（例: options）を開く。UI の確認用
 		// ベースシーンを数フレーム更新してから開く（一度も更新されていないシーンは描画の準備ができていないため）。
 		// const で読む（非 const の get は既定値の空文字列を設定に書き込み、保存すると壊れた行になるため）
-		pending_start_overlay_ = static_cast< const Config& >( * get_config() ).get< string_t >( "debug.start_overlay", "" );
+		string_t start_overlay = static_cast< const Config& >( * get_config() ).get< string_t >( "debug.start_overlay", "" );
 
 		// 環境変数でも指定できる（自動操作の確認で設定ファイルを書き換えずに済むように）
 		if ( dev_options_.start_overlay )
 		{
-			pending_start_overlay_ = * dev_options_.start_overlay;
+			start_overlay = * dev_options_.start_overlay;
 		}
+
+		scene_stack_->set_start_overlay( start_overlay );
 
 		// 開発用 : BLUE_SKY_DEBUG_SCENE_SEQUENCE（"stage_select,game_play:1-1,title" のように「シーン[:ステージ]」を , で並べる）を設定すると、
 		// 150 フレームごとに順にベースシーンを置き換える。シーンを替えて戻ったときにリソースが正しく引けるかを、入力を送らずに確かめるため
@@ -1399,7 +1306,7 @@ void GameMain::setup_scene()
 	// Scene
 	if ( get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
 	{
-		setup_scene( "title" );
+		scene_stack_->setup_base_scene( "title" );
 	}
 	else
 	{
@@ -1416,108 +1323,45 @@ void GameMain::setup_scene()
 			set_stage_name( "0-0" );
 		}
 
-		setup_scene( "stage_intro" );
+		scene_stack_->setup_base_scene( "stage_intro" );
 	}
 }
 
 /**
- * シーンを準備する
- *
- * @param scene_name シーン名
+ * ベースを壊した後、次のシーンを作る前の片付け（SceneStack がベースを置き換えるときに呼ぶ）
  */
-Scene* GameMain::generate_scene( const string_t& scene_name, const SceneArguments& args )
+void GameMain::clear_for_next_scene()
 {
-	next_scene_arguments_ = args;
-
-	try
+	// ゲームの物体を EntityManager より先に壊す（物体の位置の正・剛体の持ち主は、物体の Entity の部品にある。
+	// 本編のシーンは自分で壊すが、CanvasTestScene などはスクリプトで作った物体を残したまま終わり、
+	// 以前は Entity を失った物体が次のシーンへ残っていた）
+	if ( object_factory_ )
 	{
-		Scene* scene = scene_manager_->generate_scene( scene_name, * this );
-		next_scene_arguments_.clear();
-		return scene;
-	}
-	catch ( ... )
-	{
-		next_scene_arguments_.clear();
-		throw;
-	}
-}
-
-void GameMain::setup_scene( const string_t& scene_name, const SceneArguments& args )
-{
-	if ( ! scene_manager_->is_scene_registered( scene_name ) )
-	{
-		// 例外にすると、スクリプトから呼ばれたときに後続のスクリプトが実行されなくなるので、ログに出して無視する
-		debug_log( "[Scene] 未登録のシーンを開こうとしました: " + scene_name );
-		return;
+		object_factory_->clear();
 	}
 
-	sound_manager_->pop_group();
-	sound_manager_->push_group( scene_name.c_str() );
-	
-	// 現在のシーンを解放
-	scene_.reset();
+	entity_manager_->clear();
+	get_graphics_manager()->set_main_camera_info( nullptr, nullptr );
 
-	// シーンによって設定されていたデータをクリア
+	// 物体の剛体は部品が持ち、ECS の剛体は clear で PhysicsSystem が解放する（以前はシーンをまたいで溜まっていた）。
+	// 世界が持つ地面・ステージの当たりの形・共有する形はここで消す（以前の本編の世界は GamePlayScene だけが消し、
+	// DebugScene・ParticleSystemTestScene が足した地面は残っていた。世界を 1 つにしたので、どのシーンの後も消す）
+	const int count = physics_manager_->get_rigid_body_count() - static_cast< int >( physics_manager_->get_owned_rigid_body_count() );
+
+	physics_manager_->clear();
+
+	// 残っていたら漏れなので知らせる
+	if ( count > 0 )
 	{
-		// ゲームの物体を EntityManager より先に壊す（物体の位置の正・剛体の持ち主は、物体の Entity の部品にある。
-		// 本編のシーンは自分で壊すが、CanvasTestScene などはスクリプトで作った物体を残したまま終わり、
-		// 以前は Entity を失った物体が次のシーンへ残っていた）
-		if ( object_factory_ )
-		{
-			object_factory_->clear();
-		}
-
-		entity_manager_->clear();
-		get_graphics_manager()->set_main_camera_info( nullptr, nullptr );
-
-		// 物体の剛体は部品が持ち、ECS の剛体は clear で PhysicsSystem が解放する（以前はシーンをまたいで溜まっていた）。
-		// 世界が持つ地面・ステージの当たりの形・共有する形はここで消す（以前の本編の世界は GamePlayScene だけが消し、
-		// DebugScene・ParticleSystemTestScene が足した地面は残っていた。世界を 1 つにしたので、どのシーンの後も消す）
-		const int count = physics_manager_->get_rigid_body_count() - static_cast< int >( physics_manager_->get_owned_rigid_body_count() );
-
-		physics_manager_->clear();
-
-		// 残っていたら漏れなので知らせる
-		if ( count > 0 )
-		{
-			debug_log( "[Physics] シーンを片付けた後も物理の世界に物体の剛体が残っています: " + std::to_string( count ) + " 個" );
-		}
-
-		// 前のシーンが解放を頼んだリソースを、次のシーンを読む前に解放する（同時に持つメモリを増やさない）
-		flush_resource_releases();
-
-		// Handle の数（中身のある数/作った数）。解放しても減らないので、増え方をここで見る（doc/ハンドルの設計.md の 2 章）
-		debug_log( "[Resource] 前のシーンを片付けた後の Handle の数 : " + get_graphics_manager()->describe_handle_counts()
-			+ "・音 " + std::to_string( sound_manager_->get_live_handle_count() ) + "/" + std::to_string( sound_manager_->get_handle_count() ) );
+		debug_log( "[Physics] シーンを片付けた後も物理の世界に物体の剛体が残っています: " + std::to_string( count ) + " 個" );
 	}
 
-	// 新しいシーンを設定
-	// 生成に失敗したら（モデルが無いなど）ログを出してタイトルへ戻す（以前はシーンが null のまま次のフレームで落ちた）
-	try
-	{
-		scene_.reset( generate_scene( scene_name, args ) );
-	}
-	catch ( const common::exception< std::string >& e )
-	{
-		debug_log( "[Scene] シーンを作れませんでした: " + scene_name + " : " + e.data() );
-	}
+	// 前のシーンが解放を頼んだリソースを、次のシーンを読む前に解放する（同時に持つメモリを増やさない）
+	flush_resource_releases();
 
-	if ( ! scene_ )
-	{
-		if ( scene_name == "title" )
-		{
-			COMMON_THROW_EXCEPTION_MESSAGE( "title シーンを作れませんでした" );
-		}
-
-		setup_scene( "title" );
-		return;
-	}
-
-	// 登録した名前（stage_intro など、同じクラスに別の名前を付けたもの）をシーンに覚えさせる
-	scene_->set_name( scene_name );
-	scene_->set_next_stage_name( get_stage_name() );
-
-	update_cursor_state();
+	// Handle の数（中身のある数/作った数）。解放しても減らないので、増え方をここで見る（doc/ハンドルの設計.md の 2 章）
+	debug_log( "[Resource] 前のシーンを片付けた後の Handle の数 : " + get_graphics_manager()->describe_handle_counts()
+		+ "・音 " + std::to_string( sound_manager_->get_live_handle_count() ) + "/" + std::to_string( sound_manager_->get_handle_count() ) );
 }
 
 /**
@@ -1527,74 +1371,12 @@ void GameMain::setup_scene( const string_t& scene_name, const SceneArguments& ar
  */
 void GameMain::update_cursor_state()
 {
-	const bool menu_open = ! overlay_scene_stack_.empty();
+	const bool menu_open = scene_stack_->has_overlay();
 	const bool show = is_command_mode_ || menu_open;
 
 	set_show_cursor( show );
-	get_app()->clip_cursor( ! show && scene_ && scene_->is_clip_cursor_required() );
-}
-
-/**
- * オーバーレイシーンをスタックにプッシュする
- *
- * ベースシーンを破棄せずに、上にオーバーレイシーン (ポーズメニュー等) を重ねる。
- * ベースシーンの更新は停止し、入力はオーバーレイシーンのみが受け取る。
- *
- * @param scene_name シーン名
- */
-void GameMain::push_overlay_scene( const string_t& scene_name, const SceneArguments& args )
-{
-	if ( ! scene_manager_->is_scene_registered( scene_name ) )
-	{
-		debug_log( "[Scene] 未登録のオーバーレイを開こうとしました: " + scene_name );
-		return;
-	}
-
-	// ベースシーンをポーズ
-	scene_->set_paused( true );
-
-	// オーバーレイシーンを生成してスタックに追加
-	std::unique_ptr< Scene > overlay( generate_scene( scene_name, args ) );
-
-	// オーバーレイ用でないシーン（ゲーム本体など）は積まない（入力・描画の扱いがオーバーレイを前提にしていないため）
-	if ( ! overlay || ! overlay->is_overlay() )
-	{
-		debug_log( "[Scene] オーバーレイ用でないシーンを重ねようとしました: " + scene_name );
-		scene_->set_paused( false );
-		return;
-	}
-
-	overlay->set_name( scene_name );
-	overlay->set_next_stage_name( get_stage_name() );
-
-	overlay_scene_stack_.push_back( std::move( overlay ) );
-
-	// カーソルを表示 (メニュー操作用)
-	update_cursor_state();
-}
-
-/**
- * オーバーレイシーンをスタックからポップする
- *
- * スタックが空になった場合、ベースシーンのポーズを解除する。
- */
-void GameMain::pop_overlay_scene()
-{
-	if ( overlay_scene_stack_.empty() )
-	{
-		return;
-	}
-
-	overlay_scene_stack_.pop_back();
-
-	if ( overlay_scene_stack_.empty() )
-	{
-		// 全てのオーバーレイが閉じた → ベースシーンのポーズ解除
-		scene_->set_paused( false );
-		input_->set_blocked( false );
-
-		update_cursor_state();
-	}
+	Scene* base = scene_stack_->get_base_scene();
+	get_app()->clip_cursor( ! show && base && base->is_clip_cursor_required() );
 }
 
 } // namespace blue_sky

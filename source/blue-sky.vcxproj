@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="blue_sky\SceneStack.cpp" />
     <ClCompile Include="blue_sky\dev\DevOptions.cpp" />
     <ClCompile Include="core\graphics\Direct3D11\EffectStateDesc.cpp" />
     <ClCompile Include="blue_sky\ecs\system\PhysicsSyncSystem.cpp" />
@@ -186,6 +187,7 @@
     <ClCompile Include="blue_sky\ecs\system\PlayerInventorySystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="blue_sky\SceneStack.h" />
     <ClInclude Include="blue_sky\dev\DevOptions.h" />
     <ClInclude Include="core\sound\SampleRateStepper.h" />
     <ClInclude Include="blue_sky\ecs\component\PhysicsBodyComponent.h" />

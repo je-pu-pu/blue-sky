@@ -135,6 +135,47 @@ void DevTools::capture_frame_if_requested()
 	debug_log( string_t( ok ? "フレームを保存しました: " : "フレームを保存できませんでした: " ) + capture_directory_ + " / " + std::to_string( frame_count_ ) );
 }
 
+/**
+ * ゲーム中のスクショ（F11）を保存する
+ *
+ * 以前は feature/enemy-ai-navmesh で GameMain に imgui の「Screenshot」窓（自動・手動）を足していた。
+ * 決まったフレームの保存は BLUE_SKY_CAPTURE_FRAMES と重なるので、遊びながら好きなときに撮るところだけをここへ移した。
+ * 保存は BLUE_SKY_CAPTURE_FRAMES と同じ save_back_buffer を使う
+ */
+void DevTools::capture_screenshot_if_requested()
+{
+	if ( ! screenshot_requested_ )
+	{
+		return;
+	}
+
+	screenshot_requested_ = false;
+
+	CreateDirectoryA( screenshot_directory_.c_str(), nullptr );
+
+	// あるファイルは上書きしない（起動し直しても前のスクショを消さない）
+	const std::wstring directory = common::convert_to_wstring( screenshot_directory_ );
+	std::wstring path;
+
+	for ( ; screenshot_number_ < 10000; screenshot_number_++ )
+	{
+		wchar_t name[ 32 ];
+		swprintf_s( name, L"/shot_%04d.png", screenshot_number_ );	// 区切りは / （Windows でも使える）
+		path = directory + name;
+
+		if ( GetFileAttributesW( path.c_str() ) == INVALID_FILE_ATTRIBUTES )
+		{
+			break;
+		}
+	}
+
+	screenshot_number_++;
+
+	const bool ok = hooks_.save_back_buffer && hooks_.save_back_buffer( path );
+
+	debug_log( string_t( ok ? "スクショを保存しました: " : "スクショを保存できませんでした: " ) + common::convert_to_string( path ) );
+}
+
 void DevTools::record_frame_time()
 {
 	if ( frame_time_last_ <= 0 || frame_count_ < frame_time_first_ || frame_count_ > frame_time_last_ || frame_time_start_ == 0 )

@@ -120,9 +120,9 @@ void RenderSystem::update()
 			continue;
 		}
 
-		// ワールド行列を計算
+		// ワールド行列を計算（スケール → 回転 → 平行移動）
 		Matrix world;
-		world.set_identity();
+		world.set_scaling( transform->scale.x(), transform->scale.y(), transform->scale.z() );
 		world *= Matrix().set_rotation_quaternion( transform->transform.get_rotation() );
 		world *= Matrix().set_translation( transform->transform.get_position() );
 

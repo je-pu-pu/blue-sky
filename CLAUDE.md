@@ -171,6 +171,7 @@ get_entity_manager()->add_system< RenderSystem >( 1000, get_graphics_manager(), 
 - PortAudio・libogg・libvorbis・TinySoundFont・libremidi (音)
 - FreeType 2.14.1・msdfgen 1.13.0 (文字の描画)
 - ONNX Runtime 1.24 + DirectML (Neural NPR。exe と一緒に DLL を配る)
+- Recast & Detour 1.6.0 (敵 AI の navmesh と経路。窓口は `core/nav/NavMesh`。ヘッダと lib は git の管理外で、作り方は `tools/x64-deps/README.md` の ④)
 - Oculus SDK 1.43.0 (VR。今は `OCULUS_RIFT_ENABLED` が未定義で、リンクしていない)
 
 ライブラリと素材のライセンス・配布のときにすることは `doc/ライセンス.md`、配布物に同梱する表示は `THIRD_PARTY_NOTICES.txt`。**ライブラリや素材を足したら、両方を更新する**。

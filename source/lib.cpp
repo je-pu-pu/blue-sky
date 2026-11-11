@@ -35,6 +35,10 @@
 
 #pragma comment( lib, "onnxruntime.lib" )  // NPR リアルタイム推論
 
+#pragma comment( lib, "Recast.lib" )       // navmesh 生成
+#pragma comment( lib, "Detour.lib" )       // 経路探索
+#pragma comment( lib, "DetourCrowd.lib" )  // 群衆回避（将来）
+
 #pragma comment( lib, "common.lib" )
 #pragma comment( lib, "game.lib" )
 #pragma comment( lib, "win.lib" )

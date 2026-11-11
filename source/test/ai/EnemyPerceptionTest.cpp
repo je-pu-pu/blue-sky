@@ -85,6 +85,75 @@ TEST( EnemyPerceptionTest, TargetSlightlyAboveWithinLimitIsVisible )
 	EXPECT_TRUE( blue_sky::ai::is_in_view_cone( eye, forward, default_cone(), target ) );
 }
 
+// --- 聴覚 -------------------------------------------------------------
+
+TEST( EnemyPerceptionTest, NoiseWithinRadiusIsHeard )
+{
+	const Vector ear( 0.f, 1.f, 0.f );
+	const Vector noise( 6.f, 1.f, 0.f ); // 6m
+	EXPECT_TRUE( blue_sky::ai::hears_noise( ear, /*hearing_radius=*/10.f, noise, /*loudness=*/1.f ) );
+}
+
+TEST( EnemyPerceptionTest, NoiseBeyondRadiusIsNotHeard )
+{
+	const Vector ear( 0.f, 1.f, 0.f );
+	const Vector noise( 15.f, 1.f, 0.f ); // 15m > 10m
+	EXPECT_FALSE( blue_sky::ai::hears_noise( ear, 10.f, noise, 1.f ) );
+}
+
+TEST( EnemyPerceptionTest, LoudNoiseExtendsRange )
+{
+	const Vector ear( 0.f, 1.f, 0.f );
+	const Vector noise( 15.f, 1.f, 0.f ); // 15m
+	// loudness 2.0 で実効半径 20m → 届く
+	EXPECT_TRUE( blue_sky::ai::hears_noise( ear, 10.f, noise, 2.f ) );
+}
+
+TEST( EnemyPerceptionTest, SilentEmitterIsNotHeard )
+{
+	const Vector ear( 0.f, 1.f, 0.f );
+	const Vector noise( 1.f, 1.f, 0.f ); // 至近だが loudness 0
+	EXPECT_FALSE( blue_sky::ai::hears_noise( ear, 10.f, noise, 0.f ) );
+}
+
+TEST( EnemyPerceptionTest, NoiseIsOmnidirectional )
+{
+	const Vector ear( 0.f, 1.f, 0.f );
+	// 真後ろでも聞こえる（向き無関係）
+	const Vector behind( 0.f, 1.f, -5.f );
+	EXPECT_TRUE( blue_sky::ai::hears_noise( ear, 10.f, behind, 1.f ) );
+}
+
+// --- LOS 遮蔽（線分×球：煙玉） ----------------------------------------
+
+TEST( EnemyPerceptionTest, SegmentThroughSphereIntersects )
+{
+	// a(0,1,0) → b(10,1,0) の途中 (5,1,0) に半径2の球
+	EXPECT_TRUE( blue_sky::ai::segment_intersects_sphere(
+		Vector( 0.f, 1.f, 0.f ), Vector( 10.f, 1.f, 0.f ), Vector( 5.f, 1.f, 0.f ), 2.f ) );
+}
+
+TEST( EnemyPerceptionTest, SegmentMissesSphere )
+{
+	// 球が線分から 5m 横（半径2）→ 当たらない
+	EXPECT_FALSE( blue_sky::ai::segment_intersects_sphere(
+		Vector( 0.f, 1.f, 0.f ), Vector( 10.f, 1.f, 0.f ), Vector( 5.f, 1.f, 5.f ), 2.f ) );
+}
+
+TEST( EnemyPerceptionTest, SphereBehindSegmentDoesNotIntersect )
+{
+	// 球が線分の始点より後ろ（線分外）→ 当たらない
+	EXPECT_FALSE( blue_sky::ai::segment_intersects_sphere(
+		Vector( 0.f, 1.f, 0.f ), Vector( 10.f, 1.f, 0.f ), Vector( -5.f, 1.f, 0.f ), 2.f ) );
+}
+
+TEST( EnemyPerceptionTest, SegmentEndInsideSphereIntersects )
+{
+	// 終点が球の内側 → 交差
+	EXPECT_TRUE( blue_sky::ai::segment_intersects_sphere(
+		Vector( 0.f, 1.f, 0.f ), Vector( 10.f, 1.f, 0.f ), Vector( 10.5f, 1.f, 0.f ), 1.f ) );
+}
+
 // --- awareness --------------------------------------------------------
 
 TEST( EnemyPerceptionTest, AwarenessRisesWhenVisibleAndClampsToOne )

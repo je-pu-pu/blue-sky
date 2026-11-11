@@ -21,7 +21,7 @@ SoundBuffer::~SoundBuffer()
 
 void SoundBuffer::init_3d_sound()
 {
-	
+	is_3d_.store( true, std::memory_order_relaxed );
 }
 
 void* SoundBuffer::lock( size_t offset, size_t )
@@ -35,9 +35,11 @@ void SoundBuffer::unlock()
 	// （以前はここで変換する予定のまま何もしておらず、22050 Hz の音楽が 44100 Hz の出力で倍の速さで鳴っていた）
 }
 
-void SoundBuffer::set_3d_position( const Vector3& )
+void SoundBuffer::set_3d_position( const Vector3& p )
 {
-	
+	pos_x_.store( p.x(), std::memory_order_relaxed );
+	pos_y_.store( p.y(), std::memory_order_relaxed );
+	pos_z_.store( p.z(), std::memory_order_relaxed );
 }
 
 void SoundBuffer::set_3d_velocity( const Vector3& )

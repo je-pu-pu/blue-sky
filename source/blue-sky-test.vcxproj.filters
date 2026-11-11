@@ -75,6 +75,9 @@
     <ClCompile Include="test\sound\SampleRateStepperTest.cpp">
       <Filter>test\sound</Filter>
     </ClCompile>
+    <ClCompile Include="test\sound\Spatial3dGainTest.cpp">
+      <Filter>test\sound</Filter>
+    </ClCompile>
     <ClCompile Include="test\math\SkinningAnimationSetTest.cpp">
       <Filter>test\math</Filter>
     </ClCompile>

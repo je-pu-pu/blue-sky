@@ -73,6 +73,37 @@ NuGet パッケージ（.nupkg = zip）を**展開のみ**で取得（exe 実行
 3. リンク: `onnxruntime.lib`、インクルード: `<onnxruntime/onnxruntime_cxx_api.h>`。
    実行時に `onnxruntime.dll` / `onnxruntime_providers_shared.dll` / `DirectML.dll` を exe と同じ場所へ。
 
+## ④ Recast & Detour（敵AI のパトロール/追跡経路 = navmesh）
+
+recastnavigation を**静的CRT**で再ビルドして配置する（RecastDemo 同梱の prebuilt は /MD で CRT 不一致になるため流用不可）。ソースは評価用に `D:\je\projects\recastnavigation` にクローン済み。
+
+```powershell
+$src = "D:\je\projects\recastnavigation"      # recastnavigation のソース
+$bld = "$src\build-bluesky"
+$cm  = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -find "**\CMake\bin\cmake.exe" | Select-Object -First 1
+
+# demo/tests/examples を切って core libのみ、静的CRT で configure
+& $cm -S $src -B $bld -A x64 `
+  -DRECASTNAVIGATION_DEMO=OFF -DRECASTNAVIGATION_TESTS=OFF -DRECASTNAVIGATION_EXAMPLES=OFF `
+  -DCMAKE_POLICY_DEFAULT_CMP0091=NEW '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded$<$<CONFIG:Debug>:Debug>'
+& $cm --build $bld --config Debug
+& $cm --build $bld --config Release
+
+# lib を配置（Debug は -d サフィックス → 同名にリネーム。config別 LibraryPath で解決）
+$dst = "D:\je\projects\blue-sky\source\lib\x64"
+foreach ($l in "Recast","Detour","DetourCrowd") {
+  Copy-Item "$bld\$l\Debug\$l-d.lib"  "$dst\Debug\$l.lib"   -Force
+  Copy-Item "$bld\$l\Release\$l.lib"  "$dst\Release\$l.lib" -Force
+}
+# ヘッダを1ディレクトリに集約（内部の相対 include が同ディレクトリで解決される）
+$inc = "D:\je\projects\blue-sky\source\lib\include\recastnavigation"
+New-Item -ItemType Directory -Force $inc | Out-Null
+foreach ($m in "Recast","Detour","DetourCrowd","DetourTileCache") { Copy-Item "$src\$m\Include\*.h" $inc -Force }
+```
+
+- リンク: `Recast.lib` / `Detour.lib` / `DetourCrowd.lib`（`source/lib.cpp`・`test/lib.cpp` の pragma）。
+- インクルード: `<recastnavigation/DetourNavMesh.h>` 等（ヘッダは git 非追跡）。
+
 ## ビルド
 
 ```powershell

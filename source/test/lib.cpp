@@ -25,6 +25,10 @@
 #pragma comment( lib, "lua.lib" )
 #pragma comment( lib, "onnxruntime.lib" )
 
+#pragma comment( lib, "Recast.lib" )
+#pragma comment( lib, "Detour.lib" )
+#pragma comment( lib, "DetourCrowd.lib" )
+
 #pragma comment( lib, "common.lib" )
 #pragma comment( lib, "game.lib" )
 #pragma comment( lib, "win.lib" )

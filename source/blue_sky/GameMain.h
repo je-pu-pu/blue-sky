@@ -9,6 +9,7 @@
 #include <type/type.h>
 
 #include <Scene/SceneRequest.h>
+#include <Scene/InputRouting.h>
 #include <blue_sky/dev/DevOptions.h>
 #include <blue_sky/SceneStack.h>
 
@@ -272,6 +273,11 @@ public:
 	/// カーソルの表示と閉じ込めを、今の状態（コマンドモード・メニュー・シーンの要求）から決める
 	void update_cursor_state();
 	bool is_show_cursor() const override { return is_show_cursor_; }
+
+	/// ゲームがマウスを取っているか（カーソルを隠して窓に閉じ込め、マウスで視点を回している間）
+	bool is_mouse_captured_by_game();
+
+	InputOwner last_input_owner_ = InputOwner::BASE_SCENE;		///< 前のフレームで入力を受け取った先（変わったときだけログに出す）
 };
 
 } // namespace blue_sky

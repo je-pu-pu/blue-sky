@@ -72,7 +72,7 @@
 - [x] MIDI の音源を再配布できるものに替えた（2026-11-11）: `FluidR3_GM2-2.SF2`（「DO NOT REDISTRIBUTE」の注記）をやめ、Debian の fluid-soundfont-gm 3.1-6 の `FluidR3_GM.sf2`（MIT、同じ Fluid R3）を読む。約 142 MB なので管理外にし `tools/soundfont/fetch_soundfont.py` で入手（SHA-256 を確かめる）。doc/ライセンス.md の 4.7・THIRD_PARTY_NOTICES.txt の 20
 - [ ] 配布の前に: 素材を確かめる。`takarajima.mid`・`SGM-V2.01.sf2`・`FluidR3_GM2-2.SF2`・`uzura.ttf` は外す。`FluidR3_GM.sf2` を入手して入れる。Rounded M+ のライセンスを確かめる
 
-## 敵AI（システミック）縦スライス  ブランチ: feature/enemy-ai-perception
+## 敵AI（システミック）縦スライス  ブランチ: feature/enemy-ai-perception → feature/enemy-ai-navmesh → feature/enemy-ai-navmesh-port（develop へ取り込み）
 
 設計は `doc/システム階層スタック.md` / `doc/動詞とゲームシステム.md`。S2 知覚 + S3 警戒状態機械 + パトロールの最小実装。
 
@@ -80,10 +80,22 @@
 - [x] Component（Perceivable/Perception/Alert/Patrol）＋ System（TargetRegistry→Perception→Alert→Patrol）を ECS 実装
 - [x] 検証シーン `EnemyAiTestScene`（scene 名 `enemy_ai_test`）＋視界錐/経路/最終視認の Bullet デバッグ可視化。起動は `blue-sky.config` の `debug.start_scene` を `enemy_ai_test` に（ローカル）
 - [x] **ECS 自動登録バグ修正**（`ComponentTypeId` 32bit 切り捨てで x64 の on_add_component 経路が全滅していた）。回帰テスト `test/ecs/EnemyAiSceneEcsTest`。詳細は lessons.md
-- [ ] 実機で挙動確認・パラメータ調整（移動速度/視界角/awareness の増減/捜索時間）
-- [ ] navmesh 統合（Recast & Detour）でパトロール/追跡を経路化（現状は平面直線）
-- [ ] 聴覚（音イベント）・対空タイプの例外知覚
-- [ ] S4 プレイヤー動詞（隠れる/逃げる/隙を突く/道具）との接続、死体隠し・警報伝播
+- [x] navmesh 統合（Recast & Detour）でパトロール/追跡を経路化＋オフメッシュ接続（階段/橋で階層移動）
+- [x] 聴覚（音イベント）＝ `hears_noise`（走行音・花火）／警報伝播 `AlarmPropagationSystem`
+- [x] S4 プレイヤー動詞の接続: 花火（陽動）・煙玉（視線遮り）・無力化・死体運搬
+- [x] 発見後の脅威（プレイヤー HP・敵の射撃・被弾フィードバック＝発砲元→照準の画面ビーム）
+- [x] **縦軸のコスト**: 落下ダメージ（8m/s まで無傷 → 17m/s ≒ 15m 落下で即死）＋ 傘（RMB 長押しで終端速度 3m/s・所持数制・拾い物で補給）。これで `fly_fuel` に初めて意味が出る
+- [x] **対空タイプ**（`EnemyKind::AntiAir`）: 上方 70deg まで見る（真上は死角）／水平 45deg・視程 26m。橋の真下と南の接近路に配置
+- [x] 広いステージ `enemy_ai_test_large`・ビルの外壁テクスチャ・仮サウンド・PortAudio の自前 3D（方向＋距離）
+- [x] **今の develop へ取り込み**（2026-11-11、ブランチ `feature/enemy-ai-navmesh-port`）: 上の navmesh 以降（07-06〜08-02）は `feature/enemy-ai-navmesh` で作っていた。今の作りに合わせて変えた所 : 捕まった・やられたときの瞬間移動は PhysicsManager に窓口を足さず `RigidBody::set_world_transform`（シーンの `teleport_player`）、システムはコンストラクタで物理・時間を受け取る（ジェットの燃料は `FpsPlayerControlSystem` の 3 つ目の引数の TimeManager）、モデルはハンドル、位置のある音は `Scene::resolve`、スクショは GameMain の imgui の窓をやめて `dev/DevTools` の F11 だけ、Recast & Detour は git の管理外のまま `tools/x64-deps/README.md` の ④・ライセンスの表示を足した。ビルの拡大のため `TransformComponent` に `scale` を足した（RenderSystem が掛ける）
+- [ ] 実機で挙動確認・パラメータ調整（落下の安全/致死速度、傘の所持数、対空の配置・画角、移動速度/視界角/awareness の増減/捜索時間）。取り込みの後、手で遊んでの確かめ（操作・音の左右と距離）はまだ
+- [ ] 滞空タイプ（飛行ドローン＝空中に居る敵）。navmesh の外を動くので追跡の作り直しが要る
+- [ ] 失敗が世界に刻まれる（doc 6章）: やり直しで敵が増える（上限付き・「強さゼロでもクリア可能」を守る）
+- [ ] 資源2系統（doc 7章）: 強化資源（敵ドロップ）と消費アイテムの補給。現状 傘だけが所持数制で、花火・煙玉は無制限
+- [ ] 残りの消費アイテム（doc 3章）: 風船（上がる）・フリーズ（止める）。本編の ECS の風船（BalloonSystem・BalloonHoldSystem）を検証シーンでも使えるか見る
+- [ ] 検証シーンの物体を `Entity*` で持っている（`enemies_`・`player_` など）。CLAUDE.md の決まり（ほかの Entity は `EntityId` で持つ）に寄せる
+- [x] 検証シーンが複製したモデル・シェーダー（clone_model・clone_shader）を片付けず、入るたびに約 100 ずつ溜まっていた（元のブランチから）。シーンを壊すときに解放する（`GraphicsManager::release_model`・`get_shader_handle_of` を足した。2026-11-11）
+- [ ] PhysicsTestScene も clone_model したモデルを解放していない（release_model で直せる）
 
 ## blue-sky 64bit 化（x64 ポート）— NPR リアルタイム統合の前提
 

@@ -80,6 +80,59 @@ inline bool is_in_view_cone(
 }
 
 /**
+ * 対象が発する音が耳に届くか（聴覚・全方位・遮蔽は無視）。
+ *
+ * 視界（is_in_view_cone）と違い向き・LOS を問わず、距離だけで判定する。
+ * loudness で実効可聴半径を伸縮する（走行=大きい音, 忍び足=小さい音, 花火=特大）。
+ *
+ * @param ear            耳（敵）の位置
+ * @param hearing_radius 基本可聴半径 (m)
+ * @param noise_pos      音源の位置
+ * @param loudness       音の大きさ倍率（<=0 は無音）
+ */
+inline bool hears_noise(
+	const core::math::Vector& ear,
+	float hearing_radius,
+	const core::math::Vector& noise_pos,
+	float loudness )
+{
+	const float r = hearing_radius * loudness;
+	if ( r <= 0.f )
+	{
+		return false;
+	}
+	const core::math::Vector d = noise_pos - ear;
+	return d.length() <= r;
+}
+
+/**
+ * 線分 a→b が球（center, radius）と交差するか。
+ *
+ * 煙玉など「視線を遮る球状ボリューム」の LOS 判定に使う。線分上で球心に最も近い点が
+ * 半径以内なら交差＝視線が通らない、と判定する。
+ */
+inline bool segment_intersects_sphere(
+	const core::math::Vector& a,
+	const core::math::Vector& b,
+	const core::math::Vector& center,
+	float radius )
+{
+	const core::math::Vector ab = b - a;
+	const float ab_len2 = ab.dot( ab );
+	if ( ab_len2 <= 1e-8f )
+	{
+		return ( a - center ).length() <= radius; // 退化: 点として判定
+	}
+
+	// a→center を ab へ射影した最近点パラメータ t を線分内 [0,1] にクランプ
+	float t = ( center - a ).dot( ab ) / ab_len2;
+	t = std::clamp( t, 0.f, 1.f );
+
+	const core::math::Vector closest = a + ab * t;
+	return ( closest - center ).length() <= radius;
+}
+
+/**
  * awareness（発見度 [0,1]）を1ステップ更新する。
  * 視認中は gain で上昇、非視認中は decay で減衰し、[0,1] にクランプする。
  *

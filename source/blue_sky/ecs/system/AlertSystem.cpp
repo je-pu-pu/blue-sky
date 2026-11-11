@@ -19,6 +19,11 @@ void AlertSystem::update_entity( ComponentTuple& tuple ) const
 	auto* perception = std::get< PerceptionComponent* >( tuple );
 	auto* alert      = std::get< AlertComponent* >( tuple );
 
+	if ( perception->downed )
+	{
+		return; // 無力化中は警戒を凍結
+	}
+
 	const float dt = time_manager_->get_delta_time();
 
 	// awareness を更新（視認で上昇・非視認で減衰）

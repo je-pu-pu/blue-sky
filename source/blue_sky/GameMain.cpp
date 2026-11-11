@@ -150,7 +150,13 @@ GameMain::GameMain( App& app )
 	io.Fonts->AddFontFromFileTTF( "media/font/rounded-mplus-1p-regular.ttf", 28 );
 
 
-	direct_input_.reset( new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() ) );
+	// DirectInput のマウスは、Raw Input を登録できなかったときだけ作る。
+	// DirectInput 8 はマウスを取得（Acquire）すると、プロセスのマウスの Raw Input の登録を自分の隠れた窓へ付け替えるので、
+	// 両方を使うとゲームの窓にマウスの WM_INPUT が届かなくなり、視点が回らなくなる（キーボードは届く）
+	if ( ! get_app()->is_raw_input_enabled() )
+	{
+		direct_input_.reset( new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() ) );
+	}
 
 	input_.reset( new Input( get_app() ) );
 	input_->set_direct_input( direct_input_.get() );
@@ -434,7 +440,11 @@ bool GameMain::update()
 	
 	if ( get_app()->is_active() )
 	{
-		direct_input_->update();
+		if ( direct_input_ )
+		{
+			direct_input_->update();
+		}
+
 		input_->update();
 
 		if ( debug_console_->is_open() )
@@ -480,6 +490,15 @@ bool GameMain::update()
 	// コンソールで打った文字やマウス操作で、UI やキャラクターが動かないように
 	const ImGuiIO& io = ImGui::GetIO();
 	const InputOwner input_owner = decide_input_owner( io.WantCaptureKeyboard || io.WantCaptureMouse, has_overlay_scene() );
+
+	// 受け取る先が変わったときだけログに出す（ゲームが操作できないときに、どこが入力を取っているかを後から追えるように）
+	if ( input_owner != last_input_owner_ )
+	{
+		const char_t* names[] = { "コンソール（imgui）", "オーバーレイ", "ベースシーン" };
+		debug_log( string_t( "[Input] 入力を受け取る先 : " ) + names[ static_cast< int >( last_input_owner_ ) ] + " → " + names[ static_cast< int >( input_owner ) ]
+			+ "（imgui がキーボードを取る : " + ( io.WantCaptureKeyboard ? "はい" : "いいえ" ) + "・マウスを取る : " + ( io.WantCaptureMouse ? "はい" : "いいえ" ) + "）" );
+		last_input_owner_ = input_owner;
+	}
 
 	if ( has_overlay_scene() )
 	{
@@ -592,6 +611,9 @@ void GameMain::render()
 
 	debug_console_->render();
 
+	// 開発用 : ゲーム中のスクショ（F11）。imgui を描く前に撮るので、開発用の窓が写らない
+	dev_tools_->capture_screenshot_if_requested();
+
 	ImGui::Render();
 	get_graphics_manager()->set_default_render_target( false );
     ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );
@@ -629,6 +651,7 @@ void GameMain::on_raw_key_down( int vk )
 
 void GameMain::on_raw_mouse_move( long dx, long dy )
 {
+
 	input_->add_raw_mouse_move( dx, dy );
 }
 
@@ -664,6 +687,10 @@ void GameMain::on_special_key_down( int key )
 	else if ( key == VK_F5 )
 	{
 		on_toggle_full_screen();
+	}
+	else if ( key == VK_F11 )
+	{
+		dev_tools_->request_screenshot();	// 開発用 : ゲーム中のスクショ（F12 はデバッガの中断に取られるので F11）
 	}
 
 	// F1〜F12 だけを番号（1〜12）にしてシーンに渡す（以前はどのキーも key - F1 + 1 にして渡し、文字のキーでも呼ばれていた）
@@ -919,8 +946,35 @@ void GameMain::update_cursor_state()
 	const bool show = ( debug_console_ && debug_console_->is_open() ) || menu_open;
 
 	set_show_cursor( show );
-	Scene* base = scene_stack_->get_base_scene();
-	get_app()->clip_cursor( ! show && base && base->is_clip_cursor_required() );
+
+	const bool captured = is_mouse_captured_by_game();
+	get_app()->clip_cursor( captured );
+
+	// ゲームがマウスを取っている間（カーソルを隠して閉じ込め、視点を回している間）は、imgui にマウスを渡さない。
+	// 渡すと、見えないカーソルが開発用の imgui の窓に重なったときに imgui が入力を受け取り、ゲームへの入力が止まる。
+	// imgui の準備の前（起動の途中）は触らない。シーンが置かれるときにまた呼ばれる
+	if ( ! ImGui::GetCurrentContext() )
+	{
+		return;
+	}
+
+	ImGuiIO& io = ImGui::GetIO();
+
+	if ( captured )
+	{
+		io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+	}
+	else
+	{
+		io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+	}
+}
+
+bool GameMain::is_mouse_captured_by_game()
+{
+	Scene* base = scene_stack_ ? scene_stack_->get_base_scene() : nullptr;
+
+	return ! is_show_cursor_ && base && base->is_clip_cursor_required();
 }
 
 } // namespace blue_sky

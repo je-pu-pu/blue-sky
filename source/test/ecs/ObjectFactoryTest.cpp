@@ -18,6 +18,8 @@
 #include <blue_sky/ecs/system/MoveToTargetSystem.h>
 #include <blue_sky/ecs/system/TranslationSystem.h>
 #include <blue_sky/ecs/system/SpinSystem.h>
+#include <blue_sky/ecs/system/PhysicsSyncSystem.h>
+#include <blue_sky/ecs/system/BalloonHoldSystem.h>
 #include <blue_sky/ecs/component/PickupComponent.h>
 
 #include <core/ecs/EntityManager.h>
@@ -401,6 +403,68 @@ TEST( ObjectFactoryTest, メダルは拾う物で回り_硬くなく当たりの
 	f.factory.restart();
 	f.manager.get_system< blue_sky::ecs::SpinSystem >()->update_spins( 0.5f );
 	EXPECT_FLOAT_EQ( e->get_component< blue_sky::ecs::SimpleObjectComponent >()->direction_degree, 45.f );
+}
+
+TEST( ObjectFactoryTest, メダルと風船は位置で動かす剛体で_物理を進めても書いた位置と向きのまま_プレイヤーとの当たりは起きる )
+{
+	FactoryFixture f;
+
+	const auto medal = * f.factory.create_object( "medal", Vector( 0.f, 5.f, 0.f ) );
+	const auto balloon = * f.factory.create_object( "balloon", Vector( 10.f, 5.f, 0.f ) );
+	const auto stone = * f.factory.create_object( "stone", Vector( 20.f, 5.f, 0.f ) );
+	const auto robot = * f.factory.create_object( "robot", Vector( 30.f, 5.f, 0.f ) );
+
+	auto body_of = [ & ] ( core::ecs::EntityId id ) { return f.entity( id )->get_component< blue_sky::ecs::PhysicsBodyComponent >()->get(); };
+
+	// System が位置を書く物だけがキネマティック（物理で動く石・敵は今までどおり）
+	EXPECT_TRUE( body_of( medal )->is_kinematic() );
+	EXPECT_TRUE( body_of( balloon )->is_kinematic() );
+	EXPECT_FALSE( body_of( stone )->is_kinematic() );
+	EXPECT_FALSE( body_of( robot )->is_kinematic() );
+
+	f.factory.restart();
+
+	// 向きを書いてから物理を何度進めても、書いた位置と向きのまま（Bullet が動きの状態から読み直しても戻らない）
+	f.manager.get_system< blue_sky::ecs::SpinSystem >()->update_spins( 0.5f );
+	blue_sky::ecs::EntityObject( f.entity( balloon ) ).set_location( Vector( 10.f, 6.f, 0.f ) );
+
+	for ( int n = 0; n < 10; n++ )
+	{
+		f.physics.step_simulation( 1.f / 60.f );
+	}
+
+	f.manager.get_system< blue_sky::ecs::PhysicsSyncSystem >()->update_transforms();
+
+	const blue_sky::ecs::EntityObject m( f.entity( medal ) );
+	EXPECT_TRUE( is_near( m.get_location(), Vector( 0.f, 5.f, 0.f ) ) );
+
+	float yaw = 0.f, pitch = 0.f, roll = 0.f;
+	m.get_transform().get_rotation().get_yaw_pitch_roll( yaw, pitch, roll );
+	EXPECT_NEAR( yaw, 3.14159265f / 4.f, 1e-4f );		// 0.5 秒で 45 度（剛体から読み直しても同じ）
+
+	EXPECT_TRUE( is_near( blue_sky::ecs::EntityObject( f.entity( balloon ) ).get_location(), Vector( 10.f, 6.f, 0.f ) ) );
+
+	// 石（動く剛体）は重力で落ちる
+	EXPECT_LT( blue_sky::ecs::EntityObject( f.entity( stone ) ).get_location().y(), 5.f );
+
+	// プレイヤー（動く剛体）をメダルに重ねると、当たりの組にメダルが入る
+	const auto player = f.create_player();
+	blue_sky::ecs::EntityObject( f.entity( player ) ).set_start_location( Vector( 0.f, 5.f, 0.f ) );
+	f.factory.add_player_rigid_body( player );
+
+	std::vector< std::optional< core::ecs::EntityId > > touched;
+	f.physics.contact_test( * body_of( player ), [ & ] ( std::optional< core::ecs::EntityId >, std::optional< core::ecs::EntityId > b ) { touched.push_back( b ); } );
+	EXPECT_NE( std::find( touched.begin(), touched.end(), std::optional< core::ecs::EntityId >( medal ) ), touched.end() );
+
+	// 物理を進めると、プレイヤーとメダルの組が世界の接点に入る（当たりの収集 check_collision_all が受け取る）
+	f.physics.step_simulation( 1.f / 60.f );
+
+	bool found = false;
+	f.physics.for_each_penetrating_contact( [ & ] ( std::optional< core::ecs::EntityId > a, std::optional< core::ecs::EntityId > b )
+	{
+		found = found || ( a == player && b == medal ) || ( a == medal && b == player );
+	} );
+	EXPECT_TRUE( found );
 }
 
 TEST( ObjectFactoryTest, プレイヤーがメダルに当たると拾って_メダルは死ぬ_拾わない物体なら何も起きない )

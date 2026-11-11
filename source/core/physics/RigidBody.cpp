@@ -100,15 +100,25 @@ void RigidBody::set_world_transform( const Transform& transform, const Vector& l
 	offset.setIdentity();
 	offset.setOrigin( local_offset );
 
-	const btTransform t = btTransform( transform ) * offset;
-	rigid_body_->setWorldTransform( t );
-	rigid_body_->setInterpolationWorldTransform( t );
+	set_world_transform_raw( btTransform( transform ) * offset );
 }
 
 void RigidBody::set_world_transform( const Transform& transform )
 {
-	rigid_body_->setWorldTransform( transform );
-	rigid_body_->setInterpolationWorldTransform( transform );
+	set_world_transform_raw( transform );
+}
+
+void RigidBody::set_world_transform_raw( const btTransform& t )
+{
+	rigid_body_->setWorldTransform( t );
+	rigid_body_->setInterpolationWorldTransform( t );
+
+	// キネマティックな剛体は、Bullet が step のたびに動きの状態（motion state）から位置を読み直す
+	// （btRigidBody::saveKinematicState）。動きの状態にも書かないと、書いた位置が元に戻される
+	if ( rigid_body_->isKinematicObject() && rigid_body_->getMotionState() )
+	{
+		rigid_body_->getMotionState()->setWorldTransform( t );
+	}
 }
 
 void RigidBody::set_motion_state_transform( const Transform& transform )

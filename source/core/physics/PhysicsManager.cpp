@@ -299,6 +299,12 @@ RigidBodyHandle PhysicsManager::create_rigid_body( const RigidBodyCreateInfo& in
 	// user_pointer は付けない（Entity の番号のタグは使う側が付ける。RigidBody::set_entity_tag）
 	rigid_body->setUserPointer( nullptr );
 
+	// 位置で動かす物は、世界に入れる前に印を付ける（既定の振り分けは、入れるときの印で動かない物の組にする）
+	if ( info.is_kinematic )
+	{
+		rigid_body->setCollisionFlags( rigid_body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT );
+	}
+
 	if ( info.use_default_collision_filter )
 	{
 		// Bullet の既定の振り分け（以前の BulletPhysics と同じ）
@@ -754,6 +760,42 @@ std::size_t PhysicsManager::get_owned_shape_count() const
 std::size_t PhysicsManager::get_owned_rigid_body_count() const
 {
 	return impl_->owned_rigid_body_list.size();
+}
+
+PhysicsManager::Stats PhysicsManager::get_stats() const
+{
+	Stats stats;
+
+	const auto& objects = impl_->dynamics_world->getCollisionObjectArray();
+	stats.collision_objects = objects.size();
+
+	for ( int n = 0; n < objects.size(); n++ )
+	{
+		if ( objects[ n ]->isActive() )
+		{
+			stats.active_objects++;
+		}
+
+		if ( objects[ n ]->isKinematicObject() )
+		{
+			stats.kinematic_objects++;
+		}
+	}
+
+	stats.overlapping_pairs = impl_->dynamics_world->getBroadphase()->getOverlappingPairCache()->getNumOverlappingPairs();
+
+	auto* dispatcher = impl_->dynamics_world->getDispatcher();
+	stats.manifolds = dispatcher->getNumManifolds();
+
+	for ( int n = 0; n < stats.manifolds; n++ )
+	{
+		if ( dispatcher->getManifoldByIndexInternal( n )->getNumContacts() > 0 )
+		{
+			stats.touching_manifolds++;
+		}
+	}
+
+	return stats;
 }
 
 } // namespace core::physics

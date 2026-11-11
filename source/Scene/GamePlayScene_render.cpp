@@ -12,6 +12,8 @@
 #include <blue_sky/graphics/shader/ShadowMapShader.h>
 
 #include <core/graphics/ShadowMap.h>
+#include <core/physics/PhysicsManager.h>
+#include <blue_sky/DebugLog.h>
 
 #include <core/graphics/Sprite.h>
 
@@ -52,7 +54,17 @@ void GamePlayScene::render()
 	render_text();
 
 	stage_timer_.mark( "文字" );
-	stage_timer_.end_frame( get_graphics_manager()->get_draw_count() );
+
+	if ( stage_timer_.end_frame( get_graphics_manager()->get_draw_count() ) )
+	{
+		// 測る範囲の最後のフレームの、物理の世界の様子（剛体が眠っているか・広い判定の組の数。BLUE_SKY_DEBUG_FRAME_STAGES のとき）
+		const auto stats = get_physics_manager()->get_stats();
+
+		char text[ 256 ];
+		sprintf_s( text, "[FrameStage] 物理の世界 : 剛体 %d 個（眠っていない %d・キネマティック %d）・広い判定の組 %d・接触の組 %d（接点あり %d）",
+			stats.collision_objects, stats.active_objects, stats.kinematic_objects, stats.overlapping_pairs, stats.manifolds, stats.touching_manifolds );
+		debug_log( text );
+	}
 }
 
 /**

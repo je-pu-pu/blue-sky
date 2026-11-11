@@ -57,6 +57,15 @@ struct RigidBodyCreateInfo
 	/// 衝突グループとマスクを使わず、Bullet の既定（動く物は DefaultFilter・全部と当たる、動かない物は StaticFilter・動かない物とは当たらない）にする（本編の物体）
 	bool use_default_collision_filter = false;
 
+	/**
+	 * 位置で動かす物（キネマティック。CF_KINEMATIC_OBJECT）として世界に入れる
+	 *
+	 * 物理では動かず（重力・速度・押されることで動かない）、使う側が set_world_transform で位置を書く。
+	 * 世界に入れる前に印を付けるので、Bullet の既定の振り分けでは動かない物（StaticFilter）と同じ組になり、
+	 * 動かない物・ほかのキネマティックな物との組を広い判定が作らない（動く物とは今までどおり当たりを調べる）
+	 */
+	bool is_kinematic = false;
+
 	short collision_group = CollisionGroup::Default;  // 自身の衝突グループ
 	short collision_mask = CollisionGroup::All;       // 衝突対象のマスク
 };
@@ -306,6 +315,20 @@ public:
 
 	/// これが持つ剛体の数（地面・ステージの当たりの形。シーンを片付けた後の漏れの確かめ用）
 	std::size_t get_owned_rigid_body_count() const;
+
+	/// 世界の様子の数（開発用の計測。BLUE_SKY_DEBUG_FRAME_STAGES のログに出す）
+	struct Stats
+	{
+		int collision_objects = 0;		///< 世界にある剛体（衝突物）の数
+		int active_objects = 0;			///< そのうち眠っていない（isActive）数
+		int kinematic_objects = 0;		///< そのうちキネマティックな数
+		int overlapping_pairs = 0;		///< 広い判定が作った組の数
+		int manifolds = 0;				///< 狭い判定の接触の組（マニフォールド）の数
+		int touching_manifolds = 0;		///< そのうち接点のある数
+	};
+
+	/// 世界の様子を数える（剛体の数だけ回る。開発用）
+	Stats get_stats() const;
 
 }; // class PhysicsManager
 

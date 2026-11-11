@@ -12,6 +12,7 @@ class btDynamicsWorld;
 class btRigidBody;
 class btMotionState;
 class btCollisionShape;
+class btTransform;
 
 namespace core::physics
 {
@@ -63,6 +64,9 @@ private:
 	/// Bullet の剛体（core/physics の中だけで使う。持っていなければ nullptr。以前は public で、本編が Bullet の剛体を直接触っていた）
 	btRigidBody* get() const { return rigid_body_.get(); }
 
+	/// 世界の位置と補間用の位置を t にする（キネマティックなら動きの状態にも書く）
+	void set_world_transform_raw( const btTransform& t );
+
 public:
 	RigidBody();
 
@@ -98,10 +102,11 @@ public:
 	/// 世界の位置と回転に、剛体から見たずれ local_offset を掛けたもの（以前の PhysicsSyncSystem::read_body の Bullet の計算と同じ）
 	Transform get_world_transform( const Vector& local_offset ) const;
 
-	/// transform に剛体から見たずれ local_offset を掛けて、世界の位置と補間用の位置にする（以前の PhysicsSyncSystem::write_body）
+	/// transform に剛体から見たずれ local_offset を掛けて、世界の位置と補間用の位置にする（以前の PhysicsSyncSystem::write_body）。
+	/// キネマティックな剛体は動きの状態にも書く（Bullet が step のたびに動きの状態から読み直すので）
 	void set_world_transform( const Transform& transform, const Vector& local_offset );
 
-	/// 世界の位置と補間用の位置をそのまま transform にする（ずれは掛けない）
+	/// 世界の位置と補間用の位置をそのまま transform にする（ずれは掛けない。キネマティックなら動きの状態にも書く）
 	void set_world_transform( const Transform& transform );
 
 	/// 動きの状態（描画などに補間して渡す位置）の位置を transform にする

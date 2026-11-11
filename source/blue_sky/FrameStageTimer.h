@@ -125,11 +125,12 @@ public:
 	}
 
 	/// @param draw_count このフレームで描いた回数（GraphicsManager::get_draw_count）
-	void end_frame( unsigned draw_count )
+	/// @return 測る範囲の最後のフレームで、結果をログに出したら true（呼ぶ側が続けて自分の数を出せる）
+	bool end_frame( unsigned draw_count )
 	{
 		if ( ! in_range_ )
 		{
-			return;
+			return false;
 		}
 
 		LARGE_INTEGER now;
@@ -146,7 +147,7 @@ public:
 
 		if ( frame_ != last_ )
 		{
-			return;
+			return false;
 		}
 
 		char text[ 256 ];
@@ -159,6 +160,8 @@ public:
 			sprintf_s( text, "[FrameStage]   %s : %.3f ms", s.name.c_str(), median( s.samples ) );
 			debug_log( text );
 		}
+
+		return true;
 	}
 };
 

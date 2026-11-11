@@ -68,6 +68,7 @@ public:
 		bool			is_safe_footing = false;		///< 着地しても死なない足場（以前の is_safe_footing）
 		bool			is_ghost = false;				///< すり抜ける（レイが当たらない。以前の is_ghost。空間スイッチ）
 		bool			is_static_object = false;		///< 動かない物の印（StaticObjectComponent）を付けるか
+		bool			is_kinematic = false;			///< 剛体を位置で動かす物（キネマティック）にするか。System が毎フレーム位置を書き、物理では動かない物（メダル・風船）
 		float_t			height_offset = -1.f;			///< 足元から剛体の中心までの高さ（負なら当たりの高さの半分。以前の get_height_offset）
 		bool			has_default_gravity = false;	///< やり直したときの重力を gravity にするか（false なら 硬い物は地球の重力、硬くない物は 0）
 		core::Vector	gravity = core::Vector::Zero;

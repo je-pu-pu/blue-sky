@@ -449,3 +449,99 @@ TEST( RigidBodyTest, 位置はずれを掛けて送り_ずれを戻して読む 
 	EXPECT_FLOAT_EQ( 5.f, body.get_center_of_mass_position().y() );
 	EXPECT_FLOAT_EQ( 4.f, body.get_world_transform( Vector::Zero ).get_position().x() );
 }
+
+// ---- 位置で動かす剛体（キネマティック。メダル・風船） ----
+
+namespace
+{
+
+/// 本編の物体と同じ作り方で、作るときからキネマティックな箱を作る
+RigidBody make_kinematic_box( PhysicsManager& physics, const Transform& transform, const Vector& half )
+{
+	RigidBodyCreateInfo info;
+	info.shape_type = RigidBodyShapeType::Box;
+	info.shape_size = half;
+	info.mass = 1.f;
+	info.transform = transform;
+	info.offset = Transform::identity();
+	info.friction = RigidBodyCreateInfo::BulletDefaultFriction;
+	info.share_shape = true;
+	info.use_default_collision_filter = true;
+	info.is_kinematic = true;
+
+	return physics.create_rigid_body( info );
+}
+
+} // namespace
+
+TEST( RigidBodyTest, キネマティックな剛体は重力で落ちず_書いた位置は物理を進めても戻らない )
+{
+	PhysicsManager physics;
+	auto body = make_kinematic_box( physics, at( 0.f, 10.f, 0.f ), Vector( 0.5f, 0.5f, 0.5f ) );
+
+	EXPECT_TRUE( body.is_kinematic() );
+
+	physics.step_simulation( 1.f / 60.f );
+	EXPECT_FLOAT_EQ( 10.f, body.get_center_of_mass_position().y() );
+
+	// 書いた位置は、Bullet が step のたびに動きの状態から読み直しても、そのまま（動きの状態にも書くので）
+	body.set_world_transform( at( 3.f, 4.f, 5.f ), Vector( 0.f, 0.5f, 0.f ) );
+
+	for ( int n = 0; n < 5; n++ )
+	{
+		physics.step_simulation( 1.f / 60.f );
+	}
+
+	EXPECT_FLOAT_EQ( 3.f, body.get_center_of_mass_position().x() );
+	EXPECT_FLOAT_EQ( 4.5f, body.get_center_of_mass_position().y() );
+	EXPECT_FLOAT_EQ( 5.f, body.get_center_of_mass_position().z() );
+
+	// 位置を読むのも同じ（PhysicsManager::get_rigid_body_transform は動きの状態から読む）
+	Vector position;
+	core::math::Quaternion rotation;
+	physics.get_rigid_body_transform( body, position, rotation );
+	EXPECT_FLOAT_EQ( 4.5f, position.y() );
+}
+
+TEST( PhysicsManagerTest, キネマティックな剛体は動く剛体と当たり_動かない物_ほかのキネマティックな物とは組を作らない )
+{
+	PhysicsManager physics;
+	physics.add_ground( Vector( 100.f, 1.f, 100.f ) );
+
+	// 地面にめり込むキネマティックな箱 2 つ（互いにも重なる）と、それに重なる動く箱
+	auto a = make_kinematic_box( physics, at( 0.f, 0.4f, 0.f ), Vector( 0.5f, 0.5f, 0.5f ) );
+	auto b = make_kinematic_box( physics, at( 0.5f, 0.4f, 0.f ), Vector( 0.5f, 0.5f, 0.5f ) );
+	auto dynamic = make_box( physics, at( 0.f, 1.2f, 0.f ), Vector( 0.5f, 0.5f, 0.5f ), 1.f );
+	a.set_entity_tag( 1 );
+	b.set_entity_tag( 2 );
+	dynamic.set_entity_tag( 3 );
+
+	// 当たりの応答を消しても（メダル・風船）、組は作る
+	a.set_no_contact_response( true );
+
+	physics.step_simulation( 1.f / 60.f );
+
+	std::vector< std::pair< Tag, Tag > > contacts;
+	physics.for_each_penetrating_contact( [ & ] ( Tag x, Tag y ) { contacts.emplace_back( x, y ); } );
+
+	auto has = [ & ] ( Tag x, Tag y )
+	{
+		return std::any_of( contacts.begin(), contacts.end(), [ & ] ( const auto& c ) { return ( c.first == x && c.second == y ) || ( c.first == y && c.second == x ); } );
+	};
+
+	EXPECT_TRUE( has( Tag( 1 ), Tag( 3 ) ) );		// キネマティック × 動く物
+	EXPECT_TRUE( has( Tag( 2 ), Tag( 3 ) ) );
+	EXPECT_FALSE( has( Tag( 1 ), Tag( 2 ) ) );		// キネマティックどうし
+	EXPECT_FALSE( has( Tag( 1 ), Tag() ) );			// キネマティック × 地面（動かない物）
+	EXPECT_FALSE( has( Tag( 2 ), Tag() ) );
+
+	// 動く剛体から調べても見つかる（プレイヤーの当たりの調べ方 contact_test）
+	std::vector< Tag > touched;
+	physics.contact_test( dynamic, [ & ] ( Tag, Tag y ) { touched.push_back( y ); } );
+	EXPECT_NE( std::find( touched.begin(), touched.end(), Tag( 1 ) ), touched.end() );
+
+	// 数える（開発用）
+	const auto stats = physics.get_stats();
+	EXPECT_EQ( 4, stats.collision_objects );
+	EXPECT_EQ( 2, stats.kinematic_objects );
+}

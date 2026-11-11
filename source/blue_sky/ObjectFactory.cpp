@@ -128,6 +128,7 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		spec.is_hard = false;
 		spec.is_block = false;
 		spec.height_offset = 0.f;
+		spec.is_kinematic = true;	// 物理では動かない（重力 0・当たりの応答なし）。向きは SpinSystem が毎フレーム書く
 
 		const EntityId id = create_entity_object( spec );
 		core::ecs::Entity* entity = entity_manager_->find( id );
@@ -250,6 +251,7 @@ std::optional< ObjectFactory::EntityId > ObjectFactory::create_object( const str
 		spec.is_block = false;
 		spec.is_safe_footing = true;
 		spec.height_offset = 0.f;
+		spec.is_kinematic = true;	// 物理では動かない（重力 0・当たりの応答なし）。位置と向きは BalloonHoldSystem が毎フレーム書く
 
 		const EntityId id = create_entity_object( spec );
 		entity_manager_->find( id )->add_component< ecs::BalloonHoldComponent >();
@@ -456,7 +458,12 @@ ObjectFactory::EntityId ObjectFactory::create_entity_object( const ObjectSpec& s
 
 		const Vector half( w / 2.f, h / 2.f, d / 2.f );
 
-		core::physics::RigidBody owner = physics_->create_rigid_body( make_body_info( spec.shape == Shape::CYLINDER ? core::physics::RigidBodyShapeType::Cylinder : core::physics::RigidBodyShapeType::Box, half, spec.mass, transform->transform, offset ) );
+		auto info = make_body_info( spec.shape == Shape::CYLINDER ? core::physics::RigidBodyShapeType::Cylinder : core::physics::RigidBodyShapeType::Box, half, spec.mass, transform->transform, offset );
+
+		// 位置で動かす物は、物理で積分せず、動かない物・ほかの位置で動かす物との組を広い判定が作らない（プレイヤー・石とは今までどおり当たる）
+		info.is_kinematic = spec.is_kinematic;
+
+		core::physics::RigidBody owner = physics_->create_rigid_body( info );
 
 		if ( ! spec.is_hard )
 		{

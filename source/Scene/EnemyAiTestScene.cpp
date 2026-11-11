@@ -3,6 +3,7 @@
 #include <blue_sky/SceneManager.h>
 #include <blue_sky/GameMain.h>
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/ConstantBuffers.h>
 #include <blue_sky/Input.h>
 
 #include <core/ecs/EntityManager.h>
@@ -218,6 +219,21 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 		Vector( -5.f, 5.f, 12.f ),
 		{ Vector( -5.f, 5.f, 12.f ), Vector( 5.f, 5.f, 12.f ) } );
 
+	// --- 対空（地上に居たまま上を見る）。空が「基本は自由、でも油断できない」になるように置く ---
+	// 橋（y5, x[-3,3], z12）の真下。屋上ネットワークへ飛んで上がる経路の上空を見張る。
+	// 橋そのものが LOS を遮るので、橋の上を歩くぶんには見えず、脇の空へ出ると見つかる。
+	spawn_enemy(
+		Vector( 0.f, 0.f, 12.f ),
+		{ Vector( -2.f, 0.f, 12.f ), Vector( 2.f, 0.f, 12.f ) },
+		EnemyKind::AntiAir );
+
+	// 南の接近路。スポーン（z-10）から街へ飛んで入ってくる空を見張る。
+	// 既存の歩行ロボの巡回レーン（x0..1, z0..8）とは重ならない位置に置く。
+	spawn_enemy(
+		Vector( -3.f, 0.f, 2.f ),
+		{ Vector( -4.f, 0.f, 2.f ), Vector( -2.f, 0.f, 2.f ) },
+		EnemyKind::AntiAir );
+
 	// 花火（陽動の音源）。生成/破棄はせず使い回す。普段は地下へ退避し無音。
 	firework_ = get_entity_manager()->create_entity();
 	{
@@ -318,6 +334,9 @@ void EnemyAiTestScene::update_target()
 	if ( ( tp - ppos ).length() <= 1.6f )
 	{
 		++score_;
+
+		// 拾い物で消費アイテムを補給（doc/動詞とゲームシステム.md 7章「安全な探索＝補給」）
+		umbrella_count_ = ( std::min )( umbrella_max_, umbrella_count_ + 1 );
 		if ( score_ >= 30 )
 		{
 			cleared_ = true;
@@ -332,32 +351,57 @@ void EnemyAiTestScene::update_target()
 	}
 }
 
-void EnemyAiTestScene::spawn_enemy( const Vector& start, const std::vector< Vector >& waypoints )
+void EnemyAiTestScene::spawn_enemy( const Vector& start, const std::vector< Vector >& waypoints, EnemyKind kind )
 {
+	const bool anti_air = ( kind == EnemyKind::AntiAir );
+
 	auto* e = get_entity_manager()->create_entity();
 
 	auto* t = e->add_component< TransformComponent >();
 	t->transform.set_identity();
 	t->transform.set_position( start );
 
-	// 見た目（プレースホルダの箱＝ロボット）
+	// 見た目（プレースホルダの箱＝ロボット）。対空は一目で見分けられるよう青緑に着色する。
 	e->add_component< RenderComponent >();
 	auto* m = e->add_component< ModelComponent >();
-	m->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "box-1x1x1" ) );
+	if ( anti_air )
+	{
+		auto* model  = get_graphics_manager()->clone_model( get_graphics_manager()->load_model( "box-1x1x1" ) );
+		auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit_unicolor" ) );
+		shader->set_color( "color", Color( 0.15f, 0.65f, 0.78f, 1.f ) );
+		model->set_shader_at( 0, shader );
+		m->model = get_graphics_manager()->get_model_handle( model );
+	}
+	else
+	{
+		m->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "box-1x1x1" ) );
+	}
 
 	auto* perception = e->add_component< blue_sky::ecs::PerceptionComponent >();
 	perception->eye_height = 1.0f;
-	perception->cone.view_distance      = 18.f;
-	perception->cone.horizontal_half_fov = 1.0472f; // 60deg
-	perception->cone.vertical_up_limit  = 0.3491f;  // 20deg
+	if ( anti_air )
+	{
+		// 対空: 上方を広く見る（70deg）。ただし真上（70deg 超）は死角＝直上を抜ければ通れる。
+		// 引き換えに水平は狭く（45deg）＝地上での正面の脅威は歩行ロボより小さい。
+		perception->cone.view_distance       = 26.f;
+		perception->cone.horizontal_half_fov = 0.7854f; // 45deg
+		perception->cone.vertical_up_limit   = 1.2217f; // 70deg
+	}
+	else
+	{
+		perception->cone.view_distance       = 18.f;
+		perception->cone.horizontal_half_fov = 1.0472f; // 60deg
+		perception->cone.vertical_up_limit   = 0.3491f; // 20deg
+	}
 
 	e->add_component< blue_sky::ecs::AlertComponent >();
 
 	auto* patrol = e->add_component< blue_sky::ecs::PatrolComponent >();
 	patrol->waypoints = waypoints;
-	patrol->move_speed = 2.5f;
+	patrol->move_speed = anti_air ? 1.2f : 2.5f;  // 対空はゆっくり空を見張る
 
 	enemies_.push_back( e );
+	enemy_kinds_.push_back( kind );
 }
 
 core::ecs::Entity* EnemyAiTestScene::spawn_solid_box( const Vector& center, const Vector& half, const Color& color )
@@ -548,10 +592,17 @@ void EnemyAiTestScene::update()
 
 	update_firework();
 	update_smoke();
+	update_umbrella();   // 傘の開閉は FpsPlayerControlSystem が読むので System より前
 	try_neutralize();
 	update_target();
 
 	get_entity_manager()->update();
+
+	// 着地衝撃 → 落下ダメージ。衝撃は System が出すので System より後。
+	update_fall_damage();
+
+	// 視認中の敵から被弾（HP 減）。HP 0 でやられ。
+	update_combat();
 
 	// 警戒中の敵に接近されたら捕捉 → スポーンへ戻す
 	check_caught();
@@ -588,14 +639,30 @@ void EnemyAiTestScene::check_caught()
 		}
 	}
 
-	if ( ! caught )
+	if ( caught )
 	{
-		return;
+		respawn_player();
 	}
+}
 
+void EnemyAiTestScene::respawn_player()
+{
 	// プレイヤーを物理ボディごとスポーンへ戻す（剛体原点は offset ぶん上）
+	// 剛体ごと戻し、落下の速度も消す（残すと落下死の直後に、その速度のまま着地してまた死ぬ）
 	teleport_player( player_spawn_ );
-	carried_ = nullptr; // 捕まったら運搬中の死体は落とす
+	carried_   = nullptr;             // やられたら運搬中の死体は落とす
+	player_hp_ = player_hp_max_;      // 体力全回復
+
+	// ステージの最初に戻る＝落下・飛行・消費アイテムも開始時の状態へ
+	if ( fps_player_ )
+	{
+		fps_player_->fall_speed     = 0.f;
+		fps_player_->landing_impact = 0.f;
+		fps_player_->umbrella_open  = false;
+		fps_player_->fly_fuel       = fps_player_->fly_fuel_max;
+	}
+	umbrella_count_ = umbrella_start_;
+	fall_flash_     = 0.f;
 
 	// 敵の警戒を解く（全員 無警戒へ）
 	for ( auto* e : enemies_ )
@@ -610,12 +677,136 @@ void EnemyAiTestScene::check_caught()
 
 	caught_flash_ = 2.0f;
 
-	// 捕まると連続ポイントはリセットし、最初の要所からやり直し（クリア後は据え置き）
+	// 連続ポイントはリセットし、最初の要所からやり直し（クリア後は据え置き）
 	if ( ! cleared_ )
 	{
 		score_ = 0;
 		current_target_ = 0;
 		place_target();
+	}
+}
+
+void EnemyAiTestScene::update_combat()
+{
+	const float  dt   = get_time_manager()->get_delta_time();
+	const Vector ppos = player_transform_->transform.get_position();
+
+	enemy_fire_cd_.resize( enemies_.size(), 0.f );
+
+	// 現在プレイヤーを視認している警戒中(Alarmed)かつ射程内の敵が、一定間隔で射撃する。
+	// 狙っている間はレーザー線を描き、発砲の瞬間に被弾（複数体で加算）。
+	combat_tracers_.clear();
+	bool targeted = false;
+	for ( std::size_t i = 0; i < enemies_.size(); ++i )
+	{
+		auto* e     = enemies_[ i ];
+		auto* alert = e->get_component< blue_sky::ecs::AlertComponent >();
+		auto* perc  = e->get_component< blue_sky::ecs::PerceptionComponent >();
+		auto* et    = e->get_component< TransformComponent >();
+		if ( ! alert || ! perc || ! et || perc->downed )
+		{
+			continue;
+		}
+
+		Vector to = ppos - et->transform.get_position();
+		const bool can_shoot =
+			alert->state == ai::AlertState::Alarmed &&
+			perc->target_visible &&
+			to.length() <= perc->cone.view_distance;
+
+		if ( ! can_shoot )
+		{
+			enemy_fire_cd_[ i ] = combat_fire_interval_ * 0.5f; // 再照準は少し溜めてから
+			continue;
+		}
+
+		targeted = true;
+		combat_tracers_.push_back( et->transform.get_position() + Vector( 0.f, perc->eye_height, 0.f ) );
+
+		enemy_fire_cd_[ i ] -= dt;
+		if ( enemy_fire_cd_[ i ] <= 0.f )
+		{
+			enemy_fire_cd_[ i ] = combat_fire_interval_;
+			player_hp_ = ( std::max )( 0.f, player_hp_ - combat_shot_damage_ );
+			hit_flash_ = 0.35f;
+			if ( player_hp_ <= 0.f )
+			{
+				respawn_player();   // やられ → スポーンへ
+				break;
+			}
+		}
+	}
+
+	// 誰にも狙われていなければ徐々に回復
+	if ( ! targeted )
+	{
+		player_hp_ = ( std::min )( player_hp_max_, player_hp_ + combat_regen_ * dt );
+	}
+
+	if ( hit_flash_ > 0.f )
+	{
+		hit_flash_ -= dt;
+	}
+}
+
+void EnemyAiTestScene::update_umbrella()
+{
+	if ( ! fps_player_ )
+	{
+		return;
+	}
+
+	// 接地したら閉じる（次の落下ではまた 1 個必要）。
+	// is_grounded は System が出すので 1 フレーム前の値だが、開閉の判断には十分。
+	if ( fps_player_->is_grounded )
+	{
+		fps_player_->umbrella_open = false;
+		return;
+	}
+
+	// 空中で B（右クリック）を押している間だけ開く。閉→開になる瞬間に 1 個消費する。
+	// press で見るのは、地上で構えたまま縁から踏み出す（＝空中に出た瞬間に開く）ため。
+	if ( get_input()->press( core::input::Button::B ) )
+	{
+		if ( ! fps_player_->umbrella_open && umbrella_count_ > 0 )
+		{
+			--umbrella_count_;
+			fps_player_->umbrella_open = true;
+		}
+	}
+	else
+	{
+		fps_player_->umbrella_open = false;
+	}
+}
+
+void EnemyAiTestScene::update_fall_damage()
+{
+	if ( ! fps_player_ )
+	{
+		return;
+	}
+
+	if ( fall_flash_ > 0.f )
+	{
+		fall_flash_ -= get_time_manager()->get_delta_time();
+	}
+
+	// 傘を開いていれば終端速度（3m/s）で着地するので、必ず無傷側に入る。
+	const float impact = fps_player_->landing_impact;
+	if ( impact <= fall_safe_speed_ )
+	{
+		return;
+	}
+
+	// 無傷速度〜致死速度を線形補間して HP を削る（致死速度なら満タンからでも死ぬ）。
+	const float t = ( impact - fall_safe_speed_ ) / ( std::max )( 0.01f, fall_lethal_speed_ - fall_safe_speed_ );
+	player_hp_  = ( std::max )( 0.f, player_hp_ - player_hp_max_ * ( std::min )( t, 1.f ) );
+	fall_flash_ = 0.5f;
+
+	if ( player_hp_ <= 0.f )
+	{
+		respawn_player();
 	}
 }
 
@@ -834,8 +1025,9 @@ void EnemyAiTestScene::draw_debug()
 		return;
 	}
 
-	for ( auto* e : enemies_ )
+	for ( std::size_t enemy_index = 0; enemy_index < enemies_.size(); ++enemy_index )
 	{
+		auto* e = enemies_[ enemy_index ];
 		auto* transform  = e->get_component< TransformComponent >();
 		auto* perception = e->get_component< blue_sky::ecs::PerceptionComponent >();
 		auto* alert      = e->get_component< blue_sky::ecs::AlertComponent >();
@@ -884,6 +1076,30 @@ void EnemyAiTestScene::draw_debug()
 		}
 		// 敵の体と扇をつなぐ縦線（足元→目の高さ）。錐の原点が敵だと分かるように。
 		dd->drawLine( apex, pos + Vector( 0.f, perception->eye_height, 0.f ), col );
+
+		// 対空だけ、上方許容角の境界（斜め上に開く錐）も描く。床の扇だけでは「どこまで上を
+		// 見るか」が分からず、対空の真上が死角であることも読めないため。
+		if ( enemy_kinds_[ enemy_index ] == EnemyKind::AntiAir )
+		{
+			const Vector eye = pos + Vector( 0.f, perception->eye_height, 0.f );
+			const float  el  = perception->cone.vertical_up_limit;
+			const float  ce  = std::cos( el );
+			const float  se  = std::sin( el );
+			const int    K   = 8;
+			Vector prev_up;
+			for ( int i = 0; i <= K; ++i )
+			{
+				const float a = base - half + ( 2.f * half ) * static_cast< float >( i ) / K;
+				const Vector end = eye + Vector( std::sin( a ) * ce, se, std::cos( a ) * ce ) * dist;
+
+				dd->drawLine( eye, end, col );
+				if ( i > 0 )
+				{
+					dd->drawLine( prev_up, end, col );
+				}
+				prev_up = end;
+			}
+		}
 
 		// 正面マーカ（白い矢印＝鼻）。箱のどちらが前かを一目で分かるように前方へ突き出す。
 		// 状態色（黄/橙/赤/灰）と区別するため固定の白にする。
@@ -1009,6 +1225,25 @@ void EnemyAiTestScene::draw_debug()
 		}
 	}
 
+	// 被弾トレーサー（赤）＝いま撃ってくる敵の目 → プレイヤーの胸。
+	// ＋発砲元の頭上に赤い縦線＋×マーカ（一人称でレーザーが見えづらいので発砲元を目立たせる）。
+	{
+		// 視線の高さだと一人称で見えづらいので、足元へ向けて撃つ（斜め下から入ってくる）。
+		const Vector pfeet = player_transform_->transform.get_position() + Vector( 0.f, 0.15f, 0.f );
+		const core::Vector shot_col( 1.0f, 0.15f, 0.1f );
+		for ( const auto& eye : combat_tracers_ )
+		{
+			const core::Vector e( eye.x(), eye.y(), eye.z() );
+			dd->drawLine( e, core::Vector( pfeet.x(), pfeet.y(), pfeet.z() ), shot_col );
+
+			// 発砲元マーカ: 頭上に高い赤い縦線＋大きな×（遠くからでも発砲元が分かる）
+			const core::Vector top = e + core::Vector( 0.f, 2.5f, 0.f );
+			dd->drawLine( e, top, shot_col );
+			dd->drawLine( top + core::Vector( -0.5f, 0.f, -0.5f ), top + core::Vector( 0.5f, 0.f, 0.5f ), shot_col );
+			dd->drawLine( top + core::Vector( -0.5f, 0.f,  0.5f ), top + core::Vector( 0.5f, 0.f, -0.5f ), shot_col );
+		}
+	}
+
 }
 
 void EnemyAiTestScene::render()
@@ -1028,14 +1263,23 @@ void EnemyAiTestScene::render()
 	{
 		ss << "SCORE: " << score_ << " / 30   (get the spinning yellow cube; caught = reset)\n";
 	}
+	ss << "HP: " << static_cast< int >( player_hp_ ) << " / " << static_cast< int >( player_hp_max_ );
+	if ( hit_flash_ > 0.f ) { ss << "   <<< UNDER FIRE! >>>"; }
+	ss << "\n";
 	if ( caught_flash_ > 0.f )
 	{
-		ss << "*** CAUGHT! streak reset, sent back to start ***\n";
+		ss << "*** DOWN! streak reset, sent back to start ***\n";
 	}
-	ss << "WASD move, C: run, Space: jump / hold in air to fly, Q: firework, E: smoke, Z: neutralize/carry.\n";
+	ss << "WASD move, C: run, Space: jump / hold in air to fly, RMB: umbrella (hold while falling),\n"
+	   << "Q: firework, E: smoke, Z: neutralize/carry.\n";
 	if ( fps_player_ )
 	{
-		ss << "jet fuel: " << static_cast< int >( fps_player_->fly_fuel * 100.f ) << "%\n";
+		ss << "jet fuel: " << static_cast< int >( fps_player_->fly_fuel * 100.f ) << "%"
+		   << "   umbrella: " << umbrella_count_ << " / " << umbrella_max_
+		   << ( fps_player_->umbrella_open ? " [OPEN]" : "" )
+		   << "   fall: " << static_cast< int >( fps_player_->fall_speed ) << " m/s"
+		   << ( fps_player_->fall_speed > fall_safe_speed_ ? " (!)" : "" )
+		   << "\n";
 	}
 	if ( carried_ )
 	{
@@ -1057,11 +1301,137 @@ void EnemyAiTestScene::render()
 			ss << "enemy[" << i << "] DOWNED\n";
 			continue;
 		}
-		ss << "enemy[" << i << "] " << state_name( alert->state )
+		ss << "enemy[" << i << "]" << ( enemy_kinds_[ i ] == EnemyKind::AntiAir ? "(AA)" : "    " )
+		   << " " << state_name( alert->state )
 		   << "  awareness=" << alert->awareness << "\n";
 	}
 
 	get_graphics_manager()->draw_text( 10.f, 10.f, 480.f, 200.f, ss.str().c_str(), Color::White );
+
+	// 画面全体の赤フラッシュ: 被弾・やられ・低HP。imgui の前面描画リストに直接乗せる。
+	{
+		float a = 0.f;
+		if ( hit_flash_    > 0.f ) { a = ( std::max )( a, ( hit_flash_    / 0.35f ) * 0.35f ); } // 被弾
+		if ( fall_flash_   > 0.f ) { a = ( std::max )( a, ( fall_flash_   / 0.5f  ) * 0.45f ); } // 落下ダメージ
+		if ( caught_flash_ > 0.f ) { a = ( std::max )( a, ( caught_flash_ / 2.0f  ) * 0.55f ); } // やられ
+		if ( player_hp_ < 30.f )   { a = ( std::max )( a, ( 1.f - player_hp_ / 30.f ) * 0.22f ); } // 低HPの赤ふち
+		if ( a > 0.002f )
+		{
+			const ImVec2 sz = ImGui::GetIO().DisplaySize;
+			ImGui::GetForegroundDrawList()->AddRectFilled(
+				ImVec2( 0.f, 0.f ), sz,
+				IM_COL32( 200, 20, 20, static_cast< int >( ( std::min )( a, 1.f ) * 255.f ) ) );
+		}
+	}
+
+	// 被弾フィードバック: 一人称では敵→自分のワールド線はカメラに収束して見えないので、
+	// 発砲元をスクリーンへ投影し「敵の画面上位置 → 照準」へ太い赤ビーム＋発砲フラッシュを描く。
+	// 敵が画面外なら画面端の赤い矢印で方向を示す。
+	if ( fps_player_ && ! combat_tracers_.empty() )
+	{
+		const Vector  ppos = player_transform_->transform.get_position();
+		const float   yaw  = fps_player_->yaw;
+		const ImVec2  sz   = ImGui::GetIO().DisplaySize;
+		const ImVec2  ctr( sz.x * 0.5f, sz.y * 0.5f );
+		auto*         dl   = ImGui::GetForegroundDrawList();
+
+		// 描画に使っている view/projection を再利用（Vector*Matrix の2段で変換）
+		const auto& fd = get_graphics_manager()->get_frame_render_data()->data();
+		auto to_screen = [&]( const Vector& w, ImVec2& out ) -> bool
+		{
+			const Vector c = ( Vector( w.x(), w.y(), w.z(), 1.f ) * fd.view ) * fd.projection;
+			const float wv = c.w();
+			if ( wv <= 0.0001f ) return false;                 // カメラ後方
+			const float nx = c.x() / wv, ny = c.y() / wv;      // NDC (-1..1)
+			out = ImVec2( ( nx * 0.5f + 0.5f ) * sz.x, ( 1.f - ( ny * 0.5f + 0.5f ) ) * sz.y );
+			return true;
+		};
+
+		// 被弾直後はパルスで太く・大きく（気づきやすさ）
+		const float pulse = 1.f + 0.7f * ( hit_flash_ > 0.f ? hit_flash_ / 0.35f : 0.f );
+
+		for ( const auto& s : combat_tracers_ )
+		{
+			ImVec2 muzzle;
+			const bool proj  = to_screen( s, muzzle );
+			const bool onscr = proj && muzzle.x > -60.f && muzzle.x < sz.x + 60.f
+			                        && muzzle.y > -60.f && muzzle.y < sz.y + 60.f;
+			if ( onscr )
+			{
+				// 発砲元 → 照準 の太い赤ビーム（黒フチ→赤芯）＋発砲フラッシュ
+				dl->AddLine( muzzle, ctr, IM_COL32(   0,  0,  0, 190 ), 10.f * pulse );
+				dl->AddLine( muzzle, ctr, IM_COL32( 255, 40, 30, 235 ),  5.f * pulse );
+				dl->AddCircleFilled( muzzle, 11.f * pulse, IM_COL32( 255,  70, 35, 255 ) );
+				dl->AddCircleFilled( muzzle,  5.f * pulse, IM_COL32( 255, 235,190, 255 ) );
+			}
+			else
+			{
+				// 画面外の敵: 画面端に大きな赤い矢印で方向を示す
+				Vector d = s - ppos;
+				const float ang = std::atan2( d.x(), d.z() ) - yaw;   // 前方=0, 右=+
+				const float ox = std::sin( ang ), oy = -std::cos( ang );
+				const float pxp = -oy, pyp = ox;
+				const float R = ( std::min )( sz.x, sz.y ) * 0.42f;
+				const float len = 46.f * pulse, wid = 30.f * pulse;
+				const ImVec2 tip ( ctr.x + ox * ( R + len ), ctr.y + oy * ( R + len ) );
+				const ImVec2 b1  ( ctr.x + ox * R + pxp * wid, ctr.y + oy * R + pyp * wid );
+				const ImVec2 b2  ( ctr.x + ox * R - pxp * wid, ctr.y + oy * R - pyp * wid );
+				const ImVec2 tipO( ctr.x + ox * ( R + len + 6.f ), ctr.y + oy * ( R + len + 6.f ) );
+				const ImVec2 b1O ( ctr.x + ox * ( R - 6.f ) + pxp * ( wid + 6.f ), ctr.y + oy * ( R - 6.f ) + pyp * ( wid + 6.f ) );
+				const ImVec2 b2O ( ctr.x + ox * ( R - 6.f ) - pxp * ( wid + 6.f ), ctr.y + oy * ( R - 6.f ) - pyp * ( wid + 6.f ) );
+				dl->AddTriangleFilled( tipO, b1O, b2O, IM_COL32(   0,  0,  0, 220 ) );
+				dl->AddTriangleFilled( tip,  b1,  b2,  IM_COL32( 255, 40, 30, 255 ) );
+			}
+		}
+	}
+
+	// 傘オーバーレイ: 開いている間、画面上部から吊り下がる和傘の内側を描く。
+	// 一人称では傘は視界の外（頭上）にあって見えないので、HUD 文字だけでは効果が分かりにくい。
+	// 画面上部を覆う「傘の下から見上げた内側」を描いて、落下が緩んでいることを体で伝える。
+	if ( fps_player_ && fps_player_->umbrella_open )
+	{
+		const ImVec2 sz = ImGui::GetIO().DisplaySize;
+		auto*        dl = ImGui::GetForegroundDrawList();
+
+		const float cx   = sz.x * 0.5f;
+		const float hubY = sz.y * 0.02f;   // 中棒の先（頂点＝一番近い）
+		const float half = sz.x * 0.52f;   // 画面幅より少し広く張り出す
+		const float sag  = sz.y * 0.30f;   // 縁の垂れ下がり
+
+		constexpr int K = 10;
+		ImVec2 hem[ K + 1 ];
+		for ( int i = 0; i <= K; ++i )
+		{
+			const float f  = static_cast< float >( i ) / K - 0.5f;  // -0.5..0.5
+			const float y  = hubY + sag * ( 4.f * f * f );          // 放物線: 中央が高く縁が垂れる
+			hem[ i ] = ImVec2( cx + f * 2.f * half, y );
+		}
+
+		const ImVec2 hub( cx, hubY );
+		const ImU32  panel_a = IM_COL32( 198,  66,  52, 224 );  // 和傘の朱
+		const ImU32  panel_b = IM_COL32( 226, 120,  96, 224 );  // 明るい朱（コマの交互）
+		const ImU32  rib     = IM_COL32(  74,  26,  22, 235 );  // 骨・縁（濃い焦茶）
+
+		// 扇形パネル（交互色）＝傘のコマ
+		for ( int i = 0; i < K; ++i )
+		{
+			dl->AddTriangleFilled( hub, hem[ i ], hem[ i + 1 ], ( i & 1 ) ? panel_b : panel_a );
+		}
+		// スカラップ（縁の下向きの膨らみ）＝和傘のフチのなみなみ
+		for ( int i = 0; i < K; ++i )
+		{
+			const ImVec2 mid( ( hem[ i ].x + hem[ i + 1 ].x ) * 0.5f,
+			                  ( hem[ i ].y + hem[ i + 1 ].y ) * 0.5f + sz.y * 0.03f );
+			dl->AddTriangleFilled( hem[ i ], hem[ i + 1 ], mid, ( i & 1 ) ? panel_a : panel_b );
+		}
+		// 骨（ハブ→縁の放射線）と縁のライン
+		for ( int i = 0; i <= K; ++i )
+		{
+			dl->AddLine( hub, hem[ i ], rib, 2.f );
+		}
+		dl->AddPolyline( hem, K + 1, rib, 0, 2.5f );
+		dl->AddCircleFilled( hub, 5.f, rib );  // 中棒の先端（石突）
+	}
 
 	// 警報伝播の切替（簡単に ON/OFF できるように）
 	ImGui::Begin( "Enemy AI" );

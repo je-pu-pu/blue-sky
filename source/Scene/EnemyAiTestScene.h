@@ -42,7 +42,14 @@ public:
 	bool is_clip_cursor_required() override { return true; }
 
 private:
-	void spawn_enemy( const core::math::Vector& start, const std::vector< core::math::Vector >& waypoints );
+	/// 敵の種別（doc/動詞とゲームシステム.md 4章）。滞空タイプ（飛行ドローン）はまだ無い。
+	enum class EnemyKind
+	{
+		Ground,   ///< 地上の歩行ロボ。上をほとんど見ない ＝「高いほど安全」を保証する側
+		AntiAir,  ///< 対空。地上に居たまま上方を広く見る ＝ 空の「下」からの脅威
+	};
+
+	void spawn_enemy( const core::math::Vector& start, const std::vector< core::math::Vector >& waypoints, EnemyKind kind = EnemyKind::Ground );
 	void draw_debug();
 
 	core::ecs::Entity* player_ = nullptr;
@@ -51,6 +58,7 @@ private:
 	blue_sky::ecs::FpsPlayerComponent* fps_player_ = nullptr;
 
 	std::vector< core::ecs::Entity* > enemies_;
+	std::vector< EnemyKind >          enemy_kinds_;   ///< 各敵の種別（enemies_ と同順）
 
 	core::math::Vector player_spawn_;   ///< プレイヤーの初期位置（捕捉時に戻す先）
 	float caught_flash_ = 0.f;          ///< 捕捉演出（"CAUGHT" 表示）の残り時間 (s)
@@ -85,6 +93,31 @@ private:
 
 	void check_caught();                ///< 警戒中の敵に接近されたらスポーンへ戻す
 	void teleport_player( const core::math::Vector& feet ); ///< プレイヤーを剛体ごと足元 feet へ瞬間移動する（速度は消す）
+
+	// --- 発見後の脅威・戦闘（プレイヤー HP・敵の射撃） ---
+	float player_hp_          = 100.f;  ///< プレイヤーの体力
+	float player_hp_max_      = 100.f;
+	float combat_fire_interval_ = 0.7f; ///< 敵の発砲間隔 (s)
+	float combat_shot_damage_ = 14.f;   ///< 1発の被ダメージ
+	float combat_regen_       = 8.f;    ///< 見られていない時の回復 (/s)
+	float hit_flash_          = 0.f;    ///< 被弾演出の残り (s)
+	std::vector< float >              enemy_fire_cd_;  ///< 各敵の発砲クールダウン（enemies_ と同順）
+	std::vector< core::math::Vector > combat_tracers_; ///< 狙ってくる敵の目の位置（レーザー線描画用）
+	void  respawn_player();             ///< スポーンへ戻す＋HP/警戒/スコアをリセット
+	void  update_combat();              ///< 視認中の Alarmed 敵が一定間隔で射撃、HP 0 でやられ
+
+	// --- 縦軸のコスト（落下ダメージ）と「降りる」動詞（傘） ---
+	// 高さに代償が無いと「飛ぶ＝有限資源で一時的な自由を買う」（doc/動詞とゲームシステム.md 2章）が
+	// 成立しない。落下ダメージがジェット燃料に意味を与え、傘がその出口になる。
+	float fall_safe_speed_   = 8.f;     ///< この着地速度までは無傷 (m/s ≒ 3.3m 落下)
+	float fall_lethal_speed_ = 17.f;    ///< この着地速度で満タンから即死 (m/s ≒ 15m 落下)
+	float fall_flash_        = 0.f;     ///< 落下ダメージ演出の残り (s)
+	int   umbrella_count_    = 3;       ///< 傘の所持数（空中で開くたびに 1 消費）
+	int   umbrella_start_    = 3;       ///< 開始時／やり直し時の所持数
+	int   umbrella_max_      = 5;       ///< 所持上限（拾い物で補給）
+	void  update_umbrella();            ///< 傘の開閉入力と所持数を処理
+	void  update_fall_damage();         ///< 着地衝撃 (landing_impact) を HP ダメージへ変換
+
 	void update_firework();             ///< 花火の投擲入力と発音タイマを処理
 	void update_smoke();                ///< 煙玉の投擲入力と有効タイマを処理
 	void try_neutralize();              ///< 背後・近接の敵を無力化（ダウン）する

@@ -150,7 +150,13 @@ GameMain::GameMain( App& app )
 	io.Fonts->AddFontFromFileTTF( "media/font/rounded-mplus-1p-regular.ttf", 28 );
 
 
-	direct_input_.reset( new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() ) );
+	// DirectInput のマウスは、Raw Input を登録できなかったときだけ作る。
+	// DirectInput 8 はマウスを取得（Acquire）すると、プロセスのマウスの Raw Input の登録を自分の隠れた窓へ付け替えるので、
+	// 両方を使うとゲームの窓にマウスの WM_INPUT が届かなくなり、視点が回らなくなる（キーボードは届く）
+	if ( ! get_app()->is_raw_input_enabled() )
+	{
+		direct_input_.reset( new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() ) );
+	}
 
 	input_.reset( new Input( get_app() ) );
 	input_->set_direct_input( direct_input_.get() );
@@ -434,7 +440,11 @@ bool GameMain::update()
 	
 	if ( get_app()->is_active() )
 	{
-		direct_input_->update();
+		if ( direct_input_ )
+		{
+			direct_input_->update();
+		}
+
 		input_->update();
 
 		if ( debug_console_->is_open() )
@@ -656,6 +666,7 @@ void GameMain::on_raw_key_down( int vk )
 
 void GameMain::on_raw_mouse_move( long dx, long dy )
 {
+
 	input_->add_raw_mouse_move( dx, dy );
 }
 

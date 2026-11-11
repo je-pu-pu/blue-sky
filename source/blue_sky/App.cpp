@@ -518,6 +518,11 @@ win::Tablet* App::get_tablet()
 
 void App::set_active( bool active )
 {
+	if ( active != is_active_ )
+	{
+		blue_sky::debug_log( active ? "[App] 窓がアクティブになりました（入力を受け取ります）" : "[App] 窓がアクティブでなくなりました（入力を受け取りません）" );
+	}
+
 	is_active_ = active;
 
 	// 閉じ込めはアクティブなときだけ効かせ、ほかの窓に切り替えたら外す

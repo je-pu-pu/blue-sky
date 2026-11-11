@@ -74,3 +74,19 @@ venv/
 
 # ゲーム中のスクショ（F11。作業ディレクトリの screenshot/ に保存される）
 screenshot/
+
+# Remotion PR 動画（tools/pr-video）
+/tools/pr-video/node_modules/
+/tools/pr-video/out/
+/tools/pr-video/.remotion/
+/tools/pr-video/.voicevox/
+# 生成/コピーした音声素材（再生成可能: BGM は media/ が原本、ナレーションは synth スクリプトで再合成）
+/tools/pr-video/public/audio/
+# ゲーム内スクショ（各自撮影）と、その自動生成マニフェスト・2パスログ
+/tools/pr-video/public/shots/
+/tools/pr-video/src/shots.generated.ts
+/tools/pr-video/ffmpeg2pass-*.log
+# 差し込む素材（大きいので任意・各自用意）
+/tools/pr-video/public/footage/*.mp4
+/tools/pr-video/public/footage/*.png
+/tools/pr-video/public/footage/*.jpg

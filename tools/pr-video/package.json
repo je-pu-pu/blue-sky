@@ -1,0 +1,24 @@
+{
+  "name": "blue-sky-pr-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "blue-sky 進捗 PR 動画（Remotion）",
+  "scripts": {
+    "dev": "node scripts/gen_shots.mjs && remotion studio",
+    "render": "node scripts/gen_shots.mjs && remotion render ProgressPR out/progress-pr.mp4",
+    "discord": "bash scripts/make_discord.sh",
+    "still": "remotion still ProgressPR out/still.png --frame=60",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@remotion/transitions": "^4.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "typescript": "^5.4.0"
+  }
+}

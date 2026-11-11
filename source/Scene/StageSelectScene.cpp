@@ -17,12 +17,32 @@
 #include <common/exception.h>
 #include <common/serialize.h>
 
+#include <blue_sky/stage/StoryTextParser.h>
+
 #include <boost/filesystem.hpp>
 
 #include <random>
 
 namespace blue_sky
 {
+
+namespace
+{
+
+/// ステージのファイルに [intro] があるか（読めないファイルは無いとする。理由は game_play がステージを読むときにログに出る）
+bool has_intro( const string_t& stage_file_name )
+{
+	try
+	{
+		return stage::StoryTextParser::parse_file( stage_file_name, "intro" ).has_value();
+	}
+	catch ( const std::exception& )
+	{
+		return false;
+	}
+}
+
+} // namespace
 
 StageSelectScene::StageSelectScene( GameMain& game_main )
 	: Scene( game_main )
@@ -97,7 +117,7 @@ void StageSelectScene::update()
 
 			set_next_stage_name( stage->name );
 
-			if ( boost::filesystem::exists( string_t( "media/stage/" ) + stage->name + ".intro.toml" ) )
+			if ( has_intro( get_stage_dir_name_by_page( page_ ) + stage->name + ".stage.toml" ) )
 			{
 				set_next_scene( "stage_intro" );
 			}

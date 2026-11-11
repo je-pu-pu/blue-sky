@@ -181,6 +181,14 @@ TEST( TomlStageParserTest, 文法の誤りは場所付きの例外 )
 	}
 }
 
+TEST( TomlStageParserTest, 前後の文の表は読み飛ばして警告しない )
+{
+	// [intro]・[outro] は StoryTextParser が読む（中の書き間違いもそちらが警告する）
+	const StageData data = parse( "format = 1\n[intro]\nsound = \"a\"\nvoice = 1\n[[intro.layer]]\nimage = \"noise.jpg\"\n[outro]\nsound = \"b\"\n" );
+
+	EXPECT_TRUE( data.warnings.empty() ) << all_warnings( data );
+}
+
 TEST( TomlStageParserTest, ファイルが無いと例外 )
 {
 	EXPECT_THROW( TomlStageParser::parse_file( "media/stage/no-such-stage.stage.toml" ), std::exception );

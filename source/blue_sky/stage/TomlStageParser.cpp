@@ -666,7 +666,8 @@ StageData TomlStageParser::parse_text( const string_t& text, const string_t& fil
 	{
 		const string_t key( k.str() );
 
-		if ( key == "format" || key == "object" || key == "event" )
+		// [intro]・[outro]（ステージの前後の文と背景）は StoryTextParser が読む（その場面になったとき。ステージを始めるときには要らない）
+		if ( key == "format" || key == "object" || key == "event" || key == "intro" || key == "outro" )
 		{
 			continue;
 		}

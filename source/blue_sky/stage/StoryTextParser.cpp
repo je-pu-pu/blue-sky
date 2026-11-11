@@ -19,13 +19,21 @@ class Reader
 {
 private:
 	string_t		file_name_;
+	string_t		table_name_;	///< 読んでいる表（"intro"・"outro"）。警告のキーの名前に付ける
 	StoryTextData&	data_;
 
 public:
-	Reader( const string_t& file_name, StoryTextData& data )
+	Reader( const string_t& file_name, const string_t& table_name, StoryTextData& data )
 		: file_name_( file_name )
+		, table_name_( table_name )
 		, data_( data )
 	{ }
+
+	/// 警告に出すキーの名前（"intro.sound" など）
+	string_t name( const string_t& key ) const
+	{
+		return table_name_ + "." + key;
+	}
 
 	SourceLocation where( const toml::source_region& r ) const
 	{
@@ -178,14 +186,14 @@ public:
 		return chase;
 	}
 
-	/// [[layer]] 1 つ
+	/// [[intro.layer]] 1 つ
 	void read_layer( const toml::node& node )
 	{
 		const toml::table* t = node.as_table();
 
 		if ( ! t )
 		{
-			warn( node.source(), "[[layer]] は表で書きます。飛ばします" );
+			warn( node.source(), "[[" + name( "layer" ) + "]] は表で書きます。飛ばします" );
 			return;
 		}
 
@@ -196,7 +204,7 @@ public:
 
 		if ( ! image || ! image->is_string() )
 		{
-			warn( t->source(), "[[layer]] に image（文字列）がありません。この重なりを飛ばします" );
+			warn( t->source(), "[[" + name( "layer" ) + "]] に image（文字列）がありません。この重なりを飛ばします" );
 			return;
 		}
 
@@ -254,7 +262,7 @@ public:
 			}
 			else
 			{
-				warn( k.source(), "[[layer]] の知らないキー " + key + " を飛ばします" );
+				warn( k.source(), "[[" + name( "layer" ) + "]] の知らないキー " + key + " を飛ばします" );
 			}
 		}
 
@@ -273,7 +281,7 @@ public:
 		return static_cast< uint32_t >( v.as_integer()->get() );
 	}
 
-	/// [text]
+	/// [intro.text]
 	void read_text( const toml::table& t )
 	{
 		for ( const auto& [ k, v ] : t )
@@ -282,22 +290,22 @@ public:
 
 			if ( key == "color" )
 			{
-				data_.text_color = read_color( v, "text.color" );
+				data_.text_color = read_color( v, name( "text.color" ) );
 			}
 			else if ( key == "border_color" )
 			{
-				data_.text_border_color = read_color( v, "text.border_color" );
+				data_.text_border_color = read_color( v, name( "text.border_color" ) );
 			}
 			else if ( key == "body" )
 			{
-				if ( auto s = read_string( v, "text.body" ) )
+				if ( auto s = read_string( v, name( "text.body" ) ) )
 				{
 					data_.text = * s;
 				}
 			}
 			else
 			{
-				warn( k.source(), "[text] の知らないキー " + key + " を飛ばします" );
+				warn( k.source(), "[" + name( "text" ) + "] の知らないキー " + key + " を飛ばします" );
 			}
 		}
 	}
@@ -309,7 +317,7 @@ public:
 
 		if ( ! t )
 		{
-			warn_type( v, "bgm", "{ file = \"…\", volume = … } の表" );
+			warn_type( v, name( "bgm" ), "{ file = \"…\", volume = … } の表" );
 			return;
 		}
 
@@ -317,7 +325,7 @@ public:
 
 		if ( ! file || ! file->is_string() )
 		{
-			warn( t->source(), "bgm に file（文字列）がありません。飛ばします" );
+			warn( t->source(), name( "bgm" ) + " に file（文字列）がありません。飛ばします" );
 			return;
 		}
 
@@ -340,22 +348,83 @@ public:
 				}
 				else
 				{
-					warn_type( value, "bgm.volume", "数" );
+					warn_type( value, name( "bgm.volume" ), "数" );
 				}
 			}
 			else
 			{
-				warn( k.source(), "bgm の知らないキー " + key + " を飛ばします" );
+				warn( k.source(), name( "bgm" ) + " の知らないキー " + key + " を飛ばします" );
 			}
 		}
 
 		data_.bgm = bgm;
 	}
+
+	/// 表 1 つ（[intro] か [outro]）
+	void read( const toml::table& table )
+	{
+		for ( const auto& [ k, v ] : table )
+		{
+			const string_t key( k.str() );
+
+			if ( key == "layer" )
+			{
+				continue;
+			}
+			else if ( key == "sound" )
+			{
+				data_.sound = read_string( v, name( key ) );
+			}
+			else if ( key == "next_scene" )
+			{
+				data_.next_scene = read_string( v, name( key ) );
+			}
+			else if ( key == "next_stage" )
+			{
+				data_.next_stage = read_string( v, name( key ) );
+			}
+			else if ( key == "bgm" )
+			{
+				read_bgm( v );
+			}
+			else if ( key == "text" )
+			{
+				if ( const toml::table* t = v.as_table() )
+				{
+					read_text( * t );
+				}
+				else
+				{
+					warn( v.source(), "[" + name( "text" ) + "] は表で書きます。飛ばします" );
+				}
+			}
+			else
+			{
+				warn( k.source(), "[" + table_name_ + "] の知らないキー " + key + " を飛ばします" );
+			}
+		}
+
+		// 重なりは配列の順に描く（表のキーの順は TOML では意味を持たないので、順番は配列で決める）
+		if ( const toml::node* node = table.get( "layer" ) )
+		{
+			if ( const toml::array* a = node->as_array() )
+			{
+				for ( const auto& v : * a )
+				{
+					read_layer( v );
+				}
+			}
+			else
+			{
+				warn( node->source(), "[[" + name( "layer" ) + "]] は表の配列で書きます。飛ばします" );
+			}
+		}
+	}
 };
 
 } // namespace
 
-StoryTextData StoryTextParser::parse_text( const string_t& text, const string_t& file_name )
+std::optional< StoryTextData > StoryTextParser::parse_text( const string_t& text, const string_t& file_name, const string_t& table_name )
 {
 	toml::table root;
 
@@ -368,95 +437,41 @@ StoryTextData StoryTextParser::parse_text( const string_t& text, const string_t&
 		COMMON_THROW_EXCEPTION_MESSAGE( file_name + ":" + std::to_string( e.source().begin.line ) + ":" + std::to_string( e.source().begin.column ) + ": TOML の文法の誤り : " + string_t( e.description() ) );
 	}
 
+	const toml::node* node = root.get( table_name );
+
+	if ( ! node )
+	{
+		return std::nullopt;
+	}
+
 	StoryTextData data;
-	Reader reader( file_name, data );
+	Reader reader( file_name, table_name, data );
 
-	// 形式の版（読めない版は出せない）
-	if ( const toml::node* format = root.get( "format" ) )
+	const toml::table* table = node->as_table();
+
+	if ( ! table )
 	{
-		if ( ! format->is_integer() || format->as_integer()->get() != FORMAT_VERSION )
-		{
-			COMMON_THROW_EXCEPTION_MESSAGE( reader.where( format->source() ).to_string() + ": 読めない形式の版です（format = " + std::to_string( FORMAT_VERSION ) + " だけ読めます）" );
-		}
-	}
-	else
-	{
-		reader.warn( root.source(), "format がありません（" + std::to_string( FORMAT_VERSION ) + " として読みます）" );
+		COMMON_THROW_EXCEPTION_MESSAGE( reader.where( node->source() ).to_string() + ": " + table_name + " は [" + table_name + "] の表で書きます" );
 	}
 
-	for ( const auto& [ k, v ] : root )
-	{
-		const string_t key( k.str() );
-
-		if ( key == "format" || key == "layer" )
-		{
-			continue;
-		}
-		else if ( key == "sound" )
-		{
-			data.sound = reader.read_string( v, key );
-		}
-		else if ( key == "next_scene" )
-		{
-			data.next_scene = reader.read_string( v, key );
-		}
-		else if ( key == "next_stage" )
-		{
-			data.next_stage = reader.read_string( v, key );
-		}
-		else if ( key == "bgm" )
-		{
-			reader.read_bgm( v );
-		}
-		else if ( key == "text" )
-		{
-			if ( const toml::table* t = v.as_table() )
-			{
-				reader.read_text( * t );
-			}
-			else
-			{
-				reader.warn( v.source(), "[text] は表で書きます。飛ばします" );
-			}
-		}
-		else
-		{
-			reader.warn( k.source(), "知らないキー " + key + " を飛ばします" );
-		}
-	}
-
-	// 重なりは配列の順に描く（表のキーの順は TOML では意味を持たないので、順番は配列で決める）
-	if ( const toml::node* node = root.get( "layer" ) )
-	{
-		if ( const toml::array* a = node->as_array() )
-		{
-			for ( const auto& v : * a )
-			{
-				reader.read_layer( v );
-			}
-		}
-		else
-		{
-			reader.warn( node->source(), "[[layer]] は表の配列で書きます。飛ばします" );
-		}
-	}
+	reader.read( * table );
 
 	return data;
 }
 
-StoryTextData StoryTextParser::parse_file( const string_t& file_name )
+std::optional< StoryTextData > StoryTextParser::parse_file( const string_t& file_name, const string_t& table_name )
 {
 	std::ifstream in( file_name, std::ios::binary );
 
 	if ( ! in.good() )
 	{
-		COMMON_THROW_EXCEPTION_MESSAGE( "ステージの前後の文のファイル \"" + file_name + "\" を開けません" );
+		COMMON_THROW_EXCEPTION_MESSAGE( "ステージのファイル \"" + file_name + "\" を開けません" );
 	}
 
 	std::stringstream ss;
 	ss << in.rdbuf();
 
-	return parse_text( ss.str(), file_name );
+	return parse_text( ss.str(), file_name, table_name );
 }
 
 } // namespace blue_sky::stage

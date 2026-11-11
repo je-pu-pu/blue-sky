@@ -7,10 +7,10 @@
 #include <filesystem>
 
 /**
- * ステージの前後の文と背景（.intro.toml・.outro.toml）を読む StoryTextParser のテスト
+ * ステージの前後の文と背景（.stage.toml の [intro]・[outro]）を読む StoryTextParser のテスト
  *
- * 書き方は doc/ステージ形式の設計.md 7 章。失敗の扱い : 文法の誤り・読めない版は例外、知らないキー・型の違いは
- * 「ファイル:行:列」付きの警告に残してそのキーだけ飛ばす
+ * 書き方は doc/ステージ形式の設計.md 7 章。失敗の扱い : 表が無ければ空、文法の誤り・表でないは例外、
+ * 知らないキー・型の違いは「ファイル:行:列」付きの警告に残してそのキーだけ飛ばす
  */
 
 using blue_sky::stage::StoryTextParser;
@@ -19,9 +19,10 @@ using blue_sky::stage::StoryTextData;
 namespace
 {
 
+/// [intro] を読む（無ければテストを失敗にする）
 StoryTextData parse( const char* text )
 {
-	return StoryTextParser::parse_text( text, "t.intro.toml" );
+	return StoryTextParser::parse_text( text, "t.stage.toml", "intro" ).value();
 }
 
 /// 警告のどれかに、すべての語が入っているか
@@ -50,29 +51,36 @@ std::filesystem::path media_path( const string_t& relative )
 	return ( std::filesystem::path( __FILE__ ).parent_path() / "../../media" / relative ).lexically_normal();
 }
 
+/// 同梱のステージ（media/stage/<stage>.stage.toml）の表を読む
+std::optional< StoryTextData > read_stage( const string_t& stage, const string_t& table_name )
+{
+	return StoryTextParser::parse_file( media_path( "stage/" + stage + ".stage.toml" ).string(), table_name );
+}
+
 } // namespace
 
 TEST( StoryTextParserTest, 書き方のとおりに読む )
 {
 	const StoryTextData data = parse( R"(
 format = 1
+[intro]
 sound = "1-1-intro"
 bgm = { file = "opening", volume = 0.5 }
 next_scene = "ending"
 next_stage = "2-0"
 
-[[layer]]
+[[intro.layer]]
 image = "noise.jpg"
 scale = { from = 1.6, to = 3, speed = 0.0001 }
 rotation = { from = 0, to = 180, speed = 0.1 }
 
-[[layer]]
+[[intro.layer]]
 image = "bg.png"
 src_rect = [0, 0, 640, 480]
 translation = { from = [1, 2], to = [3, 4.5], speed = [0.5, 0.25] }
 color = { from = [1, 1, 1, 0], to = [1, 1, 1, 1], speed = [0, 0, 0, 0.01] }
 
-[text]
+[intro.text]
 color = 0xFFFFFFCC
 border_color = 0x000000CC
 body = """
@@ -107,7 +115,7 @@ body = """
 	EXPECT_DOUBLE_EQ( ( * a.rotation->speed )[ 0 ], 0.1 );
 	EXPECT_FALSE( a.translation.has_value() );
 	EXPECT_FALSE( a.color.has_value() );
-	EXPECT_EQ( a.where.line, 8 );
+	EXPECT_EQ( a.where.line, 9 );
 
 	// 2 枚目 : 切り出し・位置・色
 	const auto& b = data.layers[ 1 ];
@@ -127,7 +135,7 @@ body = """
 
 TEST( StoryTextParserTest, 書いていない所は空のまま )
 {
-	const StoryTextData data = parse( "format = 1\nsound = \"switch-off\"\n" );
+	const StoryTextData data = parse( "format = 1\n[intro]\nsound = \"switch-off\"\n" );
 
 	EXPECT_TRUE( data.warnings.empty() ) << all_warnings( data );
 	EXPECT_EQ( data.sound, "switch-off" );
@@ -142,7 +150,7 @@ TEST( StoryTextParserTest, 書いていない所は空のまま )
 
 TEST( StoryTextParserTest, 動きの書いていない所は空のまま )
 {
-	const StoryTextData data = parse( "format = 1\n[[layer]]\nimage = \"a.png\"\nscale = { to = 2 }\n" );
+	const StoryTextData data = parse( "format = 1\n[[intro.layer]]\nimage = \"a.png\"\nscale = { to = 2 }\n" );
 
 	EXPECT_TRUE( data.warnings.empty() ) << all_warnings( data );
 	ASSERT_EQ( data.layers.size(), 1u );
@@ -152,27 +160,55 @@ TEST( StoryTextParserTest, 動きの書いていない所は空のまま )
 	EXPECT_FALSE( data.layers[ 0 ].scale->speed.has_value() );
 }
 
+TEST( StoryTextParserTest, 頼んだ表だけを読み表が無ければ空 )
+{
+	const char* text = R"(format = 1
+[stage]
+collision = "1-1.obj"
+
+[intro]
+sound = "a"
+
+[outro]
+sound = "b"
+)";
+
+	// ステージの残り（[stage] など）は読まない・警告しない（TomlStageParser が読む）
+	const auto intro = StoryTextParser::parse_text( text, "t.stage.toml", "intro" );
+	ASSERT_TRUE( intro.has_value() );
+	EXPECT_EQ( intro->sound, "a" );
+	EXPECT_TRUE( intro->warnings.empty() ) << all_warnings( * intro );
+
+	const auto outro = StoryTextParser::parse_text( text, "t.stage.toml", "outro" );
+	ASSERT_TRUE( outro.has_value() );
+	EXPECT_EQ( outro->sound, "b" );
+
+	// 表の無いステージ（おまけのステージなど）は空。その場面を飛ばす
+	EXPECT_FALSE( StoryTextParser::parse_text( "format = 1\n[stage]\ncollision = \"a.obj\"\n", "t.stage.toml", "intro" ).has_value() );
+}
+
 TEST( StoryTextParserTest, 知らないキーは行を付けて警告しそのキーだけ飛ばす )
 {
 	const StoryTextData data = parse( R"(format = 1
+[intro]
 sound = "a"
 voice = "b"
 
-[[layer]]
+[[intro.layer]]
 image = "noise.jpg"
 layer_rotate = { from = 0, to = 180, speed = 0.1 }
 scale = { from = 1.6, until = 3 }
 
-[text]
+[intro.text]
 colour = 0xFFFFFFFF
 body = "x"
 )" );
 
 	EXPECT_EQ( data.sound, "a" );
-	EXPECT_TRUE( has_warning( data, { "t.intro.toml:3:", "voice" } ) ) << all_warnings( data );
-	EXPECT_TRUE( has_warning( data, { "t.intro.toml:7:", "layer_rotate" } ) ) << all_warnings( data );
-	EXPECT_TRUE( has_warning( data, { "t.intro.toml:8:", "until" } ) ) << all_warnings( data );
-	EXPECT_TRUE( has_warning( data, { "t.intro.toml:11:", "colour" } ) ) << all_warnings( data );
+	EXPECT_TRUE( has_warning( data, { "t.stage.toml:4:", "[intro]", "voice" } ) ) << all_warnings( data );
+	EXPECT_TRUE( has_warning( data, { "t.stage.toml:8:", "[[intro.layer]]", "layer_rotate" } ) ) << all_warnings( data );
+	EXPECT_TRUE( has_warning( data, { "t.stage.toml:9:", "until" } ) ) << all_warnings( data );
+	EXPECT_TRUE( has_warning( data, { "t.stage.toml:12:", "[intro.text]", "colour" } ) ) << all_warnings( data );
 	EXPECT_EQ( data.warnings.size(), 4u ) << all_warnings( data );
 
 	// 重なりは残り、読めたキーは当たる
@@ -187,31 +223,32 @@ body = "x"
 TEST( StoryTextParserTest, 型の違いは行を付けて警告しそのキーだけ飛ばす )
 {
 	const StoryTextData data = parse( R"(format = 1
+[intro]
 sound = 3
 bgm = "opening"
 
-[[layer]]
+[[intro.layer]]
 image = "noise.jpg"
 src_rect = [0, 0, 640]
 scale = { from = "1.6", to = 3 }
 translation = { from = [1, 2, 3] }
 rotation = 180
 
-[text]
+[intro.text]
 color = "FFFFFFCC"
 body = 1
 )" );
 
 	EXPECT_FALSE( data.sound.has_value() );
 	EXPECT_FALSE( data.bgm.has_value() );
-	EXPECT_TRUE( has_warning( data, { "t.intro.toml:2:", "sound", "文字列" } ) ) << all_warnings( data );
-	EXPECT_TRUE( has_warning( data, { "t.intro.toml:3:", "bgm" } ) ) << all_warnings( data );
-	EXPECT_TRUE( has_warning( data, { "t.intro.toml:7:", "src_rect" } ) ) << all_warnings( data );
-	EXPECT_TRUE( has_warning( data, { "t.intro.toml:8:", "scale.from" } ) ) << all_warnings( data );
-	EXPECT_TRUE( has_warning( data, { "t.intro.toml:9:", "translation.from" } ) ) << all_warnings( data );
-	EXPECT_TRUE( has_warning( data, { "t.intro.toml:10:", "rotation" } ) ) << all_warnings( data );
-	EXPECT_TRUE( has_warning( data, { "t.intro.toml:13:", "text.color" } ) ) << all_warnings( data );
-	EXPECT_TRUE( has_warning( data, { "t.intro.toml:14:", "text.body" } ) ) << all_warnings( data );
+	EXPECT_TRUE( has_warning( data, { "t.stage.toml:3:", "intro.sound", "文字列" } ) ) << all_warnings( data );
+	EXPECT_TRUE( has_warning( data, { "t.stage.toml:4:", "intro.bgm" } ) ) << all_warnings( data );
+	EXPECT_TRUE( has_warning( data, { "t.stage.toml:8:", "src_rect" } ) ) << all_warnings( data );
+	EXPECT_TRUE( has_warning( data, { "t.stage.toml:9:", "scale.from" } ) ) << all_warnings( data );
+	EXPECT_TRUE( has_warning( data, { "t.stage.toml:10:", "translation.from" } ) ) << all_warnings( data );
+	EXPECT_TRUE( has_warning( data, { "t.stage.toml:11:", "rotation" } ) ) << all_warnings( data );
+	EXPECT_TRUE( has_warning( data, { "t.stage.toml:14:", "intro.text.color" } ) ) << all_warnings( data );
+	EXPECT_TRUE( has_warning( data, { "t.stage.toml:15:", "intro.text.body" } ) ) << all_warnings( data );
 	EXPECT_EQ( data.warnings.size(), 8u ) << all_warnings( data );
 
 	ASSERT_EQ( data.layers.size(), 1u );
@@ -227,18 +264,17 @@ body = 1
 
 TEST( StoryTextParserTest, 画像の無い重なりは飛ばす )
 {
-	const StoryTextData data = parse( "format = 1\n[[layer]]\nscale = { from = 2 }\n[[layer]]\nimage = \"a.png\"\n" );
+	const StoryTextData data = parse( "[intro]\n[[intro.layer]]\nscale = { from = 2 }\n[[intro.layer]]\nimage = \"a.png\"\n" );
 
-	EXPECT_TRUE( has_warning( data, { "t.intro.toml:2:", "image" } ) ) << all_warnings( data );
+	EXPECT_TRUE( has_warning( data, { "t.stage.toml:2:", "image" } ) ) << all_warnings( data );
 	ASSERT_EQ( data.layers.size(), 1u );
 	EXPECT_EQ( data.layers[ 0 ].image, "a.png" );
 }
 
-TEST( StoryTextParserTest, 文法の誤りと読めない版は例外 )
+TEST( StoryTextParserTest, 文法の誤りと表でないものとファイルが無いのは例外 )
 {
-	EXPECT_THROW( parse( "format = 1\nsound = \"a\n" ), std::exception );
-	EXPECT_THROW( parse( "format = 2\n" ), std::exception );
-	EXPECT_THROW( StoryTextParser::parse_file( "media/stage/無いファイル.intro.toml" ), std::exception );
+	EXPECT_THROW( parse( "[intro]\nsound = \"a\n" ), std::exception );
+	EXPECT_THROW( StoryTextParser::parse_file( "media/stage/無いファイル.stage.toml", "intro" ), std::exception );
 
 	try
 	{
@@ -247,41 +283,56 @@ TEST( StoryTextParserTest, 文法の誤りと読めない版は例外 )
 	}
 	catch ( const std::exception& e )
 	{
-		EXPECT_NE( string_t( e.what() ).find( "t.intro.toml:3:" ), string_t::npos ) << e.what();
+		EXPECT_NE( string_t( e.what() ).find( "t.stage.toml:3:" ), string_t::npos ) << e.what();
+	}
+
+	try
+	{
+		parse( "format = 1\nintro = \"a\"\n" );
+		FAIL();
+	}
+	catch ( const std::exception& e )
+	{
+		EXPECT_NE( string_t( e.what() ).find( "t.stage.toml:2:" ), string_t::npos ) << e.what();
 	}
 }
 
-TEST( StoryTextParserTest, formatが無ければ警告して読む )
-{
-	const StoryTextData data = parse( "sound = \"a\"\n" );
-
-	EXPECT_TRUE( has_warning( data, { "format" } ) ) << all_warnings( data );
-	EXPECT_EQ( data.sound, "a" );
-}
-
-TEST( StoryTextFilesTest, 同梱の全introとoutroが警告0で読める )
+TEST( StoryTextFilesTest, 同梱の12ステージのintroとoutroが警告0で読めておまけのステージには無い )
 {
 	size_t count = 0;
 
-	for ( const auto& entry : std::filesystem::directory_iterator( media_path( "stage" ) ) )
+	for ( const char* dir : { "stage", "stage_ext" } )
 	{
-		const string_t name = entry.path().filename().string();
-		const bool is_story = name.size() > 11 && ( name.compare( name.size() - 11, 11, ".intro.toml" ) == 0 || name.compare( name.size() - 11, 11, ".outro.toml" ) == 0 );
-
-		if ( ! is_story )
+		for ( const auto& entry : std::filesystem::directory_iterator( media_path( dir ) ) )
 		{
-			continue;
+			const string_t name = entry.path().filename().string();
+
+			if ( name.size() < 11 || name.compare( name.size() - 11, 11, ".stage.toml" ) != 0 )
+			{
+				continue;
+			}
+
+			for ( const char* table_name : { "intro", "outro" } )
+			{
+				SCOPED_TRACE( name + " " + table_name );
+
+				const auto data = StoryTextParser::parse_file( entry.path().string(), table_name );
+
+				// おまけのステージ（stage_ext）には前後の文が無い（その場面を飛ばす）
+				ASSERT_EQ( data.has_value(), string_t( dir ) == "stage" );
+
+				if ( ! data )
+				{
+					continue;
+				}
+
+				EXPECT_TRUE( data->warnings.empty() ) << all_warnings( * data );
+				// どれも音声か本文のどちらかで終わる（どちらも無いと場面が終わらない）
+				EXPECT_TRUE( data->sound.has_value() || ! data->text.empty() );
+
+				++count;
+			}
 		}
-
-		SCOPED_TRACE( name );
-
-		const StoryTextData data = StoryTextParser::parse_file( entry.path().string() );
-
-		EXPECT_TRUE( data.warnings.empty() ) << all_warnings( data );
-		// どれも音声か本文のどちらかで終わる（どちらも無いと場面が終わらない）
-		EXPECT_TRUE( data.sound.has_value() || ! data.text.empty() );
-
-		++count;
 	}
 
 	// 12 ステージの intro・outro（増やしたら数も直す）
@@ -290,35 +341,29 @@ TEST( StoryTextFilesTest, 同梱の全introとoutroが警告0で読める )
 
 TEST( StoryTextFilesTest, 同梱のファイルの中身が古い形式から変換したときと同じ )
 {
-	// 0-0.intro : 本文と色（以前の読み方は 1 行ごとに改行を足し、ファイルの終わりの改行の後にもう 1 つ足していた）
+	// 0-0 の intro : 本文と色（以前の読み方は 1 行ごとに改行を足し、ファイルの終わりの改行の後にもう 1 つ足していた）
 	{
-		const StoryTextData data = StoryTextParser::parse_file( media_path( "stage/0-0.intro.toml" ).string() );
+		const StoryTextData data = read_stage( "0-0", "intro" ).value();
 
 		EXPECT_FALSE( data.sound.has_value() );
 		EXPECT_EQ( data.text, "ある日、少年は空を見上げた。\n\n青く広がる空の向こうに\n何かが待っている気がした。\n\nこれは、その小さな冒険の物語。\n\n" );
 		EXPECT_EQ( data.text_color, 0xFFFFFFCCu );
 		EXPECT_EQ( data.text_border_color, 0x000000CCu );
+		// 重なり : ほかと同じく回転を付けない（下の 22 個と同じ理由）
 		ASSERT_EQ( data.layers.size(), 1u );
+		EXPECT_FALSE( data.layers[ 0 ].rotation.has_value() );
 	}
 
-	// 2-3.intro : 音だけ（背景は既定の画像）
+	// 2-3 の intro : 音だけ（背景は既定の画像）
 	{
-		const StoryTextData data = StoryTextParser::parse_file( media_path( "stage/2-3.intro.toml" ).string() );
+		const StoryTextData data = read_stage( "2-3", "intro" ).value();
 
 		EXPECT_EQ( data.sound, "switch-off" );
 		EXPECT_TRUE( data.layers.empty() );
 		EXPECT_TRUE( data.text.empty() );
 	}
 
-	// 0-0.intro の重なり : ほかと同じく回転を付けない（下の 22 個と同じ理由）
-	{
-		const StoryTextData data = StoryTextParser::parse_file( media_path( "stage/0-0.intro.toml" ).string() );
-
-		ASSERT_EQ( data.layers.size(), 1u );
-		EXPECT_FALSE( data.layers[ 0 ].rotation.has_value() );
-	}
-
-	// ほかの 22 個 : 雑音の画像を 1 枚、大きさ 1.6 → 3、音声はファイルと同じ名前。
+	// ほかの 22 個 : 雑音の画像を 1 枚、大きさ 1.6 → 3、音声は "<ステージ>-<intro か outro>"。
 	// 回転は付けない（以前は layer-rotate と名前違いで書かれて 2013-08 から回っていなかった。その見た目を保つ。2026-11-11 利用者の決定）
 	for ( const char* stage : { "0-0", "0-1", "0-2", "0-3", "1-0", "1-1", "1-2", "1-3", "2-0", "2-1", "2-2", "2-3" } )
 	{
@@ -333,7 +378,7 @@ TEST( StoryTextFilesTest, 同梱のファイルの中身が古い形式から変
 
 			SCOPED_TRACE( name );
 
-			const StoryTextData data = StoryTextParser::parse_file( media_path( "stage/" + name + ".toml" ).string() );
+			const StoryTextData data = read_stage( stage, kind ).value();
 
 			EXPECT_EQ( data.sound, string_t( stage ) + "-" + kind );
 			EXPECT_TRUE( data.text.empty() );
@@ -349,7 +394,6 @@ TEST( StoryTextFilesTest, 同梱のファイルの中身が古い形式から変
 		}
 	}
 }
-
 
 /**
  * intro・outro の背景を画面を覆うまで拡大する係数（StoryTextScene の描く所で使う。doc/ステージ形式の設計.md 7.5）

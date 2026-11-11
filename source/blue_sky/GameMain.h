@@ -180,7 +180,6 @@ private:
 
 	void flush_resource_releases();
 
-	void setup_script_command();
 	void apply_display_settings();
 
 	void update_render_data_for_game() const;

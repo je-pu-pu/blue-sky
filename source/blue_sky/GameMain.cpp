@@ -14,6 +14,7 @@
 
 
 #include "ScriptManager.h"
+#include "ScriptBindings.h"
 
 #include <blue_sky/graphics/Direct3D11/GraphicsManager.h>
 
@@ -71,27 +72,6 @@
 
 namespace blue_sky
 {
-
-namespace
-{
-
-/**
- * スクリプトから渡されたオブジェクトが nil なら、落ちずにスクリプトのエラーにする（ScriptManager::exec が ScriptError として投げる）
- *
- * 以前は nil のまま使って落ちていた（set_loc( nil, … ) など）
- */
-template< typename Type >
-Type* require_not_nil( Type* p, const char* function_name )
-{
-	if ( ! p )
-	{
-		throw std::invalid_argument( std::string( function_name ) + " : 引数が nil" );
-	}
-
-	return p;
-}
-
-} // namespace
 
 //■コンストラクタ
 GameMain::GameMain( App& app )
@@ -226,7 +206,6 @@ GameMain::GameMain( App& app )
 
 	script_manager_.reset( new ScriptManager() );
 	script_manager_->load_command_history( "log/script.log" );
-	setup_script_command();
 
 	// ゲームのオブジェクトに渡すもの（物理の世界・音・シーンの経過時間）。オブジェクトは GameMain のシングルトンを呼ばない
 	game_object_context_.physics = physics_manager_.get();
@@ -236,6 +215,9 @@ GameMain::GameMain( App& app )
 
 	object_updater_ = std::make_unique< ObjectUpdater >( physics_manager_.get(), & game_object_context_, entity_manager_.get() );
 	object_factory_ = std::make_unique< ObjectFactory >( entity_manager_.get(), physics_manager_.get(), graphics_manager_.get(), sound_manager_.get() );
+
+	// ゲーム全体で使える Lua の関数（以前はここより前、物体を作る部品より先に登録し、関数が呼ばれるたびに GameMain から引いていた）
+	ScriptBindings::bind( * script_manager_, { graphics_manager_.get(), sound_manager_.get(), object_factory_.get(), bullet_debug_draw_.get(), [this] ( const SceneRequest& r ) { request_scene( r ); } } );
 
 	// GraphicsManager はゲームの物体を、EntityManager の描画の部品（ecs::ObjectRenderDataSystem の描く対象）から描く（以前は ActiveObjectManager を直接回していた）
 	graphics_manager_->set_entity_manager( entity_manager_.get() );
@@ -407,113 +389,6 @@ void GameMain::save_settings()
 	{
 		debug_log( string_t( "[Config] ユーザーの設定ファイルを保存できませんでした: " ) + user_settings_path );
 	}
-}
-
-/**
- * ゲーム全体で共有可能なスクリプトコマンドを準備する
- *
- */
-void GameMain::setup_script_command()
-{
-	get_script_manager()->exec( "function load( s ) dofile( 'media/script/' .. s ) end" );
-
-	// Scene
-	// 遷移はその場で実行せず、要求として積む（スクリプトがシーンの更新中に呼ばれても、実行中のシーンを破棄しないように）
-	// 名前の後に "?キー=値" で引数を付けられる（例 : push_overlay( "options?tab=controls" )）
-	get_script_manager()->set_function( "scene", [this] ( const char_t* name ) { SceneRequest r { SceneRequest::Type::REPLACE_BASE }; split_scene_name( name, r.name, r.args ); request_scene( r ); } );
-	get_script_manager()->set_function( "push_overlay", [this] ( const char_t* name ) { SceneRequest r { SceneRequest::Type::PUSH_OVERLAY }; split_scene_name( name, r.name, r.args ); request_scene( r ); } );
-	get_script_manager()->set_function( "pop_overlay", [this] () { request_scene( SceneRequest{ SceneRequest::Type::POP_OVERLAY } ); } );
-
-	// Basic
-	get_script_manager()->set_function( "color", [this] ( float_t r, float_t g, float_t b, float_t a ) { return Color( r, g, b, a ); } );
-	get_script_manager()->set_function( "vector", [this] ( float_t x, float_t y, float_t z ) { return Vector( x, y, z ); } );
-
-	// Fade
-	get_script_manager()->set_function( "set_fade_color", [this] ( const Color& color ) { get_graphics_manager()->set_fade_color( color ); } );
-	get_script_manager()->set_function( "start_fade_in", [this] ( float_t speed ) { get_graphics_manager()->start_fade_in( speed ); } );
-	get_script_manager()->set_function( "start_fade_out", [this] ( float_t speed ) { get_graphics_manager()->start_fade_out( speed ); } );
-
-	// ゲームの物体（Lua の "GameObject" は EntityId を包んだ GameObjectRef。ActiveObject を持たない ECS だけの物体も同じように触れる）
-	// 知らない名前なら nil を返す（以前は null に restart を呼んで落ちた）
-	get_script_manager()->set_function( "create_object", [this] ( const char_t* name ) -> sol::optional< GameObjectRef >
-	{
-		auto id = get_object_factory()->create_object( name );
-
-		if ( ! id )
-		{
-			return sol::nullopt;
-		}
-
-		GameObjectRef o = get_object_factory()->get_ref( * id );
-		o.restart();
-
-		return o;
-	} );
-	get_script_manager()->set_function( "clone_object", [this] ( const GameObjectRef* o ) -> sol::optional< GameObjectRef >
-	{
-		// 以前は ActiveObject の種類だけ複製できた（段階 6 で最後の種類のプレイヤーも ECS だけの物体になり、複製できる物体は無くなった）。
-		// ECS だけの物体は create_object で作り直す。黙って無視しない
-		require_not_nil( o, "clone_object" );
-		debug_log( "[Object] clone_object : 物体は複製できません（create_object で作り直してください）" );
-
-		return sol::nullopt;
-	} );
-	get_script_manager()->set_function( "get_object", [this] ( const char_t* name ) -> sol::optional< GameObjectRef >
-	{
-		if ( auto o = get_object_factory()->find_ref( name ) )
-		{
-			return * o;
-		}
-
-		return sol::nullopt;
-	} );
-	get_script_manager()->set_function( "set_name", [this] ( const GameObjectRef* o, const char_t* name ) { get_object_factory()->name( name, require_not_nil( o, "set_name" )->get_entity_id() ); } );
-	get_script_manager()->set_function( "set_loc", [] ( GameObjectRef* o, float_t x, float_t y, float_t z ) { require_not_nil( o, "set_loc" )->set_location( x, y, z ); } );
-	get_script_manager()->set_function( "set_dir", [] ( GameObjectRef* o, float_t r ) { require_not_nil( o, "set_dir" )->set_direction_degree( r ); } );
-	get_script_manager()->set_function( "set_vel", [] ( GameObjectRef* o, float_t x, float_t y, float_t z ) { require_not_nil( o, "set_vel" )->set_velocity( Vector( x, y, z ) ); } );
-	get_script_manager()->set_function( "set_start_loc", [] ( GameObjectRef* o, float_t  x, float_t  y, float_t  z ) { require_not_nil( o, "set_start_loc" )->set_start_location( x, y, z ); } );
-	get_script_manager()->set_function( "set_start_rot", [] ( GameObjectRef* o, float_t rx, float_t ry, float_t rz ) { require_not_nil( o, "set_start_rot" )->set_start_rotation( rx, ry, rz ); } );
-	get_script_manager()->set_function( "set_start_dir", [] ( GameObjectRef* o, float_t r ) { require_not_nil( o, "set_start_dir" )->set_start_direction_degree( r ); } );
-	get_script_manager()->set_function( "set_mass", [] ( GameObjectRef* o, float_t mass ) { require_not_nil( o, "set_mass" )->set_mass( mass ); } );
-	get_script_manager()->set_function( "make_model_unique", [] ( GameObjectRef* o ) { return require_not_nil( o, "make_model_unique" )->make_model_unique(); } );
-
-	// GrahpicsManager
-	get_script_manager()->set_function( "setup_shadow_map", [this] ( uint_t level = 3, uint_t size = 1024 ) { get_graphics_manager()->setup_shadow_map( level, size ); } );
-	get_script_manager()->set_function( "set_sky_box", [this] ( const char_t* name ) { get_graphics_manager()->set_sky_box( name ); } );
-	get_script_manager()->set_function( "unset_sky_box", [this] () { get_graphics_manager()->unset_sky_box(); } );
-	get_script_manager()->set_function( "set_ground", [this] ( const char_t* name ) { get_graphics_manager()->set_ground( name ); } );
-	get_script_manager()->set_function( "unset_ground", [this] () { get_graphics_manager()->unset_ground(); } );
-
-	get_script_manager()->set_function( "set_paper_texture_type", [this] ( int_t type ) { get_graphics_manager()->set_paper_texture_type( type ); } );
-	get_script_manager()->set_function( "set_ambient_color", [this] ( const Color& color ) { get_graphics_manager()->set_ambient_color( color ); } );
-	get_script_manager()->set_function( "set_shadow_color", [this] ( const Color& color ) { get_graphics_manager()->set_shadow_color( color ); } );
-	get_script_manager()->set_function( "set_shadow_paper_color", [this] ( const Color& color ) { get_graphics_manager()->set_shadow_paper_color( color ); } );
-	get_script_manager()->set_function( "set_drawing_accent", [this] ( float_t accent ) { get_graphics_manager()->set_drawing_accent( accent ); } );
-	get_script_manager()->set_function( "set_drawing_line_type", [this] ( int_t type ) { get_graphics_manager()->set_drawing_line_type( type ); } );
-	get_script_manager()->set_function( "set_light_direction", [this] ( float_t x, float_t y, float_t z ) { return get_graphics_manager()->set_light_direction( Vector( x, y, z, 0.f ) ); } );
-
-	get_script_manager()->set_function( "set_post_effect_shader", [this] ( core::graphics::Shader* s ) { get_graphics_manager()->set_post_effect_shader( require_not_nil( s, "set_post_effect_shader" ) ); } );
-
-	get_script_manager()->set_function( "load_model", [this] ( const char_t* name ) { return get_graphics_manager()->load_model( name ); } );
-	get_script_manager()->set_function( "clone_model", [this] ( graphics::Model* m ) { auto* m2 = get_graphics_manager()->clone_model( require_not_nil( m, "clone_model" ) ); return m2; } );
-	get_script_manager()->set_function( "clone_model_with_shaders", [this] ( graphics::Model* m ) { return get_graphics_manager()->clone_model_with_shaders( require_not_nil( m, "clone_model_with_shaders" ) ); } );
-
-	get_script_manager()->set_function( "get_shader", [this] ( const char_t* name ) { return get_graphics_manager()->get_shader( name ); } );
-	get_script_manager()->set_function( "clone_shader", [this] ( const core::graphics::Shader* s ) { return get_graphics_manager()->clone_shader( require_not_nil( s, "clone_shader" ) ); } );
-
-	get_script_manager()->set_function( "load_texture", [this] ( const char_t* file_path ) { return get_graphics_manager()->load_texture( file_path ); } );
-	// get_script_manager()->set_function( "load_named_texture", [this] ( const char_t* name, const char_t* file_path ) { return get_graphics_manager()->load_texture( name, file_path ); } );
-	get_script_manager()->set_function( "get_texture", [this] ( const char_t* name ) { return get_graphics_manager()->get_texture( name ); } );
-
-	// SoundManager
-	get_script_manager()->set_function( "play_sound", [this] ( const char_t* name ) { if ( auto* s = get_sound_manager()->get_sound( name ) ) { s->play( false ); } } );
-
-	// debug
-	get_script_manager()->set_function( "debug_axis", [this] ( int on ) { get_graphics_manager()->set_debug_axis_enabled( on != 0 ); } );
-	get_script_manager()->set_function( "debug_bullet", [this] ( int mode ) { bullet_debug_draw_->setDebugMode( mode ); } );
-
-	get_script_manager()->set_function( "debug_print_resources", [this] () { get_graphics_manager()->debug_print_resources(); } );
-
 }
 
 /**

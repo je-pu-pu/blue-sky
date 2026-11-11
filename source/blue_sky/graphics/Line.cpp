@@ -1,5 +1,6 @@
 #include "Line.h"
 
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 
@@ -77,6 +78,23 @@ bool Line::load_obj( const char* file_name )
 	create_texture();
 
 	index_size_ = index_list_.size();
+
+	// 頂点を囲む箱と、いちばん長い線分（2 つずつ組の線分。番号が範囲外の組は数えない）を覚えてから頂点を消す（カリングに使う）
+	bounds_ = LocalBounds();
+	max_segment_length_ = 0.f;
+
+	for ( const auto& v : vertex_list_ )
+	{
+		bounds_.add( v.Position );
+	}
+
+	for ( size_t n = 0; n + 1 < index_list_.size(); n += 2 )
+	{
+		if ( index_list_[ n ] < vertex_list_.size() && index_list_[ n + 1 ] < vertex_list_.size() )
+		{
+			max_segment_length_ = std::max( max_segment_length_, ( vertex_list_[ index_list_[ n + 1 ] ].Position - vertex_list_[ index_list_[ n ] ].Position ).length() );
+		}
+	}
 
 	vertex_list_.clear();
 	index_list_.clear();

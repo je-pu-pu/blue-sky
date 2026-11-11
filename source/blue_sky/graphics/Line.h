@@ -1,6 +1,7 @@
 #pragma once
 
 #include <blue_sky/type.h>
+#include <blue_sky/graphics/LocalBounds.h>
 #include <vector>
 
 namespace blue_sky::graphics
@@ -53,6 +54,9 @@ protected:
 	IndexList		index_list_;
 	size_t			index_size_;
 
+	LocalBounds		bounds_;					///< 頂点を囲む箱（load_obj が頂点を消す前に求める）
+	float_t			max_segment_length_ = 0.f;	///< いちばん長い線分の長さ（線は画面で太らせるので、カリングで囲む球をこれだけ広げる）
+
 	virtual void create_vertex_buffer() = 0;
 	virtual void create_index_buffer() = 0;
 
@@ -74,6 +78,12 @@ public:
 
 	bool is_cast_shadow() const { return is_cast_shadow_; }
 	void set_cast_shadow( bool b ) { is_cast_shadow_ = b; }
+
+	/// 頂点を囲む箱（読んでいなければ空）
+	const LocalBounds& get_bounds() const { return bounds_; }
+
+	/// いちばん長い線分の長さ
+	float_t get_max_segment_length() const { return max_segment_length_; }
 
 }; // class Line
 

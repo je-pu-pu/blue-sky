@@ -72,7 +72,19 @@ public:
 	void bind_to_render_scene() const override;
 
 	int get_cascade_levels() const override { return cascade_levels_; }
-	
+
+	/// ready_to_render_shadow_map_with_cascade_level がシェーダーに渡すのと同じ行列（光の位置・カメラの位置・カスケードの幅から）
+	bool get_cascade_view_projection( uint_t level, Matrix& view_projection ) const override
+	{
+		if ( level >= static_cast< uint_t >( cascade_levels_ ) )
+		{
+			return false;
+		}
+
+		view_projection = get_view_projection_matrix( level );
+		return true;
+	}
+
 	void set_light_position( const Vector& ) override;
 	void set_eye_position( const Vector& ) override;
 

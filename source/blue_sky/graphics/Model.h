@@ -84,6 +84,17 @@ public:
 
 	bool is_skin_mesh() const { return skinning_animation_set_; }
 
+	/**
+	 * 見えない物を描かない（カリング）ために、このモデルを囲む球をモデルの座標で求める
+	 *
+	 * メッシュと線の頂点を囲む箱から作り、描く時に頂点が箱の外へ出る分の余裕を足す
+	 * （メッシュは Phong の分割で少し膨らむので 1 割と 0.05、線は画面の上で線分の長さまで太らせるので、いちばん長い線分の 2 倍）。
+	 *
+	 * @return 求められなければ false（スキンメッシュ : アニメーションで頂点が動く・頂点から箱を求めていないメッシュ・描く物が無い）。
+	 *         false の物はカリングしない（いつも描く）
+	 */
+	bool get_cull_sphere( Vector3& center, float_t& radius ) const;
+
 	/// このモデル用のシェーダーを作る（作る先の GraphicsManager は呼ぶ側が渡す。以前は core::Service から取っていた）
 	virtual Shader* create_shader( GraphicsManager* graphics_manager ) const;
 	virtual string_t get_texture_file_path_by_texture_name( const char* ) const;

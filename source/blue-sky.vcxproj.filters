@@ -789,6 +789,9 @@
     <ClInclude Include="blue_sky\graphics\Line.h">
       <Filter>blue_sky\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\graphics\LocalBounds.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
     <ClInclude Include="blue_sky\graphics\Direct3D11\Line.h">
       <Filter>blue_sky\graphics\Direct3D11</Filter>
     </ClInclude>
@@ -838,6 +841,9 @@
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\ShadowMap.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Frustum.h">
       <Filter>core\graphics</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\ShadowMap.h">

@@ -5,6 +5,8 @@
 
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
+#include <blue_sky/ecs/system/ObjectRenderDataSystem.h>
+#include <core/ecs/EntityManager.h>
 #include <GameObject/Camera.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -44,6 +46,16 @@ void GamePlayScene::render()
 {
 	stage_timer_.mark( "update と render の間（GameMain）" );
 
+	// 見えない物を描かない（カリング）。カメラは画面に描くときと同じ行列（update_render_data_for_frame）から、影はシャドウマップの今の行列から。
+	// Oculus Rift は目ごとに視錐台が違うので、カリングしない（全部を描く）
+	if ( ! get_oculus_rift() )
+	{
+		const Matrix view = Matrix().set_look_at( camera_->position(), camera_->look_at(), camera_->up() );
+		const Matrix projection = Matrix().set_perspective_fov( math::degree_to_radian( camera_->fov() ), camera_->aspect(), camera_->near_clip(), camera_->far_clip() );
+
+		get_graphics_manager()->set_object_culling( view * projection );
+	}
+
 	get_graphics_manager()->setup_rendering();
 
 	stage_timer_.mark( "描く準備・物体の定数の更新（setup_rendering）" );
@@ -64,6 +76,16 @@ void GamePlayScene::render()
 		sprintf_s( text, "[FrameStage] 物理の世界 : 剛体 %d 個（眠っていない %d・キネマティック %d）・広い判定の組 %d・接触の組 %d（接点あり %d）",
 			stats.collision_objects, stats.active_objects, stats.kinematic_objects, stats.overlapping_pairs, stats.manifolds, stats.touching_manifolds );
 		debug_log( text );
+
+		// 同じフレームのカリングの結果（描く対象のうち、カメラ・影の各段の範囲に掛かった数）
+		if ( const auto* system = get_entity_manager()->get_system< ecs::ObjectRenderDataSystem >() )
+		{
+			const auto& c = system->get_culling_stats();
+
+			sprintf_s( text, "[FrameStage] カリング : 描く対象 %zu 個（いつも描く %zu）・カメラ %zu・影の段 %zu / %zu / %zu",
+				c.targets, c.always_visible, c.in_camera, c.in_shadow_cascade[ 0 ], c.in_shadow_cascade[ 1 ], c.in_shadow_cascade[ 2 ] );
+			debug_log( text );
+		}
 	}
 }
 

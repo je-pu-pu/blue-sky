@@ -9,6 +9,8 @@
 #include <core/ecs/EntityManager.h>
 #include <core/animation/AnimationPlayer.h>
 
+#include <algorithm>
+
 namespace blue_sky::ecs
 {
 
@@ -148,12 +150,63 @@ void ObjectRenderDataSystem::forget_resolved_models()
 {
 	models_resolved_ = false;
 
+	// 描く範囲もこのフレームだけ（次のフレームで受け取らなければ、全部を描く）
+	culling_requested_ = false;
+	culling_applied_ = false;
+
 #ifdef _DEBUG
 	for ( const auto& target : get_render_targets() )
 	{
 		target.model = nullptr;
 	}
 #endif
+}
+
+void ObjectRenderDataSystem::set_culling( const core::graphics::Frustum& camera, const core::graphics::Frustum* shadow_cascades, int cascade_count )
+{
+	camera_frustum_ = camera;
+	shadow_cascade_count_ = shadow_cascades ? std::min( cascade_count, MaxShadowCascades ) : 0;
+
+	for ( int n = 0; n < shadow_cascade_count_; n++ )
+	{
+		shadow_frustums_[ n ] = shadow_cascades[ n ];
+	}
+
+	culling_requested_ = true;
+}
+
+std::uint8_t ObjectRenderDataSystem::calculate_visibility( const RenderTarget& target, const core::Matrix& world )
+{
+	core::Vector3 local_center;
+	float_t radius = 0.f;
+
+	if ( ! target.model || ! target.model->get_cull_sphere( local_center, radius ) )
+	{
+		culling_stats_.always_visible++;
+		return VisibleAll;
+	}
+
+	// 囲む球の中心を世界へ（world は回転と移動だけ。拡大縮小は使わないので半径はそのまま）
+	const core::Vector center = core::Vector( local_center.x(), local_center.y(), local_center.z(), 1.f ) * world;
+
+	std::uint8_t visibility = 0;
+
+	if ( camera_frustum_.intersects_sphere( center, radius ) )
+	{
+		visibility |= VisibleInCamera;
+		culling_stats_.in_camera++;
+	}
+
+	for ( int n = 0; n < shadow_cascade_count_; n++ )
+	{
+		if ( shadow_frustums_[ n ].intersects_sphere( center, radius ) )
+		{
+			visibility |= visible_in_shadow_cascade( n );
+			culling_stats_.in_shadow_cascade[ n ]++;
+		}
+	}
+
+	return visibility;
 }
 
 void ObjectRenderDataSystem::update_render_data()
@@ -165,8 +218,16 @@ void ObjectRenderDataSystem::update_render_data()
 
 	resolve_models();
 
+	if ( culling_requested_ )
+	{
+		culling_stats_ = CullingStats();
+	}
+
 	for ( const auto& target : get_render_targets() )
 	{
+		// 先に全部の段に入れておく（下で書かない物も、前のフレームの結果を持ち越さない）
+		target.visibility = VisibleAll;
+
 		ObjectRenderComponent& render = * target.render;
 
 		if ( ! render.should_write_constants() || ! render.object_constant_buffer )
@@ -186,6 +247,18 @@ void ObjectRenderDataSystem::update_render_data()
 		shader_data.world = make_world_matrix( target.transform->transform );
 		shader_data.prev_world = advance_prev_world( render, shader_data.world );
 
+		if ( culling_requested_ )
+		{
+			culling_stats_.targets++;
+			target.visibility = calculate_visibility( target, shader_data.world );
+
+			// どの段にも入らない物は描かないので、定数バッファを書かない（前フレームの world は上で進めた。次に入ったときに正しい値を書く）
+			if ( target.visibility == 0 )
+			{
+				continue;
+			}
+		}
+
 		if ( model->get_line() )
 		{
 			shader_data.color = model->get_line()->get_color();
@@ -202,6 +275,8 @@ void ObjectRenderDataSystem::update_render_data()
 			render.bone_constant_buffer->update( & bone_data );
 		}
 	}
+
+	culling_applied_ = culling_requested_;
 }
 
 } // namespace blue_sky::ecs

@@ -38,6 +38,45 @@ Model::Shader* Model::create_shader( GraphicsManager* graphics_manager ) const
 	}
 }
 
+bool Model::get_cull_sphere( Vector3& center, float_t& radius ) const
+{
+	// アニメーションする物は頂点が読んだ形の外へ出るので、カリングしない（プレイヤー・敵・少女など。数は少ない）
+	if ( is_skin_mesh() )
+	{
+		return false;
+	}
+
+	LocalBounds bounds;
+
+	if ( mesh_ )
+	{
+		if ( mesh_->get_bounds().empty )
+		{
+			return false;	// 頂点から箱を求めていない（読み込み以外で作ったメッシュ）
+		}
+
+		bounds.add( mesh_->get_bounds() );
+	}
+
+	float_t line_margin = 0.f;
+
+	if ( line_ )
+	{
+		bounds.add( line_->get_bounds() );
+		line_margin = line_->get_max_segment_length() * 2.f;
+	}
+
+	if ( bounds.empty )
+	{
+		return false;
+	}
+
+	center = bounds.center();
+	radius = bounds.radius() * 1.1f + 0.05f + line_margin;
+
+	return true;
+}
+
 /**
  * 指定したテクスチャ名に対応するテクスチャファイルパスを取得する
  *

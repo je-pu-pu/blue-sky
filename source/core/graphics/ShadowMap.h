@@ -98,7 +98,14 @@ public:
 	virtual void bind_to_render_scene() const = 0;
 
 	virtual int get_cascade_levels() const = 0;
-	
+
+	/**
+	 * カスケード level のシャドウマップを描くときの、光から見た view * projection（見えない物を描かないために使う）
+	 *
+	 * @return 求められなければ false（既定。そのときは影のカリングをしない）
+	 */
+	virtual bool get_cascade_view_projection( uint_t /* level */, Matrix& /* view_projection */ ) const { return false; }
+
 	virtual void set_light_position( const Vector& ) = 0;
 	virtual void set_eye_position( const Vector& ) = 0;
 

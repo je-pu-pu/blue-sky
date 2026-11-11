@@ -176,6 +176,7 @@
     <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp" />
     <ClCompile Include="test\script\ScriptManagerTest.cpp" />
     <ClCompile Include="test\graphics\RenderSettingsTest.cpp" />
+    <ClCompile Include="test\graphics\CullingTest.cpp" />
     <ClCompile Include="test\graphics\TextureSlotTest.cpp" />
     <ClCompile Include="test\ecs\RenderSystemHandleTest.cpp" />
     <ClCompile Include="test\physics\RigidBodyTest.cpp" />

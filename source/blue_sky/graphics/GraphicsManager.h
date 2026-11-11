@@ -398,7 +398,16 @@ public:
 	virtual void unset_depth_stencil() const = 0;
 
 	virtual void setup_rendering() override;
-	
+
+	/**
+	 * このフレームで物体を描く範囲を決める（見えない物を描かない = カリング。setup_rendering の前に呼ぶ）
+	 *
+	 * カメラの視錐台（camera_view_projection から）と、影のカスケードごとの範囲（シャドウマップの今の行列から）を、
+	 * ecs::ObjectRenderDataSystem に渡す。範囲の外の物は、その段（本体・線 / 影の各段）で描かず、どこにも入らなければ定数も書かない。
+	 * 呼ばないフレームは全部を描く（以前と同じ）
+	 */
+	void set_object_culling( const Matrix& camera_view_projection ) const;
+
 	virtual void render_shadow_map() const;
 	/// ゲームの物体を描く（メッシュ → 線。描く対象は ecs::ObjectRenderDataSystem::get_render_targets の順）
 	virtual void render_objects() const;

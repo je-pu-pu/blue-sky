@@ -1,6 +1,7 @@
 #pragma once
 
 #include <blue_sky/type.h>
+#include <blue_sky/graphics/LocalBounds.h>
 
 #include <core/graphics/Mesh.h>
 #include <core/graphics/VertexGroup.h>
@@ -125,6 +126,8 @@ protected:
 
 	std::unique_ptr< Buffer > buffer_;
 
+	LocalBounds			bounds_;		///< 頂点を囲む箱（calculate_bounds で求める。求めていなければ空）
+
 public:
 	explicit Mesh( Buffer* b )
 		: buffer_( b )
@@ -157,6 +160,20 @@ public:
 
 	void create_vertex_buffer() { buffer_->create_vertex_buffer(); }
 	void create_index_buffer() { buffer_->create_index_buffer(); }
+
+	/// 頂点を囲む箱を、今の頂点の一覧から求めて覚える（頂点の一覧を消す前に呼ぶ。GraphicsManager::load_mesh）
+	void calculate_bounds()
+	{
+		bounds_ = LocalBounds();
+
+		for ( const auto& v : vertex_list_ )
+		{
+			bounds_.add( v.Position );
+		}
+	}
+
+	/// 頂点を囲む箱（求めていなければ空。見えない物を描かないために使う）
+	const LocalBounds& get_bounds() const { return bounds_; }
 
 	void clear_vertex_list();
 	void clear_vertex_weight_list();

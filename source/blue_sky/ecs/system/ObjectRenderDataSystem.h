@@ -4,7 +4,9 @@
 #include <core/ecs/EntityIdOrderedList.h>
 #include <core/ecs/component/TransformComponent.h>
 #include <blue_sky/ecs/component/ObjectRenderComponent.h>
+#include <core/graphics/Frustum.h>
 
+#include <cstdint>
 #include <vector>
 
 namespace blue_sky::graphics { class ResourceResolver; class Model; }
@@ -38,9 +40,31 @@ public:
 		/// このフレームで引いたモデル（resolve_models で 1 フレームに 1 回だけ引く。空・解放済みなら nullptr）。
 		/// 描く流れ（本体・線・速度・影の段）は、段ごとにハンドルを引き直さずにこれを使う。次のフレームへは持ち越さない
 		mutable const graphics::Model*				model = nullptr;
+
+		/// このフレームで、どの描く段に入るか（VisibleInCamera・visible_in_shadow_cascade の和。update_render_data が決める）。
+		/// 読むときは is_visible を使う（カリングしなかったフレームは全部の段に入る）
+		mutable std::uint8_t						visibility = VisibleAll;
 	};
 
 	using RenderTargetList = std::vector< RenderTarget >;
+
+	static constexpr std::uint8_t VisibleInCamera = 1;		///< カメラの視錐台に掛かる（本体・線・速度・デバッグの軸を描く）
+	static constexpr std::uint8_t VisibleAll = 0xFF;
+
+	/// 影のカスケード level の範囲に掛かる（その段のシャドウマップに描く）
+	static constexpr std::uint8_t visible_in_shadow_cascade( int level ) { return static_cast< std::uint8_t >( 2 << level ); }
+
+	/// 影のカスケードの数の上限（core::graphics::ShadowMap::MaxCascadeLevels と同じ）
+	static constexpr int MaxShadowCascades = 4;
+
+	/// カリングの結果の数（開発用。最後に update_render_data を呼んだフレームの数）
+	struct CullingStats
+	{
+		std::size_t targets = 0;							///< 描く対象（モデルのあるもの）
+		std::size_t always_visible = 0;						///< そのうち囲む球が求められずカリングしないもの（スキンメッシュなど）
+		std::size_t in_camera = 0;							///< カメラの視錐台に掛かるもの
+		std::size_t in_shadow_cascade[ MaxShadowCascades ] = { };	///< 影のカスケードごとの範囲に掛かるもの
+	};
 
 private:
 	/// アニメーションを持つ描く対象 1 つ
@@ -61,6 +85,17 @@ private:
 
 	mutable bool	models_resolved_ = false;	///< このフレームで描く対象のモデルを引いたか（フレームの終わりに forget_resolved_models で戻す）
 
+	// ---- カリング（見えない物を描かない。set_culling で範囲を受け取ったフレームだけ） ----
+	bool							culling_requested_ = false;		///< このフレームの範囲を受け取った（フレームの終わりに戻す）
+	bool							culling_applied_ = false;		///< このフレームの visibility を範囲から決めた（フレームの終わりに戻す）
+	core::graphics::Frustum			camera_frustum_;
+	core::graphics::Frustum			shadow_frustums_[ MaxShadowCascades ];
+	int								shadow_cascade_count_ = 0;
+	CullingStats					culling_stats_;
+
+	/// 描く対象 1 つが、どの段に入るか（world はこのフレームの world 行列）
+	std::uint8_t calculate_visibility( const RenderTarget& target, const core::Matrix& world );
+
 protected:
 	void on_remove_entity( core::ecs::EntityId id, ComponentTuple& ) override;
 
@@ -79,8 +114,29 @@ public:
 	/// アニメーションを 1 フレーム進める（ActiveObjectManager::update が、物体の update の後に呼ぶ）
 	void update_animations();
 
-	/// 描く前に定数バッファを書く（GraphicsManager::update_constant_buffers が呼ぶ。描く対象のモデルもここで引く）
+	/**
+	 * 描く前に定数バッファを書く（GraphicsManager::update_constant_buffers が呼ぶ。描く対象のモデルもここで引く）
+	 *
+	 * このフレームの範囲（set_culling）を受け取っていれば、描く対象ごとにどの段に入るか（RenderTarget::visibility）を決め、
+	 * どの段にも入らない物は定数バッファを書かない（前フレームの world は今までどおり進める）
+	 */
 	void update_render_data();
+
+	/**
+	 * このフレームで描く範囲を渡す（カリング。次の update_render_data で使い、フレームの終わりに忘れる）
+	 *
+	 * 呼ばないフレームは全部を描く（以前と同じ）。
+	 *
+	 * @param camera カメラの視錐台
+	 * @param shadow_cascades 影のカスケードごとの範囲（cascade_count 個。影を描かないなら nullptr・0）
+	 */
+	void set_culling( const core::graphics::Frustum& camera, const core::graphics::Frustum* shadow_cascades, int cascade_count );
+
+	/// このフレームの範囲で、target が bit の段に入るか（範囲を使わなかったフレームは、いつも true）
+	bool is_visible( const RenderTarget& target, std::uint8_t bit ) const { return ! culling_applied_ || ( target.visibility & bit ) != 0; }
+
+	/// 最後に範囲を使ったフレームのカリングの結果の数（開発用）
+	const CullingStats& get_culling_stats() const { return culling_stats_; }
 
 	/**
 	 * 描く対象のモデルを引いて RenderTarget::model に入れる（このフレームでまだ引いていなければ。1 フレームに 1 回）

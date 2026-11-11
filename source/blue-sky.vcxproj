@@ -281,6 +281,7 @@
     <ClInclude Include="blue_sky\graphics\NeuralNprEffect.h" />
     <ClInclude Include="blue_sky\graphics\Ground.h" />
     <ClInclude Include="blue_sky\graphics\Line.h" />
+    <ClInclude Include="blue_sky\graphics\LocalBounds.h" />
     <ClInclude Include="blue_sky\graphics\Mesh.h" />
     <ClInclude Include="blue_sky\graphics\Model.h" />
     <ClInclude Include="blue_sky\graphics\ObjFileLoader.h" />
@@ -407,6 +408,7 @@
     <ClInclude Include="core\graphics\ConstantBuffer.h" />
     <ClInclude Include="core\graphics\ShaderResource.h" />
     <ClInclude Include="core\graphics\ShadowMap.h" />
+    <ClInclude Include="core\graphics\Frustum.h" />
     <ClInclude Include="core\graphics\Sprite.h" />
     <ClInclude Include="core\graphics\Texture.h" />
     <ClInclude Include="core\graphics\VertexBuffer.h" />

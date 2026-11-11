@@ -16,6 +16,7 @@
 
 #include <core/animation/AnimationPlayer.h>
 #include <core/graphics/ShadowMap.h>
+#include <core/graphics/Frustum.h>
 
 #include <core/graphics/Shader.h>
 #include <core/graphics/NullTexture.h>
@@ -195,6 +196,9 @@ bool_t GraphicsManager::load_mesh( Model* model, const char_t* name )
 
 		model->get_mesh()->create_vertex_buffer();
 		model->get_mesh()->create_index_buffer();
+
+		// 頂点を囲む箱を覚えてから頂点を消す（見えない物を描かないために使う）
+		model->get_mesh()->calculate_bounds();
 
 		model->get_mesh()->clear_vertex_list();
 		model->get_mesh()->clear_vertex_weight_list();
@@ -650,6 +654,51 @@ void GraphicsManager::setup_rendering()
 	set_eye_position( eye );
 }
 
+void GraphicsManager::set_object_culling( const Matrix& camera_view_projection ) const
+{
+	auto* system = get_object_render_data_system();
+
+	if ( ! system )
+	{
+		return;
+	}
+
+	core::graphics::Frustum shadow_frustums[ ecs::ObjectRenderDataSystem::MaxShadowCascades ];
+	int cascade_count = 0;
+
+	// 影を描くなら、カスケードごとの範囲（描くときにシェーダーへ渡すのと同じ行列）。求められなければ影はカリングしない
+	if ( shadow_map_ )
+	{
+		cascade_count = std::min( shadow_map_->get_cascade_levels(), ecs::ObjectRenderDataSystem::MaxShadowCascades );
+
+		for ( int n = 0; n < cascade_count; n++ )
+		{
+			Matrix view_projection;
+
+			if ( ! shadow_map_->get_cascade_view_projection( n, view_projection ) )
+			{
+				cascade_count = 0;
+				break;
+			}
+
+			shadow_frustums[ n ] = core::graphics::Frustum::from_view_projection( view_projection );
+		}
+	}
+
+	// 影の段の範囲が無いときは、影の段を全部描く（何も外さない範囲を渡す）
+	if ( shadow_map_ && cascade_count == 0 )
+	{
+		cascade_count = std::min( shadow_map_->get_cascade_levels(), ecs::ObjectRenderDataSystem::MaxShadowCascades );
+
+		for ( int n = 0; n < cascade_count; n++ )
+		{
+			shadow_frustums[ n ] = core::graphics::Frustum();
+		}
+	}
+
+	system->set_culling( core::graphics::Frustum::from_view_projection( camera_view_projection ), shadow_frustums, cascade_count );
+}
+
 /**
  * シャドウマップを描画する
  */
@@ -689,11 +738,14 @@ void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool
 
 		system->resolve_models();	// 1 フレームに 1 回だけ引く（段ごと・カスケードごとに引き直さない）
 
+		const std::uint8_t cascade_bit = ecs::ObjectRenderDataSystem::visible_in_shadow_cascade( n );
+
 		for ( const auto& target : system->get_render_targets() )
 		{
 			const Model* model = target.model;
 
-			if ( ! model )
+			// このカスケードの範囲の外の物は描かない（set_object_culling を呼んだフレームだけ）
+			if ( ! model || ! system->is_visible( target, cascade_bit ) )
 			{
 				continue;
 			}
@@ -745,7 +797,8 @@ void GraphicsManager::render_object_meshes() const
 	{
 		const Model* model = target.model;
 
-		if ( ! model )
+		// カメラの視錐台の外の物は描かない（set_object_culling を呼んだフレームだけ）
+		if ( ! model || ! system->is_visible( target, ecs::ObjectRenderDataSystem::VisibleInCamera ) )
 		{
 			continue;
 		}
@@ -779,7 +832,9 @@ void GraphicsManager::render_object_lines() const
 
 		for ( const auto& target : system->get_render_targets() )
 		{
-			if ( const Model* model = target.model )
+			const Model* model = target.model;
+
+			if ( model && system->is_visible( target, ecs::ObjectRenderDataSystem::VisibleInCamera ) )
 			{
 				render_object_line( * target.render, model );
 			}
@@ -817,7 +872,8 @@ void GraphicsManager::render_objects_velocity() const
 	{
 		const Model* model = target.model;
 
-		if ( ! model )
+		// カメラの視錐台の外の物は描かない（定数を書いていないことがある）
+		if ( ! model || ! system->is_visible( target, ecs::ObjectRenderDataSystem::VisibleInCamera ) )
 		{
 			continue;
 		}
@@ -971,7 +1027,8 @@ void GraphicsManager::render_debug_axis() const
 
 		for ( const auto& target : system->get_render_targets() )
 		{
-			if ( ! target.render->object_constant_buffer )
+			// カメラの視錐台の外の物は、定数を書いていないことがあるので描かない
+			if ( ! target.render->object_constant_buffer || ! system->is_visible( target, ecs::ObjectRenderDataSystem::VisibleInCamera ) )
 			{
 				continue;
 			}

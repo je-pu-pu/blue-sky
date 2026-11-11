@@ -3,6 +3,8 @@
 
 #include "SceneManager.h"
 #include "SceneStack.h"
+#include "dev/DevTools.h"
+#include "dev/DebugConsole.h"
 #include "Scene/Scene.h"
 
 #include "ObjectUpdater.h"
@@ -36,7 +38,6 @@
 #include <core/input/DirectInput/DirectInput.h>
 #include <core/physics/PhysicsManager.h>
 
-#include <core/Logger.h>
 
 #include <win/Version.h>
 #include <win/Clipboard.h>
@@ -61,11 +62,9 @@
 #include <sstream>
 
 #include <imgui.h>
-#include <imgui_stdlib.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 
 #include <stdexcept>
@@ -80,9 +79,7 @@ GameMain::GameMain( App& app )
 	, scene_manager_( std::make_unique< SceneManager >() )
 	, entity_manager_( std::make_unique< core::ecs::EntityManager >() )
 	, is_display_fps_( false )
-	, is_command_mode_( false )
 	, is_show_cursor_( false )
-	, user_command_( 1024, '\0' )
 {
 	// common::log( "log/debug.log", "init" );
 
@@ -225,13 +222,12 @@ GameMain::GameMain( App& app )
 	// MainLoop
 	main_loop_.reset( new MainLoop( 60 ) );
 
-	// 開発用 : BLUE_SKY_DEBUG_FIXED_STEP_MSEC="ミリ秒" を設定すると、1 フレームの経過時間をいつもその値にする
-	// （本当の時間によらず、物理・紙の模様・線の揺れがフレームの数だけで決まる。画面を撮り比べるときに、exe の速さの違いで揺れないように）
-	if ( const unsigned long msec = dev_options_.fixed_step_msec; msec > 0 )
-	{
-		main_loop_->set_fixed_elapsed_msec( msec );
-		debug_log( "[Debug] BLUE_SKY_DEBUG_FIXED_STEP_MSEC : 1 フレームの経過時間をいつも " + std::to_string( msec ) + " ミリ秒にします" );
-	}
+	// 開発用の機能（どれも開発用の環境変数を設定したときだけ動く）。経過時間の固定は MainLoop を作った直後に設定する
+	create_dev_tools();
+	dev_tools_->apply_fixed_step( * main_loop_ );
+
+	// imgui の開発用の窓（F1）。シーンの一覧でダブルクリックしたシーンは、要求を出さずにすぐに作り直す（以前と同じ）
+	debug_console_ = std::make_unique< dev::DebugConsole >( * script_manager_, * scene_manager_, [this] ( const string_t& name ) { scene_stack_->setup_base_scene( name ); } );
 
 	// ゲーム設定 : ユーザーの設定ファイルから読み、表示系以外を反映する（表示系は App / Direct3D の初期化で、同じ登録を使って反映済み）
 	settings_ = std::make_unique< core::setting::SettingStore >();
@@ -310,6 +306,8 @@ GameMain::~GameMain()
 	// scene_stack_ は最後に宣言しているので放っておいても最初に壊れるが、決まりとしてここで壊す
 	// （以前はゲーム本編を開いたまま閉じると、GamePlayScene が壊れた SettingStore から購読を外そうとして毎回落ちていた）
 	scene_stack_.reset();
+	debug_console_.reset();
+	dev_tools_.reset();
 
 	// ゲームの物体を EntityManager より先に壊す（物体は壊れるときに自分の Entity を消す。entity_manager_ は object_factory_ より後に宣言され、先に壊れる）。
 	// ECS だけの物体（ObjectFactory が作った）も一緒に消す
@@ -414,13 +412,7 @@ bool GameMain::update()
 
 	time_manager_.update( main_loop_->get_elapsed_sec() );
 
-	if ( frame_time_last_ > 0 )
-	{
-		LARGE_INTEGER now;
-		QueryPerformanceCounter( & now );
-		frame_time_previous_start_ = frame_time_start_;
-		frame_time_start_ = now.QuadPart;
-	}
+	dev_tools_->begin_frame();
 
 	// 監視しているディレクトリ（シェーダーなど）の変更を毎フレーム確かめる
 	// （以前はウィンドウが再びアクティブになったときだけ確かめていたので、エディタと並べて作業していると読み直されなかった。
@@ -445,7 +437,7 @@ bool GameMain::update()
 		direct_input_->update();
 		input_->update();
 
-		if ( is_command_mode_ )
+		if ( debug_console_->is_open() )
 		{
 			input_->clear_mouse_move();
 		}
@@ -508,14 +500,8 @@ bool GameMain::update()
 	// 開発用 : 起動時のオーバーレイ（数フレーム後に開く）
 	scene_stack_->update_start_overlay();
 
-	// 開発用 : BLUE_SKY_DEBUG_SCENE_SEQUENCE の順に、150 フレームごとにベースシーンを置き換える
-	if ( ! debug_scene_sequence_.empty() && ! scene_stack_->is_loading_frame() && ++debug_scene_sequence_frames_ >= 150 )
-	{
-		debug_scene_sequence_frames_ = 0;
-		debug_log( "[Scene] 開発用の順でベースシーンを置き換えます: " + debug_scene_sequence_.front().name + ( debug_scene_sequence_.front().stage_name.empty() ? "" : " " + debug_scene_sequence_.front().stage_name ) );
-		request_scene( debug_scene_sequence_.front() );
-		debug_scene_sequence_.pop_front();
-	}
+	// 開発用 : BLUE_SKY_DEBUG_SCENE_SEQUENCE の順に、決まったフレームごとにベースシーンを置き換える
+	dev_tools_->update_scene_sequence( scene_stack_->is_loading_frame() );
 
 	// シーン遷移 : シーンが出した要求を集め、フレームの境目でまとめて実行する
 	scene_stack_->collect_requests();
@@ -569,61 +555,6 @@ void GameMain::apply_display_settings()
 		+ "・フルスクリーン " + ( get_app()->is_full_screen() ? "はい" : "いいえ" ) );
 }
 
-/**
- * 開発用のフレームの保存を準備する
- *
- * 環境変数 BLUE_SKY_CAPTURE_FRAMES=60,120（保存するフレームの番号）と BLUE_SKY_CAPTURE_DIR（既定 dump）。
- * 自動操作の確認で、画面がロック中（ウィンドウを撮影できない）でも描画結果を確かめるために使う。
- */
-void GameMain::setup_frame_capture()
-{
-	if ( dev_options_.capture_frames.empty() )
-	{
-		return;
-	}
-
-	capture_frames_ = dev_options_.capture_frames;
-	capture_directory_ = dev_options_.capture_directory;
-	CreateDirectoryA( capture_directory_.c_str(), nullptr );
-}
-
-void GameMain::capture_frame_if_requested()
-{
-	frame_count_++;
-
-	// 開発用 : BLUE_SKY_DEBUG_DISPLAY_CHANGE（"幅x高さ"）を設定すると、120 フレーム目に解像度を変えて「適用」する
-	// （排他フルスクリーン中の解像度の変更を、オプション画面を操作せずに確かめるため。設定ファイルを汚さないよう BLUE_SKY_SETTINGS_DIR と一緒に使う）
-	if ( frame_count_ == 120 && dev_options_.display_change_width > 0 && dev_options_.display_change_height > 0 )
-	{
-		const int w = dev_options_.display_change_width, h = dev_options_.display_change_height;
-
-		debug_log( "[Debug] 解像度を変えて適用します : " + std::to_string( w ) + "x" + std::to_string( h ) );
-		settings_->set( game_settings::SCREEN_WIDTH, w );
-		settings_->set( game_settings::SCREEN_HEIGHT, h );
-		settings_->apply_deferred();
-	}
-
-	if ( std::find( capture_frames_.begin(), capture_frames_.end(), frame_count_ ) == capture_frames_.end() )
-	{
-		return;
-	}
-
-	wchar_t name[ 32 ];
-	swprintf_s( name, L"/capture_%04d.png", frame_count_ );	// 区切りは / （Windows でも使える）
-
-	const std::wstring path = common::convert_to_wstring( capture_directory_ ) + name;
-	const bool ok = direct_3d_->save_back_buffer_to_png( path.c_str() );
-
-	// 文字のアトラスも保存する（BLUE_SKY_CAPTURE_GLYPH_ATLAS が設定されているとき。文字の描画の不具合を調べる）
-	if ( dev_options_.capture_glyph_atlas )
-	{
-		swprintf_s( name, L"/atlas_%04d.png", frame_count_ );
-		graphics_manager_->save_glyph_atlas( ( common::convert_to_wstring( capture_directory_ ) + name ).c_str() );
-	}
-
-	debug_log( string_t( ok ? "フレームを保存しました: " : "フレームを保存できませんでした: " ) + capture_directory_ + " / " + std::to_string( frame_count_ ) );
-}
-
 void GameMain::render()
 {
 	// 描画する範囲を上から決める
@@ -659,37 +590,15 @@ void GameMain::render()
 		overlays[ i ]->render();
 	}
 
-	if ( is_command_mode_ )
-    {
-		render_console_window();
-		render_scene_list_window();
-	}
+	debug_console_->render();
 
 	ImGui::Render();
 	get_graphics_manager()->set_default_render_target( false );
     ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );
 
-	capture_frame_if_requested();
-	record_frame_time();
-
-	// 開発用 : present にかかった時間も測る（BLUE_SKY_DEBUG_FRAME_TIME の範囲。最後のフレームの分はログの後なので入らない）
-	const bool measure_present = frame_time_last_ > 0 && frame_count_ >= frame_time_first_ && frame_count_ < frame_time_last_;
-	LARGE_INTEGER present_start = { }, present_end = { };
-
-	if ( measure_present )
-	{
-		QueryPerformanceCounter( & present_start );
-	}
-
-	direct_3d_->present();
-
-	if ( measure_present )
-	{
-		LARGE_INTEGER frequency;
-		QueryPerformanceCounter( & present_end );
-		QueryPerformanceFrequency( & frequency );
-		frame_time_present_ms_.push_back( static_cast< double >( present_end.QuadPart - present_start.QuadPart ) * 1000.0 / static_cast< double >( frequency.QuadPart ) );
-	}
+	// 開発用 : フレームの保存・解像度の変更の試し・フレームの時間（present にかかった時間も測る）
+	dev_tools_->after_render();
+	dev_tools_->present( [this] { direct_3d_->present(); } );
 
 	// フレームの途中で解放・差し替えを頼まれたリソースを、ここでまとめて解放する（フレームの中では引いたポインタを使い回せる。doc/ハンドルの設計.md）
 	flush_resource_releases();
@@ -700,269 +609,6 @@ void GameMain::flush_resource_releases()
 {
 	graphics_manager_->flush_releases();
 	sound_manager_->flush_releases();
-}
-
-/**
- * 開発用のフレームの時間の計測を準備する
- *
- * 環境変数 BLUE_SKY_DEBUG_FRAME_TIME="最初のフレーム,最後のフレーム"（例 "300,1500"）。
- * その間のフレームについて、update の始まりから present の前まで（CPU の仕事の時間。垂直同期の待ちを含まない）と、
- * フレームの間隔を測り、最後のフレームで中央値などを debug_log に出す（ハンドルの作り替えの前後を比べるため。doc/ハンドルの設計.md）。
- */
-void GameMain::setup_frame_time_measurement()
-{
-	frame_time_first_ = dev_options_.frame_time_first;
-	frame_time_last_ = dev_options_.frame_time_last;
-
-	if ( frame_time_last_ <= 0 )
-	{
-		return;
-	}
-
-	frame_time_work_ms_.reserve( frame_time_last_ - frame_time_first_ + 1 );
-	frame_time_interval_ms_.reserve( frame_time_last_ - frame_time_first_ + 1 );
-	frame_time_present_ms_.reserve( frame_time_last_ - frame_time_first_ + 1 );
-}
-
-void GameMain::record_frame_time()
-{
-	if ( frame_time_last_ <= 0 || frame_count_ < frame_time_first_ || frame_count_ > frame_time_last_ || frame_time_start_ == 0 )
-	{
-		return;
-	}
-
-	LARGE_INTEGER now, frequency;
-	QueryPerformanceCounter( & now );
-	QueryPerformanceFrequency( & frequency );
-
-	const double to_ms = 1000.0 / static_cast< double >( frequency.QuadPart );
-	frame_time_work_ms_.push_back( static_cast< double >( now.QuadPart - frame_time_start_ ) * to_ms );
-
-	if ( frame_time_previous_start_ != 0 )
-	{
-		frame_time_interval_ms_.push_back( static_cast< double >( frame_time_start_ - frame_time_previous_start_ ) * to_ms );
-	}
-
-	if ( frame_count_ != frame_time_last_ )
-	{
-		return;
-	}
-
-	// 中央値・平均・95 パーセンタイル・最小・最大
-	auto summary = [] ( std::vector< double > v )
-	{
-		if ( v.empty() )
-		{
-			return string_t( "なし" );
-		}
-
-		std::sort( v.begin(), v.end() );
-		double sum = 0.0;
-
-		for ( double x : v )
-		{
-			sum += x;
-		}
-
-		char text[ 160 ];
-		sprintf_s( text, "中央値 %.3f ms / 平均 %.3f ms / 95%% %.3f ms / 最小 %.3f ms / 最大 %.3f ms",
-			v[ v.size() / 2 ], sum / v.size(), v[ std::min( v.size() - 1, v.size() * 95 / 100 ) ], v.front(), v.back() );
-		return string_t( text );
-	};
-
-	debug_log( "[FrameTime] フレーム " + std::to_string( frame_time_first_ ) + "〜" + std::to_string( frame_time_last_ ) + "（" + std::to_string( frame_time_work_ms_.size() ) + " 枚）"
-		+ " シーン " + ( get_current_scene() ? get_current_scene()->get_name() : string_t( "なし" ) ) );
-	debug_log( "[FrameTime] 仕事の時間（update の始まり〜present の前） : " + summary( frame_time_work_ms_ ) );
-	debug_log( "[FrameTime] フレームの間隔 : " + summary( frame_time_interval_ms_ ) );
-	debug_log( "[FrameTime] present の時間 : " + summary( frame_time_present_ms_ ) );
-}
-
-/**
- * @brief コンソールウィンドウを描画する
- */
-void GameMain::render_console_window()
-{
-	if ( ! ImGui::Begin( "Console", 0 ) )
-    {
-		ImGui::End();
-		return;
-	}
-
-	static auto scroll_to_bottom = false;
-
-	const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
-	if ( ImGui::BeginChild( "ScrollingRegion", ImVec2( 0, -footer_height_to_reserve ), 0, ImGuiWindowFlags_HorizontalScrollbar ) )
-    {
-		if ( ImGui::BeginPopupContextWindow() )
-        {
-            if ( ImGui::Selectable( "Clear" ) )
-			{
-				// clear log
-			}
-
-            ImGui::EndPopup();
-        }
-
-		for ( const auto& log: core::logger.get_log_list() )
-		{
-			auto has_color = false;
-
-			switch ( log.get_type() )
-			{
-			case core::Logger::Log::Type::ERROR:
-				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 0.4f, 0.4f, 1.0f ) );
-				has_color = true;
-				break;
-			case core::Logger::Log::Type::WARN:
-				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 0.7f, 0.1f, 1.0f ) );
-				has_color = true;
-				break;
-			case core::Logger::Log::Type::INFO:
-				break;
-			case core::Logger::Log::Type::DEBUG:
-				break;
-			}
-                    
-
-			ImGui::TextUnformatted( log.get_message().c_str() );
-
-			if ( has_color )
-			{
-				ImGui::PopStyleColor();
-			}
-		}
-
-		if ( scroll_to_bottom )
-		{
-            ImGui::SetScrollHereY( 1.f );
-		}
-
-        scroll_to_bottom = false;
-	}
-
-	ImGui::EndChild();
-
-	ImGui::Separator();
-
-	const auto input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
-
-	ImGui::SetNextItemWidth( -FLT_MIN );
-
-	bool reclaim_focus = false;
-
-	const auto callback = [] (ImGuiInputTextCallbackData* data) -> int
-	{
-		auto game_main = static_cast< GameMain* >( data->UserData );
-		string_t command;
-
-		switch ( data->EventFlag )
-		{
-		case ImGuiInputTextFlags_CallbackCompletion:
-			command = game_main->user_command_;
-
-			game_main->get_script_manager()->auto_complete( command );
-
-			if ( ! game_main->get_script_manager()->get_output().empty() )
-			{
-				core::logger.info( game_main->get_script_manager()->get_output() );
-			}
-
-			scroll_to_bottom = true;
-
-			break;
-		case ImGuiInputTextFlags_CallbackHistory:
-			if ( data->EventKey == ImGuiKey_UpArrow )
-			{
-				command = game_main->get_script_manager()->get_prev_hisotry_command();
-			
-			}
-			else if ( data->EventKey == ImGuiKey_DownArrow )
-			{
-				command = game_main->get_script_manager()->get_next_hisotry_command();	
-			}
-		}
-
-		if ( command != game_main->user_command_ )
-		{
-			data->DeleteChars( 0, data->BufTextLen );
-			data->InsertChars( 0, command.c_str() );
-		}
-
-		return 0;
-	};
-
-	if ( ImGui::InputText( "##command", & user_command_, input_text_flags, callback, this ) )
-    {
-		boost::trim( user_command_ );
-
-		if ( user_command_ != "" )
-		{
-			core::logger.info( user_command_ );
-
-			try
-			{
-				get_script_manager()->exec( user_command_, true );
-			}
-			catch ( const ScriptError& e )
-			{
-				// get_app()->show_error_message( e.what() );
-				core::logger.error( e.what() );
-			}
-
-			user_command_ = "";
-			scroll_to_bottom = true;
-		}
-
-		reclaim_focus = true;
-	}
-
-	ImGui::SetItemDefaultFocus();
-
-    if ( reclaim_focus || ! ImGui::IsAnyItemActive() )
-	{
-		ImGui::SetKeyboardFocusHere( -1 );
-	}
-
-	ImGui::End();
-}
-/**
- * @brief シーン一覧ウィンドウを描画する
- */
-void GameMain::render_scene_list_window()
-{
-	if ( ! ImGui::Begin( "SceneList" ) )
-    {
-		ImGui::End();
-		return;
-	}
-
-	if ( ImGui::BeginListBox( "##SceneListBox", ImVec2( -FLT_MIN, 0 ) ) )
-    {
-		static int selected_item_index = -1;
-
-		int n = 0;
-
-        for ( const auto& scene: scene_manager_->get_scene_generator_map() )
-        {
-            ImGuiSelectableFlags flags = n == selected_item_index ? ImGuiSelectableFlags_Highlight : 0;
-
-            if ( ImGui::Selectable( scene.first.c_str(), n == selected_item_index, flags ) )
-			{
-				selected_item_index = n;
-			}
-
-			if ( ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked( 0 ) )
-			{
-				scene_stack_->setup_base_scene( scene.first );
-			}
-
-			n++;
-        }
-        
-		ImGui::EndListBox();
-    }
-
-	ImGui::End();
 }
 
 void GameMain::on_key_down( char_t c )
@@ -1001,7 +647,7 @@ void GameMain::on_special_key_down( int key )
 
 	if ( key == VK_F1 )
 	{
-		is_command_mode_ = ! is_command_mode_;
+		debug_console_->toggle();
 		update_cursor_state();
 	}
 	else if ( key == VK_F2 )
@@ -1052,6 +698,31 @@ void GameMain::handle_escape()
 	// 開発用のコンソール（ImGui）がキー入力を受け取っているときは、ESC はコンソールのもの。
 	// 何をするか（オーバーレイが開いていれば UI に任せる・終了・ポーズメニュー・タイトルへ）は SceneStack が決める
 	scene_stack_->handle_escape( escape_pushed && ! ImGui::GetIO().WantCaptureKeyboard );
+}
+
+/**
+ * 開発用の機能（DevTools）を作る
+ *
+ * 描画結果の保存・解像度の変更・シーンの切り替えなどの GameMain の仕事を渡す（DevTools は GameMain を知らない。テストでは偽物を渡す）
+ */
+void GameMain::create_dev_tools()
+{
+	dev::DevTools::Hooks hooks;
+
+	hooks.save_back_buffer = [this] ( const std::wstring& path ) { return direct_3d_->save_back_buffer_to_png( path.c_str() ); };
+	hooks.save_glyph_atlas = [this] ( const std::wstring& path ) { graphics_manager_->save_glyph_atlas( path.c_str() ); };
+
+	hooks.change_display = [this] ( int w, int h )
+	{
+		settings_->set( game_settings::SCREEN_WIDTH, w );
+		settings_->set( game_settings::SCREEN_HEIGHT, h );
+		settings_->apply_deferred();
+	};
+
+	hooks.request_scene = [this] ( const SceneRequest& r ) { request_scene( r ); };
+	hooks.current_scene_name = [this] { return get_current_scene() ? get_current_scene()->get_name() : string_t(); };
+
+	dev_tools_ = std::make_unique< dev::DevTools >( dev_options_, std::move( hooks ) );
 }
 
 /**
@@ -1170,10 +841,8 @@ void GameMain::setup_scene()
 
 		// 開発用 : BLUE_SKY_DEBUG_SCENE_SEQUENCE（"stage_select,game_play:1-1,title" のように「シーン[:ステージ]」を , で並べる）を設定すると、
 		// 150 フレームごとに順にベースシーンを置き換える。シーンを替えて戻ったときにリソースが正しく引けるかを、入力を送らずに確かめるため
-		debug_scene_sequence_.assign( dev_options_.scene_sequence.begin(), dev_options_.scene_sequence.end() );
-
-		setup_frame_capture();
-		setup_frame_time_measurement();
+		// 開発用 : フレームの保存・フレームの時間・シーンを順に替える（BLUE_SKY_DEBUG_SCENE_SEQUENCE）を準備する
+		dev_tools_->setup();
 
 		return;
 	}
@@ -1247,7 +916,7 @@ void GameMain::clear_for_next_scene()
 void GameMain::update_cursor_state()
 {
 	const bool menu_open = scene_stack_->has_overlay();
-	const bool show = is_command_mode_ || menu_open;
+	const bool show = ( debug_console_ && debug_console_->is_open() ) || menu_open;
 
 	set_show_cursor( show );
 	Scene* base = scene_stack_->get_base_scene();

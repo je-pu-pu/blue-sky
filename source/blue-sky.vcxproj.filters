@@ -1,6 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="blue_sky\dev\DebugConsole.cpp">
+      <Filter>blue_sky\dev</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\dev\DevTools.cpp">
+      <Filter>blue_sky\dev</Filter>
+    </ClCompile>
     <ClCompile Include="blue_sky\ScriptBindings.cpp">
       <Filter>blue_sky</Filter>
     </ClCompile>
@@ -476,6 +482,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="blue_sky\dev\DebugConsole.h">
+      <Filter>blue_sky\dev</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\dev\DevTools.h">
+      <Filter>blue_sky\dev</Filter>
+    </ClInclude>
     <ClInclude Include="blue_sky\ScriptBindings.h">
       <Filter>blue_sky</Filter>
     </ClInclude>

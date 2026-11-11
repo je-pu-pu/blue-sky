@@ -20,6 +20,12 @@
 
 namespace core::ecs { class EntityManager; }
 
+namespace blue_sky::dev
+{
+	class DevTools;
+	class DebugConsole;
+}
+
 class DirectWrite;
 
 class DirectInput;
@@ -138,9 +144,6 @@ private:
 
 	bool									is_display_fps_;		///< FPS 表示フラグ
 
-	bool									is_command_mode_;		///< 現在コマンドモード中かどうか？
-	string_t								user_command_;			///< ユーザーの入力したコマンド
-
 	bool									is_show_cursor_;		///< 現在カーソルを表示するかどうか
 
 	std::unique_ptr< core::setting::SettingStore >	settings_;		///< ゲーム設定（オプション画面が編集する）
@@ -151,28 +154,13 @@ private:
 	bool											is_display_change_requested_ = false;	///< 解像度・フルスクリーンの変更をフレーム末に行う
 	bool											is_full_screen_toggle_requested_ = false;	///< ユーザーによるフルスクリーンの切り替え（Alt+Enter / F5）をフレーム末に行う
 	bool											is_shut_down_ = false;					///< shutdown() 済み
-	std::deque< SceneRequest >						debug_scene_sequence_;			///< 開発用 : 順に置き換えるベースシーン（BLUE_SKY_DEBUG_SCENE_SEQUENCE）
-	int												debug_scene_sequence_frames_ = 0;	///< 開発用 : 前の置き換えからのフレーム数
+	/// 開発用の機能（フレームの保存・フレームの時間・シーンを順に替える・解像度の変更の試し・経過時間の固定）と、imgui の開発用の窓（F1）。
+	/// どちらも外には見せない。scene_stack_ の次に壊れる（使う GameMain の持ち物より先）
+	std::unique_ptr< dev::DevTools >				dev_tools_;
+	std::unique_ptr< dev::DebugConsole >			debug_console_;
 
-	/// 開発用 : 決まったフレームの描画結果を PNG に保存する（環境変数 BLUE_SKY_CAPTURE_FRAMES。画面がロック中でも確かめられる）
-	std::vector< int >								capture_frames_;
-	string_t										capture_directory_;
-	int												frame_count_ = 0;
-
-	void setup_frame_capture();
-	void capture_frame_if_requested();
-
-	/// 開発用 : フレームの時間を測って debug_log に出す（環境変数 BLUE_SKY_DEBUG_FRAME_TIME="最初のフレーム,最後のフレーム"）
-	int												frame_time_first_ = 0;
-	int												frame_time_last_ = 0;
-	long long										frame_time_start_ = 0;				///< このフレームの update の始まり（QueryPerformanceCounter）
-	long long										frame_time_previous_start_ = 0;		///< 前のフレームの update の始まり
-	std::vector< double >							frame_time_work_ms_;				///< update の始まりから present の前まで（ms）
-	std::vector< double >							frame_time_interval_ms_;			///< 前のフレームの始まりからの間隔（ms）
-	std::vector< double >							frame_time_present_ms_;				///< present にかかった時間（ms。GPU が追いつかないと、ここで待つ）
-
-	void setup_frame_time_measurement();
-	void record_frame_time();
+	/// 開発用の機能を作る（保存・設定の変更・シーンの切り替えの仕事を渡す）
+	void create_dev_tools();
 
 	/// ベースのシーンとオーバーレイ・切り替えの要求（外には見せない）。
 	/// シーンは設定（購読）・文字列表・テーマ・ECS など GameMain の持ち物を使うので、最後に宣言して最初に壊す（デストラクタでも最初に壊す）
@@ -192,9 +180,6 @@ private:
 
 	/// シーンの持ち物（SceneStack）を作る。シーンを作る・片付ける・画面に出す仕事を渡す
 	void create_scene_stack();
-
-	void render_console_window();
-	void render_scene_list_window();
 
 public:
 	explicit GameMain( App& app );

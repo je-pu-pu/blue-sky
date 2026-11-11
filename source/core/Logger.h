@@ -68,6 +68,7 @@ public:
 	const LogList& get_log_list() const { return log_list_; }
 };
 
-Logger logger;
+/// コンソールのログ（inline : 以前はヘッダで定義していて、2 つ目の .cpp が含めると二重定義になった）
+inline Logger logger;
 
 } // namespace core

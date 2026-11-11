@@ -45,6 +45,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test\dev\DevToolsTest.cpp">
+      <Filter>test\dev</Filter>
+    </ClCompile>
     <ClCompile Include="test\script\ScriptBindingsTest.cpp">
       <Filter>test\script</Filter>
     </ClCompile>

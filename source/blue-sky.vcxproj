@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="blue_sky\dev\DebugConsole.cpp" />
+    <ClCompile Include="blue_sky\dev\DevTools.cpp" />
     <ClCompile Include="blue_sky\ScriptBindings.cpp" />
     <ClCompile Include="blue_sky\SceneStack.cpp" />
     <ClCompile Include="blue_sky\dev\DevOptions.cpp" />
@@ -188,6 +190,8 @@
     <ClCompile Include="blue_sky\ecs\system\PlayerInventorySystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="blue_sky\dev\DebugConsole.h" />
+    <ClInclude Include="blue_sky\dev\DevTools.h" />
     <ClInclude Include="blue_sky\ScriptBindings.h" />
     <ClInclude Include="blue_sky\SceneStack.h" />
     <ClInclude Include="blue_sky\dev\DevOptions.h" />

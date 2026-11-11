@@ -1,92 +1,36 @@
 #include "PauseMenuScene.h"
 
 #include <blue_sky/GameMain.h>
-#include <blue_sky/Input.h>
+
+#include <core/ui/Button.h>
+#include <core/ui/Panel.h>
+#include <core/ui/Stack.h>
+#include <core/ui/Theme.h>
 
 namespace blue_sky
 {
 
-PauseMenuScene::PauseMenuScene()
-	: ui_renderer_( get_graphics_manager() )
+PauseMenuScene::PauseMenuScene( GameMain& game_main )
+	: UIOverlayScene( game_main )
 {
-	setup_menu();
-}
+	using namespace core::ui;
 
-PauseMenuScene::~PauseMenuScene()
-{
-}
+	auto panel = std::make_unique< Panel >( "pause.title" );
+	panel->set_width( services_.theme.menu_width );
+	panel->set_fit_height( true );
+	panel->set_show_description( false );
 
-void PauseMenuScene::setup_menu()
-{
-	// 再開
-	menu_.add_item( "Resume", [this] ()
-	{
-		set_next_scene( "pop" );
-		play_sound( "ok" );
-	} );
+	auto* menu = panel->add< Stack >( Axis::VERTICAL );
+	menu->set_wrap( true );
 
-	// オプション — set_next_scene で安全に遷移 (pop + push を GameMain が処理)
-	menu_.add_item( "Options", [this] ()
-	{
-		set_next_scene( "options" );
-		play_sound( "ok" );
-	} );
+	menu->add< Button >( "pause.resume", [this] { close(); } );
+	menu->add< Button >( "pause.options", [this] { set_next_scene( "push:options" ); } );
+	// ベースシーンをステージ選択に置き換える（オーバーレイは GameMain がすべて閉じる）
+	// 以前は const_cast でベースシーンを直接書き換えていた
+	menu->add< Button >( "pause.stage_select", [this] { set_next_scene( "base:stage_select" ); } );
 
-	// ステージ選択に戻る — ベースシーンの遷移先を設定してから pop
-	menu_.add_item( "Stage Select", [this] ()
-	{
-		auto* base_scene = const_cast< Scene* >( GameMain::get_instance()->get_current_scene() );
-
-		if ( base_scene )
-		{
-			base_scene->set_next_scene( "stage_select" );
-		}
-
-		set_next_scene( "pop" );
-		play_sound( "cancel" );
-	} );
-
-	menu_.set_width( get_content_width() );
-	menu_.set_item_height( 108.f );
-	menu_.center_on_screen( ui_renderer_ );
-}
-
-void PauseMenuScene::update()
-{
-	Scene::update();
-
-	menu_.update( get_input(), ui_renderer_ );
-}
-
-void PauseMenuScene::render()
-{
-	float_t screen_w = ui_renderer_.get_screen_width();
-	float_t screen_h = ui_renderer_.get_screen_height();
-
-	// 半透明の暗幕（全画面）
-	ui_renderer_.draw_rect( 0.f, 0.f, screen_w, screen_h, Color( 0.f, 0.f, 0.f, 0.5f ) );
-
-	// パネル背景
-	float_t panel_w = get_panel_width();
-	float_t panel_x = ( screen_w - panel_w ) * 0.5f;
-	float_t panel_y = screen_h * 0.25f;
-	float_t panel_h = screen_h * 0.5f;
-
-	ui_renderer_.draw_rect( panel_x, panel_y, panel_w, panel_h, Color( 0.05f, 0.05f, 0.1f, 0.85f ) );
-
-	// タイトル
-	float_t content_w = get_content_width();
-	float_t title_x = ( screen_w - content_w ) * 0.5f;
-	float_t title_y = screen_h * 0.28f;
-	ui_renderer_.draw_text( title_x, title_y, content_w, 126.f, "PAUSE", Color( 1.f, 1.f, 1.f, 1.f ) );
-
-	// メニュー
-	menu_.render( ui_renderer_ );
-
-	// 操作ヒント
-	float_t hint_y = screen_h * 0.65f;
-	float_t hint_x = ( screen_w - content_w ) * 0.5f;
-	ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, "Enter/Click Select    ESC Back", Color( 0.5f, 0.5f, 0.5f, 1.f ) );
+	// キャンセル（ESC / B）で再開
+	screen_.set_root( std::move( panel ), [this] { close(); } );
 }
 
 } // namespace blue_sky

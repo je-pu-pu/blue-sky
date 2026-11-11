@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Scene.h"
+#include <core/graphics/Model.h>
+
+#include <array>
 #include <memory>
 
 namespace core::ecs
@@ -35,11 +38,14 @@ protected:
 	ModelComponent* current_entity_model_ = nullptr;
 
 	Entity* camera_ = nullptr;
+
+	/// 落とす球のモデル（色違いの 3 つ。ハンドルで持つ。以前はファイルの外の生ポインタの配列で、シーンを出ても残った）
+	std::array< core::graphics::ModelHandle, 3 > sphere_models_;
 	TransformComponent* camera_transform_ = nullptr;
 	CameraComponent* camera_component_ = nullptr;
 
 public:
-	explicit PhysicsTestScene();
+	explicit PhysicsTestScene( GameMain& game_main );
 	~PhysicsTestScene() override = default;
 
 	void update() override;

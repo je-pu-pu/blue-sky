@@ -2,15 +2,31 @@
 
 
 #include <core/type.h>
-#include <game/SoundManager.h>
+#include <core/ResourceManager.h>
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <thread>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include <windows.h>
 
 namespace game
 {
 
-class Sound;
 struct SoundFormat;
+
+}
+
+namespace core
+{
+
+class Sound;
+
+/// 音を指すハンドル（解放の後は nullptr、差し替え（reload など）の後は新しい音を引ける。引くときは SoundManager::resolve）
+using SoundHandle = core::ResourceHandle< Sound >;
 
 }
 
@@ -24,15 +40,46 @@ class SoundFilter;
 /**
  * サウンド管理クラス
  *
+ * 以前は game 層の game::SoundManager を継承していて、同じ名前のクラスが 2 つの層に並んでいた。
+ * 実装はこのクラスだけなので、基底の中身（名前で引く・グループ・ミュート・音量）を取り込んで 1 つにした
+ *
+ * 音は ResourceManager で持ち、名前でもハンドル（SoundHandle）でも引ける。同じ名前で別のファイルを読む・reload すると、
+ * ハンドルの番号はそのままで中身だけ差し替え、古い音は解放する（以前は名前の表に生ポインタで持ち、外すときに生で delete していた）。
+ * 長く持つ側は生ポインタではなくハンドルを持つ（解放・差し替えの後に古い音を指したままにならない）
  */
-class SoundManager : public game::SoundManager
+class SoundManager
 {
 public:
-	using SoundFormat = game::SoundFormat;
+	using SoundFormat		= game::SoundFormat;
+	using Sound				= core::Sound;
+	using SoundHandle		= core::SoundHandle;
+	using SoundResources	= core::ResourceManager< Sound >;
+	using GroupedSoundMap	= std::unordered_map< string_t, std::unordered_set< string_t > >;	///< グループ名 → そのグループで読んだ音の名前
 
 private:
 	SoundEngine* sound_engine_;
 	std::vector< std::unique_ptr< SoundFilter > > sound_filter_list_;
+
+	SoundResources sounds_;
+	string_t group_name_;
+	GroupedSoundMap grouped_sound_map_;
+	bool is_mute_ = false;
+	float volume_ = 1.f;
+
+	/// 一覧（sound_map_ など）を、更新スレッドとメインスレッドから守る
+	mutable std::recursive_mutex mutex_;
+
+	/// 更新スレッド（start_update_thread で動かし、stop_update_thread か破棄で止める）
+	std::thread update_thread_;
+	std::atomic< bool > update_thread_running_ { false };
+
+	/**
+	 * ファイルの場所を決めた後の読み込み
+	 *
+	 * 同じ名前で同じファイルなら使い回す（force_reload なら読み直す）。同じ名前で別のファイル・読み直しなら、
+	 * ハンドルの番号を変えずに中身を差し替え、古い音を解放する
+	 */
+	Sound* load_from_path( const char* name, const string_t& file_path, bool is_3d, bool force_reload = false );
 
 public:
 	SoundManager( SoundEngine* );
@@ -40,19 +87,56 @@ public:
 
 	SoundEngine* get_sound_engine() const { return sound_engine_; }
 
-	virtual void set_mute( bool ) override;
-	virtual void set_volume( float ) override;
+	bool is_mute() const { return is_mute_; }
+	void set_mute( bool );
 
-	virtual game::Sound* load( const char*, const char* = 0 ) override;
-	virtual game::Sound* load_3d_sound( const char*, const char* = 0 ) override;
+	float get_volume() const { return volume_; }
+	void set_volume( float );
 
-	virtual game::Sound* load_music( const char* name, const char* file_name = 0, bool replace = false );
+	/// グループ : push_group から pop_group までに読み込んだ音を、pop_group でまとめて外す
+	void push_group( const char_t* group_name );
+	void pop_group();
 
-	virtual game::Sound* create_sound( const char*, bool ) override;
+	Sound* load( const char*, const char* = 0 );
+	Sound* load_3d_sound( const char*, const char* = 0 );
+	/// replace なら、読み込み済みでも読み直す（ハンドルの番号はそのまま。古い音は解放する）
+	Sound* load_music( const char* name, const char* file_name = 0, bool replace = false );
 
-	virtual void update() override;
+	/// load と同じ場所から読み直す（読み込み済みなら、ハンドルの番号を変えずに中身を差し替え、古い音を解放する）
+	Sound* reload( const char* name, const char* file_name = 0 );
 
-	virtual void stop_all();
+	/// 名前の音を外して解放する（解放するのは flush_releases。その後ハンドルは nullptr を返す）
+	void unload( const char* name );
+	void unload_all();
+
+	/// 外した・差し替えた古い音をまとめて解放する（フレームの終わりとシーンの切り替えで呼ぶ。それまではハンドルで引ける）
+	std::size_t flush_releases();
+
+	/// Handle の数（デバッグ表示用。中身のある数・作った数）
+	std::size_t get_live_handle_count() const;
+	std::size_t get_handle_count() const;
+
+	Sound* get_sound( const char* name ) const;
+
+	/// 名前の音のハンドル（無ければ空のハンドル）
+	SoundHandle get_sound_handle( const char* name ) const;
+
+	/// ハンドルから音を得る（解放済み・空なら nullptr）
+	Sound* resolve( SoundHandle ) const;
+
+	/// フェード・ストリーミングの補充を進める（更新スレッドを動かしているときは、そのスレッドが呼ぶ）
+	void update();
+	void stop_all();
+
+	/**
+	 * 更新を専用のスレッドで interval_msec ごとに行う
+	 *
+	 * 以前はメインスレッドで毎フレーム更新していて、同期の読み込みなどでメインスレッドが止まると、
+	 * ストリーミングの音（BGM）の補充が止まって音が途切れた
+	 */
+	void start_update_thread( unsigned int interval_msec = 16 );
+	void stop_update_thread();
+	bool is_update_thread_running() const { return update_thread_running_; }
 
 	void add_sound_filter( SoundFilter* filter );
 

@@ -2,91 +2,102 @@
 
 #include <blue_sky/type.h>
 #include <core/ui/Renderer.h>
+#include <core/ui/VirtualScreen.h>
+#include <win/Rect.h>
+
+#include <unordered_map>
+
+namespace blue_sky::graphics
+{
+	class Canvas2D;
+}
 
 namespace core::graphics
 {
 	class Texture;
-	class Sprite;
-}
-
-namespace blue_sky::graphics
-{
-	class GraphicsManager;
 }
 
 namespace blue_sky::ui
 {
 
 /**
- * 2D 描画 API（仮想座標系）— core::ui::Renderer の具象実装
+ * core::ui::Renderer の具象実装（2D を描く窓口 graphics::Canvas2D の Sprite・文字を使う。GraphicsManager が実装する）
  *
- * GraphicsManager の Sprite / DirectWrite を薄くラップし、
- * HUD やメニュー画面から共通で使えるシンプルなインターフェースを提供する。
- *
- * すべての座標は仮想座標系 (DESIGN_WIDTH x DESIGN_HEIGHT) で指定する。
- * 内部で物理ピクセルへのスケーリングを自動的に行うため、
- * UI コードは実際の画面解像度に依存しない。
- *
- * テキスト描画は 1 回の呼び出しで完結する（内部で 2D/3D コンテキストの切り替えを行う）。
- * スプライト描画は begin_sprite() / end_sprite() で囲んでバッチ処理する。
+ * 仮想座標系は短い辺を 1920x1080 に合わせ、長い辺は画面に合わせて伸ばす（VirtualScreen）。
+ * 物理画面へは**等方スケール**（縦横同じ倍率）で写すので、16:9 以外の解像度でも UI が歪まず、
+ * 21:9 でも画面の端まで使える（以前は 16:9 の箱を中央に置き、余りを余白にしていた）。
  */
 class Renderer : public core::ui::Renderer
 {
 public:
-	using Texture			= core::graphics::Texture;
-	using Sprite			= core::graphics::Sprite;
-	using GraphicsManager	= blue_sky::graphics::GraphicsManager;
+	using Rect = core::ui::Rect;
 
-	/// 仮想座標系の基準解像度 (Full HD)
+	/// 仮想座標系の基準解像度
 	static constexpr float_t DESIGN_WIDTH  = 1920.f;
 	static constexpr float_t DESIGN_HEIGHT = 1080.f;
 
-private:
-	GraphicsManager* gm_;
+	/// 画像名の基準ディレクトリ（画像名 "ui/panel.png" → "media/texture/ui/panel.png"）
+	static constexpr const char_t* IMAGE_DIRECTORY = "media/texture/";
 
-	/// 仮想座標 → 物理ピクセルへのスケール係数
-	float_t get_scale_x() const;
-	float_t get_scale_y() const;
+private:
+	graphics::Canvas2D* canvas_;		///< 描く先（作り手が渡す。以前は GraphicsManager の全体を受け取っていた）
+
+	/// 今まとめて描いている種類（同じ種類が続く間は準備と後始末を省く。順番は呼ばれたとおり）
+	enum class BatchMode { NONE, SPRITE, TEXT };
+	BatchMode mode_ = BatchMode::NONE;
+
+	/// Sprite を描く前に呼ぶ（文字を積んでいれば先に描く）
+	void begin_sprite_mode();
+
+	/// 文字を描く前に呼ぶ（Sprite を描いていれば後始末する）
+	void begin_text_mode();
+
+	/// 画像名 → テクスチャ（読み込みに失敗した画像は nullptr を覚えておく）。テクスチャ自体は描く先（GraphicsManager）が持つ
+	mutable std::unordered_map< string_t, const core::graphics::Texture* > images_;
+
+	/// 今の画面の大きさに対する仮想画面
+	core::ui::VirtualScreen get_virtual_screen() const;
+
+	float_t get_scale() const;
+
+	/// 描画のときの写し方（仮想座標 → 今の描画先のピクセル）。描画先が画面なら get_scale と同じでずれは 0
+	core::ui::TargetMapping get_draw_mapping() const;
+
+	Rect to_physical( const Rect& ) const;
+
+	/// 仮想座標の矩形 → 物理ピクセルの矩形（各辺を四捨五入）
+	win::Rect to_pixel_rect( const Rect& ) const;
+
+	/// 画像名からテクスチャを引く（初回に読み込む）。読めなければ nullptr
+	const core::graphics::Texture* find_image( const string_t& image ) const;
 
 public:
-	explicit Renderer( GraphicsManager* );
+	explicit Renderer( graphics::Canvas2D* canvas );
 
-	/// 仮想画面サイズ（常に基準解像度を返す）
-	float_t get_screen_width() const override { return DESIGN_WIDTH; }
-	float_t get_screen_height() const override { return DESIGN_HEIGHT; }
+	float_t get_screen_width() const override { return get_virtual_screen().width; }
+	float_t get_screen_height() const override { return get_virtual_screen().height; }
 
-	/// 物理画面サイズ
-	int get_physical_width() const;
-	int get_physical_height() const;
+	/// 物理ピクセル座標 → 仮想座標（マウス座標用。範囲外はクランプしない）
+	float_t physical_to_virtual_x( float_t px ) const;
+	float_t physical_to_virtual_y( float_t py ) const;
 
-	/// 物理ピクセル座標 → 仮想座標への変換（マウス座標用）
-	float_t physical_to_virtual_x( float_t px ) const override;
-	float_t physical_to_virtual_y( float_t py ) const override;
+	void draw_text( const Rect& rect, const char_t* text, const core::graphics::TextStyle& style ) override;
+	void draw_rect( const Rect& rect, const Color& color ) override;
+	void fill_screen( const Color& color ) override;
 
-	/**
-	 * 矩形内にテキストを描画する — 仮想座標
-	 *
-	 * @param x     矩形の左端（仮想座標）
-	 * @param y     矩形の上端（仮想座標）
-	 * @param w     矩形の幅（仮想座標）
-	 * @param h     矩形の高さ（仮想座標）
-	 * @param text  描画するテキスト
-	 * @param color テキスト色（配置はデフォルト LEFT+TOP）
-	 * @param style テキストスタイル（h_align / v_align で配置を指定可能）
-	 */
-	void draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const Color& color ) override;
-	void draw_text( float_t x, float_t y, float_t w, float_t h, const char_t* text, const core::graphics::TextStyle& style ) override;
+	float_t get_pixel_scale() const override;
 
-	/// 塗りつぶし矩形の描画 — 仮想座標
-	void draw_rect( float_t x, float_t y, float_t w, float_t h, const Color& color ) override;
+	void flush() override;
+	Rect snap_to_pixels( const Rect& rect ) const override;
 
-	/// スプライトバッチの開始・終了
-	Sprite* begin_sprite();
-	void end_sprite();
+	/// 画像名の正規化（\ → /、先頭の ./ を取る）。同じ画像を別名で二重に読まないように
+	static string_t normalize_image_name( const string_t& image );
 
-	/// GraphicsManager への直接アクセス（必要な場合のみ）
-	GraphicsManager* get_graphics_manager() { return gm_; }
-	const GraphicsManager* get_graphics_manager() const { return gm_; }
+	bool get_image_size( const string_t& image, float_t& width, float_t& height ) const override;
+	void draw_image( const Rect& rect, const string_t& image, const Rect& source, const Color& tint ) override;
+
+	float_t measure_text_width( const char_t* text, float_t font_size ) const override;
+	float_t measure_line_height( float_t font_size ) const override;
 
 }; // class Renderer
 

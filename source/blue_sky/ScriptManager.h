@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GameObject/ActiveObject.h>
+#include <blue_sky/GameObjectRef.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Mesh.h>
 
@@ -55,13 +55,14 @@ private:
 protected:
 	void setup_user_types()
 	{
-		lua_.new_usertype< ActiveObject >(
+		// ゲームの物体は EntityId を包んだ型（以前は ActiveObject* そのもの。ECS だけの物体も触れるように）
+		lua_.new_usertype< GameObjectRef >(
 			"GameObject",
-			"model", sol::property( sol::resolve< Model* () >( & ActiveObject::get_model ), & ActiveObject::set_model ),
-			"play_animation", & ActiveObject::play_animation,
+			"model", sol::property( & GameObjectRef::get_model, & GameObjectRef::set_model ),
+			"play_animation", & GameObjectRef::play_animation,
 
-			"kill", & ActiveObject::kill
-        );
+			"kill", & GameObjectRef::kill
+		);
 
 		lua_.new_usertype< Model >(
 			"Model",
@@ -76,43 +77,20 @@ protected:
 			"set_texture_at", & Shader::set_texture_at
 		);
 
-		// @todo Texture::load() を実装してスクリプトからテクスチャの内容更新ができるようにする？
-		/*
-		lua_.new_usertype< Texture >(
-			"Texture",
-			"load", & Texture::load
-		);
-		*/
+		// スクリプトからテクスチャの内容を差し替えたいときは、Texture に読み込み直す関数を作り、ここで Texture の型として登録する
 	}
 
 public:
 	ScriptManager();
 	~ScriptManager();
 
-	/*
-	template< typename ResultType, typename... ArgTypes >
-	void set_function( const string_t& name, const std::function< ResultType ( ArgTypes... ) >& function )
-	{
-		lua_.set_function( name, [ function ] ( ArgTypes... args... ) -> ResultType
-		{
-			try
-			{
-				return function( args... );
-			}
-			catch ( ... )
-			{
-
-			}
-		} );
-	}
-	*/
-
 	/**
 	 * スクリプトから呼び出せる関数を設定する
 	 *
+	 * 関数が例外を投げると、sol2 がそれを Lua のエラーに変え、exec() が ScriptError として投げ直す（テスト ScriptManagerTest）
+	 *
 	 * @param name スクリプトから呼び出す時の関数名
 	 * @param function 関数
-	 * @todo 関数が例外を投げた時にキャッチできるようにする
 	 */
 	template< typename FunctionType >
 	void set_function( const string_t& name, const FunctionType& function )
@@ -225,20 +203,6 @@ inline void ScriptManager::exec( const string_t& script, bool add_history )
 	}
 
 	auto result = lua_.safe_script( script );
-
-	/*
-	sol::protected_function_result result;
-
-	try
-	{
-		result = lua_.safe_script( script );
-	}
-	catch ( ... )
-	{
-		ScriptError e( "unknown script error." );
-		throw e;
-	}
-	*/
 
 	if ( ! result.valid() )
 	{

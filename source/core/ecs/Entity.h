@@ -16,61 +16,36 @@ class Entity
 {
 private:
 	EntityId id_;
+	EntityManager* manager_;		///< 自分を作った EntityManager（以前はシングルトンから引いていた）
 
 public:
-	Entity( std::size_t id )
+	Entity( std::size_t id, EntityManager* manager )
 		: id_( id )
+		, manager_( manager )
 	{ }
 
-	/*
-	static Entity* create()
-	{
-		return EntityManager::get_instance()->create_entity();
-	}
-
-	void destroy()
-	{
-		EntityManager::get_instance()->destroy_entity( this );
-	}
-	*/
+	// 中身は EntityManager の定義の後（EntityManager.h の末尾）にある（EntityManager の完全な型が要るため）
+	// const の正しさ : 足す・外すは非 const。const の Entity からは const のコンポーネントだけを得る
+	// （以前は const のメソッドが非 const のコンポーネントを返し、足すのも const だった）
+	template< typename ComponentType >
+	ComponentType* add_component();
 
 	template< typename ComponentType >
-	ComponentType* add_component() const
-	{
-		return EntityManager::get_instance()->add_component< ComponentType >( this );
-	}
-
-	/// @todo 非 const ComponentType を返して良いか？
-	template< typename ComponentType >
-	ComponentType* get_component() const
-	{
-		return EntityManager::get_instance()->get_component< ComponentType >( this );
-	}
-
-	/*
-	template< typename ComponentType >
-	const ComponentType* get_component() const
-	{
-		return EntityManager::get_instance()->get_component< ComponentType >( this );
-	}
-	*/
+	ComponentType* get_component();
 
 	template< typename ComponentType >
-	void remove_component()
-	{
-		return EntityManager::get_instance()->remove_component< ComponentType >( this );
-	}
+	const ComponentType* get_component() const;
 
-	/*
-	const ComponentList& get_component_list()
-	{
-	}
-	*/
+	template< typename ComponentType >
+	void remove_component();
 
 
 	~Entity() = default;
 
 	std::size_t get_id() const { return id_; }
+
+	/// 自分を作った EntityManager（部品の組み合わせで振る舞いを決める所が、相手の System を引くのに使う）
+	EntityManager* get_entity_manager() const { return manager_; }
 
 }; // class Entity
 

@@ -1,4 +1,6 @@
 #include "pch.h"
+#include <core/graphics/Direct3D11/MsdfTextRenderer.h>
+#include <core/graphics/Msdf/GlyphCache.h>
 #include <core/graphics/Msdf/MsdfFont.h>
 #include <filesystem>
 
@@ -122,4 +124,96 @@ TEST( MsdfFontTest, UnloadedFontReturnsFailure )
 
 	double kerning = 0;
 	EXPECT_FALSE( font.get_kerning( U'A', U'V', kerning ) );
+}
+
+TEST( MsdfFontTest, 主のフォントに無い文字は代わりのフォントから引く )
+{
+	const std::string uzura = ( std::filesystem::path( __FILE__ ).parent_path() / "../../media/font/uzura.ttf" ).lexically_normal().string();
+
+	// 片方にだけある文字を、2 つのフォントの組み合わせの両方向で探す（同梱の 2 つのフォントのどちらが広いかに依らない）
+	const std::string mplus = FONT_PATH;
+	const std::string paths[ 2 ] = { uzura, mplus };
+
+	uint32_t target = 0;
+	int primary_index = 0;
+
+	for ( int p = 0; p < 2 && target == 0; p++ )
+	{
+		core::graphics::MsdfFont a, b;
+		ASSERT_TRUE( a.load( paths[ p ].c_str() ) );
+		ASSERT_TRUE( b.load( paths[ 1 - p ].c_str() ) );
+
+		for ( uint32_t cp = 0x20; cp < 0xA000 && target == 0; cp++ )
+		{
+			if ( ! a.has_glyph( cp ) && b.has_glyph( cp ) )
+			{
+				target = cp;
+				primary_index = p;
+			}
+		}
+	}
+
+	ASSERT_NE( 0u, target ) << "どちらかのフォントにだけある文字が見つからない";
+
+	core::graphics::MsdfFont primary;
+	ASSERT_TRUE( primary.load( paths[ primary_index ].c_str() ) );
+
+	core::graphics::GlyphMetrics before;
+	EXPECT_FALSE( primary.has_glyph( target ) );
+
+	ASSERT_TRUE( primary.add_fallback( paths[ 1 - primary_index ].c_str() ) );
+	EXPECT_TRUE( primary.has_glyph( target ) );
+
+	core::graphics::GlyphMetrics after;
+	ASSERT_TRUE( primary.get_glyph_metrics( target, after ) );
+	EXPECT_GT( after.width, 0.0 );		// 代わりのフォントの輪郭が取れる
+	(void) before;
+}
+
+namespace
+{
+
+/// アトラスへの転送を数える偽物
+class CountingAtlas : public core::graphics::GlyphAtlasStorage
+{
+public:
+	int added = 0;
+	int add_glyph( const msdfgen::Bitmap< float, 3 >&, core::graphics::UVRect& uv ) override { uv = { 0, 0, 1, 1 }; return added++; }
+	void replace_glyph( int, const msdfgen::Bitmap< float, 3 >&, core::graphics::UVRect& ) override { }
+	void reset() override { added = 0; }
+};
+
+} // namespace
+
+TEST( GlyphCacheTest, 文字幅を測るだけではMSDFを作らずアトラスへ転送しない )
+{
+	core::graphics::MsdfFont font;
+	ASSERT_TRUE( font.load( FONT_PATH ) );
+
+	CountingAtlas atlas;
+	core::graphics::GlyphCache cache( & font, & atlas, 48, 4.0 );
+
+	double advance = 0.0;
+	ASSERT_TRUE( cache.get_advance( U'A', advance ) );
+	EXPECT_GT( advance, 0.0 );
+	EXPECT_EQ( 0, atlas.added );		// 測るだけでは転送しない（以前は MSDF を作って転送していた）
+
+	ASSERT_NE( nullptr, cache.get( U'A' ) );
+	EXPECT_EQ( 1, atlas.added );		// 描くときに初めて作る
+
+	double kerning_font = 0.0;
+	font.get_kerning( U'A', U'V', kerning_font );
+	EXPECT_DOUBLE_EQ( kerning_font, cache.get_kerning( U'A', U'V' ) );
+}
+
+TEST( MsdfTextRendererTest, サロゲートペアを1文字にする )
+{
+	// 「𠮷」(U+20BB7) は UTF-16 で D842 DFB7
+	const wchar_t text[] = { L'a', 0xD842, 0xDFB7, L'b', 0 };
+	const std::u32string cps = core::graphics::MsdfTextRenderer::decode_utf16( text );
+
+	ASSERT_EQ( 3u, cps.size() );
+	EXPECT_EQ( static_cast< uint32_t >( U'a' ), static_cast< uint32_t >( cps[ 0 ] ) );
+	EXPECT_EQ( 0x20BB7u, static_cast< uint32_t >( cps[ 1 ] ) );
+	EXPECT_EQ( static_cast< uint32_t >( U'b' ), static_cast< uint32_t >( cps[ 2 ] ) );
 }

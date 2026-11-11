@@ -1,0 +1,108 @@
+#include "UIOverlayScene.h"
+
+#include <blue_sky/GameMain.h>
+#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/Input.h>
+
+#include <core/setting/SettingStore.h>
+#include <core/ui/StringTable.h>
+#include <core/ui/Theme.h>
+
+#include <imgui.h>
+
+namespace blue_sky
+{
+
+UIServices UIServices::from_game_main( GameMain& game_main )
+{
+	GameMain* gm = & game_main;
+	return UIServices{ gm->get_ui_theme(), gm->get_ui_strings(), * gm->get_settings(), [gm] { gm->save_settings(); } };
+}
+
+UIOverlayScene::UIOverlayScene( GameMain& game_main )
+	: Scene( game_main )
+	, services_( UIServices::from_game_main( game_main ) )
+	, renderer_( get_graphics_manager() )
+	, screen_( services_.theme, services_.strings, renderer_ )
+{
+	screen_.set_sound_handler( [this] ( core::ui::UISoundEvent e, const core::ui::Widget* )
+	{
+		switch ( e )
+		{
+			case core::ui::UISoundEvent::CONFIRM:	play_sound( "ok" ); break;
+			case core::ui::UISoundEvent::CANCEL:	play_sound( "cancel" ); break;
+			default:								play_sound( "click" ); break;
+		}
+	} );
+
+	input_builder_.reset( * get_input(), renderer_ );
+	screen_.suppress_input( 1 );
+
+	theme_revision_ = services_.theme.revision;
+
+	// テーマの画像を先に読む（最初の描画やレイアウトの途中で読み込みが走って引っかからないように）
+	core::ui::preload_theme_images( services_.theme, renderer_ );
+}
+
+UIOverlayScene::~UIOverlayScene() = default;
+
+core::setting::SettingStore& UIOverlayScene::get_settings() const
+{
+	return services_.settings;
+}
+
+void UIOverlayScene::update()
+{
+	Scene::update();
+
+	const float_t dt = get_elapsed_time();
+	core::ui::UIInput input = input_builder_.build( * get_input(), renderer_, dt );
+
+	// 開発用のコンソール（ImGui）が入力を受け取っているときは、UI に渡さない
+	// （以前はコンソールで打った Enter・Esc・Q/E が UI にも届いていた）
+	const ImGuiIO& io = ImGui::GetIO();
+
+	if ( io.WantCaptureKeyboard )
+	{
+		const core::ui::UIInput keep_pointer = input;
+		input = core::ui::UIInput();
+		input.pointer_x = keep_pointer.pointer_x;
+		input.pointer_y = keep_pointer.pointer_y;
+		input.pointer_moved = keep_pointer.pointer_moved;
+		input.pointer_pressed = keep_pointer.pointer_pressed;
+		input.pointer_down = keep_pointer.pointer_down;
+		input.pointer_released = keep_pointer.pointer_released;
+		input.wheel = keep_pointer.wheel;
+		input.last_device = keep_pointer.last_device;
+	}
+
+	if ( io.WantCaptureMouse )
+	{
+		input.pointer_moved = input.pointer_pressed = input.pointer_down = input.pointer_released = false;
+		input.wheel = 0;
+	}
+
+	// テーマが変わったら（文字の大きさの設定など）配置し直す
+	const uint_t theme_revision = services_.theme.revision;
+
+	if ( theme_revision != theme_revision_ )
+	{
+		theme_revision_ = theme_revision;
+		screen_.invalidate_appearance();
+	}
+
+	screen_.update( input, dt );
+}
+
+void UIOverlayScene::render()
+{
+	screen_.render( renderer_ );
+}
+
+void UIOverlayScene::on_resume()
+{
+	input_builder_.reset( * get_input(), renderer_ );
+	screen_.suppress_input( 1 );
+}
+
+} // namespace blue_sky

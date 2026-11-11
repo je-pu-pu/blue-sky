@@ -43,19 +43,23 @@ private:
 
 	int							cascade_levels_;			///< CSM のレベル数
 
-	ID3D11Texture2D*			depth_stencil_texture_;
-	ID3D11DepthStencilView*		depth_stencil_view_;
+	com_ptr< ID3D11Texture2D >			depth_stencil_texture_;
+	com_ptr< ID3D11DepthStencilView >	depth_stencil_view_;
 
 	ViewportList				viewport_list_;
 
-	/// @todo static をやめる
-	static Vector				light_position_;			///< ( 0, 0, 0 ) を向く sun
+	// 以前は static で、全インスタンス（作り直したゲームのものも含む）が光の位置と行列を共有していた
+	Vector						light_position_;			///< ( 0, 0, 0 ) を向く sun
 
-	static Matrix				view_matrix_;
-	static MatrixList			projection_matrix_list_;
+	Matrix						view_matrix_;
+	MatrixList					projection_matrix_list_;
+
+	void update_projection();
 
 protected:
 	const Matrix get_view_projection_matrix( uint_t level ) const { return view_matrix_ * projection_matrix_list_[ level ]; }
+
+	void on_projection_changed() override { update_projection(); }
 
 public:
 	ShadowMap( Direct3D11*, uint_t, size_t );
@@ -68,7 +72,19 @@ public:
 	void bind_to_render_scene() const override;
 
 	int get_cascade_levels() const override { return cascade_levels_; }
-	
+
+	/// ready_to_render_shadow_map_with_cascade_level がシェーダーに渡すのと同じ行列（光の位置・カメラの位置・カスケードの幅から）
+	bool get_cascade_view_projection( uint_t level, Matrix& view_projection ) const override
+	{
+		if ( level >= static_cast< uint_t >( cascade_levels_ ) )
+		{
+			return false;
+		}
+
+		view_projection = get_view_projection_matrix( level );
+		return true;
+	}
+
 	void set_light_position( const Vector& ) override;
 	void set_eye_position( const Vector& ) override;
 

@@ -2,26 +2,30 @@
 #include "App.h"
 
 #include "SceneManager.h"
+#include "SceneStack.h"
+#include "dev/DevTools.h"
+#include "dev/DebugConsole.h"
 #include "Scene/Scene.h"
 
-#include "ActiveObjectManager.h"
+#include "ObjectUpdater.h"
+#include "ObjectFactory.h"
 
 // #include "ConstantBuffer.h"
 
 #include "Input.h"
 
-#include "ActiveObjectPhysics.h"
 
 #include "ScriptManager.h"
+#include "ScriptBindings.h"
 
 #include <blue_sky/graphics/Direct3D11/GraphicsManager.h>
 
 #include <core/ecs/EntityManager.h>
-#include <core/Service.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 #include <core/graphics/Direct3D11/Effect.h>
 #include <core/graphics/Shader.h>
+#include <core/graphics/TextRenderer.h>
 #include <core/graphics/OculusRift.h>
 
 
@@ -34,34 +38,48 @@
 #include <core/input/DirectInput/DirectInput.h>
 #include <core/physics/PhysicsManager.h>
 
-#include <core/Logger.h>
 
 #include <win/Version.h>
 #include <win/Clipboard.h>
 
 #include <game/Config.h>
+
+#include <blue_sky/GameSettings.h>
+#include <blue_sky/DebugLog.h>
+#include "Scene/OverlayRenderRange.h"
+#include "Scene/InputRouting.h"
+#include <core/setting/SettingStore.h>
+#include <core/ui/StringTable.h>
+#include <core/ui/Theme.h>
 #include <game/MainLoop.h>
 
 #include <common/math.h>
 #include <common/log.h>
+#include <common/string.h>
+
+#include <algorithm>
+#include <filesystem>
+#include <sstream>
 
 #include <imgui.h>
-#include <imgui_stdlib.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
+
+#include <stdexcept>
 
 namespace blue_sky
 {
 
 //■コンストラクタ
-GameMain::GameMain()
-	: is_display_fps_( false )
-	, is_command_mode_( false )
+GameMain::GameMain( App& app )
+	: app_( app )
+	, dev_options_( dev::DevOptions::read_from_environment() )
+	, scene_manager_( std::make_unique< SceneManager >() )
+	, entity_manager_( std::make_unique< core::ecs::EntityManager >() )
+	, is_display_fps_( false )
 	, is_show_cursor_( false )
-	, user_command_( 1024, '\0' )
 {
 	// common::log( "log/debug.log", "init" );
 
@@ -72,7 +90,10 @@ GameMain::GameMain()
 
 	// get_app()->clip_cursor( true );
 
+	create_scene_stack();
+
 	save_data_.reset( new Config() );
+	save_data_->set_log_handler( & debug_log );
 	save_data_->load_file( "save/blue-sky.save" );
 
 	// Direct3D
@@ -80,7 +101,6 @@ GameMain::GameMain()
 		get_app()->GetWindowHandle(),
 		get_app()->get_width(),
 		get_app()->get_height(),
-		get_app()->is_full_screen(),
 		get_config()->get( "graphics.multisample.count", 4 ), 
 		get_config()->get( "graphics.multisample.quality", 2 )
 	) );
@@ -89,9 +109,29 @@ GameMain::GameMain()
 
 	direct_3d_->create_default_input_layout();
 
-	/// @todo 各シェーダーの effect_technique_ が古いままなのを解消する
+	// シェーダーの読み直し（開発中に .hlsl を保存したとき）
+	// Effect は成功してから差し替え、取得済みの technique は中身だけ入れ替えるので、描画側のポインタはそのまま使える。
+	// コンパイルに失敗したら、ログを出して前のシェーダーのまま続ける。
+	// 監視は開発ビルド（_DEBUG）だけで行う。配布版ではシェーダーを書き換えないので、フォルダの監視と読み直しの経路を持たない
+#ifdef _DEBUG
 	get_app()->watch_directory_change( "media/shader/", [this] () {
-		direct_3d_->get_effect()->load( "media/shader/main.fx" );
+		debug_log( "[Shader] media/shader/ の変更を検出したので読み直します" );
+
+		try
+		{
+			direct_3d_->get_effect()->load( "media/shader/main.fx" );
+		}
+		catch ( const common::exception< std::string >& e )
+		{
+			debug_log( "[Shader] 読み直しに失敗しました（前のシェーダーのまま続けます）: " + e.data() );
+			return;
+		}
+		catch ( const common::exception< HRESULT >& e )
+		{
+			debug_log( "[Shader] 読み直しに失敗しました（前のシェーダーのまま続けます）: HRESULT " + std::to_string( static_cast< unsigned long >( e.data() ) ) );
+			return;
+		}
+
 		direct_3d_->create_default_input_layout();
 
 		if ( graphics_manager_ )
@@ -99,6 +139,7 @@ GameMain::GameMain()
 			graphics_manager_->refresh_all_shaders();
 		}
 	} );
+#endif
 
 	ImGui::CreateContext();
 	ImGui_ImplWin32_Init( get_app()->GetWindowHandle() );
@@ -111,7 +152,7 @@ GameMain::GameMain()
 
 	direct_input_.reset( new DirectInput( get_app()->GetInstanceHandle(), get_app()->GetWindowHandle() ) );
 
-	input_.reset( new Input() );
+	input_.reset( new Input( get_app() ) );
 	input_->set_direct_input( direct_input_.get() );
 	input_->load_config( * get_config() );
 
@@ -124,43 +165,136 @@ GameMain::GameMain()
 	bullet_debug_draw_.reset( new core::graphics::direct_3d_11::BulletDebugDraw( direct_3d_.get() ) );
 	bullet_debug_draw_->setDebugMode( get_config()->get< int >( "graphics.debug_bullet", 0 ) );
 
-	SceneManager::get_instance()->register_all_scene();
+	scene_manager_->register_all_scene();
 
-	active_object_physics_.reset( new ActiveObjectPhysics() );
-	active_object_physics_->setDebugDrawer( bullet_debug_draw_.get() );
-
-	physics_manager_.reset( new core::physics::PhysicsManager() );
+	// 物理の世界は本編と ECS のテストシーンで 1 つ（決定 1。以前は本編だけの ActiveObjectPhysics があり、デバッグ描画はそちらに設定していた）
+	physics_manager_ = std::make_unique< core::physics::PhysicsManager >();
+	physics_manager_->set_debug_drawer( bullet_debug_draw_.get() );
 
 	graphics_manager_.reset( new blue_sky::graphics::direct_3d_11::GraphicsManager( direct_3d_.get() ) );
 	graphics_manager_->set_debug_axis_enabled( get_config()->get< int >( "graphics.debug_axis", 0 ) != 0 );
-	
+
+	// 代わりのフォント（主のフォントに無い文字に使う。; 区切りで複数）
+	if ( auto* text = graphics_manager_->get_text_renderer() )
+	{
+		std::stringstream fallbacks( static_cast< const Config& >( * get_config() ).get< string_t >( "graphics.font_fallback", "" ) );
+
+		for ( string_t path; std::getline( fallbacks, path, ';' ); )
+		{
+			if ( ! path.empty() && ! text->add_fallback_font( path.c_str() ) )
+			{
+				debug_log( "[Graphics] 代わりのフォントを読み込めませんでした: " + path );
+			}
+		}
+	}
+	static_cast< graphics::direct_3d_11::GraphicsManager* >( graphics_manager_.get() )->set_bullet_debug_draw( bullet_debug_draw_.get() );
+
 	// sound_engine_.reset( new core::sound::direct_sound::SoundEngine( get_app()->GetWindowHandle() ) );
 	sound_engine_.reset( new core::sound::port_audio::SoundEngine() );
 	sound_manager_.reset( new SoundManager( sound_engine_.get() ) );
-	sound_manager_->set_mute( get_config()->get( "audio.mute", 0 ) != 0 );
-	sound_manager_->set_volume( get_config()->get( "audio.volume", 1.f ) );
-	
+	sound_manager_->start_update_thread();
+
 	sound_manager_->load( "ok" );
 	sound_manager_->load( "cancel" );
 	sound_manager_->load( "click" );
 
-	// Service に登録
-	core::Service::get_instance()->set_graphics_manager( graphics_manager_.get() );
-	core::Service::get_instance()->set_sound_manager( sound_manager_.get() );
-	core::Service::get_instance()->set_input_manager( input_.get() );
-	core::Service::get_instance()->set_physics_manager( physics_manager_.get() );
-	core::Service::get_instance()->set_time_manager( &time_manager_ );
+	// 描画のフレームの定数に入れる経過時間（以前は core::Service に登録し、各所がそこから取っていた。設計上の問題 B28）
+	graphics_manager_->set_time_manager( & time_manager_ );
 
 	script_manager_.reset( new ScriptManager() );
 	script_manager_->load_command_history( "log/script.log" );
-	setup_script_command();
 
-	active_object_manager_.reset( new ActiveObjectManager() );
+	// ゲームのオブジェクトに渡すもの（物理の世界・音・シーンの経過時間）。オブジェクトは GameMain のシングルトンを呼ばない
+	game_object_context_.physics = physics_manager_.get();
+	game_object_context_.sound_manager = sound_manager_.get();
+	game_object_context_.scene_elapsed_time = [this] { const Scene* s = scene_stack_ ? scene_stack_->get_base_scene() : nullptr; return s ? s->get_total_elapsed_time() : 0.f; };
+	game_object_context_.delta_time = [this] { return time_manager_.get_delta_time(); };
+
+	object_updater_ = std::make_unique< ObjectUpdater >( physics_manager_.get(), & game_object_context_, entity_manager_.get() );
+	object_factory_ = std::make_unique< ObjectFactory >( entity_manager_.get(), physics_manager_.get(), graphics_manager_.get(), sound_manager_.get() );
+
+	// ゲーム全体で使える Lua の関数（以前はここより前、物体を作る部品より先に登録し、関数が呼ばれるたびに GameMain から引いていた）
+	ScriptBindings::bind( * script_manager_, { graphics_manager_.get(), sound_manager_.get(), object_factory_.get(), bullet_debug_draw_.get(), [this] ( const SceneRequest& r ) { request_scene( r ); } } );
+
+	// GraphicsManager はゲームの物体を、EntityManager の描画の部品（ecs::ObjectRenderDataSystem の描く対象）から描く（以前は ActiveObjectManager を直接回していた）
+	graphics_manager_->set_entity_manager( entity_manager_.get() );
 
 	// MainLoop
 	main_loop_.reset( new MainLoop( 60 ) );
 
-	is_display_fps_ = get_config()->get( "graphics.display_fps", 0 ) != 0;
+	// 開発用の機能（どれも開発用の環境変数を設定したときだけ動く）。経過時間の固定は MainLoop を作った直後に設定する
+	create_dev_tools();
+	dev_tools_->apply_fixed_step( * main_loop_ );
+
+	// imgui の開発用の窓（F1）。シーンの一覧でダブルクリックしたシーンは、要求を出さずにすぐに作り直す（以前と同じ）
+	debug_console_ = std::make_unique< dev::DebugConsole >( * script_manager_, * scene_manager_, [this] ( const string_t& name ) { scene_stack_->setup_base_scene( name ); } );
+
+	// ゲーム設定 : ユーザーの設定ファイルから読み、表示系以外を反映する（表示系は App / Direct3D の初期化で、同じ登録を使って反映済み）
+	settings_ = std::make_unique< core::setting::SettingStore >();
+	settings_->set_error_handler( [] ( const string_t& message ) { debug_log( "[Setting] " + message ); } );
+	game_settings::register_all( * settings_, * this );
+	settings_->load( * get_app()->get_user_config() );
+	game_settings::fix_invalid_values( * settings_ );
+	settings_->apply_all_individual();
+
+	if ( get_app()->is_background() )
+	{
+		debug_log( string_t( "[開発用] 裏で動かすので音を出しません（消音 : " ) + ( get_sound_manager()->is_mute() ? "はい" : "いいえ" ) + "）" );
+	}
+
+	// ユーザーの設定は settings.config が正。2 つのファイルに同じ項目が二重に残らないようにする
+	// （どちらを編集すれば効くのか分からなくならないように）
+	// - 開発用の blue-sky.config に残っている、ストアの項目は消す（以前の版から引き継いだもの）
+	// - settings.config には、ストアの項目と版だけを残す（引き継ぎで写った開発用の項目は消す）
+	{
+		auto* user_config = get_app()->get_user_config();
+		std::vector< string_t > not_user_settings;
+
+		for ( const auto& [ name, value ] : user_config->get_values() )
+		{
+			if ( settings_->has( name ) )
+			{
+				get_config()->erase( name.c_str() );
+			}
+			else if ( name != core::setting::SettingStore::VERSION_KEY )
+			{
+				not_user_settings.push_back( name );
+			}
+		}
+
+		for ( const auto& name : not_user_settings )
+		{
+			user_config->erase( name.c_str() );
+		}
+	}
+
+	save_settings();
+
+	// UI
+	ui_theme_ = std::make_unique< core::ui::Theme >();
+	ui_strings_ = std::make_unique< core::ui::StringTable >();
+	ui_strings_->load_file( "media/text/ja.txt" );
+
+	// 見た目の差し替え : 設定 ui.theme にテーマファイルが指定されていれば、既定のテーマを上書きする
+	// （const で読む。非 const の get は既定値を設定に書き込んでしまうため）
+	if ( const string_t theme_path = static_cast< const Config& >( * get_config() ).get< string_t >( "ui.theme", "" ); ! theme_path.empty() )
+	{
+		std::vector< string_t > errors;
+
+		if ( ! core::ui::load_theme_file( * ui_theme_, theme_path.c_str(), & errors ) )
+		{
+			debug_log( "[UI] テーマファイルを開けません: " + theme_path );
+		}
+
+		for ( const auto& e : errors )
+		{
+			debug_log( "[UI] テーマファイル " + theme_path + " の " + e );
+		}
+	}
+
+	// 文字の大きさの設定は、テーマファイルで決めた大きさを基準に掛ける
+	ui_theme_base_ = std::make_unique< core::ui::Theme >( * ui_theme_ );
+	set_ui_text_scale( ui_text_scale_ );
 
 	update_render_data_for_game();
 }
@@ -168,120 +302,91 @@ GameMain::GameMain()
 //■デストラクタ
 GameMain::~GameMain()
 {
+	// シーン（SceneStack）を最初に壊す。シーンは設定（購読）・文字列表・テーマ・ECS など GameMain の持ち物を使う。
+	// scene_stack_ は最後に宣言しているので放っておいても最初に壊れるが、決まりとしてここで壊す
+	// （以前はゲーム本編を開いたまま閉じると、GamePlayScene が壊れた SettingStore から購読を外そうとして毎回落ちていた）
+	scene_stack_.reset();
+	debug_console_.reset();
+	dev_tools_.reset();
+
+	// ゲームの物体を EntityManager より先に壊す（物体は壊れるときに自分の Entity を消す。entity_manager_ は object_factory_ より後に宣言され、先に壊れる）。
+	// ECS だけの物体（ObjectFactory が作った）も一緒に消す
+	if ( object_factory_ )
+	{
+		object_factory_->clear();
+	}
+
 	ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-	get_config()->set< int >( "audio.mute", sound_manager_->is_mute() );
-	get_config()->set< int >( "graphics.full_screen", get_graphics_manager()->is_full_screen() );
+	// 設定の保存は shutdown() で行う（正常終了のときだけ）。デストラクタは例外で抜けた経路でも動くので、ここでは保存しない
+}
 
-	get_config()->save_file( "blue-sky.config" );
+/**
+ * 正常終了の後片付け（メッセージループが正常に終わったときだけ呼ばれる）
+ *
+ * 以前は static の破棄（WinMain が戻った後）で保存していたため、例外で抜けたときにも壊れた状態を保存し得た。
+ */
+void GameMain::shutdown()
+{
+	if ( is_shut_down_ )
+	{
+		return;
+	}
+
+	is_shut_down_ = true;
+
+	// 翻訳漏れ（引かれたが文字列テーブルに無かったキー）をログに出す
+	for ( const auto& key : ui_strings_->get_missing_keys() )
+	{
+		debug_log( "[UI] 文字列テーブルに無いキー: " + key );
+	}
+
+	// 設定を保存する。ユーザーの明示的な操作（F2 / F5 / Alt+Enter）はその場で設定に反映済み。
+	// 終了時の実際の状態（フォーカス喪失で解除されたフルスクリーンなど）は取り込まない
+	save_settings();
+
+	if ( ! get_config()->save_file( "blue-sky.config" ) )
+	{
+		debug_log( "[Config] 開発用の設定ファイルを保存できませんでした: blue-sky.config" );
+	}
 
 	get_script_manager()->save_command_history( "log/script.log" );
 }
 
-/**
- * ゲーム全体で共有可能なスクリプトコマンドを準備する
- *
- */
-void GameMain::setup_script_command()
+unsigned long GameMain::get_idle_wait_msec() const
 {
-	get_script_manager()->exec( "function load( s ) dofile( 'media/script/' .. s ) end" );
-
-	// Scene
-	get_script_manager()->set_function( "scene", [this] ( const char_t* name ) { setup_scene( name ); } );
-	get_script_manager()->set_function( "push_overlay", [this] ( const char_t* name ) { push_overlay_scene( name ); } );
-	get_script_manager()->set_function( "pop_overlay", [this] () { pop_overlay_scene(); } );
-
-	// Basic
-	get_script_manager()->set_function( "color", [this] ( float_t r, float_t g, float_t b, float_t a ) { return Color( r, g, b, a ); } );
-	get_script_manager()->set_function( "vector", [this] ( float_t x, float_t y, float_t z ) { return Vector( x, y, z ); } );
-
-	// Fade
-	get_script_manager()->set_function( "set_fade_color", [this] ( const Color& color ) { get_graphics_manager()->set_fade_color( color ); } );
-	get_script_manager()->set_function( "start_fade_in", [this] ( float_t speed ) { get_graphics_manager()->start_fade_in( speed ); } );
-	get_script_manager()->set_function( "start_fade_out", [this] ( float_t speed ) { get_graphics_manager()->start_fade_out( speed ); } );
-
-	// ActiveObject
-	get_script_manager()->set_function( "create_object", [this] ( const char_t* name ) { auto* o = create_object( name ); o->restart(); return o; } );
-	get_script_manager()->set_function( "clone_object", [this] ( ActiveObject* o ) { auto* o2 = clone_object( o ); o2->restart(); return o2; } );
-	get_script_manager()->set_function( "get_object", [this] ( const char_t* name ) { return get_active_object_manager()->get_active_object( name ); } );
-	get_script_manager()->set_function( "set_name", [this] ( ActiveObject* o, const char_t* name ) { get_active_object_manager()->name_active_object( name, o ); } );
-	get_script_manager()->set_function( "set_loc", [] ( ActiveObject* o, float_t x, float_t y, float_t z ) { o->set_location( x, y, z ); } );
-	get_script_manager()->set_function( "set_dir", [] ( ActiveObject* o, float_t r ) { o->set_direction_degree( r ); } );
-	get_script_manager()->set_function( "set_vel", [] ( ActiveObject* o, float_t x, float_t y, float_t z ) { o->set_velocity( Vector( x, y, z ) ); } );
-	get_script_manager()->set_function( "set_start_loc", [] ( ActiveObject* o, float_t  x, float_t  y, float_t  z ) { o->set_start_location( x, y, z ); } );
-	get_script_manager()->set_function( "set_start_rot", [] ( ActiveObject* o, float_t rx, float_t ry, float_t rz ) { o->set_start_rotation( rx, ry, rz ); } );
-	get_script_manager()->set_function( "set_start_dir", [] ( ActiveObject* o, float_t r ) { o->set_start_direction_degree( r ); } );
-	get_script_manager()->set_function( "set_mass", [] ( ActiveObject* o, float_t mass ) { o->set_mass( mass ); } );
-
-	// GrahpicsManager
-	get_script_manager()->set_function( "setup_shadow_map", [this] ( uint_t level = 3, uint_t size = 1024 ) { get_graphics_manager()->setup_shadow_map( level, size ); } );
-	get_script_manager()->set_function( "set_sky_box", [this] ( const char_t* name ) { get_graphics_manager()->set_sky_box( name ); } );
-	get_script_manager()->set_function( "unset_sky_box", [this] () { get_graphics_manager()->unset_sky_box(); } );
-	get_script_manager()->set_function( "set_ground", [this] ( const char_t* name ) { get_graphics_manager()->set_ground( name ); } );
-	get_script_manager()->set_function( "unset_ground", [this] () { get_graphics_manager()->unset_ground(); } );
-
-	get_script_manager()->set_function( "set_paper_texture_type", [this] ( int_t type ) { get_graphics_manager()->set_paper_texture_type( type ); } );
-	get_script_manager()->set_function( "set_ambient_color", [this] ( const Color& color ) { get_graphics_manager()->set_ambient_color( color ); } );
-	get_script_manager()->set_function( "set_shadow_color", [this] ( const Color& color ) { get_graphics_manager()->set_shadow_color( color ); } );
-	get_script_manager()->set_function( "set_shadow_paper_color", [this] ( const Color& color ) { get_graphics_manager()->set_shadow_paper_color( color ); } );
-	get_script_manager()->set_function( "set_drawing_accent", [this] ( float_t accent ) { get_graphics_manager()->set_drawing_accent( accent ); } );
-	get_script_manager()->set_function( "set_drawing_line_type", [this] ( int_t type ) { get_graphics_manager()->set_drawing_line_type( type ); } );
-
-	get_script_manager()->set_function( "set_post_effect_shader", [this] ( core::graphics::Shader* s ) { get_graphics_manager()->set_post_effect_shader( s ); } );
-
-	get_script_manager()->set_function( "load_model", [this] ( const char_t* name ) { return get_graphics_manager()->load_model( name ); } );
-	get_script_manager()->set_function( "clone_model", [this] ( graphics::Model* m ) { auto* m2 = get_graphics_manager()->clone_model( m ); return m2; } );
-
-	get_script_manager()->set_function( "get_shader", [this] ( const char_t* name ) { return get_graphics_manager()->get_shader( name ); } );
-	get_script_manager()->set_function( "clone_shader", [this] ( const core::graphics::Shader* s ) { return get_graphics_manager()->clone_shader( s ); } );
-
-	get_script_manager()->set_function( "load_texture", [this] ( const char_t* file_path ) { return get_graphics_manager()->load_texture( file_path ); } );
-	// get_script_manager()->set_function( "load_named_texture", [this] ( const char_t* name, const char_t* file_path ) { return get_graphics_manager()->load_texture( name, file_path ); } );
-	get_script_manager()->set_function( "get_texture", [this] ( const char_t* name ) { return get_graphics_manager()->get_texture( name ); } );
-
-	// SoundManager
-	get_script_manager()->set_function( "play_sound", [this] ( const char_t* name ) { if ( auto* s = get_sound_manager()->get_sound( name ) ) { s->play( false ); } } );
-
-	// debug
-	get_script_manager()->set_function( "debug_axis", [this] ( int on ) { get_graphics_manager()->set_debug_axis_enabled( on != 0 ); } );
-	get_script_manager()->set_function( "debug_bullet", [this] ( int mode ) { bullet_debug_draw_->setDebugMode( mode ); } );
-
-	get_script_manager()->set_function( "debug_print_resources", [this] () { get_graphics_manager()->debug_print_resources(); } );
-
-	/// @todo ActiveObject に color を持たせる？
-	// get_script_manager()->set_function( "set_object_object", [this] ( ActiveObject* o, const Color& c ) { o->set_co } );
+	return main_loop_ ? main_loop_->get_wait_msec() : 0;
 }
 
-/**
- * オブジェクトを生成する
- *
- * @param class_name  クラス名
- * @return 生成したオブジェクト
- * @todo 整理する。 loc, rot の指定をどうするか？ StaticObject の生成をどうするか？ Scenegraph に移動？
- */
-ActiveObject* GameMain::create_object( const char_t* class_name ) const
+void GameMain::set_ui_text_scale( float_t scale )
 {
-	ActiveObject* active_object = get_active_object_manager()->create_object( class_name );
+	ui_text_scale_ = scale;
 
-	/// @todo 例外にしてスクリプト呼び出し側でキャッチできるようにする
-	if ( ! active_object )
+	// 設定の反映はテーマを作る前にも呼ばれる（起動時）。テーマができたら apply_ui_text_scale() で反映する
+	if ( ui_theme_ && ui_theme_base_ )
 	{
-		return 0;
+		const uint_t revision = ui_theme_->revision;
+		*ui_theme_ = core::ui::scale_theme_text( *ui_theme_base_, scale );
+		ui_theme_->revision = revision + 1;		// 開いている画面が配置し直すきっかけ
 	}
-
-	active_object->set_rigid_body( get_active_object_physics()->add_active_object_as_box( active_object ) );
-	active_object->set_model( get_graphics_manager()->load_model( class_name ) );
-
-	/// @todo 同じ種類の複数の ActiveObject が、Shader を共有せず、個別に保持できるようにする
-
-	return active_object;
 }
 
-ActiveObject* GameMain::clone_object( const ActiveObject* o ) const
+void GameMain::save_settings()
 {
-	return get_active_object_manager()->clone_object( o );
+	settings_->save( * get_app()->get_user_config(), game_settings::USER_SETTINGS_VERSION );
+
+	const string_t user_settings_path = game_settings::user_settings_path();
+
+	// 置き場所のフォルダが無ければ作る（初回）
+	std::error_code ec;
+	std::filesystem::create_directories( std::filesystem::path( user_settings_path ).parent_path(), ec );
+
+	if ( ! get_app()->get_user_config()->save_file( user_settings_path.c_str() ) )
+	{
+		debug_log( string_t( "[Config] ユーザーの設定ファイルを保存できませんでした: " ) + user_settings_path );
+	}
 }
 
 /**
@@ -307,15 +412,32 @@ bool GameMain::update()
 
 	time_manager_.update( main_loop_->get_elapsed_sec() );
 
-	/// @todo 別スレッド化
-	get_sound_manager()->update();
+	dev_tools_->begin_frame();
+
+	// 監視しているディレクトリ（シェーダーなど）の変更を毎フレーム確かめる
+	// （以前はウィンドウが再びアクティブになったときだけ確かめていたので、エディタと並べて作業していると読み直されなかった。
+	//   待ち時間 0 の確認なので負荷はほぼない）
+	get_app()->check_directory_change();
+
+	// 前のフレームでベースシーンの置き換えが決まっていたら、「読み込み中」を表示してから置き換える
+	if ( scene_stack_->is_loading_frame() )
+	{
+		scene_stack_->replace_base_with_loading_screen();
+		return true;
+	}
+
+	// サウンドの更新は SoundManager の更新スレッドが行う（メインスレッドが止まっても BGM が途切れないように）
+	if ( ! get_sound_manager()->is_update_thread_running() )
+	{
+		get_sound_manager()->update();
+	}
 	
 	if ( get_app()->is_active() )
 	{
 		direct_input_->update();
 		input_->update();
 
-		if ( is_command_mode_ )
+		if ( debug_console_->is_open() )
 		{
 			input_->clear_mouse_move();
 		}
@@ -330,338 +452,225 @@ bool GameMain::update()
 		oculus_rift_->update();
 	}
 
-	// ESC キーはオーバーレイの有無に関わらず検出する (ブロックをバイパス)
-	{
-		const bool escape_blocked = input_->is_blocked();
-		input_->set_blocked( false );
-		const bool escape_pushed = input_->push( Input::Button::ESCAPE );
-		input_->set_blocked( escape_blocked );
-
-		if ( escape_pushed )
-		{
-			if ( has_overlay_scene() )
-			{
-				// オーバーレイが開いている場合は閉じる
-				pop_overlay_scene();
-				if ( auto* s = sound_manager_->get_sound( "cancel" ) ) { s->play( false ); }
-			}
-			else if ( scene_->get_name() == "title" )
-			{
-				get_app()->close();
-			}
-			else if ( scene_->get_name() == "game_play" )
-			{
-				// ゲームプレイ中はポーズメニューを開く
-				push_overlay_scene( "pause_menu" );
-				if ( auto* s = sound_manager_->get_sound( "ok" ) ) { s->play( false ); }
-			}
-			else
-			{
-				if (
-					get_save_data()->get< int >( "stage.0-0", 0 ) > 0 &&
-					get_save_data()->get< int >( "stage.0-1", 0 ) > 0 &&
-					get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
-				{
-					scene_->set_next_scene( "title" );
-				}
-				else
-				{
-					get_app()->close();
-				}
-
-				if ( auto* s = sound_manager_->get_sound( "cancel" ) ) { s->play( false ); }
-			}
-		}
-	}
+	handle_escape();
 
 	ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
+
+	// imgui は描画の解像度で描くので、大きさとマウスの位置を描画の座標に直す（フルスクリーン（ボーダーレス）ではウィンドウが描画より大きい）
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		io.DisplaySize = ImVec2( static_cast< float >( get_app()->get_width() ), static_cast< float >( get_app()->get_height() ) );
+
+		POINT cursor;
+
+		if ( get_app()->is_full_screen() && GetCursorPos( & cursor ) && ScreenToClient( get_app()->GetWindowHandle(), & cursor ) )
+		{
+			cursor = get_app()->client_to_render( cursor );
+			io.AddMousePosEvent( static_cast< float >( cursor.x ), static_cast< float >( cursor.y ) );
+		}
+	}
+
     ImGui::NewFrame();
 
-	// オーバーレイシーンが存在する場合、ベースシーンの入力をブロック
-	input_->set_blocked( has_overlay_scene() );
+	// 別スレッドの読み込みが終わったものを、メインスレッドで処理する（テクスチャの作成など）
+	graphics_manager_->dispatch_async_loads();
+
+	// 入力を受け取る先を 1 か所で決める（コンソール → オーバーレイ → ベースシーン）。
+	// コンソールで打った文字やマウス操作で、UI やキャラクターが動かないように
+	const ImGuiIO& io = ImGui::GetIO();
+	const InputOwner input_owner = decide_input_owner( io.WantCaptureKeyboard || io.WantCaptureMouse, has_overlay_scene() );
 
 	if ( has_overlay_scene() )
 	{
-		// ベースシーンはポーズ中 (更新しない)
-		// オーバーレイシーンのトップのみ更新（入力を一時的に許可）
-		input_->set_blocked( false );
-		overlay_scene_stack_.back()->update();
-		input_->set_blocked( true );
+		// ベースシーンはポーズ中 (更新しない)。オーバーレイシーンのトップのみ更新
+		input_->set_blocked( input_owner != InputOwner::OVERLAY );
+		scene_stack_->get_top_overlay()->update();
 	}
 	else
 	{
-		scene_->update();
+		input_->set_blocked( input_owner != InputOwner::BASE_SCENE );
+		scene_stack_->get_base_scene()->update();
 	}
+
+	input_->set_blocked( false );
 
 	render();
 
-	// オーバーレイシーンの遷移チェック
-	if ( has_overlay_scene() && ! overlay_scene_stack_.back()->get_next_scene().empty() )
-	{
-		string_t next = overlay_scene_stack_.back()->get_next_scene();
+	// 開発用 : 起動時のオーバーレイ（数フレーム後に開く）
+	scene_stack_->update_start_overlay();
 
-		if ( next == "pop" )
-		{
-			pop_overlay_scene();
-		}
-		else
-		{
-			pop_overlay_scene();
-			push_overlay_scene( next );
-		}
-	}
-	else
+	// 開発用 : BLUE_SKY_DEBUG_SCENE_SEQUENCE の順に、決まったフレームごとにベースシーンを置き換える
+	dev_tools_->update_scene_sequence( scene_stack_->is_loading_frame() );
+
+	// シーン遷移 : シーンが出した要求を集め、フレームの境目でまとめて実行する
+	scene_stack_->collect_requests();
+	scene_stack_->process_requests();
+
+	// 表示の変更は、UI のコールバックやウィンドウメッセージの処理中ではなく、ここでまとめて行う
+	//
+	// 設定（ユーザーが選んだ値）を書き換えるのはユーザーの明示的な操作（オプション画面・Alt+Enter・F5）だけ。
+	// フルスクリーンはボーダーレスなので、フォーカスを失っても解除されない（以前の排他フルスクリーンは解除され、戻す処理が要った）
+	if ( is_full_screen_toggle_requested_ )
 	{
-		check_scene_transition();
+		is_full_screen_toggle_requested_ = false;
+
+		get_app()->set_full_screen( ! get_app()->is_full_screen() );
+		settings_->sync_from_runtime( game_settings::FULL_SCREEN, get_app()->is_full_screen() );
+	}
+
+	if ( is_display_change_requested_ )
+	{
+		is_display_change_requested_ = false;
+		apply_display_settings();
 	}
 
 	return true;
 }
 
+/**
+ * 設定ストアの確定値に合わせて、解像度・フルスクリーンを変更する
+ *
+ * フルスクリーンはボーダーレス（画面いっぱいの縁なしウィンドウ）なので、解像度はフルスクリーンのままでも変えられる
+ * （描画の解像度が変わり、表示のときに画面の大きさへ拡大される。以前の排他フルスクリーンは、いったんウィンドウに戻す必要があった）
+ */
+void GameMain::apply_display_settings()
+{
+	const int w = settings_->get_committed( game_settings::SCREEN_WIDTH );
+	const int h = settings_->get_committed( game_settings::SCREEN_HEIGHT );
+	const bool full_screen = settings_->get_committed( game_settings::FULL_SCREEN );
+
+	if ( w != get_app()->get_width() || h != get_app()->get_height() )
+	{
+		get_app()->set_size( w, h );
+	}
+
+	get_app()->set_full_screen( full_screen );
+
+	// フルスクリーンの状態は、以前は 3 か所（App・スワップチェーン・設定）が持ち、毎回手で写していた。
+	// 今は役割を分ける : 実際の状態は App（ウィンドウ）だけ、ユーザーの選択は設定だけ
+
+	debug_log( "[Display] 表示の設定を適用しました : " + std::to_string( get_app()->get_width() ) + "x" + std::to_string( get_app()->get_height() )
+		+ "・描画先 " + std::to_string( direct_3d_->get_width() ) + "x" + std::to_string( direct_3d_->get_height() )
+		+ "・フルスクリーン " + ( get_app()->is_full_screen() ? "はい" : "いいえ" ) );
+}
+
 void GameMain::render()
 {
-	// ベースシーンを常に描画
-	scene_->render();
+	// 描画する範囲を上から決める
+	// - 不透明なオーバーレイ（is_transparent() が false）より下は、ベースシーンも含めて描かない
+	// - 下のオーバーレイを隠すオーバーレイ（メニューなど）より下のオーバーレイは描かない（ベースシーンは描く）
+	const auto& overlays = scene_stack_->get_overlays();
+	std::vector< OverlayLayerInfo > layers;
+	layers.reserve( overlays.size() );
 
-	// オーバーレイシーンを上から順に描画
-	for ( auto& overlay : overlay_scene_stack_ )
+	for ( const auto& overlay : overlays )
 	{
-		overlay->render();
+		layers.push_back( { overlay->is_transparent(), overlay->hides_overlays_below() } );
 	}
 
-	if ( is_command_mode_ )
-    {
-		render_console_window();
-		render_scene_list_window();
+	const OverlayRenderRange range = compute_overlay_render_range( layers );
+
+	// 前のフレームの描画状態を持ち越さない。画面と深度もここで必ずクリアする
+	// （以前はクリアをベースシーンの render() に任せていて、クリアしないシーン（enemy_ai_test など）では
+	//   前のフレームの深度が残り、深度テストのある描画が消えたり、残像が出たりした）
+	direct_3d_->reset_render_state();
+	get_graphics_manager()->clear_default_view();
+
+	if ( range.render_base )
+	{
+		scene_stack_->get_base_scene()->render();
 	}
+
+	// オーバーレイシーンを下から順に描画
+	for ( size_t i = range.first_overlay; i < overlays.size(); i++ )
+	{
+		// 下のシーン（ポストエフェクトなど）の状態を持ち越さない
+		direct_3d_->reset_render_state();
+		overlays[ i ]->render();
+	}
+
+	debug_console_->render();
 
 	ImGui::Render();
 	get_graphics_manager()->set_default_render_target( false );
     ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );
 
-	direct_3d_->present();
+	// 開発用 : フレームの保存・解像度の変更の試し・フレームの時間（present にかかった時間も測る）
+	dev_tools_->after_render();
+	dev_tools_->present( [this] { direct_3d_->present(); } );
+
+	// フレームの途中で解放・差し替えを頼まれたリソースを、ここでまとめて解放する（フレームの中では引いたポインタを使い回せる。doc/ハンドルの設計.md）
+	flush_resource_releases();
 }
 
-/**
- * @brief コンソールウィンドウを描画する
- */
-void GameMain::render_console_window()
+/// 解放・差し替えを頼まれたリソースをまとめて解放する（フレームの終わりとシーンの切り替えで呼ぶ）
+void GameMain::flush_resource_releases()
 {
-	if ( ! ImGui::Begin( "Console", 0 ) )
-    {
-		ImGui::End();
-		return;
-	}
-
-	static auto scroll_to_bottom = false;
-
-	const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
-	if ( ImGui::BeginChild( "ScrollingRegion", ImVec2( 0, -footer_height_to_reserve ), 0, ImGuiWindowFlags_HorizontalScrollbar ) )
-    {
-		if ( ImGui::BeginPopupContextWindow() )
-        {
-            if ( ImGui::Selectable( "Clear" ) )
-			{
-				// clear log
-			}
-
-            ImGui::EndPopup();
-        }
-
-		for ( const auto& log: core::logger.get_log_list() )
-		{
-			auto has_color = false;
-
-			switch ( log.get_type() )
-			{
-			case core::Logger::Log::Type::ERROR:
-				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 0.4f, 0.4f, 1.0f ) );
-				has_color = true;
-				break;
-			case core::Logger::Log::Type::WARN:
-				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 0.7f, 0.1f, 1.0f ) );
-				has_color = true;
-				break;
-			case core::Logger::Log::Type::INFO:
-				break;
-			case core::Logger::Log::Type::DEBUG:
-				break;
-			}
-                    
-
-			ImGui::TextUnformatted( log.get_message().c_str() );
-
-			if ( has_color )
-			{
-				ImGui::PopStyleColor();
-			}
-		}
-
-		if ( scroll_to_bottom )
-		{
-            ImGui::SetScrollHereY( 1.f );
-		}
-
-        scroll_to_bottom = false;
-	}
-
-	ImGui::EndChild();
-
-	ImGui::Separator();
-
-	const auto input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
-
-	ImGui::SetNextItemWidth( -FLT_MIN );
-
-	bool reclaim_focus = false;
-
-	const auto callback = [] (ImGuiInputTextCallbackData* data) -> int
-	{
-		auto game_main = static_cast< GameMain* >( data->UserData );
-		string_t command;
-
-		switch ( data->EventFlag )
-		{
-		case ImGuiInputTextFlags_CallbackCompletion:
-			command = game_main->user_command_;
-
-			game_main->get_script_manager()->auto_complete( command );
-
-			if ( ! game_main->get_script_manager()->get_output().empty() )
-			{
-				core::logger.info( game_main->get_script_manager()->get_output() );
-			}
-
-			scroll_to_bottom = true;
-
-			break;
-		case ImGuiInputTextFlags_CallbackHistory:
-			if ( data->EventKey == ImGuiKey_UpArrow )
-			{
-				command = game_main->get_script_manager()->get_prev_hisotry_command();
-			
-			}
-			else if ( data->EventKey == ImGuiKey_DownArrow )
-			{
-				command = game_main->get_script_manager()->get_next_hisotry_command();	
-			}
-		}
-
-		if ( command != game_main->user_command_ )
-		{
-			data->DeleteChars( 0, data->BufTextLen );
-			data->InsertChars( 0, command.c_str() );
-		}
-
-		return 0;
-	};
-
-	if ( ImGui::InputText( "##command", & user_command_, input_text_flags, callback, this ) )
-    {
-		boost::trim( user_command_ );
-
-		if ( user_command_ != "" )
-		{
-			core::logger.info( user_command_ );
-
-			try
-			{
-				get_script_manager()->exec( user_command_, true );
-			}
-			catch ( const ScriptError& e )
-			{
-				// get_app()->show_error_message( e.what() );
-				core::logger.error( e.what() );
-			}
-
-			user_command_ = "";
-			scroll_to_bottom = true;
-		}
-
-		reclaim_focus = true;
-	}
-
-	ImGui::SetItemDefaultFocus();
-
-    if ( reclaim_focus || ! ImGui::IsAnyItemActive() )
-	{
-		ImGui::SetKeyboardFocusHere( -1 );
-	}
-
-	ImGui::End();
-}
-/**
- * @brief シーン一覧ウィンドウを描画する
- */
-void GameMain::render_scene_list_window()
-{
-	if ( ! ImGui::Begin( "SceneList" ) )
-    {
-		ImGui::End();
-		return;
-	}
-
-	if ( ImGui::BeginListBox( "##SceneListBox", ImVec2( -FLT_MIN, 0 ) ) )
-    {
-		static int selected_item_index = -1;
-
-		int n = 0;
-
-        for ( const auto& scene: SceneManager::get_instance()->get_scene_generator_map() )
-        {
-            ImGuiSelectableFlags flags = n == selected_item_index ? ImGuiSelectableFlags_Highlight : 0;
-
-            if ( ImGui::Selectable( scene.first.c_str(), n == selected_item_index, flags ) )
-			{
-				selected_item_index = n;
-			}
-
-			if ( ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked( 0 ) )
-			{
-				setup_scene( scene.first );
-			}
-
-			n++;
-        }
-        
-		ImGui::EndListBox();
-    }
-
-	ImGui::End();
+	graphics_manager_->flush_releases();
+	sound_manager_->flush_releases();
 }
 
-void GameMain::on_key_down( char_t )
+void GameMain::on_key_down( char_t c )
 {
-	
+	// 文字の入力（WM_CHAR）。UI の文字入力（TextField）が取り出す
+	input_->push_char_byte( c );
+}
+
+void GameMain::set_vsync( bool v )
+{
+	direct_3d_->set_vsync( v );
+}
+
+void GameMain::on_raw_key_down( int vk )
+{
+	input_->latch_key_press( vk );
+}
+
+void GameMain::on_raw_mouse_move( long dx, long dy )
+{
+	input_->add_raw_mouse_move( dx, dy );
+}
+
+void GameMain::on_ime_composition( const std::u32string& text )
+{
+	input_->set_composition( text );
 }
 
 void GameMain::on_special_key_down( int key )
 {
-	if ( key == KEY_F1 )
+	// キー割り当てで押されたキーを待っている間は、切り替えを動かさない（以前は F2 でミュート・F5 でフルスクリーンが切り替わった）
+	if ( const Scene* top = scene_stack_->get_top_overlay(); top && top->is_capturing_key() )
 	{
-		is_command_mode_ = ! is_command_mode_;
-		set_show_cursor( is_command_mode_ );
-		get_app()->clip_cursor( is_command_mode_ ? false : scene_->is_clip_cursor_required() );
+		return;
 	}
-	else if ( key == KEY_F2 )
+
+	if ( key == VK_F1 )
 	{
-		get_sound_manager()->set_mute( ! get_sound_manager()->is_mute() );
-		game::Sound* bgm = get_sound_manager()->get_sound( "bgm" );
+		debug_console_->toggle();
+		update_cursor_state();
+	}
+	else if ( key == VK_F2 )
+	{
+		get_sound_manager()->set_mute( ! get_sound_manager()->is_mute() || get_app()->is_background() );	// 裏で動かすときは鳴らさない
+		settings_->sync_from_runtime( game_settings::AUDIO_MUTE, get_sound_manager()->is_mute() );
+		core::Sound* bgm = get_sound_manager()->get_sound( "bgm" );
 
 		if ( bgm )
 		{
 			bgm->play( true );
 		}
 	}
-	else if ( key == KEY_F5 )
+	else if ( key == VK_F5 )
 	{
-		get_graphics_manager()->switch_full_screen();
-		get_app()->set_full_screen( get_graphics_manager()->is_full_screen() );
+		on_toggle_full_screen();
 	}
 
-	/// @todo ちゃんとする
-	scene_->on_function_key_down( key -  KEY_F1 + 1 );
+	// F1〜F12 だけを番号（1〜12）にしてシーンに渡す（以前はどのキーも key - F1 + 1 にして渡し、文字のキーでも呼ばれていた）
+	if ( key >= VK_F1 && key <= VK_F12 )
+	{
+		scene_stack_->get_base_scene()->on_function_key_down( key - VK_F1 + 1 );
+	}
 }
 
 void GameMain::on_mouse_wheel( int wheel )
@@ -678,22 +687,110 @@ void GameMain::on_resize()
 	}
 }
 
-/**
- * 次のシーンへの遷移をチェックする
- *
- */
-void GameMain::check_scene_transition()
+void GameMain::handle_escape()
 {
-	if ( ! scene_->get_next_scene().empty() )
+	// ESC キーはオーバーレイの有無に関わらず検出する（ブロックをバイパス）
+	const bool escape_blocked = input_->is_blocked();
+	input_->set_blocked( false );
+	const bool escape_pushed = input_->push( Input::Button::ESCAPE );
+	input_->set_blocked( escape_blocked );
+
+	// 開発用のコンソール（ImGui）がキー入力を受け取っているときは、ESC はコンソールのもの。
+	// 何をするか（オーバーレイが開いていれば UI に任せる・終了・ポーズメニュー・タイトルへ）は SceneStack が決める
+	scene_stack_->handle_escape( escape_pushed && ! ImGui::GetIO().WantCaptureKeyboard );
+}
+
+/**
+ * 開発用の機能（DevTools）を作る
+ *
+ * 描画結果の保存・解像度の変更・シーンの切り替えなどの GameMain の仕事を渡す（DevTools は GameMain を知らない。テストでは偽物を渡す）
+ */
+void GameMain::create_dev_tools()
+{
+	dev::DevTools::Hooks hooks;
+
+	hooks.save_back_buffer = [this] ( const std::wstring& path ) { return direct_3d_->save_back_buffer_to_png( path.c_str() ); };
+	hooks.save_glyph_atlas = [this] ( const std::wstring& path ) { graphics_manager_->save_glyph_atlas( path.c_str() ); };
+
+	hooks.change_display = [this] ( int w, int h )
 	{
-		string_t next_scene = scene_->get_next_scene();
+		settings_->set( game_settings::SCREEN_WIDTH, w );
+		settings_->set( game_settings::SCREEN_HEIGHT, h );
+		settings_->apply_deferred();
+	};
 
-		set_stage_name( scene_->get_next_stage_name() );
+	hooks.request_scene = [this] ( const SceneRequest& r ) { request_scene( r ); };
+	hooks.current_scene_name = [this] { return get_current_scene() ? get_current_scene()->get_name() : string_t(); };
 
-		setup_scene( next_scene );
+	dev_tools_ = std::make_unique< dev::DevTools >( dev_options_, std::move( hooks ) );
+}
 
-		save_data_->save_file( "save/blue-sky.save" );
-	}
+/**
+ * シーンの持ち物（SceneStack）を作る
+ *
+ * シーンを作る・片付ける・画面に出すなどの GameMain の仕事を渡す（SceneStack は GameMain を知らない。テストでは偽物を渡す）
+ */
+void GameMain::create_scene_stack()
+{
+	SceneStack::Hooks hooks;
+
+	hooks.is_registered = [this] ( const string_t& name ) { return scene_manager_->is_scene_registered( name ); };
+
+	// 引数はシーンのコンストラクタが get_next_scene_arguments（SceneStack が作っている間だけ見せる）から受け取る
+	hooks.create_scene = [this] ( const string_t& name, const SceneArguments& ) { return std::unique_ptr< Scene >( scene_manager_->generate_scene( name, * this ) ); };
+
+	hooks.before_base_destroyed = [this] ( const string_t& name )
+	{
+		sound_manager_->pop_group();
+		sound_manager_->push_group( name.c_str() );
+	};
+
+	hooks.after_base_destroyed = [this] { clear_for_next_scene(); };
+
+	hooks.show_loading_screen = [this]
+	{
+		get_graphics_manager()->set_default_render_target( true );
+		get_graphics_manager()->clear_default_view();
+		get_graphics_manager()->draw_text_at_center( get_ui_strings().get( "loading" ).c_str(), Color( 0.8f, 0.8f, 0.8f, 1.f ) );
+		direct_3d_->present();
+	};
+
+	hooks.after_base_replaced = [this]
+	{
+		// 保存の失敗を黙って無視しない（以前は結果を見ていなかった。進み具合が残らないと次回にやり直しになる）
+		if ( ! save_data_->save_file( "save/blue-sky.save" ) )
+		{
+			debug_log( "[Save] セーブデータを保存できませんでした: save/blue-sky.save" );
+		}
+	};
+
+	hooks.update_cursor = [this] { update_cursor_state(); };
+
+	hooks.on_all_overlays_closed = [this]
+	{
+		input_->set_blocked( false );
+		update_cursor_state();
+	};
+
+	hooks.quit = [this] { get_app()->close(); };
+
+	hooks.play_sound = [this] ( const char_t* name )
+	{
+		if ( auto* s = sound_manager_->get_sound( name ) )
+		{
+			s->play( false );
+		}
+	};
+
+	hooks.can_return_to_title = [this]
+	{
+		return
+			get_save_data()->get< int >( "stage.0-0", 0 ) > 0 &&
+			get_save_data()->get< int >( "stage.0-1", 0 ) > 0 &&
+			get_save_data()->get< int >( "stage.0-2", 0 ) > 0;
+	};
+
+	scene_stack_ = std::make_unique< SceneStack >( std::move( hooks ) );
 }
 
 /**
@@ -702,12 +799,50 @@ void GameMain::check_scene_transition()
  */
 void GameMain::setup_scene()
 {
+	// 共通のシェーダーとフェーダーを準備する。以前は一部のシーン（debug・enemy_ai_test など）だけが呼んでいて、
+	// 呼ばないシーン（title など）から始めると、フェーダーにメッシュが無いまま描画して落ちた。
+	// シェーダーの生成は GameMain のシングルトンを使うので、GameMain の構築が終わったここで行う
+	graphics_manager_->setup_default_shaders();
+
 	if ( true )
 	{
 		// set_stage_name( "0-1" );
 		// setup_scene( "game_play" );
-		setup_scene( get_config()->get< string_t >( "debug.start_scene", "debug" ) );
+		string_t start_scene = get_config()->get< string_t >( "debug.start_scene", "debug" );
+
+		// 環境変数でも指定できる（自動操作の確認で設定ファイルを書き換えずに済むように）
+		if ( dev_options_.start_scene )
+		{
+			start_scene = * dev_options_.start_scene;
+		}
+
+		// ステージも指定できる（game_play はステージ名が必要）
+		if ( dev_options_.start_stage )
+		{
+			set_stage_name( * dev_options_.start_stage );
+		}
+
+		// 打ち間違いなどで未登録なら、ベースシーンが無いまま進まないようタイトルにする
+		scene_stack_->start( start_scene );
 		// setup_scene( "canvas_test" );
+
+		// 開発用 : 起動時にオーバーレイ（例: options）を開く。UI の確認用
+		// ベースシーンを数フレーム更新してから開く（一度も更新されていないシーンは描画の準備ができていないため）。
+		// const で読む（非 const の get は既定値の空文字列を設定に書き込み、保存すると壊れた行になるため）
+		string_t start_overlay = static_cast< const Config& >( * get_config() ).get< string_t >( "debug.start_overlay", "" );
+
+		// 環境変数でも指定できる（自動操作の確認で設定ファイルを書き換えずに済むように）
+		if ( dev_options_.start_overlay )
+		{
+			start_overlay = * dev_options_.start_overlay;
+		}
+
+		scene_stack_->set_start_overlay( start_overlay );
+
+		// 開発用 : BLUE_SKY_DEBUG_SCENE_SEQUENCE（"stage_select,game_play:1-1,title" のように「シーン[:ステージ]」を , で並べる）を設定すると、
+		// 150 フレームごとに順にベースシーンを置き換える。シーンを替えて戻ったときにリソースが正しく引けるかを、入力を送らずに確かめるため
+		// 開発用 : フレームの保存・フレームの時間・シーンを順に替える（BLUE_SKY_DEBUG_SCENE_SEQUENCE）を準備する
+		dev_tools_->setup();
 
 		return;
 	}
@@ -715,7 +850,7 @@ void GameMain::setup_scene()
 	// Scene
 	if ( get_save_data()->get< int >( "stage.0-2", 0 ) > 0 )
 	{
-		setup_scene( "title" );
+		scene_stack_->setup_base_scene( "title" );
 	}
 	else
 	{
@@ -732,99 +867,60 @@ void GameMain::setup_scene()
 			set_stage_name( "0-0" );
 		}
 
-		setup_scene( "stage_intro" );
+		scene_stack_->setup_base_scene( "stage_intro" );
 	}
 }
 
 /**
- * シーンを準備する
- *
- * @param scene_name シーン名
+ * ベースを壊した後、次のシーンを作る前の片付け（SceneStack がベースを置き換えるときに呼ぶ）
  */
-void GameMain::setup_scene( const string_t& scene_name )
+void GameMain::clear_for_next_scene()
 {
-	if ( ! SceneManager::get_instance()->is_scene_registered( scene_name ) )
+	// ゲームの物体を EntityManager より先に壊す（物体の位置の正・剛体の持ち主は、物体の Entity の部品にある。
+	// 本編のシーンは自分で壊すが、CanvasTestScene などはスクリプトで作った物体を残したまま終わり、
+	// 以前は Entity を失った物体が次のシーンへ残っていた）
+	if ( object_factory_ )
 	{
-		// スクリプトの途中で例外が発生し、その後のスクリプトが実行されない問題に対処している？
-		// COMMON_THROW_EXCEPTION_MESSAGE( std::string( "worng next_scene : " ) + scene_name );
-		return;
+		object_factory_->clear();
 	}
 
-	sound_manager_->pop_group();
-	sound_manager_->push_group( scene_name.c_str() );
-	
-	// 現在のシーンを解放
-	scene_.reset();
+	entity_manager_->clear();
+	get_graphics_manager()->set_main_camera_info( nullptr, nullptr );
 
-	// シーンによって設定されていたデータをクリア
+	// 物体の剛体は部品が持ち、ECS の剛体は clear で PhysicsSystem が解放する（以前はシーンをまたいで溜まっていた）。
+	// 世界が持つ地面・ステージの当たりの形・共有する形はここで消す（以前の本編の世界は GamePlayScene だけが消し、
+	// DebugScene・ParticleSystemTestScene が足した地面は残っていた。世界を 1 つにしたので、どのシーンの後も消す）
+	const int count = physics_manager_->get_rigid_body_count() - static_cast< int >( physics_manager_->get_owned_rigid_body_count() );
+
+	physics_manager_->clear();
+
+	// 残っていたら漏れなので知らせる
+	if ( count > 0 )
 	{
-		core::ecs::EntityManager::get_instance()->clear();
-		get_graphics_manager()->set_main_camera_info( nullptr, nullptr );
+		debug_log( "[Physics] シーンを片付けた後も物理の世界に物体の剛体が残っています: " + std::to_string( count ) + " 個" );
 	}
 
-	// 新しいシーンを設定
-	scene_.reset( SceneManager::get_instance()->generate_scene( scene_name ) );
+	// 前のシーンが解放を頼んだリソースを、次のシーンを読む前に解放する（同時に持つメモリを増やさない）
+	flush_resource_releases();
 
-	/// @todo 各 Scene クラスが自分の名前を持ち、
-	scene_->set_name( scene_name );
-	scene_->set_next_stage_name( get_stage_name() );
-
-	get_app()->clip_cursor( scene_->is_clip_cursor_required() );
+	// Handle の数（中身のある数/作った数）。解放しても減らないので、増え方をここで見る（doc/ハンドルの設計.md の 2 章）
+	debug_log( "[Resource] 前のシーンを片付けた後の Handle の数 : " + get_graphics_manager()->describe_handle_counts()
+		+ "・音 " + std::to_string( sound_manager_->get_live_handle_count() ) + "/" + std::to_string( sound_manager_->get_handle_count() ) );
 }
 
 /**
- * オーバーレイシーンをスタックにプッシュする
+ * カーソルの表示と閉じ込めを、今の状態（コマンドモード・メニュー・シーンの要求）から決める
  *
- * ベースシーンを破棄せずに、上にオーバーレイシーン (ポーズメニュー等) を重ねる。
- * ベースシーンの更新は停止し、入力はオーバーレイシーンのみが受け取る。
- *
- * @param scene_name シーン名
+ * 以前は 4 か所がそれぞれ決めていて、メニューを表示中にコマンドモードを抜けるとカーソルが消えた。
  */
-void GameMain::push_overlay_scene( const string_t& scene_name )
+void GameMain::update_cursor_state()
 {
-	if ( ! SceneManager::get_instance()->is_scene_registered( scene_name ) )
-	{
-		return;
-	}
+	const bool menu_open = scene_stack_->has_overlay();
+	const bool show = ( debug_console_ && debug_console_->is_open() ) || menu_open;
 
-	// ベースシーンをポーズ
-	scene_->set_paused( true );
-
-	// オーバーレイシーンを生成してスタックに追加
-	std::unique_ptr< Scene > overlay( SceneManager::get_instance()->generate_scene( scene_name ) );
-	overlay->set_name( scene_name );
-	overlay->set_next_stage_name( get_stage_name() );
-
-	overlay_scene_stack_.push_back( std::move( overlay ) );
-
-	// カーソルを表示 (メニュー操作用)
-	set_show_cursor( true );
-	get_app()->clip_cursor( false );
-}
-
-/**
- * オーバーレイシーンをスタックからポップする
- *
- * スタックが空になった場合、ベースシーンのポーズを解除する。
- */
-void GameMain::pop_overlay_scene()
-{
-	if ( overlay_scene_stack_.empty() )
-	{
-		return;
-	}
-
-	overlay_scene_stack_.pop_back();
-
-	if ( overlay_scene_stack_.empty() )
-	{
-		// 全てのオーバーレイが閉じた → ベースシーンのポーズ解除
-		scene_->set_paused( false );
-		input_->set_blocked( false );
-
-		set_show_cursor( is_command_mode_ );
-		get_app()->clip_cursor( is_command_mode_ ? false : scene_->is_clip_cursor_required() );
-	}
+	set_show_cursor( show );
+	Scene* base = scene_stack_->get_base_scene();
+	get_app()->clip_cursor( ! show && base && base->is_clip_cursor_required() );
 }
 
 } // namespace blue_sky

@@ -1,52 +1,127 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="blue_sky\dev\DebugConsole.cpp">
+      <Filter>blue_sky\dev</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\dev\DevTools.cpp">
+      <Filter>blue_sky\dev</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ScriptBindings.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\SceneStack.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\dev\DevOptions.cpp">
+      <Filter>blue_sky\dev</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\PhysicsSyncSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\CollisionEventSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\EffectStateDesc.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\EffectParser.cpp">
+      <Filter>core\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\RawInput.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\MsdfTextRenderer.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\GlyphAtlas.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\graphics\Direct3D11\OculusRift.cpp">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="core\AsyncLoader.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\CrashReport.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\AnchorBox.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Grid.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\OptionsController.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\TextFit.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\TextField.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Image.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Theme.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Brush.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\UIOverlayScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\GameSettings.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ui\UIInputBuilder.cpp">
+      <Filter>blue_sky\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\KeyBind.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\TabView.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\ScrollView.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Panel.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Dialog.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Choice.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Toggle.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\LabeledRow.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Label.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Stack.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\Screen.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\setting\SettingStore.cpp">
+      <Filter>core\setting</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\KeyNames.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ui\StringTable.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="GameObject\ActiveObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\AreaSwitch.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\Balloon.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\BaseSwitch.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\GameObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\Girl.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\Goal.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\Ladder.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\Medal.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\Missile.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\Robot.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\Stone.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\Switch.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\TranslationObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\Umbrella.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="Scene\CanvasTestScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -80,15 +155,6 @@
     <ClCompile Include="Scene\TitleScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject\Player.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\Rocket.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject\StaticeObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\Direct3D11.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClCompile>
@@ -97,9 +163,6 @@
     </ClCompile>
     <ClCompile Include="core\graphics\Direct3D11\WICTextureLoader.cpp">
       <Filter>core\graphics\Direct3D11</Filter>
-    </ClCompile>
-    <ClCompile Include="core\physics\Bullet\BulletPhysics.cpp">
-      <Filter>core\physics\Bullet</Filter>
     </ClCompile>
     <ClCompile Include="Scene\DebugScene.cpp">
       <Filter>Scene</Filter>
@@ -230,11 +293,41 @@
     <ClCompile Include="blue_sky\GameMain.cpp">
       <Filter>blue_sky</Filter>
     </ClCompile>
-    <ClCompile Include="blue_sky\ActiveObjectManager.cpp">
+    <ClCompile Include="blue_sky\ObjectFactory.cpp">
       <Filter>blue_sky</Filter>
     </ClCompile>
-    <ClCompile Include="blue_sky\ActiveObjectPhysics.cpp">
+    <ClCompile Include="blue_sky\stage\StageData.cpp">
+      <Filter>blue_sky\stage</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\stage\Action.cpp">
+      <Filter>blue_sky\stage</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\stage\StageBuilder.cpp">
+      <Filter>blue_sky\stage</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\stage\StageLook.cpp">
+      <Filter>blue_sky\stage</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\stage\TomlStageParser.cpp">
+      <Filter>blue_sky\stage</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\stage\StoryTextParser.cpp">
+      <Filter>blue_sky\stage</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\GameObjectRef.cpp">
       <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\ObjectBody.cpp">
+      <Filter>blue_sky\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\EntityObject.cpp">
+      <Filter>blue_sky\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\TranslationSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\SpinSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
     <ClCompile Include="blue_sky\App.cpp">
       <Filter>blue_sky</Filter>
@@ -248,23 +341,11 @@
     <ClCompile Include="core\ui\Button.cpp">
       <Filter>core\ui</Filter>
     </ClCompile>
-    <ClCompile Include="core\ui\SelectBox.cpp">
-      <Filter>core\ui</Filter>
-    </ClCompile>
     <ClCompile Include="core\ui\Slider.cpp">
-      <Filter>core\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="core\ui\VerticalMenu.cpp">
       <Filter>core\ui</Filter>
     </ClCompile>
     <ClCompile Include="core\ui\Widget.cpp">
       <Filter>core\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="core\ui\WidgetContainer.cpp">
-      <Filter>core\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="core\graphics\OculusRift.cpp">
-      <Filter>core\graphics</Filter>
     </ClCompile>
     <ClCompile Include="core\ecs\Entity.cpp">
       <Filter>core\ecs</Filter>
@@ -357,8 +438,11 @@
     <ClCompile Include="blue_sky\ecs\system\BalloonSystem.cpp">
       <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Msdf\GlyphAtlas.cpp">
-      <Filter>core\graphics\Msdf</Filter>
+    <ClCompile Include="blue_sky\ecs\system\ObjectRenderDataSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\MoveToTargetSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
     <ClCompile Include="core\graphics\Msdf\GlyphCache.cpp">
       <Filter>core\graphics\Msdf</Filter>
@@ -366,57 +450,243 @@
     <ClCompile Include="core\graphics\Msdf\MsdfFont.cpp">
       <Filter>core\graphics\Msdf</Filter>
     </ClCompile>
-    <ClCompile Include="core\graphics\Msdf\MsdfTextRenderer.cpp">
-      <Filter>core\graphics\Msdf</Filter>
+    <ClCompile Include="blue_sky\ecs\system\ContactCacheSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\SwitchSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\BalloonHoldSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\GirlSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\RobotBehaviorSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\PlayerBehaviorSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\PlayerInputSystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ObjectUpdater.cpp">
+      <Filter>blue_sky</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\ContactRules.cpp">
+      <Filter>blue_sky\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="blue_sky\ecs\system\PlayerInventorySystem.cpp">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="blue_sky\dev\DebugConsole.h">
+      <Filter>blue_sky\dev</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\dev\DevTools.h">
+      <Filter>blue_sky\dev</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ScriptBindings.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\SceneStack.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\dev\DevOptions.h">
+      <Filter>blue_sky\dev</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\PhysicsBodyComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\PhysicsSyncSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\CollisionTraitsComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\CollisionEventSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="core\physics\EntityTag.h">
+      <Filter>core\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\sound\SampleRateStepper.h">
+      <Filter>core\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\shader\AllShaders.h">
+      <Filter>blue_sky\graphics\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\RenderTargetTextureOptions.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\ObjectInstanceBuffer.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\ObjectInstanceBuffer.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\LightDirection.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\EffectStateDesc.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\EffectParser.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\RawInput.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\GameObjectContext.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Msdf\GlyphAtlasStorage.h">
+      <Filter>core\graphics\Msdf</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\MsdfTextRenderer.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\GlyphAtlas.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\OculusRift.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Direct3D11\DynamicPointList.h">
+      <Filter>core\graphics\Direct3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\TextRenderer.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\AsyncLoader.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\KeyLatch.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\InputRouting.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\CrashReport.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\AnchorBox.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\VirtualScreen.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\DeviceLostException.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Pixel2DSpace.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Grid.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\OptionsController.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\TextFit.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\SceneRequest.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\TextField.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\setting\SettingKey.h">
+      <Filter>core\setting</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\OverlayRenderRange.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\PixelSnap.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\DebugLog.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\FrameStageTimer.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Image.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Brush.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\UIOverlayScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\GameSettings.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ui\UIInputBuilder.h">
+      <Filter>blue_sky\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\KeyBind.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\TabView.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\ScrollView.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Panel.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Dialog.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Choice.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Toggle.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\LabeledRow.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Label.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Stack.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Screen.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Theme.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\UIInput.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\setting\SettingStore.h">
+      <Filter>core\setting</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\KeyNames.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\Rect.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\NavRepeater.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\ClickTracker.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ui\StringTable.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="GameObject\ActiveObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\AreaSwitch.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Balloon.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\BaseSwitch.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\GameObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Girl.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Goal.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Ladder.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Medal.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Missile.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Robot.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Stone.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Switch.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\TranslationObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Umbrella.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
     <ClInclude Include="Scene\CanvasTestScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -450,15 +720,6 @@
     <ClInclude Include="core\math.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="GameObject\Player.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\Rocket.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject\StaticObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\Direct3D11.h">
       <Filter>core\graphics\Direct3D11</Filter>
     </ClInclude>
@@ -473,9 +734,6 @@
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\WICTextureLoader.h">
       <Filter>core\graphics\Direct3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="core\physics\Bullet\BulletPhysics.h">
-      <Filter>core\physics\Bullet</Filter>
     </ClInclude>
     <ClInclude Include="core\DirectX.h">
       <Filter>core</Filter>
@@ -531,6 +789,21 @@
     <ClInclude Include="blue_sky\graphics\GraphicsManager.h">
       <Filter>blue_sky\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\graphics\RenderSettings.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\ResourceResolver.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\TextureSlot.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\ResourceLoader.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\Canvas2D.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
     <ClInclude Include="blue_sky\graphics\shader\BaseShader.h">
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
@@ -550,6 +823,9 @@
       <Filter>blue_sky\graphics</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\graphics\Line.h">
+      <Filter>blue_sky\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\graphics\LocalBounds.h">
       <Filter>blue_sky\graphics</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\graphics\Direct3D11\Line.h">
@@ -601,6 +877,9 @@
       <Filter>blue_sky\graphics\shader</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\ShadowMap.h">
+      <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Frustum.h">
       <Filter>core\graphics</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Direct3D11\ShadowMap.h">
@@ -689,6 +968,9 @@
     </ClInclude>
     <ClInclude Include="blue_sky\graphics\shader\post_effect\DefaultShader.h">
       <Filter>blue_sky\graphics\shader\post_effect</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ResourceHandle.h">
+      <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="core\ResourceManager.h">
       <Filter>core</Filter>
@@ -780,11 +1062,50 @@
     <ClInclude Include="blue_sky\GameMain.h">
       <Filter>blue_sky</Filter>
     </ClInclude>
-    <ClInclude Include="blue_sky\ActiveObjectManager.h">
+    <ClInclude Include="blue_sky\ObjectFactory.h">
       <Filter>blue_sky</Filter>
     </ClInclude>
-    <ClInclude Include="blue_sky\ActiveObjectPhysics.h">
+    <ClInclude Include="blue_sky\stage\StageData.h">
+      <Filter>blue_sky\stage</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\stage\Action.h">
+      <Filter>blue_sky\stage</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\stage\StageBuilder.h">
+      <Filter>blue_sky\stage</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\stage\StageLook.h">
+      <Filter>blue_sky\stage</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\stage\TomlStageParser.h">
+      <Filter>blue_sky\stage</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\stage\StoryTextParser.h">
+      <Filter>blue_sky\stage</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\GameObjectRef.h">
       <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\ObjectBody.h">
+      <Filter>blue_sky\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\EntityObject.h">
+      <Filter>blue_sky\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\TranslationSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\SpinSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\PickupComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\SimpleObjectComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\StaticObjectComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\App.h">
       <Filter>blue_sky</Filter>
@@ -801,19 +1122,10 @@
     <ClInclude Include="core\ui\Renderer.h">
       <Filter>core\ui</Filter>
     </ClInclude>
-    <ClInclude Include="core\ui\SelectBox.h">
-      <Filter>core\ui</Filter>
-    </ClInclude>
     <ClInclude Include="core\ui\Slider.h">
       <Filter>core\ui</Filter>
     </ClInclude>
-    <ClInclude Include="core\ui\VerticalMenu.h">
-      <Filter>core\ui</Filter>
-    </ClInclude>
     <ClInclude Include="core\ui\Widget.h">
-      <Filter>core\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="core\ui\WidgetContainer.h">
       <Filter>core\ui</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\OculusRift.h">
@@ -823,6 +1135,15 @@
       <Filter>core\ecs</Filter>
     </ClInclude>
     <ClInclude Include="core\ecs\EntityManager.h">
+      <Filter>core\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\EntityIdOrderedList.h">
+      <Filter>core\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\SparseIndex.h">
+      <Filter>core\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ecs\StablePool.h">
       <Filter>core\ecs</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\BackBufferTexture.h">
@@ -956,11 +1277,29 @@
     <ClInclude Include="blue_sky\ecs\component\BalloonComponent.h">
       <Filter>blue_sky\ecs\component</Filter>
     </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\ObjectRenderComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\TargetMoverComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\TargetLocationComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\TargetDirectionComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\AnimationComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\ObjectRenderDataSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\MoveToTargetSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
     <ClInclude Include="core\math\DirectXMath\Transform.h">
       <Filter>core\math\DirectXMath</Filter>
-    </ClInclude>
-    <ClInclude Include="core\Service.h">
-      <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="blue_sky\TimeManager.h">
       <Filter>blue_sky</Filter>
@@ -968,20 +1307,74 @@
     <ClInclude Include="core\TimeManager.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\Msdf\GlyphAtlas.h">
-      <Filter>core\graphics\Msdf</Filter>
-    </ClInclude>
     <ClInclude Include="core\graphics\Msdf\GlyphCache.h">
       <Filter>core\graphics\Msdf</Filter>
     </ClInclude>
     <ClInclude Include="core\graphics\Msdf\MsdfFont.h">
       <Filter>core\graphics\Msdf</Filter>
     </ClInclude>
-    <ClInclude Include="core\graphics\Msdf\MsdfTextRenderer.h">
-      <Filter>core\graphics\Msdf</Filter>
-    </ClInclude>
     <ClInclude Include="core\graphics\TextStyle.h">
       <Filter>core\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\ContactCacheComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\ContactCacheSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\SwitchComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\SwitchSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\Flicker.h">
+      <Filter>blue_sky\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\BalloonHoldComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\BalloonHoldSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\FlickerComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\GirlComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\GirlSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\RobotBehaviorComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\RobotBehaviorSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\PlayerInputComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\PlayerBehaviorComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\PlayerBehaviorSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\PlayerInputSystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ObjectUpdater.h">
+      <Filter>blue_sky</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\ContactRules.h">
+      <Filter>blue_sky\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\component\PlayerInventoryComponent.h">
+      <Filter>blue_sky\ecs\component</Filter>
+    </ClInclude>
+    <ClInclude Include="blue_sky\ecs\system\PlayerInventorySystem.h">
+      <Filter>blue_sky\ecs\system</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1158,6 +1551,15 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="blue_sky\dev">
+      <UniqueIdentifier>{83d0482a-65cc-4d38-bd04-c4bf1f8f08d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="blue_sky\stage">
+      <UniqueIdentifier>{c4bcdf4f-eca7-45b2-9b1f-1865b14e4a82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\setting">
+      <UniqueIdentifier>{447a428b-d4fe-4895-9ac4-e406a3d439fb}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{1d357c30-a5d6-4fcb-a582-73566ac2eb55}</UniqueIdentifier>
     </Filter>
@@ -1277,9 +1679,6 @@
     </Filter>
     <Filter Include="core\physics">
       <UniqueIdentifier>{6ee4d49b-143c-4437-9a3e-38f29ae8996c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="core\physics\Bullet">
-      <UniqueIdentifier>{b0f122bc-1ef3-4d7f-9dca-f528879b0c06}</UniqueIdentifier>
     </Filter>
     <Filter Include="core\graphics\Msdf">
       <UniqueIdentifier>{e4a1b2c3-d5e6-4f78-9a0b-c1d2e3f4a5b6}</UniqueIdentifier>

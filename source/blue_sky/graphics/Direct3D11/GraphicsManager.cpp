@@ -11,6 +11,12 @@
 #include <blue_sky/graphics/Direct3D11/Line.h>
 
 #include <core/graphics/Direct3D11/PixelFormat.h>
+#include <core/graphics/Direct3D11/PrimitiveTopology.h>
+#include <core/graphics/Direct3D11/TextureReadback.h>
+#include <core/graphics/Sprite.h>
+#include <core/AsyncLoader.h>
+#include <blue_sky/DebugLog.h>
+#include <core/graphics/Direct3D11/GlyphAtlas.h>
 #include <core/graphics/Direct3D11/Texture.h>
 #include <core/graphics/Direct3D11/RenderTargetTexture.h>
 #include <core/graphics/Direct3D11/BackBufferTexture.h>
@@ -24,10 +30,19 @@
 #include <core/graphics/Direct3D11/EffectPass.h>
 #include <core/graphics/Direct3D11/ShadowMap.h>
 #include <core/graphics/Direct3D11/DynamicSlotConstantBuffer.h>
+#include <core/graphics/Direct3D11/InstanceBuffer.h>
+#include <core/graphics/Direct3D11/ObjectInstanceBuffer.h>
 
-#include <core/graphics/Msdf/MsdfTextRenderer.h>
+#include <core/graphics/Direct3D11/MsdfTextRenderer.h>
 
 #include <common/string.h>
+
+#include <cstddef>
+#include <cstring>
+#include <iostream>
+
+// 入力レイアウト "2d" は、メッシュの頂点の中の UV の位置を決め打ちで読む（法線を読み飛ばす）。頂点の形が変わったら気づけるようにする
+static_assert( offsetof( blue_sky::graphics::Vertex, TexCoord ) == core::graphics::direct_3d_11::Direct3D11::mesh_vertex_tex_coord_offset, "入力レイアウト 2d の UV の位置がメッシュの頂点と合わない" );
 
 namespace {
 
@@ -38,6 +53,7 @@ float align_x( float left, float right, float text_w, core::graphics::HAlign ali
 	{
 	case core::graphics::HAlign::CENTER: return ( left + right ) * 0.5f - text_w * 0.5f;
 	case core::graphics::HAlign::RIGHT:  return right - text_w;
+	case core::graphics::HAlign::END:    return right - text_w;		// 書く向きが分からないときは左から右として扱う
 	default:                             return left;
 	}
 }
@@ -65,15 +81,15 @@ namespace blue_sky::graphics::direct_3d_11
  */
 GraphicsManager::GraphicsManager( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
-	, game_render_data_( new GameConstantBuffer() )
-	, frame_render_data_( new FrameConstantBuffer() )
-	, frame_drawing_render_data_( new FrameDrawingConstantBuffer() )
-	, shared_object_render_data_( new ObjectConstantBuffer() )
+	, game_render_data_( new GameConstantBuffer( direct_3d ) )
+	, frame_render_data_( new FrameConstantBuffer( direct_3d, core::graphics::ConstantBufferUsage::DYNAMIC ) )				// 毎フレーム書き換える
+	, frame_drawing_render_data_( new FrameDrawingConstantBuffer( direct_3d, core::graphics::ConstantBufferUsage::DYNAMIC ) )	// 毎フレーム書き換える
+	, shared_object_render_data_( new ObjectConstantBuffer( direct_3d, core::graphics::ConstantBufferUsage::DYNAMIC ) )		// 描画ごとに書き換える
 	, debug_axis_( new core::graphics::direct_3d_11::Axis( direct_3d ) )
 {
 	create_named_shader< shader::BypassShader >( "bypass" );
 
-	direct_3d_->setup_sprite();
+	direct_3d_->setup_sprite( this );
 
 	msdf_text_renderer_ = std::make_unique< core::graphics::MsdfTextRenderer >( direct_3d_, "media/font/rounded-mplus-1p-regular.ttf" );
 }
@@ -136,7 +152,12 @@ GraphicsManager::RenderTargetTexture* GraphicsManager::create_render_target_text
 
 GraphicsManager::RenderTargetTexture* GraphicsManager::create_render_target_texture( PixelFormat format )
 {
-	return new core::graphics::direct_3d_11::RenderTargetTexture( format );
+	return new core::graphics::direct_3d_11::RenderTargetTexture( direct_3d_, format );
+}
+
+GraphicsManager::RenderTargetTexture* GraphicsManager::create_render_target_texture( PixelFormat format, const RenderTargetTextureOptions& options )
+{
+	return new core::graphics::direct_3d_11::RenderTargetTexture( direct_3d_, format, options );
 }
 
 GraphicsManager::BackBufferTexture* GraphicsManager::get_back_buffer_texture()
@@ -171,9 +192,32 @@ void GraphicsManager::unload_mesh_all()
 }
 #endif
 
-std::unique_ptr< core::graphics::ConstantBuffer > GraphicsManager::create_constant_buffer( size_t size, int slot )
+std::unique_ptr< core::graphics::ConstantBuffer > GraphicsManager::create_constant_buffer( size_t size, int slot, ConstantBufferUsage usage )
 {
-	return std::make_unique< core::graphics::direct_3d_11::DynamicSlotConstantBuffer >( size, slot );
+	return std::make_unique< core::graphics::direct_3d_11::DynamicSlotConstantBuffer >( direct_3d_, size, slot, usage );
+}
+
+std::unique_ptr< core::graphics::InstanceBuffer > GraphicsManager::create_instance_buffer()
+{
+	return std::make_unique< core::graphics::direct_3d_11::InstanceBuffer >( direct_3d_ );
+}
+
+/**
+ * 物体ごとの定数の入れ物を作る（同じモデルの物体をまとめて描くため）
+ *
+ * 開発用 : 環境変数 BLUE_SKY_DEBUG_NO_INSTANCING=1 なら作らない（今までどおり 1 個ずつ描く。見た目・時間を比べるため）
+ */
+std::unique_ptr< core::graphics::ObjectInstanceBuffer > GraphicsManager::create_object_instance_buffer() const
+{
+	char buffer[ 16 ] = { };
+
+	if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_NO_INSTANCING", buffer, sizeof( buffer ) ) > 0 && std::strcmp( buffer, "1" ) == 0 )
+	{
+		std::cout << "[Instancing] BLUE_SKY_DEBUG_NO_INSTANCING=1 なので、物体を 1 個ずつ描きます" << std::endl;
+		return nullptr;
+	}
+
+	return std::make_unique< core::graphics::direct_3d_11::ObjectInstanceBuffer >( direct_3d_ );
 }
 
 GraphicsManager::ShadowMap* GraphicsManager::create_shadow_map( uint_t level, uint_t size ) const
@@ -186,9 +230,9 @@ GraphicsManager::ShadowMap* GraphicsManager::create_shadow_map( uint_t level, ui
  *
  * @return Line
  */
-GraphicsManager::Line* GraphicsManager::create_line() const
+GraphicsManager::Line* GraphicsManager::create_line()
 {
-	return new direct_3d_11::Line( direct_3d_ );
+	return new direct_3d_11::Line( direct_3d_, this );
 }
 
 /**
@@ -200,6 +244,11 @@ GraphicsManager::Line* GraphicsManager::create_line() const
 GraphicsManager::Texture* GraphicsManager::load_texture_file( const char_t* file_path ) const
 {
 	return direct_3d_->load_texture( file_path );
+}
+
+GraphicsManager::Texture* GraphicsManager::load_texture_file_premultiplied( const char_t* file_path ) const
+{
+	return direct_3d_->load_texture_premultiplied( file_path );
 }
 
 #if 0
@@ -227,14 +276,14 @@ void GraphicsManager::refresh_all_shaders()
 {
 	blue_sky::graphics::GraphicsManager::refresh_all_shaders();
 
-	direct_3d_->setup_sprite();
+	direct_3d_->setup_sprite( this );
 
 #if 0
 	if ( sky_box_ )
 	{
 		for ( int n = 0; n < sky_box_->get_shader_count(); n++ )
 		{
-			sky_box_->set_shader_at( n, sky_box_->create_shader() );
+			sky_box_->set_shader_at( n, sky_box_->create_shader( this ) );
 		}
 	}
 
@@ -242,7 +291,7 @@ void GraphicsManager::refresh_all_shaders()
 	{
 		for ( int n = 0; n < ground_->get_shader_count(); n++ )
 		{
-			ground_->set_shader_at( n, ground_->create_shader() );
+			ground_->set_shader_at( n, ground_->create_shader( this ) );
 		}
 	}
 #endif
@@ -257,18 +306,15 @@ void GraphicsManager::set_sky_box( const char_t* name )
 {
 	if ( ! sky_box_ )
 	{
-		sky_box_render_data_ = std::make_unique< ObjectConstantBufferWithData >();
+		sky_box_render_data_ = std::make_unique< ObjectConstantBufferWithData >( direct_3d_ );
 		sky_box_render_data_->data().color = Color::White;
 	}
 
-	// スカイボックスが使用しているテクスチャをクリアする
-	/// @todo スカイボックスが使用するテクスチャ名をユニークにする
-	unload_named_texture( "front" );
-	unload_named_texture( "back" );
-	unload_named_texture( "top" );
-	unload_named_texture( "bottom" );
-	unload_named_texture( "left" );
-	unload_named_texture( "right" );
+	// スカイボックスが使用しているテクスチャをクリアする（"skybox/front" のように接頭辞付きの名前で登録している）
+	for ( const auto* face_name : SkyBox::face_name_list )
+	{
+		unload_named_texture( SkyBox::get_texture_resource_name_of( face_name ).c_str() );
+	}
 
 	sky_box_.reset( new SkyBox( name ) );
 	load_mesh( sky_box_.get(), "sky-box" );
@@ -306,7 +352,7 @@ void GraphicsManager::set_ground( const char_t* name )
 	ground_.reset( new Ground() );
 	load_mesh( ground_.get(), name );
 
-	ground_render_data_.reset( new ObjectConstantBufferWithData() );
+	ground_render_data_.reset( new ObjectConstantBufferWithData( direct_3d_ ) );
 	ground_render_data_->data().world.set_identity();
 	ground_render_data_->data().color = Color::White;
 }
@@ -475,7 +521,7 @@ void GraphicsManager::set_input_layout( const InputLayout* input_layout ) const
  */
 void GraphicsManager::set_primitive_topology( PrimitiveTopology primitive_topology ) const
 {
-	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( static_cast< D3D_PRIMITIVE_TOPOLOGY >( primitive_topology ) );
+	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( core::graphics::direct_3d_11::to_d3d_primitive_topology( primitive_topology ) );
 }
 
 /**
@@ -522,6 +568,9 @@ void GraphicsManager::render_technique( const char_t* technique_name, const std:
  */
 void GraphicsManager::render_technique( const EffectTechnique* technique, const std::function< void() >& function ) const
 {
+	// Sprite が溜めている四角形を先に描く（描く順番を保つ。中で Sprite を描く場合は、Sprite が自分の描き方で溜め直す）
+	get_sprite()->flush();
+
 	for ( const auto& pass : technique->get_pass_list() )
 	{
 		pass->apply();
@@ -578,13 +627,134 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
 		resolved.font_size = default_font_size_;
 	}
 
-	float_t text_w = msdf_text_renderer_->measure_text_width( text, resolved.font_size );
-	float_t text_h = msdf_text_renderer_->measure_text_height( text, resolved.font_size );
+	// 配置に要るときだけ測る（左寄せなら幅、上寄せなら高さは要らない。以前は描く前に必ず 2 回走査していた）
+	const bool need_w = resolved.h_align != core::graphics::HAlign::LEFT && resolved.h_align != core::graphics::HAlign::START;
+	const bool need_h = resolved.v_align != core::graphics::VAlign::TOP;
+	float_t text_w = need_w ? msdf_text_renderer_->measure_text_width( text, resolved.font_size ) : 0.f;
+	float_t text_h = need_h ? msdf_text_renderer_->measure_text_height( text, resolved.font_size ) : 0.f;
 	float_t x = align_x( left, right, text_w, resolved.h_align );
 	float_t y = align_y( top, bottom, text_h, resolved.v_align );
 
+	get_sprite()->flush();		// 先に描いた Sprite が文字の下になるように
 	msdf_text_renderer_->draw_text( x, y, text, resolved );
 	msdf_text_renderer_->flush();
+}
+
+void GraphicsManager::queue_text( float_t left, float_t top, float_t right, float_t bottom, const char_t* text, const core::graphics::TextStyle& style ) const
+{
+	get_sprite()->flush();		// 先に描いた Sprite が文字の下になるように
+
+	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
+	{
+		return;
+	}
+
+	core::graphics::TextStyle resolved = style;
+	if ( resolved.font_size == 0.f )
+	{
+		resolved.font_size = default_font_size_;
+	}
+
+	const bool need_w = resolved.h_align != core::graphics::HAlign::LEFT && resolved.h_align != core::graphics::HAlign::START;
+	const bool need_h = resolved.v_align != core::graphics::VAlign::TOP;
+	const float_t text_w = need_w ? msdf_text_renderer_->measure_text_width( text, resolved.font_size ) : 0.f;
+	const float_t text_h = need_h ? msdf_text_renderer_->measure_text_height( text, resolved.font_size ) : 0.f;
+
+	msdf_text_renderer_->draw_text( align_x( left, right, text_w, resolved.h_align ), align_y( top, bottom, text_h, resolved.v_align ), text, resolved );
+}
+
+void GraphicsManager::start_texture_load_async( const string_t& file_path, std::function< void( Texture* ) > on_created )
+{
+	if ( ! async_loader_ )
+	{
+		async_loader_ = std::make_unique< core::AsyncLoader >();
+	}
+
+	using DecodedImage = core::graphics::direct_3d_11::Direct3D11::DecodedImage;
+
+	async_loader_->enqueue< std::shared_ptr< DecodedImage > >(
+		// 作業スレッド : ファイルの読み込みと展開（GPU に触れない）
+		[file_path] () -> std::shared_ptr< DecodedImage >
+		{
+			try
+			{
+				return std::make_shared< DecodedImage >( core::graphics::direct_3d_11::Direct3D11::decode_image_premultiplied( file_path.c_str() ) );
+			}
+			catch ( ... )
+			{
+				return nullptr;
+			}
+		},
+		// メインスレッド : テクスチャを作る
+		[this, file_path, on_created] ( std::shared_ptr< DecodedImage > image )
+		{
+			Texture* texture = nullptr;
+
+			if ( image )
+			{
+				try
+				{
+					texture = direct_3d_->create_texture_from_image( * image, file_path.c_str() );
+				}
+				catch ( ... )
+				{
+					texture = nullptr;
+				}
+			}
+
+			if ( ! texture )
+			{
+				debug_log( "[Graphics] 画像を別スレッドで読み込めませんでした: " + file_path );
+			}
+
+			on_created( texture );
+		} );
+}
+
+float_t GraphicsManager::get_render_target_width() const
+{
+	return direct_3d_->get_2d_space().width;
+}
+
+float_t GraphicsManager::get_render_target_height() const
+{
+	return direct_3d_->get_2d_space().height;
+}
+
+void GraphicsManager::dispatch_async_loads()
+{
+	if ( async_loader_ )
+	{
+		async_loader_->dispatch_completed();
+	}
+}
+
+size_t GraphicsManager::get_async_load_count() const
+{
+	return async_loader_ ? async_loader_->get_pending_count() : 0;
+}
+
+bool GraphicsManager::save_glyph_atlas( const wchar_t* file_name ) const
+{
+	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->get_atlas() )
+	{
+		return false;
+	}
+
+	return core::graphics::direct_3d_11::save_texture_2d_to_png( direct_3d_->getDevice(), direct_3d_->getImmediateContext(), msdf_text_renderer_->get_atlas()->get_texture(), file_name );
+}
+
+core::graphics::TextRenderer* GraphicsManager::get_text_renderer() const
+{
+	return msdf_text_renderer_.get();
+}
+
+void GraphicsManager::flush_text() const
+{
+	if ( msdf_text_renderer_ )
+	{
+		msdf_text_renderer_->flush();
+	}
 }
 
 void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float_t bottom, const wchar_t* text, const core::graphics::TextStyle& style ) const
@@ -600,11 +770,15 @@ void GraphicsManager::draw_text( float_t left, float_t top, float_t right, float
 		resolved.font_size = default_font_size_;
 	}
 
-	float_t text_w = msdf_text_renderer_->measure_text_width( text, resolved.font_size );
-	float_t text_h = msdf_text_renderer_->measure_text_height( text, resolved.font_size );
+	// 配置に要るときだけ測る（左寄せなら幅、上寄せなら高さは要らない。以前は描く前に必ず 2 回走査していた）
+	const bool need_w = resolved.h_align != core::graphics::HAlign::LEFT && resolved.h_align != core::graphics::HAlign::START;
+	const bool need_h = resolved.v_align != core::graphics::VAlign::TOP;
+	float_t text_w = need_w ? msdf_text_renderer_->measure_text_width( text, resolved.font_size ) : 0.f;
+	float_t text_h = need_h ? msdf_text_renderer_->measure_text_height( text, resolved.font_size ) : 0.f;
 	float_t x = align_x( left, right, text_w, resolved.h_align );
 	float_t y = align_y( top, bottom, text_h, resolved.v_align );
 
+	get_sprite()->flush();		// 先に描いた Sprite が文字の下になるように
 	msdf_text_renderer_->draw_text( x, y, text, resolved );
 	msdf_text_renderer_->flush();
 }
@@ -637,12 +811,31 @@ float_t GraphicsManager::get_text_height( const wchar_t* text, float_t, float_t 
 	return 0.f;
 }
 
+float_t GraphicsManager::measure_text_width( const char_t* text, float_t font_size ) const
+{
+	if ( ! text || ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
+	{
+		return 0.f;
+	}
+
+	return msdf_text_renderer_->measure_text_width( text, font_size > 0.f ? font_size : default_font_size_ );
+}
+
+float_t GraphicsManager::measure_text_line_height( float_t font_size ) const
+{
+	if ( ! msdf_text_renderer_ || ! msdf_text_renderer_->is_ready() )
+	{
+		return 0.f;
+	}
+
+	return msdf_text_renderer_->measure_text_height( "", font_size > 0.f ? font_size : default_font_size_ );
+}
+
 /**
  * 画面の中央に文字列を描画する
  *
  * @param text 文字列
  * @param color 色
- * @todo 高速化する
  */
 void GraphicsManager::draw_text_at_center( const char_t* text, const Color& color ) const
 {
@@ -659,6 +852,7 @@ void GraphicsManager::draw_text_at_center( const char_t* text, const Color& colo
 	float_t x = static_cast< float_t >( direct_3d_->get_width() ) * 0.5f - text_w * 0.5f;
 	float_t y = static_cast< float_t >( direct_3d_->get_height() ) * 0.5f - style.font_size * 0.5f;
 
+	get_sprite()->flush();
 	msdf_text_renderer_->draw_text( x, y, text, style );
 	msdf_text_renderer_->flush();
 }
@@ -687,7 +881,7 @@ void GraphicsManager::render_debug_axis_model() const
  */
 void GraphicsManager::clear_debug_bullet() const
 {
-	GameMain::get_instance()->get_bullet_debug_draw()->clear();
+	if ( bullet_debug_draw_ ) { bullet_debug_draw_->clear(); }
 }
 
 /**
@@ -703,7 +897,7 @@ void GraphicsManager::render_debug_bullet() const
 		get_game_render_data()->bind_to_vs();
 		get_frame_render_data()->bind_to_vs();
 
-		GameMain::get_instance()->get_bullet_debug_draw()->render();
+		if ( bullet_debug_draw_ ) { bullet_debug_draw_->render(); }
 	} );
 }
 
@@ -724,25 +918,6 @@ void GraphicsManager::clear_default_view( const Color& color )
 void GraphicsManager::unset_render_target()
 {
 	direct_3d_->unset_render_target();
-}
-
-/**
- * フルスクリーン状態を取得する
- *
- * @return フルスクリーンの場合 true
- */
-bool GraphicsManager::is_full_screen() const
-{
-	return direct_3d_->is_full_screen();
-}
-
-/**
- * フルスクリーン/ウィンドウモードを切り替える
- *
- */
-void GraphicsManager::switch_full_screen()
-{
-	direct_3d_->switch_full_screen();
 }
 
 } // namespace blue_sky::graphics::direct_3d_11

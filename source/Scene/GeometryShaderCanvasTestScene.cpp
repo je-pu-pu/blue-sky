@@ -28,14 +28,15 @@
 namespace blue_sky
 {
 
-GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene()
-	: mesh_( get_graphics_manager()->create_named_mesh( "line_cube", Mesh::Buffer::Type::DEFAULT ) )
+GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene( GameMain& game_main )
+	: Scene( game_main )
+	, mesh_( get_graphics_manager()->create_named_mesh( "line_cube", Mesh::Buffer::Type::DEFAULT ) )
 	// , input_layout_( get_graphics_manager()->create_named_input_layout( "pos_color", { } ) )
 	, input_layout_( get_graphics_manager()->get_input_layout( "pos_color" ) )
 
-	, camera_( EntityManager::get_instance()->create_entity() )
+	, camera_( get_entity_manager()->create_entity() )
 
-	, texture_( get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" ) )
+	, texture_( get_graphics_manager()->get_texture_handle_of( get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" ) ) )
 {
 
 	// 色
@@ -82,7 +83,7 @@ GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene()
 	// auto vertex_buffer = get_graphics_manager()->create_vertex_buffer( vs );
 	// get_graphics_manager()->set_vertex_buffer( vertex_buffer );
 
-	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >();
+	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >( 0, get_input() );
 
 	camera_transform_ = camera_->add_component< core::ecs::TransformComponent >();
 	camera_transform_->transform.set_identity();
@@ -96,7 +97,8 @@ GeometryShaderCanvasTestScene::GeometryShaderCanvasTestScene()
 
 GeometryShaderCanvasTestScene::~GeometryShaderCanvasTestScene()
 {
-
+	// 作ったメッシュを外す（以前は外さず、このシーンに入るたびに溜まった）
+	get_graphics_manager()->unload_named_mesh( "line_cube" );
 }
 
 void GeometryShaderCanvasTestScene::update()
@@ -121,7 +123,7 @@ void GeometryShaderCanvasTestScene::update()
 		static int i = 0;
 		i = ( i + 1 ) % texture_names.size();
 
-		texture_ = get_graphics_manager()->load_texture( texture_names[ i ] );
+		texture_ = get_graphics_manager()->get_texture_handle_of( get_graphics_manager()->load_texture( texture_names[ i ] ) );
 	}
 }
 
@@ -135,7 +137,8 @@ void GeometryShaderCanvasTestScene::render()
 	get_graphics_manager()->set_primitive_topology( GraphicsManager::PrimitiveTopology::LINE_LIST );
 	get_graphics_manager()->set_input_layout( input_layout_ );
 
-	blue_sky::ObjectConstantBufferWithData shader_data;
+	// 定数バッファは GraphicsManager の共有のものを使う（以前はローカル変数で作り、中で Direct3D11 の get_instance() を使っていた）
+	ObjectConstantBufferData shader_data;
 
 	static const int bpm = 120;
 	static int last_step = 0;
@@ -160,13 +163,13 @@ void GeometryShaderCanvasTestScene::render()
 	}
 	
 
-	shader_data.data().world.set_identity();
-	shader_data.data().world *= Matrix().set_rotation_y( aa );
-	shader_data.data().world *= Matrix().set_scaling( scale, scale, scale );
+	shader_data.world.set_identity();
+	shader_data.world *= Matrix().set_rotation_y( aa );
+	shader_data.world *= Matrix().set_scaling( scale, scale, scale );
 
-	shader_data.update();
+	get_graphics_manager()->get_shared_object_render_data()->update( & shader_data );
 
-	get_graphics_manager()->set_current_object_constant_buffer( & shader_data );
+	get_graphics_manager()->set_current_object_constant_buffer( get_graphics_manager()->get_shared_object_render_data() );
 	get_graphics_manager()->set_current_skinning_constant_buffer( nullptr );
 
 	render_technique( "|line_cube", [ this ]
@@ -176,7 +179,10 @@ void GeometryShaderCanvasTestScene::render()
 		get_graphics_manager()->get_frame_drawing_render_data()->bind_to_all();
 		get_graphics_manager()->get_current_object_constant_buffer()->bind_to_all();
 
-		texture_->bind_to_ps( 1 );
+		if ( const Texture* texture = resolve( texture_, "pen" ) )
+		{
+			texture->bind_to_ps( 1 );
+		}
 
 		mesh_->bind();
 		mesh_->render( 0 );

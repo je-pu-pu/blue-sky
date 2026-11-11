@@ -54,11 +54,10 @@ protected:
 
 protected:
 
-	/// @todo Scenegraph に移動する
 	std::unique_ptr< Camera > camera_;
 
 public:
-	explicit DebugScene();
+	explicit DebugScene( GameMain& game_main );
 	~DebugScene() override;
 
 	void update() override;

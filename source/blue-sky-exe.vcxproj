@@ -269,6 +269,15 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
+  <!-- プロセスの文字コードを UTF-8 にする（blue-sky-exe.utf8.manifest を既定のマニフェストに足す） -->
+  <ItemDefinitionGroup>
+    <Manifest>
+      <AdditionalManifestFiles>blue-sky-exe.utf8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="blue-sky-exe.utf8.manifest" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

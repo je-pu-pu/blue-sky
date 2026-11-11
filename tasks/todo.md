@@ -6,6 +6,72 @@
 2. 完了したら `[x]` にする
 3. セクションが全て完了したら、セクションごと削除してよい
 
+## UI ライブラリ（オプション画面の基盤）  ブランチ: feature/ui-library（develop から）
+
+設計書: `doc/UIライブラリ設計.md`（第 3 版。サブエージェントの厳格レビュー 2 回を反映）
+
+- [x] 現状調査・問題点の洗い出し（A1〜A9 / B1〜B11）・要件・設計
+- [x] 設計レビュー 2 回（指摘 25 件＋再レビュー 12 件）を設計書に反映
+- [x] core::setting::SettingStore（保留／確定／既定、IMMEDIATE / DEFERRED、グループ反映、snapshot/rollback、入れ替えフック、Config 入出力）
+- [x] core::ui 基盤: UIInput / NavRepeater / Theme / StringTable / Renderer（計測・fill_screen）/ Widget / Screen（層・post・入力抑止・階層ナビ・クリップを考慮したヒット判定・フォーカス修復・ヒント）
+- [x] 部品: Stack / Label（折り返し）/ Button / Toggle / Slider / Choice / KeyBind / ScrollView / TabView / Dialog / Panel
+- [x] blue_sky 側: Renderer（等方スケール）/ UIInputBuilder / Input の生キー API・キー割り当て API / KeyNames / GameSettings / UIOverlayScene
+- [x] OptionsScene（3 タブ・適用／既定値／戻る・解像度の確認とロールバック）/ PauseMenuScene 置換、旧 VerticalMenu / WidgetContainer / SelectBox 削除
+- [x] GameMain: オーバーレイを積む（push:）・ESC を UI に任せる・表示変更をフレーム末に・F2/F5/Alt+Enter の同期・終了時の保存をストア経由に
+- [x] テスト 75 件追加（62 → 137 件。136 成功、失敗 1 件は作業前から失敗していた NeuralNprTest.DmlInferenceSmoke）
+- [x] 実機確認（2026-11-08）: ポーズ→オプション→戻るでポーズへ／タブ／スクロール／キー割り当ての入れ替え／解像度の適用→15 秒でロールバック
+- [x] 16:10（1680x1050）・ウルトラワイド（2560x1080）での表示 : BLUE_SKY_SETTINGS_DIR で解像度を変えて起動し、オプション画面が画面に収まり正しく並ぶことを描画結果で確かめた（2026-11-10）
+- [x] 目標地点への移動（壁・ゴールが動くイベント）: 0-1・1-1・1-2・2-0・2-1 で着いて止まることを確かめた（5ebff4eb の BLUE_SKY_DEBUG_PRESS_SWITCHES）
+- [x] キー割り当ての前進と右が入れ替わっていた : コードの既定（前進 W・右 D）は正しく、以前のキー入れ替えの確認の結果が古い設定ファイル（source/settings.config）に残り、%LOCALAPPDATA% へ引き継がれていた。2 行を消して既定に戻した（2026-11-10）
+- [x] フルスクリーンをボーダーレス（画面いっぱいの縁なしウィンドウ）にした（2026-11-10）: 排他フルスクリーンは 4K モニター 3 台の開発機で、切り替え 1 回に 17〜50 秒かかり、抜けるときに止まって終了できないことがあった。ボーダーレスでは切り替えは一瞬、フルスクリーンのまま 1280x720 → 1600x900 に変えられ、Alt+Enter の往復・終了も確かめた
+- [x] 実機（機器）が要る確認 : パッド操作は設計整備の対象外とした（2026-11-10、利用者の判断。開発機にパッドが無い）。パッドを使う作業（XInput など）を始めるときに、つないで確かめる
+- [x] 設計書 2.2 の後続のうち対応したもの : Alt+Enter の抑止（MakeWindowAssociation、86ed6344）、MSDF グリフキャッシュの O(1) 化（f404201f）、キー待ち中のホットキー抑止（34541b28）
+- [ ] 機能の追加（設計上の問題ではない後続）: XInput、パッドのボタンアイコン、ハードウェアシザー、HUD への適用
+- [x] タイトルシーンが起動直後に落ちる不具合 : 67dca1c5 で直した。全 15 シーンを起動して落ちないことを 2026-11-10 に確かめた
+
+### 設計上の問題の洗い出し（2026-11-10）
+
+一覧: `doc/設計上の問題の洗い出し.md`（UI ライブラリ・描画基盤・アプリへの組み込みの 3 範囲、60 件）
+
+対応状況は一覧の冒頭の「対応状況」節が正（番号とコミット）。
+
+- [x] A（今すぐ直す不具合 11 件）: すべて対応。ただし A9 はデバイスロストを知らせて終了するまで（復旧は B20 と一緒に）
+- [x] B（構造の問題 28 件）: 困りごとはすべて対応、A9 の復旧も（B23 の非同期の読み込みは後続。下の見直しを参照）。B19 は d686edf3（抽象層に D3D11 の型なし）と 1bba4f84（Effects11 をやめて自前で読む）。B3 の 2 次元の計測は 4cad6f57、B27 の Raw Input は a0a074bf・9f2521ec。B28 は 7a418118・12888db6・60d9b151・be50ed76・87abd1c4 で core::Service・Direct3D11::get_instance・すべてのシングルトンを削除
+- [x] C（品質の改善）: すべて対応（c3fbbd9d・a259d986・dcb91898・8f1df39f・aeac9c46・5331914b・d5b11a22・89074b8d・797a1683）。項目ごとの根拠は一覧の「3 章の各項目と、対応した根拠」
+- [x] 一覧の外で見つけた不具合 : ECS のシーンの 3D が真っ黒（95aee6ab）、canvas_test が落ちる（87abd1c4）
+- [x] 39 件の見直し（2026-11-10 14:35）: 「一部だけ」だったものを直した。B11 クリック判定を ClickTracker に（a777beb0）、B26 設定ファイルの 2 つ目以降のキーも割り当てられるか判定（64a0fd37）、A9 ResizeBuffers のデバイスロストも復旧の経路へ（5dd8b997）、A3 設定ファイルの読めない行・値をファイル名と行番号付きでログに（57d2af07）、A5 シェーダーの監視を開発ビルドだけに（71899d62）、B20 create_named の説明の誤り（228d76e3）、B7 遷移の要求に引数（"push:options?tab=controls"、518344cb）。テストは 332 件が通る
+- [ ] B23 の残り（後続）: 非同期の読み込みは仕組み（AsyncLoader・start_texture_load_async）だけで、まだ使っていない（3bdcf18d で説明に明記）。シーンの読み込みを別スレッドにするときに使う
+- 入れないと決めた直し方の案（理由は一覧の対応状況の表）: B4 の TextKey 型・代わりの言語、B5 の on_value_changed、B9 の LabeledRow の継承をやめる・タブの見出しを部品に
+- テストは 284 件が通る。全 15 シーンを起動して落ちない。Effects11 の置き換えの前後を全 15 シーンで画素ごとに比べて違いなし（2026-11-10）
+- [x] Raw Input で OS の入力が届くこと : 開発用の BLUE_SKY_RAW_INPUT_SINK（2a2dc0ec）で背面でも受け取るようにし、SendInput のマウスの移動と F24 のキーが WM_INPUT → ゲームまで届くことをログで確かめた（2026-11-10。画面のロック中のため前面での確認の代わり）
+- [x] 画面で確かめる: 文字の色（9ed89881）、文字の大きさ 160%（b9f40890）、横長画面（76fda1fc）。描画結果の PNG 保存（BLUE_SKY_CAPTURE_FRAMES）で、画面がロック中でも確認した
+- [x] アウトライン付きの文字の端の 1 画素幅の縦線 : MSAA で UV が外挿されていた。centroid で直した（1945a242）
+- 確認の手順（画面がロック中でも使える）: 環境変数 BLUE_SKY_START_SCENE / BLUE_SKY_START_OVERLAY / BLUE_SKY_CAPTURE_FRAMES / BLUE_SKY_CAPTURE_DIR を付けて起動すると、指定フレームの描画結果が PNG になる。落ちたら log/crash.log に呼び出し履歴
+
+### 画像による装飾（2026-11-10）
+
+記録: `doc/UI画像対応と既存コードの修正.md`（何がまずくてどう直したか。レビュー指摘 19 件中 15 件を対応）
+
+- [x] Brush（単色／画像・9 分割・切り出し・切り取り・代用）、Image 部品、テーマの Brush 化と用途別の面、テーマファイル（専用パーサ）、先読み
+- [x] UI 用のテクスチャ読み込み（乗算済みアルファ・ミップなし・UNORM）と sprite_premultiplied technique
+- [x] 既存コードの修正: is_transparent を GameMain が無視していた／Sprite の整数の切り出し・null・重複・既定引数／sprite.hlsl の文字化け／矩形の丸め／9 分割の角の太さ
+- [x] 9 分割の辺・中央を並べて埋める（`edge` / `center` = stretch / repeat / round）。模様のある枠が引き伸ばしで崩れないように
+- [x] サンプルテーマ（`media/ui/sample_theme.txt`、設定 `ui.theme` で有効）と生成スクリプト `tools/ui_sample/make_ui_sample.py`。テスト 53 件追加（190 件中 189 成功）
+- [x] 再レビュー（12 件）を反映: Sprite の Map 前ガード、オーバーレイの描画範囲を純粋関数化（隠れた不透明も考慮・ベース非描画時のクリア）、丸め規則の共有（PixelSnap.h）、切り取りの物理ピクセル揃え、中央を描かない（center = none）ほか
+- [x] 後続のうち対応したもの : Sprite のバッチ化（c1f1d86c）、画像のハンドル化・寿命管理（ResourceManager のハンドル、979b2c32）
+- [ ] 機能の追加（設計上の問題ではない後続）: シザーによるクリップ、部品別スタイル、@2x 素材
+- [x] 調査: enemy_ai_test の操作タブのキー欄の上の細い縦線 : 操作タブを描画結果で撮り、画素で探して出ていないことを確かめた（2026-11-10）。MSAA で文字の UV が外挿されていた件（1945a242）と同じ原因だった
+
+## ライセンスの表示（配布の前に）
+
+一覧: `doc/ライセンス.md`（配布物に入る／入らない・要確認の点）。同梱するファイル: リポジトリの直下の `THIRD_PARTY_NOTICES.txt`
+
+- [x] 使っているライブラリ・素材の洗い出しと、手元の原文からの THIRD_PARTY_NOTICES.txt の作成（2026-11-11）
+- [ ] 配布の前に: THIRD_PARTY_NOTICES.txt を配布物に同梱する。「【要確認】」（19 か所: ogg・vorbis・Boost・libxml2・ONNX Runtime・DirectML などの原文、版）を配布元で確かめて埋める
+- [ ] 配布の前に: FBX SDK の表示の文を利用規約か About・クレジットの画面にも入れる（または FBX SDK を exe から外す）。ONNX Runtime の ThirdPartyNotices.txt を同梱し、DirectML.dll の再配布の条件を確かめる
+- [x] MIDI の音源を再配布できるものに替えた（2026-11-11）: `FluidR3_GM2-2.SF2`（「DO NOT REDISTRIBUTE」の注記）をやめ、Debian の fluid-soundfont-gm 3.1-6 の `FluidR3_GM.sf2`（MIT、同じ Fluid R3）を読む。約 142 MB なので管理外にし `tools/soundfont/fetch_soundfont.py` で入手（SHA-256 を確かめる）。doc/ライセンス.md の 4.7・THIRD_PARTY_NOTICES.txt の 20
+- [ ] 配布の前に: 素材を確かめる。`takarajima.mid`・`SGM-V2.01.sf2`・`FluidR3_GM2-2.SF2`・`uzura.ttf` は外す。`FluidR3_GM.sf2` を入手して入れる。Rounded M+ のライセンスを確かめる
+
 ## 敵AI（システミック）縦スライス  ブランチ: feature/enemy-ai-perception
 
 設計は `doc/システム階層スタック.md` / `doc/動詞とゲームシステム.md`。S2 知覚 + S3 警戒状態機械 + パトロールの最小実装。
@@ -28,14 +94,9 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 方針: **VR(Oculus) は一旦外す**（コンパイルスイッチで無効化。ベンダー依存を1つ減らす）。
 
 ### 依存ライブラリの x64 化（source/lib/x64 へ配置）
-- [ ] Bullet (Collision/Dynamics/LinearMath) — OSS、ソースから x64 ビルド
-- [ ] libogg / libvorbis / libvorbisfile — OSS、x64 ビルド
-- [ ] PortAudio (portaudio_static) — OSS、x64 ビルド
-- [ ] Effects11 — OSS(FX11)、ソース取得して x64 ビルド（現状 prebuilt のみ）
-- [ ] boost 1.75 (chrono/filesystem/regex/timer) — b2 で x64 ビルド
-- [ ] imgui — ソース内蔵(`lib/src/imgui`)、x64 再コンパイル
-- [ ] libremidi / msdfgen / freetype — ソースから x64 再コンパイル
-- [ ] FBX SDK (libfbxsdk/zlib/libxml2) — **Autodesk から x64 SDK のインストールが必要（ユーザー操作）**。標準パスに未インストール
+- [x] Bullet・libogg / libvorbis / libvorbisfile・PortAudio・boost（1.90）・FBX SDK（libfbxsdk / zlib / libxml2）・Recast / Detour・ONNX Runtime : source/lib/x64/debug にある（2026-11-10 に確認。x64 Debug でビルドと全シーンの起動ができている）
+- [x] imgui・libremidi / msdfgen / freetype : ソースから x64 でビルドしている
+- [x] Effects11 : 不要になった（1bba4f84 で自前の実装に置き換えた）
 - [x] lua — x64 版が既存（`lib/x64/common/lua.lib`）
 - [~] Oculus LibOVR — VR を外すので不要化
 
@@ -199,113 +260,132 @@ ONNX Runtime + DirectML（NPR を実機リアルタイム実行する経路）�
 ### ~~Shader.h が Direct3D11 ConstantBuffer を直接参照~~ [完了]
 - [x] 対応済み — 抽象 ConstantBuffer に update() 追加、DynamicSlotConstantBuffer 新設、ファクトリ経由に切り替え
 
-### テクスチャアンロード後の dangling pointer [難易度: 中]
-- `GraphicsManager.cpp:430` — `paper_texture_` がアンロード後に無効参照になる可能性
-- unload_texture() 時にオブザーバー通知 or weak_ptr 化が必要
-- [ ] 対応する
+### ~~テクスチャアンロード後の dangling pointer~~ [完了]
+- [x] 対応済み（979b2c32）— 紙テクスチャを ResourceManager のハンドルで持ち、bind_paper_texture は resolve して無ければ使わない
 
 ### ~~ウィンドウリサイズ時に RenderTargetTexture が再作成されない~~ [完了]
 - [x] 対応済み — 遅延再作成 (Lazy Resize) 方式で解決。画面サイズ依存 RTT は activate()/clear() 時にサイズ不一致を検出して自動再作成。固定サイズ RTT (シャドウマップ等) は対象外。
 
-### スカイボックスのテクスチャ名が汎用的すぎる [難易度: 低]
-- `Direct3D11/GraphicsManager.cpp:259` — "front", "back" 等の名前で競合リスク
-- プレフィックス付き ("skybox/front" 等) に変更
-- [ ] 対応する
+### ~~スカイボックスのテクスチャ名が汎用的すぎる~~ [完了]
+- [x] 対応済み — Model::get_texture_resource_name で登録名を決め、SkyBox は "skybox/front" のように接頭辞を付ける（読み込み・set_sky_box のアンロードとも）
 
 ---
 
 ## 重要度: 中 / 設計改善・拡張性
 
-### extern/game の Sound/SoundManager を core に統合 [難易度: 中]
-- `extern/game/SoundManager.h:14`, `extern/game/Sound.h:10`
-- game 層と core 層に同名クラスが並存している
-- [ ] 対応する
+- [ ] 設定ファイルの形式（2026-11-10 検討）: 今の「キー 値」形式のままにする。UI のテーマ・キーの複数割り当て・セーブデータなど、まとまったデータを扱い始めるときに TOML（toml++）を入れ、新しいデータから使う
+- [x] 次の段階の課題 D1〜D5（doc/設計上の問題の洗い出し.md の 6 章）: D1 ゲームの物体を ECS に寄せる（完了。ActiveObject の継承は無い）・D3 描画の窓口（完了）・D4 ハンドル（完了。モデル・テクスチャ・音・Entity の参照に続き、2026-11-11 に残っていた生ポインタのメンバ 52 件を分け、44 件と見つかった容器などをハンドルにした。シェーダーのテクスチャは TextureSlot、シェーダーは ShaderHandle。残した 8 件と後続（Model のシェーダーの一覧）は doc/ECS移行計画.md の 4.1。a0e274c8・81283ce6・288a7686・4c99b299・19628109）・D5 本編のテスト（テスト 320 → 535 件。プレイヤー・敵・風船・スイッチ・ステージの読み込みにテストと開発用の確かめの手段ができた）・D2 GameMain の分割（完了。2026-11-10 に保留、2026-11-11 に利用者の決定で再開。下の行）。後続 : プレイヤーの行動の部品からの切り出しの続き、敵の Perception・Alert・PatrolSystem への寄せ、ステージ形式の段階 6（intro・outro の TOML 化は 2026-11-11 に完了）
+  - [x] D2「GameMain が何でも持っている」完了（2026-11-11、doc/GameMainの分割.md の 5 章）: GameMain は窓口のまま、中の手順を部品に移した。DevOptions（開発用の環境変数を起動時に 1 回読む。ba86aa83）・SceneStack（シーンの積み下ろしと切り替えの要求。偽のシーンでテスト。62b88cf5）・ScriptBindings（Lua の関数。58a41c34）・DevTools と DebugConsole（開発用の機能と imgui の窓。d758043c）。シーンの近道・切り替えの要求の出し方・Lua の関数・環境変数の名前は変えていない。GameMain.cpp 1638 → 925 行。テスト 585 → 613 件。変える前の exe と経過時間を固定して撮り比べ、全シーン・7 ステージ・シーンを順に替える確かめ・本編の開発用の確かめが同じ。残り : F1 のコンソール・シーンの一覧は手で開いていない。設定と表示（設定ファイルの整理・テーマ・表示の変更）は GameMain に残した
+  - [x] ハンドルの作り替え 完了（2026-11-11、doc/ハンドルの設計.md の 5 章）: 計測を足す（ベンチマーク test/ui/ResourceHandleBenchmarkTest.cpp・BLUE_SKY_DEBUG_FRAME_TIME。955a8cb8）→ 解放と差し替えをフレームの終わりとシーンの切り替えにまとめる（flush_releases。788a9551）→ Handle（ResourceManager だけ）と WeakHandle（8 バイト）に作り替え（88b378de）→ 描く流れは描く対象のモデルを 1 フレームに 1 回だけ引く（79c3bc70）。引く手間は Release 5〜12 ns → 0.4〜1.3 ns・Debug 106〜120 ns → 2.5〜4.0 ns、本編のフレームの仕事の時間は Release −3〜5%・Debug −8〜9%。テスト 553 → 564 件。全シーンと 7 ステージ・シーンを順に替える確かめ・開発用の確かめで変える前と比べ、揺れの幅に収まる。Handle の数はシーンを片付けた後に debug_log に出る
+  - [x] 1 万を超える物体でのフレームの時間を測った（2026-11-11、doc/ECS移行計画.md の 6.7）: 物体を大量に出す BLUE_SKY_DEBUG_SPAWN_OBJECTS="数[,static|medal|balloon]"（12440399）・段階ごとの時間と描いた回数を出す BLUE_SKY_DEBUG_FRAME_STAGES="最初,最後"（ef783f6b。FRAME_TIME は present の時間も出す）。Release の 1 万個は static 12.1・medal 10.9・balloon 14.3 ms で 60 fps に収まり、3 万個は 32〜61 ms。Debug の 1 万個は 138〜233 ms。直したもの : 作るときの O(n²)（原点に重ねて剛体を作っていた。1 万個 6,981 → 49 ms、027cdf2f）・風船が毎フレーム乱数を作り直す（風船 1 万個の System 11.28 → 0.77 ms、1fdd800e）。重い所は 描く流れ（カリング無しで 1 物体 4 回、影 3 段 + 本体）・物理（動かない動く剛体が眠らない）・物体ごとの定数の更新。テスト 564 → 565 件。027cdf2f の後の本編のステージを前の exe と 2 回ずつ見比べ、揺れの幅を超える違いが無いことを確かめた（物体の一覧 16 ステージ・物体巡り・石投げは同じ。6.7 の追記）
+  - [x] 1 万個の後続の C と A（2026-11-11、doc/ECS移行計画.md の 6.7「案 C・A をやった結果」）: C メダル・風船の剛体を作るときからキネマティックに（4045c63e。物理 Release 3 万個 medal 16.5 → 5.5 ms・balloon 19.5 → 9.1 ms。動く床・目標地点へ動く物は振る舞いが変わるので今のまま）→ A 視錐台カリングと影のカスケードごとのカリング（8f1888a2。モデルの頂点を囲む箱から球、線は線分の長さの余裕、スキンメッシュはカリングしない。どの段にも入らない物は定数も書かない）。Release の仕事の時間 : 1 万個 9.2〜14.1 → 3.9〜5.9 ms、3 万個 32〜60 → 9.9〜18.2 ms（static・medal は 3 万個でも 60 fps）。Debug の 1 万個 139〜231 → 51〜83 ms。描いた回数 1 万個 40,144 → 8,670。テスト 566 → 577 件。本編のステージを変える前の exe と 2 回ずつ見比べた
+  - [x] 1 万個の後続の B インスタンシング（2026-11-11、doc/ECS移行計画.md の 6.7「案 B をやった結果」）: 同じモデルの物体を、本体・影の各段・線のすべてでまとめて 1 回で描く（物体ごとの定数の構造化バッファ ObjectInstanceBuffer・描く段ごとの並び ObjectRenderDataSystem::get_draw_list。スキンメッシュ・ボーンの定数を持つ物・まとめて描けないシェーダーのモデルは 1 個ずつ。まとめて描く物は定数バッファへの書き込みを後回し）。開発用 BLUE_SKY_DEBUG_FIXED_STEP_MSEC（経過時間を固定して 1 画素単位で撮り比べる）・BLUE_SKY_DEBUG_NO_INSTANCING（今までどおり 1 個ずつ描く）。96eb9535・58a7e4f7・7bfdd591・8dff46c0・4cfe6f73・72213b3f。描いた回数は物体の数によらず 121〜129 回（3 万個の風船で 30,979 → 129）。Release の仕事の時間 3 万個 10.4〜17.0 → 3.4〜8.3 ms（風船 3 万個も 60 fps）、Debug の 1 万個 50〜82 → 10〜27 ms。テスト 577 → 585 件。同じ exe のまとめる／まとめないを経過時間を固定して全ステージ・全シーンで撮り比べ、変える前の exe と振る舞い・画面を 2 回ずつ見比べた
+  - [ ] 1 万個の後続の残り : 次の重い所は描く流れではなく、風船の System（Release 3 万個 3.5 ms・Debug 34 ms）・物理（2.9 ms・Debug 47 ms）・定数（world 行列とカリング。0.9 ms・Debug 11 ms）。E 物理の刻みの上限・眠っている剛体の AABB の作り直し（Bullet の m_forceUpdateAllAabbs）。影の段でスキンメッシュを探すために全部を回している分。D 並べ替えは B で要らなくなった。GPU の時間（タイムスタンプのクエリ）は未計測
+  - [ ] ハンドルの後続 : Model のシェーダーの一覧・shadow_map_shader_ をハンドルにする（doc/ECS移行計画.md の 4.1 の残り）
+  - [x] ECS 移行の段階 0「土台の修理」完了（2026-11-10、doc/ECS移行計画.md の 3 章）: destroy_entity がシステムの対象から外してコンポーネントも外す（794d545a）・is_alive / find( EntityId )（dc031ebf）・PhysicsSystem が対象から外れたとき・remove_system・clear で剛体を解放（16826f67。以前はシーンをまたいで物理の世界に溜まっていたのをテストで確かめた）・GameObject の ComponentMap を削除（f3a810ca）。テスト 339 件。残り: シーンをまたぐ確かめは単体テストだけ（実機でシーンを替えての確認はしていない）
+  - [x] ECS 移行の H1「ハンドルの土台」完了（2026-11-10、doc/ECS移行計画.md の 3 章）: ResourceManager に replace（番号を変えずに中身を差し替え、古い中身を解放。102d2107）・モデル・メッシュ・テクスチャを GraphicsManager からハンドルで引ける（load_model_handle・resolve_model・replace_model など。4163ac1c）・音を SoundManager からハンドルで引け、同じ名前で別のファイル・reload・ステージの load_sound の replace は差し替え（476fe98d）。型の食い違いは、モデル・メッシュを core の型（core::graphics::Model / Mesh）で管理し、ハンドルも core の型にして解いた（core 層の ModelComponent が blue_sky 層を知らずに持てる。引く入口は core の GraphicsManager::resolve_model）。テスト 345 件。残り: 使う側の生ポインタ（ActiveObject の Model* など）は段階 1 以降で移す。GraphicsManager のハンドルの関数は偽物の GraphicsManager が無いので単体テストは ResourceManager の段まで（起動して確かめた）
+  - [x] ECS 移行の段階 1「描画データをコンポーネントへ」完了（2026-11-10、doc/ECS移行計画.md の 3 章）: ObjectRenderComponent・AnimationComponent・ObjectRenderDataSystem を足した（6b0b526c、単体テスト 9 件）。ActiveObject が Entity を 1 つ持ち、モデル（ModelHandle）・定数バッファ・前フレームの world・AnimationPlayer を部品へ移した。GraphicsManager は ActiveObjectManager ではなく ObjectRenderDataSystem の描く対象を回す（0ca44ae3。ActiveObject・ActiveObjectManager への依存を外した）。描く順は作った順。テスト 354 件。画面の見比べ（1-1・1-2・2-1・0-0 の 60・120 フレーム目）は変える前と同じ（揺れの範囲）、スイッチのログも 1-1・1-3 で同じ数・同じ座標。残り: 位置と描くかどうかの正は ActiveObject のまま（一方向に写す。位置は段階 3、表示の旗と kill は派生を部品にする段階 4・5 で移す）。2-1 のスイッチを全部押す確かめは、押せる数が起動ごとに変わる（押す順が unordered_set のアドレスの順）ので数の一致では比べられない
+  - [x] 段階 1 で見つけた不具合を修正（2026-11-10、edf12d65）: BLUE_SKY_DEBUG_PRESS_SWITCHES で押せるスイッチの数が起動ごとに 2・5・13 個と変わっていた。物体の一覧が unordered_set< ActiveObject* >（アドレスの順）で、2-1 では最後に書いた switch-m の turn-on がほかの全部のスイッチを break するため、switch-m が早く回ると残りが「入らなかった」になっていた。一覧を vector（加えた順）にし、更新・スイッチを押す所は添字で回す（イベントで物体が加わっても壊れない）。2-1 を 3 回起動して 3 回とも入った 13・目標地点へ動かします 24・着きました 23 で同じ
+  - [x] ECS 移行の段階 2「目標地点・向きへの移動」完了（2026-11-10、fd200d78、doc/ECS移行計画.md の 3 章）: TargetLocationComponent・TargetDirectionComponent・TargetMoverComponent（窓口 TargetMover を ActiveObject が private で実装）・MoveToTargetSystem を足し、ActiveObjectManager の 3 つの unordered_map をやめた。set_target_* は窓口として残る。ActiveObjectManager::update の以前と同じ所から update_targets を呼ぶ（EntityManager::update では動かさない）。TargetLocationTest を MoveToTargetSystemTest に移して 12 件足した（テスト 366 件）。0-1・1-1・1-2・2-0・2-1 のスイッチ・目標地点のログは移す前と同じ数・同じ座標。残り: 剛体の速度は ActiveObject を通して触る（段階 3・H2 で部品から直接に）。向く先の物体は EntityId で持つが、生きているかは Entity で見る（kill した物体は今までどおり追う）
+  - [x] ECS の効率の点検（2026-11-10、doc/ECS移行計画.md の 6 節。前提 : Entity は最終的に 1 万を超える）: ベンチマーク EcsBenchmark（1 万・10 万個。既定では走らない。--gtest_also_run_disabled_tests --gtest_filter=EcsBenchmark.*、54290822）・型の番号を通し番号にし get_component が何も作らない（039b39e7。Release で部品を引くのが約 4 分の 1、作るのが約半分）・Component::get_type_id() const を削除（b956c756）・remove_system の erase（01cfeefa）・ObjectRenderDataSystem がアニメーションを持つ物体だけを回す（BaseSystem に付け外しを知りたい部品の仕組み、9c0ecc9b）・RenderSystem の map とシェーダーを使い回す（d5e71fd2）・PerceptionSystem の表引きを 1 回にし近くない対象にレイを飛ばさない（722df99f）・ParticleRenderSystem は 2 つ以上でも壊れないことを確かめ、前提を static_assert で守る（e4c0289c）。テスト 375 件。残り: System の update（Release で 1 個 約 20 ns、10 万個で 2 ms）と作る・消すは構造の問題のまま
+  - [x] 部品の持ち方の作り替え 完了（2026-11-10、doc/ECS移行計画.md の 6.6）: 置き場 StablePool（値をページに詰めて置き、場所は外すまで動かない。剛体の userPointer・GraphicsManager のカメラ・シーンのメンバが部品のポインタを持ち続けるため）と EntityId → 添字の表 SparseIndex（unordered_map より Release で引くのが約 7〜15 倍速い）（72bb2ae5）・EntityManager が部品と Entity を置き場に値で持つ（3bc263d2）・System の対象を密な配列に（d2542cb2）・1 体ごとの仮想関数をやめ System 単位で一度だけ呼ぶ（1c3ab399）。Release 10 万個の update 2.22 → 0.165 ms、作る 48.5 → 11.6 ms、引く 3.41 → 0.76 ms、消す 32.4 → 3.0 ms。テスト 375 → 385 件。1-1・2-1 のスイッチのログは基準と同じ
+  - [x] ObjectRenderDataSystem・MoveToTargetSystem の一覧を、対象が 1 つ増減するたびに全部作り直して並べ替えるのをやめた（2026-11-10、9c9989ee、doc/ECS移行計画.md の 6.6）: core::ecs::EntityIdOrderedList（足すときはたいてい末尾に足すだけ・外すときは印を付けて次に読むときにまとめて詰める）。1 万個で 1 つ足す 0.838 → 0.000 ms・1 つ消す 1.385 → 0.050 ms（Debug）。テスト 385 → 392 件
+  - [x] ECS 移行の段階 3「物理の同期と当たりのイベント」と H2「剛体の持ち主を 1 つに」完了（2026-11-10、doc/ECS移行計画.md の 3 章）: 剛体を RAII の持ち主 core::physics::RigidBody にし世界の生の new を unique_ptr に（480d2ad8）・ECS の剛体の userPointer を EntityId のタグに（34cb8cbb）・本編の剛体もタグにし、ecs::CollisionEventSystem が当たりを集めて互換の層（ActiveObjectManager）が二重ディスパッチを呼ぶ、物体の性質を CollisionTraitsComponent に（3f70cb95）・位置の正を TransformComponent に、PhysicsSyncSystem が剛体と同期、本編の剛体の持ち主を PhysicsBodyComponent に（fa636bda）・開発用 BLUE_SKY_DEBUG_VISIT_OBJECTS（プレイヤーをメダル・風船・梯子・ゴールの所へ置いて結果をログに出す、7ae506c0）。テスト 392 → 413 件。スイッチ・目標地点のログは 1-1・2-1・1-2・0-1・2-0 で移す前と同じ数、画面もほぼ同じ。0-1・2-0 でメダル・風船・梯子・ゴールの当たりが起きることを開発用の手段で確かめた
+  - [x] MoveToTargetSystem::update_targets が目標を持たない物体も含め全対象を毎フレーム回す（1 万個で Debug 1.1 ms）。目標を持つ物体だけの一覧にした（2026-11-10、e721902e。1 万個で 1.42 → 0.000 ms）
+  - [x] 物体のゆらぎの種が物体のアドレスで、起動ごとに画面が変わる（2-3）。Entity の番号を種にした（2026-11-10、2acea460）
+  - [x] ECS 移行の段階 4「単純な種類を ECS だけに」一部完了（2026-11-10、doc/ECS移行計画.md の 3 章）: ObjectFactory・GameObjectRef（Lua の "GameObject"）・EntityObject を足し、動かない物と動く床（a9c8f7fe）・メダル（421d2f60）・傘（d6662315）・ロケット（e5e70543）・ゴール（378f4e00）を ECS だけの物体にした。使っていない Missile を消した（329e5ad5）。テスト 413 → 435 件。スイッチのログ・画面・BLUE_SKY_DEBUG_VISIT_OBJECTS の結果は移す前と同じ
+  - [x] ECS 移行の段階 4 の残り（梯子・石・スイッチ・空間スイッチ）完了（2026-11-10、doc/ECS移行計画.md の 3 章の「4」の行）: 開発用 BLUE_SKY_DEBUG_THROW_STONES（石を全部拾い、スイッチ・敵・風船へ投げて結果をログに出す。並行の作業の docs のコミット ede57ac9 に一緒に入った）・相手側を GameObjectRef・EntityId で受け取る形に（on_collide_with_stone・on_collide_with_ladder、Player の石の一覧は GameObjectRef、間引きは EntityId。6812b8ae）・梯子（LadderComponent・ContactCacheComponent・ContactCacheSystem。87e3bfe3）・石（ThrowableComponent・SpinComponent の degree_per_frame。7bb44c3d）・スイッチと空間スイッチ（SwitchComponent・SwitchSystem・ObjectFactory::create_area_switch、ECS だけの物体どうしの当たり on_collide_entity_objects、デバッグの dynamic_cast< BaseSwitch* > をやめた。0a4f8a3a）。Ladder・Stone・BaseSwitch・Switch・AreaSwitch クラスを消した。テスト 435 → 448 件。スイッチ・目標地点のログ（1-1・2-1・1-2・0-1・2-0）・物体巡り・石投げの結果は移す前と同じ。残り : 石を投げる・当てるのは開発用の手段だけで確かめた（手で遊んではいない）。ActiveObject の種類は Player・Girl・Robot・Balloon（段階 5・6）
+  - [x] ステージの形式を独自の .stage から TOML（.stage.toml）へ移した（2026-11-10、doc/ステージ形式の設計.md の 6 章。設計 3.3 の段階 1〜5）: 開発用 BLUE_SKY_DEBUG_DUMP_STAGE（53bd888b）・読む所と当てる所を分ける StageData / LegacyStageParser / StageBuilder（5a93a87e）・toml++ v3.4.0 と TomlStageParser・動き Action・DelayedCommand が Action を持つ（86f40eea）・変換ツール tools/stage_convert/convert_stage.py と 16 個の .stage.toml（d418eb56）・ゲームとステージ選びが .stage.toml を読む（d12a97c6）・古い形式を消した（1e193ee7）。テスト 448 → 461 件。16 個すべてで古い形式と作った物体の一覧・スイッチ・物体巡り・石投げ・画面が同じ（揺れの範囲）。残り : [environment]・[sounds]・when の条件・部品の上書き（段階 6）
+  - [x] ステージの前後の文と背景（.intro・.outro の 24 個）を TOML（.intro.toml・.outro.toml）へ移した（2026-11-11、doc/ステージ形式の設計.md の 7 章）: 形式・変換ツール tools/stage_convert/convert_story_text.py・24 個の TOML・読む所 blue_sky/stage/StoryTextParser・StoryTextScene が TOML を読む（74c98f80）・全ファイルで黙って無視されていた layer-rotate を回転として当てた（6985b899）・古い形式を消した（cd7b75ea）。テスト 543 → 553 件。変える前と画面が同じ（回転を当てる前）・回転を書いた背景だけが変わることを 24 個で確かめた。回転で隅に黒い所が出たので、利用者の決定（2026-11-11）で回さない（13 年間の見た目）に戻した : 23 個から rotation を外し、変換ツールは layer-rotate を写さずコメントに（403ab81e。回転の軸は以前から画面の中心で、黒い所は大きさの不足。設計書 7.5）。1920x1080 などで背景が画面より小さく黒い帯が出ていたのは、利用者の決定（2026-11-11）で画面を覆うまで拡大するようにした（基準 1280x720 で係数 1、係数 = max( 幅 / 1280, 高さ / 720 )。設計書 7.5）。残り : ステージ選びから intro に入る流れは手で通していない
+  - [x] ECS 移行の段階 5「Balloon・Girl・Robot」完了（2026-11-10、doc/ECS移行計画.md の 3 章の「5」の行）: 風船（BalloonHoldComponent・BalloonHoldSystem、点滅は描画の部品の is_hidden。a1b5327c）・少女（GirlComponent・GirlSystem・FlickerComponent。3b626c62）・敵（行動をまとめた RobotBehaviorComponent・RobotBehaviorSystem、テクスチャは TextureHandle、巡回の地点は PatrolComponent。da5e50cd）を ECS だけの物体にし、Balloon・Girl・Robot クラスを消した。プレイヤーの状態は窓口 ecs::BalloonHolder・ecs::ChaseTarget をプレイヤーが実装して渡す。開発用 BLUE_SKY_DEBUG_LOG_ACTORS を足した。テスト 461 → 481 件。作った物体の一覧・様子のログ・スイッチ・物体巡り・石投げ・画面は移す前と同じ（揺れの範囲）。残り : 敵の注目 → 追う・プレイヤーが傷つくは単体テストだけで確かめた（遊んでいない）。Perception・Alert・PatrolSystem への寄せは物理の世界を 1 つにするとき（理由は計画書）。ActiveObject の種類は Player だけ（段階 6）
+  - [x] ECS 移行の段階 6「Player」完了（2026-11-11、doc/ECS移行計画.md の 3 章の「6」の行と「消せる条件」）: 入力を値（PlayerInputComponent）にし開発用 BLUE_SKY_DEBUG_PLAYER_SCRIPT（決まった入力の並びを流してプレイヤーの様子をログに出す）を足した（e09cadd9）・プレイヤーを行動をまとめた部品（PlayerBehaviorComponent・PlayerBehaviorSystem・PlayerInputSystem）で ECS だけの物体にし Player・BalloonHolder・ChaseTarget を消した（e2452eb1）・ActiveObject・ActiveObjectManager・GameObject を消し ObjectUpdater と ecs::contact_rules に分けた（36758535）・持ち物を PlayerInventoryComponent・PlayerInventorySystem に切り出した（3b1c5a4d）。テスト 481 → 494 件。移す前（25a4df1b）と入力の並び・スイッチ・物体巡り・石投げ・物体の一覧・様子のログ・画面が揺れの範囲で同じ。残り : 行動の部品から移動・梯子・風船とロケット（動作の状態）・視点はまだ分けていない（理由は計画書）。手で遊んでは確かめていない。ActiveObjectPhysics は物理の世界の統一（下）まで残す
+  - [x] 本編の物理の世界（ActiveObjectPhysics）と ECS の物理の世界（PhysicsManager）を PhysicsManager に統一する（決定 1）完了（2026-11-11、doc/ECS移行計画.md の 3 章の「7」の行）: PhysicsManager に地面・OBJ の当たりの形・自分と相手を除くレイ・接触の判定・置いた箱の判定・形の共有を足し、RigidBody に剛体の操作を足した（fb58ec0e）・本編を PhysicsManager 1 つ（GameMain が持ち、シーンを替えるときに clear）に移し ActiveObjectPhysics を消した（42903a1f）・BulletPhysics を消し RigidBody::get を private にした（de0e9039）。値（重力・刻み・摩擦・形・振り分け）は変えていない。テスト 494 → 508 件。移す前と入力の並び・スイッチ・物体巡り・石投げ・物体の一覧・様子・画面が揺れの範囲で同じ、ECS のテストシーンも落ちない。Bullet の型が core/physics の外に残るのは core/math の変換と BulletDebugDraw だけ。残り : 手で遊んでいない。シーンを続けて替える確かめは実機でしていない。敵の Perception・Alert・PatrolSystem への寄せはしていない（理由は計画書の「5」の行）
+  - [x] D3「描画の窓口が大きすぎる」完了（2026-11-11、doc/描画の窓口の分割.md）: GraphicsManager の関数を 11 の役割に分けて使う所を数え、使う側の使い方に合わせて小さな窓口 4 つに分けた（GraphicsManager が全部実装する）。ResourceResolver（引くだけ）・ResourceLoader（読む・作る）・RenderSettings（空・地面・色・線・紙）・Canvas2D（2D と文字）。run_action の set・fade の描画の部分は stage::StageLook に移した。使われていない関数 8 個を消した（4a65f31e・91d17036・446ccf2b・a2b51ac0・824d2e94）。偽物（test/graphics/FakeGraphics.h）でテスト 27 件（508 → 535 件）。全シーンと 7 ステージを移す前の exe と撮り比べ、揺れの幅に収まる。残り: フレームの流れ・フェード・デバッグ表示・低レベルは分けていない（使うのはシーン・GameMain・シェーダーだけ。シーンをテストするときに使う側に合わせて作る）
+  - [x] 見つけた不具合（H1 とは別。~GameMain の最初でシーンを壊して直した）: game_play のシーンを開いたまま閉じると終了時に落ちる。GameMain のメンバの破棄の順で settings_ が scene_ より先に壊れ、GamePlayScene の fov_subscription_ が壊れた SettingStore から購読を外そうとする（crash.log : SettingStore::unsubscribe ← ~GamePlayScene ← ~GameMain）
 
-### ライト方向がハードコード [難易度: 中]
-- `GraphicsManager.cpp:484` — `Vector(-1, -2, 0.5, 0)` 固定
-- ECS のコンポーネント化、またはシーンごとの設定を可能にする
-- [ ] 対応する
+### ~~extern/game の Sound/SoundManager を core に統合~~ [完了]
+- [x] 対応済み（cbae6686）— 実装は core だけだったので、game::Sound・game::SoundManager の中身を core::Sound・core::sound::SoundManager に取り込み、extern/game から削除
 
-### シェーダーホットリロード後に effect_technique が古いまま [難易度: 中]
-- `GameMain.cpp:92` — reload 時にキャッシュ無効化が不完全
-- 開発中にちらつきやクラッシュのリスク
-- [ ] 対応する
+### ~~ライト方向がハードコード~~ [完了]
+- [x] 対応済み — GraphicsManager::set_light_direction / get_light_direction / reset_light_direction（core::graphics::LightDirection）。既定は以前と同じ。Lua は set_light_direction( x, y, z )
+- 残り: シーンが変えた向きは次のシーンへ持ち越す（Scene の切り替えで reset するかは未決）。DebugScene・GamePlayScene は今も定数バッファに自前で光を書いている
 
-### 同種 ActiveObject 間でシェーダーを個別保持できない [難易度: 高]
-- `GameMain.cpp:277` — シェーダー共有のため個別パラメータ設定不可
-- clone / per-instance パラメータの仕組みが必要
-- [ ] 対応する
+### ~~シェーダーホットリロード後に effect_technique が古いまま~~ [完了]
+- [x] 対応済み — 277ce0c4（読み直しの後に refresh_all_shaders で全シェーダーの technique を取り直す）と 1bba4f84（自前の Effect は取得済みの technique のオブジェクトを残して中身を入れ替える）。読み直しの成功・失敗を実機で確かめた
 
-### ConstantBuffer の Usage/更新方式の使い分け [難易度: 中]
-- `ConstantBuffer.h:26,54` — 全て DEFAULT + UpdateSubresource 固定
-- 頻繁更新の CB は DYNAMIC + Map の方が効率的
-- [ ] 対応する
+### ~~同種 ActiveObject 間でシェーダーを個別保持できない~~ [完了]
+- [x] 対応済み — 原因は load_model が名前でモデルを使い回し、モデルのシェーダー一覧も共有していたこと。GraphicsManager::clone_model_with_shaders と ActiveObject::make_model_unique（Lua: make_model_unique( o )）で、そのオブジェクトだけのモデル・シェーダーにできる。Model の複製で線が消えていたのも直した（線は shared_ptr で共有）
+- 残り: 複製したモデル・シェーダーは GraphicsManager が持ったまま（シーンを出ても解放しない）
 
-### シャドウマップの far clip が固定値 [難易度: 低]
-- `ShadowMap.cpp:109` — far=500 固定、地面が範囲外になる可能性
-- [ ] 対応する
+### ~~ConstantBuffer の Usage/更新方式の使い分け~~ [完了]
+- [x] 対応済み — 作るときに ConstantBufferUsage::DYNAMIC（Map(WRITE_DISCARD)）を選べる。既定は DEFAULT。フレーム・フレーム描画・共有オブジェクト・ActiveObject の world とボーン・ECS の RenderSystem / ParticleRenderSystem を DYNAMIC にした
+
+### ~~シャドウマップの far clip が固定値~~ [完了]
+- [x] 対応済み — core::graphics::ShadowMap::set_clip / set_far_clip（既定 1〜500）。setup_shadow_map で作り直すと既定に戻る
 
 ---
 
 ## 重要度: 低 / コード整理・最適化
 
-### GraphicsManager.cpp のシェーダー include を別ファイルに分離 [難易度: 低]
-- `GraphicsManager.cpp:12` — 12個のシェーダーヘッダ include
-- [ ] 対応する
+### ~~GraphicsManager.cpp のシェーダー include を別ファイルに分離~~ [完了]
+- [x] 対応済み — blue_sky/graphics/shader/AllShaders.h
 
-### setup_default_shaders() の関数名と責務分割 [難易度: 低]
-- `GraphicsManager.cpp:314` — 3つの処理が混在
-- [ ] 対応する
+### ~~setup_default_shaders() の関数名と責務分割~~ [完了]
+- [x] 対応済み — create_default_shaders / select_shadow_map_shaders / setup_screen_rectangles に分け、setup_default_shaders はこの順に呼ぶだけ
 
-### 2D 描画に法線を使っている [難易度: 低]
-- `Direct3D11.cpp:410`, `GraphicsManager.cpp:683` — 2D 用 InputLayout が未整備
-- [ ] 対応する
+### ~~2D 描画に法線を使っている~~ [完了]
+- [x] 対応済み — 入力レイアウト "2d"（位置・UV。メッシュの頂点から法線を読み飛ばす）を main2d の頂点シェーダーから作り、フェーダー・ポストエフェクト・Flat2D・シャドウマップのデバッグ表示で使う。HLSL は COMMON_2D_INPUT
+- 残り: 頂点バッファ自体は法線入りのまま（2D 専用の矩形メッシュは作っていない）
 
-### Entity::get_component() の const 正確性 [難易度: 低]
-- `Entity.h:43` — const メソッドが非 const ポインタを返す
-- [ ] 対応する
+### ~~Entity::get_component() の const 正確性~~ [完了]
+- [x] 対応済み（cbae6686）— 足す・外すは非 const、const の Entity からは const のコンポーネント。System は持ち主の EntityManager から得る
 
-### BulletPhysics::get_dynamics_world() を削除 [難易度: 低]
-- `BulletPhysics.h:53` — Bullet 内部 API の露出
-- [ ] 呼び出し元を確認して削除
+### ~~BulletPhysics::get_dynamics_world() を削除~~ [完了]
+- [x] 対応済み（cbae6686）— 世界そのものを出さず ray_test・contact_test の問い合わせだけを出す。PhysicsManager の同名の関数（呼び出し元なし）も削除。テスト BulletPhysicsTest
 
-### CollisionShape の共有 [難易度: 中]
-- `BulletPhysics.h:12` — 同一形状の RigidBody でメモリ重複
-- [ ] 対応する
+### ~~CollisionShape の共有~~ [完了]
+- [x] 対応済み（cbae6686）— 種類と大きさで形をキャッシュして共有する。テスト BulletPhysicsTest
 
-### AnimationPlayer の整理 [難易度: 低]
-- `AnimationPlayer.h:16,30` — 不要な type alias、定数バッファの責務分離
-- [ ] 対応する
+### ~~AnimationPlayer の整理~~ [完了]
+- [x] 対応済み（cbae6686・22bb672c）— 不要な別名・定数を削除、値を返さない代入演算子をコピー禁止に。定数バッファは ActiveObject が持ち、AnimationPlayer はボーン行列の計算（calculate_bone_matrices）だけ
 
-### シャドウマップカスケード幅の動的設定 [難易度: 低]
-- `ShadowMap.cpp:103` — 固定値をメンバ変数 + setter に変更
-- [ ] 対応する
+### ~~シャドウマップカスケード幅の動的設定~~ [完了]
+- [x] 対応済み — core::graphics::ShadowMap::set_cascade_width（既定 10 / 50 / 150 / 9999）
 
-### RenderTargetTexture の MipLevels/SampleDesc 可変化 [難易度: 低]
-- `RenderTargetTexture.cpp:11,30` — コンストラクタ引数追加
-- [ ] 対応する
+### ~~RenderTargetTexture の MipLevels/SampleDesc 可変化~~ [完了]
+- [x] 対応済み — create_render_target_texture( format, RenderTargetTextureOptions )。既定はミップ 1 段・画面と同じ MSAA。ミップ 2 段以上は resolve_for_sampling でミップを作る
 
-### サウンド更新の別スレッド化 [難易度: 高]
-- `GameMain.cpp:310` — 現在メインスレッドで実行
-- [ ] 対応する
+### ~~サウンド更新の別スレッド化~~ [完了]
+- [x] 対応済み（cbae6686）— SoundManager::start_update_thread（16ms ごと）。一覧は SoundManager の、音の操作は音ごとのロックで守る。メインスレッドが止まっても BGM の補充が続く
 
-### その他の細かい整理
-- `GameMain.cpp:253` — ActiveObject に color を持たせるか検討
-- `GameMain.cpp:262` — create_object() の引数整理
-- `GameMain.cpp:268` — 例外化してスクリプト側でキャッチ
-- `GameMain.cpp:663,767` — 各所の雑多な整理
-- `GraphicsManager.cpp:313` — スクリプトからシェーダー生成
-- `GraphicsManager.cpp:446,487` — 定数バッファ更新頻度、時間データの場所
-- `GraphicsManager.cpp:498,578` — シャドウマップ高速化、バインド最適化
-- `Direct3D11/GraphicsManager.cpp:639` — draw_text_at_center 高速化
-- `SkinningAnimationSet.h:89` — 整理
-- `Shader.h:21` — テクスチャごとのシェーダーステージ設定
-- `FlatShader.h:43,50` / `MatcapShader.h:41,48` / `LitShader.h:42,49` — バインド最適化、スキニング分離
-- `UnicolorShader.h:32` / `TessellationMatcapShader.h:57,84` / `post_effect/DefaultShader.h:42` — バインド最適化
-- `Scene/*.cpp` 各所 — GraphicsManager への移行、整理
-- `BackBufferTexture.h:17` — Texture と共通化
-- `core/graphics/Shader.h:18,38` — パラメータ設計
-- `core/graphics/GraphicsManager.h:32` — 太らせる
+### ~~その他の細かい整理~~ [完了]
+エンジン本体（source/blue_sky・core・Scene・GameObject・Main.cpp・media/shader）の `@todo` / `TODO` 86 個を一つずつ判断し、すべて片付けた（残り 0 個。案として残すものは、何をすれば良いかの説明に書き換えた）。
+
+- [x] GameMain の ActiveObject の色 — 解決済み。色はシェーダーの color パラメータで変え、1 つだけ変えたいときは make_model_unique で自分だけのモデルにする
+- [x] GameMain の create_object() の引数・例外化 — 解決済み（42b42f8e で知らない名前は nil とログ）。さらに対応済み : スクリプトから nil を渡すと落ちていた関数（set_loc・clone_object・clone_model・set_post_effect_shader など 14 個）は、スクリプトのエラー（ScriptError）にする。C++ の関数が投げた例外は sol2 が Lua のエラーに変え、exec が ScriptError として投げることを確かめた（テスト ScriptManagerTest）
+- [x] GameMain の雑多な整理 — 解決済み（該当の @todo はもう無い）。ファンクションキーの別名 enum Key は削除し VK_* を直接使う
+- 案 : スクリプトからシェーダーを作る（GraphicsManager::create_default_shaders に、やり方を書いた）
+- [x] 定数バッファの更新頻度・時間の置き場所 — 解決済み（1 フレーム 1 回の小さな更新。理由をコメントに書いた）
+- 案（最適化。全シーンで FPS 60 が出ているので今は不要）: シャドウマップの描画の高速化、定数バッファを必要なステージだけに結ぶ（FlatShader・MatcapShader・LitShader・UnicolorShader・TessellationMatcapShader・post_effect::DefaultShader・GraphicsManager の線の描画）、Model::render をシェーダーごとにまとめる、AnimationPlayer で必要なボーン行列だけ計算する。方針は blue_sky/graphics/shader/Shader.h の説明に 1 つにまとめた
+- [x] draw_text_at_center の高速化 — 解決済み（使うのは「読み込み中」の 1 回だけ）
+- [x] SkinningAnimationSet の整理 — 対応済み : オフセット行列を new したポインタで持ち、コピーすると二重に解放する形だった。値で持つ（テスト SkinningAnimationSetTest）
+- 案 : テクスチャごとのシェーダーステージ。テクスチャはピクセルシェーダーに結び、ほかのステージで使うものは各シェーダーの bind() で結ぶ（Shader.h に説明）
+- 案 : スキニングの有無でシェーダーの型を分ける。今はスキニングの定数バッファがあるときだけ結ぶ（各シェーダーに説明）
+- [x] Scene の各所 — 対応済み : CanvasTestScene のファイル static 変数（回転・拡大・ペンの状態がシーンを出ても残った）をメンバに。GamePlayScene の風船の const_cast をやめた。GamePlayScene に入るたびに "rectangle" のモデルとメッシュを作り直して溜め、GraphicsManager の画面の矩形の名前も奪っていたのを、使い回しに。ステージ選択・エンディングの cloth.png とストーリーの背景が同じテクスチャ名 "bg" で、先に読んだ画像が後のシーンに出ていたのを、名前を分けた。MusicGamePrototypeScene が入るたびにシェーダーの複製を溜めていたのを直した。GamePlayScene が Direct3D11/Sprite.h を直接使っていたのを抽象の Sprite.h に
+- 案 : Scene の描画の GraphicsManager への移行。ほかのシーンでも同じ描画が要るようになったら移す（GamePlayScene.h に説明）
+- 案 : BackBufferTexture と Texture の共通化。スワップチェーンへの解決があるので別にしている（BackBufferTexture.h に説明）
+- 案 : core::graphics::Shader のパラメータ。名前で設定・取得する形はできている。既定値は数だけで、VECTOR・COLOR の既定値が要るときに型ごとに持たせる
+- [x] core::graphics::GraphicsManager を太らせる — コメントを削除（作り手から受け取る今の形で困っていない）
+- [x] そのほか @todo で見つかった不具合 — 対応済み :
+  - ShadowMap の光の位置・行列が static で、作り直したゲーム（デバイスロストからの復旧）とも共有されていた → メンバに
+  - Direct3D11・ShadowMap のデバイス・スワップチェーン・深度ステンシルが生ポインタで、コンストラクタの途中で例外が出るとリークした → com_ptr に
+  - 法線の変換がワールド行列をそのまま掛けていて、拡大縮小で法線が傾き長さも変わった → 余因子行列で変換して長さを 1 に（common.hlsl）
+  - PortAudio の出力（44100 Hz）で 22050 Hz の音楽 5 曲（road・semi・tokyo-shojo・tokyo-shojo-vocal・washer）が倍の速さで鳴っていた → 読み出しで周波数を合わせる（SampleRateStepper。テスト SampleRateStepperTest）。**耳での確認はまだ**
+  - 目標の位置への移動（ステージの set_target_location）が、速いときに目標の周りを行ったり来たりして着かないことがあり、着いた後も最後の速度が残っていた → このフレームで届くなら着いたことにし、目標の位置に合わせて止める（テスト TargetLocationTest）
+  - .obj の読み込みで、範囲外の番号でそのまま配列を読み、UV の無い "1//3" を誤読していた → ファイル名と行番号付きの例外、UV が無ければ ( 0, 0 )、多角形は三角形に分ける（テスト ObjFaceVertexTest）
+  - MeshBuffer の中身が空の update_vertex_buffer / update_index_buffer（呼んでも何も起きない）を削除
+  - CityGenerator の道路の左右の判定の重複を RoadNode::get_side_of に
+- 残り（@todo には無かったが、同じ種類の問題）: CityGenerator・GeometryShaderCanvasTestScene も、作るたびに同じ名前のモデル・メッシュを作り直して古いものを溜める
 
 ## NPR コード品質改善（ブランチ refactor/npr-code-quality）
 - [x] ② テクスチャ読み戻しを `core/graphics/Direct3D11/TextureReadback` に共通化（dump と neural の重複解消）

@@ -53,7 +53,7 @@ protected:
 	void print_axis_system( const FbxAxisSystem& ) const;
 
 public:
-	FbxFileLoader( Model*, const char_t* );
+	FbxFileLoader( GraphicsManager*, Model*, const char_t* );
 	~FbxFileLoader();
 
 	bool load( const char_t* ) override;

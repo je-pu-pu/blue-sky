@@ -32,7 +32,10 @@ struct MSDF_VS_INPUT
 struct MSDF_PS_INPUT
 {
 	float4 Position : SV_POSITION;
-	float2 TexCoord : TEXCOORD0;
+	// centroid : MSAA では、四角形の端の画素は中心が三角形の外でも塗られ、UV が三角形の外へ外挿される。
+	// するとアトラスの隣のセル（別のグリフ）の距離を読み、アウトラインがそれを増幅して、文字の端に 1 画素幅の縦線が出ていた。
+	// centroid にすると、覆っているサンプルの内側で補間されるので、UV がセルの外に出ない
+	centroid float2 TexCoord : TEXCOORD0;
 	float4 Color    : COLOR0;
 };
 
@@ -78,14 +81,15 @@ float4 ps_msdf( MSDF_PS_INPUT input ) : SV_Target
 		float boundary_mask = clamp( spr * dist, 0.0, 1.0 );
 		outline_alpha = min( outline_alpha, boundary_mask );
 
-		float4 color = lerp( OutlineColor, TextColor, body_alpha );
+		float4 color = lerp( OutlineColor, input.Color, body_alpha );
 		color.a *= outline_alpha;
 
 		return color;
 	}
 	else
 	{
-		float4 color = TextColor;
+		// 文字の色は頂点で渡す（定数バッファの TextColor は使わない。色の違う文字列をまとめて描画できる）
+		float4 color = input.Color;
 		color.a *= body_alpha;
 
 		return color;

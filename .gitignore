@@ -26,6 +26,9 @@
 
 /source/imgui.ini
 /source/blue-sky.config
+/source/settings.config
+/source/settings.config.tmp
+/source/blue-sky.config.tmp
 /source/save/*.save
 /source/log/*.log
 
@@ -62,3 +65,5 @@ venv/
 /tools/npr_offline/out.old/
 # probe 出力画像（再生成可能）
 /tools/npr_offline/*.png
+# MIDI の音源（約 142 MB。tools/soundfont/fetch_soundfont.py で入手する。doc/ライセンス.md の 4.7）
+/source/media/music/FluidR3_GM.sf2

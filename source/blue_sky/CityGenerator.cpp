@@ -27,22 +27,37 @@ CityGenerator::~CityGenerator()
 		n->left_node  = nullptr;
 		n->right_node = nullptr;
 	}
+
+	// 作ったものを外す（以前は外さず、DebugScene に入るたびにモデル・メッシュ・シェーダーが溜まった）
+	for ( Model* m : { model_, debug_model_ } )
+	{
+		for ( uint_t n = 0; n < m->get_shader_count(); n++ )
+		{
+			graphics_manager_->destroy_shader( m->get_shader_at( n ) );
+		}
+	}
+
+	graphics_manager_->unload_named_model( "generated_city" );
+	graphics_manager_->unload_named_model( "generated_city_debug" );
+	graphics_manager_->unload_named_mesh( "generated_city" );
+	graphics_manager_->unload_named_mesh( "generated_city_debug" );
 }
 
-CityGenerator::CityGenerator()
-	: model_( GameMain::get_instance()->get_graphics_manager()->create_named_model( "generated_city" ) )
-	, debug_model_( GameMain::get_instance()->get_graphics_manager()->create_named_model( "generated_city_debug" ) )
+CityGenerator::CityGenerator( graphics::GraphicsManager* gm )
+	: graphics_manager_( gm )
+	, model_( gm->create_named_model( "generated_city" ) )
+	, debug_model_( gm->create_named_model( "generated_city_debug" ) )
 {
-	model_->set_mesh( GameMain::get_instance()->get_graphics_manager()->create_named_mesh( "generated_city", Mesh::Buffer::Type::UPDATABLE ) );
+	model_->set_mesh( gm->create_named_mesh( "generated_city", Mesh::Buffer::Type::UPDATABLE ) );
 	
-	model_->set_shader_at( 0, GameMain::get_instance()->get_graphics_manager()->create_shader< graphics::shader::FlatShader >() );
-	model_->get_shader_at( 0 )->set_texture_at( 0, GameMain::get_instance()->get_graphics_manager()->load_texture( "media/model/road.png" ) );
+	model_->set_shader_at( 0, gm->create_shader< graphics::shader::FlatShader >() );
+	model_->get_shader_at( 0 )->set_texture_at( 0, gm->load_texture( "media/model/road.png" ) );
 
-	model_->set_shader_at( 1, GameMain::get_instance()->get_graphics_manager()->create_shader< graphics::shader::FlatShader >() );
-	model_->get_shader_at( 1 )->set_texture_at( 0, GameMain::get_instance()->get_graphics_manager()->load_texture( "media/model/road-cross.png" ) );
+	model_->set_shader_at( 1, gm->create_shader< graphics::shader::FlatShader >() );
+	model_->get_shader_at( 1 )->set_texture_at( 0, gm->load_texture( "media/model/road-cross.png" ) );
 
-	model_->set_shader_at( 2, GameMain::get_instance()->get_graphics_manager()->create_shader< graphics::shader::FlatShader >() );
-	model_->get_shader_at( 2 )->set_texture_at( 0, GameMain::get_instance()->get_graphics_manager()->load_texture( "media/model/road-t.png" ) );
+	model_->set_shader_at( 2, gm->create_shader< graphics::shader::FlatShader >() );
+	model_->get_shader_at( 2 )->set_texture_at( 0, gm->load_texture( "media/model/road-t.png" ) );
 
 	for ( uint_t n = 0; n < model_->get_shader_count(); n++ )
 	{
@@ -63,10 +78,10 @@ CityGenerator::CityGenerator()
 	model_->get_mesh()->create_vertex_buffer();
 	model_->get_mesh()->create_index_buffer();
 
-	debug_model_->set_mesh( GameMain::get_instance()->get_graphics_manager()->create_named_mesh( "generated_city_debug", Mesh::Buffer::Type::DEFAULT ) );
+	debug_model_->set_mesh( gm->create_named_mesh( "generated_city_debug", Mesh::Buffer::Type::DEFAULT ) );
 	
-	debug_model_->set_shader_at( 0, GameMain::get_instance()->get_graphics_manager()->create_shader< graphics::shader::FlatShader >() );
-	debug_model_->get_shader_at( 0 )->set_texture_at( 0, GameMain::get_instance()->get_graphics_manager()->load_texture( "media/model/road.png" ) );	
+	debug_model_->set_shader_at( 0, gm->create_shader< graphics::shader::FlatShader >() );
+	debug_model_->get_shader_at( 0 )->set_texture_at( 0, gm->load_texture( "media/model/road.png" ) );	
 
 	debug_model_->get_mesh()->create_vertex_group();
 
@@ -229,8 +244,7 @@ bool CityGenerator::check_collision( RoadControlPoint& cp ) const
 			{
 				node->type = RoadNode::Type::T_INTERSECTION;
 
-				// @todo 共通化する
-				const float cross = node->start_front.xz().cross( ( cp.position - node->position ).xz() );
+				const float cross = node->get_side_of( cp.position );
 
 				if ( cross < 0.f )
 				{
@@ -407,7 +421,7 @@ void CityGenerator::RoadNode::update_vertex_pos()
 	// 終端の処理
 	if ( is_end && front_node )
 	{
-		const float cross = front_node->start_front.xz().cross( ( position - front_node->position ).xz() );
+		const float cross = front_node->get_side_of( position );
 
 		if ( cross < 0.f )
 		{

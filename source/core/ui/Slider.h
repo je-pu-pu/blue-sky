@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Widget.h"
+#include <core/ui/LabeledRow.h>
 
 #include <functional>
 
@@ -8,64 +8,64 @@ namespace core::ui
 {
 
 /**
- * スライダーウィジェット
+ * 数値スライダー
  *
- * [ラベル 30%] [トラック 50%] [値表示 20%] のレイアウト。
- * トラック: 背景矩形 + 充填矩形（値に比例した幅）。
+ * 左右（長押しでリピート）で step ずつ変える。溝をクリック・ドラッグすると位置の値になる
+ * （行の中で押したときだけ。Enter で値が飛ぶことは無い）。
  */
-class Slider : public Widget
+class Slider : public LabeledRow
 {
 public:
+	/// 捕捉が外れた（層が積まれたなど）: 押している・ドラッグ中の状態を解除する
+	void on_capture_lost() override { if ( dragging_ ) { dragging_ = false; commit(); } }
+
+	using Getter = std::function< float_t() >;
+	using Setter = std::function< void( float_t ) >;
 	using Formatter = std::function< string_t( float_t ) >;
 
 private:
-	string_t label_;
-	float_t min_ = 0.f;
-	float_t max_ = 1.f;
-	float_t step_ = 0.1f;
-	float_t value_ = 0.5f;
-
-	std::function< void( float_t ) > on_change_;
+	Getter getter_;
+	Setter setter_;
+	float_t min_;
+	float_t max_;
+	float_t step_;
 	Formatter formatter_;
 
 	bool dragging_ = false;
+	std::function< void() > on_commit_;
 
-	// レイアウト比率
-	static constexpr float_t LABEL_RATIO = 0.30f;
-	static constexpr float_t TRACK_RATIO = 0.50f;
-	static constexpr float_t VALUE_RATIO = 0.20f;
+	/// 操作を終えた（ドラッグを離した・キーで 1 段動かした）ことを知らせる
+	void commit() { if ( on_commit_ ) on_commit_(); }
+	Rect track_rect_;
+	Rect text_rect_;
 
-	// トラック上下余白
-	static constexpr float_t TRACK_PADDING_Y = 0.25f;
-
-	// 色
-	Color track_bg_color_       = Color( 0.1f, 0.1f, 0.15f, 0.9f );
-	Color track_fill_color_     = Color( 0.3f, 0.5f, 0.8f, 0.9f );
-	Color track_fill_focused_   = Color( 0.4f, 0.65f, 1.f, 0.9f );
-	Color label_color_          = Color( 0.8f, 0.8f, 0.8f, 1.f );
-	Color label_focused_color_  = Color( 1.f, 1.f, 0.5f, 1.f );
-	Color value_color_          = Color( 0.9f, 0.9f, 0.9f, 1.f );
-
-	float_t get_ratio() const;
-	void clamp_value();
-	void set_value_from_mouse( float_t mouse_vx );
-
-	string_t format_value() const;
+	void set_value( float_t v, UIContext& ctx );
+	float_t value_from_x( float_t x ) const;
 
 public:
-	Slider() { set_hint_text( "Arrow/AD Adjust    ESC Back" ); }
+	Slider( const string_t& label_key, Getter getter, Setter setter, float_t min, float_t max, float_t step )
+		: LabeledRow( label_key ), getter_( std::move( getter ) ), setter_( std::move( setter ) ), min_( min ), max_( max ), step_( step ) { }
 
-	void set_label( const string_t& label ) { label_ = label; }
-	void set_range( float_t min_val, float_t max_val ) { min_ = min_val; max_ = max_val; }
-	void set_step( float_t s ) { step_ = s; }
-	void set_value( float_t v ) { value_ = v; clamp_value(); }
-	float_t get_value() const { return value_; }
+	void set_formatter( Formatter f ) { formatter_ = std::move( f ); }
 
-	void set_on_change( std::function< void( float_t ) > callback ) { on_change_ = callback; }
-	void set_format( Formatter fmt ) { formatter_ = fmt; }
+	float_t get_value() const { return getter_ ? getter_() : min_; }
+	AccessibleInfo describe( const UIContext& ctx ) const override;
+	const Rect& get_track_rect() const { return track_rect_; }
+	bool is_dragging() const { return dragging_; }
 
-	void update( core::input::InputManager* input, Renderer& renderer ) override;
-	void render( Renderer& renderer ) override;
+	/// 操作を終えたとき（ドラッグを離した・キーで 1 段動かした）に呼ぶ関数（設定の ON_RELEASE の反映に使う）
+	void set_on_commit( std::function< void() > f ) { on_commit_ = std::move( f ); }
+
+	void arrange( const Rect& rect, const UIContext& ctx ) override;
+
+	bool on_nav( NavDir dir, UIContext& ctx ) override;
+	bool on_pointer( const PointerEvent& e, UIContext& ctx ) override;
+
+	void render( Renderer& renderer, const UIContext& ctx ) const override;
+	void collect_hints( std::vector< Hint >& hints ) const override;
+
+	/// 既定の表示（小数第 1 位まで）
+	string_t format_value( float_t v ) const;
 
 }; // class Slider
 

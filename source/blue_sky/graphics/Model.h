@@ -19,6 +19,7 @@ namespace blue_sky::graphics
 {
 	class Mesh;
 	class Line;
+	class GraphicsManager;
 
 /**
  * blue_sky モデルクラス
@@ -35,7 +36,7 @@ public:
 
 private:
 	Mesh*					mesh_;
-	std::unique_ptr< Line >	line_; ///< @todo Mesh にまとめる？
+	std::shared_ptr< Line >	line_; ///< 複製したモデル同士で共有する（線の形は同じ。以前は unique_ptr で、複製すると線が無くなっていた）
 	ShaderList				shader_list_;
 	SkinningAnimationSet*	skinning_animation_set_;
 
@@ -48,7 +49,7 @@ public:
 
 	Model( const Model& m )
 		: mesh_( m.mesh_ )
-		, line_() /// @todo 実装する
+		, line_( m.line_ )
 		, shader_list_( m.shader_list_ )
 		, skinning_animation_set_( m.skinning_animation_set_ )
 	{ }
@@ -59,7 +60,6 @@ public:
 	const Mesh* get_mesh() const override { return mesh_; };
 	void set_mesh( core::graphics::Mesh* m ) override { mesh_ = static_cast< Mesh* >( m ); }
 
-	/// @todo Mesh にまとめる
 	Line* get_line() { return line_.get(); }
 	const Line* get_line() const { return line_.get(); }
 	void set_line( Line* l ) { line_.reset( l ); }
@@ -84,10 +84,39 @@ public:
 
 	bool is_skin_mesh() const { return skinning_animation_set_; }
 
-	virtual Shader* create_shader() const;
+	/**
+	 * 見えない物を描かない（カリング）ために、このモデルを囲む球をモデルの座標で求める
+	 *
+	 * メッシュと線の頂点を囲む箱から作り、描く時に頂点が箱の外へ出る分の余裕を足す
+	 * （メッシュは Phong の分割で少し膨らむので 1 割と 0.05、線は画面の上で線分の長さまで太らせるので、いちばん長い線分の 2 倍）。
+	 *
+	 * @return 求められなければ false（スキンメッシュ : アニメーションで頂点が動く・頂点から箱を求めていないメッシュ・描く物が無い）。
+	 *         false の物はカリングしない（いつも描く）
+	 */
+	bool get_cull_sphere( Vector3& center, float_t& radius ) const;
+
+	/// このモデル用のシェーダーを作る（作る先の GraphicsManager は呼ぶ側が渡す。以前は core::Service から取っていた）
+	virtual Shader* create_shader( GraphicsManager* graphics_manager ) const;
 	virtual string_t get_texture_file_path_by_texture_name( const char* ) const;
 
+	/// テクスチャを登録する名前（既定はテクスチャ名そのまま。"front" のような汎用的な名前が他と衝突するモデルは接頭辞を付ける）
+	virtual string_t get_texture_resource_name( const char* texture_name ) const { return texture_name; }
+
 	void render() const override;
+
+	/**
+	 * 同じモデルの物体をまとめて 1 回で描けるか（インスタンス描画）
+	 *
+	 * メッシュがあり、スキンメッシュでなく、シェーダーが 1 つ以上あってどれもまとめて描ける（Shader::can_render_object_instances）なら true
+	 */
+	bool can_render_object_instances() const;
+
+	/**
+	 * このモデルを instance_count 個まとめて描く（render の、まとめて描く版。物体ごとの定数は呼ぶ側が結んでおく）
+	 *
+	 * can_render_object_instances が true のモデルだけに使う
+	 */
+	void render_object_instances( uint_t instance_count ) const;
 };
 
 } // namespace blue_sky::graphics

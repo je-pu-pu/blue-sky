@@ -1,5 +1,4 @@
 #include "TransformControlSystem.h"
-#include <core/Service.h>
 #include <core/input/InputManager.h>
 
 #include <common/math.h>
@@ -8,11 +7,16 @@
 namespace blue_sky::ecs
 {
 
-void TransformControlSystem::update( ComponentTuple& component_tuple ) const
+void TransformControlSystem::update()
+{
+	for_each( [ this ] ( ComponentTuple& t ) { update_entity( t ); } );
+}
+
+void TransformControlSystem::update_entity( ComponentTuple& component_tuple ) const
 {
 	using Button = core::input::Button;
 
-	const auto* input = core::get_input_manager();
+	const auto* input = input_;
 
 	auto* transform = std::get< TransformComponent* >( component_tuple );
 	auto* transform_control = std::get< TransformControlComponent* >( component_tuple );

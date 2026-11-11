@@ -2,11 +2,9 @@
 #include "StageSelectScene.h"
 
 #include <blue_sky/GameMain.h>
+#include <blue_sky/GameSettings.h>
+#include <core/setting/SettingStore.h>
 
-/// @todo ActiveObjectManager へ移動
-#include <GameObject/Player.h>
-#include <GameObject/Goal.h>
-#include <GameObject/Balloon.h>
 #include <GameObject/Camera.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -17,14 +15,22 @@
 
 #include <core/sound/SoundManager.h>
 
-/// @todo 抽象化する
-#include <core/graphics/Direct3D11/Sprite.h>
+#include <core/graphics/Sprite.h>
 
-#include <blue_sky/ActiveObjectPhysics.h>
+#include <core/physics/PhysicsManager.h>
 
 #include <blue_sky/Input.h>
 
-#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ObjectUpdater.h>
+#include <blue_sky/ObjectFactory.h>
+#include <blue_sky/DebugLog.h>
+#include <blue_sky/ecs/system/SwitchSystem.h>
+#include <blue_sky/ecs/EntityObject.h>
+#include <blue_sky/ecs/component/BalloonHoldComponent.h>
+#include <blue_sky/ecs/system/RobotBehaviorSystem.h>
+#include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
+#include <blue_sky/ecs/system/PlayerInputSystem.h>
+#include <core/ecs/EntityManager.h>
 
 #include <core/graphics/OculusRift.h>
 
@@ -32,60 +38,68 @@
 
 #include <core/math.h>
 
-#include <game/Sound.h>
+#include <core/sound/Sound.h>
 #include <game/Config.h>
 
 #include <common/exception.h>
 #include <common/serialize.h>
 #include <common/math.h>
 
+#include <map>
+
 namespace blue_sky
 {
 
-GamePlayScene::GamePlayScene()
-	: stage_config_( new Config() )
-	, debug_texture_shader_( get_graphics_manager()->get_shader( "debug_shadow_map_texture" ) )
+GamePlayScene::GamePlayScene( GameMain& game_main )
+	: Scene( game_main )
+	, debug_texture_shader_( get_graphics_manager()->get_shader_handle( "debug_shadow_map_texture" ) )
 	, camera_( new Camera() )
 	, action_bgm_after_timer_( 0.f )
 	, bpm_( 120.f )
-	, drawing_accent_scale_( 0.f )
-	, light_position_( Vector3( 0.25f, 1.f, -1.f ), 0.1f )
-	, ambient_color_( Color( 1.f, 1.f, 1.f, 1.f ), 0.02f )
-	, shadow_color_( Color( 0.f, 0.f, 0.f, 1.f ), 0.02f )
-	, shadow_paper_color_( Color( 0.9f, 0.9f, 0.9f, 1.f ), 0.02f )
-	, shading_enabled_( true )
 	, balloon_sound_type_( BalloonSoundType::MIX )
 	, is_blackout_( false )
 	, blackout_timer_( 0.f )
 {
-	// ShadowMap
-	if ( get_config()->get( "graphics.shadow-map-enabled", 1 ) != 0 && stage_config_->get( "graphics.shadow-map-enabled", true ) )
+	// ShadowMap（以前はステージの設定 graphics.shadow-map-enabled も見ていたが、ステージを読む前に見ていたので常に既定の true だった）
+	if ( get_config()->get( "graphics.shadow-map-enabled", 1 ) != 0 )
 	{
 		get_graphics_manager()->setup_shadow_map( get_config()->get( "graphics.shadow-map-cascade-levels", 3 ), get_config()->get( "graphics.shadow-map-size", 1024 ) );
 	}
 
 	// Physics
-	get_active_object_physics()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
+	get_physics_manager()->add_ground( Vector( 1000, 1, 1000 ) );
 
 	// Texture
-	ui_texture_ = get_graphics_manager()->load_named_texture( "ui", "media/image/item.png" );
+	ui_texture_ = load_named_texture_handle( "ui", "media/image/item.png" );
 
 	// Sound
 	load_sound_all( get_stage_name() == "2-3" );
 
 
 	// Player
-	player_ = new Player();
-	player_->set_model( get_graphics_manager()->load_model( "player" ) );
-	get_active_object_manager()->add_active_object( player_ );
-	get_active_object_manager()->name_active_object( "player", player_ );
+	// ECS だけの物体（以前は new Player() して ActiveObjectManager に加えていた）。剛体はステージを読むときに作る
+	player_id_ = get_object_factory()->create_player();
+	get_object_factory()->name( "player", player_id_ );
 
 	// Goal
-	goal_ = static_cast< Goal* >( GameMain::get_instance()->create_object( "goal" ) );
-	get_active_object_manager()->name_active_object( "goal", goal_ );
+	if ( auto id = get_object_factory()->create_object( "goal" ) )
+	{
+		goal_ = get_object_factory()->get_ref( * id );
+		get_object_factory()->name( "goal", * id );
+	}
+	else
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( "create goal failed." );
+	}
 
 	// Camera
-	camera_->set_fov_default( get_config()->get( "camera.fov", 90.f ) );
+	camera_->set_fov_default( get_setting_store()->get( game_settings::CAMERA_FOV ) );
+
+	// オプション画面で FOV が変わったら反映する（ズーム倍率は保つ）。購読はシーンと一緒に破棄される
+	fov_subscription_ = get_setting_store()->subscribe( game_settings::CAMERA_FOV, [this] ( const core::setting::SettingStore::Value& v )
+	{
+		camera_->change_fov_default_keep_zoom( std::get< float_t >( v ) );
+	} );
 	camera_->reset_fov();
 	camera_->set_aspect( static_cast< float >( get_width() ) / static_cast< float >( get_height() ) );
 
@@ -97,50 +111,115 @@ GamePlayScene::GamePlayScene()
 	}
 
 	std::string stage_dir_name = StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) );
-	load_stage_file( ( stage_dir_name + get_stage_name() + ".stage" ).c_str() );
+	load_stage_file( ( stage_dir_name + get_stage_name() ).c_str() );
 
 	if ( ! get_graphics_manager()->is_sky_box_set() )
 	{
 		get_graphics_manager()->set_sky_box( "sky-box-3" );
 	}
 
-	/// @todo 直す
-	// far_billboards_ = get_graphics_manager()->load_model( ( get_stage_name() + "-far-billboards" ).c_str() );
-	far_billboards_ = get_graphics_manager()->load_model( "far-billboards-1" );
+	// 既定の遠景。ステージファイルの far_billboards コマンドで差し替える
+	far_billboards_ = load_model_handle( "far-billboards-1" );
 
-	/// @todo 直す
-	rectangle_ = get_graphics_manager()->create_named_model( "rectangle" );
-	rectangle_->set_mesh( get_graphics_manager()->create_named_mesh< Rectangle >( "rectangle", Rectangle::Buffer::Type::DEFAULT ) );
+	// シャドウマップのデバッグ表示に使う矩形。メッシュは GraphicsManager が作った画面全体の矩形を使い回す
+	// （以前は入るたびに同じ名前のモデルとメッシュを作り直していて、古いものが解放されずに溜まり、GraphicsManager の矩形の名前も奪っていた）
+	Model* rectangle = get_graphics_manager()->get_model( "rectangle" );
 
-	scope_mesh_ = get_graphics_manager()->load_model( "scope" );
-
-	bgm_ = get_sound_manager()->get_sound( "bgm" );
-
-	if ( bgm_ )
+	if ( ! rectangle )
 	{
-		bgm_->play( stage_config_->get( "bgm.loop", true ) );
+		rectangle = get_graphics_manager()->create_named_model( "rectangle" );
+		rectangle->set_mesh( get_graphics_manager()->get_mesh( "rectangle" ) );
+	}
+
+	rectangle_ = get_graphics_manager()->get_model_handle( rectangle );
+
+	scope_mesh_ = load_model_handle( "scope" );
+
+	bgm_ = get_sound_manager()->get_sound_handle( "bgm" );	// 無ければ空（ステージの bgm で読む）
+
+	if ( Sound* bgm = resolve( bgm_, "bgm" ) )
+	{
+		bgm->play( bgm_loop_ );
 	}
 
 	get_graphics_manager()->load_paper_textures();
 
+	// 開発用 : やり直し（restart）の前に作り、やり直しで始めの位置に置かれるようにする
+	debug_spawn_objects();
+
+	// 開発用 : 段階ごとの時間を測るなら、System ごとの時間も測る（BLUE_SKY_DEBUG_FRAME_STAGES）
+	if ( stage_timer_.is_enabled() )
+	{
+		get_object_updater()->set_stage_timer( & stage_timer_ );
+	}
+
 	restart();
+
+	// 開発用 : BLUE_SKY_DEBUG_DUMP_STAGE を設定すると、ステージから作った物体の一覧をログに出す
+	// （ステージの読み方を変える前と後で、作られる物体が同じかを比べるため。設計 doc/ステージ形式の設計.md 3.2）
+	if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_DUMP_STAGE", nullptr, 0 ) > 0 )
+	{
+		debug_log( "[StageDump] ステージ " + get_stage_name() + " : 物体 " + std::to_string( get_object_factory()->describe_objects().size() ) + " 個・始めの動き " + std::to_string( stage_setup_command_call_list_.size() ) + " 個" );
+
+		for ( const auto& line : get_object_factory()->describe_objects() )
+		{
+			debug_log( "[StageDump] " + line );
+		}
+	}
 }
 
 GamePlayScene::~GamePlayScene()
 {
+	get_object_updater()->set_stage_timer( nullptr );	// 開発用の測る先（このシーンが持つ）を外す
+
 	get_graphics_manager()->unset_render_target();
 
-	get_active_object_manager()->clear();
+	// 物体（ECS だけの物体）を、物理の世界を片付ける前に壊す
+	get_object_factory()->clear();
 
 	get_graphics_manager()->unset_sky_box();
 	get_graphics_manager()->unset_ground();
 	get_graphics_manager()->unset_shadow_map();
 
-	get_active_object_physics()->clear();
+	get_physics_manager()->clear();
 
 	clear_delayed_command();
 
 	get_graphics_manager()->get_sprite()->set_ortho_offset( 0.f );
+}
+
+ecs::PlayerBehaviorSystem* GamePlayScene::get_player_system() const
+{
+	return get_entity_manager()->get_system< ecs::PlayerBehaviorSystem >();
+}
+
+ecs::PlayerBehaviorComponent& GamePlayScene::get_player() const
+{
+	static ecs::PlayerBehaviorComponent empty;		// プレイヤーがいない（作れなかった）ときの空の部品
+
+	ecs::PlayerBehaviorComponent* p = get_player_system() ? get_player_system()->find_player( player_id_ ) : nullptr;
+
+	return p ? * p : empty;
+}
+
+ecs::PlayerInventoryComponent& GamePlayScene::get_player_inventory() const
+{
+	static ecs::PlayerInventoryComponent empty;		// プレイヤーがいない（作れなかった）ときの空の部品
+
+	core::ecs::Entity* entity = get_entity_manager()->find( player_id_ );
+	ecs::PlayerInventoryComponent* inventory = entity ? entity->get_component< ecs::PlayerInventoryComponent >() : nullptr;
+
+	return inventory ? * inventory : empty;
+}
+
+ecs::EntityObject GamePlayScene::get_player_object() const
+{
+	return ecs::EntityObject( get_entity_manager()->find( player_id_ ) );
+}
+
+GameObjectRef GamePlayScene::get_player_ref() const
+{
+	return get_object_factory()->get_ref( player_id_ );
 }
 
 void GamePlayScene::clear_delayed_command()
@@ -172,7 +251,7 @@ void GamePlayScene::restart()
 
 	camera_->restart();
 
-	get_active_object_manager()->restart();
+	get_object_factory()->restart();
 
 	clear_delayed_command();
 	setup_stage();
@@ -252,6 +331,8 @@ void GamePlayScene::load_sound_all( bool is_final_stage )
  */
 void GamePlayScene::update()
 {
+	stage_timer_.begin_frame();
+
 	Scene::update();
 
 	if ( is_blackout_ )
@@ -267,32 +348,67 @@ void GamePlayScene::update()
 		update_main();
 	}
 
-	get_active_object_manager()->update();
+	// 開発用 : BLUE_SKY_DEBUG_PRESS_SWITCHES を設定すると、始まってから 30 フレーム後にステージのスイッチを全部押す
+	// （スイッチで壁やゴールが動くイベントを、遊ばずに確かめるため。動いた物体が目標に着くと log/blue-sky.log に出る）
+	if ( debug_press_switches_frame_ >= 0 && GetEnvironmentVariableA( "BLUE_SKY_DEBUG_PRESS_SWITCHES", nullptr, 0 ) > 0 && ++debug_press_switches_frame_ == 30 )
+	{
+		debug_press_switches_frame_ = -1;
+
+		// 作った順（ステージに書いた順）に押す。スイッチのイベントで物体が作られる（一覧に加わる）ことがあるので、添字で回す
+		// （スイッチは ECS だけの物体。以前は ActiveObject の一覧から dynamic_cast< BaseSwitch* > で探していた）
+		const auto& objects = get_object_factory()->get_entity_object_list();
+		auto* switches = get_entity_manager()->get_system< ecs::SwitchSystem >();
+
+		for ( size_t i = 0; switches && i < objects.size(); ++i )
+		{
+			if ( switches->get_state( objects[ i ] ) )
+			{
+				const bool switched = switches->do_switch( objects[ i ] );
+				debug_log( string_t( "[Debug] スイッチを押しました : " ) + ( switched ? "入った" : "入らなかった" ) );
+			}
+		}
+	}
+
+	debug_visit_objects();
+	debug_throw_stones();
+	debug_player_script();
+	debug_log_actors();
+
+	stage_timer_.mark( "シーン・プレイヤーの入力" );
+
+	get_object_updater()->update();
 
 	if ( ! is_cleared_ )
 	{
 		get_graphics_manager()->clear_debug_bullet();
-		get_active_object_physics()->update( get_elapsed_time() );
+		get_physics_manager()->step_simulation( get_elapsed_time() );
 
-		for ( auto i = get_active_object_manager()->active_object_list().begin(); i != get_active_object_manager()->active_object_list().end(); ++i )
-		{
-			( *i )->update_transform();
-		}
+		stage_timer_.mark( "物理（Bullet の step_simulation）" );
+
+		// 剛体の位置を位置の正（TransformComponent）へ写す（ecs::PhysicsSyncSystem。以前は物体ごとに update_transform を呼んでいた）
+		get_object_updater()->update_transforms();
+
+		stage_timer_.mark( "剛体の位置を写す（update_transforms）" );
 	}
 
-	camera_->update_with_player( player_ );
+	{
+		const ecs::EntityObject player = get_player_object();
+		camera_->update_with_player( player.get_location(), player.get_front(), get_player().eye_height, get_player().eye_depth, get_player_system()->is_dead( player_id_ ) );
+	}
 	camera_->update();
 
 
-	// collision_check
-	get_active_object_physics()->check_collision_with( player_ );
+	// collision_check（当たった組を ecs::CollisionEventSystem に集め、互換の層が二重ディスパッチを呼ぶ。調べる順は以前と同じ : プレイヤー → ゴール → 全部）
+	get_object_updater()->check_collision_with( player_id_ );
 
-	if ( get_active_object_physics()->is_collision( player_, goal_ ) )
+	if ( get_physics_manager()->contact_pair_test( get_player_ref().get_rigid_body(), goal_.get_rigid_body() ) )
 	{
 		on_goal();
 	}
 
-	get_active_object_physics()->check_collision_all();
+	get_object_updater()->check_collision_all();
+
+	stage_timer_.mark( "当たり（check_collision）" );
 
 	get_sound_manager()->set_listener_position( camera_->position().xyz() );
 	get_sound_manager()->set_listener_orientation( camera_->front().xyz(), camera_->up().xyz() );
@@ -302,12 +418,8 @@ void GamePlayScene::update()
 	update_balloon_sound();
 	update_shadow();
 
-	light_position_.chase();
-	ambient_color_.chase();
-	shadow_color_.chase();
-	shadow_paper_color_.chase();
-
-	get_graphics_manager()->set_ambient_color( ambient_color_.value() );
+	look_.chase();
+	look_.apply_ambient_color( * get_graphics_manager() );
 
 	// tess test
 	{
@@ -322,6 +434,8 @@ void GamePlayScene::update()
 
 		get_graphics_manager()->get_frame_render_data()->data().tess_factor = math::clamp( get_graphics_manager()->get_frame_render_data()->data().tess_factor, 1.f, 8.f );
 	}
+
+	stage_timer_.mark( "そのほかの update（音・影の設定など）" );
 }
 
 /**
@@ -330,157 +444,58 @@ void GamePlayScene::update()
  */
 void GamePlayScene::update_main()
 {
+	read_player_input();
+
+	const ecs::PlayerInputComponent* input = get_entity_manager()->get_system< ecs::PlayerInputSystem >() ? get_entity_manager()->get_system< ecs::PlayerInputSystem >()->find_input( player_id_ ) : nullptr;
+
+	if ( ! input )
+	{
+		return;
+	}
+
 	const float_t rotation_speed_rate = camera_->fov() / camera_->get_fov_default();
 
 	if ( ! get_oculus_rift() )
 	{
-		camera_->rotate_degree_target() += Vector( get_input()->get_mouse_dy() * get_mouse_rotation_speed() * rotation_speed_rate, 0.f, 0.f, 0.f );
+		camera_->rotate_degree_target() += Vector( input->mouse_dy * get_mouse_rotation_speed() * rotation_speed_rate, 0.f, 0.f, 0.f );
 		camera_->rotate_degree_target().set_x( math::clamp( camera_->rotate_degree_target().x(), -get_mouse_rotation_speed(), +get_mouse_rotation_speed() ) );
 	}
 
-	player_->set_pitch( -camera_->rotate_degree_target().x() / get_mouse_rotation_speed() );
+	// プレイヤーの操作（ecs::PlayerInputSystem。以前はここでプレイヤーの関数を直接呼んでいた）。カメラの動きはプレイヤーの操作の結果を変えないので、操作の後にまとめる
+	ecs::PlayerInputSystem::View view;
+	view.camera_rotate_x = camera_->rotate_degree_target().x();
+	view.camera_front = camera_->front();
+	view.rotation_speed_rate = rotation_speed_rate;
+	view.mouse_rotation_speed = get_mouse_rotation_speed();
+	view.is_mouse_look = ! get_oculus_rift();
 
-	float eye_depth_add = 0.f;
+	const ecs::PlayerInputSystem::Result result = get_entity_manager()->get_system< ecs::PlayerInputSystem >()->update_player( player_id_, view );
 
-	if ( player_->is_on_ladder() )
+	if ( ! result.is_dead )
 	{
-		eye_depth_add = -0.05f;
-	}
-	else if ( camera_->rotate_degree_target().x() > 0.f )
-	{
-		if ( ! get_oculus_rift() )
+		if ( result.scope_started )
 		{
-			eye_depth_add = get_input()->get_mouse_dy();
-		}
-	}
-
-	player_->add_eye_depth( eye_depth_add );
-
-	if ( ! player_->is_dead() )
-	{
-		bool is_moving = false;
-
-		if ( ! player_->is_ladder_step_only() )
-		{
-			if ( get_input()->press( Input::Button::LEFT ) )
-			{
-				player_->side_step( -1.f );
-				is_moving = true;
-			}
-			if ( get_input()->press( Input::Button::RIGHT ) )
-			{
-				player_->side_step( +1.f );
-				is_moving = true;
-			}
-			if ( get_input()->press( Input::Button::UP ) )
-			{
-				player_->step( +1.f );
-				is_moving = true;
-			}
-			if ( get_input()->press( Input::Button::DOWN ) )
-			{
-				player_->step( -1.f );
-				is_moving = true;
-			}
+			camera_->set_fov_target( camera_->get_fov_default() * get_scope_zoom_factor() );
+			camera_->set_fov( camera_->get_fov_default() * get_scope_zoom_factor() );
 		}
 
-		bool is_moving_on_ladder = false;
-
-		if ( player_->is_on_ladder() )
+		if ( result.scope_wheel > 0 )
 		{
-			if ( get_input()->press( Input::Button::UP ) )
-			{
-				player_->ladder_step( +1.f );
-				is_moving_on_ladder = true;
-			}
-			if ( get_input()->press( Input::Button::DOWN ) )
-			{
-				player_->ladder_step( -1.f );
-				is_moving_on_ladder = true;
-			}
+			camera_->set_fov_target( std::max( camera_->get_fov_target() * get_scope_zoom_factor(), get_min_scope_fov() ) );
 		}
-		else
+		else if ( result.scope_wheel < 0 )
 		{
-			player_->release_ladder();
+			camera_->set_fov_target( std::min( camera_->get_fov_target() / get_scope_zoom_factor(), camera_->get_fov_default() * get_scope_zoom_factor() ) );
 		}
 
-		if ( ! is_moving )
+		if ( result.reset_fov )
 		{
-			player_->stop();
-		}
-
-		if ( ! is_moving_on_ladder )
-		{
-			player_->stop_ladder_step();
-		}
-
-		if ( get_input()->push( Input::Button::A ) )
-		{
-			switch ( player_->get_selected_item_type() )
-			{
-				case Player::ItemType::NONE: player_->jump(); break;
-				case Player::ItemType::ROCKET: player_->rocket( camera_->front() ); break;
-				case Player::ItemType::STONE: player_->throw_stone( camera_->front() ); break;
-					case Player::ItemType::SCOPE:
-				{
-					player_->switch_scope_mode();
-
-					if ( player_->get_action_mode() == Player::ActionMode::SCOPE )
-					{
-						camera_->set_fov_target( camera_->get_fov_default() * get_scope_zoom_factor() );
-						camera_->set_fov( camera_->get_fov_default() * get_scope_zoom_factor() );
-					}
-					break;
-				}
-			}
-		}
-		else if ( get_input()->push( Input::Button::JUMP ) )
-		{
-			player_->jump();
-		}
-		else if ( get_input()->press( Input::Button::A ) || get_input()->press( Input::Button::JUMP ) )
-		{
-			player_->clamber();
-		}
-		else
-		{
-			player_->stop_clamber();
-		}
-
-		int wheel = get_input()->pop_mouse_wheel_queue();
-
-		if ( player_->get_action_mode() == Player::ActionMode::SCOPE )
-		{
-			if ( wheel > 0 )
-			{
-				camera_->set_fov_target( std::max( camera_->get_fov_target() * get_scope_zoom_factor(), get_min_scope_fov() ) );
-			}
-			else if ( wheel < 0 )
-			{
-				camera_->set_fov_target( std::min( camera_->get_fov_target() / get_scope_zoom_factor(), camera_->get_fov_default() * get_scope_zoom_factor() ) );
-			}
-		}
-		else
-		{
-			if ( wheel > 0 )
-			{
-				player_->select_next_item();
-			}
-			else if ( wheel < 0 )
-			{
-				player_->select_prev_item();
-			}
-
 			camera_->reset_fov();
 		}
 
-		float_t add_direction_degree_by_mouse = get_input()->get_mouse_dx() * get_mouse_rotation_speed() * rotation_speed_rate;
-		float_t add_direction_degree_by_hmd   = get_oculus_rift() ? math::radian_to_degree( get_oculus_rift()->get_delta_yaw() ) : 0.f;
+		camera_->rotate_degree_target().set_y( get_player_object().get_direction_degree() );
 
-		player_->add_direction_degree( add_direction_degree_by_mouse + add_direction_degree_by_hmd );
-		camera_->rotate_degree_target().set_y( player_->get_direction_degree() );
-
-		if ( player_->is_falling_to_die() )
+		if ( get_player_system()->is_falling_to_die( player_id_ ) )
 		{
 			// 落ちて死のうとしている場合は白くフェードアウトする
 
@@ -494,7 +509,7 @@ void GamePlayScene::update_main()
 	}
 	else
 	{
-		if ( get_input()->push( Input::Button::A ) )
+		if ( result.restart_requested )
 		{
 			restart();
 		}
@@ -504,6 +519,149 @@ void GamePlayScene::update_main()
 			get_graphics_manager()->fade_out( get_fade_speed_dead() );
 		}
 	}
+}
+
+/**
+ * 入力（Input）を、このフレームのプレイヤーへの入力（プレイヤーの ecs::PlayerInputComponent）に書く
+ *
+ * 開発用の BLUE_SKY_DEBUG_PLAYER_SCRIPT を設定したときは、Input を読まず、決まった入力の並び（debug_player_script_input）を書く
+ */
+void GamePlayScene::read_player_input()
+{
+	auto* system = get_entity_manager()->get_system< ecs::PlayerInputSystem >();
+	ecs::PlayerInputComponent* found = system ? system->find_input( player_id_ ) : nullptr;
+
+	if ( ! found )
+	{
+		return;
+	}
+
+	ecs::PlayerInputComponent& input = * found;
+	input.clear();
+
+	if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_PLAYER_SCRIPT", nullptr, 0 ) > 0 )
+	{
+		debug_player_script_input( input );
+		return;
+	}
+
+	input.left = get_input()->press( Input::Button::LEFT );
+	input.right = get_input()->press( Input::Button::RIGHT );
+	input.up = get_input()->press( Input::Button::UP );
+	input.down = get_input()->press( Input::Button::DOWN );
+	input.a = get_input()->press( Input::Button::A );
+	input.jump = get_input()->press( Input::Button::JUMP );
+	input.a_pushed = get_input()->push( Input::Button::A );
+	input.jump_pushed = get_input()->push( Input::Button::JUMP );
+	input.mouse_dx = get_input()->get_mouse_dx();
+	input.mouse_dy = get_input()->get_mouse_dy();
+	input.hmd_delta_yaw_degree = get_oculus_rift() ? math::radian_to_degree( get_oculus_rift()->get_delta_yaw() ) : 0.f;
+
+	// ホイールは、プレイヤーが生きている間だけ取り出す（以前と同じ。死んでいる間に回した分は、やり直した後に効く）
+	if ( ! get_player_system()->is_dead( player_id_ ) )
+	{
+		input.wheel = get_input()->pop_mouse_wheel_queue();
+	}
+}
+
+/**
+ * 開発用 : 決まった入力の並び（フレームごと）を書く（BLUE_SKY_DEBUG_PLAYER_SCRIPT）
+ *
+ * 歩く → 跳ぶ・よじ登る → 歩きながら向きを変える → 横歩き・後ろ歩き → 見下ろす・見上げる → 走る → 跳ぶ → 望遠鏡 →
+ * （梯子があれば）梯子を上って跳び降りる →（ロケットがあれば）ロケットで飛ぶ → 1520 フレーム目に A（死んでいればやり直す）。
+ * 物体の所へ置く（梯子・風船・ロケット）のは debug_player_script が行う
+ */
+void GamePlayScene::debug_player_script_input( ecs::PlayerInputComponent& input ) const
+{
+	const int f = debug_player_script_frame_;
+
+	if ( f < 60 ) { }
+	else if ( f < 150 ) { input.up = true; }
+	else if ( f == 150 ) { input.jump = true; input.jump_pushed = true; }
+	else if ( f < 160 ) { input.jump = true; }
+	else if ( f < 220 ) { input.up = true; input.mouse_dx = 0.02f; }
+	else if ( f < 260 ) { input.left = true; }
+	else if ( f < 300 ) { input.right = true; input.down = true; }
+	else if ( f < 330 ) { input.mouse_dy = 0.02f; }
+	else if ( f < 360 ) { input.mouse_dy = -0.02f; }
+	else if ( f < 540 ) { input.up = true; }
+	else if ( f == 540 ) { input.jump = true; input.jump_pushed = true; }
+	else if ( f == 600 ) { input.wheel = +1; }
+	else if ( f == 610 ) { input.a = true; input.a_pushed = true; }
+	else if ( f == 620 ) { input.wheel = +1; }
+	else if ( f == 640 ) { input.a = true; input.a_pushed = true; }
+	else if ( f >= 705 && f < 715 ) { input.up = true; input.mouse_dy = -0.04f; }
+	else if ( f >= 715 && f < 765 ) { input.up = true; }
+	else if ( f == 770 ) { input.jump = true; input.jump_pushed = true; }
+	else if ( f == 1020 ) { input.a = true; input.a_pushed = true; }
+	else if ( f == 1520 ) { input.a = true; input.a_pushed = true; }
+}
+
+/**
+ * 開発用 : 決まった入力の並びに合わせて、プレイヤーを物体の所へ置き、5 フレームごとにプレイヤーの様子をログに出す（BLUE_SKY_DEBUG_PLAYER_SCRIPT）
+ *
+ * プレイヤーを ECS へ移す前と後で、歩く・跳ぶ・梯子・風船・ロケット・望遠鏡・視点が同じに動くかを比べるため（本編の動きは変えない）。
+ * 700 フレーム目に最初の梯子、820 フレーム目に最初の風船、1000 フレーム目に最初のロケットの所へ置く（あるものだけ）。1540 フレーム目で終わる
+ */
+void GamePlayScene::debug_player_script()
+{
+	if ( debug_player_script_frame_ < 0 || GetEnvironmentVariableA( "BLUE_SKY_DEBUG_PLAYER_SCRIPT", nullptr, 0 ) == 0 )
+	{
+		return;
+	}
+
+	const int f = debug_player_script_frame_++;
+
+	auto put_at_first = [ & ] ( const char_t* label, const char_t* kind )
+	{
+		if ( auto id = get_object_factory()->find_first_of_kind( kind ) )
+		{
+			const Vector to = get_object_factory()->get_ref( * id ).get_location();
+
+			get_player_ref().set_location( to );
+			get_player_ref().set_velocity( Vector::Zero );
+
+			debug_log( string_t( "[Debug] プレイヤーを" ) + label + "の所へ置きました" );
+		}
+	};
+
+	if ( f == 700 ) { put_at_first( "梯子", "ladder" ); }
+	if ( f == 820 ) { put_at_first( "風船", "balloon" ); }
+	if ( f == 1000 ) { put_at_first( "ロケット", "rocket" ); }
+
+	if ( f >= 60 && f % 5 == 0 )
+	{
+		debug_log( "[Debug] プレイヤーの様子 " + std::to_string( f ) + " " + describe_player_state() );
+	}
+
+	if ( f >= 1540 )
+	{
+		debug_log( "[Debug] プレイヤーの入力の並びを終えました" );
+		debug_player_script_frame_ = -1;
+	}
+}
+
+/// 開発用 : プレイヤーの様子（位置・速度・向き・状態）を 1 行にする（BLUE_SKY_DEBUG_PLAYER_SCRIPT・BLUE_SKY_DEBUG_LOG_ACTORS）
+string_t GamePlayScene::describe_player_state() const
+{
+	static const char_t* const action_modes[] = { "NONE", "BALLOON", "ROCKET", "UMBRELLA", "SCOPE" };
+
+	const ecs::EntityObject player = get_player_object();
+	const ecs::PlayerBehaviorComponent& p = get_player();
+	const ecs::PlayerInventoryComponent& items = get_player_inventory();
+	const Vector l = player.get_location();
+	const Vector v = player.get_velocity();
+
+	char buffer[ 512 ];
+	std::snprintf( buffer, sizeof( buffer ),
+		"位置 ( %.2f, %.2f, %.2f ) 速度 ( %.2f, %.2f, %.2f ) 向き %.1f 足場 %d 跳ぶ %d 跳べる %d 梯子 %d 壁 %d よじ登り %d/%d 覗く %d 投げる %d 動作 %s 終わりかけ %d 歩く速さ %.3f 目 %.2f/%.2f 選択 %d 石 %d ロケット %d メダル %d 死 %d 落ちて死ぬ %d HP %d 視野 %.1f カメラ ( %.1f, %.1f, %.1f )",
+		l.x(), l.y(), l.z(), v.x(), v.y(), v.z(), player.get_direction_degree(),
+		p.is_on_footing, p.is_jumping, p.is_jumpable, p.is_on_ladder, p.is_facing_to_block, p.can_clamber, p.is_clambering, p.can_peer_down, p.can_throw,
+		action_modes[ static_cast< int >( p.action_mode ) ], p.is_action_pre_finish, p.step_speed, p.eye_height, p.eye_depth,
+		static_cast< int >( items.selected_item_type ), items.get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ), items.get_item_count( ecs::PlayerBehaviorComponent::ItemType::ROCKET ), items.has_medal,
+		get_player_system()->is_dead( player_id_ ), get_player_system()->is_falling_to_die( player_id_ ), p.hp, camera_->fov(), camera_->position().x(), camera_->position().y(), camera_->position().z() );
+
+	return buffer;
 }
 
 void GamePlayScene::update_blackout()
@@ -525,7 +683,7 @@ void GamePlayScene::update_delayed_command()
 	{
 		if ( ( *i )->update( get_elapsed_time() ) )
 		{
-			exec_command( ( *i )->get_command() );
+			run_action( ( *i )->get_action() );
 		}
 
 		if ( ( *i )->is_over() )
@@ -541,7 +699,7 @@ void GamePlayScene::update_delayed_command()
 
 void GamePlayScene::update_balloon_sound()
 {
-	int_t balloon_sound_request = player_->pop_balloon_sound_request();
+	int_t balloon_sound_request = get_player().pop_balloon_sound_request();
 
 	if ( balloon_sound_request >= 1 )
 	{
@@ -570,7 +728,7 @@ void GamePlayScene::update_balloon_sound()
 		}
 	}
 
-	if ( player_->get_action_mode() == Player::ActionMode::BALLOON && ( balloon_sound_type_ == BalloonSoundType::SOLO || balloon_sound_type_ == BalloonSoundType::SCALE ) )
+	if ( get_player().action_mode == ecs::PlayerBehaviorComponent::ActionMode::BALLOON && ( balloon_sound_type_ == BalloonSoundType::SOLO || balloon_sound_type_ == BalloonSoundType::SCALE ) )
 	{
 		action_bgm_after_timer_ = get_action_bgm_fade_delay();
 	}
@@ -579,26 +737,23 @@ void GamePlayScene::update_balloon_sound()
 		action_bgm_after_timer_ -= get_elapsed_time();
 	}
 
-	if ( action_bgm_after_timer_ > 0.f )
+	if ( Sound* bgm = resolve( bgm_, "bgm" ) )
 	{
-		if ( bgm_ )
+		if ( action_bgm_after_timer_ > 0.f )
 		{
-			bgm_->fade_out();
+			bgm->fade_out();
 		}
-	}
-	else
-	{
-		if ( bgm_ )
+		else
 		{
-			bgm_->fade_in();
+			bgm->fade_in();
 		}
 	}
 
-	/// @todo 整理する
-	// ぶれるのでここでやる。
-	if ( player_->get_balloon() )
+	// プレイヤーの位置が決まった後で、持っている風船を手元に合わせ直す
+	// （物体の更新の中だけだと、プレイヤーより先に更新されたときに 1 フレーム遅れてぶれる。以前は const_cast で呼んでいた）
+	if ( const auto balloon = get_player().balloon )
 	{
-		const_cast< Balloon* >( player_->get_balloon() )->update();
+		get_object_updater()->update_balloon( * balloon );
 	}
 }
 
@@ -610,7 +765,8 @@ void GamePlayScene::update_shadow()
 {
 	if ( get_graphics_manager()->is_shadow_enabled() )
 	{
-		get_graphics_manager()->get_shadow_map()->set_light_position( Vector( light_position_.value().x(), light_position_.value().y(), light_position_.value().z(), 1.f ) );
+		const Vector3 light_position = look_.get_light_position();
+		get_graphics_manager()->get_shadow_map()->set_light_position( Vector( light_position.x(), light_position.y(), light_position.z(), 1.f ) );
 		get_graphics_manager()->get_shadow_map()->set_eye_position( camera_->position() );
 	}
 }
@@ -632,15 +788,371 @@ void GamePlayScene::on_goal()
 	}
 }
 
+/**
+ * 開発用 : プレイヤーをメダル・風船・梯子・ゴールの所へ順に動かし、当たった結果をログに出す
+ *
+ * 環境変数 BLUE_SKY_DEBUG_VISIT_OBJECTS を設定したときだけ動く（本編の動きは変えない）。行き先はメダル・風船・梯子・ロケット・ゴールの順（あるものだけ）。
+ * 当たりのイベント（ecs::CollisionEventSystem と互換の層）が、遊ばずに起きることを確かめるため。
+ * 始まってから 60 フレーム後から 40 フレームごとに、次の物体の位置へプレイヤーを置いて速度を 0 にする。
+ * 置いてから 3 フレーム後に、その結果（メダルを持っているか・風船につかまっているか・梯子に触れているか・ゴールしたか）を出す。
+ * ゴールに着くとステージが終わるので、ゴールは最後にする
+ */
+void GamePlayScene::debug_visit_objects()
+{
+	if ( debug_visit_objects_frame_ < 0 || GetEnvironmentVariableA( "BLUE_SKY_DEBUG_VISIT_OBJECTS", nullptr, 0 ) == 0 )
+	{
+		return;
+	}
+
+	constexpr int start_frame = 60;
+	constexpr int interval = 40;
+	constexpr int result_frame = 3;		///< 置いてから結果を出すまでのフレーム数（当たりは物理を進めた後に調べるので、置いた次のフレームから効く）
+
+	const int frame = debug_visit_objects_frame_++;
+	const int phase = ( frame - start_frame ) % interval;
+
+	if ( frame < start_frame || ( phase != 0 && phase != result_frame ) )
+	{
+		return;
+	}
+
+	// 行き先（種類ごとに最初の 1 つ。加えた順 = ステージに書いた順）
+	std::vector< std::pair< string_t, Vector > > targets;
+
+	// 工場が作った物体から種類の名前で探す
+	auto add_first_entity = [ & ] ( const char_t* name, const char_t* kind )
+	{
+		if ( auto id = get_object_factory()->find_first_of_kind( kind ) )
+		{
+			targets.emplace_back( name, get_object_factory()->get_ref( * id ).get_location() );
+		}
+	};
+
+	add_first_entity( "メダル", "medal" );
+	add_first_entity( "風船", "balloon" );
+	add_first_entity( "梯子", "ladder" );
+	add_first_entity( "ロケット", "rocket" );
+	targets.emplace_back( "ゴール", goal_.get_location() );
+
+	const size_t step = static_cast< size_t >( ( frame - start_frame ) / interval );
+
+	if ( phase == result_frame )
+	{
+		if ( step < targets.size() )
+		{
+			debug_log( string_t( "[Debug] 物体の所へ動かした結果 : " ) + targets[ step ].first
+				+ " / メダル " + ( get_player_inventory().has_medal ? "持っている" : "持っていない" )
+				+ " / 風船 " + ( get_player().action_mode == ecs::PlayerBehaviorComponent::ActionMode::BALLOON ? "つかまっている" : "つかまっていない" )
+				+ " / 梯子 " + ( get_player().is_on_ladder ? "触れている" : "触れていない" )
+				+ " / ゴール " + ( is_cleared_ ? "した" : "していない" )
+				+ " / ロケット " + std::to_string( get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::ROCKET ) ) + " 個" );
+		}
+
+		return;
+	}
+
+	if ( step >= targets.size() || is_cleared_ )
+	{
+		debug_visit_objects_frame_ = -1;
+		return;
+	}
+
+	const Vector to = targets[ step ].second;
+
+	get_player_ref().set_location( to );
+	get_player_ref().set_velocity( Vector::Zero );
+
+	debug_log( "[Debug] プレイヤーを" + targets[ step ].first + "の所へ動かしました ( " + std::to_string( to.x() ) + ", " + std::to_string( to.y() ) + ", " + std::to_string( to.z() ) + " )" );
+}
+
+/**
+ * 開発用 : ステージの石を全部拾い、スイッチ・敵・風船に向けて順に投げて、当たった結果をログに出す
+ *
+ * 環境変数 BLUE_SKY_DEBUG_THROW_STONES を設定したときだけ動く（本編の動きは変えない）。
+ * 石を拾う・投げる・石がスイッチや敵や風船に当たる、を遊ばずに確かめるため（石とスイッチを ECS だけの物体にするときの見比べ）。
+ * 始まってから 60 フレーム後から 10 フレームごとに、次の石の位置へプレイヤーを置く（触れると拾う）。
+ * 拾い終えたら、行き先（最初のスイッチ・全部の敵・最初の風船。あるものだけ）ごとに 60 フレームずつ使う :
+ * 0 フレーム目に行き先の 2.5 m 後ろ（行き先の向きの反対側）へ置いて行き先を向かせ、5 フレーム目に行き先へ投げ、45 フレーム目に結果を出す
+ */
+void GamePlayScene::debug_throw_stones()
+{
+	if ( debug_throw_stones_frame_ < 0 || GetEnvironmentVariableA( "BLUE_SKY_DEBUG_THROW_STONES", nullptr, 0 ) == 0 )
+	{
+		return;
+	}
+
+	constexpr int start_frame = 60;
+	constexpr int pick_interval = 10;
+	constexpr int throw_interval = 60;
+	constexpr int throw_frame = 5;
+	constexpr int result_frame = 45;
+	constexpr float_t distance = 2.5f;
+
+	const int frame = debug_throw_stones_frame_++;
+
+	if ( frame < start_frame )
+	{
+		return;
+	}
+
+	// 種類の物体を作った順に集める（工場が作った物体から種類の名前で探す）
+	auto find_objects = [ & ] ( const char_t* kind )
+	{
+		std::vector< GameObjectRef > result;
+
+		for ( const auto id : get_object_factory()->find_all_of_kind( kind ) )
+		{
+			result.push_back( get_object_factory()->get_ref( id ) );
+		}
+
+		return result;
+	};
+
+	const auto stones = find_objects( "stone" );
+
+	// 石を拾う
+	if ( frame < start_frame + pick_interval * static_cast< int >( stones.size() ) )
+	{
+		if ( ( frame - start_frame ) % pick_interval == 0 )
+		{
+			get_player_ref().set_location( stones[ ( frame - start_frame ) / pick_interval ].get_location() );
+			get_player_ref().set_velocity( Vector::Zero );
+		}
+
+		return;
+	}
+
+	const int throw_start_frame = start_frame + pick_interval * static_cast< int >( stones.size() );
+
+	if ( frame == throw_start_frame )
+	{
+		debug_log( "[Debug] 石を拾いました : " + std::to_string( get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) ) + " 個（ステージの石 " + std::to_string( stones.size() ) + " 個）" );
+	}
+
+	// 行き先（種類ごとに最初の 1 つ）
+	std::vector< std::pair< string_t, GameObjectRef > > targets;
+
+	auto add_first = [ & ] ( const char_t* name, const std::vector< GameObjectRef >& list )
+	{
+		if ( ! list.empty() )
+		{
+			targets.emplace_back( name, list.front() );
+		}
+	};
+
+	add_first( "スイッチ", find_objects( "switch" ) );
+	// 敵は全部（向きや周りの壁で投げられない・見つかる敵がいるので）
+	for ( const auto& robot : find_objects( "robot" ) )
+	{
+		targets.emplace_back( "敵 " + std::to_string( targets.size() ), robot );
+	}
+
+	add_first( "風船", find_objects( "balloon" ) );
+
+	const size_t step = static_cast< size_t >( ( frame - throw_start_frame ) / throw_interval );
+	const int phase = ( frame - throw_start_frame ) % throw_interval;
+
+	if ( step >= targets.size() )
+	{
+		debug_log( "[Debug] 石を投げ終えました" );
+		debug_throw_stones_frame_ = -1;
+		return;
+	}
+
+	const string_t& name = targets[ step ].first;
+	const GameObjectRef& target = targets[ step ].second;
+
+	if ( phase == 0 )
+	{
+		// 行き先の後ろ（敵に見つからないように）に置き、行き先を向かせる。
+		// 後ろは行き先の向きから決める（ActiveObject::set_direction_degree の前の向きと同じ計算。ECS だけの物体も同じ所に置くため）
+		Matrix m;
+		m.set_rotation_xyz( 0.f, math::degree_to_radian( target.get_direction_degree() ), 0.f );
+
+		Vector back = -( Vector::Forward * m );
+		back.normalize();
+
+		const Vector from = target.get_location() + back * distance;
+		const Vector to = target.get_location() - from;
+
+		get_player_ref().set_location( from );
+		get_player_ref().set_velocity( Vector::Zero );
+		get_player_system()->set_direction_degree( player_id_, math::radian_to_degree( std::atan2( to.x(), to.z() ) ) );
+	}
+	else if ( phase == throw_frame )
+	{
+		Vector direction = ( target.get_location() + Vector( 0.f, 0.5f, 0.f ) ) - ( get_player_object().get_location() + Vector( 0.f, get_player().eye_height, 0.f ) );
+		direction.normalize();
+
+		const int count = get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE );
+		get_player_system()->throw_stone( player_id_, direction );
+
+		debug_log( "[Debug] 石を" + name + "へ" + ( get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) < count ? "投げました" : "投げられませんでした" ) + "（残り " + std::to_string( get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) ) + " 個）" );
+	}
+	else if ( phase == result_frame )
+	{
+		string_t result = "不明";
+
+		auto* switches = get_entity_manager()->get_system< ecs::SwitchSystem >();
+
+		if ( const auto state = switches ? switches->get_state( target.get_entity_id() ) : std::nullopt )
+		{
+			result = * state == ecs::SwitchComponent::State::ON ? "入" : * state == ecs::SwitchComponent::State::OFF ? "切" : "壊れた";
+		}
+		else if ( const auto mode = get_entity_manager()->get_system< ecs::RobotBehaviorSystem >() ? get_entity_manager()->get_system< ecs::RobotBehaviorSystem >()->get_mode( target.get_entity_id() ) : std::nullopt )
+		{
+			result = * mode == ecs::RobotBehaviorComponent::Mode::SHUTDOWN ? "止まった" : "止まっていない";
+		}
+		else if ( auto* entity = get_entity_manager()->find( target.get_entity_id() ); entity && entity->get_component< ecs::BalloonHoldComponent >() )
+		{
+			result = ecs::EntityObject( entity ).is_dead() ? "割れた" : "割れていない";
+		}
+
+		debug_log( "[Debug] 石を投げた結果 : " + name + " / " + result + "（持っている石 " + std::to_string( get_player_inventory().get_item_count( ecs::PlayerBehaviorComponent::ItemType::STONE ) ) + " 個）" );
+	}
+}
+
+/**
+ * 開発用 : ステージを読んだ後に、物体を格子状に大量に作る
+ *
+ * 環境変数 BLUE_SKY_DEBUG_SPAWN_OBJECTS="数[,種類]"（例 "10000,medal"）を設定したときだけ動く（本編の動きは変えない）。
+ * 本編のステージの物体は数十個しかないので、1 万を超える物体でのフレームの時間（BLUE_SKY_DEBUG_FRAME_TIME）を測るために使う。
+ *
+ * 種類は描画・物理・System の負荷が違うものを選ぶ :
+ *   - static  : 動かない壁（wall-1。質量 0 の剛体・StaticObjectComponent）
+ *   - medal   : 回るメダル（重力 0・当たりの応答なしの動く剛体・SpinSystem）。省略したときはこれ
+ *   - balloon : ゆらぐ風船（重力 0・当たりの応答なしの動く剛体・BalloonHoldSystem・影を落とす線）
+ *   - そのほか ObjectFactory::create_object が知っている種類（stone・switch など）
+ *
+ * 置く場所は乱数を使わず、プレイヤーの始めの位置を中心にした 3 m 間隔の正方形の格子（プレイヤーに触れないよう 4 m 上）。
+ * 作った物体はやり直し（restart）で始めの位置に置かれる
+ */
+void GamePlayScene::debug_spawn_objects()
+{
+	char buffer[ 64 ] = { };
+
+	if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_SPAWN_OBJECTS", buffer, sizeof( buffer ) ) == 0 )
+	{
+		return;
+	}
+
+	int count = 0;
+	char kind_buffer[ 32 ] = "medal";
+
+	if ( sscanf_s( buffer, "%d,%31s", & count, kind_buffer, static_cast< unsigned >( sizeof( kind_buffer ) ) ) < 1 || count <= 0 )
+	{
+		debug_log( string_t( "[DebugSpawn] BLUE_SKY_DEBUG_SPAWN_OBJECTS の値が読めません（\"数[,種類]\" で書く）: " ) + buffer );
+		return;
+	}
+
+	const string_t kind = kind_buffer;
+	const float_t spacing = 3.f;
+	const float_t height = 4.f;
+	const int columns = static_cast< int >( std::ceil( std::sqrt( static_cast< double >( count ) ) ) );
+	const Vector center = get_player_object().get_start_location();
+
+	LARGE_INTEGER start, end, frequency;
+	QueryPerformanceCounter( & start );
+
+	int created = 0;
+
+	for ( int n = 0; n < count; ++n )
+	{
+		const float_t x = center.x() + ( static_cast< float_t >( n % columns ) - static_cast< float_t >( columns - 1 ) * 0.5f ) * spacing;
+		const float_t z = center.z() + ( static_cast< float_t >( n / columns ) - static_cast< float_t >( columns - 1 ) * 0.5f ) * spacing;
+		const Vector location( x, center.y() + height, z );
+
+		if ( kind == "static" )
+		{
+			get_object_factory()->create_static_object( "wall-1", location, Vector::Zero );
+		}
+		else if ( ! get_object_factory()->create_object( kind, location ) )	// 始めの位置で作る（原点に重ねて作ると、作るたびに重なった組を全部調べる）
+		{
+			break;	// 知らない種類（理由は create_object がログに出している）
+		}
+
+		++created;
+	}
+
+	QueryPerformanceCounter( & end );
+	QueryPerformanceFrequency( & frequency );
+
+	char text[ 256 ];
+	sprintf_s( text, "[DebugSpawn] 物体を %d 個作りました（種類 %s・%d 列の格子・%.0f ms）。ステージの物体と合わせて %zu 個",
+		created, kind.c_str(), columns, static_cast< double >( end.QuadPart - start.QuadPart ) * 1000.0 / static_cast< double >( frequency.QuadPart ),
+		get_object_factory()->get_entity_object_list().size() );
+	debug_log( text );
+}
+
+/**
+ * 開発用 : 30 フレームごとに、風船・少女・敵の位置・向き・状態をログに出す
+ *
+ * 環境変数 BLUE_SKY_DEBUG_LOG_ACTORS を設定したときだけ動く（本編の動きは変えない）。
+ * 風船・少女・敵を ECS だけの物体に移す前と後で、動き（ゆらぎ・回る・追う・止まる）が同じかを比べるため
+ */
+void GamePlayScene::debug_log_actors()
+{
+	if ( GetEnvironmentVariableA( "BLUE_SKY_DEBUG_LOG_ACTORS", nullptr, 0 ) == 0 || debug_log_actors_frame_++ % 30 != 0 )
+	{
+		return;
+	}
+
+	static const char_t* const robot_modes[] = { "立つ", "回る", "巡回", "注目", "発見", "追う", "止まった", "浮く" };
+
+	// 番号 → 種類と状態（作った順 = 番号の順に出す）
+	std::map< core::ecs::EntityId, std::pair< string_t, string_t > > actors;
+
+	if ( auto* robots = get_entity_manager()->get_system< ecs::RobotBehaviorSystem >() )
+	{
+		for ( const auto id : get_object_factory()->find_all_of_kind( "robot" ) )
+		{
+			if ( const auto mode = robots->get_mode( id ) )
+			{
+				actors[ id ] = { "robot", robot_modes[ static_cast< int >( * mode ) ] };
+			}
+		}
+	}
+
+	for ( const auto id : get_object_factory()->find_all_of_kind( "girl" ) )
+	{
+		actors[ id ] = { "girl", "" };
+	}
+
+	if ( auto id = get_object_factory()->find( "player" ) )
+	{
+		actors[ * id ] = { "player", describe_player_state() };
+	}
+
+	for ( const auto id : get_object_factory()->find_all_of_kind( "balloon" ) )
+	{
+		auto* entity = get_entity_manager()->find( id );
+		const auto* balloon = entity ? entity->get_component< ecs::BalloonHoldComponent >() : nullptr;
+
+		if ( balloon )
+		{
+			actors[ id ] = { "balloon", string_t( ecs::EntityObject( entity ).is_dead() ? "割れた" : "割れていない" ) + ( balloon->is_held() ? " つかまれている" : "" ) };
+		}
+	}
+
+	for ( const auto& [ id, actor ] : actors )
+	{
+		const GameObjectRef o = get_object_factory()->get_ref( id );
+
+		char buffer[ 256 ];
+		std::snprintf( buffer, sizeof( buffer ), "[Debug] 物体の様子 %d #%u %s 位置 ( %.2f, %.2f, %.2f ) 向き %.1f %s", debug_log_actors_frame_ - 1, static_cast< unsigned >( id ), actor.first.c_str(), o.get_location().x(), o.get_location().y(), o.get_location().z(), o.get_direction_degree(), actor.second.c_str() );
+		debug_log( buffer );
+	}
+}
+
 void GamePlayScene::update_clear()
 {
-	Vector target_position = goal_->get_location();
+	Vector target_position = goal_.get_location();
 	target_position.set_z( target_position.z() - get_goal_camera_z_offset() + get_sound_manager()->get_sound( "fin" )->get_current_position() * get_goal_camera_z_speed() );
 
-	player_->set_location( player_->get_location() * ( 1.f - get_goal_position_lerp() ) + target_position * get_goal_position_lerp() );
-	player_->set_direction_degree( 0.f );
+	get_player_ref().set_location( get_player_object().get_location() * ( 1.f - get_goal_position_lerp() ) + target_position * get_goal_position_lerp() );
+	get_player_system()->set_direction_degree( player_id_, 0.f );
 
-	camera_->rotate_degree_target().set( 0.f, player_->get_direction_degree(), 0.f, 0.f );
+	camera_->rotate_degree_target().set( 0.f, get_player_object().get_direction_degree(), 0.f, 0.f );
 	camera_->set_rotate_chase_speed( get_camera_chase_speed_on_clear() );
 
 	get_graphics_manager()->fade_out( get_fade_speed_clear() );
@@ -668,7 +1180,7 @@ void GamePlayScene::go_to_next_scene()
 {
 	std::string save_param_name = StageSelectScene::get_stage_prefix_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + "." + get_stage_name();
 
-	get_save_data()->set( save_param_name.c_str(), std::max( player_->has_medal() ? 2 : 1, get_save_data()->get( save_param_name.c_str(), 0 ) ) );
+	get_save_data()->set( save_param_name.c_str(), std::max( get_player_inventory().has_medal ? 2 : 1, get_save_data()->get( save_param_name.c_str(), 0 ) ) );
 
 	if ( get_stage_name() == "2-3" )
 	{

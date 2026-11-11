@@ -1,0 +1,20 @@
+# 0-0 のステージの前の文と背景（tools/stage_convert/convert_story_text.py で 0-0.intro から変換した）
+format = 1
+
+[[layer]]
+image = "noise.jpg"
+scale = { from = 1.6, to = 3, speed = 0.0001 }
+# 回転は付けない : 以前の layer-rotate 0 180 0.1 は名前違いで 2013-08 から回っていなかった。その見た目を保つ（2026-11-11 利用者の決定）
+
+[text]
+color = 0xFFFFFFCC
+border_color = 0x000000CC
+body = """
+ある日、少年は空を見上げた。
+
+青く広がる空の向こうに
+何かが待っている気がした。
+
+これは、その小さな冒険の物語。
+
+"""

@@ -2,7 +2,9 @@
 
 #include <blue_sky/GameMain.h>
 #include <blue_sky/Input.h>
-#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ObjectUpdater.h>
+#include <blue_sky/ObjectFactory.h>
+#include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <game/MainLoop.h>
@@ -17,19 +19,13 @@
 namespace blue_sky
 {
 
-/// @todo ちゃんとする
-static ObjectConstantBufferData object_constant_buffer_data;
-static Vector eye( 0.f, 0.f, -1.f, 1.f );
-static Matrix r;
-
-static int pen_mode_ = 0;
-
-CanvasTestScene::CanvasTestScene()
-	: tablet_( Tablet::get_instance( get_game_main()->get_app()->GetWindowHandle() ) )
+CanvasTestScene::CanvasTestScene( GameMain& game_main )
+	: Scene( game_main )
+	, tablet_( get_game_main()->get_app()->get_tablet() )		// App が持つペンタブレット（以前はシングルトン）
 	, pen_color_( 0.f, 0.f, 0.f, 1.f )
-	, points_( new DynamicPointList() )
+	, points_( new DynamicPointList( get_graphics_manager()->get_direct_3d() ) )
 {
-	texture_ = get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" );
+	texture_ = get_graphics_manager()->get_texture_handle_of( get_graphics_manager()->load_texture( "media/texture/pen/white-hard-pen.png" ) );
 	get_graphics_manager()->set_sky_box( "sky-box-sky" );
 
 	// 描画性能を調べるために、デフォルトで大量の点を追加する
@@ -87,46 +83,40 @@ void CanvasTestScene::update()
 {
 	Scene::update();
 
-	/// @todo GraphicsManager に移行する
+	// 試験用のシーンなので、カメラの部品を使わずに、キーで回す行列を直接定数に書く
 	const float rs = 0.05f;
-	static float ry = 0.f;
-	static float rx = 0.f;
-
-	static float ss = 0.01f;
-	static float scale = 1.f;
-
 
 	if ( get_input()->press( Input::Button::LEFT ) )
 	{
-		ry -= rs;
+		rotation_y_ -= rs;
 	}
 
 	if ( get_input()->press( Input::Button::RIGHT ) )
 	{
-		ry += rs;
+		rotation_y_ += rs;
 	}
 
 	if ( get_input()->press( Input::Button::UP ) )
 	{
-		rx -= rs;
+		rotation_x_ -= rs;
 	}
 
 	if ( get_input()->press( Input::Button::DOWN ) )
 	{
-		rx += rs;
+		rotation_x_ += rs;
 	}
 
 	if ( get_input()->press( Input::Button::L ) )
 	{
-		scale *= 0.98f;
+		scale_ *= 0.98f;
 	}
 
 	if ( get_input()->press( Input::Button::R ) )
 	{
-		scale *= 1.02f;
+		scale_ *= 1.02f;
 	}
 
-	scale = math::clamp( scale, 0.1f, 50.f );
+	scale_ = math::clamp( scale_, 0.1f, 50.f );
 
 	if ( pen_mode_ == 1 && get_input()->release( Input::Button::A ) || pen_mode_ == 2 )
 	{
@@ -136,16 +126,14 @@ void CanvasTestScene::update()
 	{
 		if ( get_input()->press( Input::Button::B ) )
 		{
-			static float v = 0.f;
+			pen_hue_ += 0.005f;
 
-			v += 0.005f;
-
-			if ( v > 1.f )
+			if ( pen_hue_ > 1.f )
 			{
-				v -= 1.f;
+				pen_hue_ -= 1.f;
 			}
 
-			pen_color_ = Color::from_hsv( v, 1.f, 1.f );
+			pen_color_ = Color::from_hsv( pen_hue_, 1.f, 1.f );
 		}
 
 		if ( get_input()->press( Input::Button::L2 ) )
@@ -154,11 +142,9 @@ void CanvasTestScene::update()
 			pen_color_.g() -= 0.005f;
 			pen_color_.b() -= 0.005f;
 
-			auto* o = get_active_object_manager()->get_active_object( "paint_guide_plane" );
-
-			if ( o )
+			if ( auto o = get_object_factory()->find_ref( "paint_guide_plane" ) )
 			{
-				o->get_transform().set_position( o->get_transform().get_position() + Vector( 0.f, 0.f, 0.01f ) );
+				o->set_location( o->get_location() + Vector( 0.f, 0.f, 0.01f ) );
 			}
 		}
 		if ( get_input()->press( Input::Button::R2 ) )
@@ -167,11 +153,9 @@ void CanvasTestScene::update()
 			pen_color_.g() += 0.005f;
 			pen_color_.b() += 0.005f;
 
-			auto* o = get_active_object_manager()->get_active_object( "paint_guide_plane" );
-
-			if ( o )
+			if ( auto o = get_object_factory()->find_ref( "paint_guide_plane" ) )
 			{
-				o->get_transform().set_position( o->get_transform().get_position() - Vector( 0.f, 0.f, 0.01f ) );
+				o->set_location( o->get_location() - Vector( 0.f, 0.f, 0.01f ) );
 			}
 		}
 	}
@@ -186,7 +170,7 @@ void CanvasTestScene::update()
 	}
 
 	{
-		eye = Vector( 0.f, 0.f, -1.f * scale, 1.f );
+		const Vector eye( 0.f, 0.f, -1.f * scale_, 1.f );
 		Vector at( 0.f, 0.f, 0.f, 1.f );
 		Vector up( 0.f, 1.f, 0.f, 0.f );
 
@@ -209,14 +193,13 @@ void CanvasTestScene::update()
 		get_graphics_manager()->get_frame_render_data()->update();
 	}
 
-	Matrix s;
+	Matrix r;
 
 	{
-		r.set_rotation_xyz( rx, ry, 0.f );
-		s.set_scaling( scale, scale, scale );
+		r.set_rotation_xyz( rotation_x_, rotation_y_, 0.f );
 
-		object_constant_buffer_data.world = /* s * */ r;
-		object_constant_buffer_data.color = Color( 1.f, 1.f, 1.f, 1.f );
+		object_constant_buffer_data_.world = r;
+		object_constant_buffer_data_.color = Color( 1.f, 1.f, 1.f, 1.f );
 	}
 
 	Vector vector( tablet_->get_x() / get_width() - 0.5f, -( tablet_->get_y() / get_height() - 0.5f ), 0.f, 1.f );
@@ -264,14 +247,19 @@ void CanvasTestScene::update()
 	}
 
 	// プレーンオブジェクトの色を変更する
-	auto* plane = get_active_object_manager()->get_active_object( "paint_guide_plane" );
-	auto plane_color = plane->get_model()->get_shader_at( 0 )->get_color( "color" );
+	// 案内の板はスクリプトが作る。無いとき（スクリプトが読めない・まだ作られていない）は飛ばす（以前は null を使って落ちていた）
+	auto plane = get_object_factory()->find_ref( "paint_guide_plane" );
 
-	float plane_color2[ 4 ] = { plane_color.r(), plane_color.g(), plane_color.b(), plane_color.a() };
-
-	if ( ImGui::ColorEdit4( "Plane Color", plane_color2 ) )
+	if ( plane && plane->get_model() )
 	{
-		plane->get_model()->get_shader_at( 0 )->set_color( "color", Color( plane_color2[ 0 ], plane_color2[ 1 ], plane_color2[ 2 ], plane_color2[ 3 ] ) );
+		auto plane_color = plane->get_model()->get_shader_at( 0 )->get_color( "color" );
+
+		float plane_color2[ 4 ] = { plane_color.r(), plane_color.g(), plane_color.b(), plane_color.a() };
+
+		if ( ImGui::ColorEdit4( "Plane Color", plane_color2 ) )
+		{
+			plane->get_model()->get_shader_at( 0 )->set_color( "color", Color( plane_color2[ 0 ], plane_color2[ 1 ], plane_color2[ 2 ], plane_color2[ 3 ] ) );
+		}
 	}
 
 	ImGui::End();
@@ -286,7 +274,7 @@ void CanvasTestScene::render()
 	get_graphics_manager()->setup_rendering();
 	get_graphics_manager()->render_background();
 
-	/// @todo 点も一括で GraphicsManager で描画する。
+	// 点の描画はこのシーンでしか使わないので、シーンが直接行う（他のシーンでも使うときは GraphicsManager に移す）
 	get_graphics_manager()->set_input_layout( "drawing_point" );
 
 	render_technique( "|drawing_point", [this] {
@@ -297,14 +285,17 @@ void CanvasTestScene::render()
 		get_graphics_manager()->get_shared_object_render_data()->bind_to_vs();
 		get_graphics_manager()->get_shared_object_render_data()->bind_to_ps();
 		
-		get_graphics_manager()->get_shared_object_render_data()->update( &object_constant_buffer_data );
+		get_graphics_manager()->get_shared_object_render_data()->update( & object_constant_buffer_data_ );
 
-		texture_->bind_to_ps( 1 );
+		if ( const Texture* texture = resolve( texture_, "pen" ) )
+		{
+			texture->bind_to_ps( 1 );
+		}
 		points_->render();
 	} );
 
-	/// @todo 描画順の管理を GraphicsManager で行い 半透明のオブジェクトは後で描画されるようにする
-	get_graphics_manager()->render_active_objects( get_active_object_manager() );
+	// 物体は作った順（Entity の番号の順）に描く。半透明の物体を正しく重ねたいときは、render_objects で不透明 → 半透明（奥から）の順に並べ替える
+	get_graphics_manager()->render_objects();
 
 	{
 
@@ -344,10 +335,9 @@ void CanvasTestScene::on_function_key_down( int key )
 			"media/texture/pen/white-hard-round-rect-stroke-pen.png"
 		};
 
-		static int i = 0;
-		i = ( i + 1 ) % texture_names.size();
+		pen_texture_index_ = ( pen_texture_index_ + 1 ) % texture_names.size();
 
-		texture_ = get_graphics_manager()->load_texture( texture_names[ i ] );
+		texture_ = get_graphics_manager()->get_texture_handle_of( get_graphics_manager()->load_texture( texture_names[ pen_texture_index_ ] ) );
 	}
 
 	if ( key == 6 )

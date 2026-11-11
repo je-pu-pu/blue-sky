@@ -1,0 +1,142 @@
+# 1-1 のステージ（tools/stage_convert/convert_stage.py で 1-1.stage から変換した）
+format = 1
+
+[stage]
+collision = "1-1.obj"
+ground = "ground"
+
+[player]
+position = [-10.0, 1.0, -49.0]
+camera_direction = 180
+
+[goal]
+position = [0.699999988079071, 0.0, 5.099999904632568]
+
+[[object]]
+type = "static"
+model = "stage-1-1"
+position = [0, 0, 0]
+
+[[event]]
+when = "start"
+then = [
+  { do = "set", bgm = "twinkle" },
+  { do = "set", sky_box = "star-2" },
+  # exec set_line_type 4
+  # exec set_paper_type 4
+  # exec set_drawing_accent_scale 0.1
+
+  { do = "set", shadow_color = [0.5, 0.5, 0.5, 1] },
+  { do = "set", shadow_paper_color = [1, 1, 1, 1] },
+]
+
+[[object]]
+type = "stone"
+position = [1.4999998807907104, 0.0, -39.29999923706055]
+direction = 0
+
+[[object]]
+type = "stone"
+position = [1.1999999284744263, 0.0, -31.799999237060547]
+direction = 0
+
+[[object]]
+type = "static"
+model = "tree-1"
+position = [-3.000000238418579, 0.0, 1.3999977111816406]
+rotation = [0, 0, 0]
+
+[[object]]
+type = "static"
+model = "tree-1"
+position = [-3.000000238418579, 0.0, 3.3999977111816406]
+rotation = [0, 0, 0]
+
+[[object]]
+type = "static"
+model = "tree-1"
+position = [-3.000000238418579, 0.0, 5.399997711181641]
+rotation = [0, 0, 0]
+
+[[object]]
+type = "static"
+model = "tree-1"
+position = [-3.000000238418579, 0.0, 7.399997711181641]
+rotation = [0, 0, 0]
+
+[[object]]
+type = "static"
+model = "tree-1"
+position = [1.999999761581421, 0.0, -30.60000228881836]
+rotation = [0, 0, 0]
+
+[[object]]
+type = "static"
+model = "tree-1"
+position = [-0.20000019669532776, 0.0, -47.80000305175781]
+rotation = [0, 0, 0]
+
+[[object]]
+type = "static"
+model = "tree-1"
+position = [-8.300000190734863, 0.0, -45.400001525878906]
+rotation = [0, 0, 0]
+
+[[object]]
+type = "medal"
+position = [-3.0, 2.0, -2.0]
+direction = 0
+
+[[object]]
+type = "stone"
+position = [-1.399999976158142, 0.0, 0.6000000238418579]
+direction = 0
+
+[[object]]
+type = "static"
+name = "wall-1"
+model = "wall-3"
+position = [0.0, 1.0, 0.0]
+rotation = [0, 0, 0]
+
+[[object]]
+type = "static"
+name = "wall-2"
+model = "wall-3"
+position = [-1.2, 1.0, -9.5]
+rotation = [90, 0, 0]
+
+# ゴール用スイッチ
+[[object]]
+type = "switch"
+name = "switch-a"
+position = [3.5999999046325684, 0.0, -7.0]
+direction = 0
+on_turn_on = [
+  { do = "move_to", target = "wall-1", position = [0, 4, 0], speed = 1 },
+  { do = "move_to", target = "wall-2", position = [-1.2, 4, -9.5], speed = 1 },
+  { do = "play_sound", sound = "machine-translation" },
+  { do = "switch", target = "switch-a", state = "off", delay = 5 },
+]
+
+[[object]]
+type = "switch"
+name = "switch-b"
+position = [-4.0, 0.0, -10.0]
+direction = 0
+on_turn_on = [
+  { do = "move_to", target = "wall-2", position = [-1.2, 4, -9.5], speed = 1 },
+  { do = "play_sound", sound = "machine-translation" },
+  { do = "switch", target = "switch-b", state = "off", delay = 5 },
+]
+
+# 浮き上がり防止
+[[event]]
+when = "start"
+then = [
+  { do = "set_body", target = "goal", gravity = [0, -9.8, 0] },
+]
+
+# キネマティックに設定
+# exec game_object.set_kinematic wall-1 1
+# exec game_object.set_kinematic wall-2 1

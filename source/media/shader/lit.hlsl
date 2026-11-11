@@ -7,7 +7,7 @@ COMMON_POS_UV_COLOR vs_lit( COMMON_POS_NORM_UV input )
 
 	output.Position = common_wvp_pos( input.Position );
 	output.TexCoord = input.TexCoord;
-    output.Color = dot( -Light, input.Normal ) * 0.5f + 1.f;
+    output.Color = dot( -Light.xyz, input.Normal ) * 0.5f + 1.f;
 
 	return output;
 }

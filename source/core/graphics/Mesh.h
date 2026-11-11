@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/ResourceHandle.h>
 #include <type/type.h>
 #include <vector>
 
@@ -10,6 +11,7 @@ class Vertex { };
 class VertexWeight;
 class VertexGroup;
 class Material;
+class Mesh;
 
 /**
  * 抽象メッシュクラス

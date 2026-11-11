@@ -1,6 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="test\scene">
+      <UniqueIdentifier>{ddd9e890-5ee3-4e37-84a4-62b37084f170}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\dev">
+      <UniqueIdentifier>{86adbf2e-50fb-4014-a878-f6bfe7322ff7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\stage">
+      <UniqueIdentifier>{8b53b4a8-622b-4f23-880d-988d608def6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\sound">
+      <UniqueIdentifier>{18cdc58c-a880-496f-b2ad-df5aa8f366ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\math">
+      <UniqueIdentifier>{159d35dc-b7bc-491c-b80c-c0c38cf53bbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\ecs">
+      <UniqueIdentifier>{1f2ef7ea-5a0a-4a38-a9b8-4b97b9e954e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\script">
+      <UniqueIdentifier>{0957b6f1-29cf-46fd-83ed-837ad8401f2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\physics">
+      <UniqueIdentifier>{3fd0d7bd-fdc0-4ed6-af39-d36c90897a19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\graphics">
+      <UniqueIdentifier>{e51d9bc2-1427-4747-936a-6540f7abc6b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\input">
+      <UniqueIdentifier>{a4090d16-c888-49f3-9c52-f4098c258558}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{71836842-e573-4126-8e5f-fbf78c578195}</UniqueIdentifier>
+    </Filter>
     <Filter Include="math">
       <UniqueIdentifier>{a1b2c3d4-1111-2222-3333-444455556666}</UniqueIdentifier>
     </Filter>
@@ -12,6 +45,138 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test\dev\DevToolsTest.cpp">
+      <Filter>test\dev</Filter>
+    </ClCompile>
+    <ClCompile Include="test\script\ScriptBindingsTest.cpp">
+      <Filter>test\script</Filter>
+    </ClCompile>
+    <ClCompile Include="test\scene\SceneStackTest.cpp">
+      <Filter>test\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="test\dev\DevOptionsTest.cpp">
+      <Filter>test\dev</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\PhysicsSyncSystemTest.cpp">
+      <Filter>test\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\CollisionEventSystemTest.cpp">
+      <Filter>test\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\physics\EntityTagTest.cpp">
+      <Filter>test\physics</Filter>
+    </ClCompile>
+    <ClCompile Include="test\sound\PlaybackRateTest.cpp">
+      <Filter>test\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="test\sound\SoundManagerTest.cpp">
+      <Filter>test\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="test\sound\SampleRateStepperTest.cpp">
+      <Filter>test\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="test\math\SkinningAnimationSetTest.cpp">
+      <Filter>test\math</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\MoveToTargetSystemTest.cpp">
+      <Filter>test\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\ObjectFactoryTest.cpp">
+      <Filter>test\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\stage\TomlStageParserTest.cpp">
+      <Filter>test\stage</Filter>
+    </ClCompile>
+    <ClCompile Include="test\stage\StageLookTest.cpp">
+      <Filter>test\stage</Filter>
+    </ClCompile>
+    <ClCompile Include="test\stage\StageFilesTest.cpp">
+      <Filter>test\stage</Filter>
+    </ClCompile>
+    <ClCompile Include="test\stage\StoryTextParserTest.cpp">
+      <Filter>test\stage</Filter>
+    </ClCompile>
+    <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp">
+      <Filter>test\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="test\script\ScriptManagerTest.cpp">
+      <Filter>test\script</Filter>
+    </ClCompile>
+    <ClCompile Include="test\graphics\RenderSettingsTest.cpp">
+      <Filter>test\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="test\graphics\InstancingTest.cpp">
+      <Filter>test\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="test\graphics\CullingTest.cpp">
+      <Filter>test\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="test\graphics\TextureSlotTest.cpp">
+      <Filter>test\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\RenderSystemHandleTest.cpp">
+      <Filter>test\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\physics\RigidBodyTest.cpp">
+      <Filter>test\physics</Filter>
+    </ClCompile>
+    <ClCompile Include="test\physics\PhysicsManagerTest.cpp">
+      <Filter>test\physics</Filter>
+    </ClCompile>
+    <ClCompile Include="test\graphics\EffectParserTest.cpp">
+      <Filter>test\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="test\input\RawInputTest.cpp">
+      <Filter>test\input</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\UIWidgetTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\UIMeasureTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\AsyncLoaderTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\UILayoutTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\ResourceManagerTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\ResourceHandleBenchmarkTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\Pixel2DSpaceTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\OptionsControllerTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\UIRendererTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\UIActionTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\UIImageTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\UIScreenTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\SettingStoreTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\KeyNamesTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\NavRepeaterTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ui\StringTableTest.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
     <ClCompile Include="test\math\BulletTest.cpp">
       <Filter>math</Filter>
     </ClCompile>
@@ -21,13 +186,40 @@
     <ClCompile Include="test\ecs\EntityManagerTest.cpp">
       <Filter>ecs</Filter>
     </ClCompile>
+    <ClCompile Include="test\ecs\EcsBenchmarkTest.cpp">
+      <Filter>ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\StablePoolTest.cpp">
+      <Filter>ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\PerceptionSystemTest.cpp">
+      <Filter>ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\ObjectRenderDataSystemTest.cpp">
+      <Filter>ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\ObjectRenderResourcesTest.cpp">
+      <Filter>ecs</Filter>
+    </ClCompile>
     <ClCompile Include="test\graphics\MsdfFontTest.cpp">
       <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\LadderStoneSwitchTest.cpp">
+      <Filter>test\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\BalloonGirlRobotTest.cpp">
+      <Filter>test\ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ecs\PlayerTest.cpp">
+      <Filter>test\ecs</Filter>
     </ClCompile>
     <ClCompile Include="test\lib.cpp" />
     <ClCompile Include="test\pch.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="test\ui\UITestHelper.h">
+      <Filter>ui</Filter>
+    </ClInclude>
     <ClInclude Include="test\pch.h" />
   </ItemGroup>
   <ItemGroup>

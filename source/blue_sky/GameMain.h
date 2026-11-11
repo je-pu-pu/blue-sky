@@ -8,8 +8,23 @@
 
 #include <type/type.h>
 
+#include <Scene/SceneRequest.h>
+#include <blue_sky/dev/DevOptions.h>
+#include <blue_sky/SceneStack.h>
+
+#include <deque>
 #include <unordered_map>
 #include <vector>
+#include <blue_sky/DebugLog.h>
+#include <GameObject/GameObjectContext.h>
+
+namespace core::ecs { class EntityManager; }
+
+namespace blue_sky::dev
+{
+	class DevTools;
+	class DebugConsole;
+}
 
 class DirectWrite;
 
@@ -41,21 +56,29 @@ namespace core
 		class Direct3D11;
 		class BulletDebugDraw;
 	}
+
+	namespace setting
+	{
+		class SettingStore;
+	}
+
+	namespace ui
+	{
+		class StringTable;
+		struct Theme;
+	}
 }
 
 namespace blue_sky
 {
 	class Input;
 
-	class ActiveObjectPhysics;
-
-	class ActiveObject;
-	class ActiveObjectManager;
+	class ObjectUpdater;
+	class ObjectFactory;
 
 	class SceneManager;
 	class ScriptManager;
 
-	class Player;
 	class Camera;
 
 	class Scene;
@@ -86,42 +109,22 @@ public:
 	using Direct3D					= core::graphics::direct_3d_11::Direct3D11;
 	using BulletDebugDraw			= core::graphics::direct_3d_11::BulletDebugDraw;
 
-	// @todo Input クラスにあるべきでは？
-	enum Key
-	{
-		KEY_LEFT  = VK_LEFT,
-		KEY_RIGHT = VK_RIGHT,
-		KEY_UP    = VK_UP,
-		KEY_DOWN  = VK_DOWN,
-
-		KEY_F1  = VK_F1,
-		KEY_F2  = VK_F2,
-		KEY_F3  = VK_F3,
-		KEY_F4  = VK_F4,
-		KEY_F5  = VK_F5,
-		KEY_F6  = VK_F6,
-		KEY_F7  = VK_F7,
-		KEY_F8  = VK_F8,
-		KEY_F9  = VK_F9,
-		KEY_F10 = VK_F10,
-		KEY_F11 = VK_F11,
-		KEY_F12 = VK_F12,
-	};
-
 private:
+	App&									app_;					///< ウィンドウ（App が GameMain を作るときに渡す。以前は App のシングルトンから引いていた）
+	const dev::DevOptions					dev_options_;			///< 開発用の環境変数（起動時に 1 回だけ読む。以前は各所でその場で読んでいた）
 	TimeManager								time_manager_;			///< 時間管理
 
 	std::unique_ptr< Direct3D >				direct_3d_;				///< Direct3D
 
 	std::unique_ptr< DirectInput >			direct_input_;			///< DirectInput
+	ScopedCoutToLog							cout_to_log_;			///< std::cout をログ（log/blue-sky.log）にも流す（ログの出口をそろえる）
 	std::unique_ptr< Input >				input_;					///< Game Input
 
 	std::unique_ptr< OculusRift >			oculus_rift_;			///< Oculus Rift
 
 	std::unique_ptr< SoundEngine >			sound_engine_;			///< SoundEngine
 
-	std::unique_ptr< ActiveObjectPhysics >	active_object_physics_;	///< ActiveObjectPhysics (レガシー)
-	std::unique_ptr< PhysicsManager >		physics_manager_;		///< PhysicsManager
+	std::unique_ptr< PhysicsManager >		physics_manager_;		///< 物理の世界（本編と ECS のテストシーンで 1 つ。シーンを替えるときに clear する。以前は本編だけの ActiveObjectPhysics と 2 つあった）
 	std::unique_ptr< GraphicsManager >		graphics_manager_;		///< GraphicsManager
 	std::unique_ptr< SoundManager >			sound_manager_;			///< SoundManager
 	std::unique_ptr< ScriptManager >		script_manager_;		///< ScriptManager
@@ -130,37 +133,57 @@ private:
 
 	std::unique_ptr< MainLoop >				main_loop_;				///< ループ管理
 
-	std::unique_ptr< ActiveObjectManager >	active_object_manager_;	///< ActiveObjectManager
+	GameObjectContext						game_object_context_;	///< ゲームのオブジェクトに渡すもの（物理の世界・音・経過時間）
+	std::unique_ptr< ObjectUpdater >		object_updater_;		///< 本編の物体の System を決まった順に動かす（以前の ActiveObjectManager の残り）
+	std::unique_ptr< ObjectFactory >		object_factory_;		///< 物体を種類の名前から作り、名前で引く・やり直す・片付ける
 
 	std::unique_ptr< BulletDebugDraw >		bullet_debug_draw_;
 
-	std::unique_ptr< Scene >				scene_;					///< 現在のベースシーン
-	std::vector< std::unique_ptr< Scene > >	overlay_scene_stack_;	///< オーバーレイシーンのスタック
-	string_t								stage_name_;			///< 現在のステージ名
+	std::unique_ptr< SceneManager >			scene_manager_;			///< シーンの作り方の一覧（以前はシングルトン）
+	std::unique_ptr< core::ecs::EntityManager >	entity_manager_;	///< ECS の Entity・Component・System（以前はシングルトン。シーンより後に壊す）
 
 	bool									is_display_fps_;		///< FPS 表示フラグ
 
-	bool									is_command_mode_;		///< 現在コマンドモード中かどうか？
-	string_t								user_command_;			///< ユーザーの入力したコマンド
-
 	bool									is_show_cursor_;		///< 現在カーソルを表示するかどうか
 
-	void setup_script_command();
+	std::unique_ptr< core::setting::SettingStore >	settings_;		///< ゲーム設定（オプション画面が編集する）
+	std::unique_ptr< core::ui::StringTable >		ui_strings_;	///< UI の表示文字列
+	std::unique_ptr< core::ui::Theme >				ui_theme_;		///< UI の見た目（文字の大きさの倍率を掛けたもの）
+	std::unique_ptr< core::ui::Theme >				ui_theme_base_;	///< 倍率を掛ける前の見た目（既定 ＋ テーマファイル）
+	float_t											ui_text_scale_ = 1.f;	///< 文字の大きさの倍率（設定 ui.text_scale）
+	bool											is_display_change_requested_ = false;	///< 解像度・フルスクリーンの変更をフレーム末に行う
+	bool											is_full_screen_toggle_requested_ = false;	///< ユーザーによるフルスクリーンの切り替え（Alt+Enter / F5）をフレーム末に行う
+	bool											is_shut_down_ = false;					///< shutdown() 済み
+	/// 開発用の機能（フレームの保存・フレームの時間・シーンを順に替える・解像度の変更の試し・経過時間の固定）と、imgui の開発用の窓（F1）。
+	/// どちらも外には見せない。scene_stack_ の次に壊れる（使う GameMain の持ち物より先）
+	std::unique_ptr< dev::DevTools >				dev_tools_;
+	std::unique_ptr< dev::DebugConsole >			debug_console_;
+
+	/// 開発用の機能を作る（保存・設定の変更・シーンの切り替えの仕事を渡す）
+	void create_dev_tools();
+
+	/// ベースのシーンとオーバーレイ・切り替えの要求（外には見せない）。
+	/// シーンは設定（購読）・文字列表・テーマ・ECS など GameMain の持ち物を使うので、最後に宣言して最初に壊す（デストラクタでも最初に壊す）
+	std::unique_ptr< SceneStack >					scene_stack_;
+
+	void flush_resource_releases();
+
+	void apply_display_settings();
 
 	void update_render_data_for_game() const;
 
-	void check_scene_transition();
-	void setup_scene( const string_t& );
+	/// ESC を押したときの処理（オーバーレイが開いていないとき。何をするかは SceneStack が決める）
+	void handle_escape();
 
-	void render_console_window();
-	void render_scene_list_window();
+	/// ベースを壊した後、次のシーンを作る前の片付け（物体・ECS・物理の世界・解放を頼まれたリソース）
+	void clear_for_next_scene();
+
+	/// シーンの持ち物（SceneStack）を作る。シーンを作る・片付ける・画面に出す仕事を渡す
+	void create_scene_stack();
 
 public:
-	GameMain();
+	explicit GameMain( App& app );
 	virtual ~GameMain() override;
-
-	ActiveObject* create_object( const char_t* ) const;
-	ActiveObject* clone_object( const ActiveObject* ) const;
 
 	void setup_scene();
 
@@ -169,22 +192,40 @@ public:
 	void render();
 
 	void on_key_down( char_t ) override;
+
+	/// キーやマウスのボタンが押された（短いタップを取りこぼさないよう Input に溜める）
+	void on_raw_key_down( int vk ) override;
+	void on_raw_mouse_move( long dx, long dy ) override;
+
+	/// IME で変換中の文字が変わった（確定・取り消しで空）
+	void on_ime_composition( const std::u32string& text ) override;
 	void on_special_key_down( int ) override;
 	void on_mouse_wheel( int ) override;
 	void on_resize() override;
+	void on_toggle_full_screen() override { is_full_screen_toggle_requested_ = true; }
+	void shutdown() override;
+	unsigned long get_idle_wait_msec() const override;
+
+	/// ユーザーの設定（settings.config）を保存する
+	void save_settings();
 
 	Input* get_input() const { return input_.get(); }
 	
 	OculusRift* get_oculus_rift() const { return oculus_rift_.get(); }
 
-	ActiveObjectPhysics* get_active_object_physics() const { return active_object_physics_.get(); }
+	PhysicsManager* get_physics_manager() const { return physics_manager_.get(); }	///< 物理の世界（本編も ECS のテストシーンも。以前は core::Service から取っていた）
+	const TimeManager* get_time_manager() const { return & time_manager_; }		///< 時間の管理（以前は core::Service から取っていた）
 	GraphicsManager* get_graphics_manager() const { return graphics_manager_.get(); }
 	SoundManager* get_sound_manager() const { return sound_manager_.get(); }
 	ScriptManager* get_script_manager() const { return script_manager_.get(); }
 
-	ActiveObjectManager* get_active_object_manager() const { return active_object_manager_.get(); }
+	ObjectUpdater* get_object_updater() const { return object_updater_.get(); }
+	ObjectFactory* get_object_factory() const { return object_factory_.get(); }
 	
-	static App* get_app() { return App::get_instance(); }
+	App* get_app() const { return & app_; }
+
+	/// ECS の Entity・Component・System
+	core::ecs::EntityManager* get_entity_manager() const { return entity_manager_.get(); }
 
 	inline int get_width() const override { return get_app()->get_width(); }
 	inline int get_height() const override { return get_app()->get_height(); }
@@ -196,25 +237,42 @@ public:
 
 	BulletDebugDraw* get_bullet_debug_draw() const { return bullet_debug_draw_.get(); }
 
-	const std::string& get_stage_name() const { return stage_name_; }
-	void set_stage_name( const std::string& stage_name ) { stage_name_ = stage_name; }
+	const std::string& get_stage_name() const { return scene_stack_->get_stage_name(); }
+	void set_stage_name( const std::string& stage_name ) { scene_stack_->set_stage_name( stage_name ); }
 
 	bool is_display_fps() const { return is_display_fps_; }
+	/// 垂直同期を待って表示するか
+	void set_vsync( bool v );
 
-	inline static GameMain* get_instance() { static GameMain game_main; return & game_main; }
-	const Scene* get_current_scene() const { return scene_.get(); }
+	void set_display_fps( bool f ) { is_display_fps_ = f; }
 
-	/// オーバーレイシーンをスタックにプッシュする ( ベースシーンはポーズ状態になる )
-	void push_overlay_scene( const string_t& scene_name );
-	/// オーバーレイシーンをスタックからポップする ( ベースシーンのポーズが解除される )
-	void pop_overlay_scene();
+	core::setting::SettingStore* get_settings() const { return settings_.get(); }
+	const core::ui::StringTable& get_ui_strings() const { return *ui_strings_; }
+	const core::ui::Theme& get_ui_theme() const { return *ui_theme_; }
+
+	/// 解像度・フルスクリーンの変更を予約する（UI のコールバック中にウィンドウを変えないよう、update の最後に行う）
+	void request_display_change() { is_display_change_requested_ = true; }
+
+	/// 文字の大きさの倍率を UI のテーマに反映する（テーマファイルで決めた大きさに掛ける）
+	void set_ui_text_scale( float_t scale );
+
+	const Scene* get_current_scene() const { return scene_stack_->get_base_scene(); }
+
+	/// シーン遷移を要求する（実行はフレームの境目）
+	void request_scene( const SceneRequest& request ) { scene_stack_->request( request ); }
+
+	/// 今作っているシーンに渡す引数（Scene のコンストラクタが受け取る。作っている間だけ中身がある）
+	const SceneArguments& get_next_scene_arguments() const { return scene_stack_->get_next_scene_arguments(); }
+
 	/// オーバーレイシーンが存在するか
-	bool has_overlay_scene() const { return ! overlay_scene_stack_.empty(); }
+	bool has_overlay_scene() const { return scene_stack_->has_overlay(); }
 
 	void set_show_cursor( bool show_cursor ) { is_show_cursor_ = show_cursor; get_app()->show_cursor( is_show_cursor_ ); }
+
+	/// カーソルの表示と閉じ込めを、今の状態（コマンドモード・メニュー・シーンの要求）から決める
+	void update_cursor_state();
 	bool is_show_cursor() const override { return is_show_cursor_; }
 };
 
 } // namespace blue_sky
 
-inline game::Game* game::Game::get_instance() { return blue_sky::GameMain::get_instance(); }

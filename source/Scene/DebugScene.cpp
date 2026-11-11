@@ -4,8 +4,9 @@
 #include <GameObject/Camera.h>
 
 #include <blue_sky/SceneManager.h>
-#include <blue_sky/ActiveObjectManager.h>
-#include <blue_sky/ActiveObjectPhysics.h>
+#include <blue_sky/ObjectUpdater.h>
+#include <blue_sky/ObjectFactory.h>
+#include <core/physics/PhysicsManager.h>
 #include <blue_sky/ScriptManager.h>
 #include <blue_sky/Input.h>
 
@@ -28,7 +29,7 @@
 
 #include <game/MainLoop.h>
 #include <game/SoundFormat.h>
-#include <game/Sound.h>
+#include <core/sound/Sound.h>
 
 #include <common/math.h>
 
@@ -50,86 +51,12 @@
 #include <cstdio>
 #include <cmath>
 #include <chrono>
+#include <blue_sky/DebugLog.h>
 
 #pragma comment( lib, "windowscodecs.lib" )
 
 namespace
 {
-
-/**
- * R8G8B8A8_UNORM のテクスチャを PNG として保存する ( neural NPR オフライン検証用の簡易ダンパー )
- *
- * DirectXTK に依存せず Windows 標準の WIC で完結させる。
- */
-
-bool dump_texture_2d_to_png(
-	ID3D11Device* device,
-	ID3D11DeviceContext* context,
-	ID3D11Texture2D* source,
-	const wchar_t* file_name )
-{
-	using Microsoft::WRL::ComPtr;
-
-	if ( ! device || ! context || ! source )
-	{
-		return false;
-	}
-
-	std::vector< std::uint8_t > pixels;
-	UINT w = 0, h = 0;
-	if ( ! core::graphics::direct_3d_11::read_texture_2d_to_rgba8( device, context, source, pixels, w, h ) )
-	{
-		return false;
-	}
-	const UINT stride = w * 4;
-
-	// WIC で PNG エンコード ( RGBA → エンコーダ形式へ自動変換 )
-	// COM は既に初期化済みの可能性があるため戻り値は無視する ( RPC_E_CHANGED_MODE でも WIC は利用可 )
-	( void ) CoInitializeEx( nullptr, COINIT_MULTITHREADED );
-
-	ComPtr< IWICImagingFactory > factory;
-	if ( FAILED( CoCreateInstance( CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS( factory.GetAddressOf() ) ) ) )
-	{
-		return false;
-	}
-
-	ComPtr< IWICBitmap > bitmap;
-	if ( FAILED( factory->CreateBitmapFromMemory( w, h, GUID_WICPixelFormat32bppRGBA, stride, static_cast< UINT >( pixels.size() ), pixels.data(), bitmap.GetAddressOf() ) ) )
-	{
-		return false;
-	}
-
-	ComPtr< IWICStream > stream;
-	if ( FAILED( factory->CreateStream( stream.GetAddressOf() ) ) || FAILED( stream->InitializeFromFilename( file_name, GENERIC_WRITE ) ) )
-	{
-		return false;
-	}
-
-	ComPtr< IWICBitmapEncoder > encoder;
-	if ( FAILED( factory->CreateEncoder( GUID_ContainerFormatPng, nullptr, encoder.GetAddressOf() ) ) )
-	{
-		return false;
-	}
-	encoder->Initialize( stream.Get(), WICBitmapEncoderNoCache );
-
-	ComPtr< IWICBitmapFrameEncode > frame;
-	encoder->CreateNewFrame( frame.GetAddressOf(), nullptr );
-	frame->Initialize( nullptr );
-	frame->SetSize( w, h );
-
-	WICPixelFormatGUID format = GUID_WICPixelFormat32bppBGRA;
-	frame->SetPixelFormat( & format );
-
-	if ( FAILED( frame->WriteSource( bitmap.Get(), nullptr ) ) )
-	{
-		return false;
-	}
-
-	frame->Commit();
-	encoder->Commit();
-
-	return true;
-}
 
 /**
  * 深度バッファ ( D32_FLOAT / R32_TYPELESS ) を 32bit float の生バイナリとして保存する ( 案B / 段階0b )
@@ -350,24 +277,24 @@ namespace blue_sky
 core::sound::filter::BiquadFilter* filter = nullptr;
 std::unique_ptr< core::sound::MidiSequencer > midi_sequencer;
 
-DebugScene::DebugScene()
-	: camera_( new Camera() )
+DebugScene::DebugScene( GameMain& game_main )
+	: Scene( game_main )
+	, city_generator_( get_graphics_manager() )
+	, camera_( new Camera() )
 	, render_result_texture_( get_graphics_manager()->create_render_target_texture() )
 	, velocity_texture_( get_graphics_manager()->create_render_target_texture( core::graphics::direct_3d_11::PixelFormat::R32G32_FLOAT ) )
 {
 	// Physics
-	get_active_object_physics()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
+	get_physics_manager()->add_ground( Vector( 1000, 1, 1000 ) );
 
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
 	camera_->position().set( 0.f, 1.5f, -10.f, 1.f );
 
-	auto* city = get_active_object_manager()->create_object( "static" );
-	city->set_model( city_generator_.get_model() );
-
-	auto* city_debug = get_active_object_manager()->create_object( "static" );
-	city_debug->set_model( city_generator_.get_debug_model() );
+	// 町並み（剛体を持たない、描くだけの動かない物。ECS だけの物体）
+	get_object_factory()->create_model_object( city_generator_.get_model() );
+	get_object_factory()->create_model_object( city_generator_.get_debug_model() );
 
 	get_script_manager()->exec( "load( \"test/init.lua\" )" );
 
@@ -395,7 +322,7 @@ DebugScene::DebugScene()
 
 DebugScene::~DebugScene()
 {
-	get_active_object_manager()->clear();
+	get_object_factory()->clear();
 }
 
 void DebugScene::update()
@@ -442,10 +369,6 @@ void DebugScene::update()
 	if ( get_input()->push( Input::Button::A ) )
 	{
 		city_generator_.step();
-
-		// GameObject* o = get_active_object_manager()->get_nearest_object( GameObject::Vector3( camera_->position().x(), camera_->position().y(), camera_->position().z() ) );
-		// o->get_component< 
-
 	}
 
 	// filter->setCutoff( camera_->position().xz().length() * 300.f );
@@ -470,13 +393,13 @@ void DebugScene::update()
 
 	camera_->update();
 
-	get_active_object_manager()->update();
+	get_object_updater()->update();
 
 	get_graphics_manager()->update();
 	get_graphics_manager()->set_eye_position( camera_->position() );
 
 	get_graphics_manager()->clear_debug_bullet();
-	get_active_object_physics()->update( get_elapsed_time() );
+	get_physics_manager()->step_simulation( get_elapsed_time() );
 
 	auto* hand_drawing_shader = get_graphics_manager()->get_shader< graphics::shader::post_effect::HandDrawingShader >( "post_effect_hand_drawing" );
 	hand_drawing_shader->render_parameter_gui();
@@ -578,15 +501,15 @@ void DebugScene::render()
 	get_graphics_manager()->set_render_target( render_result_texture_.get() );
 
 	get_graphics_manager()->render_background();
-	get_graphics_manager()->render_active_objects( get_active_object_manager() );
+	get_graphics_manager()->render_objects();
 
 	// フレームダンプ ( ポストエフェクト前のクリーンなレンダ結果を連番 PNG 出力 )
 	if ( frame_dumping_ && frame_dump_remaining_ > 0 )
 	{
 		std::filesystem::create_directories( "dump" );
 
-		auto* d3d = core::graphics::direct_3d_11::Direct3D11::get_instance();
 		auto* rtt = static_cast< core::graphics::direct_3d_11::RenderTargetTexture* >( render_result_texture_.get() );
+		auto* d3d = rtt->get_direct_3d();	// 読み戻しに使うデバイス・コンテキストはテクスチャを作った Direct3D11 から得る（以前は Direct3D11 の get_instance()）
 
 		ID3D11Resource* resource = nullptr;
 		rtt->get_render_target_view()->GetResource( & resource );
@@ -599,7 +522,7 @@ void DebugScene::render()
 
 		wchar_t path[ 64 ];
 		swprintf_s( path, L"dump/color_%04d.png", frame_dump_index_ );
-		dump_texture_2d_to_png( d3d->getDevice(), d3d->getImmediateContext(), texture, path );
+		core::graphics::direct_3d_11::save_texture_2d_to_png( d3d->getDevice(), d3d->getImmediateContext(), texture, path );
 
 		// 案B / 段階0b: 深度 + カメラ行列も併せてダンプ ( 正確な warp / 遮蔽の元データ )
 		if ( frame_dump_gbuffer_ )
@@ -625,13 +548,13 @@ void DebugScene::render()
 			if ( ! depth_ok && frame_dump_index_ == 0 )
 			{
 				// 通常 MSAA 有効が原因。色は出るが深度が出ないので気付けるようにする。
-				OutputDebugStringW( L"[FrameDump] depth dump skipped (MSAA on?). Set graphics.multisample.count=1.\n" );
+				blue_sky::debug_log( "[FrameDump] 深度の保存を飛ばしました（MSAA が有効）。graphics.multisample.count を 1 にしてください" );
 			}
 
 			// モーションベクトルパス: シーン深度を再利用して速度 RT に描画し読み出す ( 真の動き / MSAA 可 )
 			velocity_texture_->clear( Color( 0.f, 0.f, 0.f, 0.f ) );
 			get_graphics_manager()->set_render_target( velocity_texture_.get() );
-			get_graphics_manager()->render_active_objects_velocity( get_active_object_manager() );
+			get_graphics_manager()->render_objects_velocity();
 
 			auto* vrtt = static_cast< core::graphics::direct_3d_11::RenderTargetTexture* >( velocity_texture_.get() );
 			ID3D11Resource* vres = nullptr;
@@ -673,7 +596,7 @@ void DebugScene::render()
 
 	get_graphics_manager()->render_fader();
 
-	get_graphics_manager()->render_debug_axis( get_active_object_manager() );
+	get_graphics_manager()->render_debug_axis();
 	get_graphics_manager()->render_debug_bullet();
 
 	if ( get_input()->press( Input::Button::B ) )
@@ -681,7 +604,7 @@ void DebugScene::render()
 		get_graphics_manager()->unset_depth_stencil();
 		get_graphics_manager()->resolve_depth_texture();
 
-		/// @todo sprite_ms での描画に対応する
+		// MSAA のときは深度テクスチャがマルチサンプルなので Sprite では描けない（描くにはマルチサンプルのテクスチャを読む Sprite のシェーダーを足す）
 		get_graphics_manager()->get_sprite()->begin();
 		get_graphics_manager()->get_sprite()->draw( win::Rect( get_width() / 4, get_height() / 4, get_width() / 4 * 3, get_height() / 4 * 3 ), get_graphics_manager()->get_depth_texture() );
 		// get_graphics_manager()->get_sprite()->draw( win::Rect( get_width() / 4.f, get_height() / 4.f, get_width() / 4.f * 3.f, get_height() / 4.f * 3.f ), get_graphics_manager()->get_texture( "2x2" ) );

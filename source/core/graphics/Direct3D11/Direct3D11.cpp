@@ -10,6 +10,8 @@
 #include "EffectPass.h"
 
 #include "WICTextureLoader.h"
+#include "TextureReadback.h"
+#include <core/graphics/DeviceLostException.h>
 
 #include <win/Rect.h>
 
@@ -18,7 +20,9 @@
 #include <common/string.h>
 #include <common/log.h>
 
-#include <dxgi.h>
+#include <dxgi1_6.h>
+#include <wincodec.h>
+#include <wrl/client.h>
 
 #include <string>
 
@@ -31,9 +35,37 @@
 namespace core::graphics::direct_3d_11
 {
 
-const Direct3D11::Color Direct3D11::DEFAULT_CLEAR_COLOR = Direct3D11::Color::Black;
+namespace
+{
 
-Direct3D11* Direct3D11::instance_ = nullptr;
+/**
+ * DXGI の結果がデバイスロストなら、理由付きの DeviceLostException を投げる
+ *
+ * デバイスロスト（ドライバの更新・GPU のタイムアウト・GPU の切り替え）は、Present だけでなく ResizeBuffers でも返る。
+ * どちらも WinMain が受け取り、ゲームを起動し直して復旧する（GPU のリソースは各所が持っていて、その場では作り直せない）。
+ *
+ * @param hr 調べる結果
+ * @param device 失われた理由を問い合わせるデバイス
+ * @param where どの呼び出しで起きたか（メッセージに入れる）
+ */
+void throw_if_device_lost( HRESULT hr, ID3D11Device* device, const char* where, const char* file, int line )
+{
+	if ( hr != DXGI_ERROR_DEVICE_REMOVED && hr != DXGI_ERROR_DEVICE_RESET )
+	{
+		return;
+	}
+
+	const HRESULT reason = device->GetDeviceRemovedReason();
+
+	char text[ 16 ];
+	sprintf_s( text, "0x%08lX", static_cast< unsigned long >( reason ) );
+
+	throw DeviceLostException( file, line, std::string( "GPU のデバイスが失われました（ドライバの更新、GPU のタイムアウト、GPU の切り替えなど）。場所: " ) + where + "。理由: " + text );
+}
+
+} // namespace
+
+const Direct3D11::Color Direct3D11::DEFAULT_CLEAR_COLOR = Direct3D11::Color::Black;
 
 /**
  * コンストラクタ
@@ -41,36 +73,24 @@ Direct3D11* Direct3D11::instance_ = nullptr;
  * @param hwnd					ウィンドウハンドル
  * @param w						バックバッファの幅
  * @param h						バックバッファの高さ
- * @param full_screen			フルスクリーンフラグ
  * @param multi_sample_count	マルチサンプリングのサンプル数
  * @param multi_sample_quality	マルチサンプリングのクオリティ
  */
-Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sample_count, int multi_sample_quality )
-	: device_( 0 )
-	, immediate_context_( 0 )
-	, swap_chain_( 0 )
-
-	, depth_stencil_texture_( 0 )
-	, depth_stencil_view_( 0 )
+Direct3D11::Direct3D11( HWND hwnd, int w, int h, int multi_sample_count, int multi_sample_quality )
 {
-	instance_ = this;
-
-	common::log( "log/d3d11.log", "init", false );
-
-	IDXGIFactory1* dxgi_factory = 0;
+	com_ptr< IDXGIFactory1 > dxgi_factory;
 	DIRECT_X_FAIL_CHECK( CreateDXGIFactory1( __uuidof( IDXGIFactory1 ), reinterpret_cast< void** >( & dxgi_factory ) ) );
 
-	log_all_adapter_desc( dxgi_factory );
-
-	DIRECT_X_FAIL_CHECK( dxgi_factory->EnumAdapters1( 0, & dxgi_adapter_ ) );
+	select_adapter( dxgi_factory.get() );
+	log_all_adapter_desc( dxgi_factory.get() );
 
 	create_device();
 
 	log_feature_level();
 
-	create_swap_chain( dxgi_factory, hwnd, w, h, full_screen, multi_sample_count, multi_sample_quality );
+	create_swap_chain( dxgi_factory.get(), hwnd, w, h, multi_sample_count, multi_sample_quality );
 
-	DIRECT_X_RELEASE( dxgi_factory );
+	dxgi_factory.reset();
 
 	create_back_buffer_texture();
 
@@ -88,12 +108,10 @@ Direct3D11::Direct3D11( HWND hwnd, int w, int h, bool full_screen, int multi_sam
  */
 Direct3D11::~Direct3D11()
 {
-	set_full_screen( false );
-
 	effect_.reset();
 	sprite_.reset();
 
-	if ( immediate_context_ )
+	if ( immediate_context_.get() )
 	{
 		immediate_context_->ClearState();
 		immediate_context_->Flush();
@@ -103,12 +121,12 @@ Direct3D11::~Direct3D11()
 
 	depth_texture_.reset();
 
-	DIRECT_X_RELEASE( depth_stencil_view_ );
-	DIRECT_X_RELEASE( depth_stencil_texture_ );
+	depth_stencil_view_.reset();
+	depth_stencil_texture_.reset();
 
 	back_buffer_texture_.reset();
 
-	DIRECT_X_RELEASE( swap_chain_ );
+	swap_chain_.reset();
 
 	if ( false )
 	{
@@ -120,8 +138,8 @@ Direct3D11::~Direct3D11()
 		DIRECT_X_RELEASE( debug_ );
 	}
 
-	DIRECT_X_RELEASE( immediate_context_ );
-	DIRECT_X_RELEASE( device_ );
+	immediate_context_.reset();
+	device_.reset();
 }
 
 /**
@@ -147,7 +165,7 @@ void Direct3D11::create_device()
 	DIRECT_X_FAIL_CHECK( D3D11CreateDevice( dxgi_adapter_.get(), D3D_DRIVER_TYPE_UNKNOWN, 0, d3d11_create_device_flags, feature_levels, ARRAYSIZE( feature_levels ), D3D11_SDK_VERSION, & device_, & feature_level, & immediate_context_ ) );
 }
 
-void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint_t w, uint_t h, bool full_screen, int multi_sample_count, int multi_sample_quality )
+void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint_t w, uint_t h, int multi_sample_count, int multi_sample_quality )
 {
 	ZeroMemory( & swap_chain_desc_, sizeof( swap_chain_desc_ ) );
 	swap_chain_desc_.BufferCount = 1;
@@ -160,8 +178,9 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 	swap_chain_desc_.OutputWindow = hwnd;
 	swap_chain_desc_.SampleDesc.Count = multi_sample_count;
 	swap_chain_desc_.SampleDesc.Quality = multi_sample_quality;
-	swap_chain_desc_.Windowed = ! full_screen;
-	swap_chain_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	// フルスクリーンはウィンドウ側（App）が縁なしで画面いっぱいに広げて行う（ボーダーレス）。スワップチェーンは常にウィンドウで、表示モードを変えない
+	swap_chain_desc_.Windowed = TRUE;
+	swap_chain_desc_.Flags = 0;
 
 	// check_multi_sample()
 	{
@@ -201,7 +220,30 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
 		swap_chain_desc_.SampleDesc.Quality = multi_sample_quality;
 	}
 		
-	DIRECT_X_FAIL_CHECK( dxgi_factory->CreateSwapChain( device_, & swap_chain_desc_, & swap_chain_ ) );
+	// スワップチェーン自体は MSAA なし・2 枚・FLIP_DISCARD にする（MSAA は BackBufferTexture が自前の描画先で行い、表示の前に解決する）
+	// 以前はバッファ 1 枚・DISCARD・MSAA 付きの古い構成で、フリップモデル（ウィンドウでの遅延が少ない・合成のコピーがない）を使えなかった。
+	// フリップモデルを作れない環境（古い Windows）では、以前の DISCARD に戻す
+	DXGI_SWAP_CHAIN_DESC desc = swap_chain_desc_;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.BufferCount = 2;
+	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+
+	if ( FAILED( dxgi_factory->CreateSwapChain( device_.get(), & desc, & swap_chain_ ) ) )
+	{
+		desc.BufferCount = 1;
+		desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+		DIRECT_X_FAIL_CHECK( dxgi_factory->CreateSwapChain( device_.get(), & desc, & swap_chain_ ) );
+	}
+
+	swap_chain_buffer_count_ = desc.BufferCount;
+
+	std::cout << "スワップチェーン : " << ( desc.SwapEffect == DXGI_SWAP_EFFECT_FLIP_DISCARD ? "FLIP_DISCARD" : "DISCARD" )
+		<< " バッファ " << desc.BufferCount << " 枚・MSAA " << swap_chain_desc_.SampleDesc.Count << '\n';
+
+	// Alt+Enter は DXGI に任せず、アプリ側で処理する
+	// （DXGI が勝手に切り替えると、ユーザーの操作かフォーカス喪失による解除かを区別できず、設定と実際の状態がずれる）
+	DIRECT_X_FAIL_CHECK( dxgi_factory->MakeWindowAssociation( swap_chain_desc_.OutputWindow, DXGI_MWA_NO_ALT_ENTER ) );
 }
 
 /**
@@ -210,7 +252,7 @@ void Direct3D11::create_swap_chain( IDXGIFactory1* dxgi_factory, HWND hwnd, uint
  */
 void Direct3D11::create_back_buffer_texture()
 {
-	back_buffer_texture_.reset( new BackBufferTexture( this, swap_chain_ ) );
+	back_buffer_texture_.reset( new BackBufferTexture( this, swap_chain_.get(), swap_chain_desc_.SampleDesc ) );
 }
 
 /**
@@ -236,7 +278,7 @@ void Direct3D11::create_depth_stencil_view()
 
 	DIRECT_X_FAIL_CHECK( device_->CreateTexture2D( & texture_desc, 0, & depth_stencil_texture_ ) );
 
-	depth_stencil_view_ = create_depth_stencil_view( depth_stencil_texture_ );
+	depth_stencil_view_.reset( create_depth_stencil_view( depth_stencil_texture_.get() ) );
 }
 
 /**
@@ -317,7 +359,7 @@ void Direct3D11::create_depth_texture()
 		view_desc.Texture2D.MostDetailedMip = 0;
 
 		ID3D11ShaderResourceView* view = 0;
-		DIRECT_X_FAIL_CHECK( device_->CreateShaderResourceView( depth_stencil_texture_, & view_desc, & view ) );
+		DIRECT_X_FAIL_CHECK( device_->CreateShaderResourceView( depth_stencil_texture_.get(), & view_desc, & view ) );
 
 		depth_texture_.reset( new Texture( this, view ) );
 	}
@@ -339,9 +381,9 @@ void Direct3D11::setup_default_viewport()
  *
  * この関数は、インプットレイアウトを作成した後、エフェクトファイルを読み込んだ後に呼び出す必要がある
  */
-void Direct3D11::setup_sprite()
+void Direct3D11::setup_sprite( const core::graphics::GraphicsManager* graphics_manager )
 {
-	sprite_.reset( new core::graphics::direct_3d_11::Sprite( this ) );
+	sprite_.reset( new core::graphics::direct_3d_11::Sprite( this, graphics_manager ) );
 }
 
 // ???
@@ -407,18 +449,15 @@ void Direct3D11::create_default_input_layout()
 
 	create_input_layout( "sprite", "|sprite", layout_sprite, ARRAYSIZE( layout_sprite ) );
 
-	/// @todo 2D の描画に法線を使っているのは無駄なのでなんとかする
-	/*
-	// 2D
+	// 2D（画面全体の矩形・フェーダー・ポストエフェクト）: 位置と UV だけを読む（以前は "main" で法線も読んでいた）
+	// 頂点バッファはメッシュと同じもの（位置・法線・UV）を使うので、UV はメッシュの頂点の中の位置から読み、法線は読み飛ばす
 	D3D11_INPUT_ELEMENT_DESC layout_2d[] =
-    {
-        { "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL",      0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD",    0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    };
+	{
+		{ "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,                            D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",    0, DXGI_FORMAT_R32G32_FLOAT,       0, mesh_vertex_tex_coord_offset, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
 
-	create_input_layout( "main2d", "|main2d", layout_2d, ARRAYSIZE( layout_2d ) );
-	*/
+	create_input_layout( "2d", "|main2d", layout_2d, ARRAYSIZE( layout_2d ) );
 }
 
 void Direct3D11::create_input_layout( const char_t* input_layout_name, const char_t* teqhnique_name, D3D11_INPUT_ELEMENT_DESC layout[], UINT layout_array_size )
@@ -434,43 +473,23 @@ void Direct3D11::create_input_layout( const char_t* input_layout_name, const cha
 		// input_layout_list_.erase( i );
 	}
 
-	auto* pass = static_cast< EffectPass* >( effect_->get_technique( teqhnique_name )->get_pass_list().front().get() );
+	const auto* technique = effect_->get_technique( teqhnique_name );
+
+	if ( ! technique || technique->get_pass_list().empty() )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "technique not found for input layout : " ) + teqhnique_name );
+	}
+
+	auto* pass = static_cast< EffectPass* >( technique->get_pass_list().front().get() );
 
 	input_layout_list_[ input_layout_name ] = std::make_unique< InputLayout >( pass->create_input_layout( layout, layout_array_size ) );
 }
 
-void Direct3D11::set_full_screen( bool full_screen )
-{
-	DIRECT_X_FAIL_CHECK( swap_chain_->SetFullscreenState( full_screen, 0 ) );
-}
-
 void Direct3D11::set_size( int w, int h )
 {
-	swap_chain_desc_.BufferDesc.Width = w;
-	swap_chain_desc_.BufferDesc.Height = h;
-
-	DIRECT_X_FAIL_CHECK( swap_chain_->ResizeBuffers(
-		swap_chain_desc_.BufferCount,
-		swap_chain_desc_.BufferDesc.Width,
-		swap_chain_desc_.BufferDesc.Height,
-		swap_chain_desc_.BufferDesc.Format,
-		swap_chain_desc_.Flags
-	) );
-}
-
-bool Direct3D11::is_full_screen() const
-{
-	BOOL full_screen;
-
-	DIRECT_X_FAIL_CHECK( swap_chain_->GetFullscreenState( & full_screen, 0 ) );
-
-	return full_screen == TRUE;
-}
-
-void Direct3D11::switch_full_screen()
-{
-	DIRECT_X_FAIL_CHECK( swap_chain_->ResizeTarget( & swap_chain_desc_.BufferDesc ) );
-	DIRECT_X_FAIL_CHECK( swap_chain_->SetFullscreenState( ! is_full_screen(), 0 ) );
+	// サイズ変更の経路は on_resize の 1 本だけにする
+	// （以前は ResizeBuffers だけを行う別の経路があり、バックバッファ・深度・ビューポートを作り直していなかった）
+	on_resize( w, h );
 }
 
 void Direct3D11::on_resize( int w, int h )
@@ -482,18 +501,22 @@ void Direct3D11::on_resize( int w, int h )
 	swap_chain_desc_.BufferDesc.Width = w;
 	swap_chain_desc_.BufferDesc.Height = h;
 
-	DIRECT_X_FAIL_CHECK( swap_chain_->ResizeBuffers(
-		swap_chain_desc_.BufferCount,
+	const HRESULT hr = swap_chain_->ResizeBuffers(
+		swap_chain_buffer_count_,
 		swap_chain_desc_.BufferDesc.Width,
 		swap_chain_desc_.BufferDesc.Height,
 		swap_chain_desc_.BufferDesc.Format,
 		swap_chain_desc_.Flags
-	) );
+	);
+
+	// デバイスロストは Present と同じく専用の例外にする（以前は普通の例外で終了し、復旧されなかった）
+	throw_if_device_lost( hr, device_.get(), "ResizeBuffers", __FILE__, __LINE__ );
+	DIRECT_X_FAIL_CHECK( hr );
 
 	create_back_buffer_texture();
 
-	DIRECT_X_RELEASE( depth_stencil_view_ );
-	DIRECT_X_RELEASE( depth_stencil_texture_ );
+	depth_stencil_view_.reset();
+	depth_stencil_texture_.reset();
 
 	create_depth_stencil_view();
 	create_depth_texture();
@@ -532,7 +555,7 @@ void Direct3D11::clear_back_buffer_view( const Color& color )
  */
 void Direct3D11::clear_depth_stencil_view()
 {
-	clear_depth_stencil_view( depth_stencil_view_ );
+	clear_depth_stencil_view( depth_stencil_view_.get() );
 }
 
 /**
@@ -564,7 +587,7 @@ void Direct3D11::clear_depth_stencil_view( ID3D11DepthStencilView* view )
 void Direct3D11::set_default_render_target( bool with_depth_stencil )
 {
 	ID3D11RenderTargetView* views[] = { back_buffer_texture_->get_render_target_view() };
-	immediate_context_->OMSetRenderTargets( 1, views, with_depth_stencil ? depth_stencil_view_ : nullptr );
+	immediate_context_->OMSetRenderTargets( 1, views, with_depth_stencil ? depth_stencil_view_.get() : nullptr );
 }
 
 /**
@@ -576,6 +599,51 @@ void Direct3D11::set_default_viewport()
 	immediate_context_->RSSetViewports( 1, & viewport_ );
 }
 
+Pixel2DSpace Direct3D11::get_2d_space() const
+{
+	// 今の描画先の大きさ（ビューポート）。VR の目ごとの描画などで、画面と違う大きさの描画先に描くときに合わせる
+	UINT count = 1;
+	D3D11_VIEWPORT viewport = { };
+	immediate_context_.get()->RSGetViewports( & count, & viewport );
+
+	if ( count >= 1 && viewport.Width > 0.f && viewport.Height > 0.f )
+	{
+		return Pixel2DSpace{ viewport.Width, viewport.Height, offset_2d_x_ };
+	}
+
+	return Pixel2DSpace{ static_cast< float_t >( get_width() ), static_cast< float_t >( get_height() ), offset_2d_x_ };
+}
+
+bool Direct3D11::save_back_buffer_to_png( const wchar_t* file_name )
+{
+	// 描画先（MSAA なら解決してから）を保存する。フリップモデルのスワップチェーンのバッファは、表示の後は中身が決まらない
+	if ( ! back_buffer_texture_ )
+	{
+		return false;
+	}
+
+	return save_texture_2d_to_png( device_.get(), immediate_context_.get(), back_buffer_texture_->get_texture_2d(), file_name );
+}
+
+void Direct3D11::reset_render_state()
+{
+	immediate_context_->OMSetBlendState( nullptr, nullptr, 0xFFFFFFFF );
+	immediate_context_->OMSetDepthStencilState( nullptr, 0 );
+	immediate_context_->RSSetState( nullptr );
+
+	immediate_context_->GSSetShader( nullptr, nullptr, 0 );
+	immediate_context_->HSSetShader( nullptr, nullptr, 0 );
+	immediate_context_->DSSetShader( nullptr, nullptr, 0 );
+
+	// 描画先にしたテクスチャが読み込み側に残っていると、描画先に結び付けられない（D3D11 が黙って外す）
+	ID3D11ShaderResourceView* null_views[ D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT ] = { };
+	immediate_context_->VSSetShaderResources( 0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, null_views );
+	immediate_context_->PSSetShaderResources( 0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, null_views );
+
+	set_default_render_target();
+	set_default_viewport();
+}
+
 /**
  * レンダリング結果を書き込むテクスチャを設定する
  *
@@ -584,13 +652,13 @@ void Direct3D11::set_default_viewport()
 void Direct3D11::set_render_target( RenderTargetTexture* texture )
 {
 	ID3D11RenderTargetView* views[] = { texture->get_render_target_view() };
-	immediate_context_->OMSetRenderTargets( 1, views, depth_stencil_view_ );
+	immediate_context_->OMSetRenderTargets( 1, views, depth_stencil_view_.get() );
 }
 
 void Direct3D11::set_render_target( BackBufferTexture* texture )
 {
 	ID3D11RenderTargetView* views[] = { texture->get_render_target_view() };
-	immediate_context_->OMSetRenderTargets( 1, views, depth_stencil_view_ );
+	immediate_context_->OMSetRenderTargets( 1, views, depth_stencil_view_.get() );
 }
 
 /**
@@ -663,7 +731,7 @@ Direct3D11::Texture* Direct3D11::load_texture( const char* file_path )
 
 	std::wstring ws_file_name = common::convert_to_wstring( file_path );
 	
-	if ( FAILED( DirectX::CreateWICTextureFromFileEx( device_, immediate_context_, ws_file_name.c_str(), 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, false, nullptr, & view ) ) )
+	if ( FAILED( DirectX::CreateWICTextureFromFileEx( device_.get(), immediate_context_.get(), ws_file_name.c_str(), 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, false, nullptr, & view ) ) )
 	{
 		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "file open failed. " ) + file_path );
 	}
@@ -671,6 +739,112 @@ Direct3D11::Texture* Direct3D11::load_texture( const char* file_path )
 	// immediate_context_->GenerateMips( view );
 
 	return new Texture( this, view );
+}
+
+Direct3D11::Texture* Direct3D11::load_texture_premultiplied( const char* file_path )
+{
+	return create_texture_from_image( decode_image_premultiplied( file_path ), file_path );
+}
+
+Direct3D11::DecodedImage Direct3D11::decode_image_premultiplied( const char* file_path )
+{
+	const std::wstring ws_file_name = common::convert_to_wstring( file_path );
+
+	const auto fail = [ file_path ] ( const char* step, HRESULT hr )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "UI texture load failed ( " ) + step + " : " + common::serialize( static_cast< unsigned long >( hr ) ) + " ). " + file_path );
+	};
+
+	// WIC のファクトリーは呼び出しごとに作る（作業スレッドからも呼べるように。以前はメインスレッド前提で使い回していた）
+	Microsoft::WRL::ComPtr< IWICImagingFactory > factory;
+	HRESULT hr = CoCreateInstance( CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS( factory.GetAddressOf() ) );
+	if ( FAILED( hr ) ) { fail( "factory", hr ); }
+
+	Microsoft::WRL::ComPtr< IWICBitmapDecoder > decoder;
+	hr = factory->CreateDecoderFromFilename( ws_file_name.c_str(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf() );
+	if ( FAILED( hr ) ) { fail( "open", hr ); }
+
+	Microsoft::WRL::ComPtr< IWICBitmapFrameDecode > frame;
+	hr = decoder->GetFrame( 0, frame.GetAddressOf() );
+	if ( FAILED( hr ) ) { fail( "frame", hr ); }
+
+	UINT width = 0;
+	UINT height = 0;
+	hr = frame->GetSize( & width, & height );
+	if ( FAILED( hr ) ) { fail( "size", hr ); }
+
+	// 機能レベル 10.x の上限（8192）に合わせる（UI の画像でそれより大きいものは想定しない）
+	constexpr UINT MAX_UI_TEXTURE_SIZE = 8192;
+
+	if ( width == 0 || height == 0 || width > MAX_UI_TEXTURE_SIZE || height > MAX_UI_TEXTURE_SIZE )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "UI texture load failed ( unsupported size " ) + std::to_string( width ) + "x" + std::to_string( height ) + ", max " + std::to_string( MAX_UI_TEXTURE_SIZE ) + " ). " + file_path );
+	}
+
+	// どの形式の画像でも 32bit RGBA（ストレート）に変換して取り出し、自前で乗算済みにする
+	// （WIC の 32bppPRGBA への変換は丸め方が実装依存なので使わない）
+	Microsoft::WRL::ComPtr< IWICFormatConverter > converter;
+	hr = factory->CreateFormatConverter( converter.GetAddressOf() );
+	if ( FAILED( hr ) ) { fail( "converter", hr ); }
+
+	hr = converter->Initialize( frame.Get(), GUID_WICPixelFormat32bppRGBA, WICBitmapDitherTypeNone, nullptr, 0.0, WICBitmapPaletteTypeCustom );
+	if ( FAILED( hr ) ) { fail( "convert", hr ); }
+
+	DecodedImage image;
+	image.width = width;
+	image.height = height;
+
+	const UINT row_pitch = width * 4;
+	image.pixels.resize( static_cast< size_t >( row_pitch ) * height );
+
+	hr = converter->CopyPixels( nullptr, row_pitch, static_cast< UINT >( image.pixels.size() ), image.pixels.data() );
+	if ( FAILED( hr ) ) { fail( "copy", hr ); }
+
+	for ( size_t i = 0; i < image.pixels.size(); i += 4 )
+	{
+		const unsigned a = image.pixels[ i + 3 ];
+
+		for ( size_t c = 0; c < 3; c++ )
+		{
+			image.pixels[ i + c ] = static_cast< uint8_t >( ( image.pixels[ i + c ] * a + 127 ) / 255 );
+		}
+	}
+
+	return image;
+}
+
+Direct3D11::Texture* Direct3D11::create_texture_from_image( const DecodedImage& image, const char* name_for_error )
+{
+	const auto fail = [ name_for_error ] ( const char* step, HRESULT hr )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "UI texture create failed ( " ) + step + " : " + common::serialize( static_cast< unsigned long >( hr ) ) + " ). " + ( name_for_error ? name_for_error : "" ) );
+	};
+
+	D3D11_TEXTURE2D_DESC desc = { };
+	desc.Width = image.width;
+	desc.Height = image.height;
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.SampleDesc.Count = 1;
+	desc.Usage = D3D11_USAGE_IMMUTABLE;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+	D3D11_SUBRESOURCE_DATA data = { };
+	data.pSysMem = image.pixels.data();
+	data.SysMemPitch = image.width * 4;
+
+	Microsoft::WRL::ComPtr< ID3D11Texture2D > texture;
+	HRESULT hr = device_->CreateTexture2D( & desc, & data, texture.GetAddressOf() );
+	if ( FAILED( hr ) ) { fail( "texture", hr ); }
+
+	ID3D11ShaderResourceView* view = nullptr;
+	hr = device_->CreateShaderResourceView( texture.Get(), nullptr, & view );
+	if ( FAILED( hr ) ) { fail( "view", hr ); }
+
+	Texture* result = new Texture( this, view );
+	result->set_premultiplied( true );		// 展開のときに乗算済みにしている
+	return result;
 }
 
 /**
@@ -700,7 +874,19 @@ void Direct3D11::bind_texture_to_ps( uint_t slot, const Texture* texture )
 
 void Direct3D11::present()
 {
-	DIRECT_X_FAIL_CHECK( swap_chain_->Present( 0, 0 ) );
+	if ( back_buffer_texture_ )
+	{
+		back_buffer_texture_->resolve( immediate_context_.get() );
+	}
+
+	// フリップモデルでは表示のあと描画先が外れる。次のフレームの頭で reset_render_state が結び直す
+	const HRESULT hr = swap_chain_->Present( vsync_ ? 1 : 0, 0 );
+
+	// デバイスロストは専用の例外で知らせる（WinMain が受け取り、ゲームを起動し直して復旧する）
+	throw_if_device_lost( hr, device_.get(), "Present", __FILE__, __LINE__ );
+
+	// DXGI_STATUS_OCCLUDED（最小化中など）は成功の扱い
+	DIRECT_X_FAIL_CHECK( hr );
 }
 
 /**
@@ -710,12 +896,41 @@ void Direct3D11::present()
 void Direct3D11::resolve_depth_texture()
 {
 #if 0
-	immediate_context_->ResolveSubresource( depth_texture_->get_texture_2d(), 0, depth_stencil_texture_, 0, DXGI_FORMAT_R32_FLOAT );
+	immediate_context_->ResolveSubresource( depth_texture_->get_texture_2d(), 0, depth_stencil_texture_.get(), 0, DXGI_FORMAT_R32_FLOAT );
 #endif
 }
 
+/**
+ * 描画に使う GPU を選ぶ
+ *
+ * 高性能な GPU（外付けのビデオカード）を優先する。CPU 内蔵の GPU と外付けの GPU が両方ある PC で、内蔵の方を選ばないため
+ * （以前は一覧の 0 番目を使っていた。多くの場合は画面をつないだ GPU だが、そうとは限らない）。
+ * 高性能を優先する選び方（IDXGIFactory6・Windows 10 1803 以降）が無ければ、以前と同じ 0 番目を使う
+ */
+void Direct3D11::select_adapter( IDXGIFactory1* dxgi_factory )
+{
+	Microsoft::WRL::ComPtr< IDXGIFactory6 > factory_6;
+
+	if ( SUCCEEDED( dxgi_factory->QueryInterface( IID_PPV_ARGS( & factory_6 ) ) ) &&
+		SUCCEEDED( factory_6->EnumAdapterByGpuPreference( 0, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, __uuidof( IDXGIAdapter1 ), reinterpret_cast< void** >( & dxgi_adapter_ ) ) ) )
+	{
+		return;
+	}
+
+	DIRECT_X_FAIL_CHECK( dxgi_factory->EnumAdapters1( 0, & dxgi_adapter_ ) );
+}
+
+/**
+ * PC にある GPU を 1 行ずつログに出し、描画に使うものに印を付ける
+ *
+ * CPU 内蔵の GPU（例 : Ryzen の Radeon Graphics）や、ソフトウェアの描画（Microsoft Basic Render Driver）も一覧には出る。
+ * （以前は「GPU の情報 :」を GPU ごとに細かく出していて、どれを使っているのか分からなかった）
+ */
 void Direct3D11::log_all_adapter_desc( IDXGIFactory1* dxgi_factory )
 {
+	DXGI_ADAPTER_DESC1 selected = { };
+	DIRECT_X_FAIL_CHECK( dxgi_adapter_->GetDesc1( & selected ) );
+
 	IDXGIAdapter1* dxgi_adapter;
 
 	for ( int n = 0; dxgi_factory->EnumAdapters1( n, & dxgi_adapter ) != DXGI_ERROR_NOT_FOUND; n++ )
@@ -723,29 +938,22 @@ void Direct3D11::log_all_adapter_desc( IDXGIFactory1* dxgi_factory )
 		DXGI_ADAPTER_DESC1 adapter_desc;
 		DIRECT_X_FAIL_CHECK( dxgi_adapter->GetDesc1( & adapter_desc ) );
 
-		log_adapter_desc( n, adapter_desc );
+		const bool is_selected = adapter_desc.AdapterLuid.LowPart == selected.AdapterLuid.LowPart && adapter_desc.AdapterLuid.HighPart == selected.AdapterLuid.HighPart;
+		log_adapter_desc( n, adapter_desc, is_selected );
 
 		DIRECT_X_RELEASE( dxgi_adapter );
 	}
 }
 
-void Direct3D11::log_adapter_desc( int index, const DXGI_ADAPTER_DESC1& adapter_desc )
+void Direct3D11::log_adapter_desc( int index, const DXGI_ADAPTER_DESC1& adapter_desc, bool is_selected )
 {
-	#define adapter_desc_string( name ) std::wstring( L"\t" ) + L# name + L" : " + common::w_serialize( adapter_desc.name ) + L"\n"
+	const auto mb = []( SIZE_T bytes ) { return std::to_string( bytes / ( 1024 * 1024 ) ); };
 
-	std::wstring text = common::w_serialize( index ) + L" : " + adapter_desc.Description + L"\n" +
-		adapter_desc_string( VendorId ) +
-		adapter_desc_string( DeviceId ) +
-		adapter_desc_string( SubSysId ) +
-		adapter_desc_string( Revision ) +
-		adapter_desc_string( DedicatedVideoMemory ) +
-		adapter_desc_string( DedicatedSystemMemory ) +
-		adapter_desc_string( SharedSystemMemory ) +
-		adapter_desc_string( AdapterLuid.LowPart ) + 
-		adapter_desc_string( AdapterLuid.HighPart ) + 
-		adapter_desc_string( Flags );
-
-	common::log( "log/adapter_info.log", text );
+	// ログの出口をそろえる（以前は log/adapter_info.log に別に書いていた）。std::cout は GameMain が debug_log へ流す
+	std::cout << "GPU " << index << " : " << common::convert_to_string( adapter_desc.Description )
+		<< "（専用メモリ " << mb( adapter_desc.DedicatedVideoMemory ) << " MB"
+		<< ( ( adapter_desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE ) ? "・ソフトウェア" : "" ) << "）"
+		<< ( is_selected ? " ← 描画に使う" : "" ) << std::endl;
 }
 
 void Direct3D11::log_feature_level()
@@ -759,7 +967,7 @@ void Direct3D11::log_feature_level()
 	feature_level_map[ D3D_FEATURE_LEVEL_10_1 ] = "10.1";
 	feature_level_map[ D3D_FEATURE_LEVEL_11_0 ] = "11.0";
 
-	common::log( "log/d3d11.log", std::string( "created d3d11 device ( feature_level : " ) + feature_level_map[ device_->GetFeatureLevel() ] + " )" );
+	std::cout << "Direct3D 11 のデバイスを作りました（機能レベル : " << feature_level_map[ device_->GetFeatureLevel() ] << "）" << std::endl;
 }
 
 std::vector< Direct3D11::DisplayMode > Direct3D11::get_available_display_modes() const

@@ -1,8 +1,11 @@
 #pragma once
 
 #include <core/graphics/Shader.h>
+#include <core/graphics/Model.h>
 #include <core/graphics/PixelFormat.h>
 #include <core/graphics/PrimitiveTopology.h>
+#include <core/graphics/ConstantBuffer.h>
+#include <core/graphics/RenderTargetTextureOptions.h>
 #include <core/ResourceManager.h>
 #include <core/math/Vector.h>
 #include <functional>
@@ -22,15 +25,15 @@ class RenderTarget;
 class RenderTargetTexture;
 class BackBufferTexture;
 class ConstantBuffer;
+class InstanceBuffer;
 
 // enum class PrimitiveTopology;
 class InputLayout;
 class EffectTechnique;
+class TextRenderer;
 
 /**
  * グラフィック管理クラス
- *
- * @todo 太らせる
  */
 class GraphicsManager
 {
@@ -43,8 +46,13 @@ public:
 	using BackBufferTexture				= core::graphics::BackBufferTexture;
 
 	using ConstantBuffer				= core::graphics::ConstantBuffer;
+	using ConstantBufferUsage			= core::graphics::ConstantBufferUsage;
+	using RenderTargetTextureOptions	= core::graphics::RenderTargetTextureOptions;
 
 	using SkinningAnimationSet			= core::SkinningAnimationSet;
+
+	using ModelHandle					= core::graphics::ModelHandle;
+	using TextureHandle					= core::ResourceHandle< Texture >;	///< Texture.h の core::graphics::TextureHandle と同じ型
 
 	using ShaderManager					= core::ResourceManager< Shader >;
 	using TextureManager				= core::ResourceManager< Texture >;
@@ -65,20 +73,42 @@ public:
 	GraphicsManager() { }
 	virtual ~GraphicsManager() { }
 
-	// Shader
-	template< typename Type, typename ... Args > Type* create_shader( Args ... args ) { return shader_manager_.create< Type >( args ... ); }
-	template< typename Type, typename ... Args > Type* create_named_shader( const char_t* name, Args ... args ) { return shader_manager_.create_named< Type >( name, args ... ); }
+	// Shader（シェーダーのコンストラクタの先頭に自分を渡す。以前シェーダーは core::Service から取っていた）
+	template< typename Type, typename ... Args > Type* create_shader( Args ... args ) { return shader_manager_.create< Type >( this, args ... ); }
+	template< typename Type, typename ... Args > Type* create_named_shader( const char_t* name, Args ... args ) { return shader_manager_.create_named< Type >( name, this, args ... ); }
 	template< typename Type=Shader > Type* get_shader( const char_t* name ) { return shader_manager_.get< Type >( name ); }
+
+	/// 名前のシェーダーのハンドル（無ければ空）・ハンドルから引く（解放済み・空なら nullptr）。シェーダーを長く持つ側はハンドルを持つ
+	ShaderHandle get_shader_handle( const char_t* name ) const { return shader_manager_.get_handle( name ); }
+	Shader* resolve_shader( ShaderHandle h ) const { return h.get(); }
 	Shader* clone_shader( const Shader* s ) { Shader* s2 = s->clone(); shader_manager_.add( s2 ); return s2; }
 
 	const ShaderManager::ResourceList& get_shader_list() const { return shader_manager_.get_resource_list(); }
 
-	virtual std::unique_ptr< ConstantBuffer > create_constant_buffer( size_t size, int slot ) = 0;
+	/**
+	 * 定数バッファを作る
+	 *
+	 * @param usage 毎フレーム・毎描画で書き換えるもの（オブジェクトごとの world など）は DYNAMIC にする。既定は DEFAULT（以前と同じ）
+	 */
+	virtual std::unique_ptr< ConstantBuffer > create_constant_buffer( size_t size, int slot, ConstantBufferUsage usage = ConstantBufferUsage::DEFAULT ) = 0;
+	virtual std::unique_ptr< InstanceBuffer > create_instance_buffer() = 0;
+
 
 	virtual Texture* load_texture( const char_t* ) = 0;
 
+	/**
+	 * モデルのハンドルからモデルを得る（解放済み・空なら nullptr）
+	 *
+	 * モデルを管理するのは blue_sky の GraphicsManager。core 層（ModelComponent を描くシステムなど）が
+	 * blue_sky 層を知らずにハンドルを引けるよう、ここに置く
+	 */
+	virtual core::graphics::Model* resolve_model( ModelHandle ) const = 0;
+
 	virtual RenderTargetTexture* create_render_target_texture() = 0;
 	virtual RenderTargetTexture* create_render_target_texture( PixelFormat ) = 0;
+
+	/// ミップの段数・MSAA を指定して、描画先にできるテクスチャ（画面の大きさ）を作る
+	virtual RenderTargetTexture* create_render_target_texture( PixelFormat, const RenderTargetTextureOptions& ) = 0;
 
 	virtual BackBufferTexture* get_back_buffer_texture() = 0;
 	virtual void set_render_target( RenderTarget* );
@@ -86,6 +116,9 @@ public:
 
 	virtual void setup_rendering() = 0;
 	virtual void render_background() const = 0;
+
+	/// 文字の描画（core 層から文字を描くときに使う。無ければ nullptr）
+	virtual TextRenderer* get_text_renderer() const { return nullptr; }
 
 	virtual const InputLayout* get_input_layout( const char_t* ) const = 0;
 	virtual EffectTechnique* get_effect_technique( const char_t* ) const = 0;

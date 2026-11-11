@@ -10,7 +10,12 @@ namespace core::ecs
 
 using namespace ::math::literals;
 
-void ParticleSystem::update( ComponentTuple& component_tuple ) const
+void ParticleSystem::update()
+{
+	for_each( [ this ] ( ComponentTuple& t ) { update_entity( t ); } );
+}
+
+void ParticleSystem::update_entity( ComponentTuple& component_tuple ) const
 {
 	for ( auto& p : std::get< ParticleSystemComponent* >( component_tuple )->particle_list )
 	{

@@ -9,7 +9,7 @@
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
 
-#include <game/Sound.h>
+#include <core/sound/Sound.h>
 #include <game/Config.h>
 
 #include <win/Rect.h>
@@ -24,14 +24,11 @@
 namespace blue_sky
 {
 
-StageSelectScene::StageSelectScene()
-	: page_( 0 )
+StageSelectScene::StageSelectScene( GameMain& game_main )
+	: Scene( game_main )
+	, page_( 0 )
 	, stage_count_( 0 )
 	, is_story_completed_( false )
-	, sprite_texture_( 0 )
-	, bg_texture_( 0 )
-	, ok_( 0 )
-	, click_( 0 )
 	, cursor_src_rect_( win::Rect::Size( 0, 702, 92, 136 ) )
 	, left_arrow_src_rect_( win::Rect::Size( 256, 704, 82, 126 ) )
 	, right_arrow_src_rect_( win::Rect::Size( 384, 704, 86, 126 ) )
@@ -51,11 +48,13 @@ StageSelectScene::StageSelectScene()
 	face_src_rect_list_.push_back( win::Rect::Size( 704, 384, 64, 64 ) );
 	face_src_rect_list_.push_back( win::Rect::Size( 768, 384, 64, 64 ) );
 
-	sprite_texture_ = get_graphics_manager()->load_named_texture( "sprite", "media/image/title.png" );
-	bg_texture_ = get_graphics_manager()->load_named_texture( "bg", "media/texture/cloth.png" );
+	sprite_texture_ = load_named_texture_handle( "sprite", "media/image/title.png" );
+	// テクスチャの名前はファイルごとに付ける（以前はステージ選択・エンディングの cloth.png とストーリーの背景が同じ名前 "bg" で、
+	// 先に読んだシーンの画像が後のシーンの背景に使われていた）
+	bg_texture_ = load_named_texture_handle( "cloth", "media/texture/cloth.png" );
 
-	ok_ = get_sound_manager()->get_sound( "ok" );
-	click_ = get_sound_manager()->get_sound( "click" );
+	ok_ = get_sound_manager()->get_sound_handle( "ok" );
+	click_ = get_sound_manager()->get_sound_handle( "click" );
 
 	update_stage_list();
 
@@ -65,12 +64,8 @@ StageSelectScene::StageSelectScene()
 
 StageSelectScene::~StageSelectScene()
 {
-	/// @todo 直す
-#if false
-	// get_graphics_manager()->unload_texture( "sprite" );
-	get_graphics_manager()->unload_texture( "bg" );
-#endif
-
+	// テクスチャは解放しない（GraphicsManager が持ち続け、ほかのシーン・次に入ったときに使い回す。
+	// 名前の登録を消しても、ほかが生ポインタで持っていると解放できないため）
 	clear_stage_list();
 }
 
@@ -88,21 +83,21 @@ void StageSelectScene::update()
 		{
 			update_page( page_ - 1 );
 
-			ok_->play( false );
+			play( ok_, "ok" );
 		}
 		else if ( is_mouse_on_right_arrow() )
 		{
 			update_page( page_ + 1 );
 
-			ok_->play( false );
+			play( ok_, "ok" );
 		}
 		else if ( Stage* stage = get_pointed_stage() )
 		{
-			ok_->play( false );
+			play( ok_, "ok" );
 
 			set_next_stage_name( stage->name );
 
-			if ( boost::filesystem::exists( string_t( "media/stage/" ) + stage->name + ".intro" ) )
+			if ( boost::filesystem::exists( string_t( "media/stage/" ) + stage->name + ".intro.toml" ) )
 			{
 				set_next_scene( "stage_intro" );
 			}
@@ -113,7 +108,7 @@ void StageSelectScene::update()
 		}
 		else
 		{
-			click_->play( false );
+			play( click_, "click" );
 		}
 	}
 }
@@ -133,11 +128,14 @@ void StageSelectScene::render()
 	auto* sprite = get_graphics_manager()->get_sprite();
 	sprite->begin();
 
+	// 画像はハンドルから引く（引けなければ Sprite は描かない）
+	const Texture* sprite_texture = resolve( sprite_texture_, "sprite" );
+
 	render_technique( "|sprite", [this, sprite]
 	{
 		// render_bg()
 		{
-			sprite->draw( win::Rect::Size( 0, 0, get_width(), get_height() ), bg_texture_ );
+			sprite->draw( win::Rect::Size( 0, 0, get_width(), get_height() ), resolve( bg_texture_, "cloth" ) );	// 引けなければ Sprite は描かない
 		}
 	} );
 
@@ -178,19 +176,19 @@ void StageSelectScene::render()
 		const win::Rect frame_scale_rect( -5, -5, +5, +5 );
 
 		// shadow
-		sprite->draw( dst_rect + frame_scale_rect + win::Point( -5, 5 ), sprite_texture_, white_src_rect, Color::from_hex( 0x00000099 ) );
+		sprite->draw( dst_rect + frame_scale_rect + win::Point( -5, 5 ), sprite_texture, white_src_rect, Color::from_hex( 0x00000099 ) );
 
 		// white
-		sprite->draw( dst_rect + frame_scale_rect + win::Point( -offset, offset ), sprite_texture_, white_src_rect, frame_color );
+		sprite->draw( dst_rect + frame_scale_rect + win::Point( -offset, offset ), sprite_texture, white_src_rect, frame_color );
 
 		// stage
-		sprite->draw( dst_rect + win::Point( -offset, offset ), stage->texture, stage_src_rect_, Color::White );
+		sprite->draw( dst_rect + win::Point( -offset, offset ), resolve( stage->texture, stage->name.c_str() ), stage_src_rect_, Color::White );
 
 		// circle
 		if ( stage->cleared )
 		{
 			win::Point circle_dst_point = win::Point( dst_rect.right() - j->width(), dst_rect.bottom() - j->height() ) + win::Point( -offset, offset );
-			sprite->draw( circle_dst_point, sprite_texture_, *j, Color::from_hex( 0xFFFFFF99 ) );
+			sprite->draw( circle_dst_point, sprite_texture, *j, Color::from_hex( 0xFFFFFF99 ) );
 		}
 
 		// face
@@ -200,13 +198,13 @@ void StageSelectScene::render()
 			if ( true )
 			{
 				win::Point circle_dst_point = win::Point( dst_rect.right() - j->width() + ( j->width() - k->width() ) / 2, dst_rect.bottom() - j->height() + ( j->height() - k->height() ) / 2 ) + win::Point( -offset, offset );
-				sprite->draw( circle_dst_point, sprite_texture_, *k, Color::from_hex( 0xFFFFFF99 ) );
+				sprite->draw( circle_dst_point, sprite_texture, *k, Color::from_hex( 0xFFFFFF99 ) );
 			}
 
 			// medal
 			win::Rect medal_src_rect = win::Rect::Size( 832, 384, 64, 64 );
 			win::Point medal_dst_point = win::Point( dst_rect.left(), dst_rect.bottom() - medal_src_rect.height() ) + win::Point( -offset, offset );
-			sprite->draw( medal_dst_point, sprite_texture_, medal_src_rect, Color::from_hex( 0xFFFFFF99 ) );
+			sprite->draw( medal_dst_point, sprite_texture, medal_src_rect, Color::from_hex( 0xFFFFFF99 ) );
 		}
 	}
 
@@ -222,7 +220,7 @@ void StageSelectScene::render()
 		}
 
 		win::Point arrow_dst_point = win::Point( get_margin(), ( get_height() - src_rect.height() ) / 2 );
-		sprite->draw( arrow_dst_point, sprite_texture_, src_rect.get_rect() );
+		sprite->draw( arrow_dst_point, sprite_texture, src_rect.get_rect() );
 	}
 	if ( has_next_page() )
 	{
@@ -235,7 +233,7 @@ void StageSelectScene::render()
 		}
 
 		win::Point arrow_dst_point( get_width() - get_margin() - src_rect.width(), ( get_height() - src_rect.height() ) / 2 );
-		sprite->draw( arrow_dst_point, sprite_texture_, src_rect.get_rect() );
+		sprite->draw( arrow_dst_point, sprite_texture, src_rect.get_rect() );
 	}
 
 	// Cursor
@@ -249,7 +247,7 @@ void StageSelectScene::render()
 		}
 
 		win::Point cursor_dst_point( get_input()->get_mouse_x(), get_input()->get_mouse_y() );
-		sprite->draw( cursor_dst_point, sprite_texture_, src_rect.get_rect() );
+		sprite->draw( cursor_dst_point, sprite_texture, src_rect.get_rect() );
 	}
 
 	sprite->end();
@@ -283,11 +281,11 @@ void StageSelectScene::update_stage_list()
 	
 	if ( page_ < get_max_story_page() )
 	{
-		file_pattern = get_stage_dir_name_by_page( page_ ) + common::serialize( page_ ) + "-*.stage";
+		file_pattern = get_stage_dir_name_by_page( page_ ) + common::serialize( page_ ) + "-*.stage.toml";
 	}
 	else
 	{
-		file_pattern = get_stage_dir_name_by_page( page_ ) + "*.stage";
+		file_pattern = get_stage_dir_name_by_page( page_ ) + "*.stage.toml";
 	}
 	
 	HANDLE find_handle = FindFirstFile( file_pattern.c_str(), & find_data );
@@ -344,11 +342,11 @@ void StageSelectScene::update_stage_list()
 
 		try
 		{
-			stage->texture = get_graphics_manager()->load_named_texture( stage->name.c_str(), ( get_stage_dir_name_by_page( page_ ) + stage->name + ".png" ).c_str() );
+			stage->texture = load_named_texture_handle( stage->name.c_str(), ( get_stage_dir_name_by_page( page_ ) + stage->name + ".png" ).c_str() );
 		}
 		catch ( ... )
 		{
-			stage->texture = get_graphics_manager()->load_named_texture( stage->name.c_str(), "media/stage/default.png" );
+			stage->texture = load_named_texture_handle( stage->name.c_str(), "media/stage/default.png" );
 		}
 
 		stage_list_.push_back( std::move( stage ) );

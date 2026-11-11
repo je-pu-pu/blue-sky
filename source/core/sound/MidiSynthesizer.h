@@ -3,6 +3,9 @@
 
 #include <tsf.h>
 
+#include <iostream>
+#include <string>
+
 namespace core::sound
 {
 
@@ -25,8 +28,12 @@ public:
 
 		if ( ! sound_font_ )
 		{
-			COMMON_THROW_EXCEPTION_MESSAGE( "tsf_load_filename() failed." );
+			// どのファイルが読めなかったかを残す（SoundFont は git に無く、tools/soundfont/fetch_soundfont.py で入手する）
+			COMMON_THROW_EXCEPTION_MESSAGE( std::string( "音色（SoundFont）を読めません : " ) + sound_font_file_path + "（tools/soundfont/fetch_soundfont.py で入手する）" );
 		}
+
+		// 読めたことを残す（GameMain が生きている間、std::cout はログに流れる）
+		std::cout << "[Sound] 音色（SoundFont）を読みました : " << sound_font_file_path << "（プリセット " << tsf_get_presetcount( sound_font_ ) << " 個）" << std::endl;
 
 		if ( format.channels != 2 )
 		{

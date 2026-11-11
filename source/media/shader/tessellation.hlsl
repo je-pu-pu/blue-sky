@@ -17,7 +17,7 @@ COMMON_POS_NORM_UV vs_skin_tess_test( VS_SKIN_INPUT input )
 	COMMON_POS_NORM_UV output;
 
 	output.Position = common_skinning_pos( input.Position, input.Bone, input.Weight );
-	output.Position /= output.Position.w; /// @todo なぜ必要なのか調べる
+	output.Position /= output.Position.w; // ウェイトの和が 1 でない頂点では w がウェイトの和になる。通常の描画は透視除算で打ち消されるが、テッセレーションでは位置を補間・射影するので w = 1 にそろえる
 
 	output.Normal = common_skinning_norm( input.Normal, input.Bone, input.Weight );
 

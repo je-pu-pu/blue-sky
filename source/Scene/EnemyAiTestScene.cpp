@@ -28,7 +28,6 @@
 
 #include <blue_sky/ai/EnemyPerception.h>
 
-#include <core/Service.h>
 #include <core/physics/PhysicsManager.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 
@@ -51,15 +50,15 @@ namespace
 {
 
 /// 警戒状態ごとの色（白/灰＝無警戒, 黄＝不審, 橙＝捜索, 赤＝警報）
-btVector3 state_color( ai::AlertState s )
+core::Vector state_color( ai::AlertState s )
 {
 	switch ( s )
 	{
-	case ai::AlertState::Suspicious: return btVector3( 1.f, 1.f, 0.f );
-	case ai::AlertState::Searching:  return btVector3( 1.f, 0.5f, 0.f );
-	case ai::AlertState::Alarmed:    return btVector3( 1.f, 0.f, 0.f );
+	case ai::AlertState::Suspicious: return core::Vector( 1.f, 1.f, 0.f );
+	case ai::AlertState::Searching:  return core::Vector( 1.f, 0.5f, 0.f );
+	case ai::AlertState::Alarmed:    return core::Vector( 1.f, 0.f, 0.f );
 	case ai::AlertState::Unaware:
-	default:                         return btVector3( 0.5f, 0.5f, 0.5f );
+	default:                         return core::Vector( 0.5f, 0.5f, 0.5f );
 	}
 }
 
@@ -77,22 +76,23 @@ const char* state_name( ai::AlertState s )
 
 } // namespace
 
-EnemyAiTestScene::EnemyAiTestScene()
+EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
+	: Scene( game_main )
 {
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
 	// Bullet デバッグ描画（LOS レイの遮蔽やコーン可視化に使う）
-	core::get_physics_manager()->set_debug_drawer( GameMain::get_instance()->get_bullet_debug_draw() );
+	get_physics_manager()->set_debug_drawer( get_bullet_debug_draw() );
 
 	// System を追加（実行順が重要: 対象収集 → 知覚 → 警戒 → 移動 → 物理 → 描画）
-	get_entity_manager()->add_system< core::ecs::PhysicsSystem >( 5 );
-	get_entity_manager()->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10 );
+	get_entity_manager()->add_system< core::ecs::PhysicsSystem >( 5, get_physics_manager() );
+	get_entity_manager()->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10, get_input(), get_physics_manager() );
 	get_entity_manager()->add_system< blue_sky::ecs::TargetRegistrySystem >( 20 );
-	get_entity_manager()->add_system< blue_sky::ecs::PerceptionSystem >( 30 );
-	get_entity_manager()->add_system< blue_sky::ecs::AlertSystem >( 40 );
-	get_entity_manager()->add_system< blue_sky::ecs::PatrolSystem >( 50 );
-	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
+	get_entity_manager()->add_system< blue_sky::ecs::PerceptionSystem >( 30, get_physics_manager() );
+	get_entity_manager()->add_system< blue_sky::ecs::AlertSystem >( 40, get_time_manager() );
+	get_entity_manager()->add_system< blue_sky::ecs::PatrolSystem >( 50, get_time_manager() );
+	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000, get_graphics_manager(), get_time_manager() );
 
 	// --- プレイヤー（侵入者） ---
 	player_ = get_entity_manager()->create_entity();
@@ -128,7 +128,7 @@ EnemyAiTestScene::EnemyAiTestScene()
 		t->transform.set_identity();
 		e->add_component< RenderComponent >();
 		auto* m = e->add_component< ModelComponent >();
-		m->model = get_graphics_manager()->load_model( "ground" );
+		m->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "ground" ) );
 
 		auto* rb = e->add_component< RigidBodyComponent >();
 		rb->shape_type = RigidBodyShapeType::Box;
@@ -143,7 +143,7 @@ EnemyAiTestScene::EnemyAiTestScene()
 		Vector( -6.f, 0.f, 8.f ),
 		Vector(  0.f, 0.f, 14.f ),
 	};
-	auto* box_model = get_graphics_manager()->load_model( "box-1x1x1" );
+	const auto box_model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "box-1x1x1" ) );
 	for ( const auto& p : building_positions )
 	{
 		auto* e = get_entity_manager()->create_entity();
@@ -182,7 +182,7 @@ void EnemyAiTestScene::spawn_enemy( const Vector& start, const std::vector< Vect
 	// 見た目（プレースホルダの箱＝ロボット）
 	e->add_component< RenderComponent >();
 	auto* m = e->add_component< ModelComponent >();
-	m->model = get_graphics_manager()->load_model( "box-1x1x1" );
+	m->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "box-1x1x1" ) );
 
 	auto* perception = e->add_component< blue_sky::ecs::PerceptionComponent >();
 	perception->eye_height = 1.0f;
@@ -214,7 +214,7 @@ void EnemyAiTestScene::update()
 
 void EnemyAiTestScene::draw_debug()
 {
-	auto* dd = GameMain::get_instance()->get_bullet_debug_draw();
+	auto* dd = get_bullet_debug_draw();
 	if ( ! dd )
 	{
 		return;
@@ -233,7 +233,7 @@ void EnemyAiTestScene::draw_debug()
 
 		const Vector pos     = transform->transform.get_position();
 		const Vector forward = transform->transform.forward();
-		const btVector3 col  = state_color( alert->state );
+		const core::Vector col = state_color( alert->state );
 
 		// 視界錐は「床に投影した扇」として描く。
 		// 目の高さの水平な扇だと、同じ目線高さの FPS 視点からは真横＝1本の線に見えて
@@ -264,7 +264,7 @@ void EnemyAiTestScene::draw_debug()
 		// パトロール経路（薄い青の折れ線・床）
 		if ( patrol && patrol->waypoints.size() >= 2 )
 		{
-			const btVector3 path_col( 0.2f, 0.4f, 1.f );
+			const core::Vector path_col( 0.2f, 0.4f, 1.f );
 			for ( std::size_t i = 0; i < patrol->waypoints.size(); ++i )
 			{
 				Vector a = patrol->waypoints[ i ];
@@ -288,6 +288,9 @@ void EnemyAiTestScene::draw_debug()
 
 void EnemyAiTestScene::render()
 {
+	// 描く System（RenderSystem など）を、画面のクリアの後に動かす
+	get_entity_manager()->render();
+
 	get_graphics_manager()->render_debug_bullet();
 
 	std::stringstream ss;

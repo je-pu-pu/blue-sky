@@ -1,0 +1,69 @@
+# 1-0 のステージ（tools/stage_convert/convert_stage.py で 1-0.stage から変換した）
+format = 1
+
+[stage]
+collision = "1-0.obj"
+
+[player]
+position = [-25.0, 46.0, -65.0]
+camera_direction = 60
+
+[goal]
+position = [-35.0, 50.0, 35.0]
+
+# 変換で捨てた行（どこも読まない）: video.shadow-map-enabled 0
+
+[[event]]
+when = "start"
+then = [
+  { do = "set", bgm = "drain" },
+  { do = "set", bpm = 120, beat = 0.25 },
+  { do = "set", sky_box = "moon" },
+  { do = "set", shadow_color = [0, 0, 0, 1] },
+  { do = "set", shadow_paper_color = [0.5, 0.5, 0.5, 1] },
+  { do = "set", paper_type = 1 },
+]
+
+[[object]]
+type = "static"
+model = "stage-1-0"
+position = [0, 0, 0]
+
+[[object]]
+type = "rocket"
+position = [-50.79999923706055, 43.0, -0.10000000149011612]
+direction = 0
+
+[[object]]
+type = "stone"
+positions = [
+  [-12.88033676147461, 40.98952102661133, -15.03026294708252],
+  [-28.067394256591797, 40.98952102661133, -31.28021240234375],
+  [-25.195222854614258, 40.98952102661133, -18.870576858520508],
+  [-12.46678352355957, 40.98952102661133, -5.381356239318848],
+]
+direction = 0
+
+[[object]]
+type = "ladder"
+position = [-40.0, 45.0, 15.0]
+direction = 270
+
+[[object]]
+type = "medal"
+position = [-43.0, 45.0, -43.0]
+direction = 0
+
+[[object]]
+type = "area-switch"
+name = "area-switch-1"
+position = [-35.0, 50.0, 15.0]
+size = [12.0, 2.0, 12.0]
+on_turn_on = [
+
+  { do = "set", bgm = "tower" },
+  { do = "set", bpm = 120 },
+  { do = "fade", shadow_color = [0.75, 0.75, 1, 1], speed = 0.01 },
+  { do = "fade", shadow_paper_color = [1, 1, 1, 1], speed = 0.01 },
+  { do = "switch", target = "area-switch-1", state = "broken" },
+]

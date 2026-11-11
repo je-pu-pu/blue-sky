@@ -16,35 +16,43 @@
 
 #include <common/string.h>
 
-#include <fstream>
-#include <sstream>
+#include <blue_sky/DebugLog.h>
+#include <blue_sky/stage/StoryTextParser.h>
+
+#include <filesystem>
 
 namespace blue_sky
 {
 
-StoryTextScene::StoryTextScene( const char* file_name, const char* next_scene_name )
-	: text_y_( static_cast< float >( get_height() ) )
+StoryTextScene::StoryTextScene( GameMain& game_main, const char* file_name, const char* next_scene_name )
+	: Scene( game_main )
+	, text_y_( static_cast< float >( get_height() ) )
 	, text_y_target_( 0.f )
 	, text_scroll_speed_( 0.5f )
 	, text_color_( Color::from_256( 255, 255, 255, 127 ) )
 	, text_border_color_( Color::from_256( 0, 0, 0, 127 ) )
 	, next_scene_name_( next_scene_name )
-	, sprite_texture_( 0 )
-	, bgm_( 0 )
-	, sound_( 0 )
 	, is_skipped_( false )
 {
 	get_sound_manager()->stop_all();
 
-	load_story_text_file( file_name );
+	// ファイル名の {stage} を今のステージ名にする（シーンの登録側が GameMain からステージ名を引かなくて済むように）
+	std::string path = file_name;
+
+	if ( const auto pos = path.find( "{stage}" ); pos != std::string::npos )
+	{
+		path.replace( pos, 7, get_stage_name() );
+	}
+
+	load_story_text_file( path.c_str() );
 
 	text_y_target_ = -get_graphics_manager()->get_text_height( text_.c_str(), static_cast< float >( get_width() ), static_cast< float >( get_height() ) );
 	
-	sprite_texture_ = get_graphics_manager()->load_named_texture( "sprite", "media/image/title.png" );
+	sprite_texture_ = load_named_texture_handle( "sprite", "media/image/title.png" );
 
 	if ( bg_sprite_layer_list_.empty() )
 	{
-		bg_sprite_layer_list_.push_back( std::make_unique< BgSpriteLayer >( "bg", get_graphics_manager()->load_named_texture( "bg", "media/image/story-bg-default.jpg" ) ) );
+		bg_sprite_layer_list_.push_back( create_bg_sprite_layer( "bg", "story-bg-default", "media/image/story-bg-default.jpg" ) );
 	}
 
 	get_graphics_manager()->get_fader()->full_out();
@@ -54,113 +62,105 @@ StoryTextScene::~StoryTextScene() = default;
 
 void StoryTextScene::load_story_text_file( const char* file_name )
 {
-	std::ifstream in( file_name );
-	
-	if ( ! in.good() )
+	// ファイルが無いステージ（おまけのステージの outro など）は、この場面を飛ばす
+	if ( ! std::filesystem::exists( file_name ) )
 	{
+		debug_log( string_t( "[StoryText] " ) + file_name + " が無いので、この場面を飛ばします" );
 		set_next_scene( next_scene_name_ );
 		return;
 	}
 
-	bool in_text = false;
-	BgSpriteLayer* current_layer = nullptr;
+	stage::StoryTextData data;
 
-	while ( in.good() )
+	try
 	{
-		std::string line;
-		std::getline( in, line );
+		data = stage::StoryTextParser::parse_file( file_name );
+	}
+	catch ( const std::exception& e )
+	{
+		// 文法の誤り・読めない版 : 理由を残して、この場面を飛ばす（ゲームは続ける）
+		debug_log( string_t( "[StoryText] " ) + e.what() + "（この場面を飛ばします）" );
+		set_next_scene( next_scene_name_ );
+		return;
+	}
 
-		if ( in_text )
+	for ( const auto& warning : data.warnings )
+	{
+		debug_log( "[StoryText] " + warning );
+	}
+
+	for ( const auto& desc : data.layers )
+	{
+		auto layer = create_bg_sprite_layer( desc.image.c_str(), desc.image.c_str(), ( "media/image/" + desc.image ).c_str() );
+
+		if ( desc.src_rect )
 		{
-			text_ += common::convert_to_wstring( line ) + L"\n";
-			continue;
+			layer->get_src_rect() = win::Rect( ( * desc.src_rect )[ 0 ], ( * desc.src_rect )[ 1 ], ( * desc.src_rect )[ 2 ], ( * desc.src_rect )[ 3 ] );
 		}
 
-		std::stringstream ss;
-		std::string command;
+		if ( desc.translation )
+		{
+			apply_chase( layer->get_translation(), * desc.translation, [] ( Vector3& v, const std::array< double, 2 >& a ) { v.x() = static_cast< float >( a[ 0 ] ); v.y() = static_cast< float >( a[ 1 ] ); } );
+		}
 
-		ss << line;
-		ss >> command;
+		// 回転（度。画面の中心で回る : 重なりは画面の中央に置かれ、描画用の座標は画面の中心が原点。render() を参照）。以前の形式では layer-rotate と書いてあり、読む側の名前（layer-rotation）と違って黙って無視されていた
+		if ( desc.rotation )
+		{
+			apply_chase( layer->get_rotation(), * desc.rotation, [] ( float_t& v, const std::array< double, 1 >& a ) { v = static_cast< float_t >( a[ 0 ] ); } );
+		}
 
-		if ( command == "layer" )
+		if ( desc.scale )
 		{
-			string_t layer_name;
-			ss >> layer_name;
+			apply_chase( layer->get_scale(), * desc.scale, [] ( float_t& v, const std::array< double, 1 >& a ) { v = static_cast< float_t >( a[ 0 ] ); } );
+		}
 
-			auto layer = std::make_unique< BgSpriteLayer >( layer_name.c_str(), get_graphics_manager()->load_named_texture( layer_name.c_str(), ( std::string( "media/image/" + layer_name ) ).c_str() ) );
-			current_layer = layer.get();
+		if ( desc.color )
+		{
+			apply_chase( layer->get_color(), * desc.color, [] ( Color& v, const std::array< double, 4 >& a ) { v = Color( static_cast< float >( a[ 0 ] ), static_cast< float >( a[ 1 ] ), static_cast< float >( a[ 2 ] ), static_cast< float >( a[ 3 ] ) ); } );
+		}
 
-			ss >> current_layer->get_src_rect().left() >> current_layer->get_src_rect().top();
-			ss >> current_layer->get_src_rect().right() >> current_layer->get_src_rect().bottom();
+		bg_sprite_layer_list_.push_back( std::move( layer ) );
+	}
 
-			bg_sprite_layer_list_.push_back( std::move( layer ) );
-		}
-		else if ( command == "layer-translation" )
-		{
-			ss >> current_layer->get_translation().value().x() >> current_layer->get_translation().value().y();
-			ss >> current_layer->get_translation().target_value().x() >> current_layer->get_translation().target_value().y();
-			ss >> current_layer->get_translation().speed().x() >> current_layer->get_translation().speed().y();
-		}
-		else if ( command == "layer-rotation" )
-		{
-			ss >> current_layer->get_rotation().value() >> current_layer->get_rotation().target_value() >> current_layer->get_rotation().speed();
-		}
-		else if ( command == "layer-scale" )
-		{
-			ss >> current_layer->get_scale().value() >> current_layer->get_scale().target_value() >> current_layer->get_scale().speed();
-		}
-		else if ( command == "layer-color" )
-		{
-			ss >> current_layer->get_color().value().r() >> current_layer->get_color().value().g() >> current_layer->get_color().value().b() >> current_layer->get_color().value().a();
-			ss >> current_layer->get_color().target_value().r() >> current_layer->get_color().target_value().g() >> current_layer->get_color().target_value().b() >> current_layer->get_color().value().a();
-			ss >> current_layer->get_color().speed().r() >> current_layer->get_color().speed().g() >> current_layer->get_color().speed().b() >> current_layer->get_color().speed().a();
-		}
-		else if ( command == "bgm" )
-		{
-			std::string bgm_name;
-			float_t volume = 1.f;
+	if ( data.bgm )
+	{
+		get_sound_manager()->load_music( "bgm", data.bgm->file.c_str() );
+		bgm_ = get_sound_manager()->get_sound_handle( "bgm" );
 
-			ss >> bgm_name >> volume;
+		if ( Sound* bgm = resolve( bgm_, "bgm" ) )
+		{
+			bgm->set_volume( static_cast< float_t >( data.bgm->volume ) );
+			bgm->play( false );
+		}
+	}
 
-			bgm_ = get_sound_manager()->load_music( "bgm", bgm_name.c_str() );
-			bgm_->set_volume( volume );
-			bgm_->play( false );
-		}
-		else if ( command == "text-color" )
-		{
-			uint_t hex;
+	if ( data.text_color )
+	{
+		text_color_ = Color::from_hex( * data.text_color );
+	}
 
-			ss >> std::hex >> hex;
+	if ( data.text_border_color )
+	{
+		text_border_color_ = Color::from_hex( * data.text_border_color );
+	}
 
-			text_color_ = Color::from_hex( hex );
-		}
-		else if( command == "text-border-color" )
-		{
-			uint_t hex;
+	text_ = common::convert_to_wstring( data.text );
 
-			ss >> std::hex >> hex;
+	if ( data.sound )
+	{
+		get_sound_manager()->load( "sound", data.sound->c_str() );
+		sound_ = get_sound_manager()->get_sound_handle( "sound" );
+		play( sound_, "sound" );
+	}
 
-			text_border_color_ = Color::from_hex( hex );
-		}
-		else if ( command == "text" )
-		{
-			in_text = true;
-		}
-		else if ( command == "sound" )
-		{
-			std::string sound_name;
-			ss >> sound_name;
-			sound_ = get_sound_manager()->load( "sound", sound_name.c_str() );
-			sound_->play( false );
-		}
-		else if ( command == "next-scene" )
-		{
-			ss >> next_scene_name_;
-		}
-		else if ( command == "next-stage-name" )
-		{
-			ss >> next_stage_name_;
-		}
+	if ( data.next_scene )
+	{
+		next_scene_name_ = * data.next_scene;
+	}
+
+	if ( data.next_stage )
+	{
+		next_stage_name_ = * data.next_stage;
 	}
 }
 
@@ -190,28 +190,35 @@ void StoryTextScene::update()
 			set_next_scene( next_scene_name_ );
 		}
 	}
-	else if ( sound_ )
+	else if ( ! sound_.is_null() )
 	{
+		// 音が引けなければ（解放された）、鳴り終わったものとして進める
+		Sound* sound = resolve( sound_, "sound" );
+		Sound* bgm = resolve( bgm_, "bgm" );
+
 		if ( ! is_skipped_ )
 		{
-			if ( get_input()->push( Input::Button::A ) || ! sound_->is_playing() )
+			if ( get_input()->push( Input::Button::A ) || ! sound || ! sound->is_playing() )
 			{
 				is_skipped_ = true;
 			}
 		}
 		else
 		{
-			sound_->fade_out( Sound::VOLUME_FADE_SPEED_FAST );
-
-			if ( bgm_ )
+			if ( sound )
 			{
-				bgm_->fade_out();
+				sound->fade_out( Sound::VOLUME_FADE_SPEED_FAST );
+			}
+
+			if ( bgm )
+			{
+				bgm->fade_out();
 			}
 
 			get_graphics_manager()->get_fader()->fade_out();
 		}
 
-		if ( sound_->is_fade_full_out() && ( ! bgm_ || bgm_->is_fade_full_out() ) && get_graphics_manager()->get_fader()->is_full_out() )
+		if ( ( ! sound || sound->is_fade_full_out() ) && ( ! bgm || bgm->is_fade_full_out() ) && get_graphics_manager()->get_fader()->is_full_out() )
 		{
 			set_next_scene( next_scene_name_ );
 
@@ -233,6 +240,13 @@ void StoryTextScene::update()
 	}
 }
 
+std::unique_ptr< StoryTextScene::BgSpriteLayer > StoryTextScene::create_bg_sprite_layer( const char_t* layer_name, const char_t* texture_name, const char_t* file_name ) const
+{
+	// レイヤーは画像をハンドルで持つ（大きさを読むためにだけ、読んだ画像を渡す）
+	const Texture* texture = get_graphics_manager()->load_named_texture( texture_name, file_name );
+	return std::make_unique< BgSpriteLayer >( layer_name, texture, get_graphics_manager()->get_texture_handle_of( texture ) );
+}
+
 /**
  * 描画
  */
@@ -244,19 +258,31 @@ void StoryTextScene::render()
 	sprite->begin();
 
 	{
-		render_technique( "|sprite", [this, sprite]
+		// 画面を覆う拡大（2026-11-11 利用者の決定）: 1280x720 での見た目を、画面を覆うまで画面の中心を軸に拡大する（はみ出した所は切れる）。
+		// 画像は画素の大きさで置かれるので、画像には画素の拡大 k（BgSpriteLayer::get_screen_cover_scale）をそのまま掛ける。
+		// translation は描画用の座標（画面の高さが 2）で書かれていて、画面の高さに対する割合なので、1280x720 と比べた拡大 k * 720 / 画面の高さ を掛ける
+		// （16:9 の画面では 1。画像との位置の関係を 1280x720 と同じに保つ）。1280x720 ではどちらも 1 なので、見た目は以前と同じ
+		const float_t screen_height = static_cast< float_t >( get_height() );
+		const float_t cover = BgSpriteLayer::get_screen_cover_scale( static_cast< float_t >( get_width() ), screen_height );
+		const float_t translation_cover = cover * BgSpriteLayer::BASE_SCREEN_HEIGHT / screen_height;
+
+		render_technique( "|sprite", [this, sprite, cover, translation_cover]
 		{
 			for ( auto j = bg_sprite_layer_list_.begin(); j != bg_sprite_layer_list_.end(); ++j )
 			{
 
-				Matrix r, s, t;
+				// 重なりは描く先を渡さないので、Sprite が画面の中央に置く。描画用の座標（Pixel2DSpace）は画面の中心が原点なので、
+				// 回転・拡大は画面の中心（＝重なりの中心）を軸にかかり、その後で translation だけ動く。
+				// 画面を覆う拡大も、ファイルの拡大と同じく translation の前に画面の中心を軸に掛ける（回転の軸も画面の中心のまま）
+				Matrix r, s, c, t;
 
 				r.set_rotation_z( math::degree_to_radian( ( *j )->get_rotation().value() ) );
 				s.set_scaling( ( *j )->get_scale().value(), ( *j )->get_scale().value(), 1.f );
-				t.set_translation( ( *j )->get_translation().value().x(), ( *j )->get_translation().value().y(), 0.f );
+				c.set_scaling( cover, cover, 1.f );
+				t.set_translation( ( *j )->get_translation().value().x() * translation_cover, ( *j )->get_translation().value().y() * translation_cover, 0.f );
 
-				sprite->set_transform( r * s * t );
-				sprite->draw( ( *j )->get_texture(), ( *j )->get_src_rect(), ( *j )->get_color().value() );
+				sprite->set_transform( r * s * c * t );
+				sprite->draw( resolve( ( *j )->get_texture_handle(), ( *j )->get_name().c_str() ), ( *j )->get_src_rect(), ( *j )->get_color().value() );	// 引けなければ Sprite は描かない
 			}
 		} );
 	}
@@ -285,7 +311,7 @@ void StoryTextScene::render()
 			win::Rect src_rect = win::Rect::Size( 512, 0, 272, 128 );
 			win::Point dst_point( get_width() - src_rect.width(), get_height() - src_rect.height() );
 
-			sprite->draw( dst_point, sprite_texture_, src_rect );
+			sprite->draw( dst_point, resolve( sprite_texture_, "sprite" ), src_rect );
 		} );
 
 		sprite->end();

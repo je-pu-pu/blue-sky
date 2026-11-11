@@ -21,7 +21,16 @@ class CountSystem : public core::ecs::System< core::ecs::TransformComponent >
 {
 public:
 	mutable int update_count = 0;
-	void update( ComponentTuple& ) const override { update_count++; }
+	void update() override { for_each( [ this ] ( ComponentTuple& ) { update_count++; } ); }
+};
+
+/// 描く System の代わり（is_render_system が true）
+class RenderCountSystem : public core::ecs::System< core::ecs::TransformComponent >
+{
+public:
+	mutable int update_count = 0;
+	bool is_render_system() const override { return true; }
+	void update() override { for_each( [ this ] ( ComponentTuple& ) { update_count++; } ); }
 };
 
 /**
@@ -34,7 +43,7 @@ class DualCountSystem : public core::ecs::System< core::ecs::TransformComponent,
 {
 public:
 	mutable int update_count = 0;
-	void update( ComponentTuple& ) const override { update_count++; }
+	void update() override { for_each( [ this ] ( ComponentTuple& ) { update_count++; } ); }
 };
 
 } // namespace
@@ -48,7 +57,8 @@ public:
  */
 TEST( EcsTest, EntityManagerTest )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	auto entity = em->create_entity();
@@ -76,7 +86,8 @@ TEST( EcsTest, EntityManagerTest )
  */
 TEST( EcsTest, EntityIdUniqueness )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	auto e1 = em->create_entity();
@@ -95,7 +106,8 @@ TEST( EcsTest, EntityIdUniqueness )
  */
 TEST( EcsTest, DestroyEntity )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	auto entity = em->create_entity();
@@ -107,6 +119,133 @@ TEST( EcsTest, DestroyEntity )
 	// 破棄後に作成した Entity は別の ID を持つ
 	auto entity2 = em->create_entity();
 	EXPECT_NE( id, entity2->get_id() );
+}
+
+/**
+ * destroy_entity() で、その Entity が System の対象から外れることを検証する
+ *
+ * 以前は Entity だけを消していて、System は消えた Entity のコンポーネントを指したまま update していた
+ */
+TEST( EcsTest, DestroyEntityRemovesFromSystems )
+{
+	core::ecs::EntityManager entity_manager;
+	auto em = & entity_manager;
+
+	em->add_system< CountSystem >();
+	em->add_system< DualCountSystem >();
+
+	auto* e = em->create_entity();
+	e->add_component< core::ecs::TransformComponent >();
+	e->add_component< core::ecs::RigidBodyComponent >();
+
+	EXPECT_EQ( 1u, em->get_system< CountSystem >()->debug_entity_count() );
+	EXPECT_EQ( 1u, em->get_system< DualCountSystem >()->debug_entity_count() );
+
+	em->destroy_entity( e->get_id() );	// e はここで無効になる
+
+	EXPECT_EQ( 0u, em->get_system< CountSystem >()->debug_entity_count() );
+	EXPECT_EQ( 0u, em->get_system< DualCountSystem >()->debug_entity_count() );
+
+	em->update();
+	EXPECT_EQ( 0, em->get_system< CountSystem >()->update_count );
+	EXPECT_EQ( 0, em->get_system< DualCountSystem >()->update_count );
+}
+
+namespace {
+
+/// 壊された数を数えるコンポーネント（destroy_entity がコンポーネントを外すかを確かめる）
+struct CountedComponent : public core::ecs::Component
+{
+	static int destroyed_count;
+	~CountedComponent() override { destroyed_count++; }
+};
+
+int CountedComponent::destroyed_count = 0;
+
+} // namespace
+
+/**
+ * destroy_entity() で、その Entity のコンポーネントが外れ（壊され）、残った Entity は影響を受けないことを検証する
+ */
+TEST( EcsTest, DestroyEntityRemovesComponentsAndKeepsOthers )
+{
+	core::ecs::EntityManager entity_manager;
+	auto em = & entity_manager;
+
+	em->add_system< CountSystem >();
+
+	auto* doomed = em->create_entity();
+	doomed->add_component< core::ecs::TransformComponent >();
+	doomed->add_component< CountedComponent >();
+
+	auto* survivor = em->create_entity();
+	auto* survivor_transform = survivor->add_component< core::ecs::TransformComponent >();
+	auto* survivor_counted = survivor->add_component< CountedComponent >();
+
+	const auto doomed_id = doomed->get_id();
+	CountedComponent::destroyed_count = 0;
+	em->destroy_entity( doomed_id );
+
+	// 消した Entity のコンポーネントだけが壊される
+	EXPECT_EQ( 1, CountedComponent::destroyed_count );
+
+	// 残った Entity のコンポーネントはそのまま・System の対象のまま
+	EXPECT_EQ( survivor_transform, survivor->get_component< core::ecs::TransformComponent >() );
+	EXPECT_EQ( survivor_counted, survivor->get_component< CountedComponent >() );
+	EXPECT_EQ( 1u, em->get_system< CountSystem >()->debug_entity_count() );
+
+	em->update();
+	EXPECT_EQ( 1, em->get_system< CountSystem >()->update_count );
+
+	// 同じ id をもう一度消しても何もしない
+	em->destroy_entity( doomed_id );
+	EXPECT_EQ( 1, CountedComponent::destroyed_count );
+	EXPECT_EQ( 1u, em->get_system< CountSystem >()->debug_entity_count() );
+}
+
+/**
+ * is_alive() と find() で、EntityId から生きている Entity を引けることを検証する
+ *
+ * 消した後・作っていない id では false / nullptr。clear の後も古い id は生き返らない（番号を二度と使わない）
+ */
+TEST( EcsTest, IsAliveAndFind )
+{
+	core::ecs::EntityManager entity_manager;
+	auto em = & entity_manager;
+
+	auto* e1 = em->create_entity();
+	auto* e2 = em->create_entity();
+	const auto id1 = e1->get_id();
+	const auto id2 = e2->get_id();
+
+	EXPECT_TRUE( em->is_alive( id1 ) );
+	EXPECT_EQ( e1, em->find( id1 ) );
+	EXPECT_EQ( e2, em->find( id2 ) );
+
+	// 作っていない id
+	EXPECT_FALSE( em->is_alive( id2 + 100 ) );
+	EXPECT_EQ( nullptr, em->find( id2 + 100 ) );
+
+	// 消した後
+	em->destroy_entity( id1 );
+	EXPECT_FALSE( em->is_alive( id1 ) );
+	EXPECT_EQ( nullptr, em->find( id1 ) );
+	EXPECT_TRUE( em->is_alive( id2 ) );
+	EXPECT_EQ( e2, em->find( id2 ) );
+
+	// const からも引ける
+	const auto& const_em = entity_manager;
+	EXPECT_EQ( e2, const_em.find( id2 ) );
+
+	// clear の後、新しい Entity が古い id を使うことは無い
+	em->clear();
+	EXPECT_FALSE( em->is_alive( id2 ) );
+	auto* e3 = em->create_entity();
+	EXPECT_NE( id1, e3->get_id() );
+	EXPECT_NE( id2, e3->get_id() );
+	EXPECT_FALSE( em->is_alive( id1 ) );
+	EXPECT_FALSE( em->is_alive( id2 ) );
+	EXPECT_EQ( e3, em->find( e3->get_id() ) );
 }
 
 // ---------------------------------------------------------------------------
@@ -121,7 +260,8 @@ TEST( EcsTest, DestroyEntity )
  */
 TEST( EcsTest, DuplicateComponentReturnsNull )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	auto entity = em->create_entity();
@@ -139,7 +279,8 @@ TEST( EcsTest, DuplicateComponentReturnsNull )
  */
 TEST( EcsTest, GetNonExistentComponent )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	auto entity = em->create_entity();
@@ -153,7 +294,8 @@ TEST( EcsTest, GetNonExistentComponent )
  */
 TEST( EcsTest, MultipleComponentTypes )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	auto entity = em->create_entity();
@@ -186,11 +328,12 @@ TEST( EcsTest, MultipleComponentTypes )
  */
 TEST( EcsTest, SystemTest )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< core::ecs::ParticleSystem >();
-	em->add_system< core::ecs::PhysicsSystem >();
+	em->add_system< core::ecs::PhysicsSystem >( 0, nullptr );	// update を呼ばないので物理は渡さない
 
 	auto entity = em->create_entity();
 	EXPECT_NE( nullptr, entity );
@@ -206,7 +349,8 @@ TEST( EcsTest, SystemTest )
  */
 TEST( EcsTest, GetSystem )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	EXPECT_EQ( nullptr, em->get_system< CountSystem >() );
@@ -226,7 +370,8 @@ TEST( EcsTest, GetSystem )
  */
 TEST( EcsTest, DuplicateAddSystemIsNoop )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< CountSystem >();
@@ -250,11 +395,12 @@ TEST( EcsTest, DuplicateAddSystemIsNoop )
  *
  * CountSystem は TransformComponent を要求する。
  * TransformComponent を持つ Entity を作成して update() を呼ぶと、
- * CountSystem::update(ComponentTuple&) が 1 回呼ばれる。
+ * CountSystem が対象 1 つぶん数える（update_count が 1 増える）。
  */
 TEST( EcsTest, AutoRegistration )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< CountSystem >();
@@ -279,7 +425,8 @@ TEST( EcsTest, AutoRegistration )
  */
 TEST( EcsTest, AutoRegistrationMultipleEntities )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< CountSystem >();
@@ -310,7 +457,8 @@ TEST( EcsTest, AutoRegistrationMultipleEntities )
  */
 TEST( EcsTest, AutoRegistrationRequiresAllComponents )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< DualCountSystem >();
@@ -341,7 +489,8 @@ TEST( EcsTest, AutoRegistrationRequiresAllComponents )
  */
 TEST( EcsTest, RemoveComponentUnregistersFromSystem )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< CountSystem >();
@@ -372,7 +521,8 @@ TEST( EcsTest, RemoveComponentUnregistersFromSystem )
  */
 TEST( EcsTest, LateSystemRegistration )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	// Entity + Component を先に作成
@@ -402,7 +552,8 @@ TEST( EcsTest, LateSystemRegistration )
  */
 TEST( EcsTest, Clear )
 {
-	auto em = core::ecs::EntityManager::get_instance();
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
 	em->clear();
 
 	em->add_system< CountSystem >();
@@ -417,4 +568,358 @@ TEST( EcsTest, Clear )
 	// clear() 後も新規 Entity を作成可能
 	auto entity2 = em->create_entity();
 	EXPECT_NE( nullptr, entity2 );
+}
+
+// ---------------------------------------------------------------------------
+// PhysicsSystem の剛体の解放
+//
+// 以前は PhysicsManager::destroy_rigid_body を呼ぶ所が無く、Entity を消しても・シーンを替えても
+// （EntityManager::clear）剛体が物理の世界に残っていた。
+// PhysicsManager は EntityManager より先に作る（後に壊れる）。GameMain も同じ順
+// ---------------------------------------------------------------------------
+
+namespace {
+
+/// Transform と RigidBody を持つ Entity を作る（PhysicsSystem の update で剛体ができる）
+core::ecs::Entity* create_physics_entity( core::ecs::EntityManager& em )
+{
+	auto* e = em.create_entity();
+	e->add_component< core::ecs::TransformComponent >();
+	e->add_component< core::ecs::RigidBodyComponent >();
+	return e;
+}
+
+} // namespace
+
+/**
+ * Entity を消すと、その剛体だけが解放されることを検証する
+ */
+TEST( EcsTest, DestroyEntityReleasesRigidBody )
+{
+	core::physics::PhysicsManager physics_manager;
+	core::ecs::EntityManager em;
+	em.add_system< core::ecs::PhysicsSystem >( 0, & physics_manager );
+
+	auto* e1 = create_physics_entity( em );
+	auto* e2 = create_physics_entity( em );
+	em.update();
+	ASSERT_EQ( 2, physics_manager.get_rigid_body_count() );
+
+	em.destroy_entity( e1->get_id() );
+	EXPECT_EQ( 1, physics_manager.get_rigid_body_count() );
+	EXPECT_EQ( 1u, em.get_system< core::ecs::PhysicsSystem >()->debug_entity_count() );
+
+	// 残った Entity の剛体はそのまま動く
+	EXPECT_TRUE( e2->get_component< core::ecs::RigidBodyComponent >()->handle.is_valid() );
+	em.update();
+	EXPECT_EQ( 1, physics_manager.get_rigid_body_count() );
+}
+
+/**
+ * RigidBodyComponent を外すと剛体が解放され、付け直すと作り直されることを検証する
+ */
+TEST( EcsTest, RemoveRigidBodyComponentReleasesRigidBody )
+{
+	core::physics::PhysicsManager physics_manager;
+	core::ecs::EntityManager em;
+	em.add_system< core::ecs::PhysicsSystem >( 0, & physics_manager );
+
+	auto* e = create_physics_entity( em );
+	em.update();
+	ASSERT_EQ( 1, physics_manager.get_rigid_body_count() );
+
+	e->remove_component< core::ecs::RigidBodyComponent >();
+	EXPECT_EQ( 0, physics_manager.get_rigid_body_count() );
+
+	e->add_component< core::ecs::RigidBodyComponent >();
+	em.update();
+	EXPECT_EQ( 1, physics_manager.get_rigid_body_count() );
+
+	// TransformComponent を外しても PhysicsSystem の対象から外れるので、剛体は解放される
+	e->remove_component< core::ecs::TransformComponent >();
+	EXPECT_EQ( 0, physics_manager.get_rigid_body_count() );
+	EXPECT_FALSE( e->get_component< core::ecs::RigidBodyComponent >()->handle.is_valid() );
+}
+
+/**
+ * clear()（シーンを替えるとき GameMain が呼ぶ）で剛体がすべて解放され、その後も同じ物理の世界を使えることを検証する
+ */
+TEST( EcsTest, ClearReleasesRigidBodies )
+{
+	core::physics::PhysicsManager physics_manager;
+	core::ecs::EntityManager em;
+
+	// 1 つ目のシーン
+	em.add_system< core::ecs::PhysicsSystem >( 0, & physics_manager );
+	create_physics_entity( em );
+	create_physics_entity( em );
+	em.update();
+	ASSERT_EQ( 2, physics_manager.get_rigid_body_count() );
+
+	em.clear();
+	EXPECT_EQ( 0, physics_manager.get_rigid_body_count() );
+
+	// 2 つ目のシーン
+	em.add_system< core::ecs::PhysicsSystem >( 0, & physics_manager );
+	create_physics_entity( em );
+	em.update();
+	EXPECT_EQ( 1, physics_manager.get_rigid_body_count() );
+}
+
+/**
+ * PhysicsSystem を取り除いたとき・EntityManager を壊したときにも剛体が解放されることを検証する
+ */
+TEST( EcsTest, RemoveSystemAndDestructorReleaseRigidBodies )
+{
+	core::physics::PhysicsManager physics_manager;
+
+	{
+		core::ecs::EntityManager em;
+		em.add_system< core::ecs::PhysicsSystem >( 0, & physics_manager );
+		auto* e = create_physics_entity( em );
+		em.update();
+		ASSERT_EQ( 1, physics_manager.get_rigid_body_count() );
+
+		em.remove_system< core::ecs::PhysicsSystem >();
+		EXPECT_EQ( 0, physics_manager.get_rigid_body_count() );
+		EXPECT_FALSE( e->get_component< core::ecs::RigidBodyComponent >()->handle.is_valid() );
+
+		em.add_system< core::ecs::PhysicsSystem >( 0, & physics_manager );
+		em.update();
+		ASSERT_EQ( 1, physics_manager.get_rigid_body_count() );
+	}
+
+	EXPECT_EQ( 0, physics_manager.get_rigid_body_count() );
+}
+
+/**
+ * 描く System は update() では動かず、render() で動くことを検証する
+ *
+ * 以前は描く System も update() で動き、フレームの頭の画面のクリアに描画を消されていた（ECS のシーンが真っ黒）
+ */
+TEST( EcsTest, RenderSystemRunsOnlyInRender )
+{
+	core::ecs::EntityManager entity_manager;	// テストごとに作る（以前はシングルトンを共有していた）
+	auto em = & entity_manager;
+	em->clear();
+
+	em->add_system< CountSystem >();
+	em->add_system< RenderCountSystem >();
+
+	auto* e = em->create_entity();
+	e->add_component< core::ecs::TransformComponent >();
+
+	em->update();
+	EXPECT_EQ( 1, em->get_system< CountSystem >()->update_count );
+	EXPECT_EQ( 0, em->get_system< RenderCountSystem >()->update_count );
+
+	em->render();
+	EXPECT_EQ( 1, em->get_system< CountSystem >()->update_count );
+	EXPECT_EQ( 1, em->get_system< RenderCountSystem >()->update_count );
+
+	em->clear();
+}
+
+/**
+ * 部品・System の型の番号が、型ごとに 1 つに決まり、型が違えば違うことを検証する
+ *
+ * 以前は typeid( T ).hash_code() で、呼ぶたびに計算していた（衝突もし得た）。const の有無は区別しない（以前の typeid と同じ）
+ */
+TEST( EcsTest, TypeIdsAreStableAndDistinct )
+{
+	using namespace core::ecs;
+
+	EXPECT_EQ( get_component_type_id< TransformComponent >(), get_component_type_id< TransformComponent >() );
+	EXPECT_EQ( get_component_type_id< TransformComponent >(), get_component_type_id< const TransformComponent >() );
+	EXPECT_NE( get_component_type_id< TransformComponent >(), get_component_type_id< RigidBodyComponent >() );
+	EXPECT_NE( get_component_type_id< RigidBodyComponent >(), get_component_type_id< ParticleSystemComponent >() );
+
+	EXPECT_EQ( get_system_type_id< CountSystem >(), get_system_type_id< CountSystem >() );
+	EXPECT_NE( get_system_type_id< CountSystem >(), get_system_type_id< DualCountSystem >() );
+}
+
+/**
+ * まだ一度も足していない型の部品を引いても nullptr が返り、その後に足せば引けることを検証する
+ *
+ * 以前は operator[] で、引くだけで未登録の型の空の一覧を作っていた
+ */
+TEST( EcsTest, GetComponentOfNeverAddedTypeReturnsNull )
+{
+	struct NeverAddedComponent : public core::ecs::Component { int value = 7; };
+
+	core::ecs::EntityManager entity_manager;
+	auto* e = entity_manager.create_entity();
+
+	EXPECT_EQ( nullptr, e->get_component< NeverAddedComponent >() );
+	EXPECT_EQ( nullptr, static_cast< const core::ecs::Entity* >( e )->get_component< NeverAddedComponent >() );
+
+	ASSERT_NE( nullptr, e->add_component< NeverAddedComponent >() );
+	ASSERT_NE( nullptr, e->get_component< NeverAddedComponent >() );
+	EXPECT_EQ( 7, e->get_component< NeverAddedComponent >()->value );
+
+	e->remove_component< NeverAddedComponent >();
+	EXPECT_EQ( nullptr, e->get_component< NeverAddedComponent >() );
+}
+/**
+ * remove_system が、足していない System では何もせず、足した System だけを外し、ほかの System は動き続けることを検証する
+ *
+ * 以前は 1 引数の erase( remove( ... ) ) で、一覧に無いと end() を消す未定義動作になり得た
+ */
+TEST( EcsTest, RemoveSystem )
+{
+	core::ecs::EntityManager entity_manager;
+
+	// 何も足していないときに外しても何も起きない
+	entity_manager.remove_system< CountSystem >();
+	EXPECT_EQ( nullptr, entity_manager.get_system< CountSystem >() );
+
+	entity_manager.add_system< CountSystem >( 0 );
+	entity_manager.add_system< RenderCountSystem >( 1 );
+
+	// 足していない System を外しても、足した System はそのまま
+	entity_manager.remove_system< DualCountSystem >();
+	ASSERT_NE( nullptr, entity_manager.get_system< CountSystem >() );
+	ASSERT_NE( nullptr, entity_manager.get_system< RenderCountSystem >() );
+
+	auto* e = entity_manager.create_entity();
+	e->add_component< core::ecs::TransformComponent >();
+
+	entity_manager.remove_system< CountSystem >();
+	EXPECT_EQ( nullptr, entity_manager.get_system< CountSystem >() );
+
+	// 残った System は動き続ける
+	entity_manager.update();
+	entity_manager.render();
+	ASSERT_NE( nullptr, entity_manager.get_system< RenderCountSystem >() );
+	EXPECT_EQ( 1, entity_manager.get_system< RenderCountSystem >()->update_count );
+
+	// 二度外しても何も起きない。外した後に足し直せる
+	entity_manager.remove_system< CountSystem >();
+	entity_manager.add_system< CountSystem >( 0 );
+	entity_manager.update();
+	ASSERT_NE( nullptr, entity_manager.get_system< CountSystem >() );
+	EXPECT_EQ( 1, entity_manager.get_system< CountSystem >()->update_count );
+}
+
+/**
+ * 部品のポインタは、ほかの Entity が作られ・消えても動かない（部品を型ごとの置き場に値で持つようにした後も）
+ *
+ * 剛体の userPointer の RigidBodyComponent*・GraphicsManager のカメラの部品・シーンのメンバが、部品のポインタを持ち続けるため
+ */
+TEST( EcsTest, ComponentPointersStayValidWhenOtherEntitiesComeAndGo )
+{
+	core::ecs::EntityManager entity_manager;
+
+	auto* keeper = entity_manager.create_entity();
+	auto* keeper_transform = keeper->add_component< core::ecs::TransformComponent >();
+	keeper_transform->transform.get_position().set( 1.f, 2.f, 3.f );
+
+	// 置き場のページを何枚も使うほど作り、半分を消し、また作る
+	std::vector< core::ecs::EntityId > others;
+
+	for ( int i = 0; i < 3000; i++ )
+	{
+		auto* e = entity_manager.create_entity();
+		e->add_component< core::ecs::TransformComponent >();
+		others.push_back( static_cast< core::ecs::EntityId >( e->get_id() ) );
+	}
+
+	for ( std::size_t i = 0; i < others.size(); i += 2 )
+	{
+		entity_manager.destroy_entity( others[ i ] );
+	}
+
+	for ( int i = 0; i < 3000; i++ )
+	{
+		entity_manager.create_entity()->add_component< core::ecs::TransformComponent >();
+	}
+
+	EXPECT_EQ( keeper, entity_manager.find( static_cast< core::ecs::EntityId >( keeper->get_id() ) ) );
+	EXPECT_EQ( keeper_transform, keeper->get_component< core::ecs::TransformComponent >() );
+	EXPECT_EQ( 2.f, keeper_transform->transform.get_position().y() );
+	EXPECT_EQ( 1u + 1500u + 3000u, entity_manager.debug_entity_count() );
+}
+
+
+namespace {
+
+/// 回した対象の番号と、組に持っている部品のポインタが本物と同じかを記録する System
+class VisitRecordSystem : public core::ecs::System< core::ecs::TransformComponent, CountedComponent >
+{
+public:
+	std::vector< core::ecs::EntityId > visited;
+	int mismatch_count = 0;
+
+	void update() override
+	{
+		visited.clear();
+
+		for ( auto& [ id, tuple ] : get_component_list() )
+		{
+			visited.push_back( id );
+
+			const auto* entity = get_entity_manager()->find( id );
+
+			if ( ! entity
+				|| std::get< core::ecs::TransformComponent* >( tuple ) != entity->get_component< core::ecs::TransformComponent >()
+				|| std::get< CountedComponent* >( tuple ) != entity->get_component< CountedComponent >() )
+			{
+				mismatch_count++;
+			}
+		}
+
+		std::sort( visited.begin(), visited.end() );
+	}
+};
+
+} // namespace
+
+/**
+ * System の対象の一覧は、途中の Entity を外しても（末尾と入れ替えても）、残りを一度ずつ・正しい部品で回す。
+ * 入れ替えで動いた Entity も、後から正しく外せる
+ */
+TEST( EcsTest, SystemListStaysCorrectAfterSwapRemove )
+{
+	core::ecs::EntityManager entity_manager;
+	entity_manager.add_system< VisitRecordSystem >();
+	auto* system = entity_manager.get_system< VisitRecordSystem >();
+
+	std::vector< core::ecs::Entity* > entities;
+
+	for ( int i = 0; i < 6; i++ )
+	{
+		auto* e = entity_manager.create_entity();
+		e->add_component< core::ecs::TransformComponent >();
+		e->add_component< CountedComponent >();
+		entities.push_back( e );
+	}
+
+	const auto id = [ & ] ( int i ) { return static_cast< core::ecs::EntityId >( entities[ i ]->get_id() ); };
+
+	// 先頭・途中を外す（末尾の Entity が前に動く）
+	entity_manager.destroy_entity( id( 0 ) );
+	entities[ 2 ]->remove_component< CountedComponent >();
+
+	entity_manager.update();
+	EXPECT_EQ( ( std::vector< core::ecs::EntityId >{ id( 1 ), id( 3 ), id( 4 ), id( 5 ) } ), system->visited );
+	EXPECT_EQ( 0, system->mismatch_count );
+
+	// 前に動いた末尾の Entity（5）を外し、外した部品を足し直す
+	entity_manager.destroy_entity( id( 5 ) );
+	entities[ 2 ]->add_component< CountedComponent >();
+
+	entity_manager.update();
+	EXPECT_EQ( ( std::vector< core::ecs::EntityId >{ id( 1 ), id( 2 ), id( 3 ), id( 4 ) } ), system->visited );
+	EXPECT_EQ( 0, system->mismatch_count );
+	EXPECT_EQ( 4u, system->debug_entity_count() );
+
+	// 全部外すと空になる
+	for ( int i : { 1, 2, 3, 4 } )
+	{
+		entity_manager.destroy_entity( id( i ) );
+	}
+
+	entity_manager.update();
+	EXPECT_TRUE( system->visited.empty() );
+	EXPECT_EQ( 0u, system->debug_entity_count() );
 }

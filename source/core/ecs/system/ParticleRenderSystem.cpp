@@ -1,6 +1,5 @@
 #include "ParticleRenderSystem.h"
 #include <core/ConstantBuffers.h>
-#include <core/Service.h>
 #include <core/graphics/VertexBuffer.h>
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
@@ -14,8 +13,11 @@ using core::graphics::BufferType;
 using core::graphics::VertexBuffer;
 using core::graphics::direct_3d_11::Direct3D11;
 
-ParticleRenderSystem::ParticleRenderSystem( std::unique_ptr< core::graphics::Shader > shader )
-	: shader_( std::move( shader ) )
+ParticleRenderSystem::ParticleRenderSystem( core::graphics::GraphicsManager* graphics_manager, core::graphics::direct_3d_11::Direct3D11* direct_3d, std::unique_ptr< core::graphics::Shader > shader )
+	: graphics_manager_( graphics_manager )
+	, direct_3d_( direct_3d )
+	, shader_( std::move( shader ) )
+	, object_constant_buffer_( graphics_manager->create_constant_buffer( sizeof( core::ObjectConstantBufferData ), core::ObjectConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC ) )	// 描画ごとに書き換える
 {
 }
 
@@ -46,27 +48,38 @@ void ParticleRenderSystem::update()
 		// const auto& p = particle_system->particle_list.front();
 		// std::cout << "p0 pos, vel : " << p.position << ", " <<  p.velocity << std::endl;
 
-		static auto vb = VertexBuffer{ particle_system->particle_list, BufferType::UPDATABLE };
+		// 頂点バッファは Direct3D11 を GraphicsManager から受け取って作る（以前は関数内の static で、中で Direct3D11 の get_instance() を使っていた）
+		//
+		// 頂点バッファは 1 つで、全 Entity が使い回す。粒子の一覧の大きさが型で決まっている（std::array）ので、
+		// 最初の Entity で作った大きさが全 Entity に合う。Entity ごとに WRITE_DISCARD で書いてすぐ描く（render_technique は
+		// その場で呼ぶ）ので、粒子の Entity が 2 つ以上でも前の Entity の描画は壊れない（2026-11-10 に確かめた）。
+		// 一覧を可変長（vector など）にするなら、頂点バッファを Entity ごとにするか、最大数に合わせて作り直すこと
+		static_assert( std::tuple_size< ParticleSystemComponent::ParticleList >::value > 0, "粒子の一覧は大きさが型で決まる配列であること（上の説明）" );
 
-		vb.update( particle_system->particle_list );
+		if ( ! vertex_buffer_ )
+		{
+			vertex_buffer_ = std::make_unique< VertexBuffer< ParticleSystemComponent::ParticleList > >( direct_3d_, particle_system->particle_list, BufferType::UPDATABLE );
+		}
+
+		vertex_buffer_->update( particle_system->particle_list );
 
 		// Constant Buffer
-		static core::ObjectConstantBufferWithData object_data;
-		object_data.data().world.set_identity();
-		object_data.data().color = Color::White;
-		object_data.update();
+		core::ObjectConstantBufferData object_data;
+		object_data.world.set_identity();
+		object_data.color = Color::White;
+		object_constant_buffer_->update( & object_data );
 
 		get_graphics_manager()->set_input_layout( "pos_norm" );
 		get_graphics_manager()->set_primitive_topology( core::graphics::PrimitiveTopology::POINT_LIST );
-		get_graphics_manager()->render_technique( "point_sprite", [=] {
+		get_graphics_manager()->render_technique( "point_sprite", [this, particle_system] {
 
-			object_data.bind_to_vs();
-			object_data.bind_to_gs();
+			object_constant_buffer_->bind_to_vs();
+			object_constant_buffer_->bind_to_gs();
 			shader_->bind();
-			vb.bind();
+			vertex_buffer_->bind();
 
 			// Draw
-			Direct3D11::get_instance()->getImmediateContext()->Draw( particle_system->particle_list.size(), 0 );
+			direct_3d_->getImmediateContext()->Draw( particle_system->particle_list.size(), 0 );
 		} );
 	}
 

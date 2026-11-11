@@ -39,6 +39,20 @@ Windows 10 ( 32bit )
 - [libremidi 5.1.0](https://github.com/celtera/libremidi/releases/tag/v5.1.0)
 - [TinySoundFont](https://github.com/schellingb/TinySoundFont)
 
+MIDI の音源（SoundFont）の入手
+========
+
+MIDI を鳴らす音源 `source/media/music/FluidR3_GM.sf2`（Fluid R3 GM、Frank Wen、MIT ライセンス、約 142 MB）は大きいので git に入れていません。リポジトリの根で次を実行して入手してください（Python の標準ライブラリだけで動きます）。
+
+    python -I tools/soundfont/fetch_soundfont.py
+
+Debian の `fluid-soundfont-gm_3.1-6_all.deb` をダウンロードし、.deb と取り出した SF2 の SHA-256 を確かめてから置きます。
+
+- .deb の SHA-256 : `9965fbcc6acee17d6f72b685d28c7f968ec64eba14645445b476d5c6cc2eee4c`
+- `FluidR3_GM.sf2` の SHA-256 : `74594e8f4250680adf590507a306655a299935343583256f3b722c48a1bc1cb0`（148,398,306 バイト）
+
+入手元・ライセンス・選んだ理由は `doc/ライセンス.md` の 4.7 にあります。
+
 ディレクトリ構成
 ========
     

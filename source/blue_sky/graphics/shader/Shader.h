@@ -2,7 +2,6 @@
 
 #include "BaseShader.h"
 #include <core/graphics/ConstantBuffer.h>
-#include <core/Service.h>
 #include <common/enum_set.h>
 #include <map>
 #include <vector>
@@ -19,7 +18,8 @@ namespace blue_sky::graphics::shader
  *		テクニック
  *		シェーダー固有の名前付きパラメータ
  * 
- * @todo 各テクスチャごとに、そのテクスチャを必要とするシェーダーステージを設定できるようにする
+ * 定数バッファは使うかどうかに関わらず全ステージに結ぶ（必要なステージだけに結ぶと呼び出しは減るが、全シーンで FPS 60 が出ているので今は単純さを取る）。
+ * テクスチャはピクセルシェーダーに結ぶ。ほかのステージで使うテクスチャは、各シェーダーの bind() で結ぶ（TessellationMatcapShader）
  */
 template< typename ShaderType, int Slot = 0 >
 class Shader : public BaseShader
@@ -64,7 +64,7 @@ protected:
 	uint8_t* buffer_ = nullptr;
 	std::unique_ptr< ConstantBuffer > constant_buffer_;
 
-	std::vector< Texture* > textures_;
+	std::vector< TextureSlot > textures_;	///< 管理しているテクスチャはハンドルで持ち、描くたびに引く（TextureSlot）
 
 	ShaderStageSet shader_stage_set_;
 
@@ -166,27 +166,30 @@ protected:
 	}
 
 public:
-	Shader( const char_t* input_layout_name, const char_t* effect_technique_name, ShaderStageSet sss )
-		: render_setting_( input_layout_name, effect_technique_name )
+	Shader( GraphicsManager* graphics_manager, const char_t* input_layout_name, const char_t* effect_technique_name, ShaderStageSet sss )
+		: BaseShader( graphics_manager )
+		, render_setting_( graphics_manager, input_layout_name, effect_technique_name )
 		, shader_stage_set_( sss )
 	{
 		auto n = setup_parameters();
 
 		if ( n > 0 )
 		{
-			constant_buffer_ = core::get_graphics_manager()->create_constant_buffer( n, Slot );
+			constant_buffer_ = get_graphics_manager()->create_constant_buffer( n, Slot );
 		}
 	}
 
+	/// コピーは GraphicsManager を引き継ぐ
 	Shader( const Shader& s )
-		: render_setting_( s.render_setting_ )
+		: BaseShader( s )
+		, render_setting_( s.render_setting_ )
 		, shader_stage_set_( s.shader_stage_set_ )
 	{
 		auto n = setup_parameters();
 
 		if ( n > 0 )
 		{
-			constant_buffer_ = core::get_graphics_manager()->create_constant_buffer( n, Slot );
+			constant_buffer_ = get_graphics_manager()->create_constant_buffer( n, Slot );
 		}
 	}
 
@@ -312,22 +315,22 @@ public:
 
 	Texture* get_texture_at( uint_t n ) override
 	{
-		return  n < textures_.size() ? textures_[ n ] : nullptr;
+		return  n < textures_.size() ? resolve_texture( textures_[ n ] ) : nullptr;
 	}
 	
 	const Texture* get_texture_at( uint_t n ) const override
 	{
-		return  n < textures_.size() ? textures_[ n ] : nullptr;
+		return  n < textures_.size() ? resolve_texture( textures_[ n ] ) : nullptr;
 	}
 
 	void set_texture_at( uint_t n , Texture* t ) override
 	{
 		if ( n >= textures_.size() )
 		{
-			textures_.resize( n + 1, nullptr );
+			textures_.resize( n + 1 );
 		}
 
-		textures_[ n ] = t;
+		textures_[ n ].set( * get_graphics_manager(), t );
 	}
 
 	/**
@@ -361,7 +364,7 @@ public:
 		// テクスチャを必要なシェーダーにバインドする
 		for ( size_t n = 0; n < textures_.size(); n++ )
 		{
-			textures_[ n ]->bind_to_ps( static_cast< uint_t >( n ) );
+			bind_texture_to_ps( textures_[ n ], static_cast< uint_t >( n ) );
 		}
 	}
 
@@ -370,6 +373,14 @@ public:
 	 */
 	void render( const Mesh* mesh, uint_t n ) const override
 	{
+		for ( const auto& t : textures_ )
+		{
+			if ( is_texture_lost( t ) )
+			{
+				return;
+			}
+		}
+
 		get_graphics_manager()->set_input_layout( render_setting_.get_input_layout() );
 		get_graphics_manager()->set_primitive_topology( PrimitiveTopology::TRIANGLE_LIST );
 		get_graphics_manager()->render_technique( render_setting_.get_effect_technique(), [=] { bind(); mesh->render( n ); } );

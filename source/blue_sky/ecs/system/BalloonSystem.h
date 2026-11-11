@@ -4,6 +4,8 @@
 #include <blue_sky/ecs/component/BalloonComponent.h>
 #include <core/ecs/component/RigidBodyComponent.h>
 
+namespace core::physics { class PhysicsManager; }
+
 namespace blue_sky::ecs
 {
 
@@ -21,8 +23,13 @@ class BalloonSystem : public System<
 	RigidBodyComponent >
 {
 public:
+	/// physics_manager : 接触を調べる物理の世界（作り手が渡す。以前は core::Service から取っていた）
+	explicit BalloonSystem( core::physics::PhysicsManager* physics_manager ) : physics_manager_( physics_manager ) { }
+
 	void update() override;
-	void update( ComponentTuple& ) const override {}  // 個別処理は行わない
+
+private:
+	core::physics::PhysicsManager* physics_manager_;
 };
 
 } // namespace blue_sky::ecs

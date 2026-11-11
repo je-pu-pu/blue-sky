@@ -5,12 +5,11 @@ RasterizerState Main2dRasterizerState
 };
 */
 
-/// @todo 2D の描画に法線を使っているのは無駄なのでなんとかする
-
 // ----------------------------------------
 // for 2D ( debug ウィンドウで使用 )
+// 入力レイアウト "2d"（法線なし）はこのテクニックの頂点シェーダーから作る
 // ----------------------------------------
-COMMON_POS_UV vs_2d( COMMON_POS_NORM_UV input )
+COMMON_POS_UV vs_2d( COMMON_2D_INPUT input )
 {
 	COMMON_POS_UV output;
 

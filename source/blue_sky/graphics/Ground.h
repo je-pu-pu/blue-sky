@@ -14,7 +14,7 @@ class Ground : public Model
 public:
 
 protected:
-	Shader* create_shader() const override;
+	Shader* create_shader( GraphicsManager* graphics_manager ) const override;
 
 public:
 

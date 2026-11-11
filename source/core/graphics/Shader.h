@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/type.h>
+#include <core/ResourceHandle.h>
 #include <vector>
 #include <optional>
 #include <limits>
@@ -11,11 +12,15 @@ namespace core::graphics
 	class Mesh;
 	class Texture;
 	class InstanceBuffer;
+	class Shader;
+
+/// シェーダーを指すハンドル（解放の後は nullptr。引くときは GraphicsManager::resolve_shader）
+using ShaderHandle = core::ResourceHandle< Shader >;
 
 /**
  * 抽象シェーダークラス
  *
- * @todo scalar, vector, color, texture に名前を付けて設定、名前を指定して取得できるようにする
+ * パラメータ（int・float・vector・color）は名前で設定・取得する。テクスチャは番号（スロット）で設定・取得する
  */
 class Shader
 {
@@ -35,7 +40,7 @@ public:
 		COLOR,
 	};
 
-	/// @todo float 以外のデフォルト値に対応する？
+	/// 既定値は数（INT・FLOAT）だけ持つ。VECTOR・COLOR の既定値が要るときは default_value を型ごとに持たせる
 	/// 各パラメータの情報
 	struct ParameterInfo
 	{
@@ -104,7 +109,21 @@ public:
 	virtual void set_texture( Texture* t ) { set_texture_at( 0, t ); }
 	virtual void render_instanced( const Mesh*, uint_t, uint_t, const InstanceBuffer* ) const { }
 
+	/**
+	 * 同じモデルの物体をまとめて描けるか（物体ごとの定数を、呼ぶ側が結んだ ObjectInstanceBuffer から読む。既定はできない）
+	 *
+	 * できるシェーダーは render_object_instances を実装し、render と同じ見た目を、物体ごとの定数を入れ物から読んで描く
+	 */
+	virtual bool can_render_object_instances() const { return false; }
+
+	/// mesh の頂点のまとまり n を instance_count 個まとめて描く（物体ごとの定数は呼ぶ側が ObjectInstanceBuffer で結んでおく）
+	virtual void render_object_instances( const Mesh*, uint_t, uint_t ) const { }
+
 	virtual void render_parameter_gui();
+
+protected:
+	/// パラメーターの GUI で選んだ画像を読み込む（読み込めないシェーダーは nullptr。以前は core::Service の GraphicsManager から読んでいた）
+	virtual Texture* load_texture_from_file( const char_t* ) { return nullptr; }
 
 }; // Shader
 

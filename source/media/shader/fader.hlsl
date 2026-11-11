@@ -3,7 +3,7 @@ struct PS_FADER_INPUT
 	float4 Position : SV_POSITION;
 };
 
-PS_FADER_INPUT vs_fader( COMMON_POS_NORM_UV input )
+PS_FADER_INPUT vs_fader( COMMON_2D_INPUT input )
 {
 	PS_FADER_INPUT output;
 

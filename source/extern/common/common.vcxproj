@@ -159,7 +159,6 @@
     <ClInclude Include="random.h" />
 
     <ClInclude Include="serialize.h" />
-    <ClInclude Include="Singleton.h" />
     <ClInclude Include="string.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="time_stamp.h" />

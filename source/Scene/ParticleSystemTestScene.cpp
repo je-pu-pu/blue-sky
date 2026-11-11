@@ -1,7 +1,7 @@
 #include "ParticleSystemTestScene.h"
 
 #include <blue_sky/graphics/GraphicsManager.h>
-#include <blue_sky/ActiveObjectPhysics.h>
+#include <core/physics/PhysicsManager.h>
 #include <blue_sky/Input.h>
 
 #include <core/ecs/Component/CameraComponent.h>
@@ -22,22 +22,23 @@
 namespace blue_sky
 {
 
-ParticleSystemTestScene::ParticleSystemTestScene()
-	: camera_( EntityManager::get_instance()->create_entity() )
+ParticleSystemTestScene::ParticleSystemTestScene( GameMain& game_main )
+	: Scene( game_main )
+	, camera_( get_entity_manager()->create_entity() )
 {
 	// Physics
-	get_active_object_physics()->add_ground_rigid_body( Vector( 1000, 1, 1000 ) );
+	get_physics_manager()->add_ground( Vector( 1000, 1, 1000 ) );
 
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
 	// System を追加する
-	auto particle_shader = std::make_unique< blue_sky::graphics::shader::PointSpriteShader >();
+	auto particle_shader = std::make_unique< blue_sky::graphics::shader::PointSpriteShader >( get_graphics_manager() );
 	particle_shader->set_texture_at( 0, get_graphics_manager()->load_texture( "media/texture/pen/circle.png" ) );
-	get_entity_manager()->add_system< core::ecs::ParticleRenderSystem >( 1001, std::move( particle_shader ) );
+	get_entity_manager()->add_system< core::ecs::ParticleRenderSystem >( 1001, get_graphics_manager(), get_graphics_manager()->get_direct_3d(), std::move( particle_shader ) );
 	get_entity_manager()->add_system< core::ecs::ParticleSystem >( 0 );
-	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >();
-	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
+	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >( 0, get_input() );
+	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000, get_graphics_manager(), get_time_manager() );
 
 	// Entity と Component を追加する
 	auto particle_system = get_entity_manager()->create_entity();
@@ -67,11 +68,14 @@ void ParticleSystemTestScene::update()
 	get_graphics_manager()->update();
 
 	get_graphics_manager()->clear_debug_bullet();
-	get_active_object_physics()->update( get_elapsed_time() );
+	get_physics_manager()->step_simulation( get_elapsed_time() );
 }
 
 void ParticleSystemTestScene::render()
 {
+	// 描く System（RenderSystem など）を、画面のクリアの後に動かす
+	get_entity_manager()->render();
+
 	std::stringstream ss;
 	ss << "Time : " << get_total_elapsed_time() << '\n';
 	ss << "FPS : " << get_main_loop()->get_last_fps() << '\n';

@@ -17,7 +17,7 @@ class SkinningAnimationSet
 {
 public:
 	using SkinningAnimationMap	= std::unordered_map< string_t, SkinningAnimation >;
-	using MatrixList			= std::vector< Matrix* >;
+	using MatrixList			= std::vector< Matrix >;
 	using BoneIndexList			= std::vector< uint_t >;
 	using ChildBoneIndexList	= std::vector< BoneIndexList >;
 	using ParentBoneIndexList	= std::vector< uint_t >;
@@ -35,13 +35,7 @@ public:
 		parent_bone_index_list_[ 0 ] = 0;
 	}
 
-	~SkinningAnimationSet()
-	{
-		for ( auto i = bone_offset_matrix_list_.begin(); i != bone_offset_matrix_list_.end(); ++i )
-		{
-			delete *i;
-		}
-	}
+	// 以前はオフセット行列を new したポインタで持ち、デストラクタで delete していた（コピーすると二重に解放された）
 
 	/**
 	 * 指定した名前に対応したスキニングアニメーションを取得する
@@ -86,9 +80,9 @@ public:
 		return get_skinning_animation( name ).get_bone_animation_by_bone_index( bone_index );
 	}
 
-	/*** @todo 整理する */
-	Matrix& get_bone_offset_matrix_by_bone_index( uint_t bone_index ) { return *bone_offset_matrix_list_[ bone_index ]; }
-	const Matrix& get_bone_offset_matrix_by_bone_index( uint_t bone_index ) const { return *bone_offset_matrix_list_[ bone_index ]; }
+	/// ボーンのオフセット行列（ボーンの空間からメッシュの空間への変換。読み込むときに書き込む）
+	Matrix& get_bone_offset_matrix_by_bone_index( uint_t bone_index ) { return bone_offset_matrix_list_[ bone_index ]; }
+	const Matrix& get_bone_offset_matrix_by_bone_index( uint_t bone_index ) const { return bone_offset_matrix_list_[ bone_index ]; }
 
 	/**
 	 * ボーンの数を取得する
@@ -112,12 +106,7 @@ public:
 			COMMON_THROW_EXCEPTION_MESSAGE( "duplicate call set_bonoe_count()" );
 		}
 
-		bone_offset_matrix_list_.resize( count );
-
-		for ( auto i = bone_offset_matrix_list_.begin(); i != bone_offset_matrix_list_.end(); ++i )
-		{
-			*i = new Matrix( Matrix::identity() );
-		}
+		bone_offset_matrix_list_.resize( count, Matrix::identity() );
 
 		for ( auto i = skinning_animation_map_.begin(); i != skinning_animation_map_.end(); ++i )
 		{

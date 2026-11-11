@@ -1,19 +1,23 @@
 #pragma once
 
+#include <core/graphics/PixelFormat.h>
+
 #include <d3d11.h>
 
 namespace core::graphics::direct_3d_11
 {
-	/**
-	 * ピクセルフォーマット
-	 *
-	 */
-	enum class PixelFormat
+	using PixelFormat = core::graphics::PixelFormat;
+
+	/// エンジンのピクセルフォーマット → DXGI_FORMAT
+	inline DXGI_FORMAT to_dxgi_format( PixelFormat format )
 	{
-		R8G8B8A8_UNORM	= DXGI_FORMAT_R8G8B8A8_UNORM,
-		// R8G8B8A8_SNORM = DXGI_FORMAT_R8G8B8A8_SNORM,
-		// B8G8R8A8_UNORM = DXGI_FORMAT_B8G8R8A8_UNORM,
-		R8_UINT			= DXGI_FORMAT_R8_UINT,
-		R32G32_FLOAT	= DXGI_FORMAT_R32G32_FLOAT,	///< モーションベクトル (速度) G-buffer 用
-	};
+		switch ( format )
+		{
+			case PixelFormat::R8G8B8A8_UNORM:	return DXGI_FORMAT_R8G8B8A8_UNORM;
+			case PixelFormat::R8_UINT:			return DXGI_FORMAT_R8_UINT;
+			case PixelFormat::R32G32_FLOAT:		return DXGI_FORMAT_R32G32_FLOAT;
+		}
+
+		return DXGI_FORMAT_UNKNOWN;
+	}
 }

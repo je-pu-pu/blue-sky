@@ -453,11 +453,17 @@ static HRESULT CreateTextureFromWIC( _In_ ID3D11Device* d3dDevice,
         return E_FAIL;
 
     // Handle sRGB formats
+    //
+    // blue-sky の方針（設計上の問題 B21）: 描画先（バックバッファ）は UNORM で、ガンマ空間で描画している。
+    // 色空間はファイルのメタデータではなくエンジンが決める。既定は常に UNORM で読み、sRGB は forceSRGB で明示したときだけ。
+    // 以前は PNG の sRGB チャンクの有無で形式が変わり、チャンクのある素材（空・道路など 16 件）だけが暗く描かれていた。
+    constexpr bool use_srgb_metadata = false;
+
     if ( forceSRGB )
     {
         format = MakeSRGB( format );
     }
-    else
+    else if ( use_srgb_metadata )
     {
         ComPtr<IWICMetadataQueryReader> metareader;
         if ( SUCCEEDED( frame->GetMetadataQueryReader( metareader.GetAddressOf() ) ) )

@@ -3,6 +3,7 @@
 #include <blue_sky/SceneManager.h>
 #include <blue_sky/GameMain.h>
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/shader/LitShader.h>
 #include <blue_sky/Input.h>
 
 #include <core/ecs/component/TransformComponent.h>
@@ -19,7 +20,6 @@
 #include <blue_sky/ecs/system/BalloonSystem.h>
 
 #include <core/ecs/EntityManager.h>
-#include <core/Service.h>
 #include <core/physics/PhysicsManager.h>
 #include <core/graphics/Direct3D11/BulletDebugDraw.h>
 
@@ -40,20 +40,21 @@ namespace blue_sky
 
 using RigidBodyShapeType = core::physics::RigidBodyShapeType;
 
-MusicGamePrototypeScene::MusicGamePrototypeScene()
-	: player_( EntityManager::get_instance()->create_entity() )
+MusicGamePrototypeScene::MusicGamePrototypeScene( GameMain& game_main )
+	: Scene( game_main )
+	, player_( get_entity_manager()->create_entity() )
 {
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
 	// PhysicsManager にデバッグ描画を設定
-	core::get_physics_manager()->set_debug_drawer( GameMain::get_instance()->get_bullet_debug_draw() );
+	get_physics_manager()->set_debug_drawer( get_bullet_debug_draw() );
 
 	// System を追加する (順序が重要)
-	get_entity_manager()->add_system< core::ecs::PhysicsSystem >();
-	get_entity_manager()->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10 );
-	get_entity_manager()->add_system< blue_sky::ecs::BalloonSystem >( 20 );
-	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
+	get_entity_manager()->add_system< core::ecs::PhysicsSystem >( 0, get_physics_manager() );
+	get_entity_manager()->add_system< blue_sky::ecs::FpsPlayerControlSystem >( 10, get_input(), get_physics_manager() );
+	get_entity_manager()->add_system< blue_sky::ecs::BalloonSystem >( 20, get_physics_manager() );
+	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000, get_graphics_manager(), get_time_manager() );
 
 	// プレイヤーを設定 (ビルの屋上に配置)
 	player_transform_ = player_->add_component< core::ecs::TransformComponent >();
@@ -90,7 +91,7 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 		t->transform.set_identity();
 		e->add_component< core::ecs::RenderComponent >();
 		auto* m = e->add_component< core::ecs::ModelComponent>();
-		m->model = get_graphics_manager()->load_model( "ground" );
+		m->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "ground" ) );
 
 		// 地面の RigidBody (静的)
 		auto* ground_rigid_body = e->add_component< core::ecs::RigidBodyComponent >();
@@ -105,12 +106,17 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 		get_graphics_manager()->load_model( "building-white" ),
 	};
 
-	/// @todo もっとスマートにやる
-	// シェーダーを設定 ( flat から lit に変更 )
+	// シェーダーを設定 ( flat から lit に変更 )。モデルはこのシーン専用で、GraphicsManager が持ち続ける
+	// すでに lit にしたもの（このシーンに入り直したとき）はそのまま使う（以前は入るたびに複製を作り、古い複製が溜まっていた）
 	for ( auto* m : models )
 	{
 		for ( size_t n = 0; n < m->get_shader_count(); n++ )
 		{
+			if ( dynamic_cast< const graphics::shader::LitShader* >( m->get_shader_at( n ) ) )
+			{
+				continue;
+			}
+
 			auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit" ) );
 			shader->set_texture_at( 0, m->get_shader_at( n )->get_texture_at( 0 ) );
 
@@ -150,7 +156,7 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 
 			e->add_component< core::ecs::RenderComponent >();
 			auto* m = e->add_component< core::ecs::ModelComponent>();
-			m->model = models[ common::random( 0, 1 ) ];
+			m->model = get_graphics_manager()->get_model_handle( models[ common::random( 0, 1 ) ] );
 
 			auto* building_rigid_body = e->add_component< core::ecs::RigidBodyComponent >();
 			building_rigid_body->shape_type = RigidBodyShapeType::Box;
@@ -161,7 +167,7 @@ MusicGamePrototypeScene::MusicGamePrototypeScene()
 	}
 
 	// 風船モデルを読み込み
-	auto* balloon_model = get_graphics_manager()->load_model( "balloon" );
+	const auto balloon_model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "balloon" ) );
 
 	// 隣接するビル間に風船の連なりを配置
 	for ( int z = 0; z < 30; z++ )
@@ -267,7 +273,7 @@ void MusicGamePrototypeScene::update()
 
 		e->add_component< core::ecs::RenderComponent >();
 		auto* m = e->add_component< core::ecs::ModelComponent >();
-		m->model = get_graphics_manager()->load_model( "box-1x1x1" );
+		m->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "box-1x1x1" ) );
 
 		auto* rigid_body = e->add_component< core::ecs::RigidBodyComponent >();
 		rigid_body->shape_type = RigidBodyShapeType::Box;
@@ -298,6 +304,9 @@ void MusicGamePrototypeScene::update()
 
 void MusicGamePrototypeScene::render()
 {
+	// 描く System（RenderSystem など）を、画面のクリアの後に動かす
+	get_entity_manager()->render();
+
 	// デバッグ描画を行う
 	get_graphics_manager()->render_debug_bullet();
 

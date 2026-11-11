@@ -12,6 +12,7 @@ namespace blue_sky
 {
 	namespace graphics
 	{
+		class GraphicsManager;
 		class Model;
 		class Mesh;
 	}
@@ -70,6 +71,12 @@ public:
 		~RoadNode()
 		{
 			unlink();
+		}
+
+		/// 位置がこの道路のどちら側にあるか（負 : 右・正 : 左・0 : 正面）。ぶつかってきた道路の向きを決めるのに使う
+		float_t get_side_of( const Vector& p ) const
+		{
+			return start_front.xz().cross( ( p - position ).xz() );
 		}
 
 		void unlink()
@@ -208,6 +215,7 @@ public:
 	using RoadControlPointList = std::list< RoadControlPoint >;
 
 private:
+	graphics::GraphicsManager* graphics_manager_;	///< モデル・メッシュ・シェーダーを作った先（破棄で外す）
 	Model* model_; // 街のモデル
 	Model* debug_model_; // デバッグ用のモデル
 
@@ -238,7 +246,8 @@ protected:
 	VertexGroup* get_vertex_group_by_road_node( const RoadNode* );
 
 public:
-	CityGenerator();
+	/// 描画の管理を受け取る（以前は GameMain のシングルトンから 12 か所で引いていた）
+	explicit CityGenerator( graphics::GraphicsManager* graphics_manager );
 	~CityGenerator();
 
 	void step();

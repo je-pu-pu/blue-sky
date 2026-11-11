@@ -19,8 +19,8 @@ public:
 protected:
 
 public:
-	UnicolorShader( const char_t* input_layout_name = "main", const char_t* effect_technique_name = "flat" )
-		: Shader( input_layout_name, effect_technique_name, { ShaderStage::VS, ShaderStage::PS } )
+	UnicolorShader( GraphicsManager* graphics_manager, const char_t* input_layout_name = "main", const char_t* effect_technique_name = "flat" )
+		: Shader( graphics_manager, input_layout_name, effect_technique_name, { ShaderStage::VS, ShaderStage::PS } )
 	{
 
 	}
@@ -29,7 +29,6 @@ public:
 
 	void bind() const override
 	{
-		/// @todo 必要なものだけをバインドするようにする
 		get_game_constant_buffer()->bind_to_all();
 		get_frame_constant_buffer()->bind_to_all();
 		get_frame_drawing_constant_buffer()->bind_to_all();

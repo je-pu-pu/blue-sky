@@ -1,0 +1,838 @@
+THIRD-PARTY SOFTWARE NOTICES / 第三者のソフトウェアの表示
+
+blue-sky は以下の第三者のソフトウェアを使っています。各ソフトウェアの著作権表示と
+ライセンスの条文を以下に示します（条文は原文のまま）。
+
+This software uses the following third-party software. Their copyright notices
+and license terms are reproduced below.
+
+目次 / Contents
+   1. Bullet Physics
+   2. Dear ImGui
+   3. Lua
+   4. sol2
+   5. toml++
+   6. TinySoundFont
+   7. libremidi
+   8. PortAudio
+   9. libogg / libvorbis / libvorbisfile (Ogg Vorbis)
+  10. Boost
+  11. portable-file-dialogs
+  12. FreeType
+  13. msdfgen
+  14. zlib
+  15. Autodesk FBX SDK
+  16. libxml2
+  17. DirectXTK (WICTextureLoader)
+  18. ONNX Runtime (onnxruntime.dll / onnxruntime_providers_shared.dll)
+  19. DirectML (DirectML.dll)
+  20. Fluid (R3) General MIDI SoundFont (FluidR3_GM.sf2)
+
+==============================================================================
+Bullet Physics
+==============================================================================
+版: 3.25 (LinearMath/btScalar.h の BT_BULLET_VERSION 325)
+配布元: https://github.com/bulletphysics/bullet3
+ライセンス: zlib License
+写した元: source/lib/include/btBulletDynamicsCommon.h の先頭の注記
+
+------------------------------------------------------------------------------
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it freely,
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+
+==============================================================================
+Dear ImGui
+==============================================================================
+版: 1.91.0 (imgui.h の IMGUI_VERSION)
+配布元: https://github.com/ocornut/imgui
+ライセンス: MIT License
+写した元: source/lib/src/imgui/imgui.cpp の著作権の行。【要確認】手元に LICENSE.txt が無い。imgui.cpp の「standard MIT License」の記述に従い、標準の MIT の本文を載せた。配布元の LICENSE.txt と照合すること
+
+------------------------------------------------------------------------------
+Copyright (c) 2014-2024 Omar Cornut
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+------------------------------------------------------------------------------
+Dear ImGui に同梱の stb_truetype (v1.26) / stb_rect_pack (v1.01) / stb_textedit (v1.14)
+(imstb_truetype.h / imstb_rectpack.h / imstb_textedit.h) は、MIT License と Public Domain の
+選択制。参考に imstb_truetype.h の MIT の側の文を写す。
+
+ALTERNATIVE A - MIT License
+Copyright (c) 2017 Sean Barrett
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+==============================================================================
+Lua
+==============================================================================
+版: 5.4.3 (lua.h の LUA_RELEASE)
+配布元: https://www.lua.org/
+ライセンス: MIT License
+写した元: source/lib/include/lua.h の末尾の注記
+
+------------------------------------------------------------------------------
+Copyright (C) 1994-2021 Lua.org, PUC-Rio.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+==============================================================================
+sol2
+==============================================================================
+版: 3.2.3 (sol/version.hpp の SOL_VERSION_STRING)
+配布元: https://github.com/ThePhD/sol2
+ライセンス: MIT License
+写した元: source/lib/include/sol/sol.hpp の先頭の注記
+
+------------------------------------------------------------------------------
+The MIT License (MIT)
+
+Copyright (c) 2013-2020 Rapptz, ThePhD and contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+==============================================================================
+toml++
+==============================================================================
+版: 3.4.0 (toml++/toml.hpp の TOML_LIB_MAJOR/MINOR/PATCH)
+配布元: https://github.com/marzer/tomlplusplus
+ライセンス: MIT License
+写した元: source/lib/include/toml++/LICENSE
+
+------------------------------------------------------------------------------
+MIT License
+
+Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+==============================================================================
+TinySoundFont
+==============================================================================
+版: v0.9 (tsf.h の先頭)
+配布元: https://github.com/schellingb/TinySoundFont
+ライセンス: MIT License
+写した元: source/lib/include/tsf.h の先頭の注記
+
+------------------------------------------------------------------------------
+Copyright (C) 2017-2025 Bernhard Schelling
+Based on SFZero, Copyright (C) 2012 Steve Folta (https://github.com/stevefolta/SFZero)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+software and associated documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+==============================================================================
+libremidi
+==============================================================================
+版: 4.5.0 (libremidi/config.hpp の LIBREMIDI_VERSION。ヘッダのみの形で使う)
+配布元: https://github.com/celtera/libremidi
+ライセンス: RtMidi のライセンス (MIT 系) と ModernMidi のライセンス (BSD 系)
+写した元: source/lib/include/libremidi/libremidi.hpp の先頭の注記。【要確認】libremidi そのものの著作権表示・LICENSE のファイルが手元に無い。配布元の LICENSE を確かめて足すこと
+
+------------------------------------------------------------------------------
+This software is based on the RtMidi and ModernMidi libraries.
+
+  RtMidi WWW site: http://music.mcgill.ca/~gary/libremidi/
+
+  RtMidi: realtime MIDI i/o C++ classes
+  Copyright (c) 2003-2017 Gary P. Scavone
+
+  Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation files
+  (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge,
+  publish, distribute, sublicense, and/or sell copies of the Software,
+  and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  Any person wishing to distribute modifications to the Software is
+  asked to send the modifications to the original developer so that
+  they can be incorporated into the canonical version.  This is,
+  however, not a binding provision of this license.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+  ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+ ------------
+
+  ModernMidi Copyright (c) 2015, Dimitri Diakopoulos All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+==============================================================================
+PortAudio
+==============================================================================
+版: 【要確認】不明（ヘッダに版の記載なし。portaudio_static.lib をビルドした版を確かめる）
+配布元: http://www.portaudio.com/
+ライセンス: MIT License
+写した元: source/lib/include/portaudio/portaudio.h の先頭の注記
+
+------------------------------------------------------------------------------
+PortAudio Portable Real-Time Audio Library
+PortAudio API Header File
+Latest version available at: http://www.portaudio.com/
+
+Copyright (c) 1999-2002 Ross Bencina and Phil Burk
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files
+(the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software,
+and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+The text above constitutes the entire PortAudio license; however,
+the PortAudio community also makes the following non-binding requests:
+
+Any person wishing to distribute modifications to the Software is
+requested to send the modifications to the original developer so that
+they can be incorporated into the canonical version. It is also
+requested that these non-binding requests be included along with the
+license above.
+
+==============================================================================
+libogg / libvorbis / libvorbisfile (Ogg Vorbis)
+==============================================================================
+版: 【要確認】不明（libogg.lib・libvorbis_static.lib・libvorbisfile_static.lib をビルドした版を確かめる）
+配布元: https://xiph.org/
+ライセンス: BSD 系 (ヘッダの注記: "BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE IN 'COPYING'")
+写した元: source/lib/include/ogg/ogg.h・vorbis/vorbisfile.h の先頭の注記。【要確認】手元に COPYING が無い。配布元の libogg・libvorbis の COPYING の全文をここに写すこと
+
+------------------------------------------------------------------------------
+/********************************************************************
+ *                                                                  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
+ * USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     *
+ * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
+ * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
+ *                                                                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
+ *                                                                  *
+ ********************************************************************
+
+------------------------------------------------------------------------------
+【要確認】libogg の COPYING の全文（未記入）
+
+------------------------------------------------------------------------------
+【要確認】libvorbis の COPYING の全文（未記入）
+
+==============================================================================
+Boost
+==============================================================================
+版: 1.90.0 (boost/version.hpp の BOOST_VERSION。filesystem・timer・chrono・atomic・regex などを静的リンク)
+配布元: https://www.boost.org/
+ライセンス: Boost Software License 1.0
+写した元: source/lib/include/boost/version.hpp の注記。【要確認】手元に LICENSE_1_0.txt が無い。全文は https://www.boost.org/LICENSE_1_0.txt（実行形式のみの配布では表示は必須ではないが、載せておくのが無難）
+
+------------------------------------------------------------------------------
+ (C) Copyright John maddock 1999. Distributed under the Boost
+ Software License, Version 1.0. (See accompanying file
+ LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+------------------------------------------------------------------------------
+【要確認】Boost Software License 1.0 の全文（未記入）
+
+==============================================================================
+portable-file-dialogs
+==============================================================================
+版: 【要確認】不明（ヘッダの著作権は 2018-2022）
+配布元: https://github.com/samhocevar/portable-file-dialogs
+ライセンス: WTFPL Version 2
+写した元: source/lib/include/portable-file-dialogs.h の先頭の注記
+
+------------------------------------------------------------------------------
+Portable File Dialogs
+
+Copyright © 2018–2022 Sam Hocevar <sam@hocevar.net>
+
+This library is free software. It comes without any warranty, to
+the extent permitted by applicable law. You can redistribute it
+and/or modify it under the terms of the Do What the Fuck You Want
+to Public License, Version 2, as published by the WTFPL Task Force.
+See http://www.wtfpl.net/ for more details.
+
+==============================================================================
+FreeType
+==============================================================================
+版: 2.14.1 (サブモジュールのタグ VER-2-14-1)
+配布元: https://freetype.org/
+ライセンス: The FreeType License (FTL) を選ぶ（GPLv2 との二者択一）。BDF・PCF のドライバは X 系の許諾、gzip のモジュールは zlib License（下の zlib の項）
+写した元: source/extern/freetype/LICENSE.TXT・docs/FTL.TXT・src/bdf/README・src/pcf/README・src/pcf/pcfutil.c
+
+------------------------------------------------------------------------------
+Portions of this software are copyright © 2025 The FreeType
+Project (https://freetype.org).  All rights reserved.
+
+------------------------------------------------------------------------------
+                    The FreeType Project LICENSE
+                    ----------------------------
+
+                            2006-Jan-27
+
+                    Copyright 1996-2002, 2006 by
+          David Turner, Robert Wilhelm, and Werner Lemberg
+
+
+
+Introduction
+============
+
+  The FreeType  Project is distributed in  several archive packages;
+  some of them may contain, in addition to the FreeType font engine,
+  various tools and  contributions which rely on, or  relate to, the
+  FreeType Project.
+
+  This  license applies  to all  files found  in such  packages, and
+  which do not  fall under their own explicit  license.  The license
+  affects  thus  the  FreeType   font  engine,  the  test  programs,
+  documentation and makefiles, at the very least.
+
+  This  license   was  inspired  by  the  BSD,   Artistic,  and  IJG
+  (Independent JPEG  Group) licenses, which  all encourage inclusion
+  and  use of  free  software in  commercial  and freeware  products
+  alike.  As a consequence, its main points are that:
+
+    o We don't promise that this software works. However, we will be
+      interested in any kind of bug reports. (`as is' distribution)
+
+    o You can  use this software for whatever you  want, in parts or
+      full form, without having to pay us. (`royalty-free' usage)
+
+    o You may not pretend that  you wrote this software.  If you use
+      it, or  only parts of it,  in a program,  you must acknowledge
+      somewhere  in  your  documentation  that  you  have  used  the
+      FreeType code. (`credits')
+
+  We  specifically  permit  and  encourage  the  inclusion  of  this
+  software, with  or without modifications,  in commercial products.
+  We  disclaim  all warranties  covering  The  FreeType Project  and
+  assume no liability related to The FreeType Project.
+
+
+  Finally,  many  people  asked  us  for  a  preferred  form  for  a
+  credit/disclaimer to use in compliance with this license.  We thus
+  encourage you to use the following text:
+
+   """
+    Portions of this software are copyright © <year> The FreeType
+    Project (https://freetype.org).  All rights reserved.
+   """
+
+  Please replace <year> with the value from the FreeType version you
+  actually use.
+
+
+Legal Terms
+===========
+
+0. Definitions
+--------------
+
+  Throughout this license,  the terms `package', `FreeType Project',
+  and  `FreeType  archive' refer  to  the  set  of files  originally
+  distributed  by the  authors  (David Turner,  Robert Wilhelm,  and
+  Werner Lemberg) as the `FreeType Project', be they named as alpha,
+  beta or final release.
+
+  `You' refers to  the licensee, or person using  the project, where
+  `using' is a generic term including compiling the project's source
+  code as  well as linking it  to form a  `program' or `executable'.
+  This  program is  referred to  as  `a program  using the  FreeType
+  engine'.
+
+  This  license applies  to all  files distributed  in  the original
+  FreeType  Project,   including  all  source   code,  binaries  and
+  documentation,  unless  otherwise  stated   in  the  file  in  its
+  original, unmodified form as  distributed in the original archive.
+  If you are  unsure whether or not a particular  file is covered by
+  this license, you must contact us to verify this.
+
+  The FreeType  Project is copyright (C) 1996-2000  by David Turner,
+  Robert Wilhelm, and Werner Lemberg.  All rights reserved except as
+  specified below.
+
+1. No Warranty
+--------------
+
+  THE FREETYPE PROJECT  IS PROVIDED `AS IS' WITHOUT  WARRANTY OF ANY
+  KIND, EITHER  EXPRESS OR IMPLIED,  INCLUDING, BUT NOT  LIMITED TO,
+  WARRANTIES  OF  MERCHANTABILITY   AND  FITNESS  FOR  A  PARTICULAR
+  PURPOSE.  IN NO EVENT WILL ANY OF THE AUTHORS OR COPYRIGHT HOLDERS
+  BE LIABLE  FOR ANY DAMAGES CAUSED  BY THE USE OR  THE INABILITY TO
+  USE, OF THE FREETYPE PROJECT.
+
+2. Redistribution
+-----------------
+
+  This  license  grants  a  worldwide, royalty-free,  perpetual  and
+  irrevocable right  and license to use,  execute, perform, compile,
+  display,  copy,   create  derivative  works   of,  distribute  and
+  sublicense the  FreeType Project (in  both source and  object code
+  forms)  and  derivative works  thereof  for  any  purpose; and  to
+  authorize others  to exercise  some or all  of the  rights granted
+  herein, subject to the following conditions:
+
+    o Redistribution of  source code  must retain this  license file
+      (`FTL.TXT') unaltered; any  additions, deletions or changes to
+      the original  files must be clearly  indicated in accompanying
+      documentation.   The  copyright   notices  of  the  unaltered,
+      original  files must  be  preserved in  all  copies of  source
+      files.
+
+    o Redistribution in binary form must provide a  disclaimer  that
+      states  that  the software is based in part of the work of the
+      FreeType Team,  in  the  distribution  documentation.  We also
+      encourage you to put an URL to the FreeType web page  in  your
+      documentation, though this isn't mandatory.
+
+  These conditions  apply to any  software derived from or  based on
+  the FreeType Project,  not just the unmodified files.   If you use
+  our work, you  must acknowledge us.  However, no  fee need be paid
+  to us.
+
+3. Advertising
+--------------
+
+  Neither the  FreeType authors and  contributors nor you  shall use
+  the name of the  other for commercial, advertising, or promotional
+  purposes without specific prior written permission.
+
+  We suggest,  but do not require, that  you use one or  more of the
+  following phrases to refer  to this software in your documentation
+  or advertising  materials: `FreeType Project',  `FreeType Engine',
+  `FreeType library', or `FreeType Distribution'.
+
+  As  you have  not signed  this license,  you are  not  required to
+  accept  it.   However,  as  the FreeType  Project  is  copyrighted
+  material, only  this license, or  another one contracted  with the
+  authors, grants you  the right to use, distribute,  and modify it.
+  Therefore,  by  using,  distributing,  or modifying  the  FreeType
+  Project, you indicate that you understand and accept all the terms
+  of this license.
+
+4. Contacts
+-----------
+
+  There are two mailing lists related to FreeType:
+
+    o freetype@nongnu.org
+
+      Discusses general use and applications of FreeType, as well as
+      future and  wanted additions to the  library and distribution.
+      If  you are looking  for support,  start in  this list  if you
+      haven't found anything to help you in the documentation.
+
+    o freetype-devel@nongnu.org
+
+      Discusses bugs,  as well  as engine internals,  design issues,
+      specific licenses, porting, etc.
+
+  Our home page can be found at
+
+    https://freetype.org
+
+
+--- end of FTL.TXT ---
+
+------------------------------------------------------------------------------
+FreeType BDF driver (src/bdf/README)
+
+Copyright (C) 2001-2002 by Francesco Zappa Nardelli
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+*** Portions of the driver (that is, bdflib.c and bdf.h):
+
+Copyright 2000 Computing Research Labs, New Mexico State University
+Copyright 2001-2002, 2011 Francesco Zappa Nardelli
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+THE COMPUTING RESEARCH LAB OR NEW MEXICO STATE UNIVERSITY BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
+OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+------------------------------------------------------------------------------
+FreeType PCF driver (src/pcf/README)
+
+Copyright (C) 2000 by Francesco Zappa Nardelli
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+------------------------------------------------------------------------------
+FreeType PCF driver (src/pcf/pcfutil.c)
+
+Copyright 1990, 1994, 1998  The Open Group
+
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of The Open Group shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from The Open Group.
+
+==============================================================================
+msdfgen
+==============================================================================
+版: 1.13.0 (msdfgen/msdfgen-config.h の MSDFGEN_VERSION、サブモジュールのタグ v1.13)
+配布元: https://github.com/Chlumsky/msdfgen
+ライセンス: MIT License
+写した元: source/extern/msdfgen/LICENSE.txt
+
+------------------------------------------------------------------------------
+MIT License
+
+Copyright (c) 2014 - 2025 Viktor Chlumsky
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+==============================================================================
+zlib
+==============================================================================
+版: 1.3.1（FreeType の src/gzip/zlib.h。FBX SDK 2020.3.9 の zlib-mt.lib も readme.txt の変更履歴では 1.3.1）
+配布元: https://zlib.net/
+ライセンス: zlib License
+写した元: source/extern/freetype/src/gzip/zlib.h の先頭の注記
+
+------------------------------------------------------------------------------
+/* zlib.h -- interface of the 'zlib' general purpose compression library
+  version 1.3.1, January 22nd, 2024
+
+  Copyright (C) 1995-2024 Jean-loup Gailly and Mark Adler
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+
+  Jean-loup Gailly        Mark Adler
+  jloup@gzip.org          madler@alumni.caltech.edu
+
+==============================================================================
+Autodesk FBX SDK
+==============================================================================
+版: 2020.3.9（libfbxsdk-mt.lib を静的リンク。ヘッダは 2020.2 のまま）
+配布元: https://aps.autodesk.com/developer/overview/fbx-sdk
+ライセンス: Autodesk の独自のライセンス (Autodesk License and Services Agreement)
+写した元: C:/Program Files/Autodesk/FBX/FBX SDK/2020.3.9/License.rtf の 1.1.5 の定めの文
+
+------------------------------------------------------------------------------
+"This software contains Autodesk® FBX® code developed by Autodesk, Inc. Copyright 2019 Autodesk, Inc. All rights, reserved. Such code is provided "as is" and Autodesk, Inc. disclaims any and all warranties, whether express or implied, including without limitation the implied warranties of merchantability, fitness for a particular purpose or non-infringement of third party rights. In no event shall Autodesk, Inc. be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of such code."
+
+==============================================================================
+libxml2
+==============================================================================
+版: 2.9.12（FBX SDK 2020.3.9 の readme.txt の変更履歴。FBX SDK に同梱の libxml2-mt.lib を静的リンク。ヘッダは 2.9.10）
+配布元: https://gitlab.gnome.org/GNOME/libxml2
+ライセンス: 【要確認】MIT License のはず（手元のファイルでは確かめられていない）
+写した元: 【要確認】手元にライセンスのファイルが無い。配布元の Copyright のファイルの全文をここに写すこと
+
+------------------------------------------------------------------------------
+【要確認】libxml2 の Copyright の全文（未記入）
+
+==============================================================================
+DirectXTK (WICTextureLoader)
+==============================================================================
+版: 【要確認】不明（source/core/graphics/Direct3D11/WICTextureLoader.cpp・.h に写して改変したもの）
+配布元: https://github.com/microsoft/DirectXTK
+ライセンス: 【要確認】ファイルにライセンスの名前が無い（写した時期により MS-PL か MIT）
+写した元: source/core/graphics/Direct3D11/WICTextureLoader.h の先頭の注記
+
+------------------------------------------------------------------------------
+THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+PARTICULAR PURPOSE.
+
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+http://go.microsoft.com/fwlink/?LinkId=248926
+http://go.microsoft.com/fwlink/?LinkId=248929
+
+==============================================================================
+ONNX Runtime (onnxruntime.dll / onnxruntime_providers_shared.dll)
+==============================================================================
+版: 1.24 (DLL のファイルの版 1.24.20260316.9.2d92497、ORT_API_VERSION 24)
+配布元: https://github.com/microsoft/onnxruntime
+ライセンス: MIT License
+写した元: source/lib/include/onnxruntime/onnxruntime_c_api.h の先頭の注記（"Licensed under the MIT License."）。【要確認】手元に LICENSE・ThirdPartyNotices.txt が無い。標準の MIT の本文を載せた。配布元の LICENSE と照合し、ThirdPartyNotices.txt も同梱すること
+
+------------------------------------------------------------------------------
+Copyright (c) Microsoft Corporation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+------------------------------------------------------------------------------
+【要確認】ONNX Runtime の ThirdPartyNotices.txt（未同梱）
+
+==============================================================================
+DirectML (DirectML.dll)
+==============================================================================
+版: 1.15.4 (DLL のファイルの版 1.15.4+241025-1615.1.dml-1.15.fac7597)
+配布元: https://www.nuget.org/packages/Microsoft.AI.DirectML
+ライセンス: 【要確認】Microsoft の独自のライセンス（NuGet の Microsoft.AI.DirectML に同梱の LICENSE.txt）。手元に無い
+写した元: 【要確認】手元にライセンスのファイルが無い。NuGet パッケージの LICENSE.txt・ThirdPartyNotices.txt の再配布の条件を確かめ、必要な文をここに写すこと
+
+------------------------------------------------------------------------------
+Copyright (c) Microsoft Corporation. All rights reserved.（DLL の LegalCopyright）
+
+==============================================================================
+Fluid (R3) General MIDI SoundFont (FluidR3_GM.sf2)
+==============================================================================
+版: Fluid R3 GM（SF2 の INFO: 作成 Feb 24. 2008）。Debian の fluid-soundfont-gm 3.1-6 に入っているもの
+配布元: https://deb.debian.org/debian/pool/main/f/fluid-soundfont/fluid-soundfont-gm_3.1-6_all.deb
+ライセンス: MIT License
+写した元: Debian の著作権の文書（https://metadata.ftp-master.debian.org/changelogs/main/f/fluid-soundfont/unstable_copyright）の Files: * の節。SF2 の INFO チャンクの著作権（ICOP）「Frank Wen 2000-2002, 2008; Toby Smithe 2008」とコメント（ICMT）「Licensed under the MIT License.」と一致する
+
+------------------------------------------------------------------------------
+Copyright (c) 2000-2002, 2008 Frank Wen <getfrank@gmail.com>
+Copyright (c) 2008 Toby Smithe
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.

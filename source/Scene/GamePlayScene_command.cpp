@@ -3,13 +3,8 @@
 
 #include <blue_sky/GameMain.h>
 
-#include <GameObject/Player.h>
-#include <GameObject/Girl.h>
-#include <GameObject/Goal.h>
-#include <GameObject/Robot.h>
-#include <GameObject/Balloon.h>
-#include <GameObject/AreaSwitch.h>
-#include <GameObject/TranslationObject.h>
+#include <blue_sky/ecs/EntityObject.h>
+#include <blue_sky/ecs/system/PlayerBehaviorSystem.h>
 #include <GameObject/Camera.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
@@ -18,13 +13,14 @@
 #include <core/animation/AnimationPlayer.h>
 #include <core/sound/SoundManager.h>
 
-#include <blue_sky/ActiveObjectPhysics.h>
-#include <blue_sky/ActiveObjectManager.h>
+#include <blue_sky/ObjectFactory.h>
 #include <blue_sky/ScriptManager.h>
 
 #include <blue_sky/DelayedCommand.h>
+#include <blue_sky/stage/TomlStageParser.h>
+#include <blue_sky/stage/StageBuilder.h>
 
-#include <game/Sound.h>
+#include <core/sound/Sound.h>
 #include <game/Config.h>
 
 #include <common/exception.h>
@@ -38,349 +34,255 @@ namespace blue_sky
 {
 
 /**
- * オブジェクトを生成する
+ * プレイヤーの前方にオブジェクトを生成する（スクリプトの create_object_at_player_front）
  *
- * @param class_name クラス名
- * @return 生成したオブジェクト
- * プレイヤーの前方にオブジェクトを生成する
+ * @param class_name 種類の名前
+ * @return 生成したオブジェクト（知らない種類なら std::nullopt。スクリプトには nil）
  */
-ActiveObject* GamePlayScene::create_object_at_player_front( const char_t* class_name )
+std::optional< GameObjectRef > GamePlayScene::create_object_at_player_front( const char_t* class_name )
 {
-	ActiveObject* active_object = GameMain::get_instance()->create_object( class_name );
+	auto id = get_object_factory()->create_object( class_name );
 
-	if ( ! active_object )
+	if ( ! id )
 	{
-		return 0;
+		return std::nullopt;
 	}
 
-	active_object->set_start_location( player_->get_location().x(), player_->get_location().y(), player_->get_location().z() + 3.f );
-	active_object->set_start_direction_degree( 0.f );
+	GameObjectRef o = get_object_factory()->get_ref( * id );
 
-	active_object->restart();
+	const Vector player_location = get_player_object().get_location();
+	o.set_start_location( player_location.x(), player_location.y(), player_location.z() + 3.f );
+	o.set_start_direction_degree( 0.f );
 
-	return active_object;
+	o.restart();
+
+	return o;
 }
 
 /**
- * コマンドを準備する
+ * スクリプトから呼べる関数を準備する
+ *
+ * ステージの動き（以前の command_map_ の 36 個のコマンド）は、読み込むときに stage::Action にし、run_action で行う
  */
 void GamePlayScene::setup_command()
 {
-	// 名前付きオブジェクトを取得して操作するコマンド登録ヘルパー
-	auto obj_command = [this] ( const string_t& name, auto action )
-	{
-		command_map_[ name ] = [this, action] ( const string_t& s )
-		{
-			std::stringstream ss;
-			ss << s;
-
-			string_t object_name;
-			ss >> object_name;
-
-			auto* o = get_active_object_manager()->get_active_object( object_name );
-
-			if ( o )
-			{
-				action( o, ss );
-			}
-		};
-	};
-
-	auto set_color = [] ( Color& color, const string_t& s )
-	{
-		std::stringstream ss;
-		ss << s;
-		ss >> color.r() >> color.g() >> color.b() >> color.a();
-	};
-
-	auto set_color_target = [] ( common::chase_value< Color, float_t >& color, const string_t& s )
-	{
-		std::stringstream ss;
-		ss << s;
-		ss >> color.target_value().r() >> color.target_value().g() >> color.target_value().b() >> color.target_value().a() >> color.speed();
-	};
-
 	// --- スクリプト ---
-	get_script_manager()->set_function( "create_object_at_player_front", [this] ( const char_t* class_name ) { return create_object_at_player_front( class_name ); } );
-
-	// --- 描画設定 ---
-	command_map_[ "set_line_type" ] = [this] ( const string_t& s ) { get_graphics_manager()->set_drawing_line_type( common::deserialize< int >( s ) ); };
-	command_map_[ "set_paper_type" ] = [this] ( const string_t& s ) { get_graphics_manager()->set_paper_texture_type( common::deserialize< int >( s ) ); };
-	command_map_[ "set_drawing_accent_scale" ] = [this] ( const string_t& s ) { drawing_accent_scale_ = common::deserialize< float_t >( s ); };
-	command_map_[ "set_shading_enabled" ] = [this] ( const string_t& s ) { shading_enabled_ = common::deserialize< bool >( s ); };
-	command_map_[ "set_balloon_sound_type" ] = [this] ( const string_t& s ) { balloon_sound_type_ = static_cast< BalloonSoundType >( common::deserialize< int_t >( s ) ); };
-
-	// --- ライティング ---
-	command_map_[ "set_ambient_color_target" ] = [&] ( const string_t& s ) { set_color_target( ambient_color_, s ); };
-	command_map_[ "set_ambient_color" ] = [&] ( const string_t& s ) { set_color( ambient_color_.target_value(), s ); ambient_color_.chase_full(); };
-	command_map_[ "set_shadow_color_target" ] = [&] ( const string_t& s ) { set_color_target( shadow_color_, s ); };
-	command_map_[ "set_shadow_color" ] = [&] ( const string_t& s ) { set_color( shadow_color_.target_value(), s ); shadow_color_.chase_full(); };
-	command_map_[ "set_shadow_paper_color_target" ] = [&] ( const string_t& s ) { set_color_target( shadow_paper_color_, s ); };
-	command_map_[ "set_shadow_paper_color" ] = [&] ( const string_t& s ) { set_color( shadow_paper_color_.target_value(), s ); shadow_paper_color_.chase_full(); };
-
-	command_map_[ "set_light_position_target" ] = [this] ( const string_t& s )
+	get_script_manager()->set_function( "create_object_at_player_front", [this] ( const char_t* class_name ) -> sol::optional< GameObjectRef >
 	{
-		std::stringstream ss;
-		ss << s;
-		float_t x = 0.f, y = 0.f, z = 0.f;
-		ss >> x >> y >> z;
-		light_position_.target_value().set( x, y, z );
-	};
-	command_map_[ "set_light_position" ] = [this] ( const string_t& s )
-	{
-		command_map_[ "set_light_position_target" ]( s );
-		light_position_.value() = light_position_.target_value();
-	};
-
-	// --- スカイボックス ---
-	command_map_[ "change_sky_box" ] = [this] ( const string_t& s )
-	{
-		std::stringstream ss;
-		ss << s;
-
-		string_t sky_box_name, sky_box_ext;
-		ss >> sky_box_name >> sky_box_ext;
-
-		assert( sky_box_ext != "png" );
-
-		if ( sky_box_name == "none" )
+		if ( auto o = create_object_at_player_front( class_name ) )
 		{
-			get_graphics_manager()->unset_sky_box();
-		}
-		else
-		{
-			get_graphics_manager()->set_sky_box( ( string_t( "sky-box-" ) + sky_box_name ).c_str() );
-		}
-	};
-
-	// --- サウンド ---
-	command_map_[ "change_bgm" ] = [this] ( const string_t& s )
-	{
-		bgm_ = get_sound_manager()->load_music( "bgm", s.c_str(), true );
-		bgm_->play( stage_config_->get( "bgm.loop", true ) );
-	};
-	command_map_[ "change_bpm" ] = [this] ( const string_t& s )
-	{
-		std::stringstream ss;
-		ss << s;
-
-		float_t bpm, beat = 1;
-		ss >> bpm >> beat;
-		set_bpm( bpm * beat );
-	};
-	command_map_[ "load_sound" ] = [this] ( const string_t& s )
-	{
-		std::stringstream ss;
-		ss << s;
-
-		string_t sound_name, sound_file_name;
-		bool replace = false;
-		ss >> sound_name >> sound_file_name >> replace;
-
-		if ( replace && get_sound_manager()->load( sound_name.c_str() ) )
-		{
-			get_sound_manager()->unload( sound_name.c_str() );
+			return * o;
 		}
 
-		get_sound_manager()->load( sound_name.c_str(), ( sound_file_name.empty() ? sound_name : sound_file_name ).c_str() );
-	};
-	command_map_[ "play_sound" ] = [this] ( const string_t& s )
-	{
-		std::stringstream ss;
-		ss << s;
-
-		string_t sound_name;
-		bool force = true, loop = false;
-		ss >> sound_name >> force >> loop;
-
-		if ( Sound* sound = get_sound_manager()->load( sound_name.c_str() ) )
-		{
-			sound->play( loop, force );
-		}
-	};
-	command_map_[ "stop_sound" ] = [this] ( const string_t& s )
-	{
-		if ( Sound* sound = get_sound_manager()->load( s.c_str() ) )
-		{
-			sound->stop();
-		}
-	};
-	command_map_[ "stop_all_sound" ] = [this] ( const string_t& ) { get_sound_manager()->stop_all(); };
-
-	// --- オブジェクト生成 ---
-	command_map_[ "game_object.create" ] = [this] ( const string_t& s )
-	{
-		std::stringstream ss;
-		ss << s;
-		get_active_object_manager()->create_static_object( ss );
-	};
-
-	// --- オブジェクト属性変更 ---
-	obj_command( "game_object.set_mass", [] ( ActiveObject* o, std::stringstream& ss )
-	{
-		float_t mass = 0.f;
-		ss >> mass;
-		o->set_mass( mass );
+		return sol::nullopt;
 	} );
-	obj_command( "game_object.set_gravity", [] ( ActiveObject* o, std::stringstream& ss )
-	{
-		float_t x = 0.f, y = 0.f, z = 0.f;
-		ss >> x >> y >> z;
-		o->set_gravity( Vector( x, y, z ) );
-	} );
-	obj_command( "game_object.set_angular_factor", [] ( ActiveObject* o, std::stringstream& ss )
-	{
-		float_t x = 0.f, y = 0.f, z = 0.f;
-		ss >> x >> y >> z;
-		o->set_angular_factor( Vector( x, y, z ) );
-	} );
-	obj_command( "game_object.set_kinematic", [] ( ActiveObject* o, std::stringstream& ss )
-	{
-		bool is_kinematic = false;
-		ss >> is_kinematic;
-		o->set_kinematic( is_kinematic );
-	} );
-	obj_command( "game_object.set_no_contact_response", [] ( ActiveObject* o, std::stringstream& ss )
-	{
-		bool v = false;
-		ss >> v;
-		o->set_no_contact_response( v );
-	} );
-	obj_command( "game_object.set_flicker_scale", [] ( ActiveObject* o, std::stringstream& ss )
-	{
-		float_t scale = 1.f;
-		ss >> scale;
-		o->set_flicker_scale( scale );
-	} );
-
-	// --- オブジェクト移動・方向 ---
-	obj_command( "game_object.set_target_location", [this] ( ActiveObject* o, std::stringstream& ss )
-	{
-		float_t x = 0.f, y = 0.f, z = 0.f, speed = 0.f;
-		ss >> x >> y >> z >> speed;
-		get_active_object_manager()->set_target_location( o, Vector( x, y, z ), speed );
-	} );
-	obj_command( "game_object.set_target_direction", [this] ( ActiveObject* o, std::stringstream& ss )
-	{
-		float_t r = 0.f, speed = 0.f;
-		ss >> r >> speed;
-		get_active_object_manager()->set_target_direction( o, r, speed );
-	} );
-	command_map_[ "game_object.set_target_direction_object" ] = [this] ( const string_t& s )
-	{
-		std::stringstream ss;
-		ss << s;
-
-		string_t object_name, target_object_name;
-		float_t speed = 0.f;
-		ss >> object_name >> target_object_name >> speed;
-
-		ActiveObject* o = get_active_object_manager()->get_active_object( object_name );
-		ActiveObject* to = get_active_object_manager()->get_active_object( target_object_name );
-
-		if ( o && to )
-		{
-			get_active_object_manager()->set_target_direction_object( o, to, speed );
-		}
-	};
-
-	// --- オブジェクトアニメーション ---
-	obj_command( "game_object.play_animation", [] ( ActiveObject* o, std::stringstream& ss )
-	{
-		string_t animation_name;
-		bool force = true, loop = false;
-		ss >> animation_name >> force >> loop;
-		o->play_animation( animation_name.c_str(), force, loop );
-	} );
-	obj_command( "game_object.set_animation_speed", [] ( ActiveObject* o, std::stringstream& ss )
-	{
-		float_t speed;
-		ss >> speed;
-		if ( o->get_animation_player() ) { o->get_animation_player()->set_speed( speed ); }
-	} );
-	obj_command( "game_object.action", [] ( ActiveObject* o, std::stringstream& ss )
-	{
-		string_t action;
-		while ( ss.good() )
-		{
-			string_t p;
-			ss >> p;
-			if ( ! action.empty() ) { action += " "; }
-			action += p;
-		}
-		o->action( action );
-	} );
-
-	// --- プレイヤー ---
-	command_map_[ "player.start_flickering" ] = [this] ( const string_t& ) { player_->start_flickering(); };
-
-	// --- タイマー・イベント ---
-	command_map_[ "timer" ] = [this] ( const string_t& s )
-	{
-		std::stringstream ss;
-		ss << s;
-
-		float_t interval = 1.f;
-		int_t count = 1;
-		string_t command;
-
-		ss >> interval >> count;
-
-		while ( ss.good() )
-		{
-			string_t p;
-			ss >> p;
-			if ( ! command.empty() ) { command += " "; }
-			command += p;
-		}
-
-		delayed_command_list_.push_back( std::make_unique< DelayedCommand >( interval, count, command ) );
-	};
-	command_map_[ "end_by_last_switch" ] = [this] ( const string_t& )
-	{
-		if ( bgm_ ) { bgm_->stop(); }
-		get_sound_manager()->stop_all();
-
-		if ( Sound* sound = get_sound_manager()->get_sound( "switch-off" ) )
-		{
-			sound->play( false, true );
-		}
-
-		is_blackout_ = true;
-	};
 }
 
-void GamePlayScene::exec_command( const string_t& command )
+/**
+ * ステージの動きを 1 つ行う（以前は command_map_ の名前で引き、文字列の引数を解釈していた）
+ *
+ * 時間を置く動き（delay・every。以前の timer）は、時間を置く一覧（delayed_command_list_）に預ける。
+ * 書いていない引数は以前と同じ既定の値を使う（色は書いた成分だけ変える・位置の足りない数は 0 など。読む側で決めてある）
+ */
+void GamePlayScene::run_action( const stage::Action& a )
 {
-	std::stringstream ss;
-	ss << command;
+	using stage::ActionType;
 
-	string_t command_name;
-	string_t command_params;
-
-	ss >> command_name;
-
-	while ( ss.good() )
+	if ( a.is_timed )
 	{
-		string_t s;
-		ss >> s;
+		stage::Action now = a;
+		now.is_timed = false;
 
-		if ( ! command_params.empty() )
+		delayed_command_list_.push_back( std::make_unique< DelayedCommand >( static_cast< float_t >( a.interval ), a.count, now ) );
+		return;
+	}
+
+	auto to_vector = [] ( const std::vector< double >* v )
+	{
+		return v ? Vector( static_cast< float_t >( ( * v )[ 0 ] ), static_cast< float_t >( ( * v )[ 1 ] ), static_cast< float_t >( ( * v )[ 2 ] ) ) : Vector::Zero;
+	};
+
+	auto number = [ & ] ( const char* key, double default_value ) { return static_cast< float_t >( a.number( key, default_value ) ); };
+
+	// 名前で引いた物体（見つからなければ何もしない。以前と同じ）
+	std::optional< GameObjectRef > target = a.has( "target" ) ? get_object_factory()->find_ref( a.text( "target" ) ) : std::nullopt;
+
+	switch ( a.type )
+	{
+		case ActionType::SET:
 		{
-			command_params += " ";
+			// 見た目（空・線・紙・色・光の位置・線の揺れ）はステージの見た目が行う
+			look_.apply( a, * get_graphics_manager() );
+
+			if ( a.has( "bgm" ) )
+			{
+				// 同じ名前で読み直す（ハンドルの番号はそのまま、中身が差し替わる）
+				get_sound_manager()->load_music( "bgm", a.text( "bgm" ).c_str(), true );
+				bgm_ = get_sound_manager()->get_sound_handle( "bgm" );
+
+				if ( Sound* bgm = resolve( bgm_, "bgm" ) )
+				{
+					bgm->play( bgm_loop_ );
+				}
+			}
+
+			if ( a.has( "bpm" ) )
+			{
+				set_bpm( number( "bpm", 120.0 ) * number( "beat", 1.0 ) );
+			}
+
+			if ( a.has( "balloon_sound_type" ) ) { balloon_sound_type_ = static_cast< BalloonSoundType >( static_cast< int_t >( a.number( "balloon_sound_type", 0.0 ) ) ); }
+
+			break;
 		}
+		case ActionType::FADE:
+		{
+			// 色・光の位置を少しずつ変える（ステージの見た目が行う）
+			look_.apply( a, * get_graphics_manager() );
+			break;
+		}
+		case ActionType::PLAY_SOUND:
+		{
+			if ( Sound* sound = get_sound_manager()->load( a.text( "sound" ).c_str() ) )
+			{
+				sound->play( a.flag( "loop", false ), a.flag( "force", true ) );
+			}
 
-		command_params += s;
+			break;
+		}
+		case ActionType::STOP_SOUND:
+		{
+			if ( Sound* sound = get_sound_manager()->load( a.text( "sound" ).c_str() ) )
+			{
+				sound->stop();
+			}
+
+			break;
+		}
+		case ActionType::STOP_ALL_SOUNDS:
+		{
+			get_sound_manager()->stop_all();
+			break;
+		}
+		case ActionType::LOAD_SOUND:
+		{
+			const string_t& sound_name = a.text( "name" );
+			const string_t& file = a.has( "file" ) ? a.text( "file" ) : sound_name;
+
+			// replace なら読み込み済みでも読み直す（番号を変えずに中身を差し替える）
+			if ( a.flag( "replace", false ) )
+			{
+				get_sound_manager()->reload( sound_name.c_str(), file.c_str() );
+			}
+			else
+			{
+				get_sound_manager()->load( sound_name.c_str(), file.c_str() );
+			}
+
+			break;
+		}
+		case ActionType::SPAWN:
+		{
+			get_object_factory()->create_static_object( a.text( "model" ), to_vector( a.numbers( "position" ) ), to_vector( a.numbers( "rotation" ) ) );
+			break;
+		}
+		case ActionType::MOVE_TO:
+		{
+			if ( target ) { target->set_target_location( to_vector( a.numbers( "position" ) ), number( "speed", 0.0 ) ); }
+			break;
+		}
+		case ActionType::TURN_TO:
+		{
+			if ( ! target )
+			{
+				break;
+			}
+
+			if ( a.has( "face" ) )
+			{
+				if ( auto to = get_object_factory()->find_ref( a.text( "face" ) ) )
+				{
+					target->set_target_direction_to( * to, number( "speed", 0.0 ) );
+				}
+			}
+			else
+			{
+				target->set_target_direction( number( "direction", 0.0 ), number( "speed", 0.0 ) );
+			}
+
+			break;
+		}
+		case ActionType::SET_BODY:
+		{
+			if ( ! target )
+			{
+				break;
+			}
+
+			if ( a.has( "mass" ) ) { target->set_mass( number( "mass", 0.0 ) ); }
+			if ( auto v = a.numbers( "gravity" ) ) { target->set_gravity( to_vector( v ) ); }
+			if ( auto v = a.numbers( "angular_factor" ) ) { target->set_angular_factor( to_vector( v ) ); }
+			if ( a.has( "kinematic" ) ) { target->set_kinematic( a.flag( "kinematic", false ) ); }
+			if ( a.has( "contact_response" ) ) { target->set_no_contact_response( ! a.flag( "contact_response", true ) ); }
+			break;
+		}
+		case ActionType::SET_FLICKER:
+		{
+			if ( target ) { target->set_flicker_scale( number( "scale", 1.0 ) ); }
+			break;
+		}
+		case ActionType::START_FLICKERING:
+		{
+			get_player_system()->start_flickering( player_id_ );
+			break;
+		}
+		case ActionType::PLAY_ANIMATION:
+		{
+			if ( target ) { target->play_animation( a.text( "name" ).c_str(), a.flag( "force", true ), a.flag( "loop", false ) ); }
+			break;
+		}
+		case ActionType::SET_ANIMATION_SPEED:
+		{
+			if ( target ) { target->set_animation_speed( number( "speed", 1.0 ) ); }
+			break;
+		}
+		case ActionType::SWITCH:
+		{
+			// イベントは起こさない（以前の game_object.action の turn-on・turn-off・break）
+			const string_t& state = a.text( "state" );
+
+			if ( target ) { target->action( state == "on" ? "turn-on" : state == "off" ? "turn-off" : "break" ); }
+			break;
+		}
+		case ActionType::SET_MODE:
+		{
+			if ( target ) { target->action( a.text( "mode" ) ); }
+			break;
+		}
+		case ActionType::SET_VISIBLE:
+		{
+			if ( target ) { target->action( string_t( "set_visible " ) + ( a.flag( "model", true ) ? "1" : "0" ) + " " + ( a.flag( "line", true ) ? "1" : "0" ) ); }
+			break;
+		}
+		case ActionType::BREAK_ANIMATION:
+		{
+			if ( target ) { target->action( a.flag( "broken", true ) ? "break_animation 1" : "break_animation 0" ); }
+			break;
+		}
+		case ActionType::END_STAGE:
+		{
+			if ( Sound* bgm = resolve( bgm_, "bgm" ) ) { bgm->stop(); }
+			get_sound_manager()->stop_all();
+
+			if ( Sound* sound = get_sound_manager()->get_sound( "switch-off" ) )
+			{
+				sound->play( false, true );
+			}
+
+			is_blackout_ = true;
+			break;
+		}
 	}
-
-	auto i = command_map_.find( command_name );
-
-	if ( i == command_map_.end() )
-	{
-		COMMON_THROW_EXCEPTION_MESSAGE( ( "command not found. ( " ) + command_name + " )" );
-	}
-
-	i->second( command_params );
 }
 
 void GamePlayScene::save_stage_file( const char* ) const
@@ -391,227 +293,33 @@ void GamePlayScene::save_stage_file( const char* ) const
 /**
  * ステージファイルを読み込む
  *
- * @param file_name ステージファイル名
+ * @param base_name ステージのファイル名から .stage.toml を除いたもの（"media/stage/2-1" など）
  */
-void GamePlayScene::load_stage_file( const char* file_name )
+void GamePlayScene::load_stage_file( const char* base_name )
 {
-	std::ifstream in( file_name );
+	// 読む（ファイル → StageData）。以前の独自の形式（.stage）は 2026-11-10 に TOML へ移して消した（変換ツールは tools/stage_convert）
+	const stage::StageData data = stage::TomlStageParser::parse_file( string_t( base_name ) + ".stage.toml" );
 
-	if ( ! in.good() )
+	// 当てる（StageData → ゲーム）
+	stage::StageBuilder::Context context;
+	context.object_factory = get_object_factory();
+	context.physics = get_physics_manager();
+	context.render_settings = get_graphics_manager();
+	context.sound_manager = get_sound_manager();
+	context.player = player_id_;
+	context.camera = camera_.get();
+	context.goal = goal_;
+	context.stage_dir = StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) );
+	context.set_bpm = [this] ( float_t bpm ) { set_bpm( bpm ); };
+	context.make_call = [this] ( const stage::Action& action ) -> stage::StageBuilder::Call
 	{
-		COMMON_THROW_EXCEPTION_MESSAGE( std::string( "load stage file \"" ) + file_name + "\" failed." );
-	}
+		return [ this, action ] { run_action( action ); };
+	};
 
-	ActiveObject* last_object = 0;
+	const auto result = stage::StageBuilder::build( data, context );
 
-	while ( in.good() )
-	{
-		std::string line;
-		std::getline( in, line );
-
-		std::stringstream ss;
-		std::string command;
-
-		ss << line;
-		ss >> command;
-
-		if ( command == "#" )
-		{
-			//
-		}
-		else if ( command == "bgm" )
-		{
-			std::string bgm_name;
-			bool loop = true;
-
-			ss >> bgm_name;
-			ss >> loop;
-
-
-			get_sound_manager()->load_music( "bgm", bgm_name.c_str() );
-
-			if ( ss.good() )
-			{
-				float_t bpm = get_bpm();
-
-				ss >> bpm;
-
-				set_bpm( bpm );
-			}
-		}
-		else if ( command == "collision" )
-		{
-			std::string collision_file_name;
-
-			ss >> collision_file_name;
-
-			get_active_object_physics()->load_obj( ( StageSelectScene::get_stage_dir_name_by_page( get_save_data()->get( "stage-select.page", 0 ) ) + collision_file_name ).c_str() );
-		}
-		else if ( command == "player" )
-		{
-			float_t x = 0, y = 0, z = 0;
-
-			ss >> x >> y >> z;
-
-			player_->set_start_location( x, y, z );
-			player_->set_rigid_body( get_active_object_physics()->add_active_object_as_capsule( player_ ) );
-
-			if ( ! ss.eof() )
-			{
-				float r = 0.f;
-
-				ss >> r;
-
-				camera_->rotate_degree_target().set_x( r );
-				camera_->rotate_degree().set_x( r );
-			}
-		}
-		else if ( command == "goal" )
-		{
-			float_t x = 0, y = 0, z = 0;
-			ss >> x >> y >> z;
-
-			goal_->set_start_location( x, y, z );
-		}
-		else if ( command == "ground" )
-		{
-			string_t ground_name;
-			ss >> ground_name;
-
-			get_graphics_manager()->set_ground( ground_name.c_str() );
-		}
-		else if ( command == "far-billboards" )
-		{
-			std::string far_billboards_name;
-
-			ss >> far_billboards_name;
-
-			far_billboards_ = get_graphics_manager()->load_model( far_billboards_name.c_str() );
-		}
-		else if ( command == "object" || command == "static-object" || command == "dynamic-object" )
-		{
-			last_object = get_active_object_manager()->create_static_object( ss );
-		}
-		else if ( command == "translation-object" )
-		{
-			float_t x = 0, y = 0, z = 0, tw = 0, th = 0, td = 0, s = 0.01f;
-			ss >> x >> y >> z >> tw >> th >> td >> s;
-
-			TranslationObject* object = new TranslationObject( 5, 5, 5, tw, th, td, s );
-
-			Model* model = get_graphics_manager()->load_model( "box-5x5x5" );
-
-			object->set_model( model );
-			object->set_rigid_body( get_active_object_physics()->add_active_object_as_box( object ) );
-			object->set_start_location( x, y, z );
-
-			get_active_object_manager()->add_active_object( object );
-
-			last_object = object;
-		}
-		else if ( command == "girl" || command == "robot" || command == "balloon" || command == "medal" || command == "ladder" || command == "rocket" || command == "umbrella" || command == "stone" || command == "switch" )
-		{
-			ActiveObject* active_object = GameMain::get_instance()->create_object( command.c_str() );
-
-			float x = 0, y = 0, z = 0, r = 0;
-			ss >> x >> y >> z >> r;
-
-			active_object->set_start_location( x, y, z );
-			active_object->set_start_direction_degree( r );
-
-			if ( command == "girl" )
-			{
-				girl_ = static_cast< Girl* >( active_object );
-				girl_->set_player( player_ );
-				get_active_object_manager()->name_active_object( "girl", girl_ );
-			}
-			else if ( command == "robot" )
-			{
-				Robot* robot = static_cast< Robot* >( active_object );
-				robot->set_player( player_ );
-			}
-
-			last_object = active_object;
-		}
-		else if ( command == "area-switch" )
-		{
-			float_t x = 0.f, y = 0.f, z = 0.f;
-			float_t w = 0.f, h = 0.f, d = 0.f;
-			float_t r = 0.f;
-
-			ss >> x >> y >> z >> w >> h >> d >> r;
-
-			AreaSwitch* s = new AreaSwitch( w, h, d );
-			s->set_rigid_body( get_active_object_physics()->add_active_object_as_box( s ) );
-			s->set_start_location( x, y, z );
-			s->set_start_direction_degree( r );
-
-			get_active_object_manager()->add_active_object( s );
-
-			last_object = s;
-		}
-		else if ( command == "event" || command == "exec" )
-		{
-			string_t event_name;
-			string_t event_handler_name;
-			string_t event_handler_params;
-
-			if ( command == "event" )
-			{
-				ss >> event_name;
-			}
-
-			ss >> event_handler_name;
-
-			while ( ss.good() )
-			{
-				string_t s;
-				ss >> s;
-
-				if ( ! event_handler_params.empty() )
-				{
-					event_handler_params += " ";
-				}
-
-				event_handler_params += s;
-			}
-
-			auto i = command_map_.find( event_handler_name );
-
-			if ( i == command_map_.end() )
-			{
-				COMMON_THROW_EXCEPTION_MESSAGE( ( "event handler not found. ( " ) + event_handler_name + " )" );
-			}
-
-			auto command_call = [ = ] { i->second( event_handler_params ); };
-
-			if ( command == "event" )
-			{
-				last_object->add_event_handler( event_name.c_str(), command_call );
-			}
-			else
-			{
-				stage_setup_command_call_list_.push_back( command_call );
-			}
-		}
-		else if ( command == "name" )
-		{
-			if ( ! last_object )
-			{
-				COMMON_THROW_EXCEPTION_MESSAGE( "naming object not found." );
-			}
-
-			string_t object_name;
-
-			ss >> object_name;
-			get_active_object_manager()->name_active_object( object_name, last_object );
-		}
-		else
-		{
-			// 未知のコマンドはステージ設定として読み込む
-			stage_config_->read_line( line );
-		}
-	}
+	stage_setup_command_call_list_.assign( result.start_calls.begin(), result.start_calls.end() );
+	bgm_loop_ = result.bgm_loop;
 }
 
 } // namespace blue_sky

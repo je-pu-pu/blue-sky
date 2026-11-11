@@ -1,5 +1,7 @@
 #include "App.h"
+#include <blue_sky/DebugLog.h>
 #include "GameMain.h"
+#include "GameSettings.h"
 #include "resource.h"
 
 #include <win/Tablet.h>
@@ -7,12 +9,20 @@
 #include <win/Point.h>
 #include <win/LastError.h>
 
+#include <common/string.h>
+
 #include <winnls32.h>
+#include <imm.h>
+
+#pragma comment( lib, "imm32.lib" )
 
 #include <boost/filesystem.hpp>
 #include <iostream>
 
+// デバッグ用のコンソール（std::cout の出力先）。リリースビルドでは開かない
+#ifdef _DEBUG
 #define ENABLE_DEBUG_CONSOLE
+#endif
 
 //□コンストラクタ
 App::App()
@@ -25,11 +35,10 @@ App::App()
 	, width_( DEFAULT_WIDTH )
 	, height_( DEFAULT_HEIGHT )
 	, is_active_( false )
-	, is_full_screen_( false )
-	, last_window_rect_{ 0, 0, 0, 0 }
 	, is_mouse_in_window_( false )
 	, is_clip_cursor_enabled_( false )
 	, config_( new Config() )
+	, user_config_( new Config() )
 {
 	/*
 	TCHAR exe_path[ MAX_PATH ];
@@ -39,13 +48,24 @@ App::App()
 	boost::filesystem::current_path( dir_path.parent_path() );
 	*/
 
-	setlocale( LC_CTYPE, "" );
+	// C ランタイムの文字の扱いも UTF-8 にする（中の文字列は UTF-8。以前は "" で、日本語の Windows では Shift-JIS になっていた）
+	setlocale( LC_CTYPE, ".UTF8" );
+
+	// 開発用 : BLUE_SKY_BACKGROUND を設定すると裏で動かす（窓を前面に出さず、フォーカスを取らず、カーソルを隠さず・閉じ込めない）。
+	// 自動の確かめでゲームを何度も起動しても、使っている人のほかの作業を邪魔しないため
+	is_background_ = GetEnvironmentVariableA( "BLUE_SKY_BACKGROUND", nullptr, 0 ) > 0;
 
 #ifdef ENABLE_DEBUG_CONSOLE
-	AllocConsole();
-	if ( freopen( "CONOUT$", "w", stdout ) == nullptr )
+	// コンソールを開けなくてもゲームは続ける（出力が見えないだけ）
+	// 裏で動かすときは開かない（新しいコンソールの窓が前面に出てしまい、閉じる操作もそちらに届いて強制終了になるため。出力は log/blue-sky.log にある）
+	if ( ! is_background_ && AllocConsole() )
 	{
-		COMMON_THROW_EXCEPTION_MESSAGE( "freopen() failed." );
+		FILE* out = nullptr;
+		freopen_s( & out, "CONOUT$", "w", stdout );
+
+		// 出す文字は UTF-8（/utf-8 でコンパイルしている）。新しく作ったコンソールはシステムの既定（日本語の Windows では Shift-JIS の 932）で
+		// 表示するので、UTF-8 として表示させる（以前は日本語が化けていた）
+		SetConsoleOutputCP( CP_UTF8 );
 	}
 #endif
 }
@@ -66,11 +86,16 @@ App::~App()
 //■初期化
 bool App::Init(HINSTANCE hi, int nCmdShow)
 {
-	// 設定を読み込む
+	// 設定を読み込む : 開発用・エンジンの設定と、ユーザーの設定（無ければ前者から引き継ぐ）
+	config_->set_log_handler( & blue_sky::debug_log );
+	user_config_->set_log_handler( & blue_sky::debug_log );
 	config_->load_file( "blue-sky.config" );
-	
-	width_ = get_config()->get( "graphics.screen_width", DEFAULT_WIDTH );
-	height_ = get_config()->get( "graphics.screen_height", DEFAULT_HEIGHT );
+	blue_sky::game_settings::load_user_settings_file( * user_config_, * config_ );
+
+	// 表示設定は、ゲーム中のストアと同じ登録（既定値・範囲）で読む
+	// （以前は App とストアがばらばらに読み、既定値が 800x600 と 1920x1080 の 2 つあり、範囲の検査も違った）
+	bool initial_full_screen = false;
+	blue_sky::game_settings::read_initial_display( * user_config_, width_, height_, initial_full_screen );
 
 	//インスタンスハンドルをコピー
 	hInst = hi;
@@ -111,10 +136,10 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 
 	//ウインドウ作成
 	hWnd = CreateWindowEx(
-		0 /* WS_EX_TOPMOST */,		//手前に表示
+		is_background_ ? WS_EX_NOACTIVATE : 0,		// 裏で動かすときは、クリックされても前面に出ず・フォーカスを取らない
 		class_name_.c_str(),	//クラス名
 		title_.c_str(),		//タイトル
-		style_,				//スタイル
+		is_background_ ? ( style_ & ~WS_VISIBLE ) : style_,	// 裏で動かすときは、作った瞬間に表示して前面に出ないよう、後で前面に出さずに表示する
 		x,					//表示座標
 		y,					//
 		w,					//サイズ
@@ -122,7 +147,7 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		nullptr,			//親ウィンドウのハンドル
 		nullptr,			//メニューのハンドル
 		hInst,				//インスタンスハンドル
-		nullptr				//ウィンドウ作成データ アドレス
+		this				//ウィンドウ作成データ アドレス（WM_NCCREATE で受け取り、ウィンドウに結び付ける）
 	);
 
 	if ( ! hWnd )
@@ -130,13 +155,35 @@ bool App::Init(HINSTANCE hi, int nCmdShow)
 		return false;
 	}
 	
-	set_full_screen( get_config()->get( "graphics.full_screen", 0 ) != 0 );
+	if ( initial_full_screen )
+	{
+		set_full_screen( true );
+	}
+
+	// 入力の出来事を Raw Input（WM_INPUT）で受け取る。登録できなければ以前のやり方（ポーリング・WM_KEYDOWN・DirectInput）を使う
+	// プロセスの文字コード（blue-sky-exe.utf8.manifest で UTF-8 にしている。Windows 10 1903 より前では効かず、システムの既定になる）
+	blue_sky::debug_log( "[文字コード] プロセスの文字コード : " + std::to_string( GetACP() ) + ( GetACP() == CP_UTF8 ? "（UTF-8）" : "（UTF-8 ではない。日本語などを含むパス・タイトルが化けることがある）" ) );
+
+	is_raw_input_enabled_ = blue_sky::raw_input::register_devices( hWnd );
+	blue_sky::debug_log( is_raw_input_enabled_ ? "[Input] Raw Input を登録しました（キーボード・マウス）" : "[Input] Raw Input を登録できませんでした。以前のやり方（ポーリング・WM_KEYDOWN・DirectInput）で読みます" );
 
 	// ゲームを初期化する
-	game_ = blue_sky::GameMain::get_instance();
-	blue_sky::GameMain::get_instance()->setup_scene();
+	game_main_ = std::make_unique< blue_sky::GameMain >( * this );
+	game_ = game_main_.get();
+	game_main_->setup_scene();
 	
-	ShowWindow( hWnd, nCmdShow );		//表示
+	if ( is_background_ )
+	{
+		// 前面に出さずに表示し、一番後ろに置く（描画とフレームの保存は続く）
+		ShowWindow( hWnd, SW_SHOWNOACTIVATE );
+		SetWindowPos( hWnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE );
+		blue_sky::debug_log( "[開発用] 裏で動かします（BLUE_SKY_BACKGROUND）: 前面に出ず、カーソルを隠さず・閉じ込めず、入力を受け取りません" );
+	}
+	else
+	{
+		ShowWindow( hWnd, nCmdShow );		//表示
+	}
+
 	UpdateWindow( hWnd );				//描画
 
 	// WINNLSEnableIME(hWnd, FALSE);	//IME非表示
@@ -160,21 +207,74 @@ int App::MessageLoop()
 
 			TranslateMessage( & msg );
 			DispatchMessage( & msg );
+
+			// ウィンドウプロシージャの中で起きた例外は、ここで投げ直す（WinMain が受け止める）
+			if ( pending_exception_ )
+			{
+				std::exception_ptr e = pending_exception_;
+				pending_exception_ = nullptr;
+				std::rethrow_exception( e );
+			}
 		}
 		else
 		{
 			if ( ! game_->update() )
 			{
-				Sleep( 0 );
+				// 次のフレームまで眠る（メッセージが来たらすぐ起きる）
+				// 以前は Sleep( 0 ) で回り続け、CPU のコアを 1 つ使い切っていた
+				const DWORD wait = game_->get_idle_wait_msec();
+
+				if ( wait > 0 )
+				{
+					MsgWaitForMultipleObjects( 0, nullptr, FALSE, wait, QS_ALLINPUT );
+				}
 			}
 		}
+	}
+
+	// 正常に終わったときだけ、設定などを保存して後片付けする（例外で抜けたときは、壊れた状態を保存しない）
+	if ( game_ )
+	{
+		game_->shutdown();
 	}
 
 	return static_cast< int >( msg.wParam );
 }
 
-//□ウィンドウプロシージャ
+/**
+ * ウィンドウプロシージャ
+ *
+ * 例外を user32 の外へ出さない（x64 ではコールバックをまたぐ例外が握りつぶされることがある）。
+ * 中で起きた例外は預けておき、メッセージループに戻ってから投げ直す。
+ */
 LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
+{
+	// ウィンドウに結び付けた App（CreateWindowEx の最後の引数で渡し、WM_NCCREATE で覚える）。以前は App のシングルトンを使っていた
+	if ( msg == WM_NCCREATE )
+	{
+		const auto* create = reinterpret_cast< const CREATESTRUCT* >( lp );
+		SetWindowLongPtr( hwnd, GWLP_USERDATA, reinterpret_cast< LONG_PTR >( create->lpCreateParams ) );
+	}
+
+	App* app = reinterpret_cast< App* >( GetWindowLongPtr( hwnd, GWLP_USERDATA ) );
+
+	if ( ! app )
+	{
+		return DefWindowProc( hwnd, msg, wp, lp );
+	}
+
+	try
+	{
+		return app->WinProcImpl( hwnd, msg, wp, lp );
+	}
+	catch ( ... )
+	{
+		app->pending_exception_ = std::current_exception();
+		return 0;
+	}
+}
+
+LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 {
 	extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -198,30 +298,145 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		on_resize( hwnd );
 		break;
 	}
+	case WM_INPUT:
+	{
+		// 入力の出来事（キー・マウスボタンの押す/離す・相対の移動量）。フレームの間に起きたことを順に渡す
+		App* app = this;
+		std::vector< blue_sky::raw_input::Event > events;
+
+		if ( app->game_ && blue_sky::raw_input::read( lp, app->raw_input_decoder_, events ) )
+		{
+			blue_sky::raw_input::dispatch( events, * app->game_, & blue_sky::debug_log );
+		}
+
+		return DefWindowProc( hwnd, msg, wp, lp );		// WM_INPUT は DefWindowProc で後始末する
+	}
 	case WM_KEYDOWN:
 	{
-		if ( App::get_instance()->game_ )
+		// 押し続けによるキーリピートは、ファンクションキー（ミュート・フルスクリーンなどの切り替え）には渡さない
+		const bool is_repeat = ( lp & ( 1 << 30 ) ) != 0;
+		const bool is_function_key = wp >= VK_F1 && wp <= VK_F24;
+
+		// 押下の記録は Raw Input が使えるならそちらで行う（二重に記録しない）
+		if ( this->game_ && ! is_repeat && ! this->is_raw_input_enabled_ )
 		{
-			App::get_instance()->game_->on_special_key_down( static_cast< int >( wp ) );
+			this->game_->on_raw_key_down( static_cast< int >( wp ) );
+		}
+
+		if ( this->game_ && ! ( is_repeat && is_function_key ) )
+		{
+			this->game_->on_special_key_down( static_cast< int >( wp ) );
 		}
 
 		break;
 	}
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	{
+		// 短いクリックを取りこぼさない（ボタンの状態は毎フレームのポーリングで読んでいるため）。Raw Input が使えるならそちらで記録する
+		if ( this->game_ && ! this->is_raw_input_enabled_ )
+		{
+			this->game_->on_raw_key_down( msg == WM_LBUTTONDOWN ? VK_LBUTTON : msg == WM_RBUTTONDOWN ? VK_RBUTTON : VK_MBUTTON );
+		}
+
+		return DefWindowProc( hwnd, msg, wp, lp );
+	}
+	case WM_SYSKEYDOWN:
+	{
+		if ( this->game_ && ! ( lp & ( 1 << 30 ) ) && ! this->is_raw_input_enabled_ )
+		{
+			this->game_->on_raw_key_down( static_cast< int >( wp ) );
+		}
+
+		// Alt+Enter : フルスクリーンの切り替え（DXGI の自動処理は止めてある）
+		if ( wp == VK_RETURN && ( lp & ( 1 << 29 ) ) && ! ( lp & ( 1 << 30 ) ) )
+		{
+			if ( this->game_ )
+			{
+				this->game_->on_toggle_full_screen();
+			}
+
+			return 0;
+		}
+
+		return DefWindowProc( hwnd, msg, wp, lp );
+	}
+	case WM_SYSCOMMAND:
+	{
+		// Alt や F10 を単独で押したときに、ウィンドウメニューのモードに入ってゲームの入力が奪われないようにする
+		if ( ( wp & 0xFFF0 ) == SC_KEYMENU )
+		{
+			return 0;
+		}
+
+		return DefWindowProc( hwnd, msg, wp, lp );
+	}
+	case WM_IME_COMPOSITION:
+	{
+		// 変換中の文字を UI に見せる（確定した文字は DefWindowProc が WM_CHAR にして届ける）
+		if ( ( lp & GCS_COMPSTR ) && this->game_ )
+		{
+			std::u32string composition;
+
+			if ( HIMC imc = ImmGetContext( hwnd ) )
+			{
+				const LONG bytes = ImmGetCompositionStringW( imc, GCS_COMPSTR, nullptr, 0 );
+
+				if ( bytes > 0 )
+				{
+					std::wstring w( static_cast< size_t >( bytes ) / sizeof( wchar_t ), L'\0' );
+					ImmGetCompositionStringW( imc, GCS_COMPSTR, w.data(), bytes );
+
+					// UTF-16 → UTF-32（サロゲートペアを組み立てる）
+					for ( size_t i = 0; i < w.size(); i++ )
+					{
+						const char32_t c = w[ i ];
+
+						if ( c >= 0xD800 && c <= 0xDBFF && i + 1 < w.size() )
+						{
+							composition.push_back( 0x10000 + ( ( c - 0xD800 ) << 10 ) + ( static_cast< char32_t >( w[ i + 1 ] ) - 0xDC00 ) );
+							i++;
+						}
+						else
+						{
+							composition.push_back( c );
+						}
+					}
+				}
+
+				ImmReleaseContext( hwnd, imc );
+			}
+
+			this->game_->on_ime_composition( composition );
+		}
+
+		return DefWindowProc( hwnd, msg, wp, lp );
+	}
+	case WM_IME_ENDCOMPOSITION:
+	{
+		if ( this->game_ )
+		{
+			this->game_->on_ime_composition( std::u32string() );
+		}
+
+		return DefWindowProc( hwnd, msg, wp, lp );
+	}
 	case WM_CHAR:
 	{
-		if ( App::get_instance()->game_ )
+		if ( this->game_ )
 		{
-			App::get_instance()->game_->on_key_down( static_cast< char_t >( wp ) );
+			this->game_->on_key_down( static_cast< char_t >( wp ) );
 		}
 
 		break;
 	}
 	case WM_MOUSEMOVE:
 	{
-		if ( ! App::get_instance()->is_mouse_in_window_ )
+		if ( ! this->is_mouse_in_window_ )
 		{
-			App::get_instance()->is_mouse_in_window_ = true;
-			App::get_instance()->show_cursor( App::get_instance()->game_->is_show_cursor() );
+			this->is_mouse_in_window_ = true;
+			this->show_cursor( this->game_->is_show_cursor() );
 
 			TRACKMOUSEEVENT track_mouse_event = { sizeof( TRACKMOUSEEVENT ), TME_LEAVE, hwnd };
 			TrackMouseEvent( & track_mouse_event );
@@ -231,28 +446,34 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	}
 	case WM_MOUSELEAVE:
 	{
-		App::get_instance()->is_mouse_in_window_ = false;
-		App::get_instance()->show_cursor( App::get_instance()->game_->is_show_cursor() );
+		this->is_mouse_in_window_ = false;
+		this->show_cursor( this->game_->is_show_cursor() );
 
 		break;
 	}
 	case WM_MOUSEWHEEL:
 	{
-		if ( App::get_instance()->game_ )
+		if ( this->game_ )
 		{
-			App::get_instance()->game_->on_mouse_wheel( GET_WHEEL_DELTA_WPARAM( wp ) );
+			this->game_->on_mouse_wheel( GET_WHEEL_DELTA_WPARAM( wp ) );
 		}
 
 		break;
 	}
 	case WM_ACTIVATEAPP:
 	{
-		App::get_instance()->set_active( LOWORD( wp ) != 0 );
+		this->set_active( LOWORD( wp ) != 0 );
+
+		// フォーカスを失うと離したことを受け取れないので、押している状態を忘れる
+		this->raw_input_decoder_.reset();
 
 		if ( wp )
 		{
-			// アプリケーションがアクティブになった際、監視対象のディレクトリの変更をチェックする
-			App::get_instance()->check_directory_change();
+			// フォーカスを失って解除された排他フルスクリーンを、設定に合わせて戻す
+			if ( this->game_ )
+			{
+				this->game_->on_activated();
+			}
 		}
 
 		break;
@@ -266,7 +487,7 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	{
 		if ( win::Tablet::is_enabled() )
 		{
-			win::Tablet::get_instance( hwnd )->on_activate( wp, lp );
+			get_tablet()->on_activate( wp, lp );
 		}
 		break;
 	}
@@ -274,7 +495,7 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	{
 		if ( win::Tablet::is_enabled() )
 		{
-			win::Tablet::get_instance( hwnd )->on_packet( wp, lp );
+			get_tablet()->on_packet( wp, lp );
 		}
 		break;
 	}
@@ -285,28 +506,37 @@ LRESULT CALLBACK App::WinProc( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 	return	0;
 }
 
+win::Tablet* App::get_tablet()
+{
+	if ( ! tablet_ )
+	{
+		tablet_ = std::make_unique< win::Tablet >( hWnd );
+	}
+
+	return tablet_.get();
+}
+
 void App::set_active( bool active )
 {
 	is_active_ = active;
 
-	if ( active )
-	{
-		App::get_instance()->clip_cursor( is_clip_cursor_enabled_ );
-	}
+	// 閉じ込めはアクティブなときだけ効かせ、ほかの窓に切り替えたら外す
+	// （以前は外さず、ほかのアプリで作業していてもカーソルがゲームの窓に閉じ込められることがあった）
+	this->clip_cursor( is_clip_cursor_enabled_ );
 }
 
 void App::on_resize( HWND /* hwnd */ )
 {
-	if ( ! App::get_instance()->hWnd )
+	if ( ! this->hWnd )
 	{
 		return;
 	}
 
 	// App::GetInstance()->clip_cursor( App::GetInstance()->is_clip_cursor_enabled_ );
 	
-	if ( App::get_instance()->game_ )
+	if ( this->game_ )
 	{
-		App::get_instance()->game_->on_resize();
+		this->game_->on_resize();
 	}
 }
 
@@ -317,6 +547,12 @@ void App::on_resize( HWND /* hwnd */ )
  */
 void App::show_cursor( bool show )
 {
+	// 裏で動かすときは、使っている人のカーソルを隠さない
+	if ( is_background_ )
+	{
+		return;
+	}
+
 	if ( show != is_show_cursor_enabled_ )
 	{
 		is_show_cursor_enabled_ = show;
@@ -330,8 +566,12 @@ void App::clip_cursor( bool clip )
 {
 	is_clip_cursor_enabled_ = clip;
 
-	if ( is_clip_cursor_enabled_ )
+	// ClipCursor はパソコン全体に効くので、閉じ込めるのはこの窓がアクティブなときだけ（裏で動かすときは閉じ込めない）。
+	// 外すのは自分が閉じ込めていたときだけ（ほかのアプリの閉じ込めを壊さない）
+	if ( is_clip_cursor_enabled_ && is_active_ && ! is_background_ )
 	{
+		is_cursor_clipped_ = true;
+
 		RECT rect;
 		GetClientRect( hWnd, & rect );
 
@@ -345,8 +585,9 @@ void App::clip_cursor( bool clip )
 
 		ClipCursor( & rect );
 	}
-	else
+	else if ( is_cursor_clipped_ )
 	{
+		is_cursor_clipped_ = false;
 		ClipCursor( nullptr );
 	}
 }
@@ -356,19 +597,79 @@ void App::set_size( int w, int h )
 	width_ = w;
 	height_ = h;
 
-	int sw = GetSystemMetrics( SM_CXSCREEN );
-	int sh = GetSystemMetrics( SM_CYSCREEN );
+	// フルスクリーンではウィンドウはモニターいっぱいのまま、描画の解像度だけ変える（ウィンドウの大きさが変わらないので WM_SIZE は来ない）
+	if ( is_full_screen_ )
+	{
+		if ( this->game_ )
+		{
+			this->game_->on_resize();
+		}
 
-	
+		return;
+	}
+
 	RECT rect = { 0, 0, width_, height_ };
 	AdjustWindowRect( & rect, style_, false );
 
 	int ww = rect.right - rect.left;
 	int wh = rect.bottom - rect.top;
 
-	SetWindowPos( hWnd, HWND_NOTOPMOST, ( sw - ww ) / 2, ( sh - wh ) / 2, ww, wh, SWP_SHOWWINDOW );
+	// ウィンドウが今あるモニターの作業領域の中央に置く（以前はプライマリモニターの中央へ飛んだ）
+	MONITORINFO monitor = { sizeof( MONITORINFO ) };
+	GetMonitorInfo( MonitorFromWindow( hWnd, MONITOR_DEFAULTTONEAREST ), & monitor );
+	const RECT& work = monitor.rcWork;
 
-	// PostMessage( hWnd, WM_EXITSIZEMOVE, 0, 0 );
+	// 裏で動かすときは、重なりの順を変えず前面に出さない
+	SetWindowPos( hWnd, HWND_NOTOPMOST, work.left + ( ( work.right - work.left ) - ww ) / 2, work.top + ( ( work.bottom - work.top ) - wh ) / 2, ww, wh,
+		SWP_SHOWWINDOW | SWP_FRAMECHANGED | ( is_background_ ? ( SWP_NOZORDER | SWP_NOACTIVATE ) : 0 ) );
+}
+
+void App::set_full_screen( bool full_screen )
+{
+	if ( full_screen == is_full_screen_ )
+	{
+		return;
+	}
+
+	is_full_screen_ = full_screen;
+
+	if ( full_screen )
+	{
+		// 縁なしにして、今いるモニター全体（タスクバーも覆う）に広げる
+		MONITORINFO monitor = { sizeof( MONITORINFO ) };
+		GetMonitorInfo( MonitorFromWindow( hWnd, MONITOR_DEFAULTTONEAREST ), & monitor );
+		const RECT& r = monitor.rcMonitor;
+
+		SetWindowLongPtr( hWnd, GWL_STYLE, WS_POPUP | WS_VISIBLE );
+		SetWindowPos( hWnd, HWND_TOP, r.left, r.top, r.right - r.left, r.bottom - r.top,
+			SWP_SHOWWINDOW | SWP_FRAMECHANGED | ( is_background_ ? ( SWP_NOZORDER | SWP_NOACTIVATE ) : 0 ) );
+	}
+	else
+	{
+		// ウィンドウの縁を戻し、描画の解像度の大きさにして作業領域の中央に置く
+		SetWindowLongPtr( hWnd, GWL_STYLE, style_ );
+		set_size( width_, height_ );
+	}
+
+	// カーソルの閉じ込めはクライアント領域で決まるので、広さが変わったら決め直す（アクティブでなければ閉じ込めない）
+	clip_cursor( is_clip_cursor_enabled_ );
+
+	blue_sky::debug_log( is_full_screen_ ? "[Display] フルスクリーン（ボーダーレス）にしました" : "[Display] ウィンドウに戻しました" );
+}
+
+POINT App::client_to_render( POINT point ) const
+{
+	RECT client;
+
+	if ( ! GetClientRect( hWnd, & client ) || client.right <= 0 || client.bottom <= 0 )
+	{
+		return point;
+	}
+
+	point.x = MulDiv( point.x, width_, client.right );
+	point.y = MulDiv( point.y, height_, client.bottom );
+
+	return point;
 }
 
 /**
@@ -409,45 +710,13 @@ void App::set_title( const char_t* t )
  */
 void App::show_error_message( const char_t* message ) const
 {
-	MessageBox( hWnd, message, "ERROR", MB_OK );
-}
-
-void App::set_full_screen( bool full_screen )
-{
-	/*
-	if ( full_screen )
-	{
-		if ( ! is_full_screen_ )
-		{
-			GetWindowRect( hWnd, & last_window_rect_ );
-			ShowCursor( FALSE );
-		}
-
-		SetWindowLong( hWnd, GWL_STYLE, get_window_style_full_scrren() );
-	}
-	else
-	{
-		SetWindowLong( hWnd, GWL_STYLE, get_window_style() );
-
-		if ( is_full_screen_ )
-		{
-			SetWindowPos(  hWnd, HWND_NOTOPMOST, last_window_rect_.left, last_window_rect_.top, last_window_rect_.right - last_window_rect_.left, last_window_rect_.bottom - last_window_rect_.top, SWP_SHOWWINDOW );
-			ShowCursor( TRUE );
-		}
-	}
-	*/
-
-	is_full_screen_ = full_screen;
+	// メッセージは UTF-8（ソースは /utf-8）。ANSI 版の MessageBox では日本語が化けるので UTF-16 にして出す
+	MessageBoxW( hWnd, common::convert_to_wstring( message ).c_str(), L"エラー", MB_OK | MB_ICONERROR );
 }
 
 DWORD App::get_window_style() const
 {
 	return WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE;
-}
-
-DWORD App::get_window_style_full_scrren() const
-{
-	return WS_POPUP;
 }
 
 /**

@@ -13,6 +13,7 @@
 #pragma once
 
 #include <core/input/InputManager.h>
+#include <blue_sky/DebugLog.h>
 #include <type/type.h>
 
 #include <windows.h>
@@ -20,10 +21,13 @@
 #include <unordered_map>
 #include <deque>
 #include <array>
+#include <string>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 class DirectInput;
+class App;
 
 namespace game
 {
@@ -50,7 +54,6 @@ public:
 
 	using Config				= game::Config;
 
-	using ButtonStack			= std::deque< Button >;
 	using ButtonCodeList		= std::array< unsigned int, static_cast< int >( Button::MAX ) >;
 	using ButtonCodeMultiList	= std::array< std::vector< int >, static_cast< int >( Button::MAX ) >;
 	using ConfigKeyCodeMap		= std::unordered_map< std::string, int >;
@@ -59,7 +62,6 @@ private:
 	const DirectInput* direct_input_;						///< DirectInput
 
 	unsigned int state_[ static_cast< int >( Button::MAX ) ];						///< 全てのボタンの状態
-	ButtonStack arrow_stack_;								///< 最優先の方向ボタン
 
 	bool joystick_enabled_;									///< ジョイスティック有効フラグ
 
@@ -79,20 +81,44 @@ private:
 	float mouse_y_rate_;									///< マウス Y 座標 ( -1.f .. 1.f )
 	
 	float mouse_dx_;										///< マウス X 移動量
+	long raw_mouse_dx_ = 0;									///< Raw Input で受け取った、このフレームのマウスの移動量
+	long raw_mouse_dy_ = 0;
 	float mouse_dy_;
 
 	int mouse_wheel_;										///< マウスホイール ( + : front / - : back )
 
 	POINT mouse_point_;										///< マウス 座標
 
-	ButtonCodeMultiList key_code_;
+	ButtonCodeMultiList key_code_;							///< ユーザーが割り当てたキー（設定ファイル・キー割り当て画面で変更できる）
+	ButtonCodeMultiList fixed_key_code_;					///< 常に有効な固定キー（メニュー操作用の矢印・Enter、ESC）
 	ButtonCodeList joystick_code_;
 
-	ConfigKeyCodeMap config_key_code_map_;					///< コンフィグファイルのキー名 から GetAsyncKeyState() の引数に渡すキーへのマップ
+	// 生の入力状態（UI 用。ゲームのキー割り当てとは無関係）
+	const App* app_ = nullptr;								///< ウィンドウ
+	std::array< bool, 256 > key_now_;						///< 仮想キーごとの今フレームの押下状態
+	std::array< bool, 256 > key_prev_;						///< 前フレームの押下状態
+	std::array< bool, 256 > key_latched_{};					///< ウィンドウメッセージで届いた押下（次の update で使って消す）
+	bool was_foreground_;									///< 前フレームでウィンドウがアクティブだったか
+	DWORD pad_buttons_now_;									///< パッドのボタン（ビット）
+	float_t stick_x_ = 0.f;									///< スティックの傾き
+	float_t stick_y_ = 0.f;
+	DWORD pad_buttons_prev_;
+	int pad_dir_now_;										///< パッドの方向（ビット : 左 1 / 右 2 / 上 4 / 下 8）
+	int pad_dir_prev_;
+
+	void update_raw_keys();
+	static int pad_dir_bit( Button );
 
 	bool is_blocked_;										///< 入力ブロックフラグ ( オーバーレイ UI がアクティブな時にゲーム入力をブロックする )
 
-	void load_key_code_config( Config&, Button, const char_t*, const char_t* );
+	unsigned char pending_lead_byte_ = 0;	///< 2 バイト文字の先頭バイト（次のバイトを待っている）
+	std::u32string pending_text_;			///< 入力された文字（UI が取り出すまで溜める）
+	std::u32string composition_;			///< IME で変換中の文字
+	int joystick_detect_wait_ = 0;			///< パッドを探し直すまでのフレーム数
+
+	/// パッドを探す（つながっていれば joystick_enabled_ を true にする）
+	void detect_joystick();
+
 	
 	void update_state_by_key_for( uint_t );
 
@@ -100,7 +126,8 @@ private:
 	float get_rate_by_joystick_axis_pos( DWORD ) const;
 
 public:
-	Input();
+	/// ウィンドウ（前面かどうか・クライアント座標・大きさ）を受け取る（以前は App のシングルトンから引いていた）
+	explicit Input( const App* app );
 	~Input();
 
 	void set_direct_input( const DirectInput* i ) { direct_input_ = i; }
@@ -111,22 +138,82 @@ public:
 	void set_blocked( bool blocked ) { is_blocked_ = blocked; }
 	bool is_blocked() const { return is_blocked_; }
 
-	void load_config( Config& );
+	void load_config( const Config& );
+
+	/// 設定ファイルのキー名（`input.key.left` など）。割り当て対象外のボタンは nullptr
+	static const char_t* get_key_config_name( Button );
+
+	/// ユーザー割り当てのキー（仮想キーコード）一覧
+	const std::vector< int >& get_key_bindings( Button button ) const { return key_code_[ static_cast< int >( button ) ]; }
+
+	/// ユーザー割り当てのキーを差し替える（固定キーは変わらない）
+	void set_key_bindings( Button button, const std::vector< int >& codes ) { key_code_[ static_cast< int >( button ) ] = codes; }
+
+	/// ユーザー割り当てを設定ファイルの値の形式（`W UP` のような空白区切りのキー名）にする
+	string_t get_key_bindings_text( Button ) const;
+
+	/**
+	 * 空白区切りのキー名をキーコード一覧にする
+	 *
+	 * 解釈できない名前と、割り当てられないキー（Enter・矢印・Esc などの固定キー。UI と同じ key_names::is_bindable で判定）は
+	 * 飛ばし、理由を log に残す。設定ファイルを手で書いたときに 2 つ目以降のキーへ固定キーが入るのを防ぐ。
+	 * 同じキーが 2 回あれば 1 つにする。
+	 *
+	 * @param log 飛ばした理由の出し先（既定は debug_log。テストでは差し替える）
+	 */
+	static std::vector< int > parse_key_bindings_text( const string_t&, const std::function< void( const std::string& ) >& log = & debug_log );
+
+	// ---- 生の入力状態（UI 用。is_blocked_ の影響を受けない） ----
+	// ウィンドウが非アクティブなときは全て false。再アクティブになったフレームは「押した瞬間」を出さない
+
+	bool is_key_down( int vk ) const { return vk > 0 && vk < 256 && key_now_[ vk ]; }
+	bool is_key_pushed( int vk ) const { return vk > 0 && vk < 256 && key_now_[ vk ] && ! key_prev_[ vk ]; }
+	bool is_key_released( int vk ) const { return vk > 0 && vk < 256 && ! key_now_[ vk ] && key_prev_[ vk ]; }
+
+	/// 設定ファイルで指定されたパッドのボタンのビット（A / B / L / R）
+	DWORD get_joystick_button_mask( Button b ) const { return joystick_code_[ static_cast< int >( b ) ]; }
+	bool is_pad_mask_pushed( DWORD mask ) const { return mask != 0 && ( pad_buttons_now_ & mask ) != 0 && ( pad_buttons_prev_ & mask ) == 0; }
+
+	/// パッドのボタン（0 始まり）
+	bool is_pad_button_down( int index ) const { return ( pad_buttons_now_ & ( 1u << index ) ) != 0; }
+	bool is_pad_button_pushed( int index ) const { return is_pad_button_down( index ) && ( pad_buttons_prev_ & ( 1u << index ) ) == 0; }
+
+	/// パッドの方向（LEFT / RIGHT / UP / DOWN）
+	bool is_pad_dir_down( Button dir ) const { return ( pad_dir_now_ & pad_dir_bit( dir ) ) != 0; }
+	bool is_pad_dir_pushed( Button dir ) const { return is_pad_dir_down( dir ) && ( pad_dir_prev_ & pad_dir_bit( dir ) ) == 0; }
+
+	/// パッドに何か入力があるか（最後に使ったデバイスの判定用）
+	bool is_pad_active() const { return pad_buttons_now_ != 0 || pad_dir_now_ != 0; }
+
+	/// スティックの傾き（-1 〜 +1。右・上が正。中央付近は 0）
+	float_t get_stick_x() const { return stick_x_; }
+	float_t get_stick_y() const { return stick_y_; }
+
+	/// 割り当て可能なキーのうち、このフレームに押された最初のもの（無ければ 0）
+	int get_pushed_bindable_key() const;
+
+	bool is_foreground() const { return was_foreground_; }
 
 	void update();
 	void update_null();
-	void update_common();
 
-	void arrow_push( Button button )
-	{
-		arrow_stack_.push_back( button );
-	}
+	/// ウィンドウメッセージ（WM_CHAR）の 1 バイトを受け取る。CP932 の 2 バイト文字は組み立ててから溜める
+	void push_char_byte( char_t byte );
 
-	void arrow_pop( Button button )
-	{
-		ButtonStack::iterator i = std::find( arrow_stack_.begin(), arrow_stack_.end(), button );
-		arrow_stack_.erase( i );
-	}
+	/// キーやマウスのボタンが押された（WM_KEYDOWN / WM_LBUTTONDOWN など）。1 フレーム内に押して離しても取りこぼさない
+	void latch_key_press( int vk ) { if ( vk > 0 && vk < 256 ) key_latched_[ vk ] = true; }
+
+	/// Raw Input のマウスの相対の移動量を足す（次の update でそのフレームの移動量になる）
+	void add_raw_mouse_move( long dx, long dy ) { raw_mouse_dx_ += dx; raw_mouse_dy_ += dy; }
+
+	/// 溜まった文字を取り出す（UI が 1 フレームに 1 回呼ぶ）
+	std::u32string take_text();
+
+	/// IME で変換中の文字を設定する（WM_IME_COMPOSITION。確定・取り消しで空にする）
+	void set_composition( std::u32string text ) { composition_ = std::move( text ); }
+
+	/// IME で変換中の文字
+	const std::u32string& get_composition() const { return composition_; }
 
 	/**
 	 * ボタンが押されていない状態に更新する
@@ -180,30 +267,6 @@ public:
 		return ( state_[ static_cast< int >( button ) ] & 1 ) == 0 && ( state_[ static_cast< int >( button ) ] & 2 ) > 0;
 	}
 
-	/**
-	 * 現在最優先で押されている方向ボタンを取得する
-	 *
-	 * @return 現在最優先で押されている方向ボタン ( 方向ボタンが押されていない場合は NONE を返す )
-	 */
-	Button get_primary_arrow_button() const
-	{
-		if ( arrow_stack_.empty() ) return Button::NONE;
-
-		return arrow_stack_.back();
-	}
-
-	const ButtonStack& get_arrow_button_stack() const
-	{
-		return arrow_stack_;
-	}
-
-	static const Input& get_null_input()
-	{
-		static Input null_input;
-
-		return null_input;
-	}
-
 	int get_mouse_x() const override { return mouse_point_.x; }
 	int get_mouse_y() const override { return mouse_point_.y; }
 
@@ -216,6 +279,8 @@ public:
 	void clear_mouse_move() override
 	{
 		mouse_dx_ = 0.f;
+		raw_mouse_dx_ = 0;
+		raw_mouse_dy_ = 0;
 		mouse_dy_ = 0.f;
 	}
 

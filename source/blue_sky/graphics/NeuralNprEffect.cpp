@@ -2,6 +2,8 @@
 
 #include "CoherentNoise.h"
 
+#include <blue_sky/DebugLog.h>
+
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/NeuralStylizer.h>
 #include <core/graphics/Shader.h>
@@ -35,8 +37,8 @@ namespace
 NeuralNprEffect::NeuralNprEffect( core::graphics::GraphicsManager* gm )
 {
 	// 色保持リカラー／素通しシェーダを取得（setup_default_shaders 済み前提）
-	recolor_shader_ = gm->get_shader( "post_effect_recolor" );
-	default_shader_ = gm->get_shader( "post_effect_default" );
+	recolor_shader_ = gm->get_shader_handle( "post_effect_recolor" );
+	default_shader_ = gm->get_shader_handle( "post_effect_default" );
 
 	// モデルがあれば DirectML でロード（無ければ NPR 無効のまま続行）
 	std::error_code ec;
@@ -45,16 +47,16 @@ NeuralNprEffect::NeuralNprEffect( core::graphics::GraphicsManager* gm )
 		try
 		{
 			stylizer_ = std::make_unique< core::graphics::NeuralStylizer >( MODEL_FP16 );
-			OutputDebugStringA( "[NeuralNPR] model loaded.\n" );
+			debug_log( "[NeuralNPR] モデルを読み込みました" );
 		}
 		catch ( const std::exception& e )
 		{
-			OutputDebugStringA( ( std::string( "[NeuralNPR] load failed: " ) + e.what() ).c_str() );
+			debug_log( std::string( "[NeuralNPR] モデルを読み込めませんでした: " ) + e.what() );
 		}
 	}
 	else
 	{
-		OutputDebugStringA( "[NeuralNPR] model file not found (CWD?): media/neural/starry_boil_small_fp16.onnx\n" );
+		debug_log( "[NeuralNPR] モデルのファイルがありません（作業ディレクトリを確認）: media/neural/starry_boil_small_fp16.onnx" );
 	}
 }
 
@@ -100,15 +102,15 @@ bool NeuralNprEffect::apply( core::graphics::GraphicsManager* gm, core::graphics
 		}
 		catch ( const std::exception& e )
 		{
-			OutputDebugStringA( ( std::string( "[NeuralNPR] model reload failed: " ) + e.what() ).c_str() );
+			debug_log( std::string( "[NeuralNPR] モデルを読み直せませんでした: " ) + e.what() );
 		}
 		loaded_fp16_ = use_fp16_;  // 失敗してもループしないようフラグは合わせる
 	}
 
 	if ( ! enabled_ || ! stylizer_ ) return false;
 
-	auto* d3d = core::graphics::direct_3d_11::Direct3D11::get_instance();
 	auto* rtt = static_cast< core::graphics::direct_3d_11::RenderTargetTexture* >( scene );
+	auto* d3d = rtt->get_direct_3d();	// 読み戻しに使うデバイス・コンテキストはテクスチャを作った Direct3D11 から得る（以前は Direct3D11 の get_instance()）
 
 	ID3D11Resource* resource = nullptr;
 	rtt->get_render_target_view()->GetResource( & resource );
@@ -185,18 +187,20 @@ bool NeuralNprEffect::apply( core::graphics::GraphicsManager* gm, core::graphics
 
 			// 表示の間だけポストエフェクトを差し替え、描画後に元へ戻す（非NPRシーンに影響させない）
 			core::graphics::Shader* prev_pe = gm->get_post_effect_shader();
-			if ( color_preserve_ && recolor_shader_ )
+			core::graphics::Shader* recolor_shader = gm->resolve_shader( recolor_shader_ );	// 解放されていれば nullptr（使わない）
+			core::graphics::Shader* default_shader = gm->resolve_shader( default_shader_ );
+			if ( color_preserve_ && recolor_shader )
 			{
-				recolor_shader_->set_float( "blue", color_blue_ );
-				recolor_shader_->set_float( "yellow", color_yellow_ );
-				recolor_shader_->set_float( "a_spread", color_a_ );
-				recolor_shader_->set_float( "dark_clip", color_dark_ );
-				recolor_shader_->set_texture_at( 1, scene );  // 元シーン(色の基準)
-				gm->set_post_effect_shader( recolor_shader_ );
+				recolor_shader->set_float( "blue", color_blue_ );
+				recolor_shader->set_float( "yellow", color_yellow_ );
+				recolor_shader->set_float( "a_spread", color_a_ );
+				recolor_shader->set_float( "dark_clip", color_dark_ );
+				recolor_shader->set_texture_at( 1, scene );  // 元シーン(色の基準)
+				gm->set_post_effect_shader( recolor_shader );
 			}
-			else if ( default_shader_ )
+			else if ( default_shader )
 			{
-				gm->set_post_effect_shader( default_shader_ );  // 素通し（うねり無し）
+				gm->set_post_effect_shader( default_shader );  // 素通し（うねり無し）
 			}
 			gm->render_post_effect( output_texture_.get() );
 			if ( prev_pe ) gm->set_post_effect_shader( prev_pe );
@@ -213,7 +217,7 @@ bool NeuralNprEffect::apply( core::graphics::GraphicsManager* gm, core::graphics
 		catch ( const std::exception& e )
 		{
 			enabled_ = false;
-			OutputDebugStringA( ( std::string( "[NeuralNPR] inference failed, disabling NPR: " ) + e.what() ).c_str() );
+			debug_log( std::string( "[NeuralNPR] 推論に失敗したので NPR を止めます: " ) + e.what() );
 		}
 	}
 
@@ -232,7 +236,7 @@ void NeuralNprEffect::render_imgui()
 		ImGui::SliderInt( "  proc res (long side)", & proc_long_side_, 128, 1080 );
 		ImGui::SliderFloat( "  boil (noise temporal)", & noise_temporal_, 0.05f, 1.0f );
 		ImGui::Checkbox( "  color preserve (recolor)", & color_preserve_ );
-		ImGui::Text( "  shaders: recolor=%s default=%s", recolor_shader_ ? "ok" : "NULL", default_shader_ ? "ok" : "NULL" );
+		ImGui::Text( "  shaders: recolor=%s default=%s", ! recolor_shader_.is_null() ? "ok" : "NULL", ! default_shader_.is_null() ? "ok" : "NULL" );
 		if ( color_preserve_ )
 		{
 			ImGui::SliderFloat( "  blue", & color_blue_, 0.f, 8.f );

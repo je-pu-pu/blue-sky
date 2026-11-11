@@ -12,6 +12,8 @@ namespace blue_sky::graphics::shader
 class BypassShader : public BaseShader
 {
 public:
+	using BaseShader::BaseShader;
+
 	void reload() override { }
 
 	BypassShader* clone() const override { return new BypassShader( *this ); }

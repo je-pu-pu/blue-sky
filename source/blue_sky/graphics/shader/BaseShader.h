@@ -1,8 +1,7 @@
 #pragma once
 
-#include <core/Service.h>
-
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/graphics/TextureSlot.h>
 
 #include <core/animation/AnimationPlayer.h>
 #include <core/graphics/PrimitiveTopology.h>
@@ -11,6 +10,8 @@
 #include <core/graphics/Mesh.h>
 
 #include <core/math/Vector.h>
+
+#include <iostream>
 
 namespace blue_sky::graphics::shader
 {
@@ -29,18 +30,25 @@ public:
 	using EffectTechnique	= core::graphics::EffectTechnique;
 	using ConstantBuffer	= core::graphics::ConstantBuffer;
 
+	/**
+	 * 入力レイアウトとテクニック
+	 *
+	 * GraphicsManager はシェーダーから受け取る（以前は core::Service から取っていた。設計上の問題 B28）
+	 */
 	class RenderSetting
 	{
 	private:
+		const core::graphics::GraphicsManager* graphics_manager_;
 		const InputLayout* input_layout_;
 		const string_t effect_technique_name_;
 		const EffectTechnique* effect_technique_;
 
 	public:
-		RenderSetting( const char_t* input_layout_name, const char_t* effect_technique_name )
-			: input_layout_( core::get_graphics_manager()->get_input_layout( input_layout_name ) )
+		RenderSetting( const core::graphics::GraphicsManager* graphics_manager, const char_t* input_layout_name, const char_t* effect_technique_name )
+			: graphics_manager_( graphics_manager )
+			, input_layout_( graphics_manager->get_input_layout( input_layout_name ) )
 			, effect_technique_name_( effect_technique_name )
-			, effect_technique_( core::get_graphics_manager()->get_effect_technique( effect_technique_name ) )
+			, effect_technique_( graphics_manager->get_effect_technique( effect_technique_name ) )
 		{
 			if ( ! input_layout_ )
 			{
@@ -55,15 +63,58 @@ public:
 
 		void reload()
 		{
-			effect_technique_ = core::get_graphics_manager()->get_effect_technique( effect_technique_name_.c_str() );
+			effect_technique_ = graphics_manager_->get_effect_technique( effect_technique_name_.c_str() );
 		}
 
 		const InputLayout* get_input_layout() const { return input_layout_; }
 		const EffectTechnique* get_effect_technique() const { return effect_technique_; }
 	};
 
+private:
+	GraphicsManager* graphics_manager_;	///< 作り手（GraphicsManager::create_shader）が渡す。コピー（clone）は引き継ぐ。以前は core::Service から取っていた
+
+	mutable bool texture_lost_logged_ = false;	///< 解放されたテクスチャのログを出したか（毎フレーム出さない）
+
 protected:
-	GraphicsManager* get_graphics_manager() const { return static_cast<GraphicsManager*>( core::get_graphics_manager() ); }
+	using TextureSlot = graphics::TextureSlot;
+
+	GraphicsManager* get_graphics_manager() const { return graphics_manager_; }
+
+	/// テクスチャのスロットを引く（空・解放済みなら nullptr）
+	Texture* resolve_texture( const TextureSlot& slot ) const { return slot.get( * graphics_manager_ ); }
+
+	/// テクスチャのスロットをピクセルシェーダーに結ぶ（空・解放済みなら結ばない）
+	void bind_texture_to_ps( const TextureSlot& slot, uint_t n ) const
+	{
+		if ( Texture* t = resolve_texture( slot ) )
+		{
+			t->bind_to_ps( n );
+		}
+	}
+
+	/**
+	 * 設定したテクスチャが解放されていれば true（描かない）
+	 *
+	 * 理由はシェーダーごとに 1 回だけログに出す（毎フレーム出すと溢れる）。std::cout は GameMain が debug_log へ流す
+	 */
+	bool is_texture_lost( const TextureSlot& slot ) const
+	{
+		if ( ! slot.is_lost( * graphics_manager_ ) )
+		{
+			return false;
+		}
+
+		if ( ! texture_lost_logged_ )
+		{
+			texture_lost_logged_ = true;
+			std::cout << "[Shader] " << get_name() << " : 設定したテクスチャが解放されたので描きません" << std::endl;
+		}
+
+		return true;
+	}
+
+	/// パラメーターの GUI で選んだ画像を読み込む
+	Texture* load_texture_from_file( const char_t* file_path ) override { return graphics_manager_->load_texture( file_path ); }
 
 	const ConstantBuffer* get_game_constant_buffer() const { return get_graphics_manager()->get_game_render_data(); }
 	const ConstantBuffer* get_frame_constant_buffer() const { return get_graphics_manager()->get_frame_render_data(); }
@@ -103,6 +154,10 @@ protected:
 	void set_texture( const char_t*, Texture* ) override { }
 
 public:
+	explicit BaseShader( GraphicsManager* graphics_manager )
+		: graphics_manager_( graphics_manager )
+	{ }
+
 	void update() const override { }
 
 	void render_model( const core::graphics::Model* m ) const override

@@ -28,7 +28,7 @@ protected:
 	Entity* camera_;
 
 public:
-	explicit ParticleSystemTestScene();
+	explicit ParticleSystemTestScene( GameMain& game_main );
 	~ParticleSystemTestScene() override;
 
 	void update() override;

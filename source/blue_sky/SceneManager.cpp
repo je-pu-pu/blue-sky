@@ -27,8 +27,6 @@ namespace blue_sky
  * 全てのシーンを登録する
  * 
  * 新しいシーンを追加した場合は、ここに登録コードを追加する必要がある
- * 
- * @todo シーンの自動登録機能を実装する
  */
 void SceneManager::register_all_scene()
 {
@@ -36,8 +34,8 @@ void SceneManager::register_all_scene()
 	register_scene< StageSelectScene >();
 	register_scene< GamePlayScene >();
 
-	register_scene< StoryTextScene >( "stage_intro", [] () { return new StoryTextScene( ( std::string( "media/stage/" ) + GameMain::get_instance()->get_stage_name() + ".intro" ).c_str(), "game_play" ); } );
-	register_scene< StoryTextScene >( "stage_outro", [] () { return new StoryTextScene( ( std::string( "media/stage/" ) + GameMain::get_instance()->get_stage_name() + ".outro" ).c_str(), "stage_select" ); } );
+	register_scene< StoryTextScene >( "stage_intro", [] ( GameMain& game_main ) { return new StoryTextScene( game_main, "media/stage/{stage}.intro.toml", "game_play" ); } );
+	register_scene< StoryTextScene >( "stage_outro", [] ( GameMain& game_main ) { return new StoryTextScene( game_main, "media/stage/{stage}.outro.toml", "stage_select" ); } );
 
 	register_scene< EndingScene >();
 

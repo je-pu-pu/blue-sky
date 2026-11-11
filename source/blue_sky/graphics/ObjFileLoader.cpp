@@ -8,7 +8,8 @@
 #include <boost/filesystem.hpp>
 #include <fstream>
 #include <sstream>
-#include <list>
+#include <algorithm>
+#include <vector>
 
 namespace blue_sky::graphics
 {
@@ -16,9 +17,13 @@ namespace blue_sky::graphics
 /**
  * OBJ ファイルを読み込む
  *
- * @todo マテリアル・テクスチャの指定のないモデルも読み込めるようにする ( plane.obj, teapot.obj など )
- * @todo 不完全な .obj を読み込んだ時にエラーを出力する
- * 
+ * usemtl の無い .obj は何もしないシェーダー（null）で読み込むので描かれない（今の素材はそれを前提にしている）。
+ * マテリアルの無いモデルを描きたいときは、usemtl を書くか、最初の面の前に create_shader() で作ったシェーダーを割り当てる。
+ *
+ * 面の番号が範囲外・書き方が正しくない・頂点が 3 つ未満のときは、ファイル名と行番号を付けて例外を投げる
+ * （以前は範囲外の番号でそのまま配列を読み、UV の無い "1//3" は法線の番号を UV の番号として読んでいた）。
+ * UV が書かれていない頂点は UV ( 0, 0 ) にする。4 つ以上の頂点の面は扇形に三角形へ分ける
+ *
  * @param file_name OBJ ファイル名
  * @return ファイルの読み込みに成功した場合は true を、失敗した場合は false を返す
  */
@@ -50,10 +55,19 @@ bool ObjFileLoader::load( const char_t* file_name )
 
 	std::string texture_name;
 
+	int line_number = 0;
+
+	/// 不完全な .obj のとき、どこが悪いかを付けて投げる
+	auto fail = [&] ( const std::string& reason, const std::string& line )
+	{
+		COMMON_THROW_EXCEPTION_MESSAGE( std::string( file_name ) + " の " + std::to_string( line_number ) + " 行目 : " + reason + " ( " + line + " )" );
+	};
+
 	while ( in.good() )
 	{
-		std::string line;		
+		std::string line;
 		std::getline( in, line );
+		line_number++;
 
 		std::stringstream ss;
 		std::string command;
@@ -91,57 +105,61 @@ bool ObjFileLoader::load( const char_t* file_name )
 		}
 		else if ( command == "f" )
 		{
-			std::list< std::string > f_list;
+			std::vector< std::string > f_list;
 
-			while ( ss.good() )
+			for ( std::string f; ss >> f; )
 			{
-				std::string f;
-
-				ss >> f;
-
 				f_list.push_back( f );
 			}
 
-			if ( f_list.size() >= 3 )
+			if ( f_list.size() < 3 )
 			{
-				f_list.reverse();
+				fail( "面の頂点が 3 つ未満", line );
 			}
-			
 
-			for ( auto fi = f_list.begin(); fi != f_list.end(); ++fi )
+			// Z を反転したので、巻き順も逆にする
+			std::reverse( f_list.begin(), f_list.end() );
+
+			std::vector< Vertex > face;
+
+			for ( const auto& f : f_list )
 			{
-				std::string& f = *fi;
+				const auto fv = obj::parse_face_vertex( f );
 
-				std::replace( f.begin(), f.end(), '/', ' ' );
-				
-				std::stringstream fss;
-				fss << f;
-
-				Mesh::PositionList::size_type position_index;
-				Mesh::TexCoordList::size_type tex_coord_index;
-				Mesh::NormalList::size_type normal_index;
-
-				fss >> position_index >> tex_coord_index;
-
-				// 1 origin -> 0 origin
-				position_index--;
-				tex_coord_index--;
-
-				Vertex v;
-				
-				v.Position = position_list[ position_index ];
-				v.TexCoord = tex_coord_list[ tex_coord_index ];
-				v.TexCoord.y() = 1.f - v.TexCoord.y();
-
-				if ( ! fss.eof() )
+				if ( ! fv )
 				{
-					fss >> normal_index;
-
-					normal_index--;
-
-					v.Normal = normal_list[ normal_index ];
+					fail( "面の頂点の書き方が正しくない", line );
 				}
 
+				if ( fv->position >= position_list.size() || ( fv->tex_coord && *fv->tex_coord >= tex_coord_list.size() ) || ( fv->normal && *fv->normal >= normal_list.size() ) )
+				{
+					fail( "面の番号が範囲外", line );
+				}
+
+				Vertex v;
+
+				v.Position = position_list[ fv->position ];
+
+				if ( fv->tex_coord )
+				{
+					v.TexCoord = tex_coord_list[ *fv->tex_coord ];
+					v.TexCoord.y() = 1.f - v.TexCoord.y();
+				}
+				else
+				{
+					v.TexCoord = Mesh::TexCoord( 0.f, 0.f );
+				}
+
+				if ( fv->normal )
+				{
+					v.Normal = normal_list[ *fv->normal ];
+				}
+
+				face.push_back( v );
+			}
+
+			auto add_vertex = [&] ( const Vertex& v )
+			{
 				VertexIndexMap::iterator i = vertex_index_map.find( v );
 
 				if ( i != vertex_index_map.end() )
@@ -157,6 +175,14 @@ bool ObjFileLoader::load( const char_t* file_name )
 
 					vertex_index_map[ v ] = vertex_index;
 				}
+			};
+
+			// 三角形はそのまま、4 つ以上は扇形に分ける
+			for ( size_t n = 1; n + 1 < face.size(); n++ )
+			{
+				add_vertex( face[ 0 ] );
+				add_vertex( face[ n ] );
+				add_vertex( face[ n + 1 ] );
 			}
 		}
 		else if ( command == "texture" )
@@ -219,5 +245,87 @@ bool ObjFileLoader::load( const char_t* file_name )
 
 	return true;
 }
+
+namespace obj
+{
+
+std::optional< FaceVertex > parse_face_vertex( const std::string& text )
+{
+	std::vector< std::string > fields;
+	std::string::size_type start = 0;
+
+	while ( true )
+	{
+		const auto slash = text.find( '/', start );
+		fields.push_back( text.substr( start, slash == std::string::npos ? std::string::npos : slash - start ) );
+
+		if ( slash == std::string::npos )
+		{
+			break;
+		}
+
+		start = slash + 1;
+	}
+
+	if ( fields.size() > 3 )
+	{
+		return std::nullopt;
+	}
+
+	/// 1 始まりの番号を 0 始まりにする（空の欄は「書かれていない」）
+	auto to_index = [] ( const std::string& s, bool& ok ) -> std::optional< size_t >
+	{
+		if ( s.empty() )
+		{
+			return std::nullopt;
+		}
+
+		if ( s.find_first_not_of( "0123456789" ) != std::string::npos || s.size() > 9 )
+		{
+			ok = false;
+			return std::nullopt;
+		}
+
+		const auto n = std::stoul( s );
+
+		if ( n == 0 )
+		{
+			ok = false;
+			return std::nullopt;
+		}
+
+		return static_cast< size_t >( n - 1 );
+	};
+
+	bool ok = true;
+	const auto position = to_index( fields[ 0 ], ok );
+
+	if ( ! position )
+	{
+		return std::nullopt;
+	}
+
+	FaceVertex result;
+	result.position = *position;
+
+	if ( fields.size() > 1 )
+	{
+		result.tex_coord = to_index( fields[ 1 ], ok );
+	}
+
+	if ( fields.size() > 2 )
+	{
+		result.normal = to_index( fields[ 2 ], ok );
+	}
+
+	if ( ! ok )
+	{
+		return std::nullopt;
+	}
+
+	return result;
+}
+
+} // namespace obj
 
 } // namespace blue_sky::graphics

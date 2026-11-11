@@ -4,7 +4,6 @@
 #include <blue_sky/ai/EnemyPerception.h>
 
 #include <core/ecs/EntityManager.h>
-#include <core/Service.h>
 #include <core/physics/PhysicsManager.h>
 
 #include <cfloat>
@@ -12,7 +11,17 @@
 namespace blue_sky::ecs
 {
 
-void PerceptionSystem::update( ComponentTuple& tuple ) const
+void PerceptionSystem::update()
+{
+	const auto* registry = get_entity_manager()->get_system< TargetRegistrySystem >();
+
+	for ( auto& i : get_component_list() )
+	{
+		perceive( i.second, registry );
+	}
+}
+
+void PerceptionSystem::perceive( ComponentTuple& tuple, const TargetRegistrySystem* registry ) const
 {
 	using core::math::Vector;
 
@@ -21,7 +30,6 @@ void PerceptionSystem::update( ComponentTuple& tuple ) const
 
 	perception->target_visible = false;
 
-	auto* registry = core::ecs::EntityManager::get_instance()->get_system< TargetRegistrySystem >();
 	if ( ! registry )
 	{
 		return;
@@ -29,7 +37,7 @@ void PerceptionSystem::update( ComponentTuple& tuple ) const
 
 	const Vector eye     = transform->transform.get_position() + Vector( 0.f, perception->eye_height, 0.f );
 	const Vector forward = transform->transform.forward();
-	auto* physics = core::get_physics_manager();
+	auto* physics = physics_manager_;
 
 	float best_dist = FLT_MAX;
 
@@ -44,6 +52,12 @@ void PerceptionSystem::update( ComponentTuple& tuple ) const
 		Vector to = target - eye;
 		const float dist = to.length();
 		if ( dist < 1e-4f )
+		{
+			continue;
+		}
+
+		// 既に見えている対象より近くなければ採らないので、レイを飛ばさない（以前は飛ばしてから距離で捨てていた）
+		if ( dist >= best_dist )
 		{
 			continue;
 		}

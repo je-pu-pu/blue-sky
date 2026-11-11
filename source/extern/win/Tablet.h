@@ -49,7 +49,6 @@ private:
 	static BOOL ( API * DllWTOverlap )( HCTX, BOOL );
 
 protected:
-	explicit Tablet( HWND );
 
 	template< typename T >
 	void get_proc_address( T& f, const char* name )
@@ -68,17 +67,15 @@ protected:
 	}
 
 public:
+	/// ウィンドウ（hwnd）のペンタブレットを開く。持ち主（App）が 1 つ作る（以前は get_instance の関数内 static だった）
+	explicit Tablet( HWND );
 	~Tablet();
+
+	Tablet( const Tablet& ) = delete;
+	Tablet& operator = ( const Tablet& ) = delete;
 	
 	void on_activate( WPARAM, LPARAM );
 	void on_packet( WPARAM, LPARAM );
-
-	static Tablet* get_instance( HWND hwnd )
-	{
-		static Tablet t( hwnd );
-
-		return & t;
-	}
 
 	int get_cursor_index() const { return cursor_index_; }
 	float get_x() const { return x_; }

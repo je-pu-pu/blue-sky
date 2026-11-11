@@ -1,232 +1,272 @@
 #include "OptionsScene.h"
 
 #include <blue_sky/GameMain.h>
-#include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/GameSettings.h>
 #include <blue_sky/Input.h>
-#include <blue_sky/App.h>
+#include <blue_sky/KeyNames.h>
+#include <blue_sky/graphics/GraphicsManager.h>
 
-#include <core/sound/SoundManager.h>
-#include <core/graphics/TextStyle.h>
+#include <core/setting/SettingStore.h>
+#include <core/ui/Button.h>
+#include <core/ui/Choice.h>
+#include <core/ui/Dialog.h>
+#include <core/ui/KeyBind.h>
+#include <core/ui/Label.h>
+#include <core/ui/Panel.h>
+#include <core/ui/ScrollView.h>
+#include <core/ui/Slider.h>
+#include <core/ui/Stack.h>
+#include <core/ui/Theme.h>
+#include <core/ui/StringTable.h>
+#include <core/ui/TabView.h>
+#include <core/ui/Toggle.h>
 
 #include <game/Config.h>
 
-#include <sstream>
-#include <iomanip>
+#include <algorithm>
+#include <cmath>
 
 namespace blue_sky
 {
 
-OptionsScene::OptionsScene()
-	: ui_renderer_( get_graphics_manager() )
-	, resolutions_( get_graphics_manager()->get_available_display_modes() )
-	, is_mute_( get_sound_manager()->is_mute() )
-	, is_fullscreen_( get_graphics_manager()->is_full_screen() )
+namespace gs = game_settings;
+using namespace core::ui;
+using core::setting::SettingStore;
+
+namespace
 {
-	setup_widgets();
+
+/// 縦の Stack を ScrollView に入れたページを作る
+Stack* add_scroll_page( TabView* tabs, const char_t* title_key )
+{
+	auto* scroll = tabs->add_page< ScrollView >( title_key );
+	return scroll->add< Stack >( Axis::VERTICAL );
 }
 
-OptionsScene::~OptionsScene()
+/// 0..1 を「50%」の形に（書式は文字列テーブルの format.percent。言語によって「50 %」「%50」などと変えられる）
+string_t format_percent( const core::ui::StringTable& strings, float_t v )
 {
-	save_settings();
+	const string_t number = std::to_string( static_cast< int >( std::lround( v * 100.f ) ) );
+	return strings.has( "format.percent" ) ? strings.format( "format.percent", { number } ) : number + "%";
 }
 
-int OptionsScene::find_current_resolution() const
+string_t format_int( float_t v )
 {
-	int w = GameMain::get_app()->get_width();
-	int h = GameMain::get_app()->get_height();
+	return std::to_string( static_cast< int >( std::lround( v ) ) );
+}
 
-	for ( int i = 0; i < static_cast< int >( resolutions_.size() ); i++ )
-	{
-		if ( resolutions_[ i ].width == w && resolutions_[ i ].height == h )
+string_t format_one_decimal( float_t v )
+{
+	const int tenth = static_cast< int >( std::lround( v * 10.f ) );
+	return std::to_string( tenth / 10 ) + "." + std::to_string( std::abs( tenth % 10 ) );
+}
+
+/**
+ * 設定の項目からスライダーを作る（範囲・刻み・ラベル・説明はストアの登録から取る）
+ *
+ * 以前は範囲を画面側にも書いていて、ストアの登録と食い違うおそれがあった。
+ *
+ * @param also 値を書いたあとに追加で行うこと（X / Y の感度をそろえるなど）
+ */
+Slider* add_setting_slider( Stack* page, SettingStore* store, const core::setting::SettingKey< float_t >& key,
+	std::function< string_t( float_t ) > formatter, std::function< void( float_t ) > also = {} )
+{
+	SettingStore::Range range;
+	store->get_range( key, range );
+	const auto info = store->get_info( key );
+
+	auto* slider = page->add< Slider >( info.label_key,
+		[store, key] { return store->get( key ); },
+		[store, key, also] ( float_t v )
 		{
-			return i;
+			store->set( key, v );
+
+			if ( also )
+			{
+				also( v );
+			}
+		},
+		range.min, range.max, range.step );
+
+	slider->set_formatter( std::move( formatter ) );
+	slider->set_description_key( info.description_key );
+	slider->set_on_commit( [store, key] { store->apply_pending( key ); } );		// ON_RELEASE の項目はここで反映
+	return slider;
+}
+
+/// 設定の項目からトグルを作る（ラベル・説明はストアの登録から取る）
+Toggle* add_setting_toggle( Stack* page, SettingStore* store, const core::setting::SettingKey< bool >& key )
+{
+	const auto info = store->get_info( key );
+
+	auto* toggle = page->add< Toggle >( info.label_key,
+		[store, key] { return store->get( key ); },
+		[store, key] ( bool v ) { store->set( key, v ); } );
+
+	toggle->set_description_key( info.description_key );
+	return toggle;
+}
+
+} // namespace
+
+OptionsScene::OptionsScene( GameMain& game_main )
+	: UIOverlayScene( game_main )
+{
+	// 適用・確認・ロールバック・保存の流れ（テストできるよう、依存を渡して切り離してある）
+	OptionsController::Dependencies deps;
+	deps.store = & get_settings();
+	deps.screen = & screen_;
+	deps.display_keys = gs::get_display_keys();
+	deps.save = services_.save_settings;
+	deps.close = [this] { close(); };
+	deps.now = [this] { return get_total_elapsed_time(); };
+	deps.confirm_display_message = [this] ( int remaining )
+	{
+		return services_.strings.format( "options.confirm_display", { std::to_string( remaining ) } );
+	};
+	controller_ = std::make_unique< OptionsController >( std::move( deps ) );
+
+	// 解像度の選択肢（DXGI の一覧から重複を除く）
+	for ( const auto& m : get_graphics_manager()->get_available_display_modes() )
+	{
+		if ( find_resolution_index( m.width, m.height ) < 0 )
+		{
+			resolutions_.push_back( Resolution{ m.width, m.height } );
 		}
 	}
 
-	return 0;
-}
+	auto panel = std::make_unique< Panel >( "options.title" );
+	auto* body = panel->add< Stack >( Axis::VERTICAL );
+	body->set_spacing( services_.theme.section_spacing );
 
-void OptionsScene::apply_resolution( int index )
-{
-	if ( index >= 0 && index < static_cast< int >( resolutions_.size() ) )
+	auto* tabs = body->add< TabView >();
+	build_graphics_page( add_scroll_page( tabs, "options.tab.graphics" ) );
+	build_audio_page( add_scroll_page( tabs, "options.tab.audio" ) );
+	build_controls_page( add_scroll_page( tabs, "options.tab.controls" ) );
+	body->set_flex( tabs );
+
+	// 開くときにタブを選べる（"push:options?tab=controls" のように遷移の要求に引数を付ける）
+	if ( const string_t tab = get_argument( "tab" ); ! tab.empty() )
 	{
-		const auto& res = resolutions_[ index ];
-		GameMain::get_app()->set_size( res.width, res.height );
-	}
-}
+		const char_t* tab_names[] = { "graphics", "audio", "controls" };
+		const auto i = std::find( std::begin( tab_names ), std::end( tab_names ), tab );
 
-void OptionsScene::setup_widgets()
-{
-	// Resolution
-	resolution_select_.set_label( "Resolution" );
-
-	for ( const auto& res : resolutions_ )
-	{
-		std::stringstream ss;
-		ss << res.width << " x " << res.height;
-		resolution_select_.add_option( ss.str() );
-	}
-
-	resolution_select_.set_selected( find_current_resolution() );
-	resolution_select_.set_on_change( [this] ( int index )
-	{
-		apply_resolution( index );
-		play_sound( "ok" );
-	} );
-
-	// Volume
-	float_t volume = get_sound_manager()->get_volume();
-	volume_slider_.set_label( "Volume" );
-	volume_slider_.set_range( 0.f, 1.f );
-	volume_slider_.set_step( 0.1f );
-	volume_slider_.set_value( volume );
-	volume_slider_.set_format( [] ( float_t v ) -> string_t
-	{
-		int percent = static_cast< int >( v * 100.f + 0.5f );
-		return std::to_string( percent ) + "%";
-	} );
-	volume_slider_.set_on_change( [this] ( float_t v )
-	{
-		get_sound_manager()->set_volume( v );
-	} );
-
-	// Mute
-	mute_button_.set_text( is_mute_ ? "Mute : ON" : "Mute : OFF" );
-	mute_button_.set_hint_text( "Enter/Click Toggle    ESC Back" );
-	mute_button_.set_on_click( [this] ()
-	{
-		is_mute_ = ! is_mute_;
-		get_sound_manager()->set_mute( is_mute_ );
-		mute_button_.set_text( is_mute_ ? "Mute : ON" : "Mute : OFF" );
-		play_sound( "ok" );
-	} );
-
-	// Mouse Sensitivity
-	float_t sens = get_config()->get( "input.mouse.x_sensitivity", 1.f );
-	mouse_sens_slider_.set_label( "Mouse Sens." );
-	mouse_sens_slider_.set_range( 0.1f, 3.f );
-	mouse_sens_slider_.set_step( 0.1f );
-	mouse_sens_slider_.set_value( sens );
-	mouse_sens_slider_.set_on_change( [this] ( float_t v )
-	{
-		get_input()->set_mouse_x_sensitivity( v );
-		get_input()->set_mouse_y_sensitivity( v );
-	} );
-
-	// FOV
-	float_t fov = get_config()->get( "camera.fov", 90.f );
-	fov_slider_.set_label( "FOV" );
-	fov_slider_.set_range( 50.f, 120.f );
-	fov_slider_.set_step( 5.f );
-	fov_slider_.set_value( fov );
-	fov_slider_.set_format( [] ( float_t v ) -> string_t
-	{
-		return std::to_string( static_cast< int >( v + 0.5f ) );
-	} );
-
-	// Fullscreen
-	fullscreen_button_.set_text( is_fullscreen_ ? "Fullscreen : ON" : "Fullscreen : OFF" );
-	fullscreen_button_.set_hint_text( "Enter/Click Toggle    ESC Back" );
-	fullscreen_button_.set_on_click( [this] ()
-	{
-		get_graphics_manager()->switch_full_screen();
-		is_fullscreen_ = get_graphics_manager()->is_full_screen();
-		fullscreen_button_.set_text( is_fullscreen_ ? "Fullscreen : ON" : "Fullscreen : OFF" );
-		play_sound( "ok" );
-	} );
-
-	// Back
-	back_button_.set_text( "Back" );
-	back_button_.set_on_click( [this] ()
-	{
-		set_next_scene( "pop" );
-		play_sound( "ok" );
-	} );
-
-	// コンテナに登録
-	container_.add_widget( &resolution_select_ );
-	container_.add_widget( &volume_slider_ );
-	container_.add_widget( &mute_button_ );
-	container_.add_widget( &mouse_sens_slider_ );
-	container_.add_widget( &fov_slider_ );
-	container_.add_widget( &fullscreen_button_ );
-	container_.add_widget( &back_button_ );
-
-	float_t screen_w = ui_renderer_.get_screen_width();
-	float_t content_w = get_content_width();
-
-	container_.set_position( ( screen_w - content_w ) * 0.5f, 200.f );
-	container_.set_width( content_w );
-	container_.set_item_height( 100.f );
-	container_.layout();
-}
-
-void OptionsScene::save_settings()
-{
-	int res_index = resolution_select_.get_selected();
-
-	if ( res_index >= 0 && res_index < static_cast< int >( resolutions_.size() ) )
-	{
-		const auto& res = resolutions_[ res_index ];
-		get_config()->set( "graphics.screen_width", res.width );
-		get_config()->set( "graphics.screen_height", res.height );
+		if ( i != std::end( tab_names ) )
+		{
+			tabs->set_initial_page( static_cast< size_t >( i - std::begin( tab_names ) ) );
+		}
+		else
+		{
+			debug_log( "[Options] 知らないタブの名前なので最初のタブで開きます: " + tab );
+		}
 	}
 
-	get_config()->set( "audio.volume", volume_slider_.get_value() );
-	get_config()->set< int >( "audio.mute", is_mute_ ? 1 : 0 );
-	get_config()->set( "input.mouse.x_sensitivity", mouse_sens_slider_.get_value() );
-	get_config()->set( "input.mouse.y_sensitivity", mouse_sens_slider_.get_value() );
-	get_config()->set( "camera.fov", fov_slider_.get_value() );
-	get_config()->set< int >( "graphics.full_screen", is_fullscreen_ ? 1 : 0 );
+	// 下のボタン行
+	auto* buttons = body->add< Stack >( Axis::HORIZONTAL );
+	SettingStore* store = & get_settings();
 
-	get_config()->save_file( "blue-sky.config" );
+	auto* apply_button = buttons->add< Button >( "options.apply", [this] { controller_->apply( false ); } );
+	apply_button->set_enabled_if( [store] { return store->has_pending_deferred(); } );
+	apply_button->set_description_key( "options.apply.description" );
+
+	auto* defaults_button = buttons->add< Button >( "options.defaults", [this] { controller_->reset_to_defaults(); } );
+	defaults_button->set_description_key( "options.defaults.description" );
+
+	buttons->add< Button >( "options.back", [this] { controller_->back(); } );
+
+	screen_.set_root( std::move( panel ), [this] { controller_->back(); } );
 }
 
-void OptionsScene::update()
+int OptionsScene::find_resolution_index( int w, int h ) const
 {
-	Scene::update();
-
-	container_.update( get_input(), ui_renderer_ );
-}
-
-void OptionsScene::render()
-{
-	float_t screen_w = ui_renderer_.get_screen_width();
-	float_t screen_h = ui_renderer_.get_screen_height();
-
-	// 半透明の暗幕（全画面）
-	ui_renderer_.draw_rect( 0.f, 0.f, screen_w, screen_h, Color( 0.f, 0.f, 0.f, 0.5f ) );
-
-	// パネル背景
-	float_t panel_w = get_panel_width();
-	float_t panel_x = ( screen_w - panel_w ) * 0.5f;
-	float_t panel_y = screen_h * 0.05f;
-	float_t panel_h = screen_h * 0.90f;
-
-	ui_renderer_.draw_rect( panel_x, panel_y, panel_w, panel_h, Color( 0.05f, 0.05f, 0.1f, 0.85f ) );
-
-	// タイトル
-	float_t content_w = get_content_width();
-	float_t title_x = ( screen_w - content_w ) * 0.5f;
-	float_t title_y = screen_h * 0.08f;
-	ui_renderer_.draw_text( title_x, title_y, content_w, 120.f, "OPTIONS", core::graphics::TextStyle{ Color( 1.f, 1.f, 1.f, 1.f ), Color::Black, 3.f } );
-
-	// ウィジェット描画
-	container_.render( ui_renderer_ );
-
-	// 操作ヒント
-	float_t hint_y = screen_h * 0.90f;
-	float_t hint_x = ( screen_w - content_w ) * 0.5f;
-
-	const auto* focused = container_.get_focused_widget();
-	const char_t* hint = "ESC Back";
-
-	if ( focused && ! focused->get_hint_text().empty() )
+	for ( size_t i = 0; i < resolutions_.size(); i++ )
 	{
-		hint = focused->get_hint_text().c_str();
+		if ( resolutions_[ i ].width == w && resolutions_[ i ].height == h )
+		{
+			return static_cast< int >( i );
+		}
 	}
 
-	ui_renderer_.draw_text( hint_x, hint_y, content_w, 90.f, hint, core::graphics::TextStyle{ Color( 0.5f, 0.5f, 0.5f, 1.f ), Color::Black, 3.f } );
+	return -1;
+}
+
+void OptionsScene::build_graphics_page( Stack* page )
+{
+	SettingStore* store = & get_settings();
+
+	std::vector< string_t > options;
+
+	for ( const auto& r : resolutions_ )
+	{
+		options.push_back( std::to_string( r.width ) + " x " + std::to_string( r.height ) );
+	}
+
+	auto* resolution = page->add< Choice >( "options.resolution", options,
+		[this, store] { return find_resolution_index( store->get( gs::SCREEN_WIDTH ), store->get( gs::SCREEN_HEIGHT ) ); },
+		[this, store] ( int i )
+		{
+			store->set( gs::SCREEN_WIDTH, resolutions_[ i ].width );
+			store->set( gs::SCREEN_HEIGHT, resolutions_[ i ].height );
+		} );
+
+	// 現在の解像度が一覧に無いときの表示（勝手に一覧の値へ書き換えない）
+	resolution->set_custom_text( [this, store]
+	{
+		const auto& strings = services_.strings;
+		return strings.format( "options.resolution.custom", { std::to_string( store->get( gs::SCREEN_WIDTH ) ) + " x " + std::to_string( store->get( gs::SCREEN_HEIGHT ) ) } );
+	} );
+	resolution->set_options_literal( true );		// "1920 x 1080" はキーではない
+	resolution->set_description_key( "options.resolution.description" );
+
+	add_setting_toggle( page, store, gs::FULL_SCREEN );
+	add_setting_slider( page, store, gs::CAMERA_FOV, & format_int );
+	add_setting_toggle( page, store, gs::DISPLAY_FPS );
+	add_setting_toggle( page, store, gs::VSYNC );
+	add_setting_slider( page, store, gs::UI_TEXT_SCALE, [this] ( float_t v ) { return format_percent( services_.strings, v ); } );
+}
+
+void OptionsScene::build_audio_page( Stack* page )
+{
+	SettingStore* store = & get_settings();
+
+	add_setting_slider( page, store, gs::AUDIO_VOLUME, [this] ( float_t v ) { return format_percent( services_.strings, v ); } );
+	add_setting_toggle( page, store, gs::AUDIO_MUTE );
+}
+
+void OptionsScene::build_controls_page( Stack* page )
+{
+	SettingStore* store = & get_settings();
+
+	// 感度は X / Y を同じ値で設定する
+	add_setting_slider( page, store, gs::MOUSE_X_SENSITIVITY, & format_one_decimal,
+		[store] ( float_t v ) { store->set( gs::MOUSE_Y_SENSITIVITY, v ); } );
+
+	page->add< Label >( "options.key_bindings", Label::Style::HEADER );
+
+	// キーの表示名 : 文字列テーブルの key.<名前> があればそれ、無ければ名前そのもの
+	auto key_display_name = [this] ( int code ) -> string_t
+	{
+		if ( key_names::is_pad_code( code ) )
+		{
+			return services_.strings.format( "key.pad", { std::to_string( key_names::pad_button_index( code ) + 1 ) } );
+		}
+
+		const string_t name = key_names::name_from_code( code );
+		const auto& strings = services_.strings;
+		const string_t table_key = "key." + name;
+		return strings.has( table_key ) ? strings.get( table_key ) : name;
+	};
+
+	for ( const auto& b : gs::get_bindable_buttons() )
+	{
+		const string_t key = Input::get_key_config_name( b.button );
+
+		page->add< KeyBind >( b.label_key,
+			[store, key] { return key_names::code_from_name( gs::get_primary_key( store->get< string_t >( key ) ) ); },
+			[store, key] ( int code ) { store->set( key, gs::replace_primary_key( store->get< string_t >( key ), key_names::name_from_code( code ) ) ); },
+			key_display_name )
+			->set_description_key( "options.key.description" );
+	}
 }
 
 } // namespace blue_sky

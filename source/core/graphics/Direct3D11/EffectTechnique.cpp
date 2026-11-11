@@ -2,20 +2,26 @@
 #include "EffectPass.h"
 #include "Direct3D11.h"
 
-#include <d3dx11effect.h>
-
 namespace core::graphics::direct_3d_11
 {
 
-EffectTechnique::EffectTechnique( Direct3D* direct_3d, ID3DX11EffectTechnique* t )
+EffectTechnique::EffectTechnique( Direct3D* direct_3d, const PassSetupList* setup_list )
 {
-	D3DX11_TECHNIQUE_DESC desc;
+	rebind( direct_3d, setup_list );
+}
 
-	DIRECT_X_FAIL_CHECK( t->GetDesc( & desc ) );
+void EffectTechnique::rebind( Direct3D* direct_3d, const PassSetupList* setup_list )
+{
+	pass_list_.clear();
 
-	for ( UINT n = 0; n < desc.Passes; n++ )
+	if ( ! setup_list )
 	{
-		pass_list_.push_back( std::make_unique< EffectPass >( direct_3d, t->GetPassByIndex( n ) ) );
+		return;
+	}
+
+	for ( const auto& setup : *setup_list )
+	{
+		pass_list_.push_back( std::make_unique< EffectPass >( direct_3d, setup ) );
 	}
 }
 

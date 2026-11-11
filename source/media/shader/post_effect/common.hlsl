@@ -3,7 +3,7 @@ Texture2D source_texture : register( t0 ); /// ポストエフェクト適用前
 /**
  * ポストエフェクト用共通 Vertex Shader
  */
-COMMON_POS_UV vs_post_effect( COMMON_POS_NORM_UV input )
+COMMON_POS_UV vs_post_effect( COMMON_2D_INPUT input )
 {
 	COMMON_POS_UV output;
 

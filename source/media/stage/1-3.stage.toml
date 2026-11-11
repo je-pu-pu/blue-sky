@@ -1,0 +1,96 @@
+# 1-3 のステージ（tools/stage_convert/convert_stage.py で 1-3.stage から変換した）
+format = 1
+
+[stage]
+collision = "1-3.obj"
+ground = "ground"
+bgm_loop = false
+
+[player]
+position = [-5.0, 1.0, 4.0]
+
+[goal]
+position = [-5.0, 21.0, 60.0]
+
+[[object]]
+type = "static"
+model = "stage-1-3"
+position = [0, 0, 0]
+
+[[event]]
+when = "start"
+then = [
+  { do = "set", shadow_paper_color = [0.5, 0.5, 0.5, 1] },
+  { do = "set", paper_type = 1 },
+  { do = "set", drawing_accent_scale = 2 },
+  { do = "set", ambient_color = [0, 0, 0, 1] },
+
+  { do = "set", bgm = "road" },
+  { do = "set", bpm = 80, beat = 1 },
+  { do = "set", sky_box = "3" },
+  { do = "set", balloon_sound_type = 3 },
+
+  { do = "set_body", target = "goal", mass = 0 },
+
+  { do = "load_sound", name = "fin", file = "today-and-tomorrow-b", replace = true },
+]
+
+[[object]]
+type = "ladder"
+position = [-4.399999618530273, 4.0, 12.0]
+direction = 0
+
+[[object]]
+type = "ladder"
+position = [-5.0, 16.0, 33.0]
+direction = 0
+
+[[object]]
+type = "ladder"
+position = [-5.0, 10.399999618530273, 33.0]
+direction = 0
+
+[[object]]
+type = "medal"
+position = [1.5, 2.0, 41.0]
+direction = 0
+
+[[object]]
+type = "ladder"
+position = [-5.0, 7.0, 12.0]
+direction = 0
+
+# スイッチ
+[[object]]
+type = "switch"
+name = "switch-a"
+position = [-4.5, 0.0, -3.5]
+direction = 0
+on_turn_on = [
+  { do = "set", bgm = "today-and-tomorrow" },
+  { do = "fade", shadow_color = [1, 0, 0, 1], speed = 0.001 },
+  { do = "fade", shadow_paper_color = [0.5, 0.0, 0.0, 1] },
+  { do = "spawn", model = "robot-dead-body", position = [5, 81, -32] },
+  { do = "switch", target = "switch-a", state = "broken" },
+  { do = "spawn", model = "robot-dead-body", position = [-5, 30, 10], every = 1, count = 10 },
+  { do = "spawn", model = "robot-dead-body", position = [-4, 30, 10], every = 1, count = 9 },
+  { do = "spawn", model = "robot-dead-body", position = [-5, 30, 8], every = 2, count = 8 },
+  { do = "spawn", model = "robot-dead-body", position = [-4, 30, 8], every = 2, count = 7 },
+  { do = "spawn", model = "robot-dead-body", position = [-5, 30, 6], every = 3, count = 6 },
+  { do = "spawn", model = "robot-dead-body", position = [-4, 30, 6], every = 3, count = 5 },
+]
+
+[[event]]
+when = "start"
+then = [
+  { do = "switch", target = "switch-a", state = "off" },
+]
+
+# ゴール近くスイッチ
+[[object]]
+type = "area-switch"
+position = [-5.0, 16.0, 33.0]
+size = [2.0, 2.0, 2.0]
+on_turn_on = [
+  { do = "fade", ambient_color = [1, 1, 1, 1], speed = 0.001 },
+]

@@ -1,0 +1,160 @@
+# ext-0 のステージ（tools/stage_convert/convert_stage.py で ext-0.stage から変換した）
+format = 1
+
+[stage]
+collision = "ext-0.obj"
+ground = "ground"
+
+[player]
+position = [0.0, 101.0, -47.0]
+camera_direction = 60
+
+[goal]
+position = [0.0, 99.0, 40.0]
+
+[[object]]
+type = "static"
+model = "stage-ext-0"
+position = [0, 0, 0]
+
+[[event]]
+when = "start"
+then = [
+  { do = "set", bgm = "road" },
+  { do = "set", sky_box = "sky" },
+  { do = "set", balloon_sound_type = 3 },
+
+  { do = "set", line_type = 4 },
+  { do = "set", paper_type = 4 },
+  { do = "set", shadow_color = [0.5, 0.5, 0.25, 0.75] },
+]
+
+[[object]]
+type = "balloon"
+position = [0.0, 70.0, -10.0]
+direction = 0
+
+[[object]]
+type = "balloon"
+positions = [
+  [0.0, 80.0, -20.0],
+  [0.0, 20.0, 0.0],
+  [0.0, 30.0, 0.0],
+  [0.0, 40.0, 0.0],
+  [0.0, 50.0, 0.0],
+  [10.0, 37.0, 0.0],
+  [-7.0, 22.0, 7.0],
+  [7.0, 32.0, 7.0],
+  [0.0, 27.0, 10.0],
+  [-7.0, 53.0, -7.0],
+  [-10.0, 18.0, 0.0],
+  [7.0, 42.0, -7.0],
+  [0.0, 47.0, -10.0],
+  [0.0, 60.0, 0.0],
+  [0.0, 100.0, 24.0],
+  [0.0, 100.0, 27.0],
+  [0.0, 100.0, 30.0],
+]
+direction = 0
+
+[[object]]
+type = "robot"
+position = [4.0, 99.0, -44.0]
+direction = 0
+
+[[object]]
+type = "robot"
+position = [-4.0, 99.0, -44.0]
+direction = 0
+
+[[object]]
+type = "robot"
+position = [-8.0, 99.0, -33.0]
+direction = 90
+
+[[object]]
+type = "robot"
+position = [8.0, 99.0, -33.0]
+direction = 270
+
+[[object]]
+type = "robot"
+position = [8.0, 99.0, -36.0]
+direction = 270
+
+[[object]]
+type = "robot"
+position = [-8.0, 99.0, -36.0]
+direction = 90
+
+[[object]]
+type = "rocket"
+name = "rocket-a"
+position = [7.0, 35.0, 7.0]
+direction = 0
+
+[[object]]
+type = "rocket"
+name = "rocket-b"
+position = [-7.0, 25.0, 7.0]
+direction = 0
+
+[[object]]
+type = "rocket"
+name = "rocket-c"
+position = [-7.0, 55.0, -7.0]
+direction = 0
+
+[[object]]
+type = "rocket"
+name = "rocket-d"
+position = [-10.0, 20.0, 0.0]
+direction = 0
+
+[[object]]
+type = "rocket"
+name = "rocket-e"
+position = [0.0, 30.0, 10.0]
+direction = 0
+
+[[object]]
+type = "rocket"
+name = "rocket-f"
+position = [10.0, 40.0, 0.0]
+direction = 0
+
+[[object]]
+type = "rocket"
+name = "rocket-g"
+position = [7.0, 45.0, -7.0]
+direction = 0
+
+[[object]]
+type = "rocket"
+name = "rocket-h"
+position = [0.0, 50.0, -10.0]
+direction = 0
+
+# 全てのロケットを宙に浮かす
+[[event]]
+when = "start"
+then = [
+  { do = "set_body", target = "rocket-a", gravity = [0, 0, 0] },
+  { do = "set_body", target = "rocket-b", gravity = [0, 0, 0] },
+  { do = "set_body", target = "rocket-c", gravity = [0, 0, 0] },
+  { do = "set_body", target = "rocket-d", gravity = [0, 0, 0] },
+  { do = "set_body", target = "rocket-e", gravity = [0, 0, 0] },
+  { do = "set_body", target = "rocket-f", gravity = [0, 0, 0] },
+  { do = "set_body", target = "rocket-g", gravity = [0, 0, 0] },
+  { do = "set_body", target = "rocket-h", gravity = [0, 0, 0] },
+
+  # 全てのロケットの反発をなくす
+  { do = "set_body", target = "rocket-a", contact_response = false },
+  { do = "set_body", target = "rocket-b", contact_response = false },
+  { do = "set_body", target = "rocket-c", contact_response = false },
+  { do = "set_body", target = "rocket-d", contact_response = false },
+  { do = "set_body", target = "rocket-e", contact_response = false },
+  { do = "set_body", target = "rocket-f", contact_response = false },
+  { do = "set_body", target = "rocket-g", contact_response = false },
+  { do = "set_body", target = "rocket-h", contact_response = false },
+]

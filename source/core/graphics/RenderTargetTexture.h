@@ -16,6 +16,14 @@ public:
 	RenderTargetTexture() { }
 	virtual ~RenderTargetTexture() { }
 
+	/**
+	 * シェーダーで普通のテクスチャ（Texture2D の Sample）として読める形にして返す
+	 *
+	 * MSAA の描画先は、そのままでは Texture2D として読めない（読むと真っ黒になる）。MSAA なら MSAA なしのテクスチャへ解決して、それを返す。
+	 * MSAA でなければ自分を返す。ポストエフェクトのように描画結果を読むときに呼ぶ
+	 */
+	virtual Texture* resolve_for_sampling() { return this; }
+
 }; // RenderTargetTexture
 
 } // namespace core::graphics

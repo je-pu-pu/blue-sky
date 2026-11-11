@@ -1,6 +1,7 @@
 #pragma once
 
 #include <blue_sky/type.h>
+#include <blue_sky/graphics/LocalBounds.h>
 
 #include <core/graphics/Mesh.h>
 #include <core/graphics/VertexGroup.h>
@@ -18,7 +19,7 @@ namespace blue_sky::graphics
 /**
  * blue-sky 頂点情報
  * 
- * @todo 柔軟な頂点構造に対応する
+ * 頂点の形は位置・法線・UV に固定（スキニングの重みは別のバッファ）。ほかの形が要るときは、頂点の型ごとに Mesh を分ける
  */
 struct Vertex : public core::graphics::Vertex
 {
@@ -106,11 +107,10 @@ public:
 		void set_mesh( Mesh* m ) { mesh_ = m; }
 		Type get_type() const { return type_; }
 
+		// 形が変わったときは create_vertex_buffer() / create_index_buffer() で作り直す（CityGenerator）。
+		// 以前は中身が空の update_vertex_buffer() / update_index_buffer() があり、呼んでも何も起きなかった
 		virtual void create_vertex_buffer() = 0;
 		virtual void create_index_buffer() = 0;
-
-		virtual void update_vertex_buffer() = 0;
-		virtual void update_index_buffer() = 0;
 
 		virtual void bind() const = 0;
 		virtual void render( uint_t ) const = 0;
@@ -125,6 +125,8 @@ protected:
 	IndexCountList		index_count_list_;
 
 	std::unique_ptr< Buffer > buffer_;
+
+	LocalBounds			bounds_;		///< 頂点を囲む箱（calculate_bounds で求める。求めていなければ空）
 
 public:
 	explicit Mesh( Buffer* b )
@@ -158,6 +160,20 @@ public:
 
 	void create_vertex_buffer() { buffer_->create_vertex_buffer(); }
 	void create_index_buffer() { buffer_->create_index_buffer(); }
+
+	/// 頂点を囲む箱を、今の頂点の一覧から求めて覚える（頂点の一覧を消す前に呼ぶ。GraphicsManager::load_mesh）
+	void calculate_bounds()
+	{
+		bounds_ = LocalBounds();
+
+		for ( const auto& v : vertex_list_ )
+		{
+			bounds_.add( v.Position );
+		}
+	}
+
+	/// 頂点を囲む箱（求めていなければ空。見えない物を描かないために使う）
+	const LocalBounds& get_bounds() const { return bounds_; }
 
 	void clear_vertex_list();
 	void clear_vertex_weight_list();

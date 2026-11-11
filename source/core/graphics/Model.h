@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/ResourceHandle.h>
 #include <type/type.h>
 
 namespace core::graphics
@@ -7,6 +8,16 @@ namespace core::graphics
 
 class Mesh;
 class Shader;
+class Model;
+
+/**
+ * モデルを指すハンドル
+ *
+ * 型は core の Model にしている。管理する側（blue_sky の GraphicsManager）は core の Model の型で管理し、中身は blue_sky のモデル。
+ * こうすると core 層（ModelComponent・RenderSystem）も、blue_sky 層を知らずにハンドルを持てる。
+ * 引くときは GraphicsManager::resolve_model を使う（解放済みなら nullptr）
+ */
+using ModelHandle = core::ResourceHandle< Model >;
 
 /**
  * 抽象モデルクラス

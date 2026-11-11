@@ -9,24 +9,30 @@
 #include <game/Game.h>
 #include <game/Config.h>
 
-#include <common/Singleton.h>
 
 #include <type/type.h>
 
 #include <windows.h>
 
+#include <exception>
 #include <memory>
 #include <functional>
 #include <unordered_map>
+#include <blue_sky/RawInput.h>
 
 /**
  * アプリケーションとそれに対応するひとつのウィンドウを管理する
  *
  */
-class App : public common::Singleton< App >
+namespace blue_sky { class GameMain; }
+namespace win { class Tablet; }
+
+/**
+ * WinMain が 1 つ作り、ゲーム（GameMain）を持つ（以前はシングルトン）
+ */
+class App
 {
 public:
-	friend class common::Singleton< App >;
 
 	static const int DEFAULT_WIDTH = 800;
 	static const int DEFAULT_HEIGHT = 600;
@@ -47,37 +53,49 @@ private:
 	int			height_;				///< ウィンドウ高さ
 
 	bool		is_active_;				///< アクティブフラグ
-	bool		is_full_screen_;		///< フルスクリーン
-	RECT		last_window_rect_;		///< 前回のウィンドウ位置とサイズ
+	bool		is_full_screen_ = false;	///< ボーダーレスのフルスクリーン（画面いっぱいの縁なしウィンドウ）か。実際の状態はここ、ユーザーの選択は設定が持つ
 
 	bool		is_mouse_in_window_;
 
-	bool		is_show_cursor_enabled_ = true;
-	bool		is_clip_cursor_enabled_;
+	blue_sky::raw_input::Decoder	raw_input_decoder_;			///< Raw Input の出来事の読み取り
+	bool		is_raw_input_enabled_ = false;	///< Raw Input を使えるか（使えなければ、以前のポーリングとメッセージで読む）
 
+	bool		is_show_cursor_enabled_ = true;
+	bool		is_clip_cursor_enabled_;	///< カーソルを閉じ込めたいか（シーンの要求。実際に閉じ込めるのはアクティブなときだけ）
+	bool		is_cursor_clipped_ = false;	///< 今カーソルを閉じ込めているか（外すときに、ほかのアプリの閉じ込めを壊さないため）
+	bool		is_background_ = false;		///< 開発用 : 裏で動かす（BLUE_SKY_BACKGROUND）。前面に出ず、カーソルを隠さず・閉じ込めない
+
+	std::unique_ptr< blue_sky::GameMain >	game_main_;		///< ゲーム（以前はシングルトン）
+	std::unique_ptr< win::Tablet >			tablet_;		///< ペンタブレット（初めて使うときに開く。以前はシングルトン）
 	Game*		game_ = nullptr;
-	std::unique_ptr< Config >			config_;
+	std::unique_ptr< Config >			config_;		///< 開発用・エンジンの設定（blue-sky.config）
+	std::unique_ptr< Config >			user_config_;	///< ユーザーの設定（settings.config。SettingStore が読み書きする）
 
 	std::unordered_map< HANDLE, std::function< void() > > watch_directory_change_handler_list_;
 
-	App();								//コンストラクタ
+	/// ウィンドウプロシージャの中で起きた例外（メッセージループに戻ってから投げ直す）
+	std::exception_ptr	pending_exception_;
 
+	/// ウィンドウプロシージャ。ウィンドウに結び付けた App（GWLP_USERDATA）に渡す。例外を外（user32）へ出さず、pending_exception_ に預ける
 	static LRESULT CALLBACK WinProc(HWND, UINT, WPARAM, LPARAM);
-	static void on_resize( HWND );
+	LRESULT WinProcImpl(HWND, UINT, WPARAM, LPARAM);
+	void on_resize( HWND );
 
 	DWORD get_window_style() const;
-	DWORD get_window_style_full_scrren() const;
 
-	void check_directory_change() const;
 
 public:
+	App();								///< コンストラクタ（WinMain が作る）
 	virtual ~App();						///< デストラクタ
+
+	App( const App& ) = delete;
+	App& operator = ( const App& ) = delete;
 
 	bool		Init(HINSTANCE, int);	//初期化
 	int			MessageLoop();			//メッセージループ
 
 	HINSTANCE	GetInstanceHandle(){ return hInst; }
-	HWND		GetWindowHandle(){ return hWnd; }
+	HWND		GetWindowHandle() const { return hWnd; }
 	
 	int get_width() const { return width_; }
 	int	get_height() const { return height_; }
@@ -87,6 +105,12 @@ public:
 	void set_active( bool );
 	bool is_active() const { return is_active_; }
 
+	/// このウィンドウのペンタブレット（初めて呼ばれたときに開く）
+	win::Tablet* get_tablet();
+
+	/// Raw Input（WM_INPUT）で入力の出来事を受け取っているか
+	bool is_raw_input_enabled() const { return is_raw_input_enabled_; }
+
 	const char_t* get_title();
 	void set_title( const char_t* );
 
@@ -95,15 +119,30 @@ public:
 
 	void show_error_message( const char_t* ) const;
 
-	bool is_full_screen() const { return is_full_screen_; }
+	/**
+	 * フルスクリーンにする・やめる
+	 *
+	 * 表示モードを変える排他フルスクリーンではなく、ウィンドウを縁なしにして今いるモニターいっぱいに広げる（ボーダーレス）。
+	 * 描画の解像度（get_width() / get_height()）は変えず、表示のときに画面の大きさへ拡大される。
+	 * （以前は排他フルスクリーンで、4K モニターが複数ある環境では切り替え 1 回に 17〜18 秒かかり、抜けるときに止まることがあった）
+	 */
 	void set_full_screen( bool );
+	bool is_full_screen() const { return is_full_screen_; }
+
+	/// クライアント領域の座標（マウスなど）を、描画の解像度の座標に直す（フルスクリーンではクライアント領域が描画より大きい）
+	POINT client_to_render( POINT ) const;
 
 	void show_cursor( bool );
 	void clip_cursor( bool );
 
+	/// 開発用 : 裏で動かしているか（BLUE_SKY_BACKGROUND。自動の確かめで、使っている人の作業を邪魔しないため）
+	bool is_background() const { return is_background_; }
+
 	void watch_directory_change( const char*, std::function<void()> );
+	void check_directory_change() const;	///< 監視しているディレクトリに変更があれば、登録した関数を呼ぶ（毎フレーム呼んでよい）
 
 	void close();
 
 	Config* get_config() { return config_.get(); }
+	Config* get_user_config() { return user_config_.get(); }
 };

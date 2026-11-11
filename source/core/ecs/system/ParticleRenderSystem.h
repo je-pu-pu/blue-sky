@@ -4,6 +4,15 @@
 #include <core/ecs/component/ParticleSystemComponent.h>
 #include <core/ecs/System.h>
 #include <core/graphics/Shader.h>
+#include <core/graphics/ConstantBuffer.h>
+#include <core/graphics/VertexBuffer.h>
+
+namespace core::graphics
+{
+	class GraphicsManager;
+
+	namespace direct_3d_11 { class Direct3D11; }
+}
 
 namespace core::ecs
 {
@@ -17,12 +26,19 @@ class ParticleRenderSystem : public System< TransformComponent, ParticleSystemCo
 public:
 
 private:
+	core::graphics::GraphicsManager* graphics_manager_;
+	core::graphics::direct_3d_11::Direct3D11* direct_3d_;	///< 頂点バッファと描画に使う（この System は Direct3D 11 の実装に直接触る。作り手が渡す）	///< 描画先（作り手が渡す。以前は core::Service から取っていた）
 	std::unique_ptr< core::graphics::Shader > shader_;
+	std::unique_ptr< core::graphics::VertexBuffer< ParticleSystemComponent::ParticleList > > vertex_buffer_;	///< 最初の描画で作る（以前は関数内の static だった）
+	std::unique_ptr< core::graphics::ConstantBuffer > object_constant_buffer_;	///< world と色（同上）
+
+	core::graphics::GraphicsManager* get_graphics_manager() const { return graphics_manager_; }
 
 public:
-	explicit ParticleRenderSystem( std::unique_ptr< core::graphics::Shader > shader );
+	ParticleRenderSystem( core::graphics::GraphicsManager* graphics_manager, core::graphics::direct_3d_11::Direct3D11* direct_3d, std::unique_ptr< core::graphics::Shader > shader );
 	virtual ~ParticleRenderSystem() = default;
 
+	bool is_render_system() const override { return true; }	///< 描画の段階（EntityManager::render）で動かす
 	virtual void update() override;
 
 }; // class ParticleRenderSystem

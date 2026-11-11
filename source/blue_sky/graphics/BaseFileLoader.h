@@ -18,6 +18,8 @@ namespace core
 
 namespace blue_sky::graphics
 {
+
+class GraphicsManager;
 	class Model;
 	class Mesh;
 
@@ -28,8 +30,8 @@ namespace blue_sky::graphics
 class BaseFileLoader
 {
 public:
-	using Model					= blue_sky::graphics::Model;	///< @todo 抽象化する
-	using Mesh					= blue_sky::graphics::Mesh;		///< @todo 抽象化する
+	using Model					= blue_sky::graphics::Model;
+	using Mesh					= blue_sky::graphics::Mesh;
 	using SkinningAnimationSet	= core::SkinningAnimationSet;
 	using Shader				= core::graphics::Shader;
 	using Texture				= core::graphics::Texture;
@@ -38,6 +40,7 @@ public:
 	using VertexIndexMap		= std::map< Mesh::Vertex, Mesh::Index >;
 
 private:
+	GraphicsManager* graphics_manager_;		///< 作ったものを登録する先（以前は GameMain のシングルトンから引いていた）
 	Model* model_;
 	string_t name_;
 
@@ -57,8 +60,9 @@ protected:
 	Texture* load_texture( const char_t* ) const;
 
 public:
-	BaseFileLoader( Model* model, const char_t* name )
-		: model_( model )
+	BaseFileLoader( GraphicsManager* graphics_manager, Model* model, const char_t* name )
+		: graphics_manager_( graphics_manager )
+		, model_( model )
 		, name_( name )
 	{
 

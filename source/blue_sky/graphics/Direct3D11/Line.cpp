@@ -1,6 +1,6 @@
 #include "Line.h"
 
-#include <blue_sky/GameMain.h>
+#include <core/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
 
@@ -8,16 +8,17 @@
 #include <common/math.h>
 
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
 namespace blue_sky::graphics::direct_3d_11
 {
 
-Line::Line( Direct3D* direct_3d )
+Line::Line( Direct3D* direct_3d, blue_sky::graphics::GraphicsManager* graphics_manager )
 	: direct_3d_( direct_3d )
+	, graphics_manager_( graphics_manager )
 	, vertex_buffer_( nullptr )
 	, index_buffer_( nullptr )
-	, texture_( nullptr )
 {
 
 }
@@ -58,15 +59,27 @@ void Line::create_index_buffer()
 
 void Line::create_texture()
 {
-	texture_ = blue_sky::GameMain::get_instance()->get_graphics_manager()->load_named_texture( "lines", "media/texture/lines.png" );
-	// texture_ = blue_sky::GameMain::get_instance()->get_graphics_manager()->load_named_texture( "lines", "media/texture/test.png" );
-	// texture_ = blue_sky::GameMain::get_instance()->get_graphics_manager()->load_named_texture( "lines", "media/model/building-roof-3.png" );
+	texture_ = graphics_manager_->get_texture_handle_of( graphics_manager_->load_named_texture( "lines", "media/texture/lines.png" ) );
 }
 
 void Line::render_part( int part_count ) const
 {
 	if ( part_count < 1 )
 	{
+		return;
+	}
+
+	// 画像はハンドルから引く。解放されていれば描かない（理由は 1 回だけログに出す）
+	const Texture* texture = graphics_manager_->resolve_texture( texture_ );
+
+	if ( ! texture )
+	{
+		if ( ! texture_lost_logged_ )
+		{
+			texture_lost_logged_ = true;
+			std::cout << "[Line] 線の画像（lines）を引けません。線を描きません" << std::endl;
+		}
+
 		return;
 	}
 
@@ -78,7 +91,7 @@ void Line::render_part( int part_count ) const
 
 	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
 
-	texture_->bind_to_ps( 0 );
+	texture->bind_to_ps( 0 );
 	// direct_3d_->bind_texture_to_ps( 0, texture_ );
 
 	// debug !!!
@@ -87,7 +100,42 @@ void Line::render_part( int part_count ) const
 
 	direct_3d_->getImmediateContext()->DrawIndexed( std::min< int >( part_count * 2, static_cast< int >( index_size_ ) ), 0, 0 );
 
-	GameMain::get_instance()->get_graphics_manager()->count_draw();
+	graphics_manager_->count_draw();
+}
+
+/**
+ * 線全体を instance_count 個まとめて描く（render_part と同じものを結び、DrawIndexedInstanced で描く）
+ *
+ * 幾何シェーダーの SV_PrimitiveID はインスタンスごとに 0 から数え直すので、線の揺れ方（線分の番号で決まる）は 1 個ずつ描いたときと同じ
+ */
+void Line::render_instanced( uint_t instance_count ) const
+{
+	const Texture* texture = graphics_manager_->resolve_texture( texture_ );
+
+	if ( ! texture )
+	{
+		if ( ! texture_lost_logged_ )
+		{
+			texture_lost_logged_ = true;
+			std::cout << "[Line] 線の画像（lines）を引けません。線を描きません" << std::endl;
+		}
+
+		return;
+	}
+
+	UINT stride = sizeof( Vertex );
+	UINT offset = 0;
+
+	direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, 1, & vertex_buffer_, & stride, & offset );
+	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_, IndexBufferFormat, 0 );
+
+	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
+
+	texture->bind_to_ps( 0 );
+
+	direct_3d_->getImmediateContext()->DrawIndexedInstanced( static_cast< UINT >( index_size_ ), instance_count, 0, 0, 0 );
+
+	graphics_manager_->count_draw();
 }
 
 } // namespace blue_sky::graphics::direct_3d_11

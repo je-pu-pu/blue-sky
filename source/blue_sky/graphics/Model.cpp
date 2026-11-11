@@ -1,5 +1,6 @@
 #include "Model.h"
-#include <blue_sky/GameMain.h>
+#include <blue_sky/graphics/GraphicsManager.h>
+#include <core/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/shader/FlatShader.h>
 #include <boost/filesystem.hpp>
 
@@ -9,33 +10,71 @@ namespace blue_sky::graphics
 /**
  * このモデル用のシェーダーを作成する
  * 
- * @todo より柔軟にする。
- * @todo どのシェーダーを使うかはモデルによって異なるため、
+ * 影の有無とスキニングの有無でシェーダーを選ぶ（モデルごとに別のシェーダーを使いたいときは、読み込んだ後で set_shader_at で差し替える）
  */
-Model::Shader* Model::create_shader() const
+Model::Shader* Model::create_shader( GraphicsManager* graphics_manager ) const
 {
-	if ( GameMain::get_instance()->get_graphics_manager()->is_shadow_enabled() )
+	if ( graphics_manager->is_shadow_enabled() )
 	{
 		if ( is_skin_mesh() )
 		{
-			return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShadowShader >( "skin", "skin_with_shadow" );
+			return graphics_manager->create_shader< shader::FlatShadowShader >( "skin", "skin_with_shadow" );
 		}
 		else
 		{
-			return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShadowShader >( "main", "main_with_shadow" );
+			return graphics_manager->create_shader< shader::FlatShadowShader >( "main", "main_with_shadow", "main_with_shadow_instanced" );
 		}
 	}
 	else
 	{
 		if ( is_skin_mesh() )
 		{
-			return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShader >( "skin", "flat_skin" );
+			return graphics_manager->create_shader< shader::FlatShader >( "skin", "flat_skin" );
 		}
 		else
 		{
-			return GameMain::get_instance()->get_graphics_manager()->create_shader< shader::FlatShader >( "main", "flat" );
+			return graphics_manager->create_shader< shader::FlatShader >( "main", "flat", "flat_object_instanced" );
 		}
 	}
+}
+
+bool Model::get_cull_sphere( Vector3& center, float_t& radius ) const
+{
+	// アニメーションする物は頂点が読んだ形の外へ出るので、カリングしない（プレイヤー・敵・少女など。数は少ない）
+	if ( is_skin_mesh() )
+	{
+		return false;
+	}
+
+	LocalBounds bounds;
+
+	if ( mesh_ )
+	{
+		if ( mesh_->get_bounds().empty )
+		{
+			return false;	// 頂点から箱を求めていない（読み込み以外で作ったメッシュ）
+		}
+
+		bounds.add( mesh_->get_bounds() );
+	}
+
+	float_t line_margin = 0.f;
+
+	if ( line_ )
+	{
+		bounds.add( line_->get_bounds() );
+		line_margin = line_->get_max_segment_length() * 2.f;
+	}
+
+	if ( bounds.empty )
+	{
+		return false;
+	}
+
+	center = bounds.center();
+	radius = bounds.radius() * 1.1f + 0.05f + line_margin;
+
+	return true;
 }
 
 /**
@@ -72,11 +111,42 @@ void Model::render() const
 
 	for ( uint_t n = 0; n < get_shader_count(); n++ )
 	{
-		/// @todo Shader 毎にレンダリングする。モデルの描画毎に update(), bind() しない
 		get_shader_at( n )->update();
 		get_shader_at( n )->bind();
 
 		get_shader_at( n )->render( get_mesh(), n );
+	}
+}
+
+bool Model::can_render_object_instances() const
+{
+	if ( ! mesh_ || is_skin_mesh() || shader_list_.empty() )
+	{
+		return false;
+	}
+
+	for ( const auto* shader : shader_list_ )
+	{
+		if ( ! shader || ! shader->can_render_object_instances() )
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * render と同じ順にシェーダーを回し、まとめて描く
+ */
+void Model::render_object_instances( uint_t instance_count ) const
+{
+	get_mesh()->bind();
+
+	for ( uint_t n = 0; n < get_shader_count(); n++ )
+	{
+		get_shader_at( n )->update();
+		get_shader_at( n )->render_object_instances( get_mesh(), n, instance_count );
 	}
 }
 

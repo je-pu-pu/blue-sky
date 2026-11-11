@@ -6,6 +6,8 @@
 #include <blue_sky/ecs/component/PerceptionComponent.h>
 #include <core/ecs/System.h>
 
+namespace core { class TimeManager; }
+
 namespace blue_sky::ecs
 {
 
@@ -26,7 +28,17 @@ using core::ecs::TransformComponent;
 class PatrolSystem : public System< TransformComponent, PatrolComponent, AlertComponent, PerceptionComponent >
 {
 public:
-	void update( ComponentTuple& ) const override;
+	/// time_manager : 経過時間（作り手が渡す。以前は core::Service から取っていた）
+	explicit PatrolSystem( const core::TimeManager* time_manager ) : time_manager_( time_manager ) { }
+
+	void update() override;
+
+private:
+	/// 対象 1 つぶん（update() が対象ごとに呼ぶ。仮想関数ではないので、ループの中にインライン化できる）
+	void update_entity( ComponentTuple& ) const;
+
+private:
+	const core::TimeManager* time_manager_;
 
 }; // class PatrolSystem
 

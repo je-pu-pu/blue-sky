@@ -1,5 +1,4 @@
 #include "FpsPlayerControlSystem.h"
-#include <core/Service.h>
 #include <core/input/InputManager.h>
 #include <core/physics/PhysicsManager.h>
 #include <common/math.h>
@@ -8,13 +7,18 @@
 namespace blue_sky::ecs
 {
 
-void FpsPlayerControlSystem::update( ComponentTuple& component_tuple ) const
+void FpsPlayerControlSystem::update()
+{
+	for_each( [ this ] ( ComponentTuple& t ) { update_entity( t ); } );
+}
+
+void FpsPlayerControlSystem::update_entity( ComponentTuple& component_tuple ) const
 {
 	using Vector = core::math::Vector;
 	using Button = core::input::Button;
 
-	const auto* input = core::get_input_manager();
-	auto* physics_manager = core::get_physics_manager();
+	const auto* input = input_;
+	auto* physics_manager = physics_manager_;
 
 	auto* fps_player = std::get< FpsPlayerComponent* >( component_tuple );
 	auto* rigid_body = std::get< RigidBodyComponent* >( component_tuple );

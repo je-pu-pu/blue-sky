@@ -6,6 +6,11 @@
 
 #include <memory>
 
+namespace core
+{
+	class AsyncLoader;
+}
+
 namespace core::graphics
 {
 	class MsdfTextRenderer;
@@ -16,9 +21,8 @@ namespace core::graphics::direct_3d_11
 	class Direct3D11;
 	class Axis;
 
-	enum class PixelFormat;
-
 	class RenderTargetTexture;
+	class BulletDebugDraw;
 }
 
 namespace blue_sky::graphics
@@ -37,7 +41,7 @@ class GraphicsManager : public blue_sky::graphics::GraphicsManager
 {
 public:
 	using Direct3D				= core::graphics::direct_3d_11::Direct3D11;
-	using PixelFormat			= core::graphics::direct_3d_11::PixelFormat;
+	using PixelFormat			= core::graphics::PixelFormat;
 	using Axis					= core::graphics::direct_3d_11::Axis;
 
 private:
@@ -48,6 +52,8 @@ private:
 	
 	std::unique_ptr< Axis >							debug_axis_;
 	std::unique_ptr< core::graphics::MsdfTextRenderer >	msdf_text_renderer_;
+	std::unique_ptr< core::AsyncLoader >				async_loader_;		///< 別スレッドの読み込み
+	core::graphics::direct_3d_11::BulletDebugDraw*		bullet_debug_draw_ = nullptr;	///< 物理のデバッグ表示（GameMain が渡す）
 	float_t											default_font_size_ = 64.f;
 
 	std::unique_ptr< GameConstantBuffer >			game_render_data_;
@@ -70,10 +76,13 @@ protected:
 	void unset_depth_stencil() const override;
 
 	[[nodiscard]] ShadowMap* create_shadow_map( uint_t, uint_t ) const override;
-	[[nodiscard]] Line* create_line() const override;
+	[[nodiscard]] Line* create_line() override;
 	[[nodiscard]] Texture* load_texture_file( const char_t* ) const override;
+	[[nodiscard]] Texture* load_texture_file_premultiplied( const char_t* ) const override;
 
 	void render_debug_axis_model() const override;
+
+	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type, this ); }
 
 public:
 	explicit GraphicsManager( Direct3D* );
@@ -90,13 +99,15 @@ public:
 
 	RenderTargetTexture* create_render_target_texture() override;
 	RenderTargetTexture* create_render_target_texture( PixelFormat ) override;
+	RenderTargetTexture* create_render_target_texture( PixelFormat, const RenderTargetTextureOptions& ) override;
 
 	BackBufferTexture* get_back_buffer_texture() override;
 	void set_default_render_target( bool clear = true ) override;
 
-	std::unique_ptr< core::graphics::ConstantBuffer > create_constant_buffer( size_t size, int slot ) override;
-
-	MeshBuffer* create_mesh_buffer( MeshBuffer::Type type ) const override { return new MeshBuffer( direct_3d_, type ); }
+	std::unique_ptr< core::graphics::ConstantBuffer > create_constant_buffer( size_t size, int slot, ConstantBufferUsage usage = ConstantBufferUsage::DEFAULT ) override;
+	std::unique_ptr< core::graphics::InstanceBuffer > create_instance_buffer() override;
+	std::unique_ptr< core::graphics::ObjectInstanceBuffer > create_object_instance_buffer() const override;
+	Direct3D* get_direct_3d() const override { return direct_3d_; }
 
 	// void unload_mesh( const char_t* ) override;
 	// void unload_mesh_all() override;
@@ -129,8 +140,6 @@ public:
 	void clear_default_view( const Color& = Color::Black ) override;
 	void unset_render_target() override;
 
-	bool is_full_screen() const override;
-	void switch_full_screen() override;
 
 	GameConstantBuffer* get_game_render_data() const override { return game_render_data_.get(); }
 	FrameConstantBuffer* get_frame_render_data() const override { return frame_render_data_.get(); }
@@ -145,7 +154,25 @@ public:
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const Color& ) const override;
 	void draw_text( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const override;
 	void draw_text( float_t, float_t, float_t, float_t, const wchar_t*, const core::graphics::TextStyle& ) const override;
+	void queue_text( float_t, float_t, float_t, float_t, const char_t*, const core::graphics::TextStyle& ) const override;
+	void flush_text() const override;
+
+	core::graphics::TextRenderer* get_text_renderer() const override;
+
+	/// 物理のデバッグ表示を渡す（GameMain が組み立てのときに呼ぶ）
+	void set_bullet_debug_draw( core::graphics::direct_3d_11::BulletDebugDraw* d ) { bullet_debug_draw_ = d; }
+	bool save_glyph_atlas( const wchar_t* file_name ) const override;
+
+	void start_texture_load_async( const string_t& file_path, std::function< void( Texture* ) > on_created ) override;
+	void dispatch_async_loads() override;
+	float_t get_render_target_width() const override;
+	float_t get_render_target_height() const override;
+	size_t get_async_load_count() const override;
 	void draw_text_at_center( const char_t*, const Color& ) const override;
+
+	float_t measure_text_width( const char_t*, float_t ) const override;
+	float_t measure_text_line_height( float_t ) const override;
+	float_t get_default_font_size() const override { return default_font_size_; }
 
 	float_t get_text_height( const char_t* text, float_t width, float_t height ) const override;
 	float_t get_text_height( const wchar_t* text, float_t width, float_t height ) const override;

@@ -3,6 +3,9 @@
 #include <blue_sky/ConstantBuffers.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Mesh.h>
+#include <blue_sky/graphics/RenderSettings.h>
+#include <blue_sky/graphics/ResourceLoader.h>
+#include <blue_sky/graphics/Canvas2D.h>
 #include <blue_sky/type.h>
 
 #include <core/animation/SkinningAnimationSet.h>
@@ -11,6 +14,8 @@
 #include <core/graphics/PrimitiveTopology.h>
 #include <core/graphics/TextStyle.h>
 #include <core/graphics/Mesh.h>
+#include <core/graphics/LightDirection.h>
+#include <core/graphics/ObjectInstanceBuffer.h>
 
 #include <core/ecs/component/TransformComponent.h>
 #include <core/ecs/component/CameraComponent.h>
@@ -21,6 +26,11 @@
 
 namespace core
 {
+	class TimeManager;
+	class AnimationPlayer;
+
+	namespace ecs { class EntityManager; }
+
 	namespace graphics
 	{
 		class InputLayout;
@@ -30,14 +40,16 @@ namespace core
 		class Shader;
 		class Texture;
 		class BackBufferTexture;
+
+		namespace direct_3d_11 { class Direct3D11; }
 	}
 
 }
 
-namespace blue_sky
+namespace blue_sky::ecs
 {
-	class ActiveObject;
-	class ActiveObjectManager;
+	struct ObjectRenderComponent;
+	class ObjectRenderDataSystem;
 }
 
 namespace blue_sky::graphics
@@ -56,17 +68,25 @@ namespace blue_sky::graphics
  *
  * このクラスが実体化される事はない。
  * 実際にはこのクラスを継承した blue_sky::graphics::direct_3d_11::GraphicsManager が実体化される。
+ *
+ * 使う側ごとの小さな窓口（ResourceLoader・RenderSettings・Canvas2D）も実装する。使う側は全体ではなく窓口だけを受け取る（doc/描画の窓口の分割.md）
  */
-class GraphicsManager : public core::graphics::GraphicsManager
+class GraphicsManager : public core::graphics::GraphicsManager, public ResourceLoader, public RenderSettings, public Canvas2D
 {
 public:
 	using Model							= Model;
 	using Mesh							= Mesh;
 	using Line							= Line;
 	
-	using ModelManager					= core::ResourceManager< Model >;
-	using MeshManager					= core::ResourceManager< Mesh >;
-	
+	/**
+	 * モデル・メッシュは core の型で管理し、中身は blue_sky の Model・Mesh（それ以外は入れない）
+	 *
+	 * ハンドル（core::graphics::ModelHandle）を core 層の ModelComponent などがそのまま持てるようにするため。
+	 * 名前・ハンドルで引く関数（get_model・resolve_model など）は blue_sky の型に戻して返す
+	 */
+	using ModelManager					= core::ResourceManager< core::graphics::Model >;
+	using MeshManager					= core::ResourceManager< core::graphics::Mesh >;
+
 	using ShadowMap						= core::graphics::ShadowMap;
 	using Sprite						= core::graphics::Sprite;
 
@@ -86,8 +106,9 @@ private:
 	BaseShadowMapShader*									shadow_map_shader_ = nullptr;
 	BaseShadowMapShader*									shadow_map_skin_shader_ = nullptr;
 
-	std::vector< Texture* >		paper_texture_list_;
-	Texture*					paper_texture_ = nullptr;
+	/// 紙テクスチャ（ハンドルで持つ。アンロードされたら描画で使わない。以前は生ポインタで、アンロード後に無効な参照になり得た）
+	std::vector< TextureManager::WeakHandle >	paper_texture_list_;
+	TextureManager::WeakHandle					paper_texture_;
 
 	ModelManager				model_manager_;
 	MeshManager					mesh_manager_;
@@ -96,6 +117,10 @@ private:
 
 	Texture*					null_texture_ = nullptr;
 
+	/// GameMain が渡す依存（以前は GameMain のシングルトンから引いていた。設計上の問題 B28）
+	core::ecs::EntityManager*	entity_manager_ = nullptr;		///< ゲームの物体の描画の部品を持つ（以前は ActiveObjectManager を持ち、その一覧を回していた）
+	const core::TimeManager*	time_manager_ = nullptr;		///< シェーダーに渡す経過時間（以前は core::Service から取っていた）
+
 	mutable const ConstantBuffer* current_object_constant_buffer_ = nullptr;
 	mutable const ConstantBuffer* current_skinning_constant_buffer_ = nullptr;
 
@@ -103,29 +128,79 @@ private:
 	const TransformComponent*	main_camera_transform_component_ = nullptr;
 	const CameraComponent*		main_camera_component_ = nullptr;
 
+	/// 平行光源の向き（以前は setup_rendering に直接書かれていた。シーンから set_light_direction で変えられる）
+	core::graphics::LightDirection	light_direction_;
+
 	bool						is_debug_axis_enabled_ = true;
 
 	mutable uint_t				pass_count_ = 0;
 	mutable uint_t				draw_count_ = 0;
 
+	/// 同じモデルの物体をまとめて描くときの、物体ごとの定数の入れ物（初めて使うときに create_object_instance_buffer で作る。作れなければ 1 個ずつ描く）
+	mutable std::unique_ptr< core::graphics::ObjectInstanceBuffer >	object_instance_buffer_;
+	mutable bool												object_instance_buffer_created_ = false;
+
 protected:
-	const ActiveObjectManager* get_game_object_manager() const;
+	/// ゲームの物体の描画のデータを持つ System（物体がまだ無い・EntityManager が無いなら nullptr）
+	ecs::ObjectRenderDataSystem* get_object_render_data_system() const;
+
+	// 物体 1 つを描く（以前の ActiveObject::render_mesh・render_line・bind_render_data と同じ中身）
+	void bind_object_render_data( const ecs::ObjectRenderComponent& ) const;
+	void render_object_mesh( const ecs::ObjectRenderComponent&, const Model* ) const;
+	void render_object_mesh( const ecs::ObjectRenderComponent&, const Model*, const Shader* ) const;
+	void render_object_line( const ecs::ObjectRenderComponent&, const Model* ) const;
 
 	bool_t load_mesh( Model*, const char_t* name );
 	bool_t load_line( Model*, const char_t* nmae );
 
 	[[nodiscard]] virtual ShadowMap* create_shadow_map( uint_t, uint_t ) const = 0;
-	[[nodiscard]] virtual Line* create_line() const = 0;
+	[[nodiscard]] virtual Line* create_line() = 0;	///< Line はテクスチャを読み込むので const ではない（自分を Line に渡す）
 	[[nodiscard]] virtual Texture* load_texture_file( const char_t* ) const = 0;
+
+	[[nodiscard]] virtual Texture* load_texture_file_premultiplied( const char_t* ) const = 0;
+
+	/**
+	 * 画像ファイルを別スレッドで展開し、メインスレッドでテクスチャを作って on_created を呼ぶ（失敗したら nullptr）
+	 *
+	 * 実装（D3D11）は AsyncLoader を使う。on_created は dispatch_async_loads の中で呼ばれる。
+	 * 今これを呼ぶのは load_named_texture_premultiplied_async だけで、それを使う側はまだ無い。
+	 */
+	virtual void start_texture_load_async( const string_t& file_path, std::function< void( Texture* ) > on_created ) = 0;
+
+	// setup_default_shaders の中身（この順に呼ぶ）
+	void create_default_shaders();
+	void select_shadow_map_shaders();
+	void setup_screen_rectangles();
 
 	void update_constant_buffers() const;
 
 	void render_shadow_map( const BaseShadowMapShader* , bool ) const;
+	void render_shadow_map_instances( const BaseShadowMapShader*, const core::graphics::ObjectInstanceBuffer&, const ecs::ObjectRenderDataSystem&, int level ) const;
 
-	void render_debug_axis_for_bones( const ActiveObject* ) const;
+	void render_debug_axis_for_bones( const core::Transform&, const core::AnimationPlayer&, const Model* ) const;
 	virtual void render_debug_axis_model() const = 0;
 
+	/// メッシュの頂点バッファを作る（create_named_mesh が使う）
+	virtual Mesh::Buffer* create_mesh_buffer( Mesh::Buffer::Type ) const = 0;
+
+	/// 物体ごとの定数の入れ物を作る（まとめて描かないなら nullptr。開発用の BLUE_SKY_DEBUG_NO_INSTANCING=1 のときなど）
+	[[nodiscard]] virtual std::unique_ptr< core::graphics::ObjectInstanceBuffer > create_object_instance_buffer() const = 0;
+
+	/// まとめて描く準備ができていれば、物体ごとの定数の入れ物を返す（できていなければ nullptr。1 個ずつ描く）
+	const core::graphics::ObjectInstanceBuffer* get_ready_object_instance_buffer( const ecs::ObjectRenderDataSystem* ) const;
+
+	/// 名前のテクスチャを外す（空を外すときに使う）
+	void unload_named_texture( const char_t* );
+
+	// 描画の回数（実装がフレームの初め・パスごと・描くごとに数える。読むのは get_pass_count・get_draw_count）
+	void clear_pass_count() const { pass_count_ = 0; }
+	void count_pass() const { pass_count_++; }
+	void clear_draw_count() const { draw_count_ = 0; }
+
 public:
+	/// Direct3D 11 の実装に直接触る所（頂点バッファ・Draw など）向け。抽象層（core::graphics::GraphicsManager）には置かない（B19）
+	virtual core::graphics::direct_3d_11::Direct3D11* get_direct_3d() const = 0;
+
 	GraphicsManager();
 	virtual ~GraphicsManager() override;
 
@@ -135,8 +210,8 @@ public:
 		int height;
 	};
 
-	virtual int get_screen_width() const = 0;		///< 画面の幅を返す
-	virtual int get_screen_height() const = 0;		///< 画面の高さを返す
+	int get_screen_width() const override = 0;		///< 画面の幅を返す
+	int get_screen_height() const override = 0;		///< 画面の高さを返す
 
 	/// システムが対応する表示解像度のリストを返す
 	virtual std::vector< DisplayMode > get_available_display_modes() const = 0;
@@ -151,10 +226,54 @@ public:
 
 	// Model
 	template< typename Type=Model > Type* create_named_model( const char_t* name ) { return model_manager_.create_named< Type >( name ); }
-	Model* load_model( const char_t* name );
+	Model* load_model( const char_t* name ) override;
 	Model* clone_model( const Model* );
+
+	/**
+	 * モデルとシェーダーを複製する（メッシュ・線・アニメーションは共有する）
+	 *
+	 * load_model が返すモデルとそのシェーダーは、同じ種類の ActiveObject すべてで共有されている。
+	 * 1 つの ActiveObject だけシェーダーのテクスチャやパラメータを変えたいときは、これで複製したモデルを持たせる
+	 */
+	Model* clone_model_with_shaders( const Model* ) override;
 	
 	template< typename Type=Model > Type* get_model( const char_t* name ) { return model_manager_.get< Type >( name ); }
+
+	/**
+	 * モデルのハンドル
+	 *
+	 * 長く持つ側（段階 1 からのコンポーネント）は生ポインタではなくハンドルを持ち、使うたびに resolve_model で引く。
+	 * 解放（unload_named_model）の後は nullptr を返す
+	 */
+	ModelHandle get_model_handle( const core::graphics::Model* m ) const override { return model_manager_.handle_of( m ); }	///< 管理しているモデル（clone_model の結果など）
+	Model* resolve_model( ModelHandle h ) const override { return static_cast< Model* >( h.get() ); }
+
+	/// 名前で作ったモデル・メッシュを外す（どの名前からも指されなくなれば解放する。解放はフレームの終わりの flush_releases で、その後ハンドルは nullptr を返す）。作った側が、使い終わったときに呼ぶ
+	void unload_named_model( const char_t* name ) { model_manager_.remove_named( name ); }
+	void unload_named_mesh( const char_t* name ) { mesh_manager_.remove_named( name ); }
+
+	/// create_shader で作ったシェーダーを解放する（作った側が、使い終わったときに呼ぶ。解放はフレームの終わり）
+	void destroy_shader( Shader* shader ) { get_shader_manager().release( shader ); }
+
+	/**
+	 * 解放・差し替えを頼まれたリソースをまとめて解放する（GameMain がフレームの終わり（Present の後）とシーンの切り替えで呼ぶ）
+	 *
+	 * モデルが先（メッシュ・シェーダー・テクスチャを使う側）。描く対象のこのフレームのモデル（ObjectRenderDataSystem）も忘れる。
+	 * @return 解放した数
+	 */
+	std::size_t flush_releases();
+
+	/// Handle の数の説明（デバッグ表示用。種類ごとに「中身のある数 / 作った数」。doc/ハンドルの設計.md の 2 章）
+	string_t describe_handle_counts() const
+	{
+		auto describe = [] ( const char_t* name, const auto& manager )
+		{
+			return string_t( name ) + " " + std::to_string( manager.get_live_handle_count() ) + "/" + std::to_string( manager.get_handle_count() );
+		};
+
+		return describe( "モデル", model_manager_ ) + "・" + describe( "メッシュ", mesh_manager_ ) + "・" + describe( "シェーダー", get_shader_manager() )
+			+ "・" + describe( "テクスチャ", texture_manager_ ) + "・" + describe( "スキニング", skinning_animation_set_manager_ );
+	}
 	
 	// Mesh
 	template< typename Type=Mesh > Type* create_named_mesh( const char_t* name, Mesh::Buffer::Type type )
@@ -166,19 +285,65 @@ public:
 		return m;
 	}
 
-	Mesh* get_mesh( const char_t* name ) { return mesh_manager_.get( name ); }
+	Mesh* get_mesh( const char_t* name ) { return mesh_manager_.get< Mesh >( name ); }
 
-	virtual Mesh::Buffer* create_mesh_buffer( Mesh::Buffer::Type ) const = 0;
+	/// 定数バッファを作る（core::graphics::GraphicsManager と ResourceLoader の両方の関数。両方から同じ名前を受け継ぐので、ここで宣言し直して 1 つにする）
+	std::unique_ptr< ConstantBuffer > create_constant_buffer( size_t size, int slot, ConstantBufferUsage usage = ConstantBufferUsage::DEFAULT ) override = 0;
 
 	// SkinningAnimationSet
 	SkinningAnimationSet* create_skinning_animation_set() { return skinning_animation_set_manager_.create(); }
 
 	// Texture
 	Texture* load_texture( const char_t* file_name ) override { return load_named_texture( file_name, file_name ); }
+	// 読み込みに失敗すると例外（common::exception< std::string >。std::exception ではない）を投げる。nullptr は返らない
 	Texture* load_named_texture( const char_t* name, const char_t* file_name );
-	Texture* get_texture( const char_t* name );
+	Texture* get_texture( const char_t* name ) override;
+
+	/// 名前のテクスチャのハンドル（無ければ空）・ハンドルから引く（解放済みなら nullptr）
+	TextureHandle get_texture_handle( const char_t* name ) const override { return texture_manager_.get_handle( name ); }
+	TextureHandle get_texture_handle_of( const Texture* t ) const override { return texture_manager_.handle_of( t ); }
+	Texture* resolve_texture( TextureHandle h ) const override { return h.get(); }
+
+	/// UI 用の画像を名前付きで読み込む（乗算済みアルファ・ミップなし。詳細は Direct3D11::load_texture_premultiplied）。失敗すると例外
+	Texture* load_named_texture_premultiplied( const char_t* name, const char_t* file_name ) override;
+
+	/**
+	 * load_named_texture_premultiplied の別スレッド版（設計上の問題 B23）
+	 *
+	 * 画像の展開は作業スレッドで行い、テクスチャの作成・登録と on_loaded の呼び出しはメインスレッド
+	 * （毎フレームの dispatch_async_loads の中）で行う。読み込み済みならすぐ on_loaded を呼ぶ。失敗したら nullptr を渡す。
+	 *
+	 * まだ使う側が無い（呼んでいる所は無い）。シーンの読み込みを非同期にする後続の作業で使う。
+	 */
+	void load_named_texture_premultiplied_async( const char_t* name, const char_t* file_name, std::function< void( Texture* ) > on_loaded );
+
+	/// ゲームの物体の描画の部品を持つ EntityManager を渡す（GameMain が組み立てのときに呼ぶ）
+	void set_entity_manager( core::ecs::EntityManager* m ) { entity_manager_ = m; }
+
+	/// 時間の管理を渡す（GameMain が組み立てのときに呼ぶ）
+	void set_time_manager( const core::TimeManager* m ) { time_manager_ = m; }
+
+	/**
+	 * シェーダーを作る（シェーダーのコンストラクタの先頭に自分を渡す）
+	 *
+	 * core::graphics::GraphicsManager の同名の関数を隠し、blue_sky の GraphicsManager として渡す
+	 * （シェーダーは blue_sky の機能を使う。以前は core::Service から取っていた。設計上の問題 B28）
+	 */
+	template< typename Type, typename ... Args > Type* create_shader( Args ... args ) { return get_shader_manager().create< Type >( this, args ... ); }
+	template< typename Type, typename ... Args > Type* create_named_shader( const char_t* name, Args ... args ) { return get_shader_manager().create_named< Type >( name, this, args ... ); }
+
+	/// 今の描画先の大きさ（ビューポート。UI を描くときに、描画先に合わせて写すのに使う）
+	float_t get_render_target_width() const override = 0;
+	float_t get_render_target_height() const override = 0;
+
+	/// 別スレッドの読み込みが終わったものを処理する（GameMain が毎フレーム呼ぶ）
+	virtual void dispatch_async_loads() = 0;
+
+	/// 別スレッドの読み込みで、まだ終わっていないものの数
+	virtual size_t get_async_load_count() const = 0;
 	Texture* get_null_texture() { return null_texture_; }
 
+	/// 既定のシェーダー・シャドウマップ用シェーダー・画面全体の矩形を準備する
 	void setup_default_shaders();
 	virtual void refresh_all_shaders();
 
@@ -187,27 +352,36 @@ public:
 	// virtual void unload_mesh( const char_t* ) = 0;
 	// virtual void unload_mesh_all() = 0;
 
-	virtual void unload_named_texture( const char_t* );
 	// virtual void unload_texture_all() = 0;
 
-	void set_paper_texture_type( int_t );
+	void set_paper_texture_type( int_t ) override;
 	void bind_paper_texture() const;
 
-	virtual void set_sky_box( const char_t* ) = 0;
-	virtual void unset_sky_box() = 0;
+	// RenderSettings
+	void set_sky_box( const char_t* ) override = 0;
+	void unset_sky_box() override = 0;
 	virtual bool is_sky_box_set() const = 0;
 
-	virtual void set_ground( const char_t* ) = 0;
+	void set_ground( const char_t* ) override = 0;
 	virtual void unset_ground() = 0;
 	// virtual bool is_ground_set() const = 0;
 
-	virtual void set_ambient_color( const Color& ) = 0;
-	virtual void set_shadow_color( const Color& ) = 0;
-	virtual void set_shadow_paper_color( const Color& ) = 0;
-	virtual void set_drawing_accent( float_t ) = 0;
-	virtual void set_drawing_line_type( int_t ) = 0;
+	void set_ambient_color( const Color& ) override = 0;
+	void set_shadow_color( const Color& ) override = 0;
+	void set_shadow_paper_color( const Color& ) override = 0;
+	void set_drawing_accent( float_t ) override = 0;
+	void set_drawing_line_type( int_t ) override = 0;
 
 	virtual void set_eye_position( const Vector& ) = 0;
+
+	/**
+	 * 平行光源の向き（光が進む向き）を設定する。次の setup_rendering から使う
+	 *
+	 * 長さは問わない（正規化して使う）。長さ 0 の向きは無視する。既定は ( -1, -2, 0.5 )
+	 *
+	 * @return 設定したら true
+	 */
+	bool set_light_direction( const Vector& direction ) { return light_direction_.set( direction ); }
 
 	bool_t is_shadow_enabled() const { return static_cast< bool_t >( shadow_map_ ); }
 	ShadowMap* get_shadow_map() { return shadow_map_.get(); }
@@ -215,13 +389,11 @@ public:
 
 	virtual void resolve_depth_texture() const = 0;
 	virtual Texture* get_depth_texture() const = 0;
-	virtual Sprite* get_sprite() const = 0;
+	Sprite* get_sprite() const override = 0;
 
 	virtual void clear_default_view( const Color& = Color::Black ) = 0;
 	virtual void unset_render_target() = 0;
 
-	virtual bool is_full_screen() const = 0;
-	virtual void switch_full_screen() = 0;
 
 	virtual GameConstantBuffer* get_game_render_data() const = 0;
 	virtual FrameConstantBuffer* get_frame_render_data() const = 0;
@@ -238,10 +410,22 @@ public:
 	virtual void unset_depth_stencil() const = 0;
 
 	virtual void setup_rendering() override;
-	
+
+	/**
+	 * このフレームで物体を描く範囲を決める（見えない物を描かない = カリング。setup_rendering の前に呼ぶ）
+	 *
+	 * カメラの視錐台（camera_view_projection から）と、影のカスケードごとの範囲（シャドウマップの今の行列から）を、
+	 * ecs::ObjectRenderDataSystem に渡す。範囲の外の物は、その段（本体・線 / 影の各段）で描かず、どこにも入らなければ定数も書かない。
+	 * 呼ばないフレームは全部を描く（以前と同じ）
+	 */
+	void set_object_culling( const Matrix& camera_view_projection ) const;
+
 	virtual void render_shadow_map() const;
-	virtual void render_active_objects( const ActiveObjectManager* ) const;
-	virtual void render_active_objects_velocity( const ActiveObjectManager* ) const;	///< モーションベクトルパス ( 案B / 段階0b )
+	/// ゲームの物体を描く（メッシュ → 線。描く対象は ecs::ObjectRenderDataSystem::get_render_targets の順）
+	virtual void render_objects() const;
+	void render_object_meshes() const;	///< render_objects の前半 : 物体のメッシュ（段ごとの時間を測るため分けた）
+	void render_object_lines() const;	///< render_objects の後半 : 物体の線
+	virtual void render_objects_velocity() const;	///< モーションベクトルパス ( 案B / 段階0b )
 
 	virtual void set_post_effect_shader( Shader* ) override;
 	virtual Shader* get_post_effect_shader() const override;
@@ -278,15 +462,39 @@ public:
 	virtual void draw_text( float_t left, float_t top, float_t right, float_t bottom, const char_t* text, const core::graphics::TextStyle& style ) const = 0;
 	virtual void draw_text( float_t left, float_t top, float_t right, float_t bottom, const wchar_t* text, const core::graphics::TextStyle& style ) const = 0;
 
+	/// 文字を積むだけで、まだ描かない（flush_text で描く）。続けて描く文字列を 1 回の描画にまとめる
+	void queue_text( float_t left, float_t top, float_t right, float_t bottom, const char_t* text, const core::graphics::TextStyle& style ) const override = 0;
+
+	/// 積んだ文字を描く
+	void flush_text() const override = 0;
+
+	/// 開発用 : 文字のアトラス（MSDF）を PNG に保存する
+	virtual bool save_glyph_atlas( const wchar_t* /* file_name */ ) const { return false; }
+
 	/// 画面中央にテキストを描画する（ローディング表示等）
 	virtual void draw_text_at_center( const char_t*, const Color& ) const = 0;
 
 	virtual float_t get_text_height( const char_t* text, float_t width, float_t height ) const = 0;
 	virtual float_t get_text_height( const wchar_t* text, float_t width, float_t height ) const = 0;
 
+	/**
+	 * テキストの描画幅を測る（ピクセル）
+	 *
+	 * @param text 文字列（UTF-8）。最初の改行までを測る
+	 * @param font_size フォントサイズ（ピクセル）。0 以下ならデフォルトサイズ
+	 * @return 描画幅。フォント未準備なら 0
+	 */
+	float_t measure_text_width( const char_t* text, float_t font_size ) const override = 0;
+
+	/// テキストの 1 行の高さ（ピクセル）。font_size が 0 以下ならデフォルトサイズ
+	float_t measure_text_line_height( float_t font_size ) const override = 0;
+
+	/// TextStyle::font_size が 0 のときに使われるフォントサイズ（ピクセル）
+	float_t get_default_font_size() const override = 0;
+
 	void set_debug_axis_enabled( bool e ) { is_debug_axis_enabled_ = e; }
 
-	void render_debug_axis( const ActiveObjectManager* ) const;
+	void render_debug_axis() const;
 
 	/**
 	 * メインカメラの情報を設定する
@@ -324,11 +532,8 @@ public:
 		return Vector( 0.f, 0.f, 1.f );
 	}
 
-	void clear_pass_count() const { pass_count_ = 0; }
-	void count_pass() const { pass_count_++; }
 	uint_t get_pass_count() const { return pass_count_; }
 
-	void clear_draw_count() const { draw_count_ = 0; }
 	void count_draw() const override { draw_count_++; }
 	uint_t get_draw_count() const { return draw_count_; }
 

@@ -1,0 +1,120 @@
+# UI の表示文字列（日本語）
+# 形式: キー = 値（UTF-8。# で始まる行はコメント。\n で改行。{0} {1} は差し込み）
+# 未登録のキーはキーそのものが表示される
+
+# ---- 共通 ----
+common.yes = はい
+common.no = いいえ
+common.cancel = キャンセル
+ui.on = オン
+ui.off = オフ
+ui.key_waiting = キーを押してください…
+loading = 読み込み中…
+
+# ---- 操作ヒント（キーボード・マウス） ----
+hint.key.confirm = Enter
+hint.key.change = ←→
+hint.key.cancel = Esc
+hint.key.tab = Q / E
+# ---- 操作ヒント（パッド） ----
+hint.pad.confirm = A
+hint.pad.change = ←→
+hint.pad.cancel = B
+hint.pad.tab = LB / RB
+
+hint.select = 決定
+hint.toggle = 切替
+hint.adjust = 調整
+hint.change = 変更
+hint.rebind = キーを変更
+hint.back = 戻る
+hint.abort = 中止
+hint.tab = タブ切替
+
+# ---- ポーズ ----
+pause.title = ポーズ
+pause.resume = ゲームに戻る
+pause.options = オプション
+pause.stage_select = ステージ選択へ
+
+# ---- オプション ----
+options.title = オプション
+options.tab.graphics = グラフィックス
+options.tab.audio = サウンド
+options.tab.controls = 操作
+
+options.resolution = 解像度
+options.resolution.custom = カスタム（{0}）
+options.resolution.description = 画面の解像度。「適用」で反映されます
+options.full_screen = フルスクリーン
+options.full_screen.description = フルスクリーン表示にします。「適用」で反映されます
+options.fov = 視野角
+options.fov.description = カメラの視野角（度）
+options.display_fps = FPS 表示
+options.display_fps.description = 画面にフレームレートを表示します
+options.text_scale = 文字の大きさ
+options.text_scale.description = メニューの文字の大きさを変えます
+
+options.volume = 音量
+options.volume.description = 全体の音量
+options.mute = ミュート
+options.mute.description = すべての音を消します（F2 でも切り替えられます）
+
+options.mouse_sensitivity = マウス感度
+options.mouse_sensitivity.description = 視点を動かす速さ
+options.key_bindings = キー割り当て
+options.key.description = 決定を押してから、割り当てたいキーを押してください。他の操作と重なった場合は入れ替わります
+options.key.up = 前進
+options.key.down = 後退
+options.key.left = 左へ移動
+options.key.right = 右へ移動
+options.key.jump = ジャンプ
+options.key.a = アクション
+options.key.b = サブアクション
+options.key.l = L
+options.key.r = R
+options.key.l2 = L2
+options.key.r2 = R2
+
+options.apply = 適用
+options.apply.description = 解像度・フルスクリーンの変更を反映します
+options.defaults = 既定値に戻す
+options.defaults.description = すべての設定を既定値に戻します（まだ保存されません）
+options.back = 戻る
+
+options.confirm_display = この表示設定を維持しますか？\n{0} 秒後に元の設定に戻ります
+options.keep = 維持する
+options.revert = 元に戻す
+options.confirm_unapplied = 適用していない変更があります
+options.apply_and_back = 適用して戻る
+options.discard_and_back = 破棄して戻る
+options.confirm_defaults = すべての設定を既定値に戻しますか？
+
+# ---- キーの表示名 ----
+key.MOUSE_L = マウス左
+key.MOUSE_R = マウス右
+key.MOUSE_M = マウス中
+key.MOUSE_X1 = マウス X1
+key.MOUSE_X2 = マウス X2
+key.SPACE = スペース
+key.ENTER = Enter
+key.BACKSPACE = BackSpace
+key.LSHIFT = 左 Shift
+key.RSHIFT = 右 Shift
+key.LCTRL = 左 Ctrl
+key.RCTRL = 右 Ctrl
+key.LALT = 左 Alt
+key.RALT = 右 Alt
+key.UP = ↑
+key.DOWN = ↓
+key.LEFT = ←
+key.RIGHT = →
+
+# 数値の書式（{0} が数）
+format.percent = {0}%
+
+# パッドのボタンの表示名（{0} がボタンの番号）
+key.pad = パッド {0}
+
+options.vsync = 垂直同期
+options.vsync.description = 画面の書き換えに合わせて表示し、映像のずれ（ティアリング）を防ぎます

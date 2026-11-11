@@ -2,7 +2,6 @@
 
 #include <blue_sky/ai/EnemyPerception.h>
 
-#include <core/Service.h>
 #include <core/TimeManager.h>
 #include <core/math/Quaternion.h>
 
@@ -52,14 +51,19 @@ void face_toward( TransformComponent* transform, const Vector& goal, float turn_
 
 } // namespace
 
-void PatrolSystem::update( ComponentTuple& tuple ) const
+void PatrolSystem::update()
+{
+	for_each( [ this ] ( ComponentTuple& t ) { update_entity( t ); } );
+}
+
+void PatrolSystem::update_entity( ComponentTuple& tuple ) const
 {
 	auto* transform  = std::get< TransformComponent* >( tuple );
 	auto* patrol     = std::get< PatrolComponent* >( tuple );
 	auto* alert      = std::get< AlertComponent* >( tuple );
 	auto* perception = std::get< PerceptionComponent* >( tuple );
 
-	const float dt  = core::get_time_manager()->get_delta_time();
+	const float dt  = time_manager_->get_delta_time();
 	const Vector pos = transform->transform.get_position();
 
 	// --- 目標地点を警戒状態で決める ---

@@ -159,15 +159,67 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test\dev\DevToolsTest.cpp" />
+    <ClCompile Include="test\script\ScriptBindingsTest.cpp" />
+    <ClCompile Include="test\scene\SceneStackTest.cpp" />
+    <ClCompile Include="test\dev\DevOptionsTest.cpp" />
+    <ClCompile Include="test\sound\PlaybackRateTest.cpp" />
+    <ClCompile Include="test\ecs\PhysicsSyncSystemTest.cpp" />
+    <ClCompile Include="test\ecs\CollisionEventSystemTest.cpp" />
+    <ClCompile Include="test\physics\EntityTagTest.cpp" />
+    <ClCompile Include="test\sound\SampleRateStepperTest.cpp" />
+    <ClCompile Include="test\sound\SoundManagerTest.cpp" />
+    <ClCompile Include="test\math\SkinningAnimationSetTest.cpp" />
+    <ClCompile Include="test\ecs\MoveToTargetSystemTest.cpp" />
+    <ClCompile Include="test\ecs\ObjectFactoryTest.cpp" />
+    <ClCompile Include="test\stage\TomlStageParserTest.cpp" />
+    <ClCompile Include="test\stage\StageFilesTest.cpp" />
+    <ClCompile Include="test\stage\StoryTextParserTest.cpp" />
+    <ClCompile Include="test\stage\StageLookTest.cpp" />
+    <ClCompile Include="test\ecs\ObjectRenderResourcesTest.cpp" />
+    <ClCompile Include="test\graphics\ObjFaceVertexTest.cpp" />
+    <ClCompile Include="test\script\ScriptManagerTest.cpp" />
+    <ClCompile Include="test\graphics\RenderSettingsTest.cpp" />
+    <ClCompile Include="test\graphics\CullingTest.cpp" />
+    <ClCompile Include="test\graphics\InstancingTest.cpp" />
+    <ClCompile Include="test\graphics\TextureSlotTest.cpp" />
+    <ClCompile Include="test\ecs\RenderSystemHandleTest.cpp" />
+    <ClCompile Include="test\physics\RigidBodyTest.cpp" />
+    <ClCompile Include="test\physics\PhysicsManagerTest.cpp" />
+    <ClCompile Include="test\graphics\EffectParserTest.cpp" />
+    <ClCompile Include="test\input\RawInputTest.cpp" />
+    <ClCompile Include="test\ui\UIWidgetTest.cpp" />
+    <ClCompile Include="test\ui\UIMeasureTest.cpp" />
+    <ClCompile Include="test\ui\AsyncLoaderTest.cpp" />
+    <ClCompile Include="test\ui\UILayoutTest.cpp" />
+    <ClCompile Include="test\ui\ResourceManagerTest.cpp" />
+    <ClCompile Include="test\ui\ResourceHandleBenchmarkTest.cpp" />
+    <ClCompile Include="test\ui\Pixel2DSpaceTest.cpp" />
+    <ClCompile Include="test\ui\OptionsControllerTest.cpp" />
+    <ClCompile Include="test\ui\UIRendererTest.cpp" />
+    <ClCompile Include="test\ui\UIActionTest.cpp" />
+    <ClCompile Include="test\ui\UIImageTest.cpp" />
+    <ClCompile Include="test\ui\UIScreenTest.cpp" />
+    <ClCompile Include="test\ui\SettingStoreTest.cpp" />
+    <ClCompile Include="test\ui\KeyNamesTest.cpp" />
+    <ClCompile Include="test\ui\NavRepeaterTest.cpp" />
+    <ClCompile Include="test\ui\StringTableTest.cpp" />
     <ClCompile Include="test\math\BulletTest.cpp" />
     <ClCompile Include="test\math\DirectXMathTest.cpp" />
     <ClCompile Include="test\ecs\EntityManagerTest.cpp" />
+    <ClCompile Include="test\ecs\EcsBenchmarkTest.cpp" />
+    <ClCompile Include="test\ecs\StablePoolTest.cpp" />
+    <ClCompile Include="test\ecs\PerceptionSystemTest.cpp" />
+    <ClCompile Include="test\ecs\ObjectRenderDataSystemTest.cpp" />
     <ClCompile Include="test\ecs\EnemyAiSceneEcsTest.cpp" />
     <ClCompile Include="test\graphics\MsdfFontTest.cpp" />
     <ClCompile Include="test\graphics\NeuralNprTest.cpp" />
     <ClCompile Include="test\graphics\CoherentNoiseTest.cpp" />
     <ClCompile Include="test\ai\EnemyPerceptionTest.cpp" />
     <ClCompile Include="test\lib.cpp" />
+    <ClCompile Include="test\ecs\LadderStoneSwitchTest.cpp" />
+    <ClCompile Include="test\ecs\BalloonGirlRobotTest.cpp" />
+    <ClCompile Include="test\ecs\PlayerTest.cpp" />
     <ClCompile Include="test\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -176,6 +228,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="test\ui\UITestHelper.h" />
+    <ClInclude Include="test\graphics\FakeGraphics.h" />
     <ClInclude Include="test\pch.h" />
   </ItemGroup>
   <ItemGroup>

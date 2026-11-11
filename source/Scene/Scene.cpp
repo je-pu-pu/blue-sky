@@ -1,9 +1,10 @@
 #include "Scene.h"
 
 #include <blue_sky/GameMain.h>
-#include <blue_sky/ActiveObjectManager.h>
-#include <blue_sky/ActiveObjectPhysics.h>
+#include <blue_sky/ObjectUpdater.h>
+#include <blue_sky/ObjectFactory.h>
 #include <blue_sky/graphics/GraphicsManager.h>
+#include <blue_sky/DebugLog.h>
 
 #include <core/ecs/EntityManager.h>
 #include <core/sound/SoundManager.h>
@@ -14,9 +15,20 @@
 namespace blue_sky
 {
 
-Scene::Scene()
-	: total_elapsed_time_( 0.f )
+Scene::Scene( GameMain& game_main )
+	: game_main_( & game_main )
+	, total_elapsed_time_( 0.f )
 	, is_paused_( false )
+	, arguments_( game_main.get_next_scene_arguments() )
+{
+
+}
+
+Scene::Scene( const SceneArguments& arguments )
+	: game_main_( nullptr )
+	, total_elapsed_time_( 0.f )
+	, is_paused_( false )
+	, arguments_( arguments )
 {
 
 }
@@ -24,6 +36,68 @@ Scene::Scene()
 Scene::~Scene()
 {
 
+}
+
+void Scene::log_lost_resource( const char_t* what ) const
+{
+	if ( lost_resource_logged_.insert( what ).second )
+	{
+		debug_log( "[" + get_name() + "] " + what + " を引けません（解放された）。使わずに続けます" );
+	}
+}
+
+Scene::Texture* Scene::resolve( TextureHandle h, const char_t* what ) const
+{
+	Texture* t = h.get();
+
+	if ( ! t && ! h.is_null() )
+	{
+		log_lost_resource( what );
+	}
+
+	return t;
+}
+
+Scene::Model* Scene::resolve( ModelHandle h, const char_t* what ) const
+{
+	Model* m = static_cast< Model* >( h.get() );	// GraphicsManager は blue_sky のモデルだけを入れる
+
+	if ( ! m && ! h.is_null() )
+	{
+		log_lost_resource( what );
+	}
+
+	return m;
+}
+
+Scene::Sound* Scene::resolve( SoundHandle h, const char_t* what ) const
+{
+	Sound* s = h.get();
+
+	if ( ! s && ! h.is_null() )
+	{
+		log_lost_resource( what );
+	}
+
+	return s;
+}
+
+Scene::TextureHandle Scene::load_named_texture_handle( const char_t* name, const char_t* file_name ) const
+{
+	return get_graphics_manager()->get_texture_handle_of( get_graphics_manager()->load_named_texture( name, file_name ) );
+}
+
+Scene::ModelHandle Scene::load_model_handle( const char_t* name ) const
+{
+	return get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( name ) );
+}
+
+void Scene::play( SoundHandle h, const char_t* what, bool loop ) const
+{
+	if ( Sound* s = resolve( h, what ) )
+	{
+		s->play( loop );
+	}
 }
 
 void Scene::update()
@@ -50,17 +124,27 @@ float Scene::get_elapsed_time() const
 
 Scene::EntityManager* Scene::get_entity_manager() const
 {
-	return EntityManager::get_instance();
+	return game_main_->get_entity_manager();
 }
 
-ActiveObjectManager* Scene::get_active_object_manager() const
+ObjectUpdater* Scene::get_object_updater() const
 {
-	return get_game_main()->get_active_object_manager();
+	return get_game_main()->get_object_updater();
 }
 
-ActiveObjectPhysics* Scene::get_active_object_physics() const
+ObjectFactory* Scene::get_object_factory() const
 {
-	return get_game_main()->get_active_object_physics();
+	return get_game_main()->get_object_factory();
+}
+
+core::physics::PhysicsManager* Scene::get_physics_manager() const
+{
+	return game_main_->get_physics_manager();
+}
+
+const core::TimeManager* Scene::get_time_manager() const
+{
+	return game_main_->get_time_manager();
 }
 
 GraphicsManager* Scene::get_graphics_manager() const
@@ -110,7 +194,17 @@ const App* Scene::get_app() const
 
 const GameMain* Scene::get_game_main() const
 {
-	return GameMain::get_instance();
+	return game_main_;
+}
+
+core::setting::SettingStore* Scene::get_setting_store() const
+{
+	return game_main_->get_settings();
+}
+
+core::graphics::direct_3d_11::BulletDebugDraw* Scene::get_bullet_debug_draw() const
+{
+	return game_main_->get_bullet_debug_draw();
 }
 
 int Scene::get_width() const
@@ -153,8 +247,6 @@ void Scene::stop_sound( const char* name ) const
 
 /***
  * スプライト描画のための定数バッファを更新する
- *
- * @todo GraphicsManager に移行する
  */
 void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t drawing_accent_scale )
 {
@@ -169,7 +261,8 @@ void Scene::update_constant_buffer_for_sprite_frame( int line_type, float_t draw
 	}
 
 	{
-		get_graphics_manager()->set_drawing_accent( get_bgm()->get_current_peak_level() * drawing_accent_scale );
+		const Sound* bgm = get_bgm();	// BGM が無い・引けないなら、線の強調は 0
+		get_graphics_manager()->set_drawing_accent( ( bgm ? bgm->get_current_peak_level() : 0.f ) * drawing_accent_scale );
 		get_graphics_manager()->set_drawing_line_type( line_type );
 
 		get_graphics_manager()->get_frame_drawing_render_data()->update();

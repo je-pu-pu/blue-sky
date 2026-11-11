@@ -1,6 +1,7 @@
 #include "TransformTestScene.h"
 
 #include <blue_sky/SceneManager.h>
+#include <blue_sky/Input.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 
 #include <core/ecs/component/TransformComponent.h>
@@ -26,15 +27,16 @@
 namespace blue_sky
 {
 
-TransformTestScene::TransformTestScene()
-	: camera_( EntityManager::get_instance()->create_entity() )
+TransformTestScene::TransformTestScene( GameMain& game_main )
+	: Scene( game_main )
+	, camera_( get_entity_manager()->create_entity() )
 {
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
 	// System を追加する
-	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >();
-	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000 );
+	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >( 0, get_input() );
+	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000, get_graphics_manager(), get_time_manager() );
 
 	// Entity と Component を追加する
 	current_entity_ = get_entity_manager()->create_entity();
@@ -43,7 +45,7 @@ TransformTestScene::TransformTestScene()
 	current_entity_->add_component< core::ecs::RenderComponent >();
 	current_entity_model_ = current_entity_->add_component< core::ecs::ModelComponent >();
 
-	current_entity_model_->model = get_graphics_manager()->load_model( "goal" );
+	current_entity_model_->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( "goal" ) );
 
 	camera_transform_ = camera_->add_component< core::ecs::TransformComponent >();
 	camera_transform_->transform.set_identity();
@@ -83,7 +85,6 @@ void TransformTestScene::update()
 	get_entity_manager()->update();
 
 	
-	/// @todo Component の値を GUI で変更する仕組みを整理する
 	
 	// GUI によってモデルを変更する
 	static int model_index = 0;
@@ -95,7 +96,7 @@ void TransformTestScene::update()
 	if ( ImGui::Combo( "Model", & model_index, & combo_items[ 0 ], static_cast< int >( combo_items.size() ) ) )
 	{
 		std::cout << "index : " << model_index << std::endl;
-		current_entity_model_->model = get_graphics_manager()->load_model( combo_items[ model_index ] );
+		current_entity_model_->model = get_graphics_manager()->get_model_handle( get_graphics_manager()->load_model( combo_items[ model_index ] ) );
 	}
 
 	static std::vector< int > shader_index_list;
@@ -108,14 +109,18 @@ void TransformTestScene::update()
 		shader_combo_items.push_back( s->get_name() );
 	}
 
-	shader_index_list.resize( current_entity_model_->model->get_shader_count() );
+	// モデルはハンドルから引く（読めなかった・解放されたなら、シェーダーの選択は出さない）
+	auto* current_model = get_graphics_manager()->resolve_model( current_entity_model_->model );
+	const uint_t shader_count = current_model ? current_model->get_shader_count() : 0;
 
-	for ( uint_t n = 0; n < current_entity_model_->model->get_shader_count(); n++ )
+	shader_index_list.resize( shader_count );
+
+	for ( uint_t n = 0; n < shader_count; n++ )
 	{
 		if ( ImGui::Combo( string_t( "Shader " + std::to_string( n ) ).c_str(), & shader_index_list[ n ], & shader_combo_items[ 0 ], static_cast< int >( shader_combo_items.size() ) ) )
 		{
 			std::cout << "index : " << shader_index_list[ n ] << std::endl;
-			current_entity_model_->model->set_shader_at( n, get_graphics_manager()->get_shader_list()[ shader_index_list[ n ] ].get() );
+			current_model->set_shader_at( n, get_graphics_manager()->get_shader_list()[ shader_index_list[ n ] ].get() );
 		}
 	}
 
@@ -146,6 +151,9 @@ void TransformTestScene::update()
 
 void TransformTestScene::render()
 {
+	// 描く System（RenderSystem など）を、画面のクリアの後に動かす
+	get_entity_manager()->render();
+
 	std::stringstream ss;
 	ss << "Time : " << get_total_elapsed_time() << '\n';
 	ss << "FPS : " << get_main_loop()->get_last_fps() << '\n';

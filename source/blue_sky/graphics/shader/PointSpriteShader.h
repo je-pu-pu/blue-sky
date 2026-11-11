@@ -17,8 +17,8 @@ public:
 protected:
 
 public:
-	PointSpriteShader( const char_t* input_layout_name = "pos_norm", const char_t* effect_technique_name = "point_sprite" )
-		: Shader( input_layout_name, effect_technique_name, { ShaderStage::VS, ShaderStage::PS } )
+	PointSpriteShader( GraphicsManager* graphics_manager, const char_t* input_layout_name = "pos_norm", const char_t* effect_technique_name = "point_sprite" )
+		: Shader( graphics_manager, input_layout_name, effect_technique_name, { ShaderStage::VS, ShaderStage::PS } )
 	{
 
 	}

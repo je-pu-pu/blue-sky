@@ -8,7 +8,7 @@ COMMON_POS_COLOR vs_drawing_line( COMMON_POS_COLOR input, uint vertex_id : SV_Ve
 	// 色を変動させる
 	static const float color_random_range = 0.1f;
 
-	/// @todo 描画毎に vertex_id が変動する場合があるため色がちらつく問題に対応する
+	// 頂点ごとに色を揺らす（無効にしてある。vertex_id が描画ごとに変わることがあり色がちらつくため。使うなら線の頂点に変わらない番号を持たせる）
 	if ( false )
 	{
 		output.Color.r += ( ( ( uint( Time *  5 ) + vertex_id ) % 8 ) / 4.f - 1.f ) * color_random_range;
@@ -29,6 +29,23 @@ COMMON_POS_COLOR vs_drawing_line( COMMON_POS_COLOR input, uint vertex_id : SV_Ve
 }
 
 /**
+ * vs_drawing_line の、同じモデルの物体をまとめて描く版（物体ごとの world・色を object_instance.hlsl から読む）
+ *
+ * vs_drawing_line の使っている計算（色を揺らす・ぶらすは無効にしてある）と同じ
+ */
+COMMON_POS_COLOR vs_drawing_line_instanced( COMMON_POS_COLOR input, uint instance_id : SV_InstanceID )
+{
+	const ObjectInstanceData object = get_object_instance( instance_id );
+
+	COMMON_POS_COLOR output;
+
+	output.Position = common_wvp_pos_w( input.Position, object.World );
+	output.Color = input.Color + object.Color;
+
+	return output;
+}
+
+/**
  * 手書き風の線を生成する
  *
  * input  : 0----------1
@@ -37,7 +54,7 @@ COMMON_POS_COLOR vs_drawing_line( COMMON_POS_COLOR input, uint vertex_id : SV_Ve
  *          |          |
  *          1----------3
  *
- * @todo 線が崩れる問題の解決後 get_drawing_line_common() と共通化
+ * get_drawing_line_common() と同じ形を作る（get_drawing_line_common() は線が崩れることがあるため、共通化はそれを確かめてから）
  */
 [maxvertexcount(4)]
 void gs_drawing_line( line COMMON_POS_COLOR input[2], inout TriangleStream<COMMON_POS_UV_COLOR> Stream, uint primitive_id : SV_PrimitiveID )
@@ -193,7 +210,7 @@ COMMON_POS_COLOR vs_drawing_line_debug( COMMON_POS_COLOR input )
  *          |          |
  *          0----------2
  *
- * @todo 線が崩れる問題を検証
+ * 線が崩れることがある（原因は未確認）
  */
 void get_drawing_line_common( line COMMON_POS_COLOR input[ 2 ], out COMMON_POS_UV_COLOR output[ 4 ] )
 {
@@ -389,4 +406,23 @@ technique11 drawing_line
 		RASTERIZERSTATE = Default;
 	}
 	*/
+}
+
+// 手書き風の線（同じモデルの物体をまとめて描く版。頂点シェーダーのほかは drawing_line と同じ）。
+// 幾何シェーダーの SV_PrimitiveID はインスタンスごとに 0 から数え直すので、線の揺れ方は 1 個ずつ描いたときと同じ
+technique11 drawing_line_instanced
+{
+	pass main
+	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_drawing_line_instanced() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
+		SetGeometryShader( CompileShader( gs_4_0, gs_drawing_line() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_drawing_line() ) );
+
+		RASTERIZERSTATE = Default;
+	}
 }

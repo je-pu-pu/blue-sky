@@ -19,6 +19,14 @@ protected:
 	DataType data_;
 
 public:
+	/// direct_3d はバッファを作る先（作り手が渡す。以前は Direct3D11 の get_instance() から取っていた）
+	/// usage : 毎フレーム・毎描画で書き換えるものは DYNAMIC にする（既定は DEFAULT）
+	explicit ConstantBufferWithData( Direct3D11* direct_3d, core::graphics::ConstantBufferUsage usage = core::graphics::ConstantBufferUsage::DEFAULT )
+		: ConstantBufferTyped( direct_3d, usage )
+	{
+
+	}
+
 	DataType& data() { return data_; }
 	const DataType& data() const { return data_; }
 

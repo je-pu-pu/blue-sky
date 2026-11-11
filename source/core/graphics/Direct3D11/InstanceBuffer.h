@@ -19,12 +19,14 @@ public:
 	static constexpr int SLOT = 10; // t10 に対応
 
 private:
+	Direct3D11* direct_3d_;		///< バッファを作る・更新する先（作り手が渡す。以前は Direct3D11 の get_instance() から取っていた）
 	ID3D11Buffer* buffer_ = nullptr;
 	ID3D11ShaderResourceView* srv_ = nullptr;
 	size_t current_count_ = 0;
 
 public:
-	InstanceBuffer()
+	explicit InstanceBuffer( Direct3D11* direct_3d )
+		: direct_3d_( direct_3d )
 	{
 		create_buffer();
 	}
@@ -53,7 +55,7 @@ public:
 		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 		buffer_desc.StructureByteStride = sizeof( Matrix );
 
-		DIRECT_X_FAIL_CHECK( Direct3D11::get_instance()->getDevice()->CreateBuffer( &buffer_desc, nullptr, &buffer_ ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( &buffer_desc, nullptr, &buffer_ ) );
 
 		// SRV を作成
 		D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
@@ -62,7 +64,7 @@ public:
 		srv_desc.Buffer.FirstElement = 0;
 		srv_desc.Buffer.NumElements = MAX_INSTANCES;
 
-		DIRECT_X_FAIL_CHECK( Direct3D11::get_instance()->getDevice()->CreateShaderResourceView( buffer_, &srv_desc, &srv_ ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateShaderResourceView( buffer_, &srv_desc, &srv_ ) );
 	}
 
 	/**
@@ -81,11 +83,11 @@ public:
 		current_count_ = count;
 
 		D3D11_MAPPED_SUBRESOURCE mapped;
-		DIRECT_X_FAIL_CHECK( Direct3D11::get_instance()->getImmediateContext()->Map( buffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped ) );
+		DIRECT_X_FAIL_CHECK( direct_3d_->getImmediateContext()->Map( buffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped ) );
 
 		memcpy( mapped.pData, matrices, sizeof( Matrix ) * count );
 
-		Direct3D11::get_instance()->getImmediateContext()->Unmap( buffer_, 0 );
+		direct_3d_->getImmediateContext()->Unmap( buffer_, 0 );
 	}
 
 	/**
@@ -93,7 +95,7 @@ public:
 	 */
 	void bind_to_vs() const override
 	{
-		Direct3D11::get_instance()->getImmediateContext()->VSSetShaderResources( SLOT, 1, &srv_ );
+		direct_3d_->getImmediateContext()->VSSetShaderResources( SLOT, 1, &srv_ );
 	}
 
 	/**
@@ -102,7 +104,7 @@ public:
 	void unbind_from_vs() const override
 	{
 		ID3D11ShaderResourceView* null_srv = nullptr;
-		Direct3D11::get_instance()->getImmediateContext()->VSSetShaderResources( SLOT, 1, &null_srv );
+		direct_3d_->getImmediateContext()->VSSetShaderResources( SLOT, 1, &null_srv );
 	}
 
 	/**

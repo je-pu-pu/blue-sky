@@ -1,8 +1,6 @@
 #include "PhysicsSystem.h"
-#include <core/Service.h>
 #include <core/physics/PhysicsManager.h>
 #include <core/math/Quaternion.h>
-#include <btBulletDynamicsCommon.h>
 
 namespace core::ecs
 {
@@ -12,14 +10,14 @@ using RigidBodyCreateInfo = core::physics::RigidBodyCreateInfo;
 using Quaternion = core::math::Quaternion;
 using Vector = core::math::Vector;
 
-void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, TransformComponent* transform )
+void PhysicsSystem::initialize_rigid_body( EntityId id, RigidBodyComponent* rigid_body, TransformComponent* transform )
 {
 	if ( rigid_body->handle.is_valid() )
 	{
 		return;
 	}
 
-	auto* physics_manager = core::get_physics_manager();
+	auto* physics_manager = physics_manager_;
 
 	if ( ! physics_manager )
 	{
@@ -46,17 +44,39 @@ void PhysicsSystem::initialize_rigid_body( RigidBodyComponent* rigid_body, Trans
 	if ( rigid_body->handle.is_valid() )
 	{
 		physics_manager->set_rigid_body_angular_factor( rigid_body->handle, rigid_body->angular_factor );
-		rigid_body->handle.rigid_body->setFriction( rigid_body->friction );
+		rigid_body->handle.set_friction( rigid_body->friction );
 
-		// user_pointer に RigidBodyComponent へのポインタを設定
-		rigid_body->handle.user_pointer = rigid_body;
-		rigid_body->handle.rigid_body->setUserPointer( rigid_body );
+		// userPointer に Entity の番号のタグを付ける（以前は RigidBodyComponent* を入れ、当たりで読む側がキャストしていた）
+		rigid_body->handle.set_entity_tag( id );
 	}
+}
+
+PhysicsSystem::~PhysicsSystem()
+{
+	for ( auto& pair : get_component_list() )
+	{
+		release_rigid_body( std::get< RigidBodyComponent* >( pair.second ) );
+	}
+}
+
+void PhysicsSystem::on_remove_entity( EntityId, ComponentTuple& component_tuple )
+{
+	release_rigid_body( std::get< RigidBodyComponent* >( component_tuple ) );
+}
+
+void PhysicsSystem::release_rigid_body( RigidBodyComponent* rigid_body )
+{
+	if ( ! rigid_body || ! rigid_body->handle.is_valid() || ! physics_manager_ )
+	{
+		return;
+	}
+
+	physics_manager_->destroy_rigid_body( rigid_body->handle );
 }
 
 void PhysicsSystem::update()
 {
-	auto* physics_manager = core::get_physics_manager();
+	auto* physics_manager = physics_manager_;
 
 	if ( ! physics_manager )
 	{
@@ -77,7 +97,7 @@ void PhysicsSystem::update()
 		// 未初期化の RigidBody を初期化
 		if ( ! rigid_body->handle.is_valid() )
 		{
-			initialize_rigid_body( rigid_body, transform );
+			initialize_rigid_body( pair.first, rigid_body, transform );
 		}
 
 		// 物理演算の結果を TransformComponent に反映
@@ -94,11 +114,6 @@ void PhysicsSystem::update()
 			transform->transform.set_rotation( rotation );
 		}
 	}
-}
-
-void PhysicsSystem::update( ComponentTuple& ) const
-{
-	// update() でまとめて処理するため、ここでは何もしない
 }
 
 } // namespace core::ecs

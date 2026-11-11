@@ -33,7 +33,14 @@ class EnemyAiTestScene : public Scene
 public:
 	static inline const char_t* name = "enemy_ai_test";
 
-	explicit EnemyAiTestScene( GameMain& game_main );
+	/// ステージ形状。機構（AI・戦闘・動詞）は共通で、地形/敵/目標の配置だけを切り替える。
+	enum class StageKind
+	{
+		Compact,  ///< 従来の検証用の小さな街（enemy_ai_test）
+		Large,    ///< 広くて高低差の大きい街（enemy_ai_test_large）。縦の動詞をテストする
+	};
+
+	explicit EnemyAiTestScene( GameMain& game_main, StageKind kind = StageKind::Compact );
 	~EnemyAiTestScene() override = default;
 
 	void update() override;
@@ -51,6 +58,11 @@ private:
 
 	void spawn_enemy( const core::math::Vector& start, const std::vector< core::math::Vector >& waypoints, EnemyKind kind = EnemyKind::Ground );
 	void draw_debug();
+
+	void build_stage_compact();  ///< 従来の小さな街を組む（地形・敵・目標）
+	void build_stage_large();    ///< 広くて高低差の大きい街を組む（縦の動詞テスト用）
+
+	float nav_ground_half_ = 25.f; ///< navmesh の地面矩形の半径（ステージの広さに合わせる）
 
 	core::ecs::Entity* player_ = nullptr;
 	core::ecs::TransformComponent* player_transform_ = nullptr;
@@ -77,8 +89,9 @@ private:
 	std::vector< core::math::Vector > nav_edges_;               ///< navmesh のポリゴン辺（描画用キャッシュ）
 	std::vector< core::nav::OffMeshLink > nav_links_;           ///< オフメッシュ接続（地上↔屋上。描画用）
 
-	/// 単色（塗りつぶし）の直方体を1つ生成する（描画スケール＋静的コリジョン）。
-	core::ecs::Entity* spawn_solid_box( const core::math::Vector& center, const core::math::Vector& half, const core::Color& color );
+	/// 直方体を1つ生成する（描画スケール＋静的コリジョン）。
+	/// texture_path を渡すと lit シェーダ＋そのテクスチャ（ビル外壁など）、null なら単色。
+	core::ecs::Entity* spawn_solid_box( const core::math::Vector& center, const core::math::Vector& half, const core::Color& color, const char_t* texture_path = nullptr );
 
 	/// 階段を作る（low→high の段状ボックス＝見た目/当たり ＋ オフメッシュ接続）。
 	/// 水平移動は x/z の大きい方の軸に沿う（軸並行）。敵はリンクを 3D で渡って昇降する。

@@ -47,7 +47,9 @@ void SceneManager::register_all_scene()
 
 	register_scene< PhysicsTestScene >();
 	register_scene< MusicGamePrototypeScene >();
-	register_scene< EnemyAiTestScene >();
+	// 同じシーンクラスを形状違いで2つ登録（機構は共通・地形/敵/目標だけ切り替え）
+	register_scene< EnemyAiTestScene >( "enemy_ai_test",       [] ( GameMain& game_main ) { return new EnemyAiTestScene( game_main, EnemyAiTestScene::StageKind::Compact ); } );
+	register_scene< EnemyAiTestScene >( "enemy_ai_test_large", [] ( GameMain& game_main ) { return new EnemyAiTestScene( game_main, EnemyAiTestScene::StageKind::Large ); } );
 
 	register_scene< PauseMenuScene >();
 	register_scene< OptionsScene >();

@@ -85,7 +85,7 @@ const char* state_name( ai::AlertState s )
 
 } // namespace
 
-EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
+EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main, StageKind kind )
 	: Scene( game_main )
 {
 	get_graphics_manager()->setup_default_shaders();
@@ -150,6 +150,59 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 		rb->mass = 0.f;
 	}
 
+	// 花火（陽動の音源）。生成/破棄はせず使い回す。普段は地下へ退避し無音。
+	firework_ = get_entity_manager()->create_entity();
+	{
+		auto* t = firework_->add_component< TransformComponent >();
+		t->transform.set_identity();
+		t->transform.set_position( Vector( 0.f, -1000.f, 0.f ) );
+
+		auto* pv = firework_->add_component< blue_sky::ecs::PerceivableComponent >();
+		pv->emitting_noise = false;
+		pv->noise_loudness = 2.5f; // 花火は大音量（広く引きつける）
+	}
+
+	// 煙玉（視線を遮る球）。使い回す。普段は地下へ退避。
+	smoke_ = get_entity_manager()->create_entity();
+	{
+		auto* t = smoke_->add_component< TransformComponent >();
+		t->transform.set_identity();
+		t->transform.set_position( Vector( 0.f, -1000.f, 0.f ) );
+
+		auto* sm = smoke_->add_component< blue_sky::ecs::SmokeComponent >();
+		sm->radius = 3.5f;
+	}
+
+	// 目標エンティティ（収集する黄色い小立方体）。出現候補 target_points_ はステージ側で決める。
+	target_ = get_entity_manager()->create_entity();
+	{
+		auto* t = target_->add_component< TransformComponent >();
+		t->transform.set_identity();
+		t->scale = Vector( 0.5f, 0.5f, 0.5f );   // 0.5m の小立方体
+
+		target_->add_component< RenderComponent >();
+		auto* m = target_->add_component< ModelComponent >();
+		auto* model  = get_graphics_manager()->clone_model( get_graphics_manager()->load_model( "box-1x1x1" ) );
+		auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit_unicolor" ) ); // 単色＋面陰影（ビルと同じ）
+		shader->set_color( "color", Color( 1.f, 0.85f, 0.1f, 1.f ) ); // 黄色
+		model->set_shader_at( 0, shader );
+		m->model = get_graphics_manager()->get_model_handle( model );
+	}
+
+	// --- ステージ形状（機構は共通・地形/敵/目標の配置だけ切り替える） ---
+	if ( kind == StageKind::Large ) { build_stage_large(); }
+	else                            { build_stage_compact(); }
+
+	place_target();
+	build_navmesh();
+}
+
+void EnemyAiTestScene::build_stage_compact()
+{
+	nav_ground_half_ = 25.f;
+	player_transform_->transform.set_position( Vector( 0.f, 2.f, -10.f ) );
+	player_spawn_ = Vector( 0.f, 2.f, -10.f );
+
 	// --- ステージ: 合成ビル（複数箱の組み合わせ）＋コネクタ（階段/橋） ---
 	// center.y = half.y で底面を地面(y=0)に接地。描画・当たり・navmesh の穴が一致する。
 	const Color wall_color( 0.62f, 0.62f, 0.66f, 1.f );  // ビル本体（冷たいグレー）
@@ -170,9 +223,18 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 		{ Vector(   0.f, 1.5f, 17.f ), Vector( 3.0f, 1.5f, 2.0f ) },  // h3（低い横長）
 		{ Vector(   4.f, 1.0f, -2.f ), Vector( 1.5f, 1.0f, 1.5f ) },  // h2（低い遮蔽）
 	};
-	for ( const auto& o : obstacles_ )
+	// ビルは外壁テクスチャ（facade）を貼る。数種を巡回して街の変化を出す。
+	static const char_t* facades[] = {
+		"media/model/building-wall-1.png",
+		"media/model/building-wall-2.png",
+		"media/model/building-wall-3.png",
+		"media/model/building-side-dark.png",
+		"media/model/building-white-side.png",
+	};
+	for ( std::size_t i = 0; i < obstacles_.size(); ++i )
 	{
-		spawn_solid_box( o.center, o.half, wall_color );
+		spawn_solid_box( obstacles_[ i ].center, obstacles_[ i ].half, wall_color,
+			facades[ i % ( sizeof( facades ) / sizeof( facades[ 0 ] ) ) ] );
 	}
 
 	// コネクタ（見た目の階段/橋 ＝ 縁と縁の隙間だけ）＋ オフメッシュ接続（端点は屋上の内側へ inset）。
@@ -234,29 +296,6 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 		{ Vector( -4.f, 0.f, 2.f ), Vector( -2.f, 0.f, 2.f ) },
 		EnemyKind::AntiAir );
 
-	// 花火（陽動の音源）。生成/破棄はせず使い回す。普段は地下へ退避し無音。
-	firework_ = get_entity_manager()->create_entity();
-	{
-		auto* t = firework_->add_component< TransformComponent >();
-		t->transform.set_identity();
-		t->transform.set_position( Vector( 0.f, -1000.f, 0.f ) );
-
-		auto* pv = firework_->add_component< blue_sky::ecs::PerceivableComponent >();
-		pv->emitting_noise = false;
-		pv->noise_loudness = 2.5f; // 花火は大音量（広く引きつける）
-	}
-
-	// 煙玉（視線を遮る球）。使い回す。普段は地下へ退避。
-	smoke_ = get_entity_manager()->create_entity();
-	{
-		auto* t = smoke_->add_component< TransformComponent >();
-		t->transform.set_identity();
-		t->transform.set_position( Vector( 0.f, -1000.f, 0.f ) );
-
-		auto* sm = smoke_->add_component< blue_sky::ecs::SmokeComponent >();
-		sm->radius = 3.5f;
-	}
-
 	// --- 目標収集ゲーム: 要所（地上/各屋上/橋）に黄色い小立方体。取ると +1 で次へ。連続30でクリア ---
 	// 位置は「拾う立方体の中心」。屋上/橋は面より少し上、地上は浮かせて視認しやすくする。
 	target_points_ = {
@@ -273,23 +312,129 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main )
 		Vector( -14.f, 0.6f, 20.f ),   // 地上（北西）
 		Vector(   8.f, 5.6f,  4.f ),   // 遮蔽 h5 屋上
 	};
-	target_ = get_entity_manager()->create_entity();
+}
+
+void EnemyAiTestScene::build_stage_large()
+{
+	// 縦の動詞（飛ぶ/降りる/落下）をテストするための、広くて高低差の大きい街。
+	// - 中央に高さ 15m の塔（屋上に marquee 目標）。ジェットは満タンでも一度に ~8m しか
+	//   上がれないので、塔の側面のせり出し（ledge, y5/y10）に着地して燃料を回復しながら登る。
+	// - 15m 落下は満タンでも致死（fall_lethal 17m/s ≒ 15m）なので、塔からの降下は傘が要る。
+	// - 上空・広場を対空が見張り、「上＝基本自由でも油断できない」を広い空間で試す。
+	nav_ground_half_ = 45.f;   // navmesh 地面を広く（物理地面は 500m で不変）
+	player_transform_->transform.set_position( Vector( 0.f, 2.f, -26.f ) );
+	player_spawn_ = Vector( 0.f, 2.f, -26.f );
+
+	const Color wall_color ( 0.62f, 0.62f, 0.66f, 1.f );  // ビル本体（テクスチャ時は無視）
+	const Color walk_color ( 0.72f, 0.68f, 0.56f, 1.f );  // 通路（階段/橋・単色で導線を目立たせる）
+	const Color cover_color( 0.48f, 0.50f, 0.52f, 1.f );  // 屋上カバー
+
+	// center.y == half.y で接地。top = 2*half.y。
+	obstacles_ = {
+		// 中央の塔（top 15）。屋上が一番高い目標。
+		{ Vector(   0.f, 7.5f,   4.f ), Vector( 2.5f, 7.5f, 2.5f ) },  // T (top15)
+
+		// 北の屋上チェーン（階段/橋で連結＝敵も巡回できる）
+		{ Vector( -12.f, 3.0f,  16.f ), Vector( 3.0f, 3.0f, 3.0f ) },  // A (top6)
+		{ Vector(  -4.f, 4.0f,  16.f ), Vector( 3.0f, 4.0f, 3.0f ) },  // B (top8)
+		{ Vector(   4.f, 4.0f,  16.f ), Vector( 3.0f, 4.0f, 3.0f ) },  // C (top8)
+		{ Vector(  12.f, 3.0f,  16.f ), Vector( 3.0f, 3.0f, 3.0f ) },  // D (top6)
+
+		// 中層リング（飛ばないと屋上へ行けない＝縦のテスト）
+		{ Vector( -18.f, 2.5f,   2.f ), Vector( 3.0f, 2.5f, 3.0f ) },  // E (top5・西)
+		{ Vector(  18.f, 2.5f,   2.f ), Vector( 3.0f, 2.5f, 3.0f ) },  // F (top5・東)
+		{ Vector( -13.f, 3.0f, -12.f ), Vector( 3.0f, 3.0f, 3.0f ) },  // G (top6・南西)
+		{ Vector(  13.f, 3.0f, -12.f ), Vector( 3.0f, 3.0f, 3.0f ) },  // H (top6・南東)
+		{ Vector(   0.f, 4.5f, -16.f ), Vector( 3.5f, 4.5f, 3.0f ) },  // I (top9・南の中層)
+
+		// 低い遮蔽（地上の見通しを切る・カバー）
+		{ Vector(  -7.f, 1.5f,  -4.f ), Vector( 2.0f, 1.5f, 2.0f ) },  // J (top3)
+		{ Vector(   7.f, 1.5f,  -4.f ), Vector( 2.0f, 1.5f, 2.0f ) },  // K (top3)
+		{ Vector( -22.f, 2.0f,  18.f ), Vector( 2.0f, 2.0f, 2.0f ) },  // L (top4・北西隅)
+		{ Vector(  22.f, 2.0f,  18.f ), Vector( 2.0f, 2.0f, 2.0f ) },  // M (top4・北東隅)
+	};
+	// ビルは外壁テクスチャ（facade）を貼る。塔だけ縦長の外壁、他は数種を巡回して街の変化を出す。
+	static const char_t* facades[] = {
+		"media/model/building-wall-1.png",
+		"media/model/building-wall-2.png",
+		"media/model/building-wall-3.png",
+		"media/model/building-side-dark.png",
+		"media/model/building-white-side.png",
+	};
+	for ( std::size_t i = 0; i < obstacles_.size(); ++i )
 	{
-		auto* t = target_->add_component< TransformComponent >();
-		t->transform.set_identity();
-		t->scale = Vector( 0.5f, 0.5f, 0.5f );   // 0.5m の小立方体
-
-		target_->add_component< RenderComponent >();
-		auto* m = target_->add_component< ModelComponent >();
-		auto* model  = get_graphics_manager()->clone_model( get_graphics_manager()->load_model( "box-1x1x1" ) );
-		auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit_unicolor" ) ); // 単色＋面陰影（ビルと同じ）
-		shader->set_color( "color", Color( 1.f, 0.85f, 0.1f, 1.f ) ); // 黄色
-		model->set_shader_at( 0, shader );
-		m->model = get_graphics_manager()->get_model_handle( model );
+		const char_t* tex = ( i == 0 )
+			? "media/model/building-200.png"                                   // 塔（高い）＝縦長 facade
+			: facades[ i % ( sizeof( facades ) / sizeof( facades[ 0 ] ) ) ];
+		spawn_solid_box( obstacles_[ i ].center, obstacles_[ i ].half, wall_color, tex );
 	}
-	place_target();
 
-	build_navmesh();
+	// 塔のせり出し（ledge）: ジェットで一段ずつ登って燃料回復するための足場。navmesh には焼かない。
+	// 満タンで地上→y5(北面)へ、y5→y10(南面)へ、y10→屋上へ。降りは傘（無いと致死）。
+	spawn_solid_box( Vector( 0.f, 4.85f,  7.2f ), Vector( 2.0f, 0.15f, 1.2f ), walk_color ); // 北面 y5
+	spawn_solid_box( Vector( 0.f, 9.85f,  0.8f ), Vector( 2.0f, 0.15f, 1.2f ), walk_color ); // 南面 y10
+
+	// 北チェーンのコネクタ（階段/橋）。地上から2入口＝ループ。敵が屋上を巡回できる。
+	add_stairs( Vector( -12.f, 0.f, 22.f ), Vector( -12.f, 6.f, 19.f ), 2.5f, walk_color ); // 地上→A
+	add_stairs( Vector(  -9.f, 6.f, 16.f ), Vector(  -7.f, 8.f, 16.f ), 2.0f, walk_color ); // A→B
+	add_bridge( Vector(  -1.f, 8.f, 16.f ), Vector(   1.f, 8.f, 16.f ), 2.0f, walk_color ); // B↔C（橋）
+	add_stairs( Vector(   7.f, 8.f, 16.f ), Vector(   9.f, 6.f, 16.f ), 2.0f, walk_color ); // C→D
+	add_stairs( Vector(  12.f, 0.f, 22.f ), Vector(  12.f, 6.f, 19.f ), 2.5f, walk_color ); // 地上→D（2つ目の入口）
+
+	// 南の中層 I へ上る長い階段（top9）。地上パトロールが高所へ出る導線。
+	add_stairs( Vector( 0.f, 0.f, -22.f ), Vector( 0.f, 9.f, -19.f ), 2.5f, walk_color ); // 地上→I
+
+	// 屋上カバー（腰高の壁）。屋上での隠れ場所＆LOS 遮蔽。
+	auto cover = [&]( float cx, float roof, float cz, float hx, float hz, float h )
+	{
+		spawn_solid_box( Vector( cx, roof + h * 0.5f, cz ), Vector( hx, h * 0.5f, hz ), cover_color );
+	};
+	cover(  -4.f, 8.f, 18.4f, 2.0f, 0.2f, 1.0f ); // B 北縁
+	cover(   4.f, 8.f, 13.6f, 2.0f, 0.2f, 1.0f ); // C 南縁
+	cover( -12.f, 6.f, 13.4f, 2.0f, 0.2f, 1.0f ); // A 南縁
+	cover(  12.f, 6.f, 18.6f, 2.0f, 0.2f, 1.0f ); // D 北縁
+	cover(   0.f, 9.f, -13.6f, 2.4f, 0.2f, 1.0f ); // I 南縁
+
+	// --- 敵 ---
+	// 地上パトロール（街路）。広いので数を増やす。
+	spawn_enemy( Vector( -6.f, 0.f, 4.f ),
+		{ Vector( -6.f, 0.f, 4.f ), Vector( 6.f, 0.f, 4.f ), Vector( 6.f, 0.f, -6.f ), Vector( -6.f, 0.f, -6.f ) } ); // 塔まわりを周回
+	spawn_enemy( Vector( -12.f, 0.f, 8.f ),
+		{ Vector( -12.f, 0.f, 8.f ), Vector( 12.f, 0.f, 8.f ) } ); // 北の大通り
+	spawn_enemy( Vector( -18.f, 0.f, -8.f ),
+		{ Vector( -18.f, 0.f, -8.f ), Vector( -18.f, 0.f, 10.f ) } ); // 西
+	spawn_enemy( Vector( 18.f, 0.f, -8.f ),
+		{ Vector( 18.f, 0.f, -8.f ), Vector( 18.f, 0.f, 10.f ) } ); // 東
+	// 屋上パトロール（北チェーン。橋を渡る）
+	spawn_enemy( Vector( -4.f, 8.f, 16.f ),
+		{ Vector( -4.f, 8.f, 16.f ), Vector( 4.f, 8.f, 16.f ) } );
+
+	// 対空（上空・広場を見張る）。塔へ飛んで登る空路と、屋上への接近空路を潰す。
+	spawn_enemy( Vector( 0.f, 0.f, -4.f ),
+		{ Vector( -3.f, 0.f, -4.f ), Vector( 3.f, 0.f, -4.f ) }, EnemyKind::AntiAir ); // 塔の南＝登り空路の直下
+	spawn_enemy( Vector( 0.f, 0.f, 10.f ),
+		{ Vector( -3.f, 0.f, 10.f ), Vector( 3.f, 0.f, 10.f ) }, EnemyKind::AntiAir ); // 北チェーンへの接近空路
+	spawn_enemy( Vector( -18.f, 0.f, 2.f ),
+		{ Vector( -20.f, 0.f, 2.f ), Vector( -16.f, 0.f, 2.f ) }, EnemyKind::AntiAir ); // 西の中層 E 上空
+
+	// --- 目標（各高さ・各隅にばらまく。飛ばないと届かない屋上を多めに） ---
+	target_points_ = {
+		Vector(   0.f, 15.6f,   4.f ),  // 塔の屋上（最高所・marquee）
+		Vector( -20.f,  0.6f, -18.f ),  // 地上（南西の隅）
+		Vector(  20.f,  0.6f, -18.f ),  // 地上（南東の隅）
+		Vector(   0.f,  0.6f,  24.f ),  // 地上（北の外）
+		Vector( -12.f,  6.6f,  16.f ),  // A 屋上
+		Vector(  -4.f,  8.6f,  16.f ),  // B 屋上
+		Vector(   4.f,  8.6f,  16.f ),  // C 屋上
+		Vector(  12.f,  6.6f,  16.f ),  // D 屋上
+		Vector(   0.f,  9.6f, -16.f ),  // I 屋上（南の中層）
+		Vector( -13.f,  6.6f, -12.f ),  // G 屋上
+		Vector(  13.f,  6.6f, -12.f ),  // H 屋上
+		Vector( -18.f,  5.6f,   2.f ),  // E 屋上
+		Vector(  18.f,  5.6f,   2.f ),  // F 屋上
+		Vector( -22.f,  4.6f,  18.f ),  // L 屋上（北西隅）
+		Vector(  22.f,  4.6f,  18.f ),  // M 屋上（北東隅）
+	};
 }
 
 void EnemyAiTestScene::place_target()
@@ -404,7 +549,7 @@ void EnemyAiTestScene::spawn_enemy( const Vector& start, const std::vector< Vect
 	enemy_kinds_.push_back( kind );
 }
 
-core::ecs::Entity* EnemyAiTestScene::spawn_solid_box( const Vector& center, const Vector& half, const Color& color )
+core::ecs::Entity* EnemyAiTestScene::spawn_solid_box( const Vector& center, const Vector& half, const Color& color, const char_t* texture_path )
 {
 	auto* e = get_entity_manager()->create_entity();
 
@@ -416,10 +561,21 @@ core::ecs::Entity* EnemyAiTestScene::spawn_solid_box( const Vector& center, cons
 
 	e->add_component< RenderComponent >();
 	auto* m = e->add_component< ModelComponent >();
-	auto* model  = get_graphics_manager()->clone_model( get_graphics_manager()->load_model( "box-1x1x1" ) );
-	auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit_unicolor" ) ); // 単色＋面陰影
-	shader->set_color( "color", color );
-	model->set_shader_at( 0, shader );
+	auto* model = get_graphics_manager()->clone_model( get_graphics_manager()->load_model( "box-1x1x1" ) );
+	if ( texture_path )
+	{
+		// lit（テクスチャ×面陰影）。各面 UV 0..1 なので、ビル1棟の外壁を1枚にした
+		// facade 画像を貼ると面いっぱいに窓付き外壁が出る。load_texture はパスでキャッシュ。
+		auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit" ) );
+		shader->set_texture_at( 0, get_graphics_manager()->load_texture( texture_path ) );
+		model->set_shader_at( 0, shader );
+	}
+	else
+	{
+		auto* shader = get_graphics_manager()->clone_shader( get_graphics_manager()->get_shader( "lit_unicolor" ) ); // 単色＋面陰影
+		shader->set_color( "color", color );
+		model->set_shader_at( 0, shader );
+	}
 	m->model = get_graphics_manager()->get_model_handle( model );
 
 	// 静的コリジョン。transform を底へ下げたぶん offset で中心を center に戻す。
@@ -527,12 +683,13 @@ void EnemyAiTestScene::build_navmesh()
 		tris.push_back( a ); tris.push_back( b ); tris.push_back( c );
 	};
 
-	// 地面（-25..25, y=0）。上向き法線になる巻き順。
+	// 地面（-half..half, y=0）。上向き法線になる巻き順。範囲はステージの広さに合わせる。
 	{
-		const int v0 = add_vertex( -25.f, 0.f, -25.f );
-		const int v1 = add_vertex(  25.f, 0.f, -25.f );
-		const int v2 = add_vertex(  25.f, 0.f,  25.f );
-		const int v3 = add_vertex( -25.f, 0.f,  25.f );
+		const float g = nav_ground_half_;
+		const int v0 = add_vertex( -g, 0.f, -g );
+		const int v1 = add_vertex(  g, 0.f, -g );
+		const int v2 = add_vertex(  g, 0.f,  g );
+		const int v3 = add_vertex( -g, 0.f,  g );
 		add_tri( v0, v2, v1 );
 		add_tri( v0, v3, v2 );
 	}

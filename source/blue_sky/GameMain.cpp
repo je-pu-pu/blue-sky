@@ -592,6 +592,9 @@ void GameMain::render()
 
 	debug_console_->render();
 
+	// 開発用 : ゲーム中のスクショ（F11）。imgui を描く前に撮るので、開発用の窓が写らない
+	dev_tools_->capture_screenshot_if_requested();
+
 	ImGui::Render();
 	get_graphics_manager()->set_default_render_target( false );
     ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );
@@ -664,6 +667,10 @@ void GameMain::on_special_key_down( int key )
 	else if ( key == VK_F5 )
 	{
 		on_toggle_full_screen();
+	}
+	else if ( key == VK_F11 )
+	{
+		dev_tools_->request_screenshot();	// 開発用 : ゲーム中のスクショ（F12 はデバッガの中断に取られるので F11）
 	}
 
 	// F1〜F12 だけを番号（1〜12）にしてシーンに渡す（以前はどのキーも key - F1 + 1 にして渡し、文字のキーでも呼ばれていた）

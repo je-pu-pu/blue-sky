@@ -164,3 +164,40 @@ TEST_F( DevToolsTest, FrameTimeMeasurementIsEnabledByOptions )
 
 	EXPECT_EQ( tools->get_frame_count(), 6 );
 }
+
+/// ゲーム中のスクショ（F11）は、頼んだときだけ 1 枚保存し、あるファイルは上書きせず次の番号にする
+TEST_F( DevToolsTest, ScreenshotIsSavedOnlyWhenRequested )
+{
+	const auto directory = std::filesystem::temp_directory_path() / "blue-sky-dev-tools-screenshot-test";
+	std::filesystem::remove_all( directory );
+
+	auto tools = make();
+	tools->set_screenshot_directory( directory.string() );
+
+	tools->capture_screenshot_if_requested();
+	EXPECT_TRUE( saved.empty() );								// 頼まなければ撮らない
+
+	// shot_0000.png があるときは飛ばす
+	std::filesystem::create_directories( directory );
+	{
+		std::FILE* f = nullptr;
+		_wfopen_s( & f, ( directory / L"shot_0000.png" ).c_str(), L"wb" );
+		ASSERT_NE( f, nullptr );
+		std::fclose( f );
+	}
+
+	tools->request_screenshot();
+	tools->capture_screenshot_if_requested();
+	ASSERT_EQ( saved.size(), 1u );
+	EXPECT_EQ( std::filesystem::path( saved[ 0 ] ).filename(), L"shot_0001.png" );
+
+	tools->capture_screenshot_if_requested();
+	EXPECT_EQ( saved.size(), 1u );								// 1 回頼めば 1 枚だけ
+
+	tools->request_screenshot();
+	tools->capture_screenshot_if_requested();
+	ASSERT_EQ( saved.size(), 2u );
+	EXPECT_EQ( std::filesystem::path( saved[ 1 ] ).filename(), L"shot_0002.png" );
+
+	std::filesystem::remove_all( directory );
+}

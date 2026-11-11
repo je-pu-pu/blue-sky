@@ -71,3 +71,6 @@ venv/
 /tools/npr_offline/*.png
 # MIDI の音源（約 142 MB。tools/soundfont/fetch_soundfont.py で入手する。doc/ライセンス.md の 4.7）
 /source/media/music/FluidR3_GM.sf2
+
+# ゲーム中のスクショ（F11。作業ディレクトリの screenshot/ に保存される）
+screenshot/

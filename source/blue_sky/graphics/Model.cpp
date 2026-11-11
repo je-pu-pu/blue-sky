@@ -22,7 +22,7 @@ Model::Shader* Model::create_shader( GraphicsManager* graphics_manager ) const
 		}
 		else
 		{
-			return graphics_manager->create_shader< shader::FlatShadowShader >( "main", "main_with_shadow" );
+			return graphics_manager->create_shader< shader::FlatShadowShader >( "main", "main_with_shadow", "main_with_shadow_instanced" );
 		}
 	}
 	else
@@ -33,7 +33,7 @@ Model::Shader* Model::create_shader( GraphicsManager* graphics_manager ) const
 		}
 		else
 		{
-			return graphics_manager->create_shader< shader::FlatShader >( "main", "flat" );
+			return graphics_manager->create_shader< shader::FlatShader >( "main", "flat", "flat_object_instanced" );
 		}
 	}
 }

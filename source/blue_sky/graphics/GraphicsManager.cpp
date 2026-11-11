@@ -812,6 +812,37 @@ void GraphicsManager::render_object_meshes() const
 
 	system->resolve_models();	// 1 フレームに 1 回だけ引く
 
+	// 同じモデルの物はまとめて描く（準備ができていなければ、下で今までどおり 1 個ずつ描く）
+	if ( const auto* instances = get_ready_object_instance_buffer( system ) )
+	{
+		const auto& list = system->get_draw_list( ecs::ObjectRenderDataSystem::MeshPass );
+		const auto& targets = system->get_render_targets();
+
+		object_instance_buffer_->update_indices( list.instance_indices.data(), list.instance_indices.size() );
+
+		for ( const auto& item : list.items )
+		{
+			if ( item.batch == ecs::ObjectRenderDataSystem::NoBatch )
+			{
+				const auto& target = targets[ item.target ];
+
+				set_current_object_constant_buffer( target.render->object_constant_buffer.get() );
+				set_current_skinning_constant_buffer( target.render->bone_constant_buffer.get() );
+
+				render_object_mesh( * target.render, target.model );
+			}
+			else
+			{
+				const auto& batch = list.batches[ item.batch ];
+
+				instances->bind_to_vs( batch.first );
+				batch.model->render_object_instances( batch.count );
+			}
+		}
+
+		return;
+	}
+
 	for ( const auto& target : system->get_render_targets() )
 	{
 		const Model* model = target.model;

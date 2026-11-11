@@ -1,6 +1,7 @@
 #include "common_state.hlsl"
 #include "common_cbuffer.hlsl"
 #include "common_texture.hlsl"
+#include "object_instance.hlsl"
 
 /**
  * デバッグ用の線のための DepthStencilState
@@ -119,9 +120,28 @@ float random( float seed )
 	return frac( sin( dot( float2( seed, seed ), float2( 12.9898, 78.233 ) ) ) * 10000.0 );
 }
 
+// ワールド行列を引数で受け取る版（_w）。1 個ずつ描くときは World を、まとめて描くときは物体ごとの定数の World を渡す
+
+/**
+ * 頂点 v にワールド行列 world を掛ける（mul( v, world ) と同じ値）
+ *
+ * 行の重みの和として書く。mul( v, world ) のままだと、定数バッファの World と構造化バッファから読んだ World とで
+ * コンパイラーが違う命令（mul・mad の並びと dp4）にし、丸めが違って、まとめて描いた物の縁の画素が 1 個ずつ描いた物と少し変わる。
+ * この書き方なら、どちらも以前の mul( v, World ) と同じ命令の並び（mul y・mad x・mad z・mad w）になる（fxc の逆アセンブルで確かめた）
+ */
+float4 common_mul_world( float4 v, matrix world )
+{
+	return v.x * world[ 0 ] + v.y * world[ 1 ] + v.z * world[ 2 ] + v.w * world[ 3 ];
+}
+
+float4 common_wv_pos_w( float4 input, matrix world )
+{
+	return mul( common_mul_world( input, world ), View );
+}
+
 float4 common_wv_pos( float4 input )
 {
-	return mul( mul( input, World ), View );
+	return common_wv_pos_w( input, World );
 }
 
 float4 common_p_pos( float4 input )
@@ -129,9 +149,14 @@ float4 common_p_pos( float4 input )
 	return mul( input, Projection );
 }
 
+float4 common_wvp_pos_w( float4 input, matrix world )
+{
+	return mul( mul( common_mul_world( input, world ), View ), Projection );
+}
+
 float4 common_wvp_pos( float4 input )
 {
-	return mul( mul( mul( input, World ), View ), Projection );
+	return common_wvp_pos_w( input, World );
 }
 
 float4 common_vp_pos( float4 input )
@@ -145,11 +170,11 @@ float4 common_vp_pos( float4 input )
  * ワールド行列の逆行列の転置（の定数倍である余因子行列）で変換し、長さを 1 にする
  * （以前はワールド行列をそのまま掛けていて、拡大縮小の入ったワールド行列では法線が傾き、長さも変わっていた）
  */
-float3 common_w_norm( float3 input )
+float3 common_w_norm_w( float3 input, matrix world )
 {
-	const float3 r0 = World[ 0 ].xyz;
-	const float3 r1 = World[ 1 ].xyz;
-	const float3 r2 = World[ 2 ].xyz;
+	const float3 r0 = world[ 0 ].xyz;
+	const float3 r1 = world[ 1 ].xyz;
+	const float3 r2 = world[ 2 ].xyz;
 
 	const float3x3 cofactor = float3x3( cross( r1, r2 ), cross( r2, r0 ), cross( r0, r1 ) );
 
@@ -158,6 +183,11 @@ float3 common_w_norm( float3 input )
 	const float len = length( n );
 
 	return len > 0.f ? n / len : n;
+}
+
+float3 common_w_norm( float3 input )
+{
+	return common_w_norm_w( input, World );
 }
 
 float3 common_v_norm( float3 input )
@@ -181,11 +211,11 @@ float3 common_wv_norm( float3 input )
  * @param pos ローカル座標系での頂点座標
  * @param csm_level カスケードレベル
  */
-float4 common_shadow_texcoord( float4 pos, int csm_level )
+float4 common_shadow_texcoord_w( float4 pos, int csm_level, matrix world )
 {
 	float4 shadow_texcoord = pos;
 
-	shadow_texcoord = mul( shadow_texcoord, World );
+	shadow_texcoord = common_mul_world( shadow_texcoord, world );
 	shadow_texcoord = mul( shadow_texcoord, ShadowViewProjection[ csm_level ] );
 		
 	shadow_texcoord /= shadow_texcoord.w;
@@ -194,6 +224,11 @@ float4 common_shadow_texcoord( float4 pos, int csm_level )
 	shadow_texcoord.y = ( -shadow_texcoord.y + 1.f ) / 2.f;
 
 	return shadow_texcoord;
+}
+
+float4 common_shadow_texcoord( float4 pos, int csm_level )
+{
+	return common_shadow_texcoord_w( pos, csm_level, World );
 }
 
 /**

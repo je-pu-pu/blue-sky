@@ -134,23 +134,36 @@ float4 ps_skin_wrap_flat_paper( PS_INPUT input ) : SV_Target
  * @param input 入力頂点情報
  * @return 出力頂点情報
  */
-PS_SHADOW_INPUT vs_with_shadow( COMMON_POS_NORM_UV input )
+PS_SHADOW_INPUT vs_with_shadow_common( COMMON_POS_NORM_UV input, matrix world )
 {
 	PS_SHADOW_INPUT output;
 
-	output.Position = common_wvp_pos( input.Position );
-	output.Normal = common_w_norm( input.Normal );
+	output.Position = common_wvp_pos_w( input.Position, world );
+	output.Normal = common_w_norm_w( input.Normal, world );
 	output.TexCoord = input.TexCoord;
-	
+
 	[unroll]
 	for ( int n = 0; n < ShadowMapCascadeLevels; n++ )
 	{
-		output.ShadowTexCoord[ n ] = common_shadow_texcoord( input.Position, n );
+		output.ShadowTexCoord[ n ] = common_shadow_texcoord_w( input.Position, n, world );
 	}
 
-	output.Depth = common_wv_pos( input.Position ).z;
+	output.Depth = common_wv_pos_w( input.Position, world ).z;
 
 	return output;
+}
+
+PS_SHADOW_INPUT vs_with_shadow( COMMON_POS_NORM_UV input )
+{
+	return vs_with_shadow_common( input, World );
+}
+
+/**
+ * スキニングなし・シャドウありの頂点シェーダー（同じモデルの物体をまとめて描く版。物体ごとの定数を object_instance.hlsl から読む）
+ */
+PS_SHADOW_INPUT vs_with_shadow_instanced( COMMON_POS_NORM_UV input, uint instance_id : SV_InstanceID )
+{
+	return vs_with_shadow_common( input, get_object_instance( instance_id ).World );
 }
 
 /**
@@ -329,6 +342,24 @@ technique11 main_with_shadow
 		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
 		// SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_simple() ) );
 		// SetPixelShader( CompileShader( ps_4_0, ps_with_shadow_debug_cascade_level() ) );
+
+		RASTERIZERSTATE = Default;
+	}
+}
+
+// シェーディングあり・スキニングなし・シャドウあり（同じモデルの物体をまとめて描く版。頂点シェーダーのほかは main_with_shadow と同じ）
+technique11 main_with_shadow_instanced
+{
+	pass main
+	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_with_shadow_instanced() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
+		SetGeometryShader( NULL );
+		SetPixelShader( CompileShader( ps_4_0, ps_with_shadow() ) );
 
 		RASTERIZERSTATE = Default;
 	}

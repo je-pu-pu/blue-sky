@@ -1,12 +1,29 @@
-COMMON_POS_UV_COLOR vs_flat( COMMON_POS_NORM_UV input )
+COMMON_POS_UV_COLOR vs_flat_common( COMMON_POS_NORM_UV input, matrix world, float4 color )
 {
 	COMMON_POS_UV_COLOR output;
 
-	output.Position = common_wvp_pos( input.Position );
+	output.Position = common_wvp_pos_w( input.Position, world );
 	output.TexCoord = input.TexCoord;
-	output.Color = ObjectColor;
+	output.Color = color;
 
 	return output;
+}
+
+COMMON_POS_UV_COLOR vs_flat( COMMON_POS_NORM_UV input )
+{
+	return vs_flat_common( input, World, ObjectColor );
+}
+
+/**
+ * vs_flat の、同じモデルの物体をまとめて描く版（物体ごとの定数を object_instance.hlsl から読む）
+ *
+ * 以前からある flat_instanced（lit_instanced.hlsl の world 行列だけの入れ物を使う。core の RenderSystem 用）とは別
+ */
+COMMON_POS_UV_COLOR vs_flat_object_instanced( COMMON_POS_NORM_UV input, uint instance_id : SV_InstanceID )
+{
+	const ObjectInstanceData object = get_object_instance( instance_id );
+
+	return vs_flat_common( input, object.World, object.Color );
 }
 
 float4 ps_flat( COMMON_POS_UV_COLOR input ) : SV_Target
@@ -99,4 +116,22 @@ technique11 flat
 		RASTERIZERSTATE = WireframeRasterizerState;
     }
 #endif
+}
+
+// シェーディングなし・スキニングなし（同じモデルの物体をまとめて描く版。頂点シェーダーのほかは flat と同じ）
+technique11 flat_object_instanced
+{
+	pass main
+    {
+		SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( WriteDepth, 0xFFFFFFFF );
+
+        SetVertexShader( CompileShader( vs_4_0, vs_flat_object_instanced() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_4_0, ps_main_wrap_flat() ) );
+
+		RASTERIZERSTATE = Default;
+    }
 }

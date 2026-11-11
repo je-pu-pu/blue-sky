@@ -94,7 +94,7 @@ get_entity_manager()->add_system< RenderSystem >( 1000, get_graphics_manager(), 
 - ステージは **TOML**（`source/media/stage/*.stage.toml`・`media/stage_ext/`）。物体は `[[object]] type = "…"`、スイッチの動きはスイッチの中に `on_turn_on = [ { do = "…", … } ]`、場所と関係ない条件は `[[event]] when = …`。書き方は `doc/ステージ形式の設計.md`
 - 読む所 `blue_sky/stage/TomlStageParser`（ファイル → `StageData`、書き間違いは「ファイル:行」付きでログ）、当てる所 `StageBuilder`、動きは型付きの `Action`
 - 以前の独自形式（`.stage`）は無い。古いファイルは `tools/stage_convert/convert_stage.py` で変換できる
-- ステージの前後の文と背景（StoryTextScene）は `media/stage/<ステージ>.intro.toml`・`.outro.toml`（`[[layer]]`・`sound`・`[text]`。書き方は同じ文書の 7 章）。読む所は `blue_sky/stage/StoryTextParser`。intro はファイルがあれば出す。古い `.intro`・`.outro` は `tools/stage_convert/convert_story_text.py` で変換できる
+- ステージの前後の文と背景（StoryTextScene）は、ステージのファイルの中の `[intro]`・`[outro]` の表（`sound`・`[[intro.layer]]`・`[intro.text]`。書き方は同じ文書の 7 章）。読む所は `blue_sky/stage/StoryTextParser`（表 1 つを読む。ステージの残りは読まない）。表が無ければその場面を飛ばす（intro の有無も表で決める）。古い `.intro`・`.outro` は `tools/stage_convert/convert_story_text.py` で `.stage.toml` に書き足せる
 
 ### リソースと物理
 

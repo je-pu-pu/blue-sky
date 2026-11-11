@@ -454,6 +454,21 @@ bool GameMain::update()
 
 	handle_escape();
 
+	// ゲームがマウスを取っている間（カーソルを隠して閉じ込め、視点を回している間）は、imgui にマウスを渡さない。
+	// 渡すと、見えないカーソルが開発用の imgui の窓に重なったときに imgui が入力を受け取り、ゲームへの入力が止まって視点が回らなくなる
+	{
+		ImGuiIO& io = ImGui::GetIO();
+
+		if ( is_mouse_captured_by_game() )
+		{
+			io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+		}
+		else
+		{
+			io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+		}
+	}
+
 	ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
 
@@ -480,6 +495,15 @@ bool GameMain::update()
 	// コンソールで打った文字やマウス操作で、UI やキャラクターが動かないように
 	const ImGuiIO& io = ImGui::GetIO();
 	const InputOwner input_owner = decide_input_owner( io.WantCaptureKeyboard || io.WantCaptureMouse, has_overlay_scene() );
+
+	// 受け取る先が変わったときだけログに出す（ゲームが操作できないときに、どこが入力を取っているかを後から追えるように）
+	if ( input_owner != last_input_owner_ )
+	{
+		const char_t* names[] = { "コンソール（imgui）", "オーバーレイ", "ベースシーン" };
+		debug_log( string_t( "[Input] 入力を受け取る先 : " ) + names[ static_cast< int >( last_input_owner_ ) ] + " → " + names[ static_cast< int >( input_owner ) ]
+			+ "（imgui がキーボードを取る : " + ( io.WantCaptureKeyboard ? "はい" : "いいえ" ) + "・マウスを取る : " + ( io.WantCaptureMouse ? "はい" : "いいえ" ) + "）" );
+		last_input_owner_ = input_owner;
+	}
 
 	if ( has_overlay_scene() )
 	{
@@ -926,8 +950,14 @@ void GameMain::update_cursor_state()
 	const bool show = ( debug_console_ && debug_console_->is_open() ) || menu_open;
 
 	set_show_cursor( show );
-	Scene* base = scene_stack_->get_base_scene();
-	get_app()->clip_cursor( ! show && base && base->is_clip_cursor_required() );
+	get_app()->clip_cursor( is_mouse_captured_by_game() );
+}
+
+bool GameMain::is_mouse_captured_by_game()
+{
+	Scene* base = scene_stack_ ? scene_stack_->get_base_scene() : nullptr;
+
+	return ! is_show_cursor_ && base && base->is_clip_cursor_required();
 }
 
 } // namespace blue_sky

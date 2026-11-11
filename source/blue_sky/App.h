@@ -135,6 +135,11 @@ public:
 	void show_cursor( bool );
 	void clip_cursor( bool );
 
+private:
+	RECT get_client_rect_on_screen() const;
+
+public:
+
 	/// 開発用 : 裏で動かしているか（BLUE_SKY_BACKGROUND。自動の確かめで、使っている人の作業を邪魔しないため）
 	bool is_background() const { return is_background_; }
 

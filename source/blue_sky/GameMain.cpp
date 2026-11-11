@@ -464,21 +464,6 @@ bool GameMain::update()
 
 	handle_escape();
 
-	// ゲームがマウスを取っている間（カーソルを隠して閉じ込め、視点を回している間）は、imgui にマウスを渡さない。
-	// 渡すと、見えないカーソルが開発用の imgui の窓に重なったときに imgui が入力を受け取り、ゲームへの入力が止まって視点が回らなくなる
-	{
-		ImGuiIO& io = ImGui::GetIO();
-
-		if ( is_mouse_captured_by_game() )
-		{
-			io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
-		}
-		else
-		{
-			io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
-		}
-	}
-
 	ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
 
@@ -961,7 +946,28 @@ void GameMain::update_cursor_state()
 	const bool show = ( debug_console_ && debug_console_->is_open() ) || menu_open;
 
 	set_show_cursor( show );
-	get_app()->clip_cursor( is_mouse_captured_by_game() );
+
+	const bool captured = is_mouse_captured_by_game();
+	get_app()->clip_cursor( captured );
+
+	// ゲームがマウスを取っている間（カーソルを隠して閉じ込め、視点を回している間）は、imgui にマウスを渡さない。
+	// 渡すと、見えないカーソルが開発用の imgui の窓に重なったときに imgui が入力を受け取り、ゲームへの入力が止まる。
+	// imgui の準備の前（起動の途中）は触らない。シーンが置かれるときにまた呼ばれる
+	if ( ! ImGui::GetCurrentContext() )
+	{
+		return;
+	}
+
+	ImGuiIO& io = ImGui::GetIO();
+
+	if ( captured )
+	{
+		io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+	}
+	else
+	{
+		io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+	}
 }
 
 bool GameMain::is_mouse_captured_by_game()

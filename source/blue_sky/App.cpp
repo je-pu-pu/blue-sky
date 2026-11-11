@@ -298,6 +298,15 @@ LRESULT App::WinProcImpl( HWND hwnd, UINT msg, WPARAM wp, LPARAM lp )
 		on_resize( hwnd );
 		break;
 	}
+	case WM_MOVE:
+	case WM_EXITSIZEMOVE:
+	{
+		// 窓が動いたら閉じ込める範囲も動かす。
+		// また、Windows は窓の移動の処理（タイトルバーをつかむ。クリックして窓を選ぶだけでも通る）を終えるときに閉じ込めを外すので、掛け直す
+		// （外れたままだと、見えないカーソルが窓の外へ出て、クリックでほかの窓に切り替わる）
+		this->clip_cursor( is_clip_cursor_enabled_ );
+		break;
+	}
 	case WM_INPUT:
 	{
 		// 入力の出来事（キー・マウスボタンの押す/離す・相対の移動量）。フレームの間に起きたことを順に渡す
@@ -537,8 +546,9 @@ void App::on_resize( HWND /* hwnd */ )
 		return;
 	}
 
-	// App::GetInstance()->clip_cursor( App::GetInstance()->is_clip_cursor_enabled_ );
-	
+	// 窓の大きさが変わったら、閉じ込める範囲も合わせる
+	this->clip_cursor( is_clip_cursor_enabled_ );
+
 	if ( this->game_ )
 	{
 		this->game_->on_resize();
@@ -577,17 +587,7 @@ void App::clip_cursor( bool clip )
 	{
 		is_cursor_clipped_ = true;
 
-		RECT rect;
-		GetClientRect( hWnd, & rect );
-
-		POINT point = { rect.left, rect.top };
-		ClientToScreen( hWnd, & point );
-	
-		rect.left = point.x;
-		rect.top = point.y;
-		rect.right += point.x;
-		rect.bottom += point.y;
-
+		const RECT rect = get_client_rect_on_screen();
 		ClipCursor( & rect );
 	}
 	else if ( is_cursor_clipped_ )
@@ -595,6 +595,23 @@ void App::clip_cursor( bool clip )
 		is_cursor_clipped_ = false;
 		ClipCursor( nullptr );
 	}
+}
+
+/// 窓の描く所（クライアント領域）を、画面の座標で返す
+RECT App::get_client_rect_on_screen() const
+{
+	RECT rect;
+	GetClientRect( hWnd, & rect );
+
+	POINT point = { rect.left, rect.top };
+	ClientToScreen( hWnd, & point );
+
+	rect.left = point.x;
+	rect.top = point.y;
+	rect.right += point.x;
+	rect.bottom += point.y;
+
+	return rect;
 }
 
 void App::set_size( int w, int h )

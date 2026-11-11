@@ -103,4 +103,39 @@ void Line::render_part( int part_count ) const
 	graphics_manager_->count_draw();
 }
 
+/**
+ * 線全体を instance_count 個まとめて描く（render_part と同じものを結び、DrawIndexedInstanced で描く）
+ *
+ * 幾何シェーダーの SV_PrimitiveID はインスタンスごとに 0 から数え直すので、線の揺れ方（線分の番号で決まる）は 1 個ずつ描いたときと同じ
+ */
+void Line::render_instanced( uint_t instance_count ) const
+{
+	const Texture* texture = graphics_manager_->resolve_texture( texture_ );
+
+	if ( ! texture )
+	{
+		if ( ! texture_lost_logged_ )
+		{
+			texture_lost_logged_ = true;
+			std::cout << "[Line] 線の画像（lines）を引けません。線を描きません" << std::endl;
+		}
+
+		return;
+	}
+
+	UINT stride = sizeof( Vertex );
+	UINT offset = 0;
+
+	direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, 1, & vertex_buffer_, & stride, & offset );
+	direct_3d_->getImmediateContext()->IASetIndexBuffer( index_buffer_, IndexBufferFormat, 0 );
+
+	direct_3d_->getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
+
+	texture->bind_to_ps( 0 );
+
+	direct_3d_->getImmediateContext()->DrawIndexedInstanced( static_cast< UINT >( index_size_ ), instance_count, 0, 0, 0 );
+
+	graphics_manager_->count_draw();
+}
+
 } // namespace blue_sky::graphics::direct_3d_11

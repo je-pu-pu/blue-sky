@@ -71,6 +71,9 @@ public:
 	void render() const { render_part(); }
 	virtual void render_part( int part_count = 99999 ) const = 0;
 
+	/// 線全体を instance_count 個まとめて描く（render の、同じモデルの物体をまとめて描く版。物体ごとの定数は呼ぶ側が結んでおく）
+	virtual void render_instanced( uint_t instance_count ) const = 0;
+
 	int get_part_count() const { return static_cast< int >( index_size_ / 2 ); }
 
 	const Color& get_color() const { return color_; }

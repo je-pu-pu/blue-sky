@@ -77,6 +77,7 @@ protected:
 	void create_texture() override { }
 public:
 	void render_part( int ) const override { }
+	void render_instanced( uint_t ) const override { }
 };
 
 /**

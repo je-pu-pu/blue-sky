@@ -49,6 +49,7 @@ public:
 	virtual ~Line() override;
 
 	void render_part( int part_count = 99999 ) const;
+	void render_instanced( uint_t instance_count ) const override;
 
 }; // class Line
 

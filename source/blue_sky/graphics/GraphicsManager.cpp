@@ -757,6 +757,17 @@ void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool
 
 		system->resolve_models();	// 1 フレームに 1 回だけ引く（段ごと・カスケードごとに引き直さない）
 
+		// スキンメッシュでない物は、同じモデルの物をまとめて描く（準備ができていなければ、下で今までどおり 1 個ずつ描く）。
+		// スキンメッシュは今までどおり、下で 1 個ずつ描く
+		if ( ! is_skin_mesh && n < ecs::ObjectRenderDataSystem::MaxShadowCascades )
+		{
+			if ( const auto* instances = get_ready_object_instance_buffer( system ) )
+			{
+				render_shadow_map_instances( shader, * instances, * system, n );
+				continue;
+			}
+		}
+
 		const std::uint8_t cascade_bit = ecs::ObjectRenderDataSystem::visible_in_shadow_cascade( n );
 
 		for ( const auto& target : system->get_render_targets() )
@@ -781,6 +792,71 @@ void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool
 					render_object_line( * target.render, model );
 				}
 			}
+		}
+	}
+}
+
+/**
+ * 影のカスケード level のシャドウマップに、スキンメッシュでない物を、同じモデルの物をまとめて描く
+ *
+ * メッシュ → 影を落とす線の順に描く（以前は物体ごとにメッシュ・線の順。シャドウマップは深さだけで、深さの比べ方は描く順によらない）。
+ * 以前は線を、直前に当てたメッシュのシャドウマップのパスのまま描いていた。今は線用のパス（shadow_map_line_instanced。同じ計算）で描く
+ */
+void GraphicsManager::render_shadow_map_instances( const BaseShadowMapShader* shader, const core::graphics::ObjectInstanceBuffer& instances, const ecs::ObjectRenderDataSystem& system, int level ) const
+{
+	const auto& targets = system.get_render_targets();
+
+	// メッシュ
+	{
+		const auto& list = system.get_draw_list( ecs::ObjectRenderDataSystem::shadow_mesh_pass( level ) );
+
+		object_instance_buffer_->update_indices( list.instance_indices.data(), list.instance_indices.size() );
+
+		for ( const auto& item : list.items )
+		{
+			if ( item.batch == ecs::ObjectRenderDataSystem::NoBatch )
+			{
+				// 影の段はスキンメッシュでない物をすべてまとめるので、ここへは来ない（来たら今までどおり 1 個ずつ描く）
+				const auto& target = targets[ item.target ];
+
+				set_current_object_constant_buffer( target.render->object_constant_buffer.get() );
+				set_current_skinning_constant_buffer( target.render->bone_constant_buffer.get() );
+
+				render_object_mesh( * target.render, target.model, shader );
+				continue;
+			}
+
+			const auto& batch = list.batches[ item.batch ];
+			const Mesh* mesh = batch.model->get_mesh();
+
+			instances.bind_to_vs( batch.first );
+
+			mesh->bind();
+
+			for ( uint_t m = 0; m < mesh->get_rendering_vertex_group_count(); m++ )
+			{
+				shader->render_object_instances( mesh, m, batch.count );
+			}
+		}
+	}
+
+	// 影を落とす線
+	{
+		const auto& list = system.get_draw_list( ecs::ObjectRenderDataSystem::shadow_line_pass( level ) );
+
+		object_instance_buffer_->update_indices( list.instance_indices.data(), list.instance_indices.size() );
+
+		for ( const auto& item : list.items )
+		{
+			if ( item.batch == ecs::ObjectRenderDataSystem::NoBatch )
+			{
+				continue;	// 線はすべてまとめるので、ここへは来ない
+			}
+
+			const auto& batch = list.batches[ item.batch ];
+
+			instances.bind_to_vs( batch.first );
+			shader->render_line_instances( batch.model->get_line(), batch.count );
 		}
 	}
 }

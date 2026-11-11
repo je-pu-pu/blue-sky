@@ -175,6 +175,7 @@ protected:
 	void update_constant_buffers() const;
 
 	void render_shadow_map( const BaseShadowMapShader* , bool ) const;
+	void render_shadow_map_instances( const BaseShadowMapShader*, const core::graphics::ObjectInstanceBuffer&, const ecs::ObjectRenderDataSystem&, int level ) const;
 
 	void render_debug_axis_for_bones( const core::Transform&, const core::AnimationPlayer&, const Model* ) const;
 	virtual void render_debug_axis_model() const = 0;

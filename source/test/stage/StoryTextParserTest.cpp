@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include <blue_sky/stage/StoryTextParser.h>
+#include <core/graphics/BgSpriteLayer.h>
 
 #include <algorithm>
 #include <filesystem>
@@ -346,5 +347,28 @@ TEST( StoryTextFilesTest, 同梱のファイルの中身が古い形式から変
 			EXPECT_DOUBLE_EQ( ( * layer.scale->speed )[ 0 ], 0.0001 );
 			EXPECT_FALSE( layer.rotation.has_value() );
 		}
+	}
+}
+
+
+/**
+ * intro・outro の背景を画面を覆うまで拡大する係数（StoryTextScene の描く所で使う。doc/ステージ形式の設計.md 7.5）
+ * 1280x720 では 1（以前と同じ見た目）。縦横比が違う画面では、幅の比と高さの比の大きい方
+ */
+TEST( StoryTextParserTest, 背景を画面を覆う拡大は1280x720で1になり縦横比の違う画面では大きい方の比になる )
+{
+	using core::BgSpriteLayer;
+
+	EXPECT_FLOAT_EQ( BgSpriteLayer::get_screen_cover_scale( 1280.f, 720.f ), 1.f );
+	EXPECT_FLOAT_EQ( BgSpriteLayer::get_screen_cover_scale( 1920.f, 1080.f ), 1.5f );
+	EXPECT_FLOAT_EQ( BgSpriteLayer::get_screen_cover_scale( 1680.f, 1050.f ), 1050.f / 720.f );	// 16:10 : 高さで決まる
+	EXPECT_FLOAT_EQ( BgSpriteLayer::get_screen_cover_scale( 2560.f, 1080.f ), 2.f );			// ウルトラワイド : 幅で決まる
+
+	// 1280x720 で画面を覆っていた大きさ（1280x720）は、拡大するとどの画面も覆う
+	for ( const auto& [ w, h ] : { std::pair{ 1920.f, 1080.f }, { 1680.f, 1050.f }, { 2560.f, 1080.f }, { 1024.f, 768.f } } )
+	{
+		const float k = BgSpriteLayer::get_screen_cover_scale( w, h );
+		EXPECT_GE( 1280.f * k, w );
+		EXPECT_GE( 720.f * k, h );
 	}
 }

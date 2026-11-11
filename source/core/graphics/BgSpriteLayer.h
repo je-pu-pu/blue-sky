@@ -7,6 +7,8 @@
 
 #include <common/chase_value.h>
 
+#include <algorithm>
+
 
 namespace core
 {
@@ -37,6 +39,21 @@ private:
 	BgSpriteLayer& operator = ( const BgSpriteLayer& ) { }
 
 public:
+	/// 背景を作った基準の画面の大きさ。この大きさの画面では、画像を画素の大きさのまま描く（13 年間の見た目）
+	static constexpr float_t BASE_SCREEN_WIDTH = 1280.f;
+	static constexpr float_t BASE_SCREEN_HEIGHT = 720.f;
+
+	/**
+	 * 画面を覆うための拡大（画像の画素の大きさに掛ける。ファイルに書いた拡大はその上に掛かる）
+	 *
+	 * 基準の画面（1280x720）で 1。縦横比が違う画面では、幅の比と高さの比の大きい方に合わせる（はみ出す方は切れ、足りない方は出ない）。
+	 * 基準の画面で画面を覆っていた背景は、どの画面でも覆う
+	 */
+	static float_t get_screen_cover_scale( float_t screen_width, float_t screen_height )
+	{
+		return ( std::max )( screen_width / BASE_SCREEN_WIDTH, screen_height / BASE_SCREEN_HEIGHT );
+	}
+
 	/// texture は大きさを読むだけで持たない。持つのは handle（同じテクスチャのハンドル）
 	BgSpriteLayer( const char_t* name, const Texture* texture, TextureHandle handle );
 	~BgSpriteLayer();

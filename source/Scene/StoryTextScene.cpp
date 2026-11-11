@@ -258,20 +258,30 @@ void StoryTextScene::render()
 	sprite->begin();
 
 	{
-		render_technique( "|sprite", [this, sprite]
+		// 画面を覆う拡大（2026-11-11 利用者の決定）: 1280x720 での見た目を、画面を覆うまで画面の中心を軸に拡大する（はみ出した所は切れる）。
+		// 画像は画素の大きさで置かれるので、画像には画素の拡大 k（BgSpriteLayer::get_screen_cover_scale）をそのまま掛ける。
+		// translation は描画用の座標（画面の高さが 2）で書かれていて、画面の高さに対する割合なので、1280x720 と比べた拡大 k * 720 / 画面の高さ を掛ける
+		// （16:9 の画面では 1。画像との位置の関係を 1280x720 と同じに保つ）。1280x720 ではどちらも 1 なので、見た目は以前と同じ
+		const float_t screen_height = static_cast< float_t >( get_height() );
+		const float_t cover = BgSpriteLayer::get_screen_cover_scale( static_cast< float_t >( get_width() ), screen_height );
+		const float_t translation_cover = cover * BgSpriteLayer::BASE_SCREEN_HEIGHT / screen_height;
+
+		render_technique( "|sprite", [this, sprite, cover, translation_cover]
 		{
 			for ( auto j = bg_sprite_layer_list_.begin(); j != bg_sprite_layer_list_.end(); ++j )
 			{
 
 				// 重なりは描く先を渡さないので、Sprite が画面の中央に置く。描画用の座標（Pixel2DSpace）は画面の中心が原点なので、
-				// 回転・拡大は画面の中心（＝重なりの中心）を軸にかかり、その後で translation だけ動く
-				Matrix r, s, t;
+				// 回転・拡大は画面の中心（＝重なりの中心）を軸にかかり、その後で translation だけ動く。
+				// 画面を覆う拡大も、ファイルの拡大と同じく translation の前に画面の中心を軸に掛ける（回転の軸も画面の中心のまま）
+				Matrix r, s, c, t;
 
 				r.set_rotation_z( math::degree_to_radian( ( *j )->get_rotation().value() ) );
 				s.set_scaling( ( *j )->get_scale().value(), ( *j )->get_scale().value(), 1.f );
-				t.set_translation( ( *j )->get_translation().value().x(), ( *j )->get_translation().value().y(), 0.f );
+				c.set_scaling( cover, cover, 1.f );
+				t.set_translation( ( *j )->get_translation().value().x() * translation_cover, ( *j )->get_translation().value().y() * translation_cover, 0.f );
 
-				sprite->set_transform( r * s * t );
+				sprite->set_transform( r * s * c * t );
 				sprite->draw( resolve( ( *j )->get_texture_handle(), ( *j )->get_name().c_str() ), ( *j )->get_src_rect(), ( *j )->get_color().value() );	// 引けなければ Sprite は描かない
 			}
 		} );

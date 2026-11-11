@@ -766,6 +766,9 @@ void GraphicsManager::render_shadow_map( const BaseShadowMapShader* shader, bool
 				render_shadow_map_instances( shader, * instances, * system, n );
 				continue;
 			}
+
+			// 1 個ずつ描くので、定数バッファに書くのを後回しにした物の定数を書く（スキンメッシュは後回しにしないので、スキンメッシュの段では要らない）
+			system->write_deferred_constants();
 		}
 
 		const std::uint8_t cascade_bit = ecs::ObjectRenderDataSystem::visible_in_shadow_cascade( n );
@@ -919,6 +922,9 @@ void GraphicsManager::render_object_meshes() const
 		return;
 	}
 
+	// 1 個ずつ描くので、定数バッファに書くのを後回しにした物の定数を書く
+	system->write_deferred_constants();
+
 	for ( const auto& target : system->get_render_targets() )
 	{
 		const Model* model = target.model;
@@ -976,6 +982,9 @@ void GraphicsManager::render_object_lines() const
 
 			return;
 		}
+
+		// 1 個ずつ描くので、定数バッファに書くのを後回しにした物の定数を書く
+		system->write_deferred_constants();
 	}
 
 	render_technique( "|drawing_line", [ this, system ]
@@ -1028,6 +1037,7 @@ void GraphicsManager::render_objects_velocity() const
 	}
 
 	system->resolve_models();	// 1 フレームに 1 回だけ引く
+	system->write_deferred_constants();	// 物体の定数バッファを読むので、書くのを後回しにした物の定数を書く
 
 	for ( const auto& target : system->get_render_targets() )
 	{
@@ -1181,6 +1191,7 @@ void GraphicsManager::render_debug_axis() const
 	set_input_layout( "pos_color" );
 
 	system->resolve_models();	// 1 フレームに 1 回だけ引く
+	system->write_deferred_constants();	// 物体の定数バッファを読むので、書くのを後回しにした物の定数を書く
 
 	render_technique( "|simple_line", [ this, system ]
 	{

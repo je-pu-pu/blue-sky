@@ -238,6 +238,7 @@ void ObjectRenderDataSystem::update_render_data()
 	}
 
 	instances_.clear();
+	deferred_constants_count_ = 0;
 
 	for ( auto& list : draw_lists_ )
 	{
@@ -249,6 +250,8 @@ void ObjectRenderDataSystem::update_render_data()
 		// 先に全部の段に入れておく（下で書かない物も、前のフレームの結果を持ち越さない）
 		target.visibility = VisibleAll;
 		target.instance = NoInstance;
+		target.mesh_batchable = false;
+		target.constants_deferred = false;
 
 		ObjectRenderComponent& render = * target.render;
 
@@ -286,13 +289,26 @@ void ObjectRenderDataSystem::update_render_data()
 			shader_data.color = model->get_line()->get_color();
 		}
 
-		render.object_constant_buffer->update( & shader_data );
+		// 本体をまとめて描けるか（このフレームで 1 回だけ決める。本体の段の並びでも使う）
+		target.mesh_batchable = ! render.bone_constant_buffer && model->can_render_object_instances();
 
-		// まとめて描くときに、インスタンスの入れ物へ写す（同じ中身）
 		if ( instancing_enabled_ )
 		{
+			// まとめて描くときに、インスタンスの入れ物へ写す（定数バッファと同じ中身）
 			target.instance = static_cast< std::uint32_t >( instances_.size() );
 			instances_.push_back( shader_data );
+		}
+
+		// 本体・影・線のどれもまとめて描く物（スキンメッシュでなく本体をまとめられる物）は、定数バッファを今は書かない。
+		// 1 個ずつ描く流れ（まとめの準備ができていないフレーム・速度のパス・デバッグの軸）が使うときに write_deferred_constants で書く
+		if ( instancing_enabled_ && target.mesh_batchable )
+		{
+			target.constants_deferred = true;
+			deferred_constants_count_++;
+		}
+		else
+		{
+			render.object_constant_buffer->update( & shader_data );
 		}
 
 		const auto* animation = target.animation;
@@ -359,7 +375,8 @@ bool ObjectRenderDataSystem::can_batch_in_pass( const RenderTarget& target, int 
 	if ( pass == MeshPass )
 	{
 		// ボーンの定数（アニメーション）は物体ごとに違うので、まとめない。シェーダーがまとめて描けないモデルもまとめない
-		return ! target.render->bone_constant_buffer && target.model->can_render_object_instances();
+		// （update_render_data が決めた RenderTarget::mesh_batchable）
+		return target.mesh_batchable;
 	}
 
 	// 線・影の段（スキンメッシュでない物）は、どれもまとめる
@@ -453,6 +470,26 @@ void ObjectRenderDataSystem::build_draw_list( int pass, DrawList& list ) const
 	}
 
 	list.built = true;
+}
+
+void ObjectRenderDataSystem::write_deferred_constants() const
+{
+	if ( deferred_constants_count_ == 0 )
+	{
+		return;
+	}
+
+	for ( const auto& target : get_render_targets() )
+	{
+		if ( target.constants_deferred )
+		{
+			// 定数を求めた物（instance を持つ）だけが後回しになる
+			target.render->object_constant_buffer->update( & instances_[ target.instance ] );
+			target.constants_deferred = false;
+		}
+	}
+
+	deferred_constants_count_ = 0;
 }
 
 const ObjectRenderDataSystem::DrawList& ObjectRenderDataSystem::get_draw_list( int pass ) const

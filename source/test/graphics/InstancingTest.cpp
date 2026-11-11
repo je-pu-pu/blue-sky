@@ -352,6 +352,11 @@ TEST( InstancingTest, 物体ごとの定数は定数バッファに書いたも�
 	const auto& target = f.system->get_render_targets()[ 0 ];
 	ASSERT_NE( target.instance, ObjectRenderDataSystem::NoInstance );
 
+	// まとめて描く物なので、定数バッファに書くのは後回し。1 個ずつ描く流れが求めたときに同じ中身を書く
+	EXPECT_EQ( buffer->update_count, 0 );
+	f.system->write_deferred_constants();
+	EXPECT_EQ( buffer->update_count, 1 );
+
 	const auto& instance = f.system->get_instances()[ target.instance ];
 	EXPECT_EQ( std::memcmp( & instance, buffer->data.data(), sizeof( blue_sky::ObjectConstantBufferData ) ), 0 );
 	EXPECT_FLOAT_EQ( instance.color.g(), 0.5f );		// 線の色
@@ -394,6 +399,45 @@ TEST( InstancingTest, 有効にしていない_描く対象が増えた_フレ�
 	EXPECT_EQ( f.describe( ObjectRenderDataSystem::MeshPass ), "0x1" );
 	f.system->forget_resolved_models();
 	EXPECT_FALSE( f.system->is_instancing_ready() );
+}
+
+TEST( InstancingTest, 定数バッファはまとめて描く物だけ後回しにし_求められたら1回だけ書く )
+{
+	InstancingFixture f;
+	auto* a = f.add_mesh_model( "a" );
+	auto* no_instancing = f.add_mesh_model( "no_instancing", false );
+	auto* skin = f.add_mesh_model( "skin" );
+	skin->set_skinning_animation_set( & f.skinning );
+
+	FakeConstantBuffer* batched = nullptr;
+	FakeConstantBuffer* single = nullptr;
+	FakeConstantBuffer* skinned = nullptr;
+	FakeConstantBuffer* animated_buffer = nullptr;
+	f.create( a, Vector( 0.f, 0.f, 10.f ), & batched );
+	f.create( no_instancing, Vector( 1.f, 0.f, 10.f ), & single );
+	f.create( skin, Vector( 2.f, 0.f, 10.f ), & skinned );
+	auto* animated = f.create( a, Vector( 3.f, 0.f, 10.f ), & animated_buffer );
+	animated->bone_constant_buffer = std::make_unique< FakeConstantBuffer >( 16, 5, core::graphics::ConstantBufferUsage::DYNAMIC );
+
+	f.system->update_render_data();
+
+	// 1 個ずつ描くことのある物（まとめられないシェーダー・スキンメッシュ・ボーンの定数を持つ物）は、今までどおりすぐ書く
+	EXPECT_EQ( batched->update_count, 0 );
+	EXPECT_EQ( single->update_count, 1 );
+	EXPECT_EQ( skinned->update_count, 1 );
+	EXPECT_EQ( animated_buffer->update_count, 1 );
+
+	f.system->write_deferred_constants();
+	f.system->write_deferred_constants();	// 2 回目は何もしない
+	EXPECT_EQ( batched->update_count, 1 );
+	EXPECT_EQ( single->update_count, 1 );
+
+	// まとめて描かないなら、どれもすぐ書く（以前と同じ）
+	f.system->forget_resolved_models();
+	f.system->set_instancing_enabled( false );
+	f.system->update_render_data();
+	EXPECT_EQ( batched->update_count, 2 );
+	EXPECT_EQ( single->update_count, 2 );
 }
 
 TEST( InstancingTest, モデルを差し替えて別のモデルになった物は別にまとめる )

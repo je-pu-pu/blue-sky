@@ -48,6 +48,12 @@ public:
 
 		/// このフレームの物体の定数の、get_instances の中の位置（update_render_data が定数を求めた物だけ。求めていなければ NoInstance）
 		mutable std::uint32_t						instance = NoInstance;
+
+		/// このフレームで本体をまとめて描けるか（スキンメッシュでない・ボーンの定数を持たない・シェーダーがまとめて描ける。update_render_data が決める）
+		mutable bool								mesh_batchable = false;
+
+		/// このフレームの定数を、定数バッファにまだ書いていない（まとめて描くので後回しにした。write_deferred_constants で書く）
+		mutable bool								constants_deferred = false;
 	};
 
 	using RenderTargetList = std::vector< RenderTarget >;
@@ -143,6 +149,7 @@ private:
 	bool										instancing_enabled_ = false;	///< まとめて描くか（GraphicsManager が、インスタンスの入れ物を持つときに有効にする）
 	bool										instances_ready_ = false;		///< このフレームの物体の定数を求め、その後に描く対象が増減していない（フレームの終わりに戻す）
 	std::vector< core::ObjectConstantBufferData >	instances_;					///< このフレームの物体の定数（定数を求めた物だけ。RenderTarget::instance の位置）
+	mutable std::size_t							deferred_constants_count_ = 0;	///< 定数バッファに書くのを後回しにした物の数
 	mutable DrawList							draw_lists_[ DrawPassCount ];
 
 	// build_draw_list の作業用（毎回確保し直さない）
@@ -217,6 +224,15 @@ public:
 
 	/// このフレームの物体の定数（update_render_data が定数を求めた物だけ。RenderTarget::instance の位置。インスタンスの入れ物に写す）
 	const std::vector< core::ObjectConstantBufferData >& get_instances() const { return instances_; }
+
+	/**
+	 * 定数バッファに書くのを後回しにした物の定数を、今書く（後回しにした物が無ければ何もしない）
+	 *
+	 * まとめて描くとき、本体・影・線のどれもまとめて描く物は、update_render_data で定数バッファを書かない（Map・Unmap を省く）。
+	 * 物体の定数バッファを読む流れ（まとめの準備ができていないフレームの 1 個ずつ描く流れ・速度のパス・デバッグの軸）は、
+	 * 描く前にこれを呼ぶ
+	 */
+	void write_deferred_constants() const;
 
 	/**
 	 * 段 pass で描く物の並び（このフレームで初めて求められたときに作る。is_instancing_ready のときだけ使う）

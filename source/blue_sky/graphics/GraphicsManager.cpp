@@ -943,6 +943,41 @@ void GraphicsManager::render_object_lines() const
 
 	set_input_layout( "pos_color" );
 
+	// 線はどれも、同じモデルの物をまとめて描く（準備ができていなければ、下で今までどおり 1 個ずつ描く）
+	if ( system )
+	{
+		system->resolve_models();	// 1 フレームに 1 回だけ引く（引いた後なら何もしない）
+
+		if ( const auto* instances = get_ready_object_instance_buffer( system ) )
+		{
+			const auto& list = system->get_draw_list( ecs::ObjectRenderDataSystem::LinePass );
+
+			object_instance_buffer_->update_indices( list.instance_indices.data(), list.instance_indices.size() );
+
+			render_technique( "|drawing_line_instanced", [ this, & list, instances ]
+			{
+				get_game_render_data()->bind_to_all();
+				get_frame_render_data()->bind_to_all();
+				get_frame_drawing_render_data()->bind_to_all();
+
+				for ( const auto& item : list.items )
+				{
+					if ( item.batch == ecs::ObjectRenderDataSystem::NoBatch )
+					{
+						continue;	// 線はすべてまとめるので、ここへは来ない
+					}
+
+					const auto& batch = list.batches[ item.batch ];
+
+					instances->bind_to_vs( batch.first );
+					batch.model->get_line()->render_instanced( batch.count );
+				}
+			} );
+
+			return;
+		}
+	}
+
 	render_technique( "|drawing_line", [ this, system ]
 	{
 		get_game_render_data()->bind_to_all();

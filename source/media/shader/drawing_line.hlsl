@@ -29,6 +29,23 @@ COMMON_POS_COLOR vs_drawing_line( COMMON_POS_COLOR input, uint vertex_id : SV_Ve
 }
 
 /**
+ * vs_drawing_line の、同じモデルの物体をまとめて描く版（物体ごとの world・色を object_instance.hlsl から読む）
+ *
+ * vs_drawing_line の使っている計算（色を揺らす・ぶらすは無効にしてある）と同じ
+ */
+COMMON_POS_COLOR vs_drawing_line_instanced( COMMON_POS_COLOR input, uint instance_id : SV_InstanceID )
+{
+	const ObjectInstanceData object = get_object_instance( instance_id );
+
+	COMMON_POS_COLOR output;
+
+	output.Position = common_wvp_pos_w( input.Position, object.World );
+	output.Color = input.Color + object.Color;
+
+	return output;
+}
+
+/**
  * 手書き風の線を生成する
  *
  * input  : 0----------1
@@ -389,4 +406,23 @@ technique11 drawing_line
 		RASTERIZERSTATE = Default;
 	}
 	*/
+}
+
+// 手書き風の線（同じモデルの物体をまとめて描く版。頂点シェーダーのほかは drawing_line と同じ）。
+// 幾何シェーダーの SV_PrimitiveID はインスタンスごとに 0 から数え直すので、線の揺れ方は 1 個ずつ描いたときと同じ
+technique11 drawing_line_instanced
+{
+	pass main
+	{
+		SetBlendState( Blend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetDepthStencilState( NoWriteDepth, 0xFFFFFFFF );
+
+		SetVertexShader( CompileShader( vs_4_0, vs_drawing_line_instanced() ) );
+		SetHullShader( NULL );
+		SetDomainShader( NULL );
+		SetGeometryShader( CompileShader( gs_4_0, gs_drawing_line() ) );
+		SetPixelShader( CompileShader( ps_4_0, ps_drawing_line() ) );
+
+		RASTERIZERSTATE = Default;
+	}
 }

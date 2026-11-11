@@ -51,6 +51,10 @@ dump/
 # ONNX Runtime ヘッダ（NuGet 由来・再生成可能。lib/dll は lib/x64/* で無視済み）
 /source/lib/include/onnxruntime/
 
+# Recast & Detour ヘッダ（recastnavigation 由来・再生成可能。lib は lib/x64/* で無視済み）
+# セットアップは tools/x64-deps/ 参照
+/source/lib/include/recastnavigation/
+
 # Python（tools/npr_offline 等）
 __pycache__/
 *.pyc

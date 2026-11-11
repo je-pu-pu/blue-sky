@@ -212,6 +212,8 @@
     <ClCompile Include="test\ecs\PerceptionSystemTest.cpp" />
     <ClCompile Include="test\ecs\ObjectRenderDataSystemTest.cpp" />
     <ClCompile Include="test\ecs\EnemyAiSceneEcsTest.cpp" />
+    <ClCompile Include="test\nav\RecastLinkTest.cpp" />
+    <ClCompile Include="test\nav\NavMeshTest.cpp" />
     <ClCompile Include="test\graphics\MsdfFontTest.cpp" />
     <ClCompile Include="test\graphics\NeuralNprTest.cpp" />
     <ClCompile Include="test\graphics\CoherentNoiseTest.cpp" />

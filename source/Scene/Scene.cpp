@@ -5,6 +5,7 @@
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/DebugLog.h>
+#include <blue_sky/Fader.h>
 
 #include <core/ecs/EntityManager.h>
 #include <core/sound/SoundManager.h>
@@ -202,9 +203,14 @@ core::setting::SettingStore* Scene::get_setting_store() const
 	return game_main_->get_settings();
 }
 
-core::graphics::direct_3d_11::BulletDebugDraw* Scene::get_bullet_debug_draw() const
+core::graphics::DebugDraw* Scene::get_debug_draw() const
 {
-	return game_main_->get_bullet_debug_draw();
+	return game_main_->get_debug_draw();
+}
+
+Fader* Scene::get_fader() const
+{
+	return game_main_->get_fader();
 }
 
 int Scene::get_width() const
@@ -339,7 +345,7 @@ void Scene::render_technique( const char_t* technique_name, std::function< void(
  */
 void Scene::render_fader() const
 {
-	get_graphics_manager()->render_fader();
+	get_graphics_manager()->render_screen_color( get_fader()->get_color() );
 }
 
 } // namespace blue_sky

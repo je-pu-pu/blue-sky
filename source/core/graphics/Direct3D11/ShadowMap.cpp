@@ -1,7 +1,7 @@
 #include "ShadowMap.h"
 #include "Direct3D11.h"
 
-#include <core/graphics/Direct3D11/ConstantBuffer.h>
+#include <core/graphics/Direct3D11/DynamicSlotConstantBuffer.h>
 
 #include <common/exception.h>
 
@@ -12,7 +12,7 @@ static const float light_y = 500.f;
 
 ShadowMap::ShadowMap( Direct3D11* direct_3d, uint_t cascade_levels, size_t size )
 	: direct_3d_( direct_3d )
-	, shader_resource_( new ConstantBuffer( direct_3d ) )
+	, shader_resource_( create_typed_constant_buffer< ConstantBuffer >( direct_3d ) )
 	, cascade_levels_( cascade_levels )
 {
 	assert( cascade_levels_ <= MaxCascadeLevels );

@@ -7,11 +7,8 @@
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/NeuralStylizer.h>
 #include <core/graphics/Shader.h>
-#include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/Direct3D11/RenderTargetTexture.h>
-#include <core/graphics/Direct3D11/Texture.h>
-#include <core/graphics/Direct3D11/PixelFormat.h>
-#include <core/graphics/Direct3D11/TextureReadback.h>
+#include <core/graphics/Texture.h>
+#include <core/graphics/RenderTargetTexture.h>
 
 #include <imgui.h>
 
@@ -109,19 +106,11 @@ bool NeuralNprEffect::apply( core::graphics::GraphicsManager* gm, core::graphics
 
 	if ( ! enabled_ || ! stylizer_ ) return false;
 
-	auto* rtt = static_cast< core::graphics::direct_3d_11::RenderTargetTexture* >( scene );
-	auto* d3d = rtt->get_direct_3d();	// 読み戻しに使うデバイス・コンテキストはテクスチャを作った Direct3D11 から得る（以前は Direct3D11 の get_instance()）
-
-	ID3D11Resource* resource = nullptr;
-	rtt->get_render_target_view()->GetResource( & resource );
-	ID3D11Texture2D* texture = nullptr;
-	if ( resource ) resource->QueryInterface( IID_PPV_ARGS( & texture ) );
-
+	// 描画結果を CPU へ読み戻す（以前は Direct3D 11 の描画先へキャストし、デバイスで直接読んでいた）
 	std::vector< std::uint8_t > rgba;
-	UINT w = 0, h = 0;
+	uint_t w = 0, h = 0;
 	const auto t0 = clock::now();
-	const bool ok = texture && core::graphics::direct_3d_11::read_texture_2d_to_rgba8(
-		d3d->getDevice(), d3d->getImmediateContext(), texture, rgba, w, h );
+	const bool ok = gm->read_texture_rgba8( scene, rgba, w, h );
 	const auto t1 = clock::now();
 
 	bool displayed = false;
@@ -144,10 +133,10 @@ bool NeuralNprEffect::apply( core::graphics::GraphicsManager* gm, core::graphics
 		// フル解像度 RGBA8 -> 処理解像度 NCHW float[0,1]（最近傍ダウンサンプル）
 		for ( int py = 0; py < ph; ++py )
 		{
-			const UINT sy = static_cast< UINT >( ( static_cast< size_t >( py ) * full_h ) / ph );
+			const uint_t sy = static_cast< uint_t >( ( static_cast< size_t >( py ) * full_h ) / ph );
 			for ( int px = 0; px < pw; ++px )
 			{
-				const UINT sx = static_cast< UINT >( ( static_cast< size_t >( px ) * full_w ) / pw );
+				const uint_t sx = static_cast< uint_t >( ( static_cast< size_t >( px ) * full_w ) / pw );
 				const size_t si = ( static_cast< size_t >( sy ) * full_w + sx ) * 4;
 				const size_t di = static_cast< size_t >( py ) * pw + px;
 				input_[ 0 * n + di ] = rgba[ si + 0 ] / 255.f;
@@ -178,12 +167,9 @@ bool NeuralNprEffect::apply( core::graphics::GraphicsManager* gm, core::graphics
 			// 表示用テクスチャ（無し/サイズ違いなら作り直し）。処理解像度のまま、表示時に GPU が画面へ bilinear 拡大。
 			if ( ! output_texture_ || static_cast< int >( output_texture_->get_width() ) != pw || static_cast< int >( output_texture_->get_height() ) != ph )
 			{
-				output_texture_ = std::make_unique< core::graphics::direct_3d_11::Texture >(
-					d3d, core::graphics::direct_3d_11::PixelFormat::R8G8B8A8_UNORM, pw, ph, false );
+				output_texture_ = gm->create_texture( core::graphics::PixelFormat::R8G8B8A8_UNORM, pw, ph );
 			}
-			d3d->getImmediateContext()->UpdateSubresource(
-				output_texture_->get_texture_2d(), 0, nullptr, rgba_.data(),
-				static_cast< UINT >( pw ) * 4, static_cast< UINT >( pw ) * 4 * ph );
+			gm->update_texture( output_texture_.get(), rgba_.data() );
 
 			// 表示の間だけポストエフェクトを差し替え、描画後に元へ戻す（非NPRシーンに影響させない）
 			core::graphics::Shader* prev_pe = gm->get_post_effect_shader();
@@ -221,8 +207,6 @@ bool NeuralNprEffect::apply( core::graphics::GraphicsManager* gm, core::graphics
 		}
 	}
 
-	if ( texture ) texture->Release();
-	if ( resource ) resource->Release();
 	return displayed;
 }
 

@@ -4,6 +4,8 @@
 
 #include <map>
 
+#include <windows.h>	// SetEnvironmentVariableA（以前は Direct3D 11 のヘッダから間接に読んでいた）
+
 using blue_sky::dev::DevOptions;
 using blue_sky::SceneRequest;
 

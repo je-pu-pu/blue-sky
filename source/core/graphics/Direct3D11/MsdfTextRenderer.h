@@ -35,6 +35,10 @@ namespace core::graphics::direct_3d_11
 	class Direct3D11;
 	class InputLayout;
 	class EffectTechnique;
+}
+
+namespace core::graphics
+{
 	template< typename, int > class ConstantBufferTyped;
 }
 
@@ -83,8 +87,8 @@ public:
 		Matrix transform;	///< 正射影行列
 	};
 
-	using MsdfConstantBuffer = direct_3d_11::ConstantBufferTyped< MsdfConstantBufferData, 3 >;		///< PS slot 3
-	using TransformConstantBuffer = direct_3d_11::ConstantBufferTyped< TransformConstantBufferData, 13 >;	///< VS slot 13
+	using MsdfConstantBuffer = ConstantBufferTyped< MsdfConstantBufferData, 3 >;		///< PS slot 3
+	using TransformConstantBuffer = ConstantBufferTyped< TransformConstantBufferData, 13 >;	///< VS slot 13
 
 private:
 	direct_3d_11::Direct3D11* direct_3d_;	///< D3D11 デバイスラッパー（外部所有）

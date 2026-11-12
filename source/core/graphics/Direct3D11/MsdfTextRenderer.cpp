@@ -1,6 +1,6 @@
 #include "MsdfTextRenderer.h"
 #include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/Direct3D11/ConstantBufferTyped.h>
+#include <core/graphics/Direct3D11/DynamicSlotConstantBuffer.h>
 #include <core/graphics/Direct3D11/Effect.h>
 #include <core/graphics/Direct3D11/EffectTechnique.h>
 #include <core/graphics/Direct3D11/EffectPass.h>
@@ -68,8 +68,8 @@ MsdfTextRenderer::MsdfTextRenderer( direct_3d_11::Direct3D11* direct_3d, const c
 
 	cache_ = std::make_unique< GlyphCache >( font_.get(), atlas_.get(), CELL_SIZE );
 
-	msdf_constant_buffer_ = std::make_unique< MsdfConstantBuffer >( direct_3d_ );
-	transform_constant_buffer_ = std::make_unique< TransformConstantBuffer >( direct_3d_ );
+	msdf_constant_buffer_ = direct_3d_11::create_typed_constant_buffer< MsdfConstantBuffer >( direct_3d_ );
+	transform_constant_buffer_ = direct_3d_11::create_typed_constant_buffer< TransformConstantBuffer >( direct_3d_ );
 
 	create_vertex_buffer();
 	create_index_buffer();

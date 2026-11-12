@@ -8,7 +8,8 @@
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/DebugLog.h>
 
-#include <core/graphics/Direct3D11/BulletDebugDraw.h>
+#include <blue_sky/Fader.h>
+#include <core/graphics/DebugDraw.h>
 #include <core/graphics/Shader.h>
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
@@ -49,7 +50,8 @@ void ScriptBindings::bind( ScriptManager& script, const Targets& targets )
 	auto* const graphics_manager = targets.graphics;
 	auto* const sound_manager = targets.sound;
 	auto* const objects = targets.objects;
-	auto* const bullet_debug_draw = targets.bullet_debug_draw;
+	auto* const debug_draw = targets.debug_draw;
+	auto* const fader = targets.fader;
 	const auto request_scene = targets.request_scene;
 
 	script.exec( "function load( s ) dofile( 'media/script/' .. s ) end" );
@@ -66,9 +68,9 @@ void ScriptBindings::bind( ScriptManager& script, const Targets& targets )
 	script.set_function( "vector", [] ( float_t x, float_t y, float_t z ) { return Vector( x, y, z ); } );
 
 	// Fade
-	script.set_function( "set_fade_color", [graphics_manager] ( const Color& color ) { graphics_manager->set_fade_color( color ); } );
-	script.set_function( "start_fade_in", [graphics_manager] ( float_t speed ) { graphics_manager->start_fade_in( speed ); } );
-	script.set_function( "start_fade_out", [graphics_manager] ( float_t speed ) { graphics_manager->start_fade_out( speed ); } );
+	script.set_function( "set_fade_color", [fader] ( const Color& color ) { fader->set_color( color ); } );
+	script.set_function( "start_fade_in", [fader] ( float_t speed ) { fader->start_fade_in( speed ); } );
+	script.set_function( "start_fade_out", [fader] ( float_t speed ) { fader->start_fade_out( speed ); } );
 
 	// ゲームの物体（Lua の "GameObject" は EntityId を包んだ GameObjectRef。ActiveObject を持たない ECS だけの物体も同じように触れる）
 	// 知らない名前なら nil を返す（以前は null に restart を呼んで落ちた）
@@ -147,7 +149,7 @@ void ScriptBindings::bind( ScriptManager& script, const Targets& targets )
 
 	// debug
 	script.set_function( "debug_axis", [graphics_manager] ( int on ) { graphics_manager->set_debug_axis_enabled( on != 0 ); } );
-	script.set_function( "debug_bullet", [bullet_debug_draw] ( int mode ) { bullet_debug_draw->setDebugMode( mode ); } );
+	script.set_function( "debug_bullet", [debug_draw] ( int mode ) { debug_draw->set_physics_debug_mode( mode ); } );
 
 	script.set_function( "debug_print_resources", [graphics_manager] () { graphics_manager->debug_print_resources(); } );
 }

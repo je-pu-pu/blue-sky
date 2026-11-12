@@ -1,4 +1,5 @@
 #include "PhysicsTestScene.h"
+#include <blue_sky/Fader.h>
 
 #include <blue_sky/SceneManager.h>
 #include <blue_sky/GameMain.h>
@@ -18,7 +19,6 @@
 
 #include <core/ecs/EntityManager.h>
 #include <core/physics/PhysicsManager.h>
-#include <core/graphics/Direct3D11/BulletDebugDraw.h>
 
 #include <common/random.h>
 
@@ -34,8 +34,7 @@ PhysicsTestScene::PhysicsTestScene( GameMain& game_main )
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
-	// PhysicsManager にデバッグ描画を設定
-	get_physics_manager()->set_debug_drawer( get_bullet_debug_draw() );
+	// 物理のデバッグ表示は GameMain が物理の世界に渡してある（物理の世界は 1 つで、作り直さない）
 
 	// System を追加する
 	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >( 0, get_input() );
@@ -125,7 +124,7 @@ void PhysicsTestScene::update()
 		physics_component->mass = 1.f; // 動的オブジェクト
 	}
 
-	get_graphics_manager()->update();
+	get_fader()->update();	// Lua の start_fade_in・start_fade_out で決めたフェードを進める（以前は GraphicsManager::update）
 	get_graphics_manager()->clear_debug_bullet();
 
 	get_entity_manager()->update();

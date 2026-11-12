@@ -41,7 +41,6 @@ namespace core
 		class Texture;
 		class BackBufferTexture;
 
-		namespace direct_3d_11 { class Direct3D11; }
 	}
 
 }
@@ -54,7 +53,6 @@ namespace blue_sky::ecs
 
 namespace blue_sky::graphics
 {
-	class Fader;
 	class ObjFileLoader;
 	class FbxFileLoader;
 
@@ -96,10 +94,7 @@ public:
 	using BaseShadowMapShader			= graphics::shader::BaseShadowMapShader;
 	
 private:
-	std::unique_ptr< Fader >	fader_;
-	bool_t						is_fading_in_ = true;		///< true : 現在フェードイン中 or false : 現在フェードアウト中
-	float_t						fade_speed_ = 0.f;
-
+	std::unique_ptr< Model >	screen_color_rectangle_;	///< 画面全体に色を重ねる矩形（fader のシェーダー。render_screen_color で描く）
 	std::unique_ptr< Model >	post_effect_rectangle_;		///< ポストエフェクトレンダリング用矩形
 
 	mutable std::unique_ptr< ShadowMap >					shadow_map_;
@@ -198,9 +193,6 @@ protected:
 	void clear_draw_count() const { draw_count_ = 0; }
 
 public:
-	/// Direct3D 11 の実装に直接触る所（頂点バッファ・Draw など）向け。抽象層（core::graphics::GraphicsManager）には置かない（B19）
-	virtual core::graphics::direct_3d_11::Direct3D11* get_direct_3d() const = 0;
-
 	GraphicsManager();
 	virtual ~GraphicsManager() override;
 
@@ -219,7 +211,6 @@ public:
 	void setup_shadow_map( uint_t, uint_t );
 	void unset_shadow_map();
 
-	void update();
 
 	virtual void set_default_viewport() = 0;
 	virtual void set_viewport( float_t x, float_t y, float_t w, float_t h, float_t min_d = 0.f, float_t max_d = 1.f ) = 0;
@@ -435,18 +426,12 @@ public:
 	virtual void render_post_effect( Texture* ) override;
 	virtual void render_post_effect( Texture*, RenderTarget* ) override;
 
-	Fader* get_fader() { return fader_.get(); }
-	const Fader* get_fader() const { return fader_.get(); }
-
-	void set_fade_color( const Color& );
-
-	void start_fade_in( float_t speed );
-	void start_fade_out( float_t speed );
-
-	void fade_in( float_t speed = 1.f );
-	void fade_out( float_t speed = 1.f );
-
-	void render_fader() const override;
+	/**
+	 * 画面全体に色を重ねて描く（色の a で混ぜる。画面の暗転・白飛びなどの演出の見た目）
+	 *
+	 * 色と不透明度の移り変わり（フェード）はゲームの側の blue_sky::Fader が持つ。以前は描画の窓口がフェーダーを持っていた
+	 */
+	void render_screen_color( const Color& color ) const;
 
 	/**
 	 * 矩形内にテキストを描画する

@@ -4,7 +4,7 @@
 #include <blue_sky/Input.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
-#include <blue_sky/graphics/Fader.h>
+#include <blue_sky/Fader.h>
 
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
@@ -48,7 +48,7 @@ StoryTextScene::StoryTextScene( GameMain& game_main, const char* table_name, con
 		bg_sprite_layer_list_.push_back( create_bg_sprite_layer( "bg", "story-bg-default", "media/image/story-bg-default.jpg" ) );
 	}
 
-	get_graphics_manager()->get_fader()->full_out();
+	get_fader()->full_out();
 }
 
 StoryTextScene::~StoryTextScene() = default;
@@ -210,10 +210,10 @@ void StoryTextScene::update()
 				bgm->fade_out();
 			}
 
-			get_graphics_manager()->get_fader()->fade_out();
+			get_fader()->fade_out();
 		}
 
-		if ( ( ! sound || sound->is_fade_full_out() ) && ( ! bgm || bgm->is_fade_full_out() ) && get_graphics_manager()->get_fader()->is_full_out() )
+		if ( ( ! sound || sound->is_fade_full_out() ) && ( ! bgm || bgm->is_fade_full_out() ) && get_fader()->is_full_out() )
 		{
 			set_next_scene( next_scene_name_ );
 
@@ -226,7 +226,7 @@ void StoryTextScene::update()
 
 	if ( ! is_skipped_ )
 	{
-		get_graphics_manager()->get_fader()->fade_in();
+		get_fader()->fade_in();
 	}
 
 	for ( auto i = bg_sprite_layer_list_.begin(); i != bg_sprite_layer_list_.end(); ++i )

@@ -2,20 +2,15 @@
 #include <core/ConstantBuffers.h>
 #include <core/graphics/VertexBuffer.h>
 #include <core/graphics/GraphicsManager.h>
-#include <core/graphics/Direct3D11/Direct3D11.h>
 #include <iostream>
 
 
 namespace core::ecs
 {
 
-using core::graphics::BufferType;
-using core::graphics::VertexBuffer;
-using core::graphics::direct_3d_11::Direct3D11;
 
-ParticleRenderSystem::ParticleRenderSystem( core::graphics::GraphicsManager* graphics_manager, core::graphics::direct_3d_11::Direct3D11* direct_3d, std::unique_ptr< core::graphics::Shader > shader )
+ParticleRenderSystem::ParticleRenderSystem( core::graphics::GraphicsManager* graphics_manager, std::unique_ptr< core::graphics::Shader > shader )
 	: graphics_manager_( graphics_manager )
-	, direct_3d_( direct_3d )
 	, shader_( std::move( shader ) )
 	, object_constant_buffer_( graphics_manager->create_constant_buffer( sizeof( core::ObjectConstantBufferData ), core::ObjectConstantBuffer::SLOT, core::graphics::ConstantBufferUsage::DYNAMIC ) )	// 描画ごとに書き換える
 {
@@ -48,7 +43,7 @@ void ParticleRenderSystem::update()
 		// const auto& p = particle_system->particle_list.front();
 		// std::cout << "p0 pos, vel : " << p.position << ", " <<  p.velocity << std::endl;
 
-		// 頂点バッファは Direct3D11 を GraphicsManager から受け取って作る（以前は関数内の static で、中で Direct3D11 の get_instance() を使っていた）
+		// 頂点バッファは GraphicsManager が作る（以前は Direct3D11 を受け取って自分で作っていた。その前は関数内の static で、中で Direct3D11 の get_instance() を使っていた）
 		//
 		// 頂点バッファは 1 つで、全 Entity が使い回す。粒子の一覧の大きさが型で決まっている（std::array）ので、
 		// 最初の Entity で作った大きさが全 Entity に合う。Entity ごとに WRITE_DISCARD で書いてすぐ描く（render_technique は
@@ -58,10 +53,10 @@ void ParticleRenderSystem::update()
 
 		if ( ! vertex_buffer_ )
 		{
-			vertex_buffer_ = std::make_unique< VertexBuffer< ParticleSystemComponent::ParticleList > >( direct_3d_, particle_system->particle_list, BufferType::UPDATABLE );
+			vertex_buffer_ = get_graphics_manager()->create_dynamic_vertex_buffer( sizeof( ParticleSystemComponent::ParticleList::value_type ), particle_system->particle_list.size() );
 		}
 
-		vertex_buffer_->update( particle_system->particle_list );
+		vertex_buffer_->update( particle_system->particle_list.data(), particle_system->particle_list.size() );
 
 		// Constant Buffer
 		core::ObjectConstantBufferData object_data;
@@ -76,10 +71,7 @@ void ParticleRenderSystem::update()
 			object_constant_buffer_->bind_to_vs();
 			object_constant_buffer_->bind_to_gs();
 			shader_->bind();
-			vertex_buffer_->bind();
-
-			// Draw
-			direct_3d_->getImmediateContext()->Draw( particle_system->particle_list.size(), 0 );
+			vertex_buffer_->draw( particle_system->particle_list.size() );
 		} );
 	}
 

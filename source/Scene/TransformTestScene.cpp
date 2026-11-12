@@ -1,4 +1,5 @@
 #include "TransformTestScene.h"
+#include <blue_sky/Fader.h>
 
 #include <blue_sky/SceneManager.h>
 #include <blue_sky/Input.h>
@@ -79,7 +80,7 @@ void TransformTestScene::update()
 {
 	Scene::update();
 
-	get_graphics_manager()->update();
+	get_fader()->update();	// Lua の start_fade_in・start_fade_out で決めたフェードを進める（以前は GraphicsManager::update）
 	get_graphics_manager()->clear_debug_bullet();
 
 	get_entity_manager()->update();

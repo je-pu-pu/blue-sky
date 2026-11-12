@@ -37,7 +37,7 @@ namespace core
 
 	namespace graphics
 	{
-		namespace direct_3d_11 { class BulletDebugDraw; }
+		class DebugDraw;
 		class Texture;
 	}
 }
@@ -49,6 +49,7 @@ namespace blue_sky
 	class ObjectFactory;
 	class ScriptManager;
 	class Input;
+	class Fader;
 
 	namespace graphics
 	{
@@ -127,8 +128,11 @@ protected:
 	/// ゲームの設定（シーンは GameMain を直接呼ばず、これらの近道を使う。設計上の問題 B28）
 	core::setting::SettingStore* get_setting_store() const;
 
-	/// 物理のデバッグ表示
-	core::graphics::direct_3d_11::BulletDebugDraw* get_bullet_debug_draw() const;
+	/// デバッグ表示の線（物理のデバッグ表示と同じ所に描く）
+	core::graphics::DebugDraw* get_debug_draw() const;
+
+	/// 画面のフェード（持ち主は GameMain。描くのは render_fader）
+	Fader* get_fader() const;
 
 	int get_width() const;
 	int get_height() const;

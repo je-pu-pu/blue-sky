@@ -17,6 +17,7 @@
 
 #include "ScriptManager.h"
 #include "ScriptBindings.h"
+#include "Fader.h"
 
 #include <blue_sky/graphics/Direct3D11/GraphicsManager.h>
 
@@ -26,7 +27,7 @@
 #include <core/graphics/Direct3D11/Effect.h>
 #include <core/graphics/Shader.h>
 #include <core/graphics/TextRenderer.h>
-#include <core/graphics/OculusRift.h>
+#include <core/graphics/Direct3D11/OculusRift.h>
 
 
 #include <core/sound/DirectSound/SoundEngine.h>
@@ -165,11 +166,13 @@ GameMain::GameMain( App& app )
 	// Oculus Rift
 	if ( get_config()->get( "input.oculus_rift.enabled", 0 ) )
 	{
-		oculus_rift_.reset( new OculusRift( direct_3d_.get() ) );
+		oculus_rift_.reset( new core::graphics::direct_3d_11::OculusRift( direct_3d_.get() ) );
 	}
 
 	bullet_debug_draw_.reset( new core::graphics::direct_3d_11::BulletDebugDraw( direct_3d_.get() ) );
 	bullet_debug_draw_->setDebugMode( get_config()->get< int >( "graphics.debug_bullet", 0 ) );
+
+	fader_ = std::make_unique< Fader >();
 
 	scene_manager_->register_all_scene();
 
@@ -220,7 +223,7 @@ GameMain::GameMain( App& app )
 	object_factory_ = std::make_unique< ObjectFactory >( entity_manager_.get(), physics_manager_.get(), graphics_manager_.get(), sound_manager_.get() );
 
 	// ゲーム全体で使える Lua の関数（以前はここより前、物体を作る部品より先に登録し、関数が呼ばれるたびに GameMain から引いていた）
-	ScriptBindings::bind( * script_manager_, { graphics_manager_.get(), sound_manager_.get(), object_factory_.get(), bullet_debug_draw_.get(), [this] ( const SceneRequest& r ) { request_scene( r ); } } );
+	ScriptBindings::bind( * script_manager_, { graphics_manager_.get(), sound_manager_.get(), object_factory_.get(), bullet_debug_draw_.get(), fader_.get(), [this] ( const SceneRequest& r ) { request_scene( r ); } } );
 
 	// GraphicsManager はゲームの物体を、EntityManager の描画の部品（ecs::ObjectRenderDataSystem の描く対象）から描く（以前は ActiveObjectManager を直接回していた）
 	graphics_manager_->set_entity_manager( entity_manager_.get() );
@@ -306,6 +309,11 @@ GameMain::GameMain( App& app )
 }
 
 //■デストラクタ
+core::graphics::DebugDraw* GameMain::get_debug_draw() const
+{
+	return bullet_debug_draw_.get();
+}
+
 GameMain::~GameMain()
 {
 	// シーン（SceneStack）を最初に壊す。シーンは設定（購読）・文字列表・テーマ・ECS など GameMain の持ち物を使う。

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/graphics/Direct3D11/Direct3D11.h>
+#include <core/graphics/OculusRift.h>
 #include <core/type.h>
 
 #include <OVR_CAPI_D3D.h>
@@ -9,11 +10,14 @@
 
 #include <vector>
 
+namespace core::graphics::direct_3d_11
+{
+
 /**
- * Oculus Rift
+ * Oculus Rift（Direct3D 11 と Oculus SDK の実装。使う側は抽象の ::OculusRift で受け取る）
  *
  */
-class OculusRift
+class OculusRift : public ::OculusRift
 {
 public:
 	using Direct3D = core::graphics::direct_3d_11::Direct3D11;
@@ -61,27 +65,29 @@ protected:
 	void setup_default_viewport( int );
 
 public:
-	OculusRift( Direct3D* );
-	~OculusRift();
+	explicit OculusRift( Direct3D* );
+	~OculusRift() override;
 
-	void update();
+	void update() override;
 
-	void setup_rendering();
-	void setup_rendering_for_left_eye();
-	void setup_rendering_for_right_eye();
+	void setup_rendering() override;
+	void setup_rendering_for_left_eye() override;
+	void setup_rendering_for_right_eye() override;
 
-	void finish_rendering();
+	void finish_rendering() override;
 
-	Vector get_eye_position( int ) const;
-	Matrix get_eye_rotation( int ) const;
-	Matrix get_projection_matrix( int, float, float ) const;
+	Vector get_eye_position( int ) const override;
+	Matrix get_eye_rotation( int ) const override;
+	Matrix get_projection_matrix( int, float, float ) const override;
 
-	float_t get_yaw() const { return yaw_; }
-	float_t get_pitch() const { return pitch_; }
-	float_t get_roll() const { return roll_; }
+	float_t get_yaw() const override { return yaw_; }
+	float_t get_pitch() const override { return pitch_; }
+	float_t get_roll() const override { return roll_; }
 
-	float_t get_delta_yaw() const { return yaw_ - last_yaw_; }
-	float_t get_delta_pitch() const { return pitch_ - last_pitch_; }
-	float_t get_delta_roll() const { return roll_ - last_roll_; }
+	float_t get_delta_yaw() const override { return yaw_ - last_yaw_; }
+	float_t get_delta_pitch() const override { return pitch_ - last_pitch_; }
+	float_t get_delta_roll() const override { return roll_ - last_roll_; }
 
 }; // class OculusRift
+
+} // namespace core::graphics::direct_3d_11

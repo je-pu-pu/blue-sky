@@ -5,13 +5,14 @@
 #include <functional>
 
 namespace core::sound { class SoundManager; }
-namespace core::graphics::direct_3d_11 { class BulletDebugDraw; }
+namespace core::graphics { class DebugDraw; }
 
 namespace blue_sky
 {
 
 class ScriptManager;
 class ObjectFactory;
+class Fader;
 
 namespace graphics { class GraphicsManager; }
 
@@ -31,7 +32,8 @@ public:
 		graphics::GraphicsManager*							graphics = nullptr;
 		core::sound::SoundManager*							sound = nullptr;
 		ObjectFactory*										objects = nullptr;
-		core::graphics::direct_3d_11::BulletDebugDraw*		bullet_debug_draw = nullptr;
+		core::graphics::DebugDraw*							debug_draw = nullptr;		///< デバッグ表示（物理のデバッグ表示の種類を決める）
+		Fader*												fader = nullptr;			///< 画面のフェード
 		std::function< void( const SceneRequest& ) >		request_scene;		///< シーンの切り替えを要求する（実行はフレームの区切り）
 	};
 

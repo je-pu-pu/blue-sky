@@ -4,7 +4,7 @@
 #include <imgui.h>
 #include <string>
 
-#include <core/graphics/Direct3D11/Texture.h>
+#include <core/graphics/Texture.h>
 #include <portable-file-dialogs.h>
 
 namespace core::graphics
@@ -100,14 +100,15 @@ void Shader::render_parameter_gui()
 			break;
 		}
 
-		auto texture = dynamic_cast< const core::graphics::direct_3d_11::Texture* >( t );
+		// imgui で描けないテクスチャ（描画先など）で終える（以前は Direct3D 11 のテクスチャへ dynamic_cast して確かめていた）
+		void* const texture_id = t->get_imgui_texture_id();
 
-		if ( ! texture )
+		if ( ! texture_id )
 		{
 			break;
 		}
 
-		if ( ImGui::ImageButton( texture->get_shader_resource_view(), ImVec2( 64, 64 ) ) )
+		if ( ImGui::ImageButton( texture_id, ImVec2( 64, 64 ) ) )
 		{
 			 auto file = pfd::open_file( "image file", "./", { "Image files (.png)", "*.png" } );
 

@@ -3,7 +3,7 @@
 #include "EffectTechnique.h"
 #include "EffectPass.h"
 #include "Direct3D11.h"
-#include "ConstantBufferTyped.h"
+#include "DynamicSlotConstantBuffer.h"
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/Texture.h>
 #include <win/Rect.h>
@@ -24,7 +24,7 @@ Sprite::Sprite( Direct3D* direct_3d, const core::graphics::GraphicsManager* grap
 	, premultiplied_technique_( direct_3d_->get_effect()->get_technique( "sprite_premultiplied" ) )
 	, graphics_manager_( graphics_manager )
 {
-	constant_buffer_ = std::make_unique< ConstantBuffer >( direct_3d_ );
+	constant_buffer_ = create_typed_constant_buffer< ConstantBuffer >( direct_3d_ );
 	
 	create_vertex_buffer();
 	create_index_buffer();

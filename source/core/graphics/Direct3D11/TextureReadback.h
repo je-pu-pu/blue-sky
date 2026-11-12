@@ -4,8 +4,39 @@
 #include <vector>
 #include <cstdint>
 
+namespace core::graphics
+{
+	class Texture;
+}
+
 namespace core::graphics::direct_3d_11
 {
+
+/**
+ * 抽象のテクスチャ（core::graphics::Texture）から Direct3D 11 の 2D テクスチャを得る
+ *
+ * Direct3D 11 の Texture と RenderTargetTexture（描画先なら MSAA のままの本体）に対応する。ほかは nullptr
+ */
+ID3D11Texture2D* get_texture_2d( const core::graphics::Texture* texture );
+
+/// 1 画素のバイト数（読み戻し・書き込みで扱う形式だけ。扱わない形式は 0）
+unsigned int get_bytes_per_pixel( DXGI_FORMAT format );
+
+/**
+ * テクスチャを CPU 側の連続したバイト列へ読み戻す（形式はそのまま。行ピッチは詰める）
+ *
+ * 色の MSAA テクスチャは非 MSAA へ解決してから読む。MSAA の深度（型の無い形式・深度の形式）は解決できないので false
+ *
+ * @param out_bytes 読み戻し先。size = width * height * 1 画素のバイト数 にリサイズされる
+ * @return 成功したら true
+ */
+bool read_texture_2d(
+	ID3D11Device* device,
+	ID3D11DeviceContext* context,
+	ID3D11Texture2D* source,
+	std::vector< std::uint8_t >& out_bytes,
+	UINT& out_width,
+	UINT& out_height );
 
 /**
  * R8G8B8A8 系テクスチャを CPU 側の連続 RGBA8 バッファへ読み戻す。
@@ -14,7 +45,7 @@ namespace core::graphics::direct_3d_11
  * ( フレームダンプ・ニューラル推論入力など、GPU→CPU 読み戻しの共通処理 )
  *
  * @param out_pixels 読み戻し先。size = width*height*4 にリサイズされる
- * @return 成功したら true
+ * @return 成功したら true（1 画素が 4 バイトでない形式は false）
  */
 bool read_texture_2d_to_rgba8(
 	ID3D11Device* device,
@@ -32,6 +63,19 @@ bool read_texture_2d_to_rgba8(
  * @return 成功したら true
  */
 bool save_texture_2d_to_png(
+	ID3D11Device* device,
+	ID3D11DeviceContext* context,
+	ID3D11Texture2D* source,
+	const wchar_t* file_name );
+
+/**
+ * テクスチャの中身をそのままのバイト列でファイルへ保存する（read_texture_2d で読んだもの）
+ *
+ * Neural NPR のフレームの保存で、深度（float32）・速度（float32 x2）を保存するのに使う
+ *
+ * @return 成功したら true
+ */
+bool save_texture_2d_to_raw(
 	ID3D11Device* device,
 	ID3D11DeviceContext* context,
 	ID3D11Texture2D* source,

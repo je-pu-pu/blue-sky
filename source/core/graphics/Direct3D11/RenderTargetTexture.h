@@ -41,8 +41,8 @@ namespace core::graphics::direct_3d_11
 		RenderTargetTexture( Direct3D11* direct_3d, PixelFormat format, const Options& options );
 		RenderTargetTexture( Direct3D11* direct_3d, PixelFormat format, int width, int height );
 
-		/// このテクスチャを作った Direct3D11（中身を読み戻す所がデバイス・コンテキストを得るのに使う）
-		Direct3D11* get_direct_3d() const { return direct_3d_; }
+		/// 描画先の本体のテクスチャ（MSAA ならそのまま。中身を読み戻すときに使う）
+		const core::graphics::direct_3d_11::Texture* get_texture() const { return texture_.get(); }
 
 		void bind_to_ds( uint_t slot ) const override { texture_->bind_to_ds( slot ); }
 		void bind_to_ps( uint_t slot ) const override { texture_->bind_to_ps( slot ); }

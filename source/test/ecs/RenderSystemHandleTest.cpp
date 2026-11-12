@@ -6,6 +6,7 @@
 #include <core/graphics/GraphicsManager.h>
 #include <core/graphics/RenderTargetTexture.h>
 #include <core/graphics/InstanceBuffer.h>
+#include <core/graphics/VertexBuffer.h>
 #include <core/ResourceManager.h>
 
 namespace {
@@ -81,6 +82,12 @@ public:
 
 	std::unique_ptr< ConstantBuffer > create_constant_buffer( size_t, int, ConstantBufferUsage ) override { return std::make_unique< FakeConstantBuffer >(); }
 	std::unique_ptr< InstanceBuffer > create_instance_buffer() override { return std::make_unique< FakeInstanceBuffer >(); }
+	std::unique_ptr< core::graphics::VertexBuffer > create_dynamic_vertex_buffer( size_t, size_t ) override { return nullptr; }
+	std::unique_ptr< Texture > create_texture( PixelFormat, uint_t, uint_t ) override { return nullptr; }
+	void update_texture( Texture*, const void* ) const override { }
+	bool read_texture_rgba8( const Texture*, std::vector< std::uint8_t >&, uint_t&, uint_t& ) const override { return false; }
+	bool save_texture_png( const Texture*, const wchar_t* ) const override { return false; }
+	bool save_texture_raw( const Texture*, const wchar_t* ) const override { return false; }
 	Texture* load_texture( const char_t* ) override { return nullptr; }
 	core::graphics::Model* resolve_model( ModelHandle h ) const override { return models.resolve( h ); }
 	RenderTargetTexture* create_render_target_texture() override { return new FakeRenderTargetTexture(); }
@@ -103,7 +110,6 @@ public:
 	void set_post_effect_shader( Shader* ) override { }
 	void render_post_effect( Texture* ) override { }
 	void render_post_effect( Texture*, RenderTarget* ) override { }
-	void render_fader() const override { }
 	void clear_debug_bullet() const override { }
 	void render_debug_bullet() const override { }
 	void count_draw() const override { }

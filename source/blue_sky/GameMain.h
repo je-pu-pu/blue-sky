@@ -52,6 +52,11 @@ namespace core
 		class PhysicsManager;
 	}
 
+	namespace graphics
+	{
+		class DebugDraw;
+	}
+
 	namespace graphics::direct_3d_11
 	{
 		class Direct3D11;
@@ -83,6 +88,7 @@ namespace blue_sky
 	class Camera;
 
 	class Scene;
+	class Fader;
 
 	namespace graphics
 	{
@@ -138,7 +144,8 @@ private:
 	std::unique_ptr< ObjectUpdater >		object_updater_;		///< 本編の物体の System を決まった順に動かす（以前の ActiveObjectManager の残り）
 	std::unique_ptr< ObjectFactory >		object_factory_;		///< 物体を種類の名前から作り、名前で引く・やり直す・片付ける
 
-	std::unique_ptr< BulletDebugDraw >		bullet_debug_draw_;
+	std::unique_ptr< BulletDebugDraw >		bullet_debug_draw_;		///< 物理のデバッグ表示（Direct3D 11 の実装。ほかへは抽象の DebugDraw として渡す）
+	std::unique_ptr< Fader >				fader_;					///< 画面のフェード（ゲームの演出。シーンは Scene::get_fader・render_fader で使う。以前は描画の窓口が持っていた）
 
 	std::unique_ptr< SceneManager >			scene_manager_;			///< シーンの作り方の一覧（以前はシングルトン）
 	std::unique_ptr< core::ecs::EntityManager >	entity_manager_;	///< ECS の Entity・Component・System（以前はシングルトン。シーンより後に壊す）
@@ -236,7 +243,11 @@ public:
 
 	const MainLoop* get_main_loop() const { return main_loop_.get(); }
 
-	BulletDebugDraw* get_bullet_debug_draw() const { return bullet_debug_draw_.get(); }
+	/// デバッグ表示の線（物理のデバッグ表示と同じ所に描く）
+	core::graphics::DebugDraw* get_debug_draw() const;
+
+	/// 画面のフェード
+	Fader* get_fader() const { return fader_.get(); }
 
 	const std::string& get_stage_name() const { return scene_stack_->get_stage_name(); }
 	void set_stage_name( const std::string& stage_name ) { scene_stack_->set_stage_name( stage_name ); }

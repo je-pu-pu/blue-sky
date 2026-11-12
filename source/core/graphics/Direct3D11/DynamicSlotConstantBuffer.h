@@ -1,8 +1,11 @@
 #pragma once
 
 #include <core/graphics/ConstantBuffer.h>
+#include <core/graphics/ConstantBufferTyped.h>
 #include <core/graphics/Direct3D11/ConstantBuffer.h>
 #include <core/graphics/Direct3D11/Direct3D11.h>
+
+#include <memory>
 
 namespace core::graphics::direct_3d_11
 {
@@ -10,8 +13,8 @@ namespace core::graphics::direct_3d_11
 /**
  * ランタイム slot 指定の Direct3D11 定数バッファ
  *
- * テンプレート版 ConstantBuffer<Slot> と同じ機能を提供するが、
  * slot をコンストラクタ引数で受け取ることでランタイムに決定できる。
+ * 中身の型の決まった定数バッファ（core::graphics::ConstantBufferTyped）も、中ではこれを持つ（create_typed_constant_buffer）。
  */
 class DynamicSlotConstantBuffer : public core::graphics::ConstantBuffer
 {
@@ -74,5 +77,16 @@ public:
 	}
 
 }; // class DynamicSlotConstantBuffer
+
+/**
+ * 中身の型の決まった定数バッファ（core::graphics::ConstantBufferTyped・ConstantBufferWithData）を作る
+ *
+ * 大きさは T::DataType、場所は T::SLOT で、実装のバッファ（DynamicSlotConstantBuffer）を作って持たせる
+ */
+template< typename T >
+std::unique_ptr< T > create_typed_constant_buffer( Direct3D11* direct_3d, core::graphics::ConstantBufferUsage usage = core::graphics::ConstantBufferUsage::DEFAULT )
+{
+	return std::make_unique< T >( std::make_unique< DynamicSlotConstantBuffer >( direct_3d, sizeof( typename T::DataType ), T::SLOT, usage ) );
+}
 
 } // namespace core::graphics::direct_3d_11

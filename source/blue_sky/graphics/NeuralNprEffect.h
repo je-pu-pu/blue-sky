@@ -13,8 +13,7 @@ namespace core::graphics
 	class RenderTargetTexture;
 	class NeuralStylizer;
 	class Shader;
-
-	namespace direct_3d_11 { class Texture; }
+	class Texture;
 }
 
 namespace blue_sky::graphics
@@ -55,7 +54,7 @@ private:
 	void generate_noise( int width, int height );  ///< フレーム毎ノイズ（空間白色＋時間 EMA 平滑）を noise_ に生成
 
 	std::unique_ptr< core::graphics::NeuralStylizer >        stylizer_;
-	std::unique_ptr< core::graphics::direct_3d_11::Texture > output_texture_;  ///< 推論結果の表示用（CPU から動的更新）
+	std::unique_ptr< core::graphics::Texture > output_texture_;  ///< 推論結果の表示用（CPU から動的更新。GraphicsManager::create_texture で作る）
 	/// 使うシェーダー（ハンドルで持ち、使うたびに引く。以前は生ポインタで、シェーダーが解放されると壊れ得た）
 	core::ResourceHandle< core::graphics::Shader > recolor_shader_;  ///< 色保持リカラー用
 	core::ResourceHandle< core::graphics::Shader > default_shader_;  ///< 素通し（うねり回避）

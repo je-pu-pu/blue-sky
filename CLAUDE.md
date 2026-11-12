@@ -137,9 +137,12 @@ get_entity_manager()->add_system< RenderSystem >( 1000, get_graphics_manager(), 
 
 - **組み立ての根**は `GameMain`（と `App`・`Main.cpp`）。マネージャーを作り、使う側に渡す
 - **GameMain の部品**（SceneStack・DevTools）は GameMain の仕事（シーンを作る・片付ける・保存する など）を `Hooks`（std::function の入れ物）で受け取り、GameMain を知らない。テストでは偽物を渡す（例: `test/scene/SceneStackTest.cpp` は Scene のテスト用のコンストラクタで偽のシーンを作る）
+- **画面のフェード**はゲームの演出なので `blue_sky::Fader`（`blue_sky/Fader.h`）が状態を持ち、GameMain が持つ。シーンは `get_fader()` で進め、`render_fader()` で描く（描画の窓口は `render_screen_color` で色を重ねるだけ）
 - **シーン**は `Scene( GameMain& )` で受け取り、`Scene::get_*_manager()`・`get_input()`・`get_time_manager()` などの近道で GameMain から得る
 - **ECS のシステム**は必要なもの（物理・入力・時間・描画）をコンストラクタで受け取る。シーンが `add_system< T >( priority, get_physics_manager(), ... )` のように渡す（`add_system` は priority の後の引数をコンストラクタに渡す）
 - **描画を使うロジック**（ECS のシステム・ステージ・UI）は GraphicsManager の全体ではなく、使う分だけの小さな窓口で受け取る : `graphics::ResourceResolver`（ハンドルから引くだけ）・`ResourceLoader`（読む・作る）・`RenderSettings`（空・地面・色・線・紙）・`Canvas2D`（2D と文字）。GraphicsManager が全部実装する。テストの偽物は `test/graphics/FakeGraphics.h`（doc/描画の窓口の分割.md）
+  - **Direct3D 11 を知ってよいのは、組み立ての根（`GameMain`）と描画の実装（`core/graphics/Direct3D11/`・`blue_sky/graphics/Direct3D11/`）と実装を直接試すテストだけ**。ゲーム（Scene・blue_sky）も core の抽象（core/graphics の Direct3D11 の外・core/ecs など）も、Direct3D 11 のヘッダ・型（`ID3D11*`・`DXGI_*`・`direct_3d_11::`）を使わない。破ると `test/graphics/Direct3DBoundaryTest` が失敗する（例外の場所はそのテストの表）
+  - 必要なものは抽象の窓口で使う : 定数バッファは `core::graphics::ConstantBufferTyped`・`ConstantBufferWithData`（ゲームの定数バッファの型）、毎フレーム書き換える頂点は `GraphicsManager::create_dynamic_vertex_buffer`（`core::graphics::VertexBuffer`）、テクスチャの読み戻し・保存・CPU から書くテクスチャは `GraphicsManager` の `read_texture_rgba8`・`save_texture_png`・`save_texture_raw`・`create_texture`・`update_texture`、デバッグ表示の線は `core::graphics::DebugDraw`（シーンは `get_debug_draw()`）、VR は抽象の `OculusRift`
 - **描画の部品**は作り手の GraphicsManager から受け取る。シェーダーは `create_shader< T >( ... )` / `create_named_shader< T >( name, ... )` がコンストラクタの先頭に GraphicsManager を渡す（clone は引き継ぐ）。`Model::create_shader( GraphicsManager* )`・Line・MeshBuffer・Sprite も作り手が渡す
 - **ゲームの物体のシステム**は `GameObjectContext`（物理・音・経過時間・delta_time）を ObjectFactory・ObjectUpdater から受け取る
 - **新しく書くロジック**も、依存を引数・コンストラクタで受け取る（例: `Scene/OptionsController`）。シングルトンに触れないのでテストで動かせる

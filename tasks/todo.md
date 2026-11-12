@@ -48,6 +48,8 @@
 - [x] アウトライン付きの文字の端の 1 画素幅の縦線 : MSAA で UV が外挿されていた。centroid で直した（1945a242）
 - 確認の手順（画面がロック中でも使える）: 環境変数 BLUE_SKY_START_SCENE / BLUE_SKY_START_OVERLAY / BLUE_SKY_CAPTURE_FRAMES / BLUE_SKY_CAPTURE_DIR を付けて起動すると、指定フレームの描画結果が PNG になる。落ちたら log/crash.log に呼び出し履歴
 
+- [x] ゲームから Direct3D 11 を見えなくした（2026-11-12、feature/hide-direct3d-from-game）: 定数バッファ・頂点の置き場・テクスチャの読み戻し・デバッグ表示・VR を抽象の窓口に、フェードの状態を blue_sky::Fader（GameMain が持つ）へ。決まりは test/graphics/Direct3DBoundaryTest（doc/描画の窓口の分割.md の 7 章）
+
 ### 画像による装飾（2026-11-10）
 
 記録: `doc/UI画像対応と既存コードの修正.md`（何がまずくてどう直したか。レビュー指摘 19 件中 15 件を対応）

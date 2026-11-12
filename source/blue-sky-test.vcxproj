@@ -159,6 +159,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test\graphics\Direct3DBoundaryTest.cpp" />
     <ClCompile Include="test\dev\DevToolsTest.cpp" />
     <ClCompile Include="test\script\ScriptBindingsTest.cpp" />
     <ClCompile Include="test\scene\SceneStackTest.cpp" />

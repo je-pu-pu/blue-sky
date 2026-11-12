@@ -5,7 +5,7 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
-#include <blue_sky/graphics/Fader.h>
+#include <blue_sky/Fader.h>
 
 #include <core/graphics/Sprite.h>
 
@@ -46,7 +46,7 @@ EndingScene::EndingScene( GameMain& game_main )
 
 	bg_texture_ = load_named_texture_handle( "cloth", "media/texture/cloth.png" );
 
-	get_graphics_manager()->get_fader()->full_in();
+	get_fader()->full_in();
 
 	elapsed_timer_->reset();
 	play( bgm_, "opening-of-the-day" );
@@ -175,7 +175,7 @@ void EndingScene::update()
 
 	if ( in_fade_out_ )
 	{
-		if ( get_graphics_manager()->get_fader()->fade_out() )
+		if ( get_fader()->fade_out() )
 		{
 			set_next_scene( "title" );
 		}

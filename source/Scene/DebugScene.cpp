@@ -1,4 +1,5 @@
 #include "DebugScene.h"
+#include <blue_sky/Fader.h>
 #include "StageSelectScene.h"
 
 #include <GameObject/Camera.h>
@@ -19,7 +20,7 @@
 #include <filesystem>
 #include <system_error>
 #include <string>
-#include <core/graphics/Direct3D11/PixelFormat.h>
+#include <core/graphics/PixelFormat.h>
 
 #include <core/sound/SoundManager.h>
 #include <core/sound/SoundEngine.h>
@@ -36,13 +37,6 @@
 #include <imgui.h>
 #include <portable-file-dialogs.h>
 
-#include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/Direct3D11/RenderTargetTexture.h>
-#include <core/graphics/Direct3D11/Texture.h>
-#include <core/graphics/Direct3D11/TextureReadback.h>
-
-#include <wrl/client.h>
-#include <wincodec.h>
 #include <DirectXMath.h>
 
 #include <filesystem>
@@ -53,83 +47,8 @@
 #include <chrono>
 #include <blue_sky/DebugLog.h>
 
-#pragma comment( lib, "windowscodecs.lib" )
-
 namespace
 {
-
-/**
- * 深度バッファ ( D32_FLOAT / R32_TYPELESS ) を 32bit float の生バイナリとして保存する ( 案B / 段階0b )
- *
- * Python ハーネス側が color PNG から W/H を知り、float32 little-endian の W*H 配列として読む。
- * NDC 深度 [0,1] をそのまま書き出す ( 線形化はハーネス側で行列から行う )。
- * MSAA テクスチャは Map も深度の Resolve もできないため、単一サンプル時のみ対応し、
- * MSAA 検出時は false を返す ( 呼び出し側で警告する )。
- */
-bool dump_depth_to_raw(
-	ID3D11Device* device,
-	ID3D11DeviceContext* context,
-	ID3D11Texture2D* source,
-	const wchar_t* file_name )
-{
-	using Microsoft::WRL::ComPtr;
-
-	if ( ! device || ! context || ! source )
-	{
-		return false;
-	}
-
-	D3D11_TEXTURE2D_DESC desc{};
-	source->GetDesc( & desc );
-
-	// MSAA 深度は CPU readback 不可 ( Map 不可・深度フォーマットは ResolveSubresource 非対応 )
-	if ( desc.SampleDesc.Count > 1 )
-	{
-		return false;
-	}
-
-	D3D11_TEXTURE2D_DESC sd = desc;
-	sd.Usage = D3D11_USAGE_STAGING;
-	sd.BindFlags = 0;
-	sd.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	sd.MiscFlags = 0;
-
-	ComPtr< ID3D11Texture2D > staging;
-	if ( FAILED( device->CreateTexture2D( & sd, nullptr, staging.GetAddressOf() ) ) )
-	{
-		return false;
-	}
-
-	context->CopyResource( staging.Get(), source );
-
-	D3D11_MAPPED_SUBRESOURCE mapped{};
-	if ( FAILED( context->Map( staging.Get(), 0, D3D11_MAP_READ, 0, & mapped ) ) )
-	{
-		return false;
-	}
-
-	// 行ピッチを詰めて float32 連続バッファ化する
-	std::vector< float > depth( static_cast< size_t >( desc.Width ) * desc.Height );
-	const BYTE* src = static_cast< const BYTE* >( mapped.pData );
-	for ( UINT y = 0; y < desc.Height; ++y )
-	{
-		std::memcpy(
-			depth.data() + static_cast< size_t >( y ) * desc.Width,
-			src + static_cast< size_t >( y ) * mapped.RowPitch,
-			static_cast< size_t >( desc.Width ) * sizeof( float ) );
-	}
-	context->Unmap( staging.Get(), 0 );
-
-	FILE* fp = nullptr;
-	if ( _wfopen_s( & fp, file_name, L"wb" ) != 0 || ! fp )
-	{
-		return false;
-	}
-	std::fwrite( depth.data(), sizeof( float ), depth.size(), fp );
-	std::fclose( fp );
-
-	return true;
-}
 
 /**
  * カメラ行列 ( view / projection ) と near/far・解像度をテキストで保存する ( 案B / 段階0b )
@@ -142,8 +61,8 @@ bool dump_camera_to_txt(
 	const DirectX::XMMATRIX& projection,
 	float near_clip,
 	float far_clip,
-	UINT width,
-	UINT height )
+	uint_t width,
+	uint_t height )
 {
 	DirectX::XMFLOAT4X4 v;
 	DirectX::XMFLOAT4X4 p;
@@ -177,98 +96,6 @@ bool dump_camera_to_txt(
 	return true;
 }
 
-/**
- * モーションベクトル ( R32G32_FLOAT ) を 32bit float x2 の生バイナリとして保存する ( 案B / 段階0b )
- *
- * 各画素 ( x, y ) に NDC 空間の速度 ( cur_ndc - prev_ndc ) が入る。
- * MSAA の場合は ResolveSubresource で解決してから読む ( 色フォーマットなので解決可 )。
- */
-bool dump_motion_to_raw(
-	ID3D11Device* device,
-	ID3D11DeviceContext* context,
-	ID3D11Texture2D* source,
-	const wchar_t* file_name )
-{
-	using Microsoft::WRL::ComPtr;
-
-	if ( ! device || ! context || ! source )
-	{
-		return false;
-	}
-
-	D3D11_TEXTURE2D_DESC desc{};
-	source->GetDesc( & desc );
-
-	// MSAA なら非 MSAA テクスチャへ解決する
-	ComPtr< ID3D11Texture2D > resolved;
-	if ( desc.SampleDesc.Count > 1 )
-	{
-		D3D11_TEXTURE2D_DESC rd = desc;
-		rd.SampleDesc.Count = 1;
-		rd.SampleDesc.Quality = 0;
-		rd.Usage = D3D11_USAGE_DEFAULT;
-		rd.BindFlags = 0;
-		rd.CPUAccessFlags = 0;
-		rd.MiscFlags = 0;
-
-		if ( FAILED( device->CreateTexture2D( & rd, nullptr, resolved.GetAddressOf() ) ) )
-		{
-			return false;
-		}
-
-		context->ResolveSubresource( resolved.Get(), 0, source, 0, desc.Format );
-	}
-	else
-	{
-		resolved = source;
-	}
-
-	D3D11_TEXTURE2D_DESC sd = desc;
-	sd.SampleDesc.Count = 1;
-	sd.SampleDesc.Quality = 0;
-	sd.Usage = D3D11_USAGE_STAGING;
-	sd.BindFlags = 0;
-	sd.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	sd.MiscFlags = 0;
-
-	ComPtr< ID3D11Texture2D > staging;
-	if ( FAILED( device->CreateTexture2D( & sd, nullptr, staging.GetAddressOf() ) ) )
-	{
-		return false;
-	}
-
-	context->CopyResource( staging.Get(), resolved.Get() );
-
-	D3D11_MAPPED_SUBRESOURCE mapped{};
-	if ( FAILED( context->Map( staging.Get(), 0, D3D11_MAP_READ, 0, & mapped ) ) )
-	{
-		return false;
-	}
-
-	// RG float32 ( 8 byte/pixel ) を行ピッチを詰めて連続化する
-	const size_t row_bytes = static_cast< size_t >( desc.Width ) * 2 * sizeof( float );
-	std::vector< float > motion( static_cast< size_t >( desc.Width ) * desc.Height * 2 );
-	const BYTE* src = static_cast< const BYTE* >( mapped.pData );
-	for ( UINT y = 0; y < desc.Height; ++y )
-	{
-		std::memcpy(
-			reinterpret_cast< BYTE* >( motion.data() ) + static_cast< size_t >( y ) * row_bytes,
-			src + static_cast< size_t >( y ) * mapped.RowPitch,
-			row_bytes );
-	}
-	context->Unmap( staging.Get(), 0 );
-
-	FILE* fp = nullptr;
-	if ( _wfopen_s( & fp, file_name, L"wb" ) != 0 || ! fp )
-	{
-		return false;
-	}
-	std::fwrite( motion.data(), sizeof( float ), motion.size(), fp );
-	std::fclose( fp );
-
-	return true;
-}
-
 } // namespace
 
 namespace blue_sky
@@ -282,7 +109,7 @@ DebugScene::DebugScene( GameMain& game_main )
 	, city_generator_( get_graphics_manager() )
 	, camera_( new Camera() )
 	, render_result_texture_( get_graphics_manager()->create_render_target_texture() )
-	, velocity_texture_( get_graphics_manager()->create_render_target_texture( core::graphics::direct_3d_11::PixelFormat::R32G32_FLOAT ) )
+	, velocity_texture_( get_graphics_manager()->create_render_target_texture( core::graphics::PixelFormat::R32G32_FLOAT ) )
 {
 	// Physics
 	get_physics_manager()->add_ground( Vector( 1000, 1, 1000 ) );
@@ -395,7 +222,7 @@ void DebugScene::update()
 
 	get_object_updater()->update();
 
-	get_graphics_manager()->update();
+	get_fader()->update();	// Lua の start_fade_in・start_fade_out で決めたフェードを進める（以前は GraphicsManager::update）
 	get_graphics_manager()->set_eye_position( camera_->position() );
 
 	get_graphics_manager()->clear_debug_bullet();
@@ -508,31 +335,19 @@ void DebugScene::render()
 	{
 		std::filesystem::create_directories( "dump" );
 
-		auto* rtt = static_cast< core::graphics::direct_3d_11::RenderTargetTexture* >( render_result_texture_.get() );
-		auto* d3d = rtt->get_direct_3d();	// 読み戻しに使うデバイス・コンテキストはテクスチャを作った Direct3D11 から得る（以前は Direct3D11 の get_instance()）
-
-		ID3D11Resource* resource = nullptr;
-		rtt->get_render_target_view()->GetResource( & resource );
-
-		ID3D11Texture2D* texture = nullptr;
-		if ( resource )
-		{
-			resource->QueryInterface( IID_PPV_ARGS( & texture ) );
-		}
-
+		// 読み戻しと保存は描画の窓口に任せる（以前はここで Direct3D 11 のテクスチャを直接読んでいた）
 		wchar_t path[ 64 ];
 		swprintf_s( path, L"dump/color_%04d.png", frame_dump_index_ );
-		core::graphics::direct_3d_11::save_texture_2d_to_png( d3d->getDevice(), d3d->getImmediateContext(), texture, path );
+		get_graphics_manager()->save_texture_png( render_result_texture_.get(), path );
 
 		// 案B / 段階0b: 深度 + カメラ行列も併せてダンプ ( 正確な warp / 遮蔽の元データ )
 		if ( frame_dump_gbuffer_ )
 		{
-			auto* depth_tex = d3d->get_depth_texture();
-			ID3D11Texture2D* depth_2d = depth_tex ? depth_tex->get_texture_2d() : nullptr;
-
+			// 深度 ( D32_FLOAT ) は float32 の W*H 配列の生バイナリ。Python ハーネスが color PNG から W/H を知って読む。
+			// NDC 深度 [0,1] をそのまま書き出す ( 線形化はハーネス側で行列から行う )。MSAA の深度は読めないので false
 			wchar_t depth_path[ 64 ];
 			swprintf_s( depth_path, L"dump/depth_%04d.raw", frame_dump_index_ );
-			const bool depth_ok = dump_depth_to_raw( d3d->getDevice(), d3d->getImmediateContext(), depth_2d, depth_path );
+			const bool depth_ok = get_graphics_manager()->save_texture_raw( get_graphics_manager()->get_depth_texture(), depth_path );
 
 			wchar_t cam_path[ 64 ];
 			swprintf_s( cam_path, L"dump/cam_%04d.txt", frame_dump_index_ );
@@ -556,28 +371,14 @@ void DebugScene::render()
 			get_graphics_manager()->set_render_target( velocity_texture_.get() );
 			get_graphics_manager()->render_objects_velocity();
 
-			auto* vrtt = static_cast< core::graphics::direct_3d_11::RenderTargetTexture* >( velocity_texture_.get() );
-			ID3D11Resource* vres = nullptr;
-			vrtt->get_render_target_view()->GetResource( & vres );
-			ID3D11Texture2D* vtex = nullptr;
-			if ( vres )
-			{
-				vres->QueryInterface( IID_PPV_ARGS( & vtex ) );
-			}
-
+			// 速度 ( R32G32_FLOAT。NDC 空間の cur_ndc - prev_ndc ) は float32 x2 の生バイナリ。MSAA は解決してから保存する
 			wchar_t motion_path[ 64 ];
 			swprintf_s( motion_path, L"dump/motion_%04d.raw", frame_dump_index_ );
-			dump_motion_to_raw( d3d->getDevice(), d3d->getImmediateContext(), vtex, motion_path );
-
-			if ( vtex )	vtex->Release();
-			if ( vres )	vres->Release();
+			get_graphics_manager()->save_texture_raw( velocity_texture_.get(), motion_path );
 
 			// レンダーターゲットを元に戻す
 			get_graphics_manager()->set_render_target( render_result_texture_.get() );
 		}
-
-		if ( texture )	texture->Release();
-		if ( resource )	resource->Release();
 
 		frame_dump_index_++;
 		frame_dump_remaining_--;
@@ -594,7 +395,7 @@ void DebugScene::render()
 		get_graphics_manager()->render_post_effect( render_result_texture_.get() );
 	}
 
-	get_graphics_manager()->render_fader();
+	render_fader();
 
 	get_graphics_manager()->render_debug_axis();
 	get_graphics_manager()->render_debug_bullet();

@@ -60,6 +60,11 @@ void BulletDebugDraw::drawLine( const btVector3& from, const btVector3& to, cons
 	vertex_list_.push_back( to_v );
 }
 
+void BulletDebugDraw::draw_line( const Vector& from, const Vector& to, const Vector& color )
+{
+	drawLine( btVector3( from.x(), from.y(), from.z() ), btVector3( to.x(), to.y(), to.z() ), btVector3( color.x(), color.y(), color.z() ) );
+}
+
 void BulletDebugDraw::clear()
 {
 	vertex_list_.clear();

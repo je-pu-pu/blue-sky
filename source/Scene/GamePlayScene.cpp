@@ -24,6 +24,7 @@
 #include <blue_sky/ObjectUpdater.h>
 #include <blue_sky/ObjectFactory.h>
 #include <blue_sky/DebugLog.h>
+#include <blue_sky/Fader.h>
 #include <blue_sky/ecs/system/SwitchSystem.h>
 #include <blue_sky/ecs/EntityObject.h>
 #include <blue_sky/ecs/component/BalloonHoldComponent.h>
@@ -241,8 +242,8 @@ void GamePlayScene::setup_stage()
 
 void GamePlayScene::restart()
 {
-	get_graphics_manager()->set_fade_color( Color::White );
-	get_graphics_manager()->fade_out();
+	get_fader()->set_color( Color::White );
+	get_fader()->fade_out( 1.f );
 
 	is_cleared_ = false;
 	action_bgm_after_timer_ = 0.f;
@@ -499,12 +500,12 @@ void GamePlayScene::update_main()
 		{
 			// 落ちて死のうとしている場合は白くフェードアウトする
 
-			get_graphics_manager()->set_fade_color( Color( 1.f, 1.f, 1.f, 0.5f ) );
-			get_graphics_manager()->fade_out( get_fade_speed_falling() );
+			get_fader()->set_color( Color( 1.f, 1.f, 1.f, 0.5f ) );
+			get_fader()->fade_out( get_fade_speed_falling() );
 		}
 		else
 		{
-			get_graphics_manager()->fade_in( get_fade_speed_normal() );
+			get_fader()->fade_in( get_fade_speed_normal() );
 		}
 	}
 	else
@@ -515,8 +516,8 @@ void GamePlayScene::update_main()
 		}
 		else
 		{
-			get_graphics_manager()->set_fade_color( Color( 0.25f, 0.f, 0.f, 0.75f ) );
-			get_graphics_manager()->fade_out( get_fade_speed_dead() );
+			get_fader()->set_color( Color( 0.25f, 0.f, 0.f, 0.75f ) );
+			get_fader()->fade_out( get_fade_speed_dead() );
 		}
 	}
 }
@@ -668,8 +669,8 @@ void GamePlayScene::update_blackout()
 {
 	blackout_timer_ += get_elapsed_time();
 
-	get_graphics_manager()->set_fade_color( Color::Black );
-	get_graphics_manager()->fade_out();
+	get_fader()->set_color( Color::Black );
+	get_fader()->fade_out( 1.f );
 
 	if ( blackout_timer_ >= get_blackout_timeout() )
 	{
@@ -1155,7 +1156,7 @@ void GamePlayScene::update_clear()
 	camera_->rotate_degree_target().set( 0.f, get_player_object().get_direction_degree(), 0.f, 0.f );
 	camera_->set_rotate_chase_speed( get_camera_chase_speed_on_clear() );
 
-	get_graphics_manager()->fade_out( get_fade_speed_clear() );
+	get_fader()->fade_out( get_fade_speed_clear() );
 
 	Sound* fin_sound = get_sound_manager()->get_sound( "fin" );
 

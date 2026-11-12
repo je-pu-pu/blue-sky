@@ -107,7 +107,13 @@ public:
 	std::unique_ptr< core::graphics::ConstantBuffer > create_constant_buffer( size_t size, int slot, ConstantBufferUsage usage = ConstantBufferUsage::DEFAULT ) override;
 	std::unique_ptr< core::graphics::InstanceBuffer > create_instance_buffer() override;
 	std::unique_ptr< core::graphics::ObjectInstanceBuffer > create_object_instance_buffer() const override;
-	Direct3D* get_direct_3d() const override { return direct_3d_; }
+	std::unique_ptr< core::graphics::VertexBuffer > create_dynamic_vertex_buffer( size_t vertex_size, size_t vertex_count ) override;
+
+	std::unique_ptr< Texture > create_texture( PixelFormat, uint_t width, uint_t height ) override;
+	void update_texture( Texture*, const void* pixels ) const override;
+	bool read_texture_rgba8( const Texture*, std::vector< std::uint8_t >& pixels, uint_t& width, uint_t& height ) const override;
+	bool save_texture_png( const Texture*, const wchar_t* file_name ) const override;
+	bool save_texture_raw( const Texture*, const wchar_t* file_name ) const override;
 
 	// void unload_mesh( const char_t* ) override;
 	// void unload_mesh_all() override;

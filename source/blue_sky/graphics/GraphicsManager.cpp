@@ -4,7 +4,6 @@
 #include <blue_sky/ecs/system/ObjectRenderDataSystem.h>
 #include <blue_sky/ecs/component/AnimationComponent.h>
 
-#include <blue_sky/graphics/Fader.h>
 #include <blue_sky/graphics/Rectangle.h>
 #include <blue_sky/graphics/ObjFileLoader.h>
 #include <blue_sky/graphics/FbxFileLoader.h>
@@ -40,7 +39,7 @@ namespace blue_sky::graphics
 {
 
 GraphicsManager::GraphicsManager()
-	: fader_( std::make_unique< Fader >() )
+	: screen_color_rectangle_( std::make_unique< Model >() )
 	, post_effect_rectangle_( std::make_unique< Model >() )
 	, null_texture_( texture_manager_.create< core::graphics::NullTexture >() )
 {
@@ -131,22 +130,6 @@ void GraphicsManager::render_object_line( const ecs::ObjectRenderComponent& rend
 	bind_object_render_data( render );
 
 	model->get_line()->render();
-}
-
-/**
- * 更新処理
- *
- */
-void GraphicsManager::update()
-{
-	if ( is_fading_in_ )
-	{
-		fade_in( fade_speed_ );
-	}
-	else
-	{
-		fade_out( fade_speed_ );
-	}
 }
 
 /**
@@ -503,14 +486,14 @@ void GraphicsManager::select_shadow_map_shaders()
 }
 
 /**
- * 画面全体を覆う矩形（フェーダーとポストエフェクト用）を作り、シェーダーを割り当てる
+ * 画面全体を覆う矩形（画面に色を重ねる用とポストエフェクト用）を作り、シェーダーを割り当てる
  */
 void GraphicsManager::setup_screen_rectangles()
 {
 	auto rectangle = create_named_mesh< Rectangle >( "rectangle", Mesh::Buffer::Type::DEFAULT );
 
-	fader_->set_mesh( rectangle );
-	fader_->set_shader_at( 0, get_shader( "fader" ) );
+	screen_color_rectangle_->set_mesh( rectangle );
+	screen_color_rectangle_->set_shader_at( 0, get_shader( "fader" ) );
 
 	post_effect_rectangle_->set_mesh( rectangle );
 	set_post_effect_shader( get_shader( "post_effect_default" ) );
@@ -1106,69 +1089,20 @@ void GraphicsManager::render_post_effect( Texture* texture, RenderTarget* render
 }
 
 /**
- * フェードイン・フェードアウト用の色を設定する
+ * 画面全体に色を重ねて描く
  *
- * @param color 色
+ * @param color 色（a で混ぜる）
  */
-void GraphicsManager::set_fade_color( const Color& color )
-{
-	get_fader()->set_color( color );
-}
-
-void GraphicsManager::start_fade_in( float_t speed )
-{
-	is_fading_in_ = true;
-	fade_speed_ = speed;
-}
-	
-void GraphicsManager::start_fade_out( float_t speed )
-{
-	is_fading_in_ = false;
-	fade_speed_ = speed;
-}
-
-void GraphicsManager::fade_in( float_t speed )
-{
-	get_fader()->fade_in( speed );
-}
-	
-void GraphicsManager::fade_out( float_t speed )
-{
-	get_fader()->fade_out( speed );
-}
-
-/**
- * フェーダーを描画する
- *
- */
-void GraphicsManager::render_fader() const
+void GraphicsManager::render_screen_color( const Color& color ) const
 {
 	ObjectConstantBufferData shader_data;
 	shader_data.world = Matrix().set_identity();
-	shader_data.color = get_fader()->get_color();
+	shader_data.color = color;
 
 	get_shared_object_render_data()->update( & shader_data );
 	set_current_object_constant_buffer( get_shared_object_render_data() );
 
-	get_fader()->render();
-
-#if 0
-	ObjectConstantBufferData buffer_data;
-	buffer_data.world = Matrix().set_identity();
-	buffer_data.color = direct_3d_->getFader()->get_color();
-	
-	get_shared_object_render_data()->update( & buffer_data );
-
-	set_input_layout( "2d" );
-
-	render_technique( "|main2d", [this]
-	{
-		get_shared_object_render_data()->bind_to_vs();
-		get_shared_object_render_data()->bind_to_ps();
-
-		direct_3d_->getFader()->render();
-	} );
-#endif
+	screen_color_rectangle_->render();
 }
 
 /**

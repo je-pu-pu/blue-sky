@@ -2,6 +2,7 @@
 
 #include "Direct3D11Common.h"
 #include <core/type.h>
+#include <core/graphics/DebugDraw.h>
 #include <btBulletCollisionCommon.h>
 #include <vector>
 
@@ -12,12 +13,14 @@ namespace core::graphics::direct_3d_11
 /**
  * Bullet のデバッグ表示を Direct3D11 で行うためのクラス
  *
+ * ゲームの側からは抽象の窓口（core::graphics::DebugDraw）として使う。Bullet の型も Direct3D 11 の型も見せない
  */
-class BulletDebugDraw : public btIDebugDraw
+class BulletDebugDraw : public btIDebugDraw, public core::graphics::DebugDraw
 {
 public:
 	using Position	= Vector3;
 	using Color		= Vector3;
+	using Vector	= core::Vector;
 
 	struct Vertex
 	{
@@ -48,6 +51,9 @@ public:
 	void draw3dText( const btVector3&, const char* ) { }
 	void setDebugMode( int debug_mode ) { debug_mode_ = debug_mode; }
 	int getDebugMode() const { return debug_mode_; }
+
+	void draw_line( const Vector& from, const Vector& to, const Vector& color ) override;
+	void set_physics_debug_mode( int mode ) override { setDebugMode( mode ); }
 
 	void clear();
 	void render() const;

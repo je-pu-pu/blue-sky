@@ -8,6 +8,9 @@
 
 #include <iostream>
 
+namespace core::graphics::direct_3d_11
+{
+
 #define OCULUS_VR_FAIL_CHECK( x ) { if ( OVR_FAILURE( x ) ) { ovrErrorInfo errorInfo; ovr_GetLastErrorInfo( & errorInfo ); COMMON_THROW_EXCEPTION_MESSAGE( std::string( #x ) + " failed. : " + errorInfo.ErrorString ); } }
 
 const OculusRift::Matrix OculusRift::COORDINATE_SYSTEM_CONVERT_MATRIX = [] () { Matrix m; m.set_scaling( 1, 1, -1 ); return m; }();
@@ -320,3 +323,5 @@ OculusRift::Matrix OculusRift::get_eye_rotation( int ) const { return Matrix(); 
 OculusRift::Matrix OculusRift::get_projection_matrix( int, float, float ) const { return Matrix(); }
 
 #endif  // OCULUS_RIFT_ENABLED
+
+} // namespace core::graphics::direct_3d_11

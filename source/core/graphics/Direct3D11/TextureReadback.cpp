@@ -1,17 +1,99 @@
 #include "TextureReadback.h"
+#include "Texture.h"
+#include "RenderTargetTexture.h"
 
 #include <wrl/client.h>
 #include <wincodec.h>
+#include <cstdio>
 #include <cstring>
+
+#pragma comment( lib, "windowscodecs.lib" )	// PNG の保存（WIC）
 
 namespace core::graphics::direct_3d_11
 {
 
-bool read_texture_2d_to_rgba8(
+namespace
+{
+
+/// MSAA を解決できない形式（深度・型の無い形式）か
+bool is_unresolvable_format( DXGI_FORMAT format )
+{
+	switch ( format )
+	{
+		case DXGI_FORMAT_R32_TYPELESS:
+		case DXGI_FORMAT_D32_FLOAT:
+		case DXGI_FORMAT_R24G8_TYPELESS:
+		case DXGI_FORMAT_D24_UNORM_S8_UINT:
+		case DXGI_FORMAT_R16_TYPELESS:
+		case DXGI_FORMAT_D16_UNORM:
+		case DXGI_FORMAT_R32G32_TYPELESS:
+		case DXGI_FORMAT_R8G8B8A8_TYPELESS:
+		case DXGI_FORMAT_B8G8R8A8_TYPELESS:
+			return true;
+		default:
+			return false;
+	}
+}
+
+} // namespace
+
+ID3D11Texture2D* get_texture_2d( const core::graphics::Texture* texture )
+{
+	if ( const auto* t = dynamic_cast< const Texture* >( texture ) )
+	{
+		return t->get_texture_2d();
+	}
+
+	if ( const auto* rtt = dynamic_cast< const RenderTargetTexture* >( texture ) )
+	{
+		return rtt->get_texture() ? rtt->get_texture()->get_texture_2d() : nullptr;
+	}
+
+	return nullptr;
+}
+
+unsigned int get_bytes_per_pixel( DXGI_FORMAT format )
+{
+	switch ( format )
+	{
+		case DXGI_FORMAT_R8_UINT:
+		case DXGI_FORMAT_R8_UNORM:
+			return 1;
+
+		case DXGI_FORMAT_R8G8B8A8_TYPELESS:
+		case DXGI_FORMAT_R8G8B8A8_UNORM:
+		case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+		case DXGI_FORMAT_B8G8R8A8_TYPELESS:
+		case DXGI_FORMAT_B8G8R8A8_UNORM:
+		case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+		case DXGI_FORMAT_B8G8R8X8_UNORM:
+		case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+		case DXGI_FORMAT_R32_TYPELESS:
+		case DXGI_FORMAT_R32_FLOAT:
+		case DXGI_FORMAT_R32_UINT:
+		case DXGI_FORMAT_D32_FLOAT:
+		case DXGI_FORMAT_R24G8_TYPELESS:
+		case DXGI_FORMAT_D24_UNORM_S8_UINT:
+			return 4;
+
+		case DXGI_FORMAT_R32G32_TYPELESS:
+		case DXGI_FORMAT_R32G32_FLOAT:
+		case DXGI_FORMAT_R16G16B16A16_FLOAT:
+			return 8;
+
+		case DXGI_FORMAT_R32G32B32A32_FLOAT:
+			return 16;
+
+		default:
+			return 0;
+	}
+}
+
+bool read_texture_2d(
 	ID3D11Device* device,
 	ID3D11DeviceContext* context,
 	ID3D11Texture2D* source,
-	std::vector< std::uint8_t >& out_pixels,
+	std::vector< std::uint8_t >& out_bytes,
 	UINT& out_width,
 	UINT& out_height )
 {
@@ -25,10 +107,22 @@ bool read_texture_2d_to_rgba8(
 	D3D11_TEXTURE2D_DESC desc{};
 	source->GetDesc( & desc );
 
-	// MSAA なら非 MSAA テクスチャへ解決する
+	const UINT bytes_per_pixel = get_bytes_per_pixel( desc.Format );
+
+	if ( bytes_per_pixel == 0 )
+	{
+		return false;
+	}
+
+	// MSAA なら非 MSAA テクスチャへ解決する（深度は解決できない）
 	ComPtr< ID3D11Texture2D > resolved;
 	if ( desc.SampleDesc.Count > 1 )
 	{
+		if ( is_unresolvable_format( desc.Format ) )
+		{
+			return false;
+		}
+
 		D3D11_TEXTURE2D_DESC rd = desc;
 		rd.SampleDesc.Count = 1;
 		rd.SampleDesc.Quality = 0;
@@ -73,13 +167,13 @@ bool read_texture_2d_to_rgba8(
 	}
 
 	// 行ピッチを詰めて連続バッファ化する
-	const UINT stride = desc.Width * 4;
-	out_pixels.resize( static_cast< size_t >( stride ) * desc.Height );
+	const size_t stride = static_cast< size_t >( desc.Width ) * bytes_per_pixel;
+	out_bytes.resize( stride * desc.Height );
 	const std::uint8_t* src = static_cast< const std::uint8_t* >( mapped.pData );
 	for ( UINT y = 0; y < desc.Height; ++y )
 	{
 		std::memcpy(
-			out_pixels.data() + static_cast< size_t >( y ) * stride,
+			out_bytes.data() + static_cast< size_t >( y ) * stride,
 			src + static_cast< size_t >( y ) * mapped.RowPitch,
 			stride );
 	}
@@ -88,6 +182,30 @@ bool read_texture_2d_to_rgba8(
 	out_width = desc.Width;
 	out_height = desc.Height;
 	return true;
+}
+
+bool read_texture_2d_to_rgba8(
+	ID3D11Device* device,
+	ID3D11DeviceContext* context,
+	ID3D11Texture2D* source,
+	std::vector< std::uint8_t >& out_pixels,
+	UINT& out_width,
+	UINT& out_height )
+{
+	if ( ! source )
+	{
+		return false;
+	}
+
+	D3D11_TEXTURE2D_DESC desc{};
+	source->GetDesc( & desc );
+
+	if ( get_bytes_per_pixel( desc.Format ) != 4 )
+	{
+		return false;
+	}
+
+	return read_texture_2d( device, context, source, out_pixels, out_width, out_height );
 }
 
 bool save_texture_2d_to_png(
@@ -159,6 +277,32 @@ bool save_texture_2d_to_png(
 	frame->SetPixelFormat( & format );
 
 	return SUCCEEDED( frame->WriteSource( bitmap.Get(), nullptr ) ) && SUCCEEDED( frame->Commit() ) && SUCCEEDED( encoder->Commit() );
+}
+
+bool save_texture_2d_to_raw(
+	ID3D11Device* device,
+	ID3D11DeviceContext* context,
+	ID3D11Texture2D* source,
+	const wchar_t* file_name )
+{
+	std::vector< std::uint8_t > bytes;
+	UINT w = 0, h = 0;
+
+	if ( ! file_name || ! read_texture_2d( device, context, source, bytes, w, h ) )
+	{
+		return false;
+	}
+
+	FILE* fp = nullptr;
+	if ( _wfopen_s( & fp, file_name, L"wb" ) != 0 || ! fp )
+	{
+		return false;
+	}
+
+	std::fwrite( bytes.data(), 1, bytes.size(), fp );
+	std::fclose( fp );
+
+	return true;
 }
 
 } // namespace core::graphics::direct_3d_11

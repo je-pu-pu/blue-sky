@@ -85,6 +85,8 @@ public:
 	void bind_to_ds( uint_t slot ) const override { direct_3d_->bind_texture_to_ds( slot, this ); }
 	void bind_to_ps( uint_t slot ) const override { direct_3d_->bind_texture_to_ps( slot, this ); }
 
+	void* get_imgui_texture_id() const override { return shader_resource_view_.get(); }
+
 	ID3D11ShaderResourceView* get_shader_resource_view() const { return shader_resource_view_.get(); }
 	ID3D11Texture2D* get_texture_2d() const { return texture_2d_.get(); }
 

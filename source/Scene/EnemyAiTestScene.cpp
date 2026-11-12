@@ -1,4 +1,6 @@
 #include "EnemyAiTestScene.h"
+#include <blue_sky/Fader.h>
+#include <core/graphics/DebugDraw.h>
 
 #include <blue_sky/SceneManager.h>
 #include <blue_sky/GameMain.h>
@@ -36,7 +38,6 @@
 #include <core/input/InputManager.h>
 #include <core/physics/PhysicsManager.h>
 #include <core/math/Quaternion.h>
-#include <core/graphics/Direct3D11/BulletDebugDraw.h>
 #include <core/sound/SoundManager.h>
 
 #include <game/MainLoop.h>
@@ -93,8 +94,7 @@ EnemyAiTestScene::EnemyAiTestScene( GameMain& game_main, StageKind kind )
 	get_graphics_manager()->setup_default_shaders();
 	get_graphics_manager()->load_paper_textures();
 
-	// Bullet デバッグ描画（LOS レイの遮蔽やコーン可視化に使う）
-	get_physics_manager()->set_debug_drawer( get_bullet_debug_draw() );
+	// デバッグ表示の線（LOS レイの遮蔽やコーン可視化に使う）は get_debug_draw() に描く。物理のデバッグ表示は GameMain が物理の世界に渡してある
 
 	// --- サウンド（仮）: 既存の media/sound, media/music から流用して割り当てる。
 	// 現バックエンド(PortAudio)は 3D/ピッチ/パンが no-op なので、すべて位置なしで鳴らす。
@@ -797,7 +797,7 @@ void EnemyAiTestScene::update()
 {
 	Scene::update();
 
-	get_graphics_manager()->update();
+	get_fader()->update();	// Lua の start_fade_in・start_fade_out で決めたフェードを進める（以前は GraphicsManager::update）
 	get_graphics_manager()->clear_debug_bullet();
 
 	// 3D サウンドのリスナー＝プレイヤーの目。位置・向きを毎フレーム更新して commit。
@@ -1309,7 +1309,7 @@ void EnemyAiTestScene::try_neutralize()
 
 void EnemyAiTestScene::draw_debug()
 {
-	auto* dd = get_bullet_debug_draw();
+	auto* dd = get_debug_draw();
 	if ( ! dd )
 	{
 		return;
@@ -1332,8 +1332,8 @@ void EnemyAiTestScene::draw_debug()
 		{
 			const Vector dp = transform->transform.get_position();
 			const core::Vector down_col( 0.2f, 0.5f, 1.f );
-			dd->drawLine( dp + Vector( -0.6f, 0.1f, -0.6f ), dp + Vector( 0.6f, 0.1f, 0.6f ), down_col );
-			dd->drawLine( dp + Vector( -0.6f, 0.1f,  0.6f ), dp + Vector( 0.6f, 0.1f, -0.6f ), down_col );
+			dd->draw_line( dp + Vector( -0.6f, 0.1f, -0.6f ), dp + Vector( 0.6f, 0.1f, 0.6f ), down_col );
+			dd->draw_line( dp + Vector( -0.6f, 0.1f,  0.6f ), dp + Vector( 0.6f, 0.1f, -0.6f ), down_col );
 			continue;
 		}
 
@@ -1357,15 +1357,15 @@ void EnemyAiTestScene::draw_debug()
 			const Vector dir( std::sin( a ), 0.f, std::cos( a ) );
 			const Vector end = apex + dir * dist;
 
-			dd->drawLine( apex, end, col );         // 稜線（床）
+			dd->draw_line( apex, end, col );         // 稜線（床）
 			if ( i > 0 )
 			{
-				dd->drawLine( prev_end, end, col ); // 弧（床）
+				dd->draw_line( prev_end, end, col ); // 弧（床）
 			}
 			prev_end = end;
 		}
 		// 敵の体と扇をつなぐ縦線（足元→目の高さ）。錐の原点が敵だと分かるように。
-		dd->drawLine( apex, pos + Vector( 0.f, perception->eye_height, 0.f ), col );
+		dd->draw_line( apex, pos + Vector( 0.f, perception->eye_height, 0.f ), col );
 
 		// 対空だけ、上方許容角の境界（斜め上に開く錐）も描く。床の扇だけでは「どこまで上を
 		// 見るか」が分からず、対空の真上が死角であることも読めないため。
@@ -1382,10 +1382,10 @@ void EnemyAiTestScene::draw_debug()
 				const float a = base - half + ( 2.f * half ) * static_cast< float >( i ) / K;
 				const Vector end = eye + Vector( std::sin( a ) * ce, se, std::cos( a ) * ce ) * dist;
 
-				dd->drawLine( eye, end, col );
+				dd->draw_line( eye, end, col );
 				if ( i > 0 )
 				{
-					dd->drawLine( prev_up, end, col );
+					dd->draw_line( prev_up, end, col );
 				}
 				prev_up = end;
 			}
@@ -1398,9 +1398,9 @@ void EnemyAiTestScene::draw_debug()
 			const Vector chest = pos + Vector( 0.f, 0.6f, 0.f );  // 箱の胸の高さ
 			const Vector tip   = chest + forward * 1.2f;          // 前方へ伸ばす
 			const Vector side( forward.z(), 0.f, -forward.x() );  // forward の水平右手
-			dd->drawLine( chest, tip, nose_col );
-			dd->drawLine( tip, tip - forward * 0.35f + side * 0.28f, nose_col );  // 矢じり
-			dd->drawLine( tip, tip - forward * 0.35f - side * 0.28f, nose_col );
+			dd->draw_line( chest, tip, nose_col );
+			dd->draw_line( tip, tip - forward * 0.35f + side * 0.28f, nose_col );  // 矢じり
+			dd->draw_line( tip, tip - forward * 0.35f - side * 0.28f, nose_col );
 		}
 
 		// 可聴半径（薄い円・床）。聴覚の届く範囲。
@@ -1415,7 +1415,7 @@ void EnemyAiTestScene::draw_debug()
 				const Vector p( pos.x() + std::sin( a ) * hr, floor_y, pos.z() + std::cos( a ) * hr );
 				if ( i > 0 )
 				{
-					dd->drawLine( prev_h, p, hear_col );
+					dd->draw_line( prev_h, p, hear_col );
 				}
 				prev_h = p;
 			}
@@ -1431,7 +1431,7 @@ void EnemyAiTestScene::draw_debug()
 				Vector b = patrol->waypoints[ ( i + 1 ) % patrol->waypoints.size() ];
 				a.set_y( floor_y );
 				b.set_y( floor_y );
-				dd->drawLine( a, b, path_col );
+				dd->draw_line( a, b, path_col );
 			}
 		}
 
@@ -1441,7 +1441,7 @@ void EnemyAiTestScene::draw_debug()
 			const core::Vector nav_path_col( 1.f, 0.2f, 0.9f );
 			for ( std::size_t i = 0; i + 1 < patrol->path.size(); ++i )
 			{
-				dd->drawLine( patrol->path[ i ], patrol->path[ i + 1 ], nav_path_col );
+				dd->draw_line( patrol->path[ i ], patrol->path[ i + 1 ], nav_path_col );
 			}
 		}
 
@@ -1449,9 +1449,9 @@ void EnemyAiTestScene::draw_debug()
 		if ( perception->has_last_seen && alert->state != ai::AlertState::Unaware )
 		{
 			const Vector p = perception->last_seen_position;
-			dd->drawLine( p - Vector( 0.5f, 0.f, 0.f ), p + Vector( 0.5f, 0.f, 0.f ), col );
-			dd->drawLine( p - Vector( 0.f, 0.f, 0.5f ), p + Vector( 0.f, 0.f, 0.5f ), col );
-			dd->drawLine( p, p + Vector( 0.f, 2.f, 0.f ), col );
+			dd->draw_line( p - Vector( 0.5f, 0.f, 0.f ), p + Vector( 0.5f, 0.f, 0.f ), col );
+			dd->draw_line( p - Vector( 0.f, 0.f, 0.5f ), p + Vector( 0.f, 0.f, 0.5f ), col );
+			dd->draw_line( p, p + Vector( 0.f, 2.f, 0.f ), col );
 		}
 	}
 
@@ -1462,9 +1462,9 @@ void EnemyAiTestScene::draw_debug()
 		{
 			const Vector p = t->transform.get_position();
 			const core::Vector fw_col( 1.f, 0.6f, 0.f );
-			dd->drawLine( p - Vector( 0.6f, 0.f, 0.f ), p + Vector( 0.6f, 0.f, 0.f ), fw_col );
-			dd->drawLine( p - Vector( 0.f, 0.f, 0.6f ), p + Vector( 0.f, 0.f, 0.6f ), fw_col );
-			dd->drawLine( p, p + Vector( 0.f, 1.5f, 0.f ), fw_col );
+			dd->draw_line( p - Vector( 0.6f, 0.f, 0.f ), p + Vector( 0.6f, 0.f, 0.f ), fw_col );
+			dd->draw_line( p - Vector( 0.f, 0.f, 0.6f ), p + Vector( 0.f, 0.f, 0.6f ), fw_col );
+			dd->draw_line( p, p + Vector( 0.f, 1.5f, 0.f ), fw_col );
 		}
 	}
 
@@ -1486,7 +1486,7 @@ void EnemyAiTestScene::draw_debug()
 				const Vector p( c.x() + std::sin( a ) * r, c.y(), c.z() + std::cos( a ) * r );
 				if ( i > 0 )
 				{
-					dd->drawLine( prev_s, p, sm_col );
+					dd->draw_line( prev_s, p, sm_col );
 				}
 				prev_s = p;
 			}
@@ -1498,7 +1498,7 @@ void EnemyAiTestScene::draw_debug()
 		const core::Vector nav_col( 0.2f, 0.85f, 0.35f );
 		for ( std::size_t i = 0; i + 1 < nav_edges_.size(); i += 2 )
 		{
-			dd->drawLine( nav_edges_[ i ], nav_edges_[ i + 1 ], nav_col );
+			dd->draw_line( nav_edges_[ i ], nav_edges_[ i + 1 ], nav_col );
 		}
 	}
 
@@ -1509,9 +1509,9 @@ void EnemyAiTestScene::draw_debug()
 		{
 			const core::Vector a( lk.start.x(), lk.start.y(), lk.start.z() );
 			const core::Vector b( lk.end.x(),   lk.end.y(),   lk.end.z() );
-			dd->drawLine( a, b, link_col );
-			dd->drawLine( a, a + core::Vector( 0, 0.5f, 0 ), link_col );  // 端点マーカ
-			dd->drawLine( b, b + core::Vector( 0, 0.5f, 0 ), link_col );
+			dd->draw_line( a, b, link_col );
+			dd->draw_line( a, a + core::Vector( 0, 0.5f, 0 ), link_col );  // 端点マーカ
+			dd->draw_line( b, b + core::Vector( 0, 0.5f, 0 ), link_col );
 		}
 	}
 
@@ -1524,13 +1524,13 @@ void EnemyAiTestScene::draw_debug()
 		for ( const auto& eye : combat_tracers_ )
 		{
 			const core::Vector e( eye.x(), eye.y(), eye.z() );
-			dd->drawLine( e, core::Vector( pfeet.x(), pfeet.y(), pfeet.z() ), shot_col );
+			dd->draw_line( e, core::Vector( pfeet.x(), pfeet.y(), pfeet.z() ), shot_col );
 
 			// 発砲元マーカ: 頭上に高い赤い縦線＋大きな×（遠くからでも発砲元が分かる）
 			const core::Vector top = e + core::Vector( 0.f, 2.5f, 0.f );
-			dd->drawLine( e, top, shot_col );
-			dd->drawLine( top + core::Vector( -0.5f, 0.f, -0.5f ), top + core::Vector( 0.5f, 0.f, 0.5f ), shot_col );
-			dd->drawLine( top + core::Vector( -0.5f, 0.f,  0.5f ), top + core::Vector( 0.5f, 0.f, -0.5f ), shot_col );
+			dd->draw_line( e, top, shot_col );
+			dd->draw_line( top + core::Vector( -0.5f, 0.f, -0.5f ), top + core::Vector( 0.5f, 0.f, 0.5f ), shot_col );
+			dd->draw_line( top + core::Vector( -0.5f, 0.f,  0.5f ), top + core::Vector( 0.5f, 0.f, -0.5f ), shot_col );
 		}
 	}
 

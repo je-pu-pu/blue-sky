@@ -1,81 +1,72 @@
 #pragma once
 
 #include <core/graphics/Direct3D11/Direct3D11.h>
-#include <core/graphics/BufferType.h>
-#include <core/type.h>
+#include <core/graphics/VertexBuffer.h>
 
 #include <d3d11.h>
+
+#include <cassert>
+#include <cstring>
 
 namespace core::graphics::direct_3d_11
 {
 
 /**
- * Direct3D 11 の頂点バッファのラッパークラス
+ * Direct3D 11 の CPU から書き換えられる頂点バッファ（core::graphics::VertexBuffer の実装）
  *
- * コンストラクタに任意のコンテナを指定することで、そのコンテナの要素の型と、その時点でのコンテナのサイズで頂点バッファを作成する
- * 
+ * 書き換えは前の中身を捨てて書き直す（DYNAMIC + Map(WRITE_DISCARD)）。
  * 制限 : IASetVertexBuffers() で複数の頂点バッファを同時に設定することはできない
  */
-template< typename ContainerType >
-class VertexBuffer
+class VertexBuffer : public core::graphics::VertexBuffer
 {
-public:
-
 private:
-	Direct3D11* direct_3d_;		///< バッファを作る・更新する先（作り手が渡す。以前は Direct3D11 の get_instance() から取っていた）
-	com_ptr< ID3D11Buffer > buffer_;
-	D3D11_BUFFER_DESC buffer_desc_ = { 0 };
+	Direct3D11*					direct_3d_;		///< バッファを作る・更新する・描く先（作り手が渡す）
+	com_ptr< ID3D11Buffer >		buffer_;
+	UINT						vertex_size_;	///< 1 頂点の大きさ（バイト）
+	size_t						vertex_count_;	///< 置ける頂点の数
 
 public:
-	/**
-	 * @brief コンテナを使用して頂点バッファを作成する
-	 * @param direct_3d 頂点バッファを作る先
-	 * @param container 頂点バッファに設定するデータの入ったコンテナ
-	 * @param type 作成する頂点バッファの種類
-	 */
-	VertexBuffer( Direct3D11* direct_3d, const ContainerType& container, BufferType type = BufferType::DEFAULT )
+	VertexBuffer( Direct3D11* direct_3d, size_t vertex_size, size_t vertex_count )
 		: direct_3d_( direct_3d )
+		, vertex_size_( static_cast< UINT >( vertex_size ) )
+		, vertex_count_( vertex_count )
 	{
-		buffer_desc_.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		buffer_desc_.Usage = ( type == BufferType::UPDATABLE ) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
-		buffer_desc_.CPUAccessFlags = ( type == BufferType::UPDATABLE ) ? D3D11_CPU_ACCESS_WRITE : 0;
-		buffer_desc_.ByteWidth = sizeof( ContainerType::value_type ) * container.size();
-    
-		D3D11_SUBRESOURCE_DATA data = { nullptr };
-		data.pSysMem = & container[ 0 ];
+		D3D11_BUFFER_DESC buffer_desc = { 0 };
 
-		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc_, & data, & buffer_ ) );
+		buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
+		buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		buffer_desc.ByteWidth = static_cast< UINT >( vertex_size * vertex_count );
+
+		DIRECT_X_FAIL_CHECK( direct_3d_->getDevice()->CreateBuffer( & buffer_desc, nullptr, & buffer_ ) );
 	}
 
-	/**
-	 * @brief 頂点バッファを指定したコンテナで更新する
-	 * 
-	 * @param container 頂点バッファを更新するデータの入ったコンテナ
-	 */
-	void update( const ContainerType& container )
+	void update( const void* vertices, size_t vertex_count ) override
 	{
-		assert( buffer_desc_.Usage == D3D11_USAGE_DYNAMIC );
-		assert( buffer_desc_.ByteWidth == sizeof( ContainerType::value_type ) * container.size() );
+		assert( vertex_count <= vertex_count_ );
 
 		D3D11_MAPPED_SUBRESOURCE mapped_subresource;
 
 		DIRECT_X_FAIL_CHECK( direct_3d_->getImmediateContext()->Map( buffer_.get(), 0, D3D11_MAP_WRITE_DISCARD, 0, & mapped_subresource ) );
 
-		memcpy( mapped_subresource.pData, & container[ 0 ], sizeof( ContainerType::value_type ) * container.size() );
+		if ( vertex_count > 0 )
+		{
+			std::memcpy( mapped_subresource.pData, vertices, static_cast< size_t >( vertex_size_ ) * vertex_count );
+		}
 
 		direct_3d_->getImmediateContext()->Unmap( buffer_.get(), 0 );
 	}
 
-	/**
-	 * @brief 頂点バッファを入力アセンブラに設定する
-	 * 
-	 */
-	void bind()
+	void draw( size_t vertex_count ) const override
 	{
-		UINT stride = sizeof( ContainerType::value_type );
+		UINT stride = vertex_size_;
 		UINT offset = 0;
 
-		direct_3d_->getImmediateContext()->IASetVertexBuffers( 0, 1, & buffer_, & stride, & offset );
+		auto* context = direct_3d_->getImmediateContext();
+		ID3D11Buffer* buffer = buffer_.get();
+
+		context->IASetVertexBuffers( 0, 1, & buffer, & stride, & offset );
+		context->Draw( static_cast< UINT >( vertex_count ), 0 );
 	}
 
 }; // class VertexBuffer

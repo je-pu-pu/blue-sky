@@ -49,9 +49,9 @@ struct FrameDrawingConstantBufferData
 using ObjectConstantBufferData		= core::ObjectConstantBufferData;
 using BoneConstantBufferData		= core::BoneConstantBufferData;
 
-using GameConstantBuffer			= core::graphics::direct_3d_11::ConstantBufferTyped< GameConstantBufferData, 0 >;
-using FrameConstantBuffer			= core::graphics::direct_3d_11::ConstantBufferWithData< FrameConstantBufferData, 1 >;
-using FrameDrawingConstantBuffer	= core::graphics::direct_3d_11::ConstantBufferWithData< FrameDrawingConstantBufferData, 4 >;
+using GameConstantBuffer			= core::graphics::ConstantBufferTyped< GameConstantBufferData, 0 >;
+using FrameConstantBuffer			= core::graphics::ConstantBufferWithData< FrameConstantBufferData, 1 >;
+using FrameDrawingConstantBuffer	= core::graphics::ConstantBufferWithData< FrameDrawingConstantBufferData, 4 >;
 using ObjectConstantBuffer			= core::ObjectConstantBuffer;
 using ObjectConstantBufferWithData	= core::ObjectConstantBufferWithData;
 using BoneConstantBuffer			= core::BoneConstantBuffer;

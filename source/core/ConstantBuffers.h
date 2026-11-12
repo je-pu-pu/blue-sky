@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/type.h>
-#include <core/graphics/Direct3D11/ConstantBufferWithData.h>
+#include <core/graphics/ConstantBufferWithData.h>
 
 namespace core
 {
@@ -34,8 +34,8 @@ struct BoneConstantBufferData
 	}
 };
 
-using ObjectConstantBuffer			= core::graphics::direct_3d_11::ConstantBufferTyped< ObjectConstantBufferData, 2 >;
-using ObjectConstantBufferWithData	= core::graphics::direct_3d_11::ConstantBufferWithData< ObjectConstantBufferData, 2 >;
-using BoneConstantBuffer			= core::graphics::direct_3d_11::ConstantBufferTyped< BoneConstantBufferData, 5 >;
+using ObjectConstantBuffer			= core::graphics::ConstantBufferTyped< ObjectConstantBufferData, 2 >;
+using ObjectConstantBufferWithData	= core::graphics::ConstantBufferWithData< ObjectConstantBufferData, 2 >;
+using BoneConstantBuffer			= core::graphics::ConstantBufferTyped< BoneConstantBufferData, 5 >;
 
 } // namespace core

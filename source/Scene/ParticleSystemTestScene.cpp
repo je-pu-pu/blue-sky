@@ -1,4 +1,5 @@
 #include "ParticleSystemTestScene.h"
+#include <blue_sky/Fader.h>
 
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <core/physics/PhysicsManager.h>
@@ -35,7 +36,7 @@ ParticleSystemTestScene::ParticleSystemTestScene( GameMain& game_main )
 	// System を追加する
 	auto particle_shader = std::make_unique< blue_sky::graphics::shader::PointSpriteShader >( get_graphics_manager() );
 	particle_shader->set_texture_at( 0, get_graphics_manager()->load_texture( "media/texture/pen/circle.png" ) );
-	get_entity_manager()->add_system< core::ecs::ParticleRenderSystem >( 1001, get_graphics_manager(), get_graphics_manager()->get_direct_3d(), std::move( particle_shader ) );
+	get_entity_manager()->add_system< core::ecs::ParticleRenderSystem >( 1001, get_graphics_manager(), std::move( particle_shader ) );
 	get_entity_manager()->add_system< core::ecs::ParticleSystem >( 0 );
 	get_entity_manager()->add_system< blue_sky::ecs::TransformControlSystem >( 0, get_input() );
 	get_entity_manager()->add_system< core::ecs::RenderSystem >( 1000, get_graphics_manager(), get_time_manager() );
@@ -65,7 +66,7 @@ void ParticleSystemTestScene::update()
 	Scene::update();
 
 	get_entity_manager()->update();
-	get_graphics_manager()->update();
+	get_fader()->update();	// Lua の start_fade_in・start_fade_out で決めたフェードを進める（以前は GraphicsManager::update）
 
 	get_graphics_manager()->clear_debug_bullet();
 	get_physics_manager()->step_simulation( get_elapsed_time() );

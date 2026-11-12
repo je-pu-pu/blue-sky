@@ -42,6 +42,9 @@ private:
 public:
 	virtual uint_t get_multi_sample_quality() const = 0;
 
+	/// imgui の画像として描くときの印（ImTextureID）。imgui で描けないテクスチャは nullptr
+	virtual void* get_imgui_texture_id() const { return nullptr; }
+
 }; // Texture
 
 } // namespace core::graphics

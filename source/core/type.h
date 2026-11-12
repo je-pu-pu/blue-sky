@@ -16,17 +16,9 @@ namespace core
 {
 	namespace graphics
 	{
-		namespace direct_3d_11
-		{
-			template< int > class ConstantBuffer;
-		}
-
 		/// ピクセルフォーマット（エンジン独自の型。定義は core/graphics/PixelFormat.h）
 		enum class PixelFormat;
 	}
-
-	template< int Slot >
-	using ConstantBuffer	= graphics::direct_3d_11::ConstantBuffer< Slot >;
 
 	using Vector2			= math::direct_x_math::Vector2;
 	using Vector3			= math::direct_x_math::Vector3;

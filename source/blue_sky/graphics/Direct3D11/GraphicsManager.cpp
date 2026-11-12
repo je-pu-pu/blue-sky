@@ -4,7 +4,6 @@
 #include <blue_sky/ConstantBuffers.h>
 #include <blue_sky/graphics/SkyBox.h>
 #include <blue_sky/graphics/Ground.h>
-#include <blue_sky/graphics/Fader.h>
 #include <blue_sky/graphics/ObjFileLoader.h>
 #include <blue_sky/graphics/FbxFileLoader.h>
 #include <blue_sky/graphics/shader/BypassShader.h>
@@ -31,6 +30,7 @@
 #include <core/graphics/Direct3D11/ShadowMap.h>
 #include <core/graphics/Direct3D11/DynamicSlotConstantBuffer.h>
 #include <core/graphics/Direct3D11/InstanceBuffer.h>
+#include <core/graphics/Direct3D11/VertexBuffer.h>
 #include <core/graphics/Direct3D11/ObjectInstanceBuffer.h>
 
 #include <core/graphics/Direct3D11/MsdfTextRenderer.h>
@@ -81,10 +81,10 @@ namespace blue_sky::graphics::direct_3d_11
  */
 GraphicsManager::GraphicsManager( Direct3D* direct_3d )
 	: direct_3d_( direct_3d )
-	, game_render_data_( new GameConstantBuffer( direct_3d ) )
-	, frame_render_data_( new FrameConstantBuffer( direct_3d, core::graphics::ConstantBufferUsage::DYNAMIC ) )				// 毎フレーム書き換える
-	, frame_drawing_render_data_( new FrameDrawingConstantBuffer( direct_3d, core::graphics::ConstantBufferUsage::DYNAMIC ) )	// 毎フレーム書き換える
-	, shared_object_render_data_( new ObjectConstantBuffer( direct_3d, core::graphics::ConstantBufferUsage::DYNAMIC ) )		// 描画ごとに書き換える
+	, game_render_data_( core::graphics::direct_3d_11::create_typed_constant_buffer< GameConstantBuffer >( direct_3d ) )
+	, frame_render_data_( core::graphics::direct_3d_11::create_typed_constant_buffer< FrameConstantBuffer >( direct_3d, core::graphics::ConstantBufferUsage::DYNAMIC ) )				// 毎フレーム書き換える
+	, frame_drawing_render_data_( core::graphics::direct_3d_11::create_typed_constant_buffer< FrameDrawingConstantBuffer >( direct_3d, core::graphics::ConstantBufferUsage::DYNAMIC ) )	// 毎フレーム書き換える
+	, shared_object_render_data_( core::graphics::direct_3d_11::create_typed_constant_buffer< ObjectConstantBuffer >( direct_3d, core::graphics::ConstantBufferUsage::DYNAMIC ) )		// 描画ごとに書き換える
 	, debug_axis_( new core::graphics::direct_3d_11::Axis( direct_3d ) )
 {
 	create_named_shader< shader::BypassShader >( "bypass" );
@@ -202,6 +202,57 @@ std::unique_ptr< core::graphics::InstanceBuffer > GraphicsManager::create_instan
 	return std::make_unique< core::graphics::direct_3d_11::InstanceBuffer >( direct_3d_ );
 }
 
+std::unique_ptr< core::graphics::VertexBuffer > GraphicsManager::create_dynamic_vertex_buffer( size_t vertex_size, size_t vertex_count )
+{
+	return std::make_unique< core::graphics::direct_3d_11::VertexBuffer >( direct_3d_, vertex_size, vertex_count );
+}
+
+std::unique_ptr< GraphicsManager::Texture > GraphicsManager::create_texture( PixelFormat format, uint_t width, uint_t height )
+{
+	return std::make_unique< core::graphics::direct_3d_11::Texture >( direct_3d_, format, width, height, false );
+}
+
+void GraphicsManager::update_texture( Texture* texture, const void* pixels ) const
+{
+	ID3D11Texture2D* texture_2d = core::graphics::direct_3d_11::get_texture_2d( texture );
+
+	if ( ! texture_2d )
+	{
+		return;
+	}
+
+	D3D11_TEXTURE2D_DESC desc{};
+	texture_2d->GetDesc( & desc );
+
+	const UINT row_pitch = desc.Width * core::graphics::direct_3d_11::get_bytes_per_pixel( desc.Format );
+	direct_3d_->getImmediateContext()->UpdateSubresource( texture_2d, 0, nullptr, pixels, row_pitch, row_pitch * desc.Height );
+}
+
+bool GraphicsManager::read_texture_rgba8( const Texture* texture, std::vector< std::uint8_t >& pixels, uint_t& width, uint_t& height ) const
+{
+	UINT w = 0, h = 0;
+
+	if ( ! core::graphics::direct_3d_11::read_texture_2d_to_rgba8( direct_3d_->getDevice(), direct_3d_->getImmediateContext(), core::graphics::direct_3d_11::get_texture_2d( texture ), pixels, w, h ) )
+	{
+		return false;
+	}
+
+	width = w;
+	height = h;
+
+	return true;
+}
+
+bool GraphicsManager::save_texture_png( const Texture* texture, const wchar_t* file_name ) const
+{
+	return core::graphics::direct_3d_11::save_texture_2d_to_png( direct_3d_->getDevice(), direct_3d_->getImmediateContext(), core::graphics::direct_3d_11::get_texture_2d( texture ), file_name );
+}
+
+bool GraphicsManager::save_texture_raw( const Texture* texture, const wchar_t* file_name ) const
+{
+	return core::graphics::direct_3d_11::save_texture_2d_to_raw( direct_3d_->getDevice(), direct_3d_->getImmediateContext(), core::graphics::direct_3d_11::get_texture_2d( texture ), file_name );
+}
+
 /**
  * 物体ごとの定数の入れ物を作る（同じモデルの物体をまとめて描くため）
  *
@@ -306,7 +357,7 @@ void GraphicsManager::set_sky_box( const char_t* name )
 {
 	if ( ! sky_box_ )
 	{
-		sky_box_render_data_ = std::make_unique< ObjectConstantBufferWithData >( direct_3d_ );
+		sky_box_render_data_ = core::graphics::direct_3d_11::create_typed_constant_buffer< ObjectConstantBufferWithData >( direct_3d_ );
 		sky_box_render_data_->data().color = Color::White;
 	}
 
@@ -352,7 +403,7 @@ void GraphicsManager::set_ground( const char_t* name )
 	ground_.reset( new Ground() );
 	load_mesh( ground_.get(), name );
 
-	ground_render_data_.reset( new ObjectConstantBufferWithData( direct_3d_ ) );
+	ground_render_data_ = core::graphics::direct_3d_11::create_typed_constant_buffer< ObjectConstantBufferWithData >( direct_3d_ );
 	ground_render_data_->data().world.set_identity();
 	ground_render_data_->data().color = Color::White;
 }

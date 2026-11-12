@@ -15,12 +15,11 @@ namespace direct_x_math
 namespace core::graphics
 {
 	class GraphicsManager;
+	template< typename, int > class ConstantBufferTyped;
 }
 
 namespace core::graphics::direct_3d_11
 {
-	template< typename, int > class ConstantBufferTyped;
-
 	class Direct3D11;
 	class InputLayout;
 	class EffectTechnique;
@@ -50,7 +49,7 @@ public:
 		Matrix transform;
 	};
 
-	using ConstantBuffer = ConstantBufferTyped< ConstantBufferData, 13 >;
+	using ConstantBuffer = core::graphics::ConstantBufferTyped< ConstantBufferData, 13 >;
 
 	static const DXGI_FORMAT IndexBufferFormat = DXGI_FORMAT_R16_UINT;
 

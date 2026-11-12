@@ -8,8 +8,10 @@
 #include <core/graphics/RenderTargetTextureOptions.h>
 #include <core/ResourceManager.h>
 #include <core/math/Vector.h>
+#include <cstdint>
 #include <functional>
 #include <memory>
+#include <vector>
 
 namespace core
 {
@@ -26,6 +28,7 @@ class RenderTargetTexture;
 class BackBufferTexture;
 class ConstantBuffer;
 class InstanceBuffer;
+class VertexBuffer;
 
 // enum class PrimitiveTopology;
 class InputLayout;
@@ -94,6 +97,39 @@ public:
 	virtual std::unique_ptr< ConstantBuffer > create_constant_buffer( size_t size, int slot, ConstantBufferUsage usage = ConstantBufferUsage::DEFAULT ) = 0;
 	virtual std::unique_ptr< InstanceBuffer > create_instance_buffer() = 0;
 
+	/**
+	 * CPU から書き換えられる頂点の置き場を作る（粒子・点の列など、毎フレーム書き換えて描くもの）
+	 *
+	 * @param vertex_size 1 頂点の大きさ（バイト）
+	 * @param vertex_count 置ける頂点の数
+	 */
+	virtual std::unique_ptr< VertexBuffer > create_dynamic_vertex_buffer( size_t vertex_size, size_t vertex_count ) = 0;
+
+	/// CPU から中身を書くテクスチャを作る（MSAA なし・ミップ 1 段。中身は update_texture で書く）
+	virtual std::unique_ptr< Texture > create_texture( PixelFormat, uint_t width, uint_t height ) = 0;
+
+	/// create_texture で作ったテクスチャの中身を書く（pixels は 1 行 width 画素を詰めて並べたもの）
+	virtual void update_texture( Texture*, const void* pixels ) const = 0;
+
+	/**
+	 * テクスチャの中身を CPU へ読み戻す（8 ビットの RGBA・BGRA のテクスチャ。行の詰め物は除く。MSAA は解決してから読む）
+	 *
+	 * 開発用のフレームの保存と Neural NPR の入力に使う。重い（GPU を待つ）ので毎フレームの描画では使わない
+	 *
+	 * @return 読めたら true（pixels は width * height * 4 バイト）
+	 */
+	virtual bool read_texture_rgba8( const Texture*, std::vector< std::uint8_t >& pixels, uint_t& width, uint_t& height ) const = 0;
+
+	/// テクスチャ（8 ビットの RGBA・BGRA）を PNG で保存する（不透明にして保存する）。保存できたら true
+	virtual bool save_texture_png( const Texture*, const wchar_t* file_name ) const = 0;
+
+	/**
+	 * テクスチャの中身をそのままのバイト列で保存する（深度の float・速度の float x2 など。行の詰め物は除く）
+	 *
+	 * 色の MSAA は解決してから保存する。MSAA の深度は読めないので false
+	 */
+	virtual bool save_texture_raw( const Texture*, const wchar_t* file_name ) const = 0;
+
 
 	virtual Texture* load_texture( const char_t* ) = 0;
 
@@ -139,8 +175,6 @@ public:
 	virtual Shader* get_post_effect_shader() const { return nullptr; }
 	virtual void render_post_effect( Texture* ) = 0;
 	virtual void render_post_effect( Texture*, RenderTarget* ) = 0;
-
-	virtual void render_fader() const = 0;
 
 	virtual void clear_debug_bullet() const = 0;
 	virtual void render_debug_bullet() const = 0;

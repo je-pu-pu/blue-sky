@@ -5,7 +5,7 @@
 #include <blue_sky/graphics/GraphicsManager.h>
 #include <blue_sky/graphics/Model.h>
 #include <blue_sky/graphics/Line.h>
-#include <blue_sky/graphics/Fader.h>
+#include <blue_sky/Fader.h>
 
 #include <core/sound/SoundManager.h>
 #include <core/sound/Sound.h>
@@ -38,7 +38,7 @@ TitleScene::TitleScene( GameMain& game_main )
 	reset_total_elapsed_time();
 	play( bgm_, "bgm" );
 
-	get_graphics_manager()->get_fader()->full_out();
+	get_fader()->full_out();
 }
 
 TitleScene::~TitleScene()
@@ -55,7 +55,7 @@ void TitleScene::update()
 	Scene::update();
 
 	sequence_elapsed_time_ += get_elapsed_time();
-	get_graphics_manager()->get_fader()->fade_in();
+	get_fader()->fade_in();
 
 	if ( get_input()->push( Input::Button::A ) )
 	{
@@ -69,7 +69,7 @@ void TitleScene::update()
 			play( ok_, "ok" );
 			sequence_ = SEQUENCE_TITLE_FIX;
 			sequence_elapsed_time_ = 0.f;
-			get_graphics_manager()->get_fader()->full_out();
+			get_fader()->full_out();
 		}
 	}
 
@@ -83,7 +83,7 @@ void TitleScene::update()
 		{
 			sequence_ = SEQUENCE_TITLE_FIX;
 			sequence_elapsed_time_ = 0.f;
-			get_graphics_manager()->get_fader()->full_out();
+			get_fader()->full_out();
 		}
 	}
 	else if ( bgm_position >= 4.25f )
@@ -92,7 +92,7 @@ void TitleScene::update()
 		{
 			sequence_ = SEQUENCE_TITLE_LOGO;
 			sequence_elapsed_time_ = 0.f;
-			get_graphics_manager()->get_fader()->full_out();
+			get_fader()->full_out();
 		}
 	}
 }

@@ -2,7 +2,7 @@
 
 #include <blue_sky/Input.h>
 #include <blue_sky/graphics/GraphicsManager.h>
-#include <blue_sky/graphics/Fader.h>
+#include <blue_sky/Fader.h>
 
 #include <core/graphics/Sprite.h>
 
@@ -78,8 +78,8 @@ StageSelectScene::StageSelectScene( GameMain& game_main )
 
 	update_stage_list();
 
-	get_graphics_manager()->get_fader()->set_color( Color::White );
-	get_graphics_manager()->get_fader()->full_out();
+	get_fader()->set_color( Color::White );
+	get_fader()->full_out();
 }
 
 StageSelectScene::~StageSelectScene()
@@ -95,7 +95,7 @@ StageSelectScene::~StageSelectScene()
  */
 void StageSelectScene::update()
 {
-	get_graphics_manager()->get_fader()->fade_in();
+	get_fader()->fade_in();
 
 	if ( get_input()->push( Input::Button::A ) )
 	{
